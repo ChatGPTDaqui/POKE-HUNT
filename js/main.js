@@ -460,12 +460,21 @@ const controller = {
     const poke = [...gameState.team, ...gameState.bagPokes].find((p) => p.uid === pokeUid);
     if (!poke) return;
     const previousName = SPECIES[poke.speciesId].name;
-    const result = evolvePokeInstance(poke);
-    if (result) {
-      eventBus.emit('toast', { message: `${shinyPrefix(poke.isShiny)}${previousName} evoluiu para ${result.species.name}!`, type: 'levelup', channel: 'world' });
-      showLevelUpSplash();
-      saveGame();
+    const result = evolvePokeInstance(poke, gameState);
+    if (!result) return;
+    if (result.blocked === 'stones') {
+      const { itemId, count } = result.required;
+      const have = gameState.items[itemId] || 0;
+      eventBus.emit('toast', {
+        message: `${previousName} precisa de ${count}x ${getItem(itemId).name} para evoluir (tem ${have}).`,
+        type: 'error',
+        channel: 'world',
+      });
+      return;
     }
+    eventBus.emit('toast', { message: `${shinyPrefix(poke.isShiny)}${previousName} evoluiu para ${result.species.name}!`, type: 'levelup', channel: 'world' });
+    showLevelUpSplash();
+    saveGame();
   },
   openScreen(name) {
     uiManager.openScreen(name);

@@ -1,7 +1,7 @@
 import { SHOP_STOCK, getItem } from '../../data/items.js';
 import { buyItem, sellItem, sellAllItems, sellBagPoke, sellAllBagPokes, pokemonSellValue } from '../../systems/EconomySystem.js';
 import { SPECIES, averageIvPercent } from '../../data/pokes.js';
-import { itemIconUrl } from '../../data/sprites.js';
+import { itemIconUrl, itemIconBorderColor } from '../../data/sprites.js';
 import { swatchHtml, pokeNameTagHtml } from './swatchHtml.js';
 import { showConfirmModal } from './confirmModal.js';
 import { showPokeProfileModal } from './PokeProfileModal.js';
@@ -28,7 +28,9 @@ function getQty(map, itemId) {
 // tooltip; falls back to no icon (card just shows text) otherwise.
 function itemIconHtml(item) {
   const url = itemIconUrl(item.id);
-  return url ? `<img class="item-icon" src="${url}" alt="${item.name}" title="${item.description}">` : '';
+  const borderColor = itemIconBorderColor(item.id);
+  const style = borderColor ? ` style="border:3px solid ${borderColor};border-radius:8px;"` : '';
+  return url ? `<img class="item-icon" src="${url}" alt="${item.name}" title="${item.description}"${style}>` : '';
 }
 
 export function renderShopMenu(container, { gameState, controller, refresh }) {

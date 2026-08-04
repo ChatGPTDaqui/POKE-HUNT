@@ -1,3 +1,5 @@
+import { colorForType } from './typeColors.js';
+
 // Real sprite art. The original 32 species' assets/sprites/*.png (+ shiny at
 // assets/sprites-shiny/*.png) came from the community icon sheets
 // assets/48056.png/48064.png (+ 48057/48065 for shiny). The other 58 —
@@ -57,7 +59,20 @@ const ITEM_ICON_IDS = new Set([
   'revive', 'max_revive',
 ]);
 
+// Every "Pedra <TYPE>" (data/stones.js) shares one neutral gem icon (that
+// pack's Moon Stone, assets/item-icons/type_stone.png) — there's no real
+// per-elemental-type Pokemon item to rip 17 distinct icons from. The type is
+// told apart via the colored badge border applied where this is rendered
+// (see itemIconBorderColor below), same "tint by colorForType" language the
+// rest of the UI already uses for ability slots/type chips/aura outlines.
 export function itemIconUrl(itemId) {
+  if (itemId.startsWith('stone_')) return 'assets/item-icons/type_stone.png';
   if (!ITEM_ICON_IDS.has(itemId)) return null;
   return `assets/item-icons/${itemId}.png`;
+}
+
+export function itemIconBorderColor(itemId) {
+  if (!itemId.startsWith('stone_')) return null;
+  const type = itemId.slice('stone_'.length).toUpperCase();
+  return colorForType(type);
 }

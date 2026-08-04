@@ -56,6 +56,31 @@ export const SPECIES = Object.fromEntries(
   Object.entries(SPECIES_DATA).map(([key, species]) => [key, withVisuals(species)])
 );
 
+// Hand-authored patch, same "layer on top of the synced data" pattern as
+// nightmareMaps.js/legendaries.js: species whose real Gen1/2 evolution
+// required a trade (with or without a held item) come out of the sync with
+// evolvesTo=null — scripts/sync-planilha.js's "Evolui no Nivel" column has no
+// trade/hold-item trigger at all, so today these are permanently stuck at
+// their un-evolved stage. Per explicit user request, that dead end is
+// replaced with a Level 80 + Stones-of-the-primary-type gate instead (see
+// data/stones.js, systems/ProgressionSystem.js#evolvePokeInstance). Only
+// species whose real evolved form is actually present in this project's
+// curated roster are listed — Graveler->Golem, Poliwhirl->Politoed,
+// Slowpoke->Slowking, Seadra->Kingdra, Scyther->Scizor and Porygon->Porygon2
+// were never curated into the roster at all (their target species doesn't
+// exist here), so there's no evolvesTo to point them at.
+export const SPECIAL_EVOLUTION_LEVEL = 80;
+export const SPECIAL_EVOLUTION_STONE_COUNT = 20;
+const SPECIAL_EVOLUTIONS = { kadabra: 'alakazam', machoke: 'machamp', haunter: 'gengar' };
+for (const [fromId, toId] of Object.entries(SPECIAL_EVOLUTIONS)) {
+  const from = SPECIES[fromId];
+  if (from && SPECIES[toId] && !from.evolvesTo) {
+    from.evolvesTo = toId;
+    from.evolvesAtLevel = SPECIAL_EVOLUTION_LEVEL;
+    from.isSpecialEvolution = true;
+  }
+}
+
 // Real Gen2 stat formulas: floor((2*base+iv)*level/100)+5 (and the HP variant).
 // `rarityKey` is an optional multiplier on top of the real formula (see
 // data/rarity.js) — omitted/unrecognized keys default to Comum's 1x, so

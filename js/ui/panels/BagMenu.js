@@ -1,6 +1,6 @@
 import { ITEMS } from '../../data/items.js';
 import { SPECIES, averageIvPercent } from '../../data/pokes.js';
-import { itemIconUrl } from '../../data/sprites.js';
+import { itemIconUrl, itemIconBorderColor } from '../../data/sprites.js';
 import { showPokeProfileModal } from './PokeProfileModal.js';
 import { swatchHtml, pokeNameTagHtml } from './swatchHtml.js';
 import { rarityRank } from '../../data/rarity.js';
@@ -198,7 +198,9 @@ function renderItensTab(content, gameState, controller, fainted, refresh) {
       item.kind === 'revive' ? fainted : item.kind === 'potion' ? !fainted : false
     );
     const iconUrl = itemIconUrl(itemId);
-    const icon = iconUrl ? `<img class="item-icon" src="${iconUrl}" alt="${item.name}" title="${item.description}">` : '';
+    const borderColor = itemIconBorderColor(itemId);
+    const iconStyle = borderColor ? ` style="border:3px solid ${borderColor};border-radius:8px;"` : '';
+    const icon = iconUrl ? `<img class="item-icon" src="${iconUrl}" alt="${item.name}" title="${item.description}"${iconStyle}>` : '';
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `

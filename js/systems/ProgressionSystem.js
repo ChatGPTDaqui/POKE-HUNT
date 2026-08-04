@@ -1,5 +1,6 @@
-import { SPECIES, computeStatsAtLevel, totalExpForLevel } from '../data/pokes.js';
+import { SPECIES, computeStatsAtLevel, totalExpForLevel, SPECIAL_EVOLUTION_STONE_COUNT } from '../data/pokes.js';
 import { getAbility } from '../data/abilities.js';
+import { stoneItemId } from '../data/stones.js';
 import { createFormulaEngine } from '../core/FormulaEngine.js';
 import { FORMULAS } from '../data/formulas.generated.js';
 
@@ -29,9 +30,26 @@ export function expProgressForInstance(pokeInstance, species) {
   return { into: pokeInstance.exp - currentBase, needed: Math.max(1, nextTotal - currentBase) };
 }
 
-// Whether this poke has reached its evolution level.
+// Whether this poke has reached its evolution level. Species patched with
+// the Level 80 special-evolution rule (data/pokes.js#SPECIAL_EVOLUTIONS) go
+// through the exact same level check — the extra Stone cost is a separate
+// gate, checked only once the level is actually reached (see
+// evolvePokeInstance below), so the "Evoluir" button still appears at 80 even
+// if the player doesn't have the Stones yet, same as any other affordability
+// check elsewhere in the game (buy/unlock buttons stay visible, just fail on
+// click with a toast).
 export function canEvolve(pokeInstance, species) {
   return species.evolvesTo != null && pokeInstance.level >= species.evolvesAtLevel;
+}
+
+// The Stone cost gate for a species patched by the special-evolution rule —
+// 20 Stones of the pokemon's PRIMARY type, dual-type or not (explicit
+// "Regra de Desempate" from the user's request: secondary type is ignored on
+// purpose). null for every ordinary (non-patched) evolution, which costs
+// nothing extra.
+export function evolutionStoneRequirement(species) {
+  if (!species.isSpecialEvolution) return null;
+  return { itemId: stoneItemId(species.type), count: SPECIAL_EVOLUTION_STONE_COUNT, type: species.type };
 }
 
 // Swaps the poke to its evolved species (stats recomputed from the new
@@ -40,11 +58,19 @@ export function canEvolve(pokeInstance, species) {
 // any move it would have already learned by the current level (levelReq <=
 // level) gets unlocked immediately, not just moves gained from here on;
 // otherwise a poke evolving past a level it already outleveled would
-// permanently miss that move. Returns the new species, or null if not
-// eligible.
-export function evolvePokeInstance(pokeInstance) {
+// permanently miss that move.
+// Returns:
+//   - null                                   -> level not reached yet
+//   - { blocked: 'stones', required }         -> level reached, Stones missing (inventory untouched)
+//   - { species, newAbilities }               -> evolved; Stones (if any) already deducted
+export function evolvePokeInstance(pokeInstance, gameState) {
   const species = SPECIES[pokeInstance.speciesId];
   if (!canEvolve(pokeInstance, species)) return null;
+
+  const stoneReq = evolutionStoneRequirement(species);
+  if (stoneReq && !gameState.hasItem(stoneReq.itemId, stoneReq.count)) {
+    return { blocked: 'stones', required: stoneReq };
+  }
 
   const newSpecies = SPECIES[species.evolvesTo];
   const hpRatio = pokeInstance.hp / pokeInstance.stats.hp;
@@ -66,6 +92,8 @@ export function evolvePokeInstance(pokeInstance) {
     pokeInstance.unlockedAbilities.push(entry.key);
     newAbilities.push(ability);
   }
+
+  if (stoneReq) gameState.removeItem(stoneReq.itemId, stoneReq.count);
 
   return { species: newSpecies, newAbilities };
 }

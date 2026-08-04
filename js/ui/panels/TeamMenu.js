@@ -1,5 +1,6 @@
 import { SPECIES } from '../../data/pokes.js';
-import { expProgressForInstance, canEvolve } from '../../systems/ProgressionSystem.js';
+import { expProgressForInstance, canEvolve, evolutionStoneRequirement } from '../../systems/ProgressionSystem.js';
+import { stoneName } from '../../data/stones.js';
 import { showPokeProfileModal } from './PokeProfileModal.js';
 import { swatchHtml, pokeNameTagHtml } from './swatchHtml.js';
 
@@ -24,7 +25,9 @@ export function renderTeamMenu(container, { gameState, controller, refresh }) {
     const isActive = index === gameState.activeIndex;
 
     const progress = expProgressForInstance(poke, species);
-    const evolveTag = canEvolve(poke, species) ? ' <button class="evolve-tag">Evoluir</button>' : '';
+    const stoneReq = evolutionStoneRequirement(species);
+    const evolveLabel = stoneReq ? `Evoluir (${stoneReq.count}x ${stoneName(stoneReq.type)})` : 'Evoluir';
+    const evolveTag = canEvolve(poke, species) ? ` <button class="evolve-tag">${evolveLabel}</button>` : '';
     const canRemove = gameState.team.length > 1;
     const card = document.createElement('div');
     card.className = 'card';

@@ -1,5 +1,6 @@
 import { SPECIES } from '../../data/pokes.js';
-import { expProgressForInstance, canEvolve, trainerExpProgress } from '../../systems/ProgressionSystem.js';
+import { expProgressForInstance, canEvolve, evolutionStoneRequirement, trainerExpProgress } from '../../systems/ProgressionSystem.js';
+import { stoneName } from '../../data/stones.js';
 import { spriteUrl } from '../../data/sprites.js';
 import { showPokeProfileModal } from './PokeProfileModal.js';
 import { rarityOf } from '../../data/rarity.js';
@@ -118,6 +119,8 @@ export function renderHud(container, { gameState, world, controller }) {
   const eligible = canEvolve(poke, species);
   els.evolveBtn.style.display = eligible ? '' : 'none';
   els.evolveBtn.dataset.uid = poke.uid;
+  const stoneReq = evolutionStoneRequirement(species);
+  els.evolveBtn.textContent = stoneReq ? `Evoluir (${stoneReq.count}x ${stoneName(stoneReq.type)})` : 'Evoluir';
 
   els.hpFill.style.width = `${hpPct * 100}%`;
   els.hpFill.classList.toggle('low', hpPct < 0.3);
