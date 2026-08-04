@@ -11,6 +11,7 @@ let activeTab = 'pokemons';
 let bagSortKey = 'rarity'; // 'rarity' | 'iv' | 'level'
 let bagSortDesc = true;
 let bagSearchTerm = '';
+let bagShinyOnly = false;
 
 const SORT_LABELS = { rarity: 'Raridade', iv: 'IV', level: 'Nivel' };
 
@@ -48,6 +49,14 @@ export function renderBagMenu(container, { gameState, controller, world, refresh
 }
 
 function renderPokemonsTab(content, gameState, controller, refresh) {
+  if (gameState.bagPokes.length === 0) {
+    const hint = document.createElement('div');
+    hint.className = 'hint';
+    hint.textContent = 'Nenhum POKE na mochila.';
+    content.appendChild(hint);
+    return;
+  }
+
   const searchRow = document.createElement('div');
   searchRow.className = 'row';
   searchRow.innerHTML = `
@@ -76,13 +85,16 @@ function renderPokemonsTab(content, gameState, controller, refresh) {
     refresh();
   });
 
-  if (gameState.bagPokes.length === 0) {
-    const hint = document.createElement('div');
-    hint.className = 'hint';
-    hint.textContent = 'Nenhum POKE na mochila.';
-    content.appendChild(hint);
-    return;
-  }
+  const shinyFilterRow = document.createElement('div');
+  shinyFilterRow.className = 'row';
+  shinyFilterRow.innerHTML = `
+    <label><input type="checkbox" id="bag-shiny-only" ${bagShinyOnly ? 'checked' : ''}> Somente Shiny ✨</label>
+  `;
+  content.appendChild(shinyFilterRow);
+  shinyFilterRow.querySelector('#bag-shiny-only').addEventListener('change', (e) => {
+    bagShinyOnly = e.target.checked;
+    applyBagSearch();
+  });
 
   const sorted = [...gameState.bagPokes].sort((a, b) => {
     const diff = sortValue(a, bagSortKey) - sortValue(b, bagSortKey);
@@ -100,7 +112,8 @@ function renderPokemonsTab(content, gameState, controller, refresh) {
     const term = bagSearchTerm.trim().toLowerCase();
     let anyVisible = false;
     for (const card of cardList.querySelectorAll('.card')) {
-      const matches = !term || card.dataset.speciesName.includes(term);
+      const matches = (!term || card.dataset.speciesName.includes(term))
+        && (!bagShinyOnly || card.dataset.shiny === 'true');
       card.style.display = matches ? '' : 'none';
       if (matches) anyVisible = true;
     }
@@ -125,6 +138,7 @@ function renderPokemonsTab(content, gameState, controller, refresh) {
     card.className = 'card';
     card.style.cursor = 'pointer';
     card.dataset.speciesName = species.name.toLowerCase();
+    card.dataset.shiny = String(Boolean(poke.isShiny));
     card.innerHTML = `
       ${swatchHtml(species, { isShiny: poke.isShiny, poke })}
       <div class="card-info">

@@ -917,6 +917,35 @@ button.confirm-danger {
   padding: 10px 20px;
 }
 
+/* Live counts for whichever items the Auto bot is actually configured to
+   use right now (default/shiny ball + any per-species rule balls) — see
+   js/ui/panels/AutoButtonBadge.js. Empty/hidden when auto-catch has nothing
+   configured yet. */
+.auto-item-badge {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 8px;
+  font-size: 10px;
+  width: 130px;
+}
+
+.auto-item-badge:empty {
+  display: none;
+}
+
+.auto-item-badge .auto-item-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.auto-item-badge .item-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 .perf-stats {
   width: 130px;
   padding: 8px 10px;

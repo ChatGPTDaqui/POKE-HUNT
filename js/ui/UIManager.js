@@ -8,6 +8,7 @@ import { renderBagMenu } from './panels/BagMenu.js';
 import { renderSettingsScreen } from './panels/SettingsScreen.js';
 import { renderStartScreen } from './panels/StartScreen.js';
 import { renderPerfStats } from './panels/PerfStatsHUD.js';
+import { renderAutoItemBadge } from './panels/AutoButtonBadge.js';
 import { ChatLog } from './panels/ChatLog.js';
 import { makeDraggable } from './draggable.js';
 
@@ -33,6 +34,7 @@ export class UIManager {
     this.navEl = document.getElementById('bottom-nav');
     this.overlayRoot = document.getElementById('overlay-root');
     this.perfStatsEl = document.getElementById('perf-stats');
+    this.autoItemBadgeEl = document.getElementById('auto-item-badge');
     this.reviveModalEl = document.getElementById('revive-modal');
     this.bossDefeatModalEl = document.getElementById('boss-defeat-modal');
     this.chatLog = new ChatLog(document.getElementById('chat-log'));
@@ -198,6 +200,7 @@ export class UIManager {
     renderHud(this.hudEl, { gameState: this.gameState, world: this.getWorld(), controller: this.controller });
     renderAbilityHud(this.abilityHudEl, { world: this.getWorld() });
     renderPerfStats(this.perfStatsEl, this.gameState);
+    renderAutoItemBadge(this.autoItemBadgeEl, this.gameState);
     this._updateReviveModal();
     this._updateBossDefeatModal();
   }

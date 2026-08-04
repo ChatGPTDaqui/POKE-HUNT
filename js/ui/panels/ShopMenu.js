@@ -14,6 +14,7 @@ let ivMin = 0;
 let ivMax = 100;
 let sortDesc = true;
 let sellSearchTerm = '';
+let sellShinyOnly = false; // when on, the bulk-sell flow allows shinies (with a confirm) — see renderPokemonsTab
 const buyQty = new Map(); // itemId -> chosen quantity, defaults to 1 below
 const sellQty = new Map();
 const selectedPokeUids = new Set(); // uids checked in the "venda pokemon" tab, see renderPokemonsTab
@@ -211,6 +212,7 @@ function renderPokemonsTab(content, gameState, controller, refresh) {
           <input type="checkbox" class="rarity-check" value="${r.key}" ${selectedRarities.has(r.key) ? 'checked' : ''}> ${r.label}
         </label>
       `).join('')}
+      <label><input type="checkbox" id="sell-shiny-only" ${sellShinyOnly ? 'checked' : ''}> Somente Shiny ✨</label>
     </div>
     <div class="row" id="bulk-sell-row" style="justify-content: space-between; align-items: center;">
       <label><input type="checkbox" id="select-all-pokes"> Selecionar tudo</label>
@@ -243,6 +245,7 @@ function renderPokemonsTab(content, gameState, controller, refresh) {
     const pokesWithIv = gameState.bagPokes.map((poke) => ({ poke, ivPct: averageIvPercent(poke.ivs) }));
     const filtered = pokesWithIv.filter(({ poke, ivPct }) => ivPct >= ivMin && ivPct <= ivMax
       && selectedRarities.has(rarityOf(poke).key)
+      && (!sellShinyOnly || poke.isShiny)
       && (!term || SPECIES[poke.speciesId].name.toLowerCase().includes(term)));
     filtered.sort((a, b) => (sortDesc ? b.ivPct - a.ivPct : a.ivPct - b.ivPct));
 
@@ -252,10 +255,11 @@ function renderPokemonsTab(content, gameState, controller, refresh) {
     for (const uid of selectedPokeUids) {
       if (!filteredUids.has(uid)) selectedPokeUids.delete(uid);
     }
-    // Shinies and locked POKEs are excluded from selection entirely — same
-    // safety rule as "Vender Tudo" below, they only leave via their own
-    // per-card confirm (shiny) or after being unlocked in the Mochila.
-    const selectableFiltered = filtered.filter(({ poke }) => !poke.isShiny && !poke.locked);
+    // Locked POKEs never enter bulk selection. Shinies only do when the
+    // "Somente Shiny" filter is active (see sellSelectedBtn below, which
+    // then requires an explicit confirm) — same safety rule as "Vender Tudo"
+    // otherwise, which never touches shiny at all.
+    const selectableFiltered = filtered.filter(({ poke }) => !poke.locked && (sellShinyOnly || !poke.isShiny));
 
     pokeList.innerHTML = '';
     if (gameState.bagPokes.length === 0) {
@@ -270,7 +274,7 @@ function renderPokemonsTab(content, gameState, controller, refresh) {
       card.className = 'card';
       card.style.cursor = 'pointer';
       card.innerHTML = `
-        ${poke.isShiny || poke.locked ? '<span class="checkbox-spacer"></span>' : `<input type="checkbox" class="sell-select-box" ${selectedPokeUids.has(poke.uid) ? 'checked' : ''}>`}
+        ${poke.locked || (poke.isShiny && !sellShinyOnly) ? '<span class="checkbox-spacer"></span>' : `<input type="checkbox" class="sell-select-box" ${selectedPokeUids.has(poke.uid) ? 'checked' : ''}>`}
         ${swatchHtml(species, { isShiny: poke.isShiny, poke })}
         <div class="card-info">
           <div class="card-title">${pokeNameTagHtml(poke, species)} Lv${poke.level}</div>
@@ -323,13 +327,27 @@ function renderPokemonsTab(content, gameState, controller, refresh) {
     syncSellSelectedBtn();
     sellSelectedBtn.onclick = () => {
       const uids = [...selectedPokeUids];
-      const res = sellAllBagPokes(gameState, uids);
-      selectedPokeUids.clear();
-      if (res.pokeCount > 0) {
-        controller.save();
-        controller.toast(`Vendeu ${res.pokeCount} POKEs por ${res.gold} ouro.`, 'success', 'trade');
+      const doSellSelected = () => {
+        const res = sellAllBagPokes(gameState, uids);
+        selectedPokeUids.clear();
+        if (res.pokeCount > 0) {
+          controller.save();
+          controller.toast(`Vendeu ${res.pokeCount} POKEs por ${res.gold} ouro.`, 'success', 'trade');
+        }
+        refresh();
+      };
+      // Selection only ever contains shinies while "Somente Shiny" is active
+      // (see selectableFiltered above) — every uid here is shiny in that
+      // case, so a straight count is enough, no per-uid lookup needed.
+      if (sellShinyOnly && uids.length > 0) {
+        showConfirmModal({
+          title: 'Vender POKEs Shiny?',
+          message: `Voce esta vendendo ${uids.length} POKE(s) Shiny! Essa acao nao pode ser desfeita. Confirmar venda?`,
+          confirmLabel: 'Vender',
+        }, doSellSelected);
+      } else {
+        doSellSelected();
       }
-      refresh();
     };
 
     // Shinies and locked POKEs never go out via the bulk button — shinies
@@ -377,6 +395,11 @@ function renderPokemonsTab(content, gameState, controller, refresh) {
       else selectedRarities.delete(box.value);
       renderList();
     });
+  });
+  content.querySelector('#sell-shiny-only').addEventListener('change', (e) => {
+    sellShinyOnly = e.target.checked;
+    selectedPokeUids.clear(); // switching modes changes what's selectable — start clean
+    renderList();
   });
 
   renderList();
