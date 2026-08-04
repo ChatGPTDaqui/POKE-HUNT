@@ -21,7 +21,7 @@ import { updateMovement } from './systems/MovementSystem.js';
 import { updateCombat } from './systems/CombatSystem.js';
 import { updateAnimations } from './systems/AnimationSystem.js';
 import { updateAutoHeal, maybeAutoCatch } from './systems/AutoSystem.js';
-import { grantExp, expRewardForEnemy, evolvePokeInstance, grantTrainerExp } from './systems/ProgressionSystem.js';
+import { grantExp, expRewardForEnemy, evolvePokeInstance, grantTrainerExp, applyDeathExpPenalty } from './systems/ProgressionSystem.js';
 import { awardKillLoot } from './systems/EconomySystem.js';
 import { recordKill, recordBatch, resetStats } from './systems/StatsTracker.js';
 import { simulateWorldSeconds } from './systems/OfflineSimSystem.js';
@@ -286,8 +286,17 @@ function stepWorld(world, dt, { silent = false } = {}) {
   }
   world.enemies = world.enemies.filter((e) => !e.isDead || e.deathRemovalTimer > 0);
 
-  if (playerJustFainted && !silent) {
-    eventBus.emit('toast', { message: `${SPECIES[world.player.poke.speciesId].name} desmaiou!`, type: 'error', channel: 'combat' });
+  if (playerJustFainted) {
+    // Runs even when silent (offline/catch-up) — same rule as every other
+    // reward/penalty pipeline here, only the toast is live-only.
+    const { leveledDown, level } = applyDeathExpPenalty(gameState.activePoke);
+    if (!silent) {
+      eventBus.emit('toast', {
+        message: `${SPECIES[world.player.poke.speciesId].name} desmaiou!${leveledDown ? ` Caiu para o nivel ${level}.` : ''}`,
+        type: 'error',
+        channel: 'combat',
+      });
+    }
   }
 
   const autoEvents = updateAutoHeal(world, gameState, dt);

@@ -9,6 +9,12 @@ const formulaEngine = createFormulaEngine(FORMULAS);
 // XP rate be rebalanced with one number instead of reshaping the curve.
 // 0.4 = explicit user request to cut all XP gain by 60%.
 const XP_GLOBAL_MULTIPLIER = formulaEngine.evalOrDefault('XP_GLOBAL_MULTIPLIER', 0.4);
+// 0.05 = explicit user request: dying costs 5% of the EXP needed for the
+// CURRENT level (expProgressForInstance's `needed`, i.e. one level's worth of
+// span), not 5% of total cumulative EXP — the cumulative curve grows fast
+// enough that 5% of a high-level poke's total would be a wildly
+// disproportionate, possibly multi-level loss from a single death.
+const DEATH_EXP_LOSS_PERCENT = formulaEngine.evalOrDefault('DEATH_EXP_LOSS_PERCENT', 0.05);
 
 export function expRewardForEnemy(enemyPoke) {
   const species = SPECIES[enemyPoke.speciesId];
@@ -42,6 +48,12 @@ export function evolvePokeInstance(pokeInstance) {
 
   const newSpecies = SPECIES[species.evolvesTo];
   const hpRatio = pokeInstance.hp / pokeInstance.stats.hp;
+  // Floor for applyDeathExpPenalty below — an evolved POKE must never
+  // de-evolve, even after a death-penalty level-down. Uses the OLD species'
+  // evolvesAtLevel (the threshold that just fired), maxed against any prior
+  // value so a multi-stage chain keeps the latest (highest) evolution's
+  // requirement, not an earlier stage's lower one.
+  pokeInstance.minLevel = Math.max(pokeInstance.minLevel || 1, species.evolvesAtLevel);
   pokeInstance.speciesId = newSpecies.id;
   pokeInstance.stats = computeStatsAtLevel(newSpecies, pokeInstance.level, pokeInstance.ivs, pokeInstance.rarity);
   pokeInstance.hp = Math.max(1, Math.round(pokeInstance.stats.hp * hpRatio));
@@ -109,4 +121,30 @@ export function grantExp(pokeInstance, amount) {
   }
 
   return { leveledUp, newAbilities, level: pokeInstance.level };
+}
+
+// Death penalty: loses DEATH_EXP_LOSS_PERCENT of the current level's EXP
+// span, which can cascade into a level-down (mirrors grantExp's ascending
+// loop, just descending). Floored at `pokeInstance.minLevel` (set by
+// evolvePokeInstance below at the level it last evolved, absent = 1 via
+// `|| 1` — same no-migration-needed pattern as poke.rarity/poke.locked) so an
+// evolved POKE can never de-evolve. Never touches unlockedAbilities/
+// speciesId — nothing in the game ever removes a learned move, so a level
+// dropping back below a move's levelReq doesn't desync anything (leveling
+// back up past it later is a no-op, same as re-evolving already does).
+export function applyDeathExpPenalty(pokeInstance) {
+  const species = SPECIES[pokeInstance.speciesId];
+  const { needed } = expProgressForInstance(pokeInstance, species);
+  pokeInstance.exp = Math.max(0, pokeInstance.exp - Math.round(needed * DEATH_EXP_LOSS_PERCENT));
+
+  const floor = pokeInstance.minLevel || 1;
+  let leveledDown = false;
+  while (pokeInstance.level > floor && pokeInstance.exp < totalExpForLevel(pokeInstance.level, species.growthCurve)) {
+    pokeInstance.level -= 1;
+    leveledDown = true;
+    pokeInstance.stats = computeStatsAtLevel(species, pokeInstance.level, pokeInstance.ivs, pokeInstance.rarity);
+    pokeInstance.hp = Math.min(pokeInstance.hp, pokeInstance.stats.hp);
+  }
+
+  return { leveledDown, level: pokeInstance.level };
 }

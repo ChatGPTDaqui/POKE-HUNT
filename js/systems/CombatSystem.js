@@ -143,15 +143,27 @@ function spawnDamageNumber(world, target, result) {
   }));
 }
 
+// BASIC_ATTACK is one shared module-level object (see data/abilities.js) —
+// mutating its `.type` directly would corrupt it for every other entity
+// using it mid-fight. This builds a per-attack override typed to the
+// attacker's own primary type instead (dual-typing ties always go primary,
+// same field STAB already reads off `attackerSpecies.type`), threaded
+// through pickAbility -> queueHit -> resolveHit by reference so damage/color
+// end up consistent everywhere without touching the shared object.
+function basicAttackFor(attackerSpecies) {
+  return { ...BASIC_ATTACK, type: attackerSpecies.type };
+}
+
 // Picks the ready ability that deals the most damage to `defenderPoke`.
 // Status/non-damage moves (power 0) are excluded from selection — they stay
 // in the data files for possible future use but are inert in combat for now.
 // `aoeTargetCounter` is a function (ability) => number of targets an AOE cast
 // would hit, used to prefer AOE when it would strike multiple enemies.
 function pickAbility(entity, defenderPoke, aoeTargetCounter) {
+  const attackerSpecies = SPECIES[entity.poke.speciesId];
   const candidateIds = [...entity.poke.unlockedAbilities, BASIC_ATTACK.id];
   const ready = candidateIds
-    .map((id) => getAbility(id))
+    .map((id) => (id === BASIC_ATTACK.id ? basicAttackFor(attackerSpecies) : getAbility(id)))
     .filter((ability) => isDamagingAbility(ability) && entity.isAbilityReady(ability.id));
 
   if (ready.length === 0) return null;

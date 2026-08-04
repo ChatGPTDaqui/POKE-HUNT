@@ -3,7 +3,7 @@ import { attemptCapture } from './CaptureSystem.js';
 
 const AUTO_ACTION_COOLDOWN = 1.0;
 export const BEST_POTION_OPTION = 'best';
-export const AUTO_REVIVE_DELAY = 3.0; // seconds a fainted POKE waits before Auto-Revive actually fires
+export const AUTO_REVIVE_DELAY = 5.0; // seconds a fainted POKE waits before Auto-Revive actually fires
 
 // Resolves a rule's chosen potion to a concrete itemId. `best` picks the
 // highest-healAmount potion the player currently owns.

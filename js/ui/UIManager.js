@@ -211,7 +211,7 @@ export class UIManager {
     this.bossDefeatModalEl.classList.toggle('visible', visible);
   }
 
-  // Auto-Revive's 3s countdown (world.reviveCountdown, see AutoSystem.js) —
+  // Auto-Revive's countdown (world.reviveCountdown, see AutoSystem.js#AUTO_REVIVE_DELAY) —
   // no interactive elements here, so a plain innerHTML rebuild every frame
   // is safe (unlike the HUD evolve button, nothing here needs to survive a
   // mid-click DOM swap).
