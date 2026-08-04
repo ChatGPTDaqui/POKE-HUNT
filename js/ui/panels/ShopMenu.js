@@ -242,8 +242,16 @@ function renderPokemonsTab(content, gameState, controller, refresh) {
   // instead of getting reset by a full-panel refresh() on every keystroke.
   function renderList() {
     const term = sellSearchTerm.trim().toLowerCase();
-    const pokesWithIv = gameState.bagPokes.map((poke) => ({ poke, ivPct: averageIvPercent(poke.ivs) }));
-    const filtered = pokesWithIv.filter(({ poke, ivPct }) => ivPct >= ivMin && ivPct <= ivMax
+    // Bounds may be typed out of order (min > max) — compare against the
+    // sorted pair instead of the raw fields so that never yields an
+    // incorrectly-empty list; the input boxes themselves keep showing
+    // exactly what the user typed.
+    const loBound = Math.min(ivMin, ivMax);
+    const hiBound = Math.max(ivMin, ivMax);
+    const pokesWithIv = gameState.bagPokes
+      .filter((poke) => SPECIES[poke.speciesId] && poke.ivs)
+      .map((poke) => ({ poke, ivPct: averageIvPercent(poke.ivs) }));
+    const filtered = pokesWithIv.filter(({ poke, ivPct }) => ivPct >= loBound && ivPct <= hiBound
       && selectedRarities.has(rarityOf(poke).key)
       && (!sellShinyOnly || poke.isShiny)
       && (!term || SPECIES[poke.speciesId].name.toLowerCase().includes(term)));
@@ -266,6 +274,9 @@ function renderPokemonsTab(content, gameState, controller, refresh) {
       pokeList.innerHTML = '<div class="hint">Nenhum POKE extra na mochila.</div>';
     } else if (filtered.length === 0) {
       pokeList.innerHTML = '<div class="hint">Nenhum POKE corresponde ao filtro de IV.</div>';
+    }
+    if (ivMin > ivMax) {
+      pokeList.innerHTML += '<div class="hint">Aviso: IV min% é maior que IV max% — invertido automaticamente para filtrar.</div>';
     }
     for (const { poke, ivPct } of filtered) {
       const species = SPECIES[poke.speciesId];

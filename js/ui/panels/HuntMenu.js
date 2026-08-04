@@ -133,8 +133,10 @@ export function renderHuntMenu(container, { gameState, controller, refresh }) {
       </div>
     </div>
     <div class="grid-list" id="map-list"></div>
+    <div class="hint" id="hunt-no-results" style="display:none">Nenhuma hunt encontrada (pode estar oculta pelo filtro de elemento).</div>
   `;
   const list = container.querySelector('#map-list');
+  const noResultsHint = container.querySelector('#hunt-no-results');
   const searchInput = container.querySelector('#hunt-search');
   const typeFilterEl = container.querySelector('#hunt-type-filter');
   const tabsEl = container.querySelector('#continent-tabs');
@@ -211,13 +213,22 @@ export function renderHuntMenu(container, { gameState, controller, refresh }) {
   function applySearch() {
     const term = searchTerm.trim().toLowerCase();
     let firstMatch = null;
+    let anyMatch = false;
     for (const card of list.querySelectorAll('.card')) {
+      // Cards hidden by the type filter shouldn't count as a match — matching
+      // one would try to highlight/scroll to an element with no layout box,
+      // silently doing nothing and making the search look broken.
+      const visible = card.style.display !== 'none';
       const map = MAPS[card.dataset.mapId];
-      const matches = huntMatches(map, term);
+      const matches = visible && huntMatches(map, term);
       card.classList.toggle('hunt-match', matches);
-      if (matches && !firstMatch) firstMatch = card;
+      if (matches) {
+        anyMatch = true;
+        if (!firstMatch) firstMatch = card;
+      }
     }
     if (firstMatch) firstMatch.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    noResultsHint.style.display = (term && !anyMatch) ? '' : 'none';
   }
 
   searchInput.addEventListener('input', () => {

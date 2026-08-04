@@ -17,6 +17,10 @@ export function renderTeamMenu(container, { gameState, controller, refresh }) {
 
   gameState.team.forEach((poke, index) => {
     const species = SPECIES[poke.speciesId];
+    if (!species) {
+      console.warn('TeamMenu: pulando POKE com especie invalida', poke);
+      return;
+    }
     const isActive = index === gameState.activeIndex;
 
     const progress = expProgressForInstance(poke, species);

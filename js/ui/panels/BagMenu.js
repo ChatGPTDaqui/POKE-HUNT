@@ -132,6 +132,10 @@ function renderPokemonsTab(content, gameState, controller, refresh) {
 
   for (const poke of sorted) {
     const species = SPECIES[poke.speciesId];
+    if (!species || !poke.ivs) {
+      console.warn('BagMenu: pulando POKE com dados invalidos', poke);
+      continue;
+    }
     const canMove = gameState.team.length < 6;
 
     const card = document.createElement('div');
