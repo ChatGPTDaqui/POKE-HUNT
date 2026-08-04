@@ -1,0 +1,29 @@
+# Claude Code session data - not part of the game
+.claude/
+
+# Project documentation - not needed to run the game (kept out per request)
+CLAUDE.md
+
+# Unused source-art leftovers: already consumed by import scripts / superseded
+# by generated assets, never referenced at runtime (see CLAUDE.md history).
+assets/SpriteCollab-master (1)/
+assets/sprites.zip
+assets/48056.png
+assets/48057.png
+assets/48064.png
+assets/48065.png
+assets/64891.png
+assets/DS _ DSi - Pokemon Black 2 _ White 2 - Miscellaneous - HP Bars.png
+assets/Design sem nome.png
+assets/Design sem nome (1).png
+assets/Design sem nome (1) (1).png
+assets/Gemini_Generated_Image_.png
+assets/Hunt background/
+assets/Nintendo Switch - Pokemon Scarlet _ Violet - UI Elements - Item Icons/
+assets/grass background medio.png
+assets/hp-bar/
+assets/move sprites/
+
+# OS/editor cruft
+.DS_Store
+Thumbs.db

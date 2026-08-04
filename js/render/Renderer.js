@@ -1,0 +1,126 @@
+import { drawEntity, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, drawNpcMarker } from './Sprites.js';
+
+const HOSPITAL_BG = { primary: '#2b2f45', secondary: '#333a5c' };
+
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 2.5;
+const ZOOM_SENSITIVITY = 0.0015;
+const ZOOM_STEP = 0.1;
+
+export class Renderer {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.ctx.imageSmoothingEnabled = false;
+    this.width = canvas.width;
+    this.height = canvas.height;
+    this.zoom = 1;
+  }
+
+  // Canvas attribute width/height (its actual drawing-buffer resolution) are
+  // resized to match the real window on load/resize (see main.js) so the
+  // game always fills 100% at any aspect ratio, no fixed 960x540 + letterbox
+  // scaling. Everything here already keys off this.width/this.height rather
+  // than a hardcoded resolution, so just re-reading them after a resize is
+  // enough to keep the camera/hospital layout correct.
+  handleResize() {
+    this.width = this.canvas.width;
+    this.height = this.canvas.height;
+  }
+
+  // Ctrl+Scroll camera zoom (see main.js's wheel listener). Negative deltaY
+  // (scroll up) zooms in.
+  adjustZoom(deltaY) {
+    this.zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, this.zoom - deltaY * ZOOM_SENSITIVITY));
+  }
+
+  // Discrete +/- zoom button (see #zoom-control in index.html) — same clamp
+  // as the Ctrl+Scroll wheel gesture above, just a fixed step per click.
+  zoomStep(direction) {
+    this.zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, this.zoom + direction * ZOOM_STEP));
+    return this.zoom;
+  }
+
+  clear() {
+    this.ctx.clearRect(0, 0, this.width, this.height);
+  }
+
+  // Nurse desk / player spot in the Hospital scene, as fractions of the
+  // current canvas size (not fixed px) so they stay sensibly placed — nurse
+  // upper-middle, player just below her — at any window size/aspect ratio.
+  get hospitalNursePos() {
+    return { x: this.width / 2, y: this.height * 0.35 };
+  }
+
+  get hospitalPlayerPos() {
+    return { x: this.width / 2, y: this.height * 0.68 };
+  }
+
+  renderHospital(playerEntity) {
+    const ctx = this.ctx;
+    this.clear();
+    const hospitalMap = { bounds: { width: this.width, height: this.height }, bg: HOSPITAL_BG };
+    const nursePos = this.hospitalNursePos;
+    drawMapBackground(ctx, hospitalMap, { x: 0, y: 0, w: this.width, h: this.height });
+    drawNpcMarker(ctx, nursePos.x, nursePos.y, 'Enfermeira');
+    if (playerEntity) {
+      const original = { x: playerEntity.x, y: playerEntity.y };
+      const playerPos = this.hospitalPlayerPos;
+      playerEntity.x = playerPos.x;
+      playerEntity.y = playerPos.y;
+      drawEntity(ctx, playerEntity);
+      drawHpBar(ctx, playerEntity);
+      drawNameLevelTag(ctx, playerEntity);
+      playerEntity.x = original.x;
+      playerEntity.y = original.y;
+    }
+  }
+
+  renderMap(mapDef, world) {
+    const ctx = this.ctx;
+    this.clear();
+
+    const camera = this._computeCamera(mapDef, world.player);
+    ctx.save();
+    ctx.scale(this.zoom, this.zoom);
+    ctx.translate(-camera.x, -camera.y);
+
+    // Divided by zoom: at zoom<1 (zoomed out) more world is visible than a
+    // raw width/height would cover, and drawMapBackground's viewport-filled
+    // pattern (see Sprites.js) needs the real visible world-space rect to
+    // avoid a ring of unpainted background at the edges.
+    drawMapBackground(ctx, mapDef, { x: camera.x, y: camera.y, w: this.width / this.zoom, h: this.height / this.zoom });
+
+    for (const enemy of world.enemies) {
+      // Dead enemies stay in the array briefly (see DEATH_ANIM_GRACE_PERIOD in
+      // main.js) just long enough to play their Faint pose, HP bar/tag hidden.
+      drawEntity(ctx, enemy);
+      if (!enemy.isDead) {
+        drawHpBar(ctx, enemy);
+        drawNameLevelTag(ctx, enemy);
+      }
+    }
+
+    if (world.player && !world.player.fainted) {
+      drawEntity(ctx, world.player);
+      drawHpBar(ctx, world.player);
+      drawNameLevelTag(ctx, world.player);
+    }
+
+    for (const effect of world.effects) {
+      drawEffect(ctx, effect);
+    }
+
+    ctx.restore();
+  }
+
+  // The player POKE always stays dead-center on screen — no clamping to the
+  // map bounds, so the camera can show past the edges near a corner. Divided
+  // by zoom so the visible world area shrinks/grows around that same center
+  // point as the player scrolls in/out (see adjustZoom).
+  _computeCamera(mapDef, player) {
+    const px = player ? player.x : mapDef.bounds.width / 2;
+    const py = player ? player.y : mapDef.bounds.height / 2;
+    return { x: px - this.width / 2 / this.zoom, y: py - this.height / 2 / this.zoom };
+  }
+}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NOVO POKE IDLE</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="game-viewport">
+      <canvas id="game-canvas" width="960" height="540"></canvas>
+
+      <!-- Top HUD: active poke status + wallet + menu buttons -->
+      <div id="hud" class="panel hud"></div>
+
+      <!-- Toast notifications (level up, item drop, capture result...) -->
+      <div id="toasts"></div>
+
+      <!-- Bottom-center ability bar: active POKE's moves + cooldowns -->
+      <div id="ability-hud"></div>
+
+      <!-- Bottom-left: Auto toggle button (opens a compact floating panel,
+           see js/ui/panels/autoFloatingPanel.js) stacked above the
+           real-time farming rate stats -->
+      <div id="bottom-left-stack">
+        <button id="auto-toggle-btn">🤖 Auto</button>
+        <div id="perf-stats" class="panel perf-stats"></div>
+      </div>
+
+      <!-- Bottom-right: collapsible chat/log window (Mundo/Comercio/Log tabs) -->
+      <div id="chat-log" class="panel chat-log"></div>
+
+      <!-- Auto-Revive countdown modal -->
+      <div id="revive-modal" class="revive-modal panel"></div>
+
+      <!-- BOSS-hunt defeat warning (no auto-pot/auto-revive there, see AutoSystem.js) -->
+      <div id="boss-defeat-modal" class="boss-defeat-modal panel"></div>
+
+      <!-- Bottom nav: switch between screens -->
+      <nav id="bottom-nav" class="panel">
+        <button data-nav="team">⚾ Equipe</button>
+        <button data-nav="bag">🎒 Mochila</button>
+        <button data-nav="hunt">🗺️ Hunts</button>
+        <button data-nav="shop">🛒 Loja</button>
+        <button data-nav="hospital">🏥 Hospital</button>
+        <button data-nav="settings">⚙️ Config</button>
+      </nav>
+
+      <!-- Discreet camera zoom control, top-right -->
+      <div id="zoom-control" class="panel">
+        <button id="zoom-out-btn">−</button>
+        <span id="zoom-level">100%</span>
+        <button id="zoom-in-btn">+</button>
+      </div>
+
+      <!-- Modal overlay screens -->
+      <div id="overlay-root"></div>
+
+      <!-- Fade-in cover shown briefly whenever the world swaps (hunt change, Hospital) -->
+      <div id="screen-transition"></div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

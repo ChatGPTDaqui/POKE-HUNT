@@ -1,0 +1,21 @@
+NOVO POKE IDLE — como jogar
+============================
+
+Requisito: Node.js instalado (https://nodejs.org, versao LTS).
+
+Como abrir:
+1. De um duplo-clique em "Jogar NOVO POKE IDLE.exe".
+2. Aguarde o navegador abrir sozinho em http://localhost:5173.
+3. Pronto — o progresso fica salvo no navegador (localStorage), nao precisa
+   de conta nem internet depois de instalado.
+
+Se o .exe nao funcionar (ex.: por bloqueio de antivirus/SmartScreen em outro
+computador), abra um terminal nesta pasta e rode:
+
+    node server.js
+
+e depois abra http://localhost:5173 manualmente no navegador.
+
+Para fechar o jogo, feche a janela do navegador e encerre o processo node
+(o .exe nao abre uma janela de console visivel — use o Gerenciador de
+Tarefas para encerrar "node.exe" se precisar).

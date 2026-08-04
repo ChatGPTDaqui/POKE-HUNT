@@ -1,0 +1,10 @@
+{
+  "name": "novo-poke-idle",
+  "version": "0.1.0",
+  "description": "Jogo idle top-down em HTML/CSS/JS puro com Canvas",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "planilha:aplicar": "node scripts/sync-planilha.js"
+  }
+}
