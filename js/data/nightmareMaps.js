@@ -1,8 +1,8 @@
-// Modo Pesadelo: every regular hunt (Johto zones + Kanto bands — NOT the
-// legendary chamber, superseded by the 11 standalone BOSS hunts below)
-// mirrored with every spawn level +100, plus one hunt per legendary where it
-// spawns alone at level 300 and doesn't respawn (see `noRespawn`, consumed by
-// main.js#stepWorld's respawn check).
+// Modo Pesadelo: every regular hunt (Johto zones + Kanto bands) mirrored with
+// every spawn level +100, plus one hunt per legendary where it spawns alone
+// at level 300 and doesn't respawn (see `noRespawn`, consumed by
+// main.js#stepWorld's respawn check) — the only way to encounter a legendary
+// at all now that the "Camara dos Lendarios" farmable hunt is gone.
 //
 // Hand-authored at runtime rather than routed through
 // scripts/sync-planilha.js: this is a mechanical transform of data that's
@@ -32,7 +32,6 @@ function buildNightmareMirror() {
   const encounters = {};
 
   for (const map of Object.values(MAPS_DATA)) {
-    if (map.id === 'legendary_lair') continue;
     const newId = `nightmare_${map.id}`;
     const enemyPool = [];
     for (const encId of map.enemyPool) {

@@ -70,10 +70,10 @@ export const MAPS_DATA = {
       }
     ]
   },
-  "lv_1_10": {
-    "id": "lv_1_10",
-    "name": "Zona Nivel 1-10",
-    "description": "Local selvagem: Zona Nivel 1-10 (nivel 2-12).",
+  "lv_1_10_floresta": {
+    "id": "lv_1_10_floresta",
+    "name": "Zona Nivel 1-10 (Floresta)",
+    "description": "Local selvagem: Zona Nivel 1-10 (Floresta) (nivel 2-12).",
     "levelRange": [
       2,
       12
@@ -122,30 +122,14 @@ export const MAPS_DATA = {
       }
     ],
     "enemyPool": [
-      "lv_1_10_pidgey",
-      "lv_1_10_sentret",
-      "lv_1_10_rattata",
-      "lv_1_10_hoppip",
-      "lv_1_10_geodude",
-      "lv_1_10_zubat",
-      "lv_1_10_dunsparce",
-      "lv_1_10_caterpie",
-      "lv_1_10_weedle",
-      "lv_1_10_bellsprout",
-      "lv_1_10_unown",
-      "lv_1_10_growlithe",
-      "lv_1_10_sandshrew",
-      "lv_1_10_onix",
-      "lv_1_10_metapod",
-      "lv_1_10_kakuna",
-      "lv_1_10_paras",
-      "lv_1_10_ekans",
-      "lv_1_10_spearow",
-      "lv_1_10_slowpoke",
-      "lv_1_10_snubbull",
-      "lv_1_10_abra",
-      "lv_1_10_jigglypuff",
-      "lv_1_10_ditto"
+      "lv_1_10_floresta_hoppip",
+      "lv_1_10_floresta_caterpie",
+      "lv_1_10_floresta_weedle",
+      "lv_1_10_floresta_bellsprout",
+      "lv_1_10_floresta_metapod",
+      "lv_1_10_floresta_kakuna",
+      "lv_1_10_floresta_paras",
+      "lv_1_10_floresta_ariados"
     ],
     "itemDrops": [
       {
@@ -158,10 +142,154 @@ export const MAPS_DATA = {
       }
     ]
   },
-  "lv_11_20": {
-    "id": "lv_11_20",
-    "name": "Zona Nivel 11-20",
-    "description": "Local selvagem: Zona Nivel 11-20 (nivel 10-18).",
+  "lv_1_10_aquatico": {
+    "id": "lv_1_10_aquatico",
+    "name": "Zona Nivel 1-10 (Aquatico)",
+    "description": "Local selvagem: Zona Nivel 1-10 (Aquatico) (nivel 2-12).",
+    "levelRange": [
+      2,
+      12
+    ],
+    "unlockCost": null,
+    "continent": "johto",
+    "bounds": {
+      "width": 2800,
+      "height": 1800
+    },
+    "playerSpawn": {
+      "x": 1400,
+      "y": 900
+    },
+    "bg": {
+      "primary": "#284b3c",
+      "secondary": "#2e5544",
+      "image": "assets/Hunt background.png"
+    },
+    "maxEnemies": 6,
+    "respawnDelay": 6,
+    "spawnPoints": [
+      {
+        "x": 500,
+        "y": 320
+      },
+      {
+        "x": 900,
+        "y": 320
+      },
+      {
+        "x": 500,
+        "y": 580
+      },
+      {
+        "x": 900,
+        "y": 580
+      },
+      {
+        "x": 700,
+        "y": 250
+      },
+      {
+        "x": 700,
+        "y": 650
+      }
+    ],
+    "enemyPool": [
+      "lv_1_10_aquatico_slowpoke",
+      "lv_1_10_aquatico_azumarill",
+      "lv_1_10_aquatico_delibird",
+      "lv_1_10_aquatico_dewgong",
+      "lv_1_10_aquatico_golduck",
+      "lv_1_10_aquatico_jynx",
+      "lv_1_10_aquatico_kingler",
+      "lv_1_10_aquatico_krabby"
+    ],
+    "itemDrops": [
+      {
+        "itemId": "potion",
+        "chance": 0.15
+      },
+      {
+        "itemId": "poke_ball",
+        "chance": 0.1
+      }
+    ]
+  },
+  "lv_11_20_vulcanico": {
+    "id": "lv_11_20_vulcanico",
+    "name": "Zona Nivel 11-20 (Vulcanico)",
+    "description": "Local selvagem: Zona Nivel 11-20 (Vulcanico) (nivel 10-18).",
+    "levelRange": [
+      10,
+      18
+    ],
+    "unlockCost": null,
+    "continent": "johto",
+    "bounds": {
+      "width": 2800,
+      "height": 1800
+    },
+    "playerSpawn": {
+      "x": 1400,
+      "y": 900
+    },
+    "bg": {
+      "primary": "#1c1c2b",
+      "secondary": "#242438",
+      "image": "assets/Hunt background.png"
+    },
+    "maxEnemies": 6,
+    "respawnDelay": 6,
+    "spawnPoints": [
+      {
+        "x": 500,
+        "y": 320
+      },
+      {
+        "x": 900,
+        "y": 320
+      },
+      {
+        "x": 500,
+        "y": 580
+      },
+      {
+        "x": 900,
+        "y": 580
+      },
+      {
+        "x": 700,
+        "y": 250
+      },
+      {
+        "x": 700,
+        "y": 650
+      }
+    ],
+    "enemyPool": [
+      "lv_11_20_vulcanico_growlithe",
+      "lv_11_20_vulcanico_geodude",
+      "lv_11_20_vulcanico_cyndaquil",
+      "lv_11_20_vulcanico_quilava",
+      "lv_11_20_vulcanico_typhlosion",
+      "lv_11_20_vulcanico_arcanine",
+      "lv_11_20_vulcanico_donphan",
+      "lv_11_20_vulcanico_gligar"
+    ],
+    "itemDrops": [
+      {
+        "itemId": "potion",
+        "chance": 0.15
+      },
+      {
+        "itemId": "poke_ball",
+        "chance": 0.1
+      }
+    ]
+  },
+  "lv_11_20_eletrico": {
+    "id": "lv_11_20_eletrico",
+    "name": "Zona Nivel 11-20 (Eletrico)",
+    "description": "Local selvagem: Zona Nivel 11-20 (Eletrico) (nivel 10-18).",
     "levelRange": [
       10,
       18
@@ -210,37 +338,14 @@ export const MAPS_DATA = {
       }
     ],
     "enemyPool": [
-      "lv_11_20_nidoran_f",
-      "lv_11_20_nidoran_m",
-      "lv_11_20_sunkern",
-      "lv_11_20_pidgey",
-      "lv_11_20_caterpie",
-      "lv_11_20_weedle",
-      "lv_11_20_snubbull",
-      "lv_11_20_growlithe",
-      "lv_11_20_abra",
-      "lv_11_20_jigglypuff",
-      "lv_11_20_ditto",
-      "lv_11_20_yanma",
-      "lv_11_20_rattata",
-      "lv_11_20_zubat",
-      "lv_11_20_machop",
-      "lv_11_20_golbat",
-      "lv_11_20_geodude",
-      "lv_11_20_raticate",
-      "lv_11_20_koffing",
-      "lv_11_20_weezing",
-      "lv_11_20_pidgeotto",
-      "lv_11_20_magnemite",
-      "lv_11_20_tauros",
-      "lv_11_20_miltank",
-      "lv_11_20_ekans",
-      "lv_11_20_spearow",
-      "lv_11_20_arbok",
-      "lv_11_20_fearow",
-      "lv_11_20_sentret",
-      "lv_11_20_farfetch_d",
-      "lv_11_20_furret"
+      "lv_11_20_eletrico_magnemite",
+      "lv_11_20_eletrico_magneton",
+      "lv_11_20_eletrico_skarmory",
+      "lv_11_20_eletrico_steelix",
+      "lv_11_20_eletrico_pikachu",
+      "lv_11_20_eletrico_voltorb",
+      "lv_11_20_eletrico_electrode",
+      "lv_11_20_eletrico_electabuzz"
     ],
     "itemDrops": [
       {
@@ -253,10 +358,82 @@ export const MAPS_DATA = {
       }
     ]
   },
-  "lv_21_30": {
-    "id": "lv_21_30",
-    "name": "Zona Nivel 21-30",
-    "description": "Local selvagem: Zona Nivel 21-30 (nivel 18-32).",
+  "lv_21_30_sombrio": {
+    "id": "lv_21_30_sombrio",
+    "name": "Zona Nivel 21-30 (Sombrio)",
+    "description": "Local selvagem: Zona Nivel 21-30 (Sombrio) (nivel 18-32).",
+    "levelRange": [
+      18,
+      32
+    ],
+    "unlockCost": null,
+    "continent": "johto",
+    "bounds": {
+      "width": 2800,
+      "height": 1800
+    },
+    "playerSpawn": {
+      "x": 1400,
+      "y": 900
+    },
+    "bg": {
+      "primary": "#1c1c2b",
+      "secondary": "#242438",
+      "image": "assets/Hunt background.png"
+    },
+    "maxEnemies": 6,
+    "respawnDelay": 6,
+    "spawnPoints": [
+      {
+        "x": 500,
+        "y": 320
+      },
+      {
+        "x": 900,
+        "y": 320
+      },
+      {
+        "x": 500,
+        "y": 580
+      },
+      {
+        "x": 900,
+        "y": 580
+      },
+      {
+        "x": 700,
+        "y": 250
+      },
+      {
+        "x": 700,
+        "y": 650
+      }
+    ],
+    "enemyPool": [
+      "lv_21_30_sombrio_zubat",
+      "lv_21_30_sombrio_golbat",
+      "lv_21_30_sombrio_arbok",
+      "lv_21_30_sombrio_ekans",
+      "lv_21_30_sombrio_gastly",
+      "lv_21_30_sombrio_gengar",
+      "lv_21_30_sombrio_haunter",
+      "lv_21_30_sombrio_koffing"
+    ],
+    "itemDrops": [
+      {
+        "itemId": "potion",
+        "chance": 0.15
+      },
+      {
+        "itemId": "poke_ball",
+        "chance": 0.1
+      }
+    ]
+  },
+  "lv_21_30_mistico": {
+    "id": "lv_21_30_mistico",
+    "name": "Zona Nivel 21-30 (Mistico)",
+    "description": "Local selvagem: Zona Nivel 21-30 (Mistico) (nivel 18-32).",
     "levelRange": [
       18,
       32
@@ -305,30 +482,14 @@ export const MAPS_DATA = {
       }
     ],
     "enemyPool": [
-      "lv_21_30_natu",
-      "lv_21_30_smeargle",
-      "lv_21_30_zubat",
-      "lv_21_30_golbat",
-      "lv_21_30_raticate",
-      "lv_21_30_geodude",
-      "lv_21_30_onix",
-      "lv_21_30_slowpoke",
-      "lv_21_30_rattata",
-      "lv_21_30_swinub",
-      "lv_21_30_jynx",
-      "lv_21_30_krabby",
-      "lv_21_30_seel",
-      "lv_21_30_tangela",
-      "lv_21_30_lickitung",
-      "lv_21_30_bellsprout",
-      "lv_21_30_weepinbell",
-      "lv_21_30_graveler",
-      "lv_21_30_ursaring",
-      "lv_21_30_gligar",
-      "lv_21_30_donphan",
-      "lv_21_30_skarmory",
-      "lv_21_30_machoke",
-      "lv_21_30_machop"
+      "lv_21_30_mistico_natu",
+      "lv_21_30_mistico_abra",
+      "lv_21_30_mistico_alakazam",
+      "lv_21_30_mistico_drowzee",
+      "lv_21_30_mistico_hypno",
+      "lv_21_30_mistico_kadabra",
+      "lv_21_30_mistico_unown",
+      "lv_21_30_mistico_wobbuffet"
     ],
     "itemDrops": [
       {
@@ -341,10 +502,10 @@ export const MAPS_DATA = {
       }
     ]
   },
-  "lv_31_40": {
-    "id": "lv_31_40",
-    "name": "Zona Nivel 31-40",
-    "description": "Local selvagem: Zona Nivel 31-40 (nivel 15-51).",
+  "lv_31_40_planicie": {
+    "id": "lv_31_40_planicie",
+    "name": "Zona Nivel 31-40 (Planicie)",
+    "description": "Local selvagem: Zona Nivel 31-40 (Planicie) (nivel 15-51).",
     "levelRange": [
       15,
       51
@@ -360,8 +521,8 @@ export const MAPS_DATA = {
       "y": 900
     },
     "bg": {
-      "primary": "#1c1c2b",
-      "secondary": "#242438",
+      "primary": "#284b3c",
+      "secondary": "#2e5544",
       "image": "assets/Hunt background.png"
     },
     "maxEnemies": 6,
@@ -393,15 +554,14 @@ export const MAPS_DATA = {
       }
     ],
     "enemyPool": [
-      "lv_31_40_golbat",
-      "lv_31_40_onix",
-      "lv_31_40_graveler",
-      "lv_31_40_ursaring",
-      "lv_31_40_larvitar",
-      "lv_31_40_pupitar",
-      "lv_31_40_magmar",
-      "lv_31_40_machoke",
-      "lv_31_40_parasect"
+      "lv_31_40_planicie_ursaring",
+      "lv_31_40_planicie_machoke",
+      "lv_31_40_planicie_sentret",
+      "lv_31_40_planicie_pidgey",
+      "lv_31_40_planicie_rattata",
+      "lv_31_40_planicie_hoothoot",
+      "lv_31_40_planicie_ditto",
+      "lv_31_40_planicie_dodrio"
     ],
     "itemDrops": [
       {
@@ -414,10 +574,154 @@ export const MAPS_DATA = {
       }
     ]
   },
-  "lv_41_50": {
-    "id": "lv_41_50",
-    "name": "Zona Nivel 41-50",
-    "description": "Local selvagem: Zona Nivel 41-50 (nivel 41-52).",
+  "lv_31_40_floresta": {
+    "id": "lv_31_40_floresta",
+    "name": "Zona Nivel 31-40 (Floresta)",
+    "description": "Local selvagem: Zona Nivel 31-40 (Floresta) (nivel 15-51).",
+    "levelRange": [
+      15,
+      51
+    ],
+    "unlockCost": null,
+    "continent": "johto",
+    "bounds": {
+      "width": 2800,
+      "height": 1800
+    },
+    "playerSpawn": {
+      "x": 1400,
+      "y": 900
+    },
+    "bg": {
+      "primary": "#284b3c",
+      "secondary": "#2e5544",
+      "image": "assets/Hunt background.png"
+    },
+    "maxEnemies": 6,
+    "respawnDelay": 6,
+    "spawnPoints": [
+      {
+        "x": 500,
+        "y": 320
+      },
+      {
+        "x": 900,
+        "y": 320
+      },
+      {
+        "x": 500,
+        "y": 580
+      },
+      {
+        "x": 900,
+        "y": 580
+      },
+      {
+        "x": 700,
+        "y": 250
+      },
+      {
+        "x": 700,
+        "y": 650
+      }
+    ],
+    "enemyPool": [
+      "lv_31_40_floresta_parasect",
+      "lv_31_40_floresta_hoppip",
+      "lv_31_40_floresta_ariados",
+      "lv_31_40_floresta_beedrill",
+      "lv_31_40_floresta_bellsprout",
+      "lv_31_40_floresta_butterfree",
+      "lv_31_40_floresta_caterpie",
+      "lv_31_40_floresta_gloom"
+    ],
+    "itemDrops": [
+      {
+        "itemId": "potion",
+        "chance": 0.15
+      },
+      {
+        "itemId": "poke_ball",
+        "chance": 0.1
+      }
+    ]
+  },
+  "lv_41_50_aquatico": {
+    "id": "lv_41_50_aquatico",
+    "name": "Zona Nivel 41-50 (Aquatico)",
+    "description": "Local selvagem: Zona Nivel 41-50 (Aquatico) (nivel 41-52).",
+    "levelRange": [
+      41,
+      52
+    ],
+    "unlockCost": null,
+    "continent": "johto",
+    "bounds": {
+      "width": 2800,
+      "height": 1800
+    },
+    "playerSpawn": {
+      "x": 1400,
+      "y": 900
+    },
+    "bg": {
+      "primary": "#284b3c",
+      "secondary": "#2e5544",
+      "image": "assets/Hunt background.png"
+    },
+    "maxEnemies": 6,
+    "respawnDelay": 6,
+    "spawnPoints": [
+      {
+        "x": 500,
+        "y": 320
+      },
+      {
+        "x": 900,
+        "y": 320
+      },
+      {
+        "x": 500,
+        "y": 580
+      },
+      {
+        "x": 900,
+        "y": 580
+      },
+      {
+        "x": 700,
+        "y": 250
+      },
+      {
+        "x": 700,
+        "y": 650
+      }
+    ],
+    "enemyPool": [
+      "lv_41_50_aquatico_azumarill",
+      "lv_41_50_aquatico_delibird",
+      "lv_41_50_aquatico_dewgong",
+      "lv_41_50_aquatico_golduck",
+      "lv_41_50_aquatico_jynx",
+      "lv_41_50_aquatico_kingler",
+      "lv_41_50_aquatico_krabby",
+      "lv_41_50_aquatico_marill"
+    ],
+    "itemDrops": [
+      {
+        "itemId": "potion",
+        "chance": 0.15
+      },
+      {
+        "itemId": "poke_ball",
+        "chance": 0.1
+      }
+    ]
+  },
+  "lv_41_50_vulcanico": {
+    "id": "lv_41_50_vulcanico",
+    "name": "Zona Nivel 41-50 (Vulcanico)",
+    "description": "Local selvagem: Zona Nivel 41-50 (Vulcanico) (nivel 41-52).",
     "levelRange": [
       41,
       52
@@ -466,14 +770,14 @@ export const MAPS_DATA = {
       }
     ],
     "enemyPool": [
-      "lv_41_50_tangela",
-      "lv_41_50_ponyta",
-      "lv_41_50_arbok",
-      "lv_41_50_rapidash",
-      "lv_41_50_doduo",
-      "lv_41_50_dodrio",
-      "lv_41_50_golbat",
-      "lv_41_50_parasect"
+      "lv_41_50_vulcanico_ponyta",
+      "lv_41_50_vulcanico_rapidash",
+      "lv_41_50_vulcanico_cyndaquil",
+      "lv_41_50_vulcanico_quilava",
+      "lv_41_50_vulcanico_typhlosion",
+      "lv_41_50_vulcanico_arcanine",
+      "lv_41_50_vulcanico_donphan",
+      "lv_41_50_vulcanico_geodude"
     ],
     "itemDrops": [
       {
@@ -486,10 +790,10 @@ export const MAPS_DATA = {
       }
     ]
   },
-  "kanto_lv_1_10": {
-    "id": "kanto_lv_1_10",
-    "name": "Kanto Zona Nivel 52-62",
-    "description": "Local selvagem: Kanto Zona Nivel 52-62 (nivel 52-62).",
+  "kanto_lv_1_10_floresta": {
+    "id": "kanto_lv_1_10_floresta",
+    "name": "Kanto Zona Nivel 52-62 (Floresta)",
+    "description": "Local selvagem: Kanto Zona Nivel 52-62 (Floresta) (nivel 52-62).",
     "levelRange": [
       52,
       62
@@ -538,28 +842,14 @@ export const MAPS_DATA = {
       }
     ],
     "enemyPool": [
-      "kanto_lv_1_10_pichu",
-      "kanto_lv_1_10_cleffa",
-      "kanto_lv_1_10_igglybuff",
-      "kanto_lv_1_10_togepi",
-      "kanto_lv_1_10_pikachu",
-      "kanto_lv_1_10_hoothoot",
-      "kanto_lv_1_10_spinarak",
-      "kanto_lv_1_10_ledyba",
-      "kanto_lv_1_10_pineco",
-      "kanto_lv_1_10_oddish",
-      "kanto_lv_1_10_poliwag",
-      "kanto_lv_1_10_diglett",
-      "kanto_lv_1_10_voltorb",
-      "kanto_lv_1_10_meowth",
-      "kanto_lv_1_10_gastly",
-      "kanto_lv_1_10_drowzee",
-      "kanto_lv_1_10_magikarp",
-      "kanto_lv_1_10_goldeen",
-      "kanto_lv_1_10_horsea",
-      "kanto_lv_1_10_tentacool",
-      "kanto_lv_1_10_exeggcute",
-      "kanto_lv_1_10_mareep"
+      "kanto_lv_1_10_floresta_spinarak",
+      "kanto_lv_1_10_floresta_ledyba",
+      "kanto_lv_1_10_floresta_pineco",
+      "kanto_lv_1_10_floresta_oddish",
+      "kanto_lv_1_10_floresta_exeggcute",
+      "kanto_lv_1_10_floresta_hoppip",
+      "kanto_lv_1_10_floresta_ariados",
+      "kanto_lv_1_10_floresta_beedrill"
     ],
     "itemDrops": [
       {
@@ -572,10 +862,154 @@ export const MAPS_DATA = {
       }
     ]
   },
-  "kanto_lv_11_20": {
-    "id": "kanto_lv_11_20",
-    "name": "Kanto Zona Nivel 60-70",
-    "description": "Local selvagem: Kanto Zona Nivel 60-70 (nivel 60-70).",
+  "kanto_lv_1_10_aquatico": {
+    "id": "kanto_lv_1_10_aquatico",
+    "name": "Kanto Zona Nivel 52-62 (Aquatico)",
+    "description": "Local selvagem: Kanto Zona Nivel 52-62 (Aquatico) (nivel 52-62).",
+    "levelRange": [
+      52,
+      62
+    ],
+    "unlockCost": null,
+    "continent": "kanto",
+    "bounds": {
+      "width": 2800,
+      "height": 1800
+    },
+    "playerSpawn": {
+      "x": 1400,
+      "y": 900
+    },
+    "bg": {
+      "primary": "#284b3c",
+      "secondary": "#2e5544",
+      "image": "assets/Hunt background.png"
+    },
+    "maxEnemies": 6,
+    "respawnDelay": 6,
+    "spawnPoints": [
+      {
+        "x": 500,
+        "y": 320
+      },
+      {
+        "x": 900,
+        "y": 320
+      },
+      {
+        "x": 500,
+        "y": 580
+      },
+      {
+        "x": 900,
+        "y": 580
+      },
+      {
+        "x": 700,
+        "y": 250
+      },
+      {
+        "x": 700,
+        "y": 650
+      }
+    ],
+    "enemyPool": [
+      "kanto_lv_1_10_aquatico_poliwag",
+      "kanto_lv_1_10_aquatico_magikarp",
+      "kanto_lv_1_10_aquatico_goldeen",
+      "kanto_lv_1_10_aquatico_horsea",
+      "kanto_lv_1_10_aquatico_tentacool",
+      "kanto_lv_1_10_aquatico_azumarill",
+      "kanto_lv_1_10_aquatico_delibird",
+      "kanto_lv_1_10_aquatico_dewgong"
+    ],
+    "itemDrops": [
+      {
+        "itemId": "potion",
+        "chance": 0.15
+      },
+      {
+        "itemId": "poke_ball",
+        "chance": 0.1
+      }
+    ]
+  },
+  "kanto_lv_11_20_vulcanico": {
+    "id": "kanto_lv_11_20_vulcanico",
+    "name": "Kanto Zona Nivel 60-70 (Vulcanico)",
+    "description": "Local selvagem: Kanto Zona Nivel 60-70 (Vulcanico) (nivel 60-70).",
+    "levelRange": [
+      60,
+      70
+    ],
+    "unlockCost": null,
+    "continent": "kanto",
+    "bounds": {
+      "width": 2800,
+      "height": 1800
+    },
+    "playerSpawn": {
+      "x": 1400,
+      "y": 900
+    },
+    "bg": {
+      "primary": "#1c1c2b",
+      "secondary": "#242438",
+      "image": "assets/Hunt background.png"
+    },
+    "maxEnemies": 6,
+    "respawnDelay": 6,
+    "spawnPoints": [
+      {
+        "x": 500,
+        "y": 320
+      },
+      {
+        "x": 900,
+        "y": 320
+      },
+      {
+        "x": 500,
+        "y": 580
+      },
+      {
+        "x": 900,
+        "y": 580
+      },
+      {
+        "x": 700,
+        "y": 250
+      },
+      {
+        "x": 700,
+        "y": 650
+      }
+    ],
+    "enemyPool": [
+      "kanto_lv_11_20_vulcanico_cyndaquil",
+      "kanto_lv_11_20_vulcanico_cubone",
+      "kanto_lv_11_20_vulcanico_slugma",
+      "kanto_lv_11_20_vulcanico_phanpy",
+      "kanto_lv_11_20_vulcanico_magby",
+      "kanto_lv_11_20_vulcanico_quilava",
+      "kanto_lv_11_20_vulcanico_typhlosion",
+      "kanto_lv_11_20_vulcanico_arcanine"
+    ],
+    "itemDrops": [
+      {
+        "itemId": "potion",
+        "chance": 0.15
+      },
+      {
+        "itemId": "poke_ball",
+        "chance": 0.1
+      }
+    ]
+  },
+  "kanto_lv_11_20_eletrico": {
+    "id": "kanto_lv_11_20_eletrico",
+    "name": "Kanto Zona Nivel 60-70 (Eletrico)",
+    "description": "Local selvagem: Kanto Zona Nivel 60-70 (Eletrico) (nivel 60-70).",
     "levelRange": [
       60,
       70
@@ -624,27 +1058,14 @@ export const MAPS_DATA = {
       }
     ],
     "enemyPool": [
-      "kanto_lv_11_20_cyndaquil",
-      "kanto_lv_11_20_chikorita",
-      "kanto_lv_11_20_totodile",
-      "kanto_lv_11_20_mankey",
-      "kanto_lv_11_20_cubone",
-      "kanto_lv_11_20_chinchou",
-      "kanto_lv_11_20_shellder",
-      "kanto_lv_11_20_staryu",
-      "kanto_lv_11_20_grimer",
-      "kanto_lv_11_20_venonat",
-      "kanto_lv_11_20_psyduck",
-      "kanto_lv_11_20_wooper",
-      "kanto_lv_11_20_slugma",
-      "kanto_lv_11_20_houndour",
-      "kanto_lv_11_20_teddiursa",
-      "kanto_lv_11_20_phanpy",
-      "kanto_lv_11_20_remoraid",
-      "kanto_lv_11_20_tyrogue",
-      "kanto_lv_11_20_elekid",
-      "kanto_lv_11_20_magby",
-      "kanto_lv_11_20_smoochum"
+      "kanto_lv_11_20_eletrico_elekid",
+      "kanto_lv_11_20_eletrico_magnemite",
+      "kanto_lv_11_20_eletrico_magneton",
+      "kanto_lv_11_20_eletrico_skarmory",
+      "kanto_lv_11_20_eletrico_steelix",
+      "kanto_lv_11_20_eletrico_pikachu",
+      "kanto_lv_11_20_eletrico_voltorb",
+      "kanto_lv_11_20_eletrico_electrode"
     ],
     "itemDrops": [
       {
@@ -657,10 +1078,10 @@ export const MAPS_DATA = {
       }
     ]
   },
-  "kanto_lv_21_35": {
-    "id": "kanto_lv_21_35",
-    "name": "Kanto Zona Nivel 68-85",
-    "description": "Local selvagem: Kanto Zona Nivel 68-85 (nivel 68-85).",
+  "kanto_lv_21_35_sombrio": {
+    "id": "kanto_lv_21_35_sombrio",
+    "name": "Kanto Zona Nivel 68-85 (Sombrio)",
+    "description": "Local selvagem: Kanto Zona Nivel 68-85 (Sombrio) (nivel 68-85).",
     "levelRange": [
       68,
       85
@@ -676,8 +1097,8 @@ export const MAPS_DATA = {
       "y": 900
     },
     "bg": {
-      "primary": "#284b3c",
-      "secondary": "#2e5544",
+      "primary": "#1c1c2b",
+      "secondary": "#242438",
       "image": "assets/Hunt background.png"
     },
     "maxEnemies": 6,
@@ -709,29 +1130,14 @@ export const MAPS_DATA = {
       }
     ],
     "enemyPool": [
-      "kanto_lv_21_35_marill",
-      "kanto_lv_21_35_sudowoodo",
-      "kanto_lv_21_35_murkrow",
-      "kanto_lv_21_35_aipom",
-      "kanto_lv_21_35_qwilfish",
-      "kanto_lv_21_35_corsola",
-      "kanto_lv_21_35_sneasel",
-      "kanto_lv_21_35_girafarig",
-      "kanto_lv_21_35_stantler",
-      "kanto_lv_21_35_misdreavus",
-      "kanto_lv_21_35_delibird",
-      "kanto_lv_21_35_sunflora",
-      "kanto_lv_21_35_wobbuffet",
-      "kanto_lv_21_35_mantine",
-      "kanto_lv_21_35_rhyhorn",
-      "kanto_lv_21_35_hitmonlee",
-      "kanto_lv_21_35_hitmonchan",
-      "kanto_lv_21_35_kangaskhan",
-      "kanto_lv_21_35_lapras",
-      "kanto_lv_21_35_porygon",
-      "kanto_lv_21_35_eevee",
-      "kanto_lv_21_35_scyther",
-      "kanto_lv_21_35_pinsir"
+      "kanto_lv_21_35_sombrio_murkrow",
+      "kanto_lv_21_35_sombrio_sneasel",
+      "kanto_lv_21_35_sombrio_misdreavus",
+      "kanto_lv_21_35_sombrio_arbok",
+      "kanto_lv_21_35_sombrio_ekans",
+      "kanto_lv_21_35_sombrio_gastly",
+      "kanto_lv_21_35_sombrio_gengar",
+      "kanto_lv_21_35_sombrio_golbat"
     ],
     "itemDrops": [
       {
@@ -744,10 +1150,82 @@ export const MAPS_DATA = {
       }
     ]
   },
-  "kanto_lv_36_55": {
-    "id": "kanto_lv_36_55",
-    "name": "Kanto Zona Nivel 80-105",
-    "description": "Local selvagem: Kanto Zona Nivel 80-105 (nivel 80-105).",
+  "kanto_lv_21_35_mistico": {
+    "id": "kanto_lv_21_35_mistico",
+    "name": "Kanto Zona Nivel 68-85 (Mistico)",
+    "description": "Local selvagem: Kanto Zona Nivel 68-85 (Mistico) (nivel 68-85).",
+    "levelRange": [
+      68,
+      85
+    ],
+    "unlockCost": null,
+    "continent": "kanto",
+    "bounds": {
+      "width": 2800,
+      "height": 1800
+    },
+    "playerSpawn": {
+      "x": 1400,
+      "y": 900
+    },
+    "bg": {
+      "primary": "#3e2f23",
+      "secondary": "#4a3829",
+      "image": "assets/Hunt background.png"
+    },
+    "maxEnemies": 6,
+    "respawnDelay": 6,
+    "spawnPoints": [
+      {
+        "x": 500,
+        "y": 320
+      },
+      {
+        "x": 900,
+        "y": 320
+      },
+      {
+        "x": 500,
+        "y": 580
+      },
+      {
+        "x": 900,
+        "y": 580
+      },
+      {
+        "x": 700,
+        "y": 250
+      },
+      {
+        "x": 700,
+        "y": 650
+      }
+    ],
+    "enemyPool": [
+      "kanto_lv_21_35_mistico_wobbuffet",
+      "kanto_lv_21_35_mistico_abra",
+      "kanto_lv_21_35_mistico_alakazam",
+      "kanto_lv_21_35_mistico_drowzee",
+      "kanto_lv_21_35_mistico_hypno",
+      "kanto_lv_21_35_mistico_kadabra",
+      "kanto_lv_21_35_mistico_natu",
+      "kanto_lv_21_35_mistico_unown"
+    ],
+    "itemDrops": [
+      {
+        "itemId": "potion",
+        "chance": 0.15
+      },
+      {
+        "itemId": "poke_ball",
+        "chance": 0.1
+      }
+    ]
+  },
+  "kanto_lv_36_55_planicie": {
+    "id": "kanto_lv_36_55_planicie",
+    "name": "Kanto Zona Nivel 80-105 (Planicie)",
+    "description": "Local selvagem: Kanto Zona Nivel 80-105 (Planicie) (nivel 80-105).",
     "levelRange": [
       80,
       105
@@ -796,21 +1274,14 @@ export const MAPS_DATA = {
       }
     ],
     "enemyPool": [
-      "kanto_lv_36_55_dratini",
-      "kanto_lv_36_55_omanyte",
-      "kanto_lv_36_55_kabuto",
-      "kanto_lv_36_55_aerodactyl",
-      "kanto_lv_36_55_snorlax",
-      "kanto_lv_36_55_heracross",
-      "kanto_lv_36_55_alakazam",
-      "kanto_lv_36_55_gengar",
-      "kanto_lv_36_55_machamp",
-      "kanto_lv_36_55_victreebel",
-      "kanto_lv_36_55_arcanine",
-      "kanto_lv_36_55_nidoking",
-      "kanto_lv_36_55_nidoqueen",
-      "kanto_lv_36_55_steelix",
-      "kanto_lv_36_55_gyarados"
+      "kanto_lv_36_55_planicie_snorlax",
+      "kanto_lv_36_55_planicie_machamp",
+      "kanto_lv_36_55_planicie_sentret",
+      "kanto_lv_36_55_planicie_pidgey",
+      "kanto_lv_36_55_planicie_rattata",
+      "kanto_lv_36_55_planicie_hoothoot",
+      "kanto_lv_36_55_planicie_ditto",
+      "kanto_lv_36_55_planicie_dodrio"
     ],
     "itemDrops": [
       {
@@ -823,17 +1294,15 @@ export const MAPS_DATA = {
       }
     ]
   },
-  "legendary_lair": {
-    "id": "legendary_lair",
-    "name": "Camara dos Lendarios",
-    "description": "Local selvagem: Camara dos Lendarios (nivel 110-120).",
+  "kanto_lv_36_55_floresta": {
+    "id": "kanto_lv_36_55_floresta",
+    "name": "Kanto Zona Nivel 80-105 (Floresta)",
+    "description": "Local selvagem: Kanto Zona Nivel 80-105 (Floresta) (nivel 80-105).",
     "levelRange": [
-      110,
-      120
+      80,
+      105
     ],
-    "unlockCost": {
-      "gold": 1000000
-    },
+    "unlockCost": null,
     "continent": "kanto",
     "bounds": {
       "width": 2800,
@@ -844,8 +1313,8 @@ export const MAPS_DATA = {
       "y": 900
     },
     "bg": {
-      "primary": "#3e2f23",
-      "secondary": "#4a3829",
+      "primary": "#284b3c",
+      "secondary": "#2e5544",
       "image": "assets/Hunt background.png"
     },
     "maxEnemies": 6,
@@ -877,17 +1346,14 @@ export const MAPS_DATA = {
       }
     ],
     "enemyPool": [
-      "legendary_lair_articuno",
-      "legendary_lair_zapdos",
-      "legendary_lair_moltres",
-      "legendary_lair_raikou",
-      "legendary_lair_entei",
-      "legendary_lair_suicune",
-      "legendary_lair_lugia",
-      "legendary_lair_ho_oh",
-      "legendary_lair_celebi",
-      "legendary_lair_mewtwo",
-      "legendary_lair_mew"
+      "kanto_lv_36_55_floresta_heracross",
+      "kanto_lv_36_55_floresta_victreebel",
+      "kanto_lv_36_55_floresta_hoppip",
+      "kanto_lv_36_55_floresta_ariados",
+      "kanto_lv_36_55_floresta_beedrill",
+      "kanto_lv_36_55_floresta_bellsprout",
+      "kanto_lv_36_55_floresta_butterfree",
+      "kanto_lv_36_55_floresta_caterpie"
     ],
     "itemDrops": [
       {

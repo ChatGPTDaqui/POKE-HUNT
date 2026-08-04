@@ -13,6 +13,18 @@ const { readWorkbook } = require('./xlsx-reader.js');
 const ROOT = path.join(__dirname, '..');
 const XLSX_PATH = path.join(ROOT, 'Planilha mestra', 'dados_do_jogo.xlsx');
 const DATA_DIR = path.join(ROOT, 'js', 'data');
+
+// Every species that already has real imported battle-sprite art (see
+// scripts/import-kanto-sprites.js) — restricts the biome backfill below
+// (splitByBiome/backfillBiomePool) to species that won't fall back to the
+// geometric placeholder shape. Read straight off disk instead of duplicating
+// js/data/sprites.js#SPECIES_WITH_ART (this script is plain CommonJS, no
+// import from js/) — zero drift risk either way.
+const ART_SPECIES_IDS = new Set(
+  fs.readdirSync(path.join(ROOT, 'assets', 'battle-sprites'), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+);
 // Every non-Surf day-period location in the sheet — this workbook only
 // covers Johto (the starting region; there's no Kanto data in it at all), so
 // "all remaining hunts for the initial region" means all of these. Surf
@@ -212,13 +224,97 @@ function bandRangeForLevel(avgLevel) {
   return { bandIndex, from, to: from + BAND_SIZE - 1 };
 }
 
+// Biomes are our own idle-game concept (no equivalent in the spreadsheet,
+// same spirit as BG_ROUTE/CAVE/TOWER below) — a species' biome is its primary
+// elemental type's biome. Covers all 17 real types in this dataset (no Fairy,
+// see js/data/typeColors.js) with no overlap, so every species lands in
+// exactly one biome.
+const BIOME_ORDER = ['Floresta', 'Aquatico', 'Vulcanico', 'Eletrico', 'Sombrio', 'Mistico', 'Planicie'];
+const BIOME_BY_TYPE = {
+  GRASS: 'Floresta', BUG: 'Floresta',
+  WATER: 'Aquatico', ICE: 'Aquatico',
+  FIRE: 'Vulcanico', GROUND: 'Vulcanico', ROCK: 'Vulcanico',
+  ELECTRIC: 'Eletrico', STEEL: 'Eletrico',
+  GHOST: 'Sombrio', DARK: 'Sombrio', POISON: 'Sombrio',
+  FLYING: 'Mistico', PSYCHIC: 'Mistico', DRAGON: 'Mistico',
+  NORMAL: 'Planicie', FIGHTING: 'Planicie',
+};
+function biomeForType(type) {
+  return BIOME_BY_TYPE[type] || 'Planicie';
+}
+function primaryTypeOf(especiesByKey, sheetKey) {
+  const row = especiesByKey[sheetKey];
+  return row && row['Tipo 1'];
+}
+
+// Every level-band's real species pool (from real Johto encounter data, or
+// KANTO_BANDS' hand-curated lists) gets split into 2 biome-themed hunts
+// instead of 1 (explicit user request: "2 hunts por 10 niveis, por bioma").
+// 8, not 4: a first pass at 4 left most hunts sitting right at the floor
+// (splitting an already-modest ~15-22 species Johto/Kanto band 2 ways by
+// biome leaves thin real intersections most of the time), which dropped
+// total roster variety from ~210 huntable species down to 99 — a much bigger
+// loss than intended. 8 pulls in enough backfill to keep hunts feeling
+// varied without making every hunt 100% backfilled filler.
+const MIN_BIOME_POOL_SIZE = 8;
+
+// Tops a biome's species pool up to MIN_BIOME_POOL_SIZE using the full
+// National Dex (the "Espécies" sheet in full, not just this band's real
+// encounter data) — same curation spirit as KANTO_BANDS/LEGENDARY_BAND
+// (hand-placing species beyond what real Johto encounter rows cover), just
+// automated: same biome (primary type), already has real art, not already
+// placed elsewhere in this same band's 2 hunts.
+function backfillBiomePool(pool, biome, levelRange, workbook, excludeKeys) {
+  if (Object.keys(pool).length >= MIN_BIOME_POOL_SIZE) return pool;
+  const filled = { ...pool };
+  for (const row of workbook['Espécies'] || []) {
+    if (Object.keys(filled).length >= MIN_BIOME_POOL_SIZE) break;
+    const sheetKey = row['Chave'];
+    if (!sheetKey || filled[sheetKey] || excludeKeys.has(sheetKey)) continue;
+    if (biomeForType(row['Tipo 1']) !== biome) continue;
+    if (!ART_SPECIES_IDS.has(sheetKey.toLowerCase())) continue;
+    filled[sheetKey] = { min: levelRange.min, max: levelRange.max };
+  }
+  return filled;
+}
+
+// Splits one combined species pool (sheet key -> {min,max} level range) into
+// 2 biome-themed sub-pools. `seed` is this band's position in its continent's
+// sequence (0, 1, 2, ...) — the 2 biomes used are BIOME_ORDER[2*seed] and
+// BIOME_ORDER[2*seed+1] (wrapping), NOT whichever happen to have the most
+// real species in this particular band: picking by real prevalence alone
+// systematically favors the same handful of common biomes (Planicie/
+// Vulcanico) band after band and starves out the rest — e.g. a first pass at
+// this produced zero hunts for Eletrico or Mistico anywhere in the game.
+// Rotating guarantees every biome gets used across a continent's bands (5
+// Johto bands or 4 Kanto bands both cycle through all 7 within their own
+// count). Bands/biomes with little or no real data just lean harder on the
+// backfill below — by design, that's what it's for.
+function splitByBiome(speciesLevels, levelRange, workbook, especiesByKey, seed) {
+  const byBiome = new Map();
+  for (const [sp, range] of Object.entries(speciesLevels)) {
+    const biome = biomeForType(primaryTypeOf(especiesByKey, sp));
+    if (!byBiome.has(biome)) byBiome.set(biome, {});
+    byBiome.get(biome)[sp] = range;
+  }
+  const n = BIOME_ORDER.length;
+  const chosen = [BIOME_ORDER[(seed * 2) % n], BIOME_ORDER[(seed * 2 + 1) % n]];
+
+  const usedKeys = new Set(Object.keys(speciesLevels));
+  return chosen.map((biome) => {
+    const pool = backfillBiomePool(byBiome.get(biome) || {}, biome, levelRange, workbook, usedKeys);
+    for (const key of Object.keys(pool)) usedKeys.add(key);
+    return { biome, speciesLevels: pool };
+  });
+}
+
 // Fresh Lv1 starters shouldn't be able to run into anything above Lv2 in
 // their very first hunt (explicit user request) — clamp just the ceiling,
 // not the floor, of both the hunt's own maxLevel and every per-species range
 // that feeds it.
 const STARTER_HUNT_MAX_LEVEL = 2;
 
-function groupHuntsIntoBands(candidates) {
+function groupHuntsIntoBands(candidates, workbook, especiesByKey) {
   const sorted = [...candidates].sort((a, b) => a.avgLevel - b.avgLevel);
   const starter = sorted.shift();
   starter.name = `${starter.name} (Inicial)`;
@@ -235,12 +331,10 @@ function groupHuntsIntoBands(candidates) {
   }
 
   const grouped = [starter];
+  let bandSeq = 0;
   for (const bandIndex of [...bandsByIndex.keys()].sort((a, b) => a - b)) {
     const group = bandsByIndex.get(bandIndex);
     const { from, to } = bandRangeForLevel(group[0].avgLevel);
-    // Only used to pick a route/cave/tower background theme below — the
-    // group's lowest-level location is the closest thing to a "main" spot.
-    const anchor = group.reduce((best, c) => (c.avgLevel < best.avgLevel ? c : best), group[0]);
 
     const speciesLevels = {};
     let minLevel = Infinity;
@@ -259,15 +353,22 @@ function groupHuntsIntoBands(candidates) {
       }
     }
 
-    grouped.push({
-      key: `lv_${from}_${to}`,
-      name: `Zona Nivel ${from}-${to}`,
-      bgTheme: anchor.name,
-      avgLevel: levelSum / group.length,
-      minLevel,
-      maxLevel,
-      speciesLevels,
-    });
+    // Every 10-level band becomes 2 biome-themed hunts instead of 1 (explicit
+    // user request) — see splitByBiome above for how species get divided and
+    // topped up.
+    const subHunts = splitByBiome(speciesLevels, { min: minLevel, max: maxLevel }, workbook, especiesByKey, bandSeq);
+    bandSeq += 1;
+    for (const { biome, speciesLevels: subSpeciesLevels } of subHunts) {
+      grouped.push({
+        key: `lv_${from}_${to}_${biome.toLowerCase()}`,
+        name: `Zona Nivel ${from}-${to} (${biome})`,
+        bgTheme: biome,
+        avgLevel: levelSum / group.length,
+        minLevel,
+        maxLevel,
+        speciesLevels: subSpeciesLevels,
+      });
+    }
   }
 
   return grouped;
@@ -286,10 +387,7 @@ function groupHuntsIntoBands(candidates) {
 // hand-made curation, exactly like the Johto hunts' bounds/spawnPoints/bg
 // already are.
 // Every band's minLevel/maxLevel got a flat +50 (explicit user request,
-// "hunts de Kanto receberam um aumento de 50 levels") — LEGENDARY_BAND below
-// got the same +50 so it stays strictly above the highest Kanto zone
-// (otherwise the endgame capstone would sit *below* a regular zone's level
-// range, which reads as a broken progression). Band `name` strings were
+// "hunts de Kanto receberam um aumento de 50 levels"). Band `name` strings were
 // re-numbered to match so the card title's baked-in range text doesn't go
 // stale next to the real (map.levelRange-derived) "(Lv X-Y)" suffix.
 const KANTO_BANDS = [
@@ -311,42 +409,35 @@ const KANTO_BANDS = [
   },
 ];
 
-// The one hunt every legendary in the sheet spawns in — a deliberate
-// end-of-progression capstone, gated behind a gold cost (see
-// DEFAULT_UNLOCKED_MAPS in state/GameState.js, which excludes this key from
-// the "everything is free" default) so it reads as the actual final goal
-// rather than just another zone. +50 alongside KANTO_BANDS (see comment
-// above) to stay above the now-higher Kanto zones.
-const LEGENDARY_BAND = {
-  key: 'legendary_lair', name: 'Camara dos Lendarios', minLevel: 110, maxLevel: 120,
-  bgTheme: 'Tin Tower', // forces the moody BG_TOWER palette via pickBgTheme's keyword match
-  unlockCost: { gold: 1000000 },
-  species: ['ARTICUNO', 'ZAPDOS', 'MOLTRES', 'RAIKOU', 'ENTEI', 'SUICUNE', 'LUGIA', 'HO_OH', 'CELEBI', 'MEWTWO', 'MEW'],
-};
+// Removed: LEGENDARY_BAND / "Camara dos Lendarios" (explicit user request —
+// legendaries are now only obtainable via the 11 standalone BOSS hunts, see
+// js/data/nightmareMaps.js#buildBossHunts + js/data/legendaries.js, which are
+// generated independently of this file's hunt list).
 
-function bandToHunt(band, continent) {
+// Splits one hand-curated Kanto band (flat species list, single level range)
+// into 2 biome-themed hunts — same splitByBiome used for the real Johto
+// bands above, just fed a synthetic single-range speciesLevels map instead of
+// per-location real data.
+function splitBandByBiome(band, workbook, especiesByKey, seed) {
   const speciesLevels = {};
   for (const sp of band.species) {
     speciesLevels[sp] = { min: band.minLevel, max: band.maxLevel };
   }
-  return {
-    key: band.key,
-    name: band.name,
+  const subHunts = splitByBiome(speciesLevels, { min: band.minLevel, max: band.maxLevel }, workbook, especiesByKey, seed);
+  return subHunts.map(({ biome, speciesLevels: subSpeciesLevels }) => ({
+    key: `${band.key}_${biome.toLowerCase()}`,
+    name: `${band.name} (${biome})`,
     avgLevel: (band.minLevel + band.maxLevel) / 2,
     minLevel: band.minLevel,
     maxLevel: band.maxLevel,
-    speciesLevels,
-    bgTheme: band.bgTheme,
+    speciesLevels: subSpeciesLevels,
+    bgTheme: biome,
     unlockCost: band.unlockCost || null,
-    continent,
-  };
+  }));
 }
 
-function buildHandAuthoredHunts() {
-  return [
-    ...KANTO_BANDS.map((band) => bandToHunt(band, 'kanto')),
-    bandToHunt(LEGENDARY_BAND, 'kanto'),
-  ];
+function buildHandAuthoredHunts(workbook, especiesByKey) {
+  return KANTO_BANDS.flatMap((band, seed) => splitBandByBiome(band, workbook, especiesByKey, seed).map((hunt) => ({ ...hunt, continent: 'kanto' })));
 }
 
 // Species + their real movesets/moves for the starter trio plus every
@@ -459,7 +550,17 @@ const BG_ROUTE = { primary: '#284b3c', secondary: '#2e5544', image: HUNT_BG_IMAG
 const BG_CAVE = { primary: '#1c1c2b', secondary: '#242438', image: HUNT_BG_IMAGE };
 const BG_TOWER = { primary: '#3e2f23', secondary: '#4a3829', image: HUNT_BG_IMAGE };
 
+// Every biome maps to one of the 3 existing palettes by vibe — cosmetic only,
+// since the real tiled image is identical across all themes (see comment
+// above); this just picks the fallback color shown before it loads.
+const BIOME_THEME = {
+  Floresta: BG_ROUTE, Aquatico: BG_ROUTE, Eletrico: BG_ROUTE, Planicie: BG_ROUTE,
+  Vulcanico: BG_CAVE, Sombrio: BG_CAVE,
+  Mistico: BG_TOWER,
+};
+
 function pickBgTheme(name) {
+  if (BIOME_THEME[name]) return BIOME_THEME[name];
   const lower = name.toLowerCase();
   if (lower.includes('cave')) return BG_CAVE;
   if (lower.includes('tower') || lower.includes('ruins')) return BG_TOWER;
@@ -538,9 +639,10 @@ function main() {
   syncFormulas(workbook);
   syncTypeChart(workbook);
   syncItemsFull(workbook);
+  const especiesByKey = indexByKey(workbook['Espécies'] || [], 'Chave');
   const rawHunts = pickTopHunts(workbook, HUNT_COUNT);
-  const johtoHunts = groupHuntsIntoBands(rawHunts).map((hunt) => ({ ...hunt, continent: 'johto' }));
-  const kantoHunts = buildHandAuthoredHunts();
+  const johtoHunts = groupHuntsIntoBands(rawHunts, workbook, especiesByKey).map((hunt) => ({ ...hunt, continent: 'johto' }));
+  const kantoHunts = buildHandAuthoredHunts(workbook, especiesByKey);
   const hunts = [...johtoHunts, ...kantoHunts];
   const { speciesData } = syncSpeciesAndMoves(workbook, hunts);
   syncMapsAndEncounters(hunts, speciesData);
