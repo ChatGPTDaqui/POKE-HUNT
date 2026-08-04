@@ -34,6 +34,13 @@ export class GameState {
     this.autoToggles = { autoPot: true, autoCatch: true, autoRevive: true };
     this.autoPotRules = DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })); // ordered list, first matching rule wins, max 3
     this.autoCatchConfig = { ...DEFAULT_AUTO_CATCH_CONFIG };
+    // Per-species overrides for auto-catch: { speciesId, ballItemId }. Takes
+    // priority over autoCatchConfig for that species — and unlike the
+    // default/shiny config, never falls back to another ball when its own
+    // runs out (see AutoSystem.js#maybeAutoCatch), so a player can dedicate a
+    // scarce ball to one species without risking it getting drained on
+    // everything else.
+    this.autoCatchRules = [];
     // Bottom-left farming-rate panel totals — persisted (not just per page
     // load) so switching hunts or reloading the page never looks like a
     // reset; only the panel's own "Resetar" button (systems/StatsTracker.js)
@@ -141,6 +148,7 @@ export class GameState {
       ? data.autoPotRules
       : DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r }));
     state.autoCatchConfig = { ...DEFAULT_AUTO_CATCH_CONFIG, ...(data.autoCatchConfig || {}) };
+    state.autoCatchRules = data.autoCatchRules || [];
     state.perfStats = { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now(), ...(data.perfStats || {}) };
     state.trainer = { name: 'Treinador', level: 1, exp: 0, ...(data.trainer || {}) };
     return state;

@@ -9,7 +9,7 @@ import { makeDraggable } from '../draggable.js';
 
 let currentOverlay = null;
 
-export function showAutoFloatingPanel(gameState, controller) {
+export function showAutoFloatingPanel(gameState, controller, getWorld) {
   if (currentOverlay) return; // already open — toggle button should close instead, see main.js
 
   const panel = document.createElement('div');
@@ -21,7 +21,7 @@ export function showAutoFloatingPanel(gameState, controller) {
   makeDraggable(panel, panel.querySelector('.auto-floating-topbar'));
 
   const body = panel.querySelector('.auto-floating-body');
-  const refresh = () => renderAutoPanel(body, { gameState, controller, refresh });
+  const refresh = () => renderAutoPanel(body, { gameState, controller, world: getWorld ? getWorld() : null, refresh });
   refresh();
 
   const close = () => {

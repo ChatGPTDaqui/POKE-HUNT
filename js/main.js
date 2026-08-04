@@ -541,7 +541,7 @@ syncZoomLabel();
 // toggles it open/closed instead of routing through UIManager.openScreen.
 document.getElementById('auto-toggle-btn').addEventListener('click', () => {
   if (isAutoFloatingPanelOpen()) closeAutoFloatingPanel();
-  else showAutoFloatingPanel(gameState, controller);
+  else showAutoFloatingPanel(gameState, controller, () => currentWorld);
 });
 
 // ---------- Browser-throttle catch-up (tab minimized/backgrounded, still open) ----------

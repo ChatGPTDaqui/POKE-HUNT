@@ -76,10 +76,21 @@ export function updateAutoHeal(world, gameState, dt) {
 }
 
 // Called right after a kill when gameState.autoToggles.autoCatch is on.
-// Uses the configured default ball, or the shiny-only ball when the rule is
-// enabled and the defeated poke is shiny.
+// Precedence: a per-species rule (gameState.autoCatchRules) beats the
+// shiny-ball config, which beats the default ball. A matched species rule
+// has NO fallback to another ball when its own ball runs out — the bot just
+// lets that species go uncaptured (kills it) instead of spending a different
+// ball on it, since the whole point of a rule is reserving a specific ball
+// for a specific species.
 export function maybeAutoCatch(gameState, defeatedPoke) {
   if (!gameState.autoToggles.autoCatch) return null;
+
+  const rule = gameState.autoCatchRules.find((r) => r.speciesId === defeatedPoke.speciesId);
+  if (rule) {
+    if (!rule.ballItemId || !gameState.hasItem(rule.ballItemId, 1)) return null;
+    return attemptCapture(gameState, defeatedPoke, rule.ballItemId);
+  }
+
   const config = gameState.autoCatchConfig;
   const isShiny = Boolean(defeatedPoke.isShiny);
   const ballId = isShiny && config.catchShinyEnabled ? config.shinyBallId : config.ballId;

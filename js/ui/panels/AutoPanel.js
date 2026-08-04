@@ -1,4 +1,6 @@
 import { ITEMS } from '../../data/items.js';
+import { SPECIES } from '../../data/pokes.js';
+import { getEncounter } from '../../data/enemies.js';
 import { BEST_POTION_OPTION } from '../../systems/AutoSystem.js';
 
 const MAX_AUTO_POT_RULES = 3;
@@ -13,9 +15,28 @@ function potionOptionsHtml(potionOptions, selectedId) {
   return bestOption + items;
 }
 
-export function renderAutoPanel(container, { gameState, controller, refresh }) {
+function ballOptionsHtml(ballOptions, selectedId) {
+  return ballOptions.map((b) => `<option value="${b.id}" ${selectedId === b.id ? 'selected' : ''}>${b.name}</option>`).join('');
+}
+
+// Species currently spawnable in the active hunt — same enemyPool -> encounter
+// -> species lookup HuntMenu.js#huntOdds already uses. Deduped since the same
+// species can back multiple encounter rows in one pool.
+function currentHuntSpecies(world) {
+  if (!world || !world.mapDef) return [];
+  const seen = new Map();
+  for (const encounterId of world.mapDef.enemyPool) {
+    const enc = getEncounter(encounterId);
+    const species = enc && SPECIES[enc.speciesId];
+    if (species && !seen.has(species.id)) seen.set(species.id, species);
+  }
+  return [...seen.values()];
+}
+
+export function renderAutoPanel(container, { gameState, controller, world, refresh }) {
   const potionOptions = Object.values(ITEMS).filter((i) => i.kind === 'potion');
   const ballOptions = Object.values(ITEMS).filter((i) => i.kind === 'ball');
+  const huntSpecies = currentHuntSpecies(world);
 
   container.innerHTML = `
     <h2>Automacoes</h2>
@@ -66,6 +87,15 @@ export function renderAutoPanel(container, { gameState, controller, refresh }) {
       </div>
     </div>
 
+    <div class="row">
+      <strong>Regras por especie ${infoIcon('Define uma bola especifica pra uma especie da hunt atual. Tem prioridade sobre a bola padrao/shiny. Se a bola da regra acabar, o bot so mata aquela especie em vez de gastar outra bola nela.')}</strong>
+    </div>
+    ${huntSpecies.length === 0 ? '<div class="hint">Entre numa hunt pra configurar regras por especie.</div>' : ''}
+    <div class="grid-list" id="autocatch-rules"></div>
+    <div class="row">
+      <button id="add-catch-rule" ${huntSpecies.length === 0 ? 'disabled' : ''}>+ Adicionar regra</button>
+    </div>
+
     <div class="toggle-row" id="row-revive">
       <div>
         <div>Auto-revive ${infoIcon('Se o POKE em campo desmaiar, usa automaticamente um Revive da mochila para reanima-lo.')}</div>
@@ -111,6 +141,62 @@ export function renderAutoPanel(container, { gameState, controller, refresh }) {
     }
     rulesList.appendChild(row);
   });
+
+  const catchRulesList = container.querySelector('#autocatch-rules');
+  gameState.autoCatchRules.forEach((rule, index) => {
+    const speciesOptions = new Map(huntSpecies.map((s) => [s.id, s.name]));
+    // A rule's species can outlive the hunt it was created in (the player
+    // moved on) — keep it selectable/visible instead of silently vanishing
+    // from its own dropdown.
+    if (rule.speciesId && !speciesOptions.has(rule.speciesId)) {
+      const staleSpecies = SPECIES[rule.speciesId];
+      speciesOptions.set(rule.speciesId, staleSpecies ? `${staleSpecies.name} (fora da hunt atual)` : rule.speciesId);
+    }
+
+    const row = document.createElement('div');
+    row.className = 'card';
+    row.innerHTML = `
+      <div class="card-info">
+        <div class="row">
+          <span>Especie</span>
+          <select class="rule-species-select">
+            ${[...speciesOptions.entries()].map(([id, name]) => `<option value="${id}" ${rule.speciesId === id ? 'selected' : ''}>${name}</option>`).join('')}
+          </select>
+          <span>bola</span>
+          <select class="rule-ball-select">
+            ${ballOptionsHtml(ballOptions, rule.ballItemId)}
+          </select>
+        </div>
+      </div>
+      <button>Remover</button>
+    `;
+    row.querySelector('.rule-species-select').addEventListener('change', (e) => {
+      rule.speciesId = e.target.value;
+      controller.save();
+    });
+    row.querySelector('.rule-ball-select').addEventListener('change', (e) => {
+      rule.ballItemId = e.target.value;
+      controller.save();
+    });
+    row.querySelector('button').addEventListener('click', () => {
+      gameState.autoCatchRules.splice(index, 1);
+      controller.save();
+      refresh();
+    });
+    catchRulesList.appendChild(row);
+  });
+
+  const addCatchRuleBtn = container.querySelector('#add-catch-rule');
+  if (addCatchRuleBtn) {
+    addCatchRuleBtn.addEventListener('click', () => {
+      if (huntSpecies.length === 0) return;
+      const alreadyRuled = new Set(gameState.autoCatchRules.map((r) => r.speciesId));
+      const firstFree = huntSpecies.find((s) => !alreadyRuled.has(s.id)) || huntSpecies[0];
+      gameState.autoCatchRules.push({ speciesId: firstFree.id, ballItemId: gameState.autoCatchConfig.ballId });
+      controller.save();
+      refresh();
+    });
+  }
 
   container.querySelector('#add-rule').addEventListener('click', () => {
     if (gameState.autoPotRules.length < MAX_AUTO_POT_RULES) {
