@@ -763,13 +763,13 @@ export const ABILITIES_DATA = {
     "power": 1,
     "pp": 10
   },
-  "splash": {
-    "id": "splash",
-    "name": "Splash",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 0,
-    "pp": 40
+  "absorb": {
+    "id": "absorb",
+    "name": "Absorb",
+    "type": "GRASS",
+    "category": "special",
+    "power": 20,
+    "pp": 20
   },
   "stun_spore": {
     "id": "stun_spore",
@@ -779,37 +779,29 @@ export const ABILITIES_DATA = {
     "power": 0,
     "pp": 30
   },
-  "cotton_spore": {
-    "id": "cotton_spore",
-    "name": "Cotton Spore",
-    "type": "GRASS",
-    "category": "special",
-    "power": 0,
-    "pp": 40
-  },
-  "mega_drain": {
-    "id": "mega_drain",
-    "name": "Mega Drain",
-    "type": "GRASS",
-    "category": "special",
-    "power": 40,
-    "pp": 10
-  },
-  "string_shot": {
-    "id": "string_shot",
-    "name": "String Shot",
-    "type": "BUG",
-    "category": "physical",
-    "power": 0,
-    "pp": 40
-  },
-  "poison_sting": {
-    "id": "poison_sting",
-    "name": "Poison Sting",
+  "acid": {
+    "id": "acid",
+    "name": "Acid",
     "type": "POISON",
     "category": "physical",
-    "power": 15,
-    "pp": 35
+    "power": 40,
+    "pp": 30
+  },
+  "moonlight": {
+    "id": "moonlight",
+    "name": "Moonlight",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
+    "pp": 5
+  },
+  "petal_dance": {
+    "id": "petal_dance",
+    "name": "Petal Dance",
+    "type": "GRASS",
+    "category": "special",
+    "power": 70,
+    "pp": 20
   },
   "wrap": {
     "id": "wrap",
@@ -819,20 +811,132 @@ export const ABILITIES_DATA = {
     "power": 15,
     "pp": 20
   },
-  "acid": {
-    "id": "acid",
-    "name": "Acid",
-    "type": "POISON",
-    "category": "physical",
-    "power": 40,
-    "pp": 30
-  },
   "slam": {
     "id": "slam",
     "name": "Slam",
     "type": "NORMAL",
     "category": "physical",
     "power": 80,
+    "pp": 20
+  },
+  "barrage": {
+    "id": "barrage",
+    "name": "Barrage",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 15,
+    "pp": 20
+  },
+  "hypnosis": {
+    "id": "hypnosis",
+    "name": "Hypnosis",
+    "type": "PSYCHIC",
+    "category": "special",
+    "power": 0,
+    "pp": 20
+  },
+  "constrict": {
+    "id": "constrict",
+    "name": "Constrict",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 10,
+    "pp": 35
+  },
+  "bind": {
+    "id": "bind",
+    "name": "Bind",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 15,
+    "pp": 20
+  },
+  "mega_drain": {
+    "id": "mega_drain",
+    "name": "Mega Drain",
+    "type": "GRASS",
+    "category": "special",
+    "power": 40,
+    "pp": 10
+  },
+  "body_slam": {
+    "id": "body_slam",
+    "name": "Body Slam",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 85,
+    "pp": 15
+  },
+  "splash": {
+    "id": "splash",
+    "name": "Splash",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
+    "pp": 40
+  },
+  "cotton_spore": {
+    "id": "cotton_spore",
+    "name": "Cotton Spore",
+    "type": "GRASS",
+    "category": "special",
+    "power": 0,
+    "pp": 40
+  },
+  "giga_drain": {
+    "id": "giga_drain",
+    "name": "Giga Drain",
+    "type": "GRASS",
+    "category": "special",
+    "power": 60,
+    "pp": 5
+  },
+  "string_shot": {
+    "id": "string_shot",
+    "name": "String Shot",
+    "type": "BUG",
+    "category": "physical",
+    "power": 0,
+    "pp": 40
+  },
+  "supersonic": {
+    "id": "supersonic",
+    "name": "Supersonic",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
+    "pp": 20
+  },
+  "psybeam": {
+    "id": "psybeam",
+    "name": "Psybeam",
+    "type": "PSYCHIC",
+    "category": "special",
+    "power": 65,
+    "pp": 20
+  },
+  "poison_sting": {
+    "id": "poison_sting",
+    "name": "Poison Sting",
+    "type": "POISON",
+    "category": "physical",
+    "power": 15,
+    "pp": 35
+  },
+  "twineedle": {
+    "id": "twineedle",
+    "name": "Twineedle",
+    "type": "BUG",
+    "category": "physical",
+    "power": 25,
+    "pp": 20
+  },
+  "pin_missile": {
+    "id": "pin_missile",
+    "name": "Pin Missile",
+    "type": "BUG",
+    "category": "physical",
+    "power": 14,
     "pp": 20
   },
   "leech_life": {
@@ -851,21 +955,85 @@ export const ABILITIES_DATA = {
     "power": 0,
     "pp": 15
   },
-  "giga_drain": {
-    "id": "giga_drain",
-    "name": "Giga Drain",
-    "type": "GRASS",
-    "category": "special",
-    "power": 60,
-    "pp": 5
-  },
-  "constrict": {
-    "id": "constrict",
-    "name": "Constrict",
+  "foresight": {
+    "id": "foresight",
+    "name": "Foresight",
     "type": "NORMAL",
     "category": "physical",
-    "power": 10,
-    "pp": 35
+    "power": 0,
+    "pp": 40
+  },
+  "false_swipe": {
+    "id": "false_swipe",
+    "name": "False Swipe",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 40,
+    "pp": 40
+  },
+  "swords_dance": {
+    "id": "swords_dance",
+    "name": "Swords Dance",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
+    "pp": 30
+  },
+  "double_team": {
+    "id": "double_team",
+    "name": "Double Team",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
+    "pp": 15
+  },
+  "vicegrip": {
+    "id": "vicegrip",
+    "name": "Vice Grip",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 55,
+    "pp": 30
+  },
+  "seismic_toss": {
+    "id": "seismic_toss",
+    "name": "Seismic Toss",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 1,
+    "pp": 20
+  },
+  "guillotine": {
+    "id": "guillotine",
+    "name": "Guillotine",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
+    "pp": 5
+  },
+  "submission": {
+    "id": "submission",
+    "name": "Submission",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 80,
+    "pp": 25
+  },
+  "comet_punch": {
+    "id": "comet_punch",
+    "name": "Comet Punch",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 18,
+    "pp": 15
+  },
+  "double_edge": {
+    "id": "double_edge",
+    "name": "Double-Edge",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 120,
+    "pp": 15
   },
   "night_shade": {
     "id": "night_shade",
@@ -891,52 +1059,12 @@ export const ABILITIES_DATA = {
     "power": 0,
     "pp": 10
   },
-  "curse": {
-    "id": "curse",
-    "name": "Curse",
-    "type": "GHOST",
-    "category": "physical",
-    "power": 0,
-    "pp": 10
-  },
-  "headbutt": {
-    "id": "headbutt",
-    "name": "Headbutt",
+  "sonicboom": {
+    "id": "sonicboom",
+    "name": "Sonic Boom",
     "type": "NORMAL",
     "category": "physical",
-    "power": 70,
-    "pp": 15
-  },
-  "double_edge": {
-    "id": "double_edge",
-    "name": "Double-Edge",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 120,
-    "pp": 15
-  },
-  "present": {
-    "id": "present",
-    "name": "Present",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 1,
-    "pp": 15
-  },
-  "rest": {
-    "id": "rest",
-    "name": "Rest",
-    "type": "PSYCHIC",
-    "category": "special",
-    "power": 0,
-    "pp": 10
-  },
-  "take_down": {
-    "id": "take_down",
-    "name": "Take Down",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 90,
+    "power": 20,
     "pp": 20
   },
   "screech": {
@@ -947,461 +1075,13 @@ export const ABILITIES_DATA = {
     "power": 0,
     "pp": 40
   },
-  "lick": {
-    "id": "lick",
-    "name": "Lick",
-    "type": "GHOST",
-    "category": "physical",
-    "power": 20,
-    "pp": 30
-  },
-  "lovely_kiss": {
-    "id": "lovely_kiss",
-    "name": "Lovely Kiss",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 0,
-    "pp": 10
-  },
-  "doubleslap": {
-    "id": "doubleslap",
-    "name": "DoubleSlap",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 15,
-    "pp": 10
-  },
-  "ice_punch": {
-    "id": "ice_punch",
-    "name": "Ice Punch",
-    "type": "ICE",
-    "category": "special",
-    "power": 75,
-    "pp": 15
-  },
-  "mean_look": {
-    "id": "mean_look",
-    "name": "Mean Look",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 0,
-    "pp": 5
-  },
-  "body_slam": {
-    "id": "body_slam",
-    "name": "Body Slam",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 85,
-    "pp": 15
-  },
-  "vicegrip": {
-    "id": "vicegrip",
-    "name": "Vice Grip",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 55,
-    "pp": 30
-  },
-  "guillotine": {
-    "id": "guillotine",
-    "name": "Guillotine",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 0,
-    "pp": 5
-  },
-  "crabhammer": {
-    "id": "crabhammer",
-    "name": "Crabhammer",
-    "type": "WATER",
-    "category": "special",
-    "power": 90,
-    "pp": 10
-  },
-  "flame_wheel": {
-    "id": "flame_wheel",
-    "name": "Flame Wheel",
-    "type": "FIRE",
-    "category": "special",
-    "power": 60,
-    "pp": 25
-  },
-  "extremespeed": {
-    "id": "extremespeed",
-    "name": "Extreme Speed",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 80,
-    "pp": 5
-  },
-  "horn_attack": {
-    "id": "horn_attack",
-    "name": "Horn Attack",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 65,
-    "pp": 25
-  },
-  "flail": {
-    "id": "flail",
-    "name": "Flail",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 1,
-    "pp": 15
-  },
-  "sand_attack": {
-    "id": "sand_attack",
-    "name": "Sand Attack",
-    "type": "GROUND",
-    "category": "physical",
-    "power": 0,
-    "pp": 15
-  },
-  "faint_attack": {
-    "id": "faint_attack",
-    "name": "Faint Attack",
-    "type": "DARK",
-    "category": "special",
-    "power": 60,
-    "pp": 20
-  },
-  "supersonic": {
-    "id": "supersonic",
-    "name": "Supersonic",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 0,
-    "pp": 20
-  },
-  "sonicboom": {
-    "id": "sonicboom",
-    "name": "Sonic Boom",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 20,
-    "pp": 20
-  },
-  "lock_on": {
-    "id": "lock_on",
-    "name": "Lock On",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 0,
-    "pp": 5
-  },
-  "zap_cannon": {
-    "id": "zap_cannon",
-    "name": "Zap Cannon",
-    "type": "ELECTRIC",
-    "category": "special",
-    "power": 100,
-    "pp": 5
-  },
-  "tri_attack": {
-    "id": "tri_attack",
-    "name": "Tri Attack",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 80,
-    "pp": 10
-  },
-  "steel_wing": {
-    "id": "steel_wing",
-    "name": "Steel Wing",
-    "type": "STEEL",
-    "category": "physical",
-    "power": 70,
-    "pp": 25
-  },
-  "bind": {
-    "id": "bind",
-    "name": "Bind",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 15,
-    "pp": 20
-  },
-  "sandstorm": {
-    "id": "sandstorm",
-    "name": "Sandstorm",
-    "type": "ROCK",
-    "category": "physical",
-    "power": 0,
-    "pp": 10
-  },
-  "double_team": {
-    "id": "double_team",
-    "name": "Double Team",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 0,
-    "pp": 15
-  },
-  "thunderbolt": {
-    "id": "thunderbolt",
-    "name": "Thunderbolt",
-    "type": "ELECTRIC",
-    "category": "special",
-    "power": 95,
-    "pp": 15
-  },
-  "thunderpunch": {
-    "id": "thunderpunch",
-    "name": "Thunder Punch",
-    "type": "ELECTRIC",
-    "category": "special",
-    "power": 75,
-    "pp": 15
-  },
-  "confuse_ray": {
-    "id": "confuse_ray",
-    "name": "Confuse Ray",
-    "type": "GHOST",
-    "category": "physical",
-    "power": 0,
-    "pp": 10
-  },
-  "haze": {
-    "id": "haze",
-    "name": "Haze",
-    "type": "ICE",
-    "category": "special",
-    "power": 0,
-    "pp": 30
-  },
-  "glare": {
-    "id": "glare",
-    "name": "Glare",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 0,
-    "pp": 30
-  },
-  "hypnosis": {
-    "id": "hypnosis",
-    "name": "Hypnosis",
-    "type": "PSYCHIC",
-    "category": "special",
-    "power": 0,
-    "pp": 20
-  },
-  "spite": {
-    "id": "spite",
-    "name": "Spite",
-    "type": "GHOST",
-    "category": "physical",
-    "power": 0,
-    "pp": 10
-  },
-  "dream_eater": {
-    "id": "dream_eater",
-    "name": "Dream Eater",
-    "type": "PSYCHIC",
-    "category": "special",
-    "power": 100,
-    "pp": 15
-  },
-  "destiny_bond": {
-    "id": "destiny_bond",
-    "name": "Destiny Bond",
-    "type": "GHOST",
-    "category": "physical",
-    "power": 0,
-    "pp": 5
-  },
-  "poison_gas": {
-    "id": "poison_gas",
-    "name": "Poison Gas",
-    "type": "POISON",
-    "category": "physical",
-    "power": 0,
-    "pp": 40
-  },
-  "smog": {
-    "id": "smog",
-    "name": "Smog",
-    "type": "POISON",
-    "category": "physical",
-    "power": 20,
-    "pp": 20
-  },
-  "sludge": {
-    "id": "sludge",
-    "name": "Sludge",
-    "type": "POISON",
-    "category": "physical",
-    "power": 65,
-    "pp": 20
-  },
-  "teleport": {
-    "id": "teleport",
-    "name": "Teleport",
-    "type": "PSYCHIC",
-    "category": "special",
-    "power": 0,
-    "pp": 20
-  },
-  "kinesis": {
-    "id": "kinesis",
-    "name": "Kinesis",
-    "type": "PSYCHIC",
-    "category": "special",
-    "power": 0,
-    "pp": 15
-  },
-  "psybeam": {
-    "id": "psybeam",
-    "name": "Psybeam",
-    "type": "PSYCHIC",
-    "category": "special",
-    "power": 65,
-    "pp": 20
-  },
-  "meditate": {
-    "id": "meditate",
-    "name": "Meditate",
-    "type": "PSYCHIC",
-    "category": "special",
-    "power": 0,
-    "pp": 40
-  },
-  "hidden_power": {
-    "id": "hidden_power",
-    "name": "Hidden Power",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 1,
-    "pp": 15
-  },
-  "counter": {
-    "id": "counter",
-    "name": "Counter",
-    "type": "FIGHTING",
-    "category": "physical",
-    "power": 1,
-    "pp": 20
-  },
-  "snore": {
-    "id": "snore",
-    "name": "Snore",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 40,
-    "pp": 15
-  },
-  "thrash": {
-    "id": "thrash",
-    "name": "Thrash",
+  "take_down": {
+    "id": "take_down",
+    "name": "Take Down",
     "type": "NORMAL",
     "category": "physical",
     "power": 90,
     "pp": 20
-  },
-  "low_kick": {
-    "id": "low_kick",
-    "name": "Low Kick",
-    "type": "FIGHTING",
-    "category": "physical",
-    "power": 50,
-    "pp": 20
-  },
-  "karate_chop": {
-    "id": "karate_chop",
-    "name": "Karate Chop",
-    "type": "FIGHTING",
-    "category": "physical",
-    "power": 50,
-    "pp": 25
-  },
-  "seismic_toss": {
-    "id": "seismic_toss",
-    "name": "Seismic Toss",
-    "type": "FIGHTING",
-    "category": "physical",
-    "power": 1,
-    "pp": 20
-  },
-  "foresight": {
-    "id": "foresight",
-    "name": "Foresight",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 0,
-    "pp": 40
-  },
-  "vital_throw": {
-    "id": "vital_throw",
-    "name": "Vital Throw",
-    "type": "FIGHTING",
-    "category": "physical",
-    "power": 70,
-    "pp": 10
-  },
-  "cross_chop": {
-    "id": "cross_chop",
-    "name": "Cross Chop",
-    "type": "FIGHTING",
-    "category": "physical",
-    "power": 100,
-    "pp": 5
-  },
-  "submission": {
-    "id": "submission",
-    "name": "Submission",
-    "type": "FIGHTING",
-    "category": "physical",
-    "power": 80,
-    "pp": 25
-  },
-  "twineedle": {
-    "id": "twineedle",
-    "name": "Twineedle",
-    "type": "BUG",
-    "category": "physical",
-    "power": 25,
-    "pp": 20
-  },
-  "pin_missile": {
-    "id": "pin_missile",
-    "name": "Pin Missile",
-    "type": "BUG",
-    "category": "physical",
-    "power": 14,
-    "pp": 20
-  },
-  "absorb": {
-    "id": "absorb",
-    "name": "Absorb",
-    "type": "GRASS",
-    "category": "special",
-    "power": 20,
-    "pp": 20
-  },
-  "moonlight": {
-    "id": "moonlight",
-    "name": "Moonlight",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 0,
-    "pp": 5
-  },
-  "petal_dance": {
-    "id": "petal_dance",
-    "name": "Petal Dance",
-    "type": "GRASS",
-    "category": "special",
-    "power": 70,
-    "pp": 20
-  },
-  "comet_punch": {
-    "id": "comet_punch",
-    "name": "Comet Punch",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 18,
-    "pp": 15
   },
   "bide": {
     "id": "bide",
@@ -1419,13 +1099,69 @@ export const ABILITIES_DATA = {
     "power": 0,
     "pp": 20
   },
-  "barrage": {
-    "id": "barrage",
-    "name": "Barrage",
+  "metal_claw": {
+    "id": "metal_claw",
+    "name": "Metal Claw",
+    "type": "STEEL",
+    "category": "physical",
+    "power": 50,
+    "pp": 35
+  },
+  "horn_attack": {
+    "id": "horn_attack",
+    "name": "Horn Attack",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 65,
+    "pp": 25
+  },
+  "counter": {
+    "id": "counter",
+    "name": "Counter",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 1,
+    "pp": 20
+  },
+  "reversal": {
+    "id": "reversal",
+    "name": "Reversal",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 1,
+    "pp": 15
+  },
+  "megahorn": {
+    "id": "megahorn",
+    "name": "Megahorn",
+    "type": "BUG",
+    "category": "physical",
+    "power": 120,
+    "pp": 10
+  },
+  "flail": {
+    "id": "flail",
+    "name": "Flail",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 1,
+    "pp": 15
+  },
+  "haze": {
+    "id": "haze",
+    "name": "Haze",
+    "type": "ICE",
+    "category": "special",
+    "power": 0,
+    "pp": 30
+  },
+  "doubleslap": {
+    "id": "doubleslap",
+    "name": "DoubleSlap",
     "type": "NORMAL",
     "category": "physical",
     "power": 15,
-    "pp": 20
+    "pp": 10
   },
   "belly_drum": {
     "id": "belly_drum",
@@ -1434,6 +1170,78 @@ export const ABILITIES_DATA = {
     "category": "physical",
     "power": 0,
     "pp": 10
+  },
+  "lock_on": {
+    "id": "lock_on",
+    "name": "Lock On",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
+    "pp": 5
+  },
+  "hyper_beam": {
+    "id": "hyper_beam",
+    "name": "Hyper Beam",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 150,
+    "pp": 5
+  },
+  "twister": {
+    "id": "twister",
+    "name": "Twister",
+    "type": "DRAGON",
+    "category": "special",
+    "power": 40,
+    "pp": 20
+  },
+  "confuse_ray": {
+    "id": "confuse_ray",
+    "name": "Confuse Ray",
+    "type": "GHOST",
+    "category": "physical",
+    "power": 0,
+    "pp": 10
+  },
+  "clamp": {
+    "id": "clamp",
+    "name": "Clamp",
+    "type": "WATER",
+    "category": "special",
+    "power": 35,
+    "pp": 10
+  },
+  "curse": {
+    "id": "curse",
+    "name": "Curse",
+    "type": "GHOST",
+    "category": "physical",
+    "power": 0,
+    "pp": 10
+  },
+  "headbutt": {
+    "id": "headbutt",
+    "name": "Headbutt",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 70,
+    "pp": 15
+  },
+  "rest": {
+    "id": "rest",
+    "name": "Rest",
+    "type": "PSYCHIC",
+    "category": "special",
+    "power": 0,
+    "pp": 10
+  },
+  "minimize": {
+    "id": "minimize",
+    "name": "Minimize",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
+    "pp": 20
   },
   "waterfall": {
     "id": "waterfall",
@@ -1451,101 +1259,85 @@ export const ABILITIES_DATA = {
     "power": 1,
     "pp": 5
   },
-  "twister": {
-    "id": "twister",
-    "name": "Twister",
-    "type": "DRAGON",
-    "category": "special",
-    "power": 40,
-    "pp": 20
-  },
-  "bone_club": {
-    "id": "bone_club",
-    "name": "Bone Club",
-    "type": "GROUND",
-    "category": "physical",
-    "power": 65,
-    "pp": 20
-  },
-  "bonemerang": {
-    "id": "bonemerang",
-    "name": "Bonemerang",
-    "type": "GROUND",
-    "category": "physical",
-    "power": 50,
-    "pp": 10
-  },
-  "false_swipe": {
-    "id": "false_swipe",
-    "name": "False Swipe",
+  "spike_cannon": {
+    "id": "spike_cannon",
+    "name": "Spike Cannon",
     "type": "NORMAL",
     "category": "physical",
-    "power": 40,
-    "pp": 40
+    "power": 20,
+    "pp": 15
   },
-  "bone_rush": {
-    "id": "bone_rush",
-    "name": "Bone Rush",
+  "crabhammer": {
+    "id": "crabhammer",
+    "name": "Crabhammer",
+    "type": "WATER",
+    "category": "special",
+    "power": 90,
+    "pp": 10
+  },
+  "sand_attack": {
+    "id": "sand_attack",
+    "name": "Sand Attack",
     "type": "GROUND",
     "category": "physical",
-    "power": 25,
-    "pp": 10
-  },
-  "rock_slide": {
-    "id": "rock_slide",
-    "name": "Rock Slide",
-    "type": "ROCK",
-    "category": "physical",
-    "power": 75,
-    "pp": 10
-  },
-  "fire_punch": {
-    "id": "fire_punch",
-    "name": "Fire Punch",
-    "type": "FIRE",
-    "category": "special",
-    "power": 75,
+    "power": 0,
     "pp": 15
   },
-  "beat_up": {
-    "id": "beat_up",
-    "name": "Beat Up",
-    "type": "DARK",
-    "category": "special",
-    "power": 10,
-    "pp": 10
-  },
-  "metal_claw": {
-    "id": "metal_claw",
-    "name": "Metal Claw",
-    "type": "STEEL",
-    "category": "physical",
-    "power": 50,
-    "pp": 35
-  },
-  "psywave": {
-    "id": "psywave",
-    "name": "Psywave",
-    "type": "PSYCHIC",
-    "category": "special",
-    "power": 1,
-    "pp": 15
-  },
-  "pain_split": {
-    "id": "pain_split",
-    "name": "Pain Split",
+  "sing": {
+    "id": "sing",
+    "name": "Sing",
     "type": "NORMAL",
     "category": "physical",
     "power": 0,
-    "pp": 20
+    "pp": 15
   },
-  "hyper_beam": {
-    "id": "hyper_beam",
-    "name": "Hyper Beam",
+  "pay_day": {
+    "id": "pay_day",
+    "name": "Pay Day",
     "type": "NORMAL",
     "category": "physical",
-    "power": 150,
-    "pp": 5
+    "power": 40,
+    "pp": 20
+  },
+  "faint_attack": {
+    "id": "faint_attack",
+    "name": "Faint Attack",
+    "type": "DARK",
+    "category": "special",
+    "power": 60,
+    "pp": 20
+  },
+  "tri_attack": {
+    "id": "tri_attack",
+    "name": "Tri Attack",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 80,
+    "pp": 10
+  },
+  "lick": {
+    "id": "lick",
+    "name": "Lick",
+    "type": "GHOST",
+    "category": "physical",
+    "power": 20,
+    "pp": 30
+  },
+  "dizzy_punch": {
+    "id": "dizzy_punch",
+    "name": "Dizzy Punch",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 70,
+    "pp": 10
+  },
+  "thrash": {
+    "id": "thrash",
+    "name": "Thrash",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 90,
+    "pp": 20
   },
   "conversion2": {
     "id": "conversion2",
@@ -1571,28 +1363,428 @@ export const ABILITIES_DATA = {
     "power": 0,
     "pp": 30
   },
-  "reversal": {
-    "id": "reversal",
-    "name": "Reversal",
-    "type": "FIGHTING",
+  "zap_cannon": {
+    "id": "zap_cannon",
+    "name": "Zap Cannon",
+    "type": "ELECTRIC",
+    "category": "special",
+    "power": 100,
+    "pp": 5
+  },
+  "snore": {
+    "id": "snore",
+    "name": "Snore",
+    "type": "NORMAL",
     "category": "physical",
-    "power": 1,
+    "power": 40,
     "pp": 15
   },
-  "megahorn": {
-    "id": "megahorn",
-    "name": "Megahorn",
-    "type": "BUG",
+  "dream_eater": {
+    "id": "dream_eater",
+    "name": "Dream Eater",
+    "type": "PSYCHIC",
+    "category": "special",
+    "power": 100,
+    "pp": 15
+  },
+  "charm": {
+    "id": "charm",
+    "name": "Charm",
+    "type": "NORMAL",
     "category": "physical",
-    "power": 120,
+    "power": 0,
+    "pp": 20
+  },
+  "encore": {
+    "id": "encore",
+    "name": "Encore",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
+    "pp": 5
+  },
+  "sweet_kiss": {
+    "id": "sweet_kiss",
+    "name": "Sweet Kiss",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
     "pp": 10
   },
-  "swords_dance": {
-    "id": "swords_dance",
-    "name": "Swords Dance",
+  "glare": {
+    "id": "glare",
+    "name": "Glare",
     "type": "NORMAL",
     "category": "physical",
     "power": 0,
     "pp": 30
+  },
+  "spite": {
+    "id": "spite",
+    "name": "Spite",
+    "type": "GHOST",
+    "category": "physical",
+    "power": 0,
+    "pp": 10
+  },
+  "sketch": {
+    "id": "sketch",
+    "name": "Sketch",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
+    "pp": 1
+  },
+  "milk_drink": {
+    "id": "milk_drink",
+    "name": "Milk Drink",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
+    "pp": 10
+  },
+  "sandstorm": {
+    "id": "sandstorm",
+    "name": "Sandstorm",
+    "type": "ROCK",
+    "category": "physical",
+    "power": 0,
+    "pp": 10
+  },
+  "mimic": {
+    "id": "mimic",
+    "name": "Mimic",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
+    "pp": 10
+  },
+  "low_kick": {
+    "id": "low_kick",
+    "name": "Low Kick",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 50,
+    "pp": 20
+  },
+  "rock_slide": {
+    "id": "rock_slide",
+    "name": "Rock Slide",
+    "type": "ROCK",
+    "category": "physical",
+    "power": 75,
+    "pp": 10
+  },
+  "dig": {
+    "id": "dig",
+    "name": "Dig",
+    "type": "GROUND",
+    "category": "physical",
+    "power": 60,
+    "pp": 10
+  },
+  "fissure": {
+    "id": "fissure",
+    "name": "Fissure",
+    "type": "GROUND",
+    "category": "physical",
+    "power": 1,
+    "pp": 5
+  },
+  "bone_club": {
+    "id": "bone_club",
+    "name": "Bone Club",
+    "type": "GROUND",
+    "category": "physical",
+    "power": 65,
+    "pp": 20
+  },
+  "bonemerang": {
+    "id": "bonemerang",
+    "name": "Bonemerang",
+    "type": "GROUND",
+    "category": "physical",
+    "power": 50,
+    "pp": 10
+  },
+  "bone_rush": {
+    "id": "bone_rush",
+    "name": "Bone Rush",
+    "type": "GROUND",
+    "category": "physical",
+    "power": 25,
+    "pp": 10
+  },
+  "flame_wheel": {
+    "id": "flame_wheel",
+    "name": "Flame Wheel",
+    "type": "FIRE",
+    "category": "special",
+    "power": 60,
+    "pp": 25
+  },
+  "extremespeed": {
+    "id": "extremespeed",
+    "name": "Extreme Speed",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 80,
+    "pp": 5
+  },
+  "smog": {
+    "id": "smog",
+    "name": "Smog",
+    "type": "POISON",
+    "category": "physical",
+    "power": 20,
+    "pp": 20
+  },
+  "fire_punch": {
+    "id": "fire_punch",
+    "name": "Fire Punch",
+    "type": "FIRE",
+    "category": "special",
+    "power": 75,
+    "pp": 15
+  },
+  "thunderbolt": {
+    "id": "thunderbolt",
+    "name": "Thunderbolt",
+    "type": "ELECTRIC",
+    "category": "special",
+    "power": 95,
+    "pp": 15
+  },
+  "thunderpunch": {
+    "id": "thunderpunch",
+    "name": "Thunder Punch",
+    "type": "ELECTRIC",
+    "category": "special",
+    "power": 75,
+    "pp": 15
+  },
+  "double_kick": {
+    "id": "double_kick",
+    "name": "Double Kick",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 30,
+    "pp": 30
+  },
+  "mean_look": {
+    "id": "mean_look",
+    "name": "Mean Look",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
+    "pp": 5
+  },
+  "poison_gas": {
+    "id": "poison_gas",
+    "name": "Poison Gas",
+    "type": "POISON",
+    "category": "physical",
+    "power": 0,
+    "pp": 40
+  },
+  "sludge": {
+    "id": "sludge",
+    "name": "Sludge",
+    "type": "POISON",
+    "category": "physical",
+    "power": 65,
+    "pp": 20
+  },
+  "acid_armor": {
+    "id": "acid_armor",
+    "name": "Acid Armor",
+    "type": "POISON",
+    "category": "physical",
+    "power": 0,
+    "pp": 40
+  },
+  "sludge_bomb": {
+    "id": "sludge_bomb",
+    "name": "Sludge Bomb",
+    "type": "POISON",
+    "category": "physical",
+    "power": 90,
+    "pp": 10
+  },
+  "destiny_bond": {
+    "id": "destiny_bond",
+    "name": "Destiny Bond",
+    "type": "GHOST",
+    "category": "physical",
+    "power": 0,
+    "pp": 5
+  },
+  "karate_chop": {
+    "id": "karate_chop",
+    "name": "Karate Chop",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 50,
+    "pp": 25
+  },
+  "cross_chop": {
+    "id": "cross_chop",
+    "name": "Cross Chop",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 100,
+    "pp": 5
+  },
+  "vital_throw": {
+    "id": "vital_throw",
+    "name": "Vital Throw",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 70,
+    "pp": 10
+  },
+  "meditate": {
+    "id": "meditate",
+    "name": "Meditate",
+    "type": "PSYCHIC",
+    "category": "special",
+    "power": 0,
+    "pp": 40
+  },
+  "rolling_kick": {
+    "id": "rolling_kick",
+    "name": "Rolling Kick",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 60,
+    "pp": 15
+  },
+  "jump_kick": {
+    "id": "jump_kick",
+    "name": "Jump Kick",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 70,
+    "pp": 25
+  },
+  "hi_jump_kick": {
+    "id": "hi_jump_kick",
+    "name": "Hi Jump Kick",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 85,
+    "pp": 20
+  },
+  "mega_kick": {
+    "id": "mega_kick",
+    "name": "Mega Kick",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 120,
+    "pp": 5
+  },
+  "ice_punch": {
+    "id": "ice_punch",
+    "name": "Ice Punch",
+    "type": "ICE",
+    "category": "special",
+    "power": 75,
+    "pp": 15
+  },
+  "mach_punch": {
+    "id": "mach_punch",
+    "name": "Mach Punch",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 40,
+    "pp": 30
+  },
+  "lovely_kiss": {
+    "id": "lovely_kiss",
+    "name": "Lovely Kiss",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
+    "pp": 10
+  },
+  "present": {
+    "id": "present",
+    "name": "Present",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 1,
+    "pp": 15
+  },
+  "steel_wing": {
+    "id": "steel_wing",
+    "name": "Steel Wing",
+    "type": "STEEL",
+    "category": "physical",
+    "power": 70,
+    "pp": 25
+  },
+  "teleport": {
+    "id": "teleport",
+    "name": "Teleport",
+    "type": "PSYCHIC",
+    "category": "special",
+    "power": 0,
+    "pp": 20
+  },
+  "kinesis": {
+    "id": "kinesis",
+    "name": "Kinesis",
+    "type": "PSYCHIC",
+    "category": "special",
+    "power": 0,
+    "pp": 15
+  },
+  "hidden_power": {
+    "id": "hidden_power",
+    "name": "Hidden Power",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 1,
+    "pp": 15
+  },
+  "psywave": {
+    "id": "psywave",
+    "name": "Psywave",
+    "type": "PSYCHIC",
+    "category": "special",
+    "power": 1,
+    "pp": 15
+  },
+  "pain_split": {
+    "id": "pain_split",
+    "name": "Pain Split",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 0,
+    "pp": 20
+  },
+  "beat_up": {
+    "id": "beat_up",
+    "name": "Beat Up",
+    "type": "DARK",
+    "category": "special",
+    "power": 10,
+    "pp": 10
+  },
+  "outrage": {
+    "id": "outrage",
+    "name": "Outrage",
+    "type": "DRAGON",
+    "category": "special",
+    "power": 90,
+    "pp": 15
+  },
+  "octazooka": {
+    "id": "octazooka",
+    "name": "Octazooka",
+    "type": "WATER",
+    "category": "special",
+    "power": 65,
+    "pp": 10
   }
 };

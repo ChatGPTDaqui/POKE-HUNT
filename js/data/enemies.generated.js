@@ -30,71 +30,296 @@ export const ENCOUNTERS_DATA = {
     "wanderRadius": 60,
     "weight": 255
   },
-  "lv_1_10_floresta_hoppip": {
-    "id": "lv_1_10_floresta_hoppip",
-    "speciesId": "hoppip",
-    "minLevel": 3,
-    "maxLevel": 7,
+  "lv_1_10_floresta_ivysaur": {
+    "id": "lv_1_10_floresta_ivysaur",
+    "speciesId": "ivysaur",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_1_10_floresta_venusaur": {
+    "id": "lv_1_10_floresta_venusaur",
+    "speciesId": "venusaur",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_1_10_floresta_oddish": {
+    "id": "lv_1_10_floresta_oddish",
+    "speciesId": "oddish",
+    "minLevel": 2,
+    "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 255
   },
-  "lv_1_10_floresta_caterpie": {
-    "id": "lv_1_10_floresta_caterpie",
-    "speciesId": "caterpie",
-    "minLevel": 3,
-    "maxLevel": 5,
+  "lv_1_10_floresta_gloom": {
+    "id": "lv_1_10_floresta_gloom",
+    "speciesId": "gloom",
+    "minLevel": 2,
+    "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
-  },
-  "lv_1_10_floresta_weedle": {
-    "id": "lv_1_10_floresta_weedle",
-    "speciesId": "weedle",
-    "minLevel": 3,
-    "maxLevel": 5,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
+    "weight": 120
   },
   "lv_1_10_floresta_bellsprout": {
     "id": "lv_1_10_floresta_bellsprout",
     "speciesId": "bellsprout",
-    "minLevel": 5,
-    "maxLevel": 7,
+    "minLevel": 2,
+    "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 255
   },
-  "lv_1_10_floresta_metapod": {
-    "id": "lv_1_10_floresta_metapod",
+  "lv_1_10_floresta_weepinbell": {
+    "id": "lv_1_10_floresta_weepinbell",
+    "speciesId": "weepinbell",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 120
+  },
+  "lv_1_10_floresta_victreebel": {
+    "id": "lv_1_10_floresta_victreebel",
+    "speciesId": "victreebel",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_1_10_floresta_exeggcute": {
+    "id": "lv_1_10_floresta_exeggcute",
+    "speciesId": "exeggcute",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 90
+  },
+  "lv_1_10_floresta_tangela": {
+    "id": "lv_1_10_floresta_tangela",
+    "speciesId": "tangela",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_1_10_floresta_chikorita": {
+    "id": "lv_1_10_floresta_chikorita",
+    "speciesId": "chikorita",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_1_10_floresta_bayleef": {
+    "id": "lv_1_10_floresta_bayleef",
+    "speciesId": "bayleef",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_1_10_floresta_meganium": {
+    "id": "lv_1_10_floresta_meganium",
+    "speciesId": "meganium",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_1_10_floresta_hoppip": {
+    "id": "lv_1_10_floresta_hoppip",
+    "speciesId": "hoppip",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "lv_1_10_floresta_skiploom": {
+    "id": "lv_1_10_floresta_skiploom",
+    "speciesId": "skiploom",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 120
+  },
+  "lv_1_10_floresta_jumpluff": {
+    "id": "lv_1_10_floresta_jumpluff",
+    "speciesId": "jumpluff",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_1_10_floresta_sunkern": {
+    "id": "lv_1_10_floresta_sunkern",
+    "speciesId": "sunkern",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 235
+  },
+  "lv_1_10_floresta_sunflora": {
+    "id": "lv_1_10_floresta_sunflora",
+    "speciesId": "sunflora",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 120
+  },
+  "lv_1_10_bosque_caterpie": {
+    "id": "lv_1_10_bosque_caterpie",
+    "speciesId": "caterpie",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "lv_1_10_bosque_metapod": {
+    "id": "lv_1_10_bosque_metapod",
     "speciesId": "metapod",
-    "minLevel": 7,
-    "maxLevel": 7,
+    "minLevel": 2,
+    "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 120
   },
-  "lv_1_10_floresta_kakuna": {
-    "id": "lv_1_10_floresta_kakuna",
+  "lv_1_10_bosque_butterfree": {
+    "id": "lv_1_10_bosque_butterfree",
+    "speciesId": "butterfree",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_1_10_bosque_weedle": {
+    "id": "lv_1_10_bosque_weedle",
+    "speciesId": "weedle",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "lv_1_10_bosque_kakuna": {
+    "id": "lv_1_10_bosque_kakuna",
     "speciesId": "kakuna",
-    "minLevel": 7,
-    "maxLevel": 7,
+    "minLevel": 2,
+    "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 120
   },
-  "lv_1_10_floresta_paras": {
-    "id": "lv_1_10_floresta_paras",
+  "lv_1_10_bosque_beedrill": {
+    "id": "lv_1_10_bosque_beedrill",
+    "speciesId": "beedrill",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_1_10_bosque_paras": {
+    "id": "lv_1_10_bosque_paras",
     "speciesId": "paras",
-    "minLevel": 6,
-    "maxLevel": 6,
+    "minLevel": 2,
+    "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 190
   },
-  "lv_1_10_floresta_ariados": {
-    "id": "lv_1_10_floresta_ariados",
+  "lv_1_10_bosque_parasect": {
+    "id": "lv_1_10_bosque_parasect",
+    "speciesId": "parasect",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "lv_1_10_bosque_venonat": {
+    "id": "lv_1_10_bosque_venonat",
+    "speciesId": "venonat",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_1_10_bosque_venomoth": {
+    "id": "lv_1_10_bosque_venomoth",
+    "speciesId": "venomoth",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "lv_1_10_bosque_scyther": {
+    "id": "lv_1_10_bosque_scyther",
+    "speciesId": "scyther",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_1_10_bosque_pinsir": {
+    "id": "lv_1_10_bosque_pinsir",
+    "speciesId": "pinsir",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_1_10_bosque_ledyba": {
+    "id": "lv_1_10_bosque_ledyba",
+    "speciesId": "ledyba",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "lv_1_10_bosque_ledian": {
+    "id": "lv_1_10_bosque_ledian",
+    "speciesId": "ledian",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 90
+  },
+  "lv_1_10_bosque_spinarak": {
+    "id": "lv_1_10_bosque_spinarak",
+    "speciesId": "spinarak",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "lv_1_10_bosque_ariados": {
+    "id": "lv_1_10_bosque_ariados",
     "speciesId": "ariados",
     "minLevel": 2,
     "maxLevel": 12,
@@ -102,962 +327,1556 @@ export const ENCOUNTERS_DATA = {
     "wanderRadius": 60,
     "weight": 90
   },
-  "lv_1_10_aquatico_slowpoke": {
-    "id": "lv_1_10_aquatico_slowpoke",
-    "speciesId": "slowpoke",
-    "minLevel": 6,
-    "maxLevel": 8,
+  "lv_1_10_bosque_yanma": {
+    "id": "lv_1_10_bosque_yanma",
+    "speciesId": "yanma",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "lv_1_10_bosque_pineco": {
+    "id": "lv_1_10_bosque_pineco",
+    "speciesId": "pineco",
+    "minLevel": 2,
+    "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 190
   },
-  "lv_1_10_aquatico_azumarill": {
-    "id": "lv_1_10_aquatico_azumarill",
-    "speciesId": "azumarill",
+  "lv_1_10_bosque_forretress": {
+    "id": "lv_1_10_bosque_forretress",
+    "speciesId": "forretress",
     "minLevel": 2,
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 75
   },
-  "lv_1_10_aquatico_delibird": {
-    "id": "lv_1_10_aquatico_delibird",
-    "speciesId": "delibird",
+  "lv_1_10_bosque_scizor": {
+    "id": "lv_1_10_bosque_scizor",
+    "speciesId": "scizor",
+    "minLevel": 2,
+    "maxLevel": 12,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 25
+  },
+  "lv_1_10_bosque_heracross": {
+    "id": "lv_1_10_bosque_heracross",
+    "speciesId": "heracross",
     "minLevel": 2,
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
   },
-  "lv_1_10_aquatico_dewgong": {
-    "id": "lv_1_10_aquatico_dewgong",
-    "speciesId": "dewgong",
-    "minLevel": 2,
-    "maxLevel": 12,
+  "lv_11_20_costa_magikarp": {
+    "id": "lv_11_20_costa_magikarp",
+    "speciesId": "magikarp",
+    "minLevel": 10,
+    "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 255
   },
-  "lv_1_10_aquatico_golduck": {
-    "id": "lv_1_10_aquatico_golduck",
-    "speciesId": "golduck",
-    "minLevel": 2,
-    "maxLevel": 12,
+  "lv_11_20_costa_wooper": {
+    "id": "lv_11_20_costa_wooper",
+    "speciesId": "wooper",
+    "minLevel": 10,
+    "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 255
   },
-  "lv_1_10_aquatico_jynx": {
-    "id": "lv_1_10_aquatico_jynx",
-    "speciesId": "jynx",
-    "minLevel": 2,
-    "maxLevel": 12,
+  "lv_11_20_costa_marill": {
+    "id": "lv_11_20_costa_marill",
+    "speciesId": "marill",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_11_20_costa_totodile": {
+    "id": "lv_11_20_costa_totodile",
+    "speciesId": "totodile",
+    "minLevel": 10,
+    "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
   },
-  "lv_1_10_aquatico_kingler": {
-    "id": "lv_1_10_aquatico_kingler",
-    "speciesId": "kingler",
-    "minLevel": 2,
-    "maxLevel": 12,
+  "lv_11_20_costa_poliwag": {
+    "id": "lv_11_20_costa_poliwag",
+    "speciesId": "poliwag",
+    "minLevel": 10,
+    "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 255
   },
-  "lv_1_10_aquatico_krabby": {
-    "id": "lv_1_10_aquatico_krabby",
-    "speciesId": "krabby",
-    "minLevel": 2,
-    "maxLevel": 12,
+  "lv_11_20_costa_remoraid": {
+    "id": "lv_11_20_costa_remoraid",
+    "speciesId": "remoraid",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_11_20_costa_psyduck": {
+    "id": "lv_11_20_costa_psyduck",
+    "speciesId": "psyduck",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_11_20_costa_horsea": {
+    "id": "lv_11_20_costa_horsea",
+    "speciesId": "horsea",
+    "minLevel": 10,
+    "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 225
   },
-  "lv_11_20_vulcanico_growlithe": {
-    "id": "lv_11_20_vulcanico_growlithe",
-    "speciesId": "growlithe",
-    "minLevel": 13,
-    "maxLevel": 16,
+  "lv_11_20_costa_chinchou": {
+    "id": "lv_11_20_costa_chinchou",
+    "speciesId": "chinchou",
+    "minLevel": 10,
+    "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 190
   },
-  "lv_11_20_vulcanico_geodude": {
-    "id": "lv_11_20_vulcanico_geodude",
-    "speciesId": "geodude",
-    "minLevel": 13,
-    "maxLevel": 16,
+  "lv_11_20_costa_shellder": {
+    "id": "lv_11_20_costa_shellder",
+    "speciesId": "shellder",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_11_20_costa_slowpoke": {
+    "id": "lv_11_20_costa_slowpoke",
+    "speciesId": "slowpoke",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_11_20_costa_seel": {
+    "id": "lv_11_20_costa_seel",
+    "speciesId": "seel",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_11_20_costa_qwilfish": {
+    "id": "lv_11_20_costa_qwilfish",
+    "speciesId": "qwilfish",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_11_20_costa_tentacool": {
+    "id": "lv_11_20_costa_tentacool",
+    "speciesId": "tentacool",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_11_20_costa_staryu": {
+    "id": "lv_11_20_costa_staryu",
+    "speciesId": "staryu",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 225
+  },
+  "lv_11_20_costa_goldeen": {
+    "id": "lv_11_20_costa_goldeen",
+    "speciesId": "goldeen",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 225
+  },
+  "lv_11_20_costa_corsola": {
+    "id": "lv_11_20_costa_corsola",
+    "speciesId": "corsola",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 60
+  },
+  "lv_11_20_costa_krabby": {
+    "id": "lv_11_20_costa_krabby",
+    "speciesId": "krabby",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 225
+  },
+  "lv_11_20_costa_poliwhirl": {
+    "id": "lv_11_20_costa_poliwhirl",
+    "speciesId": "poliwhirl",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 120
+  },
+  "lv_11_20_costa_quagsire": {
+    "id": "lv_11_20_costa_quagsire",
+    "speciesId": "quagsire",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 90
+  },
+  "lv_11_20_planicie_pidgey": {
+    "id": "lv_11_20_planicie_pidgey",
+    "speciesId": "pidgey",
+    "minLevel": 10,
+    "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 255
   },
-  "lv_11_20_vulcanico_cyndaquil": {
-    "id": "lv_11_20_vulcanico_cyndaquil",
-    "speciesId": "cyndaquil",
+  "lv_11_20_planicie_pidgeotto": {
+    "id": "lv_11_20_planicie_pidgeotto",
+    "speciesId": "pidgeotto",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 120
+  },
+  "lv_11_20_planicie_pidgeot": {
+    "id": "lv_11_20_planicie_pidgeot",
+    "speciesId": "pidgeot",
     "minLevel": 10,
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
   },
-  "lv_11_20_vulcanico_quilava": {
-    "id": "lv_11_20_vulcanico_quilava",
-    "speciesId": "quilava",
+  "lv_11_20_planicie_rattata": {
+    "id": "lv_11_20_planicie_rattata",
+    "speciesId": "rattata",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "lv_11_20_planicie_raticate": {
+    "id": "lv_11_20_planicie_raticate",
+    "speciesId": "raticate",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 90
+  },
+  "lv_11_20_planicie_spearow": {
+    "id": "lv_11_20_planicie_spearow",
+    "speciesId": "spearow",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "lv_11_20_planicie_fearow": {
+    "id": "lv_11_20_planicie_fearow",
+    "speciesId": "fearow",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 90
+  },
+  "lv_11_20_planicie_jigglypuff": {
+    "id": "lv_11_20_planicie_jigglypuff",
+    "speciesId": "jigglypuff",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 170
+  },
+  "lv_11_20_planicie_meowth": {
+    "id": "lv_11_20_planicie_meowth",
+    "speciesId": "meowth",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "lv_11_20_planicie_persian": {
+    "id": "lv_11_20_planicie_persian",
+    "speciesId": "persian",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 90
+  },
+  "lv_11_20_planicie_farfetch_d": {
+    "id": "lv_11_20_planicie_farfetch_d",
+    "speciesId": "farfetch_d",
     "minLevel": 10,
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
   },
-  "lv_11_20_vulcanico_typhlosion": {
-    "id": "lv_11_20_vulcanico_typhlosion",
-    "speciesId": "typhlosion",
+  "lv_11_20_planicie_doduo": {
+    "id": "lv_11_20_planicie_doduo",
+    "speciesId": "doduo",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_11_20_planicie_dodrio": {
+    "id": "lv_11_20_planicie_dodrio",
+    "speciesId": "dodrio",
     "minLevel": 10,
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
   },
-  "lv_11_20_vulcanico_arcanine": {
-    "id": "lv_11_20_vulcanico_arcanine",
-    "speciesId": "arcanine",
+  "lv_11_20_planicie_lickitung": {
+    "id": "lv_11_20_planicie_lickitung",
+    "speciesId": "lickitung",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_11_20_planicie_kangaskhan": {
+    "id": "lv_11_20_planicie_kangaskhan",
+    "speciesId": "kangaskhan",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_11_20_planicie_tauros": {
+    "id": "lv_11_20_planicie_tauros",
+    "speciesId": "tauros",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_11_20_planicie_ditto": {
+    "id": "lv_11_20_planicie_ditto",
+    "speciesId": "ditto",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 35
+  },
+  "lv_11_20_planicie_eevee": {
+    "id": "lv_11_20_planicie_eevee",
+    "speciesId": "eevee",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_11_20_planicie_porygon": {
+    "id": "lv_11_20_planicie_porygon",
+    "speciesId": "porygon",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_11_20_planicie_snorlax": {
+    "id": "lv_11_20_planicie_snorlax",
+    "speciesId": "snorlax",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 25
+  },
+  "lv_11_20_planicie_sentret": {
+    "id": "lv_11_20_planicie_sentret",
+    "speciesId": "sentret",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "lv_11_20_planicie_furret": {
+    "id": "lv_11_20_planicie_furret",
+    "speciesId": "furret",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 90
+  },
+  "lv_11_20_planicie_hoothoot": {
+    "id": "lv_11_20_planicie_hoothoot",
+    "speciesId": "hoothoot",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "lv_11_20_planicie_noctowl": {
+    "id": "lv_11_20_planicie_noctowl",
+    "speciesId": "noctowl",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 90
+  },
+  "lv_11_20_planicie_cleffa": {
+    "id": "lv_11_20_planicie_cleffa",
+    "speciesId": "cleffa",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 150
+  },
+  "lv_11_20_planicie_igglybuff": {
+    "id": "lv_11_20_planicie_igglybuff",
+    "speciesId": "igglybuff",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 170
+  },
+  "lv_11_20_planicie_togepi": {
+    "id": "lv_11_20_planicie_togepi",
+    "speciesId": "togepi",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_11_20_planicie_aipom": {
+    "id": "lv_11_20_planicie_aipom",
+    "speciesId": "aipom",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_11_20_planicie_girafarig": {
+    "id": "lv_11_20_planicie_girafarig",
+    "speciesId": "girafarig",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 60
+  },
+  "lv_11_20_planicie_dunsparce": {
+    "id": "lv_11_20_planicie_dunsparce",
+    "speciesId": "dunsparce",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_11_20_planicie_snubbull": {
+    "id": "lv_11_20_planicie_snubbull",
+    "speciesId": "snubbull",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_11_20_planicie_granbull": {
+    "id": "lv_11_20_planicie_granbull",
+    "speciesId": "granbull",
     "minLevel": 10,
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 75
   },
-  "lv_11_20_vulcanico_donphan": {
-    "id": "lv_11_20_vulcanico_donphan",
-    "speciesId": "donphan",
+  "lv_11_20_planicie_teddiursa": {
+    "id": "lv_11_20_planicie_teddiursa",
+    "speciesId": "teddiursa",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 120
+  },
+  "lv_11_20_planicie_ursaring": {
+    "id": "lv_11_20_planicie_ursaring",
+    "speciesId": "ursaring",
     "minLevel": 10,
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 60
   },
-  "lv_11_20_vulcanico_gligar": {
-    "id": "lv_11_20_vulcanico_gligar",
-    "speciesId": "gligar",
-    "minLevel": 10,
-    "maxLevel": 18,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 60
-  },
-  "lv_11_20_eletrico_magnemite": {
-    "id": "lv_11_20_eletrico_magnemite",
-    "speciesId": "magnemite",
-    "minLevel": 16,
-    "maxLevel": 16,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 190
-  },
-  "lv_11_20_eletrico_magneton": {
-    "id": "lv_11_20_eletrico_magneton",
-    "speciesId": "magneton",
-    "minLevel": 10,
-    "maxLevel": 18,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 60
-  },
-  "lv_11_20_eletrico_skarmory": {
-    "id": "lv_11_20_eletrico_skarmory",
-    "speciesId": "skarmory",
-    "minLevel": 10,
-    "maxLevel": 18,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 25
-  },
-  "lv_11_20_eletrico_steelix": {
-    "id": "lv_11_20_eletrico_steelix",
-    "speciesId": "steelix",
-    "minLevel": 10,
-    "maxLevel": 18,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 25
-  },
-  "lv_11_20_eletrico_pikachu": {
-    "id": "lv_11_20_eletrico_pikachu",
-    "speciesId": "pikachu",
-    "minLevel": 10,
-    "maxLevel": 18,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 190
-  },
-  "lv_11_20_eletrico_voltorb": {
-    "id": "lv_11_20_eletrico_voltorb",
-    "speciesId": "voltorb",
-    "minLevel": 10,
-    "maxLevel": 18,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 190
-  },
-  "lv_11_20_eletrico_electrode": {
-    "id": "lv_11_20_eletrico_electrode",
-    "speciesId": "electrode",
-    "minLevel": 10,
-    "maxLevel": 18,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 60
-  },
-  "lv_11_20_eletrico_electabuzz": {
-    "id": "lv_11_20_eletrico_electabuzz",
-    "speciesId": "electabuzz",
+  "lv_11_20_planicie_porygon2": {
+    "id": "lv_11_20_planicie_porygon2",
+    "speciesId": "porygon2",
     "minLevel": 10,
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
   },
-  "lv_21_30_sombrio_zubat": {
-    "id": "lv_21_30_sombrio_zubat",
-    "speciesId": "zubat",
-    "minLevel": 19,
-    "maxLevel": 26,
+  "lv_11_20_planicie_stantler": {
+    "id": "lv_11_20_planicie_stantler",
+    "speciesId": "stantler",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_11_20_planicie_smeargle": {
+    "id": "lv_11_20_planicie_smeargle",
+    "speciesId": "smeargle",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_11_20_planicie_miltank": {
+    "id": "lv_11_20_planicie_miltank",
+    "speciesId": "miltank",
+    "minLevel": 10,
+    "maxLevel": 18,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_21_30_caverna_geodude": {
+    "id": "lv_21_30_caverna_geodude",
+    "speciesId": "geodude",
+    "minLevel": 18,
+    "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 255
   },
-  "lv_21_30_sombrio_golbat": {
-    "id": "lv_21_30_sombrio_golbat",
-    "speciesId": "golbat",
-    "minLevel": 22,
-    "maxLevel": 30,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 90
-  },
-  "lv_21_30_sombrio_arbok": {
-    "id": "lv_21_30_sombrio_arbok",
-    "speciesId": "arbok",
+  "lv_21_30_caverna_graveler": {
+    "id": "lv_21_30_caverna_graveler",
+    "speciesId": "graveler",
     "minLevel": 18,
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 120
   },
-  "lv_21_30_sombrio_ekans": {
-    "id": "lv_21_30_sombrio_ekans",
-    "speciesId": "ekans",
-    "minLevel": 18,
-    "maxLevel": 32,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "lv_21_30_sombrio_gastly": {
-    "id": "lv_21_30_sombrio_gastly",
-    "speciesId": "gastly",
-    "minLevel": 18,
-    "maxLevel": 32,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 190
-  },
-  "lv_21_30_sombrio_gengar": {
-    "id": "lv_21_30_sombrio_gengar",
-    "speciesId": "gengar",
+  "lv_21_30_caverna_golem": {
+    "id": "lv_21_30_caverna_golem",
+    "speciesId": "golem",
     "minLevel": 18,
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
   },
-  "lv_21_30_sombrio_haunter": {
-    "id": "lv_21_30_sombrio_haunter",
-    "speciesId": "haunter",
+  "lv_21_30_caverna_onix": {
+    "id": "lv_21_30_caverna_onix",
+    "speciesId": "onix",
+    "minLevel": 18,
+    "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_21_30_caverna_omanyte": {
+    "id": "lv_21_30_caverna_omanyte",
+    "speciesId": "omanyte",
+    "minLevel": 18,
+    "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_21_30_caverna_omastar": {
+    "id": "lv_21_30_caverna_omastar",
+    "speciesId": "omastar",
+    "minLevel": 18,
+    "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_21_30_caverna_kabuto": {
+    "id": "lv_21_30_caverna_kabuto",
+    "speciesId": "kabuto",
+    "minLevel": 18,
+    "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_21_30_caverna_kabutops": {
+    "id": "lv_21_30_caverna_kabutops",
+    "speciesId": "kabutops",
+    "minLevel": 18,
+    "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_21_30_caverna_aerodactyl": {
+    "id": "lv_21_30_caverna_aerodactyl",
+    "speciesId": "aerodactyl",
+    "minLevel": 18,
+    "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_21_30_caverna_sudowoodo": {
+    "id": "lv_21_30_caverna_sudowoodo",
+    "speciesId": "sudowoodo",
+    "minLevel": 18,
+    "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 65
+  },
+  "lv_21_30_caverna_larvitar": {
+    "id": "lv_21_30_caverna_larvitar",
+    "speciesId": "larvitar",
+    "minLevel": 18,
+    "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_21_30_caverna_pupitar": {
+    "id": "lv_21_30_caverna_pupitar",
+    "speciesId": "pupitar",
+    "minLevel": 18,
+    "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_21_30_caverna_tyranitar": {
+    "id": "lv_21_30_caverna_tyranitar",
+    "speciesId": "tyranitar",
+    "minLevel": 18,
+    "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_21_30_deserto_sandshrew": {
+    "id": "lv_21_30_deserto_sandshrew",
+    "speciesId": "sandshrew",
+    "minLevel": 18,
+    "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "lv_21_30_deserto_sandslash": {
+    "id": "lv_21_30_deserto_sandslash",
+    "speciesId": "sandslash",
     "minLevel": 18,
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 90
   },
-  "lv_21_30_sombrio_koffing": {
-    "id": "lv_21_30_sombrio_koffing",
-    "speciesId": "koffing",
+  "lv_21_30_deserto_diglett": {
+    "id": "lv_21_30_deserto_diglett",
+    "speciesId": "diglett",
     "minLevel": 18,
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 255
   },
-  "lv_21_30_mistico_natu": {
-    "id": "lv_21_30_mistico_natu",
-    "speciesId": "natu",
-    "minLevel": 18,
-    "maxLevel": 24,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 190
-  },
-  "lv_21_30_mistico_abra": {
-    "id": "lv_21_30_mistico_abra",
-    "speciesId": "abra",
-    "minLevel": 18,
-    "maxLevel": 32,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 200
-  },
-  "lv_21_30_mistico_alakazam": {
-    "id": "lv_21_30_mistico_alakazam",
-    "speciesId": "alakazam",
+  "lv_21_30_deserto_dugtrio": {
+    "id": "lv_21_30_deserto_dugtrio",
+    "speciesId": "dugtrio",
     "minLevel": 18,
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 50
   },
-  "lv_21_30_mistico_drowzee": {
-    "id": "lv_21_30_mistico_drowzee",
-    "speciesId": "drowzee",
+  "lv_21_30_deserto_cubone": {
+    "id": "lv_21_30_deserto_cubone",
+    "speciesId": "cubone",
     "minLevel": 18,
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 190
   },
-  "lv_21_30_mistico_hypno": {
-    "id": "lv_21_30_mistico_hypno",
-    "speciesId": "hypno",
+  "lv_21_30_deserto_marowak": {
+    "id": "lv_21_30_deserto_marowak",
+    "speciesId": "marowak",
     "minLevel": 18,
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 75
   },
-  "lv_21_30_mistico_kadabra": {
-    "id": "lv_21_30_mistico_kadabra",
-    "speciesId": "kadabra",
+  "lv_21_30_deserto_rhyhorn": {
+    "id": "lv_21_30_deserto_rhyhorn",
+    "speciesId": "rhyhorn",
     "minLevel": 18,
     "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 120
+  },
+  "lv_21_30_deserto_rhydon": {
+    "id": "lv_21_30_deserto_rhydon",
+    "speciesId": "rhydon",
+    "minLevel": 18,
+    "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 60
+  },
+  "lv_21_30_deserto_gligar": {
+    "id": "lv_21_30_deserto_gligar",
+    "speciesId": "gligar",
+    "minLevel": 18,
+    "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 60
+  },
+  "lv_21_30_deserto_phanpy": {
+    "id": "lv_21_30_deserto_phanpy",
+    "speciesId": "phanpy",
+    "minLevel": 18,
+    "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 120
+  },
+  "lv_21_30_deserto_donphan": {
+    "id": "lv_21_30_deserto_donphan",
+    "speciesId": "donphan",
+    "minLevel": 18,
+    "maxLevel": 32,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 60
+  },
+  "lv_31_40_vulcanico_charmeleon": {
+    "id": "lv_31_40_vulcanico_charmeleon",
+    "speciesId": "charmeleon",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_31_40_vulcanico_charizard": {
+    "id": "lv_31_40_vulcanico_charizard",
+    "speciesId": "charizard",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_31_40_vulcanico_growlithe": {
+    "id": "lv_31_40_vulcanico_growlithe",
+    "speciesId": "growlithe",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_31_40_vulcanico_arcanine": {
+    "id": "lv_31_40_vulcanico_arcanine",
+    "speciesId": "arcanine",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "lv_31_40_vulcanico_ponyta": {
+    "id": "lv_31_40_vulcanico_ponyta",
+    "speciesId": "ponyta",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_31_40_vulcanico_rapidash": {
+    "id": "lv_31_40_vulcanico_rapidash",
+    "speciesId": "rapidash",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 60
+  },
+  "lv_31_40_vulcanico_magmar": {
+    "id": "lv_31_40_vulcanico_magmar",
+    "speciesId": "magmar",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_31_40_vulcanico_cyndaquil": {
+    "id": "lv_31_40_vulcanico_cyndaquil",
+    "speciesId": "cyndaquil",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_31_40_vulcanico_quilava": {
+    "id": "lv_31_40_vulcanico_quilava",
+    "speciesId": "quilava",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_31_40_vulcanico_typhlosion": {
+    "id": "lv_31_40_vulcanico_typhlosion",
+    "speciesId": "typhlosion",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_31_40_vulcanico_slugma": {
+    "id": "lv_31_40_vulcanico_slugma",
+    "speciesId": "slugma",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_31_40_vulcanico_magcargo": {
+    "id": "lv_31_40_vulcanico_magcargo",
+    "speciesId": "magcargo",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "lv_31_40_vulcanico_magby": {
+    "id": "lv_31_40_vulcanico_magby",
+    "speciesId": "magby",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_31_40_usina_pikachu": {
+    "id": "lv_31_40_usina_pikachu",
+    "speciesId": "pikachu",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_31_40_usina_magnemite": {
+    "id": "lv_31_40_usina_magnemite",
+    "speciesId": "magnemite",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_31_40_usina_magneton": {
+    "id": "lv_31_40_usina_magneton",
+    "speciesId": "magneton",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 60
+  },
+  "lv_31_40_usina_voltorb": {
+    "id": "lv_31_40_usina_voltorb",
+    "speciesId": "voltorb",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_31_40_usina_electrode": {
+    "id": "lv_31_40_usina_electrode",
+    "speciesId": "electrode",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 60
+  },
+  "lv_31_40_usina_electabuzz": {
+    "id": "lv_31_40_usina_electabuzz",
+    "speciesId": "electabuzz",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_31_40_usina_pichu": {
+    "id": "lv_31_40_usina_pichu",
+    "speciesId": "pichu",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_31_40_usina_mareep": {
+    "id": "lv_31_40_usina_mareep",
+    "speciesId": "mareep",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 235
+  },
+  "lv_31_40_usina_flaaffy": {
+    "id": "lv_31_40_usina_flaaffy",
+    "speciesId": "flaaffy",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 120
+  },
+  "lv_31_40_usina_ampharos": {
+    "id": "lv_31_40_usina_ampharos",
+    "speciesId": "ampharos",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_31_40_usina_elekid": {
+    "id": "lv_31_40_usina_elekid",
+    "speciesId": "elekid",
+    "minLevel": 15,
+    "maxLevel": 51,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_41_50_pantano_ekans": {
+    "id": "lv_41_50_pantano_ekans",
+    "speciesId": "ekans",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "lv_41_50_pantano_arbok": {
+    "id": "lv_41_50_pantano_arbok",
+    "speciesId": "arbok",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 90
+  },
+  "lv_41_50_pantano_nidoran_f": {
+    "id": "lv_41_50_pantano_nidoran_f",
+    "speciesId": "nidoran_f",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 235
+  },
+  "lv_41_50_pantano_nidorina": {
+    "id": "lv_41_50_pantano_nidorina",
+    "speciesId": "nidorina",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 120
+  },
+  "lv_41_50_pantano_nidoqueen": {
+    "id": "lv_41_50_pantano_nidoqueen",
+    "speciesId": "nidoqueen",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_41_50_pantano_nidoran_m": {
+    "id": "lv_41_50_pantano_nidoran_m",
+    "speciesId": "nidoran_m",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 235
+  },
+  "lv_41_50_pantano_nidorino": {
+    "id": "lv_41_50_pantano_nidorino",
+    "speciesId": "nidorino",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 120
+  },
+  "lv_41_50_pantano_nidoking": {
+    "id": "lv_41_50_pantano_nidoking",
+    "speciesId": "nidoking",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_41_50_pantano_zubat": {
+    "id": "lv_41_50_pantano_zubat",
+    "speciesId": "zubat",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "lv_41_50_pantano_golbat": {
+    "id": "lv_41_50_pantano_golbat",
+    "speciesId": "golbat",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 90
+  },
+  "lv_41_50_pantano_grimer": {
+    "id": "lv_41_50_pantano_grimer",
+    "speciesId": "grimer",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_41_50_pantano_muk": {
+    "id": "lv_41_50_pantano_muk",
+    "speciesId": "muk",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "lv_41_50_pantano_koffing": {
+    "id": "lv_41_50_pantano_koffing",
+    "speciesId": "koffing",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_41_50_pantano_weezing": {
+    "id": "lv_41_50_pantano_weezing",
+    "speciesId": "weezing",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 60
+  },
+  "lv_41_50_dojo_mankey": {
+    "id": "lv_41_50_dojo_mankey",
+    "speciesId": "mankey",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "lv_41_50_dojo_primeape": {
+    "id": "lv_41_50_dojo_primeape",
+    "speciesId": "primeape",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "lv_41_50_dojo_machop": {
+    "id": "lv_41_50_dojo_machop",
+    "speciesId": "machop",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 180
+  },
+  "lv_41_50_dojo_machoke": {
+    "id": "lv_41_50_dojo_machoke",
+    "speciesId": "machoke",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 90
+  },
+  "lv_41_50_dojo_machamp": {
+    "id": "lv_41_50_dojo_machamp",
+    "speciesId": "machamp",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_41_50_dojo_hitmonlee": {
+    "id": "lv_41_50_dojo_hitmonlee",
+    "speciesId": "hitmonlee",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_41_50_dojo_hitmonchan": {
+    "id": "lv_41_50_dojo_hitmonchan",
+    "speciesId": "hitmonchan",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "lv_41_50_dojo_tyrogue": {
+    "id": "lv_41_50_dojo_tyrogue",
+    "speciesId": "tyrogue",
+    "minLevel": 41,
+    "maxLevel": 52,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "kanto_lv_1_10_geleira_jynx": {
+    "id": "kanto_lv_1_10_geleira_jynx",
+    "speciesId": "jynx",
+    "minLevel": 52,
+    "maxLevel": 62,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "kanto_lv_1_10_geleira_swinub": {
+    "id": "kanto_lv_1_10_geleira_swinub",
+    "speciesId": "swinub",
+    "minLevel": 52,
+    "maxLevel": 62,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 225
+  },
+  "kanto_lv_1_10_geleira_piloswine": {
+    "id": "kanto_lv_1_10_geleira_piloswine",
+    "speciesId": "piloswine",
+    "minLevel": 52,
+    "maxLevel": 62,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "kanto_lv_1_10_geleira_delibird": {
+    "id": "kanto_lv_1_10_geleira_delibird",
+    "speciesId": "delibird",
+    "minLevel": 52,
+    "maxLevel": 62,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "kanto_lv_1_10_geleira_smoochum": {
+    "id": "kanto_lv_1_10_geleira_smoochum",
+    "speciesId": "smoochum",
+    "minLevel": 52,
+    "maxLevel": 62,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "kanto_lv_1_10_fabrica_steelix": {
+    "id": "kanto_lv_1_10_fabrica_steelix",
+    "speciesId": "steelix",
+    "minLevel": 52,
+    "maxLevel": 62,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 25
+  },
+  "kanto_lv_1_10_fabrica_skarmory": {
+    "id": "kanto_lv_1_10_fabrica_skarmory",
+    "speciesId": "skarmory",
+    "minLevel": 52,
+    "maxLevel": 62,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 25
+  },
+  "kanto_lv_1_10_fabrica_magnemite": {
+    "id": "kanto_lv_1_10_fabrica_magnemite",
+    "speciesId": "magnemite",
+    "minLevel": 52,
+    "maxLevel": 62,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "kanto_lv_1_10_fabrica_forretress": {
+    "id": "kanto_lv_1_10_fabrica_forretress",
+    "speciesId": "forretress",
+    "minLevel": 52,
+    "maxLevel": 62,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "kanto_lv_1_10_fabrica_magneton": {
+    "id": "kanto_lv_1_10_fabrica_magneton",
+    "speciesId": "magneton",
+    "minLevel": 52,
+    "maxLevel": 62,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 60
+  },
+  "kanto_lv_1_10_fabrica_scizor": {
+    "id": "kanto_lv_1_10_fabrica_scizor",
+    "speciesId": "scizor",
+    "minLevel": 52,
+    "maxLevel": 62,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 25
+  },
+  "kanto_lv_11_20_penhascos_pidgey": {
+    "id": "kanto_lv_11_20_penhascos_pidgey",
+    "speciesId": "pidgey",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "kanto_lv_11_20_penhascos_spearow": {
+    "id": "kanto_lv_11_20_penhascos_spearow",
+    "speciesId": "spearow",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "kanto_lv_11_20_penhascos_zubat": {
+    "id": "kanto_lv_11_20_penhascos_zubat",
+    "speciesId": "zubat",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "kanto_lv_11_20_penhascos_hoothoot": {
+    "id": "kanto_lv_11_20_penhascos_hoothoot",
+    "speciesId": "hoothoot",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "kanto_lv_11_20_penhascos_ledyba": {
+    "id": "kanto_lv_11_20_penhascos_ledyba",
+    "speciesId": "ledyba",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "kanto_lv_11_20_penhascos_hoppip": {
+    "id": "kanto_lv_11_20_penhascos_hoppip",
+    "speciesId": "hoppip",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 255
+  },
+  "kanto_lv_11_20_penhascos_doduo": {
+    "id": "kanto_lv_11_20_penhascos_doduo",
+    "speciesId": "doduo",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "kanto_lv_11_20_penhascos_natu": {
+    "id": "kanto_lv_11_20_penhascos_natu",
+    "speciesId": "natu",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "kanto_lv_11_20_penhascos_pidgeotto": {
+    "id": "kanto_lv_11_20_penhascos_pidgeotto",
+    "speciesId": "pidgeotto",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 120
+  },
+  "kanto_lv_11_20_penhascos_skiploom": {
+    "id": "kanto_lv_11_20_penhascos_skiploom",
+    "speciesId": "skiploom",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 120
+  },
+  "kanto_lv_11_20_penhascos_fearow": {
+    "id": "kanto_lv_11_20_penhascos_fearow",
+    "speciesId": "fearow",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 90
+  },
+  "kanto_lv_11_20_penhascos_golbat": {
+    "id": "kanto_lv_11_20_penhascos_golbat",
+    "speciesId": "golbat",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 90
+  },
+  "kanto_lv_11_20_penhascos_noctowl": {
+    "id": "kanto_lv_11_20_penhascos_noctowl",
+    "speciesId": "noctowl",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 90
+  },
+  "kanto_lv_11_20_penhascos_ledian": {
+    "id": "kanto_lv_11_20_penhascos_ledian",
+    "speciesId": "ledian",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 90
+  },
+  "kanto_lv_11_20_penhascos_xatu": {
+    "id": "kanto_lv_11_20_penhascos_xatu",
+    "speciesId": "xatu",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "kanto_lv_11_20_penhascos_yanma": {
+    "id": "kanto_lv_11_20_penhascos_yanma",
+    "speciesId": "yanma",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "kanto_lv_11_20_torre_mistica_abra": {
+    "id": "kanto_lv_11_20_torre_mistica_abra",
+    "speciesId": "abra",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 200
+  },
+  "kanto_lv_11_20_torre_mistica_kadabra": {
+    "id": "kanto_lv_11_20_torre_mistica_kadabra",
+    "speciesId": "kadabra",
+    "minLevel": 60,
+    "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 100
   },
-  "lv_21_30_mistico_unown": {
-    "id": "lv_21_30_mistico_unown",
+  "kanto_lv_11_20_torre_mistica_alakazam": {
+    "id": "kanto_lv_11_20_torre_mistica_alakazam",
+    "speciesId": "alakazam",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 50
+  },
+  "kanto_lv_11_20_torre_mistica_drowzee": {
+    "id": "kanto_lv_11_20_torre_mistica_drowzee",
+    "speciesId": "drowzee",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "kanto_lv_11_20_torre_mistica_hypno": {
+    "id": "kanto_lv_11_20_torre_mistica_hypno",
+    "speciesId": "hypno",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "kanto_lv_11_20_torre_mistica_natu": {
+    "id": "kanto_lv_11_20_torre_mistica_natu",
+    "speciesId": "natu",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 190
+  },
+  "kanto_lv_11_20_torre_mistica_xatu": {
+    "id": "kanto_lv_11_20_torre_mistica_xatu",
+    "speciesId": "xatu",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "kanto_lv_11_20_torre_mistica_unown": {
+    "id": "kanto_lv_11_20_torre_mistica_unown",
     "speciesId": "unown",
-    "minLevel": 18,
-    "maxLevel": 32,
+    "minLevel": 60,
+    "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 225
   },
-  "lv_21_30_mistico_wobbuffet": {
-    "id": "lv_21_30_mistico_wobbuffet",
+  "kanto_lv_11_20_torre_mistica_wobbuffet": {
+    "id": "kanto_lv_11_20_torre_mistica_wobbuffet",
     "speciesId": "wobbuffet",
-    "minLevel": 18,
-    "maxLevel": 32,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "lv_31_40_planicie_ursaring": {
-    "id": "lv_31_40_planicie_ursaring",
-    "speciesId": "ursaring",
-    "minLevel": 44,
-    "maxLevel": 50,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 60
-  },
-  "lv_31_40_planicie_machoke": {
-    "id": "lv_31_40_planicie_machoke",
-    "speciesId": "machoke",
-    "minLevel": 48,
-    "maxLevel": 48,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 90
-  },
-  "lv_31_40_planicie_sentret": {
-    "id": "lv_31_40_planicie_sentret",
-    "speciesId": "sentret",
-    "minLevel": 15,
-    "maxLevel": 51,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "lv_31_40_planicie_pidgey": {
-    "id": "lv_31_40_planicie_pidgey",
-    "speciesId": "pidgey",
-    "minLevel": 15,
-    "maxLevel": 51,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "lv_31_40_planicie_rattata": {
-    "id": "lv_31_40_planicie_rattata",
-    "speciesId": "rattata",
-    "minLevel": 15,
-    "maxLevel": 51,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "lv_31_40_planicie_hoothoot": {
-    "id": "lv_31_40_planicie_hoothoot",
-    "speciesId": "hoothoot",
-    "minLevel": 15,
-    "maxLevel": 51,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "lv_31_40_planicie_ditto": {
-    "id": "lv_31_40_planicie_ditto",
-    "speciesId": "ditto",
-    "minLevel": 15,
-    "maxLevel": 51,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 35
-  },
-  "lv_31_40_planicie_dodrio": {
-    "id": "lv_31_40_planicie_dodrio",
-    "speciesId": "dodrio",
-    "minLevel": 15,
-    "maxLevel": 51,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "lv_31_40_floresta_parasect": {
-    "id": "lv_31_40_floresta_parasect",
-    "speciesId": "parasect",
-    "minLevel": 46,
-    "maxLevel": 48,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 75
-  },
-  "lv_31_40_floresta_hoppip": {
-    "id": "lv_31_40_floresta_hoppip",
-    "speciesId": "hoppip",
-    "minLevel": 15,
-    "maxLevel": 51,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "lv_31_40_floresta_ariados": {
-    "id": "lv_31_40_floresta_ariados",
-    "speciesId": "ariados",
-    "minLevel": 15,
-    "maxLevel": 51,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 90
-  },
-  "lv_31_40_floresta_beedrill": {
-    "id": "lv_31_40_floresta_beedrill",
-    "speciesId": "beedrill",
-    "minLevel": 15,
-    "maxLevel": 51,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "lv_31_40_floresta_bellsprout": {
-    "id": "lv_31_40_floresta_bellsprout",
-    "speciesId": "bellsprout",
-    "minLevel": 15,
-    "maxLevel": 51,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "lv_31_40_floresta_butterfree": {
-    "id": "lv_31_40_floresta_butterfree",
-    "speciesId": "butterfree",
-    "minLevel": 15,
-    "maxLevel": 51,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "lv_31_40_floresta_caterpie": {
-    "id": "lv_31_40_floresta_caterpie",
-    "speciesId": "caterpie",
-    "minLevel": 15,
-    "maxLevel": 51,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "lv_31_40_floresta_gloom": {
-    "id": "lv_31_40_floresta_gloom",
-    "speciesId": "gloom",
-    "minLevel": 15,
-    "maxLevel": 51,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 120
-  },
-  "lv_41_50_aquatico_azumarill": {
-    "id": "lv_41_50_aquatico_azumarill",
-    "speciesId": "azumarill",
-    "minLevel": 41,
-    "maxLevel": 52,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 75
-  },
-  "lv_41_50_aquatico_delibird": {
-    "id": "lv_41_50_aquatico_delibird",
-    "speciesId": "delibird",
-    "minLevel": 41,
-    "maxLevel": 52,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "lv_41_50_aquatico_dewgong": {
-    "id": "lv_41_50_aquatico_dewgong",
-    "speciesId": "dewgong",
-    "minLevel": 41,
-    "maxLevel": 52,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 75
-  },
-  "lv_41_50_aquatico_golduck": {
-    "id": "lv_41_50_aquatico_golduck",
-    "speciesId": "golduck",
-    "minLevel": 41,
-    "maxLevel": 52,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 75
-  },
-  "lv_41_50_aquatico_jynx": {
-    "id": "lv_41_50_aquatico_jynx",
-    "speciesId": "jynx",
-    "minLevel": 41,
-    "maxLevel": 52,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "lv_41_50_aquatico_kingler": {
-    "id": "lv_41_50_aquatico_kingler",
-    "speciesId": "kingler",
-    "minLevel": 41,
-    "maxLevel": 52,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 60
-  },
-  "lv_41_50_aquatico_krabby": {
-    "id": "lv_41_50_aquatico_krabby",
-    "speciesId": "krabby",
-    "minLevel": 41,
-    "maxLevel": 52,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 225
-  },
-  "lv_41_50_aquatico_marill": {
-    "id": "lv_41_50_aquatico_marill",
-    "speciesId": "marill",
-    "minLevel": 41,
-    "maxLevel": 52,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 190
-  },
-  "lv_41_50_vulcanico_ponyta": {
-    "id": "lv_41_50_vulcanico_ponyta",
-    "speciesId": "ponyta",
-    "minLevel": 42,
-    "maxLevel": 42,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 190
-  },
-  "lv_41_50_vulcanico_rapidash": {
-    "id": "lv_41_50_vulcanico_rapidash",
-    "speciesId": "rapidash",
-    "minLevel": 44,
-    "maxLevel": 44,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 60
-  },
-  "lv_41_50_vulcanico_cyndaquil": {
-    "id": "lv_41_50_vulcanico_cyndaquil",
-    "speciesId": "cyndaquil",
-    "minLevel": 41,
-    "maxLevel": 52,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "lv_41_50_vulcanico_quilava": {
-    "id": "lv_41_50_vulcanico_quilava",
-    "speciesId": "quilava",
-    "minLevel": 41,
-    "maxLevel": 52,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "lv_41_50_vulcanico_typhlosion": {
-    "id": "lv_41_50_vulcanico_typhlosion",
-    "speciesId": "typhlosion",
-    "minLevel": 41,
-    "maxLevel": 52,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "lv_41_50_vulcanico_arcanine": {
-    "id": "lv_41_50_vulcanico_arcanine",
-    "speciesId": "arcanine",
-    "minLevel": 41,
-    "maxLevel": 52,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 75
-  },
-  "lv_41_50_vulcanico_donphan": {
-    "id": "lv_41_50_vulcanico_donphan",
-    "speciesId": "donphan",
-    "minLevel": 41,
-    "maxLevel": 52,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 60
-  },
-  "lv_41_50_vulcanico_geodude": {
-    "id": "lv_41_50_vulcanico_geodude",
-    "speciesId": "geodude",
-    "minLevel": 41,
-    "maxLevel": 52,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "kanto_lv_1_10_floresta_spinarak": {
-    "id": "kanto_lv_1_10_floresta_spinarak",
-    "speciesId": "spinarak",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "kanto_lv_1_10_floresta_ledyba": {
-    "id": "kanto_lv_1_10_floresta_ledyba",
-    "speciesId": "ledyba",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "kanto_lv_1_10_floresta_pineco": {
-    "id": "kanto_lv_1_10_floresta_pineco",
-    "speciesId": "pineco",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 190
-  },
-  "kanto_lv_1_10_floresta_oddish": {
-    "id": "kanto_lv_1_10_floresta_oddish",
-    "speciesId": "oddish",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "kanto_lv_1_10_floresta_exeggcute": {
-    "id": "kanto_lv_1_10_floresta_exeggcute",
-    "speciesId": "exeggcute",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 90
-  },
-  "kanto_lv_1_10_floresta_hoppip": {
-    "id": "kanto_lv_1_10_floresta_hoppip",
-    "speciesId": "hoppip",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "kanto_lv_1_10_floresta_ariados": {
-    "id": "kanto_lv_1_10_floresta_ariados",
-    "speciesId": "ariados",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 90
-  },
-  "kanto_lv_1_10_floresta_beedrill": {
-    "id": "kanto_lv_1_10_floresta_beedrill",
-    "speciesId": "beedrill",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "kanto_lv_1_10_aquatico_poliwag": {
-    "id": "kanto_lv_1_10_aquatico_poliwag",
-    "speciesId": "poliwag",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "kanto_lv_1_10_aquatico_magikarp": {
-    "id": "kanto_lv_1_10_aquatico_magikarp",
-    "speciesId": "magikarp",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "kanto_lv_1_10_aquatico_goldeen": {
-    "id": "kanto_lv_1_10_aquatico_goldeen",
-    "speciesId": "goldeen",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 225
-  },
-  "kanto_lv_1_10_aquatico_horsea": {
-    "id": "kanto_lv_1_10_aquatico_horsea",
-    "speciesId": "horsea",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 225
-  },
-  "kanto_lv_1_10_aquatico_tentacool": {
-    "id": "kanto_lv_1_10_aquatico_tentacool",
-    "speciesId": "tentacool",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 190
-  },
-  "kanto_lv_1_10_aquatico_kingdra": {
-    "id": "kanto_lv_1_10_aquatico_kingdra",
-    "speciesId": "kingdra",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "kanto_lv_1_10_aquatico_politoed": {
-    "id": "kanto_lv_1_10_aquatico_politoed",
-    "speciesId": "politoed",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "kanto_lv_1_10_aquatico_azumarill": {
-    "id": "kanto_lv_1_10_aquatico_azumarill",
-    "speciesId": "azumarill",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 75
-  },
-  "kanto_lv_11_20_vulcanico_cyndaquil": {
-    "id": "kanto_lv_11_20_vulcanico_cyndaquil",
-    "speciesId": "cyndaquil",
     "minLevel": 60,
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
   },
-  "kanto_lv_11_20_vulcanico_cubone": {
-    "id": "kanto_lv_11_20_vulcanico_cubone",
-    "speciesId": "cubone",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 190
-  },
-  "kanto_lv_11_20_vulcanico_slugma": {
-    "id": "kanto_lv_11_20_vulcanico_slugma",
-    "speciesId": "slugma",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 190
-  },
-  "kanto_lv_11_20_vulcanico_phanpy": {
-    "id": "kanto_lv_11_20_vulcanico_phanpy",
-    "speciesId": "phanpy",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 120
-  },
-  "kanto_lv_11_20_vulcanico_magby": {
-    "id": "kanto_lv_11_20_vulcanico_magby",
-    "speciesId": "magby",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "kanto_lv_11_20_vulcanico_onix": {
-    "id": "kanto_lv_11_20_vulcanico_onix",
-    "speciesId": "onix",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "kanto_lv_11_20_vulcanico_golem": {
-    "id": "kanto_lv_11_20_vulcanico_golem",
-    "speciesId": "golem",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "kanto_lv_11_20_vulcanico_quilava": {
-    "id": "kanto_lv_11_20_vulcanico_quilava",
-    "speciesId": "quilava",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "kanto_lv_11_20_eletrico_elekid": {
-    "id": "kanto_lv_11_20_eletrico_elekid",
-    "speciesId": "elekid",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "kanto_lv_11_20_eletrico_magnemite": {
-    "id": "kanto_lv_11_20_eletrico_magnemite",
-    "speciesId": "magnemite",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 190
-  },
-  "kanto_lv_11_20_eletrico_magneton": {
-    "id": "kanto_lv_11_20_eletrico_magneton",
-    "speciesId": "magneton",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 60
-  },
-  "kanto_lv_11_20_eletrico_skarmory": {
-    "id": "kanto_lv_11_20_eletrico_skarmory",
-    "speciesId": "skarmory",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 25
-  },
-  "kanto_lv_11_20_eletrico_steelix": {
-    "id": "kanto_lv_11_20_eletrico_steelix",
-    "speciesId": "steelix",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 25
-  },
-  "kanto_lv_11_20_eletrico_pikachu": {
-    "id": "kanto_lv_11_20_eletrico_pikachu",
-    "speciesId": "pikachu",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 190
-  },
-  "kanto_lv_11_20_eletrico_voltorb": {
-    "id": "kanto_lv_11_20_eletrico_voltorb",
-    "speciesId": "voltorb",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 190
-  },
-  "kanto_lv_11_20_eletrico_electrode": {
-    "id": "kanto_lv_11_20_eletrico_electrode",
-    "speciesId": "electrode",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 60
-  },
-  "kanto_lv_21_35_sombrio_murkrow": {
-    "id": "kanto_lv_21_35_sombrio_murkrow",
-    "speciesId": "murkrow",
+  "kanto_lv_21_35_cemiterio_gastly": {
+    "id": "kanto_lv_21_35_cemiterio_gastly",
+    "speciesId": "gastly",
     "minLevel": 68,
     "maxLevel": 85,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 30
+    "weight": 190
   },
-  "kanto_lv_21_35_sombrio_sneasel": {
-    "id": "kanto_lv_21_35_sombrio_sneasel",
-    "speciesId": "sneasel",
+  "kanto_lv_21_35_cemiterio_haunter": {
+    "id": "kanto_lv_21_35_cemiterio_haunter",
+    "speciesId": "haunter",
     "minLevel": 68,
     "maxLevel": 85,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 90
   },
-  "kanto_lv_21_35_sombrio_misdreavus": {
-    "id": "kanto_lv_21_35_sombrio_misdreavus",
+  "kanto_lv_21_35_cemiterio_gengar": {
+    "id": "kanto_lv_21_35_cemiterio_gengar",
+    "speciesId": "gengar",
+    "minLevel": 68,
+    "maxLevel": 85,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "kanto_lv_21_35_cemiterio_misdreavus": {
+    "id": "kanto_lv_21_35_cemiterio_misdreavus",
     "speciesId": "misdreavus",
     "minLevel": 68,
     "maxLevel": 85,
@@ -1065,265 +1884,247 @@ export const ENCOUNTERS_DATA = {
     "wanderRadius": 60,
     "weight": 45
   },
-  "kanto_lv_21_35_sombrio_arbok": {
-    "id": "kanto_lv_21_35_sombrio_arbok",
-    "speciesId": "arbok",
+  "kanto_lv_21_35_covil_sombrio_murkrow": {
+    "id": "kanto_lv_21_35_covil_sombrio_murkrow",
+    "speciesId": "murkrow",
     "minLevel": 68,
     "maxLevel": 85,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 30
   },
-  "kanto_lv_21_35_sombrio_ekans": {
-    "id": "kanto_lv_21_35_sombrio_ekans",
-    "speciesId": "ekans",
+  "kanto_lv_21_35_covil_sombrio_sneasel": {
+    "id": "kanto_lv_21_35_covil_sombrio_sneasel",
+    "speciesId": "sneasel",
     "minLevel": 68,
     "maxLevel": 85,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 60
   },
-  "kanto_lv_21_35_sombrio_gastly": {
-    "id": "kanto_lv_21_35_sombrio_gastly",
-    "speciesId": "gastly",
+  "kanto_lv_21_35_covil_sombrio_houndour": {
+    "id": "kanto_lv_21_35_covil_sombrio_houndour",
+    "speciesId": "houndour",
     "minLevel": 68,
     "maxLevel": 85,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 120
   },
-  "kanto_lv_21_35_sombrio_gengar": {
-    "id": "kanto_lv_21_35_sombrio_gengar",
-    "speciesId": "gengar",
-    "minLevel": 68,
-    "maxLevel": 85,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "kanto_lv_21_35_sombrio_golbat": {
-    "id": "kanto_lv_21_35_sombrio_golbat",
-    "speciesId": "golbat",
-    "minLevel": 68,
-    "maxLevel": 85,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 90
-  },
-  "kanto_lv_21_35_mistico_wobbuffet": {
-    "id": "kanto_lv_21_35_mistico_wobbuffet",
-    "speciesId": "wobbuffet",
+  "kanto_lv_21_35_covil_sombrio_houndoom": {
+    "id": "kanto_lv_21_35_covil_sombrio_houndoom",
+    "speciesId": "houndoom",
     "minLevel": 68,
     "maxLevel": 85,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
   },
-  "kanto_lv_21_35_mistico_abra": {
-    "id": "kanto_lv_21_35_mistico_abra",
-    "speciesId": "abra",
-    "minLevel": 68,
-    "maxLevel": 85,
+  "kanto_lv_36_55_ruinas_ancestrais_dratini": {
+    "id": "kanto_lv_36_55_ruinas_ancestrais_dratini",
+    "speciesId": "dratini",
+    "minLevel": 80,
+    "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 200
+    "weight": 45
   },
-  "kanto_lv_21_35_mistico_alakazam": {
-    "id": "kanto_lv_21_35_mistico_alakazam",
-    "speciesId": "alakazam",
-    "minLevel": 68,
-    "maxLevel": 85,
+  "kanto_lv_36_55_ruinas_ancestrais_dragonair": {
+    "id": "kanto_lv_36_55_ruinas_ancestrais_dragonair",
+    "speciesId": "dragonair",
+    "minLevel": 80,
+    "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 50
+    "weight": 45
   },
-  "kanto_lv_21_35_mistico_drowzee": {
-    "id": "kanto_lv_21_35_mistico_drowzee",
-    "speciesId": "drowzee",
-    "minLevel": 68,
-    "maxLevel": 85,
+  "kanto_lv_36_55_ruinas_ancestrais_dragonite": {
+    "id": "kanto_lv_36_55_ruinas_ancestrais_dragonite",
+    "speciesId": "dragonite",
+    "minLevel": 80,
+    "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 45
   },
-  "kanto_lv_21_35_mistico_hypno": {
-    "id": "kanto_lv_21_35_mistico_hypno",
-    "speciesId": "hypno",
-    "minLevel": 68,
-    "maxLevel": 85,
+  "kanto_lv_36_55_ruinas_ancestrais_kingdra": {
+    "id": "kanto_lv_36_55_ruinas_ancestrais_kingdra",
+    "speciesId": "kingdra",
+    "minLevel": 80,
+    "maxLevel": 105,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "kanto_lv_36_55_profundezas_wartortle": {
+    "id": "kanto_lv_36_55_profundezas_wartortle",
+    "speciesId": "wartortle",
+    "minLevel": 80,
+    "maxLevel": 105,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "kanto_lv_36_55_profundezas_croconaw": {
+    "id": "kanto_lv_36_55_profundezas_croconaw",
+    "speciesId": "croconaw",
+    "minLevel": 80,
+    "maxLevel": 105,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "kanto_lv_36_55_profundezas_azumarill": {
+    "id": "kanto_lv_36_55_profundezas_azumarill",
+    "speciesId": "azumarill",
+    "minLevel": 80,
+    "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 75
   },
-  "kanto_lv_21_35_mistico_kadabra": {
-    "id": "kanto_lv_21_35_mistico_kadabra",
-    "speciesId": "kadabra",
-    "minLevel": 68,
-    "maxLevel": 85,
+  "kanto_lv_36_55_profundezas_seadra": {
+    "id": "kanto_lv_36_55_profundezas_seadra",
+    "speciesId": "seadra",
+    "minLevel": 80,
+    "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 100
+    "weight": 75
   },
-  "kanto_lv_21_35_mistico_natu": {
-    "id": "kanto_lv_21_35_mistico_natu",
-    "speciesId": "natu",
-    "minLevel": 68,
-    "maxLevel": 85,
+  "kanto_lv_36_55_profundezas_lanturn": {
+    "id": "kanto_lv_36_55_profundezas_lanturn",
+    "speciesId": "lanturn",
+    "minLevel": 80,
+    "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 75
   },
-  "kanto_lv_21_35_mistico_unown": {
-    "id": "kanto_lv_21_35_mistico_unown",
-    "speciesId": "unown",
-    "minLevel": 68,
-    "maxLevel": 85,
+  "kanto_lv_36_55_profundezas_slowbro": {
+    "id": "kanto_lv_36_55_profundezas_slowbro",
+    "speciesId": "slowbro",
+    "minLevel": 80,
+    "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 225
+    "weight": 75
   },
-  "kanto_lv_36_55_planicie_snorlax": {
-    "id": "kanto_lv_36_55_planicie_snorlax",
-    "speciesId": "snorlax",
+  "kanto_lv_36_55_profundezas_octillery": {
+    "id": "kanto_lv_36_55_profundezas_octillery",
+    "speciesId": "octillery",
+    "minLevel": 80,
+    "maxLevel": 105,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "kanto_lv_36_55_profundezas_mantine": {
+    "id": "kanto_lv_36_55_profundezas_mantine",
+    "speciesId": "mantine",
     "minLevel": 80,
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 25
   },
-  "kanto_lv_36_55_planicie_machamp": {
-    "id": "kanto_lv_36_55_planicie_machamp",
-    "speciesId": "machamp",
+  "kanto_lv_36_55_profundezas_seaking": {
+    "id": "kanto_lv_36_55_profundezas_seaking",
+    "speciesId": "seaking",
+    "minLevel": 80,
+    "maxLevel": 105,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 60
+  },
+  "kanto_lv_36_55_profundezas_golduck": {
+    "id": "kanto_lv_36_55_profundezas_golduck",
+    "speciesId": "golduck",
+    "minLevel": 80,
+    "maxLevel": 105,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "kanto_lv_36_55_profundezas_dewgong": {
+    "id": "kanto_lv_36_55_profundezas_dewgong",
+    "speciesId": "dewgong",
+    "minLevel": 80,
+    "maxLevel": 105,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 75
+  },
+  "kanto_lv_36_55_profundezas_politoed": {
+    "id": "kanto_lv_36_55_profundezas_politoed",
+    "speciesId": "politoed",
     "minLevel": 80,
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
   },
-  "kanto_lv_36_55_planicie_porygon2": {
-    "id": "kanto_lv_36_55_planicie_porygon2",
-    "speciesId": "porygon2",
+  "kanto_lv_36_55_profundezas_tentacruel": {
+    "id": "kanto_lv_36_55_profundezas_tentacruel",
+    "speciesId": "tentacruel",
+    "minLevel": 80,
+    "maxLevel": 105,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 60
+  },
+  "kanto_lv_36_55_profundezas_kingler": {
+    "id": "kanto_lv_36_55_profundezas_kingler",
+    "speciesId": "kingler",
+    "minLevel": 80,
+    "maxLevel": 105,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 60
+  },
+  "kanto_lv_36_55_profundezas_kingdra": {
+    "id": "kanto_lv_36_55_profundezas_kingdra",
+    "speciesId": "kingdra",
     "minLevel": 80,
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
   },
-  "kanto_lv_36_55_planicie_porygon": {
-    "id": "kanto_lv_36_55_planicie_porygon",
-    "speciesId": "porygon",
+  "kanto_lv_36_55_profundezas_blastoise": {
+    "id": "kanto_lv_36_55_profundezas_blastoise",
+    "speciesId": "blastoise",
     "minLevel": 80,
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
   },
-  "kanto_lv_36_55_planicie_sentret": {
-    "id": "kanto_lv_36_55_planicie_sentret",
-    "speciesId": "sentret",
-    "minLevel": 80,
-    "maxLevel": 105,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "kanto_lv_36_55_planicie_pidgey": {
-    "id": "kanto_lv_36_55_planicie_pidgey",
-    "speciesId": "pidgey",
-    "minLevel": 80,
-    "maxLevel": 105,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "kanto_lv_36_55_planicie_rattata": {
-    "id": "kanto_lv_36_55_planicie_rattata",
-    "speciesId": "rattata",
-    "minLevel": 80,
-    "maxLevel": 105,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "kanto_lv_36_55_planicie_hoothoot": {
-    "id": "kanto_lv_36_55_planicie_hoothoot",
-    "speciesId": "hoothoot",
-    "minLevel": 80,
-    "maxLevel": 105,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "kanto_lv_36_55_floresta_heracross": {
-    "id": "kanto_lv_36_55_floresta_heracross",
-    "speciesId": "heracross",
+  "kanto_lv_36_55_profundezas_feraligatr": {
+    "id": "kanto_lv_36_55_profundezas_feraligatr",
+    "speciesId": "feraligatr",
     "minLevel": 80,
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
   },
-  "kanto_lv_36_55_floresta_victreebel": {
-    "id": "kanto_lv_36_55_floresta_victreebel",
-    "speciesId": "victreebel",
+  "kanto_lv_36_55_profundezas_gyarados": {
+    "id": "kanto_lv_36_55_profundezas_gyarados",
+    "speciesId": "gyarados",
     "minLevel": 80,
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
   },
-  "kanto_lv_36_55_floresta_scizor": {
-    "id": "kanto_lv_36_55_floresta_scizor",
-    "speciesId": "scizor",
-    "minLevel": 80,
-    "maxLevel": 105,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 25
-  },
-  "kanto_lv_36_55_floresta_scyther": {
-    "id": "kanto_lv_36_55_floresta_scyther",
-    "speciesId": "scyther",
+  "kanto_lv_36_55_profundezas_lapras": {
+    "id": "kanto_lv_36_55_profundezas_lapras",
+    "speciesId": "lapras",
     "minLevel": 80,
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
-  },
-  "kanto_lv_36_55_floresta_hoppip": {
-    "id": "kanto_lv_36_55_floresta_hoppip",
-    "speciesId": "hoppip",
-    "minLevel": 80,
-    "maxLevel": 105,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "kanto_lv_36_55_floresta_ariados": {
-    "id": "kanto_lv_36_55_floresta_ariados",
-    "speciesId": "ariados",
-    "minLevel": 80,
-    "maxLevel": 105,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 90
-  },
-  "kanto_lv_36_55_floresta_beedrill": {
-    "id": "kanto_lv_36_55_floresta_beedrill",
-    "speciesId": "beedrill",
-    "minLevel": 80,
-    "maxLevel": 105,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "kanto_lv_36_55_floresta_bellsprout": {
-    "id": "kanto_lv_36_55_floresta_bellsprout",
-    "speciesId": "bellsprout",
-    "minLevel": 80,
-    "maxLevel": 105,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
   }
 };

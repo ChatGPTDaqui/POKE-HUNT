@@ -236,88 +236,169 @@ function bandRangeForLevel(avgLevel) {
   return { bandIndex, from, to: from + BAND_SIZE - 1 };
 }
 
-// Biomes are our own idle-game concept (no equivalent in the spreadsheet,
-// same spirit as BG_ROUTE/CAVE/TOWER below) — a species' biome is its primary
-// elemental type's biome. Covers all 17 real types in this dataset (no Fairy,
-// see js/data/typeColors.js) with no overlap, so every species lands in
-// exactly one biome.
-const BIOME_ORDER = ['Floresta', 'Aquatico', 'Vulcanico', 'Eletrico', 'Sombrio', 'Mistico', 'Planicie'];
-const BIOME_BY_TYPE = {
-  GRASS: 'Floresta', BUG: 'Floresta',
-  WATER: 'Aquatico', ICE: 'Aquatico',
-  FIRE: 'Vulcanico', GROUND: 'Vulcanico', ROCK: 'Vulcanico',
-  ELECTRIC: 'Eletrico', STEEL: 'Eletrico',
-  GHOST: 'Sombrio', DARK: 'Sombrio', POISON: 'Sombrio',
-  FLYING: 'Mistico', PSYCHIC: 'Mistico', DRAGON: 'Mistico',
-  NORMAL: 'Planicie', FIGHTING: 'Planicie',
-};
-function biomeForType(type) {
-  return BIOME_BY_TYPE[type] || 'Planicie';
-}
-function primaryTypeOf(especiesByKey, sheetKey) {
-  const row = especiesByKey[sheetKey];
-  return row && row['Tipo 1'];
-}
+// ---------------------------------------------------------------------------
+// World Building v2 (explicit user request: "corrija definitivamente o
+// World Building do jogo" — a prior round's biome system silently dropped
+// entire types from the game, see the bug note on TYPE_BIOME_PLAN below).
+//
+// Old design (removed): every level-band rotated through a shared list of 7
+// "bundled" biomes (e.g. Sombrio = GHOST+DARK+POISON, Mistico =
+// FLYING+PSYCHIC+DRAGON) via `BIOME_ORDER[(seed*2)%7]`. Two compounding bugs
+// made this silently incomplete: (1) `allSpeciesKeys` (in
+// syncSpeciesAndMoves) was built from the POST-split hunts, so a species
+// whose type's bundled biome wasn't chosen for its one hardcoded band wasn't
+// just unspawnable — it never made it into pokes.generated.js AT ALL (found
+// live: DRATINI/DRAGONAIR/DRAGONITE were completely absent from the
+// generated species file, not merely absent from a hunt); (2) bundling 3
+// types into 1 biome meant the backfill (which filled thin pools from the
+// full National Dex in Pokedex order) always exhausted its slots on the
+// bigger of the bundled types before ever reaching the smaller one — e.g.
+// Mistico's pool always filled up on PSYCHIC (13 species, low Pokedex
+// numbers) before DRAGON (3 species, higher numbers) got a single pick.
+//
+// New design: every real elemental type in this dataset gets its OWN biome
+// (no bundling), and every level-bracket's 2 hunts are an explicit,
+// hand-authored {type, name} pair (TYPE_BIOME_PLAN below) instead of a
+// modular-arithmetic rotation — auditable at a glance, and impossible to
+// silently mis-fire the way index math did. Species selection is now driven
+// straight off the full roster (buildTypeRoster) instead of whatever a
+// specific real Johto location or hand-typed Kanto list happened to
+// remember to include — every species in the roster that matches a bracket
+// slot's type is included, full stop (no MIN_BIOME_POOL_SIZE-style cap that
+// could leave some of a type's real members homeless). That is what
+// guarantees "todo e qualquer Pokemon... tenha um local valido de caca" —
+// not a hope that rotation+backfill happens to reach every type/species over
+// enough bands, but a direct type->hunt assignment checked by the coverage
+// report `main()` prints at the end of a sync.
+const ALL_TYPES = ['GRASS', 'BUG', 'WATER', 'NORMAL', 'FIGHTING', 'FLYING', 'GROUND', 'ROCK', 'STEEL', 'FIRE', 'ELECTRIC', 'ICE', 'PSYCHIC', 'GHOST', 'DARK', 'POISON', 'DRAGON'];
 
-// Every level-band's real species pool (from real Johto encounter data, or
-// KANTO_BANDS' hand-curated lists) gets split into 2 biome-themed hunts
-// instead of 1 (explicit user request: "2 hunts por 10 niveis, por bioma").
-// 8, not 4: a first pass at 4 left most hunts sitting right at the floor
-// (splitting an already-modest ~15-22 species Johto/Kanto band 2 ways by
-// biome leaves thin real intersections most of the time), which dropped
-// total roster variety from ~210 huntable species down to 99 — a much bigger
-// loss than intended. 8 pulls in enough backfill to keep hunts feeling
-// varied without making every hunt 100% backfilled filler.
-const MIN_BIOME_POOL_SIZE = 8;
+// One 10-level bracket = 2 hunts (explicit, already-existing rule — see
+// CLAUDE.md). 9 brackets (5 Johto + 4 Kanto) * 2 slots = 18 slots for 17
+// types: 16 types get exactly 1 slot, WATER gets 2 (it's easily the most
+// populous real type here — 40 species with real art, see the audit that
+// drove this — so an early "Costa" pond/river hunt and a late-game
+// "Profundezas" deep-ocean hunt both stay well stocked instead of splitting
+// an already-thin type in half). Order matches the bracket order produced
+// below (5 Johto bands low->high, then the 4 hand-set Kanto bands
+// low->high) — level-thematic pairing is a game-design call (e.g. Rock+Ground
+// = caves, Ghost+Dark = the graveyard zone right before the Dragon/Water
+// capstone), not derived from anything in the spreadsheet.
+const TYPE_BIOME_PLAN = [
+  { slots: [{ type: 'GRASS', name: 'Floresta' }, { type: 'BUG', name: 'Bosque' }] },
+  { slots: [{ type: 'WATER', name: 'Costa' }, { type: 'NORMAL', name: 'Planicie' }] },
+  { slots: [{ type: 'ROCK', name: 'Caverna' }, { type: 'GROUND', name: 'Deserto' }] },
+  { slots: [{ type: 'FIRE', name: 'Vulcanico' }, { type: 'ELECTRIC', name: 'Usina' }] },
+  { slots: [{ type: 'POISON', name: 'Pantano' }, { type: 'FIGHTING', name: 'Dojo' }] },
+  { slots: [{ type: 'ICE', name: 'Geleira' }, { type: 'STEEL', name: 'Fabrica' }] },
+  { slots: [{ type: 'FLYING', name: 'Penhascos' }, { type: 'PSYCHIC', name: 'Torre Mistica' }] },
+  { slots: [{ type: 'GHOST', name: 'Cemiterio' }, { type: 'DARK', name: 'Covil Sombrio' }] },
+  { slots: [{ type: 'DRAGON', name: 'Ruinas Ancestrais' }, { type: 'WATER', name: 'Profundezas' }] },
+];
 
-// Tops a biome's species pool up to MIN_BIOME_POOL_SIZE using the full
-// National Dex (the "Espécies" sheet in full, not just this band's real
-// encounter data) — same curation spirit as KANTO_BANDS/LEGENDARY_BAND
-// (hand-placing species beyond what real Johto encounter rows cover), just
-// automated: same biome (primary type), already has real art, not already
-// placed elsewhere in this same band's 2 hunts.
-function backfillBiomePool(pool, biome, levelRange, workbook, excludeKeys) {
-  if (Object.keys(pool).length >= MIN_BIOME_POOL_SIZE) return pool;
-  const filled = { ...pool };
+// A type's real primary-type population in this dataset varies wildly (WATER
+// 40, STEEL 2, DRAGON 3, FLYING 0 — no Gen1/2 species has FLYING as its
+// PRIMARY type at all, real games included). Below this floor, a type-only
+// hunt would be near-empty or (FLYING) completely empty, so we widen the
+// pool with real dual-type carriers of that type (explicit user rule:
+// "Pokemons de tipagem dupla podem aparecer em biomas de qualquer um dos
+// dois tipos") — e.g. Magnemite/Scizor (secondary STEEL) top up Fabrica,
+// and every real secondary-FLYING species (Pidgey, Zubat, Charizard, ...)
+// IS Penhascos' entire population. This intentionally duplicates a species
+// into a 2nd hunt on top of its primary-type home — allowed by the same
+// rule, and the only way a thin type gets a hunt worth visiting at all.
+const MIN_TYPE_POOL = 4;
+const TYPE2_FALLBACK_CAP = 16;
+
+// Every species (from the full National Dex sheet) eligible to populate a
+// wild hunt: has real battle-sprite art (no placeholder-shape mons in wild
+// hunts) and isn't a legendary (BOSS-hunt-only by design, see
+// LEGENDARY_SHEET_KEYS) or one of the 3 base starters (Charmander/Squirtle/
+// Bulbasaur stay exclusive to the starter-choice screen — their EVOLVED
+// forms are NOT excluded, e.g. Charizard/Venusaur/Blastoise are regular
+// FIRE/GRASS/WATER wild finds like any other species of their type).
+function buildTypeRoster(workbook) {
+  const exclude = new Set([...LEGENDARY_SHEET_KEYS, ...STARTER_SHEET_KEYS]);
+  const roster = [];
   for (const row of workbook['Espécies'] || []) {
-    if (Object.keys(filled).length >= MIN_BIOME_POOL_SIZE) break;
     const sheetKey = row['Chave'];
-    if (!sheetKey || filled[sheetKey] || excludeKeys.has(sheetKey)) continue;
-    if (biomeForType(row['Tipo 1']) !== biome) continue;
+    if (!sheetKey || exclude.has(sheetKey)) continue;
     if (!ART_SPECIES_IDS.has(sheetKey.toLowerCase())) continue;
-    filled[sheetKey] = { min: levelRange.min, max: levelRange.max };
+    roster.push({
+      key: sheetKey,
+      type1: row['Tipo 1'],
+      type2: row['Tipo 2'] || null,
+      catchRate: row['Taxa de Captura (0-255)'] || 45,
+      baseExp: row['EXP Base'] || 0,
+      dex: row['Nº Pokédex'] || 9999,
+    });
   }
-  return filled;
+  roster.sort((a, b) => a.dex - b.dex);
+  return roster;
 }
 
-// Splits one combined species pool (sheet key -> {min,max} level range) into
-// 2 biome-themed sub-pools. `seed` is this band's position in its continent's
-// sequence (0, 1, 2, ...) — the 2 biomes used are BIOME_ORDER[2*seed] and
-// BIOME_ORDER[2*seed+1] (wrapping), NOT whichever happen to have the most
-// real species in this particular band: picking by real prevalence alone
-// systematically favors the same handful of common biomes (Planicie/
-// Vulcanico) band after band and starves out the rest — e.g. a first pass at
-// this produced zero hunts for Eletrico or Mistico anywhere in the game.
-// Rotating guarantees every biome gets used across a continent's bands (5
-// Johto bands or 4 Kanto bands both cycle through all 7 within their own
-// count). Bands/biomes with little or no real data just lean harder on the
-// backfill below — by design, that's what it's for.
-function splitByBiome(speciesLevels, levelRange, workbook, especiesByKey, seed) {
-  const byBiome = new Map();
-  for (const [sp, range] of Object.entries(speciesLevels)) {
-    const biome = biomeForType(primaryTypeOf(especiesByKey, sp));
-    if (!byBiome.has(biome)) byBiome.set(biome, {});
-    byBiome.get(biome)[sp] = range;
+// Builds, once per type, the full ordered list of species that will ever
+// populate that type's hunt(s) across the whole plan — augmented with
+// dual-type carriers if the primary-type population is too thin (see
+// MIN_TYPE_POOL above). For a type used in more than 1 bracket (only WATER
+// today), the pool is split into that many level-ordered chunks (by
+// baseExp, weakest first) so an early bracket gets the common/weak half
+// (Magikarp, Poliwag, ...) and a late bracket gets the strong/rare half
+// (Gyarados, Lapras, Kingdra, ...) instead of both hunts drawing from the
+// same random mix.
+function buildTypePoolQueues(roster, plan) {
+  const occurrences = {};
+  for (const bracket of plan) {
+    for (const slot of bracket.slots) occurrences[slot.type] = (occurrences[slot.type] || 0) + 1;
   }
-  const n = BIOME_ORDER.length;
-  const chosen = [BIOME_ORDER[(seed * 2) % n], BIOME_ORDER[(seed * 2 + 1) % n]];
 
-  const usedKeys = new Set(Object.keys(speciesLevels));
-  return chosen.map((biome) => {
-    const pool = backfillBiomePool(byBiome.get(biome) || {}, biome, levelRange, workbook, usedKeys);
-    for (const key of Object.keys(pool)) usedKeys.add(key);
-    return { biome, speciesLevels: pool };
-  });
+  const queues = {};
+  for (const type of Object.keys(occurrences)) {
+    const count = occurrences[type];
+    let pool = roster.filter((s) => s.type1 === type);
+    if (pool.length < MIN_TYPE_POOL) {
+      const fallback = roster
+        .filter((s) => s.type2 === type && s.type1 !== type)
+        .sort((a, b) => b.catchRate - a.catchRate)
+        .slice(0, TYPE2_FALLBACK_CAP);
+      pool = [...pool, ...fallback];
+    }
+    if (count === 1) {
+      queues[type] = [pool];
+      continue;
+    }
+    const sorted = [...pool].sort((a, b) => a.baseExp - b.baseExp);
+    const chunkSize = Math.ceil(sorted.length / count);
+    queues[type] = [];
+    for (let i = 0; i < count; i++) queues[type].push(sorted.slice(i * chunkSize, (i + 1) * chunkSize));
+  }
+  return queues;
+}
+
+function slugify(name) {
+  return name.toLowerCase().replace(/\s+/g, '_');
+}
+
+// One hunt from one {type, name} plan slot: every roster species of that
+// type (already resolved into `pool` by buildTypePoolQueues), all sharing
+// this bracket's flat level range — same "one range for every species in a
+// hand-curated hunt" pattern the old KANTO_BANDS already used.
+function buildHuntFromSlot(slot, bracket, queues, queueIndex) {
+  const idx = queueIndex[slot.type] || 0;
+  queueIndex[slot.type] = idx + 1;
+  const pool = (queues[slot.type] && queues[slot.type][idx]) || [];
+  const speciesLevels = {};
+  for (const s of pool) speciesLevels[s.key] = { min: bracket.minLevel, max: bracket.maxLevel };
+  return {
+    key: `${bracket.keyPrefix}_${slugify(slot.name)}`,
+    name: `${bracket.label} (${slot.name})`,
+    avgLevel: (bracket.minLevel + bracket.maxLevel) / 2,
+    minLevel: bracket.minLevel,
+    maxLevel: bracket.maxLevel,
+    speciesLevels,
+    bgTheme: slot.type,
+    continent: bracket.continent,
+    unlockCost: bracket.unlockCost || null,
+  };
 }
 
 // Fresh Lv1 starters shouldn't be able to run into anything above Lv2 in
@@ -326,7 +407,13 @@ function splitByBiome(speciesLevels, levelRange, workbook, especiesByKey, seed) 
 // that feeds it.
 const STARTER_HUNT_MAX_LEVEL = 2;
 
-function groupHuntsIntoBands(candidates, workbook, especiesByKey) {
+// Computes the starter hunt (unchanged: still real per-location data, kept
+// small/simple on purpose — not part of the "2 hunts per bracket" system)
+// plus the 5 Johto brackets' level ranges from real Locais_Info/Encontros
+// data. Species population for those 5 brackets no longer comes from here
+// (see buildTypePoolQueues above) — only the min/max level range each real
+// bracket implies stays sourced from the spreadsheet.
+function computeJohtoBrackets(candidates) {
   const sorted = [...candidates].sort((a, b) => a.avgLevel - b.avgLevel);
   const starter = sorted.shift();
   starter.name = `${starter.name} (Inicial)`;
@@ -334,6 +421,9 @@ function groupHuntsIntoBands(candidates, workbook, especiesByKey) {
   for (const range of Object.values(starter.speciesLevels)) {
     range.max = Math.min(range.max, STARTER_HUNT_MAX_LEVEL);
   }
+  starter.continent = 'johto';
+  starter.bgTheme = null;
+  starter.unlockCost = null;
 
   const bandsByIndex = new Map();
   for (const candidate of sorted) {
@@ -342,106 +432,47 @@ function groupHuntsIntoBands(candidates, workbook, especiesByKey) {
     bandsByIndex.get(bandIndex).push(candidate);
   }
 
-  const grouped = [starter];
-  let bandSeq = 0;
+  const brackets = [];
   for (const bandIndex of [...bandsByIndex.keys()].sort((a, b) => a - b)) {
     const group = bandsByIndex.get(bandIndex);
     const { from, to } = bandRangeForLevel(group[0].avgLevel);
-
-    const speciesLevels = {};
     let minLevel = Infinity;
     let maxLevel = -Infinity;
-    let levelSum = 0;
     for (const candidate of group) {
       minLevel = Math.min(minLevel, candidate.minLevel);
       maxLevel = Math.max(maxLevel, candidate.maxLevel);
-      levelSum += candidate.avgLevel;
-      for (const [sp, range] of Object.entries(candidate.speciesLevels)) {
-        if (!speciesLevels[sp]) speciesLevels[sp] = { ...range };
-        else {
-          speciesLevels[sp].min = Math.min(speciesLevels[sp].min, range.min);
-          speciesLevels[sp].max = Math.max(speciesLevels[sp].max, range.max);
-        }
-      }
     }
-
-    // Every 10-level band becomes 2 biome-themed hunts instead of 1 (explicit
-    // user request) — see splitByBiome above for how species get divided and
-    // topped up.
-    const subHunts = splitByBiome(speciesLevels, { min: minLevel, max: maxLevel }, workbook, especiesByKey, bandSeq);
-    bandSeq += 1;
-    for (const { biome, speciesLevels: subSpeciesLevels } of subHunts) {
-      grouped.push({
-        key: `lv_${from}_${to}_${biome.toLowerCase()}`,
-        name: `Zona Nivel ${from}-${to} (${biome})`,
-        bgTheme: biome,
-        avgLevel: levelSum / group.length,
-        minLevel,
-        maxLevel,
-        speciesLevels: subSpeciesLevels,
-      });
-    }
+    brackets.push({
+      keyPrefix: `lv_${from}_${to}`,
+      label: `Zona Nivel ${from}-${to}`,
+      minLevel, maxLevel,
+      continent: 'johto',
+      unlockCost: null,
+    });
   }
 
-  return grouped;
+  return { starter, brackets };
 }
 
-// "Novo Continente" (a second region, Kanto) — hand-curated bands, the same
-// way BG_ROUTE/CAVE/TOWER and the world bounds/spawn points below are
+// "Novo Continente" (a second region, Kanto) — hand-set level brackets, the
+// same way BG_ROUTE/CAVE/TOWER and the world bounds/spawn points below are
 // hand-picked "our own idle-game concept" (see that comment). The reason
-// this can't reuse pickTopHunts/groupHuntsIntoBands like Johto did: this
+// this can't reuse pickTopHunts/computeJohtoBrackets like Johto did: this
 // workbook's Locais_Info/Encontros sheets only cover Johto's 99 real
 // locations (confirmed by inspection — zero Kanto route/city entries, zero
-// legendary encounter rows). BUT the Espécies/Movesets/Golpes sheets cover
-// the *complete* National Dex #1-251, Kanto and every legendary included —
-// so every stat/moveset below is still 100% real spreadsheet data; only the
-// grouping into bands/levels (which species belongs in which bracket) is a
-// hand-made curation, exactly like the Johto hunts' bounds/spawnPoints/bg
-// already are.
-// Every band's minLevel/maxLevel got a flat +50 (explicit user request,
-// "hunts de Kanto receberam um aumento de 50 levels"). Band `name` strings were
-// re-numbered to match so the card title's baked-in range text doesn't go
-// stale next to the real (map.levelRange-derived) "(Lv X-Y)" suffix.
-const KANTO_BANDS = [
-  {
-    key: 'kanto_lv_1_10', name: 'Kanto Zona Nivel 52-62', minLevel: 52, maxLevel: 62,
-    // KINGDRA/POLITOED added here, not band3 — splitByBiome only keeps a
-    // species if its PRIMARY type's biome is one of the 2 rotated in for that
-    // band's seed (see splitByBiome/BIOME_BY_TYPE above); this band's pair is
-    // Floresta+Aquatico, and both are WATER (Aquatico) — Setima leva note in
-    // CLAUDE.md.
-    species: ['PICHU', 'CLEFFA', 'IGGLYBUFF', 'TOGEPI', 'PIKACHU', 'HOOTHOOT', 'SPINARAK', 'LEDYBA', 'PINECO', 'ODDISH', 'POLIWAG', 'DIGLETT', 'VOLTORB', 'MEOWTH', 'GASTLY', 'DROWZEE', 'MAGIKARP', 'GOLDEEN', 'HORSEA', 'TENTACOOL', 'EXEGGCUTE', 'MAREEP', 'KINGDRA', 'POLITOED'],
-  },
-  {
-    key: 'kanto_lv_11_20', name: 'Kanto Zona Nivel 60-70', minLevel: 60, maxLevel: 70,
-    // ONIX/GOLEM added here — this band's biome pair is Vulcanico+Eletrico,
-    // and both are ROCK (Vulcanico). See note above.
-    species: ['CYNDAQUIL', 'CHIKORITA', 'TOTODILE', 'MANKEY', 'CUBONE', 'CHINCHOU', 'SHELLDER', 'STARYU', 'GRIMER', 'VENONAT', 'PSYDUCK', 'WOOPER', 'SLUGMA', 'HOUNDOUR', 'TEDDIURSA', 'PHANPY', 'REMORAID', 'TYROGUE', 'ELEKID', 'MAGBY', 'SMOOCHUM', 'ONIX', 'GOLEM'],
-  },
-  {
-    key: 'kanto_lv_21_35', name: 'Kanto Zona Nivel 68-85', minLevel: 68, maxLevel: 85,
-    // PORYGON/SCYTHER were listed here in a prior round but never actually
-    // spawned: this band's biome pair is Sombrio+Mistico, and NORMAL/BUG map
-    // to Planicie/Floresta — neither matches, so splitByBiome silently
-    // dropped both every sync since (same latent bug class as the missing
-    // legendaries above, just species-scoped instead of roster-wide). Moved
-    // to kanto_lv_36_55 below, which actually has a matching biome. EEVEE/
-    // PINSIR are left as-is (same silent-drop issue, but outside this round's
-    // scope — not part of the trade/hold-item evolution work requested).
-    species: ['MARILL', 'SUDOWOODO', 'MURKROW', 'AIPOM', 'QWILFISH', 'CORSOLA', 'SNEASEL', 'GIRAFARIG', 'STANTLER', 'MISDREAVUS', 'DELIBIRD', 'SUNFLORA', 'WOBBUFFET', 'MANTINE', 'RHYHORN', 'HITMONLEE', 'HITMONCHAN', 'KANGASKHAN', 'LAPRAS', 'EEVEE', 'PINSIR'],
-  },
-  {
-    key: 'kanto_lv_36_55', name: 'Kanto Zona Nivel 80-105', minLevel: 80, maxLevel: 105,
-    // SCIZOR/PORYGON2 (this band's biome pair, Planicie+Floresta, matches
-    // both) plus PORYGON/SCYTHER (moved from kanto_lv_21_35, see note there)
-    // added for the same reason ALAKAZAM/GENGAR/MACHAMP/STEELIX already were:
-    // real Gen1/2 trade (+ hold-item) evolutions with no in-game trading, so
-    // the fully-evolved form needs a direct wild source of its own (see
-    // "Setima leva" note in CLAUDE.md — the Level 80 + Stones
-    // special-evolution rule now covers all 9 such chains, not just the 3
-    // that happened to be fully in-roster already).
-    species: ['DRATINI', 'OMANYTE', 'KABUTO', 'AERODACTYL', 'SNORLAX', 'HERACROSS', 'ALAKAZAM', 'GENGAR', 'MACHAMP', 'VICTREEBEL', 'ARCANINE', 'NIDOKING', 'NIDOQUEEN', 'STEELIX', 'GYARADOS', 'SCIZOR', 'PORYGON2', 'PORYGON', 'SCYTHER'],
-  },
+// legendary encounter rows) — so there's no real per-location data to derive
+// a level range from. Species population comes from buildTypePoolQueues like
+// every other bracket now (see the removed KANTO_BANDS.species hand-lists
+// note in git history — those hand lists are exactly what let 8 of these
+// species go silently unspawnable, since each was only ever listed in ONE
+// band and had no fallback if that band's old biome rotation missed its type).
+// Every band's minLevel/maxLevel carries the same flat +50 as before
+// (explicit user request, "hunts de Kanto receberam um aumento de 50 levels").
+const KANTO_BRACKETS = [
+  { keyPrefix: 'kanto_lv_1_10', label: 'Kanto Zona Nivel 52-62', minLevel: 52, maxLevel: 62, continent: 'kanto', unlockCost: null },
+  { keyPrefix: 'kanto_lv_11_20', label: 'Kanto Zona Nivel 60-70', minLevel: 60, maxLevel: 70, continent: 'kanto', unlockCost: null },
+  { keyPrefix: 'kanto_lv_21_35', label: 'Kanto Zona Nivel 68-85', minLevel: 68, maxLevel: 85, continent: 'kanto', unlockCost: null },
+  { keyPrefix: 'kanto_lv_36_55', label: 'Kanto Zona Nivel 80-105', minLevel: 80, maxLevel: 105, continent: 'kanto', unlockCost: null },
 ];
 
 // Removed: LEGENDARY_BAND / "Camara dos Lendarios" (explicit user request —
@@ -449,30 +480,47 @@ const KANTO_BANDS = [
 // js/data/nightmareMaps.js#buildBossHunts + js/data/legendaries.js, which are
 // generated independently of this file's hunt list).
 
-// Splits one hand-curated Kanto band (flat species list, single level range)
-// into 2 biome-themed hunts — same splitByBiome used for the real Johto
-// bands above, just fed a synthetic single-range speciesLevels map instead of
-// per-location real data.
-function splitBandByBiome(band, workbook, especiesByKey, seed) {
-  const speciesLevels = {};
-  for (const sp of band.species) {
-    speciesLevels[sp] = { min: band.minLevel, max: band.maxLevel };
+function buildTypeDrivenHunts(brackets, roster) {
+  if (brackets.length !== TYPE_BIOME_PLAN.length) {
+    throw new Error(`TYPE_BIOME_PLAN tem ${TYPE_BIOME_PLAN.length} brackets, mas foram computados ${brackets.length} — atualize o plano.`);
   }
-  const subHunts = splitByBiome(speciesLevels, { min: band.minLevel, max: band.maxLevel }, workbook, especiesByKey, seed);
-  return subHunts.map(({ biome, speciesLevels: subSpeciesLevels }) => ({
-    key: `${band.key}_${biome.toLowerCase()}`,
-    name: `${band.name} (${biome})`,
-    avgLevel: (band.minLevel + band.maxLevel) / 2,
-    minLevel: band.minLevel,
-    maxLevel: band.maxLevel,
-    speciesLevels: subSpeciesLevels,
-    bgTheme: biome,
-    unlockCost: band.unlockCost || null,
-  }));
+  const queues = buildTypePoolQueues(roster, TYPE_BIOME_PLAN);
+  const queueIndex = {};
+  return brackets.flatMap((bracket, i) => TYPE_BIOME_PLAN[i].slots.map((slot) => buildHuntFromSlot(slot, bracket, queues, queueIndex)));
 }
 
-function buildHandAuthoredHunts(workbook, especiesByKey) {
-  return KANTO_BANDS.flatMap((band, seed) => splitBandByBiome(band, workbook, especiesByKey, seed).map((hunt) => ({ ...hunt, continent: 'kanto' })));
+// Prints a per-type coverage table and warns loudly (instead of silently
+// shipping a hole, which is exactly the bug this whole redesign fixes) if
+// any real type — or any individual roster species — ends up with zero wild
+// hunt. Legendaries/base-starters are intentionally excluded from `roster`
+// (see buildTypeRoster) so they don't count as "missing" here.
+function reportTypeCoverage(hunts, roster) {
+  const spawnedKeys = new Set();
+  for (const hunt of hunts) for (const sp of Object.keys(hunt.speciesLevels)) spawnedKeys.add(sp);
+
+  console.log('\nCobertura por tipo (elenco selvagem, exclui lendarios/iniciais-base):');
+  let anyMissingType = false;
+  for (const type of ALL_TYPES) {
+    const primary = roster.filter((s) => s.type1 === type);
+    const spawnedPrimary = primary.filter((s) => spawnedKeys.has(s.key));
+    // A real type CAN have zero primary-type members in this dataset (e.g.
+    // FLYING — no Gen1/2 species has Flying as its PRIMARY type, real games
+    // included) and still be fully "covered" via dual-type carriers spawned
+    // in its own hunt (see MIN_TYPE_POOL fallback) — count those too so this
+    // report doesn't cry wolf on an expected, real-data shape.
+    const spawnedAny = roster.filter((s) => (s.type1 === type || s.type2 === type) && spawnedKeys.has(s.key));
+    if (spawnedAny.length === 0) anyMissingType = true;
+    const note = primary.length === 0 ? ` (sem membro primario real neste dataset — via tipagem dupla)` : '';
+    console.log(`  ${type.padEnd(10)} total=${primary.length} spawnado=${spawnedPrimary.length}/${primary.length} | spawnavel(incl. dual-type)=${spawnedAny.length}${note}`);
+  }
+
+  const orphans = roster.filter((s) => !spawnedKeys.has(s.key));
+  if (orphans.length > 0) {
+    console.log(`  AVISO: ${orphans.length} especie(s) sem nenhuma hunt: ${orphans.map((s) => s.key).join(', ')}`);
+  } else {
+    console.log('  OK: toda especie do elenco selvagem tem pelo menos 1 hunt.');
+  }
+  if (anyMissingType) console.log('  AVISO: pelo menos 1 tipo ficou sem nenhuma especie spawnavel.');
 }
 
 // Species + their real movesets/moves for the starter trio plus every
@@ -585,21 +633,19 @@ const BG_ROUTE = { primary: '#284b3c', secondary: '#2e5544', image: HUNT_BG_IMAG
 const BG_CAVE = { primary: '#1c1c2b', secondary: '#242438', image: HUNT_BG_IMAGE };
 const BG_TOWER = { primary: '#3e2f23', secondary: '#4a3829', image: HUNT_BG_IMAGE };
 
-// Every biome maps to one of the 3 existing palettes by vibe — cosmetic only,
-// since the real tiled image is identical across all themes (see comment
-// above); this just picks the fallback color shown before it loads.
-const BIOME_THEME = {
-  Floresta: BG_ROUTE, Aquatico: BG_ROUTE, Eletrico: BG_ROUTE, Planicie: BG_ROUTE,
-  Vulcanico: BG_CAVE, Sombrio: BG_CAVE,
-  Mistico: BG_TOWER,
+// Every real type maps to one of the 3 existing palettes by vibe — cosmetic
+// only, since the real tiled image is identical across all themes (see
+// comment above); this just picks the fallback color shown before it loads.
+// Keyed by the TYPE constant now (hunt.bgTheme carries e.g. 'GRASS'), not by
+// the old bundled biome name.
+const TYPE_THEME = {
+  GRASS: BG_ROUTE, BUG: BG_ROUTE, NORMAL: BG_ROUTE, WATER: BG_ROUTE, POISON: BG_ROUTE, FLYING: BG_ROUTE, GROUND: BG_ROUTE,
+  ROCK: BG_CAVE, FIRE: BG_CAVE, STEEL: BG_CAVE, ICE: BG_CAVE, DARK: BG_CAVE, FIGHTING: BG_CAVE, ELECTRIC: BG_CAVE,
+  PSYCHIC: BG_TOWER, GHOST: BG_TOWER, DRAGON: BG_TOWER,
 };
 
-function pickBgTheme(name) {
-  if (BIOME_THEME[name]) return BIOME_THEME[name];
-  const lower = name.toLowerCase();
-  if (lower.includes('cave')) return BG_CAVE;
-  if (lower.includes('tower') || lower.includes('ruins')) return BG_TOWER;
-  return BG_ROUTE;
+function pickBgTheme(type) {
+  return (type && TYPE_THEME[type]) || BG_ROUTE;
 }
 
 const SPAWN_POINTS = [
@@ -674,13 +720,15 @@ function main() {
   syncFormulas(workbook);
   syncTypeChart(workbook);
   syncItemsFull(workbook);
-  const especiesByKey = indexByKey(workbook['Espécies'] || [], 'Chave');
   const rawHunts = pickTopHunts(workbook, HUNT_COUNT);
-  const johtoHunts = groupHuntsIntoBands(rawHunts, workbook, especiesByKey).map((hunt) => ({ ...hunt, continent: 'johto' }));
-  const kantoHunts = buildHandAuthoredHunts(workbook, especiesByKey);
-  const hunts = [...johtoHunts, ...kantoHunts];
+  const { starter, brackets: johtoBrackets } = computeJohtoBrackets(rawHunts);
+  const allBrackets = [...johtoBrackets, ...KANTO_BRACKETS];
+  const roster = buildTypeRoster(workbook);
+  const typeHunts = buildTypeDrivenHunts(allBrackets, roster);
+  const hunts = [starter, ...typeHunts];
   const { speciesData } = syncSpeciesAndMoves(workbook, hunts);
   syncMapsAndEncounters(hunts, speciesData);
+  reportTypeCoverage(hunts, roster);
 
   console.log('\nSincronizacao concluida.');
 }
