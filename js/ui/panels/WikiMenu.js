@@ -20,6 +20,39 @@ function chipList(types) {
   return `<div class="row" style="flex-wrap:wrap;gap:4px">${types.map(typeChip).join('')}</div>`;
 }
 
+// Full 17x17 reference table — rows are the ATTACKING move's type, columns
+// are the DEFENDING POKE's type, straight from the same TYPE_CHART used in
+// real combat (no dual-type math here, that's what the interactive tool
+// above already covers per-type; this is the raw single-type source table).
+function typeMatrixHtml() {
+  const header = `
+    <tr>
+      <th class="type-matrix-corner">Atk \\ Def</th>
+      ${ALL_TYPES.map((t) => `<th style="background:${colorForType(t)}">${t.slice(0, 3)}</th>`).join('')}
+    </tr>
+  `;
+  const rows = ALL_TYPES.map((atk) => `
+    <tr>
+      <th style="background:${colorForType(atk)}">${atk.slice(0, 3)}</th>
+      ${ALL_TYPES.map((def) => {
+        const m = TYPE_CHART[atk][def];
+        const cls = m === 2 ? 'type-matrix-x2' : m === 0.5 ? 'type-matrix-xhalf' : m === 0 ? 'type-matrix-x0' : 'type-matrix-x1';
+        const label = m === 1 ? '·' : m;
+        return `<td class="${cls}">${label}</td>`;
+      }).join('')}
+    </tr>
+  `).join('');
+
+  return `
+    <div class="type-matrix-wrap">
+      <table class="type-matrix">
+        <thead>${header}</thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
 // ---------- Primeiros Passos ----------
 
 function renderInicioTab(container) {
@@ -56,15 +89,18 @@ function renderInicioTab(container) {
           Assim que voce entra numa hunt, seu POKE ativo comeca a andar pelo
           mapa sozinho procurando o inimigo selvagem mais proximo. Ao chegar
           perto o suficiente ele engaja em combate automaticamente e usa seus
-          golpes por conta propria (o golpe de maior poder disponivel, dando
-          preferencia a golpes em area quando isso acerta 2 ou mais alvos).
+          golpes por conta propria (dentre os que estao prontos/fora de
+          cooldown, o de maior dano estimado contra aquele alvo — dando
+          preferencia a golpes em area sempre que acertariam 2 ou mais
+          inimigos ao mesmo tempo).
           Depois de derrotar o inimigo, ele imediatamente escolhe um novo alvo
           e continua a caçada — seu POKE nunca fica parado esperando ordem.
           <br><br>
           Voce pode <b>desligar</b> um golpe especifico da rotacao automatica
           dando duplo clique no icone dele na barra de habilidades (a barra
-          inferior central, acima do botao Auto) — util pra evitar que a IA
-          gaste um golpe fraco quando um mais forte esta quase pronto.
+          fixa no centro inferior da tela, entre os dois lados do HUD) — util
+          pra evitar que a IA gaste um golpe fraco quando um mais forte esta
+          quase pronto.
         </div>
       </div>
     </div>
@@ -74,14 +110,16 @@ function renderInicioTab(container) {
         <div class="card-title">3. Navegando pelos menus</div>
         <div class="card-sub">
           O menu inferior da tela tem os atalhos principais:
-          <br>⚾ <b>Equipe</b> — seus ate 6 POKEs ativos, trocar quem esta em
-          campo, evoluir, ver status completos.
+          <br>🔴 <b>Equipe</b> (icone de Pokebola) — seus ate 6 POKEs ativos,
+          trocar quem esta em campo, evoluir, ver status completos.
           <br>🎒 <b>Mochila</b> — POKEs capturados extras e todos os seus
           itens (bolas, pocoes, revives, Stones).
           <br>🗺️ <b>Hunts</b> — escolher onde caçar (ver item 4 abaixo).
           <br>🛒 <b>Loja</b> — comprar itens e vender POKEs/itens por ouro.
           <br>📖 <b>Pokedex</b> — registro de toda especie do jogo, mesmo as
-          que voce nunca capturou, com onde encontrar cada uma.
+          que voce nunca capturou, com onde encontrar cada uma (incluindo
+          fraquezas/resistencias de cada uma).
+          <br>📚 <b>Wiki</b> — este guia que voce esta lendo agora.
           <br>🏥 <b>Hospital</b> — clique na enfermeira em campo pra curar seu
           time por completo, de graça.
           <br>🤖 <b>Auto</b> (botao flutuante no canto inferior esquerdo) —
@@ -140,6 +178,13 @@ function renderTiposTab(container) {
       </div>
     </div>
     <div id="wiki-type-result"></div>
+    <div class="card">
+      <div class="card-info" style="width:100%">
+        <div class="card-title">Tabela completa (linhas = golpe atacante, colunas = POKE defensor)</div>
+        <div class="card-sub">Arraste pros lados pra ver a tabela inteira. "·" = dano normal (1x).</div>
+        ${typeMatrixHtml()}
+      </div>
+    </div>
   `;
 
   const select = container.querySelector('#wiki-type-select');
@@ -282,12 +327,14 @@ function renderMecanicasTab(container) {
       <div class="card-info">
         <div class="card-title">Sistema de captura</div>
         <div class="card-sub">
-          Ao derrotar um selvagem, a captura tenta usar a bola escolhida
-          (manual ou via auto-catch) e rola uma chance de sucesso baseada em
-          3 fatores: a <b>taxa de captura real</b> da especie (dado da
-          planilha/Gen2 — quanto menor, mais raro e dificil de capturar), o
-          <b>multiplicador da bola</b> usada (bolas melhores capturam mais
-          facil) e um multiplicador global fixo de balanceamento. Todo POKE
+          A captura e <b>sempre automatica</b> — nao existe um botao pra
+          jogar a bola manualmente. Sempre que um selvagem e derrotado (com
+          <b>auto-catch</b> ligado no painel 🤖 Auto), o jogo tenta usar a
+          bola configurada e rola uma chance de sucesso baseada em 3 fatores:
+          a <b>taxa de captura real</b> da especie (dado da planilha/Gen2 —
+          quanto menor, mais raro e dificil de capturar), o <b>multiplicador
+          da bola</b> usada (bolas melhores capturam mais facil) e um
+          multiplicador global fixo de balanceamento. Todo POKE
           capturado entra na mochila resetado pro <b>Nivel 1</b>,
           independente do nivel que tinha em campo — e sempre carrega consigo
           a raridade e o status shiny que foram sorteados no momento em que
@@ -342,9 +389,9 @@ function renderMecanicasTab(container) {
           ao redor de quem usou o golpe, em vez de só um alvo unico — o
           efeito visual em campo (o anel se expandindo) e desenhado exatamente
           do tamanho real dessa area, então dá pra ver visualmente quem vai
-          ser atingido. A IA de combate prioriza usar um golpe AOE disponivel
-          sempre que ele acertaria 2 ou mais inimigos ao mesmo tempo em vez de
-          um golpe single-target de poder parecido.
+          ser atingido. Sempre que algum golpe AOE disponivel acertaria 2 ou
+          mais inimigos ao mesmo tempo, a IA de combate o escolhe direto —
+          mesmo que exista um golpe single-target pronto com mais poder.
           <br><br>
           Todo POKE, ao atingir o <b>Nivel 50</b>, aprende automaticamente um
           golpe em area exclusivo tematizado pelo seu próprio tipo elemental

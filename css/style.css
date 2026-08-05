@@ -1654,6 +1654,44 @@ button.confirm-danger {
   letter-spacing: 0.03em;
 }
 
+/* Wiki's full 17x17 type-effectiveness reference table (WikiMenu.js) — wide
+   enough that it needs its own horizontal scroller instead of ever widening
+   the shared .screen-body (which must never scroll sideways). */
+.type-matrix-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.type-matrix {
+  border-collapse: collapse;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.type-matrix th,
+.type-matrix td {
+  padding: 4px 6px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.type-matrix thead th,
+.type-matrix tbody th {
+  color: #111;
+  font-weight: 700;
+}
+
+.type-matrix-corner {
+  background: var(--color-panel);
+  color: var(--color-text-dim) !important;
+  font-size: 9px;
+}
+
+.type-matrix-x2 { background: rgba(74, 222, 128, 0.22); color: #4ade80; font-weight: 700; }
+.type-matrix-xhalf { background: rgba(248, 113, 113, 0.16); color: #f87171; }
+.type-matrix-x0 { background: rgba(0, 0, 0, 0.35); color: #888; font-weight: 700; }
+.type-matrix-x1 { color: var(--color-text-dim); }
+
 .moveset-row.learned {
   background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);

@@ -6,6 +6,15 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '2.7',
+    date: '2026-08-05',
+    title: 'Wiki corrigida + tabela de tipos completa',
+    highlights: [
+      'Corrigidas informacoes divergentes na Wiki: a captura e sempre automatica (via auto-catch, nao existe botao de jogar bola manualmente), o icone da Equipe e uma Pokebola (nao mais o emoji de baseball), a barra de habilidades fica no centro inferior da tela (nao "acima do botao Auto"), e a IA so troca pra AOE quando ele realmente acertaria 2+ inimigos.',
+      'Aba "Efetividade de Tipos" ganhou a tabela completa 17x17 (golpe atacante x POKE defensor), com rolagem horizontal propria e cores por multiplicador.',
+    ],
+  },
+  {
     version: '2.6',
     date: '2026-08-05',
     title: 'Fraquezas e resistencias na Pokedex',
