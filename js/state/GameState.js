@@ -61,7 +61,15 @@ export class GameState {
     // carries no unlockCost — this is a second, continent-wide gate in front
     // of it). 'johto' always unlocked; 'kanto' only after
     // main.js#stepWorld's sequence-clear check calls unlockContinent.
-    this.unlockedContinents = ['johto'];
+    // 'nightmare' (Modo Pesadelo + the 11 legendary BOSS hunts,
+    // data/nightmareMaps.js) is meant to be free from the start (see
+    // CLAUDE.md) — included here upfront so HuntMenu.js's continent gate
+    // (isContinentUnlocked) never blocks it. Real bug found live: every
+    // nightmare-continent hunt showed "Bloqueado"/"Derrote o Campeao Lance"
+    // forever, even after actually clearing Lance, because nothing ever
+    // called unlockContinent('nightmare') — Lance's clear only ever unlocks
+    // 'kanto'. See fromSnapshot below for the matching fix on existing saves.
+    this.unlockedContinents = ['johto', 'nightmare'];
   }
 
   get activePoke() {
@@ -175,7 +183,12 @@ export class GameState {
     // No grandfathering: explicit user request made clearing Champion Lance
     // a hard requirement for Kanto, so every save (old or new) needs it —
     // an old save with existing Kanto progress just needs one Lance clear.
-    state.unlockedContinents = data.unlockedContinents || ['johto'];
+    // 'nightmare' is unioned in unconditionally (not just defaulted) since
+    // every save written before this fix has unlockedContinents stuck at
+    // just ['johto'] (or ['johto','kanto']) with no way to ever add
+    // 'nightmare' itself — same "union, never replace" reasoning as
+    // unlockedMaps right above.
+    state.unlockedContinents = [...new Set([...(data.unlockedContinents || ['johto']), 'nightmare'])];
     return state;
   }
 }

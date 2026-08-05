@@ -6,6 +6,14 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '2.4',
+    date: '2026-08-05',
+    title: 'Correcao real do desbloqueio pos-Lance (Modo Pesadelo)',
+    highlights: [
+      'Corrigido bug real: todas as hunts do Modo Pesadelo (as 19 zonas espelhadas + as 11 hunts BOSS de lendarios) ficavam permanentemente marcadas como "Bloqueado - Derrote o Campeao Lance", mesmo depois de realmente derrota-lo — o desbloqueio de continente so soltava Kanto, nunca o Modo Pesadelo. Agora o Modo Pesadelo fica liberado desde o inicio (como sempre foi a intencao) tanto em jogos novos quanto em saves ja existentes.',
+    ],
+  },
+  {
     version: '2.3',
     date: '2026-08-05',
     title: 'Novo menu Wiki: guia completo do jogo',
