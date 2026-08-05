@@ -54,6 +54,14 @@ export class GameState {
     // unconditionally in main.js#handleEnemyDefeated (both live and the
     // silent catch-up/Farm Offline paths), see systems/PokedexSystem.js.
     this.pokedexKills = {};
+    // Champion Lance (data/nightmareMaps.js#LANCE_MAP_ID) is now Johto's
+    // final hunt — clearing its 6-POKE sequence is a hard requirement to
+    // reach Kanto (explicit user request), separate from the existing
+    // per-map gold-cost unlock system above (every Kanto hunt itself still
+    // carries no unlockCost — this is a second, continent-wide gate in front
+    // of it). 'johto' always unlocked; 'kanto' only after
+    // main.js#stepWorld's sequence-clear check calls unlockContinent.
+    this.unlockedContinents = ['johto'];
   }
 
   get activePoke() {
@@ -126,6 +134,14 @@ export class GameState {
     return this.unlockedMaps.includes(mapId);
   }
 
+  unlockContinent(continent) {
+    if (!this.unlockedContinents.includes(continent)) this.unlockedContinents.push(continent);
+  }
+
+  isContinentUnlocked(continent) {
+    return this.unlockedContinents.includes(continent);
+  }
+
   healTeamFully() {
     for (const poke of this.team) {
       poke.hp = poke.stats.hp;
@@ -156,6 +172,10 @@ export class GameState {
     state.perfStats = { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now(), ...(data.perfStats || {}) };
     state.trainer = { name: 'Treinador', level: 1, exp: 0, ...(data.trainer || {}) };
     state.pokedexKills = data.pokedexKills || {};
+    // No grandfathering: explicit user request made clearing Champion Lance
+    // a hard requirement for Kanto, so every save (old or new) needs it —
+    // an old save with existing Kanto progress just needs one Lance clear.
+    state.unlockedContinents = data.unlockedContinents || ['johto'];
     return state;
   }
 }

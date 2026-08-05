@@ -148,16 +148,45 @@ function spawnEnemyAt(mapDef) {
   return new Enemy({ poke, x: point.x, y: point.y, encounterId });
 }
 
+// Explicit user request: each POKE after the first in a sequence-boss fight
+// spawns at a short-to-medium distance from the base spawn point instead of
+// the exact same pixel every time. Rejection-sampled the same way
+// randomSpawnPoint is (stay within the map's walkable circle, never on a
+// blocked collision cell), just around `base` instead of the map center.
+const SEQUENCE_SPAWN_OFFSET_MIN = 60;
+const SEQUENCE_SPAWN_OFFSET_MAX = 150;
+function sequenceSpawnPoint(mapDef, base) {
+  const mapCx = mapDef.bounds.width / 2;
+  const mapCy = mapDef.bounds.height / 2;
+  const radius = mapWalkRadius(mapDef);
+  let x = base.x, y = base.y, attempts = 0;
+  do {
+    const angle = randRange(0, Math.PI * 2);
+    const dist = randRange(SEQUENCE_SPAWN_OFFSET_MIN, SEQUENCE_SPAWN_OFFSET_MAX);
+    x = base.x + Math.cos(angle) * dist;
+    y = base.y + Math.sin(angle) * dist;
+    attempts++;
+  } while (
+    attempts < SPAWN_POINT_MAX_ATTEMPTS
+    && (Math.hypot(x - mapCx, y - mapCy) > radius || isCellBlocked(mapDef, x, y))
+  );
+  return { x, y };
+}
+
 // Sequence-boss spawn (Champion Lance, see data/nightmareMaps.js): fixed
-// species/level/rarity/ivs per slot, in order, at the map's single spawn
-// point — no random pool pick, no random stat rolls (encounter.rarity/ivs
-// are only ever set on a sequence hunt's encounters; a normal hunt's
-// encounter has neither, and createPokeInstance's own `|| rollX()` fallback
-// already handles that being undefined here).
+// species/level/rarity/ivs per slot, in order — no random pool pick, no
+// random stat rolls (encounter.rarity/ivs are only ever set on a sequence
+// hunt's encounters; a normal hunt's encounter has neither, and
+// createPokeInstance's own `|| rollX()` fallback already handles that being
+// undefined here). The very first POKE (index 0, spawned as the player
+// enters) lands exactly on the map's spawn point; every POKE after that
+// (spawned once the previous one is defeated) gets a jittered nearby point
+// instead of that same exact spot.
 function spawnSequenceEnemy(mapDef, index) {
   const encounterId = mapDef.sequence[index];
   const encounter = getEncounter(encounterId);
-  const point = mapDef.spawnPoints[0] || mapDef.playerSpawn;
+  const base = mapDef.spawnPoints[0] || mapDef.playerSpawn;
+  const point = index === 0 ? base : sequenceSpawnPoint(mapDef, base);
   const poke = createPokeInstance(encounter.speciesId, encounter.minLevel, { rarity: encounter.rarity, ivs: encounter.ivs });
   return new Enemy({ poke, x: point.x, y: point.y, encounterId });
 }
@@ -183,6 +212,7 @@ function buildMapWorld(mapId) {
     reviveCountdown: null,
     respawnTimer: mapDef.respawnDelay,
     sequenceIndex: 0,
+    sequenceCleared: false,
   };
 }
 
@@ -228,7 +258,9 @@ function handleEnemyDefeated(world, enemy, { silent = false } = {}) {
   const { leveledUp, newAbilities, level } = grantExp(poke, expGain);
   const trainerResult = grantTrainerExp(gameState.trainer, expGain);
   const loot = awardKillLoot(gameState, enemy, world.mapDef);
-  const captureResult = maybeAutoCatch(gameState, enemy.poke);
+  // Champion Lance (data/nightmareMaps.js#LANCE_MAP_ID) explicitly disallows
+  // capture — its `noCatch` flag is the only place that's ever set.
+  const captureResult = world.mapDef.noCatch ? null : maybeAutoCatch(gameState, enemy.poke);
   recordPokedexKill(gameState, enemy.poke.speciesId, Boolean(enemy.poke.isShiny));
 
   if (!silent) {
@@ -394,6 +426,24 @@ function stepWorld(world, dt, { silent = false } = {}) {
   // legendary once per visit and never refill the pool after it dies —
   // leaving and re-entering the hunt (buildMapWorld) is what brings it back.
   const aliveCount = world.enemies.filter((e) => !e.isDead).length;
+
+  // Sequence-boss cleared (Champion Lance, or any future sequence-boss with
+  // an `unlocksContinentOnClear`) — the last slot's POKE is dead and there's
+  // no next one to spawn. `world.sequenceCleared` guards this firing more
+  // than once per visit (aliveCount stays 0 every subsequent tick too).
+  if (
+    world.mapDef.sequence && world.mapDef.unlocksContinentOnClear && !world.sequenceCleared
+    && aliveCount === 0 && world.sequenceIndex === world.mapDef.sequence.length - 1
+  ) {
+    world.sequenceCleared = true;
+    const continent = world.mapDef.unlocksContinentOnClear;
+    const wasLocked = !gameState.isContinentUnlocked(continent);
+    gameState.unlockContinent(continent);
+    if (!silent && wasLocked) {
+      eventBus.emit('toast', { message: `Voce derrotou o Campeao Lance! O Novo Continente foi desbloqueado.`, type: 'success', channel: 'world' });
+    }
+  }
+
   if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn) {
     world.respawnTimer -= dt;
     if (world.respawnTimer <= 0) {

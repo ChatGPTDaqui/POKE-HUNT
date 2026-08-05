@@ -172,17 +172,22 @@ function buildLanceHunt() {
   const map = {
     id: LANCE_MAP_ID,
     name: 'BOSS Campeao Lance',
-    description: 'Batalha final contra o Campeao Lance — 6 POKEs Lendarios em sequencia (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o proximo POKE da equipe entra automaticamente.',
+    description: 'Batalha final de Johto contra o Campeao Lance — 6 POKEs Lendarios em sequencia (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o proximo POKE da equipe entra automaticamente. Captura desabilitada. Derrota-lo libera o Novo Continente (Kanto).',
     levelRange: [55, 65],
     unlockCost: null,
-    continent: 'nightmare',
+    // Johto's final hunt (explicit user request) — always free to enter like
+    // every other Johto/Kanto hunt, but clearing its sequence is what gates
+    // Kanto (see unlocksContinentOnClear, consumed by main.js#stepWorld).
+    continent: 'johto',
     bounds: { width: 1400, height: 900 },
     playerSpawn: { x: 700, y: 450 },
     bg: { primary: '#3e2f23', secondary: '#4a3829', image: TYPE_BACKGROUND_IMAGE.DRAGON },
     maxEnemies: 1,
     noRespawn: true,
+    noCatch: true, // explicit user request — no capturing Lance's team
     autoSwitchTeamOnFaint: true,
     sequence: enemyPool, // ordered encounter ids — main.js walks through them one at a time instead of picking randomly
+    unlocksContinentOnClear: 'kanto', // consumed generically by main.js#stepWorld once the whole sequence is cleared
     respawnDelay: 3,
     spawnPoints: [{ x: 700, y: 450 }],
     enemyPool,

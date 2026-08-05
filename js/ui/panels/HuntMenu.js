@@ -180,7 +180,13 @@ export function renderHuntMenu(container, { gameState, controller, refresh }) {
   }
 
   for (const map of Object.values(MAPS).filter((m) => (m.continent || 'johto') === selectedContinent)) {
-    const unlocked = gameState.isMapUnlocked(map.id);
+    // Continent-wide gate (explicit user request): Kanto stays locked until
+    // Champion Lance — Johto's own final hunt now, see
+    // data/nightmareMaps.js#unlocksContinentOnClear — has been cleared once.
+    // Separate from (and checked before) the existing per-map gold-cost
+    // unlock below, which every Kanto hunt itself still has none of.
+    const continentGated = !gameState.isContinentUnlocked(map.continent || 'johto');
+    const unlocked = !continentGated && gameState.isMapUnlocked(map.id);
     const card = document.createElement('div');
     card.className = 'card';
     card.dataset.mapId = map.id;
@@ -197,15 +203,17 @@ export function renderHuntMenu(container, { gameState, controller, refresh }) {
           ${map.name} (Lv ${map.levelRange[0]}-${map.levelRange[1]})
           <span class="info-icon" tabindex="0">?${huntTooltipHtml(map)}</span>
         </div>
-        ${unlocked ? '' : `<div class="card-sub">${costLabel}</div>`}
+        ${unlocked ? '' : `<div class="card-sub">${continentGated ? 'Derrote o Campeao Lance (Johto) para desbloquear' : costLabel}</div>`}
       </div>
-      <button>${unlocked ? 'Entrar' : 'Desbloquear'}</button>
+      <button>${unlocked ? 'Entrar' : continentGated ? 'Bloqueado' : 'Desbloquear'}</button>
     `;
 
     card.querySelector('button').addEventListener('click', (e) => {
       e.stopPropagation();
       if (unlocked) {
         controller.enterMap(map.id);
+      } else if (continentGated) {
+        controller.toast(`Derrote o Campeao Lance em Johto antes de acessar ${CONTINENT_LABELS[map.continent] || map.continent}.`, 'error', 'world');
       } else {
         const result = unlockMap(gameState, map);
         if (result.success) {
