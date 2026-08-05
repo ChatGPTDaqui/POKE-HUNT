@@ -11,7 +11,7 @@ import { Enemy } from './entities/Enemy.js';
 import { Effect } from './entities/Effect.js';
 
 import { SPECIES, createPokeInstance } from './data/pokes.js';
-import { getMap, mapWalkRadius } from './data/maps.js';
+import { getMap, mapWalkRadius, isCellBlocked } from './data/maps.js';
 import { getEncounter } from './data/enemies.js';
 import { getItem } from './data/items.js';
 import { isDamagingAbility } from './data/abilities.js';
@@ -102,17 +102,24 @@ const SPAWN_MARGIN = 60;
 // Random point inside the map's circular walkable area, at least a medium
 // distance from where the player starts, so wilds are scattered for the
 // POKE to walk up on rather than clustered right at the entrance.
+const SPAWN_POINT_MAX_ATTEMPTS = 40; // give up rerolling and accept whatever's left rather than loop forever on a near-fully-blocked map
+
 function randomSpawnPoint(mapDef) {
   const cx = mapDef.bounds.width / 2;
   const cy = mapDef.bounds.height / 2;
   const radius = mapWalkRadius(mapDef) - SPAWN_MARGIN;
   let x, y;
+  let attempts = 0;
   do {
     const angle = randRange(0, Math.PI * 2);
     const dist = Math.sqrt(randRange(0, 1)) * radius;
     x = cx + Math.cos(angle) * dist;
     y = cy + Math.sin(angle) * dist;
-  } while (Math.hypot(x - mapDef.playerSpawn.x, y - mapDef.playerSpawn.y) < SPAWN_MIN_DISTANCE);
+    attempts++;
+  } while (
+    attempts < SPAWN_POINT_MAX_ATTEMPTS
+    && (Math.hypot(x - mapDef.playerSpawn.x, y - mapDef.playerSpawn.y) < SPAWN_MIN_DISTANCE || isCellBlocked(mapDef, x, y))
+  );
   return { x, y };
 }
 

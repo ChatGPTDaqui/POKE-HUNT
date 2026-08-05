@@ -6,6 +6,7 @@ import { MAPS_DATA } from './maps.generated.js';
 import { NIGHTMARE_MAPS_DATA } from './nightmareMaps.js';
 import { createFormulaEngine } from '../core/FormulaEngine.js';
 import { FORMULAS } from './formulas.generated.js';
+import { COLLISION_GRIDS, COLLISION_GRID_CELL_SIZE } from './collisionGrids.generated.js';
 
 // Modo Pesadelo hunts (see nightmareMaps.js) are hand-authored clones merged
 // in at runtime, not part of the spreadsheet sync.
@@ -17,10 +18,24 @@ const formulaEngine = createFormulaEngine(FORMULAS);
 // the spreadsheet's raw respawnDelay by default.
 const RESPAWN_DELAY_MULTIPLIER = formulaEngine.evalOrDefault('MOB_RESPAWN_DELAY_MULTIPLIER', 0.25);
 
+// Only the 7 hunt themes with real background art (see
+// scripts/build-collision-grids.js) have a grid — every other hunt gets
+// `collisionGrid: null` and keeps the old fully-open walkable circle
+// (js/systems/MovementSystem.js treats a null grid as "no extra blocking").
 export function getMap(id) {
   const map = MAPS[id];
   if (!map) return null;
-  return { ...map, respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER };
+  const collisionGrid = (map.bg && map.bg.image && COLLISION_GRIDS[map.bg.image]) || null;
+  return { ...map, respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER, collisionGrid };
+}
+
+export function isCellBlocked(mapDef, x, y) {
+  const grid = mapDef.collisionGrid;
+  if (!grid) return false;
+  const col = Math.floor(x / COLLISION_GRID_CELL_SIZE);
+  const row = Math.floor(y / COLLISION_GRID_CELL_SIZE);
+  if (row < 0 || row >= grid.length || col < 0 || col >= grid[0].length) return false;
+  return grid[row][col] === '1';
 }
 
 // The walkable area is a circle (not the full rectangular bounds — those

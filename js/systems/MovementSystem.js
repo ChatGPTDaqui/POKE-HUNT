@@ -1,22 +1,55 @@
 import { randRange } from '../core/Random.js';
 import { engageRangeFor } from './CombatSystem.js';
-import { mapWalkRadius } from '../data/maps.js';
+import { mapWalkRadius, isCellBlocked } from '../data/maps.js';
 
 const WANDER_MARGIN = 40;
 const ARRIVE_THRESHOLD = 4;
 const WANDER_PAUSE_MIN = 1;
 const WANDER_PAUSE_MAX = 3;
 
-function moveToward(entity, tx, ty, speed, dt) {
+// A POKE's collision footprint is exactly 1 grid box (COLLISION_GRID_CELL_SIZE,
+// see data/collisionGrids.generated.js) per explicit user request — checking
+// just the entity's own center point against the grid is equivalent to that,
+// since each cell already IS one box.
+function canOccupy(mapDef, x, y) {
+  return !isCellBlocked(mapDef, x, y);
+}
+
+// Moves toward (tx,ty), refusing to step into a blocked cell (walls/black
+// void areas, see data/collisionGrids.generated.js) instead of ignoring
+// collision entirely. Tries the full diagonal step first, then falls back to
+// sliding along just the X or just the Y axis — simple axis-separated
+// collision so a POKE grazing a wall at an angle slides along it instead of
+// stopping dead, without needing real pathfinding for what's still a
+// straight-line "walk toward a point" mover. `mapDef` is optional-safe: maps
+// with no collision grid (10 of 17 hunt themes, see getMap) behave exactly
+// as before this feature existed.
+function moveToward(entity, tx, ty, speed, dt, mapDef) {
   const dx = tx - entity.x;
   const dy = ty - entity.y;
   const dist = Math.sqrt(dx * dx + dy * dy);
   if (dist <= ARRIVE_THRESHOLD) return true; // arrived
   const step = speed * dt;
   const ratio = Math.min(1, step / dist);
-  entity.x += dx * ratio;
-  entity.y += dy * ratio;
+  const stepX = dx * ratio;
+  const stepY = dy * ratio;
   entity.facing = { x: dx / dist, y: dy / dist };
+
+  if (!mapDef || !mapDef.collisionGrid) {
+    entity.x += stepX;
+    entity.y += stepY;
+    return false;
+  }
+
+  const fullX = entity.x + stepX, fullY = entity.y + stepY;
+  if (canOccupy(mapDef, fullX, fullY)) {
+    entity.x = fullX;
+    entity.y = fullY;
+  } else if (canOccupy(mapDef, fullX, entity.y)) {
+    entity.x = fullX; // slide along the wall on the X axis
+  } else if (canOccupy(mapDef, entity.x, fullY)) {
+    entity.y = fullY; // slide along the wall on the Y axis
+  } // else: fully blocked this step, hold position
   return false;
 }
 
@@ -32,10 +65,16 @@ function clampToMapCircle(x, y, mapCx, mapCy, mapRadius) {
   return { x: mapCx + dx * ratio, y: mapCy + dy * ratio };
 }
 
-function wanderStep(entity, dt, centerX, centerY, radius, mapCx, mapCy, mapRadius) {
+function wanderStep(entity, dt, centerX, centerY, radius, mapCx, mapCy, mapRadius, mapDef) {
   if (entity.wanderTarget) {
-    const arrived = moveToward(entity, entity.wanderTarget.x, entity.wanderTarget.y, entity.moveSpeed, dt);
-    if (arrived) {
+    const prevX = entity.x, prevY = entity.y;
+    const arrived = moveToward(entity, entity.wanderTarget.x, entity.wanderTarget.y, entity.moveSpeed, dt, mapDef);
+    // A wander target that turned out to be behind a wall would otherwise
+    // freeze this entity forever (moveToward's collision holds position, so
+    // `arrived` never becomes true) — treat "didn't move at all this frame"
+    // the same as arriving: give up on it and roll a fresh target.
+    const stuck = !arrived && entity.x === prevX && entity.y === prevY;
+    if (arrived || stuck) {
       entity.wanderTarget = null;
       entity.wanderPause = randRange(WANDER_PAUSE_MIN, WANDER_PAUSE_MAX);
     }
@@ -83,10 +122,14 @@ function findNearestAliveShiny(player, enemies) {
   return nearest;
 }
 
-function wanderFreely(entity, dt, cx, cy, radius) {
+function wanderFreely(entity, dt, cx, cy, radius, mapDef) {
   if (entity.wanderTarget) {
-    const arrived = moveToward(entity, entity.wanderTarget.x, entity.wanderTarget.y, entity.moveSpeed, dt);
-    if (arrived) {
+    const prevX = entity.x, prevY = entity.y;
+    const arrived = moveToward(entity, entity.wanderTarget.x, entity.wanderTarget.y, entity.moveSpeed, dt, mapDef);
+    // See wanderStep's identical comment — a target behind a wall must not
+    // freeze the entity forever.
+    const stuck = !arrived && entity.x === prevX && entity.y === prevY;
+    if (arrived || stuck) {
       entity.wanderTarget = null;
       entity.wanderPause = randRange(WANDER_PAUSE_MIN, WANDER_PAUSE_MAX);
     }
@@ -131,12 +174,12 @@ export function updateMovement(world, dt) {
         player.state = 'engaged';
       } else {
         player.state = 'chase';
-        moveToward(player, targetEnemy.x, targetEnemy.y, player.moveSpeed, dt);
+        moveToward(player, targetEnemy.x, targetEnemy.y, player.moveSpeed, dt, mapDef);
         player.wanderTarget = null;
       }
     } else {
       player.state = 'wander';
-      wanderFreely(player, dt, mapCx, mapCy, mapRadius);
+      wanderFreely(player, dt, mapCx, mapCy, mapRadius, mapDef);
     }
   }
 
@@ -149,7 +192,7 @@ export function updateMovement(world, dt) {
     if (player.fainted) {
       enemy.state = 'wander';
       enemy.target = null;
-      wanderStep(enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius);
+      wanderStep(enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef);
       continue;
     }
 
@@ -164,16 +207,16 @@ export function updateMovement(world, dt) {
       enemy.state = 'chase';
       enemy.target = player;
       enemy.wanderTarget = null;
-      moveToward(enemy, player.x, player.y, enemy.moveSpeed, dt);
+      moveToward(enemy, player.x, player.y, enemy.moveSpeed, dt, mapDef);
     } else {
       enemy.state = 'wander';
       enemy.target = null;
       const distToSpawn = Math.hypot(enemy.x - enemy.spawnPoint.x, enemy.y - enemy.spawnPoint.y);
       if (distToSpawn > enemy.wanderRadius) {
-        moveToward(enemy, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.moveSpeed, dt);
+        moveToward(enemy, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.moveSpeed, dt, mapDef);
         enemy.wanderTarget = null;
       } else {
-        wanderStep(enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius);
+        wanderStep(enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef);
       }
     }
   }

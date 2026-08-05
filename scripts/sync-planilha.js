@@ -621,31 +621,45 @@ function syncSpeciesAndMoves(workbook, hunts) {
 // World layout for the 5 hunts is our own idle-game concept (bounds, spawn
 // points, background) — the spreadsheet has no equivalent, so these stay
 // hand-picked defaults, just parameterized by however many hunts we pick.
-// Every theme shares the same real tiled background image
-// (assets/Hunt background.png, user-provided — a single detailed top-down
-// scene, not a small seamless texture, but tiled the same way the old
-// route-only "Grass background.png" was) instead of the procedural
-// checkerboard — see render/Sprites.js#drawMapBackground. `primary`/
-// `secondary` stay theme-distinct as the fallback colors for whenever the
-// image hasn't loaded yet (e.g. first paint).
-const HUNT_BG_IMAGE = 'assets/Hunt background.png';
-const BG_ROUTE = { primary: '#284b3c', secondary: '#2e5544', image: HUNT_BG_IMAGE };
-const BG_CAVE = { primary: '#1c1c2b', secondary: '#242438', image: HUNT_BG_IMAGE };
-const BG_TOWER = { primary: '#3e2f23', secondary: '#4a3829', image: HUNT_BG_IMAGE };
+// `primary`/`secondary` are the fallback colors for whenever no real image
+// is loaded (either it hasn't finished loading yet, or this type has none —
+// see TYPE_BACKGROUND_IMAGE below) — see render/Sprites.js#drawMapBackground.
+const BG_ROUTE = { primary: '#284b3c', secondary: '#2e5544' };
+const BG_CAVE = { primary: '#1c1c2b', secondary: '#242438' };
+const BG_TOWER = { primary: '#3e2f23', secondary: '#4a3829' };
 
-// Every real type maps to one of the 3 existing palettes by vibe — cosmetic
-// only, since the real tiled image is identical across all themes (see
-// comment above); this just picks the fallback color shown before it loads.
-// Keyed by the TYPE constant now (hunt.bgTheme carries e.g. 'GRASS'), not by
-// the old bundled biome name.
+// Every real type maps to one of the 3 palettes above by vibe — used only as
+// the fallback color underneath the real image (or the procedural
+// checkerboard, for types with none). Keyed by the TYPE constant
+// (hunt.bgTheme carries e.g. 'GRASS'), not by the old bundled biome name.
 const TYPE_THEME = {
   GRASS: BG_ROUTE, BUG: BG_ROUTE, NORMAL: BG_ROUTE, WATER: BG_ROUTE, POISON: BG_ROUTE, FLYING: BG_ROUTE, GROUND: BG_ROUTE,
   ROCK: BG_CAVE, FIRE: BG_CAVE, STEEL: BG_CAVE, ICE: BG_CAVE, DARK: BG_CAVE, FIGHTING: BG_CAVE, ELECTRIC: BG_CAVE,
   PSYCHIC: BG_TOWER, GHOST: BG_TOWER, DRAGON: BG_TOWER,
 };
 
+// Real per-type background art (user-provided, see assets/hunt-backgrounds/)
+// — only 7 of the 17 real types have dedicated art matching their biome.
+// Every other type keeps the old procedural checkerboard (image: null,
+// see drawMapBackground) instead of showing another type's mismatched art —
+// "combinando os biomas com os tipos do local" only holds when the art
+// actually matches. js/data/collisionGrids.generated.js (built by
+// scripts/build-collision-grids.js from these same 7 files) is what gives
+// these specific hunts real walk-blocking collision; types without art here
+// stay fully walkable (open circle) like before.
+const TYPE_BACKGROUND_IMAGE = {
+  FIRE: 'assets/hunt-backgrounds/fire.png',
+  WATER: 'assets/hunt-backgrounds/water.png',
+  GRASS: 'assets/hunt-backgrounds/forest.png',
+  ROCK: 'assets/hunt-backgrounds/cave.png',
+  FIGHTING: 'assets/hunt-backgrounds/dojo.png',
+  ELECTRIC: 'assets/hunt-backgrounds/eletric.png',
+  DRAGON: 'assets/hunt-backgrounds/dragon.png',
+};
+
 function pickBgTheme(type) {
-  return (type && TYPE_THEME[type]) || BG_ROUTE;
+  const base = (type && TYPE_THEME[type]) || BG_ROUTE;
+  return { ...base, image: (type && TYPE_BACKGROUND_IMAGE[type]) || null };
 }
 
 const SPAWN_POINTS = [
