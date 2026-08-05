@@ -1,9 +1,5 @@
 // Official Pokedex height (meters) for the species currently in the game —
 // used to scale battle-field sprites so bigger POKE actually read as bigger.
-// Only species taller than REFERENCE_HEIGHT get scaled UP (never down), and
-// the result is capped at MAX_SCALE so a Venusaur doesn't dwarf the map.
-import { LEGENDARY_SPECIES_IDS } from './legendaries.js';
-
 const HEIGHT_M = {
   bulbasaur: 0.7, ivysaur: 1.0, venusaur: 2.0,
   charmander: 0.6, charmeleon: 1.1, charizard: 1.7,
@@ -88,25 +84,23 @@ const HEIGHT_M = {
   lugia: 5.2, ho_oh: 3.8, celebi: 0.6, mewtwo: 2.0, mew: 0.4,
 };
 
-const REFERENCE_HEIGHT = 1.0;
-// Raised from 1.6x to the explicit "up to 2x" request — at 1.6x, every
-// species taller than ~1.6m (49 of the 238 with real height data, e.g.
-// Steelix 9.2m/Onix 8.8m/Gyarados 6.5m/Lugia 5.2m) all clamped to the exact
-// same on-screen size regardless of how much taller they really are, so a
-// canonically massive POKE like Steelix read no bigger than a Venusaur
-// (2.0m). 2.0x keeps proportional scaling meaningfully further before
-// clamping, without going past what was explicitly asked for.
-const MAX_SCALE = 2.0;
-// Flat multiplier bumping every battle sprite up from native size — reverted
-// back to 1x for regular species (the earlier 1.5x global bump read as too
-// big across the board, explicit user request), but kept for legendaries
-// (see LEGENDARY_SPECIES_IDS below) so BOSS hunts still read as imposing.
-const GLOBAL_BATTLE_SCALE = 1;
-const LEGENDARY_BATTLE_SCALE = 1.5;
+// Explicit user request: replace the old "1.6x/2.0x cap above a fixed 1m
+// reference" scheme with a straight linear interpolation across the WHOLE
+// roster's real height range — the single shortest species in HEIGHT_M gets
+// exactly MIN_SCALE, the single tallest gets exactly MAX_SCALE, and every
+// other species lands proportionally in between (no separate legendary
+// bonus anymore — a legendary's size now comes purely from its real height,
+// same rule as everyone else). Species with no height data default to
+// MIN_SCALE (no real-size info to scale up from).
+const MIN_SCALE = 1;
+const MAX_SCALE = 3;
+const HEIGHT_VALUES = Object.values(HEIGHT_M);
+const MIN_HEIGHT = Math.min(...HEIGHT_VALUES);
+const MAX_HEIGHT = Math.max(...HEIGHT_VALUES);
 
 export function scaleForSpecies(speciesId) {
   const height = HEIGHT_M[speciesId];
-  const heightScale = height ? Math.min(MAX_SCALE, Math.max(1, height / REFERENCE_HEIGHT)) : 1;
-  const globalScale = LEGENDARY_SPECIES_IDS.includes(speciesId) ? LEGENDARY_BATTLE_SCALE : GLOBAL_BATTLE_SCALE;
-  return heightScale * globalScale;
+  if (!height) return MIN_SCALE;
+  const ratio = (height - MIN_HEIGHT) / (MAX_HEIGHT - MIN_HEIGHT);
+  return MIN_SCALE + ratio * (MAX_SCALE - MIN_SCALE);
 }
