@@ -5,7 +5,7 @@ let nextEffectId = 1;
 
 export class Effect {
   constructor({
-    type, x, y, targetX, targetY, radius = 10, color = '#fff', duration = 0.25,
+    type, x, y, targetX, targetY, radius = 10, color = '#fff', duration = 0.25, delay = 0,
     value, effectiveness, effectivenessLabel, text, unit, isAoe, owner, laneSize = 1,
     worldSize, elementType, ballItemId, success,
   }) {
@@ -18,6 +18,11 @@ export class Effect {
     this.radius = radius;
     this.color = color;
     this.duration = duration;
+    // Seconds this effect stays invisible/inert before it actually starts
+    // playing — e.g. the capture-ball animation waits out the defeated
+    // enemy's Faint pose first (see main.js#handleEnemyDefeated). `age` still
+    // just counts total elapsed time; `done`/`progress` below fold `delay` in.
+    this.delay = delay;
     this.age = 0;
     this.value = value; // damageNumber/rewardText
     this.effectiveness = effectiveness; // future type-advantage hook, unset for now
@@ -44,11 +49,11 @@ export class Effect {
   }
 
   get progress() {
-    return Math.min(1, this.age / this.duration);
+    return Math.min(1, Math.max(0, (this.age - this.delay) / this.duration));
   }
 
   get done() {
-    return this.age >= this.duration;
+    return this.age >= this.delay + this.duration;
   }
 
   tick(dt) {

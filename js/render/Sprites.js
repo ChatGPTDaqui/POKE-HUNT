@@ -561,14 +561,18 @@ const CAPTURE_ANIM_DRAW_SIZE = 40; // on-screen px, roughly a POKE icon's size
 
 // Post-battle Pokeball-throw animation, see data/captureAnim.js for the
 // sheet's real measured grid and CombatSystem/main.js for the trigger.
-// `effect.age`/frameDuration pick the frame; captureAnimFrameRect clamps to
-// the sequence's last frame instead of running off the end, so a duration
+// `effect.delay` holds this invisible until the defeated enemy's Faint pose
+// has fully played out (see main.js#handleEnemyDefeated) — the ball must
+// never appear mid-faint. Once past the delay, `effect.age - effect.delay`
+// over frameDuration picks the frame; captureAnimFrameRect clamps to the
+// sequence's last frame instead of running off the end, so a duration
 // slightly longer than rowCount*frameDuration just holds the final pose
 // briefly before the effect is removed.
 function drawCaptureAnim(ctx, effect) {
+  if (effect.age < effect.delay) return;
   const img = getOrLoadImage(CAPTURE_ANIM_URL);
   if (!img.complete || img.naturalWidth === 0) return;
-  const frameIndex = Math.floor(effect.age / CAPTURE_ANIM_FRAME_DURATION);
+  const frameIndex = Math.floor((effect.age - effect.delay) / CAPTURE_ANIM_FRAME_DURATION);
   const frame = captureAnimFrameRect(effect.ballItemId, effect.success, frameIndex);
   if (!frame) return;
 
