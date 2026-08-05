@@ -247,15 +247,16 @@ export function updateMovement(world, dt) {
   } else {
     // A shiny anywhere in the hunt overrides everything else — the player
     // switches focus to it immediately, even mid-fight with something else.
-    // Otherwise, whichever enemy is already coming for the player takes
-    // priority as the walk-to target, so both sides close the distance at
-    // the same time instead of the player standing still waiting to be
-    // approached.
+    // Otherwise the player always walks toward whichever alive enemy is
+    // currently CLOSEST (explicit user request: "focar no alvo mais proximo
+    // e redefinir esse alvo toda vez que derrotar um inimigo") — recomputed
+    // fresh every frame, so a just-defeated enemy (already filtered out of
+    // `enemies` as dead by findNearestAliveEnemy) immediately hands the
+    // target over to whichever one is nearest now, and the player actively
+    // walks across the map to it instead of only ever fighting whatever
+    // happens to already be approaching.
     const shinyEnemy = findNearestAliveShiny(player, enemies);
-    const chasingEnemy = enemies.find(
-      (e) => !e.isDead && (e.state === 'chase' || e.state === 'engaged') && e.target === player
-    );
-    const targetEnemy = shinyEnemy || chasingEnemy || findNearestAliveEnemy(player, enemies);
+    const targetEnemy = shinyEnemy || findNearestAliveEnemy(player, enemies);
 
     if (targetEnemy) {
       const engageRange = engageRangeFor(player, targetEnemy);
