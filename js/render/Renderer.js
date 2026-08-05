@@ -6,6 +6,10 @@ const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2.5;
 const ZOOM_SENSITIVITY = 0.0015;
 const ZOOM_STEP = 0.1;
+// Fraction of screen height the active POKE anchors to — 0.5 would be dead
+// center; explicit user request to sit slightly below center instead, so a
+// bit more of the world ahead/above is visible than behind.
+const PLAYER_ANCHOR_Y = 0.58;
 
 export class Renderer {
   constructor(canvas) {
@@ -114,13 +118,14 @@ export class Renderer {
     ctx.restore();
   }
 
-  // The player POKE always stays dead-center on screen — no clamping to the
+  // The player POKE stays horizontally centered and anchored at
+  // PLAYER_ANCHOR_Y vertically (slightly below center) — no clamping to the
   // map bounds, so the camera can show past the edges near a corner. Divided
-  // by zoom so the visible world area shrinks/grows around that same center
+  // by zoom so the visible world area shrinks/grows around that same anchor
   // point as the player scrolls in/out (see adjustZoom).
   _computeCamera(mapDef, player) {
     const px = player ? player.x : mapDef.bounds.width / 2;
     const py = player ? player.y : mapDef.bounds.height / 2;
-    return { x: px - this.width / 2 / this.zoom, y: py - this.height / 2 / this.zoom };
+    return { x: px - this.width / 2 / this.zoom, y: py - (this.height * PLAYER_ANCHOR_Y) / this.zoom };
   }
 }
