@@ -24,6 +24,7 @@ import { updateAutoHeal, maybeAutoCatch } from './systems/AutoSystem.js';
 import { grantExp, expRewardForEnemy, evolvePokeInstance, grantTrainerExp, applyDeathExpPenalty } from './systems/ProgressionSystem.js';
 import { awardKillLoot } from './systems/EconomySystem.js';
 import { recordKill, recordBatch, resetStats } from './systems/StatsTracker.js';
+import { recordPokedexKill } from './systems/PokedexSystem.js';
 import { simulateWorldSeconds } from './systems/OfflineSimSystem.js';
 
 import { UIManager } from './ui/UIManager.js';
@@ -188,6 +189,7 @@ function handleEnemyDefeated(world, enemy, { silent = false } = {}) {
   const trainerResult = grantTrainerExp(gameState.trainer, expGain);
   const loot = awardKillLoot(gameState, enemy, world.mapDef);
   const captureResult = maybeAutoCatch(gameState, enemy.poke);
+  recordPokedexKill(gameState, enemy.poke.speciesId, Boolean(enemy.poke.isShiny));
 
   if (!silent) {
     recordKill(gameState, { gold: loot.gold, xp: expGain, isShiny: enemy.poke.isShiny });

@@ -121,6 +121,18 @@ function huntHasType(map, type) {
   });
 }
 
+// Called by PokedexMenu.js's "ir para a hunt" shortcut before switching to
+// this screen — pre-fills the continent tab + search box so the target hunt
+// is the one visible/highlighted/scrolled-to as soon as the panel renders
+// (reuses the exact same search-match/scroll logic applySearch() already
+// runs on every render, just seeded with the map's own name instead of
+// whatever the player last typed).
+export function focusHunt(map) {
+  selectedContinent = map.continent || 'johto';
+  searchTerm = map.name;
+  selectedType = 'all';
+}
+
 export function renderHuntMenu(container, { gameState, controller, refresh }) {
   if (!gameState.hasStarter) {
     container.innerHTML = `<h2>Hunts</h2><div class="dialogue-box">Volte ao Hospital e escolha seu primeiro POKE antes de sair para caçar.</div>`;

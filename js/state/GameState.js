@@ -50,6 +50,10 @@ export class GameState {
     // see systems/ProgressionSystem.js#grantTrainerExp, granted per kill
     // alongside the POKE's own EXP.
     this.trainer = { name: 'Treinador', level: 1, exp: 0 };
+    // Pokedex kill counters, keyed by speciesId: { normal, shiny }. Recorded
+    // unconditionally in main.js#handleEnemyDefeated (both live and the
+    // silent catch-up/Farm Offline paths), see systems/PokedexSystem.js.
+    this.pokedexKills = {};
   }
 
   get activePoke() {
@@ -151,6 +155,7 @@ export class GameState {
     state.autoCatchRules = data.autoCatchRules || [];
     state.perfStats = { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now(), ...(data.perfStats || {}) };
     state.trainer = { name: 'Treinador', level: 1, exp: 0, ...(data.trainer || {}) };
+    state.pokedexKills = data.pokedexKills || {};
     return state;
   }
 }
