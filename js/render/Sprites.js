@@ -750,7 +750,13 @@ export function drawNpcMarker(ctx, x, y, label, color = '#eae2b7') {
 // route where one grass tile ~= one small POKE's footprint) instead of the
 // raw export's native resolution, tuned visually in-browser next to a small
 // species like Charmander/Rattata — adjust this single constant to re-tune.
-const HUNT_BG_TILE_SCALE = 1.6;
+// Halved from 1.6 to 0.8 (explicit user request): the background art was
+// reading too large next to the POKE sprites, so every hunt's terrain detail
+// now renders at half its previous on-screen size — still comfortably bigger
+// than the whole 1400x900 map (smallest source image is 2048px tall) so a
+// single centered draw keeps covering the entire walkable circle with margin
+// to spare, same as before.
+const HUNT_BG_TILE_SCALE = 0.8;
 
 export function drawMapBackground(ctx, map, viewport) {
   const { primary, secondary, image } = map.bg;
