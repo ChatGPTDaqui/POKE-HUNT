@@ -6,6 +6,16 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '3.1',
+    date: '2026-08-05',
+    title: 'HUD mobile: menu inferior e painel Auto ficavam cortados',
+    highlights: [
+      'Bug real corrigido: em telas de celular (~375px de largura), o menu inferior (Equipe...Config) nao cabia numa linha so e 4 botoes (Pokedex, Wiki, Hospital, Config) ficavam fora da area visivel — so alcancaveis por um scroll horizontal escondido, sem nenhuma pista visual de que existia. Agora o menu quebra em 2 linhas em telas estreitas, com todos os 8 botoes sempre visiveis.',
+      'O painel "Automacoes" tambem vazava 55px pra fora da tela em celulares (a posicao fixa era pensada pra desktop) — cortando os controles do lado direito. Agora se ajusta a largura da tela em vez de vazar.',
+      'PC/telas largas nao mudam nada (os dois ajustes so entram em telas ate 520px de largura).',
+    ],
+  },
+  {
     version: '3.0',
     date: '2026-08-05',
     title: 'Cartao do POKE na Pokedex + fraquezas em todo cartao de status',

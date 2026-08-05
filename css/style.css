@@ -1211,6 +1211,12 @@ button.confirm-danger {
   left: 150px;
   bottom: 54px;
   width: 280px;
+  /* Real bug found live: at left:150px + width:280px, any viewport under
+     ~430px wide (every phone) pushed the panel's right side off-screen —
+     inputs/dropdowns on that side were unreachable. See the narrow-viewport
+     media query near the bottom of this file, which repositions `left` too
+     (a width clamp alone isn't enough — left:150px is already off-center on
+     a phone-sized screen). */
   max-height: 65vh;
   padding: 14px;
   /* Above modal windows too (was 95, just under .confirm-modal-overlay's
@@ -1611,6 +1617,46 @@ button.confirm-danger {
   color: var(--color-text-dim);
   text-transform: uppercase;
   letter-spacing: 0.02em;
+}
+
+/* ---------- Narrow-viewport (mobile) HUD overrides ----------
+   Real bugs found live testing at 375px width (iPhone-class phones):
+   #bottom-nav's 8 buttons (Equipe..Config) never actually shrink below
+   their text's natural width (flex-shrink can't go under min-content), so
+   4 of them silently fell outside the visible row — reachable only via an
+   undiscoverable horizontal scroll (`overflow: auto hidden`), which read as
+   "Wiki/Hospital/Config are just gone". Wrapping the nav to 2 rows here
+   makes every button visible with no scrolling and no hidden UI, at the
+   cost of pushing #zoom-control/#toasts down to clear the taller nav. */
+@media (max-width: 520px) {
+  #bottom-nav {
+    flex-wrap: wrap;
+    overflow: visible;
+    row-gap: 6px;
+  }
+
+  #bottom-nav button {
+    flex: 1 1 22%;
+    min-width: 0;
+    font-size: 10.5px;
+    padding: 6px 4px;
+  }
+
+  #zoom-control,
+  #toasts {
+    top: 160px;
+  }
+
+  /* Same off-screen bug as the nav, different cause: left:150px assumes a
+     desktop-width battlefield to its left. On a phone that pushes the
+     panel's right edge (150+280=430px) well past the viewport, burying
+     every control past the "Poke Ball"/"Great Ball" row. Recentered full-
+     width like every other corner panel instead. */
+  .auto-floating-panel {
+    left: 8px;
+    right: 8px;
+    width: auto;
+  }
 }
 
 .mini-stat b {
