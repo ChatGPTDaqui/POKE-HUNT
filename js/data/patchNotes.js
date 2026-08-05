@@ -6,6 +6,15 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '2.6',
+    date: '2026-08-05',
+    title: 'Fraquezas e resistencias na Pokedex',
+    highlights: [
+      'Cada especie na Pokedex agora mostra sua secao de "Fraquezas e resistencias": contra quais tipos ela recebe dano dobrado, reduzido ou nulo — calculado com a tabela real de tipos do jogo (a mesma usada em combate), inclusive combinando os dois tipos de POKEs duplos.',
+      'POKEs cujos dois tipos sao fracos ao mesmo elemento (ex.: Charizard Fogo/Voador contra Pedra) ganham um aviso separado de "Fraqueza dupla (4x de dano)".',
+    ],
+  },
+  {
     version: '2.5',
     date: '2026-08-05',
     title: 'Colisao de paredes pausada temporariamente',
