@@ -42,6 +42,19 @@ export class Entity {
     // this entity — lets several simultaneous texts stack without
     // overlapping instead of each guessing its own fixed offset.
     this.effectLanes = [];
+
+    // A* route state (see core/Pathfinding.js + systems/MovementSystem.js).
+    // null = undecided (next moveToward call must check line-of-sight or
+    // compute a route); [] = "line of sight is clear, walk straight" (a
+    // deliberately distinct state from null so a clear line doesn't get
+    // re-checked every single frame); non-empty = actively following these
+    // waypoints. pathTargetX/Y + pathRecalcTimer throttle how often a moving
+    // target (e.g. a chased player) triggers a full recompute.
+    this.pathWaypoints = null;
+    this.pathIndex = 0;
+    this.pathRecalcTimer = 0;
+    this.pathTargetX = null;
+    this.pathTargetY = null;
   }
 
   // Lowest unclaimed run of `size` consecutive lane slots above this entity —

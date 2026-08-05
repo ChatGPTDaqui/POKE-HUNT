@@ -1,11 +1,28 @@
 import { randRange } from '../core/Random.js';
 import { engageRangeFor } from './CombatSystem.js';
 import { mapWalkRadius, isCellBlocked } from '../data/maps.js';
+import { COLLISION_GRID_CELL_SIZE } from '../data/collisionGrids.generated.js';
+import { findPath } from '../core/Pathfinding.js';
 
 const WANDER_MARGIN = 40;
 const ARRIVE_THRESHOLD = 4;
 const WANDER_PAUSE_MIN = 1;
 const WANDER_PAUSE_MAX = 3;
+
+// How often (seconds) a moving target (e.g. the player, while an enemy
+// chases it) forces a full route recompute — cheap enough on this grid size
+// to run this often without a frame hitch, but not so often it recomputes
+// every single tick for no reason.
+const PATH_RECALC_INTERVAL = 1;
+// A tracked target has to drift this many world units from where the current
+// route/line-of-sight check was last computed against before that alone
+// forces an early recompute (on top of the timer above).
+const PATH_TARGET_DRIFT = 60;
+// A much bigger jump (e.g. an entity switching from a wander target to
+// chasing the player, or vice-versa) bypasses the recalc timer entirely —
+// otherwise a state switch could keep an entity walking toward its old,
+// now-irrelevant target for up to PATH_RECALC_INTERVAL seconds.
+const PATH_TARGET_BIG_JUMP = 150;
 
 // A POKE's collision footprint is exactly 1 grid box (COLLISION_GRID_CELL_SIZE,
 // see data/collisionGrids.generated.js) per explicit user request — checking
@@ -15,42 +32,107 @@ function canOccupy(mapDef, x, y) {
   return !isCellBlocked(mapDef, x, y);
 }
 
-// Moves toward (tx,ty), refusing to step into a blocked cell (walls/black
-// void areas, see data/collisionGrids.generated.js) instead of ignoring
-// collision entirely. Tries the full diagonal step first, then falls back to
-// sliding along just the X or just the Y axis — simple axis-separated
-// collision so a POKE grazing a wall at an angle slides along it instead of
-// stopping dead, without needing real pathfinding for what's still a
-// straight-line "walk toward a point" mover. `mapDef` is optional-safe: maps
-// with no collision grid (10 of 17 hunt themes, see getMap) behave exactly
-// as before this feature existed.
-function moveToward(entity, tx, ty, speed, dt, mapDef) {
+// Straight-line step with no collision awareness — safe to use either when
+// there's no grid at all, or along a segment already verified walkable
+// (a clear line-of-sight check, or a leg of an A* route).
+function stepDirect(entity, tx, ty, speed, dt) {
   const dx = tx - entity.x;
   const dy = ty - entity.y;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-  if (dist <= ARRIVE_THRESHOLD) return true; // arrived
+  const dist = Math.hypot(dx, dy);
+  if (dist <= ARRIVE_THRESHOLD) return true;
+  const step = Math.min(1, (speed * dt) / dist);
+  entity.x += dx * step;
+  entity.y += dy * step;
+  entity.facing = { x: dx / dist, y: dy / dist };
+  return false;
+}
+
+// Old axis-separated collision fallback: tries the full diagonal step, then
+// slides along just the X or just the Y axis. Used only when A* itself
+// couldn't find a route (goal cell blocked/unreachable) — better than
+// freezing solid, even though it can still get stuck against a concave wall.
+function slideToward(entity, tx, ty, speed, dt, mapDef) {
+  const dx = tx - entity.x, dy = ty - entity.y;
+  const dist = Math.hypot(dx, dy);
+  if (dist <= ARRIVE_THRESHOLD) return true;
   const step = speed * dt;
   const ratio = Math.min(1, step / dist);
-  const stepX = dx * ratio;
-  const stepY = dy * ratio;
+  const stepX = dx * ratio, stepY = dy * ratio;
   entity.facing = { x: dx / dist, y: dy / dist };
-
-  if (!mapDef || !mapDef.collisionGrid) {
-    entity.x += stepX;
-    entity.y += stepY;
-    return false;
-  }
-
   const fullX = entity.x + stepX, fullY = entity.y + stepY;
   if (canOccupy(mapDef, fullX, fullY)) {
     entity.x = fullX;
     entity.y = fullY;
   } else if (canOccupy(mapDef, fullX, entity.y)) {
-    entity.x = fullX; // slide along the wall on the X axis
+    entity.x = fullX;
   } else if (canOccupy(mapDef, entity.x, fullY)) {
-    entity.y = fullY; // slide along the wall on the Y axis
-  } // else: fully blocked this step, hold position
+    entity.y = fullY;
+  }
   return false;
+}
+
+// Samples points along the straight segment from (x0,y0) to (x1,y1) at
+// roughly half a grid cell apart, checking each against the collision grid —
+// cheap "can I just walk there directly" probe, run only when a route needs
+// (re)deciding, never every frame.
+function hasLineOfSight(mapDef, x0, y0, x1, y1) {
+  const dist = Math.hypot(x1 - x0, y1 - y0);
+  const steps = Math.max(1, Math.ceil(dist / (COLLISION_GRID_CELL_SIZE / 2)));
+  for (let i = 1; i <= steps; i++) {
+    const t = i / steps;
+    if (isCellBlocked(mapDef, x0 + (x1 - x0) * t, y0 + (y1 - y0) * t)) return false;
+  }
+  return true;
+}
+
+// Moves an entity toward (tx,ty), routing around obstacles (walls/void/water,
+// see data/collisionGrids.generated.js) via real A* pathfinding
+// (core/Pathfinding.js) instead of just sliding along whatever it grazes —
+// a POKE now actually walks around a wall to reach a target on the other
+// side instead of getting stuck against it. `mapDef` is optional-safe: maps
+// with no collision grid (10 of 17 hunt themes, see getMap) skip all of this
+// and always move in a straight line, exactly as before this feature existed.
+function moveToward(entity, tx, ty, speed, dt, mapDef) {
+  if (!mapDef || !mapDef.collisionGrid) {
+    return stepDirect(entity, tx, ty, speed, dt);
+  }
+
+  const dist = Math.hypot(tx - entity.x, ty - entity.y);
+  if (dist <= ARRIVE_THRESHOLD) {
+    entity.pathWaypoints = null;
+    return true;
+  }
+
+  entity.pathRecalcTimer -= dt;
+  const targetJump = Math.hypot(tx - (entity.pathTargetX ?? tx), ty - (entity.pathTargetY ?? ty));
+  const drifted = targetJump > PATH_TARGET_DRIFT;
+  const bigJump = targetJump > PATH_TARGET_BIG_JUMP;
+  if (entity.pathWaypoints == null || bigJump || (drifted && entity.pathRecalcTimer <= 0)) {
+    if (hasLineOfSight(mapDef, entity.x, entity.y, tx, ty)) {
+      entity.pathWaypoints = []; // clear line — walk straight, no route needed
+    } else {
+      const route = findPath(mapDef, entity.x, entity.y, tx, ty);
+      entity.pathWaypoints = route || []; // null (unreachable) falls back to the direct/slide branch below
+      entity.pathIndex = 0;
+    }
+    entity.pathTargetX = tx;
+    entity.pathTargetY = ty;
+    entity.pathRecalcTimer = PATH_RECALC_INTERVAL;
+  }
+
+  if (entity.pathWaypoints.length > 0) {
+    const wp = entity.pathWaypoints[entity.pathIndex];
+    const arrivedAtWaypoint = stepDirect(entity, wp.x, wp.y, speed, dt);
+    if (arrivedAtWaypoint) {
+      entity.pathIndex += 1;
+      if (entity.pathIndex >= entity.pathWaypoints.length) entity.pathWaypoints = null;
+    }
+    return false;
+  }
+
+  // No route needed (clear line) or none found (goal unreachable) — walk
+  // straight, still sliding off anything it grazes rather than freezing.
+  return slideToward(entity, tx, ty, speed, dt, mapDef);
 }
 
 // Pulls (x, y) back onto the map's circular walkable edge if it landed

@@ -6,6 +6,17 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '2.1',
+    date: '2026-08-05',
+    title: 'Pathfinding real, mecanicas do Campeao Lance, sincronia de captura e escala de fundo',
+    highlights: [
+      'POKEs agora contornam paredes/obstaculos de verdade (busca de rota tipo A*) em vez de ficar travados contra eles.',
+      'Hunt do Campeao Lance ganhou contagem regressiva de 5 antes do primeiro POKE aparecer, e um aviso central de Vitoria/Derrota ao fim da luta.',
+      'POKEs derrotados na luta do Lance ficam visiveis no campo como corpos, em vez de desaparecer.',
+      'Escala visual dos backgrounds das hunts reduzida a metade para bater melhor com o tamanho das sprites.',
+    ],
+  },
+  {
     version: '2.0',
     date: '2026-08-05',
     title: 'Combate corpo-a-corpo real, mapas redimensionados e Campeao Lance vira o gate final de Johto',
