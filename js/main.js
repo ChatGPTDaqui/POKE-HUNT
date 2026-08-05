@@ -16,6 +16,7 @@ import { getEncounter } from './data/enemies.js';
 import { getItem } from './data/items.js';
 import { isDamagingAbility } from './data/abilities.js';
 import { FORMULAS } from './data/formulas.generated.js';
+import { CAPTURE_ANIM_FRAME_DURATION, captureAnimRowCount } from './data/captureAnim.js';
 
 import { updateMovement } from './systems/MovementSystem.js';
 import { updateCombat } from './systems/CombatSystem.js';
@@ -224,6 +225,18 @@ function handleEnemyDefeated(world, enemy, { silent = false } = {}) {
 
     for (const itemId of loot.droppedItems) {
       eventBus.emit('toast', { message: `Item encontrado: ${getItem(itemId).name}`, type: 'success', channel: 'world' });
+    }
+
+    // Pokeball-throw animation — only for an actual attempt (a ball was
+    // really thrown: either it caught or the catch roll failed), not for
+    // 'invalid_ball'/'no_ball' where nothing was ever thrown at the enemy.
+    if (captureResult && captureResult.ballItemId) {
+      const rowCount = captureAnimRowCount(captureResult.success);
+      world.effects.push(new Effect({
+        type: 'captureAnim', x: enemy.x, y: enemy.y, targetX: enemy.x, targetY: enemy.y,
+        ballItemId: captureResult.ballItemId, success: captureResult.success,
+        duration: rowCount * CAPTURE_ANIM_FRAME_DURATION + 0.3,
+      }));
     }
 
     if (captureResult) {

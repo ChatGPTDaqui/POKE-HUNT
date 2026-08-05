@@ -7,6 +7,7 @@ import { hpBarFillColor } from '../data/hpBar.js';
 import { AURA_COLORS } from '../data/auraColors.js';
 import { LEGENDARY_SPECIES_IDS } from '../data/legendaries.js';
 import { impactShapeForType } from '../data/impactShapes.js';
+import { CAPTURE_ANIM_URL, CAPTURE_ANIM_FRAME_DURATION, captureAnimFrameRect } from '../data/captureAnim.js';
 
 const IV_MAX = 31;
 
@@ -556,6 +557,31 @@ function drawAbilityEffect(ctx, effect) {
   }
 }
 
+const CAPTURE_ANIM_DRAW_SIZE = 40; // on-screen px, roughly a POKE icon's size
+
+// Post-battle Pokeball-throw animation, see data/captureAnim.js for the
+// sheet's real measured grid and CombatSystem/main.js for the trigger.
+// `effect.age`/frameDuration pick the frame; captureAnimFrameRect clamps to
+// the sequence's last frame instead of running off the end, so a duration
+// slightly longer than rowCount*frameDuration just holds the final pose
+// briefly before the effect is removed.
+function drawCaptureAnim(ctx, effect) {
+  const img = getOrLoadImage(CAPTURE_ANIM_URL);
+  if (!img.complete || img.naturalWidth === 0) return;
+  const frameIndex = Math.floor(effect.age / CAPTURE_ANIM_FRAME_DURATION);
+  const frame = captureAnimFrameRect(effect.ballItemId, effect.success, frameIndex);
+  if (!frame) return;
+
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(
+    img, frame.sx, frame.sy, frame.sw, frame.sh,
+    effect.targetX - CAPTURE_ANIM_DRAW_SIZE / 2, effect.targetY - CAPTURE_ANIM_DRAW_SIZE / 2,
+    CAPTURE_ANIM_DRAW_SIZE, CAPTURE_ANIM_DRAW_SIZE,
+  );
+  ctx.restore();
+}
+
 export function drawEffect(ctx, effect) {
   if (effect.type === 'damageNumber') {
     drawDamageNumber(ctx, effect);
@@ -571,6 +597,10 @@ export function drawEffect(ctx, effect) {
   }
   if (effect.type === 'abilityEffect') {
     drawAbilityEffect(ctx, effect);
+    return;
+  }
+  if (effect.type === 'captureAnim') {
+    drawCaptureAnim(ctx, effect);
     return;
   }
 }

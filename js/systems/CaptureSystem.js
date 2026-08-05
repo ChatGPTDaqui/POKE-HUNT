@@ -23,7 +23,7 @@ export function attemptCapture(gameState, defeatedPoke, ballItemId) {
   }), 0, 1);
   const captured = rollChance(chance);
 
-  if (!captured) return { success: false, reason: 'roll_failed', chance };
+  if (!captured) return { success: false, reason: 'roll_failed', chance, ballItemId };
 
   const stats = computeStatsAtLevel(species, CAPTURE_LEVEL, defeatedPoke.ivs, defeatedPoke.rarity, defeatedPoke.isShiny);
   const newPoke = {
@@ -39,5 +39,5 @@ export function attemptCapture(gameState, defeatedPoke, ballItemId) {
       .filter((key) => getAbility(key)),
   };
   const location = gameState.addCapturedPoke(newPoke);
-  return { success: true, location, chance, poke: newPoke };
+  return { success: true, location, chance, poke: newPoke, ballItemId };
 }

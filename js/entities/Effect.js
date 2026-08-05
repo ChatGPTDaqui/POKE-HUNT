@@ -7,10 +7,10 @@ export class Effect {
   constructor({
     type, x, y, targetX, targetY, radius = 10, color = '#fff', duration = 0.25,
     value, effectiveness, effectivenessLabel, text, unit, isAoe, owner, laneSize = 1,
-    worldSize, elementType,
+    worldSize, elementType, ballItemId, success,
   }) {
     this.id = `effect-${nextEffectId++}`;
-    this.type = type; // 'damageNumber' | 'abilityName' | 'rewardText' | 'abilityEffect'
+    this.type = type; // 'damageNumber' | 'abilityName' | 'rewardText' | 'abilityEffect' | 'captureAnim'
     this.x = x;
     this.y = y;
     this.targetX = targetX;
@@ -27,6 +27,8 @@ export class Effect {
     this.isAoe = isAoe; // abilityEffect — draws an expanding ring instead of a burst
     this.worldSize = worldSize; // abilityEffect — AOE moves draw at this diameter instead of the flat default
     this.elementType = elementType; // abilityEffect — picks the particle shape family, see data/impactShapes.js
+    this.ballItemId = ballItemId; // captureAnim — which sheet column to draw, see data/captureAnim.js
+    this.success = success; // captureAnim — which row band (caught vs broke free)
 
     // Floating-text effects (damageNumber/abilityName/rewardText) that name an
     // `owner` entity track it live instead of freezing targetX/targetY at
