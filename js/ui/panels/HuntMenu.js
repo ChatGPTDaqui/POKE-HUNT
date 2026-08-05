@@ -51,6 +51,19 @@ function speciesRowHtml(sp, pct) {
   `;
 }
 
+// Hunt card icon color: the elemental type that dominates the hunt's real
+// spawn odds (same weighting huntOdds() already computes for the tooltip),
+// via the existing colorForType() dictionary (js/data/typeColors.js already
+// covers every real type in this dataset — no need for a second color map).
+// Replaces the old flat theme color (map.bg.primary, only 3 distinct values
+// across all hunts) with the exact biome color per hunt (explicit user
+// request). Falls back to the theme color only for a hunt with no species at
+// all (shouldn't happen post-World-Building-v2, but stays safe either way).
+function huntSwatchColor(map) {
+  const { dominantTypes } = huntOdds(map);
+  return dominantTypes.length > 0 ? colorForType(dominantTypes[0][0]) : map.bg.primary;
+}
+
 function huntTooltipHtml(map) {
   const { species, dominantTypes } = huntOdds(map);
   const speciesRows = species.map(({ species: sp, pct }) => speciesRowHtml(sp, pct)).join('');
@@ -166,7 +179,7 @@ export function renderHuntMenu(container, { gameState, controller, refresh }) {
     card.style.cursor = 'pointer';
     card.style.display = huntHasType(map, selectedType) ? '' : 'none';
     card.innerHTML = `
-      <div class="swatch" style="background:${map.bg.primary}"></div>
+      <div class="swatch" style="background:${huntSwatchColor(map)}"></div>
       <div class="card-info">
         <div class="card-title">
           ${map.name} (Lv ${map.levelRange[0]}-${map.levelRange[1]})
