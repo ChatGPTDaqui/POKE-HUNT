@@ -89,7 +89,14 @@ const HEIGHT_M = {
 };
 
 const REFERENCE_HEIGHT = 1.0;
-const MAX_SCALE = 1.6;
+// Raised from 1.6x to the explicit "up to 2x" request — at 1.6x, every
+// species taller than ~1.6m (49 of the 238 with real height data, e.g.
+// Steelix 9.2m/Onix 8.8m/Gyarados 6.5m/Lugia 5.2m) all clamped to the exact
+// same on-screen size regardless of how much taller they really are, so a
+// canonically massive POKE like Steelix read no bigger than a Venusaur
+// (2.0m). 2.0x keeps proportional scaling meaningfully further before
+// clamping, without going past what was explicitly asked for.
+const MAX_SCALE = 2.0;
 // Flat multiplier bumping every battle sprite up from native size — reverted
 // back to 1x for regular species (the earlier 1.5x global bump read as too
 // big across the board, explicit user request), but kept for legendaries
