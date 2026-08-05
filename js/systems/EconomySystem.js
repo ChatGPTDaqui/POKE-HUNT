@@ -9,11 +9,11 @@ import { RARITIES } from '../data/rarity.js';
 const formulaEngine = createFormulaEngine(FORMULAS);
 const POKEMON_SELL_DIVISOR = formulaEngine.eval('POKEMON_SELL_DIVISOR');
 const KILL_MONEY_DIVISOR = formulaEngine.eval('KILL_MONEY_DIVISOR');
-// 0.2 = explicit user request (raised from an initial 0.05): every kill has
-// a flat 20% chance to drop a Stone matching the victim's PRIMARY type,
+// 0.05 = explicit user request (brought back down from 0.2): every kill has
+// a flat 5% chance to drop a Stone matching the victim's PRIMARY type,
 // independent of the hunt's own itemDrops table below (Stones aren't
 // spreadsheet loot — see data/stones.js).
-const STONE_DROP_CHANCE = formulaEngine.evalOrDefault('STONE_DROP_CHANCE', 0.2);
+const STONE_DROP_CHANCE = formulaEngine.evalOrDefault('STONE_DROP_CHANCE', 0.05);
 // Both spreadsheet-editable (see CLAUDE.md's "Balanceamento de economia"
 // section) with fallbacks matching the old hardcoded behavior — gold earned
 // from defeating a wild POKE is boosted 5x over the raw MONEY_FOR_KILL
