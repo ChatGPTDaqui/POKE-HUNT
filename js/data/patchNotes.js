@@ -6,6 +6,15 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '3.0',
+    date: '2026-08-05',
+    title: 'Cartao do POKE na Pokedex + fraquezas em todo cartao de status',
+    highlights: [
+      'Pokedex ganhou o botao "Ver cartao do POKE" em cada especie — abre o mesmo cartao animado (sprite, HP/EXP, abas Status/Golpes) usado em Equipe/Mochila/Loja/Hospital/HUD, montado com um POKE de exibicao (Lv50, IVs maximos) ja que a Pokedex nao tem uma instancia real capturada.',
+      'O cartao de status (aba "Status") agora mostra Fraquezas e resistencias em qualquer lugar do jogo, nao mais so na Pokedex — mesma logica compartilhada dos dois lugares, incluindo o aviso de fraqueza dupla (4x).',
+    ],
+  },
+  {
     version: '2.9',
     date: '2026-08-05',
     title: 'Hunt Analyser/Auto/Log ficavam presos atras de janelas abertas',

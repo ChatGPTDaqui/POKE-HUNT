@@ -2,75 +2,35 @@
 // independent of whether the player has ever owned/caught one — base stats,
 // full learnset, which hunts it spawns in, and a per-species kill counter
 // (js/systems/PokedexSystem.js) with a toggle for the shiny-only count.
-import { SPECIES } from '../../data/pokes.js';
+import { SPECIES, createPokeInstance } from '../../data/pokes.js';
 import { getAbility } from '../../data/abilities.js';
-import { colorForType, TYPE_COLORS } from '../../data/typeColors.js';
-import { getEffectiveness } from '../../data/typeChart.generated.js';
+import { colorForType } from '../../data/typeColors.js';
 import { MAPS } from '../../data/maps.js';
 import { getEncounter } from '../../data/enemies.js';
 import { pokedexKillCount } from '../../systems/PokedexSystem.js';
 import { focusHunt } from './HuntMenu.js';
 import { swatchHtml } from './swatchHtml.js';
+import { weaknessSectionHtml } from './typeMatchups.js';
+import { showPokeProfileModal } from './PokeProfileModal.js';
 
 let searchTerm = '';
 let expandedSpeciesId = null;
 let shinyView = false;
 
-const ALL_TYPES = Object.keys(TYPE_COLORS);
-
 function typeChip(type) {
   return `<span class="type-chip" style="background:${colorForType(type)}">${type.slice(0, 3)}</span>`;
 }
 
-// Every attacking type's real multiplier against this species (both its own
-// types combined via getEffectiveness's dual-type multiply — same function
-// CombatSystem.js uses for real damage, so this always matches what actually
-// happens in a fight), bucketed by the resulting multiplier. `weak4x` is
-// called out separately (explicit user request: flag when a species has
-// TWO types that are each weak to the same attacking type, stacking into a
-// real 4x hit) rather than folded into the regular 2x weakness list.
-function typeMatchups(species) {
-  const weak4x = [];
-  const weak2x = [];
-  const resist2x = [];
-  const resist4x = [];
-  const immune = [];
-  for (const atkType of ALL_TYPES) {
-    const m = getEffectiveness(atkType, species.type, species.type2);
-    if (m === 4) weak4x.push(atkType);
-    else if (m === 2) weak2x.push(atkType);
-    else if (m === 0.5) resist2x.push(atkType);
-    else if (m === 0.25) resist4x.push(atkType);
-    else if (m === 0) immune.push(atkType);
-  }
-  return { weak4x, weak2x, resist2x, resist4x, immune };
-}
-
-function typeChipRow(types) {
-  return types.length > 0
-    ? `<div class="row" style="flex-wrap:wrap;gap:4px">${types.map(typeChip).join('')}</div>`
-    : '<span class="card-sub">Nenhum</span>';
-}
-
-function weaknessSectionHtml(species) {
-  const { weak4x, weak2x, resist2x, resist4x, immune } = typeMatchups(species);
-  const doubleWeakBlock = weak4x.length > 0 ? `
-    <div class="card-sub" style="color:#ff5252;font-weight:600">⚠ Fraqueza dupla (4x de dano):</div>
-    ${typeChipRow(weak4x)}
-  ` : '';
-  return `
-    ${doubleWeakBlock}
-    <div class="card-sub">Fraco contra (2x de dano):</div>
-    ${typeChipRow(weak2x)}
-    <div class="card-sub" style="margin-top:6px">Resiste (0.5x de dano):</div>
-    ${typeChipRow(resist2x)}
-    ${resist4x.length > 0 ? `
-      <div class="card-sub" style="margin-top:6px">Resiste em dobro (0.25x de dano):</div>
-      ${typeChipRow(resist4x)}
-    ` : ''}
-    <div class="card-sub" style="margin-top:6px">Imune a:</div>
-    ${typeChipRow(immune)}
-  `;
+// Showcase-only instance for the Pokedex's "abrir cartao" button — a species
+// on its own (no owned poke) can't feed showPokeProfileModal, which expects
+// a real instance (level/HP/EXP/IVs/rarity). Deterministic and fixed (Lv50,
+// max/75%-ish IVs, Comum, never shiny) purely for display — this instance is
+// never added to bagPokes/team and never saved, matching the same "preview
+// only" spirit StartScreen.js already uses for the starter-selection sprite.
+const DEX_PREVIEW_LEVEL = 50;
+const DEX_PREVIEW_IVS = { hp: 31, atkFis: 31, atkEsp: 31, def: 31, defEsp: 31, speed: 31 };
+function buildDexPreviewInstance(species) {
+  return createPokeInstance(species.id, DEX_PREVIEW_LEVEL, { ivs: DEX_PREVIEW_IVS, rarity: 'comum' });
 }
 
 // Every species' `description` field is spreadsheet text like "Pokedex
@@ -155,6 +115,7 @@ function buildSpeciesDetail(species, gameState, controller) {
   detail.dataset.speciesName = species.name.toLowerCase();
   detail.innerHTML = `
     <div class="card-info">
+      <button class="pokedex-open-card-btn">🪪 Ver cartao do POKE</button>
       <div class="card-title">Status base</div>
       ${baseStatGridHtml(species)}
       <div class="card-title">Fraquezas e resistencias</div>
@@ -165,6 +126,11 @@ function buildSpeciesDetail(species, gameState, controller) {
       <div class="pokedex-hunt-links"></div>
     </div>
   `;
+  detail.querySelector('.pokedex-open-card-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    showPokeProfileModal(buildDexPreviewInstance(species), species);
+  });
+
   const linksEl = detail.querySelector('.pokedex-hunt-links');
   if (hunts.length === 0) {
     linksEl.innerHTML = '<span class="card-sub">Nenhuma hunt conhecida ainda.</span>';

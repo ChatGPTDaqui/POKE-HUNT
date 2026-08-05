@@ -1643,6 +1643,18 @@ button.confirm-danger {
   margin-top: 8px;
 }
 
+/* Pokedex's "abrir cartao" button (see PokedexMenu.js#buildSpeciesDetail) —
+   opens the same animated profile card (PokeProfileModal.js) every other
+   menu already uses, built from a fixed Lv50/max-IV showcase instance since
+   the Pokedex has no owned poke to show. */
+.pokedex-open-card-btn {
+  width: 100%;
+  margin-bottom: 8px;
+  background: rgba(245, 166, 35, 0.12);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
 .moveset-table {
   display: flex;
   flex-direction: column;

@@ -4,6 +4,7 @@ import { gen5SpriteUrl } from '../../data/gen5Sprites.js';
 import { colorForType } from '../../data/typeColors.js';
 import { pokeNameTagHtml } from './swatchHtml.js';
 import { rarityOf } from '../../data/rarity.js';
+import { weaknessSectionHtml } from './typeMatchups.js';
 
 const IV_LABELS = { hp: 'HP', atkFis: 'AF', atkEsp: 'AE', def: 'DF', defEsp: 'DE', speed: 'VL' };
 
@@ -69,6 +70,8 @@ export function buildStatDetail(poke, species) {
       ${Object.entries(poke.ivs).map(([key, value]) => `<span class="iv-chip">${IV_LABELS[key] || key} <b>${value}</b></span>`).join('')}
     </div>
     <div class="card-sub">Habilidades: ${abilityNames.length ? abilityNames.join(', ') : 'Nenhuma ainda'}</div>
+    <div class="card-title" style="margin-top:8px">Fraquezas e resistencias</div>
+    ${weaknessSectionHtml(species)}
   `;
   return detail;
 }
