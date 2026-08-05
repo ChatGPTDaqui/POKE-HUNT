@@ -257,6 +257,7 @@ function resolveHit(world, hit, defeatedEnemies, onPlayerFainted) {
     // AOE moves draw at their actual splash diameter instead of the flat
     // default size, so the ring visually matches the area it really hits.
     worldSize: isAoe ? ability.radius * 2 : undefined,
+    elementType: ability.type,
   }));
 
   if (!target.isDead) return;

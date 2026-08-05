@@ -6,6 +6,7 @@ import { footOffsetFraction } from '../data/spriteFootOffsets.js';
 import { hpBarFillColor } from '../data/hpBar.js';
 import { AURA_COLORS } from '../data/auraColors.js';
 import { LEGENDARY_SPECIES_IDS } from '../data/legendaries.js';
+import { impactShapeForType } from '../data/impactShapes.js';
 
 const IV_MAX = 31;
 
@@ -288,12 +289,172 @@ export function drawNameLevelTag(ctx, entity) {
 // visually matches the area it actually covers.
 const IMPACT_BASE_SIZE = 44; // diameter for single-target hits (no worldSize)
 
+// Draws one particle of the given shape family, already translated to its
+// world position and rotated so local +x points "outward" (away from the
+// hit center) — every case below draws in that local space, centered on the
+// origin, sized by `size`. See data/impactShapes.js for the type->shape
+// mapping and the rationale (no real spritesheet assets exist yet, so this
+// IS the visual fallback — themed shapes instead of one generic dot).
+function drawShapeParticle(ctx, shape, size) {
+  const r = size / 2;
+  switch (shape) {
+    case 'flame': {
+      // Teardrop flickering outward: rounded base, pointed flame tip.
+      ctx.beginPath();
+      ctx.moveTo(-r, 0);
+      ctx.quadraticCurveTo(-r * 0.3, -r * 0.9, r, -r * 0.15);
+      ctx.quadraticCurveTo(r * 0.5, 0, r, r * 0.15);
+      ctx.quadraticCurveTo(-r * 0.3, r * 0.9, -r, 0);
+      ctx.fill();
+      break;
+    }
+    case 'droplet': {
+      ctx.beginPath();
+      ctx.moveTo(r, 0);
+      ctx.quadraticCurveTo(r * 0.2, -r * 0.75, -r, 0);
+      ctx.quadraticCurveTo(r * 0.2, r * 0.75, r, 0);
+      ctx.fill();
+      break;
+    }
+    case 'leaf': {
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r, r * 0.45, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-r, 0);
+      ctx.lineTo(r, 0);
+      ctx.lineWidth = Math.max(1, r * 0.12);
+      ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+      ctx.stroke();
+      break;
+    }
+    case 'shard': {
+      ctx.beginPath();
+      ctx.moveTo(r, 0);
+      ctx.lineTo(-r * 0.5, -r * 0.5);
+      ctx.lineTo(-r * 0.5, r * 0.5);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+    case 'bolt': {
+      ctx.lineWidth = Math.max(1.5, r * 0.35);
+      ctx.strokeStyle = ctx.fillStyle;
+      ctx.beginPath();
+      ctx.moveTo(-r, -r * 0.6);
+      ctx.lineTo(-r * 0.1, -r * 0.1);
+      ctx.lineTo(-r * 0.4, r * 0.1);
+      ctx.lineTo(r, r * 0.7);
+      ctx.stroke();
+      break;
+    }
+    case 'crystal': {
+      ctx.beginPath();
+      ctx.moveTo(0, -r);
+      ctx.lineTo(r * 0.55, 0);
+      ctx.lineTo(0, r);
+      ctx.lineTo(-r * 0.55, 0);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+    case 'star': {
+      const spikes = 4;
+      ctx.beginPath();
+      for (let i = 0; i < spikes * 2; i++) {
+        const rad = i % 2 === 0 ? r : r * 0.35;
+        const ang = (Math.PI / spikes) * i - Math.PI / 2;
+        const px = Math.cos(ang) * rad;
+        const py = Math.sin(ang) * rad;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+    case 'bubble': {
+      ctx.globalAlpha *= 0.7;
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha *= 1.4;
+      ctx.beginPath();
+      ctx.arc(-r * 0.3, -r * 0.3, r * 0.25, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      break;
+    }
+    case 'chunk': {
+      ctx.save();
+      ctx.rotate(0.5);
+      ctx.fillRect(-r * 0.5, -r * 0.5, r, r);
+      ctx.restore();
+      break;
+    }
+    case 'feather': {
+      ctx.beginPath();
+      ctx.moveTo(r, 0);
+      ctx.quadraticCurveTo(0, -r * 0.55, -r, -r * 0.1);
+      ctx.quadraticCurveTo(0, 0, r, 0);
+      ctx.quadraticCurveTo(0, r * 0.05, -r, r * 0.1);
+      ctx.quadraticCurveTo(0, r * 0.55, r, 0);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.9, 0);
+      ctx.lineTo(r * 0.9, 0);
+      ctx.lineWidth = Math.max(1, r * 0.1);
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+      ctx.stroke();
+      break;
+    }
+    case 'swirl': {
+      ctx.lineWidth = Math.max(1.5, r * 0.3);
+      ctx.strokeStyle = ctx.fillStyle;
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0.3, Math.PI * 1.5);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(r * 0.85, 0, r * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'wisp': {
+      ctx.globalAlpha *= 0.6;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r, r * 0.7, 0, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'claw': {
+      ctx.lineWidth = Math.max(1.5, r * 0.28);
+      ctx.strokeStyle = ctx.fillStyle;
+      ctx.lineCap = 'round';
+      for (let i = -1; i <= 1; i++) {
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.6, -r * 0.6 + i * r * 0.5);
+        ctx.lineTo(r * 0.6, r * 0.6 + i * r * 0.5);
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'dot':
+    default: {
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+  }
+}
+
 function drawImpactBurst(ctx, effect) {
   const { targetX: x, targetY: y, color, progress } = effect;
   const growth = Math.min(1, progress / 0.25); // quick pop-in
   const fade = progress < 0.25 ? 1 : 1 - (progress - 0.25) / 0.75;
   const alpha = Math.max(0, Math.min(1, fade));
   const coreRadius = ((effect.worldSize || IMPACT_BASE_SIZE) / 2) * (0.55 + growth * 0.45);
+  const shape = impactShapeForType(effect.elementType);
 
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
@@ -309,19 +470,23 @@ function drawImpactBurst(ctx, effect) {
   ctx.fill();
 
   // Outward-streaking particles at fixed angles derived from index (no RNG
-  // needed each frame, so the burst looks identical across its whole life).
+  // needed each frame, so the burst looks identical across its whole life) —
+  // each one is drawn as the move's typed shape (flame/droplet/leaf/...)
+  // instead of a plain dot, oriented to face outward along its travel angle.
   const particleCount = 7;
   const travel = coreRadius * 1.6 * progress;
   for (let i = 0; i < particleCount; i++) {
     const angle = (i / particleCount) * Math.PI * 2 + i * 0.7;
     const px = x + Math.cos(angle) * travel;
     const py = y + Math.sin(angle) * travel;
-    const particleRadius = coreRadius * 0.22 * (1 - progress);
-    if (particleRadius <= 0) continue;
-    ctx.beginPath();
+    const particleSize = coreRadius * 0.44 * (1 - progress * 0.7);
+    if (particleSize <= 0) continue;
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(angle);
     ctx.fillStyle = color;
-    ctx.arc(px, py, particleRadius, 0, Math.PI * 2);
-    ctx.fill();
+    drawShapeParticle(ctx, shape, particleSize);
+    ctx.restore();
   }
   ctx.restore();
 }
@@ -332,6 +497,7 @@ function drawAoeRing(ctx, effect) {
   const eased = 1 - (1 - progress) * (1 - progress); // ease-out
   const radius = maxRadius * eased;
   const alpha = Math.max(0, 1 - progress);
+  const shape = impactShapeForType(effect.elementType);
 
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
@@ -350,6 +516,26 @@ function drawAoeRing(ctx, effect) {
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, Math.PI * 2);
   ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Type-shaped particles scattered around the ring's live circumference —
+  // "ampliadas e de maior fidelidade" than the single-target burst (explicit
+  // user request): more of them, bigger, riding the ring outward so the
+  // AOE's element reads clearly even at a glance, on top of the ring already
+  // communicating the real splash radius.
+  const particleCount = 12;
+  const particleSize = Math.max(6, maxRadius * 0.16) * (0.4 + 0.6 * (1 - progress));
+  for (let i = 0; i < particleCount; i++) {
+    const angle = (i / particleCount) * Math.PI * 2 + 0.3;
+    const px = x + Math.cos(angle) * radius;
+    const py = y + Math.sin(angle) * radius;
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(angle);
+    ctx.fillStyle = color;
+    drawShapeParticle(ctx, shape, particleSize);
+    ctx.restore();
+  }
 
   ctx.restore();
 }
