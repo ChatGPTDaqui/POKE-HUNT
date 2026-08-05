@@ -188,6 +188,8 @@ function buildLanceHunt() {
     autoSwitchTeamOnFaint: true,
     sequence: enemyPool, // ordered encounter ids — main.js walks through them one at a time instead of picking randomly
     unlocksContinentOnClear: 'kanto', // consumed generically by main.js#stepWorld once the whole sequence is cleared
+    startCountdown: 5, // explicit user request — 5..0 countdown before Lance's first POKE spawns (main.js#buildMapWorld/stepWorld)
+    keepCorpses: true, // explicit user request — defeated POKEs here stay on the field as "bodies" instead of despawning after DEATH_ANIM_GRACE_PERIOD
     respawnDelay: 3,
     spawnPoints: [{ x: 700, y: 450 }],
     enemyPool,

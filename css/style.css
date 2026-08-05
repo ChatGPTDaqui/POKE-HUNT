@@ -1343,6 +1343,80 @@ button.confirm-danger {
   100% { background: rgba(0, 0, 0, 0); }
 }
 
+/* ---------- VITORIA/DERROTA banner (sequence-boss fights, e.g. Champion
+   Lance) — same self-dismissing full-viewport overlay as LVL UP!, just
+   parametrized by outcome via a variant class (see battleResultSplash.js) ---------- */
+.battle-result-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  animation: level-up-splash-fade 2.5s ease-out forwards;
+}
+
+.battle-result-splash-text {
+  font-family: 'Courier New', monospace;
+  font-weight: 900;
+  font-size: clamp(44px, 10vw, 100px);
+  letter-spacing: 4px;
+  -webkit-text-stroke: 3px #1a1200;
+  text-shadow:
+    3px 3px 0 #1a1200,
+    -3px 3px 0 #1a1200,
+    3px -3px 0 #1a1200,
+    -3px -3px 0 #1a1200,
+    6px 6px 0 rgba(0, 0, 0, 0.35);
+  animation: level-up-splash-pop 2.5s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+}
+
+.battle-result-splash-victory .battle-result-splash-text {
+  color: #4ade80;
+  text-shadow:
+    3px 3px 0 #1a1200, -3px 3px 0 #1a1200, 3px -3px 0 #1a1200, -3px -3px 0 #1a1200,
+    6px 6px 0 rgba(0, 0, 0, 0.35), 0 0 28px rgba(74, 222, 128, 0.65);
+}
+
+.battle-result-splash-defeat .battle-result-splash-text {
+  color: var(--color-danger);
+  text-shadow:
+    3px 3px 0 #1a1200, -3px 3px 0 #1a1200, 3px -3px 0 #1a1200, -3px -3px 0 #1a1200,
+    6px 6px 0 rgba(0, 0, 0, 0.35), 0 0 28px rgba(214, 40, 40, 0.65);
+}
+
+/* ---------- Lance intro countdown (5..0 before its first POKE spawns) ---------- */
+.lance-countdown-modal {
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 50;
+  display: none;
+  pointer-events: none;
+}
+
+.lance-countdown-modal.visible {
+  display: block;
+}
+
+.lance-countdown-modal .lance-countdown-title {
+  color: var(--color-accent);
+  font-size: 14px;
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+
+.lance-countdown-modal .lance-countdown-count {
+  font-size: 64px;
+  font-weight: 900;
+  color: #fff;
+  -webkit-text-stroke: 2px #1a1200;
+  text-shadow: 3px 3px 0 #1a1200, -3px 3px 0 #1a1200, 3px -3px 0 #1a1200, -3px -3px 0 #1a1200;
+}
+
 /* ---------- POKE profile modal (Status/Golpes) ---------- */
 .poke-profile-modal {
   position: relative;

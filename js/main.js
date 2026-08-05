@@ -32,6 +32,7 @@ import { simulateWorldSeconds } from './systems/OfflineSimSystem.js';
 import { UIManager } from './ui/UIManager.js';
 import { showOfflineFarmModal } from './ui/panels/offlineFarmModal.js';
 import { showLevelUpSplash } from './ui/panels/levelUpSplash.js';
+import { showBattleResultSplash } from './ui/panels/battleResultSplash.js';
 import { showAutoFloatingPanel, closeAutoFloatingPanel, isAutoFloatingPanelOpen } from './ui/panels/autoFloatingPanel.js';
 
 const STARTER_LEVEL = 1;
@@ -197,12 +198,17 @@ function buildMapWorld(mapId) {
   const player = new Player({ poke, x: mapDef.playerSpawn.x, y: mapDef.playerSpawn.y });
   if (player.isDead) player.fainted = true;
 
+  // Champion Lance's intro countdown (explicit user request): its first POKE
+  // doesn't spawn until stepWorld's countdown phase (below) finishes — every
+  // other hunt has no `startCountdown` and spawns exactly as before.
   const enemies = [];
-  if (mapDef.sequence) {
-    enemies.push(spawnSequenceEnemy(mapDef, 0));
-  } else {
-    for (let i = 0; i < mapDef.maxEnemies; i++) {
-      enemies.push(spawnEnemyAt(mapDef));
+  if (!mapDef.startCountdown) {
+    if (mapDef.sequence) {
+      enemies.push(spawnSequenceEnemy(mapDef, 0));
+    } else {
+      for (let i = 0; i < mapDef.maxEnemies; i++) {
+        enemies.push(spawnEnemyAt(mapDef));
+      }
     }
   }
 
@@ -213,6 +219,7 @@ function buildMapWorld(mapId) {
     respawnTimer: mapDef.respawnDelay,
     sequenceIndex: 0,
     sequenceCleared: false,
+    countdownRemaining: mapDef.startCountdown || null,
   };
 }
 
@@ -352,6 +359,22 @@ function stepWorld(world, dt, { silent = false } = {}) {
     return [];
   }
 
+  // Champion Lance's intro countdown (explicit user request): movement/
+  // combat/respawn are all frozen and nothing has spawned yet until this
+  // reaches 0 — only the player's own idle animation keeps playing so the
+  // screen doesn't look frozen. UIManager reads world.countdownRemaining
+  // directly to render the 5..0 number.
+  if (world.countdownRemaining != null) {
+    world.countdownRemaining -= dt;
+    if (world.countdownRemaining <= 0) {
+      world.countdownRemaining = null;
+      if (world.mapDef.sequence) world.enemies.push(spawnSequenceEnemy(world.mapDef, world.sequenceIndex));
+      else for (let i = 0; i < world.mapDef.maxEnemies; i++) world.enemies.push(spawnEnemyAt(world.mapDef));
+    }
+    if (!silent) updateAnimations(world, dt);
+    return [];
+  }
+
   updateMovement(world, dt);
   const { defeatedEnemies, playerJustFainted } = updateCombat(world, dt);
   // Must run AFTER combat: triggerAttackAnim() (called from inside
@@ -371,7 +394,13 @@ function stepWorld(world, dt, { silent = false } = {}) {
   for (const enemy of world.enemies) {
     if (enemy.isDead && enemy.deathRemovalTimer > 0) enemy.deathRemovalTimer -= dt;
   }
-  world.enemies = world.enemies.filter((e) => !e.isDead || e.deathRemovalTimer > 0);
+  // Champion Lance rule (explicit user request): defeated POKEs stay on the
+  // field as visible "bodies" instead of despawning after the usual grace
+  // period — see data/nightmareMaps.js#buildLanceHunt's keepCorpses flag.
+  // AnimationSystem.js already freezes a dead entity on its last Faint frame
+  // forever on its own, so nothing else needs to change for them to render
+  // correctly indefinitely.
+  world.enemies = world.enemies.filter((e) => !e.isDead || e.deathRemovalTimer > 0 || world.mapDef.keepCorpses);
 
   if (playerJustFainted) {
     // Runs even when silent (offline/catch-up) — same rule as every other
@@ -395,6 +424,11 @@ function stepWorld(world, dt, { silent = false } = {}) {
     // which is what UIManager's boss-defeat-modal already keys off.
     if (world.mapDef.autoSwitchTeamOnFaint) {
       const nextIndex = gameState.team.findIndex((p) => p.hp > 0);
+      if (nextIndex === -1 && !silent) {
+        // Whole team is down — this is the real, final defeat (as opposed to
+        // an intermediate faint the auto-switch below just recovers from).
+        showBattleResultSplash('DERROTA', 'defeat');
+      }
       if (nextIndex !== -1) {
         gameState.setActiveIndex(nextIndex);
         world.player.poke = gameState.activePoke;
@@ -439,8 +473,11 @@ function stepWorld(world, dt, { silent = false } = {}) {
     const continent = world.mapDef.unlocksContinentOnClear;
     const wasLocked = !gameState.isContinentUnlocked(continent);
     gameState.unlockContinent(continent);
-    if (!silent && wasLocked) {
-      eventBus.emit('toast', { message: `Voce derrotou o Campeao Lance! O Novo Continente foi desbloqueado.`, type: 'success', channel: 'world' });
+    if (!silent) {
+      showBattleResultSplash('VITORIA', 'victory');
+      if (wasLocked) {
+        eventBus.emit('toast', { message: `Voce derrotou o Campeao Lance! O Novo Continente foi desbloqueado.`, type: 'success', channel: 'world' });
+      }
     }
   }
 

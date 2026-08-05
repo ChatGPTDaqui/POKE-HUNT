@@ -40,6 +40,7 @@ export class UIManager {
     this.autoItemBadgeEl = document.getElementById('auto-item-badge');
     this.reviveModalEl = document.getElementById('revive-modal');
     this.bossDefeatModalEl = document.getElementById('boss-defeat-modal');
+    this.lanceCountdownModalEl = document.getElementById('lance-countdown-modal');
     this.chatLog = new ChatLog(document.getElementById('chat-log'));
     this.currentScreen = null;
     // Scroll position within each screen's scrolling body, keyed by screen
@@ -207,6 +208,23 @@ export class UIManager {
     updateAutoFloatingPanelCounts(this.gameState);
     this._updateReviveModal();
     this._updateBossDefeatModal();
+    this._updateLanceCountdownModal();
+  }
+
+  // Champion Lance's intro countdown (world.countdownRemaining, see
+  // main.js#buildMapWorld/stepWorld) — no interactive elements, so a plain
+  // innerHTML rebuild every frame is safe, same as the revive modal above.
+  _updateLanceCountdownModal() {
+    const world = this.getWorld();
+    const remaining = world && world.countdownRemaining;
+    const visible = remaining != null && remaining > 0;
+    this.lanceCountdownModalEl.classList.toggle('visible', visible);
+    if (visible) {
+      this.lanceCountdownModalEl.innerHTML = `
+        <div class="lance-countdown-title">O Campeao Lance se aproxima...</div>
+        <div class="lance-countdown-count">${Math.ceil(remaining)}</div>
+      `;
+    }
   }
 
   // BOSS hunts disable auto-pot/auto-revive entirely (see AutoSystem.js) —
