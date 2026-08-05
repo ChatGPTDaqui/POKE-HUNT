@@ -15,6 +15,7 @@ export const PATCH_NOTES = [
       'Duplo clique num icone de habilidade liga/desliga o uso automatico dela pela IA de combate.',
       'Distancia de lure (aggro) dos selvagens reduzida para um alcance moderado (era 2.5x o valor real da planilha).',
       'POKE principal agora sempre foca e caca ativamente o inimigo vivo mais proximo pelo mapa, redefinindo o alvo a cada abate, em vez de priorizar quem ja estava vindo em sua direcao.',
+      'Hunt Inicial troca Geodude por Sentret; Wooper e Quagsire saem da zona costeira (Agua) e passam a aparecer na zona do Deserto (Terra); Dragonite agora aparece em Ruinas Ancestrais com exatamente 1% de chance.',
     ],
   },
   {

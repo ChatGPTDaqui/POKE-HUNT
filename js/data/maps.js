@@ -2,15 +2,17 @@
 // spreadsheet (see scripts/sync-planilha.js#pickTopHunts), with world
 // bounds/spawn points/background that are our own idle-game concept (the
 // spreadsheet has no equivalent for those).
-import { MAPS_DATA } from './maps.generated.js';
-import { NIGHTMARE_MAPS_DATA } from './nightmareMaps.js';
 import { createFormulaEngine } from '../core/FormulaEngine.js';
 import { FORMULAS } from './formulas.generated.js';
 import { COLLISION_GRIDS, COLLISION_GRID_CELL_SIZE } from './collisionGrids.generated.js';
 
-// Modo Pesadelo hunts (see nightmareMaps.js) are hand-authored clones merged
-// in at runtime, not part of the spreadsheet sync.
-export const MAPS = { ...MAPS_DATA, ...NIGHTMARE_MAPS_DATA };
+// Modo Pesadelo hunts (see nightmareMaps.js) and the hand-picked spawn-pool
+// edits (see huntSpawnOverrides.js) are merged in at runtime, not part of
+// the spreadsheet sync — huntSpawnOverrides.js is the one place that does
+// this merge, since it needs to patch both this file's enemyPools AND
+// data/enemies.js's encounters together.
+import { MAPS } from './huntSpawnOverrides.js';
+export { MAPS };
 
 const formulaEngine = createFormulaEngine(FORMULAS);
 // Spreadsheet-editable (see CLAUDE.md's "Balanceamento de economia" section),

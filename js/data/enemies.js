@@ -2,11 +2,13 @@
 // `${mapId}_${speciesId}` — with the real per-location level range from the
 // spreadsheet's Encontros sheet. Enemies are instances of the same POKE
 // species the player can capture.
-import { ENCOUNTERS_DATA } from './enemies.generated.js';
-import { NIGHTMARE_ENCOUNTERS_DATA } from './nightmareMaps.js';
-
-// Modo Pesadelo encounters (see nightmareMaps.js) merged in at runtime.
-export const ENCOUNTERS = { ...ENCOUNTERS_DATA, ...NIGHTMARE_ENCOUNTERS_DATA };
+// Modo Pesadelo encounters (see nightmareMaps.js) and the hand-picked
+// spawn-pool edits (see huntSpawnOverrides.js) are merged in at runtime —
+// huntSpawnOverrides.js is the one place that does this merge, since it
+// needs to patch both this file's encounters AND data/maps.js's enemyPools
+// together.
+import { ENCOUNTERS } from './huntSpawnOverrides.js';
+export { ENCOUNTERS };
 
 export function getEncounter(id) {
   return ENCOUNTERS[id] || null;
