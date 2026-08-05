@@ -81,7 +81,7 @@ export function evolvePokeInstance(pokeInstance, gameState) {
   // requirement, not an earlier stage's lower one.
   pokeInstance.minLevel = Math.max(pokeInstance.minLevel || 1, species.evolvesAtLevel);
   pokeInstance.speciesId = newSpecies.id;
-  pokeInstance.stats = computeStatsAtLevel(newSpecies, pokeInstance.level, pokeInstance.ivs, pokeInstance.rarity);
+  pokeInstance.stats = computeStatsAtLevel(newSpecies, pokeInstance.level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny);
   pokeInstance.hp = Math.max(1, Math.round(pokeInstance.stats.hp * hpRatio));
 
   const newAbilities = [];
@@ -135,7 +135,7 @@ export function grantExp(pokeInstance, amount) {
     pokeInstance.level += 1;
     leveledUp = true;
 
-    pokeInstance.stats = computeStatsAtLevel(species, pokeInstance.level, pokeInstance.ivs, pokeInstance.rarity);
+    pokeInstance.stats = computeStatsAtLevel(species, pokeInstance.level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny);
     const hpGain = pokeInstance.stats.hp - previousMaxHp;
     pokeInstance.hp = Math.min(pokeInstance.stats.hp, pokeInstance.hp + hpGain);
 
@@ -170,7 +170,7 @@ export function applyDeathExpPenalty(pokeInstance) {
   while (pokeInstance.level > floor && pokeInstance.exp < totalExpForLevel(pokeInstance.level, species.growthCurve)) {
     pokeInstance.level -= 1;
     leveledDown = true;
-    pokeInstance.stats = computeStatsAtLevel(species, pokeInstance.level, pokeInstance.ivs, pokeInstance.rarity);
+    pokeInstance.stats = computeStatsAtLevel(species, pokeInstance.level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny);
     pokeInstance.hp = Math.min(pokeInstance.hp, pokeInstance.stats.hp);
   }
 

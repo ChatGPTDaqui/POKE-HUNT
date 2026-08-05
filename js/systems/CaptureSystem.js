@@ -25,7 +25,7 @@ export function attemptCapture(gameState, defeatedPoke, ballItemId) {
 
   if (!captured) return { success: false, reason: 'roll_failed', chance };
 
-  const stats = computeStatsAtLevel(species, CAPTURE_LEVEL, defeatedPoke.ivs, defeatedPoke.rarity);
+  const stats = computeStatsAtLevel(species, CAPTURE_LEVEL, defeatedPoke.ivs, defeatedPoke.rarity, defeatedPoke.isShiny);
   const newPoke = {
     ...defeatedPoke,
     uid: `poke-${Date.now()}-${Math.floor(Math.random() * 10000)}`,

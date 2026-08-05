@@ -94,15 +94,21 @@ for (const [fromId, toId] of Object.entries(SPECIAL_EVOLUTIONS)) {
 // Real Gen2 stat formulas: floor((2*base+iv)*level/100)+5 (and the HP variant).
 // `rarityKey` is an optional multiplier on top of the real formula (see
 // data/rarity.js) — omitted/unrecognized keys default to Comum's 1x, so
-// every pre-existing call site keeps working unchanged.
-export function computeStatsAtLevel(species, level, ivs, rarityKey) {
+// every pre-existing call site keeps working unchanged. `isShiny` applies a
+// flat 1.2x on top of the real base stat, BEFORE the rarity multiplier (per
+// explicit user request) — the two stack multiplicatively (shiny+Mythic ends
+// up at 1.2 * 3 = 3.6x, not additive).
+export const SHINY_STAT_MULTIPLIER = 1.2;
+
+export function computeStatsAtLevel(species, level, ivs, rarityKey, isShiny) {
   const lvl = Math.max(1, level);
-  const multiplier = (RARITIES[rarityKey] || RARITIES.comum).statMultiplier;
+  const rarityMultiplier = (RARITIES[rarityKey] || RARITIES.comum).statMultiplier;
   const stats = {};
   for (const key of Object.keys(species.base)) {
     const formulaKey = key === 'hp' ? 'HP_FORMULA' : 'STAT_FORMULA';
     const base = formulaEngine.eval(formulaKey, { base: species.base[key], level: lvl, iv: ivs[key] });
-    stats[key] = Math.max(1, Math.round(base * multiplier));
+    const shinyBase = isShiny ? base * SHINY_STAT_MULTIPLIER : base;
+    stats[key] = Math.max(1, Math.round(shinyBase * rarityMultiplier));
   }
   return stats;
 }
@@ -135,13 +141,14 @@ export function createPokeInstance(speciesId, level = 1, { ivs: fixedIvs, rarity
   if (!species) throw new Error(`Especie desconhecida: ${speciesId}`);
   const ivs = fixedIvs || rollIvs();
   const rarity = fixedRarity || rollRarity();
-  const stats = computeStatsAtLevel(species, level, ivs, rarity);
   const shinyChance = (species.catchRate / MAX_CATCH_RATE) * SHINY_CHANCE_AT_MAX_CATCH_RATE;
+  const isShiny = rollChance(shinyChance);
+  const stats = computeStatsAtLevel(species, level, ivs, rarity, isShiny);
   return {
     uid: `poke-${nextInstanceId++}`,
     speciesId,
     level,
-    isShiny: rollChance(shinyChance),
+    isShiny,
     rarity,
     // Baseline EXP for starting AT `level` (not 0) — otherwise a poke created
     // above level 1 needs to earn the full cumulative EXP of a low-level curve
