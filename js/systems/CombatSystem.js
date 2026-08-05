@@ -5,7 +5,7 @@ import { Effect } from '../entities/Effect.js';
 import { createFormulaEngine } from '../core/FormulaEngine.js';
 import { FORMULAS } from '../data/formulas.generated.js';
 import { getEffectiveness } from '../data/typeChart.generated.js';
-import { rollChance } from '../core/Random.js';
+import { rollChance, randRange } from '../core/Random.js';
 import { triggerAttackAnim, ATTACK_ANIM_DURATION } from './AnimationSystem.js';
 
 // Damage/effects/defeat-handling land this long after an attack fires, so
@@ -49,47 +49,198 @@ function scaledCooldown(ability, speed) {
   return ability.cooldown * (SPEED_REFERENCE / Math.max(1, speed));
 }
 
+// Moves the spreadsheet marks with a `power: 1` placeholder (Magnitude,
+// Seismic Toss, Counter, ...) don't use a flat base power in the real games —
+// each has its own particular mechanic. Two shapes, both looked up by
+// ability id:
+//  - DYNAMIC_POWER_ABILITIES: computes a real power value for this hit, which
+//    then still runs through the normal ATK/DEF/STAB/effectiveness/crit/
+//    variance pipeline exactly like any other move (Magnitude/Reversal/
+//    Flail/Present/Hidden Power all work this way in the real games).
+//  - FIXED_DAMAGE_ABILITIES: computes the FINAL raw HP amount directly,
+//    bypassing ATK/DEF/STAB — matches how these moves actually behave
+//    (Seismic Toss/Night Shade/Dragon Rage/Super Fang/Horn Drill/Fissure/
+//    Psywave/Counter/Mirror Coat). Still zeroed out by full type immunity,
+//    but skips crit and the 85-100% random roll, since the real moves don't
+//    apply those either.
+function averageIv(ivs) {
+  const vals = ivs ? Object.values(ivs) : [];
+  if (!vals.length) return 0;
+  return vals.reduce((sum, v) => sum + v, 0) / vals.length;
+}
+
+// Real Gen2 Magnitude roll: 7 possible magnitudes (4-10), each its own
+// probability and fixed power.
+const MAGNITUDE_TABLE = [
+  { chance: 5, power: 10 }, { chance: 10, power: 30 }, { chance: 20, power: 50 },
+  { chance: 30, power: 70 }, { chance: 20, power: 90 }, { chance: 10, power: 110 },
+  { chance: 5, power: 150 },
+];
+function rollMagnitudePower() {
+  let roll = Math.random() * 100;
+  for (const tier of MAGNITUDE_TABLE) {
+    if (roll < tier.chance) return tier.power;
+    roll -= tier.chance;
+  }
+  return MAGNITUDE_TABLE[MAGNITUDE_TABLE.length - 1].power;
+}
+
+// Reversal/Flail: power climbs as the user's own remaining HP% drops.
+function hpRatioPower(attackerPoke) {
+  const ratio = Math.max(0, attackerPoke.hp) / attackerPoke.stats.hp;
+  if (ratio <= 0.04) return 200;
+  if (ratio <= 0.09) return 150;
+  if (ratio <= 0.16) return 100;
+  if (ratio <= 0.32) return 80;
+  if (ratio <= 0.48) return 40;
+  return 20;
+}
+
+// Present's real 4th outcome (heal the target) has no equivalent in this
+// engine (no heal-the-opponent mechanic exists), so its odds are folded
+// proportionally into the 3 damage tiers instead.
+function rollPresentPower() {
+  const roll = Math.random();
+  if (roll < 0.4) return 40;
+  if (roll < 0.7) return 80;
+  return 120;
+}
+
+// This roster's IVs are on a 0-31 scale (Gen3+ convention), not the 0-15 DVs
+// Gen2's real Hidden Power type/power formula reads from — with no DV data to
+// derive a "real" type from, this keeps the spreadsheet's NORMAL-type
+// placeholder and only makes the power dynamic (30-70 range, scaled by how
+// close to max the POKE's average IV is), documented as a deliberate
+// simplification rather than a faithful port of the Gen2 formula.
+function hiddenPowerPower(attackerPoke) {
+  return 30 + Math.round((averageIv(attackerPoke.ivs) / 31) * 40);
+}
+
+// Real Gen1/2 Psywave: random damage roughly 0.5x-1.5x the user's level,
+// bypassing ATK/DEF entirely.
+function psywaveDamage(attackerPoke) {
+  return Math.max(1, Math.round(attackerPoke.level * randRange(0.5, 1.5)));
+}
+
+const DYNAMIC_POWER_ABILITIES = {
+  magnitude: () => rollMagnitudePower(),
+  reversal: (attackerPoke) => hpRatioPower(attackerPoke),
+  flail: (attackerPoke) => hpRatioPower(attackerPoke),
+  present: () => rollPresentPower(),
+  hidden_power: (attackerPoke) => hiddenPowerPower(attackerPoke),
+};
+
+// Counter/Mirror Coat reflect 2x the last hit of the matching category the
+// user itself took — real Gen2 only remembers "this turn"; approximated here
+// as a short recent window since combat isn't strictly turn-based. With
+// nothing recent to reflect, real Counter just fails (0 damage), but a
+// hard-0 move an idle auto-battler's AI might rank highly would just look
+// broken, so the caller (specialDamageFor) falls back to a plain hit instead.
+const COUNTER_MEMORY_WINDOW = 3; // seconds
+function counterDamage(attackerEntity, category) {
+  const memory = attackerEntity.lastDamageTaken[category];
+  if (memory.amount > 0 && memory.age <= COUNTER_MEMORY_WINDOW) return memory.amount * 2;
+  return null;
+}
+
+const FIXED_DAMAGE_ABILITIES = {
+  seismic_toss: (attackerPoke) => attackerPoke.level,
+  night_shade: (attackerPoke) => attackerPoke.level,
+  dragon_rage: () => 40,
+  super_fang: (attackerPoke, defenderPoke) => Math.max(1, Math.floor(defenderPoke.hp / 2)),
+  horn_drill: (attackerPoke, defenderPoke) => defenderPoke.hp,
+  fissure: (attackerPoke, defenderPoke) => defenderPoke.hp,
+  psywave: (attackerPoke) => psywaveDamage(attackerPoke),
+  counter: (attackerPoke, defenderPoke, attackerEntity) => counterDamage(attackerEntity, 'physical'),
+  mirror_coat: (attackerPoke, defenderPoke, attackerEntity) => counterDamage(attackerEntity, 'special'),
+};
+
+// Returns null (use the ability's own flat `power` through the normal
+// pipeline) or one of:
+//  { mode: 'dynamicPower', power }
+//  { mode: 'fixed', amount }
+function specialDamageFor(ability, attackerEntity, defenderEntity) {
+  const attackerPoke = attackerEntity.poke;
+  const defenderPoke = defenderEntity.poke;
+
+  const dynamic = DYNAMIC_POWER_ABILITIES[ability.id];
+  if (dynamic) return { mode: 'dynamicPower', power: dynamic(attackerPoke, defenderPoke, attackerEntity, defenderEntity) };
+
+  const fixed = FIXED_DAMAGE_ABILITIES[ability.id];
+  if (fixed) {
+    const amount = fixed(attackerPoke, defenderPoke, attackerEntity, defenderEntity);
+    if (amount === null) return { mode: 'dynamicPower', power: 40 }; // Counter/Mirror Coat with nothing to reflect
+    return { mode: 'fixed', amount };
+  }
+
+  return null;
+}
+
 // Rough damage estimate (no crit, no roll variation) used only to rank
 // candidate abilities against a specific target — mirrors computeDamage's
 // pipeline minus the two random steps.
-function estimateDamage(attackerPoke, defenderPoke, ability) {
+function estimateDamage(attackerEntity, defenderEntity, ability) {
+  const attackerPoke = attackerEntity.poke;
+  const defenderPoke = defenderEntity.poke;
   const attackerSpecies = SPECIES[attackerPoke.speciesId];
   const defenderSpecies = SPECIES[defenderPoke.speciesId];
+  const effectivenessMultiplier = getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2);
+  if (effectivenessMultiplier === 0) return 0;
+
+  const special = specialDamageFor(ability, attackerEntity, defenderEntity);
+  if (special && special.mode === 'fixed') return special.amount;
+
   const isPhysical = ability.category === 'physical';
   const atk = isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp;
   const def = isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp;
+  const power = special && special.mode === 'dynamicPower' ? special.power : ability.power;
 
-  let dmg = formulaEngine.eval('DAMAGE_BASE', { level: attackerPoke.level, power: ability.power, atk, def });
+  let dmg = formulaEngine.eval('DAMAGE_BASE', { level: attackerPoke.level, power, atk, def });
 
   const isStab = ability.type && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2);
   if (isStab) dmg *= STAB_MULTIPLIER;
 
-  dmg *= getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2);
+  dmg *= effectivenessMultiplier;
   return dmg;
 }
 
 // Real Gen2 damage pipeline: DAMAGE_BASE -> STAB -> type effectiveness ->
 // crit -> 85-100% variation. Returns the final amount plus enough info for
-// the floating combat-text popup (effectiveness label, crit).
-function computeDamage(attackerPoke, defenderPoke, ability) {
+// the floating combat-text popup (effectiveness label, crit). Fixed-damage
+// moves (see specialDamageFor) skip straight to a raw amount and bypass
+// STAB/crit/variance, matching how they actually work — but are still
+// zeroed out by full type immunity.
+function computeDamage(attackerEntity, defenderEntity, ability) {
+  const attackerPoke = attackerEntity.poke;
+  const defenderPoke = defenderEntity.poke;
   const attackerSpecies = SPECIES[attackerPoke.speciesId];
   const defenderSpecies = SPECIES[defenderPoke.speciesId];
-  const isPhysical = ability.category === 'physical';
-  const atk = isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp;
-  const def = isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp;
-
-  let dmg = formulaEngine.eval('DAMAGE_BASE', { level: attackerPoke.level, power: ability.power, atk, def });
-
-  const isStab = ability.type && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2);
-  if (isStab) dmg *= STAB_MULTIPLIER;
-
   const effectivenessMultiplier = getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2);
-  dmg *= effectivenessMultiplier;
+  const special = specialDamageFor(ability, attackerEntity, defenderEntity);
 
-  const isCrit = rollChance(CRIT_CHANCE);
-  if (isCrit) dmg *= CRIT_MULTIPLIER;
+  let dmg;
+  let isCrit = false;
 
-  dmg *= formulaEngine.eval('DAMAGE_VARIATION');
+  if (special && special.mode === 'fixed') {
+    dmg = effectivenessMultiplier === 0 ? 0 : special.amount;
+  } else {
+    const isPhysical = ability.category === 'physical';
+    const atk = isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp;
+    const def = isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp;
+    const power = special && special.mode === 'dynamicPower' ? special.power : ability.power;
+
+    dmg = formulaEngine.eval('DAMAGE_BASE', { level: attackerPoke.level, power, atk, def });
+
+    const isStab = ability.type && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2);
+    if (isStab) dmg *= STAB_MULTIPLIER;
+
+    dmg *= effectivenessMultiplier;
+
+    isCrit = rollChance(CRIT_CHANCE);
+    if (isCrit) dmg *= CRIT_MULTIPLIER;
+
+    dmg *= formulaEngine.eval('DAMAGE_VARIATION');
+  }
 
   let effectiveness = 'normal';
   let effectivenessLabel = null;
@@ -108,7 +259,7 @@ function computeDamage(attackerPoke, defenderPoke, ability) {
   }
 
   return {
-    amount: Math.max(1, Math.round(dmg)),
+    amount: effectivenessMultiplier === 0 ? 0 : Math.max(1, Math.round(dmg)),
     effectiveness,
     effectivenessLabel,
     isCrit,
@@ -159,7 +310,7 @@ function basicAttackFor(attackerSpecies) {
 // in the data files for possible future use but are inert in combat for now.
 // `aoeTargetCounter` is a function (ability) => number of targets an AOE cast
 // would hit, used to prefer AOE when it would strike multiple enemies.
-function pickAbility(entity, defenderPoke, aoeTargetCounter) {
+function pickAbility(entity, defenderEntity, aoeTargetCounter) {
   const attackerSpecies = SPECIES[entity.poke.speciesId];
   const candidateIds = [...entity.poke.unlockedAbilities, BASIC_ATTACK.id];
   const ready = candidateIds
@@ -171,7 +322,7 @@ function pickAbility(entity, defenderPoke, aoeTargetCounter) {
   const aoeReady = ready.filter((a) => a.target === 'aoe' && aoeTargetCounter(a) >= 2);
   const pool = aoeReady.length > 0 ? aoeReady : ready;
   return pool.reduce((best, a) => (
-    estimateDamage(entity.poke, defenderPoke, a) > estimateDamage(entity.poke, defenderPoke, best) ? a : best
+    estimateDamage(entity, defenderEntity, a) > estimateDamage(entity, defenderEntity, best) ? a : best
   ));
 }
 
@@ -214,7 +365,7 @@ function executePlayerAction(world, player, engagedEnemies) {
   if (!player.canAct()) return;
 
   const primaryTarget = engagedEnemies[0];
-  const ability = pickAbility(player, primaryTarget.poke, (a) =>
+  const ability = pickAbility(player, primaryTarget, (a) =>
     engagedEnemies.filter((e) => !e.isDead && Math.hypot(e.x - player.x, e.y - player.y) <= a.radius).length
   );
   if (!ability) return;
@@ -237,7 +388,7 @@ function executePlayerAction(world, player, engagedEnemies) {
 function executeEnemyAction(world, enemy, player) {
   if (!enemy.canAct()) return;
 
-  const ability = pickAbility(enemy, player.poke, () => 1); // enemies only ever target the single player
+  const ability = pickAbility(enemy, player, () => 1); // enemies only ever target the single player
   if (!ability) return;
 
   enemy.startCooldown(ability.id, scaledCooldown(ability, enemy.poke.stats.speed));
@@ -273,8 +424,8 @@ function resolveHit(world, hit, defeatedEnemies, onPlayerFainted) {
 
   if (target.isDead) return; // e.g. an AOE ally already finished it off first
 
-  const result = computeDamage(attacker.poke, target.poke, ability);
-  target.takeDamage(result.amount);
+  const result = computeDamage(attacker, target, ability);
+  target.takeDamage(result.amount, ability.category);
   spawnDamageNumber(world, target, result);
 
   const isPlayerAttacker = attacker === world.player;

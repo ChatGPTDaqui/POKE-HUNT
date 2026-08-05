@@ -20,6 +20,15 @@ export class Entity {
     this.deathHandled = false;
     this.flashTimer = 0; // brief white flash when taking damage, purely visual
 
+    // Last hit taken per category, read by Counter (physical) / Mirror Coat
+    // (special) to reflect 2x that amount — see CombatSystem.js#counterDamage.
+    // `age` grows every tickCooldowns(dt) call and gates how "recent" a hit
+    // has to be to still count as reflectable.
+    this.lastDamageTaken = {
+      physical: { amount: 0, age: Infinity },
+      special: { amount: 0, age: Infinity },
+    };
+
     // Battle sprite animation state (see systems/AnimationSystem.js). Attack
     // animations (Shoot/Charge) briefly override the movement-driven one.
     this.battleAnim = null; // resolved {name, url, frameWidth, frameHeight, durations}
@@ -93,6 +102,8 @@ export class Entity {
     }
     if (this.globalCooldown > 0) this.globalCooldown = Math.max(0, this.globalCooldown - dt);
     if (this.flashTimer > 0) this.flashTimer = Math.max(0, this.flashTimer - dt);
+    this.lastDamageTaken.physical.age += dt;
+    this.lastDamageTaken.special.age += dt;
   }
 
   isAbilityReady(abilityId) {
@@ -114,9 +125,12 @@ export class Entity {
     this.globalCooldown = seconds;
   }
 
-  takeDamage(amount) {
+  takeDamage(amount, category) {
     this.poke.hp = Math.max(0, this.poke.hp - amount);
     this.flashTimer = 0.15;
+    if (category === 'physical' || category === 'special') {
+      this.lastDamageTaken[category] = { amount, age: 0 };
+    }
   }
 
   heal(amount) {
