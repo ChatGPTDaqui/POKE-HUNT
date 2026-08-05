@@ -25,6 +25,16 @@ const STAB_MULTIPLIER = formulaEngine.eval('STAB_MULTIPLIER');
 const CRIT_CHANCE = formulaEngine.eval('CRIT_CHANCE');
 const CRIT_MULTIPLIER = formulaEngine.eval('CRIT_MULTIPLIER');
 
+// Real Gen1/2 self-KO moves — explicit user-reported bug: these dealt damage
+// to the TARGET only, with no recoil at all on the user, unlike the real
+// games. Fixed per explicit spec: using either one costs the user 50% of
+// their OWN current HP (not a full faint like the real games — a lighter,
+// spreadsheet-independent debuff), applied once per cast regardless of how
+// many enemies the AOE actually hits (see the isAoeVisual branch of
+// resolveHit below, which already fires exactly once per cast).
+const SELF_DESTRUCT_ABILITY_KEYS = new Set(['explosion', 'selfdestruct']);
+const SELF_DESTRUCT_HP_LOSS_PERCENT = 0.5;
+
 // Both spreadsheet-editable (see CLAUDE.md's "Balanceamento de economia"
 // section) with fallbacks matching the old hardcoded values.
 const SPEED_REFERENCE = formulaEngine.evalOrDefault('ATTACK_SPEED_REFERENCE', 100); // speed stat value that maps to an ability's listed cooldown as-is
@@ -308,11 +318,18 @@ function basicAttackFor(attackerSpecies) {
 // Picks the ready ability that deals the most damage to `defenderPoke`.
 // Status/non-damage moves (power 0) are excluded from selection — they stay
 // in the data files for possible future use but are inert in combat for now.
+// Moves the player double-clicked off in AbilityHUD.js (`poke.disabledAbilities`,
+// explicit user request) are excluded from auto-selection the same way — most
+// useful for opting a POKE out of ever self-destructing (see
+// SELF_DESTRUCT_ABILITY_KEYS below), but works as a general per-move on/off
+// switch. Wild enemies never have this field set, so the filter is a no-op
+// for them.
 // `aoeTargetCounter` is a function (ability) => number of targets an AOE cast
 // would hit, used to prefer AOE when it would strike multiple enemies.
 function pickAbility(entity, defenderEntity, aoeTargetCounter) {
   const attackerSpecies = SPECIES[entity.poke.speciesId];
-  const candidateIds = [...entity.poke.unlockedAbilities, BASIC_ATTACK.id];
+  const disabled = entity.poke.disabledAbilities || {};
+  const candidateIds = [...entity.poke.unlockedAbilities, BASIC_ATTACK.id].filter((id) => !disabled[id]);
   const ready = candidateIds
     .map((id) => (id === BASIC_ATTACK.id ? basicAttackFor(attackerSpecies) : getAbility(id)))
     .filter((ability) => isDamagingAbility(ability) && entity.isAbilityReady(ability.id));
@@ -419,6 +436,23 @@ function resolveHit(world, hit, defeatedEnemies, onPlayerFainted) {
       worldSize: ability.radius * 2,
       elementType: ability.type,
     }));
+
+    if (SELF_DESTRUCT_ABILITY_KEYS.has(ability.id) && !attacker.isDead) {
+      const recoil = Math.round(attacker.poke.hp * SELF_DESTRUCT_HP_LOSS_PERCENT);
+      attacker.takeDamage(recoil);
+      spawnDamageNumber(world, attacker, { amount: recoil, effectiveness: 'normal', effectivenessLabel: null, isCrit: false });
+      if (attacker.isDead) {
+        if (attacker === world.player) {
+          if (!attacker.fainted) {
+            attacker.fainted = true;
+            onPlayerFainted();
+          }
+        } else if (!attacker.deathHandled) {
+          attacker.deathHandled = true;
+          defeatedEnemies.push(attacker);
+        }
+      }
+    }
     return;
   }
 

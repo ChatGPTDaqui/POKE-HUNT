@@ -287,6 +287,22 @@ select:focus, input[type="number"]:focus, input[type="text"]:focus {
   color: #fff;
 }
 
+/* Toggled off via double-click (AbilityHUD.js#ensureToggleListener) — the
+   auto-battle AI will never pick this move until it's toggled back on.
+   Desaturated + a persistent red "OFF" overlay (unlike the cooldown overlay,
+   which clears once ready) so the off state reads as a deliberate choice,
+   not a temporarily-unready move. */
+.ability-slot.disabled {
+  filter: grayscale(0.85) brightness(0.6);
+}
+
+.ability-slot .ability-off-overlay {
+  background: rgba(120, 10, 10, 0.75);
+  font-size: 9px;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+}
+
 /* Damage preview vs. the current/nearest target — sits in a strip below the
    move label, layered above the cooldown-overlay (z-index) so it stays
    readable even while the ability is on cooldown. */

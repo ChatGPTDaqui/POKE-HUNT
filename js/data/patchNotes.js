@@ -11,6 +11,8 @@ export const PATCH_NOTES = [
     title: 'Golpe AoE de nivel 50, debuffs reais, IA de caca ativa e ajustes de Lance',
     highlights: [
       'Todo POKE agora aprende um golpe em area exclusivo ao atingir o nivel 50, tematizado pelo seu tipo primario — a categoria (Fisico/Especial) e decidida automaticamente pelo maior atributo de ataque do proprio POKE.',
+      'Self-Destruct/Explosion agora custam 50% da vida atual de quem usa o golpe, corrigindo o recuo que nunca era aplicado.',
+      'Duplo clique num icone de habilidade liga/desliga o uso automatico dela pela IA de combate.',
     ],
   },
   {
