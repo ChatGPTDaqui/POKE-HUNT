@@ -327,6 +327,13 @@ select:focus, input[type="number"]:focus, input[type="text"]:focus {
   border-radius: var(--radius-pill);
 }
 
+.nav-icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: -3px;
+  image-rendering: pixelated;
+}
+
 #bottom-nav button.active {
   background: var(--color-accent);
   border-color: var(--color-accent);
