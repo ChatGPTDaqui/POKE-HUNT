@@ -24,7 +24,7 @@ export const MAPS_DATA = {
     "bg": {
       "primary": "#284b3c",
       "secondary": "#2e5544",
-      "image": null
+      "image": "assets/hunt-backgrounds/forest.png"
     },
     "maxEnemies": 6,
     "respawnDelay": 6,
@@ -172,7 +172,7 @@ export const MAPS_DATA = {
     "bg": {
       "primary": "#284b3c",
       "secondary": "#2e5544",
-      "image": null
+      "image": "assets/hunt-backgrounds/forest.png"
     },
     "maxEnemies": 6,
     "respawnDelay": 6,
@@ -341,7 +341,7 @@ export const MAPS_DATA = {
     "bg": {
       "primary": "#284b3c",
       "secondary": "#2e5544",
-      "image": null
+      "image": "assets/hunt-backgrounds/forest.png"
     },
     "maxEnemies": 6,
     "respawnDelay": 6,
@@ -520,7 +520,7 @@ export const MAPS_DATA = {
     "bg": {
       "primary": "#284b3c",
       "secondary": "#2e5544",
-      "image": null
+      "image": "assets/hunt-backgrounds/cave.png"
     },
     "maxEnemies": 6,
     "respawnDelay": 6,
@@ -747,7 +747,7 @@ export const MAPS_DATA = {
     "bg": {
       "primary": "#284b3c",
       "secondary": "#2e5544",
-      "image": null
+      "image": "assets/hunt-backgrounds/water.png"
     },
     "maxEnemies": 6,
     "respawnDelay": 6,
@@ -897,7 +897,7 @@ export const MAPS_DATA = {
     "bg": {
       "primary": "#1c1c2b",
       "secondary": "#242438",
-      "image": null
+      "image": "assets/hunt-backgrounds/cave.png"
     },
     "maxEnemies": 6,
     "respawnDelay": 6,
@@ -966,7 +966,7 @@ export const MAPS_DATA = {
     "bg": {
       "primary": "#1c1c2b",
       "secondary": "#242438",
-      "image": null
+      "image": "assets/hunt-backgrounds/cave.png"
     },
     "maxEnemies": 6,
     "respawnDelay": 6,
@@ -1036,7 +1036,7 @@ export const MAPS_DATA = {
     "bg": {
       "primary": "#284b3c",
       "secondary": "#2e5544",
-      "image": null
+      "image": "assets/hunt-backgrounds/water.png"
     },
     "maxEnemies": 6,
     "respawnDelay": 6,
@@ -1116,7 +1116,7 @@ export const MAPS_DATA = {
     "bg": {
       "primary": "#3e2f23",
       "secondary": "#4a3829",
-      "image": null
+      "image": "assets/hunt-backgrounds/dojo.png"
     },
     "maxEnemies": 6,
     "respawnDelay": 6,
@@ -1189,7 +1189,7 @@ export const MAPS_DATA = {
     "bg": {
       "primary": "#3e2f23",
       "secondary": "#4a3829",
-      "image": null
+      "image": "assets/hunt-backgrounds/cave.png"
     },
     "maxEnemies": 6,
     "respawnDelay": 6,
@@ -1257,7 +1257,7 @@ export const MAPS_DATA = {
     "bg": {
       "primary": "#1c1c2b",
       "secondary": "#242438",
-      "image": null
+      "image": "assets/hunt-backgrounds/cave.png"
     },
     "maxEnemies": 6,
     "respawnDelay": 6,

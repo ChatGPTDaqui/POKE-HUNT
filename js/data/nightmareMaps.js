@@ -15,11 +15,13 @@ import { ENCOUNTERS_DATA } from './enemies.generated.js';
 import { SPECIES } from './pokes.js';
 import { LEGENDARY_SPECIES_IDS } from './legendaries.js';
 
-// Same 7-of-17 real per-type background art as the regular hunts (see
-// scripts/sync-planilha.js#TYPE_BACKGROUND_IMAGE) — duplicated here rather
-// than shared, since this file runs as an ES module at runtime while the
-// sync script is a plain Node/CJS build script (no clean way to import one
-// from the other, and it's only 7 lines).
+// Same all-17-types real per-type background art as the regular hunts (see
+// scripts/sync-planilha.js#TYPE_BACKGROUND_IMAGE — only 7 real images exist
+// on disk, the other 10 types reuse the closest-fitting one so no hunt is
+// ever left on the procedural checkerboard) — duplicated here rather than
+// shared, since this file runs as an ES module at runtime while the sync
+// script is a plain Node/CJS build script (no clean way to import one from
+// the other).
 const TYPE_BACKGROUND_IMAGE = {
   FIRE: 'assets/hunt-backgrounds/fire.png',
   WATER: 'assets/hunt-backgrounds/water.png',
@@ -28,13 +30,22 @@ const TYPE_BACKGROUND_IMAGE = {
   FIGHTING: 'assets/hunt-backgrounds/dojo.png',
   ELECTRIC: 'assets/hunt-backgrounds/eletric.png',
   DRAGON: 'assets/hunt-backgrounds/dragon.png',
+  BUG: 'assets/hunt-backgrounds/forest.png',
+  NORMAL: 'assets/hunt-backgrounds/forest.png',
+  POISON: 'assets/hunt-backgrounds/water.png',
+  FLYING: 'assets/hunt-backgrounds/water.png',
+  GROUND: 'assets/hunt-backgrounds/cave.png',
+  ICE: 'assets/hunt-backgrounds/cave.png',
+  STEEL: 'assets/hunt-backgrounds/cave.png',
+  PSYCHIC: 'assets/hunt-backgrounds/dojo.png',
+  GHOST: 'assets/hunt-backgrounds/cave.png',
+  DARK: 'assets/hunt-backgrounds/cave.png',
 };
 
 // BOSS hunts have no "bracket" of mixed types to average like regular hunts
-// do — just the one legendary's own typing. Falls back from primary to
-// secondary type (matching the same primary->secondary reinforcement logic
-// World Building v2 already uses for thin type pools), then to the
-// procedural checkerboard (null) if neither has dedicated art.
+// do — just the one legendary's own typing. Every real type now has an
+// entry in TYPE_BACKGROUND_IMAGE, so this always resolves to a real image;
+// the secondary-type fallback stays as a defensive backstop only.
 function bossBackgroundImage(species) {
   return TYPE_BACKGROUND_IMAGE[species.type] || TYPE_BACKGROUND_IMAGE[species.type2] || null;
 }

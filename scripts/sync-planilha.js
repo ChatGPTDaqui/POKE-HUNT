@@ -422,7 +422,12 @@ function computeJohtoBrackets(candidates) {
     range.max = Math.min(range.max, STARTER_HUNT_MAX_LEVEL);
   }
   starter.continent = 'johto';
-  starter.bgTheme = null;
+  // 'NORMAL' rather than null: its enemyPool mixes types with no single
+  // bracket theme to inherit, but every hunt now needs a real background
+  // (explicit user request, see TYPE_BACKGROUND_IMAGE) — NORMAL's generic
+  // open-route art (forest.png) fits a starter route better than any other
+  // available image.
+  starter.bgTheme = 'NORMAL';
   starter.unlockCost = null;
 
   const bandsByIndex = new Map();
@@ -639,14 +644,19 @@ const TYPE_THEME = {
 };
 
 // Real per-type background art (user-provided, see assets/hunt-backgrounds/)
-// — only 7 of the 17 real types have dedicated art matching their biome.
-// Every other type keeps the old procedural checkerboard (image: null,
-// see drawMapBackground) instead of showing another type's mismatched art —
-// "combinando os biomas com os tipos do local" only holds when the art
-// actually matches. js/data/collisionGrids.generated.js (built by
-// scripts/build-collision-grids.js from these same 7 files) is what gives
-// these specific hunts real walk-blocking collision; types without art here
-// stay fully walkable (open circle) like before.
+// — only 7 real images exist on disk (the source folder itself only has 7,
+// confirmed by listing it — there's no more art to import). Explicit user
+// request: "Nenhuma hunt devera ficar sem background" — every one of the 17
+// real types must load and use a real image, never the procedural
+// checkerboard placeholder. The 10 types with no dedicated art of their own
+// reuse whichever of the 7 fits its vibe closest (Ice/Ground/Steel/Ghost/Dark
+// -> cave, echoing real Ice Path/Icefall Cave being literal caves; Bug/Normal
+// -> forest; Flying/Poison -> water, coastal cliffs and swamps both read as
+// "wet"; Psychic -> dojo, closest to a mystic shrine/tower vibe) rather than
+// leaving them on the checkerboard. js/data/collisionGrids.generated.js
+// (built by scripts/build-collision-grids.js from these same 7 files) only
+// has real walk-blocking collision data for the 7 base images though — a
+// type reusing one of them inherits that same collision grid too.
 const TYPE_BACKGROUND_IMAGE = {
   FIRE: 'assets/hunt-backgrounds/fire.png',
   WATER: 'assets/hunt-backgrounds/water.png',
@@ -655,6 +665,16 @@ const TYPE_BACKGROUND_IMAGE = {
   FIGHTING: 'assets/hunt-backgrounds/dojo.png',
   ELECTRIC: 'assets/hunt-backgrounds/eletric.png',
   DRAGON: 'assets/hunt-backgrounds/dragon.png',
+  BUG: 'assets/hunt-backgrounds/forest.png',
+  NORMAL: 'assets/hunt-backgrounds/forest.png',
+  POISON: 'assets/hunt-backgrounds/water.png',
+  FLYING: 'assets/hunt-backgrounds/water.png',
+  GROUND: 'assets/hunt-backgrounds/cave.png',
+  ICE: 'assets/hunt-backgrounds/cave.png',
+  STEEL: 'assets/hunt-backgrounds/cave.png',
+  PSYCHIC: 'assets/hunt-backgrounds/dojo.png',
+  GHOST: 'assets/hunt-backgrounds/cave.png',
+  DARK: 'assets/hunt-backgrounds/cave.png',
 };
 
 function pickBgTheme(type) {
