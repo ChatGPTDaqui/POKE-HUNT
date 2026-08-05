@@ -155,6 +155,13 @@ export function updateMovement(world, dt) {
 
   if (player.fainted) {
     player.state = 'dead';
+  } else if (player.attackAnimTimer > 0) {
+    // Mid Shoot/Charge pose: hold position — a POKE must never walk and use
+    // an ability in the same instant (explicit user request). The pose plays
+    // for ATTACK_ANIM_DURATION (AnimationSystem.js), which is also exactly
+    // when the hit lands (CombatSystem.js#HIT_LAND_DELAY), so this window is
+    // already the entity's "committed to this attack" period.
+    player.state = 'engaged';
   } else {
     // A shiny anywhere in the hunt overrides everything else — the player
     // switches focus to it immediately, even mid-fight with something else.
@@ -186,6 +193,12 @@ export function updateMovement(world, dt) {
   for (const enemy of enemies) {
     if (enemy.isDead) {
       enemy.state = 'dead';
+      continue;
+    }
+
+    if (enemy.attackAnimTimer > 0) {
+      // Same lock as the player above — never walk mid-attack.
+      enemy.state = 'engaged';
       continue;
     }
 

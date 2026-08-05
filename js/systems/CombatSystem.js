@@ -28,8 +28,8 @@ const CRIT_MULTIPLIER = formulaEngine.eval('CRIT_MULTIPLIER');
 // Both spreadsheet-editable (see CLAUDE.md's "Balanceamento de economia"
 // section) with fallbacks matching the old hardcoded values.
 const SPEED_REFERENCE = formulaEngine.evalOrDefault('ATTACK_SPEED_REFERENCE', 100); // speed stat value that maps to an ability's listed cooldown as-is
-const BASE_ATTACK_INTERVAL = formulaEngine.evalOrDefault('BASIC_ATTACK_COOLDOWN', 1.5); // BASIC_ATTACK's cooldown, fixed — every POKE's baseline move
-const MIN_ACTION_GAP = 1; // global cooldown: no two attacks from the same entity land closer than this
+const BASE_ATTACK_INTERVAL = formulaEngine.evalOrDefault('BASIC_ATTACK_COOLDOWN', 2); // BASIC_ATTACK's cooldown, fixed — every POKE's baseline move (was 1.5s)
+const MIN_ACTION_GAP = 2; // global cooldown: no two attacks from the same entity land closer than this (was 1s) — the real minimum time between any two actions
 const MELEE_RANGE_PADDING = 10; // touch-distance buffer added on top of both radii
 
 // How close `attacker` needs to be to `defender` to fight — always melee
