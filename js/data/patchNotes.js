@@ -16,6 +16,7 @@ export const PATCH_NOTES = [
       'Distancia de lure (aggro) dos selvagens reduzida para um alcance moderado (era 2.5x o valor real da planilha).',
       'POKE principal agora sempre foca e caca ativamente o inimigo vivo mais proximo pelo mapa, redefinindo o alvo a cada abate, em vez de priorizar quem ja estava vindo em sua direcao.',
       'Hunt Inicial troca Geodude por Sentret; Wooper e Quagsire saem da zona costeira (Agua) e passam a aparecer na zona do Deserto (Terra); Dragonite agora aparece em Ruinas Ancestrais com exatamente 1% de chance.',
+      'Verificado ao vivo que Kanto desbloqueia corretamente apos vencer o Campeao Lance (persiste em save/reload). Novo botao "Retornar ao Centro Pokemon" aparece na hunt do Lance so depois da vitoria.',
     ],
   },
   {

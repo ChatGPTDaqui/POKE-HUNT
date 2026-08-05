@@ -1119,6 +1119,50 @@ button.confirm-danger {
   cursor: pointer;
 }
 
+/* ---------- Champion Lance victory: return-to-Hospital shortcut ---------- */
+/* Explicit user request: appears ONLY once his 6-POKE sequence is cleared
+   (world.sequenceCleared, see main.js#stepWorld), while the player is still
+   standing in his hunt looking at the corpses left behind (keepCorpses) —
+   gives a clear, unmissable next step instead of the player having to
+   remember the bottom nav's Hospital button after the "VITORIA" splash
+   (battleResultSplash.js) already faded out. Positioned above the bottom
+   nav so it never overlaps it. */
+.lance-victory-return {
+  position: absolute;
+  bottom: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 14px 20px;
+  text-align: center;
+  z-index: 16;
+  display: none;
+  border: 2px solid var(--color-accent);
+  box-shadow: 0 0 24px rgba(255, 193, 7, 0.4);
+}
+
+.lance-victory-return.visible {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.lance-victory-return .lance-victory-title {
+  color: var(--color-accent);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.lance-victory-return .lance-victory-btn {
+  background: var(--color-accent);
+  color: #1a1200;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 /* ---------- Confirm modal (shiny sell guard) ---------- */
 .confirm-modal-overlay {
   position: fixed;

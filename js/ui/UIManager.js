@@ -13,6 +13,7 @@ import { renderAutoItemBadge } from './panels/AutoButtonBadge.js';
 import { updateAutoFloatingPanelCounts } from './panels/autoFloatingPanel.js';
 import { ChatLog } from './panels/ChatLog.js';
 import { makeDraggable } from './draggable.js';
+import { LANCE_MAP_ID } from '../data/nightmareMaps.js';
 
 // Hospital and Auto are no longer DOM overlays — Hospital is just the canvas
 // scene (click the nurse to heal, see main.js), and Auto is a small floating
@@ -41,6 +42,7 @@ export class UIManager {
     this.reviveModalEl = document.getElementById('revive-modal');
     this.bossDefeatModalEl = document.getElementById('boss-defeat-modal');
     this.lanceCountdownModalEl = document.getElementById('lance-countdown-modal');
+    this.lanceVictoryReturnEl = document.getElementById('lance-victory-return');
     this.chatLog = new ChatLog(document.getElementById('chat-log'));
     this.currentScreen = null;
     // Scroll position within each screen's scrolling body, keyed by screen
@@ -71,6 +73,15 @@ export class UIManager {
       <button class="boss-defeat-btn">Volte para Hospital e nao pise mais aqui</button>
     `;
     this.bossDefeatModalEl.querySelector('.boss-defeat-btn').addEventListener('click', () => {
+      this.controller.returnToHospital();
+    });
+    // Champion Lance victory shortcut: same "built once, only toggled" safety
+    // as the defeat warning right above — see _updateLanceVictoryReturn.
+    this.lanceVictoryReturnEl.innerHTML = `
+      <div class="lance-victory-title">Voce derrotou o Campeao Lance!</div>
+      <button class="lance-victory-btn">Retornar ao Centro Pokemon</button>
+    `;
+    this.lanceVictoryReturnEl.querySelector('.lance-victory-btn').addEventListener('click', () => {
       this.controller.returnToHospital();
     });
     // Click-outside-to-close: only when a real screen is open (currentScreen
@@ -209,6 +220,19 @@ export class UIManager {
     this._updateReviveModal();
     this._updateBossDefeatModal();
     this._updateLanceCountdownModal();
+    this._updateLanceVictoryReturn();
+  }
+
+  // Explicit user request: a "Retornar ao Centro Pokemon" button appears
+  // ONLY after beating Champion Lance, for as long as the player is still
+  // standing in his hunt (world.sequenceCleared, set once per visit by
+  // main.js#stepWorld's sequence-clear check — leaving and coming back
+  // resets it, same as everything else about that world object, but
+  // isContinentUnlocked/'kanto' stays unlocked forever regardless).
+  _updateLanceVictoryReturn() {
+    const world = this.getWorld();
+    const visible = Boolean(world && world.mapDef && world.mapDef.id === LANCE_MAP_ID && world.sequenceCleared);
+    this.lanceVictoryReturnEl.classList.toggle('visible', visible);
   }
 
   // Champion Lance's intro countdown (world.countdownRemaining, see
