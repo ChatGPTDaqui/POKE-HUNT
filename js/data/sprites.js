@@ -27,6 +27,9 @@ const SPECIES_WITH_ART = new Set([
 
   // Kanto/legendary species added with the "Novo Continente" hunts:
   'pichu', 'cleffa', 'igglybuff', 'togepi', 'pikachu', 'hoothoot', 'spinarak', 'ledyba', 'pineco', 'oddish', 'poliwag', 'diglett', 'voltorb', 'meowth', 'gastly', 'drowzee', 'magikarp', 'goldeen', 'horsea', 'tentacool', 'exeggcute', 'mareep', 'cyndaquil', 'chikorita', 'totodile', 'mankey', 'cubone', 'chinchou', 'shellder', 'staryu', 'grimer', 'venonat', 'psyduck', 'wooper', 'slugma', 'houndour', 'teddiursa', 'phanpy', 'remoraid', 'tyrogue', 'elekid', 'magby', 'smoochum', 'marill', 'sudowoodo', 'murkrow', 'aipom', 'qwilfish', 'corsola', 'sneasel', 'girafarig', 'stantler', 'misdreavus', 'delibird', 'sunflora', 'wobbuffet', 'mantine', 'rhyhorn', 'hitmonlee', 'hitmonchan', 'kangaskhan', 'lapras', 'porygon', 'eevee', 'scyther', 'pinsir', 'dratini', 'omanyte', 'kabuto', 'aerodactyl', 'snorlax', 'heracross', 'alakazam', 'gengar', 'machamp', 'victreebel', 'arcanine', 'nidoking', 'nidoqueen', 'steelix', 'gyarados', 'articuno', 'zapdos', 'moltres', 'raikou', 'entei', 'suicune', 'lugia', 'ho_oh', 'celebi', 'mewtwo', 'mew', 'noctowl', 'ariados', 'ledian', 'forretress', 'gloom', 'poliwhirl', 'dugtrio', 'electrode', 'persian', 'haunter', 'hypno', 'seaking', 'seadra', 'tentacruel', 'flaaffy', 'quilava', 'bayleef', 'croconaw', 'primeape', 'marowak', 'lanturn', 'muk', 'venomoth', 'golduck', 'quagsire', 'magcargo', 'houndoom', 'octillery', 'electabuzz', 'azumarill', 'rhydon', 'dragonair', 'omastar', 'kabutops', 'ampharos', 'typhlosion', 'meganium', 'feraligatr', 'dragonite',
+
+  // Kanto/legendary species added with the "Novo Continente" hunts:
+  'kingdra', 'politoed', 'golem', 'porygon2', 'scizor',
 ]);
 
 export function spriteUrl(speciesId, isShiny = false) {

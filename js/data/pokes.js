@@ -63,15 +63,25 @@ export const SPECIES = Object.fromEntries(
 // trade/hold-item trigger at all, so today these are permanently stuck at
 // their un-evolved stage. Per explicit user request, that dead end is
 // replaced with a Level 80 + Stones-of-the-primary-type gate instead (see
-// data/stones.js, systems/ProgressionSystem.js#evolvePokeInstance). Only
-// species whose real evolved form is actually present in this project's
-// curated roster are listed — Graveler->Golem, Poliwhirl->Politoed,
-// Slowpoke->Slowking, Seadra->Kingdra, Scyther->Scizor and Porygon->Porygon2
-// were never curated into the roster at all (their target species doesn't
-// exist here), so there's no evolvesTo to point them at.
+// data/stones.js, systems/ProgressionSystem.js#evolvePokeInstance).
+//
+// All 9 real Gen1/2 trade/hold-item evolution chains are covered — the
+// missing evolved-form species (Golem/Onix/Scizor/Kingdra/Politoed/Porygon2)
+// were added to scripts/sync-planilha.js#KANTO_BANDS and synced in
+// ("Setima leva" in CLAUDE.md) specifically so this list wouldn't have to
+// skip any of them. Slowpoke->Slowking is the one real Gen2 case NOT here:
+// Slowpoke already has a genuine, working LEVEL evolution to Slowbro (real
+// planilha data, level 37) — this single-`evolvesTo`-field data model can't
+// represent a second branching option, and Slowpoke isn't "stuck" the way
+// the other 9 species are, so it's out of scope for a fix that's specifically
+// about un-sticking dead-end evolutions.
 export const SPECIAL_EVOLUTION_LEVEL = 80;
 export const SPECIAL_EVOLUTION_STONE_COUNT = 20;
-const SPECIAL_EVOLUTIONS = { kadabra: 'alakazam', machoke: 'machamp', haunter: 'gengar' };
+const SPECIAL_EVOLUTIONS = {
+  kadabra: 'alakazam', machoke: 'machamp', haunter: 'gengar',
+  graveler: 'golem', onix: 'steelix', scyther: 'scizor',
+  seadra: 'kingdra', poliwhirl: 'politoed', porygon: 'porygon2',
+};
 for (const [fromId, toId] of Object.entries(SPECIAL_EVOLUTIONS)) {
   const from = SPECIES[fromId];
   if (from && SPECIES[toId] && !from.evolvesTo) {

@@ -919,9 +919,9 @@ export const MAPS_DATA = {
       "kanto_lv_1_10_aquatico_goldeen",
       "kanto_lv_1_10_aquatico_horsea",
       "kanto_lv_1_10_aquatico_tentacool",
-      "kanto_lv_1_10_aquatico_azumarill",
-      "kanto_lv_1_10_aquatico_delibird",
-      "kanto_lv_1_10_aquatico_dewgong"
+      "kanto_lv_1_10_aquatico_kingdra",
+      "kanto_lv_1_10_aquatico_politoed",
+      "kanto_lv_1_10_aquatico_azumarill"
     ],
     "itemDrops": [
       {
@@ -991,9 +991,9 @@ export const MAPS_DATA = {
       "kanto_lv_11_20_vulcanico_slugma",
       "kanto_lv_11_20_vulcanico_phanpy",
       "kanto_lv_11_20_vulcanico_magby",
-      "kanto_lv_11_20_vulcanico_quilava",
-      "kanto_lv_11_20_vulcanico_typhlosion",
-      "kanto_lv_11_20_vulcanico_arcanine"
+      "kanto_lv_11_20_vulcanico_onix",
+      "kanto_lv_11_20_vulcanico_golem",
+      "kanto_lv_11_20_vulcanico_quilava"
     ],
     "itemDrops": [
       {
@@ -1276,12 +1276,12 @@ export const MAPS_DATA = {
     "enemyPool": [
       "kanto_lv_36_55_planicie_snorlax",
       "kanto_lv_36_55_planicie_machamp",
+      "kanto_lv_36_55_planicie_porygon2",
+      "kanto_lv_36_55_planicie_porygon",
       "kanto_lv_36_55_planicie_sentret",
       "kanto_lv_36_55_planicie_pidgey",
       "kanto_lv_36_55_planicie_rattata",
-      "kanto_lv_36_55_planicie_hoothoot",
-      "kanto_lv_36_55_planicie_ditto",
-      "kanto_lv_36_55_planicie_dodrio"
+      "kanto_lv_36_55_planicie_hoothoot"
     ],
     "itemDrops": [
       {
@@ -1348,12 +1348,12 @@ export const MAPS_DATA = {
     "enemyPool": [
       "kanto_lv_36_55_floresta_heracross",
       "kanto_lv_36_55_floresta_victreebel",
+      "kanto_lv_36_55_floresta_scizor",
+      "kanto_lv_36_55_floresta_scyther",
       "kanto_lv_36_55_floresta_hoppip",
       "kanto_lv_36_55_floresta_ariados",
       "kanto_lv_36_55_floresta_beedrill",
-      "kanto_lv_36_55_floresta_bellsprout",
-      "kanto_lv_36_55_floresta_butterfree",
-      "kanto_lv_36_55_floresta_caterpie"
+      "kanto_lv_36_55_floresta_bellsprout"
     ],
     "itemDrops": [
       {

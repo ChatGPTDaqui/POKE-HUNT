@@ -197,6 +197,636 @@ export const SPECIES_DATA = {
     "evolvesTo": "ivysaur",
     "evolvesAtLevel": 16
   },
+  "articuno": {
+    "id": "articuno",
+    "name": "Articuno",
+    "description": "Pokedex Nº144 - tipo ICE/FLYING.",
+    "type": "ICE",
+    "type2": "FLYING",
+    "catchRate": 3,
+    "baseExp": 215,
+    "growthCurve": "SLOW",
+    "base": {
+      "hp": 90,
+      "atkFis": 85,
+      "atkEsp": 95,
+      "def": 100,
+      "defEsp": 125,
+      "speed": 85
+    },
+    "abilities": [
+      {
+        "key": "gust",
+        "levelReq": 1
+      },
+      {
+        "key": "powder_snow",
+        "levelReq": 1
+      },
+      {
+        "key": "mist",
+        "levelReq": 13
+      },
+      {
+        "key": "agility",
+        "levelReq": 25
+      },
+      {
+        "key": "mind_reader",
+        "levelReq": 37
+      },
+      {
+        "key": "ice_beam",
+        "levelReq": 49
+      },
+      {
+        "key": "reflect",
+        "levelReq": 61
+      },
+      {
+        "key": "blizzard",
+        "levelReq": 73
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "zapdos": {
+    "id": "zapdos",
+    "name": "Zapdos",
+    "description": "Pokedex Nº145 - tipo ELECTRIC/FLYING.",
+    "type": "ELECTRIC",
+    "type2": "FLYING",
+    "catchRate": 3,
+    "baseExp": 216,
+    "growthCurve": "SLOW",
+    "base": {
+      "hp": 90,
+      "atkFis": 90,
+      "atkEsp": 125,
+      "def": 85,
+      "defEsp": 90,
+      "speed": 100
+    },
+    "abilities": [
+      {
+        "key": "peck",
+        "levelReq": 1
+      },
+      {
+        "key": "thundershock",
+        "levelReq": 1
+      },
+      {
+        "key": "thunder_wave",
+        "levelReq": 13
+      },
+      {
+        "key": "agility",
+        "levelReq": 25
+      },
+      {
+        "key": "detect",
+        "levelReq": 37
+      },
+      {
+        "key": "drill_peck",
+        "levelReq": 49
+      },
+      {
+        "key": "light_screen",
+        "levelReq": 61
+      },
+      {
+        "key": "thunder",
+        "levelReq": 73
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "moltres": {
+    "id": "moltres",
+    "name": "Moltres",
+    "description": "Pokedex Nº146 - tipo FIRE/FLYING.",
+    "type": "FIRE",
+    "type2": "FLYING",
+    "catchRate": 3,
+    "baseExp": 217,
+    "growthCurve": "SLOW",
+    "base": {
+      "hp": 90,
+      "atkFis": 100,
+      "atkEsp": 125,
+      "def": 90,
+      "defEsp": 85,
+      "speed": 90
+    },
+    "abilities": [
+      {
+        "key": "wing_attack",
+        "levelReq": 1
+      },
+      {
+        "key": "ember",
+        "levelReq": 1
+      },
+      {
+        "key": "fire_spin",
+        "levelReq": 13
+      },
+      {
+        "key": "agility",
+        "levelReq": 25
+      },
+      {
+        "key": "endure",
+        "levelReq": 37
+      },
+      {
+        "key": "flamethrower",
+        "levelReq": 49
+      },
+      {
+        "key": "safeguard",
+        "levelReq": 61
+      },
+      {
+        "key": "sky_attack",
+        "levelReq": 73
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "raikou": {
+    "id": "raikou",
+    "name": "Raikou",
+    "description": "Pokedex Nº243 - tipo ELECTRIC.",
+    "type": "ELECTRIC",
+    "type2": null,
+    "catchRate": 3,
+    "baseExp": 216,
+    "growthCurve": "SLOW",
+    "base": {
+      "hp": 90,
+      "atkFis": 85,
+      "atkEsp": 115,
+      "def": 75,
+      "defEsp": 100,
+      "speed": 115
+    },
+    "abilities": [
+      {
+        "key": "bite",
+        "levelReq": 1
+      },
+      {
+        "key": "leer",
+        "levelReq": 1
+      },
+      {
+        "key": "thundershock",
+        "levelReq": 11
+      },
+      {
+        "key": "roar",
+        "levelReq": 21
+      },
+      {
+        "key": "quick_attack",
+        "levelReq": 31
+      },
+      {
+        "key": "spark",
+        "levelReq": 41
+      },
+      {
+        "key": "reflect",
+        "levelReq": 51
+      },
+      {
+        "key": "crunch",
+        "levelReq": 61
+      },
+      {
+        "key": "thunder",
+        "levelReq": 71
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "entei": {
+    "id": "entei",
+    "name": "Entei",
+    "description": "Pokedex Nº244 - tipo FIRE.",
+    "type": "FIRE",
+    "type2": null,
+    "catchRate": 3,
+    "baseExp": 217,
+    "growthCurve": "SLOW",
+    "base": {
+      "hp": 115,
+      "atkFis": 115,
+      "atkEsp": 90,
+      "def": 85,
+      "defEsp": 75,
+      "speed": 100
+    },
+    "abilities": [
+      {
+        "key": "bite",
+        "levelReq": 1
+      },
+      {
+        "key": "leer",
+        "levelReq": 1
+      },
+      {
+        "key": "ember",
+        "levelReq": 11
+      },
+      {
+        "key": "roar",
+        "levelReq": 21
+      },
+      {
+        "key": "fire_spin",
+        "levelReq": 31
+      },
+      {
+        "key": "stomp",
+        "levelReq": 41
+      },
+      {
+        "key": "flamethrower",
+        "levelReq": 51
+      },
+      {
+        "key": "swagger",
+        "levelReq": 61
+      },
+      {
+        "key": "fire_blast",
+        "levelReq": 71
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "suicune": {
+    "id": "suicune",
+    "name": "Suicune",
+    "description": "Pokedex Nº245 - tipo WATER.",
+    "type": "WATER",
+    "type2": null,
+    "catchRate": 3,
+    "baseExp": 215,
+    "growthCurve": "SLOW",
+    "base": {
+      "hp": 100,
+      "atkFis": 75,
+      "atkEsp": 90,
+      "def": 115,
+      "defEsp": 115,
+      "speed": 85
+    },
+    "abilities": [
+      {
+        "key": "bite",
+        "levelReq": 1
+      },
+      {
+        "key": "leer",
+        "levelReq": 1
+      },
+      {
+        "key": "bubblebeam",
+        "levelReq": 11
+      },
+      {
+        "key": "rain_dance",
+        "levelReq": 21
+      },
+      {
+        "key": "gust",
+        "levelReq": 31
+      },
+      {
+        "key": "aurora_beam",
+        "levelReq": 41
+      },
+      {
+        "key": "mist",
+        "levelReq": 51
+      },
+      {
+        "key": "mirror_coat",
+        "levelReq": 61
+      },
+      {
+        "key": "hydro_pump",
+        "levelReq": 71
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "lugia": {
+    "id": "lugia",
+    "name": "Lugia",
+    "description": "Pokedex Nº249 - tipo PSYCHIC/FLYING.",
+    "type": "PSYCHIC",
+    "type2": "FLYING",
+    "catchRate": 3,
+    "baseExp": 220,
+    "growthCurve": "SLOW",
+    "base": {
+      "hp": 106,
+      "atkFis": 90,
+      "atkEsp": 90,
+      "def": 130,
+      "defEsp": 154,
+      "speed": 110
+    },
+    "abilities": [
+      {
+        "key": "aeroblast",
+        "levelReq": 1
+      },
+      {
+        "key": "safeguard",
+        "levelReq": 11
+      },
+      {
+        "key": "gust",
+        "levelReq": 22
+      },
+      {
+        "key": "recover",
+        "levelReq": 33
+      },
+      {
+        "key": "hydro_pump",
+        "levelReq": 44
+      },
+      {
+        "key": "rain_dance",
+        "levelReq": 55
+      },
+      {
+        "key": "swift",
+        "levelReq": 66
+      },
+      {
+        "key": "whirlwind",
+        "levelReq": 77
+      },
+      {
+        "key": "ancientpower",
+        "levelReq": 88
+      },
+      {
+        "key": "future_sight",
+        "levelReq": 99
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "ho_oh": {
+    "id": "ho_oh",
+    "name": "Ho-Oh",
+    "description": "Pokedex Nº250 - tipo FIRE/FLYING.",
+    "type": "FIRE",
+    "type2": "FLYING",
+    "catchRate": 3,
+    "baseExp": 220,
+    "growthCurve": "SLOW",
+    "base": {
+      "hp": 106,
+      "atkFis": 130,
+      "atkEsp": 110,
+      "def": 90,
+      "defEsp": 154,
+      "speed": 90
+    },
+    "abilities": [
+      {
+        "key": "sacred_fire",
+        "levelReq": 1
+      },
+      {
+        "key": "safeguard",
+        "levelReq": 11
+      },
+      {
+        "key": "gust",
+        "levelReq": 22
+      },
+      {
+        "key": "recover",
+        "levelReq": 33
+      },
+      {
+        "key": "fire_blast",
+        "levelReq": 44
+      },
+      {
+        "key": "sunny_day",
+        "levelReq": 55
+      },
+      {
+        "key": "swift",
+        "levelReq": 66
+      },
+      {
+        "key": "whirlwind",
+        "levelReq": 77
+      },
+      {
+        "key": "ancientpower",
+        "levelReq": 88
+      },
+      {
+        "key": "future_sight",
+        "levelReq": 99
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "celebi": {
+    "id": "celebi",
+    "name": "Celebi",
+    "description": "Pokedex Nº251 - tipo PSYCHIC/GRASS.",
+    "type": "PSYCHIC",
+    "type2": "GRASS",
+    "catchRate": 45,
+    "baseExp": 64,
+    "growthCurve": "MEDIUM_SLOW",
+    "base": {
+      "hp": 100,
+      "atkFis": 100,
+      "atkEsp": 100,
+      "def": 100,
+      "defEsp": 100,
+      "speed": 100
+    },
+    "abilities": [
+      {
+        "key": "leech_seed",
+        "levelReq": 1
+      },
+      {
+        "key": "confusion",
+        "levelReq": 1
+      },
+      {
+        "key": "recover",
+        "levelReq": 1
+      },
+      {
+        "key": "heal_bell",
+        "levelReq": 1
+      },
+      {
+        "key": "safeguard",
+        "levelReq": 10
+      },
+      {
+        "key": "ancientpower",
+        "levelReq": 20
+      },
+      {
+        "key": "future_sight",
+        "levelReq": 30
+      },
+      {
+        "key": "baton_pass",
+        "levelReq": 40
+      },
+      {
+        "key": "perish_song",
+        "levelReq": 50
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "mewtwo": {
+    "id": "mewtwo",
+    "name": "Mewtwo",
+    "description": "Pokedex Nº150 - tipo PSYCHIC.",
+    "type": "PSYCHIC",
+    "type2": null,
+    "catchRate": 3,
+    "baseExp": 220,
+    "growthCurve": "SLOW",
+    "base": {
+      "hp": 106,
+      "atkFis": 110,
+      "atkEsp": 154,
+      "def": 90,
+      "defEsp": 90,
+      "speed": 130
+    },
+    "abilities": [
+      {
+        "key": "confusion",
+        "levelReq": 1
+      },
+      {
+        "key": "disable",
+        "levelReq": 1
+      },
+      {
+        "key": "barrier",
+        "levelReq": 11
+      },
+      {
+        "key": "swift",
+        "levelReq": 22
+      },
+      {
+        "key": "psych_up",
+        "levelReq": 33
+      },
+      {
+        "key": "future_sight",
+        "levelReq": 44
+      },
+      {
+        "key": "mist",
+        "levelReq": 55
+      },
+      {
+        "key": "psychic_m",
+        "levelReq": 66
+      },
+      {
+        "key": "amnesia",
+        "levelReq": 77
+      },
+      {
+        "key": "recover",
+        "levelReq": 88
+      },
+      {
+        "key": "safeguard",
+        "levelReq": 99
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "mew": {
+    "id": "mew",
+    "name": "Mew",
+    "description": "Pokedex Nº151 - tipo PSYCHIC.",
+    "type": "PSYCHIC",
+    "type2": null,
+    "catchRate": 45,
+    "baseExp": 64,
+    "growthCurve": "MEDIUM_SLOW",
+    "base": {
+      "hp": 100,
+      "atkFis": 100,
+      "atkEsp": 100,
+      "def": 100,
+      "defEsp": 100,
+      "speed": 100
+    },
+    "abilities": [
+      {
+        "key": "pound",
+        "levelReq": 1
+      },
+      {
+        "key": "transform",
+        "levelReq": 10
+      },
+      {
+        "key": "mega_punch",
+        "levelReq": 20
+      },
+      {
+        "key": "metronome",
+        "levelReq": 30
+      },
+      {
+        "key": "psychic_m",
+        "levelReq": 40
+      },
+      {
+        "key": "ancientpower",
+        "levelReq": 50
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
   "geodude": {
     "id": "geodude",
     "name": "Geodude",
@@ -4269,6 +4899,114 @@ export const SPECIES_DATA = {
     "evolvesTo": "tentacruel",
     "evolvesAtLevel": 30
   },
+  "kingdra": {
+    "id": "kingdra",
+    "name": "Kingdra",
+    "description": "Pokedex Nº230 - tipo WATER/DRAGON.",
+    "type": "WATER",
+    "type2": "DRAGON",
+    "catchRate": 45,
+    "baseExp": 207,
+    "growthCurve": "MEDIUM_FAST",
+    "base": {
+      "hp": 75,
+      "atkFis": 95,
+      "atkEsp": 95,
+      "def": 95,
+      "defEsp": 95,
+      "speed": 85
+    },
+    "abilities": [
+      {
+        "key": "bubble",
+        "levelReq": 1
+      },
+      {
+        "key": "smokescreen",
+        "levelReq": 1
+      },
+      {
+        "key": "leer",
+        "levelReq": 1
+      },
+      {
+        "key": "water_gun",
+        "levelReq": 1
+      },
+      {
+        "key": "smokescreen",
+        "levelReq": 8
+      },
+      {
+        "key": "leer",
+        "levelReq": 15
+      },
+      {
+        "key": "water_gun",
+        "levelReq": 22
+      },
+      {
+        "key": "twister",
+        "levelReq": 29
+      },
+      {
+        "key": "agility",
+        "levelReq": 40
+      },
+      {
+        "key": "hydro_pump",
+        "levelReq": 51
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "politoed": {
+    "id": "politoed",
+    "name": "Politoed",
+    "description": "Pokedex Nº186 - tipo WATER.",
+    "type": "WATER",
+    "type2": null,
+    "catchRate": 45,
+    "baseExp": 185,
+    "growthCurve": "MEDIUM_SLOW",
+    "base": {
+      "hp": 90,
+      "atkFis": 75,
+      "atkEsp": 90,
+      "def": 75,
+      "defEsp": 100,
+      "speed": 70
+    },
+    "abilities": [
+      {
+        "key": "water_gun",
+        "levelReq": 1
+      },
+      {
+        "key": "hypnosis",
+        "levelReq": 1
+      },
+      {
+        "key": "doubleslap",
+        "levelReq": 1
+      },
+      {
+        "key": "perish_song",
+        "levelReq": 1
+      },
+      {
+        "key": "perish_song",
+        "levelReq": 35
+      },
+      {
+        "key": "swagger",
+        "levelReq": 51
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
   "cubone": {
     "id": "cubone",
     "name": "Cubone",
@@ -4500,6 +5238,130 @@ export const SPECIES_DATA = {
     ],
     "evolvesTo": "magmar",
     "evolvesAtLevel": 30
+  },
+  "onix": {
+    "id": "onix",
+    "name": "Onix",
+    "description": "Pokedex Nº95 - tipo ROCK/GROUND.",
+    "type": "ROCK",
+    "type2": "GROUND",
+    "catchRate": 45,
+    "baseExp": 108,
+    "growthCurve": "MEDIUM_FAST",
+    "base": {
+      "hp": 35,
+      "atkFis": 45,
+      "atkEsp": 30,
+      "def": 160,
+      "defEsp": 45,
+      "speed": 70
+    },
+    "abilities": [
+      {
+        "key": "tackle",
+        "levelReq": 1
+      },
+      {
+        "key": "screech",
+        "levelReq": 1
+      },
+      {
+        "key": "bind",
+        "levelReq": 10
+      },
+      {
+        "key": "rock_throw",
+        "levelReq": 14
+      },
+      {
+        "key": "harden",
+        "levelReq": 23
+      },
+      {
+        "key": "rage",
+        "levelReq": 27
+      },
+      {
+        "key": "sandstorm",
+        "levelReq": 36
+      },
+      {
+        "key": "slam",
+        "levelReq": 40
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "golem": {
+    "id": "golem",
+    "name": "Golem",
+    "description": "Pokedex Nº76 - tipo ROCK/GROUND.",
+    "type": "ROCK",
+    "type2": "GROUND",
+    "catchRate": 45,
+    "baseExp": 177,
+    "growthCurve": "MEDIUM_SLOW",
+    "base": {
+      "hp": 80,
+      "atkFis": 110,
+      "atkEsp": 55,
+      "def": 130,
+      "defEsp": 65,
+      "speed": 45
+    },
+    "abilities": [
+      {
+        "key": "tackle",
+        "levelReq": 1
+      },
+      {
+        "key": "defense_curl",
+        "levelReq": 1
+      },
+      {
+        "key": "rock_throw",
+        "levelReq": 1
+      },
+      {
+        "key": "magnitude",
+        "levelReq": 1
+      },
+      {
+        "key": "defense_curl",
+        "levelReq": 6
+      },
+      {
+        "key": "rock_throw",
+        "levelReq": 11
+      },
+      {
+        "key": "magnitude",
+        "levelReq": 16
+      },
+      {
+        "key": "selfdestruct",
+        "levelReq": 21
+      },
+      {
+        "key": "harden",
+        "levelReq": 27
+      },
+      {
+        "key": "rollout",
+        "levelReq": 34
+      },
+      {
+        "key": "earthquake",
+        "levelReq": 41
+      },
+      {
+        "key": "explosion",
+        "levelReq": 48
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
   },
   "elekid": {
     "id": "elekid",
@@ -4845,6 +5707,130 @@ export const SPECIES_DATA = {
     "evolvesTo": null,
     "evolvesAtLevel": null
   },
+  "porygon2": {
+    "id": "porygon2",
+    "name": "Porygon2",
+    "description": "Pokedex Nº233 - tipo NORMAL.",
+    "type": "NORMAL",
+    "type2": null,
+    "catchRate": 45,
+    "baseExp": 180,
+    "growthCurve": "MEDIUM_FAST",
+    "base": {
+      "hp": 85,
+      "atkFis": 80,
+      "atkEsp": 105,
+      "def": 90,
+      "defEsp": 95,
+      "speed": 60
+    },
+    "abilities": [
+      {
+        "key": "conversion2",
+        "levelReq": 1
+      },
+      {
+        "key": "tackle",
+        "levelReq": 1
+      },
+      {
+        "key": "conversion",
+        "levelReq": 1
+      },
+      {
+        "key": "agility",
+        "levelReq": 9
+      },
+      {
+        "key": "psybeam",
+        "levelReq": 12
+      },
+      {
+        "key": "recover",
+        "levelReq": 20
+      },
+      {
+        "key": "defense_curl",
+        "levelReq": 24
+      },
+      {
+        "key": "lock_on",
+        "levelReq": 32
+      },
+      {
+        "key": "tri_attack",
+        "levelReq": 36
+      },
+      {
+        "key": "zap_cannon",
+        "levelReq": 44
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "porygon": {
+    "id": "porygon",
+    "name": "Porygon",
+    "description": "Pokedex Nº137 - tipo NORMAL.",
+    "type": "NORMAL",
+    "type2": null,
+    "catchRate": 45,
+    "baseExp": 130,
+    "growthCurve": "MEDIUM_FAST",
+    "base": {
+      "hp": 65,
+      "atkFis": 60,
+      "atkEsp": 85,
+      "def": 70,
+      "defEsp": 75,
+      "speed": 40
+    },
+    "abilities": [
+      {
+        "key": "conversion2",
+        "levelReq": 1
+      },
+      {
+        "key": "tackle",
+        "levelReq": 1
+      },
+      {
+        "key": "conversion",
+        "levelReq": 1
+      },
+      {
+        "key": "agility",
+        "levelReq": 9
+      },
+      {
+        "key": "psybeam",
+        "levelReq": 12
+      },
+      {
+        "key": "recover",
+        "levelReq": 20
+      },
+      {
+        "key": "sharpen",
+        "levelReq": 24
+      },
+      {
+        "key": "lock_on",
+        "levelReq": 32
+      },
+      {
+        "key": "tri_attack",
+        "levelReq": 36
+      },
+      {
+        "key": "zap_cannon",
+        "levelReq": 44
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
   "heracross": {
     "id": "heracross",
     "name": "Heracross",
@@ -4936,6 +5922,130 @@ export const SPECIES_DATA = {
       {
         "key": "razor_leaf",
         "levelReq": 1
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "scizor": {
+    "id": "scizor",
+    "name": "Scizor",
+    "description": "Pokedex Nº212 - tipo BUG/STEEL.",
+    "type": "BUG",
+    "type2": "STEEL",
+    "catchRate": 25,
+    "baseExp": 200,
+    "growthCurve": "MEDIUM_FAST",
+    "base": {
+      "hp": 70,
+      "atkFis": 130,
+      "atkEsp": 55,
+      "def": 100,
+      "defEsp": 80,
+      "speed": 65
+    },
+    "abilities": [
+      {
+        "key": "quick_attack",
+        "levelReq": 1
+      },
+      {
+        "key": "leer",
+        "levelReq": 1
+      },
+      {
+        "key": "focus_energy",
+        "levelReq": 6
+      },
+      {
+        "key": "pursuit",
+        "levelReq": 12
+      },
+      {
+        "key": "false_swipe",
+        "levelReq": 18
+      },
+      {
+        "key": "agility",
+        "levelReq": 24
+      },
+      {
+        "key": "metal_claw",
+        "levelReq": 30
+      },
+      {
+        "key": "slash",
+        "levelReq": 36
+      },
+      {
+        "key": "swords_dance",
+        "levelReq": 42
+      },
+      {
+        "key": "double_team",
+        "levelReq": 48
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "scyther": {
+    "id": "scyther",
+    "name": "Scyther",
+    "description": "Pokedex Nº123 - tipo BUG/FLYING.",
+    "type": "BUG",
+    "type2": "FLYING",
+    "catchRate": 45,
+    "baseExp": 187,
+    "growthCurve": "MEDIUM_FAST",
+    "base": {
+      "hp": 70,
+      "atkFis": 110,
+      "atkEsp": 55,
+      "def": 80,
+      "defEsp": 80,
+      "speed": 105
+    },
+    "abilities": [
+      {
+        "key": "quick_attack",
+        "levelReq": 1
+      },
+      {
+        "key": "leer",
+        "levelReq": 1
+      },
+      {
+        "key": "focus_energy",
+        "levelReq": 6
+      },
+      {
+        "key": "pursuit",
+        "levelReq": 12
+      },
+      {
+        "key": "false_swipe",
+        "levelReq": 18
+      },
+      {
+        "key": "agility",
+        "levelReq": 24
+      },
+      {
+        "key": "wing_attack",
+        "levelReq": 30
+      },
+      {
+        "key": "slash",
+        "levelReq": 36
+      },
+      {
+        "key": "swords_dance",
+        "levelReq": 42
+      },
+      {
+        "key": "double_team",
+        "levelReq": 48
       }
     ],
     "evolvesTo": null,

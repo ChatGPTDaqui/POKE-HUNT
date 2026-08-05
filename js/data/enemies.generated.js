@@ -867,27 +867,27 @@ export const ENCOUNTERS_DATA = {
     "wanderRadius": 60,
     "weight": 190
   },
-  "kanto_lv_1_10_aquatico_azumarill": {
-    "id": "kanto_lv_1_10_aquatico_azumarill",
-    "speciesId": "azumarill",
-    "minLevel": 52,
-    "maxLevel": 62,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 75
-  },
-  "kanto_lv_1_10_aquatico_delibird": {
-    "id": "kanto_lv_1_10_aquatico_delibird",
-    "speciesId": "delibird",
+  "kanto_lv_1_10_aquatico_kingdra": {
+    "id": "kanto_lv_1_10_aquatico_kingdra",
+    "speciesId": "kingdra",
     "minLevel": 52,
     "maxLevel": 62,
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
   },
-  "kanto_lv_1_10_aquatico_dewgong": {
-    "id": "kanto_lv_1_10_aquatico_dewgong",
-    "speciesId": "dewgong",
+  "kanto_lv_1_10_aquatico_politoed": {
+    "id": "kanto_lv_1_10_aquatico_politoed",
+    "speciesId": "politoed",
+    "minLevel": 52,
+    "maxLevel": 62,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "kanto_lv_1_10_aquatico_azumarill": {
+    "id": "kanto_lv_1_10_aquatico_azumarill",
+    "speciesId": "azumarill",
     "minLevel": 52,
     "maxLevel": 62,
     "aggroRadius": 175,
@@ -939,6 +939,24 @@ export const ENCOUNTERS_DATA = {
     "wanderRadius": 60,
     "weight": 45
   },
+  "kanto_lv_11_20_vulcanico_onix": {
+    "id": "kanto_lv_11_20_vulcanico_onix",
+    "speciesId": "onix",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "kanto_lv_11_20_vulcanico_golem": {
+    "id": "kanto_lv_11_20_vulcanico_golem",
+    "speciesId": "golem",
+    "minLevel": 60,
+    "maxLevel": 70,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
   "kanto_lv_11_20_vulcanico_quilava": {
     "id": "kanto_lv_11_20_vulcanico_quilava",
     "speciesId": "quilava",
@@ -947,24 +965,6 @@ export const ENCOUNTERS_DATA = {
     "aggroRadius": 175,
     "wanderRadius": 60,
     "weight": 45
-  },
-  "kanto_lv_11_20_vulcanico_typhlosion": {
-    "id": "kanto_lv_11_20_vulcanico_typhlosion",
-    "speciesId": "typhlosion",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "kanto_lv_11_20_vulcanico_arcanine": {
-    "id": "kanto_lv_11_20_vulcanico_arcanine",
-    "speciesId": "arcanine",
-    "minLevel": 60,
-    "maxLevel": 70,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 75
   },
   "kanto_lv_11_20_eletrico_elekid": {
     "id": "kanto_lv_11_20_eletrico_elekid",
@@ -1200,6 +1200,24 @@ export const ENCOUNTERS_DATA = {
     "wanderRadius": 60,
     "weight": 45
   },
+  "kanto_lv_36_55_planicie_porygon2": {
+    "id": "kanto_lv_36_55_planicie_porygon2",
+    "speciesId": "porygon2",
+    "minLevel": 80,
+    "maxLevel": 105,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "kanto_lv_36_55_planicie_porygon": {
+    "id": "kanto_lv_36_55_planicie_porygon",
+    "speciesId": "porygon",
+    "minLevel": 80,
+    "maxLevel": 105,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
   "kanto_lv_36_55_planicie_sentret": {
     "id": "kanto_lv_36_55_planicie_sentret",
     "speciesId": "sentret",
@@ -1236,24 +1254,6 @@ export const ENCOUNTERS_DATA = {
     "wanderRadius": 60,
     "weight": 255
   },
-  "kanto_lv_36_55_planicie_ditto": {
-    "id": "kanto_lv_36_55_planicie_ditto",
-    "speciesId": "ditto",
-    "minLevel": 80,
-    "maxLevel": 105,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 35
-  },
-  "kanto_lv_36_55_planicie_dodrio": {
-    "id": "kanto_lv_36_55_planicie_dodrio",
-    "speciesId": "dodrio",
-    "minLevel": 80,
-    "maxLevel": 105,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
   "kanto_lv_36_55_floresta_heracross": {
     "id": "kanto_lv_36_55_floresta_heracross",
     "speciesId": "heracross",
@@ -1266,6 +1266,24 @@ export const ENCOUNTERS_DATA = {
   "kanto_lv_36_55_floresta_victreebel": {
     "id": "kanto_lv_36_55_floresta_victreebel",
     "speciesId": "victreebel",
+    "minLevel": 80,
+    "maxLevel": 105,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 45
+  },
+  "kanto_lv_36_55_floresta_scizor": {
+    "id": "kanto_lv_36_55_floresta_scizor",
+    "speciesId": "scizor",
+    "minLevel": 80,
+    "maxLevel": 105,
+    "aggroRadius": 175,
+    "wanderRadius": 60,
+    "weight": 25
+  },
+  "kanto_lv_36_55_floresta_scyther": {
+    "id": "kanto_lv_36_55_floresta_scyther",
+    "speciesId": "scyther",
     "minLevel": 80,
     "maxLevel": 105,
     "aggroRadius": 175,
@@ -1302,24 +1320,6 @@ export const ENCOUNTERS_DATA = {
   "kanto_lv_36_55_floresta_bellsprout": {
     "id": "kanto_lv_36_55_floresta_bellsprout",
     "speciesId": "bellsprout",
-    "minLevel": 80,
-    "maxLevel": 105,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 255
-  },
-  "kanto_lv_36_55_floresta_butterfree": {
-    "id": "kanto_lv_36_55_floresta_butterfree",
-    "speciesId": "butterfree",
-    "minLevel": 80,
-    "maxLevel": 105,
-    "aggroRadius": 175,
-    "wanderRadius": 60,
-    "weight": 45
-  },
-  "kanto_lv_36_55_floresta_caterpie": {
-    "id": "kanto_lv_36_55_floresta_caterpie",
-    "speciesId": "caterpie",
     "minLevel": 80,
     "maxLevel": 105,
     "aggroRadius": 175,

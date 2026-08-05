@@ -15075,5 +15075,349 @@ export const BATTLE_SPRITE_ANIMS = {
         35
       ]
     }
+  },
+  "kingdra": {
+    "Idle": {
+      "frameWidth": 40,
+      "frameHeight": 72,
+      "durations": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 64,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 72,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 64,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "politoed": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "durations": [
+        40,
+        3,
+        5,
+        3,
+        6
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 72,
+      "durations": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 40,
+      "frameHeight": 64,
+      "durations": [
+        1,
+        1,
+        2,
+        6,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "golem": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        25
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        8,
+        12,
+        8,
+        12
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "durations": [
+        30,
+        35
+      ]
+    }
+  },
+  "porygon2": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        12,
+        8,
+        12,
+        8
+      ]
+    },
+    "Walk": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        10,
+        10,
+        10,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 32,
+      "frameHeight": 40,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 24,
+      "frameHeight": 40,
+      "durations": [
+        16,
+        12,
+        16,
+        16,
+        12,
+        16
+      ]
+    }
+  },
+  "scizor": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 64,
+      "durations": [
+        30,
+        2,
+        3,
+        3,
+        3,
+        2
+      ]
+    },
+    "Walk": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        8,
+        10,
+        8,
+        10
+      ]
+    },
+    "Shoot": {
+      "frameWidth": 48,
+      "frameHeight": 56,
+      "durations": [
+        2,
+        2,
+        6,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Charge": {
+      "frameWidth": 40,
+      "frameHeight": 48,
+      "durations": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "Sleep": {
+      "frameWidth": 40,
+      "frameHeight": 40,
+      "durations": [
+        30,
+        35
+      ]
+    }
   }
 };
