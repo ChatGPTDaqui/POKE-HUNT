@@ -481,6 +481,7 @@ select:focus, input[type="number"]:focus, input[type="text"]:focus {
    user scrolls past it. */
 .screen-body {
   flex: 1 1 auto;
+  overflow-x: hidden;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -1572,4 +1573,71 @@ button.confirm-danger {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+}
+
+/* ---------- Mobile HUD layout ---------- */
+/* Phones (portrait, <=480px real CSS width — covers everything from an
+   iPhone SE at 320px up through most phones in portrait). Nothing here
+   redesigns a panel, it only resolves real overflow/overlap bugs measured
+   at 320-375px: the 6-button nav's content (~400px of text+emoji) didn't
+   fit its own bar and got clipped past the right edge, and the fixed-width
+   Auto/perf-stats stack (130px) + chat-log (240px) summed past the
+   viewport and physically overlapped by up to 66px on a 320px phone. */
+@media (max-width: 480px) {
+  /* Nav becomes a horizontal-scroll strip instead of clipping off-screen —
+     buttons keep their natural (unshrunk) width so the emoji+label never
+     wraps/truncates, the bar itself scrolls to reach the rest. */
+  #bottom-nav {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  #bottom-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  #bottom-nav button {
+    flex: 0 0 auto;
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  /* Both fixed-width side panels shrink with the viewport (capped at their
+     original desktop size via min()) so they can never sum past the
+     available width and overlap each other again. */
+  #bottom-left-stack {
+    max-width: 40vw;
+  }
+
+  .auto-item-badge,
+  .perf-stats {
+    width: min(130px, 40vw);
+  }
+
+  #auto-toggle-btn {
+    font-size: 16px;
+    padding: 8px 14px;
+  }
+
+  .chat-log {
+    width: min(240px, 42vw);
+    font-size: 10px;
+  }
+
+  .chat-log-lines {
+    max-height: 84px;
+  }
+
+  /* Ability slots + zoom control are touch targets — keep them from
+     shrinking below a comfortable tap size while everything around them
+     compresses. */
+  .ability-slot {
+    width: 34px;
+    height: 34px;
+  }
+
+  #zoom-control button {
+    padding: 4px 10px;
+  }
 }
