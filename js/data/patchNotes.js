@@ -6,6 +6,18 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '2.3',
+    date: '2026-08-05',
+    title: 'Novo menu Wiki: guia completo do jogo',
+    highlights: [
+      'Novo menu principal "Wiki" (📚), com 4 abas: Primeiros Passos, Efetividade de Tipos, Raridades Pokemon e Mecanicas.',
+      '"Primeiros Passos" explica como comecar, como funciona o combate automatico, como navegar pelos menus e como progredir nas hunts.',
+      '"Efetividade de Tipos" e uma ferramenta interativa: escolha qualquer um dos 17 tipos elementais e veja, com dados reais do jogo, contra quais tipos ele e super eficaz/resistido/imune tanto atacando quanto defendendo.',
+      '"Raridades Pokemon" documenta a tabela completa (Comum a Mythic) com chance/multiplicador de status/multiplicador de venda de cada uma, alem de explicar Shiny e os lendarios como eixos separados.',
+      '"Mecanicas" detalha captura, agressividade/lure, distancia de visao da camera, habilidades em area (AoE) e o sistema de recarga (cooldown por PP + Velocidade).',
+    ],
+  },
+  {
     version: '2.2',
     date: '2026-08-05',
     title: 'Golpe AoE de nivel 50, debuffs reais, IA de caca ativa e ajustes de Lance',

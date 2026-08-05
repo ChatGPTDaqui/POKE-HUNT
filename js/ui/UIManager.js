@@ -6,6 +6,7 @@ import { renderShopMenu } from './panels/ShopMenu.js';
 import { renderTeamMenu } from './panels/TeamMenu.js';
 import { renderBagMenu } from './panels/BagMenu.js';
 import { renderPokedexMenu } from './panels/PokedexMenu.js';
+import { renderWikiMenu } from './panels/WikiMenu.js';
 import { renderSettingsScreen } from './panels/SettingsScreen.js';
 import { renderStartScreen } from './panels/StartScreen.js';
 import { renderPerfStats } from './panels/PerfStatsHUD.js';
@@ -24,6 +25,7 @@ const PANEL_RENDERERS = {
   team: renderTeamMenu,
   bag: renderBagMenu,
   pokedex: renderPokedexMenu,
+  wiki: renderWikiMenu,
   settings: renderSettingsScreen,
 };
 
