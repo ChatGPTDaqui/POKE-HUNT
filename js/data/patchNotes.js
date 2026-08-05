@@ -18,6 +18,7 @@ export const PATCH_NOTES = [
       'Hunt Inicial troca Geodude por Sentret; Wooper e Quagsire saem da zona costeira (Agua) e passam a aparecer na zona do Deserto (Terra); Dragonite agora aparece em Ruinas Ancestrais com exatamente 1% de chance.',
       'Verificado ao vivo que Kanto desbloqueia corretamente apos vencer o Campeao Lance (persiste em save/reload). Novo botao "Retornar ao Centro Pokemon" aparece na hunt do Lance so depois da vitoria.',
       'Distancia de visao padrao da camera aumentada para 160% (nas hunts e no Hospital), mantendo o zoom manual disponivel para ajustar ainda mais.',
+      'Pokebola so e jogada depois que o "corpo" do POKE derrotado desaparece por completo do campo, nao mais so apos a animacao de desmaio terminar.',
     ],
   },
   {

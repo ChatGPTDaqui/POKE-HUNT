@@ -561,9 +561,11 @@ const CAPTURE_ANIM_DRAW_SIZE = 40; // on-screen px, roughly a POKE icon's size
 
 // Post-battle Pokeball-throw animation, see data/captureAnim.js for the
 // sheet's real measured grid and CombatSystem/main.js for the trigger.
-// `effect.delay` holds this invisible until the defeated enemy's Faint pose
-// has fully played out (see main.js#handleEnemyDefeated) — the ball must
-// never appear mid-faint. Once past the delay, `effect.age - effect.delay`
+// `effect.delay` holds this invisible until the defeated enemy's corpse has
+// fully despawned (main.js#handleEnemyDefeated sets it to
+// DEATH_ANIM_GRACE_PERIOD, the same timer the corpse itself is removed
+// after) — the ball must never appear while the "body" is still on screen.
+// Once past the delay, `effect.age - effect.delay`
 // over frameDuration picks the frame; captureAnimFrameRect clamps to the
 // sequence's last frame instead of running off the end, so a duration
 // slightly longer than rowCount*frameDuration just holds the final pose

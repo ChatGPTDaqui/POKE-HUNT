@@ -17,7 +17,6 @@ import { getItem } from './data/items.js';
 import { isDamagingAbility } from './data/abilities.js';
 import { FORMULAS } from './data/formulas.generated.js';
 import { CAPTURE_ANIM_FRAME_DURATION, captureAnimRowCount } from './data/captureAnim.js';
-import { resolveBattleAnim } from './data/battleSprites.js';
 
 import { updateMovement } from './systems/MovementSystem.js';
 import { updateCombat } from './systems/CombatSystem.js';
@@ -43,18 +42,6 @@ const STARTER_LEVEL = 1;
 const STARTER_RARITY = 'comum';
 const STARTER_IVS = { hp: 23, atkFis: 23, atkEsp: 23, def: 23, defEsp: 23, speed: 23 };
 const DEATH_ANIM_GRACE_PERIOD = 4.0; // seconds a defeated enemy stays visible playing its Faint pose
-
-// Real length of a species' Faint pose (sum of its frame durations, which are
-// in 1/60s units — see AnimationSystem.js) — the capture-ball animation must
-// only start once this has fully played out (explicit user request), not the
-// instant the enemy is defeated. Species with no Faint animation of their own
-// (falls back to Sleep, or has no battle sprites at all) get 0: nothing to
-// wait out, the ball can appear immediately.
-function faintAnimDuration(speciesId, isShiny) {
-  const anim = resolveBattleAnim(speciesId, 'Faint', isShiny);
-  if (!anim || anim.name !== 'Faint') return 0;
-  return anim.durations.reduce((sum, d) => sum + d, 0) / 60;
-}
 
 // Both spreadsheet-editable (see CLAUDE.md's "Balanceamento de economia"
 // section) — Farm Offline's hard cap, and the tick size the two headless
@@ -308,12 +295,18 @@ function handleEnemyDefeated(world, enemy, { silent = false } = {}) {
     // Pokeball-throw animation — only for an actual attempt (a ball was
     // really thrown: either it caught or the catch roll failed), not for
     // 'invalid_ball'/'no_ball' where nothing was ever thrown at the enemy.
+    // Explicit user request (re-adjusted from a previous round): the ball
+    // must wait out the enemy's ENTIRE corpse-visible period — not just its
+    // Faint pose finishing — so it only appears once the "body" has fully
+    // despawned. DEATH_ANIM_GRACE_PERIOD is exactly that timer (same value
+    // `enemy.deathRemovalTimer` above counts down from, right before this
+    // corpse is filtered out of world.enemies for good).
     if (captureResult && captureResult.ballItemId) {
       const rowCount = captureAnimRowCount(captureResult.success);
       world.effects.push(new Effect({
         type: 'captureAnim', x: enemy.x, y: enemy.y, targetX: enemy.x, targetY: enemy.y,
         ballItemId: captureResult.ballItemId, success: captureResult.success,
-        delay: faintAnimDuration(enemySpecies.id, Boolean(enemy.poke.isShiny)),
+        delay: DEATH_ANIM_GRACE_PERIOD,
         duration: rowCount * CAPTURE_ANIM_FRAME_DURATION + 0.3,
       }));
     }
