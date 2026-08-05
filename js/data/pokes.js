@@ -11,6 +11,7 @@ import { SPECIES_DATA } from './pokes.generated.js';
 import { colorForType } from './typeColors.js';
 import { randInt, rollChance } from '../core/Random.js';
 import { RARITIES, rollRarity } from './rarity.js';
+import { typedAoeMoveKey, TYPED_AOE_LEVEL } from './typedAoeMoves.js';
 
 // Shiny odds scale with how easy the species is to catch in the first place —
 // a common 255-catch-rate species is the real Gen2 1/8192, rarer species are
@@ -55,6 +56,18 @@ function withVisuals(species) {
 export const SPECIES = Object.fromEntries(
   Object.entries(SPECIES_DATA).map(([key, species]) => [key, withVisuals(species)])
 );
+
+// Every species gets the level-50 typed AoE move (typedAoeMoves.js) appended
+// to its real learnset, keyed to ITS OWN primary type — explicit user
+// request, invented content with no spreadsheet equivalent. Piggybacking on
+// the existing `species.abilities` {key, levelReq} shape means grantExp/
+// evolvePokeInstance/createPokeInstance (data/pokes.js below, systems/
+// ProgressionSystem.js) and the moveset preview table
+// (ui/panels/PokeStatDetail.js#buildMovesetTable) all pick it up for free,
+// with zero special-casing anywhere else.
+for (const species of Object.values(SPECIES)) {
+  species.abilities = [...species.abilities, { key: typedAoeMoveKey(species.type), levelReq: TYPED_AOE_LEVEL }];
+}
 
 // Hand-authored patch, same "layer on top of the synced data" pattern as
 // nightmareMaps.js/legendaries.js: species whose real Gen1/2 evolution

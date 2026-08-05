@@ -24,6 +24,7 @@
 import { createFormulaEngine } from '../core/FormulaEngine.js';
 import { FORMULAS } from './formulas.generated.js';
 import { ABILITIES_DATA } from './abilities.generated.js';
+import { TYPED_AOE_MOVES } from './typedAoeMoves.js';
 
 const formulaEngine = createFormulaEngine(FORMULAS);
 const TICK_SECONDS = formulaEngine.eval('TICK_MS') / 1000;
@@ -48,11 +49,19 @@ export const BASIC_ATTACK = {
 // ones that already deal damage here get the AOE treatment (the matching
 // 0-power status moves, e.g. Growl/Tail Whip/Leer, stay inert per
 // isDamagingAbility, so tagging them 'aoe' would have no effect anyway).
-const AOE_ABILITY_KEYS = new Set(['razor_leaf', 'bubble', 'earthquake', 'explosion', 'magnitude', 'selfdestruct']);
-const AOE_RADIUS = 240; // medium/high splash circle around the attacker (doubled per balance pass)
+const AOE_ABILITY_KEYS = new Set([
+  'razor_leaf', 'bubble', 'earthquake', 'explosion', 'magnitude', 'selfdestruct',
+  ...Object.keys(TYPED_AOE_MOVES), // every level-50 typed move is AOE by design
+]);
+export const AOE_RADIUS = 240; // medium/high splash circle around the attacker (doubled per balance pass)
+
+// Merged in ahead of the spreadsheet moves — TYPED_AOE_MOVES's keys
+// (aoe50_fire, aoe50_water, ...) never collide with real spreadsheet move
+// keys, so a plain object spread is enough.
+const ALL_ABILITIES_SOURCE = { ...ABILITIES_DATA, ...TYPED_AOE_MOVES };
 
 export const ABILITIES = Object.fromEntries(
-  Object.entries(ABILITIES_DATA).map(([key, ability]) => {
+  Object.entries(ALL_ABILITIES_SOURCE).map(([key, ability]) => {
     const isAoe = AOE_ABILITY_KEYS.has(key);
     return [
       key,
@@ -75,4 +84,15 @@ export function getAbility(id) {
 // player-facing move list and the combat AI both filter through this.
 export function isDamagingAbility(ability) {
   return !!ability && ability.power > 0;
+}
+
+// The level-50 typed AoE moves (typedAoeMoves.js) don't have a fixed
+// physical/special category — explicit user request: it's decided per-user,
+// at cast time, by whichever of their two attack stats is higher. Every
+// real spreadsheet move already has a fixed category and passes through
+// unchanged. Used by CombatSystem.js (actual damage), AbilityHUD.js (slot
+// border color) and PokeStatDetail.js (moveset table) so all three agree.
+export function resolveAbilityCategory(ability, pokeInstance) {
+  if (ability.category !== 'dynamic') return ability.category;
+  return pokeInstance.stats.atkFis >= pokeInstance.stats.atkEsp ? 'physical' : 'special';
 }

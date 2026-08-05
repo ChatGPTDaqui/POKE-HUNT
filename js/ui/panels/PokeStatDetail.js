@@ -1,5 +1,5 @@
 import { expProgressForInstance } from '../../systems/ProgressionSystem.js';
-import { getAbility, isDamagingAbility } from '../../data/abilities.js';
+import { getAbility, isDamagingAbility, resolveAbilityCategory } from '../../data/abilities.js';
 import { gen5SpriteUrl } from '../../data/gen5Sprites.js';
 import { colorForType } from '../../data/typeColors.js';
 import { pokeNameTagHtml } from './swatchHtml.js';
@@ -93,7 +93,7 @@ export function buildMovesetTable(poke, species) {
     ${rows.map(({ entry, ability }) => {
       const learned = entry.levelReq <= poke.level;
       const dmg = ability.power > 0 ? ability.power : '—';
-      const category = ability.category === 'physical' ? 'Fisico' : 'Especial';
+      const category = resolveAbilityCategory(ability, poke) === 'physical' ? 'Fisico' : 'Especial';
       const aoe = ability.target === 'aoe' ? '✓' : '—';
       return `
         <div class="moveset-row ${learned ? 'learned' : ''}">

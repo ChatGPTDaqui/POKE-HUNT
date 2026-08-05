@@ -1,4 +1,4 @@
-import { getAbility, BASIC_ATTACK, isDamagingAbility } from '../../data/abilities.js';
+import { getAbility, BASIC_ATTACK, isDamagingAbility, resolveAbilityCategory } from '../../data/abilities.js';
 import { colorForType } from '../../data/typeColors.js';
 
 // Physical/Special border colors and the AOE ring color are fixed UI accents
@@ -29,7 +29,7 @@ export function renderAbilityHud(container, { world }) {
     const cd = player.cooldowns[id] || 0;
     const ready = cd <= 0;
     const typeColor = colorForType(ability.type);
-    const borderColor = CATEGORY_BORDER[ability.category] || CATEGORY_BORDER.physical;
+    const borderColor = CATEGORY_BORDER[resolveAbilityCategory(ability, player.poke)] || CATEGORY_BORDER.physical;
     const aoeClass = ability.target === 'aoe' ? ' aoe' : '';
     return `
       <div class="ability-slot${ready ? ' ready' : ''}${aoeClass}" title="${ability.name}"

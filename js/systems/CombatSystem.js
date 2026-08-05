@@ -1,4 +1,4 @@
-import { getAbility, BASIC_ATTACK, isDamagingAbility } from '../data/abilities.js';
+import { getAbility, BASIC_ATTACK, isDamagingAbility, resolveAbilityCategory } from '../data/abilities.js';
 import { SPECIES } from '../data/pokes.js';
 import { colorForType } from '../data/typeColors.js';
 import { Effect } from '../entities/Effect.js';
@@ -190,7 +190,7 @@ function estimateDamage(attackerEntity, defenderEntity, ability) {
   const special = specialDamageFor(ability, attackerEntity, defenderEntity);
   if (special && special.mode === 'fixed') return special.amount;
 
-  const isPhysical = ability.category === 'physical';
+  const isPhysical = resolveAbilityCategory(ability, attackerPoke) === 'physical';
   const atk = isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp;
   const def = isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp;
   const power = special && special.mode === 'dynamicPower' ? special.power : ability.power;
@@ -224,7 +224,7 @@ function computeDamage(attackerEntity, defenderEntity, ability) {
   if (special && special.mode === 'fixed') {
     dmg = effectivenessMultiplier === 0 ? 0 : special.amount;
   } else {
-    const isPhysical = ability.category === 'physical';
+    const isPhysical = resolveAbilityCategory(ability, attackerPoke) === 'physical';
     const atk = isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp;
     const def = isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp;
     const power = special && special.mode === 'dynamicPower' ? special.power : ability.power;
@@ -425,7 +425,7 @@ function resolveHit(world, hit, defeatedEnemies, onPlayerFainted) {
   if (target.isDead) return; // e.g. an AOE ally already finished it off first
 
   const result = computeDamage(attacker, target, ability);
-  target.takeDamage(result.amount, ability.category);
+  target.takeDamage(result.amount, resolveAbilityCategory(ability, attacker.poke));
   spawnDamageNumber(world, target, result);
 
   const isPlayerAttacker = attacker === world.player;

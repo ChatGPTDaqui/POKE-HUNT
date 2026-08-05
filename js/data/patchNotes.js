@@ -6,6 +6,14 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '2.2',
+    date: '2026-08-05',
+    title: 'Golpe AoE de nivel 50, debuffs reais, IA de caca ativa e ajustes de Lance',
+    highlights: [
+      'Todo POKE agora aprende um golpe em area exclusivo ao atingir o nivel 50, tematizado pelo seu tipo primario — a categoria (Fisico/Especial) e decidida automaticamente pelo maior atributo de ataque do proprio POKE.',
+    ],
+  },
+  {
     version: '2.1',
     date: '2026-08-05',
     title: 'Pathfinding real, mecanicas do Campeao Lance, sincronia de captura e escala de fundo',

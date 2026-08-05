@@ -69,16 +69,26 @@ function movesetTableHtml(species) {
       <div class="moveset-row moveset-header">
         <span>Nv</span><span>Golpe</span><span>Tipo</span><span>Cat.</span><span>Dano</span><span>AOE</span>
       </div>
-      ${rows.map(({ entry, ability }) => `
+      ${rows.map(({ entry, ability }) => {
+        // No specific poke instance in the Pokedex (species-only view) —
+        // approximate the dynamic level-50 AoE move's category off the
+        // species' own BASE stats instead of a real instance's (see
+        // resolveAbilityCategory in data/abilities.js for the real, per-poke
+        // version used everywhere a live instance exists).
+        const category = ability.category === 'dynamic'
+          ? (species.base.atkFis >= species.base.atkEsp ? 'physical' : 'special')
+          : ability.category;
+        return `
         <div class="moveset-row">
           <span>${entry.levelReq}</span>
           <span>${ability.name}</span>
           <span>${typeChip(ability.type)}</span>
-          <span>${ability.category === 'physical' ? 'Fisico' : 'Especial'}</span>
+          <span>${category === 'physical' ? 'Fisico' : 'Especial'}</span>
           <span>${ability.power > 0 ? ability.power : '—'}</span>
           <span>${ability.target === 'aoe' ? '✓' : '—'}</span>
         </div>
-      `).join('')}
+      `;
+      }).join('')}
     </div>
   `;
 }
