@@ -288,6 +288,13 @@ export function drawNameLevelTag(ctx, entity) {
 // diameter (`effect.worldSize`, see CombatSystem.js#resolveHit) so the ring
 // visually matches the area it actually covers.
 const IMPACT_BASE_SIZE = 44; // diameter for single-target hits (no worldSize)
+// Explicit user request: the old fade-through-full-transparency look read as
+// too washed out — colors now hold at a solid 90% opacity through most of
+// the effect's life (HOLD_PORTION) instead of fading continuously from the
+// very first frame, and only fade out in the final stretch so the effect
+// still disappears smoothly instead of popping off.
+const SOLID_OPACITY = 0.9;
+const HOLD_PORTION = 0.6;
 
 // Draws one particle of the given shape family, already translated to its
 // world position and rotated so local +x points "outward" (away from the
@@ -451,18 +458,18 @@ function drawShapeParticle(ctx, shape, size) {
 function drawImpactBurst(ctx, effect) {
   const { targetX: x, targetY: y, color, progress } = effect;
   const growth = Math.min(1, progress / 0.25); // quick pop-in
-  const fade = progress < 0.25 ? 1 : 1 - (progress - 0.25) / 0.75;
-  const alpha = Math.max(0, Math.min(1, fade));
+  const fade = progress < HOLD_PORTION ? 1 : 1 - (progress - HOLD_PORTION) / (1 - HOLD_PORTION);
+  const alpha = Math.max(0, Math.min(1, fade)) * SOLID_OPACITY;
   const coreRadius = ((effect.worldSize || IMPACT_BASE_SIZE) / 2) * (0.55 + growth * 0.45);
   const shape = impactShapeForType(effect.elementType);
 
   ctx.save();
-  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalCompositeOperation = 'source-over';
   ctx.globalAlpha = alpha;
 
   const gradient = ctx.createRadialGradient(x, y, 0, x, y, coreRadius);
-  gradient.addColorStop(0, `${color}ee`);
-  gradient.addColorStop(0.5, `${color}77`);
+  gradient.addColorStop(0, `${color}ff`);
+  gradient.addColorStop(0.6, `${color}cc`);
   gradient.addColorStop(1, `${color}00`);
   ctx.fillStyle = gradient;
   ctx.beginPath();
@@ -496,13 +503,14 @@ function drawAoeRing(ctx, effect) {
   const maxRadius = effect.worldSize / 2;
   const eased = 1 - (1 - progress) * (1 - progress); // ease-out
   const radius = maxRadius * eased;
-  const alpha = Math.max(0, 1 - progress);
+  const fade = progress < HOLD_PORTION ? 1 : 1 - (progress - HOLD_PORTION) / (1 - HOLD_PORTION);
+  const alpha = Math.max(0, fade) * SOLID_OPACITY;
   const shape = impactShapeForType(effect.elementType);
 
   ctx.save();
-  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalCompositeOperation = 'source-over';
 
-  ctx.globalAlpha = alpha * 0.25;
+  ctx.globalAlpha = alpha * 0.5;
   ctx.fillStyle = color;
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, Math.PI * 2);
