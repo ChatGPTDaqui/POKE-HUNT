@@ -21,7 +21,7 @@ const path = require('path');
 const { decodePng } = require('./lib/png');
 
 const HUNT_BG_TILE_SCALE = 1.6; // must match js/render/Sprites.js
-const MAP_BOUNDS = { width: 2800, height: 1800 }; // must match every regular hunt's bounds (scripts/sync-planilha.js)
+const MAP_BOUNDS = { width: 1400, height: 900 }; // must match every regular hunt's bounds (scripts/sync-planilha.js)
 const CELL_SIZE = 40; // world units per grid cell — ~1 POKE collision "box" (entity radius 14-16, diameter ~28-32)
 const DARKNESS_THRESHOLD = 26; // 0-255 average RGB below this = "black area"
 const SAMPLE_STRIDE = 5; // sample a 5x5 grid of points per cell instead of every pixel (plenty for a threshold this coarse)
@@ -31,8 +31,13 @@ const BG_FILES = ['fire.png', 'water.png', 'forest.png', 'cave.png', 'dojo.png',
 const bgDir = path.join(__dirname, '..', 'assets', 'hunt-backgrounds');
 const outFile = path.join(__dirname, '..', 'js', 'data', 'collisionGrids.generated.js');
 
-const cols = MAP_BOUNDS.width / CELL_SIZE;
-const rows = MAP_BOUNDS.height / CELL_SIZE;
+// Math.ceil rather than a plain division: 1400/40 is exact (35) but 900/40
+// isn't (22.5) — ceil gives a whole extra row of buffer past the map's real
+// bottom edge instead of leaving `rows` a non-integer (which would still
+// "work" via the for-loop's implicit truncation, but make the exported
+// COLLISION_GRID_ROWS constant lie about the grid's real dimensions).
+const cols = Math.ceil(MAP_BOUNDS.width / CELL_SIZE);
+const rows = Math.ceil(MAP_BOUNDS.height / CELL_SIZE);
 const mapCx = MAP_BOUNDS.width / 2;
 const mapCy = MAP_BOUNDS.height / 2;
 

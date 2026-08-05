@@ -14,12 +14,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "johto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#284b3c",
@@ -81,12 +81,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "johto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#284b3c",
@@ -162,12 +162,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "johto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#284b3c",
@@ -247,12 +247,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "johto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#284b3c",
@@ -331,12 +331,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "johto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#284b3c",
@@ -433,12 +433,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "johto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#1c1c2b",
@@ -510,12 +510,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "johto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#284b3c",
@@ -585,12 +585,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "johto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#1c1c2b",
@@ -662,12 +662,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "johto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#1c1c2b",
@@ -737,12 +737,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "johto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#284b3c",
@@ -815,12 +815,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "johto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#1c1c2b",
@@ -887,12 +887,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "kanto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#1c1c2b",
@@ -956,12 +956,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "kanto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#1c1c2b",
@@ -1026,12 +1026,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "kanto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#284b3c",
@@ -1106,12 +1106,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "kanto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#3e2f23",
@@ -1179,12 +1179,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "kanto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#3e2f23",
@@ -1247,12 +1247,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "kanto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#1c1c2b",
@@ -1315,12 +1315,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "kanto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#3e2f23",
@@ -1383,12 +1383,12 @@ export const MAPS_DATA = {
     "unlockCost": null,
     "continent": "kanto",
     "bounds": {
-      "width": 2800,
-      "height": 1800
+      "width": 1400,
+      "height": 900
     },
     "playerSpawn": {
-      "x": 1400,
-      "y": 900
+      "x": 700,
+      "y": 450
     },
     "bg": {
       "primary": "#284b3c",
