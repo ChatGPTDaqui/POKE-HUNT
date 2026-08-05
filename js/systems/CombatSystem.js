@@ -182,6 +182,19 @@ function queueHit(world, attacker, target, ability) {
   world.pendingHits.push({ timer: HIT_LAND_DELAY, attacker, target, ability });
 }
 
+// AOE moves get exactly ONE visual ring, centered on the attacker (the POKE
+// that cast it), landing at the same instant as the per-target damage hits.
+// Previously each hit in resolveHit spawned its own ring at the TARGET's
+// position, so a 3-enemy AOE would show 3 separate rings each originating
+// from a different enemy instead of one ring expanding out from the caster —
+// explicit user-reported bug ("a area de dano deve partir do Pokemon que
+// utiliza a habilidade, e nao no Pokemon alvo"). Queued the same way as a
+// real hit (no `target`) so it lands in sync with the attack pose finishing;
+// resolveHit special-cases `isAoeVisual` and skips the per-target ring below.
+function queueAoeVisual(world, attacker, ability) {
+  world.pendingHits.push({ timer: HIT_LAND_DELAY, attacker, target: null, ability, isAoeVisual: true });
+}
+
 // Pops the move's name just below the caster the instant it's used — separate
 // from queueHit's damage number, which only appears once the hit actually
 // lands HIT_LAND_DELAY seconds later.
@@ -215,6 +228,7 @@ function executePlayerAction(world, player, engagedEnemies) {
     ? engagedEnemies.filter((e) => !e.isDead && Math.hypot(e.x - player.x, e.y - player.y) <= ability.radius)
     : [engagedEnemies[0]].filter(Boolean);
 
+  if (ability.target === 'aoe') queueAoeVisual(world, player, ability);
   for (const target of targets) {
     queueHit(world, player, target, ability);
   }
@@ -231,6 +245,7 @@ function executeEnemyAction(world, enemy, player) {
   triggerAttackAnim(enemy, ability.target === 'aoe');
   announceAbility(world, enemy, ability);
 
+  if (ability.target === 'aoe') queueAoeVisual(world, enemy, ability);
   queueHit(world, enemy, player, ability);
 }
 
@@ -239,6 +254,23 @@ function executeEnemyAction(world, enemy, player) {
 // once the attacker's Shoot/Charge pose has finished playing.
 function resolveHit(world, hit, defeatedEnemies, onPlayerFainted) {
   const { attacker, target, ability } = hit;
+
+  if (hit.isAoeVisual) {
+    // The one ring for this AOE cast, centered on the attacker — see
+    // queueAoeVisual. Individual target hits below skip drawing their own.
+    world.effects.push(new Effect({
+      type: 'abilityEffect',
+      x: attacker.x, y: attacker.y,
+      targetX: attacker.x, targetY: attacker.y - attacker.radius * 0.6,
+      color: colorForType(ability.type),
+      isAoe: true,
+      duration: AOE_EFFECT_DURATION,
+      worldSize: ability.radius * 2,
+      elementType: ability.type,
+    }));
+    return;
+  }
+
   if (target.isDead) return; // e.g. an AOE ally already finished it off first
 
   const result = computeDamage(attacker.poke, target.poke, ability);
@@ -247,18 +279,17 @@ function resolveHit(world, hit, defeatedEnemies, onPlayerFainted) {
 
   const isPlayerAttacker = attacker === world.player;
   const isAoe = ability.target === 'aoe';
-  world.effects.push(new Effect({
-    type: 'abilityEffect',
-    x: target.x, y: target.y,
-    targetX: target.x, targetY: target.y - target.radius * 0.6,
-    color: colorForType(ability.type),
-    isAoe,
-    duration: isAoe ? AOE_EFFECT_DURATION : IMPACT_EFFECT_DURATION,
-    // AOE moves draw at their actual splash diameter instead of the flat
-    // default size, so the ring visually matches the area it really hits.
-    worldSize: isAoe ? ability.radius * 2 : undefined,
-    elementType: ability.type,
-  }));
+  if (!isAoe) {
+    world.effects.push(new Effect({
+      type: 'abilityEffect',
+      x: target.x, y: target.y,
+      targetX: target.x, targetY: target.y - target.radius * 0.6,
+      color: colorForType(ability.type),
+      isAoe: false,
+      duration: IMPACT_EFFECT_DURATION,
+      elementType: ability.type,
+    }));
+  }
 
   if (!target.isDead) return;
   if (isPlayerAttacker) {
