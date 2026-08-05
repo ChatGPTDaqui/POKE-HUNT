@@ -1160,8 +1160,130 @@ button.confirm-danger {
   margin-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   overflow-y: auto;
+}
+
+/* Compact redesign of the Auto panel's internals (explicit user request:
+   "despoluir a tela sem perder a usabilidade") — tighter padding/font and a
+   2-column grid for the ball pickers instead of 2 stacked full-width cards.
+   Scoped to .auto-floating-body so it doesn't affect .toggle-row/.card
+   anywhere else in the app. */
+.auto-floating-body .toggle-row {
+  padding: 6px 8px;
+  font-size: 11px;
+}
+
+.auto-floating-body .card {
+  padding: 6px 8px;
+  font-size: 11px;
+}
+
+.auto-floating-body h2 {
+  margin: 0 0 2px;
+  font-size: 14px;
+}
+
+.auto-floating-body .hint {
+  font-size: 10px;
+}
+
+.auto-floating-body .grid-list {
+  gap: 5px;
+}
+
+.auto-floating-body .row {
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.auto-floating-body .hp-input {
+  width: 36px;
+  font-family: inherit;
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--color-text);
+  border: 1px solid var(--color-panel-border);
+  border-radius: var(--radius-btn);
+  padding: 3px 4px;
+}
+
+.auto-floating-body select {
+  max-width: 100px;
+}
+
+.auto-config-grid select {
+  max-width: none;
+  width: 100%;
+}
+
+.auto-config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.auto-config-grid .card {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  padding: 6px 8px;
+}
+
+.auto-config-grid .card-info {
+  gap: 3px;
+}
+
+.auto-config-grid label.row {
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+/* Live inventory counter shown beside every item-picking select in the Auto
+   panel (explicit user request: "mostrador reativo ao lado de cada item
+   listado") — kept as a plain sibling <span>, never rebuilt, so it can be
+   updated every frame (see AutoPanel.js#updateAutoPanelCounts) without ever
+   touching the <select> itself and risking the click-swallow bug documented
+   in CLAUDE.md. */
+.item-count-badge {
+  font-size: 10px;
+  color: var(--color-text-dim);
+  font-weight: 600;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ---------- Patch Notes (Config screen tab) ---------- */
+.patch-note-card {
+  align-items: flex-start;
+}
+
+.patch-note-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.patch-note-version {
+  color: var(--color-accent);
+  font-weight: 700;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.patch-note-date {
+  margin-bottom: 4px;
+}
+
+.patch-note-list {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: var(--color-text-dim);
+  font-size: 11px;
 }
 
 /* ---------- LVL UP! splash (POKE evolution / Trainer level-up) ---------- */

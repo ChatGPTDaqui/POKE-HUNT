@@ -1,8 +1,11 @@
+import { sortedPatchNotes } from '../../data/patchNotes.js';
+
 const CONFIRM_TIMEOUT_MS = 4000;
 
-export function renderSettingsScreen(container, { controller }) {
+let activeTab = 'geral';
+
+function renderGeralTab(container, { controller }) {
   container.innerHTML = `
-    <div class="screen-sticky-header"><h2>Configuracoes</h2></div>
     <div class="card">
       <div class="card-info">
         <div class="card-title">Iniciar novo jogo</div>
@@ -31,4 +34,47 @@ export function renderSettingsScreen(container, { controller }) {
       controller.resetGame();
     }
   });
+}
+
+function renderPatchNotesTab(container) {
+  const notes = sortedPatchNotes();
+  container.innerHTML = notes.map((note) => `
+    <div class="card patch-note-card">
+      <div class="card-info">
+        <div class="card-title patch-note-title">
+          <span>${note.title}</span>
+          <span class="patch-note-version">v${note.version}</span>
+        </div>
+        <div class="card-sub patch-note-date">${note.date}</div>
+        <ul class="patch-note-list">
+          ${note.highlights.map((h) => `<li>${h}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+  `).join('');
+}
+
+export function renderSettingsScreen(container, ctx) {
+  container.innerHTML = `
+    <div class="screen-sticky-header">
+      <h2>Configuracoes</h2>
+      <div class="row tabs" id="settings-tabs">
+        <button data-tab="geral">Geral</button>
+        <button data-tab="patchnotes">Patch-notes</button>
+      </div>
+    </div>
+    <div id="settings-content"></div>
+  `;
+
+  container.querySelectorAll('#settings-tabs button').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.tab === activeTab);
+    btn.addEventListener('click', () => {
+      activeTab = btn.dataset.tab;
+      renderSettingsScreen(container, ctx);
+    });
+  });
+
+  const content = container.querySelector('#settings-content');
+  if (activeTab === 'patchnotes') renderPatchNotesTab(content);
+  else renderGeralTab(content, ctx);
 }

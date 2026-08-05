@@ -9,6 +9,7 @@ import { renderSettingsScreen } from './panels/SettingsScreen.js';
 import { renderStartScreen } from './panels/StartScreen.js';
 import { renderPerfStats } from './panels/PerfStatsHUD.js';
 import { renderAutoItemBadge } from './panels/AutoButtonBadge.js';
+import { updateAutoFloatingPanelCounts } from './panels/autoFloatingPanel.js';
 import { ChatLog } from './panels/ChatLog.js';
 import { makeDraggable } from './draggable.js';
 
@@ -201,6 +202,7 @@ export class UIManager {
     renderAbilityHud(this.abilityHudEl, { world: this.getWorld() });
     renderPerfStats(this.perfStatsEl, this.gameState);
     renderAutoItemBadge(this.autoItemBadgeEl, this.gameState);
+    updateAutoFloatingPanelCounts(this.gameState);
     this._updateReviveModal();
     this._updateBossDefeatModal();
   }

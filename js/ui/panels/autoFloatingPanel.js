@@ -4,10 +4,11 @@
 // stays fully visible while automation toggles are open. Reuses
 // renderAutoPanel's actual body untouched; only the container/positioning
 // differs.
-import { renderAutoPanel } from './AutoPanel.js';
+import { renderAutoPanel, updateAutoPanelCounts } from './AutoPanel.js';
 import { makeDraggable } from '../draggable.js';
 
 let currentOverlay = null;
+let currentBody = null;
 
 export function showAutoFloatingPanel(gameState, controller, getWorld) {
   if (currentOverlay) return; // already open — toggle button should close instead, see main.js
@@ -21,12 +22,14 @@ export function showAutoFloatingPanel(gameState, controller, getWorld) {
   makeDraggable(panel, panel.querySelector('.auto-floating-topbar'));
 
   const body = panel.querySelector('.auto-floating-body');
+  currentBody = body;
   const refresh = () => renderAutoPanel(body, { gameState, controller, world: getWorld ? getWorld() : null, refresh });
   refresh();
 
   const close = () => {
     panel.remove();
     currentOverlay = null;
+    currentBody = null;
     document.removeEventListener('mousedown', onOutsideClick, true);
   };
   function onOutsideClick(e) {
@@ -47,4 +50,11 @@ export function closeAutoFloatingPanel() {
 
 export function isAutoFloatingPanelOpen() {
   return currentOverlay !== null;
+}
+
+// Called every frame from UIManager.updateHud() while the panel is open —
+// keeps every item-count badge live (explicit user request: "atualizado em
+// tempo real") without rebuilding the panel itself (see AutoPanel.js).
+export function updateAutoFloatingPanelCounts(gameState) {
+  if (currentBody) updateAutoPanelCounts(currentBody, gameState);
 }

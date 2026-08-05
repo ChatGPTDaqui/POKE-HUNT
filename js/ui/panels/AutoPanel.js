@@ -9,6 +9,15 @@ function infoIcon(text) {
   return `<span class="info-icon">?<span class="tooltip">${text}</span></span>`;
 }
 
+// A live count badge next to a <select> that picks an item — tagged with
+// `item-count-source` so updateAutoPanelCounts() can find it every frame and
+// write the count of whichever option is currently selected, without ever
+// touching/rebuilding the <select> itself (see the CSS comment on
+// .item-count-badge for why that matters).
+function itemCountBadgeHtml() {
+  return `<span class="item-count-badge"></span>`;
+}
+
 function potionOptionsHtml(potionOptions, selectedId) {
   const bestOption = `<option value="${BEST_POTION_OPTION}" ${selectedId === BEST_POTION_OPTION ? 'selected' : ''}>Escolher melhor</option>`;
   const items = potionOptions.map((p) => `<option value="${p.id}" ${selectedId === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
@@ -42,10 +51,7 @@ export function renderAutoPanel(container, { gameState, controller, world, refre
     <h2>Automacoes</h2>
 
     <div class="toggle-row" id="row-pot">
-      <div>
-        <div>Auto-pot ${infoIcon('Cura automaticamente usando as regras abaixo. Cada regra define um limite de vida (%) e qual pocao usar quando o POKE cair abaixo desse limite. A primeira regra que corresponder (na ordem da lista) e usada.')}</div>
-        <div class="hint">Usa pocoes seguindo as regras abaixo, na ordem listada.</div>
-      </div>
+      <div>Auto-pot ${infoIcon('Cura automaticamente usando as regras abaixo. Cada regra define um limite de vida (%) e qual pocao usar quando o POKE cair abaixo desse limite. A primeira regra que corresponder (na ordem da lista) e usada.')}</div>
       <div class="switch ${gameState.autoToggles.autoPot ? 'on' : ''}"><div class="knob"></div></div>
     </div>
     <div class="grid-list" id="autopot-rules"></div>
@@ -54,36 +60,34 @@ export function renderAutoPanel(container, { gameState, controller, world, refre
     </div>
 
     <div class="toggle-row" id="row-catch">
-      <div>
-        <div>Auto-catch ${infoIcon('Lanca automaticamente a bola escolhida abaixo em todo inimigo derrotado, tentando captura-lo. Capturas sempre vao para a mochila.')}</div>
-        <div class="hint">Lanca a bola selecionada automaticamente em todo inimigo derrotado.</div>
-      </div>
+      <div>Auto-catch ${infoIcon('Lanca automaticamente a bola escolhida abaixo em todo inimigo derrotado, tentando captura-lo. Capturas sempre vao para a mochila.')}</div>
       <div class="switch ${gameState.autoToggles.autoCatch ? 'on' : ''}"><div class="knob"></div></div>
     </div>
-    <div class="card">
-      <div class="card-info">
-        <label class="row">Bola padrao:
-          <select id="ball-select">
-            ${ballOptions.map((b) => `<option value="${b.id}" ${gameState.autoCatchConfig.ballId === b.id ? 'selected' : ''}>${b.name}</option>`).join('')}
-          </select>
-        </label>
-      </div>
-    </div>
-
     <div class="toggle-row" id="row-shiny">
-      <div>
-        <div>Catch Shiny ${infoIcon('Quando ativado, usa uma bola diferente (escolhida abaixo) especificamente ao capturar POKES Shiny — uma variante rara e colorida.')}</div>
-        <div class="hint">Usa uma bola diferente ao capturar POKES Shiny (raros).</div>
-      </div>
+      <div>Catch Shiny ${infoIcon('Quando ativado, usa uma bola diferente (escolhida abaixo) especificamente ao capturar POKES Shiny — uma variante rara e colorida.')}</div>
       <div class="switch ${gameState.autoCatchConfig.catchShinyEnabled ? 'on' : ''}"><div class="knob"></div></div>
     </div>
-    <div class="card">
-      <div class="card-info">
-        <label class="row">Bola para Shiny:
-          <select id="shiny-ball-select" ${gameState.autoCatchConfig.catchShinyEnabled ? '' : 'disabled'}>
-            ${ballOptions.map((b) => `<option value="${b.id}" ${gameState.autoCatchConfig.shinyBallId === b.id ? 'selected' : ''}>${b.name}</option>`).join('')}
-          </select>
-        </label>
+
+    <div class="auto-config-grid">
+      <div class="card">
+        <div class="card-info">
+          <label class="row">Bola padrao
+            <select id="ball-select" class="item-count-source">
+              ${ballOptionsHtml(ballOptions, gameState.autoCatchConfig.ballId)}
+            </select>
+            ${itemCountBadgeHtml()}
+          </label>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-info">
+          <label class="row">Bola Shiny
+            <select id="shiny-ball-select" class="item-count-source" ${gameState.autoCatchConfig.catchShinyEnabled ? '' : 'disabled'}>
+              ${ballOptionsHtml(ballOptions, gameState.autoCatchConfig.shinyBallId)}
+            </select>
+            ${itemCountBadgeHtml()}
+          </label>
+        </div>
       </div>
     </div>
 
@@ -97,10 +101,7 @@ export function renderAutoPanel(container, { gameState, controller, world, refre
     </div>
 
     <div class="toggle-row" id="row-revive">
-      <div>
-        <div>Auto-revive ${infoIcon('Se o POKE em campo desmaiar, usa automaticamente um Revive da mochila para reanima-lo.')}</div>
-        <div class="hint">Usa um Revive automaticamente se o POKE desmaiar.</div>
-      </div>
+      <div>Auto-revive ${infoIcon('Se o POKE em campo desmaiar, usa automaticamente um Revive da mochila para reanima-lo.')}</div>
       <div class="switch ${gameState.autoToggles.autoRevive ? 'on' : ''}"><div class="knob"></div></div>
     </div>
   `;
@@ -112,12 +113,13 @@ export function renderAutoPanel(container, { gameState, controller, world, refre
     row.innerHTML = `
       <div class="card-info">
         <div class="row">
-          <span>Se vida &lt;=</span>
+          <span>Vida &lt;=</span>
           <input type="number" min="1" max="99" value="${rule.hpPercent}" class="hp-input" />
           <span>%, usar</span>
-          <select class="potion-select">
+          <select class="potion-select item-count-source">
             ${potionOptionsHtml(potionOptions, rule.itemId)}
           </select>
+          ${itemCountBadgeHtml()}
         </div>
       </div>
       ${gameState.autoPotRules.length > 1 ? '<button>Remover</button>' : ''}
@@ -130,6 +132,7 @@ export function renderAutoPanel(container, { gameState, controller, world, refre
     row.querySelector('.potion-select').addEventListener('change', (e) => {
       rule.itemId = e.target.value;
       controller.save();
+      updateAutoPanelCounts(container, gameState);
     });
     const removeBtn = row.querySelector('button');
     if (removeBtn) {
@@ -158,14 +161,13 @@ export function renderAutoPanel(container, { gameState, controller, world, refre
     row.innerHTML = `
       <div class="card-info">
         <div class="row">
-          <span>Especie</span>
           <select class="rule-species-select">
             ${[...speciesOptions.entries()].map(([id, name]) => `<option value="${id}" ${rule.speciesId === id ? 'selected' : ''}>${name}</option>`).join('')}
           </select>
-          <span>bola</span>
-          <select class="rule-ball-select">
+          <select class="rule-ball-select item-count-source">
             ${ballOptionsHtml(ballOptions, rule.ballItemId)}
           </select>
+          ${itemCountBadgeHtml()}
         </div>
       </div>
       <button>Remover</button>
@@ -177,6 +179,7 @@ export function renderAutoPanel(container, { gameState, controller, world, refre
     row.querySelector('.rule-ball-select').addEventListener('change', (e) => {
       rule.ballItemId = e.target.value;
       controller.save();
+      updateAutoPanelCounts(container, gameState);
     });
     row.querySelector('button').addEventListener('click', () => {
       gameState.autoCatchRules.splice(index, 1);
@@ -221,9 +224,34 @@ export function renderAutoPanel(container, { gameState, controller, world, refre
   container.querySelector('#ball-select').addEventListener('change', (e) => {
     gameState.autoCatchConfig.ballId = e.target.value;
     controller.save();
+    updateAutoPanelCounts(container, gameState);
   });
   container.querySelector('#shiny-ball-select').addEventListener('change', (e) => {
     gameState.autoCatchConfig.shinyBallId = e.target.value;
     controller.save();
+    updateAutoPanelCounts(container, gameState);
+  });
+
+  updateAutoPanelCounts(container, gameState);
+}
+
+// Writes the live inventory count into every item-count badge, reading each
+// select's CURRENT value fresh every call — safe to run every frame (see
+// autoFloatingPanel.js#updateAutoFloatingPanelCounts, wired into
+// UIManager.updateHud()) since it only ever touches the sibling <span>, never
+// the <select>/<option> nodes themselves (that's what avoids the click-
+// swallow bug from rebuilding interactive elements underneath a live
+// pointer — see CLAUDE.md's "Bug de clique em botao..." note).
+export function updateAutoPanelCounts(container, gameState) {
+  if (!container) return;
+  container.querySelectorAll('select.item-count-source').forEach((select) => {
+    const badge = select.parentElement.querySelector('.item-count-badge');
+    if (!badge) return;
+    if (select.value === BEST_POTION_OPTION) {
+      badge.textContent = '';
+      return;
+    }
+    const count = gameState.items[select.value] || 0;
+    badge.textContent = `x${count}`;
   });
 }
