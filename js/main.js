@@ -20,7 +20,7 @@ import { CAPTURE_ANIM_FRAME_DURATION, captureAnimRowCount } from './data/capture
 
 import { updateMovement } from './systems/MovementSystem.js';
 import { updateCombat } from './systems/CombatSystem.js';
-import { updateAnimations } from './systems/AnimationSystem.js';
+import { updateAnimations, tickAttackAnimTimers } from './systems/AnimationSystem.js';
 import { updateAutoHeal, maybeAutoCatch } from './systems/AutoSystem.js';
 import { grantExp, expRewardForEnemy, evolvePokeInstance, grantTrainerExp, applyDeathExpPenalty } from './systems/ProgressionSystem.js';
 import { awardKillLoot } from './systems/EconomySystem.js';
@@ -370,11 +370,19 @@ function stepWorld(world, dt, { silent = false } = {}) {
 
   updateMovement(world, dt);
   const { defeatedEnemies, playerJustFainted } = updateCombat(world, dt);
+  // attackAnimTimer must decrement every tick regardless of `silent` —
+  // MovementSystem.js locks movement while it's running, so skipping this
+  // during a silent simulation (Farm Offline / background catch-up) would
+  // freeze the entity in place forever after its very first attack (real bug
+  // found live: offline simulations stalled to near-zero kills once combat
+  // started). See AnimationSystem.js#tickAttackAnimTimers.
+  tickAttackAnimTimers(world, dt);
   // Must run AFTER combat: triggerAttackAnim() (called from inside
   // updateCombat) needs to be picked up the same tick, or the sprite shows
   // last tick's pose (e.g. Idle) for one frame while attackAnimTimer is
   // already counting down — a stale Idle/Shoot mismatch that reads as two
-  // sprites fighting for the same frame. Purely visual, so skipped when silent.
+  // sprites fighting for the same frame. The rest of updateAnimations (frame/
+  // sprite selection) is purely visual, so still skipped when silent.
   if (!silent) updateAnimations(world, dt);
 
   const kills = [];

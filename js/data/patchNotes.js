@@ -6,6 +6,15 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '2.8',
+    date: '2026-08-05',
+    title: 'Corrigido: Farm Offline/catch-up travava apos o primeiro ataque',
+    highlights: [
+      'Bug real encontrado e corrigido: toda simulacao silenciosa (Farm Offline ao reabrir o jogo, e o catch-up de aba minimizada) travava o POKE parado em "engaged" para sempre assim que ele desferia o primeiro ataque — o cronometro que trava o movimento durante a pose de ataque so era descontado pelo sistema de animacao, que e pulado de proposito nesses modos silenciosos por ser so visual. Na pratica isso reduzia horas de Farm Offline a pouquissimos abates (so quando um inimigo errante encostava por acaso no jogador congelado).',
+      'Agora esse cronometro sempre desconta, silencioso ou nao — testado ao vivo: 720 segundos simulados renderam 288 abates a um ritmo constante, contra 3 abates (e travamento total) antes da correcao.',
+    ],
+  },
+  {
     version: '2.7',
     date: '2026-08-05',
     title: 'Wiki corrigida + tabela de tipos completa',

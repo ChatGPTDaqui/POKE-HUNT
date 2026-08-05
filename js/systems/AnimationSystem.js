@@ -23,18 +23,35 @@ function desiredAnimName(entity) {
   return 'Idle';
 }
 
-// Advances each entity's battle-sprite animation frame. Purely visual state —
-// combat/movement don't read any of it. Entities whose species has no battle
-// sprites (resolveBattleAnim returns null) are left untouched and fall back
-// to the geometric placeholder shape in render/Sprites.js.
+// Decrements attackAnimTimer for every entity — split out from
+// updateAnimations below (which is skipped in silent/headless mode, see
+// main.js#stepWorld) because MovementSystem.js also reads this same timer to
+// LOCK movement while an attack pose plays (`todo POKE trava no lugar
+// enquanto usa um golpe`). Real bug found live: since only updateAnimations
+// ever ticked it down, a silent simulation (Farm Offline / background
+// catch-up) permanently froze the acting entity in place the instant its
+// very first attack fired — nothing left running would ever bring the timer
+// back to 0, so movement stayed locked into 'engaged' for the rest of the
+// simulation regardless of what was actually nearby. Must run every tick,
+// silent or not.
+export function tickAttackAnimTimers(world, dt) {
+  for (const entity of [world.player, ...world.enemies]) {
+    if (entity && entity.attackAnimTimer > 0) {
+      entity.attackAnimTimer = Math.max(0, entity.attackAnimTimer - dt);
+    }
+  }
+}
+
+// Advances each entity's battle-sprite animation frame — sprite/frame
+// selection only now (see tickAttackAnimTimers above for the timer itself,
+// which movement also depends on and so can't be skipped when silent).
+// Entities whose species has no battle sprites (resolveBattleAnim returns
+// null) are left untouched and fall back to the geometric placeholder shape
+// in render/Sprites.js.
 export function updateAnimations(world, dt) {
   const entities = [world.player, ...world.enemies].filter(Boolean);
 
   for (const entity of entities) {
-    if (entity.attackAnimTimer > 0) {
-      entity.attackAnimTimer = Math.max(0, entity.attackAnimTimer - dt);
-    }
-
     const wantedName = desiredAnimName(entity);
     const resolved = resolveBattleAnim(entity.species.id, wantedName, entity.poke.isShiny);
     if (!resolved) {
