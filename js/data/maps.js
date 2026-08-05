@@ -20,6 +20,16 @@ const formulaEngine = createFormulaEngine(FORMULAS);
 // the spreadsheet's raw respawnDelay by default.
 const RESPAWN_DELAY_MULTIPLIER = formulaEngine.evalOrDefault('MOB_RESPAWN_DELAY_MULTIPLIER', 0.25);
 
+// Explicit user request: temporarily pause the wall/obstacle collision
+// system (the per-background grid baked by scripts/build-collision-grids.js
+// — water banks, cave walls, cliffs) so every POKE can walk freely across
+// the whole map with nothing blocking them, while leaving the rest of the
+// system in place to flip back on later (just set this back to true).
+// Doesn't touch the separate circular map-edge clamp (mapWalkRadius below /
+// MovementSystem.js), which is what actually keeps POKEs inside the hunt at
+// all and isn't part of "wall block".
+const WALL_BLOCK_ENABLED = false;
+
 // Only the 7 hunt themes with real background art (see
 // scripts/build-collision-grids.js) have a grid — every other hunt gets
 // `collisionGrid: null` and keeps the old fully-open walkable circle
@@ -27,7 +37,9 @@ const RESPAWN_DELAY_MULTIPLIER = formulaEngine.evalOrDefault('MOB_RESPAWN_DELAY_
 export function getMap(id) {
   const map = MAPS[id];
   if (!map) return null;
-  const collisionGrid = (map.bg && map.bg.image && COLLISION_GRIDS[map.bg.image]) || null;
+  const collisionGrid = WALL_BLOCK_ENABLED
+    ? (map.bg && map.bg.image && COLLISION_GRIDS[map.bg.image]) || null
+    : null;
   return { ...map, respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER, collisionGrid };
 }
 

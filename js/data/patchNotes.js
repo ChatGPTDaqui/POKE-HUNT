@@ -6,6 +6,14 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '2.5',
+    date: '2026-08-05',
+    title: 'Colisao de paredes pausada temporariamente',
+    highlights: [
+      'Sistema de colisao contra paredes/obstaculos (agua, cavernas, penhascos) pausado temporariamente — POKEs podem andar livremente por qualquer parte do mapa. O limite circular da borda de cada hunt continua normal.',
+    ],
+  },
+  {
     version: '2.4',
     date: '2026-08-05',
     title: 'Correcao real do desbloqueio pos-Lance (Modo Pesadelo)',
