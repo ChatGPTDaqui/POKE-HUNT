@@ -6,6 +6,13 @@ const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2.5;
 const ZOOM_SENSITIVITY = 0.0015;
 const ZOOM_STEP = 0.1;
+// Explicit user request: default viewing distance is 160% of what it used
+// to be (100%, i.e. zoom=1) — since visible world size scales with 1/zoom,
+// seeing 1.6x farther by default means starting at zoom = 1/1.6, not 1.6.
+// Applies to both the hunt camera (renderMap) and the Hospital scene
+// (renderHospital) — the player can still zoom past this via
+// Ctrl+Scroll/the +/- buttons, same MIN/MAX clamp as before.
+const DEFAULT_ZOOM = 1 / 1.6;
 // Fraction of screen height the active POKE anchors to — 0.5 would be dead
 // center; explicit user request to sit slightly below center instead, so a
 // bit more of the world ahead/above is visible than behind.
@@ -18,7 +25,7 @@ export class Renderer {
     this.ctx.imageSmoothingEnabled = false;
     this.width = canvas.width;
     this.height = canvas.height;
-    this.zoom = 1;
+    this.zoom = DEFAULT_ZOOM;
   }
 
   // Canvas attribute width/height (its actual drawing-buffer resolution) are
@@ -49,27 +56,64 @@ export class Renderer {
     this.ctx.clearRect(0, 0, this.width, this.height);
   }
 
-  // Nurse desk / player spot in the Hospital scene, as fractions of the
-  // current canvas size (not fixed px) so they stay sensibly placed — nurse
-  // upper-middle, player just below her — at any window size/aspect ratio.
-  get hospitalNursePos() {
+  // Nurse desk / player spot in the Hospital scene BEFORE the zoom pull-back
+  // below — fractions of the current canvas size (not fixed px) so they
+  // stay sensibly placed — nurse upper-middle, player just below her — at
+  // any window size/aspect ratio. Only used internally by renderHospital,
+  // which draws at these positions under a ctx transform; anything outside
+  // this file (nurse click/hover hit-test in main.js) must use the public,
+  // already-zoom-adjusted getters below instead.
+  _hospitalBaseNursePos() {
     return { x: this.width / 2, y: this.height * 0.35 };
   }
 
-  get hospitalPlayerPos() {
+  _hospitalBasePlayerPos() {
     return { x: this.width / 2, y: this.height * 0.68 };
+  }
+
+  // Maps a base Hospital position through the same center-anchored
+  // scale renderHospital applies to the whole scene, so callers doing plain
+  // canvas-pixel hit-testing (no ctx transform of their own) land on
+  // whatever is actually drawn on screen at the current zoom.
+  _applyHospitalZoom({ x, y }) {
+    const cx = this.width / 2, cy = this.height / 2;
+    return { x: cx + (x - cx) * this.zoom, y: cy + (y - cy) * this.zoom };
+  }
+
+  // Public: real on-screen position, accounting for zoom — used by both
+  // renderHospital's own drawing (indirectly, via the ctx transform) and
+  // main.js's nurse click/hover hit-test, so the two can never drift apart.
+  get hospitalNursePos() {
+    return this._applyHospitalZoom(this._hospitalBaseNursePos());
+  }
+
+  get hospitalPlayerPos() {
+    return this._applyHospitalZoom(this._hospitalBasePlayerPos());
   }
 
   renderHospital(playerEntity) {
     const ctx = this.ctx;
     this.clear();
     const hospitalMap = { bounds: { width: this.width, height: this.height }, bg: HOSPITAL_BG };
-    const nursePos = this.hospitalNursePos;
-    drawMapBackground(ctx, hospitalMap, { x: 0, y: 0, w: this.width, h: this.height });
+    const cx = this.width / 2, cy = this.height / 2;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(this.zoom, this.zoom);
+    ctx.translate(-cx, -cy);
+
+    // Enlarged so the shrunk (zoom < 1 = pulled back) scene still covers the
+    // whole canvas after the transform above — same technique renderMap uses
+    // for the hunt camera (viewport size divided by zoom).
+    const viewportW = this.width / this.zoom;
+    const viewportH = this.height / this.zoom;
+    drawMapBackground(ctx, hospitalMap, { x: cx - viewportW / 2, y: cy - viewportH / 2, w: viewportW, h: viewportH });
+
+    const nursePos = this._hospitalBaseNursePos();
     drawNpcMarker(ctx, nursePos.x, nursePos.y, 'Enfermeira');
     if (playerEntity) {
       const original = { x: playerEntity.x, y: playerEntity.y };
-      const playerPos = this.hospitalPlayerPos;
+      const playerPos = this._hospitalBasePlayerPos();
       playerEntity.x = playerPos.x;
       playerEntity.y = playerPos.y;
       drawEntity(ctx, playerEntity);
@@ -78,6 +122,7 @@ export class Renderer {
       playerEntity.x = original.x;
       playerEntity.y = original.y;
     }
+    ctx.restore();
   }
 
   renderMap(mapDef, world) {
