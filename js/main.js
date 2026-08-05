@@ -135,6 +135,20 @@ function spawnEnemyAt(mapDef) {
   return new Enemy({ poke, x: point.x, y: point.y, encounterId });
 }
 
+// Sequence-boss spawn (Champion Lance, see data/nightmareMaps.js): fixed
+// species/level/rarity/ivs per slot, in order, at the map's single spawn
+// point — no random pool pick, no random stat rolls (encounter.rarity/ivs
+// are only ever set on a sequence hunt's encounters; a normal hunt's
+// encounter has neither, and createPokeInstance's own `|| rollX()` fallback
+// already handles that being undefined here).
+function spawnSequenceEnemy(mapDef, index) {
+  const encounterId = mapDef.sequence[index];
+  const encounter = getEncounter(encounterId);
+  const point = mapDef.spawnPoints[0] || mapDef.playerSpawn;
+  const poke = createPokeInstance(encounter.speciesId, encounter.minLevel, { rarity: encounter.rarity, ivs: encounter.ivs });
+  return new Enemy({ poke, x: point.x, y: point.y, encounterId });
+}
+
 function buildMapWorld(mapId) {
   const mapDef = getMap(mapId);
   const poke = gameState.activePoke;
@@ -142,8 +156,12 @@ function buildMapWorld(mapId) {
   if (player.isDead) player.fainted = true;
 
   const enemies = [];
-  for (let i = 0; i < mapDef.maxEnemies; i++) {
-    enemies.push(spawnEnemyAt(mapDef));
+  if (mapDef.sequence) {
+    enemies.push(spawnSequenceEnemy(mapDef, 0));
+  } else {
+    for (let i = 0; i < mapDef.maxEnemies; i++) {
+      enemies.push(spawnEnemyAt(mapDef));
+    }
   }
 
   return {
@@ -151,6 +169,7 @@ function buildMapWorld(mapId) {
     autoTimers: { pot: 0, revive: 0 },
     reviveCountdown: null,
     respawnTimer: mapDef.respawnDelay,
+    sequenceIndex: 0,
   };
 }
 
@@ -319,6 +338,34 @@ function stepWorld(world, dt, { silent = false } = {}) {
         channel: 'combat',
       });
     }
+
+    // Champion Lance rule (js/data/nightmareMaps.js#autoSwitchTeamOnFaint):
+    // instead of the usual BOSS "you're done" modal on the very first faint,
+    // the next non-fainted team member fields automatically — same in-place
+    // player-entity swap setActiveTeamIndex/removeFromTeam already use.
+    // Applied AFTER the exp penalty above so it lands on the POKE that
+    // actually just fainted, not whichever one ends up active next. Only
+    // when every team member is down does world.player.fainted stay true,
+    // which is what UIManager's boss-defeat-modal already keys off.
+    if (world.mapDef.autoSwitchTeamOnFaint) {
+      const nextIndex = gameState.team.findIndex((p) => p.hp > 0);
+      if (nextIndex !== -1) {
+        gameState.setActiveIndex(nextIndex);
+        world.player.poke = gameState.activePoke;
+        world.player.cooldowns = {};
+        world.player.flashTimer = 0;
+        world.player.fainted = false;
+        world.player.state = 'wander';
+        world.player.target = null;
+        if (!silent) {
+          eventBus.emit('toast', {
+            message: `${shinyPrefix(world.player.poke.isShiny)}${SPECIES[world.player.poke.speciesId].name} entrou em campo!`,
+            type: 'success',
+            channel: 'combat',
+          });
+        }
+      }
+    }
   }
 
   const autoEvents = updateAutoHeal(world, gameState, dt);
@@ -337,6 +384,17 @@ function stepWorld(world, dt, { silent = false } = {}) {
     world.respawnTimer -= dt;
     if (world.respawnTimer <= 0) {
       world.enemies.push(spawnEnemyAt(world.mapDef));
+      world.respawnTimer = world.mapDef.respawnDelay;
+    }
+  } else if (world.mapDef.sequence && aliveCount === 0 && world.sequenceIndex < world.mapDef.sequence.length - 1) {
+    // Champion Lance (and any future sequence-boss): the next team member
+    // fields in after a short beat, same timer field the normal respawn
+    // branch above uses, just walking `sequence` in order instead of
+    // picking randomly from `enemyPool`.
+    world.respawnTimer -= dt;
+    if (world.respawnTimer <= 0) {
+      world.sequenceIndex += 1;
+      world.enemies.push(spawnSequenceEnemy(world.mapDef, world.sequenceIndex));
       world.respawnTimer = world.mapDef.respawnDelay;
     }
   }

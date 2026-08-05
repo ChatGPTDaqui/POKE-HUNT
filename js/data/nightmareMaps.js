@@ -119,8 +119,71 @@ function buildBossHunts() {
   return { maps, encounters };
 }
 
+// Champion Lance: a single hunt with an ORDERED 6-POKE team fought one at a
+// time (real trainer-battle style), not the single-legendary-no-respawn
+// shape every other BOSS hunt uses — see main.js#spawnSequenceEnemy/
+// stepWorld's respawn block (`mapDef.sequence`, generic enough for any
+// future sequence-boss, not hardcoded to Lance by name there) and
+// `autoSwitchTeamOnFaint` (main.js's playerJustFainted handling): the next
+// team member fields automatically on a faint instead of the usual BOSS
+// "you're done, walk back to the Hospital" modal — only when the WHOLE team
+// is down does that modal show. `noRespawn: true` (shared with every other
+// BOSS hunt) already disables auto-pot/auto-revive via AutoSystem.js, which
+// covers "proibido auto-pot e revive" for free.
+export const LANCE_MAP_ID = 'boss_lance';
+// Per explicit user request: every Lance POKE is raridade Lendario with a
+// FIXED (not rolled) IV of 23 on all 6 stats — deliberately not the 31 max,
+// and not random like a normal wild encounter.
+const LANCE_RARITY = 'legendary';
+const LANCE_IVS = { hp: 23, atkFis: 23, atkEsp: 23, def: 23, defEsp: 23, speed: 23 };
+// Exact composition and order from the user's spec — index 0 fights first.
+const LANCE_TEAM = [
+  { speciesId: 'gyarados', level: 60 },
+  { speciesId: 'dragonite', level: 55 },
+  { speciesId: 'charizard', level: 60 },
+  { speciesId: 'dragonite', level: 56 },
+  { speciesId: 'aerodactyl', level: 60 },
+  { speciesId: 'dragonite', level: 65 },
+];
+
+function buildLanceHunt() {
+  const encounters = {};
+  const enemyPool = LANCE_TEAM.map((entry, i) => {
+    const encId = `${LANCE_MAP_ID}_${i}`;
+    encounters[encId] = {
+      id: encId, speciesId: entry.speciesId, minLevel: entry.level, maxLevel: entry.level,
+      aggroRadius: 175, wanderRadius: 60, weight: 1,
+      rarity: LANCE_RARITY, ivs: LANCE_IVS,
+    };
+    return encId;
+  });
+
+  const map = {
+    id: LANCE_MAP_ID,
+    name: 'BOSS Campeao Lance',
+    description: 'Batalha final contra o Campeao Lance — 6 POKEs Lendarios em sequencia (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o proximo POKE da equipe entra automaticamente.',
+    levelRange: [55, 65],
+    unlockCost: null,
+    continent: 'nightmare',
+    bounds: { width: 2800, height: 1800 },
+    playerSpawn: { x: 1400, y: 900 },
+    bg: { primary: '#3e2f23', secondary: '#4a3829', image: TYPE_BACKGROUND_IMAGE.DRAGON },
+    maxEnemies: 1,
+    noRespawn: true,
+    autoSwitchTeamOnFaint: true,
+    sequence: enemyPool, // ordered encounter ids — main.js walks through them one at a time instead of picking randomly
+    respawnDelay: 3,
+    spawnPoints: [{ x: 1400, y: 900 }],
+    enemyPool,
+    itemDrops: [],
+  };
+
+  return { map, encounters };
+}
+
 const nightmare = buildNightmareMirror();
 const bosses = buildBossHunts();
+const lance = buildLanceHunt();
 
-export const NIGHTMARE_MAPS_DATA = { ...nightmare.maps, ...bosses.maps };
-export const NIGHTMARE_ENCOUNTERS_DATA = { ...nightmare.encounters, ...bosses.encounters };
+export const NIGHTMARE_MAPS_DATA = { ...nightmare.maps, ...bosses.maps, [LANCE_MAP_ID]: lance.map };
+export const NIGHTMARE_ENCOUNTERS_DATA = { ...nightmare.encounters, ...bosses.encounters, ...lance.encounters };
