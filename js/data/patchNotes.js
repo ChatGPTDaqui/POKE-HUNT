@@ -6,6 +6,22 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '2.0',
+    date: '2026-08-05',
+    title: 'Combate corpo-a-corpo real, mapas redimensionados e Campeao Lance vira o gate final de Johto',
+    highlights: [
+      'Tempo minimo entre acoes subiu para 2s e todo POKE trava no lugar enquanto usa um golpe (nao anda mais durante o ataque).',
+      'Golpes em area agora nascem visualmente de quem usou a habilidade, nao mais de cada alvo atingido.',
+      'Magnitude, Reversal, Counter, Seismic Toss e outros 10 golpes de dano variavel usam a formula real de cada um em vez do poder base generico.',
+      'Camera do POKE ativo ancora um pouco abaixo do centro da tela.',
+      'Escala das sprites em campo virou proporcional de verdade: o menor POKE do jogo fica em 1x, o maior em 3x.',
+      'Animacao da pokebola so comeca depois que o POKE derrotado termina de desmaiar.',
+      'Toda hunt agora tem um background real (nenhuma mais cai no xadrez de fundo antigo) e o mapa ficou 2x menor para o tamanho dos POKEs bater com o cenario.',
+      'Colisao de mapa agora bloqueia agua de verdade tambem, nao so paredes e vazio.',
+      'Campeao Lance virou a hunt final de Johto: derrota-lo agora e obrigatorio para acessar o Novo Continente (Kanto). Captura desabilitada nessa luta.',
+    ],
+  },
+  {
     version: '1.9',
     date: '2026-08-04',
     title: 'World Building: um bioma por tipo elemental',
