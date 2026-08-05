@@ -931,7 +931,15 @@ button.confirm-danger {
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
-  z-index: 35; /* same reasoning as #bottom-nav above */
+  /* Above every modal window too (.confirm-modal-overlay/offline-farm-modal/
+     etc., z-index 100 — see below), not just #overlay-root's screens (30).
+     Real bug found live: opening a POKE profile (or any other modal) put its
+     full-viewport backdrop ON TOP of this panel, so a click on "Auto" landed
+     on the backdrop instead and just closed the modal — the Hunt Analyser/
+     Auto toggle looked present but was actually unclickable dead space.
+     Stays below the celebratory splashes (200), which are meant to be a
+     true uninterruptible full-screen moment. */
+  z-index: 105;
 }
 
 /* 2x the size of a regular button — explicit user request to make the Auto
@@ -994,7 +1002,9 @@ button.confirm-danger {
   right: 8px;
   bottom: 54px;
   width: 240px;
-  z-index: 10;
+  /* Same fix/reasoning as #bottom-left-stack above — must outrank modal
+     windows (z-index 100), not just #overlay-root's screens. */
+  z-index: 105;
   font-size: 11px;
 }
 
@@ -1203,7 +1213,11 @@ button.confirm-danger {
   width: 280px;
   max-height: 65vh;
   padding: 14px;
-  z-index: 95;
+  /* Above modal windows too (was 95, just under .confirm-modal-overlay's
+     100 — see #bottom-left-stack's comment above for the bug this caused:
+     opening the Auto panel and then a POKE profile on top of it buried the
+     already-open panel behind the new modal's backdrop). */
+  z-index: 106;
   display: flex;
   flex-direction: column;
 }

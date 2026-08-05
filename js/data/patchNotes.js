@@ -6,6 +6,15 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '2.9',
+    date: '2026-08-05',
+    title: 'Hunt Analyser/Auto/Log ficavam presos atras de janelas abertas',
+    highlights: [
+      'Bug real corrigido: abrir qualquer janela flutuante (perfil de um POKE, confirmacao de venda, resumo do Farm Offline) colocava o fundo escurecido dessa janela ACIMA do painel Hunt Analyser, do botao/painel Auto e do chat/log — os paineis pareciam presentes na tela mas um clique neles na verdade fechava a janela por baixo, em vez de abrir o Auto ou trocar de aba no log.',
+      'Os 3 paineis agora ficam sempre acima de qualquer janela/modal aberto (continuam abaixo dos splashes de vitoria/derrota e "LVL UP!", que sao intencionalmente um interrupt de tela cheia).',
+    ],
+  },
+  {
     version: '2.8',
     date: '2026-08-05',
     title: 'Corrigido: Farm Offline/catch-up travava apos o primeiro ataque',
