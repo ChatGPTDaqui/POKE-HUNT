@@ -156,11 +156,14 @@ max_indexes = 5
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "http://127.0.0.1:3000"
+# Porta do dev server do Vite (web/). Trocar para o dominio real ao publicar —
+# esta URL e a allow-list de redirect do Auth, entao um valor errado quebra o
+# retorno de confirmacao de email / reset de senha.
+site_url = "http://localhost:5173"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+additional_redirect_urls = ["http://localhost:5173", "http://127.0.0.1:5173"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.
@@ -179,10 +182,12 @@ enable_anonymous_sign_ins = false
 # Allow/disallow testing manual linking of accounts
 enable_manual_linking = false
 # Passwords shorter than this value will be rejected as weak. Minimum 6, recommended 8 or more.
-minimum_password_length = 6
+# Subido de 6 (default) para 8: cadastro sera aberto ao publico, e 6 caracteres
+# sem exigencia nenhuma e fraco demais para conta que guarda progresso.
+minimum_password_length = 8
 # Passwords that do not meet the following requirements will be rejected as weak. Supported values
 # are: `letters_digits`, `lower_upper_letters_digits`, `lower_upper_letters_digits_symbols`
-password_requirements = ""
+password_requirements = "letters_digits"
 
 # Configure passkey sign-ins.
 # [auth.passkey]
@@ -223,13 +228,24 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
+#
+# !!! LIGAR ANTES DE ABRIR O CADASTRO AO PUBLICO !!!
+# Desligado de proposito durante o desenvolvimento (decisao explicita do
+# usuario) para nao depender de entrega de email a cada conta de teste. Com
+# cadastro publico e isto desligado, qualquer um cria conta com email que nao
+# possui — inclusive o de outra pessoa. Ligar exige tambem configurar SMTP
+# proprio ([auth.email.smtp] abaixo): o servico de email embutido do Supabase
+# tem limite baixo e nao serve para producao.
 enable_confirmations = false
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
-max_frequency = "1s"
+# 1m0s, nao o default de 1s do `supabase init`: com 1s qualquer um dispara um
+# email de confirmacao/reset por segundo contra um endereco alheio. O projeto
+# remoto ja vinha com 1m0s e um `config push` cego rebaixou isso — restaurado.
+max_frequency = "1m0s"
 # Number of characters used in the email OTP.
-otp_length = 6
+otp_length = 8
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
