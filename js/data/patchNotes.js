@@ -6,6 +6,15 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '3.3',
+    date: '2026-08-06',
+    title: 'Cartao do POKE: Vantagens de tipo + Pokedex abre automatico',
+    highlights: [
+      'O cartao de status agora mostra tambem "Vantagem contra" (quais tipos este POKE causa 2x de dano ao atacar), lado a lado com Fraquezas e Resistencias, em qualquer menu.',
+      'Pokedex: selecionar uma especie abre o cartao automaticamente — nao precisa mais clicar num botao separado "Ver cartao do POKE" (removido).',
+    ],
+  },
+  {
     version: '3.2',
     date: '2026-08-06',
     title: 'Combate: cancelamento de golpe ao morrer + AoE corrigido + rebalanceamento de XP/Ouro',

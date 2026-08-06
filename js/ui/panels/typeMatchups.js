@@ -42,15 +42,38 @@ function typeChipRow(types) {
     : '<span class="card-sub">Nenhum</span>';
 }
 
+// Offense side of the matchup — which opposing types this species' OWN
+// type(s) hit hard (2x damage), i.e. the STAB-relevant advantage a player
+// gets from bringing this species into a fight. Complementary to
+// typeMatchups() above (which is entirely about defending), so it
+// deliberately runs the effectiveness lookup the other way around: species'
+// type as the attacker, every real type as a hypothetical single-typed
+// defender — a single attacking type against a single defending type never
+// exceeds 2x (4x only happens on the DEFENDING side, when two of the
+// defender's own types are each independently weak to the same attack), so
+// there's no "double advantage" bucket to track here, unlike weak4x above.
+export function typeAdvantages(species) {
+  const atkTypes = [species.type, species.type2].filter(Boolean);
+  const advantage2x = [];
+  for (const defType of ALL_TYPES) {
+    const best = Math.max(...atkTypes.map((atkType) => getEffectiveness(atkType, defType, undefined)));
+    if (best === 2) advantage2x.push(defType);
+  }
+  return { advantage2x };
+}
+
 export function weaknessSectionHtml(species) {
   const { weak4x, weak2x, resist2x, resist4x, immune } = typeMatchups(species);
+  const { advantage2x } = typeAdvantages(species);
   const doubleWeakBlock = weak4x.length > 0 ? `
     <div class="card-sub" style="color:#ff5252;font-weight:600">⚠ Fraqueza dupla (4x de dano):</div>
     ${typeChipRow(weak4x)}
   ` : '';
   return `
+    <div class="card-sub" style="color:#4caf50">Vantagem contra (2x de dano):</div>
+    ${typeChipRow(advantage2x)}
     ${doubleWeakBlock}
-    <div class="card-sub">Fraco contra (2x de dano):</div>
+    <div class="card-sub" style="margin-top:6px">Fraco contra (2x de dano):</div>
     ${typeChipRow(weak2x)}
     <div class="card-sub" style="margin-top:6px">Resiste (0.5x de dano):</div>
     ${typeChipRow(resist2x)}

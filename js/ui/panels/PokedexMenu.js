@@ -115,7 +115,6 @@ function buildSpeciesDetail(species, gameState, controller) {
   detail.dataset.speciesName = species.name.toLowerCase();
   detail.innerHTML = `
     <div class="card-info">
-      <button class="pokedex-open-card-btn">🪪 Ver cartao do POKE</button>
       <div class="card-title">Status base</div>
       ${baseStatGridHtml(species)}
       <div class="card-title">Fraquezas e resistencias</div>
@@ -126,10 +125,6 @@ function buildSpeciesDetail(species, gameState, controller) {
       <div class="pokedex-hunt-links"></div>
     </div>
   `;
-  detail.querySelector('.pokedex-open-card-btn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    showPokeProfileModal(buildDexPreviewInstance(species), species);
-  });
 
   const linksEl = detail.querySelector('.pokedex-hunt-links');
   if (hunts.length === 0) {
@@ -186,8 +181,16 @@ export function renderPokedexMenu(container, { gameState, controller, refresh })
     `;
 
     card.addEventListener('click', () => {
-      expandedSpeciesId = expandedSpeciesId === species.id ? null : species.id;
+      const wasExpanded = expandedSpeciesId === species.id;
+      expandedSpeciesId = wasExpanded ? null : species.id;
       refresh();
+      // Explicit user request: the profile card opens automatically the
+      // moment a species is selected — no more separate "Ver cartao do
+      // POKE" button click required. Only fires on the click that actually
+      // *selects* the species (not the one that collapses it again).
+      if (!wasExpanded) {
+        showPokeProfileModal(buildDexPreviewInstance(species), species);
+      }
     });
 
     list.appendChild(card);
