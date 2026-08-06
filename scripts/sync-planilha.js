@@ -12,7 +12,12 @@ const { readWorkbook } = require('./xlsx-reader.js');
 
 const ROOT = path.join(__dirname, '..');
 const XLSX_PATH = path.join(ROOT, 'Planilha mestra', 'dados_do_jogo.xlsx');
-const DATA_DIR = path.join(ROOT, 'js', 'data');
+// Migracao React: os *.generated.ts passam a viver dentro do app Vite
+// (web/src/data/generated/), tipados contra web/src/data/generated/types.ts
+// (nao gerado, escrito a mao uma vez). O jogo vanilla antigo (js/data/) fica
+// intacto ate o corte final da migracao — ver plano em
+// .claude/plans/wise-snuggling-oasis.md.
+const DATA_DIR = path.join(ROOT, 'web', 'src', 'data', 'generated');
 
 // Every species that already has real imported battle-sprite art (see
 // scripts/import-kanto-sprites.js) — restricts the biome backfill below
@@ -97,7 +102,7 @@ function syncFormulas(workbook) {
       : varsRaw.split(',').map((s) => s.trim()).filter(Boolean);
     formulas[key] = { expr: String(row['Expressão']), vars };
   }
-  writeGenerated('formulas.generated.js', `export const FORMULAS = ${toJsLiteral(formulas)};\n`);
+  writeGenerated('formulas.generated.ts', `import type { FormulasData } from './types';\n\nexport const FORMULAS: FormulasData = ${toJsLiteral(formulas)};\n`);
   console.log(`  ${Object.keys(formulas).length} formulas`);
   return formulas;
 }
@@ -118,15 +123,16 @@ function syncTypeChart(workbook) {
     chart[attackType] = rowChart;
   }
   const contents =
-    `export const TYPE_CHART = ${toJsLiteral(chart)};\n\n` +
-    `export function getEffectiveness(moveType, defType1, defType2) {\n` +
+    `import type { TypeChartData, ElementType } from './types';\n\n` +
+    `export const TYPE_CHART: TypeChartData = ${toJsLiteral(chart)};\n\n` +
+    `export function getEffectiveness(moveType: ElementType, defType1: ElementType, defType2: ElementType | null): number {\n` +
     `  const row = TYPE_CHART[moveType];\n` +
     `  if (!row) return 1;\n` +
     `  const m1 = defType1 in row ? row[defType1] : 1;\n` +
     `  const m2 = defType2 && defType2 in row ? row[defType2] : 1;\n` +
     `  return m1 * m2;\n` +
     `}\n`;
-  writeGenerated('typeChart.generated.js', contents);
+  writeGenerated('typeChart.generated.ts', contents);
   console.log(`  ${Object.keys(chart).length} types`);
   return chart;
 }
@@ -166,7 +172,7 @@ function syncItemsFull(workbook) {
     itemsData[ourKey] = item;
   }
 
-  writeGenerated('items.generated.js', `export const ITEMS_DATA = ${toJsLiteral(itemsData)};\n`);
+  writeGenerated('items.generated.ts', `import type { ItemsData } from './types';\n\nexport const ITEMS_DATA: ItemsData = ${toJsLiteral(itemsData)};\n`);
   console.log(`  ${Object.keys(itemsData).length} itens`);
   return itemsData;
 }
@@ -617,8 +623,8 @@ function syncSpeciesAndMoves(workbook, hunts) {
     };
   }
 
-  writeGenerated('pokes.generated.js', `export const SPECIES_DATA = ${toJsLiteral(speciesData)};\n`);
-  writeGenerated('abilities.generated.js', `export const ABILITIES_DATA = ${toJsLiteral(abilitiesData)};\n`);
+  writeGenerated('pokes.generated.ts', `import type { SpeciesData } from './types';\n\nexport const SPECIES_DATA: SpeciesData = ${toJsLiteral(speciesData)};\n`);
+  writeGenerated('abilities.generated.ts', `import type { AbilitiesData } from './types';\n\nexport const ABILITIES_DATA: AbilitiesData = ${toJsLiteral(abilitiesData)};\n`);
   console.log(`  ${Object.keys(speciesData).length} especies, ${Object.keys(abilitiesData).length} golpes unicos`);
   return { speciesData, abilitiesData };
 }
@@ -738,8 +744,8 @@ function syncMapsAndEncounters(hunts, speciesData) {
     console.log(`  ${hunt.name} (méd. ${Math.round(hunt.avgLevel * 10) / 10}, niv ${hunt.minLevel}-${hunt.maxLevel}): ${Object.keys(hunt.speciesLevels).join(', ')}`);
   }
 
-  writeGenerated('maps.generated.js', `export const MAPS_DATA = ${toJsLiteral(mapsData)};\n`);
-  writeGenerated('enemies.generated.js', `export const ENCOUNTERS_DATA = ${toJsLiteral(encountersData)};\n`);
+  writeGenerated('maps.generated.ts', `import type { MapsData } from './types';\n\nexport const MAPS_DATA: MapsData = ${toJsLiteral(mapsData)};\n`);
+  writeGenerated('enemies.generated.ts', `import type { EncountersData } from './types';\n\nexport const ENCOUNTERS_DATA: EncountersData = ${toJsLiteral(encountersData)};\n`);
   return { mapsData, encountersData };
 }
 

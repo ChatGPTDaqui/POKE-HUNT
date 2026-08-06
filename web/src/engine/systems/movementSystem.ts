@@ -1,0 +1,323 @@
+// Port de js/systems/MovementSystem.js.
+import { randRange } from '@/core/random'
+import { mapWalkRadius, isCellBlocked, type MapDef } from '@/data/maps'
+import { COLLISION_GRID_CELL_SIZE } from '@/data/generated/collisionGrids.generated'
+import { findPath } from '@/core/pathfinding'
+import { engageRangeFor } from './combatSystem'
+import { isDead, distanceTo } from '../entity'
+import type { EnemyEntity, PlayerEntity, Point, WorldState } from '../types'
+
+const WANDER_MARGIN = 40
+const ARRIVE_THRESHOLD = 4
+const WANDER_PAUSE_MIN = 1
+const WANDER_PAUSE_MAX = 3
+
+// A cada quantos segundos um alvo em movimento (ex: o jogador, enquanto um
+// inimigo persegue) forca um recalculo completo de rota — barato o
+// suficiente nesse tamanho de grade pra rodar sem soluco de frame, mas nao
+// tao frequente a ponto de recalcular todo tick a toa.
+const PATH_RECALC_INTERVAL = 1
+// Um alvo rastreado precisa se afastar essa quantidade de unidades de onde
+// a rota/linha-de-visao atual foi calculada por ultimo antes disso sozinho
+// forcar um recalculo antecipado (alem do timer acima).
+const PATH_TARGET_DRIFT = 60
+// Um salto bem maior (ex: uma entidade trocando de alvo de wander pra
+// perseguir o jogador, ou vice-versa) pula o timer de recalculo por
+// completo.
+const PATH_TARGET_BIG_JUMP = 150
+
+// A pegada de colisao de um POKE e exatamente 1 caixa da grade
+// (COLLISION_GRID_CELL_SIZE) por pedido explicito do usuario — checar so o
+// ponto central da entidade contra a grade equivale a isso, ja que cada
+// celula ja E uma caixa.
+function canOccupy(mapDef: MapDef, x: number, y: number): boolean {
+  return !isCellBlocked(mapDef, x, y)
+}
+
+// Passo em linha reta sem consciencia de colisao — seguro quando nao ha
+// grade nenhuma, ou ao longo de um segmento ja verificado caminhavel.
+function stepDirect(entity: { x: number; y: number; facing: Point }, tx: number, ty: number, speed: number, dt: number): boolean {
+  const dx = tx - entity.x
+  const dy = ty - entity.y
+  const dist = Math.hypot(dx, dy)
+  if (dist <= ARRIVE_THRESHOLD) return true
+  const step = Math.min(1, (speed * dt) / dist)
+  entity.x += dx * step
+  entity.y += dy * step
+  entity.facing = { x: dx / dist, y: dy / dist }
+  return false
+}
+
+// Fallback antigo de colisao por eixo separado: tenta o passo diagonal
+// completo, depois desliza so no eixo X ou so no Y. Usado so quando o A*
+// nao achou rota (celula alvo bloqueada/inalcancavel).
+function slideToward(entity: { x: number; y: number; facing: Point }, tx: number, ty: number, speed: number, dt: number, mapDef: MapDef): boolean {
+  const dx = tx - entity.x, dy = ty - entity.y
+  const dist = Math.hypot(dx, dy)
+  if (dist <= ARRIVE_THRESHOLD) return true
+  const step = speed * dt
+  const ratio = Math.min(1, step / dist)
+  const stepX = dx * ratio, stepY = dy * ratio
+  entity.facing = { x: dx / dist, y: dy / dist }
+  const fullX = entity.x + stepX, fullY = entity.y + stepY
+  if (canOccupy(mapDef, fullX, fullY)) {
+    entity.x = fullX
+    entity.y = fullY
+  } else if (canOccupy(mapDef, fullX, entity.y)) {
+    entity.x = fullX
+  } else if (canOccupy(mapDef, entity.x, fullY)) {
+    entity.y = fullY
+  }
+  return false
+}
+
+// Amostra pontos ao longo do segmento reto de (x0,y0) a (x1,y1) a cada
+// ~meia celula de grade, checando cada um contra a grade de colisao —
+// probe barato de "consigo andar direto ate ali", rodado so quando uma
+// rota precisa ser (re)decidida, nunca todo frame.
+function hasLineOfSight(mapDef: MapDef, x0: number, y0: number, x1: number, y1: number): boolean {
+  const dist = Math.hypot(x1 - x0, y1 - y0)
+  const steps = Math.max(1, Math.ceil(dist / (COLLISION_GRID_CELL_SIZE / 2)))
+  for (let i = 1; i <= steps; i++) {
+    const t = i / steps
+    if (isCellBlocked(mapDef, x0 + (x1 - x0) * t, y0 + (y1 - y0) * t)) return false
+  }
+  return true
+}
+
+interface Movable {
+  x: number
+  y: number
+  facing: Point
+  pathWaypoints: Point[] | null
+  pathIndex: number
+  pathRecalcTimer: number
+  pathTargetX: number | null
+  pathTargetY: number | null
+}
+
+// Move uma entidade em direcao a (tx,ty), contornando obstaculos via A*
+// real (core/pathfinding.ts) em vez de so deslizar no que encostar. `mapDef`
+// e opcional-seguro: mapas sem grade de colisao (10 dos 17 temas de hunt)
+// pulam tudo isso e sempre se movem em linha reta.
+function moveToward(entity: Movable, tx: number, ty: number, speed: number, dt: number, mapDef: MapDef | null): boolean {
+  if (!mapDef || !mapDef.collisionGrid) {
+    return stepDirect(entity, tx, ty, speed, dt)
+  }
+
+  const dist = Math.hypot(tx - entity.x, ty - entity.y)
+  if (dist <= ARRIVE_THRESHOLD) {
+    entity.pathWaypoints = null
+    return true
+  }
+
+  entity.pathRecalcTimer -= dt
+  const targetJump = Math.hypot(tx - (entity.pathTargetX ?? tx), ty - (entity.pathTargetY ?? ty))
+  const drifted = targetJump > PATH_TARGET_DRIFT
+  const bigJump = targetJump > PATH_TARGET_BIG_JUMP
+  if (entity.pathWaypoints == null || bigJump || (drifted && entity.pathRecalcTimer <= 0)) {
+    if (hasLineOfSight(mapDef, entity.x, entity.y, tx, ty)) {
+      entity.pathWaypoints = [] // linha limpa — anda reto, sem rota necessaria
+    } else {
+      const route = findPath(mapDef, entity.x, entity.y, tx, ty)
+      entity.pathWaypoints = route || [] // null (inalcancavel) cai no fallback direto/slide abaixo
+      entity.pathIndex = 0
+    }
+    entity.pathTargetX = tx
+    entity.pathTargetY = ty
+    entity.pathRecalcTimer = PATH_RECALC_INTERVAL
+  }
+
+  if (entity.pathWaypoints.length > 0) {
+    const wp = entity.pathWaypoints[entity.pathIndex]
+    const arrivedAtWaypoint = stepDirect(entity, wp.x, wp.y, speed, dt)
+    if (arrivedAtWaypoint) {
+      entity.pathIndex += 1
+      if (entity.pathIndex >= entity.pathWaypoints.length) entity.pathWaypoints = null
+    }
+    return false
+  }
+
+  // Sem rota necessaria (linha limpa) ou nenhuma encontrada (alvo
+  // inalcancavel) — anda reto, ainda deslizando no que encostar em vez de
+  // congelar.
+  return slideToward(entity, tx, ty, speed, dt, mapDef)
+}
+
+// Puxa (x, y) de volta pra borda circular caminhavel do mapa se caiu fora
+// dela — a hunt nao tem mais cantos retangulares, so esse circulo invisivel.
+function clampToMapCircle(x: number, y: number, mapCx: number, mapCy: number, mapRadius: number): Point {
+  const dx = x - mapCx
+  const dy = y - mapCy
+  const dist = Math.hypot(dx, dy)
+  if (dist <= mapRadius || dist === 0) return { x, y }
+  const ratio = mapRadius / dist
+  return { x: mapCx + dx * ratio, y: mapCy + dy * ratio }
+}
+
+interface Wanderer extends Movable {
+  wanderTarget: Point | null
+  wanderPause: number
+  moveSpeed: number
+}
+
+function wanderStep(entity: Wanderer, dt: number, centerX: number, centerY: number, radius: number, mapCx: number, mapCy: number, mapRadius: number, mapDef: MapDef | null): void {
+  if (entity.wanderTarget) {
+    const prevX = entity.x, prevY = entity.y
+    const arrived = moveToward(entity, entity.wanderTarget.x, entity.wanderTarget.y, entity.moveSpeed, dt, mapDef)
+    // Um alvo de wander atras de uma parede congelaria essa entidade pra
+    // sempre (a colisao do moveToward segura a posicao, entao `arrived`
+    // nunca vira true) — trata "nao se moveu nada este frame" igual a
+    // chegar: desiste do alvo e sorteia um novo.
+    const stuck = !arrived && entity.x === prevX && entity.y === prevY
+    if (arrived || stuck) {
+      entity.wanderTarget = null
+      entity.wanderPause = randRange(WANDER_PAUSE_MIN, WANDER_PAUSE_MAX)
+    }
+    return
+  }
+  if (entity.wanderPause > 0) {
+    entity.wanderPause -= dt
+    return
+  }
+  const angle = randRange(0, Math.PI * 2)
+  const dist = randRange(radius * 0.3, radius)
+  const tx = centerX + Math.cos(angle) * dist
+  const ty = centerY + Math.sin(angle) * dist
+  entity.wanderTarget = clampToMapCircle(tx, ty, mapCx, mapCy, mapRadius)
+}
+
+function findNearestAliveEnemy(player: PlayerEntity, enemies: EnemyEntity[]): EnemyEntity | null {
+  let nearest: EnemyEntity | null = null
+  let nearestDist = Infinity
+  for (const enemy of enemies) {
+    if (isDead(enemy)) continue
+    const dist = distanceTo(player, enemy)
+    if (dist < nearestDist) {
+      nearestDist = dist
+      nearest = enemy
+    }
+  }
+  return nearest
+}
+
+// Um shiny em qualquer lugar da hunt sempre ganha a atencao do jogador —
+// shiny mais proximo se houver mais de um vivo ao mesmo tempo, sobrepondo o
+// que quer que ele estivesse perseguindo/lutando antes.
+function findNearestAliveShiny(player: PlayerEntity, enemies: EnemyEntity[]): EnemyEntity | null {
+  let nearest: EnemyEntity | null = null
+  let nearestDist = Infinity
+  for (const enemy of enemies) {
+    if (isDead(enemy) || !enemy.poke.isShiny) continue
+    const dist = distanceTo(player, enemy)
+    if (dist < nearestDist) {
+      nearestDist = dist
+      nearest = enemy
+    }
+  }
+  return nearest
+}
+
+function wanderFreely(entity: Wanderer, dt: number, cx: number, cy: number, radius: number, mapDef: MapDef | null): void {
+  if (entity.wanderTarget) {
+    const prevX = entity.x, prevY = entity.y
+    const arrived = moveToward(entity, entity.wanderTarget.x, entity.wanderTarget.y, entity.moveSpeed, dt, mapDef)
+    const stuck = !arrived && entity.x === prevX && entity.y === prevY
+    if (arrived || stuck) {
+      entity.wanderTarget = null
+      entity.wanderPause = randRange(WANDER_PAUSE_MIN, WANDER_PAUSE_MAX)
+    }
+    return
+  }
+  if (entity.wanderPause > 0) {
+    entity.wanderPause -= dt
+    return
+  }
+  // Amostragem uniforme-por-AREA dentro do circulo (raiz quadrada de um
+  // fracao uniforme [0,1]) em vez de uniforme-por-raio, que concentraria
+  // pontos demais perto do centro.
+  const angle = randRange(0, Math.PI * 2)
+  const dist = Math.sqrt(randRange(0, 1)) * radius
+  entity.wanderTarget = { x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist }
+}
+
+export function updateMovement(world: WorldState, dt: number): void {
+  const { player, enemies, mapDef } = world
+  if (!player || !mapDef) return
+  const mapCx = mapDef.bounds.width / 2
+  const mapCy = mapDef.bounds.height / 2
+  const mapRadius = mapWalkRadius(mapDef) - WANDER_MARGIN
+
+  if (player.fainted) {
+    player.state = 'dead'
+  } else if (player.attackAnimTimer > 0) {
+    // Meio da pose Shoot/Charge: segura a posicao — um POKE nunca pode
+    // andar e usar um golpe no mesmo instante.
+    player.state = 'engaged'
+  } else {
+    // Um shiny em qualquer lugar da hunt sobrepoe tudo mais — o jogador
+    // troca de foco pra ele imediatamente, mesmo no meio de outra luta.
+    // Fora isso, o jogador sempre anda em direcao a qualquer inimigo vivo
+    // mais PROXIMO agora — recalculado do zero todo frame.
+    const shinyEnemy = findNearestAliveShiny(player, enemies)
+    const targetEnemy = shinyEnemy || findNearestAliveEnemy(player, enemies)
+
+    if (targetEnemy) {
+      const engageRange = engageRangeFor(player, targetEnemy)
+      if (distanceTo(player, targetEnemy) <= engageRange) {
+        player.state = 'engaged'
+      } else {
+        player.state = 'chase'
+        moveToward(player, targetEnemy.x, targetEnemy.y, player.moveSpeed, dt, mapDef)
+        player.wanderTarget = null
+      }
+    } else {
+      player.state = 'wander'
+      wanderFreely(player, dt, mapCx, mapCy, mapRadius, mapDef)
+    }
+  }
+
+  for (const enemy of enemies) {
+    if (isDead(enemy)) {
+      enemy.state = 'dead'
+      continue
+    }
+
+    if (enemy.attackAnimTimer > 0) {
+      // Mesma trava do jogador acima — nunca anda no meio de um ataque.
+      enemy.state = 'engaged'
+      continue
+    }
+
+    if (player.fainted) {
+      enemy.state = 'wander'
+      enemy.targetId = null
+      wanderStep(enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef)
+      continue
+    }
+
+    const dist = distanceTo(enemy, player)
+    const engageRange = engageRangeFor(enemy, player)
+
+    if (dist <= engageRange) {
+      enemy.state = 'engaged'
+      enemy.targetId = player.id
+      enemy.wanderTarget = null
+    } else if (dist <= enemy.aggroRadius || ((enemy.state === 'chase' || enemy.state === 'engaged') && dist <= enemy.leashRadius)) {
+      enemy.state = 'chase'
+      enemy.targetId = player.id
+      enemy.wanderTarget = null
+      moveToward(enemy, player.x, player.y, enemy.moveSpeed, dt, mapDef)
+    } else {
+      enemy.state = 'wander'
+      enemy.targetId = null
+      const distToSpawn = Math.hypot(enemy.x - enemy.spawnPoint.x, enemy.y - enemy.spawnPoint.y)
+      if (distToSpawn > enemy.wanderRadius) {
+        moveToward(enemy, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.moveSpeed, dt, mapDef)
+        enemy.wanderTarget = null
+      } else {
+        wanderStep(enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef)
+      }
+    }
+  }
+}

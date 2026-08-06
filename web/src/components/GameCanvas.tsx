@@ -1,0 +1,132 @@
+// Fase 5: monta o canvas e roda o motor de verdade. Porta a parte DOM/canvas
+// de js/main.js que a Fase 4 deixou de fora de proposito (resize, hit-test
+// de clique/hover na enfermeira, zoom via Ctrl+Scroll) — controller.ts so
+// tinha a logica de jogo pura.
+//
+// Duas coisas rodam em paralelo aqui, de proposito separadas (ver plano):
+// 1. `useGameLoop` — passo de simulacao fixo (60/s), atualiza o worldStore.
+// 2. O rAF proprio deste componente — so DESENHA, lendo
+//    `useWorldStore.getState()` direto (imperativo, fora do ciclo de render
+//    do React) a cada frame. Canvas nao tem virtual DOM pra reconciliar
+//    contra JSX, entao rotear o desenho pelo React (useWorldStore(selector)
+//    disparando re-render 60x/s) so custaria overhead sem desenhar nada a
+//    mais — ver "Decisao de implementacao: estado do motor" no plano.
+import { useEffect, useRef } from 'react'
+import { Renderer } from '@/render/renderer'
+import { useGameLoop } from '@/engine/useGameLoop'
+import { useWorldStore } from '@/stores/worldStore'
+import { useGameStateStore } from '@/stores/gameStateStore'
+import { useRendererStore } from '@/stores/rendererStore'
+import { buildHospitalWorld, controller, syncActivePokeToGameState } from '@/engine/controller'
+
+const NURSE_CLICK_RADIUS = 30
+// Sincronia periodica de baixa frequencia: copia o HP/EXP ao vivo do POKE em
+// campo (worldStore, muda a cada tick de combate) de volta pra
+// gameStateStore.team (a fonte persistida via zustand/persist) sem martelar
+// o localStorage a 60Hz. Fecha a lacuna documentada na Fase 4: entre um kill
+// e outro (o outro ponto de sync automatico), dano/cura em andamento sem
+// morte ainda nao tinha nenhum ponto de sync — isso cobre esse intervalo.
+// TODO Fase 6: chamar isso tambem no autosave/beforeunload e no
+// catch-up de visibilitychange (equivalente ao lastLiveTickAt do main.js
+// original), que ainda nao foram portados.
+const SYNC_INTERVAL_MS = 5000
+
+export function GameCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useGameLoop(true)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const renderer = new Renderer(canvas)
+    // Publica o renderer pro ZoomControl (que vive fora do canvas e precisa
+    // chamar zoomStep/ler o % atual) — ver stores/rendererStore.ts.
+    useRendererStore.getState().setRenderer(renderer)
+
+    // Bug real encontrado ao vivo (jogo abria o Hospital SEM o POKE em campo
+    // sempre que a pagina era recarregada com um save existente): o
+    // `worldStore` nasce vazio (`emptyWorldState`), e so `chooseStarter`/
+    // `enterMap` o preenchiam — nada reconstruia o mundo no boot. O
+    // js/main.js vanilla fazia exatamente isso na carga do modulo
+    // (`let currentWorld = buildHospitalWorld()`), sempre voltando pro
+    // Hospital ("enemies/effects aren't persisted", nota do original).
+    //
+    // O guard `player === null` existe pro caso de remount (HMR em dev, ou
+    // StrictMode chamando o efeito 2x): so constroi quando de fato nao ha
+    // mundo montado, entao um remount no meio de uma hunt nao expulsa o
+    // jogador de volta pro Hospital.
+    if (useWorldStore.getState().player === null) {
+      const { team, activeIndex } = useGameStateStore.getState()
+      useWorldStore.getState().setWorld(buildHospitalWorld(team[activeIndex] ?? null, renderer.hospitalPlayerPos))
+    }
+
+    function resize() {
+      canvas!.width = canvas!.clientWidth
+      canvas!.height = canvas!.clientHeight
+      renderer.handleResize()
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    function canvasPointFromEvent(event: MouseEvent): { x: number; y: number } {
+      const rect = canvas!.getBoundingClientRect()
+      const scaleX = canvas!.width / rect.width
+      const scaleY = canvas!.height / rect.height
+      return { x: (event.clientX - rect.left) * scaleX, y: (event.clientY - rect.top) * scaleY }
+    }
+
+    function handleClick(event: MouseEvent) {
+      if (useWorldStore.getState().mapDef) return // enfermeira so existe na cena do Hospital
+      const { x, y } = canvasPointFromEvent(event)
+      const nursePos = renderer.hospitalNursePos
+      if (Math.hypot(x - nursePos.x, y - nursePos.y) <= NURSE_CLICK_RADIUS) {
+        controller.healTeam()
+      }
+    }
+
+    function handleMouseMove(event: MouseEvent) {
+      if (useWorldStore.getState().mapDef) {
+        canvas!.style.cursor = 'default'
+        return
+      }
+      const { x, y } = canvasPointFromEvent(event)
+      const nursePos = renderer.hospitalNursePos
+      canvas!.style.cursor = Math.hypot(x - nursePos.x, y - nursePos.y) <= NURSE_CLICK_RADIUS ? 'pointer' : 'default'
+    }
+
+    function handleWheel(event: WheelEvent) {
+      if (!event.ctrlKey) return
+      event.preventDefault()
+      renderer.adjustZoom(event.deltaY)
+      useRendererStore.getState().setZoomPercent(Math.round(renderer.zoom * 100))
+    }
+
+    canvas.addEventListener('click', handleClick)
+    canvas.addEventListener('mousemove', handleMouseMove)
+    canvas.addEventListener('wheel', handleWheel, { passive: false })
+
+    let rafId = requestAnimationFrame(function draw() {
+      const world = useWorldStore.getState()
+      if (world.mapDef) renderer.renderMap(world.mapDef, world)
+      else renderer.renderHospital(world.player)
+      rafId = requestAnimationFrame(draw)
+    })
+
+    const syncInterval = setInterval(() => {
+      syncActivePokeToGameState(useWorldStore.getState(), useGameStateStore.getState())
+    }, SYNC_INTERVAL_MS)
+
+    return () => {
+      window.removeEventListener('resize', resize)
+      canvas.removeEventListener('click', handleClick)
+      canvas.removeEventListener('mousemove', handleMouseMove)
+      canvas.removeEventListener('wheel', handleWheel)
+      cancelAnimationFrame(rafId)
+      clearInterval(syncInterval)
+      useRendererStore.getState().setRenderer(null)
+    }
+  }, [])
+
+  return <canvas ref={canvasRef} id="game-canvas" className="block h-full w-full" />
+}

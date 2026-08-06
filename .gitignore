@@ -1,6 +1,14 @@
 # Claude Code session data - not part of the game
 .claude/
 
+# web/public/assets e uma JUNCAO (link de diretorio do Windows) apontando pro
+# assets/ da raiz, criada so pra o dev server do Vite conseguir servir a arte
+# do jogo — o Vite so serve estatico de dentro do proprio publicDir. O git no
+# Windows segue a juncao como se fosse pasta de verdade e duplicaria ~6.300
+# arquivos (270MB) que ja estao versionados em assets/. Recriar apos clonar:
+#   New-Item -ItemType Junction -Path web\public\assets -Target assets
+web/public/assets/
+
 # Project documentation - not needed to run the game (kept out per request)
 CLAUDE.md
 

@@ -1,0 +1,197 @@
+// Port de js/systems/OfflineSimSystem.js — driver headless de "avanco no
+// tempo" compartilhado pelos 2 sistemas "voce nao estava vendo": o catch-up
+// de throttle do browser (aba minimizada/oculta, ainda aberta) e o relatorio
+// real de Farm Offline (mostrado no boot depois que a aba/app foi fechada
+// de verdade, ver CLAUDE.md).
+//
+// Deliberadamente NAO reimplementa movimento/combate/auto-heal — ele
+// dirige `stepFn` (controller.ts#stepWorld), a MESMA funcao que o loop ao
+// vivo chama a cada tick fixo, so que em modo silent e num loop apertado em
+// vez de uma chamada por frame. `world` passado aqui e um objeto solto
+// (nao o draft do worldStore ao vivo) — quem chama (controller.ts/Fase 5)
+// decide se opera sobre um snapshot descartavel ou commita o resultado de
+// volta na store no final; esta funcao so muta o `world` que recebeu,
+// exatamente como o stepFn original fazia sobre um objeto JS qualquer.
+import type { PokeInstance } from '@/data/pokes'
+import type { RarityKey } from '@/data/rarity'
+import type { GameStateStore } from '@/stores/gameStateStore'
+import type { WorldState } from '../types'
+
+export interface KillResult {
+  gold: number
+  xp: number
+  leveledUp: boolean
+  trainerLeveledUp: boolean
+  isShiny: boolean
+  captured: boolean
+  capturedPoke: PokeInstance | null
+  droppedItems: string[]
+}
+
+// Tetos de trabalho por chamada, pra um gap muito longo nao travar (nem
+// fazer o navegador matar) um dispositivo fraco. Dois limites independentes:
+//
+// 1. `maxSteps` limita a CONTAGEM DE ITERACOES — o passo cresce alem do
+//    `stepSeconds` pedido quando o gap e enorme, trocando fidelidade de
+//    combate por um loop limitado em vez de ilimitado (3 dias a 0.1s sao
+//    2.6M passos de combate completo; so desktop sobrevive a isso).
+// 2. `maxWallClockMs` limita o TEMPO REAL gasto, checado a cada
+//    CLOCK_CHECK_EVERY iteracoes. Estourar o orcamento NAO joga o resto do
+//    gap fora na hora: o passo e quadruplicado (ate MAX_COARSEN_ROUNDS
+//    vezes) pra o restante ainda ser simulado, so que com menos fidelidade —
+//    perder precisao e melhor que perder as horas do jogador. So quando nem
+//    isso basta e que para com `truncated:true`, o que ainda e melhor que
+//    travar a thread principal ate o navegador matar a pagina (o que
+//    significava que o save nunca acontecia, e a mesma simulacao condenada
+//    rodava de novo a cada carregamento).
+// 250k mantem o cap de 6h do Farm Offline no passo pedido de 0.1s
+// (6h/0.1 = 216k) — ou seja, zero mudanca de fidelidade no caso que o jogo
+// realmente usa; so gaps maiores que isso (o catch-up de segundo plano, que
+// nao tem cap de tempo) ficam com passo mais grosso.
+const DEFAULT_MAX_STEPS = 250000
+const DEFAULT_MAX_WALL_CLOCK_MS = 2500
+const CLOCK_CHECK_EVERY = 512
+// Cada rodada de "coarsening" quadruplica o passo, entao o trabalho que
+// falta cai 4x — 3 rodadas cobrem ate 64x o passo original, o que fecha
+// qualquer gap realista. Cada rodada ganha meio orcamento novo, entao o
+// custo total nunca passa de ~2.5x maxWallClockMs.
+const COARSEN_FACTOR = 4
+const MAX_COARSEN_ROUNDS = 3
+
+function nowMs(): number {
+  return typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now()
+}
+
+export interface OfflineSimSummary {
+  requestedSeconds: number
+  simulatedSeconds: number
+  kills: number
+  gold: number
+  xp: number
+  captures: { speciesId: string; level: number; isShiny: boolean; rarity: RarityKey }[]
+  shinySeen: number
+  shinyCaptured: number
+  itemsGained: Record<string, number>
+  itemsConsumed: Record<string, number>
+  pokeLeveledUp: boolean
+  trainerLeveledUp: boolean
+  stoppedEarly: boolean // desmaiou sem jeito de auto-reanimar (sem toggle, ou sem `revive` sobrando)
+  truncated: boolean // acabou o orcamento de tempo real antes de cobrir o gap inteiro
+  stepSeconds: number // o passo realmente usado (pode ser mais grosso que o pedido — ver DEFAULT_MAX_STEPS)
+}
+
+export function createEmptySummary(): OfflineSimSummary {
+  return {
+    requestedSeconds: 0,
+    simulatedSeconds: 0,
+    kills: 0,
+    gold: 0,
+    xp: 0,
+    captures: [],
+    shinySeen: 0,
+    shinyCaptured: 0,
+    itemsGained: {},
+    itemsConsumed: {},
+    pokeLeveledUp: false,
+    trainerLeveledUp: false,
+    stoppedEarly: false,
+    truncated: false,
+    stepSeconds: 0,
+  }
+}
+
+export type StepFn = (world: WorldState, dt: number, opts: { silent: boolean }) => KillResult[]
+
+export interface SimulateWorldSecondsParams {
+  world: WorldState
+  gameState: GameStateStore
+  seconds: number
+  stepSeconds: number
+  stepFn: StepFn
+  maxSteps?: number
+  maxWallClockMs?: number
+}
+
+export function simulateWorldSeconds({
+  world,
+  gameState,
+  seconds,
+  stepSeconds,
+  stepFn,
+  maxSteps = DEFAULT_MAX_STEPS,
+  maxWallClockMs = DEFAULT_MAX_WALL_CLOCK_MS,
+}: SimulateWorldSecondsParams): OfflineSimSummary {
+  const summary = createEmptySummary()
+  summary.requestedSeconds = seconds
+  // Guarda contra gap nao-finito/negativo (um dispositivo cujo relogio ande
+  // pra tras no meio da sessao faria este loop rodar pra sempre).
+  if (!Number.isFinite(seconds) || seconds <= 0 || !world.player) return summary
+
+  const itemsBefore = { ...gameState.items }
+  const stepCap = Math.max(1, maxSteps)
+  let step = Math.max(Math.max(0.01, stepSeconds), seconds / stepCap)
+  let deadline = nowMs() + maxWallClockMs
+  let coarsenRounds = 0
+  let sinceClockCheck = 0
+  let remaining = seconds
+
+  while (remaining > 0) {
+    const dt = Math.min(step, remaining)
+    remaining -= dt
+
+    const kills = stepFn(world, dt, { silent: true }) || []
+    for (const result of kills) {
+      summary.kills += 1
+      summary.gold += result.gold
+      summary.xp += result.xp
+      if (result.leveledUp) summary.pokeLeveledUp = true
+      if (result.trainerLeveledUp) summary.trainerLeveledUp = true
+      if (result.isShiny) summary.shinySeen += 1
+      if (result.captured && result.capturedPoke) {
+        summary.captures.push({
+          speciesId: result.capturedPoke.speciesId,
+          level: result.capturedPoke.level,
+          isShiny: Boolean(result.capturedPoke.isShiny),
+          rarity: result.capturedPoke.rarity,
+        })
+        if (result.capturedPoke.isShiny) summary.shinyCaptured += 1
+      }
+    }
+
+    if (world.player.fainted) {
+      const canRecover = gameState.autoToggles.autoRevive && gameState.hasItem('revive', 1)
+      if (!canRecover) {
+        summary.stoppedEarly = true
+        break
+      }
+    }
+
+    sinceClockCheck += 1
+    if (sinceClockCheck >= CLOCK_CHECK_EVERY) {
+      sinceClockCheck = 0
+      if (nowMs() >= deadline) {
+        if (coarsenRounds < MAX_COARSEN_ROUNDS && remaining > step) {
+          coarsenRounds += 1
+          step *= COARSEN_FACTOR
+          deadline = nowMs() + maxWallClockMs / 2
+        } else {
+          summary.truncated = true
+          break
+        }
+      }
+    }
+  }
+
+  summary.stepSeconds = step
+
+  summary.simulatedSeconds = seconds - Math.max(0, remaining)
+
+  const itemIds = new Set([...Object.keys(itemsBefore), ...Object.keys(gameState.items)])
+  for (const itemId of itemIds) {
+    const delta = (gameState.items[itemId] || 0) - (itemsBefore[itemId] || 0)
+    if (delta > 0) summary.itemsGained[itemId] = delta
+    else if (delta < 0) summary.itemsConsumed[itemId] = -delta
+  }
+
+  return summary
+}
