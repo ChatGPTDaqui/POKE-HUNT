@@ -6,6 +6,19 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '3.8',
+    date: '2026-08-06',
+    title: 'Farm offline corrigido: tempo em segundo plano deixa de ser perdido',
+    highlights: [
+      'Bug real corrigido (o motivo de "o offline nao funciona em alguns aparelhos"): com a aba minimizada, navegadores como Chrome e Edge nao congelam o jogo — eles deixam ele acordar so uma vez por minuto, e cada despertar desses avancava apenas 1 segundo de jogo. Na pratica, 3 horas em segundo plano rendiam cerca de 3 minutos. Aparelhos que congelam a pagina de vez (celulares, aba descartada) nunca sofreram disso, por isso o problema so aparecia em alguns dispositivos. Agora o jogo compara o relogio real com quanto tempo de fato foi simulado e recupera a diferenca inteira.',
+      'O jogo agora salva tambem no momento em que a aba e ocultada. Navegador de celular costuma encerrar uma aba em segundo plano sem avisar, e o horario do ultimo save e justamente o que mede seu tempo fora — sem isso, parte do tempo offline simplesmente nao era contada.',
+      'Ficar muito tempo fora nao trava mais o aparelho: a recuperacao de tempo tinha custo ilimitado e podia congelar (ou fazer o navegador matar) a pagina, e como o save so acontecia no fim, o progresso era perdido e a mesma travada se repetia a cada abertura. Agora o calculo tem teto: em periodos muito longos ele fica menos detalhado, mas o tempo continua sendo creditado.',
+      'Relogio do aparelho adiantado/atrasado (ou trocado manualmente) nao deixa mais o farm offline travado ate a hora real "alcancar" o horario errado.',
+      'Se o navegador estiver bloqueando o armazenamento (ex: aba anonima do Safari), o jogo agora avisa na tela em vez de falhar em silencio — sem save nao existe farm offline nem progresso guardado.',
+      'A recuperacao de tempo passou a valer tambem em situacoes que antes nao disparavam nada: voltar pelo botao "voltar" do navegador, notebook que dormiu com a aba aberta na frente, e tela de celular desligada em alguns navegadores Android.',
+    ],
+  },
+  {
     version: '3.7',
     date: '2026-08-06',
     title: 'Texto do nome do golpe: fonte menor, deslocado pra nao encostar no nome',

@@ -114,11 +114,18 @@ export function showOfflineFarmModal(summary) {
   const overlay = document.createElement('div');
   overlay.className = 'confirm-modal-overlay';
 
-  const capNote = !summary.stoppedEarly && summary.requestedSeconds > summary.simulatedSeconds + 1
+  const capNote = !summary.stoppedEarly && !summary.truncated && summary.requestedSeconds > summary.simulatedSeconds + 1
     ? `<div class="hint">Limitado a ${formatDuration(summary.simulatedSeconds)} de simulacao (o resto do tempo fora nao gerou progresso).</div>`
     : '';
   const stoppedNote = summary.stoppedEarly
     ? '<div class="hint">Seu POKE desmaiou e ficou sem Revive para reanimar automaticamente — a farm parou antes do tempo acabar.</div>'
+    : '';
+  // The simulation has a wall-clock budget so a slow device can't be frozen
+  // (or have the page killed) replaying hours of combat — when that budget
+  // runs out the report says so instead of quietly reporting less progress
+  // than the time away would suggest.
+  const truncatedNote = summary.truncated
+    ? '<div class="hint">A simulacao foi interrompida para nao travar o dispositivo — parte do tempo fora nao foi processada.</div>'
     : '';
 
   overlay.innerHTML = `
@@ -127,6 +134,7 @@ export function showOfflineFarmModal(summary) {
       <div class="card-sub">Voce ficou fora por ${formatDuration(summary.requestedSeconds)}.</div>
       ${capNote}
       ${stoppedNote}
+      ${truncatedNote}
       <div class="offline-farm-body">${buildBody(summary)}</div>
       <div class="row" style="justify-content:flex-end;">
         <button class="confirm-btn">Fechar</button>

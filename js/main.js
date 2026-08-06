@@ -54,6 +54,10 @@ const OFFLINE_SIM_STEP_SECONDS = formulaEngine.evalOrDefault('OFFLINE_SIM_STEP_S
 
 const MIN_CATCHUP_GAP_SECONDS = 5; // below this, it's just normal frame jitter, not browser throttling
 const MIN_OFFLINE_GAP_SECONDS = 60; // below this, a save-then-reload doesn't count as "you were gone"
+// How often the drift between wall clock and simulated time is reconciled.
+// Deliberately independent of any visibility event — see runCatchUp's comment.
+const CATCHUP_CHECK_INTERVAL_MS = 10000;
+const CATCHUP_WALL_CLOCK_BUDGET_MS = 1200;
 
 // ---------- Boot ----------
 const loadedSave = SaveManager.load();
@@ -84,8 +88,24 @@ window.addEventListener('resize', resizeCanvasToViewport);
 
 let currentWorld = buildHospitalWorld();
 
+// Surfaced once per session (not per call — this runs on every kill) because
+// a silent failure here looks exactly like "the offline farm is broken": no
+// save means no `savedAt`, which means no time-away report and no progress
+// kept at all. Storage being unavailable is a real device case, not a
+// hypothetical — Safari private browsing throws on write, and some browsers
+// evict site storage after a period of inactivity.
+let saveFailureReported = false;
+
 function saveGame() {
-  SaveManager.save(gameState);
+  const ok = SaveManager.save(gameState);
+  if (!ok && !saveFailureReported) {
+    saveFailureReported = true;
+    eventBus.emit('toast', {
+      message: 'Nao foi possivel salvar o jogo neste navegador (armazenamento bloqueado) — o progresso e o farm offline nao serao mantidos.',
+      type: 'error',
+      channel: 'world',
+    });
+  }
 }
 
 // ---------- World construction ----------
@@ -504,11 +524,25 @@ function stepWorld(world, dt, { silent = false } = {}) {
   return kills;
 }
 
-let lastLiveTickAt = Date.now(); // wall-clock of the last real (non-silent) tick — see visibilitychange handler below
+// ---------- Live-vs-wall-clock drift accounting (feeds the catch-up below) ----------
+// The old version tracked only "wall clock of the last live tick", which is
+// wrong on any browser that THROTTLES timers instead of freezing them: Chrome/
+// Edge drop a hidden tab's setInterval to once per minute, GameLoop clamps
+// each of those wake-ups to MAX_DELTA (1s), and the timestamp got refreshed
+// every time — so the gap always looked like <=60s and 59 of every 60 seconds
+// in the background were silently thrown away. Devices that freeze the page
+// outright (mobile Safari/Chrome, discarded tabs) kept working, which is
+// exactly why this only broke "on some devices".
+//
+// Now we compare real elapsed wall-clock against how much game time was
+// actually simulated. The difference is what the catch-up owes, whatever the
+// reason it was lost (timer throttling, MAX_DELTA clamping, OS sleep).
+let lastSyncAt = Date.now();
+let simulatedSinceSync = 0;
 
 function updateGame(dt) {
   stepWorld(currentWorld, dt, { silent: false });
-  lastLiveTickAt = Date.now();
+  simulatedSinceSync += dt;
 }
 
 function renderGame() {
@@ -736,25 +770,44 @@ document.getElementById('auto-toggle-btn').addEventListener('click', () => {
 });
 
 // ---------- Browser-throttle catch-up (tab minimized/backgrounded, still open) ----------
-// NOT Farm Offline — the tab was never closed, the browser just throttled
-// setInterval/rAF while hidden (Page Visibility spec, applies to minimized
-// windows too). Uncapped and silent by design: this only corrects ticks the
-// browser skipped, it doesn't grant a bonus for being away, so there's no
-// cap and no toast/modal — the numbers just catch up.
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) return;
-  const gapSeconds = (Date.now() - lastLiveTickAt) / 1000;
-  lastLiveTickAt = Date.now();
-  if (gapSeconds < MIN_CATCHUP_GAP_SECONDS) return;
+// NOT Farm Offline — the tab was never closed, the browser just throttled (or
+// froze) setInterval/rAF while hidden (Page Visibility spec, applies to
+// minimized windows too). Uncapped and silent by design: this only corrects
+// ticks the browser skipped, it doesn't grant a bonus for being away, so
+// there's no time cap and no toast/modal — the numbers just catch up. The
+// COST of it is bounded instead (see simulateWorldSeconds's maxSteps/
+// maxWallClockMs), which is what keeps a multi-day gap from hanging a phone.
+function runCatchUp() {
+  const now = Date.now();
+  let gapSeconds = (now - lastSyncAt) / 1000 - simulatedSinceSync;
+  lastSyncAt = now;
+  simulatedSinceSync = 0;
+
+  // Wall clock went backwards (NTP resync, user/OS clock change, dual boot).
+  // Never simulate a negative gap — just re-baseline and force a save so the
+  // stored `savedAt` stops being in the future, otherwise Farm Offline would
+  // stay dead until real time caught up with the bogus timestamp.
+  if (!Number.isFinite(gapSeconds) || gapSeconds < 0) {
+    saveGame();
+    return;
+  }
+  if (gapSeconds < MIN_CATCHUP_GAP_SECONDS) return; // normal frame jitter, not throttling
 
   const world = currentWorld;
   if (!world.mapDef || !world.player) return; // nothing to fast-forward at the Hospital
+
   const summary = simulateWorldSeconds({
     world,
     gameState,
     seconds: gapSeconds,
     stepSeconds: OFFLINE_SIM_STEP_SECONDS,
     stepFn: stepWorld,
+    // Orcamento mais curto que o do Farm Offline de boot: este roda com o
+    // jogo ja na tela, entao a pausa e sentida como travada. Como o
+    // simulador engrossa o passo em vez de descartar o resto do tempo (ver
+    // OfflineSimSystem.js), um orcamento menor custa fidelidade, nao tempo
+    // de jogo perdido.
+    maxWallClockMs: CATCHUP_WALL_CLOCK_BUDGET_MS,
   });
   // Same aggregate criteria the Farm Offline report uses (summary.gold/xp/
   // kills/shinySeen) — folded into the perf panel in one batch so its Ouro/H
@@ -762,7 +815,31 @@ document.addEventListener('visibilitychange', () => {
   // simulated silently instead of ticked live.
   recordBatch(gameState, { gold: summary.gold, xp: summary.xp, mobs: summary.kills, shinys: summary.shinySeen });
   saveGame();
+}
+
+// Three triggers, because no single one fires on every device:
+// - `visibilitychange` covers the common tab-switch/minimize case.
+// - `pageshow` covers a bfcache restore (back/forward navigation), where the
+//   page resumes without necessarily going through a visibility transition.
+// - the periodic timer covers the cases with NO visibility event at all:
+//   laptop lid closed with the tab focused, phone screen off in some Android
+//   browsers, and plain timer throttling while the tab stays hidden for hours
+//   (running it while hidden also keeps the save fresh, so a tab discarded
+//   mid-background resumes from a recent point instead of an hour-old one).
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    // Mobile browsers routinely kill a backgrounded page without ever firing
+    // `beforeunload`, so this (plus `pagehide`) is the only reliable save
+    // point on those devices — and `savedAt` is exactly what Farm Offline
+    // measures the time away from.
+    saveGame();
+    return;
+  }
+  runCatchUp();
 });
+window.addEventListener('pageshow', runCatchUp);
+window.addEventListener('pagehide', saveGame);
+setInterval(runCatchUp, CATCHUP_CHECK_INTERVAL_MS);
 
 // ---------- Farm Offline (tab actually closed / computer off / etc.) ----------
 // Runs once at boot. Distinct from the catch-up above: only fires when the
@@ -771,7 +848,14 @@ document.addEventListener('visibilitychange', () => {
 // silent — see js/systems/OfflineSimSystem.js and offlineFarmModal.js.
 if (lastMapId && savedAt && gameState.hasStarter) {
   const offlineGapSeconds = (Date.now() - savedAt) / 1000;
-  if (offlineGapSeconds >= MIN_OFFLINE_GAP_SECONDS) {
+  // `savedAt` in the future (device clock moved backwards since the save, or
+  // the save came from a machine whose clock is ahead) yields a negative gap:
+  // skip the simulation, but still fall through to the saveGame() below so
+  // the timestamp is rewritten to this device's own clock and the next
+  // session works normally instead of staying stuck.
+  if (offlineGapSeconds < 0) {
+    saveGame();
+  } else if (offlineGapSeconds >= MIN_OFFLINE_GAP_SECONDS) {
     const offlineMapDef = getMap(lastMapId);
     if (offlineMapDef) {
       const cappedSeconds = Math.min(offlineGapSeconds, OFFLINE_FARM_MAX_HOURS * 3600);
@@ -791,6 +875,12 @@ if (lastMapId && savedAt && gameState.hasStarter) {
     }
   }
 }
+
+// Boot work (module evaluation + the Farm Offline replay above) burned real
+// wall-clock time that no live tick covered — re-baseline the drift so the
+// first runCatchUp doesn't try to "recover" the loading time itself.
+lastSyncAt = Date.now();
+simulatedSinceSync = 0;
 
 const loop = new GameLoop({ update: updateGame, render: renderGame });
 loop.start();
