@@ -6,13 +6,11 @@ const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2.5;
 const ZOOM_SENSITIVITY = 0.0015;
 const ZOOM_STEP = 0.1;
-// Explicit user request: default viewing distance is 160% of what it used
-// to be (100%, i.e. zoom=1) — since visible world size scales with 1/zoom,
-// seeing 1.6x farther by default means starting at zoom = 1/1.6, not 1.6.
-// Applies to both the hunt camera (renderMap) and the Hospital scene
-// (renderHospital) — the player can still zoom past this via
+// Explicit user request: default zoom level (the % shown in #zoom-control)
+// is 150%. Applies to both the hunt camera (renderMap) and the Hospital
+// scene (renderHospital) — the player can still zoom past this via
 // Ctrl+Scroll/the +/- buttons, same MIN/MAX clamp as before.
-const DEFAULT_ZOOM = 1 / 1.6;
+const DEFAULT_ZOOM = 1.5;
 // Fraction of screen height the active POKE anchors to — 0.5 would be dead
 // center; explicit user request to sit slightly below center instead, so a
 // bit more of the world ahead/above is visible than behind.

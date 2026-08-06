@@ -6,6 +6,14 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '3.6',
+    date: '2026-08-06',
+    title: 'Zoom padrao da camera agora comeca em 150%',
+    highlights: [
+      'O zoom inicial da camera (mostrado no controle +/- no canto superior direito) mudou pra 150%, tanto nas hunts quanto na cena do Hospital. Ainda da pra ajustar livremente com os botoes +/- ou Ctrl+Scroll, pra qualquer lado.',
+    ],
+  },
+  {
     version: '3.5',
     date: '2026-08-06',
     title: 'Auto/Chat/Hunt Analyser agora ficam em segundo plano ao abrir outra janela',
