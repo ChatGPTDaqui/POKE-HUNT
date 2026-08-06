@@ -55,10 +55,37 @@ const GENERATED_HEADER =
   '// Do not edit by hand — your changes will be overwritten on the next sync.\n' +
   '// Edit the spreadsheet instead, then re-run the sync.\n\n';
 
+// Enquanto o jogo vanilla existir como fallback, ele tambem precisa receber
+// o sync — senao editar a planilha atualizaria so o app novo e o fallback
+// ficaria com dado velho, silenciosamente. LEGACY_DATA_DIR e escrito apenas
+// se a pasta ainda existir, entao isto se auto-desliga quando js/ for
+// apagado no corte final da migracao (nenhuma mudanca de codigo necessaria).
+const LEGACY_DATA_DIR = path.join(ROOT, 'js', 'data');
+
 function writeGenerated(fileName, contents) {
   const filePath = path.join(DATA_DIR, fileName);
   fs.writeFileSync(filePath, GENERATED_HEADER + contents, 'utf8');
   console.log(`  -> ${path.relative(ROOT, filePath)}`);
+}
+
+// Emite o mesmo dado nos dois formatos: `.ts` tipado pro app novo e `.js`
+// puro pro vanilla. `extraTs`/`extraJs` cobrem o unico caso que nao e so uma
+// constante exportada (typeChart, que embute a funcao getEffectiveness).
+function emitData(baseName, exportName, typeName, literal, extra) {
+  // `extra.imports` cobre tipos usados so pela funcao extra (typeChart usa
+  // ElementType na assinatura de getEffectiveness).
+  const typeImports = [typeName, ...((extra && extra.imports) || [])].join(', ');
+  const tsBody =
+    `import type { ${typeImports} } from './types';\n\n` +
+    `export const ${exportName}: ${typeName} = ${literal};\n` +
+    (extra ? extra.ts : '');
+  writeGenerated(`${baseName}.generated.ts`, tsBody);
+
+  if (!fs.existsSync(LEGACY_DATA_DIR)) return;
+  const jsBody = `export const ${exportName} = ${literal};\n` + (extra ? extra.js : '');
+  const legacyPath = path.join(LEGACY_DATA_DIR, `${baseName}.generated.js`);
+  fs.writeFileSync(legacyPath, GENERATED_HEADER + jsBody, 'utf8');
+  console.log(`  -> ${path.relative(ROOT, legacyPath)} (fallback vanilla)`);
 }
 
 // JSON.stringify silently turns Infinity into null, and generated files are
@@ -102,7 +129,7 @@ function syncFormulas(workbook) {
       : varsRaw.split(',').map((s) => s.trim()).filter(Boolean);
     formulas[key] = { expr: String(row['Expressão']), vars };
   }
-  writeGenerated('formulas.generated.ts', `import type { FormulasData } from './types';\n\nexport const FORMULAS: FormulasData = ${toJsLiteral(formulas)};\n`);
+  emitData('formulas', 'FORMULAS', 'FormulasData', toJsLiteral(formulas));
   console.log(`  ${Object.keys(formulas).length} formulas`);
   return formulas;
 }
@@ -122,17 +149,19 @@ function syncTypeChart(workbook) {
     }
     chart[attackType] = rowChart;
   }
-  const contents =
-    `import type { TypeChartData, ElementType } from './types';\n\n` +
-    `export const TYPE_CHART: TypeChartData = ${toJsLiteral(chart)};\n\n` +
-    `export function getEffectiveness(moveType: ElementType, defType1: ElementType, defType2: ElementType | null): number {\n` +
+  // Corpo identico nos dois; so a assinatura leva tipos no .ts.
+  const effectivenessBody =
     `  const row = TYPE_CHART[moveType];\n` +
     `  if (!row) return 1;\n` +
     `  const m1 = defType1 in row ? row[defType1] : 1;\n` +
     `  const m2 = defType2 && defType2 in row ? row[defType2] : 1;\n` +
     `  return m1 * m2;\n` +
     `}\n`;
-  writeGenerated('typeChart.generated.ts', contents);
+  emitData('typeChart', 'TYPE_CHART', 'TypeChartData', toJsLiteral(chart), {
+    imports: ['ElementType'],
+    ts: `\nexport function getEffectiveness(moveType: ElementType, defType1: ElementType, defType2: ElementType | null): number {\n${effectivenessBody}`,
+    js: `\nexport function getEffectiveness(moveType, defType1, defType2) {\n${effectivenessBody}`,
+  });
   console.log(`  ${Object.keys(chart).length} types`);
   return chart;
 }
@@ -172,7 +201,7 @@ function syncItemsFull(workbook) {
     itemsData[ourKey] = item;
   }
 
-  writeGenerated('items.generated.ts', `import type { ItemsData } from './types';\n\nexport const ITEMS_DATA: ItemsData = ${toJsLiteral(itemsData)};\n`);
+  emitData('items', 'ITEMS_DATA', 'ItemsData', toJsLiteral(itemsData));
   console.log(`  ${Object.keys(itemsData).length} itens`);
   return itemsData;
 }
@@ -623,8 +652,8 @@ function syncSpeciesAndMoves(workbook, hunts) {
     };
   }
 
-  writeGenerated('pokes.generated.ts', `import type { SpeciesData } from './types';\n\nexport const SPECIES_DATA: SpeciesData = ${toJsLiteral(speciesData)};\n`);
-  writeGenerated('abilities.generated.ts', `import type { AbilitiesData } from './types';\n\nexport const ABILITIES_DATA: AbilitiesData = ${toJsLiteral(abilitiesData)};\n`);
+  emitData('pokes', 'SPECIES_DATA', 'SpeciesData', toJsLiteral(speciesData));
+  emitData('abilities', 'ABILITIES_DATA', 'AbilitiesData', toJsLiteral(abilitiesData));
   console.log(`  ${Object.keys(speciesData).length} especies, ${Object.keys(abilitiesData).length} golpes unicos`);
   return { speciesData, abilitiesData };
 }
@@ -744,8 +773,8 @@ function syncMapsAndEncounters(hunts, speciesData) {
     console.log(`  ${hunt.name} (méd. ${Math.round(hunt.avgLevel * 10) / 10}, niv ${hunt.minLevel}-${hunt.maxLevel}): ${Object.keys(hunt.speciesLevels).join(', ')}`);
   }
 
-  writeGenerated('maps.generated.ts', `import type { MapsData } from './types';\n\nexport const MAPS_DATA: MapsData = ${toJsLiteral(mapsData)};\n`);
-  writeGenerated('enemies.generated.ts', `import type { EncountersData } from './types';\n\nexport const ENCOUNTERS_DATA: EncountersData = ${toJsLiteral(encountersData)};\n`);
+  emitData('maps', 'MAPS_DATA', 'MapsData', toJsLiteral(mapsData));
+  emitData('enemies', 'ENCOUNTERS_DATA', 'EncountersData', toJsLiteral(encountersData));
   return { mapsData, encountersData };
 }
 
