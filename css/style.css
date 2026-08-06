@@ -535,6 +535,16 @@ select:focus, input[type="number"]:focus, input[type="text"]:focus {
   max-height: min(78vh, 640px);
 }
 
+/* Wiki's 17x17 type-effectiveness table (WikiMenu.js#typeMatrixHtml) is
+   wider than every other panel's content — explicit user request: instead of
+   hiding the extra width behind .type-matrix-wrap's inner drag-to-scroll
+   (still there as a fallback on narrow viewports, see below), the window
+   itself grows to fit it on anything wide enough to show it without
+   scrolling at all. */
+.screen.compact.screen-wiki {
+  width: min(700px, calc(100vw - 32px));
+}
+
 button.confirm-danger {
   border-color: var(--color-danger);
   color: var(--color-danger);

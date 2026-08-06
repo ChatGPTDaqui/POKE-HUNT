@@ -6,6 +6,15 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '3.4',
+    date: '2026-08-06',
+    title: 'Janela da Wiki agora se ajusta pra caber a tabela de tipos',
+    highlights: [
+      'A janela da Wiki era limitada a mesma largura compacta (480px) de todos os outros menus, entao a tabela completa de efetividade de tipos (17x17) so cabia com bastante scroll horizontal escondido. Agora a janela da Wiki cresce ate 700px quando a tela permite — em telas menores que isso, a tabela continua com seu proprio scroll horizontal interno, sem cortar nada.',
+      'Os outros menus (Equipe/Mochila/Hunts/Loja/Config) continuam na mesma largura compacta de sempre.',
+    ],
+  },
+  {
     version: '3.3',
     date: '2026-08-06',
     title: 'Cartao do POKE: Vantagens de tipo + Pokedex abre automatico',

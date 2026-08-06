@@ -176,7 +176,7 @@ export class UIManager {
     // system entirely, see PANEL_RENDERERS above) shrinks so the battlefield
     // stays visible behind it.
     const wrapper = document.createElement('div');
-    wrapper.className = 'screen panel compact';
+    wrapper.className = `screen panel compact screen-${this.currentScreen}`;
 
     // Non-scrolling chrome: close button always stays put (see #screen-body
     // below, the only part that actually scrolls), and doubles as the
