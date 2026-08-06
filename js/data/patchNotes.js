@@ -6,6 +6,15 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '3.5',
+    date: '2026-08-06',
+    title: 'Auto/Chat/Hunt Analyser agora ficam em segundo plano ao abrir outra janela',
+    highlights: [
+      'Pedido explicito do usuario: quando qualquer janela principal (Equipe, Mochila, Hunts, Loja, Pokedex, Wiki, Config, ou um cartao de POKE) abre por cima, os paineis Auto, Chat/Log e Hunt Analyser (Ouro/H, XP/H) agora ficam visualmente atras dela em vez de continuar flutuando por cima — clicar onde eles estariam agora interage com a janela aberta, nao com esses paineis.',
+      'O menu inferior de navegacao e o controle de zoom continuam sempre por cima, pra dar sempre pra trocar de janela num clique so.',
+    ],
+  },
+  {
     version: '3.4',
     date: '2026-08-06',
     title: 'Janela da Wiki agora se ajusta pra caber a tabela de tipos',

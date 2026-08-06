@@ -941,15 +941,15 @@ button.confirm-danger {
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
-  /* Above every modal window too (.confirm-modal-overlay/offline-farm-modal/
-     etc., z-index 100 — see below), not just #overlay-root's screens (30).
-     Real bug found live: opening a POKE profile (or any other modal) put its
-     full-viewport backdrop ON TOP of this panel, so a click on "Auto" landed
-     on the backdrop instead and just closed the modal — the Hunt Analyser/
-     Auto toggle looked present but was actually unclickable dead space.
-     Stays below the celebratory splashes (200), which are meant to be a
-     true uninterruptible full-screen moment. */
-  z-index: 105;
+  /* Explicit user request (reversing an earlier fix): this panel (Hunt
+     Analyser's perf-stats + the Auto toggle) must fall BEHIND any main
+     window/modal that opens over it, not fight for attention above it —
+     below #overlay-root's dimmed backdrop (30) so it's visually obscured
+     the moment a screen opens, and below every body-appended modal (100)
+     too. #bottom-nav/#zoom-control (35) intentionally stay above the
+     backdrop instead — you still need to be able to switch screens with a
+     single click while one is open. */
+  z-index: 5;
 }
 
 /* 2x the size of a regular button — explicit user request to make the Auto
@@ -1012,9 +1012,9 @@ button.confirm-danger {
   right: 8px;
   bottom: 54px;
   width: 240px;
-  /* Same fix/reasoning as #bottom-left-stack above — must outrank modal
-     windows (z-index 100), not just #overlay-root's screens. */
-  z-index: 105;
+  /* Same reversal/reasoning as #bottom-left-stack above — falls behind any
+     open screen/modal instead of outranking it. */
+  z-index: 5;
   font-size: 11px;
 }
 
@@ -1229,11 +1229,10 @@ button.confirm-danger {
      a phone-sized screen). */
   max-height: 65vh;
   padding: 14px;
-  /* Above modal windows too (was 95, just under .confirm-modal-overlay's
-     100 — see #bottom-left-stack's comment above for the bug this caused:
-     opening the Auto panel and then a POKE profile on top of it buried the
-     already-open panel behind the new modal's backdrop). */
-  z-index: 106;
+  /* Same reversal/reasoning as #bottom-left-stack above — explicit user
+     request: opening a main window/modal over an already-open Auto panel
+     must bury the panel behind it, not the other way around. */
+  z-index: 5;
   display: flex;
   flex-direction: column;
 }
