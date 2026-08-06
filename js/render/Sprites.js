@@ -682,11 +682,15 @@ function drawDamageNumber(ctx, effect) {
 // The move's name, popped just below the caster's feet when it's used —
 // stays put and just fades, distinct from the damage number (which floats
 // up from the target once the hit actually lands).
+// Explicit user request: smaller font + nudged 2px further down (away from
+// the name/level tag above it) so the two never visually touch.
+const ABILITY_NAME_Y_OFFSET = 2;
+
 function drawAbilityName(ctx, effect) {
   const alpha = effect.progress < 0.7 ? 1 : 1 - (effect.progress - 0.7) / 0.3;
   const anchor = effectAnchor(effect);
   const x = anchor.x;
-  const y = anchor.y;
+  const y = anchor.y + ABILITY_NAME_Y_OFFSET;
 
   ctx.save();
   ctx.globalAlpha = Math.max(0, alpha);
@@ -694,7 +698,7 @@ function drawAbilityName(ctx, effect) {
   ctx.lineWidth = 3;
   ctx.lineJoin = 'round';
   ctx.strokeStyle = '#000000';
-  ctx.font = 'bold 10px monospace';
+  ctx.font = 'bold 8px monospace';
   ctx.fillStyle = effect.color || '#cdd6ff';
   ctx.strokeText(effect.text, x, y);
   ctx.fillText(effect.text, x, y);

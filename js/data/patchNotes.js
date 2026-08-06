@@ -6,6 +6,14 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '3.7',
+    date: '2026-08-06',
+    title: 'Texto do nome do golpe: fonte menor, deslocado pra nao encostar no nome',
+    highlights: [
+      'O texto que mostra o nome do golpe usado (acima do POKE em combate) ficou com fonte menor (8px, era 10px) e foi deslocado 2px pra baixo, garantindo folga em relacao ao nome/nivel do POKE logo abaixo dele.',
+    ],
+  },
+  {
     version: '3.6',
     date: '2026-08-06',
     title: 'Zoom padrao da camera agora comeca em 150%',
