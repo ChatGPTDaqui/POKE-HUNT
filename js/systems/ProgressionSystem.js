@@ -8,8 +8,9 @@ const formulaEngine = createFormulaEngine(FORMULAS);
 // Spreadsheet-editable global lever on top of the EXP_GAIN curve itself (see
 // CLAUDE.md's "Balanceamento de economia" section) — lets the whole game's
 // XP rate be rebalanced with one number instead of reshaping the curve.
-// 0.4 = explicit user request to cut all XP gain by 60%.
-const XP_GLOBAL_MULTIPLIER = formulaEngine.evalOrDefault('XP_GLOBAL_MULTIPLIER', 0.4);
+// 0.28 = explicit user request to cut XP gain by a further 30% on top of the
+// previous -60% cut (0.4 * 0.7 = 0.28, an effective -72% off the original rate).
+const XP_GLOBAL_MULTIPLIER = formulaEngine.evalOrDefault('XP_GLOBAL_MULTIPLIER', 0.28);
 // 0.05 = explicit user request: dying costs 5% of the EXP needed for the
 // CURRENT level (expProgressForInstance's `needed`, i.e. one level's worth of
 // span), not 5% of total cumulative EXP — the cumulative curve grows fast

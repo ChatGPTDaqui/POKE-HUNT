@@ -378,12 +378,24 @@ function announceAbility(world, attacker, ability) {
   }));
 }
 
+// AOE targeting must reach every live enemy within the move's real splash
+// radius, not just the ones already at melee touch-distance (`engagedEnemies`
+// — the pool `updateCombat` uses just to decide whether the player can act at
+// all). Explicit bug report: with a 240-unit AOE radius but targets pulled
+// only from `engagedEnemies` (a ~radius+radius+10 melee range), the splash
+// never actually reached past whichever single enemy was already touching
+// the player — the large radius had no real effect.
+function nearbyAliveEnemies(world) {
+  return world.enemies.filter((e) => !e.isDead);
+}
+
 function executePlayerAction(world, player, engagedEnemies) {
   if (!player.canAct()) return;
 
   const primaryTarget = engagedEnemies[0];
+  const allEnemies = nearbyAliveEnemies(world);
   const ability = pickAbility(player, primaryTarget, (a) =>
-    engagedEnemies.filter((e) => !e.isDead && Math.hypot(e.x - player.x, e.y - player.y) <= a.radius).length
+    allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= a.radius).length
   );
   if (!ability) return;
 
@@ -393,7 +405,7 @@ function executePlayerAction(world, player, engagedEnemies) {
   announceAbility(world, player, ability);
 
   const targets = ability.target === 'aoe'
-    ? engagedEnemies.filter((e) => !e.isDead && Math.hypot(e.x - player.x, e.y - player.y) <= ability.radius)
+    ? allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= ability.radius)
     : [engagedEnemies[0]].filter(Boolean);
 
   if (ability.target === 'aoe') queueAoeVisual(world, player, ability);
@@ -422,6 +434,12 @@ function executeEnemyAction(world, enemy, player) {
 // once the attacker's Shoot/Charge pose has finished playing.
 function resolveHit(world, hit, defeatedEnemies, onPlayerFainted) {
   const { attacker, target, ability } = hit;
+
+  // Explicit bug report: a POKE defeated between queueing a hit (attack
+  // pose starts) and the hit actually landing (HIT_LAND_DELAY later) still
+  // dealt its damage. A fainted/dead attacker can no longer land anything
+  // it queued before dying — cancel the whole action, damage included.
+  if (attacker.isDead) return;
 
   if (hit.isAoeVisual) {
     // The one ring for this AOE cast, centered on the attacker — see

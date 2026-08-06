@@ -6,6 +6,17 @@
 // wrong instead of just looking odd in the source file).
 export const PATCH_NOTES = [
   {
+    version: '3.2',
+    date: '2026-08-06',
+    title: 'Combate: cancelamento de golpe ao morrer + AoE corrigido + rebalanceamento de XP/Ouro',
+    highlights: [
+      'Bug real corrigido: um POKE derrotado ENTRE o inicio de um golpe (pose de ataque) e o instante em que o dano realmente e aplicado continuava acertando o alvo do alem-tumulo — agora a acao e cancelada por completo se quem a usou ja estiver morto quando o golpe chegaria a resolver.',
+      'Bug real corrigido: golpes em area (AoE) so atingiam inimigos ja "engajados" em combate corpo-a-corpo com o jogador, entao o raio real do golpe (240) nunca fazia diferenca nenhuma — todo inimigo fora do toque direto ficava de fora mesmo dentro do circulo. Agora o AoE atinge de verdade qualquer inimigo vivo dentro do raio real da habilidade.',
+      'XP por abate reduzido em mais 30% sobre o valor atual.',
+      'Ouro por abate revertido para a formula original (removido o bonus extra de +300% de uma leva anterior).',
+    ],
+  },
+  {
     version: '3.1',
     date: '2026-08-05',
     title: 'HUD mobile: menu inferior e painel Auto ficavam cortados',

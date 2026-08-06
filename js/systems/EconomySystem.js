@@ -19,8 +19,9 @@ const STONE_DROP_CHANCE = formulaEngine.evalOrDefault('STONE_DROP_CHANCE', 0.05)
 // from defeating a wild POKE is boosted 5x over the raw MONEY_FOR_KILL
 // formula, times an extra global lever for one-knob rebalancing.
 const KILL_GOLD_MULTIPLIER = formulaEngine.evalOrDefault('KILL_GOLD_MULTIPLIER', 5);
-// 4 = explicit user request to raise all kill gold by 300% (4x the previous total).
-const GOLD_GLOBAL_MULTIPLIER = formulaEngine.evalOrDefault('GOLD_GLOBAL_MULTIPLIER', 4);
+// 1 = explicit user request to revert the earlier +300% balance pass and
+// restore the original formula (just KILL_GOLD_MULTIPLIER, no extra knob).
+const GOLD_GLOBAL_MULTIPLIER = formulaEngine.evalOrDefault('GOLD_GLOBAL_MULTIPLIER', 1);
 
 // `rarityKey` is optional (see data/rarity.js) — omitted/unrecognized keys
 // default to Comum's 1x, same fallback rule as computeStatsAtLevel.
