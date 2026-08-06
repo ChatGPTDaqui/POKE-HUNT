@@ -30,6 +30,13 @@ assets/grass background medio.png
 assets/hp-bar/
 assets/move sprites/
 
+# Segredos. O `.env` da raiz guarda a SUPABASE_SERVICE_ROLE_KEY, usada pelos
+# scripts de catalogo (e, na Fase D, pelo servidor Node). Essa chave ignora RLS
+# por completo — vazar equivale a dar acesso total ao banco. Nunca commitar.
+.env
+.env.*
+!.env.example
+
 # OS/editor cruft
 .DS_Store
 Thumbs.db
