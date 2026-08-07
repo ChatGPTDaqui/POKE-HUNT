@@ -16,7 +16,7 @@ import tailwindcss from '@tailwindcss/vite'
 // Em vez disso, este plugin serve `/assets/*` direto da pasta original, tanto
 // no dev server quanto no `vite preview`. Nada e copiado, nada depende de
 // link de sistema de arquivos, e funciona igual em qualquer clone.
-const GAME_ASSETS_DIR = path.resolve(import.meta.dirname, '../assets')
+const GAME_ASSETS_DIR = path.resolve(import.meta.dirname, 'assets')
 
 const MIME: Record<string, string> = {
   '.png': 'image/png',

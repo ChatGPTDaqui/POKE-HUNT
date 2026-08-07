@@ -43,7 +43,7 @@ function isGreenMask(r, g, b) {
 
 const maskPath = path.join(__dirname, '..', 'assets', 'hunt-backgrounds', 'masks', 'water-collision-mask.png');
 const referenceImgPath = path.join(__dirname, '..', 'assets', 'hunt-backgrounds', 'water.png');
-const outFileTs = path.join(__dirname, '..', 'web', 'src', 'data', 'generated', 'waterCollisionMask.generated.ts');
+const outFileTs = path.join(__dirname, '..', 'src', 'data', 'generated', 'waterCollisionMask.generated.ts');
 const outFileJs = path.join(__dirname, '..', 'js', 'data', 'waterCollisionMask.generated.js');
 
 const maskBuf = fs.readFileSync(maskPath);

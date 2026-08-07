@@ -31,7 +31,7 @@ const BASES = ['formulas', 'typeChart', 'items', 'pokes', 'abilities', 'maps', '
 // enquanto os dois existirem (o `.js` se desliga sozinho quando `js/data/`
 // sumir, no corte). Verificar so o `.ts` deixaria o fallback sem cobertura.
 const ARQUIVOS = [
-  ...BASES.map((b) => path.join('web', 'src', 'data', 'generated', `${b}.generated.ts`)),
+  ...BASES.map((b) => path.join('src', 'data', 'generated', `${b}.generated.ts`)),
   ...(fs.existsSync(path.join(ROOT, 'js', 'data'))
     ? BASES.map((b) => path.join('js', 'data', `${b}.generated.js`))
     : []),

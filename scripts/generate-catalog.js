@@ -111,7 +111,7 @@ function num(value) {
 // Ordem canonica dos 17 tipos, de typeColors.ts (ver nota 2 do cabecalho).
 // ---------------------------------------------------------------------------
 function readTypeOrder() {
-  const src = fs.readFileSync(path.join(ROOT, 'web', 'src', 'data', 'typeColors.ts'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'src', 'data', 'typeColors.ts'), 'utf8');
   const types = [...src.matchAll(/^ {2}([A-Z_]+):/gm)].map((m) => m[1]);
   if (types.length !== 17) throw new Error(`typeColors.ts: esperava 17 tipos, achei ${types.length}`);
   return types;

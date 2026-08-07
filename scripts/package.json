@@ -1,0 +1,4 @@
+{
+  "//": "Os scripts de pipeline (catalogo, sprites, spawn tiers) sao CommonJS. Quando web/ virou a raiz, o package.json do app — que declara \"type\": \"module\" — passou a valer pra este diretorio tambem, e todo `require` aqui quebrou. Este arquivo devolve o escopo CommonJS so pra scripts/, sem precisar renomear 10 arquivos pra .cjs nem reescrever os requires.",
+  "type": "commonjs"
+}

@@ -363,7 +363,7 @@ function lerRoster(constantesAsm) {
   const unicos = [...new Set(ids)].sort();
   if (unicos.length !== 251) throw new Error(`esperava 251 especies no dex, achei ${unicos.length}`);
 
-  const gerado = path.join(ROOT, 'web', 'src', 'data', 'generated', 'pokes.generated.ts');
+  const gerado = path.join(ROOT, 'src', 'data', 'generated', 'pokes.generated.ts');
   const conhecidos = new Set([...fs.readFileSync(gerado, 'utf8').matchAll(/^\s{4}"id": "([a-z0-9_]+)"/gm)].map((m) => m[1]));
   const foraDoDex = [...conhecidos].filter((id) => !unicos.includes(id));
   if (foraDoDex.length) throw new Error(`ids do jogo que o dex nao produz: ${foraDoDex.join(', ')}`);

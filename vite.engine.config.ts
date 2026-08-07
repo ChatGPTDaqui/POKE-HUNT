@@ -17,7 +17,7 @@ export default defineConfig({
   resolve: { alias: { '@': path.resolve(import.meta.dirname, './src') } },
   build: {
     ssr: 'src/engine/headless.ts',
-    outDir: '../server/engine',
+    outDir: 'server/engine',
     emptyOutDir: true,
     target: 'es2023',
   },

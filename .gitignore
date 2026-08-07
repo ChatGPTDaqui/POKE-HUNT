@@ -49,3 +49,21 @@ Thumbs.db
 # LibreOffice/Excel lock file, created while the spreadsheet is open and
 # deleted on close — never part of the project.
 .~lock.*#
+
+# --- vindas do antigo web/.gitignore (o app agora e a raiz) ---
+node_modules
+dist
+dist-ssr
+dist-engine/
+*.local
+logs
+*.log
+npm-debug.log*
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

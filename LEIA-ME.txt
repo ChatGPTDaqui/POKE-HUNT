@@ -1,20 +1,31 @@
 NOVO POKE IDLE
 ==============
 
-Jogo web (React + Vite) com backend no Supabase.
+Jogo web (React + Vite) com backend no Supabase. A RAIZ do repositorio E o app —
+`src/`, `index.html` e `package.json` ficam aqui, sem pasta `web/`. Isso existe
+pra o Cloudflare Pages funcionar sem configurar "root directory".
 
 RODAR LOCAL
-  npm run dev          -> http://localhost:5173
+  npm install
+  npm run dev            -> http://localhost:5173
 
-  Precisa de web/.env.local com VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY e
-  VITE_SERVIDOR_URL (veja web/.env.example). A ultima e OBRIGATORIA: o servidor
-  e quem grava o progresso, e a RLS recusa escrita vinda do navegador.
+  Precisa de .env.local com VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY e
+  VITE_SERVIDOR_URL (ver .env.example). A ultima e OBRIGATORIA: quem grava o
+  progresso e o servidor, e a RLS recusa escrita vinda do navegador.
 
 PUBLICAR
   Site      -> Cloudflare Pages, automatico pelo push na main.
-               Config: root `web`, build `npm run build`, saida `dist`.
-  Servidor  -> npm run edge:publicar   (Supabase Edge Function `jogo`)
+               build `npm run build`, saida `dist`, root padrao (a raiz).
+  Servidor  -> npm run edge:publicar     (Supabase Edge Function `jogo`)
   Banco     -> npx supabase db push
+
+O QUE MORA ONDE
+  src/         o jogo (React + motor)
+  assets/      arte (281MB) — copiada pra dist/ no build
+  server/      o servico de autoridade; roda local (node) ou como Edge Function
+  supabase/    migrations + a Edge Function publicada
+  scripts/     pipeline de dados (catalogo, sprites, tiers de spawn) — CommonJS,
+               por isso tem um package.json proprio marcando "type": "commonjs"
 
 DADOS DO JOGO
   npm run catalog:gerar       regenera o catalogo a partir do Postgres
@@ -22,6 +33,5 @@ DADOS DO JOGO
 
 O JOGO VANILLA ANTIGO
   Saiu deste repositorio (esta em "NOVO POKE IDLE - vanilla" na Area de
-  Trabalho). Ele nao usava login nem servidor: salvava em localStorage. Enquanto
-  ficava aqui, era publicado por acidente sempre que o deploy apontava pra raiz
-  do repositorio — foi exatamente o que aconteceu no Cloudflare Pages.
+  Trabalho). Enquanto ficava aqui, era publicado por acidente sempre que o
+  deploy apontasse pra raiz — foi o que aconteceu no Cloudflare Pages.

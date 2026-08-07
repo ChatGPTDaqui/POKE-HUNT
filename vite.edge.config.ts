@@ -17,8 +17,8 @@ export default defineConfig({
     },
   },
   build: {
-    ssr: '../server/src/edge.ts',
-    outDir: '../supabase/functions/jogo',
+    ssr: 'server/src/edge.ts',
+    outDir: 'supabase/functions/jogo',
     emptyOutDir: false,
     target: 'es2022',
     rollupOptions: { output: { entryFileNames: 'servidor.js' } },

@@ -12,9 +12,9 @@ import { cpSync, existsSync, rmSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const web = dirname(dirname(fileURLToPath(import.meta.url)))
-const origem = join(web, '..', 'assets')
-const destino = join(web, 'dist', 'assets')
+const raiz = dirname(dirname(fileURLToPath(import.meta.url)))
+const origem = join(raiz, 'assets')
+const destino = join(raiz, 'dist', 'assets')
 
 if (!existsSync(origem)) {
   console.error(`Arte nao encontrada em ${origem} — o site subiria sem sprite nenhum.`)

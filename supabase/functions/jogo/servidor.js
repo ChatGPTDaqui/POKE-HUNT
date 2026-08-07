@@ -21,7 +21,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 	enumerable: true
 }) : target, mod));
 //#endregion
-//#region ../server/src/db.ts
+//#region server/src/db.ts
 var ErroHttp = class extends Error {
 	status;
 	constructor(status, message) {
@@ -103,7 +103,7 @@ async function apagar(cfg, caminho) {
 	});
 }
 //#endregion
-//#region ../server/src/auth.ts
+//#region server/src/auth.ts
 async function autenticar(cfg, req) {
 	const header = req.headers.get("authorization") || "";
 	const token = header.toLowerCase().startsWith("bearer ") ? header.slice(7).trim() : "";
@@ -58821,7 +58821,7 @@ async function savePlayerState(userId, state) {
 }
 //#endregion
 //#region src/data/remote/servidor.ts
-var BASE = "http://localhost:8787".replace(/\/$/, "");
+var BASE = "https://cffbihbmhiuudahsgjsn.supabase.co/functions/v1/jogo".replace(/\/$/, "");
 /** Se o jogo esta rodando sob autoridade do servidor. */
 function servidorAtivo() {
 	return BASE.length > 0;
@@ -59285,7 +59285,7 @@ create()(persist((set, get) => ({
 	}
 }));
 //#endregion
-//#region ../server/src/estadoDoJogador.ts
+//#region server/src/estadoDoJogador.ts
 function criarEstadoDoJogador(dados) {
 	const s = structuredClone(dados);
 	const acharPoke = (uid) => {
@@ -59519,7 +59519,7 @@ function criarEstadoDoJogador(dados) {
 	};
 }
 //#endregion
-//#region ../server/src/farmOffline.ts
+//#region server/src/farmOffline.ts
 var FRACAO_DO_PISO = .5;
 var NENHUM_PISO = {
 	aplicado: false,
@@ -59567,7 +59567,7 @@ function aplicarPiso(store, estado, resumo, agoraMs) {
 	};
 }
 //#endregion
-//#region ../server/src/progresso.ts
+//#region server/src/progresso.ts
 var MAX_SEGUNDOS_POR_FLUSH = 21600;
 async function carregarEstado(cfg, userId) {
 	const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
@@ -59654,7 +59654,7 @@ async function aplicarFlush(cfg, userId, sessao) {
 	};
 }
 //#endregion
-//#region ../server/src/acoes.ts
+//#region server/src/acoes.ts
 var STARTER_LEVEL = 1;
 var STARTER_RARITY = "comum";
 var STARTER_IVS = {
@@ -59857,7 +59857,7 @@ function aplicarAcao(store, estado, acao) {
 	return manipulador(store, estado, acao);
 }
 //#endregion
-//#region ../server/src/app.ts
+//#region server/src/app.ts
 function json(dado, status = 200) {
 	return new Response(JSON.stringify(dado), {
 		status,

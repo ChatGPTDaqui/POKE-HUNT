@@ -17,7 +17,7 @@ const XLSX_PATH = path.join(ROOT, 'Planilha mestra', 'dados_do_jogo.xlsx');
 // (nao gerado, escrito a mao uma vez). O jogo vanilla antigo (js/data/) fica
 // intacto ate o corte final da migracao — ver plano em
 // .claude/plans/wise-snuggling-oasis.md.
-const DATA_DIR = path.join(ROOT, 'web', 'src', 'data', 'generated');
+const DATA_DIR = path.join(ROOT, 'src', 'data', 'generated');
 
 // Every species that already has real imported battle-sprite art (see
 // scripts/import-kanto-sprites.js) — restricts the biome backfill below

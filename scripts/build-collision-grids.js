@@ -51,7 +51,7 @@ const bgDir = path.join(__dirname, '..', 'assets', 'hunt-backgrounds');
 // Migracao React: passa a escrever dentro do app Vite, tipado — ver
 // scripts/sync-planilha.js (mesmo padrao de retarget) e o plano em
 // .claude/plans/wise-snuggling-oasis.md.
-const outFile = path.join(__dirname, '..', 'web', 'src', 'data', 'generated', 'collisionGrids.generated.ts');
+const outFile = path.join(__dirname, '..', 'src', 'data', 'generated', 'collisionGrids.generated.ts');
 
 // Math.ceil rather than a plain division: 1400/40 is exact (35) but 900/40
 // isn't (22.5) — ceil gives a whole extra row of buffer past the map's real

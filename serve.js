@@ -21,7 +21,7 @@ import path from 'node:path';
 
 const HERE = import.meta.dirname;
 const DIST = path.join(HERE, 'dist');
-const GAME_ASSETS = path.join(HERE, '..', 'assets');
+const GAME_ASSETS = path.join(HERE, 'assets');
 const PORT = process.env.PORT || 5173;
 
 const MIME = {

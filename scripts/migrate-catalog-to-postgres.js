@@ -114,7 +114,7 @@ async function count(table) {
 // extraidos por regex. Sao arquivos de dado simples e estaveis; se algum
 // mudar de forma, o parse falha alto (contagem zero) em vez de silenciar.
 // ---------------------------------------------------------------------------
-const WEB_DATA = path.join(ROOT, 'web', 'src', 'data');
+const WEB_DATA = path.join(ROOT, 'src', 'data');
 const readWebData = (f) => fs.readFileSync(path.join(WEB_DATA, f), 'utf8');
 
 function parseLegendaries() {
