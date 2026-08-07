@@ -40,19 +40,24 @@ export function focusHunt(map: HuntMapDef) {
 }
 
 interface HuntOdds {
-  species: { species: Species; pct: number }[]
+  species: { id: string; species: Species; pct: number }[]
   dominantTypes: [ElementType, number][]
 }
 
-// O peso de cada encontro vem da taxa de captura real Gen2 (ver
-// sync-planilha.js#syncMapsAndEncounters + spawnEnemyAt, que spawna
-// proporcionalmente a ele) — especies raras aparecem menos, e a "dominancia"
-// de um tipo e a soma das odds de toda especie que o carrega.
+// O peso de cada encontro vem do TIER de spawn da especie, derivado da chance
+// real de encontro selvagem do Gen1/Gen2 (ver scripts/derive-spawn-tiers.js e a
+// migration `spawn_tier_por_especie`; `spawnEnemyAt` spawna proporcionalmente a
+// ele). Antes era `species.catchRate` — taxa de CAPTURA, que nao tem relacao com
+// frequencia de APARICAO. A "dominancia" de um tipo e a soma das odds de toda
+// especie que o carrega.
 function huntOdds(map: HuntMapDef): HuntOdds {
   const encounters = map.enemyPool.map(getEncounter).filter((e) => e != null)
   const totalWeight = encounters.reduce((sum, enc) => sum + enc.weight, 0)
+  // A chave e o id do ENCONTRO, nao o da especie: a hunt do Campeao Lance tem
+  // tres Dragonites (composicao real dele), e keyar por especie fazia o React
+  // reclamar de chave duplicada e arriscar omitir linhas da lista.
   const species = encounters
-    .map((enc) => ({ species: SPECIES[enc.speciesId], pct: (enc.weight / totalWeight) * 100 }))
+    .map((enc) => ({ id: enc.id, species: SPECIES[enc.speciesId], pct: (enc.weight / totalWeight) * 100 }))
     .filter((entry) => entry.species != null)
     .sort((a, b) => b.pct - a.pct)
 
@@ -261,8 +266,8 @@ export function HuntMenu() {
                       <TooltipContent className="max-w-xs border bg-popover px-3 py-2 text-popover-foreground">
                         <div className="mb-1 text-xs font-semibold">Pokemons na area</div>
                         <div className="max-h-48 space-y-0.5 overflow-y-auto">
-                          {odds.species.map(({ species: sp, pct }) => (
-                            <SpeciesRow key={sp.id} sp={sp} pct={pct} />
+                          {odds.species.map(({ id, species: sp, pct }) => (
+                            <SpeciesRow key={id} sp={sp} pct={pct} />
                           ))}
                         </div>
                         <div className="mt-1.5 mb-1 text-xs font-semibold">Tipos dominantes</div>
@@ -318,8 +323,8 @@ export function HuntMenu() {
                 <div className="mt-1 rounded-lg border bg-muted/30 p-3">
                   <div className="mb-1.5 text-sm font-medium">Pokemons de {map.name}</div>
                   <div className="space-y-0.5">
-                    {odds.species.map(({ species: sp, pct }) => (
-                      <SpeciesRow key={sp.id} sp={sp} pct={pct} />
+                    {odds.species.map(({ id, species: sp, pct }) => (
+                            <SpeciesRow key={id} sp={sp} pct={pct} />
                     ))}
                   </div>
                 </div>
