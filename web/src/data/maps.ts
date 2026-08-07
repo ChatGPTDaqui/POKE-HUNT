@@ -5,6 +5,7 @@
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
 import { COLLISION_GRIDS, COLLISION_GRID_CELL_SIZE } from './generated/collisionGrids.generated'
+import { WATER_COLLISION_GRID, WATER_SPAWN_POINT } from './generated/waterCollisionMask.generated'
 import type { HuntMapDef } from './huntTypes'
 
 // Modo Pesadelo hunts (see nightmareMaps.js) and the hand-picked spawn-pool
@@ -35,6 +36,16 @@ const RESPAWN_DELAY_MULTIPLIER = formulaEngine.evalOrDefault('MOB_RESPAWN_DELAY_
 // all and isn't part of "wall block".
 const WALL_BLOCK_ENABLED = false
 
+// Explicit user request: reactivate wall-block EXCLUSIVELY for the two real
+// Water-type hunts, using a hand-painted mask
+// (scripts/build-water-collision-mask.js) instead of the pixel-heuristic
+// grid above. Deliberately keyed by hunt id, not by `bg.image` — `Pantano`
+// (POISON) and `Penhascos` (FLYING) reuse the same water.png art (see
+// scripts/sync-planilha.js#TYPE_BACKGROUND_IMAGE) but are a different biome
+// and must NOT get this collision/spawn override; enabling by image key
+// would have leaked it onto both.
+const WATER_HUNT_IDS = new Set(['lv_11_20_costa', 'kanto_lv_36_55_profundezas'])
+
 // Only the 7 hunt themes with real background art (see
 // scripts/build-collision-grids.js) have a grid — every other hunt gets
 // `collisionGrid: null` and keeps the old fully-open walkable circle
@@ -42,6 +53,14 @@ const WALL_BLOCK_ENABLED = false
 export function getMap(id: string): MapDef | null {
   const map = MAPS[id]
   if (!map) return null
+  if (WATER_HUNT_IDS.has(id)) {
+    return {
+      ...map,
+      respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER,
+      collisionGrid: WATER_COLLISION_GRID,
+      playerSpawn: WATER_SPAWN_POINT,
+    }
+  }
   const collisionGrid = WALL_BLOCK_ENABLED
     ? (map.bg && map.bg.image && COLLISION_GRIDS[map.bg.image]) || null
     : null
