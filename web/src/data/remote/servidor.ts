@@ -69,6 +69,9 @@ export interface RespostaFlush extends RespostaComEstado {
   // dois sem saber de onde vieram, porque o servidor roda exatamente o mesmo
   // `simulateWorldSeconds`.
   resumo: OfflineSimSummary
+  // Se o piso de 50% da taxa online precisou completar o resultado. O relatorio
+  // avisa em vez de so mostrar um numero maior que o combate pessimista rendeu.
+  piso: { aplicado: boolean; ouroAdicionado: number; xpAdicionado: number }
 }
 
 export const servidor = {
@@ -82,7 +85,7 @@ export const servidor = {
 
   flush: () => pedir<RespostaFlush>('/sessao/flush', { method: 'POST' }),
 
-  fecharSessao: () => pedir<{ fechada: boolean; resumo?: RespostaFlush['resumo'] } & Partial<RespostaComEstado>>('/sessao/fechar', { method: 'POST' }),
+  fecharSessao: () => pedir<{ fechada: boolean; resumo?: RespostaFlush['resumo']; piso?: RespostaFlush['piso'] } & Partial<RespostaComEstado>>('/sessao/fechar', { method: 'POST' }),
 
   /**
    * Manda uma intencao. NUNCA um resultado: o cliente diz "quero comprar 5

@@ -170,4 +170,12 @@ export interface WorldState {
   // replay bit-a-bit de coordenadas entre engines diferentes).
   rng: Rng
   counters: WorldCounters
+  // Combate no PIOR CASO, usado so pelo farm offline: variacao de dano no minimo,
+  // zero critico e o inimigo mais forte do pool em vez do sorteado. Regra do
+  // usuario — offline nunca pode render mais que jogar de verdade.
+  //
+  // Vive no WorldState (e nao num parametro solto) porque atravessa tres
+  // sistemas — spawn, dano e critico — e um deles decide no meio de um respawn,
+  // longe de quem iniciou a simulacao.
+  pessimista: boolean
 }

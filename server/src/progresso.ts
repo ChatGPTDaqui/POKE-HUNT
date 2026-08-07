@@ -8,6 +8,7 @@ import {
 } from '#engine'
 import { ErroHttp, selecionarTudo, selecionar, atualizar, inserir, apagar, type Config } from './db.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
+import { aplicarPiso, type ResultadoPiso } from './farmOffline.js'
 
 // Teto de quanto tempo um unico flush pode creditar. NAO e uma regra de
 // balanceamento — e o limite que impede um relogio maluco (ou uma sessao
@@ -69,6 +70,7 @@ export interface ResultadoFlush {
   truncado: boolean
   resumo: OfflineSimSummary
   estado: GameStateData
+  piso: ResultadoPiso
 }
 
 /**
@@ -103,6 +105,11 @@ export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSes
     rng: createRng(semente),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
   })
+  // Farm offline roda no PIOR CASO (dano minimo, sem critico, inimigo mais forte
+  // do pool) — regra do usuario: offline nunca pode render mais que jogar. O
+  // piso de 50% da taxa online, aplicado logo abaixo, e o contrapeso que impede
+  // esse pior caso de degenerar pra zero.
+  world.pessimista = true
 
   const resumo = simulateWorldSeconds({
     world,
@@ -111,6 +118,8 @@ export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSes
     stepSeconds: OFFLINE_SIM_STEP_SECONDS,
     stepFn: (w, dt, opts) => stepWorld(w, dt, store, opts),
   })
+
+  const piso = aplicarPiso(store, estado, resumo, agora)
 
   estado.currentMapId = sessao.map_id
   await gravarEstado(cfg, userId, estado)
@@ -123,5 +132,5 @@ export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSes
     simulated_seconds: Number(sessao.simulated_seconds) + segundos,
   })
 
-  return { segundosCreditados: segundos, truncado, resumo, estado }
+  return { segundosCreditados: segundos, truncado, resumo, estado, piso }
 }

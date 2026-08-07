@@ -150,6 +150,7 @@ async function flush(cfg: Config, userId: string): Promise<Response> {
     segundosCreditados: resultado.segundosCreditados,
     truncado: resultado.truncado,
     resumo: resultado.resumo,
+    piso: resultado.piso,
     // O cliente sobrescreve o estado local com isto. Ele e predicao; a verdade
     // e o que volta daqui.
     estado: resultado.estado,
@@ -162,7 +163,7 @@ async function fechar(cfg: Config, userId: string): Promise<Response> {
   const resultado = await aplicarFlush(cfg, userId, sessao)
   await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { closed_at: new Date().toISOString() })
   await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null })
-  return json({ fechada: true, resumo: resultado.resumo, estado: resultado.estado })
+  return json({ fechada: true, resumo: resultado.resumo, piso: resultado.piso, estado: resultado.estado })
 }
 
 // Aplica UMA acao de jogador e devolve o estado resultante.

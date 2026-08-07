@@ -234,7 +234,13 @@ export interface DamageResult {
 // crit -> variacao 85-100%. Golpes de dano fixo (ver specialDamageFor) vao
 // direto pro valor bruto e pulam STAB/crit/variancia, igual ao real — mas
 // ainda zerados por imunidade total de tipo.
-function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity, ability: Ability): DamageResult {
+// `DANO_VARIACAO_MINIMA` e o piso da formula DAMAGE_VARIATION da planilha
+// ((floor(random()*16)+85)/100). Repetido aqui como constante, e nao lido de la,
+// porque o que o modo pessimista precisa e o MINIMO da distribuicao — a formula
+// so sabe sortear dentro dela.
+const DANO_VARIACAO_MINIMA = 0.85
+
+function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity, ability: Ability, pessimista = false): DamageResult {
   const attackerPoke = attackerEntity.poke
   const defenderPoke = defenderEntity.poke
   const attackerSpecies = SPECIES[attackerPoke.speciesId]
@@ -260,10 +266,10 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
 
     dmg *= effectivenessMultiplier
 
-    isCrit = rollChance(rng, CRIT_CHANCE)
+    isCrit = pessimista ? false : rollChance(rng, CRIT_CHANCE)
     if (isCrit) dmg *= CRIT_MULTIPLIER
 
-    dmg *= formulaEngine.eval('DAMAGE_VARIATION', {}, rng)
+    dmg *= pessimista ? DANO_VARIACAO_MINIMA : formulaEngine.eval('DAMAGE_VARIATION', {}, rng)
   }
 
   let effectiveness: Effectiveness = 'normal'
@@ -485,7 +491,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   const target = findEntityById(world.player, world.enemies, hit.targetId)
   if (!target || isDead(target)) return // ex: um aliado de AOE ja tinha finalizado antes
 
-  const result = computeDamage(world.rng, attacker, target, ability)
+  const result = computeDamage(world.rng, attacker, target, ability, world.pessimista)
   takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke))
   spawnDamageNumber(world, target, result)
 

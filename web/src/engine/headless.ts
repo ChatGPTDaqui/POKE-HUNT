@@ -36,7 +36,7 @@ export {
   buyItem, sellItem, sellAllItems, sellBagPoke, sellAllBagPokes,
   unlockMap, pokemonSellValue,
 } from './systems/economySystem'
-export { evolvePokeInstance } from './systems/progressionSystem'
+export { evolvePokeInstance, grantExp } from './systems/progressionSystem'
 export { isDead } from './entity'
 
 // O contrato que o motor exige de "estado do jogador". No navegador quem
