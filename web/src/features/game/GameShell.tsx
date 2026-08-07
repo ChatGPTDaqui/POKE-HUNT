@@ -37,7 +37,7 @@ import {
   OFFLINE_SIM_STEP_SECONDS,
   CATCHUP_CHECK_INTERVAL_MS,
   CATCHUP_WALL_CLOCK_BUDGET_MS,
-} from '@/engine/controller'
+} from '@/engine/simulation'
 import { pendingDriftSeconds, resetDrift } from '@/engine/clockDrift'
 import { simulateWorldSeconds, type OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
 import { recordBatch } from '@/engine/systems/statsTracker'

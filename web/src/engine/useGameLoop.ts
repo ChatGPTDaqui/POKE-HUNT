@@ -9,7 +9,7 @@
 import { useEffect, useRef } from 'react'
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
-import { stepWorld } from './controller'
+import { stepWorld } from './simulation'
 import { recordSimulatedSeconds } from './clockDrift'
 
 const STEP = 1 / 60

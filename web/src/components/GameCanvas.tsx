@@ -17,7 +17,8 @@ import { useGameLoop } from '@/engine/useGameLoop'
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useRendererStore } from '@/stores/rendererStore'
-import { buildHospitalWorld, controller, syncActivePokeToGameState } from '@/engine/controller'
+import { controller } from '@/engine/controller'
+import { buildHospitalWorld, syncActivePokeToGameState } from '@/engine/simulation'
 
 const NURSE_CLICK_RADIUS = 30
 // Sincronia periodica de baixa frequencia: copia o HP/EXP ao vivo do POKE em

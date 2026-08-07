@@ -26,7 +26,7 @@ import { describe, expect, it } from 'vitest'
 
 import { createRng, nextFloat, deriveRng } from '@/core/rng'
 import { createPokeInstance, type PokeInstance } from '@/data/pokes'
-import { buildMapWorld, stepWorld } from './controller'
+import { buildMapWorld, stepWorld } from './simulation'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import type { WorldState } from './types'
 

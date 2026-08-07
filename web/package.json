@@ -11,7 +11,8 @@
     "serve": "node serve.js",
     "start": "npm run build && node serve.js",
     "db:types": "cd .. && npx supabase gen types typescript --linked > web/src/lib/database.types.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "build:engine": "vite build --ssr src/engine/headless.ts --outDir dist-engine"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
