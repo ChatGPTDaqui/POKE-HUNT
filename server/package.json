@@ -1,0 +1,20 @@
+{
+  "name": "novo-poke-idle-server",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#engine": {
+      "types": "./engine/types/engine/headless.d.ts",
+      "default": "./engine/headless.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "npm run build && node dist/node.js",
+    "start": "node dist/node.js"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "typescript": "^7.0.2"
+  }
+}

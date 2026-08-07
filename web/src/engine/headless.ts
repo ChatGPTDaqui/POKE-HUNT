@@ -32,4 +32,16 @@ export type { WorldState, WorldCounters } from './types'
 // Postgres. Exportar o TIPO aqui e o que garante que o adaptador do servidor
 // nao esqueca um metodo — se esquecer, o type-check quebra em vez de o jogo
 // falhar em runtime no meio de uma simulacao de 6 horas.
-export type { GameStateStore } from '@/stores/gameStateStore'
+export type { GameStateStore, GameStateData } from '@/stores/gameStateStore'
+export { defaultGameStateData } from '@/stores/gameStateStore'
+
+// Traducao linha-do-Postgres <-> estado de jogo. Reexportada, e nao
+// reimplementada no servidor, pelo mesmo motivo do motor: duas implementacoes
+// divergem no primeiro campo novo, e o servidor passaria a gravar um formato
+// que o cliente nao le. O modulo e puro (so imports de tipo), entao entra no
+// bundle sem arrastar o cliente Supabase do navegador junto.
+export {
+  snapshotToGameState, gameStateToPlayerRow, gameStateToPokemonRows,
+  gameStateToItemRows, gameStateToPokedexRows,
+} from '@/data/remote/playerMapper'
+export type { PlayerSnapshot } from '@/data/remote/playerMapper'
