@@ -59695,6 +59695,15 @@ var MANIPULADORES = {
 			mensagem: `${SPECIES[speciesId].name} entrou na sua equipe!`
 		};
 	},
+	reiniciarJogo(store, estado) {
+		const zerado = defaultGameStateData();
+		const alvo = estado;
+		for (const chave of Object.keys(zerado)) alvo[chave] = structuredClone(zerado[chave]);
+		return {
+			ok: true,
+			mensagem: "Progresso apagado. Escolha um novo inicial."
+		};
+	},
 	comprarItem(store, _estado, acao) {
 		const r = buyItem(store, texto(acao.itemId, "itemId"), inteiroPositivo(acao.qtd));
 		if (!r.success) throw new ErroHttp(409, r.reason ?? "compra recusada");

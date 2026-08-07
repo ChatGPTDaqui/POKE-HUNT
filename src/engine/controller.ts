@@ -69,8 +69,12 @@ export const controller = {
 
   resetGame(): void {
     const gameState = useGameStateStore.getState()
-    gameState.resetToDefaults()
-    useWorldStore.getState().setWorld(buildHospitalWorld(null, { x: 0, y: 0 }))
+    void pedirAcao({ tipo: 'reiniciarJogo' }, () => gameState.resetToDefaults()).then(() => {
+      // Reconstroi a cena so DEPOIS: no caminho do servidor o estado zerado so
+      // chega com a resposta, e montar o mundo antes deixaria o POKE antigo em
+      // campo com a conta ja apagada.
+      useWorldStore.getState().setWorld(buildHospitalWorld(null, { x: 0, y: 0 }))
+    })
   },
 
   healTeam(): void {

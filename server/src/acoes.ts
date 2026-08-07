@@ -15,7 +15,7 @@
 import {
   SPECIES, MAPS, getMap, getItem, createPokeInstance, createRng, randomSeed,
   buyItem, sellItem, sellAllItems, sellBagPoke, sellAllBagPokes, unlockMap,
-  evolvePokeInstance,
+  evolvePokeInstance, defaultGameStateData,
   type GameStateData, type GameStateStore,
 } from '#engine'
 import { ErroHttp } from './db.js'
@@ -64,6 +64,23 @@ const MANIPULADORES: Record<string, Manipulador> = {
     store.addPokeToTeam(poke)
     store.setActiveIndex(0)
     return { ok: true, mensagem: `${SPECIES[speciesId].name} entrou na sua equipe!` }
+  },
+
+  // Recomecar do zero. E a UNICA acao destrutiva exposta, e existe porque sem
+  // ela o botao "Apagar e recomecar" MENTIA: o cliente zerava o estado local, o
+  // servidor recusava a escrita (RLS) e o progresso voltava no proximo
+  // carregamento — com direito a modal de confirmacao dando a entender que tinha
+  // funcionado.
+  //
+  // Zera pelo mesmo `defaultGameStateData()` que o jogo usa pra conta nova, em
+  // vez de uma lista de campos escrita a mao aqui: campo novo no jogo entra no
+  // reset sozinho, sem ninguem lembrar de vir atualizar isto.
+  reiniciarJogo(store, estado) {
+    const zerado = defaultGameStateData() as unknown as Record<string, unknown>
+    const alvo = estado as unknown as Record<string, unknown>
+    for (const chave of Object.keys(zerado)) alvo[chave] = structuredClone(zerado[chave])
+    void store
+    return { ok: true, mensagem: 'Progresso apagado. Escolha um novo inicial.' }
   },
 
   comprarItem(store, _estado, acao) {
