@@ -235,6 +235,9 @@ function buildMoveRows(workbook) {
   });
 }
 
+// `sort_order` guarda a ordem das linhas na aba de origem. Ela e dado real:
+// os *.generated.ts emitem as chaves nessa ordem, e nenhum criterio derivavel
+// a reproduz (ver a migration `ordem_de_origem_do_catalogo`).
 function buildItemRows(workbook, typeOrder) {
   const rows = [];
   const KIND_DESC = {
@@ -244,6 +247,7 @@ function buildItemRows(workbook, typeOrder) {
     rod: 'Vara de pesca (mecanica ainda nao implementada).',
   };
 
+  let ordem = 0;
   for (const r of workbook['Itens'] || []) {
     const kind = r['Tipo (kind)'];
     const heal = r['Cura de HP'];
@@ -261,6 +265,7 @@ function buildItemRows(workbook, typeOrder) {
       heals_full: healsFull,
       revive_hp_percent: kind === 'revive' ? r['Cura % (revive)'] : null,
       stone_type: null,
+      sort_order: ordem++,
     });
   }
 
@@ -279,6 +284,7 @@ function buildItemRows(workbook, typeOrder) {
       heals_full: false,
       revive_hp_percent: null,
       stone_type: type,
+      sort_order: ordem++,
     });
   }
   return rows;
@@ -297,7 +303,7 @@ function buildTypeChartRows(chart) {
 function buildFormulaRows(workbook) {
   return (workbook['Fórmulas'] || [])
     .filter((r) => r['Chave'])
-    .map((r) => {
+    .map((r, i) => {
       const varsRaw = r['Variáveis disponíveis'] || '';
       return {
         key: r['Chave'],
@@ -306,6 +312,7 @@ function buildFormulaRows(workbook) {
           ? []
           : varsRaw.split(',').map((s) => s.trim()).filter(Boolean),
         description: r['Descrição'] || null,
+        sort_order: i,
       };
     });
 }
@@ -320,7 +327,7 @@ function buildMapRows(hunts, mapsData) {
   return hunts
     .map((h) => ({ hunt: h, map: mapsData[h.key.toLowerCase()] }))
     .filter(({ map }) => map && (map.continent === 'johto' || map.continent === 'kanto'))
-    .map(({ hunt, map }) => ({
+    .map(({ hunt, map }, i) => ({
       id: map.id,
       name: map.name,
       continent: map.continent,
@@ -330,6 +337,9 @@ function buildMapRows(hunts, mapsData) {
       bounds_width: map.bounds.width,
       bounds_height: map.bounds.height,
       unlock_cost: map.unlockCost ?? null,
+      // Ordem em que o pipeline cria as hunts — ver a migration
+      // `ordem_de_origem_de_mapas_e_encontros`.
+      sort_order: i,
     }));
 }
 
@@ -344,6 +354,9 @@ function buildMapEncounterRows(hunts, mapsData, encountersData) {
   for (const hunt of hunts) {
     const mapId = hunt.key.toLowerCase();
     if (!validMaps.has(mapId)) continue;
+    // `sort_order` reinicia por mapa: e a posicao dentro do enemyPool daquela
+    // hunt, nao um indice global.
+    let ordem = 0;
     for (const speciesSheetKey of Object.keys(hunt.speciesLevels)) {
       const speciesId = speciesSheetKey.toLowerCase();
       const pk = `${mapId}|${speciesId}`;
@@ -357,25 +370,31 @@ function buildMapEncounterRows(hunts, mapsData, encountersData) {
         min_level: enc.minLevel,
         max_level: enc.maxLevel,
         weight: enc.weight,
+        sort_order: ordem++,
       });
     }
   }
   return rows;
 }
 
+// `sort_order` = posicao no array `abilities` da especie, que ja vem ordenado
+// por levelReq com os empates preservando a ordem da planilha (o sort do JS e
+// estavel). Guardar o indice final, em vez do numero da linha na aba, torna a
+// releitura trivial: ordenar so por sort_order reproduz o array exato.
 function buildSpeciesMoveRows(speciesData, moveIds) {
+  // Nenhuma deduplicacao: a chave e (especie, posicao), entao o array vai
+  // inteiro, inclusive o mesmo golpe em dois niveis e a unica linha repetida
+  // da planilha (SEAKING|TAIL_WHIP|1). Ver as duas migrations
+  // `species_moves_*` — deduplicar aqui apagava 163 linhas reais.
   const rows = [];
-  const seen = new Set();
   for (const sp of Object.values(speciesData)) {
+    let ordem = 0;
     for (const ab of sp.abilities) {
       // aoe50_* sao camada de runtime (typedAoeMoves.ts), nao existem em
       // `moves` — mas tambem nao aparecem aqui, porque speciesData vem da aba
       // Movesets. O guard existe pra falhar visivelmente se isso mudar.
       if (!moveIds.has(ab.key)) continue;
-      const pk = `${sp.id}|${ab.key}`;
-      if (seen.has(pk)) continue;
-      seen.add(pk);
-      rows.push({ species_id: sp.id, move_id: ab.key, level_req: ab.levelReq });
+      rows.push({ species_id: sp.id, move_id: ab.key, level_req: ab.levelReq, sort_order: ordem++ });
     }
   }
   return rows;
@@ -424,7 +443,7 @@ async function main() {
   await upsert('type_chart', chartRows, 'attacking_type,defending_type');
   await upsert('formulas', formulaRows, 'key');
   await upsert('maps', mapRows, 'id');
-  await upsert('species_moves', speciesMoveRows, 'species_id,move_id');
+  await upsert('species_moves', speciesMoveRows, 'species_id,sort_order');
   await upsert('map_encounters', encounterRows, 'map_id,species_id');
 
   // Passe 2: agora que todas as especies existem, liga as evolucoes.

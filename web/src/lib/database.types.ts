@@ -160,18 +160,21 @@ export type Database = {
           description: string | null
           expression: string
           key: string
+          sort_order: number
           variables: string[]
         }
         Insert: {
           description?: string | null
           expression: string
           key: string
+          sort_order?: number
           variables?: string[]
         }
         Update: {
           description?: string | null
           expression?: string
           key?: string
+          sort_order?: number
           variables?: string[]
         }
         Relationships: []
@@ -187,6 +190,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["item_kind"]
           name: string
           revive_hp_percent: number | null
+          sort_order: number
           stone_type: Database["public"]["Enums"]["element_type"] | null
         }
         Insert: {
@@ -199,6 +203,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["item_kind"]
           name: string
           revive_hp_percent?: number | null
+          sort_order?: number
           stone_type?: Database["public"]["Enums"]["element_type"] | null
         }
         Update: {
@@ -211,6 +216,7 @@ export type Database = {
           kind?: Database["public"]["Enums"]["item_kind"]
           name?: string
           revive_hp_percent?: number | null
+          sort_order?: number
           stone_type?: Database["public"]["Enums"]["element_type"] | null
         }
         Relationships: []
@@ -286,6 +292,7 @@ export type Database = {
           map_id: string
           max_level: number
           min_level: number
+          sort_order: number
           species_id: string
           weight: number
         }
@@ -293,6 +300,7 @@ export type Database = {
           map_id: string
           max_level: number
           min_level: number
+          sort_order?: number
           species_id: string
           weight: number
         }
@@ -300,6 +308,7 @@ export type Database = {
           map_id?: string
           max_level?: number
           min_level?: number
+          sort_order?: number
           species_id?: string
           weight?: number
         }
@@ -330,6 +339,7 @@ export type Database = {
           max_level: number
           min_level: number
           name: string
+          sort_order: number
           unlock_cost: number | null
         }
         Insert: {
@@ -341,6 +351,7 @@ export type Database = {
           max_level: number
           min_level: number
           name: string
+          sort_order?: number
           unlock_cost?: number | null
         }
         Update: {
@@ -352,6 +363,7 @@ export type Database = {
           max_level?: number
           min_level?: number
           name?: string
+          sort_order?: number
           unlock_cost?: number | null
         }
         Relationships: []
@@ -768,16 +780,19 @@ export type Database = {
         Row: {
           level_req: number
           move_id: string
+          sort_order: number
           species_id: string
         }
         Insert: {
           level_req: number
           move_id: string
+          sort_order?: number
           species_id: string
         }
         Update: {
           level_req?: number
           move_id?: string
+          sort_order?: number
           species_id?: string
         }
         Relationships: [

@@ -5,6 +5,9 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
+    "catalog:gerar": "node scripts/generate-catalog.js",
+    "catalog:migrar": "node scripts/migrate-catalog-to-postgres.js",
+    "catalog:verificar": "node scripts/verify-catalog-diff.js",
     "planilha:aplicar": "node scripts/sync-planilha.js"
   }
 }
