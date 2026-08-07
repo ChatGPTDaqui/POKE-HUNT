@@ -10,11 +10,13 @@
 //    de fato mudou.
 //  - `controller.save()` apos cada mutacao: o `persist` do Zustand grava
 //    sozinho a cada escrita na store.
+import { useEffect, useRef } from 'react'
 import { ITEMS } from '@/data/items'
 import { SPECIES } from '@/data/pokes'
 import { getEncounter } from '@/data/enemies'
 import { BEST_POTION_OPTION } from '@/engine/systems/autoSystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
+import { sincronizarAuto } from '@/data/remote/autoridade'
 import { useWorldStore } from '@/stores/worldStore'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -75,6 +77,20 @@ export function AutoPanel() {
   const addAutoCatchRule = useGameStateStore((s) => s.addAutoCatchRule)
   const updateAutoCatchRule = useGameStateStore((s) => s.updateAutoCatchRule)
   const removeAutoCatchRule = useGameStateStore((s) => s.removeAutoCatchRule)
+
+  // A config de auto e sincronizada em BLOCO quando muda, em vez de rotear os
+  // 14 pontos de mutacao um a um — ver sincronizarAuto(). Nao e cosmetico: o
+  // servidor le estas regras ao decidir usar pocao/bola durante a simulacao.
+  //
+  // O primeiro disparo e ignorado de proposito: ele aconteceria logo apos o
+  // estado chegar DO servidor, e mandaria os mesmos valores de volta a cada
+  // abertura do painel.
+  const primeiraSync = useRef(true)
+  useEffect(() => {
+    if (primeiraSync.current) { primeiraSync.current = false; return }
+    sincronizarAuto()
+  }, [autoToggles, autoPotRules, autoCatchConfig, autoCatchRules])
+
 
   const huntSpecies = useCurrentHuntSpecies()
 

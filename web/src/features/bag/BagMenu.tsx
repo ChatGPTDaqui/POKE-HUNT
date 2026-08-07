@@ -6,6 +6,7 @@
 // node estavel entre renders, entao da pra filtrar o array de verdade —
 // esse workaround nao precisa ser portado.
 import { useMemo, useState } from 'react'
+import { pedirAcao } from '@/data/remote/autoridade'
 import { SPECIES, averageIvPercent, type PokeInstance } from '@/data/pokes'
 import { ITEMS } from '@/data/items'
 import { itemIconUrl, itemIconBorderColor } from '@/data/sprites'
@@ -125,7 +126,7 @@ function PokemonsTab() {
                   title={poke.locked ? 'Destrancar' : 'Trancar'}
                   onClick={(e) => {
                     e.stopPropagation()
-                    updatePokeInstance(poke.uid, (p) => ({ ...p, locked: !p.locked }))
+                    void pedirAcao({ tipo: 'alternarTravaPoke', pokeUid: poke.uid }, () => updatePokeInstance(poke.uid, (p) => ({ ...p, locked: !p.locked })))
                   }}
                 >
                   {poke.locked ? '🔒' : '🔓'}
@@ -137,7 +138,7 @@ function PokemonsTab() {
                     className="text-xs"
                     onClick={(e) => {
                       e.stopPropagation()
-                      moveBagToTeam(poke.uid)
+                      void pedirAcao({ tipo: 'porNaEquipe', pokeUid: poke.uid }, () => { moveBagToTeam(poke.uid) })
                     }}
                   >
                     Mover p/ equipe
@@ -195,7 +196,7 @@ function ItensTab() {
               size="sm"
               variant="ghost"
               title={locked ? 'Destrancar' : 'Trancar'}
-              onClick={() => toggleItemLock(itemId)}
+              onClick={() => { void pedirAcao({ tipo: 'alternarTravaItem', itemId }, () => toggleItemLock(itemId)) }}
             >
               {locked ? '🔒' : '🔓'}
             </Button>

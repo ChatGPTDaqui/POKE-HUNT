@@ -98,3 +98,27 @@ export async function fecharSessaoDeHunt(): Promise<void> {
     reportarErro(erro)
   }
 }
+
+// --- configuracao de automacao ---------------------------------------------
+
+// A UI de auto tem 14 pontos de mutacao granulares (toggles, regras, bolas).
+// Rotear cada um seria 14 chamadas e 14 chances de esquecer uma; em vez disso o
+// bloco inteiro e sincronizado depois que muda. Isso vale porque a config de
+// auto e pequena e idempotente — nao e um delta que possa ser perdido, e o
+// servidor a substitui por completo.
+//
+// Nao e cosmetico: o servidor LE estas regras quando decide usar pocao ou bola
+// durante a simulacao. Config dessincronizada = simulacao com regra errada.
+export function sincronizarAuto(): void {
+  if (!servidorAtivo()) return
+  const s = useGameStateStore.getState()
+  void servidor.acao({
+    tipo: 'configurarAuto',
+    patch: {
+      toggles: s.autoToggles,
+      catchConfig: s.autoCatchConfig,
+      potRules: s.autoPotRules,
+      catchRules: s.autoCatchRules,
+    },
+  }).catch(reportarErro)
+}

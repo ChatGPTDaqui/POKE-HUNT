@@ -233,7 +233,11 @@ export function HuntMenu() {
           // do gate de custo em ouro por mapa, e checado antes dele.
           const mapContinent = map.continent || 'johto'
           const continentGated = !unlockedContinents.includes(mapContinent)
-          const unlocked = !continentGated && unlockedMaps.includes(map.id)
+          // Mesma regra do servidor (server/src/app.ts#abrirSessao): hunt sem custo
+          // nasce liberada. Checar so a lista trancava visualmente as hunts do Modo
+          // Pesadelo e as BOSS, que sao geradas em runtime e nunca entram na coluna
+          // `unlocked_maps` do banco.
+          const unlocked = !continentGated && (map.unlockCost == null || unlockedMaps.includes(map.id))
           // `unlockCost` e number|null no dado real (ouro) — o vanilla ainda
           // tratava como {gold,diamonds}, um formato que nenhum mapa usa.
           const costLabel = map.unlockCost ? `Custo: ${map.unlockCost} ouro` : 'Gratis'
