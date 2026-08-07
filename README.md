@@ -13,8 +13,10 @@ npm run dev          # desenvolvimento, http://localhost:5173
 npm start            # build + servidor de producao, http://localhost:5173
 ```
 
-O jogo vanilla antigo continua funcionando em paralelo, na raiz do repo
-(`node server.js`), enquanto serve de fallback.
+O jogo vanilla antigo NAO faz mais parte deste repositorio — foi movido pra fora
+no corte da migracao. Enquanto ele ficava aqui, era publicado por acidente
+sempre que o deploy apontasse pra raiz, que foi exatamente o que aconteceu no
+Cloudflare Pages.
 
 ## Onde as coisas estao
 

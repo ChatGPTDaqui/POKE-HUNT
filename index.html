@@ -1,16 +1,55 @@
 <!doctype html>
-<!-- classe `dark` fixa: o jogo sempre foi dark-themed (ver css/style.css do
-     vanilla, "dark glass"), entao o tema claro padrao do shadcn nunca se
-     aplica aqui — nao ha alternancia de tema no jogo. -->
+<!-- `dark` fixa no <html>: o jogo e dark-themed e nao tem alternancia de tema,
+     entao o tema claro padrao do shadcn nunca deve se aplicar. Fica aqui, e nao
+     no JS, pra nao existir um flash de tema claro antes do React montar. -->
 <html lang="pt-BR" class="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- `viewport-fit=cover` faz o canvas ocupar tambem a area sob o notch em
+         celular. Zoom por pinca continua PERMITIDO de proposito: o jogo tem
+         controle de zoom proprio, mas bloquear o do navegador quebra quem
+         precisa ampliar pra ler. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
     <title>NOVO POKE IDLE</title>
+    <meta
+      name="description"
+      content="Idle de captura e batalha automatica: escolha seu inicial, explore as hunts e evolua sua equipe — o progresso continua rodando enquanto voce esta fora."
+    />
+    <!-- Cor da barra do navegador no celular. Sem isto ela fica clara, brigando
+         com o jogo inteiro escuro. Mesmo valor de --background do index.css. -->
+    <meta name="theme-color" content="#0a0a0a" />
+
+    <!-- Previa ao compartilhar o link. Sem isto o link sai "pelado" em
+         WhatsApp/Discord, que e como um jogo web costuma circular. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="NOVO POKE IDLE" />
+    <meta
+      property="og:description"
+      content="Idle de captura e batalha automatica. O progresso continua rodando enquanto voce esta fora."
+    />
+
+    <!-- O app fala com o Supabase (auth + Edge Function) no primeiro instante
+         do carregamento, e e outra origem: sem isto, o navegador so comeca DNS
+         e TLS quando a primeira chamada acontece. `crossorigin` e obrigatorio —
+         sem ele o preconnect abre uma conexao anonima que as requests com
+         credencial nao reaproveitam, e o custo seria pago duas vezes.
+         `%VITE_SUPABASE_URL%` e substituido pelo Vite no build, entao isto
+         acompanha o ambiente em vez de fixar um projeto. -->
+    <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
+    <link rel="dns-prefetch" href="%VITE_SUPABASE_URL%" />
   </head>
   <body>
     <div id="root"></div>
+    <!-- O jogo inteiro e JavaScript: sem ele o jogador veria uma pagina branca e
+         nenhuma explicacao. -->
+    <noscript>
+      <div style="padding: 2rem; font-family: system-ui, sans-serif; color: #fafafa">
+        <h1>NOVO POKE IDLE</h1>
+        <p>Este jogo precisa de JavaScript para rodar. Ative-o e recarregue a pagina.</p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
