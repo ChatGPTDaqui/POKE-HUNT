@@ -1,21 +1,27 @@
-NOVO POKE IDLE — como jogar
-============================
+NOVO POKE IDLE
+==============
 
-Requisito: Node.js instalado (https://nodejs.org, versao LTS).
+Jogo web (React + Vite) com backend no Supabase.
 
-Como abrir:
-1. De um duplo-clique em "Jogar NOVO POKE IDLE.exe".
-2. Aguarde o navegador abrir sozinho em http://localhost:5173.
-3. Pronto — o progresso fica salvo no navegador (localStorage), nao precisa
-   de conta nem internet depois de instalado.
+RODAR LOCAL
+  npm run dev          -> http://localhost:5173
 
-Se o .exe nao funcionar (ex.: por bloqueio de antivirus/SmartScreen em outro
-computador), abra um terminal nesta pasta e rode:
+  Precisa de web/.env.local com VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY e
+  VITE_SERVIDOR_URL (veja web/.env.example). A ultima e OBRIGATORIA: o servidor
+  e quem grava o progresso, e a RLS recusa escrita vinda do navegador.
 
-    node server.js
+PUBLICAR
+  Site      -> Cloudflare Pages, automatico pelo push na main.
+               Config: root `web`, build `npm run build`, saida `dist`.
+  Servidor  -> npm run edge:publicar   (Supabase Edge Function `jogo`)
+  Banco     -> npx supabase db push
 
-e depois abra http://localhost:5173 manualmente no navegador.
+DADOS DO JOGO
+  npm run catalog:gerar       regenera o catalogo a partir do Postgres
+  npm run catalog:verificar   prova que o Postgres reproduz a planilha
 
-Para fechar o jogo, feche a janela do navegador e encerre o processo node
-(o .exe nao abre uma janela de console visivel — use o Gerenciador de
-Tarefas para encerrar "node.exe" se precisar).
+O JOGO VANILLA ANTIGO
+  Saiu deste repositorio (esta em "NOVO POKE IDLE - vanilla" na Area de
+  Trabalho). Ele nao usava login nem servidor: salvava em localStorage. Enquanto
+  ficava aqui, era publicado por acidente sempre que o deploy apontava pra raiz
+  do repositorio — foi exatamente o que aconteceu no Cloudflare Pages.

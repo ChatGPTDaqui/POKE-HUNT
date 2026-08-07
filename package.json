@@ -4,10 +4,12 @@
   "description": "Jogo idle top-down em HTML/CSS/JS puro com Canvas",
   "private": true,
   "scripts": {
-    "start": "node server.js",
     "catalog:gerar": "node scripts/generate-catalog.js",
     "catalog:migrar": "node scripts/migrate-catalog-to-postgres.js",
     "catalog:verificar": "node scripts/verify-catalog-diff.js",
-    "planilha:aplicar": "node scripts/sync-planilha.js"
+    "planilha:aplicar": "node scripts/sync-planilha.js",
+    "dev": "npm --prefix web run dev",
+    "build": "npm --prefix web run build",
+    "edge:publicar": "npm --prefix web run build:edge && npx supabase functions deploy jogo"
   }
 }
