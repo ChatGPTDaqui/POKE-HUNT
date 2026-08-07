@@ -11,6 +11,7 @@ import { SPECIES_DATA } from './generated/pokes.generated'
 import { colorForType } from './typeColors'
 import { randInt, rollChance } from '@/core/random'
 import { RARITIES, rollRarity, type RarityKey } from './rarity'
+import type { Rng } from '@/core/rng'
 import { typedAoeMoveKey, TYPED_AOE_LEVEL } from './typedAoeMoves'
 import type { GrowthCurve, SpeciesBaseStats, SpeciesDataEntry } from './generated/types'
 
@@ -159,14 +160,14 @@ export function computeStatsAtLevel(species: Species, level: number, ivs: StatBl
 const IV_MAX = 31
 const IV_STAT_COUNT = 6
 
-function rollIvs(): StatBlock {
+function rollIvs(rng: Rng): StatBlock {
   return {
-    hp: randInt(0, IV_MAX),
-    atkFis: randInt(0, IV_MAX),
-    atkEsp: randInt(0, IV_MAX),
-    def: randInt(0, IV_MAX),
-    defEsp: randInt(0, IV_MAX),
-    speed: randInt(0, IV_MAX),
+    hp: randInt(rng, 0, IV_MAX),
+    atkFis: randInt(rng, 0, IV_MAX),
+    atkEsp: randInt(rng, 0, IV_MAX),
+    def: randInt(rng, 0, IV_MAX),
+    defEsp: randInt(rng, 0, IV_MAX),
+    speed: randInt(rng, 0, IV_MAX),
   }
 }
 
@@ -195,13 +196,17 @@ export interface CreatePokeInstanceOptions {
   rarity?: RarityKey
 }
 
-export function createPokeInstance(speciesId: string, level = 1, { ivs: fixedIvs, rarity: fixedRarity }: CreatePokeInstanceOptions = {}): PokeInstance {
+// `rng` e o primeiro parametro (e obrigatorio) de proposito: os tres sorteios
+// aqui — IV, raridade e shiny — sao exatamente os que o servidor precisa poder
+// reconferir na Fase D. Um default pra `Math.random()` deixaria um caminho
+// silencioso de volta pro nao-verificavel.
+export function createPokeInstance(rng: Rng, speciesId: string, level = 1, { ivs: fixedIvs, rarity: fixedRarity }: CreatePokeInstanceOptions = {}): PokeInstance {
   const species = SPECIES[speciesId]
   if (!species) throw new Error(`Especie desconhecida: ${speciesId}`)
-  const ivs = fixedIvs || rollIvs()
-  const rarity = fixedRarity || rollRarity()
+  const ivs = fixedIvs || rollIvs(rng)
+  const rarity = fixedRarity || rollRarity(rng)
   const shinyChance = (species.catchRate / MAX_CATCH_RATE) * SHINY_CHANCE_AT_MAX_CATCH_RATE
-  const isShiny = rollChance(shinyChance)
+  const isShiny = rollChance(rng, shinyChance)
   const stats = computeStatsAtLevel(species, level, ivs, rarity, isShiny)
   return {
     uid: novoPokeUid(),

@@ -1,4 +1,5 @@
 // Port de js/systems/AutoSystem.js.
+import type { Rng } from '@/core/rng'
 import { getItem, ITEMS, type GeneratedItem } from '@/data/items'
 import type { GameStateStore } from '@/stores/gameStateStore'
 import { attemptCapture, type CaptureResult } from './captureSystem'
@@ -84,18 +85,18 @@ export function updateAutoHeal(world: WorldState, gameState: GameStateStore, dt:
 // esta ligado. Precedencia: uma regra por-especie (gameState.autoCatchRules)
 // ganha da config de bola shiny, que ganha da bola padrao. Uma regra
 // combinada NAO tem fallback pra outra bola quando a sua propria acaba.
-export function maybeAutoCatch(gameState: GameStateStore, defeatedPoke: PokeInstance): CaptureResult | null {
+export function maybeAutoCatch(rng: Rng, gameState: GameStateStore, defeatedPoke: PokeInstance): CaptureResult | null {
   if (!gameState.autoToggles.autoCatch) return null
 
   const rule = gameState.autoCatchRules.find((r) => r.speciesId === defeatedPoke.speciesId)
   if (rule) {
     if (!rule.ballItemId || !gameState.hasItem(rule.ballItemId, 1)) return null
-    return attemptCapture(gameState, defeatedPoke, rule.ballItemId)
+    return attemptCapture(rng, gameState, defeatedPoke, rule.ballItemId)
   }
 
   const config = gameState.autoCatchConfig
   const isShiny = Boolean(defeatedPoke.isShiny)
   const ballId = isShiny && config.catchShinyEnabled ? config.shinyBallId : config.ballId
   if (!ballId || !gameState.hasItem(ballId, 1)) return null
-  return attemptCapture(gameState, defeatedPoke, ballId)
+  return attemptCapture(rng, gameState, defeatedPoke, ballId)
 }

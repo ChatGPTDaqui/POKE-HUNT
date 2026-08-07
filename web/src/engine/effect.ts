@@ -3,10 +3,10 @@
 // captura). Puramente cosmetico — a resolucao de combate ja aconteceu antes
 // do Effect ser criado (ver combatSystem.ts#resolveHit).
 import type { BaseEntity } from './types'
-import type { EffectType, WorldEffect } from './types'
+import type { EffectType, WorldCounters, WorldEffect } from './types'
 import { claimEffectLane } from './entity'
 
-let nextEffectId = 1
+// Contador no WorldState, nao em modulo — ver a nota em types.ts#WorldCounters.
 
 export interface CreateWorldEffectParams {
   type: EffectType
@@ -37,14 +37,14 @@ export interface CreateWorldEffectParams {
   laneSize?: number
 }
 
-export function createWorldEffect(params: CreateWorldEffectParams): WorldEffect {
+export function createWorldEffect(counters: WorldCounters, params: CreateWorldEffectParams): WorldEffect {
   const {
     type, x, y, targetX, targetY, radius = 10, color = '#fff', duration = 0.25, delay = 0,
     value, effectiveness, effectivenessLabel, text, unit, isAoe, owner = null, laneSize = 1,
     worldSize, elementType, ballItemId, success,
   } = params
 
-  const id = `effect-${nextEffectId++}`
+  const id = `effect-${counters.effect++}`
   const lane = owner ? claimEffectLane(owner, id, laneSize) : 0
 
   return {

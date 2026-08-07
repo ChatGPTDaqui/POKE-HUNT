@@ -3,6 +3,11 @@
 // completo, em quais hunts aparece, e um contador de abates por especie.
 import { useMemo, useState } from 'react'
 import { SPECIES, createPokeInstance, type Species } from '@/data/pokes'
+// Preview da Pokedex nao e simulacao: usa uma sequencia DERIVADA do id da
+// especie em vez da do mundo. Consumir a sequencia principal pra desenhar um
+// cartao dessincronizaria o replay que o servidor verifica (Fase D) — e de
+// quebra, assim o mesmo POKE aparece igual toda vez que o cartao abre.
+import { deriveRng } from '@/core/rng'
 import { getAbility } from '@/data/abilities'
 import { colorForType } from '@/data/typeColors'
 import { MAPS } from '@/data/maps'
@@ -210,7 +215,7 @@ export function PokedexMenu() {
                   // no clique que SELECIONA a especie (nao no que recolhe).
                   if (!wasExpanded) {
                     showProfile(
-                      createPokeInstance(species.id, DEX_PREVIEW_LEVEL, { ivs: DEX_PREVIEW_IVS, rarity: 'comum' }),
+                      createPokeInstance(deriveRng(0, species.id), species.id, DEX_PREVIEW_LEVEL, { ivs: DEX_PREVIEW_IVS, rarity: 'comum' }),
                       species,
                     )
                   }

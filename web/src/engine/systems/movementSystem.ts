@@ -1,5 +1,6 @@
 // Port de js/systems/MovementSystem.js.
 import { randRange } from '@/core/random'
+import type { Rng } from '@/core/rng'
 import { mapWalkRadius, isCellBlocked, type MapDef } from '@/data/maps'
 import { COLLISION_GRID_CELL_SIZE } from '@/data/generated/collisionGrids.generated'
 import { findPath } from '@/core/pathfinding'
@@ -161,7 +162,7 @@ interface Wanderer extends Movable {
   moveSpeed: number
 }
 
-function wanderStep(entity: Wanderer, dt: number, centerX: number, centerY: number, radius: number, mapCx: number, mapCy: number, mapRadius: number, mapDef: MapDef | null): void {
+function wanderStep(rng: Rng, entity: Wanderer, dt: number, centerX: number, centerY: number, radius: number, mapCx: number, mapCy: number, mapRadius: number, mapDef: MapDef | null): void {
   if (entity.wanderTarget) {
     const prevX = entity.x, prevY = entity.y
     const arrived = moveToward(entity, entity.wanderTarget.x, entity.wanderTarget.y, entity.moveSpeed, dt, mapDef)
@@ -172,7 +173,7 @@ function wanderStep(entity: Wanderer, dt: number, centerX: number, centerY: numb
     const stuck = !arrived && entity.x === prevX && entity.y === prevY
     if (arrived || stuck) {
       entity.wanderTarget = null
-      entity.wanderPause = randRange(WANDER_PAUSE_MIN, WANDER_PAUSE_MAX)
+      entity.wanderPause = randRange(rng, WANDER_PAUSE_MIN, WANDER_PAUSE_MAX)
     }
     return
   }
@@ -180,8 +181,8 @@ function wanderStep(entity: Wanderer, dt: number, centerX: number, centerY: numb
     entity.wanderPause -= dt
     return
   }
-  const angle = randRange(0, Math.PI * 2)
-  const dist = randRange(radius * 0.3, radius)
+  const angle = randRange(rng, 0, Math.PI * 2)
+  const dist = randRange(rng, radius * 0.3, radius)
   const tx = centerX + Math.cos(angle) * dist
   const ty = centerY + Math.sin(angle) * dist
   entity.wanderTarget = clampToMapCircle(tx, ty, mapCx, mapCy, mapRadius)
@@ -218,14 +219,14 @@ function findNearestAliveShiny(player: PlayerEntity, enemies: EnemyEntity[]): En
   return nearest
 }
 
-function wanderFreely(entity: Wanderer, dt: number, cx: number, cy: number, radius: number, mapDef: MapDef | null): void {
+function wanderFreely(rng: Rng, entity: Wanderer, dt: number, cx: number, cy: number, radius: number, mapDef: MapDef | null): void {
   if (entity.wanderTarget) {
     const prevX = entity.x, prevY = entity.y
     const arrived = moveToward(entity, entity.wanderTarget.x, entity.wanderTarget.y, entity.moveSpeed, dt, mapDef)
     const stuck = !arrived && entity.x === prevX && entity.y === prevY
     if (arrived || stuck) {
       entity.wanderTarget = null
-      entity.wanderPause = randRange(WANDER_PAUSE_MIN, WANDER_PAUSE_MAX)
+      entity.wanderPause = randRange(rng, WANDER_PAUSE_MIN, WANDER_PAUSE_MAX)
     }
     return
   }
@@ -236,8 +237,8 @@ function wanderFreely(entity: Wanderer, dt: number, cx: number, cy: number, radi
   // Amostragem uniforme-por-AREA dentro do circulo (raiz quadrada de um
   // fracao uniforme [0,1]) em vez de uniforme-por-raio, que concentraria
   // pontos demais perto do centro.
-  const angle = randRange(0, Math.PI * 2)
-  const dist = Math.sqrt(randRange(0, 1)) * radius
+  const angle = randRange(rng, 0, Math.PI * 2)
+  const dist = Math.sqrt(randRange(rng, 0, 1)) * radius
   entity.wanderTarget = { x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist }
 }
 
@@ -273,7 +274,7 @@ export function updateMovement(world: WorldState, dt: number): void {
       }
     } else {
       player.state = 'wander'
-      wanderFreely(player, dt, mapCx, mapCy, mapRadius, mapDef)
+      wanderFreely(world.rng, player, dt, mapCx, mapCy, mapRadius, mapDef)
     }
   }
 
@@ -292,7 +293,7 @@ export function updateMovement(world: WorldState, dt: number): void {
     if (player.fainted) {
       enemy.state = 'wander'
       enemy.targetId = null
-      wanderStep(enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef)
+      wanderStep(world.rng, enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef)
       continue
     }
 
@@ -316,7 +317,7 @@ export function updateMovement(world: WorldState, dt: number): void {
         moveToward(enemy, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.moveSpeed, dt, mapDef)
         enemy.wanderTarget = null
       } else {
-        wanderStep(enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef)
+        wanderStep(world.rng, enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef)
       }
     }
   }

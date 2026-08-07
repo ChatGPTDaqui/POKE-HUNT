@@ -18,6 +18,7 @@ import type { MapDef } from '@/data/maps'
 import type { ElementType } from '@/data/generated/types'
 import type { Ability } from '@/data/abilities'
 import type { ResolvedBattleAnim } from '@/data/battleSprites'
+import type { Rng } from '@/core/rng'
 
 export type EntityState = 'idle' | 'wander' | 'chase' | 'engaged' | 'dead'
 export type AttackAnimKind = 'Shoot' | 'Charge'
@@ -139,6 +140,19 @@ export interface AutoTimers {
 // A arvore de estado efemera inteira — reconstruida do zero a cada troca de
 // cena (buildHospitalWorld/buildMapWorld no main.js original), nunca
 // persistida. `mapDef: null` = cena do Hospital.
+// Contadores de id que antes eram `let nextXId = 1` no topo de entity.ts,
+// effect.ts e combatSystem.ts. Singleton de modulo nao serve pra um mundo
+// reproduzivel: o id passa a depender de quantas cenas o jogador visitou nesta
+// aba, e nao do estado do mundo. Isso ja mordeu de verdade duas vezes neste
+// projeto (ver "Gotchas conhecidos" no CLAUDE.md: um `import()` extra resetava o
+// contador e gerava ids colidindo com os do jogo). Vivendo aqui, sao salvos e
+// retomados junto com o resto do mundo.
+export interface WorldCounters {
+  entity: number
+  effect: number
+  pendingHit: number
+}
+
 export interface WorldState {
   mapDef: MapDef | null
   player: PlayerEntity | null
@@ -151,4 +165,9 @@ export interface WorldState {
   sequenceIndex: number
   sequenceCleared: boolean
   countdownRemaining: number | null
+  // Toda aleatoriedade da simulacao sai daqui. Ver core/rng.ts pro porque e
+  // pros limites (isto torna a SEQUENCIA DE SORTEIOS reproduzivel; nao promete
+  // replay bit-a-bit de coordenadas entre engines diferentes).
+  rng: Rng
+  counters: WorldCounters
 }

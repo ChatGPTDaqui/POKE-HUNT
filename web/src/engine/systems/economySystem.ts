@@ -1,4 +1,5 @@
 // Port de js/systems/EconomySystem.js.
+import type { Rng } from '@/core/rng'
 import { getItem } from '@/data/items'
 import { SPECIES } from '@/data/pokes'
 import { stoneItemId } from '@/data/stones'
@@ -34,7 +35,7 @@ export interface KillLoot {
 // Drops de item vem do proprio mapa da hunt (mapDef.itemDrops) — a
 // planilha nao tem "item segurado" por especie, entao todo kill numa hunt
 // rola contra a tabela de drop compartilhada daquela hunt.
-export function awardKillLoot(gameState: GameStateStore, enemy: EnemyEntity, mapDef: MapDef): KillLoot {
+export function awardKillLoot(rng: Rng, gameState: GameStateStore, enemy: EnemyEntity, mapDef: MapDef): KillLoot {
   const species = SPECIES[enemy.poke.speciesId]
   const sellValue = pokemonSellValue(enemy.poke.level, species.baseExp, enemy.poke.rarity)
   const baseGold = Math.max(1, Math.floor(formulaEngine.eval('MONEY_FOR_KILL', { sellValue, killDivisor: KILL_MONEY_DIVISOR })))
@@ -43,13 +44,13 @@ export function awardKillLoot(gameState: GameStateStore, enemy: EnemyEntity, map
 
   const droppedItems: string[] = []
   for (const drop of mapDef.itemDrops) {
-    if (rollChance(drop.chance)) {
+    if (rollChance(rng, drop.chance)) {
       gameState.addItem(drop.itemId, 1)
       droppedItems.push(drop.itemId)
     }
   }
 
-  if (rollChance(STONE_DROP_CHANCE)) {
+  if (rollChance(rng, STONE_DROP_CHANCE)) {
     const stoneId = stoneItemId(species.type)
     gameState.addItem(stoneId, 1)
     droppedItems.push(stoneId)

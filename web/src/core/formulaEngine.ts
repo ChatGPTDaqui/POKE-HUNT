@@ -5,6 +5,7 @@
 // the spreadsheet, so this only ever executes this restricted grammar.
 
 import type { FormulasData } from '@/data/generated/types'
+import { nextFloat, type Rng } from './rng'
 
 export type FormulaContext = Record<string, number>
 
@@ -16,7 +17,14 @@ const FUNCS: Record<string, (...args: number[]) => number> = {
   sqrt: Math.sqrt,
   min: (a, b) => Math.min(a, b),
   max: (a, b) => Math.max(a, b),
-  random: () => Math.random(),
+  // Substituida em tempo de avaliacao quando um Rng e passado (ver evalNode).
+  // Sem Rng isto ESTOURA em vez de cair num `Math.random()`: uma formula da
+  // planilha que sorteia e, por definicao, parte da simulacao, e um fallback
+  // silencioso aqui abriria um caminho invisivel de volta pro nao-reproduzivel
+  // — exatamente o que a Fase C existe pra fechar.
+  random: () => {
+    throw new Error('random() exige um Rng: passe world.rng em formulaEngine.eval(chave, contexto, rng)')
+  },
 }
 
 type Token = { type: 'number'; value: number } | { type: 'ident'; value: string } | { type: 'op'; value: string }
@@ -147,23 +155,23 @@ function parse(tokens: Token[]): AstNode {
   return result
 }
 
-function evalNode(node: AstNode, context: FormulaContext): number {
+function evalNode(node: AstNode, context: FormulaContext, rng?: Rng): number {
   switch (node.type) {
     case 'number':
       return node.value
     case 'neg':
-      return -evalNode(node.value, context)
+      return -evalNode(node.value, context, rng)
     case 'var':
       if (!(node.name in context)) throw new Error(`Formula: variavel desconhecida "${node.name}"`)
       return context[node.name]
     case 'call': {
-      const fn = FUNCS[node.name]
+      const fn = node.name === 'random' && rng ? () => nextFloat(rng) : FUNCS[node.name]
       if (!fn) throw new Error(`Formula: funcao desconhecida "${node.name}"`)
-      return fn(...node.args.map((a) => evalNode(a, context)))
+      return fn(...node.args.map((a) => evalNode(a, context, rng)))
     }
     case 'binary': {
-      const l = evalNode(node.left, context)
-      const r = evalNode(node.right, context)
+      const l = evalNode(node.left, context, rng)
+      const r = evalNode(node.right, context, rng)
       switch (node.op) {
         case '+': return l + r
         case '-': return l - r
@@ -191,30 +199,33 @@ function getAst(expr: string): AstNode {
 }
 
 // Evaluates a raw expression string directly (no formula-table lookup).
-export function evalExpression(expr: string, context: FormulaContext = {}): number {
-  return evalNode(getAst(expr), context)
+export function evalExpression(expr: string, context: FormulaContext = {}, rng?: Rng): number {
+  return evalNode(getAst(expr), context, rng)
 }
 
 export interface FormulaEngine {
-  eval(key: string, context?: FormulaContext): number
+  // `rng`: passe SEMPRE que a formula for avaliada dentro da simulacao. Hoje so
+  // DAMAGE_VARIATION usa random(), mas a planilha pode ganhar outras — sem o
+  // rng, elas cairiam num Math.random() invisivel e furariam o determinismo.
+  eval(key: string, context?: FormulaContext, rng?: Rng): number
   // Same as eval(), but returns `fallback` instead of throwing when the
   // spreadsheet doesn't (yet) have this key — lets new economy knobs ship
   // in code before the user has pasted the matching row into the "Formulas"
   // sheet and re-run the sync (see CLAUDE.md's balancing-formulas section).
-  evalOrDefault(key: string, fallback: number, context?: FormulaContext): number
+  evalOrDefault(key: string, fallback: number, context?: FormulaContext, rng?: Rng): number
 }
 
 // `formulas` is the { KEY: { expr, vars } } map from data/generated/formulas.generated.ts.
 export function createFormulaEngine(formulas: FormulasData): FormulaEngine {
   return {
-    eval(key, context = {}) {
+    eval(key, context = {}, rng) {
       const entry = formulas[key]
       if (!entry) throw new Error(`Formula desconhecida: "${key}"`)
-      return evalExpression(entry.expr, context)
+      return evalExpression(entry.expr, context, rng)
     },
-    evalOrDefault(key, fallback, context = {}) {
+    evalOrDefault(key, fallback, context = {}, rng) {
       if (!(key in formulas)) return fallback
-      return evalExpression(formulas[key].expr, context)
+      return evalExpression(formulas[key].expr, context, rng)
     },
   }
 }

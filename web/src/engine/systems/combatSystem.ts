@@ -5,6 +5,7 @@
 // `pendingHit.attacker`/`pendingHit.target` eram referencia direta no
 // original — aqui viram id + lookup via findEntityById, unica mudanca de
 // forma permitida no port (risco de referencia obsoleta sob Immer).
+import { deriveRng, nextFloat, type Rng } from '@/core/rng'
 import { getAbility, BASIC_ATTACK, isDamagingAbility, resolveAbilityCategory, type Ability } from '@/data/abilities'
 import { SPECIES } from '@/data/pokes'
 import type { PokeInstance } from '@/data/pokes'
@@ -86,8 +87,8 @@ const MAGNITUDE_TABLE = [
   { chance: 30, power: 70 }, { chance: 20, power: 90 }, { chance: 10, power: 110 },
   { chance: 5, power: 150 },
 ]
-function rollMagnitudePower(): number {
-  let roll = Math.random() * 100
+function rollMagnitudePower(rng: Rng): number {
+  let roll = nextFloat(rng) * 100
   for (const tier of MAGNITUDE_TABLE) {
     if (roll < tier.chance) return tier.power
     roll -= tier.chance
@@ -109,8 +110,8 @@ function hpRatioPower(attackerPoke: PokeInstance): number {
 // O 4o resultado real de Present (curar o alvo) nao tem equivalente neste
 // motor (nao existe mecanica de curar o oponente) — suas chances sao
 // dobradas proporcionalmente nos 3 tiers de dano em vez disso.
-function rollPresentPower(): number {
-  const roll = Math.random()
+function rollPresentPower(rng: Rng): number {
+  const roll = nextFloat(rng)
   if (roll < 0.4) return 40
   if (roll < 0.7) return 80
   return 120
@@ -128,16 +129,16 @@ function hiddenPowerPower(attackerPoke: PokeInstance): number {
 
 // Psywave real Gen1/2: dano aleatorio entre ~0.5x-1.5x o nivel do usuario,
 // ignorando ATK/DEF por completo.
-function psywaveDamage(attackerPoke: PokeInstance): number {
-  return Math.max(1, Math.round(attackerPoke.level * randRange(0.5, 1.5)))
+function psywaveDamage(rng: Rng, attackerPoke: PokeInstance): number {
+  return Math.max(1, Math.round(attackerPoke.level * randRange(rng, 0.5, 1.5)))
 }
 
-const DYNAMIC_POWER_ABILITIES: Record<string, (attackerPoke: PokeInstance) => number> = {
-  magnitude: () => rollMagnitudePower(),
-  reversal: (attackerPoke) => hpRatioPower(attackerPoke),
-  flail: (attackerPoke) => hpRatioPower(attackerPoke),
-  present: () => rollPresentPower(),
-  hidden_power: (attackerPoke) => hiddenPowerPower(attackerPoke),
+const DYNAMIC_POWER_ABILITIES: Record<string, (rng: Rng, attackerPoke: PokeInstance) => number> = {
+  magnitude: (rng) => rollMagnitudePower(rng),
+  reversal: (_rng, attackerPoke) => hpRatioPower(attackerPoke),
+  flail: (_rng, attackerPoke) => hpRatioPower(attackerPoke),
+  present: (rng) => rollPresentPower(rng),
+  hidden_power: (_rng, attackerPoke) => hiddenPowerPower(attackerPoke),
 }
 
 // Counter/Mirror Coat refletem 2x o ultimo golpe daquela categoria que o
@@ -154,14 +155,14 @@ function counterDamage(attackerEntity: WorldEntity, category: 'physical' | 'spec
   return null
 }
 
-const FIXED_DAMAGE_ABILITIES: Record<string, (attackerPoke: PokeInstance, defenderPoke: PokeInstance, attackerEntity: WorldEntity) => number | null> = {
+const FIXED_DAMAGE_ABILITIES: Record<string, (attackerPoke: PokeInstance, defenderPoke: PokeInstance, attackerEntity: WorldEntity, rng: Rng) => number | null> = {
   seismic_toss: (attackerPoke) => attackerPoke.level,
   night_shade: (attackerPoke) => attackerPoke.level,
   dragon_rage: () => 40,
   super_fang: (_a, defenderPoke) => Math.max(1, Math.floor(defenderPoke.hp / 2)),
   horn_drill: (_a, defenderPoke) => defenderPoke.hp,
   fissure: (_a, defenderPoke) => defenderPoke.hp,
-  psywave: (attackerPoke) => psywaveDamage(attackerPoke),
+  psywave: (attackerPoke, _d, _e, rng) => psywaveDamage(rng, attackerPoke),
   counter: (_a, _d, attackerEntity) => counterDamage(attackerEntity, 'physical'),
   mirror_coat: (_a, _d, attackerEntity) => counterDamage(attackerEntity, 'special'),
 }
@@ -170,16 +171,16 @@ type SpecialDamage = { mode: 'dynamicPower'; power: number } | { mode: 'fixed'; 
 
 // Devolve null (usa o `power` fixo do golpe pelo pipeline normal) ou uma das
 // formas acima.
-function specialDamageFor(ability: Ability, attackerEntity: WorldEntity, defenderEntity: WorldEntity): SpecialDamage {
+function specialDamageFor(rng: Rng, ability: Ability, attackerEntity: WorldEntity, defenderEntity: WorldEntity): SpecialDamage {
   const attackerPoke = attackerEntity.poke
   const defenderPoke = defenderEntity.poke
 
   const dynamic = DYNAMIC_POWER_ABILITIES[ability.id]
-  if (dynamic) return { mode: 'dynamicPower', power: dynamic(attackerPoke) }
+  if (dynamic) return { mode: 'dynamicPower', power: dynamic(rng, attackerPoke) }
 
   const fixed = FIXED_DAMAGE_ABILITIES[ability.id]
   if (fixed) {
-    const amount = fixed(attackerPoke, defenderPoke, attackerEntity)
+    const amount = fixed(attackerPoke, defenderPoke, attackerEntity, rng)
     if (amount === null) return { mode: 'dynamicPower', power: 40 } // Counter/Mirror Coat sem nada pra refletir
     return { mode: 'fixed', amount }
   }
@@ -190,7 +191,12 @@ function specialDamageFor(ability: Ability, attackerEntity: WorldEntity, defende
 // Estimativa aproximada de dano (sem crit, sem variacao de roll) usada so
 // pra ranquear golpes candidatos contra um alvo especifico — espelha o
 // pipeline de computeDamage menos os 2 passos aleatorios.
-function estimateDamage(attackerEntity: WorldEntity, defenderEntity: WorldEntity, ability: Ability): number {
+// Recebe o rng so pra DERIVAR um scratch: estimar dano nao pode consumir a
+// sequencia principal. Ranquear candidatos e uma decisao interna da IA e o
+// numero de candidatos varia por nivel/cooldown — se a estimativa gastasse
+// sorteios, a sequencia que o servidor verifica dependeria de detalhes que nao
+// sao eventos de jogo.  le o estado sem avanca-lo.
+function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity, ability: Ability): number {
   const attackerPoke = attackerEntity.poke
   const defenderPoke = defenderEntity.poke
   const attackerSpecies = SPECIES[attackerPoke.speciesId]
@@ -198,7 +204,7 @@ function estimateDamage(attackerEntity: WorldEntity, defenderEntity: WorldEntity
   const effectivenessMultiplier = getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2)
   if (effectivenessMultiplier === 0) return 0
 
-  const special = specialDamageFor(ability, attackerEntity, defenderEntity)
+  const special = specialDamageFor(deriveRng(rng.state, 'estimate'), ability, attackerEntity, defenderEntity)
   if (special && special.mode === 'fixed') return special.amount
 
   const isPhysical = resolveAbilityCategory(ability, attackerPoke) === 'physical'
@@ -228,13 +234,13 @@ export interface DamageResult {
 // crit -> variacao 85-100%. Golpes de dano fixo (ver specialDamageFor) vao
 // direto pro valor bruto e pulam STAB/crit/variancia, igual ao real — mas
 // ainda zerados por imunidade total de tipo.
-function computeDamage(attackerEntity: WorldEntity, defenderEntity: WorldEntity, ability: Ability): DamageResult {
+function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity, ability: Ability): DamageResult {
   const attackerPoke = attackerEntity.poke
   const defenderPoke = defenderEntity.poke
   const attackerSpecies = SPECIES[attackerPoke.speciesId]
   const defenderSpecies = SPECIES[defenderPoke.speciesId]
   const effectivenessMultiplier = getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2)
-  const special = specialDamageFor(ability, attackerEntity, defenderEntity)
+  const special = specialDamageFor(rng, ability, attackerEntity, defenderEntity)
 
   let dmg: number
   let isCrit = false
@@ -254,10 +260,10 @@ function computeDamage(attackerEntity: WorldEntity, defenderEntity: WorldEntity,
 
     dmg *= effectivenessMultiplier
 
-    isCrit = rollChance(CRIT_CHANCE)
+    isCrit = rollChance(rng, CRIT_CHANCE)
     if (isCrit) dmg *= CRIT_MULTIPLIER
 
-    dmg *= formulaEngine.eval('DAMAGE_VARIATION')
+    dmg *= formulaEngine.eval('DAMAGE_VARIATION', {}, rng)
   }
 
   let effectiveness: Effectiveness = 'normal'
@@ -297,7 +303,7 @@ const EFFECTIVENESS_COLORS: Record<Effectiveness, string> = {
 // (ex: "Super efetivo!") desenham 2 linhas empilhadas, entao reservam 2
 // slots de raia em vez de 1.
 function spawnDamageNumber(world: WorldState, target: WorldEntity, result: DamageResult): void {
-  world.effects.push(createWorldEffect({
+  world.effects.push(createWorldEffect(world.counters, {
     type: 'damageNumber',
     x: target.x, y: target.y,
     targetX: target.x, targetY: target.y - target.radius - 40,
@@ -326,7 +332,7 @@ function basicAttackFor(attackerSpecies: { type: Ability['type'] }): Ability {
 // campo setado, entao o filtro e um no-op pra eles.
 // `aoeTargetCounter` e uma funcao (ability) => numero de alvos que um cast
 // AOE atingiria, usada pra preferir AOE quando atingiria 2+ alvos.
-function pickAbility(entity: WorldEntity, defenderEntity: WorldEntity, aoeTargetCounter: (a: Ability) => number): Ability | null {
+function pickAbility(rng: Rng, entity: WorldEntity, defenderEntity: WorldEntity, aoeTargetCounter: (a: Ability) => number): Ability | null {
   const attackerSpecies = SPECIES[entity.poke.speciesId]
   const disabled = entity.poke.disabledAbilities || {}
   const candidateIds = [...entity.poke.unlockedAbilities, BASIC_ATTACK.id].filter((id) => !disabled[id])
@@ -339,17 +345,17 @@ function pickAbility(entity: WorldEntity, defenderEntity: WorldEntity, aoeTarget
   const aoeReady = ready.filter((a) => a.target === 'aoe' && aoeTargetCounter(a) >= 2)
   const pool = aoeReady.length > 0 ? aoeReady : ready
   return pool.reduce((best, a) => (
-    estimateDamage(entity, defenderEntity, a) > estimateDamage(entity, defenderEntity, best) ? a : best
+    estimateDamage(rng, entity, defenderEntity, a) > estimateDamage(rng, entity, defenderEntity, best) ? a : best
   ))
 }
 
-let nextPendingHitId = 1
+// Contador no WorldState, nao em modulo — ver a nota em types.ts#WorldCounters.
 
 // Enfileira um hit pra acontecer HIT_LAND_DELAY segundos a partir de agora —
 // resolveHit() aplica o dano/efeito/derrota real quando esse timer zera, em
 // sincronia com a pose Shoot/Charge terminando.
 function queueHit(world: WorldState, attacker: WorldEntity, target: WorldEntity, ability: Ability): void {
-  world.pendingHits.push({ id: `hit-${nextPendingHitId++}`, timer: HIT_LAND_DELAY, attackerId: attacker.id, targetId: target.id, ability })
+  world.pendingHits.push({ id: `hit-${world.counters.pendingHit++}`, timer: HIT_LAND_DELAY, attackerId: attacker.id, targetId: target.id, ability })
 }
 
 // Golpes AOE ganham EXATAMENTE UM anel visual, centrado no atacante,
@@ -358,14 +364,14 @@ function queueHit(world: WorldState, attacker: WorldEntity, target: WorldEntity,
 // com a pose de ataque terminando; resolveHit trata `isAoeVisual` como caso
 // especial e pula o anel por-alvo abaixo.
 function queueAoeVisual(world: WorldState, attacker: WorldEntity, ability: Ability): void {
-  world.pendingHits.push({ id: `hit-${nextPendingHitId++}`, timer: HIT_LAND_DELAY, attackerId: attacker.id, targetId: null, ability, isAoeVisual: true })
+  world.pendingHits.push({ id: `hit-${world.counters.pendingHit++}`, timer: HIT_LAND_DELAY, attackerId: attacker.id, targetId: null, ability, isAoeVisual: true })
 }
 
 // Aparece o nome do golpe logo abaixo do usuario no instante em que e
 // usado — separado do numero de dano de queueHit, que so aparece quando o
 // hit realmente pousa HIT_LAND_DELAY segundos depois.
 function announceAbility(world: WorldState, attacker: WorldEntity, ability: Ability): void {
-  world.effects.push(createWorldEffect({
+  world.effects.push(createWorldEffect(world.counters, {
     type: 'abilityName',
     x: attacker.x, y: attacker.y,
     targetX: attacker.x, targetY: attacker.y + getGroundOffset(attacker) + 14,
@@ -392,7 +398,7 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
 
   const primaryTarget = engagedEnemies[0]
   const allEnemies = nearbyAliveEnemies(world)
-  const ability = pickAbility(player, primaryTarget, (a) =>
+  const ability = pickAbility(world.rng, player, primaryTarget, (a) =>
     allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length,
   )
   if (!ability) return
@@ -415,7 +421,7 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
 function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: PlayerEntity): void {
   if (!canAct(enemy)) return
 
-  const ability = pickAbility(enemy, player, () => 1) // inimigos so miram no jogador unico
+  const ability = pickAbility(world.rng, enemy, player, () => 1) // inimigos so miram no jogador unico
   if (!ability) return
 
   startCooldown(enemy, ability.id, scaledCooldown(ability, enemy.poke.stats.speed))
@@ -446,7 +452,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     // O unico anel deste cast AOE, centrado no atacante — ver
     // queueAoeVisual. Hits individuais por-alvo abaixo pulam desenhar o
     // proprio.
-    world.effects.push(createWorldEffect({
+    world.effects.push(createWorldEffect(world.counters, {
       type: 'abilityEffect',
       x: attacker.x, y: attacker.y,
       targetX: attacker.x, targetY: attacker.y - attacker.radius * 0.6,
@@ -479,14 +485,14 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   const target = findEntityById(world.player, world.enemies, hit.targetId)
   if (!target || isDead(target)) return // ex: um aliado de AOE ja tinha finalizado antes
 
-  const result = computeDamage(attacker, target, ability)
+  const result = computeDamage(world.rng, attacker, target, ability)
   takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke))
   spawnDamageNumber(world, target, result)
 
   const isPlayerAttacker = attacker.kind === 'player'
   const isAoe = ability.target === 'aoe'
   if (!isAoe) {
-    world.effects.push(createWorldEffect({
+    world.effects.push(createWorldEffect(world.counters, {
       type: 'abilityEffect',
       x: target.x, y: target.y,
       targetX: target.x, targetY: target.y - target.radius * 0.6,

@@ -31,6 +31,7 @@ import { isDamagingAbility } from '@/data/abilities'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { randInt, randRange, weightedPick } from '@/core/random'
+import type { Rng } from '@/core/rng'
 import { CAPTURE_ANIM_FRAME_DURATION, captureAnimRowCount } from '@/data/captureAnim'
 
 import { createPlayerEntity, createEnemyEntity, isDead, heal } from './entity'
@@ -80,25 +81,42 @@ function shinyPrefix(isShiny?: boolean): string {
 
 // ---------- Construcao de mundo ----------
 
-export function buildHospitalWorld(activePoke: PokeInstance | null, hospitalSpot: Point): WorldState {
-  const player = activePoke ? createPlayerEntity({ poke: activePoke, x: hospitalSpot.x, y: hospitalSpot.y }) : null
+// A sequencia de sorteios ATRAVESSA as trocas de cena: quem constroi um mundo
+// novo passa o `rng`/`counters` do mundo atual, entao a sessao inteira e uma
+// unica sequencia derivada de uma semente so. Sem isso, cada ida ao Hospital
+// reiniciaria o stream com uma semente nova e o servidor (Fase D) teria que
+// rastrear uma semente por cena em vez de uma por sessao.
+export type SequenciaDeSorteio = Pick<WorldState, 'rng' | 'counters'>
+
+function novoMundo(carry?: SequenciaDeSorteio): WorldState {
+  const base = emptyWorldState()
+  if (carry) {
+    base.rng = { ...carry.rng }
+    base.counters = { ...carry.counters }
+  }
+  return base
+}
+
+export function buildHospitalWorld(activePoke: PokeInstance | null, hospitalSpot: Point, carry?: SequenciaDeSorteio): WorldState {
+  const base = novoMundo(carry)
+  const player = activePoke ? createPlayerEntity(base.counters, { poke: activePoke, x: hospitalSpot.x, y: hospitalSpot.y }) : null
   if (player && isDead(player)) player.fainted = true
-  return { ...emptyWorldState(), player, enemies: [] }
+  return { ...base, player, enemies: [] }
 }
 
 const SPAWN_MIN_DISTANCE = 250
 const SPAWN_MARGIN = 60
 const SPAWN_POINT_MAX_ATTEMPTS = 40
 
-function randomSpawnPoint(mapDef: MapDef): Point {
+function randomSpawnPoint(rng: Rng, mapDef: MapDef): Point {
   const cx = mapDef.bounds.width / 2
   const cy = mapDef.bounds.height / 2
   const radius = mapWalkRadius(mapDef) - SPAWN_MARGIN
   let x = cx, y = cy
   let attempts = 0
   do {
-    const angle = randRange(0, Math.PI * 2)
-    const dist = Math.sqrt(randRange(0, 1)) * radius
+    const angle = randRange(rng, 0, Math.PI * 2)
+    const dist = Math.sqrt(randRange(rng, 0, 1)) * radius
     x = cx + Math.cos(angle) * dist
     y = cy + Math.sin(angle) * dist
     attempts++
@@ -109,30 +127,31 @@ function randomSpawnPoint(mapDef: MapDef): Point {
   return { x, y }
 }
 
-function spawnEnemyAt(mapDef: MapDef): EnemyEntity {
-  const point = randomSpawnPoint(mapDef)
+function spawnEnemyAt(world: SequenciaDeSorteio, mapDef: MapDef): EnemyEntity {
+  const { rng, counters } = world
+  const point = randomSpawnPoint(rng, mapDef)
   // Ponderado pelo TIER de spawn da especie, derivado da chance real de
   // encontro selvagem do Gen1/Gen2 (ver scripts/derive-spawn-tiers.js) — quem e
   // comum nos jogos reais aparece mais que quem e raro, dentro da mesma hunt.
   // Antes era a taxa de captura, que mede outra coisa.
-  const encounterId = weightedPick(mapDef.enemyPool, (id) => getEncounter(id)?.weight ?? 45)
+  const encounterId = weightedPick(rng, mapDef.enemyPool, (id) => getEncounter(id)?.weight ?? 45)
   const encounter = getEncounter(encounterId)
   if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
-  const level = randInt(encounter.minLevel, encounter.maxLevel)
-  const poke = createPokeInstance(encounter.speciesId, level)
-  return createEnemyEntity({ poke, x: point.x, y: point.y, encounterId })
+  const level = randInt(rng, encounter.minLevel, encounter.maxLevel)
+  const poke = createPokeInstance(rng, encounter.speciesId, level)
+  return createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId })
 }
 
 const SEQUENCE_SPAWN_OFFSET_MIN = 60
 const SEQUENCE_SPAWN_OFFSET_MAX = 150
-function sequenceSpawnPoint(mapDef: MapDef, base: Point): Point {
+function sequenceSpawnPoint(rng: Rng, mapDef: MapDef, base: Point): Point {
   const mapCx = mapDef.bounds.width / 2
   const mapCy = mapDef.bounds.height / 2
   const radius = mapWalkRadius(mapDef)
   let x = base.x, y = base.y, attempts = 0
   do {
-    const angle = randRange(0, Math.PI * 2)
-    const dist = randRange(SEQUENCE_SPAWN_OFFSET_MIN, SEQUENCE_SPAWN_OFFSET_MAX)
+    const angle = randRange(rng, 0, Math.PI * 2)
+    const dist = randRange(rng, SEQUENCE_SPAWN_OFFSET_MIN, SEQUENCE_SPAWN_OFFSET_MAX)
     x = base.x + Math.cos(angle) * dist
     y = base.y + Math.sin(angle) * dist
     attempts++
@@ -143,20 +162,22 @@ function sequenceSpawnPoint(mapDef: MapDef, base: Point): Point {
   return { x, y }
 }
 
-function spawnSequenceEnemy(mapDef: MapDef, index: number): EnemyEntity {
+function spawnSequenceEnemy(world: SequenciaDeSorteio, mapDef: MapDef, index: number): EnemyEntity {
+  const { rng, counters } = world
   const encounterId = mapDef.sequence![index]
   const encounter = getEncounter(encounterId)
   if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
   const base = mapDef.spawnPoints[0] || mapDef.playerSpawn
-  const point = index === 0 ? base : sequenceSpawnPoint(mapDef, base)
-  const poke = createPokeInstance(encounter.speciesId, encounter.minLevel, { rarity: encounter.rarity, ivs: encounter.ivs })
-  return createEnemyEntity({ poke, x: point.x, y: point.y, encounterId })
+  const point = index === 0 ? base : sequenceSpawnPoint(rng, mapDef, base)
+  const poke = createPokeInstance(rng, encounter.speciesId, encounter.minLevel, { rarity: encounter.rarity, ivs: encounter.ivs })
+  return createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId })
 }
 
-export function buildMapWorld(mapId: string, activePoke: PokeInstance): WorldState {
+export function buildMapWorld(mapId: string, activePoke: PokeInstance, carry?: SequenciaDeSorteio): WorldState {
   const mapDef = getMap(mapId)
   if (!mapDef) throw new Error(`Mapa desconhecido: ${mapId}`)
-  const player = createPlayerEntity({ poke: activePoke, x: mapDef.playerSpawn.x, y: mapDef.playerSpawn.y })
+  const base = novoMundo(carry)
+  const player = createPlayerEntity(base.counters, { poke: activePoke, x: mapDef.playerSpawn.x, y: mapDef.playerSpawn.y })
   if (isDead(player)) player.fainted = true
 
   // Contagem regressiva de intro da Champion Lance (pedido explicito do
@@ -166,15 +187,16 @@ export function buildMapWorld(mapId: string, activePoke: PokeInstance): WorldSta
   const enemies: EnemyEntity[] = []
   if (!mapDef.startCountdown) {
     if (mapDef.sequence) {
-      enemies.push(spawnSequenceEnemy(mapDef, 0))
+      enemies.push(spawnSequenceEnemy(base, mapDef, 0))
     } else {
       for (let i = 0; i < mapDef.maxEnemies; i++) {
-        enemies.push(spawnEnemyAt(mapDef))
+        enemies.push(spawnEnemyAt(base, mapDef))
       }
     }
   }
 
   return {
+    ...base,
     mapDef, player, enemies, effects: [], pendingHits: [],
     autoTimers: { pot: 0, revive: 0 },
     reviveCountdown: null,
@@ -208,21 +230,21 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
   const trainerResult = grantTrainerExp(gameState.trainer, expGain)
   gameState.setTrainer(trainerResult.trainer)
 
-  const loot = awardKillLoot(gameState, enemy, world.mapDef!)
+  const loot = awardKillLoot(world.rng, gameState, enemy, world.mapDef!)
   // Champion Lance (data/nightmareMaps.ts) proibe captura explicitamente —
   // seu `noCatch` e o unico lugar que isso e setado.
-  const captureResult = world.mapDef!.noCatch ? null : maybeAutoCatch(gameState, enemy.poke)
+  const captureResult = world.mapDef!.noCatch ? null : maybeAutoCatch(world.rng, gameState, enemy.poke)
   recordPokedexKill(gameState, enemy.poke.speciesId, Boolean(enemy.poke.isShiny))
 
   if (!silent) {
     recordKill(gameState, { gold: loot.gold, xp: expGain, isShiny: enemy.poke.isShiny })
 
-    world.effects.push(createWorldEffect({
+    world.effects.push(createWorldEffect(world.counters, {
       type: 'rewardText', x: enemy.x, y: enemy.y,
       targetX: enemy.x, targetY: enemy.y,
       value: expGain, unit: 'XP', color: '#4ade80', duration: 1.1, owner: enemy,
     }))
-    world.effects.push(createWorldEffect({
+    world.effects.push(createWorldEffect(world.counters, {
       type: 'rewardText', x: enemy.x, y: enemy.y,
       targetX: enemy.x, targetY: enemy.y,
       value: loot.gold, unit: '🪙', color: '#fff59d', duration: 1.1, owner: enemy,
@@ -251,7 +273,7 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
     // Animacao de arremesso de Pokebola — so pra uma tentativa de verdade.
     if (captureResult && 'ballItemId' in captureResult && captureResult.ballItemId) {
       const rowCount = captureAnimRowCount(captureResult.success)
-      world.effects.push(createWorldEffect({
+      world.effects.push(createWorldEffect(world.counters, {
         type: 'captureAnim', x: enemy.x, y: enemy.y, targetX: enemy.x, targetY: enemy.y,
         ballItemId: captureResult.ballItemId, success: captureResult.success,
         delay: DEATH_ANIM_GRACE_PERIOD,
@@ -303,8 +325,8 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     world.countdownRemaining -= dt
     if (world.countdownRemaining <= 0) {
       world.countdownRemaining = null
-      if (world.mapDef.sequence) world.enemies.push(spawnSequenceEnemy(world.mapDef, world.sequenceIndex))
-      else for (let i = 0; i < world.mapDef.maxEnemies; i++) world.enemies.push(spawnEnemyAt(world.mapDef))
+      if (world.mapDef.sequence) world.enemies.push(spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex))
+      else for (let i = 0; i < world.mapDef.maxEnemies; i++) world.enemies.push(spawnEnemyAt(world, world.mapDef))
     }
     if (!silent) updateAnimations(world, dt)
     return []
@@ -400,14 +422,14 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn) {
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
-      world.enemies.push(spawnEnemyAt(world.mapDef))
+      world.enemies.push(spawnEnemyAt(world, world.mapDef))
       world.respawnTimer = world.mapDef.respawnDelay
     }
   } else if (world.mapDef.sequence && aliveCount === 0 && world.sequenceIndex < world.mapDef.sequence.length - 1) {
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
       world.sequenceIndex += 1
-      world.enemies.push(spawnSequenceEnemy(world.mapDef, world.sequenceIndex))
+      world.enemies.push(spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex))
       world.respawnTimer = world.mapDef.respawnDelay
     }
   }
@@ -430,7 +452,7 @@ export const controller = {
   returnToHospital(hospitalSpot: Point): void {
     const gameState = useGameStateStore.getState()
     gameState.setCurrentMapId(null)
-    const world = buildHospitalWorld(gameState.team[gameState.activeIndex] || null, hospitalSpot)
+    const world = buildHospitalWorld(gameState.team[gameState.activeIndex] || null, hospitalSpot, useWorldStore.getState())
     useWorldStore.getState().setWorld(world)
   },
 
@@ -439,7 +461,7 @@ export const controller = {
     const activePoke = gameState.team[gameState.activeIndex]
     if (!activePoke) return
     gameState.setCurrentMapId(mapId)
-    const world = buildMapWorld(mapId, activePoke)
+    const world = buildMapWorld(mapId, activePoke, useWorldStore.getState())
     useWorldStore.getState().setWorld(world)
     resetStats(gameState) // painel de taxa de farm reinicia do zero a cada hunt nova
   },
@@ -447,10 +469,10 @@ export const controller = {
   chooseStarter(speciesId: string, hospitalSpot: Point): void {
     const gameState = useGameStateStore.getState()
     if (gameState.team.length > 0) return
-    const poke = createPokeInstance(speciesId, STARTER_LEVEL, { ivs: STARTER_IVS, rarity: STARTER_RARITY })
+    const poke = useWorldStore.getState().sortear((rng) => createPokeInstance(rng, speciesId, STARTER_LEVEL, { ivs: STARTER_IVS, rarity: STARTER_RARITY }))
     gameState.addPokeToTeam(poke)
     gameState.setActiveIndex(0)
-    useWorldStore.getState().setWorld(buildHospitalWorld(poke, hospitalSpot))
+    useWorldStore.getState().setWorld(buildHospitalWorld(poke, hospitalSpot, useWorldStore.getState()))
   },
 
   resetGame(): void {

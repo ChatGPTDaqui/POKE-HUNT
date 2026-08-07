@@ -1,4 +1,5 @@
 // Port de js/systems/CaptureSystem.js.
+import type { Rng } from '@/core/rng'
 import { SPECIES, computeStatsAtLevel, totalExpForLevel, novoPokeUid, type PokeInstance } from '@/data/pokes'
 import { getItem } from '@/data/items'
 import { getAbility } from '@/data/abilities'
@@ -17,7 +18,7 @@ export type CaptureResult =
   | { success: false; reason: 'roll_failed'; chance: number; ballItemId: string }
   | { success: true; location: 'bag'; chance: number; poke: PokeInstance; ballItemId: string }
 
-export function attemptCapture(gameState: GameStateStore, defeatedPoke: PokeInstance, ballItemId: string): CaptureResult {
+export function attemptCapture(rng: Rng, gameState: GameStateStore, defeatedPoke: PokeInstance, ballItemId: string): CaptureResult {
   const ball = getItem(ballItemId)
   if (!ball || ball.kind !== 'ball' || ball.captureRate == null) return { success: false, reason: 'invalid_ball' }
   if (!gameState.removeItem(ballItemId, 1)) return { success: false, reason: 'no_ball' }
@@ -28,7 +29,7 @@ export function attemptCapture(gameState: GameStateStore, defeatedPoke: PokeInst
     ballMultiplier: ball.captureRate,
     catchMultiplier: GLOBAL_CATCH_MULTIPLIER,
   }), 0, 1)
-  const captured = rollChance(chance)
+  const captured = rollChance(rng, chance)
 
   if (!captured) return { success: false, reason: 'roll_failed', chance, ballItemId }
 

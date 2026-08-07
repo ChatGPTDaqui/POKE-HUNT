@@ -7,12 +7,13 @@ import { SPECIES } from '@/data/pokes'
 import { footOffsetFraction } from '@/data/spriteFootOffsets'
 import { getEncounter } from '@/data/enemies'
 import type { PokeInstance } from '@/data/pokes'
-import type { BaseEntity, EnemyEntity, Point, PlayerEntity, WorldEntity } from './types'
+import type { BaseEntity, EnemyEntity, Point, PlayerEntity, WorldCounters, WorldEntity } from './types'
 
-let nextEntityId = 1
-export function resetEntityIdCounterForTests(): void {
-  nextEntityId = 1
-}
+// O contador de id vive no WorldState (`world.counters`), nao aqui. Um `let`
+// de modulo faria o id depender de quantas cenas esta aba ja construiu — e isso
+// ja mordeu de verdade neste projeto: um `import()` extra criava uma segunda
+// copia do modulo com o contador zerado, gerando ids que colidiam com os do
+// jogo (ver "Gotchas conhecidos" no CLAUDE.md).
 
 const PLAYER_MOVE_SPEED = 91 // pixels/segundo (+30% balance pass), independente da stat de Velocidade
 const ENEMY_MOVE_SPEED = 58.5 // pixels/segundo (+30% balance pass)
@@ -21,9 +22,9 @@ const ENEMY_MOVE_SPEED = 58.5 // pixels/segundo (+30% balance pass)
 const AGGRO_RADIUS_MULTIPLIER = 1
 const ENEMY_LEASH_MULTIPLIER = 2.2
 
-export function createPlayerEntity({ poke, x, y }: { poke: PokeInstance; x: number; y: number }): PlayerEntity {
+export function createPlayerEntity(counters: WorldCounters, { poke, x, y }: { poke: PokeInstance; x: number; y: number }): PlayerEntity {
   return {
-    id: `entity-${nextEntityId++}`,
+    id: `entity-${counters.entity++}`,
     kind: 'player',
     poke, x, y,
     facing: { x: 0, y: 1 },
@@ -53,12 +54,12 @@ export function createPlayerEntity({ poke, x, y }: { poke: PokeInstance; x: numb
   }
 }
 
-export function createEnemyEntity({ poke, x, y, encounterId }: { poke: PokeInstance; x: number; y: number; encounterId: string }): EnemyEntity {
+export function createEnemyEntity(counters: WorldCounters, { poke, x, y, encounterId }: { poke: PokeInstance; x: number; y: number; encounterId: string }): EnemyEntity {
   const encounter = getEncounter(encounterId)
   if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
   const aggroRadius = encounter.aggroRadius * AGGRO_RADIUS_MULTIPLIER
   return {
-    id: `entity-${nextEntityId++}`,
+    id: `entity-${counters.entity++}`,
     kind: 'enemy',
     poke, x, y,
     facing: { x: 0, y: 1 },

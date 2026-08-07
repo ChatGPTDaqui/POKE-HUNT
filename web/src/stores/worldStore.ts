@@ -24,8 +24,13 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import type { WorldState } from '@/engine/types'
+import { createRng, randomSeed, type Rng } from '@/core/rng'
 
-export function emptyWorldState(): WorldState {
+// `seed` opcional: quem constroi um mundo pra valer passa a semente da sessao
+// (na Fase D ela vem do servidor); sem argumento, sorteia uma. Nao ha fallback
+// pra `Math.random()` em lugar nenhum da simulacao — a sequencia inteira sai
+// deste estado.
+export function emptyWorldState(seed: number = randomSeed()): WorldState {
   return {
     mapDef: null,
     player: null,
@@ -38,6 +43,8 @@ export function emptyWorldState(): WorldState {
     sequenceIndex: 0,
     sequenceCleared: false,
     countdownRemaining: null,
+    rng: createRng(seed),
+    counters: { entity: 1, effect: 1, pendingHit: 1 },
   }
 }
 
@@ -49,6 +56,15 @@ export interface WorldStore extends WorldState {
   // Escotilha generica pros sistemas da Fase 4 mutarem o draft imer direto,
   // com a mesma ergonomia de mutacao em lugar que o codigo vanilla ja tinha.
   update: (recipe: (draft: WorldState) => void) => void
+  // Sorteia usando o Rng do mundo E persiste o avanco da sequencia.
+  //
+  // Necessario porque `getState().rng` vem CONGELADO pelo immer (autoFreeze) e
+  // `nextFloat` muta o estado do gerador — passar o rng congelado direto pra
+  // qualquer helper de sorteio estoura com "Cannot assign to read only property
+  // 'state'". Foi um bug real: `chooseStarter` fazia exatamente isso e quebrava
+  // a criacao do primeiro POKE. Dentro do `update` o rng e um draft mutavel,
+  // entao o avanco da sequencia fica gravado em vez de se perder.
+  sortear: <T>(fn: (rng: Rng) => T) => T
 }
 
 export const useWorldStore = create<WorldStore>()(
@@ -66,5 +82,11 @@ export const useWorldStore = create<WorldStore>()(
       }),
 
     update: (recipe) => set((draft) => recipe(draft)),
+
+    sortear: (fn) => {
+      let resultado: ReturnType<typeof fn>
+      set((draft) => { resultado = fn(draft.rng) })
+      return resultado!
+    },
   })),
 )

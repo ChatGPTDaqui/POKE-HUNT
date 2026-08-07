@@ -6,6 +6,7 @@
 // MAX_CATCH_RATE) since it's a fixed 6-row table, not a single tunable
 // scalar the "Balanceamento de economia" formula system is built for.
 import { weightedPick } from '@/core/random'
+import type { Rng } from '@/core/rng'
 
 export type RarityKey = 'comum' | 'incomum' | 'raro' | 'ultra' | 'legendary' | 'mythic'
 
@@ -47,8 +48,8 @@ export const RARITIES: Record<RarityKey, RarityDef> = {
 
 const RARITY_LIST = Object.values(RARITIES)
 
-export function rollRarity(): RarityKey {
-  return weightedPick(RARITY_LIST, (r) => r.weight).key
+export function rollRarity(rng: Rng): RarityKey {
+  return weightedPick(rng, RARITY_LIST, (r) => r.weight).key
 }
 
 // Saves written before this feature shipped have no `rarity` field on their
