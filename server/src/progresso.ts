@@ -3,18 +3,29 @@ import {
   buildMapWorld, stepWorld, simulateWorldSeconds, createRng,
   snapshotToGameState, gameStateToPlayerRow, gameStateToPokemonRows,
   gameStateToItemRows, gameStateToPokedexRows, defaultGameStateData,
-  OFFLINE_SIM_STEP_SECONDS,
+  OFFLINE_SIM_STEP_SECONDS, recordBatch,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary,
 } from '#engine'
 import { ErroHttp, selecionarTudo, selecionar, atualizar, inserir, apagar, type Config } from './db.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
-import { aplicarPiso, type ResultadoPiso } from './farmOffline.js'
+import { aplicarPiso, NENHUM_PISO, type ResultadoPiso } from './farmOffline.js'
 
 // Teto de quanto tempo um unico flush pode creditar. NAO e uma regra de
 // balanceamento — e o limite que impede um relogio maluco (ou uma sessao
 // esquecida aberta por uma semana) de virar uma simulacao de dias num request.
 // O Farm Offline do cliente ja tinha um teto proprio pelo mesmo motivo.
 export const MAX_SEGUNDOS_POR_FLUSH = 6 * 3600
+
+// Acima disto, o intervalo e tratado como AUSENCIA (farm offline) e nao como
+// jogo ao vivo. O cliente liquida de 30 em 30 segundos enquanto o jogador esta
+// com o jogo aberto, entao 120s deixa folga confortavel pra um flush atrasado
+// por rede sem ser confundido com ausencia.
+//
+// Isto e o que separa os dois regimes: offline roda em modo pessimista e ganha o
+// piso de 50%; ao vivo roda normal e ALIMENTA a taxa que o piso usa de
+// referencia. Ligar o modo pessimista em todo flush (como estava) penalizava
+// quem estava jogando de verdade E destruia a propria referencia do piso.
+export const LIMIAR_OFFLINE_SEGUNDOS = 120
 
 export interface LinhaSessao {
   id: string
@@ -105,11 +116,10 @@ export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSes
     rng: createRng(semente),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
   })
-  // Farm offline roda no PIOR CASO (dano minimo, sem critico, inimigo mais forte
-  // do pool) — regra do usuario: offline nunca pode render mais que jogar. O
-  // piso de 50% da taxa online, aplicado logo abaixo, e o contrapeso que impede
-  // esse pior caso de degenerar pra zero.
-  world.pessimista = true
+  // Pior caso SO quando o intervalo caracteriza ausencia — ver
+  // LIMIAR_OFFLINE_SEGUNDOS. Jogo ao vivo resolve o combate normalmente.
+  const offline = segundos > LIMIAR_OFFLINE_SEGUNDOS
+  world.pessimista = offline
 
   const resumo = simulateWorldSeconds({
     world,
@@ -119,7 +129,21 @@ export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSes
     stepFn: (w, dt, opts) => stepWorld(w, dt, store, opts),
   })
 
-  const piso = aplicarPiso(store, estado, resumo, agora)
+  // O piso so existe pra impedir que o pior caso degenere pra zero — nao tem o
+  // que fazer num flush de jogo ao vivo.
+  const piso = offline ? aplicarPiso(store, estado, resumo, agora) : NENHUM_PISO
+
+  // A taxa "online medida" que o piso usa de referencia so pode vir de jogo ao
+  // vivo. Sem isto ela nunca sairia do zero: `recordKill` vive dentro de um
+  // `if (!silent)` no motor, e o servidor simula SEMPRE em silencio — entao o
+  // piso ficava permanentemente reprovado pela guarda de amostra minima. Mesmo
+  // remedio que o catch-up de aba oculta ja usava no cliente (recordBatch).
+  //
+  // Alimentar tambem com o resultado offline tornaria a referencia
+  // auto-referente: a taxa passaria a incluir os proprios periodos ausentes.
+  if (!offline) {
+    recordBatch(store, { gold: resumo.gold, xp: resumo.xp, mobs: resumo.kills, shinys: resumo.shinySeen })
+  }
 
   estado.currentMapId = sessao.map_id
   await gravarEstado(cfg, userId, estado)

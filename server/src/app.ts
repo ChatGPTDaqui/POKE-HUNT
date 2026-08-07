@@ -138,7 +138,15 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
     seed: randomSeed(),
   }, { retornar: true })
 
-  await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: mapId })
+  // Zera a amostra de taxa (perfStats) ao entrar na hunt — mesmo comportamento
+  // que `controller.enterMap` sempre teve no cliente. E o que faz o piso do farm
+  // offline ser medido POR HUNT: sem isso, a referencia seria a media de tudo que
+  // o jogador ja fez, e daria pra farmar uma hunt facil, trocar pra uma brutal e
+  // deslogar levando a taxa da facil.
+  await atualizar(cfg, `players?user_id=eq.${userId}`, {
+    current_map_id: mapId,
+    perf_stats: { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now() },
+  })
   return json({ sessaoId: criada.id, mapId, iniciadaEm: criada.last_flush_at })
 }
 

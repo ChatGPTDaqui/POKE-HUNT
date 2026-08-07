@@ -17,6 +17,8 @@ export const FRACAO_DO_PISO = 0.5
 export const AMOSTRA_MINIMA_SEGUNDOS = 300
 export const AMOSTRA_MINIMA_KILLS = 10
 
+export const NENHUM_PISO: ResultadoPiso = { aplicado: false, ouroAdicionado: 0, xpAdicionado: 0 }
+
 export interface ResultadoPiso {
   aplicado: boolean
   ouroAdicionado: number
@@ -40,7 +42,7 @@ export function aplicarPiso(
   resumo: OfflineSimSummary,
   agoraMs: number,
 ): ResultadoPiso {
-  const nada = { aplicado: false, ouroAdicionado: 0, xpAdicionado: 0 }
+  const nada = NENHUM_PISO
   const perf = estado.perfStats
   const amostraSegundos = (agoraMs - perf.since) / 1000
   if (!Number.isFinite(amostraSegundos) || amostraSegundos < AMOSTRA_MINIMA_SEGUNDOS) return nada
