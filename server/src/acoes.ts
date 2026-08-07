@@ -47,6 +47,22 @@ const texto = (v: unknown, campo: string): string => {
   return v
 }
 
+// buyItem/sellItem/unlockMap devolvem um CODIGO (`insufficient_gold`, ...), nao
+// uma frase. Sob autoridade do servidor o cliente nao executa a acao — ele so
+// mostra a mensagem que volta daqui —, entao o codigo cru vazava pro chat
+// ("insufficient_gold" aparecia pro jogador). Traduzido no unico lugar por onde
+// esses erros saem.
+const MENSAGEM_ERRO_ECONOMIA: Record<string, string> = {
+  insufficient_gold: 'Ouro insuficiente.',
+  insufficient_quantity: 'Voce nao tem itens suficientes.',
+  unknown_item: 'Item desconhecido.',
+  locked: 'Este item esta travado — destrave antes de vender.',
+  not_found: 'POKE nao encontrado.',
+  already_unlocked: 'Esta hunt ja esta desbloqueada.',
+}
+const traduzErroEconomia = (reason: string | undefined, padrao: string): string =>
+  (reason && MENSAGEM_ERRO_ECONOMIA[reason]) || padrao
+
 type Manipulador = (store: GameStateStore, estado: GameStateData, acao: Acao) => ResultadoAcao
 
 const MANIPULADORES: Record<string, Manipulador> = {
@@ -94,7 +110,7 @@ const MANIPULADORES: Record<string, Manipulador> = {
     const qtd = inteiroPositivo(acao.qtd)
     const item = getItem(itemId)
     const r = buyItem(store, itemId, qtd)
-    if (!r.success) throw new ErroHttp(409, r.reason ?? 'compra recusada')
+    if (!r.success) throw new ErroHttp(409, traduzErroEconomia(r.reason, 'Compra recusada.'))
     const custo = item && 'buyPrice' in item ? item.buyPrice * qtd : 0
     return { ok: true, mensagem: `Comprou ${item?.name ?? itemId} x${qtd} por ${custo} de ouro.` }
   },
@@ -104,7 +120,7 @@ const MANIPULADORES: Record<string, Manipulador> = {
     const qtd = inteiroPositivo(acao.qtd)
     const item = getItem(itemId)
     const r = sellItem(store, itemId, qtd)
-    if (!r.success) throw new ErroHttp(409, r.reason ?? 'venda recusada')
+    if (!r.success) throw new ErroHttp(409, traduzErroEconomia(r.reason, 'Venda recusada.'))
     return { ok: true, mensagem: `Vendeu ${item?.name ?? itemId} x${qtd} por ${(item?.sellPrice ?? 0) * qtd} de ouro.` }
   },
 
@@ -116,7 +132,7 @@ const MANIPULADORES: Record<string, Manipulador> = {
   venderPoke(store, _estado, acao) {
     const uid = texto(acao.pokeUid, 'pokeUid')
     const r = sellBagPoke(store, uid)
-    if (!r.success) throw new ErroHttp(409, r.reason)
+    if (!r.success) throw new ErroHttp(409, traduzErroEconomia(r.reason, 'Venda recusada.'))
     return { ok: true, mensagem: `Vendido por ${r.value} de ouro.` }
   },
 
@@ -204,7 +220,7 @@ const MANIPULADORES: Record<string, Manipulador> = {
     const mapa = MAPS[mapId] && getMap(mapId)
     if (!mapa) throw new ErroHttp(400, 'hunt desconhecida')
     const r = unlockMap(store, mapa)
-    if (!r.success) throw new ErroHttp(409, r.reason ?? 'recursos insuficientes')
+    if (!r.success) throw new ErroHttp(409, traduzErroEconomia(r.reason, 'Recursos insuficientes.'))
     return { ok: true, mensagem: `${mapa.name} desbloqueada!` }
   },
 

@@ -92,17 +92,24 @@ export const controller = {
   // Traz a POKE recem-colocada em campo pro topo da lista visivel do time.
   setActiveTeamIndex(index: number): void {
     const gameState = useGameStateStore.getState()
-    void pedirAcao({ tipo: 'definirAtivo', indice: index }, () => gameState.moveTeamIndexToFront(index))
-    const newActivePoke = useGameStateStore.getState().team[0]
-    useWorldStore.getState().update((draft) => {
-      if (draft.player) {
-        draft.player.poke = newActivePoke
-        draft.player.cooldowns = {}
-        draft.player.flashTimer = 0
-        draft.player.fainted = isDead(draft.player)
-        draft.player.state = draft.player.fainted ? 'dead' : 'wander'
-        draft.player.targetId = null
-      }
+    // A escrita no worldStore precisa esperar `pedirAcao`: sob autoridade do
+    // servidor o `fallback` NAO roda, entao ler `team[0]` de forma sincrona logo
+    // apos o `void pedirAcao` pegava o POKE ativo VELHO (a resposta com o time
+    // reordenado ainda nao tinha chegado) e o colocava em campo — o HUD e o
+    // sprite ficavam no POKE errado ate a proxima troca de cena. Mesmo padrao de
+    // `chooseStarter`: reconstruir/atualizar so no `.then`.
+    void pedirAcao({ tipo: 'definirAtivo', indice: index }, () => gameState.moveTeamIndexToFront(index)).then(() => {
+      const newActivePoke = useGameStateStore.getState().team[0]
+      useWorldStore.getState().update((draft) => {
+        if (draft.player && newActivePoke) {
+          draft.player.poke = newActivePoke
+          draft.player.cooldowns = {}
+          draft.player.flashTimer = 0
+          draft.player.fainted = isDead(draft.player)
+          draft.player.state = draft.player.fainted ? 'dead' : 'wander'
+          draft.player.targetId = null
+        }
+      })
     })
   },
 
@@ -116,8 +123,10 @@ export const controller = {
     }
     const wasActive = idx === gameState.activeIndex
     const removed = gameState.team[idx]
-    void pedirAcao({ tipo: 'tirarDaEquipe', pokeUid }, () => { gameState.moveTeamToBag(pokeUid) })
-    if (wasActive) {
+    // Mesmo motivo de `setActiveTeamIndex`: sob servidor o time reajustado so
+    // chega na resposta, entao a troca do POKE em campo tem que ir pro `.then`.
+    void pedirAcao({ tipo: 'tirarDaEquipe', pokeUid }, () => { gameState.moveTeamToBag(pokeUid) }).then(() => {
+      if (!wasActive) return
       const newActivePoke = useGameStateStore.getState().team[useGameStateStore.getState().activeIndex]
       useWorldStore.getState().update((draft) => {
         if (draft.player && newActivePoke) {
@@ -129,7 +138,7 @@ export const controller = {
           draft.player.targetId = null
         }
       })
-    }
+    })
     useToastStore.getState().pushToast(`${shinyPrefix(removed.isShiny)}${SPECIES[removed.speciesId].name} foi retirado da equipe.`, 'success', 'world')
   },
 

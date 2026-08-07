@@ -59611,6 +59611,9 @@ async function gravarEstado(cfg, userId, estado) {
 	if (remover.length) await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${remover.join(",")})`);
 	if (linhasPoke.length) await inserir(cfg, "pokemon_instances", linhasPoke, { upsert: "id" });
 	const linhasItens = gameStateToItemRows(userId, estado);
+	const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id));
+	const removerItens = (await selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=item_id`)).map((l) => l.item_id).filter((id) => !itemIdsAgora.has(id));
+	if (removerItens.length) await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${removerItens.join(",")})`);
 	if (linhasItens.length) await inserir(cfg, "player_items", linhasItens, { upsert: "user_id,item_id" });
 	const linhasDex = gameStateToPokedexRows(userId, estado);
 	if (linhasDex.length) await inserir(cfg, "player_pokedex", linhasDex, { upsert: "user_id,species_id" });
@@ -59698,6 +59701,15 @@ var texto = (v, campo) => {
 	if (typeof v !== "string" || !v || v.length > 200) throw new ErroHttp(400, `${campo} invalido`);
 	return v;
 };
+var MENSAGEM_ERRO_ECONOMIA = {
+	insufficient_gold: "Ouro insuficiente.",
+	insufficient_quantity: "Voce nao tem itens suficientes.",
+	unknown_item: "Item desconhecido.",
+	locked: "Este item esta travado — destrave antes de vender.",
+	not_found: "POKE nao encontrado.",
+	already_unlocked: "Esta hunt ja esta desbloqueada."
+};
+var traduzErroEconomia = (reason, padrao) => reason && MENSAGEM_ERRO_ECONOMIA[reason] || padrao;
 var MANIPULADORES = {
 	escolherStarter(store, estado, acao) {
 		const speciesId = texto(acao.speciesId, "speciesId");
@@ -59728,7 +59740,7 @@ var MANIPULADORES = {
 		const qtd = inteiroPositivo(acao.qtd);
 		const item = getItem(itemId);
 		const r = buyItem(store, itemId, qtd);
-		if (!r.success) throw new ErroHttp(409, r.reason ?? "compra recusada");
+		if (!r.success) throw new ErroHttp(409, traduzErroEconomia(r.reason, "Compra recusada."));
 		const custo = item && "buyPrice" in item ? item.buyPrice * qtd : 0;
 		return {
 			ok: true,
@@ -59740,7 +59752,7 @@ var MANIPULADORES = {
 		const qtd = inteiroPositivo(acao.qtd);
 		const item = getItem(itemId);
 		const r = sellItem(store, itemId, qtd);
-		if (!r.success) throw new ErroHttp(409, r.reason ?? "venda recusada");
+		if (!r.success) throw new ErroHttp(409, traduzErroEconomia(r.reason, "Venda recusada."));
 		return {
 			ok: true,
 			mensagem: `Vendeu ${item?.name ?? itemId} x${qtd} por ${(item?.sellPrice ?? 0) * qtd} de ouro.`
@@ -59755,7 +59767,7 @@ var MANIPULADORES = {
 	},
 	venderPoke(store, _estado, acao) {
 		const r = sellBagPoke(store, texto(acao.pokeUid, "pokeUid"));
-		if (!r.success) throw new ErroHttp(409, r.reason);
+		if (!r.success) throw new ErroHttp(409, traduzErroEconomia(r.reason, "Venda recusada."));
 		return {
 			ok: true,
 			mensagem: `Vendido por ${r.value} de ouro.`
@@ -59856,7 +59868,7 @@ var MANIPULADORES = {
 		const mapa = MAPS[mapId] && getMap(mapId);
 		if (!mapa) throw new ErroHttp(400, "hunt desconhecida");
 		const r = unlockMap(store, mapa);
-		if (!r.success) throw new ErroHttp(409, r.reason ?? "recursos insuficientes");
+		if (!r.success) throw new ErroHttp(409, traduzErroEconomia(r.reason, "Recursos insuficientes."));
 		return {
 			ok: true,
 			mensagem: `${mapa.name} desbloqueada!`

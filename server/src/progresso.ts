@@ -75,6 +75,19 @@ export async function gravarEstado(cfg: Config, userId: string, estado: GameStat
   if (linhasPoke.length) await inserir(cfg, 'pokemon_instances', linhasPoke, { upsert: 'id' })
 
   const linhasItens = gameStateToItemRows(userId, estado)
+  // Mesmo diff de remocao que `pokemon_instances` acima. Sem ele, um item
+  // consumido ate exatamente 0 (e nao travado) some de `estado.items` mas a
+  // linha velha continua no banco — o upsert so toca as chaves presentes, nunca
+  // apaga. Efeito real: 20 Stones gastas numa evolucao especial voltavam a 20 no
+  // reload (evolucao especial de graca), e qualquer pocao/bola zerada
+  // ressuscitava. `gameStateToItemRows` ja preserva itens travados com
+  // quantidade 0, entao esses continuam na lista e nao sao removidos.
+  const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id))
+  const itensNoBanco = await selecionarTudo<{ item_id: string }>(cfg, `player_items?user_id=eq.${userId}&select=item_id`)
+  const removerItens = itensNoBanco.map((l) => l.item_id).filter((id) => !itemIdsAgora.has(id))
+  if (removerItens.length) {
+    await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${removerItens.join(',')})`)
+  }
   if (linhasItens.length) await inserir(cfg, 'player_items', linhasItens, { upsert: 'user_id,item_id' })
 
   const linhasDex = gameStateToPokedexRows(userId, estado)
