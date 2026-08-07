@@ -1,0 +1,9 @@
+# SPA: rotas do React (/jogo, /login, /registro) precisam cair no index.html.
+# Sem isto, recarregar a pagina em qualquer rota que nao seja "/" da 404 no
+# Cloudflare Pages — o arquivo nao existe no disco, quem resolve a rota e o
+# roteador no navegador.
+#
+# Arquivo existente sempre ganha desta regra (o Pages so aplica o rewrite quando
+# nao acha o arquivo), entao /assets/* e /build/* continuam sendo servidos
+# normalmente.
+/*    /index.html   200
