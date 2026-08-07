@@ -1,5 +1,5 @@
 // Port de js/systems/CaptureSystem.js.
-import { SPECIES, computeStatsAtLevel, totalExpForLevel, type PokeInstance } from '@/data/pokes'
+import { SPECIES, computeStatsAtLevel, totalExpForLevel, novoPokeUid, type PokeInstance } from '@/data/pokes'
 import { getItem } from '@/data/items'
 import { getAbility } from '@/data/abilities'
 import { rollChance, clamp } from '@/core/random'
@@ -35,7 +35,10 @@ export function attemptCapture(gameState: GameStateStore, defeatedPoke: PokeInst
   const stats = computeStatsAtLevel(species, CAPTURE_LEVEL, defeatedPoke.ivs, defeatedPoke.rarity, defeatedPoke.isShiny)
   const newPoke: PokeInstance = {
     ...defeatedPoke,
-    uid: `poke-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+    // Mesma fonte de uid do createPokeInstance — o uid E a PK no Postgres.
+    // Substitui um `Date.now()+Math.random()` que, alem de nao ser uuid,
+    // podia colidir em duas capturas no mesmo milissegundo.
+    uid: novoPokeUid(),
     level: CAPTURE_LEVEL,
     exp: totalExpForLevel(CAPTURE_LEVEL, species.growthCurve),
     stats,

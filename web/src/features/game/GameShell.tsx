@@ -41,6 +41,7 @@ import {
 import { pendingDriftSeconds, resetDrift } from '@/engine/clockDrift'
 import { simulateWorldSeconds, type OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
 import { recordBatch } from '@/engine/systems/statsTracker'
+import { useProgressoRemoto, type EstadoProgresso } from './useProgressoRemoto'
 
 // Farm Offline (aba fechada / PC desligado) — porta o bloco de boot do
 // js/main.js. Roda uma vez, no primeiro mount, e so quando o save diz que o
@@ -212,6 +213,38 @@ function useSyncOnUnload(): void {
 }
 
 export function GameShell() {
+  const progresso = useProgressoRemoto()
+
+  // Gate obrigatorio, nao cosmetico: montar o jogo antes do progresso chegar
+  // faria o GameCanvas construir o mundo com o estado default (equipe vazia) e
+  // o primeiro autosave gravaria esse vazio por cima do save real.
+  if (progresso.fase !== 'pronto') return <TelaCarregandoProgresso estado={progresso} />
+
+  return <JogoCarregado />
+}
+
+function TelaCarregandoProgresso({ estado }: { estado: EstadoProgresso }) {
+  return (
+    <div className="flex min-h-svh flex-col items-center justify-center gap-3 bg-background p-6 text-center">
+      {estado.fase === 'erro' ? (
+        <>
+          <p className="font-medium text-destructive">Nao foi possivel carregar seu progresso.</p>
+          <p className="max-w-md text-sm text-muted-foreground">{estado.mensagem}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-2 rounded-md border px-4 py-2 text-sm hover:bg-accent"
+          >
+            Tentar de novo
+          </button>
+        </>
+      ) : (
+        <p className="text-sm text-muted-foreground">Carregando seu progresso...</p>
+      )}
+    </div>
+  )
+}
+
+function JogoCarregado() {
   const hasStarter = useHasStarter()
   const { summary, dismiss } = useOfflineFarmOnBoot()
   useBackgroundCatchUp()

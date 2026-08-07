@@ -177,7 +177,18 @@ export function averageIvPercent(ivs: StatBlock): number {
   return (sum / (IV_MAX * IV_STAT_COUNT)) * 100
 }
 
-let nextInstanceId = 1
+// O uid do POKE E a chave primaria dele no Postgres (`pokemon_instances.id`,
+// tipo uuid). Antes era um contador de modulo (`poke-1`), que tinha dois
+// problemas ao sair do localStorage: reiniciava a cada carga da pagina (dois
+// POKEs diferentes podiam receber o mesmo uid em sessoes distintas) e nao
+// servia como PK. Gerar uuid aqui faz `poke.uid === pokemon_instances.id`
+// sempre, o que torna o diff de save trivial e dispensa tabela de-para.
+//
+// `crypto.randomUUID` exige contexto seguro (https ou localhost) — os dois
+// unicos jeitos de o jogo rodar, ja que o Supabase so atende https.
+export function novoPokeUid(): string {
+  return crypto.randomUUID()
+}
 
 export interface CreatePokeInstanceOptions {
   ivs?: StatBlock
@@ -193,7 +204,7 @@ export function createPokeInstance(speciesId: string, level = 1, { ivs: fixedIvs
   const isShiny = rollChance(shinyChance)
   const stats = computeStatsAtLevel(species, level, ivs, rarity, isShiny)
   return {
-    uid: `poke-${nextInstanceId++}`,
+    uid: novoPokeUid(),
     speciesId,
     level,
     isShiny,

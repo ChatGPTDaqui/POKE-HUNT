@@ -11,10 +11,13 @@
 // metodo proprio. As acoes que faltam sao adicionadas quando o codigo que
 // as usa for portado (main.js controller na Fase 4, paineis na Fase 6).
 import { create } from 'zustand'
-import { persist, type PersistStorage, type StorageValue } from 'zustand/middleware'
+import { persist, type PersistStorage } from 'zustand/middleware'
 import type { PokeInstance } from '@/data/pokes'
 import { MAPS } from '@/data/maps'
 import { useToastStore } from '@/stores/toastStore'
+// Sem ciclo em runtime: os modulos de `data/remote` so importam TIPOS deste
+// arquivo (`import type`, apagado na compilacao).
+import { postgresStorage, flushAgora, ultimoSavedAt, aoFalharSave } from '@/data/remote/gameStatePersistence'
 
 // Todo item real, vendavel, da planilha (varas excluidas — pesca fora de
 // escopo, ver CLAUDE.md).
@@ -95,7 +98,9 @@ export interface GameStateData {
   unlockedContinents: string[]
 }
 
-function defaultGameStateData(): GameStateData {
+// Exportado porque o adaptador de persistencia precisa dos mesmos defaults
+// para preencher campo ausente numa linha antiga do Postgres.
+export function defaultGameStateData(): GameStateData {
   return {
     team: [],
     activeIndex: 0,
@@ -235,53 +240,72 @@ function detachPoke<T>(poke: T): T {
 // progresso nenhum guardado. Armazenamento indisponivel e caso real de
 // dispositivo, nao hipotese — Safari em navegacao privada lanca na escrita,
 // e alguns navegadores descartam o storage do site apos um tempo sem uso.
-let saveFailureReported = false
+// Agora o risco mudou de natureza: nao e mais "armazenamento bloqueado" (raro,
+// permanente), e sim rede caindo (comum, intermitente). Por isso o aviso
+// aparece uma vez quando comeca a falhar e some quando volta a gravar, em vez
+// de ser um alerta unico e definitivo.
+let falhaDeSaveAvisada = false
 
-function reportSaveFailure(err: unknown): void {
-  console.warn('Falha ao salvar jogo:', err)
-  if (saveFailureReported) return
-  saveFailureReported = true
+aoFalharSave((mensagem) => {
+  if (mensagem == null) {
+    falhaDeSaveAvisada = false
+    return
+  }
+  if (falhaDeSaveAvisada) return
+  falhaDeSaveAvisada = true
   useToastStore
     .getState()
     .pushToast(
-      'Nao foi possivel salvar o jogo neste navegador (armazenamento bloqueado) — o progresso e o farm offline nao serao mantidos.',
+      'Sem conexao com o servidor — seu progresso nao esta sendo salvo. Ele volta a salvar sozinho quando a conexao voltar.',
       'error',
       'world',
     )
+})
+
+// O adaptador de localStorage foi substituido pelo `postgresStorage`. O que
+// sobra do localStorage e SO leitura: quem ja jogava antes do login existir
+// tem um save real gravado neste formato ({version, data, savedAt}, a mesma
+// chave que o js/core/SaveManager.js do vanilla usava), e ele precisa ser
+// importado pra conta no primeiro acesso — senao o jogador "perde" o
+// progresso ao criar conta.
+export interface SaveLocalLegado {
+  data: GameStateData
+  savedAt: number | null
 }
 
-// Formato de storage customizado, byte-a-byte compativel com o payload que
-// js/core/SaveManager.js ja escrevia ({version, data, savedAt}) — mesma
-// chave de localStorage tambem, de proposito: no corte final da migracao
-// (Fase 7), o save de um jogador real carrega direto pro app novo sem
-// nenhuma acao manual. `data` (nao `state`, que e o nome padrao do Zustand)
-// e a chave interna do payload — so pra bater com o formato que ja existia
-// em disco.
-const gameStateStorage: PersistStorage<GameStateData> = {
-  getItem: (): StorageValue<GameStateData> | null => {
-    try {
-      const raw = localStorage.getItem(SAVE_KEY)
-      if (!raw) return null
-      const payload = JSON.parse(raw) as { version: number; data: GameStateData; savedAt?: number }
-      if (payload.version !== SAVE_VERSION) {
-        console.warn('Save de versao antiga descartado.')
-        return null
-      }
-      return { state: payload.data, version: SAVE_VERSION }
-    } catch (err) {
-      console.warn('Falha ao carregar save:', err)
-      return null
-    }
-  },
-  setItem: (_name, value) => {
-    try {
-      const payload = { version: SAVE_VERSION, data: value.state, savedAt: Date.now() }
-      localStorage.setItem(SAVE_KEY, JSON.stringify(payload))
-    } catch (err) {
-      reportSaveFailure(err)
-    }
-  },
-  removeItem: () => localStorage.removeItem(SAVE_KEY),
+export function lerSaveLocalLegado(): SaveLocalLegado | null {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY)
+    if (!raw) return null
+    const payload = JSON.parse(raw) as { version: number; data: GameStateData; savedAt?: number }
+    if (payload.version !== SAVE_VERSION) return null
+    if (!payload.data || !Array.isArray(payload.data.team)) return null
+    return { data: payload.data, savedAt: payload.savedAt ?? null }
+  } catch {
+    return null
+  }
+}
+
+// Nao apaga o save local depois de importar: se algo der errado no meio da
+// importacao, ele e a unica copia do progresso. Marca como importado, e a
+// tela de importacao usa isso pra nao oferecer de novo.
+const CHAVE_IMPORTADO = `${SAVE_KEY}:importado`
+
+export function marcarSaveLegadoImportado(): void {
+  try {
+    localStorage.setItem(CHAVE_IMPORTADO, new Date().toISOString())
+  } catch {
+    // localStorage bloqueado — a importacao seria oferecida de novo, o que e
+    // chato mas nao destrutivo (a tela deixa recusar).
+  }
+}
+
+export function saveLegadoJaImportado(): boolean {
+  try {
+    return localStorage.getItem(CHAVE_IMPORTADO) != null
+  } catch {
+    return false
+  }
 }
 
 // Escreve o save AGORA, sem esperar uma mudanca de estado disparar o
@@ -292,14 +316,16 @@ const gameStateStorage: PersistStorage<GameStateData> = {
 // armazenamento esta bloqueado (Safari em navegacao privada, por exemplo),
 // pra quem chama poder avisar em vez de falhar em silencio.
 export function forceSave(): boolean {
-  try {
-    const payload = { version: SAVE_VERSION, data: useGameStateStore.getState(), savedAt: Date.now() }
-    localStorage.setItem(SAVE_KEY, JSON.stringify(payload))
-    return true
-  } catch (err) {
-    reportSaveFailure(err)
-    return false
-  }
+  // Assinatura sincrona mantida de proposito: e chamada de dentro do tick do
+  // jogo e de handlers de visibilidade, em ~8 pontos que nao teriam o que
+  // fazer com uma Promise. A escrita em si e assincrona (rede) e reporta
+  // falha pelo callback de `gameStatePersistence`, nao pelo retorno.
+  //
+  // O `true` aqui significa "flush disparado", nao "gravado" — diferente do
+  // tempo do localStorage, onde os dois eram a mesma coisa. Para o ponto onde
+  // isso importa de verdade (pagina fechando), ver `flushPlayerRowOnUnload`.
+  void flushAgora()
+  return true
 }
 
 // Roda `fn` com a persistencia DESLIGADA, gravando uma unica vez no fim.
@@ -334,14 +360,12 @@ export function withSavesDeferred<T>(fn: () => T): T {
 // saber quanto tempo real se passou desde o ultimo save, igual
 // SaveManager.load() devolvia `savedAt` junto do `data`.
 export function readLastSavedAt(): number | null {
-  try {
-    const raw = localStorage.getItem(SAVE_KEY)
-    if (!raw) return null
-    const payload = JSON.parse(raw) as { savedAt?: number }
-    return payload.savedAt ?? null
-  } catch {
-    return null
-  }
+  // Vem de `players.updated_at` (no load) ou do relogio local (a cada
+  // escrita) — ver gameStatePersistence. Nota que importa pro Farm Offline:
+  // o `updated_at` e carimbado pelo RELOGIO DO SERVIDOR, entao o tempo fora
+  // calculado agora e imune a relogio de aparelho adiantado/atrasado, que era
+  // uma fonte real de gap absurdo na versao localStorage.
+  return ultimoSavedAt()
 }
 
 export const useGameStateStore = create<GameStateStore>()(
@@ -580,7 +604,14 @@ export const useGameStateStore = create<GameStateStore>()(
     }),
     {
       name: SAVE_KEY,
-      storage: gameStateStorage,
+      // Postgres, nao mais localStorage. O adaptador (data/remote/
+      // gameStatePersistence.ts) precisa saber QUEM esta logado antes de
+      // poder ler/escrever, e isso so existe depois do login — por isso
+      // `skipHydration`: quem chama `hidratarProgresso()` apos a sessao
+      // resolver e o bootstrap em features/game, nao o carregamento deste
+      // modulo.
+      storage: postgresStorage,
+      skipHydration: true,
       version: SAVE_VERSION,
       // Equivalente ao GameState.fromSnapshot: defaults defensivos pra save
       // antigo faltando campo novo, e UNIAO (nao substituicao) em

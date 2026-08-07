@@ -62,7 +62,15 @@ const GENERATED_HEADER =
 // apagado no corte final da migracao (nenhuma mudanca de codigo necessaria).
 const LEGACY_DATA_DIR = path.join(ROOT, 'js', 'data');
 
+// Quando outro script (scripts/migrate-catalog-to-postgres.js) importa este
+// arquivo so pra REUSAR o pipeline em memoria — a curadoria de hunts vive so
+// aqui, duplicar seria garantia de divergencia — regravar os *.generated.*
+// seria efeito colateral surpresa. A flag desliga so a escrita; todo o
+// calculo continua igual e as funcoes seguem devolvendo os mesmos dados.
+const SKIP_WRITE = process.env.SYNC_SKIP_WRITE === '1';
+
 function writeGenerated(fileName, contents) {
+  if (SKIP_WRITE) return;
   const filePath = path.join(DATA_DIR, fileName);
   fs.writeFileSync(filePath, GENERATED_HEADER + contents, 'utf8');
   console.log(`  -> ${path.relative(ROOT, filePath)}`);
@@ -72,6 +80,7 @@ function writeGenerated(fileName, contents) {
 // puro pro vanilla. `extraTs`/`extraJs` cobrem o unico caso que nao e so uma
 // constante exportada (typeChart, que embute a funcao getEffectiveness).
 function emitData(baseName, exportName, typeName, literal, extra) {
+  if (SKIP_WRITE) return;
   // `extra.imports` cobre tipos usados so pela funcao extra (typeChart usa
   // ElementType na assinatura de getEffectiveness).
   const typeImports = [typeName, ...((extra && extra.imports) || [])].join(', ');
@@ -802,4 +811,23 @@ function main() {
   console.log('\nSincronizacao concluida.');
 }
 
-main();
+// So roda o pipeline quando chamado direto (`npm run planilha:aplicar`). Sob
+// `require(...)`, apenas expoe as funcoes — ver a nota de SKIP_WRITE acima.
+if (require.main === module) main();
+
+module.exports = {
+  XLSX_PATH,
+  readWorkbook,
+  syncFormulas,
+  syncTypeChart,
+  syncItemsFull,
+  pickTopHunts,
+  computeJohtoBrackets,
+  buildTypeRoster,
+  buildTypeDrivenHunts,
+  syncSpeciesAndMoves,
+  syncMapsAndEncounters,
+  HUNT_COUNT,
+  KANTO_BRACKETS,
+  LEGENDARY_SHEET_KEYS,
+};
