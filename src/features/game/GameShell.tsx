@@ -8,13 +8,7 @@
 // sessao.
 import { useEffect, useRef, useState } from 'react'
 import { GameCanvas } from '@/components/GameCanvas'
-import { Hud } from '@/components/hud/Hud'
-import { AbilityHud } from '@/components/hud/AbilityHud'
-import { PerfStatsHud } from '@/components/hud/PerfStatsHud'
-import { ZoomControl } from '@/components/hud/ZoomControl'
 import { ToastStack } from '@/components/toasts/ToastStack'
-import { ChatLog } from '@/components/toasts/ChatLog'
-import { AutoFloatingPanel } from '@/components/auto/AutoFloatingPanel'
 import { PokeProfileModal } from '@/components/modals/PokeProfileModal'
 import { ConfirmDialog } from '@/components/modals/ConfirmDialog'
 import { LevelUpSplash } from '@/components/modals/LevelUpSplash'
@@ -22,9 +16,10 @@ import { BossDefeatModal } from '@/components/modals/BossDefeatModal'
 import { LanceCountdownModal, LanceVictoryReturn } from '@/components/modals/LanceModals'
 import { ReviveCountdownModal } from '@/components/modals/ReviveCountdownModal'
 import { OfflineFarmModal } from '@/components/modals/OfflineFarmModal'
-import { BottomNav } from '@/features/nav/BottomNav'
+import { HudLayer } from './HudLayer'
 import { ScreenOverlay } from '@/features/screens/ScreenOverlay'
 import { StartScreen } from '@/features/start/StartScreen'
+import { useUiStore } from '@/stores/uiStore'
 import { useGameStateStore, useHasStarter, readLastSavedAt, forceSave, withSavesDeferred } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import {
@@ -226,6 +221,20 @@ function useSyncOnUnload(): void {
   }, [])
 }
 
+// Um unico listener de resize pro app inteiro. Alem de alimentar os
+// breakpoints, ele LIMPA as posicoes de janela arrastadas: uma janela largada
+// no canto direito de uma tela larga fica fora da area visivel quando a janela
+// do navegador encolhe, e sem barra de titulo alcancavel nao ha como traze-la
+// de volta.
+function useViewportTracking(): void {
+  useEffect(() => {
+    const onResize = () => useUiStore.getState().handleViewportResize(window.innerWidth)
+    onResize()
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+}
+
 export function GameShell() {
   const progresso = useProgressoRemoto()
 
@@ -260,12 +269,20 @@ function TelaCarregandoProgresso({ estado }: { estado: EstadoProgresso }) {
 
 function JogoCarregado() {
   const hasStarter = useHasStarter()
+  const hudScale = useUiStore((s) => s.hudScale)
   const { summary, dismiss } = useOfflineFarmOnBoot()
   useBackgroundCatchUp()
   useSyncOnUnload()
+  useViewportTracking()
 
   return (
-    <div className="relative h-svh w-svw overflow-hidden bg-background text-foreground">
+    <div
+      // `.hud-root` define o font-size fluido do qual TODO tamanho em `em` da
+      // interface deriva; `--hud-scale` e a preferencia do jogador (0.8–1.4),
+      // que multiplica esse ajuste em vez de substitui-lo.
+      className="hud-root relative h-svh w-svw overflow-hidden bg-background text-foreground"
+      style={{ '--hud-scale': hudScale } as React.CSSProperties}
+    >
       <GameCanvas />
 
       {/* Camada de HUD. Ela FALTAVA: canvas, HUD, menus e StartScreen eram irmaos
@@ -282,41 +299,7 @@ function JogoCarregado() {
       <div className="pointer-events-none absolute inset-0">
         {hasStarter && (
           <>
-            {/* Topo: status do treinador/POKE ativo. */}
-            <div className="absolute top-2 left-1/2 z-[35] -translate-x-1/2">
-              <Hud />
-            </div>
-
-            {/* Menu principal logo ABAIXO do HUD, nao no rodape — mudanca pedida
-                pelo usuario numa leva anterior do jogo vanilla. z-35 pra ficar
-                acima do backdrop do ScreenOverlay (z-30), senao trocar de tela
-                com um menu aberto exigiria dois cliques. */}
-            <div className="absolute top-20 left-1/2 z-[35] -translate-x-1/2">
-              <BottomNav />
-            </div>
-
-            {/* Zoom no canto superior direito, na linha do menu. */}
-            <div className="absolute top-20 right-2 z-[35]">
-              <ZoomControl />
-            </div>
-
-            {/* Barra de golpes: rodape ao centro. */}
-            <div className="absolute bottom-3 left-1/2 z-[35] -translate-x-1/2">
-              <AbilityHud />
-            </div>
-
-            {/* Painel de taxa de farm: rodape a esquerda. O botao flutuante de
-                automacao se posiciona sozinho (fixed) logo acima dele. */}
-            <div className="absolute bottom-3 left-3 z-[35]">
-              <PerfStatsHud />
-            </div>
-
-            {/* Log/chat: rodape a direita. */}
-            <div className="absolute right-3 bottom-3 z-[35]">
-              <ChatLog />
-            </div>
-
-            <AutoFloatingPanel />
+            <HudLayer />
             <ScreenOverlay />
             <ReviveCountdownModal />
             <BossDefeatModal />

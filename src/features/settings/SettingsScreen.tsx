@@ -1,44 +1,63 @@
-// Port de js/ui/panels/SettingsScreen.js — abas Geral e Patch-notes.
+// Configuracoes: abas Geral e Patch-notes.
 import { useState } from 'react'
 import { sortedPatchNotes } from '@/data/patchNotes'
 import { controller } from '@/engine/controller'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
+import { useConfirmDialogStore } from '@/stores/confirmDialogStore'
+import { useUiStore, HUD_SCALE_MIN, HUD_SCALE_MAX } from '@/stores/uiStore'
+import { GameButton, GameCard, SegmentedTabs } from '@/components/game/controls'
 
 function GeralTab() {
+  const askConfirm = useConfirmDialogStore((s) => s.confirm)
+  const hudScale = useUiStore((s) => s.hudScale)
+  const setHudScale = useUiStore((s) => s.setHudScale)
+
   return (
-    <div className="flex items-center gap-3 rounded-lg border bg-card p-3">
-      <div className="min-w-0 flex-1">
-        <div className="text-sm font-medium">Iniciar novo jogo</div>
-        <div className="text-xs text-muted-foreground">
+    <div className="flex flex-col gap-[.7em]">
+      <GameCard className="flex flex-col gap-[.4em] p-[.8em]">
+        <div className="font-medium">Tamanho da interface</div>
+        <div className="text-[.8em] text-n500">
+          A HUD ja escala sozinha com a largura da tela. Este ajuste multiplica essa escala — util em monitor
+          muito grande ou pra quem prefere tudo maior. Fica salvo neste aparelho.
+        </div>
+        <div className="flex items-center gap-[.6em]">
+          <input
+            type="range"
+            min={HUD_SCALE_MIN}
+            max={HUD_SCALE_MAX}
+            step={0.05}
+            value={hudScale}
+            onChange={(e) => setHudScale(Number(e.target.value))}
+            className="h-[1em] flex-1 cursor-pointer accent-primary"
+            aria-label="Escala da interface"
+          />
+          <span className="w-[3.5em] text-right tabular-nums text-n300">
+            {Math.round(hudScale * 100)}%
+          </span>
+          <GameButton variant="ghost" onClick={() => setHudScale(1)}>Padrao</GameButton>
+        </div>
+      </GameCard>
+
+      <GameCard className="flex flex-col gap-[.4em] p-[.8em]">
+        <div className="font-medium">Iniciar novo jogo</div>
+        <div className="text-[.8em] text-n500">
           Apaga todo o progresso (equipe, itens, ouro, mapas) e comeca do zero.
         </div>
-      </div>
-      {/* O vanilla usava um botao de "clique 2x pra confirmar" com timeout de
-          4s; um AlertDialog de verdade e mais claro e nao depende de o usuario
-          lembrar de clicar de novo dentro da janela de tempo. */}
-      <AlertDialog>
-        <AlertDialogTrigger render={<Button variant="destructive" size="sm" className="shrink-0 text-xs" />}>
+        <GameButton
+          variant="danger"
+          className="self-start"
+          onClick={() =>
+            askConfirm({
+              title: 'Apagar todo o progresso?',
+              message:
+                'Equipe, itens, ouro e mapas desbloqueados serao perdidos. Essa acao nao pode ser desfeita.',
+              confirmLabel: 'Apagar e recomecar',
+              onConfirm: () => controller.resetGame(),
+            })
+          }
+        >
           Iniciar novo jogo
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Apagar todo o progresso?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Equipe, itens, ouro e mapas desbloqueados serao perdidos. Essa acao nao pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={() => controller.resetGame()}>Apagar e recomecar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        </GameButton>
+      </GameCard>
     </div>
   )
 }
@@ -46,38 +65,37 @@ function GeralTab() {
 function PatchNotesTab() {
   const notes = sortedPatchNotes()
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-[.6em]">
       {notes.map((note) => (
-        <div key={note.version} className="rounded-lg border bg-card p-3">
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="text-sm font-medium">{note.title}</span>
-            <span className="shrink-0 text-xs text-muted-foreground">v{note.version}</span>
+        <GameCard key={note.version} className="p-[.8em]">
+          <div className="flex items-baseline justify-between gap-[.5em]">
+            <b className="font-medium">{note.title}</b>
+            <span className="shrink-0 text-[.75em] text-n500">v{note.version} · {note.date}</span>
           </div>
-          <div className="text-xs text-muted-foreground">{note.date}</div>
-          <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-xs text-muted-foreground">
+          <ul className="mt-[.4em] list-disc pl-[1.2em] text-[.8em] text-n400">
             {note.highlights.map((h, i) => (
               <li key={i}>{h}</li>
             ))}
           </ul>
-        </div>
+        </GameCard>
       ))}
     </div>
   )
 }
 
 export function SettingsScreen() {
-  const [tab, setTab] = useState('geral')
+  const [tab, setTab] = useState<'geral' | 'patch'>('geral')
   return (
-    <div className="space-y-3">
-      <h2 className="text-lg font-semibold">Configuracoes</h2>
-      <Tabs value={tab} onValueChange={setTab}>
-        <TabsList>
-          <TabsTrigger value="geral">Geral</TabsTrigger>
-          <TabsTrigger value="patchnotes">Patch-notes</TabsTrigger>
-        </TabsList>
-        <TabsContent value="geral" className="mt-3"><GeralTab /></TabsContent>
-        <TabsContent value="patchnotes" className="mt-3"><PatchNotesTab /></TabsContent>
-      </Tabs>
+    <div className="flex flex-col gap-[.8em]">
+      <SegmentedTabs
+        value={tab}
+        onChange={setTab}
+        options={[
+          { value: 'geral', label: 'Geral' },
+          { value: 'patch', label: 'Patch-notes' },
+        ]}
+      />
+      {tab === 'geral' ? <GeralTab /> : <PatchNotesTab />}
     </div>
   )
 }

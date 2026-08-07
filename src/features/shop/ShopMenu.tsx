@@ -1,32 +1,36 @@
-// Port de js/ui/panels/ShopMenu.js — aba Itens (colunas comprar/vender) e
-// aba Pokemons (venda em lote com filtros).
+// Loja: aba Itens (colunas comprar/vender) e aba Pokemons (venda em lote com
+// filtros).
+//
+// Todo botao daqui faz round-trip ao servidor de autoridade, entao todos passam
+// por `useAcaoPendente` (fica desabilitado enquanto a intencao esta no ar) e por
+// `pedirAcaoComLocal` (o toast reporta o resultado REAL, nao um literal fixo —
+// ver a nota naquele helper).
 import { useMemo, useState } from 'react'
-import { pedirAcao } from '@/data/remote/autoridade'
+import { Coin, Diamond, LockSimple, LockSimpleOpen } from '@phosphor-icons/react'
+import { pedirAcao, pedirAcaoComLocal } from '@/data/remote/autoridade'
 import { SHOP_STOCK, getItem, ITEMS } from '@/data/items'
 import { SPECIES, averageIvPercent } from '@/data/pokes'
 import { itemIconUrl, itemIconBorderColor } from '@/data/sprites'
 import { RARITIES, rarityOf, type RarityKey } from '@/data/rarity'
 import {
-  buyItem, sellItem, sellAllItems, sellBagPoke, sellAllBagPokes, pokemonSellValue,
+  buyItem, sellItem, sellAllItems, sellAllBagPokes, pokemonSellValue,
 } from '@/engine/systems/economySystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
-import { useToastStore, type ToastType, type ToastChannel } from '@/stores/toastStore'
+import { useBreakpoints } from '@/stores/uiStore'
+import { useToastStore, type ToastType } from '@/stores/toastStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
+import { useConfirmDialogStore } from '@/stores/confirmDialogStore'
+import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { PokeNameTag } from '@/components/shared/PokeNameTag'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Slider } from '@/components/ui/slider'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+  GameButton, GameCard, GameCheck, GameIconButton, GameInput, SectionLabel, SegmentedTabs,
+} from '@/components/game/controls'
 
-function toast(message: string, type: ToastType, channel: ToastChannel) {
-  useToastStore.getState().pushToast(message, type, channel)
+const fmt = new Intl.NumberFormat('pt-BR')
+
+function toast(message: string, type: ToastType = 'success') {
+  useToastStore.getState().pushToast(message, type, 'trade')
 }
 
 function ItemIcon({ itemId, name, description }: { itemId: string; name: string; description?: string }) {
@@ -38,35 +42,22 @@ function ItemIcon({ itemId, name, description }: { itemId: string; name: string;
       src={url}
       alt={name}
       title={description}
-      className="h-10 w-10 shrink-0 rounded-md object-contain"
+      className="h-[2.2em] w-[2.2em] shrink-0 rounded-[.4em] object-contain"
       style={borderColor ? { border: `3px solid ${borderColor}` } : undefined}
     />
   )
 }
 
-// Slider + campo numerico sincronizados. No vanilla os dois eram inputs
-// separados que se atualizavam via listener manual pra nao disparar um
-// re-render do painel inteiro no meio do arrasto; aqui e so estado local.
-function QtyControl({ value, max, onChange }: { value: number; max: number; onChange: (v: number) => void }) {
+function QtyInput({ value, max, onChange }: { value: number; max: number; onChange: (v: number) => void }) {
   return (
-    <div className="flex shrink-0 items-center gap-2">
-      <Slider
-        className="w-24"
-        min={1}
-        max={Math.max(1, max)}
-        step={1}
-        value={value}
-        onValueChange={(v) => onChange(Array.isArray(v) ? v[0] : v)}
-      />
-      <Input
-        type="number"
-        className="h-8 w-16 text-xs"
-        min={1}
-        max={max}
-        value={value}
-        onChange={(e) => onChange(Math.max(1, Math.min(max, Math.floor(Number(e.target.value) || 1))))}
-      />
-    </div>
+    <GameInput
+      type="number"
+      min={1}
+      max={max}
+      value={value}
+      onChange={(e) => onChange(Math.max(1, Math.min(max, Math.floor(Number(e.target.value) || 1))))}
+      className="w-[3.4em] text-center"
+    />
   )
 }
 
@@ -75,65 +66,89 @@ function ItensTab() {
   const items = useGameStateStore((s) => s.items)
   const lockedItems = useGameStateStore((s) => s.lockedItems)
   const toggleItemLock = useGameStateStore((s) => s.toggleItemLock)
+  const { colStack } = useBreakpoints()
+  const acao = useAcaoPendente()
 
   const [buyQty, setBuyQty] = useState<Record<string, number>>({})
   const [sellQty, setSellQty] = useState<Record<string, number>>({})
 
   const ownedItemIds = Object.keys(items).filter((id) => items[id] > 0 && ITEMS[id])
 
+  async function comprar(itemId: string, qty: number, nome: string) {
+    const { ok, local } = await pedirAcaoComLocal(
+      { tipo: 'comprarItem', itemId, qtd: qty },
+      () => buyItem(useGameStateStore.getState(), itemId, qty),
+    )
+    if (!ok) return // pedirAcao ja avisou o erro do servidor
+    if (!local) return // caminho remoto: a mensagem certa vem do servidor
+    if (local.success) toast(`Comprou ${nome} x${qty}.`)
+    else toast(local.reason === 'insufficient_gold' ? 'Ouro insuficiente.' : 'Nao foi possivel comprar.', 'error')
+  }
+
+  async function vender(itemId: string, qty: number, nome: string) {
+    const { ok, local } = await pedirAcaoComLocal(
+      { tipo: 'venderItem', itemId, qtd: qty },
+      () => sellItem(useGameStateStore.getState(), itemId, qty),
+    )
+    if (!ok || !local) return
+    if (local.success) toast(`Vendeu ${nome} x${qty}.`)
+    else toast(local.reason === 'locked' ? 'Item trancado.' : 'Nao foi possivel vender.', 'error')
+  }
+
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <div className="space-y-2">
-        <div className="text-xs font-semibold tracking-wide text-muted-foreground">COMPRAR</div>
+    <div className={colStack ? 'flex flex-col gap-[1em]' : 'grid grid-cols-2 gap-[1em]'}>
+      <div className="flex flex-col gap-[.5em]">
+        <SectionLabel>COMPRAR</SectionLabel>
         {SHOP_STOCK.map((stock) => {
           const item = getItem(stock.itemId)
           if (!item || item.kind === 'stone') return null
-          const buyPrice = item.buyPrice
-          const maxAffordable = Math.max(1, Math.floor(gold / buyPrice))
+          const maxAffordable = Math.max(1, Math.floor(gold / item.buyPrice))
           const qty = Math.min(buyQty[item.id] ?? 1, maxAffordable)
+          const key = `buy:${item.id}`
           return (
-            <div key={item.id} className="flex flex-wrap items-center gap-2 rounded-lg border bg-card p-3">
+            <GameCard key={item.id} className="flex flex-wrap items-center gap-[.6em] p-[.55em]">
               <ItemIcon itemId={item.id} name={item.name} description={item.description} />
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium">
-                  {item.name} <span className="text-xs text-muted-foreground">(voce tem: {items[item.id] || 0})</span>
+              <div className="min-w-[6em] flex-1">
+                <div className="font-medium">
+                  {item.name} <span className="text-[.78em] text-n500">(tem: {items[item.id] || 0})</span>
                 </div>
-                <div className="text-xs text-muted-foreground">Preço: {buyPrice} ouro</div>
+                <div className="text-[.78em] text-gold">{fmt.format(item.buyPrice)} ouro</div>
               </div>
-              <QtyControl value={qty} max={maxAffordable} onChange={(v) => setBuyQty((m) => ({ ...m, [item.id]: v }))} />
-              <Button
-                size="sm"
-                className="text-xs"
-                onClick={() => {
-                  const res = { success: true } as const; void pedirAcao({ tipo: 'comprarItem', itemId: item.id, qtd: qty }, () => { buyItem(useGameStateStore.getState(), item.id, qty) })
-                  if (res.success) toast(`Comprou ${item.name} x${qty}.`, 'success', 'trade')
-                  else toast('Ouro insuficiente.', 'error', 'trade')
-                }}
+              <QtyInput value={qty} max={maxAffordable} onChange={(v) => setBuyQty((m) => ({ ...m, [item.id]: v }))} />
+              <GameButton
+                disabled={acao.pendingKey != null}
+                onClick={() => void acao.run(key, () => comprar(item.id, qty, item.name))}
               >
-                Comprar ({buyPrice * qty} ouro)
-              </Button>
-            </div>
+                {acao.isPending(key) ? '...' : `Comprar (${fmt.format(item.buyPrice * qty)})`}
+              </GameButton>
+            </GameCard>
           )
         })}
       </div>
 
-      <div className="space-y-2">
+      <div className="flex flex-col gap-[.5em]">
         <div className="flex items-center justify-between">
-          <div className="text-xs font-semibold tracking-wide text-muted-foreground">VENDER ITENS</div>
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-xs"
-            onClick={() => {
-              const res = { gold: 0, itemCount: 0 }; void pedirAcao({ tipo: 'venderTodosItens' }, () => { sellAllItems(useGameStateStore.getState()) })
-              if (res.itemCount > 0) toast(`Vendeu ${res.itemCount} itens por ${res.gold} ouro.`, 'success', 'trade')
-            }}
+          <SectionLabel>VENDER ITENS</SectionLabel>
+          <GameButton
+            variant="ghost"
+            disabled={acao.pendingKey != null}
+            onClick={() =>
+              void acao.run('sell-all-items', async () => {
+                const { ok, local } = await pedirAcaoComLocal(
+                  { tipo: 'venderTodosItens' },
+                  () => sellAllItems(useGameStateStore.getState()),
+                )
+                if (!ok || !local) return
+                if (local.itemCount > 0) toast(`Vendeu ${local.itemCount} itens por ${fmt.format(local.gold)} ouro.`)
+                else toast('Nada para vender (itens trancados sao poupados).', 'info')
+              })
+            }
           >
             Vender Tudo
-          </Button>
+          </GameButton>
         </div>
 
-        {ownedItemIds.length === 0 && <p className="text-sm text-muted-foreground">Nenhum item para vender.</p>}
+        {ownedItemIds.length === 0 && <p className="text-n500">Nenhum item para vender.</p>}
 
         {ownedItemIds.map((itemId) => {
           const item = ITEMS[itemId]
@@ -141,42 +156,41 @@ function ItensTab() {
           const locked = Boolean(lockedItems[itemId])
           const qty = Math.min(sellQty[itemId] ?? 1, owned)
           return (
-            <div key={itemId} className="flex flex-wrap items-center gap-2 rounded-lg border bg-card p-3">
+            <GameCard key={itemId} className="flex flex-wrap items-center gap-[.6em] p-[.55em]">
               <ItemIcon itemId={itemId} name={item.name} description={item.description} />
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium">
-                  {item.name} x{owned}
+              <div className="min-w-[6em] flex-1">
+                <div className="font-medium">
+                  {item.name} <span className="text-n400">x{owned}</span>
                 </div>
-                <div className="text-xs text-muted-foreground">Valor de venda: {item.sellPrice} ouro</div>
+                <div className="text-[.78em] text-n500">
+                  Venda: <span className="text-gold">{fmt.format(item.sellPrice)} ouro</span>
+                </div>
               </div>
-              <Button size="sm" variant="ghost" title={locked ? 'Destrancar' : 'Trancar'} onClick={() => toggleItemLock(itemId)}>
-                {locked ? '🔒' : '🔓'}
-              </Button>
+              <GameIconButton
+                variant="ghost"
+                title={locked ? 'Destrancar' : 'Trancar'}
+                aria-label={locked ? 'Destrancar' : 'Trancar'}
+                className={locked ? 'text-gold' : undefined}
+                onClick={() =>
+                  void acao.run(`lock:${itemId}`, () =>
+                    pedirAcao({ tipo: 'alternarTravaItem', itemId }, () => toggleItemLock(itemId)),
+                  )
+                }
+              >
+                {locked ? <LockSimple weight="fill" /> : <LockSimpleOpen />}
+              </GameIconButton>
               {!locked && (
                 <>
-                  <QtyControl value={qty} max={owned} onChange={(v) => setSellQty((m) => ({ ...m, [itemId]: v }))} />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-xs"
-                    onClick={() => { void pedirAcao({ tipo: 'venderItem', itemId, qtd: qty }, () => { sellItem(useGameStateStore.getState(), itemId, qty) }) }}
+                  <QtyInput value={qty} max={owned} onChange={(v) => setSellQty((m) => ({ ...m, [itemId]: v }))} />
+                  <GameButton
+                    disabled={acao.pendingKey != null}
+                    onClick={() => void acao.run(`sell:${itemId}`, () => vender(itemId, qty, item.name))}
                   >
-                    Vender ({qty})
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-xs"
-                    onClick={() => {
-                      void pedirAcao({ tipo: 'venderItem', itemId, qtd: owned }, () => { sellItem(useGameStateStore.getState(), itemId, owned) })
-                      toast(`Vendeu ${item.name} x${owned}.`, 'success', 'trade')
-                    }}
-                  >
-                    Vender Tudo
-                  </Button>
+                    Vender ({fmt.format(item.sellPrice * qty)})
+                  </GameButton>
                 </>
               )}
-            </div>
+            </GameCard>
           )
         })}
       </div>
@@ -184,15 +198,11 @@ function ItensTab() {
   )
 }
 
-interface PendingSell {
-  title: string
-  message: string
-  onConfirm: () => void
-}
-
 function PokemonsTab() {
   const bagPokes = useGameStateStore((s) => s.bagPokes)
   const showProfile = usePokeProfileStore((s) => s.showProfile)
+  const askConfirm = useConfirmDialogStore((s) => s.confirm)
+  const acao = useAcaoPendente()
 
   const [search, setSearch] = useState('')
   const [ivMin, setIvMin] = useState(0)
@@ -203,13 +213,12 @@ function PokemonsTab() {
     () => new Set(Object.keys(RARITIES) as RarityKey[]),
   )
   const [selectedUids, setSelectedUids] = useState<Set<string>>(() => new Set())
-  const [pending, setPending] = useState<PendingSell | null>(null)
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase()
-    // Os limites podem ser digitados fora de ordem (min > max) — compara
-    // contra o par ordenado pra nunca resultar numa lista vazia por engano;
-    // os campos continuam mostrando exatamente o que foi digitado.
+    // Os limites podem ser digitados fora de ordem (min > max) — compara contra
+    // o par ordenado pra nunca resultar numa lista vazia por engano; os campos
+    // continuam mostrando exatamente o que foi digitado.
     const lo = Math.min(ivMin, ivMax)
     const hi = Math.max(ivMin, ivMax)
     return bagPokes
@@ -223,248 +232,235 @@ function PokemonsTab() {
       .sort((a, b) => (sortDesc ? b.ivPct - a.ivPct : a.ivPct - b.ivPct))
   }, [bagPokes, search, ivMin, ivMax, sortDesc, shinyOnly, selectedRarities])
 
-  // POKEs trancados nunca entram na selecao em lote. Shinies so entram
-  // quando o filtro "Somente Shiny" esta ativo (e ai a venda exige confirm) —
-  // mesma regra de seguranca do "Vender Tudo", que nunca toca em shiny.
+  // POKEs trancados nunca entram na selecao em lote. Shinies so entram quando o
+  // filtro "Somente Shiny" esta ativo (e ai a venda exige confirmacao) — mesma
+  // regra de seguranca do "Vender Tudo", que nunca toca em shiny.
   const selectable = filtered.filter(({ poke }) => !poke.locked && (shinyOnly || !poke.isShiny))
   const selectableUids = selectable.map(({ poke }) => poke.uid)
   const allSelected = selectableUids.length > 0 && selectableUids.every((uid) => selectedUids.has(uid))
-  // Uids que sairam do filtro (vendidos, ou nao batem mais) nao contam.
   const activeSelection = [...selectedUids].filter((uid) => selectableUids.includes(uid))
 
-  function toggleRarity(key: RarityKey, on: boolean) {
-    setSelectedRarities((prev) => {
-      const next = new Set(prev)
-      if (on) next.add(key)
-      else next.delete(key)
-      return next
-    })
+  async function venderLote(uids: string[], extras?: { shiny: number; locked: number }) {
+    const { ok, local } = await pedirAcaoComLocal(
+      { tipo: 'venderPokes', pokeUids: uids },
+      () => sellAllBagPokes(useGameStateStore.getState(), uids),
+    )
+    setSelectedUids(new Set())
+    if (!ok) return
+    if (local && local.pokeCount > 0) {
+      toast(`Vendeu ${local.pokeCount} POKE(s) por ${fmt.format(local.gold)} ouro.`)
+    }
+    // Contagens de poupados sao calculadas do estado LOCAL antes da acao, entao
+    // valem nos dois caminhos.
+    if (extras?.shiny) toast(`${extras.shiny} POKE(s) Shiny nao foram vendidos ✨`, 'info')
+    if (extras?.locked) toast(`${extras.locked} POKE(s) trancado(s) nao foram vendidos.`, 'info')
   }
 
-  function sellSelected() {
+  function venderSelecionados() {
     const uids = activeSelection
-    const doSell = () => {
-      const res = { gold: 0, pokeCount: uids.length }; void pedirAcao({ tipo: 'venderPokes', pokeUids: uids }, () => { sellAllBagPokes(useGameStateStore.getState(), uids) })
-      setSelectedUids(new Set())
-      if (res.pokeCount > 0) toast(`Vendeu ${res.pokeCount} POKEs por ${res.gold} ouro.`, 'success', 'trade')
-    }
+    if (uids.length === 0) return
+    const executar = () => void acao.run('sell-selected', () => venderLote(uids))
     // A selecao so contem shiny enquanto "Somente Shiny" esta ativo (ver
     // `selectable`) — nesse caso todo uid e shiny, contagem direta basta.
-    if (shinyOnly && uids.length > 0) {
-      setPending({
+    if (shinyOnly) {
+      askConfirm({
         title: 'Vender POKEs Shiny?',
-        message: `Voce esta vendendo ${uids.length} POKE(s) Shiny! Essa acao nao pode ser desfeita. Confirmar venda?`,
-        onConfirm: doSell,
+        message: `Voce esta vendendo ${uids.length} POKE(s) Shiny. Essa acao nao pode ser desfeita.`,
+        confirmLabel: 'Vender',
+        onConfirm: executar,
       })
     } else {
-      doSell()
+      executar()
     }
   }
 
-  function sellAll() {
-    const shinyCount = filtered.filter(({ poke }) => poke.isShiny).length
-    const lockedCount = filtered.filter(({ poke }) => poke.locked).length
+  function venderTudo() {
+    const shiny = filtered.filter(({ poke }) => poke.isShiny).length
+    const locked = filtered.filter(({ poke }) => poke.locked).length
     const uids = filtered.filter(({ poke }) => !poke.isShiny && !poke.locked).map(({ poke }) => poke.uid)
-    const res = { gold: 0, pokeCount: uids.length }; void pedirAcao({ tipo: 'venderPokes', pokeUids: uids }, () => { sellAllBagPokes(useGameStateStore.getState(), uids) })
-    setSelectedUids(new Set())
-    if (res.pokeCount > 0) toast(`Vendeu ${res.pokeCount} POKEs por ${res.gold} ouro.`, 'success', 'trade')
-    if (shinyCount > 0) toast(`${shinyCount} POKE(s) Shiny nao foram vendidos automaticamente.`, 'info', 'trade')
-    if (lockedCount > 0) toast(`${lockedCount} POKE(s) trancado(s) nao foram vendidos.`, 'info', 'trade')
+    if (uids.length === 0) {
+      toast('Nenhum POKE elegivel (shiny e trancados sao poupados).', 'info')
+      return
+    }
+    void acao.run('sell-all-pokes', () => venderLote(uids, { shiny, locked }))
   }
 
   return (
-    <div className="space-y-3">
-      <div className="text-xs font-semibold tracking-wide text-muted-foreground">VENDER POKES EXTRAS (MOCHILA)</div>
+    <div className="flex flex-col gap-[.6em]">
+      <SectionLabel>VENDER POKES EXTRAS (MOCHILA)</SectionLabel>
 
-      <Input placeholder="Buscar POKE por nome..." value={search} onChange={(e) => setSearch(e.target.value)} />
-
-      <div className="flex flex-wrap items-center gap-2">
-        <Label className="flex items-center gap-1 text-xs">
-          IV min%
-          <Input
-            type="number" className="h-8 w-16 text-xs" min={0} max={100} value={ivMin}
+      <div className="flex flex-wrap items-center gap-[.5em]">
+        <GameInput
+          placeholder="Buscar por nome..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="min-w-[9em] flex-1"
+        />
+        <label className="flex items-center gap-[.3em] text-[.8em] text-n400">
+          IV min
+          <GameInput
+            type="number" min={0} max={100} value={ivMin} className="w-[3.4em] text-center"
             onChange={(e) => setIvMin(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
           />
-        </Label>
-        <Label className="flex items-center gap-1 text-xs">
-          IV max%
-          <Input
-            type="number" className="h-8 w-16 text-xs" min={0} max={100} value={ivMax}
+        </label>
+        <label className="flex items-center gap-[.3em] text-[.8em] text-n400">
+          IV max
+          <GameInput
+            type="number" min={0} max={100} value={ivMax} className="w-[3.4em] text-center"
             onChange={(e) => setIvMax(Math.max(0, Math.min(100, Number(e.target.value) || 100)))}
           />
-        </Label>
-        <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setSortDesc((d) => !d)}>
-          Ordenar por IV {sortDesc ? '↓' : '↑'}
-        </Button>
+        </label>
+        <GameButton onClick={() => setSortDesc((d) => !d)}>IV {sortDesc ? '↓' : '↑'}</GameButton>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-x-[.9em] gap-y-[.3em]">
         {Object.values(RARITIES).map((r) => (
-          <Label key={r.key} className="flex items-center gap-1.5 text-xs" style={{ color: r.color }}>
-            <Checkbox
-              checked={selectedRarities.has(r.key)}
-              onCheckedChange={(c) => toggleRarity(r.key, c === true)}
-            />
-            {r.label}
-          </Label>
+          <GameCheck
+            key={r.key}
+            checked={selectedRarities.has(r.key)}
+            onChange={(on) =>
+              setSelectedRarities((prev) => {
+                const next = new Set(prev)
+                if (on) next.add(r.key)
+                else next.delete(r.key)
+                return next
+              })
+            }
+          >
+            <span style={{ color: r.color }}>{r.label}</span>
+          </GameCheck>
         ))}
-        <Label className="flex items-center gap-1.5 text-xs">
-          <Checkbox
-            checked={shinyOnly}
-            onCheckedChange={(c) => {
-              setShinyOnly(c === true)
-              setSelectedUids(new Set()) // trocar de modo muda o que e selecionavel
-            }}
-          />
+        <GameCheck
+          checked={shinyOnly}
+          onChange={(on) => {
+            setShinyOnly(on)
+            setSelectedUids(new Set()) // trocar de modo muda o que e selecionavel
+          }}
+        >
           Somente Shiny ✨
-        </Label>
+        </GameCheck>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <Label className="flex items-center gap-1.5 text-xs">
-          <Checkbox
-            checked={allSelected}
-            onCheckedChange={(c) => setSelectedUids(c === true ? new Set(selectableUids) : new Set())}
-          />
+      <div className="flex flex-wrap items-center justify-between gap-[.5em]">
+        <GameCheck
+          checked={allSelected}
+          onChange={(on) => setSelectedUids(on ? new Set(selectableUids) : new Set())}
+        >
           Selecionar tudo
-        </Label>
-        <div className="flex gap-2">
-          <Button size="sm" variant="outline" className="text-xs" disabled={activeSelection.length === 0} onClick={sellSelected}>
-            {activeSelection.length > 0 ? `Vender Selecionados (${activeSelection.length})` : 'Vender Selecionados'}
-          </Button>
-          <Button size="sm" variant="outline" className="text-xs" onClick={sellAll}>
+        </GameCheck>
+        <div className="flex gap-[.4em]">
+          <GameButton
+            disabled={activeSelection.length === 0 || acao.pendingKey != null}
+            onClick={venderSelecionados}
+          >
+            Vender Selecionados ({activeSelection.length})
+          </GameButton>
+          <GameButton variant="ghost" disabled={acao.pendingKey != null} onClick={venderTudo}>
             Vender Tudo
-          </Button>
+          </GameButton>
         </div>
       </div>
 
       {ivMin > ivMax && (
-        <p className="text-xs text-muted-foreground">
-          Aviso: IV min% é maior que IV max% — invertido automaticamente para filtrar.
-        </p>
+        <p className="text-[.78em] text-warn">IV min maior que IV max — invertido automaticamente para filtrar.</p>
       )}
-      {bagPokes.length === 0 && <p className="text-sm text-muted-foreground">Nenhum POKE extra na mochila.</p>}
+      {bagPokes.length === 0 && <p className="text-n500">Nenhum POKE extra na mochila.</p>}
       {bagPokes.length > 0 && filtered.length === 0 && (
-        <p className="text-sm text-muted-foreground">Nenhum POKE corresponde ao filtro de IV.</p>
+        <p className="text-n500">Nenhum POKE corresponde aos filtros.</p>
       )}
 
-      <div className="space-y-2">
-        {filtered.map(({ poke, ivPct }) => {
-          const species = SPECIES[poke.speciesId]
-          const value = pokemonSellValue(poke.level, species.baseExp, poke.rarity)
-          const showCheckbox = !poke.locked && (shinyOnly || !poke.isShiny)
-          return (
-            <div
-              key={poke.uid}
-              className="flex cursor-pointer items-center gap-3 rounded-lg border bg-card p-3 hover:bg-accent/40"
-              onClick={() => showProfile(poke, species)}
-            >
-              {showCheckbox ? (
-                <span onClick={(e) => e.stopPropagation()}>
-                  <Checkbox
-                    checked={selectedUids.has(poke.uid)}
-                    onCheckedChange={(c) =>
-                      setSelectedUids((prev) => {
-                        const next = new Set(prev)
-                        if (c === true) next.add(poke.uid)
-                        else next.delete(poke.uid)
-                        return next
-                      })
-                    }
-                  />
-                </span>
-              ) : (
-                <span className="w-4 shrink-0" />
-              )}
-              <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} />
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <PokeNameTag poke={poke} species={species} />
-                  <span className="text-muted-foreground">Lv{poke.level}</span>
-                </div>
-                <div className="text-xs text-muted-foreground">IV: {ivPct.toFixed(0)}%</div>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs"
-                disabled={poke.locked}
-                title={poke.locked ? 'Trancado - destranque na Mochila' : undefined}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  if (poke.locked) return
-                  const doSell = () => {
-                    setSelectedUids((prev) => {
-                      const next = new Set(prev)
-                      next.delete(poke.uid)
-                      return next
-                    })
-                    sellBagPoke(useGameStateStore.getState(), poke.uid)
-                  }
-                  if (poke.isShiny) {
-                    setPending({
-                      title: 'Vender POKE Shiny?',
-                      message: `${species.name} eh Shiny! Essa acao nao pode ser desfeita. Vender mesmo assim por ${value} ouro?`,
-                      onConfirm: doSell,
-                    })
-                  } else {
-                    doSell()
-                  }
-                }}
-              >
-                {poke.locked ? '🔒 Trancado' : `Vender (${value} ouro)`}
-              </Button>
-            </div>
-          )
-        })}
-      </div>
+      {filtered.map(({ poke, ivPct }) => {
+        const species = SPECIES[poke.speciesId]
+        const value = pokemonSellValue(poke.level, species.baseExp, poke.rarity)
+        const showCheckbox = !poke.locked && (shinyOnly || !poke.isShiny)
+        const key = `sell:${poke.uid}`
 
-      <AlertDialog open={pending !== null} onOpenChange={(open) => !open && setPending(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{pending?.title}</AlertDialogTitle>
-            <AlertDialogDescription>{pending?.message}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                pending?.onConfirm()
-                setPending(null)
-              }}
+        function venderUm() {
+          // Venda individual passa pelo MESMO endpoint em lote: antes ela
+          // chamava `sellBagPoke` local direto, sem `pedirAcao`, entao sob
+          // autoridade do servidor o POKE reaparecia no sincronismo seguinte.
+          const executar = () => void acao.run(key, () => venderLote([poke.uid]))
+          if (poke.isShiny) {
+            askConfirm({
+              title: 'Vender POKE Shiny?',
+              message: `${species.name} e Shiny. Essa acao nao pode ser desfeita. Vender por ${fmt.format(value)} ouro?`,
+              confirmLabel: 'Vender',
+              onConfirm: executar,
+            })
+          } else {
+            executar()
+          }
+        }
+
+        return (
+          <GameCard key={poke.uid} className="flex items-center gap-[.6em] p-[.55em]">
+            {showCheckbox ? (
+              <GameCheck
+                checked={selectedUids.has(poke.uid)}
+                onChange={(on) =>
+                  setSelectedUids((prev) => {
+                    const next = new Set(prev)
+                    if (on) next.add(poke.uid)
+                    else next.delete(poke.uid)
+                    return next
+                  })
+                }
+              />
+            ) : (
+              // Espacador: mantem o alinhamento das colunas quando a linha nao
+              // pode ser selecionada (shiny/trancado).
+              <span className="w-[1em] shrink-0" />
+            )}
+            <span onClick={() => showProfile(poke, species)} className="cursor-pointer">
+              <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={2.4} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-[.4em]">
+                <PokeNameTag poke={poke} species={species} />
+                <span className="text-n400">Lv{poke.level}</span>
+                <span className="text-[.78em] text-n500">IV {ivPct.toFixed(0)}%</span>
+              </div>
+            </div>
+            <GameButton
+              disabled={poke.locked || acao.pendingKey != null}
+              title={poke.locked ? 'Trancado — destranque na Mochila' : undefined}
+              onClick={venderUm}
             >
-              Vender
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              {poke.locked ? '🔒 Trancado' : `Vender (${fmt.format(value)})`}
+            </GameButton>
+          </GameCard>
+        )
+      })}
     </div>
   )
 }
 
 export function ShopMenu() {
-  const [tab, setTab] = useState('itens')
+  const [tab, setTab] = useState<'itens' | 'pokemons'>('itens')
   const gold = useGameStateStore((s) => s.wallet.gold)
   const diamonds = useGameStateStore((s) => s.wallet.diamonds)
 
   return (
-    <div className="space-y-3">
-      <h2 className="text-lg font-semibold">Loja</h2>
-      <div className="text-sm font-medium">
-        Ouro: {gold} | Diamantes: {diamonds}
+    <div className="flex flex-col gap-[.8em]">
+      <div className="flex flex-wrap items-center gap-[.8em]">
+        <SegmentedTabs
+          value={tab}
+          onChange={setTab}
+          options={[
+            { value: 'itens', label: 'Itens' },
+            { value: 'pokemons', label: 'Pokemons' },
+          ]}
+        />
+        <span className="flex items-center gap-[.6em] text-[.85em] text-n300">
+          <span className="flex items-center gap-[.25em] text-gold">
+            <Coin weight="fill" /> {fmt.format(gold)}
+          </span>
+          <span className="flex items-center gap-[.25em] text-diamond">
+            <Diamond weight="fill" /> {fmt.format(diamonds)}
+          </span>
+        </span>
       </div>
-      <Tabs value={tab} onValueChange={setTab}>
-        <TabsList>
-          <TabsTrigger value="itens">Itens</TabsTrigger>
-          <TabsTrigger value="pokemons">Pokemons</TabsTrigger>
-        </TabsList>
-        <TabsContent value="itens" className="mt-3">
-          <ItensTab />
-        </TabsContent>
-        <TabsContent value="pokemons" className="mt-3">
-          <PokemonsTab />
-        </TabsContent>
-      </Tabs>
+      {tab === 'itens' ? <ItensTab /> : <PokemonsTab />}
     </div>
   )
 }

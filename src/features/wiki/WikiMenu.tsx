@@ -6,21 +6,19 @@ import { TYPE_CHART, getEffectiveness } from '@/data/generated/typeChart.generat
 import { colorForType, TYPE_COLORS } from '@/data/typeColors'
 import { RARITIES, RARITY_ORDER } from '@/data/rarity'
 import type { ElementType } from '@/data/generated/types'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { GameSelect, SegmentedTabs } from '@/components/game/controls'
+import { TypeChip as SharedTypeChip } from '@/components/shared/TypeChip'
 
 const ALL_TYPES = Object.keys(TYPE_COLORS) as ElementType[]
 
+// A Wiki mostra o nome COMPLETO do tipo (e um guia de referencia, nao uma
+// lista densa) — no resto do jogo o chip usa a abreviacao de 3 letras.
 function TypeChip({ type }: { type: ElementType }) {
-  return (
-    <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold text-white" style={{ background: colorForType(type) }}>
-      {type}
-    </span>
-  )
+  return <SharedTypeChip type={type} full />
 }
 
 function ChipList({ types }: { types: ElementType[] }) {
-  if (types.length === 0) return <span className="text-xs text-muted-foreground">Nenhum</span>
+  if (types.length === 0) return <span className="text-[.8em] text-n400">Nenhum</span>
   return (
     <div className="flex flex-wrap gap-1">
       {types.map((t) => (
@@ -32,9 +30,9 @@ function ChipList({ types }: { types: ElementType[] }) {
 
 function WikiCard({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="rounded-lg border bg-card p-3">
-      <div className="mb-1.5 text-sm font-medium">{title}</div>
-      <div className="text-xs leading-relaxed text-muted-foreground">{children}</div>
+    <div className="rounded-lg border bg-n900 p-3">
+      <div className="mb-1.5 text-[.9em] font-medium">{title}</div>
+      <div className="text-[.8em] leading-relaxed text-n400">{children}</div>
     </div>
   )
 }
@@ -80,7 +78,7 @@ function InicioTab() {
         onde encontrar cada uma (incluindo fraquezas/resistencias de cada uma).
         <br />📚 <b>Wiki</b> — este guia que voce esta lendo agora.
         <br />🏥 <b>Hospital</b> — clique na enfermeira em campo pra curar seu time por completo, de graça.
-        <br />🤖 <b>Auto</b> (botao flutuante no canto inferior esquerdo) — liga/desliga auto-pot, auto-catch
+        <br />🤖 <b>Auto</b> (botao flutuante no canto inferior direito) — liga/desliga auto-pot, auto-catch
         e auto-revive, e configura qual item cada automacao deve usar.
         <br />⚙️ <b>Config</b> — reiniciar o jogo e ver o historico de atualizacoes (Patch-notes).
       </WikiCard>
@@ -109,7 +107,7 @@ function InicioTab() {
 function TypeMatrix() {
   return (
     <div className="overflow-x-auto">
-      <table className="border-collapse text-[10px]">
+      <table className="border-collapse text-[.7em]">
         <thead>
           <tr>
             <th className="border bg-muted px-1 py-0.5 text-left whitespace-nowrap">Atk \ Def</th>
@@ -132,7 +130,7 @@ function TypeMatrix() {
                   m === 2 ? 'bg-emerald-500/25 font-semibold'
                     : m === 0.5 ? 'bg-amber-500/20'
                       : m === 0 ? 'bg-destructive/25 font-semibold'
-                        : 'text-muted-foreground'
+                        : 'text-n400'
                 return (
                   <td key={def} className={`border px-1 py-0.5 text-center ${cls}`}>
                     {m === 1 ? '·' : m}
@@ -173,62 +171,59 @@ function TiposTab() {
 
   return (
     <div className="space-y-2">
-      <div className="rounded-lg border bg-card p-3">
-        <div className="mb-1.5 text-sm font-medium">Como funciona a efetividade de tipos</div>
-        <div className="text-xs leading-relaxed text-muted-foreground">
+      <div className="rounded-lg border bg-n900 p-3">
+        <div className="mb-1.5 text-[.9em] font-medium">Como funciona a efetividade de tipos</div>
+        <div className="text-[.8em] leading-relaxed text-n400">
           Todo golpe tem um tipo elemental. Quando ele acerta um POKE, o dano e multiplicado de acordo com o
           tipo do defensor: <b>2x</b> (super eficaz), <b>0.5x</b> (pouco eficaz/resistido) ou <b>0x</b> (sem
           efeito/imune) — sem multiplicador nenhum, o golpe causa dano normal (1x). POKEs com <b>dois tipos</b>{' '}
           multiplicam os dois efeitos juntos (ex.: um golpe de Agua contra um POKE Terra+Rocha seria 2x * 2x =
           4x de dano).
         </div>
-        <Select value={selected} onValueChange={(v) => setSelected(v as ElementType)}>
-          <SelectTrigger className="mt-2 w-40 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {ALL_TYPES.map((t) => (
-              <SelectItem key={t} value={t}>
-                {t}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <GameSelect
+          value={selected}
+          onChange={(e) => setSelected(e.target.value as ElementType)}
+          className="mt-[.6em] w-[11em]"
+        >
+          {ALL_TYPES.map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </GameSelect>
       </div>
 
-      <div className="rounded-lg border bg-card p-3">
-        <div className="mb-1.5 flex items-center gap-1.5 text-sm font-medium">
+      <div className="rounded-lg border bg-n900 p-3">
+        <div className="mb-1.5 flex items-center gap-1.5 text-[.9em] font-medium">
           Atacando com golpes de <TypeChip type={selected} />
         </div>
         <div className="space-y-1.5">
-          <div className="text-xs text-muted-foreground">Super eficaz (2x) contra:</div>
+          <div className="text-[.8em] text-n400">Super eficaz (2x) contra:</div>
           <ChipList types={strongAtk} />
-          <div className="text-xs text-muted-foreground">Pouco eficaz (0.5x) contra:</div>
+          <div className="text-[.8em] text-n400">Pouco eficaz (0.5x) contra:</div>
           <ChipList types={weakAtk} />
-          <div className="text-xs text-muted-foreground">Sem efeito (0x) contra:</div>
+          <div className="text-[.8em] text-n400">Sem efeito (0x) contra:</div>
           <ChipList types={noEffAtk} />
         </div>
       </div>
 
-      <div className="rounded-lg border bg-card p-3">
-        <div className="mb-1.5 flex items-center gap-1.5 text-sm font-medium">
+      <div className="rounded-lg border bg-n900 p-3">
+        <div className="mb-1.5 flex items-center gap-1.5 text-[.9em] font-medium">
           Defendendo como um POKE de <TypeChip type={selected} />
         </div>
         <div className="space-y-1.5">
-          <div className="text-xs text-muted-foreground">Fraqueza — recebe 2x de:</div>
+          <div className="text-[.8em] text-n400">Fraqueza — recebe 2x de:</div>
           <ChipList types={weaknesses} />
-          <div className="text-xs text-muted-foreground">Resistencia — recebe 0.5x de:</div>
+          <div className="text-[.8em] text-n400">Resistencia — recebe 0.5x de:</div>
           <ChipList types={resistances} />
-          <div className="text-xs text-muted-foreground">Imunidade — recebe 0x de:</div>
+          <div className="text-[.8em] text-n400">Imunidade — recebe 0x de:</div>
           <ChipList types={immunities} />
         </div>
       </div>
 
-      <div className="rounded-lg border bg-card p-3">
-        <div className="mb-1.5 text-sm font-medium">
+      <div className="rounded-lg border bg-n900 p-3">
+        <div className="mb-1.5 text-[.9em] font-medium">
           Tabela completa (linhas = golpe atacante, colunas = POKE defensor)
         </div>
-        <div className="mb-2 text-xs text-muted-foreground">
+        <div className="mb-2 text-[.8em] text-n400">
           Arraste pros lados pra ver a tabela inteira. "·" = dano normal (1x).
         </div>
         <TypeMatrix />
@@ -250,9 +245,9 @@ function RaridadesTab() {
         fortes de verdade.
       </WikiCard>
 
-      <div className="rounded-lg border bg-card p-3">
-        <div className="mb-1.5 text-sm font-medium">Tabela de raridades</div>
-        <div className="overflow-hidden rounded-md border text-xs">
+      <div className="rounded-lg border bg-n900 p-3">
+        <div className="mb-1.5 text-[.9em] font-medium">Tabela de raridades</div>
+        <div className="overflow-hidden rounded-md border text-[.8em]">
           <div className="grid grid-cols-4 gap-1 border-b bg-muted/50 px-2 py-1 font-medium">
             <span>Raridade</span><span>Chance</span><span>Status</span><span>Venda</span>
           </div>
@@ -350,23 +345,26 @@ function MecanicasTab() {
   )
 }
 
+type WikiTab = 'inicio' | 'tipos' | 'raridades' | 'mecanicas'
+
 export function WikiMenu() {
-  const [tab, setTab] = useState('inicio')
+  const [tab, setTab] = useState<WikiTab>('inicio')
   return (
-    <div className="space-y-3">
-      <h2 className="text-lg font-semibold">📚 Wiki</h2>
-      <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="flex-wrap">
-          <TabsTrigger value="inicio">Primeiros Passos</TabsTrigger>
-          <TabsTrigger value="tipos">Efetividade de Tipos</TabsTrigger>
-          <TabsTrigger value="raridades">Raridades</TabsTrigger>
-          <TabsTrigger value="mecanicas">Mecanicas</TabsTrigger>
-        </TabsList>
-        <TabsContent value="inicio" className="mt-3"><InicioTab /></TabsContent>
-        <TabsContent value="tipos" className="mt-3"><TiposTab /></TabsContent>
-        <TabsContent value="raridades" className="mt-3"><RaridadesTab /></TabsContent>
-        <TabsContent value="mecanicas" className="mt-3"><MecanicasTab /></TabsContent>
-      </Tabs>
+    <div className="flex flex-col gap-[.8em]">
+      <SegmentedTabs
+        value={tab}
+        onChange={setTab}
+        options={[
+          { value: 'inicio', label: 'Primeiros Passos' },
+          { value: 'tipos', label: 'Efetividade' },
+          { value: 'raridades', label: 'Raridades' },
+          { value: 'mecanicas', label: 'Mecanicas' },
+        ]}
+      />
+      {tab === 'inicio' && <InicioTab />}
+      {tab === 'tipos' && <TiposTab />}
+      {tab === 'raridades' && <RaridadesTab />}
+      {tab === 'mecanicas' && <MecanicasTab />}
     </div>
   )
 }

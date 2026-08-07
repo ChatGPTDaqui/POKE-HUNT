@@ -1,16 +1,13 @@
-// Port de js/ui/panels/AutoPanel.js — corpo do painel de automacoes
-// (auto-pot / auto-catch / auto-revive).
+// Corpo do painel de automacoes (auto-pot / auto-catch / auto-revive).
 //
-// Duas coisas do original sumiram de proposito:
+// Duas coisas do vanilla sumiram de proposito:
 //  - `updateAutoPanelCounts` rodando a cada frame pra manter os badges "x12"
-//    de quantidade vivos sem tocar no <select>: era um workaround pro mesmo
-//    bug de reconstruir DOM interativo debaixo do ponteiro. Aqui os badges
-//    saem de um selector do Zustand (`items`), entao atualizam sozinhos
-//    quando a quantidade muda, e o <select> so re-renderiza se o valor dele
-//    de fato mudou.
-//  - `controller.save()` apos cada mutacao: o `persist` do Zustand grava
-//    sozinho a cada escrita na store.
+//    vivos sem tocar no <select>: era workaround pra nao reconstruir DOM
+//    interativo debaixo do ponteiro. Aqui os badges saem de um selector do
+//    Zustand, entao atualizam sozinhos.
+//  - `controller.save()` apos cada mutacao: o `persist` grava sozinho.
 import { useEffect, useRef } from 'react'
+import { Question } from '@phosphor-icons/react'
 import { ITEMS } from '@/data/items'
 import { SPECIES } from '@/data/pokes'
 import { getEncounter } from '@/data/enemies'
@@ -18,9 +15,7 @@ import { BEST_POTION_OPTION } from '@/engine/systems/autoSystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { sincronizarAuto } from '@/data/remote/autoridade'
 import { useWorldStore } from '@/stores/worldStore'
-import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
-import { Input } from '@/components/ui/input'
+import { GameButton, GameInput, GameSelect, GameSwitch } from '@/components/game/controls'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 const MAX_AUTO_POT_RULES = 3
@@ -33,12 +28,12 @@ function InfoIcon({ text }: { text: string }) {
     <Tooltip>
       <TooltipTrigger
         render={
-          <span className="ml-1 inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full border text-[9px] text-muted-foreground" />
+          <span className="inline-flex h-[1.15em] w-[1.15em] cursor-help items-center justify-center rounded-full border border-n600 text-n500" />
         }
       >
-        ?
+        <Question className="text-[.7em]" />
       </TooltipTrigger>
-      <TooltipContent className="max-w-64 bg-popover text-popover-foreground">{text}</TooltipContent>
+      <TooltipContent className="max-w-[18em] bg-popover text-popover-foreground">{text}</TooltipContent>
     </Tooltip>
   )
 }
@@ -46,12 +41,33 @@ function InfoIcon({ text }: { text: string }) {
 function ItemCountBadge({ itemId }: { itemId: string }) {
   const count = useGameStateStore((s) => s.items[itemId] ?? 0)
   if (itemId === BEST_POTION_OPTION) return null
-  return <span className="shrink-0 text-[11px] text-muted-foreground">x{count}</span>
+  return (
+    <span className="shrink-0 rounded-full border border-n700 px-[.4em] text-[.8em] text-n400">x{count}</span>
+  )
+}
+
+function ToggleRow({
+  label, tip, checked, onChange,
+}: {
+  label: string
+  tip: string
+  checked: boolean
+  onChange: (v: boolean) => void
+}) {
+  return (
+    <div className="flex items-center gap-[.5em]">
+      <span className="flex flex-1 items-center gap-[.4em]">
+        {label}
+        <InfoIcon text={tip} />
+      </span>
+      <GameSwitch checked={checked} onChange={onChange} label={label} />
+    </div>
+  )
 }
 
 // Especies que podem nascer na hunt atual — mesma cadeia enemyPool ->
-// encounter -> species que o HuntMenu ja usa. Deduplicado, ja que a mesma
-// especie pode ter varias linhas de encontro no mesmo pool.
+// encounter -> species que o HuntMenu usa. Deduplicado, ja que a mesma especie
+// pode ter varias linhas de encontro no mesmo pool.
 function useCurrentHuntSpecies() {
   const mapDef = useWorldStore((s) => s.mapDef)
   if (!mapDef) return []
@@ -87,28 +103,30 @@ export function AutoPanel() {
   // abertura do painel.
   const primeiraSync = useRef(true)
   useEffect(() => {
-    if (primeiraSync.current) { primeiraSync.current = false; return }
+    if (primeiraSync.current) {
+      primeiraSync.current = false
+      return
+    }
     sincronizarAuto()
   }, [autoToggles, autoPotRules, autoCatchConfig, autoCatchRules])
-
 
   const huntSpecies = useCurrentHuntSpecies()
 
   return (
-    <div className="space-y-3 text-xs">
-      <div className="flex items-center justify-between gap-2">
-        <span>
-          Auto-pot
-          <InfoIcon text="Cura automaticamente usando as regras abaixo. Cada regra define um limite de vida (%) e qual pocao usar quando o POKE cair abaixo desse limite. A primeira regra que corresponder (na ordem da lista) e usada." />
-        </span>
-        <Switch checked={autoToggles.autoPot} onCheckedChange={(v) => setAutoToggle('autoPot', v)} />
-      </div>
+    <div className="flex flex-col gap-[.7em] text-[.8em]">
+      <ToggleRow
+        label="Auto-pot"
+        tip="Usa pocao quando o HP cai do limite. A primeira regra que casar (na ordem da lista) e usada."
+        checked={autoToggles.autoPot}
+        onChange={(v) => setAutoToggle('autoPot', v)}
+      />
 
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-[.5em] rounded-[.6em] border border-n800 p-[.6em]">
+        <div className="text-[.9em] text-n400">Regra de auto-pot</div>
         {autoPotRules.map((rule, index) => (
-          <div key={index} className="flex flex-wrap items-center gap-1.5 rounded-md border p-1.5">
-            <span>Vida &lt;=</span>
-            <Input
+          <div key={index} className="flex flex-wrap items-center gap-[.4em]">
+            <span>Vida ≤</span>
+            <GameInput
               type="number"
               min={1}
               max={99}
@@ -116,172 +134,157 @@ export function AutoPanel() {
               onChange={(e) =>
                 updateAutoPotRule(index, { hpPercent: Math.max(1, Math.min(99, Number(e.target.value) || 1)) })
               }
-              className="h-7 w-14 px-1.5 text-xs"
+              // Largura fixa e pequena: sem ela o input numerico cai no tamanho
+              // default do navegador (~20 caracteres) e transborda a janela de
+              // 19em na horizontal.
+              className="w-[3.4em] text-center"
             />
-            <span>%, usar</span>
-            <select
+            <span>% usar</span>
+            <GameSelect
               value={rule.itemId}
               onChange={(e) => updateAutoPotRule(index, { itemId: e.target.value })}
-              className="h-7 rounded border bg-background px-1 text-xs"
+              className="max-w-[9em] flex-1"
             >
               <option value={BEST_POTION_OPTION}>Escolher melhor</option>
               {POTION_OPTIONS.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
+                <option key={p.id} value={p.id}>{p.name}</option>
               ))}
-            </select>
+            </GameSelect>
             <ItemCountBadge itemId={rule.itemId} />
             {autoPotRules.length > 1 && (
-              <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px]" onClick={() => removeAutoPotRule(index)}>
-                Remover
-              </Button>
+              <GameButton variant="ghost" onClick={() => removeAutoPotRule(index)}>Remover</GameButton>
             )}
           </div>
         ))}
+        <GameButton
+          variant="ghost"
+          block
+          disabled={autoPotRules.length >= MAX_AUTO_POT_RULES}
+          onClick={() => addAutoPotRule({ hpPercent: 50, itemId: BEST_POTION_OPTION })}
+        >
+          + Adicionar regra
+        </GameButton>
       </div>
 
-      <Button
-        variant="outline"
-        size="sm"
-        className="h-7 w-full text-[11px]"
-        disabled={autoPotRules.length >= MAX_AUTO_POT_RULES}
-        onClick={() => addAutoPotRule({ hpPercent: 50, itemId: BEST_POTION_OPTION })}
-      >
-        + Adicionar regra
-      </Button>
+      <ToggleRow
+        label="Auto-catch"
+        tip="Lanca a bola em todo inimigo derrotado; capturas vao para a mochila."
+        checked={autoToggles.autoCatch}
+        onChange={(v) => setAutoToggle('autoCatch', v)}
+      />
+      <ToggleRow
+        label="Catch Shiny"
+        tip="Usa uma bola diferente especificamente em shinies."
+        checked={autoCatchConfig.catchShinyEnabled}
+        onChange={(v) => setAutoCatchConfig({ catchShinyEnabled: v })}
+      />
 
-      <div className="flex items-center justify-between gap-2">
-        <span>
-          Auto-catch
-          <InfoIcon text="Lanca automaticamente a bola escolhida abaixo em todo inimigo derrotado, tentando captura-lo. Capturas sempre vao para a mochila." />
-        </span>
-        <Switch checked={autoToggles.autoCatch} onCheckedChange={(v) => setAutoToggle('autoCatch', v)} />
-      </div>
-
-      <div className="flex items-center justify-between gap-2">
-        <span>
-          Catch Shiny
-          <InfoIcon text="Quando ativado, usa uma bola diferente (escolhida abaixo) especificamente ao capturar POKES Shiny — uma variante rara e colorida." />
-        </span>
-        <Switch
-          checked={autoCatchConfig.catchShinyEnabled}
-          onCheckedChange={(v) => setAutoCatchConfig({ catchShinyEnabled: v })}
+      <div className="grid grid-cols-2 gap-[.5em]">
+        <BallPicker
+          label="Bola padrao"
+          value={autoCatchConfig.ballId}
+          onChange={(ballId) => setAutoCatchConfig({ ballId })}
+        />
+        <BallPicker
+          label="Bola Shiny"
+          value={autoCatchConfig.shinyBallId}
+          disabled={!autoCatchConfig.catchShinyEnabled}
+          onChange={(shinyBallId) => setAutoCatchConfig({ shinyBallId })}
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        <label className="flex flex-col gap-1 rounded-md border p-1.5">
-          <span className="text-[11px] text-muted-foreground">Bola padrao</span>
-          <div className="flex items-center gap-1">
-            <select
-              value={autoCatchConfig.ballId}
-              onChange={(e) => setAutoCatchConfig({ ballId: e.target.value })}
-              className="h-7 min-w-0 flex-1 rounded border bg-background px-1 text-xs"
-            >
-              {BALL_OPTIONS.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
-            <ItemCountBadge itemId={autoCatchConfig.ballId} />
-          </div>
-        </label>
-
-        <label className="flex flex-col gap-1 rounded-md border p-1.5">
-          <span className="text-[11px] text-muted-foreground">Bola Shiny</span>
-          <div className="flex items-center gap-1">
-            <select
-              value={autoCatchConfig.shinyBallId}
-              disabled={!autoCatchConfig.catchShinyEnabled}
-              onChange={(e) => setAutoCatchConfig({ shinyBallId: e.target.value })}
-              className="h-7 min-w-0 flex-1 rounded border bg-background px-1 text-xs disabled:opacity-50"
-            >
-              {BALL_OPTIONS.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
-            <ItemCountBadge itemId={autoCatchConfig.shinyBallId} />
-          </div>
-        </label>
-      </div>
-
-      <div className="font-medium">
+      <div className="flex items-center gap-[.4em] font-medium">
         Regras por especie
         <InfoIcon text="Define uma bola especifica pra uma especie da hunt atual. Tem prioridade sobre a bola padrao/shiny. Se a bola da regra acabar, o bot so mata aquela especie em vez de gastar outra bola nela." />
       </div>
 
       {huntSpecies.length === 0 && (
-        <div className="text-muted-foreground">Entre numa hunt pra configurar regras por especie.</div>
+        <div className="text-n500">Entre numa hunt pra configurar regras por especie.</div>
       )}
 
-      <div className="space-y-1.5">
+      <div className="flex flex-col gap-[.4em]">
         {autoCatchRules.map((rule, index) => {
-          // A especie de uma regra pode sobreviver a hunt em que foi criada
-          // (o jogador seguiu em frente) — mantem ela selecionavel/visivel em
-          // vez de sumir silenciosamente do proprio dropdown.
+          // A especie de uma regra pode sobreviver a hunt em que foi criada (o
+          // jogador seguiu em frente) — mantem ela selecionavel/visivel em vez
+          // de sumir silenciosamente do proprio dropdown.
           const options = new Map(huntSpecies.map((s) => [s.id, s.name]))
           if (rule.speciesId && !options.has(rule.speciesId)) {
             const stale = SPECIES[rule.speciesId]
             options.set(rule.speciesId, stale ? `${stale.name} (fora da hunt atual)` : rule.speciesId)
           }
           return (
-            <div key={index} className="flex flex-wrap items-center gap-1.5 rounded-md border p-1.5">
-              <select
+            <div key={index} className="flex flex-wrap items-center gap-[.4em] rounded-[.5em] border border-n800 p-[.4em]">
+              <GameSelect
                 value={rule.speciesId}
                 onChange={(e) => updateAutoCatchRule(index, { speciesId: e.target.value })}
-                className="h-7 min-w-0 flex-1 rounded border bg-background px-1 text-xs"
+                className="flex-1"
               >
                 {[...options.entries()].map(([id, name]) => (
-                  <option key={id} value={id}>
-                    {name}
-                  </option>
+                  <option key={id} value={id}>{name}</option>
                 ))}
-              </select>
-              <select
+              </GameSelect>
+              <GameSelect
                 value={rule.ballItemId}
                 onChange={(e) => updateAutoCatchRule(index, { ballItemId: e.target.value })}
-                className="h-7 rounded border bg-background px-1 text-xs"
               >
                 {BALL_OPTIONS.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                  </option>
+                  <option key={b.id} value={b.id}>{b.name}</option>
                 ))}
-              </select>
+              </GameSelect>
               <ItemCountBadge itemId={rule.ballItemId} />
-              <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px]" onClick={() => removeAutoCatchRule(index)}>
-                Remover
-              </Button>
+              <GameButton variant="ghost" onClick={() => removeAutoCatchRule(index)}>Remover</GameButton>
             </div>
           )
         })}
       </div>
 
-      <Button
-        variant="outline"
-        size="sm"
-        className="h-7 w-full text-[11px]"
+      <GameButton
+        variant="ghost"
+        block
         disabled={huntSpecies.length === 0}
         onClick={() => {
           if (huntSpecies.length === 0) return
-          const alreadyRuled = new Set(autoCatchRules.map((r) => r.speciesId))
-          const firstFree = huntSpecies.find((s) => !alreadyRuled.has(s.id)) || huntSpecies[0]
-          addAutoCatchRule({ speciesId: firstFree.id, ballItemId: autoCatchConfig.ballId })
+          const jaTemRegra = new Set(autoCatchRules.map((r) => r.speciesId))
+          const primeiraLivre = huntSpecies.find((s) => !jaTemRegra.has(s.id)) || huntSpecies[0]
+          addAutoCatchRule({ speciesId: primeiraLivre.id, ballItemId: autoCatchConfig.ballId })
         }}
       >
         + Adicionar regra
-      </Button>
+      </GameButton>
 
-      <div className="flex items-center justify-between gap-2">
-        <span>
-          Auto-revive
-          <InfoIcon text="Se o POKE em campo desmaiar, usa automaticamente um Revive da mochila para reanima-lo." />
-        </span>
-        <Switch checked={autoToggles.autoRevive} onCheckedChange={(v) => setAutoToggle('autoRevive', v)} />
+      <ToggleRow
+        label="Auto-revive"
+        tip="Se o POKE em campo desmaiar, usa um Revive da mochila automaticamente."
+        checked={autoToggles.autoRevive}
+        onChange={(v) => setAutoToggle('autoRevive', v)}
+      />
+    </div>
+  )
+}
+
+function BallPicker({
+  label, value, onChange, disabled,
+}: {
+  label: string
+  value: string
+  onChange: (id: string) => void
+  disabled?: boolean
+}) {
+  return (
+    <div className="flex flex-col gap-[.25em]" style={{ opacity: disabled ? 0.45 : 1 }}>
+      <span className="text-n400">{label}</span>
+      <div className="flex items-center gap-[.3em]">
+        <GameSelect
+          value={value}
+          disabled={disabled}
+          onChange={(e) => onChange(e.target.value)}
+          className="min-w-0 flex-1"
+        >
+          {BALL_OPTIONS.map((b) => (
+            <option key={b.id} value={b.id}>{b.name}</option>
+          ))}
+        </GameSelect>
+        <ItemCountBadge itemId={value} />
       </div>
     </div>
   )

@@ -1,17 +1,15 @@
-// Port de js/ui/panels/PokeProfileModal.js — a experiencia unica e canonica
-// de "clicar num POKE pra ver o perfil". No vanilla ele era anexado direto no
-// <body> por qualquer painel que importasse `showPokeProfileModal`; aqui e um
-// componente montado uma vez, e quem quer abrir escreve no pokeProfileStore.
+// A experiencia unica e canonica de "clicar num POKE pra ver o perfil": Equipe,
+// Mochila, Loja, Pokedex, Calculadora e o card do POKE ativo no HUD abrem
+// exatamente esta janela. Quem quer abrir so escreve no pokeProfileStore.
 //
 // O cabecalho (ProfileHero, com a sprite gen5 animada) fica FORA do corpo
-// trocado pelas abas — igual no original: se ele fosse re-montado a cada
-// clique de aba, a animacao do GIF reiniciaria do zero.
+// trocado pelas abas: se ele fosse remontado a cada clique de aba, a animacao
+// do GIF reiniciaria do zero. Ele tambem e a alca de arraste da janela.
 import { useEffect, useState } from 'react'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { GameWindow } from '@/components/game/GameWindow'
 import { ProfileHero, StatDetail, MovesetTable } from '@/components/shared/PokeStatDetail'
 import { TypeWeaknessSection } from '@/components/shared/TypeWeaknessSection'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
-import { useDraggable } from '@/hooks/useDraggable'
 import { cn } from '@/lib/utils'
 
 type ProfileTab = 'status' | 'golpes'
@@ -20,10 +18,9 @@ export function PokeProfileModal() {
   const open = usePokeProfileStore((s) => s.open)
   const close = usePokeProfileStore((s) => s.close)
   const [activeTab, setActiveTab] = useState<ProfileTab>('status')
-  const { elementRef, handleRef } = useDraggable<HTMLDivElement, HTMLDivElement>()
 
-  // Toda vez que um POKE diferente e aberto, volta pra aba Status (o vanilla
-  // recriava o modal inteiro, entao isso vinha de graca).
+  // Trocar de POKE volta pra aba Status (o vanilla recriava o modal inteiro,
+  // entao isso vinha de graca).
   useEffect(() => {
     if (open) setActiveTab('status')
   }, [open?.poke.uid])
@@ -32,38 +29,39 @@ export function PokeProfileModal() {
   const { poke, species } = open
 
   return (
-    <Dialog open onOpenChange={(next) => !next && close()}>
-      <DialogContent ref={elementRef} className="max-h-[85vh] overflow-y-auto sm:max-w-md">
-        <DialogTitle className="sr-only">{species.name}</DialogTitle>
-
-        <div ref={handleRef} className="cursor-move">
-          <ProfileHero poke={poke} species={species} />
-        </div>
-
-        <div className="flex gap-1 border-b">
+    <GameWindow
+      winKey="profile"
+      widthEm={30}
+      defaultTop="8vh"
+      zIndex={46}
+      backdrop={{ zIndex: 45 }}
+      onClose={close}
+      header={<ProfileHero poke={poke} species={species} />}
+      subheader={
+        <div className="flex gap-[1em] border-b border-n800 px-[1em]">
           {(['status', 'golpes'] as const).map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
               className={cn(
-                'px-3 py-1.5 text-xs capitalize',
+                'cursor-pointer border-b-2 bg-transparent px-[.2em] py-[.4em] font-[inherit] text-[.9em]',
                 activeTab === tab
-                  ? 'border-b-2 border-primary font-medium'
-                  : 'text-muted-foreground hover:text-foreground',
+                  ? 'border-primary text-foreground'
+                  : 'border-transparent text-n500 hover:text-foreground',
               )}
             >
               {tab === 'status' ? 'Status' : 'Golpes'}
             </button>
           ))}
         </div>
-
-        {activeTab === 'status' ? (
-          <StatDetail poke={poke} weaknessSection={<TypeWeaknessSection species={species} />} />
-        ) : (
-          <MovesetTable poke={poke} species={species} />
-        )}
-      </DialogContent>
-    </Dialog>
+      }
+    >
+      {activeTab === 'status' ? (
+        <StatDetail poke={poke} weaknessSection={<TypeWeaknessSection species={species} />} />
+      ) : (
+        <MovesetTable poke={poke} species={species} />
+      )}
+    </GameWindow>
   )
 }

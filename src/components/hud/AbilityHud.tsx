@@ -1,9 +1,9 @@
-// Port de js/ui/panels/AbilityHUD.js — barra de golpes do POKE em campo.
-// Cor de fundo por tipo elemental, borda por categoria (fisico/especial),
-// marca AOE, badge de dano base, overlay de cooldown.
+// Barra de golpes do POKE em campo. Fundo na cor do TIPO elemental, borda na
+// cor da CATEGORIA (fisico/especial), bolinha verde = AOE, faixa inferior com o
+// dano base, anel branco = pronto, overlay preto = cooldown ou desligado.
 //
 // Duplo-clique num slot liga/desliga o golpe pra selecao automatica da IA
-// (CombatSystem#pickAbility filtra contra `poke.disabledAbilities`) — pedido
+// (combatSystem#pickAbility filtra contra `poke.disabledAbilities`) — pedido
 // explicito do usuario, util principalmente pra optar por nao usar
 // self-destruct, mas funciona como on/off geral por golpe.
 //
@@ -15,9 +15,10 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { cn } from '@/lib/utils'
 
-// Cores fixas de UI (nao por tipo) — bater o olho no slot ja diz a categoria
-// do golpe sem precisar ler o tooltip.
-const CATEGORY_BORDER: Record<string, string> = { physical: '#9aa0a6', special: '#60a5fa' }
+const CATEGORY_BORDER: Record<string, string> = {
+  physical: 'var(--color-cat-physical)',
+  special: 'var(--color-cat-special)',
+}
 
 function shortLabel(name: string): string {
   return name
@@ -43,46 +44,54 @@ export function AbilityHud() {
   if (abilities.length === 0) return null
 
   return (
-    <div className="pointer-events-auto flex gap-1.5">
+    <div className="pointer-events-auto flex flex-wrap justify-center gap-[.45em]">
       {abilities.map((ability) => {
         const isOff = Boolean(disabled[ability.id])
         const cd = cooldowns?.[ability.id] ?? 0
         const ready = cd <= 0 && !isOff
-        const typeColor = colorForType(ability.type)
         const borderColor = CATEGORY_BORDER[resolveAbilityCategory(ability, poke)] || CATEGORY_BORDER.physical
-        const isAoe = ability.target === 'aoe'
 
         return (
           <div
             key={ability.id}
             onDoubleClick={() => toggleAbilityDisabled(poke.uid, ability.id)}
-            title={`${ability.name}${isOff ? ' (desativado — 2x clique para reativar)' : ' (2x clique para desativar)'}`}
+            title={`${ability.name}${isOff ? ' (desligado — duplo clique religa)' : ' (duplo clique desliga da rotação)'}`}
             className={cn(
-              'relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-md border-4 text-[11px] font-bold text-white shadow select-none',
-              ready && 'ring-2 ring-white/70',
+              'relative flex h-[3.4em] w-[3.4em] cursor-pointer items-center justify-center rounded-[.6em] select-none',
+              ready && 'shadow-[0_0_0_2px_rgba(255,255,255,.85)]',
             )}
-            style={{ background: typeColor, borderColor }}
+            style={{
+              background: colorForType(ability.type),
+              border: `.28em solid ${borderColor}`,
+            }}
           >
-            <span className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.9)]">{shortLabel(ability.name)}</span>
+            <span
+              className="font-mono text-[.95em] font-bold text-white"
+              style={{ textShadow: '0 1px 3px rgba(0,0,0,.8)' }}
+            >
+              {shortLabel(ability.name)}
+            </span>
 
-            {isAoe && (
-              <span className="absolute -top-1.5 -right-1.5 h-3 w-3 rounded-full border-2 border-background bg-emerald-400" />
+            {ability.target === 'aoe' && (
+              <span className="absolute -top-[.3em] -right-[.3em] h-[.8em] w-[.8em] rounded-full border border-[#052e16] bg-[#4ade80]" />
             )}
 
             {!ready && !isOff && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-sm bg-black/65 text-[11px]">
-                {cd.toFixed(1)}
-              </div>
+              <span className="absolute inset-0 flex items-center justify-center rounded-[.32em] bg-black/65 text-[.85em] tabular-nums text-white">
+                {cd.toFixed(1)}s
+              </span>
             )}
             {isOff && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-sm bg-black/75 text-[10px] tracking-wider">
+              <span className="absolute inset-0 flex items-center justify-center rounded-[.32em] bg-black/75 text-[.8em] tracking-[.1em] text-n400">
                 OFF
-              </div>
+              </span>
             )}
 
-            <div className="absolute inset-x-0 bottom-0 z-10 rounded-b-sm bg-black/70 text-center text-[9px] leading-tight">
+            {/* z-[2] pra faixa de dano continuar legivel POR CIMA do overlay de
+                cooldown, que cobre o slot inteiro. */}
+            <span className="absolute inset-x-0 bottom-0 z-[2] rounded-b-[.32em] bg-black/70 text-center text-[.72em] text-[#e5e5e5]">
               {ability.power}
-            </div>
+            </span>
           </div>
         )
       })}

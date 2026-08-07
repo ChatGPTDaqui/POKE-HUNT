@@ -2,12 +2,55 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+/* Par monospace da Geist. Existe porque `font-mono` era usado nos tres
+   elementos mais chamativos do DOM (splash "LVL UP !", contagem do Campeao
+   Lance, contagem do Auto-Revive) sem `--font-mono` definido em lugar nenhum —
+   caia no stack default, ou seja, Menlo no Mac, Consolas no Windows e Liberation
+   Mono no Linux, cada um com peso e largura diferentes. O texto desenhado no
+   CANVAS (src/render/sprites.ts) continua em `monospace` literal de proposito:
+   ele nao herda CSS e e pixel-art do mundo, nao chrome. */
+@import "@fontsource-variable/geist-mono";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: 'Geist Variable', sans-serif;
+    --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+
+    /* --- escada neutra do tema "black" -------------------------------------
+       Valores literais do handoff. Existem ao lado dos tokens do shadcn porque
+       o design distingue coisas que o shadcn junta: borda de JANELA
+       (neutral-700) e borda de CARD (neutral-800) sao dois valores, e ambos
+       viram `--border` se so os tokens do shadcn forem usados. */
+    --color-n900: #141519;
+    --color-n800: #232428;
+    --color-n700: #303136;
+    --color-n600: #4a4b52;
+    --color-n500: #717580;
+    --color-n400: #9b9ea8;
+    --color-n300: #c9cbd1;
+    --color-n200: #e4e5e9;
+    --color-n100: #f4f4f6;
+
+    /* --- paleta semantica de DADO (nao inventar cor nova aqui) --------------
+       Sao as mesmas ja usadas pelo jogo (ouro, HP, EXP, shiny...), promovidas de
+       utilitario Tailwind solto (`amber-400`, `emerald-500`) pra token, pra
+       existir UM lugar quando a cor mudar. As paletas de tipo elemental e de
+       raridade continuam em src/data/typeColors.ts e src/data/rarity.ts: sao
+       dado do jogo indexado por chave, nao cor de chrome. */
+    --color-gold: #fbbf24;
+    --color-diamond: #4fc3f7;
+    --color-hp: #10b981;
+    --color-hp-low: #ef4444;
+    --color-exp: #38bdf8;
+    --color-shiny: #b366ff;
+    --color-ok: #34d399;
+    --color-warn: #fb923c;
+    --color-bad: #ef4444;
+    --color-cat-physical: #9aa0a6;
+    --color-cat-special: #60a5fa;
+
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -83,38 +126,46 @@
     --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* Tema "black" do handoff. Substituiu o preset neutro de fabrica do shadcn
+   (todos `oklch(... 0 0)`, cromaticamente vazio): a identidade agora e o par
+   preto quase-puro + pilula clara de estado ativo, e o CONTEUDO do jogo (tipo
+   elemental, raridade) continua sendo a unica fonte de cor saturada. */
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    --background: #0a0a0c;
+    --foreground: #f2f2f3;
+    --card: #141519;
+    --card-foreground: #f2f2f3;
+    --popover: #141519;
+    --popover-foreground: #f2f2f3;
+    /* `primary` e a pilula clara de "estado ativo" do design (botao de menu
+       selecionado, aba ativa) — conteudo escuro sobre fundo claro. */
+    --primary: #e6e7ea;
+    --primary-foreground: #0b0b0d;
+    --secondary: #232428;
+    --secondary-foreground: #f2f2f3;
+    --muted: #232428;
+    --muted-foreground: #9b9ea8;
+    --accent: #232428;
+    --accent-foreground: #f2f2f3;
+    --destructive: #ef4444;
+    /* Borda padrao = neutral-800 (a de CARD, de longe a mais comum). A borda de
+       janela (neutral-700) e aplicada explicitamente com `border-n700`. */
+    --border: #232428;
+    --input: #303136;
+    --ring: #717580;
+    --chart-1: #c9cbd1;
+    --chart-2: #9b9ea8;
+    --chart-3: #717580;
+    --chart-4: #4a4b52;
+    --chart-5: #303136;
+    --sidebar: #141519;
+    --sidebar-foreground: #f2f2f3;
+    --sidebar-primary: #e6e7ea;
+    --sidebar-primary-foreground: #0b0b0d;
+    --sidebar-accent: #232428;
+    --sidebar-accent-foreground: #f2f2f3;
+    --sidebar-border: #232428;
+    --sidebar-ring: #717580;
 }
 
 @layer base {
@@ -127,4 +178,46 @@
   html {
     @apply font-sans;
     }
+}
+
+/* --- escala fluida da HUD ---------------------------------------------------
+   O contrato de layout inteiro depende disto: a raiz da HUD define um
+   `font-size` que acompanha a largura do viewport, e TODO tamanho/espaco dentro
+   dela e escrito em `em`. Resultado: a interface encolhe e cresce em bloco, sem
+   uma media query por elemento.
+
+   `--hud-scale` e a preferencia do jogador (0.8–1.4), escrita pelo uiStore no
+   proprio elemento. Ela multiplica o ajuste automatico em vez de substitui-lo —
+   quem quer tudo maior nao perde a adaptacao por tela. */
+.hud-root {
+  font-size: calc(clamp(13px, 0.55vw + 9px, 19.5px) * var(--hud-scale, 1));
+  line-height: 1.35;
+}
+
+/* Superficie translucida da HUD (cards do topo, pilulas, chat). O blur fica SO
+   aqui: o backdrop escuro atras de um menu aberto nao borra o jogo — pedido
+   explicito, e o motivo de nao ser um utilitario generico. */
+.hud-surface {
+  background: color-mix(in srgb, var(--background) 85%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+/* Barra de arraste: `touch-action:none` e obrigatorio pra o gesto funcionar no
+   toque — sem isso o navegador interpreta o movimento como rolagem e o
+   `pointermove` nunca chega. */
+.win-drag-handle {
+  cursor: move;
+  user-select: none;
+  touch-action: none;
+}
+
+/* Scrollbar fina, pra listas longas dentro de janelas pequenas nao perderem
+   largura util pro chrome do navegador. */
+.hud-root ::-webkit-scrollbar { width: 8px; height: 8px }
+.hud-root ::-webkit-scrollbar-thumb { background: var(--color-n700); border-radius: 4px }
+.hud-root ::-webkit-scrollbar-track { background: transparent }
+
+@keyframes hud-toast-in {
+  from { opacity: 0; transform: translateY(-6px) }
+  to { opacity: 1; transform: none }
 }

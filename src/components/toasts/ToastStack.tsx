@@ -1,28 +1,29 @@
-// Port do `_showToast` de js/ui/UIManager.js — toasts flutuantes que somem
-// sozinhos. A regra de "canal 'combat' vai SO pro log, nunca vira toast" ja
-// vive na store (toastStore#pushToast), entao aqui e so renderizar o que
-// chegou na fila.
+// Toasts flutuantes que somem sozinhos, empilhados sob o topo da tela. A regra
+// de "canal 'combat' vai SO pro log, nunca vira toast" ja vive na store
+// (toastStore#pushToast) — aqui e so renderizar a fila.
+//
+// `pointer-events: none` na pilha inteira: um toast que aparece bem no meio da
+// tela nao pode roubar um clique do jogador.
 import { useEffect } from 'react'
 import { useToastStore, type ToastEntry, type ToastType } from '@/stores/toastStore'
-import { cn } from '@/lib/utils'
 
 const TOAST_DURATION_MS = 2500
 
-const TYPE_CLASS: Record<ToastType, string> = {
-  gold: 'border-amber-500/60 text-amber-300',
-  levelup: 'border-sky-500/60 text-sky-300',
-  success: 'border-emerald-500/60 text-emerald-300',
-  error: 'border-destructive/60 text-destructive',
-  'capture-success': 'border-emerald-500/60 text-emerald-300',
-  'capture-fail': 'border-orange-500/60 text-orange-300',
-  info: 'border-border text-foreground',
+const TYPE_COLOR: Record<ToastType, string> = {
+  gold: 'var(--color-gold)',
+  levelup: '#7dd3fc',
+  success: 'var(--color-ok)',
+  error: 'var(--color-bad)',
+  'capture-success': 'var(--color-ok)',
+  'capture-fail': 'var(--color-warn)',
+  info: 'var(--color-n300)',
 }
 
 export function ToastStack() {
   const toasts = useToastStore((s) => s.toasts)
 
   return (
-    <div className="pointer-events-none flex flex-col items-center gap-1.5">
+    <div className="pointer-events-none absolute top-[7.5em] left-1/2 z-[70] flex -translate-x-1/2 flex-col items-center gap-[.4em]">
       {toasts.map((toast) => (
         <Toast key={toast.id} toast={toast} />
       ))}
@@ -38,12 +39,11 @@ function Toast({ toast }: { toast: ToastEntry }) {
     return () => clearTimeout(id)
   }, [toast.id, dismissToast])
 
+  const color = TYPE_COLOR[toast.type] ?? TYPE_COLOR.info
   return (
     <div
-      className={cn(
-        'rounded-md border bg-background/90 px-3 py-1.5 text-xs shadow-lg backdrop-blur-sm',
-        TYPE_CLASS[toast.type] ?? TYPE_CLASS.info,
-      )}
+      className="rounded-lg border bg-background/92 px-[.9em] py-[.5em] text-[.8em] shadow-lg backdrop-blur-sm"
+      style={{ borderColor: color, color, animation: 'hud-toast-in .18s ease-out' }}
     >
       {toast.message}
     </div>

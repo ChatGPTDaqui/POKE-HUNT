@@ -1,10 +1,14 @@
-// Port de js/ui/panels/HuntMenu.js.
+// Hunts: abas de continente, busca, filtro de elemento, e um card por local.
+//
+// O tooltip `?` que duplicava a lista de especies foi removido (item 7 da
+// auditoria): a MESMA lista aparecia em duas superficies, e a versao expandida
+// no card e a que da pra ler com calma e rolar.
 import { useMemo, useState } from 'react'
 import { pedirAcao } from '@/data/remote/autoridade'
-// `MAPS` guarda HuntMapDef (a definicao crua). `MapDef` e a forma RESOLVIDA
-// que getMap() devolve (collisionGrid ja aplicado/anulado, respawnDelay ja
-// multiplicado) — so o unlockMap do engine exige essa forma, por isso a
-// chamada de getMap() abaixo em vez de repassar o objeto cru.
+// `MAPS` guarda HuntMapDef (a definicao crua). `MapDef` e a forma RESOLVIDA que
+// getMap() devolve (collisionGrid ja aplicado/anulado, respawnDelay ja
+// multiplicado) — so o unlockMap do engine exige essa forma, por isso a chamada
+// de getMap() abaixo em vez de repassar o objeto cru.
 import { MAPS, getMap } from '@/data/maps'
 import type { HuntMapDef } from '@/data/huntTypes'
 import { getEncounter } from '@/data/enemies'
@@ -17,10 +21,9 @@ import { controller } from '@/engine/controller'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useUiStore } from '@/stores/uiStore'
 import { useToastStore } from '@/stores/toastStore'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useAcaoPendente } from '@/hooks/useAcaoPendente'
+import { TypeChip } from '@/components/shared/TypeChip'
+import { GameButton, GameCard, GameInput, GameSelect, SegmentedTabs } from '@/components/game/controls'
 
 const CONTINENT_LABELS: Record<string, string> = {
   johto: 'Johto',
@@ -28,6 +31,7 @@ const CONTINENT_LABELS: Record<string, string> = {
   nightmare: 'Modo Pesadelo',
 }
 const TYPE_LIST = (Object.keys(TYPE_COLORS) as ElementType[]).sort()
+const fmt = new Intl.NumberFormat('pt-BR')
 
 // Chamado pela Pokedex antes de trocar de tela — pre-preenche a aba de
 // continente + a busca pra hunt alvo ja aparecer filtrada assim que o painel
@@ -68,45 +72,36 @@ function huntOdds(map: HuntMapDef): HuntOdds {
       typeTotals.set(type, (typeTotals.get(type) || 0) + pct)
     }
   }
-  const dominantTypes = [...typeTotals.entries()].sort((a, b) => b[1] - a[1])
-  return { species, dominantTypes }
+  return { species, dominantTypes: [...typeTotals.entries()].sort((a, b) => b[1] - a[1]) }
 }
 
-// Cor do icone da hunt: o tipo elemental que domina as odds reais de spawn
-// (mesma ponderacao que huntOdds ja calcula pro tooltip). Substitui a antiga
-// cor de tema (map.bg.primary, so 3 valores distintos no jogo inteiro).
+// Cor do circulo do card: o tipo elemental que domina as odds reais de spawn.
+// Substitui a antiga cor de tema (map.bg.primary, so 3 valores distintos no
+// jogo inteiro).
 function huntSwatchColor(map: HuntMapDef): string {
   const { dominantTypes } = huntOdds(map)
   return dominantTypes.length > 0 ? colorForType(dominantTypes[0][0]) : map.bg.primary
 }
 
-function TypeChip({ type }: { type: ElementType }) {
-  return (
-    <span className="rounded px-1 py-0.5 text-[10px] font-semibold text-white" style={{ background: colorForType(type) }}>
-      {type.slice(0, 3)}
-    </span>
-  )
-}
-
 function SpeciesRow({ sp, pct }: { sp: Species; pct: number }) {
   const url = faceIconUrl(sp.id)
   return (
-    <div className="flex items-center gap-1.5 text-xs">
+    <div className="flex items-center gap-[.5em] text-[.85em]">
       {url ? (
-        <img src={url} alt={sp.name} className="h-5 w-5 shrink-0 object-contain" />
+        <img src={url} alt="" className="h-[1.6em] w-[1.6em] shrink-0 object-contain" />
       ) : (
-        <span className="h-5 w-5 shrink-0 rounded" style={{ background: sp.color }} />
+        <span className="h-[1.6em] w-[1.6em] shrink-0 rounded-[.3em]" style={{ background: sp.color }} />
       )}
       <TypeChip type={sp.type} />
       {sp.type2 && <TypeChip type={sp.type2} />}
-      <span className="truncate">{sp.name}</span>
-      <span className="text-muted-foreground">— {pct.toFixed(1)}%</span>
+      <span className="flex-1 truncate">{sp.name}</span>
+      <span className="tabular-nums text-n400">{pct.toFixed(1)}%</span>
     </div>
   )
 }
 
-// Uma hunt "bate" na busca pelo proprio nome OU por qualquer especie que
-// possa aparecer nela.
+// Uma hunt "bate" na busca pelo proprio nome OU por qualquer especie que possa
+// aparecer nela.
 function huntMatches(map: HuntMapDef, term: string): boolean {
   if (!term) return true
   if (map.name.toLowerCase().includes(term)) return true
@@ -142,6 +137,7 @@ export function HuntMenu() {
   const setTypeFilter = useUiStore((s) => s.setHuntType)
 
   const [expandedMapId, setExpandedMapId] = useState<string | null>(null)
+  const acao = useAcaoPendente()
 
   const continents = useMemo(
     () => [...new Set(Object.values(MAPS).map((m) => m.continent || 'johto'))],
@@ -160,188 +156,145 @@ export function HuntMenu() {
 
   if (team.length === 0) {
     return (
-      <div className="space-y-3">
-        <h2 className="text-lg font-semibold">Hunts</h2>
-        <p className="rounded-lg border bg-card p-3 text-sm">
-          Volte ao Hospital e escolha seu primeiro POKE antes de sair para caçar.
-        </p>
-      </div>
+      <GameCard className="p-[.8em]">
+        Volte ao Hospital e escolha seu primeiro POKE antes de sair para caçar.
+      </GameCard>
     )
   }
   if (activePoke && activePoke.hp <= 0) {
     return (
-      <div className="space-y-3">
-        <h2 className="text-lg font-semibold">Hunts</h2>
-        <p className="rounded-lg border bg-card p-3 text-sm">
-          Seu POKE esta desmaiado! Volte ao Hospital para cura-lo antes de sair para caçar.
-        </p>
-      </div>
+      <GameCard className="p-[.8em]">
+        Seu POKE esta desmaiado! Volte ao Hospital para cura-lo antes de sair para caçar.
+      </GameCard>
     )
   }
 
   return (
-    <div className="space-y-3">
-      <h2 className="text-lg font-semibold">Selecione um mapa</h2>
-
+    <div className="flex flex-col gap-[.7em]">
       {continents.length > 1 && (
-        <div className="flex flex-wrap gap-1">
-          {continents.map((c) => (
-            <Button
-              key={c}
-              size="sm"
-              variant={c === continent ? 'default' : 'outline'}
-              className="text-xs"
-              onClick={() => setContinent(c)}
-            >
-              {CONTINENT_LABELS[c] || c}
-            </Button>
-          ))}
-        </div>
+        <SegmentedTabs
+          value={continent}
+          onChange={setContinent}
+          options={continents.map((c) => ({ value: c, label: CONTINENT_LABELS[c] || c }))}
+        />
       )}
 
-      <div className="flex gap-2">
-        <Input
-          className="flex-1"
+      <div className="flex flex-wrap gap-[.5em]">
+        <GameInput
+          className="min-w-[10em] flex-1"
           placeholder="Buscar local ou POKE..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v ?? 'all')}>
-          <SelectTrigger className="w-44 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os elementos</SelectItem>
-            {TYPE_LIST.map((type) => (
-              <SelectItem key={type} value={type}>
-                {type}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <GameSelect value={typeFilter} onChange={(e) => setTypeFilter(e.target.value || 'all')}>
+          <option value="all">Todos os elementos</option>
+          {TYPE_LIST.map((type) => (
+            <option key={type} value={type}>{type}</option>
+          ))}
+        </GameSelect>
       </div>
 
       {visibleMaps.length === 0 && (
-        <p className="text-sm text-muted-foreground">
-          Nenhuma hunt encontrada (pode estar oculta pelo filtro de elemento).
-        </p>
+        <p className="text-n500">Nenhuma hunt encontrada (pode estar oculta pelo filtro de elemento).</p>
       )}
 
-      <div className="space-y-2">
-        {visibleMaps.map((map) => {
-          // Gate por continente (Kanto so depois do Campeao Lance) — separado
-          // do gate de custo em ouro por mapa, e checado antes dele.
-          const mapContinent = map.continent || 'johto'
-          const continentGated = !unlockedContinents.includes(mapContinent)
-          // Mesma regra do servidor (server/src/app.ts#abrirSessao): hunt sem custo
-          // nasce liberada. Checar so a lista trancava visualmente as hunts do Modo
-          // Pesadelo e as BOSS, que sao geradas em runtime e nunca entram na coluna
-          // `unlocked_maps` do banco.
-          const unlocked = !continentGated && (map.unlockCost == null || unlockedMaps.includes(map.id))
-          // `unlockCost` e number|null no dado real (ouro) — o vanilla ainda
-          // tratava como {gold,diamonds}, um formato que nenhum mapa usa.
-          const costLabel = map.unlockCost ? `Custo: ${map.unlockCost} ouro` : 'Gratis'
-          const odds = huntOdds(map)
-          const expanded = expandedMapId === map.id
+      {visibleMaps.map((map) => {
+        // Gate por continente (Kanto so depois do Campeao Lance) — separado do
+        // gate de custo em ouro por mapa, e checado antes dele.
+        const mapContinent = map.continent || 'johto'
+        const continentGated = !unlockedContinents.includes(mapContinent)
+        // Mesma regra do servidor (server/src/app.ts#abrirSessao): hunt sem
+        // custo nasce liberada. Checar so a lista trancava visualmente as hunts
+        // do Modo Pesadelo e as BOSS, que sao geradas em runtime e nunca entram
+        // na coluna `unlocked_maps` do banco.
+        const unlocked = !continentGated && (map.unlockCost == null || unlockedMaps.includes(map.id))
+        const odds = huntOdds(map)
+        const expanded = expandedMapId === map.id
+        const key = `map:${map.id}`
+        const pending = acao.isPending(key)
 
-          return (
-            <div key={map.id}>
-              <div
-                className="flex cursor-pointer items-center gap-3 rounded-lg border bg-card p-3 hover:bg-accent/40"
-                onClick={() => setExpandedMapId(expanded ? null : map.id)}
-              >
-                <span className="h-8 w-8 shrink-0 rounded-full" style={{ background: huntSwatchColor(map) }} />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 text-sm font-medium">
-                    <span className="truncate">
-                      {map.name} (Lv {map.levelRange[0]}-{map.levelRange[1]})
-                    </span>
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <span
-                            tabIndex={0}
-                            className="flex h-4 w-4 shrink-0 cursor-help items-center justify-center rounded-full border text-[10px]"
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        }
-                      >
-                        ?
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs border bg-popover px-3 py-2 text-popover-foreground">
-                        <div className="mb-1 text-xs font-semibold">Pokemons na area</div>
-                        <div className="max-h-48 space-y-0.5 overflow-y-auto">
-                          {odds.species.map(({ id, species: sp, pct }) => (
-                            <SpeciesRow key={id} sp={sp} pct={pct} />
-                          ))}
-                        </div>
-                        <div className="mt-1.5 mb-1 text-xs font-semibold">Tipos dominantes</div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {odds.dominantTypes.map(([type, pct]) => (
-                            <span key={type} className="flex items-center gap-1 text-xs">
-                              <TypeChip type={type} /> {pct.toFixed(0)}%
-                            </span>
-                          ))}
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  {!unlocked && (
-                    <div className="text-xs text-muted-foreground">
-                      {continentGated ? 'Derrote o Campeao Lance (Johto) para desbloquear' : costLabel}
-                    </div>
-                  )}
-                </div>
-                <Button
-                  size="sm"
-                  className="text-xs"
-                  onClick={async (e) => {
-                    e.stopPropagation()
-                    // A tela so fecha se o jogador REALMENTE entrou. Fechar antes
-                    // esconderia a recusa do servidor e deixaria o jogador olhando
-                    // um combate que nao rende nada.
-                    if (unlocked) {
-                      if (await controller.enterMap(map.id)) useUiStore.getState().closeScreen()
-                    } else if (continentGated) {
-                      useToastStore.getState().pushToast(
-                        `Derrote o Campeao Lance em Johto antes de acessar ${CONTINENT_LABELS[mapContinent] || mapContinent}.`,
-                        'error', 'world',
-                      )
-                    } else {
-                      const resolved = getMap(map.id)
-                      if (!resolved) return
-                      const desbloqueou = await pedirAcao(
-                        { tipo: 'desbloquearHunt', mapId: map.id },
-                        () => unlockMap(useGameStateStore.getState(), resolved).success,
-                      )
-                      if (!desbloqueou) {
-                        useToastStore.getState().pushToast(
-                          `Recursos insuficientes para desbloquear ${map.name}.`, 'error', 'world',
-                        )
-                        return
-                      }
-                      if (await controller.enterMap(map.id)) useUiStore.getState().closeScreen()
-                    }
-                  }}
-                >
-                  {unlocked ? 'Entrar' : continentGated ? 'Bloqueado' : 'Desbloquear'}
-                </Button>
-              </div>
-
-              {expanded && (
-                <div className="mt-1 rounded-lg border bg-muted/30 p-3">
-                  <div className="mb-1.5 text-sm font-medium">Pokemons de {map.name}</div>
-                  <div className="space-y-0.5">
-                    {odds.species.map(({ id, species: sp, pct }) => (
-                            <SpeciesRow key={id} sp={sp} pct={pct} />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+        async function acionar() {
+          if (unlocked) {
+            // A tela so fecha se o jogador REALMENTE entrou. Fechar antes
+            // esconderia a recusa do servidor e deixaria o jogador olhando um
+            // combate que nao rende nada.
+            if (await controller.enterMap(map.id)) useUiStore.getState().closeScreen()
+            return
+          }
+          if (continentGated) {
+            useToastStore.getState().pushToast(
+              `Derrote o Campeao Lance em Johto antes de acessar ${CONTINENT_LABELS[mapContinent] || mapContinent}.`,
+              'error', 'world',
+            )
+            return
+          }
+          const resolved = getMap(map.id)
+          if (!resolved) return
+          const desbloqueou = await pedirAcao(
+            { tipo: 'desbloquearHunt', mapId: map.id },
+            () => unlockMap(useGameStateStore.getState(), resolved).success,
           )
-        })}
-      </div>
+          if (!desbloqueou) {
+            useToastStore.getState().pushToast(
+              `Recursos insuficientes para desbloquear ${map.name}.`, 'error', 'world',
+            )
+            return
+          }
+          if (await controller.enterMap(map.id)) useUiStore.getState().closeScreen()
+        }
+
+        return (
+          <div key={map.id} className="overflow-hidden rounded-[.7em] border border-n800 bg-n900">
+            <div
+              onClick={() => setExpandedMapId(expanded ? null : map.id)}
+              className="flex cursor-pointer items-center gap-[.7em] p-[.7em] hover:bg-n800"
+            >
+              <span
+                className="h-[2.2em] w-[2.2em] shrink-0 rounded-full"
+                style={{
+                  background: huntSwatchColor(map),
+                  boxShadow: `0 0 10px ${huntSwatchColor(map)}66`,
+                }}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-medium">
+                  {map.name}{' '}
+                  <span className="font-normal text-n400">(Lv {map.levelRange[0]}-{map.levelRange[1]})</span>
+                </div>
+                {/* A linha de custo/gate so aparece quando ha bloqueio: com a
+                    hunt liberada, "Desbloqueado" seria ruido — o proprio botao
+                    "Entrar" ja diz isso. */}
+                {!unlocked && (
+                  <div className="mt-[.15em] text-[.75em] text-warn">
+                    {continentGated
+                      ? 'Derrote o Campeao Lance (Johto) para desbloquear'
+                      : `Custo: ${fmt.format(map.unlockCost ?? 0)} ouro`}
+                  </div>
+                )}
+              </div>
+              <GameButton
+                variant={unlocked ? 'primary' : 'ghost'}
+                disabled={pending || acao.pendingKey != null}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  void acao.run(key, acionar)
+                }}
+              >
+                {pending ? 'Entrando...' : unlocked ? 'Entrar' : continentGated ? 'Bloqueado' : 'Desbloquear'}
+              </GameButton>
+            </div>
+
+            {expanded && (
+              <div className="flex flex-col gap-[.4em] border-t border-n800 p-[.7em]">
+                <div className="text-[.75em] text-n500">Pokemons de {map.name}</div>
+                {odds.species.map(({ id, species: sp, pct }) => (
+                  <SpeciesRow key={id} sp={sp} pct={pct} />
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }

@@ -50,6 +50,31 @@ export async function pedirAcao(
   }
 }
 
+/**
+ * Igual a `pedirAcao`, mas devolve TAMBEM o que o fallback local retornou.
+ *
+ * Existe por causa de um bug real: varias telas faziam
+ * `const res = { gold: 0, itemCount: 0 }; void pedirAcao(...)` e depois liam
+ * `res` pra montar o toast. Como `res` era um literal fixo e `pedirAcao` e
+ * assincrona, a mensagem NUNCA refletia o que aconteceu — comprar dizia
+ * "Comprou" mesmo sem ouro, "Vender Tudo" nunca aparecia (itemCount 0) e vender
+ * POKE sempre dizia "por 0 ouro".
+ *
+ * `local` e `null` quando ha servidor: nesse caminho quem executou foi ele, e a
+ * mensagem certa vem na resposta (`resposta.mensagem`). Quem chama deve tratar
+ * os dois casos — nunca inventar um numero pro caso remoto.
+ */
+export async function pedirAcaoComLocal<T>(
+  acao: { tipo: string } & Record<string, unknown>,
+  fallback: () => T,
+): Promise<{ ok: boolean; local: T | null }> {
+  let local: T | null = null
+  const ok = await pedirAcao(acao, () => {
+    local = fallback()
+  })
+  return { ok, local }
+}
+
 // --- sessao de hunt ---------------------------------------------------------
 
 // De quanto em quanto tempo o progresso e liquidado com o servidor. 30s e um

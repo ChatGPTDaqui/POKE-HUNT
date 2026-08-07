@@ -1,16 +1,17 @@
-// Substitui o sistema de overlay de js/ui/UIManager.js (#overlay-root +
-// PANEL_RENDERERS + _renderScreen).
+// Hospeda a janela de menu aberta (uma por vez) dentro do GameWindow
+// compartilhado.
 //
 // Duas coisas do vanilla que NAO precisam ser portadas:
 //  - `_scrollPositions`: la o painel inteiro era destruido e recriado a cada
 //    clique de filtro (`refresh()` = `overlayRoot.innerHTML = ''`), entao a
-//    posicao do scroll tinha que ser salva/restaurada a mao. Aqui o painel e
-//    um componente montado — ele so re-renderiza, o node de scroll continua
-//    o mesmo, e a posicao se mantem sozinha.
+//    posicao do scroll tinha que ser salva/restaurada a mao. Aqui o painel e um
+//    componente montado — ele so re-renderiza, o node de scroll continua o
+//    mesmo, e a posicao se mantem sozinha.
 //  - O padrao de "DOM incremental" pra nao quebrar clique: o reconciler do
 //    React ja resolve isso.
-import { useUiStore } from '@/stores/uiStore'
-import { useDraggable } from '@/hooks/useDraggable'
+import { useUiStore, useBreakpoints, type ScreenName } from '@/stores/uiStore'
+import { useGameStateStore, MAX_TEAM_SIZE } from '@/stores/gameStateStore'
+import { GameWindow } from '@/components/game/GameWindow'
 import { TeamMenu } from '@/features/team/TeamMenu'
 import { BagMenu } from '@/features/bag/BagMenu'
 import { ShopMenu } from '@/features/shop/ShopMenu'
@@ -18,50 +19,82 @@ import { HuntMenu } from '@/features/hunt/HuntMenu'
 import { PokedexMenu } from '@/features/pokedex/PokedexMenu'
 import { WikiMenu } from '@/features/wiki/WikiMenu'
 import { SettingsScreen } from '@/features/settings/SettingsScreen'
-import { Button } from '@/components/ui/button'
+import { BestiarioMenu } from '@/features/bestiario/BestiarioMenu'
+import { TasksMenu } from '@/features/tasks/TasksMenu'
+import { CorreioMenu } from '@/features/correio/CorreioMenu'
+import { CalculadoraMenu } from '@/features/calc/CalculadoraMenu'
+import { MercadoMenu } from '@/features/mercado/MercadoMenu'
 
-const PANELS = {
-  team: TeamMenu,
-  bag: BagMenu,
-  shop: ShopMenu,
-  hunt: HuntMenu,
+const PANELS: Record<ScreenName, () => React.ReactElement | null> = {
+  equipe: TeamMenu,
+  mochila: BagMenu,
+  loja: ShopMenu,
+  hunts: HuntMenu,
   pokedex: PokedexMenu,
   wiki: WikiMenu,
-  settings: SettingsScreen,
-} as const
+  config: SettingsScreen,
+  bestiario: BestiarioMenu,
+  tasks: TasksMenu,
+  correio: CorreioMenu,
+  calc: CalculadoraMenu,
+  mercado: MercadoMenu,
+}
+
+const TITLES: Record<ScreenName, string> = {
+  equipe: 'Equipe',
+  mochila: 'Mochila',
+  loja: 'Loja',
+  hunts: 'Selecione um mapa',
+  pokedex: 'Pokedex',
+  wiki: 'Wiki',
+  config: 'Configuracoes',
+  bestiario: 'Bestiário',
+  tasks: 'Tasks & Missões',
+  correio: 'Correio',
+  calc: 'Calculadora de Força',
+  mercado: 'Mercado',
+}
+
+// Largura padrao por tela, em `em`. Nao e capricho: a aba Itens da Loja tem
+// duas colunas com icone + nome + preco + quantidade + botao cada uma, e nos
+// 36em do painel comum as colunas ficam apertadas em QUALQUER viewport (era o
+// item 2 da auditoria). Bestiario tem grade + painel de detalhe lado a lado.
+const DEFAULT_WIDTH = 36
+const WIDTHS: Partial<Record<ScreenName, number>> = {
+  loja: 52,
+  bestiario: 56,
+  calc: 46,
+  correio: 40,
+}
 
 export function ScreenOverlay() {
   const currentScreen = useUiStore((s) => s.currentScreen)
   const closeScreen = useUiStore((s) => s.closeScreen)
-  const { elementRef, handleRef } = useDraggable<HTMLDivElement, HTMLDivElement>()
+  const teamSize = useGameStateStore((s) => s.team.length)
+  const { narrow } = useBreakpoints()
 
   if (!currentScreen) return null
   const Panel = PANELS[currentScreen]
+  // A contagem da equipe entra no titulo (e nao no corpo) porque e a informacao
+  // que decide se ainda cabe alguem — vale estar visivel mesmo com a lista
+  // rolada pra baixo, e a barra de titulo e a unica faixa que nao rola.
+  const title = currentScreen === 'equipe'
+    ? `Equipe (${teamSize}/${MAX_TEAM_SIZE})`
+    : TITLES[currentScreen]
 
   return (
-    <div
-      className="pointer-events-auto absolute inset-0 z-30 bg-black/50"
-      // Clique-fora-fecha: so quando o alvo e o proprio backdrop, nunca um
-      // clique que borbulhou de dentro do painel.
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) closeScreen()
-      }}
+    <GameWindow
+      winKey="panel"
+      // Em telas estreitas a largura em `em` nao importa (o `max-width` de
+      // 100vw-1.5em corta antes), mas manter o valor grande faria a janela
+      // nascer colada nas duas bordas — 36em uniforme e mais previsivel.
+      widthEm={narrow ? DEFAULT_WIDTH : (WIDTHS[currentScreen] ?? DEFAULT_WIDTH)}
+      zIndex={31}
+      backdrop={{ zIndex: 30 }}
+      onClose={closeScreen}
+      title={title}
     >
-      <div
-        ref={elementRef}
-        className="absolute top-1/2 left-1/2 flex max-h-[78vh] w-[min(560px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
-      >
-        {/* Barra de titulo: alca de arrastar + botao fechar, fora da area
-            rolavel pra continuar acessivel com a lista longa. */}
-        <div ref={handleRef} className="flex shrink-0 cursor-move items-center justify-end border-b px-2 py-1.5">
-          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={closeScreen}>
-            ✕
-          </Button>
-        </div>
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <Panel />
-        </div>
-      </div>
-    </div>
+      <Panel />
+    </GameWindow>
   )
 }
