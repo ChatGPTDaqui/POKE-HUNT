@@ -7,7 +7,7 @@
 // exige mexer em nenhuma tela.
 import { useGameStateStore, type GameStateData } from '@/stores/gameStateStore'
 import { useToastStore } from '@/stores/toastStore'
-import { servidor, servidorAtivo, ErroServidor } from './servidor'
+import { servidor, servidorAtivo, ErroServidor, type RespostaFlush } from './servidor'
 
 /** Substitui o estado local pelo que o servidor considera verdade. */
 export function aplicarEstadoDoServidor(estado: unknown): void {
@@ -129,4 +129,34 @@ export function sincronizarAuto(): void {
       catchRules: s.autoCatchRules,
     },
   }).catch(reportarErro)
+}
+
+// --- farm offline -----------------------------------------------------------
+
+/**
+ * Liquida a sessao que ficou aberta desde a ultima vez que o jogador jogou, e
+ * devolve o resumo do que ELA rendeu — que e o "farm offline" sob autoridade do
+ * servidor.
+ *
+ * Por que isto precisa existir: o jogo sempre volta ao Hospital no boot, entao
+ * a sessao anterior ficava aberta e so era liquidada quando o jogador clicasse
+ * "Entrar" numa hunt. O tempo era creditado (nada se perdia), mas em SILENCIO e
+ * num momento sem relacao com o que aconteceu — o jogador via o ouro pular sem
+ * explicacao. Pior: o modal de Farm Offline do cliente nunca aparecia, porque o
+ * `savedAt` vem do servidor e o gap medido localmente e sempre ~0.
+ *
+ * Fecha a sessao (em vez de so dar flush) porque o jogador esta no Hospital
+ * agora, nao cacando.
+ */
+export async function assentarSessaoPendente(): Promise<RespostaFlush['resumo'] | null> {
+  if (!servidorAtivo()) return null
+  try {
+    const r = await servidor.fecharSessao()
+    if (!r.fechada) return null
+    if (r.estado) aplicarEstadoDoServidor(r.estado)
+    return r.resumo ?? null
+  } catch (erro) {
+    reportarErro(erro)
+    return null
+  }
 }

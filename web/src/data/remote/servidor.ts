@@ -14,6 +14,7 @@
 // ainda nao foi decidida (ver CLAUDE.md, Fase D). Apontar a variavel pro
 // servico e literalmente o unico passo que falta.
 import { supabase } from '@/lib/supabase'
+import type { OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
 
 const BASE = (import.meta.env.VITE_SERVIDOR_URL || '').replace(/\/$/, '')
 
@@ -64,7 +65,10 @@ export interface RespostaComEstado {
 export interface RespostaFlush extends RespostaComEstado {
   segundosCreditados: number
   truncado: boolean
-  resumo: { kills: number; gold: number; xp: number; levelUps: number; shinySeen: number }
+  // O MESMO tipo que a simulacao local produz — o modal de Farm Offline le os
+  // dois sem saber de onde vieram, porque o servidor roda exatamente o mesmo
+  // `simulateWorldSeconds`.
+  resumo: OfflineSimSummary
 }
 
 export const servidor = {
@@ -78,7 +82,7 @@ export const servidor = {
 
   flush: () => pedir<RespostaFlush>('/sessao/flush', { method: 'POST' }),
 
-  fecharSessao: () => pedir<{ fechada: boolean } & Partial<RespostaComEstado>>('/sessao/fechar', { method: 'POST' }),
+  fecharSessao: () => pedir<{ fechada: boolean; resumo?: RespostaFlush['resumo'] } & Partial<RespostaComEstado>>('/sessao/fechar', { method: 'POST' }),
 
   /**
    * Manda uma intencao. NUNCA um resultado: o cliente diz "quero comprar 5

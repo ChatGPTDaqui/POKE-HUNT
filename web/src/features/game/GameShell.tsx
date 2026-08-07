@@ -42,6 +42,8 @@ import { pendingDriftSeconds, resetDrift } from '@/engine/clockDrift'
 import { simulateWorldSeconds, type OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
 import { recordBatch } from '@/engine/systems/statsTracker'
 import { useProgressoRemoto, type EstadoProgresso } from './useProgressoRemoto'
+import { assentarSessaoPendente } from '@/data/remote/autoridade'
+import { servidorAtivo } from '@/data/remote/servidor'
 
 // Farm Offline (aba fechada / PC desligado) — porta o bloco de boot do
 // js/main.js. Roda uma vez, no primeiro mount, e so quando o save diz que o
@@ -57,6 +59,18 @@ function useOfflineFarmOnBoot(): { summary: OfflineSimSummary | null; dismiss: (
     // dobro.
     if (ranRef.current) return
     ranRef.current = true
+
+    // Sob autoridade do servidor, quem simulou o tempo offline foi ELE — a
+    // sessao ficou aberta desde a ultima vez que o jogador jogou. Simular de
+    // novo aqui produziria numeros diferentes dos creditados (RNG e mundo
+    // independentes), e o jogador veria um relatorio que nao bate com o ouro
+    // que recebeu. Entao aqui so pedimos o resumo e mostramos.
+    if (servidorAtivo()) {
+      void assentarSessaoPendente().then((resumo) => {
+        if (resumo && resumo.kills > 0) setSummary(resumo)
+      })
+      return
+    }
 
     const savedAt = readLastSavedAt()
     if (savedAt == null) return
