@@ -128,6 +128,23 @@ function createRng(seed) {
 		draws: 0
 	};
 }
+/**
+* Retoma uma sequencia ja em andamento, a partir do estado que foi persistido.
+*
+* Distinto de `createRng`, que sempre RECOMECA do zero. A diferenca ja custou um
+* bug: o servidor refazia `createRng(seed)` a cada flush de 30s, entao a sessao
+* inteira era a mesma sequencia repetida — mesmos inimigos, mesmos IVs, mesma
+* raridade, indefinidamente (ver server/src/progresso.ts#aplicarFlush).
+*
+* `state | 0` porque o valor pode voltar do banco como string ou como float:
+* mulberry32 so funciona sobre um inteiro de 32 bits com sinal.
+*/
+function restoreRng(state, draws) {
+	return {
+		state: state | 0,
+		draws: Number.isFinite(draws) ? draws : 0
+	};
+}
 /** Semente nova pra uma sessao. Na Fase D quem emite isto e o servidor. */
 function randomSeed() {
 	const buf = /* @__PURE__ */ new Uint32Array(1);
@@ -59614,9 +59631,9 @@ async function aplicarFlush(cfg, userId, sessao) {
 	const ativo = estado.team.find((p) => p.uid === sessao.poke_uid);
 	if (!ativo) throw new ErroHttp(409, "o POKE desta sessao nao esta mais na equipe");
 	store.setActiveIndex(estado.team.indexOf(ativo));
-	const semente = Number(sessao.seed);
+	const rng = restoreRng(Number(sessao.rng_state), Number(sessao.rng_draws));
 	const world = buildMapWorld(sessao.map_id, ativo, {
-		rng: createRng(semente),
+		rng,
 		counters: {
 			entity: 1,
 			effect: 1,
@@ -59643,7 +59660,9 @@ async function aplicarFlush(cfg, userId, sessao) {
 	await gravarEstado(cfg, userId, estado);
 	await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, {
 		last_flush_at: new Date(agora).toISOString(),
-		simulated_seconds: Number(sessao.simulated_seconds) + segundos
+		simulated_seconds: Number(sessao.simulated_seconds) + segundos,
+		rng_state: world.rng.state,
+		rng_draws: world.rng.draws
 	});
 	return {
 		segundosCreditados: segundos,
@@ -59933,11 +59952,14 @@ async function abrirSessao(cfg, userId, req) {
 		await aplicarFlush(cfg, userId, anterior);
 		await atualizar(cfg, `game_sessions?id=eq.${anterior.id}`, { closed_at: (/* @__PURE__ */ new Date()).toISOString() });
 	}
+	const semente = randomSeed();
 	const [criada] = await inserir(cfg, "game_sessions", {
 		user_id: userId,
 		map_id: mapId,
 		poke_uid: pokeUid,
-		seed: randomSeed()
+		seed: semente,
+		rng_state: semente,
+		rng_draws: 0
 	}, { retornar: true });
 	await atualizar(cfg, `players?user_id=eq.${userId}`, {
 		current_map_id: mapId,

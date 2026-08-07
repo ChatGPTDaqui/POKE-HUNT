@@ -1,6 +1,6 @@
 // Carrega o progresso do jogador, simula, grava. E aqui que a autoridade mora.
 import {
-  buildMapWorld, stepWorld, simulateWorldSeconds, createRng,
+  buildMapWorld, stepWorld, simulateWorldSeconds, restoreRng,
   snapshotToGameState, gameStateToPlayerRow, gameStateToPokemonRows,
   gameStateToItemRows, gameStateToPokedexRows, defaultGameStateData,
   OFFLINE_SIM_STEP_SECONDS, recordBatch,
@@ -33,6 +33,11 @@ export interface LinhaSessao {
   map_id: string
   poke_uid: string
   seed: number | string
+  // Onde a sequencia de sorteio PAROU no ultimo flush. Distinto de `seed`, que e
+  // so a origem imutavel da sessao — ver a migration
+  // `sessao_guarda_o_estado_do_sorteio` pro bug que a ausencia disto causava.
+  rng_state: number | string
+  rng_draws: number | string
   last_flush_at: string
   simulated_seconds: number | string
   closed_at: string | null
@@ -109,11 +114,17 @@ export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSes
   if (!ativo) throw new ErroHttp(409, 'o POKE desta sessao nao esta mais na equipe')
   store.setActiveIndex(estado.team.indexOf(ativo))
 
-  // A semente da sessao alimenta a sequencia inteira. O cliente nunca escolhe:
-  // e ela que decide shiny, IV, raridade e crit (ver core/rng.ts).
-  const semente = Number(sessao.seed)
+  // A sequencia RETOMA de onde o flush anterior parou. O cliente nunca escolhe a
+  // semente: e ela que decide shiny, IV, raridade e crit (ver core/rng.ts).
+  //
+  // Retomar (em vez de `createRng(sessao.seed)`) e o que impede o jogo inteiro de
+  // virar um loop: o cliente liquida de 30 em 30 segundos, entao recomecar da
+  // semente fazia todo flush repetir os MESMOS inimigos, niveis, IVs, raridade e
+  // shiny. Na mochila isso aparecia como a mesma especie chegando de novo a cada
+  // meio minuto. Ver a migration `sessao_guarda_o_estado_do_sorteio`.
+  const rng = restoreRng(Number(sessao.rng_state), Number(sessao.rng_draws))
   const world = buildMapWorld(sessao.map_id, ativo, {
-    rng: createRng(semente),
+    rng,
     counters: { entity: 1, effect: 1, pendingHit: 1 },
   })
   // Pior caso SO quando o intervalo caracteriza ausencia — ver
@@ -154,6 +165,11 @@ export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSes
   await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, {
     last_flush_at: new Date(agora).toISOString(),
     simulated_seconds: Number(sessao.simulated_seconds) + segundos,
+    // Grava onde a sequencia parou. `world.rng` e o MESMO objeto passado pro
+    // `buildMapWorld` — `nextFloat` muta em lugar de proposito (ver core/rng.ts),
+    // entao ler daqui pega o estado ja avancado pela simulacao inteira.
+    rng_state: world.rng.state,
+    rng_draws: world.rng.draws,
   })
 
   return { segundosCreditados: segundos, truncado, resumo, estado, piso }

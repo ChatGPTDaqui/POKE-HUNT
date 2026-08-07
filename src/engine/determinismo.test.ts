@@ -24,7 +24,7 @@
 //    sequencia.
 import { describe, expect, it } from 'vitest'
 
-import { createRng, nextFloat, deriveRng } from '@/core/rng'
+import { createRng, restoreRng, nextFloat, deriveRng } from '@/core/rng'
 import { createPokeInstance, type PokeInstance } from '@/data/pokes'
 import { buildMapWorld, stepWorld } from './simulation'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -116,5 +116,49 @@ describe('determinismo da simulacao', () => {
     const scratch = deriveRng(r.state, 'estimate')
     for (let i = 0; i < 10; i++) nextFloat(scratch)
     expect(r).toEqual(antes)
+  })
+
+  // Guarda de regressao pro bug de "varias copias iguais do mesmo POKE".
+  //
+  // O servidor simula por JANELAS (um flush a cada ~30s, ver
+  // server/src/progresso.ts#aplicarFlush) e monta um mundo novo em cada uma.
+  // Enquanto ele fazia `createRng(seed)` por janela, toda janela repetia a mesma
+  // sequencia: mesmos inimigos, mesmos niveis, mesmos IVs, mesma raridade. Na
+  // mochila do jogador isso chegava como a mesma especie de novo a cada meio
+  // minuto, e na pratica a sessao inteira era um loop de 30 segundos.
+  //
+  // O teste roda janelas de verdade, e nao so o Rng solto, porque o defeito nao
+  // estava no PRNG (ele sempre funcionou) e sim em QUEM o reconstruia. Um teste
+  // so sobre `createRng`/`restoreRng` seria tautologico e nao pegaria uma
+  // regressao futura em `aplicarFlush`.
+  it('janelas consecutivas nao repetem a sequencia quando o estado e retomado', () => {
+    const gameState = useGameStateStore.getState()
+    const JANELAS = 4
+
+    function janelas(retomar: boolean): string[] {
+      let estado = { state: SEMENTE, draws: 0 }
+      const assinaturas: string[] = []
+      for (let j = 0; j < JANELAS; j++) {
+        const rng = retomar ? restoreRng(estado.state, estado.draws) : createRng(SEMENTE)
+        const poke = createPokeInstance(createRng(1), 'charmander', 30)
+        const world = buildMapWorld(MAPA, poke, {
+          rng, counters: { entity: 1, effect: 1, pendingHit: 1 },
+        })
+        for (let i = 0; i < 100; i++) stepWorld(world, PASSO, gameState, { silent: true })
+        estado = { state: world.rng.state, draws: world.rng.draws }
+        // O que a janela produziu, sem `uid` (ver cabecalho: uid nunca sai da
+        // semente, entao sempre difere e esconderia justamente a repeticao).
+        assinaturas.push(world.enemies
+          .map((e) => `${e.poke.speciesId}:${e.poke.level}:${e.poke.rarity}:${e.poke.isShiny}`)
+          .join('|'))
+      }
+      return assinaturas
+    }
+
+    // O comportamento antigo, fixado aqui pra deixar o contraste explicito: sem
+    // retomar, TODA janela e identica.
+    expect(new Set(janelas(false)).size).toBe(1)
+    // Com o estado retomado, cada janela e uma continuacao.
+    expect(new Set(janelas(true)).size).toBe(JANELAS)
   })
 })

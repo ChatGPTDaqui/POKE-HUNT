@@ -129,13 +129,19 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
     await atualizar(cfg, `game_sessions?id=eq.${anterior.id}`, { closed_at: new Date().toISOString() })
   }
 
+  // A semente NASCE no servidor. Se o cliente pudesse escolher, escolheria a
+  // que da shiny.
+  const semente = randomSeed()
   const [criada] = await inserir<LinhaSessao>(cfg, 'game_sessions', {
     user_id: userId,
     map_id: mapId,
     poke_uid: pokeUid,
-    // A semente NASCE no servidor. Se o cliente pudesse escolher, escolheria a
-    // que da shiny.
-    seed: randomSeed(),
+    seed: semente,
+    // A sequencia comeca NA semente e avanca a cada flush (ver aplicarFlush).
+    // `seed` fica imutavel como origem auditavel da sessao; `rng_state` e onde a
+    // sequencia esta agora.
+    rng_state: semente,
+    rng_draws: 0,
   }, { retornar: true })
 
   // Zera a amostra de taxa (perfStats) ao entrar na hunt — mesmo comportamento

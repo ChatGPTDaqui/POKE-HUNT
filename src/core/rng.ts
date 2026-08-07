@@ -40,6 +40,21 @@ export function createRng(seed: number): Rng {
   return { state: seed | 0, draws: 0 }
 }
 
+/**
+ * Retoma uma sequencia ja em andamento, a partir do estado que foi persistido.
+ *
+ * Distinto de `createRng`, que sempre RECOMECA do zero. A diferenca ja custou um
+ * bug: o servidor refazia `createRng(seed)` a cada flush de 30s, entao a sessao
+ * inteira era a mesma sequencia repetida — mesmos inimigos, mesmos IVs, mesma
+ * raridade, indefinidamente (ver server/src/progresso.ts#aplicarFlush).
+ *
+ * `state | 0` porque o valor pode voltar do banco como string ou como float:
+ * mulberry32 so funciona sobre um inteiro de 32 bits com sinal.
+ */
+export function restoreRng(state: number, draws: number): Rng {
+  return { state: state | 0, draws: Number.isFinite(draws) ? draws : 0 }
+}
+
 /** Semente nova pra uma sessao. Na Fase D quem emite isto e o servidor. */
 export function randomSeed(): number {
   // `crypto.getRandomValues` em vez de `Math.random()`: a semente e a unica
