@@ -25,20 +25,28 @@ function reportarErro(erro: unknown): void {
  * do jogo, preservado inteiro. Nao e um "modo degradado": e o modo padrao
  * enquanto a hospedagem nao foi decidida.
  */
+// Devolve se a acao foi de fato APLICADA. Quem so quer disparar pode ignorar o
+// retorno (`void pedirAcao(...)`); quem toma uma decisao em cima do resultado —
+// como "entrar na hunt depois de desbloquear" — precisa esperar. Sem isso, um
+// `else` de erro vira codigo morto e a UI segue como se tivesse dado certo.
+//
+// O `fallback` pode devolver `false` pra sinalizar que a operacao local falhou
+// (ex: ouro insuficiente pra desbloquear).
 export async function pedirAcao(
   acao: { tipo: string } & Record<string, unknown>,
-  fallback: () => void,
-): Promise<void> {
+  fallback: () => boolean | void,
+): Promise<boolean> {
   if (!servidorAtivo()) {
-    fallback()
-    return
+    return fallback() !== false
   }
   try {
     const resposta = await servidor.acao(acao)
     aplicarEstadoDoServidor(resposta.estado)
     if (resposta.mensagem) useToastStore.getState().pushToast(resposta.mensagem, 'success', 'world')
+    return true
   } catch (erro) {
     reportarErro(erro)
+    return false
   }
 }
 

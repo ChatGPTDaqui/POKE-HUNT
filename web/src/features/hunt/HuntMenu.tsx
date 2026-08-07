@@ -295,11 +295,13 @@ export function HuntMenu() {
                 <Button
                   size="sm"
                   className="text-xs"
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.stopPropagation()
+                    // A tela so fecha se o jogador REALMENTE entrou. Fechar antes
+                    // esconderia a recusa do servidor e deixaria o jogador olhando
+                    // um combate que nao rende nada.
                     if (unlocked) {
-                      controller.enterMap(map.id)
-                      useUiStore.getState().closeScreen()
+                      if (await controller.enterMap(map.id)) useUiStore.getState().closeScreen()
                     } else if (continentGated) {
                       useToastStore.getState().pushToast(
                         `Derrote o Campeao Lance em Johto antes de acessar ${CONTINENT_LABELS[mapContinent] || mapContinent}.`,
@@ -308,15 +310,17 @@ export function HuntMenu() {
                     } else {
                       const resolved = getMap(map.id)
                       if (!resolved) return
-                      const result = { success: true } as const; void pedirAcao({ tipo: 'desbloquearHunt', mapId: map.id }, () => { unlockMap(useGameStateStore.getState(), resolved) })
-                      if (result.success) {
-                        controller.enterMap(map.id)
-                        useUiStore.getState().closeScreen()
-                      } else {
+                      const desbloqueou = await pedirAcao(
+                        { tipo: 'desbloquearHunt', mapId: map.id },
+                        () => unlockMap(useGameStateStore.getState(), resolved).success,
+                      )
+                      if (!desbloqueou) {
                         useToastStore.getState().pushToast(
                           `Recursos insuficientes para desbloquear ${map.name}.`, 'error', 'world',
                         )
+                        return
                       }
+                      if (await controller.enterMap(map.id)) useUiStore.getState().closeScreen()
                     }
                   }}
                 >

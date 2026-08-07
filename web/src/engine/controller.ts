@@ -26,18 +26,25 @@ export const controller = {
     useWorldStore.getState().setWorld(world)
   },
 
-  enterMap(mapId: string): void {
+  // Devolve se o jogador REALMENTE entrou. Assincrona de proposito: a sessao
+  // precisa ser aceita pelo servidor ANTES de trocar a cena.
+  //
+  // Antes isto era `void abrirSessaoDeHunt(...)` e a cena trocava sem esperar.
+  // O resultado era o pior dos dois mundos: com o servidor recusando (hunt
+  // trancada, POKE que nao e da equipe, sessao invalida), o jogador entrava,
+  // via o combate rodando na tela e nao ganhava nada — sem nenhum aviso, porque
+  // a simulacao local continua desenhando normalmente. Um erro que so aparece
+  // como "o jogo parou de dar ouro".
+  async enterMap(mapId: string): Promise<boolean> {
     const gameState = useGameStateStore.getState()
     const activePoke = gameState.team[gameState.activeIndex]
-    if (!activePoke) return
-    // Declara a INTENCAO antes de entrar. Se o servidor recusar (hunt trancada,
-    // POKE que nao e da equipe), nao entra — senao o jogador ficaria caçando numa
-    // tela que nao rende nada, o pior dos dois mundos.
-    void abrirSessaoDeHunt(mapId, activePoke.uid)
+    if (!activePoke) return false
+    if (!(await abrirSessaoDeHunt(mapId, activePoke.uid))) return false
     gameState.setCurrentMapId(mapId)
     const world = buildMapWorld(mapId, activePoke, useWorldStore.getState())
     useWorldStore.getState().setWorld(world)
     resetStats(gameState) // painel de taxa de farm reinicia do zero a cada hunt nova
+    return true
   },
 
   chooseStarter(speciesId: string, hospitalSpot: Point): void {
