@@ -122,26 +122,41 @@ function randomSpawnPoint(rng: Rng, mapDef: MapDef): Point {
   return { x, y }
 }
 
-function spawnEnemyAt(world: SequenciaDeSorteio & { pessimista?: boolean }, mapDef: MapDef): EnemyEntity {
+function spawnEnemyAt(world: SequenciaDeSorteio, mapDef: MapDef): EnemyEntity {
   const { rng, counters } = world
   const point = randomSpawnPoint(rng, mapDef)
   // Ponderado pelo TIER de spawn da especie, derivado da chance real de
   // encontro selvagem do Gen1/Gen2 (ver scripts/derive-spawn-tiers.js) — quem e
   // comum nos jogos reais aparece mais que quem e raro, dentro da mesma hunt.
   // Antes era a taxa de captura, que mede outra coisa.
-  // No modo pessimista (farm offline) o inimigo NAO e sorteado: vem sempre o de
-  // maior nivel do pool. E o que faz o resultado ser um limite inferior de
-  // verdade — com sorteio, uma sequencia de sorte inflaria o offline acima do
-  // que o jogador conseguiria acordado.
-  const encounterId = world.pessimista
-    ? mapDef.enemyPool.reduce((pior, id) => (
-      (getEncounter(id)?.maxLevel ?? 0) > (getEncounter(pior)?.maxLevel ?? 0) ? id : pior
-    ))
-    : weightedPick(rng, mapDef.enemyPool, (id) => getEncounter(id)?.weight ?? 45)
+  //
+  // O SORTEIO E O MESMO NO MODO PESSIMISTA (farm offline). Uma versao anterior
+  // fixava aqui o inimigo de maior nivel do pool, na ideia de que "o mais forte
+  // sempre" seria o limite inferior. Media, era falso e quebrava o jogo de dois
+  // jeitos (1h na Planicie, mesma semente):
+  //
+  //   sorteado  1213 kills, 305.005 ouro, 219 capturas de 28 especies
+  //   fixado    1073 kills, 209.165 ouro, 332 capturas de  1 especie
+  //
+  //   1. A mochila voltava com 332 copias do MESMO POKE — o jogador farmava a
+  //      noite inteira e recebia uma unica especie repetida. Foi assim que o
+  //      bug apareceu.
+  //   2. Capturar rendia MAIS offline que acordado, exatamente o contrario da
+  //      regra. O inimigo fixo era Pidgey (o de maior nivel ali), que tem
+  //      `catchRate` alto — fixar a especie fixa junto a chance de captura
+  //      dela, entao "o mais forte" podia ser tambem "o mais facil de pegar".
+  //
+  // O limite inferior vem de onde ele e de fato monotonico: a RESOLUCAO do
+  // combate (dano na variacao minima, zero critico — ver computeDamage), que so
+  // faz matar mais devagar, nunca render mais. Composicao de especie e nivel
+  // continua sendo a da hunt, entao o que volta na mochila e o que aquela hunt
+  // realmente da. Contra a "sequencia de sorte" que a versao anterior temia, o
+  // que protege e a escala: um flush offline sao milhares de kills, e a media
+  // de milhares de sorteios nao desvia o bastante pra passar o jogo ao vivo.
+  const encounterId = weightedPick(rng, mapDef.enemyPool, (id) => getEncounter(id)?.weight ?? 45)
   const encounter = getEncounter(encounterId)
   if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
-  // Nivel tambem no teto quando pessimista — inimigo mais forte possivel.
-  const level = world.pessimista ? encounter.maxLevel : randInt(rng, encounter.minLevel, encounter.maxLevel)
+  const level = randInt(rng, encounter.minLevel, encounter.maxLevel)
   const poke = createPokeInstance(rng, encounter.speciesId, level)
   return createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId })
 }

@@ -37201,10 +37201,10 @@ function randomSpawnPoint(rng, mapDef) {
 function spawnEnemyAt(world, mapDef) {
 	const { rng, counters } = world;
 	const point = randomSpawnPoint(rng, mapDef);
-	const encounterId = world.pessimista ? mapDef.enemyPool.reduce((pior, id) => (getEncounter(id)?.maxLevel ?? 0) > (getEncounter(pior)?.maxLevel ?? 0) ? id : pior) : weightedPick(rng, mapDef.enemyPool, (id) => getEncounter(id)?.weight ?? 45);
+	const encounterId = weightedPick(rng, mapDef.enemyPool, (id) => getEncounter(id)?.weight ?? 45);
 	const encounter = getEncounter(encounterId);
 	if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
-	const level = world.pessimista ? encounter.maxLevel : randInt(rng, encounter.minLevel, encounter.maxLevel);
+	const level = randInt(rng, encounter.minLevel, encounter.maxLevel);
 	return createEnemyEntity(counters, {
 		poke: createPokeInstance(rng, encounter.speciesId, level),
 		x: point.x,
