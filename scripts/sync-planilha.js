@@ -736,7 +736,32 @@ const MAP_ITEM_DROPS = [
   { itemId: 'poke_ball', chance: 0.1 },
 ];
 
-function syncMapsAndEncounters(hunts, speciesData) {
+// Spawn weights for the spreadsheet path. The tier is NOT spreadsheet data —
+// it is derived from the pret disassemblies by `scripts/derive-spawn-tiers.js`
+// and committed as JSON, so this path reads that file directly. The Postgres
+// path (`generate-catalog.js`) reads the same values from the `spawn_tiers`
+// table instead; the migration `spawn_tier_por_especie` seeded them from this
+// very file, so the two agree by construction.
+function readSpawnWeightsFromJson() {
+  const arquivo = path.join(__dirname, 'spawn-tiers.json');
+  const { tiers, especies } = JSON.parse(fs.readFileSync(arquivo, 'utf8'));
+  const pesoPorTier = Object.fromEntries(tiers.map((t) => [t.chave, t.peso]));
+  const pesos = {};
+  for (const [id, info] of Object.entries(especies)) {
+    const peso = pesoPorTier[info.tier];
+    if (peso == null) throw new Error(`tier desconhecido em spawn-tiers.json: ${info.tier} (${id})`);
+    pesos[id] = peso;
+  }
+  return pesos;
+}
+
+// `spawnWeights` maps a species id to its spawn weight (the tier's weight —
+// 30/20/10/5/1, the real Gen2 encounter-slot values). Both callers supply it:
+// the spreadsheet path reads `scripts/spawn-tiers.json`, the Postgres path
+// joins `species.spawn_tier` against `spawn_tiers`. Missing entries throw
+// rather than defaulting — a species silently falling back to some middle
+// weight is exactly the kind of thing nobody would ever notice.
+function syncMapsAndEncounters(hunts, spawnWeights) {
   console.log('Locais_Info + Encontros (agrupados em faixas de nivel):');
   const mapsData = {};
   const encountersData = {};
@@ -745,20 +770,23 @@ function syncMapsAndEncounters(hunts, speciesData) {
     const mapKey = hunt.key.toLowerCase();
     const enemyPool = [];
     for (const [speciesSheetKey, levels] of Object.entries(hunt.speciesLevels)) {
-      const encounterKey = `${mapKey}_${speciesSheetKey.toLowerCase()}`;
-      const species = speciesData[speciesSheetKey.toLowerCase()];
+      const speciesId = speciesSheetKey.toLowerCase();
+      const encounterKey = `${mapKey}_${speciesId}`;
+      const weight = spawnWeights[speciesId];
+      if (weight == null) throw new Error(`especie sem spawn tier: ${speciesId}`);
       encountersData[encounterKey] = {
         id: encounterKey,
-        speciesId: speciesSheetKey.toLowerCase(),
+        speciesId,
         minLevel: levels.min,
         maxLevel: levels.max,
         aggroRadius: 175,
         wanderRadius: 60,
-        // Rarer species (lower real Gen2 catch rate) spawn less often within
-        // the same hunt — reuses the spreadsheet's own catch-rate data as a
-        // ready-made rarity signal instead of inventing new numbers (see
-        // main.js#spawnEnemyAt, which picks from enemyPool by this weight).
-        weight: (species && species.catchRate) || 45,
+        // Peso de spawn = tier derivado da chance REAL de encontro selvagem do
+        // Gen1/Gen2 (ver scripts/derive-spawn-tiers.js e a migration
+        // `spawn_tier_por_especie`). Substituiu `species.catchRate`, que era
+        // taxa de CAPTURA — nao tem relacao com frequencia de APARICAO e fazia
+        // Dunsparce (a vaga de 1% do mapa real) spawnar 27% da hunt.
+        weight,
       };
       enemyPool.push(encounterKey);
     }
@@ -804,8 +832,8 @@ function main() {
   const roster = buildTypeRoster(workbook);
   const typeHunts = buildTypeDrivenHunts(allBrackets, roster);
   const hunts = [starter, ...typeHunts];
-  const { speciesData } = syncSpeciesAndMoves(workbook, hunts);
-  syncMapsAndEncounters(hunts, speciesData);
+  syncSpeciesAndMoves(workbook, hunts);
+  syncMapsAndEncounters(hunts, readSpawnWeightsFromJson());
   reportTypeCoverage(hunts, roster);
 
   console.log('\nSincronizacao concluida.');

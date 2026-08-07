@@ -17,10 +17,12 @@ function typeChipHtml(type) {
   return `<span class="type-chip" style="background:${colorForType(type)}">${type.slice(0, 3)}</span>`;
 }
 
-// Each encounter's weight comes from its real Gen2 catch rate (see
-// scripts/sync-planilha.js#syncMapsAndEncounters + main.js#spawnEnemyAt,
-// which spawns proportionally to it) — rarer species show up less often, and
-// a type's "dominance" is the sum of the odds of every species carrying it.
+// Each encounter's weight comes from the species' spawn TIER, derived from its
+// real Gen1/Gen2 wild encounter chance (see scripts/derive-spawn-tiers.js and
+// the `spawn_tier_por_especie` migration; main.js#spawnEnemyAt spawns
+// proportionally to it). It used to be `species.catchRate` — CAPTURE rate,
+// which has nothing to do with APPEARANCE frequency. A type's "dominance" is
+// the sum of the odds of every species carrying it.
 function huntOdds(map) {
   const encounters = map.enemyPool.map(getEncounter).filter(Boolean);
   const totalWeight = encounters.reduce((sum, enc) => sum + enc.weight, 0);

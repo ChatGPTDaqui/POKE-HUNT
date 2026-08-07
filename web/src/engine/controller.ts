@@ -111,6 +111,10 @@ function randomSpawnPoint(mapDef: MapDef): Point {
 
 function spawnEnemyAt(mapDef: MapDef): EnemyEntity {
   const point = randomSpawnPoint(mapDef)
+  // Ponderado pelo TIER de spawn da especie, derivado da chance real de
+  // encontro selvagem do Gen1/Gen2 (ver scripts/derive-spawn-tiers.js) — quem e
+  // comum nos jogos reais aparece mais que quem e raro, dentro da mesma hunt.
+  // Antes era a taxa de captura, que mede outra coisa.
   const encounterId = weightedPick(mapDef.enemyPool, (id) => getEncounter(id)?.weight ?? 45)
   const encounter = getEncounter(encounterId)
   if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)

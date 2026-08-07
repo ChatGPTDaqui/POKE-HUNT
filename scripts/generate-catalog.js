@@ -235,6 +235,21 @@ function keyPrefixDoMapa(map) {
   return map.id.slice(0, map.id.length - slug.length - 1);
 }
 
+// Peso de spawn por especie: `species.spawn_tier` resolvido contra a tabela
+// `spawn_tiers`. O peso mora no banco (e nao numa constante do build) porque e
+// dado de balanceamento — rebalancear vira um update, nao um deploy. Ver a
+// migration `spawn_tier_por_especie` pra procedencia de cada tier.
+function spawnWeights(species, tiers) {
+  const pesoPorTier = Object.fromEntries(tiers.map((t) => [t.key, num(t.weight)]));
+  const pesos = {};
+  for (const s of species) {
+    const peso = pesoPorTier[s.spawn_tier];
+    if (peso == null) throw new Error(`especie ${s.id}: spawn_tier "${s.spawn_tier}" nao esta em spawn_tiers`);
+    pesos[s.id] = peso;
+  }
+  return pesos;
+}
+
 function rebuildStarterHunt(maps, encounters) {
   const map = maps.find((m) => m.id === STARTER_MAP_ID);
   if (!map) throw new Error(`hunt inicial "${STARTER_MAP_ID}" nao encontrada em maps`);
@@ -285,7 +300,7 @@ function rebuildBrackets(maps) {
 async function main() {
   console.log('Lendo catalogo do Postgres...\n');
 
-  const [species, moves, speciesMoves, items, typeChart, maps, mapEncounters, formulas] = await Promise.all([
+  const [species, moves, speciesMoves, items, typeChart, maps, mapEncounters, formulas, spawnTiers] = await Promise.all([
     fetchAll('species', 'dex_number.asc'),
     fetchAll('moves', 'id.asc'),
     fetchAll('species_moves', 'species_id.asc,sort_order.asc'),
@@ -294,11 +309,12 @@ async function main() {
     fetchAll('maps', 'sort_order.asc'),
     fetchAll('map_encounters', 'map_id.asc,sort_order.asc'),
     fetchAll('formulas', 'sort_order.asc'),
+    fetchAll('spawn_tiers', 'sort_order.asc'),
   ]);
 
   console.log(`  species ${species.length} | moves ${moves.length} | species_moves ${speciesMoves.length}`);
   console.log(`  items ${items.length} | type_chart ${typeChart.length} | maps ${maps.length}`);
-  console.log(`  map_encounters ${mapEncounters.length} | formulas ${formulas.length}\n`);
+  console.log(`  map_encounters ${mapEncounters.length} | formulas ${formulas.length} | spawn_tiers ${spawnTiers.length}\n`);
 
   const workbook = {
     'Espécies': speciesSheet(species),
@@ -318,8 +334,8 @@ async function main() {
   const roster = sync.buildTypeRoster(workbook);
   const hunts = [starter, ...sync.buildTypeDrivenHunts(brackets, roster)];
 
-  const { speciesData } = sync.syncSpeciesAndMoves(workbook, hunts);
-  sync.syncMapsAndEncounters(hunts, speciesData);
+  sync.syncSpeciesAndMoves(workbook, hunts);
+  sync.syncMapsAndEncounters(hunts, spawnWeights(species, spawnTiers));
 
   console.log('\nCatalogo gerado a partir do Postgres.');
 }

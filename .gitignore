@@ -37,6 +37,11 @@ assets/move sprites/
 .env.*
 !.env.example
 
+# Copia local dos .asm que `scripts/derive-spawn-tiers.js` baixa dos
+# disassemblies pret/*. Serve so pra rerodar a derivacao sem bater na rede de
+# novo — o resultado (`scripts/spawn-tiers.json`) e que e versionado.
+.cache/
+
 # OS/editor cruft
 .DS_Store
 Thumbs.db

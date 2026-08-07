@@ -1,0 +1,1602 @@
+{
+  "_origem": "Gerado por scripts/derive-spawn-tiers.js a partir dos disassemblies pret/pokecrystal, pret/pokegold e pret/pokered. Nao editar a mao.",
+  "_escala": "O peso espelha a GrassMonProbTable do Gen2 (30/20/10/5/1) — os tiers sao as vagas reais do jogo.",
+  "tiers": [
+    {
+      "chave": "muito_comum",
+      "peso": 30,
+      "minChance": 25
+    },
+    {
+      "chave": "comum",
+      "peso": 20,
+      "minChance": 15
+    },
+    {
+      "chave": "incomum",
+      "peso": 10,
+      "minChance": 7.5
+    },
+    {
+      "chave": "raro",
+      "peso": 5,
+      "minChance": 3
+    },
+    {
+      "chave": "muito_raro",
+      "peso": 1,
+      "minChance": null
+    }
+  ],
+  "especies": {
+    "abra": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 10.42,
+      "locais": 8,
+      "nota": "Gen2: 10.42% medio em 8 local(is) (grama)"
+    },
+    "aerodactyl": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0, nao evolui)"
+    },
+    "aipom": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 20,
+      "locais": 2,
+      "nota": "Gen2: 20% medio em 2 local(is) (arvore)"
+    },
+    "alakazam": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "ampharos": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "arbok": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 4.68,
+      "locais": 7,
+      "nota": "Gen2: 4.68% medio em 7 local(is) (grama)"
+    },
+    "arcanine": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "ariados": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 0.83,
+      "locais": 2,
+      "nota": "Gen2: 0.83% medio em 2 local(is) (grama)"
+    },
+    "articuno": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "azumarill": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "bayleef": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "beedrill": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 2.81,
+      "locais": 2,
+      "nota": "Gen2: 2.81% medio em 2 local(is) (arvore/grama)"
+    },
+    "bellossom": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "bellsprout": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 18.33,
+      "locais": 8,
+      "nota": "Gen2: 18.33% medio em 8 local(is) (grama)"
+    },
+    "blastoise": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "blissey": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "bulbasaur": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "butterfree": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 2.51,
+      "locais": 4,
+      "nota": "Gen2: 2.51% medio em 4 local(is) (arvore/grama)"
+    },
+    "caterpie": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 12.2,
+      "locais": 8,
+      "nota": "Gen2: 12.2% medio em 8 local(is) (arvore/grama)"
+    },
+    "celebi": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "chansey": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 1,
+      "locais": 3,
+      "nota": "Gen2: 1% medio em 3 local(is) (grama)"
+    },
+    "charizard": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "charmander": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "charmeleon": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "chikorita": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "chinchou": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 30,
+      "locais": 2,
+      "nota": "Gen2: 30% medio em 2 local(is) (pesca)"
+    },
+    "clefable": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "clefairy": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 2.78,
+      "locais": 3,
+      "nota": "Gen2: 2.78% medio em 3 local(is) (grama)"
+    },
+    "cleffa": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "cloyster": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "corsola": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 10,
+      "locais": 2,
+      "nota": "Gen2: 10% medio em 2 local(is) (pesca)"
+    },
+    "crobat": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "croconaw": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "cubone": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 28.33,
+      "locais": 2,
+      "nota": "Gen2: 28.33% medio em 2 local(is) (grama)"
+    },
+    "cyndaquil": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "delibird": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 11.11,
+      "locais": 5,
+      "nota": "Gen2: 11.11% medio em 5 local(is) (grama)"
+    },
+    "dewgong": {
+      "tier": "muito_raro",
+      "origem": "rb",
+      "chanceMedia": 2.73,
+      "locais": 2,
+      "nota": "sem encontro no Gen2; Gen1: 2.73% medio em 2 local(is)"
+    },
+    "diglett": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 90,
+      "locais": 1,
+      "nota": "Gen2: 90% medio em 1 local(is) (grama)"
+    },
+    "ditto": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 4.5,
+      "locais": 2,
+      "nota": "Gen2: 4.5% medio em 2 local(is) (grama)"
+    },
+    "dodrio": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 2.5,
+      "locais": 4,
+      "nota": "Gen2: 2.5% medio em 4 local(is) (grama)"
+    },
+    "doduo": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 14,
+      "locais": 5,
+      "nota": "Gen2: 14% medio em 5 local(is) (grama)"
+    },
+    "donphan": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 6.18,
+      "locais": 8,
+      "nota": "Gen2: 6.18% medio em 8 local(is) (grama)"
+    },
+    "dragonair": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 10,
+      "locais": 2,
+      "nota": "Gen2: 10% medio em 2 local(is) (pesca)"
+    },
+    "dragonite": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "dratini": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 18,
+      "locais": 5,
+      "nota": "Gen2: 18% medio em 5 local(is) (agua/pesca)"
+    },
+    "drowzee": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 21.67,
+      "locais": 4,
+      "nota": "Gen2: 21.67% medio em 4 local(is) (grama)"
+    },
+    "dugtrio": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 10,
+      "locais": 1,
+      "nota": "Gen2: 10% medio em 1 local(is) (grama)"
+    },
+    "dunsparce": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 1,
+      "locais": 1,
+      "nota": "Gen2: 1% medio em 1 local(is) (grama)"
+    },
+    "eevee": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "ekans": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 11.95,
+      "locais": 7,
+      "nota": "Gen2: 11.95% medio em 7 local(is) (arvore/grama)"
+    },
+    "electabuzz": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 6.11,
+      "locais": 1,
+      "nota": "Gen2: 6.11% medio em 1 local(is) (grama)"
+    },
+    "electrode": {
+      "tier": "incomum",
+      "origem": "rb",
+      "chanceMedia": 12.5,
+      "locais": 2,
+      "nota": "sem encontro no Gen2; Gen1: 12.5% medio em 2 local(is)"
+    },
+    "elekid": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "entei": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "espeon": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "exeggcute": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 20,
+      "locais": 3,
+      "nota": "Gen2: 20% medio em 3 local(is) (arvore)"
+    },
+    "exeggutor": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "farfetch_d": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 4.44,
+      "locais": 3,
+      "nota": "Gen2: 4.44% medio em 3 local(is) (grama)"
+    },
+    "fearow": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 13.97,
+      "locais": 7,
+      "nota": "Gen2: 13.97% medio em 7 local(is) (grama)"
+    },
+    "feraligatr": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "flaaffy": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 14.44,
+      "locais": 2,
+      "nota": "Gen2: 14.44% medio em 2 local(is) (grama)"
+    },
+    "flareon": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "forretress": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "furret": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 3.33,
+      "locais": 2,
+      "nota": "Gen2: 3.33% medio em 2 local(is) (grama)"
+    },
+    "gastly": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 20.9,
+      "locais": 13,
+      "nota": "Gen2: 20.9% medio em 13 local(is) (grama)"
+    },
+    "gengar": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "geodude": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 27.3,
+      "locais": 15,
+      "nota": "Gen2: 27.3% medio em 15 local(is) (grama)"
+    },
+    "girafarig": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 20,
+      "locais": 1,
+      "nota": "Gen2: 20% medio em 1 local(is) (grama)"
+    },
+    "gligar": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 13.33,
+      "locais": 1,
+      "nota": "Gen2: 13.33% medio em 1 local(is) (grama)"
+    },
+    "gloom": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 1.39,
+      "locais": 2,
+      "nota": "Gen2: 1.39% medio em 2 local(is) (grama)"
+    },
+    "golbat": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 12.99,
+      "locais": 30,
+      "nota": "Gen2: 12.99% medio em 30 local(is) (grama)"
+    },
+    "goldeen": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 72.67,
+      "locais": 15,
+      "nota": "Gen2: 72.67% medio em 15 local(is) (agua/pesca)"
+    },
+    "golduck": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 10.97,
+      "locais": 8,
+      "nota": "Gen2: 10.97% medio em 8 local(is) (agua/grama)"
+    },
+    "golem": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "granbull": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 1.11,
+      "locais": 1,
+      "nota": "Gen2: 1.11% medio em 1 local(is) (grama)"
+    },
+    "graveler": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 27.13,
+      "locais": 6,
+      "nota": "Gen2: 27.13% medio em 6 local(is) (grama)"
+    },
+    "grimer": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 65.97,
+      "locais": 4,
+      "nota": "Gen2: 65.97% medio em 4 local(is) (agua/grama)"
+    },
+    "growlithe": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 7.11,
+      "locais": 5,
+      "nota": "Gen2: 7.11% medio em 5 local(is) (grama)"
+    },
+    "gyarados": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 16.67,
+      "locais": 3,
+      "nota": "Gen2: 16.67% medio em 3 local(is) (agua/pesca)"
+    },
+    "haunter": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 3.15,
+      "locais": 3,
+      "nota": "Gen2: 3.15% medio em 3 local(is) (grama)"
+    },
+    "heracross": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 3,
+      "locais": 2,
+      "nota": "Gen2: 3% medio em 2 local(is) (arvore)"
+    },
+    "hitmonchan": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0, nao evolui)"
+    },
+    "hitmonlee": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0, nao evolui)"
+    },
+    "hitmontop": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0, nao evolui)"
+    },
+    "ho_oh": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "hoothoot": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 20.69,
+      "locais": 18,
+      "nota": "Gen2: 20.69% medio em 18 local(is) (arvore/grama)"
+    },
+    "hoppip": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 7.56,
+      "locais": 9,
+      "nota": "Gen2: 7.56% medio em 9 local(is) (grama)"
+    },
+    "horsea": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 44,
+      "locais": 5,
+      "nota": "Gen2: 44% medio em 5 local(is) (agua/pesca)"
+    },
+    "houndoom": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "houndour": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 3.33,
+      "locais": 1,
+      "nota": "Gen2: 3.33% medio em 1 local(is) (grama)"
+    },
+    "hypno": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 7.22,
+      "locais": 1,
+      "nota": "Gen2: 7.22% medio em 1 local(is) (grama)"
+    },
+    "igglybuff": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "ivysaur": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "jigglypuff": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 2.96,
+      "locais": 9,
+      "nota": "Gen2: 2.96% medio em 9 local(is) (grama)"
+    },
+    "jolteon": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "jumpluff": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "jynx": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 5.38,
+      "locais": 5,
+      "nota": "Gen2: 5.38% medio em 5 local(is) (grama)"
+    },
+    "kabuto": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "kabutops": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "kadabra": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 5,
+      "locais": 1,
+      "nota": "Gen2: 5% medio em 1 local(is) (grama)"
+    },
+    "kakuna": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 4.34,
+      "locais": 6,
+      "nota": "Gen2: 4.34% medio em 6 local(is) (arvore/grama)"
+    },
+    "kangaskhan": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 4.44,
+      "locais": 1,
+      "nota": "Gen2: 4.44% medio em 1 local(is) (grama)"
+    },
+    "kingdra": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "kingler": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 15,
+      "locais": 2,
+      "nota": "Gen2: 15% medio em 2 local(is) (pesca)"
+    },
+    "koffing": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 43.17,
+      "locais": 2,
+      "nota": "Gen2: 43.17% medio em 2 local(is) (grama)"
+    },
+    "krabby": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 45.08,
+      "locais": 14,
+      "nota": "Gen2: 45.08% medio em 14 local(is) (grama/pesca)"
+    },
+    "lanturn": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 10,
+      "locais": 1,
+      "nota": "Gen2: 10% medio em 1 local(is) (pesca)"
+    },
+    "lapras": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0, nao evolui)"
+    },
+    "larvitar": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 4.39,
+      "locais": 4,
+      "nota": "Gen2: 4.39% medio em 4 local(is) (grama)"
+    },
+    "ledian": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 0.83,
+      "locais": 2,
+      "nota": "Gen2: 0.83% medio em 2 local(is) (grama)"
+    },
+    "ledyba": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 6.69,
+      "locais": 7,
+      "nota": "Gen2: 6.69% medio em 7 local(is) (arvore/grama)"
+    },
+    "lickitung": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 18.89,
+      "locais": 1,
+      "nota": "Gen2: 18.89% medio em 1 local(is) (grama)"
+    },
+    "lugia": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "machamp": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "machoke": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 12.59,
+      "locais": 3,
+      "nota": "Gen2: 12.59% medio em 3 local(is) (grama)"
+    },
+    "machop": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 15.33,
+      "locais": 5,
+      "nota": "Gen2: 15.33% medio em 5 local(is) (grama)"
+    },
+    "magby": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "magcargo": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "magikarp": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 69.23,
+      "locais": 39,
+      "nota": "Gen2: 69.23% medio em 39 local(is) (agua/pesca)"
+    },
+    "magmar": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 3.33,
+      "locais": 2,
+      "nota": "Gen2: 3.33% medio em 2 local(is) (grama)"
+    },
+    "magnemite": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 18.33,
+      "locais": 4,
+      "nota": "Gen2: 18.33% medio em 4 local(is) (grama)"
+    },
+    "magneton": {
+      "tier": "incomum",
+      "origem": "rb",
+      "chanceMedia": 12.7,
+      "locais": 2,
+      "nota": "sem encontro no Gen2; Gen1: 12.7% medio em 2 local(is)"
+    },
+    "mankey": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 10,
+      "locais": 2,
+      "nota": "Gen2: 10% medio em 2 local(is) (grama)"
+    },
+    "mantine": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 6.67,
+      "locais": 1,
+      "nota": "Gen2: 6.67% medio em 1 local(is) (agua)"
+    },
+    "mareep": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 14.44,
+      "locais": 3,
+      "nota": "Gen2: 14.44% medio em 3 local(is) (grama)"
+    },
+    "marill": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 4.46,
+      "locais": 8,
+      "nota": "Gen2: 4.46% medio em 8 local(is) (agua/grama)"
+    },
+    "marowak": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 1.94,
+      "locais": 4,
+      "nota": "Gen2: 1.94% medio em 4 local(is) (grama)"
+    },
+    "meganium": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "meowth": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 11.9,
+      "locais": 7,
+      "nota": "Gen2: 11.9% medio em 7 local(is) (grama)"
+    },
+    "metapod": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 4.16,
+      "locais": 8,
+      "nota": "Gen2: 4.16% medio em 8 local(is) (arvore/grama)"
+    },
+    "mew": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "mewtwo": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "miltank": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 4.44,
+      "locais": 2,
+      "nota": "Gen2: 4.44% medio em 2 local(is) (grama)"
+    },
+    "misdreavus": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 6.39,
+      "locais": 2,
+      "nota": "Gen2: 6.39% medio em 2 local(is) (grama)"
+    },
+    "moltres": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "mr__mime": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 6.67,
+      "locais": 1,
+      "nota": "Gen2: 6.67% medio em 1 local(is) (grama)"
+    },
+    "muk": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 7.36,
+      "locais": 4,
+      "nota": "Gen2: 7.36% medio em 4 local(is) (agua/grama)"
+    },
+    "murkrow": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 7.22,
+      "locais": 2,
+      "nota": "Gen2: 7.22% medio em 2 local(is) (grama)"
+    },
+    "natu": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 90,
+      "locais": 1,
+      "nota": "Gen2: 90% medio em 1 local(is) (grama)"
+    },
+    "nidoking": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "nidoqueen": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "nidoran_f": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 15.56,
+      "locais": 3,
+      "nota": "Gen2: 15.56% medio em 3 local(is) (grama)"
+    },
+    "nidoran_m": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 15.56,
+      "locais": 3,
+      "nota": "Gen2: 15.56% medio em 3 local(is) (grama)"
+    },
+    "nidorina": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 26.67,
+      "locais": 3,
+      "nota": "Gen2: 26.67% medio em 3 local(is) (grama)"
+    },
+    "nidorino": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 26.67,
+      "locais": 3,
+      "nota": "Gen2: 26.67% medio em 3 local(is) (grama)"
+    },
+    "ninetales": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "noctowl": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 4.53,
+      "locais": 15,
+      "nota": "Gen2: 4.53% medio em 15 local(is) (arvore/grama)"
+    },
+    "octillery": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "oddish": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 12.22,
+      "locais": 5,
+      "nota": "Gen2: 12.22% medio em 5 local(is) (grama)"
+    },
+    "omanyte": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "omastar": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "onix": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 16.19,
+      "locais": 7,
+      "nota": "Gen2: 16.19% medio em 7 local(is) (grama)"
+    },
+    "paras": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 9.72,
+      "locais": 2,
+      "nota": "Gen2: 9.72% medio em 2 local(is) (grama)"
+    },
+    "parasect": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 5.83,
+      "locais": 2,
+      "nota": "Gen2: 5.83% medio em 2 local(is) (grama)"
+    },
+    "persian": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 2.78,
+      "locais": 1,
+      "nota": "Gen2: 2.78% medio em 1 local(is) (grama)"
+    },
+    "phanpy": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 2.22,
+      "locais": 2,
+      "nota": "Gen2: 2.22% medio em 2 local(is) (grama)"
+    },
+    "pichu": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "pidgeot": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "pidgeotto": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 8.98,
+      "locais": 12,
+      "nota": "Gen2: 8.98% medio em 12 local(is) (grama)"
+    },
+    "pidgey": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 18.11,
+      "locais": 15,
+      "nota": "Gen2: 18.11% medio em 15 local(is) (grama)"
+    },
+    "pikachu": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 4.44,
+      "locais": 1,
+      "nota": "Gen2: 4.44% medio em 1 local(is) (grama)"
+    },
+    "piloswine": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "pineco": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 9,
+      "locais": 4,
+      "nota": "Gen2: 9% medio em 4 local(is) (arvore)"
+    },
+    "pinsir": {
+      "tier": "muito_raro",
+      "origem": "rb",
+      "chanceMedia": 1.37,
+      "locais": 2,
+      "nota": "sem encontro no Gen2; Gen1: 1.37% medio em 2 local(is)"
+    },
+    "politoed": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "poliwag": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 55.44,
+      "locais": 19,
+      "nota": "Gen2: 55.44% medio em 19 local(is) (agua/grama/pesca)"
+    },
+    "poliwhirl": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 15,
+      "locais": 12,
+      "nota": "Gen2: 15% medio em 12 local(is) (agua/grama)"
+    },
+    "poliwrath": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "ponyta": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 16,
+      "locais": 5,
+      "nota": "Gen2: 16% medio em 5 local(is) (grama)"
+    },
+    "porygon": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "porygon2": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "primeape": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 1.67,
+      "locais": 1,
+      "nota": "Gen2: 1.67% medio em 1 local(is) (grama)"
+    },
+    "psyduck": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 39.68,
+      "locais": 7,
+      "nota": "Gen2: 39.68% medio em 7 local(is) (agua/grama)"
+    },
+    "pupitar": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 0.22,
+      "locais": 1,
+      "nota": "Gen2: 0.22% medio em 1 local(is) (grama)"
+    },
+    "quagsire": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 20.41,
+      "locais": 17,
+      "nota": "Gen2: 20.41% medio em 17 local(is) (agua/grama)"
+    },
+    "quilava": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "qwilfish": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 47.5,
+      "locais": 4,
+      "nota": "Gen2: 47.5% medio em 4 local(is) (pesca)"
+    },
+    "raichu": {
+      "tier": "raro",
+      "origem": "rb",
+      "chanceMedia": 5.6,
+      "locais": 3,
+      "nota": "sem encontro no Gen2; Gen1: 5.6% medio em 3 local(is)"
+    },
+    "raikou": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "rapidash": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 10,
+      "locais": 2,
+      "nota": "Gen2: 10% medio em 2 local(is) (grama)"
+    },
+    "raticate": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 12.24,
+      "locais": 22,
+      "nota": "Gen2: 12.24% medio em 22 local(is) (grama)"
+    },
+    "rattata": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 35.77,
+      "locais": 38,
+      "nota": "Gen2: 35.77% medio em 38 local(is) (grama)"
+    },
+    "remoraid": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 47.5,
+      "locais": 4,
+      "nota": "Gen2: 47.5% medio em 4 local(is) (pesca)"
+    },
+    "rhydon": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 1.11,
+      "locais": 1,
+      "nota": "Gen2: 1.11% medio em 1 local(is) (grama)"
+    },
+    "rhyhorn": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 10,
+      "locais": 1,
+      "nota": "Gen2: 10% medio em 1 local(is) (grama)"
+    },
+    "sandshrew": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 8,
+      "locais": 5,
+      "nota": "Gen2: 8% medio em 5 local(is) (grama)"
+    },
+    "sandslash": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 5.28,
+      "locais": 4,
+      "nota": "Gen2: 5.28% medio em 4 local(is) (grama)"
+    },
+    "scizor": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "scyther": {
+      "tier": "muito_raro",
+      "origem": "rb",
+      "chanceMedia": 1.37,
+      "locais": 2,
+      "nota": "sem encontro no Gen2; Gen1: 1.37% medio em 2 local(is)"
+    },
+    "seadra": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 10,
+      "locais": 2,
+      "nota": "Gen2: 10% medio em 2 local(is) (agua/pesca)"
+    },
+    "seaking": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 15.38,
+      "locais": 13,
+      "nota": "Gen2: 15.38% medio em 13 local(is) (agua/pesca)"
+    },
+    "seel": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 15.56,
+      "locais": 8,
+      "nota": "Gen2: 15.56% medio em 8 local(is) (grama)"
+    },
+    "sentret": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 15.56,
+      "locais": 3,
+      "nota": "Gen2: 15.56% medio em 3 local(is) (grama)"
+    },
+    "shellder": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 20,
+      "locais": 2,
+      "nota": "Gen2: 20% medio em 2 local(is) (pesca)"
+    },
+    "shuckle": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0, nao evolui)"
+    },
+    "skarmory": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 2.78,
+      "locais": 1,
+      "nota": "Gen2: 2.78% medio em 1 local(is) (grama)"
+    },
+    "skiploom": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 5.11,
+      "locais": 1,
+      "nota": "Gen2: 5.11% medio em 1 local(is) (grama)"
+    },
+    "slowbro": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 10,
+      "locais": 1,
+      "nota": "Gen2: 10% medio em 1 local(is) (agua)"
+    },
+    "slowking": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "slowpoke": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 44.17,
+      "locais": 6,
+      "nota": "Gen2: 44.17% medio em 6 local(is) (agua/grama)"
+    },
+    "slugma": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 7.22,
+      "locais": 3,
+      "nota": "Gen2: 7.22% medio em 3 local(is) (grama)"
+    },
+    "smeargle": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 8.89,
+      "locais": 1,
+      "nota": "Gen2: 8.89% medio em 1 local(is) (grama)"
+    },
+    "smoochum": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "sneasel": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 1.13,
+      "locais": 6,
+      "nota": "Gen2: 1.13% medio em 6 local(is) (grama)"
+    },
+    "snorlax": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0, nao evolui)"
+    },
+    "snubbull": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 5.49,
+      "locais": 7,
+      "nota": "Gen2: 5.49% medio em 7 local(is) (grama)"
+    },
+    "spearow": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 32.07,
+      "locais": 11,
+      "nota": "Gen2: 32.07% medio em 11 local(is) (arvore/grama)"
+    },
+    "spinarak": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 6.69,
+      "locais": 7,
+      "nota": "Gen2: 6.69% medio em 7 local(is) (arvore/grama)"
+    },
+    "squirtle": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "stantler": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 13.89,
+      "locais": 2,
+      "nota": "Gen2: 13.89% medio em 2 local(is) (grama)"
+    },
+    "starmie": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "staryu": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 10,
+      "locais": 2,
+      "nota": "Gen2: 10% medio em 2 local(is) (pesca)"
+    },
+    "steelix": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "sudowoodo": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0, nao evolui)"
+    },
+    "suicune": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "sunflora": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "sunkern": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 8.89,
+      "locais": 2,
+      "nota": "Gen2: 8.89% medio em 2 local(is) (grama)"
+    },
+    "swinub": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 35.56,
+      "locais": 5,
+      "nota": "Gen2: 35.56% medio em 5 local(is) (grama)"
+    },
+    "tangela": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 42.5,
+      "locais": 4,
+      "nota": "Gen2: 42.5% medio em 4 local(is) (grama)"
+    },
+    "tauros": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 4.11,
+      "locais": 2,
+      "nota": "Gen2: 4.11% medio em 2 local(is) (grama)"
+    },
+    "teddiursa": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 1.48,
+      "locais": 3,
+      "nota": "Gen2: 1.48% medio em 3 local(is) (grama)"
+    },
+    "tentacool": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 74.2,
+      "locais": 27,
+      "nota": "Gen2: 74.2% medio em 27 local(is) (agua/pesca)"
+    },
+    "tentacruel": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 12,
+      "locais": 25,
+      "nota": "Gen2: 12% medio em 25 local(is) (agua/pesca)"
+    },
+    "togepi": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "togetic": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "totodile": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "typhlosion": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "tyranitar": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "tyrogue": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 0)"
+    },
+    "umbreon": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "unown": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 100,
+      "locais": 1,
+      "nota": "Gen2: 100% medio em 1 local(is) (grama)"
+    },
+    "ursaring": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 7.85,
+      "locais": 8,
+      "nota": "Gen2: 7.85% medio em 8 local(is) (grama)"
+    },
+    "vaporeon": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "venomoth": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 1.46,
+      "locais": 8,
+      "nota": "Gen2: 1.46% medio em 8 local(is) (grama)"
+    },
+    "venonat": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 6.18,
+      "locais": 11,
+      "nota": "Gen2: 6.18% medio em 11 local(is) (arvore/grama)"
+    },
+    "venusaur": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "victreebel": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "vileplume": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 2)"
+    },
+    "voltorb": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 30,
+      "locais": 1,
+      "nota": "Gen2: 30% medio em 1 local(is) (grama)"
+    },
+    "vulpix": {
+      "tier": "raro",
+      "origem": "gsc",
+      "chanceMedia": 4.44,
+      "locais": 4,
+      "nota": "Gen2: 4.44% medio em 4 local(is) (grama)"
+    },
+    "wartortle": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "weedle": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 9.32,
+      "locais": 6,
+      "nota": "Gen2: 9.32% medio em 6 local(is) (arvore/grama)"
+    },
+    "weepinbell": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 12.96,
+      "locais": 3,
+      "nota": "Gen2: 12.96% medio em 3 local(is) (grama)"
+    },
+    "weezing": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 0.33,
+      "locais": 1,
+      "nota": "Gen2: 0.33% medio em 1 local(is) (grama)"
+    },
+    "wigglytuff": {
+      "tier": "raro",
+      "origem": "rb",
+      "chanceMedia": 5.08,
+      "locais": 1,
+      "nota": "sem encontro no Gen2; Gen1: 5.08% medio em 1 local(is)"
+    },
+    "wobbuffet": {
+      "tier": "incomum",
+      "origem": "gsc",
+      "chanceMedia": 11.67,
+      "locais": 1,
+      "nota": "Gen2: 11.67% medio em 1 local(is) (grama)"
+    },
+    "wooper": {
+      "tier": "muito_comum",
+      "origem": "gsc",
+      "chanceMedia": 28.14,
+      "locais": 7,
+      "nota": "Gen2: 28.14% medio em 7 local(is) (agua/grama)"
+    },
+    "xatu": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Gen1/Gen2; regra por estagio evolutivo (profundidade 1)"
+    },
+    "yanma": {
+      "tier": "muito_raro",
+      "origem": "gsc",
+      "chanceMedia": 1,
+      "locais": 1,
+      "nota": "Gen2: 1% medio em 1 local(is) (grama)"
+    },
+    "zapdos": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "zubat": {
+      "tier": "comum",
+      "origem": "gsc",
+      "chanceMedia": 23.98,
+      "locais": 39,
+      "nota": "Gen2: 23.98% medio em 39 local(is) (grama)"
+    }
+  }
+}

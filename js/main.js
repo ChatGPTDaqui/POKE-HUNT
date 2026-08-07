@@ -146,9 +146,10 @@ function randomSpawnPoint(mapDef) {
 
 function spawnEnemyAt(mapDef) {
   const point = randomSpawnPoint(mapDef);
-  // Weighted by each encounter's real Gen2 catch rate (see
-  // scripts/sync-planilha.js#syncMapsAndEncounters) — common species (high
-  // catch rate) show up more often than rarer ones in the same hunt.
+  // Weighted by the species' spawn tier, derived from its real Gen1/Gen2 wild
+  // encounter chance (see scripts/derive-spawn-tiers.js) — a species that is
+  // common in the real games shows up more often than a rare one in the same
+  // hunt. It used to be the catch rate, which measured the wrong thing.
   const encounterId = weightedPick(mapDef.enemyPool, (id) => getEncounter(id).weight);
   const encounter = getEncounter(encounterId);
   const level = randInt(encounter.minLevel, encounter.maxLevel);

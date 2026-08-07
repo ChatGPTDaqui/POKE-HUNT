@@ -9,6 +9,14 @@
 //
 // Ordem importa: a planilha roda PRIMEIRO e o Postgres por ULTIMO, entao o que
 // fica no disco no fim e a saida do novo gerador (que e a que vai ser commitada).
+//
+// Nem tudo no catalogo vem da planilha: o peso de spawn vem do tier derivado dos
+// disassemblies pret/* (`scripts/spawn-tiers.json`, ver a migration
+// `spawn_tier_por_especie`). Os dois lados leem esse tier de lugares diferentes —
+// o gerador da planilha le o JSON, o do Postgres le a tabela `spawn_tiers` — e o
+// banco foi semeado a partir do mesmo JSON. Entao esta comparacao tambem prova
+// que o seed do banco continua batendo com o arquivo versionado: se alguem editar
+// um tier so de um lado, o diff acusa.
 'use strict';
 
 const fs = require('fs');
@@ -109,4 +117,4 @@ if (falhas > 0) {
   console.log(`\n${falhas} de ${ARQUIVOS.length} arquivo(s) divergem. A planilha ainda NAO pode ser aposentada.`);
   process.exit(1);
 }
-console.log(`\nOs ${ARQUIVOS.length} arquivos sao identicos. Postgres reproduz a planilha exatamente.`);
+console.log(`\nOs ${ARQUIVOS.length} arquivos sao identicos. Postgres reproduz a planilha (+ spawn-tiers.json) exatamente.`);

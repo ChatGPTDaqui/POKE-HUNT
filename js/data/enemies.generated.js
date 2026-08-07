@@ -10,7 +10,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 2,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 30
   },
   "route_46_spearow": {
     "id": "route_46_spearow",
@@ -19,7 +19,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 2,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 30
   },
   "route_46_rattata": {
     "id": "route_46_rattata",
@@ -28,7 +28,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 2,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 30
   },
   "lv_1_10_floresta_ivysaur": {
     "id": "lv_1_10_floresta_ivysaur",
@@ -37,7 +37,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_1_10_floresta_venusaur": {
     "id": "lv_1_10_floresta_venusaur",
@@ -46,7 +46,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_1_10_floresta_oddish": {
     "id": "lv_1_10_floresta_oddish",
@@ -55,7 +55,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 10
   },
   "lv_1_10_floresta_gloom": {
     "id": "lv_1_10_floresta_gloom",
@@ -64,7 +64,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 1
   },
   "lv_1_10_floresta_bellsprout": {
     "id": "lv_1_10_floresta_bellsprout",
@@ -73,7 +73,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 20
   },
   "lv_1_10_floresta_weepinbell": {
     "id": "lv_1_10_floresta_weepinbell",
@@ -82,7 +82,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 10
   },
   "lv_1_10_floresta_victreebel": {
     "id": "lv_1_10_floresta_victreebel",
@@ -91,7 +91,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_1_10_floresta_exeggcute": {
     "id": "lv_1_10_floresta_exeggcute",
@@ -100,7 +100,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 20
   },
   "lv_1_10_floresta_tangela": {
     "id": "lv_1_10_floresta_tangela",
@@ -109,7 +109,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 30
   },
   "lv_1_10_floresta_chikorita": {
     "id": "lv_1_10_floresta_chikorita",
@@ -118,7 +118,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 10
   },
   "lv_1_10_floresta_bayleef": {
     "id": "lv_1_10_floresta_bayleef",
@@ -127,7 +127,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_1_10_floresta_meganium": {
     "id": "lv_1_10_floresta_meganium",
@@ -136,7 +136,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_1_10_floresta_hoppip": {
     "id": "lv_1_10_floresta_hoppip",
@@ -145,7 +145,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 10
   },
   "lv_1_10_floresta_skiploom": {
     "id": "lv_1_10_floresta_skiploom",
@@ -154,7 +154,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 5
   },
   "lv_1_10_floresta_jumpluff": {
     "id": "lv_1_10_floresta_jumpluff",
@@ -163,7 +163,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_1_10_floresta_sunkern": {
     "id": "lv_1_10_floresta_sunkern",
@@ -172,7 +172,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 235
+    "weight": 10
   },
   "lv_1_10_floresta_sunflora": {
     "id": "lv_1_10_floresta_sunflora",
@@ -181,7 +181,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 5
   },
   "lv_1_10_bosque_caterpie": {
     "id": "lv_1_10_bosque_caterpie",
@@ -190,7 +190,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 10
   },
   "lv_1_10_bosque_metapod": {
     "id": "lv_1_10_bosque_metapod",
@@ -199,7 +199,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 5
   },
   "lv_1_10_bosque_butterfree": {
     "id": "lv_1_10_bosque_butterfree",
@@ -208,7 +208,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_1_10_bosque_weedle": {
     "id": "lv_1_10_bosque_weedle",
@@ -217,7 +217,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 10
   },
   "lv_1_10_bosque_kakuna": {
     "id": "lv_1_10_bosque_kakuna",
@@ -226,7 +226,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 5
   },
   "lv_1_10_bosque_beedrill": {
     "id": "lv_1_10_bosque_beedrill",
@@ -235,7 +235,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_1_10_bosque_paras": {
     "id": "lv_1_10_bosque_paras",
@@ -244,7 +244,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 10
   },
   "lv_1_10_bosque_parasect": {
     "id": "lv_1_10_bosque_parasect",
@@ -253,7 +253,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 5
   },
   "lv_1_10_bosque_venonat": {
     "id": "lv_1_10_bosque_venonat",
@@ -262,7 +262,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 5
   },
   "lv_1_10_bosque_venomoth": {
     "id": "lv_1_10_bosque_venomoth",
@@ -271,7 +271,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 1
   },
   "lv_1_10_bosque_scyther": {
     "id": "lv_1_10_bosque_scyther",
@@ -280,7 +280,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_1_10_bosque_pinsir": {
     "id": "lv_1_10_bosque_pinsir",
@@ -289,7 +289,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_1_10_bosque_ledyba": {
     "id": "lv_1_10_bosque_ledyba",
@@ -298,7 +298,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 5
   },
   "lv_1_10_bosque_ledian": {
     "id": "lv_1_10_bosque_ledian",
@@ -307,7 +307,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 1
   },
   "lv_1_10_bosque_spinarak": {
     "id": "lv_1_10_bosque_spinarak",
@@ -316,7 +316,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 5
   },
   "lv_1_10_bosque_ariados": {
     "id": "lv_1_10_bosque_ariados",
@@ -325,7 +325,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 1
   },
   "lv_1_10_bosque_yanma": {
     "id": "lv_1_10_bosque_yanma",
@@ -334,7 +334,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 1
   },
   "lv_1_10_bosque_pineco": {
     "id": "lv_1_10_bosque_pineco",
@@ -343,7 +343,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 10
   },
   "lv_1_10_bosque_forretress": {
     "id": "lv_1_10_bosque_forretress",
@@ -352,7 +352,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 5
   },
   "lv_1_10_bosque_scizor": {
     "id": "lv_1_10_bosque_scizor",
@@ -361,7 +361,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 25
+    "weight": 5
   },
   "lv_1_10_bosque_heracross": {
     "id": "lv_1_10_bosque_heracross",
@@ -370,7 +370,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 12,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_11_20_costa_magikarp": {
     "id": "lv_11_20_costa_magikarp",
@@ -379,7 +379,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 30
   },
   "lv_11_20_costa_wooper": {
     "id": "lv_11_20_costa_wooper",
@@ -388,7 +388,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 30
   },
   "lv_11_20_costa_marill": {
     "id": "lv_11_20_costa_marill",
@@ -397,7 +397,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 5
   },
   "lv_11_20_costa_totodile": {
     "id": "lv_11_20_costa_totodile",
@@ -406,7 +406,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 10
   },
   "lv_11_20_costa_poliwag": {
     "id": "lv_11_20_costa_poliwag",
@@ -415,7 +415,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 30
   },
   "lv_11_20_costa_remoraid": {
     "id": "lv_11_20_costa_remoraid",
@@ -424,7 +424,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 30
   },
   "lv_11_20_costa_psyduck": {
     "id": "lv_11_20_costa_psyduck",
@@ -433,7 +433,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 30
   },
   "lv_11_20_costa_horsea": {
     "id": "lv_11_20_costa_horsea",
@@ -442,7 +442,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 225
+    "weight": 30
   },
   "lv_11_20_costa_chinchou": {
     "id": "lv_11_20_costa_chinchou",
@@ -451,7 +451,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 30
   },
   "lv_11_20_costa_shellder": {
     "id": "lv_11_20_costa_shellder",
@@ -460,7 +460,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 20
   },
   "lv_11_20_costa_slowpoke": {
     "id": "lv_11_20_costa_slowpoke",
@@ -469,7 +469,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 30
   },
   "lv_11_20_costa_seel": {
     "id": "lv_11_20_costa_seel",
@@ -478,7 +478,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 20
   },
   "lv_11_20_costa_qwilfish": {
     "id": "lv_11_20_costa_qwilfish",
@@ -487,7 +487,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 30
   },
   "lv_11_20_costa_tentacool": {
     "id": "lv_11_20_costa_tentacool",
@@ -496,7 +496,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 30
   },
   "lv_11_20_costa_staryu": {
     "id": "lv_11_20_costa_staryu",
@@ -505,7 +505,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 225
+    "weight": 10
   },
   "lv_11_20_costa_goldeen": {
     "id": "lv_11_20_costa_goldeen",
@@ -514,7 +514,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 225
+    "weight": 30
   },
   "lv_11_20_costa_corsola": {
     "id": "lv_11_20_costa_corsola",
@@ -523,7 +523,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 10
   },
   "lv_11_20_costa_krabby": {
     "id": "lv_11_20_costa_krabby",
@@ -532,7 +532,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 225
+    "weight": 30
   },
   "lv_11_20_costa_poliwhirl": {
     "id": "lv_11_20_costa_poliwhirl",
@@ -541,7 +541,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 20
   },
   "lv_11_20_costa_quagsire": {
     "id": "lv_11_20_costa_quagsire",
@@ -550,7 +550,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 20
   },
   "lv_11_20_planicie_pidgey": {
     "id": "lv_11_20_planicie_pidgey",
@@ -559,7 +559,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 20
   },
   "lv_11_20_planicie_pidgeotto": {
     "id": "lv_11_20_planicie_pidgeotto",
@@ -568,7 +568,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 10
   },
   "lv_11_20_planicie_pidgeot": {
     "id": "lv_11_20_planicie_pidgeot",
@@ -577,7 +577,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_11_20_planicie_rattata": {
     "id": "lv_11_20_planicie_rattata",
@@ -586,7 +586,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 30
   },
   "lv_11_20_planicie_raticate": {
     "id": "lv_11_20_planicie_raticate",
@@ -595,7 +595,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 10
   },
   "lv_11_20_planicie_spearow": {
     "id": "lv_11_20_planicie_spearow",
@@ -604,7 +604,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 30
   },
   "lv_11_20_planicie_fearow": {
     "id": "lv_11_20_planicie_fearow",
@@ -613,7 +613,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 10
   },
   "lv_11_20_planicie_jigglypuff": {
     "id": "lv_11_20_planicie_jigglypuff",
@@ -622,7 +622,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 170
+    "weight": 1
   },
   "lv_11_20_planicie_meowth": {
     "id": "lv_11_20_planicie_meowth",
@@ -631,7 +631,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 10
   },
   "lv_11_20_planicie_persian": {
     "id": "lv_11_20_planicie_persian",
@@ -640,7 +640,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 1
   },
   "lv_11_20_planicie_farfetch_d": {
     "id": "lv_11_20_planicie_farfetch_d",
@@ -649,7 +649,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_11_20_planicie_doduo": {
     "id": "lv_11_20_planicie_doduo",
@@ -658,7 +658,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 10
   },
   "lv_11_20_planicie_dodrio": {
     "id": "lv_11_20_planicie_dodrio",
@@ -667,7 +667,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_11_20_planicie_lickitung": {
     "id": "lv_11_20_planicie_lickitung",
@@ -676,7 +676,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 20
   },
   "lv_11_20_planicie_kangaskhan": {
     "id": "lv_11_20_planicie_kangaskhan",
@@ -685,7 +685,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_11_20_planicie_tauros": {
     "id": "lv_11_20_planicie_tauros",
@@ -694,7 +694,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_11_20_planicie_ditto": {
     "id": "lv_11_20_planicie_ditto",
@@ -703,7 +703,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 35
+    "weight": 5
   },
   "lv_11_20_planicie_eevee": {
     "id": "lv_11_20_planicie_eevee",
@@ -712,7 +712,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 10
   },
   "lv_11_20_planicie_porygon": {
     "id": "lv_11_20_planicie_porygon",
@@ -721,7 +721,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 10
   },
   "lv_11_20_planicie_snorlax": {
     "id": "lv_11_20_planicie_snorlax",
@@ -730,7 +730,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 25
+    "weight": 5
   },
   "lv_11_20_planicie_sentret": {
     "id": "lv_11_20_planicie_sentret",
@@ -739,7 +739,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 20
   },
   "lv_11_20_planicie_furret": {
     "id": "lv_11_20_planicie_furret",
@@ -748,7 +748,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 5
   },
   "lv_11_20_planicie_hoothoot": {
     "id": "lv_11_20_planicie_hoothoot",
@@ -757,7 +757,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 20
   },
   "lv_11_20_planicie_noctowl": {
     "id": "lv_11_20_planicie_noctowl",
@@ -766,7 +766,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 5
   },
   "lv_11_20_planicie_cleffa": {
     "id": "lv_11_20_planicie_cleffa",
@@ -775,7 +775,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 150
+    "weight": 10
   },
   "lv_11_20_planicie_igglybuff": {
     "id": "lv_11_20_planicie_igglybuff",
@@ -784,7 +784,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 170
+    "weight": 10
   },
   "lv_11_20_planicie_togepi": {
     "id": "lv_11_20_planicie_togepi",
@@ -793,7 +793,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 10
   },
   "lv_11_20_planicie_aipom": {
     "id": "lv_11_20_planicie_aipom",
@@ -802,7 +802,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 20
   },
   "lv_11_20_planicie_girafarig": {
     "id": "lv_11_20_planicie_girafarig",
@@ -811,7 +811,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 20
   },
   "lv_11_20_planicie_dunsparce": {
     "id": "lv_11_20_planicie_dunsparce",
@@ -820,7 +820,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 1
   },
   "lv_11_20_planicie_snubbull": {
     "id": "lv_11_20_planicie_snubbull",
@@ -829,7 +829,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 5
   },
   "lv_11_20_planicie_granbull": {
     "id": "lv_11_20_planicie_granbull",
@@ -838,7 +838,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 1
   },
   "lv_11_20_planicie_teddiursa": {
     "id": "lv_11_20_planicie_teddiursa",
@@ -847,7 +847,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 1
   },
   "lv_11_20_planicie_ursaring": {
     "id": "lv_11_20_planicie_ursaring",
@@ -856,7 +856,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 10
   },
   "lv_11_20_planicie_porygon2": {
     "id": "lv_11_20_planicie_porygon2",
@@ -865,7 +865,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_11_20_planicie_stantler": {
     "id": "lv_11_20_planicie_stantler",
@@ -874,7 +874,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 10
   },
   "lv_11_20_planicie_smeargle": {
     "id": "lv_11_20_planicie_smeargle",
@@ -883,7 +883,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 10
   },
   "lv_11_20_planicie_miltank": {
     "id": "lv_11_20_planicie_miltank",
@@ -892,7 +892,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 18,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_21_30_caverna_geodude": {
     "id": "lv_21_30_caverna_geodude",
@@ -901,7 +901,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 30
   },
   "lv_21_30_caverna_graveler": {
     "id": "lv_21_30_caverna_graveler",
@@ -910,7 +910,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 30
   },
   "lv_21_30_caverna_golem": {
     "id": "lv_21_30_caverna_golem",
@@ -919,7 +919,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_21_30_caverna_onix": {
     "id": "lv_21_30_caverna_onix",
@@ -928,7 +928,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 20
   },
   "lv_21_30_caverna_omanyte": {
     "id": "lv_21_30_caverna_omanyte",
@@ -937,7 +937,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 10
   },
   "lv_21_30_caverna_omastar": {
     "id": "lv_21_30_caverna_omastar",
@@ -946,7 +946,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_21_30_caverna_kabuto": {
     "id": "lv_21_30_caverna_kabuto",
@@ -955,7 +955,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 10
   },
   "lv_21_30_caverna_kabutops": {
     "id": "lv_21_30_caverna_kabutops",
@@ -964,7 +964,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_21_30_caverna_aerodactyl": {
     "id": "lv_21_30_caverna_aerodactyl",
@@ -973,7 +973,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_21_30_caverna_sudowoodo": {
     "id": "lv_21_30_caverna_sudowoodo",
@@ -982,7 +982,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 65
+    "weight": 5
   },
   "lv_21_30_caverna_larvitar": {
     "id": "lv_21_30_caverna_larvitar",
@@ -991,7 +991,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_21_30_caverna_pupitar": {
     "id": "lv_21_30_caverna_pupitar",
@@ -1000,7 +1000,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_21_30_caverna_tyranitar": {
     "id": "lv_21_30_caverna_tyranitar",
@@ -1009,7 +1009,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_21_30_deserto_sandshrew": {
     "id": "lv_21_30_deserto_sandshrew",
@@ -1018,7 +1018,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 10
   },
   "lv_21_30_deserto_sandslash": {
     "id": "lv_21_30_deserto_sandslash",
@@ -1027,7 +1027,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 5
   },
   "lv_21_30_deserto_diglett": {
     "id": "lv_21_30_deserto_diglett",
@@ -1036,7 +1036,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 30
   },
   "lv_21_30_deserto_dugtrio": {
     "id": "lv_21_30_deserto_dugtrio",
@@ -1045,7 +1045,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 50
+    "weight": 10
   },
   "lv_21_30_deserto_cubone": {
     "id": "lv_21_30_deserto_cubone",
@@ -1054,7 +1054,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 30
   },
   "lv_21_30_deserto_marowak": {
     "id": "lv_21_30_deserto_marowak",
@@ -1063,7 +1063,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 1
   },
   "lv_21_30_deserto_rhyhorn": {
     "id": "lv_21_30_deserto_rhyhorn",
@@ -1072,7 +1072,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 10
   },
   "lv_21_30_deserto_rhydon": {
     "id": "lv_21_30_deserto_rhydon",
@@ -1081,7 +1081,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 1
   },
   "lv_21_30_deserto_gligar": {
     "id": "lv_21_30_deserto_gligar",
@@ -1090,7 +1090,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 10
   },
   "lv_21_30_deserto_phanpy": {
     "id": "lv_21_30_deserto_phanpy",
@@ -1099,7 +1099,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 1
   },
   "lv_21_30_deserto_donphan": {
     "id": "lv_21_30_deserto_donphan",
@@ -1108,7 +1108,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 32,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 5
   },
   "lv_31_40_vulcanico_charmeleon": {
     "id": "lv_31_40_vulcanico_charmeleon",
@@ -1117,7 +1117,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_31_40_vulcanico_charizard": {
     "id": "lv_31_40_vulcanico_charizard",
@@ -1126,7 +1126,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_31_40_vulcanico_growlithe": {
     "id": "lv_31_40_vulcanico_growlithe",
@@ -1135,7 +1135,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 5
   },
   "lv_31_40_vulcanico_arcanine": {
     "id": "lv_31_40_vulcanico_arcanine",
@@ -1144,7 +1144,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 5
   },
   "lv_31_40_vulcanico_ponyta": {
     "id": "lv_31_40_vulcanico_ponyta",
@@ -1153,7 +1153,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 20
   },
   "lv_31_40_vulcanico_rapidash": {
     "id": "lv_31_40_vulcanico_rapidash",
@@ -1162,7 +1162,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 10
   },
   "lv_31_40_vulcanico_magmar": {
     "id": "lv_31_40_vulcanico_magmar",
@@ -1171,7 +1171,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_31_40_vulcanico_cyndaquil": {
     "id": "lv_31_40_vulcanico_cyndaquil",
@@ -1180,7 +1180,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 10
   },
   "lv_31_40_vulcanico_quilava": {
     "id": "lv_31_40_vulcanico_quilava",
@@ -1189,7 +1189,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_31_40_vulcanico_typhlosion": {
     "id": "lv_31_40_vulcanico_typhlosion",
@@ -1198,7 +1198,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_31_40_vulcanico_slugma": {
     "id": "lv_31_40_vulcanico_slugma",
@@ -1207,7 +1207,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 5
   },
   "lv_31_40_vulcanico_magcargo": {
     "id": "lv_31_40_vulcanico_magcargo",
@@ -1216,7 +1216,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 5
   },
   "lv_31_40_vulcanico_magby": {
     "id": "lv_31_40_vulcanico_magby",
@@ -1225,7 +1225,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 10
   },
   "lv_31_40_usina_pikachu": {
     "id": "lv_31_40_usina_pikachu",
@@ -1234,7 +1234,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 5
   },
   "lv_31_40_usina_magnemite": {
     "id": "lv_31_40_usina_magnemite",
@@ -1243,7 +1243,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 20
   },
   "lv_31_40_usina_magneton": {
     "id": "lv_31_40_usina_magneton",
@@ -1252,7 +1252,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 10
   },
   "lv_31_40_usina_voltorb": {
     "id": "lv_31_40_usina_voltorb",
@@ -1261,7 +1261,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 30
   },
   "lv_31_40_usina_electrode": {
     "id": "lv_31_40_usina_electrode",
@@ -1270,7 +1270,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 10
   },
   "lv_31_40_usina_electabuzz": {
     "id": "lv_31_40_usina_electabuzz",
@@ -1279,7 +1279,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_31_40_usina_pichu": {
     "id": "lv_31_40_usina_pichu",
@@ -1288,7 +1288,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 10
   },
   "lv_31_40_usina_mareep": {
     "id": "lv_31_40_usina_mareep",
@@ -1297,7 +1297,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 235
+    "weight": 10
   },
   "lv_31_40_usina_flaaffy": {
     "id": "lv_31_40_usina_flaaffy",
@@ -1306,7 +1306,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 10
   },
   "lv_31_40_usina_ampharos": {
     "id": "lv_31_40_usina_ampharos",
@@ -1315,7 +1315,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_31_40_usina_elekid": {
     "id": "lv_31_40_usina_elekid",
@@ -1324,7 +1324,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 51,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 10
   },
   "lv_41_50_pantano_ekans": {
     "id": "lv_41_50_pantano_ekans",
@@ -1333,7 +1333,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 10
   },
   "lv_41_50_pantano_arbok": {
     "id": "lv_41_50_pantano_arbok",
@@ -1342,7 +1342,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 5
   },
   "lv_41_50_pantano_nidoran_f": {
     "id": "lv_41_50_pantano_nidoran_f",
@@ -1351,7 +1351,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 235
+    "weight": 20
   },
   "lv_41_50_pantano_nidorina": {
     "id": "lv_41_50_pantano_nidorina",
@@ -1360,7 +1360,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 30
   },
   "lv_41_50_pantano_nidoqueen": {
     "id": "lv_41_50_pantano_nidoqueen",
@@ -1369,7 +1369,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_41_50_pantano_nidoran_m": {
     "id": "lv_41_50_pantano_nidoran_m",
@@ -1378,7 +1378,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 235
+    "weight": 20
   },
   "lv_41_50_pantano_nidorino": {
     "id": "lv_41_50_pantano_nidorino",
@@ -1387,7 +1387,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 30
   },
   "lv_41_50_pantano_nidoking": {
     "id": "lv_41_50_pantano_nidoking",
@@ -1396,7 +1396,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_41_50_pantano_zubat": {
     "id": "lv_41_50_pantano_zubat",
@@ -1405,7 +1405,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 20
   },
   "lv_41_50_pantano_golbat": {
     "id": "lv_41_50_pantano_golbat",
@@ -1414,7 +1414,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 10
   },
   "lv_41_50_pantano_grimer": {
     "id": "lv_41_50_pantano_grimer",
@@ -1423,7 +1423,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 30
   },
   "lv_41_50_pantano_muk": {
     "id": "lv_41_50_pantano_muk",
@@ -1432,7 +1432,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 5
   },
   "lv_41_50_pantano_koffing": {
     "id": "lv_41_50_pantano_koffing",
@@ -1441,7 +1441,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 30
   },
   "lv_41_50_pantano_weezing": {
     "id": "lv_41_50_pantano_weezing",
@@ -1450,7 +1450,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 1
   },
   "lv_41_50_dojo_mankey": {
     "id": "lv_41_50_dojo_mankey",
@@ -1459,7 +1459,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 10
   },
   "lv_41_50_dojo_primeape": {
     "id": "lv_41_50_dojo_primeape",
@@ -1468,7 +1468,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 1
   },
   "lv_41_50_dojo_machop": {
     "id": "lv_41_50_dojo_machop",
@@ -1477,7 +1477,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 180
+    "weight": 20
   },
   "lv_41_50_dojo_machoke": {
     "id": "lv_41_50_dojo_machoke",
@@ -1486,7 +1486,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 10
   },
   "lv_41_50_dojo_machamp": {
     "id": "lv_41_50_dojo_machamp",
@@ -1495,7 +1495,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "lv_41_50_dojo_hitmonlee": {
     "id": "lv_41_50_dojo_hitmonlee",
@@ -1504,7 +1504,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_41_50_dojo_hitmonchan": {
     "id": "lv_41_50_dojo_hitmonchan",
@@ -1513,7 +1513,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "lv_41_50_dojo_tyrogue": {
     "id": "lv_41_50_dojo_tyrogue",
@@ -1522,7 +1522,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 52,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 10
   },
   "kanto_lv_1_10_geleira_jynx": {
     "id": "kanto_lv_1_10_geleira_jynx",
@@ -1531,7 +1531,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 62,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "kanto_lv_1_10_geleira_swinub": {
     "id": "kanto_lv_1_10_geleira_swinub",
@@ -1540,7 +1540,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 62,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 225
+    "weight": 30
   },
   "kanto_lv_1_10_geleira_piloswine": {
     "id": "kanto_lv_1_10_geleira_piloswine",
@@ -1549,7 +1549,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 62,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 5
   },
   "kanto_lv_1_10_geleira_delibird": {
     "id": "kanto_lv_1_10_geleira_delibird",
@@ -1558,7 +1558,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 62,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 10
   },
   "kanto_lv_1_10_geleira_smoochum": {
     "id": "kanto_lv_1_10_geleira_smoochum",
@@ -1567,7 +1567,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 62,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 10
   },
   "kanto_lv_1_10_fabrica_steelix": {
     "id": "kanto_lv_1_10_fabrica_steelix",
@@ -1576,7 +1576,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 62,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 25
+    "weight": 5
   },
   "kanto_lv_1_10_fabrica_skarmory": {
     "id": "kanto_lv_1_10_fabrica_skarmory",
@@ -1585,7 +1585,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 62,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 25
+    "weight": 1
   },
   "kanto_lv_1_10_fabrica_magnemite": {
     "id": "kanto_lv_1_10_fabrica_magnemite",
@@ -1594,7 +1594,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 62,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 20
   },
   "kanto_lv_1_10_fabrica_forretress": {
     "id": "kanto_lv_1_10_fabrica_forretress",
@@ -1603,7 +1603,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 62,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 5
   },
   "kanto_lv_1_10_fabrica_magneton": {
     "id": "kanto_lv_1_10_fabrica_magneton",
@@ -1612,7 +1612,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 62,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 10
   },
   "kanto_lv_1_10_fabrica_scizor": {
     "id": "kanto_lv_1_10_fabrica_scizor",
@@ -1621,7 +1621,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 62,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 25
+    "weight": 5
   },
   "kanto_lv_11_20_penhascos_pidgey": {
     "id": "kanto_lv_11_20_penhascos_pidgey",
@@ -1630,7 +1630,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 20
   },
   "kanto_lv_11_20_penhascos_spearow": {
     "id": "kanto_lv_11_20_penhascos_spearow",
@@ -1639,7 +1639,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 30
   },
   "kanto_lv_11_20_penhascos_zubat": {
     "id": "kanto_lv_11_20_penhascos_zubat",
@@ -1648,7 +1648,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 20
   },
   "kanto_lv_11_20_penhascos_hoothoot": {
     "id": "kanto_lv_11_20_penhascos_hoothoot",
@@ -1657,7 +1657,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 20
   },
   "kanto_lv_11_20_penhascos_ledyba": {
     "id": "kanto_lv_11_20_penhascos_ledyba",
@@ -1666,7 +1666,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 5
   },
   "kanto_lv_11_20_penhascos_hoppip": {
     "id": "kanto_lv_11_20_penhascos_hoppip",
@@ -1675,7 +1675,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 255
+    "weight": 10
   },
   "kanto_lv_11_20_penhascos_doduo": {
     "id": "kanto_lv_11_20_penhascos_doduo",
@@ -1684,7 +1684,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 10
   },
   "kanto_lv_11_20_penhascos_natu": {
     "id": "kanto_lv_11_20_penhascos_natu",
@@ -1693,7 +1693,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 30
   },
   "kanto_lv_11_20_penhascos_pidgeotto": {
     "id": "kanto_lv_11_20_penhascos_pidgeotto",
@@ -1702,7 +1702,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 10
   },
   "kanto_lv_11_20_penhascos_skiploom": {
     "id": "kanto_lv_11_20_penhascos_skiploom",
@@ -1711,7 +1711,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 5
   },
   "kanto_lv_11_20_penhascos_fearow": {
     "id": "kanto_lv_11_20_penhascos_fearow",
@@ -1720,7 +1720,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 10
   },
   "kanto_lv_11_20_penhascos_golbat": {
     "id": "kanto_lv_11_20_penhascos_golbat",
@@ -1729,7 +1729,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 10
   },
   "kanto_lv_11_20_penhascos_noctowl": {
     "id": "kanto_lv_11_20_penhascos_noctowl",
@@ -1738,7 +1738,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 5
   },
   "kanto_lv_11_20_penhascos_ledian": {
     "id": "kanto_lv_11_20_penhascos_ledian",
@@ -1747,7 +1747,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 1
   },
   "kanto_lv_11_20_penhascos_xatu": {
     "id": "kanto_lv_11_20_penhascos_xatu",
@@ -1756,7 +1756,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 5
   },
   "kanto_lv_11_20_penhascos_yanma": {
     "id": "kanto_lv_11_20_penhascos_yanma",
@@ -1765,7 +1765,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 1
   },
   "kanto_lv_11_20_torre_mistica_abra": {
     "id": "kanto_lv_11_20_torre_mistica_abra",
@@ -1774,7 +1774,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 200
+    "weight": 10
   },
   "kanto_lv_11_20_torre_mistica_kadabra": {
     "id": "kanto_lv_11_20_torre_mistica_kadabra",
@@ -1783,7 +1783,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 100
+    "weight": 5
   },
   "kanto_lv_11_20_torre_mistica_alakazam": {
     "id": "kanto_lv_11_20_torre_mistica_alakazam",
@@ -1792,7 +1792,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 50
+    "weight": 1
   },
   "kanto_lv_11_20_torre_mistica_drowzee": {
     "id": "kanto_lv_11_20_torre_mistica_drowzee",
@@ -1801,7 +1801,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 20
   },
   "kanto_lv_11_20_torre_mistica_hypno": {
     "id": "kanto_lv_11_20_torre_mistica_hypno",
@@ -1810,7 +1810,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 5
   },
   "kanto_lv_11_20_torre_mistica_natu": {
     "id": "kanto_lv_11_20_torre_mistica_natu",
@@ -1819,7 +1819,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 30
   },
   "kanto_lv_11_20_torre_mistica_xatu": {
     "id": "kanto_lv_11_20_torre_mistica_xatu",
@@ -1828,7 +1828,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 5
   },
   "kanto_lv_11_20_torre_mistica_unown": {
     "id": "kanto_lv_11_20_torre_mistica_unown",
@@ -1837,7 +1837,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 225
+    "weight": 30
   },
   "kanto_lv_11_20_torre_mistica_wobbuffet": {
     "id": "kanto_lv_11_20_torre_mistica_wobbuffet",
@@ -1846,7 +1846,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 70,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 10
   },
   "kanto_lv_21_35_cemiterio_gastly": {
     "id": "kanto_lv_21_35_cemiterio_gastly",
@@ -1855,7 +1855,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 85,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 190
+    "weight": 20
   },
   "kanto_lv_21_35_cemiterio_haunter": {
     "id": "kanto_lv_21_35_cemiterio_haunter",
@@ -1864,7 +1864,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 85,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 90
+    "weight": 5
   },
   "kanto_lv_21_35_cemiterio_gengar": {
     "id": "kanto_lv_21_35_cemiterio_gengar",
@@ -1873,7 +1873,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 85,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "kanto_lv_21_35_cemiterio_misdreavus": {
     "id": "kanto_lv_21_35_cemiterio_misdreavus",
@@ -1882,7 +1882,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 85,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "kanto_lv_21_35_covil_sombrio_murkrow": {
     "id": "kanto_lv_21_35_covil_sombrio_murkrow",
@@ -1891,7 +1891,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 85,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 30
+    "weight": 5
   },
   "kanto_lv_21_35_covil_sombrio_sneasel": {
     "id": "kanto_lv_21_35_covil_sombrio_sneasel",
@@ -1900,7 +1900,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 85,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 1
   },
   "kanto_lv_21_35_covil_sombrio_houndour": {
     "id": "kanto_lv_21_35_covil_sombrio_houndour",
@@ -1909,7 +1909,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 85,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 120
+    "weight": 5
   },
   "kanto_lv_21_35_covil_sombrio_houndoom": {
     "id": "kanto_lv_21_35_covil_sombrio_houndoom",
@@ -1918,7 +1918,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 85,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "kanto_lv_36_55_ruinas_ancestrais_dratini": {
     "id": "kanto_lv_36_55_ruinas_ancestrais_dratini",
@@ -1927,7 +1927,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 20
   },
   "kanto_lv_36_55_ruinas_ancestrais_dragonair": {
     "id": "kanto_lv_36_55_ruinas_ancestrais_dragonair",
@@ -1936,7 +1936,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 10
   },
   "kanto_lv_36_55_ruinas_ancestrais_dragonite": {
     "id": "kanto_lv_36_55_ruinas_ancestrais_dragonite",
@@ -1945,7 +1945,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "kanto_lv_36_55_ruinas_ancestrais_kingdra": {
     "id": "kanto_lv_36_55_ruinas_ancestrais_kingdra",
@@ -1954,7 +1954,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "kanto_lv_36_55_profundezas_wartortle": {
     "id": "kanto_lv_36_55_profundezas_wartortle",
@@ -1963,7 +1963,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "kanto_lv_36_55_profundezas_croconaw": {
     "id": "kanto_lv_36_55_profundezas_croconaw",
@@ -1972,7 +1972,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   },
   "kanto_lv_36_55_profundezas_azumarill": {
     "id": "kanto_lv_36_55_profundezas_azumarill",
@@ -1981,7 +1981,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 5
   },
   "kanto_lv_36_55_profundezas_seadra": {
     "id": "kanto_lv_36_55_profundezas_seadra",
@@ -1990,7 +1990,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 10
   },
   "kanto_lv_36_55_profundezas_lanturn": {
     "id": "kanto_lv_36_55_profundezas_lanturn",
@@ -1999,7 +1999,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 10
   },
   "kanto_lv_36_55_profundezas_slowbro": {
     "id": "kanto_lv_36_55_profundezas_slowbro",
@@ -2008,7 +2008,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 10
   },
   "kanto_lv_36_55_profundezas_octillery": {
     "id": "kanto_lv_36_55_profundezas_octillery",
@@ -2017,7 +2017,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 5
   },
   "kanto_lv_36_55_profundezas_mantine": {
     "id": "kanto_lv_36_55_profundezas_mantine",
@@ -2026,7 +2026,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 25
+    "weight": 5
   },
   "kanto_lv_36_55_profundezas_seaking": {
     "id": "kanto_lv_36_55_profundezas_seaking",
@@ -2035,7 +2035,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 20
   },
   "kanto_lv_36_55_profundezas_golduck": {
     "id": "kanto_lv_36_55_profundezas_golduck",
@@ -2044,7 +2044,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 10
   },
   "kanto_lv_36_55_profundezas_dewgong": {
     "id": "kanto_lv_36_55_profundezas_dewgong",
@@ -2053,7 +2053,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 75
+    "weight": 1
   },
   "kanto_lv_36_55_profundezas_politoed": {
     "id": "kanto_lv_36_55_profundezas_politoed",
@@ -2062,7 +2062,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "kanto_lv_36_55_profundezas_tentacruel": {
     "id": "kanto_lv_36_55_profundezas_tentacruel",
@@ -2071,7 +2071,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 10
   },
   "kanto_lv_36_55_profundezas_kingler": {
     "id": "kanto_lv_36_55_profundezas_kingler",
@@ -2080,7 +2080,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 60
+    "weight": 20
   },
   "kanto_lv_36_55_profundezas_kingdra": {
     "id": "kanto_lv_36_55_profundezas_kingdra",
@@ -2089,7 +2089,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "kanto_lv_36_55_profundezas_blastoise": {
     "id": "kanto_lv_36_55_profundezas_blastoise",
@@ -2098,7 +2098,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "kanto_lv_36_55_profundezas_feraligatr": {
     "id": "kanto_lv_36_55_profundezas_feraligatr",
@@ -2107,7 +2107,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 1
   },
   "kanto_lv_36_55_profundezas_gyarados": {
     "id": "kanto_lv_36_55_profundezas_gyarados",
@@ -2116,7 +2116,7 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 20
   },
   "kanto_lv_36_55_profundezas_lapras": {
     "id": "kanto_lv_36_55_profundezas_lapras",
@@ -2125,6 +2125,6 @@ export const ENCOUNTERS_DATA = {
     "maxLevel": 105,
     "aggroRadius": 175,
     "wanderRadius": 60,
-    "weight": 45
+    "weight": 5
   }
 };
