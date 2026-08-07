@@ -7,7 +7,9 @@
 // mantem ela aberta de graca. Sao 4 rotas; framework nao pagaria seu custo.
 import { autenticar } from './auth.js'
 import { ErroHttp, selecionar, inserir, atualizar, type Config } from './db.js'
-import { aplicarFlush, carregarEstado, type LinhaSessao } from './progresso.js'
+import { aplicarFlush, carregarEstado, gravarEstado, type LinhaSessao } from './progresso.js'
+import { aplicarAcao, type Acao } from './acoes.js'
+import { criarEstadoDoJogador } from './estadoDoJogador.js'
 import { MAPS, randomSeed } from '#engine'
 
 function json(dado: unknown, status = 200): Response {
@@ -76,6 +78,9 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
   if (url.pathname === '/estado' && req.method === 'GET') {
     return json({ estado: await carregarEstado(cfg, jogador.id) })
   }
+  if (url.pathname === '/acao' && req.method === 'POST') {
+    return acao(cfg, jogador.id, req)
+  }
   return json({ erro: 'rota desconhecida' }, 404)
 }
 
@@ -100,7 +105,16 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
   const estado = await carregarEstado(cfg, userId)
   const poke = estado.team.find((p) => p.uid === pokeUid)
   if (!poke) throw new ErroHttp(403, 'este POKE nao esta na sua equipe')
-  if (!estado.unlockedMaps.includes(mapId)) throw new ErroHttp(403, 'hunt nao desbloqueada')
+  // A regra real do jogo e "hunt sem custo nasce liberada; hunt com custo exige
+  // ter pago" — nao "tem que estar na coluna `unlocked_maps`". A diferenca
+  // importa: as hunts do Modo Pesadelo e as BOSS sao geradas em RUNTIME
+  // (data/nightmareMaps.ts) e nunca entraram na tabela `maps`, entao nunca
+  // apareceriam naquela coluna. Checar so a coluna trancava o Modo Pesadelo
+  // inteiro pra todo mundo, em silencio.
+  const temCusto = MAPS[mapId].unlockCost != null
+  if (temCusto && !estado.unlockedMaps.includes(mapId)) {
+    throw new ErroHttp(403, 'hunt nao desbloqueada')
+  }
   const continente = MAPS[mapId].continent || 'johto'
   if (!estado.unlockedContinents.includes(continente)) {
     throw new ErroHttp(403, 'continente nao desbloqueado')
@@ -149,4 +163,29 @@ async function fechar(cfg: Config, userId: string): Promise<Response> {
   await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { closed_at: new Date().toISOString() })
   await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null })
   return json({ fechada: true, resumo: resultado.resumo, estado: resultado.estado })
+}
+
+// Aplica UMA acao de jogador e devolve o estado resultante.
+//
+// Uma acao por request de proposito: em lote, uma acao invalida no meio deixaria
+// o cliente sem saber quais das outras foram aplicadas — e o cliente sobrescreve
+// o estado local com a resposta, entao ambiguidade ali vira dessincronizacao.
+//
+// Se ha uma sessao de hunt aberta, ela e liquidada ANTES da acao. Sem isso,
+// vender o POKE que esta cacando (ou usar a ultima pocao) mudaria o estado sob
+// os pes de uma simulacao que ainda nao foi creditada, e o flush seguinte
+// simularia com dado que ja nao vale.
+async function acao(cfg: OpcoesApp, userId: string, req: Request): Promise<Response> {
+  const corpo = (await req.json().catch(() => null)) as Acao | null
+  if (!corpo || typeof corpo.tipo !== 'string') throw new ErroHttp(400, 'informe { tipo }')
+
+  const sessao = await sessaoAberta(cfg, userId)
+  if (sessao) await aplicarFlush(cfg, userId, sessao)
+
+  const dados = await carregarEstado(cfg, userId)
+  const { store, dados: estado } = criarEstadoDoJogador(dados)
+  const resultado = aplicarAcao(store, estado, corpo)
+  await gravarEstado(cfg, userId, estado)
+
+  return json({ ...resultado, estado })
 }

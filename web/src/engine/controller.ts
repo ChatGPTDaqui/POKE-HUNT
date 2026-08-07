@@ -16,9 +16,11 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
 import type { Point } from './types'
+import { pedirAcao, abrirSessaoDeHunt, fecharSessaoDeHunt } from '@/data/remote/autoridade'
 export const controller = {
   returnToHospital(hospitalSpot: Point): void {
     const gameState = useGameStateStore.getState()
+    void fecharSessaoDeHunt()
     gameState.setCurrentMapId(null)
     const world = buildHospitalWorld(gameState.team[gameState.activeIndex] || null, hospitalSpot, useWorldStore.getState())
     useWorldStore.getState().setWorld(world)
@@ -28,6 +30,10 @@ export const controller = {
     const gameState = useGameStateStore.getState()
     const activePoke = gameState.team[gameState.activeIndex]
     if (!activePoke) return
+    // Declara a INTENCAO antes de entrar. Se o servidor recusar (hunt trancada,
+    // POKE que nao e da equipe), nao entra — senao o jogador ficaria caçando numa
+    // tela que nao rende nada, o pior dos dois mundos.
+    void abrirSessaoDeHunt(mapId, activePoke.uid)
     gameState.setCurrentMapId(mapId)
     const world = buildMapWorld(mapId, activePoke, useWorldStore.getState())
     useWorldStore.getState().setWorld(world)
@@ -37,10 +43,21 @@ export const controller = {
   chooseStarter(speciesId: string, hospitalSpot: Point): void {
     const gameState = useGameStateStore.getState()
     if (gameState.team.length > 0) return
-    const poke = useWorldStore.getState().sortear((rng) => createPokeInstance(rng, speciesId, STARTER_LEVEL, { ivs: STARTER_IVS, rarity: STARTER_RARITY }))
-    gameState.addPokeToTeam(poke)
-    gameState.setActiveIndex(0)
-    useWorldStore.getState().setWorld(buildHospitalWorld(poke, hospitalSpot, useWorldStore.getState()))
+    void pedirAcao(
+      { tipo: 'escolherStarter', speciesId },
+      () => {
+        const poke = useWorldStore.getState().sortear((rng) => createPokeInstance(rng, speciesId, STARTER_LEVEL, { ivs: STARTER_IVS, rarity: STARTER_RARITY }))
+        gameState.addPokeToTeam(poke)
+        gameState.setActiveIndex(0)
+      },
+    ).then(() => {
+      // O mundo e reconstruido DEPOIS, dos dois lados: no caminho do servidor a
+      // POKE so existe quando a resposta chega (foi ele quem a criou), e no
+      // caminho local ela ja esta na store. Ler de `team[0]` aqui cobre os dois
+      // sem duplicar a montagem da cena.
+      const poke = useGameStateStore.getState().team[0]
+      if (poke) useWorldStore.getState().setWorld(buildHospitalWorld(poke, hospitalSpot, useWorldStore.getState()))
+    })
   },
 
   resetGame(): void {
@@ -51,7 +68,7 @@ export const controller = {
 
   healTeam(): void {
     const gameState = useGameStateStore.getState()
-    gameState.healTeamFully()
+    void pedirAcao({ tipo: 'curarEquipe' }, () => gameState.healTeamFully())
     const world = useWorldStore.getState()
     if (world.player) {
       useWorldStore.getState().update((draft) => {
@@ -64,7 +81,7 @@ export const controller = {
   // Traz a POKE recem-colocada em campo pro topo da lista visivel do time.
   setActiveTeamIndex(index: number): void {
     const gameState = useGameStateStore.getState()
-    gameState.moveTeamIndexToFront(index)
+    void pedirAcao({ tipo: 'definirAtivo', indice: index }, () => gameState.moveTeamIndexToFront(index))
     const newActivePoke = useGameStateStore.getState().team[0]
     useWorldStore.getState().update((draft) => {
       if (draft.player) {
@@ -87,8 +104,8 @@ export const controller = {
       return
     }
     const wasActive = idx === gameState.activeIndex
-    const removed = gameState.moveTeamToBag(pokeUid)
-    if (!removed) return
+    const removed = gameState.team[idx]
+    void pedirAcao({ tipo: 'tirarDaEquipe', pokeUid }, () => { gameState.moveTeamToBag(pokeUid) })
     if (wasActive) {
       const newActivePoke = useGameStateStore.getState().team[useGameStateStore.getState().activeIndex]
       useWorldStore.getState().update((draft) => {
@@ -114,7 +131,8 @@ export const controller = {
     if (item.kind === 'potion' && item.healAmount != null) {
       if (world.player.fainted) {
         useToastStore.getState().pushToast('POKE desmaiado! Use um Revive ou volte ao Hospital.', 'error', 'world')
-      } else if (gameState.removeItem(itemId, 1)) {
+      } else if (gameState.hasItem(itemId, 1)) {
+        void pedirAcao({ tipo: 'usarItem', itemId }, () => { gameState.removeItem(itemId, 1) })
         const healAmount = item.healAmount
         useWorldStore.getState().update((draft) => {
           if (draft.player) heal(draft.player, healAmount)
@@ -125,7 +143,8 @@ export const controller = {
     } else if (item.kind === 'revive' && item.reviveHpPercent != null) {
       if (!world.player.fainted) {
         useToastStore.getState().pushToast('O POKE ja esta consciente.', 'error', 'world')
-      } else if (gameState.removeItem(itemId, 1)) {
+      } else if (gameState.hasItem(itemId, 1)) {
+        void pedirAcao({ tipo: 'usarItem', itemId }, () => { gameState.removeItem(itemId, 1) })
         const revivePercent = item.reviveHpPercent
         useWorldStore.getState().update((draft) => {
           if (draft.player) {
@@ -157,7 +176,7 @@ export const controller = {
       )
       return
     }
-    gameState.updatePokeInstance(pokeUid, () => result.updatedPoke)
+    void pedirAcao({ tipo: 'evoluirPoke', pokeUid }, () => gameState.updatePokeInstance(pokeUid, () => result.updatedPoke))
     // Se a POKE evoluida esta em campo agora, o world tambem precisa
     // refletir a nova especie/stats imediatamente.
     const world = useWorldStore.getState()

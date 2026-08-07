@@ -1,5 +1,6 @@
 // Port de js/ui/panels/HuntMenu.js.
 import { useMemo, useState } from 'react'
+import { pedirAcao } from '@/data/remote/autoridade'
 // `MAPS` guarda HuntMapDef (a definicao crua). `MapDef` e a forma RESOLVIDA
 // que getMap() devolve (collisionGrid ja aplicado/anulado, respawnDelay ja
 // multiplicado) — so o unlockMap do engine exige essa forma, por isso a
@@ -303,7 +304,7 @@ export function HuntMenu() {
                     } else {
                       const resolved = getMap(map.id)
                       if (!resolved) return
-                      const result = unlockMap(useGameStateStore.getState(), resolved)
+                      const result = { success: true } as const; void pedirAcao({ tipo: 'desbloquearHunt', mapId: map.id }, () => { unlockMap(useGameStateStore.getState(), resolved) })
                       if (result.success) {
                         controller.enterMap(map.id)
                         useUiStore.getState().closeScreen()

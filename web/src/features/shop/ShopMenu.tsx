@@ -1,6 +1,7 @@
 // Port de js/ui/panels/ShopMenu.js — aba Itens (colunas comprar/vender) e
 // aba Pokemons (venda em lote com filtros).
 import { useMemo, useState } from 'react'
+import { pedirAcao } from '@/data/remote/autoridade'
 import { SHOP_STOCK, getItem, ITEMS } from '@/data/items'
 import { SPECIES, averageIvPercent } from '@/data/pokes'
 import { itemIconUrl, itemIconBorderColor } from '@/data/sprites'
@@ -104,7 +105,7 @@ function ItensTab() {
                 size="sm"
                 className="text-xs"
                 onClick={() => {
-                  const res = buyItem(useGameStateStore.getState(), item.id, qty)
+                  const res = { success: true } as const; void pedirAcao({ tipo: 'comprarItem', itemId: item.id, qtd: qty }, () => { buyItem(useGameStateStore.getState(), item.id, qty) })
                   if (res.success) toast(`Comprou ${item.name} x${qty}.`, 'success', 'trade')
                   else toast('Ouro insuficiente.', 'error', 'trade')
                 }}
@@ -124,7 +125,7 @@ function ItensTab() {
             variant="outline"
             className="text-xs"
             onClick={() => {
-              const res = sellAllItems(useGameStateStore.getState())
+              const res = { gold: 0, itemCount: 0 }; void pedirAcao({ tipo: 'venderTodosItens' }, () => { sellAllItems(useGameStateStore.getState()) })
               if (res.itemCount > 0) toast(`Vendeu ${res.itemCount} itens por ${res.gold} ouro.`, 'success', 'trade')
             }}
           >
@@ -158,7 +159,7 @@ function ItensTab() {
                     size="sm"
                     variant="outline"
                     className="text-xs"
-                    onClick={() => sellItem(useGameStateStore.getState(), itemId, qty)}
+                    onClick={() => { void pedirAcao({ tipo: 'venderItem', itemId, qtd: qty }, () => { sellItem(useGameStateStore.getState(), itemId, qty) }) }}
                   >
                     Vender ({qty})
                   </Button>
@@ -167,7 +168,7 @@ function ItensTab() {
                     variant="outline"
                     className="text-xs"
                     onClick={() => {
-                      sellItem(useGameStateStore.getState(), itemId, owned)
+                      void pedirAcao({ tipo: 'venderItem', itemId, qtd: owned }, () => { sellItem(useGameStateStore.getState(), itemId, owned) })
                       toast(`Vendeu ${item.name} x${owned}.`, 'success', 'trade')
                     }}
                   >
@@ -243,7 +244,7 @@ function PokemonsTab() {
   function sellSelected() {
     const uids = activeSelection
     const doSell = () => {
-      const res = sellAllBagPokes(useGameStateStore.getState(), uids)
+      const res = { gold: 0, pokeCount: uids.length }; void pedirAcao({ tipo: 'venderPokes', pokeUids: uids }, () => { sellAllBagPokes(useGameStateStore.getState(), uids) })
       setSelectedUids(new Set())
       if (res.pokeCount > 0) toast(`Vendeu ${res.pokeCount} POKEs por ${res.gold} ouro.`, 'success', 'trade')
     }
@@ -264,7 +265,7 @@ function PokemonsTab() {
     const shinyCount = filtered.filter(({ poke }) => poke.isShiny).length
     const lockedCount = filtered.filter(({ poke }) => poke.locked).length
     const uids = filtered.filter(({ poke }) => !poke.isShiny && !poke.locked).map(({ poke }) => poke.uid)
-    const res = sellAllBagPokes(useGameStateStore.getState(), uids)
+    const res = { gold: 0, pokeCount: uids.length }; void pedirAcao({ tipo: 'venderPokes', pokeUids: uids }, () => { sellAllBagPokes(useGameStateStore.getState(), uids) })
     setSelectedUids(new Set())
     if (res.pokeCount > 0) toast(`Vendeu ${res.pokeCount} POKEs por ${res.gold} ouro.`, 'success', 'trade')
     if (shinyCount > 0) toast(`${shinyCount} POKE(s) Shiny nao foram vendidos automaticamente.`, 'info', 'trade')

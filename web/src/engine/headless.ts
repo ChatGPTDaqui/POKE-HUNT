@@ -27,6 +27,18 @@ export { ITEMS, getItem } from '@/data/items'
 
 export type { WorldState, WorldCounters } from './types'
 
+// Regras de economia e progressao usadas pelas ACOES do jogador (comprar,
+// vender, desbloquear, evoluir). O servidor chama exatamente estas — nao ha uma
+// versao "do servidor" das regras de preco, senao o primeiro reajuste de
+// balanceamento faria cliente e servidor discordarem sobre quanto custa uma
+// Pokebola.
+export {
+  buyItem, sellItem, sellAllItems, sellBagPoke, sellAllBagPokes,
+  unlockMap, pokemonSellValue,
+} from './systems/economySystem'
+export { evolvePokeInstance } from './systems/progressionSystem'
+export { isDead } from './entity'
+
 // O contrato que o motor exige de "estado do jogador". No navegador quem
 // satisfaz isso e a store zustand; no servidor sera um objeto sobre as linhas do
 // Postgres. Exportar o TIPO aqui e o que garante que o adaptador do servidor

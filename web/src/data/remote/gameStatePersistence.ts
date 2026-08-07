@@ -16,6 +16,7 @@
 import type { PersistStorage, StorageValue } from 'zustand/middleware'
 import type { GameStateData } from '@/stores/gameStateStore'
 import { loadPlayerState, savePlayerState } from './playerRepository'
+import { servidorAtivo, servidor } from './servidor'
 
 const DEBOUNCE_MS = 3000
 
@@ -106,6 +107,14 @@ export function ultimoSavedAt(): number | null {
 export const postgresStorage: PersistStorage<GameStateData> = {
   getItem: async (): Promise<StorageValue<GameStateData> | null> => {
     if (!usuarioAtual || !defaultsDoJogo) return null
+    // Sob autoridade do servidor, o estado inicial vem DELE — nao de uma leitura
+    // direta do Postgres. Assim o cliente enxerga exatamente o que o servidor
+    // considera verdade, inclusive o que uma sessao ainda aberta ja rendeu.
+    if (servidorAtivo()) {
+      const { estado } = await servidor.estado()
+      savedAtMs = Date.now()
+      return { state: estado as GameStateData, version: 1 }
+    }
     const resultado = await loadPlayerState(usuarioAtual, defaultsDoJogo)
     if (!resultado) return null
     savedAtMs = resultado.savedAt
@@ -113,6 +122,12 @@ export const postgresStorage: PersistStorage<GameStateData> = {
   },
 
   setItem: (_nome, valor) => {
+    // Sob autoridade do servidor o cliente NAO grava progresso. Este e o ponto
+    // exato onde o jogo deixa de ser autoritativo: sem este early-return, o
+    // autosave do navegador continuaria sobrescrevendo por cima do que o
+    // servidor calculou — e o resultado seria pior que nao ter servidor, porque
+    // a ultima escrita venceria e ela viria do cliente.
+    if (servidorAtivo()) return
     if (!usuarioAtual) return
     pendente = valor.state
     if (timer) clearTimeout(timer)
