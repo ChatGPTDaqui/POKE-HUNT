@@ -362,10 +362,9 @@ export type Database = {
           always_hits: boolean
           aoe_radius: number | null
           category: Database["public"]["Enums"]["move_category"]
-          fixed_damage: number | null
+          fixed_damage_mode: string | null
           id: string
-          multi_hit_max: number | null
-          multi_hit_min: number | null
+          multi_hit: boolean
           name: string
           power: number
           pp: number
@@ -379,10 +378,9 @@ export type Database = {
           always_hits?: boolean
           aoe_radius?: number | null
           category: Database["public"]["Enums"]["move_category"]
-          fixed_damage?: number | null
+          fixed_damage_mode?: string | null
           id: string
-          multi_hit_max?: number | null
-          multi_hit_min?: number | null
+          multi_hit?: boolean
           name: string
           power: number
           pp: number
@@ -396,10 +394,9 @@ export type Database = {
           always_hits?: boolean
           aoe_radius?: number | null
           category?: Database["public"]["Enums"]["move_category"]
-          fixed_damage?: number | null
+          fixed_damage_mode?: string | null
           id?: string
-          multi_hit_max?: number | null
-          multi_hit_min?: number | null
+          multi_hit?: boolean
           name?: string
           power?: number
           pp?: number

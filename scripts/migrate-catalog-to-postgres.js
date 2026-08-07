@@ -223,13 +223,12 @@ function buildMoveRows(workbook) {
       target: isAoe ? 'aoe' : 'single',
       aoe_radius: isAoe ? AOE_RADIUS : null,
       always_hits: r['Sempre Acerta'] === 'sim',
-      // multi_hit_min/max e fixed_damage ficam NULL de proposito — ver
-      // "lacunas" no relatorio: a planilha guarda 'sim'/'ohko'/'level'/'half'
-      // (modos), nao numeros, e o schema modelou como faixa/int. Inventar o
-      // range do Gen2 aqui seria dado fabricado.
-      multi_hit_min: null,
-      multi_hit_max: null,
-      fixed_damage: null,
+      // O schema foi ajustado pra forma real do dado (migration
+      // `moves_multihit_e_dano_fixo`): a planilha guarda MODO, nao numero.
+      // `multi_hit_min/max` e `fixed_damage int` foram removidos justamente
+      // porque preenche-los exigiria inventar o range do Gen2.
+      multi_hit: r['Multi-hit'] === 'sim',
+      fixed_damage_mode: r['Dano Fixo'] || null,
       recoil_fraction: r['Recoil (fração)'] ?? null,
       priority: r['Prioridade'] ?? 0,
     };
