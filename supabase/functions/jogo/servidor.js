@@ -59724,14 +59724,27 @@ var MANIPULADORES = {
 		};
 	},
 	comprarItem(store, _estado, acao) {
-		const r = buyItem(store, texto(acao.itemId, "itemId"), inteiroPositivo(acao.qtd));
+		const itemId = texto(acao.itemId, "itemId");
+		const qtd = inteiroPositivo(acao.qtd);
+		const item = getItem(itemId);
+		const r = buyItem(store, itemId, qtd);
 		if (!r.success) throw new ErroHttp(409, r.reason ?? "compra recusada");
-		return { ok: true };
+		const custo = item && "buyPrice" in item ? item.buyPrice * qtd : 0;
+		return {
+			ok: true,
+			mensagem: `Comprou ${item?.name ?? itemId} x${qtd} por ${custo} de ouro.`
+		};
 	},
 	venderItem(store, _estado, acao) {
-		const r = sellItem(store, texto(acao.itemId, "itemId"), inteiroPositivo(acao.qtd));
+		const itemId = texto(acao.itemId, "itemId");
+		const qtd = inteiroPositivo(acao.qtd);
+		const item = getItem(itemId);
+		const r = sellItem(store, itemId, qtd);
 		if (!r.success) throw new ErroHttp(409, r.reason ?? "venda recusada");
-		return { ok: true };
+		return {
+			ok: true,
+			mensagem: `Vendeu ${item?.name ?? itemId} x${qtd} por ${(item?.sellPrice ?? 0) * qtd} de ouro.`
+		};
 	},
 	venderTodosItens(store) {
 		const r = sellAllItems(store);
@@ -59822,13 +59835,21 @@ var MANIPULADORES = {
 	tirarDaEquipe(store, estado, acao) {
 		const uid = texto(acao.pokeUid, "pokeUid");
 		if (estado.team.length <= 1) throw new ErroHttp(409, "voce precisa manter ao menos 1 POKE na equipe");
+		const poke = estado.team.find((p) => p.uid === uid);
 		if (!store.moveTeamToBag(uid)) throw new ErroHttp(404, "POKE nao esta na equipe");
-		return { ok: true };
+		return {
+			ok: true,
+			mensagem: `${(poke ? SPECIES[poke.speciesId]?.name : null) ?? "POKE"} foi para a mochila.`
+		};
 	},
-	porNaEquipe(store, _estado, acao) {
+	porNaEquipe(store, estado, acao) {
 		const uid = texto(acao.pokeUid, "pokeUid");
+		const poke = estado.bagPokes.find((p) => p.uid === uid);
 		if (!store.moveBagToTeam(uid)) throw new ErroHttp(404, "POKE nao esta na mochila");
-		return { ok: true };
+		return {
+			ok: true,
+			mensagem: `${(poke ? SPECIES[poke.speciesId]?.name : null) ?? "POKE"} entrou na equipe.`
+		};
 	},
 	desbloquearHunt(store, _estado, acao) {
 		const mapId = texto(acao.mapId, "mapId");
@@ -59836,7 +59857,10 @@ var MANIPULADORES = {
 		if (!mapa) throw new ErroHttp(400, "hunt desconhecida");
 		const r = unlockMap(store, mapa);
 		if (!r.success) throw new ErroHttp(409, r.reason ?? "recursos insuficientes");
-		return { ok: true };
+		return {
+			ok: true,
+			mensagem: `${mapa.name} desbloqueada!`
+		};
 	},
 	alternarTravaItem(store, _estado, acao) {
 		store.toggleItemLock(texto(acao.itemId, "itemId"));

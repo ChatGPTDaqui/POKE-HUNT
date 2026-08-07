@@ -83,20 +83,29 @@ const MANIPULADORES: Record<string, Manipulador> = {
     return { ok: true, mensagem: 'Progresso apagado. Escolha um novo inicial.' }
   },
 
+  // As mensagens sao montadas AQUI, e nao no cliente, porque sob autoridade do
+  // servidor o cliente nao executa a acao — ele nao sabe o preco cobrado nem se
+  // deu certo. Antes de existirem, a Loja mostrava "Comprou" a partir de um
+  // literal fixo escrito antes da chamada, ou seja, dizia o mesmo tendo ouro ou
+  // nao. Uma acao que muda a carteira sem dizer nada e igualmente ruim: o
+  // jogador ve o saldo cair sem confirmacao do que aconteceu.
   comprarItem(store, _estado, acao) {
     const itemId = texto(acao.itemId, 'itemId')
     const qtd = inteiroPositivo(acao.qtd)
+    const item = getItem(itemId)
     const r = buyItem(store, itemId, qtd)
     if (!r.success) throw new ErroHttp(409, r.reason ?? 'compra recusada')
-    return { ok: true }
+    const custo = item && 'buyPrice' in item ? item.buyPrice * qtd : 0
+    return { ok: true, mensagem: `Comprou ${item?.name ?? itemId} x${qtd} por ${custo} de ouro.` }
   },
 
   venderItem(store, _estado, acao) {
     const itemId = texto(acao.itemId, 'itemId')
     const qtd = inteiroPositivo(acao.qtd)
+    const item = getItem(itemId)
     const r = sellItem(store, itemId, qtd)
     if (!r.success) throw new ErroHttp(409, r.reason ?? 'venda recusada')
-    return { ok: true }
+    return { ok: true, mensagem: `Vendeu ${item?.name ?? itemId} x${qtd} por ${(item?.sellPrice ?? 0) * qtd} de ouro.` }
   },
 
   venderTodosItens(store) {
@@ -176,14 +185,18 @@ const MANIPULADORES: Record<string, Manipulador> = {
   tirarDaEquipe(store, estado, acao) {
     const uid = texto(acao.pokeUid, 'pokeUid')
     if (estado.team.length <= 1) throw new ErroHttp(409, 'voce precisa manter ao menos 1 POKE na equipe')
+    const poke = estado.team.find((p) => p.uid === uid)
     if (!store.moveTeamToBag(uid)) throw new ErroHttp(404, 'POKE nao esta na equipe')
-    return { ok: true }
+    const nome = poke ? SPECIES[poke.speciesId]?.name : null
+    return { ok: true, mensagem: `${nome ?? 'POKE'} foi para a mochila.` }
   },
 
-  porNaEquipe(store, _estado, acao) {
+  porNaEquipe(store, estado, acao) {
     const uid = texto(acao.pokeUid, 'pokeUid')
+    const poke = estado.bagPokes.find((p) => p.uid === uid)
     if (!store.moveBagToTeam(uid)) throw new ErroHttp(404, 'POKE nao esta na mochila')
-    return { ok: true }
+    const nome = poke ? SPECIES[poke.speciesId]?.name : null
+    return { ok: true, mensagem: `${nome ?? 'POKE'} entrou na equipe.` }
   },
 
   desbloquearHunt(store, _estado, acao) {
@@ -192,7 +205,7 @@ const MANIPULADORES: Record<string, Manipulador> = {
     if (!mapa) throw new ErroHttp(400, 'hunt desconhecida')
     const r = unlockMap(store, mapa)
     if (!r.success) throw new ErroHttp(409, r.reason ?? 'recursos insuficientes')
-    return { ok: true }
+    return { ok: true, mensagem: `${mapa.name} desbloqueada!` }
   },
 
   alternarTravaItem(store, _estado, acao) {
