@@ -268,24 +268,72 @@ function JogoCarregado() {
     <div className="relative h-svh w-svw overflow-hidden bg-background text-foreground">
       <GameCanvas />
 
-      {hasStarter && (
-        <>
-          <Hud />
-          <AbilityHud />
-          <PerfStatsHud />
-          <ZoomControl />
-          <BottomNav />
-          <ChatLog />
-          <AutoFloatingPanel />
-          <ScreenOverlay />
-          <ReviveCountdownModal />
-          <BossDefeatModal />
-          <LanceCountdownModal />
-          <LanceVictoryReturn />
-        </>
-      )}
+      {/* Camada de HUD. Ela FALTAVA: canvas, HUD, menus e StartScreen eram irmaos
+          em fluxo normal, entao tudo depois do canvas (que ocupa a tela inteira)
+          era empurrado pra baixo e recortado pelo `overflow-hidden` do pai — o
+          jogador via so o cenario, sem menu nenhum. O sinal de que a camada
+          existia no desenho original: todo componente de HUD ja traz
+          `pointer-events-auto`, que so faz sentido dentro de um pai
+          `pointer-events-none`.
 
-      {!hasStarter && <StartScreen />}
+          `pointer-events-none` no container e obrigatorio: sem ele esta camada
+          cobriria o canvas inteiro e o clique na Enfermeira (cura no Hospital)
+          pararia de funcionar. Cada filho reativa o clique por conta propria. */}
+      <div className="pointer-events-none absolute inset-0">
+        {hasStarter && (
+          <>
+            {/* Topo: status do treinador/POKE ativo. */}
+            <div className="absolute top-2 left-1/2 z-[35] -translate-x-1/2">
+              <Hud />
+            </div>
+
+            {/* Menu principal logo ABAIXO do HUD, nao no rodape — mudanca pedida
+                pelo usuario numa leva anterior do jogo vanilla. z-35 pra ficar
+                acima do backdrop do ScreenOverlay (z-30), senao trocar de tela
+                com um menu aberto exigiria dois cliques. */}
+            <div className="absolute top-20 left-1/2 z-[35] -translate-x-1/2">
+              <BottomNav />
+            </div>
+
+            {/* Zoom no canto superior direito, na linha do menu. */}
+            <div className="absolute top-20 right-2 z-[35]">
+              <ZoomControl />
+            </div>
+
+            {/* Barra de golpes: rodape ao centro. */}
+            <div className="absolute bottom-3 left-1/2 z-[35] -translate-x-1/2">
+              <AbilityHud />
+            </div>
+
+            {/* Painel de taxa de farm: rodape a esquerda. O botao flutuante de
+                automacao se posiciona sozinho (fixed) logo acima dele. */}
+            <div className="absolute bottom-3 left-3 z-[35]">
+              <PerfStatsHud />
+            </div>
+
+            {/* Log/chat: rodape a direita. */}
+            <div className="absolute right-3 bottom-3 z-[35]">
+              <ChatLog />
+            </div>
+
+            <AutoFloatingPanel />
+            <ScreenOverlay />
+            <ReviveCountdownModal />
+            <BossDefeatModal />
+            <LanceCountdownModal />
+            <LanceVictoryReturn />
+          </>
+        )}
+
+        {/* Escolha do inicial: sobreposicao de tela cheia. Antes entrava no fluxo
+            normal e era medida em y=908 — exatamente uma altura de tela abaixo do
+            topo, ou seja, fora da area visivel. */}
+        {!hasStarter && (
+          <div className="pointer-events-auto absolute inset-0 z-40 overflow-y-auto">
+            <StartScreen />
+          </div>
+        )}
+      </div>
 
       <ToastStack />
       <PokeProfileModal />
