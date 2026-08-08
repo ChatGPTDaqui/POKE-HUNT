@@ -22,6 +22,7 @@ function GeralTab() {
         <div className="flex items-center gap-[.6em]">
           <input
             type="range"
+            name="hud-scale"
             min={HUD_SCALE_MIN}
             max={HUD_SCALE_MAX}
             step={0.05}

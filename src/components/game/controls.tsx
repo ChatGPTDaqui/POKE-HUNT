@@ -9,6 +9,7 @@
 // proprio card (aconteceu de verdade no prototipo, com o input de % do
 // auto-pot). Os primitivos do shadcn continuam em uso nas telas FORA do jogo
 // (login/cadastro/home), onde nao ha escala fluida.
+import { useId } from 'react'
 import type {
   ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes,
 } from 'react'
@@ -60,9 +61,16 @@ export function GameIconButton({ className, ...props }: GameButtonProps) {
 }
 
 export function GameInput({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
+  // Nome automatico quando o call site nao passa um: sem `name`/`id` o Chrome
+  // emite "A form field element has neither an id nor a name attribute" por
+  // instancia (a auditoria contou 208, quase todas de busca/qtd/filtro em
+  // listas). O fallback vem DEPOIS do spread pra sempre vencer, e ainda respeita
+  // um `name`/`id` explicito quando existe.
+  const autoId = useId()
   return (
     <input
       {...props}
+      name={props.name ?? props.id ?? autoId}
       className={cn(
         'min-w-0 rounded-[.45em] border border-n700 bg-n900 px-[.55em] py-[.32em]',
         'font-[inherit] text-[.85em] text-foreground placeholder:text-n500',
@@ -75,9 +83,11 @@ export function GameInput({ className, ...props }: InputHTMLAttributes<HTMLInput
 }
 
 export function GameSelect({ className, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
+  const autoId = useId()
   return (
     <select
       {...props}
+      name={props.name ?? props.id ?? autoId}
       className={cn(
         'min-w-0 cursor-pointer rounded-[.45em] border border-n700 bg-n900 px-[.4em] py-[.32em]',
         'font-[inherit] text-[.85em] text-foreground',
@@ -99,6 +109,7 @@ export function GameCheck({
   disabled?: boolean
   className?: string
 }) {
+  const autoId = useId()
   return (
     <label
       className={cn(
@@ -109,6 +120,7 @@ export function GameCheck({
     >
       <input
         type="checkbox"
+        name={autoId}
         checked={checked}
         disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
