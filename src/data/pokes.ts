@@ -48,6 +48,12 @@ export interface PokeInstance {
   // Treinador — sem ele nao ha nenhuma ordem temporal no save (o array da
   // mochila e ordem de insercao do PostgREST, nao de captura).
   capturedAt?: string
+  // Nome do treinador no momento da CAPTURA (coluna `original_trainer`).
+  // Imutavel: nao acompanha renomeacao do jogador e nao seria derivavel do
+  // dono se algum dia existir troca entre jogadores. Opcional porque POKE
+  // recem-criado em memoria pode ainda nao ter passado pelo banco, e save
+  // anterior a coluna nao tem valor real (ver a migration para o backfill).
+  originalTrainer?: string
 }
 
 const MAX_CATCH_RATE = 255

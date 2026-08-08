@@ -179,6 +179,82 @@ export type Database = {
         }
         Relationships: []
       }
+      game_sessions: {
+        Row: {
+          closed_at: string | null
+          id: string
+          last_flush_at: string
+          map_id: string
+          poke_uid: string
+          rng_draws: number
+          rng_state: number
+          seed: number
+          simulated_seconds: number
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          closed_at?: string | null
+          id?: string
+          last_flush_at?: string
+          map_id: string
+          poke_uid: string
+          rng_draws?: number
+          rng_state: number
+          seed: number
+          simulated_seconds?: number
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          closed_at?: string | null
+          id?: string
+          last_flush_at?: string
+          map_id?: string
+          poke_uid?: string
+          rng_draws?: number
+          rng_state?: number
+          seed?: number
+          simulated_seconds?: number
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_sessions_poke_uid_fkey"
+            columns: ["poke_uid"]
+            isOneToOne: false
+            referencedRelation: "pokemon_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hall_da_fama: {
+        Row: {
+          conquista: string
+          conquistado_em: string
+          user_id: string
+        }
+        Insert: {
+          conquista: string
+          conquistado_em?: string
+          user_id: string
+        }
+        Update: {
+          conquista?: string
+          conquistado_em?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hall_da_fama_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       items: {
         Row: {
           buy_price: number | null
@@ -616,6 +692,7 @@ export type Database = {
           level: number
           location: Database["public"]["Enums"]["pokemon_location"]
           locked: boolean
+          original_trainer: string | null
           rarity: Database["public"]["Enums"]["rarity_tier"]
           species_id: string
           stat_atk_esp: number
@@ -644,6 +721,7 @@ export type Database = {
           level?: number
           location: Database["public"]["Enums"]["pokemon_location"]
           locked?: boolean
+          original_trainer?: string | null
           rarity?: Database["public"]["Enums"]["rarity_tier"]
           species_id: string
           stat_atk_esp: number
@@ -672,6 +750,7 @@ export type Database = {
           level?: number
           location?: Database["public"]["Enums"]["pokemon_location"]
           locked?: boolean
+          original_trainer?: string | null
           rarity?: Database["public"]["Enums"]["rarity_tier"]
           species_id?: string
           stat_atk_esp?: number
@@ -702,6 +781,24 @@ export type Database = {
           },
         ]
       }
+      spawn_tiers: {
+        Row: {
+          key: string
+          sort_order: number
+          weight: number
+        }
+        Insert: {
+          key: string
+          sort_order: number
+          weight: number
+        }
+        Update: {
+          key?: string
+          sort_order?: number
+          weight?: number
+        }
+        Relationships: []
+      }
       species: {
         Row: {
           base_atk_esp: number
@@ -721,6 +818,7 @@ export type Database = {
           is_legendary: boolean
           is_special_evolution: boolean
           name: string
+          spawn_tier: string
           type1: Database["public"]["Enums"]["element_type"]
           type2: Database["public"]["Enums"]["element_type"] | null
         }
@@ -742,6 +840,7 @@ export type Database = {
           is_legendary?: boolean
           is_special_evolution?: boolean
           name: string
+          spawn_tier: string
           type1: Database["public"]["Enums"]["element_type"]
           type2?: Database["public"]["Enums"]["element_type"] | null
         }
@@ -763,6 +862,7 @@ export type Database = {
           is_legendary?: boolean
           is_special_evolution?: boolean
           name?: string
+          spawn_tier?: string
           type1?: Database["public"]["Enums"]["element_type"]
           type2?: Database["public"]["Enums"]["element_type"] | null
         }
@@ -773,6 +873,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "species"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "species_spawn_tier_fkey"
+            columns: ["spawn_tier"]
+            isOneToOne: false
+            referencedRelation: "spawn_tiers"
+            referencedColumns: ["key"]
           },
         ]
       }
@@ -835,7 +942,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      concessao_inicial_de_itens: {
+        Args: never
+        Returns: {
+          item_id: string
+          quantity: number
+        }[]
+      }
+      hunts_iniciais: { Args: never; Returns: string[] }
       is_admin: { Args: never; Returns: boolean }
+      wipe_inventario_e_economia: {
+        Args: never
+        Returns: {
+          jogadores_afetados: number
+          linhas_de_item_apagadas: number
+        }[]
+      }
+      wipe_todos_os_saves: {
+        Args: never
+        Returns: {
+          jogadores_resetados: number
+          pokes_apagados: number
+          sessoes_fechadas: number
+        }[]
+      }
     }
     Enums: {
       admin_role: "support" | "owner"

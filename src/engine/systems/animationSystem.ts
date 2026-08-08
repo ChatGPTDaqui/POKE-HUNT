@@ -87,11 +87,36 @@ export function updateAnimations(world: WorldState, dt: number): void {
   }
 }
 
+// Vira o atacante de frente pro alvo.
+//
+// `facing` so era escrito por quem MOVIA a entidade (stepDirect/slideToward em
+// movementSystem). Como o combate acontece parado — e a pose de ataque ainda
+// trava o movimento pela duracao dela —, o POKE atacava virado pra onde estava
+// andando quando parou: golpe saindo de costas pro alvo era o caso comum
+// quando o inimigo chegava por tras. `facing` alimenta o row do spritesheet
+// PMD (8 direcoes, ver directionRowFromFacing), entao mexer nele e o
+// equivalente aqui ao `scaleX(-1)` de um sprite de duas direcoes.
+//
+// Distancia zero (entidades exatamente sobrepostas) mantem o facing anterior:
+// normalizar um vetor nulo daria NaN e o atan2 escolheria uma direcao a esmo.
+export function faceToward(entity: PlayerEntity | EnemyEntity, target: Point): void {
+  const dx = target.x - entity.x
+  const dy = target.y - entity.y
+  const dist = Math.hypot(dx, dy)
+  if (dist === 0) return
+  entity.facing = { x: dx / dist, y: dy / dist }
+}
+
 // Chamado por CombatSystem no instante em que um golpe dispara, pra o
 // atacante mostrar brevemente uma pose Shoot (single-target) ou Charge (AOE)
 // em vez de Walk/Idle.
-export function triggerAttackAnim(entity: PlayerEntity | EnemyEntity, isAoe: boolean): void {
+//
+// `target` entra aqui, e nao numa chamada separada de faceToward no
+// CombatSystem, pra nao existir caminho novo de ataque que dispare a pose sem
+// virar o POKE — foi exatamente esse esquecimento que produziu o bug.
+export function triggerAttackAnim(entity: PlayerEntity | EnemyEntity, isAoe: boolean, target?: Point): void {
   const kind: AttackAnimKind = isAoe ? 'Charge' : 'Shoot'
   entity.attackAnim = kind
   entity.attackAnimTimer = ATTACK_ANIM_DURATION
+  if (target) faceToward(entity, target)
 }

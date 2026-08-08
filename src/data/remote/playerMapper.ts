@@ -41,7 +41,7 @@ export interface PlayerSnapshot {
 
 // --- DB -> jogo -------------------------------------------------------------
 
-function rowToPoke(row: PokemonRow): PokeInstance {
+export function rowToPoke(row: PokemonRow): PokeInstance {
   const ivs: StatBlock = {
     hp: row.iv_hp, atkFis: row.iv_atk_fis, atkEsp: row.iv_atk_esp,
     def: row.iv_def, defEsp: row.iv_def_esp, speed: row.iv_speed,
@@ -87,6 +87,7 @@ function rowToPoke(row: PokemonRow): PokeInstance {
     unlockedAbilities: row.unlocked_abilities,
     locked: row.locked,
     capturedAt: row.created_at,
+    originalTrainer: row.original_trainer ?? undefined,
   }
 }
 
@@ -181,6 +182,12 @@ export function pokeToRow(userId: string, poke: PokeInstance, location: 'team' |
     is_shiny: poke.isShiny,
     rarity: poke.rarity,
     locked: poke.locked ?? false,
+    // `?? null` e nao `?? undefined`: com undefined a chave sumiria do JSON do
+    // upsert e o PostgREST manteria o valor antigo da linha. Aqui as duas
+    // coisas coincidem hoje (o valor nunca e apagado), mas o upsert do
+    // servidor reescreve a linha inteira e um campo que "some" e a forma
+    // classica de perder dado sem erro nenhum aparecer.
+    original_trainer: poke.originalTrainer ?? null,
     iv_hp: poke.ivs.hp, iv_atk_fis: poke.ivs.atkFis, iv_atk_esp: poke.ivs.atkEsp,
     iv_def: poke.ivs.def, iv_def_esp: poke.ivs.defEsp, iv_speed: poke.ivs.speed,
     stat_hp: poke.stats.hp, stat_atk_fis: poke.stats.atkFis, stat_atk_esp: poke.stats.atkEsp,

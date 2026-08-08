@@ -6,11 +6,12 @@
 // automacoes. Por isso ela vive em z-40 (acima do painel de menu) sem escurecer
 // nada atras.
 import { useEffect, useRef, type CSSProperties } from 'react'
-import { Robot, X } from '@phosphor-icons/react'
+import { Robot, Warning, X } from '@phosphor-icons/react'
 import { useUiStore, useBreakpoints } from '@/stores/uiStore'
 import { useWindowDrag } from '@/hooks/useWindowDrag'
 import { GameIconButton } from '@/components/game/controls'
 import { AutoPanel } from './AutoPanel'
+import { useEstoqueBaixoNoAuto, LIMIAR_ESTOQUE_BAIXO } from './estoqueBaixo'
 import { cn } from '@/lib/utils'
 
 // O badge de contagem de bolas que ficava logo ABAIXO do botao "auto" foi
@@ -23,12 +24,16 @@ import { cn } from '@/lib/utils'
 export function AutoButton() {
   const open = useUiStore((s) => s.autoOpen)
   const setOpen = useUiStore((s) => s.setAutoOpen)
+  // O alerta tambem vive AQUI, e nao so nos badges dentro do painel: o painel
+  // fica fechado quase o tempo todo, e um aviso de "as bolas estao acabando"
+  // que so aparece depois de abrir o painel chega tarde demais pra servir.
+  const estoqueBaixo = useEstoqueBaixoNoAuto()
 
   return (
     <div className="pointer-events-auto flex flex-col items-end gap-[.4em]">
       <button
         type="button"
-        title="Automacoes"
+        title={estoqueBaixo ? `Automacoes — um consumivel em uso esta abaixo de ${LIMIAR_ESTOQUE_BAIXO}` : 'Automacoes'}
         data-auto-toggle
         onClick={() => setOpen(!open)}
         className={cn(
@@ -36,10 +41,12 @@ export function AutoButton() {
           'font-[inherit] text-[.9em] shadow-lg transition-colors',
           'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
           open ? 'border-primary text-n100' : 'border-n700 text-foreground hover:border-primary',
+          estoqueBaixo && 'animate-pulse-alerta border-bad text-bad',
         )}
       >
         <Robot className="text-[1.25em]" />
         auto
+        {estoqueBaixo && <Warning className="text-[1.1em]" weight="fill" />}
       </button>
     </div>
   )

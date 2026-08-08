@@ -15,6 +15,7 @@
 // servico e literalmente o unico passo que falta.
 import { supabase } from '@/lib/supabase'
 import type { OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
+import type { PokeInstance } from '@/data/pokes'
 
 const BASE = (import.meta.env.VITE_SERVIDOR_URL || '').replace(/\/$/, '')
 
@@ -154,8 +155,12 @@ export type CriterioPoke = 'level' | 'atkFis' | 'atkEsp' | 'hp' | 'def' | 'defEs
 
 export interface EntradaTreinador { userId: string; nome: string; nivel: number; exp: number }
 export interface EntradaPoke {
-  userId: string; treinador: string; speciesId: string
-  level: number; isShiny: boolean; rarity: string; valor: number
+  userId: string
+  treinador: string
+  treinadorOriginal: string | null
+  valor: number
+  /** POKE completo (mesmo formato do save) — alimenta o cartao de perfil. */
+  poke: PokeInstance
 }
 export interface EntradaHall { userId: string; nome: string; conquistadoEm: string }
 export interface PerfilRemoto {

@@ -17,6 +17,8 @@ import { sincronizarAuto } from '@/data/remote/autoridade'
 import { useWorldStore } from '@/stores/worldStore'
 import { GameButton, GameInput, GameSelect, GameSwitch } from '@/components/game/controls'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { estoqueDoItemDeRegra, LIMIAR_ESTOQUE_BAIXO } from './estoqueBaixo'
+import { cn } from '@/lib/utils'
 
 const MAX_AUTO_POT_RULES = 3
 
@@ -38,21 +40,34 @@ function InfoIcon({ text }: { text: string }) {
   )
 }
 
-function ItemCountBadge({ itemId }: { itemId: string }) {
-  const count = useGameStateStore((s) => s.items[itemId] ?? 0)
+// `emUso` decide se o badge alerta. Um item selecionado num `<select>` de uma
+// automacao DESLIGADA nao pisca: o bot nao vai gasta-lo, e um alerta que grita
+// sem motivo e um alerta que o jogador aprende a ignorar.
+function ItemCountBadge({ itemId, emUso = true }: { itemId: string; emUso?: boolean }) {
+  const count = useGameStateStore((s) => estoqueDoItemDeRegra(s.items, itemId))
   if (itemId === BEST_POTION_OPTION) return null
+  const baixo = emUso && count < LIMIAR_ESTOQUE_BAIXO
   return (
-    <span className="shrink-0 rounded-full border border-n700 px-[.4em] text-[.8em] text-n400">x{count}</span>
+    <span
+      className={cn(
+        'shrink-0 rounded-full border px-[.4em] text-[.8em]',
+        baixo ? 'animate-pulse-alerta border-bad font-semibold text-bad' : 'border-n700 text-n400',
+      )}
+      title={baixo ? `Acabando: menos de ${LIMIAR_ESTOQUE_BAIXO} em estoque` : undefined}
+    >
+      x{count}
+    </span>
   )
 }
 
 function ToggleRow({
-  label, tip, checked, onChange,
+  label, tip, checked, onChange, badge,
 }: {
   label: string
   tip: string
   checked: boolean
   onChange: (v: boolean) => void
+  badge?: React.ReactNode
 }) {
   return (
     <div className="flex items-center gap-[.5em]">
@@ -60,6 +75,7 @@ function ToggleRow({
         {label}
         <InfoIcon text={tip} />
       </span>
+      {badge}
       <GameSwitch checked={checked} onChange={onChange} label={label} />
     </div>
   )
@@ -150,7 +166,7 @@ export function AutoPanel() {
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
             </GameSelect>
-            <ItemCountBadge itemId={rule.itemId} />
+            <ItemCountBadge itemId={rule.itemId} emUso={autoToggles.autoPot} />
             {autoPotRules.length > 1 && (
               <GameButton variant="ghost" onClick={() => removeAutoPotRule(index)}>Remover</GameButton>
             )}
@@ -183,11 +199,13 @@ export function AutoPanel() {
         <BallPicker
           label="Bola padrao"
           value={autoCatchConfig.ballId}
+          emUso={autoToggles.autoCatch}
           onChange={(ballId) => setAutoCatchConfig({ ballId })}
         />
         <BallPicker
           label="Bola Shiny"
           value={autoCatchConfig.shinyBallId}
+          emUso={autoToggles.autoCatch && autoCatchConfig.catchShinyEnabled}
           disabled={!autoCatchConfig.catchShinyEnabled}
           onChange={(shinyBallId) => setAutoCatchConfig({ shinyBallId })}
         />
@@ -231,7 +249,7 @@ export function AutoPanel() {
                   <option key={b.id} value={b.id}>{b.name}</option>
                 ))}
               </GameSelect>
-              <ItemCountBadge itemId={rule.ballItemId} />
+              <ItemCountBadge itemId={rule.ballItemId} emUso={autoToggles.autoCatch} />
               <GameButton variant="ghost" onClick={() => removeAutoCatchRule(index)}>Remover</GameButton>
             </div>
           )
@@ -256,6 +274,9 @@ export function AutoPanel() {
         label="Auto-revive"
         tip="Se o POKE em campo desmaiar, usa um Revive da mochila automaticamente."
         checked={autoToggles.autoRevive}
+        // O Revive nao tem `<select>` (o item e fixo), entao era o unico
+        // consumivel do bot sem contagem visivel nenhuma.
+        badge={<ItemCountBadge itemId="revive" emUso={autoToggles.autoRevive} />}
         onChange={(v) => setAutoToggle('autoRevive', v)}
       />
     </div>
@@ -263,12 +284,13 @@ export function AutoPanel() {
 }
 
 function BallPicker({
-  label, value, onChange, disabled,
+  label, value, onChange, disabled, emUso,
 }: {
   label: string
   value: string
   onChange: (id: string) => void
   disabled?: boolean
+  emUso?: boolean
 }) {
   return (
     <div className="flex flex-col gap-[.25em]" style={{ opacity: disabled ? 0.45 : 1 }}>
@@ -284,7 +306,7 @@ function BallPicker({
             <option key={b.id} value={b.id}>{b.name}</option>
           ))}
         </GameSelect>
-        <ItemCountBadge itemId={value} />
+        <ItemCountBadge itemId={value} emUso={emUso} />
       </div>
     </div>
   )

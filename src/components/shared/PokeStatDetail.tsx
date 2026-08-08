@@ -70,6 +70,14 @@ const IV_MAX = 31
 export function StatDetail({ poke, weaknessSection }: { poke: PokeInstance; weaknessSection: ReactNode }) {
   return (
     <div className="flex flex-col gap-[.7em]">
+      {/* Ausente em POKE anterior a coluna `original_trainer` que o backfill
+          nao alcancou (nenhum hoje) — a linha some em vez de mostrar vazio. */}
+      {poke.originalTrainer && (
+        <div className="flex items-center justify-between rounded-[.4em] border border-n800 bg-n900 px-[.55em] py-[.4em] text-[.85em]">
+          <span className="text-n500">Treinador original</span>
+          <b className="min-w-0 truncate font-medium">{poke.originalTrainer}</b>
+        </div>
+      )}
       <div className="grid grid-cols-3 gap-[.4em]">
         {([
           ['Atk Fis', poke.stats.atkFis],

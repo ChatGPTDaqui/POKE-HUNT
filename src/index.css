@@ -234,3 +234,20 @@
   from { opacity: 0; transform: translateY(-6px) }
   to { opacity: 1; transform: none }
 }
+
+/* Alerta de consumivel acabando no bot (ver components/auto/estoqueBaixo.ts).
+   Pulso de opacidade + halo, sem mexer em `transform`: o badge e o botao Auto
+   ficam em fluxo ao lado de outros controles, e escalar faria os vizinhos
+   dancarem a cada meio segundo. */
+@keyframes pulso-alerta {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-bad) 55%, transparent) }
+  50% { opacity: .55; box-shadow: 0 0 0 .35em color-mix(in oklab, var(--color-bad) 0%, transparent) }
+}
+.animate-pulse-alerta { animation: pulso-alerta 1.1s ease-in-out infinite }
+
+/* Piscar continuo e exatamente o que a preferencia de movimento reduzido
+   existe pra desligar. A cor de alerta (borda/texto vermelhos) permanece —
+   e ela que carrega a informacao; a animacao so chama atencao. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-alerta { animation: none }
+}

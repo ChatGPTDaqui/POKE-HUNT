@@ -5,6 +5,7 @@
 // tabelas direto de proposito: a RLS nao deixa um jogador ler a linha de outro,
 // e afrouxar isso pra montar um ranking exporia ouro, itens e equipe de todo
 // mundo — o ranking precisa de dois campos, nao da linha inteira.
+import { rowToPoke, type PokeInstance, type PokemonRow } from '#engine'
 import { ErroHttp, selecionar, selecionarTudo, type Config } from './db.js'
 
 // Teto de linhas devolvidas. O cliente pede menos; isto e o limite duro pra uma
@@ -67,45 +68,41 @@ export async function rankingDeTreinadores(cfg: Config, limiteBruto: string | nu
   }))
 }
 
-interface LinhaPoke {
-  user_id: string
-  species_id: string
-  level: number
-  is_shiny: boolean
-  rarity: string
-  stat_hp: number
-  stat_atk_fis: number
-  stat_atk_esp: number
-  stat_def: number
-  stat_def_esp: number
-  stat_speed: number
-}
-
 export interface EntradaPoke {
   userId: string
+  /** Nome do dono AGORA (join em `players`). */
   treinador: string
-  speciesId: string
-  level: number
-  isShiny: boolean
-  rarity: string
+  /** Nome de quem capturou, gravado na captura — pode diferir do dono. */
+  treinadorOriginal: string | null
   valor: number
+  /**
+   * O POKE inteiro, no mesmo formato que o jogo usa.
+   *
+   * Vem daqui e nao de uma remontagem no cliente porque o cartao de perfil
+   * mostra IV, EXP e HP reais — sintetizar isso a partir de (especie, nivel)
+   * daria numeros plausiveis e ERRADOS numa tela cuja unica funcao e comparar
+   * POKEs de jogadores diferentes. `pokemon_instances` nao guarda nada privado
+   * alem do `user_id`, que ja e devolvido.
+   */
+  poke: PokeInstance
 }
 
 export async function rankingDePokemon(cfg: Config, criterio: CriterioPoke, limiteBruto: string | null): Promise<EntradaPoke[]> {
   const n = limite(limiteBruto)
   const coluna = COLUNA_POR_CRITERIO[criterio]
-  const linhas = await selecionar<LinhaPoke>(
+  const linhas = await selecionar<PokemonRow>(
     cfg,
-    `pokemon_instances?select=user_id,species_id,level,is_shiny,rarity,stat_hp,stat_atk_fis,stat_atk_esp,stat_def,stat_def_esp,stat_speed&order=${coluna}.desc&limit=${n}`,
+    `pokemon_instances?select=*&order=${coluna}.desc&limit=${n}`,
   )
   const nomes = await nomesDosTreinadores(cfg, linhas.map((l) => l.user_id))
   return linhas.map((l) => ({
     userId: l.user_id,
     treinador: nomes.get(l.user_id) ?? 'Treinador',
-    speciesId: l.species_id,
-    level: l.level,
-    isShiny: l.is_shiny,
-    rarity: l.rarity,
+    treinadorOriginal: l.original_trainer ?? null,
+    // `rowToPoke` e o MESMO mapper que carrega o save do dono (reexportado do
+    // motor): stats recalculados pela formula atual, sem uma segunda versao da
+    // traducao linha->POKE vivendo aqui.
+    poke: rowToPoke(l),
     valor: (l as unknown as Record<string, number>)[coluna],
   }))
 }

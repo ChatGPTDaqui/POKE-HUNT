@@ -14,6 +14,7 @@ import {
 import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
 import { rarityOf } from '@/data/rarity'
+import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { SegmentedTabs, GameSelect, SectionLabel, ComingSoon } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 
@@ -95,11 +96,19 @@ function Posicao({ n }: { n: number }) {
   return <span className={cn('w-[2.2em] shrink-0 text-right font-mono text-[.9em] font-bold', cor)}>#{n}</span>
 }
 
-function Linha({ children }: { children: React.ReactNode }) {
+function Linha({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
+  const classe = 'flex w-full items-center gap-[.6em] rounded-[.45em] border border-n800 px-[.6em] py-[.4em] text-left'
+  // `<button>` e nao um `<div onClick>`: a linha vira foco de teclado e
+  // anuncia como acionavel, sem nenhum handler extra.
+  if (!onClick) return <div className={classe}>{children}</div>
   return (
-    <div className="flex items-center gap-[.6em] rounded-[.45em] border border-n800 px-[.6em] py-[.4em]">
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(classe, 'cursor-pointer bg-transparent font-[inherit] text-[inherit] hover:border-n600 hover:bg-n900')}
+    >
       {children}
-    </div>
+    </button>
   )
 }
 
@@ -129,6 +138,10 @@ function AbaTreinadores() {
 }
 
 function AbaPokemon({ criterio }: { criterio: CriterioPoke }) {
+  // Mesma janela de perfil de Equipe/Mochila/Loja/Pokedex — o POKE de outro
+  // jogador abre exatamente o mesmo cartao, e por isso o campo "Treinador
+  // original" dentro dele responde de quem ele e.
+  const showProfile = usePokeProfileStore((s) => s.showProfile)
   const { data, isLoading, error } = useQuery({
     queryKey: ['ranking', 'pokemon', criterio],
     queryFn: () => servidor.rankingPokemon(criterio),
@@ -140,11 +153,18 @@ function AbaPokemon({ criterio }: { criterio: CriterioPoke }) {
     <Estado carregando={isLoading} erro={error} vazio={entradas.length === 0}>
       <div className="flex flex-col gap-[.3em]">
         {entradas.map((e, i) => {
-          const species = SPECIES[e.speciesId]
-          const url = faceIconUrl(e.speciesId, e.isShiny)
-          const raridade = rarityOf({ rarity: e.rarity })
+          const species = SPECIES[e.poke.speciesId]
+          const url = faceIconUrl(e.poke.speciesId, e.poke.isShiny)
+          const raridade = rarityOf(e.poke)
+          // Uma especie desconhecida (renomeada/removida num sync depois do
+          // POKE ter sido criado) ainda aparece na lista, mas nao abre o
+          // perfil: o cartao inteiro e montado a partir de `species`.
+          const abrivel = Boolean(species)
           return (
-            <Linha key={`${e.userId}-${e.speciesId}-${i}`}>
+            <Linha
+              key={e.poke.uid}
+              onClick={abrivel ? () => showProfile(e.poke, species) : undefined}
+            >
               <Posicao n={i + 1} />
               {url && (
                 <img
@@ -155,11 +175,11 @@ function AbaPokemon({ criterio }: { criterio: CriterioPoke }) {
                 />
               )}
               <span className="min-w-0 flex-1 truncate">
-                {e.isShiny && <span className="text-shiny">✨ </span>}
-                {species?.name ?? e.speciesId}
-                <span className="text-n500"> · {e.treinador}</span>
+                {e.poke.isShiny && <span className="text-shiny">✨ </span>}
+                {species?.name ?? e.poke.speciesId}
+                <span className="text-n500"> · {e.treinadorOriginal ?? e.treinador}</span>
               </span>
-              <span className="shrink-0 text-[.75em] text-n500">Lv {e.level}</span>
+              <span className="shrink-0 text-[.75em] text-n500">Lv {e.poke.level}</span>
               <span className="shrink-0 font-mono text-[.9em] font-bold">{e.valor}</span>
             </Linha>
           )

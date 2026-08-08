@@ -13,6 +13,21 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '4.2',
+    date: '2026-08-08',
+    title: 'Treinador original, venda de POKE a partir de 1.000G e ranking clicavel',
+    highlights: [
+      'VENDA DE POKE VALE NO MINIMO 1.000 DE OURO. Vale pra qualquer POKE, de qualquer nivel e raridade; quem ja valia mais que isso continua valendo o mesmo (raridade e nivel seguem multiplicando por cima).',
+      'O ouro por ABATE nao mudou. Ele sai da mesma formula da venda, mas o piso e regra de venda: sem essa separacao, o ouro por kill na hunt inicial teria pulado de ~5 pra ~330 sem ninguem pedir. Na pratica, capturar e vender agora rende MUITO mais que so matar — 40 minutos de cacada renderam ~1.000 de ouro em abates contra ~21.000 vendendo as capturas do mesmo periodo.',
+      'NOVO — Treinador original: todo POKE guarda para sempre o nome de quem o capturou, gravado no instante da captura. O card do POKE mostra esse nome. Os POKE que ja existiam receberam o nome do dono atual (nao ha troca entre jogadores no jogo, entao dono e capturador sao a mesma pessoa).',
+      'Ranking de Pokemon ficou clicavel: clicar numa linha abre o card completo daquele POKE — os atributos, IVs e HP reais dele, e o treinador dono — e nao uma reconstrucao aproximada.',
+      'Calculadora de Forca: os seis atributos viraram campos editaveis. Da pra digitar um valor por atributo pra simular "e se", com o valor calculado mostrado embaixo e um botao pra voltar atras. Trocar nivel ou raridade recalcula so os atributos que voce NAO editou.',
+      'O bot avisa quando um consumivel esta acabando: com menos de 10 unidades de um item que uma automacao LIGADA usa, a contagem dele e o botao "auto" piscam em vermelho. Item de automacao desligada nao alerta.',
+      'Bug corrigido: no combate, o POKE atacava virado pra onde estava andando quando parou — muitas vezes de costas pro alvo. Agora ele se vira de frente pro alvo no instante do golpe.',
+      'O painel Auto passou a mostrar tambem a quantidade de Revive, que era o unico consumivel do bot sem contagem visivel.',
+    ],
+  },
+  {
     version: '4.1',
     date: '2026-08-08',
     title: 'Johto e Kanto separados, Ranking, Perfil do Treinador e economia reiniciada',

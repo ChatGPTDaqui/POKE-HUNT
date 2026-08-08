@@ -61,6 +61,7 @@ export const controller = {
       { tipo: 'escolherStarter', speciesId },
       () => {
         const poke = useWorldStore.getState().sortear((rng) => createPokeInstance(rng, speciesId, STARTER_LEVEL, { ivs: STARTER_IVS, rarity: STARTER_RARITY }))
+        poke.originalTrainer = gameState.trainer.name // espelha o servidor (ver acoes.ts#escolherStarter)
         gameState.addPokeToTeam(poke)
         gameState.setActiveIndex(0)
       },

@@ -77,6 +77,10 @@ const MANIPULADORES: Record<string, Manipulador> = {
     const poke = createPokeInstance(createRng(randomSeed()), speciesId, STARTER_LEVEL, {
       ivs: STARTER_IVS, rarity: STARTER_RARITY,
     })
+    // O inicial nao passa pelo captureSystem, mas tambem e "o primeiro dono" —
+    // sem isto o card do POKE mais importante do jogador seria o unico sem
+    // treinador original, parecendo dado faltando.
+    poke.originalTrainer = estado.trainer.name
     store.addPokeToTeam(poke)
     store.setActiveIndex(0)
     return { ok: true, mensagem: `${SPECIES[speciesId].name} entrou na sua equipe!` }

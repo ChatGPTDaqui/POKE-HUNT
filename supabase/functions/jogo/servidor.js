@@ -35449,9 +35449,20 @@ function updateAnimations(world, dt) {
 		}
 	}
 }
-function triggerAttackAnim(entity, isAoe) {
+function faceToward(entity, target) {
+	const dx = target.x - entity.x;
+	const dy = target.y - entity.y;
+	const dist = Math.hypot(dx, dy);
+	if (dist === 0) return;
+	entity.facing = {
+		x: dx / dist,
+		y: dy / dist
+	};
+}
+function triggerAttackAnim(entity, isAoe, target) {
 	entity.attackAnim = isAoe ? "Charge" : "Shoot";
 	entity.attackAnimTimer = ATTACK_ANIM_DURATION;
+	if (target) faceToward(entity, target);
 }
 //#endregion
 //#region src/engine/systems/combatSystem.ts
@@ -35738,7 +35749,7 @@ function executePlayerAction(world, player, engagedEnemies) {
 	if (!ability) return;
 	startCooldown(player, ability.id, scaledCooldown(ability, player.poke.stats.speed));
 	startGlobalCooldown(player, MIN_ACTION_GAP);
-	triggerAttackAnim(player, ability.target === "aoe");
+	triggerAttackAnim(player, ability.target === "aoe", primaryTarget);
 	announceAbility(world, player, ability);
 	const targets = ability.target === "aoe" ? allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (ability.radius ?? 0)) : [engagedEnemies[0]].filter(Boolean);
 	if (ability.target === "aoe") queueAoeVisual(world, player, ability);
@@ -35750,7 +35761,7 @@ function executeEnemyAction(world, enemy, player) {
 	if (!ability) return;
 	startCooldown(enemy, ability.id, scaledCooldown(ability, enemy.poke.stats.speed));
 	startGlobalCooldown(enemy, MIN_ACTION_GAP);
-	triggerAttackAnim(enemy, ability.target === "aoe");
+	triggerAttackAnim(enemy, ability.target === "aoe", player);
 	announceAbility(world, enemy, ability);
 	if (ability.target === "aoe") queueAoeVisual(world, enemy, ability);
 	queueHit(world, enemy, player, ability);
@@ -36119,6 +36130,7 @@ function attemptCapture(rng, gameState, defeatedPoke, ballItemId) {
 		uid: novoPokeUid(),
 		level: CAPTURE_LEVEL,
 		exp: totalExpForLevel(CAPTURE_LEVEL, species.growthCurve),
+		originalTrainer: gameState.trainer.name,
 		stats,
 		hp: stats.hp,
 		unlockedAbilities: species.abilities.filter((entry) => entry.levelReq <= CAPTURE_LEVEL).map((entry) => entry.key).filter((key) => getAbility(key))
@@ -36363,7 +36375,19 @@ var KILL_MONEY_DIVISOR = formulaEngine$1.eval("KILL_MONEY_DIVISOR");
 var STONE_DROP_CHANCE = formulaEngine$1.evalOrDefault("STONE_DROP_CHANCE", .05);
 var KILL_GOLD_MULTIPLIER = formulaEngine$1.evalOrDefault("KILL_GOLD_MULTIPLIER", 5);
 var GOLD_GLOBAL_MULTIPLIER = formulaEngine$1.evalOrDefault("GOLD_GLOBAL_MULTIPLIER", 1);
-function pokemonSellValue(level, baseExp, rarityKey) {
+var MIN_POKEMON_SELL_VALUE = formulaEngine$1.evalOrDefault("MIN_POKEMON_SELL_VALUE", 1e3);
+/**
+* Valor bruto de um POKE pela formula da planilha, SEM o piso de venda.
+*
+* Existe separado de `pokemonSellValue` porque o ouro por kill deriva do mesmo
+* numero (`MONEY_FOR_KILL = sellValue / killDivisor`). Aplicar o piso de 1000
+* aqui dentro nao subiria so o preco de venda: com o divisor atual (15) e os
+* multiplicadores de kill, o ouro por abate saltaria de ~5 para ~330 na hunt
+* inicial — 60x, sem ninguem ter pedido inflacao de farm. Piso e regra de
+* VENDA; deixar os dois na mesma funcao juntaria duas decisoes de
+* balanceamento que precisam poder andar separadas.
+*/
+function pokemonBaseValue(level, baseExp, rarityKey) {
 	const base = formulaEngine$1.eval("POKEMON_SELL_VALUE", {
 		level,
 		baseExp,
@@ -36372,9 +36396,12 @@ function pokemonSellValue(level, baseExp, rarityKey) {
 	const multiplier = (rarityKey && RARITIES[rarityKey] || RARITIES.comum).sellMultiplier;
 	return Math.max(1, Math.floor(base * multiplier));
 }
+function pokemonSellValue(level, baseExp, rarityKey) {
+	return Math.max(MIN_POKEMON_SELL_VALUE, pokemonBaseValue(level, baseExp, rarityKey));
+}
 function awardKillLoot(rng, gameState, enemy, mapDef) {
 	const species = SPECIES[enemy.poke.speciesId];
-	const sellValue = pokemonSellValue(enemy.poke.level, species.baseExp, enemy.poke.rarity);
+	const sellValue = pokemonBaseValue(enemy.poke.level, species.baseExp, enemy.poke.rarity);
 	const baseGold = Math.max(1, Math.floor(formulaEngine$1.eval("MONEY_FOR_KILL", {
 		sellValue,
 		killDivisor: KILL_MONEY_DIVISOR
@@ -58827,7 +58854,8 @@ function rowToPoke(row) {
 		stats,
 		unlockedAbilities: row.unlocked_abilities,
 		locked: row.locked,
-		capturedAt: row.created_at
+		capturedAt: row.created_at,
+		originalTrainer: row.original_trainer ?? void 0
 	};
 }
 function snapshotToGameState(snap, defaults) {
@@ -58906,6 +58934,7 @@ function pokeToRow(userId, poke, location, teamSlot) {
 		is_shiny: poke.isShiny,
 		rarity: poke.rarity,
 		locked: poke.locked ?? false,
+		original_trainer: poke.originalTrainer ?? null,
 		iv_hp: poke.ivs.hp,
 		iv_atk_fis: poke.ivs.atkFis,
 		iv_atk_esp: poke.ivs.atkEsp,
@@ -59834,15 +59863,13 @@ async function rankingDeTreinadores(cfg, limiteBruto) {
 async function rankingDePokemon(cfg, criterio, limiteBruto) {
 	const n = limite(limiteBruto);
 	const coluna = COLUNA_POR_CRITERIO[criterio];
-	const linhas = await selecionar(cfg, `pokemon_instances?select=user_id,species_id,level,is_shiny,rarity,stat_hp,stat_atk_fis,stat_atk_esp,stat_def,stat_def_esp,stat_speed&order=${coluna}.desc&limit=${n}`);
+	const linhas = await selecionar(cfg, `pokemon_instances?select=*&order=${coluna}.desc&limit=${n}`);
 	const nomes = await nomesDosTreinadores(cfg, linhas.map((l) => l.user_id));
 	return linhas.map((l) => ({
 		userId: l.user_id,
 		treinador: nomes.get(l.user_id) ?? "Treinador",
-		speciesId: l.species_id,
-		level: l.level,
-		isShiny: l.is_shiny,
-		rarity: l.rarity,
+		treinadorOriginal: l.original_trainer ?? null,
+		poke: rowToPoke(l),
 		valor: l[coluna]
 	}));
 }
@@ -60033,6 +60060,7 @@ var MANIPULADORES = {
 			ivs: STARTER_IVS,
 			rarity: STARTER_RARITY
 		});
+		poke.originalTrainer = estado.trainer.name;
 		store.addPokeToTeam(poke);
 		store.setActiveIndex(0);
 		return {

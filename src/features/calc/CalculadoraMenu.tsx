@@ -17,11 +17,16 @@ import { RARITIES, type RarityKey } from '@/data/rarity'
 import { useBreakpoints } from '@/stores/uiStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { TypeChip } from '@/components/shared/TypeChip'
-import { GameCheck, GameInput, GameSelect } from '@/components/game/controls'
+import { GameButton, GameCheck, GameInput, GameSelect } from '@/components/game/controls'
 
 const IV_MAX = 31
 const fmt = new Intl.NumberFormat('pt-BR')
 const ESPECIES = Object.values(SPECIES).sort((a, b) => a.name.localeCompare(b.name))
+
+const STATS: readonly (readonly [string, keyof StatBlock])[] = [
+  ['HP', 'hp'], ['Atk Fis', 'atkFis'], ['Atk Esp', 'atkEsp'],
+  ['Defesa', 'def'], ['Def Esp', 'defEsp'], ['Velocidade', 'speed'],
+]
 
 interface Lado {
   speciesId: string
@@ -29,11 +34,19 @@ interface Lado {
   rarity: RarityKey
   iv: number
   isShiny: boolean
+  /**
+   * Valores digitados a mao, por atributo.
+   *
+   * Guardado separado do calculo (e nao substituindo `stats`) porque trocar
+   * de nivel/raridade tem que voltar a recalcular os atributos que o jogador
+   * NAO tocou. Chave ausente = "use o calculado".
+   */
+  manual: Partial<Record<keyof StatBlock, number>>
 }
 
-const LADO_PADRAO: Lado = { speciesId: '', level: 50, rarity: 'comum', iv: IV_MAX, isShiny: false }
+const LADO_PADRAO: Lado = { speciesId: '', level: 50, rarity: 'comum', iv: IV_MAX, isShiny: false, manual: {} }
 
-function statsDe(lado: Lado): { species: Species; stats: StatBlock } | null {
+function statsDe(lado: Lado): { species: Species; stats: StatBlock; calculado: StatBlock } | null {
   const species = SPECIES[lado.speciesId]
   if (!species) return null
   // Um unico controle de IV aplicado aos 6 atributos: a calculadora responde
@@ -42,7 +55,13 @@ function statsDe(lado: Lado): { species: Species; stats: StatBlock } | null {
   const ivs: StatBlock = {
     hp: lado.iv, atkFis: lado.iv, atkEsp: lado.iv, def: lado.iv, defEsp: lado.iv, speed: lado.iv,
   }
-  return { species, stats: computeStatsAtLevel(species, lado.level, ivs, lado.rarity, lado.isShiny) }
+  const calculado = computeStatsAtLevel(species, lado.level, ivs, lado.rarity, lado.isShiny)
+  const stats: StatBlock = { ...calculado }
+  for (const [, key] of STATS) {
+    const manual = lado.manual[key]
+    if (manual != null) stats[key] = manual
+  }
+  return { species, stats, calculado }
 }
 
 export function CalculadoraMenu() {
@@ -180,17 +199,37 @@ function PainelLado({
           </div>
 
           <div className="grid grid-cols-3 gap-[.4em]">
-            {([
-              ['HP', 'hp'], ['Atk Fis', 'atkFis'], ['Atk Esp', 'atkEsp'],
-              ['Defesa', 'def'], ['Def Esp', 'defEsp'], ['Velocidade', 'speed'],
-            ] as const).map(([label, key]) => {
+            {STATS.map(([label, key]) => {
               const valor = resultado.stats[key]
               const outro = comparar?.stats[key]
               const delta = outro == null ? null : valor - outro
+              const editado = lado.manual[key] != null
               return (
-                <div key={key} className="rounded-[.5em] border border-n800 bg-background p-[.5em] text-center">
+                <div
+                  key={key}
+                  className="rounded-[.5em] border bg-background p-[.5em] text-center"
+                  style={{ borderColor: editado ? 'var(--color-primary)' : 'var(--color-n800)' }}
+                >
                   <div className="text-[.72em] text-n500">{label}</div>
-                  <div className="text-[1.1em] font-medium tabular-nums">{fmt.format(valor)}</div>
+                  {/* Campo editavel, e nao numero fixo: o valor calculado e so
+                      o ponto de partida. Digitar sobrescreve so este atributo;
+                      apagar o campo devolve o controle ao calculo (por isso a
+                      chave e REMOVIDA em vez de virar 0 — 0 e um valor manual
+                      legitimo). */}
+                  <GameInput
+                    type="number"
+                    min={0}
+                    aria-label={label}
+                    value={valor}
+                    onChange={(e) => {
+                      const bruto = e.target.value
+                      const manual = { ...lado.manual }
+                      if (bruto === '') delete manual[key]
+                      else manual[key] = Math.max(0, Math.floor(Number(bruto) || 0))
+                      onChange({ ...lado, manual })
+                    }}
+                    className="w-full text-center text-[1.05em] font-medium tabular-nums"
+                  />
                   {/* Delta so aparece quando os dois lados estao preenchidos —
                       e a unica razao de existir um lado B. */}
                   {delta != null && delta !== 0 && (
@@ -201,10 +240,21 @@ function PainelLado({
                       {delta > 0 ? '+' : ''}{fmt.format(delta)}
                     </div>
                   )}
+                  {editado && (
+                    <div className="text-[.65em] text-n500">
+                      calc. {fmt.format(resultado.calculado[key])}
+                    </div>
+                  )}
                 </div>
               )
             })}
           </div>
+
+          {Object.keys(lado.manual).length > 0 && (
+            <GameButton variant="ghost" block onClick={() => onChange({ ...lado, manual: {} })}>
+              Voltar aos valores calculados
+            </GameButton>
+          )}
         </>
       )}
     </div>

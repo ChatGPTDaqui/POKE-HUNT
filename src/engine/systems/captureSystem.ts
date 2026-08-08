@@ -42,6 +42,10 @@ export function attemptCapture(rng: Rng, gameState: GameStateStore, defeatedPoke
     uid: novoPokeUid(),
     level: CAPTURE_LEVEL,
     exp: totalExpForLevel(CAPTURE_LEVEL, species.growthCurve),
+    // Registro de captura: gravado AQUI, no instante em que o POKE muda de
+    // dono, e nunca reescrito depois. `defeatedPoke` e o POKE selvagem, que
+    // nao tem treinador — o spread acima nao traria nada.
+    originalTrainer: gameState.trainer.name,
     stats,
     hp: stats.hp,
     unlockedAbilities: species.abilities

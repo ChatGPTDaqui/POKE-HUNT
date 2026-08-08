@@ -412,7 +412,7 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
 
   startCooldown(player, ability.id, scaledCooldown(ability, player.poke.stats.speed))
   startGlobalCooldown(player, MIN_ACTION_GAP)
-  triggerAttackAnim(player, ability.target === 'aoe')
+  triggerAttackAnim(player, ability.target === 'aoe', primaryTarget)
   announceAbility(world, player, ability)
 
   const targets = ability.target === 'aoe'
@@ -433,7 +433,7 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
 
   startCooldown(enemy, ability.id, scaledCooldown(ability, enemy.poke.stats.speed))
   startGlobalCooldown(enemy, MIN_ACTION_GAP)
-  triggerAttackAnim(enemy, ability.target === 'aoe')
+  triggerAttackAnim(enemy, ability.target === 'aoe', player)
   announceAbility(world, enemy, ability)
 
   if (ability.target === 'aoe') queueAoeVisual(world, enemy, ability)

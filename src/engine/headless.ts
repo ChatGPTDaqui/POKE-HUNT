@@ -56,5 +56,6 @@ export { defaultGameStateData } from '@/stores/gameStateStore'
 export {
   snapshotToGameState, gameStateToPlayerRow, gameStateToPokemonRows,
   gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
+  rowToPoke,
 } from '@/data/remote/playerMapper'
-export type { PlayerSnapshot } from '@/data/remote/playerMapper'
+export type { PlayerSnapshot, PokemonRow } from '@/data/remote/playerMapper'
