@@ -64,6 +64,15 @@ interface UiState {
   setChatTab: (tab: ChatTab) => void
   setChatOpen: (open: boolean) => void
 
+  // Altura em px do rodape (barra de golpes + menu), medida ao vivo por um
+  // ResizeObserver no HudLayer. O chat e o botao Auto ancoram ACIMA dela em vez
+  // de um offset `em` chutado: o rodape muda de altura com a largura (o menu
+  // quebra em mais fileiras) E com o `hudScale`, entao qualquer constante em
+  // `em` erra em algum dos casos — foi ajustada a mao duas vezes e ainda colidia
+  // em 390px. Medir e a unica forma que fecha os tres eixos de uma vez.
+  footerHeight: number
+  setFooterHeight: (height: number) => void
+
   // Largura do viewport em px. Vive na store (e nao num `useState` por
   // componente) porque 8 superficies diferentes decidem posicao a partir dela:
   // um listener de resize compartilhado em vez de oito.
@@ -115,6 +124,12 @@ export const useUiStore = create<UiState>((set, get) => ({
   chatOpen: true,
   setChatTab: (chatTab) => set({ chatTab }),
   setChatOpen: (chatOpen) => set({ chatOpen }),
+
+  footerHeight: 0,
+  setFooterHeight: (height) => {
+    const r = Math.round(height)
+    if (get().footerHeight !== r) set({ footerHeight: r })
+  },
 
   viewportWidth: typeof window === 'undefined' ? 1280 : window.innerWidth,
 

@@ -35,6 +35,7 @@ export function ChatLog() {
   const setActiveTab = useUiStore((s) => s.setChatTab)
   const open = useUiStore((s) => s.chatOpen)
   const setOpen = useUiStore((s) => s.setChatOpen)
+  const footerHeight = useUiStore((s) => s.footerHeight)
   const lines = useToastStore((s) => s.chatLines[activeTab])
   const { narrow, colStack, chatNarrow } = useBreakpoints()
   const { pos, onPointerDown } = useWindowDrag('chat')
@@ -47,14 +48,16 @@ export function ChatLog() {
   }, [lines])
 
   const width = narrow ? '15em' : chatNarrow ? '13em' : '20em'
-  // Quanto o chat precisa subir pra nao encostar no que ocupa o rodape:
-  //  - acima de 780px ele fica colado embaixo, longe do menu central;
-  //  - abaixo disso o menu se aproxima e ele sobe pra 10.6em;
-  //  - em mobile os rotulos somem, o menu QUEBRA em duas fileiras e a barra de
-  //    golpes fica logo acima dela — medido ao vivo em 492px, o rodape ocupa
-  //    ~12.4em, entao 10.6em deixava o primeiro slot de golpe por baixo do
-  //    chat. 13.5em cobre as duas fileiras com folga.
-  const bottom = narrow ? '13.5em' : colStack ? '10.6em' : '.8em'
+  // Abaixo de 780px o menu do rodape se aproxima do chat (canto inferior
+  // esquerdo) e cresce em fileiras. Em vez de um offset `em` chutado (que ja
+  // deixou a barra de golpes por baixo do chat em 390px, mesmo depois de
+  // ajustada a mao duas vezes), o chat sobe pela altura REAL do rodape, medida
+  // no HudLayer. Acima de 780px o rodape e uma fileira central estreita, longe
+  // do chat, entao ele fica colado embaixo. O fallback so vale ate a primeira
+  // medida chegar.
+  const bottom = colStack
+    ? footerHeight ? `calc(${footerHeight}px + .8em)` : (narrow ? '13.5em' : '10.6em')
+    : '.8em'
   const style: CSSProperties = pos
     ? { left: pos.x, top: pos.y, width }
     : { left: '.8em', bottom, width }

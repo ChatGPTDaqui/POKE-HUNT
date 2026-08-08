@@ -84,6 +84,7 @@ export function AutoButton() {
 export function AutoWindow() {
   const open = useUiStore((s) => s.autoOpen)
   const setOpen = useUiStore((s) => s.setAutoOpen)
+  const footerHeight = useUiStore((s) => s.footerHeight)
   const { colStack } = useBreakpoints()
   const { pos, onPointerDown } = useWindowDrag('auto')
   const ref = useRef<HTMLDivElement>(null)
@@ -116,7 +117,7 @@ export function AutoWindow() {
 
   const style: CSSProperties = pos
     ? { left: pos.x, top: pos.y }
-    : { right: '.9em', bottom: colStack ? '14.2em' : '10.5em' }
+    : { right: '.9em', bottom: colStack ? (footerHeight ? `calc(${footerHeight}px + 4.2em)` : '14.2em') : '10.5em' }
 
   return (
     <div

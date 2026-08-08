@@ -36,10 +36,33 @@ import { AbilityHud } from '@/components/hud/AbilityHud'
 import { ChatLog } from '@/components/toasts/ChatLog'
 import { AutoButton, AutoWindow } from '@/components/auto/AutoFloatingPanel'
 import { MainMenu } from '@/features/nav/MainMenu'
-import { useBreakpoints } from '@/stores/uiStore'
+import { useBreakpoints, useUiStore } from '@/stores/uiStore'
+import { useEffect, useRef } from 'react'
 
 export function HudLayer() {
   const { narrow, mid, colStack } = useBreakpoints()
+  const footerHeight = useUiStore((s) => s.footerHeight)
+  const setFooterHeight = useUiStore((s) => s.setFooterHeight)
+
+  // Mede o rodape (barra de golpes + menu) ao vivo. Chat e Auto ancoram acima
+  // dele a partir deste numero — ver a nota em uiStore#footerHeight sobre por
+  // que um offset `em` fixo nao serve (rodape muda de altura com a largura E com
+  // o hudScale). ResizeObserver cobre os dois: reflow do menu (quebra de fileira)
+  // e mudanca de escala disparam o mesmo callback.
+  const footerRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = footerRef.current
+    if (!el) return
+    const ro = new ResizeObserver(() => setFooterHeight(el.getBoundingClientRect().height))
+    ro.observe(el)
+    setFooterHeight(el.getBoundingClientRect().height)
+    return () => ro.disconnect()
+  }, [setFooterHeight])
+
+  // Acima do rodape, com uma folga. So no regime empilhado (<780): acima disso o
+  // rodape e uma fileira central estreita e o Auto/chat, nos cantos, nao chegam
+  // perto. Enquanto a medida nao chega (primeiro paint), cai no valor antigo.
+  const acimaDoRodape = footerHeight ? `calc(${footerHeight}px + .8em)` : '10.6em'
 
   // A pilula de zoom fica sob o card do POKE ativo, entao a altura dela depende
   // de quanto o topo esquerdo ocupa — que muda quando o bloco central desce
@@ -82,15 +105,17 @@ export function HudLayer() {
           segura" do rodape — o canvas desenha nome/HP/texto de combate ate uns
           90px acima do sprite, e antes disso essa area estava livre pra colidir
           com a barra de golpes. */}
-      <div className="absolute bottom-[.8em] left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-[.7em]">
+      <div ref={footerRef} className="absolute bottom-[.8em] left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-[.7em]">
         <AbilityHud />
         <MainMenu />
       </div>
 
       {/* Auto: canto inferior direito, explicitamente posicionado. Antes ele
           era filho direto da camada sem wrapper e caia no fluxo normal, ou seja,
-          aparecia no canto superior ESQUERDO por cima do HUD. */}
-      <div className="absolute right-[.9em] z-[22]" style={{ bottom: colStack ? '10.6em' : '6.8em' }}>
+          aparecia no canto superior ESQUERDO por cima do HUD. No regime
+          empilhado (<780) o menu do rodape cresce e sobe; o Auto tem que ficar
+          ACIMA dele (medido), senao a fileira de baixo do menu passa por tras. */}
+      <div className="absolute right-[.9em] z-[22]" style={{ bottom: colStack ? acimaDoRodape : '6.8em' }}>
         <AutoButton />
       </div>
       <AutoWindow />

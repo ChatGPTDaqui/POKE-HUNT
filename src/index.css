@@ -194,6 +194,19 @@
   line-height: 1.35;
 }
 
+/* Numa tela estreita, a preferencia manual de escala (ate 1.4) multiplica um
+   font-size que ja esta no piso do clamp e estoura o HUD pra fora da tela — os
+   cards do topo (POKE x treinador) colidem e o chat cobre o bloco central.
+   Aqui a escala automatica ja deixa tudo no tamanho certo, entao o multiplicador
+   manual fica limitado a 1.15: ainda da um "um pouco maior" pra quem prefere,
+   sem quebrar o encaixe. E font-size (estilo puro), nao layout — por isso media
+   query, e nao o mesmo caminho JS dos breakpoints de posicionamento. */
+@media (max-width: 640px) {
+  .hud-root {
+    font-size: calc(clamp(13px, 0.55vw + 9px, 16px) * min(var(--hud-scale, 1), 1.15));
+  }
+}
+
 /* Superficie translucida da HUD (cards do topo, pilulas, chat). O blur fica SO
    aqui: o backdrop escuro atras de um menu aberto nao borra o jogo — pedido
    explicito, e o motivo de nao ser um utilitario generico. */

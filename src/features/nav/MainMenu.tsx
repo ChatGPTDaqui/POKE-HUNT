@@ -65,7 +65,10 @@ export function MainMenu() {
     // (pelo onClick) no mesmo gesto.
     <nav
       data-keep-open
-      className="pointer-events-auto relative flex max-w-[84vw] flex-wrap items-end justify-center gap-x-[.7em] gap-y-[.5em]"
+      className={cn(
+        'pointer-events-auto relative flex max-w-[92vw] flex-wrap items-end justify-center',
+        narrow ? 'gap-x-[.45em] gap-y-[.4em]' : 'gap-x-[.7em] gap-y-[.5em]',
+      )}
     >
       {entries.map((entry) =>
         entry == null ? (
@@ -73,6 +76,7 @@ export function MainMenu() {
             key="hospital"
             label="Hospital"
             showLabel={showLabels}
+            compact={narrow}
             active={false}
             Icon={FirstAid}
             onClick={() => {
@@ -85,6 +89,7 @@ export function MainMenu() {
             key={entry.screen}
             label={entry.label}
             showLabel={showLabels}
+            compact={narrow}
             big={entry.big}
             active={currentScreen === entry.screen}
             Icon={entry.Icon}
@@ -93,21 +98,31 @@ export function MainMenu() {
         ),
       )}
 
-      <MoreMenu open={moreOpen} setOpen={setMoreOpen} showLabel={showLabels} />
+      <MoreMenu open={moreOpen} setOpen={setMoreOpen} showLabel={showLabels} compact={narrow} />
     </nav>
   )
 }
 
 function MenuSlot({
-  label, Icon, active, big, showLabel, onClick,
+  label, Icon, active, big, showLabel, compact, onClick,
 }: {
   label: string
   Icon: Icon
   active: boolean
   big?: boolean
   showLabel: boolean
+  compact?: boolean
   onClick: () => void
 }) {
+  // Em mobile (compact) os circulos encolhem pra caber numa fileira so — sem
+  // isso, 7 slots quebram em tres fileiras e o rodape fica alto demais, empurrando
+  // chat/Auto pra cima e comendo o campo de batalha.
+  const size = big
+    ? (compact ? 'h-[3.2em] w-[3.2em]' : 'h-[3.9em] w-[3.9em]')
+    : (compact ? 'h-[2.6em] w-[2.6em]' : 'h-[3.1em] w-[3.1em]')
+  const iconSize = big
+    ? (compact ? 'text-[1.45em]' : 'text-[1.7em]')
+    : (compact ? 'text-[1.15em]' : 'text-[1.3em]')
   return (
     <div className="flex flex-col items-center gap-[.25em]">
       <button
@@ -118,13 +133,13 @@ function MenuSlot({
           'flex cursor-pointer items-center justify-center rounded-full border transition-[transform,border-color,background-color] duration-100',
           'hover:-translate-y-[3px] hover:border-primary',
           'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
-          big ? 'h-[3.9em] w-[3.9em]' : 'h-[3.1em] w-[3.1em]',
+          size,
           active
             ? 'border-foreground bg-foreground text-[#0b0b0d]'
             : 'border-n700 bg-n900 text-n200',
         )}
       >
-        <Icon className={big ? 'text-[1.7em]' : 'text-[1.3em]'} />
+        <Icon className={iconSize} />
       </button>
       {showLabel && (
         // `text-shadow` porque o rotulo fica direto sobre o canvas, sem
@@ -144,11 +159,12 @@ function MenuSlot({
 }
 
 function MoreMenu({
-  open, setOpen, showLabel,
+  open, setOpen, showLabel, compact,
 }: {
   open: boolean
   setOpen: (open: boolean) => void
   showLabel: boolean
+  compact?: boolean
 }) {
   const toggleScreen = useUiStore((s) => s.toggleScreen)
   const ref = useRef<HTMLDivElement>(null)
@@ -180,12 +196,13 @@ function MoreMenu({
         title="Exibir mais menus"
         onClick={() => setOpen(!open)}
         className={cn(
-          'flex h-[3.1em] w-[3.1em] cursor-pointer items-center justify-center rounded-full border border-dashed transition-colors',
+          'flex cursor-pointer items-center justify-center rounded-full border border-dashed transition-colors',
           'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
+          compact ? 'h-[2.6em] w-[2.6em]' : 'h-[3.1em] w-[3.1em]',
           open ? 'border-primary text-n200' : 'border-n600 text-n300 hover:border-primary hover:text-n200',
         )}
       >
-        <DotsThree className="text-[1.3em]" />
+        <DotsThree className={compact ? 'text-[1.15em]' : 'text-[1.3em]'} />
       </button>
       {showLabel && (
         <span
