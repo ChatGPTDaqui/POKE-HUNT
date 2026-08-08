@@ -2,6 +2,10 @@
 // autoral + pequenas ferramentas interativas sobre dado real do jogo
 // (TYPE_CHART, RARITIES). Nenhum estado do jogador e lido aqui.
 import { useState, type ReactNode } from 'react'
+import {
+  Backpack, BookOpen, Books, FirstAid, Gear, MapTrifold, Robot, Storefront,
+  UsersThree, type Icon,
+} from '@phosphor-icons/react'
 import { TYPE_CHART, getEffectiveness } from '@/data/generated/typeChart.generated'
 import { colorForType, TYPE_COLORS } from '@/data/typeColors'
 import { RARITIES, RARITY_ORDER } from '@/data/rarity'
@@ -15,6 +19,20 @@ const ALL_TYPES = Object.keys(TYPE_COLORS) as ElementType[]
 // lista densa) — no resto do jogo o chip usa a abreviacao de 3 letras.
 function TypeChip({ type }: { type: ElementType }) {
   return <SharedTypeChip type={type} full />
+}
+
+// Uma linha da lista "Navegando pelos menus": o MESMO icone do botao real
+// (@phosphor-icons/react, a biblioteca de icones do projeto) em vez de um emoji
+// aproximado do sistema operacional.
+function LinhaDeMenu({ Icon, nome, children }: { Icon: Icon; nome: string; children: ReactNode }) {
+  return (
+    <li className="flex items-start gap-[.5em]">
+      <Icon className="mt-[.15em] shrink-0 text-[1.2em] text-n300" />
+      <span>
+        <b>{nome}</b> — {children}
+      </span>
+    </li>
+  )
 }
 
 function ChipList({ types }: { types: ElementType[] }) {
@@ -67,20 +85,40 @@ function InicioTab() {
       </WikiCard>
 
       <WikiCard title="3. Navegando pelos menus">
-        O menu inferior da tela tem os atalhos principais:
-        <br />⚾ <b>Equipe</b> — seus ate 6 POKEs ativos, trocar quem esta em campo, evoluir, ver status
-        completos.
-        <br />🎒 <b>Mochila</b> — POKEs capturados extras e todos os seus itens (bolas, pocoes, revives,
-        Stones).
-        <br />🗺️ <b>Hunts</b> — escolher onde caçar (ver item 4 abaixo).
-        <br />🛒 <b>Loja</b> — comprar itens e vender POKEs/itens por ouro.
-        <br />📖 <b>Pokedex</b> — registro de toda especie do jogo, mesmo as que voce nunca capturou, com
-        onde encontrar cada uma (incluindo fraquezas/resistencias de cada uma).
-        <br />📚 <b>Wiki</b> — este guia que voce esta lendo agora.
-        <br />🏥 <b>Hospital</b> — clique na enfermeira em campo pra curar seu time por completo, de graça.
-        <br />🤖 <b>Auto</b> (botao flutuante no canto inferior direito) — liga/desliga auto-pot, auto-catch
-        e auto-revive, e configura qual item cada automacao deve usar.
-        <br />⚙️ <b>Config</b> — reiniciar o jogo e ver o historico de atualizacoes (Patch-notes).
+        O menu inferior da tela tem os atalhos principais. Os icones abaixo sao os MESMOS que aparecem no
+        menu — antes esta lista usava emoji aproximados (⚾ pra Equipe, por exemplo), que nao batiam com
+        nenhum botao da tela.
+        <ul className="mt-[.5em] flex flex-col gap-[.4em]">
+          <LinhaDeMenu Icon={UsersThree} nome="Equipe">
+            seus ate 6 POKEs ativos, trocar quem esta em campo, evoluir, ver status completos.
+          </LinhaDeMenu>
+          <LinhaDeMenu Icon={Backpack} nome="Mochila">
+            POKEs capturados extras e todos os seus itens (bolas, pocoes, revives, Stones).
+          </LinhaDeMenu>
+          <LinhaDeMenu Icon={MapTrifold} nome="Hunt">
+            escolher onde caçar (ver item 4 abaixo).
+          </LinhaDeMenu>
+          <LinhaDeMenu Icon={Storefront} nome="Loja">
+            comprar itens e vender POKEs/itens por ouro.
+          </LinhaDeMenu>
+          <LinhaDeMenu Icon={BookOpen} nome="Pokedex">
+            registro de toda especie do jogo, mesmo as que voce nunca capturou, com onde encontrar cada
+            uma (incluindo fraquezas/resistencias).
+          </LinhaDeMenu>
+          <LinhaDeMenu Icon={Books} nome="Wiki">
+            este guia que voce esta lendo agora.
+          </LinhaDeMenu>
+          <LinhaDeMenu Icon={FirstAid} nome="Hospital">
+            clique na enfermeira em campo pra curar seu time por completo, de graça.
+          </LinhaDeMenu>
+          <LinhaDeMenu Icon={Robot} nome="Auto">
+            botao flutuante no canto inferior direito — liga/desliga auto-pot, auto-catch e auto-revive, e
+            configura qual item cada automacao deve usar.
+          </LinhaDeMenu>
+          <LinhaDeMenu Icon={Gear} nome="Configuracoes">
+            reiniciar o jogo e ver o historico de atualizacoes (Patch-notes).
+          </LinhaDeMenu>
+        </ul>
       </WikiCard>
 
       <WikiCard title="4. Progredindo nas Hunts">
@@ -94,7 +132,7 @@ function InicioTab() {
         <br />
         <br />
         Deixe <b>auto-pot</b>, <b>auto-catch</b> e <b>auto-revive</b> ligados (vem ativados por padrao) pra
-        caçar sem precisar intervir manualmente — configure as bolas/pocoes preferidas no painel 🤖 Auto.
+        caçar sem precisar intervir manualmente — configure as bolas/pocoes preferidas no painel Auto.
       </WikiCard>
     </div>
   )

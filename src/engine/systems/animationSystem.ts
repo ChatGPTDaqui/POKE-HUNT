@@ -61,7 +61,14 @@ export function updateAnimations(world: WorldState, dt: number): void {
       continue
     }
 
-    if (!entity.battleAnim || entity.battleAnim.name !== resolved.name) {
+    // Compara a URL, nao so o NOME da animacao. Bug real: trocar de POKE em
+    // campo ou evoluir mantem a animacao desejada igual ('Idle'/'Walk'), entao a
+    // comparacao por nome dava "nao mudou" e `battleAnim.url` continuava
+    // apontando pro spritesheet da especie ANTIGA. A sprite so trocava quando a
+    // animacao mudava de nome por outro motivo — na pratica, no primeiro golpe
+    // ('Shoot'). A URL carrega especie + animacao + shiny, entao cobre os tres
+    // casos de troca de arte de uma vez.
+    if (!entity.battleAnim || entity.battleAnim.url !== resolved.url) {
       entity.battleAnim = resolved
       entity.animFrame = 0
       entity.animElapsed = 0

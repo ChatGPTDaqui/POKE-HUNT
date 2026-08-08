@@ -101,17 +101,6 @@ export function isDamagingAbility(ability: Ability | null | undefined): boolean 
   return !!ability && ability.power > 0
 }
 
-interface PokeStatsLike {
-  stats: { atkFis: number; atkEsp: number }
-}
-
-// The level-50 typed AoE moves (typedAoeMoves.js) don't have a fixed
-// physical/special category — explicit user request: it's decided per-user,
-// at cast time, by whichever of their two attack stats is higher. Every
-// real spreadsheet move already has a fixed category and passes through
-// unchanged. Used by CombatSystem.js (actual damage), AbilityHUD.js (slot
-// border color) and PokeStatDetail.js (moveset table) so all three agree.
-export function resolveAbilityCategory(ability: Ability, pokeInstance: PokeStatsLike): AbilityCategory {
-  if (ability.category !== 'dynamic') return ability.category
-  return pokeInstance.stats.atkFis >= pokeInstance.stats.atkEsp ? 'physical' : 'special'
-}
+// `resolveAbilityCategory` mora em data/abilityCategory.ts — ela precisa de
+// `computeStatsAtLevel` (data/pokes.ts), e pokes.ts importa ESTE arquivo, entao
+// trazer a funcao pra ca fecharia um ciclo de import.

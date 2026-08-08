@@ -13,6 +13,24 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '4.0',
+    date: '2026-08-08',
+    title: 'Reinicio geral, interfaces mais leves e correcoes de sprite',
+    highlights: [
+      'REINICIO GERAL DO SERVIDOR: o progresso de todos os jogadores foi apagado e todo mundo comeca do zero. As contas e os logins continuam os mesmos — voltam com 500.000 de ouro, 10.000 de cada consumivel e todas as hunts sem custo liberadas.',
+      'Ganho de XP reduzido em 50% (por POKE e por Treinador).',
+      'Golpes de nivel 50 (Explosao Elemental): PP passou de 15 pra 7, ou seja, o cooldown mais que dobrou (de ~1,9s pra 4s).',
+      'Golpes de nivel 50 tambem mudaram de regra: se eles contam como Fisico ou Especial passa a ser decidido pelos atributos que o POKE tem EXATAMENTE no nivel 50, e nao pelos atuais. Antes a categoria podia mudar sozinha ao subir de nivel ou evoluir, trocando a formula de dano no meio do jogo.',
+      'Mochila e Loja ficaram leves: as listas agora vem paginadas em 30 por pagina, em vez de desenhar centenas de cartoes de uma vez. Busca, filtros, ordenacao, "Selecionar tudo" e "Vender Tudo" continuam valendo pra colecao inteira, nao so pra pagina visivel.',
+      'Bug visual corrigido: no primeiro encontro com cada especie aparecia uma forma geometrica colorida por alguns instantes no lugar do POKE. Agora a arte da hunt inteira (todas as especies do local, versao normal e shiny, mais o cenario) e carregada antes da cena aparecer.',
+      'Bug corrigido: trocar de POKE em campo ou evoluir nao mudava a sprite na hora — ela so trocava depois do POKE usar um golpe. Agora a troca e imediata.',
+      'Bug corrigido: "Iniciar novo jogo" apagava o progresso mas deixava a conta travada — nem escolher um novo inicial funcionava. O reinicio agora tambem encerra a caçada em andamento, e limpa a Pokedex e as regras de auto-captura, que antes sobreviviam ao reinicio.',
+      'Bug corrigido: as regras de auto-captura por especie nunca eram salvas — desapareciam ao recarregar o jogo.',
+      'Bug corrigido: curar na enfermeira do Hospital repunha o HP mas deixava o POKE marcado como desmaiado, e ele continuava sem lutar na hunt seguinte.',
+      'Interface: o retrato do POKE ativo agora preenche a moldura do cabecalho; os icones de golpe ficaram menores e encolhem sozinhos em tela estreita; o bloco de contagem de bolas abaixo do botao "auto" foi removido (a mesma contagem continua dentro do painel Auto); setas e emojis usados como icone na Mochila, na Loja e na Wiki foram trocados pelos icones de verdade do jogo.',
+    ],
+  },
+  {
     version: '3.8',
     date: '2026-08-06',
     title: 'Farm offline corrigido: tempo em segundo plano deixa de ser perdido',

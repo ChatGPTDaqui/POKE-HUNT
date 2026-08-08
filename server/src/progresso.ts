@@ -2,7 +2,8 @@
 import {
   buildMapWorld, stepWorld, simulateWorldSeconds, restoreRng,
   snapshotToGameState, gameStateToPlayerRow, gameStateToPokemonRows,
-  gameStateToItemRows, gameStateToPokedexRows, defaultGameStateData,
+  gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
+  defaultGameStateData,
   OFFLINE_SIM_STEP_SECONDS, recordBatch,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary,
 } from '#engine'
@@ -90,8 +91,30 @@ export async function gravarEstado(cfg: Config, userId: string, estado: GameStat
   }
   if (linhasItens.length) await inserir(cfg, 'player_items', linhasItens, { upsert: 'user_id,item_id' })
 
+  // Mesmo diff de remocao das duas tabelas acima. Sem ele, `reiniciarJogo`
+  // apagava POKEs e itens mas a Pokedex sobrevivia inteira — a conta "zerada"
+  // voltava com todos os abates registrados.
   const linhasDex = gameStateToPokedexRows(userId, estado)
+  const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id))
+  const dexNoBanco = await selecionarTudo<{ species_id: string }>(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)
+  const removerDex = dexNoBanco.map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id))
+  if (removerDex.length) {
+    await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${removerDex.join(',')})`)
+  }
   if (linhasDex.length) await inserir(cfg, 'player_pokedex', linhasDex, { upsert: 'user_id,species_id' })
+
+  // `player_auto_catch_rules` NUNCA era gravada: `carregarEstado` a lia,
+  // `gameStateToAutoCatchRuleRows` existia sem nenhum call site, e o mapper de
+  // `players` nao carrega essas regras (as outras tres configs de auto sao JSONB
+  // na propria linha, esta e tabela). Resultado: a regra "capturar Dratini com
+  // Ultra Ball" era aceita pela acao `configurarAuto`, entrava na simulacao do
+  // request corrente e desaparecia no proximo load — e sobrevivia a um reset.
+  // Reescrita por inteiro (apaga tudo, insere o que tem) porque a lista e pequena
+  // e nao tem chave estavel do lado do jogo: a identidade de uma regra e o par
+  // (especie, bola), entao diff por linha nao compraria nada.
+  const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado)
+  await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}`)
+  if (linhasAuto.length) await inserir(cfg, 'player_auto_catch_rules', linhasAuto)
 }
 
 export interface ResultadoFlush {
@@ -109,7 +132,7 @@ export interface ResultadoFlush {
  * (sai de `now()` menos `last_flush_at`), nem quantos kills houve, nem quanto
  * ouro. O cliente so declarou, na abertura da sessao, em qual hunt esta.
  */
-export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSessao): Promise<ResultadoFlush> {
+export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSessao): Promise<ResultadoFlush | null> {
   const agora = Date.now()
   const desde = new Date(sessao.last_flush_at).getTime()
   const bruto = (agora - desde) / 1000
@@ -123,8 +146,13 @@ export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSes
   const dados = await carregarEstado(cfg, userId)
   const { store, dados: estado } = criarEstadoDoJogador(dados)
 
+  // POKE da sessao nao existe mais (reset de conta, venda, liberacao). Isto NAO
+  // e erro do jogador e nao pode virar 409: a sessao e insimulavel pra sempre, e
+  // como todo request passa por um flush obrigatorio, um 409 aqui travava a conta
+  // inteira — inclusive "escolher o inicial" depois de um `reiniciarJogo`. Devolve
+  // null pro chamador FECHAR a sessao e seguir.
   const ativo = estado.team.find((p) => p.uid === sessao.poke_uid)
-  if (!ativo) throw new ErroHttp(409, 'o POKE desta sessao nao esta mais na equipe')
+  if (!ativo) return null
   store.setActiveIndex(estado.team.indexOf(ativo))
 
   // A sequencia RETOMA de onde o flush anterior parou. O cliente nunca escolhe a

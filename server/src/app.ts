@@ -92,6 +92,32 @@ async function sessaoAberta(cfg: Config, userId: string): Promise<LinhaSessao | 
   return linhas[0] ?? null
 }
 
+async function fecharLinhaDeSessao(cfg: Config, sessaoId: string): Promise<void> {
+  await atualizar(cfg, `game_sessions?id=eq.${sessaoId}`, { closed_at: new Date().toISOString() })
+}
+
+/**
+ * Liquida a sessao aberta, se houver, e devolve o resultado.
+ *
+ * `aplicarFlush` devolve `null` quando o POKE da sessao nao existe mais (conta
+ * reiniciada, POKE vendido/liberado). Nesse caso a sessao e insimulavel PRA
+ * SEMPRE — a unica saida e fecha-la. Antes isso era um 409, e como TODA rota
+ * passa por um flush obrigatorio, uma sessao nesse estado travava a conta
+ * inteira: nem escolher um novo inicial funcionava depois de "Iniciar novo
+ * jogo".
+ */
+async function liquidarSessaoAberta(cfg: Config, userId: string) {
+  const sessao = await sessaoAberta(cfg, userId)
+  if (!sessao) return { sessao: null, resultado: null }
+  const resultado = await aplicarFlush(cfg, userId, sessao)
+  if (!resultado) {
+    await fecharLinhaDeSessao(cfg, sessao.id)
+    await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null })
+    return { sessao: null, resultado: null }
+  }
+  return { sessao, resultado }
+}
+
 async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<Response> {
   const corpo = (await req.json().catch(() => null)) as { mapId?: string; pokeUid?: string } | null
   const mapId = corpo?.mapId
@@ -126,7 +152,7 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
   const anterior = await sessaoAberta(cfg, userId)
   if (anterior) {
     await aplicarFlush(cfg, userId, anterior)
-    await atualizar(cfg, `game_sessions?id=eq.${anterior.id}`, { closed_at: new Date().toISOString() })
+    await fecharLinhaDeSessao(cfg, anterior.id)
   }
 
   // A semente NASCE no servidor. Se o cliente pudesse escolher, escolheria a
@@ -160,6 +186,13 @@ async function flush(cfg: Config, userId: string): Promise<Response> {
   const sessao = await sessaoAberta(cfg, userId)
   if (!sessao) throw new ErroHttp(409, 'nenhuma sessao aberta')
   const resultado = await aplicarFlush(cfg, userId, sessao)
+  // POKE da sessao sumiu — fecha e responde 409, que o cliente ja trata como
+  // "nao ha sessao aberta" (nao e erro do jogador, nao gera toast).
+  if (!resultado) {
+    await fecharLinhaDeSessao(cfg, sessao.id)
+    await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null })
+    throw new ErroHttp(409, 'nenhuma sessao aberta')
+  }
   return json({
     segundosCreditados: resultado.segundosCreditados,
     truncado: resultado.truncado,
@@ -175,8 +208,12 @@ async function fechar(cfg: Config, userId: string): Promise<Response> {
   const sessao = await sessaoAberta(cfg, userId)
   if (!sessao) return json({ fechada: false })
   const resultado = await aplicarFlush(cfg, userId, sessao)
-  await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { closed_at: new Date().toISOString() })
+  await fecharLinhaDeSessao(cfg, sessao.id)
   await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null })
+  // Sem resultado = POKE da sessao sumiu. A sessao fica fechada (acima), mas nao
+  // ha resumo pra mostrar — `fechada: false` faz o cliente nao abrir o modal de
+  // Farm Offline com numeros vazios.
+  if (!resultado) return json({ fechada: false })
   return json({ fechada: true, resumo: resultado.resumo, piso: resultado.piso, estado: resultado.estado })
 }
 
@@ -194,8 +231,15 @@ async function acao(cfg: OpcoesApp, userId: string, req: Request): Promise<Respo
   const corpo = (await req.json().catch(() => null)) as Acao | null
   if (!corpo || typeof corpo.tipo !== 'string') throw new ErroHttp(400, 'informe { tipo }')
 
-  const sessao = await sessaoAberta(cfg, userId)
-  if (sessao) await aplicarFlush(cfg, userId, sessao)
+  await liquidarSessaoAberta(cfg, userId)
+
+  // `reiniciarJogo` destroi o POKE que qualquer sessao aberta esta usando, entao
+  // a sessao tem que morrer JUNTO — deixa-la aberta apontando pra um POKE
+  // inexistente era o que travava a conta depois de "Iniciar novo jogo".
+  if (corpo.tipo === 'reiniciarJogo') {
+    const aberta = await sessaoAberta(cfg, userId)
+    if (aberta) await fecharLinhaDeSessao(cfg, aberta.id)
+  }
 
   const dados = await carregarEstado(cfg, userId)
   const { store, dados: estado } = criarEstadoDoJogador(dados)

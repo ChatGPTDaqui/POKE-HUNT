@@ -6,7 +6,8 @@
 // original — aqui viram id + lookup via findEntityById, unica mudanca de
 // forma permitida no port (risco de referencia obsoleta sob Immer).
 import { deriveRng, nextFloat, type Rng } from '@/core/rng'
-import { getAbility, BASIC_ATTACK, isDamagingAbility, resolveAbilityCategory, type Ability } from '@/data/abilities'
+import { getAbility, BASIC_ATTACK, isDamagingAbility, type Ability } from '@/data/abilities'
+import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { SPECIES } from '@/data/pokes'
 import type { PokeInstance } from '@/data/pokes'
 import { colorForType } from '@/data/typeColors'

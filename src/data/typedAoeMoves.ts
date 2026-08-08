@@ -6,11 +6,14 @@
 // per-type items. One entry per real elemental type in this dataset
 // (TYPE_COLORS already enumerates exactly those 17, see data/typeColors.js).
 //
-// `category: 'dynamic'` is NOT a real category — CombatSystem.js/AbilityHUD.js/
-// PokeStatDetail.js all resolve it per-attacker via abilities.js#resolveAbilityCategory
-// (physical if the user's Atk Fisico stat is higher, special otherwise),
-// per explicit user request ("calculado de acordo com o maior atributo do
-// Pokemon").
+// `category: 'dynamic'` is NOT a real category — combatSystem/AbilityHud/
+// PokeStatDetail all resolve it per-attacker via
+// data/abilityCategory.ts#resolveAbilityCategory (physical if the user's Atk
+// Fisico stat is higher, special otherwise), per explicit user request
+// ("calculado de acordo com o maior atributo do Pokemon"). Since the move is
+// learned AT level 50, the comparison uses the stats the POKE has AT level 50
+// and not its current ones — see that module for why that is derived instead
+// of stored.
 import { TYPE_COLORS } from './typeColors'
 import type { AbilityCategory, ElementType } from './generated/types'
 
@@ -25,7 +28,11 @@ export interface TypedAoeMove {
 
 export const TYPED_AOE_LEVEL = 50
 const TYPED_AOE_POWER = 70
-const TYPED_AOE_PP = 15
+// 7 PP = pedido explicito do usuario. PP nao e um recurso consumivel aqui: ele
+// e a UNICA entrada do cooldown (`cooldownFromPp` em abilities.ts, cooldown =
+// TICK_SECONDS * 20/pp), entao baixar de 15 pra 7 mais que dobra o tempo de
+// recarga do golpe de nivel 50 — e a alavanca de balanceamento dele.
+const TYPED_AOE_PP = 7
 
 export function typedAoeMoveKey(type: ElementType): string {
   return `aoe50_${type.toLowerCase()}`

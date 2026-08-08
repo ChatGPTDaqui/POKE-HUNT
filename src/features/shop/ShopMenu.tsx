@@ -6,7 +6,9 @@
 // `pedirAcaoComLocal` (o toast reporta o resultado REAL, nao um literal fixo —
 // ver a nota naquele helper).
 import { useMemo, useState } from 'react'
-import { Coin, Diamond, LockSimple, LockSimpleOpen } from '@phosphor-icons/react'
+import {
+  ArrowDown, ArrowUp, Coin, Diamond, LockSimple, LockSimpleOpen, Sparkle,
+} from '@phosphor-icons/react'
 import { pedirAcao, pedirAcaoComLocal } from '@/data/remote/autoridade'
 import { SHOP_STOCK, getItem, ITEMS } from '@/data/items'
 import { SPECIES, averageIvPercent } from '@/data/pokes'
@@ -26,6 +28,7 @@ import { PokeNameTag } from '@/components/shared/PokeNameTag'
 import {
   GameButton, GameCard, GameCheck, GameIconButton, GameInput, SectionLabel, SegmentedTabs,
 } from '@/components/game/controls'
+import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
 
 const fmt = new Intl.NumberFormat('pt-BR')
 
@@ -72,7 +75,11 @@ function ItensTab() {
   const [buyQty, setBuyQty] = useState<Record<string, number>>({})
   const [sellQty, setSellQty] = useState<Record<string, number>>({})
 
-  const ownedItemIds = Object.keys(items).filter((id) => items[id] > 0 && ITEMS[id])
+  const ownedItemIds = useMemo(
+    () => Object.keys(items).filter((id) => items[id] > 0 && ITEMS[id]),
+    [items],
+  )
+  const paginadoVenda = usePaginacao(ownedItemIds)
 
   async function comprar(itemId: string, qty: number, nome: string) {
     const { ok, local } = await pedirAcaoComLocal(
@@ -150,7 +157,7 @@ function ItensTab() {
 
         {ownedItemIds.length === 0 && <p className="text-n500">Nenhum item para vender.</p>}
 
-        {ownedItemIds.map((itemId) => {
+        {paginadoVenda.pagina.map((itemId) => {
           const item = ITEMS[itemId]
           const owned = items[itemId]
           const locked = Boolean(lockedItems[itemId])
@@ -193,6 +200,8 @@ function ItensTab() {
             </GameCard>
           )
         })}
+
+        <Paginacao estado={paginadoVenda} rotulo="itens" />
       </div>
     </div>
   )
@@ -232,6 +241,12 @@ function PokemonsTab() {
       .sort((a, b) => (sortDesc ? b.ivPct - a.ivPct : a.ivPct - b.ivPct))
   }, [bagPokes, search, ivMin, ivMax, sortDesc, shinyOnly, selectedRarities])
 
+  // Pagina so a RENDERIZACAO. "Selecionar tudo" e "Vender Tudo" continuam
+  // olhando `filtered` inteiro de proposito: um "Selecionar tudo" que marcasse
+  // apenas os 30 da pagina visivel seria uma armadilha — o jogador clica, ve
+  // "Vender Selecionados (30)" e acha que limpou a mochila.
+  const paginado = usePaginacao(filtered)
+
   // POKEs trancados nunca entram na selecao em lote. Shinies so entram quando o
   // filtro "Somente Shiny" esta ativo (e ai a venda exige confirmacao) — mesma
   // regra de seguranca do "Vender Tudo", que nunca toca em shiny.
@@ -252,7 +267,7 @@ function PokemonsTab() {
     }
     // Contagens de poupados sao calculadas do estado LOCAL antes da acao, entao
     // valem nos dois caminhos.
-    if (extras?.shiny) toast(`${extras.shiny} POKE(s) Shiny nao foram vendidos ✨`, 'info')
+    if (extras?.shiny) toast(`${extras.shiny} POKE(s) Shiny nao foram vendidos.`, 'info')
     if (extras?.locked) toast(`${extras.locked} POKE(s) trancado(s) nao foram vendidos.`, 'info')
   }
 
@@ -310,7 +325,9 @@ function PokemonsTab() {
             onChange={(e) => setIvMax(Math.max(0, Math.min(100, Number(e.target.value) || 100)))}
           />
         </label>
-        <GameButton onClick={() => setSortDesc((d) => !d)}>IV {sortDesc ? '↓' : '↑'}</GameButton>
+        <GameButton onClick={() => setSortDesc((d) => !d)} title={sortDesc ? 'Maior IV primeiro' : 'Menor IV primeiro'}>
+          IV {sortDesc ? <ArrowDown /> : <ArrowUp />}
+        </GameButton>
       </div>
 
       <div className="flex flex-wrap items-center gap-x-[.9em] gap-y-[.3em]">
@@ -337,7 +354,9 @@ function PokemonsTab() {
             setSelectedUids(new Set()) // trocar de modo muda o que e selecionavel
           }}
         >
-          Somente Shiny ✨
+          <span className="inline-flex items-center gap-[.25em]">
+            Somente <Sparkle weight="fill" className="text-shiny" /> Shiny
+          </span>
         </GameCheck>
       </div>
 
@@ -369,7 +388,7 @@ function PokemonsTab() {
         <p className="text-n500">Nenhum POKE corresponde aos filtros.</p>
       )}
 
-      {filtered.map(({ poke, ivPct }) => {
+      {paginado.pagina.map(({ poke, ivPct }) => {
         const species = SPECIES[poke.speciesId]
         const value = pokemonSellValue(poke.level, species.baseExp, poke.rarity)
         const showCheckbox = !poke.locked && (shinyOnly || !poke.isShiny)
@@ -426,11 +445,13 @@ function PokemonsTab() {
               title={poke.locked ? 'Trancado — destranque na Mochila' : undefined}
               onClick={venderUm}
             >
-              {poke.locked ? '🔒 Trancado' : `Vender (${fmt.format(value)})`}
+              {poke.locked ? <><LockSimple weight="fill" /> Trancado</> : `Vender (${fmt.format(value)})`}
             </GameButton>
           </GameCard>
         )
       })}
+
+      <Paginacao estado={paginado} rotulo="POKEs" />
     </div>
   )
 }

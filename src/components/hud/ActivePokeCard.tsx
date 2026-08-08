@@ -6,7 +6,7 @@
 // worldStore e so e sincronizado de volta pro gameStateStore periodicamente —
 // ler do gameState mostraria HP defasado no meio do combate.
 import { SPECIES, type PokeInstance } from '@/data/pokes'
-import { spriteUrl } from '@/data/sprites'
+import { faceIconUrl, spriteUrl } from '@/data/sprites'
 import { rarityOf } from '@/data/rarity'
 import { stoneName } from '@/data/stones'
 import {
@@ -52,15 +52,30 @@ export function ActivePokeCard() {
   )
 }
 
+// A sprite de FACE (`assets/sprites-face/`, o retrato 40x40 do PMD) e a arte
+// certa pra uma moldura quadrada: ela e enquadrada no rosto e ja vem quadrada.
+// `spriteUrl` (o icone "grande", recorte de fan sheet) tem proporcao e padding
+// variaveis por especie, e com `object-contain` sobrava faixa vazia de um dos
+// lados — era esse o "nao preenche a moldura".
+//
+// `object-cover` + `h-full w-full` faz o retrato ocupar a moldura inteira; como
+// os dois sao quadrados, cover nao corta nada na pratica. `pixelated` porque e
+// upscale de 40px (o mesmo tratamento que a sprite do perfil ja usa).
 function PokeArt({ poke, name }: { poke: PokeInstance; name: string }) {
-  const url = spriteUrl(poke.speciesId, poke.isShiny)
+  const url = faceIconUrl(poke.speciesId, poke.isShiny) ?? spriteUrl(poke.speciesId, poke.isShiny)
   const rarity = rarityOf(poke)
   return (
     <div
-      className="flex h-[5em] w-[5em] shrink-0 items-center justify-center rounded-[.7em] border-2 bg-n900"
+      className="h-[5em] w-[5em] shrink-0 overflow-hidden rounded-[.7em] border-2 bg-n900"
       style={{ borderColor: rarity.color }}
     >
-      {url && <img src={url} alt={name} className="max-h-full max-w-full object-contain" />}
+      {url && (
+        <img
+          src={url}
+          alt={name}
+          className="h-full w-full object-cover [image-rendering:pixelated]"
+        />
+      )}
     </div>
   )
 }

@@ -15,6 +15,7 @@ import {
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
+import { preloadEspecies, preloadHunt } from '@/data/preload'
 import type { Point } from './types'
 import { pedirAcao, abrirSessaoDeHunt, fecharSessaoDeHunt } from '@/data/remote/autoridade'
 export const controller = {
@@ -40,6 +41,12 @@ export const controller = {
     const activePoke = gameState.team[gameState.activeIndex]
     if (!activePoke) return false
     if (!(await abrirSessaoDeHunt(mapId, activePoke.uid))) return false
+    // Arte de TODA especie do pool na memoria antes de a cena aparecer — senao o
+    // primeiro encontro com cada uma pisca sem sprite enquanto o PNG baixa (ver
+    // data/preload.ts). Tem teto de tempo proprio, entao rede ruim atrasa a
+    // entrada mas nunca a impede. Depois da sessao ja estar aceita de proposito:
+    // se o servidor recusar, nao ha por que gastar banda.
+    await preloadHunt(mapId, { speciesId: activePoke.speciesId, isShiny: activePoke.isShiny })
     gameState.setCurrentMapId(mapId)
     const world = buildMapWorld(mapId, activePoke, useWorldStore.getState())
     useWorldStore.getState().setWorld(world)
@@ -69,12 +76,22 @@ export const controller = {
 
   resetGame(): void {
     const gameState = useGameStateStore.getState()
-    void pedirAcao({ tipo: 'reiniciarJogo' }, () => gameState.resetToDefaults()).then(() => {
-      // Reconstroi a cena so DEPOIS: no caminho do servidor o estado zerado so
-      // chega com a resposta, e montar o mundo antes deixaria o POKE antigo em
-      // campo com a conta ja apagada.
-      useWorldStore.getState().setWorld(buildHospitalWorld(null, { x: 0, y: 0 }))
-    })
+    // Fecha a sessao de hunt ANTES de apagar. Sem isto ela ficava aberta
+    // apontando pro `poke_uid` de um POKE que o reset acabou de destruir, e todo
+    // request seguinte (inclusive escolher o novo inicial) morria no flush
+    // obrigatorio com "o POKE desta sessao nao esta mais na equipe" — o botao
+    // "Iniciar novo jogo" apagava o progresso e deixava a conta travada na tela
+    // de escolha do inicial. O servidor tambem aprendeu a se curar disso (ver
+    // aplicarFlush), mas fechar aqui e o que para o timer de flush de 30s no
+    // cliente.
+    void fecharSessaoDeHunt()
+      .then(() => pedirAcao({ tipo: 'reiniciarJogo' }, () => gameState.resetToDefaults()))
+      .then(() => {
+        // Reconstroi a cena so DEPOIS: no caminho do servidor o estado zerado so
+        // chega com a resposta, e montar o mundo antes deixaria o POKE antigo em
+        // campo com a conta ja apagada.
+        useWorldStore.getState().setWorld(buildHospitalWorld(null, { x: 0, y: 0 }))
+      })
   },
 
   healTeam(): void {
@@ -83,7 +100,18 @@ export const controller = {
     const world = useWorldStore.getState()
     if (world.player) {
       useWorldStore.getState().update((draft) => {
-        if (draft.player) draft.player.poke = { ...draft.player.poke, hp: draft.player.poke.stats.hp }
+        if (!draft.player) return
+        draft.player.poke = { ...draft.player.poke, hp: draft.player.poke.stats.hp }
+        // Repor o HP nao bastava: `fainted`/`state` continuavam em desmaiado.
+        // Bug real reproduzido ao vivo — curar na enfermeira mostrava HP 14/14 e
+        // "Desmaiado!" ao mesmo tempo, e o POKE seguia sem lutar ao entrar numa
+        // hunt (MovementSystem/CombatSystem olham `fainted`, nao o HP). O caminho
+        // do Revive (useItem, abaixo) sempre limpou os dois; a cura do Hospital
+        // era a unica que esquecia.
+        draft.player.fainted = false
+        draft.player.state = 'wander'
+        draft.player.targetId = null
+        draft.player.cooldowns = {}
       })
     }
     useToastStore.getState().pushToast('Equipe curada!', 'success', 'world')
@@ -98,8 +126,14 @@ export const controller = {
     // reordenado ainda nao tinha chegado) e o colocava em campo — o HUD e o
     // sprite ficavam no POKE errado ate a proxima troca de cena. Mesmo padrao de
     // `chooseStarter`: reconstruir/atualizar so no `.then`.
-    void pedirAcao({ tipo: 'definirAtivo', indice: index }, () => gameState.moveTeamIndexToFront(index)).then(() => {
+    void pedirAcao({ tipo: 'definirAtivo', indice: index }, () => gameState.moveTeamIndexToFront(index)).then(async () => {
       const newActivePoke = useGameStateStore.getState().team[0]
+      // Arte da especie nova em cache ANTES de trocar o POKE em campo: sem isto
+      // o sprite trocaria pra "nada desenhado" por alguns frames enquanto o PNG
+      // da especie nova baixa.
+      if (newActivePoke) {
+        await preloadEspecies([{ speciesId: newActivePoke.speciesId, isShiny: newActivePoke.isShiny }])
+      }
       useWorldStore.getState().update((draft) => {
         if (draft.player && newActivePoke) {
           draft.player.poke = newActivePoke
@@ -125,9 +159,12 @@ export const controller = {
     const removed = gameState.team[idx]
     // Mesmo motivo de `setActiveTeamIndex`: sob servidor o time reajustado so
     // chega na resposta, entao a troca do POKE em campo tem que ir pro `.then`.
-    void pedirAcao({ tipo: 'tirarDaEquipe', pokeUid }, () => { gameState.moveTeamToBag(pokeUid) }).then(() => {
+    void pedirAcao({ tipo: 'tirarDaEquipe', pokeUid }, () => { gameState.moveTeamToBag(pokeUid) }).then(async () => {
       if (!wasActive) return
       const newActivePoke = useGameStateStore.getState().team[useGameStateStore.getState().activeIndex]
+      if (newActivePoke) {
+        await preloadEspecies([{ speciesId: newActivePoke.speciesId, isShiny: newActivePoke.isShiny }])
+      }
       useWorldStore.getState().update((draft) => {
         if (draft.player && newActivePoke) {
           draft.player.poke = newActivePoke
@@ -198,12 +235,17 @@ export const controller = {
     }
     void pedirAcao({ tipo: 'evoluirPoke', pokeUid }, () => gameState.updatePokeInstance(pokeUid, () => result.updatedPoke))
     // Se a POKE evoluida esta em campo agora, o world tambem precisa
-    // refletir a nova especie/stats imediatamente.
+    // refletir a nova especie/stats imediatamente. A arte da forma evoluida e
+    // carregada ANTES da troca; `updateAnimations` compara a URL do spritesheet
+    // (nao o nome da animacao), entao o proximo tick ja desenha a especie nova.
     const world = useWorldStore.getState()
     if (world.player && world.player.poke.uid === pokeUid) {
-      useWorldStore.getState().update((draft) => {
-        if (draft.player) draft.player.poke = result.updatedPoke
-      })
+      void preloadEspecies([{ speciesId: result.updatedPoke.speciesId, isShiny: result.updatedPoke.isShiny }])
+        .then(() => {
+          useWorldStore.getState().update((draft) => {
+            if (draft.player && draft.player.poke.uid === pokeUid) draft.player.poke = result.updatedPoke
+          })
+        })
     }
     useToastStore.getState().pushToast(`${shinyPrefix(poke.isShiny)}${previousName} evoluiu para ${result.species.name}!`, 'levelup', 'world')
   },

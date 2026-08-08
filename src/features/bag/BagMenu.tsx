@@ -6,7 +6,7 @@
 // estavel entre renders, entao da pra filtrar o array de verdade — esse
 // workaround nao precisa ser portado.
 import { useMemo, useState } from 'react'
-import { LockSimple, LockSimpleOpen } from '@phosphor-icons/react'
+import { ArrowDown, ArrowUp, LockSimple, LockSimpleOpen, Sparkle } from '@phosphor-icons/react'
 import { pedirAcao } from '@/data/remote/autoridade'
 import { SPECIES, averageIvPercent, type PokeInstance } from '@/data/pokes'
 import { ITEMS } from '@/data/items'
@@ -22,6 +22,7 @@ import { PokeNameTag } from '@/components/shared/PokeNameTag'
 import {
   GameButton, GameCard, GameCheck, GameIconButton, GameInput, GameSelect, SegmentedTabs,
 } from '@/components/game/controls'
+import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
 
 type SortKey = 'rarity' | 'iv' | 'level'
 const SORT_LABELS: Record<SortKey, string> = { rarity: 'Raridade', iv: 'IV', level: 'Nivel' }
@@ -85,6 +86,10 @@ function PokemonsTab() {
       })
   }, [bagPokes, search, sortKey, sortDesc, shinyOnly])
 
+  // Pagina DEPOIS de filtrar/ordenar: a busca continua varrendo a mochila
+  // inteira, so a renderizacao e limitada — ver a nota em Paginacao.tsx.
+  const paginado = usePaginacao(visible)
+
   if (bagPokes.length === 0) return <p className="text-n500">Nenhum POKE na mochila.</p>
 
   const canMove = teamLength < MAX_TEAM_SIZE
@@ -104,15 +109,19 @@ function PokemonsTab() {
           ))}
         </GameSelect>
         <GameButton onClick={() => setSortDesc((d) => !d)} title={sortDesc ? 'Maior primeiro' : 'Menor primeiro'}>
-          {sortDesc ? '↓' : '↑'}
+          {sortDesc ? <ArrowDown /> : <ArrowUp />}
         </GameButton>
-        <GameCheck checked={shinyOnly} onChange={setShinyOnly}>Somente Shiny ✨</GameCheck>
+        <GameCheck checked={shinyOnly} onChange={setShinyOnly}>
+          <span className="inline-flex items-center gap-[.25em]">
+            Somente <Sparkle weight="fill" className="text-shiny" /> Shiny
+          </span>
+        </GameCheck>
       </div>
 
       {visible.length === 0 ? (
         <p className="text-n500">Nenhum POKE encontrado.</p>
       ) : (
-        visible.map((poke) => {
+        paginado.pagina.map((poke) => {
           const species = SPECIES[poke.speciesId]
           return (
             <GameCard
@@ -159,6 +168,8 @@ function PokemonsTab() {
           )
         })
       )}
+
+      <Paginacao estado={paginado} rotulo="POKEs" />
     </div>
   )
 }
@@ -171,12 +182,21 @@ function ItensTab() {
   const fainted = useWorldStore((s) => Boolean(s.player?.fainted))
   const acao = useAcaoPendente()
 
-  const ids = Object.keys(items).filter((id) => items[id] > 0 && ITEMS[id])
+  // Memo pra `usePaginacao` nao recortar um array novo a cada render (o objeto
+  // `items` muda de identidade em todo flush do servidor).
+  const ids = useMemo(
+    () => Object.keys(items).filter((id) => items[id] > 0 && ITEMS[id]),
+    [items],
+  )
+  // A lista de itens tambem pagina: com as 17 Stones + bolas/pocoes/revives ela
+  // ja passa de 30 linhas, cada uma com icone proprio.
+  const paginado = usePaginacao(ids)
+
   if (ids.length === 0) return <p className="text-n500">Nenhum item.</p>
 
   return (
     <div className="flex flex-col gap-[.5em]">
-      {ids.map((itemId) => {
+      {paginado.pagina.map((itemId) => {
         const item = ITEMS[itemId]
         const locked = Boolean(lockedItems[itemId])
         // "Usar" so aparece quando de fato faz alguma coisa AGORA: pocao com o
@@ -220,6 +240,8 @@ function ItensTab() {
           </GameCard>
         )
       })}
+
+      <Paginacao estado={paginado} rotulo="itens" />
     </div>
   )
 }

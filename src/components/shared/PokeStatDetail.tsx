@@ -5,7 +5,8 @@
 // fosse remontado a cada clique de aba, a animacao do GIF reiniciaria do zero.
 import type { ReactNode } from 'react'
 import { expProgressForInstance } from '@/engine/systems/progressionSystem'
-import { getAbility, resolveAbilityCategory } from '@/data/abilities'
+import { getAbility } from '@/data/abilities'
+import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { gen5SpriteUrl } from '@/data/gen5Sprites'
 import { rarityOf } from '@/data/rarity'
 import type { PokeInstance, Species } from '@/data/pokes'

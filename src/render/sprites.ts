@@ -11,6 +11,7 @@
 // tambem `world` pra resolver o id numa entidade de verdade
 // (`resolveEffectOwner`), no lugar de `effect.owner` direto.
 import { directionRowFromFacing } from '@/engine/systems/animationSystem'
+import { hasBattleSprites } from '@/data/battleSprites'
 import { effectProgress } from '@/engine/effect'
 import { SPECIES } from '@/data/pokes'
 import { scaleForSpecies } from '@/data/pokeHeights'
@@ -53,6 +54,31 @@ function getOrLoadImage(url: string): HTMLImageElement {
     imageCache.set(url, img)
   }
   return img
+}
+
+/**
+ * Carrega `url` pro MESMO cache que o desenho usa e resolve quando a imagem
+ * esta pronta (ou falhou). Existe pro sistema de preload (data/preload.ts)
+ * poder aquecer o cache antes de a cena aparecer, sem duplicar o cache: se ele
+ * tivesse um cache proprio, o primeiro frame ainda comecaria um download novo
+ * e o placeholder apareceria de novo — que e justamente o bug.
+ *
+ * Nunca rejeita: sprite faltando e um problema de asset, nao motivo pra travar
+ * a entrada numa hunt.
+ */
+export function primeImage(url: string): Promise<void> {
+  return new Promise((resolve) => {
+    const img = getOrLoadImage(url)
+    if (img.complete) return resolve()
+    img.addEventListener('load', () => resolve(), { once: true })
+    img.addEventListener('error', () => resolve(), { once: true })
+  })
+}
+
+/** A imagem desta URL ja esta decodificada e pronta pra desenhar? */
+export function isImageReady(url: string): boolean {
+  const img = imageCache.get(url)
+  return Boolean(img && img.complete && img.naturalWidth > 0)
 }
 
 function drawPlaceholderShape(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
@@ -199,7 +225,22 @@ export function drawEntity(ctx: CanvasRenderingContext2D, entity: WorldEntity): 
   drawShadow(ctx, entity)
   drawAura(ctx, entity)
   const drewSprite = Boolean(entity.battleAnim) && drawBattleSprite(ctx, entity)
-  if (!drewSprite) drawPlaceholderShape(ctx, entity)
+  // O placeholder geometrico (triangulo/circulo colorido) e pra especie que NAO
+  // TEM arte — nao pra especie cuja arte ainda esta baixando. Antes ele cobria os
+  // dois casos, e por isso todo primeiro encontro com uma especie piscava uma
+  // forma colorida por alguns frames (o bug visual relatado). O preload
+  // (data/preload.ts) aquece o cache antes da cena aparecer; este guard e a
+  // segunda linha de defesa pro caso de o preload nao ter terminado (rede lenta,
+  // respawn de especie nova no meio da hunt): desenhar nada por 2 frames e
+  // melhor que desenhar a coisa errada.
+  //
+  // O teste e `hasBattleSprites` (a especie tem arte no disco?) e nao
+  // `entity.battleAnim` (a animacao ja foi resolvida?), porque `battleAnim` nasce
+  // null em toda entidade e so e preenchido no primeiro tick de
+  // `updateAnimations` — o rAF de desenho e independente do loop de simulacao,
+  // entao o primeiro frame desenhado pode chegar antes disso e piscaria a forma
+  // colorida mesmo com a arte ja em cache.
+  if (!drewSprite && !hasBattleSprites(getSpecies(entity).id)) drawPlaceholderShape(ctx, entity)
 }
 
 const HP_BAR_WIDTH = 32

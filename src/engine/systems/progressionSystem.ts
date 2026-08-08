@@ -16,9 +16,12 @@ import type { GameStateStore, TrainerInfo } from '@/stores/gameStateStore'
 import type { Species } from '@/data/pokes'
 
 const formulaEngine = createFormulaEngine(FORMULAS)
-// 0.28 = pedido explicito do usuario, corte adicional de 30% em cima do
-// corte anterior de -60% (0.4 * 0.7 = 0.28, -72% efetivo da taxa original).
-const XP_GLOBAL_MULTIPLIER = formulaEngine.evalOrDefault('XP_GLOBAL_MULTIPLIER', 0.28)
+// 0.14 = pedido explicito do usuario, corte de 50% em cima do 0.28 anterior
+// (que por sua vez era 0.4 * 0.7). Efetivo: -86% da taxa original da planilha.
+// Este e o unico ponto de multiplicacao de XP do jogo — `expRewardForEnemy`
+// alimenta tanto o XP do POKE quanto o do Treinador (main/simulation somam o
+// mesmo valor nos dois), entao o corte vale pros dois de uma vez.
+const XP_GLOBAL_MULTIPLIER = formulaEngine.evalOrDefault('XP_GLOBAL_MULTIPLIER', 0.14)
 // 0.05 = pedido explicito do usuario: morrer custa 5% do EXP necessario pro
 // NIVEL ATUAL (o "needed" de expProgressForInstance), nao 5% do EXP
 // cumulativo total.

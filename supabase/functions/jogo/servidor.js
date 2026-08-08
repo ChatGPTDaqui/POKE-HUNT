@@ -2315,7 +2315,7 @@ function colorForType(type) {
 //#endregion
 //#region src/data/typedAoeMoves.ts
 var TYPED_AOE_POWER = 70;
-var TYPED_AOE_PP = 15;
+var TYPED_AOE_PP = 7;
 function typedAoeMoveKey(type) {
 	return `aoe50_${type.toLowerCase()}`;
 }
@@ -2379,10 +2379,6 @@ function getAbility(id) {
 }
 function isDamagingAbility(ability) {
 	return !!ability && ability.power > 0;
-}
-function resolveAbilityCategory(ability, pokeInstance) {
-	if (ability.category !== "dynamic") return ability.category;
-	return pokeInstance.stats.atkFis >= pokeInstance.stats.atkEsp ? "physical" : "special";
 }
 //#endregion
 //#region src/data/generated/pokes.generated.ts
@@ -20164,6 +20160,19 @@ function findPath(mapDef, startX, startY, goalX, goalY) {
 	return null;
 }
 //#endregion
+//#region src/data/abilityCategory.ts
+/** O bloco de atributos que este POKE tem (ou tera) exatamente no nivel 50. */
+function statsAtTypedAoeLevel(poke) {
+	const species = SPECIES[poke.speciesId];
+	if (!species) return poke.stats;
+	return computeStatsAtLevel(species, 50, poke.ivs, poke.rarity, poke.isShiny);
+}
+function resolveAbilityCategory(ability, poke) {
+	if (ability.category !== "dynamic") return ability.category;
+	const stats = statsAtTypedAoeLevel(poke);
+	return stats.atkFis >= stats.atkEsp ? "physical" : "special";
+}
+//#endregion
 //#region src/data/generated/typeChart.generated.ts
 var TYPE_CHART = {
 	"NORMAL": {
@@ -35272,7 +35281,7 @@ function updateAnimations(world, dt) {
 			entity.battleAnim = null;
 			continue;
 		}
-		if (!entity.battleAnim || entity.battleAnim.name !== resolved.name) {
+		if (!entity.battleAnim || entity.battleAnim.url !== resolved.url) {
 			entity.battleAnim = resolved;
 			entity.animFrame = 0;
 			entity.animElapsed = 0;
@@ -36036,7 +36045,7 @@ function maybeAutoCatch(rng, gameState, defeatedPoke) {
 //#endregion
 //#region src/engine/systems/progressionSystem.ts
 var formulaEngine$2 = createFormulaEngine(FORMULAS);
-var XP_GLOBAL_MULTIPLIER = formulaEngine$2.evalOrDefault("XP_GLOBAL_MULTIPLIER", .28);
+var XP_GLOBAL_MULTIPLIER = formulaEngine$2.evalOrDefault("XP_GLOBAL_MULTIPLIER", .14);
 var DEATH_EXP_LOSS_PERCENT = formulaEngine$2.evalOrDefault("DEATH_EXP_LOSS_PERCENT", .05);
 function expRewardForEnemy(enemyPoke) {
 	const species = SPECIES[enemyPoke.speciesId];
@@ -59616,7 +59625,13 @@ async function gravarEstado(cfg, userId, estado) {
 	if (removerItens.length) await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${removerItens.join(",")})`);
 	if (linhasItens.length) await inserir(cfg, "player_items", linhasItens, { upsert: "user_id,item_id" });
 	const linhasDex = gameStateToPokedexRows(userId, estado);
+	const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id));
+	const removerDex = (await selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id));
+	if (removerDex.length) await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${removerDex.join(",")})`);
 	if (linhasDex.length) await inserir(cfg, "player_pokedex", linhasDex, { upsert: "user_id,species_id" });
+	const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado);
+	await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}`);
+	if (linhasAuto.length) await inserir(cfg, "player_auto_catch_rules", linhasAuto);
 }
 /**
 * O coracao da Fase D: simula do ultimo flush ate agora e grava.
@@ -59632,7 +59647,7 @@ async function aplicarFlush(cfg, userId, sessao) {
 	const truncado = bruto > MAX_SEGUNDOS_POR_FLUSH;
 	const { store, dados: estado } = criarEstadoDoJogador(await carregarEstado(cfg, userId));
 	const ativo = estado.team.find((p) => p.uid === sessao.poke_uid);
-	if (!ativo) throw new ErroHttp(409, "o POKE desta sessao nao esta mais na equipe");
+	if (!ativo) return null;
 	store.setActiveIndex(estado.team.indexOf(ativo));
 	const rng = restoreRng(Number(sessao.rng_state), Number(sessao.rng_draws));
 	const world = buildMapWorld(sessao.map_id, ativo, {
@@ -59972,6 +59987,39 @@ async function rotear(cfg, req, url) {
 async function sessaoAberta(cfg, userId) {
 	return (await selecionar(cfg, `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*&order=started_at.desc&limit=1`))[0] ?? null;
 }
+async function fecharLinhaDeSessao(cfg, sessaoId) {
+	await atualizar(cfg, `game_sessions?id=eq.${sessaoId}`, { closed_at: (/* @__PURE__ */ new Date()).toISOString() });
+}
+/**
+* Liquida a sessao aberta, se houver, e devolve o resultado.
+*
+* `aplicarFlush` devolve `null` quando o POKE da sessao nao existe mais (conta
+* reiniciada, POKE vendido/liberado). Nesse caso a sessao e insimulavel PRA
+* SEMPRE — a unica saida e fecha-la. Antes isso era um 409, e como TODA rota
+* passa por um flush obrigatorio, uma sessao nesse estado travava a conta
+* inteira: nem escolher um novo inicial funcionava depois de "Iniciar novo
+* jogo".
+*/
+async function liquidarSessaoAberta(cfg, userId) {
+	const sessao = await sessaoAberta(cfg, userId);
+	if (!sessao) return {
+		sessao: null,
+		resultado: null
+	};
+	const resultado = await aplicarFlush(cfg, userId, sessao);
+	if (!resultado) {
+		await fecharLinhaDeSessao(cfg, sessao.id);
+		await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null });
+		return {
+			sessao: null,
+			resultado: null
+		};
+	}
+	return {
+		sessao,
+		resultado
+	};
+}
 async function abrirSessao(cfg, userId, req) {
 	const corpo = await req.json().catch(() => null);
 	const mapId = corpo?.mapId;
@@ -59986,7 +60034,7 @@ async function abrirSessao(cfg, userId, req) {
 	const anterior = await sessaoAberta(cfg, userId);
 	if (anterior) {
 		await aplicarFlush(cfg, userId, anterior);
-		await atualizar(cfg, `game_sessions?id=eq.${anterior.id}`, { closed_at: (/* @__PURE__ */ new Date()).toISOString() });
+		await fecharLinhaDeSessao(cfg, anterior.id);
 	}
 	const semente = randomSeed();
 	const [criada] = await inserir(cfg, "game_sessions", {
@@ -60017,6 +60065,11 @@ async function flush(cfg, userId) {
 	const sessao = await sessaoAberta(cfg, userId);
 	if (!sessao) throw new ErroHttp(409, "nenhuma sessao aberta");
 	const resultado = await aplicarFlush(cfg, userId, sessao);
+	if (!resultado) {
+		await fecharLinhaDeSessao(cfg, sessao.id);
+		await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null });
+		throw new ErroHttp(409, "nenhuma sessao aberta");
+	}
 	return json({
 		segundosCreditados: resultado.segundosCreditados,
 		truncado: resultado.truncado,
@@ -60029,8 +60082,9 @@ async function fechar(cfg, userId) {
 	const sessao = await sessaoAberta(cfg, userId);
 	if (!sessao) return json({ fechada: false });
 	const resultado = await aplicarFlush(cfg, userId, sessao);
-	await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { closed_at: (/* @__PURE__ */ new Date()).toISOString() });
+	await fecharLinhaDeSessao(cfg, sessao.id);
 	await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null });
+	if (!resultado) return json({ fechada: false });
 	return json({
 		fechada: true,
 		resumo: resultado.resumo,
@@ -60041,8 +60095,11 @@ async function fechar(cfg, userId) {
 async function acao(cfg, userId, req) {
 	const corpo = await req.json().catch(() => null);
 	if (!corpo || typeof corpo.tipo !== "string") throw new ErroHttp(400, "informe { tipo }");
-	const sessao = await sessaoAberta(cfg, userId);
-	if (sessao) await aplicarFlush(cfg, userId, sessao);
+	await liquidarSessaoAberta(cfg, userId);
+	if (corpo.tipo === "reiniciarJogo") {
+		const aberta = await sessaoAberta(cfg, userId);
+		if (aberta) await fecharLinhaDeSessao(cfg, aberta.id);
+	}
 	const { store, dados: estado } = criarEstadoDoJogador(await carregarEstado(cfg, userId));
 	const resultado = aplicarAcao(store, estado, corpo);
 	await gravarEstado(cfg, userId, estado);

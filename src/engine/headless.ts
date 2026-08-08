@@ -55,6 +55,6 @@ export { defaultGameStateData } from '@/stores/gameStateStore'
 // bundle sem arrastar o cliente Supabase do navegador junto.
 export {
   snapshotToGameState, gameStateToPlayerRow, gameStateToPokemonRows,
-  gameStateToItemRows, gameStateToPokedexRows,
+  gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
 } from '@/data/remote/playerMapper'
 export type { PlayerSnapshot } from '@/data/remote/playerMapper'
