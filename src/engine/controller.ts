@@ -54,6 +54,18 @@ export const controller = {
     return true
   },
 
+  // Primeira tela de um jogo novo (antes da escolha do inicial). Devolve se o
+  // nome foi aceito — a tela so avanca nesse caso, senao o jogador seguiria pro
+  // inicial achando que registrou um nome que o servidor recusou (ja em uso,
+  // fora do formato). O aviso do erro vem do proprio `pedirAcao`.
+  async definirNomeDoTreinador(nome: string): Promise<boolean> {
+    const gameState = useGameStateStore.getState()
+    return pedirAcao(
+      { tipo: 'definirNomeDoTreinador', nome },
+      () => { gameState.setTrainer({ ...gameState.trainer, name: nome }) },
+    )
+  },
+
   chooseStarter(speciesId: string, hospitalSpot: Point): void {
     const gameState = useGameStateStore.getState()
     if (gameState.team.length > 0) return
@@ -86,7 +98,15 @@ export const controller = {
     // aplicarFlush), mas fechar aqui e o que para o timer de flush de 30s no
     // cliente.
     void fecharSessaoDeHunt()
-      .then(() => pedirAcao({ tipo: 'reiniciarJogo' }, () => gameState.resetToDefaults()))
+      .then(() => pedirAcao({ tipo: 'reiniciarJogo' }, () => {
+        // Espelha o servidor (acoes.ts#reiniciarJogo): o nick sobrevive ao
+        // reset. La isso e obrigatorio (o nick e UNICO no banco e voltar pro
+        // 'Treinador' padrao colide); aqui e so pra os dois caminhos deixarem a
+        // conta no mesmo estado.
+        const nome = gameState.trainer.name
+        gameState.resetToDefaults()
+        useGameStateStore.getState().setTrainer({ ...useGameStateStore.getState().trainer, name: nome })
+      }))
       .then(() => {
         // Reconstroi a cena so DEPOIS: no caminho do servidor o estado zerado so
         // chega com a resposta, e montar o mundo antes deixaria o POKE antigo em

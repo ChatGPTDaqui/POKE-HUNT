@@ -33,12 +33,13 @@ export const MAX_TEAM_SIZE = 6
 // resposta chegar. Divergir dela nao vira exploit, vira um piscar de numeros
 // errados no HUD no primeiro segundo.
 //
-// Pedido explicito do usuario: 100 Poke Ball, 100 Potion, 10 Revive. As
-// outras bolas/pocoes (Great/Ultra/Premier, Super/Hyper/Max, Max Revive)
-// saem da concessao — passam a ser compradas ou dropadas.
+// Pedido explicito do usuario: 200 Poke Ball, 200 Potion (era 100 de cada). O
+// Revive nao foi citado no pedido e fica nos 10 de sempre. As outras
+// bolas/pocoes (Great/Ultra/Premier, Super/Hyper/Max, Max Revive) seguem fora
+// da concessao — sao compradas ou dropadas.
 const STARTING_ITEMS: Record<string, number> = {
-  poke_ball: 100,
-  potion: 100,
+  poke_ball: 200,
+  potion: 200,
   revive: 10,
 }
 

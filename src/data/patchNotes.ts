@@ -13,6 +13,23 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '5.1',
+    date: '2026-08-08',
+    title: 'Novo jogo consertado, level up destravado, economia mais barata e fogo com arte',
+    highlights: [
+      'BUG CORRIGIDO (grave): "Iniciar novo jogo" NAO funcionava. O reset tentava devolver seu nome de treinador pro padrao "Treinador", batia na regra de nome unico e a operacao inteira falhava com erro de servidor — nada era apagado. Agora o nome sobrevive ao reset (ele e sua identidade publica, nao progresso) e o resto e apagado de verdade.',
+      'O reset tambem passou a limpar o que ficava pra tras: anuncios e ordens suas no Mercado, POKE que estava a venda, entregas pendentes e o historico de tempo de jogo. Antes dava pra zerar a conta e continuar com um POKE anunciado, compravel por outra pessoa.',
+      'BUG CORRIGIDO (grave): a barra de EXP do POKE chegava a 100% e o nivel nao subia. A barra media por uma curva e o level up por outra (a que ficou 30% mais cara na versao 5.0), entao faltava sempre um pedaco invisivel. As duas passaram a ser a mesma conta.',
+      'BUG CORRIGIDO: "dou F5 e perco niveis". O que a tela mostra entre uma gravacao e outra e previsao; quem credita e o servidor. Agora todo level-up (do POKE ou do Treinador) forca a gravacao na hora, e ocultar/minimizar a aba tambem grava. A janela em que a tela podia estar adiantada caiu de 30 segundos pra 5.',
+      'CRIACAO DE PERSONAGEM EM DUAS TELAS: o nome do treinador virou a PRIMEIRA tela, e so depois de confirmar vem a escolha do POKE inicial. Vale tambem depois de "Iniciar novo jogo" — antes, recomecar nao dava nenhuma chance de trocar o nome.',
+      'Jogador novo (e conta resetada) comeca com 200 Poke Ball e 200 Potion — era 100 de cada. O Revive segue em 10.',
+      'POCOES E POKEBOLAS 70% MAIS BARATAS: Poke Ball 200 -> 60, Great Ball 600 -> 180, Ultra Ball 1.200 -> 360, Premier Ball 3.000 -> 900, Potion 300 -> 90, e o mesmo corte nas demais pocoes. O preco de VENDA acompanha o desconto de proposito: comprar e revender continua dando prejuizo, como sempre foi.',
+      'VENDA DE POKE VIROU 1.000 + BONUS, em vez de "no minimo 1.000". Antes o piso engolia os bonus ate a formula passar de 1.000 sozinha, e um POKE comum de nivel 40 valia o mesmo que um de nivel 1. Agora nivel, raridade e status somam por cima da base desde o primeiro ponto.',
+      'CHANCE DE APARICAO DAS TERCEIRAS EVOLUCOES FIXADA EM 0,2% em toda hunt (o Dragonite, que tinha 1% por regra propria, entrou nesta). As demais especies dividem o restante mantendo a raridade relativa que ja tinham; a soma de cada hunt continua fechando 100%. Hunts BOSS ficam de fora — la o elenco e a luta.',
+      'FOGO GANHOU ARTE DE VERDADE: golpes do tipo Fogo deixaram de usar o efeito generico e passaram a mostrar uma animacao real — chama em quadros no alvo unico, e explosao seguida de nuvem queimando nos golpes em area, desenhada no tamanho exato da area atingida. Os outros 16 tipos continuam com o efeito colorido por elemento.',
+    ],
+  },
+  {
     version: '5.0',
     date: '2026-08-08',
     title: 'Mercado entre jogadores, Chat Mundo, Correio, Hunt Analyzer e zonas honestas',

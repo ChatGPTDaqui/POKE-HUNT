@@ -20,7 +20,16 @@ const PISO = 1000
 describe('valor de POKE', () => {
   it('nenhuma venda sai abaixo do piso, nem a do POKE mais fraco possivel', () => {
     // Sentret Lv1 comum: o extremo inferior real do jogo (hunt inicial).
-    expect(pokemonSellValue(1, SPECIES.sentret.baseExp, 'comum')).toBe(PISO)
+    expect(pokemonSellValue(1, SPECIES.sentret.baseExp, 'comum')).toBeGreaterThanOrEqual(PISO)
+  })
+
+  // O piso e BASE, nao teto disfarcado: com `max(piso, formula)` todo POKE
+  // abaixo de 1000 valia exatamente igual e nivel nao mudava nada ate a formula
+  // ultrapassar o piso sozinha. Somando, o nivel vale desde o primeiro ponto.
+  it('nivel continua valendo mesmo na faixa em que a formula fica abaixo do piso', () => {
+    const fraco = pokemonSellValue(1, SPECIES.sentret.baseExp, 'comum')
+    const forte = pokemonSellValue(20, SPECIES.sentret.baseExp, 'comum')
+    expect(forte).toBeGreaterThan(fraco)
   })
 
   it('raridade continua valendo acima do piso', () => {

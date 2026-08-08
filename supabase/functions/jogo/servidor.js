@@ -148,6 +148,22 @@ async function atualizarRetornando(cfg, caminho, patch) {
 		body: JSON.stringify(patch)
 	}) ?? [];
 }
+/**
+* Chama uma funcao do Postgres via `POST /rest/v1/rpc/<nome>`.
+*
+* Usado onde a pergunta e do BANCO e nao cabe num filtro: o unico caso hoje e
+* "este nome de treinador esta livre?", que compara por `lower(trainer_name)`.
+* Fazer isso com `ilike` daria falso positivo — `_` e curinga de uma letra em
+* LIKE, e `_` e um caractere valido de nick, entao "ash_1" apareceria como
+* ocupado por causa de um "ashX1" de outra pessoa.
+*/
+async function chamarRpc(cfg, nome, argumentos) {
+	return await pedir$1(cfg, `rpc/${nome}`, {
+		method: "POST",
+		headers: cabecalhos(cfg),
+		body: JSON.stringify(argumentos)
+	});
+}
 async function apagar(cfg, caminho) {
 	await pedir$1(cfg, caminho, {
 		method: "DELETE",
@@ -19440,6 +19456,29 @@ var BOSS_ENCOUNTERS_DATA = {
 	...lance.encounters
 };
 //#endregion
+//#region src/data/evolutionStage.ts
+var PRE_EVOLUCAO = {};
+for (const especie of Object.values(SPECIES)) if (especie.evolvesTo && SPECIES[especie.evolvesTo]) PRE_EVOLUCAO[especie.evolvesTo] = especie.id;
+var PROFUNDIDADE_MAXIMA = 10;
+var CACHE = {};
+/** 1 = forma base, 2 = primeira evolucao, 3+ = segunda evolucao em diante. */
+function evolutionStage(speciesId) {
+	const memo = CACHE[speciesId];
+	if (memo != null) return memo;
+	let estagio = 1;
+	let atual = speciesId;
+	while (PRE_EVOLUCAO[atual] && estagio < PROFUNDIDADE_MAXIMA) {
+		atual = PRE_EVOLUCAO[atual];
+		estagio += 1;
+	}
+	CACHE[speciesId] = estagio;
+	return estagio;
+}
+/** "Pokemon de 3a evolucao" no sentido do jogador: o fim de uma cadeia de tres. */
+function isTerceiraEvolucao(speciesId) {
+	return evolutionStage(speciesId) >= 3;
+}
+//#endregion
 //#region src/data/regions.ts
 var LAST_KANTO_DEX = 151;
 var DEX_RE = /Nº\s*(\d+)/;
@@ -19535,7 +19574,6 @@ var SPECIES_BIOME_OVERRIDE = {
 	quagsire: "GROUND"
 };
 var MIN_TYPE_POOL = 4;
-var DRAGONITE_HUNT_SHARE = .01;
 var BASE_STARTERS = /* @__PURE__ */ new Set([
 	"charmander",
 	"squirtle",
@@ -19608,11 +19646,15 @@ for (const base of Object.values(MAPS_DATA)) {
 		};
 	}
 }
+var SHARE_TERCEIRA_EVOLUCAO = .002;
 for (const map of Object.values(maps)) {
-	const dragoniteEncId = map.enemyPool.find((id) => encounters[id]?.speciesId === "dragonite");
-	if (!dragoniteEncId) continue;
-	const othersWeight = map.enemyPool.filter((id) => id !== dragoniteEncId).reduce((sum, id) => sum + (encounters[id]?.weight ?? 0), 0);
-	if (othersWeight > 0) encounters[dragoniteEncId].weight = othersWeight * DRAGONITE_HUNT_SHARE / .99;
+	const fixos = map.enemyPool.filter((id) => isTerceiraEvolucao(encounters[id].speciesId));
+	if (!fixos.length) continue;
+	const pesoDosOutros = map.enemyPool.filter((id) => !fixos.includes(id)).reduce((soma, id) => soma + encounters[id].weight, 0);
+	const denominador = 1 - SHARE_TERCEIRA_EVOLUCAO * fixos.length;
+	if (pesoDosOutros <= 0 || denominador <= 0) continue;
+	const peso = SHARE_TERCEIRA_EVOLUCAO * pesoDosOutros / denominador;
+	for (const id of fixos) encounters[id].weight = peso;
 }
 var nightmare = buildNightmareMirror(maps, encounters);
 var MAPS = {
@@ -19790,13 +19832,17 @@ var STONE_ITEMS = Object.fromEntries(STONE_TYPES.map((type) => {
 //#region src/data/items.ts
 var formulaEngine$5 = createFormulaEngine(FORMULAS);
 var SELL_FRACTION = formulaEngine$5.eval("SELL_ITEM_FRACTION");
+var DESCONTO_BOLA_POCAO = formulaEngine$5.evalOrDefault("BALL_POTION_BUY_DISCOUNT", .7);
+var KINDS_COM_DESCONTO = /* @__PURE__ */ new Set(["ball", "potion"]);
 var GENERATED_ITEMS = Object.fromEntries(Object.entries(ITEMS_DATA).map(([key, item]) => {
+	const buyPrice = KINDS_COM_DESCONTO.has(item.kind) ? Math.max(1, Math.round(item.buyPrice * (1 - DESCONTO_BOLA_POCAO))) : item.buyPrice;
 	const sellPrice = Math.max(1, Math.round(formulaEngine$5.eval("SELL_ITEM_PRICE", {
-		buyPrice: item.buyPrice,
+		buyPrice,
 		sellFraction: SELL_FRACTION
 	})));
 	return [key, {
 		...item,
+		buyPrice,
 		sellPrice
 	}];
 }));
@@ -36301,8 +36347,8 @@ function expRewardForEnemy(enemyPoke) {
 	return Math.max(1, Math.round(base * XP_GLOBAL_MULTIPLIER));
 }
 function expProgressForInstance(pokeInstance, species) {
-	const currentBase = totalExpForLevel(pokeInstance.level, species.growthCurve);
-	const nextTotal = totalExpForLevel(pokeInstance.level + 1, species.growthCurve);
+	const currentBase = pokeExpForLevel(pokeInstance.level, species.growthCurve);
+	const nextTotal = pokeExpForLevel(pokeInstance.level + 1, species.growthCurve);
 	return {
 		into: pokeInstance.exp - currentBase,
 		needed: Math.max(1, nextTotal - currentBase)
@@ -36476,8 +36522,18 @@ function pokemonBaseValue(level, baseExp, rarityKey) {
 	const multiplier = (rarityKey && RARITIES[rarityKey] || RARITIES.comum).sellMultiplier;
 	return Math.max(1, Math.floor(base * multiplier));
 }
+/**
+* Preco de venda: BASE + modificadores, nao `max(BASE, modificadores)`.
+*
+* A diferenca e o pedido explicito desta leva. Com `max`, os 1000 de piso
+* ENGOLIAM todo o resto ate a formula passar de 1000 sozinha — na pratica um
+* POKE comum de nivel 40 valia o mesmo que um de nivel 1, e nivel/raridade so
+* comecavam a valer bem depois. Somando, cada modificador continua rendendo
+* desde o primeiro nivel e o piso vira o que ele diz ser: o valor de um POKE
+* sem nenhum diferencial.
+*/
 function pokemonSellValue(level, baseExp, rarityKey) {
-	return Math.max(MIN_POKEMON_SELL_VALUE, pokemonBaseValue(level, baseExp, rarityKey));
+	return MIN_POKEMON_SELL_VALUE + pokemonBaseValue(level, baseExp, rarityKey);
 }
 function awardKillLoot(rng, gameState, enemy, mapDef) {
 	const species = SPECIES[enemy.poke.speciesId];
@@ -59327,8 +59383,8 @@ var postgresStorage = {
 	removeItem: () => {}
 };
 var STARTING_ITEMS = {
-	poke_ball: 100,
-	potion: 100,
+	poke_ball: 200,
+	potion: 200,
 	revive: 10
 };
 var DEFAULT_AUTO_POT_RULES = [{
@@ -60215,6 +60271,9 @@ var STARTERS_PERMITIDOS = /* @__PURE__ */ new Set([
 	"squirtle",
 	"bulbasaur"
 ]);
+var MIN_NICK = 3;
+var MAX_NICK = 16;
+var NICK_VALIDO = /^[A-Za-z0-9_]+$/;
 var inteiroPositivo = (v, padrao = 1) => {
 	const n = Number(v ?? padrao);
 	if (!Number.isInteger(n) || n <= 0 || n > 1e6) throw new ErroHttp(400, "quantidade invalida");
@@ -60250,10 +60309,25 @@ var MANIPULADORES = {
 			mensagem: `${SPECIES[speciesId].name} entrou na sua equipe!`
 		};
 	},
+	definirNomeDoTreinador(store, estado, acao) {
+		const nome = texto$2(acao.nome, "nome").trim();
+		if (nome.length < MIN_NICK || nome.length > MAX_NICK || !NICK_VALIDO.test(nome)) throw new ErroHttp(400, `O nome precisa ter de ${MIN_NICK} a ${MAX_NICK} caracteres, so letras, numeros e _.`);
+		if (estado.team.length > 0 || estado.bagPokes.length > 0) throw new ErroHttp(409, "O nome do treinador so pode ser escolhido antes do primeiro POKE.");
+		store.setTrainer({
+			...estado.trainer,
+			name: nome
+		});
+		return {
+			ok: true,
+			mensagem: `Bem-vindo, ${nome}!`
+		};
+	},
 	reiniciarJogo(store, estado) {
+		const nome = estado.trainer.name;
 		const zerado = defaultGameStateData();
 		const alvo = estado;
 		for (const chave of Object.keys(zerado)) alvo[chave] = structuredClone(zerado[chave]);
+		estado.trainer.name = nome;
 		return {
 			ok: true,
 			mensagem: "Progresso apagado. Escolha um novo inicial."
@@ -60871,6 +60945,15 @@ async function marcarLida(cfg, userId, mensagemId) {
 	return { ok: true };
 }
 //#endregion
+//#region server/src/reiniciar.ts
+async function limparMundoDoJogador(cfg, userId) {
+	await apagar(cfg, `market_listings?seller_id=eq.${userId}`);
+	await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&location=eq.market`);
+	await apagar(cfg, `market_orders?user_id=eq.${userId}`);
+	await apagar(cfg, `market_deliveries?user_id=eq.${userId}`);
+	await apagar(cfg, `game_sessions?user_id=eq.${userId}`);
+}
+//#endregion
 //#region server/src/app.ts
 function json(dado, status = 200) {
 	return new Response(JSON.stringify(dado), {
@@ -61048,8 +61131,17 @@ async function acao(cfg, userId, req) {
 	if (corpo.tipo === "reiniciarJogo") {
 		const aberta = await sessaoAberta(cfg, userId);
 		if (aberta) await fecharLinhaDeSessao(cfg, aberta.id);
+		await limparMundoDoJogador(cfg, userId);
 	}
-	const { store, dados: estado } = criarEstadoDoJogador(await carregarEstadoParaEscrita(cfg, userId));
+	const dados = await carregarEstadoParaEscrita(cfg, userId);
+	if (corpo.tipo === "definirNomeDoTreinador" && typeof corpo.nome === "string") {
+		const nome = corpo.nome.trim();
+		const meuNome = dados.trainer.name.toLowerCase();
+		if (nome.toLowerCase() !== meuNome) {
+			if (await chamarRpc(cfg, "nome_de_treinador_disponivel", { nome }) === false) throw new ErroHttp(409, `O nome "${nome}" ja esta em uso. Escolha outro.`);
+		}
+	}
+	const { store, dados: estado } = criarEstadoDoJogador(dados);
 	const resultado = aplicarAcao(store, estado, corpo);
 	await gravarEstado(cfg, userId, estado);
 	return json({

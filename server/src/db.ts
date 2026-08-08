@@ -166,6 +166,24 @@ export async function atualizarRetornando<T>(cfg: Config, caminho: string, patch
   return (dado ?? []) as T[]
 }
 
+/**
+ * Chama uma funcao do Postgres via `POST /rest/v1/rpc/<nome>`.
+ *
+ * Usado onde a pergunta e do BANCO e nao cabe num filtro: o unico caso hoje e
+ * "este nome de treinador esta livre?", que compara por `lower(trainer_name)`.
+ * Fazer isso com `ilike` daria falso positivo — `_` e curinga de uma letra em
+ * LIKE, e `_` e um caractere valido de nick, entao "ash_1" apareceria como
+ * ocupado por causa de um "ashX1" de outra pessoa.
+ */
+export async function chamarRpc<T>(cfg: Config, nome: string, argumentos: unknown): Promise<T> {
+  const dado = await pedir(cfg, `rpc/${nome}`, {
+    method: 'POST',
+    headers: cabecalhos(cfg),
+    body: JSON.stringify(argumentos),
+  })
+  return dado as T
+}
+
 export async function apagar(cfg: Config, caminho: string): Promise<void> {
   await pedir(cfg, caminho, { method: 'DELETE', headers: cabecalhos(cfg, { Prefer: 'return=minimal' }) })
 }

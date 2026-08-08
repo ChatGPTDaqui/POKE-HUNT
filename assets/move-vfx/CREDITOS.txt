@@ -1,0 +1,16 @@
+Arte de efeito de golpe.
+
+fire/  — Dungeon Crawl Stone Soup, crawl-ref/source/rltiles/effect
+         https://github.com/crawl/crawl
+
+  flame0.png, flame1.png, flame2.png   -> impacto de alvo unico (3 quadros)
+  fire_storm0.png                      -> primeiro quadro do AOE (o estouro)
+  cloud_fire2/1/0.png                  -> AOE queimando e apagando
+
+Licenca, conforme crawl-ref/source/rltiles/license.txt do proprio repositorio:
+
+  "Part of the graphic tiles used in this program are from the public
+   domain roguelike tileset "RLTiles". Some of the tiles have been modified.
+   You can find the original tileset at: http://rltiles.sf.net"
+
+Arquivos copiados sem modificacao. Todos 32x32.

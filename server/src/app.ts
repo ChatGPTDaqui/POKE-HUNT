@@ -6,7 +6,7 @@
 // de hospedagem continua aberta (ver CLAUDE.md, Fase D) e este desenho e o que
 // mantem ela aberta de graca. Sao 4 rotas; framework nao pagaria seu custo.
 import { autenticar } from './auth.js'
-import { ErroHttp, selecionar, inserir, atualizar, type Config } from './db.js'
+import { ErroHttp, selecionar, inserir, atualizar, chamarRpc, type Config } from './db.js'
 import { aplicarFlush, carregarEstado, carregarEstadoParaEscrita, gravarEstado, type LinhaSessao } from './progresso.js'
 import { aplicarAcao, type Acao } from './acoes.js'
 import {
@@ -17,6 +17,7 @@ import {
   lerChat, enviarChat, caixaDeEntrada, pedirAmizade, responderPedido, marcarLida,
 } from './social.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
+import { limparMundoDoJogador } from './reiniciar.js'
 import {
   perfilDoJogador, rankingDeTreinadores, rankingDePokemon, hallDaFama,
   ehCriterioPoke, CONQUISTA_LANCE,
@@ -273,12 +274,37 @@ async function acao(cfg: OpcoesApp, userId: string, req: Request): Promise<Respo
   // `reiniciarJogo` destroi o POKE que qualquer sessao aberta esta usando, entao
   // a sessao tem que morrer JUNTO — deixa-la aberta apontando pra um POKE
   // inexistente era o que travava a conta depois de "Iniciar novo jogo".
+  //
+  // `limparMundoDoJogador` cuida do resto que o `gravarEstado` nao alcanca
+  // (Mercado, entregas, historico de sessao) — ver o cabecalho de reiniciar.ts.
+  // Roda ANTES da acao: o estado que vai ser gravado logo abaixo ja e o zerado,
+  // e apagar depois deixaria uma janela em que a conta esta zerada mas o POKE
+  // anunciado ainda esta a venda.
   if (corpo.tipo === 'reiniciarJogo') {
     const aberta = await sessaoAberta(cfg, userId)
     if (aberta) await fecharLinhaDeSessao(cfg, aberta.id)
+    await limparMundoDoJogador(cfg, userId)
   }
 
   const dados = await carregarEstadoParaEscrita(cfg, userId)
+
+  // Unicidade do nick: pergunta de BANCO, entao nao cabe em `aplicarAcao` (que e
+  // sincrona e pura por desenho). Sem esta checagem, escolher um nome ocupado
+  // batia no indice unico `players_trainer_name_unico` e voltava como 502
+  // "falha ao falar com o banco" — erro de servidor pra um erro de jogador.
+  //
+  // Reescolher o proprio nome atual e permitido: a RPC responde "ocupado" pra
+  // ele (o dono e o proprio), e recusar seria dizer que o nome que a tela ja
+  // mostra e invalido.
+  if (corpo.tipo === 'definirNomeDoTreinador' && typeof corpo.nome === 'string') {
+    const nome = corpo.nome.trim()
+    const meuNome = dados.trainer.name.toLowerCase()
+    if (nome.toLowerCase() !== meuNome) {
+      const livre = await chamarRpc<boolean>(cfg, 'nome_de_treinador_disponivel', { nome })
+      if (livre === false) throw new ErroHttp(409, `O nome "${nome}" ja esta em uso. Escolha outro.`)
+    }
+  }
+
   const { store, dados: estado } = criarEstadoDoJogador(dados)
   const resultado = aplicarAcao(store, estado, corpo)
   await gravarEstado(cfg, userId, estado)

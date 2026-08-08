@@ -33,9 +33,20 @@ export function expRewardForEnemy(enemyPoke: PokeInstance): number {
   return Math.max(1, Math.round(base * XP_GLOBAL_MULTIPLIER))
 }
 
+// BUG REAL CORRIGIDO (relatado como "a barra chega a 100% e o level up nao
+// dispara"): esta funcao — que E a barra de EXP — continuou medindo pela curva
+// CRUA (`totalExpForLevel`) depois que o requisito de nivel do POKE ganhou o
+// multiplicador de +30% (`pokeExpForLevel`, leva anterior). O `grantExp` abaixo
+// sobe de nivel em `pokeExpForLevel(level+1)`, entao a barra enchia 30% antes
+// do limiar real e ficava parada em 100% ate o POKE juntar o resto. Nao era
+// arredondamento nem `>` vs `>=`: eram duas curvas diferentes.
+//
+// Regra que fecha isso pra sempre: TODO calculo de progresso de POKE passa por
+// `pokeExpForLevel`; `totalExpForLevel` cru so serve pro Treinador, que nao tem
+// o multiplicador.
 export function expProgressForInstance(pokeInstance: PokeInstance, species: Species): { into: number; needed: number } {
-  const currentBase = totalExpForLevel(pokeInstance.level, species.growthCurve)
-  const nextTotal = totalExpForLevel(pokeInstance.level + 1, species.growthCurve)
+  const currentBase = pokeExpForLevel(pokeInstance.level, species.growthCurve)
+  const nextTotal = pokeExpForLevel(pokeInstance.level + 1, species.growthCurve)
   return { into: pokeInstance.exp - currentBase, needed: Math.max(1, nextTotal - currentBase) }
 }
 

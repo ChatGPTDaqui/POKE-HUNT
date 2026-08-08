@@ -8,6 +8,7 @@
 import { useGameStateStore, type GameStateData } from '@/stores/gameStateStore'
 import { useToastStore } from '@/stores/toastStore'
 import { servidor, servidorAtivo, ErroServidor, type RespostaFlush } from './servidor'
+import { flushAgora } from './gameStatePersistence'
 
 /** Substitui o estado local pelo que o servidor considera verdade. */
 export function aplicarEstadoDoServidor(estado: unknown): void {
@@ -129,6 +130,43 @@ export async function liquidar(): Promise<void> {
 export function pararFlushPeriodico(): void {
   if (timerFlush) clearInterval(timerFlush)
   timerFlush = null
+}
+
+// Intervalo minimo entre dois commits FORCADOS (level-up, aba sendo ocultada).
+// Sem ele, um POKE de nivel baixo — que sobe de nivel a cada poucos abates —
+// dispararia uma chamada de rede por segundo.
+const INTERVALO_MINIMO_COMMIT_MS = 5000
+let ultimoCommit = 0
+
+/**
+ * Grava o progresso AGORA, sem esperar o ciclo normal.
+ *
+ * Existe por causa do bug relatado como "dou F5 e perco niveis". Sob autoridade
+ * do servidor a simulacao local e PREDICAO: quem credita e o servidor, no flush,
+ * re-simulando o intervalo com a sequencia de sorteio dele. Entre dois flushes
+ * (30s) a predicao local pode ter subido um nivel que a verdade ainda nao tem —
+ * e um F5 nesse intervalo faz o nivel "voltar". Nada de tempo se perde (o
+ * relogio de referencia vive no banco), mas o jogador ve um numero regredir, que
+ * e indistinguivel de perda de progresso.
+ *
+ * Forcar o commit no momento do level-up encurta essa janela de 30s pra este
+ * intervalo minimo: a reconciliacao acontece junto do evento, nao meio minuto
+ * depois.
+ *
+ * Sem servidor configurado, faz o equivalente local: descarrega a escrita
+ * debounced (3s) do adaptador de persistencia na hora.
+ */
+export async function commitAgora(): Promise<void> {
+  const agora = Date.now()
+  if (agora - ultimoCommit < INTERVALO_MINIMO_COMMIT_MS) return
+  ultimoCommit = agora
+  if (servidorAtivo()) {
+    // So faz sentido com uma sessao de hunt aberta; fora dela o `liquidar`
+    // devolve 409 e e ignorado (ver o catch la dentro).
+    await liquidar()
+    return
+  }
+  await flushAgora()
 }
 
 export async function fecharSessaoDeHunt(): Promise<void> {

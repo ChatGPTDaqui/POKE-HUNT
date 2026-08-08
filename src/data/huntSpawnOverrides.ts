@@ -41,6 +41,7 @@ import { ENCOUNTERS_DATA } from './generated/enemies.generated'
 import { buildNightmareMirror, BOSS_MAPS_DATA, BOSS_ENCOUNTERS_DATA } from './nightmareMaps'
 import { SPECIES_DATA } from './generated/pokes.generated'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
+import { isTerceiraEvolucao } from './evolutionStage'
 import { NON_WILD_SPECIES, REGIONS, REGION_LABEL, pokedexNumber, regionOfSpecies, type Region } from './regions'
 import type { ElementType } from './generated/types'
 import type { HuntMapDef, HuntEncounter } from './huntTypes'
@@ -163,9 +164,6 @@ const SPECIES_BIOME_OVERRIDE: Record<string, ElementType> = {
 // Penhascos (FLYING nao e tipo primario de NINGUEM em Gen1/Gen2, fato real
 // do dado) nasceriam vazios.
 const MIN_TYPE_POOL = 4
-
-// 1% exato pro Dragonite nas Ruinas Ancestrais (pedido explicito anterior).
-const DRAGONITE_HUNT_SHARE = 0.01
 
 // ---------------------------------------------------------------------------
 // Elenco elegivel
@@ -299,18 +297,39 @@ for (const base of Object.values(MAPS_DATA)) {
   }
 }
 
-// Dragonite fica em exatamente 1% do pool das Ruinas Ancestrais. A conta sai
-// do peso dos OUTROS (weightedPick usa `peso / soma dos pesos`), nao de um
-// numero fixo: continua 1% mesmo se o resto do pool mudar.
+// ---------------------------------------------------------------------------
+// Chance FIXA de aparicao
+// ---------------------------------------------------------------------------
+// Pedido explicito: todo POKE de 3a evolucao aparece em exatamente 0,2% da
+// hunt. Antes, o peso vinha do tier real do Gen1/Gen2 (`WEIGHT_BY_SPECIES`) e
+// uma forma final podia ocupar dezenas de por cento de um pool pequeno.
+//
+// A conta sai do peso dos OUTROS, e nao de um numero absoluto: `weightedPick`
+// usa `peso / soma dos pesos`, entao um peso fixo mudaria de significado toda
+// vez que o pool mudasse. Com N especies fixadas em `s` cada uma e soma `S` no
+// resto:  w / (S + N*w) = s  =>  w = s*S / (1 - N*s).
+//
+// Isto SUBSTITUI o 1% que o Dragonite tinha por pedido anterior — ele e uma 3a
+// evolucao e cai na regra nova, que e mais recente e mais geral.
+const SHARE_TERCEIRA_EVOLUCAO = 0.002
+
 for (const map of Object.values(maps)) {
-  const dragoniteEncId = map.enemyPool.find((id) => encounters[id]?.speciesId === 'dragonite')
-  if (!dragoniteEncId) continue
-  const othersWeight = map.enemyPool
-    .filter((id) => id !== dragoniteEncId)
-    .reduce((sum, id) => sum + (encounters[id]?.weight ?? 0), 0)
-  if (othersWeight > 0) {
-    encounters[dragoniteEncId].weight = (othersWeight * DRAGONITE_HUNT_SHARE) / (1 - DRAGONITE_HUNT_SHARE)
-  }
+  const fixos = map.enemyPool.filter((id) => isTerceiraEvolucao(encounters[id].speciesId))
+  if (!fixos.length) continue
+
+  const pesoDosOutros = map.enemyPool
+    .filter((id) => !fixos.includes(id))
+    .reduce((soma, id) => soma + encounters[id].weight, 0)
+
+  // Hunt composta SO de formas finais (ou onde as fixas somariam 100%): nao
+  // existe peso que de 0,2% pra cada uma — o resto do pool e que paga essa
+  // conta. Deixa os pesos originais e segue; forcar aqui produziria uma hunt
+  // com soma de chances diferente de 100%, que e pior que a chance "errada".
+  const denominador = 1 - SHARE_TERCEIRA_EVOLUCAO * fixos.length
+  if (pesoDosOutros <= 0 || denominador <= 0) continue
+
+  const peso = (SHARE_TERCEIRA_EVOLUCAO * pesoDosOutros) / denominador
+  for (const id of fixos) encounters[id].weight = peso
 }
 
 // Espelho do Modo Pesadelo tirado do resultado ACIMA (ja recortado por

@@ -21,7 +21,7 @@ const STONE_DROP_CHANCE = formulaEngine.evalOrDefault('STONE_DROP_CHANCE', 0.05)
 const KILL_GOLD_MULTIPLIER = formulaEngine.evalOrDefault('KILL_GOLD_MULTIPLIER', 5)
 const GOLD_GLOBAL_MULTIPLIER = formulaEngine.evalOrDefault('GOLD_GLOBAL_MULTIPLIER', 1)
 
-// Piso do preco de venda de POKE. Editavel pela planilha como todo knob de
+// Base do preco de venda de POKE. Editavel pela planilha como todo knob de
 // economia (`evalOrDefault`), com o valor pedido como fallback.
 const MIN_POKEMON_SELL_VALUE = formulaEngine.evalOrDefault('MIN_POKEMON_SELL_VALUE', 1000)
 
@@ -42,8 +42,18 @@ function pokemonBaseValue(level: number, baseExp: number, rarityKey?: RarityKey)
   return Math.max(1, Math.floor(base * multiplier))
 }
 
+/**
+ * Preco de venda: BASE + modificadores, nao `max(BASE, modificadores)`.
+ *
+ * A diferenca e o pedido explicito desta leva. Com `max`, os 1000 de piso
+ * ENGOLIAM todo o resto ate a formula passar de 1000 sozinha — na pratica um
+ * POKE comum de nivel 40 valia o mesmo que um de nivel 1, e nivel/raridade so
+ * comecavam a valer bem depois. Somando, cada modificador continua rendendo
+ * desde o primeiro nivel e o piso vira o que ele diz ser: o valor de um POKE
+ * sem nenhum diferencial.
+ */
 export function pokemonSellValue(level: number, baseExp: number, rarityKey?: RarityKey): number {
-  return Math.max(MIN_POKEMON_SELL_VALUE, pokemonBaseValue(level, baseExp, rarityKey))
+  return MIN_POKEMON_SELL_VALUE + pokemonBaseValue(level, baseExp, rarityKey)
 }
 
 export interface KillLoot {

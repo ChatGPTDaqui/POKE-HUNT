@@ -21,6 +21,7 @@ import { AURA_COLORS } from '@/data/auraColors'
 import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
 import { impactShapeForType, type ImpactShape } from '@/data/impactShapes'
 import { CAPTURE_ANIM_URL, CAPTURE_ANIM_FRAME_DURATION, captureAnimFrameRect } from '@/data/captureAnim'
+import { vfxDoElemento } from '@/data/elementVfx'
 import type { Species } from '@/data/pokes'
 import type { WorldEntity, WorldEffect, WorldState } from '@/engine/types'
 import type { MapBackground } from '@/data/generated/types'
@@ -470,7 +471,53 @@ function drawShapeParticle(ctx: CanvasRenderingContext2D, shape: ImpactShape, si
   }
 }
 
+// Multiplicadores de tamanho da arte real em relacao ao efeito procedural que
+// ela substitui. Os quadros do Crawl sao 32x32 com margem transparente
+// generosa; desenhados no tamanho cru, o fogo fica visivelmente menor que o
+// burst procedural do mesmo golpe.
+const ESCALA_VFX_SINGLE = 1.6
+const ESCALA_VFX_AOE = 1.15
+
+/**
+ * Desenha a animacao de arte real de um efeito, se o tipo dele tiver arte E ela
+ * ja estiver decodificada.
+ *
+ * Devolve `false` quando nao ha o que desenhar — e ai quem chamou segue com o
+ * desenho procedural. Isso NAO e so fallback de erro: e o caminho de 16 dos 17
+ * tipos (so FOGO tem arte hoje) e tambem o do primeiro golpe enquanto o PNG
+ * ainda baixa. Sem a checagem de "pronto", o primeiro Ember de uma sessao
+ * apareceria sem efeito nenhum.
+ */
+function drawVfxDeElemento(
+  ctx: CanvasRenderingContext2D,
+  effect: WorldEffect,
+  quadros: string[],
+  tamanho: number,
+): boolean {
+  if (!quadros.length) return false
+  const progress = effectProgress(effect)
+  // A animacao ocupa a vida inteira do efeito: a duracao ja e diferente entre
+  // single (0.35s) e AOE (0.55s), entao amarrar o passo ao progresso mantem as
+  // duas terminando junto com o proprio efeito, sem constante de fps nova.
+  const indice = Math.min(quadros.length - 1, Math.floor(progress * quadros.length))
+  const url = quadros[indice]
+  if (!isImageReady(url)) return false
+
+  const fade = progress < HOLD_PORTION ? 1 : 1 - (progress - HOLD_PORTION) / (1 - HOLD_PORTION)
+  ctx.save()
+  ctx.globalAlpha = Math.max(0, Math.min(1, fade))
+  ctx.imageSmoothingEnabled = false
+  ctx.drawImage(getOrLoadImage(url), effect.targetX! - tamanho / 2, effect.targetY! - tamanho / 2, tamanho, tamanho)
+  ctx.restore()
+  return true
+}
+
 function drawImpactBurst(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
+  const arte = vfxDoElemento(effect.elementType)
+  if (arte && drawVfxDeElemento(ctx, effect, arte.single, (effect.worldSize || IMPACT_BASE_SIZE) * ESCALA_VFX_SINGLE)) {
+    return
+  }
+
   const x = effect.targetX!
   const y = effect.targetY!
   const color = effect.color
@@ -513,6 +560,12 @@ function drawImpactBurst(ctx: CanvasRenderingContext2D, effect: WorldEffect): vo
 }
 
 function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
+  // `worldSize` e o DIAMETRO real da area de efeito (ability.radius * 2), entao
+  // a arte sai exatamente do tamanho do que o golpe atinge — a mesma regra que
+  // o anel procedural ja seguia.
+  const arte = vfxDoElemento(effect.elementType)
+  if (arte && drawVfxDeElemento(ctx, effect, arte.aoe, effect.worldSize! * ESCALA_VFX_AOE)) return
+
   const x = effect.targetX!
   const y = effect.targetY!
   const color = effect.color

@@ -10,6 +10,7 @@ import { MAPS, ENCOUNTERS } from './huntSpawnOverrides'
 import { SPECIES_DATA } from './generated/pokes.generated'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
 import { NON_WILD_SPECIES, regionOfSpecies } from './regions'
+import { isTerceiraEvolucao } from './evolutionStage'
 
 const BASE_STARTERS = ['charmander', 'squirtle', 'bulbasaur']
 
@@ -139,6 +140,31 @@ describe('hunts', () => {
       const soma = map.enemyPool.reduce((s, id) => s + (ENCOUNTERS[id].weight / total) * 100, 0)
       expect(soma, `${map.id}`).toBeCloseTo(100, 6)
     }
+  })
+
+  // Pedido explicito: 0,2% exatos. E um numero facil de quebrar sem perceber —
+  // qualquer mexida no peso base de uma especie (`spawn-tiers.json`) ou no pool
+  // de uma hunt muda o denominador, e a chance so seria "quase" 0,2% de novo.
+  it('todo POKE de 3a evolucao aparece em exatamente 0,2% da hunt', () => {
+    const erros: string[] = []
+    for (const map of Object.values(MAPS)) {
+      // Hunts BOSS (inclusive a do Campeao Lance) ficam de fora: la a "chance
+      // de aparicao" nao existe — o elenco E a luta, com os POKEs escolhidos a
+      // mao. Aplicar 0,2% ali significaria 99,8% de nada aparecer.
+      if (map.id.startsWith('boss_')) continue
+      const total = map.enemyPool.reduce((s, id) => s + ENCOUNTERS[id].weight, 0)
+      const fixos = map.enemyPool.filter((id) => isTerceiraEvolucao(ENCOUNTERS[id].speciesId))
+      // Hunt so de formas finais nao tem como dar 0,2% pra cada uma (ver a nota
+      // em huntSpawnOverrides): fica de fora da checagem, de proposito.
+      if (!fixos.length || fixos.length === map.enemyPool.length) continue
+      for (const id of fixos) {
+        const chance = (ENCOUNTERS[id].weight / total) * 100
+        if (Math.abs(chance - 0.2) > 1e-6) {
+          erros.push(`${map.id}/${ENCOUNTERS[id].speciesId} = ${chance.toFixed(4)}%`)
+        }
+      }
+    }
+    expect(erros).toEqual([])
   })
 
   it('a hunt inicial sai 80% nivel 1 e 20% nivel 2', () => {

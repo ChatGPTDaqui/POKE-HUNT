@@ -27,6 +27,12 @@ const STARTER_RARITY = 'comum'
 const STARTER_IVS = { hp: 23, atkFis: 23, atkEsp: 23, def: 23, defEsp: 23, speed: 23 }
 const STARTERS_PERMITIDOS = new Set(['charmander', 'squirtle', 'bulbasaur'])
 
+// Mesmos limites do cadastro (src/features/auth/AuthForm.tsx) e do trigger
+// `handle_new_user`. O cliente valida por UX; quem barra de verdade e aqui.
+const MIN_NICK = 3
+const MAX_NICK = 16
+const NICK_VALIDO = /^[A-Za-z0-9_]+$/
+
 export interface Acao {
   tipo: string
   [k: string]: unknown
@@ -86,6 +92,32 @@ const MANIPULADORES: Record<string, Manipulador> = {
     return { ok: true, mensagem: `${SPECIES[speciesId].name} entrou na sua equipe!` }
   },
 
+  // Nome do treinador — escolhido na PRIMEIRA tela de um jogo novo, antes do
+  // inicial (pedido explicito desta leva).
+  //
+  // So aceita com a conta sem nenhum POKE, que e exatamente o estado de "jogo
+  // novo". Nao e restricao gratuita: o nick e identidade publica (chat, ranking,
+  // Mercado, Correio) e fica gravado como `original_trainer` em todo POKE
+  // capturado. Livre pra trocar a qualquer momento, ele viraria um jeito barato
+  // de se desassociar do proprio historico social.
+  //
+  // A unicidade NAO e checada aqui: esta funcao e sincrona e pura sobre a store
+  // (ver o cabecalho do arquivo). Quem pergunta ao banco e o `app.ts` antes de
+  // aplicar — sem isso, o nome repetido so estouraria no indice unico, e o
+  // jogador levaria um 502 "falha ao falar com o banco" no lugar de "esse nome
+  // ja esta em uso".
+  definirNomeDoTreinador(store, estado, acao) {
+    const nome = texto(acao.nome, 'nome').trim()
+    if (nome.length < MIN_NICK || nome.length > MAX_NICK || !NICK_VALIDO.test(nome)) {
+      throw new ErroHttp(400, `O nome precisa ter de ${MIN_NICK} a ${MAX_NICK} caracteres, so letras, numeros e _.`)
+    }
+    if (estado.team.length > 0 || estado.bagPokes.length > 0) {
+      throw new ErroHttp(409, 'O nome do treinador so pode ser escolhido antes do primeiro POKE.')
+    }
+    store.setTrainer({ ...estado.trainer, name: nome })
+    return { ok: true, mensagem: `Bem-vindo, ${nome}!` }
+  },
+
   // Recomecar do zero. E a UNICA acao destrutiva exposta, e existe porque sem
   // ela o botao "Apagar e recomecar" MENTIA: o cliente zerava o estado local, o
   // servidor recusava a escrita (RLS) e o progresso voltava no proximo
@@ -96,9 +128,23 @@ const MANIPULADORES: Record<string, Manipulador> = {
   // vez de uma lista de campos escrita a mao aqui: campo novo no jogo entra no
   // reset sozinho, sem ninguem lembrar de vir atualizar isto.
   reiniciarJogo(store, estado) {
+    // O NICK sobrevive ao reset, e isso nao e preferencia: `defaultGameStateData`
+    // devolve `trainer.name = 'Treinador'`, e desde que o nick virou UNICO
+    // (indice `players_trainer_name_unico`, leva do Mercado) gravar esse nome
+    // colidia com quem ja o tem — o UPDATE de `players` estourava 23505 e o
+    // "Iniciar novo jogo" respondia 502 "falha ao falar com o banco". O reset
+    // NUNCA funcionou depois daquela migration; era o bug relatado.
+    //
+    // Preservar tambem e o certo pelo conteudo: o nick e identidade publica
+    // (chat, ranking, Mercado, Correio) e e referenciado por amizades e por
+    // `original_trainer`. Reset apaga PROGRESSO. A migration de wipe em massa
+    // (20260808203000) ja tinha chegado nessa mesma conclusao; esta acao, que e
+    // o reset de UM jogador, tinha ficado pra tras.
+    const nome = estado.trainer.name
     const zerado = defaultGameStateData() as unknown as Record<string, unknown>
     const alvo = estado as unknown as Record<string, unknown>
     for (const chave of Object.keys(zerado)) alvo[chave] = structuredClone(zerado[chave])
+    estado.trainer.name = nome
     void store
     return { ok: true, mensagem: 'Progresso apagado. Escolha um novo inicial.' }
   },

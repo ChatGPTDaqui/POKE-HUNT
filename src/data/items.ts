@@ -18,13 +18,30 @@ export type AnyItem = GeneratedItem | StoneItem
 const formulaEngine = createFormulaEngine(FORMULAS)
 const SELL_FRACTION = formulaEngine.eval('SELL_ITEM_FRACTION')
 
+// Desconto de 70% no preco de COMPRA de bola e pocao (pedido explicito).
+//
+// Mora aqui, e nao no dado gerado, pela regra do projeto: `*.generated.ts` e
+// sobrescrito a cada sync e a planilha nao e escrita por mim. Este arquivo ja e
+// o lugar onde preco vira decisao de balanceamento (o `sellPrice` sempre foi
+// derivado aqui em vez de armazenado, exatamente pra poder rebalancear sem
+// mexer no dado). Vira knob de planilha como todo o resto da economia.
+const DESCONTO_BOLA_POCAO = formulaEngine.evalOrDefault('BALL_POTION_BUY_DISCOUNT', 0.7)
+const KINDS_COM_DESCONTO = new Set(['ball', 'potion'])
+
 const GENERATED_ITEMS: Record<string, GeneratedItem> = Object.fromEntries(
   Object.entries(ITEMS_DATA).map(([key, item]) => {
+    // O desconto entra ANTES do `sellPrice`, e isso nao e detalhe: venda e 50%
+    // da compra (`SELL_ITEM_FRACTION`). Descontar so a compra deixaria a Poke
+    // Ball custando 60 e vendendo por 100 — uma impressora de ouro com dois
+    // cliques. Comprar continua valendo menos que vender de volta.
+    const buyPrice = KINDS_COM_DESCONTO.has(item.kind)
+      ? Math.max(1, Math.round(item.buyPrice * (1 - DESCONTO_BOLA_POCAO)))
+      : item.buyPrice
     const sellPrice = Math.max(1, Math.round(formulaEngine.eval('SELL_ITEM_PRICE', {
-      buyPrice: item.buyPrice,
+      buyPrice,
       sellFraction: SELL_FRACTION,
     })))
-    return [key, { ...item, sellPrice }]
+    return [key, { ...item, buyPrice, sellPrice }]
   })
 )
 
