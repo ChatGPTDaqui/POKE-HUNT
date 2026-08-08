@@ -37965,6 +37965,12 @@ function createEmptySummary() {
 		itemsConsumed: {},
 		pokeLeveledUp: false,
 		trainerLeveledUp: false,
+		pokeLevelsGained: 0,
+		trainerLevelsGained: 0,
+		pokeLevelBefore: 0,
+		pokeLevelAfter: 0,
+		trainerLevelBefore: 0,
+		trainerLevelAfter: 0,
 		stoppedEarly: false,
 		truncated: false,
 		stepSeconds: 0
@@ -37975,6 +37981,8 @@ function simulateWorldSeconds({ world, gameState, seconds, stepSeconds, stepFn, 
 	summary.requestedSeconds = seconds;
 	if (!Number.isFinite(seconds) || seconds <= 0 || !world.player) return summary;
 	const itemsBefore = { ...gameState.items };
+	summary.pokeLevelBefore = world.player.poke.level;
+	summary.trainerLevelBefore = gameState.trainer.level;
 	let step = Math.max(Math.max(.01, stepSeconds), seconds / Math.max(1, maxSteps));
 	let deadline = nowMs() + maxWallClockMs;
 	let coarsenRounds = 0;
@@ -38024,6 +38032,10 @@ function simulateWorldSeconds({ world, gameState, seconds, stepSeconds, stepFn, 
 	}
 	summary.stepSeconds = step;
 	summary.simulatedSeconds = seconds - Math.max(0, remaining);
+	summary.pokeLevelAfter = world.player.poke.level;
+	summary.trainerLevelAfter = gameState.trainer.level;
+	summary.pokeLevelsGained = Math.max(0, summary.pokeLevelAfter - summary.pokeLevelBefore);
+	summary.trainerLevelsGained = Math.max(0, summary.trainerLevelAfter - summary.trainerLevelBefore);
 	const itemIds = /* @__PURE__ */ new Set([...Object.keys(itemsBefore), ...Object.keys(gameState.items)]);
 	for (const itemId of itemIds) {
 		const delta = (gameState.items[itemId] || 0) - (itemsBefore[itemId] || 0);
@@ -59436,6 +59448,21 @@ var servidor = {
 		method: "POST",
 		body: JSON.stringify(corpo)
 	}),
+	ofertar: (corpo) => pedir("/mercado/oferta", {
+		method: "POST",
+		body: JSON.stringify(corpo)
+	}),
+	responderOferta: (ofertaId, aceitar) => pedir("/mercado/oferta/responder", {
+		method: "POST",
+		body: JSON.stringify({
+			ofertaId,
+			aceitar
+		})
+	}),
+	cancelarOferta: (ofertaId) => pedir("/mercado/oferta/cancelar", {
+		method: "POST",
+		body: JSON.stringify({ ofertaId })
+	}),
 	cancelarAnuncio: (anuncioId) => pedir("/mercado/anuncio/cancelar", {
 		method: "POST",
 		body: JSON.stringify({ anuncioId })
@@ -60285,7 +60312,7 @@ async function perfilDoJogador(cfg, userId) {
 //#endregion
 //#region server/src/progresso.ts
 var MAX_SEGUNDOS_POR_FLUSH = 21600;
-async function carregarEstado(cfg, userId) {
+async function lerSnapshot(cfg, userId) {
 	const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
 		selecionar(cfg, `players?user_id=eq.${userId}&select=*`),
 		selecionarTudo(cfg, `pokemon_instances?user_id=eq.${userId}&select=*`),
@@ -60294,13 +60321,19 @@ async function carregarEstado(cfg, userId) {
 		selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=*`)
 	]);
 	if (!player[0]) throw new ErroHttp(404, "jogador sem linha em `players`");
-	return snapshotToGameState({
-		player: player[0],
-		pokemon,
-		items,
-		pokedex,
-		autoCatchRules
-	}, defaultGameStateData());
+	return {
+		estado: snapshotToGameState({
+			player: player[0],
+			pokemon,
+			items,
+			pokedex,
+			autoCatchRules
+		}, defaultGameStateData()),
+		pokeIdsNoLoad: new Set(pokemon.map((p) => p.id))
+	};
+}
+async function carregarEstado(cfg, userId) {
+	return (await lerSnapshot(cfg, userId)).estado;
 }
 /**
 * Como `carregarEstado`, mas tambem REIVINDICA as entregas pendentes do
@@ -60312,18 +60345,43 @@ async function carregarEstado(cfg, userId) {
 * continua usando `carregarEstado` cru.
 */
 async function carregarEstadoParaEscrita(cfg, userId) {
-	const estado = await carregarEstado(cfg, userId);
+	const snapshot = await lerSnapshot(cfg, userId);
 	const entregas = await reivindicarEntregas(cfg, userId);
-	if (entregas.length) aplicarEntregasNoEstado(estado, entregas);
-	return estado;
+	if (entregas.length) aplicarEntregasNoEstado(snapshot.estado, entregas);
+	return snapshot;
 }
-async function gravarEstado(cfg, userId, estado) {
+/**
+* Grava o snapshot do jogador nas cinco tabelas.
+*
+* `pokeIdsNoLoad` (os ids que existiam quando ESTE estado foi lido) e o que
+* impede um snapshot velho de destruir POKE que mudou de dono no meio do
+* caminho. Duas regras, e as duas vieram de bug real de duplicacao/sumico:
+*
+*  - So APAGA linha que este snapshot conhecia. Uma linha criada depois da
+*    leitura (o POKE que o jogador acabou de comprar no Mercado, num request
+*    paralelo) nao esta no conjunto — antes ela caia no diff de remocao e o
+*    comprador pagava por um POKE que sumia.
+*  - So GRAVA linha que AINDA e deste jogador e ainda esta em team/bag. Sem
+*    isso, o upsert (que escreve `user_id` e `location` a partir do estado em
+*    memoria) ressuscitava o POKE recem-anunciado de volta pra mochila — com o
+*    anuncio ainda de pe, ou seja, o mesmo POKE em dois lugares — e revertia
+*    pro vendedor um POKE que o comprador ja tinha pago.
+*/
+async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad) {
 	await atualizar(cfg, `players?user_id=eq.${userId}`, gameStateToPlayerRow(userId, estado));
 	const linhasPoke = gameStateToPokemonRows(userId, estado);
 	const idsAgora = new Set(linhasPoke.map((l) => l.id));
-	const remover = (await selecionarTudo(cfg, `pokemon_instances?user_id=eq.${userId}&location=in.(team,bag)&select=id`)).map((l) => l.id).filter((id) => !idsAgora.has(id));
+	const idsDeInteresse = [.../* @__PURE__ */ new Set([...pokeIdsNoLoad, ...idsAgora])];
+	const atuais = idsDeInteresse.length ? await selecionarTudo(cfg, `pokemon_instances?id=in.(${idsDeInteresse.join(",")})&select=id,user_id,location`) : [];
+	const porId = new Map(atuais.map((l) => [l.id, l]));
+	const aindaMeu = (l) => l != null && l.user_id === userId && (l.location === "team" || l.location === "bag");
+	const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)));
 	if (remover.length) await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${remover.join(",")})`);
-	if (linhasPoke.length) await inserir(cfg, "pokemon_instances", linhasPoke, { upsert: "id" });
+	const gravarPoke = linhasPoke.filter((l) => {
+		const atual = porId.get(String(l.id));
+		return atual == null || aindaMeu(atual);
+	});
+	if (gravarPoke.length) await inserir(cfg, "pokemon_instances", gravarPoke, { upsert: "id" });
 	const linhasItens = gameStateToItemRows(userId, estado);
 	const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id));
 	const removerItens = (await selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=item_id`)).map((l) => l.item_id).filter((id) => !itemIdsAgora.has(id));
@@ -60339,6 +60397,15 @@ async function gravarEstado(cfg, userId, estado) {
 	if (linhasAuto.length) await inserir(cfg, "player_auto_catch_rules", linhasAuto);
 }
 /**
+* Outro request do mesmo jogador ja esta creditando este intervalo.
+*
+* Distinto de `null` (sessao insimulavel, tem que fechar): aqui nao ha nada
+* errado, so nao ha nada a fazer — quem perdeu a corrida nao simula, nao
+* carrega e NAO grava, pra nao sobrescrever o resultado de quem ganhou com um
+* estado lido antes dele.
+*/
+var FLUSH_OCUPADO = "ocupado";
+/**
 * O coracao da Fase D: simula do ultimo flush ate agora e grava.
 *
 * Repare no que NAO entra aqui: nada vindo do cliente. Nem quanto tempo passou
@@ -60350,7 +60417,10 @@ async function aplicarFlush(cfg, userId, sessao) {
 	const bruto = (agora - new Date(sessao.last_flush_at).getTime()) / 1e3;
 	const segundos = Math.max(0, Math.min(bruto, MAX_SEGUNDOS_POR_FLUSH));
 	const truncado = bruto > MAX_SEGUNDOS_POR_FLUSH;
-	const { store, dados: estado } = criarEstadoDoJogador(await carregarEstadoParaEscrita(cfg, userId));
+	const [reivindicada] = await atualizarRetornando(cfg, `game_sessions?id=eq.${sessao.id}&closed_at=is.null&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}`, { last_flush_at: new Date(agora).toISOString() });
+	if (!reivindicada) return FLUSH_OCUPADO;
+	const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId);
+	const { store, dados: estado } = criarEstadoDoJogador(dados);
 	const continentesAntes = new Set(estado.unlockedContinents);
 	const ativo = estado.team.find((p) => p.uid === sessao.poke_uid);
 	if (!ativo) return null;
@@ -60382,13 +60452,12 @@ async function aplicarFlush(cfg, userId, sessao) {
 		shinys: resumo.shinySeen
 	});
 	estado.currentMapId = sessao.map_id;
-	await gravarEstado(cfg, userId, estado);
+	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
 	if (!continentesAntes.has("kanto") && estado.unlockedContinents.includes("kanto")) await inserir(cfg, "hall_da_fama", {
 		user_id: userId,
 		conquista: CONQUISTA_LANCE
 	}, { upsert: "user_id,conquista" });
 	await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, {
-		last_flush_at: new Date(agora).toISOString(),
 		simulated_seconds: Number(sessao.simulated_seconds) + segundos,
 		rng_state: world.rng.state,
 		rng_draws: world.rng.draws
@@ -60730,19 +60799,47 @@ async function resumoDosItens(cfg) {
 	}
 	return [...porItem.values()].sort((a, b) => a.itemId.localeCompare(b.itemId));
 }
+/** Ofertas pendentes agrupadas por anuncio, para uma lista de anuncios. */
+async function ofertasPendentesPorAnuncio(cfg, anuncioIds) {
+	const porAnuncio = /* @__PURE__ */ new Map();
+	if (!anuncioIds.length) return porAnuncio;
+	const linhas = await selecionarTudo(cfg, `market_offers?status=eq.pendente&listing_id=in.(${anuncioIds.join(",")})&select=*`);
+	for (const o of linhas) {
+		const lista = porAnuncio.get(o.listing_id);
+		if (lista) lista.push(o);
+		else porAnuncio.set(o.listing_id, [o]);
+	}
+	return porAnuncio;
+}
+function enfeitarAnuncios(linhas, nomes, ofertas) {
+	return linhas.map((l) => {
+		const lista = ofertas.get(l.id) ?? [];
+		return {
+			...l,
+			vendedor: nomes.get(l.seller_id) ?? "Treinador",
+			ofertas: lista.length,
+			melhorOferta: lista.length ? Math.max(...lista.map((o) => o.valor)) : null
+		};
+	});
+}
 async function anunciosAtivos(cfg) {
 	const linhas = await selecionarTudo(cfg, "market_listings?status=eq.ativo&select=*&order=created_at.desc");
-	const nomes = await nomesDeTreinadores(cfg, linhas.map((l) => l.seller_id));
-	return linhas.map((l) => ({
-		...l,
-		vendedor: nomes.get(l.seller_id) ?? "Treinador"
-	}));
+	const [nomes, ofertas] = await Promise.all([nomesDeTreinadores(cfg, linhas.map((l) => l.seller_id)), ofertasPendentesPorAnuncio(cfg, linhas.map((l) => l.id))]);
+	return enfeitarAnuncios(linhas, nomes, ofertas);
 }
 async function minhasOrdens(cfg, userId) {
 	const [ordens, anuncios] = await Promise.all([selecionarTudo(cfg, `market_orders?user_id=eq.${userId}&status=eq.ativa&select=*&order=created_at.desc`), selecionarTudo(cfg, `market_listings?seller_id=eq.${userId}&status=eq.ativo&select=*&order=created_at.desc`)]);
+	const [ofertasRecebidas, minhasOfertas] = await Promise.all([ofertasPendentesPorAnuncio(cfg, anuncios.map((a) => a.id)), selecionarTudo(cfg, `market_offers?buyer_id=eq.${userId}&status=eq.pendente&select=*&order=created_at.desc`)]);
+	const nomesCompradores = await nomesDeTreinadores(cfg, [...ofertasRecebidas.values()].flat().map((o) => o.buyer_id));
 	return {
 		ordens,
-		anuncios
+		anuncios,
+		ofertasRecebidas: [...ofertasRecebidas.values()].flat().map((o) => ({
+			...o,
+			comprador: nomesCompradores.get(o.buyer_id) ?? "Treinador",
+			anuncio: anuncios.find((a) => a.id === o.listing_id) ?? null
+		})),
+		minhasOfertas
 	};
 }
 async function meuHistorico(cfg, userId) {
@@ -60770,7 +60867,8 @@ async function criarOrdem(cfg, userId, corpo) {
 	const unitPrice = inteiro(corpo.unitPrice, "unitPrice", MAX_PRECO);
 	const quantity = inteiro(corpo.quantity, "quantity", MAX_QUANTIDADE);
 	if (!getItem(itemId)) throw new ErroHttp(400, "item desconhecido");
-	const { store, dados: estado } = criarEstadoDoJogador(await carregarEstadoParaEscrita(cfg, userId));
+	const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId);
+	const { store, dados: estado } = criarEstadoDoJogador(dados);
 	if (side === "venda") {
 		if (estado.lockedItems[itemId]) throw new ErroHttp(409, "Este item esta travado — destrave antes de anunciar.");
 		if (!store.removeItem(itemId, quantity)) throw new ErroHttp(409, "Voce nao tem essa quantidade.");
@@ -60785,7 +60883,7 @@ async function criarOrdem(cfg, userId, corpo) {
 		gold_retido: side === "compra" ? unitPrice * quantity : 0
 	}, { retornar: true });
 	const resultado = await casar(cfg, userId, ordem, store);
-	await gravarEstado(cfg, userId, estado);
+	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
 	return {
 		ordemId: ordem.id,
 		...resultado,
@@ -60867,10 +60965,11 @@ async function cancelarOrdem(cfg, userId, ordemId) {
 		closed_at: (/* @__PURE__ */ new Date()).toISOString()
 	});
 	if (!ordem) throw new ErroHttp(404, "ordem nao encontrada ou ja encerrada");
-	const { store, dados: estado } = criarEstadoDoJogador(await carregarEstadoParaEscrita(cfg, userId));
+	const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId);
+	const { store, dados: estado } = criarEstadoDoJogador(dados);
 	if (ordem.side === "venda") store.addItem(ordem.item_id, ordem.remaining);
 	else store.addGold(ordem.gold_retido);
-	await gravarEstado(cfg, userId, estado);
+	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
 	const item = getItem(ordem.item_id);
 	return {
 		mensagem: ordem.side === "venda" ? `Ordem cancelada — ${ordem.remaining}x ${item?.name ?? ordem.item_id} de volta na mochila.` : `Ordem cancelada — ${ordem.gold_retido} de ouro devolvido.`,
@@ -60879,7 +60978,8 @@ async function cancelarOrdem(cfg, userId, ordemId) {
 }
 async function anunciarPoke(cfg, userId, corpo) {
 	const pokeUid = texto$1(corpo.pokeUid, "pokeUid");
-	const price = inteiro(corpo.price, "price", MAX_PRECO);
+	const apenasOferta = corpo.apenasOferta === true;
+	const price = apenasOferta ? null : inteiro(corpo.price, "price", MAX_PRECO);
 	const currency = corpo.currency === "diamond" ? "diamond" : "gold";
 	const [linha] = await atualizarRetornando(cfg, `pokemon_instances?id=eq.${pokeUid}&user_id=eq.${userId}&location=eq.bag&locked=is.false`, {
 		location: "market",
@@ -60892,6 +60992,7 @@ async function anunciarPoke(cfg, userId, corpo) {
 			seller_id: userId,
 			poke_uid: pokeUid,
 			price,
+			apenas_oferta: apenasOferta,
 			currency,
 			species_id: poke.speciesId,
 			level: poke.level,
@@ -60903,10 +61004,32 @@ async function anunciarPoke(cfg, userId, corpo) {
 		await atualizar(cfg, `pokemon_instances?id=eq.${pokeUid}`, { location: "bag" });
 		throw erro;
 	}
+	const nome = SPECIES[poke.speciesId]?.name ?? poke.speciesId;
 	return {
-		mensagem: `${SPECIES[poke.speciesId]?.name ?? poke.speciesId} anunciado por ${price} ${currency === "gold" ? "de ouro" : "diamante(s)"}.`,
+		mensagem: apenasOferta ? `${nome} anunciado para receber lances.` : `${nome} anunciado por ${price} ${currency === "gold" ? "de ouro" : "diamante(s)"}.`,
 		estado: await carregarEstado(cfg, userId)
 	};
+}
+/**
+* Recusa (e DEVOLVE o escrow de) toda oferta pendente de um anuncio.
+*
+* Chamada sempre que o anuncio deixa de estar disponivel: cancelado pelo
+* vendedor, vendido por compra direta, ou uma das ofertas aceita. Sem isso o
+* ouro das outras ofertas ficaria retido pra sempre — o jogador nao teria como
+* cancelar uma oferta cujo anuncio nao existe mais na vitrine.
+*/
+async function recusarOfertasPendentes(cfg, anuncioId, motivo, exceto) {
+	const recusadas = await atualizarRetornando(cfg, `market_offers?listing_id=eq.${anuncioId}&status=eq.pendente${exceto ? `&id=neq.${exceto}` : ""}`, {
+		status: "recusada",
+		resolved_at: (/* @__PURE__ */ new Date()).toISOString()
+	});
+	for (const oferta of recusadas) await enfileirarEntrega(cfg, {
+		userId: oferta.buyer_id,
+		gold: oferta.currency === "gold" ? oferta.valor : 0,
+		diamonds: oferta.currency === "diamond" ? oferta.valor : 0,
+		motivo
+	});
+	return recusadas.length;
 }
 async function cancelarAnuncio(cfg, userId, anuncioId) {
 	const [anuncio] = await atualizarRetornando(cfg, `market_listings?id=eq.${anuncioId}&seller_id=eq.${userId}&status=eq.ativo`, { status: "cancelado" });
@@ -60915,8 +61038,120 @@ async function cancelarAnuncio(cfg, userId, anuncioId) {
 		location: "bag",
 		team_slot: null
 	});
+	const devolvidas = await recusarOfertasPendentes(cfg, anuncioId, "Anuncio retirado do Mercado");
 	return {
-		mensagem: "Anuncio cancelado — o POKE voltou pra sua mochila.",
+		mensagem: devolvidas > 0 ? `Anuncio cancelado — o POKE voltou pra sua mochila e ${devolvidas} oferta(s) foram devolvidas.` : "Anuncio cancelado — o POKE voltou pra sua mochila.",
+		estado: await carregarEstado(cfg, userId)
+	};
+}
+/**
+* Envia uma oferta num anuncio "somente lance".
+*
+* O valor sai do bolso do comprador NA HORA (escrow), como na ordem de compra
+* de item. Sem isso, dez ofertas do mesmo ouro seriam todas aceitaveis e a
+* decima aceita nao teria como ser paga.
+*/
+async function ofertarNoAnuncio(cfg, userId, corpo) {
+	const anuncioId = texto$1(corpo.anuncioId, "anuncioId");
+	const valor = inteiro(corpo.valor, "valor", MAX_PRECO);
+	const [anuncio] = await selecionar(cfg, `market_listings?id=eq.${anuncioId}&select=*`);
+	if (!anuncio || anuncio.status !== "ativo") throw new ErroHttp(409, "Este anuncio nao esta mais disponivel.");
+	if (!anuncio.apenas_oferta) throw new ErroHttp(409, "Este anuncio tem preco fixo — use Comprar.");
+	if (anuncio.seller_id === userId) throw new ErroHttp(409, "Voce nao pode ofertar no proprio anuncio.");
+	const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId);
+	const { store, dados: estado } = criarEstadoDoJogador(dados);
+	if (!(anuncio.currency === "gold" ? store.spendGold(valor) : store.spendDiamonds(valor))) throw new ErroHttp(409, anuncio.currency === "gold" ? "Ouro insuficiente." : "Diamantes insuficientes.");
+	await inserir(cfg, "market_offers", {
+		listing_id: anuncioId,
+		buyer_id: userId,
+		valor,
+		currency: anuncio.currency
+	});
+	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
+	return {
+		mensagem: `Oferta de ${valor} enviada por ${SPECIES[anuncio.species_id]?.name ?? anuncio.species_id}. O valor fica retido ate o vendedor responder.`,
+		estado
+	};
+}
+/** O comprador desiste: a oferta sai do ar e o escrow volta. */
+async function cancelarOferta(cfg, userId, ofertaId) {
+	const [oferta] = await atualizarRetornando(cfg, `market_offers?id=eq.${ofertaId}&buyer_id=eq.${userId}&status=eq.pendente`, {
+		status: "cancelada",
+		resolved_at: (/* @__PURE__ */ new Date()).toISOString()
+	});
+	if (!oferta) throw new ErroHttp(404, "oferta nao encontrada ou ja respondida");
+	const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId);
+	const { store, dados: estado } = criarEstadoDoJogador(dados);
+	if (oferta.currency === "gold") store.addGold(oferta.valor);
+	else store.addDiamonds(oferta.valor);
+	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
+	return {
+		mensagem: `Oferta cancelada — ${oferta.valor} devolvido(s).`,
+		estado
+	};
+}
+/** O vendedor aceita ou recusa uma oferta recebida. */
+async function responderOferta(cfg, userId, ofertaId, aceitar) {
+	const [oferta] = await selecionar(cfg, `market_offers?id=eq.${ofertaId}&select=*`);
+	if (!oferta || oferta.status !== "pendente") throw new ErroHttp(409, "Esta oferta ja foi respondida.");
+	const [anuncio] = await selecionar(cfg, `market_listings?id=eq.${oferta.listing_id}&select=*`);
+	if (!anuncio) throw new ErroHttp(404, "anuncio nao encontrado");
+	if (anuncio.seller_id !== userId) throw new ErroHttp(403, "Esta oferta nao e de um anuncio seu.");
+	const [respondida] = await atualizarRetornando(cfg, `market_offers?id=eq.${ofertaId}&status=eq.pendente`, {
+		status: aceitar ? "aceita" : "recusada",
+		resolved_at: (/* @__PURE__ */ new Date()).toISOString()
+	});
+	if (!respondida) throw new ErroHttp(409, "Esta oferta ja foi respondida.");
+	const nome = SPECIES[anuncio.species_id]?.name ?? anuncio.species_id;
+	if (!aceitar) {
+		await enfileirarEntrega(cfg, {
+			userId: oferta.buyer_id,
+			gold: oferta.currency === "gold" ? oferta.valor : 0,
+			diamonds: oferta.currency === "diamond" ? oferta.valor : 0,
+			motivo: `Oferta por ${nome} recusada`
+		});
+		return {
+			mensagem: "Oferta recusada — o valor foi devolvido ao ofertante.",
+			estado: await carregarEstado(cfg, userId)
+		};
+	}
+	const [fechado] = await atualizarRetornando(cfg, `market_listings?id=eq.${anuncio.id}&status=eq.ativo`, {
+		status: "vendido",
+		sold_at: (/* @__PURE__ */ new Date()).toISOString(),
+		buyer_id: oferta.buyer_id
+	});
+	if (!fechado) {
+		await enfileirarEntrega(cfg, {
+			userId: oferta.buyer_id,
+			gold: oferta.currency === "gold" ? oferta.valor : 0,
+			diamonds: oferta.currency === "diamond" ? oferta.valor : 0,
+			motivo: `Oferta por ${nome} devolvida (anuncio encerrado)`
+		});
+		throw new ErroHttp(409, "Este anuncio ja tinha sido encerrado — a oferta foi devolvida.");
+	}
+	await atualizar(cfg, `pokemon_instances?id=eq.${anuncio.poke_uid}`, {
+		user_id: oferta.buyer_id,
+		location: "bag",
+		team_slot: null
+	});
+	await enfileirarEntrega(cfg, {
+		userId,
+		gold: oferta.currency === "gold" ? oferta.valor : 0,
+		diamonds: oferta.currency === "diamond" ? oferta.valor : 0,
+		motivo: `Venda de ${nome} por lance no Mercado`
+	});
+	await inserir(cfg, "market_trades", {
+		kind: "poke",
+		species_id: anuncio.species_id,
+		quantity: 1,
+		unit_price: oferta.valor,
+		currency: oferta.currency,
+		buyer_id: oferta.buyer_id,
+		seller_id: userId
+	});
+	const devolvidas = await recusarOfertasPendentes(cfg, anuncio.id, `Outra oferta por ${nome} foi aceita`, ofertaId);
+	return {
+		mensagem: devolvidas > 0 ? `Lance aceito! ${nome} foi entregue e ${devolvidas} outra(s) oferta(s) foram devolvidas.` : `Lance aceito! ${nome} foi entregue ao ofertante.`,
 		estado: await carregarEstado(cfg, userId)
 	};
 }
@@ -60924,15 +61159,18 @@ async function comprarAnuncio(cfg, userId, anuncioId) {
 	const [anuncio] = await selecionar(cfg, `market_listings?id=eq.${anuncioId}&select=*`);
 	if (!anuncio || anuncio.status !== "ativo") throw new ErroHttp(409, "Este anuncio nao esta mais disponivel.");
 	if (anuncio.seller_id === userId) throw new ErroHttp(409, "Voce nao pode comprar o proprio anuncio.");
-	const { store, dados: estado } = criarEstadoDoJogador(await carregarEstadoParaEscrita(cfg, userId));
-	if (!(anuncio.currency === "gold" ? store.spendGold(anuncio.price) : store.spendDiamonds(anuncio.price))) throw new ErroHttp(409, anuncio.currency === "gold" ? "Ouro insuficiente." : "Diamantes insuficientes.");
+	if (anuncio.apenas_oferta || anuncio.price == null) throw new ErroHttp(409, "Este anuncio so aceita lances — envie uma oferta.");
+	const preco = anuncio.price;
+	const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId);
+	const { store, dados: estado } = criarEstadoDoJogador(dados);
+	if (!(anuncio.currency === "gold" ? store.spendGold(preco) : store.spendDiamonds(preco))) throw new ErroHttp(409, anuncio.currency === "gold" ? "Ouro insuficiente." : "Diamantes insuficientes.");
 	const [fechado] = await atualizarRetornando(cfg, `market_listings?id=eq.${anuncioId}&status=eq.ativo`, {
 		status: "vendido",
 		sold_at: (/* @__PURE__ */ new Date()).toISOString(),
 		buyer_id: userId
 	});
 	if (!fechado) throw new ErroHttp(409, "Este anuncio acabou de ser vendido.");
-	await gravarEstado(cfg, userId, estado);
+	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
 	await atualizar(cfg, `pokemon_instances?id=eq.${anuncio.poke_uid}`, {
 		user_id: userId,
 		location: "bag",
@@ -60940,15 +61178,15 @@ async function comprarAnuncio(cfg, userId, anuncioId) {
 	});
 	await enfileirarEntrega(cfg, {
 		userId: anuncio.seller_id,
-		gold: anuncio.currency === "gold" ? anuncio.price : 0,
-		diamonds: anuncio.currency === "diamond" ? anuncio.price : 0,
+		gold: anuncio.currency === "gold" ? preco : 0,
+		diamonds: anuncio.currency === "diamond" ? preco : 0,
 		motivo: `Venda de ${SPECIES[anuncio.species_id]?.name ?? anuncio.species_id} no Mercado`
 	});
 	await inserir(cfg, "market_trades", {
 		kind: "poke",
 		species_id: anuncio.species_id,
 		quantity: 1,
-		unit_price: anuncio.price,
+		unit_price: preco,
 		currency: anuncio.currency,
 		buyer_id: userId,
 		seller_id: anuncio.seller_id
@@ -61188,8 +61426,8 @@ async function rotear(cfg, req, url) {
 	if (url.pathname === "/sessao/flush" && req.method === "POST") return flush(cfg, jogador.id);
 	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id);
 	if (url.pathname === "/estado" && req.method === "GET") {
-		const estado = await carregarEstadoParaEscrita(cfg, jogador.id);
-		await gravarEstado(cfg, jogador.id, estado);
+		const { estado, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, jogador.id);
+		await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad);
 		return json({ estado });
 	}
 	if (url.pathname.startsWith("/mercado")) return mercado(cfg, jogador.id, req, url);
@@ -61228,6 +61466,10 @@ async function liquidarSessaoAberta(cfg, userId) {
 		resultado: null
 	};
 	const resultado = await aplicarFlush(cfg, userId, sessao);
+	if (resultado === "ocupado") return {
+		sessao,
+		resultado: null
+	};
 	if (!resultado) {
 		await fecharLinhaDeSessao(cfg, sessao.id);
 		await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null });
@@ -61286,6 +61528,17 @@ async function flush(cfg, userId) {
 	const sessao = await sessaoAberta(cfg, userId);
 	if (!sessao) throw new ErroHttp(409, "nenhuma sessao aberta");
 	const resultado = await aplicarFlush(cfg, userId, sessao);
+	if (resultado === "ocupado") return json({
+		segundosCreditados: 0,
+		truncado: false,
+		resumo: createEmptySummary(),
+		piso: {
+			aplicado: false,
+			ouroAdicionado: 0,
+			xpAdicionado: 0
+		},
+		estado: await carregarEstado(cfg, userId)
+	});
 	if (!resultado) {
 		await fecharLinhaDeSessao(cfg, sessao.id);
 		await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null });
@@ -61305,7 +61558,7 @@ async function fechar(cfg, userId) {
 	const resultado = await aplicarFlush(cfg, userId, sessao);
 	await fecharLinhaDeSessao(cfg, sessao.id);
 	await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null });
-	if (!resultado) return json({ fechada: false });
+	if (!resultado || resultado === "ocupado") return json({ fechada: false });
 	return json({
 		fechada: true,
 		resumo: resultado.resumo,
@@ -61322,7 +61575,7 @@ async function acao(cfg, userId, req) {
 		if (aberta) await fecharLinhaDeSessao(cfg, aberta.id);
 		await limparMundoDoJogador(cfg, userId);
 	}
-	const dados = await carregarEstadoParaEscrita(cfg, userId);
+	const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId);
 	if (corpo.tipo === "definirNomeDoTreinador" && typeof corpo.nome === "string") {
 		const nome = corpo.nome.trim();
 		const meuNome = dados.trainer.name.toLowerCase();
@@ -61332,7 +61585,7 @@ async function acao(cfg, userId, req) {
 	}
 	const { store, dados: estado } = criarEstadoDoJogador(dados);
 	const resultado = aplicarAcao(store, estado, corpo);
-	await gravarEstado(cfg, userId, estado);
+	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
 	return json({
 		...resultado,
 		estado
@@ -61359,6 +61612,9 @@ async function mercado(cfg, userId, req, url) {
 	if (url.pathname === "/mercado/anuncio") return json(await anunciarPoke(cfg, userId, corpo));
 	if (url.pathname === "/mercado/anuncio/cancelar") return json(await cancelarAnuncio(cfg, userId, String(corpo.anuncioId ?? "")));
 	if (url.pathname === "/mercado/comprar") return json(await comprarAnuncio(cfg, userId, String(corpo.anuncioId ?? "")));
+	if (url.pathname === "/mercado/oferta") return json(await ofertarNoAnuncio(cfg, userId, corpo));
+	if (url.pathname === "/mercado/oferta/responder") return json(await responderOferta(cfg, userId, String(corpo.ofertaId ?? ""), corpo.aceitar === true));
+	if (url.pathname === "/mercado/oferta/cancelar") return json(await cancelarOferta(cfg, userId, String(corpo.ofertaId ?? "")));
 	return json({ erro: "rota desconhecida" }, 404);
 }
 async function social(cfg, userId, req, url) {

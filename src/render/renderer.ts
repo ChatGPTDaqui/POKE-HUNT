@@ -68,12 +68,16 @@ export class Renderer {
     this.ctx.clearRect(0, 0, this.width, this.height)
   }
 
+  // O POKE fica no centro EXATO da tela (pedido explicito: ele estava baixo
+  // demais, quase encostando no rodape da HUD em telas curtas). A enfermeira
+  // sobe junto pra manter a mesma distancia visual entre os dois; deixa-la em
+  // 0.35 colaria as duas figuras.
   private _hospitalBaseNursePos(): ScreenPoint {
-    return { x: this.width / 2, y: this.height * 0.35 }
+    return { x: this.width / 2, y: this.height * 0.24 }
   }
 
   private _hospitalBasePlayerPos(): ScreenPoint {
-    return { x: this.width / 2, y: this.height * 0.68 }
+    return { x: this.width / 2, y: this.height * 0.5 }
   }
 
   private _applyHospitalZoom({ x, y }: ScreenPoint): ScreenPoint {

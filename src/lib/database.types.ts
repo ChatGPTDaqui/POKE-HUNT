@@ -572,6 +572,7 @@ export type Database = {
       }
       market_listings: {
         Row: {
+          apenas_oferta: boolean
           buyer_id: string | null
           created_at: string
           currency: string
@@ -580,7 +581,7 @@ export type Database = {
           iv_percent: number
           level: number
           poke_uid: string
-          price: number
+          price: number | null
           rarity: Database["public"]["Enums"]["rarity_tier"]
           seller_id: string
           sold_at: string | null
@@ -588,6 +589,7 @@ export type Database = {
           status: string
         }
         Insert: {
+          apenas_oferta?: boolean
           buyer_id?: string | null
           created_at?: string
           currency: string
@@ -596,7 +598,7 @@ export type Database = {
           iv_percent?: number
           level: number
           poke_uid: string
-          price: number
+          price?: number | null
           rarity: Database["public"]["Enums"]["rarity_tier"]
           seller_id: string
           sold_at?: string | null
@@ -604,6 +606,7 @@ export type Database = {
           status?: string
         }
         Update: {
+          apenas_oferta?: boolean
           buyer_id?: string | null
           created_at?: string
           currency?: string
@@ -612,7 +615,7 @@ export type Database = {
           iv_percent?: number
           level?: number
           poke_uid?: string
-          price?: number
+          price?: number | null
           rarity?: Database["public"]["Enums"]["rarity_tier"]
           seller_id?: string
           sold_at?: string | null
@@ -625,6 +628,47 @@ export type Database = {
             columns: ["poke_uid"]
             isOneToOne: false
             referencedRelation: "pokemon_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_offers: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          currency: string
+          id: string
+          listing_id: string
+          resolved_at: string | null
+          status: string
+          valor: number
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          currency: string
+          id?: string
+          listing_id: string
+          resolved_at?: string | null
+          status?: string
+          valor: number
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          listing_id?: string
+          resolved_at?: string | null
+          status?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_offers_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "market_listings"
             referencedColumns: ["id"]
           },
         ]

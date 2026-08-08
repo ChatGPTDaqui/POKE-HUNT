@@ -75,6 +75,21 @@ export interface OfflineSimSummary {
   itemsConsumed: Record<string, number>
   pokeLeveledUp: boolean
   trainerLeveledUp: boolean
+  /**
+   * Quantos niveis o POKE em campo e o Treinador ganharam no periodo.
+   *
+   * Medido como diferenca entre o nivel do inicio e o do fim, e nao contando
+   * `leveledUp` por abate: um unico abate pode subir mais de um nivel (EXP alta
+   * contra POKE de nivel baixo), e o booleano por abate nao distingue "subiu 1"
+   * de "subiu 4".
+   */
+  pokeLevelsGained: number
+  trainerLevelsGained: number
+  /** Nivel do POKE em campo no inicio e no fim — o relatorio mostra "12 → 15". */
+  pokeLevelBefore: number
+  pokeLevelAfter: number
+  trainerLevelBefore: number
+  trainerLevelAfter: number
   stoppedEarly: boolean // desmaiou sem jeito de auto-reanimar (sem toggle, ou sem `revive` sobrando)
   truncated: boolean // acabou o orcamento de tempo real antes de cobrir o gap inteiro
   stepSeconds: number // o passo realmente usado (pode ser mais grosso que o pedido — ver DEFAULT_MAX_STEPS)
@@ -94,6 +109,12 @@ export function createEmptySummary(): OfflineSimSummary {
     itemsConsumed: {},
     pokeLeveledUp: false,
     trainerLeveledUp: false,
+    pokeLevelsGained: 0,
+    trainerLevelsGained: 0,
+    pokeLevelBefore: 0,
+    pokeLevelAfter: 0,
+    trainerLevelBefore: 0,
+    trainerLevelAfter: 0,
     stoppedEarly: false,
     truncated: false,
     stepSeconds: 0,
@@ -128,6 +149,8 @@ export function simulateWorldSeconds({
   if (!Number.isFinite(seconds) || seconds <= 0 || !world.player) return summary
 
   const itemsBefore = { ...gameState.items }
+  summary.pokeLevelBefore = world.player.poke.level
+  summary.trainerLevelBefore = gameState.trainer.level
   const stepCap = Math.max(1, maxSteps)
   let step = Math.max(Math.max(0.01, stepSeconds), seconds / stepCap)
   let deadline = nowMs() + maxWallClockMs
@@ -185,6 +208,15 @@ export function simulateWorldSeconds({
   summary.stepSeconds = step
 
   summary.simulatedSeconds = seconds - Math.max(0, remaining)
+
+  // `world.player.poke` pode ter sido SUBSTITUIDO no meio (evolucao troca a
+  // instancia), entao le do mundo agora em vez de guardar a referencia la de
+  // cima. Nao ha troca de POKE em campo durante a simulacao, entao o "antes" e
+  // o "depois" sao sempre o mesmo POKE.
+  summary.pokeLevelAfter = world.player.poke.level
+  summary.trainerLevelAfter = gameState.trainer.level
+  summary.pokeLevelsGained = Math.max(0, summary.pokeLevelAfter - summary.pokeLevelBefore)
+  summary.trainerLevelsGained = Math.max(0, summary.trainerLevelAfter - summary.trainerLevelBefore)
 
   const itemIds = new Set([...Object.keys(itemsBefore), ...Object.keys(gameState.items)])
   for (const itemId of itemIds) {

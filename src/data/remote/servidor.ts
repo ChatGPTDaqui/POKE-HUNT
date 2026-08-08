@@ -192,7 +192,9 @@ export interface AnuncioMercado {
   id: string
   seller_id: string
   poke_uid: string
-  price: number
+  /** `null` em anuncio "somente lance": nao existe compra direta. */
+  price: number | null
+  apenas_oferta: boolean
   currency: 'gold' | 'diamond'
   species_id: string
   level: number
@@ -201,6 +203,23 @@ export interface AnuncioMercado {
   iv_percent: number
   created_at: string
   vendedor?: string
+  ofertas?: number
+  melhorOferta?: number | null
+}
+
+export interface OfertaMercado {
+  id: string
+  listing_id: string
+  buyer_id: string
+  valor: number
+  currency: 'gold' | 'diamond'
+  status: 'pendente' | 'aceita' | 'recusada' | 'cancelada'
+  created_at: string
+}
+
+export interface OfertaRecebida extends OfertaMercado {
+  comprador: string
+  anuncio: AnuncioMercado | null
 }
 
 export interface NegocioMercado {
@@ -315,15 +334,32 @@ export const servidor = {
     ),
   mercadoPokes: () => pedir<{ anuncios: AnuncioMercado[] }>('/mercado/pokes', { retentavel: true }),
   mercadoMeus: () =>
-    pedir<{ ordens: OrdemMercado[]; anuncios: AnuncioMercado[] }>('/mercado/meus', { retentavel: true }),
+    pedir<{
+      ordens: OrdemMercado[]
+      anuncios: AnuncioMercado[]
+      ofertasRecebidas: OfertaRecebida[]
+      minhasOfertas: OfertaMercado[]
+    }>('/mercado/meus', { retentavel: true }),
   mercadoHistorico: () => pedir<{ negocios: NegocioMercado[] }>('/mercado/historico', { retentavel: true }),
 
   criarOrdem: (corpo: { itemId: string; side: 'compra' | 'venda'; unitPrice: number; quantity: number }) =>
     pedir<RespostaComEstado & { executado: number }>('/mercado/ordem', { method: 'POST', body: JSON.stringify(corpo) }),
   cancelarOrdem: (ordemId: string) =>
     pedir<RespostaComEstado>('/mercado/ordem/cancelar', { method: 'POST', body: JSON.stringify({ ordemId }) }),
-  anunciarPoke: (corpo: { pokeUid: string; price: number; currency: 'gold' | 'diamond' }) =>
-    pedir<RespostaComEstado>('/mercado/anuncio', { method: 'POST', body: JSON.stringify(corpo) }),
+  anunciarPoke: (corpo: {
+    pokeUid: string
+    price: number | null
+    currency: 'gold' | 'diamond'
+    apenasOferta?: boolean
+  }) => pedir<RespostaComEstado>('/mercado/anuncio', { method: 'POST', body: JSON.stringify(corpo) }),
+  ofertar: (corpo: { anuncioId: string; valor: number }) =>
+    pedir<RespostaComEstado>('/mercado/oferta', { method: 'POST', body: JSON.stringify(corpo) }),
+  responderOferta: (ofertaId: string, aceitar: boolean) =>
+    pedir<RespostaComEstado>('/mercado/oferta/responder', {
+      method: 'POST', body: JSON.stringify({ ofertaId, aceitar }),
+    }),
+  cancelarOferta: (ofertaId: string) =>
+    pedir<RespostaComEstado>('/mercado/oferta/cancelar', { method: 'POST', body: JSON.stringify({ ofertaId }) }),
   cancelarAnuncio: (anuncioId: string) =>
     pedir<RespostaComEstado>('/mercado/anuncio/cancelar', { method: 'POST', body: JSON.stringify({ anuncioId }) }),
   comprarAnuncio: (anuncioId: string) =>

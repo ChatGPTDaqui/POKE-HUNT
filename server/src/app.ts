@@ -7,11 +7,15 @@
 // mantem ela aberta de graca. Sao 4 rotas; framework nao pagaria seu custo.
 import { autenticar } from './auth.js'
 import { ErroHttp, selecionar, inserir, atualizar, chamarRpc, type Config } from './db.js'
-import { aplicarFlush, carregarEstado, carregarEstadoParaEscrita, gravarEstado, type LinhaSessao } from './progresso.js'
+import {
+  aplicarFlush, carregarEstado, carregarEstadoParaEscrita, gravarEstado,
+  FLUSH_OCUPADO, type LinhaSessao,
+} from './progresso.js'
 import { aplicarAcao, type Acao } from './acoes.js'
 import {
   livroDoItem, resumoDosItens, anunciosAtivos, minhasOrdens, meuHistorico,
   criarOrdem, cancelarOrdem, anunciarPoke, cancelarAnuncio, comprarAnuncio,
+  ofertarNoAnuncio, responderOferta, cancelarOferta,
 } from './mercado.js'
 import {
   lerChat, enviarChat, caixaDeEntrada, pedirAmizade, responderPedido, marcarLida, coletarAnexo,
@@ -22,7 +26,7 @@ import {
   perfilDoJogador, rankingDeTreinadores, rankingDePokemon, hallDaFama,
   ehCriterioPoke, CONQUISTA_LANCE,
 } from './ranking.js'
-import { MAPS, randomSeed } from '#engine'
+import { MAPS, randomSeed, createEmptySummary } from '#engine'
 
 function json(dado: unknown, status = 200): Response {
   return new Response(JSON.stringify(dado), {
@@ -93,8 +97,8 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
     // recebe o que vendeu enquanto estava fora — por isso ele grava, apesar de
     // ser um GET. `carregarEstadoParaEscrita` carimba a entrega como aplicada,
     // entao o `gravarEstado` logo abaixo nao e opcional.
-    const estado = await carregarEstadoParaEscrita(cfg, jogador.id)
-    await gravarEstado(cfg, jogador.id, estado)
+    const { estado, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, jogador.id)
+    await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad)
     return json({ estado })
   }
   if (url.pathname.startsWith('/mercado')) return mercado(cfg, jogador.id, req, url)
@@ -148,6 +152,9 @@ async function liquidarSessaoAberta(cfg: Config, userId: string) {
   const sessao = await sessaoAberta(cfg, userId)
   if (!sessao) return { sessao: null, resultado: null }
   const resultado = await aplicarFlush(cfg, userId, sessao)
+  // Outro request do mesmo jogador esta creditando este intervalo agora mesmo.
+  // A sessao continua valida: so nao ha o que liquidar aqui.
+  if (resultado === FLUSH_OCUPADO) return { sessao, resultado: null }
   if (!resultado) {
     await fecharLinhaDeSessao(cfg, sessao.id)
     await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null })
@@ -224,6 +231,18 @@ async function flush(cfg: Config, userId: string): Promise<Response> {
   const sessao = await sessaoAberta(cfg, userId)
   if (!sessao) throw new ErroHttp(409, 'nenhuma sessao aberta')
   const resultado = await aplicarFlush(cfg, userId, sessao)
+  // Corrida com outro flush do mesmo jogador: responde o estado como esta, sem
+  // simular nem gravar. Gravar aqui sobrescreveria o resultado do vencedor com
+  // um estado lido antes dele — que e exatamente o bug que o claim fecha.
+  if (resultado === FLUSH_OCUPADO) {
+    return json({
+      segundosCreditados: 0,
+      truncado: false,
+      resumo: createEmptySummary(),
+      piso: { aplicado: false, ouroAdicionado: 0, xpAdicionado: 0 },
+      estado: await carregarEstado(cfg, userId),
+    })
+  }
   // POKE da sessao sumiu — fecha e responde 409, que o cliente ja trata como
   // "nao ha sessao aberta" (nao e erro do jogador, nao gera toast).
   if (!resultado) {
@@ -248,10 +267,11 @@ async function fechar(cfg: Config, userId: string): Promise<Response> {
   const resultado = await aplicarFlush(cfg, userId, sessao)
   await fecharLinhaDeSessao(cfg, sessao.id)
   await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null })
-  // Sem resultado = POKE da sessao sumiu. A sessao fica fechada (acima), mas nao
-  // ha resumo pra mostrar — `fechada: false` faz o cliente nao abrir o modal de
-  // Farm Offline com numeros vazios.
-  if (!resultado) return json({ fechada: false })
+  // Sem resultado = POKE da sessao sumiu (ou outro request estava creditando o
+  // intervalo). A sessao fica fechada (acima), mas nao ha resumo pra mostrar —
+  // `fechada: false` faz o cliente nao abrir o modal de Farm Offline com numeros
+  // vazios.
+  if (!resultado || resultado === FLUSH_OCUPADO) return json({ fechada: false })
   return json({ fechada: true, resumo: resultado.resumo, piso: resultado.piso, estado: resultado.estado })
 }
 
@@ -286,7 +306,7 @@ async function acao(cfg: OpcoesApp, userId: string, req: Request): Promise<Respo
     await limparMundoDoJogador(cfg, userId)
   }
 
-  const dados = await carregarEstadoParaEscrita(cfg, userId)
+  const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId)
 
   // Unicidade do nick: pergunta de BANCO, entao nao cabe em `aplicarAcao` (que e
   // sincrona e pura por desenho). Sem esta checagem, escolher um nome ocupado
@@ -307,7 +327,7 @@ async function acao(cfg: OpcoesApp, userId: string, req: Request): Promise<Respo
 
   const { store, dados: estado } = criarEstadoDoJogador(dados)
   const resultado = aplicarAcao(store, estado, corpo)
-  await gravarEstado(cfg, userId, estado)
+  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
 
   return json({ ...resultado, estado })
 }
@@ -351,6 +371,13 @@ async function mercado(cfg: OpcoesApp, userId: string, req: Request, url: URL): 
   }
   if (url.pathname === '/mercado/comprar') {
     return json(await comprarAnuncio(cfg, userId, String(corpo.anuncioId ?? '')))
+  }
+  if (url.pathname === '/mercado/oferta') return json(await ofertarNoAnuncio(cfg, userId, corpo))
+  if (url.pathname === '/mercado/oferta/responder') {
+    return json(await responderOferta(cfg, userId, String(corpo.ofertaId ?? ''), corpo.aceitar === true))
+  }
+  if (url.pathname === '/mercado/oferta/cancelar') {
+    return json(await cancelarOferta(cfg, userId, String(corpo.ofertaId ?? '')))
   }
   return json({ erro: 'rota desconhecida' }, 404)
 }

@@ -23,7 +23,7 @@ import { useUiStore } from '@/stores/uiStore'
 import { useToastStore } from '@/stores/toastStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { TypeChip } from '@/components/shared/TypeChip'
-import { GameButton, GameCard, GameInput, GameSelect, SegmentedTabs } from '@/components/game/controls'
+import { GameButton, GameCard, GameInput, GameSelect, SegmentedTabs, StickyHeader } from '@/components/game/controls'
 
 const CONTINENT_LABELS: Record<string, string> = {
   johto: 'Johto',
@@ -152,6 +152,15 @@ export function HuntMenu() {
       .filter((m) => (m.continent || 'johto') === continent)
       .filter((m) => huntHasType(m, typeFilter))
       .filter((m) => huntMatches(m, term))
+      // Ordem por NIVEL (pedido explicito). A ordem anterior era a de insercao
+      // em `MAPS`, que sai do gerador agrupada por bioma — entao a lista pulava
+      // de Lv1-10 pra Lv71-80 e voltava, e escolher "a proxima hunt" virava
+      // leitura de cada card. Desempate pelo teto e depois pelo nome, pra duas
+      // hunts da mesma faixa nao trocarem de lugar entre renders.
+      .sort((a, b) =>
+        a.levelRange[0] - b.levelRange[0]
+        || a.levelRange[1] - b.levelRange[1]
+        || a.name.localeCompare(b.name))
   }, [continent, typeFilter, search])
 
   if (team.length === 0) {
@@ -171,28 +180,30 @@ export function HuntMenu() {
 
   return (
     <div className="flex flex-col gap-[.5em]">
-      {continents.length > 1 && (
-        <SegmentedTabs
-          value={continent}
-          onChange={setContinent}
-          options={continents.map((c) => ({ value: c, label: CONTINENT_LABELS[c] || c }))}
-        />
-      )}
+      <StickyHeader>
+        {continents.length > 1 && (
+          <SegmentedTabs
+            value={continent}
+            onChange={setContinent}
+            options={continents.map((c) => ({ value: c, label: CONTINENT_LABELS[c] || c }))}
+          />
+        )}
 
-      <div className="flex flex-wrap gap-[.5em]">
-        <GameInput
-          className="min-w-[10em] flex-1"
-          placeholder="Buscar local ou POKE..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <GameSelect value={typeFilter} onChange={(e) => setTypeFilter(e.target.value || 'all')}>
-          <option value="all">Todos os elementos</option>
-          {TYPE_LIST.map((type) => (
-            <option key={type} value={type}>{type}</option>
-          ))}
-        </GameSelect>
-      </div>
+        <div className="flex flex-wrap gap-[.5em]">
+          <GameInput
+            className="min-w-[10em] flex-1"
+            placeholder="Buscar local ou POKE..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <GameSelect value={typeFilter} onChange={(e) => setTypeFilter(e.target.value || 'all')}>
+            <option value="all">Todos os elementos</option>
+            {TYPE_LIST.map((type) => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </GameSelect>
+        </div>
+      </StickyHeader>
 
       {visibleMaps.length === 0 && (
         <p className="text-n500">Nenhuma hunt encontrada (pode estar oculta pelo filtro de elemento).</p>

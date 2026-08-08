@@ -6,7 +6,7 @@
 // automacoes. Por isso ela vive em z-40 (acima do painel de menu) sem escurecer
 // nada atras.
 import { useEffect, useRef, type CSSProperties } from 'react'
-import { Robot, Warning, X } from '@phosphor-icons/react'
+import { Robot, Storefront, Warning, X } from '@phosphor-icons/react'
 import { useUiStore, useBreakpoints } from '@/stores/uiStore'
 import { useWindowDrag } from '@/hooks/useWindowDrag'
 import { GameIconButton } from '@/components/game/controls'
@@ -102,9 +102,27 @@ export function AutoWindow() {
         className="win-drag-handle flex shrink-0 items-center justify-between border-b border-n800 px-[.6em] py-[.55em]"
       >
         <span className="text-[.9em] font-medium">Automacoes</span>
-        <GameIconButton variant="ghost" onClick={() => setOpen(false)} aria-label="Fechar">
-          <X />
-        </GameIconButton>
+        <span className="flex items-center gap-[.3em]">
+          {/* Atalho pra Loja (pedido explicito): a decisao "estou sem Poke Ball"
+              nasce olhando as contagens DESTE painel, e ate agora exigia fechar
+              tudo e procurar a Loja no menu. Fecha o painel junto porque a Loja
+              abre por cima dele e um painel escondido atras de outro so atrapalha
+              o clique-fora. */}
+          <GameIconButton
+            variant="ghost"
+            title="Comprar itens na Loja"
+            aria-label="Comprar itens na Loja"
+            onClick={() => {
+              setOpen(false)
+              useUiStore.getState().openScreen('loja')
+            }}
+          >
+            <Storefront />
+          </GameIconButton>
+          <GameIconButton variant="ghost" onClick={() => setOpen(false)} aria-label="Fechar">
+            <X />
+          </GameIconButton>
+        </span>
       </div>
       <div className="min-h-0 flex-1 overflow-auto p-[.6em]">
         <AutoPanel />

@@ -209,6 +209,35 @@ export function Meter({
   )
 }
 
+/**
+ * Cabecalho que gruda no topo enquanto a lista rola (abas, busca, filtros).
+ *
+ * Precisa ser o PRIMEIRO filho do corpo da janela: as margens negativas
+ * cancelam o padding do `GameWindow` pra faixa cobrir a largura inteira. Sem
+ * elas a lista apareceria correndo pelas laterais, por baixo do cabecalho.
+ *
+ * `bg-background` solido (e nao translucido) pelo mesmo motivo: com alfa, o
+ * conteudo rolando por baixo continua legivel atraves do cabecalho.
+ */
+export function StickyHeader({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div
+      className={cn(
+        // `-top-[.7em]` e nao `top-0`: o `-mt-[.7em]` que cancela o padding do
+        // corpo tambem desloca a posicao onde o sticky gruda (ele ancora pela
+        // caixa de MARGEM), e com `top-0` sobrava uma faixa de ~12px acima do
+        // cabecalho por onde a lista passava rolando. O deslocamento negativo
+        // devolve a borda do cabecalho exatamente ao topo da area rolavel.
+        'sticky -top-[.7em] z-[5] -mx-[.7em] -mt-[.7em] flex flex-col gap-[.5em]',
+        'border-b border-n800 bg-background px-[.7em] pt-[.7em] pb-[.5em]',
+        className,
+      )}
+    >
+      {children}
+    </div>
+  )
+}
+
 /** Cabecalho de secao (`COMPRAR`, `AMIGOS`, `CAPTURAS`). */
 export function SectionLabel({ children, className }: { children: ReactNode; className?: string }) {
   return (

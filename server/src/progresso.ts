@@ -7,7 +7,9 @@ import {
   OFFLINE_SIM_STEP_SECONDS, recordBatch,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary,
 } from '#engine'
-import { ErroHttp, selecionarTudo, selecionar, atualizar, inserir, apagar, type Config } from './db.js'
+import {
+  ErroHttp, selecionarTudo, selecionar, atualizar, atualizarRetornando, inserir, apagar, type Config,
+} from './db.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
 import { aplicarPiso, NENHUM_PISO, type ResultadoPiso } from './farmOffline.js'
 import { reivindicarEntregas, aplicarEntregasNoEstado } from './entregas.js'
@@ -46,7 +48,20 @@ export interface LinhaSessao {
   closed_at: string | null
 }
 
-export async function carregarEstado(cfg: Config, userId: string): Promise<GameStateData> {
+/**
+ * Estado carregado com a lista de POKEs que EXISTIAM no momento da leitura.
+ *
+ * O conjunto de ids nao e detalhe de implementacao: e o que permite `gravarEstado`
+ * distinguir "este POKE sumiu do estado, apague a linha" de "esta linha nasceu
+ * DEPOIS que eu li, nao e minha pra apagar". Sem isso, um snapshot velho apaga o
+ * POKE que outro request acabou de comprar (ver o cabecalho de `gravarEstado`).
+ */
+export interface EstadoParaEscrita {
+  estado: GameStateData
+  pokeIdsNoLoad: Set<string>
+}
+
+async function lerSnapshot(cfg: Config, userId: string): Promise<EstadoParaEscrita> {
   const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
     selecionar<PlayerSnapshot['player']>(cfg, `players?user_id=eq.${userId}&select=*`),
     selecionarTudo<PlayerSnapshot['pokemon'][number]>(cfg, `pokemon_instances?user_id=eq.${userId}&select=*`),
@@ -55,10 +70,15 @@ export async function carregarEstado(cfg: Config, userId: string): Promise<GameS
     selecionarTudo<PlayerSnapshot['autoCatchRules'][number]>(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=*`),
   ])
   if (!player[0]) throw new ErroHttp(404, 'jogador sem linha em `players`')
-  return snapshotToGameState(
+  const estado = snapshotToGameState(
     { player: player[0], pokemon, items, pokedex, autoCatchRules },
     defaultGameStateData(),
   )
+  return { estado, pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)) }
+}
+
+export async function carregarEstado(cfg: Config, userId: string): Promise<GameStateData> {
+  return (await lerSnapshot(cfg, userId)).estado
 }
 
 /**
@@ -70,37 +90,69 @@ export async function carregarEstado(cfg: Config, userId: string): Promise<GameS
  * perderia o credito. Por isso `/sessao/abrir` (que so valida a intencao)
  * continua usando `carregarEstado` cru.
  */
-export async function carregarEstadoParaEscrita(cfg: Config, userId: string): Promise<GameStateData> {
-  const estado = await carregarEstado(cfg, userId)
+export async function carregarEstadoParaEscrita(cfg: Config, userId: string): Promise<EstadoParaEscrita> {
+  const snapshot = await lerSnapshot(cfg, userId)
   const entregas = await reivindicarEntregas(cfg, userId)
-  if (entregas.length) aplicarEntregasNoEstado(estado, entregas)
-  return estado
+  if (entregas.length) aplicarEntregasNoEstado(snapshot.estado, entregas)
+  return snapshot
 }
 
-export async function gravarEstado(cfg: Config, userId: string, estado: GameStateData): Promise<void> {
+interface LinhaLocalizacao {
+  id: string
+  user_id: string
+  location: string
+}
+
+/**
+ * Grava o snapshot do jogador nas cinco tabelas.
+ *
+ * `pokeIdsNoLoad` (os ids que existiam quando ESTE estado foi lido) e o que
+ * impede um snapshot velho de destruir POKE que mudou de dono no meio do
+ * caminho. Duas regras, e as duas vieram de bug real de duplicacao/sumico:
+ *
+ *  - So APAGA linha que este snapshot conhecia. Uma linha criada depois da
+ *    leitura (o POKE que o jogador acabou de comprar no Mercado, num request
+ *    paralelo) nao esta no conjunto — antes ela caia no diff de remocao e o
+ *    comprador pagava por um POKE que sumia.
+ *  - So GRAVA linha que AINDA e deste jogador e ainda esta em team/bag. Sem
+ *    isso, o upsert (que escreve `user_id` e `location` a partir do estado em
+ *    memoria) ressuscitava o POKE recem-anunciado de volta pra mochila — com o
+ *    anuncio ainda de pe, ou seja, o mesmo POKE em dois lugares — e revertia
+ *    pro vendedor um POKE que o comprador ja tinha pago.
+ */
+export async function gravarEstado(
+  cfg: Config,
+  userId: string,
+  estado: GameStateData,
+  pokeIdsNoLoad: Set<string>,
+): Promise<void> {
   await atualizar(cfg, `players?user_id=eq.${userId}`, gameStateToPlayerRow(userId, estado))
 
   const linhasPoke = gameStateToPokemonRows(userId, estado)
   const idsAgora = new Set(linhasPoke.map((l) => l.id))
-  // Diff de remocao: POKE vendido/liberado durante a simulacao tem que sumir do
-  // banco, senao ressuscita no proximo load. Comparado contra o que esta LA, e
-  // nao contra um cache em memoria — o servidor nao guarda estado entre
-  // requests (pra poder rodar em serverless).
-  //
-  // O filtro por `location` NAO e cosmetico: um POKE anunciado no Mercado sai
-  // do estado do jogador de proposito (location='market', ver a migration
-  // `pokemon_pode_estar_no_mercado`). Sem o filtro, o primeiro flush depois de
-  // anunciar veria a linha "sobrando" no banco e a APAGARIA — o POKE
-  // desapareceria do jogo com o anuncio dele ainda de pe.
-  const noBanco = await selecionarTudo<{ id: string }>(
-    cfg,
-    `pokemon_instances?user_id=eq.${userId}&location=in.(team,bag)&select=id`,
-  )
-  const remover = noBanco.map((l) => l.id).filter((id) => !idsAgora.has(id))
+  // Uma leitura so, cobrindo o que eu conhecia e o que estou tentando gravar.
+  const idsDeInteresse = [...new Set([...pokeIdsNoLoad, ...idsAgora])]
+  const atuais = idsDeInteresse.length
+    ? await selecionarTudo<LinhaLocalizacao>(
+      cfg,
+      `pokemon_instances?id=in.(${idsDeInteresse.join(',')})&select=id,user_id,location`,
+    )
+    : []
+  const porId = new Map(atuais.map((l) => [l.id, l]))
+  const aindaMeu = (l: LinhaLocalizacao | undefined): boolean =>
+    l != null && l.user_id === userId && (l.location === 'team' || l.location === 'bag')
+
+  const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)))
   if (remover.length) {
     await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${remover.join(',')})`)
   }
-  if (linhasPoke.length) await inserir(cfg, 'pokemon_instances', linhasPoke, { upsert: 'id' })
+  // Linha sem par no banco e POKE novo (captura, inicial, compra) — grava.
+  // Linha com par que ja nao e minha fica de fora.
+  const gravarPoke = linhasPoke.filter((l) => {
+    const atual = porId.get(String(l.id))
+    return atual == null || aindaMeu(atual)
+  })
+  if (gravarPoke.length) await inserir(cfg, 'pokemon_instances', gravarPoke, { upsert: 'id' })
 
   const linhasItens = gameStateToItemRows(userId, estado)
   // Mesmo diff de remocao que `pokemon_instances` acima. Sem ele, um item
@@ -153,13 +205,28 @@ export interface ResultadoFlush {
 }
 
 /**
+ * Outro request do mesmo jogador ja esta creditando este intervalo.
+ *
+ * Distinto de `null` (sessao insimulavel, tem que fechar): aqui nao ha nada
+ * errado, so nao ha nada a fazer — quem perdeu a corrida nao simula, nao
+ * carrega e NAO grava, pra nao sobrescrever o resultado de quem ganhou com um
+ * estado lido antes dele.
+ */
+export const FLUSH_OCUPADO = 'ocupado' as const
+export type ResultadoFlushOuOcupado = ResultadoFlush | null | typeof FLUSH_OCUPADO
+
+/**
  * O coracao da Fase D: simula do ultimo flush ate agora e grava.
  *
  * Repare no que NAO entra aqui: nada vindo do cliente. Nem quanto tempo passou
  * (sai de `now()` menos `last_flush_at`), nem quantos kills houve, nem quanto
  * ouro. O cliente so declarou, na abertura da sessao, em qual hunt esta.
  */
-export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSessao): Promise<ResultadoFlush | null> {
+export async function aplicarFlush(
+  cfg: Config,
+  userId: string,
+  sessao: LinhaSessao,
+): Promise<ResultadoFlushOuOcupado> {
   const agora = Date.now()
   const desde = new Date(sessao.last_flush_at).getTime()
   const bruto = (agora - desde) / 1000
@@ -170,7 +237,33 @@ export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSes
   const segundos = Math.max(0, Math.min(bruto, MAX_SEGUNDOS_POR_FLUSH))
   const truncado = bruto > MAX_SEGUNDOS_POR_FLUSH
 
-  const dados = await carregarEstadoParaEscrita(cfg, userId)
+  // ---------------------------------------------------------------------
+  // CLAIM ATOMICO DO INTERVALO — a correcao do bug de DUPLICACAO DE POKE.
+  //
+  // O cliente tem varios gatilhos de flush (timer de 30s, toda `/acao`, toda
+  // rota de Mercado, `visibilitychange`, e o commit forcado de level-up), entao
+  // dois requests do mesmo jogador simulando o MESMO intervalo nao e caso raro:
+  // e o caso normal quando o jogador clica em algo perto do tique dos 30s.
+  //
+  // Ouro nao denunciava porque e gravado como valor ABSOLUTO — os dois flushes
+  // convergiam pro mesmo total. Ja uma CAPTURA cria linha nova com `uid` de
+  // `crypto.randomUUID()`, que fica FORA da sequencia semeada de proposito (ver
+  // core/rng.ts): os dois flushes sorteavam o mesmo POKE e gravavam com ids
+  // DIFERENTES. Se o diff de remocao do segundo lesse o banco antes do insert do
+  // primeiro, as duas linhas sobreviviam — o mesmo POKE capturado duas vezes.
+  //
+  // `last_flush_at=eq.<valor lido>` no filtro e o que serializa: quem escreve
+  // primeiro move a ancora e o outro nao encontra linha, entao desiste antes de
+  // carregar estado, reivindicar entrega ou simular qualquer coisa.
+  const [reivindicada] = await atualizarRetornando<LinhaSessao>(
+    cfg,
+    `game_sessions?id=eq.${sessao.id}&closed_at=is.null`
+    + `&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}`,
+    { last_flush_at: new Date(agora).toISOString() },
+  )
+  if (!reivindicada) return FLUSH_OCUPADO
+
+  const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId)
   const { store, dados: estado } = criarEstadoDoJogador(dados)
   // Copia (nao referencia): a simulacao muta `estado.unlockedContinents` em
   // lugar quando o jogador limpa a sequencia do Campeao Lance, e o Hall da
@@ -236,7 +329,7 @@ export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSes
   }
 
   estado.currentMapId = sessao.map_id
-  await gravarEstado(cfg, userId, estado)
+  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
 
   // Hall da Fama: a unica coisa que libera o continente `kanto` e limpar a
   // sequencia do Campeao Lance (`unlocksContinentOnClear`, ver
@@ -253,11 +346,11 @@ export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSes
     }, { upsert: 'user_id,conquista' })
   }
 
-  // `last_flush_at` avanca pra AGORA, nao pra `desde + segundos`: o tempo
-  // descartado pelo teto foi tempo real que passou, e credita-lo depois daria
-  // ao jogador o direito de acumular semanas paradas e sacar tudo de uma vez.
+  // `last_flush_at` ja avancou pra AGORA no claim la em cima — e nao pra
+  // `desde + segundos`: o tempo descartado pelo teto foi tempo real que passou,
+  // e credita-lo depois daria ao jogador o direito de acumular semanas paradas e
+  // sacar tudo de uma vez.
   await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, {
-    last_flush_at: new Date(agora).toISOString(),
     simulated_seconds: Number(sessao.simulated_seconds) + segundos,
     // Grava onde a sequencia parou. `world.rng` e o MESMO objeto passado pro
     // `buildMapWorld` — `nextFloat` muta em lugar de proposito (ver core/rng.ts),

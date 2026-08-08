@@ -17,13 +17,15 @@ import { getAbility } from '@/data/abilities'
 import { MAPS } from '@/data/maps'
 import type { HuntMapDef } from '@/data/huntTypes'
 import { getEncounter } from '@/data/enemies'
+import { regionOfSpecies, REGION_LABEL, type Region } from '@/data/regions'
 import { useGameStateStore, type PokedexKillCount } from '@/stores/gameStateStore'
+import { useWorldStore } from '@/stores/worldStore'
 import { useUiStore } from '@/stores/uiStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { TypeChip } from '@/components/shared/TypeChip'
 import { TypeWeaknessSection } from '@/components/shared/TypeWeaknessSection'
-import { GameButton, GameInput } from '@/components/game/controls'
+import { GameButton, GameInput, SegmentedTabs, StickyHeader } from '@/components/game/controls'
 import { focusHunt } from '@/features/hunt/HuntMenu'
 
 // Instancia so-pra-exibicao do botao "Ver perfil completo": uma especie sozinha
@@ -176,9 +178,32 @@ function SpeciesDetail({ species }: { species: Species }) {
   )
 }
 
+type Escopo = 'hunt' | 'continente' | 'tudo'
+
+const ESCOPOS: { value: Escopo; label: string }[] = [
+  { value: 'hunt', label: 'Hunt Atual' },
+  { value: 'continente', label: 'Continente' },
+  { value: 'tudo', label: 'Pokédex' },
+]
+
+/** Ids das especies que podem aparecer numa hunt. */
+function especiesDaHunt(map: HuntMapDef): Set<string> {
+  const ids = new Set<string>()
+  for (const encId of map.enemyPool) {
+    const enc = getEncounter(encId)
+    if (enc) ids.add(enc.speciesId)
+  }
+  return ids
+}
+
 export function PokedexMenu() {
   const pokedexKills = useGameStateStore((s) => s.pokedexKills)
+  // A hunt em que o jogador esta AGORA. No Hospital nao ha nenhuma — o escopo
+  // "Hunt Atual" fica desabilitado em vez de mostrar uma lista vazia sem dizer
+  // por que.
+  const mapaAtual = useWorldStore((w) => w.mapDef)
   const [search, setSearch] = useState('')
+  const [escopo, setEscopo] = useState<Escopo>('tudo')
   const [expandedSpeciesId, setExpandedSpeciesId] = useState<string | null>(null)
   const [shinyView, setShinyView] = useState(false)
 
@@ -187,24 +212,57 @@ export function PokedexMenu() {
     [],
   )
 
+  const escopoAtivo: Escopo = escopo === 'hunt' && !mapaAtual ? 'tudo' : escopo
+  // Regiao do escopo "Continente": a do mapa onde o jogador esta. As hunts do
+  // Modo Pesadelo espelham as normais e carregam `continent: 'nightmare'`, que
+  // nao e regiao de especie nenhuma — nelas o escopo cai pra Johto, a regiao
+  // padrao do jogo.
+  const regiaoAtual: Region = mapaAtual?.continent === 'kanto' ? 'kanto' : 'johto'
+
   const visible = useMemo(() => {
     const term = search.trim().toLowerCase()
-    return term ? allSpecies.filter((s) => s.name.toLowerCase().includes(term)) : allSpecies
-  }, [allSpecies, search])
+    const doEscopo = (() => {
+      if (escopoAtivo === 'hunt' && mapaAtual) {
+        const ids = especiesDaHunt(mapaAtual)
+        return allSpecies.filter((s) => ids.has(s.id))
+      }
+      if (escopoAtivo === 'continente') {
+        return allSpecies.filter((s) => regionOfSpecies(s.id) === regiaoAtual)
+      }
+      return allSpecies
+    })()
+    return term ? doEscopo.filter((s) => s.name.toLowerCase().includes(term)) : doEscopo
+  }, [allSpecies, search, escopoAtivo, mapaAtual, regiaoAtual])
 
   return (
     <div className="flex flex-col gap-[.45em]">
-      <div className="flex gap-[.5em]">
-        <GameInput
-          className="flex-1"
-          placeholder="Buscar Pokemon..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <GameButton variant={shinyView ? 'primary' : 'secondary'} onClick={() => setShinyView((v) => !v)}>
-          ✨ {shinyView ? 'Abates Shiny' : 'Abates Totais'}
-        </GameButton>
-      </div>
+      <StickyHeader>
+        <div className="flex gap-[.5em]">
+          <GameInput
+            className="flex-1"
+            placeholder="Buscar Pokemon..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <GameButton variant={shinyView ? 'primary' : 'secondary'} onClick={() => setShinyView((v) => !v)}>
+            ✨ {shinyView ? 'Abates Shiny' : 'Abates Totais'}
+          </GameButton>
+        </div>
+        <div className="flex flex-wrap items-center gap-[.4em]">
+          <SegmentedTabs
+            value={escopoAtivo}
+            onChange={setEscopo}
+            options={ESCOPOS.map((e) => (
+              e.value === 'hunt' && !mapaAtual ? { ...e, label: 'Hunt Atual (fora)' } : e
+            ))}
+          />
+          <span className="text-[.75em] text-n500">
+            {escopoAtivo === 'hunt' && mapaAtual && `${mapaAtual.name} · ${visible.length}`}
+            {escopoAtivo === 'continente' && `${REGION_LABEL[regiaoAtual]} · ${visible.length}`}
+            {escopoAtivo === 'tudo' && `${visible.length} espécies`}
+          </span>
+        </div>
+      </StickyHeader>
 
       {visible.length === 0 && <p className="text-n500">Nenhum Pokemon encontrado.</p>}
 

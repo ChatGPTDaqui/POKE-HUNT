@@ -28,7 +28,7 @@ import { PokeNameTag } from '@/components/shared/PokeNameTag'
 import { ItemTooltip } from '@/components/shared/ItemTooltip'
 import { linkarPoke, tratouComoLink } from '@/components/shared/linkarNoChat'
 import {
-  GameButton, GameCard, GameCheck, GameIconButton, GameInput, SectionLabel, SegmentedTabs,
+  GameButton, GameCard, GameCheck, GameIconButton, GameInput, SectionLabel, SegmentedTabs, StickyHeader,
 } from '@/components/game/controls'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
 
@@ -52,9 +52,12 @@ function ItemIcon({ itemId, name }: { itemId: string; name: string }) {
   )
 }
 
-// Atalhos de quantidade. x100/x1000 sao pedido explicito; o "Max" entrou junto
-// porque sem ele comprar "tudo que o ouro permite" continuaria sendo digitacao
-// a mao — e e a operacao mais comum depois de uma sessao longa de farm.
+// Atalhos de quantidade. Pedido explicito: o rotulo virou "+N" e o clique
+// EXECUTA a transacao na hora, sem passar pelo botao de confirmar.
+//
+// O campo numerico + o botao "Comprar"/"Vender" continuam existindo: eles sao o
+// caminho pra uma quantidade qualquer (37 pocoes) e pra conferir o total antes
+// de pagar. Os atalhos cobrem o caso comum; o campo cobre o resto.
 const ATALHOS_QTD = [10, 100, 1000] as const
 
 function QtyInput({
@@ -75,21 +78,43 @@ function QtyInput({
         onChange={(e) => onChange(limita(Number(e.target.value) || 1))}
         className="w-[4.2em] text-center"
       />
-      {ATALHOS_QTD.map((n) => (
-        <GameButton
-          key={n}
-          variant="ghost"
-          className="px-[.4em] text-[.75em]"
-          disabled={max < n}
-          title={max < n ? `Voce so pode ate ${max}` : `Definir ${n}`}
-          onClick={() => onChange(limita(n))}
-        >
-          x{n}
-        </GameButton>
-      ))}
       <GameButton variant="ghost" className="px-[.4em] text-[.75em]" onClick={() => onChange(limita(max))}>
         Max
       </GameButton>
+    </span>
+  )
+}
+
+/**
+ * `+10 / +100 / +1000` — um clique, uma transacao.
+ *
+ * `disabled` quando o atalho nao cabe (ouro insuficiente ou estoque menor):
+ * executar "+1000" comprando 340 seria uma quantidade que o jogador nao pediu,
+ * e executar nada sem dizer por que parece botao quebrado — dai o `title`
+ * explicando o limite.
+ */
+function AtalhosDeTransacao({
+  max, verbo, ocupado, onExecutar,
+}: {
+  max: number
+  verbo: 'Comprar' | 'Vender'
+  ocupado: boolean
+  onExecutar: (qtd: number) => void
+}) {
+  return (
+    <span className="flex items-center gap-[.25em]">
+      {ATALHOS_QTD.map((n) => (
+        <GameButton
+          key={n}
+          variant="accent"
+          className="px-[.45em] text-[.75em]"
+          disabled={ocupado || max < n}
+          title={max < n ? `Só dá para ${verbo.toLowerCase()} ${max} agora` : `${verbo} ${n} agora`}
+          onClick={() => onExecutar(n)}
+        >
+          +{n}
+        </GameButton>
+      ))}
     </span>
   )
 }
@@ -171,6 +196,12 @@ function ItensTab() {
                 <div className="text-[.78em] text-gold">{fmt.format(item.buyPrice)} ouro</div>
               </div>
               <QtyInput value={qty} max={maxAffordable} onChange={(v) => setBuyQty((m) => ({ ...m, [item.id]: v }))} />
+              <AtalhosDeTransacao
+                max={Math.floor(gold / item.buyPrice)}
+                verbo="Comprar"
+                ocupado={acao.pendingKey != null}
+                onExecutar={(n) => void acao.run(`${key}:${n}`, () => comprar(item.id, n, item.name))}
+              />
               {/* Montante final ANTES de confirmar (pedido explicito). Fica em
                   linha propria e nao so dentro do botao: com x1000 selecionado o
                   numero passa de 6 digitos e o rotulo do botao quebrava. */}
@@ -249,6 +280,12 @@ function ItensTab() {
               {!locked && (
                 <>
                   <QtyInput value={qty} max={owned} onChange={(v) => setSellQty((m) => ({ ...m, [itemId]: v }))} />
+                  <AtalhosDeTransacao
+                    max={owned}
+                    verbo="Vender"
+                    ocupado={acao.pendingKey != null}
+                    onExecutar={(n) => void acao.run(`sell:${itemId}:${n}`, () => vender(itemId, n, item.name))}
+                  />
                   <span className="w-full text-[.78em] text-n400 sm:w-auto">
                     Recebe: <b className="text-gold">{fmt.format(item.sellPrice * qty)}</b>
                   </span>
@@ -541,7 +578,7 @@ export function ShopMenu() {
 
   return (
     <div className="flex flex-col gap-[.55em]">
-      <div className="flex flex-wrap items-center gap-[.55em]">
+      <StickyHeader className="flex-row flex-wrap items-center">
         <SegmentedTabs
           value={tab}
           onChange={setTab}
@@ -558,7 +595,7 @@ export function ShopMenu() {
             <Diamond weight="fill" /> {fmt.format(diamonds)}
           </span>
         </span>
-      </div>
+      </StickyHeader>
       {tab === 'itens' ? <ItensTab /> : <PokemonsTab />}
     </div>
   )

@@ -8,6 +8,8 @@ import { trainerExpProgress } from '@/engine/systems/progressionSystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useUiStore, useBreakpoints, type ScreenName } from '@/stores/uiStore'
 import { Meter } from '@/components/game/controls'
+import { NotificationBadge } from '@/components/game/NotificationBadge'
+import { usePendenciasDoCorreio } from '@/hooks/usePendencias'
 import { cn } from '@/lib/utils'
 
 const SIDE_MENUS: { screen: ScreenName; label: string; Icon: typeof Envelope }[] = [
@@ -91,6 +93,7 @@ export function SideMenuColumn() {
   const currentScreen = useUiStore((s) => s.currentScreen)
   const toggleScreen = useUiStore((s) => s.toggleScreen)
   const { narrow } = useBreakpoints()
+  const pendenciasCorreio = usePendenciasDoCorreio()
 
   return (
     // `data-keep-open`: ver a nota em MainMenu — estes botoes alternam a tela
@@ -105,7 +108,7 @@ export function SideMenuColumn() {
             title={label}
             onClick={() => toggleScreen(screen)}
             className={cn(
-              'hud-surface flex cursor-pointer items-center gap-[.45em] rounded-lg border px-[.55em] py-[.45em]',
+              'hud-surface relative flex cursor-pointer items-center gap-[.45em] rounded-lg border px-[.55em] py-[.45em]',
               'font-[inherit] text-[.82em] text-foreground transition-colors',
               'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
               active ? 'border-n400 bg-n800' : 'border-n800 hover:border-primary',
@@ -113,6 +116,9 @@ export function SideMenuColumn() {
           >
             <Icon className="text-[1.25em] text-n300" />
             {!narrow && <span>{label}</span>}
+            {screen === 'correio' && (
+              <NotificationBadge count={pendenciasCorreio} titulo={`${pendenciasCorreio} no correio`} />
+            )}
           </button>
         )
       })}

@@ -22,7 +22,7 @@ import { PokeNameTag } from '@/components/shared/PokeNameTag'
 import { linkarItem, linkarPoke, tratouComoLink } from '@/components/shared/linkarNoChat'
 import { ItemTooltip } from '@/components/shared/ItemTooltip'
 import {
-  GameButton, GameCard, GameCheck, GameIconButton, GameInput, GameSelect, SegmentedTabs,
+  GameButton, GameCard, GameCheck, GameIconButton, GameInput, GameSelect, SegmentedTabs, StickyHeader,
 } from '@/components/game/controls'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
 import { cn } from '@/lib/utils'
@@ -277,14 +277,16 @@ export function BagMenu() {
   const [tab, setTab] = useState<'pokemons' | 'itens'>('pokemons')
   return (
     <div className="flex flex-col gap-[.55em]">
-      <SegmentedTabs
-        value={tab}
-        onChange={setTab}
-        options={[
-          { value: 'pokemons', label: 'Pokemons' },
-          { value: 'itens', label: 'Itens' },
-        ]}
-      />
+      <StickyHeader>
+        <SegmentedTabs
+          value={tab}
+          onChange={setTab}
+          options={[
+            { value: 'pokemons', label: 'Pokemons' },
+            { value: 'itens', label: 'Itens' },
+          ]}
+        />
+      </StickyHeader>
       {tab === 'pokemons' ? <PokemonsTab /> : <ItensTab />}
     </div>
   )

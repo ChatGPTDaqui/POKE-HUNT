@@ -11,7 +11,7 @@
 // jogo sob autoridade.
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowsLeftRight, Coin, Diamond, Storefront, Tag, X } from '@phosphor-icons/react'
+import { ArrowsLeftRight, Coin, Diamond, Gavel, Storefront, Tag, X } from '@phosphor-icons/react'
 import {
   servidor, servidorAtivo, ErroServidor,
   type AnuncioMercado, type NegocioMercado, type OrdemMercado, type ResumoItemMercado,
@@ -27,7 +27,7 @@ import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { ItemTooltip } from '@/components/shared/ItemTooltip'
 import {
   ComingSoon, GameButton, GameCard, GameCheck, GameInput, GameSelect,
-  SectionLabel, SegmentedTabs,
+  SectionLabel, SegmentedTabs, StickyHeader,
 } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 
@@ -191,17 +191,33 @@ function ComprarItens() {
     staleTime: STALE_MS,
   })
 
-  // Todo item do jogo aparece, mesmo sem ordem nenhuma: sem isso nao haveria
-  // como abrir o livro de um item pra ser o PRIMEIRO a anunciar.
+  // SO item com proposta ativa (pedido explicito). Antes a lista trazia os ~30
+  // itens do jogo com "sem oferta" na maioria das linhas, e achar o que
+  // realmente estava a venda virava garimpo.
+  //
+  // Nao se perde nada: quem quer ser o PRIMEIRO a anunciar um item usa a aba
+  // "Vender", que lista o inventario inteiro. O livro daquele item passa a
+  // existir na hora.
   const linhas = useMemo(() => {
     const porId = new Map<string, ResumoItemMercado>((data?.itens ?? []).map((i) => [i.itemId, i]))
-    return Object.values(ITEMS).map((item) => ({
-      item,
-      resumo: porId.get(item.id) ?? null,
-    }))
+    return Object.values(ITEMS)
+      .filter((item) => porId.has(item.id))
+      .map((item) => ({ item, resumo: porId.get(item.id) ?? null }))
   }, [data])
 
   if (isLoading) return <p className="text-n500">Carregando o Mercado...</p>
+
+  if (linhas.length === 0) {
+    return (
+      <GameCard className="flex flex-col items-center gap-[.3em] p-[1em] text-center">
+        <Tag className="text-[1.6em] text-n500" />
+        <b className="font-medium">Nenhuma proposta existente no momento.</b>
+        <span className="text-[.85em] text-n500">
+          Ninguém está anunciando itens agora. Use a aba <b>Vender</b> para ser o primeiro.
+        </span>
+      </GameCard>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-[.4em]">
@@ -218,10 +234,18 @@ function ComprarItens() {
               </span>
             </ItemTooltip>
             <span className="flex-1" />
+            {/* A lista so traz item com ordem ativa, mas a ordem pode ser de
+                COMPRA — e ai nao ha nada a venda. Dizer "sem oferta" seria
+                confuso ao lado de uma linha que so aparece porque tem gente
+                querendo comprar: mostra a procura em vez de um vazio. */}
             <span className="text-[.8em] text-n400">
-              {resumo?.melhorVenda != null
-                ? <>a partir de <b className="text-gold">{fmt.format(resumo.melhorVenda)}</b> · {fmt.format(resumo.emVenda)} un.</>
-                : <span className="text-n600">sem oferta</span>}
+              {resumo?.melhorVenda != null ? (
+                <>a partir de <b className="text-gold">{fmt.format(resumo.melhorVenda)}</b> · {fmt.format(resumo.emVenda)} un.</>
+              ) : resumo?.melhorCompra != null ? (
+                <>procura-se a <b className="text-ok">{fmt.format(resumo.melhorCompra)}</b> · {fmt.format(resumo.emCompra)} un.</>
+              ) : (
+                <span className="text-n600">sem oferta</span>
+              )}
             </span>
           </GameCard>
           {aberto === item.id && (
@@ -235,10 +259,48 @@ function ComprarItens() {
   )
 }
 
+/**
+ * Filtro rapido de um toque: botao que liga/desliga (pedido explicito).
+ *
+ * `GameCheck` nao serve aqui — a caixinha some no meio de uma fileira de
+ * filtros e o alvo de toque fica pequeno demais no celular. Aqui o botao
+ * INTEIRO e o alvo, e o estado ligado e legivel pela cor.
+ */
+function FiltroToggle({
+  ativo, cor, onClick, children,
+}: {
+  ativo: boolean
+  cor?: string
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={ativo}
+      onClick={onClick}
+      className={cn(
+        'flex cursor-pointer items-center gap-[.3em] rounded-full border px-[.6em] py-[.25em] text-[.8em] transition-colors',
+        ativo ? 'border-current bg-n800 font-medium' : 'border-n700 text-n500 hover:border-n600',
+      )}
+      style={ativo && cor ? { color: cor } : undefined}
+    >
+      {children}
+    </button>
+  )
+}
+
 function ComprarPokes() {
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const [busca, setBusca] = useState('')
-  const [moeda, setMoeda] = useState<'todas' | 'gold' | 'diamond'>('todas')
+  // Tres filtros independentes (pedido explicito). Moeda comeca com as duas
+  // ligadas; "Somente Oferta" comeca desligado — ele RESTRINGE, e um filtro
+  // restritivo ligado por padrao esconderia a maioria dos anuncios sem o
+  // jogador ter pedido.
+  const [verGold, setVerGold] = useState(true)
+  const [verDiamante, setVerDiamante] = useState(true)
+  const [somenteOferta, setSomenteOferta] = useState(false)
+  const [lance, setLance] = useState<Record<string, number>>({})
   const [shinyOnly, setShinyOnly] = useState(false)
   const [nivelMin, setNivelMin] = useState(0)
   const [ivMin, setIvMin] = useState(0)
@@ -251,6 +313,7 @@ function ComprarPokes() {
     staleTime: STALE_MS,
   })
   const comprar = useAcaoMercado((anuncioId: string) => servidor.comprarAnuncio(anuncioId))
+  const ofertar = useAcaoMercado(servidor.ofertar)
 
   const filtrados = useMemo(() => {
     const termo = busca.trim().toLowerCase()
@@ -259,7 +322,9 @@ function ComprarPokes() {
         const species = SPECIES[a.species_id]
         if (!species) return false
         if (termo && !species.name.toLowerCase().includes(termo)) return false
-        if (moeda !== 'todas' && a.currency !== moeda) return false
+        if (a.currency === 'gold' && !verGold) return false
+        if (a.currency === 'diamond' && !verDiamante) return false
+        if (somenteOferta && !a.apenas_oferta) return false
         if (shinyOnly && !a.is_shiny) return false
         if (a.level < nivelMin) return false
         if (a.iv_percent < ivMin) return false
@@ -268,9 +333,11 @@ function ComprarPokes() {
       .sort((a, b) => {
         if (ordem === 'nivel') return b.level - a.level
         if (ordem === 'iv') return b.iv_percent - a.iv_percent
-        return a.price - b.price
+        // Anuncio de lance nao tem preco: vai pro fim da ordenacao por preco em
+        // vez de virar 0 e fingir ser o mais barato do Mercado.
+        return (a.price ?? Number.MAX_SAFE_INTEGER) - (b.price ?? Number.MAX_SAFE_INTEGER)
       })
-  }, [data, busca, moeda, shinyOnly, nivelMin, ivMin, raridades, ordem])
+  }, [data, busca, verGold, verDiamante, somenteOferta, shinyOnly, nivelMin, ivMin, raridades, ordem])
 
   if (isLoading) return <p className="text-n500">Carregando anuncios...</p>
 
@@ -281,16 +348,23 @@ function ComprarPokes() {
           placeholder="Buscar especie..." value={busca}
           onChange={(e) => setBusca(e.target.value)} className="min-w-[9em] flex-1"
         />
-        <GameSelect value={moeda} onChange={(e) => setMoeda(e.target.value as typeof moeda)}>
-          <option value="todas">Ouro e Diamante</option>
-          <option value="gold">So Ouro</option>
-          <option value="diamond">So Diamante</option>
-        </GameSelect>
         <GameSelect value={ordem} onChange={(e) => setOrdem(e.target.value as typeof ordem)}>
           <option value="preco">Menor preco</option>
           <option value="nivel">Maior nivel</option>
           <option value="iv">Maior IV</option>
         </GameSelect>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-[.35em]">
+        <FiltroToggle ativo={verGold} cor="var(--color-gold)" onClick={() => setVerGold((v) => !v)}>
+          <Coin weight="fill" /> Gold
+        </FiltroToggle>
+        <FiltroToggle ativo={verDiamante} cor="var(--color-diamond)" onClick={() => setVerDiamante((v) => !v)}>
+          <Diamond weight="fill" /> Diamante
+        </FiltroToggle>
+        <FiltroToggle ativo={somenteOferta} onClick={() => setSomenteOferta((v) => !v)}>
+          <Gavel /> Somente Oferta
+        </FiltroToggle>
       </div>
 
       <div className="flex flex-wrap items-center gap-[.5em] text-[.8em] text-n400">
@@ -353,16 +427,47 @@ function ComprarPokes() {
               </div>
               <div className="text-[.75em] text-n500">
                 IV {a.iv_percent}% · vendedor {a.vendedor}
+                {a.apenas_oferta && ` · ${a.ofertas ?? 0} oferta(s)`}
               </div>
             </div>
-            <Moeda valor={a.price} tipo={a.currency} />
-            <GameButton
-              variant="primary"
-              disabled={comprar.isPending}
-              onClick={() => comprar.mutate(a.id)}
-            >
-              Comprar
-            </GameButton>
+            {a.apenas_oferta ? (
+              <>
+                <span className="flex flex-col text-[.78em] text-n400">
+                  <span className="flex items-center gap-[.25em] text-warn">
+                    <Gavel weight="fill" /> Somente lance
+                  </span>
+                  {a.melhorOferta != null && (
+                    <span>maior: <Moeda valor={a.melhorOferta} tipo={a.currency} /></span>
+                  )}
+                </span>
+                <GameInput
+                  type="number"
+                  min={1}
+                  className="w-[6.5em]"
+                  placeholder="Seu lance"
+                  value={lance[a.id] ?? ''}
+                  onChange={(e) => setLance((m) => ({ ...m, [a.id]: Math.max(0, Math.floor(Number(e.target.value) || 0)) }))}
+                />
+                <GameButton
+                  variant="primary"
+                  disabled={ofertar.isPending || !(lance[a.id] > 0)}
+                  onClick={() => ofertar.mutate({ anuncioId: a.id, valor: lance[a.id] })}
+                >
+                  Ofertar
+                </GameButton>
+              </>
+            ) : (
+              <>
+                <Moeda valor={a.price ?? 0} tipo={a.currency} />
+                <GameButton
+                  variant="primary"
+                  disabled={comprar.isPending}
+                  onClick={() => comprar.mutate(a.id)}
+                >
+                  Comprar
+                </GameButton>
+              </>
+            )}
             {species && (
               <GameButton variant="ghost" onClick={() => showProfile(anuncioComoPoke(a), species)}>
                 Ver
@@ -468,6 +573,7 @@ function VenderPokes() {
   const [uid, setUid] = useState('')
   const [preco, setPreco] = useState(5000)
   const [moeda, setMoeda] = useState<'gold' | 'diamond'>('gold')
+  const [apenasOferta, setApenasOferta] = useState(false)
   const anunciar = useAcaoMercado(servidor.anunciarPoke)
 
   // POKE travado nao aparece: a trava existe justamente pra ele nao sair da
@@ -493,13 +599,17 @@ function VenderPokes() {
         </GameSelect>
       </label>
       <div className="flex flex-wrap items-end gap-[.5em]">
-        <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
-          Preco
-          <GameInput
-            type="number" min={1} className="w-[8em]" value={preco}
-            onChange={(e) => setPreco(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
-          />
-        </label>
+        {/* Em "somente lance" nao existe preco de compra direta — o campo sai da
+            tela em vez de ficar desabilitado com um numero que nao vale nada. */}
+        {!apenasOferta && (
+          <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
+            Preco
+            <GameInput
+              type="number" min={1} className="w-[8em]" value={preco}
+              onChange={(e) => setPreco(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+            />
+          </label>
+        )}
         <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
           Moeda
           <GameSelect value={moeda} onChange={(e) => setMoeda(e.target.value as typeof moeda)}>
@@ -511,12 +621,28 @@ function VenderPokes() {
           O POKE sai da sua mochila enquanto o anuncio estiver de pe.
         </div>
       </div>
+      <GameCheck checked={apenasOferta} onChange={setApenasOferta}>
+        <span className="inline-flex items-center gap-[.3em]">
+          <Gavel /> Somente Lance (sem compra direta)
+        </span>
+      </GameCheck>
+      {apenasOferta && (
+        <p className="text-[.78em] text-n500">
+          O anúncio sai sem preço: outros jogadores enviam ofertas em {moeda === 'gold' ? 'ouro' : 'diamante'} e
+          você aceita ou recusa em <b>Anúncios Ativos</b>. O valor de quem oferta fica retido até você responder.
+        </p>
+      )}
       <GameButton
         variant="primary"
         disabled={anunciar.isPending || !escolhido}
-        onClick={() => escolhido && anunciar.mutate({ pokeUid: escolhido.uid, price: preco, currency: moeda })}
+        onClick={() => escolhido && anunciar.mutate({
+          pokeUid: escolhido.uid,
+          price: apenasOferta ? null : preco,
+          currency: moeda,
+          apenasOferta,
+        })}
       >
-        {anunciar.isPending ? '...' : 'Colocar a venda'}
+        {anunciar.isPending ? '...' : apenasOferta ? 'Abrir para lances' : 'Colocar a venda'}
       </GameButton>
     </GameCard>
   )
@@ -534,13 +660,79 @@ function Ativos() {
   })
   const cancelarOrdem = useAcaoMercado((id: string) => servidor.cancelarOrdem(id))
   const cancelarAnuncio = useAcaoMercado((id: string) => servidor.cancelarAnuncio(id))
+  const responder = useAcaoMercado(({ id, aceitar }: { id: string; aceitar: boolean }) =>
+    servidor.responderOferta(id, aceitar))
+  const cancelarOferta = useAcaoMercado((id: string) => servidor.cancelarOferta(id))
 
   if (isLoading) return <p className="text-n500">Carregando...</p>
   const ordens: OrdemMercado[] = data?.ordens ?? []
   const anuncios: AnuncioMercado[] = data?.anuncios ?? []
+  const recebidas = data?.ofertasRecebidas ?? []
+  const minhas = data?.minhasOfertas ?? []
 
   return (
     <div className="flex flex-col gap-[.45em]">
+      {/* Ofertas recebidas ficam no TOPO: sao a unica linha desta aba que exige
+          uma decisao do jogador — o resto e so "cancelar se quiser". */}
+      {recebidas.length > 0 && (
+        <>
+          <SectionLabel>LANCES RECEBIDOS ({recebidas.length})</SectionLabel>
+          {recebidas.map((o) => (
+            <GameCard key={o.id} className="flex flex-wrap items-center gap-[.5em] border-primary/40 p-[.55em]">
+              {o.anuncio && (
+                <img
+                  src={faceIconUrl(o.anuncio.species_id, o.anuncio.is_shiny) ?? undefined}
+                  alt=""
+                  className="h-[2.2em] w-[2.2em] rounded-[.4em] object-cover"
+                />
+              )}
+              <div className="min-w-[8em] flex-1">
+                <b className="font-medium">
+                  {o.anuncio ? SPECIES[o.anuncio.species_id]?.name ?? o.anuncio.species_id : 'POKE'}
+                  {o.anuncio ? ` Lv${o.anuncio.level}` : ''}
+                </b>
+                <div className="text-[.78em] text-n500">lance de {o.comprador}</div>
+              </div>
+              <Moeda valor={o.valor} tipo={o.currency} />
+              <div className="flex gap-[.35em]">
+                <GameButton
+                  variant="primary"
+                  disabled={responder.isPending}
+                  onClick={() => responder.mutate({ id: o.id, aceitar: true })}
+                >
+                  Aceitar
+                </GameButton>
+                <GameButton
+                  variant="ghost"
+                  disabled={responder.isPending}
+                  onClick={() => responder.mutate({ id: o.id, aceitar: false })}
+                >
+                  Recusar
+                </GameButton>
+              </div>
+            </GameCard>
+          ))}
+        </>
+      )}
+
+      {minhas.length > 0 && (
+        <>
+          <SectionLabel>MEUS LANCES ({minhas.length})</SectionLabel>
+          {minhas.map((o) => (
+            <GameCard key={o.id} className="flex flex-wrap items-center gap-[.5em] p-[.55em]">
+              <Gavel className="text-warn" />
+              <div className="min-w-[8em] flex-1 text-[.85em] text-n400">
+                Lance enviado · valor retido até o vendedor responder
+              </div>
+              <Moeda valor={o.valor} tipo={o.currency} />
+              <GameButton variant="danger" disabled={cancelarOferta.isPending} onClick={() => cancelarOferta.mutate(o.id)}>
+                <X /> Cancelar
+              </GameButton>
+            </GameCard>
+          ))}
+        </>
+      )}
+
       <SectionLabel>MINHAS ORDENS DE ITEM</SectionLabel>
       {ordens.length === 0 && <p className="text-n500">Nenhuma ordem ativa.</p>}
       {ordens.map((o) => (
@@ -567,9 +759,13 @@ function Ativos() {
           <img src={faceIconUrl(a.species_id, a.is_shiny) ?? undefined} alt="" className="h-[2.2em] w-[2.2em] rounded-[.4em] object-cover" />
           <div className="min-w-[8em] flex-1">
             <b className="font-medium">{SPECIES[a.species_id]?.name ?? a.species_id} Lv{a.level}</b>
-            <div className="text-[.78em] text-n500">IV {a.iv_percent}%</div>
+            <div className="text-[.78em] text-n500">
+              IV {a.iv_percent}%{a.apenas_oferta && ` · ${a.ofertas ?? 0} lance(s)`}
+            </div>
           </div>
-          <Moeda valor={a.price} tipo={a.currency} />
+          {a.apenas_oferta
+            ? <span className="flex items-center gap-[.25em] text-[.8em] text-warn"><Gavel weight="fill" /> lances</span>
+            : <Moeda valor={a.price ?? 0} tipo={a.currency} />}
           <GameButton variant="danger" disabled={cancelarAnuncio.isPending} onClick={() => cancelarAnuncio.mutate(a.id)}>
             <X /> Retirar
           </GameButton>
@@ -634,21 +830,23 @@ export function MercadoMenu() {
 
   return (
     <div className="flex flex-col gap-[.5em]">
-      <div className="flex flex-wrap items-center gap-[.5em]">
-        <SegmentedTabs value={aba} onChange={setAba} options={ABAS} />
-        <span className="flex items-center gap-[.45em] text-[.85em]">
-          <Moeda valor={gold} tipo="gold" />
-          <Moeda valor={diamonds} tipo="diamond" />
-        </span>
-      </div>
+      <StickyHeader>
+        <div className="flex flex-wrap items-center gap-[.5em]">
+          <SegmentedTabs value={aba} onChange={setAba} options={ABAS} />
+          <span className="flex items-center gap-[.45em] text-[.85em]">
+            <Moeda valor={gold} tipo="gold" />
+            <Moeda valor={diamonds} tipo="diamond" />
+          </span>
+        </div>
 
-      {(aba === 'comprar' || aba === 'vender') && (
-        <SegmentedTabs
-          value={tipo}
-          onChange={setTipo}
-          options={[{ value: 'itens', label: 'Itens' }, { value: 'pokes', label: 'Pokémon' }]}
-        />
-      )}
+        {(aba === 'comprar' || aba === 'vender') && (
+          <SegmentedTabs
+            value={tipo}
+            onChange={setTipo}
+            options={[{ value: 'itens', label: 'Itens' }, { value: 'pokes', label: 'Pokémon' }]}
+          />
+        )}
+      </StickyHeader>
 
       {aba === 'comprar' && (tipo === 'itens' ? <ComprarItens /> : <ComprarPokes />)}
       {aba === 'vender' && (tipo === 'itens' ? <VenderItens /> : <VenderPokes />)}

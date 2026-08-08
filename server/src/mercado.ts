@@ -55,7 +55,9 @@ export interface LinhaAnuncio {
   id: string
   seller_id: string
   poke_uid: string
-  price: number
+  /** `null` em anuncio "somente lance" — nao ha compra direta. */
+  price: number | null
+  apenas_oferta: boolean
   currency: 'gold' | 'diamond'
   status: 'ativo' | 'vendido' | 'cancelado'
   species_id: string
@@ -66,6 +68,17 @@ export interface LinhaAnuncio {
   created_at: string
   sold_at: string | null
   buyer_id: string | null
+}
+
+export interface LinhaOferta {
+  id: string
+  listing_id: string
+  buyer_id: string
+  valor: number
+  currency: 'gold' | 'diamond'
+  status: 'pendente' | 'aceita' | 'recusada' | 'cancelada'
+  created_at: string
+  resolved_at: string | null
 }
 
 export interface LinhaNegocio {
@@ -163,6 +176,42 @@ export async function resumoDosItens(cfg: Config) {
 
 export interface AnuncioComVendedor extends LinhaAnuncio {
   vendedor: string
+  /** Quantas ofertas pendentes esse anuncio ja recebeu. */
+  ofertas: number
+  /** A maior oferta pendente — o que a vitrine mostra no lugar do preco. */
+  melhorOferta: number | null
+}
+
+/** Ofertas pendentes agrupadas por anuncio, para uma lista de anuncios. */
+async function ofertasPendentesPorAnuncio(cfg: Config, anuncioIds: string[]): Promise<Map<string, LinhaOferta[]>> {
+  const porAnuncio = new Map<string, LinhaOferta[]>()
+  if (!anuncioIds.length) return porAnuncio
+  const linhas = await selecionarTudo<LinhaOferta>(
+    cfg,
+    `market_offers?status=eq.pendente&listing_id=in.(${anuncioIds.join(',')})&select=*`,
+  )
+  for (const o of linhas) {
+    const lista = porAnuncio.get(o.listing_id)
+    if (lista) lista.push(o)
+    else porAnuncio.set(o.listing_id, [o])
+  }
+  return porAnuncio
+}
+
+function enfeitarAnuncios(
+  linhas: LinhaAnuncio[],
+  nomes: Map<string, string>,
+  ofertas: Map<string, LinhaOferta[]>,
+): AnuncioComVendedor[] {
+  return linhas.map((l) => {
+    const lista = ofertas.get(l.id) ?? []
+    return {
+      ...l,
+      vendedor: nomes.get(l.seller_id) ?? 'Treinador',
+      ofertas: lista.length,
+      melhorOferta: lista.length ? Math.max(...lista.map((o) => o.valor)) : null,
+    }
+  })
 }
 
 export async function anunciosAtivos(cfg: Config): Promise<AnuncioComVendedor[]> {
@@ -170,8 +219,11 @@ export async function anunciosAtivos(cfg: Config): Promise<AnuncioComVendedor[]>
     cfg,
     'market_listings?status=eq.ativo&select=*&order=created_at.desc',
   )
-  const nomes = await nomesDeTreinadores(cfg, linhas.map((l) => l.seller_id))
-  return linhas.map((l) => ({ ...l, vendedor: nomes.get(l.seller_id) ?? 'Treinador' }))
+  const [nomes, ofertas] = await Promise.all([
+    nomesDeTreinadores(cfg, linhas.map((l) => l.seller_id)),
+    ofertasPendentesPorAnuncio(cfg, linhas.map((l) => l.id)),
+  ])
+  return enfeitarAnuncios(linhas, nomes, ofertas)
 }
 
 export async function minhasOrdens(cfg: Config, userId: string) {
@@ -179,7 +231,27 @@ export async function minhasOrdens(cfg: Config, userId: string) {
     selecionarTudo<LinhaOrdem>(cfg, `market_orders?user_id=eq.${userId}&status=eq.ativa&select=*&order=created_at.desc`),
     selecionarTudo<LinhaAnuncio>(cfg, `market_listings?seller_id=eq.${userId}&status=eq.ativo&select=*&order=created_at.desc`),
   ])
-  return { ordens, anuncios }
+  // Ofertas RECEBIDAS (nos meus anuncios) e ofertas FEITAS (minhas, em anuncio
+  // alheio) vem juntas: as duas so podem ser respondidas/canceladas daqui, e
+  // separa-las em duas rotas obrigaria a tela a fazer dois requests pra montar
+  // uma aba so.
+  const [ofertasRecebidas, minhasOfertas] = await Promise.all([
+    ofertasPendentesPorAnuncio(cfg, anuncios.map((a) => a.id)),
+    selecionarTudo<LinhaOferta>(
+      cfg,
+      `market_offers?buyer_id=eq.${userId}&status=eq.pendente&select=*&order=created_at.desc`,
+    ),
+  ])
+  const nomesCompradores = await nomesDeTreinadores(
+    cfg,
+    [...ofertasRecebidas.values()].flat().map((o) => o.buyer_id),
+  )
+  const recebidas = [...ofertasRecebidas.values()].flat().map((o) => ({
+    ...o,
+    comprador: nomesCompradores.get(o.buyer_id) ?? 'Treinador',
+    anuncio: anuncios.find((a) => a.id === o.listing_id) ?? null,
+  }))
+  return { ordens, anuncios, ofertasRecebidas: recebidas, minhasOfertas }
 }
 
 export async function meuHistorico(cfg: Config, userId: string) {
@@ -220,7 +292,7 @@ export async function criarOrdem(
   const quantity = inteiro(corpo.quantity, 'quantity', MAX_QUANTIDADE)
   if (!getItem(itemId)) throw new ErroHttp(400, 'item desconhecido')
 
-  const dados = await carregarEstadoParaEscrita(cfg, userId)
+  const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId)
   const { store, dados: estado } = criarEstadoDoJogador(dados)
 
   // --- escrow ---
@@ -245,7 +317,7 @@ export async function criarOrdem(
 
   // O estado do jogador (escrow debitado + o que ele recebeu no casamento) e
   // gravado uma vez so, no fim. Se algo estourar antes, nada foi debitado.
-  await gravarEstado(cfg, userId, estado)
+  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
   return { ordemId: ordem.id, ...resultado, estado }
 }
 
@@ -368,11 +440,11 @@ export async function cancelarOrdem(cfg: Config, userId: string, ordemId: string
   )
   if (!ordem) throw new ErroHttp(404, 'ordem nao encontrada ou ja encerrada')
 
-  const dados = await carregarEstadoParaEscrita(cfg, userId)
+  const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId)
   const { store, dados: estado } = criarEstadoDoJogador(dados)
   if (ordem.side === 'venda') store.addItem(ordem.item_id, ordem.remaining)
   else store.addGold(ordem.gold_retido)
-  await gravarEstado(cfg, userId, estado)
+  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
 
   const item = getItem(ordem.item_id)
   return {
@@ -390,10 +462,15 @@ export async function cancelarOrdem(cfg: Config, userId: string, ordemId: string
 export async function anunciarPoke(
   cfg: Config,
   userId: string,
-  corpo: { pokeUid?: unknown; price?: unknown; currency?: unknown },
+  corpo: { pokeUid?: unknown; price?: unknown; currency?: unknown; apenasOferta?: unknown },
 ) {
   const pokeUid = texto(corpo.pokeUid, 'pokeUid')
-  const price = inteiro(corpo.price, 'price', MAX_PRECO)
+  const apenasOferta = corpo.apenasOferta === true
+  // Em "somente lance" nao ha preco de compra direta — a coluna vai NULL e a
+  // check `market_listings_preco_coerente` garante que as duas nunca se
+  // contradigam. `currency` continua valendo: ela diz em que moeda as ofertas
+  // podem ser feitas.
+  const price = apenasOferta ? null : inteiro(corpo.price, 'price', MAX_PRECO)
   const currency = corpo.currency === 'diamond' ? 'diamond' : 'gold'
 
   // A checagem e o movimento sao a MESMA operacao: o filtro exige que o POKE
@@ -413,6 +490,7 @@ export async function anunciarPoke(
       seller_id: userId,
       poke_uid: pokeUid,
       price,
+      apenas_oferta: apenasOferta,
       currency,
       species_id: poke.speciesId,
       level: poke.level,
@@ -428,10 +506,44 @@ export async function anunciarPoke(
   }
 
   const nome = SPECIES[poke.speciesId]?.name ?? poke.speciesId
+  const moeda = currency === 'gold' ? 'de ouro' : 'diamante(s)'
   return {
-    mensagem: `${nome} anunciado por ${price} ${currency === 'gold' ? 'de ouro' : 'diamante(s)'}.`,
+    mensagem: apenasOferta
+      ? `${nome} anunciado para receber lances.`
+      : `${nome} anunciado por ${price} ${moeda}.`,
     estado: await carregarEstado(cfg, userId),
   }
+}
+
+/**
+ * Recusa (e DEVOLVE o escrow de) toda oferta pendente de um anuncio.
+ *
+ * Chamada sempre que o anuncio deixa de estar disponivel: cancelado pelo
+ * vendedor, vendido por compra direta, ou uma das ofertas aceita. Sem isso o
+ * ouro das outras ofertas ficaria retido pra sempre — o jogador nao teria como
+ * cancelar uma oferta cujo anuncio nao existe mais na vitrine.
+ */
+async function recusarOfertasPendentes(
+  cfg: Config,
+  anuncioId: string,
+  motivo: string,
+  exceto?: string,
+): Promise<number> {
+  const filtroExceto = exceto ? `&id=neq.${exceto}` : ''
+  const recusadas = await atualizarRetornando<LinhaOferta>(
+    cfg,
+    `market_offers?listing_id=eq.${anuncioId}&status=eq.pendente${filtroExceto}`,
+    { status: 'recusada', resolved_at: new Date().toISOString() },
+  )
+  for (const oferta of recusadas) {
+    await enfileirarEntrega(cfg, {
+      userId: oferta.buyer_id,
+      gold: oferta.currency === 'gold' ? oferta.valor : 0,
+      diamonds: oferta.currency === 'diamond' ? oferta.valor : 0,
+      motivo,
+    })
+  }
+  return recusadas.length
 }
 
 export async function cancelarAnuncio(cfg: Config, userId: string, anuncioId: string) {
@@ -442,8 +554,159 @@ export async function cancelarAnuncio(cfg: Config, userId: string, anuncioId: st
   )
   if (!anuncio) throw new ErroHttp(404, 'anuncio nao encontrado ou ja encerrado')
   await atualizar(cfg, `pokemon_instances?id=eq.${anuncio.poke_uid}`, { location: 'bag', team_slot: null })
+  const devolvidas = await recusarOfertasPendentes(cfg, anuncioId, 'Anuncio retirado do Mercado')
   return {
-    mensagem: 'Anuncio cancelado — o POKE voltou pra sua mochila.',
+    mensagem: devolvidas > 0
+      ? `Anuncio cancelado — o POKE voltou pra sua mochila e ${devolvidas} oferta(s) foram devolvidas.`
+      : 'Anuncio cancelado — o POKE voltou pra sua mochila.',
+    estado: await carregarEstado(cfg, userId),
+  }
+}
+
+/**
+ * Envia uma oferta num anuncio "somente lance".
+ *
+ * O valor sai do bolso do comprador NA HORA (escrow), como na ordem de compra
+ * de item. Sem isso, dez ofertas do mesmo ouro seriam todas aceitaveis e a
+ * decima aceita nao teria como ser paga.
+ */
+export async function ofertarNoAnuncio(
+  cfg: Config,
+  userId: string,
+  corpo: { anuncioId?: unknown; valor?: unknown },
+) {
+  const anuncioId = texto(corpo.anuncioId, 'anuncioId')
+  const valor = inteiro(corpo.valor, 'valor', MAX_PRECO)
+
+  const [anuncio] = await selecionar<LinhaAnuncio>(cfg, `market_listings?id=eq.${anuncioId}&select=*`)
+  if (!anuncio || anuncio.status !== 'ativo') throw new ErroHttp(409, 'Este anuncio nao esta mais disponivel.')
+  if (!anuncio.apenas_oferta) throw new ErroHttp(409, 'Este anuncio tem preco fixo — use Comprar.')
+  if (anuncio.seller_id === userId) throw new ErroHttp(409, 'Voce nao pode ofertar no proprio anuncio.')
+
+  const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId)
+  const { store, dados: estado } = criarEstadoDoJogador(dados)
+  const pago = anuncio.currency === 'gold' ? store.spendGold(valor) : store.spendDiamonds(valor)
+  if (!pago) {
+    throw new ErroHttp(409, anuncio.currency === 'gold' ? 'Ouro insuficiente.' : 'Diamantes insuficientes.')
+  }
+
+  // A linha entra ANTES da gravacao do estado: o indice unico parcial
+  // `market_offers_uma_pendente` e quem recusa a segunda oferta simultanea, e se
+  // ele disparar aqui nada foi debitado ainda (o estado so e gravado abaixo).
+  await inserir(cfg, 'market_offers', {
+    listing_id: anuncioId,
+    buyer_id: userId,
+    valor,
+    currency: anuncio.currency,
+  })
+  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
+
+  const nome = SPECIES[anuncio.species_id]?.name ?? anuncio.species_id
+  return {
+    mensagem: `Oferta de ${valor} enviada por ${nome}. O valor fica retido ate o vendedor responder.`,
+    estado,
+  }
+}
+
+/** O comprador desiste: a oferta sai do ar e o escrow volta. */
+export async function cancelarOferta(cfg: Config, userId: string, ofertaId: string) {
+  const [oferta] = await atualizarRetornando<LinhaOferta>(
+    cfg,
+    `market_offers?id=eq.${ofertaId}&buyer_id=eq.${userId}&status=eq.pendente`,
+    { status: 'cancelada', resolved_at: new Date().toISOString() },
+  )
+  if (!oferta) throw new ErroHttp(404, 'oferta nao encontrada ou ja respondida')
+
+  const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId)
+  const { store, dados: estado } = criarEstadoDoJogador(dados)
+  if (oferta.currency === 'gold') store.addGold(oferta.valor)
+  else store.addDiamonds(oferta.valor)
+  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
+
+  return { mensagem: `Oferta cancelada — ${oferta.valor} devolvido(s).`, estado }
+}
+
+/** O vendedor aceita ou recusa uma oferta recebida. */
+export async function responderOferta(
+  cfg: Config,
+  userId: string,
+  ofertaId: string,
+  aceitar: boolean,
+) {
+  const [oferta] = await selecionar<LinhaOferta>(cfg, `market_offers?id=eq.${ofertaId}&select=*`)
+  if (!oferta || oferta.status !== 'pendente') throw new ErroHttp(409, 'Esta oferta ja foi respondida.')
+  const [anuncio] = await selecionar<LinhaAnuncio>(cfg, `market_listings?id=eq.${oferta.listing_id}&select=*`)
+  if (!anuncio) throw new ErroHttp(404, 'anuncio nao encontrado')
+  if (anuncio.seller_id !== userId) throw new ErroHttp(403, 'Esta oferta nao e de um anuncio seu.')
+
+  // CAS na oferta: dois cliques simultaneos em "Aceitar" nao podem transferir o
+  // POKE duas vezes nem pagar o vendedor duas vezes.
+  const [respondida] = await atualizarRetornando<LinhaOferta>(
+    cfg,
+    `market_offers?id=eq.${ofertaId}&status=eq.pendente`,
+    { status: aceitar ? 'aceita' : 'recusada', resolved_at: new Date().toISOString() },
+  )
+  if (!respondida) throw new ErroHttp(409, 'Esta oferta ja foi respondida.')
+
+  const nome = SPECIES[anuncio.species_id]?.name ?? anuncio.species_id
+
+  if (!aceitar) {
+    await enfileirarEntrega(cfg, {
+      userId: oferta.buyer_id,
+      gold: oferta.currency === 'gold' ? oferta.valor : 0,
+      diamonds: oferta.currency === 'diamond' ? oferta.valor : 0,
+      motivo: `Oferta por ${nome} recusada`,
+    })
+    return { mensagem: 'Oferta recusada — o valor foi devolvido ao ofertante.', estado: await carregarEstado(cfg, userId) }
+  }
+
+  // Fecha o anuncio com CAS. Perder aqui = o POKE ja saiu por compra direta ou
+  // o anuncio foi cancelado: devolve o escrow desta oferta em vez de entregar um
+  // POKE que ja nao esta la.
+  const [fechado] = await atualizarRetornando<LinhaAnuncio>(
+    cfg,
+    `market_listings?id=eq.${anuncio.id}&status=eq.ativo`,
+    { status: 'vendido', sold_at: new Date().toISOString(), buyer_id: oferta.buyer_id },
+  )
+  if (!fechado) {
+    await enfileirarEntrega(cfg, {
+      userId: oferta.buyer_id,
+      gold: oferta.currency === 'gold' ? oferta.valor : 0,
+      diamonds: oferta.currency === 'diamond' ? oferta.valor : 0,
+      motivo: `Oferta por ${nome} devolvida (anuncio encerrado)`,
+    })
+    throw new ErroHttp(409, 'Este anuncio ja tinha sido encerrado — a oferta foi devolvida.')
+  }
+
+  await atualizar(cfg, `pokemon_instances?id=eq.${anuncio.poke_uid}`, {
+    user_id: oferta.buyer_id,
+    location: 'bag',
+    team_slot: null,
+  })
+  await enfileirarEntrega(cfg, {
+    userId,
+    gold: oferta.currency === 'gold' ? oferta.valor : 0,
+    diamonds: oferta.currency === 'diamond' ? oferta.valor : 0,
+    motivo: `Venda de ${nome} por lance no Mercado`,
+  })
+  await inserir(cfg, 'market_trades', {
+    kind: 'poke',
+    species_id: anuncio.species_id,
+    quantity: 1,
+    unit_price: oferta.valor,
+    currency: oferta.currency,
+    buyer_id: oferta.buyer_id,
+    seller_id: userId,
+  })
+  const devolvidas = await recusarOfertasPendentes(cfg, anuncio.id, `Outra oferta por ${nome} foi aceita`, ofertaId)
+
+  return {
+    mensagem: devolvidas > 0
+      ? `Lance aceito! ${nome} foi entregue e ${devolvidas} outra(s) oferta(s) foram devolvidas.`
+      : `Lance aceito! ${nome} foi entregue ao ofertante.`,
+    // O pagamento vem por entrega (o vendedor pode estar cacando neste segundo),
+    // entao o estado devolvido aqui ainda nao tem o ouro — ele entra no proximo
+    // request que gravar. Mesma regra do resto do Mercado.
     estado: await carregarEstado(cfg, userId),
   }
 }
@@ -452,8 +715,12 @@ export async function comprarAnuncio(cfg: Config, userId: string, anuncioId: str
   const [anuncio] = await selecionar<LinhaAnuncio>(cfg, `market_listings?id=eq.${anuncioId}&select=*`)
   if (!anuncio || anuncio.status !== 'ativo') throw new ErroHttp(409, 'Este anuncio nao esta mais disponivel.')
   if (anuncio.seller_id === userId) throw new ErroHttp(409, 'Voce nao pode comprar o proprio anuncio.')
+  if (anuncio.apenas_oferta || anuncio.price == null) {
+    throw new ErroHttp(409, 'Este anuncio so aceita lances — envie uma oferta.')
+  }
+  const preco = anuncio.price
 
-  const dados = await carregarEstadoParaEscrita(cfg, userId)
+  const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId)
   const { store, dados: estado } = criarEstadoDoJogador(dados)
 
   // ORDEM DELIBERADA: cobrar e gravar ANTES de mover o POKE.
@@ -468,8 +735,8 @@ export async function comprarAnuncio(cfg: Config, userId: string, anuncioId: str
   // jogador (ele fica sem o POKE e o CAS abaixo devolve o anuncio ao ar), e o
   // erro fica visivel em vez de destruir um POKE em silencio.
   const pago = anuncio.currency === 'gold'
-    ? store.spendGold(anuncio.price)
-    : store.spendDiamonds(anuncio.price)
+    ? store.spendGold(preco)
+    : store.spendDiamonds(preco)
   if (!pago) {
     throw new ErroHttp(409, anuncio.currency === 'gold' ? 'Ouro insuficiente.' : 'Diamantes insuficientes.')
   }
@@ -484,7 +751,7 @@ export async function comprarAnuncio(cfg: Config, userId: string, anuncioId: str
   )
   if (!fechado) throw new ErroHttp(409, 'Este anuncio acabou de ser vendido.')
 
-  await gravarEstado(cfg, userId, estado)
+  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
   await atualizar(cfg, `pokemon_instances?id=eq.${anuncio.poke_uid}`, {
     user_id: userId,
     location: 'bag',
@@ -493,15 +760,15 @@ export async function comprarAnuncio(cfg: Config, userId: string, anuncioId: str
 
   await enfileirarEntrega(cfg, {
     userId: anuncio.seller_id,
-    gold: anuncio.currency === 'gold' ? anuncio.price : 0,
-    diamonds: anuncio.currency === 'diamond' ? anuncio.price : 0,
+    gold: anuncio.currency === 'gold' ? preco : 0,
+    diamonds: anuncio.currency === 'diamond' ? preco : 0,
     motivo: `Venda de ${SPECIES[anuncio.species_id]?.name ?? anuncio.species_id} no Mercado`,
   })
   await inserir(cfg, 'market_trades', {
     kind: 'poke',
     species_id: anuncio.species_id,
     quantity: 1,
-    unit_price: anuncio.price,
+    unit_price: preco,
     currency: anuncio.currency,
     buyer_id: userId,
     seller_id: anuncio.seller_id,

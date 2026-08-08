@@ -17,6 +17,8 @@ import {
 import { controller } from '@/engine/controller'
 import { useWorldStore } from '@/stores/worldStore'
 import { useUiStore, useBreakpoints, type ScreenName } from '@/stores/uiStore'
+import { NotificationBadge } from '@/components/game/NotificationBadge'
+import { usePendenciasDoMercado } from '@/hooks/usePendencias'
 import { cn } from '@/lib/utils'
 
 interface MenuEntry {
@@ -60,6 +62,7 @@ export function MainMenu() {
   const setMoreOpen = useUiStore((s) => s.setMoreOpen)
   const emHunt = useWorldStore((w) => w.mapDef != null)
   const { narrow } = useBreakpoints()
+  const pendenciasMercado = usePendenciasDoMercado()
 
   const showLabels = !narrow
   // Hospital entra depois da Loja (mesma posicao do menu antigo) e some fora de
@@ -104,6 +107,9 @@ export function MainMenu() {
             active={currentScreen === entry.screen}
             Icon={entry.Icon}
             iconUrl={entry.iconUrl}
+            // Lance recebido espera uma decisao (aceitar/recusar) e o vendedor
+            // nao tem como saber que chegou sem abrir o Mercado.
+            badge={entry.screen === 'mercado' ? pendenciasMercado : 0}
             onClick={() => toggleScreen(entry.screen)}
           />
         ),
@@ -115,7 +121,7 @@ export function MainMenu() {
 }
 
 function MenuSlot({
-  label, Icon, iconUrl, active, big, showLabel, compact, onClick,
+  label, Icon, iconUrl, active, big, showLabel, compact, badge = 0, onClick,
 }: {
   label: string
   Icon: Icon
@@ -124,6 +130,7 @@ function MenuSlot({
   big?: boolean
   showLabel: boolean
   compact?: boolean
+  badge?: number
   onClick: () => void
 }) {
   // Se a imagem falhar (arquivo movido/404), cai no icone vetorial em vez de
@@ -145,7 +152,7 @@ function MenuSlot({
         title={label}
         onClick={onClick}
         className={cn(
-          'flex cursor-pointer items-center justify-center rounded-full border transition-[transform,border-color,background-color] duration-100',
+          'relative flex cursor-pointer items-center justify-center rounded-full border transition-[transform,border-color,background-color] duration-100',
           'hover:-translate-y-[3px] hover:border-primary',
           'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
           size,
@@ -168,6 +175,7 @@ function MenuSlot({
         ) : (
           <Icon className={iconSize} />
         )}
+        <NotificationBadge count={badge} titulo={`${badge} pendência(s) em ${label}`} />
       </button>
       {showLabel && (
         // `text-shadow` porque o rotulo fica direto sobre o canvas, sem

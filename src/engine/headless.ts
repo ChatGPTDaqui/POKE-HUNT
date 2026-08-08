@@ -13,7 +13,7 @@ export { buildMapWorld, buildHospitalWorld, stepWorld, handleEnemyDefeated } fro
 export { OFFLINE_SIM_STEP_SECONDS, OFFLINE_FARM_MAX_HOURS } from './simulation'
 export type { SequenciaDeSorteio } from './simulation'
 
-export { simulateWorldSeconds } from './systems/offlineSimSystem'
+export { simulateWorldSeconds, createEmptySummary } from './systems/offlineSimSystem'
 export type { OfflineSimSummary, KillResult } from './systems/offlineSimSystem'
 
 export { createRng, restoreRng, deriveRng, nextFloat, randomSeed } from '@/core/rng'

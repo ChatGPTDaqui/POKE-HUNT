@@ -13,6 +13,26 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '5.4',
+    date: '2026-08-09',
+    title: 'Duplicacao de Pokemon corrigida, leilao no Mercado e compra em um clique',
+    highlights: [
+      'BUG CRITICO DE DUPLICACAO CORRIGIDO. O jogo grava o progresso de tempos em tempos, e varias acoes disparam essa gravacao — quando duas caiam no mesmo instante, as duas simulavam O MESMO periodo de caçada e cada uma gravava as capturas com identidade propria. Resultado: o mesmo Pokemon aparecia varias vezes na mochila. Medido antes do conserto: seis gravacoes simultaneas de 20 minutos de caçada geraram 396 Pokemon para 66 capturas reais. Agora o periodo e reservado por quem chega primeiro e as demais nao creditam nada — 61 capturas, 61 Pokemon.',
+      'Junto disso, uma gravacao atrasada nao consegue mais desfazer o que outra fez: ela nao apaga Pokemon que chegou depois dela (compra no Mercado) nem devolve pra mochila um Pokemon que ja foi anunciado ou vendido.',
+      'MERCADO — MODO SOMENTE LANCE: ao anunciar um Pokemon da pra publicar SEM preco de compra direta. Outros jogadores enviam ofertas e voce aceita ou recusa em "Anuncios Ativos". O valor de quem oferta fica retido na hora e volta inteiro se a oferta for recusada, cancelada ou se o anuncio sair do ar.',
+      'MERCADO — FILTROS RAPIDOS: botoes de Gold, Diamante e Somente Oferta na aba Comprar, cada um liga e desliga sozinho.',
+      'MERCADO — A lista de itens da aba Comprar so mostra o que realmente tem proposta ativa (antes listava os ~30 itens do jogo com "sem oferta" na maioria). Sem nenhuma proposta, a tela diz isso em vez de ficar vazia.',
+      'LOJA — COMPRA EM UM CLIQUE: os botoes viraram +10, +100 e +1000 e executam a transacao na hora, sem confirmar. Vale pra comprar e pra vender. O campo de quantidade e o botao Comprar/Vender continuam la pra qualquer outro numero.',
+      'ATALHO DA LOJA NO PAINEL AUTO: um botao no topo do painel leva direto pra Loja — a decisao "estou sem Poke Ball" nasce olhando as contagens desse painel.',
+      'BOLINHA VERMELHA DE AVISO no Correio (mensagem nova ou item por coletar) e no Mercado (lance esperando resposta).',
+      'CABECALHOS FIXOS: abas, busca e filtros de Mochila, Loja, Hunts, Mercado e Pokedex ficam travados no topo enquanto a lista rola.',
+      'POKEDEX COM FILTROS RAPIDOS: "Hunt Atual" mostra so quem aparece na hunt em que voce esta, "Continente" so a regiao, "Pokedex" a lista inteira.',
+      'HUNTS EM ORDEM DE NIVEL. A lista vinha agrupada por bioma e pulava de Lv1-10 pra Lv71-80 e voltava.',
+      'RELATORIO DE FARM OFFLINE mostra QUANTOS niveis o Pokemon e o Treinador ganharam, com o antes e o depois ("+3 (Lv 12 → 15)") no lugar de um "Subiu de nivel!" que valia igual pra 1 ou pra 9 niveis.',
+      'O Pokemon no Hospital ficou centralizado na tela.',
+    ],
+  },
+  {
     version: '5.3',
     date: '2026-08-09',
     title: 'Pokemon forte fora do inicio, 500 itens pra todo mundo e o duplo clique de volta',

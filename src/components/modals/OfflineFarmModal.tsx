@@ -170,8 +170,24 @@ export function OfflineFarmModal({ summary, onClose }: { summary: OfflineSimSumm
             <div className="flex flex-col gap-[.15em]">
               {summary.gold > 0 && <StatRow label="Ouro ganho" value={`+${fmt.format(summary.gold)}`} color="var(--color-gold)" />}
               {summary.xp > 0 && <StatRow label="EXP ganho" value={`+${fmt.format(summary.xp)}`} />}
-              {summary.pokeLeveledUp && <StatRow label="POKE ativo" value="Subiu de nivel!" color="#7dd3fc" />}
-              {summary.trainerLeveledUp && <StatRow label="Treinador" value="Subiu de nivel!" color="#7dd3fc" />}
+              {/* Quantos niveis, e de quanto pra quanto — "Subiu de nivel!" nao
+                  distinguia uma sessao que rendeu 1 nivel de uma que rendeu 9.
+                  O fallback pro booleano cobre resumo antigo (ou de um servidor
+                  ainda nao atualizado), em que a contagem vem 0. */}
+              {summary.pokeLevelsGained > 0 ? (
+                <StatRow
+                  label="Niveis do POKE ativo"
+                  value={`+${summary.pokeLevelsGained} (Lv ${summary.pokeLevelBefore} → ${summary.pokeLevelAfter})`}
+                  color="#7dd3fc"
+                />
+              ) : summary.pokeLeveledUp && <StatRow label="POKE ativo" value="Subiu de nivel!" color="#7dd3fc" />}
+              {summary.trainerLevelsGained > 0 ? (
+                <StatRow
+                  label="Niveis do Treinador"
+                  value={`+${summary.trainerLevelsGained} (Lv ${summary.trainerLevelBefore} → ${summary.trainerLevelAfter})`}
+                  color="#7dd3fc"
+                />
+              ) : summary.trainerLeveledUp && <StatRow label="Treinador" value="Subiu de nivel!" color="#7dd3fc" />}
               {summary.captures.length > 0 && (
                 <StatRow label="POKEs capturados" value={String(summary.captures.length)} color="var(--color-ok)" />
               )}
