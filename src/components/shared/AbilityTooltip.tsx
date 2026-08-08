@@ -55,7 +55,7 @@ export function AbilityTooltip({
             </span>
           </div>
 
-          <div className="flex flex-wrap gap-x-[.8em] text-[.9em] opacity-85">
+          <div className="flex flex-wrap gap-x-[.55em] text-[.9em] opacity-85">
             <span>Dano base {ability.power}</span>
             <span>PP {ability.pp}</span>
             {ability.cooldown != null && <span>Recarga {ability.cooldown.toFixed(1)}s</span>}

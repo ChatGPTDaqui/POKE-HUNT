@@ -78,11 +78,17 @@ export interface PokedexKillCount {
   shiny: number
 }
 
-// Configuracao inicial do Bot (pedido explicito): pocao a 50% de vida,
+// Configuracao inicial do Bot (pedido explicito): pocao a 70% de vida (era 50),
 // auto-catch e auto-revive desligados — ver `defaultGameStateData` abaixo e o
-// default da coluna `auto_pot_rules`/`auto_toggles` na migration
-// 20260808150000. O tutorial do Bot parte exatamente deste estado.
-const DEFAULT_AUTO_POT_RULES: AutoPotRule[] = [{ hpPercent: 50, itemId: 'potion' }]
+// default da coluna `auto_pot_rules`/`auto_toggles` nas migrations
+// 20260808150000 e 20260809120000. O tutorial do Bot parte exatamente deste
+// estado.
+//
+// O default vive nos DOIS lugares porque nenhum e redundante: o do banco vale
+// pra conta nova e pro wipe (`= default`), e este vale pro estado local antes
+// de o servidor responder (e pro modo sem servidor). Divergir os dois faria a
+// tela mostrar um valor e o bot usar outro ate o primeiro carregamento.
+const DEFAULT_AUTO_POT_RULES: AutoPotRule[] = [{ hpPercent: 70, itemId: 'potion' }]
 const DEFAULT_AUTO_CATCH_CONFIG: AutoCatchConfig = { ballId: 'poke_ball', catchShinyEnabled: true, shinyBallId: 'great_ball' }
 
 // Toda hunt sem unlockCost comeca desbloqueada — hoje so a hunt lendaria

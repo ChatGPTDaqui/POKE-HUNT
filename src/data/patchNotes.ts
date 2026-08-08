@@ -13,6 +13,21 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '5.2',
+    date: '2026-08-09',
+    title: 'Arte de golpe em 8 elementos, icones de skill, ataque do Charmander e menus mais densos',
+    highlights: [
+      'ARTE DE GOLPE EM MAIS 7 ELEMENTOS: Agua, Raio, Normal, Grama, Inseto, Lutador e Pedra ganharam animacao real em vez do efeito colorido generico — cada um com uma animacao pra alvo unico e outra pra area, esta ultima desenhada no tamanho exato da area atingida. Com o Fogo (versao 5.1), sao 8 dos 17 tipos com arte propria; os outros 9 seguem no efeito por cor.',
+      'ICONES DE SKILL: cada slot da barra de golpes passou a mostrar um icone do elemento (chama, raio, redemoinho, pedra, garra...) no lugar das tres letras do nome do golpe. O nome completo continua no tooltip e o dano base continua na faixa de baixo do slot.',
+      'BUG CORRIGIDO: o Charmander (e outras 14 especies) nao tinha animacao de ataque — ele atacava com a pose de PARADO. Essas especies nao tem a animacao "Shoot" no pacote de arte, e o jogo caia direto em "Idle" sem tentar a pose de investida, que elas TEM. Agora tenta a investida primeiro.',
+      'Toda sprite de ataque passou a ser desenhada com 90% de opacidade. O efeito procedural ja era assim; a arte real saia opaca, entao os dois tinham peso visual diferente na tela.',
+      'NOMES DE POKE COLORIDOS NO LOG: no chat (abas Sistema e Log) e nos avisos flutuantes, o nome do POKE sai na cor da raridade dele — abate, captura, subida de nivel, desmaio, evolucao e troca de equipe. Da pra ver que apareceu algo raro sem abrir a mochila.',
+      'MENUS MAIS COMPACTOS: revisao geral de espacamento em janelas, cards e botoes. Menos espaco vazio, mais informacao visivel por tela, sem mudar tamanho de fonte.',
+      'AUTO-POT AGORA VEM CONFIGURADO EM 70% DE VIDA (era 50%). Quem ja tinha mexido na porcentagem mantem a escolha; quem nunca mexeu foi movido pro novo padrao.',
+      'HUNT INICIAL SO COM POKEMON NORMAL: Route 46 (Inicial) passou a ter apenas Sentret, Hoothoot e Rattata. Ledyba e Spinarak sairam de la e continuam aparecendo nas zonas de Inseto.',
+    ],
+  },
+  {
     version: '5.1',
     date: '2026-08-08',
     title: 'Novo jogo consertado, level up destravado, economia mais barata e fogo com arte',

@@ -114,8 +114,8 @@ function LivroDoItem({ itemId }: { itemId: string }) {
   const custo = precoEfetivo * qtd
 
   return (
-    <div className="flex flex-col gap-[.6em]">
-      <div className="grid grid-cols-2 gap-[.6em]">
+    <div className="flex flex-col gap-[.45em]">
+      <div className="grid grid-cols-2 gap-[.45em]">
         <div>
           <SectionLabel>OFERTAS DE VENDA</SectionLabel>
           {(data?.vendas.length ?? 0) === 0 && <p className="text-n500">Ninguem vendendo.</p>}
@@ -275,7 +275,7 @@ function ComprarPokes() {
   if (isLoading) return <p className="text-n500">Carregando anuncios...</p>
 
   return (
-    <div className="flex flex-col gap-[.6em]">
+    <div className="flex flex-col gap-[.45em]">
       <div className="flex flex-wrap items-center gap-[.5em]">
         <GameInput
           placeholder="Buscar especie..." value={busca}
@@ -311,7 +311,7 @@ function ComprarPokes() {
         <GameCheck checked={shinyOnly} onChange={setShinyOnly}>Somente Shiny</GameCheck>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-[.9em] gap-y-[.3em]">
+      <div className="flex flex-wrap items-center gap-x-[.6em] gap-y-[.3em]">
         {Object.values(RARITIES).map((r) => (
           <GameCheck
             key={r.key}
@@ -334,7 +334,7 @@ function ComprarPokes() {
         const species = SPECIES[a.species_id]
         const cor = RARITIES[a.rarity as RarityKey]?.color
         return (
-          <GameCard key={a.id} className="flex flex-wrap items-center gap-[.6em] p-[.55em]">
+          <GameCard key={a.id} className="flex flex-wrap items-center gap-[.45em] p-[.55em]">
             <img
               src={faceIconUrl(a.species_id, a.is_shiny) ?? undefined}
               alt=""
@@ -422,7 +422,7 @@ function VenderItens() {
   }
 
   return (
-    <GameCard className="flex flex-col gap-[.6em] p-[.7em]">
+    <GameCard className="flex flex-col gap-[.45em] p-[.55em]">
       <SectionLabel>ANUNCIAR ITEM</SectionLabel>
       <div className="flex flex-wrap items-end gap-[.5em]">
         <label className="flex min-w-[10em] flex-1 flex-col gap-[.2em] text-[.78em] text-n400">
@@ -480,7 +480,7 @@ function VenderPokes() {
   }
 
   return (
-    <GameCard className="flex flex-col gap-[.6em] p-[.7em]">
+    <GameCard className="flex flex-col gap-[.45em] p-[.55em]">
       <SectionLabel>ANUNCIAR POKE</SectionLabel>
       <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
         POKE
@@ -540,7 +540,7 @@ function Ativos() {
   const anuncios: AnuncioMercado[] = data?.anuncios ?? []
 
   return (
-    <div className="flex flex-col gap-[.6em]">
+    <div className="flex flex-col gap-[.45em]">
       <SectionLabel>MINHAS ORDENS DE ITEM</SectionLabel>
       {ordens.length === 0 && <p className="text-n500">Nenhuma ordem ativa.</p>}
       {ordens.map((o) => (
@@ -633,10 +633,10 @@ export function MercadoMenu() {
   }
 
   return (
-    <div className="flex flex-col gap-[.7em]">
-      <div className="flex flex-wrap items-center gap-[.7em]">
+    <div className="flex flex-col gap-[.5em]">
+      <div className="flex flex-wrap items-center gap-[.5em]">
         <SegmentedTabs value={aba} onChange={setAba} options={ABAS} />
-        <span className="flex items-center gap-[.6em] text-[.85em]">
+        <span className="flex items-center gap-[.45em] text-[.85em]">
           <Moeda valor={gold} tipo="gold" />
           <Moeda valor={diamonds} tipo="diamond" />
         </span>

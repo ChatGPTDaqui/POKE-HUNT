@@ -6,6 +6,7 @@
 // tela nao pode roubar um clique do jogador.
 import { useEffect } from 'react'
 import { useToastStore, type ToastEntry, type ToastType } from '@/stores/toastStore'
+import { TextoComRealce } from '@/components/shared/TextoComRealce'
 
 const TOAST_DURATION_MS = 2500
 
@@ -42,10 +43,10 @@ function Toast({ toast }: { toast: ToastEntry }) {
   const color = TYPE_COLOR[toast.type] ?? TYPE_COLOR.info
   return (
     <div
-      className="rounded-lg border bg-background/92 px-[.9em] py-[.5em] text-[.8em] shadow-lg backdrop-blur-sm"
+      className="rounded-lg border bg-background/92 px-[.65em] py-[.5em] text-[.8em] shadow-lg backdrop-blur-sm"
       style={{ borderColor: color, color, animation: 'hud-toast-in .18s ease-out' }}
     >
-      {toast.message}
+      <TextoComRealce texto={toast.message} realce={toast.realce} />
     </div>
   )
 }

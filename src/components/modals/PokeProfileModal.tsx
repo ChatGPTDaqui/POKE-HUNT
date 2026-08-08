@@ -38,7 +38,7 @@ export function PokeProfileModal() {
       onClose={close}
       header={<ProfileHero poke={poke} species={species} />}
       subheader={
-        <div className="flex gap-[1em] border-b border-n800 px-[1em]">
+        <div className="flex gap-[.65em] border-b border-n800 px-[.7em]">
           {(['status', 'golpes'] as const).map((tab) => (
             <button
               key={tab}

@@ -56,7 +56,7 @@ export function RankingMenu() {
   }
 
   return (
-    <div className="flex flex-col gap-[.7em]">
+    <div className="flex flex-col gap-[.5em]">
       <SegmentedTabs value={aba} onChange={setAba} options={ABAS} />
       {aba === 'treinadores' && <AbaTreinadores />}
       {aba === 'pokemon' && (
@@ -78,15 +78,15 @@ export function RankingMenu() {
 function Estado({ carregando, erro, vazio, children }: {
   carregando: boolean; erro: unknown; vazio: boolean; children: React.ReactNode
 }) {
-  if (carregando) return <div className="p-[1.5em] text-center text-[.85em] text-n400">Carregando…</div>
+  if (carregando) return <div className="p-[1em] text-center text-[.85em] text-n400">Carregando…</div>
   if (erro) {
     return (
-      <div className="p-[1.5em] text-center text-[.85em] text-bad">
+      <div className="p-[1em] text-center text-[.85em] text-bad">
         {erro instanceof Error ? erro.message : 'nao foi possivel carregar o ranking'}
       </div>
     )
   }
-  if (vazio) return <div className="p-[1.5em] text-center text-[.85em] text-n400">Ninguém por aqui ainda.</div>
+  if (vazio) return <div className="p-[1em] text-center text-[.85em] text-n400">Ninguém por aqui ainda.</div>
   return <>{children}</>
 }
 
@@ -97,7 +97,7 @@ function Posicao({ n }: { n: number }) {
 }
 
 function Linha({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
-  const classe = 'flex w-full items-center gap-[.6em] rounded-[.45em] border border-n800 px-[.6em] py-[.4em] text-left'
+  const classe = 'flex w-full items-center gap-[.45em] rounded-[.45em] border border-n800 px-[.6em] py-[.4em] text-left'
   // `<button>` e nao um `<div onClick>`: a linha vira foco de teclado e
   // anuncia como acionavel, sem nenhum handler extra.
   if (!onClick) return <div className={classe}>{children}</div>

@@ -21,6 +21,7 @@ import { useWindowDrag } from '@/hooks/useWindowDrag'
 import { servidorAtivo, type AnexoChat } from '@/data/remote/servidor'
 import { RARITIES, type RarityKey } from '@/data/rarity'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { TextoComRealce } from '@/components/shared/TextoComRealce'
 import { cn } from '@/lib/utils'
 
 const TABS: { key: ChatTab; label: string }[] = [
@@ -107,7 +108,7 @@ function AbaMundo() {
 
   if (!servidorAtivo()) {
     return (
-      <div className="flex min-h-0 flex-1 items-center px-[.7em] text-[.76em] text-n500">
+      <div className="flex min-h-0 flex-1 items-center px-[.55em] text-[.76em] text-n500">
         O chat precisa do servidor do jogo. Sem ele, so as abas locais funcionam.
       </div>
     )
@@ -115,7 +116,7 @@ function AbaMundo() {
 
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-col gap-[.25em] overflow-auto px-[.7em] pt-[.3em] pb-[.3em] text-[.76em]">
+      <div className="flex min-h-0 flex-1 flex-col gap-[.25em] overflow-auto px-[.55em] pt-[.3em] pb-[.3em] text-[.76em]">
         {mensagens.length === 0 ? (
           <div className="text-n500">Ninguem falou nada ainda. Diga oi.</div>
         ) : (
@@ -135,7 +136,7 @@ function AbaMundo() {
         <div ref={fimRef} />
       </div>
 
-      {erro && <div className="px-[.7em] pb-[.2em] text-[.7em] text-bad">{erro}</div>}
+      {erro && <div className="px-[.55em] pb-[.2em] text-[.7em] text-bad">{erro}</div>}
 
       <form
         className="flex shrink-0 items-center gap-[.3em] border-t border-n800 px-[.5em] py-[.4em]"
@@ -246,14 +247,14 @@ export function ChatLog() {
       ) : (
         <div
           ref={linesRef}
-          className="flex min-h-0 flex-1 flex-col gap-[.25em] overflow-auto px-[.7em] pt-[.3em] pb-[.6em] text-[.76em]"
+          className="flex min-h-0 flex-1 flex-col gap-[.25em] overflow-auto px-[.55em] pt-[.3em] pb-[.6em] text-[.76em]"
         >
           {lines.length === 0 ? (
             <div className="text-n500">Nada por aqui ainda.</div>
           ) : (
             lines.map((line) => (
               <div key={line.id} style={{ color: TYPE_COLOR[line.type] ?? TYPE_COLOR.info }}>
-                {line.message}
+                <TextoComRealce texto={line.message} realce={line.realce} />
               </div>
             ))
           )}

@@ -77,7 +77,7 @@ export function MainMenu() {
       data-keep-open
       className={cn(
         'pointer-events-auto relative flex max-w-[92vw] flex-wrap items-end justify-center',
-        narrow ? 'gap-x-[.45em] gap-y-[.4em]' : 'gap-x-[.7em] gap-y-[.5em]',
+        narrow ? 'gap-x-[.45em] gap-y-[.4em]' : 'gap-x-[.5em] gap-y-[.5em]',
       )}
     >
       {entries.map((entry) =>
@@ -251,7 +251,7 @@ function MoreMenu({
                 toggleScreen(screen)
                 setOpen(false)
               }}
-              className="flex cursor-pointer items-center gap-[.55em] rounded-[.4em] px-[.7em] py-[.5em] text-left font-[inherit] text-[.85em] text-foreground hover:bg-n800"
+              className="flex cursor-pointer items-center gap-[.55em] rounded-[.4em] px-[.55em] py-[.5em] text-left font-[inherit] text-[.85em] text-foreground hover:bg-n800"
             >
               <Icon className="text-[1.15em] text-n300" />
               {label}

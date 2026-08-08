@@ -156,21 +156,21 @@ export function HuntMenu() {
 
   if (team.length === 0) {
     return (
-      <GameCard className="p-[.8em]">
+      <GameCard className="p-[.6em]">
         Volte ao Hospital e escolha seu primeiro POKE antes de sair para caçar.
       </GameCard>
     )
   }
   if (activePoke && activePoke.hp <= 0) {
     return (
-      <GameCard className="p-[.8em]">
+      <GameCard className="p-[.6em]">
         Seu POKE esta desmaiado! Volte ao Hospital para cura-lo antes de sair para caçar.
       </GameCard>
     )
   }
 
   return (
-    <div className="flex flex-col gap-[.7em]">
+    <div className="flex flex-col gap-[.5em]">
       {continents.length > 1 && (
         <SegmentedTabs
           value={continent}
@@ -247,7 +247,7 @@ export function HuntMenu() {
           <div key={map.id} className="overflow-hidden rounded-[.7em] border border-n800 bg-n900">
             <div
               onClick={() => setExpandedMapId(expanded ? null : map.id)}
-              className="flex cursor-pointer items-center gap-[.7em] p-[.7em] hover:bg-n800"
+              className="flex cursor-pointer items-center gap-[.5em] p-[.55em] hover:bg-n800"
             >
               <span
                 className="h-[2.2em] w-[2.2em] shrink-0 rounded-full"
@@ -285,7 +285,7 @@ export function HuntMenu() {
             </div>
 
             {expanded && (
-              <div className="flex flex-col gap-[.4em] border-t border-n800 p-[.7em]">
+              <div className="flex flex-col gap-[.4em] border-t border-n800 p-[.55em]">
                 <div className="text-[.75em] text-n500">Pokemons de {map.name}</div>
                 {odds.species.map(({ id, species: sp, pct }) => (
                   <SpeciesRow key={id} sp={sp} pct={pct} />

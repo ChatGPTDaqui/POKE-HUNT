@@ -37,7 +37,7 @@ export function AutoButton() {
         data-auto-toggle
         onClick={() => setOpen(!open)}
         className={cn(
-          'hud-surface flex cursor-pointer items-center gap-[.5em] rounded-full border px-[1em] py-[.5em]',
+          'hud-surface flex cursor-pointer items-center gap-[.5em] rounded-full border px-[.7em] py-[.5em]',
           'font-[inherit] text-[.9em] shadow-lg transition-colors',
           'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
           open ? 'border-primary text-n100' : 'border-n700 text-foreground hover:border-primary',
@@ -99,14 +99,14 @@ export function AutoWindow() {
     >
       <div
         onPointerDown={onPointerDown}
-        className="win-drag-handle flex shrink-0 items-center justify-between border-b border-n800 px-[.8em] py-[.55em]"
+        className="win-drag-handle flex shrink-0 items-center justify-between border-b border-n800 px-[.6em] py-[.55em]"
       >
         <span className="text-[.9em] font-medium">Automacoes</span>
         <GameIconButton variant="ghost" onClick={() => setOpen(false)} aria-label="Fechar">
           <X />
         </GameIconButton>
       </div>
-      <div className="min-h-0 flex-1 overflow-auto p-[.8em]">
+      <div className="min-h-0 flex-1 overflow-auto p-[.6em]">
         <AutoPanel />
       </div>
     </div>

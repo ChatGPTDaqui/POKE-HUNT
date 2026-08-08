@@ -12,14 +12,14 @@ function GeralTab() {
   const setHudScale = useUiStore((s) => s.setHudScale)
 
   return (
-    <div className="flex flex-col gap-[.7em]">
-      <GameCard className="flex flex-col gap-[.4em] p-[.8em]">
+    <div className="flex flex-col gap-[.5em]">
+      <GameCard className="flex flex-col gap-[.4em] p-[.6em]">
         <div className="font-medium">Tamanho da interface</div>
         <div className="text-[.8em] text-n500">
           A HUD ja escala sozinha com a largura da tela. Este ajuste multiplica essa escala — util em monitor
           muito grande ou pra quem prefere tudo maior. Fica salvo neste aparelho.
         </div>
-        <div className="flex items-center gap-[.6em]">
+        <div className="flex items-center gap-[.45em]">
           <input
             type="range"
             name="hud-scale"
@@ -38,7 +38,7 @@ function GeralTab() {
         </div>
       </GameCard>
 
-      <GameCard className="flex flex-col gap-[.4em] p-[.8em]">
+      <GameCard className="flex flex-col gap-[.4em] p-[.6em]">
         <div className="font-medium">Iniciar novo jogo</div>
         <div className="text-[.8em] text-n500">
           Apaga todo o progresso (equipe, itens, ouro, mapas) e comeca do zero.
@@ -66,9 +66,9 @@ function GeralTab() {
 function PatchNotesTab() {
   const notes = sortedPatchNotes()
   return (
-    <div className="flex flex-col gap-[.6em]">
+    <div className="flex flex-col gap-[.45em]">
       {notes.map((note) => (
-        <GameCard key={note.version} className="p-[.8em]">
+        <GameCard key={note.version} className="p-[.6em]">
           <div className="flex items-baseline justify-between gap-[.5em]">
             <b className="font-medium">{note.title}</b>
             <span className="shrink-0 text-[.75em] text-n500">v{note.version} · {note.date}</span>
@@ -87,7 +87,7 @@ function PatchNotesTab() {
 export function SettingsScreen() {
   const [tab, setTab] = useState<'geral' | 'patch'>('geral')
   return (
-    <div className="flex flex-col gap-[.8em]">
+    <div className="flex flex-col gap-[.55em]">
       <SegmentedTabs
         value={tab}
         onChange={setTab}

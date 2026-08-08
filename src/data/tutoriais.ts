@@ -35,9 +35,9 @@ export const TUTORIAIS: Tutorial[] = [
           'Ele fica no botao com o icone de robo, no canto inferior direito da tela.',
       },
       {
-        titulo: 'Auto-Pot — comeca LIGADO, a 50% de vida',
+        titulo: 'Auto-Pot — comeca LIGADO, a 70% de vida',
         corpo:
-          'Quando a vida do POKE em campo cai a 50% ou menos, o Bot usa uma pocao automaticamente. ' +
+          'Quando a vida do POKE em campo cai a 70% ou menos, o Bot usa uma pocao automaticamente. ' +
           'Voce escolhe a porcentagem e qual pocao usar; "melhor" pega sempre a pocao mais forte que voce tiver. ' +
           'Sem pocao no inventario, nada acontece — o POKE continua apanhando.',
       },

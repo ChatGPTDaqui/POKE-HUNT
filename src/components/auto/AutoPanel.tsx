@@ -124,7 +124,7 @@ function PrevisaoDeRecursos() {
         <Warning weight="fill" /> Suprimentos acabando
       </span>
       {previsoes.map((p) => (
-        <span key={p.itemId} className="flex justify-between gap-[.6em] text-n300">
+        <span key={p.itemId} className="flex justify-between gap-[.45em] text-n300">
           <span className="truncate">{rotuloDoRecurso(p.itemId, (id) => ITEMS[id]?.name ?? id)}</span>
           <span className="shrink-0 tabular-nums">
             {formatarTempoRestante(p.horasRestantes)}
@@ -193,7 +193,7 @@ export function AutoPanel() {
   )
 
   return (
-    <div className="flex flex-col gap-[.6em] text-[.8em]">
+    <div className="flex flex-col gap-[.45em] text-[.8em]">
       <PrevisaoDeRecursos />
 
       <BlocoAuto
@@ -326,7 +326,7 @@ export function AutoPanel() {
           variant="ghost"
           block
           disabled={autoPotRules.length >= MAX_AUTO_POT_RULES}
-          onClick={() => addAutoPotRule({ hpPercent: 50, itemId: BEST_POTION_OPTION })}
+          onClick={() => addAutoPotRule({ hpPercent: 70, itemId: BEST_POTION_OPTION })}
         >
           + Adicionar regra
         </GameButton>

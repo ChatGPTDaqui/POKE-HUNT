@@ -98,7 +98,7 @@ function PokemonsTab() {
   const canMove = teamLength < MAX_TEAM_SIZE
 
   return (
-    <div className="flex flex-col gap-[.6em]">
+    <div className="flex flex-col gap-[.45em]">
       <div className="flex flex-wrap items-center gap-[.5em]">
         <GameInput
           placeholder="Buscar POKE por nome..."
@@ -134,7 +134,7 @@ function PokemonsTab() {
                 if (tratouComoLink(e, () => linkarPoke(poke, species))) return
                 showProfile(poke, species)
               }}
-              className="flex items-center gap-[.7em] p-[.6em]"
+              className="flex items-center gap-[.5em] p-[.6em]"
             >
               <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={2.6} />
               <div className="min-w-0 flex-1">
@@ -232,7 +232,7 @@ function ItensTab() {
             key={itemId}
             title="Shift+clique para linkar no chat"
             onClick={(e) => { tratouComoLink(e, () => linkarItem(item, items[itemId])) }}
-            className={cn('flex items-center gap-[.7em] p-[.6em]', locked && 'border-gold/40')}
+            className={cn('flex items-center gap-[.5em] p-[.6em]', locked && 'border-gold/40')}
           >
             <ItemTooltip item={item}>
               {iconUrl && (
@@ -276,7 +276,7 @@ function ItensTab() {
 export function BagMenu() {
   const [tab, setTab] = useState<'pokemons' | 'itens'>('pokemons')
   return (
-    <div className="flex flex-col gap-[.8em]">
+    <div className="flex flex-col gap-[.55em]">
       <SegmentedTabs
         value={tab}
         onChange={setTab}

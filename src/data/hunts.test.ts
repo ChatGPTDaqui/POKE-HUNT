@@ -51,6 +51,11 @@ describe('hunts', () => {
   it('hunt de uma regiao so tem POKE daquela regiao', () => {
     const erros: string[] = []
     for (const map of wildHunts) {
+      // A hunt inicial (e o espelho dela no Modo Pesadelo) tem elenco fixo
+      // curado a mao e fica fora da regra de regiao de proposito: o pedido
+      // nomeou Rattata, que e de Kanto, numa hunt de Johto. Ver a nota em
+      // huntSpawnOverrides#STARTER_HUNT_SPECIES.
+      if (map.id === 'route_46' || map.id === 'nightmare_route_46') continue
       // O espelho do Modo Pesadelo carrega `continent: 'nightmare'`; a regiao
       // dele e a da hunt de origem, recuperada pelo id.
       const origem = map.id.startsWith('nightmare_') ? MAPS[map.id.slice('nightmare_'.length)] : map
@@ -165,6 +170,16 @@ describe('hunts', () => {
       }
     }
     expect(erros).toEqual([])
+  })
+
+  // Pedido explicito: a primeira hunt so pode ter estes tres, todos NORMAL.
+  // Sem o teste, qualquer mexida na montagem de pool (ou um sync novo) pode
+  // devolver Ledyba/Spinarak pra la sem ninguem notar — o cartao da hunt nao
+  // lista especie.
+  it('a hunt inicial so tem Sentret, Hoothoot e Rattata', () => {
+    const especies = MAPS.route_46.enemyPool.map((id) => ENCOUNTERS[id].speciesId).sort()
+    expect(especies).toEqual(['hoothoot', 'rattata', 'sentret'])
+    for (const id of especies) expect(SPECIES_DATA[id].type).toBe('NORMAL')
   })
 
   it('a hunt inicial sai 80% nivel 1 e 20% nivel 2', () => {

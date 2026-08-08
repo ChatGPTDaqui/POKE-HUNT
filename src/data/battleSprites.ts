@@ -4,11 +4,26 @@
 // closest available substitute instead of drawing nothing.
 import { BATTLE_SPRITE_ANIMS, type AnimName, type BattleSpriteAnimMeta } from './battleSpriteAnims'
 
-const ANIM_FALLBACKS: Partial<Record<AnimName, AnimName>> = {
-  Shoot: 'Idle',
-  Charge: 'Idle',
-  Faint: 'Sleep',
-  Idle: 'Walk',
+// BUG REAL CORRIGIDO (relatado como "a animacao de ataque do Charmander nao
+// funciona"): `Shoot` caia direto em `Idle`, e 15 das 227 especies com arte —
+// Charmander, o inicial mais escolhido do jogo, entre elas — nao tem
+// `Shoot-Anim.png` no disco. Resultado: elas atacavam com a pose de PARADO.
+// Nao havia erro nenhum, so a ausencia de animacao. Charmander tem
+// `Charge-Anim.png` (10 quadros) desde sempre, que E uma pose de ataque.
+//
+// A cadeia virou LISTA em vez de sucessor unico por dois motivos. Primeiro,
+// `Shoot -> Charge` e `Charge -> Shoot` sao mutuamente dependentes: com um
+// sucessor so, uma especie sem NENHUM dos dois entrava no ciclo, a guarda de
+// visitados cortava o loop e a funcao devolvia `null` — o que joga a entidade
+// no placeholder geometrico colorido. Segundo, a lista deixa o ultimo degrau
+// (`Walk`, que toda especie com arte tem) explicito, entao nenhuma cadeia
+// termina em nada.
+const ANIM_FALLBACKS: Partial<Record<AnimName, AnimName[]>> = {
+  Shoot: ['Charge', 'Idle', 'Walk'],
+  Charge: ['Shoot', 'Idle', 'Walk'],
+  Faint: ['Sleep', 'Idle', 'Walk'],
+  Idle: ['Walk'],
+  Sleep: ['Idle', 'Walk'],
 }
 
 export interface ResolvedBattleAnim extends BattleSpriteAnimMeta {
@@ -27,15 +42,11 @@ export function resolveBattleAnim(speciesId: string, animName: AnimName, isShiny
   const species = BATTLE_SPRITE_ANIMS[speciesId]
   if (!species) return null
 
-  let name: AnimName | undefined = animName
-  const seen = new Set<AnimName>()
-  while (name && !species[name] && !seen.has(name)) {
-    seen.add(name)
-    name = ANIM_FALLBACKS[name]
+  for (const name of [animName, ...(ANIM_FALLBACKS[animName] ?? [])]) {
+    const meta = species[name]
+    if (meta) return { name, url: battleSpriteUrl(speciesId, name, isShiny), ...meta }
   }
-  if (!name || !species[name]) return null
-
-  return { name, url: battleSpriteUrl(speciesId, name, isShiny), ...species[name]! }
+  return null
 }
 
 export function battleSpriteUrl(speciesId: string, animName: AnimName, isShiny = false): string {

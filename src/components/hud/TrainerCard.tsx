@@ -29,7 +29,7 @@ export function TrainerCard() {
   // passaram pra MESMA linha e o padding caiu pra .45em — ~5,1em agora, com a
   // foto no tamanho original (4.2em), que era a restricao explicita.
   return (
-    <div className="hud-surface pointer-events-auto flex items-center gap-[.6em] rounded-xl border border-n800 p-[.45em] shadow-lg">
+    <div className="hud-surface pointer-events-auto flex items-center gap-[.45em] rounded-xl border border-n800 p-[.45em] shadow-lg">
       <div className="flex flex-col items-end gap-[.2em]">
         {!narrow && (
           <>
@@ -76,7 +76,7 @@ function Carteira() {
   const gold = useGameStateStore((s) => s.wallet.gold)
   const diamonds = useGameStateStore((s) => s.wallet.diamonds)
   return (
-    <div className="flex items-center gap-[.6em] text-[.8em] leading-none tabular-nums">
+    <div className="flex items-center gap-[.45em] text-[.8em] leading-none tabular-nums">
       <span className="flex items-center gap-[.25em] font-medium text-gold">
         <Coin weight="fill" /> {fmtMoeda.format(gold)}
       </span>
@@ -105,7 +105,7 @@ export function SideMenuColumn() {
             title={label}
             onClick={() => toggleScreen(screen)}
             className={cn(
-              'hud-surface flex cursor-pointer items-center gap-[.45em] rounded-lg border px-[.7em] py-[.45em]',
+              'hud-surface flex cursor-pointer items-center gap-[.45em] rounded-lg border px-[.55em] py-[.45em]',
               'font-[inherit] text-[.82em] text-foreground transition-colors',
               'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
               active ? 'border-n400 bg-n800' : 'border-n800 hover:border-primary',

@@ -60,6 +60,20 @@ export function rarityOf(poke: { rarity?: string | null } | null | undefined): R
   return (key && RARITIES[key]) || RARITIES.comum
 }
 
+/**
+ * Realce de log: o nome de um POKE pintado com a cor da raridade DELE.
+ *
+ * Devolve um objeto estrutural (`{texto, cor}`) em vez de importar o tipo
+ * `ToastRealce` da store — `data/` nao depende de `stores/`, e o formato e
+ * pequeno o bastante pra o TypeScript casar sozinho.
+ */
+export function realceDeRaridade(
+  texto: string,
+  poke: { rarity?: string | null } | null | undefined,
+): { texto: string; cor: string } {
+  return { texto, cor: rarityOf(poke).color }
+}
+
 // Ordinal rank (common -> mythic), for sort UIs — distinct from `weight`,
 // which runs the opposite direction (more common = higher weight).
 export const RARITY_ORDER: RarityKey[] = ['comum', 'incomum', 'raro', 'ultra', 'legendary', 'mythic']

@@ -35,7 +35,7 @@ export function ActivePokeCard() {
     <div
       onClick={() => showProfile(poke, species)}
       title={`Ver perfil de ${species.name}`}
-      className="hud-surface pointer-events-auto flex cursor-pointer gap-[.8em] rounded-xl border border-n800 p-[.8em] shadow-lg"
+      className="hud-surface pointer-events-auto flex cursor-pointer gap-[.55em] rounded-xl border border-n800 p-[.6em] shadow-lg"
     >
       <PokeArt poke={poke} name={species.name} />
       <div className="flex min-w-[9em] flex-col gap-[.25em]">

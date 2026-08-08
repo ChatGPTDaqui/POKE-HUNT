@@ -22,7 +22,7 @@ export function TeamMenu() {
   }
 
   return (
-    <div className="flex flex-col gap-[.6em]">
+    <div className="flex flex-col gap-[.45em]">
       {team.map((poke, index) => {
         const species = SPECIES[poke.speciesId]
         // Guard herdado do vanilla: um unico POKE com especie invalida (save
@@ -41,7 +41,7 @@ export function TeamMenu() {
           <GameCard
             key={poke.uid}
             onClick={() => showProfile(poke, species)}
-            className="flex items-center gap-[.8em] p-[.7em]"
+            className="flex items-center gap-[.55em] p-[.55em]"
           >
             <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={3.2} />
 

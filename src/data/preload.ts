@@ -21,6 +21,7 @@ import { getMap } from './maps'
 import { getEncounter } from './enemies'
 import { faceIconUrl, spriteUrl } from './sprites'
 import { todosOsQuadrosDeVfx } from './elementVfx'
+import { todosOsIconesDeHabilidade } from './abilityIcons'
 import { primeImage } from '@/render/sprites'
 
 // Teto de tempo pra NAO transformar uma rede ruim em "o botao Entrar nao
@@ -91,11 +92,11 @@ export async function preloadHunt(mapId: string, jogador: EspeciePreload | null)
   }
 
   const fundo = mapDef.bg?.image ? [primeImage(mapDef.bg.image)] : []
-  // Arte de efeito de golpe (hoje so FOGO — ver data/elementVfx.ts). Sao 7 PNGs
-  // de 32x32 no total, entao vao TODOS de uma vez em vez de derivar quais tipos
-  // esta hunt pode usar: o proprio POKE do jogador muda de golpe ao subir de
-  // nivel e ao evoluir, e "quais tipos vao aparecer" nao e uma pergunta que da
-  // pra responder na entrada da hunt.
-  const efeitos = todosOsQuadrosDeVfx().map(primeImage)
+  // Arte de efeito de golpe (8 tipos — ver data/elementVfx.ts) e icone de slot
+  // (17 tipos). Todos de uma vez em vez de derivar quais tipos esta hunt pode
+  // usar: o proprio POKE do jogador muda de golpe ao subir de nivel e ao
+  // evoluir, e "quais tipos vao aparecer" nao e uma pergunta que da pra
+  // responder na entrada da hunt. Sao PNGs de 32x32, ~66 arquivos.
+  const efeitos = [...todosOsQuadrosDeVfx(), ...todosOsIconesDeHabilidade()].map(primeImage)
   await Promise.all([preloadEspecies(especies), ...fundo, ...efeitos])
 }

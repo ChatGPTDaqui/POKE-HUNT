@@ -122,7 +122,7 @@ export function GameWindow({
         ) : (
           <div
             onPointerDown={onPointerDown}
-            className="win-drag-handle flex shrink-0 items-center justify-between gap-[.5em] border-b border-n800 py-[.55em] pr-[.55em] pl-[1em]"
+            className="win-drag-handle flex shrink-0 items-center justify-between gap-[.5em] border-b border-n800 py-[.55em] pr-[.55em] pl-[.7em]"
           >
             <span className="truncate font-medium">{title}</span>
             <GameIconButton variant="ghost" onClick={onClose} aria-label="Fechar">
@@ -133,9 +133,9 @@ export function GameWindow({
 
         {subheader && <div className="shrink-0">{subheader}</div>}
 
-        <div className={cn('min-h-0 flex-1 overflow-auto p-[1em] text-[.85em]', bodyClassName)}>{children}</div>
+        <div className={cn('min-h-0 flex-1 overflow-auto p-[.7em] text-[.85em]', bodyClassName)}>{children}</div>
 
-        {footer && <div className="shrink-0 border-t border-n800 px-[1em] py-[.8em]">{footer}</div>}
+        {footer && <div className="shrink-0 border-t border-n800 px-[.7em] py-[.6em]">{footer}</div>}
       </div>
     </>
   )

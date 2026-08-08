@@ -72,7 +72,7 @@ export function HudLayer() {
   return (
     <>
       {/* topo-esquerdo: POKE ativo + taxas */}
-      <div className="absolute top-[.8em] left-[.8em] z-20 flex items-start gap-[.7em]">
+      <div className="absolute top-[.8em] left-[.8em] z-20 flex items-start gap-[.5em]">
         <ActivePokeCard />
         {!narrow && <RatesCard />}
       </div>
@@ -105,7 +105,7 @@ export function HudLayer() {
           segura" do rodape — o canvas desenha nome/HP/texto de combate ate uns
           90px acima do sprite, e antes disso essa area estava livre pra colidir
           com a barra de golpes. */}
-      <div ref={footerRef} className="absolute bottom-[.8em] left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-[.7em]">
+      <div ref={footerRef} className="absolute bottom-[.8em] left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-[.5em]">
         <AbilityHud />
         <MainMenu />
       </div>

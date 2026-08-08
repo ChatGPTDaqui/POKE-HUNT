@@ -221,7 +221,7 @@ function TiposTab() {
         <GameSelect
           value={selected}
           onChange={(e) => setSelected(e.target.value as ElementType)}
-          className="mt-[.6em] w-[11em]"
+          className="mt-[.45em] w-[11em]"
         >
           {ALL_TYPES.map((t) => (
             <option key={t} value={t}>{t}</option>
@@ -388,7 +388,7 @@ type WikiTab = 'inicio' | 'tipos' | 'raridades' | 'mecanicas'
 export function WikiMenu() {
   const [tab, setTab] = useState<WikiTab>('inicio')
   return (
-    <div className="flex flex-col gap-[.8em]">
+    <div className="flex flex-col gap-[.55em]">
       <SegmentedTabs
         value={tab}
         onChange={setTab}

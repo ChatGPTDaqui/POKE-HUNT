@@ -1,6 +1,14 @@
-// Barra de golpes do POKE em campo. Fundo na cor do TIPO elemental, borda na
-// cor da CATEGORIA (fisico/especial), bolinha verde = AOE, faixa inferior com o
-// dano base, anel branco = pronto, overlay preto = cooldown ou desligado.
+// Barra de golpes do POKE em campo. Icone do TIPO elemental sobre fundo na cor
+// do mesmo tipo, borda na cor da CATEGORIA (fisico/especial), bolinha verde =
+// AOE, faixa inferior com o dano base, anel branco = pronto, overlay preto =
+// cooldown ou desligado.
+//
+// O icone substituiu o rotulo de 3 letras do nome do golpe. Tradeoff assumido:
+// dois golpes do mesmo tipo passam a ficar visualmente iguais no slot — o que
+// os separa agora e o dano na faixa de baixo e o tooltip. Em troca, a barra
+// deixou de ser uma fileira de siglas ("EMB", "FLA", "SCR") e passou a dizer o
+// elemento de relance. O rotulo continua existindo como fallback pra tipo sem
+// arte (ver data/abilityIcons.ts).
 //
 // Duplo-clique num slot liga/desliga o golpe pra selecao automatica da IA
 // (combatSystem#pickAbility filtra contra `poke.disabledAbilities`) — pedido
@@ -11,6 +19,7 @@
 // estado de combate ao vivo, atualizado a cada tick.
 import { getAbility, BASIC_ATTACK, isDamagingAbility, type Ability } from '@/data/abilities'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
+import { abilityIconUrl } from '@/data/abilityIcons'
 import { colorForType } from '@/data/typeColors'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
@@ -70,6 +79,7 @@ export function AbilityHud() {
         const cd = cooldowns?.[ability.id] ?? 0
         const ready = cd <= 0 && !isOff
         const borderColor = CATEGORY_BORDER[resolveAbilityCategory(ability, poke)] || CATEGORY_BORDER.physical
+        const icone = abilityIconUrl(ability.type)
 
         return (
           <AbilityTooltip key={ability.id} ability={ability} poke={poke}>
@@ -89,12 +99,27 @@ export function AbilityHud() {
               border: `.2em solid ${borderColor}`,
             }}
           >
-            <span
-              className="font-mono font-bold text-white"
-              style={{ fontSize: fonteRotulo, textShadow: '0 1px 3px rgba(0,0,0,.8)' }}
-            >
-              {shortLabel(ability.name)}
-            </span>
+            {icone ? (
+              // `pixelated` porque a arte e 32x32 desenhada pra ser vista
+              // grande; suavizar borraria a pixel-art. O drop-shadow segura o
+              // icone legivel sobre a cor do tipo, que as vezes e clara
+              // (ELECTRIC #ffd23f) e as vezes escura (DARK #4a4a4a).
+              <img
+                src={icone}
+                alt=""
+                aria-hidden
+                draggable={false}
+                className="pointer-events-none h-[78%] w-[78%] object-contain"
+                style={{ imageRendering: 'pixelated', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.85))' }}
+              />
+            ) : (
+              <span
+                className="font-mono font-bold text-white"
+                style={{ fontSize: fonteRotulo, textShadow: '0 1px 3px rgba(0,0,0,.8)' }}
+              >
+                {shortLabel(ability.name)}
+              </span>
+            )}
 
             {ability.target === 'aoe' && (
               <span className="absolute -top-[.3em] -right-[.3em] h-[.8em] w-[.8em] rounded-full border border-[#052e16] bg-[#4ade80]" />

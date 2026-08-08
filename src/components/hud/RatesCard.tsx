@@ -44,7 +44,7 @@ export function RatesCard() {
     // "estatisticas de caca clicaveis"). O botao "Resetar" fica FORA da area
     // clicavel: ele e destrutivo (zera a amostra) e nao pode ser acionado por
     // engano por quem so queria ver os detalhes.
-    <div className="hud-surface pointer-events-auto flex flex-col gap-[.2em] rounded-lg border border-n800 px-[.8em] py-[.6em] text-[.75em] text-n300">
+    <div className="hud-surface pointer-events-auto flex flex-col gap-[.2em] rounded-lg border border-n800 px-[.6em] py-[.6em] text-[.75em] text-n300">
       <button
         type="button"
         data-keep-open
@@ -73,7 +73,7 @@ export function RatesCard() {
 
 function Row({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <div className="flex justify-between gap-[1em]">
+    <div className="flex justify-between gap-[.65em]">
       <span className="text-n500">{label}</span>
       <b className="font-medium tabular-nums" style={color ? { color } : undefined}>
         {value}
@@ -91,7 +91,7 @@ export function RatesChip() {
       data-keep-open
       title="Abrir o Hunt Analyzer"
       onClick={() => abrirAnalyzer(true)}
-      className="flex cursor-pointer items-center gap-[.8em] rounded-full border border-n800 bg-background/80 px-[.8em] py-[.4em] font-[inherit] text-[.72em] text-n400">
+      className="flex cursor-pointer items-center gap-[.55em] rounded-full border border-n800 bg-background/80 px-[.6em] py-[.4em] font-[inherit] text-[.72em] text-n400">
       <span>
         Gold/h <b className="font-medium text-gold">{formatRate(stats.goldPerHour)}</b>
       </span>

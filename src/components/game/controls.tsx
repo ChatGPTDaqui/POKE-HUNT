@@ -39,7 +39,7 @@ export function GameButton({ variant = 'secondary', block, className, ...props }
       {...props}
       className={cn(
         'inline-flex shrink-0 cursor-pointer items-center justify-center gap-[.35em] rounded-[.5em] border',
-        'px-[.7em] py-[.32em] font-[inherit] text-[.85em] leading-[1.35] whitespace-nowrap transition-colors',
+        'px-[.55em] py-[.32em] font-[inherit] text-[.85em] leading-[1.35] whitespace-nowrap transition-colors',
         'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
         'disabled:cursor-not-allowed disabled:opacity-45',
         BUTTON_VARIANT[variant],
@@ -249,7 +249,7 @@ export function GameCard({
 /** Aviso de recurso ainda sem sistema de jogo por tras. */
 export function ComingSoon({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-[.6em] rounded-[.7em] border border-dashed border-n700 p-[2em] text-center">
+    <div className="flex flex-col items-center gap-[.45em] rounded-[.7em] border border-dashed border-n700 p-[1.2em] text-center">
       <span className="text-[2em] text-n300">{icon}</span>
       <div className="font-medium">{title}</div>
       <div className="max-w-[24em] text-[.8em] text-n500">{children}</div>

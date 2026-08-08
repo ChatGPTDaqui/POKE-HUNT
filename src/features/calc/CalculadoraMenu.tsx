@@ -73,7 +73,7 @@ export function CalculadoraMenu() {
   const b = useMemo(() => statsDe(ladoB), [ladoB])
 
   return (
-    <div className={colStack ? 'flex flex-col gap-[1em]' : 'grid grid-cols-2 gap-[1em]'}>
+    <div className={colStack ? 'flex flex-col gap-[.65em]' : 'grid grid-cols-2 gap-[.65em]'}>
       <PainelLado marca="A" lado={ladoA} onChange={setLadoA} resultado={a} comparar={b} />
       <PainelLado marca="B" lado={ladoB} onChange={setLadoB} resultado={b} comparar={a} />
     </div>
@@ -106,7 +106,7 @@ function PainelLado({
   }, [team])
 
   return (
-    <div className="flex flex-col gap-[.6em] rounded-[.7em] border border-n800 bg-n900 p-[.8em]">
+    <div className="flex flex-col gap-[.45em] rounded-[.7em] border border-n800 bg-n900 p-[.6em]">
       <div className="flex items-center gap-[.5em]">
         <span className="flex h-[1.6em] w-[1.6em] items-center justify-center rounded-[.4em] bg-primary text-[.8em] font-semibold text-primary-foreground">
           {marca}
@@ -140,12 +140,12 @@ function PainelLado({
       </div>
 
       {!resultado ? (
-        <div className="flex min-h-[10em] items-center justify-center rounded-[.6em] border border-dashed border-n700 p-[.8em] text-center text-[.8em] text-n500">
+        <div className="flex min-h-[10em] items-center justify-center rounded-[.6em] border border-dashed border-n700 p-[.6em] text-center text-[.8em] text-n500">
           Escolha um Pokemon para calcular os status — ou deixe vazio se so quer olhar o outro lado.
         </div>
       ) : (
         <>
-          <div className="flex items-center gap-[.6em]">
+          <div className="flex items-center gap-[.45em]">
             {url && (
               <img
                 src={url}

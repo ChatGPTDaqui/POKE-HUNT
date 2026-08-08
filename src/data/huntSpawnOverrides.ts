@@ -139,10 +139,16 @@ function rotuloDoBioma(baseName: string): string {
 // A hunt inicial nao e um bioma: e a primeira tela do jogo, com elenco curto
 // e escolhido a mao. Fica de fora da regra generica.
 const STARTER_HUNT_ID = 'route_46'
-// So especies de Johto (a hunt e de Johto), de nivel baixo e sem evolucao
-// intimidadora. Sentret veio de um pedido explicito anterior do usuario; as
-// outras tres sao os POKEs de rota mais comuns do inicio de Johto real.
-const STARTER_HUNT_SPECIES = ['sentret', 'hoothoot', 'ledyba', 'spinarak']
+// Pedido explicito: SO tipo NORMAL na primeira hunt, e exatamente estes tres.
+// Saiu Ledyba e Spinarak (BUG) — os dois continuam com casa no bioma Bosque,
+// entao ninguem fica sem hunt (o teste "toda especie selvagem tem pelo menos
+// uma hunt" cobre isso).
+//
+// Rattata e de KANTO e esta hunt e de Johto: e a UNICA excecao a regra de
+// regiao do jogo, e ela e deliberada. A hunt inicial ja era curada a mao
+// (elenco fixo, nivel 1-2, fora do sistema de biomas); o teste de regiao a
+// exclui por isso. Rattata veio nomeado no pedido.
+const STARTER_HUNT_SPECIES = ['sentret', 'hoothoot', 'rattata']
 // Pedido explicito: a primeira hunt sai 80% nivel 1 e 20% nivel 2.
 const STARTER_LEVEL_WEIGHTS = [
   { level: 1, weight: 80 },

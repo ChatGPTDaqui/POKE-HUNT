@@ -25,7 +25,7 @@ function formatDuration(totalSeconds: number): string {
 
 function StatRow({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <div className="flex justify-between gap-[1em]">
+    <div className="flex justify-between gap-[.65em]">
       <span className="text-n400">{label}</span>
       <b className="font-medium" style={color ? { color } : undefined}>{value}</b>
     </div>
@@ -133,7 +133,7 @@ export function OfflineFarmModal({ summary, onClose }: { summary: OfflineSimSumm
       backdrop={{ zIndex: 50 }}
       onClose={onClose}
       header={
-        <div className="border-b border-n800 p-[1em]">
+        <div className="border-b border-n800 p-[.7em]">
           <div className="text-[1.05em] font-medium">Bem-vindo de volta!</div>
           <div className="text-[.8em] text-n400">
             Voce ficou fora por {formatDuration(summary.requestedSeconds)}.

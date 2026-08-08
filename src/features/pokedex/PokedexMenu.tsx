@@ -83,7 +83,7 @@ function SpeciesDetail({ species }: { species: Species }) {
     .sort((a, b) => a.entry.levelReq - b.entry.levelReq)
 
   return (
-    <div className="flex flex-col gap-[.8em] border-t border-n800 p-[.7em]">
+    <div className="flex flex-col gap-[.55em] border-t border-n800 p-[.55em]">
       <div>
         <div className="mb-[.4em] font-medium">Status base</div>
         <div className="grid grid-cols-3 gap-[.4em]">
@@ -193,7 +193,7 @@ export function PokedexMenu() {
   }, [allSpecies, search])
 
   return (
-    <div className="flex flex-col gap-[.6em]">
+    <div className="flex flex-col gap-[.45em]">
       <div className="flex gap-[.5em]">
         <GameInput
           className="flex-1"
@@ -216,7 +216,7 @@ export function PokedexMenu() {
           <div key={species.id} className="overflow-hidden rounded-[.6em] border border-n800 bg-n900">
             <div
               onClick={() => setExpandedSpeciesId(expanded ? null : species.id)}
-              className="flex cursor-pointer items-center gap-[.7em] px-[.7em] py-[.55em] hover:bg-n800"
+              className="flex cursor-pointer items-center gap-[.5em] px-[.55em] py-[.55em] hover:bg-n800"
             >
               <PokeSwatch species={species} size={2.4} />
               <div className="min-w-0 flex-1">

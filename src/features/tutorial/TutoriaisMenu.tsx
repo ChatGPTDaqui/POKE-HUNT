@@ -10,11 +10,11 @@ export function TutoriaisMenu() {
   const vistos = useTutorialStore((s) => s.vistos)
 
   return (
-    <div className="flex flex-col gap-[.7em]">
+    <div className="flex flex-col gap-[.5em]">
       <SectionLabel>Explicacoes do jogo</SectionLabel>
       {TUTORIAIS.map((tutorial) => (
         <GameCard key={tutorial.id}>
-          <div className="flex items-start gap-[.7em]">
+          <div className="flex items-start gap-[.5em]">
             <GraduationCap className="mt-[.15em] shrink-0 text-[1.4em] text-n300" />
             <div className="flex min-w-0 flex-1 flex-col gap-[.3em]">
               <div className="flex items-center gap-[.4em]">

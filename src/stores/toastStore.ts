@@ -24,16 +24,35 @@ export type ToastChannel = 'combat' | 'world' | 'trade'
 export type LogTab = 'sistema' | 'trade' | 'log'
 export type ChatTab = LogTab | 'mundo'
 
+/**
+ * Um trecho da mensagem que sai numa cor propria.
+ *
+ * Existe pro nome de um POKE aparecer na cor da RARIDADE dele no log (pedido
+ * explicito). A mensagem continua sendo uma STRING — quem renderiza procura
+ * `texto` dentro dela e pinta so aquele pedaco. A alternativa (mensagem virar
+ * lista de segmentos) obrigaria a mexer nos ~30 pontos que hoje montam texto
+ * com template string, e a maioria deles nunca vai precisar de cor.
+ *
+ * So a PRIMEIRA ocorrencia e pintada: numa frase como "X evoluiu para Y" as
+ * duas especies sao POKEs diferentes e pintar as duas com a mesma cor mentiria.
+ */
+export interface ToastRealce {
+  texto: string
+  cor: string
+}
+
 export interface ToastEntry {
   id: string
   message: string
   type: ToastType
+  realce?: ToastRealce
 }
 
 export interface ChatLine {
   id: string
   message: string
   type: ToastType
+  realce?: ToastRealce
 }
 
 const CHANNEL_TO_TAB: Record<ToastChannel, LogTab> = {
@@ -52,7 +71,7 @@ function makeId(): string {
 interface ToastState {
   toasts: ToastEntry[]
   chatLines: Record<LogTab, ChatLine[]>
-  pushToast: (message: string, type: ToastType, channel: ToastChannel) => void
+  pushToast: (message: string, type: ToastType, channel: ToastChannel, realce?: ToastRealce) => void
   dismissToast: (id: string) => void
 }
 
@@ -60,15 +79,15 @@ export const useToastStore = create<ToastState>((set) => ({
   toasts: [],
   chatLines: { sistema: [], trade: [], log: [] },
 
-  pushToast: (message, type, channel) => {
+  pushToast: (message, type, channel, realce) => {
     const tab = CHANNEL_TO_TAB[channel] || 'sistema'
-    const line: ChatLine = { id: makeId(), message, type }
+    const line: ChatLine = { id: makeId(), message, type, realce }
     set((state) => {
       const nextTabLines = [...state.chatLines[tab], line]
       if (nextTabLines.length > MAX_CHAT_LINES) nextTabLines.shift()
       const chatLines = { ...state.chatLines, [tab]: nextTabLines }
       if (channel === 'combat') return { chatLines }
-      const toastEntry: ToastEntry = { id: line.id, message, type }
+      const toastEntry: ToastEntry = { id: line.id, message, type, realce }
       return { chatLines, toasts: [...state.toasts, toastEntry] }
     })
   },

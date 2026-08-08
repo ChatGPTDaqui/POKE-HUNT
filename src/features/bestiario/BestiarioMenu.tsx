@@ -90,8 +90,8 @@ export function BestiarioMenu() {
   const pctCompleto = Math.round((resumo.completos / resumo.total) * 100)
 
   return (
-    <div className="flex flex-col gap-[.8em]">
-      <div className="flex flex-wrap items-center gap-[1em]">
+    <div className="flex flex-col gap-[.55em]">
+      <div className="flex flex-wrap items-center gap-[.65em]">
         <div className="flex h-[3.4em] w-[3.4em] shrink-0 items-center justify-center rounded-full border-2 border-primary font-medium text-n200">
           {pctCompleto}%
         </div>
@@ -118,7 +118,7 @@ export function BestiarioMenu() {
         <GameCheck checked={shinyOnly} onChange={setShinyOnly}>✨ Shiny</GameCheck>
       </div>
 
-      <div className={colStack ? 'flex flex-col gap-[1em]' : 'grid grid-cols-[1.4fr_1fr] gap-[1em]'}>
+      <div className={colStack ? 'flex flex-col gap-[.65em]' : 'grid grid-cols-[1.4fr_1fr] gap-[.65em]'}>
         <div className="grid content-start gap-[.5em] [grid-template-columns:repeat(auto-fill,minmax(6em,1fr))]">
           {visiveis.map((species) => {
             const p = progressoDe(pokedexKills, species.id)
@@ -164,7 +164,7 @@ function DetalheEspecie({
 }) {
   if (!species) {
     return (
-      <div className="self-start rounded-[.7em] border border-dashed border-n700 p-[1em] text-[.85em] text-n500">
+      <div className="self-start rounded-[.7em] border border-dashed border-n700 p-[.7em] text-[.85em] text-n500">
         Escolha um Pokemon na grade para ver o progresso dele.
       </div>
     )
@@ -174,7 +174,7 @@ function DetalheEspecie({
   const proximoLimiar = STAGE_THRESHOLDS[p.stage]
 
   return (
-    <div className="flex flex-col gap-[.6em] self-start rounded-[.7em] border border-n800 bg-n900 p-[.8em]">
+    <div className="flex flex-col gap-[.45em] self-start rounded-[.7em] border border-n800 bg-n900 p-[.6em]">
       <div className="text-[1.05em] font-medium">{species.name}</div>
       <div className="flex gap-[.3em]">
         <TypeChip type={species.type} />

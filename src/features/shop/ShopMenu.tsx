@@ -147,7 +147,7 @@ function ItensTab() {
     // janela quando ela e redimensionada pra estreita. Sem isso o botao ficava
     // cortado e inalcancavel; a rolagem horizontal e local a coluna, entao a
     // janela inteira nunca rola de lado.
-    <div className={colStack ? 'flex flex-col gap-[1em]' : 'grid grid-cols-2 gap-[1em]'}>
+    <div className={colStack ? 'flex flex-col gap-[.65em]' : 'grid grid-cols-2 gap-[.65em]'}>
       <div className="flex min-w-0 flex-col gap-[.5em] overflow-x-auto">
         <SectionLabel>COMPRAR</SectionLabel>
         {SHOP_STOCK.map((stock) => {
@@ -158,7 +158,7 @@ function ItensTab() {
           const key = `buy:${item.id}`
           const custo = item.buyPrice * qty
           return (
-            <GameCard key={item.id} className="flex flex-wrap items-center gap-[.6em] p-[.55em]">
+            <GameCard key={item.id} className="flex flex-wrap items-center gap-[.45em] p-[.55em]">
               <ItemTooltip item={item}>
                 <span className="cursor-help">
                   <ItemIcon itemId={item.id} name={item.name} />
@@ -219,7 +219,7 @@ function ItensTab() {
           const locked = Boolean(lockedItems[itemId])
           const qty = Math.min(sellQty[itemId] ?? 1, owned)
           return (
-            <GameCard key={itemId} className="flex flex-wrap items-center gap-[.6em] p-[.55em]">
+            <GameCard key={itemId} className="flex flex-wrap items-center gap-[.45em] p-[.55em]">
               <ItemTooltip item={item}>
                 <span className="cursor-help">
                   <ItemIcon itemId={itemId} name={item.name} />
@@ -375,7 +375,7 @@ function PokemonsTab() {
   }
 
   return (
-    <div className="flex flex-col gap-[.6em]">
+    <div className="flex flex-col gap-[.45em]">
       <SectionLabel>VENDER POKES EXTRAS (MOCHILA)</SectionLabel>
 
       <div className="flex flex-wrap items-center gap-[.5em]">
@@ -404,7 +404,7 @@ function PokemonsTab() {
         </GameButton>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-[.9em] gap-y-[.3em]">
+      <div className="flex flex-wrap items-center gap-x-[.6em] gap-y-[.3em]">
         {Object.values(RARITIES).map((r) => (
           <GameCheck
             key={r.key}
@@ -486,7 +486,7 @@ function PokemonsTab() {
         }
 
         return (
-          <GameCard key={poke.uid} className="flex items-center gap-[.6em] p-[.55em]">
+          <GameCard key={poke.uid} className="flex items-center gap-[.45em] p-[.55em]">
             {showCheckbox ? (
               <GameCheck
                 checked={selectedUids.has(poke.uid)}
@@ -540,8 +540,8 @@ export function ShopMenu() {
   const diamonds = useGameStateStore((s) => s.wallet.diamonds)
 
   return (
-    <div className="flex flex-col gap-[.8em]">
-      <div className="flex flex-wrap items-center gap-[.8em]">
+    <div className="flex flex-col gap-[.55em]">
+      <div className="flex flex-wrap items-center gap-[.55em]">
         <SegmentedTabs
           value={tab}
           onChange={setTab}
@@ -550,7 +550,7 @@ export function ShopMenu() {
             { value: 'pokemons', label: 'Pokemons' },
           ]}
         />
-        <span className="flex items-center gap-[.6em] text-[.85em] text-n300">
+        <span className="flex items-center gap-[.45em] text-[.85em] text-n300">
           <span className="flex items-center gap-[.25em] text-gold">
             <Coin weight="fill" /> {fmt.format(gold)}
           </span>

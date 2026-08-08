@@ -316,6 +316,9 @@ export function drawNameLevelTag(ctx: CanvasRenderingContext2D, entity: WorldEnt
 }
 
 const IMPACT_BASE_SIZE = 44
+// Opacidade de TODA sprite/efeito de ataque: 90% solida, 10% transparente.
+// Vale pro desenho procedural e pra arte real (drawVfxDeElemento) — os dois
+// multiplicam o proprio fade por ela.
 const SOLID_OPACITY = 0.9
 const HOLD_PORTION = 0.6
 
@@ -505,7 +508,11 @@ function drawVfxDeElemento(
 
   const fade = progress < HOLD_PORTION ? 1 : 1 - (progress - HOLD_PORTION) / (1 - HOLD_PORTION)
   ctx.save()
-  ctx.globalAlpha = Math.max(0, Math.min(1, fade))
+  // `SOLID_OPACITY` (90%) tambem aqui, e nao so no desenho procedural: pedido
+  // explicito de que TODA sprite de ataque fique 90% solida. Sem isso a arte
+  // real sairia opaca e o efeito procedural translucido — dois VFX do mesmo
+  // jogo com peso visual diferente.
+  ctx.globalAlpha = Math.max(0, Math.min(1, fade)) * SOLID_OPACITY
   ctx.imageSmoothingEnabled = false
   ctx.drawImage(getOrLoadImage(url), effect.targetX! - tamanho / 2, effect.targetY! - tamanho / 2, tamanho, tamanho)
   ctx.restore()
@@ -514,8 +521,9 @@ function drawVfxDeElemento(
 
 function drawImpactBurst(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
   const arte = vfxDoElemento(effect.elementType)
-  if (arte && drawVfxDeElemento(ctx, effect, arte.single, (effect.worldSize || IMPACT_BASE_SIZE) * ESCALA_VFX_SINGLE)) {
-    return
+  if (arte) {
+    const tamanho = (effect.worldSize || IMPACT_BASE_SIZE) * ESCALA_VFX_SINGLE * (arte.escala?.single ?? 1)
+    if (drawVfxDeElemento(ctx, effect, arte.single, tamanho)) return
   }
 
   const x = effect.targetX!
@@ -564,7 +572,10 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
   // a arte sai exatamente do tamanho do que o golpe atinge — a mesma regra que
   // o anel procedural ja seguia.
   const arte = vfxDoElemento(effect.elementType)
-  if (arte && drawVfxDeElemento(ctx, effect, arte.aoe, effect.worldSize! * ESCALA_VFX_AOE)) return
+  if (arte) {
+    const tamanho = effect.worldSize! * ESCALA_VFX_AOE * (arte.escala?.aoe ?? 1)
+    if (drawVfxDeElemento(ctx, effect, arte.aoe, tamanho)) return
+  }
 
   const x = effect.targetX!
   const y = effect.targetY!

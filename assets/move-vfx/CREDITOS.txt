@@ -1,11 +1,34 @@
 Arte de efeito de golpe.
 
-fire/  — Dungeon Crawl Stone Soup, crawl-ref/source/rltiles/effect
-         https://github.com/crawl/crawl
+Todos os arquivos vieram de Dungeon Crawl Stone Soup,
+crawl-ref/source/rltiles/effect  —  https://github.com/crawl/crawl
 
-  flame0.png, flame1.png, flame2.png   -> impacto de alvo unico (3 quadros)
-  fire_storm0.png                      -> primeiro quadro do AOE (o estouro)
-  cloud_fire2/1/0.png                  -> AOE queimando e apagando
+  fire/     flame0..2                          -> impacto de alvo unico
+            fire_storm0, cloud_fire2..0        -> AOE (estouro, queima, apaga)
+
+  water/    permafrost_cold0..1                -> impacto de alvo unico
+            polar_vortex2, polar_vortex1       -> AOE (vortice abrindo e sumindo)
+
+  electric/ electric_arc0..4                   -> impacto de alvo unico
+            strong_elec_shot0..2               -> AOE
+
+  normal/   sundering0..3                      -> impacto de alvo unico (corte)
+            shatter_wave_yellow0..1            -> AOE (onda de choque)
+
+  grass/    cloud_poison2..0                   -> impacto de alvo unico
+            contam0..3                         -> AOE
+
+  bug/      sting0..2                          -> impacto de alvo unico
+            cloud_meph2..0                     -> AOE
+
+  fighting/ manifold_assault0..1               -> impacto de alvo unico
+            haemoclasm0..3                     -> AOE
+
+  rock/     sandblast0..2                      -> impacto de alvo unico
+            shatter_wall0..1, cloud_dust0, cloud_dust2 -> AOE (pedra e poeira)
+
+Icones de habilidade (assets/ability-icons/) vieram do mesmo repositorio,
+crawl-ref/source/rltiles/gui/spells — um por tipo elemental.
 
 Licenca, conforme crawl-ref/source/rltiles/license.txt do proprio repositorio:
 
@@ -14,3 +37,17 @@ Licenca, conforme crawl-ref/source/rltiles/license.txt do proprio repositorio:
    You can find the original tileset at: http://rltiles.sf.net"
 
 Arquivos copiados sem modificacao. Todos 32x32.
+
+Duas notas sobre a ESCOLHA, pra quem for adicionar outro tipo:
+
+1. No repositorio de origem, um conjunto de 8 arquivos numerados 0..7 (arrow,
+   bolt, icicle, force_lance, stone_arrow, needle, slug...) sao as 8 DIRECOES
+   de um projetil, nao quadros de animacao. Nenhum deles foi usado — tocar um
+   desses em sequencia daria um projetil girando no lugar. So conjuntos de 2 a
+   5 arquivos, que sao animacao de verdade.
+
+2. O criterio decisivo foi CONTRASTE SOBRE O FUNDO DA HUNT, conferido no
+   tamanho real de jogo contra assets/hunt-backgrounds/. A primeira montagem
+   usou bog_flash/slime_wave (verde-escuro) pra GRAMA e shatter_wave_white
+   (cinza) pra LUTADOR: os dois somiam no cenario. Um efeito invisivel e pior
+   que o desenho procedural que ele substitui.

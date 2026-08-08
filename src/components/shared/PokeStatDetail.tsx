@@ -22,7 +22,7 @@ export function ProfileHero({ poke, species }: { poke: PokeInstance; species: Sp
   const expPct = Math.max(0, Math.min(100, (progress.into / progress.needed) * 100))
 
   return (
-    <div className="flex items-start gap-[.9em] border-b border-n800 p-[1em]">
+    <div className="flex items-start gap-[.6em] border-b border-n800 p-[.7em]">
       <div
         // `object-contain` num box fixo: o GIF nativo varia muito de tamanho
         // (Charmander 41x42, Gyarados 102x84) e sem o box a arte "pula" de
@@ -70,7 +70,7 @@ const IV_MAX = 31
 
 export function StatDetail({ poke, weaknessSection }: { poke: PokeInstance; weaknessSection: ReactNode }) {
   return (
-    <div className="flex flex-col gap-[.7em]">
+    <div className="flex flex-col gap-[.5em]">
       {/* Ausente em POKE anterior a coluna `original_trainer` que o backfill
           nao alcancou (nenhum hoje) — a linha some em vez de mostrar vazio. */}
       {poke.originalTrainer && (

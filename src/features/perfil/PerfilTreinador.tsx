@@ -94,7 +94,7 @@ export function PerfilTreinador() {
       onClose={() => setAberto(false)}
       title="Perfil do Treinador"
       header={
-        <div className="flex items-center gap-[.9em] border-b border-n800 px-[.9em] pb-[.8em]">
+        <div className="flex items-center gap-[.6em] border-b border-n800 px-[.65em] pb-[.6em]">
           <div className="flex h-[4.6em] w-[4.6em] shrink-0 items-center justify-center rounded-[.7em] border border-n700 bg-n900">
             <User className="text-[2.2em] text-n300" />
           </div>
@@ -116,10 +116,10 @@ export function PerfilTreinador() {
           </div>
         </div>
       }
-      subheader={<div className="px-[.9em] py-[.5em]"><SegmentedTabs value={aba} onChange={setAba} options={ABAS} /></div>}
+      subheader={<div className="px-[.65em] py-[.5em]"><SegmentedTabs value={aba} onChange={setAba} options={ABAS} /></div>}
     >
       {aba === 'resumo' && (
-        <div className="flex flex-col gap-[.7em]">
+        <div className="flex flex-col gap-[.5em]">
           <div className="grid grid-cols-2 gap-[.45em]">
             <Estatistica icon={<Coins />} rotulo="Ouro" valor={wallet.gold.toLocaleString('pt-BR')} cor="text-gold" />
             <Estatistica icon={<Diamond />} rotulo="Diamantes" valor={String(wallet.diamonds)} cor="text-diamond" />
@@ -157,7 +157,7 @@ export function PerfilTreinador() {
           <div className="flex flex-col gap-[.35em]">
             <SectionLabel>Outfit</SectionLabel>
             <GameCard>
-              <div className="flex items-center gap-[.6em]">
+              <div className="flex items-center gap-[.45em]">
                 <TShirt className="text-[1.5em] text-n400" />
                 <div className="flex min-w-0 flex-1 flex-col">
                   <span className="text-[.85em]">Nenhuma skin disponível</span>
@@ -215,7 +215,7 @@ export function PerfilTreinador() {
         <div className="flex flex-col gap-[.5em]">
           <SectionLabel>Especialidades</SectionLabel>
           <GameCard>
-            <div className="flex items-start gap-[.6em]">
+            <div className="flex items-start gap-[.45em]">
               <Star className="mt-[.15em] shrink-0 text-[1.4em] text-n400" />
               <div className="flex flex-col gap-[.3em] text-[.82em] text-n300">
                 <span className="font-medium text-foreground">Ainda não implementado</span>

@@ -30,7 +30,7 @@ export function TutorialModal() {
       onClose={fechar}
       title={aberto.titulo}
       footer={
-        <div className="flex items-center justify-between gap-[.6em]">
+        <div className="flex items-center justify-between gap-[.45em]">
           <div className="flex gap-[.3em]">
             {aberto.passos.map((_, i) => (
               <span
@@ -51,7 +51,7 @@ export function TutorialModal() {
         </div>
       }
     >
-      <div className="flex flex-col gap-[.6em]">
+      <div className="flex flex-col gap-[.45em]">
         <div className="text-[.72em] tracking-[.08em] text-n400 uppercase">
           Passo {passo + 1} de {aberto.passos.length}
         </div>

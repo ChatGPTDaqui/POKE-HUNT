@@ -22,7 +22,7 @@ export function ConfirmDialog() {
         if (e.target === e.currentTarget) close()
       }}
     >
-      <div className="flex w-[22em] max-w-[calc(100vw-2em)] flex-col gap-[.7em] rounded-xl border border-n700 bg-background p-[1.1em] shadow-2xl">
+      <div className="flex w-[22em] max-w-[calc(100vw-2em)] flex-col gap-[.5em] rounded-xl border border-n700 bg-background p-[1.1em] shadow-2xl">
         <div className="font-medium">{request.title}</div>
         <div className="text-[.85em] text-n400">{request.message}</div>
         <div className="flex justify-end gap-[.5em]">

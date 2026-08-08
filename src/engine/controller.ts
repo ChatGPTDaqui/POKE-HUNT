@@ -5,6 +5,7 @@
 // isto junto — ver a nota de topo de la.
 import { SPECIES, createPokeInstance } from '@/data/pokes'
 import { getItem } from '@/data/items'
+import { realceDeRaridade } from '@/data/rarity'
 import { evolvePokeInstance } from './systems/progressionSystem'
 import { resetStats } from './systems/statsTracker'
 import { isDead, heal } from './entity'
@@ -197,7 +198,11 @@ export const controller = {
         }
       })
     })
-    useToastStore.getState().pushToast(`${shinyPrefix(removed.isShiny)}${SPECIES[removed.speciesId].name} foi retirado da equipe.`, 'success', 'world')
+    useToastStore.getState().pushToast(
+      `${shinyPrefix(removed.isShiny)}${SPECIES[removed.speciesId].name} foi retirado da equipe.`,
+      'success', 'world',
+      realceDeRaridade(SPECIES[removed.speciesId].name, removed),
+    )
   },
 
   useItem(itemId: string): void {
@@ -268,7 +273,14 @@ export const controller = {
           })
         })
     }
-    useToastStore.getState().pushToast(`${shinyPrefix(poke.isShiny)}${previousName} evoluiu para ${result.species.name}!`, 'levelup', 'world')
+    useToastStore.getState().pushToast(
+      `${shinyPrefix(poke.isShiny)}${previousName} evoluiu para ${result.species.name}!`,
+      'levelup', 'world',
+      // A raridade e da INSTANCIA e nao muda ao evoluir, entao pintar o nome da
+      // forma nova (o segundo da frase) diria a mesma coisa. Pinta-se o
+      // primeiro, que e o que o `TextoComRealce` acha.
+      realceDeRaridade(previousName, poke),
+    )
   },
 
   toast(message: string, type: Parameters<ReturnType<typeof useToastStore.getState>['pushToast']>[1], channel: Parameters<ReturnType<typeof useToastStore.getState>['pushToast']>[2]): void {

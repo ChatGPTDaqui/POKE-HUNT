@@ -47,7 +47,7 @@ function Metrica({
   cor?: string
 }) {
   return (
-    <div className="flex flex-col gap-[.15em] rounded-[.55em] border border-n800 bg-n900 px-[.7em] py-[.55em]">
+    <div className="flex flex-col gap-[.15em] rounded-[.55em] border border-n800 bg-n900 px-[.55em] py-[.55em]">
       <span className="flex items-center gap-[.35em] text-[.75em] text-n500">
         {icone} {rotulo}
       </span>
@@ -108,7 +108,7 @@ export function HuntAnalyzer() {
       onClose={fechar}
       title="Hunt Analyzer"
     >
-      <div className="flex flex-col gap-[.8em]">
+      <div className="flex flex-col gap-[.55em]">
         <div className="flex flex-wrap items-center gap-[.5em]">
           <b className="font-medium">{mapDef?.name ?? 'Hospital'}</b>
           {mapDef && (

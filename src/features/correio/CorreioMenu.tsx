@@ -72,7 +72,7 @@ export function CorreioMenu() {
   }
 
   return (
-    <div className="flex flex-col gap-[.8em]">
+    <div className="flex flex-col gap-[.55em]">
       <GameCard className="flex flex-wrap items-end gap-[.5em] p-[.6em]">
         <label className="flex min-w-[10em] flex-1 flex-col gap-[.2em] text-[.78em] text-n400">
           Adicionar amigo pelo nick

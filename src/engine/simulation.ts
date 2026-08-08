@@ -28,7 +28,7 @@ import { FORMULAS } from '@/data/generated/formulas.generated'
 import { randInt, randRange, weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
 import { CAPTURE_ANIM_FRAME_DURATION, captureAnimRowCount } from '@/data/captureAnim'
-import { rarityOf } from '@/data/rarity'
+import { rarityOf, realceDeRaridade } from '@/data/rarity'
 import { formatStatGains } from '@/data/statLabels'
 
 import { createPlayerEntity, createEnemyEntity, isDead } from './entity'
@@ -277,7 +277,7 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
 
     useToastStore.getState().pushToast(
       `${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} derrotado! +${expGain} EXP, +${loot.gold} ouro`,
-      'gold', 'combat',
+      'gold', 'combat', realceDeRaridade(enemySpecies.name, enemy.poke),
     )
 
     if (grantResult.leveledUp) {
@@ -288,6 +288,7 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
       useToastStore.getState().pushToast(
         `${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ''}`,
         'levelup', 'combat',
+        realceDeRaridade(SPECIES[grantResult.poke.speciesId].name, grantResult.poke),
       )
       for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) {
         useToastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, 'levelup', 'combat')
@@ -323,6 +324,9 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
         useToastStore.getState().pushToast(
           `${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`,
           'capture-success', 'world',
+          // A raridade que vale e a da INSTANCIA capturada, nao a do inimigo em
+          // campo: `attemptCapture` sorteia o POKE que entra na mochila.
+          realceDeRaridade(enemySpecies.name, captureResult.poke),
         )
       } else if (captureResult.reason === 'roll_failed') {
         useToastStore.getState().pushToast('A captura falhou!', 'capture-fail', 'combat')
@@ -406,6 +410,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       useToastStore.getState().pushToast(
         `${SPECIES[world.player.poke.speciesId].name} desmaiou!${penaltyResult.leveledDown ? ` Caiu para o nivel ${penaltyResult.level}.` : ''}`,
         'error', 'combat',
+        realceDeRaridade(SPECIES[world.player.poke.speciesId].name, world.player.poke),
       )
     }
 
@@ -424,7 +429,11 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
         world.player.state = 'wander'
         world.player.targetId = null
         if (!silent) {
-          useToastStore.getState().pushToast(`${shinyPrefix(nextPoke.isShiny)}${SPECIES[nextPoke.speciesId].name} entrou em campo!`, 'success', 'combat')
+          useToastStore.getState().pushToast(
+            `${shinyPrefix(nextPoke.isShiny)}${SPECIES[nextPoke.speciesId].name} entrou em campo!`,
+            'success', 'combat',
+            realceDeRaridade(SPECIES[nextPoke.speciesId].name, nextPoke),
+          )
         }
       }
     }
