@@ -4,7 +4,7 @@
 // usuario) em vez de mostrar uma parede de zeros.
 import { SPECIES } from '@/data/pokes'
 import { ITEMS } from '@/data/items'
-import { spriteUrl, itemIconUrl } from '@/data/sprites'
+import { faceIconUrl, spriteUrl, itemIconUrl } from '@/data/sprites'
 import { pokemonSellValue } from '@/engine/systems/economySystem'
 import type { OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
 import { PokeNameTag } from '@/components/shared/PokeNameTag'
@@ -86,10 +86,17 @@ function Captures({ captures }: { captures: OfflineSimSummary['captures'] }) {
         {shown.map((c, i) => {
           const species = SPECIES[c.speciesId]
           if (!species) return null
-          const url = spriteUrl(c.speciesId, c.isShiny)
+          // `faceIconUrl` (retrato PMD 40x40, ja quadrado e enquadrado no
+          // rosto) e nao `spriteUrl` (o icone "grande", recorte de fan sheet
+          // com proporcao e padding variaveis por especie) — era esse o
+          // "sprite de face renderizando errado" aqui: num box de 1.6em o
+          // recorte grande virava uma mancha com faixa vazia em volta, e em
+          // varias especies o POKE nem aparecia. Mesma correcao ja feita no
+          // ActivePokeCard. `spriteUrl` fica de reserva.
+          const url = faceIconUrl(c.speciesId, c.isShiny) ?? spriteUrl(c.speciesId, c.isShiny)
           return (
             <div key={i} className="flex items-center gap-[.4em] overflow-hidden rounded-[.35em] border border-n800 px-[.4em] py-[.25em] text-[.8em]">
-              {url && <img src={url} alt="" className="h-[1.6em] w-[1.6em] shrink-0 object-contain" />}
+              {url && <img src={url} alt="" className="h-[1.6em] w-[1.6em] shrink-0 rounded-[.2em] object-cover" />}
               <span className="truncate">
                 <PokeNameTag poke={c} species={species} /> Lv{c.level}
               </span>

@@ -28,6 +28,8 @@ import { FORMULAS } from '@/data/generated/formulas.generated'
 import { randInt, randRange, weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
 import { CAPTURE_ANIM_FRAME_DURATION, captureAnimRowCount } from '@/data/captureAnim'
+import { rarityOf } from '@/data/rarity'
+import { formatStatGains } from '@/data/statLabels'
 
 import { createPlayerEntity, createEnemyEntity, isDead } from './entity'
 import { createWorldEffect } from './effect'
@@ -156,7 +158,11 @@ function spawnEnemyAt(world: SequenciaDeSorteio, mapDef: MapDef): EnemyEntity {
   const encounterId = weightedPick(rng, mapDef.enemyPool, (id) => getEncounter(id)?.weight ?? 45)
   const encounter = getEncounter(encounterId)
   if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
-  const level = randInt(rng, encounter.minLevel, encounter.maxLevel)
+  // `levelWeights` (ver data/huntTypes.ts) troca o sorteio uniforme por um
+  // ponderado — hoje so a hunt inicial usa, pra sair 80% Lv1 / 20% Lv2.
+  const level = encounter.levelWeights?.length
+    ? weightedPick(rng, encounter.levelWeights, (entry) => entry.weight).level
+    : randInt(rng, encounter.minLevel, encounter.maxLevel)
   const poke = createPokeInstance(rng, encounter.speciesId, level)
   return createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId })
 }
@@ -275,7 +281,14 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
     )
 
     if (grantResult.leveledUp) {
-      useToastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!`, 'levelup', 'combat')
+      // O ganho numerico de atributo vai junto do aviso (pedido explicito):
+      // sem ele o level-up so dizia "subiu de nivel" e o jogador precisava
+      // abrir o perfil pra descobrir se aquilo valeu alguma coisa.
+      const ganhos = formatStatGains(grantResult.statGains)
+      useToastStore.getState().pushToast(
+        `${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ''}`,
+        'levelup', 'combat',
+      )
       for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) {
         useToastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, 'levelup', 'combat')
       }
@@ -303,7 +316,14 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
     if (captureResult) {
       if (captureResult.success) {
         const location = captureResult.location === 'bag' ? 'mochila' : captureResult.location
-        useToastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} capturado! Foi para a ${location}.`, 'capture-success', 'world')
+        // Raridade concatenada no relatorio (pedido explicito): ela multiplica
+        // atributo e valor de venda em ate 600x, entao e o dado que decide se
+        // aquela captura importou — e o chat era o unico lugar que nao dizia.
+        const raridade = rarityOf(captureResult.poke).label
+        useToastStore.getState().pushToast(
+          `${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`,
+          'capture-success', 'world',
+        )
       } else if (captureResult.reason === 'roll_failed') {
         useToastStore.getState().pushToast('A captura falhou!', 'capture-fail', 'combat')
       }

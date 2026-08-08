@@ -1,6 +1,9 @@
-// Official Pokedex height (meters) for the species currently in the game —
-// used to scale battle-field sprites so bigger POKE actually read as bigger.
-const HEIGHT_M: Record<string, number> = {
+// Altura oficial da Pokedex (metros) das especies do jogo. Dado real,
+// mantido exportado: hoje nao escala mais nada no campo de batalha (ver
+// `scaleForSpecies` no fim do arquivo), mas continua sendo a unica fonte de
+// tamanho real por especie que o projeto tem — apagar seria jogar fora dado
+// levantado a mao pra reescrever depois.
+export const HEIGHT_M: Record<string, number> = {
   bulbasaur: 0.7, ivysaur: 1.0, venusaur: 2.0,
   charmander: 0.6, charmeleon: 1.1, charizard: 1.7,
   squirtle: 0.5, wartortle: 1.0, blastoise: 1.6,
@@ -84,23 +87,24 @@ const HEIGHT_M: Record<string, number> = {
   lugia: 5.2, ho_oh: 3.8, celebi: 0.6, mewtwo: 2.0, mew: 0.4,
 }
 
-// Explicit user request: replace the old "1.6x/2.0x cap above a fixed 1m
-// reference" scheme with a straight linear interpolation across the WHOLE
-// roster's real height range — the single shortest species in HEIGHT_M gets
-// exactly MIN_SCALE, the single tallest gets exactly MAX_SCALE, and every
-// other species lands proportionally in between (no separate legendary
-// bonus anymore — a legendary's size now comes purely from its real height,
-// same rule as everyone else). Species with no height data default to
-// MIN_SCALE (no real-size info to scale up from).
-const MIN_SCALE = 1
-const MAX_SCALE = 3
-const HEIGHT_VALUES = Object.values(HEIGHT_M)
-const MIN_HEIGHT = Math.min(...HEIGHT_VALUES)
-const MAX_HEIGHT = Math.max(...HEIGHT_VALUES)
+// ESCALA DESLIGADA — pedido explicito do usuario: "Remova quaisquer
+// redimensionamentos dinamicos via codigo das sprites no campo de batalha.
+// Resete o tamanho visual de todas as sprites (comuns e lendarios) para o seu
+// tamanho original exato, conforme os arquivos de imagem."
+//
+// O que existia aqui: uma interpolacao linear entre 1x e 3x sobre a altura
+// real da Pokedex de cada especie (`HEIGHT_M` abaixo), com Steelix (9,2m) e
+// Lugia (5,2m) esticados quase ao teto. Antes disso houve um `GLOBAL_BATTLE_
+// SCALE` de 1.5 e um bonus so pros lendarios. Agora a sprite sai exatamente
+// no tamanho do frame do arquivo PMD.
+//
+// A funcao continua existindo (em vez de sumir e apagar as tres chamadas em
+// render/sprites.ts) porque ela e o UNICO ponto de escala do campo de
+// batalha: enquanto ela devolver 1, nao ha como uma escala nova reaparecer
+// espalhada por ai — e religar a proporcao por altura no futuro e trocar uma
+// linha. `HEIGHT_M` fica: e dado real de Pokedex e nao custa nada.
+const NO_SCALE = 1
 
-export function scaleForSpecies(speciesId: string): number {
-  const height = HEIGHT_M[speciesId]
-  if (!height) return MIN_SCALE
-  const ratio = (height - MIN_HEIGHT) / (MAX_HEIGHT - MIN_HEIGHT)
-  return MIN_SCALE + ratio * (MAX_SCALE - MIN_SCALE)
+export function scaleForSpecies(_speciesId: string): number {
+  return NO_SCALE
 }

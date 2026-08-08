@@ -15,8 +15,18 @@ export function aplicarEstadoDoServidor(estado: unknown): void {
   useGameStateStore.setState(estado as GameStateData)
 }
 
+// Um erro de rede num flush de 30s vira um toast a cada 30s enquanto a
+// conexao estiver ruim — o jogador leva uma pilha de avisos identicos por cima
+// do jogo. Repetir a MESMA mensagem so passa depois desta janela.
+const JANELA_ANTI_REPETICAO_MS = 20000
+const ultimoAviso = new Map<string, number>()
+
 function reportarErro(erro: unknown): void {
   const mensagem = erro instanceof ErroServidor ? erro.message : 'nao foi possivel falar com o servidor'
+  const agora = Date.now()
+  const anterior = ultimoAviso.get(mensagem)
+  if (anterior != null && agora - anterior < JANELA_ANTI_REPETICAO_MS) return
+  ultimoAviso.set(mensagem, agora)
   useToastStore.getState().pushToast(mensagem, 'error', 'world')
 }
 

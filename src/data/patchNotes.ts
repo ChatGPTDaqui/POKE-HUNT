@@ -13,6 +13,33 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '4.1',
+    date: '2026-08-08',
+    title: 'Johto e Kanto separados, Ranking, Perfil do Treinador e economia reiniciada',
+    highlights: [
+      'INVENTARIO E ECONOMIA REINICIADOS pra todos os jogadores. POKEs, nivel, Pokedex e hunts liberadas continuam intactos — o que zerou foi o estoque e a carteira.',
+      'Novos valores de inicio (e o que todo mundo recebeu no reinicio): 1.000 de ouro, 0 diamantes, 100 Poke Ball, 100 Potion e 10 Revive. Great/Ultra/Premier Ball, Super/Hyper/Max Potion e Max Revive deixaram de ser dados de graca — agora sao comprados ou dropados.',
+      'HUNTS SEPARADAS POR REGIAO: hunt de Johto so tem POKE de Johto, hunt de Kanto so tem POKE de Kanto. Como quase toda hunt era mista, cada bioma passou a existir NAS DUAS regioes — sao 35 hunts agora (eram 19), cada regiao com uma escada completa de nivel. Nenhuma especie ficou sem lugar pra aparecer.',
+      'Porygon, Porygon2 e Eevee sairam de todas as tabelas de spawn selvagem (sao POKE de cassino/presente). Eles continuam no Bestiario e na Pokedex, mas hoje nao ha outra forma de obte-los no jogo.',
+      'Hunt inicial (Johto Route 46): agora sai exatamente 80% de POKE nivel 1 e 20% nivel 2, e o elenco dela passou a ser so de Johto (Sentret, Hoothoot, Ledyba, Spinarak).',
+      'Shiny ficou bem mais forte: os atributos base de um shiny passaram a ser multiplicados por 1,5 (era 1,2). A chance de encontrar shiny NAO mudou — continua a formula de sempre.',
+      'Os atributos de todo POKE passaram a ser recalculados ao carregar o jogo, entao mudancas de balanceamento como essa valem pra equipe inteira, e nao so pros POKE capturados depois.',
+      'NOVO — Ranking (menu "Mais"): Treinadores por nivel, Pokemon por nivel/Dano Fisico/Dano Especial/HP/Defesa/Defesa Especial/Velocidade, e um Hall da Fama com os primeiros a derrotar o Campeao Lance.',
+      'NOVO — Perfil do Treinador: clique na sua foto, no canto superior direito. Mostra nick, nivel, sua posicao no ranking geral, % da Pokedex, ouro, diamantes, batalhas vencidas, shinys derrotados, tempo de jogo e um log das ultimas capturas.',
+      'NOVO — Tutorial do Bot na primeira vez que voce joga, e um menu "Repetir Tutoriais" (dentro de "Mais") pra rever quando quiser.',
+      'Bot muda de configuracao inicial: pocao a 50% de vida (era 40%), e auto-catch e auto-revive agora comecam DESLIGADOS — os dois gastam item a cada uso, e o estoque inicial ficou bem menor.',
+      'Sprites de batalha voltaram ao tamanho original do arquivo. Todo redimensionamento por altura da especie foi removido (inclusive o dos lendarios).',
+      'O aviso de contagem do Auto-Revive (e os avisos de BOSS/Lance) deixaram de cobrir a tela inteira — agora ficam restritos ao campo de batalha e nao passam por cima do menu de baixo.',
+      'Subir de nivel passou a mostrar quanto cada atributo ganhou, e o relatorio de captura no chat passou a dizer a raridade do POKE capturado.',
+      'Calculadora de Forca: os POKE da sua equipe aparecem primeiro na lista de selecao.',
+      'Icone do menu Equipe trocado. Cabecalho do treinador ficou mais compacto (a foto continua do mesmo tamanho).',
+      'Conexao mais estavel: as chamadas ao servidor ganharam tempo limite e nova tentativa automatica em falha de rede, e as mensagens de erro passaram a dizer o que houve ("sem conexao", "o servidor demorou demais") em vez do generico "nao foi possivel falar com o servidor" repetido a cada 30 segundos.',
+      'Bug corrigido: recarregar a pagina em /jogo, /login ou /registro devolvia erro 404 no site publicado.',
+      'Bug corrigido: os icones de POKE do relatorio de farm offline usavam o recorte errado e varios apareciam cortados ou em branco.',
+      'Bug corrigido: o Modo Pesadelo espelhava a composicao ANTIGA das hunts — agora ele reflete o elenco separado por regiao, e as hunts novas tambem ganharam espelho.',
+    ],
+  },
+  {
     version: '4.0',
     date: '2026-08-08',
     title: 'Reinicio geral, interfaces mais leves e correcoes de sprite',

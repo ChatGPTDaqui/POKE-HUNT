@@ -23,4 +23,9 @@ export interface HuntMapDef extends MapDataEntry {
 export interface HuntEncounter extends EncounterDataEntry {
   rarity?: RarityKey
   ivs?: StatBlock
+  // Distribuicao de nivel ponderada, quando o sorteio uniforme entre
+  // minLevel/maxLevel nao serve. Usado hoje so pela hunt inicial, que por
+  // pedido explicito sai 80% nivel 1 e 20% nivel 2 (uniforme daria 50/50).
+  // Ausente = uniforme, como sempre foi.
+  levelWeights?: { level: number; weight: number }[]
 }

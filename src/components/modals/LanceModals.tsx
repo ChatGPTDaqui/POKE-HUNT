@@ -4,6 +4,7 @@ import { LANCE_MAP_ID } from '@/data/nightmareMaps'
 import { controller } from '@/engine/controller'
 import { useWorldStore } from '@/stores/worldStore'
 import { Button } from '@/components/ui/button'
+import { CampoOverlay } from './CampoOverlay'
 
 // Contagem regressiva de intro (world.countdownRemaining, ver
 // controller.ts#buildMapWorld/stepWorld): nada nasceu ainda e o combate esta
@@ -13,10 +14,10 @@ export function LanceCountdownModal() {
   if (remaining == null || remaining <= 0) return null
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[55] flex flex-col items-center justify-center gap-2 bg-black/60">
+    <CampoOverlay>
       <div className="text-lg font-semibold">O Campeao Lance se aproxima...</div>
       <div className="font-mono text-6xl font-black text-amber-300">{Math.ceil(remaining)}</div>
-    </div>
+    </CampoOverlay>
   )
 }
 

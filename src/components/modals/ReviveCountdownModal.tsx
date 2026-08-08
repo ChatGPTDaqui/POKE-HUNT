@@ -6,15 +6,19 @@
 // (autoSystem.ts#AUTO_REVIVE_DELAY, world.reviveCountdown). Sem ele o POKE
 // simplesmente revive do nada, sem aviso nenhum.
 import { useWorldStore } from '@/stores/worldStore'
+import { CampoOverlay } from './CampoOverlay'
 
 export function ReviveCountdownModal() {
   const countdown = useWorldStore((s) => s.reviveCountdown)
   if (countdown == null || countdown <= 0) return null
 
+  // Confinado ao campo de batalha (ver CampoOverlay): a contagem durava 5
+  // segundos cobrindo o menu inteiro, justo quando o jogador quer abrir a
+  // Mochila pra conferir se ainda tem Revive.
   return (
-    <div className="pointer-events-none fixed inset-0 z-[55] flex flex-col items-center justify-center gap-2 bg-black/60">
+    <CampoOverlay>
       <div className="text-sm font-medium">POKE desmaiado! Auto-Revive em...</div>
       <div className="font-mono text-5xl font-black text-emerald-300">{Math.ceil(countdown)}</div>
-    </div>
+    </CampoOverlay>
   )
 }

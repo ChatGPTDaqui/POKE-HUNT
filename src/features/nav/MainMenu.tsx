@@ -9,10 +9,10 @@
 //
 // "Mais" fica FORA da fileira, a direita, e abre um popover com o que nao
 // merece um circulo permanente (Wiki, Config).
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
-  Backpack, BookOpen, DotsThree, FirstAid, Gear, MapTrifold, Scales,
-  Storefront, UsersThree, Books, type Icon,
+  Backpack, BookOpen, DotsThree, FirstAid, Gear, GraduationCap, MapTrifold, Scales,
+  Storefront, Trophy, UsersThree, Books, type Icon,
 } from '@phosphor-icons/react'
 import { controller } from '@/engine/controller'
 import { useWorldStore } from '@/stores/worldStore'
@@ -23,13 +23,21 @@ interface MenuEntry {
   screen: ScreenName
   label: string
   Icon: Icon
+  /**
+   * Imagem que SUBSTITUI o icone vetorial. Pedido explicito do usuario pra
+   * Equipe (o item_0004 do pack de icones do Scarlet/Violet, copiado pra
+   * assets/ui-icons/equipe.png). `Icon` continua obrigatorio de proposito: e
+   * o fallback se a imagem nao carregar — um botao sem icone nenhum nao diz
+   * o que faz.
+   */
+  iconUrl?: string
   big?: boolean
 }
 
 // Ordem fixa. Hunt e o circulo grande do centro: e a acao que o jogador repete
 // mais, e a unica que muda a cena do jogo.
 const MAIN_MENUS: MenuEntry[] = [
-  { screen: 'equipe', label: 'Equipe', Icon: UsersThree },
+  { screen: 'equipe', label: 'Equipe', Icon: UsersThree, iconUrl: 'assets/ui-icons/equipe.png' },
   { screen: 'mochila', label: 'Mochila', Icon: Backpack },
   { screen: 'pokedex', label: 'Pokedex', Icon: BookOpen },
   { screen: 'hunts', label: 'Hunt', Icon: MapTrifold, big: true },
@@ -38,6 +46,8 @@ const MAIN_MENUS: MenuEntry[] = [
 ]
 
 const MORE_MENUS: { screen: ScreenName; label: string; Icon: Icon }[] = [
+  { screen: 'ranking', label: 'Ranking', Icon: Trophy },
+  { screen: 'tutoriais', label: 'Repetir Tutoriais', Icon: GraduationCap },
   { screen: 'wiki', label: 'Wiki', Icon: Books },
   { screen: 'config', label: 'Configurações', Icon: Gear },
 ]
@@ -93,6 +103,7 @@ export function MainMenu() {
             big={entry.big}
             active={currentScreen === entry.screen}
             Icon={entry.Icon}
+            iconUrl={entry.iconUrl}
             onClick={() => toggleScreen(entry.screen)}
           />
         ),
@@ -104,16 +115,20 @@ export function MainMenu() {
 }
 
 function MenuSlot({
-  label, Icon, active, big, showLabel, compact, onClick,
+  label, Icon, iconUrl, active, big, showLabel, compact, onClick,
 }: {
   label: string
   Icon: Icon
+  iconUrl?: string
   active: boolean
   big?: boolean
   showLabel: boolean
   compact?: boolean
   onClick: () => void
 }) {
+  // Se a imagem falhar (arquivo movido/404), cai no icone vetorial em vez de
+  // deixar um circulo vazio.
+  const [imagemQuebrada, setImagemQuebrada] = useState(false)
   // Em mobile (compact) os circulos encolhem pra caber numa fileira so — sem
   // isso, 7 slots quebram em tres fileiras e o rodape fica alto demais, empurrando
   // chat/Auto pra cima e comendo o campo de batalha.
@@ -139,7 +154,20 @@ function MenuSlot({
             : 'border-n700 bg-n900 text-n200',
         )}
       >
-        <Icon className={iconSize} />
+        {iconUrl && !imagemQuebrada ? (
+          <img
+            src={iconUrl}
+            alt=""
+            onError={() => setImagemQuebrada(true)}
+            // `object-contain` (nao cover): o icone do pack tem margem propria
+            // e cortar as bordas comeria a borda do desenho. A caixa e um
+            // pouco menor que o circulo pra sobrar respiro.
+            className={cn('object-contain', big ? 'h-[62%] w-[62%]' : 'h-[58%] w-[58%]')}
+            style={{ imageRendering: 'pixelated' }}
+          />
+        ) : (
+          <Icon className={iconSize} />
+        )}
       </button>
       {showLabel && (
         // `text-shadow` porque o rotulo fica direto sobre o canvas, sem

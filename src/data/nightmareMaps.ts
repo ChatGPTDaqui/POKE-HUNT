@@ -10,8 +10,6 @@
 // extending the codegen pipeline for it would be overkill and would risk the
 // next `npm run planilha:aplicar` clobbering it. Confirmed with the user:
 // totally free, no unlockCost anywhere in here.
-import { MAPS_DATA } from './generated/maps.generated'
-import { ENCOUNTERS_DATA } from './generated/enemies.generated'
 import { SPECIES } from './pokes'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
 import type { ElementType, SpeciesDataEntry } from './generated/types'
@@ -65,15 +63,23 @@ const BOSS_LEVEL = 300
 const NIGHTMARE_MIN_LEVEL = 150
 const shiftLevel = (level: number) => Math.max(level + LEVEL_OFFSET, NIGHTMARE_MIN_LEVEL)
 
-function buildNightmareMirror(): { maps: Record<string, HuntMapDef>; encounters: Record<string, HuntEncounter> } {
+// Recebe as hunts normais em vez de ler `MAPS_DATA` direto: o espelho tem
+// que ser tirado do resultado FINAL (depois do recorte por regiao e das
+// hunts-irmas criadas em huntSpawnOverrides.ts), senao o Modo Pesadelo
+// congelaria a composicao antiga — POKE de Kanto numa hunt de Johto — e as
+// hunts novas nao teriam espelho nenhum.
+export function buildNightmareMirror(
+  sourceMaps: Record<string, HuntMapDef>,
+  sourceEncounters: Record<string, HuntEncounter>,
+): { maps: Record<string, HuntMapDef>; encounters: Record<string, HuntEncounter> } {
   const maps: Record<string, HuntMapDef> = {}
   const encounters: Record<string, HuntEncounter> = {}
 
-  for (const map of Object.values(MAPS_DATA)) {
+  for (const map of Object.values(sourceMaps)) {
     const newId = `nightmare_${map.id}`
     const enemyPool: string[] = []
     for (const encId of map.enemyPool) {
-      const enc = ENCOUNTERS_DATA[encId]
+      const enc = sourceEncounters[encId]
       if (!enc) continue
       const newEncId = `nightmare_${encId}`
       encounters[newEncId] = {
@@ -202,9 +208,11 @@ function buildLanceHunt(): { map: HuntMapDef; encounters: Record<string, HuntEnc
   return { map, encounters }
 }
 
-const nightmare = buildNightmareMirror()
 const bosses = buildBossHunts()
 const lance = buildLanceHunt()
 
-export const NIGHTMARE_MAPS_DATA: Record<string, HuntMapDef> = { ...nightmare.maps, ...bosses.maps, [LANCE_MAP_ID]: lance.map }
-export const NIGHTMARE_ENCOUNTERS_DATA: Record<string, HuntEncounter> = { ...nightmare.encounters, ...bosses.encounters, ...lance.encounters }
+// BOSS e Lance nao dependem das hunts normais (time/nivel proprios), entao
+// continuam prontos aqui. O espelho do Modo Pesadelo e montado depois, em
+// huntSpawnOverrides.ts, sobre as hunts ja recortadas por regiao.
+export const BOSS_MAPS_DATA: Record<string, HuntMapDef> = { ...bosses.maps, [LANCE_MAP_ID]: lance.map }
+export const BOSS_ENCOUNTERS_DATA: Record<string, HuntEncounter> = { ...bosses.encounters, ...lance.encounters }

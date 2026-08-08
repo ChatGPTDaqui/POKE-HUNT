@@ -1,0 +1,12 @@
+# Cloudflare Pages: roteamento de SPA.
+#
+# Sem isto, recarregar a pagina em /jogo, /login ou /registro devolve 404 — o
+# arquivo nao existe no disco, quem resolve essas rotas e o React Router. O
+# sintoma engana: parece "o servidor caiu", nao "falta uma regra de rota".
+#
+# A regra de /assets/* vem PRIMEIRO e e explicita: a arte do jogo e copiada
+# pra dist/assets no build (scripts/copiar-assets.mjs) e nao pode, em hipotese
+# nenhuma, cair no catch-all e devolver o index.html com status 200 — uma
+# sprite que volta como HTML nao da erro visivel, so nao aparece.
+/assets/*  /assets/:splat  200
+/*         /index.html     200

@@ -7,7 +7,7 @@
 // dispararia re-render nem seria persistida corretamente — cada funcao
 // abaixo devolve um POKE NOVO (`{...pokeInstance, ...}`), e o chamador
 // escreve de volta via `gameState.updatePokeInstance(uid, () => novoPoke)`.
-import { SPECIES, computeStatsAtLevel, totalExpForLevel, SPECIAL_EVOLUTION_STONE_COUNT, type PokeInstance } from '@/data/pokes'
+import { SPECIES, computeStatsAtLevel, totalExpForLevel, SPECIAL_EVOLUTION_STONE_COUNT, type PokeInstance, type StatBlock } from '@/data/pokes'
 import { getAbility, type Ability } from '@/data/abilities'
 import { stoneItemId } from '@/data/stones'
 import { createFormulaEngine } from '@/core/formulaEngine'
@@ -129,6 +129,17 @@ export interface GrantPokeExpResult {
   leveledUp: boolean
   newAbilities: Ability[]
   level: number
+  /**
+   * Quanto cada atributo subiu no conjunto de level-ups desta chamada
+   * (`null` quando nao houve nenhum). Calculado aqui, e nao na tela, porque
+   * so aqui existem os dois lados da comparacao: depois que `poke` volta, o
+   * estado anterior ja foi substituido.
+   *
+   * Um kill pode causar MAIS DE UM nivel de uma vez, e o delta e do bloco
+   * inteiro — que e o que o jogador quer saber ("subi 3 niveis, ganhei
+   * quanto?").
+   */
+  statGains: StatBlock | null
 }
 
 // Aplica EXP a um pokeInstance, tratando (possivelmente varios) level-ups e
@@ -162,7 +173,16 @@ export function grantExp(pokeInstance: PokeInstance, amount: number): GrantPokeE
   }
 
   const poke: PokeInstance = { ...pokeInstance, exp, level, stats, hp, unlockedAbilities }
-  return { poke, leveledUp, newAbilities, level }
+  const statGains = leveledUp ? diffStats(pokeInstance.stats, stats) : null
+  return { poke, leveledUp, newAbilities, level, statGains }
+}
+
+function diffStats(antes: StatBlock, depois: StatBlock): StatBlock {
+  const out = {} as StatBlock
+  for (const key of Object.keys(depois) as (keyof StatBlock)[]) {
+    out[key] = depois[key] - antes[key]
+  }
+  return out
 }
 
 export interface DeathPenaltyResult {

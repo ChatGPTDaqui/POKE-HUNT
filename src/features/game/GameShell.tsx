@@ -19,6 +19,9 @@ import { OfflineFarmModal } from '@/components/modals/OfflineFarmModal'
 import { HudLayer } from './HudLayer'
 import { ScreenOverlay } from '@/features/screens/ScreenOverlay'
 import { StartScreen } from '@/features/start/StartScreen'
+import { PerfilTreinador } from '@/features/perfil/PerfilTreinador'
+import { TutorialModal } from '@/features/tutorial/TutorialModal'
+import { useTutorialStore, TUTORIAL_BOT } from '@/stores/tutorialStore'
 import { useUiStore } from '@/stores/uiStore'
 import { useGameStateStore, useHasStarter, readLastSavedAt, forceSave, withSavesDeferred } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
@@ -267,6 +270,21 @@ function TelaCarregandoProgresso({ estado }: { estado: EstadoProgresso }) {
   )
 }
 
+// Tutorial do Bot no primeiro contato.
+//
+// Dispara depois de o jogador ter um inicial — antes disso a tela de escolha
+// ocupa tudo e um modal por cima dela so atrapalha. Uma vez so por aparelho: o
+// controle de "ja viu" mora no localStorage (ver tutorialStore), nao no save,
+// porque o save e sobrescrito pelo servidor a cada flush.
+function useTutorialInicial(hasStarter: boolean): void {
+  const jaDisparou = useRef(false)
+  useEffect(() => {
+    if (!hasStarter || jaDisparou.current) return
+    jaDisparou.current = true
+    useTutorialStore.getState().abrirSeInedito(TUTORIAL_BOT)
+  }, [hasStarter])
+}
+
 function JogoCarregado() {
   const hasStarter = useHasStarter()
   const hudScale = useUiStore((s) => s.hudScale)
@@ -274,6 +292,7 @@ function JogoCarregado() {
   useBackgroundCatchUp()
   useSyncOnUnload()
   useViewportTracking()
+  useTutorialInicial(hasStarter)
 
   return (
     <div
@@ -320,6 +339,8 @@ function JogoCarregado() {
 
       <ToastStack />
       <PokeProfileModal />
+      <PerfilTreinador />
+      <TutorialModal />
       <ConfirmDialog />
       <LevelUpSplash />
       {summary && <OfflineFarmModal summary={summary} onClose={dismiss} />}

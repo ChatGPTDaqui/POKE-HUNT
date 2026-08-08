@@ -7,7 +7,7 @@
 // testadas sozinhas.
 import type { Database } from '@/lib/database.types'
 import type { GameStateData, AutoPotRule, AutoCatchConfig, AutoCatchRule, PerfStats, TrainerInfo, PokedexKillCount } from '@/stores/gameStateStore'
-import type { PokeInstance, StatBlock } from '@/data/pokes'
+import { SPECIES, computeStatsAtLevel, type PokeInstance, type StatBlock } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
 
 type Json = Database['public']['Tables']['players']['Row']['auto_toggles']
@@ -46,10 +46,29 @@ function rowToPoke(row: PokemonRow): PokeInstance {
     hp: row.iv_hp, atkFis: row.iv_atk_fis, atkEsp: row.iv_atk_esp,
     def: row.iv_def, defEsp: row.iv_def_esp, speed: row.iv_speed,
   }
-  const stats: StatBlock = {
+  // Atributos sao RECALCULADOS na carga em vez de lidos das colunas
+  // `stat_*`. Eles sao deterministicos a partir de (especie, nivel, IVs,
+  // raridade, shiny) — tudo que a linha ja guarda — entao as colunas sao
+  // cache, nao verdade.
+  //
+  // O motivo de nao confiar no cache: todo ajuste de balanceamento que mexe
+  // no multiplicador (raridade, shiny, formula da planilha) so valeria pros
+  // POKEs criados DEPOIS. O jogador ficaria com dois shinys identicos e
+  // atributos diferentes, sem nada no jogo explicando por que. Recalcular
+  // aqui faz a mudanca alcancar o time inteiro na proxima carga, sem
+  // migration nem backfill.
+  //
+  // Especie desconhecida (save antigo referenciando especie renomeada/
+  // removida no sync) cai nas colunas gravadas em vez de estourar — a
+  // alternativa seria o jogo inteiro nao abrir por causa de um POKE.
+  const gravados: StatBlock = {
     hp: row.stat_hp, atkFis: row.stat_atk_fis, atkEsp: row.stat_atk_esp,
     def: row.stat_def, defEsp: row.stat_def_esp, speed: row.stat_speed,
   }
+  const species = SPECIES[row.species_id]
+  const stats = species
+    ? computeStatsAtLevel(species, row.level, ivs, row.rarity as RarityKey, row.is_shiny)
+    : gravados
   return {
     // O uid do jogo passa a SER o uuid do Postgres. Antes era um contador de
     // modulo (`poke-1`), que nao sobrevive a recarga nem serve de PK — ver
@@ -58,13 +77,16 @@ function rowToPoke(row: PokemonRow): PokeInstance {
     speciesId: row.species_id,
     level: row.level,
     exp: row.exp,
-    hp: row.hp,
+    // Recalcular pra baixo pode deixar o HP salvo acima do novo maximo — a
+    // barra passaria de 100% e o auto-pot nunca dispararia.
+    hp: Math.min(row.hp, stats.hp),
     isShiny: row.is_shiny,
     rarity: row.rarity as RarityKey,
     ivs,
     stats,
     unlockedAbilities: row.unlocked_abilities,
     locked: row.locked,
+    capturedAt: row.created_at,
   }
 }
 

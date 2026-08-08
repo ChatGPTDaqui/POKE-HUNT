@@ -15,6 +15,7 @@ import { SPECIES, computeStatsAtLevel, type Species, type StatBlock } from '@/da
 import { gen5SpriteUrl } from '@/data/gen5Sprites'
 import { RARITIES, type RarityKey } from '@/data/rarity'
 import { useBreakpoints } from '@/stores/uiStore'
+import { useGameStateStore } from '@/stores/gameStateStore'
 import { TypeChip } from '@/components/shared/TypeChip'
 import { GameCheck, GameInput, GameSelect } from '@/components/game/controls'
 
@@ -70,6 +71,20 @@ function PainelLado({
   comparar: ReturnType<typeof statsDe>
 }) {
   const url = resultado ? gen5SpriteUrl(resultado.species.id, lado.isShiny) : null
+  // Especies presentes na equipe agora, na ordem da equipe e sem repetir
+  // (dois POKEs da mesma especie dariam duas opcoes identicas).
+  const team = useGameStateStore((s) => s.team)
+  const daEquipe = useMemo(() => {
+    const vistas = new Set<string>()
+    const out: Species[] = []
+    for (const poke of team) {
+      const species = SPECIES[poke.speciesId]
+      if (!species || vistas.has(species.id)) continue
+      vistas.add(species.id)
+      out.push(species)
+    }
+    return out
+  }, [team])
 
   return (
     <div className="flex flex-col gap-[.6em] rounded-[.7em] border border-n800 bg-n900 p-[.8em]">
@@ -83,9 +98,25 @@ function PainelLado({
           className="min-w-0 flex-1"
         >
           <option value="">Escolher Pokemon...</option>
-          {ESPECIES.map((s) => (
-            <option key={s.id} value={s.id}>{s.name}</option>
-          ))}
+          {/*
+            A equipe atual vem PRIMEIRO, num grupo proprio (pedido explicito).
+            O caso comum aqui e "quanto o meu POKE chega a valer" — com 226
+            especies em ordem alfabetica, achar o proprio POKE era rolar a
+            lista inteira. `<optgroup>` em vez de so reordenar porque sem o
+            rotulo o jogador nao entende por que a lista comeca fora de ordem.
+          */}
+          {daEquipe.length > 0 && (
+            <optgroup label="Sua equipe">
+              {daEquipe.map((s) => (
+                <option key={`equipe-${s.id}`} value={s.id}>{s.name}</option>
+              ))}
+            </optgroup>
+          )}
+          <optgroup label={daEquipe.length > 0 ? 'Todas as espécies' : ''}>
+            {ESPECIES.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </optgroup>
         </GameSelect>
       </div>
 

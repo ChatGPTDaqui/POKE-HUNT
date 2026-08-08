@@ -10,6 +10,10 @@ import { ErroHttp, selecionar, inserir, atualizar, type Config } from './db.js'
 import { aplicarFlush, carregarEstado, gravarEstado, type LinhaSessao } from './progresso.js'
 import { aplicarAcao, type Acao } from './acoes.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
+import {
+  perfilDoJogador, rankingDeTreinadores, rankingDePokemon, hallDaFama,
+  ehCriterioPoke, CONQUISTA_LANCE,
+} from './ranking.js'
 import { MAPS, randomSeed } from '#engine'
 
 function json(dado: unknown, status = 200): Response {
@@ -77,6 +81,21 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
   }
   if (url.pathname === '/estado' && req.method === 'GET') {
     return json({ estado: await carregarEstado(cfg, jogador.id) })
+  }
+  if (url.pathname === '/perfil' && req.method === 'GET') {
+    return json(await perfilDoJogador(cfg, jogador.id))
+  }
+  if (url.pathname === '/ranking/treinadores' && req.method === 'GET') {
+    return json({ entradas: await rankingDeTreinadores(cfg, url.searchParams.get('limite')) })
+  }
+  if (url.pathname === '/ranking/pokemon' && req.method === 'GET') {
+    const criterio = url.searchParams.get('criterio') ?? 'level'
+    // Lista branca: o criterio vira nome de coluna numa URL do PostgREST.
+    if (!ehCriterioPoke(criterio)) throw new ErroHttp(400, 'criterio desconhecido')
+    return json({ entradas: await rankingDePokemon(cfg, criterio, url.searchParams.get('limite')) })
+  }
+  if (url.pathname === '/ranking/hall' && req.method === 'GET') {
+    return json({ entradas: await hallDaFama(cfg, CONQUISTA_LANCE, url.searchParams.get('limite')) })
   }
   if (url.pathname === '/acao' && req.method === 'POST') {
     return acao(cfg, jogador.id, req)

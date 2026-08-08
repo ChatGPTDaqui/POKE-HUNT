@@ -37,9 +37,41 @@ function cabecalhos(cfg, extras = {}) {
 		...extras
 	};
 }
+var ESPERA_ENTRE_TENTATIVAS_MS$1 = [200, 700];
+var TIMEOUT_MS = 1e4;
+var dormir$1 = (ms) => new Promise((r) => setTimeout(r, ms));
+function ehFalhaTransitoria(status) {
+	return status === 408 || status === 425 || status === 429 || status >= 500;
+}
+async function buscarComRetry(cfg, caminho, init) {
+	let ultimo = null;
+	for (let tentativa = 0; tentativa <= ESPERA_ENTRE_TENTATIVAS_MS$1.length; tentativa++) {
+		if (tentativa > 0) await dormir$1(ESPERA_ENTRE_TENTATIVAS_MS$1[tentativa - 1]);
+		try {
+			const resposta = await fetch(`${cfg.supabaseUrl}/rest/v1/${caminho}`, {
+				...init,
+				signal: AbortSignal.timeout(TIMEOUT_MS)
+			});
+			const texto = await resposta.text();
+			if (resposta.ok || !ehFalhaTransitoria(resposta.status)) return {
+				resposta,
+				texto
+			};
+			console.error(`PostgREST ${resposta.status} em ${caminho} (tentativa ${tentativa + 1}): ${texto.slice(0, 400)}`);
+			ultimo = {
+				resposta,
+				texto
+			};
+		} catch (erro) {
+			console.error(`PostgREST inacessivel em ${caminho} (tentativa ${tentativa + 1}): ${String(erro).slice(0, 200)}`);
+			if (tentativa === ESPERA_ENTRE_TENTATIVAS_MS$1.length) throw new ErroHttp(502, "falha ao falar com o banco");
+		}
+	}
+	if (!ultimo) throw new ErroHttp(502, "falha ao falar com o banco");
+	return ultimo;
+}
 async function pedir$1(cfg, caminho, init) {
-	const resposta = await fetch(`${cfg.supabaseUrl}/rest/v1/${caminho}`, init);
-	const texto = await resposta.text();
+	const { resposta, texto } = await buscarComRetry(cfg, caminho, init);
 	if (!resposta.ok) {
 		console.error(`PostgREST ${resposta.status} em ${caminho}: ${texto.slice(0, 400)}`);
 		throw new ErroHttp(502, "falha ao falar com o banco");
@@ -60,11 +92,10 @@ async function selecionarTudo(cfg, caminho, pagina = 1e3) {
 	const acumulado = [];
 	let inicio = 0;
 	for (;;) {
-		const resposta = await fetch(`${cfg.supabaseUrl}/rest/v1/${caminho}${juncao}`, { headers: cabecalhos(cfg, {
+		const { resposta, texto } = await buscarComRetry(cfg, `${caminho}${juncao}`, { headers: cabecalhos(cfg, {
 			Range: `${inicio}-${inicio + pagina - 1}`,
 			Prefer: "count=exact"
 		}) });
-		const texto = await resposta.text();
 		if (!resposta.ok) {
 			console.error(`PostgREST ${resposta.status} em ${caminho}: ${texto.slice(0, 400)}`);
 			throw new ErroHttp(502, "falha ao falar com o banco");
@@ -15513,11 +15544,15 @@ var RARITY_LIST = Object.values(RARITIES);
 function rollRarity(rng) {
 	return weightedPick(rng, RARITY_LIST, (r) => r.weight).key;
 }
+function rarityOf(poke) {
+	const key = poke?.rarity;
+	return key && RARITIES[key] || RARITIES.comum;
+}
 //#endregion
 //#region src/data/pokes.ts
-var SHINY_CHANCE_AT_MAX_CATCH_RATE = 1 / 8192 * 200;
 var MAX_CATCH_RATE = 255;
 var formulaEngine$6 = createFormulaEngine(FORMULAS);
+var SHINY_CHANCE_AT_MAX_CATCH_RATE = 1 / 8192 * formulaEngine$6.evalOrDefault("SHINY_RATE_MULTIPLIER", 200);
 var SHAPES = [
 	"triangle",
 	"circle",
@@ -15571,7 +15606,7 @@ for (const [fromId, toId] of Object.entries({
 		from.isSpecialEvolution = true;
 	}
 }
-var SHINY_STAT_MULTIPLIER = 1.2;
+var SHINY_STAT_MULTIPLIER = 1.5;
 function computeStatsAtLevel(species, level, ivs, rarityKey, isShiny) {
 	const lvl = Math.max(1, level);
 	const rarityMultiplier = (rarityKey && RARITIES[rarityKey] || RARITIES.comum).statMultiplier;
@@ -19166,14 +19201,14 @@ var LEVEL_OFFSET = 100;
 var BOSS_LEVEL = 300;
 var NIGHTMARE_MIN_LEVEL = 150;
 var shiftLevel = (level) => Math.max(level + LEVEL_OFFSET, NIGHTMARE_MIN_LEVEL);
-function buildNightmareMirror() {
+function buildNightmareMirror(sourceMaps, sourceEncounters) {
 	const maps = {};
 	const encounters = {};
-	for (const map of Object.values(MAPS_DATA)) {
+	for (const map of Object.values(sourceMaps)) {
 		const newId = `nightmare_${map.id}`;
 		const enemyPool = [];
 		for (const encId of map.enemyPool) {
-			const enc = ENCOUNTERS_DATA[encId];
+			const enc = sourceEncounters[encId];
 			if (!enc) continue;
 			const newEncId = `nightmare_${encId}`;
 			encounters[newEncId] = {
@@ -19345,82 +19380,171 @@ function buildLanceHunt() {
 		encounters
 	};
 }
-var nightmare = buildNightmareMirror();
 var bosses = buildBossHunts();
 var lance = buildLanceHunt();
-var NIGHTMARE_MAPS_DATA = {
-	...nightmare.maps,
+var BOSS_MAPS_DATA = {
 	...bosses.maps,
 	[LANCE_MAP_ID]: lance.map
 };
-var NIGHTMARE_ENCOUNTERS_DATA = {
-	...nightmare.encounters,
+var BOSS_ENCOUNTERS_DATA = {
 	...bosses.encounters,
 	...lance.encounters
 };
 //#endregion
+//#region src/data/regions.ts
+var LAST_KANTO_DEX = 151;
+var DEX_RE = /Nº\s*(\d+)/;
+var POKEDEX_NUMBER = Object.fromEntries(Object.entries(SPECIES_DATA).map(([id, species]) => {
+	const match = species.description.match(DEX_RE);
+	if (!match) throw new Error(`Especie "${id}" sem numero de Pokedex na descricao ("${species.description}") — sem ele nao da pra dizer se ela e de Kanto ou de Johto.`);
+	return [id, Number(match[1])];
+}));
+function pokedexNumber(speciesId) {
+	const dex = POKEDEX_NUMBER[speciesId];
+	if (dex == null) throw new Error(`Especie desconhecida: ${speciesId}`);
+	return dex;
+}
+function regionOfSpecies(speciesId) {
+	return pokedexNumber(speciesId) <= LAST_KANTO_DEX ? "kanto" : "johto";
+}
+var REGIONS = ["johto", "kanto"];
+var REGION_LABEL = {
+	johto: "Johto",
+	kanto: "Kanto"
+};
+var NON_WILD_SPECIES = /* @__PURE__ */ new Set([
+	"porygon",
+	"porygon2",
+	"eevee"
+]);
+//#endregion
 //#region src/data/huntSpawnOverrides.ts
-var ROUTE_46_ID = "route_46";
-var COSTA_11_20_ID = "lv_11_20_costa";
-var DESERTO_21_30_ID = "lv_21_30_deserto";
-var RUINAS_ANCESTRAIS_ID = "kanto_lv_36_55_ruinas_ancestrais";
-function cloneMapsWithOwnPools(mapsData) {
-	const out = {};
-	for (const [id, map] of Object.entries(mapsData)) out[id] = {
-		...map,
-		enemyPool: [...map.enemyPool]
-	};
-	return out;
-}
-var maps = {
-	...cloneMapsWithOwnPools(MAPS_DATA),
-	...cloneMapsWithOwnPools(NIGHTMARE_MAPS_DATA)
+var HUNT_BIOME = {
+	lv_1_10_floresta: "GRASS",
+	lv_1_10_bosque: "BUG",
+	lv_11_20_costa: "WATER",
+	lv_11_20_planicie: "NORMAL",
+	lv_21_30_caverna: "ROCK",
+	lv_21_30_deserto: "GROUND",
+	lv_31_40_vulcanico: "FIRE",
+	lv_31_40_usina: "ELECTRIC",
+	lv_41_50_pantano: "POISON",
+	lv_41_50_dojo: "FIGHTING",
+	kanto_lv_1_10_geleira: "ICE",
+	kanto_lv_1_10_fabrica: "STEEL",
+	kanto_lv_11_20_penhascos: "FLYING",
+	kanto_lv_11_20_torre_mistica: "PSYCHIC",
+	kanto_lv_21_35_cemiterio: "GHOST",
+	kanto_lv_21_35_covil_sombrio: "DARK",
+	kanto_lv_36_55_ruinas_ancestrais: "DRAGON",
+	kanto_lv_36_55_profundezas: "WATER"
 };
-var encounters = {
-	...ENCOUNTERS_DATA,
-	...NIGHTMARE_ENCOUNTERS_DATA
+var STARTER_HUNT_ID = "route_46";
+var STARTER_HUNT_SPECIES = [
+	"sentret",
+	"hoothoot",
+	"ledyba",
+	"spinarak"
+];
+var STARTER_LEVEL_WEIGHTS = [{
+	level: 1,
+	weight: 80
+}, {
+	level: 2,
+	weight: 20
+}];
+var SPECIES_BIOME_OVERRIDE = {
+	wooper: "GROUND",
+	quagsire: "GROUND"
 };
-function removeEncounterFromMap(mapId, speciesId) {
-	const map = maps[mapId];
-	if (!map) return;
-	const encId = map.enemyPool.find((id) => encounters[id] && encounters[id].speciesId === speciesId);
-	if (!encId) return;
-	map.enemyPool = map.enemyPool.filter((id) => id !== encId);
-	delete encounters[encId];
+var MIN_TYPE_POOL = 4;
+var DRAGONITE_HUNT_SHARE = .01;
+var BASE_STARTERS = /* @__PURE__ */ new Set([
+	"charmander",
+	"squirtle",
+	"bulbasaur"
+]);
+var LEGENDARY = new Set(LEGENDARY_SPECIES_IDS);
+var WILD_SPECIES_IDS = Object.keys(SPECIES_DATA).filter((id) => !BASE_STARTERS.has(id) && !LEGENDARY.has(id) && !NON_WILD_SPECIES.has(id)).sort((a, b) => pokedexNumber(a) - pokedexNumber(b));
+function biomeOf(speciesId) {
+	return SPECIES_BIOME_OVERRIDE[speciesId] ?? SPECIES_DATA[speciesId].type;
 }
-function addEncounterToMap(mapId, speciesId) {
-	const map = maps[mapId];
-	const species = SPECIES[speciesId];
-	if (!map || !species) return;
-	const encId = `${mapId}_${speciesId}`;
-	if (encounters[encId]) return;
-	encounters[encId] = {
-		id: encId,
+function poolFor(region, biome) {
+	const mine = WILD_SPECIES_IDS.filter((id) => regionOfSpecies(id) === region);
+	const primary = mine.filter((id) => biomeOf(id) === biome);
+	if (primary.length >= MIN_TYPE_POOL) return primary;
+	const secondary = mine.filter((id) => SPECIES_DATA[id].type2 === biome && !primary.includes(id));
+	return [...primary, ...secondary];
+}
+var WEIGHT_BY_SPECIES = {};
+for (const enc of Object.values(ENCOUNTERS_DATA)) WEIGHT_BY_SPECIES[enc.speciesId] = enc.weight;
+var DEFAULT_WEIGHT = 10;
+var maps = {};
+var encounters = {};
+function addEncounter(huntId, speciesId, minLevel, maxLevel, levelWeights) {
+	const id = `${huntId}_${speciesId}`;
+	encounters[id] = {
+		id,
 		speciesId,
-		minLevel: map.levelRange[0],
-		maxLevel: map.levelRange[1],
+		minLevel,
+		maxLevel,
 		aggroRadius: 175,
 		wanderRadius: 60,
-		weight: species.catchRate
+		weight: WEIGHT_BY_SPECIES[speciesId] ?? DEFAULT_WEIGHT,
+		...levelWeights ? { levelWeights } : {}
 	};
-	map.enemyPool.push(encId);
+	return id;
 }
-removeEncounterFromMap(ROUTE_46_ID, "geodude");
-addEncounterToMap(ROUTE_46_ID, "sentret");
-for (const speciesId of ["wooper", "quagsire"]) {
-	removeEncounterFromMap(COSTA_11_20_ID, speciesId);
-	addEncounterToMap(DESERTO_21_30_ID, speciesId);
+function nameFor(baseName, region) {
+	const stripped = baseName.replace(/^(Kanto|Johto)\s+/, "");
+	return `${REGION_LABEL[region]} ${stripped}`;
 }
-var ruinsMap = maps[RUINAS_ANCESTRAIS_ID];
-if (ruinsMap) {
-	const dragoniteEncId = ruinsMap.enemyPool.find((id) => encounters[id] && encounters[id].speciesId === "dragonite");
-	if (dragoniteEncId) {
-		const othersWeight = ruinsMap.enemyPool.filter((id) => id !== dragoniteEncId).reduce((sum, id) => sum + (encounters[id] ? encounters[id].weight : 0), 0);
-		encounters[dragoniteEncId].weight = othersWeight / 99;
+for (const base of Object.values(MAPS_DATA)) {
+	if (base.id === STARTER_HUNT_ID) {
+		const pool = STARTER_HUNT_SPECIES.filter((id) => SPECIES_DATA[id]);
+		maps[base.id] = {
+			...base,
+			name: nameFor(base.name, "johto"),
+			continent: "johto",
+			levelRange: [STARTER_LEVEL_WEIGHTS[0].level, STARTER_LEVEL_WEIGHTS[STARTER_LEVEL_WEIGHTS.length - 1].level],
+			enemyPool: pool.map((speciesId) => addEncounter(base.id, speciesId, STARTER_LEVEL_WEIGHTS[0].level, STARTER_LEVEL_WEIGHTS[STARTER_LEVEL_WEIGHTS.length - 1].level, STARTER_LEVEL_WEIGHTS))
+		};
+		continue;
+	}
+	const biome = HUNT_BIOME[base.id];
+	if (!biome) throw new Error(`Hunt "${base.id}" sem bioma em HUNT_BIOME (data/huntSpawnOverrides.ts). Toda hunt gerada precisa declarar o tipo elemental dela pro recorte por regiao funcionar.`);
+	for (const region of REGIONS) {
+		const pool = poolFor(region, biome);
+		if (!pool.length) continue;
+		const id = base.continent === region ? base.id : `${base.id}_${region}`;
+		const name = nameFor(base.name, region);
+		maps[id] = {
+			...base,
+			id,
+			name,
+			description: `Local selvagem: ${name} (nivel ${base.levelRange[0]}-${base.levelRange[1]}).`,
+			continent: region,
+			enemyPool: pool.map((speciesId) => addEncounter(id, speciesId, base.levelRange[0], base.levelRange[1]))
+		};
 	}
 }
-var MAPS = maps;
-var ENCOUNTERS = encounters;
+for (const map of Object.values(maps)) {
+	const dragoniteEncId = map.enemyPool.find((id) => encounters[id]?.speciesId === "dragonite");
+	if (!dragoniteEncId) continue;
+	const othersWeight = map.enemyPool.filter((id) => id !== dragoniteEncId).reduce((sum, id) => sum + (encounters[id]?.weight ?? 0), 0);
+	if (othersWeight > 0) encounters[dragoniteEncId].weight = othersWeight * DRAGONITE_HUNT_SHARE / .99;
+}
+var nightmare = buildNightmareMirror(maps, encounters);
+var MAPS = {
+	...maps,
+	...nightmare.maps,
+	...BOSS_MAPS_DATA
+};
+var ENCOUNTERS = {
+	...encounters,
+	...nightmare.encounters,
+	...BOSS_ENCOUNTERS_DATA
+};
 //#endregion
 //#region src/data/maps.ts
 var RESPAWN_DELAY_MULTIPLIER = createFormulaEngine(FORMULAS).evalOrDefault("MOB_RESPAWN_DELAY_MULTIPLIER", .25);
@@ -19610,6 +19734,35 @@ function getItem(id) {
 var CAPTURE_ANIM_FRAME_DURATION = .07;
 function captureAnimRowCount(success) {
 	return success ? 15 : 11;
+}
+//#endregion
+//#region src/data/statLabels.ts
+var STAT_LABEL = {
+	hp: "HP",
+	atkFis: "Atk Fís",
+	atkEsp: "Atk Esp",
+	def: "Def",
+	defEsp: "Def Esp",
+	speed: "Vel"
+};
+var STAT_ORDER = [
+	"hp",
+	"atkFis",
+	"atkEsp",
+	"def",
+	"defEsp",
+	"speed"
+];
+/**
+* "+3 HP, +2 Atk Fís, +1 Vel" — so os atributos que realmente subiram.
+*
+* Devolve string vazia quando nada mudou: em nivel alto de uma curva lenta um
+* level-up pode nao mover atributo nenhum (a formula do Gen2 e inteira e
+* arredonda pra baixo), e escrever "ganhou: " sem nada depois pareceria bug.
+*/
+function formatStatGains(gains) {
+	if (!gains) return "";
+	return STAT_ORDER.filter((key) => (gains[key] ?? 0) > 0).map((key) => `+${gains[key]} ${STAT_LABEL[key]}`).join(", ");
 }
 //#endregion
 //#region src/data/spriteFootOffsets.ts
@@ -36153,19 +36306,27 @@ function grantExp(pokeInstance, amount) {
 			newAbilities.push(ability);
 		}
 	}
+	const poke = {
+		...pokeInstance,
+		exp,
+		level,
+		stats,
+		hp,
+		unlockedAbilities
+	};
+	const statGains = leveledUp ? diffStats(pokeInstance.stats, stats) : null;
 	return {
-		poke: {
-			...pokeInstance,
-			exp,
-			level,
-			stats,
-			hp,
-			unlockedAbilities
-		},
+		poke,
 		leveledUp,
 		newAbilities,
-		level
+		level,
+		statGains
 	};
+}
+function diffStats(antes, depois) {
+	const out = {};
+	for (const key of Object.keys(depois)) out[key] = depois[key] - antes[key];
+	return out;
 }
 function applyDeathExpPenalty(pokeInstance) {
 	const species = SPECIES[pokeInstance.speciesId];
@@ -37230,7 +37391,7 @@ function spawnEnemyAt(world, mapDef) {
 	const encounterId = weightedPick(rng, mapDef.enemyPool, (id) => getEncounter(id)?.weight ?? 45);
 	const encounter = getEncounter(encounterId);
 	if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
-	const level = randInt(rng, encounter.minLevel, encounter.maxLevel);
+	const level = encounter.levelWeights?.length ? weightedPick(rng, encounter.levelWeights, (entry) => entry.weight).level : randInt(rng, encounter.minLevel, encounter.maxLevel);
 	return createEnemyEntity(counters, {
 		poke: createPokeInstance(rng, encounter.speciesId, level),
 		x: point.x,
@@ -37353,7 +37514,8 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 		}));
 		useToastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} derrotado! +${expGain} EXP, +${loot.gold} ouro`, "gold", "combat");
 		if (grantResult.leveledUp) {
-			useToastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!`, "levelup", "combat");
+			const ganhos = formatStatGains(grantResult.statGains);
+			useToastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ""}`, "levelup", "combat");
 			for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) useToastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, "levelup", "combat");
 		}
 		if (trainerResult.leveledUp) useToastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, "levelup", "combat");
@@ -37378,7 +37540,8 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 		if (captureResult) {
 			if (captureResult.success) {
 				const location = captureResult.location === "bag" ? "mochila" : captureResult.location;
-				useToastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} capturado! Foi para a ${location}.`, "capture-success", "world");
+				const raridade = rarityOf(captureResult.poke).label;
+				useToastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world");
 			} else if (captureResult.reason === "roll_failed") useToastStore.getState().pushToast("A captura falhou!", "capture-fail", "combat");
 		}
 	}
@@ -58642,7 +58805,7 @@ function rowToPoke(row) {
 		defEsp: row.iv_def_esp,
 		speed: row.iv_speed
 	};
-	const stats = {
+	const gravados = {
 		hp: row.stat_hp,
 		atkFis: row.stat_atk_fis,
 		atkEsp: row.stat_atk_esp,
@@ -58650,18 +58813,21 @@ function rowToPoke(row) {
 		defEsp: row.stat_def_esp,
 		speed: row.stat_speed
 	};
+	const species = SPECIES[row.species_id];
+	const stats = species ? computeStatsAtLevel(species, row.level, ivs, row.rarity, row.is_shiny) : gravados;
 	return {
 		uid: row.id,
 		speciesId: row.species_id,
 		level: row.level,
 		exp: row.exp,
-		hp: row.hp,
+		hp: Math.min(row.hp, stats.hp),
 		isShiny: row.is_shiny,
 		rarity: row.rarity,
 		ivs,
 		stats,
 		unlockedAbilities: row.unlocked_abilities,
-		locked: row.locked
+		locked: row.locked,
+		capturedAt: row.created_at
 	};
 }
 function snapshotToGameState(snap, defaults) {
@@ -58859,24 +59025,68 @@ var ErroServidor = class extends Error {
 		this.status = status;
 	}
 };
-async function pedir(caminho, init = {}) {
+var TIMEOUT_PADRAO_MS = 15e3;
+var TIMEOUT_FLUSH_MS = 45e3;
+var ESPERA_ENTRE_TENTATIVAS_MS = [400, 1200];
+var dormir = (ms) => new Promise((r) => setTimeout(r, ms));
+var STATUS_RETENTAVEIS = /* @__PURE__ */ new Set([
+	408,
+	425,
+	429,
+	503,
+	504
+]);
+function ehErroDeRede(erro) {
+	return erro instanceof TypeError || erro instanceof DOMException && erro.name === "AbortError";
+}
+async function pedir(caminho, { retentavel = false, timeoutMs = TIMEOUT_PADRAO_MS, ...init } = {}) {
 	const { data } = await supabase.auth.getSession();
 	const token = data.session?.access_token;
 	if (!token) throw new ErroServidor(401, "sem sessao — faca login de novo");
-	const resposta = await fetch(`${BASE}${caminho}`, {
-		...init,
-		headers: {
-			Authorization: `Bearer ${token}`,
-			"content-type": "application/json",
-			...init.headers || {}
+	const tentativas = retentavel ? ESPERA_ENTRE_TENTATIVAS_MS.length + 1 : 1;
+	let ultimoErro;
+	for (let tentativa = 0; tentativa < tentativas; tentativa++) {
+		if (tentativa > 0) await dormir(ESPERA_ENTRE_TENTATIVAS_MS[tentativa - 1]);
+		try {
+			const resposta = await fetch(`${BASE}${caminho}`, {
+				...init,
+				signal: AbortSignal.timeout(timeoutMs),
+				headers: {
+					Authorization: `Bearer ${token}`,
+					"content-type": "application/json",
+					...init.headers || {}
+				}
+			});
+			const corpo = await resposta.json().catch(() => null);
+			if (resposta.ok) return corpo;
+			const erro = new ErroServidor(resposta.status, corpo?.erro || mensagemPorStatus(resposta.status));
+			if (!STATUS_RETENTAVEIS.has(resposta.status)) throw erro;
+			ultimoErro = erro;
+		} catch (erro) {
+			if (erro instanceof ErroServidor) throw erro;
+			if (!ehErroDeRede(erro)) throw erro;
+			ultimoErro = new ErroServidor(0, mensagemDeRede(erro));
 		}
-	});
-	const corpo = await resposta.json().catch(() => null);
-	if (!resposta.ok) throw new ErroServidor(resposta.status, corpo?.erro || `servidor respondeu ${resposta.status}`);
-	return corpo;
+	}
+	throw ultimoErro;
+}
+function mensagemPorStatus(status) {
+	if (status === 401 || status === 403) return "sua sessao expirou — entre de novo";
+	if (status === 429) return "muitas chamadas seguidas — tente de novo em instantes";
+	if (status === 502 || status === 503 || status === 504) return "o servidor esta fora do ar no momento — tente de novo em instantes";
+	if (status >= 500) return "erro no servidor — tente de novo em instantes";
+	return `servidor respondeu ${status}`;
+}
+function mensagemDeRede(erro) {
+	if (erro instanceof DOMException && erro.name === "AbortError") return "o servidor demorou demais para responder";
+	return "sem conexao com o servidor — verifique sua internet";
 }
 var servidor = {
-	estado: () => pedir("/estado"),
+	estado: () => pedir("/estado", { retentavel: true }),
+	perfil: () => pedir("/perfil", { retentavel: true }),
+	rankingTreinadores: (limite = 50) => pedir(`/ranking/treinadores?limite=${limite}`, { retentavel: true }),
+	rankingPokemon: (criterio, limite = 50) => pedir(`/ranking/pokemon?criterio=${criterio}&limite=${limite}`, { retentavel: true }),
+	hallDaFama: (limite = 50) => pedir(`/ranking/hall?limite=${limite}`, { retentavel: true }),
 	abrirSessao: (mapId, pokeUid) => pedir("/sessao/abrir", {
 		method: "POST",
 		body: JSON.stringify({
@@ -58884,8 +59094,16 @@ var servidor = {
 			pokeUid
 		})
 	}),
-	flush: () => pedir("/sessao/flush", { method: "POST" }),
-	fecharSessao: () => pedir("/sessao/fechar", { method: "POST" }),
+	flush: () => pedir("/sessao/flush", {
+		method: "POST",
+		retentavel: true,
+		timeoutMs: TIMEOUT_FLUSH_MS
+	}),
+	fecharSessao: () => pedir("/sessao/fechar", {
+		method: "POST",
+		retentavel: true,
+		timeoutMs: TIMEOUT_FLUSH_MS
+	}),
 	/**
 	* Manda uma intencao. NUNCA um resultado: o cliente diz "quero comprar 5
 	* pocoes", nao "meu ouro agora e X". Ver server/src/acoes.ts.
@@ -58951,19 +59169,12 @@ var postgresStorage = {
 	removeItem: () => {}
 };
 var STARTING_ITEMS = {
-	poke_ball: 1e4,
-	great_ball: 1e4,
-	ultra_ball: 1e4,
-	premier_ball: 1e4,
-	potion: 1e4,
-	super_potion: 1e4,
-	hyper_potion: 1e4,
-	max_potion: 1e4,
-	revive: 1e4,
-	max_revive: 1e4
+	poke_ball: 100,
+	potion: 100,
+	revive: 10
 };
 var DEFAULT_AUTO_POT_RULES = [{
-	hpPercent: 40,
+	hpPercent: 50,
 	itemId: "potion"
 }];
 var DEFAULT_AUTO_CATCH_CONFIG = {
@@ -58982,15 +59193,15 @@ function defaultGameStateData() {
 		items: { ...STARTING_ITEMS },
 		lockedItems: {},
 		wallet: {
-			gold: 5e5,
-			diamonds: 5
+			gold: 1e3,
+			diamonds: 0
 		},
 		unlockedMaps: defaultUnlockedMaps(),
 		currentMapId: null,
 		autoToggles: {
 			autoPot: true,
-			autoCatch: true,
-			autoRevive: true
+			autoCatch: false,
+			autoRevive: false
 		},
 		autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
 		autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
@@ -59270,9 +59481,7 @@ create()(persist((set, get) => ({
 			...currentState,
 			...persisted,
 			autoToggles: {
-				autoPot: true,
-				autoCatch: true,
-				autoRevive: true,
+				...defaultGameStateData().autoToggles,
 				...persisted.autoToggles || {}
 			},
 			wallet: {
@@ -59593,6 +59802,91 @@ function aplicarPiso(store, estado, resumo, agoraMs) {
 	};
 }
 //#endregion
+//#region server/src/ranking.ts
+var LIMITE_MAXIMO = 100;
+var LIMITE_PADRAO = 50;
+var CONQUISTA_LANCE = "boss_lance";
+var COLUNA_POR_CRITERIO = {
+	level: "level",
+	hp: "stat_hp",
+	atkFis: "stat_atk_fis",
+	atkEsp: "stat_atk_esp",
+	def: "stat_def",
+	defEsp: "stat_def_esp",
+	speed: "stat_speed"
+};
+function ehCriterioPoke(valor) {
+	return valor in COLUNA_POR_CRITERIO;
+}
+function limite(valor) {
+	const n = Number(valor);
+	if (!Number.isFinite(n) || n <= 0) return LIMITE_PADRAO;
+	return Math.min(Math.floor(n), LIMITE_MAXIMO);
+}
+async function rankingDeTreinadores(cfg, limiteBruto) {
+	return (await selecionar(cfg, `players?select=user_id,trainer_name,trainer_level,trainer_exp&order=trainer_exp.desc,trainer_level.desc&limit=${limite(limiteBruto)}`)).map((l) => ({
+		userId: l.user_id,
+		nome: l.trainer_name,
+		nivel: l.trainer_level,
+		exp: Number(l.trainer_exp)
+	}));
+}
+async function rankingDePokemon(cfg, criterio, limiteBruto) {
+	const n = limite(limiteBruto);
+	const coluna = COLUNA_POR_CRITERIO[criterio];
+	const linhas = await selecionar(cfg, `pokemon_instances?select=user_id,species_id,level,is_shiny,rarity,stat_hp,stat_atk_fis,stat_atk_esp,stat_def,stat_def_esp,stat_speed&order=${coluna}.desc&limit=${n}`);
+	const nomes = await nomesDosTreinadores(cfg, linhas.map((l) => l.user_id));
+	return linhas.map((l) => ({
+		userId: l.user_id,
+		treinador: nomes.get(l.user_id) ?? "Treinador",
+		speciesId: l.species_id,
+		level: l.level,
+		isShiny: l.is_shiny,
+		rarity: l.rarity,
+		valor: l[coluna]
+	}));
+}
+async function nomesDosTreinadores(cfg, userIds) {
+	const unicos = [...new Set(userIds)];
+	if (!unicos.length) return /* @__PURE__ */ new Map();
+	const linhas = await selecionar(cfg, `players?select=user_id,trainer_name&user_id=in.(${unicos.join(",")})`);
+	return new Map(linhas.map((l) => [l.user_id, l.trainer_name]));
+}
+async function hallDaFama(cfg, conquista, limiteBruto) {
+	const n = limite(limiteBruto);
+	const linhas = await selecionar(cfg, `hall_da_fama?select=user_id,conquistado_em&conquista=eq.${encodeURIComponent(conquista)}&order=conquistado_em.asc&limit=${n}`);
+	const nomes = await nomesDosTreinadores(cfg, linhas.map((l) => l.user_id));
+	return linhas.map((l) => ({
+		userId: l.user_id,
+		nome: nomes.get(l.user_id) ?? "Treinador",
+		conquistadoEm: l.conquistado_em
+	}));
+}
+/**
+* Os numeros do Perfil que NAO estao no estado do jogador.
+*
+* `rank` e contado, nao ordenado: "quantos jogadores tem mais EXP que eu, + 1".
+* Ordenar a base inteira pra achar a posicao de um jogador seria caro e daria o
+* mesmo numero.
+*/
+async function perfilDoJogador(cfg, userId) {
+	const [meu] = await selecionar(cfg, `players?user_id=eq.${userId}&select=trainer_exp,created_at`);
+	if (!meu) throw new ErroHttp(404, "jogador sem linha em `players`");
+	const [acima, todos, sessoes, hall] = await Promise.all([
+		selecionar(cfg, `players?select=user_id&trainer_exp=gt.${Number(meu.trainer_exp)}`),
+		selecionar(cfg, "players?select=user_id"),
+		selecionarTudo(cfg, `game_sessions?user_id=eq.${userId}&select=simulated_seconds`),
+		selecionar(cfg, `hall_da_fama?user_id=eq.${userId}&conquista=eq.${CONQUISTA_LANCE}&select=conquistado_em`)
+	]);
+	return {
+		rank: acima.length + 1,
+		totalJogadores: todos.length,
+		segundosJogados: sessoes.reduce((soma, s) => soma + Number(s.simulated_seconds || 0), 0),
+		contaCriadaEm: meu.created_at ?? null,
+		noHallDaFama: hall[0]?.conquistado_em ?? null
+	};
+}
+//#endregion
 //#region server/src/progresso.ts
 var MAX_SEGUNDOS_POR_FLUSH = 21600;
 async function carregarEstado(cfg, userId) {
@@ -59646,6 +59940,7 @@ async function aplicarFlush(cfg, userId, sessao) {
 	const segundos = Math.max(0, Math.min(bruto, MAX_SEGUNDOS_POR_FLUSH));
 	const truncado = bruto > MAX_SEGUNDOS_POR_FLUSH;
 	const { store, dados: estado } = criarEstadoDoJogador(await carregarEstado(cfg, userId));
+	const continentesAntes = new Set(estado.unlockedContinents);
 	const ativo = estado.team.find((p) => p.uid === sessao.poke_uid);
 	if (!ativo) return null;
 	store.setActiveIndex(estado.team.indexOf(ativo));
@@ -59676,6 +59971,10 @@ async function aplicarFlush(cfg, userId, sessao) {
 	});
 	estado.currentMapId = sessao.map_id;
 	await gravarEstado(cfg, userId, estado);
+	if (!continentesAntes.has("kanto") && estado.unlockedContinents.includes("kanto")) await inserir(cfg, "hall_da_fama", {
+		user_id: userId,
+		conquista: CONQUISTA_LANCE
+	}, { upsert: "user_id,conquista" });
 	await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, {
 		last_flush_at: new Date(agora).toISOString(),
 		simulated_seconds: Number(sessao.simulated_seconds) + segundos,
@@ -59981,6 +60280,14 @@ async function rotear(cfg, req, url) {
 	if (url.pathname === "/sessao/flush" && req.method === "POST") return flush(cfg, jogador.id);
 	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id);
 	if (url.pathname === "/estado" && req.method === "GET") return json({ estado: await carregarEstado(cfg, jogador.id) });
+	if (url.pathname === "/perfil" && req.method === "GET") return json(await perfilDoJogador(cfg, jogador.id));
+	if (url.pathname === "/ranking/treinadores" && req.method === "GET") return json({ entradas: await rankingDeTreinadores(cfg, url.searchParams.get("limite")) });
+	if (url.pathname === "/ranking/pokemon" && req.method === "GET") {
+		const criterio = url.searchParams.get("criterio") ?? "level";
+		if (!ehCriterioPoke(criterio)) throw new ErroHttp(400, "criterio desconhecido");
+		return json({ entradas: await rankingDePokemon(cfg, criterio, url.searchParams.get("limite")) });
+	}
+	if (url.pathname === "/ranking/hall" && req.method === "GET") return json({ entradas: await hallDaFama(cfg, CONQUISTA_LANCE, url.searchParams.get("limite")) });
 	if (url.pathname === "/acao" && req.method === "POST") return acao(cfg, jogador.id, req);
 	return json({ erro: "rota desconhecida" }, 404);
 }

@@ -16,12 +16,13 @@ import { create } from 'zustand'
 export type ScreenName =
   | 'equipe' | 'mochila' | 'loja' | 'hunts' | 'pokedex'
   | 'wiki' | 'config' | 'correio' | 'bestiario' | 'tasks' | 'calc' | 'mercado'
+  | 'ranking' | 'tutoriais'
 
 export type ChatTab = 'world' | 'trade' | 'log'
 
 // Cada janela flutuante que pode ser arrastada tem uma chave propria: a posicao
 // e por JANELA, nao por tela, senao arrastar a Loja moveria tambem o perfil.
-export type WindowKey = 'panel' | 'profile' | 'offline' | 'auto' | 'chat'
+export type WindowKey = 'panel' | 'profile' | 'offline' | 'auto' | 'chat' | 'perfil' | 'tutorial'
 
 export type WindowPositions = Partial<Record<WindowKey, { x: number; y: number }>>
 
@@ -58,6 +59,12 @@ interface UiState {
 
   autoOpen: boolean
   setAutoOpen: (open: boolean) => void
+
+  // Perfil do Treinador: modal proprio, aberto pela foto no card do topo. Nao
+  // e uma `ScreenName` porque nao vive no menu — nao ha botao pra ele, e ele
+  // pode ficar aberto por cima de qualquer tela.
+  perfilOpen: boolean
+  setPerfilOpen: (open: boolean) => void
 
   chatTab: ChatTab
   chatOpen: boolean
@@ -119,6 +126,11 @@ export const useUiStore = create<UiState>((set, get) => ({
 
   autoOpen: false,
   setAutoOpen: (autoOpen) => set({ autoOpen }),
+
+  perfilOpen: false,
+  // Abrir zera a posicao arrastada, mesma regra de `openScreen`.
+  setPerfilOpen: (perfilOpen) =>
+    set((s) => ({ perfilOpen, winPos: perfilOpen ? { ...s.winPos, perfil: undefined } : s.winPos })),
 
   chatTab: 'world',
   chatOpen: true,

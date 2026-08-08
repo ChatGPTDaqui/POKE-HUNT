@@ -42,15 +42,31 @@ export interface PokeInstance {
   // ProgressionSystem.js#evolvePokeInstance — nivel minimo pos-evolucao, pra
   // applyDeathExpPenalty nunca conseguir de-evoluir o poke.
   minLevel?: number
+  // Quando a linha entrou em `pokemon_instances` (o `created_at` do Postgres).
+  // So de leitura: nunca e gravado de volta, e nao existe em POKE recem-criado
+  // que ainda nao passou pelo banco. Alimenta o "Log de capturas" do Perfil do
+  // Treinador — sem ele nao ha nenhuma ordem temporal no save (o array da
+  // mochila e ordem de insercao do PostgREST, nao de captura).
+  capturedAt?: string
 }
 
-// Shiny odds scale with how easy the species is to catch in the first place —
-// a common 255-catch-rate species is the real Gen2 1/8192, rarer species are
-// rarer still.
-const SHINY_CHANCE_AT_MAX_CATCH_RATE = (1 / 8192) * 200 // 200x boosted shiny rate
 const MAX_CATCH_RATE = 255
 
 const formulaEngine = createFormulaEngine(FORMULAS)
+
+// A chance de shiny escala com a facilidade de captura da especie: uma
+// especie comum (catchRate 255) sai na taxa real do Gen2 (1/8192) vezes o
+// multiplicador abaixo; especies mais raras saem proporcionalmente mais
+// raras. Esta E a formula original do projeto, inalterada.
+//
+// O multiplicador virou knob editavel (mesmo mecanismo do "Balanceamento de
+// economia": basta colar a linha `SHINY_RATE_MULTIPLIER` na aba "Formulas" e
+// rodar o sync) porque ele e o unico numero aqui que e decisao de
+// balanceamento, nao formula. O fallback 200 e o valor que o projeto sempre
+// usou — sem a linha na planilha, nada muda.
+const REAL_GEN2_SHINY_RATE = 1 / 8192
+const SHINY_RATE_MULTIPLIER = formulaEngine.evalOrDefault('SHINY_RATE_MULTIPLIER', 200)
+const SHINY_CHANCE_AT_MAX_CATCH_RATE = REAL_GEN2_SHINY_RATE * SHINY_RATE_MULTIPLIER
 const SHAPES = ['triangle', 'circle', 'square', 'diamond']
 
 const GROWTH_FORMULA_BY_CURVE: Record<GrowthCurve, string> = {
@@ -139,10 +155,10 @@ for (const [fromId, toId] of Object.entries(SPECIAL_EVOLUTIONS)) {
 // `rarityKey` is an optional multiplier on top of the real formula (see
 // data/rarity.js) — omitted/unrecognized keys default to Comum's 1x, so
 // every pre-existing call site keeps working unchanged. `isShiny` applies a
-// flat 1.2x on top of the real base stat, BEFORE the rarity multiplier (per
+// flat 1.5x on top of the real base stat, BEFORE the rarity multiplier (per
 // explicit user request) — the two stack multiplicatively (shiny+Mythic ends
-// up at 1.2 * 3 = 3.6x, not additive).
-export const SHINY_STAT_MULTIPLIER = 1.2
+// up at 1.5 * 3 = 4.5x, not additive).
+export const SHINY_STAT_MULTIPLIER = 1.5
 
 export function computeStatsAtLevel(species: Species, level: number, ivs: StatBlock, rarityKey?: RarityKey, isShiny?: boolean): StatBlock {
   const lvl = Math.max(1, level)

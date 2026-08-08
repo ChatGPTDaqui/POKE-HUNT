@@ -19,22 +19,45 @@ const SIDE_MENUS: { screen: ScreenName; label: string; Icon: typeof Envelope }[]
 
 export function TrainerCard() {
   const trainer = useGameStateStore((s) => s.trainer)
+  const setPerfilOpen = useUiStore((s) => s.setPerfilOpen)
   const { narrow } = useBreakpoints()
   const progress = trainerExpProgress(trainer)
   const expPct = Math.max(0, Math.min(100, (progress.into / progress.needed) * 100))
 
+  // Compactacao pedida pelo usuario: o card ocupava ~5,8em de altura (3 linhas
+  // de texto empilhadas + .8em de padding em cima e embaixo). Nome e nivel
+  // passaram pra MESMA linha e o padding caiu pra .45em — ~5,1em agora, com a
+  // foto no tamanho original (4.2em), que era a restricao explicita.
   return (
-    <div className="hud-surface pointer-events-auto flex items-center gap-[.8em] rounded-xl border border-n800 p-[.8em] shadow-lg">
+    <div className="hud-surface pointer-events-auto flex items-center gap-[.6em] rounded-xl border border-n800 p-[.45em] shadow-lg">
       {!narrow && (
-        <div className="flex flex-col items-end gap-[.25em]">
-          <div className="max-w-[9em] truncate font-medium">{trainer.name}</div>
-          <div className="text-[.78em] text-n300">Lv {trainer.level}</div>
-          <Meter pct={expPct} height=".35em" color="var(--color-gold)" className="w-[7em]" />
+        <div className="flex flex-col items-end gap-[.2em]">
+          <div className="flex items-baseline gap-[.4em]">
+            <span className="max-w-[8em] truncate font-medium leading-none">{trainer.name}</span>
+            <span className="text-[.75em] leading-none text-n300">Lv {trainer.level}</span>
+          </div>
+          <Meter pct={expPct} height=".3em" color="var(--color-gold)" className="w-[7em]" />
         </div>
       )}
-      <div className="flex h-[4.2em] w-[4.2em] shrink-0 items-center justify-center rounded-[.7em] border border-n700 bg-n900">
+      {/*
+        A foto abre o Perfil do Treinador. E um `button` de verdade (nao uma
+        `div` com onClick) pra vir de graca com foco por teclado e papel de
+        botao pro leitor de tela — e `data-keep-open` porque o modal do perfil
+        fecha ao clicar fora, e sem a marca o mesmo clique que o abre tambem o
+        fecharia.
+      */}
+      <button
+        type="button"
+        data-keep-open
+        title="Abrir perfil do treinador"
+        onClick={() => setPerfilOpen(true)}
+        className={cn(
+          'flex h-[4.2em] w-[4.2em] shrink-0 cursor-pointer items-center justify-center rounded-[.7em] border border-n700 bg-n900',
+          'transition-colors hover:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
+        )}
+      >
         <User className="text-[1.8em] text-n300" />
-      </div>
+      </button>
     </div>
   )
 }

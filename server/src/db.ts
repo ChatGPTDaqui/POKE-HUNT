@@ -29,9 +29,49 @@ function cabecalhos(cfg: Config, extras: Record<string, string> = {}): Record<st
   }
 }
 
+// Toda chamada daqui e IDEMPOTENTE: leitura, upsert de linha com chave fixa,
+// delete por filtro, e PATCH que grava valor ABSOLUTO (nunca `gold = gold +
+// x`). Por isso repetir e seguro — e necessario: o pooler do Supabase derruba
+// conexao de vez em quando, e uma unica falha assim virava um 502 na cara do
+// jogador ("falha ao falar com o banco") no meio de um flush.
+const ESPERA_ENTRE_TENTATIVAS_MS = [200, 700]
+// Sem timeout, um socket pendurado consome a invocacao inteira da Edge
+// Function ate o limite dela — e o jogador so ve o jogo travado.
+const TIMEOUT_MS = 10000
+
+const dormir = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+function ehFalhaTransitoria(status: number): boolean {
+  // 408/425/429 e 5xx do lado do PostgREST/pooler. 4xx de verdade (400
+  // constraint, 404 rota) nao melhoram repetindo.
+  return status === 408 || status === 425 || status === 429 || status >= 500
+}
+
+async function buscarComRetry(cfg: Config, caminho: string, init: RequestInit): Promise<{ resposta: Response; texto: string }> {
+  let ultimo: { resposta: Response; texto: string } | null = null
+  for (let tentativa = 0; tentativa <= ESPERA_ENTRE_TENTATIVAS_MS.length; tentativa++) {
+    if (tentativa > 0) await dormir(ESPERA_ENTRE_TENTATIVAS_MS[tentativa - 1])
+    try {
+      const resposta = await fetch(`${cfg.supabaseUrl}/rest/v1/${caminho}`, {
+        ...init,
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      })
+      const texto = await resposta.text()
+      if (resposta.ok || !ehFalhaTransitoria(resposta.status)) return { resposta, texto }
+      console.error(`PostgREST ${resposta.status} em ${caminho} (tentativa ${tentativa + 1}): ${texto.slice(0, 400)}`)
+      ultimo = { resposta, texto }
+    } catch (erro) {
+      // Sem resposta nenhuma (rede/timeout). Ultima tentativa: vira 502.
+      console.error(`PostgREST inacessivel em ${caminho} (tentativa ${tentativa + 1}): ${String(erro).slice(0, 200)}`)
+      if (tentativa === ESPERA_ENTRE_TENTATIVAS_MS.length) throw new ErroHttp(502, 'falha ao falar com o banco')
+    }
+  }
+  if (!ultimo) throw new ErroHttp(502, 'falha ao falar com o banco')
+  return ultimo
+}
+
 async function pedir(cfg: Config, caminho: string, init: RequestInit): Promise<unknown> {
-  const resposta = await fetch(`${cfg.supabaseUrl}/rest/v1/${caminho}`, init)
-  const texto = await resposta.text()
+  const { resposta, texto } = await buscarComRetry(cfg, caminho, init)
   if (!resposta.ok) {
     // Nunca repassar o corpo do PostgREST pro cliente: ele traz nome de coluna,
     // constraint e as vezes trecho de dado. Aqui vai pro log do servidor.
@@ -57,10 +97,9 @@ export async function selecionarTudo<T>(cfg: Config, caminho: string, pagina = 1
   const acumulado: T[] = []
   let inicio = 0
   for (;;) {
-    const resposta = await fetch(`${cfg.supabaseUrl}/rest/v1/${caminho}${juncao}`, {
+    const { resposta, texto } = await buscarComRetry(cfg, `${caminho}${juncao}`, {
       headers: cabecalhos(cfg, { Range: `${inicio}-${inicio + pagina - 1}`, Prefer: 'count=exact' }),
     })
-    const texto = await resposta.text()
     if (!resposta.ok) {
       console.error(`PostgREST ${resposta.status} em ${caminho}: ${texto.slice(0, 400)}`)
       throw new ErroHttp(502, 'falha ao falar com o banco')

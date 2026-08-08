@@ -27,10 +27,19 @@ import { postgresStorage, flushAgora, ultimoSavedAt, aoFalharSave } from '@/data
 // e pela UI que decide mostrar/esconder o botao "Mover p/ equipe".
 export const MAX_TEAM_SIZE = 6
 
+// Concessao inicial de conta nova. Espelha `concessao_inicial_de_itens()` na
+// migration 20260808150000 — o servidor e quem manda (o cliente perdeu a
+// escrita na Fase D), esta copia so serve pro estado local antes da primeira
+// resposta chegar. Divergir dela nao vira exploit, vira um piscar de numeros
+// errados no HUD no primeiro segundo.
+//
+// Pedido explicito do usuario: 100 Poke Ball, 100 Potion, 10 Revive. As
+// outras bolas/pocoes (Great/Ultra/Premier, Super/Hyper/Max, Max Revive)
+// saem da concessao — passam a ser compradas ou dropadas.
 const STARTING_ITEMS: Record<string, number> = {
-  poke_ball: 10000, great_ball: 10000, ultra_ball: 10000, premier_ball: 10000,
-  potion: 10000, super_potion: 10000, hyper_potion: 10000, max_potion: 10000,
-  revive: 10000, max_revive: 10000,
+  poke_ball: 100,
+  potion: 100,
+  revive: 10,
 }
 
 export interface AutoPotRule {
@@ -68,7 +77,11 @@ export interface PokedexKillCount {
   shiny: number
 }
 
-const DEFAULT_AUTO_POT_RULES: AutoPotRule[] = [{ hpPercent: 40, itemId: 'potion' }]
+// Configuracao inicial do Bot (pedido explicito): pocao a 50% de vida,
+// auto-catch e auto-revive desligados — ver `defaultGameStateData` abaixo e o
+// default da coluna `auto_pot_rules`/`auto_toggles` na migration
+// 20260808150000. O tutorial do Bot parte exatamente deste estado.
+const DEFAULT_AUTO_POT_RULES: AutoPotRule[] = [{ hpPercent: 50, itemId: 'potion' }]
 const DEFAULT_AUTO_CATCH_CONFIG: AutoCatchConfig = { ballId: 'poke_ball', catchShinyEnabled: true, shinyBallId: 'great_ball' }
 
 // Toda hunt sem unlockCost comeca desbloqueada — hoje so a hunt lendaria
@@ -107,10 +120,10 @@ export function defaultGameStateData(): GameStateData {
     bagPokes: [],
     items: { ...STARTING_ITEMS },
     lockedItems: {},
-    wallet: { gold: 500000, diamonds: 5 },
+    wallet: { gold: 1000, diamonds: 0 },
     unlockedMaps: defaultUnlockedMaps(),
     currentMapId: null,
-    autoToggles: { autoPot: true, autoCatch: true, autoRevive: true },
+    autoToggles: { autoPot: true, autoCatch: false, autoRevive: false },
     autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
     autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
     autoCatchRules: [],
@@ -635,7 +648,7 @@ export const useGameStateStore = create<GameStateStore>()(
         return {
           ...currentState,
           ...persisted,
-          autoToggles: { autoPot: true, autoCatch: true, autoRevive: true, ...(persisted.autoToggles || {}) },
+          autoToggles: { ...defaultGameStateData().autoToggles, ...(persisted.autoToggles || {}) },
           wallet: { gold: 0, diamonds: 0, ...(persisted.wallet || {}) },
           unlockedMaps: [...new Set([...(persisted.unlockedMaps || []), ...defaultUnlockedMaps()])],
           team: persisted.team || [],

@@ -10,6 +10,7 @@ import {
 import { ErroHttp, selecionarTudo, selecionar, atualizar, inserir, apagar, type Config } from './db.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
 import { aplicarPiso, NENHUM_PISO, type ResultadoPiso } from './farmOffline.js'
+import { CONQUISTA_LANCE } from './ranking.js'
 
 // Teto de quanto tempo um unico flush pode creditar. NAO e uma regra de
 // balanceamento — e o limite que impede um relogio maluco (ou uma sessao
@@ -145,6 +146,10 @@ export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSes
 
   const dados = await carregarEstado(cfg, userId)
   const { store, dados: estado } = criarEstadoDoJogador(dados)
+  // Copia (nao referencia): a simulacao muta `estado.unlockedContinents` em
+  // lugar quando o jogador limpa a sequencia do Campeao Lance, e o Hall da
+  // Fama precisa comparar o antes com o depois.
+  const continentesAntes = new Set(estado.unlockedContinents)
 
   // POKE da sessao nao existe mais (reset de conta, venda, liberacao). Isto NAO
   // e erro do jogador e nao pode virar 409: a sessao e insimulavel pra sempre, e
@@ -199,6 +204,21 @@ export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSes
 
   estado.currentMapId = sessao.map_id
   await gravarEstado(cfg, userId, estado)
+
+  // Hall da Fama: a unica coisa que libera o continente `kanto` e limpar a
+  // sequencia do Campeao Lance (`unlocksContinentOnClear`, ver
+  // data/nightmareMaps.ts). O QUANDO nao cabia em `unlocked_continents`, e "os
+  // primeiros a completar" e uma ordem por tempo — dai a tabela propria.
+  //
+  // Registrado aqui, e nao no motor, de proposito: o motor roda igual no
+  // cliente, e o cliente nao pode escrever conquista. `on_conflict` faz a
+  // segunda vez ser no-op, entao a data guardada e sempre a da PRIMEIRA vez.
+  if (!continentesAntes.has('kanto') && estado.unlockedContinents.includes('kanto')) {
+    await inserir(cfg, 'hall_da_fama', {
+      user_id: userId,
+      conquista: CONQUISTA_LANCE,
+    }, { upsert: 'user_id,conquista' })
+  }
 
   // `last_flush_at` avanca pra AGORA, nao pra `desde + segundos`: o tempo
   // descartado pelo teto foi tempo real que passou, e credita-lo depois daria
