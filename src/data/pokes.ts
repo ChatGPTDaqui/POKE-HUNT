@@ -68,10 +68,15 @@ const formulaEngine = createFormulaEngine(FORMULAS)
 // O multiplicador virou knob editavel (mesmo mecanismo do "Balanceamento de
 // economia": basta colar a linha `SHINY_RATE_MULTIPLIER` na aba "Formulas" e
 // rodar o sync) porque ele e o unico numero aqui que e decisao de
-// balanceamento, nao formula. O fallback 200 e o valor que o projeto sempre
-// usou — sem a linha na planilha, nada muda.
+// balanceamento, nao formula.
+//
+// Era 200 (o valor historico do projeto) e caiu pra 100: pedido explicito de
+// cortar a chance de shiny pela metade. A FORMULA nao mudou — so o
+// multiplicador —, entao a proporcionalidade por `catchRate` continua igual:
+// especie facil de capturar segue tendo mais chance de shiny que especie rara,
+// a taxa toda so ficou 2x mais dura.
 const REAL_GEN2_SHINY_RATE = 1 / 8192
-const SHINY_RATE_MULTIPLIER = formulaEngine.evalOrDefault('SHINY_RATE_MULTIPLIER', 200)
+const SHINY_RATE_MULTIPLIER = formulaEngine.evalOrDefault('SHINY_RATE_MULTIPLIER', 100)
 const SHINY_CHANCE_AT_MAX_CATCH_RATE = REAL_GEN2_SHINY_RATE * SHINY_RATE_MULTIPLIER
 const SHAPES = ['triangle', 'circle', 'square', 'diamond']
 

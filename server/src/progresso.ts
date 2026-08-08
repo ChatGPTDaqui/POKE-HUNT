@@ -3,7 +3,7 @@ import {
   buildMapWorld, stepWorld, simulateWorldSeconds, restoreRng,
   snapshotToGameState, gameStateToPlayerRow, gameStateToPokemonRows,
   gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
-  defaultGameStateData,
+  defaultGameStateData, MAPS,
   OFFLINE_SIM_STEP_SECONDS, recordBatch,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary,
 } from '#engine'
@@ -185,6 +185,13 @@ export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSes
   const ativo = estado.team.find((p) => p.uid === sessao.poke_uid)
   if (!ativo) return null
   store.setActiveIndex(estado.team.indexOf(ativo))
+
+  // Mesma classe de problema, outra causa: a hunt da sessao pode ter deixado de
+  // existir entre a abertura e o flush (rebalanceamento que recorta os pools,
+  // sync que renomeia). `buildMapWorld` estouraria, e como TODO request passa
+  // por um flush obrigatorio, isso travaria a conta inteira em 502 — sem nada
+  // que o jogador pudesse fazer. Devolver null fecha a sessao e segue.
+  if (!MAPS[sessao.map_id]) return null
 
   // A sequencia RETOMA de onde o flush anterior parou. O cliente nunca escolhe a
   // semente: e ela que decide shiny, IV, raridade e crit (ver core/rng.ts).

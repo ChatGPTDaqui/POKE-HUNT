@@ -85,6 +85,9 @@ export function rowToPoke(row: PokemonRow): PokeInstance {
     ivs,
     stats,
     unlockedAbilities: row.unlocked_abilities,
+    // Coluna adicionada depois (migration 20260809150000): linha antiga volta
+    // com o default `{}` do banco, entao nao ha migracao de dado a fazer.
+    disabledAbilities: (row.disabled_abilities ?? {}) as Record<string, boolean>,
     locked: row.locked,
     capturedAt: row.created_at,
     originalTrainer: row.original_trainer ?? undefined,
@@ -193,6 +196,9 @@ export function pokeToRow(userId: string, poke: PokeInstance, location: 'team' |
     stat_hp: poke.stats.hp, stat_atk_fis: poke.stats.atkFis, stat_atk_esp: poke.stats.atkEsp,
     stat_def: poke.stats.def, stat_def_esp: poke.stats.defEsp, stat_speed: poke.stats.speed,
     unlocked_abilities: poke.unlockedAbilities,
+    // Sem esta linha o golpe desligado a mao voltava ligado no proximo
+    // carregamento — o combate respeitava o campo, mas ninguem o gravava.
+    disabled_abilities: poke.disabledAbilities ?? {},
   }
 }
 

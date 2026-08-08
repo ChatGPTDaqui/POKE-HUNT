@@ -13,6 +13,23 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '5.3',
+    date: '2026-08-09',
+    title: 'Pokemon forte fora do inicio, 500 itens pra todo mundo e o duplo clique de volta',
+    highlights: [
+      'BUG DE BALANCEAMENTO (grave): Pokemon forte aparecia na PRIMEIRA hunt do jogo. Scizor, Heracross, Scyther e Pinsir (500 de status total) nasciam na Zona 0, de nivel 1 a 10; Meganium e Venusaur tambem; Kingdra, Gyarados, Lapras e Blastoise apareciam na Zona 1; e Tyranitar (600) na Zona 2. Agora cada especie tem um NIVEL MINIMO derivado da forca e do estagio de evolucao, e nenhuma passa dele.',
+      'ZONAS AVANCADAS: quem foi tirado do inicio nao sumiu do jogo — cada bioma ganhou versoes de nivel mais alto conforme precisou. "Johto Zona 5 · Bosque" (Lv 51-60) existe porque Scizor e Heracross precisavam de casa; "Johto Zona 7 · Caverna" (Lv 71-80) e onde o Tyranitar foi parar. Sao 69 hunts normais no lugar de 36.',
+      'Formas finais continuam em 0,2% nas hunts comuns, mas a regra deixou de valer nas zonas que sao MAJORITARIAMENTE de formas finais — nelas, forcar 0,2% dava mais de 99% da hunt pro unico POKE que nao era forma final.',
+      'CHANCE DE SHINY CORTADA PELA METADE. A formula nao mudou (especie mais facil de capturar continua tendo mais chance de shiny) — so o multiplicador global caiu de 200x para 100x sobre a taxa original do Gen2.',
+      'TODO JOGADOR NOVO COMECA COM 500 Poke Ball, 500 Potion e 50 Revive (era 200/200/10).',
+      'QUEM JA JOGAVA RECEBEU A MESMA QUANTIDADE PELO CORREIO: abra o Correio e clique em "Coletar" na mensagem "Reposicao de suprimentos". O Correio ganhou anexo de itens de verdade — com botao de coletar, e a coleta so acontece uma vez.',
+      'BUG CORRIGIDO: o duplo clique que desliga um golpe tinha parado de funcionar. O evento sempre disparou; o problema e que a escolha nunca chegava ao servidor (que e quem decide o golpe em combate) e nem sequer tinha onde ser salva no banco. Agora vale na hora, vale no combate e sobrevive ao logout.',
+      'Icones das skills preenchem o slot inteiro: o fundo preto que vinha dentro da propria arte foi removido no desenho, e o icone aparece sobre a cor do elemento.',
+      'A janela do Correio deixou de parecer desabilitada — texto com contraste normal, no mesmo peso visual das outras janelas.',
+      'CORES DE RARIDADE NO LOG: a cor agora pinta so a PALAVRA da raridade, e nao o nome do Pokemon. O abate passou a mostrar a raridade tambem: "Rattata [RARO] derrotado!" com apenas RARO em azul.',
+    ],
+  },
+  {
     version: '5.2',
     date: '2026-08-09',
     title: 'Arte de golpe em 8 elementos, icones de skill, ataque do Charmander e menus mais densos',

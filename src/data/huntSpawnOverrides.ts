@@ -42,6 +42,7 @@ import { buildNightmareMirror, BOSS_MAPS_DATA, BOSS_ENCOUNTERS_DATA } from './ni
 import { SPECIES_DATA } from './generated/pokes.generated'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
 import { isTerceiraEvolucao } from './evolutionStage'
+import { zonaMinimaDaEspecie } from './spawnStrength'
 import { NON_WILD_SPECIES, REGIONS, REGION_LABEL, pokedexNumber, regionOfSpecies, type Region } from './regions'
 import type { ElementType } from './generated/types'
 import type { HuntMapDef, HuntEncounter } from './huntTypes'
@@ -235,6 +236,55 @@ function addEncounter(
   return id
 }
 
+// Abaixo disto, uma zona avancada e fundida com a de cima em vez de virar hunt
+// propria. Sem isso o recorte por forca produzia dezenas de hunts com 1 ou 2
+// especies (medido: 78 hunts, varias com uma so) — cada uma um cartao no menu
+// e uma entrada a mais no espelho do Modo Pesadelo, com pool pequeno demais pra
+// valer a visita.
+const MIN_POOL_ZONA_AVANCADA = 3
+
+/**
+ * Junta as zonas avancadas magras, subindo o nivel de quem foi absorvido.
+ *
+ * Duas regras que nao sao arbitrarias:
+ *
+ * 1. **A zona BASE do bioma sempre sai como hunt propria**, mesmo com pool
+ *    pequeno. Ela e a que carrega o id historico (`lv_1_10_bosque`), e esse id
+ *    aparece em `unlocked_maps` e em `game_sessions.map_id` no Postgres —
+ *    fundi-la deixaria sessao viva apontando pra hunt que nao existe mais.
+ * 2. **A fusao so sobe de nivel, nunca desce.** `zonaMinimaDaEspecie` e um
+ *    PISO: subir respeita todo mundo do grupo, descer colocaria de volta na
+ *    hunt cedo exatamente o POKE que esta leva tirou de la.
+ *
+ * A sobra do topo vira hunt propria mesmo com uma especie so. A alternativa
+ * (fundir pra baixo) apagaria a hunt cedo do bioma; e uma hunt de um POKE so —
+ * Tyranitar na Zona 7 da Caverna, por exemplo — e conteudo legitimo, nao erro:
+ * e o dado real de Johto ter poucas especies ROCK.
+ */
+function agruparZonasMagras(
+  porZona: Map<number, string[]>,
+  zonaBase: number,
+): [number, string[]][] {
+  const saida: [number, string[]][] = []
+  const base = porZona.get(zonaBase)
+  if (base?.length) saida.push([zonaBase, base])
+
+  const acima = [...porZona.entries()]
+    .filter(([z]) => z !== zonaBase)
+    .sort((a, b) => a[0] - b[0])
+
+  let acumulado: string[] = []
+  for (const [z, especies] of acima) {
+    acumulado = [...acumulado, ...especies]
+    if (acumulado.length >= MIN_POOL_ZONA_AVANCADA) {
+      saida.push([z, acumulado])
+      acumulado = []
+    }
+  }
+  if (acumulado.length) saida.push([acima[acima.length - 1][0], acumulado])
+  return saida
+}
+
 // "Zona Nivel 11-20 (Planicie)" vira "Johto Zona 1 · Planicie".
 //
 // O prefixo de regiao esta em TODA hunt (nao so nas novas): com o mesmo bioma
@@ -280,25 +330,47 @@ for (const base of Object.values(MAPS_DATA)) {
       'Sem numero de zona nao ha faixa de nivel — e era justamente a divergencia entre nome e nivel que esta tabela existe pra fechar.'
     )
   }
-  // A faixa e a MESMA pro nome, pro cartao e pro spawn. Antes o `levelRange`
-  // vinha do sync (min/max real das especies agrupadas) e o nome vinha do
-  // bracket nominal — dois numeros que discordavam.
-  const [minLevel, maxLevel] = faixaDaZona(zona)
-
+  // A faixa e a MESMA pro nome, pro cartao e pro spawn (antes o `levelRange`
+  // vinha do sync e o nome do bracket nominal — dois numeros que discordavam),
+  // e desde o recorte por forca ela e derivada por BUCKET dentro do laco
+  // abaixo: a mesma hunt-base pode gerar mais de uma zona.
   for (const region of REGIONS) {
     const pool = poolFor(region, biome)
     if (!pool.length) continue // ex.: Kanto + DARK — nao existe no dado real
     const isHome = base.continent === region
-    const id = isHome ? base.id : `${base.id}_${region}`
-    const name = nameFor(base.name, region, zona)
-    maps[id] = {
-      ...base,
-      id,
-      name,
-      levelRange: [minLevel, maxLevel],
-      description: `Local selvagem: ${name} (nivel ${minLevel}-${maxLevel}).`,
-      continent: region,
-      enemyPool: pool.map((speciesId) => addEncounter(id, speciesId, minLevel, maxLevel)),
+    const idBase = isHome ? base.id : `${base.id}_${region}`
+
+    // AQUI mora a correcao de "Pokemon forte na hunt inicial". O bioma continua
+    // sendo o do tipo primario (Scizor nao vira POKE de Floresta), mas a ZONA
+    // passa a ser `max(zona do bioma, zona minima da especie)` — ver
+    // data/spawnStrength.ts. Uma especie forte num bioma cedo nao e removida do
+    // jogo: ela cai numa versao AVANCADA daquele mesmo bioma, criada aqui sob
+    // demanda ("Johto Zona 5 · Bosque" existe porque Scizor e Heracross
+    // precisam de casa, nao porque alguem escreveu a hunt a mao).
+    const porZona = new Map<number, string[]>()
+    for (const speciesId of pool) {
+      const alvo = Math.max(zona, zonaMinimaDaEspecie(speciesId))
+      const lista = porZona.get(alvo)
+      if (lista) lista.push(speciesId)
+      else porZona.set(alvo, [speciesId])
+    }
+
+    for (const [zonaAlvo, especies] of agruparZonasMagras(porZona, zona)) {
+      // A zona base MANTEM o id historico. Isso nao e estetica: `map_id` de uma
+      // sessao aberta e `unlocked_maps` no Postgres apontam pra esses ids, e
+      // renomear tudo deixaria sessao viva apontando pra hunt inexistente.
+      const id = zonaAlvo === zona ? idBase : `${idBase}_z${zonaAlvo}`
+      const [lo, hi] = faixaDaZona(zonaAlvo)
+      const name = nameFor(base.name, region, zonaAlvo)
+      maps[id] = {
+        ...base,
+        id,
+        name,
+        levelRange: [lo, hi],
+        description: `Local selvagem: ${name} (nivel ${lo}-${hi}).`,
+        continent: region,
+        enemyPool: especies.map((speciesId) => addEncounter(id, speciesId, lo, hi)),
+      }
     }
   }
 }
@@ -319,9 +391,24 @@ for (const base of Object.values(MAPS_DATA)) {
 // evolucao e cai na regra nova, que e mais recente e mais geral.
 const SHARE_TERCEIRA_EVOLUCAO = 0.002
 
+// A partir desta fatia do pool, a hunt E uma zona de formas finais e a regra
+// nao se aplica.
+//
+// Isto virou necessario com o recorte por forca desta leva. Antes, forma final
+// era sempre minoria num pool misturado. Agora existem zonas cujo elenco quase
+// todo e final — "Johto Zona 7 · Costa" tem Politoed, Feraligatr, Kingdra e
+// Octillery. Fixar tres deles em 0,2% dava 99,4% pro quarto: a zona criada
+// justamente pra abrigar as formas finais viraria uma fazenda de Octillery.
+//
+// O espirito do pedido original ("forma final tem que ser rara") vale pra hunt
+// COMUM, onde ela e a excecao no meio de POKE fraco. Onde ela e a regra, quem
+// manda e o tier de encontro real do Gen2, como em qualquer outro pool.
+const LIMITE_ZONA_DE_FINAIS = 0.5
+
 for (const map of Object.values(maps)) {
   const fixos = map.enemyPool.filter((id) => isTerceiraEvolucao(encounters[id].speciesId))
   if (!fixos.length) continue
+  if (fixos.length / map.enemyPool.length >= LIMITE_ZONA_DE_FINAIS) continue
 
   const pesoDosOutros = map.enemyPool
     .filter((id) => !fixos.includes(id))

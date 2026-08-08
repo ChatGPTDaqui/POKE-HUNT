@@ -246,6 +246,11 @@ export interface MensagemChat {
   created_at: string
 }
 
+export interface AnexoItemCorreio {
+  itemId: string
+  quantity: number
+}
+
 export interface MensagemCorreio {
   id: string
   de_id: string | null
@@ -255,6 +260,10 @@ export interface MensagemCorreio {
   corpo: string
   estado: 'pendente' | 'aceito' | 'recusado' | 'lido'
   created_at: string
+  /** Itens anexados. Vazio na maioria das mensagens. */
+  anexo_itens?: AnexoItemCorreio[]
+  /** Carimbo de coleta — presente significa "ja recebido". */
+  anexo_coletado_em?: string | null
 }
 
 export interface AmigoRemoto { userId: string; nome: string; nivel: number }
@@ -332,6 +341,13 @@ export const servidor = {
     pedir<{ mensagem: string }>('/correio/responder', { method: 'POST', body: JSON.stringify({ mensagemId, aceitar }) }),
   marcarLida: (mensagemId: string) =>
     pedir<{ ok: boolean }>('/correio/ler', { method: 'POST', body: JSON.stringify({ mensagemId }) }),
+  // NAO retentavel: coletar duas vezes nao credita em dobro (o claim no banco e
+  // atomico), mas a segunda chamada volta 409 e o jogador veria um erro depois
+  // de uma coleta que deu certo.
+  coletarAnexo: (mensagemId: string) =>
+    pedir<{ ok: boolean; itens: AnexoItemCorreio[]; mensagem: string }>(
+      '/correio/coletar', { method: 'POST', body: JSON.stringify({ mensagemId }) },
+    ),
 }
 
 /**

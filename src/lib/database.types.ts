@@ -410,6 +410,8 @@ export type Database = {
       }
       mail_messages: {
         Row: {
+          anexo_coletado_em: string | null
+          anexo_itens: Json
           assunto: string
           corpo: string
           created_at: string
@@ -422,6 +424,8 @@ export type Database = {
           tipo: string
         }
         Insert: {
+          anexo_coletado_em?: string | null
+          anexo_itens?: Json
           assunto: string
           corpo?: string
           created_at?: string
@@ -434,6 +438,8 @@ export type Database = {
           tipo: string
         }
         Update: {
+          anexo_coletado_em?: string | null
+          anexo_itens?: Json
           assunto?: string
           corpo?: string
           created_at?: string
@@ -939,6 +945,7 @@ export type Database = {
       pokemon_instances: {
         Row: {
           created_at: string
+          disabled_abilities: Json
           exp: number
           hp: number
           id: string
@@ -968,6 +975,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          disabled_abilities?: Json
           exp?: number
           hp: number
           id?: string
@@ -997,6 +1005,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          disabled_abilities?: Json
           exp?: number
           hp?: number
           id?: string
@@ -1217,6 +1226,18 @@ export type Database = {
         Returns: {
           jogadores_afetados: number
           linhas_de_item_apagadas: number
+        }[]
+      }
+      wipe_mundo_social: {
+        Args: never
+        Returns: {
+          amizades: number
+          anuncios: number
+          chat: number
+          entregas: number
+          mensagens: number
+          negocios: number
+          ordens: number
         }[]
       }
       wipe_todos_os_saves: {

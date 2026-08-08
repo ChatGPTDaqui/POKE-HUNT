@@ -11,6 +11,7 @@
 // direto), que e justamente o que a Fase D fechou. Com dezenas de jogadores,
 // uma leitura a cada poucos segundos e barata e nao abre porta nenhuma.
 import { ErroHttp, selecionar, selecionarTudo, inserir, atualizar, atualizarRetornando, type Config } from './db.js'
+import { enfileirarEntrega } from './entregas.js'
 
 // Mensagens carregadas por vez. O cliente sempre pede as mais recentes e o
 // historico nao e navegavel — chat de jogo e efemero por natureza.
@@ -41,6 +42,8 @@ export interface LinhaCorreio {
   estado: 'pendente' | 'aceito' | 'recusado' | 'lido'
   created_at: string
   read_at: string | null
+  anexo_itens?: unknown
+  anexo_coletado_em?: string | null
 }
 
 const texto = (v: unknown, campo: string, max: number): string => {
@@ -230,6 +233,58 @@ export async function responderPedido(cfg: Config, userId: string, mensagemId: s
   })
 
   return { mensagem: `Agora voce e amigo de ${pedido.de_nome}.` }
+}
+
+export interface AnexoItem {
+  itemId: string
+  quantity: number
+}
+
+/**
+ * Coleta o anexo de itens de uma mensagem do Correio.
+ *
+ * DOIS PONTOS QUE NAO SAO DETALHE:
+ *
+ * 1. **O claim e atomico e vem PRIMEIRO.** `anexo_coletado_em=is.null` esta no
+ *    FILTRO do update: dois cliques (ou dois aparelhos) simultaneos nao podem
+ *    coletar o mesmo anexo duas vezes, porque o segundo PATCH nao encontra
+ *    linha. Se o enfileiramento abaixo falhar, o jogador perde o anexo — erra
+ *    contra ele, mas nao imprime item, que e o lado certo de errar aqui.
+ *
+ * 2. **O credito vai pra fila de entregas, nao pro `players` direto.** O
+ *    servidor grava progresso reescrevendo o SNAPSHOT inteiro do jogador; um
+ *    `update player_items` aqui seria sobrescrito pelo proximo flush de quem
+ *    estivesse cacando nesse segundo. `market_deliveries` ja existe exatamente
+ *    pra isso e e aplicada dentro do proximo request que grava (ver
+ *    server/src/entregas.ts). O nome da tabela e historico — ela e a fila
+ *    generica de "creditar isto no proximo request", nao so do Mercado.
+ */
+export async function coletarAnexo(cfg: Config, userId: string, mensagemId: string) {
+  const [msg] = await atualizarRetornando<LinhaCorreio & { anexo_itens: AnexoItem[] }>(
+    cfg,
+    `mail_messages?id=eq.${mensagemId}&para_id=eq.${userId}&anexo_coletado_em=is.null&anexo_itens=neq.${encodeURIComponent('[]')}`,
+    { anexo_coletado_em: new Date().toISOString(), estado: 'lido', read_at: new Date().toISOString() },
+  )
+  if (!msg) throw new ErroHttp(409, 'Nada para coletar nesta mensagem.')
+
+  const itens = Array.isArray(msg.anexo_itens) ? msg.anexo_itens : []
+  for (const item of itens) {
+    if (!item?.itemId || !(item.quantity > 0)) continue
+    await enfileirarEntrega(cfg, {
+      userId,
+      itemId: item.itemId,
+      quantity: Math.floor(item.quantity),
+      motivo: `correio:${mensagemId}`,
+    })
+  }
+
+  return {
+    ok: true,
+    itens,
+    mensagem: itens.length
+      ? `Recebido: ${itens.map((i) => `${i.quantity}x ${i.itemId}`).join(', ')}.`
+      : 'Nada para coletar.',
+  }
 }
 
 export async function marcarLida(cfg: Config, userId: string, mensagemId: string) {

@@ -14,7 +14,7 @@ import {
   criarOrdem, cancelarOrdem, anunciarPoke, cancelarAnuncio, comprarAnuncio,
 } from './mercado.js'
 import {
-  lerChat, enviarChat, caixaDeEntrada, pedirAmizade, responderPedido, marcarLida,
+  lerChat, enviarChat, caixaDeEntrada, pedirAmizade, responderPedido, marcarLida, coletarAnexo,
 } from './social.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
 import { limparMundoDoJogador } from './reiniciar.js'
@@ -376,6 +376,9 @@ async function social(cfg: OpcoesApp, userId: string, req: Request, url: URL): P
   }
   if (url.pathname === '/correio/ler') {
     return json(await marcarLida(cfg, userId, String(corpo.mensagemId ?? '')))
+  }
+  if (url.pathname === '/correio/coletar') {
+    return json(await coletarAnexo(cfg, userId, String(corpo.mensagemId ?? '')))
   }
   return json({ erro: 'rota desconhecida' }, 404)
 }

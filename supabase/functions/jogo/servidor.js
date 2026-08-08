@@ -15585,11 +15585,31 @@ function rarityOf(poke) {
 	const key = poke?.rarity;
 	return key && RARITIES[key] || RARITIES.comum;
 }
+/**
+* Realce de log: a PALAVRA da raridade pintada com a cor dela.
+*
+* Correcao de comportamento pedida explicitamente: a versao anterior pintava o
+* NOME do POKE ("Sentret" saia azul quando o POKE era raro), o que confundia
+* duas informacoes numa so — quem le nao tem como saber se o azul fala da
+* especie ou da raridade. Agora quem recebe a cor e a propria palavra
+* ("RARO"), e o nome fica na cor normal da linha.
+*
+* Devolve um objeto estrutural (`{texto, cor}`) em vez de importar o tipo
+* `ToastRealce` da store — `data/` nao depende de `stores/`, e o formato e
+* pequeno o bastante pra o TypeScript casar sozinho.
+*/
+function realceDaRaridade(poke) {
+	const def = rarityOf(poke);
+	return {
+		texto: def.label,
+		cor: def.color
+	};
+}
 //#endregion
 //#region src/data/pokes.ts
 var MAX_CATCH_RATE = 255;
 var formulaEngine$6 = createFormulaEngine(FORMULAS);
-var SHINY_CHANCE_AT_MAX_CATCH_RATE = 1 / 8192 * formulaEngine$6.evalOrDefault("SHINY_RATE_MULTIPLIER", 200);
+var SHINY_CHANCE_AT_MAX_CATCH_RATE = 1 / 8192 * formulaEngine$6.evalOrDefault("SHINY_RATE_MULTIPLIER", 100);
 var SHAPES = [
 	"triangle",
 	"circle",
@@ -19479,6 +19499,68 @@ function isTerceiraEvolucao(speciesId) {
 	return evolutionStage(speciesId) >= 3;
 }
 //#endregion
+//#region src/data/spawnStrength.ts
+/** Soma dos 6 atributos base — a medida de forca usada em toda a serie. */
+function baseStatTotal(speciesId) {
+	const b = SPECIES_DATA[speciesId]?.base;
+	if (!b) return 0;
+	return b.hp + b.atkFis + b.atkEsp + b.def + b.defEsp + b.speed;
+}
+/**
+* Faixas de forca -> zona minima.
+*
+* Os cortes saem da distribuicao real do elenco (226 especies): 300-349 e a
+* moda (49 especies), 450-499 vem logo atras (41), e so 14 passam de 550. Nao
+* sao numeros redondos escolhidos a esmo — sao os degraus onde a populacao
+* realmente muda de patamar.
+*
+* Zona 3 e o primeiro degrau acima de Lv 30, que e o piso pedido
+* explicitamente ("restrinja o spawn deles estritamente para zonas com faixa
+* de level 30+"): toda especie com 425 de total ou mais cai nele ou acima.
+*/
+var FAIXAS = [
+	{
+		bstMinimo: 525,
+		zona: 7
+	},
+	{
+		bstMinimo: 475,
+		zona: 5
+	},
+	{
+		bstMinimo: 425,
+		zona: 3
+	},
+	{
+		bstMinimo: 350,
+		zona: 1
+	},
+	{
+		bstMinimo: 0,
+		zona: 0
+	}
+];
+/**
+* Piso por estagio de evolucao, indexado por `evolutionStage` (1 = forma base).
+*
+* Existe porque BST sozinho deixa passar forma final fraca: Butterfree (395) e
+* Beedrill (395) sao 3as evolucoes e cairiam na Zona 1 junto com o Caterpie
+* que virou eles. Uma forma evoluida na zona de estreia le como bug mesmo
+* quando o numero permite.
+*/
+var PISO_POR_ESTAGIO = [
+	0,
+	0,
+	1,
+	2
+];
+function zonaMinimaDaEspecie(speciesId) {
+	const bst = baseStatTotal(speciesId);
+	const porForca = FAIXAS.find((f) => bst >= f.bstMinimo)?.zona ?? 0;
+	const estagio = Math.min(evolutionStage(speciesId), PISO_POR_ESTAGIO.length - 1);
+	return Math.max(porForca, PISO_POR_ESTAGIO[estagio]);
+}
+//#endregion
 //#region src/data/regions.ts
 var LAST_KANTO_DEX = 151;
 var DEX_RE = /Nº\s*(\d+)/;
@@ -19559,8 +19641,7 @@ var STARTER_HUNT_ID = "route_46";
 var STARTER_HUNT_SPECIES = [
 	"sentret",
 	"hoothoot",
-	"ledyba",
-	"spinarak"
+	"rattata"
 ];
 var STARTER_LEVEL_WEIGHTS = [{
 	level: 1,
@@ -19610,6 +19691,41 @@ function addEncounter(huntId, speciesId, minLevel, maxLevel, levelWeights) {
 	};
 	return id;
 }
+var MIN_POOL_ZONA_AVANCADA = 3;
+/**
+* Junta as zonas avancadas magras, subindo o nivel de quem foi absorvido.
+*
+* Duas regras que nao sao arbitrarias:
+*
+* 1. **A zona BASE do bioma sempre sai como hunt propria**, mesmo com pool
+*    pequeno. Ela e a que carrega o id historico (`lv_1_10_bosque`), e esse id
+*    aparece em `unlocked_maps` e em `game_sessions.map_id` no Postgres —
+*    fundi-la deixaria sessao viva apontando pra hunt que nao existe mais.
+* 2. **A fusao so sobe de nivel, nunca desce.** `zonaMinimaDaEspecie` e um
+*    PISO: subir respeita todo mundo do grupo, descer colocaria de volta na
+*    hunt cedo exatamente o POKE que esta leva tirou de la.
+*
+* A sobra do topo vira hunt propria mesmo com uma especie so. A alternativa
+* (fundir pra baixo) apagaria a hunt cedo do bioma; e uma hunt de um POKE so —
+* Tyranitar na Zona 7 da Caverna, por exemplo — e conteudo legitimo, nao erro:
+* e o dado real de Johto ter poucas especies ROCK.
+*/
+function agruparZonasMagras(porZona, zonaBase) {
+	const saida = [];
+	const base = porZona.get(zonaBase);
+	if (base?.length) saida.push([zonaBase, base]);
+	const acima = [...porZona.entries()].filter(([z]) => z !== zonaBase).sort((a, b) => a[0] - b[0]);
+	let acumulado = [];
+	for (const [z, especies] of acima) {
+		acumulado = [...acumulado, ...especies];
+		if (acumulado.length >= MIN_POOL_ZONA_AVANCADA) {
+			saida.push([z, acumulado]);
+			acumulado = [];
+		}
+	}
+	if (acumulado.length) saida.push([acima[acima.length - 1][0], acumulado]);
+	return saida;
+}
 function nameFor(baseName, region, zona) {
 	return `${REGION_LABEL[region]} Zona ${zona} · ${rotuloDoBioma(baseName)}`;
 }
@@ -19629,27 +19745,39 @@ for (const base of Object.values(MAPS_DATA)) {
 	if (!biome) throw new Error(`Hunt "${base.id}" sem bioma em HUNT_BIOME (data/huntSpawnOverrides.ts). Toda hunt gerada precisa declarar o tipo elemental dela pro recorte por regiao funcionar.`);
 	const zona = ZONA_POR_HUNT[base.id];
 	if (zona == null) throw new Error(`Hunt "${base.id}" sem zona em ZONA_POR_HUNT (data/huntSpawnOverrides.ts). Sem numero de zona nao ha faixa de nivel — e era justamente a divergencia entre nome e nivel que esta tabela existe pra fechar.`);
-	const [minLevel, maxLevel] = faixaDaZona(zona);
 	for (const region of REGIONS) {
 		const pool = poolFor(region, biome);
 		if (!pool.length) continue;
-		const id = base.continent === region ? base.id : `${base.id}_${region}`;
-		const name = nameFor(base.name, region, zona);
-		maps[id] = {
-			...base,
-			id,
-			name,
-			levelRange: [minLevel, maxLevel],
-			description: `Local selvagem: ${name} (nivel ${minLevel}-${maxLevel}).`,
-			continent: region,
-			enemyPool: pool.map((speciesId) => addEncounter(id, speciesId, minLevel, maxLevel))
-		};
+		const idBase = base.continent === region ? base.id : `${base.id}_${region}`;
+		const porZona = /* @__PURE__ */ new Map();
+		for (const speciesId of pool) {
+			const alvo = Math.max(zona, zonaMinimaDaEspecie(speciesId));
+			const lista = porZona.get(alvo);
+			if (lista) lista.push(speciesId);
+			else porZona.set(alvo, [speciesId]);
+		}
+		for (const [zonaAlvo, especies] of agruparZonasMagras(porZona, zona)) {
+			const id = zonaAlvo === zona ? idBase : `${idBase}_z${zonaAlvo}`;
+			const [lo, hi] = faixaDaZona(zonaAlvo);
+			const name = nameFor(base.name, region, zonaAlvo);
+			maps[id] = {
+				...base,
+				id,
+				name,
+				levelRange: [lo, hi],
+				description: `Local selvagem: ${name} (nivel ${lo}-${hi}).`,
+				continent: region,
+				enemyPool: especies.map((speciesId) => addEncounter(id, speciesId, lo, hi))
+			};
+		}
 	}
 }
 var SHARE_TERCEIRA_EVOLUCAO = .002;
+var LIMITE_ZONA_DE_FINAIS = .5;
 for (const map of Object.values(maps)) {
 	const fixos = map.enemyPool.filter((id) => isTerceiraEvolucao(encounters[id].speciesId));
 	if (!fixos.length) continue;
+	if (fixos.length / map.enemyPool.length >= LIMITE_ZONA_DE_FINAIS) continue;
 	const pesoDosOutros = map.enemyPool.filter((id) => !fixos.includes(id)).reduce((soma, id) => soma + encounters[id].weight, 0);
 	const denominador = 1 - SHARE_TERCEIRA_EVOLUCAO * fixos.length;
 	if (pesoDosOutros <= 0 || denominador <= 0) continue;
@@ -35514,26 +35642,36 @@ var BATTLE_SPRITE_ANIMS = {
 //#endregion
 //#region src/data/battleSprites.ts
 var ANIM_FALLBACKS = {
-	Shoot: "Idle",
-	Charge: "Idle",
-	Faint: "Sleep",
-	Idle: "Walk"
+	Shoot: [
+		"Charge",
+		"Idle",
+		"Walk"
+	],
+	Charge: [
+		"Shoot",
+		"Idle",
+		"Walk"
+	],
+	Faint: [
+		"Sleep",
+		"Idle",
+		"Walk"
+	],
+	Idle: ["Walk"],
+	Sleep: ["Idle", "Walk"]
 };
 function resolveBattleAnim(speciesId, animName, isShiny = false) {
 	const species = BATTLE_SPRITE_ANIMS[speciesId];
 	if (!species) return null;
-	let name = animName;
-	const seen = /* @__PURE__ */ new Set();
-	while (name && !species[name] && !seen.has(name)) {
-		seen.add(name);
-		name = ANIM_FALLBACKS[name];
+	for (const name of [animName, ...ANIM_FALLBACKS[animName] ?? []]) {
+		const meta = species[name];
+		if (meta) return {
+			name,
+			url: battleSpriteUrl(speciesId, name, isShiny),
+			...meta
+		};
 	}
-	if (!name || !species[name]) return null;
-	return {
-		name,
-		url: battleSpriteUrl(speciesId, name, isShiny),
-		...species[name]
-	};
+	return null;
 }
 function battleSpriteUrl(speciesId, animName, isShiny = false) {
 	return `assets/battle-sprites/${speciesId}/${animName}${isShiny ? "-Shiny" : ""}-Anim.png`;
@@ -37483,12 +37621,13 @@ var useToastStore = create((set) => ({
 		trade: [],
 		log: []
 	},
-	pushToast: (message, type, channel) => {
+	pushToast: (message, type, channel, realce) => {
 		const tab = CHANNEL_TO_TAB[channel] || "sistema";
 		const line = {
 			id: makeId(),
 			message,
-			type
+			type,
+			realce
 		};
 		set((state) => {
 			const nextTabLines = [...state.chatLines[tab], line];
@@ -37501,7 +37640,8 @@ var useToastStore = create((set) => ({
 			const toastEntry = {
 				id: line.id,
 				message,
-				type
+				type,
+				realce
 			};
 			return {
 				chatLines,
@@ -37675,7 +37815,7 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			duration: 1.1,
 			owner: enemy
 		}));
-		useToastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} derrotado! +${expGain} EXP, +${loot.gold} ouro`, "gold", "combat");
+		useToastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${rarityOf(enemy.poke).label}] derrotado! +${expGain} EXP, +${loot.gold} ouro`, "gold", "combat", realceDaRaridade(enemy.poke));
 		if (grantResult.leveledUp) {
 			const ganhos = formatStatGains(grantResult.statGains);
 			useToastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ""}`, "levelup", "combat");
@@ -37704,7 +37844,7 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			if (captureResult.success) {
 				const location = captureResult.location === "bag" ? "mochila" : captureResult.location;
 				const raridade = rarityOf(captureResult.poke).label;
-				useToastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world");
+				useToastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
 			} else if (captureResult.reason === "roll_failed") useToastStore.getState().pushToast("A captura falhou!", "capture-fail", "combat");
 		}
 	}
@@ -58989,6 +59129,7 @@ function rowToPoke(row) {
 		ivs,
 		stats,
 		unlockedAbilities: row.unlocked_abilities,
+		disabledAbilities: row.disabled_abilities ?? {},
 		locked: row.locked,
 		capturedAt: row.created_at,
 		originalTrainer: row.original_trainer ?? void 0
@@ -59083,7 +59224,8 @@ function pokeToRow(userId, poke, location, teamSlot) {
 		stat_def: poke.stats.def,
 		stat_def_esp: poke.stats.defEsp,
 		stat_speed: poke.stats.speed,
-		unlocked_abilities: poke.unlockedAbilities
+		unlocked_abilities: poke.unlockedAbilities,
+		disabled_abilities: poke.disabledAbilities ?? {}
 	};
 }
 function gameStateToPokemonRows(userId, s) {
@@ -59325,6 +59467,10 @@ var servidor = {
 	marcarLida: (mensagemId) => pedir("/correio/ler", {
 		method: "POST",
 		body: JSON.stringify({ mensagemId })
+	}),
+	coletarAnexo: (mensagemId) => pedir("/correio/coletar", {
+		method: "POST",
+		body: JSON.stringify({ mensagemId })
 	})
 };
 //#endregion
@@ -59383,12 +59529,12 @@ var postgresStorage = {
 	removeItem: () => {}
 };
 var STARTING_ITEMS = {
-	poke_ball: 200,
-	potion: 200,
-	revive: 10
+	poke_ball: 500,
+	potion: 500,
+	revive: 50
 };
 var DEFAULT_AUTO_POT_RULES = [{
-	hpPercent: 50,
+	hpPercent: 70,
 	itemId: "potion"
 }];
 var DEFAULT_AUTO_CATCH_CONFIG = {
@@ -60209,6 +60355,7 @@ async function aplicarFlush(cfg, userId, sessao) {
 	const ativo = estado.team.find((p) => p.uid === sessao.poke_uid);
 	if (!ativo) return null;
 	store.setActiveIndex(estado.team.indexOf(ativo));
+	if (!MAPS[sessao.map_id]) return null;
 	const rng = restoreRng(Number(sessao.rng_state), Number(sessao.rng_draws));
 	const world = buildMapWorld(sessao.map_id, ativo, {
 		rng,
@@ -60937,6 +61084,48 @@ async function responderPedido(cfg, userId, mensagemId, aceitar) {
 	});
 	return { mensagem: `Agora voce e amigo de ${pedido.de_nome}.` };
 }
+/**
+* Coleta o anexo de itens de uma mensagem do Correio.
+*
+* DOIS PONTOS QUE NAO SAO DETALHE:
+*
+* 1. **O claim e atomico e vem PRIMEIRO.** `anexo_coletado_em=is.null` esta no
+*    FILTRO do update: dois cliques (ou dois aparelhos) simultaneos nao podem
+*    coletar o mesmo anexo duas vezes, porque o segundo PATCH nao encontra
+*    linha. Se o enfileiramento abaixo falhar, o jogador perde o anexo — erra
+*    contra ele, mas nao imprime item, que e o lado certo de errar aqui.
+*
+* 2. **O credito vai pra fila de entregas, nao pro `players` direto.** O
+*    servidor grava progresso reescrevendo o SNAPSHOT inteiro do jogador; um
+*    `update player_items` aqui seria sobrescrito pelo proximo flush de quem
+*    estivesse cacando nesse segundo. `market_deliveries` ja existe exatamente
+*    pra isso e e aplicada dentro do proximo request que grava (ver
+*    server/src/entregas.ts). O nome da tabela e historico — ela e a fila
+*    generica de "creditar isto no proximo request", nao so do Mercado.
+*/
+async function coletarAnexo(cfg, userId, mensagemId) {
+	const [msg] = await atualizarRetornando(cfg, `mail_messages?id=eq.${mensagemId}&para_id=eq.${userId}&anexo_coletado_em=is.null&anexo_itens=neq.${encodeURIComponent("[]")}`, {
+		anexo_coletado_em: (/* @__PURE__ */ new Date()).toISOString(),
+		estado: "lido",
+		read_at: (/* @__PURE__ */ new Date()).toISOString()
+	});
+	if (!msg) throw new ErroHttp(409, "Nada para coletar nesta mensagem.");
+	const itens = Array.isArray(msg.anexo_itens) ? msg.anexo_itens : [];
+	for (const item of itens) {
+		if (!item?.itemId || !(item.quantity > 0)) continue;
+		await enfileirarEntrega(cfg, {
+			userId,
+			itemId: item.itemId,
+			quantity: Math.floor(item.quantity),
+			motivo: `correio:${mensagemId}`
+		});
+	}
+	return {
+		ok: true,
+		itens,
+		mensagem: itens.length ? `Recebido: ${itens.map((i) => `${i.quantity}x ${i.itemId}`).join(", ")}.` : "Nada para coletar."
+	};
+}
 async function marcarLida(cfg, userId, mensagemId) {
 	await atualizar(cfg, `mail_messages?id=eq.${mensagemId}&para_id=eq.${userId}&estado=eq.pendente&tipo=neq.pedido_amizade`, {
 		estado: "lido",
@@ -61185,6 +61374,7 @@ async function social(cfg, userId, req, url) {
 	if (url.pathname === "/correio/amizade") return json(await pedirAmizade(cfg, userId, String(corpo.nick ?? "")));
 	if (url.pathname === "/correio/responder") return json(await responderPedido(cfg, userId, String(corpo.mensagemId ?? ""), corpo.aceitar === true));
 	if (url.pathname === "/correio/ler") return json(await marcarLida(cfg, userId, String(corpo.mensagemId ?? "")));
+	if (url.pathname === "/correio/coletar") return json(await coletarAnexo(cfg, userId, String(corpo.mensagemId ?? "")));
 	return json({ erro: "rota desconhecida" }, 404);
 }
 //#endregion

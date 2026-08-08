@@ -61,17 +61,23 @@ export function rarityOf(poke: { rarity?: string | null } | null | undefined): R
 }
 
 /**
- * Realce de log: o nome de um POKE pintado com a cor da raridade DELE.
+ * Realce de log: a PALAVRA da raridade pintada com a cor dela.
+ *
+ * Correcao de comportamento pedida explicitamente: a versao anterior pintava o
+ * NOME do POKE ("Sentret" saia azul quando o POKE era raro), o que confundia
+ * duas informacoes numa so — quem le nao tem como saber se o azul fala da
+ * especie ou da raridade. Agora quem recebe a cor e a propria palavra
+ * ("RARO"), e o nome fica na cor normal da linha.
  *
  * Devolve um objeto estrutural (`{texto, cor}`) em vez de importar o tipo
  * `ToastRealce` da store — `data/` nao depende de `stores/`, e o formato e
  * pequeno o bastante pra o TypeScript casar sozinho.
  */
-export function realceDeRaridade(
-  texto: string,
+export function realceDaRaridade(
   poke: { rarity?: string | null } | null | undefined,
 ): { texto: string; cor: string } {
-  return { texto, cor: rarityOf(poke).color }
+  const def = rarityOf(poke)
+  return { texto: def.label, cor: def.color }
 }
 
 // Ordinal rank (common -> mythic), for sort UIs — distinct from `weight`,

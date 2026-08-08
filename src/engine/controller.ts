@@ -5,7 +5,6 @@
 // isto junto — ver a nota de topo de la.
 import { SPECIES, createPokeInstance } from '@/data/pokes'
 import { getItem } from '@/data/items'
-import { realceDeRaridade } from '@/data/rarity'
 import { evolvePokeInstance } from './systems/progressionSystem'
 import { resetStats } from './systems/statsTracker'
 import { isDead, heal } from './entity'
@@ -116,6 +115,44 @@ export const controller = {
       })
   },
 
+  /**
+   * Liga/desliga um golpe da rotacao automatica (duplo clique no slot).
+   *
+   * BUG REAL CORRIGIDO — e o listener de duplo clique nunca esteve quebrado.
+   * A tela chamava `useGameStateStore.toggleAbilityDisabled` DIRETO, e sob
+   * autoridade do servidor (Fase D) isso tem dois efeitos, os dois invisiveis:
+   *
+   *  1. O estado local muda, o slot mostra "OFF", e o proximo flush (ate 30s
+   *     depois) sobrescreve o estado inteiro com o do servidor — o golpe volta
+   *     a aparecer ligado sozinho.
+   *  2. Quem escolhe o golpe em combate e o SERVIDOR, e ele nunca soube do
+   *     desligamento. Mesmo dentro dos 30s de ilusao, o POKE continuava usando
+   *     o golpe.
+   *
+   * O manipulador `alternarHabilidade` ja existia no servidor desde a Fase D;
+   * so faltava a tela chamar por ele.
+   *
+   * A escrita no `worldStore` e separada porque o POKE em campo e uma COPIA
+   * (ver a nota de HP/EXP em CLAUDE.md): sem isto, o desligamento so valeria
+   * apos a proxima troca de cena.
+   */
+  toggleAbility(pokeUid: string, abilityId: string): void {
+    const gameState = useGameStateStore.getState()
+    void pedirAcao(
+      { tipo: 'alternarHabilidade', pokeUid, abilityId },
+      () => gameState.toggleAbilityDisabled(pokeUid, abilityId),
+    ).then((ok) => {
+      if (!ok) return
+      const atualizado = useGameStateStore.getState().team.find((p) => p.uid === pokeUid)
+      if (!atualizado) return
+      useWorldStore.getState().update((draft) => {
+        if (draft.player && draft.player.poke.uid === pokeUid) {
+          draft.player.poke = { ...draft.player.poke, disabledAbilities: atualizado.disabledAbilities }
+        }
+      })
+    })
+  },
+
   healTeam(): void {
     const gameState = useGameStateStore.getState()
     void pedirAcao({ tipo: 'curarEquipe' }, () => gameState.healTeamFully())
@@ -201,7 +238,6 @@ export const controller = {
     useToastStore.getState().pushToast(
       `${shinyPrefix(removed.isShiny)}${SPECIES[removed.speciesId].name} foi retirado da equipe.`,
       'success', 'world',
-      realceDeRaridade(SPECIES[removed.speciesId].name, removed),
     )
   },
 
@@ -276,10 +312,6 @@ export const controller = {
     useToastStore.getState().pushToast(
       `${shinyPrefix(poke.isShiny)}${previousName} evoluiu para ${result.species.name}!`,
       'levelup', 'world',
-      // A raridade e da INSTANCIA e nao muda ao evoluir, entao pintar o nome da
-      // forma nova (o segundo da frase) diria a mesma coisa. Pinta-se o
-      // primeiro, que e o que o `TextoComRealce` acha.
-      realceDeRaridade(previousName, poke),
     )
   },
 

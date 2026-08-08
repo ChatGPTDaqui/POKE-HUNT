@@ -11,6 +11,7 @@ import { SPECIES_DATA } from './generated/pokes.generated'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
 import { NON_WILD_SPECIES, regionOfSpecies } from './regions'
 import { isTerceiraEvolucao } from './evolutionStage'
+import { baseStatTotal, especieForte, zonaMinimaDaEspecie } from './spawnStrength'
 
 const BASE_STARTERS = ['charmander', 'squirtle', 'bulbasaur']
 
@@ -159,9 +160,10 @@ describe('hunts', () => {
       if (map.id.startsWith('boss_')) continue
       const total = map.enemyPool.reduce((s, id) => s + ENCOUNTERS[id].weight, 0)
       const fixos = map.enemyPool.filter((id) => isTerceiraEvolucao(ENCOUNTERS[id].speciesId))
-      // Hunt so de formas finais nao tem como dar 0,2% pra cada uma (ver a nota
-      // em huntSpawnOverrides): fica de fora da checagem, de proposito.
-      if (!fixos.length || fixos.length === map.enemyPool.length) continue
+      // Zona de formas finais (metade ou mais do pool) fica de fora: ver
+      // LIMITE_ZONA_DE_FINAIS em huntSpawnOverrides. Forcar 0,2% ali daria ao
+      // resto do pool uma fatia proxima de 100%.
+      if (!fixos.length || fixos.length / map.enemyPool.length >= 0.5) continue
       for (const id of fixos) {
         const chance = (ENCOUNTERS[id].weight / total) * 100
         if (Math.abs(chance - 0.2) > 1e-6) {
@@ -176,6 +178,45 @@ describe('hunts', () => {
   // Sem o teste, qualquer mexida na montagem de pool (ou um sync novo) pode
   // devolver Ledyba/Spinarak pra la sem ninguem notar — o cartao da hunt nao
   // lista especie.
+  // Pedido explicito: POKE forte (Scizor foi o exemplo dado) nao pode aparecer
+  // no comeco da jornada — so em zona de Lv 30+. Este teste tranca a regra
+  // inteira, e nao o caso do Scizor: qualquer especie que passe o corte de
+  // forca (data/spawnStrength.ts) e apareca numa hunt que termina antes do
+  // nivel 30 reprova. A falha e silenciosa sem ele — Tyranitar num pool de
+  // Lv 21-30 nao quebra nada, so estraga o inicio de jogo.
+  it('nenhum POKE forte aparece em hunt que termina antes do Lv 30', () => {
+    const erros: string[] = []
+    for (const map of wildHunts) {
+      // O espelho do Modo Pesadelo desloca tudo pra Lv 150+; a regra e sobre a
+      // progressao normal.
+      if (map.id.startsWith('nightmare_')) continue
+      if (map.levelRange[1] >= 30) continue
+      for (const encId of map.enemyPool) {
+        const speciesId = ENCOUNTERS[encId].speciesId
+        if (especieForte(speciesId)) {
+          erros.push(`${map.id} (Lv ${map.levelRange[0]}-${map.levelRange[1]}) tem ${speciesId} (BST ${baseStatTotal(speciesId)})`)
+        }
+      }
+    }
+    expect(erros).toEqual([])
+  })
+
+  // O piso e por ESPECIE, nao so "antes do 30": Scizor (475+) so pode em Lv 51+,
+  // Tyranitar (525+) so em Lv 71+.
+  it('toda especie respeita a propria zona minima', () => {
+    const erros: string[] = []
+    for (const map of wildHunts) {
+      if (map.id.startsWith('nightmare_')) continue
+      const zona = Math.floor((map.levelRange[0] - 1) / 10)
+      for (const encId of map.enemyPool) {
+        const speciesId = ENCOUNTERS[encId].speciesId
+        const minima = zonaMinimaDaEspecie(speciesId)
+        if (zona < minima) erros.push(`${map.id} (zona ${zona}) tem ${speciesId} (minima ${minima})`)
+      }
+    }
+    expect(erros).toEqual([])
+  })
+
   it('a hunt inicial so tem Sentret, Hoothoot e Rattata', () => {
     const especies = MAPS.route_46.enemyPool.map((id) => ENCOUNTERS[id].speciesId).sort()
     expect(especies).toEqual(['hoothoot', 'rattata', 'sentret'])

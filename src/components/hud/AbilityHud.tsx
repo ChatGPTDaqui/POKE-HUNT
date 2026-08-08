@@ -21,7 +21,7 @@ import { getAbility, BASIC_ATTACK, isDamagingAbility, type Ability } from '@/dat
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { abilityIconUrl } from '@/data/abilityIcons'
 import { colorForType } from '@/data/typeColors'
-import { useGameStateStore } from '@/stores/gameStateStore'
+import { controller } from '@/engine/controller'
 import { useWorldStore } from '@/stores/worldStore'
 import { useBreakpoints } from '@/stores/uiStore'
 import { AbilityTooltip } from '@/components/shared/AbilityTooltip'
@@ -56,7 +56,6 @@ const TAMANHO_ROTULO = { largo: '.8em', medio: '.75em', estreito: '.68em' } as c
 export function AbilityHud() {
   const poke = useWorldStore((s) => s.player?.poke ?? null)
   const cooldowns = useWorldStore((s) => s.player?.cooldowns ?? null)
-  const toggleAbilityDisabled = useGameStateStore((s) => s.toggleAbilityDisabled)
   const { narrow, colStack } = useBreakpoints()
 
   if (!poke) return null
@@ -84,7 +83,7 @@ export function AbilityHud() {
         return (
           <AbilityTooltip key={ability.id} ability={ability} poke={poke}>
           <div
-            onDoubleClick={() => toggleAbilityDisabled(poke.uid, ability.id)}
+            onDoubleClick={() => controller.toggleAbility(poke.uid, ability.id)}
             title={isOff ? 'Desligado — duplo clique religa' : 'Duplo clique desliga da rotação'}
             className={cn(
               'relative flex cursor-pointer items-center justify-center rounded-[.5em] select-none',
@@ -100,17 +99,30 @@ export function AbilityHud() {
             }}
           >
             {icone ? (
+              // Duas coisas resolvem o "preto ao redor do icone", e so a
+              // primeira e `object-fit`:
+              //
+              // 1. `object-cover` + `h/w-full` faz a arte PREENCHER o slot. Na
+              //    versao anterior ela ocupava 78% com `object-contain`, e
+              //    sobrava um anel da cor do tipo entre a arte e a borda de
+              //    categoria.
+              // 2. `mix-blend-mode: screen` apaga o PRETO DA PROPRIA ARTE.
+              //    Os icones do repositorio de origem nao tem transparencia:
+              //    sao ladrilhos 32x32 com fundo preto opaco, entao nenhum
+              //    `object-fit` daria conta — o preto esta dentro do PNG. No
+              //    modo `screen`, pixel preto vira neutro (deixa passar o que
+              //    esta atras) e so o desenho fica, sobre a cor do tipo que ja
+              //    e o fundo do slot.
+              //
               // `pixelated` porque a arte e 32x32 desenhada pra ser vista
-              // grande; suavizar borraria a pixel-art. O drop-shadow segura o
-              // icone legivel sobre a cor do tipo, que as vezes e clara
-              // (ELECTRIC #ffd23f) e as vezes escura (DARK #4a4a4a).
+              // grande; suavizar borraria a pixel-art.
               <img
                 src={icone}
                 alt=""
                 aria-hidden
                 draggable={false}
-                className="pointer-events-none h-[78%] w-[78%] object-contain"
-                style={{ imageRendering: 'pixelated', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,.85))' }}
+                className="pointer-events-none h-full w-full object-cover"
+                style={{ imageRendering: 'pixelated', mixBlendMode: 'screen' }}
               />
             ) : (
               <span
