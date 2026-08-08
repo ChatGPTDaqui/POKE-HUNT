@@ -44,7 +44,7 @@ export function focusHunt(map: HuntMapDef) {
   ui.setHuntType('all')
 }
 
-interface HuntOdds {
+export interface HuntOdds {
   species: { id: string; species: Species; pct: number }[]
   dominantTypes: [ElementType, number][]
 }
@@ -55,7 +55,7 @@ interface HuntOdds {
 // ele). Antes era `species.catchRate` — taxa de CAPTURA, que nao tem relacao com
 // frequencia de APARICAO. A "dominancia" de um tipo e a soma das odds de toda
 // especie que o carrega.
-function huntOdds(map: HuntMapDef): HuntOdds {
+export function huntOdds(map: HuntMapDef): HuntOdds {
   const encounters = map.enemyPool.map(getEncounter).filter((e) => e != null)
   const totalWeight = encounters.reduce((sum, enc) => sum + enc.weight, 0)
   // A chave e o id do ENCONTRO, nao o da especie: a hunt do Campeao Lance tem

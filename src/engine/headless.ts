@@ -19,7 +19,7 @@ export type { OfflineSimSummary, KillResult } from './systems/offlineSimSystem'
 export { createRng, restoreRng, deriveRng, nextFloat, randomSeed } from '@/core/rng'
 export type { Rng } from '@/core/rng'
 
-export { createPokeInstance, SPECIES, computeStatsAtLevel, totalExpForLevel } from '@/data/pokes'
+export { createPokeInstance, SPECIES, computeStatsAtLevel, totalExpForLevel, averageIvPercent } from '@/data/pokes'
 export type { PokeInstance } from '@/data/pokes'
 export { MAPS, getMap } from '@/data/maps'
 export { getEncounter } from '@/data/enemies'

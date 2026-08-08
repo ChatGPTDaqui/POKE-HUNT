@@ -51,6 +51,8 @@ async function main() {
     console.error('');
     console.error('  ATENCAO: isto apaga o progresso de TODOS os jogadores. Nao ha volta.');
     console.error('  Equipe, mochila, ouro, Pokedex e regras de auto de toda conta sao perdidos.');
+    console.error('  O Mercado (ordens, anuncios, historico, entregas), o Chat Mundo, o Correio');
+    console.error('  e as amizades tambem sao apagados. O NOME do treinador e preservado.');
     console.error('  As contas em si (login) continuam existindo — so o save volta ao inicio.');
     console.error('');
     console.error(`  Para executar de verdade:  node scripts/wipe-todos-os-saves.js --confirmar=${FRASE}`);
@@ -63,29 +65,45 @@ async function main() {
   // errado e o pior resultado possivel deste script.
   console.log(`Banco: ${env.SUPABASE_URL}`);
 
-  const res = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/wipe_todos_os_saves`, {
-    method: 'POST',
-    headers: {
-      apikey: env.SUPABASE_SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-      'content-type': 'application/json',
-    },
-    body: '{}',
-  });
+  const chamar = async (rpc) => {
+    const res = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/${rpc}`, {
+      method: 'POST',
+      headers: {
+        apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+        'content-type': 'application/json',
+      },
+      body: '{}',
+    });
+    const texto = await res.text();
+    if (res.status >= 400) {
+      console.error(`falhou em ${rpc}: ${res.status} ${texto}`);
+      console.error('Se a funcao nao existe, aplique as migrations: npx supabase db push');
+      process.exit(1);
+    }
+    const linhas = JSON.parse(texto);
+    return Array.isArray(linhas) ? linhas[0] : linhas;
+  };
 
-  const texto = await res.text();
-  if (res.status >= 400) {
-    console.error(`falhou: ${res.status} ${texto}`);
-    console.error('Se a funcao nao existe, aplique as migrations: npx supabase db push');
-    process.exit(1);
-  }
+  // ORDEM OBRIGATORIA: o mundo social sai primeiro. `market_listings.poke_uid`
+  // referencia `pokemon_instances` com `on delete restrict` (anuncio orfao seria
+  // pior que a restricao), entao apagar os POKEs antes falharia com violacao de
+  // chave estrangeira.
+  const social = await chamar('wipe_mundo_social');
+  const r = await chamar('wipe_todos_os_saves');
 
-  const linhas = JSON.parse(texto);
-  const r = Array.isArray(linhas) ? linhas[0] : linhas;
   console.log('Wipe concluido.');
   console.log(`  jogadores resetados: ${r.jogadores_resetados}`);
   console.log(`  POKEs apagados:      ${r.pokes_apagados}`);
   console.log(`  sessoes fechadas:    ${r.sessoes_fechadas}`);
+  console.log('  mundo social:');
+  console.log(`    ordens de item:    ${social.ordens}`);
+  console.log(`    anuncios de POKE:  ${social.anuncios}`);
+  console.log(`    negocios:          ${social.negocios}`);
+  console.log(`    entregas pendentes:${social.entregas}`);
+  console.log(`    mensagens:         ${social.mensagens}`);
+  console.log(`    amizades:          ${social.amizades}`);
+  console.log(`    linhas de chat:    ${social.chat}`);
 }
 
 main().catch((erro) => {

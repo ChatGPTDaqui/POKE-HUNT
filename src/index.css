@@ -177,6 +177,12 @@
     }
   html {
     @apply font-sans;
+    /* +3px em TODA a interface (pedido explicito). Este e o unico ponto que
+       precisa mudar pras telas fora do jogo (login, cadastro, home) e pros
+       primitivos do shadcn — eles sao dimensionados em `rem`, ou seja, ancorados
+       exatamente aqui. A HUD do jogo nao herda daqui (ela tem font-size proprio
+       em px, ver `.hud-root` abaixo) e recebe os mesmos +3px la. */
+    font-size: 19px;
     }
 }
 
@@ -190,7 +196,10 @@
    proprio elemento. Ela multiplica o ajuste automatico em vez de substitui-lo —
    quem quer tudo maior nao perde a adaptacao por tela. */
 .hud-root {
-  font-size: calc(clamp(13px, 0.55vw + 9px, 19.5px) * var(--hud-scale, 1));
+  /* Os tres numeros do clamp subiram exatamente 3px (13->16, 9->12, 19.5->22.5)
+     — o aumento global pedido, aplicado sem mexer na inclinacao do `vw` (que e o
+     que faz a interface acompanhar a largura da tela). */
+  font-size: calc(clamp(16px, 0.55vw + 12px, 22.5px) * var(--hud-scale, 1));
   line-height: 1.35;
 }
 
@@ -202,8 +211,13 @@
    sem quebrar o encaixe. E font-size (estilo puro), nao layout — por isso media
    query, e nao o mesmo caminho JS dos breakpoints de posicionamento. */
 @media (max-width: 640px) {
+  /* Mesmos +3px (13->16, 9->12, 16->19). CONSEQUENCIA REAL do aumento global: o
+     encaixe de 360px foi calibrado no piso antigo (13px), entao no piso novo o
+     multiplicador manual passou a ser o unico ajuste que sobra — por isso o teto
+     dele aqui caiu de 1.15 pra 1, e o minimo global desceu pra 0.7 (uiStore),
+     dando ao jogador de celular como voltar ao tamanho anterior se quiser. */
   .hud-root {
-    font-size: calc(clamp(13px, 0.55vw + 9px, 16px) * min(var(--hud-scale, 1), 1.15));
+    font-size: calc(clamp(16px, 0.55vw + 12px, 19px) * min(var(--hud-scale, 1), 1));
   }
 }
 

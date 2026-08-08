@@ -49,3 +49,44 @@ export function useEstoqueBaixoNoAuto(): boolean {
     itensEmUso(s).some((id) => estoqueDoItemDeRegra(s.items, id) < LIMIAR_ESTOQUE_BAIXO),
   )
 }
+
+/**
+ * Registra o aviso de estoque baixo TAMBEM no chat (aba Sistema), alem do
+ * pisca-pisca no botao Auto.
+ *
+ * Pedido explicito. O motivo pratico: o alerta visual so existe enquanto o
+ * jogador esta olhando pra tela — quem volta depois de uma hora nao tem como
+ * saber que o bot ficou sem bola aos 10 minutos. A linha no chat fica.
+ *
+ * Dispara na BORDA (cruzou o limiar), nunca continuamente: o estado e checado a
+ * cada mudanca do save, o que num combate ativo acontece varias vezes por
+ * segundo. `jaAvisados` guarda quem ja gerou linha e libera de novo quando o
+ * estoque volta a subir — assim comprar mais e gastar de novo avisa outra vez.
+ */
+const jaAvisados = new Set<string>()
+
+export function observarEstoqueBaixo(
+  avisar: (mensagem: string) => void,
+): () => void {
+  return useGameStateStore.subscribe((s) => {
+    const emUso = new Set(itensEmUso(s))
+    for (const id of emUso) {
+      const quantidade = estoqueDoItemDeRegra(s.items, id)
+      if (quantidade < LIMIAR_ESTOQUE_BAIXO) {
+        if (jaAvisados.has(id)) continue
+        jaAvisados.add(id)
+        const nome = id === BEST_POTION_OPTION ? 'Poções' : ITEMS[id]?.name ?? id
+        avisar(
+          quantidade === 0
+            ? `O bot ficou sem ${nome}.`
+            : `${nome} acabando: restam ${quantidade}.`,
+        )
+      } else {
+        jaAvisados.delete(id)
+      }
+    }
+    // Item que saiu de uso (automacao desligada, regra removida) volta a poder
+    // avisar quando entrar de novo.
+    for (const id of [...jaAvisados]) if (!emUso.has(id)) jaAvisados.delete(id)
+  })
+}

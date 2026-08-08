@@ -74,6 +74,67 @@ const HUNT_BIOME: Record<string, ElementType> = {
   kanto_lv_36_55_profundezas: 'WATER',
 }
 
+// ---------------------------------------------------------------------------
+// Zonas: numero e faixa de nivel
+// ---------------------------------------------------------------------------
+// BUG REAL QUE ISTO CORRIGE: o nome da hunt NAO batia com o nivel que ela
+// spawnava. Medido no dado gerado, antes desta leva:
+//
+//   "Zona Nivel 1-10 (Floresta)"        spawnava Lv 2-12
+//   "Zona Nivel 11-20 (Planicie)"       spawnava Lv 10-18
+//   "Zona Nivel 31-40 (Vulcanico)"      spawnava Lv 15-51  (!)
+//   "Kanto Zona Nivel 52-62 (Geleira)"  spawnava Lv 52-62
+//
+// O nome vinha do BRACKET nominal do sync (`pickTopHunts`/`computeJohtoBrackets`
+// agrupam por nivel medio), e o `levelRange` vinha do min/max real das especies
+// agrupadas ali — dois numeros diferentes que ninguem cruzava. A "Zona 31-40"
+// entregando um POKE de nivel 15 e outro de 51 e exatamente o que o pedido
+// descreve.
+//
+// A correcao e fixar a faixa PRIMEIRO e derivar tudo dela: cada hunt declara
+// seu numero de zona aqui, a faixa e `[n*10+1, n*10+10]`, e todo encontro nasce
+// dentro dela. Nome e nivel deixam de ser duas fontes.
+//
+// Numeracao pedida explicitamente: Lv 1-10 = Zona 0, 11-20 = Zona 1, 21-30 =
+// Zona 2, e assim por diante. Como as zonas sao contiguas e sao 9, o teto do
+// jogo normal passou de Lv105 pra Lv90 — consequencia assumida do "respeite
+// estritamente a faixa"; o conteudo acima disso continua sendo o Modo Pesadelo
+// (+100, piso 150) e as hunts BOSS (Lv300).
+const ZONA_POR_HUNT: Record<string, number> = {
+  lv_1_10_floresta: 0,
+  lv_1_10_bosque: 0,
+  lv_11_20_costa: 1,
+  lv_11_20_planicie: 1,
+  lv_21_30_caverna: 2,
+  lv_21_30_deserto: 2,
+  lv_31_40_vulcanico: 3,
+  lv_31_40_usina: 3,
+  lv_41_50_pantano: 4,
+  lv_41_50_dojo: 4,
+  kanto_lv_1_10_geleira: 5,
+  kanto_lv_1_10_fabrica: 5,
+  kanto_lv_11_20_penhascos: 6,
+  kanto_lv_11_20_torre_mistica: 6,
+  kanto_lv_21_35_cemiterio: 7,
+  kanto_lv_21_35_covil_sombrio: 7,
+  kanto_lv_36_55_ruinas_ancestrais: 8,
+  kanto_lv_36_55_profundezas: 8,
+}
+
+const NIVEIS_POR_ZONA = 10
+
+export function faixaDaZona(zona: number): [number, number] {
+  return [zona * NIVEIS_POR_ZONA + 1, (zona + 1) * NIVEIS_POR_ZONA]
+}
+
+// "Zona Nivel 21-30 (Caverna)" -> "Caverna". O rotulo do bioma e a unica parte
+// do nome antigo que ainda diz alguma coisa: o resto (o intervalo) passou a ser
+// derivado da zona.
+function rotuloDoBioma(baseName: string): string {
+  const m = baseName.match(/\(([^)]+)\)\s*$/)
+  return m ? m[1] : baseName
+}
+
 // A hunt inicial nao e um bioma: e a primeira tela do jogo, com elenco curto
 // e escolhido a mao. Fica de fora da regra generica.
 const STARTER_HUNT_ID = 'route_46'
@@ -170,14 +231,15 @@ function addEncounter(
   return id
 }
 
-// "Zona Nivel 11-20 (Planicie)" e "Kanto Zona Nivel 52-62 (Geleira)" viram
-// "Johto Zona ..." / "Kanto Zona ...". Prefixo em TODA hunt (nao so nas
-// novas): com o mesmo bioma existindo nas duas regioes, um nome sem regiao
-// vira ambiguo no chat, no HUD e no relatorio de farm offline, onde nao ha
-// aba de continente por perto pra desambiguar.
-function nameFor(baseName: string, region: Region): string {
-  const stripped = baseName.replace(/^(Kanto|Johto)\s+/, '')
-  return `${REGION_LABEL[region]} ${stripped}`
+// "Zona Nivel 11-20 (Planicie)" vira "Johto Zona 1 · Planicie".
+//
+// O prefixo de regiao esta em TODA hunt (nao so nas novas): com o mesmo bioma
+// existindo nas duas regioes, um nome sem regiao vira ambiguo no chat, no HUD e
+// no relatorio de farm offline, onde nao ha aba de continente por perto pra
+// desambiguar. O numero da zona substitui o intervalo escrito no nome — ele
+// mentia (ver ZONA_POR_HUNT) e o cartao da hunt ja mostra o intervalo real.
+function nameFor(baseName: string, region: Region, zona: number): string {
+  return `${REGION_LABEL[region]} Zona ${zona} · ${rotuloDoBioma(baseName)}`
 }
 
 for (const base of Object.values(MAPS_DATA)) {
@@ -185,7 +247,9 @@ for (const base of Object.values(MAPS_DATA)) {
     const pool = STARTER_HUNT_SPECIES.filter((id) => SPECIES_DATA[id])
     maps[base.id] = {
       ...base,
-      name: nameFor(base.name, 'johto'),
+      // A inicial mantem o nome proprio: ela nao e uma zona (nao segue a faixa
+      // de 10 niveis e tem elenco curado a mao).
+      name: 'Route 46 (Inicial)',
       continent: 'johto',
       levelRange: [
         STARTER_LEVEL_WEIGHTS[0].level,
@@ -205,20 +269,32 @@ for (const base of Object.values(MAPS_DATA)) {
       'Toda hunt gerada precisa declarar o tipo elemental dela pro recorte por regiao funcionar.'
     )
   }
+  const zona = ZONA_POR_HUNT[base.id]
+  if (zona == null) {
+    throw new Error(
+      `Hunt "${base.id}" sem zona em ZONA_POR_HUNT (data/huntSpawnOverrides.ts). ` +
+      'Sem numero de zona nao ha faixa de nivel — e era justamente a divergencia entre nome e nivel que esta tabela existe pra fechar.'
+    )
+  }
+  // A faixa e a MESMA pro nome, pro cartao e pro spawn. Antes o `levelRange`
+  // vinha do sync (min/max real das especies agrupadas) e o nome vinha do
+  // bracket nominal — dois numeros que discordavam.
+  const [minLevel, maxLevel] = faixaDaZona(zona)
 
   for (const region of REGIONS) {
     const pool = poolFor(region, biome)
     if (!pool.length) continue // ex.: Kanto + DARK — nao existe no dado real
     const isHome = base.continent === region
     const id = isHome ? base.id : `${base.id}_${region}`
-    const name = nameFor(base.name, region)
+    const name = nameFor(base.name, region, zona)
     maps[id] = {
       ...base,
       id,
       name,
-      description: `Local selvagem: ${name} (nivel ${base.levelRange[0]}-${base.levelRange[1]}).`,
+      levelRange: [minLevel, maxLevel],
+      description: `Local selvagem: ${name} (nivel ${minLevel}-${maxLevel}).`,
       continent: region,
-      enemyPool: pool.map((speciesId) => addEncounter(id, speciesId, base.levelRange[0], base.levelRange[1])),
+      enemyPool: pool.map((speciesId) => addEncounter(id, speciesId, minLevel, maxLevel)),
     }
   }
 }

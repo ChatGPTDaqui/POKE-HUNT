@@ -25,6 +25,8 @@ import { useConfirmDialogStore } from '@/stores/confirmDialogStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { PokeNameTag } from '@/components/shared/PokeNameTag'
+import { ItemTooltip } from '@/components/shared/ItemTooltip'
+import { linkarPoke, tratouComoLink } from '@/components/shared/linkarNoChat'
 import {
   GameButton, GameCard, GameCheck, GameIconButton, GameInput, SectionLabel, SegmentedTabs,
 } from '@/components/game/controls'
@@ -36,7 +38,7 @@ function toast(message: string, type: ToastType = 'success') {
   useToastStore.getState().pushToast(message, type, 'trade')
 }
 
-function ItemIcon({ itemId, name, description }: { itemId: string; name: string; description?: string }) {
+function ItemIcon({ itemId, name }: { itemId: string; name: string }) {
   const url = itemIconUrl(itemId)
   const borderColor = itemIconBorderColor(itemId)
   if (!url) return null
@@ -44,23 +46,51 @@ function ItemIcon({ itemId, name, description }: { itemId: string; name: string;
     <img
       src={url}
       alt={name}
-      title={description}
       className="h-[2.2em] w-[2.2em] shrink-0 rounded-[.4em] object-contain"
       style={borderColor ? { border: `3px solid ${borderColor}` } : undefined}
     />
   )
 }
 
-function QtyInput({ value, max, onChange }: { value: number; max: number; onChange: (v: number) => void }) {
+// Atalhos de quantidade. x100/x1000 sao pedido explicito; o "Max" entrou junto
+// porque sem ele comprar "tudo que o ouro permite" continuaria sendo digitacao
+// a mao — e e a operacao mais comum depois de uma sessao longa de farm.
+const ATALHOS_QTD = [10, 100, 1000] as const
+
+function QtyInput({
+  value, max, onChange,
+}: {
+  value: number
+  max: number
+  onChange: (v: number) => void
+}) {
+  const limita = (v: number) => Math.max(1, Math.min(max, Math.floor(v)))
   return (
-    <GameInput
-      type="number"
-      min={1}
-      max={max}
-      value={value}
-      onChange={(e) => onChange(Math.max(1, Math.min(max, Math.floor(Number(e.target.value) || 1))))}
-      className="w-[3.4em] text-center"
-    />
+    <span className="flex items-center gap-[.25em]">
+      <GameInput
+        type="number"
+        min={1}
+        max={max}
+        value={value}
+        onChange={(e) => onChange(limita(Number(e.target.value) || 1))}
+        className="w-[4.2em] text-center"
+      />
+      {ATALHOS_QTD.map((n) => (
+        <GameButton
+          key={n}
+          variant="ghost"
+          className="px-[.4em] text-[.75em]"
+          disabled={max < n}
+          title={max < n ? `Voce so pode ate ${max}` : `Definir ${n}`}
+          onClick={() => onChange(limita(n))}
+        >
+          x{n}
+        </GameButton>
+      ))}
+      <GameButton variant="ghost" className="px-[.4em] text-[.75em]" onClick={() => onChange(limita(max))}>
+        Max
+      </GameButton>
+    </span>
   )
 }
 
@@ -75,9 +105,18 @@ function ItensTab() {
   const [buyQty, setBuyQty] = useState<Record<string, number>>({})
   const [sellQty, setSellQty] = useState<Record<string, number>>({})
 
+  // Item TRAVADO vai pro fim (mesma regra da Mochila): ele nao pode ser vendido,
+  // entao ficar no topo da lista de VENDA e ruido puro.
   const ownedItemIds = useMemo(
-    () => Object.keys(items).filter((id) => items[id] > 0 && ITEMS[id]),
-    [items],
+    () => Object.keys(items)
+      .filter((id) => items[id] > 0 && ITEMS[id])
+      .sort((a, b) => {
+        const travaA = lockedItems[a] ? 1 : 0
+        const travaB = lockedItems[b] ? 1 : 0
+        if (travaA !== travaB) return travaA - travaB
+        return ITEMS[a].name.localeCompare(ITEMS[b].name)
+      }),
+    [items, lockedItems],
   )
   const paginadoVenda = usePaginacao(ownedItemIds)
 
@@ -103,8 +142,13 @@ function ItensTab() {
   }
 
   return (
+    // `overflow-x-auto` nas duas colunas (pedido explicito): com os atalhos de
+    // quantidade e o botao "Vender tudo", uma linha da Loja passa da largura da
+    // janela quando ela e redimensionada pra estreita. Sem isso o botao ficava
+    // cortado e inalcancavel; a rolagem horizontal e local a coluna, entao a
+    // janela inteira nunca rola de lado.
     <div className={colStack ? 'flex flex-col gap-[1em]' : 'grid grid-cols-2 gap-[1em]'}>
-      <div className="flex flex-col gap-[.5em]">
+      <div className="flex min-w-0 flex-col gap-[.5em] overflow-x-auto">
         <SectionLabel>COMPRAR</SectionLabel>
         {SHOP_STOCK.map((stock) => {
           const item = getItem(stock.itemId)
@@ -112,9 +156,14 @@ function ItensTab() {
           const maxAffordable = Math.max(1, Math.floor(gold / item.buyPrice))
           const qty = Math.min(buyQty[item.id] ?? 1, maxAffordable)
           const key = `buy:${item.id}`
+          const custo = item.buyPrice * qty
           return (
             <GameCard key={item.id} className="flex flex-wrap items-center gap-[.6em] p-[.55em]">
-              <ItemIcon itemId={item.id} name={item.name} description={item.description} />
+              <ItemTooltip item={item}>
+                <span className="cursor-help">
+                  <ItemIcon itemId={item.id} name={item.name} />
+                </span>
+              </ItemTooltip>
               <div className="min-w-[6em] flex-1">
                 <div className="font-medium">
                   {item.name} <span className="text-[.78em] text-n500">(tem: {items[item.id] || 0})</span>
@@ -122,18 +171,25 @@ function ItensTab() {
                 <div className="text-[.78em] text-gold">{fmt.format(item.buyPrice)} ouro</div>
               </div>
               <QtyInput value={qty} max={maxAffordable} onChange={(v) => setBuyQty((m) => ({ ...m, [item.id]: v }))} />
+              {/* Montante final ANTES de confirmar (pedido explicito). Fica em
+                  linha propria e nao so dentro do botao: com x1000 selecionado o
+                  numero passa de 6 digitos e o rotulo do botao quebrava. */}
+              <span className="w-full text-[.78em] text-n400 sm:w-auto">
+                Total: <b className={custo > gold ? 'text-bad' : 'text-gold'}>{fmt.format(custo)}</b>
+                {custo > gold && <span className="text-bad"> · ouro insuficiente</span>}
+              </span>
               <GameButton
-                disabled={acao.pendingKey != null}
+                disabled={acao.pendingKey != null || custo > gold}
                 onClick={() => void acao.run(key, () => comprar(item.id, qty, item.name))}
               >
-                {acao.isPending(key) ? '...' : `Comprar (${fmt.format(item.buyPrice * qty)})`}
+                {acao.isPending(key) ? '...' : 'Comprar'}
               </GameButton>
             </GameCard>
           )
         })}
       </div>
 
-      <div className="flex flex-col gap-[.5em]">
+      <div className="flex min-w-0 flex-col gap-[.5em] overflow-x-auto">
         <div className="flex items-center justify-between">
           <SectionLabel>VENDER ITENS</SectionLabel>
           <GameButton
@@ -164,7 +220,11 @@ function ItensTab() {
           const qty = Math.min(sellQty[itemId] ?? 1, owned)
           return (
             <GameCard key={itemId} className="flex flex-wrap items-center gap-[.6em] p-[.55em]">
-              <ItemIcon itemId={itemId} name={item.name} description={item.description} />
+              <ItemTooltip item={item}>
+                <span className="cursor-help">
+                  <ItemIcon itemId={itemId} name={item.name} />
+                </span>
+              </ItemTooltip>
               <div className="min-w-[6em] flex-1">
                 <div className="font-medium">
                   {item.name} <span className="text-n400">x{owned}</span>
@@ -189,11 +249,25 @@ function ItensTab() {
               {!locked && (
                 <>
                   <QtyInput value={qty} max={owned} onChange={(v) => setSellQty((m) => ({ ...m, [itemId]: v }))} />
+                  <span className="w-full text-[.78em] text-n400 sm:w-auto">
+                    Recebe: <b className="text-gold">{fmt.format(item.sellPrice * qty)}</b>
+                  </span>
                   <GameButton
                     disabled={acao.pendingKey != null}
                     onClick={() => void acao.run(`sell:${itemId}`, () => vender(itemId, qty, item.name))}
                   >
-                    Vender ({fmt.format(item.sellPrice * qty)})
+                    Vender
+                  </GameButton>
+                  {/* "Vender tudo" POR ITEM (pedido explicito). O "Vender Tudo"
+                      global do topo esvazia a mochila inteira — sao coisas
+                      diferentes e a confusao entre elas custa caro. */}
+                  <GameButton
+                    variant="accent"
+                    disabled={acao.pendingKey != null}
+                    title={`Vender as ${owned} unidades por ${fmt.format(item.sellPrice * owned)} de ouro`}
+                    onClick={() => void acao.run(`sell-all:${itemId}`, () => vender(itemId, owned, item.name))}
+                  >
+                    Vender tudo ({fmt.format(item.sellPrice * owned)})
                   </GameButton>
                 </>
               )}
@@ -430,7 +504,11 @@ function PokemonsTab() {
               // pode ser selecionada (shiny/trancado).
               <span className="w-[1em] shrink-0" />
             )}
-            <span onClick={() => showProfile(poke, species)} className="cursor-pointer">
+            <span
+              title="Clique para o perfil · Shift+clique para linkar no chat"
+              onClick={(e) => { if (tratouComoLink(e, () => linkarPoke(poke, species))) return; showProfile(poke, species) }}
+              className="cursor-pointer"
+            >
               <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={2.4} />
             </span>
             <div className="min-w-0 flex-1">

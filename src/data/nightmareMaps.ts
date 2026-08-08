@@ -87,6 +87,15 @@ export function buildNightmareMirror(
         id: newEncId,
         minLevel: shiftLevel(enc.minLevel),
         maxLevel: shiftLevel(enc.maxLevel),
+        // BUG REAL: o espelho deslocava `minLevel`/`maxLevel` mas nao os
+        // `levelWeights`, que sao o sorteio de nivel de FATO quando existem
+        // (`spawnEnemyAt` prefere eles ao `randInt`). Efeito: o Modo Pesadelo da
+        // hunt inicial anunciava Lv150 e spawnava POKE de nivel 1 e 2 — a hunt
+        // mais dificil do inicio do jogo era a mais facil dele. Achado pelo
+        // teste de faixa (`hunts.test.ts`), nao por leitura.
+        ...(enc.levelWeights
+          ? { levelWeights: enc.levelWeights.map((lw) => ({ ...lw, level: shiftLevel(lw.level) })) }
+          : {}),
       }
       enemyPool.push(newEncId)
     }

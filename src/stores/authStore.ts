@@ -19,7 +19,7 @@ interface AuthState {
   // storage de forma assincrona.
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
-  signUp: (email: string, password: string) => Promise<{ error: string | null }>
+  signUp: (email: string, password: string, trainerName?: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
 }
 
@@ -52,8 +52,18 @@ export const useAuthStore = create<AuthState>(() => ({
     return { error: error ? traduzErro(error.message) : null }
   },
 
-  signUp: async (email, password) => {
-    const { error } = await supabase.auth.signUp({ email, password })
+  // O nome do treinador viaja em `options.data` (= `raw_user_meta_data` no
+  // Postgres) e e lido pelo trigger `handle_new_user`, que cria a linha em
+  // `players` na MESMA transacao do cadastro. A alternativa seria o cliente
+  // fazer um UPDATE logo depois — que a RLS proibe desde a Fase D (o cliente
+  // perdeu a escrita) e que deixaria uma janela com o nome errado.
+  signUp: async (email, password, trainerName) => {
+    const nome = trainerName?.trim()
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      ...(nome ? { options: { data: { trainer_name: nome } } } : {}),
+    })
     return { error: error ? traduzErro(error.message) : null }
   },
 

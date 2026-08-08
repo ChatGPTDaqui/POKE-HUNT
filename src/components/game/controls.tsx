@@ -216,13 +216,19 @@ export function SectionLabel({ children, className }: { children: ReactNode; cla
   )
 }
 
-/** Card padrao das listas (POKE, item, hunt). */
+/**
+ * Card padrao das listas (POKE, item, hunt).
+ *
+ * `onClick` recebe o EVENTO (e nao e um `() => void`) porque o Shift+clique
+ * precisa distinguir "abrir o perfil" de "linkar no chat" — sem o evento, cada
+ * tela teria que embrulhar o card num div so pra ler `shiftKey`.
+ */
 export function GameCard({
   children, className, onClick, title,
 }: {
   children: ReactNode
   className?: string
-  onClick?: () => void
+  onClick?: (e: React.MouseEvent) => void
   title?: string
 }) {
   return (

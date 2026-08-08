@@ -10,6 +10,7 @@ import {
 import { ErroHttp, selecionarTudo, selecionar, atualizar, inserir, apagar, type Config } from './db.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
 import { aplicarPiso, NENHUM_PISO, type ResultadoPiso } from './farmOffline.js'
+import { reivindicarEntregas, aplicarEntregasNoEstado } from './entregas.js'
 import { CONQUISTA_LANCE } from './ranking.js'
 
 // Teto de quanto tempo um unico flush pode creditar. NAO e uma regra de
@@ -60,6 +61,22 @@ export async function carregarEstado(cfg: Config, userId: string): Promise<GameS
   )
 }
 
+/**
+ * Como `carregarEstado`, mas tambem REIVINDICA as entregas pendentes do
+ * Mercado e as soma ao estado devolvido.
+ *
+ * So pode ser usada por quem VAI GRAVAR o estado em seguida: a reivindicacao
+ * carimba a linha como entregue, entao um caminho que carregue e nao grave
+ * perderia o credito. Por isso `/sessao/abrir` (que so valida a intencao)
+ * continua usando `carregarEstado` cru.
+ */
+export async function carregarEstadoParaEscrita(cfg: Config, userId: string): Promise<GameStateData> {
+  const estado = await carregarEstado(cfg, userId)
+  const entregas = await reivindicarEntregas(cfg, userId)
+  if (entregas.length) aplicarEntregasNoEstado(estado, entregas)
+  return estado
+}
+
 export async function gravarEstado(cfg: Config, userId: string, estado: GameStateData): Promise<void> {
   await atualizar(cfg, `players?user_id=eq.${userId}`, gameStateToPlayerRow(userId, estado))
 
@@ -69,7 +86,16 @@ export async function gravarEstado(cfg: Config, userId: string, estado: GameStat
   // banco, senao ressuscita no proximo load. Comparado contra o que esta LA, e
   // nao contra um cache em memoria — o servidor nao guarda estado entre
   // requests (pra poder rodar em serverless).
-  const noBanco = await selecionarTudo<{ id: string }>(cfg, `pokemon_instances?user_id=eq.${userId}&select=id`)
+  //
+  // O filtro por `location` NAO e cosmetico: um POKE anunciado no Mercado sai
+  // do estado do jogador de proposito (location='market', ver a migration
+  // `pokemon_pode_estar_no_mercado`). Sem o filtro, o primeiro flush depois de
+  // anunciar veria a linha "sobrando" no banco e a APAGARIA — o POKE
+  // desapareceria do jogo com o anuncio dele ainda de pe.
+  const noBanco = await selecionarTudo<{ id: string }>(
+    cfg,
+    `pokemon_instances?user_id=eq.${userId}&location=in.(team,bag)&select=id`,
+  )
   const remover = noBanco.map((l) => l.id).filter((id) => !idsAgora.has(id))
   if (remover.length) {
     await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${remover.join(',')})`)
@@ -144,7 +170,7 @@ export async function aplicarFlush(cfg: Config, userId: string, sessao: LinhaSes
   const segundos = Math.max(0, Math.min(bruto, MAX_SEGUNDOS_POR_FLUSH))
   const truncado = bruto > MAX_SEGUNDOS_POR_FLUSH
 
-  const dados = await carregarEstado(cfg, userId)
+  const dados = await carregarEstadoParaEscrita(cfg, userId)
   const { store, dados: estado } = criarEstadoDoJogador(dados)
   // Copia (nao referencia): a simulacao muta `estado.unlockedContinents` em
   // lugar quando o jogador limpa a sequencia do Campeao Lance, e o Hall da

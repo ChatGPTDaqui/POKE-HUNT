@@ -127,6 +127,27 @@ async function atualizar(cfg, caminho, patch) {
 		body: JSON.stringify(patch)
 	});
 }
+/**
+* PATCH que devolve as linhas afetadas — e a base de todo compare-and-swap
+* deste servico.
+*
+* O servico e serverless: nao ha transacao aberta entre duas chamadas ao
+* PostgREST, entao "ler a ordem, decidir, gravar" e uma corrida sempre que dois
+* jogadores tocam o mesmo livro de ofertas. O padrao usado no Mercado e mandar
+* o valor ANTIGO no filtro (`&remaining=eq.7`) junto do novo no corpo: se
+* outra requisicao chegou primeiro, o filtro nao casa, a resposta volta VAZIA e
+* quem chamou sabe que perdeu a corrida — em vez de sobrescrever em silencio.
+*
+* Com `return=minimal` isso seria indistinguivel de sucesso, que e exatamente
+* o modo de falha que este helper existe pra evitar.
+*/
+async function atualizarRetornando(cfg, caminho, patch) {
+	return await pedir$1(cfg, caminho, {
+		method: "PATCH",
+		headers: cabecalhos(cfg, { Prefer: "return=representation" }),
+		body: JSON.stringify(patch)
+	}) ?? [];
+}
 async function apagar(cfg, caminho) {
 	await pedir$1(cfg, caminho, {
 		method: "DELETE",
@@ -15571,6 +15592,27 @@ function totalExpForLevel(level, growthCurve) {
 	const formulaKey = GROWTH_FORMULA_BY_CURVE[growthCurve] || GROWTH_FORMULA_BY_CURVE.MEDIUM_SLOW;
 	return Math.max(0, Math.round(formulaEngine$6.eval(formulaKey, { n: level })));
 }
+/**
+* Requisito de EXP de um POKE — a curva acima, 30% mais cara.
+*
+* POR QUE UMA FUNCAO SEPARADA, E NAO um multiplicador dentro de
+* `totalExpForLevel`: o TREINADOR usa a mesma maquina de curva
+* (`trainerExpProgress`/`grantTrainerExp` chamam `totalExpForLevel` com
+* MEDIUM_SLOW fixo). Encarecer la dentro deixaria o nivel de treinador 30% mais
+* lento junto — coisa que ninguem pediu e que nao tem nada a ver com evolucao.
+*
+* POR QUE ISSO E "XP DE EVOLUCAO": evolucao neste jogo e 100% por NIVEL
+* (`species.evolvesAtLevel`) — nao existe uma barra de EXP de evolucao separada
+* pra encarecer. Encarecer o requisito de nivel do POKE E encarecer a evolucao,
+* e e o unico lugar onde o pedido pode ser aplicado sem inventar mecanica nova.
+*
+* Knob de planilha como todo ajuste de economia: `POKE_EXP_REQUIREMENT_MULTIPLIER`
+* na aba "Fórmulas" substitui o 1.3 sem tocar em codigo.
+*/
+var POKE_EXP_REQUIREMENT_MULTIPLIER = formulaEngine$6.evalOrDefault("POKE_EXP_REQUIREMENT_MULTIPLIER", 1.3);
+function pokeExpForLevel(level, growthCurve) {
+	return Math.round(totalExpForLevel(level, growthCurve) * POKE_EXP_REQUIREMENT_MULTIPLIER);
+}
 function hashString(s) {
 	let h = 0;
 	for (let i = 0; i < s.length; i++) h = h * 31 + s.charCodeAt(i) >>> 0;
@@ -15634,6 +15676,9 @@ function rollIvs(rng) {
 		speed: randInt(rng, 0, IV_MAX)
 	};
 }
+function averageIvPercent(ivs) {
+	return Object.values(ivs).reduce((total, v) => total + v, 0) / 186 * 100;
+}
 function novoPokeUid() {
 	return crypto.randomUUID();
 }
@@ -15650,7 +15695,7 @@ function createPokeInstance(rng, speciesId, level = 1, { ivs: fixedIvs, rarity: 
 		level,
 		isShiny,
 		rarity,
-		exp: totalExpForLevel(level, species.growthCurve),
+		exp: pokeExpForLevel(level, species.growthCurve),
 		ivs,
 		stats,
 		hp: stats.hp,
@@ -19215,7 +19260,11 @@ function buildNightmareMirror(sourceMaps, sourceEncounters) {
 				...enc,
 				id: newEncId,
 				minLevel: shiftLevel(enc.minLevel),
-				maxLevel: shiftLevel(enc.maxLevel)
+				maxLevel: shiftLevel(enc.maxLevel),
+				...enc.levelWeights ? { levelWeights: enc.levelWeights.map((lw) => ({
+					...lw,
+					level: shiftLevel(lw.level)
+				})) } : {}
 			};
 			enemyPool.push(newEncId);
 		}
@@ -19439,6 +19488,34 @@ var HUNT_BIOME = {
 	kanto_lv_36_55_ruinas_ancestrais: "DRAGON",
 	kanto_lv_36_55_profundezas: "WATER"
 };
+var ZONA_POR_HUNT = {
+	lv_1_10_floresta: 0,
+	lv_1_10_bosque: 0,
+	lv_11_20_costa: 1,
+	lv_11_20_planicie: 1,
+	lv_21_30_caverna: 2,
+	lv_21_30_deserto: 2,
+	lv_31_40_vulcanico: 3,
+	lv_31_40_usina: 3,
+	lv_41_50_pantano: 4,
+	lv_41_50_dojo: 4,
+	kanto_lv_1_10_geleira: 5,
+	kanto_lv_1_10_fabrica: 5,
+	kanto_lv_11_20_penhascos: 6,
+	kanto_lv_11_20_torre_mistica: 6,
+	kanto_lv_21_35_cemiterio: 7,
+	kanto_lv_21_35_covil_sombrio: 7,
+	kanto_lv_36_55_ruinas_ancestrais: 8,
+	kanto_lv_36_55_profundezas: 8
+};
+var NIVEIS_POR_ZONA = 10;
+function faixaDaZona(zona) {
+	return [zona * NIVEIS_POR_ZONA + 1, (zona + 1) * NIVEIS_POR_ZONA];
+}
+function rotuloDoBioma(baseName) {
+	const m = baseName.match(/\(([^)]+)\)\s*$/);
+	return m ? m[1] : baseName;
+}
 var STARTER_HUNT_ID = "route_46";
 var STARTER_HUNT_SPECIES = [
 	"sentret",
@@ -19495,16 +19572,15 @@ function addEncounter(huntId, speciesId, minLevel, maxLevel, levelWeights) {
 	};
 	return id;
 }
-function nameFor(baseName, region) {
-	const stripped = baseName.replace(/^(Kanto|Johto)\s+/, "");
-	return `${REGION_LABEL[region]} ${stripped}`;
+function nameFor(baseName, region, zona) {
+	return `${REGION_LABEL[region]} Zona ${zona} · ${rotuloDoBioma(baseName)}`;
 }
 for (const base of Object.values(MAPS_DATA)) {
 	if (base.id === STARTER_HUNT_ID) {
 		const pool = STARTER_HUNT_SPECIES.filter((id) => SPECIES_DATA[id]);
 		maps[base.id] = {
 			...base,
-			name: nameFor(base.name, "johto"),
+			name: "Route 46 (Inicial)",
 			continent: "johto",
 			levelRange: [STARTER_LEVEL_WEIGHTS[0].level, STARTER_LEVEL_WEIGHTS[STARTER_LEVEL_WEIGHTS.length - 1].level],
 			enemyPool: pool.map((speciesId) => addEncounter(base.id, speciesId, STARTER_LEVEL_WEIGHTS[0].level, STARTER_LEVEL_WEIGHTS[STARTER_LEVEL_WEIGHTS.length - 1].level, STARTER_LEVEL_WEIGHTS))
@@ -19513,18 +19589,22 @@ for (const base of Object.values(MAPS_DATA)) {
 	}
 	const biome = HUNT_BIOME[base.id];
 	if (!biome) throw new Error(`Hunt "${base.id}" sem bioma em HUNT_BIOME (data/huntSpawnOverrides.ts). Toda hunt gerada precisa declarar o tipo elemental dela pro recorte por regiao funcionar.`);
+	const zona = ZONA_POR_HUNT[base.id];
+	if (zona == null) throw new Error(`Hunt "${base.id}" sem zona em ZONA_POR_HUNT (data/huntSpawnOverrides.ts). Sem numero de zona nao ha faixa de nivel — e era justamente a divergencia entre nome e nivel que esta tabela existe pra fechar.`);
+	const [minLevel, maxLevel] = faixaDaZona(zona);
 	for (const region of REGIONS) {
 		const pool = poolFor(region, biome);
 		if (!pool.length) continue;
 		const id = base.continent === region ? base.id : `${base.id}_${region}`;
-		const name = nameFor(base.name, region);
+		const name = nameFor(base.name, region, zona);
 		maps[id] = {
 			...base,
 			id,
 			name,
-			description: `Local selvagem: ${name} (nivel ${base.levelRange[0]}-${base.levelRange[1]}).`,
+			levelRange: [minLevel, maxLevel],
+			description: `Local selvagem: ${name} (nivel ${minLevel}-${maxLevel}).`,
 			continent: region,
-			enemyPool: pool.map((speciesId) => addEncounter(id, speciesId, base.levelRange[0], base.levelRange[1]))
+			enemyPool: pool.map((speciesId) => addEncounter(id, speciesId, minLevel, maxLevel))
 		};
 	}
 }
@@ -36129,7 +36209,7 @@ function attemptCapture(rng, gameState, defeatedPoke, ballItemId) {
 		...defeatedPoke,
 		uid: novoPokeUid(),
 		level: CAPTURE_LEVEL,
-		exp: totalExpForLevel(CAPTURE_LEVEL, species.growthCurve),
+		exp: pokeExpForLevel(CAPTURE_LEVEL, species.growthCurve),
 		originalTrainer: gameState.trainer.name,
 		stats,
 		hp: stats.hp,
@@ -36303,7 +36383,7 @@ function grantExp(pokeInstance, amount) {
 	const unlockedAbilities = [...pokeInstance.unlockedAbilities];
 	let leveledUp = false;
 	const newAbilities = [];
-	while (exp >= totalExpForLevel(level + 1, species.growthCurve)) {
+	while (exp >= pokeExpForLevel(level + 1, species.growthCurve)) {
 		const previousMaxHp = stats.hp;
 		level += 1;
 		leveledUp = true;
@@ -36349,7 +36429,7 @@ function applyDeathExpPenalty(pokeInstance) {
 	let stats = pokeInstance.stats;
 	let hp = pokeInstance.hp;
 	let leveledDown = false;
-	while (level > floor && exp < totalExpForLevel(level, species.growthCurve)) {
+	while (level > floor && exp < pokeExpForLevel(level, species.growthCurve)) {
 		level -= 1;
 		leveledDown = true;
 		stats = computeStatsAtLevel(species, level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny);
@@ -37333,7 +37413,7 @@ create()(immer((set) => ({
 var CHANNEL_TO_TAB = {
 	combat: "log",
 	trade: "trade",
-	world: "world"
+	world: "sistema"
 };
 var MAX_CHAT_LINES = 60;
 var nextId = 1;
@@ -37343,12 +37423,12 @@ function makeId() {
 var useToastStore = create((set) => ({
 	toasts: [],
 	chatLines: {
-		world: [],
+		sistema: [],
 		trade: [],
 		log: []
 	},
 	pushToast: (message, type, channel) => {
-		const tab = CHANNEL_TO_TAB[channel] || "world";
+		const tab = CHANNEL_TO_TAB[channel] || "sistema";
 		const line = {
 			id: makeId(),
 			message,
@@ -59140,6 +59220,55 @@ var servidor = {
 	acao: (acao) => pedir("/acao", {
 		method: "POST",
 		body: JSON.stringify(acao)
+	}),
+	mercadoItens: () => pedir("/mercado/itens", { retentavel: true }),
+	mercadoLivro: (itemId) => pedir(`/mercado/itens?itemId=${encodeURIComponent(itemId)}`, { retentavel: true }),
+	mercadoPokes: () => pedir("/mercado/pokes", { retentavel: true }),
+	mercadoMeus: () => pedir("/mercado/meus", { retentavel: true }),
+	mercadoHistorico: () => pedir("/mercado/historico", { retentavel: true }),
+	criarOrdem: (corpo) => pedir("/mercado/ordem", {
+		method: "POST",
+		body: JSON.stringify(corpo)
+	}),
+	cancelarOrdem: (ordemId) => pedir("/mercado/ordem/cancelar", {
+		method: "POST",
+		body: JSON.stringify({ ordemId })
+	}),
+	anunciarPoke: (corpo) => pedir("/mercado/anuncio", {
+		method: "POST",
+		body: JSON.stringify(corpo)
+	}),
+	cancelarAnuncio: (anuncioId) => pedir("/mercado/anuncio/cancelar", {
+		method: "POST",
+		body: JSON.stringify({ anuncioId })
+	}),
+	comprarAnuncio: (anuncioId) => pedir("/mercado/comprar", {
+		method: "POST",
+		body: JSON.stringify({ anuncioId })
+	}),
+	lerChat: () => pedir("/chat", { retentavel: true }),
+	enviarChat: (body, anexos) => pedir("/chat", {
+		method: "POST",
+		body: JSON.stringify({
+			body,
+			anexos
+		})
+	}),
+	correio: () => pedir("/correio", { retentavel: true }),
+	pedirAmizade: (nick) => pedir("/correio/amizade", {
+		method: "POST",
+		body: JSON.stringify({ nick })
+	}),
+	responderPedido: (mensagemId, aceitar) => pedir("/correio/responder", {
+		method: "POST",
+		body: JSON.stringify({
+			mensagemId,
+			aceitar
+		})
+	}),
+	marcarLida: (mensagemId) => pedir("/correio/ler", {
+		method: "POST",
+		body: JSON.stringify({ mensagemId })
 	})
 };
 //#endregion
@@ -59831,6 +59960,44 @@ function aplicarPiso(store, estado, resumo, agoraMs) {
 	};
 }
 //#endregion
+//#region server/src/entregas.ts
+async function enfileirarEntrega(cfg, entrega) {
+	await inserir(cfg, "market_deliveries", {
+		user_id: entrega.userId,
+		gold: entrega.gold ?? 0,
+		diamonds: entrega.diamonds ?? 0,
+		item_id: entrega.itemId ?? null,
+		quantity: entrega.quantity ?? 0,
+		motivo: entrega.motivo
+	});
+}
+/**
+* Reivindica (de forma atomica) tudo que esta pendente pra este jogador.
+*
+* O `claimed_at=is.null` no FILTRO e o que torna isso atomico: dois requests
+* simultaneos do mesmo jogador nao podem reivindicar a mesma linha duas vezes,
+* porque o segundo PATCH nao encontra mais linha que case. A linha nao e
+* apagada — fica com carimbo, servindo de historico auditavel de "o jogo
+* realmente creditou isto".
+*/
+async function reivindicarEntregas(cfg, userId) {
+	return atualizarRetornando(cfg, `market_deliveries?user_id=eq.${userId}&claimed_at=is.null`, { claimed_at: (/* @__PURE__ */ new Date()).toISOString() });
+}
+/**
+* Aplica as entregas ao estado JA CARREGADO, antes de ele ser gravado.
+*
+* Muta `estado` direto (e nao pela store) de proposito: isto roda entre o
+* `carregarEstado` e o `criarEstadoDoJogador`, quando ainda nao existe store —
+* e sao somas simples em campos que o mapper ja sabe persistir.
+*/
+function aplicarEntregasNoEstado(estado, entregas) {
+	for (const e of entregas) {
+		if (e.gold) estado.wallet.gold += e.gold;
+		if (e.diamonds) estado.wallet.diamonds += e.diamonds;
+		if (e.item_id && e.quantity > 0) estado.items[e.item_id] = (estado.items[e.item_id] ?? 0) + e.quantity;
+	}
+}
+//#endregion
 //#region server/src/ranking.ts
 var LIMITE_MAXIMO = 100;
 var LIMITE_PADRAO = 50;
@@ -59933,11 +60100,26 @@ async function carregarEstado(cfg, userId) {
 		autoCatchRules
 	}, defaultGameStateData());
 }
+/**
+* Como `carregarEstado`, mas tambem REIVINDICA as entregas pendentes do
+* Mercado e as soma ao estado devolvido.
+*
+* So pode ser usada por quem VAI GRAVAR o estado em seguida: a reivindicacao
+* carimba a linha como entregue, entao um caminho que carregue e nao grave
+* perderia o credito. Por isso `/sessao/abrir` (que so valida a intencao)
+* continua usando `carregarEstado` cru.
+*/
+async function carregarEstadoParaEscrita(cfg, userId) {
+	const estado = await carregarEstado(cfg, userId);
+	const entregas = await reivindicarEntregas(cfg, userId);
+	if (entregas.length) aplicarEntregasNoEstado(estado, entregas);
+	return estado;
+}
 async function gravarEstado(cfg, userId, estado) {
 	await atualizar(cfg, `players?user_id=eq.${userId}`, gameStateToPlayerRow(userId, estado));
 	const linhasPoke = gameStateToPokemonRows(userId, estado);
 	const idsAgora = new Set(linhasPoke.map((l) => l.id));
-	const remover = (await selecionarTudo(cfg, `pokemon_instances?user_id=eq.${userId}&select=id`)).map((l) => l.id).filter((id) => !idsAgora.has(id));
+	const remover = (await selecionarTudo(cfg, `pokemon_instances?user_id=eq.${userId}&location=in.(team,bag)&select=id`)).map((l) => l.id).filter((id) => !idsAgora.has(id));
 	if (remover.length) await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${remover.join(",")})`);
 	if (linhasPoke.length) await inserir(cfg, "pokemon_instances", linhasPoke, { upsert: "id" });
 	const linhasItens = gameStateToItemRows(userId, estado);
@@ -59966,7 +60148,7 @@ async function aplicarFlush(cfg, userId, sessao) {
 	const bruto = (agora - new Date(sessao.last_flush_at).getTime()) / 1e3;
 	const segundos = Math.max(0, Math.min(bruto, MAX_SEGUNDOS_POR_FLUSH));
 	const truncado = bruto > MAX_SEGUNDOS_POR_FLUSH;
-	const { store, dados: estado } = criarEstadoDoJogador(await carregarEstado(cfg, userId));
+	const { store, dados: estado } = criarEstadoDoJogador(await carregarEstadoParaEscrita(cfg, userId));
 	const continentesAntes = new Set(estado.unlockedContinents);
 	const ativo = estado.team.find((p) => p.uid === sessao.poke_uid);
 	if (!ativo) return null;
@@ -60038,7 +60220,7 @@ var inteiroPositivo = (v, padrao = 1) => {
 	if (!Number.isInteger(n) || n <= 0 || n > 1e6) throw new ErroHttp(400, "quantidade invalida");
 	return n;
 };
-var texto = (v, campo) => {
+var texto$2 = (v, campo) => {
 	if (typeof v !== "string" || !v || v.length > 200) throw new ErroHttp(400, `${campo} invalido`);
 	return v;
 };
@@ -60053,7 +60235,7 @@ var MENSAGEM_ERRO_ECONOMIA = {
 var traduzErroEconomia = (reason, padrao) => reason && MENSAGEM_ERRO_ECONOMIA[reason] || padrao;
 var MANIPULADORES = {
 	escolherStarter(store, estado, acao) {
-		const speciesId = texto(acao.speciesId, "speciesId");
+		const speciesId = texto$2(acao.speciesId, "speciesId");
 		if (!STARTERS_PERMITIDOS.has(speciesId)) throw new ErroHttp(403, "essa especie nao e um inicial");
 		if (estado.team.length > 0 || estado.bagPokes.length > 0) throw new ErroHttp(409, "voce ja tem um POKE");
 		const poke = createPokeInstance(createRng(randomSeed()), speciesId, STARTER_LEVEL, {
@@ -60078,7 +60260,7 @@ var MANIPULADORES = {
 		};
 	},
 	comprarItem(store, _estado, acao) {
-		const itemId = texto(acao.itemId, "itemId");
+		const itemId = texto$2(acao.itemId, "itemId");
 		const qtd = inteiroPositivo(acao.qtd);
 		const item = getItem(itemId);
 		const r = buyItem(store, itemId, qtd);
@@ -60090,7 +60272,7 @@ var MANIPULADORES = {
 		};
 	},
 	venderItem(store, _estado, acao) {
-		const itemId = texto(acao.itemId, "itemId");
+		const itemId = texto$2(acao.itemId, "itemId");
 		const qtd = inteiroPositivo(acao.qtd);
 		const item = getItem(itemId);
 		const r = sellItem(store, itemId, qtd);
@@ -60108,7 +60290,7 @@ var MANIPULADORES = {
 		};
 	},
 	venderPoke(store, _estado, acao) {
-		const r = sellBagPoke(store, texto(acao.pokeUid, "pokeUid"));
+		const r = sellBagPoke(store, texto$2(acao.pokeUid, "pokeUid"));
 		if (!r.success) throw new ErroHttp(409, traduzErroEconomia(r.reason, "Venda recusada."));
 		return {
 			ok: true,
@@ -60116,7 +60298,7 @@ var MANIPULADORES = {
 		};
 	},
 	venderPokes(store, _estado, acao) {
-		const uids = Array.isArray(acao.pokeUids) ? acao.pokeUids.map((u) => texto(u, "pokeUid")) : [];
+		const uids = Array.isArray(acao.pokeUids) ? acao.pokeUids.map((u) => texto$2(u, "pokeUid")) : [];
 		if (!uids.length) throw new ErroHttp(400, "nenhum POKE informado");
 		const r = sellAllBagPokes(store, uids);
 		return {
@@ -60125,7 +60307,7 @@ var MANIPULADORES = {
 		};
 	},
 	usarItem(store, estado, acao) {
-		const itemId = texto(acao.itemId, "itemId");
+		const itemId = texto$2(acao.itemId, "itemId");
 		const item = getItem(itemId);
 		if (!item) throw new ErroHttp(400, "item desconhecido");
 		const ativo = estado.team[estado.activeIndex];
@@ -60164,7 +60346,7 @@ var MANIPULADORES = {
 		};
 	},
 	evoluirPoke(store, estado, acao) {
-		const uid = texto(acao.pokeUid, "pokeUid");
+		const uid = texto$2(acao.pokeUid, "pokeUid");
 		const poke = [...estado.team, ...estado.bagPokes].find((p) => p.uid === uid);
 		if (!poke) throw new ErroHttp(404, "POKE nao encontrado");
 		const anterior = SPECIES[poke.speciesId].name;
@@ -60187,7 +60369,7 @@ var MANIPULADORES = {
 		return { ok: true };
 	},
 	tirarDaEquipe(store, estado, acao) {
-		const uid = texto(acao.pokeUid, "pokeUid");
+		const uid = texto$2(acao.pokeUid, "pokeUid");
 		if (estado.team.length <= 1) throw new ErroHttp(409, "voce precisa manter ao menos 1 POKE na equipe");
 		const poke = estado.team.find((p) => p.uid === uid);
 		if (!store.moveTeamToBag(uid)) throw new ErroHttp(404, "POKE nao esta na equipe");
@@ -60197,7 +60379,7 @@ var MANIPULADORES = {
 		};
 	},
 	porNaEquipe(store, estado, acao) {
-		const uid = texto(acao.pokeUid, "pokeUid");
+		const uid = texto$2(acao.pokeUid, "pokeUid");
 		const poke = estado.bagPokes.find((p) => p.uid === uid);
 		if (!store.moveBagToTeam(uid)) throw new ErroHttp(404, "POKE nao esta na mochila");
 		return {
@@ -60206,7 +60388,7 @@ var MANIPULADORES = {
 		};
 	},
 	desbloquearHunt(store, _estado, acao) {
-		const mapId = texto(acao.mapId, "mapId");
+		const mapId = texto$2(acao.mapId, "mapId");
 		const mapa = MAPS[mapId] && getMap(mapId);
 		if (!mapa) throw new ErroHttp(400, "hunt desconhecida");
 		const r = unlockMap(store, mapa);
@@ -60217,11 +60399,11 @@ var MANIPULADORES = {
 		};
 	},
 	alternarTravaItem(store, _estado, acao) {
-		store.toggleItemLock(texto(acao.itemId, "itemId"));
+		store.toggleItemLock(texto$2(acao.itemId, "itemId"));
 		return { ok: true };
 	},
 	alternarTravaPoke(store, estado, acao) {
-		const uid = texto(acao.pokeUid, "pokeUid");
+		const uid = texto$2(acao.pokeUid, "pokeUid");
 		if (![...estado.team, ...estado.bagPokes].find((p) => p.uid === uid)) throw new ErroHttp(404, "POKE nao encontrado");
 		store.updatePokeInstance(uid, (p) => ({
 			...p,
@@ -60230,7 +60412,7 @@ var MANIPULADORES = {
 		return { ok: true };
 	},
 	alternarHabilidade(store, _estado, acao) {
-		store.toggleAbilityDisabled(texto(acao.pokeUid, "pokeUid"), texto(acao.abilityId, "abilityId"));
+		store.toggleAbilityDisabled(texto$2(acao.pokeUid, "pokeUid"), texto$2(acao.abilityId, "abilityId"));
 		return { ok: true };
 	},
 	configurarAuto(store, _estado, acao) {
@@ -60261,6 +60443,432 @@ function aplicarAcao(store, estado, acao) {
 	const manipulador = MANIPULADORES[acao?.tipo];
 	if (!manipulador) throw new ErroHttp(400, `acao desconhecida: ${String(acao?.tipo)}`);
 	return manipulador(store, estado, acao);
+}
+//#endregion
+//#region server/src/mercado.ts
+var MAX_QUANTIDADE = 1e6;
+var MAX_PRECO = 1e8;
+var MAX_CASAMENTOS = 40;
+var inteiro = (v, campo, max) => {
+	const n = Number(v);
+	if (!Number.isInteger(n) || n <= 0 || n > max) throw new ErroHttp(400, `${campo} invalido`);
+	return n;
+};
+var texto$1 = (v, campo) => {
+	if (typeof v !== "string" || !v || v.length > 120) throw new ErroHttp(400, `${campo} invalido`);
+	return v;
+};
+async function nomesDeTreinadores(cfg, ids) {
+	const unicos = [...new Set(ids.filter((id) => Boolean(id)))];
+	if (!unicos.length) return /* @__PURE__ */ new Map();
+	const linhas = await selecionarTudo(cfg, `players?user_id=in.(${unicos.join(",")})&select=user_id,trainer_name`);
+	return new Map(linhas.map((l) => [l.user_id, l.trainer_name]));
+}
+/** Livro de um item: melhores compras e melhores vendas, agregadas por preco. */
+async function livroDoItem(cfg, itemId) {
+	const ativas = await selecionarTudo(cfg, `market_orders?item_id=eq.${itemId}&status=eq.ativa&select=*`);
+	const agrega = (lado) => {
+		const porPreco = /* @__PURE__ */ new Map();
+		for (const o of ativas) {
+			if (o.side !== lado) continue;
+			porPreco.set(o.unit_price, (porPreco.get(o.unit_price) ?? 0) + o.remaining);
+		}
+		return [...porPreco.entries()].map(([unitPrice, quantity]) => ({
+			unitPrice,
+			quantity
+		})).sort((a, b) => lado === "compra" ? b.unitPrice - a.unitPrice : a.unitPrice - b.unitPrice).slice(0, 12);
+	};
+	const negocios = await selecionar(cfg, `market_trades?item_id=eq.${itemId}&select=*&order=created_at.desc&limit=15`);
+	return {
+		itemId,
+		compras: agrega("compra"),
+		vendas: agrega("venda"),
+		negocios
+	};
+}
+/** Resumo de todos os itens com ordem ativa — a lista da aba "Comprar". */
+async function resumoDosItens(cfg) {
+	const ativas = await selecionarTudo(cfg, "market_orders?status=eq.ativa&select=*");
+	const porItem = /* @__PURE__ */ new Map();
+	for (const o of ativas) {
+		const atual = porItem.get(o.item_id) ?? {
+			itemId: o.item_id,
+			melhorCompra: null,
+			melhorVenda: null,
+			emVenda: 0,
+			emCompra: 0
+		};
+		if (o.side === "venda") {
+			atual.emVenda += o.remaining;
+			atual.melhorVenda = atual.melhorVenda == null ? o.unit_price : Math.min(atual.melhorVenda, o.unit_price);
+		} else {
+			atual.emCompra += o.remaining;
+			atual.melhorCompra = atual.melhorCompra == null ? o.unit_price : Math.max(atual.melhorCompra, o.unit_price);
+		}
+		porItem.set(o.item_id, atual);
+	}
+	return [...porItem.values()].sort((a, b) => a.itemId.localeCompare(b.itemId));
+}
+async function anunciosAtivos(cfg) {
+	const linhas = await selecionarTudo(cfg, "market_listings?status=eq.ativo&select=*&order=created_at.desc");
+	const nomes = await nomesDeTreinadores(cfg, linhas.map((l) => l.seller_id));
+	return linhas.map((l) => ({
+		...l,
+		vendedor: nomes.get(l.seller_id) ?? "Treinador"
+	}));
+}
+async function minhasOrdens(cfg, userId) {
+	const [ordens, anuncios] = await Promise.all([selecionarTudo(cfg, `market_orders?user_id=eq.${userId}&status=eq.ativa&select=*&order=created_at.desc`), selecionarTudo(cfg, `market_listings?seller_id=eq.${userId}&status=eq.ativo&select=*&order=created_at.desc`)]);
+	return {
+		ordens,
+		anuncios
+	};
+}
+async function meuHistorico(cfg, userId) {
+	const linhas = await selecionar(cfg, `market_trades?or=(buyer_id.eq.${userId},seller_id.eq.${userId})&select=*&order=created_at.desc&limit=60`);
+	const nomes = await nomesDeTreinadores(cfg, linhas.flatMap((l) => [l.buyer_id, l.seller_id]));
+	return linhas.map((l) => ({
+		...l,
+		comprador: l.buyer_id ? nomes.get(l.buyer_id) ?? "Treinador" : null,
+		vendedor: l.seller_id ? nomes.get(l.seller_id) ?? "Treinador" : null,
+		souComprador: l.buyer_id === userId
+	}));
+}
+/**
+* Cria uma ordem e casa com o lado oposto imediatamente.
+*
+* O preco de execucao e o da ordem QUE JA ESTAVA NO LIVRO, nunca o da que
+* chegou. E a convencao de qualquer livro de ofertas, e aqui ela tem efeito
+* concreto: quem compra "a mercado" (limite alto) paga o preco da melhor venda
+* disponivel e recebe o troco de volta, em vez de pagar o proprio limite.
+*/
+async function criarOrdem(cfg, userId, corpo) {
+	const itemId = texto$1(corpo.itemId, "itemId");
+	const side = corpo.side === "compra" || corpo.side === "venda" ? corpo.side : null;
+	if (!side) throw new ErroHttp(400, "side deve ser \"compra\" ou \"venda\"");
+	const unitPrice = inteiro(corpo.unitPrice, "unitPrice", MAX_PRECO);
+	const quantity = inteiro(corpo.quantity, "quantity", MAX_QUANTIDADE);
+	if (!getItem(itemId)) throw new ErroHttp(400, "item desconhecido");
+	const { store, dados: estado } = criarEstadoDoJogador(await carregarEstadoParaEscrita(cfg, userId));
+	if (side === "venda") {
+		if (estado.lockedItems[itemId]) throw new ErroHttp(409, "Este item esta travado — destrave antes de anunciar.");
+		if (!store.removeItem(itemId, quantity)) throw new ErroHttp(409, "Voce nao tem essa quantidade.");
+	} else if (!store.spendGold(unitPrice * quantity)) throw new ErroHttp(409, "Ouro insuficiente.");
+	const [ordem] = await inserir(cfg, "market_orders", {
+		user_id: userId,
+		item_id: itemId,
+		side,
+		unit_price: unitPrice,
+		quantity,
+		remaining: quantity,
+		gold_retido: side === "compra" ? unitPrice * quantity : 0
+	}, { retornar: true });
+	const resultado = await casar(cfg, userId, ordem, store);
+	await gravarEstado(cfg, userId, estado);
+	return {
+		ordemId: ordem.id,
+		...resultado,
+		estado
+	};
+}
+async function casar(cfg, userId, ordem, store) {
+	const oposto = ordem.side === "compra" ? "venda" : "compra";
+	const ordenacao = oposto === "venda" ? "unit_price.asc" : "unit_price.desc";
+	const filtroPreco = oposto === "venda" ? `unit_price=lte.${ordem.unit_price}` : `unit_price=gte.${ordem.unit_price}`;
+	const candidatas = await selecionar(cfg, `market_orders?item_id=eq.${ordem.item_id}&side=eq.${oposto}&status=eq.ativa&${filtroPreco}&user_id=neq.${userId}&select=*&order=${ordenacao},created_at.asc&limit=${MAX_CASAMENTOS}`);
+	let restante = ordem.remaining;
+	let retido = ordem.gold_retido;
+	let executado = 0;
+	let gastoTotal = 0;
+	let recebidoTotal = 0;
+	for (const outra of candidatas) {
+		if (restante <= 0) break;
+		const qtd = Math.min(restante, outra.remaining);
+		if (qtd <= 0) continue;
+		const preco = outra.unit_price;
+		const valor = preco * qtd;
+		const novoRestanteOutra = outra.remaining - qtd;
+		const patch = {
+			remaining: novoRestanteOutra,
+			status: novoRestanteOutra === 0 ? "concluida" : "ativa",
+			closed_at: novoRestanteOutra === 0 ? (/* @__PURE__ */ new Date()).toISOString() : null
+		};
+		if (outra.side === "compra") patch.gold_retido = Math.max(0, outra.gold_retido - valor);
+		if (!(await atualizarRetornando(cfg, `market_orders?id=eq.${outra.id}&status=eq.ativa&remaining=eq.${outra.remaining}`, patch)).length) continue;
+		if (ordem.side === "compra") {
+			store.addItem(ordem.item_id, qtd);
+			const troco = (ordem.unit_price - preco) * qtd;
+			if (troco > 0) store.addGold(troco);
+			retido = Math.max(0, retido - ordem.unit_price * qtd);
+			gastoTotal += valor;
+			await enfileirarEntrega(cfg, {
+				userId: outra.user_id,
+				gold: valor,
+				motivo: `Venda de ${qtd}x ${ordem.item_id} no Mercado`
+			});
+		} else {
+			store.addGold(valor);
+			recebidoTotal += valor;
+			await enfileirarEntrega(cfg, {
+				userId: outra.user_id,
+				itemId: ordem.item_id,
+				quantity: qtd,
+				motivo: `Compra de ${qtd}x ${ordem.item_id} no Mercado`
+			});
+		}
+		await inserir(cfg, "market_trades", {
+			kind: "item",
+			item_id: ordem.item_id,
+			quantity: qtd,
+			unit_price: preco,
+			currency: "gold",
+			buyer_id: ordem.side === "compra" ? userId : outra.user_id,
+			seller_id: ordem.side === "compra" ? outra.user_id : userId
+		});
+		restante -= qtd;
+		executado += qtd;
+	}
+	if (executado > 0 || restante !== ordem.remaining) await atualizar(cfg, `market_orders?id=eq.${ordem.id}`, {
+		remaining: restante,
+		gold_retido: ordem.side === "compra" ? retido : 0,
+		status: restante === 0 ? "concluida" : "ativa",
+		closed_at: restante === 0 ? (/* @__PURE__ */ new Date()).toISOString() : null
+	});
+	return {
+		executado,
+		gastoTotal,
+		recebidoTotal
+	};
+}
+async function cancelarOrdem(cfg, userId, ordemId) {
+	const [ordem] = await atualizarRetornando(cfg, `market_orders?id=eq.${ordemId}&user_id=eq.${userId}&status=eq.ativa`, {
+		status: "cancelada",
+		closed_at: (/* @__PURE__ */ new Date()).toISOString()
+	});
+	if (!ordem) throw new ErroHttp(404, "ordem nao encontrada ou ja encerrada");
+	const { store, dados: estado } = criarEstadoDoJogador(await carregarEstadoParaEscrita(cfg, userId));
+	if (ordem.side === "venda") store.addItem(ordem.item_id, ordem.remaining);
+	else store.addGold(ordem.gold_retido);
+	await gravarEstado(cfg, userId, estado);
+	const item = getItem(ordem.item_id);
+	return {
+		mensagem: ordem.side === "venda" ? `Ordem cancelada — ${ordem.remaining}x ${item?.name ?? ordem.item_id} de volta na mochila.` : `Ordem cancelada — ${ordem.gold_retido} de ouro devolvido.`,
+		estado
+	};
+}
+async function anunciarPoke(cfg, userId, corpo) {
+	const pokeUid = texto$1(corpo.pokeUid, "pokeUid");
+	const price = inteiro(corpo.price, "price", MAX_PRECO);
+	const currency = corpo.currency === "diamond" ? "diamond" : "gold";
+	const [linha] = await atualizarRetornando(cfg, `pokemon_instances?id=eq.${pokeUid}&user_id=eq.${userId}&location=eq.bag&locked=is.false`, {
+		location: "market",
+		team_slot: null
+	});
+	if (!linha) throw new ErroHttp(409, "POKE indisponivel — precisa estar na mochila e destravado.");
+	const poke = rowToPoke(linha);
+	try {
+		await inserir(cfg, "market_listings", {
+			seller_id: userId,
+			poke_uid: pokeUid,
+			price,
+			currency,
+			species_id: poke.speciesId,
+			level: poke.level,
+			rarity: poke.rarity,
+			is_shiny: poke.isShiny,
+			iv_percent: Math.round(averageIvPercent(poke.ivs))
+		});
+	} catch (erro) {
+		await atualizar(cfg, `pokemon_instances?id=eq.${pokeUid}`, { location: "bag" });
+		throw erro;
+	}
+	return {
+		mensagem: `${SPECIES[poke.speciesId]?.name ?? poke.speciesId} anunciado por ${price} ${currency === "gold" ? "de ouro" : "diamante(s)"}.`,
+		estado: await carregarEstado(cfg, userId)
+	};
+}
+async function cancelarAnuncio(cfg, userId, anuncioId) {
+	const [anuncio] = await atualizarRetornando(cfg, `market_listings?id=eq.${anuncioId}&seller_id=eq.${userId}&status=eq.ativo`, { status: "cancelado" });
+	if (!anuncio) throw new ErroHttp(404, "anuncio nao encontrado ou ja encerrado");
+	await atualizar(cfg, `pokemon_instances?id=eq.${anuncio.poke_uid}`, {
+		location: "bag",
+		team_slot: null
+	});
+	return {
+		mensagem: "Anuncio cancelado — o POKE voltou pra sua mochila.",
+		estado: await carregarEstado(cfg, userId)
+	};
+}
+async function comprarAnuncio(cfg, userId, anuncioId) {
+	const [anuncio] = await selecionar(cfg, `market_listings?id=eq.${anuncioId}&select=*`);
+	if (!anuncio || anuncio.status !== "ativo") throw new ErroHttp(409, "Este anuncio nao esta mais disponivel.");
+	if (anuncio.seller_id === userId) throw new ErroHttp(409, "Voce nao pode comprar o proprio anuncio.");
+	const { store, dados: estado } = criarEstadoDoJogador(await carregarEstadoParaEscrita(cfg, userId));
+	if (!(anuncio.currency === "gold" ? store.spendGold(anuncio.price) : store.spendDiamonds(anuncio.price))) throw new ErroHttp(409, anuncio.currency === "gold" ? "Ouro insuficiente." : "Diamantes insuficientes.");
+	const [fechado] = await atualizarRetornando(cfg, `market_listings?id=eq.${anuncioId}&status=eq.ativo`, {
+		status: "vendido",
+		sold_at: (/* @__PURE__ */ new Date()).toISOString(),
+		buyer_id: userId
+	});
+	if (!fechado) throw new ErroHttp(409, "Este anuncio acabou de ser vendido.");
+	await gravarEstado(cfg, userId, estado);
+	await atualizar(cfg, `pokemon_instances?id=eq.${anuncio.poke_uid}`, {
+		user_id: userId,
+		location: "bag",
+		team_slot: null
+	});
+	await enfileirarEntrega(cfg, {
+		userId: anuncio.seller_id,
+		gold: anuncio.currency === "gold" ? anuncio.price : 0,
+		diamonds: anuncio.currency === "diamond" ? anuncio.price : 0,
+		motivo: `Venda de ${SPECIES[anuncio.species_id]?.name ?? anuncio.species_id} no Mercado`
+	});
+	await inserir(cfg, "market_trades", {
+		kind: "poke",
+		species_id: anuncio.species_id,
+		quantity: 1,
+		unit_price: anuncio.price,
+		currency: anuncio.currency,
+		buyer_id: userId,
+		seller_id: anuncio.seller_id
+	});
+	return {
+		mensagem: `${SPECIES[anuncio.species_id]?.name ?? anuncio.species_id} comprado! Ele esta na sua mochila.`,
+		estado: await carregarEstado(cfg, userId)
+	};
+}
+//#endregion
+//#region server/src/social.ts
+var MAX_MENSAGENS = 60;
+var MAX_CORPO = 240;
+var MAX_ANEXOS = 3;
+var INTERVALO_MINIMO_MS = 1200;
+var texto = (v, campo, max) => {
+	if (typeof v !== "string") throw new ErroHttp(400, `${campo} invalido`);
+	const t = v.trim();
+	if (!t || t.length > max) throw new ErroHttp(400, `${campo} invalido`);
+	return t;
+};
+/**
+* Anexo de chat: o SNAPSHOT do item/POKE, nunca so um id.
+*
+* Guardar o snapshot resolve duas coisas de uma vez. (1) O link continua
+* mostrando o que foi mostrado na hora, mesmo que o POKE seja vendido ou
+* evolua depois — um link que muda de conteudo com o tempo e pior que nenhum.
+* (2) Ninguem ganha um jeito de consultar POKE alheio por id: o servidor nunca
+* resolve o id, ele so repassa o que o autor exibiu.
+*
+* Os campos sao recortados aqui: um anexo e dado que outro jogador vai
+* renderizar, entao nada alem do que a lista abaixo permite atravessa.
+*/
+function saneiaAnexos(bruto) {
+	if (!Array.isArray(bruto)) return [];
+	return bruto.slice(0, MAX_ANEXOS).map((a) => {
+		const o = a ?? {};
+		const kind = o.kind === "poke" ? "poke" : "item";
+		const limpo = {
+			kind,
+			id: texto(o.id, "anexo.id", 120),
+			nome: texto(o.nome, "anexo.nome", 60)
+		};
+		if (kind === "poke") {
+			limpo.speciesId = texto(o.speciesId, "anexo.speciesId", 60);
+			limpo.level = Math.max(1, Math.min(999, Number(o.level) || 1));
+			limpo.rarity = texto(o.rarity ?? "comum", "anexo.rarity", 30);
+			limpo.isShiny = Boolean(o.isShiny);
+			limpo.ivPercent = Math.max(0, Math.min(100, Math.round(Number(o.ivPercent) || 0)));
+		} else limpo.quantidade = Math.max(0, Math.min(99999999, Math.round(Number(o.quantidade) || 0)));
+		return limpo;
+	});
+}
+async function lerChat(cfg) {
+	return (await selecionar(cfg, `chat_messages?select=*&order=created_at.desc&limit=${MAX_MENSAGENS}`)).reverse();
+}
+async function enviarChat(cfg, userId, corpo) {
+	const body = texto(corpo.body, "mensagem", MAX_CORPO);
+	const anexos = saneiaAnexos(corpo.anexos);
+	const [jogador] = await selecionar(cfg, `players?user_id=eq.${userId}&select=trainer_name`);
+	if (!jogador) throw new ErroHttp(404, "jogador sem linha em `players`");
+	const [ultima] = await selecionar(cfg, `chat_messages?user_id=eq.${userId}&select=created_at&order=created_at.desc&limit=1`);
+	if (ultima && Date.now() - new Date(ultima.created_at).getTime() < INTERVALO_MINIMO_MS) throw new ErroHttp(429, "Devagar — espere um instante antes de mandar outra mensagem.");
+	await inserir(cfg, "chat_messages", {
+		user_id: userId,
+		trainer_name: jogador.trainer_name,
+		body,
+		anexos
+	});
+	return lerChat(cfg);
+}
+async function caixaDeEntrada(cfg, userId) {
+	const [mensagens, amizades] = await Promise.all([selecionar(cfg, `mail_messages?para_id=eq.${userId}&select=*&order=created_at.desc&limit=80`), selecionarTudo(cfg, `friendships?user_id=eq.${userId}&select=amigo_id`)]);
+	let amigos = [];
+	if (amizades.length) amigos = (await selecionarTudo(cfg, `players?user_id=in.(${amizades.map((a) => a.amigo_id).join(",")})&select=user_id,trainer_name,trainer_level`)).map((l) => ({
+		userId: l.user_id,
+		nome: l.trainer_name,
+		nivel: l.trainer_level
+	})).sort((a, b) => a.nome.localeCompare(b.nome));
+	const naoLidas = mensagens.filter((m) => m.estado === "pendente").length;
+	return {
+		mensagens,
+		amigos,
+		naoLidas
+	};
+}
+async function pedirAmizade(cfg, userId, nick) {
+	const alvo = texto(nick, "nick", 40);
+	const [eu] = await selecionar(cfg, `players?user_id=eq.${userId}&select=trainer_name`);
+	if (!eu) throw new ErroHttp(404, "jogador sem linha em `players`");
+	if (eu.trainer_name.toLowerCase() === alvo.toLowerCase()) throw new ErroHttp(409, "Voce nao pode adicionar a si mesmo.");
+	const [destino] = await selecionar(cfg, `players?trainer_name=ilike.${encodeURIComponent(alvo)}&select=user_id,trainer_name&limit=1`);
+	if (!destino) throw new ErroHttp(404, `Nao existe treinador chamado "${alvo}".`);
+	const [jaAmigos] = await selecionar(cfg, `friendships?user_id=eq.${userId}&amigo_id=eq.${destino.user_id}&select=amigo_id`);
+	if (jaAmigos) throw new ErroHttp(409, `${destino.trainer_name} ja e seu amigo.`);
+	try {
+		await inserir(cfg, "mail_messages", {
+			para_id: destino.user_id,
+			de_id: userId,
+			de_nome: eu.trainer_name,
+			tipo: "pedido_amizade",
+			assunto: "Pedido de amizade",
+			corpo: `${eu.trainer_name} quer ser seu amigo.`
+		});
+	} catch {
+		throw new ErroHttp(409, `Voce ja tem um pedido pendente com ${destino.trainer_name}.`);
+	}
+	return { mensagem: `Pedido enviado para ${destino.trainer_name}.` };
+}
+async function responderPedido(cfg, userId, mensagemId, aceitar) {
+	const [pedido] = await atualizarRetornando(cfg, `mail_messages?id=eq.${mensagemId}&para_id=eq.${userId}&tipo=eq.pedido_amizade&estado=eq.pendente`, {
+		estado: aceitar ? "aceito" : "recusado",
+		read_at: (/* @__PURE__ */ new Date()).toISOString()
+	});
+	if (!pedido) throw new ErroHttp(404, "pedido nao encontrado ou ja respondido");
+	if (!aceitar) return { mensagem: "Pedido recusado." };
+	if (!pedido.de_id) throw new ErroHttp(409, "Quem enviou o pedido nao existe mais.");
+	await inserir(cfg, "friendships", [{
+		user_id: userId,
+		amigo_id: pedido.de_id
+	}, {
+		user_id: pedido.de_id,
+		amigo_id: userId
+	}], { upsert: "user_id,amigo_id" });
+	const [eu] = await selecionar(cfg, `players?user_id=eq.${userId}&select=trainer_name`);
+	await inserir(cfg, "mail_messages", {
+		para_id: pedido.de_id,
+		de_id: userId,
+		de_nome: eu?.trainer_name ?? "Treinador",
+		tipo: "sistema",
+		assunto: "Pedido aceito",
+		corpo: `${eu?.trainer_name ?? "Um treinador"} aceitou seu pedido de amizade.`
+	});
+	return { mensagem: `Agora voce e amigo de ${pedido.de_nome}.` };
+}
+async function marcarLida(cfg, userId, mensagemId) {
+	await atualizar(cfg, `mail_messages?id=eq.${mensagemId}&para_id=eq.${userId}&estado=eq.pendente&tipo=neq.pedido_amizade`, {
+		estado: "lido",
+		read_at: (/* @__PURE__ */ new Date()).toISOString()
+	});
+	return { ok: true };
 }
 //#endregion
 //#region server/src/app.ts
@@ -60307,7 +60915,13 @@ async function rotear(cfg, req, url) {
 	if (url.pathname === "/sessao/abrir" && req.method === "POST") return abrirSessao(cfg, jogador.id, req);
 	if (url.pathname === "/sessao/flush" && req.method === "POST") return flush(cfg, jogador.id);
 	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id);
-	if (url.pathname === "/estado" && req.method === "GET") return json({ estado: await carregarEstado(cfg, jogador.id) });
+	if (url.pathname === "/estado" && req.method === "GET") {
+		const estado = await carregarEstadoParaEscrita(cfg, jogador.id);
+		await gravarEstado(cfg, jogador.id, estado);
+		return json({ estado });
+	}
+	if (url.pathname.startsWith("/mercado")) return mercado(cfg, jogador.id, req, url);
+	if (url.pathname.startsWith("/chat") || url.pathname.startsWith("/correio")) return social(cfg, jogador.id, req, url);
 	if (url.pathname === "/perfil" && req.method === "GET") return json(await perfilDoJogador(cfg, jogador.id));
 	if (url.pathname === "/ranking/treinadores" && req.method === "GET") return json({ entradas: await rankingDeTreinadores(cfg, url.searchParams.get("limite")) });
 	if (url.pathname === "/ranking/pokemon" && req.method === "GET") {
@@ -60435,13 +61049,51 @@ async function acao(cfg, userId, req) {
 		const aberta = await sessaoAberta(cfg, userId);
 		if (aberta) await fecharLinhaDeSessao(cfg, aberta.id);
 	}
-	const { store, dados: estado } = criarEstadoDoJogador(await carregarEstado(cfg, userId));
+	const { store, dados: estado } = criarEstadoDoJogador(await carregarEstadoParaEscrita(cfg, userId));
 	const resultado = aplicarAcao(store, estado, corpo);
 	await gravarEstado(cfg, userId, estado);
 	return json({
 		...resultado,
 		estado
 	});
+}
+async function mercado(cfg, userId, req, url) {
+	if (req.method === "GET") {
+		if (url.pathname === "/mercado/itens") {
+			const itemId = url.searchParams.get("itemId");
+			if (itemId) return json(await livroDoItem(cfg, itemId));
+			return json({ itens: await resumoDosItens(cfg) });
+		}
+		if (url.pathname === "/mercado/pokes") return json({ anuncios: await anunciosAtivos(cfg) });
+		if (url.pathname === "/mercado/meus") return json(await minhasOrdens(cfg, userId));
+		if (url.pathname === "/mercado/historico") return json({ negocios: await meuHistorico(cfg, userId) });
+		return json({ erro: "rota desconhecida" }, 404);
+	}
+	if (req.method !== "POST") return json({ erro: "rota desconhecida" }, 404);
+	const corpo = await req.json().catch(() => null);
+	if (!corpo) throw new ErroHttp(400, "corpo invalido");
+	await liquidarSessaoAberta(cfg, userId);
+	if (url.pathname === "/mercado/ordem") return json(await criarOrdem(cfg, userId, corpo));
+	if (url.pathname === "/mercado/ordem/cancelar") return json(await cancelarOrdem(cfg, userId, String(corpo.ordemId ?? "")));
+	if (url.pathname === "/mercado/anuncio") return json(await anunciarPoke(cfg, userId, corpo));
+	if (url.pathname === "/mercado/anuncio/cancelar") return json(await cancelarAnuncio(cfg, userId, String(corpo.anuncioId ?? "")));
+	if (url.pathname === "/mercado/comprar") return json(await comprarAnuncio(cfg, userId, String(corpo.anuncioId ?? "")));
+	return json({ erro: "rota desconhecida" }, 404);
+}
+async function social(cfg, userId, req, url) {
+	if (req.method === "GET") {
+		if (url.pathname === "/chat") return json({ mensagens: await lerChat(cfg) });
+		if (url.pathname === "/correio") return json(await caixaDeEntrada(cfg, userId));
+		return json({ erro: "rota desconhecida" }, 404);
+	}
+	if (req.method !== "POST") return json({ erro: "rota desconhecida" }, 404);
+	const corpo = await req.json().catch(() => null);
+	if (!corpo) throw new ErroHttp(400, "corpo invalido");
+	if (url.pathname === "/chat") return json({ mensagens: await enviarChat(cfg, userId, corpo) });
+	if (url.pathname === "/correio/amizade") return json(await pedirAmizade(cfg, userId, String(corpo.nick ?? "")));
+	if (url.pathname === "/correio/responder") return json(await responderPedido(cfg, userId, String(corpo.mensagemId ?? ""), corpo.aceitar === true));
+	if (url.pathname === "/correio/ler") return json(await marcarLida(cfg, userId, String(corpo.mensagemId ?? "")));
+	return json({ erro: "rota desconhecida" }, 404);
 }
 //#endregion
 export { criarApp };

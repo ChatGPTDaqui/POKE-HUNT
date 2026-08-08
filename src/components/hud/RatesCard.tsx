@@ -12,6 +12,8 @@ import { useEffect, useState } from 'react'
 import { getPerfStats } from '@/engine/systems/statsTracker'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { controller } from '@/engine/controller'
+import { useUiStore } from '@/stores/uiStore'
+import { ChartLineUp } from '@phosphor-icons/react'
 import { GameButton } from '@/components/game/controls'
 
 // Ouro/H e XP/H passam facil das centenas de milhares em nivel alto — abreviar
@@ -36,12 +38,28 @@ function useRates() {
 
 export function RatesCard() {
   const stats = useRates()
+  const abrirAnalyzer = useUiStore((s) => s.setAnalyzerOpen)
   return (
+    // O corpo do card e clicavel e abre o Hunt Analyzer (pedido explicito de
+    // "estatisticas de caca clicaveis"). O botao "Resetar" fica FORA da area
+    // clicavel: ele e destrutivo (zera a amostra) e nao pode ser acionado por
+    // engano por quem so queria ver os detalhes.
     <div className="hud-surface pointer-events-auto flex flex-col gap-[.2em] rounded-lg border border-n800 px-[.8em] py-[.6em] text-[.75em] text-n300">
-      <Row label="Gold/h" value={formatRate(stats.goldPerHour)} color="var(--color-gold)" />
-      <Row label="XP/h" value={formatRate(stats.xpPerHour)} />
-      <Row label="Mobs/h" value={String(stats.mobsPerHour)} />
-      <Row label="Shinys" value={String(stats.shinys)} color="var(--color-shiny)" />
+      <button
+        type="button"
+        data-keep-open
+        title="Abrir o Hunt Analyzer"
+        onClick={() => abrirAnalyzer(true)}
+        className="flex cursor-pointer flex-col gap-[.2em] rounded-[.35em] text-left font-[inherit] text-[inherit] hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+      >
+        <Row label="Gold/h" value={formatRate(stats.goldPerHour)} color="var(--color-gold)" />
+        <Row label="XP/h" value={formatRate(stats.xpPerHour)} />
+        <Row label="Mobs/h" value={String(stats.mobsPerHour)} />
+        <Row label="Shinys" value={String(stats.shinys)} color="var(--color-shiny)" />
+        <span className="mt-[.1em] flex items-center gap-[.25em] text-[.9em] text-n500">
+          <ChartLineUp /> detalhes
+        </span>
+      </button>
       <GameButton
         variant="ghost"
         className="mt-[.2em] justify-center text-[.9em]"
@@ -66,8 +84,14 @@ function Row({ label, value, color }: { label: string; value: string; color?: st
 
 export function RatesChip() {
   const stats = useRates()
+  const abrirAnalyzer = useUiStore((s) => s.setAnalyzerOpen)
   return (
-    <div className="flex items-center gap-[.8em] rounded-full border border-n800 bg-background/80 px-[.8em] py-[.4em] text-[.72em] text-n400">
+    <button
+      type="button"
+      data-keep-open
+      title="Abrir o Hunt Analyzer"
+      onClick={() => abrirAnalyzer(true)}
+      className="flex cursor-pointer items-center gap-[.8em] rounded-full border border-n800 bg-background/80 px-[.8em] py-[.4em] font-[inherit] text-[.72em] text-n400">
       <span>
         Gold/h <b className="font-medium text-gold">{formatRate(stats.goldPerHour)}</b>
       </span>
@@ -77,6 +101,6 @@ export function RatesChip() {
       <span>
         Mobs/h <b className="font-medium text-n200">{stats.mobsPerHour}</b>
       </span>
-    </div>
+    </button>
   )
 }

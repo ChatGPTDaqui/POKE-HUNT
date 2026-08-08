@@ -7,7 +7,7 @@
 // dispararia re-render nem seria persistida corretamente — cada funcao
 // abaixo devolve um POKE NOVO (`{...pokeInstance, ...}`), e o chamador
 // escreve de volta via `gameState.updatePokeInstance(uid, () => novoPoke)`.
-import { SPECIES, computeStatsAtLevel, totalExpForLevel, SPECIAL_EVOLUTION_STONE_COUNT, type PokeInstance, type StatBlock } from '@/data/pokes'
+import { SPECIES, computeStatsAtLevel, totalExpForLevel, pokeExpForLevel, SPECIAL_EVOLUTION_STONE_COUNT, type PokeInstance, type StatBlock } from '@/data/pokes'
 import { getAbility, type Ability } from '@/data/abilities'
 import { stoneItemId } from '@/data/stones'
 import { createFormulaEngine } from '@/core/formulaEngine'
@@ -154,7 +154,7 @@ export function grantExp(pokeInstance: PokeInstance, amount: number): GrantPokeE
   let leveledUp = false
   const newAbilities: Ability[] = []
 
-  while (exp >= totalExpForLevel(level + 1, species.growthCurve)) {
+  while (exp >= pokeExpForLevel(level + 1, species.growthCurve)) {
     const previousMaxHp = stats.hp
     level += 1
     leveledUp = true
@@ -206,7 +206,7 @@ export function applyDeathExpPenalty(pokeInstance: PokeInstance): DeathPenaltyRe
   let stats = pokeInstance.stats
   let hp = pokeInstance.hp
   let leveledDown = false
-  while (level > floor && exp < totalExpForLevel(level, species.growthCurve)) {
+  while (level > floor && exp < pokeExpForLevel(level, species.growthCurve)) {
     level -= 1
     leveledDown = true
     stats = computeStatsAtLevel(species, level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny)

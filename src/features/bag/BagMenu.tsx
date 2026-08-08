@@ -19,10 +19,13 @@ import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { PokeNameTag } from '@/components/shared/PokeNameTag'
+import { linkarItem, linkarPoke, tratouComoLink } from '@/components/shared/linkarNoChat'
+import { ItemTooltip } from '@/components/shared/ItemTooltip'
 import {
   GameButton, GameCard, GameCheck, GameIconButton, GameInput, GameSelect, SegmentedTabs,
 } from '@/components/game/controls'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
+import { cn } from '@/lib/utils'
 
 type SortKey = 'rarity' | 'iv' | 'level'
 const SORT_LABELS: Record<SortKey, string> = { rarity: 'Raridade', iv: 'IV', level: 'Nivel' }
@@ -126,7 +129,11 @@ function PokemonsTab() {
           return (
             <GameCard
               key={poke.uid}
-              onClick={() => showProfile(poke, species)}
+              title="Clique para ver o perfil · Shift+clique para linkar no chat"
+              onClick={(e) => {
+                if (tratouComoLink(e, () => linkarPoke(poke, species))) return
+                showProfile(poke, species)
+              }}
               className="flex items-center gap-[.7em] p-[.6em]"
             >
               <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={2.6} />
@@ -184,9 +191,21 @@ function ItensTab() {
 
   // Memo pra `usePaginacao` nao recortar um array novo a cada render (o objeto
   // `items` muda de identidade em todo flush do servidor).
+  //
+  // Item TRANCADO vai pro fim da lista (pedido explicito). O criterio de
+  // desempate continua sendo o nome, e nao a ordem de chegada do objeto: sem
+  // ele, destrancar um item o mandaria pra uma posicao aleatoria em vez de
+  // devolve-lo ao lugar de onde saiu.
   const ids = useMemo(
-    () => Object.keys(items).filter((id) => items[id] > 0 && ITEMS[id]),
-    [items],
+    () => Object.keys(items)
+      .filter((id) => items[id] > 0 && ITEMS[id])
+      .sort((a, b) => {
+        const travaA = lockedItems[a] ? 1 : 0
+        const travaB = lockedItems[b] ? 1 : 0
+        if (travaA !== travaB) return travaA - travaB
+        return ITEMS[a].name.localeCompare(ITEMS[b].name)
+      }),
+    [items, lockedItems],
   )
   // A lista de itens tambem pagina: com as 17 Stones + bolas/pocoes/revives ela
   // ja passa de 30 linhas, cada uma com icone proprio.
@@ -209,22 +228,30 @@ function ItensTab() {
         const borderColor = itemIconBorderColor(itemId)
 
         return (
-          <GameCard key={itemId} className="flex items-center gap-[.7em] p-[.6em]">
-            {iconUrl && (
-              <img
-                src={iconUrl}
-                alt={item.name}
-                title={item.description}
-                className="h-[2.6em] w-[2.6em] shrink-0 rounded-[.5em] object-contain"
-                style={borderColor ? { border: `3px solid ${borderColor}` } : undefined}
-              />
-            )}
-            <div className="min-w-0 flex-1">
-              <div className="font-medium">
-                {item.name} <span className="text-n400">x{items[itemId]}</span>
+          <GameCard
+            key={itemId}
+            title="Shift+clique para linkar no chat"
+            onClick={(e) => { tratouComoLink(e, () => linkarItem(item, items[itemId])) }}
+            className={cn('flex items-center gap-[.7em] p-[.6em]', locked && 'border-gold/40')}
+          >
+            <ItemTooltip item={item}>
+              {iconUrl && (
+                <img
+                  src={iconUrl}
+                  alt={item.name}
+                  className="h-[2.6em] w-[2.6em] shrink-0 rounded-[.5em] object-contain"
+                  style={borderColor ? { border: `3px solid ${borderColor}` } : undefined}
+                />
+              )}
+            </ItemTooltip>
+            <ItemTooltip item={item}>
+              <div className="min-w-0 flex-1 cursor-help">
+                <div className="font-medium">
+                  {item.name} <span className="text-n400">x{items[itemId]}</span>
+                </div>
+                <div className="text-[.75em] text-n500">{item.description}</div>
               </div>
-              <div className="text-[.75em] text-n500">{item.description}</div>
-            </div>
+            </ItemTooltip>
             <LockButton
               locked={locked}
               disabled={acao.isPending(`lock:${itemId}`)}

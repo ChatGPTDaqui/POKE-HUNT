@@ -1,0 +1,16 @@
+-- Um POKE anunciado no Mercado precisa sair do inventario do vendedor sem sair
+-- do banco: ele ainda existe, ainda tem dono registrado, e volta pra mochila
+-- (dele ou do comprador) quando o anuncio termina.
+--
+-- Por que um valor NOVO de enum e nao uma coluna `anunciado boolean`:
+-- `snapshotToGameState` monta o estado do jogador filtrando `location` em
+-- 'team'/'bag'. Com um valor que nao e nenhum dos dois, o POKE some do estado
+-- do vendedor sozinho — inclusive da Loja, onde ele poderia ser vendido pro
+-- sistema enquanto estivesse anunciado. Com uma coluna booleana, cada leitura
+-- teria que lembrar de filtrar, e a que esquecesse virava venda dupla.
+--
+-- ISTO PRECISA SER UMA MIGRATION SEPARADA: Postgres proibe USAR um valor de
+-- enum na mesma transacao em que ele foi adicionado ("unsafe use of new value").
+-- As tabelas do Mercado, que referenciam esse estado em codigo, vao no arquivo
+-- seguinte.
+alter type pokemon_location add value if not exists 'market';

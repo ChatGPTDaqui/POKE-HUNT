@@ -3,7 +3,7 @@
 // ao lado do avatar e o primeiro a sair porque e o unico dado do topo que ja
 // aparece em outro lugar (o nivel do treinador nao muda o que o jogador pode
 // fazer agora).
-import { Calculator, User, BookBookmark, CheckSquare, Envelope } from '@phosphor-icons/react'
+import { Calculator, Coin, Diamond, User, BookBookmark, CheckSquare, Envelope } from '@phosphor-icons/react'
 import { trainerExpProgress } from '@/engine/systems/progressionSystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useUiStore, useBreakpoints, type ScreenName } from '@/stores/uiStore'
@@ -30,15 +30,23 @@ export function TrainerCard() {
   // foto no tamanho original (4.2em), que era a restricao explicita.
   return (
     <div className="hud-surface pointer-events-auto flex items-center gap-[.6em] rounded-xl border border-n800 p-[.45em] shadow-lg">
-      {!narrow && (
-        <div className="flex flex-col items-end gap-[.2em]">
-          <div className="flex items-baseline gap-[.4em]">
-            <span className="max-w-[8em] truncate font-medium leading-none">{trainer.name}</span>
-            <span className="text-[.75em] leading-none text-n300">Lv {trainer.level}</span>
-          </div>
-          <Meter pct={expPct} height=".3em" color="var(--color-gold)" className="w-[7em]" />
-        </div>
-      )}
+      <div className="flex flex-col items-end gap-[.2em]">
+        {!narrow && (
+          <>
+            <div className="flex items-baseline gap-[.4em]">
+              <span className="max-w-[8em] truncate font-medium leading-none">{trainer.name}</span>
+              <span className="text-[.75em] leading-none text-n300">Lv {trainer.level}</span>
+            </div>
+            <Meter pct={expPct} height=".3em" color="var(--color-gold)" className="w-[7em]" />
+          </>
+        )}
+        {/* A carteira vive AQUI, colada no treinador (pedido explicito), e nao
+            mais no bloco central. O bloco central muda de ancora em <1140px (ele
+            desce pra baixo dos cards laterais) — ou seja, o dado mais consultado
+            do jogo trocava de lugar conforme a largura da janela. Junto do
+            treinador ele fica no mesmo canto em qualquer viewport. */}
+        <Carteira />
+      </div>
       {/*
         A foto abre o Perfil do Treinador. E um `button` de verdade (nao uma
         `div` com onClick) pra vir de graca com foco por teclado e papel de
@@ -58,6 +66,23 @@ export function TrainerCard() {
       >
         <User className="text-[1.8em] text-n300" />
       </button>
+    </div>
+  )
+}
+
+const fmtMoeda = new Intl.NumberFormat('pt-BR')
+
+function Carteira() {
+  const gold = useGameStateStore((s) => s.wallet.gold)
+  const diamonds = useGameStateStore((s) => s.wallet.diamonds)
+  return (
+    <div className="flex items-center gap-[.6em] text-[.8em] leading-none tabular-nums">
+      <span className="flex items-center gap-[.25em] font-medium text-gold">
+        <Coin weight="fill" /> {fmtMoeda.format(gold)}
+      </span>
+      <span className="flex items-center gap-[.25em] font-medium text-diamond">
+        <Diamond weight="fill" /> {fmtMoeda.format(diamonds)}
+      </span>
     </div>
   )
 }

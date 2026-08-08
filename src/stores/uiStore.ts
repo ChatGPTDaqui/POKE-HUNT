@@ -9,6 +9,7 @@
 // uma janela DOM. O botao dele no menu troca a cena e fecha o que estiver
 // aberto.
 import { create } from 'zustand'
+import type { ChatTab } from '@/stores/toastStore'
 
 // Nomes em portugues porque sao os mesmos rotulos que aparecem no menu — o
 // handoff especifica esta uniao literalmente, e ter um `'team'` interno virando
@@ -18,16 +19,21 @@ export type ScreenName =
   | 'wiki' | 'config' | 'correio' | 'bestiario' | 'tasks' | 'calc' | 'mercado'
   | 'ranking' | 'tutoriais'
 
-export type ChatTab = 'world' | 'trade' | 'log'
+// Reexportado do toastStore em vez de redeclarado: as duas listas ja
+// divergiram uma vez (a aba "Mundo" mudou de dono e esta copia continuaria
+// dizendo 'world'), e o compilador nao acusa duas unioes de string iguais.
+export type { ChatTab } from '@/stores/toastStore'
 
 // Cada janela flutuante que pode ser arrastada tem uma chave propria: a posicao
 // e por JANELA, nao por tela, senao arrastar a Loja moveria tambem o perfil.
-export type WindowKey = 'panel' | 'profile' | 'offline' | 'auto' | 'chat' | 'perfil' | 'tutorial'
+export type WindowKey = 'panel' | 'profile' | 'offline' | 'auto' | 'chat' | 'perfil' | 'tutorial' | 'analyzer'
 
 export type WindowPositions = Partial<Record<WindowKey, { x: number; y: number }>>
 
 const HUD_SCALE_KEY = 'novo-poke-idle:hud-scale'
-export const HUD_SCALE_MIN = 0.8
+// 0.7 (era 0.8) porque a fonte base da HUD subiu 3px nesta leva: sem descer o
+// minimo, quem jogava confortavel no tamanho antigo perdeu a opcao de voltar.
+export const HUD_SCALE_MIN = 0.7
 export const HUD_SCALE_MAX = 1.4
 
 // A escala da HUD NAO vive no gameStateStore de proposito. Aquele estado e
@@ -65,6 +71,12 @@ interface UiState {
   // pode ficar aberto por cima de qualquer tela.
   perfilOpen: boolean
   setPerfilOpen: (open: boolean) => void
+
+  // Hunt Analyzer: aberto pelo card/chip de taxas do HUD. Mesma razao do perfil
+  // pra nao ser uma `ScreenName` — nao vive no menu e abre por cima de qualquer
+  // tela.
+  analyzerOpen: boolean
+  setAnalyzerOpen: (open: boolean) => void
 
   chatTab: ChatTab
   chatOpen: boolean
@@ -113,8 +125,13 @@ export const useUiStore = create<UiState>((set, get) => ({
   currentScreen: null,
   // Abrir uma janela zera a posicao arrastada dela: a proxima abertura nasce
   // centralizada, em vez de reaparecer onde uma tela anterior foi largada.
+  // Abrir uma tela FECHA o Hunt Analyzer. As duas janelas usam o mesmo z-index
+  // (31) e o mesmo backdrop, entao deixar as duas abertas empilha uma sobre a
+  // outra e o botao "Fechar" mais proximo do topo do DOM fecha a errada —
+  // reproduzido ao vivo: com o Analyzer aberto, clicar em "Mercado" abria o
+  // Mercado por baixo dele.
   openScreen: (currentScreen) =>
-    set((s) => ({ currentScreen, moreOpen: false, winPos: { ...s.winPos, panel: undefined } })),
+    set((s) => ({ currentScreen, moreOpen: false, analyzerOpen: false, winPos: { ...s.winPos, panel: undefined } })),
   toggleScreen: (screen) => {
     if (get().currentScreen === screen) set({ currentScreen: null, moreOpen: false })
     else get().openScreen(screen)
@@ -132,7 +149,16 @@ export const useUiStore = create<UiState>((set, get) => ({
   setPerfilOpen: (perfilOpen) =>
     set((s) => ({ perfilOpen, winPos: perfilOpen ? { ...s.winPos, perfil: undefined } : s.winPos })),
 
-  chatTab: 'world',
+  analyzerOpen: false,
+  setAnalyzerOpen: (analyzerOpen) =>
+    set((s) => ({
+      analyzerOpen,
+      // Simetrico do `openScreen`: so uma janela de painel por vez.
+      currentScreen: analyzerOpen ? null : s.currentScreen,
+      winPos: analyzerOpen ? { ...s.winPos, analyzer: undefined } : s.winPos,
+    })),
+
+  chatTab: 'mundo',
   chatOpen: true,
   setChatTab: (chatTab) => set({ chatTab }),
   setChatOpen: (chatOpen) => set({ chatOpen }),

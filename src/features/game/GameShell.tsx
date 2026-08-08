@@ -18,11 +18,14 @@ import { ReviveCountdownModal } from '@/components/modals/ReviveCountdownModal'
 import { OfflineFarmModal } from '@/components/modals/OfflineFarmModal'
 import { HudLayer } from './HudLayer'
 import { ScreenOverlay } from '@/features/screens/ScreenOverlay'
+import { HuntAnalyzer } from '@/features/hunt/HuntAnalyzer'
 import { StartScreen } from '@/features/start/StartScreen'
 import { PerfilTreinador } from '@/features/perfil/PerfilTreinador'
 import { TutorialModal } from '@/features/tutorial/TutorialModal'
 import { useTutorialStore, TUTORIAL_BOT } from '@/stores/tutorialStore'
 import { useUiStore } from '@/stores/uiStore'
+import { useToastStore } from '@/stores/toastStore'
+import { observarEstoqueBaixo } from '@/components/auto/estoqueBaixo'
 import { useGameStateStore, useHasStarter, readLastSavedAt, forceSave, withSavesDeferred } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import {
@@ -285,6 +288,15 @@ function useTutorialInicial(hasStarter: boolean): void {
   }, [hasStarter])
 }
 
+// O alerta de "sem bola/pocao/revive" tambem vira linha no chat (aba Sistema).
+// O pisca no botao Auto so existe enquanto alguem esta olhando; a linha do chat
+// sobrevive a uma hora de jogo em segundo plano.
+function useAvisoDeEstoqueNoChat(): void {
+  useEffect(() => observarEstoqueBaixo((mensagem) => {
+    useToastStore.getState().pushToast(mensagem, 'error', 'world')
+  }), [])
+}
+
 function JogoCarregado() {
   const hasStarter = useHasStarter()
   const hudScale = useUiStore((s) => s.hudScale)
@@ -293,6 +305,7 @@ function JogoCarregado() {
   useSyncOnUnload()
   useViewportTracking()
   useTutorialInicial(hasStarter)
+  useAvisoDeEstoqueNoChat()
 
   return (
     <div
@@ -338,6 +351,7 @@ function JogoCarregado() {
       </div>
 
       <ToastStack />
+      <HuntAnalyzer />
       <PokeProfileModal />
       <PerfilTreinador />
       <TutorialModal />

@@ -12,6 +12,7 @@
 import { useMemo, useState } from 'react'
 import { CheckCircle } from '@phosphor-icons/react'
 import { SPECIES, type Species } from '@/data/pokes'
+import { pokedexNumber } from '@/data/regions'
 import { faceIconUrl } from '@/data/sprites'
 import { useGameStateStore, type PokedexKillCount } from '@/stores/gameStateStore'
 import { useBreakpoints } from '@/stores/uiStore'
@@ -50,7 +51,15 @@ export function BestiarioMenu() {
   const [shinyOnly, setShinyOnly] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  const todas = useMemo(() => Object.values(SPECIES), [])
+  // Ordem oficial da Pokedex (pedido explicito). `Object.values(SPECIES)` sai na
+  // ordem do arquivo gerado, que e a ordem de curadoria das hunts — util pro
+  // sync, arbitraria pro jogador que procura "o numero 25". O numero real vem de
+  // `data/regions.ts#pokedexNumber`, que ja o extrai da descricao emitida pelo
+  // sync (e estoura se alguma especie nao tiver).
+  const todas = useMemo(
+    () => Object.values(SPECIES).sort((a, b) => pokedexNumber(a.id) - pokedexNumber(b.id)),
+    [],
+  )
 
   const resumo = useMemo(() => {
     let completos = 0

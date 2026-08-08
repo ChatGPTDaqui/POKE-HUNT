@@ -12,7 +12,17 @@ import { create } from 'zustand'
 export type ToastType =
   | 'gold' | 'levelup' | 'success' | 'error' | 'capture-success' | 'capture-fail' | 'info'
 export type ToastChannel = 'combat' | 'world' | 'trade'
-export type ChatTab = 'world' | 'trade' | 'log'
+
+/**
+ * Abas alimentadas por ESTE store — tudo local (o jogo falando com o jogador).
+ *
+ * A aba "Mundo" saiu daqui: ela agora e o chat entre jogadores de verdade e
+ * vive no `chatStore` (rede). O canal `world`, que antes a alimentava, passou a
+ * cair em "Sistema" — pedido explicito de isolar o Chat Mundo pra so receber
+ * mensagem ao vivo de outro jogador.
+ */
+export type LogTab = 'sistema' | 'trade' | 'log'
+export type ChatTab = LogTab | 'mundo'
 
 export interface ToastEntry {
   id: string
@@ -26,10 +36,10 @@ export interface ChatLine {
   type: ToastType
 }
 
-const CHANNEL_TO_TAB: Record<ToastChannel, ChatTab> = {
+const CHANNEL_TO_TAB: Record<ToastChannel, LogTab> = {
   combat: 'log',
   trade: 'trade',
-  world: 'world',
+  world: 'sistema',
 }
 
 const MAX_CHAT_LINES = 60
@@ -41,17 +51,17 @@ function makeId(): string {
 
 interface ToastState {
   toasts: ToastEntry[]
-  chatLines: Record<ChatTab, ChatLine[]>
+  chatLines: Record<LogTab, ChatLine[]>
   pushToast: (message: string, type: ToastType, channel: ToastChannel) => void
   dismissToast: (id: string) => void
 }
 
 export const useToastStore = create<ToastState>((set) => ({
   toasts: [],
-  chatLines: { world: [], trade: [], log: [] },
+  chatLines: { sistema: [], trade: [], log: [] },
 
   pushToast: (message, type, channel) => {
-    const tab = CHANNEL_TO_TAB[channel] || 'world'
+    const tab = CHANNEL_TO_TAB[channel] || 'sistema'
     const line: ChatLine = { id: makeId(), message, type }
     set((state) => {
       const nextTabLines = [...state.chatLines[tab], line]

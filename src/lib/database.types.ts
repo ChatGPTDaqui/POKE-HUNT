@@ -95,6 +95,33 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          anexos: Json
+          body: string
+          created_at: string
+          id: string
+          trainer_name: string
+          user_id: string
+        }
+        Insert: {
+          anexos?: Json
+          body: string
+          created_at?: string
+          id?: string
+          trainer_name: string
+          user_id: string
+        }
+        Update: {
+          anexos?: Json
+          body?: string
+          created_at?: string
+          id?: string
+          trainer_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       encounter_slot_rates: {
         Row: {
           percent: number
@@ -176,6 +203,24 @@ export type Database = {
           key?: string
           sort_order?: number
           variables?: string[]
+        }
+        Relationships: []
+      }
+      friendships: {
+        Row: {
+          amigo_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          amigo_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          amigo_id?: string
+          created_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -363,6 +408,45 @@ export type Database = {
         }
         Relationships: []
       }
+      mail_messages: {
+        Row: {
+          assunto: string
+          corpo: string
+          created_at: string
+          de_id: string | null
+          de_nome: string
+          estado: string
+          id: string
+          para_id: string
+          read_at: string | null
+          tipo: string
+        }
+        Insert: {
+          assunto: string
+          corpo?: string
+          created_at?: string
+          de_id?: string | null
+          de_nome: string
+          estado?: string
+          id?: string
+          para_id: string
+          read_at?: string | null
+          tipo: string
+        }
+        Update: {
+          assunto?: string
+          corpo?: string
+          created_at?: string
+          de_id?: string | null
+          de_nome?: string
+          estado?: string
+          id?: string
+          para_id?: string
+          read_at?: string | null
+          tipo?: string
+        }
+        Relationships: []
+      }
       map_encounters: {
         Row: {
           map_id: string
@@ -441,6 +525,182 @@ export type Database = {
           name?: string
           sort_order?: number
           unlock_cost?: number | null
+        }
+        Relationships: []
+      }
+      market_deliveries: {
+        Row: {
+          claimed_at: string | null
+          created_at: string
+          diamonds: number
+          gold: number
+          id: string
+          item_id: string | null
+          motivo: string
+          quantity: number
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          created_at?: string
+          diamonds?: number
+          gold?: number
+          id?: string
+          item_id?: string | null
+          motivo: string
+          quantity?: number
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string | null
+          created_at?: string
+          diamonds?: number
+          gold?: number
+          id?: string
+          item_id?: string | null
+          motivo?: string
+          quantity?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      market_listings: {
+        Row: {
+          buyer_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          is_shiny: boolean
+          iv_percent: number
+          level: number
+          poke_uid: string
+          price: number
+          rarity: Database["public"]["Enums"]["rarity_tier"]
+          seller_id: string
+          sold_at: string | null
+          species_id: string
+          status: string
+        }
+        Insert: {
+          buyer_id?: string | null
+          created_at?: string
+          currency: string
+          id?: string
+          is_shiny?: boolean
+          iv_percent?: number
+          level: number
+          poke_uid: string
+          price: number
+          rarity: Database["public"]["Enums"]["rarity_tier"]
+          seller_id: string
+          sold_at?: string | null
+          species_id: string
+          status?: string
+        }
+        Update: {
+          buyer_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_shiny?: boolean
+          iv_percent?: number
+          level?: number
+          poke_uid?: string
+          price?: number
+          rarity?: Database["public"]["Enums"]["rarity_tier"]
+          seller_id?: string
+          sold_at?: string | null
+          species_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_listings_poke_uid_fkey"
+            columns: ["poke_uid"]
+            isOneToOne: false
+            referencedRelation: "pokemon_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_orders: {
+        Row: {
+          closed_at: string | null
+          created_at: string
+          gold_retido: number
+          id: string
+          item_id: string
+          quantity: number
+          remaining: number
+          side: string
+          status: string
+          unit_price: number
+          user_id: string
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string
+          gold_retido?: number
+          id?: string
+          item_id: string
+          quantity: number
+          remaining: number
+          side: string
+          status?: string
+          unit_price: number
+          user_id: string
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string
+          gold_retido?: number
+          id?: string
+          item_id?: string
+          quantity?: number
+          remaining?: number
+          side?: string
+          status?: string
+          unit_price?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      market_trades: {
+        Row: {
+          buyer_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          item_id: string | null
+          kind: string
+          quantity: number
+          seller_id: string | null
+          species_id: string | null
+          unit_price: number
+        }
+        Insert: {
+          buyer_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          item_id?: string | null
+          kind: string
+          quantity?: number
+          seller_id?: string | null
+          species_id?: string | null
+          unit_price: number
+        }
+        Update: {
+          buyer_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          item_id?: string | null
+          kind?: string
+          quantity?: number
+          seller_id?: string | null
+          species_id?: string | null
+          unit_price?: number
         }
         Relationships: []
       }
@@ -951,6 +1211,7 @@ export type Database = {
       }
       hunts_iniciais: { Args: never; Returns: string[] }
       is_admin: { Args: never; Returns: boolean }
+      nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
       wipe_inventario_e_economia: {
         Args: never
         Returns: {
@@ -992,7 +1253,7 @@ export type Database = {
       map_continent: "johto" | "kanto"
       move_category: "physical" | "special"
       move_target: "single" | "aoe"
-      pokemon_location: "team" | "bag"
+      pokemon_location: "team" | "bag" | "market"
       rarity_tier:
         | "comum"
         | "incomum"
@@ -1155,7 +1416,7 @@ export const Constants = {
       map_continent: ["johto", "kanto"],
       move_category: ["physical", "special"],
       move_target: ["single", "aoe"],
-      pokemon_location: ["team", "bag"],
+      pokemon_location: ["team", "bag", "market"],
       rarity_tier: ["comum", "incomum", "raro", "ultra", "legendary", "mythic"],
     },
   },

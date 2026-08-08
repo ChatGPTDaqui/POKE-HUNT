@@ -171,6 +171,94 @@ export interface PerfilRemoto {
   noHallDaFama: string | null
 }
 
+// --- mercado, chat e correio ------------------------------------------------
+// Os tipos espelham server/src/mercado.ts e server/src/social.ts.
+
+export interface NivelDePreco { unitPrice: number; quantity: number }
+
+export interface OrdemMercado {
+  id: string
+  user_id: string
+  item_id: string
+  side: 'compra' | 'venda'
+  unit_price: number
+  quantity: number
+  remaining: number
+  gold_retido: number
+  created_at: string
+}
+
+export interface AnuncioMercado {
+  id: string
+  seller_id: string
+  poke_uid: string
+  price: number
+  currency: 'gold' | 'diamond'
+  species_id: string
+  level: number
+  rarity: string
+  is_shiny: boolean
+  iv_percent: number
+  created_at: string
+  vendedor?: string
+}
+
+export interface NegocioMercado {
+  id: string
+  kind: 'item' | 'poke'
+  item_id: string | null
+  species_id: string | null
+  quantity: number
+  unit_price: number
+  currency: 'gold' | 'diamond'
+  created_at: string
+  comprador?: string | null
+  vendedor?: string | null
+  souComprador?: boolean
+}
+
+export interface ResumoItemMercado {
+  itemId: string
+  melhorCompra: number | null
+  melhorVenda: number | null
+  emVenda: number
+  emCompra: number
+}
+
+export interface AnexoChat {
+  kind: 'item' | 'poke'
+  id: string
+  nome: string
+  quantidade?: number
+  speciesId?: string
+  level?: number
+  rarity?: string
+  isShiny?: boolean
+  ivPercent?: number
+}
+
+export interface MensagemChat {
+  id: string
+  user_id: string
+  trainer_name: string
+  body: string
+  anexos: AnexoChat[]
+  created_at: string
+}
+
+export interface MensagemCorreio {
+  id: string
+  de_id: string | null
+  de_nome: string
+  tipo: 'texto' | 'pedido_amizade' | 'sistema'
+  assunto: string
+  corpo: string
+  estado: 'pendente' | 'aceito' | 'recusado' | 'lido'
+  created_at: string
+}
+
+export interface AmigoRemoto { userId: string; nome: string; nivel: number }
+
 export const servidor = {
   estado: () => pedir<RespostaComEstado>('/estado', { retentavel: true }),
 
@@ -207,6 +295,43 @@ export const servidor = {
       method: 'POST',
       body: JSON.stringify(acao),
     }),
+
+  // --- Mercado --------------------------------------------------------------
+  // Leituras sao retentaveis (consulta pura). Escritas NAO: criar ordem duas
+  // vezes cria duas ordens, e o escrow sai do bolso do jogador nas duas.
+  mercadoItens: () => pedir<{ itens: ResumoItemMercado[] }>('/mercado/itens', { retentavel: true }),
+  mercadoLivro: (itemId: string) =>
+    pedir<{ itemId: string; compras: NivelDePreco[]; vendas: NivelDePreco[]; negocios: NegocioMercado[] }>(
+      `/mercado/itens?itemId=${encodeURIComponent(itemId)}`, { retentavel: true },
+    ),
+  mercadoPokes: () => pedir<{ anuncios: AnuncioMercado[] }>('/mercado/pokes', { retentavel: true }),
+  mercadoMeus: () =>
+    pedir<{ ordens: OrdemMercado[]; anuncios: AnuncioMercado[] }>('/mercado/meus', { retentavel: true }),
+  mercadoHistorico: () => pedir<{ negocios: NegocioMercado[] }>('/mercado/historico', { retentavel: true }),
+
+  criarOrdem: (corpo: { itemId: string; side: 'compra' | 'venda'; unitPrice: number; quantity: number }) =>
+    pedir<RespostaComEstado & { executado: number }>('/mercado/ordem', { method: 'POST', body: JSON.stringify(corpo) }),
+  cancelarOrdem: (ordemId: string) =>
+    pedir<RespostaComEstado>('/mercado/ordem/cancelar', { method: 'POST', body: JSON.stringify({ ordemId }) }),
+  anunciarPoke: (corpo: { pokeUid: string; price: number; currency: 'gold' | 'diamond' }) =>
+    pedir<RespostaComEstado>('/mercado/anuncio', { method: 'POST', body: JSON.stringify(corpo) }),
+  cancelarAnuncio: (anuncioId: string) =>
+    pedir<RespostaComEstado>('/mercado/anuncio/cancelar', { method: 'POST', body: JSON.stringify({ anuncioId }) }),
+  comprarAnuncio: (anuncioId: string) =>
+    pedir<RespostaComEstado>('/mercado/comprar', { method: 'POST', body: JSON.stringify({ anuncioId }) }),
+
+  // --- Chat e Correio -------------------------------------------------------
+  lerChat: () => pedir<{ mensagens: MensagemChat[] }>('/chat', { retentavel: true }),
+  enviarChat: (body: string, anexos: AnexoChat[]) =>
+    pedir<{ mensagens: MensagemChat[] }>('/chat', { method: 'POST', body: JSON.stringify({ body, anexos }) }),
+  correio: () =>
+    pedir<{ mensagens: MensagemCorreio[]; amigos: AmigoRemoto[]; naoLidas: number }>('/correio', { retentavel: true }),
+  pedirAmizade: (nick: string) =>
+    pedir<{ mensagem: string }>('/correio/amizade', { method: 'POST', body: JSON.stringify({ nick }) }),
+  responderPedido: (mensagemId: string, aceitar: boolean) =>
+    pedir<{ mensagem: string }>('/correio/responder', { method: 'POST', body: JSON.stringify({ mensagemId, aceitar }) }),
+  marcarLida: (mensagemId: string) =>
+    pedir<{ ok: boolean }>('/correio/ler', { method: 'POST', body: JSON.stringify({ mensagemId }) }),
 }
 
 /**

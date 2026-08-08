@@ -15,6 +15,7 @@ import { colorForType } from '@/data/typeColors'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useBreakpoints } from '@/stores/uiStore'
+import { AbilityTooltip } from '@/components/shared/AbilityTooltip'
 import { cn } from '@/lib/utils'
 
 const CATEGORY_BORDER: Record<string, string> = {
@@ -71,10 +72,10 @@ export function AbilityHud() {
         const borderColor = CATEGORY_BORDER[resolveAbilityCategory(ability, poke)] || CATEGORY_BORDER.physical
 
         return (
+          <AbilityTooltip key={ability.id} ability={ability} poke={poke}>
           <div
-            key={ability.id}
             onDoubleClick={() => toggleAbilityDisabled(poke.uid, ability.id)}
-            title={`${ability.name}${isOff ? ' (desligado — duplo clique religa)' : ' (duplo clique desliga da rotação)'}`}
+            title={isOff ? 'Desligado — duplo clique religa' : 'Duplo clique desliga da rotação'}
             className={cn(
               'relative flex cursor-pointer items-center justify-center rounded-[.5em] select-none',
               ready && 'shadow-[0_0_0_2px_rgba(255,255,255,.85)]',
@@ -124,6 +125,7 @@ export function AbilityHud() {
               {ability.power}
             </span>
           </div>
+          </AbilityTooltip>
         )
       })}
     </div>

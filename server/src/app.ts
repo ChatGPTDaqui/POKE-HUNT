@@ -7,8 +7,15 @@
 // mantem ela aberta de graca. Sao 4 rotas; framework nao pagaria seu custo.
 import { autenticar } from './auth.js'
 import { ErroHttp, selecionar, inserir, atualizar, type Config } from './db.js'
-import { aplicarFlush, carregarEstado, gravarEstado, type LinhaSessao } from './progresso.js'
+import { aplicarFlush, carregarEstado, carregarEstadoParaEscrita, gravarEstado, type LinhaSessao } from './progresso.js'
 import { aplicarAcao, type Acao } from './acoes.js'
+import {
+  livroDoItem, resumoDosItens, anunciosAtivos, minhasOrdens, meuHistorico,
+  criarOrdem, cancelarOrdem, anunciarPoke, cancelarAnuncio, comprarAnuncio,
+} from './mercado.js'
+import {
+  lerChat, enviarChat, caixaDeEntrada, pedirAmizade, responderPedido, marcarLida,
+} from './social.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
 import {
   perfilDoJogador, rankingDeTreinadores, rankingDePokemon, hallDaFama,
@@ -80,7 +87,18 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
     return fechar(cfg, jogador.id)
   }
   if (url.pathname === '/estado' && req.method === 'GET') {
-    return json({ estado: await carregarEstado(cfg, jogador.id) })
+    // Le E LIQUIDA as entregas pendentes do Mercado. E o unico ponto por onde
+    // um jogador que so abriu o jogo (sem entrar em hunt nem comprar nada)
+    // recebe o que vendeu enquanto estava fora — por isso ele grava, apesar de
+    // ser um GET. `carregarEstadoParaEscrita` carimba a entrega como aplicada,
+    // entao o `gravarEstado` logo abaixo nao e opcional.
+    const estado = await carregarEstadoParaEscrita(cfg, jogador.id)
+    await gravarEstado(cfg, jogador.id, estado)
+    return json({ estado })
+  }
+  if (url.pathname.startsWith('/mercado')) return mercado(cfg, jogador.id, req, url)
+  if (url.pathname.startsWith('/chat') || url.pathname.startsWith('/correio')) {
+    return social(cfg, jogador.id, req, url)
   }
   if (url.pathname === '/perfil' && req.method === 'GET') {
     return json(await perfilDoJogador(cfg, jogador.id))
@@ -260,10 +278,78 @@ async function acao(cfg: OpcoesApp, userId: string, req: Request): Promise<Respo
     if (aberta) await fecharLinhaDeSessao(cfg, aberta.id)
   }
 
-  const dados = await carregarEstado(cfg, userId)
+  const dados = await carregarEstadoParaEscrita(cfg, userId)
   const { store, dados: estado } = criarEstadoDoJogador(dados)
   const resultado = aplicarAcao(store, estado, corpo)
   await gravarEstado(cfg, userId, estado)
 
   return json({ ...resultado, estado })
+}
+
+// --- Mercado ----------------------------------------------------------------
+//
+// Rotas proprias em vez de entradas na lista branca de `/acao` por um motivo
+// concreto: toda operacao de mercado e ASSINCRONA e toca linhas de OUTRO
+// jogador (ordem alheia, entrega, transferencia de POKE). `aplicarAcao` e uma
+// funcao sincrona e pura sobre a store do proprio jogador — enfiar I/O ali
+// quebraria a garantia que faz aquele arquivo ser auditavel.
+async function mercado(cfg: OpcoesApp, userId: string, req: Request, url: URL): Promise<Response> {
+  if (req.method === 'GET') {
+    if (url.pathname === '/mercado/itens') {
+      const itemId = url.searchParams.get('itemId')
+      if (itemId) return json(await livroDoItem(cfg, itemId))
+      return json({ itens: await resumoDosItens(cfg) })
+    }
+    if (url.pathname === '/mercado/pokes') return json({ anuncios: await anunciosAtivos(cfg) })
+    if (url.pathname === '/mercado/meus') return json(await minhasOrdens(cfg, userId))
+    if (url.pathname === '/mercado/historico') return json({ negocios: await meuHistorico(cfg, userId) })
+    return json({ erro: 'rota desconhecida' }, 404)
+  }
+
+  if (req.method !== 'POST') return json({ erro: 'rota desconhecida' }, 404)
+  const corpo = (await req.json().catch(() => null)) as Record<string, unknown> | null
+  if (!corpo) throw new ErroHttp(400, 'corpo invalido')
+
+  // Mesma razao de `/acao`: uma sessao de hunt aberta ainda nao creditada
+  // mudaria o inventario sob os pes desta operacao. Liquida antes de decidir
+  // qualquer coisa sobre ouro ou itens.
+  await liquidarSessaoAberta(cfg, userId)
+
+  if (url.pathname === '/mercado/ordem') return json(await criarOrdem(cfg, userId, corpo))
+  if (url.pathname === '/mercado/ordem/cancelar') {
+    return json(await cancelarOrdem(cfg, userId, String(corpo.ordemId ?? '')))
+  }
+  if (url.pathname === '/mercado/anuncio') return json(await anunciarPoke(cfg, userId, corpo))
+  if (url.pathname === '/mercado/anuncio/cancelar') {
+    return json(await cancelarAnuncio(cfg, userId, String(corpo.anuncioId ?? '')))
+  }
+  if (url.pathname === '/mercado/comprar') {
+    return json(await comprarAnuncio(cfg, userId, String(corpo.anuncioId ?? '')))
+  }
+  return json({ erro: 'rota desconhecida' }, 404)
+}
+
+// --- Chat e Correio ---------------------------------------------------------
+async function social(cfg: OpcoesApp, userId: string, req: Request, url: URL): Promise<Response> {
+  if (req.method === 'GET') {
+    if (url.pathname === '/chat') return json({ mensagens: await lerChat(cfg) })
+    if (url.pathname === '/correio') return json(await caixaDeEntrada(cfg, userId))
+    return json({ erro: 'rota desconhecida' }, 404)
+  }
+  if (req.method !== 'POST') return json({ erro: 'rota desconhecida' }, 404)
+
+  const corpo = (await req.json().catch(() => null)) as Record<string, unknown> | null
+  if (!corpo) throw new ErroHttp(400, 'corpo invalido')
+
+  if (url.pathname === '/chat') return json({ mensagens: await enviarChat(cfg, userId, corpo) })
+  if (url.pathname === '/correio/amizade') {
+    return json(await pedirAmizade(cfg, userId, String(corpo.nick ?? '')))
+  }
+  if (url.pathname === '/correio/responder') {
+    return json(await responderPedido(cfg, userId, String(corpo.mensagemId ?? ''), corpo.aceitar === true))
+  }
+  if (url.pathname === '/correio/ler') {
+    return json(await marcarLida(cfg, userId, String(corpo.mensagemId ?? '')))
+  }
+  return json({ erro: 'rota desconhecida' }, 404)
 }

@@ -1,6 +1,6 @@
 // Port de js/systems/CaptureSystem.js.
 import type { Rng } from '@/core/rng'
-import { SPECIES, computeStatsAtLevel, totalExpForLevel, novoPokeUid, type PokeInstance } from '@/data/pokes'
+import { SPECIES, computeStatsAtLevel, pokeExpForLevel, novoPokeUid, type PokeInstance } from '@/data/pokes'
 import { getItem } from '@/data/items'
 import { getAbility } from '@/data/abilities'
 import { rollChance, clamp } from '@/core/random'
@@ -41,7 +41,7 @@ export function attemptCapture(rng: Rng, gameState: GameStateStore, defeatedPoke
     // podia colidir em duas capturas no mesmo milissegundo.
     uid: novoPokeUid(),
     level: CAPTURE_LEVEL,
-    exp: totalExpForLevel(CAPTURE_LEVEL, species.growthCurve),
+    exp: pokeExpForLevel(CAPTURE_LEVEL, species.growthCurve),
     // Registro de captura: gravado AQUI, no instante em que o POKE muda de
     // dono, e nunca reescrito depois. `defeatedPoke` e o POKE selvagem, que
     // nao tem treinador — o spread acima nao traria nada.

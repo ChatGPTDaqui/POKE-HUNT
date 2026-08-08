@@ -92,6 +92,29 @@ export function totalExpForLevel(level: number, growthCurve: GrowthCurve): numbe
   return Math.max(0, Math.round(formulaEngine.eval(formulaKey, { n: level })))
 }
 
+/**
+ * Requisito de EXP de um POKE — a curva acima, 30% mais cara.
+ *
+ * POR QUE UMA FUNCAO SEPARADA, E NAO um multiplicador dentro de
+ * `totalExpForLevel`: o TREINADOR usa a mesma maquina de curva
+ * (`trainerExpProgress`/`grantTrainerExp` chamam `totalExpForLevel` com
+ * MEDIUM_SLOW fixo). Encarecer la dentro deixaria o nivel de treinador 30% mais
+ * lento junto — coisa que ninguem pediu e que nao tem nada a ver com evolucao.
+ *
+ * POR QUE ISSO E "XP DE EVOLUCAO": evolucao neste jogo e 100% por NIVEL
+ * (`species.evolvesAtLevel`) — nao existe uma barra de EXP de evolucao separada
+ * pra encarecer. Encarecer o requisito de nivel do POKE E encarecer a evolucao,
+ * e e o unico lugar onde o pedido pode ser aplicado sem inventar mecanica nova.
+ *
+ * Knob de planilha como todo ajuste de economia: `POKE_EXP_REQUIREMENT_MULTIPLIER`
+ * na aba "Fórmulas" substitui o 1.3 sem tocar em codigo.
+ */
+const POKE_EXP_REQUIREMENT_MULTIPLIER = formulaEngine.evalOrDefault('POKE_EXP_REQUIREMENT_MULTIPLIER', 1.3)
+
+export function pokeExpForLevel(level: number, growthCurve: GrowthCurve): number {
+  return Math.round(totalExpForLevel(level, growthCurve) * POKE_EXP_REQUIREMENT_MULTIPLIER)
+}
+
 function hashString(s: string): number {
   let h = 0
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
@@ -239,7 +262,7 @@ export function createPokeInstance(rng: Rng, speciesId: string, level = 1, { ivs
     // Baseline EXP for starting AT `level` (not 0) — otherwise a poke created
     // above level 1 needs to earn the full cumulative EXP of a low-level curve
     // before its progress bar (and grantExp's level-up check) show any movement.
-    exp: totalExpForLevel(level, species.growthCurve),
+    exp: pokeExpForLevel(level, species.growthCurve),
     ivs,
     stats,
     hp: stats.hp,

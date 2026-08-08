@@ -143,6 +143,29 @@ export async function atualizar(cfg: Config, caminho: string, patch: unknown): P
   })
 }
 
+/**
+ * PATCH que devolve as linhas afetadas — e a base de todo compare-and-swap
+ * deste servico.
+ *
+ * O servico e serverless: nao ha transacao aberta entre duas chamadas ao
+ * PostgREST, entao "ler a ordem, decidir, gravar" e uma corrida sempre que dois
+ * jogadores tocam o mesmo livro de ofertas. O padrao usado no Mercado e mandar
+ * o valor ANTIGO no filtro (`&remaining=eq.7`) junto do novo no corpo: se
+ * outra requisicao chegou primeiro, o filtro nao casa, a resposta volta VAZIA e
+ * quem chamou sabe que perdeu a corrida — em vez de sobrescrever em silencio.
+ *
+ * Com `return=minimal` isso seria indistinguivel de sucesso, que e exatamente
+ * o modo de falha que este helper existe pra evitar.
+ */
+export async function atualizarRetornando<T>(cfg: Config, caminho: string, patch: unknown): Promise<T[]> {
+  const dado = await pedir(cfg, caminho, {
+    method: 'PATCH',
+    headers: cabecalhos(cfg, { Prefer: 'return=representation' }),
+    body: JSON.stringify(patch),
+  })
+  return (dado ?? []) as T[]
+}
+
 export async function apagar(cfg: Config, caminho: string): Promise<void> {
   await pedir(cfg, caminho, { method: 'DELETE', headers: cabecalhos(cfg, { Prefer: 'return=minimal' }) })
 }

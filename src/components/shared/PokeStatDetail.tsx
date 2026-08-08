@@ -12,6 +12,7 @@ import { rarityOf } from '@/data/rarity'
 import type { PokeInstance, Species } from '@/data/pokes'
 import { PokeNameTag } from './PokeNameTag'
 import { TypeChip } from './TypeChip'
+import { AbilityTooltip } from './AbilityTooltip'
 import { Meter } from '@/components/game/controls'
 
 export function ProfileHero({ poke, species }: { poke: PokeInstance; species: Species }) {
@@ -145,7 +146,11 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
               }`}
             >
               <span className="text-n400">{entry.levelReq}</span>
-              <span className="truncate">{ability.name}</span>
+              <AbilityTooltip ability={ability} poke={poke}>
+                <span className="cursor-help truncate underline decoration-dotted underline-offset-2">
+                  {ability.name}
+                </span>
+              </AbilityTooltip>
               <span><TypeChip type={ability.type} /></span>
               <span className="text-n400">
                 {resolveAbilityCategory(ability, poke) === 'physical' ? 'Fisico' : 'Especial'}

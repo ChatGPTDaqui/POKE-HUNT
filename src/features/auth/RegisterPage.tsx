@@ -12,6 +12,7 @@ export function RegisterPage() {
       descricao="Seu progresso fica salvo na nuvem e acompanha voce em qualquer dispositivo."
       rotuloAcao="Criar conta"
       confirmarSenha
+      pedirNomeTreinador
       onSubmit={signUp}
       // Com `enable_confirmations = false` (ver supabase/config.toml), o
       // signUp ja devolve sessao ativa e da pra ir direto pro jogo. Quando a

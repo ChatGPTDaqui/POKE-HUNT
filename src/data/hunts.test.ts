@@ -74,6 +74,73 @@ describe('hunts', () => {
     expect(achados).toEqual([])
   })
 
+  // O bug que este teste tranca: o NOME da zona e o NIVEL que ela spawna eram
+  // dois numeros de origens diferentes, e discordavam. "Zona Nivel 31-40"
+  // entregava POKE de nivel 15 e de nivel 51. Agora a faixa e a fonte unica —
+  // e a unica forma de isso voltar a divergir e alguem reintroduzir uma segunda
+  // fonte, que este teste pega.
+  it('todo encontro respeita estritamente a faixa da propria zona', () => {
+    const erros: string[] = []
+    for (const map of Object.values(MAPS)) {
+      const [min, max] = map.levelRange
+      for (const encId of map.enemyPool) {
+        const enc = ENCOUNTERS[encId]
+        if (enc.minLevel < min || enc.maxLevel > max) {
+          erros.push(`${map.id} (Lv ${min}-${max}) tem ${enc.speciesId} em Lv ${enc.minLevel}-${enc.maxLevel}`)
+        }
+        for (const lw of enc.levelWeights ?? []) {
+          if (lw.level < min || lw.level > max) {
+            erros.push(`${map.id} (Lv ${min}-${max}) sorteia nivel ${lw.level}`)
+          }
+        }
+      }
+    }
+    expect(erros).toEqual([])
+  })
+
+  it('as zonas normais sao faixas fechadas de 10 niveis, sem buraco entre elas', () => {
+    // O espelho do Modo Pesadelo herda o nome (com o numero da zona) mas nao a
+    // faixa: ele e a mesma zona deslocada em +100 com piso 150, entao "10
+    // niveis fechados" nao vale nem deveria valer pra ele.
+    const zonas = Object.values(MAPS)
+      .filter((m) => !m.id.startsWith('nightmare_'))
+      .filter((m) => / Zona \d+ /.test(m.name))
+      .map((m) => ({ id: m.id, nome: m.name, min: m.levelRange[0], max: m.levelRange[1] }))
+    expect(zonas.length).toBeGreaterThan(0)
+    for (const z of zonas) {
+      // O numero escrito no nome tem que ser o numero da faixa: e a coisa que
+      // o jogador le antes de entrar.
+      const numero = Number(z.nome.match(/ Zona (\d+) /)?.[1])
+      expect(z.max - z.min, `${z.id} nao tem 10 niveis`).toBe(9)
+      expect(z.min, `${z.nome} comeca no nivel errado`).toBe(numero * 10 + 1)
+    }
+  })
+
+  // A soma dos pesos e o denominador do `weightedPick`: peso zero (ou negativo,
+  // ou NaN vindo de um encontro sem tier) faria uma especie nunca spawnar sem
+  // erro nenhum, e uma hunt com soma zero travaria o sorteio.
+  it('a matriz de spawn fecha: todo peso e positivo e toda hunt soma mais que zero', () => {
+    const erros: string[] = []
+    for (const map of Object.values(MAPS)) {
+      let soma = 0
+      for (const encId of map.enemyPool) {
+        const peso = ENCOUNTERS[encId].weight
+        if (!Number.isFinite(peso) || peso <= 0) erros.push(`${map.id}/${encId} tem peso ${peso}`)
+        else soma += peso
+      }
+      if (soma <= 0) erros.push(`${map.id} tem soma de pesos ${soma}`)
+    }
+    expect(erros).toEqual([])
+  })
+
+  it('as chances de spawn de cada hunt somam 100%', () => {
+    for (const map of Object.values(MAPS)) {
+      const total = map.enemyPool.reduce((s, id) => s + ENCOUNTERS[id].weight, 0)
+      const soma = map.enemyPool.reduce((s, id) => s + (ENCOUNTERS[id].weight / total) * 100, 0)
+      expect(soma, `${map.id}`).toBeCloseTo(100, 6)
+    }
+  })
+
   it('a hunt inicial sai 80% nivel 1 e 20% nivel 2', () => {
     const inicial = MAPS.route_46
     expect(inicial).toBeTruthy()

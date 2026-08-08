@@ -181,6 +181,14 @@ function drawAura(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
   ctx.save()
   ctx.globalAlpha = alpha
   if (bounds && frame) {
+    // Com mais de uma aura, as camadas passam a SOMAR luz em vez de a ultima
+    // cobrir as anteriores (pedido explicito de "sobreposicao gerando efeito
+    // arco-iris"). `lighter` e blending aditivo: verde + vermelho vira amarelo
+    // na regiao onde os dois halos se encontram, e cada cor continua
+    // reconhecivel na borda onde so ela alcanca — que e exatamente a leitura
+    // util ("este POKE tem HP e Ataque maximos"). Com uma aura so o modo normal
+    // e mantido: aditivo sobre fundo claro lavaria a cor.
+    if (maxedStats.length > 1) ctx.globalCompositeOperation = 'lighter'
     maxedStats.forEach((stat, i) => {
       ctx.shadowColor = AURA_COLORS[stat]
       ctx.shadowBlur = 9 + i * 5
