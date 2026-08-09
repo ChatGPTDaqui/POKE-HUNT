@@ -133,11 +133,41 @@ export async function recarregarEstado(): Promise<void> {
   }
 }
 
+/**
+ * O que fazer quando o SERVIDOR encerra a cacada sozinho.
+ *
+ * Registrado de fora (GameShell) em vez de chamado direto porque `controller`
+ * ja importa este modulo — chamar de volta daqui fecharia um ciclo de import.
+ */
+let aoEncerrarSessao: (() => void) | null = null
+
+export function registrarEncerramentoDeSessao(cb: () => void): () => void {
+  aoEncerrarSessao = cb
+  return () => { if (aoEncerrarSessao === cb) aoEncerrarSessao = null }
+}
+
+const MOTIVO_ENCERRAMENTO: Record<string, string> = {
+  desmaio: 'Seu POKE desmaiou e a cacada foi encerrada. Cure na Enfermeira para voltar a cacar.',
+}
+
+function tratarEncerramento(motivo: string | null | undefined): void {
+  if (!motivo) return
+  // Sem parar o timer, o cliente segue pedindo flush de 30 em 30 segundos numa
+  // sessao que ja nao existe (409 silencioso), e o jogador continua vendo a
+  // hunt como se estivesse rendendo.
+  pararFlushPeriodico()
+  useToastStore.getState().pushToast(
+    MOTIVO_ENCERRAMENTO[motivo] ?? 'A cacada foi encerrada pelo servidor.', 'error', 'world',
+  )
+  aoEncerrarSessao?.()
+}
+
 export async function liquidar(): Promise<void> {
   if (!servidorAtivo()) return
   try {
     const r = await servidor.flush()
     aplicarEstadoDoServidor(r.estado)
+    tratarEncerramento(r.sessaoEncerrada)
     if (r.truncado) {
       useToastStore.getState().pushToast(
         'Voce ficou fora tempo demais — parte do periodo nao foi creditada.', 'error', 'world',

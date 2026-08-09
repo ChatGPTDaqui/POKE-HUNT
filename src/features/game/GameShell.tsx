@@ -12,7 +12,7 @@ import { ToastStack } from '@/components/toasts/ToastStack'
 import { PokeProfileModal } from '@/components/modals/PokeProfileModal'
 import { ConfirmDialog } from '@/components/modals/ConfirmDialog'
 import { LevelUpSplash } from '@/components/modals/LevelUpSplash'
-import { BossDefeatModal } from '@/components/modals/BossDefeatModal'
+import { DefeatModal } from '@/components/modals/DefeatModal'
 import { LanceCountdownModal, LanceVictoryReturn } from '@/components/modals/LanceModals'
 import { ReviveCountdownModal } from '@/components/modals/ReviveCountdownModal'
 import { OfflineFarmModal } from '@/components/modals/OfflineFarmModal'
@@ -43,8 +43,9 @@ import { pendingDriftSeconds, resetDrift } from '@/engine/clockDrift'
 import { simulateWorldSeconds, type OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
 import { recordBatch } from '@/engine/systems/statsTracker'
 import { useProgressoRemoto, type EstadoProgresso } from './useProgressoRemoto'
-import { assentarSessaoPendente, commitAgora } from '@/data/remote/autoridade'
+import { assentarSessaoPendente, commitAgora, registrarEncerramentoDeSessao } from '@/data/remote/autoridade'
 import { servidorAtivo } from '@/data/remote/servidor'
+import { controller } from '@/engine/controller'
 
 // Farm Offline (aba fechada / PC desligado) — porta o bloco de boot do
 // js/main.js. Roda uma vez, no primeiro mount, e so quando o save diz que o
@@ -68,7 +69,12 @@ function useOfflineFarmOnBoot(): { summary: OfflineSimSummary | null; dismiss: (
     // que recebeu. Entao aqui so pedimos o resumo e mostramos.
     if (servidorAtivo()) {
       void assentarSessaoPendente().then((resumo) => {
-        if (resumo && resumo.kills > 0) setSummary(resumo)
+        // `stoppedEarly` entra no criterio junto com os abates: a sessao que
+        // termina com o POKE no chao pode ter rendido ZERO, e era exatamente
+        // esse caso que ficava sem relatorio nenhum. O jogador voltava depois de
+        // uma noite fora, nao via modal, nao via ouro, e nao tinha como
+        // descobrir que o POKE tinha caido nos primeiros minutos.
+        if (resumo && (resumo.kills > 0 || resumo.stoppedEarly)) setSummary(resumo)
       })
       return
     }
@@ -239,6 +245,47 @@ function useCommitOnLevelUp(): void {
   }, [])
 }
 
+// O servidor pode encerrar a cacada sozinho (POKE desmaiado sem como levantar).
+// Quando isso acontece o cliente TEM que sair da hunt: a simulacao local
+// continuaria desenhando combate — com o POKE caido, parado — enquanto o
+// servidor ja nao credita nada, e o jogador nao teria como perceber.
+//
+// Registrado aqui, e nao dentro de `autoridade.ts`, porque `controller` importa
+// aquele modulo: chamar o controller de la fecharia um ciclo de import.
+function useSaidaAoEncerrarSessao(): void {
+  useEffect(() => {
+    const soltarCallback = registrarEncerramentoDeSessao(voltarProHospital)
+    if (!servidorAtivo()) return soltarCallback
+
+    // Rede de seguranca que cobre TODAS as rotas, nao so o flush: `/acao` e
+    // `/mercado` tambem liquidam a sessao antes de agir, e um POKE que caiu
+    // durante uma delas encerraria a cacada sem passar pelo callback acima. Em
+    // vez de espalhar o aviso por cada rota, o cliente confia no dado que ja
+    // volta em todas: `currentMapId` nulo com uma hunt na tela significa que o
+    // servidor tirou o jogador de la.
+    const cancelar = useGameStateStore.subscribe((estado) => {
+      if (estado.currentMapId != null) return
+      if (!useWorldStore.getState().mapDef) return
+      voltarProHospital()
+    })
+    return () => { soltarCallback(); cancelar() }
+  }, [])
+}
+
+// `returnToHospital` zera o `currentMapId` (que ja e nulo) antes de trocar a
+// cena, e esse `set` acorda o proprio observador acima com a hunt ainda na
+// tela. Sem a trava, a chamada se chamaria de novo pra sempre.
+let saindoDaHunt = false
+function voltarProHospital(): void {
+  if (saindoDaHunt) return
+  saindoDaHunt = true
+  try {
+    controller.returnToHospital({ x: 0, y: 0 })
+  } finally {
+    saindoDaHunt = false
+  }
+}
+
 // O `zustand/persist` ja grava a cada mudanca do gameState, mas o HP/EXP do
 // POKE em campo vive no worldStore durante a hunt (ver nota de arquitetura em
 // engine/controller.ts) — sem isso, fechar a aba no meio de uma luta perderia
@@ -336,6 +383,7 @@ function JogoCarregado() {
   const hudScale = useUiStore((s) => s.hudScale)
   const { summary, dismiss } = useOfflineFarmOnBoot()
   useBackgroundCatchUp()
+  useSaidaAoEncerrarSessao()
   useSyncOnUnload()
   useViewportTracking()
   useCommitOnLevelUp()
@@ -369,7 +417,7 @@ function JogoCarregado() {
             <HudLayer />
             <ScreenOverlay />
             <ReviveCountdownModal />
-            <BossDefeatModal />
+            <DefeatModal />
             <LanceCountdownModal />
             <LanceVictoryReturn />
           </>

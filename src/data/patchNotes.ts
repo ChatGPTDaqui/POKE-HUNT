@@ -13,6 +13,21 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '5.5',
+    date: '2026-08-09',
+    title: 'O farm offline parava de render pra sempre depois que o Pokemon desmaiava',
+    highlights: [
+      'BUG CRITICO DO FARM OFFLINE CORRIGIDO. Quando o Pokemon desmaiava durante uma caçada, a caçada continuava "aberta" pra sempre com ele caido: cada vez que o jogo acertava as contas com o servidor, o periodo inteiro era consumido do relogio e a simulacao parava no primeiro instante, porque o Pokemon ja estava no chao. Medido antes do conserto: tres periodos seguidos de 6 horas foram consumidos e renderam ZERO de ouro, zero abates e nenhum aviso. Quem passasse uma noite fora voltava sem nada e sem explicacao.',
+      'Agora a caçada TERMINA quando o Pokemon cai sem como levantar. O jogador volta pro Hospital, o relogio para de ser consumido, e o proximo periodo so comeca quando ele curar e entrar numa hunt de novo.',
+      'O RELATORIO "BEM-VINDO DE VOLTA" APARECE MESMO QUANDO NAO RENDEU NADA, dizendo que o Pokemon desmaiou e a farm parou antes do tempo acabar. Antes ele so aparecia se tivesse havido pelo menos um abate — ou seja, justamente no caso do problema ele ficava calado.',
+      'AVISO NA TELA quando o Pokemon cai numa hunt sem auto-revive (ou sem Revive na mochila): antes esse aviso so existia nas hunts BOSS, e nas outras o jogador ficava olhando um Pokemon deitado sem saber que nao estava mais ganhando nada.',
+      'Nao da mais pra entrar numa hunt com o Pokemon desmaiado (o servidor tambem recusa).',
+      'Hunts BOSS nao reanimam de proposito — mas a simulacao nao sabia disso e, com Revive na mochila, rodava as 6 horas inteiras com o Pokemon caido, sem explicar o zero no relatorio.',
+      'O "tempo de jogo" do Perfil parou de contar tempo que nao foi jogado: contava o periodo inteiro mesmo quando a simulacao parava nos primeiros segundos (tres periodos de 6h viravam 30 horas de tempo jogado para 6 horas reais).',
+      'LEMBRETE: o auto-revive vem DESLIGADO por padrao. Com ele ligado e Revive na mochila, o Pokemon levanta sozinho e a caçada continua enquanto voce estiver fora.',
+    ],
+  },
+  {
     version: '5.4',
     date: '2026-08-09',
     title: 'Duplicacao de Pokemon corrigida, leilao no Mercado e compra em um clique',

@@ -202,6 +202,21 @@ export interface ResultadoFlush {
   resumo: OfflineSimSummary
   estado: GameStateData
   piso: ResultadoPiso
+  /**
+   * A cacada acabou sozinha e a sessao TEM que ser fechada pelo chamador.
+   *
+   * Hoje so ha um motivo: o POKE desmaiou e nao ha como reanima-lo (auto-revive
+   * desligado, sem Revive na mochila, ou hunt BOSS, onde reanimar e proibido).
+   *
+   * Existe porque uma sessao nesse estado nao "renderia menos" — ela rendia ZERO
+   * e mesmo assim continuava consumindo o relogio: cada flush creditava o
+   * intervalo inteiro, simulava 0,1 segundo (o primeiro passo ja encontra o POKE
+   * caido) e devolvia nada. Medido: tres flushes seguidos de 6h creditaram 6h
+   * cada e renderam 0 de ouro. O jogador ficava dias sem farmar nada sem
+   * nenhum aviso, e nao havia caminho automatico de volta — o POKE so levanta
+   * curando no Hospital.
+   */
+  encerrada: 'desmaio' | null
 }
 
 /**
@@ -328,7 +343,12 @@ export async function aplicarFlush(
     recordBatch(store, { gold: resumo.gold, xp: resumo.xp, mobs: resumo.kills, shinys: resumo.shinySeen })
   }
 
-  estado.currentMapId = sessao.map_id
+  // A cacada acabou com o POKE no chao: o jogador NAO esta mais numa hunt.
+  // Zerar aqui (e nao so na coluna, depois) e o que mantem banco, resposta e
+  // cliente contando a mesma historia — o cliente sobrescreve o estado local com
+  // esta resposta, entao um `currentMapId` sobrevivente o deixaria desenhando
+  // uma cacada que o servidor ja encerrou.
+  estado.currentMapId = resumo.stoppedEarly ? null : sessao.map_id
   await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
 
   // Hall da Fama: a unica coisa que libera o continente `kanto` e limpar a
@@ -351,7 +371,12 @@ export async function aplicarFlush(
   // e credita-lo depois daria ao jogador o direito de acumular semanas paradas e
   // sacar tudo de uma vez.
   await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, {
-    simulated_seconds: Number(sessao.simulated_seconds) + segundos,
+    // `resumo.simulatedSeconds` e nao `segundos`: os dois so divergem quando a
+    // simulacao PAROU antes do fim do intervalo (POKE caido), e ai creditar o
+    // intervalo cheio mentiria no "tempo de jogo" do Perfil — na medicao que
+    // originou este fix, tres flushes de 6h somaram 30 horas de tempo jogado
+    // pra 6 horas de simulacao real.
+    simulated_seconds: Number(sessao.simulated_seconds) + resumo.simulatedSeconds,
     // Grava onde a sequencia parou. `world.rng` e o MESMO objeto passado pro
     // `buildMapWorld` — `nextFloat` muta em lugar de proposito (ver core/rng.ts),
     // entao ler daqui pega o estado ja avancado pela simulacao inteira.
@@ -359,5 +384,12 @@ export async function aplicarFlush(
     rng_draws: world.rng.draws,
   })
 
-  return { segundosCreditados: segundos, truncado, resumo, estado, piso }
+  return {
+    segundosCreditados: segundos,
+    truncado,
+    resumo,
+    estado,
+    piso,
+    encerrada: resumo.stoppedEarly ? 'desmaio' : null,
+  }
 }

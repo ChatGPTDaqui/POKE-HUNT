@@ -146,6 +146,13 @@ export interface RespostaFlush extends RespostaComEstado {
   // Se o piso de 50% da taxa online precisou completar o resultado. O relatorio
   // avisa em vez de so mostrar um numero maior que o combate pessimista rendeu.
   piso: { aplicado: boolean; ouroAdicionado: number; xpAdicionado: number }
+  /**
+   * O servidor encerrou a cacada por conta propria (POKE desmaiado sem como
+   * levantar). Nao e erro: e o unico jeito de o cliente descobrir que continuar
+   * na hunt nao rende mais nada — a simulacao local seguiria desenhando combate
+   * enquanto o servidor ja nao credita.
+   */
+  sessaoEncerrada?: 'desmaio' | null
 }
 
 // --- ranking e perfil -------------------------------------------------------

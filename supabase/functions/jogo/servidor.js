@@ -37981,6 +37981,7 @@ function simulateWorldSeconds({ world, gameState, seconds, stepSeconds, stepFn, 
 	summary.requestedSeconds = seconds;
 	if (!Number.isFinite(seconds) || seconds <= 0 || !world.player) return summary;
 	const itemsBefore = { ...gameState.items };
+	const isBossHunt = Boolean(world.mapDef && world.mapDef.noRespawn);
 	summary.pokeLevelBefore = world.player.poke.level;
 	summary.trainerLevelBefore = gameState.trainer.level;
 	let step = Math.max(Math.max(.01, stepSeconds), seconds / Math.max(1, maxSteps));
@@ -38010,7 +38011,7 @@ function simulateWorldSeconds({ world, gameState, seconds, stepSeconds, stepFn, 
 			}
 		}
 		if (world.player.fainted) {
-			if (!(gameState.autoToggles.autoRevive && gameState.hasItem("revive", 1))) {
+			if (!(!isBossHunt && gameState.autoToggles.autoRevive && gameState.hasItem("revive", 1))) {
 				summary.stoppedEarly = true;
 				break;
 			}
@@ -60451,14 +60452,14 @@ async function aplicarFlush(cfg, userId, sessao) {
 		mobs: resumo.kills,
 		shinys: resumo.shinySeen
 	});
-	estado.currentMapId = sessao.map_id;
+	estado.currentMapId = resumo.stoppedEarly ? null : sessao.map_id;
 	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
 	if (!continentesAntes.has("kanto") && estado.unlockedContinents.includes("kanto")) await inserir(cfg, "hall_da_fama", {
 		user_id: userId,
 		conquista: CONQUISTA_LANCE
 	}, { upsert: "user_id,conquista" });
 	await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, {
-		simulated_seconds: Number(sessao.simulated_seconds) + segundos,
+		simulated_seconds: Number(sessao.simulated_seconds) + resumo.simulatedSeconds,
 		rng_state: world.rng.state,
 		rng_draws: world.rng.draws
 	});
@@ -60467,7 +60468,8 @@ async function aplicarFlush(cfg, userId, sessao) {
 		truncado,
 		resumo,
 		estado,
-		piso
+		piso,
+		encerrada: resumo.stoppedEarly ? "desmaio" : null
 	};
 }
 //#endregion
@@ -61459,6 +61461,17 @@ async function fecharLinhaDeSessao(cfg, sessaoId) {
 * inteira: nem escolher um novo inicial funcionava depois de "Iniciar novo
 * jogo".
 */
+/**
+* Fecha a linha da sessao E tira o jogador da hunt.
+*
+* `current_map_id` tem que ser limpo junto: e ele que faz o cliente voltar pra
+* hunt no proximo carregamento. Deixar a coluna apontando pra um mapa sem
+* sessao poe o jogador dentro de uma cacada que nao credita nada.
+*/
+async function sairDaHunt(cfg, userId, sessaoId) {
+	await fecharLinhaDeSessao(cfg, sessaoId);
+	await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null });
+}
 async function liquidarSessaoAberta(cfg, userId) {
 	const sessao = await sessaoAberta(cfg, userId);
 	if (!sessao) return {
@@ -61471,13 +61484,13 @@ async function liquidarSessaoAberta(cfg, userId) {
 		resultado: null
 	};
 	if (!resultado) {
-		await fecharLinhaDeSessao(cfg, sessao.id);
-		await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null });
+		await sairDaHunt(cfg, userId, sessao.id);
 		return {
 			sessao: null,
 			resultado: null
 		};
 	}
+	if (resultado.encerrada) await sairDaHunt(cfg, userId, sessao.id);
 	return {
 		sessao,
 		resultado
@@ -61490,7 +61503,9 @@ async function abrirSessao(cfg, userId, req) {
 	if (!mapId || !pokeUid) throw new ErroHttp(400, "mapId e pokeUid sao obrigatorios");
 	if (!MAPS[mapId]) throw new ErroHttp(400, "hunt desconhecida");
 	const estado = await carregarEstado(cfg, userId);
-	if (!estado.team.find((p) => p.uid === pokeUid)) throw new ErroHttp(403, "este POKE nao esta na sua equipe");
+	const poke = estado.team.find((p) => p.uid === pokeUid);
+	if (!poke) throw new ErroHttp(403, "este POKE nao esta na sua equipe");
+	if (poke.hp <= 0) throw new ErroHttp(409, "Seu POKE esta desmaiado. Cure na Enfermeira antes de cacar.");
 	if (MAPS[mapId].unlockCost != null && !estado.unlockedMaps.includes(mapId)) throw new ErroHttp(403, "hunt nao desbloqueada");
 	const continente = MAPS[mapId].continent || "johto";
 	if (!estado.unlockedContinents.includes(continente)) throw new ErroHttp(403, "continente nao desbloqueado");
@@ -61540,15 +61555,16 @@ async function flush(cfg, userId) {
 		estado: await carregarEstado(cfg, userId)
 	});
 	if (!resultado) {
-		await fecharLinhaDeSessao(cfg, sessao.id);
-		await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null });
+		await sairDaHunt(cfg, userId, sessao.id);
 		throw new ErroHttp(409, "nenhuma sessao aberta");
 	}
+	if (resultado.encerrada) await sairDaHunt(cfg, userId, sessao.id);
 	return json({
 		segundosCreditados: resultado.segundosCreditados,
 		truncado: resultado.truncado,
 		resumo: resultado.resumo,
 		piso: resultado.piso,
+		sessaoEncerrada: resultado.encerrada,
 		estado: resultado.estado
 	});
 }
@@ -61556,8 +61572,7 @@ async function fechar(cfg, userId) {
 	const sessao = await sessaoAberta(cfg, userId);
 	if (!sessao) return json({ fechada: false });
 	const resultado = await aplicarFlush(cfg, userId, sessao);
-	await fecharLinhaDeSessao(cfg, sessao.id);
-	await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null });
+	await sairDaHunt(cfg, userId, sessao.id);
 	if (!resultado || resultado === "ocupado") return json({ fechada: false });
 	return json({
 		fechada: true,

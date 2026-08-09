@@ -148,6 +148,18 @@ async function fecharLinhaDeSessao(cfg: Config, sessaoId: string): Promise<void>
  * inteira: nem escolher um novo inicial funcionava depois de "Iniciar novo
  * jogo".
  */
+/**
+ * Fecha a linha da sessao E tira o jogador da hunt.
+ *
+ * `current_map_id` tem que ser limpo junto: e ele que faz o cliente voltar pra
+ * hunt no proximo carregamento. Deixar a coluna apontando pra um mapa sem
+ * sessao poe o jogador dentro de uma cacada que nao credita nada.
+ */
+async function sairDaHunt(cfg: Config, userId: string, sessaoId: string): Promise<void> {
+  await fecharLinhaDeSessao(cfg, sessaoId)
+  await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null })
+}
+
 async function liquidarSessaoAberta(cfg: Config, userId: string) {
   const sessao = await sessaoAberta(cfg, userId)
   if (!sessao) return { sessao: null, resultado: null }
@@ -156,10 +168,13 @@ async function liquidarSessaoAberta(cfg: Config, userId: string) {
   // A sessao continua valida: so nao ha o que liquidar aqui.
   if (resultado === FLUSH_OCUPADO) return { sessao, resultado: null }
   if (!resultado) {
-    await fecharLinhaDeSessao(cfg, sessao.id)
-    await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null })
+    await sairDaHunt(cfg, userId, sessao.id)
     return { sessao: null, resultado: null }
   }
+  // POKE caido sem como levantar: a cacada acabou. Manter a sessao aberta era o
+  // que fazia o farm offline "nao funcionar" — ver o comentario de
+  // `ResultadoFlush.encerrada`.
+  if (resultado.encerrada) await sairDaHunt(cfg, userId, sessao.id)
   return { sessao, resultado }
 }
 
@@ -176,6 +191,14 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
   const estado = await carregarEstado(cfg, userId)
   const poke = estado.team.find((p) => p.uid === pokeUid)
   if (!poke) throw new ErroHttp(403, 'este POKE nao esta na sua equipe')
+  // POKE caido nao luta. Sem esta recusa, abrir a hunt com ele desmaiado
+  // iniciava uma sessao que so sabe queimar o relogio: o primeiro passo da
+  // simulacao ja encontra o POKE no chao, para ali, e cada flush seguinte
+  // credita o intervalo inteiro por 0,1 segundo de jogo. Uma ausencia de uma
+  // noite virava zero de ouro, sem erro em lugar nenhum.
+  if (poke.hp <= 0) {
+    throw new ErroHttp(409, 'Seu POKE esta desmaiado. Cure na Enfermeira antes de cacar.')
+  }
   // A regra real do jogo e "hunt sem custo nasce liberada; hunt com custo exige
   // ter pago" — nao "tem que estar na coluna `unlocked_maps`". A diferenca
   // importa: as hunts do Modo Pesadelo e as BOSS sao geradas em RUNTIME
@@ -246,15 +269,19 @@ async function flush(cfg: Config, userId: string): Promise<Response> {
   // POKE da sessao sumiu — fecha e responde 409, que o cliente ja trata como
   // "nao ha sessao aberta" (nao e erro do jogador, nao gera toast).
   if (!resultado) {
-    await fecharLinhaDeSessao(cfg, sessao.id)
-    await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null })
+    await sairDaHunt(cfg, userId, sessao.id)
     throw new ErroHttp(409, 'nenhuma sessao aberta')
   }
+  // O POKE caiu e nao ha como reanima-lo. A sessao morre aqui, e o cliente
+  // precisa SABER: sem o aviso ele continua desenhando a hunt e o jogador acha
+  // que esta farmando enquanto o servidor ja nao credita nada.
+  if (resultado.encerrada) await sairDaHunt(cfg, userId, sessao.id)
   return json({
     segundosCreditados: resultado.segundosCreditados,
     truncado: resultado.truncado,
     resumo: resultado.resumo,
     piso: resultado.piso,
+    sessaoEncerrada: resultado.encerrada,
     // O cliente sobrescreve o estado local com isto. Ele e predicao; a verdade
     // e o que volta daqui.
     estado: resultado.estado,
@@ -265,8 +292,7 @@ async function fechar(cfg: Config, userId: string): Promise<Response> {
   const sessao = await sessaoAberta(cfg, userId)
   if (!sessao) return json({ fechada: false })
   const resultado = await aplicarFlush(cfg, userId, sessao)
-  await fecharLinhaDeSessao(cfg, sessao.id)
-  await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null })
+  await sairDaHunt(cfg, userId, sessao.id)
   // Sem resultado = POKE da sessao sumiu (ou outro request estava creditando o
   // intervalo). A sessao fica fechada (acima), mas nao ha resumo pra mostrar —
   // `fechada: false` faz o cliente nao abrir o modal de Farm Offline com numeros

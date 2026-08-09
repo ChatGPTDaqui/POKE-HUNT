@@ -149,6 +149,7 @@ export function simulateWorldSeconds({
   if (!Number.isFinite(seconds) || seconds <= 0 || !world.player) return summary
 
   const itemsBefore = { ...gameState.items }
+  const isBossHunt = Boolean(world.mapDef && world.mapDef.noRespawn)
   summary.pokeLevelBefore = world.player.poke.level
   summary.trainerLevelBefore = gameState.trainer.level
   const stepCap = Math.max(1, maxSteps)
@@ -182,7 +183,14 @@ export function simulateWorldSeconds({
     }
 
     if (world.player.fainted) {
-      const canRecover = gameState.autoToggles.autoRevive && gameState.hasItem('revive', 1)
+      // Hunts BOSS desligam auto-revive por completo (autoSystem.ts), nao
+      // importa a config do jogador. Sem espelhar isso aqui, um POKE morto numa
+      // BOSS com Revive na mochila era considerado "recuperavel": o laco rodava
+      // as 6 horas inteiras com um cadaver em campo, sem `stoppedEarly` e sem
+      // nenhum abate — o relatorio nao tinha como explicar o zero.
+      const canRecover = !isBossHunt
+        && gameState.autoToggles.autoRevive
+        && gameState.hasItem('revive', 1)
       if (!canRecover) {
         summary.stoppedEarly = true
         break

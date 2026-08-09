@@ -40,6 +40,16 @@ export const controller = {
     const gameState = useGameStateStore.getState()
     const activePoke = gameState.team[gameState.activeIndex]
     if (!activePoke) return false
+    // POKE caido nao luta, e uma cacada com ele so queima o relogio: a simulacao
+    // para no primeiro passo e cada flush credita o intervalo por 0,1 segundo de
+    // jogo. O servidor tambem recusa (defesa em profundidade), mas aqui a
+    // resposta e imediata e diz o que fazer.
+    if (activePoke.hp <= 0) {
+      useToastStore.getState().pushToast(
+        'Seu POKE esta desmaiado. Cure na Enfermeira antes de cacar.', 'error', 'world',
+      )
+      return false
+    }
     if (!(await abrirSessaoDeHunt(mapId, activePoke.uid))) return false
     // Arte de TODA especie do pool na memoria antes de a cena aparecer — senao o
     // primeiro encontro com cada uma pisca sem sprite enquanto o PNG baixa (ver
