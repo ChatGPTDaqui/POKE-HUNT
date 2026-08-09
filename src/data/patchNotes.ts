@@ -13,6 +13,22 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '5.6',
+    date: '2026-08-09',
+    title: 'Caça a bugs: ouro do Mercado sumindo e duplicacao por clique duplo',
+    highlights: [
+      'PERDA DE OURO E ITENS CORRIGIDA (critico). O que voce recebia no Mercado (venda, lance aceito, anexo do Correio) e entregue no seu proximo pedido ao servidor. So que qualquer pedido RECUSADO — "Ouro insuficiente", item trancado, POKE indisponivel — marcava a entrega como recebida e jogava fora no meio do caminho. Medido: 500 de ouro de uma venda sumiram porque o jogador, logo depois, tentou comprar algo que nao podia pagar. Como recusa e o erro mais comum do jogo, isso acontecia direto. Agora a entrega volta pra fila e chega no pedido seguinte.',
+      'DUPLICACAO POR CLIQUE DUPLO CORRIGIDA (critico). Dois cliques rapidos em "Entrar" abriam DUAS caçadas ao mesmo tempo. So uma era contabilizada; a outra ficava parada e, quando a primeira terminava, pagava de novo TODO o periodo. Medido: 30 minutos creditados duas vezes = +8.105 de ouro e +60 Pokemon do nada. Agora o banco so aceita uma caçada aberta por jogador, e o clique duplo simplesmente entra na mesma.',
+      'BUSCA DE AMIGO PELO NICK CONSERTADA. Digitar "%" ou "___" mandava pedido de amizade pra um jogador qualquer, sem saber o nome dele — e dava pra descobrir nicks alheios por tentativa. A busca agora compara o nome inteiro.',
+      'LIMITE DE 6 NA EQUIPE PASSOU A VALER DE VERDADE. Ele so existia na tela; o 7º Pokemon era recusado la no banco e voltava como "erro no servidor".',
+      'POCAO NAO E MAIS GASTA A TOA. Usar Potion com a vida cheia consumia o item e nao curava nada. Agora o botao "Usar" some quando nao ha o que curar, igual ja acontecia com o Revive.',
+      'LANCE DUPLICADO NO MERCADO: enviar um segundo lance no mesmo anuncio dizia "erro no servidor"; agora explica que ja existe um lance pendente. E quando dois lances eram aceitos ao mesmo tempo, os DOIS ficavam marcados como aceitos no historico (o dinheiro voltava certo, o registro e que mentia).',
+      'CONFIGURACAO DO BOT VALIDADA: dava pra gravar milhares de regras de pocao de uma vez (o que travava a simulacao da caçada) e regras com valores sem sentido. Agora ha limite e checagem.',
+      'O ranking do Perfil parava de contar a partir do jogador 1.000 e mostrava uma posicao errada sem avisar.',
+      'Mensagens de limite no Mercado dizem qual e o teto em vez de so "valor invalido".',
+    ],
+  },
+  {
     version: '5.5',
     date: '2026-08-09',
     title: 'O farm offline parava de render pra sempre depois que o Pokemon desmaiava',

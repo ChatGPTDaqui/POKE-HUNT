@@ -121,6 +121,31 @@ export async function selecionarTudo<T>(cfg: Config, caminho: string, pagina = 1
   }
 }
 
+/**
+ * Quantas linhas casam com o filtro — sem trazer nenhuma.
+ *
+ * Existe porque `selecionar(...).length` MENTE: o PostgREST corta em 1000 linhas
+ * em silencio (o gotcha que este projeto ja documentou no catalogo). O Perfil
+ * contava jogadores assim, entao a partir do jogador 1001 o total e a posicao no
+ * ranking congelariam — e nada no jogo denunciaria isso, porque o numero
+ * continua parecendo plausivel.
+ *
+ * `Range: 0-0` + `count=exact` traz UMA linha e o total no `Content-Range`.
+ */
+export async function contar(cfg: Config, caminho: string): Promise<number> {
+  const juncao = caminho.includes('?') ? '&' : '?'
+  const { resposta, texto } = await buscarComRetry(cfg, `${caminho}${juncao}`, {
+    headers: cabecalhos(cfg, { Range: '0-0', Prefer: 'count=exact' }),
+  })
+  if (!resposta.ok) {
+    console.error(`PostgREST ${resposta.status} em ${caminho}: ${texto.slice(0, 400)}`)
+    throw new ErroHttp(502, 'falha ao falar com o banco')
+  }
+  const total = Number(resposta.headers.get('content-range')?.split('/')[1])
+  if (!Number.isFinite(total)) throw new ErroHttp(502, `Content-Range ausente/ilegivel em ${caminho}`)
+  return total
+}
+
 export async function inserir<T>(cfg: Config, tabela: string, linhas: unknown, opcoes: { retornar?: boolean; upsert?: string } = {}): Promise<T[]> {
   const prefer = [
     opcoes.retornar ? 'return=representation' : 'return=minimal',

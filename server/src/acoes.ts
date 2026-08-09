@@ -69,6 +69,54 @@ const MENSAGEM_ERRO_ECONOMIA: Record<string, string> = {
 const traduzErroEconomia = (reason: string | undefined, padrao: string): string =>
   (reason && MENSAGEM_ERRO_ECONOMIA[reason]) || padrao
 
+// ---------------------------------------------------------------------------
+// Validacao das regras de automacao
+// ---------------------------------------------------------------------------
+// Isto NAO e zelo excessivo: `configurarAuto` era o unico ponto do servico que
+// gravava, sem olhar, um objeto vindo do cliente. Medido contra a funcao
+// publicada: 5.000 regras de pocao foram aceitas e persistidas, e
+// `{itemId: 42, hpPercent: "abc"}` tambem.
+//
+// As duas consequencias sao concretas:
+//  - `updateAutoHeal` percorre `autoPotRules` a cada tick. Uma simulacao de 6h
+//    faz ~216 mil ticks; com milhares de regras que nao casam, isso vira bilhoes
+//    de iteracoes, a Edge Function bate no teto de CPU e o request morre. Com o
+//    claim atomico do flush (leva 5.4), morrer no meio CUSTA o intervalo.
+//  - regra com tipo errado volta pra tela e quebra o `<input type="number">` que
+//    a renderiza.
+const MAX_REGRAS_AUTO = 20
+
+function listaDeRegras(bruto: unknown, campo: string): Record<string, unknown>[] {
+  if (!Array.isArray(bruto)) throw new ErroHttp(400, `${campo} invalido`)
+  if (bruto.length > MAX_REGRAS_AUTO) throw new ErroHttp(400, `${campo}: no maximo ${MAX_REGRAS_AUTO} regras`)
+  return bruto.map((r) => {
+    if (!r || typeof r !== 'object' || Array.isArray(r)) throw new ErroHttp(400, `${campo} invalido`)
+    return r as Record<string, unknown>
+  })
+}
+
+function validaRegraDePocao(r: Record<string, unknown>) {
+  const hpPercent = Number(r.hpPercent)
+  if (!Number.isFinite(hpPercent) || hpPercent < 1 || hpPercent > 100) {
+    throw new ErroHttp(400, 'hpPercent deve ficar entre 1 e 100')
+  }
+  return { hpPercent: Math.round(hpPercent), itemId: texto(r.itemId, 'itemId') }
+}
+
+function validaRegraDeCaptura(r: Record<string, unknown>) {
+  return { speciesId: texto(r.speciesId, 'speciesId'), ballItemId: texto(r.ballItemId, 'ballItemId') }
+}
+
+function validaCatchConfig(bruto: unknown) {
+  if (!bruto || typeof bruto !== 'object' || Array.isArray(bruto)) throw new ErroHttp(400, 'catchConfig invalido')
+  const c = bruto as Record<string, unknown>
+  return {
+    ballId: texto(c.ballId, 'ballId'),
+    catchShinyEnabled: Boolean(c.catchShinyEnabled),
+    shinyBallId: texto(c.shinyBallId, 'shinyBallId'),
+  }
+}
+
 type Manipulador = (store: GameStateStore, estado: GameStateData, acao: Acao) => ResultadoAcao
 
 const MANIPULADORES: Record<string, Manipulador> = {
@@ -202,6 +250,10 @@ const MANIPULADORES: Record<string, Manipulador> = {
 
     if (item.kind === 'potion' && item.healAmount != null) {
       if (ativo.hp <= 0) throw new ErroHttp(409, 'POKE desmaiado — use um Revive')
+      // Sem esta guarda a pocao era consumida por nada: `Math.min` abaixo
+      // devolvia o mesmo HP e o item sumia do inventario. O Revive ja tinha a
+      // recusa simetrica ("o POKE ja esta consciente"); a pocao nao.
+      if (ativo.hp >= ativo.stats.hp) throw new ErroHttp(409, 'O POKE ja esta com a vida cheia.')
       if (!store.removeItem(itemId, 1)) throw new ErroHttp(409, 'voce nao tem esse item')
       store.updatePokeInstance(ativo.uid, (p) => ({
         ...p, hp: Math.min(p.stats.hp, p.hp + item.healAmount!),
@@ -304,18 +356,16 @@ const MANIPULADORES: Record<string, Manipulador> = {
         store.setAutoToggle(k, Boolean(v))
       }
     }
-    if ('catchConfig' in patch) store.setAutoCatchConfig(patch.catchConfig as never)
+    if ('catchConfig' in patch) store.setAutoCatchConfig(validaCatchConfig(patch.catchConfig))
     if ('potRules' in patch) {
-      const regras = patch.potRules as unknown[]
-      if (!Array.isArray(regras)) throw new ErroHttp(400, 'potRules invalido')
+      const regras = listaDeRegras(patch.potRules, 'potRules').map(validaRegraDePocao)
       while (_estado.autoPotRules.length) store.removeAutoPotRule(0)
-      for (const r of regras) store.addAutoPotRule(r as never)
+      for (const r of regras) store.addAutoPotRule(r)
     }
     if ('catchRules' in patch) {
-      const regras = patch.catchRules as unknown[]
-      if (!Array.isArray(regras)) throw new ErroHttp(400, 'catchRules invalido')
+      const regras = listaDeRegras(patch.catchRules, 'catchRules').map(validaRegraDeCaptura)
       while (_estado.autoCatchRules.length) store.removeAutoCatchRule(0)
-      for (const r of regras) store.addAutoCatchRule(r as never)
+      for (const r of regras) store.addAutoCatchRule(r)
     }
     return { ok: true }
   },

@@ -12,7 +12,9 @@ import {
 } from './db.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
 import { aplicarPiso, NENHUM_PISO, type ResultadoPiso } from './farmOffline.js'
-import { reivindicarEntregas, aplicarEntregasNoEstado } from './entregas.js'
+import {
+  reivindicarEntregas, aplicarEntregasNoEstado, devolverEntregas, type LinhaEntrega,
+} from './entregas.js'
 import { CONQUISTA_LANCE } from './ranking.js'
 
 // Teto de quanto tempo um unico flush pode creditar. NAO e uma regra de
@@ -59,6 +61,15 @@ export interface LinhaSessao {
 export interface EstadoParaEscrita {
   estado: GameStateData
   pokeIdsNoLoad: Set<string>
+  /**
+   * As entregas do Mercado reivindicadas por ESTE request.
+   *
+   * Ficam expostas porque o claim e irreversivel do ponto de vista do banco: a
+   * linha ja esta carimbada. Se a operacao abortar antes de gravar, elas TEM que
+   * voltar pra fila — ver `devolverEntregas`. Quem usa `comEstadoParaEscrita`
+   * ganha isso de graca.
+   */
+  entregas: LinhaEntrega[]
 }
 
 async function lerSnapshot(cfg: Config, userId: string): Promise<EstadoParaEscrita> {
@@ -74,7 +85,7 @@ async function lerSnapshot(cfg: Config, userId: string): Promise<EstadoParaEscri
     { player: player[0], pokemon, items, pokedex, autoCatchRules },
     defaultGameStateData(),
   )
-  return { estado, pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)) }
+  return { estado, pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)), entregas: [] }
 }
 
 export async function carregarEstado(cfg: Config, userId: string): Promise<GameStateData> {
@@ -94,7 +105,32 @@ export async function carregarEstadoParaEscrita(cfg: Config, userId: string): Pr
   const snapshot = await lerSnapshot(cfg, userId)
   const entregas = await reivindicarEntregas(cfg, userId)
   if (entregas.length) aplicarEntregasNoEstado(snapshot.estado, entregas)
+  snapshot.entregas = entregas
   return snapshot
+}
+
+/**
+ * Carrega o estado pra escrita, roda `fn`, e DEVOLVE as entregas se `fn` abortar.
+ *
+ * Este embrulho existe porque a versao "carregue e lembre de tratar o erro" ja
+ * falhou na pratica em TODOS os call sites de uma vez: nenhum tinha try/catch, e
+ * qualquer 409 (o erro mais comum do jogo — ouro insuficiente, item travado,
+ * POKE indisponivel) apagava o que o jogador tinha recebido no Mercado. Com o
+ * embrulho, esquecer o tratamento deixa de ser possivel: quem carrega, carrega
+ * por aqui.
+ */
+export async function comEstadoParaEscrita<T>(
+  cfg: Config,
+  userId: string,
+  fn: (ctx: EstadoParaEscrita) => Promise<T>,
+): Promise<T> {
+  const ctx = await carregarEstadoParaEscrita(cfg, userId)
+  try {
+    return await fn(ctx)
+  } catch (erro) {
+    await devolverEntregas(cfg, ctx.entregas)
+    throw erro
+  }
 }
 
 interface LinhaLocalizacao {
@@ -278,7 +314,29 @@ export async function aplicarFlush(
   )
   if (!reivindicada) return FLUSH_OCUPADO
 
-  const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId)
+  // Toda saida daqui pra baixo que NAO grave (POKE sumiu, hunt sumiu, erro de
+  // simulacao) tem que devolver as entregas reivindicadas — senao o ouro de uma
+  // venda no Mercado some porque o jogador tirou o POKE da equipe.
+  return comEstadoParaEscrita(cfg, userId, async (ctx) => {
+    const resultado = await simularSessao(
+      cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, { agora, segundos, truncado },
+    )
+    // `null` = sessao insimulavel; sai SEM gravar, entao as entregas voltam pra
+    // fila (o `catch` do embrulho so cobre excecao, e aqui nao ha excecao).
+    if (!resultado) await devolverEntregas(cfg, ctx.entregas)
+    return resultado
+  })
+}
+
+async function simularSessao(
+  cfg: Config,
+  userId: string,
+  sessao: LinhaSessao,
+  dados: GameStateData,
+  pokeIdsNoLoad: Set<string>,
+  janela: { agora: number; segundos: number; truncado: boolean },
+): Promise<ResultadoFlush | null> {
+  const { agora, segundos, truncado } = janela
   const { store, dados: estado } = criarEstadoDoJogador(dados)
   // Copia (nao referencia): a simulacao muta `estado.unlockedContinents` em
   // lugar quando o jogador limpa a sequencia do Campeao Lance, e o Hall da

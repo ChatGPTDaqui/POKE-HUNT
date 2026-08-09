@@ -6,7 +6,7 @@
 // e afrouxar isso pra montar um ranking exporia ouro, itens e equipe de todo
 // mundo — o ranking precisa de dois campos, nao da linha inteira.
 import { rowToPoke, type PokeInstance, type PokemonRow } from '#engine'
-import { ErroHttp, selecionar, selecionarTudo, type Config } from './db.js'
+import { ErroHttp, selecionar, selecionarTudo, contar, type Config } from './db.js'
 
 // Teto de linhas devolvidas. O cliente pede menos; isto e o limite duro pra uma
 // query solta nao virar um dump da base.
@@ -163,9 +163,13 @@ export async function perfilDoJogador(cfg: Config, userId: string): Promise<Perf
   )
   if (!meu) throw new ErroHttp(404, 'jogador sem linha em `players`')
 
-  const [acima, todos, sessoes, hall] = await Promise.all([
-    selecionar<{ user_id: string }>(cfg, `players?select=user_id&trainer_exp=gt.${Number(meu.trainer_exp)}`),
-    selecionar<{ user_id: string }>(cfg, 'players?select=user_id'),
+  // `contar` e nao `selecionar(...).length`: o PostgREST corta em 1000 linhas
+  // sem erro nenhum, entao a partir do jogador 1001 o rank e o total
+  // congelariam num numero plausivel e errado. De brinde, para de trazer a base
+  // inteira pra contar duas coisas.
+  const [acima, totalJogadores, sessoes, hall] = await Promise.all([
+    contar(cfg, `players?select=user_id&trainer_exp=gt.${Number(meu.trainer_exp)}`),
+    contar(cfg, 'players?select=user_id'),
     selecionarTudo<{ simulated_seconds: number | string }>(cfg, `game_sessions?user_id=eq.${userId}&select=simulated_seconds`),
     selecionar<{ conquistado_em: string }>(
       cfg,
@@ -174,8 +178,8 @@ export async function perfilDoJogador(cfg: Config, userId: string): Promise<Perf
   ])
 
   return {
-    rank: acima.length + 1,
-    totalJogadores: todos.length,
+    rank: acima + 1,
+    totalJogadores,
     segundosJogados: sessoes.reduce((soma, s) => soma + Number(s.simulated_seconds || 0), 0),
     contaCriadaEm: meu.created_at ?? null,
     noHallDaFama: hall[0]?.conquistado_em ?? null,

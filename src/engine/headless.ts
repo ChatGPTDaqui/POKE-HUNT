@@ -46,7 +46,7 @@ export { recordBatch } from './systems/statsTracker'
 // nao esqueca um metodo — se esquecer, o type-check quebra em vez de o jogo
 // falhar em runtime no meio de uma simulacao de 6 horas.
 export type { GameStateStore, GameStateData } from '@/stores/gameStateStore'
-export { defaultGameStateData } from '@/stores/gameStateStore'
+export { defaultGameStateData, MAX_TEAM_SIZE } from '@/stores/gameStateStore'
 
 // Traducao linha-do-Postgres <-> estado de jogo. Reexportada, e nao
 // reimplementada no servidor, pelo mesmo motivo do motor: duas implementacoes

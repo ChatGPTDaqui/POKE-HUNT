@@ -112,6 +112,30 @@ async function selecionarTudo(cfg, caminho, pagina = 1e3) {
 		inicio += pagina;
 	}
 }
+/**
+* Quantas linhas casam com o filtro — sem trazer nenhuma.
+*
+* Existe porque `selecionar(...).length` MENTE: o PostgREST corta em 1000 linhas
+* em silencio (o gotcha que este projeto ja documentou no catalogo). O Perfil
+* contava jogadores assim, entao a partir do jogador 1001 o total e a posicao no
+* ranking congelariam — e nada no jogo denunciaria isso, porque o numero
+* continua parecendo plausivel.
+*
+* `Range: 0-0` + `count=exact` traz UMA linha e o total no `Content-Range`.
+*/
+async function contar(cfg, caminho) {
+	const { resposta, texto } = await buscarComRetry(cfg, `${caminho}${caminho.includes("?") ? "&" : "?"}`, { headers: cabecalhos(cfg, {
+		Range: "0-0",
+		Prefer: "count=exact"
+	}) });
+	if (!resposta.ok) {
+		console.error(`PostgREST ${resposta.status} em ${caminho}: ${texto.slice(0, 400)}`);
+		throw new ErroHttp(502, "falha ao falar com o banco");
+	}
+	const total = Number(resposta.headers.get("content-range")?.split("/")[1]);
+	if (!Number.isFinite(total)) throw new ErroHttp(502, `Content-Range ausente/ilegivel em ${caminho}`);
+	return total;
+}
 async function inserir(cfg, tabela, linhas, opcoes = {}) {
 	const prefer = [opcoes.retornar ? "return=representation" : "return=minimal", opcoes.upsert ? "resolution=merge-duplicates" : null].filter(Boolean).join(",");
 	return await pedir$1(cfg, `${tabela}${opcoes.upsert ? `?on_conflict=${opcoes.upsert}` : ""}`, {
@@ -60047,6 +60071,7 @@ function criarEstadoDoJogador(dados) {
 				return p;
 			},
 			moveBagToTeam: (uid) => {
+				if (s.team.length >= 6) return null;
 				const i = s.bagPokes.findIndex((p) => p.uid === uid);
 				if (i < 0) return null;
 				const [p] = s.bagPokes.splice(i, 1);
@@ -60214,6 +60239,21 @@ async function reivindicarEntregas(cfg, userId) {
 	return atualizarRetornando(cfg, `market_deliveries?user_id=eq.${userId}&claimed_at=is.null`, { claimed_at: (/* @__PURE__ */ new Date()).toISOString() });
 }
 /**
+* Desfaz o claim: as entregas voltam pra fila.
+*
+* Existe por causa de um bug REAL de perda de progresso. O claim acontece no
+* `carregarEstadoParaEscrita`, ou seja, ANTES de a operacao rodar — e uma
+* operacao recusada (409 "Ouro insuficiente", item travado, POKE ja evoluido...)
+* nunca chega ao `gravarEstado`. As entregas ficavam carimbadas como aplicadas
+* sem terem sido aplicadas a lugar nenhum. Medido: uma venda de 500 de ouro no
+* Mercado sumiu porque o jogador, em seguida, tentou comprar algo que nao podia
+* pagar. Como 409 e o erro mais comum do jogo, isso acontecia o tempo todo.
+*/
+async function devolverEntregas(cfg, entregas) {
+	if (!entregas.length) return;
+	await atualizarRetornando(cfg, `market_deliveries?id=in.(${entregas.map((e) => e.id).join(",")})`, { claimed_at: null });
+}
+/**
 * Aplica as entregas ao estado JA CARREGADO, antes de ele ser gravado.
 *
 * Muta `estado` direto (e nao pela store) de proposito: isto roda entre o
@@ -60296,15 +60336,15 @@ async function hallDaFama(cfg, conquista, limiteBruto) {
 async function perfilDoJogador(cfg, userId) {
 	const [meu] = await selecionar(cfg, `players?user_id=eq.${userId}&select=trainer_exp,created_at`);
 	if (!meu) throw new ErroHttp(404, "jogador sem linha em `players`");
-	const [acima, todos, sessoes, hall] = await Promise.all([
-		selecionar(cfg, `players?select=user_id&trainer_exp=gt.${Number(meu.trainer_exp)}`),
-		selecionar(cfg, "players?select=user_id"),
+	const [acima, totalJogadores, sessoes, hall] = await Promise.all([
+		contar(cfg, `players?select=user_id&trainer_exp=gt.${Number(meu.trainer_exp)}`),
+		contar(cfg, "players?select=user_id"),
 		selecionarTudo(cfg, `game_sessions?user_id=eq.${userId}&select=simulated_seconds`),
 		selecionar(cfg, `hall_da_fama?user_id=eq.${userId}&conquista=eq.${CONQUISTA_LANCE}&select=conquistado_em`)
 	]);
 	return {
-		rank: acima.length + 1,
-		totalJogadores: todos.length,
+		rank: acima + 1,
+		totalJogadores,
 		segundosJogados: sessoes.reduce((soma, s) => soma + Number(s.simulated_seconds || 0), 0),
 		contaCriadaEm: meu.created_at ?? null,
 		noHallDaFama: hall[0]?.conquistado_em ?? null
@@ -60330,7 +60370,8 @@ async function lerSnapshot(cfg, userId) {
 			pokedex,
 			autoCatchRules
 		}, defaultGameStateData()),
-		pokeIdsNoLoad: new Set(pokemon.map((p) => p.id))
+		pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)),
+		entregas: []
 	};
 }
 async function carregarEstado(cfg, userId) {
@@ -60349,7 +60390,27 @@ async function carregarEstadoParaEscrita(cfg, userId) {
 	const snapshot = await lerSnapshot(cfg, userId);
 	const entregas = await reivindicarEntregas(cfg, userId);
 	if (entregas.length) aplicarEntregasNoEstado(snapshot.estado, entregas);
+	snapshot.entregas = entregas;
 	return snapshot;
+}
+/**
+* Carrega o estado pra escrita, roda `fn`, e DEVOLVE as entregas se `fn` abortar.
+*
+* Este embrulho existe porque a versao "carregue e lembre de tratar o erro" ja
+* falhou na pratica em TODOS os call sites de uma vez: nenhum tinha try/catch, e
+* qualquer 409 (o erro mais comum do jogo — ouro insuficiente, item travado,
+* POKE indisponivel) apagava o que o jogador tinha recebido no Mercado. Com o
+* embrulho, esquecer o tratamento deixa de ser possivel: quem carrega, carrega
+* por aqui.
+*/
+async function comEstadoParaEscrita(cfg, userId, fn) {
+	const ctx = await carregarEstadoParaEscrita(cfg, userId);
+	try {
+		return await fn(ctx);
+	} catch (erro) {
+		await devolverEntregas(cfg, ctx.entregas);
+		throw erro;
+	}
 }
 /**
 * Grava o snapshot do jogador nas cinco tabelas.
@@ -60420,7 +60481,18 @@ async function aplicarFlush(cfg, userId, sessao) {
 	const truncado = bruto > MAX_SEGUNDOS_POR_FLUSH;
 	const [reivindicada] = await atualizarRetornando(cfg, `game_sessions?id=eq.${sessao.id}&closed_at=is.null&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}`, { last_flush_at: new Date(agora).toISOString() });
 	if (!reivindicada) return FLUSH_OCUPADO;
-	const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId);
+	return comEstadoParaEscrita(cfg, userId, async (ctx) => {
+		const resultado = await simularSessao(cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, {
+			agora,
+			segundos,
+			truncado
+		});
+		if (!resultado) await devolverEntregas(cfg, ctx.entregas);
+		return resultado;
+	});
+}
+async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, janela) {
+	const { agora, segundos, truncado } = janela;
 	const { store, dados: estado } = criarEstadoDoJogador(dados);
 	const continentesAntes = new Set(estado.unlockedContinents);
 	const ativo = estado.team.find((p) => p.uid === sessao.poke_uid);
@@ -60510,6 +60582,38 @@ var MENSAGEM_ERRO_ECONOMIA = {
 	already_unlocked: "Esta hunt ja esta desbloqueada."
 };
 var traduzErroEconomia = (reason, padrao) => reason && MENSAGEM_ERRO_ECONOMIA[reason] || padrao;
+var MAX_REGRAS_AUTO = 20;
+function listaDeRegras(bruto, campo) {
+	if (!Array.isArray(bruto)) throw new ErroHttp(400, `${campo} invalido`);
+	if (bruto.length > MAX_REGRAS_AUTO) throw new ErroHttp(400, `${campo}: no maximo ${MAX_REGRAS_AUTO} regras`);
+	return bruto.map((r) => {
+		if (!r || typeof r !== "object" || Array.isArray(r)) throw new ErroHttp(400, `${campo} invalido`);
+		return r;
+	});
+}
+function validaRegraDePocao(r) {
+	const hpPercent = Number(r.hpPercent);
+	if (!Number.isFinite(hpPercent) || hpPercent < 1 || hpPercent > 100) throw new ErroHttp(400, "hpPercent deve ficar entre 1 e 100");
+	return {
+		hpPercent: Math.round(hpPercent),
+		itemId: texto$2(r.itemId, "itemId")
+	};
+}
+function validaRegraDeCaptura(r) {
+	return {
+		speciesId: texto$2(r.speciesId, "speciesId"),
+		ballItemId: texto$2(r.ballItemId, "ballItemId")
+	};
+}
+function validaCatchConfig(bruto) {
+	if (!bruto || typeof bruto !== "object" || Array.isArray(bruto)) throw new ErroHttp(400, "catchConfig invalido");
+	const c = bruto;
+	return {
+		ballId: texto$2(c.ballId, "ballId"),
+		catchShinyEnabled: Boolean(c.catchShinyEnabled),
+		shinyBallId: texto$2(c.shinyBallId, "shinyBallId")
+	};
+}
 var MANIPULADORES = {
 	escolherStarter(store, estado, acao) {
 		const speciesId = texto$2(acao.speciesId, "speciesId");
@@ -60606,6 +60710,7 @@ var MANIPULADORES = {
 		if (!ativo) throw new ErroHttp(409, "nenhum POKE ativo");
 		if (item.kind === "potion" && item.healAmount != null) {
 			if (ativo.hp <= 0) throw new ErroHttp(409, "POKE desmaiado — use um Revive");
+			if (ativo.hp >= ativo.stats.hp) throw new ErroHttp(409, "O POKE ja esta com a vida cheia.");
 			if (!store.removeItem(itemId, 1)) throw new ErroHttp(409, "voce nao tem esse item");
 			store.updatePokeInstance(ativo.uid, (p) => ({
 				...p,
@@ -60714,16 +60819,14 @@ var MANIPULADORES = {
 			if (k !== "autoPot" && k !== "autoCatch" && k !== "autoRevive") throw new ErroHttp(400, `toggle desconhecido: ${k}`);
 			store.setAutoToggle(k, Boolean(v));
 		}
-		if ("catchConfig" in patch) store.setAutoCatchConfig(patch.catchConfig);
+		if ("catchConfig" in patch) store.setAutoCatchConfig(validaCatchConfig(patch.catchConfig));
 		if ("potRules" in patch) {
-			const regras = patch.potRules;
-			if (!Array.isArray(regras)) throw new ErroHttp(400, "potRules invalido");
+			const regras = listaDeRegras(patch.potRules, "potRules").map(validaRegraDePocao);
 			while (_estado.autoPotRules.length) store.removeAutoPotRule(0);
 			for (const r of regras) store.addAutoPotRule(r);
 		}
 		if ("catchRules" in patch) {
-			const regras = patch.catchRules;
-			if (!Array.isArray(regras)) throw new ErroHttp(400, "catchRules invalido");
+			const regras = listaDeRegras(patch.catchRules, "catchRules").map(validaRegraDeCaptura);
 			while (_estado.autoCatchRules.length) store.removeAutoCatchRule(0);
 			for (const r of regras) store.addAutoCatchRule(r);
 		}
@@ -60743,7 +60846,8 @@ var MAX_PRECO = 1e8;
 var MAX_CASAMENTOS = 40;
 var inteiro = (v, campo, max) => {
 	const n = Number(v);
-	if (!Number.isInteger(n) || n <= 0 || n > max) throw new ErroHttp(400, `${campo} invalido`);
+	if (!Number.isInteger(n) || n <= 0) throw new ErroHttp(400, `${campo} invalido`);
+	if (n > max) throw new ErroHttp(400, `O maximo permitido para ${campo} e ${max.toLocaleString("pt-BR")}.`);
 	return n;
 };
 var texto$1 = (v, campo) => {
@@ -60869,28 +60973,29 @@ async function criarOrdem(cfg, userId, corpo) {
 	const unitPrice = inteiro(corpo.unitPrice, "unitPrice", MAX_PRECO);
 	const quantity = inteiro(corpo.quantity, "quantity", MAX_QUANTIDADE);
 	if (!getItem(itemId)) throw new ErroHttp(400, "item desconhecido");
-	const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId);
-	const { store, dados: estado } = criarEstadoDoJogador(dados);
-	if (side === "venda") {
-		if (estado.lockedItems[itemId]) throw new ErroHttp(409, "Este item esta travado — destrave antes de anunciar.");
-		if (!store.removeItem(itemId, quantity)) throw new ErroHttp(409, "Voce nao tem essa quantidade.");
-	} else if (!store.spendGold(unitPrice * quantity)) throw new ErroHttp(409, "Ouro insuficiente.");
-	const [ordem] = await inserir(cfg, "market_orders", {
-		user_id: userId,
-		item_id: itemId,
-		side,
-		unit_price: unitPrice,
-		quantity,
-		remaining: quantity,
-		gold_retido: side === "compra" ? unitPrice * quantity : 0
-	}, { retornar: true });
-	const resultado = await casar(cfg, userId, ordem, store);
-	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
-	return {
-		ordemId: ordem.id,
-		...resultado,
-		estado
-	};
+	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+		const { store, dados: estado } = criarEstadoDoJogador(dados);
+		if (side === "venda") {
+			if (estado.lockedItems[itemId]) throw new ErroHttp(409, "Este item esta travado — destrave antes de anunciar.");
+			if (!store.removeItem(itemId, quantity)) throw new ErroHttp(409, "Voce nao tem essa quantidade.");
+		} else if (!store.spendGold(unitPrice * quantity)) throw new ErroHttp(409, "Ouro insuficiente.");
+		const [ordem] = await inserir(cfg, "market_orders", {
+			user_id: userId,
+			item_id: itemId,
+			side,
+			unit_price: unitPrice,
+			quantity,
+			remaining: quantity,
+			gold_retido: side === "compra" ? unitPrice * quantity : 0
+		}, { retornar: true });
+		const resultado = await casar(cfg, userId, ordem, store);
+		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
+		return {
+			ordemId: ordem.id,
+			...resultado,
+			estado
+		};
+	});
 }
 async function casar(cfg, userId, ordem, store) {
 	const oposto = ordem.side === "compra" ? "venda" : "compra";
@@ -60967,16 +61072,17 @@ async function cancelarOrdem(cfg, userId, ordemId) {
 		closed_at: (/* @__PURE__ */ new Date()).toISOString()
 	});
 	if (!ordem) throw new ErroHttp(404, "ordem nao encontrada ou ja encerrada");
-	const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId);
-	const { store, dados: estado } = criarEstadoDoJogador(dados);
-	if (ordem.side === "venda") store.addItem(ordem.item_id, ordem.remaining);
-	else store.addGold(ordem.gold_retido);
-	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
-	const item = getItem(ordem.item_id);
-	return {
-		mensagem: ordem.side === "venda" ? `Ordem cancelada — ${ordem.remaining}x ${item?.name ?? ordem.item_id} de volta na mochila.` : `Ordem cancelada — ${ordem.gold_retido} de ouro devolvido.`,
-		estado
-	};
+	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+		const { store, dados: estado } = criarEstadoDoJogador(dados);
+		if (ordem.side === "venda") store.addItem(ordem.item_id, ordem.remaining);
+		else store.addGold(ordem.gold_retido);
+		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
+		const item = getItem(ordem.item_id);
+		return {
+			mensagem: ordem.side === "venda" ? `Ordem cancelada — ${ordem.remaining}x ${item?.name ?? ordem.item_id} de volta na mochila.` : `Ordem cancelada — ${ordem.gold_retido} de ouro devolvido.`,
+			estado
+		};
+	});
 }
 async function anunciarPoke(cfg, userId, corpo) {
 	const pokeUid = texto$1(corpo.pokeUid, "pokeUid");
@@ -61060,20 +61166,26 @@ async function ofertarNoAnuncio(cfg, userId, corpo) {
 	if (!anuncio || anuncio.status !== "ativo") throw new ErroHttp(409, "Este anuncio nao esta mais disponivel.");
 	if (!anuncio.apenas_oferta) throw new ErroHttp(409, "Este anuncio tem preco fixo — use Comprar.");
 	if (anuncio.seller_id === userId) throw new ErroHttp(409, "Voce nao pode ofertar no proprio anuncio.");
-	const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId);
-	const { store, dados: estado } = criarEstadoDoJogador(dados);
-	if (!(anuncio.currency === "gold" ? store.spendGold(valor) : store.spendDiamonds(valor))) throw new ErroHttp(409, anuncio.currency === "gold" ? "Ouro insuficiente." : "Diamantes insuficientes.");
-	await inserir(cfg, "market_offers", {
-		listing_id: anuncioId,
-		buyer_id: userId,
-		valor,
-		currency: anuncio.currency
+	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+		const { store, dados: estado } = criarEstadoDoJogador(dados);
+		if (!(anuncio.currency === "gold" ? store.spendGold(valor) : store.spendDiamonds(valor))) throw new ErroHttp(409, anuncio.currency === "gold" ? "Ouro insuficiente." : "Diamantes insuficientes.");
+		try {
+			await inserir(cfg, "market_offers", {
+				listing_id: anuncioId,
+				buyer_id: userId,
+				valor,
+				currency: anuncio.currency
+			});
+		} catch {
+			throw new ErroHttp(409, "Voce ja tem um lance pendente neste anuncio — cancele antes de enviar outro.");
+		}
+		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
+		const nome = SPECIES[anuncio.species_id]?.name ?? anuncio.species_id;
+		return {
+			mensagem: `Oferta de ${valor} enviada por ${nome}. O valor fica retido ate o vendedor responder.`,
+			estado
+		};
 	});
-	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
-	return {
-		mensagem: `Oferta de ${valor} enviada por ${SPECIES[anuncio.species_id]?.name ?? anuncio.species_id}. O valor fica retido ate o vendedor responder.`,
-		estado
-	};
 }
 /** O comprador desiste: a oferta sai do ar e o escrow volta. */
 async function cancelarOferta(cfg, userId, ofertaId) {
@@ -61082,15 +61194,16 @@ async function cancelarOferta(cfg, userId, ofertaId) {
 		resolved_at: (/* @__PURE__ */ new Date()).toISOString()
 	});
 	if (!oferta) throw new ErroHttp(404, "oferta nao encontrada ou ja respondida");
-	const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId);
-	const { store, dados: estado } = criarEstadoDoJogador(dados);
-	if (oferta.currency === "gold") store.addGold(oferta.valor);
-	else store.addDiamonds(oferta.valor);
-	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
-	return {
-		mensagem: `Oferta cancelada — ${oferta.valor} devolvido(s).`,
-		estado
-	};
+	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+		const { store, dados: estado } = criarEstadoDoJogador(dados);
+		if (oferta.currency === "gold") store.addGold(oferta.valor);
+		else store.addDiamonds(oferta.valor);
+		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
+		return {
+			mensagem: `Oferta cancelada — ${oferta.valor} devolvido(s).`,
+			estado
+		};
+	});
 }
 /** O vendedor aceita ou recusa uma oferta recebida. */
 async function responderOferta(cfg, userId, ofertaId, aceitar) {
@@ -61123,6 +61236,10 @@ async function responderOferta(cfg, userId, ofertaId, aceitar) {
 		buyer_id: oferta.buyer_id
 	});
 	if (!fechado) {
+		await atualizar(cfg, `market_offers?id=eq.${ofertaId}`, {
+			status: "recusada",
+			resolved_at: (/* @__PURE__ */ new Date()).toISOString()
+		});
 		await enfileirarEntrega(cfg, {
 			userId: oferta.buyer_id,
 			gold: oferta.currency === "gold" ? oferta.valor : 0,
@@ -61163,10 +61280,12 @@ async function comprarAnuncio(cfg, userId, anuncioId) {
 	if (anuncio.seller_id === userId) throw new ErroHttp(409, "Voce nao pode comprar o proprio anuncio.");
 	if (anuncio.apenas_oferta || anuncio.price == null) throw new ErroHttp(409, "Este anuncio so aceita lances — envie uma oferta.");
 	const preco = anuncio.price;
-	const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId);
+	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => concluirCompra(cfg, userId, anuncio, preco, dados, pokeIdsNoLoad));
+}
+async function concluirCompra(cfg, userId, anuncio, preco, dados, pokeIdsNoLoad) {
 	const { store, dados: estado } = criarEstadoDoJogador(dados);
 	if (!(anuncio.currency === "gold" ? store.spendGold(preco) : store.spendDiamonds(preco))) throw new ErroHttp(409, anuncio.currency === "gold" ? "Ouro insuficiente." : "Diamantes insuficientes.");
-	const [fechado] = await atualizarRetornando(cfg, `market_listings?id=eq.${anuncioId}&status=eq.ativo`, {
+	const [fechado] = await atualizarRetornando(cfg, `market_listings?id=eq.${anuncio.id}&status=eq.ativo`, {
 		status: "vendido",
 		sold_at: (/* @__PURE__ */ new Date()).toISOString(),
 		buyer_id: userId
@@ -61280,7 +61399,9 @@ async function pedirAmizade(cfg, userId, nick) {
 	const [eu] = await selecionar(cfg, `players?user_id=eq.${userId}&select=trainer_name`);
 	if (!eu) throw new ErroHttp(404, "jogador sem linha em `players`");
 	if (eu.trainer_name.toLowerCase() === alvo.toLowerCase()) throw new ErroHttp(409, "Voce nao pode adicionar a si mesmo.");
-	const [destino] = await selecionar(cfg, `players?trainer_name=ilike.${encodeURIComponent(alvo)}&select=user_id,trainer_name&limit=1`);
+	const destinoId = await chamarRpc(cfg, "id_por_nome_de_treinador", { nome: alvo });
+	if (!destinoId) throw new ErroHttp(404, `Nao existe treinador chamado "${alvo}".`);
+	const [destino] = await selecionar(cfg, `players?user_id=eq.${destinoId}&select=user_id,trainer_name`);
 	if (!destino) throw new ErroHttp(404, `Nao existe treinador chamado "${alvo}".`);
 	const [jaAmigos] = await selecionar(cfg, `friendships?user_id=eq.${userId}&amigo_id=eq.${destino.user_id}&select=amigo_id`);
 	if (jaAmigos) throw new ErroHttp(409, `${destino.trainer_name} ja e seu amigo.`);
@@ -61427,11 +61548,10 @@ async function rotear(cfg, req, url) {
 	if (url.pathname === "/sessao/abrir" && req.method === "POST") return abrirSessao(cfg, jogador.id, req);
 	if (url.pathname === "/sessao/flush" && req.method === "POST") return flush(cfg, jogador.id);
 	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id);
-	if (url.pathname === "/estado" && req.method === "GET") {
-		const { estado, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, jogador.id);
+	if (url.pathname === "/estado" && req.method === "GET") return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad }) => {
 		await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad);
 		return json({ estado });
-	}
+	});
 	if (url.pathname.startsWith("/mercado")) return mercado(cfg, jogador.id, req, url);
 	if (url.pathname.startsWith("/chat") || url.pathname.startsWith("/correio")) return social(cfg, jogador.id, req, url);
 	if (url.pathname === "/perfil" && req.method === "GET") return json(await perfilDoJogador(cfg, jogador.id));
@@ -61445,8 +61565,21 @@ async function rotear(cfg, req, url) {
 	if (url.pathname === "/acao" && req.method === "POST") return acao(cfg, jogador.id, req);
 	return json({ erro: "rota desconhecida" }, 404);
 }
+/**
+* A sessao aberta do jogador — e no maximo UMA.
+*
+* O indice unico parcial `game_sessions_abertas` garante isso desde a migration
+* `20260809180000`. A varredura abaixo continua existindo como defesa em
+* profundidade e como conserto de dado legado: uma orfa nascida antes do indice
+* (ou num ambiente sem a migration) seria flushada mais tarde e creditaria de
+* novo um periodo que a sessao vencedora ja pagou — o exploit de duplicacao que
+* aquela migration descreve. Fechar sem creditar e o certo: o tempo dela ja foi
+* pago pela outra.
+*/
 async function sessaoAberta(cfg, userId) {
-	return (await selecionar(cfg, `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*&order=started_at.desc&limit=1`))[0] ?? null;
+	const linhas = await selecionar(cfg, `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*&order=started_at.desc`);
+	for (const orfa of linhas.slice(1)) await fecharLinhaDeSessao(cfg, orfa.id);
+	return linhas[0] ?? null;
 }
 async function fecharLinhaDeSessao(cfg, sessaoId) {
 	await atualizar(cfg, `game_sessions?id=eq.${sessaoId}`, { closed_at: (/* @__PURE__ */ new Date()).toISOString() });
@@ -61515,14 +61648,25 @@ async function abrirSessao(cfg, userId, req) {
 		await fecharLinhaDeSessao(cfg, anterior.id);
 	}
 	const semente = randomSeed();
-	const [criada] = await inserir(cfg, "game_sessions", {
-		user_id: userId,
-		map_id: mapId,
-		poke_uid: pokeUid,
-		seed: semente,
-		rng_state: semente,
-		rng_draws: 0
-	}, { retornar: true });
+	let criada;
+	try {
+		[criada] = await inserir(cfg, "game_sessions", {
+			user_id: userId,
+			map_id: mapId,
+			poke_uid: pokeUid,
+			seed: semente,
+			rng_state: semente,
+			rng_draws: 0
+		}, { retornar: true });
+	} catch {
+		const vencedora = await sessaoAberta(cfg, userId);
+		if (!vencedora) throw new ErroHttp(409, "nao foi possivel abrir a sessao — tente de novo");
+		return json({
+			sessaoId: vencedora.id,
+			mapId: vencedora.map_id,
+			iniciadaEm: vencedora.last_flush_at
+		});
+	}
 	await atualizar(cfg, `players?user_id=eq.${userId}`, {
 		current_map_id: mapId,
 		perf_stats: {
@@ -61590,20 +61734,21 @@ async function acao(cfg, userId, req) {
 		if (aberta) await fecharLinhaDeSessao(cfg, aberta.id);
 		await limparMundoDoJogador(cfg, userId);
 	}
-	const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId);
-	if (corpo.tipo === "definirNomeDoTreinador" && typeof corpo.nome === "string") {
-		const nome = corpo.nome.trim();
-		const meuNome = dados.trainer.name.toLowerCase();
-		if (nome.toLowerCase() !== meuNome) {
-			if (await chamarRpc(cfg, "nome_de_treinador_disponivel", { nome }) === false) throw new ErroHttp(409, `O nome "${nome}" ja esta em uso. Escolha outro.`);
+	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+		if (corpo.tipo === "definirNomeDoTreinador" && typeof corpo.nome === "string") {
+			const nome = corpo.nome.trim();
+			const meuNome = dados.trainer.name.toLowerCase();
+			if (nome.toLowerCase() !== meuNome) {
+				if (await chamarRpc(cfg, "nome_de_treinador_disponivel", { nome }) === false) throw new ErroHttp(409, `O nome "${nome}" ja esta em uso. Escolha outro.`);
+			}
 		}
-	}
-	const { store, dados: estado } = criarEstadoDoJogador(dados);
-	const resultado = aplicarAcao(store, estado, corpo);
-	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
-	return json({
-		...resultado,
-		estado
+		const { store, dados: estado } = criarEstadoDoJogador(dados);
+		const resultado = aplicarAcao(store, estado, corpo);
+		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
+		return json({
+			...resultado,
+			estado
+		});
 	});
 }
 async function mercado(cfg, userId, req, url) {

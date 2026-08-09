@@ -10,7 +10,7 @@
 // pra `authenticated` em `chat_messages` (e portanto o cliente lendo a tabela
 // direto), que e justamente o que a Fase D fechou. Com dezenas de jogadores,
 // uma leitura a cada poucos segundos e barata e nao abre porta nenhuma.
-import { ErroHttp, selecionar, selecionarTudo, inserir, atualizar, atualizarRetornando, type Config } from './db.js'
+import { ErroHttp, selecionar, selecionarTudo, inserir, atualizar, atualizarRetornando, chamarRpc, type Config } from './db.js'
 import { enfileirarEntrega } from './entregas.js'
 
 // Mensagens carregadas por vez. O cliente sempre pede as mais recentes e o
@@ -170,11 +170,16 @@ export async function pedirAmizade(cfg: Config, userId: string, nick: string) {
     throw new ErroHttp(409, 'Voce nao pode adicionar a si mesmo.')
   }
 
-  // `ilike` com o nome inteiro (sem `%`) = comparacao exata sem diferenciar
-  // maiusculas, que e como o indice unico de nick foi criado.
+  // RPC, e NAO `ilike`: `_` e curinga de uma letra em LIKE e e caractere valido
+  // de nick, e `%` atravessava porque o `nick` que chega do cliente so tinha
+  // limite de tamanho. Medido: `{"nick":"%"}` mandava pedido pra um jogador
+  // arbitrario, e `"___"` pra qualquer um de tres letras — dava pra enumerar a
+  // base inteira. Ver a migration `20260809181000`.
+  const destinoId = await chamarRpc<string | null>(cfg, 'id_por_nome_de_treinador', { nome: alvo })
+  if (!destinoId) throw new ErroHttp(404, `Nao existe treinador chamado "${alvo}".`)
   const [destino] = await selecionar<{ user_id: string; trainer_name: string }>(
     cfg,
-    `players?trainer_name=ilike.${encodeURIComponent(alvo)}&select=user_id,trainer_name&limit=1`,
+    `players?user_id=eq.${destinoId}&select=user_id,trainer_name`,
   )
   if (!destino) throw new ErroHttp(404, `Nao existe treinador chamado "${alvo}".`)
 

@@ -187,6 +187,13 @@ function ItensTab() {
   const toggleItemLock = useGameStateStore((s) => s.toggleItemLock)
   const hasStarter = useGameStateStore((s) => s.team.length > 0)
   const fainted = useWorldStore((s) => Boolean(s.player?.fainted))
+  // HP do POKE em campo vem do `worldStore` durante a hunt (ver a nota de
+  // arquitetura em engine/controller.ts); fora dela o mundo do Hospital carrega
+  // o mesmo POKE, entao esta leitura vale nos dois casos.
+  const vidaCheia = useWorldStore((s) => {
+    const p = s.player?.poke
+    return p != null && p.hp >= p.stats.hp
+  })
   const acao = useAcaoPendente()
 
   // Memo pra `usePaginacao` nao recortar um array novo a cada render (o objeto
@@ -219,9 +226,16 @@ function ItensTab() {
         const item = ITEMS[itemId]
         const locked = Boolean(lockedItems[itemId])
         // "Usar" so aparece quando de fato faz alguma coisa AGORA: pocao com o
-        // POKE de pe, revive com ele desmaiado. Um botao que sempre existe e
+        // POKE ferido, revive com ele desmaiado. Um botao que sempre existe e
         // sempre recusa e pior que a ausencia dele.
-        const canUse = hasStarter && (item.kind === 'revive' ? fainted : item.kind === 'potion' ? !fainted : false)
+        //
+        // `vidaCheia` entrou junto com a recusa no servidor: antes a pocao era
+        // consumida por nada nesse caso, e so tirar o desperdicio deixaria a UI
+        // oferecendo um botao que sempre da erro — que e exatamente o que o
+        // comentario acima diz pra nao fazer.
+        const canUse = hasStarter && (item.kind === 'revive'
+          ? fainted
+          : item.kind === 'potion' ? !fainted && !vidaCheia : false)
         const iconUrl = itemIconUrl(itemId)
         // Stones compartilham UM icone base; a distincao entre os 17 tipos vem
         // da cor da borda (nao existem 17 sprites no pack de origem).

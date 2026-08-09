@@ -64,6 +64,26 @@ export async function reivindicarEntregas(cfg: Config, userId: string): Promise<
 }
 
 /**
+ * Desfaz o claim: as entregas voltam pra fila.
+ *
+ * Existe por causa de um bug REAL de perda de progresso. O claim acontece no
+ * `carregarEstadoParaEscrita`, ou seja, ANTES de a operacao rodar — e uma
+ * operacao recusada (409 "Ouro insuficiente", item travado, POKE ja evoluido...)
+ * nunca chega ao `gravarEstado`. As entregas ficavam carimbadas como aplicadas
+ * sem terem sido aplicadas a lugar nenhum. Medido: uma venda de 500 de ouro no
+ * Mercado sumiu porque o jogador, em seguida, tentou comprar algo que nao podia
+ * pagar. Como 409 e o erro mais comum do jogo, isso acontecia o tempo todo.
+ */
+export async function devolverEntregas(cfg: Config, entregas: LinhaEntrega[]): Promise<void> {
+  if (!entregas.length) return
+  await atualizarRetornando(
+    cfg,
+    `market_deliveries?id=in.(${entregas.map((e) => e.id).join(',')})`,
+    { claimed_at: null },
+  )
+}
+
+/**
  * Aplica as entregas ao estado JA CARREGADO, antes de ele ser gravado.
  *
  * Muta `estado` direto (e nao pela store) de proposito: isto roda entre o

@@ -8,7 +8,7 @@
 import { autenticar } from './auth.js'
 import { ErroHttp, selecionar, inserir, atualizar, chamarRpc, type Config } from './db.js'
 import {
-  aplicarFlush, carregarEstado, carregarEstadoParaEscrita, gravarEstado,
+  aplicarFlush, carregarEstado, comEstadoParaEscrita, gravarEstado,
   FLUSH_OCUPADO, type LinhaSessao,
 } from './progresso.js'
 import { aplicarAcao, type Acao } from './acoes.js'
@@ -97,9 +97,10 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
     // recebe o que vendeu enquanto estava fora — por isso ele grava, apesar de
     // ser um GET. `carregarEstadoParaEscrita` carimba a entrega como aplicada,
     // entao o `gravarEstado` logo abaixo nao e opcional.
-    const { estado, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, jogador.id)
-    await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad)
-    return json({ estado })
+    return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad }) => {
+      await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad)
+      return json({ estado })
+    })
   }
   if (url.pathname.startsWith('/mercado')) return mercado(cfg, jogador.id, req, url)
   if (url.pathname.startsWith('/chat') || url.pathname.startsWith('/correio')) {
@@ -126,11 +127,23 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
   return json({ erro: 'rota desconhecida' }, 404)
 }
 
+/**
+ * A sessao aberta do jogador — e no maximo UMA.
+ *
+ * O indice unico parcial `game_sessions_abertas` garante isso desde a migration
+ * `20260809180000`. A varredura abaixo continua existindo como defesa em
+ * profundidade e como conserto de dado legado: uma orfa nascida antes do indice
+ * (ou num ambiente sem a migration) seria flushada mais tarde e creditaria de
+ * novo um periodo que a sessao vencedora ja pagou — o exploit de duplicacao que
+ * aquela migration descreve. Fechar sem creditar e o certo: o tempo dela ja foi
+ * pago pela outra.
+ */
 async function sessaoAberta(cfg: Config, userId: string): Promise<LinhaSessao | null> {
   const linhas = await selecionar<LinhaSessao>(
     cfg,
-    `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*&order=started_at.desc&limit=1`,
+    `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*&order=started_at.desc`,
   )
+  for (const orfa of linhas.slice(1)) await fecharLinhaDeSessao(cfg, orfa.id)
   return linhas[0] ?? null
 }
 
@@ -226,17 +239,30 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
   // A semente NASCE no servidor. Se o cliente pudesse escolher, escolheria a
   // que da shiny.
   const semente = randomSeed()
-  const [criada] = await inserir<LinhaSessao>(cfg, 'game_sessions', {
-    user_id: userId,
-    map_id: mapId,
-    poke_uid: pokeUid,
-    seed: semente,
-    // A sequencia comeca NA semente e avanca a cada flush (ver aplicarFlush).
-    // `seed` fica imutavel como origem auditavel da sessao; `rng_state` e onde a
-    // sequencia esta agora.
-    rng_state: semente,
-    rng_draws: 0,
-  }, { retornar: true })
+  let criada: LinhaSessao
+  try {
+    ;[criada] = await inserir<LinhaSessao>(cfg, 'game_sessions', {
+      user_id: userId,
+      map_id: mapId,
+      poke_uid: pokeUid,
+      seed: semente,
+      // A sequencia comeca NA semente e avanca a cada flush (ver aplicarFlush).
+      // `seed` fica imutavel como origem auditavel da sessao; `rng_state` e onde a
+      // sequencia esta agora.
+      rng_state: semente,
+      rng_draws: 0,
+    }, { retornar: true })
+  } catch {
+    // O indice unico parcial recusou: outro request do mesmo jogador abriu uma
+    // sessao no intervalo entre o fechamento acima e este INSERT (clique duplo
+    // em "Entrar", ou dois aparelhos). Isso NAO e erro pro jogador — a intencao
+    // dele foi atendida —, entao devolvemos a sessao que venceu a corrida em vez
+    // de um 502. Sem isso, o unico jeito de impedir a duplicacao seria recusar a
+    // segunda entrada com uma mensagem de falha que nao descreve nada.
+    const vencedora = await sessaoAberta(cfg, userId)
+    if (!vencedora) throw new ErroHttp(409, 'nao foi possivel abrir a sessao — tente de novo')
+    return json({ sessaoId: vencedora.id, mapId: vencedora.map_id, iniciadaEm: vencedora.last_flush_at })
+  }
 
   // Zera a amostra de taxa (perfStats) ao entrar na hunt — mesmo comportamento
   // que `controller.enterMap` sempre teve no cliente. E o que faz o piso do farm
@@ -332,30 +358,35 @@ async function acao(cfg: OpcoesApp, userId: string, req: Request): Promise<Respo
     await limparMundoDoJogador(cfg, userId)
   }
 
-  const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId)
-
-  // Unicidade do nick: pergunta de BANCO, entao nao cabe em `aplicarAcao` (que e
-  // sincrona e pura por desenho). Sem esta checagem, escolher um nome ocupado
-  // batia no indice unico `players_trainer_name_unico` e voltava como 502
-  // "falha ao falar com o banco" — erro de servidor pra um erro de jogador.
-  //
-  // Reescolher o proprio nome atual e permitido: a RPC responde "ocupado" pra
-  // ele (o dono e o proprio), e recusar seria dizer que o nome que a tela ja
-  // mostra e invalido.
-  if (corpo.tipo === 'definirNomeDoTreinador' && typeof corpo.nome === 'string') {
-    const nome = corpo.nome.trim()
-    const meuNome = dados.trainer.name.toLowerCase()
-    if (nome.toLowerCase() !== meuNome) {
-      const livre = await chamarRpc<boolean>(cfg, 'nome_de_treinador_disponivel', { nome })
-      if (livre === false) throw new ErroHttp(409, `O nome "${nome}" ja esta em uso. Escolha outro.`)
+  // `comEstadoParaEscrita` e obrigatorio aqui, e nao conveniencia: uma acao
+  // RECUSADA (409 — ouro insuficiente, item travado, POKE indisponivel) lanca
+  // antes do `gravarEstado`, e as entregas do Mercado ja tinham sido carimbadas
+  // como aplicadas. Medido: uma venda de 500 de ouro sumiu porque o jogador
+  // tentou, em seguida, comprar algo que nao podia pagar.
+  return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+    // Unicidade do nick: pergunta de BANCO, entao nao cabe em `aplicarAcao` (que e
+    // sincrona e pura por desenho). Sem esta checagem, escolher um nome ocupado
+    // batia no indice unico `players_trainer_name_unico` e voltava como 502
+    // "falha ao falar com o banco" — erro de servidor pra um erro de jogador.
+    //
+    // Reescolher o proprio nome atual e permitido: a RPC responde "ocupado" pra
+    // ele (o dono e o proprio), e recusar seria dizer que o nome que a tela ja
+    // mostra e invalido.
+    if (corpo.tipo === 'definirNomeDoTreinador' && typeof corpo.nome === 'string') {
+      const nome = corpo.nome.trim()
+      const meuNome = dados.trainer.name.toLowerCase()
+      if (nome.toLowerCase() !== meuNome) {
+        const livre = await chamarRpc<boolean>(cfg, 'nome_de_treinador_disponivel', { nome })
+        if (livre === false) throw new ErroHttp(409, `O nome "${nome}" ja esta em uso. Escolha outro.`)
+      }
     }
-  }
 
-  const { store, dados: estado } = criarEstadoDoJogador(dados)
-  const resultado = aplicarAcao(store, estado, corpo)
-  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
+    const { store, dados: estado } = criarEstadoDoJogador(dados)
+    const resultado = aplicarAcao(store, estado, corpo)
+    await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
 
-  return json({ ...resultado, estado })
+    return json({ ...resultado, estado })
+  })
 }
 
 // --- Mercado ----------------------------------------------------------------

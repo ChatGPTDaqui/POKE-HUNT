@@ -12,6 +12,7 @@
 // quem grava e o `flush` no fim, a partir do estado final. Nada aqui escreve
 // direto no Postgres — um `addGold` que fizesse UPDATE por kill geraria milhares
 // de escritas por sessao.
+import { MAX_TEAM_SIZE } from '#engine'
 import type {
   GameStateData, GameStateStore, PokeInstance,
 } from '#engine'
@@ -112,6 +113,14 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
       return p
     },
     moveBagToTeam: (uid) => {
+      // O limite de 6 existia SO na store do navegador. Sob autoridade do
+      // servidor o cliente nao executa nada — quem move e este adaptador —,
+      // entao a regra simplesmente nao valia aqui. O que segurava era a check
+      // `team_slot <= 5` do banco, que so estoura na hora de GRAVAR: o jogador
+      // levava um 502 "falha ao falar com o banco" no 7o POKE, e (antes do
+      // `comEstadoParaEscrita`) esse mesmo erro ainda engolia as entregas do
+      // Mercado ja reivindicadas naquele request.
+      if (s.team.length >= MAX_TEAM_SIZE) return null
       const i = s.bagPokes.findIndex((p) => p.uid === uid)
       if (i < 0) return null
       const [p] = s.bagPokes.splice(i, 1)

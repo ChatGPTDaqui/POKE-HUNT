@@ -25,8 +25,9 @@
 import { SPECIES, averageIvPercent, getItem, rowToPoke, type PokemonRow } from '#engine'
 import { ErroHttp, selecionar, selecionarTudo, inserir, atualizar, atualizarRetornando, type Config } from './db.js'
 import { enfileirarEntrega } from './entregas.js'
-import { carregarEstado, carregarEstadoParaEscrita, gravarEstado } from './progresso.js'
+import { carregarEstado, comEstadoParaEscrita, gravarEstado } from './progresso.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
+import type { GameStateData } from '#engine'
 
 // Teto de itens por ordem. Nao e regra de jogo — e limite de sanidade: uma
 // ordem de 2 bilhoes estouraria o int da coluna e travaria o livro.
@@ -96,7 +97,11 @@ export interface LinhaNegocio {
 
 const inteiro = (v: unknown, campo: string, max: number): number => {
   const n = Number(v)
-  if (!Number.isInteger(n) || n <= 0 || n > max) throw new ErroHttp(400, `${campo} invalido`)
+  if (!Number.isInteger(n) || n <= 0) throw new ErroHttp(400, `${campo} invalido`)
+  // Mensagem separada da de "invalido": quem digita 999.999.999 num lance esta
+  // fazendo algo legitimo e so precisa saber onde e o teto. "valor invalido" ali
+  // parecia bug do jogo.
+  if (n > max) throw new ErroHttp(400, `O maximo permitido para ${campo} e ${max.toLocaleString('pt-BR')}.`)
   return n
 }
 
@@ -292,33 +297,34 @@ export async function criarOrdem(
   const quantity = inteiro(corpo.quantity, 'quantity', MAX_QUANTIDADE)
   if (!getItem(itemId)) throw new ErroHttp(400, 'item desconhecido')
 
-  const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId)
-  const { store, dados: estado } = criarEstadoDoJogador(dados)
+  return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+    const { store, dados: estado } = criarEstadoDoJogador(dados)
 
-  // --- escrow ---
-  if (side === 'venda') {
-    if (estado.lockedItems[itemId]) throw new ErroHttp(409, 'Este item esta travado — destrave antes de anunciar.')
-    if (!store.removeItem(itemId, quantity)) throw new ErroHttp(409, 'Voce nao tem essa quantidade.')
-  } else {
-    if (!store.spendGold(unitPrice * quantity)) throw new ErroHttp(409, 'Ouro insuficiente.')
-  }
+    // --- escrow ---
+    if (side === 'venda') {
+      if (estado.lockedItems[itemId]) throw new ErroHttp(409, 'Este item esta travado — destrave antes de anunciar.')
+      if (!store.removeItem(itemId, quantity)) throw new ErroHttp(409, 'Voce nao tem essa quantidade.')
+    } else {
+      if (!store.spendGold(unitPrice * quantity)) throw new ErroHttp(409, 'Ouro insuficiente.')
+    }
 
-  const [ordem] = await inserir<LinhaOrdem>(cfg, 'market_orders', {
-    user_id: userId,
-    item_id: itemId,
-    side,
-    unit_price: unitPrice,
-    quantity,
-    remaining: quantity,
-    gold_retido: side === 'compra' ? unitPrice * quantity : 0,
-  }, { retornar: true })
+    const [ordem] = await inserir<LinhaOrdem>(cfg, 'market_orders', {
+      user_id: userId,
+      item_id: itemId,
+      side,
+      unit_price: unitPrice,
+      quantity,
+      remaining: quantity,
+      gold_retido: side === 'compra' ? unitPrice * quantity : 0,
+    }, { retornar: true })
 
-  const resultado = await casar(cfg, userId, ordem, store)
+    const resultado = await casar(cfg, userId, ordem, store)
 
-  // O estado do jogador (escrow debitado + o que ele recebeu no casamento) e
-  // gravado uma vez so, no fim. Se algo estourar antes, nada foi debitado.
-  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
-  return { ordemId: ordem.id, ...resultado, estado }
+    // O estado do jogador (escrow debitado + o que ele recebeu no casamento) e
+    // gravado uma vez so, no fim. Se algo estourar antes, nada foi debitado.
+    await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
+    return { ordemId: ordem.id, ...resultado, estado }
+  })
 }
 
 interface ResultadoCasamento {
@@ -440,19 +446,20 @@ export async function cancelarOrdem(cfg: Config, userId: string, ordemId: string
   )
   if (!ordem) throw new ErroHttp(404, 'ordem nao encontrada ou ja encerrada')
 
-  const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId)
-  const { store, dados: estado } = criarEstadoDoJogador(dados)
-  if (ordem.side === 'venda') store.addItem(ordem.item_id, ordem.remaining)
-  else store.addGold(ordem.gold_retido)
-  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
+  return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+    const { store, dados: estado } = criarEstadoDoJogador(dados)
+    if (ordem.side === 'venda') store.addItem(ordem.item_id, ordem.remaining)
+    else store.addGold(ordem.gold_retido)
+    await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
 
-  const item = getItem(ordem.item_id)
-  return {
-    mensagem: ordem.side === 'venda'
-      ? `Ordem cancelada — ${ordem.remaining}x ${item?.name ?? ordem.item_id} de volta na mochila.`
-      : `Ordem cancelada — ${ordem.gold_retido} de ouro devolvido.`,
-    estado,
-  }
+    const item = getItem(ordem.item_id)
+    return {
+      mensagem: ordem.side === 'venda'
+        ? `Ordem cancelada — ${ordem.remaining}x ${item?.name ?? ordem.item_id} de volta na mochila.`
+        : `Ordem cancelada — ${ordem.gold_retido} de ouro devolvido.`,
+      estado,
+    }
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -583,29 +590,38 @@ export async function ofertarNoAnuncio(
   if (!anuncio.apenas_oferta) throw new ErroHttp(409, 'Este anuncio tem preco fixo — use Comprar.')
   if (anuncio.seller_id === userId) throw new ErroHttp(409, 'Voce nao pode ofertar no proprio anuncio.')
 
-  const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId)
-  const { store, dados: estado } = criarEstadoDoJogador(dados)
-  const pago = anuncio.currency === 'gold' ? store.spendGold(valor) : store.spendDiamonds(valor)
-  if (!pago) {
-    throw new ErroHttp(409, anuncio.currency === 'gold' ? 'Ouro insuficiente.' : 'Diamantes insuficientes.')
-  }
+  return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+    const { store, dados: estado } = criarEstadoDoJogador(dados)
+    const pago = anuncio.currency === 'gold' ? store.spendGold(valor) : store.spendDiamonds(valor)
+    if (!pago) {
+      throw new ErroHttp(409, anuncio.currency === 'gold' ? 'Ouro insuficiente.' : 'Diamantes insuficientes.')
+    }
 
-  // A linha entra ANTES da gravacao do estado: o indice unico parcial
-  // `market_offers_uma_pendente` e quem recusa a segunda oferta simultanea, e se
-  // ele disparar aqui nada foi debitado ainda (o estado so e gravado abaixo).
-  await inserir(cfg, 'market_offers', {
-    listing_id: anuncioId,
-    buyer_id: userId,
-    valor,
-    currency: anuncio.currency,
+    // A linha entra ANTES da gravacao do estado: o indice unico parcial
+    // `market_offers_uma_pendente` e quem recusa a segunda oferta simultanea, e se
+    // ele disparar aqui nada foi debitado ainda (o estado so e gravado abaixo).
+    //
+    // O try/catch traduz essa colisao: sem ele o PostgREST devolvia 23505, que
+    // `db.ts` (corretamente) nao repassa pro cliente, e o jogador via
+    // "falha ao falar com o banco" em vez de saber que ja tinha um lance ali.
+    try {
+      await inserir(cfg, 'market_offers', {
+        listing_id: anuncioId,
+        buyer_id: userId,
+        valor,
+        currency: anuncio.currency,
+      })
+    } catch {
+      throw new ErroHttp(409, 'Voce ja tem um lance pendente neste anuncio — cancele antes de enviar outro.')
+    }
+    await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
+
+    const nome = SPECIES[anuncio.species_id]?.name ?? anuncio.species_id
+    return {
+      mensagem: `Oferta de ${valor} enviada por ${nome}. O valor fica retido ate o vendedor responder.`,
+      estado,
+    }
   })
-  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
-
-  const nome = SPECIES[anuncio.species_id]?.name ?? anuncio.species_id
-  return {
-    mensagem: `Oferta de ${valor} enviada por ${nome}. O valor fica retido ate o vendedor responder.`,
-    estado,
-  }
 }
 
 /** O comprador desiste: a oferta sai do ar e o escrow volta. */
@@ -617,13 +633,14 @@ export async function cancelarOferta(cfg: Config, userId: string, ofertaId: stri
   )
   if (!oferta) throw new ErroHttp(404, 'oferta nao encontrada ou ja respondida')
 
-  const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId)
-  const { store, dados: estado } = criarEstadoDoJogador(dados)
-  if (oferta.currency === 'gold') store.addGold(oferta.valor)
-  else store.addDiamonds(oferta.valor)
-  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
+  return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+    const { store, dados: estado } = criarEstadoDoJogador(dados)
+    if (oferta.currency === 'gold') store.addGold(oferta.valor)
+    else store.addDiamonds(oferta.valor)
+    await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
 
-  return { mensagem: `Oferta cancelada — ${oferta.valor} devolvido(s).`, estado }
+    return { mensagem: `Oferta cancelada — ${oferta.valor} devolvido(s).`, estado }
+  })
 }
 
 /** O vendedor aceita ou recusa uma oferta recebida. */
@@ -669,6 +686,14 @@ export async function responderOferta(
     { status: 'vendido', sold_at: new Date().toISOString(), buyer_id: oferta.buyer_id },
   )
   if (!fechado) {
+    // A oferta ja foi marcada 'aceita' no CAS acima, mas o anuncio saiu debaixo
+    // dela: ela NAO foi aceita, e deixar o carimbo produzia duas ofertas
+    // "aceitas" pro mesmo POKE (reproduzido com dois `Aceitar` simultaneos).
+    // O escrow voltava certo — mentia so o registro, que e o que um historico
+    // de negociacao existe pra nao fazer.
+    await atualizar(cfg, `market_offers?id=eq.${ofertaId}`, {
+      status: 'recusada', resolved_at: new Date().toISOString(),
+    })
     await enfileirarEntrega(cfg, {
       userId: oferta.buyer_id,
       gold: oferta.currency === 'gold' ? oferta.valor : 0,
@@ -720,7 +745,18 @@ export async function comprarAnuncio(cfg: Config, userId: string, anuncioId: str
   }
   const preco = anuncio.price
 
-  const { estado: dados, pokeIdsNoLoad } = await carregarEstadoParaEscrita(cfg, userId)
+  return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) =>
+    concluirCompra(cfg, userId, anuncio, preco, dados, pokeIdsNoLoad))
+}
+
+async function concluirCompra(
+  cfg: Config,
+  userId: string,
+  anuncio: LinhaAnuncio,
+  preco: number,
+  dados: GameStateData,
+  pokeIdsNoLoad: Set<string>,
+) {
   const { store, dados: estado } = criarEstadoDoJogador(dados)
 
   // ORDEM DELIBERADA: cobrar e gravar ANTES de mover o POKE.
@@ -746,7 +782,7 @@ export async function comprarAnuncio(cfg: Config, userId: string, anuncioId: str
   // `gravarEstado` vem depois), entao basta recusar.
   const [fechado] = await atualizarRetornando<LinhaAnuncio>(
     cfg,
-    `market_listings?id=eq.${anuncioId}&status=eq.ativo`,
+    `market_listings?id=eq.${anuncio.id}&status=eq.ativo`,
     { status: 'vendido', sold_at: new Date().toISOString(), buyer_id: userId },
   )
   if (!fechado) throw new ErroHttp(409, 'Este anuncio acabou de ser vendido.')
