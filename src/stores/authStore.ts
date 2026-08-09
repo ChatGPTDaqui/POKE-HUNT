@@ -10,6 +10,7 @@
 import { create } from 'zustand'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+import { ehFalhaSemResposta, mensagemDeFalhaDeRede } from '@/lib/erroDeRede'
 
 interface AuthState {
   session: Session | null
@@ -36,6 +37,11 @@ function traduzErro(mensagem: string): string {
   if (m.includes('email rate limit') || m.includes('over_email_send_rate_limit')) {
     return 'Muitas tentativas seguidas. Espere um minuto e tente de novo.'
   }
+  // Sem esta traducao a tela de login mostrava a string crua do navegador, em
+  // ingles: o jogador com bloqueador via "Failed to fetch" e nao tinha o que
+  // fazer com isso. Ver lib/erroDeRede.ts pro porque da mensagem citar
+  // bloqueador de anuncios.
+  if (ehFalhaSemResposta(mensagem)) return mensagemDeFalhaDeRede()
   return mensagem
 }
 

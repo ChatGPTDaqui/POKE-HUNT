@@ -12,7 +12,9 @@
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/stores/authStore'
 import { useGameStateStore, defaultGameStateData } from '@/stores/gameStateStore'
-import { configurarPersistencia, limparPersistencia, flushAgora } from '@/data/remote/gameStatePersistence'
+import {
+  configurarPersistencia, limparPersistencia, flushAgora, erroDaUltimaCarga,
+} from '@/data/remote/gameStatePersistence'
 
 export type EstadoProgresso =
   | { fase: 'carregando' }
@@ -33,11 +35,19 @@ export function useProgressoRemoto(): EstadoProgresso {
     useGameStateStore.persist
       .rehydrate()
       ?.then(() => {
-        if (!cancelado) setEstado({ fase: 'pronto' })
+        if (cancelado) return
+        // O `.catch` abaixo NAO cobre falha de leitura: o `persist` do zustand
+        // engole o erro do storage e resolve mesmo assim (ver a nota em
+        // gameStatePersistence.ts). Por isso a falha e consultada, nao capturada.
+        //
+        // Falhar visivelmente e obrigatorio aqui: sem isto o store fica com o
+        // DEFAULT e o jogo entra apresentando a conta como nova — pedindo nome e
+        // inicial pra quem ja tem equipe no servidor. Reproduzido com um
+        // bloqueador de anuncios barrando o servico.
+        const falha = erroDaUltimaCarga()
+        setEstado(falha ? { fase: 'erro', mensagem: falha } : { fase: 'pronto' })
       })
       .catch((err: unknown) => {
-        // Falhar visivelmente e melhor que entrar no jogo com estado default:
-        // o primeiro autosave gravaria esse default por cima do progresso real.
         if (!cancelado) {
           setEstado({ fase: 'erro', mensagem: err instanceof Error ? err.message : String(err) })
         }

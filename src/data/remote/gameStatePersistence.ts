@@ -104,21 +104,46 @@ export function ultimoSavedAt(): number | null {
   return savedAtMs
 }
 
+/**
+ * Por que a falha de carga precisa ser registrada aqui em vez de propagada.
+ *
+ * O `persist` do zustand ENGOLE o erro do storage: o `hydrate()` dele termina
+ * num `.catch` que chama `onRehydrateStorage(undefined, erro)` e **resolve** a
+ * promessa. Ou seja, `rehydrate()?.then(...)` roda o `then` mesmo quando o
+ * `getItem` rejeitou, e o `.catch` de quem chamou nunca dispara.
+ *
+ * Consequencia real, reproduzida com um bloqueador de anuncios barrando o
+ * servico: a leitura falhava, o store hidratava com o DEFAULT e o jogo entrava
+ * apresentando a conta como nova — pedindo nome de treinador e inicial pra quem
+ * ja tinha equipe e progresso no servidor. O gate de "falhar visivelmente" que
+ * o `useProgressoRemoto` documenta existia, mas era codigo morto.
+ */
+let erroDeCarga: string | null = null
+export function erroDaUltimaCarga(): string | null {
+  return erroDeCarga
+}
+
 export const postgresStorage: PersistStorage<GameStateData> = {
   getItem: async (): Promise<StorageValue<GameStateData> | null> => {
+    erroDeCarga = null
     if (!usuarioAtual || !defaultsDoJogo) return null
-    // Sob autoridade do servidor, o estado inicial vem DELE — nao de uma leitura
-    // direta do Postgres. Assim o cliente enxerga exatamente o que o servidor
-    // considera verdade, inclusive o que uma sessao ainda aberta ja rendeu.
-    if (servidorAtivo()) {
-      const { estado } = await servidor.estado()
-      savedAtMs = Date.now()
-      return { state: estado as GameStateData, version: 1 }
+    try {
+      // Sob autoridade do servidor, o estado inicial vem DELE — nao de uma leitura
+      // direta do Postgres. Assim o cliente enxerga exatamente o que o servidor
+      // considera verdade, inclusive o que uma sessao ainda aberta ja rendeu.
+      if (servidorAtivo()) {
+        const { estado } = await servidor.estado()
+        savedAtMs = Date.now()
+        return { state: estado as GameStateData, version: 1 }
+      }
+      const resultado = await loadPlayerState(usuarioAtual, defaultsDoJogo)
+      if (!resultado) return null
+      savedAtMs = resultado.savedAt
+      return { state: resultado.data, version: 1 }
+    } catch (err) {
+      erroDeCarga = err instanceof Error ? err.message : String(err)
+      throw err
     }
-    const resultado = await loadPlayerState(usuarioAtual, defaultsDoJogo)
-    if (!resultado) return null
-    savedAtMs = resultado.savedAt
-    return { state: resultado.data, version: 1 }
   },
 
   setItem: (_nome, valor) => {

@@ -14,6 +14,7 @@
 // ainda nao foi decidida (ver CLAUDE.md, Fase D). Apontar a variavel pro
 // servico e literalmente o unico passo que falta.
 import { supabase } from '@/lib/supabase'
+import { mensagemDeFalhaDeRede } from '@/lib/erroDeRede'
 import type { OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
 import type { PokeInstance } from '@/data/pokes'
 
@@ -123,9 +124,12 @@ function mensagemPorStatus(status: number): string {
   return `servidor respondeu ${status}`
 }
 
+// Timeout tem causa propria (o servidor respondeu devagar, nao foi barrado); o
+// resto cai na traducao compartilhada — ver lib/erroDeRede.ts pro porque de a
+// mensagem citar bloqueador de anuncios.
 function mensagemDeRede(erro: unknown): string {
   if (erro instanceof DOMException && erro.name === 'AbortError') return 'o servidor demorou demais para responder'
-  return 'sem conexao com o servidor — verifique sua internet'
+  return mensagemDeFalhaDeRede()
 }
 
 // O estado do jogador, do jeito que o servidor o entende. Sempre que uma

@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '5.7',
+    date: '2026-08-09',
+    title: 'Bloqueador de anuncios fazia o jogo apresentar sua conta como nova',
+    highlights: [
+      'PROGRESSO "SUMINDO" COM BLOQUEADOR DE ANUNCIOS — CORRIGIDO. Se uma extensao (uBlock, AdBlock, Brave Shields) ou um filtro de DNS barrasse a conversa com o servidor, o jogo NAO avisava: ele entrava com a ficha em branco e pedia nome de treinador e Pokemon inicial pra quem ja tinha equipe, ouro e Pokedex. O progresso nunca foi apagado (o servidor guarda tudo), mas na tela parecia perdido — e criar de novo tambem nao funcionava, porque o mesmo bloqueio derrubava a criacao. Agora o jogo para e explica em vez de fingir que voce e novo.',
+      'MENSAGEM DE ERRO QUE DIZ A VERDADE. Qualquer falha de rede virava "verifique sua internet", e quem estava com internet perfeita ia reiniciar o roteador a toa. Quando o aparelho esta online e mesmo assim nao ha resposta, a mensagem passa a citar bloqueador de anuncios, extensao de privacidade e filtro de DNS como causa mais provavel.',
+      'TELA DE LOGIN mostrava "Failed to fetch" em ingles quando o acesso era bloqueado. Agora explica o que houve em portugues.',
+      'Nada aqui exige desligar seu bloqueador para jogar, e o jogo nao verifica se voce usa um: a mensagem so aparece quando alguma coisa ja falhou, para voce saber onde olhar.',
+    ],
+  },
+  {
     version: '5.6',
     date: '2026-08-09',
     title: 'Caça a bugs: ouro do Mercado sumindo e duplicacao por clique duplo',
