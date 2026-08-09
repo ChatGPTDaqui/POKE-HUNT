@@ -39,14 +39,14 @@ function cabecalhos(cfg, extras = {}) {
 }
 var ESPERA_ENTRE_TENTATIVAS_MS$1 = [200, 700];
 var TIMEOUT_MS = 1e4;
-var dormir$1 = (ms) => new Promise((r) => setTimeout(r, ms));
+var dormir$2 = (ms) => new Promise((r) => setTimeout(r, ms));
 function ehFalhaTransitoria(status) {
 	return status === 408 || status === 425 || status === 429 || status >= 500;
 }
 async function buscarComRetry(cfg, caminho, init) {
 	let ultimo = null;
 	for (let tentativa = 0; tentativa <= ESPERA_ENTRE_TENTATIVAS_MS$1.length; tentativa++) {
-		if (tentativa > 0) await dormir$1(ESPERA_ENTRE_TENTATIVAS_MS$1[tentativa - 1]);
+		if (tentativa > 0) await dormir$2(ESPERA_ENTRE_TENTATIVAS_MS$1[tentativa - 1]);
 		try {
 			const resposta = await fetch(`${cfg.supabaseUrl}/rest/v1/${caminho}`, {
 				...init,
@@ -59356,6 +59356,12 @@ async function savePlayerState(userId, state) {
 	idsNoBanco = vivos;
 }
 //#endregion
+//#region src/lib/erroDeRede.ts
+function mensagemDeFalhaDeRede(online = typeof navigator === "undefined" || navigator.onLine !== false) {
+	if (!online) return "Sem conexao — verifique sua internet e tente de novo.";
+	return "Nao foi possivel falar com o servidor. Voce parece estar online, entao o mais provavel e um bloqueador de anuncios, extensao de privacidade ou filtro de DNS barrando o jogo — libere este site e tente de novo.";
+}
+//#endregion
 //#region src/data/remote/servidor.ts
 var BASE = "https://cffbihbmhiuudahsgjsn.supabase.co/functions/v1/jogo".replace(/\/$/, "");
 /** Se o jogo esta rodando sob autoridade do servidor. */
@@ -59372,7 +59378,7 @@ var ErroServidor = class extends Error {
 var TIMEOUT_PADRAO_MS = 15e3;
 var TIMEOUT_FLUSH_MS = 45e3;
 var ESPERA_ENTRE_TENTATIVAS_MS = [400, 1200];
-var dormir = (ms) => new Promise((r) => setTimeout(r, ms));
+var dormir$1 = (ms) => new Promise((r) => setTimeout(r, ms));
 var STATUS_RETENTAVEIS = /* @__PURE__ */ new Set([
 	408,
 	425,
@@ -59390,7 +59396,7 @@ async function pedir(caminho, { retentavel = false, timeoutMs = TIMEOUT_PADRAO_M
 	const tentativas = retentavel ? ESPERA_ENTRE_TENTATIVAS_MS.length + 1 : 1;
 	let ultimoErro;
 	for (let tentativa = 0; tentativa < tentativas; tentativa++) {
-		if (tentativa > 0) await dormir(ESPERA_ENTRE_TENTATIVAS_MS[tentativa - 1]);
+		if (tentativa > 0) await dormir$1(ESPERA_ENTRE_TENTATIVAS_MS[tentativa - 1]);
 		try {
 			const resposta = await fetch(`${BASE}${caminho}`, {
 				...init,
@@ -59423,7 +59429,7 @@ function mensagemPorStatus(status) {
 }
 function mensagemDeRede(erro) {
 	if (erro instanceof DOMException && erro.name === "AbortError") return "o servidor demorou demais para responder";
-	return "sem conexao com o servidor — verifique sua internet";
+	return mensagemDeFalhaDeRede();
 }
 var servidor = {
 	estado: () => pedir("/estado", { retentavel: true }),
@@ -59551,20 +59557,25 @@ var savedAtMs = null;
 var postgresStorage = {
 	getItem: async () => {
 		if (!usuarioAtual || !defaultsDoJogo) return null;
-		if (servidorAtivo()) {
-			const { estado } = await servidor.estado();
+		try {
+			if (servidorAtivo()) {
+				const { estado } = await servidor.estado();
+				return {
+					state: estado,
+					version: 1
+				};
+			}
+			const resultado = await loadPlayerState(usuarioAtual, defaultsDoJogo);
+			if (!resultado) return null;
+			resultado.savedAt;
 			return {
-				state: estado,
+				state: resultado.data,
 				version: 1
 			};
+		} catch (err) {
+			err instanceof Error && err.message;
+			throw err;
 		}
-		const resultado = await loadPlayerState(usuarioAtual, defaultsDoJogo);
-		if (!resultado) return null;
-		resultado.savedAt;
-		return {
-			state: resultado.data,
-			version: 1
-		};
 	},
 	setItem: (_nome, valor) => {
 		if (servidorAtivo()) return;
@@ -60353,6 +60364,30 @@ async function perfilDoJogador(cfg, userId) {
 //#endregion
 //#region server/src/progresso.ts
 var MAX_SEGUNDOS_POR_FLUSH = 21600;
+var MARCA_DE_FLUSH_EXPIRA_MS = 3e4;
+var ESPERA_MAXIMA_POR_FLUSH_MS = 2500;
+var INTERVALO_DE_SONDAGEM_MS = 120;
+var dormir = (ms) => new Promise((r) => setTimeout(r, ms));
+/**
+* Segura o request enquanto um flush do MESMO jogador ainda esta escrevendo.
+*
+* Sem isto, ler o estado durante um flush e depois grava-lo apaga o que o flush
+* creditou — e o intervalo ja foi consumido pelo claim, entao nao volta em flush
+* nenhum. Ver a migration `20260809190000_marca_de_flush_em_andamento` pros
+* numeros medidos.
+*
+* E uma espera, e nao um erro, porque o outro request nao esta fazendo nada de
+* errado: ele vai terminar em milissegundos e a resposta correta e usar o
+* resultado DELE como ponto de partida.
+*/
+async function aguardarFlushEmAndamento(cfg, userId) {
+	const limite = Date.now() + ESPERA_MAXIMA_POR_FLUSH_MS;
+	for (;;) {
+		if (!(await selecionar(cfg, `game_sessions?user_id=eq.${userId}&flushing_since=not.is.null&select=flushing_since`)).some((l) => Date.now() - new Date(l.flushing_since).getTime() < MARCA_DE_FLUSH_EXPIRA_MS)) return;
+		if (Date.now() >= limite) return;
+		await dormir(INTERVALO_DE_SONDAGEM_MS);
+	}
+}
 async function lerSnapshot(cfg, userId) {
 	const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
 		selecionar(cfg, `players?user_id=eq.${userId}&select=*`),
@@ -60403,7 +60438,8 @@ async function carregarEstadoParaEscrita(cfg, userId) {
 * embrulho, esquecer o tratamento deixa de ser possivel: quem carrega, carrega
 * por aqui.
 */
-async function comEstadoParaEscrita(cfg, userId, fn) {
+async function comEstadoParaEscrita(cfg, userId, fn, opcoes = {}) {
+	if (opcoes.esperarFlush !== false) await aguardarFlushEmAndamento(cfg, userId);
 	const ctx = await carregarEstadoParaEscrita(cfg, userId);
 	try {
 		return await fn(ctx);
@@ -60455,8 +60491,10 @@ async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad) {
 	if (removerDex.length) await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${removerDex.join(",")})`);
 	if (linhasDex.length) await inserir(cfg, "player_pokedex", linhasDex, { upsert: "user_id,species_id" });
 	const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado);
-	await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}`);
-	if (linhasAuto.length) await inserir(cfg, "player_auto_catch_rules", linhasAuto);
+	const especiesAgora = new Set(linhasAuto.map((l) => l.species_id));
+	const removerAuto = (await selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !especiesAgora.has(id));
+	if (removerAuto.length) await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${removerAuto.join(",")})`);
+	if (linhasAuto.length) await inserir(cfg, "player_auto_catch_rules", linhasAuto, { upsert: "user_id,species_id" });
 }
 /**
 * Outro request do mesmo jogador ja esta creditando este intervalo.
@@ -60475,21 +60513,29 @@ var FLUSH_OCUPADO = "ocupado";
 * ouro. O cliente so declarou, na abertura da sessao, em qual hunt esta.
 */
 async function aplicarFlush(cfg, userId, sessao) {
+	await aguardarFlushEmAndamento(cfg, userId);
 	const agora = Date.now();
 	const bruto = (agora - new Date(sessao.last_flush_at).getTime()) / 1e3;
 	const segundos = Math.max(0, Math.min(bruto, MAX_SEGUNDOS_POR_FLUSH));
 	const truncado = bruto > MAX_SEGUNDOS_POR_FLUSH;
-	const [reivindicada] = await atualizarRetornando(cfg, `game_sessions?id=eq.${sessao.id}&closed_at=is.null&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}`, { last_flush_at: new Date(agora).toISOString() });
-	if (!reivindicada) return FLUSH_OCUPADO;
-	return comEstadoParaEscrita(cfg, userId, async (ctx) => {
-		const resultado = await simularSessao(cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, {
-			agora,
-			segundos,
-			truncado
-		});
-		if (!resultado) await devolverEntregas(cfg, ctx.entregas);
-		return resultado;
+	const [reivindicada] = await atualizarRetornando(cfg, `game_sessions?id=eq.${sessao.id}&closed_at=is.null&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}`, {
+		last_flush_at: new Date(agora).toISOString(),
+		flushing_since: new Date(agora).toISOString()
 	});
+	if (!reivindicada) return FLUSH_OCUPADO;
+	try {
+		return await comEstadoParaEscrita(cfg, userId, async (ctx) => {
+			const resultado = await simularSessao(cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, {
+				agora,
+				segundos,
+				truncado
+			});
+			if (!resultado) await devolverEntregas(cfg, ctx.entregas);
+			return resultado;
+		}, { esperarFlush: false });
+	} finally {
+		await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { flushing_since: null });
+	}
 }
 async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, janela) {
 	const { agora, segundos, truncado } = janela;
@@ -61548,8 +61594,8 @@ async function rotear(cfg, req, url) {
 	if (url.pathname === "/sessao/abrir" && req.method === "POST") return abrirSessao(cfg, jogador.id, req);
 	if (url.pathname === "/sessao/flush" && req.method === "POST") return flush(cfg, jogador.id);
 	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id);
-	if (url.pathname === "/estado" && req.method === "GET") return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad }) => {
-		await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad);
+	if (url.pathname === "/estado" && req.method === "GET") return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, entregas }) => {
+		if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad);
 		return json({ estado });
 	});
 	if (url.pathname.startsWith("/mercado")) return mercado(cfg, jogador.id, req, url);

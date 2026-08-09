@@ -97,8 +97,14 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
     // recebe o que vendeu enquanto estava fora — por isso ele grava, apesar de
     // ser um GET. `carregarEstadoParaEscrita` carimba a entrega como aplicada,
     // entao o `gravarEstado` logo abaixo nao e opcional.
-    return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad }) => {
-      await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad)
+    return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, entregas }) => {
+      // So grava quando ha o que gravar. A escrita aqui existe por UM motivo —
+      // persistir a entrega que acabou de ser carimbada como aplicada; sem
+      // entrega, ela regravaria o snapshot identico ao que acabou de ler, e
+      // essa escrita inutil era metade do problema: no carregamento da pagina
+      // ela chegava depois de um flush ainda em andamento e o desfazia.
+      // (A outra metade e a espera por esse flush, em comEstadoParaEscrita.)
+      if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad)
       return json({ estado })
     })
   }

@@ -48,6 +48,52 @@ export interface LinhaSessao {
   last_flush_at: string
   simulated_seconds: number | string
   closed_at: string | null
+  // Quando o flush em andamento comecou a simular/gravar; nulo fora disso. Ver
+  // `aguardarFlushEmAndamento` — e o sinal que impede o resto do jogo de gravar
+  // um snapshot de ANTES do flush por cima do resultado dele.
+  flushing_since: string | null
+}
+
+// Marca de flush mais velha que isto e tratada como lixo: a invocacao morreu no
+// meio (limite de CPU da Edge Function, deploy, queda) e nunca limpou. Sem a
+// expiracao, uma marca orfa faria TODO request seguinte esperar o tempo maximo.
+// Folga larga de proposito: o pior caso medido (6h de farm offline numa
+// invocacao) leva ~1,6s.
+const MARCA_DE_FLUSH_EXPIRA_MS = 30000
+// Teto da espera. Estourar nao e erro: seguir em frente devolve o
+// comportamento antigo (a corrida), enquanto travar o request seria trocar uma
+// perda rara por uma falha certa.
+const ESPERA_MAXIMA_POR_FLUSH_MS = 2500
+const INTERVALO_DE_SONDAGEM_MS = 120
+
+const dormir = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+/**
+ * Segura o request enquanto um flush do MESMO jogador ainda esta escrevendo.
+ *
+ * Sem isto, ler o estado durante um flush e depois grava-lo apaga o que o flush
+ * creditou — e o intervalo ja foi consumido pelo claim, entao nao volta em flush
+ * nenhum. Ver a migration `20260809190000_marca_de_flush_em_andamento` pros
+ * numeros medidos.
+ *
+ * E uma espera, e nao um erro, porque o outro request nao esta fazendo nada de
+ * errado: ele vai terminar em milissegundos e a resposta correta e usar o
+ * resultado DELE como ponto de partida.
+ */
+export async function aguardarFlushEmAndamento(cfg: Config, userId: string): Promise<void> {
+  const limite = Date.now() + ESPERA_MAXIMA_POR_FLUSH_MS
+  for (;;) {
+    const linhas = await selecionar<{ flushing_since: string }>(
+      cfg,
+      `game_sessions?user_id=eq.${userId}&flushing_since=not.is.null&select=flushing_since`,
+    )
+    const emAndamento = linhas.some(
+      (l) => Date.now() - new Date(l.flushing_since).getTime() < MARCA_DE_FLUSH_EXPIRA_MS,
+    )
+    if (!emAndamento) return
+    if (Date.now() >= limite) return
+    await dormir(INTERVALO_DE_SONDAGEM_MS)
+  }
 }
 
 /**
@@ -123,7 +169,11 @@ export async function comEstadoParaEscrita<T>(
   cfg: Config,
   userId: string,
   fn: (ctx: EstadoParaEscrita) => Promise<T>,
+  // Só o proprio flush passa `false`: ele E o dono da marca, entao esperaria por
+  // si mesmo ate o teto.
+  opcoes: { esperarFlush?: boolean } = {},
 ): Promise<T> {
+  if (opcoes.esperarFlush !== false) await aguardarFlushEmAndamento(cfg, userId)
   const ctx = await carregarEstadoParaEscrita(cfg, userId)
   try {
     return await fn(ctx)
@@ -224,12 +274,29 @@ export async function gravarEstado(
   // na propria linha, esta e tabela). Resultado: a regra "capturar Dratini com
   // Ultra Ball" era aceita pela acao `configurarAuto`, entrava na simulacao do
   // request corrente e desaparecia no proximo load — e sobrevivia a um reset.
-  // Reescrita por inteiro (apaga tudo, insere o que tem) porque a lista e pequena
-  // e nao tem chave estavel do lado do jogo: a identidade de uma regra e o par
-  // (especie, bola), entao diff por linha nao compraria nada.
+  //
+  // Escrita pelo mesmo diff de remocao + upsert das outras tabelas, e NAO por
+  // "apaga tudo e insere de novo" como era antes. A versao antiga produzia 502
+  // ("falha ao falar com o banco") em toda concorrencia: a tabela tem UNIQUE
+  // (user_id, species_id), entao dois requests do mesmo jogador intercalando
+  // DELETE/DELETE/INSERT/INSERT faziam o segundo INSERT violar a constraint.
+  // Reproduzido: com 8 regras configuradas, 33 de 48 GET /estado concorrentes
+  // voltaram 502, com o log do PostgREST acusando
+  // `duplicate key value violates unique constraint
+  // "player_auto_catch_rules_user_id_species_id_key"`. Era o aviso que aparecia
+  // ao recarregar a pagina com Ctrl+Shift+R.
   const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado)
-  await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}`)
-  if (linhasAuto.length) await inserir(cfg, 'player_auto_catch_rules', linhasAuto)
+  const especiesAgora = new Set(linhasAuto.map((l) => l.species_id))
+  const autoNoBanco = await selecionarTudo<{ species_id: string }>(
+    cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`,
+  )
+  const removerAuto = autoNoBanco.map((l) => l.species_id).filter((id) => !especiesAgora.has(id))
+  if (removerAuto.length) {
+    await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${removerAuto.join(',')})`)
+  }
+  if (linhasAuto.length) {
+    await inserir(cfg, 'player_auto_catch_rules', linhasAuto, { upsert: 'user_id,species_id' })
+  }
 }
 
 export interface ResultadoFlush {
@@ -278,6 +345,20 @@ export async function aplicarFlush(
   userId: string,
   sessao: LinhaSessao,
 ): Promise<ResultadoFlushOuOcupado> {
+  // ANTES do claim, e nao dentro do `comEstadoParaEscrita` la embaixo.
+  //
+  // O claim so protege contra dois flushes creditarem o MESMO intervalo. Ele nao
+  // impede um segundo flush legitimo: quando /acao (ou /mercado) liquida a
+  // sessao logo depois de o flush do timer ter comecado, ele le a linha ja com
+  // `last_flush_at` novo, reivindica um intervalo de ~0 segundo — e antes desta
+  // espera, seguia direto pra ler o estado enquanto o primeiro ainda escrevia,
+  // gravando um snapshot de antes dele. Medido: 5 de 6 cliques a 30ms do tique
+  // do flush apagavam o intervalo inteiro.
+  //
+  // A espera fica aqui de proposito: depois do claim seria esperar pela propria
+  // marca.
+  await aguardarFlushEmAndamento(cfg, userId)
+
   const agora = Date.now()
   const desde = new Date(sessao.last_flush_at).getTime()
   const bruto = (agora - desde) / 1000
@@ -306,26 +387,40 @@ export async function aplicarFlush(
   // `last_flush_at=eq.<valor lido>` no filtro e o que serializa: quem escreve
   // primeiro move a ancora e o outro nao encontra linha, entao desiste antes de
   // carregar estado, reivindicar entrega ou simular qualquer coisa.
+  // `flushing_since` entra JUNTO com o claim, na mesma escrita: o claim diz
+  // "este intervalo e meu" e a marca diz "e eu ainda estou escrevendo". Sao
+  // coisas diferentes — `last_flush_at` avanca no COMECO, e o que os outros
+  // requests precisam saber e quando o snapshot parou de mudar. Sem a marca, o
+  // GET /estado da pagina recarregada (ou um clique na Loja) lia o estado
+  // durante a simulacao e o regravava depois, apagando o que este flush
+  // creditou.
   const [reivindicada] = await atualizarRetornando<LinhaSessao>(
     cfg,
     `game_sessions?id=eq.${sessao.id}&closed_at=is.null`
     + `&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}`,
-    { last_flush_at: new Date(agora).toISOString() },
+    { last_flush_at: new Date(agora).toISOString(), flushing_since: new Date(agora).toISOString() },
   )
   if (!reivindicada) return FLUSH_OCUPADO
 
-  // Toda saida daqui pra baixo que NAO grave (POKE sumiu, hunt sumiu, erro de
-  // simulacao) tem que devolver as entregas reivindicadas — senao o ouro de uma
-  // venda no Mercado some porque o jogador tirou o POKE da equipe.
-  return comEstadoParaEscrita(cfg, userId, async (ctx) => {
-    const resultado = await simularSessao(
-      cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, { agora, segundos, truncado },
-    )
-    // `null` = sessao insimulavel; sai SEM gravar, entao as entregas voltam pra
-    // fila (o `catch` do embrulho so cobre excecao, e aqui nao ha excecao).
-    if (!resultado) await devolverEntregas(cfg, ctx.entregas)
-    return resultado
-  })
+  try {
+    // Toda saida daqui pra baixo que NAO grave (POKE sumiu, hunt sumiu, erro de
+    // simulacao) tem que devolver as entregas reivindicadas — senao o ouro de uma
+    // venda no Mercado some porque o jogador tirou o POKE da equipe.
+    return await comEstadoParaEscrita(cfg, userId, async (ctx) => {
+      const resultado = await simularSessao(
+        cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, { agora, segundos, truncado },
+      )
+      // `null` = sessao insimulavel; sai SEM gravar, entao as entregas voltam pra
+      // fila (o `catch` do embrulho so cobre excecao, e aqui nao ha excecao).
+      if (!resultado) await devolverEntregas(cfg, ctx.entregas)
+      return resultado
+    }, { esperarFlush: false })
+  } finally {
+    // No `finally` porque uma marca que sobrevive a um erro faria todo request
+    // seguinte esperar o teto ate ela expirar. A expiracao existe pro caso em
+    // que nem o `finally` roda (invocacao morta no meio).
+    await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { flushing_since: null })
+  }
 }
 
 async function simularSessao(
