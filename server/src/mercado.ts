@@ -333,7 +333,7 @@ interface ResultadoCasamento {
   recebidoTotal: number
 }
 
-async function casar(
+export async function casar(
   cfg: Config,
   userId: string,
   ordem: LinhaOrdem,
@@ -425,12 +425,46 @@ async function casar(
   }
 
   if (executado > 0 || restante !== ordem.remaining) {
-    await atualizar(cfg, `market_orders?id=eq.${ordem.id}`, {
+    // CAS na propria ordem: sem isso, esta escrita final sobrescreve em
+    // silencio qualquer decremento que OUTRO casamento tenha aplicado nesta
+    // mesma ordem (via linha 380) enquanto este loop ainda estava em voo —
+    // bug real de duplicacao de ouro/item (PH-3).
+    let remainingEsperado = ordem.remaining
+    let patchFinal = {
       remaining: restante,
       gold_retido: ordem.side === 'compra' ? retido : 0,
       status: restante === 0 ? 'concluida' : 'ativa',
       closed_at: restante === 0 ? new Date().toISOString() : null,
-    })
+    }
+    let aplicado = await atualizarRetornando<LinhaOrdem>(
+      cfg,
+      `market_orders?id=eq.${ordem.id}&status=eq.ativa&remaining=eq.${remainingEsperado}`,
+      patchFinal,
+    )
+
+    if (!aplicado.length) {
+      // Perdemos a corrida: em vez de gravar por cima o valor pre-calculado,
+      // rele o estado atual e recalcula o delta so com o que ESTA chamada
+      // executou (`executado`), preservando o que a outra escrita ja aplicou.
+      const [atual] = await selecionar<LinhaOrdem>(cfg, `market_orders?id=eq.${ordem.id}&select=*`)
+      if (atual && atual.status === 'ativa') {
+        remainingEsperado = atual.remaining
+        const remainingFinal = Math.max(0, atual.remaining - executado)
+        patchFinal = {
+          remaining: remainingFinal,
+          gold_retido: ordem.side === 'compra' ? Math.max(0, atual.gold_retido - ordem.unit_price * executado) : 0,
+          status: remainingFinal === 0 ? 'concluida' : 'ativa',
+          closed_at: remainingFinal === 0 ? new Date().toISOString() : null,
+        }
+        aplicado = await atualizarRetornando<LinhaOrdem>(
+          cfg,
+          `market_orders?id=eq.${ordem.id}&status=eq.ativa&remaining=eq.${remainingEsperado}`,
+          patchFinal,
+        )
+      }
+
+      if (!aplicado.length) throw new ErroHttp(409, 'outro comando concorrente nesta ordem — tente de novo')
+    }
   }
 
   return { executado, gastoTotal, recebidoTotal }
