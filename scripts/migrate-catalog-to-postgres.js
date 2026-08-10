@@ -26,6 +26,26 @@ const sync = require('./sync-planilha.js');
 
 const ROOT = path.join(__dirname, '..');
 
+// species.spawn_tier (migration `spawn_tier_por_especie`) e NOT NULL e so
+// aceita as chaves de `spawn_tiers` (fk); map_encounters.weight e o peso
+// numerico do tier (30/20/10/5/1). O mesmo spawn-tiers.json que a migration
+// usou pra gerar seus UPDATEs hardcoded e a fonte pros dois — throw se
+// faltar, mesmo padrao de `especie sem spawn tier` do sync-planilha.js.
+function loadSpawnTierData() {
+  const arquivo = path.join(__dirname, 'spawn-tiers.json');
+  const { tiers, especies } = JSON.parse(fs.readFileSync(arquivo, 'utf8'));
+  const pesoPorTier = Object.fromEntries(tiers.map((t) => [t.chave, t.peso]));
+  const tierBySpecies = {};
+  const weightBySpecies = {};
+  for (const [id, info] of Object.entries(especies)) {
+    const peso = pesoPorTier[info.tier];
+    if (peso == null) throw new Error(`tier desconhecido em spawn-tiers.json: ${info.tier} (${id})`);
+    tierBySpecies[id] = info.tier;
+    weightBySpecies[id] = peso;
+  }
+  return { tierBySpecies, weightBySpecies };
+}
+
 // ---------------------------------------------------------------------------
 // Credenciais (.env da raiz, gitignored). Nunca logar o valor da service_role.
 // ---------------------------------------------------------------------------
@@ -167,11 +187,13 @@ const AOE_RADIUS = 240;
 // ---------------------------------------------------------------------------
 // Construcao das linhas
 // ---------------------------------------------------------------------------
-function buildSpeciesRows(workbook, legendaries, specialEvos, heights) {
+function buildSpeciesRows(workbook, legendaries, specialEvos, heights, tierBySpecies) {
   const rows = [];
   for (const r of workbook['Espécies'] || []) {
     const id = String(r['Chave']).toLowerCase();
     const sheetEvolvesTo = r['Evolui Para (chave)'] ? String(r['Evolui Para (chave)']).toLowerCase() : null;
+    const spawnTier = tierBySpecies[id];
+    if (!spawnTier) throw new Error(`especie sem spawn tier: ${id}`);
 
     // Patch de evolucao especial (pokes.ts): as 9 especies que no Gen1/2
     // evoluiam por TROCA saem da planilha sem evolucao nenhuma. O jogo aplica
@@ -196,6 +218,7 @@ function buildSpeciesRows(workbook, legendaries, specialEvos, heights) {
       base_exp: r['EXP Base'],
       catch_rate: r['Taxa de Captura (0-255)'],
       growth_curve: r['Curva de Crescimento'],
+      spawn_tier: spawnTier,
       height_m: heights[id] ?? null,
       is_legendary: legendaries.has(id),
       is_special_evolution: Boolean(special),
@@ -413,8 +436,9 @@ async function main() {
   const roster = sync.buildTypeRoster(workbook);
   const typeHunts = sync.buildTypeDrivenHunts([...brackets, ...sync.KANTO_BRACKETS], roster);
   const hunts = [starter, ...typeHunts];
+  const { tierBySpecies, weightBySpecies } = loadSpawnTierData();
   const { speciesData } = sync.syncSpeciesAndMoves(workbook, hunts);
-  const { mapsData, encountersData } = sync.syncMapsAndEncounters(hunts, speciesData);
+  const { mapsData, encountersData } = sync.syncMapsAndEncounters(hunts, weightBySpecies);
 
   const legendaries = parseLegendaries();
   const specialEvos = parseSpecialEvolutions();
@@ -422,7 +446,7 @@ async function main() {
   const typeOrder = parseTypeOrder();
   console.log(`\nHand-authored: ${legendaries.size} lendarios, ${Object.keys(specialEvos).length} evolucoes especiais, ${Object.keys(heights).length} alturas, ${typeOrder.length} tipos`);
 
-  const speciesRows = buildSpeciesRows(workbook, legendaries, specialEvos, heights);
+  const speciesRows = buildSpeciesRows(workbook, legendaries, specialEvos, heights, tierBySpecies);
   const moveRows = buildMoveRows(workbook);
   const moveIds = new Set(moveRows.map((m) => m.id));
   const itemRows = buildItemRows(workbook, typeOrder);
