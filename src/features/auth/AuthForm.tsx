@@ -13,9 +13,9 @@ import { Label } from '@/components/ui/label'
 // Espelha o que o servidor exige (supabase/config.toml: minimum_password_length
 // = 8, password_requirements = "letters_digits"). Validar aqui e so UX — poupa
 // um round-trip e da mensagem melhor; quem de fato barra e o Supabase.
-const MIN_SENHA = 8
+export const MIN_SENHA = 8
 
-function validaSenha(senha: string): string | null {
+export function validaSenha(senha: string): string | null {
   if (senha.length < MIN_SENHA) return `A senha precisa de pelo menos ${MIN_SENHA} caracteres.`
   if (!/[a-zA-Z]/.test(senha) || !/[0-9]/.test(senha)) return 'A senha precisa misturar letras e numeros.'
   return null

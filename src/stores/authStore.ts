@@ -19,9 +19,16 @@ interface AuthState {
   // de login por um instante para quem JA esta logado, porque a sessao vem do
   // storage de forma assincrona.
   loading: boolean
+  // `true` quando o link de "esqueci minha senha" acabou de logar o usuario.
+  // O Supabase trata o token de recovery como uma sessao valida de verdade —
+  // sem esta flag, o app veria "tem sessao" e mandaria direto pro jogo (App.tsx
+  // ja faz isso pra sessao normal), pulando a troca de senha que era o motivo
+  // do link. Some assim que a senha nova e confirmada.
+  emRecuperacaoDeSenha: boolean
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signUp: (email: string, password: string, trainerName?: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
+  atualizarSenha: (novaSenha: string) => Promise<{ error: string | null }>
 }
 
 // Mensagens do Supabase vem em ingles e algumas sao cripticas para o jogador.
@@ -52,6 +59,7 @@ export const useAuthStore = create<AuthState>(() => ({
   session: null,
   user: null,
   loading: true,
+  emRecuperacaoDeSenha: false,
 
   signIn: async (email, password) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -76,6 +84,13 @@ export const useAuthStore = create<AuthState>(() => ({
   signOut: async () => {
     await supabase.auth.signOut()
   },
+
+  atualizarSenha: async (novaSenha) => {
+    const { error } = await supabase.auth.updateUser({ password: novaSenha })
+    if (error) return { error: traduzErro(error.message) }
+    useAuthStore.setState({ emRecuperacaoDeSenha: false })
+    return { error: null }
+  },
 }))
 
 // Ligado uma vez, no carregamento do modulo — nao dentro de um componente.
@@ -85,6 +100,11 @@ supabase.auth.getSession().then(({ data }) => {
   useAuthStore.setState({ session: data.session, user: data.session?.user ?? null, loading: false })
 })
 
-supabase.auth.onAuthStateChange((_event, session) => {
-  useAuthStore.setState({ session, user: session?.user ?? null, loading: false })
+supabase.auth.onAuthStateChange((event, session) => {
+  useAuthStore.setState({
+    session,
+    user: session?.user ?? null,
+    loading: false,
+    ...(event === 'PASSWORD_RECOVERY' ? { emRecuperacaoDeSenha: true } : {}),
+  })
 })
