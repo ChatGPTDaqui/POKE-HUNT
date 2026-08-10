@@ -564,7 +564,7 @@ export async function anunciarPoke(
  * ouro das outras ofertas ficaria retido pra sempre — o jogador nao teria como
  * cancelar uma oferta cujo anuncio nao existe mais na vitrine.
  */
-async function recusarOfertasPendentes(
+export async function recusarOfertasPendentes(
   cfg: Config,
   anuncioId: string,
   motivo: string,

@@ -24,9 +24,32 @@
 //    `pokemon_instances.original_trainer`. Reset apaga PROGRESSO.
 //  - Chat, Correio, amizades e Hall da Fama: sao o registro social/historico do
 //    jogador, nao o save dele. Um Hall da Fama que se apaga deixa de ser hall.
-import { apagar, type Config } from './db.js'
+import { apagar, atualizar, selecionarTudo, type Config } from './db.js'
+import { recusarOfertasPendentes } from './mercado.js'
 
 export async function limparMundoDoJogador(cfg: Config, userId: string): Promise<void> {
+  // PH-4, como VENDEDOR: `market_offers.listing_id` tem `on delete cascade`
+  // pra `market_listings` — apagar os anuncios abaixo sem este passo antes
+  // apaga direto a oferta pendente de quem ofertou, sem passar por
+  // `recusarOfertasPendentes` (unico caminho que devolve o escrow). Resultado
+  // sem isto: ouro do ofertante some, e ele nem consegue mais cancelar (a
+  // linha ja nao existe).
+  const meusAnuncios = await selecionarTudo<{ id: string }>(
+    cfg, `market_listings?seller_id=eq.${userId}&status=eq.ativo&select=id`,
+  )
+  for (const { id } of meusAnuncios) {
+    await recusarOfertasPendentes(cfg, id, 'Conta resetada pelo vendedor — oferta devolvida')
+  }
+
+  // PH-4, como COMPRADOR: oferta que EU fiz em anuncio de outro jogador. Meu
+  // wallet ja esta sendo zerado por este mesmo reset, entao nao ha escrow pra
+  // devolver aqui — so cancela, pra o vendedor nao poder aceitar/recusar
+  // depois e creditar (via `responderOferta`/`enfileirarEntrega`) uma conta
+  // que "comecou do zero", injetando ouro/POKE de graca.
+  await atualizar(cfg, `market_offers?buyer_id=eq.${userId}&status=eq.pendente`, {
+    status: 'cancelada', resolved_at: new Date().toISOString(),
+  })
+
   // ORDEM OBRIGATORIA: `market_listings.poke_uid` referencia
   // `pokemon_instances` com `on delete restrict`, entao o anuncio sai antes do
   // POKE. Invertido, o DELETE do POKE falha com violacao de chave estrangeira e
