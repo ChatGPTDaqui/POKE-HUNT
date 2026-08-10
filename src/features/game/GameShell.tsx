@@ -51,6 +51,15 @@ import { controller } from '@/engine/controller'
 // js/main.js. Roda uma vez, no primeiro mount, e so quando o save diz que o
 // jogador estava DENTRO de uma hunt (`currentMapId`) e ficou fora por mais de
 // MIN_OFFLINE_GAP_SECONDS (evita disparar em todo F5 de desenvolvimento).
+// So o modo dev-sem-servidor pode confiar no relogio do proprio DISPOSITIVO
+// pra calcular o farm offline. Em producao, adiantar o relogio do aparelho
+// creditaria ouro/XP/capturas ficticios sem nenhuma verificacao externa —
+// exportada separada do hook (que usa store/efeito, dificil de testar
+// isolado) pra esse gate ter cobertura direta (PH-14).
+export function farmOfflineSemServidorEhConfiavel(producao: boolean): boolean {
+  return !producao
+}
+
 function useOfflineFarmOnBoot(): { summary: OfflineSimSummary | null; dismiss: () => void } {
   const [summary, setSummary] = useState<OfflineSimSummary | null>(null)
   const ranRef = useRef(false)
@@ -78,6 +87,19 @@ function useOfflineFarmOnBoot(): { summary: OfflineSimSummary | null; dismiss: (
       })
       return
     }
+
+    if (!farmOfflineSemServidorEhConfiavel(import.meta.env.PROD)) {
+      console.warn(
+        '[farm-offline] producao sem servidor de autoridade (VITE_SERVIDOR_URL ausente) — '
+        + 'farm offline desabilitado, relogio do dispositivo nao e confiavel',
+      )
+      return
+    }
+
+    console.info(
+      '[farm-offline] modo dev sem servidor de autoridade — usando relogio do dispositivo '
+      + '(nao confiavel, valido so para desenvolvimento local)',
+    )
 
     const savedAt = readLastSavedAt()
     if (savedAt == null) return
