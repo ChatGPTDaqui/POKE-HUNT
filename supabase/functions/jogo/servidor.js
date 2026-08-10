@@ -36796,7 +36796,7 @@ function sellBagPoke(gameState, pokeUid) {
 }
 function sellAllBagPokes(gameState, pokeUids) {
 	const uidSet = new Set(pokeUids);
-	const toSell = gameState.bagPokes.filter((p) => uidSet.has(p.uid) && !p.locked);
+	const toSell = gameState.bagPokes.filter((p) => uidSet.has(p.uid) && !p.locked && !p.isShiny);
 	let totalGold = 0;
 	for (const poke of toSell) {
 		const species = SPECIES[poke.speciesId];
@@ -60391,7 +60391,8 @@ async function lerSnapshot(cfg, userId) {
 			autoCatchRules
 		}, defaultGameStateData()),
 		pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)),
-		entregas: []
+		entregas: [],
+		playerUpdatedAt: player[0].updated_at
 	};
 }
 async function carregarEstado(cfg, userId) {
@@ -60449,8 +60450,8 @@ async function comEstadoParaEscrita(cfg, userId, fn) {
 *    anuncio ainda de pe, ou seja, o mesmo POKE em dois lugares — e revertia
 *    pro vendedor um POKE que o comprador ja tinha pago.
 */
-async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad) {
-	await atualizar(cfg, `players?user_id=eq.${userId}`, gameStateToPlayerRow(userId, estado));
+async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAtEsperado) {
+	if (!(await atualizarRetornando(cfg, `players?user_id=eq.${userId}&updated_at=eq.${encodeURIComponent(playerUpdatedAtEsperado)}`, gameStateToPlayerRow(userId, estado))).length) throw new ErroHttp(409, "outro comando em andamento — tente de novo");
 	const linhasPoke = gameStateToPokemonRows(userId, estado);
 	const idsAgora = new Set(linhasPoke.map((l) => l.id));
 	const idsDeInteresse = [.../* @__PURE__ */ new Set([...pokeIdsNoLoad, ...idsAgora])];
@@ -60502,7 +60503,7 @@ async function aplicarFlush(cfg, userId, sessao) {
 	const [reivindicada] = await atualizarRetornando(cfg, `game_sessions?id=eq.${sessao.id}&closed_at=is.null&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}`, { last_flush_at: new Date(agora).toISOString() });
 	if (!reivindicada) return FLUSH_OCUPADO;
 	return comEstadoParaEscrita(cfg, userId, async (ctx) => {
-		const resultado = await simularSessao(cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, {
+		const resultado = await simularSessao(cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, ctx.playerUpdatedAt, {
 			agora,
 			segundos,
 			truncado
@@ -60511,7 +60512,7 @@ async function aplicarFlush(cfg, userId, sessao) {
 		return resultado;
 	});
 }
-async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, janela) {
+async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUpdatedAt, janela) {
 	const { agora, segundos, truncado } = janela;
 	const { store, dados: estado } = criarEstadoDoJogador(dados);
 	const continentesAntes = new Set(estado.unlockedContinents);
@@ -60545,7 +60546,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, janela) 
 		shinys: resumo.shinySeen
 	});
 	estado.currentMapId = resumo.stoppedEarly ? null : sessao.map_id;
-	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
+	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt);
 	if (!continentesAntes.has("kanto") && estado.unlockedContinents.includes("kanto")) await inserir(cfg, "hall_da_fama", {
 		user_id: userId,
 		conquista: CONQUISTA_LANCE
@@ -60993,7 +60994,7 @@ async function criarOrdem(cfg, userId, corpo) {
 	const unitPrice = inteiro(corpo.unitPrice, "unitPrice", MAX_PRECO);
 	const quantity = inteiro(corpo.quantity, "quantity", MAX_QUANTIDADE);
 	if (!getItem(itemId)) throw new ErroHttp(400, "item desconhecido");
-	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad, playerUpdatedAt }) => {
 		const { store, dados: estado } = criarEstadoDoJogador(dados);
 		if (side === "venda") {
 			if (estado.lockedItems[itemId]) throw new ErroHttp(409, "Este item esta travado — destrave antes de anunciar.");
@@ -61009,7 +61010,7 @@ async function criarOrdem(cfg, userId, corpo) {
 			gold_retido: side === "compra" ? unitPrice * quantity : 0
 		}, { retornar: true });
 		const resultado = await casar(cfg, userId, ordem, store);
-		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
+		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt);
 		return {
 			ordemId: ordem.id,
 			...resultado,
@@ -61074,12 +61075,31 @@ async function casar(cfg, userId, ordem, store) {
 		restante -= qtd;
 		executado += qtd;
 	}
-	if (executado > 0 || restante !== ordem.remaining) await atualizar(cfg, `market_orders?id=eq.${ordem.id}`, {
-		remaining: restante,
-		gold_retido: ordem.side === "compra" ? retido : 0,
-		status: restante === 0 ? "concluida" : "ativa",
-		closed_at: restante === 0 ? (/* @__PURE__ */ new Date()).toISOString() : null
-	});
+	if (executado > 0 || restante !== ordem.remaining) {
+		let remainingEsperado = ordem.remaining;
+		let patchFinal = {
+			remaining: restante,
+			gold_retido: ordem.side === "compra" ? retido : 0,
+			status: restante === 0 ? "concluida" : "ativa",
+			closed_at: restante === 0 ? (/* @__PURE__ */ new Date()).toISOString() : null
+		};
+		let aplicado = await atualizarRetornando(cfg, `market_orders?id=eq.${ordem.id}&status=eq.ativa&remaining=eq.${remainingEsperado}`, patchFinal);
+		if (!aplicado.length) {
+			const [atual] = await selecionar(cfg, `market_orders?id=eq.${ordem.id}&select=*`);
+			if (atual && atual.status === "ativa") {
+				remainingEsperado = atual.remaining;
+				const remainingFinal = Math.max(0, atual.remaining - executado);
+				patchFinal = {
+					remaining: remainingFinal,
+					gold_retido: ordem.side === "compra" ? Math.max(0, atual.gold_retido - ordem.unit_price * executado) : 0,
+					status: remainingFinal === 0 ? "concluida" : "ativa",
+					closed_at: remainingFinal === 0 ? (/* @__PURE__ */ new Date()).toISOString() : null
+				};
+				aplicado = await atualizarRetornando(cfg, `market_orders?id=eq.${ordem.id}&status=eq.ativa&remaining=eq.${remainingEsperado}`, patchFinal);
+			}
+			if (!aplicado.length) throw new ErroHttp(409, "outro comando concorrente nesta ordem — tente de novo");
+		}
+	}
 	return {
 		executado,
 		gastoTotal,
@@ -61092,11 +61112,11 @@ async function cancelarOrdem(cfg, userId, ordemId) {
 		closed_at: (/* @__PURE__ */ new Date()).toISOString()
 	});
 	if (!ordem) throw new ErroHttp(404, "ordem nao encontrada ou ja encerrada");
-	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad, playerUpdatedAt }) => {
 		const { store, dados: estado } = criarEstadoDoJogador(dados);
 		if (ordem.side === "venda") store.addItem(ordem.item_id, ordem.remaining);
 		else store.addGold(ordem.gold_retido);
-		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
+		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt);
 		const item = getItem(ordem.item_id);
 		return {
 			mensagem: ordem.side === "venda" ? `Ordem cancelada — ${ordem.remaining}x ${item?.name ?? ordem.item_id} de volta na mochila.` : `Ordem cancelada — ${ordem.gold_retido} de ouro devolvido.`,
@@ -61186,7 +61206,7 @@ async function ofertarNoAnuncio(cfg, userId, corpo) {
 	if (!anuncio || anuncio.status !== "ativo") throw new ErroHttp(409, "Este anuncio nao esta mais disponivel.");
 	if (!anuncio.apenas_oferta) throw new ErroHttp(409, "Este anuncio tem preco fixo — use Comprar.");
 	if (anuncio.seller_id === userId) throw new ErroHttp(409, "Voce nao pode ofertar no proprio anuncio.");
-	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad, playerUpdatedAt }) => {
 		const { store, dados: estado } = criarEstadoDoJogador(dados);
 		if (!(anuncio.currency === "gold" ? store.spendGold(valor) : store.spendDiamonds(valor))) throw new ErroHttp(409, anuncio.currency === "gold" ? "Ouro insuficiente." : "Diamantes insuficientes.");
 		try {
@@ -61199,7 +61219,7 @@ async function ofertarNoAnuncio(cfg, userId, corpo) {
 		} catch {
 			throw new ErroHttp(409, "Voce ja tem um lance pendente neste anuncio — cancele antes de enviar outro.");
 		}
-		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
+		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt);
 		const nome = SPECIES[anuncio.species_id]?.name ?? anuncio.species_id;
 		return {
 			mensagem: `Oferta de ${valor} enviada por ${nome}. O valor fica retido ate o vendedor responder.`,
@@ -61214,11 +61234,11 @@ async function cancelarOferta(cfg, userId, ofertaId) {
 		resolved_at: (/* @__PURE__ */ new Date()).toISOString()
 	});
 	if (!oferta) throw new ErroHttp(404, "oferta nao encontrada ou ja respondida");
-	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad, playerUpdatedAt }) => {
 		const { store, dados: estado } = criarEstadoDoJogador(dados);
 		if (oferta.currency === "gold") store.addGold(oferta.valor);
 		else store.addDiamonds(oferta.valor);
-		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
+		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt);
 		return {
 			mensagem: `Oferta cancelada — ${oferta.valor} devolvido(s).`,
 			estado
@@ -61268,11 +61288,30 @@ async function responderOferta(cfg, userId, ofertaId, aceitar) {
 		});
 		throw new ErroHttp(409, "Este anuncio ja tinha sido encerrado — a oferta foi devolvida.");
 	}
-	await atualizar(cfg, `pokemon_instances?id=eq.${anuncio.poke_uid}`, {
-		user_id: oferta.buyer_id,
-		location: "bag",
-		team_slot: null
-	});
+	try {
+		await atualizar(cfg, `pokemon_instances?id=eq.${anuncio.poke_uid}`, {
+			user_id: oferta.buyer_id,
+			location: "bag",
+			team_slot: null
+		});
+	} catch (erro) {
+		await atualizar(cfg, `market_listings?id=eq.${anuncio.id}`, {
+			status: "ativo",
+			sold_at: null,
+			buyer_id: null
+		});
+		await atualizar(cfg, `market_offers?id=eq.${ofertaId}`, {
+			status: "recusada",
+			resolved_at: (/* @__PURE__ */ new Date()).toISOString()
+		});
+		await enfileirarEntrega(cfg, {
+			userId: oferta.buyer_id,
+			gold: oferta.currency === "gold" ? oferta.valor : 0,
+			diamonds: oferta.currency === "diamond" ? oferta.valor : 0,
+			motivo: `Estorno — falha ao transferir ${nome} no Mercado`
+		});
+		throw erro;
+	}
 	await enfileirarEntrega(cfg, {
 		userId,
 		gold: oferta.currency === "gold" ? oferta.valor : 0,
@@ -61300,9 +61339,9 @@ async function comprarAnuncio(cfg, userId, anuncioId) {
 	if (anuncio.seller_id === userId) throw new ErroHttp(409, "Voce nao pode comprar o proprio anuncio.");
 	if (anuncio.apenas_oferta || anuncio.price == null) throw new ErroHttp(409, "Este anuncio so aceita lances — envie uma oferta.");
 	const preco = anuncio.price;
-	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => concluirCompra(cfg, userId, anuncio, preco, dados, pokeIdsNoLoad));
+	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad, playerUpdatedAt }) => concluirCompra(cfg, userId, anuncio, preco, dados, pokeIdsNoLoad, playerUpdatedAt));
 }
-async function concluirCompra(cfg, userId, anuncio, preco, dados, pokeIdsNoLoad) {
+async function concluirCompra(cfg, userId, anuncio, preco, dados, pokeIdsNoLoad, playerUpdatedAt) {
 	const { store, dados: estado } = criarEstadoDoJogador(dados);
 	if (!(anuncio.currency === "gold" ? store.spendGold(preco) : store.spendDiamonds(preco))) throw new ErroHttp(409, anuncio.currency === "gold" ? "Ouro insuficiente." : "Diamantes insuficientes.");
 	const [fechado] = await atualizarRetornando(cfg, `market_listings?id=eq.${anuncio.id}&status=eq.ativo`, {
@@ -61311,12 +61350,27 @@ async function concluirCompra(cfg, userId, anuncio, preco, dados, pokeIdsNoLoad)
 		buyer_id: userId
 	});
 	if (!fechado) throw new ErroHttp(409, "Este anuncio acabou de ser vendido.");
-	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
-	await atualizar(cfg, `pokemon_instances?id=eq.${anuncio.poke_uid}`, {
-		user_id: userId,
-		location: "bag",
-		team_slot: null
-	});
+	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt);
+	try {
+		await atualizar(cfg, `pokemon_instances?id=eq.${anuncio.poke_uid}`, {
+			user_id: userId,
+			location: "bag",
+			team_slot: null
+		});
+	} catch (erro) {
+		await atualizar(cfg, `market_listings?id=eq.${anuncio.id}`, {
+			status: "ativo",
+			sold_at: null,
+			buyer_id: null
+		});
+		await enfileirarEntrega(cfg, {
+			userId,
+			gold: anuncio.currency === "gold" ? preco : 0,
+			diamonds: anuncio.currency === "diamond" ? preco : 0,
+			motivo: `Estorno — falha ao transferir ${SPECIES[anuncio.species_id]?.name ?? anuncio.species_id} no Mercado`
+		});
+		throw erro;
+	}
 	await enfileirarEntrega(cfg, {
 		userId: anuncio.seller_id,
 		gold: anuncio.currency === "gold" ? preco : 0,
@@ -61568,8 +61622,8 @@ async function rotear(cfg, req, url) {
 	if (url.pathname === "/sessao/abrir" && req.method === "POST") return abrirSessao(cfg, jogador.id, req);
 	if (url.pathname === "/sessao/flush" && req.method === "POST") return flush(cfg, jogador.id);
 	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id);
-	if (url.pathname === "/estado" && req.method === "GET") return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad }) => {
-		await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad);
+	if (url.pathname === "/estado" && req.method === "GET") return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt }) => {
+		await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt);
 		return json({ estado });
 	});
 	if (url.pathname.startsWith("/mercado")) return mercado(cfg, jogador.id, req, url);
@@ -61754,7 +61808,7 @@ async function acao(cfg, userId, req) {
 		if (aberta) await fecharLinhaDeSessao(cfg, aberta.id);
 		await limparMundoDoJogador(cfg, userId);
 	}
-	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad, playerUpdatedAt }) => {
 		if (corpo.tipo === "definirNomeDoTreinador" && typeof corpo.nome === "string") {
 			const nome = corpo.nome.trim();
 			const meuNome = dados.trainer.name.toLowerCase();
@@ -61764,7 +61818,7 @@ async function acao(cfg, userId, req) {
 		}
 		const { store, dados: estado } = criarEstadoDoJogador(dados);
 		const resultado = aplicarAcao(store, estado, corpo);
-		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad);
+		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt);
 		return json({
 			...resultado,
 			estado

@@ -9,7 +9,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { createRng } from '@/core/rng'
-import { pokemonSellValue, awardKillLoot } from './economySystem'
+import { pokemonSellValue, awardKillLoot, sellAllBagPokes } from './economySystem'
 import { SPECIES, createPokeInstance } from '@/data/pokes'
 import { getMap } from '@/data/maps'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -52,5 +52,36 @@ describe('valor de POKE', () => {
     // Se o piso vazasse pra ca, este numero passaria de 300.
     expect(gold).toBeLessThan(PISO / 10)
     expect(useGameStateStore.getState().wallet.gold).toBe(ouroAntes + gold)
+  })
+})
+
+// PH-24: a UI ja exclui POKE shiny da selecao de venda em lote, mas uma
+// request forjada direto pra `venderPokes` (bypassando a UI) bate no servidor
+// sem passar por ela. `sellAllBagPokes` e a MESMA funcao usada pelo servidor
+// (bundle em server/engine/), entao ela e a revalidacao — nao pode confiar so
+// no `locked`.
+describe('sellAllBagPokes — defesa em profundidade (PH-24)', () => {
+  it('pula POKE shiny mesmo destrancado, mesmo com o uid explicitamente pedido', () => {
+    const gameState = useGameStateStore.getState()
+    const rng = createRng(2026)
+
+    const shiny = createPokeInstance(rng, 'sentret', 5)
+    shiny.isShiny = true
+    shiny.locked = false
+    gameState.addCapturedPoke(shiny)
+
+    const normal = createPokeInstance(rng, 'sentret', 5)
+    normal.isShiny = false
+    normal.locked = false
+    gameState.addCapturedPoke(normal)
+
+    const ouroAntes = useGameStateStore.getState().wallet.gold
+    const { pokeCount } = sellAllBagPokes(useGameStateStore.getState(), [shiny.uid, normal.uid])
+
+    expect(pokeCount).toBe(1)
+    const bagUids = useGameStateStore.getState().bagPokes.map((p) => p.uid)
+    expect(bagUids).toContain(shiny.uid)
+    expect(bagUids).not.toContain(normal.uid)
+    expect(useGameStateStore.getState().wallet.gold).toBeGreaterThan(ouroAntes)
   })
 })
