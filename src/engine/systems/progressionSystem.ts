@@ -68,12 +68,14 @@ export function evolutionStoneRequirement(species: Species): StoneRequirement | 
 export type EvolveResult =
   | null
   | { blocked: 'stones'; required: StoneRequirement }
-  | { species: Species; newAbilities: Ability[]; updatedPoke: PokeInstance }
+  | { species: Species; newAbilities: Ability[]; updatedPoke: PokeInstance; stoneReq: StoneRequirement | null }
 
-// Troca o poke pra especie evoluida (stats recalculados da nova especie no
-// mesmo nivel/IVs, HP mantido na mesma %). Devolve o novo pokeInstance
-// dentro do resultado (`updatedPoke`) pro chamador escrever via
-// gameState.updatePokeInstance.
+// Calcula a evolucao (stats recalculados da nova especie no mesmo nivel/IVs,
+// HP mantido na mesma %) SEM mutar `gameState` — so le (`hasItem`), nunca
+// remove item. Devolve `stoneReq` pro chamador decidir QUANDO debitar as
+// Stones (server: na hora, ja e a acao confirmada; client otimista: so
+// depois que `pedirAcao` confirmar — mutar aqui direto era o bug real da
+// PH-12, Stones sumiam de uma evolucao que o servidor recusou).
 export function evolvePokeInstance(pokeInstance: PokeInstance, gameState: GameStateStore): EvolveResult {
   const species = SPECIES[pokeInstance.speciesId]
   if (!canEvolve(pokeInstance, species)) return null
@@ -101,10 +103,8 @@ export function evolvePokeInstance(pokeInstance: PokeInstance, gameState: GameSt
     newAbilities.push(ability)
   }
 
-  if (stoneReq) gameState.removeItem(stoneReq.itemId, stoneReq.count)
-
   const updatedPoke: PokeInstance = { ...pokeInstance, minLevel, speciesId: newSpecies.id, stats, hp, unlockedAbilities }
-  return { species: newSpecies, newAbilities, updatedPoke }
+  return { species: newSpecies, newAbilities, updatedPoke, stoneReq }
 }
 
 // Trainer reusa a mesma maquina de curva de EXP cumulativa que um POKE —

@@ -287,6 +287,7 @@ const MANIPULADORES: Record<string, Manipulador> = {
       const item = getItem(r.required.itemId)
       throw new ErroHttp(409, `faltam ${r.required.count}x ${item?.name ?? r.required.itemId}`)
     }
+    if (r.stoneReq) store.removeItem(r.stoneReq.itemId, r.stoneReq.count)
     store.updatePokeInstance(uid, () => r.updatedPoke)
     return { ok: true, mensagem: `${anterior} evoluiu para ${r.species.name}!` }
   },

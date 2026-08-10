@@ -305,7 +305,17 @@ export const controller = {
       )
       return
     }
-    void pedirAcao({ tipo: 'evoluirPoke', pokeUid }, () => gameState.updatePokeInstance(pokeUid, () => result.updatedPoke))
+    // Debita as Stones e aplica a evolucao SO dentro do fallback — que so
+    // roda no modo dev sem servidor (pedirAcao chama isto direto). Sob
+    // autoridade do servidor, `aplicarEstadoDoServidor` (dentro de
+    // pedirAcao) e quem debita e aplica, via a resposta confirmada; se a
+    // request falhar, este fallback nunca roda e nenhuma Stone e removida
+    // localmente (PH-12 — antes disso acontecia incondicionalmente ali em
+    // cima, mesmo se `pedirAcao` fosse falhar depois).
+    void pedirAcao({ tipo: 'evoluirPoke', pokeUid }, () => {
+      if (result.stoneReq) gameState.removeItem(result.stoneReq.itemId, result.stoneReq.count)
+      gameState.updatePokeInstance(pokeUid, () => result.updatedPoke)
+    })
     // Se a POKE evoluida esta em campo agora, o world tambem precisa
     // refletir a nova especie/stats imediatamente. A arte da forma evoluida e
     // carregada ANTES da troca; `updateAnimations` compara a URL do spritesheet

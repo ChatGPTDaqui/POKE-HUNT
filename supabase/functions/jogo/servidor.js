@@ -36555,7 +36555,6 @@ function evolvePokeInstance(pokeInstance, gameState) {
 		unlockedAbilities.push(entry.key);
 		newAbilities.push(ability);
 	}
-	if (stoneReq) gameState.removeItem(stoneReq.itemId, stoneReq.count);
 	return {
 		species: newSpecies,
 		newAbilities,
@@ -36566,7 +36565,8 @@ function evolvePokeInstance(pokeInstance, gameState) {
 			stats,
 			hp,
 			unlockedAbilities
-		}
+		},
+		stoneReq
 	};
 }
 var TRAINER_GROWTH_CURVE = "MEDIUM_SLOW";
@@ -59302,6 +59302,13 @@ function gameStateToAutoCatchRuleRows(userId, s) {
 }
 //#endregion
 //#region src/data/remote/playerRepository.ts
+/** Erro distinto do genérico de rede — quem chama sabe que é conflito, não falha de I/O. */
+var ConflitoDeEscrita = class extends Error {
+	constructor() {
+		super("Progresso salvo em outra aba/dispositivo enquanto esta aba tentava gravar.");
+		this.name = "ConflitoDeEscrita";
+	}
+};
 async function loadPlayerState(userId, defaults) {
 	const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
 		supabase.from("players").select("*").eq("user_id", userId).maybeSingle(),
@@ -59321,6 +59328,7 @@ async function loadPlayerState(userId, defaults) {
 		autoCatchRules: autoCatchRules.data ?? []
 	};
 	definirIdsConhecidos(snap.pokemon.map((r) => r.id));
+	updatedAtEsperado = player.data.updated_at;
 	return {
 		data: snapshotToGameState(snap, defaults),
 		savedAt: new Date(player.data.updated_at).getTime()
@@ -59331,6 +59339,7 @@ var idsNoBanco = /* @__PURE__ */ new Set();
 function definirIdsConhecidos(ids) {
 	idsNoBanco = new Set(ids);
 }
+var updatedAtEsperado = null;
 async function savePlayerState(userId, state) {
 	const pokemonRows = gameStateToPokemonRows(userId, state);
 	const itemRows = gameStateToItemRows(userId, state);
@@ -59338,8 +59347,12 @@ async function savePlayerState(userId, state) {
 	const ruleRows = gameStateToAutoCatchRuleRows(userId, state);
 	const vivos = new Set(pokemonRows.map((r) => r.id));
 	const removidos = [...idsNoBanco].filter((id) => !vivos.has(id));
-	const { error: erroPlayer } = await supabase.from("players").update(gameStateToPlayerRow(userId, state)).eq("user_id", userId);
+	let query = supabase.from("players").update(gameStateToPlayerRow(userId, state)).eq("user_id", userId);
+	if (updatedAtEsperado != null) query = query.eq("updated_at", updatedAtEsperado);
+	const { data: linhasPlayer, error: erroPlayer } = await query.select("updated_at");
 	if (erroPlayer) throw new Error(`Falha ao salvar jogador: ${erroPlayer.message}`);
+	if (!linhasPlayer?.length) throw updatedAtEsperado != null ? new ConflitoDeEscrita() : /* @__PURE__ */ new Error("Nenhuma linha atualizada ao salvar jogador — sessao pode ter expirado ou sido revogada");
+	updatedAtEsperado = linhasPlayer[0].updated_at;
 	if (removidos.length > 0) {
 		const { error } = await supabase.from("pokemon_instances").delete().eq("user_id", userId).in("id", removidos);
 		if (error) throw new Error(`Falha ao remover pokemon: ${error.message}`);
@@ -60774,6 +60787,7 @@ var MANIPULADORES = {
 			const item = getItem(r.required.itemId);
 			throw new ErroHttp(409, `faltam ${r.required.count}x ${item?.name ?? r.required.itemId}`);
 		}
+		if (r.stoneReq) store.removeItem(r.stoneReq.itemId, r.stoneReq.count);
 		store.updatePokeInstance(uid, () => r.updatedPoke);
 		return {
 			ok: true,
@@ -61571,6 +61585,12 @@ async function marcarLida(cfg, userId, mensagemId) {
 //#endregion
 //#region server/src/reiniciar.ts
 async function limparMundoDoJogador(cfg, userId) {
+	const meusAnuncios = await selecionarTudo(cfg, `market_listings?seller_id=eq.${userId}&status=eq.ativo&select=id`);
+	for (const { id } of meusAnuncios) await recusarOfertasPendentes(cfg, id, "Conta resetada pelo vendedor — oferta devolvida");
+	await atualizar(cfg, `market_offers?buyer_id=eq.${userId}&status=eq.pendente`, {
+		status: "cancelada",
+		resolved_at: (/* @__PURE__ */ new Date()).toISOString()
+	});
 	await apagar(cfg, `market_listings?seller_id=eq.${userId}`);
 	await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&location=eq.market`);
 	await apagar(cfg, `market_orders?user_id=eq.${userId}`);
