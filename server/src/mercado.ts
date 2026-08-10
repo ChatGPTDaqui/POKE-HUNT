@@ -737,11 +737,33 @@ export async function responderOferta(
     throw new ErroHttp(409, 'Este anuncio ja tinha sido encerrado — a oferta foi devolvida.')
   }
 
-  await atualizar(cfg, `pokemon_instances?id=eq.${anuncio.poke_uid}`, {
-    user_id: oferta.buyer_id,
-    location: 'bag',
-    team_slot: null,
-  })
+  try {
+    await atualizar(cfg, `pokemon_instances?id=eq.${anuncio.poke_uid}`, {
+      user_id: oferta.buyer_id,
+      location: 'bag',
+      team_slot: null,
+    })
+  } catch (erro) {
+    // Oferta ja 'aceita' e anuncio ja 'vendido' (CAS acima) -- o comprador
+    // pagou o escrow no momento da oferta (ofertarNoAnuncio), nao agora. Sem
+    // compensacao aqui, uma falha transitoria nesta transferencia deixa o
+    // mesmo orfao da compra direta (PH-7): reabre o anuncio, fecha a oferta
+    // como recusada e estorna o comprador — mesmo padrao do bloco `!fechado`
+    // logo acima.
+    await atualizar(cfg, `market_listings?id=eq.${anuncio.id}`, {
+      status: 'ativo', sold_at: null, buyer_id: null,
+    })
+    await atualizar(cfg, `market_offers?id=eq.${ofertaId}`, {
+      status: 'recusada', resolved_at: new Date().toISOString(),
+    })
+    await enfileirarEntrega(cfg, {
+      userId: oferta.buyer_id,
+      gold: oferta.currency === 'gold' ? oferta.valor : 0,
+      diamonds: oferta.currency === 'diamond' ? oferta.valor : 0,
+      motivo: `Estorno — falha ao transferir ${nome} no Mercado`,
+    })
+    throw erro
+  }
   await enfileirarEntrega(cfg, {
     userId,
     gold: oferta.currency === 'gold' ? oferta.valor : 0,
@@ -783,7 +805,7 @@ export async function comprarAnuncio(cfg: Config, userId: string, anuncioId: str
     concluirCompra(cfg, userId, anuncio, preco, dados, pokeIdsNoLoad, playerUpdatedAt))
 }
 
-async function concluirCompra(
+export async function concluirCompra(
   cfg: Config,
   userId: string,
   anuncio: LinhaAnuncio,
@@ -823,11 +845,29 @@ async function concluirCompra(
   if (!fechado) throw new ErroHttp(409, 'Este anuncio acabou de ser vendido.')
 
   await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt)
-  await atualizar(cfg, `pokemon_instances?id=eq.${anuncio.poke_uid}`, {
-    user_id: userId,
-    location: 'bag',
-    team_slot: null,
-  })
+  try {
+    await atualizar(cfg, `pokemon_instances?id=eq.${anuncio.poke_uid}`, {
+      user_id: userId,
+      location: 'bag',
+      team_slot: null,
+    })
+  } catch (erro) {
+    // O comprador ja foi cobrado (gravarEstado acima ja commitou) e o anuncio
+    // ja fechou (CAS acima) -- sem compensacao aqui, uma falha transitoria
+    // nesta transferencia deixa o comprador cobrado com um POKE orfao preso
+    // em location='market' (o vendedor nunca recebe, ver `db.ts:66`) — PH-7.
+    // O POKE nunca saiu da mao do vendedor, entao reabrir o anuncio e seguro.
+    await atualizar(cfg, `market_listings?id=eq.${anuncio.id}`, {
+      status: 'ativo', sold_at: null, buyer_id: null,
+    })
+    await enfileirarEntrega(cfg, {
+      userId,
+      gold: anuncio.currency === 'gold' ? preco : 0,
+      diamonds: anuncio.currency === 'diamond' ? preco : 0,
+      motivo: `Estorno — falha ao transferir ${SPECIES[anuncio.species_id]?.name ?? anuncio.species_id} no Mercado`,
+    })
+    throw erro
+  }
 
   await enfileirarEntrega(cfg, {
     userId: anuncio.seller_id,
