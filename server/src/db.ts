@@ -12,6 +12,9 @@
 export interface Config {
   supabaseUrl: string
   serviceRoleKey: string
+  // Schema alvo no PostgREST (Accept-Profile/Content-Profile). Ausente ou
+  // 'public' nao manda cabecalho nenhum -- comportamento padrao do PostgREST.
+  schema?: string
 }
 
 export class ErroHttp extends Error {
@@ -21,10 +24,19 @@ export class ErroHttp extends Error {
 }
 
 function cabecalhos(cfg: Config, extras: Record<string, string> = {}): Record<string, string> {
+  // Accept-Profile vale pra GET/HEAD, Content-Profile pro resto -- o PostgREST
+  // ignora o que nao se aplica ao metodo da request, entao mandar os dois
+  // sempre e seguro e evita ter que saber o metodo aqui dentro.
+  const perfil: Record<string, string> = {}
+  if (cfg.schema && cfg.schema !== 'public') {
+    perfil['Accept-Profile'] = cfg.schema
+    perfil['Content-Profile'] = cfg.schema
+  }
   return {
     apikey: cfg.serviceRoleKey,
     Authorization: `Bearer ${cfg.serviceRoleKey}`,
     'Content-Type': 'application/json',
+    ...perfil,
     ...extras,
   }
 }

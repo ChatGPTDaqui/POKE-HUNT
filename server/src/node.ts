@@ -45,7 +45,11 @@ const PORTA = Number(env.PORTA_SERVIDOR || 8787)
 // site chamar o servico com o token do jogador.
 const origensPermitidas = (env.ORIGENS_PERMITIDAS || 'http://localhost:5173').split(',').map((o) => o.trim())
 
-const handler = criarApp({ supabaseUrl, serviceRoleKey, origensPermitidas })
+// Schema alvo no PostgREST -- 'public' (default, producao) ou 'dev' (ambiente
+// de teste clonado no mesmo projeto Supabase, ver supabase/dev-schema-clone.sql).
+const schema = env.SUPABASE_SCHEMA || 'public'
+
+const handler = criarApp({ supabaseUrl, serviceRoleKey, schema, origensPermitidas })
 
 createServer(async (reqNode, resNode) => {
   const url = `http://${reqNode.headers.host ?? 'localhost'}${reqNode.url ?? '/'}`

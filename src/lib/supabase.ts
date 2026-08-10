@@ -20,7 +20,14 @@ if (!url || !anonKey) {
 // Tipado com o schema real do banco (`database.types.ts`, gerado por
 // `npm run db:types`) — um typo em nome de tabela/coluna vira erro de
 // compilacao em vez de erro de runtime em producao.
+// Schema alvo no PostgREST -- 'public' (default, producao) ou 'dev' (ambiente
+// de teste clonado no mesmo projeto Supabase). database.types.ts so cobre
+// `public`; apontar pra `dev` mantem o client funcional mas perde o
+// type-check de tabela/coluna (regenerar tipos contra dev cobre isso depois).
+const schema = (import.meta.env.VITE_SUPABASE_SCHEMA || 'public') as 'public'
+
 export const supabase = createClient<Database>(url, anonKey, {
+  db: { schema },
   auth: {
     // Mantem a sessao entre reloads e renova o token sozinho. `detectSessionInUrl`
     // e o que faz o retorno de magic-link / confirmacao de email funcionar.
