@@ -20,6 +20,14 @@ export interface LoadResult {
   savedAt: number
 }
 
+/** Erro distinto do genérico de rede — quem chama sabe que é conflito, não falha de I/O. */
+export class ConflitoDeEscrita extends Error {
+  constructor() {
+    super('Progresso salvo em outra aba/dispositivo enquanto esta aba tentava gravar.')
+    this.name = 'ConflitoDeEscrita'
+  }
+}
+
 export async function loadPlayerState(userId: string, defaults: GameStateData): Promise<LoadResult | null> {
   // Uma ida por tabela, em paralelo. Um `select` aninhado do PostgREST traria
   // tudo numa request so, mas devolveria o progresso inteiro embutido na linha
@@ -52,6 +60,11 @@ export async function loadPlayerState(userId: string, defaults: GameStateData): 
 
   // Ancora o diff de exclusao do proximo save (ver `definirIdsConhecidos`).
   definirIdsConhecidos(snap.pokemon.map((r) => r.id))
+  // Ancora o CAS otimista do proximo save (PH-18) — string bruta do Postgres,
+  // nao `new Date(...).getTime()` reconstruido: `timestamptz` tem precisao de
+  // microssegundo, `Date` so de milissegundo, e o filtro abaixo compara igualdade
+  // exata.
+  updatedAtEsperado = player.data.updated_at
 
   return {
     data: snapshotToGameState(snap, defaults),
@@ -70,6 +83,12 @@ export function definirIdsConhecidos(ids: Iterable<string>): void {
   idsNoBanco = new Set(ids)
 }
 
+// `players.updated_at` que este cliente acredita ser o atual — CAS otimista
+// do proximo save (PH-18). `null` = ainda nao carregou nem salvou nesta
+// sessao de aba; nesse caso o primeiro save nao tem o que comparar e so
+// grava (mesmo comportamento de sempre).
+let updatedAtEsperado: string | null = null
+
 export async function savePlayerState(userId: string, state: GameStateData): Promise<void> {
   const pokemonRows = gameStateToPokemonRows(userId, state)
   const itemRows = gameStateToItemRows(userId, state)
@@ -79,11 +98,19 @@ export async function savePlayerState(userId: string, state: GameStateData): Pro
   const vivos = new Set(pokemonRows.map((r) => r.id as string))
   const removidos = [...idsNoBanco].filter((id) => !vivos.has(id))
 
-  const { error: erroPlayer } = await supabase
-    .from('players')
-    .update(gameStateToPlayerRow(userId, state))
-    .eq('user_id', userId)
+  // CAS otimista: sem isso, duas abas do MESMO jogador cada uma com seu
+  // proprio debounce de `setItem` fazem update/upsert sem checar conflito — a
+  // que grava por ultimo sobrescreve o ouro/hunt atual que a outra ja tinha
+  // persistido, e nada detecta ou avisa (PH-18). `updated_at` e mantido pelo
+  // trigger `players_set_updated_at` (toda escrita bem sucedida avanca a
+  // versao), entao comparar contra o valor lido no load/save anterior e
+  // suficiente pra detectar quem perdeu a corrida.
+  let query = supabase.from('players').update(gameStateToPlayerRow(userId, state)).eq('user_id', userId)
+  if (updatedAtEsperado != null) query = query.eq('updated_at', updatedAtEsperado)
+  const { data: linhasPlayer, error: erroPlayer } = await query.select('updated_at')
   if (erroPlayer) throw new Error(`Falha ao salvar jogador: ${erroPlayer.message}`)
+  if (updatedAtEsperado != null && !linhasPlayer?.length) throw new ConflitoDeEscrita()
+  updatedAtEsperado = linhasPlayer?.[0]?.updated_at ?? updatedAtEsperado
 
   // Apagar ANTES de inserir, e nao depois: um POKE que saiu da equipe pra
   // mochila muda de `location`/`team_slot`, e o indice unico
