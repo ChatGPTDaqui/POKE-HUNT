@@ -30,10 +30,16 @@ var ErroHttp = class extends Error {
 	}
 };
 function cabecalhos(cfg, extras = {}) {
+	const perfil = {};
+	if (cfg.schema && cfg.schema !== "public") {
+		perfil["Accept-Profile"] = cfg.schema;
+		perfil["Content-Profile"] = cfg.schema;
+	}
 	return {
 		apikey: cfg.serviceRoleKey,
 		Authorization: `Bearer ${cfg.serviceRoleKey}`,
 		"Content-Type": "application/json",
+		...perfil,
 		...extras
 	};
 }
@@ -36817,7 +36823,7 @@ function unlockMap(gameState, mapDef) {
 	return { success: true };
 }
 //#endregion
-//#region src/engine/systems/statsTracker.ts
+//#region src/engine/systems/farmRates.ts
 function recordKill(gameState, { gold, xp, isShiny }) {
 	gameState.incrementPerfStats({
 		gold,
@@ -59122,11 +59128,14 @@ function shouldShowDeprecationWarning() {
 	return parseInt(versionMatch[1], 10) <= 20;
 }
 if (shouldShowDeprecationWarning()) console.warn("⚠️  Node.js 20 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 22 or later. For more information, visit: https://github.com/orgs/supabase/discussions/45715");
-var supabase = createClient("https://cffbihbmhiuudahsgjsn.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmZmJpaGJtaGl1dWRhaHNnanNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMTc1MTEsImV4cCI6MjEwMTU5MzUxMX0.OqgNs1oEmGREH9gMm5x-ckG4tuHK-OuRNk_M_1Yk6F0", { auth: {
-	persistSession: true,
-	autoRefreshToken: true,
-	detectSessionInUrl: true
-} });
+var supabase = createClient("http://127.0.0.1:54321", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0", {
+	db: { schema: "dev" },
+	auth: {
+		persistSession: true,
+		autoRefreshToken: true,
+		detectSessionInUrl: true
+	}
+});
 //#endregion
 //#region src/data/remote/playerMapper.ts
 function fromJson(value, fallback) {
@@ -59356,8 +59365,14 @@ async function savePlayerState(userId, state) {
 	idsNoBanco = vivos;
 }
 //#endregion
+//#region src/lib/erroDeRede.ts
+function mensagemDeFalhaDeRede(online = typeof navigator === "undefined" || navigator.onLine !== false) {
+	if (!online) return "Sem conexao — verifique sua internet e tente de novo.";
+	return "Nao foi possivel falar com o servidor. Voce parece estar online, entao o mais provavel e um bloqueador de anuncios, extensao de privacidade ou filtro de DNS barrando o jogo — libere este site e tente de novo.";
+}
+//#endregion
 //#region src/data/remote/servidor.ts
-var BASE = "https://cffbihbmhiuudahsgjsn.supabase.co/functions/v1/jogo".replace(/\/$/, "");
+var BASE = "http://localhost:8787".replace(/\/$/, "");
 /** Se o jogo esta rodando sob autoridade do servidor. */
 function servidorAtivo() {
 	return BASE.length > 0;
@@ -59423,7 +59438,7 @@ function mensagemPorStatus(status) {
 }
 function mensagemDeRede(erro) {
 	if (erro instanceof DOMException && erro.name === "AbortError") return "o servidor demorou demais para responder";
-	return "sem conexao com o servidor — verifique sua internet";
+	return mensagemDeFalhaDeRede();
 }
 var servidor = {
 	estado: () => pedir("/estado", { retentavel: true }),
@@ -59551,20 +59566,25 @@ var savedAtMs = null;
 var postgresStorage = {
 	getItem: async () => {
 		if (!usuarioAtual || !defaultsDoJogo) return null;
-		if (servidorAtivo()) {
-			const { estado } = await servidor.estado();
+		try {
+			if (servidorAtivo()) {
+				const { estado } = await servidor.estado();
+				return {
+					state: estado,
+					version: 1
+				};
+			}
+			const resultado = await loadPlayerState(usuarioAtual, defaultsDoJogo);
+			if (!resultado) return null;
+			resultado.savedAt;
 			return {
-				state: estado,
+				state: resultado.data,
 				version: 1
 			};
+		} catch (err) {
+			err instanceof Error && err.message;
+			throw err;
 		}
-		const resultado = await loadPlayerState(usuarioAtual, defaultsDoJogo);
-		if (!resultado) return null;
-		resultado.savedAt;
-		return {
-			state: resultado.data,
-			version: 1
-		};
 	},
 	setItem: (_nome, valor) => {
 		if (servidorAtivo()) return;

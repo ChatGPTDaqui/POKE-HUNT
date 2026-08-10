@@ -38,7 +38,7 @@ export {
 } from './systems/economySystem'
 export { evolvePokeInstance, grantExp } from './systems/progressionSystem'
 export { isDead } from './entity'
-export { recordBatch } from './systems/statsTracker'
+export { recordBatch } from './systems/farmRates'
 
 // O contrato que o motor exige de "estado do jogador". No navegador quem
 // satisfaz isso e a store zustand; no servidor sera um objeto sobre as linhas do

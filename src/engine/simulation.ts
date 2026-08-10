@@ -39,7 +39,7 @@ import { updateAnimations, tickAttackAnimTimers } from './systems/animationSyste
 import { updateAutoHeal, maybeAutoCatch } from './systems/autoSystem'
 import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } from './systems/progressionSystem'
 import { awardKillLoot } from './systems/economySystem'
-import { recordKill } from './systems/statsTracker'
+import { recordKill } from './systems/farmRates'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
 

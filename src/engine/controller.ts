@@ -6,7 +6,7 @@
 import { SPECIES, createPokeInstance } from '@/data/pokes'
 import { getItem } from '@/data/items'
 import { evolvePokeInstance } from './systems/progressionSystem'
-import { resetStats } from './systems/statsTracker'
+import { resetStats } from './systems/farmRates'
 import { isDead, heal } from './entity'
 import {
   buildHospitalWorld, buildMapWorld, shinyPrefix, syncActivePokeToGameState,

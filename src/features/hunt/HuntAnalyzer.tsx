@@ -11,7 +11,7 @@
 // grafico de "ouro por minuto nos ultimos 10 minutos" exigiria uma serie
 // temporal que ninguem grava — seria uma linha bonita feita de nada.
 import { ChartLineUp, Clock, Coin, Lightning, Sparkle, Target } from '@phosphor-icons/react'
-import { getPerfStats } from '@/engine/systems/statsTracker'
+import { getPerfStats } from '@/engine/systems/farmRates'
 import { expProgressForInstance, trainerExpProgress } from '@/engine/systems/progressionSystem'
 import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'

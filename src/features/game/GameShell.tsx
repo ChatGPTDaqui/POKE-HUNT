@@ -41,7 +41,7 @@ import {
 } from '@/engine/simulation'
 import { pendingDriftSeconds, resetDrift } from '@/engine/clockDrift'
 import { simulateWorldSeconds, type OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
-import { recordBatch } from '@/engine/systems/statsTracker'
+import { recordBatch } from '@/engine/systems/farmRates'
 import { useProgressoRemoto, type EstadoProgresso } from './useProgressoRemoto'
 import { assentarSessaoPendente, commitAgora, registrarEncerramentoDeSessao } from '@/data/remote/autoridade'
 import { servidorAtivo } from '@/data/remote/servidor'
