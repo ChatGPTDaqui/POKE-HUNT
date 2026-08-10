@@ -11,6 +11,7 @@ import { create } from 'zustand'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { ehFalhaSemResposta, mensagemDeFalhaDeRede } from '@/lib/erroDeRede'
+import { flushAgora } from '@/data/remote/gameStatePersistence'
 
 interface AuthState {
   session: Session | null
@@ -82,6 +83,16 @@ export const useAuthStore = create<AuthState>(() => ({
   },
 
   signOut: async () => {
+    // PH-17: sem isto, o cleanup reativo de useProgressoRemoto (que roda
+    // depois que `user` vira null no store) so chama flushAgora() DEPOIS que
+    // signOut() ja invalidou o token local — RLS filtra o UPDATE final pra 0
+    // linhas, e Postgrest nao trata isso como erro, entao os ~3s de
+    // progresso pendente do debounce somem em silencio. Flush com o token
+    // AINDA valido, antes de invalidar a sessao. Nao relanca: uma falha de
+    // save nao pode travar o jogador logado.
+    await flushAgora().catch((erro) => {
+      console.warn('Falha ao salvar progresso antes do logout:', erro)
+    })
     await supabase.auth.signOut()
   },
 

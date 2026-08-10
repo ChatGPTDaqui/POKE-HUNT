@@ -7,6 +7,10 @@ import { defaultGameStateData } from '@/stores/gameStateStore'
 // player_auto_catch_rules) nao sao o foco aqui -- viram builder generico que
 // sempre resolve vazio, sem erro.
 let tabelaPlayers: { user_id: string; updated_at: string; [k: string]: unknown }
+// Simula RLS filtrando o UPDATE pra zero linhas por sessao invalida/revogada
+// (PH-17) — sem `error` nenhum do Postgrest, exatamente o sucesso silencioso
+// disfarcado que o bug descreve.
+let bloqueadoPorRLS = false
 
 function builderGenerico() {
   const builder = {
@@ -41,6 +45,10 @@ function builderPlayers() {
     },
     maybeSingle: () => Promise.resolve({ data: { ...tabelaPlayers }, error: null }),
     then: (resolve: (v: { data: Array<{ updated_at: string }>; error: null }) => void) => {
+      if (bloqueadoPorRLS) {
+        resolve({ data: [], error: null })
+        return
+      }
       const bateUpdatedAt = filtrosUpdatedAt.every((valor) => valor === tabelaPlayers.updated_at)
       if (!bateUpdatedAt) {
         resolve({ data: [], error: null })
@@ -63,6 +71,7 @@ vi.mock('@/lib/supabase', () => ({
 
 beforeEach(() => {
   tabelaPlayers = { user_id: 'jogador-1', updated_at: '2026-01-01T00:00:00.000Z' }
+  bloqueadoPorRLS = false
   vi.resetModules()
 })
 
@@ -91,5 +100,15 @@ describe('savePlayerState() — CAS otimista na linha de players (PH-18)', () =>
 
     await aba.savePlayerState('jogador-1', defaultGameStateData())
     await expect(aba.savePlayerState('jogador-1', defaultGameStateData())).resolves.toBeUndefined()
+  })
+})
+
+describe('savePlayerState() — 0 linhas nunca e sucesso silencioso (PH-17)', () => {
+  it('sessao invalida/revogada (RLS bloqueia sem `error`): joga erro explicito, mesmo sem CAS em voo', async () => {
+    const aba = await import('./playerRepository')
+    // Nunca chamou loadPlayerState nesta aba -- updatedAtEsperado comeca
+    // null, entao sem o fix o retorno vazio do RLS passaria batido.
+    bloqueadoPorRLS = true
+    await expect(aba.savePlayerState('jogador-1', defaultGameStateData())).rejects.toThrow(/sessao pode ter expirado/)
   })
 })

@@ -109,8 +109,18 @@ export async function savePlayerState(userId: string, state: GameStateData): Pro
   if (updatedAtEsperado != null) query = query.eq('updated_at', updatedAtEsperado)
   const { data: linhasPlayer, error: erroPlayer } = await query.select('updated_at')
   if (erroPlayer) throw new Error(`Falha ao salvar jogador: ${erroPlayer.message}`)
-  if (updatedAtEsperado != null && !linhasPlayer?.length) throw new ConflitoDeEscrita()
-  updatedAtEsperado = linhasPlayer?.[0]?.updated_at ?? updatedAtEsperado
+  if (!linhasPlayer?.length) {
+    // PH-17: 0 linhas SEM `error` e sucesso silencioso disfarcado — sessao
+    // expirada/revogada faz a RLS filtrar o UPDATE pra zero linhas, e
+    // Postgrest nunca transforma isso em `error`. Sem CAS em voo
+    // (updatedAtEsperado null), so pode ser isso: sessao invalida. Com CAS
+    // em voo, tambem pode ser outra aba que venceu a corrida (PH-18) — os
+    // dois casos tem que ficar visiveis, nunca silenciosos.
+    throw updatedAtEsperado != null
+      ? new ConflitoDeEscrita()
+      : new Error('Nenhuma linha atualizada ao salvar jogador — sessao pode ter expirado ou sido revogada')
+  }
+  updatedAtEsperado = linhasPlayer[0].updated_at
 
   // Apagar ANTES de inserir, e nao depois: um POKE que saiu da equipe pra
   // mochila muda de `location`/`team_slot`, e o indice unico
