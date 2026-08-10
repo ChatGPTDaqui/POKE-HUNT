@@ -97,8 +97,8 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
     // recebe o que vendeu enquanto estava fora — por isso ele grava, apesar de
     // ser um GET. `carregarEstadoParaEscrita` carimba a entrega como aplicada,
     // entao o `gravarEstado` logo abaixo nao e opcional.
-    return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad }) => {
-      await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad)
+    return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt }) => {
+      await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt)
       return json({ estado })
     })
   }
@@ -363,7 +363,7 @@ async function acao(cfg: OpcoesApp, userId: string, req: Request): Promise<Respo
   // antes do `gravarEstado`, e as entregas do Mercado ja tinham sido carimbadas
   // como aplicadas. Medido: uma venda de 500 de ouro sumiu porque o jogador
   // tentou, em seguida, comprar algo que nao podia pagar.
-  return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad }) => {
+  return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad, playerUpdatedAt }) => {
     // Unicidade do nick: pergunta de BANCO, entao nao cabe em `aplicarAcao` (que e
     // sincrona e pura por desenho). Sem esta checagem, escolher um nome ocupado
     // batia no indice unico `players_trainer_name_unico` e voltava como 502
@@ -383,7 +383,7 @@ async function acao(cfg: OpcoesApp, userId: string, req: Request): Promise<Respo
 
     const { store, dados: estado } = criarEstadoDoJogador(dados)
     const resultado = aplicarAcao(store, estado, corpo)
-    await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
+    await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt)
 
     return json({ ...resultado, estado })
   })

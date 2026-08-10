@@ -70,6 +70,14 @@ export interface EstadoParaEscrita {
    * ganha isso de graca.
    */
   entregas: LinhaEntrega[]
+  /**
+   * `players.updated_at` no momento desta leitura — CAS obrigatorio na
+   * escrita final de `gravarEstado` (PH-5). Sem isso, duas acoes concorrentes
+   * do mesmo jogador (duas abas, duplo clique, comprar+evoluir quase juntos)
+   * leem o mesmo snapshot e a escrita que terminar por ultimo sobrescreve em
+   * silencio o efeito da outra.
+   */
+  playerUpdatedAt: string
 }
 
 async function lerSnapshot(cfg: Config, userId: string): Promise<EstadoParaEscrita> {
@@ -85,7 +93,12 @@ async function lerSnapshot(cfg: Config, userId: string): Promise<EstadoParaEscri
     { player: player[0], pokemon, items, pokedex, autoCatchRules },
     defaultGameStateData(),
   )
-  return { estado, pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)), entregas: [] }
+  return {
+    estado,
+    pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)),
+    entregas: [],
+    playerUpdatedAt: player[0].updated_at,
+  }
 }
 
 export async function carregarEstado(cfg: Config, userId: string): Promise<GameStateData> {
@@ -161,8 +174,21 @@ export async function gravarEstado(
   userId: string,
   estado: GameStateData,
   pokeIdsNoLoad: Set<string>,
+  playerUpdatedAtEsperado: string,
 ): Promise<void> {
-  await atualizar(cfg, `players?user_id=eq.${userId}`, gameStateToPlayerRow(userId, estado))
+  // CAS na linha de `players`: sem isso, duas acoes concorrentes do mesmo
+  // jogador (duas abas, duplo clique, comprar+evoluir quase juntos) leem o
+  // mesmo snapshot e a escrita que terminar por ultimo sobrescreve em
+  // silencio o efeito da outra — mesma classe de bug que PH-3 corrigiu no
+  // Mercado, aqui na linha do jogador (PH-5). `updated_at` e mantido pelo
+  // trigger `players_set_updated_at`: todo UPDATE bem sucedido (nosso ou de
+  // outro request concorrente) sempre avanca a versao.
+  const gravada = await atualizarRetornando(
+    cfg,
+    `players?user_id=eq.${userId}&updated_at=eq.${encodeURIComponent(playerUpdatedAtEsperado)}`,
+    gameStateToPlayerRow(userId, estado),
+  )
+  if (!gravada.length) throw new ErroHttp(409, 'outro comando em andamento — tente de novo')
 
   const linhasPoke = gameStateToPokemonRows(userId, estado)
   const idsAgora = new Set(linhasPoke.map((l) => l.id))
@@ -319,7 +345,7 @@ export async function aplicarFlush(
   // venda no Mercado some porque o jogador tirou o POKE da equipe.
   return comEstadoParaEscrita(cfg, userId, async (ctx) => {
     const resultado = await simularSessao(
-      cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, { agora, segundos, truncado },
+      cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, ctx.playerUpdatedAt, { agora, segundos, truncado },
     )
     // `null` = sessao insimulavel; sai SEM gravar, entao as entregas voltam pra
     // fila (o `catch` do embrulho so cobre excecao, e aqui nao ha excecao).
@@ -334,6 +360,7 @@ async function simularSessao(
   sessao: LinhaSessao,
   dados: GameStateData,
   pokeIdsNoLoad: Set<string>,
+  playerUpdatedAt: string,
   janela: { agora: number; segundos: number; truncado: boolean },
 ): Promise<ResultadoFlush | null> {
   const { agora, segundos, truncado } = janela
@@ -407,7 +434,7 @@ async function simularSessao(
   // esta resposta, entao um `currentMapId` sobrevivente o deixaria desenhando
   // uma cacada que o servidor ja encerrou.
   estado.currentMapId = resumo.stoppedEarly ? null : sessao.map_id
-  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
+  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt)
 
   // Hall da Fama: a unica coisa que libera o continente `kanto` e limpar a
   // sequencia do Campeao Lance (`unlocksContinentOnClear`, ver
