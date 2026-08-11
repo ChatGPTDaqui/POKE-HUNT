@@ -34,11 +34,7 @@ describe('controller.evolvePoke — Stone so sai depois da confirmacao (PH-12)',
     const poke = createPokeInstance(createRng(1), 'kadabra', 80)
     gameState.addCapturedPoke(poke)
 
-    controller.evolvePoke(poke.uid)
-    // pedirAcao e fire-and-forget (`void`) dentro de evolvePoke — dar um
-    // microtask pro mock resolver antes de checar.
-    await Promise.resolve()
-    await Promise.resolve()
+    await controller.evolvePoke(poke.uid)
 
     expect(useGameStateStore.getState().items[itemId]).toBe(20)
     const aindaNaMochila = useGameStateStore.getState().bagPokes.find((p) => p.uid === poke.uid)
@@ -58,11 +54,55 @@ describe('controller.evolvePoke — Stone so sai depois da confirmacao (PH-12)',
     const poke = createPokeInstance(createRng(1), 'kadabra', 80)
     gameState.addCapturedPoke(poke)
 
-    controller.evolvePoke(poke.uid)
-    await Promise.resolve()
+    await controller.evolvePoke(poke.uid)
 
     expect(useGameStateStore.getState().items[itemId] || 0).toBe(0)
     const evoluido = useGameStateStore.getState().bagPokes.find((p) => p.uid === poke.uid)
     expect(evoluido?.speciesId).toBe('alakazam')
+  })
+})
+
+describe('controller.evolvePoke — round-trip inteiro guarda reentrancia (PH-13)', () => {
+  it('await evolvePoke so resolve depois que pedirAcao resolve, nao no microtask seguinte', async () => {
+    let resolvePedirAcao!: (ok: boolean) => void
+    pedirAcaoMock.mockImplementation(() => new Promise<boolean>((resolve) => {
+      resolvePedirAcao = resolve
+    }))
+
+    const { controller } = await import('./controller')
+    const gameState = useGameStateStore.getState()
+    const itemId = stoneItemId(SPECIES.kadabra.type)
+    gameState.addItem(itemId, 20)
+    const poke = createPokeInstance(createRng(1), 'kadabra', 80)
+    gameState.addCapturedPoke(poke)
+
+    let resolvido = false
+    const promise = controller.evolvePoke(poke.uid).then(() => {
+      resolvido = true
+    })
+
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(resolvido).toBe(false)
+
+    resolvePedirAcao(true)
+    await promise
+    expect(resolvido).toBe(true)
+  })
+
+  it('pedirAcao falha: toast de sucesso e troca de especie nao disparam', async () => {
+    pedirAcaoMock.mockResolvedValue(false)
+
+    const { controller } = await import('./controller')
+    const gameState = useGameStateStore.getState()
+    const itemId = stoneItemId(SPECIES.kadabra.type)
+    gameState.addItem(itemId, 20)
+    const poke = createPokeInstance(createRng(1), 'kadabra', 80)
+    gameState.addCapturedPoke(poke)
+
+    await controller.evolvePoke(poke.uid)
+
+    const aindaKadabra = useGameStateStore.getState().bagPokes.find((p) => p.uid === poke.uid)
+    expect(aindaKadabra?.speciesId).toBe('kadabra')
   })
 })

@@ -288,7 +288,7 @@ export const controller = {
     }
   },
 
-  evolvePoke(pokeUid: string): void {
+  async evolvePoke(pokeUid: string): Promise<void> {
     const gameState = useGameStateStore.getState()
     const poke = [...gameState.team, ...gameState.bagPokes].find((p) => p.uid === pokeUid)
     if (!poke) return
@@ -312,10 +312,16 @@ export const controller = {
     // request falhar, este fallback nunca roda e nenhuma Stone e removida
     // localmente (PH-12 — antes disso acontecia incondicionalmente ali em
     // cima, mesmo se `pedirAcao` fosse falhar depois).
-    void pedirAcao({ tipo: 'evoluirPoke', pokeUid }, () => {
+    //
+    // `await` aqui (em vez de `void`) e o que faz o round-trip inteiro contar
+    // pra guarda de reentrancia de quem chama (useAcaoPendente.run so libera
+    // depois que a Promise retornada resolve) — sem isso a janela de duplo
+    // clique durava um microtask (PH-13).
+    const ok = await pedirAcao({ tipo: 'evoluirPoke', pokeUid }, () => {
       if (result.stoneReq) gameState.removeItem(result.stoneReq.itemId, result.stoneReq.count)
       gameState.updatePokeInstance(pokeUid, () => result.updatedPoke)
     })
+    if (!ok) return
     // Se a POKE evoluida esta em campo agora, o world tambem precisa
     // refletir a nova especie/stats imediatamente. A arte da forma evoluida e
     // carregada ANTES da troca; `updateAnimations` compara a URL do spritesheet

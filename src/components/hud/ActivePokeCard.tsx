@@ -16,6 +16,7 @@ import { controller } from '@/engine/controller'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
+import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { Meter } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 
@@ -114,16 +115,19 @@ function PokeVitals({ poke, species }: { poke: PokeInstance; species: (typeof SP
 // Evoluir fica DENTRO do card clicavel, entao precisa parar a propagacao: sem
 // isso o clique tambem abriria o modal de perfil por cima da evolucao.
 function EvolveButton({ poke, species }: { poke: PokeInstance; species: (typeof SPECIES)[string] }) {
+  const acao = useAcaoPendente()
   if (!canEvolve(poke, species)) return null
   const stoneReq = evolutionStoneRequirement(species)
+  const pending = acao.isPending(`evo:${poke.uid}`)
   return (
     <button
       type="button"
+      disabled={pending}
       onClick={(e) => {
         e.stopPropagation()
-        controller.evolvePoke(poke.uid)
+        void acao.run(`evo:${poke.uid}`, () => controller.evolvePoke(poke.uid))
       }}
-      className="mt-[.15em] cursor-pointer self-start rounded-[.4em] border border-gold px-[.6em] py-[.15em] text-[.72em] text-gold hover:bg-gold/12"
+      className="mt-[.15em] cursor-pointer self-start rounded-[.4em] border border-gold px-[.6em] py-[.15em] text-[.72em] text-gold hover:bg-gold/12 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {stoneReq ? `Evoluir (${stoneReq.count}x ${stoneName(stoneReq.type)})` : 'Evoluir'}
     </button>
