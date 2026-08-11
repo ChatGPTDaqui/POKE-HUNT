@@ -59,12 +59,12 @@ export async function loadPlayerState(userId: string, defaults: GameStateData): 
   }
 
   // Ancora o diff de exclusao do proximo save (ver `definirIdsConhecidos`).
-  definirIdsConhecidos(snap.pokemon.map((r) => r.id))
+  definirIdsConhecidos(userId, snap.pokemon.map((r) => r.id))
   // Ancora o CAS otimista do proximo save (PH-18) — string bruta do Postgres,
   // nao `new Date(...).getTime()` reconstruido: `timestamptz` tem precisao de
   // microssegundo, `Date` so de milissegundo, e o filtro abaixo compara igualdade
   // exata.
-  updatedAtEsperado = player.data.updated_at
+  updatedAtEsperadoPorUsuario.set(userId, player.data.updated_at)
 
   return {
     data: snapshotToGameState(snap, defaults),
@@ -76,18 +76,29 @@ export async function loadPlayerState(userId: string, defaults: GameStateData): 
 // que de fato sumiu, em vez de mandar `delete ... not in (<lista inteira>)`:
 // com uma mochila grande aquela lista vira uma URL de milhares de caracteres
 // a cada save, e servidores/proxies cortam URL longa.
-let idsNoBanco = new Set<string>()
+//
+// Escopado por `userId` (nao um singleton de modulo compartilhado): login e
+// logout sao navegacao SPA sem reload de pagina, entao o modulo sobrevive a
+// troca de conta na mesma aba. Um `Set` global era sobrescrito pelo save
+// pendente da conta anterior resolvendo DEPOIS do login da proxima, fazendo
+// o diff de exclusao comparar contra os ids errados e um POKE removido de
+// verdade "reaparecer" numa leitura futura (PH-19).
+const idsNoBancoPorUsuario = new Map<string, Set<string>>()
 
 /** Chamado pelo load e por quem importa um save, pra ancorar o diff. */
-export function definirIdsConhecidos(ids: Iterable<string>): void {
-  idsNoBanco = new Set(ids)
+export function definirIdsConhecidos(userId: string, ids: Iterable<string>): void {
+  idsNoBancoPorUsuario.set(userId, new Set(ids))
 }
 
 // `players.updated_at` que este cliente acredita ser o atual — CAS otimista
-// do proximo save (PH-18). `null` = ainda nao carregou nem salvou nesta
-// sessao de aba; nesse caso o primeiro save nao tem o que comparar e so
-// grava (mesmo comportamento de sempre).
-let updatedAtEsperado: string | null = null
+// do proximo save (PH-18). `undefined`/ausente na Map = ainda nao carregou
+// nem salvou esta conta nesta aba; nesse caso o primeiro save nao tem o que
+// comparar e so grava (mesmo comportamento de sempre). Mesma razao do Map
+// acima pra nao ser singleton de modulo: senao o save pendente de uma conta
+// resolvendo apos o login de outra sobrescrevia o CAS token da conta nova
+// com o da antiga, e o proximo save dela levava um `ConflitoDeEscrita` falso
+// (PH-19).
+const updatedAtEsperadoPorUsuario = new Map<string, string | null>()
 
 export async function savePlayerState(userId: string, state: GameStateData): Promise<void> {
   const pokemonRows = gameStateToPokemonRows(userId, state)
@@ -95,6 +106,7 @@ export async function savePlayerState(userId: string, state: GameStateData): Pro
   const pokedexRows = gameStateToPokedexRows(userId, state)
   const ruleRows = gameStateToAutoCatchRuleRows(userId, state)
 
+  const idsNoBanco = idsNoBancoPorUsuario.get(userId) ?? new Set<string>()
   const vivos = new Set(pokemonRows.map((r) => r.id as string))
   const removidos = [...idsNoBanco].filter((id) => !vivos.has(id))
 
@@ -105,6 +117,7 @@ export async function savePlayerState(userId: string, state: GameStateData): Pro
   // trigger `players_set_updated_at` (toda escrita bem sucedida avanca a
   // versao), entao comparar contra o valor lido no load/save anterior e
   // suficiente pra detectar quem perdeu a corrida.
+  const updatedAtEsperado = updatedAtEsperadoPorUsuario.get(userId) ?? null
   let query = supabase.from('players').update(gameStateToPlayerRow(userId, state)).eq('user_id', userId)
   if (updatedAtEsperado != null) query = query.eq('updated_at', updatedAtEsperado)
   const { data: linhasPlayer, error: erroPlayer } = await query.select('updated_at')
@@ -120,7 +133,7 @@ export async function savePlayerState(userId: string, state: GameStateData): Pro
       ? new ConflitoDeEscrita()
       : new Error('Nenhuma linha atualizada ao salvar jogador — sessao pode ter expirado ou sido revogada')
   }
-  updatedAtEsperado = linhasPlayer[0].updated_at
+  updatedAtEsperadoPorUsuario.set(userId, linhasPlayer[0].updated_at)
 
   // Apagar ANTES de inserir, e nao depois: um POKE que saiu da equipe pra
   // mochila muda de `location`/`team_slot`, e o indice unico
@@ -156,7 +169,7 @@ export async function savePlayerState(userId: string, state: GameStateData): Pro
     if (error) throw new Error(`Falha ao salvar regras: ${error.message}`)
   }
 
-  idsNoBanco = vivos
+  idsNoBancoPorUsuario.set(userId, vivos)
 }
 
 // Ultima tentativa de gravar quando a pagina esta fechando.
