@@ -204,6 +204,52 @@ export async function atualizarRetornando<T>(cfg: Config, caminho: string, patch
 }
 
 /**
+ * Reivindica uma linha por CAS (via `atualizarRetornando`) e roda `fn` com
+ * ela. Se a corrida for perdida (claim veio vazio), lanca `ErroHttp(409, ...)`
+ * antes de chamar `fn`. Se `fn` lancar, desfaz o claim (aplica
+ * `patchDesfazer` na mesma linha, por id) e repropaga o erro ORIGINAL — pra
+ * "reivindicado mas nunca processado" nunca virar perda silenciosa.
+ *
+ * Generaliza o padrao "PATCH+filtro, vazio=corrida perdida, desfazer se o
+ * downstream falhar" usado em `coletarAnexo` (PH-21). NAO cobre:
+ * - `casar()` (mercado.ts, PH-3): perde a corrida e RETENTA com um delta
+ *   recalculado sobre saldo divisivel — estrategia diferente, nao um claim
+ *   marcador com undo.
+ * - `evolvePoke` (PH-12): nao e CAS de banco nenhum, e client-side
+ *   (confirm-then-apply — so debita a Stone depois do servidor confirmar).
+ * - `playerRepository.ts` (PH-17/PH-18): roda no cliente via supabase-js
+ *   (`.eq()` chaining), transporte diferente deste `db.ts` baseado em fetch.
+ * - `aplicarFlush`/`gravarEstado` (PH-5, progresso.ts): `gravarEstado` faz o
+ *   CAS na escrita final inteira, nao ha nada a desfazer se falhar (ja lanca
+ *   409 direto); `aplicarFlush` decide de proposito NAO reverter
+ *   `last_flush_at` quando o downstream falha, pra sessao quebrada nao
+ *   entrar em loop de retry — contrato oposto ao deste helper.
+ *
+ * Ver PH-1 (epic) para o raciocinio completo de por que esses 5 ficam fora.
+ */
+export async function comClaimAtomico<L extends Record<string, unknown>, T>(
+  cfg: Config,
+  tabela: string,
+  filtroClaim: string,
+  patchClaim: Record<string, unknown>,
+  patchDesfazer: Record<string, unknown>,
+  fn: (linhaClaimada: L) => Promise<T>,
+  opcoes: { idCampo?: string; mensagemCorridaPerdida?: string } = {},
+): Promise<T> {
+  const idCampo = opcoes.idCampo ?? 'id'
+  const [linha] = await atualizarRetornando<L>(cfg, `${tabela}?${filtroClaim}`, patchClaim)
+  if (!linha) {
+    throw new ErroHttp(409, opcoes.mensagemCorridaPerdida ?? 'operação já em andamento ou concluída — tente de novo')
+  }
+  try {
+    return await fn(linha)
+  } catch (erro) {
+    await atualizarRetornando(cfg, `${tabela}?${idCampo}=eq.${linha[idCampo]}`, patchDesfazer)
+    throw erro
+  }
+}
+
+/**
  * Chama uma funcao do Postgres via `POST /rest/v1/rpc/<nome>`.
  *
  * Usado onde a pergunta e do BANCO e nao cabe num filtro: o unico caso hoje e

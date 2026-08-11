@@ -10,7 +10,7 @@
 // pra `authenticated` em `chat_messages` (e portanto o cliente lendo a tabela
 // direto), que e justamente o que a Fase D fechou. Com dezenas de jogadores,
 // uma leitura a cada poucos segundos e barata e nao abre porta nenhuma.
-import { ErroHttp, selecionar, selecionarTudo, inserir, atualizar, atualizarRetornando, chamarRpc, type Config } from './db.js'
+import { ErroHttp, selecionar, selecionarTudo, inserir, atualizar, atualizarRetornando, comClaimAtomico, chamarRpc, type Config } from './db.js'
 import { enfileirarEntregas } from './entregas.js'
 
 // Mensagens carregadas por vez. O cliente sempre pede as mais recentes e o
@@ -250,12 +250,20 @@ export interface AnexoItem {
  *
  * DOIS PONTOS QUE NAO SAO DETALHE:
  *
- * 1. **O claim e atomico e vem PRIMEIRO.** `anexo_coletado_em=is.null` esta no
- *    FILTRO do update: dois cliques (ou dois aparelhos) simultaneos nao podem
- *    coletar o mesmo anexo duas vezes, porque o segundo PATCH nao encontra
- *    linha. O enfileiramento abaixo e um UNICO INSERT em lote (nao um loop de
- *    inserts individuais) justamente pra nao existir janela onde metade dos
- *    itens entrou e a outra metade falhou com o anexo ja marcado como coletado.
+ * 1. **O claim e atomico e vem PRIMEIRO, via `comClaimAtomico`.**
+ *    `anexo_coletado_em=is.null` esta no FILTRO do update: dois cliques (ou
+ *    dois aparelhos) simultaneos nao podem coletar o mesmo anexo duas vezes,
+ *    porque o segundo PATCH nao encontra linha (corrida perdida -> 409
+ *    imediato, nada e enfileirado). Isso cobre a corrida entre cliques.
+ *
+ *    Mas corrida entre cliques nao e o unico jeito de perder o anexo (PH-21):
+ *    se `enfileirarEntregas` lancar DEPOIS do claim ja ter comitado (ex:
+ *    PostgREST fora do ar), o anexo ficava marcado como coletado pra sempre
+ *    sem o item nunca ter entrado na fila — perda silenciosa, sem
+ *    possibilidade de nova tentativa. `comClaimAtomico` fecha esse buraco:
+ *    se `fn` (o bloco que enfileira) lancar, ele desfaz o claim
+ *    (`anexo_coletado_em` volta a `null`) e repropaga o erro original, entao
+ *    o cliente recebe um erro retryable em vez de "sucesso" com item sumido.
  *
  * 2. **O credito vai pra fila de entregas, nao pro `players` direto.** O
  *    servidor grava progresso reescrevendo o SNAPSHOT inteiro do jogador; um
@@ -264,25 +272,37 @@ export interface AnexoItem {
  *    pra isso e e aplicada dentro do proximo request que grava (ver
  *    server/src/entregas.ts). O nome da tabela e historico — ela e a fila
  *    generica de "creditar isto no proximo request", nao so do Mercado.
+ *
+ *    `estado: 'lido'`/`read_at` NAO fazem parte do claim atomico: sao
+ *    melhor-esforco, gravados so depois de `enfileirarEntregas` confirmar.
+ *    Se esse ultimo PATCH falhar, os itens ja estao seguros na fila — so o
+ *    estado de "lido" da mensagem fica desatualizado, inconsistencia
+ *    inofensiva ja tolerada em outros pontos deste arquivo (ex: `marcarLida`).
  */
 export async function coletarAnexo(cfg: Config, userId: string, mensagemId: string) {
-  const [msg] = await atualizarRetornando<LinhaCorreio & { anexo_itens: AnexoItem[] }>(
+  const itens = await comClaimAtomico<LinhaCorreio & { anexo_itens: AnexoItem[] }, AnexoItem[]>(
     cfg,
-    `mail_messages?id=eq.${mensagemId}&para_id=eq.${userId}&anexo_coletado_em=is.null&anexo_itens=neq.${encodeURIComponent('[]')}`,
-    { anexo_coletado_em: new Date().toISOString(), estado: 'lido', read_at: new Date().toISOString() },
+    'mail_messages',
+    `id=eq.${mensagemId}&para_id=eq.${userId}&anexo_coletado_em=is.null&anexo_itens=neq.${encodeURIComponent('[]')}`,
+    { anexo_coletado_em: new Date().toISOString() },
+    { anexo_coletado_em: null },
+    async (msg) => {
+      const brutos = Array.isArray(msg.anexo_itens) ? msg.anexo_itens : []
+      const entregas = brutos
+        .filter((item) => item?.itemId && item.quantity > 0)
+        .map((item) => ({
+          userId,
+          itemId: item.itemId,
+          quantity: Math.floor(item.quantity),
+          motivo: `correio:${mensagemId}`,
+        }))
+      await enfileirarEntregas(cfg, entregas)
+      return brutos
+    },
+    { mensagemCorridaPerdida: 'Nada para coletar nesta mensagem.' },
   )
-  if (!msg) throw new ErroHttp(409, 'Nada para coletar nesta mensagem.')
 
-  const itens = Array.isArray(msg.anexo_itens) ? msg.anexo_itens : []
-  const entregas = itens
-    .filter((item) => item?.itemId && item.quantity > 0)
-    .map((item) => ({
-      userId,
-      itemId: item.itemId,
-      quantity: Math.floor(item.quantity),
-      motivo: `correio:${mensagemId}`,
-    }))
-  await enfileirarEntregas(cfg, entregas)
+  await atualizar(cfg, `mail_messages?id=eq.${mensagemId}`, { estado: 'lido', read_at: new Date().toISOString() })
 
   return {
     ok: true,
