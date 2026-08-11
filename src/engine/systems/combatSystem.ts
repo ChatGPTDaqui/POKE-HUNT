@@ -419,10 +419,17 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
     ? allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (ability.radius ?? 0))
     : [engagedEnemies[0]].filter(Boolean)
 
-  if (ability.target === 'aoe') queueAoeVisual(world, player, ability)
+  // Dano real primeiro, visual/recoil de AOE depois (PH-10): os dois pousam
+  // no MESMO tick (mesmo timer), mas `landed` processa na ordem de insercao
+  // e `resolveHit` cancela um hit inteiro se o atacante ja estiver morto
+  // (guard contra acao enfileirada antes de um desmaio anterior). Recoil de
+  // Explosao/Autodestruicao mata o proprio atacante — enfileirado antes dos
+  // hits de dano real, o guard cancelava o dano no(s) alvo(s) sempre que o
+  // recoil terminava de matar quem usou o golpe.
   for (const target of targets) {
     queueHit(world, player, target, ability)
   }
+  if (ability.target === 'aoe') queueAoeVisual(world, player, ability)
 }
 
 function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: PlayerEntity): void {
@@ -436,8 +443,10 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   triggerAttackAnim(enemy, ability.target === 'aoe', player)
   announceAbility(world, enemy, ability)
 
-  if (ability.target === 'aoe') queueAoeVisual(world, enemy, ability)
+  // Mesma ordem de executePlayerAction acima — dano real antes do recoil de
+  // AOE (PH-10).
   queueHit(world, enemy, player, ability)
+  if (ability.target === 'aoe') queueAoeVisual(world, enemy, ability)
 }
 
 // Aplica o dano/texto/efeito-de-golpe/tratamento-de-derrota de um hit
