@@ -11,7 +11,7 @@
 // direto), que e justamente o que a Fase D fechou. Com dezenas de jogadores,
 // uma leitura a cada poucos segundos e barata e nao abre porta nenhuma.
 import { ErroHttp, selecionar, selecionarTudo, inserir, atualizar, atualizarRetornando, chamarRpc, type Config } from './db.js'
-import { enfileirarEntrega } from './entregas.js'
+import { enfileirarEntregas } from './entregas.js'
 
 // Mensagens carregadas por vez. O cliente sempre pede as mais recentes e o
 // historico nao e navegavel — chat de jogo e efemero por natureza.
@@ -253,8 +253,9 @@ export interface AnexoItem {
  * 1. **O claim e atomico e vem PRIMEIRO.** `anexo_coletado_em=is.null` esta no
  *    FILTRO do update: dois cliques (ou dois aparelhos) simultaneos nao podem
  *    coletar o mesmo anexo duas vezes, porque o segundo PATCH nao encontra
- *    linha. Se o enfileiramento abaixo falhar, o jogador perde o anexo — erra
- *    contra ele, mas nao imprime item, que e o lado certo de errar aqui.
+ *    linha. O enfileiramento abaixo e um UNICO INSERT em lote (nao um loop de
+ *    inserts individuais) justamente pra nao existir janela onde metade dos
+ *    itens entrou e a outra metade falhou com o anexo ja marcado como coletado.
  *
  * 2. **O credito vai pra fila de entregas, nao pro `players` direto.** O
  *    servidor grava progresso reescrevendo o SNAPSHOT inteiro do jogador; um
@@ -273,15 +274,15 @@ export async function coletarAnexo(cfg: Config, userId: string, mensagemId: stri
   if (!msg) throw new ErroHttp(409, 'Nada para coletar nesta mensagem.')
 
   const itens = Array.isArray(msg.anexo_itens) ? msg.anexo_itens : []
-  for (const item of itens) {
-    if (!item?.itemId || !(item.quantity > 0)) continue
-    await enfileirarEntrega(cfg, {
+  const entregas = itens
+    .filter((item) => item?.itemId && item.quantity > 0)
+    .map((item) => ({
       userId,
       itemId: item.itemId,
       quantity: Math.floor(item.quantity),
       motivo: `correio:${mensagemId}`,
-    })
-  }
+    }))
+  await enfileirarEntregas(cfg, entregas)
 
   return {
     ok: true,
