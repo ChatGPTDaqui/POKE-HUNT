@@ -22,10 +22,10 @@
 //    chamadas ao PostgREST (o servico e serverless), entao cada baixa numa
 //    ordem alheia manda o valor antigo no filtro; se nao casar, a corrida foi
 //    perdida e aquela ordem simplesmente nao e usada nesta execucao.
-import { SPECIES, averageIvPercent, getItem, rowToPoke, type PokemonRow } from '#engine'
+import { SPECIES, averageIvPercent, getItem, rowToPoke, type PokemonRow, type GameStateStore } from '#engine'
 import { ErroHttp, selecionar, selecionarTudo, inserir, atualizar, atualizarRetornando, apagar, type Config } from './db.js'
 import { enfileirarEntrega } from './entregas.js'
-import { carregarEstado, comEstadoParaEscrita, gravarEstado } from './progresso.js'
+import { carregarEstado, comEstadoParaEscrita, gravarEstado, lerSnapshot } from './progresso.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
 import type { GameStateData } from '#engine'
 
@@ -277,6 +277,52 @@ export async function meuHistorico(cfg: Config, userId: string) {
 // Ordem de item: criacao + casamento
 // ---------------------------------------------------------------------------
 
+export type Operacao =
+  | { tipo: 'addItem'; itemId: string; qty: number }
+  | { tipo: 'removeItem'; itemId: string; qty: number }
+  | { tipo: 'addGold'; amount: number }
+  | { tipo: 'spendGold'; amount: number }
+
+const MAX_TENTATIVAS_GRAVAR = 5
+
+/**
+ * Recarrega o estado do jogador do zero e reaplica `operacoes` por cima —
+ * usado quando `gravarEstado` perde o CAS depois de `criarOrdem` ja ter
+ * casado de verdade com outro jogador (ver call site). `lerSnapshot` (ao
+ * contrario de `carregarEstadoParaEscrita`) nao reivindica entregas: aqui so
+ * queremos uma base fresca pra reaplicar um delta ja decidido, nao repetir o
+ * claim.
+ */
+export async function gravarComRetry(cfg: Config, userId: string, operacoes: Operacao[]): Promise<void> {
+  for (let tentativa = 0; tentativa < MAX_TENTATIVAS_GRAVAR; tentativa++) {
+    const fresco = await lerSnapshot(cfg, userId)
+    const { store: storeFresco, dados: estadoFresco } = criarEstadoDoJogador(fresco.estado)
+
+    for (const op of operacoes) {
+      if (op.tipo === 'addItem') storeFresco.addItem(op.itemId, op.qty)
+      else if (op.tipo === 'removeItem') {
+        if (!storeFresco.removeItem(op.itemId, op.qty)) {
+          throw new ErroHttp(409, 'outro comando em andamento — tente de novo')
+        }
+      } else if (op.tipo === 'addGold') storeFresco.addGold(op.amount)
+      else if (!storeFresco.spendGold(op.amount)) {
+        throw new ErroHttp(409, 'outro comando em andamento — tente de novo')
+      }
+    }
+
+    try {
+      await gravarEstado(cfg, userId, estadoFresco, fresco.pokeIdsNoLoad, fresco.playerUpdatedAt)
+      return
+    } catch (erro) {
+      if (!(erro instanceof ErroHttp) || erro.status !== 409) throw erro
+      // Outra escrita venceu de novo a corrida nesta mesma janela — tenta
+      // mais uma vez com uma leitura fresca. So desiste apos esgotar as
+      // tentativas (contencao real, nao so o duplo clique que motivou o fix).
+    }
+  }
+  throw new ErroHttp(409, 'outro comando em andamento — tente de novo')
+}
+
 /**
  * Cria uma ordem e casa com o lado oposto imediatamente.
  *
@@ -300,12 +346,31 @@ export async function criarOrdem(
   return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad, playerUpdatedAt }) => {
     const { store, dados: estado } = criarEstadoDoJogador(dados)
 
+    // Registra so as operacoes de item/ouro desta chamada (escrow + o que
+    // `casar` render pro nosso lado) — replayavel sobre uma base fresca se o
+    // CAS final de `gravarEstado` perder a corrida (ver retry abaixo).
+    // `criarOrdem` nunca mexe em POKE/team, entao so estas 4 acoes bastam.
+    const operacoes: Operacao[] = []
+    const storeComLog: GameStateStore = Object.create(store)
+    storeComLog.addItem = (id, qty = 1) => { operacoes.push({ tipo: 'addItem', itemId: id, qty }); store.addItem(id, qty) }
+    storeComLog.removeItem = (id, qty = 1) => {
+      const ok = store.removeItem(id, qty)
+      if (ok) operacoes.push({ tipo: 'removeItem', itemId: id, qty })
+      return ok
+    }
+    storeComLog.addGold = (amount) => { operacoes.push({ tipo: 'addGold', amount }); store.addGold(amount) }
+    storeComLog.spendGold = (amount) => {
+      const ok = store.spendGold(amount)
+      if (ok) operacoes.push({ tipo: 'spendGold', amount })
+      return ok
+    }
+
     // --- escrow ---
     if (side === 'venda') {
       if (estado.lockedItems[itemId]) throw new ErroHttp(409, 'Este item esta travado — destrave antes de anunciar.')
-      if (!store.removeItem(itemId, quantity)) throw new ErroHttp(409, 'Voce nao tem essa quantidade.')
+      if (!storeComLog.removeItem(itemId, quantity)) throw new ErroHttp(409, 'Voce nao tem essa quantidade.')
     } else {
-      if (!store.spendGold(unitPrice * quantity)) throw new ErroHttp(409, 'Ouro insuficiente.')
+      if (!storeComLog.spendGold(unitPrice * quantity)) throw new ErroHttp(409, 'Ouro insuficiente.')
     }
 
     const [ordem] = await inserir<LinhaOrdem>(cfg, 'market_orders', {
@@ -318,23 +383,32 @@ export async function criarOrdem(
       gold_retido: side === 'compra' ? unitPrice * quantity : 0,
     }, { retornar: true })
 
-    const resultado = await casar(cfg, userId, ordem, store)
+    const resultado = await casar(cfg, userId, ordem, storeComLog)
 
     // O estado do jogador (escrow debitado + o que ele recebeu no casamento) e
     // gravado uma vez so, no fim.
     try {
       await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt)
     } catch (erro) {
-      // Perdemos a corrida (duplo clique, duas abas) e a ordem que acabamos de
-      // inserir ficou sem lastro — o debito do escrow nunca foi persistido,
-      // entao ela vira um anuncio fantasma que outro jogador pode comprar de
-      // graca (PH-8). So e seguro apagar quando NADA casou: se `executado > 0`,
-      // negociacoes reais com outros jogadores ja foram gravadas por `casar` e
-      // desfazer so a nossa ordem esconderia um trade que de fato aconteceu.
+      if (!(erro instanceof ErroHttp) || erro.status !== 409) throw erro
+
       if (resultado.executado === 0) {
+        // Perdemos a corrida (duplo clique, duas abas) antes de qualquer
+        // casamento real acontecer: a ordem que acabamos de inserir ficou sem
+        // lastro — o debito do escrow nunca foi persistido, entao ela vira um
+        // anuncio fantasma que outro jogador pode comprar de graca (PH-8).
         await apagar(cfg, `market_orders?id=eq.${ordem.id}`)
+        throw erro
       }
-      throw erro
+
+      // Ja casamos de verdade com outro jogador: `casar` gravou o lado dele e
+      // enfileirou a entrega. Desistir aqui faria a gente perder o que ganhou
+      // no trade so porque uma acao concorrente nossa (outra aba, Hunt em
+      // paralelo) tocou nossa linha entre o load e esta escrita — e apagar a
+      // ordem, como no caso acima, esconderia um trade que de fato aconteceu.
+      // Em vez de abortar, recarrega o estado fresco e reaplica so o delta
+      // desta chamada (escrow + ganhos do casamento) por cima dele.
+      await gravarComRetry(cfg, userId, operacoes)
     }
     return { ordemId: ordem.id, ...resultado, estado }
   })

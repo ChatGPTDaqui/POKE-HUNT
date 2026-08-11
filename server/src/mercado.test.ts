@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { defaultGameStateData } from '#engine'
 import { ErroHttp, type Config } from './db.js'
-import { casar, type LinhaOrdem } from './mercado.js'
+import { casar, gravarComRetry, type LinhaOrdem, type Operacao } from './mercado.js'
 
 // Fake minimo do PostgREST: guarda `market_orders` num Map e entende os
 // filtros de query string que mercado.ts realmente usa (eq/neq/lte/gte,
@@ -69,6 +70,26 @@ vi.mock('./entregas.js', () => ({
   enfileirarEntrega: vi.fn(async () => {}),
 }))
 
+// Fake de `progresso.js` pro retry de `gravarComRetry`: `snapshotFresco` e o
+// que `lerSnapshot` devolve a cada tentativa (sempre a MESMA base intocada —
+// `criarEstadoDoJogador` clona por dentro, entao tentativas nao se
+// contaminam); `falhasRestantes` controla quantas vezes `gravarEstado` joga
+// 409 antes de aceitar.
+let snapshotFresco: { estado: ReturnType<typeof defaultGameStateData>; pokeIdsNoLoad: Set<string>; playerUpdatedAt: string }
+let falhasRestantes = 0
+let estadosGravados: Array<ReturnType<typeof defaultGameStateData>> = []
+
+vi.mock('./progresso.js', () => ({
+  lerSnapshot: vi.fn(async () => snapshotFresco),
+  gravarEstado: vi.fn(async (_cfg: unknown, _userId: string, estado: ReturnType<typeof defaultGameStateData>) => {
+    estadosGravados.push(estado)
+    if (falhasRestantes > 0) {
+      falhasRestantes -= 1
+      throw new ErroHttp(409, 'outro comando em andamento — tente de novo')
+    }
+  }),
+}))
+
 const cfg = {} as Config
 const store = { addItem: vi.fn(), addGold: vi.fn() } as unknown as Parameters<typeof casar>[3]
 
@@ -93,6 +114,13 @@ beforeEach(() => {
   tabela.clear()
   aoAplicarPatchDaOutra = null
   vi.clearAllMocks()
+
+  const base = defaultGameStateData()
+  base.wallet.gold = 1000
+  base.items = { potion: 5 }
+  snapshotFresco = { estado: base, pokeIdsNoLoad: new Set(), playerUpdatedAt: 'v1' }
+  falhasRestantes = 0
+  estadosGravados = []
 })
 
 describe('casar() — CAS na escrita final da propria ordem (PH-3)', () => {
@@ -167,5 +195,42 @@ describe('casar() — CAS na escrita final da propria ordem (PH-3)', () => {
 
     await expect(casar(cfg, 'seller-A', { ...ordemA }, store)).rejects.toThrow(ErroHttp)
     expect(tabela.get('A')!.status).toBe('cancelada')
+  })
+})
+
+describe('gravarComRetry() — reaplica delta sobre estado fresco quando o CAS final perde a corrida (PH-8)', () => {
+  it('reaplica o delta (ouro gasto + item recebido) e grava depois de perder o CAS 2x', async () => {
+    falhasRestantes = 2
+    const operacoes: Operacao[] = [
+      { tipo: 'spendGold', amount: 100 },
+      { tipo: 'addItem', itemId: 'poke_ball', qty: 3 },
+    ]
+
+    await gravarComRetry(cfg, 'user-1', operacoes)
+
+    // 2 falhas + 1 sucesso: cada tentativa recarrega a base e reaplica o
+    // delta do zero, nao acumula em cima de uma tentativa anterior.
+    expect(estadosGravados).toHaveLength(3)
+    const gravado = estadosGravados[estadosGravados.length - 1]
+    expect(gravado.wallet.gold).toBe(900)
+    expect(gravado.items.poke_ball).toBe(3)
+    // A base fresca (mockada) nunca e mutada pelas tentativas anteriores —
+    // `criarEstadoDoJogador` clona por dentro.
+    expect(snapshotFresco.estado.wallet.gold).toBe(1000)
+  })
+
+  it('joga 409 sem tentar de novo se o delta nao cabe mais na base fresca (concorrencia genuina)', async () => {
+    snapshotFresco.estado.items = { potion: 1 }
+    const operacoes: Operacao[] = [{ tipo: 'removeItem', itemId: 'potion', qty: 2 }]
+
+    await expect(gravarComRetry(cfg, 'user-1', operacoes)).rejects.toThrow(ErroHttp)
+    // Nunca chegou a chamar gravarEstado: a falha e na reaplicacao do delta.
+    expect(estadosGravados).toHaveLength(0)
+  })
+
+  it('desiste apos esgotar as tentativas de gravar', async () => {
+    falhasRestantes = 999
+    await expect(gravarComRetry(cfg, 'user-1', [{ tipo: 'addGold', amount: 10 }])).rejects.toThrow(ErroHttp)
+    expect(estadosGravados).toHaveLength(5)
   })
 })

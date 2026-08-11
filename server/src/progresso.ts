@@ -84,7 +84,11 @@ export interface EstadoParaEscrita {
   playerUpdatedAt: string
 }
 
-async function lerSnapshot(cfg: Config, userId: string): Promise<EstadoParaEscrita> {
+// Exportada (sem side-effect, ao contrario de `carregarEstadoParaEscrita`, que
+// tambem reivindica entregas) pra permitir recarregar estado fresco no meio
+// de uma escrita ja em andamento — usado pelo retry de `criarOrdem` (PH-8)
+// quando o CAS final perde a corrida depois de um casamento real ja gravado.
+export async function lerSnapshot(cfg: Config, userId: string): Promise<EstadoParaEscrita> {
   const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
     selecionar<PlayerSnapshot['player']>(cfg, `players?user_id=eq.${userId}&select=*`),
     selecionarTudo<PlayerSnapshot['pokemon'][number]>(cfg, `pokemon_instances?user_id=eq.${userId}&select=*`),
