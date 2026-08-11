@@ -69,6 +69,14 @@ export function deveSerPessimista(elapsedSeconds: number): boolean {
   return elapsedSeconds > LIMIAR_OFFLINE_SEGUNDOS
 }
 
+// Teto de segundos que o catch-up de aba em segundo plano pode replayar,
+// mesmo teto do farm offline oficial — exportada separada pelo mesmo motivo
+// das duas acima: sem isso, tampa fechada por dias simulava o gap inteiro
+// de uma vez (PH-16).
+export function segundosCatchUpEfetivos(gapSeconds: number): number {
+  return Math.min(gapSeconds, OFFLINE_FARM_MAX_HOURS * 3600)
+}
+
 function useOfflineFarmOnBoot(): { summary: OfflineSimSummary | null; dismiss: () => void } {
   const [summary, setSummary] = useState<OfflineSimSummary | null>(null)
   const ranRef = useRef(false)
@@ -160,10 +168,14 @@ function useOfflineFarmOnBoot(): { summary: OfflineSimSummary | null; dismiss: (
 // porta o handler de `visibilitychange` do js/main.js. Navegadores fazem
 // throttling agressivo de setInterval em aba oculta; quando ela volta, isso
 // roda a simulacao pelo intervalo perdido SOBRE o mundo que ja existe
-// (mesmos inimigos/posicoes/cooldowns reais). Sem limite de tempo e
+// (mesmos inimigos/posicoes/cooldowns reais). Sem limite de TRIGGER e
 // totalmente silencioso, por decisao explicita do usuario: "se a aba estiver
-// aberta nao e farm offline, e so o navegador tendo se perdido".
-// O custo dele e limitado (ver maxSteps/maxWallClockMs em
+// aberta nao e farm offline, e so o navegador tendo se perdido" — mas o
+// intervalo SIMULADO agora leva o mesmo teto de horas e o mesmo modo
+// pessimista do farm offline oficial (PH-16): sem isso, tampa fechada 10h+
+// simulava as 10h inteiras em modo otimista, e uma captura rara feita nessa
+// predicao desaparecia quando o flush do servidor sobrescrevia o estado
+// ~30s depois. O custo dele tambem e limitado por maxWallClockMs (ver
 // offlineSimSystem.ts), que e o que impede um gap de varios dias de travar
 // um celular.
 function useBackgroundCatchUp(): void {
@@ -186,15 +198,26 @@ function useBackgroundCatchUp(): void {
       }
       if (gapSeconds < MIN_CATCHUP_GAP_SECONDS) return // jitter normal de frame, nao throttle
 
+      // Sob autoridade do servidor a sessao aberta ja fica sendo simulada
+      // LA — este catch-up local seria predicao pura sobre um mundo que o
+      // proximo flush (`INTERVALO_FLUSH_MS`, no maximo 30s) vai substituir
+      // pelo calculo real do servidor. `forceSave()` alias ja e no-op sob
+      // servidor (ver comentario em onVisibilityChange abaixo), entao rodar
+      // a simulacao aqui nao persistia nada — so mostrava um estado (kills,
+      // capturas) que desaparecia segundos depois (PH-16).
+      if (servidorAtivo()) return
+
       const world = useWorldStore.getState()
       if (!world.mapDef || !world.player) return // nada a adiantar no Hospital
 
+      const cappedSeconds = segundosCatchUpEfetivos(gapSeconds)
       withSavesDeferred(() => {
         useWorldStore.getState().update((draft) => {
+          draft.pessimista = deveSerPessimista(gapSeconds)
           const summary = simulateWorldSeconds({
             world: draft,
             gameState: useGameStateStore.getState(),
-            seconds: gapSeconds,
+            seconds: cappedSeconds,
             stepSeconds: OFFLINE_SIM_STEP_SECONDS,
             stepFn: (w, dt, opts) => stepWorld(w, dt, useGameStateStore.getState(), opts),
             maxWallClockMs: CATCHUP_WALL_CLOCK_BUDGET_MS,
