@@ -16,6 +16,12 @@ export interface AcaoPendente {
 
 export function useAcaoPendente(): AcaoPendente {
   const [pendingKey, setPendingKey] = useState<string | null>(null)
+  // `pendingKey` (state) so reflete no DOM no proximo render — dois cliques
+  // sincronos (ou disparados no mesmo tick) leem o mesmo valor antigo fechado
+  // no closure e passam os dois pela guarda (PH-8, PH-13: mesmo defeito que
+  // `mutation.isPending` do TanStack Query tinha, so que reimplementado com
+  // state). A guarda de verdade precisa ser sincrona.
+  const pendingRef = useRef<string | null>(null)
   const montado = useRef(true)
 
   useEffect(() => {
@@ -26,19 +32,19 @@ export function useAcaoPendente(): AcaoPendente {
   }, [])
 
   const run = useCallback(async (key: string, fn: () => Promise<unknown> | unknown) => {
-    // Guarda de reentrancia: sem ela, dois cliques rapidos na MESMA linha
-    // disparam duas acoes antes de o primeiro `setPendingKey` chegar ao DOM.
-    if (pendingKey != null) return
+    if (pendingRef.current != null) return
+    pendingRef.current = key
     setPendingKey(key)
     try {
       await fn()
     } finally {
+      pendingRef.current = null
       // A janela pode ter fechado no meio (varias acoes fecham a tela ao
       // terminar) — escrever estado num componente desmontado nao quebra, mas
       // tambem nao serve pra nada.
       if (montado.current) setPendingKey(null)
     }
-  }, [pendingKey])
+  }, [])
 
   return {
     pendingKey,

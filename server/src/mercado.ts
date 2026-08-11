@@ -23,7 +23,7 @@
 //    ordem alheia manda o valor antigo no filtro; se nao casar, a corrida foi
 //    perdida e aquela ordem simplesmente nao e usada nesta execucao.
 import { SPECIES, averageIvPercent, getItem, rowToPoke, type PokemonRow } from '#engine'
-import { ErroHttp, selecionar, selecionarTudo, inserir, atualizar, atualizarRetornando, type Config } from './db.js'
+import { ErroHttp, selecionar, selecionarTudo, inserir, atualizar, atualizarRetornando, apagar, type Config } from './db.js'
 import { enfileirarEntrega } from './entregas.js'
 import { carregarEstado, comEstadoParaEscrita, gravarEstado } from './progresso.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
@@ -321,8 +321,21 @@ export async function criarOrdem(
     const resultado = await casar(cfg, userId, ordem, store)
 
     // O estado do jogador (escrow debitado + o que ele recebeu no casamento) e
-    // gravado uma vez so, no fim. Se algo estourar antes, nada foi debitado.
-    await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt)
+    // gravado uma vez so, no fim.
+    try {
+      await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt)
+    } catch (erro) {
+      // Perdemos a corrida (duplo clique, duas abas) e a ordem que acabamos de
+      // inserir ficou sem lastro — o debito do escrow nunca foi persistido,
+      // entao ela vira um anuncio fantasma que outro jogador pode comprar de
+      // graca (PH-8). So e seguro apagar quando NADA casou: se `executado > 0`,
+      // negociacoes reais com outros jogadores ja foram gravadas por `casar` e
+      // desfazer so a nossa ordem esconderia um trade que de fato aconteceu.
+      if (resultado.executado === 0) {
+        await apagar(cfg, `market_orders?id=eq.${ordem.id}`)
+      }
+      throw erro
+    }
     return { ordemId: ordem.id, ...resultado, estado }
   })
 }
