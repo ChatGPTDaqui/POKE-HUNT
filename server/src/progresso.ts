@@ -4,7 +4,7 @@ import {
   snapshotToGameState, gameStateToPlayerRow, gameStateToPokemonRows,
   gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
   defaultGameStateData, MAPS,
-  OFFLINE_SIM_STEP_SECONDS, recordBatch,
+  OFFLINE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary,
 } from '#engine'
 import {
@@ -23,6 +23,11 @@ import { CONQUISTA_LANCE } from './ranking.js'
 // O Farm Offline do cliente ja tinha um teto proprio pelo mesmo motivo.
 export const MAX_SEGUNDOS_POR_FLUSH = 6 * 3600
 
+// LIMIAR_OFFLINE_SEGUNDOS vem do engine compartilhado (src/engine/simulation.ts)
+// — o farm offline sem servidor (GameShell.tsx) precisa do MESMO limiar pra
+// decidir `world.pessimista`, senao os dois caminhos discordam sobre o que
+// conta como ausencia (PH-15).
+//
 // Acima disto, o intervalo e tratado como AUSENCIA (farm offline) e nao como
 // jogo ao vivo. O cliente liquida de 30 em 30 segundos enquanto o jogador esta
 // com o jogo aberto, entao 120s deixa folga confortavel pra um flush atrasado
@@ -32,7 +37,6 @@ export const MAX_SEGUNDOS_POR_FLUSH = 6 * 3600
 // piso de 50%; ao vivo roda normal e ALIMENTA a taxa que o piso usa de
 // referencia. Ligar o modo pessimista em todo flush (como estava) penalizava
 // quem estava jogando de verdade E destruia a propria referencia do piso.
-export const LIMIAR_OFFLINE_SEGUNDOS = 120
 
 export interface LinhaSessao {
   id: string

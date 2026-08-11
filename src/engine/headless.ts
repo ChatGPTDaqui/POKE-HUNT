@@ -10,7 +10,7 @@
 // aliases `@/` e produz um ESM que o Node importa direto. Nada aqui pode puxar
 // `gameStateStore` como VALOR — ver a nota de topo de simulation.ts.
 export { buildMapWorld, buildHospitalWorld, stepWorld, handleEnemyDefeated } from './simulation'
-export { OFFLINE_SIM_STEP_SECONDS, OFFLINE_FARM_MAX_HOURS } from './simulation'
+export { OFFLINE_SIM_STEP_SECONDS, OFFLINE_FARM_MAX_HOURS, LIMIAR_OFFLINE_SEGUNDOS } from './simulation'
 export type { SequenciaDeSorteio } from './simulation'
 
 export { simulateWorldSeconds, createEmptySummary } from './systems/offlineSimSystem'

@@ -38,6 +38,7 @@ import {
   OFFLINE_SIM_STEP_SECONDS,
   CATCHUP_CHECK_INTERVAL_MS,
   CATCHUP_WALL_CLOCK_BUDGET_MS,
+  LIMIAR_OFFLINE_SEGUNDOS,
 } from '@/engine/simulation'
 import { pendingDriftSeconds, resetDrift } from '@/engine/clockDrift'
 import { simulateWorldSeconds, type OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
@@ -58,6 +59,14 @@ import { controller } from '@/engine/controller'
 // isolado) pra esse gate ter cobertura direta (PH-14).
 export function farmOfflineSemServidorEhConfiavel(producao: boolean): boolean {
   return !producao
+}
+
+// Mesmo limiar que o servidor usa no flush (`LIMIAR_OFFLINE_SEGUNDOS`,
+// compartilhado via engine/simulation.ts) — exportada separada do hook pelo
+// mesmo motivo de `farmOfflineSemServidorEhConfiavel` acima: cobertura direta
+// sem precisar montar store/efeito (PH-15).
+export function deveSerPessimista(elapsedSeconds: number): boolean {
+  return elapsedSeconds > LIMIAR_OFFLINE_SEGUNDOS
 }
 
 function useOfflineFarmOnBoot(): { summary: OfflineSimSummary | null; dismiss: () => void } {
@@ -122,6 +131,11 @@ function useOfflineFarmOnBoot(): { summary: OfflineSimSummary | null; dismiss: (
     const cappedSeconds = Math.min(elapsedSeconds, OFFLINE_FARM_MAX_HOURS * 3600)
 
     const world = buildMapWorld(mapId, activePoke)
+    // Sem isto o farm offline sem servidor (so ativo em dev) rodava com a
+    // MESMA distribuicao de dano do jogo ao vivo por ate OFFLINE_FARM_MAX_HOURS
+    // sem supervisao — contradiz o invariante de nunca render mais offline
+    // que jogando ao vivo (PH-15).
+    world.pessimista = deveSerPessimista(elapsedSeconds)
     const result = withSavesDeferred(() =>
       simulateWorldSeconds({
         world,
