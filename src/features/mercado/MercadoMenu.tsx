@@ -24,6 +24,7 @@ import { RARITIES, rarityOf, type RarityKey } from '@/data/rarity'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useToastStore } from '@/stores/toastStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
+import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { ItemTooltip } from '@/components/shared/ItemTooltip'
 import {
   ComingSoon, GameButton, GameCard, GameCheck, GameInput, GameSelect,
@@ -106,6 +107,7 @@ function LivroDoItem({ itemId }: { itemId: string }) {
     staleTime: STALE_MS,
   })
   const criar = useAcaoMercado(servidor.criarOrdem)
+  const acao = useAcaoPendente()
 
   const melhorVenda = data?.vendas[0]?.unitPrice ?? 0
   // O campo nasce no melhor preco disponivel: e o que o jogador quer em 90% dos
@@ -164,10 +166,15 @@ function LivroDoItem({ itemId }: { itemId: string }) {
         </div>
         <GameButton
           variant="primary"
-          disabled={criar.isPending || precoEfetivo <= 0 || custo > gold}
-          onClick={() => criar.mutate({ itemId, side: 'compra', unitPrice: precoEfetivo, quantity: qtd })}
+          disabled={acao.isPending('criar-ordem') || precoEfetivo <= 0 || custo > gold}
+          // `useAcaoPendente.run` cobre o round-trip inteiro pra fechar a janela de
+          // duplo clique (PH-8, mesmo defeito do PH-13) — `mutateAsync` rejeita no
+          // erro (diferente de `mutate`), e o `.catch` aqui e so pra `run` nao
+          // propagar unhandled rejection; o toast de erro ja vem do onError de
+          // useAcaoMercado.
+          onClick={() => void acao.run('criar-ordem', () => criar.mutateAsync({ itemId, side: 'compra', unitPrice: precoEfetivo, quantity: qtd }).catch(() => {}))}
         >
-          {criar.isPending ? '...' : 'Comprar'}
+          {acao.isPending('criar-ordem') ? '...' : 'Comprar'}
         </GameButton>
       </GameCard>
 
@@ -517,6 +524,7 @@ function VenderItens() {
   const [preco, setPreco] = useState(100)
   const [qtd, setQtd] = useState(1)
   const criar = useAcaoMercado(servidor.criarOrdem)
+  const acao = useAcaoPendente()
 
   const disponiveis = Object.keys(items).filter((id) => items[id] > 0 && ITEMS[id] && !lockedItems[id])
   const escolhido = itemId || disponiveis[0] || ''
@@ -559,10 +567,10 @@ function VenderItens() {
       </div>
       <GameButton
         variant="primary"
-        disabled={criar.isPending || maximo === 0}
-        onClick={() => criar.mutate({ itemId: escolhido, side: 'venda', unitPrice: preco, quantity: Math.min(qtd, maximo) })}
+        disabled={acao.isPending('criar-ordem') || maximo === 0}
+        onClick={() => void acao.run('criar-ordem', () => criar.mutateAsync({ itemId: escolhido, side: 'venda', unitPrice: preco, quantity: Math.min(qtd, maximo) }).catch(() => {}))}
       >
-        {criar.isPending ? '...' : 'Colocar a venda'}
+        {acao.isPending('criar-ordem') ? '...' : 'Colocar a venda'}
       </GameButton>
     </GameCard>
   )
