@@ -54,3 +54,29 @@ describe('Explosao/Autodestruicao com atacante em HP baixo (PH-10)', () => {
     expect(player.fainted).toBe(true)
   })
 })
+
+describe('silent pula criacao de WorldEffect sem afetar dano (PH-11)', () => {
+  it('silent:true aplica dano/derrota normalmente mas nao cria nenhum WorldEffect', () => {
+    const { world, player, enemy, enemyHpAntes } = construirCenarioExplosao()
+
+    updateCombat(world, 0, { silent: true })
+    expect(world.pendingHits.length).toBeGreaterThan(0)
+    updateCombat(world, 999, { silent: true })
+
+    // Mesmo resultado de combate do teste do PH-10 (dano real + recoil letal)...
+    expect(enemy.poke.hp).toBeLessThan(enemyHpAntes)
+    expect(player.fainted).toBe(true)
+    // ...mas nenhum efeito visual (damageNumber/abilityEffect) foi alocado.
+    expect(world.effects.length).toBe(0)
+  })
+
+  it('silent:false (default) cria WorldEffect pro mesmo cenario — prova que o gate e real', () => {
+    const { world, enemy, enemyHpAntes } = construirCenarioExplosao()
+
+    updateCombat(world, 0)
+    updateCombat(world, 999)
+
+    expect(enemy.poke.hp).toBeLessThan(enemyHpAntes)
+    expect(world.effects.length).toBeGreaterThan(0)
+  })
+})

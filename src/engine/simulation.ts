@@ -385,7 +385,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   }
 
   updateMovement(world, dt)
-  const { defeatedEnemyIds, playerJustFainted } = updateCombat(world, dt)
+  const { defeatedEnemyIds, playerJustFainted } = updateCombat(world, dt, { silent })
   // attackAnimTimer precisa decrementar todo tick independente de `silent`
   // — MovementSystem trava movimento enquanto ele roda.
   tickAttackAnimTimers(world, dt)

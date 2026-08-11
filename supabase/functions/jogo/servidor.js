@@ -179,6 +179,41 @@ async function atualizarRetornando(cfg, caminho, patch) {
 	}) ?? [];
 }
 /**
+* Reivindica uma linha por CAS (via `atualizarRetornando`) e roda `fn` com
+* ela. Se a corrida for perdida (claim veio vazio), lanca `ErroHttp(409, ...)`
+* antes de chamar `fn`. Se `fn` lancar, desfaz o claim (aplica
+* `patchDesfazer` na mesma linha, por id) e repropaga o erro ORIGINAL — pra
+* "reivindicado mas nunca processado" nunca virar perda silenciosa.
+*
+* Generaliza o padrao "PATCH+filtro, vazio=corrida perdida, desfazer se o
+* downstream falhar" usado em `coletarAnexo` (PH-21). NAO cobre:
+* - `casar()` (mercado.ts, PH-3): perde a corrida e RETENTA com um delta
+*   recalculado sobre saldo divisivel — estrategia diferente, nao um claim
+*   marcador com undo.
+* - `evolvePoke` (PH-12): nao e CAS de banco nenhum, e client-side
+*   (confirm-then-apply — so debita a Stone depois do servidor confirmar).
+* - `playerRepository.ts` (PH-17/PH-18): roda no cliente via supabase-js
+*   (`.eq()` chaining), transporte diferente deste `db.ts` baseado em fetch.
+* - `aplicarFlush`/`gravarEstado` (PH-5, progresso.ts): `gravarEstado` faz o
+*   CAS na escrita final inteira, nao ha nada a desfazer se falhar (ja lanca
+*   409 direto); `aplicarFlush` decide de proposito NAO reverter
+*   `last_flush_at` quando o downstream falha, pra sessao quebrada nao
+*   entrar em loop de retry — contrato oposto ao deste helper.
+*
+* Ver PH-1 (epic) para o raciocinio completo de por que esses 5 ficam fora.
+*/
+async function comClaimAtomico(cfg, tabela, filtroClaim, patchClaim, patchDesfazer, fn, opcoes = {}) {
+	const idCampo = opcoes.idCampo ?? "id";
+	const [linha] = await atualizarRetornando(cfg, `${tabela}?${filtroClaim}`, patchClaim);
+	if (!linha) throw new ErroHttp(409, opcoes.mensagemCorridaPerdida ?? "operação já em andamento ou concluída — tente de novo");
+	try {
+		return await fn(linha);
+	} catch (erro) {
+		await atualizarRetornando(cfg, `${tabela}?${idCampo}=eq.${linha[idCampo]}`, patchDesfazer);
+		throw erro;
+	}
+}
+/**
 * Chama uma funcao do Postgres via `POST /rest/v1/rpc/<nome>`.
 *
 * Usado onde a pergunta e do BANCO e nao cabe num filtro: o unico caso hoje e
@@ -36046,8 +36081,8 @@ function executePlayerAction(world, player, engagedEnemies) {
 	triggerAttackAnim(player, ability.target === "aoe", primaryTarget);
 	announceAbility(world, player, ability);
 	const targets = ability.target === "aoe" ? allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (ability.radius ?? 0)) : [engagedEnemies[0]].filter(Boolean);
-	if (ability.target === "aoe") queueAoeVisual(world, player, ability);
 	for (const target of targets) queueHit(world, player, target, ability);
+	if (ability.target === "aoe") queueAoeVisual(world, player, ability);
 }
 function executeEnemyAction(world, enemy, player) {
 	if (!canAct(enemy)) return;
@@ -36057,16 +36092,16 @@ function executeEnemyAction(world, enemy, player) {
 	startGlobalCooldown(enemy, MIN_ACTION_GAP);
 	triggerAttackAnim(enemy, ability.target === "aoe", player);
 	announceAbility(world, enemy, ability);
-	if (ability.target === "aoe") queueAoeVisual(world, enemy, ability);
 	queueHit(world, enemy, player, ability);
+	if (ability.target === "aoe") queueAoeVisual(world, enemy, ability);
 }
-function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted) {
+function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	const attacker = findEntityById(world.player, world.enemies, hit.attackerId);
 	if (!attacker) return;
 	const { ability } = hit;
 	if (isDead(attacker)) return;
 	if (hit.isAoeVisual) {
-		world.effects.push(createWorldEffect(world.counters, {
+		if (!silent) world.effects.push(createWorldEffect(world.counters, {
 			type: "abilityEffect",
 			x: attacker.x,
 			y: attacker.y,
@@ -36081,7 +36116,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted) {
 		if (SELF_DESTRUCT_ABILITY_KEYS.has(ability.id) && !isDead(attacker)) {
 			const recoil = Math.round(attacker.poke.hp * SELF_DESTRUCT_HP_LOSS_PERCENT);
 			takeDamage(attacker, recoil);
-			spawnDamageNumber(world, attacker, {
+			if (!silent) spawnDamageNumber(world, attacker, {
 				amount: recoil,
 				effectiveness: "normal",
 				effectivenessLabel: null,
@@ -36105,9 +36140,9 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted) {
 	if (!target || isDead(target)) return;
 	const result = computeDamage(world.rng, attacker, target, ability, world.pessimista);
 	takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke));
-	spawnDamageNumber(world, target, result);
+	if (!silent) spawnDamageNumber(world, target, result);
 	const isPlayerAttacker = attacker.kind === "player";
-	if (!(ability.target === "aoe")) world.effects.push(createWorldEffect(world.counters, {
+	if (!(ability.target === "aoe") && !silent) world.effects.push(createWorldEffect(world.counters, {
 		type: "abilityEffect",
 		x: target.x,
 		y: target.y,
@@ -36129,7 +36164,8 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted) {
 		onPlayerFainted();
 	}
 }
-function updateCombat(world, dt) {
+function updateCombat(world, dt, opts = {}) {
+	const silent = opts.silent ?? false;
 	const { player, enemies } = world;
 	if (!player) return {
 		defeatedEnemyIds: [],
@@ -36150,7 +36186,7 @@ function updateCombat(world, dt) {
 	world.pendingHits = world.pendingHits.filter((hit) => hit.timer > 0);
 	for (const hit of landed) resolveHit(world, hit, defeatedEnemyIds, () => {
 		playerJustFainted = true;
-	});
+	}, silent);
 	if (player.fainted) return {
 		defeatedEnemyIds,
 		playerJustFainted
@@ -37907,7 +37943,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		return [];
 	}
 	updateMovement(world, dt);
-	const { defeatedEnemyIds, playerJustFainted } = updateCombat(world, dt);
+	const { defeatedEnemyIds, playerJustFainted } = updateCombat(world, dt, { silent });
 	tickAttackAnimTimers(world, dt);
 	if (!silent) updateAnimations(world, dt);
 	const kills = [];
@@ -59327,32 +59363,34 @@ async function loadPlayerState(userId, defaults) {
 		pokedex: pokedex.data ?? [],
 		autoCatchRules: autoCatchRules.data ?? []
 	};
-	definirIdsConhecidos(snap.pokemon.map((r) => r.id));
-	updatedAtEsperado = player.data.updated_at;
+	definirIdsConhecidos(userId, snap.pokemon.map((r) => r.id));
+	updatedAtEsperadoPorUsuario.set(userId, player.data.updated_at);
 	return {
 		data: snapshotToGameState(snap, defaults),
 		savedAt: new Date(player.data.updated_at).getTime()
 	};
 }
-var idsNoBanco = /* @__PURE__ */ new Set();
+var idsNoBancoPorUsuario = /* @__PURE__ */ new Map();
 /** Chamado pelo load e por quem importa um save, pra ancorar o diff. */
-function definirIdsConhecidos(ids) {
-	idsNoBanco = new Set(ids);
+function definirIdsConhecidos(userId, ids) {
+	idsNoBancoPorUsuario.set(userId, new Set(ids));
 }
-var updatedAtEsperado = null;
+var updatedAtEsperadoPorUsuario = /* @__PURE__ */ new Map();
 async function savePlayerState(userId, state) {
 	const pokemonRows = gameStateToPokemonRows(userId, state);
 	const itemRows = gameStateToItemRows(userId, state);
 	const pokedexRows = gameStateToPokedexRows(userId, state);
 	const ruleRows = gameStateToAutoCatchRuleRows(userId, state);
+	const idsNoBanco = idsNoBancoPorUsuario.get(userId) ?? /* @__PURE__ */ new Set();
 	const vivos = new Set(pokemonRows.map((r) => r.id));
 	const removidos = [...idsNoBanco].filter((id) => !vivos.has(id));
+	const updatedAtEsperado = updatedAtEsperadoPorUsuario.get(userId) ?? null;
 	let query = supabase.from("players").update(gameStateToPlayerRow(userId, state)).eq("user_id", userId);
 	if (updatedAtEsperado != null) query = query.eq("updated_at", updatedAtEsperado);
 	const { data: linhasPlayer, error: erroPlayer } = await query.select("updated_at");
 	if (erroPlayer) throw new Error(`Falha ao salvar jogador: ${erroPlayer.message}`);
 	if (!linhasPlayer?.length) throw updatedAtEsperado != null ? new ConflitoDeEscrita() : /* @__PURE__ */ new Error("Nenhuma linha atualizada ao salvar jogador — sessao pode ter expirado ou sido revogada");
-	updatedAtEsperado = linhasPlayer[0].updated_at;
+	updatedAtEsperadoPorUsuario.set(userId, linhasPlayer[0].updated_at);
 	if (removidos.length > 0) {
 		const { error } = await supabase.from("pokemon_instances").delete().eq("user_id", userId).in("id", removidos);
 		if (error) throw new Error(`Falha ao remover pokemon: ${error.message}`);
@@ -59375,7 +59413,7 @@ async function savePlayerState(userId, state) {
 		const { error } = await supabase.from("player_auto_catch_rules").insert(ruleRows);
 		if (error) throw new Error(`Falha ao salvar regras: ${error.message}`);
 	}
-	idsNoBanco = vivos;
+	idsNoBancoPorUsuario.set(userId, vivos);
 }
 //#endregion
 //#region src/lib/erroDeRede.ts
@@ -60250,14 +60288,24 @@ function aplicarPiso(store, estado, resumo, agoraMs) {
 //#endregion
 //#region server/src/entregas.ts
 async function enfileirarEntrega(cfg, entrega) {
-	await inserir(cfg, "market_deliveries", {
+	await enfileirarEntregas(cfg, [entrega]);
+}
+/**
+* Mesma coisa que `enfileirarEntrega`, mas em lote: um unico INSERT
+* multi-linha, atomico no Postgres (tudo ou nada). Usar sempre que mais de
+* uma entrega nasce do mesmo evento (ex: anexo de correio com varios itens)
+* pra nao correr risco de inserir a primeira metade e falhar no meio.
+*/
+async function enfileirarEntregas(cfg, entregas) {
+	if (entregas.length === 0) return;
+	await inserir(cfg, "market_deliveries", entregas.map((entrega) => ({
 		user_id: entrega.userId,
 		gold: entrega.gold ?? 0,
 		diamonds: entrega.diamonds ?? 0,
 		item_id: entrega.itemId ?? null,
 		quantity: entrega.quantity ?? 0,
 		motivo: entrega.motivo
-	});
+	})));
 }
 /**
 * Reivindica (de forma atomica) tudo que esta pendente pra este jogador.
@@ -60993,6 +61041,33 @@ async function meuHistorico(cfg, userId) {
 		souComprador: l.buyer_id === userId
 	}));
 }
+var MAX_TENTATIVAS_GRAVAR = 5;
+/**
+* Recarrega o estado do jogador do zero e reaplica `operacoes` por cima —
+* usado quando `gravarEstado` perde o CAS depois de `criarOrdem` ja ter
+* casado de verdade com outro jogador (ver call site). `lerSnapshot` (ao
+* contrario de `carregarEstadoParaEscrita`) nao reivindica entregas: aqui so
+* queremos uma base fresca pra reaplicar um delta ja decidido, nao repetir o
+* claim.
+*/
+async function gravarComRetry(cfg, userId, operacoes) {
+	for (let tentativa = 0; tentativa < MAX_TENTATIVAS_GRAVAR; tentativa++) {
+		const fresco = await lerSnapshot(cfg, userId);
+		const { store: storeFresco, dados: estadoFresco } = criarEstadoDoJogador(fresco.estado);
+		for (const op of operacoes) if (op.tipo === "addItem") storeFresco.addItem(op.itemId, op.qty);
+		else if (op.tipo === "removeItem") {
+			if (!storeFresco.removeItem(op.itemId, op.qty)) throw new ErroHttp(409, "outro comando em andamento — tente de novo");
+		} else if (op.tipo === "addGold") storeFresco.addGold(op.amount);
+		else if (!storeFresco.spendGold(op.amount)) throw new ErroHttp(409, "outro comando em andamento — tente de novo");
+		try {
+			await gravarEstado(cfg, userId, estadoFresco, fresco.pokeIdsNoLoad, fresco.playerUpdatedAt);
+			return;
+		} catch (erro) {
+			if (!(erro instanceof ErroHttp) || erro.status !== 409) throw erro;
+		}
+	}
+	throw new ErroHttp(409, "outro comando em andamento — tente de novo");
+}
 /**
 * Cria uma ordem e casa com o lado oposto imediatamente.
 *
@@ -61010,10 +61085,44 @@ async function criarOrdem(cfg, userId, corpo) {
 	if (!getItem(itemId)) throw new ErroHttp(400, "item desconhecido");
 	return comEstadoParaEscrita(cfg, userId, async ({ estado: dados, pokeIdsNoLoad, playerUpdatedAt }) => {
 		const { store, dados: estado } = criarEstadoDoJogador(dados);
+		const operacoes = [];
+		const storeComLog = Object.create(store);
+		storeComLog.addItem = (id, qty = 1) => {
+			operacoes.push({
+				tipo: "addItem",
+				itemId: id,
+				qty
+			});
+			store.addItem(id, qty);
+		};
+		storeComLog.removeItem = (id, qty = 1) => {
+			const ok = store.removeItem(id, qty);
+			if (ok) operacoes.push({
+				tipo: "removeItem",
+				itemId: id,
+				qty
+			});
+			return ok;
+		};
+		storeComLog.addGold = (amount) => {
+			operacoes.push({
+				tipo: "addGold",
+				amount
+			});
+			store.addGold(amount);
+		};
+		storeComLog.spendGold = (amount) => {
+			const ok = store.spendGold(amount);
+			if (ok) operacoes.push({
+				tipo: "spendGold",
+				amount
+			});
+			return ok;
+		};
 		if (side === "venda") {
 			if (estado.lockedItems[itemId]) throw new ErroHttp(409, "Este item esta travado — destrave antes de anunciar.");
-			if (!store.removeItem(itemId, quantity)) throw new ErroHttp(409, "Voce nao tem essa quantidade.");
-		} else if (!store.spendGold(unitPrice * quantity)) throw new ErroHttp(409, "Ouro insuficiente.");
+			if (!storeComLog.removeItem(itemId, quantity)) throw new ErroHttp(409, "Voce nao tem essa quantidade.");
+		} else if (!storeComLog.spendGold(unitPrice * quantity)) throw new ErroHttp(409, "Ouro insuficiente.");
 		const [ordem] = await inserir(cfg, "market_orders", {
 			user_id: userId,
 			item_id: itemId,
@@ -61023,8 +61132,17 @@ async function criarOrdem(cfg, userId, corpo) {
 			remaining: quantity,
 			gold_retido: side === "compra" ? unitPrice * quantity : 0
 		}, { retornar: true });
-		const resultado = await casar(cfg, userId, ordem, store);
-		await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt);
+		const resultado = await casar(cfg, userId, ordem, storeComLog);
+		try {
+			await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt);
+		} catch (erro) {
+			if (!(erro instanceof ErroHttp) || erro.status !== 409) throw erro;
+			if (resultado.executado === 0) {
+				await apagar(cfg, `market_orders?id=eq.${ordem.id}`);
+				throw erro;
+			}
+			await gravarComRetry(cfg, userId, operacoes);
+		}
 		return {
 			ordemId: ordem.id,
 			...resultado,
@@ -61538,11 +61656,20 @@ async function responderPedido(cfg, userId, mensagemId, aceitar) {
 *
 * DOIS PONTOS QUE NAO SAO DETALHE:
 *
-* 1. **O claim e atomico e vem PRIMEIRO.** `anexo_coletado_em=is.null` esta no
-*    FILTRO do update: dois cliques (ou dois aparelhos) simultaneos nao podem
-*    coletar o mesmo anexo duas vezes, porque o segundo PATCH nao encontra
-*    linha. Se o enfileiramento abaixo falhar, o jogador perde o anexo — erra
-*    contra ele, mas nao imprime item, que e o lado certo de errar aqui.
+* 1. **O claim e atomico e vem PRIMEIRO, via `comClaimAtomico`.**
+*    `anexo_coletado_em=is.null` esta no FILTRO do update: dois cliques (ou
+*    dois aparelhos) simultaneos nao podem coletar o mesmo anexo duas vezes,
+*    porque o segundo PATCH nao encontra linha (corrida perdida -> 409
+*    imediato, nada e enfileirado). Isso cobre a corrida entre cliques.
+*
+*    Mas corrida entre cliques nao e o unico jeito de perder o anexo (PH-21):
+*    se `enfileirarEntregas` lancar DEPOIS do claim ja ter comitado (ex:
+*    PostgREST fora do ar), o anexo ficava marcado como coletado pra sempre
+*    sem o item nunca ter entrado na fila — perda silenciosa, sem
+*    possibilidade de nova tentativa. `comClaimAtomico` fecha esse buraco:
+*    se `fn` (o bloco que enfileira) lancar, ele desfaz o claim
+*    (`anexo_coletado_em` volta a `null`) e repropaga o erro original, entao
+*    o cliente recebe um erro retryable em vez de "sucesso" com item sumido.
 *
 * 2. **O credito vai pra fila de entregas, nao pro `players` direto.** O
 *    servidor grava progresso reescrevendo o SNAPSHOT inteiro do jogador; um
@@ -61551,24 +61678,28 @@ async function responderPedido(cfg, userId, mensagemId, aceitar) {
 *    pra isso e e aplicada dentro do proximo request que grava (ver
 *    server/src/entregas.ts). O nome da tabela e historico — ela e a fila
 *    generica de "creditar isto no proximo request", nao so do Mercado.
+*
+*    `estado: 'lido'`/`read_at` NAO fazem parte do claim atomico: sao
+*    melhor-esforco, gravados so depois de `enfileirarEntregas` confirmar.
+*    Se esse ultimo PATCH falhar, os itens ja estao seguros na fila — so o
+*    estado de "lido" da mensagem fica desatualizado, inconsistencia
+*    inofensiva ja tolerada em outros pontos deste arquivo (ex: `marcarLida`).
 */
 async function coletarAnexo(cfg, userId, mensagemId) {
-	const [msg] = await atualizarRetornando(cfg, `mail_messages?id=eq.${mensagemId}&para_id=eq.${userId}&anexo_coletado_em=is.null&anexo_itens=neq.${encodeURIComponent("[]")}`, {
-		anexo_coletado_em: (/* @__PURE__ */ new Date()).toISOString(),
-		estado: "lido",
-		read_at: (/* @__PURE__ */ new Date()).toISOString()
-	});
-	if (!msg) throw new ErroHttp(409, "Nada para coletar nesta mensagem.");
-	const itens = Array.isArray(msg.anexo_itens) ? msg.anexo_itens : [];
-	for (const item of itens) {
-		if (!item?.itemId || !(item.quantity > 0)) continue;
-		await enfileirarEntrega(cfg, {
+	const itens = await comClaimAtomico(cfg, "mail_messages", `id=eq.${mensagemId}&para_id=eq.${userId}&anexo_coletado_em=is.null&anexo_itens=neq.${encodeURIComponent("[]")}`, { anexo_coletado_em: (/* @__PURE__ */ new Date()).toISOString() }, { anexo_coletado_em: null }, async (msg) => {
+		const brutos = Array.isArray(msg.anexo_itens) ? msg.anexo_itens : [];
+		await enfileirarEntregas(cfg, brutos.filter((item) => item?.itemId && item.quantity > 0).map((item) => ({
 			userId,
 			itemId: item.itemId,
 			quantity: Math.floor(item.quantity),
 			motivo: `correio:${mensagemId}`
-		});
-	}
+		})));
+		return brutos;
+	}, { mensagemCorridaPerdida: "Nada para coletar nesta mensagem." });
+	await atualizar(cfg, `mail_messages?id=eq.${mensagemId}`, {
+		estado: "lido",
+		read_at: (/* @__PURE__ */ new Date()).toISOString()
+	});
 	return {
 		ok: true,
 		itens,
