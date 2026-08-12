@@ -12,6 +12,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { ehFalhaSemResposta, mensagemDeFalhaDeRede } from '@/lib/erroDeRede'
 import { flushAgora } from '@/data/remote/gameStatePersistence'
+import { pararFlushPeriodico } from '@/data/remote/autoridade'
 
 interface AuthState {
   session: Session | null
@@ -83,6 +84,15 @@ export const useAuthStore = create<AuthState>(() => ({
   },
 
   signOut: async () => {
+    // Sem isto, uma hunt aberta deixa `timerFlush` (autoridade.ts) chamando
+    // `/sessao/flush` de 30 em 30s pra sempre — o timer e modulo, nao
+    // componente React, entao nenhum unmount da arvore do jogo o cancela.
+    // Ele sobrevive ao logout: enquanto deslogado cada tick 401 ("sem sessao"),
+    // e se o jogador logar de novo antes do proximo boot liquidar a sessao, um
+    // tick que ainda pegue o timer vivo consome o gap "offline" em silencio —
+    // o Farm Offline credita mas o modal de "Bem-vindo de volta" nao aparece
+    // (o `assentarSessaoPendente` do proximo boot ve kills=0, ja gasto aqui).
+    pararFlushPeriodico()
     // PH-17: sem isto, o cleanup reativo de useProgressoRemoto (que roda
     // depois que `user` vira null no store) so chama flushAgora() DEPOIS que
     // signOut() ja invalidou o token local — RLS filtra o UPDATE final pra 0
