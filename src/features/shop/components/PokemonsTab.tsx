@@ -15,7 +15,37 @@ import {
   GameButton, GameCard, GameCheck, GameInput, SectionLabel,
 } from '@/components/game/controls'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
+import type { ConfirmRequest } from '@/stores/confirmDialogStore'
 import { fmt, toast } from '../utils'
+import type { PokeInstance, Species } from '@/data/pokes'
+
+function venderUmPoke(
+  poke: PokeInstance,
+  species: Species,
+  { askConfirm, acao, venderLote, fmt: format }: {
+    askConfirm: (request: ConfirmRequest) => void
+    acao: ReturnType<typeof useAcaoPendente>
+    venderLote: (uids: string[], extras?: { shiny: number; locked: number }) => Promise<void>
+    fmt: typeof fmt
+  },
+) {
+  const value = pokemonSellValue(poke.level, species.baseExp, poke.rarity)
+  const key = `sell:${poke.uid}`
+  // Venda individual passa pelo MESMO endpoint em lote: antes ela
+  // chamava `sellBagPoke` local direto, sem `pedirAcao`, entao sob
+  // autoridade do servidor o POKE reaparecia no sincronismo seguinte.
+  const executar = () => void acao.run(key, () => venderLote([poke.uid]))
+  if (poke.isShiny) {
+    askConfirm({
+      title: 'Vender POKE Shiny?',
+      message: `${species.name} e Shiny. Essa acao nao pode ser desfeita. Vender por ${format.format(value)} ouro?`,
+      confirmLabel: 'Vender',
+      onConfirm: executar,
+    })
+  } else {
+    executar()
+  }
+}
 
 export function PokemonsTab() {
   const bagPokes = useGameStateStore((s) => s.bagPokes)
@@ -202,24 +232,6 @@ export function PokemonsTab() {
         const species = SPECIES[poke.speciesId]
         const value = pokemonSellValue(poke.level, species.baseExp, poke.rarity)
         const showCheckbox = !poke.locked && (shinyOnly || !poke.isShiny)
-        const key = `sell:${poke.uid}`
-
-        function venderUm() {
-          // Venda individual passa pelo MESMO endpoint em lote: antes ela
-          // chamava `sellBagPoke` local direto, sem `pedirAcao`, entao sob
-          // autoridade do servidor o POKE reaparecia no sincronismo seguinte.
-          const executar = () => void acao.run(key, () => venderLote([poke.uid]))
-          if (poke.isShiny) {
-            askConfirm({
-              title: 'Vender POKE Shiny?',
-              message: `${species.name} e Shiny. Essa acao nao pode ser desfeita. Vender por ${fmt.format(value)} ouro?`,
-              confirmLabel: 'Vender',
-              onConfirm: executar,
-            })
-          } else {
-            executar()
-          }
-        }
 
         return (
           <GameCard key={poke.uid} className="flex items-center gap-[.45em] p-[.55em]">
@@ -257,7 +269,7 @@ export function PokemonsTab() {
             <GameButton
               disabled={poke.locked || acao.pendingKey != null}
               title={poke.locked ? 'Trancado — destranque na Mochila' : undefined}
-              onClick={venderUm}
+              onClick={() => venderUmPoke(poke, species, { askConfirm, acao, venderLote, fmt })}
             >
               {poke.locked ? <><LockSimple weight="fill" /> Trancado</> : `Vender (${fmt.format(value)})`}
             </GameButton>
