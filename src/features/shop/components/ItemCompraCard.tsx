@@ -1,4 +1,4 @@
-import type { AnyItem } from '@/data/items'
+import type { GeneratedItem } from '@/data/items'
 import { ItemTooltip } from '@/components/shared/ItemTooltip'
 import { GameButton, GameCard } from '@/components/game/controls'
 import { fmt } from '../utils'
@@ -7,7 +7,7 @@ import { ItemIcon, QtyInput, AtalhosDeTransacao } from './shared'
 export function ItemCompraCard({
   item, owned, gold, qty, ocupado, isPending, onQtyChange, onExecutarAtalho, onComprar,
 }: {
-  item: AnyItem
+  item: GeneratedItem
   owned: number
   gold: number
   qty: number

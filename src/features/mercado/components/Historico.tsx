@@ -4,7 +4,7 @@ import * as mercadoRpc from '@/data/remote/mercadoRpc'
 import { type NegocioMercado } from '@/data/remote/servidor'
 import { ITEMS } from '@/data/items'
 import { SPECIES } from '@/data/pokes'
-import { fmt, STALE_MS } from '../utils'
+import { STALE_MS } from '../utils'
 import { Carregando, Moeda } from './shared'
 
 export function Historico() {
