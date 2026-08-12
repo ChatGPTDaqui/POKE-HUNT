@@ -4,6 +4,7 @@
 // no `.env` da raiz, usado por script/servidor.
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from './database.types'
+import { secureAuthStorage } from './secureAuthStorage'
 
 const url = import.meta.env.VITE_SUPABASE_URL
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -34,5 +35,8 @@ export const supabase = createClient<Database>(url, anonKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+    // Token no localStorage vai criptografado (AES) — mitigacao parcial,
+    // nao protege contra XSS ativo. Ver PH-30 em _Architecture.md.
+    storage: secureAuthStorage,
   },
 })
