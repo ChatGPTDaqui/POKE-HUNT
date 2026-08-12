@@ -56,6 +56,49 @@ export interface LinhaSessao {
   last_flush_at: string
   simulated_seconds: number | string
   closed_at: string | null
+  // Quando o flush em andamento comecou a simular/gravar; nulo fora disso. Ver
+  // `aguardarFlushEmAndamento` — migration `marca_de_flush_em_andamento`.
+  flushing_since: string | null
+}
+
+// Marca de flush mais velha que isto e tratada como lixo: a invocacao morreu no
+// meio (limite de CPU da Edge Function, deploy, queda) e nunca limpou. Sem a
+// expiracao, uma marca orfa faria TODO request seguinte esperar o tempo maximo.
+const MARCA_DE_FLUSH_EXPIRA_MS = 30000
+// Teto da espera. Estourar nao e erro: seguir em frente cai no CAS de
+// `gravarEstado` (playerUpdatedAt) — que so falha (409) se AINDA houver
+// colisao real, e nesse caso o chamador decide se tenta de novo.
+const ESPERA_MAXIMA_POR_FLUSH_MS = 2500
+const INTERVALO_DE_SONDAGEM_MS = 120
+
+const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
+
+/**
+ * Segura o request enquanto um flush do MESMO jogador ainda esta escrevendo.
+ *
+ * O CAS de `gravarEstado` (playerUpdatedAt) impede sobrescrita SILENCIOSA —
+ * mas nao impede DESCARTE: `aplicarFlush` avanca `last_flush_at` no claim,
+ * ANTES de simular, e so grava no fim. Se o CAS final perder a corrida (outro
+ * request escreveu `players` no meio da simulacao), a excecao 409 propaga e a
+ * simulacao inteira — ouro, XP, capturas de um intervalo real — e jogada fora
+ * SEM que `last_flush_at` volte atras, entao aquele tempo nao credita em
+ * flush nenhum. Esperar em vez de correr evita perder o trabalho: quem chega
+ * depois so precisa ler o resultado do flush que ja estava terminando.
+ */
+export async function aguardarFlushEmAndamento(cfg: Config, userId: string): Promise<void> {
+  const limite = Date.now() + ESPERA_MAXIMA_POR_FLUSH_MS
+  for (;;) {
+    const linhas = await selecionar<{ flushing_since: string }>(
+      cfg,
+      `game_sessions?user_id=eq.${userId}&flushing_since=not.is.null&select=flushing_since`,
+    )
+    const emAndamento = linhas.some(
+      (l) => Date.now() - new Date(l.flushing_since).getTime() < MARCA_DE_FLUSH_EXPIRA_MS,
+    )
+    if (!emAndamento) return
+    if (Date.now() >= limite) return
+    await dormir(INTERVALO_DE_SONDAGEM_MS)
+  }
 }
 
 /**
@@ -148,7 +191,11 @@ export async function comEstadoParaEscrita<T>(
   cfg: Config,
   userId: string,
   fn: (ctx: EstadoParaEscrita) => Promise<T>,
+  // So o proprio flush passa `false`: ele E o dono da marca, entao esperaria
+  // por si mesmo ate o teto.
+  opcoes: { esperarFlush?: boolean } = {},
 ): Promise<T> {
+  if (opcoes.esperarFlush !== false) await aguardarFlushEmAndamento(cfg, userId)
   const ctx = await carregarEstadoParaEscrita(cfg, userId)
   try {
     return await fn(ctx)
@@ -361,26 +408,41 @@ export async function aplicarFlush(
   // `last_flush_at=eq.<valor lido>` no filtro e o que serializa: quem escreve
   // primeiro move a ancora e o outro nao encontra linha, entao desiste antes de
   // carregar estado, reivindicar entrega ou simular qualquer coisa.
+  //
+  // `flushing_since` entra JUNTO com o claim, na mesma escrita: o claim diz
+  // "este intervalo e meu" e a marca diz "e eu ainda estou escrevendo". Sem
+  // ela, um GET /estado (pagina recarregando) ou um /acao que caia durante a
+  // simulacao lia o estado no meio dela e regravava depois, e o CAS de
+  // `gravarEstado` (playerUpdatedAt) so detecta a colisao — nao evita que ELE
+  // seja quem perde e joga a simulacao fora. `aguardarFlushEmAndamento` (em
+  // `comEstadoParaEscrita`) e quem usa esta marca pra esperar em vez de correr.
   const [reivindicada] = await atualizarRetornando<LinhaSessao>(
     cfg,
     `game_sessions?id=eq.${sessao.id}&closed_at=is.null`
     + `&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}`,
-    { last_flush_at: new Date(agora).toISOString() },
+    { last_flush_at: new Date(agora).toISOString(), flushing_since: new Date(agora).toISOString() },
   )
   if (!reivindicada) return FLUSH_OCUPADO
 
-  // Toda saida daqui pra baixo que NAO grave (POKE sumiu, hunt sumiu, erro de
-  // simulacao) tem que devolver as entregas reivindicadas — senao o ouro de uma
-  // venda no Mercado some porque o jogador tirou o POKE da equipe.
-  return comEstadoParaEscrita(cfg, userId, async (ctx) => {
-    const resultado = await simularSessao(
-      cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, ctx.playerUpdatedAt, { agora, segundos, truncado },
-    )
-    // `null` = sessao insimulavel; sai SEM gravar, entao as entregas voltam pra
-    // fila (o `catch` do embrulho so cobre excecao, e aqui nao ha excecao).
-    if (!resultado) await devolverEntregas(cfg, ctx.entregas)
-    return resultado
-  })
+  try {
+    // Toda saida daqui pra baixo que NAO grave (POKE sumiu, hunt sumiu, erro de
+    // simulacao) tem que devolver as entregas reivindicadas — senao o ouro de uma
+    // venda no Mercado some porque o jogador tirou o POKE da equipe.
+    return await comEstadoParaEscrita(cfg, userId, async (ctx) => {
+      const resultado = await simularSessao(
+        cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, ctx.playerUpdatedAt, { agora, segundos, truncado },
+      )
+      // `null` = sessao insimulavel; sai SEM gravar, entao as entregas voltam pra
+      // fila (o `catch` do embrulho so cobre excecao, e aqui nao ha excecao).
+      if (!resultado) await devolverEntregas(cfg, ctx.entregas)
+      return resultado
+    }, { esperarFlush: false })
+  } finally {
+    // No `finally` porque uma marca que sobrevive a um erro (inclusive o 409
+    // do proprio CAS de gravarEstado, se AINDA colidir depois da espera) faria
+    // todo request seguinte esperar o teto ate ela expirar sozinha.
+    await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { flushing_since: null })
+  }
 }
 
 async function simularSessao(

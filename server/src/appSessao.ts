@@ -76,8 +76,14 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
     // Le E LIQUIDA as entregas pendentes do Mercado (uso interno, ver
     // entregas.ts — nenhuma RPC client-facing escreve mais na fila, mas o
     // que sobrou de antes ainda precisa ser assentado).
-    return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt }) => {
-      await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt)
+    //
+    // So grava quando ha o que gravar (entrega recem-carimbada). Sem isso,
+    // TODO carregamento de pagina fazia uma escrita inutil (regravava o
+    // snapshot identico ao que acabou de ler) que so aumentava a chance de
+    // colidir com um flush em andamento — metade do que causava progresso
+    // regredindo em recarga perto do tique de 30s.
+    return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas }) => {
+      if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt)
       return json({ estado })
     })
   }

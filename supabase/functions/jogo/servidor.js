@@ -45,14 +45,14 @@ function cabecalhos(cfg, extras = {}) {
 }
 var ESPERA_ENTRE_TENTATIVAS_MS = [200, 700];
 var TIMEOUT_MS = 1e4;
-var dormir = (ms) => new Promise((r) => setTimeout(r, ms));
+var dormir$1 = (ms) => new Promise((r) => setTimeout(r, ms));
 function ehFalhaTransitoria(status) {
 	return status === 408 || status === 425 || status === 429 || status >= 500;
 }
 async function buscarComRetry(cfg, caminho, init) {
 	let ultimo = null;
 	for (let tentativa = 0; tentativa <= ESPERA_ENTRE_TENTATIVAS_MS.length; tentativa++) {
-		if (tentativa > 0) await dormir(ESPERA_ENTRE_TENTATIVAS_MS[tentativa - 1]);
+		if (tentativa > 0) await dormir$1(ESPERA_ENTRE_TENTATIVAS_MS[tentativa - 1]);
 		try {
 			const resposta = await fetch(`${cfg.supabaseUrl}/rest/v1/${caminho}`, {
 				...init,
@@ -38428,6 +38428,30 @@ function aplicarEntregasNoEstado(estado, entregas) {
 //#region server/src/progresso.ts
 var CONQUISTA_LANCE = "boss_lance";
 var MAX_SEGUNDOS_POR_FLUSH = 21600;
+var MARCA_DE_FLUSH_EXPIRA_MS = 3e4;
+var ESPERA_MAXIMA_POR_FLUSH_MS = 2500;
+var INTERVALO_DE_SONDAGEM_MS = 120;
+var dormir = (ms) => new Promise((r) => setTimeout(r, ms));
+/**
+* Segura o request enquanto um flush do MESMO jogador ainda esta escrevendo.
+*
+* O CAS de `gravarEstado` (playerUpdatedAt) impede sobrescrita SILENCIOSA —
+* mas nao impede DESCARTE: `aplicarFlush` avanca `last_flush_at` no claim,
+* ANTES de simular, e so grava no fim. Se o CAS final perder a corrida (outro
+* request escreveu `players` no meio da simulacao), a excecao 409 propaga e a
+* simulacao inteira — ouro, XP, capturas de um intervalo real — e jogada fora
+* SEM que `last_flush_at` volte atras, entao aquele tempo nao credita em
+* flush nenhum. Esperar em vez de correr evita perder o trabalho: quem chega
+* depois so precisa ler o resultado do flush que ja estava terminando.
+*/
+async function aguardarFlushEmAndamento(cfg, userId) {
+	const limite = Date.now() + ESPERA_MAXIMA_POR_FLUSH_MS;
+	for (;;) {
+		if (!(await selecionar(cfg, `game_sessions?user_id=eq.${userId}&flushing_since=not.is.null&select=flushing_since`)).some((l) => Date.now() - new Date(l.flushing_since).getTime() < MARCA_DE_FLUSH_EXPIRA_MS)) return;
+		if (Date.now() >= limite) return;
+		await dormir(INTERVALO_DE_SONDAGEM_MS);
+	}
+}
 async function lerSnapshot(cfg, userId) {
 	const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
 		selecionar(cfg, `players?user_id=eq.${userId}&select=*`),
@@ -38479,7 +38503,8 @@ async function carregarEstadoParaEscrita(cfg, userId) {
 * embrulho, esquecer o tratamento deixa de ser possivel: quem carrega, carrega
 * por aqui.
 */
-async function comEstadoParaEscrita(cfg, userId, fn) {
+async function comEstadoParaEscrita(cfg, userId, fn, opcoes = {}) {
+	if (opcoes.esperarFlush !== false) await aguardarFlushEmAndamento(cfg, userId);
 	const ctx = await carregarEstadoParaEscrita(cfg, userId);
 	try {
 		return await fn(ctx);
@@ -38557,17 +38582,24 @@ async function aplicarFlush(cfg, userId, sessao) {
 	const bruto = (agora - new Date(sessao.last_flush_at).getTime()) / 1e3;
 	const segundos = Math.max(0, Math.min(bruto, MAX_SEGUNDOS_POR_FLUSH));
 	const truncado = bruto > MAX_SEGUNDOS_POR_FLUSH;
-	const [reivindicada] = await atualizarRetornando(cfg, `game_sessions?id=eq.${sessao.id}&closed_at=is.null&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}`, { last_flush_at: new Date(agora).toISOString() });
-	if (!reivindicada) return FLUSH_OCUPADO;
-	return comEstadoParaEscrita(cfg, userId, async (ctx) => {
-		const resultado = await simularSessao(cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, ctx.playerUpdatedAt, {
-			agora,
-			segundos,
-			truncado
-		});
-		if (!resultado) await devolverEntregas(cfg, ctx.entregas);
-		return resultado;
+	const [reivindicada] = await atualizarRetornando(cfg, `game_sessions?id=eq.${sessao.id}&closed_at=is.null&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}`, {
+		last_flush_at: new Date(agora).toISOString(),
+		flushing_since: new Date(agora).toISOString()
 	});
+	if (!reivindicada) return FLUSH_OCUPADO;
+	try {
+		return await comEstadoParaEscrita(cfg, userId, async (ctx) => {
+			const resultado = await simularSessao(cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, ctx.playerUpdatedAt, {
+				agora,
+				segundos,
+				truncado
+			});
+			if (!resultado) await devolverEntregas(cfg, ctx.entregas);
+			return resultado;
+		}, { esperarFlush: false });
+	} finally {
+		await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { flushing_since: null });
+	}
 }
 async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUpdatedAt, janela) {
 	const { agora, segundos, truncado } = janela;
@@ -38667,8 +38699,8 @@ async function rotear(cfg, req, url) {
 	if (url.pathname === "/sessao/abrir" && req.method === "POST") return abrirSessao(cfg, jogador.id, req);
 	if (url.pathname === "/sessao/flush" && req.method === "POST") return flush(cfg, jogador.id);
 	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id);
-	if (url.pathname === "/estado" && req.method === "GET") return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt }) => {
-		await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt);
+	if (url.pathname === "/estado" && req.method === "GET") return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas }) => {
+		if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt);
 		return json({ estado });
 	});
 	return json({ erro: "rota desconhecida" }, 404);
