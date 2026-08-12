@@ -21,34 +21,39 @@ export function ItemVendaCard({
   onVenderTudo: () => void
 }) {
   return (
-    <GameCard className="flex flex-wrap items-center gap-[.45em] p-[.55em]">
-      <ItemTooltip item={item}>
-        <span className="cursor-help">
-          <ItemIcon itemId={itemId} name={item.name} />
-        </span>
-      </ItemTooltip>
-      <div className="min-w-[6em] flex-1">
-        <div className="font-medium">
-          {item.name} <span className="text-n400">x{owned}</span>
+    // Mesma logica de 2 linhas do ItemCompraCard: info (icone+nome+trava) na
+    // linha de cima, controles de transacao na de baixo — evita 7 elementos
+    // competindo pelo mesmo flex-wrap.
+    <GameCard className="flex flex-col gap-[.4em] p-[.55em]">
+      <div className="flex items-center gap-[.45em]">
+        <ItemTooltip item={item}>
+          <span className="cursor-help">
+            <ItemIcon itemId={itemId} name={item.name} />
+          </span>
+        </ItemTooltip>
+        <div className="min-w-[6em] flex-1">
+          <div className="font-medium">
+            {item.name} <span className="text-n400">x{owned}</span>
+          </div>
+          <div className="text-[.78em] text-n500">
+            Venda: <span className="text-gold">{fmt.format(item.sellPrice)} ouro</span>
+          </div>
         </div>
-        <div className="text-[.78em] text-n500">
-          Venda: <span className="text-gold">{fmt.format(item.sellPrice)} ouro</span>
-        </div>
+        <GameIconButton
+          variant="ghost"
+          title={locked ? 'Destrancar' : 'Trancar'}
+          aria-label={locked ? 'Destrancar' : 'Trancar'}
+          className={locked ? 'text-gold' : undefined}
+          onClick={onToggleLock}
+        >
+          {locked ? <LockSimple weight="fill" /> : <LockSimpleOpen />}
+        </GameIconButton>
       </div>
-      <GameIconButton
-        variant="ghost"
-        title={locked ? 'Destrancar' : 'Trancar'}
-        aria-label={locked ? 'Destrancar' : 'Trancar'}
-        className={locked ? 'text-gold' : undefined}
-        onClick={onToggleLock}
-      >
-        {locked ? <LockSimple weight="fill" /> : <LockSimpleOpen />}
-      </GameIconButton>
       {!locked && (
-        <>
+        <div className="flex flex-wrap items-center gap-[.45em]">
           <QtyInput value={qty} max={owned} onChange={onQtyChange} />
           <AtalhosDeTransacao max={owned} verbo="Vender" ocupado={ocupado} onExecutar={onExecutarAtalho} />
-          <span className="w-full text-[.78em] text-n400 sm:w-auto">
+          <span className="w-full text-[.78em] text-n400 sm:ml-auto sm:w-auto">
             Recebe: <b className="text-gold">{fmt.format(item.sellPrice * qty)}</b>
           </span>
           <GameButton disabled={ocupado} onClick={onVender}>
@@ -65,7 +70,7 @@ export function ItemVendaCard({
           >
             Vender tudo ({fmt.format(item.sellPrice * owned)})
           </GameButton>
-        </>
+        </div>
       )}
     </GameCard>
   )

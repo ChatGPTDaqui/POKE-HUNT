@@ -41,7 +41,15 @@ export function QtyInput({
         onChange={(e) => onChange(limita(Number(e.target.value) || 1))}
         className="w-[4.2em] text-center"
       />
-      <GameButton variant="ghost" className="px-[.4em] text-[.75em]" onClick={() => onChange(limita(max))}>
+      {/* min-h em px (nao em): padding do GameButton e em `em`, entao com
+          text-[.75em] ele encolhia pra ~22px de alvo de toque — abaixo do
+          minimo de 44px (WCAG 2.5.5). Fixo em px pra nao depender do
+          font-size do botao. */}
+      <GameButton
+        variant="ghost"
+        className="min-h-[44px] px-[.4em] text-[.75em]"
+        onClick={() => onChange(limita(max))}
+      >
         Max
       </GameButton>
     </span>
@@ -70,7 +78,7 @@ export function AtalhosDeTransacao({
         <GameButton
           key={n}
           variant="accent"
-          className="px-[.45em] text-[.75em]"
+          className="min-h-[44px] px-[.45em] text-[.75em]"
           disabled={ocupado || max < n}
           title={max < n ? `Só dá para ${verbo.toLowerCase()} ${max} agora` : `${verbo} ${n} agora`}
           onClick={() => onExecutar(n)}
