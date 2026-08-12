@@ -38531,8 +38531,10 @@ async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAtE
 	if (removerDex.length) await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${removerDex.join(",")})`);
 	if (linhasDex.length) await inserir(cfg, "player_pokedex", linhasDex, { upsert: "user_id,species_id" });
 	const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado);
-	await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}`);
-	if (linhasAuto.length) await inserir(cfg, "player_auto_catch_rules", linhasAuto);
+	const especiesAgora = new Set(linhasAuto.map((l) => l.species_id));
+	const removerAuto = (await selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !especiesAgora.has(id));
+	if (removerAuto.length) await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${removerAuto.join(",")})`);
+	if (linhasAuto.length) await inserir(cfg, "player_auto_catch_rules", linhasAuto, { upsert: "user_id,species_id" });
 }
 /**
 * Outro request do mesmo jogador ja esta creditando este intervalo.

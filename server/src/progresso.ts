@@ -262,12 +262,29 @@ export async function gravarEstado(
   // na propria linha, esta e tabela). Resultado: a regra "capturar Dratini com
   // Ultra Ball" era aceita pela acao `configurarAuto`, entrava na simulacao do
   // request corrente e desaparecia no proximo load — e sobrevivia a um reset.
-  // Reescrita por inteiro (apaga tudo, insere o que tem) porque a lista e pequena
-  // e nao tem chave estavel do lado do jogo: a identidade de uma regra e o par
-  // (especie, bola), entao diff por linha nao compraria nada.
+  //
+  // Upsert + diff de remocao (mesmo padrao das tres tabelas acima), e NAO
+  // apaga-tudo-e-insere como era antes. A versao antiga dava 502 ("falha ao
+  // falar com o banco") em toda concorrencia: a tabela tem UNIQUE
+  // (user_id, species_id), e dois requests do mesmo jogador intercalando
+  // DELETE/DELETE/INSERT/INSERT faziam o segundo INSERT violar a constraint.
+  // Medido: com 8 regras configuradas, 33 de 48 GET /estado concorrentes
+  // voltaram 502 (erro real: 'duplicate key value violates unique constraint
+  // "player_auto_catch_rules_user_id_species_id_key"'). A identidade da regra
+  // e o proprio par (especie, bola) — a chave estavel que faltava era
+  // exatamente a constraint.
   const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado)
-  await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}`)
-  if (linhasAuto.length) await inserir(cfg, 'player_auto_catch_rules', linhasAuto)
+  const especiesAgora = new Set(linhasAuto.map((l) => l.species_id))
+  const autoNoBanco = await selecionarTudo<{ species_id: string }>(
+    cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`,
+  )
+  const removerAuto = autoNoBanco.map((l) => l.species_id).filter((id) => !especiesAgora.has(id))
+  if (removerAuto.length) {
+    await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${removerAuto.join(',')})`)
+  }
+  if (linhasAuto.length) {
+    await inserir(cfg, 'player_auto_catch_rules', linhasAuto, { upsert: 'user_id,species_id' })
+  }
 }
 
 export interface ResultadoFlush {
