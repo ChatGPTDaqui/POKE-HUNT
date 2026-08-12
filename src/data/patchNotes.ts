@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '5.8',
+    date: '2026-08-09',
+    title: 'Progresso voltando atras e "falha ao falar com o banco" ao recarregar',
+    highlights: [
+      'PROGRESSO REGREDINDO — CORRIGIDO (critico). Ao recarregar a pagina, ou ao clicar em qualquer coisa (Loja, mochila, equipe) no momento em que o jogo estava salvando a caçada, o pedido novo gravava um retrato ANTERIOR ao salvamento por cima dele. O tempo caçado ja tinha sido descontado do relogio, entao aquele ouro, XP e capturas nao voltavam em salvamento nenhum. Medido: com 10 minutos de caçada pendente, 3 de cada 6 recarregamentos e 5 de cada 6 cliques apagavam o periodo inteiro — mais de 10.000 de ouro perdidos por lote de teste. Agora o pedido novo espera o salvamento terminar antes de ler seu progresso.',
+      'AVISO "FALHA AO FALAR COM O BANCO" NO CTRL+SHIFT+R — CORRIGIDO. Quem tinha regras de captura automatica configuradas via esse erro ao recarregar: as regras eram apagadas e reinseridas a cada gravacao, e dois pedidos ao mesmo tempo colidiam. Medido: 33 de 48 carregamentos simultaneos falhavam. Agora elas sao atualizadas em vez de recriadas, e o erro sumiu (48 de 48 sem falha).',
+      'Abrir o jogo deixou de regravar seu progresso a toa: a gravacao no carregamento agora so acontece quando ha algo novo pra registrar (uma entrega do Mercado ou um anexo do Correio). Era essa gravacao inutil que desfazia o salvamento da caçada.',
+      'O relatorio "Bem-vindo de volta" e a entrega de itens do Mercado/Correio continuam funcionando igual — foram verificados junto.',
+    ],
+  },
+  {
     version: '5.7',
     date: '2026-08-09',
     title: 'Bloqueador de anuncios fazia o jogo apresentar sua conta como nova',
