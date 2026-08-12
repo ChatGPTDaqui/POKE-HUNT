@@ -4,16 +4,17 @@
 // mesma caixa que o resto, com dois botoes em vez de nenhum. Assim so existe um
 // lugar pra olhar quando alguem interage com voce — e o contador de nao lidas
 // cobre as duas coisas de uma vez.
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, Envelope, Gift, UserPlus, X } from '@phosphor-icons/react'
-import { servidor, servidorAtivo, ErroServidor, type MensagemCorreio } from '@/data/remote/servidor'
+import { Check, Gift, UserPlus, X } from '@phosphor-icons/react'
+import { ErroServidor, type MensagemCorreio } from '@/data/remote/servidor'
+import * as correioRpc from '@/data/remote/correioRealtime'
+import { supabase } from '@/lib/supabase'
 import { useToastStore } from '@/stores/toastStore'
-import { recarregarEstado } from '@/data/remote/autoridade'
 import { getItem } from '@/data/items'
 import { itemIconUrl } from '@/data/sprites'
 import {
-  ComingSoon, GameButton, GameCard, GameInput, SectionLabel,
+  GameButton, GameCard, GameInput, SectionLabel,
 } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 
@@ -35,13 +36,24 @@ export function CorreioMenu() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['correio'],
-    queryFn: () => servidor.correio(),
+    queryFn: () => correioRpc.correio(),
     staleTime: STALE_MS,
-    enabled: servidorAtivo(),
   })
 
+  // Realtime substitui o poll de 15s: qualquer INSERT/UPDATE nas MINHAS
+  // mensagens (pedido novo, resposta, mensagem de sistema) invalida a query.
+  useEffect(() => {
+    let parar: (() => void) | null = null
+    void supabase.auth.getSession().then(({ data: sessao }) => {
+      const userId = sessao.session?.user.id
+      if (!userId) return
+      parar = correioRpc.assinarCorreioAoVivo(userId, () => { void qc.invalidateQueries({ queryKey: ['correio'] }) })
+    })
+    return () => parar?.()
+  }, [qc])
+
   const adicionar = useMutation({
-    mutationFn: (n: string) => servidor.pedirAmizade(n),
+    mutationFn: (n: string) => correioRpc.pedirAmizade(n),
     onSuccess: (r) => {
       toast(r.mensagem)
       setNick('')
@@ -51,7 +63,7 @@ export function CorreioMenu() {
   })
 
   const responder = useMutation({
-    mutationFn: ({ id, aceitar }: { id: string; aceitar: boolean }) => servidor.responderPedido(id, aceitar),
+    mutationFn: ({ id, aceitar }: { id: string; aceitar: boolean }) => correioRpc.responderPedido(id, aceitar),
     onSuccess: (r) => {
       toast(r.mensagem)
       void qc.invalidateQueries({ queryKey: ['correio'] })
@@ -60,37 +72,21 @@ export function CorreioMenu() {
   })
 
   const marcarLida = useMutation({
-    mutationFn: (id: string) => servidor.marcarLida(id),
+    mutationFn: (id: string) => correioRpc.marcarLida(id),
     onSuccess: () => { void qc.invalidateQueries({ queryKey: ['correio'] }) },
   })
 
-  // O servidor NAO credita o item na resposta desta chamada: ele enfileira a
-  // entrega, que e aplicada dentro do proximo request que grava estado (ver
-  // server/src/social.ts#coletarAnexo). `recarregarEstado()` e esse request.
-  //
-  // NAO pode ser `liquidar()`: ela chama /sessao/flush, que responde 409 sem
-  // hunt aberta — e coletar no Hospital e exatamente esse caso. Foi o bug da
-  // primeira versao, pego ao vivo: a mensagem virava "Recebido" e o item so
-  // aparecia no inventario depois que o jogador entrasse numa hunt.
+  // A RPC ja credita o item na mesma transacao (sem fila de entrega — ver
+  // migracao #10) e `correioRpc.coletarAnexo` ja faz o refetch cirurgico do
+  // item no client. So falta atualizar a caixa de entrada.
   const coletar = useMutation({
-    mutationFn: (id: string) => servidor.coletarAnexo(id),
-    onSuccess: async (r) => {
-      await recarregarEstado()
+    mutationFn: (id: string) => correioRpc.coletarAnexo(id),
+    onSuccess: (r) => {
       toast(r.mensagem)
       void qc.invalidateQueries({ queryKey: ['correio'] })
     },
     onError: (e) => toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel coletar.', 'error'),
   })
-
-  if (!servidorAtivo()) {
-    return (
-      <ComingSoon icon={<Envelope />} title="O Correio exige o servidor">
-        Amigos e mensagens vivem no servidor de autoridade — o navegador só enxerga o próprio save e não
-        consegue nem descobrir que outro treinador existe. Rodando sem <code>VITE_SERVIDOR_URL</code> não
-        há caixa de entrada.
-      </ComingSoon>
-    )
-  }
 
   return (
     <div className="flex flex-col gap-[.55em]">

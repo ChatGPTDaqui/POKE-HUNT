@@ -15,7 +15,11 @@ import { aplicarPiso, NENHUM_PISO, type ResultadoPiso } from './farmOffline.js'
 import {
   reivindicarEntregas, aplicarEntregasNoEstado, devolverEntregas, type LinhaEntrega,
 } from './entregas.js'
-import { CONQUISTA_LANCE } from './ranking.js'
+
+// Chave usada em `hall_da_fama.conquista` pra "derrotou o Campeao Lance".
+// Vivia em ranking.ts (rota de leitura, apagada na migracao RPC-everything) —
+// so a constante sobrevive, e so aqui, unico lugar que ainda escreve nela.
+const CONQUISTA_LANCE = 'boss_lance'
 
 // Teto de quanto tempo um unico flush pode creditar. NAO e uma regra de
 // balanceamento — e o limite que impede um relogio maluco (ou uma sessao

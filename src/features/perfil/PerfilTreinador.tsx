@@ -12,7 +12,7 @@ import { useQuery } from '@tanstack/react-query'
 import { User, Coins, Diamond, Trophy, Sword, Clock, BookOpen, Sparkle, TShirt, Star } from '@phosphor-icons/react'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useUiStore } from '@/stores/uiStore'
-import { servidor, servidorAtivo } from '@/data/remote/servidor'
+import { perfil } from '@/data/remote/rankingRpc'
 import { trainerExpProgress } from '@/engine/systems/progressionSystem'
 import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
@@ -56,8 +56,8 @@ export function PerfilTreinador() {
   // interessam a ninguem enquanto ele esta fechado.
   const { data: remoto } = useQuery({
     queryKey: ['perfil'],
-    queryFn: () => servidor.perfil(),
-    enabled: aberto && servidorAtivo(),
+    queryFn: () => perfil(),
+    enabled: aberto,
     staleTime: 60000,
   })
 

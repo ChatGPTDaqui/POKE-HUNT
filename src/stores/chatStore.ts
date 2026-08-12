@@ -3,20 +3,15 @@
 // Store separada do `toastStore` de proposito. O toastStore e o log LOCAL do
 // jogo (combate, compra, aviso de sistema): nasce e morre na aba, nunca sai do
 // aparelho. Isto aqui e rede: tem autor, tem servidor, tem falha de conexao e
-// tem polling. Misturar as duas coisas na mesma store faria toda mensagem de
-// combate parecer candidata a ser enviada pra outra pessoa.
+// chega ao vivo por Realtime. Misturar as duas coisas na mesma store faria
+// toda mensagem de combate parecer candidata a ser enviada pra outra pessoa.
 //
 // Pedido explicito do usuario: "isole o Chat Mundo para que ele receba apenas
 // mensagens ao vivo enviadas por outros jogadores". Os avisos do jogo que antes
 // caiam na aba "Mundo" foram pra aba "Sistema" (ver toastStore#CHANNEL_TO_TAB).
 import { create } from 'zustand'
-import { servidor, servidorAtivo, ErroServidor, type AnexoChat, type MensagemChat } from '@/data/remote/servidor'
-
-// De quanto em quanto tempo busca mensagem nova. Chat de jogo idle nao precisa
-// de tempo real ao milissegundo, e cada leitura e um request autenticado — 6s
-// da a sensacao de "ao vivo" sem transformar o chat no caminho mais caro do
-// jogo.
-const INTERVALO_POLL_MS = 6000
+import { ErroServidor, type AnexoChat, type MensagemChat } from '@/data/remote/servidor'
+import { lerChat, enviarChat, assinarChatAoVivo } from '@/data/remote/chatRealtime'
 
 interface ChatState {
   mensagens: MensagemChat[]
@@ -30,9 +25,10 @@ interface ChatState {
   anexos: AnexoChat[]
   setRascunho: (texto: string) => void
   anexar: (anexo: AnexoChat, rotulo: string) => void
-  carregar: () => Promise<void>
   enviar: () => Promise<void>
-  iniciarPolling: () => () => void
+  /** Carrega o historico e assina o canal ao vivo. Devolve a funcao de parar —
+   *  quem liga e o componente do chat, que ja sabe quando some da tela. */
+  iniciarAoVivo: () => () => void
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -49,34 +45,27 @@ export const useChatStore = create<ChatState>((set, get) => ({
       // Mesmo alvo duas vezes nao vira dois anexos: o jogador que clica de novo
       // quer confirmar, nao duplicar.
       if (s.anexos.some((a) => a.kind === anexo.kind && a.id === anexo.id)) return s
-      if (s.anexos.length >= 3) return s // o servidor tambem corta em 3
+      if (s.anexos.length >= 3) return s // o banco tambem corta em 3
       const separador = s.rascunho && !s.rascunho.endsWith(' ') ? ' ' : ''
       return { anexos: [...s.anexos, anexo], rascunho: `${s.rascunho}${separador}${rotulo} ` }
     })
   },
 
-  carregar: async () => {
-    if (!servidorAtivo()) return
-    try {
-      const { mensagens } = await servidor.lerChat()
-      set({ mensagens, erro: null })
-    } catch (erro) {
-      set({ erro: erro instanceof ErroServidor ? erro.message : 'chat indisponivel' })
-    }
-  },
-
   enviar: async () => {
     const { rascunho, anexos } = get()
     const corpo = rascunho.trim()
-    if (!corpo || !servidorAtivo()) return
+    if (!corpo) return
     set({ carregando: true })
     try {
       // So vao os anexos cujo rotulo AINDA esta no texto. Sem isto, apagar o
       // "[Charmander Lv12]" do input e mandar outra frase enviaria o POKE
       // colado numa mensagem que nao fala dele.
       const vivos = anexos.filter((a) => corpo.includes(a.nome))
-      const { mensagens } = await servidor.enviarChat(corpo, vivos)
-      set({ mensagens, rascunho: '', anexos: [], erro: null })
+      await enviarChat(corpo, vivos)
+      // Sem `set({mensagens: [...]})` aqui: o proprio remetente tambem esta
+      // assinado no canal ao vivo, a mensagem volta por ele — mesmo caminho
+      // pra "eu mandei" e "outro jogador mandou", sem duplicar logica.
+      set({ rascunho: '', anexos: [], erro: null })
     } catch (erro) {
       set({ erro: erro instanceof ErroServidor ? erro.message : 'nao foi possivel enviar' })
     } finally {
@@ -84,13 +73,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  // Devolve a funcao de parada — quem liga e o componente do chat, que ja sabe
-  // quando some da tela.
-  iniciarPolling: () => {
-    if (!servidorAtivo()) return () => {}
-    void get().carregar()
-    const id = setInterval(() => { void get().carregar() }, INTERVALO_POLL_MS)
-    return () => clearInterval(id)
+  iniciarAoVivo: () => {
+    let vivo = true
+    void lerChat().then(({ mensagens }) => { if (vivo) set({ mensagens, erro: null }) })
+      .catch((erro) => { if (vivo) set({ erro: erro instanceof ErroServidor ? erro.message : 'chat indisponivel' }) })
+
+    const pararCanal = assinarChatAoVivo((mensagem) => {
+      set((s) => (s.mensagens.some((m) => m.id === mensagem.id) ? s : { mensagens: [...s.mensagens, mensagem] }))
+    })
+    return () => { vivo = false; pararCanal() }
   },
 }))
 

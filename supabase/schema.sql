@@ -388,7 +388,7 @@ create table players (
   auto_toggles jsonb not null default '{"autoPot":true,"autoCatch":true,"autoRevive":true}',
   auto_pot_rules jsonb not null default '[{"hpPercent":40,"itemId":"potion"}]',
   auto_catch_config jsonb not null default '{"ballId":"poke_ball","catchShinyEnabled":true,"shinyBallId":"great_ball"}',
-  perf_stats jsonb not null default '{"gold":0,"xp":0,"mobs":0,"shinys":0,"since":0}',
+  perf_stats jsonb not null default '{"gold":0,"xp":0,"mobs":0,"shinys":0,"captures":0,"items":0,"since":0}',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

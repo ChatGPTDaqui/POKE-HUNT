@@ -227,7 +227,7 @@ export async function atualizarRetornando<T>(cfg: Config, caminho: string, patch
  *
  * Ver PH-1 (epic) para o raciocinio completo de por que esses 5 ficam fora.
  */
-export async function comClaimAtomico<L extends Record<string, unknown>, T>(
+export async function comClaimAtomico<L extends object, T>(
   cfg: Config,
   tabela: string,
   filtroClaim: string,
@@ -244,7 +244,8 @@ export async function comClaimAtomico<L extends Record<string, unknown>, T>(
   try {
     return await fn(linha)
   } catch (erro) {
-    await atualizarRetornando(cfg, `${tabela}?${idCampo}=eq.${linha[idCampo]}`, patchDesfazer)
+    const idValor = (linha as Record<string, unknown>)[idCampo]
+    await atualizarRetornando(cfg, `${tabela}?${idCampo}=eq.${idValor}`, patchDesfazer)
     throw erro
   }
 }

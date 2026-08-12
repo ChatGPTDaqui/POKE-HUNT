@@ -1,0 +1,238 @@
+// Mercado sob RPC-everything: leituras via views/RLS publica (dev.mercado_*),
+// escritas via as 8 RPCs `dev.*` (ver _Architecture.md, migracao #15).
+//
+// Mesmos tipos de retorno de `servidor.ts` (a tela ja espera esse formato) —
+// so troca de onde o dado vem. RPC nunca devolve `estado` inteiro: cada
+// escrita carrega o refetch cirurgico do que ela pode ter mudado (mesma
+// decisao tomada com o usuario pro modulo de acoes, ver acoesRpc.ts).
+import { supabase } from '@/lib/supabase'
+import { ErroServidor } from './servidor'
+import { useGameStateStore } from '@/stores/gameStateStore'
+import { rowToPoke } from './playerMapper'
+import type {
+  AnuncioMercado, NegocioMercado, NivelDePreco, OfertaMercado, OfertaRecebida, OrdemMercado, ResumoItemMercado,
+} from './servidor'
+
+// Cast local: essas tabelas/views vivem so no schema `dev`, o gerador de tipos
+// (`database.types.ts`) so conhece `public` — mesma razao documentada em
+// `acoesRpc.ts`. Regenerar contra `dev` e retrabalho duplicado enquanto o
+// schema ainda e temporario (promocao pra `public` e decisao separada).
+type Linha = Record<string, any>
+const db = supabase as unknown as {
+  from: (tabela: string) => any
+  rpc: (nome: string, params?: Record<string, unknown>) => Promise<{ data: any; error: { message: string } | null }>
+}
+
+function estourarSeErro(error: { message: string } | null): void {
+  if (error) throw new ErroServidor(409, error.message)
+}
+
+async function userIdAtual(): Promise<string> {
+  const { data } = await supabase.auth.getSession()
+  const id = data.session?.user.id
+  if (!id) throw new ErroServidor(401, 'sem sessao — faca login de novo')
+  return id
+}
+
+// --- refetch cirurgico pos-escrita -------------------------------------------
+
+async function refetchCarteira(): Promise<void> {
+  const uid = await userIdAtual()
+  const { data } = await db.from('players').select('gold, diamonds').eq('user_id', uid).maybeSingle()
+  if (!data) return
+  useGameStateStore.setState((s) => ({ wallet: { ...s.wallet, gold: data.gold, diamonds: data.diamonds } }))
+}
+
+/** Ordens de item so mexem em ouro + mochila, nunca em POKE. */
+async function refetchAposOrdem(itemId: string): Promise<void> {
+  const uid = await userIdAtual()
+  const [{ data: player }, { data: item }] = await Promise.all([
+    db.from('players').select('gold, diamonds').eq('user_id', uid).maybeSingle(),
+    db.from('player_items').select('quantity').eq('user_id', uid).eq('item_id', itemId).maybeSingle(),
+  ])
+  useGameStateStore.setState((s) => ({
+    wallet: player ? { ...s.wallet, gold: player.gold, diamonds: player.diamonds } : s.wallet,
+    items: { ...s.items, [itemId]: item?.quantity ?? 0 },
+  }))
+}
+
+/** Acoes de anuncio de POKE so mexem em ouro/diamante + mochila (o POKE entra
+ *  ou sai dela ao ir/voltar do Mercado — nunca toca a equipe). */
+async function refetchAposAnuncio(pokeUid?: string): Promise<void> {
+  await refetchCarteira()
+  if (!pokeUid) return
+  const { data } = await db.from('pokemon_instances').select('*').eq('id', pokeUid).maybeSingle()
+  useGameStateStore.setState((s) => {
+    if (!data || data.location !== 'bag') return { bagPokes: s.bagPokes.filter((p) => p.uid !== pokeUid) }
+    const poke = rowToPoke(data)
+    const idx = s.bagPokes.findIndex((p) => p.uid === pokeUid)
+    const bagPokes = idx === -1 ? [...s.bagPokes, poke] : s.bagPokes.map((p, i) => (i === idx ? poke : p))
+    return { bagPokes }
+  })
+}
+
+// --- leituras -----------------------------------------------------------------
+
+export async function mercadoItens(): Promise<{ itens: ResumoItemMercado[] }> {
+  const { data, error } = await db.from('mercado_resumo_itens').select('*')
+  estourarSeErro(error)
+  const itens: ResumoItemMercado[] = (data ?? []).map((r: Linha) => ({
+    itemId: r.item_id, melhorCompra: r.melhor_compra, melhorVenda: r.melhor_venda,
+    emVenda: r.em_venda, emCompra: r.em_compra,
+  }))
+  return { itens }
+}
+
+function agruparPorPreco(linhas: Linha[]): NivelDePreco[] {
+  const porPreco = new Map<number, number>()
+  for (const r of linhas) porPreco.set(r.unit_price, (porPreco.get(r.unit_price) ?? 0) + r.remaining)
+  return [...porPreco.entries()].map(([unitPrice, quantity]) => ({ unitPrice, quantity }))
+}
+
+export async function mercadoLivro(itemId: string) {
+  const [vendas, compras, negocios] = await Promise.all([
+    db.from('market_orders').select('unit_price, remaining').eq('item_id', itemId).eq('side', 'venda').eq('status', 'ativa').order('unit_price', { ascending: true }).limit(20),
+    db.from('market_orders').select('unit_price, remaining').eq('item_id', itemId).eq('side', 'compra').eq('status', 'ativa').order('unit_price', { ascending: false }).limit(20),
+    db.from('market_trades').select('*').eq('item_id', itemId).eq('kind', 'item').order('created_at', { ascending: false }).limit(15),
+  ])
+  estourarSeErro(vendas.error); estourarSeErro(compras.error); estourarSeErro(negocios.error)
+  return {
+    itemId,
+    vendas: agruparPorPreco(vendas.data ?? []).sort((a, b) => a.unitPrice - b.unitPrice),
+    compras: agruparPorPreco(compras.data ?? []).sort((a, b) => b.unitPrice - a.unitPrice),
+    negocios: (negocios.data ?? []) as NegocioMercado[],
+  }
+}
+
+export async function mercadoPokes(): Promise<{ anuncios: AnuncioMercado[] }> {
+  const { data, error } = await db.from('mercado_anuncios_ativos').select('*').order('created_at', { ascending: false })
+  estourarSeErro(error)
+  const anuncios: AnuncioMercado[] = (data ?? []).map((r: Linha) => ({
+    ...r, melhorOferta: r.melhor_oferta ?? null,
+  }))
+  return { anuncios }
+}
+
+export async function mercadoMeus(): Promise<{
+  ordens: OrdemMercado[]
+  anuncios: AnuncioMercado[]
+  ofertasRecebidas: OfertaRecebida[]
+  minhasOfertas: OfertaMercado[]
+}> {
+  const uid = await userIdAtual()
+  const [ordens, anuncios, ofertasRecebidas, minhasOfertas] = await Promise.all([
+    db.from('market_orders').select('*').eq('user_id', uid).eq('status', 'ativa').order('created_at', { ascending: false }),
+    db.from('market_listings').select('*').eq('seller_id', uid).eq('status', 'ativo').order('created_at', { ascending: false }),
+    db.from('mercado_ofertas_recebidas').select('*').eq('seller_id', uid),
+    db.from('market_offers').select('*').eq('buyer_id', uid).eq('status', 'pendente').order('created_at', { ascending: false }),
+  ])
+  estourarSeErro(ordens.error); estourarSeErro(anuncios.error)
+  estourarSeErro(ofertasRecebidas.error); estourarSeErro(minhasOfertas.error)
+  return {
+    ordens: (ordens.data ?? []) as OrdemMercado[],
+    anuncios: (anuncios.data ?? []) as AnuncioMercado[],
+    ofertasRecebidas: (ofertasRecebidas.data ?? []).map((r: Linha): OfertaRecebida => ({
+      id: r.id, listing_id: r.listing_id, buyer_id: r.buyer_id, valor: r.valor,
+      currency: r.currency, status: r.status, created_at: r.created_at,
+      comprador: r.comprador,
+      // So os 3 campos que a tela realmente le do anuncio embutido (imagem +
+      // nome + nivel) — o resto de AnuncioMercado nao veio nesta leitura.
+      anuncio: { species_id: r.species_id, level: r.level, is_shiny: r.is_shiny } as AnuncioMercado,
+    })),
+    minhasOfertas: (minhasOfertas.data ?? []) as OfertaMercado[],
+  }
+}
+
+export async function mercadoHistorico(): Promise<{ negocios: NegocioMercado[] }> {
+  const uid = await userIdAtual()
+  const { data, error } = await db.from('market_trades').select('*')
+    .or(`buyer_id.eq.${uid},seller_id.eq.${uid}`).order('created_at', { ascending: false }).limit(50)
+  estourarSeErro(error)
+  const linhas = (data ?? []) as Linha[]
+  const outrosIds = [...new Set(linhas.map((n) => (n.buyer_id === uid ? n.seller_id : n.buyer_id)).filter(Boolean))]
+  const { data: nomes } = outrosIds.length
+    ? await db.from('treinadores_publico').select('user_id, trainer_name').in('user_id', outrosIds)
+    : { data: [] as Linha[] }
+  const nomePorId = new Map<string, string>((nomes ?? []).map((n: Linha) => [n.user_id, n.trainer_name]))
+  const negocios: NegocioMercado[] = linhas.map((n) => {
+    const souComprador = n.buyer_id === uid
+    return {
+      ...n, souComprador,
+      comprador: souComprador ? 'voce' : nomePorId.get(n.buyer_id) ?? null,
+      vendedor: souComprador ? nomePorId.get(n.seller_id) ?? null : 'voce',
+    } as NegocioMercado
+  })
+  return { negocios }
+}
+
+// --- escritas (RPC) -----------------------------------------------------------
+
+export async function criarOrdem(corpo: { itemId: string; side: 'compra' | 'venda'; unitPrice: number; quantity: number }) {
+  const { data, error } = await db.rpc('criar_ordem_mercado', {
+    p_item_id: corpo.itemId, p_side: corpo.side, p_unit_price: corpo.unitPrice, p_quantity: corpo.quantity,
+  })
+  estourarSeErro(error)
+  await refetchAposOrdem(corpo.itemId)
+  const executado = data?.executado ?? 0
+  // Unica das 8 RPCs do mercado sem `mensagem` no retorno (so ok/ordemId/
+  // executado/gastoTotal/recebidoTotal) — sem isto o jogador clicava
+  // "Comprar"/"Colocar a venda" e nao via nenhum toast confirmando.
+  const mensagem = executado >= corpo.quantity
+    ? `Ordem executada: ${executado}x ${corpo.itemId} casou na hora.`
+    : executado > 0
+      ? `${executado}x casou na hora, o resto (${corpo.quantity - executado}x) ficou no livro esperando.`
+      : 'Ordem criada, aguardando alguem do outro lado.'
+  return { mensagem, executado }
+}
+
+export async function cancelarOrdem(ordemId: string) {
+  const { data: ordem } = await db.from('market_orders').select('item_id').eq('id', ordemId).maybeSingle()
+  const { data, error } = await db.rpc('cancelar_ordem_mercado', { p_ordem_id: ordemId })
+  estourarSeErro(error)
+  if (ordem?.item_id) await refetchAposOrdem(ordem.item_id)
+  return { mensagem: data?.mensagem as string | undefined }
+}
+
+export async function anunciarPoke(corpo: { pokeUid: string; price: number | null; currency: 'gold' | 'diamond'; apenasOferta?: boolean }) {
+  const { data, error } = await db.rpc('anunciar_poke', {
+    p_poke_id: corpo.pokeUid, p_price: corpo.price, p_currency: corpo.currency, p_apenas_oferta: !!corpo.apenasOferta,
+  })
+  estourarSeErro(error)
+  await refetchAposAnuncio(corpo.pokeUid)
+  return { mensagem: data?.mensagem as string | undefined }
+}
+
+export async function ofertar(corpo: { anuncioId: string; valor: number }) {
+  const { data, error } = await db.rpc('ofertar_no_anuncio', { p_anuncio_id: corpo.anuncioId, p_valor: corpo.valor })
+  estourarSeErro(error)
+  await refetchCarteira()
+  return { mensagem: data?.mensagem as string | undefined }
+}
+
+export async function responderOferta(ofertaId: string, aceitar: boolean) {
+  const { data, error } = await db.rpc('responder_oferta', { p_oferta_id: ofertaId, p_aceitar: aceitar })
+  estourarSeErro(error)
+  await refetchAposAnuncio()
+  return { mensagem: data?.mensagem as string | undefined }
+}
+
+export async function cancelarOferta(ofertaId: string) {
+  const { data, error } = await db.rpc('cancelar_oferta', { p_oferta_id: ofertaId })
+  estourarSeErro(error)
+  await refetchCarteira()
+  return { mensagem: data?.mensagem as string | undefined }
+}
+
+export async function cancelarAnuncio(anuncioId: string) {
+  const { data, error } = await db.rpc('cancelar_anuncio', { p_anuncio_id: anuncioId })
+  estourarSeErro(error)
+  await refetchAposAnuncio()
+  return { mensagem: data?.mensagem as string | undefined }
+}
+
+export async function comprarAnuncio(anuncioId: string) {
+  const { data, error } = await db.rpc('comprar_anuncio', { p_anuncio_id: anuncioId })
+  estourarSeErro(error)
+  await refetchCarteira()
+  return { mensagem: data?.mensagem as string | undefined }
+}

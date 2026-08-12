@@ -16,6 +16,13 @@ import { criarApp } from './servidor.js'
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
+// Schema alvo (Content-Profile/Accept-Profile do PostgREST). SEM isto o
+// db.ts cai no default do PostgREST ('public') — que neste projeto e
+// PRODUCAO REAL, nao o ambiente de trabalho. `dev` por padrao: promover pra
+// `public` e decisao separada, explicita, nunca implicita por falta de env
+// var (ver _Architecture.md, migracao RPC-everything).
+const schema = Deno.env.get('SUPABASE_SCHEMA') ?? 'dev'
+
 // Origens do jogo. `*` junto de `Authorization` deixaria qualquer site chamar
 // isto com o token do jogador, entao a lista e explicita — configure com
 // `supabase secrets set ORIGENS_PERMITIDAS=https://seu-dominio`.
@@ -23,7 +30,7 @@ const origensPermitidas = (Deno.env.get('ORIGENS_PERMITIDAS') ?? 'http://localho
   .split(',')
   .map((o) => o.trim())
 
-const handler = criarApp({ supabaseUrl, serviceRoleKey, origensPermitidas })
+const handler = criarApp({ supabaseUrl, serviceRoleKey, schema, origensPermitidas })
 
 // O gateway das Edge Functions prefixa a rota com o nome da funcao
 // (`/jogo/sessao/flush`). O app conhece as rotas sem esse prefixo, entao ele e

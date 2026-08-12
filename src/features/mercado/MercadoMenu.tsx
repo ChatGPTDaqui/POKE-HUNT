@@ -11,12 +11,12 @@
 // jogo sob autoridade.
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowsLeftRight, Coin, Diamond, Gavel, Storefront, Tag, X } from '@phosphor-icons/react'
+import { ArrowsLeftRight, CircleNotch, Coin, Diamond, Gavel, Tag, X } from '@phosphor-icons/react'
 import {
-  servidor, servidorAtivo, ErroServidor,
+  ErroServidor,
   type AnuncioMercado, type NegocioMercado, type OrdemMercado, type ResumoItemMercado,
 } from '@/data/remote/servidor'
-import { aplicarEstadoDoServidor } from '@/data/remote/autoridade'
+import * as mercadoRpc from '@/data/remote/mercadoRpc'
 import { ITEMS, getItem } from '@/data/items'
 import { SPECIES, averageIvPercent } from '@/data/pokes'
 import { itemIconUrl, itemIconBorderColor, faceIconUrl } from '@/data/sprites'
@@ -27,7 +27,7 @@ import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { ItemTooltip } from '@/components/shared/ItemTooltip'
 import {
-  ComingSoon, GameButton, GameCard, GameCheck, GameInput, GameSelect,
+  GameButton, GameCard, GameCheck, GameInput, GameSelect,
   SectionLabel, SegmentedTabs, StickyHeader,
 } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
@@ -54,12 +54,11 @@ function toast(mensagem: string, tipo: 'success' | 'error' | 'info' = 'success')
  *  estado local com a resposta, invalida a vitrine. Centralizado pra nenhuma
  *  acao esquecer um dos tres passos — esquecer o segundo faria o ouro na HUD
  *  ficar defasado ate o proximo flush. */
-function useAcaoMercado<T>(fn: (arg: T) => Promise<{ estado?: unknown; mensagem?: string }>) {
+function useAcaoMercado<T>(fn: (arg: T) => Promise<{ mensagem?: string }>) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: fn,
     onSuccess: (r) => {
-      if (r.estado) aplicarEstadoDoServidor(r.estado)
       if (r.mensagem) toast(r.mensagem)
       void qc.invalidateQueries({ queryKey: ['mercado'] })
     },
@@ -83,6 +82,14 @@ function IconeItem({ itemId }: { itemId: string }) {
   )
 }
 
+function Carregando() {
+  return (
+    <p className="flex items-center gap-[.4em] text-n500">
+      <CircleNotch className="animate-spin" /> Carregando...
+    </p>
+  )
+}
+
 function Moeda({ valor, tipo }: { valor: number; tipo: 'gold' | 'diamond' }) {
   return (
     <span className={cn('inline-flex items-center gap-[.25em]', tipo === 'gold' ? 'text-gold' : 'text-diamond')}>
@@ -103,10 +110,10 @@ function LivroDoItem({ itemId }: { itemId: string }) {
   const [qtd, setQtd] = useState(1)
   const { data } = useQuery({
     queryKey: ['mercado', 'livro', itemId],
-    queryFn: () => servidor.mercadoLivro(itemId),
+    queryFn: () => mercadoRpc.mercadoLivro(itemId),
     staleTime: STALE_MS,
   })
-  const criar = useAcaoMercado(servidor.criarOrdem)
+  const criar = useAcaoMercado(mercadoRpc.criarOrdem)
   const acao = useAcaoPendente()
 
   const melhorVenda = data?.vendas[0]?.unitPrice ?? 0
@@ -194,7 +201,7 @@ function ComprarItens() {
   const [aberto, setAberto] = useState<string | null>(null)
   const { data, isLoading } = useQuery({
     queryKey: ['mercado', 'itens'],
-    queryFn: () => servidor.mercadoItens(),
+    queryFn: () => mercadoRpc.mercadoItens(),
     staleTime: STALE_MS,
   })
 
@@ -212,7 +219,7 @@ function ComprarItens() {
       .map((item) => ({ item, resumo: porId.get(item.id) ?? null }))
   }, [data])
 
-  if (isLoading) return <p className="text-n500">Carregando o Mercado...</p>
+  if (isLoading) return <Carregando />
 
   if (linhas.length === 0) {
     return (
@@ -316,11 +323,11 @@ function ComprarPokes() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['mercado', 'pokes'],
-    queryFn: () => servidor.mercadoPokes(),
+    queryFn: () => mercadoRpc.mercadoPokes(),
     staleTime: STALE_MS,
   })
-  const comprar = useAcaoMercado((anuncioId: string) => servidor.comprarAnuncio(anuncioId))
-  const ofertar = useAcaoMercado(servidor.ofertar)
+  const comprar = useAcaoMercado((anuncioId: string) => mercadoRpc.comprarAnuncio(anuncioId))
+  const ofertar = useAcaoMercado(mercadoRpc.ofertar)
 
   const filtrados = useMemo(() => {
     const termo = busca.trim().toLowerCase()
@@ -346,7 +353,7 @@ function ComprarPokes() {
       })
   }, [data, busca, verGold, verDiamante, somenteOferta, shinyOnly, nivelMin, ivMin, raridades, ordem])
 
-  if (isLoading) return <p className="text-n500">Carregando anuncios...</p>
+  if (isLoading) return <Carregando />
 
   return (
     <div className="flex flex-col gap-[.45em]">
@@ -523,7 +530,7 @@ function VenderItens() {
   const [itemId, setItemId] = useState('')
   const [preco, setPreco] = useState(100)
   const [qtd, setQtd] = useState(1)
-  const criar = useAcaoMercado(servidor.criarOrdem)
+  const criar = useAcaoMercado(mercadoRpc.criarOrdem)
   const acao = useAcaoPendente()
 
   const disponiveis = Object.keys(items).filter((id) => items[id] > 0 && ITEMS[id] && !lockedItems[id])
@@ -582,7 +589,7 @@ function VenderPokes() {
   const [preco, setPreco] = useState(5000)
   const [moeda, setMoeda] = useState<'gold' | 'diamond'>('gold')
   const [apenasOferta, setApenasOferta] = useState(false)
-  const anunciar = useAcaoMercado(servidor.anunciarPoke)
+  const anunciar = useAcaoMercado(mercadoRpc.anunciarPoke)
 
   // POKE travado nao aparece: a trava existe justamente pra ele nao sair da
   // mochila por engano, e anunciar e sair da mochila.
@@ -663,16 +670,16 @@ function VenderPokes() {
 function Ativos() {
   const { data, isLoading } = useQuery({
     queryKey: ['mercado', 'meus'],
-    queryFn: () => servidor.mercadoMeus(),
+    queryFn: () => mercadoRpc.mercadoMeus(),
     staleTime: STALE_MS,
   })
-  const cancelarOrdem = useAcaoMercado((id: string) => servidor.cancelarOrdem(id))
-  const cancelarAnuncio = useAcaoMercado((id: string) => servidor.cancelarAnuncio(id))
+  const cancelarOrdem = useAcaoMercado((id: string) => mercadoRpc.cancelarOrdem(id))
+  const cancelarAnuncio = useAcaoMercado((id: string) => mercadoRpc.cancelarAnuncio(id))
   const responder = useAcaoMercado(({ id, aceitar }: { id: string; aceitar: boolean }) =>
-    servidor.responderOferta(id, aceitar))
-  const cancelarOferta = useAcaoMercado((id: string) => servidor.cancelarOferta(id))
+    mercadoRpc.responderOferta(id, aceitar))
+  const cancelarOferta = useAcaoMercado((id: string) => mercadoRpc.cancelarOferta(id))
 
-  if (isLoading) return <p className="text-n500">Carregando...</p>
+  if (isLoading) return <Carregando />
   const ordens: OrdemMercado[] = data?.ordens ?? []
   const anuncios: AnuncioMercado[] = data?.anuncios ?? []
   const recebidas = data?.ofertasRecebidas ?? []
@@ -786,10 +793,10 @@ function Ativos() {
 function Historico() {
   const { data, isLoading } = useQuery({
     queryKey: ['mercado', 'historico'],
-    queryFn: () => servidor.mercadoHistorico(),
+    queryFn: () => mercadoRpc.mercadoHistorico(),
     staleTime: STALE_MS,
   })
-  if (isLoading) return <p className="text-n500">Carregando...</p>
+  if (isLoading) return <Carregando />
   const negocios: NegocioMercado[] = data?.negocios ?? []
   if (negocios.length === 0) return <p className="text-n500">Voce ainda nao negociou nada.</p>
 
@@ -826,15 +833,6 @@ export function MercadoMenu() {
   const [tipo, setTipo] = useState<'itens' | 'pokes'>('itens')
   const gold = useGameStateStore((s) => s.wallet.gold)
   const diamonds = useGameStateStore((s) => s.wallet.diamonds)
-
-  if (!servidorAtivo()) {
-    return (
-      <ComingSoon icon={<Storefront />} title="O Mercado exige o servidor">
-        Negociar com outros jogadores depende do servidor de autoridade — ele é quem guarda as ordens, o
-        escrow e as entregas. Rodando sem <code>VITE_SERVIDOR_URL</code> não há com quem negociar.
-      </ComingSoon>
-    )
-  }
 
   return (
     <div className="flex flex-col gap-[.5em]">
