@@ -56,9 +56,10 @@ export async function responderPedido(mensagemId: string, aceitar: boolean): Pro
 }
 
 export async function marcarLida(mensagemId: string): Promise<{ ok: boolean }> {
-  const uid = await userIdAtual()
-  const { error } = await db.from('mail_messages').update({ estado: 'lido', read_at: new Date().toISOString() })
-    .eq('id', mensagemId).eq('para_id', uid)
+  // RPC em vez de UPDATE direto (PH-22): o filtro de "nao marcar lido com
+  // anexo pendente" precisa rodar no banco, nao so na UI (CorreioMenu.tsx so
+  // evita CLICAR nesse caso, mas RLS-direct nao tem como aplicar essa regra).
+  const { error } = await db.rpc('marcar_correio_lido', { p_mensagem_id: mensagemId })
   if (error) throw new ErroServidor(409, error.message)
   return { ok: true }
 }
