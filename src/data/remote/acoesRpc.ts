@@ -70,11 +70,16 @@ async function refetchItem(itemId: string): Promise<void> {
   const uid = await userIdAtual()
   const { data } = await supabase
     .from('player_items')
-    .select('quantity')
+    .select('quantity, locked')
     .eq('user_id', uid)
     .eq('item_id', itemId)
     .maybeSingle()
-  useGameStateStore.setState((s) => ({ items: { ...s.items, [itemId]: data?.quantity ?? 0 } }))
+  useGameStateStore.setState((s) => {
+    const lockedItems = { ...s.lockedItems }
+    if (data?.locked) lockedItems[itemId] = true
+    else delete lockedItems[itemId]
+    return { items: { ...s.items, [itemId]: data?.quantity ?? 0 }, lockedItems }
+  })
 }
 
 async function refetchTodosItens(): Promise<void> {
