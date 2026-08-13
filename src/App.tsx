@@ -17,6 +17,8 @@ import { RegisterPage } from '@/features/auth/RegisterPage'
 import { RequireAuth } from '@/features/auth/RequireAuth'
 import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage'
 import { GameShell } from '@/features/game/GameShell'
+import { RequireAdmin } from '@/features/admin/RequireAdmin'
+import { AdminErrorsPage } from '@/features/admin/AdminErrorsPage'
 import { useAuthStore } from '@/stores/authStore'
 
 function App() {
@@ -42,6 +44,16 @@ function App() {
             element={
               <RequireAuth>
                 <GameShell />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <RequireAuth>
+                <RequireAdmin>
+                  <AdminErrorsPage />
+                </RequireAdmin>
               </RequireAuth>
             }
           />

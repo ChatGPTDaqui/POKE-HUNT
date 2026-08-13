@@ -4,7 +4,7 @@
 // `plpgsql`. Mercado/acoes/social/ranking/reset viraram RPC (`dev.*`) e nao
 // passam mais por aqui — ver as ~20 funcoes ja criadas.
 import { autenticar } from './auth.js'
-import { ErroHttp, selecionar, inserir, atualizar, type Config } from './db.js'
+import { ErroHttp, selecionar, inserir, atualizar, chamarRpc, type Config } from './db.js'
 import {
   aplicarFlush, carregarEstado, comEstadoParaEscrita, gravarEstado,
   FLUSH_OCUPADO, type LinhaSessao,
@@ -49,6 +49,14 @@ export function criarApp(cfg: OpcoesApp) {
         resposta = json({ erro: erro.message }, erro.status)
       } else {
         console.error('erro nao tratado:', erro)
+        // `await`, nao fire-and-forget: a Edge Function pode matar o isolate
+        // assim que a resposta e devolvida, entao um `void` sem esperar
+        // arriscava o report nunca terminar. `.catch` mudo de proposito —
+        // reportar o erro nunca pode virar outro erro (se o banco esta fora
+        // do ar, e exatamente isso que estamos tentando registrar).
+        await chamarRpc(cfg, 'reportar_erro', {
+          p_origem: 'server', p_rota: url.pathname, p_mensagem: String(erro),
+        }).catch(() => {})
         resposta = json({ erro: 'erro interno' }, 500)
       }
     }

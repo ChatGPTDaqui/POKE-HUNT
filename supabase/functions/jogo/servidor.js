@@ -154,6 +154,22 @@ async function atualizarRetornando(cfg, caminho, patch) {
 		body: JSON.stringify(patch)
 	}) ?? [];
 }
+/**
+* Chama uma funcao do Postgres via `POST /rest/v1/rpc/<nome>`.
+*
+* Usado onde a pergunta e do BANCO e nao cabe num filtro: o unico caso hoje e
+* "este nome de treinador esta livre?", que compara por `lower(trainer_name)`.
+* Fazer isso com `ilike` daria falso positivo — `_` e curinga de uma letra em
+* LIKE, e `_` e um caractere valido de nick, entao "ash_1" apareceria como
+* ocupado por causa de um "ashX1" de outra pessoa.
+*/
+async function chamarRpc(cfg, nome, argumentos) {
+	return await pedir(cfg, `rpc/${nome}`, {
+		method: "POST",
+		headers: cabecalhos(cfg),
+		body: JSON.stringify(argumentos)
+	});
+}
 async function apagar(cfg, caminho) {
 	await pedir(cfg, caminho, {
 		method: "DELETE",
@@ -37474,7 +37490,8 @@ var useToastStore = create((set) => ({
 				id: line.id,
 				message,
 				type,
-				realce
+				realce,
+				channel
 			};
 			return {
 				chatLines,
@@ -38686,6 +38703,11 @@ function criarApp(cfg) {
 			if (erro instanceof ErroHttp) resposta = json({ erro: erro.message }, erro.status);
 			else {
 				console.error("erro nao tratado:", erro);
+				await chamarRpc(cfg, "reportar_erro", {
+					p_origem: "server",
+					p_rota: url.pathname,
+					p_mensagem: String(erro)
+				}).catch(() => {});
 				resposta = json({ erro: "erro interno" }, 500);
 			}
 		}
