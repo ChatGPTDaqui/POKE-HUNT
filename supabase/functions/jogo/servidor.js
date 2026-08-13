@@ -38443,6 +38443,12 @@ function aplicarEntregasNoEstado(estado, entregas) {
 }
 //#endregion
 //#region server/src/progresso.ts
+var TAMANHO_LOTE_ID = 100;
+function porLotesDeId(ids) {
+	const lotes = [];
+	for (let i = 0; i < ids.length; i += TAMANHO_LOTE_ID) lotes.push(ids.slice(i, i + TAMANHO_LOTE_ID));
+	return lotes;
+}
 var CONQUISTA_LANCE = "boss_lance";
 var MAX_SEGUNDOS_POR_FLUSH = 21600;
 var MARCA_DE_FLUSH_EXPIRA_MS = 3e4;
@@ -38550,13 +38556,14 @@ async function comEstadoParaEscrita(cfg, userId, fn, opcoes = {}) {
 async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAtEsperado) {
 	if (!(await atualizarRetornando(cfg, `players?user_id=eq.${userId}&updated_at=eq.${encodeURIComponent(playerUpdatedAtEsperado)}`, gameStateToPlayerRow(userId, estado))).length) throw new ErroHttp(409, "outro comando em andamento — tente de novo");
 	const linhasPoke = gameStateToPokemonRows(userId, estado);
-	const idsAgora = new Set(linhasPoke.map((l) => l.id));
+	const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id) => id != null));
 	const idsDeInteresse = [.../* @__PURE__ */ new Set([...pokeIdsNoLoad, ...idsAgora])];
-	const atuais = idsDeInteresse.length ? await selecionarTudo(cfg, `pokemon_instances?id=in.(${idsDeInteresse.join(",")})&select=id,user_id,location`) : [];
+	const atuais = [];
+	for (const lote of porLotesDeId(idsDeInteresse)) atuais.push(...await selecionarTudo(cfg, `pokemon_instances?id=in.(${lote.join(",")})&select=id,user_id,location`));
 	const porId = new Map(atuais.map((l) => [l.id, l]));
 	const aindaMeu = (l) => l != null && l.user_id === userId && (l.location === "team" || l.location === "bag");
 	const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)));
-	if (remover.length) await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${remover.join(",")})`);
+	for (const lote of porLotesDeId(remover)) await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(",")})`);
 	const gravarPoke = linhasPoke.filter((l) => {
 		const atual = porId.get(String(l.id));
 		return atual == null || aindaMeu(atual);

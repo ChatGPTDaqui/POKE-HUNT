@@ -16,6 +16,20 @@ import {
   reivindicarEntregas, aplicarEntregasNoEstado, devolverEntregas, type LinhaEntrega,
 } from './entregas.js'
 
+// `id=in.(...)` com centenas de UUIDs estoura o tamanho de URL que o gateway
+// aceita — o fetch nem chega a ter resposta HTTP, so falha ("PostgREST
+// inacessivel"), vira 502 e o jogador ve "falha ao falar com o banco". Medido
+// em producao: conta real com 268+ pokemon_instances pra reconciliar num
+// unico flush ja estourava. Contas de teste locais nunca tem POKE suficiente
+// pra reproduzir. 100 ids por lote fica bem abaixo de qualquer limite comum
+// de proxy (~8KB de request-line) mesmo com filtro/select junto na mesma URL.
+const TAMANHO_LOTE_ID = 100
+function porLotesDeId(ids: string[]): string[][] {
+  const lotes: string[][] = []
+  for (let i = 0; i < ids.length; i += TAMANHO_LOTE_ID) lotes.push(ids.slice(i, i + TAMANHO_LOTE_ID))
+  return lotes
+}
+
 // Chave usada em `hall_da_fama.conquista` pra "derrotou o Campeao Lance".
 // Vivia em ranking.ts (rota de leitura, apagada na migracao RPC-everything) —
 // so a constante sobrevive, e so aqui, unico lugar que ainda escreve nela.
@@ -250,22 +264,27 @@ export async function gravarEstado(
   if (!gravada.length) throw new ErroHttp(409, 'outro comando em andamento — tente de novo')
 
   const linhasPoke = gameStateToPokemonRows(userId, estado)
-  const idsAgora = new Set(linhasPoke.map((l) => l.id))
+  // `id` e opcional so no tipo `Insert` (coluna tem default no banco) — aqui
+  // sempre vem preenchido, o proprio POKE que o gerou.
+  const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id): id is string => id != null))
   // Uma leitura so, cobrindo o que eu conhecia e o que estou tentando gravar.
   const idsDeInteresse = [...new Set([...pokeIdsNoLoad, ...idsAgora])]
-  const atuais = idsDeInteresse.length
-    ? await selecionarTudo<LinhaLocalizacao>(
-      cfg,
-      `pokemon_instances?id=in.(${idsDeInteresse.join(',')})&select=id,user_id,location`,
+  const atuais: LinhaLocalizacao[] = []
+  for (const lote of porLotesDeId(idsDeInteresse)) {
+    atuais.push(
+      ...(await selecionarTudo<LinhaLocalizacao>(
+        cfg,
+        `pokemon_instances?id=in.(${lote.join(',')})&select=id,user_id,location`,
+      )),
     )
-    : []
+  }
   const porId = new Map(atuais.map((l) => [l.id, l]))
   const aindaMeu = (l: LinhaLocalizacao | undefined): boolean =>
     l != null && l.user_id === userId && (l.location === 'team' || l.location === 'bag')
 
   const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)))
-  if (remover.length) {
-    await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${remover.join(',')})`)
+  for (const lote of porLotesDeId(remover)) {
+    await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(',')})`)
   }
   // Linha sem par no banco e POKE novo (captura, inicial, compra) — grava.
   // Linha com par que ja nao e minha fica de fora.
