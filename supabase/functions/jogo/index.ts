@@ -21,7 +21,12 @@ const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 // PRODUCAO REAL, nao o ambiente de trabalho. `dev` por padrao: promover pra
 // `public` e decisao separada, explicita, nunca implicita por falta de env
 // var (ver _Architecture.md, migracao RPC-everything).
-const schema = Deno.env.get('SUPABASE_SCHEMA') ?? 'dev'
+//
+// NAO chama a var de SUPABASE_SCHEMA: o prefixo SUPABASE_ e reservado pela
+// plataforma (injetado automaticamente), `supabase secrets set` recusa
+// qualquer nome que comece assim — essa var nunca foi setavel, o fallback
+// 'dev' rodava sempre, sem jeito de promover pra public (achado real, 2026-08-13).
+const schema = Deno.env.get('JOGO_SCHEMA') ?? 'dev'
 
 // Origens do jogo. `*` junto de `Authorization` deixaria qualquer site chamar
 // isto com o token do jogador, entao a lista e explicita — configure com
