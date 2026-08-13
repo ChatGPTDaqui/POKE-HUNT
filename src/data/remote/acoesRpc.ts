@@ -102,7 +102,17 @@ async function refetchPoke(pokeId: string): Promise<void> {
 
 async function refetchEquipeInteira(): Promise<void> {
   const uid = await userIdAtual()
-  const { data } = await supabase.from('pokemon_instances').select('*').eq('user_id', uid).eq('location', 'team')
+  // `order('team_slot')` e obrigatorio: `definirAtivo` reordena os slots pra
+  // trazer o POKE escolhido pro topo (slot 0), e o resto do app assume
+  // `team[0]` = ativo (ver controller.ts#setActiveTeamIndex). Sem o order, o
+  // Postgres devolve em ordem arbitraria e o campo so mostrava o POKE certo
+  // depois de um F5 (que recarrega ordenado por outro caminho).
+  const { data } = await supabase
+    .from('pokemon_instances')
+    .select('*')
+    .eq('user_id', uid)
+    .eq('location', 'team')
+    .order('team_slot', { ascending: true })
   useGameStateStore.setState({ team: (data ?? []).map(rowToPoke) })
 }
 
