@@ -216,8 +216,16 @@ const DESPACHO: Record<string, Despacho> = {
     aoSucesso: async () => { await refetchJogador() },
   },
   configurarAuto: {
+    // Sem refetch de proposito: `configurar_auto` e passthrough puro (o SQL so
+    // grava o patch que o client ja mandou, nada computado do lado do
+    // servidor). Um `refetchJogador()` aqui reescreve autoToggles/
+    // autoPotRules/autoCatchConfig com objetos NOVOS (mesmo valor, referencia
+    // diferente) — o `useEffect` do AutoPanel que observa essas referencias
+    // dispara nesse refetch, manda o patch de novo, refetch de novo: loop
+    // infinito de configurar_auto sem teto (achado ao vivo em producao,
+    // 2026-08-13, centenas de chamadas em segundos).
     chamar: rpc('configurar_auto', (a) => ({ p_patch: a.patch })),
-    aoSucesso: async () => { await refetchJogador() },
+    aoSucesso: async () => {},
   },
   escolherStarter: {
     chamar: rpc('escolher_starter', (a) => ({ p_species_id: a.speciesId })),
