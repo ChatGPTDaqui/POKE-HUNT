@@ -1081,6 +1081,8 @@ export type Database = {
           stat_def: number
           stat_def_esp: number
           stat_hp: number
+          status: string | null
+          status_turns: number | null
           stat_speed: number
           team_slot: number | null
           unlocked_abilities: string[]
@@ -1113,6 +1115,8 @@ export type Database = {
           stat_def_esp: number
           stat_hp: number
           stat_speed: number
+          status?: string | null
+          status_turns?: number | null
           team_slot?: number | null
           unlocked_abilities?: string[]
           updated_at?: string
@@ -1143,6 +1147,8 @@ export type Database = {
           stat_def?: number
           stat_def_esp?: number
           stat_hp?: number
+          status?: string | null
+          status_turns?: number | null
           stat_speed?: number
           team_slot?: number | null
           unlocked_abilities?: string[]

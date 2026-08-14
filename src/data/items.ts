@@ -56,11 +56,10 @@ export interface ShopStockEntry {
 // Built from the spreadsheet-sourced items only — Stones are loot-only (see
 // data/stones.js), never for sale.
 //
-// `status_heal` fica fora ATE os status existirem (Leva B). O item ja tem
-// linha no banco, preco e desconto — o que falta e o efeito. Vender hoje um
-// Antidote que nao cura nada e pior que nao vender: o jogador gasta ouro num
-// item inerte e nao tem como saber disso.
-const KINDS_FORA_DA_LOJA = new Set(['rod', 'status_heal'])
+// `status_heal` entrou na loja junto com os status que ele cura (Leva B). Ate
+// entao ficava de fora de proposito: vender um Antidote que nao cura nada e
+// pior que nao vender.
+const KINDS_FORA_DA_LOJA = new Set(['rod'])
 
 export const SHOP_STOCK: ShopStockEntry[] = Object.values(GENERATED_ITEMS)
   .filter((item) => !KINDS_FORA_DA_LOJA.has(item.kind))

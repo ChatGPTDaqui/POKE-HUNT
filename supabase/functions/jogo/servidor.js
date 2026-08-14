@@ -608,7 +608,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "aoe"
+		"target": "aoe",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"scratch": {
 		"id": "scratch",
@@ -617,7 +623,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 35,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"ember": {
 		"id": "ember",
@@ -626,7 +633,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 40,
 		"pp": 25,
-		"target": "single"
+		"target": "single",
+		"status": "burn",
+		"statusChance": 10,
+		"accuracy": 100
 	},
 	"smokescreen": {
 		"id": "smokescreen",
@@ -635,7 +645,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"dragon_rage": {
 		"id": "dragon_rage",
@@ -644,7 +655,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"scary_face": {
 		"id": "scary_face",
@@ -653,7 +665,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"fire_fang": {
 		"id": "fire_fang",
@@ -662,7 +680,11 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 65,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "burn",
+		"statusChance": 10,
+		"flinchChance": 10,
+		"accuracy": 95
 	},
 	"flame_burst": {
 		"id": "flame_burst",
@@ -671,7 +693,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 70,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"slash": {
 		"id": "slash",
@@ -680,7 +703,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 70,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"critStages": 1,
+		"accuracy": 100
 	},
 	"flamethrower": {
 		"id": "flamethrower",
@@ -689,7 +714,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 90,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "burn",
+		"statusChance": 10,
+		"accuracy": 100
 	},
 	"fire_spin": {
 		"id": "fire_spin",
@@ -698,7 +726,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 35,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 85
 	},
 	"inferno": {
 		"id": "inferno",
@@ -707,7 +736,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 100,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"status": "burn",
+		"statusChance": 100,
+		"accuracy": 50
 	},
 	"tackle": {
 		"id": "tackle",
@@ -716,7 +748,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 35,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"tail_whip": {
 		"id": "tail_whip",
@@ -725,7 +758,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "aoe"
+		"target": "aoe",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"water_gun": {
 		"id": "water_gun",
@@ -734,7 +773,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 40,
 		"pp": 25,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"withdraw": {
 		"id": "withdraw",
@@ -743,7 +783,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"bubble": {
 		"id": "bubble",
@@ -752,7 +798,13 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 40,
 		"pp": 30,
-		"target": "aoe"
+		"target": "aoe",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -1
+		}],
+		"statChance": 10,
+		"accuracy": 100
 	},
 	"bite": {
 		"id": "bite",
@@ -761,7 +813,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 25,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 100
 	},
 	"rapid_spin": {
 		"id": "rapid_spin",
@@ -770,7 +824,13 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 20,
 		"pp": 40,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"protect": {
 		"id": "protect",
@@ -779,7 +839,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"water_pulse": {
 		"id": "water_pulse",
@@ -788,7 +849,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 60,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 20,
+		"accuracy": 100
 	},
 	"aqua_tail": {
 		"id": "aqua_tail",
@@ -797,7 +861,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 90,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"skull_bash": {
 		"id": "skull_bash",
@@ -806,7 +871,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 130,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"iron_defense": {
 		"id": "iron_defense",
@@ -815,7 +881,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"rain_dance": {
 		"id": "rain_dance",
@@ -824,7 +896,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"hydro_pump": {
 		"id": "hydro_pump",
@@ -833,7 +906,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 110,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 80
 	},
 	"leech_seed": {
 		"id": "leech_seed",
@@ -842,7 +916,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"vine_whip": {
 		"id": "vine_whip",
@@ -851,7 +926,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 45,
 		"pp": 25,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"poison_powder": {
 		"id": "poison_powder",
@@ -860,7 +936,10 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 35,
-		"target": "single"
+		"target": "single",
+		"status": "poison",
+		"statusChance": 100,
+		"accuracy": 75
 	},
 	"sleep_powder": {
 		"id": "sleep_powder",
@@ -869,7 +948,10 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "sleep",
+		"statusChance": 100,
+		"accuracy": 75
 	},
 	"take_down": {
 		"id": "take_down",
@@ -878,7 +960,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 90,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"drainPercent": -25,
+		"accuracy": 85
 	},
 	"razor_leaf": {
 		"id": "razor_leaf",
@@ -887,7 +971,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 55,
 		"pp": 25,
-		"target": "aoe"
+		"target": "aoe",
+		"critStages": 1,
+		"accuracy": 95
 	},
 	"sweet_scent": {
 		"id": "sweet_scent",
@@ -896,7 +982,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "aoe"
+		"target": "aoe",
+		"accuracy": 100
 	},
 	"growth": {
 		"id": "growth",
@@ -905,7 +992,16 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}, {
+			"stat": "atkEsp",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"double_edge": {
 		"id": "double_edge",
@@ -914,7 +1010,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 120,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"drainPercent": -33,
+		"accuracy": 100
 	},
 	"worry_seed": {
 		"id": "worry_seed",
@@ -923,7 +1021,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"synthesis": {
 		"id": "synthesis",
@@ -932,7 +1031,9 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"healPercent": 50,
+		"accuracy": 100
 	},
 	"seed_bomb": {
 		"id": "seed_bomb",
@@ -941,7 +1042,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"gust": {
 		"id": "gust",
@@ -950,7 +1052,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 40,
 		"pp": 35,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"powder_snow": {
 		"id": "powder_snow",
@@ -959,7 +1062,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 40,
 		"pp": 25,
-		"target": "aoe"
+		"target": "aoe",
+		"status": "freeze",
+		"statusChance": 10,
+		"accuracy": 100
 	},
 	"mist": {
 		"id": "mist",
@@ -968,7 +1074,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"ice_shard": {
 		"id": "ice_shard",
@@ -977,7 +1084,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"mind_reader": {
 		"id": "mind_reader",
@@ -986,7 +1094,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"ancient_power": {
 		"id": "ancient_power",
@@ -995,7 +1104,31 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 60,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"statChanges": [
+			{
+				"stat": "atkFis",
+				"estagios": 1
+			},
+			{
+				"stat": "def",
+				"estagios": 1
+			},
+			{
+				"stat": "atkEsp",
+				"estagios": 1
+			},
+			{
+				"stat": "defEsp",
+				"estagios": 1
+			},
+			{
+				"stat": "speed",
+				"estagios": 1
+			}
+		],
+		"statChance": 10,
+		"accuracy": 100
 	},
 	"agility": {
 		"id": "agility",
@@ -1004,7 +1137,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": 2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"freeze_dry": {
 		"id": "freeze_dry",
@@ -1013,7 +1152,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 70,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"status": "freeze",
+		"statusChance": 10,
+		"accuracy": 100
 	},
 	"reflect": {
 		"id": "reflect",
@@ -1022,7 +1164,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"hail": {
 		"id": "hail",
@@ -1031,7 +1174,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"tailwind": {
 		"id": "tailwind",
@@ -1040,7 +1184,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"ice_beam": {
 		"id": "ice_beam",
@@ -1049,7 +1194,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 90,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"status": "freeze",
+		"statusChance": 10,
+		"accuracy": 100
 	},
 	"blizzard": {
 		"id": "blizzard",
@@ -1058,7 +1206,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 110,
 		"pp": 5,
-		"target": "aoe"
+		"target": "aoe",
+		"status": "freeze",
+		"statusChance": 10,
+		"accuracy": 70
 	},
 	"roost": {
 		"id": "roost",
@@ -1067,7 +1218,9 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"healPercent": 50,
+		"accuracy": 100
 	},
 	"hurricane": {
 		"id": "hurricane",
@@ -1076,7 +1229,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 110,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 30,
+		"accuracy": 70
 	},
 	"sheer_cold": {
 		"id": "sheer_cold",
@@ -1085,7 +1241,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 30
 	},
 	"peck": {
 		"id": "peck",
@@ -1094,7 +1251,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 35,
 		"pp": 35,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"thunder_shock": {
 		"id": "thunder_shock",
@@ -1103,7 +1261,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 40,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 10,
+		"accuracy": 100
 	},
 	"thunder_wave": {
 		"id": "thunder_wave",
@@ -1112,7 +1273,10 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 100,
+		"accuracy": 90
 	},
 	"detect": {
 		"id": "detect",
@@ -1121,7 +1285,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"pluck": {
 		"id": "pluck",
@@ -1130,7 +1295,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"charge": {
 		"id": "charge",
@@ -1139,7 +1305,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"discharge": {
 		"id": "discharge",
@@ -1148,7 +1320,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 80,
 		"pp": 15,
-		"target": "aoe"
+		"target": "aoe",
+		"status": "paralysis",
+		"statusChance": 30,
+		"accuracy": 100
 	},
 	"light_screen": {
 		"id": "light_screen",
@@ -1157,7 +1332,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"drill_peck": {
 		"id": "drill_peck",
@@ -1166,7 +1342,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"thunder": {
 		"id": "thunder",
@@ -1175,7 +1352,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 110,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 30,
+		"accuracy": 70
 	},
 	"magnetic_flux": {
 		"id": "magnetic_flux",
@@ -1184,7 +1364,16 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 1
+		}, {
+			"stat": "defEsp",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"zap_cannon": {
 		"id": "zap_cannon",
@@ -1193,7 +1382,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 120,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 100,
+		"accuracy": 50
 	},
 	"wing_attack": {
 		"id": "wing_attack",
@@ -1202,7 +1394,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 35,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"endure": {
 		"id": "endure",
@@ -1211,7 +1404,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"safeguard": {
 		"id": "safeguard",
@@ -1220,7 +1414,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 25,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"air_slash": {
 		"id": "air_slash",
@@ -1229,7 +1424,9 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 75,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 95
 	},
 	"sunny_day": {
 		"id": "sunny_day",
@@ -1238,7 +1435,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"heat_wave": {
 		"id": "heat_wave",
@@ -1247,7 +1445,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 95,
 		"pp": 10,
-		"target": "aoe"
+		"target": "aoe",
+		"status": "burn",
+		"statusChance": 10,
+		"accuracy": 90
 	},
 	"solar_beam": {
 		"id": "solar_beam",
@@ -1256,7 +1457,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 120,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"sky_attack": {
 		"id": "sky_attack",
@@ -1265,7 +1467,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 140,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 30,
+		"critStages": 1,
+		"accuracy": 90
 	},
 	"burn_up": {
 		"id": "burn_up",
@@ -1274,7 +1479,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 130,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"extrasensory": {
 		"id": "extrasensory",
@@ -1283,7 +1489,9 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 80,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 10,
+		"accuracy": 100
 	},
 	"leer": {
 		"id": "leer",
@@ -1292,7 +1500,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "aoe"
+		"target": "aoe",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"roar": {
 		"id": "roar",
@@ -1301,7 +1515,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"quick_attack": {
 		"id": "quick_attack",
@@ -1310,7 +1525,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"spark": {
 		"id": "spark",
@@ -1319,7 +1535,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 65,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 30,
+		"accuracy": 100
 	},
 	"crunch": {
 		"id": "crunch",
@@ -1328,7 +1547,13 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": -1
+		}],
+		"statChance": 20,
+		"accuracy": 100
 	},
 	"thunder_fang": {
 		"id": "thunder_fang",
@@ -1337,7 +1562,11 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 65,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 10,
+		"flinchChance": 10,
+		"accuracy": 95
 	},
 	"calm_mind": {
 		"id": "calm_mind",
@@ -1346,7 +1575,16 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkEsp",
+			"estagios": 1
+		}, {
+			"stat": "defEsp",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"eruption": {
 		"id": "eruption",
@@ -1355,7 +1593,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 150,
 		"pp": 5,
-		"target": "aoe"
+		"target": "aoe",
+		"accuracy": 100
 	},
 	"lava_plume": {
 		"id": "lava_plume",
@@ -1364,7 +1603,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 80,
 		"pp": 15,
-		"target": "aoe"
+		"target": "aoe",
+		"status": "burn",
+		"statusChance": 30,
+		"accuracy": 100
 	},
 	"sacred_fire": {
 		"id": "sacred_fire",
@@ -1373,7 +1615,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 100,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"status": "burn",
+		"statusChance": 50,
+		"accuracy": 95
 	},
 	"stomp": {
 		"id": "stomp",
@@ -1382,7 +1627,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 65,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 100
 	},
 	"swagger": {
 		"id": "swagger",
@@ -1391,7 +1638,15 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 100,
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 2
+		}],
+		"statChance": 100,
+		"accuracy": 85
 	},
 	"fire_blast": {
 		"id": "fire_blast",
@@ -1400,7 +1655,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 110,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"status": "burn",
+		"statusChance": 10,
+		"accuracy": 85
 	},
 	"bubble_beam": {
 		"id": "bubble_beam",
@@ -1409,7 +1667,13 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 65,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -1
+		}],
+		"statChance": 10,
+		"accuracy": 100
 	},
 	"aurora_beam": {
 		"id": "aurora_beam",
@@ -1418,7 +1682,13 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 65,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -1
+		}],
+		"statChance": 10,
+		"accuracy": 100
 	},
 	"mirror_coat": {
 		"id": "mirror_coat",
@@ -1427,7 +1697,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"ice_fang": {
 		"id": "ice_fang",
@@ -1436,7 +1707,11 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 65,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "freeze",
+		"statusChance": 10,
+		"flinchChance": 10,
+		"accuracy": 95
 	},
 	"weather_ball": {
 		"id": "weather_ball",
@@ -1445,7 +1720,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 50,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"whirlwind": {
 		"id": "whirlwind",
@@ -1454,7 +1730,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"dragon_rush": {
 		"id": "dragon_rush",
@@ -1463,7 +1740,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 100,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 20,
+		"accuracy": 75
 	},
 	"aeroblast": {
 		"id": "aeroblast",
@@ -1472,7 +1751,9 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 100,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"critStages": 1,
+		"accuracy": 95
 	},
 	"punishment": {
 		"id": "punishment",
@@ -1481,7 +1762,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"recover": {
 		"id": "recover",
@@ -1490,7 +1772,9 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"healPercent": 50,
+		"accuracy": 100
 	},
 	"future_sight": {
 		"id": "future_sight",
@@ -1499,7 +1783,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 120,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"natural_gift": {
 		"id": "natural_gift",
@@ -1508,7 +1793,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"brave_bird": {
 		"id": "brave_bird",
@@ -1517,7 +1803,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 120,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"drainPercent": -33,
+		"accuracy": 100
 	},
 	"confusion": {
 		"id": "confusion",
@@ -1526,7 +1814,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 50,
 		"pp": 25,
-		"target": "single"
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 10,
+		"accuracy": 100
 	},
 	"heal_bell": {
 		"id": "heal_bell",
@@ -1535,7 +1826,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"magical_leaf": {
 		"id": "magical_leaf",
@@ -1544,7 +1836,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 60,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"baton_pass": {
 		"id": "baton_pass",
@@ -1553,7 +1846,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"heal_block": {
 		"id": "heal_block",
@@ -1562,7 +1856,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "aoe"
+		"target": "aoe",
+		"accuracy": 100
 	},
 	"healing_wish": {
 		"id": "healing_wish",
@@ -1571,7 +1866,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"leaf_storm": {
 		"id": "leaf_storm",
@@ -1580,7 +1876,13 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 130,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkEsp",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 90
 	},
 	"perish_song": {
 		"id": "perish_song",
@@ -1589,7 +1891,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"disable": {
 		"id": "disable",
@@ -1598,7 +1901,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"laser_focus": {
 		"id": "laser_focus",
@@ -1607,7 +1911,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"psywave": {
 		"id": "psywave",
@@ -1616,7 +1921,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"swift": {
 		"id": "swift",
@@ -1625,7 +1931,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 60,
 		"pp": 20,
-		"target": "aoe"
+		"target": "aoe",
+		"accuracy": 100
 	},
 	"psych_up": {
 		"id": "psych_up",
@@ -1634,7 +1941,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"miracle_eye": {
 		"id": "miracle_eye",
@@ -1643,7 +1951,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"psycho_cut": {
 		"id": "psycho_cut",
@@ -1652,7 +1961,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 70,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"critStages": 1,
+		"accuracy": 100
 	},
 	"guard_swap": {
 		"id": "guard_swap",
@@ -1661,7 +1972,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"power_swap": {
 		"id": "power_swap",
@@ -1670,7 +1982,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"psychic": {
 		"id": "psychic",
@@ -1679,7 +1992,13 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 90,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": -1
+		}],
+		"statChance": 10,
+		"accuracy": 100
 	},
 	"barrier": {
 		"id": "barrier",
@@ -1688,7 +2007,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"aura_sphere": {
 		"id": "aura_sphere",
@@ -1697,7 +2022,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 80,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"amnesia": {
 		"id": "amnesia",
@@ -1706,7 +2032,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": 2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"me_first": {
 		"id": "me_first",
@@ -1715,7 +2047,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"psystrike": {
 		"id": "psystrike",
@@ -1724,7 +2057,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 100,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"pound": {
 		"id": "pound",
@@ -1733,7 +2067,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 35,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"reflect_type": {
 		"id": "reflect_type",
@@ -1742,7 +2077,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"transform": {
 		"id": "transform",
@@ -1751,7 +2087,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"mega_punch": {
 		"id": "mega_punch",
@@ -1760,7 +2097,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 85
 	},
 	"metronome": {
 		"id": "metronome",
@@ -1769,7 +2107,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"nasty_plot": {
 		"id": "nasty_plot",
@@ -1778,7 +2117,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkEsp",
+			"estagios": 2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"defense_curl": {
 		"id": "defense_curl",
@@ -1787,7 +2132,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"mud_sport": {
 		"id": "mud_sport",
@@ -1796,7 +2147,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"rock_polish": {
 		"id": "rock_polish",
@@ -1805,7 +2157,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": 2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"rollout": {
 		"id": "rollout",
@@ -1814,7 +2172,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 30,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"magnitude": {
 		"id": "magnitude",
@@ -1823,7 +2182,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 30,
-		"target": "aoe"
+		"target": "aoe",
+		"accuracy": 100
 	},
 	"rock_throw": {
 		"id": "rock_throw",
@@ -1832,7 +2192,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 50,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"smack_down": {
 		"id": "smack_down",
@@ -1841,7 +2202,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 50,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"bulldoze": {
 		"id": "bulldoze",
@@ -1850,7 +2212,13 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 20,
-		"target": "aoe"
+		"target": "aoe",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"self_destruct": {
 		"id": "self_destruct",
@@ -1859,7 +2227,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 200,
 		"pp": 5,
-		"target": "aoe"
+		"target": "aoe",
+		"accuracy": 100
 	},
 	"stealth_rock": {
 		"id": "stealth_rock",
@@ -1868,7 +2237,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"rock_blast": {
 		"id": "rock_blast",
@@ -1877,7 +2247,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 25,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"earthquake": {
 		"id": "earthquake",
@@ -1886,7 +2257,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 100,
 		"pp": 10,
-		"target": "aoe"
+		"target": "aoe",
+		"accuracy": 100
 	},
 	"explosion": {
 		"id": "explosion",
@@ -1895,7 +2267,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 250,
 		"pp": 5,
-		"target": "aoe"
+		"target": "aoe",
+		"accuracy": 100
 	},
 	"stone_edge": {
 		"id": "stone_edge",
@@ -1904,7 +2277,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 100,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"critStages": 1,
+		"accuracy": 80
 	},
 	"pursuit": {
 		"id": "pursuit",
@@ -1913,7 +2288,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"fury_attack": {
 		"id": "fury_attack",
@@ -1922,7 +2298,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 15,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 85
 	},
 	"aerial_ace": {
 		"id": "aerial_ace",
@@ -1931,7 +2308,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"mirror_move": {
 		"id": "mirror_move",
@@ -1940,7 +2318,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"assurance": {
 		"id": "assurance",
@@ -1949,7 +2328,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"focus_energy": {
 		"id": "focus_energy",
@@ -1958,7 +2338,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"hyper_fang": {
 		"id": "hyper_fang",
@@ -1967,7 +2348,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 10,
+		"accuracy": 90
 	},
 	"sucker_punch": {
 		"id": "sucker_punch",
@@ -1976,7 +2359,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 70,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"super_fang": {
 		"id": "super_fang",
@@ -1985,7 +2369,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"endeavor": {
 		"id": "endeavor",
@@ -1994,7 +2379,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"petal_dance": {
 		"id": "petal_dance",
@@ -2003,7 +2389,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 120,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"petal_blizzard": {
 		"id": "petal_blizzard",
@@ -2012,7 +2399,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 90,
 		"pp": 15,
-		"target": "aoe"
+		"target": "aoe",
+		"accuracy": 100
 	},
 	"absorb": {
 		"id": "absorb",
@@ -2021,7 +2409,9 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 20,
 		"pp": 25,
-		"target": "single"
+		"target": "single",
+		"drainPercent": 50,
+		"accuracy": 100
 	},
 	"acid": {
 		"id": "acid",
@@ -2030,7 +2420,13 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 40,
 		"pp": 30,
-		"target": "aoe"
+		"target": "aoe",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": -1
+		}],
+		"statChance": 10,
+		"accuracy": 100
 	},
 	"stun_spore": {
 		"id": "stun_spore",
@@ -2039,7 +2435,10 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 100,
+		"accuracy": 75
 	},
 	"mega_drain": {
 		"id": "mega_drain",
@@ -2048,7 +2447,9 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 40,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"drainPercent": 50,
+		"accuracy": 100
 	},
 	"lucky_chant": {
 		"id": "lucky_chant",
@@ -2057,7 +2458,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"moonlight": {
 		"id": "moonlight",
@@ -2066,7 +2468,9 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"healPercent": 50,
+		"accuracy": 100
 	},
 	"giga_drain": {
 		"id": "giga_drain",
@@ -2075,7 +2479,9 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 75,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"drainPercent": 50,
+		"accuracy": 100
 	},
 	"toxic": {
 		"id": "toxic",
@@ -2084,7 +2490,10 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"status": "poison",
+		"statusChance": 100,
+		"accuracy": 90
 	},
 	"moonblast": {
 		"id": "moonblast",
@@ -2093,7 +2502,13 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 95,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkEsp",
+			"estagios": -1
+		}],
+		"statChance": 30,
+		"accuracy": 100
 	},
 	"grassy_terrain": {
 		"id": "grassy_terrain",
@@ -2102,7 +2517,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"wrap": {
 		"id": "wrap",
@@ -2111,7 +2527,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 15,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"knock_off": {
 		"id": "knock_off",
@@ -2120,7 +2537,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 65,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"gastro_acid": {
 		"id": "gastro_acid",
@@ -2129,7 +2547,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"poison_jab": {
 		"id": "poison_jab",
@@ -2138,7 +2557,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"status": "poison",
+		"statusChance": 30,
+		"accuracy": 100
 	},
 	"slam": {
 		"id": "slam",
@@ -2147,7 +2569,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 75
 	},
 	"wring_out": {
 		"id": "wring_out",
@@ -2156,7 +2579,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"leaf_tornado": {
 		"id": "leaf_tornado",
@@ -2165,7 +2589,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 65,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"spit_up": {
 		"id": "spit_up",
@@ -2174,7 +2599,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"stockpile": {
 		"id": "stockpile",
@@ -2183,7 +2609,16 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 1
+		}, {
+			"stat": "defEsp",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"swallow": {
 		"id": "swallow",
@@ -2192,7 +2627,9 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"healPercent": 25,
+		"accuracy": 100
 	},
 	"leaf_blade": {
 		"id": "leaf_blade",
@@ -2201,7 +2638,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 90,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"critStages": 1,
+		"accuracy": 100
 	},
 	"barrage": {
 		"id": "barrage",
@@ -2210,7 +2649,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 15,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 85
 	},
 	"hypnosis": {
 		"id": "hypnosis",
@@ -2219,7 +2659,10 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"status": "sleep",
+		"statusChance": 100,
+		"accuracy": 60
 	},
 	"uproar": {
 		"id": "uproar",
@@ -2228,7 +2671,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 90,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"bullet_seed": {
 		"id": "bullet_seed",
@@ -2237,7 +2681,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 25,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"bestow": {
 		"id": "bestow",
@@ -2246,7 +2691,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"constrict": {
 		"id": "constrict",
@@ -2255,7 +2701,13 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 10,
 		"pp": 35,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -1
+		}],
+		"statChance": 10,
+		"accuracy": 100
 	},
 	"ingrain": {
 		"id": "ingrain",
@@ -2264,7 +2716,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"bind": {
 		"id": "bind",
@@ -2273,7 +2726,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 15,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 85
 	},
 	"tickle": {
 		"id": "tickle",
@@ -2282,7 +2736,16 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -1
+		}, {
+			"stat": "def",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"power_whip": {
 		"id": "power_whip",
@@ -2291,7 +2754,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 120,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 85
 	},
 	"body_slam": {
 		"id": "body_slam",
@@ -2300,7 +2764,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 85,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 30,
+		"accuracy": 100
 	},
 	"aromatherapy": {
 		"id": "aromatherapy",
@@ -2309,7 +2776,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"splash": {
 		"id": "splash",
@@ -2318,7 +2786,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"fairy_wind": {
 		"id": "fairy_wind",
@@ -2327,7 +2796,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 40,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"acrobatics": {
 		"id": "acrobatics",
@@ -2336,7 +2806,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 55,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"rage_powder": {
 		"id": "rage_powder",
@@ -2345,7 +2816,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"cotton_spore": {
 		"id": "cotton_spore",
@@ -2354,7 +2826,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "aoe"
+		"target": "aoe",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"u_turn": {
 		"id": "u_turn",
@@ -2363,7 +2841,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 70,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"bounce": {
 		"id": "bounce",
@@ -2372,7 +2851,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 85,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 30,
+		"accuracy": 85
 	},
 	"memento": {
 		"id": "memento",
@@ -2381,7 +2863,16 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -2
+		}, {
+			"stat": "atkEsp",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"grass_whistle": {
 		"id": "grass_whistle",
@@ -2390,7 +2881,10 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "sleep",
+		"statusChance": 100,
+		"accuracy": 55
 	},
 	"flower_shield": {
 		"id": "flower_shield",
@@ -2399,7 +2893,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"string_shot": {
 		"id": "string_shot",
@@ -2408,7 +2908,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "aoe"
+		"target": "aoe",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 95
 	},
 	"bug_bite": {
 		"id": "bug_bite",
@@ -2417,7 +2923,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"harden": {
 		"id": "harden",
@@ -2426,7 +2933,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"psybeam": {
 		"id": "psybeam",
@@ -2435,7 +2948,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 65,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 10,
+		"accuracy": 100
 	},
 	"silver_wind": {
 		"id": "silver_wind",
@@ -2444,7 +2960,31 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 60,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"statChanges": [
+			{
+				"stat": "atkFis",
+				"estagios": 1
+			},
+			{
+				"stat": "def",
+				"estagios": 1
+			},
+			{
+				"stat": "atkEsp",
+				"estagios": 1
+			},
+			{
+				"stat": "defEsp",
+				"estagios": 1
+			},
+			{
+				"stat": "speed",
+				"estagios": 1
+			}
+		],
+		"statChance": 10,
+		"accuracy": 100
 	},
 	"supersonic": {
 		"id": "supersonic",
@@ -2453,7 +2993,10 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 100,
+		"accuracy": 55
 	},
 	"bug_buzz": {
 		"id": "bug_buzz",
@@ -2462,7 +3005,13 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 90,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": -1
+		}],
+		"statChance": 10,
+		"accuracy": 100
 	},
 	"captivate": {
 		"id": "captivate",
@@ -2471,7 +3020,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "aoe"
+		"target": "aoe",
+		"statChanges": [{
+			"stat": "atkEsp",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"quiver_dance": {
 		"id": "quiver_dance",
@@ -2480,7 +3035,23 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [
+			{
+				"stat": "atkEsp",
+				"estagios": 1
+			},
+			{
+				"stat": "defEsp",
+				"estagios": 1
+			},
+			{
+				"stat": "speed",
+				"estagios": 1
+			}
+		],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"poison_sting": {
 		"id": "poison_sting",
@@ -2489,7 +3060,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 15,
 		"pp": 35,
-		"target": "single"
+		"target": "single",
+		"status": "poison",
+		"statusChance": 30,
+		"accuracy": 100
 	},
 	"twineedle": {
 		"id": "twineedle",
@@ -2498,7 +3072,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 25,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"status": "poison",
+		"statusChance": 20,
+		"accuracy": 100
 	},
 	"rage": {
 		"id": "rage",
@@ -2507,7 +3084,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 20,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"venoshock": {
 		"id": "venoshock",
@@ -2516,7 +3094,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 65,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"toxic_spikes": {
 		"id": "toxic_spikes",
@@ -2525,7 +3104,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"pin_missile": {
 		"id": "pin_missile",
@@ -2534,7 +3114,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 25,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 95
 	},
 	"fell_stinger": {
 		"id": "fell_stinger",
@@ -2543,7 +3124,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 50,
 		"pp": 25,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"fury_cutter": {
 		"id": "fury_cutter",
@@ -2552,7 +3134,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 95
 	},
 	"spore": {
 		"id": "spore",
@@ -2561,7 +3144,10 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "sleep",
+		"statusChance": 100,
+		"accuracy": 100
 	},
 	"x_scissor": {
 		"id": "x_scissor",
@@ -2570,7 +3156,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"cross_poison": {
 		"id": "cross_poison",
@@ -2579,7 +3166,11 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 70,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"status": "poison",
+		"statusChance": 10,
+		"critStages": 1,
+		"accuracy": 100
 	},
 	"foresight": {
 		"id": "foresight",
@@ -2588,7 +3179,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"signal_beam": {
 		"id": "signal_beam",
@@ -2597,7 +3189,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 75,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 10,
+		"accuracy": 100
 	},
 	"leech_life": {
 		"id": "leech_life",
@@ -2606,7 +3201,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"drainPercent": 50,
+		"accuracy": 100
 	},
 	"zen_headbutt": {
 		"id": "zen_headbutt",
@@ -2615,7 +3212,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 20,
+		"accuracy": 90
 	},
 	"poison_fang": {
 		"id": "poison_fang",
@@ -2624,7 +3223,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 50,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "poison",
+		"statusChance": 50,
+		"accuracy": 100
 	},
 	"vacuum_wave": {
 		"id": "vacuum_wave",
@@ -2633,7 +3235,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 40,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"false_swipe": {
 		"id": "false_swipe",
@@ -2642,7 +3245,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 40,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"razor_wind": {
 		"id": "razor_wind",
@@ -2651,7 +3255,9 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 80,
 		"pp": 10,
-		"target": "aoe"
+		"target": "aoe",
+		"critStages": 1,
+		"accuracy": 100
 	},
 	"double_team": {
 		"id": "double_team",
@@ -2660,7 +3266,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"night_slash": {
 		"id": "night_slash",
@@ -2669,7 +3276,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 70,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"critStages": 1,
+		"accuracy": 100
 	},
 	"double_hit": {
 		"id": "double_hit",
@@ -2678,7 +3287,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 35,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"swords_dance": {
 		"id": "swords_dance",
@@ -2687,7 +3297,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"feint": {
 		"id": "feint",
@@ -2696,7 +3312,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 30,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"vice_grip": {
 		"id": "vice_grip",
@@ -2705,7 +3322,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 55,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"seismic_toss": {
 		"id": "seismic_toss",
@@ -2714,7 +3332,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"revenge": {
 		"id": "revenge",
@@ -2723,7 +3342,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"vital_throw": {
 		"id": "vital_throw",
@@ -2732,7 +3352,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 70,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"brick_break": {
 		"id": "brick_break",
@@ -2741,7 +3362,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 75,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"submission": {
 		"id": "submission",
@@ -2750,7 +3372,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"drainPercent": -25,
+		"accuracy": 80
 	},
 	"storm_throw": {
 		"id": "storm_throw",
@@ -2759,7 +3383,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"critStages": 6,
+		"accuracy": 100
 	},
 	"thrash": {
 		"id": "thrash",
@@ -2768,7 +3394,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 120,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"superpower": {
 		"id": "superpower",
@@ -2777,7 +3404,16 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 120,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -1
+		}, {
+			"stat": "def",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"guillotine": {
 		"id": "guillotine",
@@ -2786,7 +3422,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 30
 	},
 	"mach_punch": {
 		"id": "mach_punch",
@@ -2795,7 +3432,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"comet_punch": {
 		"id": "comet_punch",
@@ -2804,7 +3442,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 18,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 85
 	},
 	"infestation": {
 		"id": "infestation",
@@ -2813,7 +3452,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 20,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"night_shade": {
 		"id": "night_shade",
@@ -2822,7 +3462,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"shadow_sneak": {
 		"id": "shadow_sneak",
@@ -2831,7 +3472,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"fury_swipes": {
 		"id": "fury_swipes",
@@ -2840,7 +3482,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 18,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 80
 	},
 	"spider_web": {
 		"id": "spider_web",
@@ -2849,7 +3492,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"sticky_web": {
 		"id": "sticky_web",
@@ -2858,7 +3502,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"toxic_thread": {
 		"id": "toxic_thread",
@@ -2867,7 +3512,15 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"status": "poison",
+		"statusChance": 100,
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"venom_drench": {
 		"id": "venom_drench",
@@ -2876,7 +3529,23 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "aoe"
+		"target": "aoe",
+		"statChanges": [
+			{
+				"stat": "atkFis",
+				"estagios": -1
+			},
+			{
+				"stat": "atkEsp",
+				"estagios": -1
+			},
+			{
+				"stat": "speed",
+				"estagios": -1
+			}
+		],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"sonic_boom": {
 		"id": "sonic_boom",
@@ -2885,7 +3554,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"screech": {
 		"id": "screech",
@@ -2894,7 +3564,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 85
 	},
 	"bide": {
 		"id": "bide",
@@ -2903,7 +3579,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"spikes": {
 		"id": "spikes",
@@ -2912,7 +3589,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"payback": {
 		"id": "payback",
@@ -2921,7 +3599,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 50,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"gyro_ball": {
 		"id": "gyro_ball",
@@ -2930,7 +3609,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"autotomize": {
 		"id": "autotomize",
@@ -2939,7 +3619,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": 2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"heavy_slam": {
 		"id": "heavy_slam",
@@ -2948,7 +3634,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"magnet_rise": {
 		"id": "magnet_rise",
@@ -2957,7 +3644,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"mirror_shot": {
 		"id": "mirror_shot",
@@ -2966,7 +3654,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 65,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 85
 	},
 	"bullet_punch": {
 		"id": "bullet_punch",
@@ -2975,7 +3664,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"metal_claw": {
 		"id": "metal_claw",
@@ -2984,7 +3674,13 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 50,
 		"pp": 35,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}],
+		"statChance": 10,
+		"accuracy": 95
 	},
 	"iron_head": {
 		"id": "iron_head",
@@ -2993,7 +3689,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 100
 	},
 	"arm_thrust": {
 		"id": "arm_thrust",
@@ -3002,7 +3700,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 15,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"horn_attack": {
 		"id": "horn_attack",
@@ -3011,7 +3710,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 65,
 		"pp": 25,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"chip_away": {
 		"id": "chip_away",
@@ -3020,7 +3720,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 70,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"counter": {
 		"id": "counter",
@@ -3029,7 +3730,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"megahorn": {
 		"id": "megahorn",
@@ -3038,7 +3740,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 120,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 85
 	},
 	"close_combat": {
 		"id": "close_combat",
@@ -3047,7 +3750,16 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 120,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": -1
+		}, {
+			"stat": "defEsp",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"reversal": {
 		"id": "reversal",
@@ -3056,7 +3768,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"flash_cannon": {
 		"id": "flash_cannon",
@@ -3065,7 +3778,13 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 80,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": -1
+		}],
+		"statChance": 10,
+		"accuracy": 100
 	},
 	"water_sport": {
 		"id": "water_sport",
@@ -3074,7 +3793,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"soak": {
 		"id": "soak",
@@ -3083,7 +3803,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"wonder_room": {
 		"id": "wonder_room",
@@ -3092,7 +3813,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"aqua_jet": {
 		"id": "aqua_jet",
@@ -3101,7 +3823,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"double_slap": {
 		"id": "double_slap",
@@ -3110,7 +3833,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 15,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 85
 	},
 	"mud_shot": {
 		"id": "mud_shot",
@@ -3119,7 +3843,13 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 55,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 95
 	},
 	"belly_drum": {
 		"id": "belly_drum",
@@ -3128,7 +3858,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"wake_up_slap": {
 		"id": "wake_up_slap",
@@ -3137,7 +3868,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 70,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"mud_bomb": {
 		"id": "mud_bomb",
@@ -3146,7 +3878,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 65,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 85
 	},
 	"acid_spray": {
 		"id": "acid_spray",
@@ -3155,7 +3888,13 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 40,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"brine": {
 		"id": "brine",
@@ -3164,7 +3903,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 65,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"hex": {
 		"id": "hex",
@@ -3173,7 +3913,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 65,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"sludge_wave": {
 		"id": "sludge_wave",
@@ -3182,7 +3923,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 95,
 		"pp": 10,
-		"target": "aoe"
+		"target": "aoe",
+		"status": "poison",
+		"statusChance": 10,
+		"accuracy": 100
 	},
 	"curse": {
 		"id": "curse",
@@ -3191,7 +3935,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"yawn": {
 		"id": "yawn",
@@ -3200,7 +3945,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"headbutt": {
 		"id": "headbutt",
@@ -3209,7 +3955,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 70,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 100
 	},
 	"slack_off": {
 		"id": "slack_off",
@@ -3218,7 +3966,9 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"healPercent": 50,
+		"accuracy": 100
 	},
 	"heal_pulse": {
 		"id": "heal_pulse",
@@ -3227,7 +3977,9 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"healPercent": 50,
+		"accuracy": 100
 	},
 	"icy_wind": {
 		"id": "icy_wind",
@@ -3236,7 +3988,13 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 55,
 		"pp": 15,
-		"target": "aoe"
+		"target": "aoe",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 95
 	},
 	"encore": {
 		"id": "encore",
@@ -3245,7 +4003,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"rest": {
 		"id": "rest",
@@ -3254,7 +4013,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"aqua_ring": {
 		"id": "aqua_ring",
@@ -3263,7 +4023,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"dive": {
 		"id": "dive",
@@ -3272,7 +4033,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"icicle_spear": {
 		"id": "icicle_spear",
@@ -3281,7 +4043,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 25,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"clamp": {
 		"id": "clamp",
@@ -3290,7 +4053,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 35,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 85
 	},
 	"razor_shell": {
 		"id": "razor_shell",
@@ -3299,7 +4063,13 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 75,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": -1
+		}],
+		"statChance": 50,
+		"accuracy": 95
 	},
 	"whirlpool": {
 		"id": "whirlpool",
@@ -3308,7 +4078,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 35,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 85
 	},
 	"shell_smash": {
 		"id": "shell_smash",
@@ -3317,7 +4088,31 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"statChanges": [
+			{
+				"stat": "def",
+				"estagios": -1
+			},
+			{
+				"stat": "defEsp",
+				"estagios": -1
+			},
+			{
+				"stat": "atkFis",
+				"estagios": 2
+			},
+			{
+				"stat": "atkEsp",
+				"estagios": 2
+			},
+			{
+				"stat": "speed",
+				"estagios": 2
+			}
+		],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"crabhammer": {
 		"id": "crabhammer",
@@ -3326,7 +4121,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 100,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"critStages": 1,
+		"accuracy": 90
 	},
 	"flail": {
 		"id": "flail",
@@ -3335,7 +4132,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"wide_guard": {
 		"id": "wide_guard",
@@ -3344,7 +4142,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"twister": {
 		"id": "twister",
@@ -3353,7 +4152,9 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 40,
 		"pp": 20,
-		"target": "aoe"
+		"target": "aoe",
+		"flinchChance": 20,
+		"accuracy": 100
 	},
 	"dragon_pulse": {
 		"id": "dragon_pulse",
@@ -3362,7 +4163,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 85,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"dragon_dance": {
 		"id": "dragon_dance",
@@ -3371,7 +4173,16 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}, {
+			"stat": "speed",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"waterfall": {
 		"id": "waterfall",
@@ -3380,7 +4191,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 20,
+		"accuracy": 100
 	},
 	"horn_drill": {
 		"id": "horn_drill",
@@ -3389,7 +4202,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 30
 	},
 	"camouflage": {
 		"id": "camouflage",
@@ -3398,7 +4212,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"minimize": {
 		"id": "minimize",
@@ -3407,7 +4222,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"power_gem": {
 		"id": "power_gem",
@@ -3416,7 +4232,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 80,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"confuse_ray": {
 		"id": "confuse_ray",
@@ -3425,7 +4242,10 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 100,
+		"accuracy": 100
 	},
 	"cosmic_power": {
 		"id": "cosmic_power",
@@ -3434,7 +4254,16 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 1
+		}, {
+			"stat": "defEsp",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"hyper_beam": {
 		"id": "hyper_beam",
@@ -3443,7 +4272,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 150,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"sing": {
 		"id": "sing",
@@ -3452,7 +4282,10 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "sleep",
+		"statusChance": 100,
+		"accuracy": 55
 	},
 	"electro_ball": {
 		"id": "electro_ball",
@@ -3461,7 +4294,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"ion_deluge": {
 		"id": "ion_deluge",
@@ -3470,7 +4304,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 25,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"eerie_impulse": {
 		"id": "eerie_impulse",
@@ -3479,7 +4314,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkEsp",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"spotlight": {
 		"id": "spotlight",
@@ -3488,7 +4329,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"helping_hand": {
 		"id": "helping_hand",
@@ -3497,7 +4339,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"play_rough": {
 		"id": "play_rough",
@@ -3506,7 +4349,13 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 90,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -1
+		}],
+		"statChance": 10,
+		"accuracy": 90
 	},
 	"hyper_voice": {
 		"id": "hyper_voice",
@@ -3515,7 +4364,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 90,
 		"pp": 10,
-		"target": "aoe"
+		"target": "aoe",
+		"accuracy": 100
 	},
 	"haze": {
 		"id": "haze",
@@ -3524,7 +4374,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"muddy_water": {
 		"id": "muddy_water",
@@ -3533,7 +4384,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 90,
 		"pp": 10,
-		"target": "aoe"
+		"target": "aoe",
+		"accuracy": 85
 	},
 	"destiny_bond": {
 		"id": "destiny_bond",
@@ -3542,7 +4394,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"refresh": {
 		"id": "refresh",
@@ -3551,7 +4404,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"spike_cannon": {
 		"id": "spike_cannon",
@@ -3560,7 +4414,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 20,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"earth_power": {
 		"id": "earth_power",
@@ -3569,7 +4424,13 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 90,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": -1
+		}],
+		"statChance": 10,
+		"accuracy": 100
 	},
 	"lock_on": {
 		"id": "lock_on",
@@ -3578,7 +4439,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"gunk_shot": {
 		"id": "gunk_shot",
@@ -3587,7 +4449,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 120,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"status": "poison",
+		"statusChance": 30,
+		"accuracy": 80
 	},
 	"octazooka": {
 		"id": "octazooka",
@@ -3596,7 +4461,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 65,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 85
 	},
 	"sand_attack": {
 		"id": "sand_attack",
@@ -3605,7 +4471,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"feather_dance": {
 		"id": "feather_dance",
@@ -3614,7 +4481,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"drill_run": {
 		"id": "drill_run",
@@ -3623,7 +4496,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"critStages": 1,
+		"accuracy": 95
 	},
 	"play_nice": {
 		"id": "play_nice",
@@ -3632,7 +4507,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"disarming_voice": {
 		"id": "disarming_voice",
@@ -3641,7 +4522,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 40,
 		"pp": 15,
-		"target": "aoe"
+		"target": "aoe",
+		"accuracy": 100
 	},
 	"round": {
 		"id": "round",
@@ -3650,7 +4532,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 60,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"mimic": {
 		"id": "mimic",
@@ -3659,7 +4542,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"fake_out": {
 		"id": "fake_out",
@@ -3668,7 +4552,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 100,
+		"accuracy": 100
 	},
 	"feint_attack": {
 		"id": "feint_attack",
@@ -3677,7 +4563,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"taunt": {
 		"id": "taunt",
@@ -3686,7 +4573,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"pay_day": {
 		"id": "pay_day",
@@ -3695,7 +4583,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"switcheroo": {
 		"id": "switcheroo",
@@ -3704,7 +4593,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"air_cutter": {
 		"id": "air_cutter",
@@ -3713,7 +4603,9 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 60,
 		"pp": 25,
-		"target": "aoe"
+		"target": "aoe",
+		"critStages": 1,
+		"accuracy": 95
 	},
 	"acupressure": {
 		"id": "acupressure",
@@ -3722,7 +4614,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"jump_kick": {
 		"id": "jump_kick",
@@ -3731,7 +4624,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 100,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 95
 	},
 	"tri_attack": {
 		"id": "tri_attack",
@@ -3740,7 +4634,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 80,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"lick": {
 		"id": "lick",
@@ -3749,7 +4644,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 30,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 30,
+		"accuracy": 100
 	},
 	"dizzy_punch": {
 		"id": "dizzy_punch",
@@ -3758,7 +4656,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 70,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 20,
+		"accuracy": 100
 	},
 	"outrage": {
 		"id": "outrage",
@@ -3767,7 +4668,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 120,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"work_up": {
 		"id": "work_up",
@@ -3776,7 +4678,16 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}, {
+			"stat": "atkEsp",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"giga_impact": {
 		"id": "giga_impact",
@@ -3785,7 +4696,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 150,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"covet": {
 		"id": "covet",
@@ -3794,7 +4706,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 25,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"baby_doll_eyes": {
 		"id": "baby_doll_eyes",
@@ -3803,7 +4716,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"charm": {
 		"id": "charm",
@@ -3812,7 +4731,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"last_resort": {
 		"id": "last_resort",
@@ -3821,7 +4746,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 140,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"trump_card": {
 		"id": "trump_card",
@@ -3830,7 +4756,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"conversion": {
 		"id": "conversion",
@@ -3839,7 +4766,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"conversion_2": {
 		"id": "conversion_2",
@@ -3848,7 +4776,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"sharpen": {
 		"id": "sharpen",
@@ -3857,7 +4786,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"recycle": {
 		"id": "recycle",
@@ -3866,7 +4801,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"magic_coat": {
 		"id": "magic_coat",
@@ -3875,7 +4811,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"snore": {
 		"id": "snore",
@@ -3884,7 +4821,9 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 50,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 100
 	},
 	"sleep_talk": {
 		"id": "sleep_talk",
@@ -3893,7 +4832,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"block": {
 		"id": "block",
@@ -3902,7 +4842,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"high_horsepower": {
 		"id": "high_horsepower",
@@ -3911,7 +4852,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 95,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 95
 	},
 	"follow_me": {
 		"id": "follow_me",
@@ -3920,7 +4862,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"coil": {
 		"id": "coil",
@@ -3929,7 +4872,16 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}, {
+			"stat": "def",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"echoed_voice": {
 		"id": "echoed_voice",
@@ -3938,7 +4890,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 40,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"psycho_shift": {
 		"id": "psycho_shift",
@@ -3947,7 +4900,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"synchronoise": {
 		"id": "synchronoise",
@@ -3956,7 +4910,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 120,
 		"pp": 10,
-		"target": "aoe"
+		"target": "aoe",
+		"accuracy": 100
 	},
 	"dream_eater": {
 		"id": "dream_eater",
@@ -3965,7 +4920,9 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 100,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"drainPercent": 50,
+		"accuracy": 100
 	},
 	"sweet_kiss": {
 		"id": "sweet_kiss",
@@ -3974,7 +4931,10 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 100,
+		"accuracy": 75
 	},
 	"copycat": {
 		"id": "copycat",
@@ -3983,7 +4943,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"astonish": {
 		"id": "astonish",
@@ -3992,7 +4953,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 30,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 100
 	},
 	"fling": {
 		"id": "fling",
@@ -4001,7 +4964,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"odor_sleuth": {
 		"id": "odor_sleuth",
@@ -4010,7 +4974,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"spite": {
 		"id": "spite",
@@ -4019,7 +4984,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"mud_slap": {
 		"id": "mud_slap",
@@ -4028,7 +4994,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 20,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"dig": {
 		"id": "dig",
@@ -4037,7 +5004,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"glare": {
 		"id": "glare",
@@ -4046,7 +5014,10 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 100,
+		"accuracy": 100
 	},
 	"fake_tears": {
 		"id": "fake_tears",
@@ -4055,7 +5026,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"hammer_arm": {
 		"id": "hammer_arm",
@@ -4064,7 +5041,13 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 100,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 90
 	},
 	"role_play": {
 		"id": "role_play",
@@ -4073,7 +5056,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"imprison": {
 		"id": "imprison",
@@ -4082,7 +5066,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"sketch": {
 		"id": "sketch",
@@ -4091,7 +5076,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 1,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"milk_drink": {
 		"id": "milk_drink",
@@ -4100,7 +5086,9 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"healPercent": 50,
+		"accuracy": 100
 	},
 	"steamroller": {
 		"id": "steamroller",
@@ -4109,7 +5097,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 65,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 100
 	},
 	"rock_tomb": {
 		"id": "rock_tomb",
@@ -4118,7 +5108,13 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 95
 	},
 	"dragon_breath": {
 		"id": "dragon_breath",
@@ -4127,7 +5123,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 60,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 30,
+		"accuracy": 100
 	},
 	"rock_slide": {
 		"id": "rock_slide",
@@ -4136,7 +5135,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 75,
 		"pp": 10,
-		"target": "aoe"
+		"target": "aoe",
+		"flinchChance": 30,
+		"accuracy": 90
 	},
 	"sand_tomb": {
 		"id": "sand_tomb",
@@ -4145,7 +5146,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 35,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 85
 	},
 	"iron_tail": {
 		"id": "iron_tail",
@@ -4154,7 +5156,13 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 100,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": -1
+		}],
+		"statChance": 30,
+		"accuracy": 75
 	},
 	"sandstorm": {
 		"id": "sandstorm",
@@ -4163,7 +5171,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"metal_sound": {
 		"id": "metal_sound",
@@ -4172,7 +5181,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": -2
+		}],
+		"statChance": 100,
+		"accuracy": 85
 	},
 	"sky_drop": {
 		"id": "sky_drop",
@@ -4181,7 +5196,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"low_kick": {
 		"id": "low_kick",
@@ -4190,7 +5206,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"wood_hammer": {
 		"id": "wood_hammer",
@@ -4199,7 +5216,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 120,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"drainPercent": -33,
+		"accuracy": 100
 	},
 	"tearful_look": {
 		"id": "tearful_look",
@@ -4208,7 +5227,16 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -1
+		}, {
+			"stat": "atkEsp",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"head_smash": {
 		"id": "head_smash",
@@ -4217,7 +5245,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 150,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"drainPercent": -50,
+		"accuracy": 80
 	},
 	"dark_pulse": {
 		"id": "dark_pulse",
@@ -4226,7 +5256,9 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 80,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 20,
+		"accuracy": 100
 	},
 	"crush_claw": {
 		"id": "crush_claw",
@@ -4235,7 +5267,13 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 75,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": -1
+		}],
+		"statChance": 50,
+		"accuracy": 95
 	},
 	"fissure": {
 		"id": "fissure",
@@ -4244,7 +5282,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 30
 	},
 	"rototiller": {
 		"id": "rototiller",
@@ -4253,7 +5292,16 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}, {
+			"stat": "atkEsp",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"bone_club": {
 		"id": "bone_club",
@@ -4262,7 +5310,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 65,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 10,
+		"accuracy": 85
 	},
 	"bonemerang": {
 		"id": "bonemerang",
@@ -4271,7 +5321,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 50,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"stomping_tantrum": {
 		"id": "stomping_tantrum",
@@ -4280,7 +5331,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 75,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"retaliate": {
 		"id": "retaliate",
@@ -4289,7 +5341,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 70,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"bone_rush": {
 		"id": "bone_rush",
@@ -4298,7 +5351,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 25,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"sky_uppercut": {
 		"id": "sky_uppercut",
@@ -4307,7 +5361,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 85,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"dragon_claw": {
 		"id": "dragon_claw",
@@ -4316,7 +5371,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"flare_blitz": {
 		"id": "flare_blitz",
@@ -4325,7 +5381,11 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 120,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "burn",
+		"statusChance": 10,
+		"drainPercent": -33,
+		"accuracy": 100
 	},
 	"shadow_claw": {
 		"id": "shadow_claw",
@@ -4334,7 +5394,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 70,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"critStages": 1,
+		"accuracy": 100
 	},
 	"flame_wheel": {
 		"id": "flame_wheel",
@@ -4343,7 +5405,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 25,
-		"target": "single"
+		"target": "single",
+		"status": "burn",
+		"statusChance": 10,
+		"accuracy": 100
 	},
 	"extreme_speed": {
 		"id": "extreme_speed",
@@ -4352,7 +5417,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"flame_charge": {
 		"id": "flame_charge",
@@ -4361,7 +5427,13 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 50,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"smog": {
 		"id": "smog",
@@ -4370,7 +5442,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 30,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"status": "poison",
+		"statusChance": 40,
+		"accuracy": 70
 	},
 	"clear_smog": {
 		"id": "clear_smog",
@@ -4379,7 +5454,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 50,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"fire_punch": {
 		"id": "fire_punch",
@@ -4388,7 +5464,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 75,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "burn",
+		"statusChance": 10,
+		"accuracy": 100
 	},
 	"incinerate": {
 		"id": "incinerate",
@@ -4397,7 +5476,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 60,
 		"pp": 15,
-		"target": "aoe"
+		"target": "aoe",
+		"accuracy": 100
 	},
 	"nuzzle": {
 		"id": "nuzzle",
@@ -4406,7 +5486,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 20,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 100,
+		"accuracy": 100
 	},
 	"thunderbolt": {
 		"id": "thunderbolt",
@@ -4415,7 +5498,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 90,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 10,
+		"accuracy": 100
 	},
 	"wild_charge": {
 		"id": "wild_charge",
@@ -4424,7 +5510,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 90,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"drainPercent": -25,
+		"accuracy": 100
 	},
 	"magnet_bomb": {
 		"id": "magnet_bomb",
@@ -4433,7 +5521,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"electric_terrain": {
 		"id": "electric_terrain",
@@ -4442,7 +5531,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"charge_beam": {
 		"id": "charge_beam",
@@ -4451,7 +5541,13 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 50,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkEsp",
+			"estagios": 1
+		}],
+		"statChance": 70,
+		"accuracy": 90
 	},
 	"shock_wave": {
 		"id": "shock_wave",
@@ -4460,7 +5556,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 60,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"thunder_punch": {
 		"id": "thunder_punch",
@@ -4469,7 +5566,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 75,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "paralysis",
+		"statusChance": 10,
+		"accuracy": 100
 	},
 	"cotton_guard": {
 		"id": "cotton_guard",
@@ -4478,7 +5578,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 3
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"belch": {
 		"id": "belch",
@@ -4487,7 +5593,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 120,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"double_kick": {
 		"id": "double_kick",
@@ -4496,7 +5603,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 30,
 		"pp": 30,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"flatter": {
 		"id": "flatter",
@@ -4505,7 +5613,15 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 100,
+		"statChanges": [{
+			"stat": "atkEsp",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"mean_look": {
 		"id": "mean_look",
@@ -4514,7 +5630,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"quick_guard": {
 		"id": "quick_guard",
@@ -4523,7 +5640,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"poison_gas": {
 		"id": "poison_gas",
@@ -4532,7 +5650,10 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "aoe"
+		"target": "aoe",
+		"status": "poison",
+		"statusChance": 100,
+		"accuracy": 90
 	},
 	"sludge": {
 		"id": "sludge",
@@ -4541,7 +5662,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 65,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"status": "poison",
+		"statusChance": 30,
+		"accuracy": 100
 	},
 	"sludge_bomb": {
 		"id": "sludge_bomb",
@@ -4550,7 +5674,10 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 90,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"status": "poison",
+		"statusChance": 30,
+		"accuracy": 100
 	},
 	"acid_armor": {
 		"id": "acid_armor",
@@ -4559,7 +5686,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 2
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"karate_chop": {
 		"id": "karate_chop",
@@ -4568,7 +5701,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 50,
 		"pp": 25,
-		"target": "single"
+		"target": "single",
+		"critStages": 1,
+		"accuracy": 100
 	},
 	"cross_chop": {
 		"id": "cross_chop",
@@ -4577,7 +5712,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 100,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"critStages": 1,
+		"accuracy": 80
 	},
 	"final_gambit": {
 		"id": "final_gambit",
@@ -4586,7 +5723,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"low_sweep": {
 		"id": "low_sweep",
@@ -4595,7 +5733,13 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 65,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "speed",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"dual_chop": {
 		"id": "dual_chop",
@@ -4604,7 +5748,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"bulk_up": {
 		"id": "bulk_up",
@@ -4613,7 +5758,16 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}, {
+			"stat": "def",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"dynamic_punch": {
 		"id": "dynamic_punch",
@@ -4622,7 +5776,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 100,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 100,
+		"accuracy": 50
 	},
 	"strength": {
 		"id": "strength",
@@ -4631,7 +5788,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 80,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"meditate": {
 		"id": "meditate",
@@ -4640,7 +5798,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"mega_kick": {
 		"id": "mega_kick",
@@ -4649,7 +5813,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 120,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 75
 	},
 	"rolling_kick": {
 		"id": "rolling_kick",
@@ -4658,7 +5823,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 85
 	},
 	"high_jump_kick": {
 		"id": "high_jump_kick",
@@ -4667,7 +5834,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 130,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"blaze_kick": {
 		"id": "blaze_kick",
@@ -4676,7 +5844,11 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 85,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"status": "burn",
+		"statusChance": 10,
+		"critStages": 1,
+		"accuracy": 90
 	},
 	"focus_punch": {
 		"id": "focus_punch",
@@ -4685,7 +5857,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 150,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"ice_punch": {
 		"id": "ice_punch",
@@ -4694,7 +5867,10 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 75,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"status": "freeze",
+		"statusChance": 10,
+		"accuracy": 100
 	},
 	"draining_kiss": {
 		"id": "draining_kiss",
@@ -4703,7 +5879,9 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 50,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"drainPercent": 75,
+		"accuracy": 100
 	},
 	"lovely_kiss": {
 		"id": "lovely_kiss",
@@ -4712,7 +5890,10 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"status": "sleep",
+		"statusChance": 100,
+		"accuracy": 75
 	},
 	"heart_stamp": {
 		"id": "heart_stamp",
@@ -4721,7 +5902,9 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 25,
-		"target": "single"
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 100
 	},
 	"avalanche": {
 		"id": "avalanche",
@@ -4730,7 +5913,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"present": {
 		"id": "present",
@@ -4739,7 +5923,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"steel_wing": {
 		"id": "steel_wing",
@@ -4748,7 +5933,13 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 70,
 		"pp": 25,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 1
+		}],
+		"statChance": 10,
+		"accuracy": 90
 	},
 	"teleport": {
 		"id": "teleport",
@@ -4757,7 +5948,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"stored_power": {
 		"id": "stored_power",
@@ -4766,7 +5958,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 20,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"ominous_wind": {
 		"id": "ominous_wind",
@@ -4775,7 +5968,31 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 60,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"statChanges": [
+			{
+				"stat": "atkFis",
+				"estagios": 1
+			},
+			{
+				"stat": "def",
+				"estagios": 1
+			},
+			{
+				"stat": "atkEsp",
+				"estagios": 1
+			},
+			{
+				"stat": "defEsp",
+				"estagios": 1
+			},
+			{
+				"stat": "speed",
+				"estagios": 1
+			}
+		],
+		"statChance": 10,
+		"accuracy": 100
 	},
 	"wish": {
 		"id": "wish",
@@ -4784,7 +6001,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"kinesis": {
 		"id": "kinesis",
@@ -4793,7 +6011,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 80
 	},
 	"telekinesis": {
 		"id": "telekinesis",
@@ -4802,7 +6021,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"ally_switch": {
 		"id": "ally_switch",
@@ -4811,7 +6031,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"trick": {
 		"id": "trick",
@@ -4820,7 +6041,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"psyshock": {
 		"id": "psyshock",
@@ -4829,7 +6051,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 80,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"nightmare": {
 		"id": "nightmare",
@@ -4838,7 +6061,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"hidden_power": {
 		"id": "hidden_power",
@@ -4847,7 +6071,8 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 60,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"shadow_ball": {
 		"id": "shadow_ball",
@@ -4856,7 +6081,13 @@ var ABILITIES_DATA = {
 		"category": "special",
 		"power": 80,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": -1
+		}],
+		"statChance": 20,
+		"accuracy": 100
 	},
 	"shadow_punch": {
 		"id": "shadow_punch",
@@ -4865,7 +6096,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"pain_split": {
 		"id": "pain_split",
@@ -4874,7 +6106,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"grudge": {
 		"id": "grudge",
@@ -4883,7 +6116,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 5,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"foul_play": {
 		"id": "foul_play",
@@ -4892,7 +6126,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 95,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"torment": {
 		"id": "torment",
@@ -4901,7 +6136,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"quash": {
 		"id": "quash",
@@ -4910,7 +6146,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"hone_claws": {
 		"id": "hone_claws",
@@ -4919,7 +6156,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"beat_up": {
 		"id": "beat_up",
@@ -4928,7 +6171,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"snatch": {
 		"id": "snatch",
@@ -4937,7 +6181,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"howl": {
 		"id": "howl",
@@ -4946,7 +6191,13 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 40,
-		"target": "single"
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"accuracy": 100
 	},
 	"embargo": {
 		"id": "embargo",
@@ -4955,7 +6206,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	},
 	"dragon_tail": {
 		"id": "dragon_tail",
@@ -4964,7 +6216,8 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 60,
 		"pp": 10,
-		"target": "single"
+		"target": "single",
+		"accuracy": 90
 	},
 	"after_you": {
 		"id": "after_you",
@@ -4973,7 +6226,8 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 15,
-		"target": "single"
+		"target": "single",
+		"accuracy": 100
 	}
 };
 //#endregion
@@ -5019,7 +6273,8 @@ function buildTypedAoeMoves() {
 			type,
 			category: "dynamic",
 			power: TYPED_AOE_POWER,
-			pp: TYPED_AOE_PP
+			pp: TYPED_AOE_PP,
+			accuracy: 100
 		};
 	}
 	return moves;
@@ -5037,7 +6292,8 @@ var BASIC_ATTACK = {
 	type: "NORMAL",
 	target: "single",
 	power: 40,
-	pp: 35
+	pp: 35,
+	accuracy: 100
 };
 var AOE_ABILITY_KEYS = new Set(Object.keys(TYPED_AOE_MOVES));
 var ALL_ABILITIES_SOURCE = {
@@ -29234,7 +30490,7 @@ var GENERATED_ITEMS = Object.fromEntries(Object.entries(ITEMS_DATA).map(([key, i
 		sellPrice
 	}];
 }));
-var KINDS_FORA_DA_LOJA = /* @__PURE__ */ new Set(["rod", "status_heal"]);
+var KINDS_FORA_DA_LOJA = /* @__PURE__ */ new Set(["rod"]);
 Object.values(GENERATED_ITEMS).filter((item) => !KINDS_FORA_DA_LOJA.has(item.kind)).map((item) => ({
 	itemId: item.id,
 	currency: "gold"
@@ -29554,6 +30810,9 @@ function createPlayerEntity(counters, { poke, x, y }) {
 		attackAnim: null,
 		attackAnimTimer: 0,
 		effectLanes: [],
+		statusVolatil: null,
+		imunidadeDeStatus: 0,
+		proximoTurnoDeStatus: TURNO_SEGUNDOS,
 		pathWaypoints: null,
 		pathIndex: 0,
 		pathRecalcTimer: 0,
@@ -29602,6 +30861,9 @@ function createEnemyEntity(counters, { poke, x, y, encounterId }) {
 		attackAnim: null,
 		attackAnimTimer: 0,
 		effectLanes: [],
+		statusVolatil: null,
+		imunidadeDeStatus: 0,
+		proximoTurnoDeStatus: TURNO_SEGUNDOS,
 		pathWaypoints: null,
 		pathIndex: 0,
 		pathRecalcTimer: 0,
@@ -29826,6 +31088,311 @@ function findPath(mapDef, startX, startY, goalX, goalY) {
 		}
 	}
 	return null;
+}
+//#endregion
+//#region src/data/generated/status.generated.ts
+var STATUS_RULES = {
+	"naoVolateis": {
+		"poison": {
+			"duracaoEmTurnos": null,
+			"danoPorTurnoFracaoDoMaximo": .125,
+			"imunidadesPorTipo": ["POISON", "STEEL"]
+		},
+		"burn": {
+			"duracaoEmTurnos": null,
+			"danoPorTurnoFracaoDoMaximo": .0625,
+			"multiplicadorDeDanoFisico": .5,
+			"imunidadesPorTipo": ["FIRE"]
+		},
+		"paralysis": {
+			"duracaoEmTurnos": null,
+			"chanceDePerderOTurno": .25,
+			"multiplicadorDeVelocidade": .5,
+			"imunidadesPorTipo": ["ELECTRIC"]
+		},
+		"sleep": {
+			"duracaoEmTurnos": [2, 4],
+			"bloqueiaAcao": true,
+			"imunidadesPorTipo": []
+		},
+		"freeze": {
+			"duracaoEmTurnos": null,
+			"chanceDeDescongelarPorTurno": .2,
+			"bloqueiaAcao": true,
+			"descongelaComTipo": "FIRE",
+			"imunidadesPorTipo": ["ICE"]
+		}
+	},
+	"volateis": { "confusion": {
+		"duracaoEmTurnos": [2, 5],
+		"chanceDeSeAtacar": .33,
+		"poderDoAutoDano": 40,
+		"imunidadesPorTipo": []
+	} },
+	"nomes": {
+		"poison": "Envenenado",
+		"burn": "Queimado",
+		"paralysis": "Paralisado",
+		"sleep": "Dormindo",
+		"freeze": "Congelado",
+		"confusion": "Confuso"
+	},
+	"golpesDePo": {
+		"imunesPorTipo": ["GRASS"],
+		"golpes": [
+			"spore",
+			"sleep_powder",
+			"stun_spore",
+			"poison_powder",
+			"cotton_spore",
+			"rage_powder",
+			"powder"
+		]
+	},
+	"reaplicacao": { "turnosDeImunidade": 3 }
+};
+Object.keys(STATUS_RULES.naoVolateis);
+Object.keys(STATUS_RULES.volateis);
+var SEGUNDOS_DE_IMUNIDADE_APOS_CURA = STATUS_RULES.reaplicacao.turnosDeImunidade * TURNO_SEGUNDOS;
+function regraDoStatus(tipo) {
+	return STATUS_RULES.naoVolateis[tipo] ?? STATUS_RULES.volateis[tipo] ?? null;
+}
+function ehVolatil(tipo) {
+	return tipo in STATUS_RULES.volateis;
+}
+function nomeDoStatus(tipo) {
+	return STATUS_RULES.nomes[tipo] ?? tipo;
+}
+var GOLPES_DE_PO = new Set(STATUS_RULES.golpesDePo.golpes);
+/**
+* O POKE alvo pode receber este status?
+*
+* Cobre as tres recusas do jogo real:
+*   1. imunidade por TIPO (Fogo nao queima, Eletrico nao paralisa, ...)
+*   2. imunidade a golpe de PO — GRASS ignora Spore/Stun Spore/Sleep Powder
+*      (Gen VI em diante). Depende do GOLPE, nao do status, por isso
+*      `abilityId` entra aqui.
+*   3. ja ter um status nao-volatil. Nos jogos so cabe um por vez: um POKE
+*      dormindo nao pode ser envenenado por cima.
+*/
+function podeReceberStatus(tipo, alvo, abilityId) {
+	const regra = regraDoStatus(tipo);
+	if (!regra) return false;
+	if (regra.imunidadesPorTipo.includes(alvo.tipo1)) return false;
+	if (alvo.tipo2 && regra.imunidadesPorTipo.includes(alvo.tipo2)) return false;
+	if (abilityId && GOLPES_DE_PO.has(abilityId)) {
+		const imunes = STATUS_RULES.golpesDePo.imunesPorTipo;
+		if (imunes.includes(alvo.tipo1) || alvo.tipo2 && imunes.includes(alvo.tipo2)) return false;
+	}
+	if (!ehVolatil(tipo) && alvo.statusAtual != null) return false;
+	return true;
+}
+function sortearDuracao(rng, tipo) {
+	const regra = regraDoStatus(tipo);
+	if (!regra || !regra.duracaoEmTurnos) return null;
+	const [min, max] = regra.duracaoEmTurnos;
+	return min + Math.floor(nextFloat(rng) * (max - min + 1));
+}
+function danoPorTurno(tipo, hpMaximo) {
+	const fracao = regraDoStatus(tipo)?.danoPorTurnoFracaoDoMaximo;
+	if (!fracao) return 0;
+	return Math.max(1, Math.floor(hpMaximo * fracao));
+}
+function multiplicadorDeVelocidade(tipo) {
+	if (!tipo) return 1;
+	return regraDoStatus(tipo)?.multiplicadorDeVelocidade ?? 1;
+}
+function multiplicadorDeDanoFisico(tipo) {
+	if (!tipo) return 1;
+	return regraDoStatus(tipo)?.multiplicadorDeDanoFisico ?? 1;
+}
+function perdeOTurno(rng, status) {
+	if (!status) return false;
+	const regra = regraDoStatus(status.tipo);
+	if (!regra) return false;
+	if (regra.bloqueiaAcao) return true;
+	if (regra.chanceDePerderOTurno) return nextFloat(rng) < regra.chanceDePerderOTurno;
+	return false;
+}
+function chanceDeSeAtacar(tipo) {
+	return regraDoStatus(tipo)?.chanceDeSeAtacar ?? 0;
+}
+function poderDoAutoDano(tipo) {
+	return regraDoStatus(tipo)?.poderDoAutoDano ?? 0;
+}
+function descongelaCom(tipo, tipoDoGolpe, poderDoGolpe) {
+	const regra = regraDoStatus(tipo);
+	return Boolean(regra?.descongelaComTipo && regra.descongelaComTipo === tipoDoGolpe && poderDoGolpe > 0);
+}
+function chanceDeDescongelar(tipo) {
+	return regraDoStatus(tipo)?.chanceDeDescongelarPorTurno ?? 0;
+}
+//#endregion
+//#region src/data/statusColors.ts
+var CORES = {
+	poison: "#a855f7",
+	burn: "#f97316",
+	paralysis: "#facc15",
+	sleep: "#94a3b8",
+	freeze: "#38bdf8",
+	confusion: "#f472b6"
+};
+function corDoStatus(tipo) {
+	return CORES[tipo] ?? "#e5e5e5";
+}
+//#endregion
+//#region src/engine/systems/statusSystem.ts
+function statusNaoVolatil(entity) {
+	return entity.poke.status ?? null;
+}
+/**
+* Vale a pena tentar este status neste alvo AGORA?
+*
+* Usada pela IA (`pickAbility`) antes de escolher um golpe de status puro. Sem
+* ela o inimigo gastaria turnos jogando Thunder Wave num POKE ja paralisado,
+* num POKE de tipo ELECTRIC, ou dentro da janela de imunidade de reaplicacao —
+* e a leitura pro jogador seria "esse POKE parou de atacar do nada".
+*
+* Nao sorteia nada: e a pergunta "pode pegar", nao "pegou".
+*/
+function statusVaiPegar(alvo, tipo, abilityId) {
+	if (alvo.imunidadeDeStatus > 0) return false;
+	if (ehVolatil(tipo) && alvo.statusVolatil) return false;
+	const especie = SPECIES[alvo.poke.speciesId];
+	return podeReceberStatus(tipo, {
+		tipo1: especie.type,
+		tipo2: especie.type2,
+		statusAtual: statusNaoVolatil(alvo)?.tipo ?? null
+	}, abilityId);
+}
+/**
+* Tenta aplicar `tipo` em `alvo`. Devolve o status aplicado, ou null se nao
+* pegou (imunidade, ja tem status, imunidade de reaplicacao, ou o sorteio da
+* chance falhou).
+*
+* `abilityId` entra porque a imunidade a golpe de PO depende do GOLPE, nao do
+* status: GRASS ignora Sleep Powder mas nao ignora Hypnosis.
+*/
+function aplicarStatus(rng, alvo, tipo, chance, abilityId) {
+	if (alvo.imunidadeDeStatus > 0) return null;
+	const especie = SPECIES[alvo.poke.speciesId];
+	if (!podeReceberStatus(tipo, {
+		tipo1: especie.type,
+		tipo2: especie.type2,
+		statusAtual: statusNaoVolatil(alvo)?.tipo ?? null
+	}, abilityId)) return null;
+	if (ehVolatil(tipo) && alvo.statusVolatil) return null;
+	if (nextFloat(rng) * 100 >= chance) return null;
+	const status = {
+		tipo,
+		turnosRestantes: sortearDuracao(rng, tipo)
+	};
+	if (ehVolatil(tipo)) alvo.statusVolatil = status;
+	else alvo.poke.status = status;
+	return status;
+}
+function aplicarEfeitosDoGolpe(rng, alvo, ability) {
+	const congelado = statusNaoVolatil(alvo);
+	if (congelado && descongelaCom(congelado.tipo, ability.type, ability.power)) curarStatus(alvo, congelado.tipo);
+	if (!ability.status || !ability.statusChance) return null;
+	return aplicarStatus(rng, alvo, ability.status, ability.statusChance, ability.id);
+}
+/**
+* Tira um status e liga a imunidade de reaplicacao.
+*
+* `tipo` opcional: sem ele tira TUDO (o que o Centro Pokemon faz). Com ele,
+* tira so aquele — e o que um Antidoto faz.
+*/
+function curarStatus(entity, tipo) {
+	let curou = false;
+	const nv = statusNaoVolatil(entity);
+	if (nv && (!tipo || nv.tipo === tipo)) {
+		entity.poke.status = null;
+		curou = true;
+	}
+	if (entity.statusVolatil && (!tipo || entity.statusVolatil.tipo === tipo)) {
+		entity.statusVolatil = null;
+		curou = true;
+	}
+	if (curou) entity.imunidadeDeStatus = SEGUNDOS_DE_IMUNIDADE_APOS_CURA;
+	return curou;
+}
+/**
+* Passa o tempo dos status de UMA entidade. Chamado todo frame; so faz algo
+* quando o relogio de turno dela fecha.
+*
+* NAO aplica o dano no POKE — devolve quanto foi, pro chamador (combatSystem)
+* decidir sobre numero flutuante, morte e loot com o mesmo caminho que ja usa
+* pro resto do dano.
+*/
+function tickStatus(rng, entity, dt) {
+	if (entity.imunidadeDeStatus > 0) entity.imunidadeDeStatus = Math.max(0, entity.imunidadeDeStatus - dt);
+	entity.proximoTurnoDeStatus -= dt;
+	if (entity.proximoTurnoDeStatus > 1e-9) return {
+		dano: 0,
+		expirados: []
+	};
+	entity.proximoTurnoDeStatus += TURNO_SEGUNDOS;
+	const expirados = [];
+	let dano = 0;
+	const nv = statusNaoVolatil(entity);
+	if (nv) {
+		dano += danoPorTurno(nv.tipo, entity.poke.stats.hp);
+		const chanceDeSair = chanceDeDescongelar(nv.tipo);
+		if (chanceDeSair > 0) {
+			if (nextFloat(rng) < chanceDeSair) {
+				entity.poke.status = null;
+				expirados.push(nv.tipo);
+			}
+		} else if (nv.turnosRestantes != null) {
+			nv.turnosRestantes -= 1;
+			if (nv.turnosRestantes <= 0) {
+				entity.poke.status = null;
+				expirados.push(nv.tipo);
+			}
+		}
+	}
+	const vol = entity.statusVolatil;
+	if (vol && vol.turnosRestantes != null) {
+		vol.turnosRestantes -= 1;
+		if (vol.turnosRestantes <= 0) {
+			entity.statusVolatil = null;
+			expirados.push(vol.tipo);
+		}
+	}
+	if (expirados.length) entity.imunidadeDeStatus = SEGUNDOS_DE_IMUNIDADE_APOS_CURA;
+	return {
+		dano,
+		expirados
+	};
+}
+/**
+* O POKE consegue agir neste turno?
+*
+* Ordem igual a dos jogos: o status nao-volatil resolve ANTES da confusao —
+* um POKE dormindo nem chega a se atacar de confuso.
+*
+* `calcularAutoDano` e injetado em vez de calculado aqui porque o dano de
+* confusao usa o MESMO pipeline de dano do combate (nivel, Ataque, Defesa),
+* que mora em combatSystem. Reimplementar aqui seria uma segunda formula de
+* dano pra divergir na primeira mudanca de balanceamento.
+*/
+function tentarAgir(rng, entity, calcularAutoDano) {
+	const nv = statusNaoVolatil(entity);
+	if (nv && perdeOTurno(rng, nv)) return {
+		agir: false,
+		motivo: nv.tipo
+	};
+	const vol = entity.statusVolatil;
+	if (vol) {
+		const chance = chanceDeSeAtacar(vol.tipo);
+		if (chance > 0 && nextFloat(rng) < chance) return {
+			agir: false,
+			motivo: vol.tipo,
+			autoDano: calcularAutoDano(poderDoAutoDano(vol.tipo))
+		};
+	}
+	return { agir: true };
 }
 //#endregion
 //#region src/data/abilityCategory.ts
@@ -45048,6 +46615,19 @@ function scaledCooldown(ability, speed) {
 	if (ability.id === BASIC_ATTACK.id) return BASE_ATTACK_INTERVAL;
 	return (ability.cooldown ?? 0) * (SPEED_REFERENCE / Math.max(1, speed));
 }
+function velocidadeEfetiva(entity) {
+	return entity.poke.stats.speed * multiplicadorDeVelocidade(entity.poke.status?.tipo ?? null);
+}
+function danoDeConfusao(entity, poder) {
+	if (poder <= 0) return 0;
+	const p = entity.poke;
+	return Math.max(1, Math.round(formulaEngine$4.eval("DAMAGE_BASE", {
+		level: p.level,
+		power: poder,
+		atk: p.stats.atkFis,
+		def: p.stats.def
+	})));
+}
 function averageIv(ivs) {
 	const vals = ivs ? Object.values(ivs) : [];
 	if (!vals.length) return 0;
@@ -45181,6 +46761,22 @@ function estimateDamage(rng, attackerEntity, defenderEntity, ability) {
 	dmg *= effectivenessMultiplier;
 	return dmg;
 }
+/**
+* Dano estimado JA DESCONTADA a chance de errar.
+*
+* `estimateDamage` responde "quanto isso tira se acertar", que era a pergunta
+* certa enquanto todo golpe sempre acertava. Com precisao valendo, ranquear por
+* ela faz o POKE escolher Blizzard (110 de poder, 70% de precisao) em vez de um
+* golpe de 100% quase tao forte — e perder o turno inteiro em 3 de cada 10
+* tentativas.
+*
+* Medido: so essa troca vale 15% das kills/hora numa hunt onde o jogador esta
+* muito acima do nivel, que e onde os golpes fortes e imprecisos dominam o
+* moveset.
+*/
+function danoEsperado(rng, atacante, defensor, ability) {
+	return estimateDamage(rng, atacante, defensor, ability) * ((ability.accuracy ?? 100) / 100);
+}
 var DANO_VARIACAO_MINIMA = .85;
 function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista = false) {
 	const attackerPoke = attackerEntity.poke;
@@ -45203,6 +46799,7 @@ function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista 
 			atk,
 			def
 		});
+		if (isPhysical) dmg *= multiplicadorDeDanoFisico(attackerPoke.status?.tipo ?? null);
 		if (Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)) dmg *= STAB_MULTIPLIER;
 		dmg *= effectivenessMultiplier;
 		isCrit = pessimista ? false : rollChance(rng, CRIT_CHANCE);
@@ -45263,14 +46860,19 @@ function basicAttackFor(attackerSpecies) {
 function pickAbility(rng, entity, defenderEntity, aoeTargetCounter) {
 	const attackerSpecies = SPECIES[entity.poke.speciesId];
 	const disabled = entity.poke.disabledAbilities || {};
-	const ready = golpesUtilizaveis(entity.poke, attackerSpecies, entity.kind === "enemy").filter((id) => !disabled[id]).map((id) => getAbility(id)).filter((ability) => ability != null && isDamagingAbility(ability) && isAbilityReady(entity, ability.id));
+	const prontos = golpesUtilizaveis(entity.poke, attackerSpecies, entity.kind === "enemy").filter((id) => !disabled[id]).map((id) => getAbility(id)).filter((a) => a != null && isAbilityReady(entity, a.id));
+	const ready = prontos.filter((ability) => isDamagingAbility(ability));
+	const statusPronto = prontos.filter((a) => a.power === 0 && a.status != null && statusVaiPegar(defenderEntity, a.status, a.id));
+	if (statusPronto.length > 0) {
+		if (ready.reduce((max, a) => Math.max(max, danoEsperado(rng, entity, defenderEntity, a)), 0) < defenderEntity.poke.hp) return statusPronto.reduce((melhor, a) => (a.statusChance ?? 0) > (melhor.statusChance ?? 0) ? a : melhor);
+	}
 	if (ready.length === 0) {
 		const basico = basicAttackFor(attackerSpecies);
 		if (disabled[BASIC_ATTACK.id] || !isAbilityReady(entity, BASIC_ATTACK.id)) return null;
 		return basico;
 	}
 	const aoeReady = ready.filter((a) => a.target === "aoe" && aoeTargetCounter(a) >= 2);
-	return (aoeReady.length > 0 ? aoeReady : ready).reduce((best, a) => estimateDamage(rng, entity, defenderEntity, a) > estimateDamage(rng, entity, defenderEntity, best) ? a : best);
+	return (aoeReady.length > 0 ? aoeReady : ready).reduce((best, a) => danoEsperado(rng, entity, defenderEntity, a) > danoEsperado(rng, entity, defenderEntity, best) ? a : best);
 }
 function queueHit(world, attacker, target, ability) {
 	world.pendingHits.push({
@@ -45291,6 +46893,19 @@ function queueAoeVisual(world, attacker, ability) {
 		isAoeVisual: true
 	});
 }
+function anunciarStatus(world, alvo, tipo, quando = "entrou") {
+	world.effects.push(createWorldEffect(world.counters, {
+		type: "abilityName",
+		x: alvo.x,
+		y: alvo.y,
+		targetX: alvo.x,
+		targetY: alvo.y + getGroundOffset(alvo) + 14,
+		text: quando === "entrou" ? `${nomeDoStatus(tipo)}!` : `${nomeDoStatus(tipo)} passou`,
+		color: corDoStatus(tipo),
+		duration: .8,
+		owner: alvo
+	}));
+}
 function announceAbility(world, attacker, ability) {
 	world.effects.push(createWorldEffect(world.counters, {
 		type: "abilityName",
@@ -45307,28 +46922,95 @@ function announceAbility(world, attacker, ability) {
 function nearbyAliveEnemies(world) {
 	return world.enemies.filter((e) => !isDead(e));
 }
-function executePlayerAction(world, player, engagedEnemies) {
+/**
+* O status deixa este POKE agir agora? Roda ANTES de escolher o golpe, como
+* nos jogos: sono, congelamento e paralisia comem o turno inteiro, e a
+* confusao troca o golpe por uma pancada em si mesmo.
+*
+* Consome o cooldown global mesmo quando o turno e perdido. Sem isso um POKE
+* dormindo tentaria agir a cada frame e o sono viraria um sorteio de 60 vezes
+* por segundo em vez de um por turno.
+*/
+/**
+* O golpe errou?
+*
+* A precisao existia no catalogo desde a migracao pro Ultra Sun, mas nao era
+* emitida pro cliente nem usada — todo golpe sempre acertava. Passa a valer
+* agora porque sem ela o status nao tem como ser fiel: Hypnosis com 60% de
+* precisao e Sing com 55% viram sono garantido, e um golpe de sono garantido
+* desequilibra o combate inteiro.
+*
+* UM sorteio por USO, nao por alvo. Nos jogos, um golpe de area rola precisao
+* contra cada alvo; aqui o AOE ja e uma aproximacao (raio em pixels, sem
+* posicionamento de batalha), e rolar por alvo so somaria variancia invisivel
+* a uma mecanica que o jogador nem ve alvo a alvo.
+*/
+function golpeErrou(rng, ability) {
+	const precisao = ability.accuracy ?? 100;
+	if (precisao >= 100) return false;
+	return nextFloat(rng) * 100 >= precisao;
+}
+function anunciarErro(world, atacante) {
+	world.effects.push(createWorldEffect(world.counters, {
+		type: "abilityName",
+		x: atacante.x,
+		y: atacante.y,
+		targetX: atacante.x,
+		targetY: atacante.y + getGroundOffset(atacante) + 14,
+		text: "Errou!",
+		color: "#94a3b8",
+		duration: .7,
+		owner: atacante
+	}));
+}
+function statusImpedeAcao(world, entity, silent) {
+	const r = tentarAgir(world.rng, entity, (poder) => danoDeConfusao(entity, poder));
+	if (r.agir) return false;
+	startGlobalCooldown(entity, MIN_ACTION_GAP);
+	if (r.autoDano != null && r.autoDano > 0) {
+		takeDamage(entity, r.autoDano, "physical");
+		if (!silent) spawnDamageNumber(world, entity, {
+			amount: r.autoDano,
+			effectiveness: "normal",
+			effectivenessLabel: null,
+			isCrit: false
+		});
+	}
+	if (!silent) anunciarStatus(world, entity, r.motivo);
+	return true;
+}
+function executePlayerAction(world, player, engagedEnemies, silent) {
 	if (!canAct(player)) return;
+	if (statusImpedeAcao(world, player, silent)) return;
 	const primaryTarget = engagedEnemies[0];
 	const allEnemies = nearbyAliveEnemies(world);
 	const ability = pickAbility(world.rng, player, primaryTarget, (a) => allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length);
 	if (!ability) return;
-	startCooldown(player, ability.id, scaledCooldown(ability, player.poke.stats.speed));
+	startCooldown(player, ability.id, scaledCooldown(ability, velocidadeEfetiva(player)));
 	startGlobalCooldown(player, MIN_ACTION_GAP);
 	triggerAttackAnim(player, ability.target === "aoe", primaryTarget);
 	announceAbility(world, player, ability);
+	if (golpeErrou(world.rng, ability)) {
+		if (!silent) anunciarErro(world, player);
+		return;
+	}
 	const targets = ability.target === "aoe" ? allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (ability.radius ?? 0)) : [engagedEnemies[0]].filter(Boolean);
 	for (const target of targets) queueHit(world, player, target, ability);
 	if (ability.target === "aoe") queueAoeVisual(world, player, ability);
 }
-function executeEnemyAction(world, enemy, player) {
+function executeEnemyAction(world, enemy, player, silent) {
 	if (!canAct(enemy)) return;
+	if (statusImpedeAcao(world, enemy, silent)) return;
 	const ability = pickAbility(world.rng, enemy, player, () => 1);
 	if (!ability) return;
-	startCooldown(enemy, ability.id, scaledCooldown(ability, enemy.poke.stats.speed));
+	startCooldown(enemy, ability.id, scaledCooldown(ability, velocidadeEfetiva(enemy)));
 	startGlobalCooldown(enemy, MIN_ACTION_GAP);
 	triggerAttackAnim(enemy, ability.target === "aoe", player);
 	announceAbility(world, enemy, ability);
+	if (golpeErrou(world.rng, ability)) {
+		if (!silent) anunciarErro(world, enemy);
+		return;
+	}
 	queueHit(world, enemy, player, ability);
 	if (ability.target === "aoe") queueAoeVisual(world, enemy, ability);
 }
@@ -45376,8 +47058,14 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	const target = findEntityById(world.player, world.enemies, hit.targetId);
 	if (!target || isDead(target)) return;
 	const result = computeDamage(world.rng, attacker, target, ability, world.pessimista);
-	takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke));
-	if (!silent) spawnDamageNumber(world, target, result);
+	if (result.amount > 0) {
+		takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke));
+		if (!silent) spawnDamageNumber(world, target, result);
+	}
+	if (!isDead(target)) {
+		const aplicado = aplicarEfeitosDoGolpe(world.rng, target, ability);
+		if (aplicado && !silent) anunciarStatus(world, target, aplicado.tipo, "entrou");
+	}
 	const isPlayerAttacker = attacker.kind === "player";
 	if (!(ability.target === "aoe") && !silent) world.effects.push(createWorldEffect(world.counters, {
 		type: "abilityEffect",
@@ -45408,16 +47096,39 @@ function updateCombat(world, dt, opts = {}) {
 		defeatedEnemyIds: [],
 		playerJustFainted: false
 	};
+	const defeatedEnemyIds = [];
+	let playerJustFainted = false;
 	tickCooldowns(player, dt);
 	for (const enemy of enemies) tickCooldowns(enemy, dt);
+	for (const entity of [player, ...enemies]) {
+		if (isDead(entity)) continue;
+		const { dano, expirados } = tickStatus(world.rng, entity, dt);
+		if (!silent) for (const tipo of expirados) anunciarStatus(world, entity, tipo, "saiu");
+		if (dano <= 0) continue;
+		takeDamage(entity, dano);
+		if (!silent) spawnDamageNumber(world, entity, {
+			amount: dano,
+			effectiveness: "normal",
+			effectivenessLabel: null,
+			isCrit: false
+		});
+		if (!isDead(entity)) continue;
+		if (entity.kind === "player") {
+			if (!player.fainted) {
+				player.fainted = true;
+				playerJustFainted = true;
+			}
+		} else if (!entity.deathHandled) {
+			entity.deathHandled = true;
+			defeatedEnemyIds.push(entity.id);
+		}
+	}
 	for (const effect of world.effects) tickEffect(effect, dt);
 	for (const effect of world.effects) if (effectDone(effect) && effect.ownerId) {
 		const owner = findEntityById(player, enemies, effect.ownerId);
 		if (owner) releaseEffectLane(owner, effect.id);
 	}
 	world.effects = world.effects.filter((e) => !effectDone(e));
-	const defeatedEnemyIds = [];
-	let playerJustFainted = false;
 	for (const hit of world.pendingHits) hit.timer -= dt;
 	const landed = world.pendingHits.filter((hit) => hit.timer <= 0);
 	world.pendingHits = world.pendingHits.filter((hit) => hit.timer > 0);
@@ -45430,10 +47141,10 @@ function updateCombat(world, dt, opts = {}) {
 	};
 	const engagedEnemies = enemies.filter((e) => !isDead(e) && e.state === "engaged" && e.targetId === player.id);
 	if (engagedEnemies.length > 0) {
-		executePlayerAction(world, player, engagedEnemies);
+		executePlayerAction(world, player, engagedEnemies, silent);
 		for (const enemy of engagedEnemies) {
 			if (isDead(enemy) || player.fainted) continue;
-			executeEnemyAction(world, enemy, player);
+			executeEnemyAction(world, enemy, player, silent);
 		}
 	}
 	return {
@@ -45724,7 +47435,8 @@ function attemptCapture(rng, gameState, defeatedPoke, ballItemId) {
 		stats,
 		hp: stats.hp,
 		unlockedAbilities: species.abilities.filter((entry) => entry.levelReq <= CAPTURE_LEVEL).map((entry) => entry.key).filter((key) => getAbility(key)),
-		activeAbilities: activeAbilitiesPadrao(species, CAPTURE_LEVEL)
+		activeAbilities: activeAbilitiesPadrao(species, CAPTURE_LEVEL),
+		status: null
 	};
 	gameState.addCapturedPoke(newPoke);
 	return {
@@ -45737,38 +47449,55 @@ function attemptCapture(rng, gameState, defeatedPoke, ballItemId) {
 }
 //#endregion
 //#region src/engine/systems/autoSystem.ts
-var AUTO_ACTION_COOLDOWN = 1;
+var COOLDOWN_DO_TREINADOR = 1.5;
+var HP_CRITICO = .25;
 function resolveRulePotionId(gameState, rule) {
 	if (rule.itemId !== "best") return rule.itemId;
 	return Object.values(ITEMS).filter((item) => item.kind === "potion" && gameState.hasItem(item.id, 1)).sort((a, b) => (b.healAmount ?? 0) - (a.healAmount ?? 0))[0]?.id || null;
+}
+/**
+* O item de cura mais BARATO que resolve o status que o POKE tem agora.
+*
+* A ordem importa em ouro: o Full Heal cura os seis, mas custa 120 contra os 30
+* de um Despertar. Deixar o bot pegar "o primeiro que serve" faria ele gastar
+* quatro vezes mais pra curar um sono. Ordena por preco de compra e pega o
+* primeiro que cobre o status — o Full Heal so entra quando e o unico que o
+* jogador tem.
+*/
+function melhorCuraDeStatus(gameState, status) {
+	return Object.values(ITEMS).filter((item) => "kind" in item && item.kind === "status_heal" && Array.isArray(item.healsStatus) && item.healsStatus.includes(status) && gameState.hasItem(item.id, 1)).sort((a, b) => a.buyPrice - b.buyPrice)[0] ?? null;
 }
 function updateAutoHeal(world, gameState, dt) {
 	const player = world.player;
 	const events = [];
 	if (!player) return events;
 	const timers = world.autoTimers;
-	timers.pot = Math.max(0, timers.pot - dt);
-	timers.revive = Math.max(0, timers.revive - dt);
+	timers.treinador = Math.max(0, timers.treinador - dt);
 	const isBossHunt = Boolean(world.mapDef && world.mapDef.noRespawn);
 	if (!isBossHunt && gameState.autoToggles.autoRevive && player.fainted) world.reviveCountdown = world.reviveCountdown == null ? 5 : Math.max(0, world.reviveCountdown - dt);
 	else world.reviveCountdown = null;
-	if (!isBossHunt && gameState.autoToggles.autoRevive && player.fainted && (world.reviveCountdown ?? 0) <= 0 && timers.revive <= 0) {
+	if (isBossHunt || timers.treinador > 0) return events;
+	if (gameState.autoToggles.autoRevive && player.fainted && (world.reviveCountdown ?? 0) <= 0) {
 		const revive = getItem("revive");
 		if (revive && "reviveHpPercent" in revive && revive.reviveHpPercent != null && gameState.hasItem("revive", 1)) {
 			gameState.removeItem("revive", 1);
 			player.poke.hp = Math.round(player.poke.stats.hp * revive.reviveHpPercent);
 			player.fainted = false;
 			player.state = "wander";
-			timers.revive = AUTO_ACTION_COOLDOWN;
+			timers.treinador = COOLDOWN_DO_TREINADOR;
 			world.reviveCountdown = null;
 			events.push({
 				type: "auto_revive",
 				itemId: "revive"
 			});
+			return events;
 		}
 	}
-	if (!isBossHunt && !player.fainted && gameState.autoToggles.autoPot && timers.pot <= 0) {
-		const hpPct = player.poke.hp / player.poke.stats.hp * 100;
+	if (player.fainted) return events;
+	const fracaoDeHp = player.poke.hp / player.poke.stats.hp;
+	const usarPocao = () => {
+		if (!gameState.autoToggles.autoPot) return false;
+		const hpPct = fracaoDeHp * 100;
 		for (const rule of gameState.autoPotRules) {
 			if (hpPct > rule.hpPercent) continue;
 			const resolvedId = resolveRulePotionId(gameState, rule);
@@ -45776,14 +47505,33 @@ function updateAutoHeal(world, gameState, dt) {
 			if (!item || !("healAmount" in item) || item.healAmount == null || !gameState.hasItem(resolvedId, 1)) continue;
 			gameState.removeItem(resolvedId, 1);
 			heal(player, item.healAmount);
-			timers.pot = AUTO_ACTION_COOLDOWN;
+			timers.treinador = COOLDOWN_DO_TREINADOR;
 			events.push({
 				type: "auto_pot",
 				itemId: resolvedId
 			});
-			break;
+			return true;
+		}
+		return false;
+	};
+	if (fracaoDeHp <= HP_CRITICO && usarPocao()) return events;
+	if (gameState.autoToggles.autoPot) {
+		const status = player.poke.status?.tipo ?? player.statusVolatil?.tipo ?? null;
+		if (status) {
+			const cura = melhorCuraDeStatus(gameState, status);
+			if (cura) {
+				gameState.removeItem(cura.id, 1);
+				curarStatus(player, status);
+				timers.treinador = COOLDOWN_DO_TREINADOR;
+				events.push({
+					type: "auto_status",
+					itemId: cura.id
+				});
+				return events;
+			}
 		}
 	}
+	usarPocao();
 	return events;
 }
 function maybeAutoCatch(rng, gameState, defeatedPoke) {
@@ -46754,10 +48502,7 @@ function emptyWorldState(seed = randomSeed()) {
 		enemies: [],
 		effects: [],
 		pendingHits: [],
-		autoTimers: {
-			pot: 0,
-			revive: 0
-		},
+		autoTimers: { treinador: 0 },
 		reviveCountdown: null,
 		respawnTimer: null,
 		sequenceIndex: 0,
@@ -46948,10 +48693,7 @@ function buildMapWorld(mapId, activePoke, carry) {
 		enemies,
 		effects: [],
 		pendingHits: [],
-		autoTimers: {
-			pot: 0,
-			revive: 0
-		},
+		autoTimers: { treinador: 0 },
 		reviveCountdown: null,
 		respawnTimer: mapDef.respawnDelay,
 		sequenceIndex: 0,
@@ -47330,6 +49072,10 @@ function rowToPoke(row) {
 		unlockedAbilities: species ? species.abilities.filter((a) => a.levelReq <= row.level).map((a) => a.key).filter((key) => getAbility(key)) : row.unlocked_abilities,
 		disabledAbilities: row.disabled_abilities ?? {},
 		activeAbilities: row.active_abilities ?? (species ? activeAbilitiesPadrao(species, row.level) : void 0),
+		status: row.status ? {
+			tipo: row.status,
+			turnosRestantes: row.status_turns
+		} : null,
 		locked: row.locked,
 		capturedAt: row.created_at,
 		originalTrainer: row.original_trainer ?? void 0
@@ -47426,6 +49172,8 @@ function pokeToRow(userId, poke, location, teamSlot) {
 		stat_speed: poke.stats.speed,
 		unlocked_abilities: poke.unlockedAbilities,
 		active_abilities: poke.activeAbilities ?? null,
+		status: poke.status?.tipo ?? null,
+		status_turns: poke.status?.turnosRestantes ?? null,
 		disabled_abilities: poke.disabledAbilities ?? {}
 	};
 }

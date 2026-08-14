@@ -88,6 +88,11 @@ export function attemptCapture(rng: Rng, gameState: GameStateStore, defeatedPoke
     // capturado, ele volta pro Nivel 1 e o conjunto tem que ser remontado —
     // manter o do selvagem deixaria golpes que ele ainda nao "sabe".
     activeAbilities: activeAbilitiesPadrao(species, CAPTURE_LEVEL),
+    // O POKE selvagem podia estar envenenado ou dormindo na hora da captura —
+    // `...defeatedPoke` traria o status junto. Como ele entra na mochila
+    // resetado pro Nivel 1 e com HP cheio, carregar o status seria a unica
+    // coisa da luta a sobreviver, e o jogador comecaria devendo um Antidoto.
+    status: null,
   }
   gameState.addCapturedPoke(newPoke)
   return { success: true, location: 'bag', chance, poke: newPoke, ballItemId }

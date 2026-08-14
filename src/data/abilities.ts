@@ -25,7 +25,7 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
 import { ABILITIES_DATA } from './generated/abilities.generated'
 import { TYPED_AOE_MOVES } from './typedAoeMoves'
-import type { AbilityCategory, ElementType } from './generated/types'
+import type { AbilityCategory, ElementType, StatusCondition, StatChange } from './generated/types'
 
 export type AbilityTarget = 'single' | 'aoe'
 
@@ -39,6 +39,17 @@ export interface Ability {
   target: AbilityTarget
   radius?: number
   cooldown?: number
+  // Efeitos, vindos do catalogo do Ultra Sun (ver AbilityDataEntry). Ausente =
+  // o golpe nao tem aquele efeito. `accuracy` e o unico sempre presente.
+  accuracy: number
+  status?: StatusCondition
+  statusChance?: number
+  statChanges?: StatChange[]
+  statChance?: number
+  flinchChance?: number
+  critStages?: number
+  drainPercent?: number
+  healPercent?: number
 }
 
 const formulaEngine = createFormulaEngine(FORMULAS)
@@ -62,6 +73,9 @@ export const BASIC_ATTACK: Ability = {
   target: 'single',
   power: 40,
   pp: 35,
+  // Sempre acerta. E o Struggle deste jogo — o golpe que sobra quando nenhum
+  // outro esta pronto; errar com ele deixaria o POKE sem NADA a fazer no turno.
+  accuracy: 100,
 }
 
 // Golpe em area agora vem do DADO (`ability.target`, alvo real do golpe nos

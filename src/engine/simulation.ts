@@ -233,7 +233,7 @@ export function buildMapWorld(mapId: string, activePoke: PokeInstance, carry?: S
   return {
     ...base,
     mapDef, player, enemies, effects: [], pendingHits: [],
-    autoTimers: { pot: 0, revive: 0 },
+    autoTimers: { treinador: 0 },
     reviveCountdown: null,
     respawnTimer: mapDef.respawnDelay,
     sequenceIndex: 0,

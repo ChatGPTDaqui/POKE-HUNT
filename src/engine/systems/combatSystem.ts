@@ -8,6 +8,9 @@
 import { deriveRng, nextFloat, type Rng } from '@/core/rng'
 import { getAbility, BASIC_ATTACK, isDamagingAbility, TURNO_SEGUNDOS, type Ability } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
+import { multiplicadorDeVelocidade, multiplicadorDeDanoFisico, nomeDoStatus, type StatusCondition } from '@/data/statusEffects'
+import { corDoStatus } from '@/data/statusColors'
+import { tickStatus, tentarAgir, aplicarEfeitosDoGolpe, statusVaiPegar } from './statusSystem'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { SPECIES } from '@/data/pokes'
 import type { PokeInstance } from '@/data/pokes'
@@ -79,6 +82,24 @@ export function engageRangeFor(attacker: WorldEntity, defender: WorldEntity): nu
 function scaledCooldown(ability: Ability, speed: number): number {
   if (ability.id === BASIC_ATTACK.id) return BASE_ATTACK_INTERVAL
   return (ability.cooldown ?? 0) * (SPEED_REFERENCE / Math.max(1, speed))
+}
+
+// A Velocidade que conta pro cooldown, ja com o efeito de status. Paralisia
+// corta pela metade na Gen VII (era 75% antes) — e aqui, onde Velocidade vira
+// ritmo de acao, isso significa literalmente agir na metade da frequencia.
+function velocidadeEfetiva(entity: WorldEntity): number {
+  return entity.poke.stats.speed * multiplicadorDeVelocidade(entity.poke.status?.tipo ?? null)
+}
+
+// Dano que o POKE causa em si mesmo quando confuso: golpe fisico SEM TIPO de
+// poder 40, sem critico e sem STAB (Bulbapedia). Passa pelo mesmo DAMAGE_BASE
+// do resto do combate, usando o proprio Ataque contra a propria Defesa.
+function danoDeConfusao(entity: WorldEntity, poder: number): number {
+  if (poder <= 0) return 0
+  const p = entity.poke
+  return Math.max(1, Math.round(formulaEngine.eval('DAMAGE_BASE', {
+    level: p.level, power: poder, atk: p.stats.atkFis, def: p.stats.def,
+  })))
 }
 
 function averageIv(ivs: PokeInstance['ivs'] | undefined): number {
@@ -231,6 +252,23 @@ function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: W
   return dmg
 }
 
+/**
+ * Dano estimado JA DESCONTADA a chance de errar.
+ *
+ * `estimateDamage` responde "quanto isso tira se acertar", que era a pergunta
+ * certa enquanto todo golpe sempre acertava. Com precisao valendo, ranquear por
+ * ela faz o POKE escolher Blizzard (110 de poder, 70% de precisao) em vez de um
+ * golpe de 100% quase tao forte — e perder o turno inteiro em 3 de cada 10
+ * tentativas.
+ *
+ * Medido: so essa troca vale 15% das kills/hora numa hunt onde o jogador esta
+ * muito acima do nivel, que e onde os golpes fortes e imprecisos dominam o
+ * moveset.
+ */
+function danoEsperado(rng: Rng, atacante: WorldEntity, defensor: WorldEntity, ability: Ability): number {
+  return estimateDamage(rng, atacante, defensor, ability) * ((ability.accuracy ?? 100) / 100)
+}
+
 export type Effectiveness = 'normal' | 'immune' | 'super' | 'effective' | 'weak'
 
 export interface DamageResult {
@@ -270,6 +308,13 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
     const power = special && special.mode === 'dynamicPower' ? special.power : ability.power
 
     dmg = formulaEngine.eval('DAMAGE_BASE', { level: attackerPoke.level, power, atk, def })
+
+    // Queimadura corta o dano FISICO do atacante pela metade (Gen VII). Entra
+    // aqui, e nao na stat de Ataque, exatamente como nos jogos desde a Gen IV:
+    // "a burn now technically halves the damage a burned Pokemon does with
+    // physical moves" — a diferenca importa porque a stat crua continua sendo
+    // a exibida na ficha do POKE.
+    if (isPhysical) dmg *= multiplicadorDeDanoFisico(attackerPoke.status?.tipo ?? null)
 
     const isStab = Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)
     if (isStab) dmg *= STAB_MULTIPLIER
@@ -356,9 +401,44 @@ function pickAbility(rng: Rng, entity: WorldEntity, defenderEntity: WorldEntity,
   // data/activeAbilities.ts.
   const candidateIds = golpesUtilizaveis(entity.poke, attackerSpecies, entity.kind === 'enemy')
     .filter((id) => !disabled[id])
-  const ready = candidateIds
+  const prontos = candidateIds
     .map((id) => getAbility(id))
-    .filter((ability): ability is Ability => ability != null && isDamagingAbility(ability) && isAbilityReady(entity, ability.id))
+    .filter((a): a is Ability => a != null && isAbilityReady(entity, a.id))
+
+  // GOLPE DE STATUS PURO entra na escolha (Leva B). A regra e simples e
+  // deliberadamente conservadora: so vale a pena se o status REALMENTE for
+  // pegar no alvo agora — nao pegou por imunidade de tipo, por o alvo ja ter
+  // status, ou por estar na janela de reaplicacao, e o golpe volta a ser
+  // ignorado. Sem essa checagem o POKE gastaria turnos jogando Thunder Wave
+  // em quem ja esta paralisado, e a leitura seria "parou de atacar do nada".
+  //
+  const ready = prontos.filter((ability) => isDamagingAbility(ability))
+
+  // ...MAS SO SE O ALVO FOR SOBREVIVER AO MELHOR GOLPE DE DANO.
+  //
+  // Sem essa condicao o POKE abre TODA luta com um golpe de status, inclusive
+  // contra inimigo que ele mata em um golpe — e ai o status e um turno jogado
+  // fora num alvo que nem chega a sofrer o efeito. Medido: sem a checagem, uma
+  // hunt onde o jogador esta muito acima do nivel (Clareira Nv85) caiu de 1.308
+  // para 997 kills/hora, um quarto do farm, porque metade dos turnos virava
+  // abertura de status inutil.
+  //
+  // Com ela a regra vira a jogada certa do jogo real: paralisar quem vai
+  // aguentar a troca, bater em quem nao vai.
+  const statusPronto = prontos.filter((a) => (
+    a.power === 0 && a.status != null && statusVaiPegar(defenderEntity, a.status, a.id)
+  ))
+  if (statusPronto.length > 0) {
+    const maiorDano = ready.reduce(
+      (max, a) => Math.max(max, danoEsperado(rng, entity, defenderEntity, a)),
+      0,
+    )
+    if (maiorDano < defenderEntity.poke.hp) {
+      return statusPronto.reduce((melhor, a) => (
+        (a.statusChance ?? 0) > (melhor.statusChance ?? 0) ? a : melhor
+      ))
+    }
+  }
 
   // Ataque Basico e o Struggle deste jogo: entra quando NENHUM dos golpes
   // selecionados pode ser usado agora. Nos jogos reais Struggle dispara por
@@ -375,7 +455,7 @@ function pickAbility(rng: Rng, entity: WorldEntity, defenderEntity: WorldEntity,
   const aoeReady = ready.filter((a) => a.target === 'aoe' && aoeTargetCounter(a) >= 2)
   const pool = aoeReady.length > 0 ? aoeReady : ready
   return pool.reduce((best, a) => (
-    estimateDamage(rng, entity, defenderEntity, a) > estimateDamage(rng, entity, defenderEntity, best) ? a : best
+    danoEsperado(rng, entity, defenderEntity, a) > danoEsperado(rng, entity, defenderEntity, best) ? a : best
   ))
 }
 
@@ -395,6 +475,22 @@ function queueHit(world: WorldState, attacker: WorldEntity, target: WorldEntity,
 // especial e pula o anel por-alvo abaixo.
 function queueAoeVisual(world: WorldState, attacker: WorldEntity, ability: Ability): void {
   world.pendingHits.push({ id: `hit-${world.counters.pendingHit++}`, timer: HIT_LAND_DELAY, attackerId: attacker.id, targetId: null, ability, isAoeVisual: true })
+}
+
+// Texto flutuante de status ("Envenenado!", "Acordou"). Reusa o mesmo efeito
+// `abilityName` do nome do golpe: o jogador precisa VER o status entrando e
+// saindo, senao o POKE simplesmente para de agir sem explicacao — e o tipo de
+// coisa que le como travamento do jogo.
+function anunciarStatus(world: WorldState, alvo: WorldEntity, tipo: StatusCondition, quando: 'entrou' | 'saiu' = 'entrou'): void {
+  world.effects.push(createWorldEffect(world.counters, {
+    type: 'abilityName',
+    x: alvo.x, y: alvo.y,
+    targetX: alvo.x, targetY: alvo.y + getGroundOffset(alvo) + 14,
+    text: quando === 'entrou' ? `${nomeDoStatus(tipo)}!` : `${nomeDoStatus(tipo)} passou`,
+    color: corDoStatus(tipo),
+    duration: 0.8,
+    owner: alvo,
+  }))
 }
 
 // Aparece o nome do golpe logo abaixo do usuario no instante em que e
@@ -423,8 +519,63 @@ function nearbyAliveEnemies(world: WorldState): EnemyEntity[] {
   return world.enemies.filter((e) => !isDead(e))
 }
 
-function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEnemies: EnemyEntity[]): void {
+/**
+ * O status deixa este POKE agir agora? Roda ANTES de escolher o golpe, como
+ * nos jogos: sono, congelamento e paralisia comem o turno inteiro, e a
+ * confusao troca o golpe por uma pancada em si mesmo.
+ *
+ * Consome o cooldown global mesmo quando o turno e perdido. Sem isso um POKE
+ * dormindo tentaria agir a cada frame e o sono viraria um sorteio de 60 vezes
+ * por segundo em vez de um por turno.
+ */
+/**
+ * O golpe errou?
+ *
+ * A precisao existia no catalogo desde a migracao pro Ultra Sun, mas nao era
+ * emitida pro cliente nem usada — todo golpe sempre acertava. Passa a valer
+ * agora porque sem ela o status nao tem como ser fiel: Hypnosis com 60% de
+ * precisao e Sing com 55% viram sono garantido, e um golpe de sono garantido
+ * desequilibra o combate inteiro.
+ *
+ * UM sorteio por USO, nao por alvo. Nos jogos, um golpe de area rola precisao
+ * contra cada alvo; aqui o AOE ja e uma aproximacao (raio em pixels, sem
+ * posicionamento de batalha), e rolar por alvo so somaria variancia invisivel
+ * a uma mecanica que o jogador nem ve alvo a alvo.
+ */
+function golpeErrou(rng: Rng, ability: Ability): boolean {
+  const precisao = ability.accuracy ?? 100
+  if (precisao >= 100) return false
+  return nextFloat(rng) * 100 >= precisao
+}
+
+function anunciarErro(world: WorldState, atacante: WorldEntity): void {
+  world.effects.push(createWorldEffect(world.counters, {
+    type: 'abilityName',
+    x: atacante.x, y: atacante.y,
+    targetX: atacante.x, targetY: atacante.y + getGroundOffset(atacante) + 14,
+    text: 'Errou!',
+    color: '#94a3b8',
+    duration: 0.7,
+    owner: atacante,
+  }))
+}
+
+function statusImpedeAcao(world: WorldState, entity: WorldEntity, silent: boolean): boolean {
+  const r = tentarAgir(world.rng, entity, (poder) => danoDeConfusao(entity, poder))
+  if (r.agir) return false
+
+  startGlobalCooldown(entity, MIN_ACTION_GAP)
+  if (r.autoDano != null && r.autoDano > 0) {
+    takeDamage(entity, r.autoDano, 'physical')
+    if (!silent) spawnDamageNumber(world, entity, { amount: r.autoDano, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+  }
+  if (!silent) anunciarStatus(world, entity, r.motivo)
+  return true
+}
+
+function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEnemies: EnemyEntity[], silent: boolean): void {
   if (!canAct(player)) return
+  if (statusImpedeAcao(world, player, silent)) return
 
   const primaryTarget = engagedEnemies[0]
   const allEnemies = nearbyAliveEnemies(world)
@@ -433,10 +584,15 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   )
   if (!ability) return
 
-  startCooldown(player, ability.id, scaledCooldown(ability, player.poke.stats.speed))
+  startCooldown(player, ability.id, scaledCooldown(ability, velocidadeEfetiva(player)))
   startGlobalCooldown(player, MIN_ACTION_GAP)
   triggerAttackAnim(player, ability.target === 'aoe', primaryTarget)
   announceAbility(world, player, ability)
+
+  if (golpeErrou(world.rng, ability)) {
+    if (!silent) anunciarErro(world, player)
+    return
+  }
 
   const targets = ability.target === 'aoe'
     ? allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (ability.radius ?? 0))
@@ -455,16 +611,22 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   if (ability.target === 'aoe') queueAoeVisual(world, player, ability)
 }
 
-function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: PlayerEntity): void {
+function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: PlayerEntity, silent: boolean): void {
   if (!canAct(enemy)) return
+  if (statusImpedeAcao(world, enemy, silent)) return
 
   const ability = pickAbility(world.rng, enemy, player, () => 1) // inimigos so miram no jogador unico
   if (!ability) return
 
-  startCooldown(enemy, ability.id, scaledCooldown(ability, enemy.poke.stats.speed))
+  startCooldown(enemy, ability.id, scaledCooldown(ability, velocidadeEfetiva(enemy)))
   startGlobalCooldown(enemy, MIN_ACTION_GAP)
   triggerAttackAnim(enemy, ability.target === 'aoe', player)
   announceAbility(world, enemy, ability)
+
+  if (golpeErrou(world.rng, ability)) {
+    if (!silent) anunciarErro(world, enemy)
+    return
+  }
 
   // Mesma ordem de executePlayerAction acima — dano real antes do recoil de
   // AOE (PH-10).
@@ -528,8 +690,20 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   if (!target || isDead(target)) return // ex: um aliado de AOE ja tinha finalizado antes
 
   const result = computeDamage(world.rng, attacker, target, ability, world.pessimista)
-  takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke))
-  if (!silent) spawnDamageNumber(world, target, result)
+  // Golpe de status causa 0 de dano — nao mostra "0" flutuando sobre o alvo
+  // nem registra "ultimo dano recebido" (Counter/Mirror Coat refletiriam nada).
+  if (result.amount > 0) {
+    takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke))
+    if (!silent) spawnDamageNumber(world, target, result)
+  }
+
+  // Efeito de status DEPOIS do dano, como nos jogos: um golpe que mata nao
+  // chega a envenenar. `aplicarEfeitosDoGolpe` tambem descongela o alvo quando
+  // o golpe e de FIRE.
+  if (!isDead(target)) {
+    const aplicado = aplicarEfeitosDoGolpe(world.rng, target, ability)
+    if (aplicado && !silent) anunciarStatus(world, target, aplicado.tipo, 'entrou')
+  }
 
   const isPlayerAttacker = attacker.kind === 'player'
   const isAoe = ability.target === 'aoe'
@@ -569,8 +743,37 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
   const { player, enemies } = world
   if (!player) return { defeatedEnemyIds: [], playerJustFainted: false }
 
+  const defeatedEnemyIds: string[] = []
+  let playerJustFainted = false
+
   tickCooldowns(player, dt)
   for (const enemy of enemies) tickCooldowns(enemy, dt)
+
+  // Status ANTES das acoes: veneno/queimadura podem derrubar o POKE neste
+  // frame, e um POKE derrubado nao age. Passa pelo mesmo caminho de morte que
+  // o dano de golpe (loot, EXP, desmaio) — dano de veneno que matasse sem
+  // creditar o kill seria um buraco silencioso na economia.
+  for (const entity of [player, ...enemies]) {
+    if (isDead(entity)) continue
+    const { dano, expirados } = tickStatus(world.rng, entity, dt)
+    if (!silent) {
+      for (const tipo of expirados) anunciarStatus(world, entity, tipo, 'saiu')
+    }
+    if (dano <= 0) continue
+
+    takeDamage(entity, dano)
+    if (!silent) spawnDamageNumber(world, entity, { amount: dano, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+    if (!isDead(entity)) continue
+    if (entity.kind === 'player') {
+      if (!player.fainted) {
+        player.fainted = true
+        playerJustFainted = true
+      }
+    } else if (!entity.deathHandled) {
+      entity.deathHandled = true
+      defeatedEnemyIds.push(entity.id)
+    }
+  }
   for (const effect of world.effects) tickEffect(effect, dt)
   for (const effect of world.effects) {
     if (effectDone(effect) && effect.ownerId) {
@@ -579,9 +782,6 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     }
   }
   world.effects = world.effects.filter((e) => !effectDone(e))
-
-  const defeatedEnemyIds: string[] = []
-  let playerJustFainted = false
 
   for (const hit of world.pendingHits) hit.timer -= dt
   const landed = world.pendingHits.filter((hit) => hit.timer <= 0)
@@ -599,11 +799,11 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
   const engagedEnemies = enemies.filter((e) => !isDead(e) && e.state === 'engaged' && e.targetId === player.id)
 
   if (engagedEnemies.length > 0) {
-    executePlayerAction(world, player, engagedEnemies)
+    executePlayerAction(world, player, engagedEnemies, silent)
 
     for (const enemy of engagedEnemies) {
       if (isDead(enemy) || player.fainted) continue
-      executeEnemyAction(world, enemy, player)
+      executeEnemyAction(world, enemy, player, silent)
     }
   }
 

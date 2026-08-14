@@ -14,6 +14,7 @@ import { RARITIES, rollRarity, type RarityKey } from './rarity'
 import type { Rng } from '@/core/rng'
 import { typedAoeMoveKey, TYPED_AOE_LEVEL } from './typedAoeMoves'
 import { activeAbilitiesPadrao } from './activeAbilities'
+import type { StatusAtivo } from './statusEffects'
 import type { GrowthCurve, SpeciesBaseStats, SpeciesDataEntry } from './generated/types'
 
 export type StatKey = keyof SpeciesBaseStats
@@ -43,6 +44,11 @@ export interface PokeInstance {
   // escolha valida (desligar tudo e cair no Ataque Basico) e NAO e o mesmo que
   // ausente.
   activeAbilities?: string[]
+  // Status NAO-VOLATIL (veneno, queimadura, paralisia, sono, congelamento).
+  // Mora no POKE, e nao na entidade de combate, porque sobrevive a hunt e e
+  // gravado — nos jogos ele so sai por item ou pelo Centro Pokemon. A
+  // confusao, que e volatil, mora na entidade (ver engine/types.ts).
+  status?: StatusAtivo | null
   // Setados fora deste arquivo, em runtime (nao no momento da criacao) —
   // opcionais aqui pra todo call site existente continuar valido.
   locked?: boolean // BagMenu.js — trava contra venda (EconomySystem.js)

@@ -37,7 +37,7 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     enemies: [],
     effects: [],
     pendingHits: [],
-    autoTimers: { pot: 0, revive: 0 },
+    autoTimers: { treinador: 0 },
     reviveCountdown: null,
     respawnTimer: null,
     sequenceIndex: 0,

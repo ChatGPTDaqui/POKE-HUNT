@@ -360,8 +360,11 @@ export const useGameStateStore = create<GameStateStore>()(
       isContinentUnlocked: (continent) => get().unlockedContinents.includes(continent),
 
       healTeamFully: () => {
+        // Tira o status junto com o HP: e o que o Centro Pokemon faz nos jogos,
+        // e sem isso o jogador sairia do Hospital com o POKE de HP cheio e
+        // ainda envenenado — que e exatamente o estado que ele foi la resolver.
         set((state) => ({
-          team: state.team.map((poke) => ({ ...poke, hp: poke.stats.hp })),
+          team: state.team.map((poke) => ({ ...poke, hp: poke.stats.hp, status: null })),
         }))
       },
 

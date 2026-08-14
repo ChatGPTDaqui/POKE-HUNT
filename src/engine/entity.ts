@@ -8,6 +8,7 @@ import { footOffsetFraction } from '@/data/spriteFootOffsets'
 import { getEncounter } from '@/data/enemies'
 import type { PokeInstance } from '@/data/pokes'
 import type { AbilityCategory } from '@/data/generated/types'
+import { TURNO_SEGUNDOS } from '@/data/abilities'
 import type { BaseEntity, EnemyEntity, Point, PlayerEntity, WorldCounters, WorldEntity } from './types'
 
 // O contador de id vive no WorldState (`world.counters`), nao aqui. Um `let`
@@ -43,6 +44,9 @@ export function createPlayerEntity(counters: WorldCounters, { poke, x, y }: { po
     attackAnim: null,
     attackAnimTimer: 0,
     effectLanes: [],
+    statusVolatil: null,
+    imunidadeDeStatus: 0,
+    proximoTurnoDeStatus: TURNO_SEGUNDOS,
     pathWaypoints: null,
     pathIndex: 0,
     pathRecalcTimer: 0,
@@ -78,6 +82,9 @@ export function createEnemyEntity(counters: WorldCounters, { poke, x, y, encount
     attackAnim: null,
     attackAnimTimer: 0,
     effectLanes: [],
+    statusVolatil: null,
+    imunidadeDeStatus: 0,
+    proximoTurnoDeStatus: TURNO_SEGUNDOS,
     pathWaypoints: null,
     pathIndex: 0,
     pathRecalcTimer: 0,

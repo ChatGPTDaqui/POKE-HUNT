@@ -11,6 +11,7 @@ import { SPECIES, computeStatsAtLevel, type PokeInstance, type StatBlock } from 
 import type { RarityKey } from '@/data/rarity'
 import { getAbility } from '@/data/abilities'
 import { activeAbilitiesPadrao } from '@/data/activeAbilities'
+import type { StatusCondition } from '@/data/statusEffects'
 
 type Json = Database['public']['Tables']['players']['Row']['auto_toggles']
 type Tables = Database['public']['Tables']
@@ -119,6 +120,12 @@ export function rowToPoke(row: PokemonRow): PokeInstance {
     // species nao ha padrao a montar.
     activeAbilities: row.active_abilities
       ?? (species ? activeAbilitiesPadrao(species, row.level) : undefined),
+    // Status NAO-VOLATIL. Sobrevive a sessao porque nos jogos ele sobrevive a
+    // batalha — so item ou Centro Pokemon tiram. A confusao NAO vem daqui: e
+    // volatil, mora na entidade de combate e some ao trocar de cena.
+    status: row.status
+      ? { tipo: row.status as StatusCondition, turnosRestantes: row.status_turns }
+      : null,
     locked: row.locked,
     capturedAt: row.created_at,
     originalTrainer: row.original_trainer ?? undefined,
@@ -230,6 +237,11 @@ export function pokeToRow(userId: string, poke: PokeInstance, location: 'team' |
     // `?? null` pelo mesmo motivo de `original_trainer` acima. NULL aqui tem
     // significado proprio (nunca configurado) e nao pode virar '{}'.
     active_abilities: poke.activeAbilities ?? null,
+    // Duas colunas em vez de um jsonb: `status` e um enum de 6 valores com
+    // check no banco, e `status_turns` e um int. Guardar `{tipo, turnos}` como
+    // JSON deixaria os dois sem validacao nenhuma do lado do Postgres.
+    status: poke.status?.tipo ?? null,
+    status_turns: poke.status?.turnosRestantes ?? null,
     // Sem esta linha o golpe desligado a mao voltava ligado no proximo
     // carregamento — o combate respeitava o campo, mas ninguem o gravava.
     disabled_abilities: poke.disabledAbilities ?? {},
