@@ -8,6 +8,7 @@
 import { useGameStateStore, type GameStateData } from '@/stores/gameStateStore'
 import { useToastStore } from '@/stores/toastStore'
 import { servidor, servidorAtivo, ErroServidor, type RespostaFlush } from './servidor'
+import { executarAcaoRpc } from './acoesRpc'
 import { flushAgora } from './gameStatePersistence'
 
 /** Substitui o estado local pelo que o servidor considera verdade. */
@@ -51,8 +52,7 @@ export async function pedirAcao(
     return fallback() !== false
   }
   try {
-    const resposta = await servidor.acao(acao)
-    aplicarEstadoDoServidor(resposta.estado)
+    const resposta = await executarAcaoRpc(acao)
     if (resposta.mensagem) useToastStore.getState().pushToast(resposta.mensagem, 'success', 'world')
     return true
   } catch (erro) {
@@ -247,7 +247,7 @@ export async function fecharSessaoDeHunt(): Promise<void> {
 export function sincronizarAuto(): void {
   if (!servidorAtivo()) return
   const s = useGameStateStore.getState()
-  void servidor.acao({
+  void executarAcaoRpc({
     tipo: 'configurarAuto',
     patch: {
       toggles: s.autoToggles,

@@ -15,26 +15,52 @@ import { HomePage } from '@/features/auth/HomePage'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { RegisterPage } from '@/features/auth/RegisterPage'
 import { RequireAuth } from '@/features/auth/RequireAuth'
+import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage'
 import { GameShell } from '@/features/game/GameShell'
+import { RequireAdmin } from '@/features/admin/RequireAdmin'
+import { AdminErrorsPage } from '@/features/admin/AdminErrorsPage'
+import { useAuthStore } from '@/stores/authStore'
 
 function App() {
+  // O Supabase trata o token do link de recovery como sessao valida — sem
+  // este desvio, HomePage veria "tem sessao" e mandaria direto pro jogo
+  // (ver HomePage.tsx), pulando a troca de senha que era o motivo do link.
+  // Fora do <Routes> de proposito: o hash do link pode cair em qualquer path
+  // (depende do Site URL configurado no Supabase), entao a troca de senha
+  // precisa interceptar antes do roteamento normal decidir pra onde ir.
+  const emRecuperacaoDeSenha = useAuthStore((s) => s.emRecuperacaoDeSenha)
+
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/registro" element={<RegisterPage />} />
-        <Route
-          path="/jogo"
-          element={
-            <RequireAuth>
-              <GameShell />
-            </RequireAuth>
-          }
-        />
-        {/* URL desconhecida volta pra home em vez de tela branca. */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      {emRecuperacaoDeSenha ? (
+        <ResetPasswordPage />
+      ) : (
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/registro" element={<RegisterPage />} />
+          <Route
+            path="/jogo"
+            element={
+              <RequireAuth>
+                <GameShell />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <RequireAuth>
+                <RequireAdmin>
+                  <AdminErrorsPage />
+                </RequireAdmin>
+              </RequireAuth>
+            }
+          />
+          {/* URL desconhecida volta pra home em vez de tela branca. */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      )}
     </BrowserRouter>
   )
 }

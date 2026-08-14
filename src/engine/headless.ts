@@ -10,7 +10,7 @@
 // aliases `@/` e produz um ESM que o Node importa direto. Nada aqui pode puxar
 // `gameStateStore` como VALOR — ver a nota de topo de simulation.ts.
 export { buildMapWorld, buildHospitalWorld, stepWorld, handleEnemyDefeated } from './simulation'
-export { OFFLINE_SIM_STEP_SECONDS, OFFLINE_FARM_MAX_HOURS } from './simulation'
+export { OFFLINE_SIM_STEP_SECONDS, OFFLINE_FARM_MAX_HOURS, LIMIAR_OFFLINE_SEGUNDOS } from './simulation'
 export type { SequenciaDeSorteio } from './simulation'
 
 export { simulateWorldSeconds, createEmptySummary } from './systems/offlineSimSystem'
@@ -41,15 +41,16 @@ export {
 } from './systems/economySystem'
 export { evolvePokeInstance, grantExp } from './systems/progressionSystem'
 export { isDead } from './entity'
-export { recordBatch } from './systems/statsTracker'
+export { recordBatch } from './systems/farmRates'
 
 // O contrato que o motor exige de "estado do jogador". No navegador quem
 // satisfaz isso e a store zustand; no servidor sera um objeto sobre as linhas do
 // Postgres. Exportar o TIPO aqui e o que garante que o adaptador do servidor
 // nao esqueca um metodo — se esquecer, o type-check quebra em vez de o jogo
 // falhar em runtime no meio de uma simulacao de 6 horas.
-export type { GameStateStore, GameStateData } from '@/stores/gameStateStore'
-export { defaultGameStateData, MAX_TEAM_SIZE } from '@/stores/gameStateStore'
+export type { GameStateStore } from '@/stores/gameStateStore'
+export type { GameStateData } from '@/stores/gameStateDefaults'
+export { defaultGameStateData, MAX_TEAM_SIZE } from '@/stores/gameStateDefaults'
 
 // Traducao linha-do-Postgres <-> estado de jogo. Reexportada, e nao
 // reimplementada no servidor, pelo mesmo motivo do motor: duas implementacoes

@@ -39,7 +39,7 @@ import { updateAnimations, tickAttackAnimTimers } from './systems/animationSyste
 import { updateAutoHeal, maybeAutoCatch } from './systems/autoSystem'
 import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } from './systems/progressionSystem'
 import { awardKillLoot } from './systems/economySystem'
-import { recordKill } from './systems/statsTracker'
+import { recordKill } from './systems/farmRates'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
 
@@ -61,6 +61,16 @@ export const OFFLINE_FARM_MAX_HOURS = formulaEngine.evalOrDefault('OFFLINE_FARM_
 export const OFFLINE_SIM_STEP_SECONDS = formulaEngine.evalOrDefault('OFFLINE_SIM_STEP_SECONDS', 0.1)
 export const MIN_CATCHUP_GAP_SECONDS = 5
 export const MIN_OFFLINE_GAP_SECONDS = 60
+// Acima disso o gap caracteriza ausencia real (offline de verdade, nao so um
+// respiro entre acoes) e o combate roda em modo pessimista (sem critico, dano
+// no piso da variacao) — em vez da MESMA distribuicao do jogo ao vivo.
+// Compartilhado entre cliente e servidor: os dois caminhos de farm offline
+// (server/src/progresso.ts no flush, e o boot sem servidor aqui embaixo em
+// GameShell.tsx) precisam concordar sobre quando ligar `world.pessimista`,
+// senao o farm offline sem servidor renderia melhor que o ao vivo por ate
+// OFFLINE_FARM_MAX_HOURS — o invariante que esse modo pessimista existe pra
+// proteger (PH-15).
+export const LIMIAR_OFFLINE_SEGUNDOS = 120
 // De quanto em quanto tempo o debito entre relogio de parede e tempo
 // simulado e reconciliado. De proposito independente de qualquer evento de
 // visibilidade — ver o comentario em App.tsx#useBackgroundCatchUp.
@@ -375,7 +385,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   }
 
   updateMovement(world, dt)
-  const { defeatedEnemyIds, playerJustFainted } = updateCombat(world, dt)
+  const { defeatedEnemyIds, playerJustFainted } = updateCombat(world, dt, { silent })
   // attackAnimTimer precisa decrementar todo tick independente de `silent`
   // — MovementSystem trava movimento enquanto ele roda.
   tickAttackAnimTimers(world, dt)

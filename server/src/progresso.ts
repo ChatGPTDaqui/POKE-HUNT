@@ -4,7 +4,7 @@ import {
   snapshotToGameState, gameStateToPlayerRow, gameStateToPokemonRows,
   gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
   defaultGameStateData, MAPS,
-  OFFLINE_SIM_STEP_SECONDS, recordBatch,
+  OFFLINE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary,
 } from '#engine'
 import {
@@ -15,7 +15,25 @@ import { aplicarPiso, NENHUM_PISO, type ResultadoPiso } from './farmOffline.js'
 import {
   reivindicarEntregas, aplicarEntregasNoEstado, devolverEntregas, type LinhaEntrega,
 } from './entregas.js'
-import { CONQUISTA_LANCE } from './ranking.js'
+
+// `id=in.(...)` com centenas de UUIDs estoura o tamanho de URL que o gateway
+// aceita — o fetch nem chega a ter resposta HTTP, so falha ("PostgREST
+// inacessivel"), vira 502 e o jogador ve "falha ao falar com o banco". Medido
+// em producao: conta real com 268+ pokemon_instances pra reconciliar num
+// unico flush ja estourava. Contas de teste locais nunca tem POKE suficiente
+// pra reproduzir. 100 ids por lote fica bem abaixo de qualquer limite comum
+// de proxy (~8KB de request-line) mesmo com filtro/select junto na mesma URL.
+const TAMANHO_LOTE_ID = 100
+function porLotesDeId(ids: string[]): string[][] {
+  const lotes: string[][] = []
+  for (let i = 0; i < ids.length; i += TAMANHO_LOTE_ID) lotes.push(ids.slice(i, i + TAMANHO_LOTE_ID))
+  return lotes
+}
+
+// Chave usada em `hall_da_fama.conquista` pra "derrotou o Campeao Lance".
+// Vivia em ranking.ts (rota de leitura, apagada na migracao RPC-everything) —
+// so a constante sobrevive, e so aqui, unico lugar que ainda escreve nela.
+const CONQUISTA_LANCE = 'boss_lance'
 
 // Teto de quanto tempo um unico flush pode creditar. NAO e uma regra de
 // balanceamento — e o limite que impede um relogio maluco (ou uma sessao
@@ -23,6 +41,11 @@ import { CONQUISTA_LANCE } from './ranking.js'
 // O Farm Offline do cliente ja tinha um teto proprio pelo mesmo motivo.
 export const MAX_SEGUNDOS_POR_FLUSH = 6 * 3600
 
+// LIMIAR_OFFLINE_SEGUNDOS vem do engine compartilhado (src/engine/simulation.ts)
+// — o farm offline sem servidor (GameShell.tsx) precisa do MESMO limiar pra
+// decidir `world.pessimista`, senao os dois caminhos discordam sobre o que
+// conta como ausencia (PH-15).
+//
 // Acima disto, o intervalo e tratado como AUSENCIA (farm offline) e nao como
 // jogo ao vivo. O cliente liquida de 30 em 30 segundos enquanto o jogador esta
 // com o jogo aberto, entao 120s deixa folga confortavel pra um flush atrasado
@@ -32,7 +55,6 @@ export const MAX_SEGUNDOS_POR_FLUSH = 6 * 3600
 // piso de 50%; ao vivo roda normal e ALIMENTA a taxa que o piso usa de
 // referencia. Ligar o modo pessimista em todo flush (como estava) penalizava
 // quem estava jogando de verdade E destruia a propria referencia do piso.
-export const LIMIAR_OFFLINE_SEGUNDOS = 120
 
 export interface LinhaSessao {
   id: string
@@ -49,36 +71,33 @@ export interface LinhaSessao {
   simulated_seconds: number | string
   closed_at: string | null
   // Quando o flush em andamento comecou a simular/gravar; nulo fora disso. Ver
-  // `aguardarFlushEmAndamento` — e o sinal que impede o resto do jogo de gravar
-  // um snapshot de ANTES do flush por cima do resultado dele.
+  // `aguardarFlushEmAndamento` — migration `marca_de_flush_em_andamento`.
   flushing_since: string | null
 }
 
 // Marca de flush mais velha que isto e tratada como lixo: a invocacao morreu no
 // meio (limite de CPU da Edge Function, deploy, queda) e nunca limpou. Sem a
 // expiracao, uma marca orfa faria TODO request seguinte esperar o tempo maximo.
-// Folga larga de proposito: o pior caso medido (6h de farm offline numa
-// invocacao) leva ~1,6s.
 const MARCA_DE_FLUSH_EXPIRA_MS = 30000
-// Teto da espera. Estourar nao e erro: seguir em frente devolve o
-// comportamento antigo (a corrida), enquanto travar o request seria trocar uma
-// perda rara por uma falha certa.
+// Teto da espera. Estourar nao e erro: seguir em frente cai no CAS de
+// `gravarEstado` (playerUpdatedAt) — que so falha (409) se AINDA houver
+// colisao real, e nesse caso o chamador decide se tenta de novo.
 const ESPERA_MAXIMA_POR_FLUSH_MS = 2500
 const INTERVALO_DE_SONDAGEM_MS = 120
 
-const dormir = (ms: number) => new Promise((r) => setTimeout(r, ms))
+const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 /**
  * Segura o request enquanto um flush do MESMO jogador ainda esta escrevendo.
  *
- * Sem isto, ler o estado durante um flush e depois grava-lo apaga o que o flush
- * creditou — e o intervalo ja foi consumido pelo claim, entao nao volta em flush
- * nenhum. Ver a migration `20260809190000_marca_de_flush_em_andamento` pros
- * numeros medidos.
- *
- * E uma espera, e nao um erro, porque o outro request nao esta fazendo nada de
- * errado: ele vai terminar em milissegundos e a resposta correta e usar o
- * resultado DELE como ponto de partida.
+ * O CAS de `gravarEstado` (playerUpdatedAt) impede sobrescrita SILENCIOSA —
+ * mas nao impede DESCARTE: `aplicarFlush` avanca `last_flush_at` no claim,
+ * ANTES de simular, e so grava no fim. Se o CAS final perder a corrida (outro
+ * request escreveu `players` no meio da simulacao), a excecao 409 propaga e a
+ * simulacao inteira — ouro, XP, capturas de um intervalo real — e jogada fora
+ * SEM que `last_flush_at` volte atras, entao aquele tempo nao credita em
+ * flush nenhum. Esperar em vez de correr evita perder o trabalho: quem chega
+ * depois so precisa ler o resultado do flush que ja estava terminando.
  */
 export async function aguardarFlushEmAndamento(cfg: Config, userId: string): Promise<void> {
   const limite = Date.now() + ESPERA_MAXIMA_POR_FLUSH_MS
@@ -116,9 +135,21 @@ export interface EstadoParaEscrita {
    * ganha isso de graca.
    */
   entregas: LinhaEntrega[]
+  /**
+   * `players.updated_at` no momento desta leitura — CAS obrigatorio na
+   * escrita final de `gravarEstado` (PH-5). Sem isso, duas acoes concorrentes
+   * do mesmo jogador (duas abas, duplo clique, comprar+evoluir quase juntos)
+   * leem o mesmo snapshot e a escrita que terminar por ultimo sobrescreve em
+   * silencio o efeito da outra.
+   */
+  playerUpdatedAt: string
 }
 
-async function lerSnapshot(cfg: Config, userId: string): Promise<EstadoParaEscrita> {
+// Exportada (sem side-effect, ao contrario de `carregarEstadoParaEscrita`, que
+// tambem reivindica entregas) pra permitir recarregar estado fresco no meio
+// de uma escrita ja em andamento — usado pelo retry de `criarOrdem` (PH-8)
+// quando o CAS final perde a corrida depois de um casamento real ja gravado.
+export async function lerSnapshot(cfg: Config, userId: string): Promise<EstadoParaEscrita> {
   const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
     selecionar<PlayerSnapshot['player']>(cfg, `players?user_id=eq.${userId}&select=*`),
     selecionarTudo<PlayerSnapshot['pokemon'][number]>(cfg, `pokemon_instances?user_id=eq.${userId}&select=*`),
@@ -131,7 +162,12 @@ async function lerSnapshot(cfg: Config, userId: string): Promise<EstadoParaEscri
     { player: player[0], pokemon, items, pokedex, autoCatchRules },
     defaultGameStateData(),
   )
-  return { estado, pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)), entregas: [] }
+  return {
+    estado,
+    pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)),
+    entregas: [],
+    playerUpdatedAt: player[0].updated_at,
+  }
 }
 
 export async function carregarEstado(cfg: Config, userId: string): Promise<GameStateData> {
@@ -169,8 +205,8 @@ export async function comEstadoParaEscrita<T>(
   cfg: Config,
   userId: string,
   fn: (ctx: EstadoParaEscrita) => Promise<T>,
-  // Só o proprio flush passa `false`: ele E o dono da marca, entao esperaria por
-  // si mesmo ate o teto.
+  // So o proprio flush passa `false`: ele E o dono da marca, entao esperaria
+  // por si mesmo ate o teto.
   opcoes: { esperarFlush?: boolean } = {},
 ): Promise<T> {
   if (opcoes.esperarFlush !== false) await aguardarFlushEmAndamento(cfg, userId)
@@ -211,26 +247,44 @@ export async function gravarEstado(
   userId: string,
   estado: GameStateData,
   pokeIdsNoLoad: Set<string>,
+  playerUpdatedAtEsperado: string,
 ): Promise<void> {
-  await atualizar(cfg, `players?user_id=eq.${userId}`, gameStateToPlayerRow(userId, estado))
+  // CAS na linha de `players`: sem isso, duas acoes concorrentes do mesmo
+  // jogador (duas abas, duplo clique, comprar+evoluir quase juntos) leem o
+  // mesmo snapshot e a escrita que terminar por ultimo sobrescreve em
+  // silencio o efeito da outra — mesma classe de bug que PH-3 corrigiu no
+  // Mercado, aqui na linha do jogador (PH-5). `updated_at` e mantido pelo
+  // trigger `players_set_updated_at`: todo UPDATE bem sucedido (nosso ou de
+  // outro request concorrente) sempre avanca a versao.
+  const gravada = await atualizarRetornando(
+    cfg,
+    `players?user_id=eq.${userId}&updated_at=eq.${encodeURIComponent(playerUpdatedAtEsperado)}`,
+    gameStateToPlayerRow(userId, estado),
+  )
+  if (!gravada.length) throw new ErroHttp(409, 'outro comando em andamento — tente de novo')
 
   const linhasPoke = gameStateToPokemonRows(userId, estado)
-  const idsAgora = new Set(linhasPoke.map((l) => l.id))
+  // `id` e opcional so no tipo `Insert` (coluna tem default no banco) — aqui
+  // sempre vem preenchido, o proprio POKE que o gerou.
+  const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id): id is string => id != null))
   // Uma leitura so, cobrindo o que eu conhecia e o que estou tentando gravar.
   const idsDeInteresse = [...new Set([...pokeIdsNoLoad, ...idsAgora])]
-  const atuais = idsDeInteresse.length
-    ? await selecionarTudo<LinhaLocalizacao>(
-      cfg,
-      `pokemon_instances?id=in.(${idsDeInteresse.join(',')})&select=id,user_id,location`,
+  const atuais: LinhaLocalizacao[] = []
+  for (const lote of porLotesDeId(idsDeInteresse)) {
+    atuais.push(
+      ...(await selecionarTudo<LinhaLocalizacao>(
+        cfg,
+        `pokemon_instances?id=in.(${lote.join(',')})&select=id,user_id,location`,
+      )),
     )
-    : []
+  }
   const porId = new Map(atuais.map((l) => [l.id, l]))
   const aindaMeu = (l: LinhaLocalizacao | undefined): boolean =>
     l != null && l.user_id === userId && (l.location === 'team' || l.location === 'bag')
 
   const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)))
-  if (remover.length) {
-    await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${remover.join(',')})`)
+  for (const lote of porLotesDeId(remover)) {
+    await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(',')})`)
   }
   // Linha sem par no banco e POKE novo (captura, inicial, compra) — grava.
   // Linha com par que ja nao e minha fica de fora.
@@ -275,16 +329,16 @@ export async function gravarEstado(
   // Ultra Ball" era aceita pela acao `configurarAuto`, entrava na simulacao do
   // request corrente e desaparecia no proximo load — e sobrevivia a um reset.
   //
-  // Escrita pelo mesmo diff de remocao + upsert das outras tabelas, e NAO por
-  // "apaga tudo e insere de novo" como era antes. A versao antiga produzia 502
-  // ("falha ao falar com o banco") em toda concorrencia: a tabela tem UNIQUE
-  // (user_id, species_id), entao dois requests do mesmo jogador intercalando
+  // Upsert + diff de remocao (mesmo padrao das tres tabelas acima), e NAO
+  // apaga-tudo-e-insere como era antes. A versao antiga dava 502 ("falha ao
+  // falar com o banco") em toda concorrencia: a tabela tem UNIQUE
+  // (user_id, species_id), e dois requests do mesmo jogador intercalando
   // DELETE/DELETE/INSERT/INSERT faziam o segundo INSERT violar a constraint.
-  // Reproduzido: com 8 regras configuradas, 33 de 48 GET /estado concorrentes
-  // voltaram 502, com o log do PostgREST acusando
-  // `duplicate key value violates unique constraint
-  // "player_auto_catch_rules_user_id_species_id_key"`. Era o aviso que aparecia
-  // ao recarregar a pagina com Ctrl+Shift+R.
+  // Medido: com 8 regras configuradas, 33 de 48 GET /estado concorrentes
+  // voltaram 502 (erro real: 'duplicate key value violates unique constraint
+  // "player_auto_catch_rules_user_id_species_id_key"'). A identidade da regra
+  // e o proprio par (especie, bola) — a chave estavel que faltava era
+  // exatamente a constraint.
   const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado)
   const especiesAgora = new Set(linhasAuto.map((l) => l.species_id))
   const autoNoBanco = await selecionarTudo<{ species_id: string }>(
@@ -345,20 +399,6 @@ export async function aplicarFlush(
   userId: string,
   sessao: LinhaSessao,
 ): Promise<ResultadoFlushOuOcupado> {
-  // ANTES do claim, e nao dentro do `comEstadoParaEscrita` la embaixo.
-  //
-  // O claim so protege contra dois flushes creditarem o MESMO intervalo. Ele nao
-  // impede um segundo flush legitimo: quando /acao (ou /mercado) liquida a
-  // sessao logo depois de o flush do timer ter comecado, ele le a linha ja com
-  // `last_flush_at` novo, reivindica um intervalo de ~0 segundo — e antes desta
-  // espera, seguia direto pra ler o estado enquanto o primeiro ainda escrevia,
-  // gravando um snapshot de antes dele. Medido: 5 de 6 cliques a 30ms do tique
-  // do flush apagavam o intervalo inteiro.
-  //
-  // A espera fica aqui de proposito: depois do claim seria esperar pela propria
-  // marca.
-  await aguardarFlushEmAndamento(cfg, userId)
-
   const agora = Date.now()
   const desde = new Date(sessao.last_flush_at).getTime()
   const bruto = (agora - desde) / 1000
@@ -387,13 +427,14 @@ export async function aplicarFlush(
   // `last_flush_at=eq.<valor lido>` no filtro e o que serializa: quem escreve
   // primeiro move a ancora e o outro nao encontra linha, entao desiste antes de
   // carregar estado, reivindicar entrega ou simular qualquer coisa.
+  //
   // `flushing_since` entra JUNTO com o claim, na mesma escrita: o claim diz
-  // "este intervalo e meu" e a marca diz "e eu ainda estou escrevendo". Sao
-  // coisas diferentes — `last_flush_at` avanca no COMECO, e o que os outros
-  // requests precisam saber e quando o snapshot parou de mudar. Sem a marca, o
-  // GET /estado da pagina recarregada (ou um clique na Loja) lia o estado
-  // durante a simulacao e o regravava depois, apagando o que este flush
-  // creditou.
+  // "este intervalo e meu" e a marca diz "e eu ainda estou escrevendo". Sem
+  // ela, um GET /estado (pagina recarregando) ou um /acao que caia durante a
+  // simulacao lia o estado no meio dela e regravava depois, e o CAS de
+  // `gravarEstado` (playerUpdatedAt) so detecta a colisao — nao evita que ELE
+  // seja quem perde e joga a simulacao fora. `aguardarFlushEmAndamento` (em
+  // `comEstadoParaEscrita`) e quem usa esta marca pra esperar em vez de correr.
   const [reivindicada] = await atualizarRetornando<LinhaSessao>(
     cfg,
     `game_sessions?id=eq.${sessao.id}&closed_at=is.null`
@@ -408,7 +449,7 @@ export async function aplicarFlush(
     // venda no Mercado some porque o jogador tirou o POKE da equipe.
     return await comEstadoParaEscrita(cfg, userId, async (ctx) => {
       const resultado = await simularSessao(
-        cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, { agora, segundos, truncado },
+        cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, ctx.playerUpdatedAt, { agora, segundos, truncado },
       )
       // `null` = sessao insimulavel; sai SEM gravar, entao as entregas voltam pra
       // fila (o `catch` do embrulho so cobre excecao, e aqui nao ha excecao).
@@ -416,9 +457,9 @@ export async function aplicarFlush(
       return resultado
     }, { esperarFlush: false })
   } finally {
-    // No `finally` porque uma marca que sobrevive a um erro faria todo request
-    // seguinte esperar o teto ate ela expirar. A expiracao existe pro caso em
-    // que nem o `finally` roda (invocacao morta no meio).
+    // No `finally` porque uma marca que sobrevive a um erro (inclusive o 409
+    // do proprio CAS de gravarEstado, se AINDA colidir depois da espera) faria
+    // todo request seguinte esperar o teto ate ela expirar sozinha.
     await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { flushing_since: null })
   }
 }
@@ -429,6 +470,7 @@ async function simularSessao(
   sessao: LinhaSessao,
   dados: GameStateData,
   pokeIdsNoLoad: Set<string>,
+  playerUpdatedAt: string,
   janela: { agora: number; segundos: number; truncado: boolean },
 ): Promise<ResultadoFlush | null> {
   const { agora, segundos, truncado } = janela
@@ -502,7 +544,7 @@ async function simularSessao(
   // esta resposta, entao um `currentMapId` sobrevivente o deixaria desenhando
   // uma cacada que o servidor ja encerrou.
   estado.currentMapId = resumo.stoppedEarly ? null : sessao.map_id
-  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
+  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt)
 
   // Hall da Fama: a unica coisa que libera o continente `kanto` e limpar a
   // sequencia do Campeao Lance (`unlocksContinentOnClear`, ver

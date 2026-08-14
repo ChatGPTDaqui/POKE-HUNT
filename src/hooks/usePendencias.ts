@@ -5,10 +5,9 @@
 // mensagem invalida o cache e o contador some sozinho — se cada lado tivesse a
 // propria chave, a bolinha continuaria la ate o proximo intervalo.
 //
-// Sem servidor configurado nao ha correio nem mercado: as consultas ficam
-// desligadas e os contadores sao 0.
 import { useQuery } from '@tanstack/react-query'
-import { servidor, servidorAtivo } from '@/data/remote/servidor'
+import { correio } from '@/data/remote/correioRealtime'
+import { mercadoMeus } from '@/data/remote/mercadoRpc'
 
 const INTERVALO_CORREIO_MS = 60000
 // O Mercado e mais caro por consulta (ordens + anuncios + ofertas dos dois
@@ -19,8 +18,7 @@ const INTERVALO_MERCADO_MS = 120000
 export function usePendenciasDoCorreio(): number {
   const { data } = useQuery({
     queryKey: ['correio'],
-    queryFn: () => servidor.correio(),
-    enabled: servidorAtivo(),
+    queryFn: () => correio(),
     staleTime: INTERVALO_CORREIO_MS / 2,
     refetchInterval: INTERVALO_CORREIO_MS,
   })
@@ -35,8 +33,7 @@ export function usePendenciasDoCorreio(): number {
 export function usePendenciasDoMercado(): number {
   const { data } = useQuery({
     queryKey: ['mercado', 'meus'],
-    queryFn: () => servidor.mercadoMeus(),
-    enabled: servidorAtivo(),
+    queryFn: () => mercadoMeus(),
     staleTime: INTERVALO_MERCADO_MS / 2,
     refetchInterval: INTERVALO_MERCADO_MS,
   })

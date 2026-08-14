@@ -12,6 +12,9 @@
 export interface Config {
   supabaseUrl: string
   serviceRoleKey: string
+  // Schema alvo no PostgREST (Accept-Profile/Content-Profile). Ausente ou
+  // 'public' nao manda cabecalho nenhum -- comportamento padrao do PostgREST.
+  schema?: string
 }
 
 export class ErroHttp extends Error {
@@ -21,10 +24,19 @@ export class ErroHttp extends Error {
 }
 
 function cabecalhos(cfg: Config, extras: Record<string, string> = {}): Record<string, string> {
+  // Accept-Profile vale pra GET/HEAD, Content-Profile pro resto -- o PostgREST
+  // ignora o que nao se aplica ao metodo da request, entao mandar os dois
+  // sempre e seguro e evita ter que saber o metodo aqui dentro.
+  const perfil: Record<string, string> = {}
+  if (cfg.schema && cfg.schema !== 'public') {
+    perfil['Accept-Profile'] = cfg.schema
+    perfil['Content-Profile'] = cfg.schema
+  }
   return {
     apikey: cfg.serviceRoleKey,
     Authorization: `Bearer ${cfg.serviceRoleKey}`,
     'Content-Type': 'application/json',
+    ...perfil,
     ...extras,
   }
 }
@@ -189,6 +201,53 @@ export async function atualizarRetornando<T>(cfg: Config, caminho: string, patch
     body: JSON.stringify(patch),
   })
   return (dado ?? []) as T[]
+}
+
+/**
+ * Reivindica uma linha por CAS (via `atualizarRetornando`) e roda `fn` com
+ * ela. Se a corrida for perdida (claim veio vazio), lanca `ErroHttp(409, ...)`
+ * antes de chamar `fn`. Se `fn` lancar, desfaz o claim (aplica
+ * `patchDesfazer` na mesma linha, por id) e repropaga o erro ORIGINAL — pra
+ * "reivindicado mas nunca processado" nunca virar perda silenciosa.
+ *
+ * Generaliza o padrao "PATCH+filtro, vazio=corrida perdida, desfazer se o
+ * downstream falhar" usado em `coletarAnexo` (PH-21). NAO cobre:
+ * - `casar()` (mercado.ts, PH-3): perde a corrida e RETENTA com um delta
+ *   recalculado sobre saldo divisivel — estrategia diferente, nao um claim
+ *   marcador com undo.
+ * - `evolvePoke` (PH-12): nao e CAS de banco nenhum, e client-side
+ *   (confirm-then-apply — so debita a Stone depois do servidor confirmar).
+ * - `playerRepository.ts` (PH-17/PH-18): roda no cliente via supabase-js
+ *   (`.eq()` chaining), transporte diferente deste `db.ts` baseado em fetch.
+ * - `aplicarFlush`/`gravarEstado` (PH-5, progresso.ts): `gravarEstado` faz o
+ *   CAS na escrita final inteira, nao ha nada a desfazer se falhar (ja lanca
+ *   409 direto); `aplicarFlush` decide de proposito NAO reverter
+ *   `last_flush_at` quando o downstream falha, pra sessao quebrada nao
+ *   entrar em loop de retry — contrato oposto ao deste helper.
+ *
+ * Ver PH-1 (epic) para o raciocinio completo de por que esses 5 ficam fora.
+ */
+export async function comClaimAtomico<L extends object, T>(
+  cfg: Config,
+  tabela: string,
+  filtroClaim: string,
+  patchClaim: Record<string, unknown>,
+  patchDesfazer: Record<string, unknown>,
+  fn: (linhaClaimada: L) => Promise<T>,
+  opcoes: { idCampo?: string; mensagemCorridaPerdida?: string } = {},
+): Promise<T> {
+  const idCampo = opcoes.idCampo ?? 'id'
+  const [linha] = await atualizarRetornando<L>(cfg, `${tabela}?${filtroClaim}`, patchClaim)
+  if (!linha) {
+    throw new ErroHttp(409, opcoes.mensagemCorridaPerdida ?? 'operação já em andamento ou concluída — tente de novo')
+  }
+  try {
+    return await fn(linha)
+  } catch (erro) {
+    const idValor = (linha as Record<string, unknown>)[idCampo]
+    await atualizarRetornando(cfg, `${tabela}?${idCampo}=eq.${idValor}`, patchDesfazer)
+    throw erro
+  }
 }
 
 /**

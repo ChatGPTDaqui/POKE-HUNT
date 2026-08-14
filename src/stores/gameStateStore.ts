@@ -13,132 +13,23 @@
 import { create } from 'zustand'
 import { persist, type PersistStorage } from 'zustand/middleware'
 import type { PokeInstance } from '@/data/pokes'
-import { MAPS } from '@/data/maps'
 import { useToastStore } from '@/stores/toastStore'
 // Sem ciclo em runtime: os modulos de `data/remote` so importam TIPOS deste
 // arquivo (`import type`, apagado na compilacao).
 import { postgresStorage, flushAgora, ultimoSavedAt, aoFalharSave } from '@/data/remote/gameStatePersistence'
+// Tipos/defaults puros do save, sem import de `data/remote/*` — extraidos pro
+// `#engine` (edge/server) poder reexportar sem trazer o client Supabase de
+// browser pro bundle da Edge Function (PH-6, incidente de boot). Ver
+// gameStateDefaults.ts pro porque.
+import {
+  MAX_TEAM_SIZE, defaultGameStateData, defaultUnlockedMaps,
+  DEFAULT_AUTO_POT_RULES, DEFAULT_AUTO_CATCH_CONFIG,
+  type AutoPotRule, type AutoCatchConfig, type AutoCatchRule,
+  type PerfStats, type TrainerInfo, type PokedexKillCount, type GameStateData,
+} from '@/stores/gameStateDefaults'
 
-// Todo item real, vendavel, da planilha (varas excluidas — pesca fora de
-// escopo, ver CLAUDE.md).
-// Limite de POKEs em campo — no vanilla so aparecia como comentario em
-// GameState.js ("poke instances, max 6") e como `team.length < 6` inline no
-// BagMenu; aqui vira constante de verdade, usada pelo guard de moveBagToTeam
-// e pela UI que decide mostrar/esconder o botao "Mover p/ equipe".
-export const MAX_TEAM_SIZE = 6
-
-// Concessao inicial de conta nova. Espelha `concessao_inicial_de_itens()` na
-// migration 20260808150000 — o servidor e quem manda (o cliente perdeu a
-// escrita na Fase D), esta copia so serve pro estado local antes da primeira
-// resposta chegar. Divergir dela nao vira exploit, vira um piscar de numeros
-// errados no HUD no primeiro segundo.
-//
-// Pedido explicito do usuario: 500 Poke Ball, 500 Potion e 50 Revive (era
-// 200/200/10). As outras bolas/pocoes (Great/Ultra/Premier, Super/Hyper/Max,
-// Max Revive) seguem fora da concessao — sao compradas ou dropadas.
-const STARTING_ITEMS: Record<string, number> = {
-  poke_ball: 500,
-  potion: 500,
-  revive: 50,
-}
-
-export interface AutoPotRule {
-  hpPercent: number
-  itemId: string
-}
-
-export interface AutoCatchConfig {
-  ballId: string
-  catchShinyEnabled: boolean
-  shinyBallId: string
-}
-
-export interface AutoCatchRule {
-  speciesId: string
-  ballItemId: string
-}
-
-export interface PerfStats {
-  gold: number
-  xp: number
-  mobs: number
-  shinys: number
-  since: number
-}
-
-export interface TrainerInfo {
-  name: string
-  level: number
-  exp: number
-}
-
-export interface PokedexKillCount {
-  normal: number
-  shiny: number
-}
-
-// Configuracao inicial do Bot (pedido explicito): pocao a 70% de vida (era 50),
-// auto-catch e auto-revive desligados — ver `defaultGameStateData` abaixo e o
-// default da coluna `auto_pot_rules`/`auto_toggles` nas migrations
-// 20260808150000 e 20260809120000. O tutorial do Bot parte exatamente deste
-// estado.
-//
-// O default vive nos DOIS lugares porque nenhum e redundante: o do banco vale
-// pra conta nova e pro wipe (`= default`), e este vale pro estado local antes
-// de o servidor responder (e pro modo sem servidor). Divergir os dois faria a
-// tela mostrar um valor e o bot usar outro ate o primeiro carregamento.
-const DEFAULT_AUTO_POT_RULES: AutoPotRule[] = [{ hpPercent: 70, itemId: 'potion' }]
-const DEFAULT_AUTO_CATCH_CONFIG: AutoCatchConfig = { ballId: 'poke_ball', catchShinyEnabled: true, shinyBallId: 'great_ball' }
-
-// Toda hunt sem unlockCost comeca desbloqueada — hoje so a hunt lendaria
-// carrega um custo (ver CLAUDE.md).
-function defaultUnlockedMaps(): string[] {
-  return Object.values(MAPS)
-    .filter((map) => !map.unlockCost)
-    .map((map) => map.id)
-}
-
-export interface GameStateData {
-  team: PokeInstance[]
-  activeIndex: number
-  bagPokes: PokeInstance[]
-  items: Record<string, number>
-  lockedItems: Record<string, boolean>
-  wallet: { gold: number; diamonds: number }
-  unlockedMaps: string[]
-  currentMapId: string | null
-  autoToggles: { autoPot: boolean; autoCatch: boolean; autoRevive: boolean }
-  autoPotRules: AutoPotRule[]
-  autoCatchConfig: AutoCatchConfig
-  autoCatchRules: AutoCatchRule[]
-  perfStats: PerfStats
-  trainer: TrainerInfo
-  pokedexKills: Record<string, PokedexKillCount>
-  unlockedContinents: string[]
-}
-
-// Exportado porque o adaptador de persistencia precisa dos mesmos defaults
-// para preencher campo ausente numa linha antiga do Postgres.
-export function defaultGameStateData(): GameStateData {
-  return {
-    team: [],
-    activeIndex: 0,
-    bagPokes: [],
-    items: { ...STARTING_ITEMS },
-    lockedItems: {},
-    wallet: { gold: 1000, diamonds: 0 },
-    unlockedMaps: defaultUnlockedMaps(),
-    currentMapId: null,
-    autoToggles: { autoPot: true, autoCatch: false, autoRevive: false },
-    autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
-    autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
-    autoCatchRules: [],
-    perfStats: { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now() },
-    trainer: { name: 'Treinador', level: 1, exp: 0 },
-    pokedexKills: {},
-    unlockedContinents: ['johto', 'nightmare'],
-  }
-}
+export { MAX_TEAM_SIZE, defaultGameStateData }
+export type { AutoPotRule, AutoCatchConfig, AutoCatchRule, PerfStats, TrainerInfo, PokedexKillCount, GameStateData }
 
 export interface GameStateActions {
   setActiveIndex: (index: number) => void
@@ -211,8 +102,8 @@ export interface GameStateActions {
   // Procura o poke em team E bagPokes, igual updatePokeInstance.
   toggleAbilityDisabled: (pokeUid: string, abilityId: string) => void
   // Os no maximo 4 golpes que o POKE leva pra luta (data/activeAbilities.ts).
-  // Quem valida a lista e o servidor (server/src/acoes.ts#definirGolpesAtivos);
-  // aqui e so o caminho de escrita local.
+  // Quem valida a lista e o Postgres (RPC `definir_golpes_ativos`); aqui e so
+  // o caminho de escrita local.
   setActiveAbilities: (pokeUid: string, abilityIds: string[]) => void
 
   // Equivalente a `Object.assign(gameState, new GameState())` do

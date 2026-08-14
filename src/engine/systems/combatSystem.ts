@@ -442,10 +442,17 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
     ? allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (ability.radius ?? 0))
     : [engagedEnemies[0]].filter(Boolean)
 
-  if (ability.target === 'aoe') queueAoeVisual(world, player, ability)
+  // Dano real primeiro, visual/recoil de AOE depois (PH-10): os dois pousam
+  // no MESMO tick (mesmo timer), mas `landed` processa na ordem de insercao
+  // e `resolveHit` cancela um hit inteiro se o atacante ja estiver morto
+  // (guard contra acao enfileirada antes de um desmaio anterior). Recoil de
+  // Explosao/Autodestruicao mata o proprio atacante — enfileirado antes dos
+  // hits de dano real, o guard cancelava o dano no(s) alvo(s) sempre que o
+  // recoil terminava de matar quem usou o golpe.
   for (const target of targets) {
     queueHit(world, player, target, ability)
   }
+  if (ability.target === 'aoe') queueAoeVisual(world, player, ability)
 }
 
 function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: PlayerEntity): void {
@@ -459,14 +466,16 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   triggerAttackAnim(enemy, ability.target === 'aoe', player)
   announceAbility(world, enemy, ability)
 
-  if (ability.target === 'aoe') queueAoeVisual(world, enemy, ability)
+  // Mesma ordem de executePlayerAction acima — dano real antes do recoil de
+  // AOE (PH-10).
   queueHit(world, enemy, player, ability)
+  if (ability.target === 'aoe') queueAoeVisual(world, enemy, ability)
 }
 
 // Aplica o dano/texto/efeito-de-golpe/tratamento-de-derrota de um hit
 // enfileirado — chamado quando seu timer chega a 0, ou seja, quando a pose
 // Shoot/Charge do atacante ja terminou de tocar.
-function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string[], onPlayerFainted: () => void): void {
+function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string[], onPlayerFainted: () => void, silent: boolean): void {
   const attacker = findEntityById(world.player, world.enemies, hit.attackerId)
   if (!attacker) return
   const { ability } = hit
@@ -481,22 +490,25 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   if (hit.isAoeVisual) {
     // O unico anel deste cast AOE, centrado no atacante — ver
     // queueAoeVisual. Hits individuais por-alvo abaixo pulam desenhar o
-    // proprio.
-    world.effects.push(createWorldEffect(world.counters, {
-      type: 'abilityEffect',
-      x: attacker.x, y: attacker.y,
-      targetX: attacker.x, targetY: attacker.y - attacker.radius * 0.6,
-      color: colorForType(ability.type),
-      isAoe: true,
-      duration: AOE_EFFECT_DURATION,
-      worldSize: (ability.radius ?? 0) * 2,
-      elementType: ability.type,
-    }))
+    // proprio. Pulado em silent (PH-11): farm offline/flush headless roda
+    // isto ate 250k vezes por chamada sem ninguem renderizando.
+    if (!silent) {
+      world.effects.push(createWorldEffect(world.counters, {
+        type: 'abilityEffect',
+        x: attacker.x, y: attacker.y,
+        targetX: attacker.x, targetY: attacker.y - attacker.radius * 0.6,
+        color: colorForType(ability.type),
+        isAoe: true,
+        duration: AOE_EFFECT_DURATION,
+        worldSize: (ability.radius ?? 0) * 2,
+        elementType: ability.type,
+      }))
+    }
 
     if (SELF_DESTRUCT_ABILITY_KEYS.has(ability.id) && !isDead(attacker)) {
       const recoil = Math.round(attacker.poke.hp * SELF_DESTRUCT_HP_LOSS_PERCENT)
       takeDamage(attacker, recoil)
-      spawnDamageNumber(world, attacker, { amount: recoil, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+      if (!silent) spawnDamageNumber(world, attacker, { amount: recoil, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
       if (isDead(attacker)) {
         if (attacker.kind === 'player') {
           if (!attacker.fainted) {
@@ -517,11 +529,11 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
 
   const result = computeDamage(world.rng, attacker, target, ability, world.pessimista)
   takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke))
-  spawnDamageNumber(world, target, result)
+  if (!silent) spawnDamageNumber(world, target, result)
 
   const isPlayerAttacker = attacker.kind === 'player'
   const isAoe = ability.target === 'aoe'
-  if (!isAoe) {
+  if (!isAoe && !silent) {
     world.effects.push(createWorldEffect(world.counters, {
       type: 'abilityEffect',
       x: target.x, y: target.y,
@@ -552,7 +564,8 @@ export interface CombatResult {
 
 // Devolve { defeatedEnemyIds, playerJustFainted } pro chamador (controller.ts)
 // distribuir EXP/loot/rolls de captura e disparar reacoes de UI.
-export function updateCombat(world: WorldState, dt: number): CombatResult {
+export function updateCombat(world: WorldState, dt: number, opts: { silent?: boolean } = {}): CombatResult {
+  const silent = opts.silent ?? false
   const { player, enemies } = world
   if (!player) return { defeatedEnemyIds: [], playerJustFainted: false }
 
@@ -576,7 +589,7 @@ export function updateCombat(world: WorldState, dt: number): CombatResult {
   for (const hit of landed) {
     resolveHit(world, hit, defeatedEnemyIds, () => {
       playerJustFainted = true
-    })
+    }, silent)
   }
 
   if (player.fainted) {
