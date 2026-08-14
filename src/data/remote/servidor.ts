@@ -17,6 +17,7 @@ import { supabase } from '@/lib/supabase'
 import { mensagemDeFalhaDeRede } from '@/lib/erroDeRede'
 import type { OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
 import type { PokeInstance } from '@/data/pokes'
+import type { SalaAtiva } from '@/engine/types'
 
 const BASE = (import.meta.env.VITE_SERVIDOR_URL || '').replace(/\/$/, '')
 
@@ -157,6 +158,14 @@ export interface RespostaFlush extends RespostaComEstado {
    * enquanto o servidor ja nao credita.
    */
   sessaoEncerrada?: 'desmaio' | null
+  /**
+   * A sala AUTORITATIVA da hunt. A simulacao local sorteia a propria (ela e
+   * predicao, com sequencia de sorteio propria), e quem decidiu o pool de
+   * especies e o loot que de fato foram creditados foi esta.
+   *
+   * Ausente (nao nula) quando o servidor e mais velho que este cliente.
+   */
+  sala?: SalaAtiva | null
 }
 
 // --- ranking e perfil -------------------------------------------------------

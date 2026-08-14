@@ -318,6 +318,9 @@ async function flush(cfg: Config, userId: string): Promise<Response> {
     resumo: resultado.resumo,
     piso: resultado.piso,
     sessaoEncerrada: resultado.encerrada,
+    // Idem pra sala: o cliente sorteia a propria como predicao, e quem decidiu
+    // o pool e o loot que de fato foram creditados foi esta aqui.
+    sala: resultado.sala,
     // O cliente sobrescreve o estado local com isto. Ele e predicao; a verdade
     // e o que volta daqui.
     estado: resultado.estado,

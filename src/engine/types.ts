@@ -153,6 +153,23 @@ export interface WorldCounters {
   pendingHit: number
 }
 
+/**
+ * A sala em que o jogador esta dentro da hunt.
+ *
+ * Uma hunt tem 10 salas; cada sala e um SUB-BIOMA sorteado do bioma dela, com
+ * pool de especies e loot proprios. Ver engine/systems/salaSystem.ts pro
+ * porque a condicao de limpeza e quota de abates e nao "zerar o campo".
+ */
+export interface SalaAtiva {
+  /** 0 a SALAS_POR_HUNT-1. */
+  indice: number
+  /** Chave do sub-bioma (casa com SUB_BIOMA_ESPECIES / data/biomas.ts). */
+  chave: string
+  abates: number
+  /** Quantas voltas completas de 10 salas ja foram fechadas nesta sessao. */
+  ciclos: number
+}
+
 export interface WorldState {
   mapDef: MapDef | null
   player: PlayerEntity | null
@@ -165,6 +182,8 @@ export interface WorldState {
   sequenceIndex: number
   sequenceCleared: boolean
   countdownRemaining: number | null
+  /** Nulo nas hunts sem salas: a inicial, as 11 BOSS e a do Campeao Lance. */
+  sala: SalaAtiva | null
   // Toda aleatoriedade da simulacao sai daqui. Ver core/rng.ts pro porque e
   // pros limites (isto torna a SEQUENCIA DE SORTEIOS reproduzivel; nao promete
   // replay bit-a-bit de coordenadas entre engines diferentes).

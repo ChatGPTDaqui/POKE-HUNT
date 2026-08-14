@@ -5,7 +5,7 @@ import {
   gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
   defaultGameStateData, MAPS, GRUPOS_DO_LANCE,
   OFFLINE_SIM_STEP_SECONDS, recordBatch,
-  type GameStateData, type PlayerSnapshot, type OfflineSimSummary,
+  type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
 } from '#engine'
 import {
   ErroHttp, selecionarTudo, selecionar, atualizar, atualizarRetornando, inserir, apagar, type Config,
@@ -59,6 +59,12 @@ export interface LinhaSessao {
   // de metade do conteudo.
   sequence_index: number | string
   sequence_cleared: boolean
+  // Sala atual da hunt. `sala_chave` nula = a sessao ainda nao entrou em
+  // nenhuma sala (hunt sem salas, ou primeira janela).
+  sala_indice: number | string
+  sala_chave: string | null
+  sala_abates: number | string
+  ciclos: number | string
 }
 
 // Marca de flush mais velha que isto e tratada como lixo: a invocacao morreu no
@@ -312,6 +318,8 @@ export interface ResultadoFlush {
   resumo: OfflineSimSummary
   estado: GameStateData
   piso: ResultadoPiso
+  /** Sala em que a hunt parou. Nulo nas hunts sem salas. */
+  sala: SalaAtiva | null
   /**
    * A cacada acabou sozinha e a sessao TEM que ser fechada pelo chamador.
    *
@@ -476,7 +484,18 @@ async function simularSessao(
     { rng, counters: { entity: 1, effect: 1, pendingHit: 1 } },
     // Progresso que atravessa a janela. Mesma familia do `rng_state`: o mundo e
     // reconstruido, o progresso nao pode ser.
-    { sequenceIndex: Number(sessao.sequence_index ?? 0), sequenceCleared: Boolean(sessao.sequence_cleared) },
+    {
+      sequenceIndex: Number(sessao.sequence_index ?? 0),
+      sequenceCleared: Boolean(sessao.sequence_cleared),
+      sala: sessao.sala_chave
+        ? {
+            indice: Number(sessao.sala_indice ?? 0),
+            chave: sessao.sala_chave,
+            abates: Number(sessao.sala_abates ?? 0),
+            ciclos: Number(sessao.ciclos ?? 0),
+          }
+        : null,
+    },
   )
   // Pior caso SO quando o intervalo caracteriza ausencia — ver
   // LIMIAR_OFFLINE_SEGUNDOS. Jogo ao vivo resolve o combate normalmente.
@@ -551,6 +570,10 @@ async function simularSessao(
     rng_draws: world.rng.draws,
     sequence_index: world.sequenceIndex,
     sequence_cleared: world.sequenceCleared,
+    sala_indice: world.sala?.indice ?? 0,
+    sala_chave: world.sala?.chave ?? null,
+    sala_abates: world.sala?.abates ?? 0,
+    ciclos: world.sala?.ciclos ?? 0,
   })
 
   return {
@@ -559,6 +582,10 @@ async function simularSessao(
     resumo,
     estado,
     piso,
+    // A sala AUTORITATIVA. O cliente roda a propria simulacao como predicao e
+    // sorteia a propria sala; sem isto a sala mostrada seria o palpite dele,
+    // que diverge do que de fato decidiu o pool e o loot creditados.
+    sala: world.sala,
     encerrada: resumo.stoppedEarly ? 'desmaio' : null,
   }
 }

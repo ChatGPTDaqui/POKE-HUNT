@@ -23,7 +23,7 @@
 // re-renderizam quando aquele campo muda de verdade.
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
-import type { WorldState } from '@/engine/types'
+import type { SalaAtiva, WorldState } from '@/engine/types'
 import { createRng, randomSeed, type Rng } from '@/core/rng'
 
 // `seed` opcional: quem constroi um mundo pra valer passa a semente da sessao
@@ -43,6 +43,7 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     sequenceIndex: 0,
     sequenceCleared: false,
     countdownRemaining: null,
+    sala: null,
     rng: createRng(seed),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
     pessimista: false,
@@ -66,6 +67,10 @@ export interface WorldStore extends WorldState {
   // a criacao do primeiro POKE. Dentro do `update` o rng e um draft mutavel,
   // entao o avanco da sequencia fica gravado em vez de se perder.
   sortear: <T>(fn: (rng: Rng) => T) => T
+  // Sobrescreve a sala com a AUTORITATIVA do servidor. A simulacao local
+  // sorteia a propria (ela e predicao e tem sequencia de sorteio propria), e
+  // quem decidiu o pool e o loot creditados foi o servidor.
+  definirSala: (sala: SalaAtiva | null) => void
 }
 
 export const useWorldStore = create<WorldStore>()(
@@ -89,5 +94,12 @@ export const useWorldStore = create<WorldStore>()(
       set((draft) => { resultado = fn(draft.rng) })
       return resultado!
     },
+
+    definirSala: (sala) =>
+      set((draft) => {
+        // So dentro de uma hunt: fora dela nao ha sala, e escrever uma aqui
+        // deixaria o Hospital com um sub-bioma pendurado no HUD.
+        if (draft.mapDef) draft.sala = sala ? { ...sala } : null
+      }),
   })),
 )

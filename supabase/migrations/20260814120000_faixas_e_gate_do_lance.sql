@@ -48,3 +48,21 @@ update public.players
 alter table public.game_sessions
   add column if not exists sequence_index integer not null default 0,
   add column if not exists sequence_cleared boolean not null default false;
+
+-- ---------------------------------------------------------------------------
+-- Salas
+-- ---------------------------------------------------------------------------
+-- Uma hunt e percorrida em 10 SALAS, e cada sala e um sub-bioma sorteado do
+-- bioma dela (ver src/data/biomas.ts e engine/systems/salaSystem.ts). Pelo
+-- mesmo motivo das colunas acima, a sala tem que viver na LINHA e nao no
+-- mundo: o mundo e reconstruido a cada flush.
+--
+-- Nao ha coluna de "plano das 10 salas": o sub-bioma da PROXIMA sala so e
+-- sorteado no momento do avanco. Um plano teria que ser mandado ao cliente
+-- (que ai le qual sala e a boa, sai e reentra ate ela cair na primeira —
+-- reroll gratis) ou escondido dele (e ai nao ha o que mostrar).
+alter table public.game_sessions
+  add column if not exists sala_indice integer not null default 0,
+  add column if not exists sala_chave text,
+  add column if not exists sala_abates integer not null default 0,
+  add column if not exists ciclos integer not null default 0;

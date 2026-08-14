@@ -40,13 +40,14 @@ import { updateAutoHeal, maybeAutoCatch } from './systems/autoSystem'
 import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } from './systems/progressionSystem'
 import { awardKillLoot } from './systems/economySystem'
 import { recordKill } from './systems/statsTracker'
+import { lootAtivo, novaSala, nomeDaSala, poolAtivo, registrarAbate, temSalas } from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
 
 import type { GameStateStore } from '@/stores/gameStateStore'
 import { emptyWorldState } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
-import type { EnemyEntity, Point, WorldState } from './types'
+import type { EnemyEntity, Point, SalaAtiva, WorldState } from './types'
 
 export const STARTER_LEVEL = 1
 // Starters sempre saem previsiveis — raridade Comum, IV 75% (23/31) em toda
@@ -124,7 +125,7 @@ function randomSpawnPoint(rng: Rng, mapDef: MapDef): Point {
   return { x, y }
 }
 
-function spawnEnemyAt(world: SequenciaDeSorteio, mapDef: MapDef): EnemyEntity {
+function spawnEnemyAt(world: SequenciaDeSorteio, mapDef: MapDef, pool: string[]): EnemyEntity {
   const { rng, counters } = world
   const point = randomSpawnPoint(rng, mapDef)
   // Ponderado pelo TIER de spawn da especie, derivado da chance real de
@@ -155,7 +156,9 @@ function spawnEnemyAt(world: SequenciaDeSorteio, mapDef: MapDef): EnemyEntity {
   // realmente da. Contra a "sequencia de sorte" que a versao anterior temia, o
   // que protege e a escala: um flush offline sao milhares de kills, e a media
   // de milhares de sorteios nao desvia o bastante pra passar o jogo ao vivo.
-  const encounterId = weightedPick(rng, mapDef.enemyPool, (id) => getEncounter(id)?.weight ?? 45)
+  // `pool` e o da SALA atual quando a hunt tem salas, e o da hunt inteira
+  // quando nao tem (inicial, BOSS, Lance) — ver systems/salaSystem.ts.
+  const encounterId = weightedPick(rng, pool, (id) => getEncounter(id)?.weight ?? 45)
   const encounter = getEncounter(encounterId)
   if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
   // `levelWeights` (ver data/huntTypes.ts) troca o sorteio uniforme por um
@@ -211,6 +214,8 @@ function spawnSequenceEnemy(world: SequenciaDeSorteio, mapDef: MapDef, index: nu
 export interface ProgressoDaSessao {
   sequenceIndex?: number
   sequenceCleared?: boolean
+  /** Sala em que a sessao parou. Ausente = comeca uma sala nova sorteada. */
+  sala?: SalaAtiva | null
 }
 
 export function buildMapWorld(
@@ -232,13 +237,22 @@ export function buildMapWorld(
   const retomando = sequenceIndex > 0 || sequenceCleared
   const countdownRemaining = retomando ? null : (mapDef.startCountdown || null)
 
+  // A sala tem que ser decidida ANTES do primeiro spawn: e ela que diz qual
+  // pool esta ativo. Retomar a sala salva (e nao sortear uma nova por janela) e
+  // o mesmo motivo do `sequenceIndex` — o mundo e reconstruido a cada flush, e
+  // sortear aqui faria a sala trocar de 30 em 30 segundos sozinha.
+  const sala = temSalas(mapId)
+    ? (progresso?.sala ?? novaSala(base.rng, mapId, 0, 0))
+    : null
+  const pool = poolAtivo(mapId, sala, mapDef.enemyPool)
+
   const enemies: EnemyEntity[] = []
   if (!countdownRemaining && !sequenceCleared) {
     if (mapDef.sequence) {
       enemies.push(spawnSequenceEnemy(base, mapDef, sequenceIndex))
     } else {
       for (let i = 0; i < mapDef.maxEnemies; i++) {
-        enemies.push(spawnEnemyAt(base, mapDef))
+        enemies.push(spawnEnemyAt(base, mapDef, pool))
       }
     }
   }
@@ -252,6 +266,7 @@ export function buildMapWorld(
     sequenceIndex,
     sequenceCleared,
     countdownRemaining,
+    sala,
   }
 }
 
@@ -278,7 +293,7 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
   const trainerResult = grantTrainerExp(gameState.trainer, expGain)
   gameState.setTrainer(trainerResult.trainer)
 
-  const loot = awardKillLoot(world.rng, gameState, enemy, world.mapDef!)
+  const loot = awardKillLoot(world.rng, gameState, enemy, world.mapDef!, lootAtivo(world.sala, world.mapDef!.itemDrops))
   // Champion Lance (data/nightmareMaps.ts) proibe captura explicitamente —
   // seu `noCatch` e o unico lugar que isso e setado.
   const captureResult = world.mapDef!.noCatch ? null : maybeAutoCatch(world.rng, gameState, enemy.poke)
@@ -391,7 +406,10 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     if (world.countdownRemaining <= 0) {
       world.countdownRemaining = null
       if (world.mapDef.sequence) world.enemies.push(spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex))
-      else for (let i = 0; i < world.mapDef.maxEnemies; i++) world.enemies.push(spawnEnemyAt(world, world.mapDef))
+      else {
+        const pool = poolAtivo(world.mapDef.id, world.sala, world.mapDef.enemyPool)
+        for (let i = 0; i < world.mapDef.maxEnemies; i++) world.enemies.push(spawnEnemyAt(world, world.mapDef, pool))
+      }
     }
     if (!silent) updateAnimations(world, dt)
     return []
@@ -413,6 +431,20 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       if (!enemy) continue
       kills.push(handleEnemyDefeated(world, enemy, gameState, { silent }))
       enemy.deathRemovalTimer = silent ? 0 : DEATH_ANIM_GRACE_PERIOD
+      // Conta pra quota da sala AQUI, e nao em quem chama: este e o unico
+      // ponto de abate do jogo, entao o combate ao vivo, o catch-up de aba
+      // oculta e o farm offline contam pela mesma regra sem nenhum deles
+      // precisar lembrar.
+      const avanco = registrarAbate(world, world.mapDef.id)
+      if (avanco.avancou && !silent) {
+        const nome = nomeDaSala(world.sala)
+        useToastStore.getState().pushToast(
+          avanco.fechouCiclo
+            ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.`
+            : `Sala limpa! Avancando para a sala ${(world.sala?.indice ?? 0) + 1}: ${nome}.`,
+          'success', 'world',
+        )
+      }
     }
   }
   for (const enemy of world.enemies) {
@@ -491,7 +523,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn) {
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
-      world.enemies.push(spawnEnemyAt(world, world.mapDef))
+      world.enemies.push(spawnEnemyAt(world, world.mapDef, poolAtivo(world.mapDef.id, world.sala, world.mapDef.enemyPool)))
       world.respawnTimer = world.mapDef.respawnDelay
     }
   } else if (world.mapDef.sequence && aliveCount === 0 && world.sequenceIndex < world.mapDef.sequence.length - 1) {

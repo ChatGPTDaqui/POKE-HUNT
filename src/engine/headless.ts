@@ -31,7 +31,7 @@ export type { BiomaDef, SubBiomaDef, FaixaDef, FaixaId } from '@/data/biomas'
 export { getEncounter } from '@/data/enemies'
 export { ITEMS, getItem } from '@/data/items'
 
-export type { WorldState, WorldCounters } from './types'
+export type { WorldState, WorldCounters, SalaAtiva } from './types'
 
 // Regras de economia e progressao usadas pelas ACOES do jogador (comprar,
 // vender, desbloquear, evoluir). O servidor chama exatamente estas — nao ha uma

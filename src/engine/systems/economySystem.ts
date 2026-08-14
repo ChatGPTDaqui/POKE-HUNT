@@ -9,6 +9,7 @@ import { FORMULAS } from '@/data/generated/formulas.generated'
 import { RARITIES, type RarityKey } from '@/data/rarity'
 import type { GameStateStore } from '@/stores/gameStateStore'
 import type { MapDef } from '@/data/maps'
+import type { MapItemDrop } from '@/data/generated/types'
 import type { EnemyEntity } from '../types'
 
 const formulaEngine = createFormulaEngine(FORMULAS)
@@ -61,10 +62,21 @@ export interface KillLoot {
   droppedItems: string[]
 }
 
-// Drops de item vem do proprio mapa da hunt (mapDef.itemDrops) — a
-// planilha nao tem "item segurado" por especie, entao todo kill numa hunt
-// rola contra a tabela de drop compartilhada daquela hunt.
-export function awardKillLoot(rng: Rng, gameState: GameStateStore, enemy: EnemyEntity, mapDef: MapDef): KillLoot {
+// Drops de item vem do lugar, nao da especie — a planilha nao tem "item
+// segurado" por especie, entao todo abate rola contra a tabela de drop do
+// lugar onde ele aconteceu.
+//
+// `drops` e o da SALA quando a hunt tem salas (cada sub-bioma tem perfil
+// proprio, ver data/biomas.ts#LOOT) e cai no `mapDef.itemDrops` quando nao
+// tem. Parametro explicito, e nao leitura de `world`: esta funcao nao conhece
+// WorldState e nao deveria passar a conhecer so pra achar a sala.
+export function awardKillLoot(
+  rng: Rng,
+  gameState: GameStateStore,
+  enemy: EnemyEntity,
+  mapDef: MapDef,
+  drops: MapItemDrop[] = mapDef.itemDrops,
+): KillLoot {
   const species = SPECIES[enemy.poke.speciesId]
   // Valor BRUTO de proposito (ver pokemonBaseValue): o piso de venda nao vale
   // aqui, senao o ouro por kill subiria junto por efeito colateral.
@@ -74,7 +86,7 @@ export function awardKillLoot(rng: Rng, gameState: GameStateStore, enemy: EnemyE
   gameState.addGold(gold)
 
   const droppedItems: string[] = []
-  for (const drop of mapDef.itemDrops) {
+  for (const drop of drops) {
     if (rollChance(rng, drop.chance)) {
       gameState.addItem(drop.itemId, 1)
       droppedItems.push(drop.itemId)

@@ -7,6 +7,7 @@
 // exige mexer em nenhuma tela.
 import { useGameStateStore, type GameStateData } from '@/stores/gameStateStore'
 import { useToastStore } from '@/stores/toastStore'
+import { useWorldStore } from '@/stores/worldStore'
 import { servidor, servidorAtivo, ErroServidor, type RespostaFlush } from './servidor'
 import { flushAgora } from './gameStatePersistence'
 
@@ -167,6 +168,11 @@ export async function liquidar(): Promise<void> {
   try {
     const r = await servidor.flush()
     aplicarEstadoDoServidor(r.estado)
+    // A sala do servidor manda. A simulacao local sorteia a propria (ela e
+    // predicao e tem sequencia de sorteio propria), entao sem esta linha a
+    // sala exibida seria um palpite — e o pool/loot que o jogador de fato
+    // recebeu vieram da sala de la.
+    if (r.sala !== undefined) useWorldStore.getState().definirSala(r.sala)
     tratarEncerramento(r.sessaoEncerrada)
     if (r.truncado) {
       useToastStore.getState().pushToast(
