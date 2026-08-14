@@ -22,6 +22,12 @@ export type { Rng } from '@/core/rng'
 export { createPokeInstance, SPECIES, computeStatsAtLevel, totalExpForLevel, averageIvPercent } from '@/data/pokes'
 export type { PokeInstance } from '@/data/pokes'
 export { MAPS, getMap } from '@/data/maps'
+export { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
+export {
+  BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, SALAS_POR_HUNT, ABATES_POR_SALA,
+  BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, huntId,
+} from '@/data/biomas'
+export type { BiomaDef, SubBiomaDef, FaixaDef, FaixaId } from '@/data/biomas'
 export { getEncounter } from '@/data/enemies'
 export { ITEMS, getItem } from '@/data/items'
 

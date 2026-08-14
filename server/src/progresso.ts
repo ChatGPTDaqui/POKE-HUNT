@@ -3,7 +3,7 @@ import {
   buildMapWorld, stepWorld, simulateWorldSeconds, restoreRng,
   snapshotToGameState, gameStateToPlayerRow, gameStateToPokemonRows,
   gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
-  defaultGameStateData, MAPS,
+  defaultGameStateData, MAPS, GRUPOS_DO_LANCE,
   OFFLINE_SIM_STEP_SECONDS, recordBatch,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary,
 } from '#engine'
@@ -52,6 +52,13 @@ export interface LinhaSessao {
   // `aguardarFlushEmAndamento` — e o sinal que impede o resto do jogo de gravar
   // um snapshot de ANTES do flush por cima do resultado dele.
   flushing_since: string | null
+  // Progresso da sequencia do Campeao Lance. Mesma razao do `rng_state`: o
+  // mundo e reconstruido a cada janela de flush, entao o que precisa
+  // sobreviver e o PROGRESSO, nao o mundo. Sem isto a luta recomecava no
+  // primeiro POKE dele a cada ~30s e era inganhavel — e agora ela e o portao
+  // de metade do conteudo.
+  sequence_index: number | string
+  sequence_cleared: boolean
 }
 
 // Marca de flush mais velha que isto e tratada como lixo: a invocacao morreu no
@@ -463,10 +470,14 @@ async function simularSessao(
   // shiny. Na mochila isso aparecia como a mesma especie chegando de novo a cada
   // meio minuto. Ver a migration `sessao_guarda_o_estado_do_sorteio`.
   const rng = restoreRng(Number(sessao.rng_state), Number(sessao.rng_draws))
-  const world = buildMapWorld(sessao.map_id, ativo, {
-    rng,
-    counters: { entity: 1, effect: 1, pendingHit: 1 },
-  })
+  const world = buildMapWorld(
+    sessao.map_id,
+    ativo,
+    { rng, counters: { entity: 1, effect: 1, pendingHit: 1 } },
+    // Progresso que atravessa a janela. Mesma familia do `rng_state`: o mundo e
+    // reconstruido, o progresso nao pode ser.
+    { sequenceIndex: Number(sessao.sequence_index ?? 0), sequenceCleared: Boolean(sessao.sequence_cleared) },
+  )
   // Pior caso SO quando o intervalo caracteriza ausencia — ver
   // LIMIAR_OFFLINE_SEGUNDOS. Jogo ao vivo resolve o combate normalmente.
   const offline = segundos > LIMIAR_OFFLINE_SEGUNDOS
@@ -504,15 +515,18 @@ async function simularSessao(
   estado.currentMapId = resumo.stoppedEarly ? null : sessao.map_id
   await gravarEstado(cfg, userId, estado, pokeIdsNoLoad)
 
-  // Hall da Fama: a unica coisa que libera o continente `kanto` e limpar a
-  // sequencia do Campeao Lance (`unlocksContinentOnClear`, ver
-  // data/nightmareMaps.ts). O QUANDO nao cabia em `unlocked_continents`, e "os
-  // primeiros a completar" e uma ordem por tempo — dai a tabela propria.
+  // Hall da Fama: a unica coisa que libera os grupos do Lance e limpar a
+  // sequencia dele (`unlocksContinentOnClear`, ver data/nightmareMaps.ts). O
+  // QUANDO nao cabia em `unlocked_continents`, e "os primeiros a completar" e
+  // uma ordem por tempo — dai a tabela propria.
   //
   // Registrado aqui, e nao no motor, de proposito: o motor roda igual no
   // cliente, e o cliente nao pode escrever conquista. `on_conflict` faz a
   // segunda vez ser no-op, entao a data guardada e sempre a da PRIMEIRA vez.
-  if (!continentesAntes.has('kanto') && estado.unlockedContinents.includes('kanto')) {
+  const ganhouGrupoDoLance = GRUPOS_DO_LANCE.some(
+    (g) => !continentesAntes.has(g) && estado.unlockedContinents.includes(g),
+  )
+  if (ganhouGrupoDoLance) {
     await inserir(cfg, 'hall_da_fama', {
       user_id: userId,
       conquista: CONQUISTA_LANCE,
@@ -535,6 +549,8 @@ async function simularSessao(
     // entao ler daqui pega o estado ja avancado pela simulacao inteira.
     rng_state: world.rng.state,
     rng_draws: world.rng.draws,
+    sequence_index: world.sequenceIndex,
+    sequence_cleared: world.sequenceCleared,
   })
 
   return {

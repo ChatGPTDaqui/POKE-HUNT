@@ -10,6 +10,7 @@ import { pedirAcao } from '@/data/remote/autoridade'
 // multiplicado) — so o unlockMap do engine exige essa forma, por isso a chamada
 // de getMap() abaixo em vez de repassar o objeto cru.
 import { MAPS, getMap } from '@/data/maps'
+import { FAIXAS } from '@/data/biomas'
 import type { HuntMapDef } from '@/data/huntTypes'
 import { getEncounter } from '@/data/enemies'
 import { SPECIES, type Species } from '@/data/pokes'
@@ -25,9 +26,11 @@ import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { TypeChip } from '@/components/shared/TypeChip'
 import { GameButton, GameCard, GameInput, GameSelect, SegmentedTabs, StickyHeader } from '@/components/game/controls'
 
+// As abas do menu de hunts. `continent` deixou de ser regiao e virou o grupo
+// de gate (ver data/biomas.ts): as duas primeiras faixas nascem abertas, a
+// terceira e o Modo Pesadelo saem do Campeao Lance.
 const CONTINENT_LABELS: Record<string, string> = {
-  johto: 'Johto',
-  kanto: 'Novo Continente (Kanto)',
+  ...Object.fromEntries(FAIXAS.map((f) => [f.id, `Faixa ${f.nome} · Lv ${f.niveis[0]}-${f.niveis[1]}`])),
   nightmare: 'Modo Pesadelo',
 }
 const TYPE_LIST = (Object.keys(TYPE_COLORS) as ElementType[]).sort()
@@ -39,7 +42,7 @@ const fmt = new Intl.NumberFormat('pt-BR')
 // nota la), nao no useState local daqui.
 export function focusHunt(map: HuntMapDef) {
   const ui = useUiStore.getState()
-  ui.setHuntContinent(map.continent || 'johto')
+  ui.setHuntContinent(map.continent ?? 'faixa1')
   ui.setHuntSearchTerm(map.name)
   ui.setHuntType('all')
 }
@@ -140,7 +143,7 @@ export function HuntMenu() {
   const acao = useAcaoPendente()
 
   const continents = useMemo(
-    () => [...new Set(Object.values(MAPS).map((m) => m.continent || 'johto'))],
+    () => [...new Set(Object.values(MAPS).map((m) => m.continent ?? 'faixa1'))],
     [],
   )
 
@@ -149,7 +152,7 @@ export function HuntMenu() {
   const visibleMaps = useMemo(() => {
     const term = search.trim().toLowerCase()
     return Object.values(MAPS)
-      .filter((m) => (m.continent || 'johto') === continent)
+      .filter((m) => (m.continent ?? 'faixa1') === continent)
       .filter((m) => huntHasType(m, typeFilter))
       .filter((m) => huntMatches(m, term))
       // Ordem por NIVEL (pedido explicito). A ordem anterior era a de insercao
@@ -212,7 +215,7 @@ export function HuntMenu() {
       {visibleMaps.map((map) => {
         // Gate por continente (Kanto so depois do Campeao Lance) — separado do
         // gate de custo em ouro por mapa, e checado antes dele.
-        const mapContinent = map.continent || 'johto'
+        const mapContinent = map.continent ?? 'faixa1'
         const continentGated = !unlockedContinents.includes(mapContinent)
         // Mesma regra do servidor (server/src/app.ts#abrirSessao): hunt sem
         // custo nasce liberada. Checar so a lista trancava visualmente as hunts
@@ -234,7 +237,7 @@ export function HuntMenu() {
           }
           if (continentGated) {
             useToastStore.getState().pushToast(
-              `Derrote o Campeao Lance em Johto antes de acessar ${CONTINENT_LABELS[mapContinent] || mapContinent}.`,
+              `Derrote o Campeao Lance antes de acessar ${CONTINENT_LABELS[mapContinent] || mapContinent}.`,
               'error', 'world',
             )
             return
@@ -278,7 +281,7 @@ export function HuntMenu() {
                 {!unlocked && (
                   <div className="mt-[.15em] text-[.75em] text-warn">
                     {continentGated
-                      ? 'Derrote o Campeao Lance (Johto) para desbloquear'
+                      ? 'Derrote o Campeao Lance para desbloquear'
                       : `Custo: ${fmt.format(map.unlockCost ?? 0)} ouro`}
                   </div>
                 )}

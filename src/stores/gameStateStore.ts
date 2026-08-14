@@ -14,6 +14,7 @@ import { create } from 'zustand'
 import { persist, type PersistStorage } from 'zustand/middleware'
 import type { PokeInstance } from '@/data/pokes'
 import { MAPS } from '@/data/maps'
+import { FAIXAS_INICIAIS, GRUPOS_DO_LANCE } from '@/data/biomas'
 import { useToastStore } from '@/stores/toastStore'
 // Sem ciclo em runtime: os modulos de `data/remote` so importam TIPOS deste
 // arquivo (`import type`, apagado na compilacao).
@@ -136,7 +137,7 @@ export function defaultGameStateData(): GameStateData {
     perfStats: { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now() },
     trainer: { name: 'Treinador', level: 1, exp: 0 },
     pokedexKills: {},
-    unlockedContinents: ['johto', 'nightmare'],
+    unlockedContinents: [...FAIXAS_INICIAIS],
   }
 }
 
@@ -670,10 +671,16 @@ export const useGameStateStore = create<GameStateStore>()(
           perfStats: { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now(), ...(persisted.perfStats || {}) },
           trainer: { name: 'Treinador', level: 1, exp: 0, ...(persisted.trainer || {}) },
           pokedexKills: persisted.pokedexKills || {},
-          // 'nightmare' sempre unido (nao so default) — save escrito antes
-          // dessa feature existir nunca teria como ganhar o continente de
-          // outro jeito (mesmo raciocinio de unlockedMaps acima).
-          unlockedContinents: [...new Set([...(persisted.unlockedContinents || ['johto']), 'nightmare'])],
+          // As faixas iniciais entram SEMPRE, nao so como default: um save
+          // escrito antes desta leva guarda os grupos antigos ('johto',
+          // 'kanto', 'nightmare') e sem isto o jogador ficaria sem hunt
+          // nenhuma. 'kanto' antigo significa "ja venceu o Lance", entao
+          // vira os grupos que o Lance abre hoje.
+          unlockedContinents: [...new Set([
+            ...FAIXAS_INICIAIS,
+            ...(persisted.unlockedContinents || []).flatMap((c) =>
+              (c === 'kanto' ? GRUPOS_DO_LANCE : [c])),
+          ])],
         }
       },
     },

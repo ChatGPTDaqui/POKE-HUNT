@@ -24,7 +24,7 @@ export function LanceCountdownModal() {
 // Atalho de vitoria: aparece SO depois de vencer o Lance, enquanto o jogador
 // ainda estiver parado na hunt dele (world.sequenceCleared e setado uma vez
 // por visita pelo stepWorld — sair e voltar reseta, mas
-// isContinentUnlocked('kanto') fica desbloqueado pra sempre).
+// os grupos que ele libera ficam desbloqueados pra sempre).
 export function LanceVictoryReturn() {
   const visible = useWorldStore((s) => Boolean(s.mapDef?.id === LANCE_MAP_ID && s.sequenceCleared))
   if (!visible) return null

@@ -198,21 +198,44 @@ function spawnSequenceEnemy(world: SequenciaDeSorteio, mapDef: MapDef, index: nu
   return createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId })
 }
 
-export function buildMapWorld(mapId: string, activePoke: PokeInstance, carry?: SequenciaDeSorteio): WorldState {
+/**
+ * Progresso que precisa ATRAVESSAR a reconstrucao do mundo.
+ *
+ * O servidor simula por JANELAS: a cada flush (~30s) ele monta o mundo do zero
+ * com esta funcao. Tudo que vive so em `WorldState` volta ao valor inicial —
+ * foi assim que a sequencia do Campeao Lance ficou INGANHAVEL sob autoridade
+ * do servidor: `sequenceIndex` voltava a 0 e o `startCountdown` de 5s era
+ * pago de novo em toda janela, entao a luta so podia ser vencida se os 6 POKEs
+ * dele caissem dentro de ~25 segundos.
+ */
+export interface ProgressoDaSessao {
+  sequenceIndex?: number
+  sequenceCleared?: boolean
+}
+
+export function buildMapWorld(
+  mapId: string,
+  activePoke: PokeInstance,
+  carry?: SequenciaDeSorteio,
+  progresso?: ProgressoDaSessao,
+): WorldState {
   const mapDef = getMap(mapId)
   if (!mapDef) throw new Error(`Mapa desconhecido: ${mapId}`)
   const base = novoMundo(carry)
   const player = createPlayerEntity(base.counters, { poke: activePoke, x: mapDef.playerSpawn.x, y: mapDef.playerSpawn.y })
   if (isDead(player)) player.fainted = true
 
-  // Contagem regressiva de intro da Champion Lance (pedido explicito do
-  // usuario): sua primeira POKE so nasce quando a fase de countdown do
-  // stepWorld termina — toda outra hunt nao tem `startCountdown` e nasce
-  // exatamente como antes.
+  const sequenceIndex = progresso?.sequenceIndex ?? 0
+  const sequenceCleared = progresso?.sequenceCleared ?? false
+  // A contagem regressiva de intro do Lance so vale na PRIMEIRA janela. Numa
+  // retomada ela seria 5 segundos de combate congelado por flush.
+  const retomando = sequenceIndex > 0 || sequenceCleared
+  const countdownRemaining = retomando ? null : (mapDef.startCountdown || null)
+
   const enemies: EnemyEntity[] = []
-  if (!mapDef.startCountdown) {
+  if (!countdownRemaining && !sequenceCleared) {
     if (mapDef.sequence) {
-      enemies.push(spawnSequenceEnemy(base, mapDef, 0))
+      enemies.push(spawnSequenceEnemy(base, mapDef, sequenceIndex))
     } else {
       for (let i = 0; i < mapDef.maxEnemies; i++) {
         enemies.push(spawnEnemyAt(base, mapDef))
@@ -226,9 +249,9 @@ export function buildMapWorld(mapId: string, activePoke: PokeInstance, carry?: S
     autoTimers: { pot: 0, revive: 0 },
     reviveCountdown: null,
     respawnTimer: mapDef.respawnDelay,
-    sequenceIndex: 0,
-    sequenceCleared: false,
-    countdownRemaining: mapDef.startCountdown || null,
+    sequenceIndex,
+    sequenceCleared,
+    countdownRemaining,
   }
 }
 

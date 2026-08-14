@@ -186,7 +186,7 @@ export const useUiStore = create<UiState>((set, get) => ({
     set({ hudScale })
   },
 
-  huntContinent: 'johto',
+  huntContinent: 'faixa1',
   huntSearchTerm: '',
   huntType: 'all',
   setHuntContinent: (huntContinent) => set({ huntContinent }),
