@@ -22,6 +22,18 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const { bloqueiaCatalogoAntigo } = require('./lib/guarda-catalogo-gen2.js');
+
+bloqueiaCatalogoAntigo(
+  'npm run catalog:verificar',
+  'Este gate provava que planilha e Postgres produziam o MESMO catalogo de Gen2.\n' +
+  'Ele deixou de fazer sentido: a fonte do jogo passou a ser o catalogo de Pokemon\n' +
+  'Ultra Sun, e rodar isto reescreveria os arquivos gerados com o dado antigo (e o\n' +
+  'objetivo da migracao e justamente que o dado MUDE).\n\n' +
+  'O que substituiu este gate: `npm run usum:conferir` (confere o catalogo contra a\n' +
+  'Bulbapedia) e os invariantes de dado em `npm test` (src/data/hunts.test.ts,\n' +
+  'src/data/catalogoUsum.test.ts).'
+);
 
 const ROOT = path.join(__dirname, '..');
 

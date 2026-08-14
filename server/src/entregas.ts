@@ -36,14 +36,29 @@ export interface NovaEntrega {
 }
 
 export async function enfileirarEntrega(cfg: Config, entrega: NovaEntrega): Promise<void> {
-  await inserir(cfg, 'market_deliveries', {
-    user_id: entrega.userId,
-    gold: entrega.gold ?? 0,
-    diamonds: entrega.diamonds ?? 0,
-    item_id: entrega.itemId ?? null,
-    quantity: entrega.quantity ?? 0,
-    motivo: entrega.motivo,
-  })
+  await enfileirarEntregas(cfg, [entrega])
+}
+
+/**
+ * Mesma coisa que `enfileirarEntrega`, mas em lote: um unico INSERT
+ * multi-linha, atomico no Postgres (tudo ou nada). Usar sempre que mais de
+ * uma entrega nasce do mesmo evento (ex: anexo de correio com varios itens)
+ * pra nao correr risco de inserir a primeira metade e falhar no meio.
+ */
+export async function enfileirarEntregas(cfg: Config, entregas: NovaEntrega[]): Promise<void> {
+  if (entregas.length === 0) return
+  await inserir(
+    cfg,
+    'market_deliveries',
+    entregas.map((entrega) => ({
+      user_id: entrega.userId,
+      gold: entrega.gold ?? 0,
+      diamonds: entrega.diamonds ?? 0,
+      item_id: entrega.itemId ?? null,
+      quantity: entrega.quantity ?? 0,
+      motivo: entrega.motivo,
+    })),
+  )
 }
 
 /**

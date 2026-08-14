@@ -1,5 +1,6 @@
-// Shop/inventory items. All 13 real items (balls/potions/revives/rods) come
-// straight from the spreadsheet sync (items.generated.js). This file only
+// Shop/inventory items. Os 19 itens reais (bolas/pocoes/revives/curas de
+// status/varas) vem do catalogo gerado (items.generated.ts, cuja fonte agora e
+// scripts/usum/items.json com os precos de loja do Ultra Sun). This file only
 // adds sellPrice, which is always computed from SELL_ITEM_PRICE rather than
 // stored (so tweaking SELL_ITEM_FRACTION in the sheet re-balances every
 // item's resale value automatically).
@@ -26,7 +27,7 @@ const SELL_FRACTION = formulaEngine.eval('SELL_ITEM_FRACTION')
 // derivado aqui em vez de armazenado, exatamente pra poder rebalancear sem
 // mexer no dado). Vira knob de planilha como todo o resto da economia.
 const DESCONTO_BOLA_POCAO = formulaEngine.evalOrDefault('BALL_POTION_BUY_DISCOUNT', 0.7)
-const KINDS_COM_DESCONTO = new Set(['ball', 'potion'])
+const KINDS_COM_DESCONTO = new Set(['ball', 'potion', 'status_heal'])
 
 const GENERATED_ITEMS: Record<string, GeneratedItem> = Object.fromEntries(
   Object.entries(ITEMS_DATA).map(([key, item]) => {
@@ -54,8 +55,14 @@ export interface ShopStockEntry {
 // since fishing isn't implemented (their data still syncs, just unused).
 // Built from the spreadsheet-sourced items only — Stones are loot-only (see
 // data/stones.js), never for sale.
+//
+// `status_heal` entrou na loja junto com os status que ele cura (Leva B). Ate
+// entao ficava de fora de proposito: vender um Antidote que nao cura nada e
+// pior que nao vender.
+const KINDS_FORA_DA_LOJA = new Set(['rod'])
+
 export const SHOP_STOCK: ShopStockEntry[] = Object.values(GENERATED_ITEMS)
-  .filter((item) => item.kind !== 'rod')
+  .filter((item) => !KINDS_FORA_DA_LOJA.has(item.kind))
   .map((item) => ({ itemId: item.id, currency: 'gold' }))
 
 // Merged view used by every generic "look up an owned item" lookup

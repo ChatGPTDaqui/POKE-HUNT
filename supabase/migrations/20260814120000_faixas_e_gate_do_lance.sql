@@ -66,3 +66,89 @@ alter table public.game_sessions
   add column if not exists sala_chave text,
   add column if not exists sala_abates integer not null default 0,
   add column if not exists ciclos integer not null default 0;
+
+-- ---------------------------------------------------------------------------
+-- O RPC de "iniciar novo jogo" tinha os grupos ESCRITOS A MAO
+-- ---------------------------------------------------------------------------
+-- `reiniciar_jogo` (migration 20260812180000, RPC-everything) nao usa o
+-- default da coluna: ele grava `array['johto','nightmare']` literal. Sem este
+-- patch, quem clicasse em "Iniciar novo jogo" ficaria com dois grupos que nao
+-- casam com hunt nenhuma — a lista de hunts sai VAZIA, sem erro em lugar
+-- nenhum. As demais rotinas (`handle_new_user`, `wipe_todos_os_saves`) usam
+-- `default`/`hunts_iniciais()` e ja acompanham a mudanca acima sozinhas.
+--
+-- Patch TEXTUAL sobre a definicao corrente em vez de reescrever a funcao
+-- inteira: ela tem ~60 linhas que nao tem nada a ver com esta leva, e copia-la
+-- aqui congelaria uma versao que outra migration pode ter mudado depois. O
+-- `raise exception` no fim e o ponto: se o literal alvo sumir ou mudar de
+-- forma, esta migration FALHA em vez de virar no-op silencioso e deixar o
+-- reset quebrado.
+do $$
+declare
+  r record;
+  novo text;
+  trocou int := 0;
+begin
+  for r in
+    select n.nspname as sch, p.oid
+      from pg_proc p
+      join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname in ('public', 'dev')
+       and p.proname = 'reiniciar_jogo'
+       and p.prokind = 'f'
+  loop
+    novo := replace(
+      pg_get_functiondef(r.oid),
+      $lit$array['johto','nightmare']$lit$,
+      $lit$array['faixa1','faixa2']$lit$
+    );
+    if novo <> pg_get_functiondef(r.oid) then
+      execute novo;
+      trocou := trocou + 1;
+    end if;
+  end loop;
+
+  if trocou = 0 then
+    raise exception
+      'reiniciar_jogo nao continha o literal array[''johto'',''nightmare''] — '
+      'confira se ela ja foi corrigida ou se o texto mudou de forma';
+  end if;
+end
+$$;
+
+-- ---------------------------------------------------------------------------
+-- Espelho `dev`
+-- ---------------------------------------------------------------------------
+-- `dev` e clone de `public` usado pra desenvolvimento (migration
+-- `clone_schema_to_dev`). Deixar so `public` migrado faria o proximo teste
+-- contra `dev` falhar com "coluna nao existe" — erro que parece bug do codigo
+-- novo e nao divergencia de schema. `if exists` porque o clone e opcional.
+do $$
+begin
+  if to_regclass('dev.players') is not null then
+    alter table dev.players
+      alter column unlocked_continents set default array['faixa1', 'faixa2'];
+    update dev.players
+       set unlocked_continents = (
+             select array_agg(distinct g)
+               from unnest(
+                 array['faixa1', 'faixa2']
+                 || case when 'kanto' = any(unlocked_continents)
+                         then array['faixa3', 'nightmare']
+                         else array[]::text[] end
+               ) as g
+           )
+     where true;
+  end if;
+
+  if to_regclass('dev.game_sessions') is not null then
+    alter table dev.game_sessions
+      add column if not exists sequence_index integer not null default 0,
+      add column if not exists sequence_cleared boolean not null default false,
+      add column if not exists sala_indice integer not null default 0,
+      add column if not exists sala_chave text,
+      add column if not exists sala_abates integer not null default 0,
+      add column if not exists ciclos integer not null default 0;
+  end if;
+end
+$$;

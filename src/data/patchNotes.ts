@@ -13,7 +13,7 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
-    version: '6.1',
+    version: '6.4',
     date: '2026-08-14',
     title: 'Hunts em salas: 12 biomas, 33 sub-biomas e o Campeao Lance como portao',
     highlights: [
@@ -24,6 +24,64 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'BUG CRITICO CORRIGIDO: a luta contra o Lance era INGANHAVEL. O servidor recomecava a sequencia no primeiro Pokemon dele a cada ~30 segundos, entao so daria pra vencer matando os 6 em menos de meio minuto. Ninguem tinha notado porque ele nao trancava nada — e ele acabou de virar o portao de metade do jogo.',
       'NIVEL COERENTE COM O ESTAGIO. Uma linha evolutiva agora aparece no estagio certo pro nivel da faixa: Caterpie ate Lv6, Metapod ate Lv9, Butterfree dali pra frente. Antes dava pra encontrar Caterpie de nivel 60.',
       'O cartao da hunt mostra os sub-biomas dela e a chance de cada um cair, e a porcentagem de cada Pokemon ja considera esse sorteio. O HUD mostra em que sala voce esta e quanto falta pra limpar.',
+    ],
+  },
+  {
+    version: '6.3',
+    date: '2026-08-14',
+    title: 'Farm offline pausado temporariamente',
+    highlights: [
+      'O FARM OFFLINE ESTA PAUSADO. Enquanto isso durar, o tempo que voce passa com o jogo FECHADO nao rende nada — voce nao vai receber o relatorio de "Bem-vindo de volta" nem ouro, XP ou capturas por esse periodo. Nao e bug: foi desligado de proposito, e volta a ligar em breve.',
+      'JOGAR COM O JOGO ABERTO CONTINUA NORMAL. A caçada ao vivo credita tudo como sempre, do mesmo jeito e no mesmo ritmo. A pausa atinge SO o periodo em que voce esta fora.',
+      'O TEMPO PARADO NAO FICA GUARDADO. Quando o farm offline voltar, ele volta contando do zero — nao ha recompensa represada esperando por voce. Isso e proposital: caso contrario, todo mundo receberia varias horas de recompensa de uma vez no instante em que fosse religado.',
+    ],
+  },
+  {
+    version: '6.2',
+    date: '2026-08-14',
+    title: 'Status de combate: veneno, queimadura, paralisia, sono, congelamento e confusao',
+    highlights: [
+      'OS STATUS EXISTEM DE VERDADE AGORA. Ate hoje, todo golpe de status do jogo (eram 184) nao fazia absolutamente nada — Toxico, Onda de Choque, Esporo, Raio Confuso e companhia eram usados e nada acontecia. Passaram a funcionar, com as regras da Geracao VII.',
+      'VENENO tira 1/8 da vida maxima por turno. QUEIMADURA tira 1/16 e ainda corta pela metade o dano dos seus golpes fisicos. PARALISIA faz perder 1 turno em cada 4 e corta a Velocidade pela metade. SONO trava de 1 a 3 turnos. CONGELAMENTO trava ate descongelar (20% de chance por turno, ou na hora se levar um golpe de Fogo). CONFUSAO da 33% de chance de se atacar sozinho.',
+      'IMUNIDADES REAIS. Pokemon de Fogo nao queima, de Eletrico nao paralisa, de Gelo nao congela, de Veneno e de Aco nao envenena. E os de Planta ignoram golpes de po (Esporo, Po do Sono, Esporo Paralisante) — como nos jogos a partir da Gen VI.',
+      'ITENS DE CURA NA LOJA: Antidoto (60), Despertar (30), Antigelo (30), Antiqueimadura (90), Antiparalisia (90) e Cura Total (120, cura todos). O bot de itens usa sozinho o mais BARATO que resolve o seu status — nao gasta Cura Total onde um Despertar bastava. O Centro Pokemon tambem limpa status junto com a vida.',
+      'O BOT DE ITENS PASSOU A TER UMA MAO SO. Antes ele usava pocao e revive no MESMO instante, porque cada um tinha seu proprio cronometro. Agora existe um cooldown unico, do Treinador: um item de cura a cada 1,5 segundo, na ordem revive > pocao com vida critica > cura de status > pocao normal. Pokebola nao entra nessa conta — capturar nao e curar.',
+      'PRECISAO PASSOU A VALER. Cada golpe tem a precisao real do jogo, e agora ele pode errar. Sem isso nao havia como os status serem fieis: Hipnose (60%) e Canto (55%) virariam sono garantido. Seu Pokemon tambem passou a escolher golpes contando a chance de errar — ele prefere um golpe de 100% de precisao a um mais forte que erra 3 de cada 10 vezes.',
+      'AUMENTOS E REDUCOES DE ATRIBUTO (os "power ups"). Danca das Espadas, Rosnado, Aro de Ferro e outros 86 golpes passaram a funcionar, com a tabela de estagios dos jogos. Eles zeram quando a luta acaba, como no original.',
+      'TAMBEM ENTRARAM: dreno de vida (Absorver e companhia curam quem usa), recuo (Investida Dupla machuca voce), cura direta (Recuperar), tontura e a taxa de critico aumentada de golpes como Corte e Folha Navalha.',
+      'O COMBATE FICOU MAIS DIFICIL, e isso e esperado: golpes erram, status atrapalham e o inimigo tambem usa tudo isso contra voce. Em caçadas onde voce esta muito acima do nivel, a queda no ritmo de abates e sensivel. O balanceamento vai ser reavaliado.',
+    ],
+  },
+  {
+    version: '6.1',
+    date: '2026-08-14',
+    title: 'Cada Pokemon leva 4 golpes — e os precos viraram os do Ultra Sun',
+    highlights: [
+      'NO MAXIMO 4 GOLPES POR VEZ, como nos jogos. Seu Pokemon continua APRENDENDO tudo do moveset dele, mas leva pra luta so 4. Escolha quais no menu Equipes, clicando no Pokemon e abrindo a aba Golpes — a coluna "Usar" marca os ativos.',
+      'NAO DA PRA TROCAR DENTRO DE UMA CAÇADA. Saia da caçada para mexer nos golpes. Fora isso, troque quando quiser, quantas vezes quiser.',
+      'SEU TIME JA VEM CONFIGURADO com os 4 golpes de maior dano de cada Pokemon (contando o bonus de tipo). Nao ha nada que voce precise fazer — so mexa se quiser outra combinacao.',
+      'O GOLPE DE AREA DO NIVEL 50 continua sempre disponivel e NAO ocupa slot. O Ataque Basico tambem nao: ele entra sozinho quando nenhum dos seus 4 esta pronto.',
+      'POKEMON SELVAGEM tambem passou a usar so 4 golpes — os 4 ultimos que a especie dele aprenderia naquele nivel, e sem o golpe de area do Nivel 50.',
+      'PRECOS DA LOJA ATUALIZADOS pro Ultra Sun: Ultra Ball ficou mais barata (de 1200 para 800 antes do desconto), Potion tambem (300 para 200), enquanto Hyper Potion (1200 para 1500) e Revive (1500 para 2000) subiram. O desconto de 70% em bolas e pocoes continua igual.',
+      'CORRECAO IMPORTANTE: derrotar um Pokemon do tipo Fada podia travar sua conta permanentemente. A Pedra Fada nao existia no catalogo do servidor, entao o drop entrava no inventario como item inexistente e TODA gravacao seguinte falhava a partir dali. Corrigido antes de qualquer conta ser afetada.',
+      'O ritmo do combate passou a ser um numero so (2 segundos por acao). Antes havia dois valores concorrentes e o menor nunca tinha efeito — os cooldowns mostrados na barra de golpes mentiam.',
+    ],
+  },
+  {
+    version: '6.0',
+    date: '2026-08-14',
+    title: 'Tudo passou a ser Pokemon Ultra Sun — e o tipo Fada chegou',
+    highlights: [
+      'BASE DE DADOS NOVA. Atributos, tipos, taxas de captura, curvas de experiencia e movesets de todos os 251 Pokemon passaram a ser os de Pokemon Ultra Sun (Geracao VII), no lugar dos de Ouro/Prata. Os dados vem da PokeAPI e foram CONFERIDOS um a um contra a Bulbapedia: 251 fichas de atributo, 250 de tipagem, 251 de taxa de captura, 251 de curva de experiencia e as 324 celulas da tabela de tipos — zero divergencia.',
+      'TIPO FADA. O 18o tipo entrou por inteiro: tabela de efetividade da Gen VI (Fada bate 2x em Dragao, Sombrio e Lutador; Dragao nao causa NADA em Fada; Veneno e Aco batem 2x nela), cor propria, icone de golpe, efeito de impacto proprio, Pedra Fada e uma hunt nova — a Clareira Encantada, onde Cleffa, Togepi, Snubbull e Granbull passam a aparecer. Jigglypuff, Igglybuff, Marill e Azumarill viraram tipo duplo com Fada.',
+      'MUDANCA QUE ATINGE QUEM NAO E FADA: na Gen VI o tipo Aco DEIXOU de resistir a Fantasma e a Sombrio. Steelix, Scizor, Magneton e companhia ficaram mais vulneraveis a esses dois.',
+      'GOLPES: de 223 para 486. Os movesets da Gen VII trazem tudo que as geracoes III a VII adicionaram — Lâmina de Folha, Combate Fechado, Pulso Sombrio, Danca do Dragao, Terreno Eletrico, Luar Explosivo e centenas de outros. Todos com descricao em portugues.',
+      'GOLPES EM AREA CORRIGIDOS E MULTIPLICADOS. Antes so 6 golpes acertavam varios inimigos, por uma lista escrita a mao. Agora isso vem do alvo real do golpe: sao 26 golpes de area com dano, incluindo Terremoto, Nevasca, Deslizamento de Rochas, Onda de Calor, Descarga e Voz Encantadora.',
+      'FORMULAS DA GERACAO VII. Critico caiu de 1/16 para 1/24 e passou a multiplicar por 1.5 em vez de 2. A captura passou a usar a formula real de tres sacudidas (que leva o HP do alvo em conta). A experiencia por abate passou a usar a formula ESCALADA: derrotar alvo do proprio nivel rende o maximo, e farmar muito abaixo do seu nivel rende cada vez menos — vale a pena subir de zona.',
+      'BALANCEAMENTO PRESERVADO ONDE DAVA. O XP por abate contra alvo do proprio nivel e a chance MEDIA de captura do elenco continuam nos mesmos patamares de antes: os dois multiplicadores globais foram recalculados para isso. O que mudou de verdade e a forma das curvas, que agora e a dos jogos.',
+      'AJUSTES DE ATRIBUTO DA GEN VI: 23 especies ficaram mais fortes (Farfetch’d, Dugtrio, Pidgeot, Alakazam, Beedrill, Butterfree, Electrode, entre outras). Seus Pokemon ja salvos recebem os novos numeros na proxima vez que o jogo carregar — nao e preciso capturar de novo.',
+      'A ZONA "PROFUNDEZAS" deu lugar a Clareira Encantada. Os Pokemon de Agua fortes que moravam la (Gyarados, Lapras, Kingdra) continuam aparecendo em zonas de nivel alto da Costa.',
+      'Tyrogue passou a evoluir de verdade (nivel 20). As nove evolucoes especiais continuam iguais: nivel 80 mais 20 Pedras do tipo primario.',
     ],
   },
   {

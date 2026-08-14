@@ -24,6 +24,7 @@ export interface TypedAoeMove {
   category: AbilityCategory | 'dynamic'
   power: number
   pp: number
+  accuracy: number
 }
 
 export const TYPED_AOE_LEVEL = 50
@@ -49,6 +50,9 @@ function buildTypedAoeMoves(): Record<string, TypedAoeMove> {
       category: 'dynamic',
       power: TYPED_AOE_POWER,
       pp: TYPED_AOE_PP,
+      // Sempre acerta: e conteudo proprio deste jogo (nao vem do catalogo), e
+      // uma recompensa de Nivel 50 que erra seria so frustracao.
+      accuracy: 100,
     }
   }
   return moves

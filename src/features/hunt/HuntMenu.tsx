@@ -37,6 +37,37 @@ const CONTINENT_LABELS: Record<string, string> = {
 const TYPE_LIST = (Object.keys(TYPE_COLORS) as ElementType[]).sort()
 const fmt = new Intl.NumberFormat('pt-BR')
 
+async function acionarHunt(map: HuntMapDef, unlocked: boolean, continentGated: boolean) {
+  if (unlocked) {
+    // A tela so fecha se o jogador REALMENTE entrou. Fechar antes
+    // esconderia a recusa do servidor e deixaria o jogador olhando um
+    // combate que nao rende nada.
+    if (await controller.enterMap(map.id)) useUiStore.getState().closeScreen()
+    return
+  }
+  if (continentGated) {
+    const mapContinent = map.continent || FAIXAS[0].id
+    useToastStore.getState().pushToast(
+      `Derrote o Campeao Lance antes de acessar ${CONTINENT_LABELS[mapContinent] || mapContinent}.`,
+      'error', 'world',
+    )
+    return
+  }
+  const resolved = getMap(map.id)
+  if (!resolved) return
+  const desbloqueou = await pedirAcao(
+    { tipo: 'desbloquearHunt', mapId: map.id },
+    () => unlockMap(useGameStateStore.getState(), resolved).success,
+  )
+  if (!desbloqueou) {
+    useToastStore.getState().pushToast(
+      `Recursos insuficientes para desbloquear ${map.name}.`, 'error', 'world',
+    )
+    return
+  }
+  if (await controller.enterMap(map.id)) useUiStore.getState().closeScreen()
+}
+
 // Chamado pela Pokedex antes de trocar de tela — pre-preenche a aba de
 // continente + a busca pra hunt alvo ja aparecer filtrada assim que o painel
 // renderiza. Escreve no uiStore porque e estado que dois paineis tocam (ver
@@ -296,36 +327,6 @@ export function HuntMenu() {
         const key = `map:${map.id}`
         const pending = acao.isPending(key)
 
-        async function acionar() {
-          if (unlocked) {
-            // A tela so fecha se o jogador REALMENTE entrou. Fechar antes
-            // esconderia a recusa do servidor e deixaria o jogador olhando um
-            // combate que nao rende nada.
-            if (await controller.enterMap(map.id)) useUiStore.getState().closeScreen()
-            return
-          }
-          if (continentGated) {
-            useToastStore.getState().pushToast(
-              `Derrote o Campeao Lance antes de acessar ${CONTINENT_LABELS[mapContinent] || mapContinent}.`,
-              'error', 'world',
-            )
-            return
-          }
-          const resolved = getMap(map.id)
-          if (!resolved) return
-          const desbloqueou = await pedirAcao(
-            { tipo: 'desbloquearHunt', mapId: map.id },
-            () => unlockMap(useGameStateStore.getState(), resolved).success,
-          )
-          if (!desbloqueou) {
-            useToastStore.getState().pushToast(
-              `Recursos insuficientes para desbloquear ${map.name}.`, 'error', 'world',
-            )
-            return
-          }
-          if (await controller.enterMap(map.id)) useUiStore.getState().closeScreen()
-        }
-
         return (
           <div key={map.id} className="overflow-hidden rounded-[.7em] border border-n800 bg-n900">
             <div
@@ -360,7 +361,7 @@ export function HuntMenu() {
                 disabled={pending || acao.pendingKey != null}
                 onClick={(e) => {
                   e.stopPropagation()
-                  void acao.run(key, acionar)
+                  void acao.run(key, () => acionarHunt(map, unlocked, continentGated))
                 }}
               >
                 {pending ? 'Entrando...' : unlocked ? 'Entrar' : continentGated ? 'Bloqueado' : 'Desbloquear'}

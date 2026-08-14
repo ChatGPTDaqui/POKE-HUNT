@@ -18,6 +18,8 @@
 // Cooldown vem do `WorldEntity` (worldStore), nao do PokeInstance salvo: e
 // estado de combate ao vivo, atualizado a cada tick.
 import { getAbility, BASIC_ATTACK, isDamagingAbility, type Ability } from '@/data/abilities'
+import { golpesUtilizaveis } from '@/data/activeAbilities'
+import { SPECIES } from '@/data/pokes'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { abilityIconUrl } from '@/data/abilityIcons'
 import { colorForType } from '@/data/typeColors'
@@ -30,6 +32,10 @@ import { cn } from '@/lib/utils'
 const CATEGORY_BORDER: Record<string, string> = {
   physical: 'var(--color-cat-physical)',
   special: 'var(--color-cat-special)',
+  // Golpe de status nao chega a barra (ela so mostra golpe com dano), mas a
+  // categoria existe no dado desde o Ultra Sun — sem esta linha ele cairia no
+  // fallback e apareceria como Fisico se algum dia a barra deixar de filtrar.
+  status: 'var(--color-n500)',
 }
 
 function shortLabel(name: string): string {
@@ -65,7 +71,14 @@ export function AbilityHud() {
   const fonteRotulo = TAMANHO_ROTULO[regime]
 
   const disabled = poke.disabledAbilities || {}
-  const abilities = [BASIC_ATTACK.id, ...poke.unlockedAbilities]
+  // Os 4 escolhidos + o AOE de nivel 50, e nao o learnset inteiro: a barra
+  // mostra exatamente o que a IA pode usar (combatSystem#pickAbility le a mesma
+  // funcao). Antes ela crescia com o nivel ate 8+ slots, e a maioria deles era
+  // golpe que o POKE nunca usaria.
+  //
+  // O Ataque Basico entra no fim porque agora ele so e usado quando nenhum dos
+  // escolhidos esta pronto — continua visivel pra o jogador poder desliga-lo.
+  const abilities = [...golpesUtilizaveis(poke, SPECIES[poke.speciesId], false), BASIC_ATTACK.id]
     .map((id) => getAbility(id))
     .filter((a): a is Ability => isDamagingAbility(a))
 

@@ -11,6 +11,8 @@ import { create } from 'zustand'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { ehFalhaSemResposta, mensagemDeFalhaDeRede } from '@/lib/erroDeRede'
+import { flushAgora } from '@/data/remote/gameStatePersistence'
+import { pararFlushPeriodico } from '@/data/remote/autoridade'
 
 interface AuthState {
   session: Session | null
@@ -19,9 +21,16 @@ interface AuthState {
   // de login por um instante para quem JA esta logado, porque a sessao vem do
   // storage de forma assincrona.
   loading: boolean
+  // `true` quando o link de "esqueci minha senha" acabou de logar o usuario.
+  // O Supabase trata o token de recovery como uma sessao valida de verdade —
+  // sem esta flag, o app veria "tem sessao" e mandaria direto pro jogo (App.tsx
+  // ja faz isso pra sessao normal), pulando a troca de senha que era o motivo
+  // do link. Some assim que a senha nova e confirmada.
+  emRecuperacaoDeSenha: boolean
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signUp: (email: string, password: string, trainerName?: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
+  atualizarSenha: (novaSenha: string) => Promise<{ error: string | null }>
 }
 
 // Mensagens do Supabase vem em ingles e algumas sao cripticas para o jogador.
@@ -52,6 +61,7 @@ export const useAuthStore = create<AuthState>(() => ({
   session: null,
   user: null,
   loading: true,
+  emRecuperacaoDeSenha: false,
 
   signIn: async (email, password) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -74,7 +84,33 @@ export const useAuthStore = create<AuthState>(() => ({
   },
 
   signOut: async () => {
+    // Sem isto, uma hunt aberta deixa `timerFlush` (autoridade.ts) chamando
+    // `/sessao/flush` de 30 em 30s pra sempre — o timer e modulo, nao
+    // componente React, entao nenhum unmount da arvore do jogo o cancela.
+    // Ele sobrevive ao logout: enquanto deslogado cada tick 401 ("sem sessao"),
+    // e se o jogador logar de novo antes do proximo boot liquidar a sessao, um
+    // tick que ainda pegue o timer vivo consome o gap "offline" em silencio —
+    // o Farm Offline credita mas o modal de "Bem-vindo de volta" nao aparece
+    // (o `assentarSessaoPendente` do proximo boot ve kills=0, ja gasto aqui).
+    pararFlushPeriodico()
+    // PH-17: sem isto, o cleanup reativo de useProgressoRemoto (que roda
+    // depois que `user` vira null no store) so chama flushAgora() DEPOIS que
+    // signOut() ja invalidou o token local — RLS filtra o UPDATE final pra 0
+    // linhas, e Postgrest nao trata isso como erro, entao os ~3s de
+    // progresso pendente do debounce somem em silencio. Flush com o token
+    // AINDA valido, antes de invalidar a sessao. Nao relanca: uma falha de
+    // save nao pode travar o jogador logado.
+    await flushAgora().catch((erro) => {
+      console.warn('Falha ao salvar progresso antes do logout:', erro)
+    })
     await supabase.auth.signOut()
+  },
+
+  atualizarSenha: async (novaSenha) => {
+    const { error } = await supabase.auth.updateUser({ password: novaSenha })
+    if (error) return { error: traduzErro(error.message) }
+    useAuthStore.setState({ emRecuperacaoDeSenha: false })
+    return { error: null }
   },
 }))
 
@@ -85,6 +121,11 @@ supabase.auth.getSession().then(({ data }) => {
   useAuthStore.setState({ session: data.session, user: data.session?.user ?? null, loading: false })
 })
 
-supabase.auth.onAuthStateChange((_event, session) => {
-  useAuthStore.setState({ session, user: session?.user ?? null, loading: false })
+supabase.auth.onAuthStateChange((event, session) => {
+  useAuthStore.setState({
+    session,
+    user: session?.user ?? null,
+    loading: false,
+    ...(event === 'PASSWORD_RECOVERY' ? { emRecuperacaoDeSenha: true } : {}),
+  })
 })

@@ -78,6 +78,10 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, './src'),
     },
   },
+  // Sem `environment` aqui de proposito: o padrao do Vitest ja e o ambiente
+  // 'node', que serve pra quase todo teste deste projeto (motor e dado puro).
+  // jsdom custa ~10x mais pra subir, entao so os testes de componente o pedem,
+  // cada um no proprio arquivo com `// @vitest-environment jsdom`.
   test: {
     // `.claude/worktrees/*` sao worktrees do git de OUTRAS branches, criadas
     // por sessoes de agente. O vitest as varre por padrao e roda os testes

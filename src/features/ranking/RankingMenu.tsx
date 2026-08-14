@@ -5,17 +5,15 @@
 // outro jogador. Sem `VITE_SERVIDOR_URL` a tela diz isso em vez de mostrar uma
 // lista com um jogador so.
 import { useState } from 'react'
-import { Trophy, Crown, Medal } from '@phosphor-icons/react'
+import { Crown, Medal } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
-import {
-  servidor, servidorAtivo,
-  type CriterioPoke, type EntradaTreinador, type EntradaPoke, type EntradaHall,
-} from '@/data/remote/servidor'
+import type { CriterioPoke, EntradaTreinador, EntradaPoke, EntradaHall } from '@/data/remote/servidor'
+import * as rankingRpc from '@/data/remote/rankingRpc'
 import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
 import { rarityOf } from '@/data/rarity'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
-import { SegmentedTabs, GameSelect, SectionLabel, ComingSoon } from '@/components/game/controls'
+import { SegmentedTabs, GameSelect, SectionLabel } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 
 type Aba = 'treinadores' | 'pokemon' | 'hall'
@@ -44,16 +42,6 @@ const STALE_MS = 60000
 export function RankingMenu() {
   const [aba, setAba] = useState<Aba>('treinadores')
   const [criterio, setCriterio] = useState<CriterioPoke>('level')
-
-  if (!servidorAtivo()) {
-    return (
-      <ComingSoon icon={<Trophy />} title="Ranking exige o servidor">
-        O ranking compara o progresso de todos os jogadores, e só o servidor de autoridade enxerga isso —
-        o navegador só tem acesso ao próprio save. Rodando sem <code>VITE_SERVIDOR_URL</code>, não há o
-        que comparar.
-      </ComingSoon>
-    )
-  }
 
   return (
     <div className="flex flex-col gap-[.5em]">
@@ -115,7 +103,7 @@ function Linha({ children, onClick }: { children: React.ReactNode; onClick?: () 
 function AbaTreinadores() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['ranking', 'treinadores'],
-    queryFn: () => servidor.rankingTreinadores(),
+    queryFn: () => rankingRpc.rankingTreinadores(),
     staleTime: STALE_MS,
   })
   const entradas: EntradaTreinador[] = data?.entradas ?? []
@@ -144,7 +132,7 @@ function AbaPokemon({ criterio }: { criterio: CriterioPoke }) {
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const { data, isLoading, error } = useQuery({
     queryKey: ['ranking', 'pokemon', criterio],
-    queryFn: () => servidor.rankingPokemon(criterio),
+    queryFn: () => rankingRpc.rankingPokemon(criterio),
     staleTime: STALE_MS,
   })
   const entradas: EntradaPoke[] = data?.entradas ?? []
@@ -192,7 +180,7 @@ function AbaPokemon({ criterio }: { criterio: CriterioPoke }) {
 function AbaHall() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['ranking', 'hall'],
-    queryFn: () => servidor.hallDaFama(),
+    queryFn: () => rankingRpc.hallDaFama(),
     staleTime: STALE_MS,
   })
   const entradas: EntradaHall[] = data?.entradas ?? []

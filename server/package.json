@@ -9,9 +9,7 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "dev": "npm run build && node dist/node.js",
-    "start": "node dist/node.js"
+    "build": "tsc -p tsconfig.json"
   },
   "devDependencies": {
     "@types/node": "^26.1.2",

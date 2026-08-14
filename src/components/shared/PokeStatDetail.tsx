@@ -6,14 +6,30 @@
 import type { ReactNode } from 'react'
 import { expProgressForInstance } from '@/engine/systems/progressionSystem'
 import { getAbility } from '@/data/abilities'
+import { activeAbilitiesPadrao, ehGolpeAoeDeNivel50, MAX_ACTIVE_ABILITIES } from '@/data/activeAbilities'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
+import { controller } from '@/engine/controller'
+import { useGameStateStore } from '@/stores/gameStateStore'
+import { useToastStore } from '@/stores/toastStore'
+import { cn } from '@/lib/utils'
 import { gen5SpriteUrl } from '@/data/gen5Sprites'
 import { rarityOf } from '@/data/rarity'
 import type { PokeInstance, Species } from '@/data/pokes'
 import { PokeNameTag } from './PokeNameTag'
+import { StatusBadge } from './StatusBadge'
 import { TypeChip } from './TypeChip'
 import { AbilityTooltip } from './AbilityTooltip'
 import { Meter } from '@/components/game/controls'
+import type { AbilityCategory } from '@/data/generated/types'
+
+// Rotulo das 3 categorias reais. Antes era um ternario `physical ? ... : ...`,
+// que passou a mentir quando 'status' virou categoria de verdade com os dados
+// do Ultra Sun: todo golpe de status apareceria como "Especial".
+const ROTULO_CATEGORIA: Record<AbilityCategory, string> = {
+  physical: 'Fisico',
+  special: 'Especial',
+  status: 'Status',
+}
 
 export function ProfileHero({ poke, species }: { poke: PokeInstance; species: Species }) {
   const url = gen5SpriteUrl(poke.speciesId, poke.isShiny)
@@ -51,8 +67,11 @@ export function ProfileHero({ poke, species }: { poke: PokeInstance; species: Sp
           <TypeChip type={species.type} />
           {species.type2 && <TypeChip type={species.type2} />}
         </div>
-        <div className="text-[.75em] text-n400">
-          HP {Math.floor(poke.hp)}/{poke.stats.hp}
+        <div className="flex items-center gap-[.4em] text-[.75em] text-n400">
+          <span>HP {Math.floor(poke.hp)}/{poke.stats.hp}</span>
+          {/* So o nao-volatil aqui: a ficha abre pra qualquer POKE da equipe ou
+              da mochila, e confusao so existe pra quem esta em campo. */}
+          <StatusBadge status={poke.status} />
         </div>
         <Meter pct={hpPct} height=".45em" color={hpPct < 30 ? 'var(--color-hp-low)' : 'var(--color-hp)'} />
         <Meter pct={expPct} height=".3em" color="var(--color-exp)" />
@@ -117,7 +136,33 @@ export function StatDetail({ poke, weaknessSection }: { poke: PokeInstance; weak
   )
 }
 
-const MOVE_GRID = 'grid grid-cols-[2.4em_1fr_3.4em_3.8em_3em_2.4em] items-center gap-[.4em]'
+const MOVE_GRID = 'grid grid-cols-[2.4em_1fr_3.4em_3.8em_3em_2.4em_2.6em] items-center gap-[.4em]'
+
+// A celula da coluna "Usar". Tres estados sem toggle: golpe ainda nao
+// aprendido (nada), o AOE de nivel 50 (sempre disponivel, fora dos 4 slots) e
+// dentro de hunt (mostra a marca, mas nao clica).
+function CelulaUsar(
+  { aoe50, aprendido, ativo, habilitado, onClick }:
+  { aoe50: boolean; aprendido: boolean; ativo: boolean; habilitado: boolean; onClick: () => void },
+) {
+  if (!aprendido) return <span className="text-n700">—</span>
+  if (aoe50) return <span className="text-n500" title="Golpe de area do Nivel 50: sempre disponivel, nao ocupa slot.">fixo</span>
+  return (
+    <button
+      type="button"
+      disabled={!habilitado}
+      onClick={onClick}
+      title={habilitado ? (ativo ? 'Remover dos golpes ativos' : 'Usar este golpe') : 'Saia da hunt para trocar de golpe'}
+      className={cn(
+        'h-[1.4em] w-[1.4em] rounded-[.25em] border font-[inherit] leading-none',
+        ativo ? 'border-primary bg-primary text-n900' : 'border-n700 bg-transparent text-transparent',
+        habilitado ? 'cursor-pointer' : 'cursor-not-allowed opacity-45',
+      )}
+    >
+      ✓
+    </button>
+  )
+}
 
 export function MovesetTable({ poke, species }: { poke: PokeInstance; species: Species }) {
   // O learnset COMPLETO da especie, nao so `poke.unlockedAbilities`: a tabela
@@ -127,10 +172,42 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
     .filter((r): r is { entry: typeof r.entry; ability: NonNullable<typeof r.ability> } => Boolean(r.ability))
     .sort((a, b) => a.entry.levelReq - b.entry.levelReq)
 
+  // A selecao dos 4 so aparece pra POKE QUE E SEU. Este mesmo componente abre
+  // na Pokedex com um POKE de preview (createPokeInstance com uid solto), e la
+  // nao ha nada a configurar — dai a checagem por uid no estado, e nao uma prop
+  // que cada chamador teria que lembrar de passar.
+  const equipe = useGameStateStore((s) => s.team)
+  const mochila = useGameStateStore((s) => s.bagPokes)
+  const emHunt = useGameStateStore((s) => s.currentMapId) != null
+  const meu = [...equipe, ...mochila].some((p) => p.uid === poke.uid)
+
+  const ativos = poke.activeAbilities ?? activeAbilitiesPadrao(species, poke.level)
+  const podeEscolher = meu && !emHunt
+
+  function alternar(key: string): void {
+    if (!podeEscolher) return
+    const ja = ativos.includes(key)
+    if (!ja && ativos.length >= MAX_ACTIVE_ABILITIES) {
+      useToastStore.getState().pushToast(`Maximo de ${MAX_ACTIVE_ABILITIES} golpes — desmarque um primeiro.`, 'info', 'world')
+      return
+    }
+    controller.setActiveAbilities(poke.uid, ja ? ativos.filter((k) => k !== key) : [...ativos, key])
+  }
+
   return (
     <div className="overflow-hidden rounded-[.4em] border border-n800 text-[.8em]">
+      {meu && (
+        <div className="flex items-center justify-between border-b border-n800 bg-n900 px-[.5em] py-[.35em]">
+          <span className="text-n400">
+            Golpes ativos <span className="text-foreground">{ativos.length}/{MAX_ACTIVE_ABILITIES}</span>
+          </span>
+          <span className="text-n500">
+            {emHunt ? 'Saia da hunt para trocar de golpe.' : 'Clique na coluna Usar para escolher.'}
+          </span>
+        </div>
+      )}
       <div className={`${MOVE_GRID} border-b border-n800 bg-n800/60 px-[.5em] py-[.3em] font-medium`}>
-        <span>Nv</span><span>Golpe</span><span>Tipo</span><span>Cat.</span><span>Dano</span><span>AOE</span>
+        <span>Nv</span><span>Golpe</span><span>Tipo</span><span>Cat.</span><span>Dano</span><span>AOE</span><span>Usar</span>
       </div>
       <div className="max-h-[18em] overflow-y-auto">
         {rows.map(({ entry, ability }, index) => {
@@ -153,10 +230,17 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
               </AbilityTooltip>
               <span><TypeChip type={ability.type} /></span>
               <span className="text-n400">
-                {resolveAbilityCategory(ability, poke) === 'physical' ? 'Fisico' : 'Especial'}
+                {ROTULO_CATEGORIA[resolveAbilityCategory(ability, poke)]}
               </span>
               <span>{ability.power > 0 ? ability.power : '—'}</span>
               <span className="text-n400">{ability.target === 'aoe' ? '✓' : '—'}</span>
+              <span>{meu && <CelulaUsar
+                aoe50={ehGolpeAoeDeNivel50(entry.key)}
+                aprendido={learned}
+                ativo={ativos.includes(entry.key)}
+                habilitado={podeEscolher}
+                onClick={() => alternar(entry.key)}
+              />}</span>
             </div>
           )
         })}

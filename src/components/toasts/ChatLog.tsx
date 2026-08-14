@@ -18,7 +18,7 @@ import { useToastStore, type ToastType } from '@/stores/toastStore'
 import { useChatStore } from '@/stores/chatStore'
 import { useUiStore, useBreakpoints, type ChatTab } from '@/stores/uiStore'
 import { useWindowDrag } from '@/hooks/useWindowDrag'
-import { servidorAtivo, type AnexoChat } from '@/data/remote/servidor'
+import type { AnexoChat } from '@/data/remote/servidor'
 import { RARITIES, type RarityKey } from '@/data/rarity'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TextoComRealce } from '@/components/shared/TextoComRealce'
@@ -100,19 +100,11 @@ function AbaMundo() {
   const enviar = useChatStore((s) => s.enviar)
   const carregando = useChatStore((s) => s.carregando)
   const erro = useChatStore((s) => s.erro)
-  const iniciarPolling = useChatStore((s) => s.iniciarPolling)
+  const iniciarAoVivo = useChatStore((s) => s.iniciarAoVivo)
   const fimRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => iniciarPolling(), [iniciarPolling])
+  useEffect(() => iniciarAoVivo(), [iniciarAoVivo])
   useEffect(() => { fimRef.current?.scrollIntoView({ block: 'end' }) }, [mensagens])
-
-  if (!servidorAtivo()) {
-    return (
-      <div className="flex min-h-0 flex-1 items-center px-[.55em] text-[.76em] text-n500">
-        O chat precisa do servidor do jogo. Sem ele, so as abas locais funcionam.
-      </div>
-    )
-  }
 
   return (
     <>

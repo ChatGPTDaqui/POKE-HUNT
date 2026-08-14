@@ -13,6 +13,8 @@ import { randInt, rollChance } from '@/core/random'
 import { RARITIES, rollRarity, type RarityKey } from './rarity'
 import type { Rng } from '@/core/rng'
 import { typedAoeMoveKey, TYPED_AOE_LEVEL } from './typedAoeMoves'
+import { activeAbilitiesPadrao } from './activeAbilities'
+import type { StatusAtivo } from './statusEffects'
 import type { GrowthCurve, SpeciesBaseStats, SpeciesDataEntry } from './generated/types'
 
 export type StatKey = keyof SpeciesBaseStats
@@ -35,6 +37,18 @@ export interface PokeInstance {
   stats: StatBlock
   hp: number
   unlockedAbilities: string[]
+  // Os no maximo 4 golpes que o POKE leva pra luta (data/activeAbilities.ts).
+  // Diferente de `unlockedAbilities`, que e DERIVAVEL de especie+nivel, este e
+  // escolha do jogador — e o unico dos dois que precisa ser gravado.
+  // Ausente = nunca configurado; o leitor cai no padrao. Array vazio e
+  // escolha valida (desligar tudo e cair no Ataque Basico) e NAO e o mesmo que
+  // ausente.
+  activeAbilities?: string[]
+  // Status NAO-VOLATIL (veneno, queimadura, paralisia, sono, congelamento).
+  // Mora no POKE, e nao na entidade de combate, porque sobrevive a hunt e e
+  // gravado — nos jogos ele so sai por item ou pelo Centro Pokemon. A
+  // confusao, que e volatil, mora na entidade (ver engine/types.ts).
+  status?: StatusAtivo | null
   // Setados fora deste arquivo, em runtime (nao no momento da criacao) —
   // opcionais aqui pra todo call site existente continuar valido.
   locked?: boolean // BagMenu.js — trava contra venda (EconomySystem.js)
@@ -80,13 +94,18 @@ const SHINY_RATE_MULTIPLIER = formulaEngine.evalOrDefault('SHINY_RATE_MULTIPLIER
 const SHINY_CHANCE_AT_MAX_CATCH_RATE = REAL_GEN2_SHINY_RATE * SHINY_RATE_MULTIPLIER
 const SHAPES = ['triangle', 'circle', 'square', 'diamond']
 
+// Os 6 grupos de experiencia reais dos jogos. ERRATIC e FLUCTUATING sao
+// funcoes POR PARTES (ver scripts/usum/formulas.json) e entraram no lugar de
+// SLIGHTLY_FAST/SLIGHTLY_SLOW, que nao correspondiam a grupo nenhum. Nenhuma
+// especie do dex 1-251 usa os dois novos — eles existem para o enum descrever
+// o conjunto real, em vez de dois nomes inventados.
 const GROWTH_FORMULA_BY_CURVE: Record<GrowthCurve, string> = {
   MEDIUM_FAST: 'GROWTH_MEDIUM_FAST',
-  SLIGHTLY_FAST: 'GROWTH_SLIGHTLY_FAST',
-  SLIGHTLY_SLOW: 'GROWTH_SLIGHTLY_SLOW',
   MEDIUM_SLOW: 'GROWTH_MEDIUM_SLOW',
   FAST: 'GROWTH_FAST',
   SLOW: 'GROWTH_SLOW',
+  ERRATIC: 'GROWTH_ERRATIC',
+  FLUCTUATING: 'GROWTH_FLUCTUATING',
 }
 
 // Total cumulative EXP required to BE at `level` (Gen2 growth-group curves
@@ -275,5 +294,9 @@ export function createPokeInstance(rng: Rng, speciesId: string, level = 1, { ivs
       .filter((entry) => entry.levelReq <= level)
       .map((entry) => entry.key)
       .filter((key) => getAbility(key)),
+    // Selvagem ignora este campo (`golpesUtilizaveis` deriva os 4 ultimos
+    // direto da especie), entao aqui vale sempre o padrao de POKE do jogador —
+    // e o valor que sobrevive se este POKE for capturado ou for o inicial.
+    activeAbilities: activeAbilitiesPadrao(species, level),
   }
 }

@@ -2,7 +2,7 @@
 // the spreadsheet sync (see abilities.generated.js) — `power` is the real
 // Gen2 base-power number fed into DAMAGE_BASE (CombatSystem), `type` drives
 // STAB/effectiveness, and `pp` drives `cooldown`: fewer PP means a slower-
-// recharging move — cooldown = TICK_MS * (PP_REFERENCE / pp). Each ability's
+// recharging move — cooldown = TURNO_SEGUNDOS * (PP_REFERENCE / pp). Each ability's
 // cooldown is tracked individually (CombatSystem.js), further scaled by the
 // user's Speed stat.
 //
@@ -25,7 +25,7 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
 import { ABILITIES_DATA } from './generated/abilities.generated'
 import { TYPED_AOE_MOVES } from './typedAoeMoves'
-import type { AbilityCategory, ElementType } from './generated/types'
+import type { AbilityCategory, ElementType, StatusCondition, StatChange } from './generated/types'
 
 export type AbilityTarget = 'single' | 'aoe'
 
@@ -39,14 +39,31 @@ export interface Ability {
   target: AbilityTarget
   radius?: number
   cooldown?: number
+  // Efeitos, vindos do catalogo do Ultra Sun (ver AbilityDataEntry). Ausente =
+  // o golpe nao tem aquele efeito. `accuracy` e o unico sempre presente.
+  accuracy: number
+  status?: StatusCondition
+  statusChance?: number
+  statChanges?: StatChange[]
+  statChance?: number
+  statTarget?: 'self'
+  flinchChance?: number
+  critStages?: number
+  drainPercent?: number
+  healPercent?: number
 }
 
 const formulaEngine = createFormulaEngine(FORMULAS)
-const TICK_SECONDS = formulaEngine.eval('TICK_MS') / 1000
-const PP_REFERENCE = 20 // PP value that recharges at exactly TICK_SECONDS
+// O turno do jogo, em segundos. E a MESMA constante que o cooldown global do
+// combate (combatSystem#MIN_ACTION_GAP) — antes eram dois numeros diferentes
+// (TICK_MS=1.4s aqui, 2s la), e o menor nunca teve efeito: nenhum POKE conseguia
+// agir antes de 2s, entao golpe com cooldown calculado em 1.4s so exibia um
+// numero que o combate ignorava.
+export const TURNO_SEGUNDOS = formulaEngine.eval('TURNO_SEGUNDOS')
+const PP_REFERENCE = 20 // PP que recarrega em exatamente um turno
 
 function cooldownFromPp(pp: number): number {
-  return TICK_SECONDS * (PP_REFERENCE / Math.max(1, pp))
+  return TURNO_SEGUNDOS * (PP_REFERENCE / Math.max(1, pp))
 }
 
 export const BASIC_ATTACK: Ability = {
@@ -57,17 +74,24 @@ export const BASIC_ATTACK: Ability = {
   target: 'single',
   power: 40,
   pp: 35,
+  // Sempre acerta. E o Struggle deste jogo — o golpe que sobra quando nenhum
+  // outro esta pronto; errar com ele deixaria o POKE sem NADA a fazer no turno.
+  accuracy: 100,
 }
 
-// Moves that hit every adjacent target in the real games, cross-referenced
-// against Bulbapedia's "moves that hit multiple Pokemon" list — only the
-// ones that already deal damage here get the AOE treatment (the matching
-// 0-power status moves, e.g. Growl/Tail Whip/Leer, stay inert per
-// isDamagingAbility, so tagging them 'aoe' would have no effect anyway).
-const AOE_ABILITY_KEYS = new Set([
-  'razor_leaf', 'bubble', 'earthquake', 'explosion', 'magnitude', 'selfdestruct',
-  ...Object.keys(TYPED_AOE_MOVES), // every level-50 typed move is AOE by design
-])
+// Golpe em area agora vem do DADO (`ability.target`, alvo real do golpe nos
+// jogos — ver AbilityDataEntry), nao de uma lista de chaves escrita a mao.
+//
+// POR QUE A LISTA SAIU: ela tinha 6 chaves e ja estava furada. Na migracao
+// para os dados de Pokemon Ultra Sun, `selfdestruct` virou `self_destruct` e a
+// entrada parou de casar — Explosao voltaria a ser golpe de alvo unico sem
+// nenhum erro em lugar nenhum. E, com o catalogo novo, sao 27 golpes de area
+// com dano de verdade (Terremoto, Nevasca, Deslizamento de Rochas, Onda de
+// Calor, Voz Encantadora, ...) contra os 6 que a lista conhecia.
+//
+// Os golpes de nivel 50 continuam sendo AOE por desenho: eles nao vem do
+// catalogo, sao conteudo proprio deste jogo.
+const AOE_ABILITY_KEYS = new Set(Object.keys(TYPED_AOE_MOVES))
 export const AOE_RADIUS = 240 // medium/high splash circle around the attacker (doubled per balance pass)
 
 // Merged in ahead of the spreadsheet moves — TYPED_AOE_MOVES's keys
@@ -77,7 +101,7 @@ const ALL_ABILITIES_SOURCE = { ...ABILITIES_DATA, ...TYPED_AOE_MOVES }
 
 export const ABILITIES: Record<string, Ability> = Object.fromEntries(
   Object.entries(ALL_ABILITIES_SOURCE).map(([key, ability]) => {
-    const isAoe = AOE_ABILITY_KEYS.has(key)
+    const isAoe = AOE_ABILITY_KEYS.has(key) || ('target' in ability && ability.target === 'aoe')
     return [
       key,
       {
@@ -95,10 +119,32 @@ export function getAbility(id: string): Ability | null {
   return ABILITIES[id] || null
 }
 
-// Status/0-power moves are inert for now (see file header) — every
-// player-facing move list and the combat AI both filter through this.
+// Golpes que causam dano de verdade mas tem `power` 0 no catalogo, porque o
+// dano deles nao vem de poder base — vem de uma regra propria, implementada em
+// combatSystem#specialDamageFor (poder dinamico ou dano fixo).
+//
+// BUG QUE ISTO CORRIGE: `isDamagingAbility` filtrava por `power > 0`, entao
+// esses golpes eram descartados de `pickAbility` e das telas — codigo morto.
+// Passou a doer de verdade com o limite de 4 golpes: antes um golpe inerte era
+// 1 de ~15 na lista, agora seria 1 dos 4 slots.
+//
+// FORA DA LISTA, DE PROPOSITO: `horn_drill` e `fissure`. Os dois causam
+// `defenderPoke.hp` — KO instantaneo. Nos jogos reais o que os equilibra e a
+// precisao de 30% e a regra de nunca acertar alvo de nivel maior, e ESTE JOGO
+// NAO TEM PRECISAO (nem `Ability` nem o dado gerado tem o campo; todo golpe
+// sempre acerta). Liga-los hoje daria um botao de vitoria automatica pra toda
+// especie que os aprende. Voltam quando precisao existir.
+const DANO_SEM_PODER_BASE = new Set([
+  'magnitude', 'reversal', 'flail', 'present', 'hidden_power',
+  'seismic_toss', 'night_shade', 'dragon_rage', 'super_fang', 'psywave',
+  'counter', 'mirror_coat',
+])
+
+// Golpe de status continua inerte ate a Leva B — toda lista voltada pro jogador
+// e a IA de combate filtram por aqui.
 export function isDamagingAbility(ability: Ability | null | undefined): boolean {
-  return !!ability && ability.power > 0
+  if (!ability) return false
+  return ability.power > 0 || DANO_SEM_PODER_BASE.has(ability.id)
 }
 
 // `resolveAbilityCategory` mora em data/abilityCategory.ts — ela precisa de

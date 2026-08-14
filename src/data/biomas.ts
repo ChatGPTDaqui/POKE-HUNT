@@ -55,6 +55,13 @@ export const FAIXAS: FaixaDef[] = [
 export const FAIXAS_INICIAIS: string[] = ['faixa1', 'faixa2']
 export const GRUPOS_DO_LANCE: string[] = ['faixa3', 'nightmare']
 
+// Grupos que existiam antes das faixas e que nenhuma hunt usa mais. Save
+// antigo (localStorage) e linha antiga de `players.unlocked_continents` os
+// carregam; sao traduzidos na carga, nunca propagados — 'kanto' vira o que o
+// Lance libera hoje, os outros dois somem. Nao basta ignorar: manter
+// 'nightmare' daria de graca o conteudo que acabou de virar gate do Lance.
+export const GRUPOS_LEGADOS: ReadonlySet<string> = new Set(['johto', 'kanto', 'nightmare'])
+
 // ---------------------------------------------------------------------------
 // Loot por sub-bioma
 // ---------------------------------------------------------------------------

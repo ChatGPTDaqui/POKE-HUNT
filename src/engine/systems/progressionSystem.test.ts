@@ -11,7 +11,9 @@ import { describe, expect, it } from 'vitest'
 
 import { createRng } from '@/core/rng'
 import { createPokeInstance, SPECIES } from '@/data/pokes'
-import { expProgressForInstance, grantExp } from './progressionSystem'
+import { stoneItemId } from '@/data/stones'
+import { useGameStateStore } from '@/stores/gameStateStore'
+import { evolvePokeInstance, expProgressForInstance, grantExp } from './progressionSystem'
 
 const rng = () => createRng(4242)
 
@@ -49,5 +51,40 @@ describe('progressao de POKE', () => {
         expect(into).toBeGreaterThanOrEqual(0)
       }
     }
+  })
+})
+
+// PH-12: evolvePokeInstance nao pode debitar Stones sozinha -- o chamador
+// (server: na hora, ja e a acao confirmada; client: so depois que pedirAcao
+// confirmar) decide QUANDO aplicar o `stoneReq` que ela devolve.
+describe('evolvePokeInstance — nao muta gameState, so calcula (PH-12)', () => {
+  it('devolve stoneReq mas nao remove o item da store, mesmo com estoque suficiente', () => {
+    const gameState = useGameStateStore.getState()
+    const itemId = stoneItemId(SPECIES.kadabra.type)
+    gameState.addItem(itemId, 20)
+    const poke = createPokeInstance(createRng(1), 'kadabra', 80)
+
+    const result = evolvePokeInstance(poke, gameState)
+
+    expect(result).not.toBeNull()
+    expect(result && 'blocked' in result).toBe(false)
+    if (result && !('blocked' in result)) {
+      expect(result.stoneReq).toEqual({ itemId, count: 20, type: SPECIES.kadabra.type })
+      expect(result.updatedPoke.speciesId).toBe('alakazam')
+    }
+    // A propria chamada nao mutou nada -- 20 Stones seguem la.
+    expect(useGameStateStore.getState().items[itemId]).toBe(20)
+  })
+
+  it('sem Stones suficientes: bloqueia sem tocar em nada', () => {
+    const gameState = useGameStateStore.getState()
+    const itemId = stoneItemId(SPECIES.kadabra.type)
+    gameState.removeItem(itemId, gameState.items[itemId] || 0)
+    const poke = createPokeInstance(createRng(1), 'kadabra', 80)
+
+    const result = evolvePokeInstance(poke, gameState)
+
+    expect(result && 'blocked' in result).toBe(true)
+    expect(useGameStateStore.getState().items[itemId] || 0).toBe(0)
   })
 })

@@ -7,6 +7,8 @@ import { SPECIES } from '@/data/pokes'
 import { footOffsetFraction } from '@/data/spriteFootOffsets'
 import { getEncounter } from '@/data/enemies'
 import type { PokeInstance } from '@/data/pokes'
+import type { AbilityCategory } from '@/data/generated/types'
+import { TURNO_SEGUNDOS } from '@/data/abilities'
 import type { BaseEntity, EnemyEntity, Point, PlayerEntity, WorldCounters, WorldEntity } from './types'
 
 // O contador de id vive no WorldState (`world.counters`), nao aqui. Um `let`
@@ -42,6 +44,10 @@ export function createPlayerEntity(counters: WorldCounters, { poke, x, y }: { po
     attackAnim: null,
     attackAnimTimer: 0,
     effectLanes: [],
+    statusVolatil: null,
+    estagios: {},
+    imunidadeDeStatus: 0,
+    proximoTurnoDeStatus: TURNO_SEGUNDOS,
     pathWaypoints: null,
     pathIndex: 0,
     pathRecalcTimer: 0,
@@ -77,6 +83,10 @@ export function createEnemyEntity(counters: WorldCounters, { poke, x, y, encount
     attackAnim: null,
     attackAnimTimer: 0,
     effectLanes: [],
+    statusVolatil: null,
+    estagios: {},
+    imunidadeDeStatus: 0,
+    proximoTurnoDeStatus: TURNO_SEGUNDOS,
     pathWaypoints: null,
     pathIndex: 0,
     pathRecalcTimer: 0,
@@ -171,7 +181,11 @@ export function startGlobalCooldown(entity: BaseEntity, seconds: number): void {
   entity.globalCooldown = seconds
 }
 
-export function takeDamage(entity: BaseEntity, amount: number, category?: 'physical' | 'special'): void {
+// `category` aceita 'status' (categoria real desde a base de dados do Ultra
+// Sun) so pra assinatura casar com `resolveAbilityCategory`; o registro de
+// ultimo dano recebido continua so pros dois que causam dano — golpe de status
+// nao chega aqui de qualquer forma (`isDamagingAbility` filtra antes).
+export function takeDamage(entity: BaseEntity, amount: number, category?: AbilityCategory): void {
   entity.poke.hp = Math.max(0, entity.poke.hp - amount)
   entity.flashTimer = 0.15
   if (category === 'physical' || category === 'special') {

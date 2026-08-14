@@ -9,7 +9,7 @@
 // tempo decorrido, que avanca sozinho mesmo sem kill nenhum, mas so muda de
 // forma perceptivel nessa escala.
 import { useEffect, useState } from 'react'
-import { getPerfStats } from '@/engine/systems/statsTracker'
+import { getPerfStats } from '@/engine/systems/farmRates'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { controller } from '@/engine/controller'
 import { useUiStore } from '@/stores/uiStore'

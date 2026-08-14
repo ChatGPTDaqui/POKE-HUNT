@@ -307,19 +307,12 @@ export interface MensagemCorreio {
 
 export interface AmigoRemoto { userId: string; nome: string; nivel: number }
 
+// Ranking/perfil/mercado/chat/correio saíram daqui na migração RPC-everything
+// (ver acoesRpc.ts, mercadoRpc.ts, chatRealtime.ts, correioRealtime.ts,
+// rankingRpc.ts) — só sessão continua HTTP, é a única coisa que ainda precisa
+// da Edge Function (simulação real de combate, ver _Architecture.md).
 export const servidor = {
   estado: () => pedir<RespostaComEstado>('/estado', { retentavel: true }),
-
-  perfil: () => pedir<PerfilRemoto>('/perfil', { retentavel: true }),
-
-  rankingTreinadores: (limite = 50) =>
-    pedir<{ entradas: EntradaTreinador[] }>(`/ranking/treinadores?limite=${limite}`, { retentavel: true }),
-
-  rankingPokemon: (criterio: CriterioPoke, limite = 50) =>
-    pedir<{ entradas: EntradaPoke[] }>(`/ranking/pokemon?criterio=${criterio}&limite=${limite}`, { retentavel: true }),
-
-  hallDaFama: (limite = 50) =>
-    pedir<{ entradas: EntradaHall[] }>(`/ranking/hall?limite=${limite}`, { retentavel: true }),
 
   // Abrir sessao fecha a anterior e gera semente nova. Repetir depois de um
   // erro de rede geraria uma segunda sessao — sem duplicar ouro (so a mais
@@ -333,77 +326,6 @@ export const servidor = {
   flush: () => pedir<RespostaFlush>('/sessao/flush', { method: 'POST', retentavel: true, timeoutMs: TIMEOUT_FLUSH_MS }),
 
   fecharSessao: () => pedir<{ fechada: boolean; resumo?: RespostaFlush['resumo']; piso?: RespostaFlush['piso'] } & Partial<RespostaComEstado>>('/sessao/fechar', { method: 'POST', retentavel: true, timeoutMs: TIMEOUT_FLUSH_MS }),
-
-  /**
-   * Manda uma intencao. NUNCA um resultado: o cliente diz "quero comprar 5
-   * pocoes", nao "meu ouro agora e X". Ver server/src/acoes.ts.
-   */
-  acao: (acao: { tipo: string } & Record<string, unknown>) =>
-    pedir<RespostaComEstado & { ok: boolean }>('/acao', {
-      method: 'POST',
-      body: JSON.stringify(acao),
-    }),
-
-  // --- Mercado --------------------------------------------------------------
-  // Leituras sao retentaveis (consulta pura). Escritas NAO: criar ordem duas
-  // vezes cria duas ordens, e o escrow sai do bolso do jogador nas duas.
-  mercadoItens: () => pedir<{ itens: ResumoItemMercado[] }>('/mercado/itens', { retentavel: true }),
-  mercadoLivro: (itemId: string) =>
-    pedir<{ itemId: string; compras: NivelDePreco[]; vendas: NivelDePreco[]; negocios: NegocioMercado[] }>(
-      `/mercado/itens?itemId=${encodeURIComponent(itemId)}`, { retentavel: true },
-    ),
-  mercadoPokes: () => pedir<{ anuncios: AnuncioMercado[] }>('/mercado/pokes', { retentavel: true }),
-  mercadoMeus: () =>
-    pedir<{
-      ordens: OrdemMercado[]
-      anuncios: AnuncioMercado[]
-      ofertasRecebidas: OfertaRecebida[]
-      minhasOfertas: OfertaMercado[]
-    }>('/mercado/meus', { retentavel: true }),
-  mercadoHistorico: () => pedir<{ negocios: NegocioMercado[] }>('/mercado/historico', { retentavel: true }),
-
-  criarOrdem: (corpo: { itemId: string; side: 'compra' | 'venda'; unitPrice: number; quantity: number }) =>
-    pedir<RespostaComEstado & { executado: number }>('/mercado/ordem', { method: 'POST', body: JSON.stringify(corpo) }),
-  cancelarOrdem: (ordemId: string) =>
-    pedir<RespostaComEstado>('/mercado/ordem/cancelar', { method: 'POST', body: JSON.stringify({ ordemId }) }),
-  anunciarPoke: (corpo: {
-    pokeUid: string
-    price: number | null
-    currency: 'gold' | 'diamond'
-    apenasOferta?: boolean
-  }) => pedir<RespostaComEstado>('/mercado/anuncio', { method: 'POST', body: JSON.stringify(corpo) }),
-  ofertar: (corpo: { anuncioId: string; valor: number }) =>
-    pedir<RespostaComEstado>('/mercado/oferta', { method: 'POST', body: JSON.stringify(corpo) }),
-  responderOferta: (ofertaId: string, aceitar: boolean) =>
-    pedir<RespostaComEstado>('/mercado/oferta/responder', {
-      method: 'POST', body: JSON.stringify({ ofertaId, aceitar }),
-    }),
-  cancelarOferta: (ofertaId: string) =>
-    pedir<RespostaComEstado>('/mercado/oferta/cancelar', { method: 'POST', body: JSON.stringify({ ofertaId }) }),
-  cancelarAnuncio: (anuncioId: string) =>
-    pedir<RespostaComEstado>('/mercado/anuncio/cancelar', { method: 'POST', body: JSON.stringify({ anuncioId }) }),
-  comprarAnuncio: (anuncioId: string) =>
-    pedir<RespostaComEstado>('/mercado/comprar', { method: 'POST', body: JSON.stringify({ anuncioId }) }),
-
-  // --- Chat e Correio -------------------------------------------------------
-  lerChat: () => pedir<{ mensagens: MensagemChat[] }>('/chat', { retentavel: true }),
-  enviarChat: (body: string, anexos: AnexoChat[]) =>
-    pedir<{ mensagens: MensagemChat[] }>('/chat', { method: 'POST', body: JSON.stringify({ body, anexos }) }),
-  correio: () =>
-    pedir<{ mensagens: MensagemCorreio[]; amigos: AmigoRemoto[]; naoLidas: number }>('/correio', { retentavel: true }),
-  pedirAmizade: (nick: string) =>
-    pedir<{ mensagem: string }>('/correio/amizade', { method: 'POST', body: JSON.stringify({ nick }) }),
-  responderPedido: (mensagemId: string, aceitar: boolean) =>
-    pedir<{ mensagem: string }>('/correio/responder', { method: 'POST', body: JSON.stringify({ mensagemId, aceitar }) }),
-  marcarLida: (mensagemId: string) =>
-    pedir<{ ok: boolean }>('/correio/ler', { method: 'POST', body: JSON.stringify({ mensagemId }) }),
-  // NAO retentavel: coletar duas vezes nao credita em dobro (o claim no banco e
-  // atomico), mas a segunda chamada volta 409 e o jogador veria um erro depois
-  // de uma coleta que deu certo.
-  coletarAnexo: (mensagemId: string) =>
-    pedir<{ ok: boolean; itens: AnexoItemCorreio[]; mensagem: string }>(
-      '/correio/coletar', { method: 'POST', body: JSON.stringify({ mensagemId }) },
-    ),
 }
 
 /**

@@ -176,6 +176,11 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
       else desligadas[abilityId] = true
       achado.lista[achado.indice] = { ...poke, disabledAbilities: desligadas }
     },
+    setActiveAbilities: (pokeUid, abilityIds) => {
+      const achado = acharPoke(pokeUid)
+      if (!achado) return
+      achado.lista[achado.indice] = { ...achado.lista[achado.indice], activeAbilities: [...abilityIds] }
+    },
     // Resetar o jogo NAO e uma operacao que o servidor deva expor via
     // simulacao. Estoura de proposito: se algum caminho chamar isto durante um
     // flush, quero o erro, nao a conta do jogador zerada em silencio.

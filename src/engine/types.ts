@@ -18,6 +18,7 @@ import type { MapDef } from '@/data/maps'
 import type { ElementType } from '@/data/generated/types'
 import type { Ability } from '@/data/abilities'
 import type { ResolvedBattleAnim } from '@/data/battleSprites'
+import type { StatusAtivo, EstagiosDeStat } from '@/data/statusEffects'
 import type { Rng } from '@/core/rng'
 
 export type EntityState = 'idle' | 'wander' | 'chase' | 'engaged' | 'dead'
@@ -67,6 +68,28 @@ export interface BaseEntity {
   pathRecalcTimer: number
   pathTargetX: number | null
   pathTargetY: number | null
+
+  // --- Status ---------------------------------------------------------------
+  // O status NAO-VOLATIL (veneno, queimadura, paralisia, sono, congelamento)
+  // mora no `poke`, nao aqui: ele sobrevive a hunt e vai pro banco, como nos
+  // jogos, onde so o Centro Pokemon ou um item tira.
+  //
+  // A CONFUSAO mora aqui porque e VOLATIL: nos jogos ela some quando o POKE
+  // sai de campo ou a batalha acaba. Como este combate nao acaba, o analogo e
+  // a entidade — que e recriada a cada troca de cena.
+  statusVolatil: StatusAtivo | null
+  // Estagios de atributo (-6 a +6). Volateis pelo mesmo motivo da confusao:
+  // nos jogos zeram quando o POKE sai de campo, e a entidade e o que e
+  // recriado a cada troca de cena. Ausente = estagio 0 (multiplicador 1).
+  estagios: EstagiosDeStat
+  // Segundos restantes de imunidade a novo status, contados depois que um
+  // status sai (cura ou fim natural). Desvio aprovado, ver
+  // scripts/usum/status.json#reaplicacao.
+  imunidadeDeStatus: number
+  // Quanto falta pro proximo "turno" de status deste POKE (dano de veneno,
+  // contador de sono, roll de descongelar). Conta separado do cooldown de
+  // acao: um POKE dormindo nao age, mas o sono precisa continuar passando.
+  proximoTurnoDeStatus: number
 }
 
 export interface PlayerEntity extends BaseEntity {
@@ -132,9 +155,18 @@ export interface PendingHit {
   isAoeVisual?: boolean
 }
 
+// UM cooldown so, do TREINADOR — nao um por tipo de item.
+//
+// Antes eram dois (`pot` e `revive`, 1s cada), o que deixava o bot usar pocao e
+// revive no MESMO instante: dois timers independentes nunca se esperam. Com o
+// Treinador virando personagem, quem tem o cooldown e ELE: uma mao, um item de
+// cada vez.
+//
+// Poke Ball nao passa por aqui de proposito (decisao explicita): capturar nao
+// e curar, e amarrar as duas coisas ao mesmo relogio faria o jogador perder
+// capturas por ter tomado uma pocao.
 export interface AutoTimers {
-  pot: number
-  revive: number
+  treinador: number
 }
 
 // A arvore de estado efemera inteira — reconstruida do zero a cada troca de

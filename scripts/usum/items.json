@@ -1,0 +1,41 @@
+{
+  "_comentario": [
+    "Catalogo de itens de Pokemon Ultra Sun. Escrito a mao, no mesmo padrao de",
+    "formulas.json — substitui a aba 'Itens' da planilha, que carregava precos de",
+    "geracoes antigas e nao tinha como ganhar as curas de status (a planilha nao e",
+    "escrita por este projeto).",
+    "",
+    "precoDeCompra = preco de LOJA do Ultra Sun, sem desconto. O desconto de 70%",
+    "de bola/pocao/cura de status e o preco de venda continuam sendo decisao de",
+    "balanceamento e vivem em src/data/items.ts.",
+    "",
+    "Itens sem preco de loja no jogo real (premier_ball, max_revive, as varas)",
+    "mantem o valor que ja tinham: sao itens deste idle, nao ha valor oficial a",
+    "copiar. Marcados com \"foraDoJogo\": true."
+  ],
+  "itens": [
+    { "chave": "poke_ball", "nome": "Poké Ball", "tipo": "ball", "precoDeCompra": 200, "multiplicadorDeCaptura": 1 },
+    { "chave": "great_ball", "nome": "Great Ball", "tipo": "ball", "precoDeCompra": 600, "multiplicadorDeCaptura": 1.5 },
+    { "chave": "ultra_ball", "nome": "Ultra Ball", "tipo": "ball", "precoDeCompra": 800, "multiplicadorDeCaptura": 2 },
+    { "chave": "premier_ball", "nome": "Premier Ball", "tipo": "ball", "precoDeCompra": 3000, "multiplicadorDeCaptura": 3, "foraDoJogo": true },
+
+    { "chave": "potion", "nome": "Potion", "tipo": "potion", "precoDeCompra": 200, "curaDeHp": 20 },
+    { "chave": "super_potion", "nome": "Super Potion", "tipo": "potion", "precoDeCompra": 700, "curaDeHp": 50 },
+    { "chave": "hyper_potion", "nome": "Hyper Potion", "tipo": "potion", "precoDeCompra": 1500, "curaDeHp": 200 },
+    { "chave": "max_potion", "nome": "Max Potion", "tipo": "potion", "precoDeCompra": 2500, "curaDeHp": "infinito" },
+
+    { "chave": "revive", "nome": "Revive", "tipo": "revive", "precoDeCompra": 2000, "curaPercentual": 0.5 },
+    { "chave": "max_revive", "nome": "Max Revive", "tipo": "revive", "precoDeCompra": 4000, "curaPercentual": 1, "foraDoJogo": true },
+
+    { "chave": "antidote", "nome": "Antidote", "tipo": "status_heal", "precoDeCompra": 200, "cura": ["poison"] },
+    { "chave": "awakening", "nome": "Awakening", "tipo": "status_heal", "precoDeCompra": 100, "cura": ["sleep"] },
+    { "chave": "burn_heal", "nome": "Burn Heal", "tipo": "status_heal", "precoDeCompra": 300, "cura": ["burn"] },
+    { "chave": "ice_heal", "nome": "Ice Heal", "tipo": "status_heal", "precoDeCompra": 100, "cura": ["freeze"] },
+    { "chave": "paralyze_heal", "nome": "Paralyze Heal", "tipo": "status_heal", "precoDeCompra": 300, "cura": ["paralysis"] },
+    { "chave": "full_heal", "nome": "Full Heal", "tipo": "status_heal", "precoDeCompra": 400, "cura": ["poison", "sleep", "burn", "freeze", "paralysis", "confusion"] },
+
+    { "chave": "old_rod", "nome": "Old Rod", "tipo": "rod", "precoDeCompra": 500, "foraDoJogo": true },
+    { "chave": "good_rod", "nome": "Good Rod", "tipo": "rod", "precoDeCompra": 2000, "foraDoJogo": true },
+    { "chave": "super_rod", "nome": "Super Rod", "tipo": "rod", "precoDeCompra": 5000, "foraDoJogo": true }
+  ]
+}

@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.15"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       admin_actions: {
@@ -140,6 +115,42 @@ export type Database = {
         }
         Relationships: []
       }
+      error_logs: {
+        Row: {
+          assinatura: string
+          contexto: Json | null
+          id: string
+          mensagem: string
+          ocorrencias: number
+          origem: string
+          primeira_vez: string
+          rota: string | null
+          ultima_vez: string
+        }
+        Insert: {
+          assinatura: string
+          contexto?: Json | null
+          id?: string
+          mensagem: string
+          ocorrencias?: number
+          origem: string
+          primeira_vez?: string
+          rota?: string | null
+          ultima_vez?: string
+        }
+        Update: {
+          assinatura?: string
+          contexto?: Json | null
+          id?: string
+          mensagem?: string
+          ocorrencias?: number
+          origem?: string
+          primeira_vez?: string
+          rota?: string | null
+          ultima_vez?: string
+        }
+        Relationships: []
+      }
       fishing_encounters: {
         Row: {
           cumulative_threshold_percent: number
@@ -227,6 +238,7 @@ export type Database = {
       game_sessions: {
         Row: {
           closed_at: string | null
+          flushing_since: string | null
           id: string
           last_flush_at: string
           map_id: string
@@ -240,6 +252,7 @@ export type Database = {
         }
         Insert: {
           closed_at?: string | null
+          flushing_since?: string | null
           id?: string
           last_flush_at?: string
           map_id: string
@@ -253,6 +266,7 @@ export type Database = {
         }
         Update: {
           closed_at?: string | null
+          flushing_since?: string | null
           id?: string
           last_flush_at?: string
           map_id?: string
@@ -270,6 +284,13 @@ export type Database = {
             columns: ["poke_uid"]
             isOneToOne: false
             referencedRelation: "pokemon_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_sessions_poke_uid_fkey"
+            columns: ["poke_uid"]
+            isOneToOne: false
+            referencedRelation: "ranking_pokemon"
             referencedColumns: ["id"]
           },
         ]
@@ -298,11 +319,19 @@ export type Database = {
             referencedRelation: "players"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "hall_da_fama_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       items: {
         Row: {
           buy_price: number | null
+          buy_price_atual: number | null
           capture_rate: number | null
           description: string | null
           heal_amount: number | null
@@ -311,11 +340,13 @@ export type Database = {
           kind: Database["public"]["Enums"]["item_kind"]
           name: string
           revive_hp_percent: number | null
+          sell_price: number | null
           sort_order: number
           stone_type: Database["public"]["Enums"]["element_type"] | null
         }
         Insert: {
           buy_price?: number | null
+          buy_price_atual?: number | null
           capture_rate?: number | null
           description?: string | null
           heal_amount?: number | null
@@ -324,11 +355,13 @@ export type Database = {
           kind: Database["public"]["Enums"]["item_kind"]
           name: string
           revive_hp_percent?: number | null
+          sell_price?: number | null
           sort_order?: number
           stone_type?: Database["public"]["Enums"]["element_type"] | null
         }
         Update: {
           buy_price?: number | null
+          buy_price_atual?: number | null
           capture_rate?: number | null
           description?: string | null
           heal_amount?: number | null
@@ -337,6 +370,7 @@ export type Database = {
           kind?: Database["public"]["Enums"]["item_kind"]
           name?: string
           revive_hp_percent?: number | null
+          sell_price?: number | null
           sort_order?: number
           stone_type?: Database["public"]["Enums"]["element_type"] | null
         }
@@ -630,6 +664,13 @@ export type Database = {
             referencedRelation: "pokemon_instances"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "market_listings_poke_uid_fkey"
+            columns: ["poke_uid"]
+            isOneToOne: false
+            referencedRelation: "ranking_pokemon"
+            referencedColumns: ["id"]
+          },
         ]
       }
       market_offers: {
@@ -669,6 +710,13 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "market_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_offers_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "mercado_anuncios_ativos"
             referencedColumns: ["id"]
           },
         ]
@@ -849,6 +897,13 @@ export type Database = {
             referencedRelation: "players"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "player_auto_catch_rules_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       player_items: {
@@ -888,6 +943,13 @@ export type Database = {
             referencedRelation: "players"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "player_items_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       player_pokedex: {
@@ -925,6 +987,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_pokedex_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
             referencedColumns: ["user_id"]
           },
         ]
@@ -988,6 +1057,7 @@ export type Database = {
       }
       pokemon_instances: {
         Row: {
+          active_abilities: string[] | null
           created_at: string
           disabled_abilities: Json
           exp: number
@@ -1011,6 +1081,8 @@ export type Database = {
           stat_def: number
           stat_def_esp: number
           stat_hp: number
+          status: string | null
+          status_turns: number | null
           stat_speed: number
           team_slot: number | null
           unlocked_abilities: string[]
@@ -1018,6 +1090,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          active_abilities?: string[] | null
           created_at?: string
           disabled_abilities?: Json
           exp?: number
@@ -1042,12 +1115,15 @@ export type Database = {
           stat_def_esp: number
           stat_hp: number
           stat_speed: number
+          status?: string | null
+          status_turns?: number | null
           team_slot?: number | null
           unlocked_abilities?: string[]
           updated_at?: string
           user_id: string
         }
         Update: {
+          active_abilities?: string[] | null
           created_at?: string
           disabled_abilities?: Json
           exp?: number
@@ -1071,6 +1147,8 @@ export type Database = {
           stat_def?: number
           stat_def_esp?: number
           stat_hp?: number
+          status?: string | null
+          status_turns?: number | null
           stat_speed?: number
           team_slot?: number | null
           unlocked_abilities?: string[]
@@ -1090,6 +1168,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pokemon_instances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
             referencedColumns: ["user_id"]
           },
         ]
@@ -1252,9 +1337,225 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      mercado_anuncios_ativos: {
+        Row: {
+          apenas_oferta: boolean | null
+          buyer_id: string | null
+          created_at: string | null
+          currency: string | null
+          id: string | null
+          is_shiny: boolean | null
+          iv_percent: number | null
+          level: number | null
+          melhor_oferta: number | null
+          ofertas: number | null
+          poke_uid: string | null
+          price: number | null
+          rarity: Database["public"]["Enums"]["rarity_tier"] | null
+          seller_id: string | null
+          sold_at: string | null
+          species_id: string | null
+          status: string | null
+          vendedor: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_listings_poke_uid_fkey"
+            columns: ["poke_uid"]
+            isOneToOne: false
+            referencedRelation: "pokemon_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_listings_poke_uid_fkey"
+            columns: ["poke_uid"]
+            isOneToOne: false
+            referencedRelation: "ranking_pokemon"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mercado_ofertas_recebidas: {
+        Row: {
+          buyer_id: string | null
+          comprador: string | null
+          created_at: string | null
+          currency: string | null
+          id: string | null
+          is_shiny: boolean | null
+          level: number | null
+          listing_id: string | null
+          resolved_at: string | null
+          seller_id: string | null
+          species_id: string | null
+          status: string | null
+          valor: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_offers_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "market_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_offers_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "mercado_anuncios_ativos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mercado_resumo_itens: {
+        Row: {
+          em_compra: number | null
+          em_venda: number | null
+          item_id: string | null
+          melhor_compra: number | null
+          melhor_venda: number | null
+        }
+        Relationships: []
+      }
+      ranking_pokemon: {
+        Row: {
+          created_at: string | null
+          disabled_abilities: Json | null
+          exp: number | null
+          hp: number | null
+          id: string | null
+          is_shiny: boolean | null
+          iv_atk_esp: number | null
+          iv_atk_fis: number | null
+          iv_def: number | null
+          iv_def_esp: number | null
+          iv_hp: number | null
+          iv_speed: number | null
+          level: number | null
+          location: Database["public"]["Enums"]["pokemon_location"] | null
+          locked: boolean | null
+          original_trainer: string | null
+          rarity: Database["public"]["Enums"]["rarity_tier"] | null
+          species_id: string | null
+          stat_atk_esp: number | null
+          stat_atk_fis: number | null
+          stat_def: number | null
+          stat_def_esp: number | null
+          stat_hp: number | null
+          stat_speed: number | null
+          team_slot: number | null
+          treinador: string | null
+          unlocked_abilities: string[] | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pokemon_instances_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pokemon_instances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pokemon_instances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      treinadores_publico: {
+        Row: {
+          trainer_exp: number | null
+          trainer_level: number | null
+          trainer_name: string | null
+          user_id: string | null
+        }
+        Insert: {
+          trainer_exp?: number | null
+          trainer_level?: number | null
+          trainer_name?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          trainer_exp?: number | null
+          trainer_level?: number | null
+          trainer_name?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      _calcular_stat: {
+        Args: {
+          p_base: number
+          p_is_hp: boolean
+          p_iv: number
+          p_level: number
+        }
+        Returns: number
+      }
+      _calcular_stats: {
+        Args: {
+          p_is_shiny: boolean
+          p_iv_atk_esp: number
+          p_iv_atk_fis: number
+          p_iv_def: number
+          p_iv_def_esp: number
+          p_iv_hp: number
+          p_iv_speed: number
+          p_level: number
+          p_rarity: string
+          p_species: Database["public"]["Tables"]["species"]["Row"]
+        }
+        Returns: {
+          stat_atk_esp: number
+          stat_atk_fis: number
+          stat_def: number
+          stat_def_esp: number
+          stat_hp: number
+          stat_speed: number
+        }[]
+      }
+      _valor_venda_poke: {
+        Args: { p_base_exp: number; p_level: number; p_rarity: string }
+        Returns: number
+      }
+      alternar_habilidade: {
+        Args: { p_ability_id: string; p_poke_id: string }
+        Returns: Json
+      }
+      alternar_trava_item: { Args: { p_item_id: string }; Returns: Json }
+      alternar_trava_poke: { Args: { p_poke_id: string }; Returns: Json }
+      anunciar_poke: {
+        Args: {
+          p_apenas_oferta: boolean
+          p_currency: string
+          p_poke_id: string
+          p_price: number
+        }
+        Returns: Json
+      }
+      cancelar_anuncio: { Args: { p_anuncio_id: string }; Returns: Json }
+      cancelar_oferta: { Args: { p_oferta_id: string }; Returns: Json }
+      cancelar_ordem_mercado: { Args: { p_ordem_id: string }; Returns: Json }
+      coletar_anexo_correio: { Args: { p_mensagem_id: string }; Returns: Json }
+      comprar_anuncio: { Args: { p_anuncio_id: string }; Returns: Json }
+      comprar_item: {
+        Args: { p_item_id: string; p_qtd?: number }
+        Returns: Json
+      }
       concessao_inicial_de_itens: {
         Args: never
         Returns: {
@@ -1262,9 +1563,65 @@ export type Database = {
           quantity: number
         }[]
       }
+      configurar_auto: { Args: { p_patch: Json }; Returns: Json }
+      criar_ordem_mercado: {
+        Args: {
+          p_item_id: string
+          p_quantity: number
+          p_side: string
+          p_unit_price: number
+        }
+        Returns: Json
+      }
+      curar_equipe: { Args: never; Returns: Json }
+      definir_ativo: { Args: { p_poke_id: string }; Returns: Json }
+      definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
+      desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
+      escolher_starter: { Args: { p_species_id: string }; Returns: Json }
+      evoluir_poke: { Args: { p_poke_id: string }; Returns: Json }
       hunts_iniciais: { Args: never; Returns: string[] }
+      id_por_nome_de_treinador: { Args: { nome: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
+      marcar_correio_lido: { Args: { p_mensagem_id: string }; Returns: Json }
+      meu_perfil: { Args: never; Returns: Json }
       nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
+      ofertar_no_anuncio: {
+        Args: { p_anuncio_id: string; p_valor: number }
+        Returns: Json
+      }
+      pedir_amizade: { Args: { p_nick: string }; Returns: Json }
+      por_na_equipe: { Args: { p_poke_id: string }; Returns: Json }
+      recusar_ofertas_pendentes: {
+        Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
+        Returns: number
+      }
+      reiniciar_jogo: { Args: never; Returns: undefined }
+      reportar_erro: {
+        Args: {
+          p_contexto?: Json
+          p_mensagem: string
+          p_origem: string
+          p_rota: string
+        }
+        Returns: undefined
+      }
+      responder_oferta: {
+        Args: { p_aceitar: boolean; p_oferta_id: string }
+        Returns: Json
+      }
+      responder_pedido_amizade: {
+        Args: { p_aceitar: boolean; p_mensagem_id: string }
+        Returns: Json
+      }
+      tirar_da_equipe: { Args: { p_poke_id: string }; Returns: Json }
+      usar_item: { Args: { p_item_id: string }; Returns: Json }
+      vender_item: {
+        Args: { p_item_id: string; p_qtd?: number }
+        Returns: Json
+      }
+      vender_poke: { Args: { p_poke_id: string }; Returns: Json }
+      vender_pokes: { Args: { p_poke_ids: string[] }; Returns: Json }
+      vender_todos_itens: { Args: never; Returns: Json }
       wipe_inventario_e_economia: {
         Args: never
         Returns: {
@@ -1451,9 +1808,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       admin_role: ["support", "owner"],

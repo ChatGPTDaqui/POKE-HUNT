@@ -9,10 +9,12 @@
 // recurso futuro (mesma decisao ja tomada em Tasks/Correio/Mercado).
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { User, Coins, Diamond, Trophy, Sword, Clock, BookOpen, Sparkle, TShirt, Star } from '@phosphor-icons/react'
+import { User, Coins, Diamond, Trophy, Sword, Clock, BookOpen, Sparkle, TShirt, Star, SignOut } from '@phosphor-icons/react'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useUiStore } from '@/stores/uiStore'
-import { servidor, servidorAtivo } from '@/data/remote/servidor'
+import { useAuthStore } from '@/stores/authStore'
+import { useConfirmDialogStore } from '@/stores/confirmDialogStore'
+import { perfil } from '@/data/remote/rankingRpc'
 import { trainerExpProgress } from '@/engine/systems/progressionSystem'
 import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
@@ -44,6 +46,8 @@ function formatarDuracao(segundos: number): string {
 export function PerfilTreinador() {
   const aberto = useUiStore((s) => s.perfilOpen)
   const setAberto = useUiStore((s) => s.setPerfilOpen)
+  const signOut = useAuthStore((s) => s.signOut)
+  const askConfirm = useConfirmDialogStore((s) => s.confirm)
   const [aba, setAba] = useState<Aba>('resumo')
 
   const trainer = useGameStateStore((s) => s.trainer)
@@ -56,8 +60,8 @@ export function PerfilTreinador() {
   // interessam a ninguem enquanto ele esta fechado.
   const { data: remoto } = useQuery({
     queryKey: ['perfil'],
-    queryFn: () => servidor.perfil(),
-    enabled: aberto && servidorAtivo(),
+    queryFn: () => perfil(),
+    enabled: aberto,
     staleTime: 60000,
   })
 
@@ -170,6 +174,21 @@ export function PerfilTreinador() {
               </div>
             </GameCard>
           </div>
+
+          <GameButton
+            variant="danger"
+            className="self-start"
+            onClick={() =>
+              askConfirm({
+                title: 'Sair da conta?',
+                message: 'Seu progresso ja esta salvo. Voce precisara entrar de novo com email e senha.',
+                confirmLabel: 'Sair da conta',
+                onConfirm: () => void signOut(),
+              })
+            }
+          >
+            <SignOut className="text-[1.1em]" /> Sair da conta
+          </GameButton>
         </div>
       )}
 

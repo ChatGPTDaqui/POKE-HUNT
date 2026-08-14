@@ -73,6 +73,7 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'grimer',
     'muk',
     'onix',
+    'hitmonlee',
     'koffing',
     'weezing',
     'rhyhorn',
@@ -95,6 +96,7 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'primeape',
     'hitmonlee',
     'hitmonchan',
+    'tyrogue',
   ],
   'factory': [
     'machop',

@@ -123,9 +123,20 @@ export function erroDaUltimaCarga(): string | null {
   return erroDeCarga
 }
 
+// Sequencia de chamadas de `getItem` — mesmo motivo da `geracao` acima, mas
+// pro LOAD em vez do save: StrictMode dispara `useProgressoRemoto` duas vezes
+// (monta -> desmonta -> monta), e as duas chamam `getItem()`, cada uma um
+// `GET /estado` real que tambem ESCREVE no servidor (liquida entregas do
+// Mercado). As duas correm em paralelo contra o mesmo CAS — uma pode 409,
+// outra 200, em QUALQUER ordem de resolucao. Sem isto, a tentativa vencedora
+// (bem-sucedida, a que o React ainda considera atual) podia ter seu resultado
+// sobrescrito por um 409 chegando atrasado da tentativa cancelada, e a tela
+// ficava travada no erro mesmo com o load real tendo funcionado.
+let chamadaDeCarga = 0
+
 export const postgresStorage: PersistStorage<GameStateData> = {
   getItem: async (): Promise<StorageValue<GameStateData> | null> => {
-    erroDeCarga = null
+    const minhaChamada = ++chamadaDeCarga
     if (!usuarioAtual || !defaultsDoJogo) return null
     try {
       // Sob autoridade do servidor, o estado inicial vem DELE — nao de uma leitura
@@ -133,15 +144,17 @@ export const postgresStorage: PersistStorage<GameStateData> = {
       // considera verdade, inclusive o que uma sessao ainda aberta ja rendeu.
       if (servidorAtivo()) {
         const { estado } = await servidor.estado()
+        if (minhaChamada === chamadaDeCarga) erroDeCarga = null
         savedAtMs = Date.now()
         return { state: estado as GameStateData, version: 1 }
       }
       const resultado = await loadPlayerState(usuarioAtual, defaultsDoJogo)
+      if (minhaChamada === chamadaDeCarga) erroDeCarga = null
       if (!resultado) return null
       savedAtMs = resultado.savedAt
       return { state: resultado.data, version: 1 }
     } catch (err) {
-      erroDeCarga = err instanceof Error ? err.message : String(err)
+      if (minhaChamada === chamadaDeCarga) erroDeCarga = err instanceof Error ? err.message : String(err)
       throw err
     }
   },

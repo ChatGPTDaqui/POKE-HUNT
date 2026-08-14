@@ -46,6 +46,9 @@ export interface ToastEntry {
   message: string
   type: ToastType
   realce?: ToastRealce
+  // So pra quem observa a store de fora (ex: captura de erro) saber de onde
+  // veio sem precisar re-derivar. Ninguem dentro deste arquivo le isto.
+  channel: ToastChannel
 }
 
 export interface ChatLine {
@@ -87,7 +90,7 @@ export const useToastStore = create<ToastState>((set) => ({
       if (nextTabLines.length > MAX_CHAT_LINES) nextTabLines.shift()
       const chatLines = { ...state.chatLines, [tab]: nextTabLines }
       if (channel === 'combat') return { chatLines }
-      const toastEntry: ToastEntry = { id: line.id, message, type, realce }
+      const toastEntry: ToastEntry = { id: line.id, message, type, realce, channel }
       return { chatLines, toasts: [...state.toasts, toastEntry] }
     })
   },

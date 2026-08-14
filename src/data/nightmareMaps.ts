@@ -17,7 +17,7 @@ import type { ElementType, SpeciesDataEntry } from './generated/types'
 import type { HuntMapDef, HuntEncounter, StatBlock } from './huntTypes'
 import type { RarityKey } from './rarity'
 
-// Same all-17-types real per-type background art as the regular hunts (see
+// Same all-18-types real per-type background art as the regular hunts (see
 // scripts/sync-planilha.js#TYPE_BACKGROUND_IMAGE — only 7 real images exist
 // on disk, the other 10 types reuse the closest-fitting one so no hunt is
 // ever left on the procedural checkerboard) — duplicated here rather than
@@ -42,6 +42,7 @@ const TYPE_BACKGROUND_IMAGE: Partial<Record<ElementType, string>> = {
   PSYCHIC: 'assets/hunt-backgrounds/dojo.png',
   GHOST: 'assets/hunt-backgrounds/cave.png',
   DARK: 'assets/hunt-backgrounds/cave.png',
+  FAIRY: 'assets/hunt-backgrounds/forest.png',
 }
 
 // BOSS hunts have no "bracket" of mixed types to average like regular hunts

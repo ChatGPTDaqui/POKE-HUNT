@@ -1,0 +1,168 @@
+{
+  "_fonte": "Formulas de Pokemon Ultra Sun/Ultra Moon (Geracao VII), conferidas na Bulbapedia (paginas Damage, Experience, Catch rate, Critical hit).",
+  "_nota": "Esta tabela SUBSTITUI a aba 'Formulas' da planilha como fonte das formulas do jogo. Ela e lida por scripts/generate-catalog-usum.js e vira src/data/generated/formulas.generated.ts. Linhas que nao sao formula de Pokemon (economia, venda, tick) sao decisao de design deste jogo e seguem aqui inalteradas.",
+  "formulas": [
+    {
+      "chave": "DAMAGE_BASE",
+      "expressao": "floor(floor(floor(2*level/5+2)*power*atk/def)/50)+2",
+      "variaveis": ["level", "power", "atk", "def"],
+      "descricao": "Gen V+ (inclui Gen VII): (((2*Nivel/5+2)*Poder*A/D)/50)+2. Mesma forma que a versao anterior, so com os floors nas posicoes exatas da formula real."
+    },
+    {
+      "chave": "STAB_MULTIPLIER",
+      "expressao": "1.5",
+      "variaveis": [],
+      "descricao": "Gen VII: 1.5x quando o tipo do golpe casa com um dos tipos do atacante."
+    },
+    {
+      "chave": "CRIT_CHANCE",
+      "expressao": "1/24",
+      "variaveis": [],
+      "descricao": "Gen VII, estagio critico +0: 1/24 (~4.17%). Era 17/256 na Gen II."
+    },
+    {
+      "chave": "CRIT_MULTIPLIER",
+      "expressao": "1.5",
+      "variaveis": [],
+      "descricao": "Gen VI em diante: critico causa 1.5x. Era 2x ate a Gen V."
+    },
+    {
+      "chave": "DAMAGE_VARIATION",
+      "expressao": "(floor(random()*16)+85)/100",
+      "variaveis": [],
+      "descricao": "Gen VII: inteiro aleatorio de 85 a 100, dividido por 100."
+    },
+    {
+      "chave": "EXP_GAIN",
+      "expressao": "floor(baseExp*level/5*((2*level+10)^2.5/(level+winnerLevel+10)^2.5))+1",
+      "variaveis": ["baseExp", "level", "winnerLevel"],
+      "descricao": "Formula ESCALADA da Gen V+ (usada na Gen VII): b*L/5 * ((2L+10)/(L+Lp+10))^2.5 + 1. Substitui a formula plana b*L/7 da Gen I-IV. Lp = nivel de quem venceu: derrotar alvo do proprio nivel rende o maximo, e farmar muito abaixo do proprio nivel rende cada vez menos."
+    },
+    {
+      "chave": "STAT_FORMULA",
+      "expressao": "floor((2*base+iv)*level/100)+5",
+      "variaveis": ["base", "level", "iv"],
+      "descricao": "Gen III+ (inclui Gen VII), com EV=0 e natureza neutra: floor((2*Base+IV+floor(EV/4))*Nivel/100)+5."
+    },
+    {
+      "chave": "HP_FORMULA",
+      "expressao": "floor((2*base+iv)*level/100)+level+10",
+      "variaveis": ["base", "level", "iv"],
+      "descricao": "Gen III+ (inclui Gen VII), com EV=0: floor((2*Base+IV+floor(EV/4))*Nivel/100)+Nivel+10."
+    },
+    {
+      "chave": "GLOBAL_CATCH_MULTIPLIER",
+      "expressao": "0.0925",
+      "variaveis": [],
+      "descricao": "Knob de balanceamento deste jogo (nao existe nos jogos originais): multiplica a taxa modificada antes das sacudidas. Recalibrado de 0.3 para 0.0925 junto com a troca da formula de captura pela da Gen VII. O valor foi MEDIDO, nao chutado: e o que iguala a chance MEDIA de captura do elenco inteiro (226 especies x Poke/Great/Ultra Ball) a de antes, 18.4%. A forma da curva muda de proposito — a Gen VII eleva a taxa a 0.1875 por sacudida, o que comprime as diferencas: especie muito dificil fica mais facil (taxa 3: 0.35% -> 2.2%) e especie muito facil fica um pouco mais dificil (taxa 255: 30% -> 26%)."
+    },
+    {
+      "chave": "CATCH_MODIFIED_RATE",
+      "expressao": "max(0.00001, (3*hpMax-2*hpAtual)/(3*hpMax)*catchRate*ballMultiplier*statusBonus*catchMultiplier)",
+      "variaveis": ["hpMax", "hpAtual", "catchRate", "ballMultiplier", "statusBonus", "catchMultiplier"],
+      "descricao": "Taxa modificada 'a' da Gen VII: ((3*HPmax-2*HPatual)/(3*HPmax)) * taxa * bonus da bola * bonus de status. O piso evita divisao por zero na formula da sacudida."
+    },
+    {
+      "chave": "CATCH_SHAKE_PROBABILITY",
+      "expressao": "min(1, (min(255, a)/255)^0.1875)",
+      "variaveis": ["a"],
+      "descricao": "Probabilidade de UMA sacudida passar na Gen VII. A Bulbapedia escreve b = 65536/(255/a)^0.1875 e compara com um sorteio de 0-65535; b/65536 simplifica algebricamente para (a/255)^0.1875, que e a mesma coisa sem o fator 65536 dos dois lados. A taxa modificada e capada em 255 (acima disso a captura ja e garantida)."
+    },
+    {
+      "chave": "CATCH_SHAKES",
+      "expressao": "3",
+      "variaveis": [],
+      "descricao": "Gen V+ (inclui Gen VII): tres checagens de sacudida; passar nas tres captura."
+    },
+    {
+      "chave": "CATCH_CHANCE",
+      "expressao": "min(1, shakeProbability^shakes)",
+      "variaveis": ["shakeProbability", "shakes"],
+      "descricao": "Chance final de captura: a probabilidade de uma sacudida elevada ao numero de sacudidas."
+    },
+    {
+      "chave": "SELL_ITEM_FRACTION",
+      "expressao": "0.5",
+      "variaveis": [],
+      "descricao": "Economia deste jogo: vender item rende metade do preco de compra."
+    },
+    {
+      "chave": "SELL_ITEM_PRICE",
+      "expressao": "floor(buyPrice*sellFraction)",
+      "variaveis": ["buyPrice", "sellFraction"],
+      "descricao": "Economia deste jogo."
+    },
+    {
+      "chave": "POKEMON_SELL_DIVISOR",
+      "expressao": "5",
+      "variaveis": [],
+      "descricao": "Economia deste jogo."
+    },
+    {
+      "chave": "POKEMON_SELL_VALUE",
+      "expressao": "max(1, floor(level*baseExp/sellDivisor))",
+      "variaveis": ["level", "baseExp", "sellDivisor"],
+      "descricao": "Economia deste jogo."
+    },
+    {
+      "chave": "KILL_MONEY_DIVISOR",
+      "expressao": "15",
+      "variaveis": [],
+      "descricao": "Economia deste jogo."
+    },
+    {
+      "chave": "MONEY_FOR_KILL",
+      "expressao": "max(1, floor(sellValue/killDivisor))",
+      "variaveis": ["sellValue", "killDivisor"],
+      "descricao": "Economia deste jogo."
+    },
+    {
+      "chave": "GROWTH_MEDIUM_FAST",
+      "expressao": "n^3",
+      "variaveis": ["n (= level)"],
+      "descricao": "Grupo de experiencia Medium Fast."
+    },
+    {
+      "chave": "GROWTH_MEDIUM_SLOW",
+      "expressao": "floor(6/5*n^3-15*n^2+100*n-140)",
+      "variaveis": ["n (= level)"],
+      "descricao": "Grupo de experiencia Medium Slow."
+    },
+    {
+      "chave": "GROWTH_FAST",
+      "expressao": "floor(4/5*n^3)",
+      "variaveis": ["n (= level)"],
+      "descricao": "Grupo de experiencia Fast."
+    },
+    {
+      "chave": "GROWTH_SLOW",
+      "expressao": "floor(5/4*n^3)",
+      "variaveis": ["n (= level)"],
+      "descricao": "Grupo de experiencia Slow."
+    },
+    {
+      "chave": "GROWTH_ERRATIC",
+      "expressao": "floor(if(lt(n,50), n^3*(100-n)/50, if(lt(n,68), n^3*(150-n)/100, if(lt(n,98), n^3*floor((1911-10*n)/3)/500, n^3*(160-n)/100))))",
+      "variaveis": ["n (= level)"],
+      "descricao": "Grupo de experiencia Erratic (a PokeAPI chama de 'slow-then-very-fast'). Funcao por partes, exatamente como na Bulbapedia. Substitui a antiga GROWTH_SLIGHTLY_FAST, que nao correspondia a nenhum grupo real."
+    },
+    {
+      "chave": "GROWTH_FLUCTUATING",
+      "expressao": "floor(if(lt(n,15), n^3*(floor((n+1)/3)+24)/50, if(lt(n,36), n^3*(n+14)/50, n^3*(floor(n/2)+32)/50)))",
+      "variaveis": ["n (= level)"],
+      "descricao": "Grupo de experiencia Fluctuating (a PokeAPI chama de 'fast-then-very-slow'). Funcao por partes. Substitui a antiga GROWTH_SLIGHTLY_SLOW, que nao correspondia a nenhum grupo real."
+    },
+    {
+      "chave": "FISH_BITE_CHANCE",
+      "expressao": "51",
+      "variaveis": [],
+      "descricao": "Pesca nao esta implementada (fora de escopo); a linha fica para nao perder o valor."
+    },
+    {
+      "chave": "TURNO_SEGUNDOS",
+      "expressao": "2",
+      "variaveis": [],
+      "descricao": "O turno deste jogo, em segundos. Faz dois papeis: converte PP em cooldown de golpe e e o intervalo minimo entre duas acoes de um mesmo POKE (MIN_ACTION_GAP no combatSystem). Substituiu TICK_MS=1400ms, que era um segundo ritmo paralelo: com o piso de 2s, 61% dos golpes de dano ja recarregavam em 2s de qualquer jeito."
+    }
+  ]
+}

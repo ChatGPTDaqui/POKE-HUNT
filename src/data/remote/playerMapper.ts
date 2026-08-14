@@ -9,6 +9,9 @@ import type { Database } from '@/lib/database.types'
 import type { GameStateData, AutoPotRule, AutoCatchConfig, AutoCatchRule, PerfStats, TrainerInfo, PokedexKillCount } from '@/stores/gameStateStore'
 import { SPECIES, computeStatsAtLevel, type PokeInstance, type StatBlock } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
+import { getAbility } from '@/data/abilities'
+import { activeAbilitiesPadrao } from '@/data/activeAbilities'
+import type { StatusCondition } from '@/data/statusEffects'
 
 type Json = Database['public']['Tables']['players']['Row']['auto_toggles']
 type Tables = Database['public']['Tables']
@@ -84,10 +87,45 @@ export function rowToPoke(row: PokemonRow): PokeInstance {
     rarity: row.rarity as RarityKey,
     ivs,
     stats,
-    unlockedAbilities: row.unlocked_abilities,
+    // DERIVADO da especie, nao lido da coluna — mesmo argumento dos atributos
+    // acima. O moveset e funcao de (especie, nivel), e todo caminho que cria ou
+    // sobe um POKE ja monta esta lista exatamente assim. Ler a coluna crua
+    // deixaria o save preso no learnset da versao em que o POKE foi criado.
+    //
+    // Deixou de ser teorico com a migracao para os dados de Pokemon Ultra Sun:
+    // os learnsets mudaram inteiros e 15 chaves de golpe trocaram de grafia
+    // (`solarbeam` -> `solar_beam`, `thundershock` -> `thunder_shock`,
+    // `psychic_m` -> `psychic`, ...). Sem isto, todo POKE ja salvo perderia em
+    // silencio os golpes renomeados — `getAbility` devolve null e o combate
+    // simplesmente pula. A coluna continua sendo GRAVADA (pokeToRow) para
+    // qualquer leitor externo e para nao virar um campo morto no schema.
+    unlockedAbilities: species
+      ? species.abilities
+          .filter((a) => a.levelReq <= row.level)
+          .map((a) => a.key)
+          .filter((key) => getAbility(key))
+      : row.unlocked_abilities,
     // Coluna adicionada depois (migration 20260809150000): linha antiga volta
     // com o default `{}` do banco, entao nao ha migracao de dado a fazer.
     disabledAbilities: (row.disabled_abilities ?? {}) as Record<string, boolean>,
+    // LIDO da coluna, ao contrario de `unlockedAbilities` logo acima: este e o
+    // unico dos dois que nao e derivavel, e escolha do jogador.
+    //
+    // `null` (POKE anterior a migration 20260814120100, ou nunca configurado)
+    // vira o padrao — os 4 ultimos golpes aprendidos. Array VAZIO e mantido
+    // como esta: e a escolha valida de desligar tudo e lutar so com o Ataque
+    // Basico, e o `??` nao a confunde com null.
+    //
+    // O filtro por especie desconhecida acompanha `unlockedAbilities`: sem
+    // species nao ha padrao a montar.
+    activeAbilities: row.active_abilities
+      ?? (species ? activeAbilitiesPadrao(species, row.level) : undefined),
+    // Status NAO-VOLATIL. Sobrevive a sessao porque nos jogos ele sobrevive a
+    // batalha — so item ou Centro Pokemon tiram. A confusao NAO vem daqui: e
+    // volatil, mora na entidade de combate e some ao trocar de cena.
+    status: row.status
+      ? { tipo: row.status as StatusCondition, turnosRestantes: row.status_turns }
+      : null,
     locked: row.locked,
     capturedAt: row.created_at,
     originalTrainer: row.original_trainer ?? undefined,
@@ -196,6 +234,14 @@ export function pokeToRow(userId: string, poke: PokeInstance, location: 'team' |
     stat_hp: poke.stats.hp, stat_atk_fis: poke.stats.atkFis, stat_atk_esp: poke.stats.atkEsp,
     stat_def: poke.stats.def, stat_def_esp: poke.stats.defEsp, stat_speed: poke.stats.speed,
     unlocked_abilities: poke.unlockedAbilities,
+    // `?? null` pelo mesmo motivo de `original_trainer` acima. NULL aqui tem
+    // significado proprio (nunca configurado) e nao pode virar '{}'.
+    active_abilities: poke.activeAbilities ?? null,
+    // Duas colunas em vez de um jsonb: `status` e um enum de 6 valores com
+    // check no banco, e `status_turns` e um int. Guardar `{tipo, turnos}` como
+    // JSON deixaria os dois sem validacao nenhuma do lado do Postgres.
+    status: poke.status?.tipo ?? null,
+    status_turns: poke.status?.turnosRestantes ?? null,
     // Sem esta linha o golpe desligado a mao voltava ligado no proximo
     // carregamento — o combate respeitava o campo, mas ninguem o gravava.
     disabled_abilities: poke.disabledAbilities ?? {},

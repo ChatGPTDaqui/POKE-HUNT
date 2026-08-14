@@ -152,12 +152,13 @@ export function sellBagPoke(gameState: GameStateStore, pokeUid: string): { succe
   return { success: true, value }
 }
 
-// Vende todo POKE da mochila cujo uid esteja em `pokeUids` — trancados sao
-// sempre pulados, mesmo se o uid foi passado (defesa em profundidade, ja
-// que a UI ja exclui eles da selecao em lote).
+// Vende todo POKE da mochila cujo uid esteja em `pokeUids` — trancados e
+// shiny sao sempre pulados, mesmo se o uid foi passado (defesa em
+// profundidade de verdade: a UI ja exclui os dois da selecao em lote, mas
+// uma request forjada direto pra `venderPokes` bypassa a UI — PH-24).
 export function sellAllBagPokes(gameState: GameStateStore, pokeUids: string[]): { gold: number; pokeCount: number } {
   const uidSet = new Set(pokeUids)
-  const toSell = gameState.bagPokes.filter((p) => uidSet.has(p.uid) && !p.locked)
+  const toSell = gameState.bagPokes.filter((p) => uidSet.has(p.uid) && !p.locked && !p.isShiny)
   let totalGold = 0
   for (const poke of toSell) {
     const species = SPECIES[poke.speciesId]

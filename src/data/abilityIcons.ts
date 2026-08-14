@@ -32,6 +32,10 @@ const ARQUIVO: Record<ElementType, string> = {
   DRAGON: 'dragon',
   DARK: 'dark',
   STEEL: 'steel',
+  // `jinxbite` do Crawl (enchantment/) — literalmente uma fada alada, entao
+  // nao colide visualmente com nenhum dos outros 17. Ver
+  // assets/move-vfx/CREDITOS.txt.
+  FAIRY: 'fairy',
 }
 
 /**

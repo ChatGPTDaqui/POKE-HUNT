@@ -1,0 +1,283 @@
+import { useMemo, useState } from 'react'
+import { ArrowDown, ArrowUp, LockSimple, Sparkle } from '@phosphor-icons/react'
+import { pedirAcaoComLocal } from '@/data/remote/autoridade'
+import { SPECIES, averageIvPercent } from '@/data/pokes'
+import { RARITIES, rarityOf, type RarityKey } from '@/data/rarity'
+import { sellAllBagPokes, pokemonSellValue } from '@/engine/systems/economySystem'
+import { useGameStateStore } from '@/stores/gameStateStore'
+import { usePokeProfileStore } from '@/stores/pokeProfileStore'
+import { useConfirmDialogStore } from '@/stores/confirmDialogStore'
+import { useAcaoPendente } from '@/hooks/useAcaoPendente'
+import { PokeSwatch } from '@/components/shared/PokeSwatch'
+import { PokeNameTag } from '@/components/shared/PokeNameTag'
+import { linkarPoke, tratouComoLink } from '@/components/shared/linkarNoChat'
+import {
+  GameButton, GameCard, GameCheck, GameInput, SectionLabel,
+} from '@/components/game/controls'
+import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
+import type { ConfirmRequest } from '@/stores/confirmDialogStore'
+import { fmt, toast } from '../utils'
+import type { PokeInstance, Species } from '@/data/pokes'
+
+function venderUmPoke(
+  poke: PokeInstance,
+  species: Species,
+  { askConfirm, acao, venderLote, fmt: format }: {
+    askConfirm: (request: ConfirmRequest) => void
+    acao: ReturnType<typeof useAcaoPendente>
+    venderLote: (uids: string[], extras?: { shiny: number; locked: number }) => Promise<void>
+    fmt: typeof fmt
+  },
+) {
+  const value = pokemonSellValue(poke.level, species.baseExp, poke.rarity)
+  const key = `sell:${poke.uid}`
+  // Venda individual passa pelo MESMO endpoint em lote: antes ela
+  // chamava `sellBagPoke` local direto, sem `pedirAcao`, entao sob
+  // autoridade do servidor o POKE reaparecia no sincronismo seguinte.
+  const executar = () => void acao.run(key, () => venderLote([poke.uid]))
+  if (poke.isShiny) {
+    askConfirm({
+      title: 'Vender POKE Shiny?',
+      message: `${species.name} e Shiny. Essa acao nao pode ser desfeita. Vender por ${format.format(value)} ouro?`,
+      confirmLabel: 'Vender',
+      onConfirm: executar,
+    })
+  } else {
+    executar()
+  }
+}
+
+export function PokemonsTab() {
+  const bagPokes = useGameStateStore((s) => s.bagPokes)
+  const showProfile = usePokeProfileStore((s) => s.showProfile)
+  const askConfirm = useConfirmDialogStore((s) => s.confirm)
+  const acao = useAcaoPendente()
+
+  const [search, setSearch] = useState('')
+  const [ivMin, setIvMin] = useState(0)
+  const [ivMax, setIvMax] = useState(100)
+  const [sortDesc, setSortDesc] = useState(true)
+  const [shinyOnly, setShinyOnly] = useState(false)
+  const [selectedRarities, setSelectedRarities] = useState<Set<RarityKey>>(
+    () => new Set(Object.keys(RARITIES) as RarityKey[]),
+  )
+  const [selectedUids, setSelectedUids] = useState<Set<string>>(() => new Set())
+
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase()
+    // Os limites podem ser digitados fora de ordem (min > max) — compara contra
+    // o par ordenado pra nunca resultar numa lista vazia por engano; os campos
+    // continuam mostrando exatamente o que foi digitado.
+    const lo = Math.min(ivMin, ivMax)
+    const hi = Math.max(ivMin, ivMax)
+    return bagPokes
+      .filter((poke) => SPECIES[poke.speciesId] && poke.ivs)
+      .map((poke) => ({ poke, ivPct: averageIvPercent(poke.ivs) }))
+      .filter(({ poke, ivPct }) =>
+        ivPct >= lo && ivPct <= hi
+        && selectedRarities.has(rarityOf(poke).key)
+        && (!shinyOnly || poke.isShiny)
+        && (!term || SPECIES[poke.speciesId].name.toLowerCase().includes(term)))
+      .sort((a, b) => (sortDesc ? b.ivPct - a.ivPct : a.ivPct - b.ivPct))
+  }, [bagPokes, search, ivMin, ivMax, sortDesc, shinyOnly, selectedRarities])
+
+  // Pagina so a RENDERIZACAO. "Selecionar tudo" e "Vender Tudo" continuam
+  // olhando `filtered` inteiro de proposito: um "Selecionar tudo" que marcasse
+  // apenas os 30 da pagina visivel seria uma armadilha — o jogador clica, ve
+  // "Vender Selecionados (30)" e acha que limpou a mochila.
+  const paginado = usePaginacao(filtered)
+
+  // POKEs trancados nunca entram na selecao em lote. Shinies so entram quando o
+  // filtro "Somente Shiny" esta ativo (e ai a venda exige confirmacao) — mesma
+  // regra de seguranca do "Vender Tudo", que nunca toca em shiny.
+  const selectable = filtered.filter(({ poke }) => !poke.locked && (shinyOnly || !poke.isShiny))
+  const selectableUids = selectable.map(({ poke }) => poke.uid)
+  const allSelected = selectableUids.length > 0 && selectableUids.every((uid) => selectedUids.has(uid))
+  const activeSelection = [...selectedUids].filter((uid) => selectableUids.includes(uid))
+
+  async function venderLote(uids: string[], extras?: { shiny: number; locked: number }) {
+    const { ok, local } = await pedirAcaoComLocal(
+      { tipo: 'venderPokes', pokeUids: uids },
+      () => sellAllBagPokes(useGameStateStore.getState(), uids),
+    )
+    setSelectedUids(new Set())
+    if (!ok) return
+    if (local && local.pokeCount > 0) {
+      toast(`Vendeu ${local.pokeCount} POKE(s) por ${fmt.format(local.gold)} ouro.`)
+    }
+    // Contagens de poupados sao calculadas do estado LOCAL antes da acao, entao
+    // valem nos dois caminhos.
+    if (extras?.shiny) toast(`${extras.shiny} POKE(s) Shiny nao foram vendidos.`, 'info')
+    if (extras?.locked) toast(`${extras.locked} POKE(s) trancado(s) nao foram vendidos.`, 'info')
+  }
+
+  function venderSelecionados() {
+    const uids = activeSelection
+    if (uids.length === 0) return
+    const executar = () => void acao.run('sell-selected', () => venderLote(uids))
+    // A selecao so contem shiny enquanto "Somente Shiny" esta ativo (ver
+    // `selectable`) — nesse caso todo uid e shiny, contagem direta basta.
+    if (shinyOnly) {
+      askConfirm({
+        title: 'Vender POKEs Shiny?',
+        message: `Voce esta vendendo ${uids.length} POKE(s) Shiny. Essa acao nao pode ser desfeita.`,
+        confirmLabel: 'Vender',
+        onConfirm: executar,
+      })
+    } else {
+      executar()
+    }
+  }
+
+  function venderTudo() {
+    const shiny = filtered.filter(({ poke }) => poke.isShiny).length
+    const locked = filtered.filter(({ poke }) => poke.locked).length
+    const uids = filtered.filter(({ poke }) => !poke.isShiny && !poke.locked).map(({ poke }) => poke.uid)
+    if (uids.length === 0) {
+      toast('Nenhum POKE elegivel (shiny e trancados sao poupados).', 'info')
+      return
+    }
+    void acao.run('sell-all-pokes', () => venderLote(uids, { shiny, locked }))
+  }
+
+  return (
+    <div className="flex flex-col gap-[.45em]">
+      <SectionLabel>VENDER POKES EXTRAS (MOCHILA)</SectionLabel>
+
+      <div className="flex flex-wrap items-center gap-[.5em]">
+        <GameInput
+          placeholder="Buscar por nome..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="min-w-[9em] flex-1"
+        />
+        <label className="flex items-center gap-[.3em] text-[.8em] text-n400">
+          IV min
+          <GameInput
+            type="number" min={0} max={100} value={ivMin} className="w-[3.4em] text-center"
+            onChange={(e) => setIvMin(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
+          />
+        </label>
+        <label className="flex items-center gap-[.3em] text-[.8em] text-n400">
+          IV max
+          <GameInput
+            type="number" min={0} max={100} value={ivMax} className="w-[3.4em] text-center"
+            onChange={(e) => setIvMax(Math.max(0, Math.min(100, Number(e.target.value) || 100)))}
+          />
+        </label>
+        <GameButton onClick={() => setSortDesc((d) => !d)} title={sortDesc ? 'Maior IV primeiro' : 'Menor IV primeiro'}>
+          IV {sortDesc ? <ArrowDown /> : <ArrowUp />}
+        </GameButton>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-[.6em] gap-y-[.3em]">
+        {Object.values(RARITIES).map((r) => (
+          <GameCheck
+            key={r.key}
+            checked={selectedRarities.has(r.key)}
+            onChange={(on) =>
+              setSelectedRarities((prev) => {
+                const next = new Set(prev)
+                if (on) next.add(r.key)
+                else next.delete(r.key)
+                return next
+              })
+            }
+          >
+            <span style={{ color: r.color }}>{r.label}</span>
+          </GameCheck>
+        ))}
+        <GameCheck
+          checked={shinyOnly}
+          onChange={(on) => {
+            setShinyOnly(on)
+            setSelectedUids(new Set()) // trocar de modo muda o que e selecionavel
+          }}
+        >
+          <span className="inline-flex items-center gap-[.25em]">
+            Somente <Sparkle weight="fill" className="text-shiny" /> Shiny
+          </span>
+        </GameCheck>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-[.5em]">
+        <GameCheck
+          checked={allSelected}
+          onChange={(on) => setSelectedUids(on ? new Set(selectableUids) : new Set())}
+        >
+          Selecionar tudo
+        </GameCheck>
+        <div className="flex gap-[.4em]">
+          <GameButton
+            disabled={activeSelection.length === 0 || acao.pendingKey != null}
+            onClick={venderSelecionados}
+          >
+            Vender Selecionados ({activeSelection.length})
+          </GameButton>
+          <GameButton variant="ghost" disabled={acao.pendingKey != null} onClick={venderTudo}>
+            Vender Tudo
+          </GameButton>
+        </div>
+      </div>
+
+      {ivMin > ivMax && (
+        <p className="text-[.78em] text-warn">IV min maior que IV max — invertido automaticamente para filtrar.</p>
+      )}
+      {bagPokes.length === 0 && <p className="text-n500">Nenhum POKE extra na mochila.</p>}
+      {bagPokes.length > 0 && filtered.length === 0 && (
+        <p className="text-n500">Nenhum POKE corresponde aos filtros.</p>
+      )}
+
+      {paginado.pagina.map(({ poke, ivPct }) => {
+        const species = SPECIES[poke.speciesId]
+        const value = pokemonSellValue(poke.level, species.baseExp, poke.rarity)
+        const showCheckbox = !poke.locked && (shinyOnly || !poke.isShiny)
+
+        return (
+          <GameCard key={poke.uid} className="flex items-center gap-[.45em] p-[.55em]">
+            {showCheckbox ? (
+              <GameCheck
+                checked={selectedUids.has(poke.uid)}
+                onChange={(on) =>
+                  setSelectedUids((prev) => {
+                    const next = new Set(prev)
+                    if (on) next.add(poke.uid)
+                    else next.delete(poke.uid)
+                    return next
+                  })
+                }
+              />
+            ) : (
+              // Espacador: mantem o alinhamento das colunas quando a linha nao
+              // pode ser selecionada (shiny/trancado).
+              <span className="w-[1em] shrink-0" />
+            )}
+            <span
+              title="Clique para o perfil · Shift+clique para linkar no chat"
+              onClick={(e) => { if (tratouComoLink(e, () => linkarPoke(poke, species))) return; showProfile(poke, species) }}
+              className="cursor-pointer"
+            >
+              <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={2.4} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-[.4em]">
+                <PokeNameTag poke={poke} species={species} />
+                <span className="text-n400">Lv{poke.level}</span>
+                <span className="text-[.78em] text-n500">IV {ivPct.toFixed(0)}%</span>
+              </div>
+            </div>
+            <GameButton
+              disabled={poke.locked || acao.pendingKey != null}
+              title={poke.locked ? 'Trancado — destranque na Mochila' : undefined}
+              onClick={() => venderUmPoke(poke, species, { askConfirm, acao, venderLote, fmt })}
+            >
+              {poke.locked ? <><LockSimple weight="fill" /> Trancado</> : `Vender (${fmt.format(value)})`}
+            </GameButton>
+          </GameCard>
+        )
+      })}
+
+      <Paginacao estado={paginado} rotulo="POKEs" />
+    </div>
+  )
+}

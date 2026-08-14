@@ -11,7 +11,11 @@ import { colorForType } from '@/data/typeColors'
 import type { PokeInstance } from '@/data/pokes'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-const ROTULO_CATEGORIA: Record<string, string> = { physical: 'Fisico', special: 'Especial' }
+// 'status' e categoria de verdade desde a base de dados do Ultra Sun (ate a
+// Gen III a categoria era decidida pelo TIPO do golpe e nao existia uma
+// terceira). Golpe de status continua inerte aqui — o aviso logo abaixo, que ja
+// aparecia em todo golpe de poder 0, e quem explica isso ao jogador.
+const ROTULO_CATEGORIA: Record<string, string> = { physical: 'Fisico', special: 'Especial', status: 'Status' }
 
 export function descricaoDoGolpe(ability: Ability): string {
   const pronta = MOVE_DESCRIPTIONS[ability.id]

@@ -1,0 +1,92 @@
+import { GameCanvas } from '@/components/GameCanvas'
+import { ToastStack } from '@/components/toasts/ToastStack'
+import { PokeProfileModal } from '@/components/modals/PokeProfileModal'
+import { ConfirmDialog } from '@/components/modals/ConfirmDialog'
+import { LevelUpSplash } from '@/components/modals/LevelUpSplash'
+import { DefeatModal } from '@/components/modals/DefeatModal'
+import { LanceCountdownModal, LanceVictoryReturn } from '@/components/modals/LanceModals'
+import { ReviveCountdownModal } from '@/components/modals/ReviveCountdownModal'
+import { OfflineFarmModal } from '@/components/modals/OfflineFarmModal'
+import { HudLayer } from '../HudLayer'
+import { ScreenOverlay } from '@/features/screens/ScreenOverlay'
+import { HuntAnalyzer } from '@/features/hunt/HuntAnalyzer'
+import { StartScreen } from '@/features/start/StartScreen'
+import { PerfilTreinador } from '@/features/perfil/PerfilTreinador'
+import { TutorialModal } from '@/features/tutorial/TutorialModal'
+import { useUiStore } from '@/stores/uiStore'
+import { useHasStarter } from '@/stores/gameStateStore'
+import { useOfflineFarmOnBoot } from '../hooks/useOfflineFarmOnBoot'
+import { useBackgroundCatchUp } from '../hooks/useBackgroundCatchUp'
+import { useSaidaAoEncerrarSessao } from '../hooks/useSaidaAoEncerrarSessao'
+import { useSyncOnUnload } from '../hooks/useSyncOnUnload'
+import { useViewportTracking } from '../hooks/useViewportTracking'
+import { useCommitOnLevelUp } from '../hooks/useCommitOnLevelUp'
+import { useTutorialInicial } from '../hooks/useTutorialInicial'
+import { useAvisoDeEstoqueNoChat } from '../hooks/useAvisoDeEstoqueNoChat'
+
+export function JogoCarregado() {
+  const hasStarter = useHasStarter()
+  const hudScale = useUiStore((s) => s.hudScale)
+  const { summary, dismiss } = useOfflineFarmOnBoot()
+  useBackgroundCatchUp()
+  useSaidaAoEncerrarSessao()
+  useSyncOnUnload()
+  useViewportTracking()
+  useCommitOnLevelUp()
+  useTutorialInicial(hasStarter)
+  useAvisoDeEstoqueNoChat()
+
+  return (
+    <div
+      // `.hud-root` define o font-size fluido do qual TODO tamanho em `em` da
+      // interface deriva; `--hud-scale` e a preferencia do jogador (0.8–1.4),
+      // que multiplica esse ajuste em vez de substitui-lo.
+      className="hud-root relative h-svh w-svw overflow-hidden bg-background text-foreground"
+      style={{ '--hud-scale': hudScale } as React.CSSProperties}
+    >
+      <GameCanvas />
+
+      {/* Camada de HUD. Ela FALTAVA: canvas, HUD, menus e StartScreen eram irmaos
+          em fluxo normal, entao tudo depois do canvas (que ocupa a tela inteira)
+          era empurrado pra baixo e recortado pelo `overflow-hidden` do pai — o
+          jogador via so o cenario, sem menu nenhum. O sinal de que a camada
+          existia no desenho original: todo componente de HUD ja traz
+          `pointer-events-auto`, que so faz sentido dentro de um pai
+          `pointer-events-none`.
+
+          `pointer-events-none` no container e obrigatorio: sem ele esta camada
+          cobriria o canvas inteiro e o clique na Enfermeira (cura no Hospital)
+          pararia de funcionar. Cada filho reativa o clique por conta propria. */}
+      <div className="pointer-events-none absolute inset-0">
+        {hasStarter && (
+          <>
+            <HudLayer />
+            <ScreenOverlay />
+            <ReviveCountdownModal />
+            <DefeatModal />
+            <LanceCountdownModal />
+            <LanceVictoryReturn />
+          </>
+        )}
+
+        {/* Escolha do inicial: sobreposicao de tela cheia. Antes entrava no fluxo
+            normal e era medida em y=908 — exatamente uma altura de tela abaixo do
+            topo, ou seja, fora da area visivel. */}
+        {!hasStarter && (
+          <div className="pointer-events-auto absolute inset-0 z-40 overflow-y-auto">
+            <StartScreen />
+          </div>
+        )}
+      </div>
+
+      <ToastStack />
+      <HuntAnalyzer />
+      <PokeProfileModal />
+      <PerfilTreinador />
+      <TutorialModal />
+      <ConfirmDialog />
+      <LevelUpSplash />
+      {summary && <OfflineFarmModal summary={summary} onClose={dismiss} />}
+    </div>
+  )
+}

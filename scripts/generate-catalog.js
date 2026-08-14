@@ -39,6 +39,15 @@
 const fs = require('fs');
 const path = require('path');
 const sync = require('./sync-planilha.js');
+const { bloqueiaCatalogoAntigo } = require('./lib/guarda-catalogo-gen2.js');
+
+bloqueiaCatalogoAntigo(
+  'npm run catalog:gerar',
+  'As 8 tabelas de catalogo do Postgres ainda guardam o dado de Gen2: a migracao\n' +
+  'para Pokemon Ultra Sun nao escreve no Supabase (decisao explicita do usuario).\n' +
+  'Rodar isto sobrescreveria stats, movesets, tipos e formulas com os da geracao\n' +
+  'antiga, e sem o tipo Fada.'
+);
 
 const ROOT = path.join(__dirname, '..');
 
