@@ -13,6 +13,20 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '6.1',
+    date: '2026-08-14',
+    title: 'Hunts em salas: 12 biomas, 33 sub-biomas e o Campeao Lance como portao',
+    highlights: [
+      'CADA HUNT VIROU 10 SALAS. Voce limpa uma sala (12 abates), avanca pra proxima, e cada sala e um SUB-BIOMA sorteado — com lista de Pokemon e loot proprios. Fechar as 10 reinicia o ciclo, entao a caçada nunca "acaba": ela continua rendendo enquanto voce estiver fora.',
+      'AS HUNTS FORAM REFEITAS. Eram 69 separadas por regiao (Johto/Kanto); agora sao 12 biomas x 3 faixas de nivel (Lv1-30, 31-60, 61-90). Os 33 sub-biomas — Planicie, Mar Aberto, Leito Oceanico, Vulcao, Cemiterio, Ruinas, Usina, Gruta Feerica... — vieram das listas do PokeRogue cruzadas com o nosso elenco. Nenhuma das 209 especies selvagens ficou sem lugar.',
+      'A SEPARACAO POR REGIAO ACABOU. As listas por bioma misturam Johto e Kanto, e recortar por regiao esvaziaria 12 dos 33 sub-biomas (Praia e Dojo nao tem NENHUM Pokemon de Johto; Floresta Nevada, nenhum de Kanto). O filtro por regiao continua existindo na Pokedex, onde ele fala da especie e nao do lugar.',
+      'O CAMPEAO LANCE VIROU PORTAO DE VERDADE. Derrota-lo libera a Faixa III (Lv61-90) e o Modo Pesadelo inteiro, com as 11 caçadas de lendario dentro. O Modo Pesadelo nascia aberto desde sempre; agora e conteudo de fim de jogo.',
+      'BUG CRITICO CORRIGIDO: a luta contra o Lance era INGANHAVEL. O servidor recomecava a sequencia no primeiro Pokemon dele a cada ~30 segundos, entao so daria pra vencer matando os 6 em menos de meio minuto. Ninguem tinha notado porque ele nao trancava nada — e ele acabou de virar o portao de metade do jogo.',
+      'NIVEL COERENTE COM O ESTAGIO. Uma linha evolutiva agora aparece no estagio certo pro nivel da faixa: Caterpie ate Lv6, Metapod ate Lv9, Butterfree dali pra frente. Antes dava pra encontrar Caterpie de nivel 60.',
+      'O cartao da hunt mostra os sub-biomas dela e a chance de cada um cair, e a porcentagem de cada Pokemon ja considera esse sorteio. O HUD mostra em que sala voce esta e quanto falta pra limpar.',
+    ],
+  },
+  {
     version: '5.8',
     date: '2026-08-09',
     title: 'Progresso voltando atras e "falha ao falar com o banco" ao recarregar',

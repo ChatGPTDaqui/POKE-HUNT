@@ -35,7 +35,7 @@
 //     mais bem fundamentado do projeto destruido em silencio.
 import { SPECIES } from './pokes'
 import { SUB_BIOMA_ESPECIES } from './generated/subBiomas.generated'
-import { ENCOUNTERS_DATA } from './generated/enemies.generated'
+import { SPAWN_WEIGHT_BY_SPECIES } from './generated/spawnTiers.generated'
 import { buildNightmareMirror, BOSS_MAPS_DATA, BOSS_ENCOUNTERS_DATA } from './nightmareMaps'
 import { BIOMAS, FAIXAS, GEOMETRIA, LOOT, huntId, type BiomaDef, type FaixaDef } from './biomas'
 import { zonaMinimaDaEspecie } from './spawnStrength'
@@ -57,12 +57,11 @@ const STARTER_LEVEL_WEIGHTS = [
 // ---------------------------------------------------------------------------
 // Peso de spawn
 // ---------------------------------------------------------------------------
-// Tier real do Gen1/Gen2 (scripts/derive-spawn-tiers.js), que ja viaja em todo
-// encontro gerado e e o MESMO pra especie em qualquer hunt.
-const WEIGHT_BY_SPECIES: Record<string, number> = {}
-for (const enc of Object.values(ENCOUNTERS_DATA)) WEIGHT_BY_SPECIES[enc.speciesId] = enc.weight
-// Especie que nao spawnava em lugar nenhum antes desta leva. 10 = "incomum",
-// o meio da escala de 5 tiers.
+// Tier real do Gen1/Gen2 (scripts/derive-spawn-tiers.js), o MESMO pra especie
+// em qualquer hunt. Vem do arquivo gerado proprio, e nao raspado dos encontros
+// da estrutura de hunts antiga: aquela dependencia era silenciosa — parar de
+// emitir o arquivo velho nao daria erro, so zeraria todos os pesos.
+// Especie sem tier cai em 10 = "incomum", o meio da escala de 5 tiers.
 const DEFAULT_WEIGHT = 10
 
 // ---------------------------------------------------------------------------
@@ -182,7 +181,7 @@ function addEncounter(
       // Mesmos valores fixos de todo encontro gerado.
       aggroRadius: 175,
       wanderRadius: 60,
-      weight: WEIGHT_BY_SPECIES[trecho.speciesId] ?? DEFAULT_WEIGHT,
+      weight: SPAWN_WEIGHT_BY_SPECIES[trecho.speciesId] ?? DEFAULT_WEIGHT,
       ...(levelWeights ? { levelWeights } : {}),
     }
   }

@@ -5,6 +5,7 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useBreakpoints } from '@/stores/uiStore'
 import { RatesChip } from './RatesCard'
+import { SalaChip } from './SalaChip'
 
 const TOTAL_SPECIES = Object.keys(SPECIES).length
 
@@ -30,6 +31,8 @@ export function CenterBlock() {
           Pokedex <b className="font-medium text-n100">{registradas}/{TOTAL_SPECIES}</b>
         </span>
       </div>
+
+      <SalaChip />
 
       {narrow && <RatesChip />}
     </div>

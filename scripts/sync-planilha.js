@@ -810,8 +810,19 @@ function syncMapsAndEncounters(hunts, spawnWeights) {
     console.log(`  ${hunt.name} (méd. ${Math.round(hunt.avgLevel * 10) / 10}, niv ${hunt.minLevel}-${hunt.maxLevel}): ${Object.keys(hunt.speciesLevels).join(', ')}`);
   }
 
-  emitData('maps', 'MAPS_DATA', 'MapsData', toJsLiteral(mapsData));
-  emitData('enemies', 'ENCOUNTERS_DATA', 'EncountersData', toJsLiteral(encountersData));
+  // AS HUNTS NAO SAEM MAIS DAQUI. Elas sao montadas em runtime por
+  // src/data/huntSpawnOverrides.ts a partir de src/data/biomas.ts (12 biomas x
+  // 3 faixas de nivel) e das pools de sub-bioma geradas por
+  // scripts/gerar-subbiomas.mjs. `maps.generated.ts` e `enemies.generated.ts`
+  // foram apagados; emiti-los de novo criaria dois arquivos que ninguem le e
+  // que pareceriam a fonte da verdade pra quem chegasse depois.
+  //
+  // O que ainda depende deste bloco: `hunts` alimenta `syncSpeciesAndMoves`
+  // (que decide o ROSTER sincronizado) e o relatorio de cobertura. Por isso a
+  // curadoria continua rodando — so a emissao saiu.
+  //
+  // O peso de spawn por especie, que era raspado destes encontros, virou
+  // arquivo proprio: `npm run tiers:gerar`.
   return { mapsData, encountersData };
 }
 

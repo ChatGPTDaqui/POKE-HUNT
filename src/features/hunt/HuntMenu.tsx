@@ -10,7 +10,8 @@ import { pedirAcao } from '@/data/remote/autoridade'
 // multiplicado) — so o unlockMap do engine exige essa forma, por isso a chamada
 // de getMap() abaixo em vez de repassar o objeto cru.
 import { MAPS, getMap } from '@/data/maps'
-import { FAIXAS } from '@/data/biomas'
+import { FAIXAS, SALAS_POR_HUNT, SUB_BIOMA_POR_CHAVE, type SubBiomaDef } from '@/data/biomas'
+import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import type { HuntMapDef } from '@/data/huntTypes'
 import { getEncounter } from '@/data/enemies'
 import { SPECIES, type Species } from '@/data/pokes'
@@ -52,20 +53,56 @@ export interface HuntOdds {
   dominantTypes: [ElementType, number][]
 }
 
-// O peso de cada encontro vem do TIER de spawn da especie, derivado da chance
-// real de encontro selvagem do Gen1/Gen2 (ver scripts/derive-spawn-tiers.js e a
-// migration `spawn_tier_por_especie`; `spawnEnemyAt` spawna proporcionalmente a
-// ele). Antes era `species.catchRate` — taxa de CAPTURA, que nao tem relacao com
-// frequencia de APARICAO. A "dominancia" de um tipo e a soma das odds de toda
-// especie que o carrega.
+/** As salas desta hunt, com o pool de cada uma. Vazio se a hunt nao tem salas. */
+function salasDaHunt(mapId: string): { sub: SubBiomaDef; pool: string[] }[] {
+  const porSala = POOL_POR_SALA[mapId]
+  if (!porSala) return []
+  return Object.entries(porSala)
+    .map(([chave, pool]) => ({ sub: SUB_BIOMA_POR_CHAVE[chave]?.sub, pool }))
+    .filter((x): x is { sub: SubBiomaDef; pool: string[] } => x.sub != null && x.pool.length > 0)
+}
+
+/**
+ * Chance de cada encontro na hunt.
+ *
+ * O peso de cada encontro vem do TIER de spawn da especie, derivado da chance
+ * real de encontro selvagem do Gen1/Gen2 (ver scripts/derive-spawn-tiers.js).
+ * A "dominancia" de um tipo e a soma das odds de toda especie que o carrega.
+ *
+ * Com SALAS, a chance nao e mais `peso / soma do pool`: o jogador so encontra o
+ * pool da sala em que esta, entao a chance real e
+ * `P(sala) x P(especie | sala)`, somada sobre as salas em que a especie
+ * aparece. Ignorar isso mostraria numeros que nao acontecem — uma especie que
+ * so vive no sub-bioma raro pareceria tao provavel quanto uma do corriqueiro.
+ *
+ * Hunt sem salas (inicial, BOSS, Lance) cai na conta simples de sempre.
+ */
 export function huntOdds(map: HuntMapDef): HuntOdds {
   const encounters = map.enemyPool.map(getEncounter).filter((e) => e != null)
-  const totalWeight = encounters.reduce((sum, enc) => sum + enc.weight, 0)
+  const pesoPorEncontro = new Map<string, number>()
+
+  const salas = salasDaHunt(map.id)
+  if (salas.length > 0) {
+    const somaPesoDeSala = salas.reduce((s, x) => s + x.sub.peso, 0)
+    for (const { sub, pool } of salas) {
+      const somaDaSala = pool.reduce((s, id) => s + (getEncounter(id)?.weight ?? 0), 0)
+      if (somaDaSala <= 0) continue
+      const pSala = sub.peso / somaPesoDeSala
+      for (const id of pool) {
+        const peso = getEncounter(id)?.weight ?? 0
+        pesoPorEncontro.set(id, (pesoPorEncontro.get(id) ?? 0) + pSala * (peso / somaDaSala))
+      }
+    }
+  } else {
+    const total = encounters.reduce((sum, enc) => sum + enc.weight, 0)
+    for (const enc of encounters) pesoPorEncontro.set(enc.id, total > 0 ? enc.weight / total : 0)
+  }
+
   // A chave e o id do ENCONTRO, nao o da especie: a hunt do Campeao Lance tem
   // tres Dragonites (composicao real dele), e keyar por especie fazia o React
   // reclamar de chave duplicada e arriscar omitir linhas da lista.
   const species = encounters
-    .map((enc) => ({ id: enc.id, species: SPECIES[enc.speciesId], pct: (enc.weight / totalWeight) * 100 }))
+    .map((enc) => ({ id: enc.id, species: SPECIES[enc.speciesId], pct: (pesoPorEncontro.get(enc.id) ?? 0) * 100 }))
     .filter((entry) => entry.species != null)
     .sort((a, b) => b.pct - a.pct)
 
@@ -84,6 +121,38 @@ export function huntOdds(map: HuntMapDef): HuntOdds {
 function huntSwatchColor(map: HuntMapDef): string {
   const { dominantTypes } = huntOdds(map)
   return dominantTypes.length > 0 ? colorForType(dominantTypes[0][0]) : map.bg.primary
+}
+
+// As salas da hunt e a chance de cada uma cair. O jogador precisa disso pra
+// saber se vale entrar caçando um sub-bioma especifico — e a chance de sala e
+// o unico numero do sistema que ele nao consegue deduzir de nada na tela.
+function SalasDaHunt({ mapId }: { mapId: string }) {
+  const salas = salasDaHunt(mapId)
+  if (salas.length === 0) return null
+  const total = salas.reduce((s, x) => s + x.sub.peso, 0)
+
+  return (
+    <div className="flex flex-col gap-[.25em] rounded-[.5em] bg-n800/50 p-[.45em]">
+      <div className="text-[.75em] text-n500">
+        {SALAS_POR_HUNT} salas · cada uma sorteia um sub-bioma
+      </div>
+      <div className="flex flex-wrap gap-[.35em]">
+        {salas
+          .slice()
+          .sort((a, b) => b.sub.peso - a.sub.peso)
+          .map(({ sub, pool }) => (
+            <span
+              key={sub.chave}
+              className="rounded-[.35em] border border-n700 px-[.45em] py-[.2em] text-[.72em]"
+              title={`${pool.length} especies · loot ${sub.loot}`}
+            >
+              {sub.nome}{' '}
+              <b className="tabular-nums font-medium text-n300">{((sub.peso / total) * 100).toFixed(0)}%</b>
+            </span>
+          ))}
+      </div>
+    </div>
+  )
 }
 
 function SpeciesRow({ sp, pct }: { sp: Species; pct: number }) {
@@ -300,7 +369,14 @@ export function HuntMenu() {
 
             {expanded && (
               <div className="flex flex-col gap-[.4em] border-t border-n800 p-[.55em]">
-                <div className="text-[.75em] text-n500">Pokemons de {map.name}</div>
+                <SalasDaHunt mapId={map.id} />
+                <div className="text-[.75em] text-n500">
+                  Pokemons de {map.name}
+                  {/* A % ja e a real: P(sala) x P(especie | sala). Sem dizer
+                      isso, o jogador soma as porcentagens do card com as da
+                      sala em que esta e nao fecham. */}
+                  <span className="text-n600"> — chance considerando o sorteio de sala</span>
+                </div>
                 {odds.species.map(({ id, species: sp, pct }) => (
                   <SpeciesRow key={id} sp={sp} pct={pct} />
                 ))}

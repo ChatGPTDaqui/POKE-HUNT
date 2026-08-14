@@ -15,6 +15,7 @@ import { BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, huntId } from './biom
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
 import { NON_WILD_SPECIES } from './regions'
 import { baseStatTotal, especieForte, zonaMinimaDaEspecie } from './spawnStrength'
+import { huntOdds } from '@/features/hunt/HuntMenu'
 
 const BASE_STARTERS = ['charmander', 'squirtle', 'bulbasaur']
 
@@ -304,6 +305,17 @@ describe('pesos de spawn', () => {
       }
     }
     expect(erros).toEqual([])
+  })
+
+  // O que o cartao da hunt mostra tem que ser uma distribuicao de verdade. Com
+  // salas, a chance e P(sala) x P(especie | sala) somada sobre as salas — uma
+  // conta facil de quebrar sem perceber (esquecer de normalizar por sala faz a
+  // soma passar de 100% e ninguem ve).
+  it('as chances mostradas em cada hunt somam 100%', () => {
+    for (const map of Object.values(MAPS)) {
+      const soma = huntOdds(map).species.reduce((s, e) => s + e.pct, 0)
+      expect(soma, map.id).toBeCloseTo(100, 6)
+    }
   })
 
   it('o enemyPool da hunt e exatamente a uniao dos pools de sala', () => {

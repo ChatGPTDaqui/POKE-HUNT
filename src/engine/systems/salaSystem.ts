@@ -27,6 +27,7 @@ import { weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
 import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, LOOT, type SubBiomaDef } from '@/data/biomas'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
+import { getEncounter } from '@/data/enemies'
 import type { MapItemDrop } from '@/data/generated/types'
 import type { SalaAtiva, WorldState } from '../types'
 
@@ -69,11 +70,65 @@ export function novaSala(rng: Rng, mapId: string, indice: number, ciclos: number
   return { indice, chave, abates: 0, ciclos }
 }
 
+/**
+ * A janela de nivel da sala: a hunt AFUNDA conforme as salas sao limpas.
+ *
+ * BUG DE BALANCEAMENTO QUE ISTO CORRIGE, medido no motor headless: uma faixa
+ * cobre 30 niveis, entao sem janela a primeira sala da "Mata I" (Lv1-30) ja
+ * podia jogar um Butterfree Lv30 contra um POKE recem-saido do Hospital. Um
+ * Charmander Lv25 morreu em 4 abates numa simulacao de 30 minutos, gastando 21
+ * pocoes no caminho. As zonas antigas tinham 10 niveis e nao expunham isso.
+ *
+ * A sala 1 fica na base da faixa e a 10 no topo — o que da a mecanica de salas
+ * um significado mecanico (a hunt fica mais dura conforme voce avanca) alem da
+ * variedade de sub-bioma.
+ */
+export function janelaDaSala(faixa: [number, number], indice: number): [number, number] {
+  const [lo, hi] = faixa
+  const largura = hi - lo
+  if (largura <= 0) return [lo, hi]
+  const passo = largura / SALAS_POR_HUNT
+  const inicio = Math.round(lo + passo * indice)
+  const fim = Math.round(lo + passo * (indice + 1))
+  // A primeira sala inclui o piso da faixa; as outras comecam onde a anterior
+  // acabou. `Math.max(inicio, fim)` cobre faixa curta demais pra 10 degraus.
+  return [Math.max(lo, inicio), Math.max(Math.max(lo, inicio), Math.min(hi, fim))]
+}
+
 /** Encontros que podem nascer agora: os da sala, ou os da hunt inteira. */
 export function poolAtivo(mapId: string, sala: SalaAtiva | null, fallback: string[]): string[] {
   if (!sala) return fallback
   const pool = POOL_POR_SALA[mapId]?.[sala.chave]
   return pool && pool.length > 0 ? pool : fallback
+}
+
+export interface ContextoDeSpawn {
+  pool: string[]
+  janela?: [number, number]
+}
+
+/**
+ * O que pode nascer AGORA: o pool da sala, recortado pela janela de nivel dela.
+ *
+ * O recorte tem fallback: se nenhum encontro da sala alcanca a janela (a sala 1
+ * de uma faixa cujo sub-bioma so tem forma evoluida, por exemplo), vale o pool
+ * inteiro da sala. Sala que nao spawna nada e pior que sala fora do nivel — o
+ * jogador ficaria num mapa vazio sem nenhum erro na tela.
+ */
+export function contextoDeSpawn(
+  mapId: string,
+  faixa: [number, number],
+  sala: SalaAtiva | null,
+  fallback: string[],
+): ContextoDeSpawn {
+  const pool = poolAtivo(mapId, sala, fallback)
+  if (!sala) return { pool }
+  const janela = janelaDaSala(faixa, sala.indice)
+  const naJanela = pool.filter((id) => {
+    const enc = getEncounter(id)
+    return enc != null && enc.minLevel <= janela[1] && enc.maxLevel >= janela[0]
+  })
+  return { pool: naJanela.length > 0 ? naJanela : pool, janela }
 }
 
 /** Loot que pode cair agora: o do sub-bioma, ou o da hunt inteira. */
@@ -86,12 +141,6 @@ export function lootAtivo(sala: SalaAtiva | null, fallback: MapItemDrop[]): MapI
 export function nomeDaSala(sala: SalaAtiva | null): string | null {
   if (!sala) return null
   return SUB_BIOMA_POR_CHAVE[sala.chave]?.sub.nome ?? sala.chave
-}
-
-export function nomeDoBioma(mapId: string): string | null {
-  const primeira = Object.keys(POOL_POR_SALA[mapId] ?? {})[0]
-  const bioma = primeira ? SUB_BIOMA_POR_CHAVE[primeira]?.bioma : null
-  return bioma?.nome ?? null
 }
 
 export interface AvancoDeSala {

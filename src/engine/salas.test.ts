@@ -11,7 +11,7 @@ import { describe, expect, it, beforeEach } from 'vitest'
 import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
 import { buildMapWorld, stepWorld } from './simulation'
-import { poolAtivo, registrarAbate, temSalas } from './systems/salaSystem'
+import { janelaDaSala, poolAtivo, registrarAbate, temSalas } from './systems/salaSystem'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { ABATES_POR_SALA, SALAS_POR_HUNT } from '@/data/biomas'
 import { ENCOUNTERS } from '@/data/huntSpawnOverrides'
@@ -134,5 +134,44 @@ describe('salas', () => {
   it('sem sala, o pool ativo e o da hunt inteira', () => {
     const inteiro = ['a', 'b']
     expect(poolAtivo(HUNT, null, inteiro)).toBe(inteiro)
+  })
+
+  // Uma faixa cobre 30 niveis. Sem a janela, a PRIMEIRA sala ja podia jogar um
+  // POKE Lv30 contra quem acabou de sair do Hospital — medido no motor
+  // headless: Charmander Lv25 morreu em 4 abates em 30 minutos de "Mata I", e
+  // com a janela fez 114 abates e chegou na sala 10.
+  it('a janela de nivel sobe com a sala e cobre a faixa inteira sem buraco', () => {
+    const faixa: [number, number] = [1, 30]
+    const janelas = Array.from({ length: SALAS_POR_HUNT }, (_, i) => janelaDaSala(faixa, i))
+
+    expect(janelas[0][0]).toBe(1)
+    expect(janelas[SALAS_POR_HUNT - 1][1]).toBe(30)
+    for (const [lo, hi] of janelas) {
+      expect(lo).toBeGreaterThanOrEqual(1)
+      expect(hi).toBeLessThanOrEqual(30)
+      expect(hi).toBeGreaterThanOrEqual(lo)
+    }
+    // Contigua: a sala seguinte nunca comeca depois do fim da anterior, senao
+    // haveria nivel nenhuma sala alcanca.
+    for (let i = 1; i < janelas.length; i++) {
+      expect(janelas[i][0], `buraco entre a sala ${i} e a ${i + 1}`).toBeLessThanOrEqual(janelas[i - 1][1] + 1)
+    }
+    // E monotonica: a hunt afunda, nunca volta.
+    for (let i = 1; i < janelas.length; i++) {
+      expect(janelas[i][0]).toBeGreaterThanOrEqual(janelas[i - 1][0])
+    }
+  })
+
+  it('a sala so faz nascer inimigo dentro da janela dela', () => {
+    const poke = createPokeInstance(createRng(9), 'charmander', 20)
+    const world = buildMapWorld(
+      HUNT, poke,
+      { rng: createRng(9), counters: { entity: 1, effect: 1, pendingHit: 1 } },
+      { sala: { indice: 0, chave: 'tall-grass', abates: 0, ciclos: 0 } },
+    )
+    const [, teto] = janelaDaSala(world.mapDef!.levelRange, 0)
+    for (const inimigo of world.enemies) {
+      expect(inimigo.poke.level, `${inimigo.poke.speciesId} acima da janela da sala 1`).toBeLessThanOrEqual(teto)
+    }
   })
 })

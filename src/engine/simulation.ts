@@ -40,7 +40,7 @@ import { updateAutoHeal, maybeAutoCatch } from './systems/autoSystem'
 import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } from './systems/progressionSystem'
 import { awardKillLoot } from './systems/economySystem'
 import { recordKill } from './systems/statsTracker'
-import { lootAtivo, novaSala, nomeDaSala, poolAtivo, registrarAbate, temSalas } from './systems/salaSystem'
+import { contextoDeSpawn, lootAtivo, novaSala, nomeDaSala, registrarAbate, temSalas } from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
 
@@ -125,7 +125,7 @@ function randomSpawnPoint(rng: Rng, mapDef: MapDef): Point {
   return { x, y }
 }
 
-function spawnEnemyAt(world: SequenciaDeSorteio, mapDef: MapDef, pool: string[]): EnemyEntity {
+function spawnEnemyAt(world: SequenciaDeSorteio, mapDef: MapDef, pool: string[], janela?: [number, number]): EnemyEntity {
   const { rng, counters } = world
   const point = randomSpawnPoint(rng, mapDef)
   // Ponderado pelo TIER de spawn da especie, derivado da chance real de
@@ -163,9 +163,17 @@ function spawnEnemyAt(world: SequenciaDeSorteio, mapDef: MapDef, pool: string[])
   if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
   // `levelWeights` (ver data/huntTypes.ts) troca o sorteio uniforme por um
   // ponderado — hoje so a hunt inicial usa, pra sair 80% Lv1 / 20% Lv2.
+  //
+  // `janela` e a faixa de nivel da SALA atual: a hunt afunda conforme as salas
+  // sao limpas (ver salaSystem#janelaDaSala). Sem ela, a primeira sala de uma
+  // faixa de 30 niveis ja podia jogar um POKE Lv30 contra quem acabou de sair
+  // do Hospital.
+  const [jmin, jmax] = janela ?? [encounter.minLevel, encounter.maxLevel]
+  const lo = Math.max(encounter.minLevel, Math.min(jmin, encounter.maxLevel))
+  const hi = Math.min(encounter.maxLevel, Math.max(jmax, encounter.minLevel))
   const level = encounter.levelWeights?.length
     ? weightedPick(rng, encounter.levelWeights, (entry) => entry.weight).level
-    : randInt(rng, encounter.minLevel, encounter.maxLevel)
+    : randInt(rng, Math.min(lo, hi), Math.max(lo, hi))
   const poke = createPokeInstance(rng, encounter.speciesId, level)
   return createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId })
 }
@@ -244,7 +252,7 @@ export function buildMapWorld(
   const sala = temSalas(mapId)
     ? (progresso?.sala ?? novaSala(base.rng, mapId, 0, 0))
     : null
-  const pool = poolAtivo(mapId, sala, mapDef.enemyPool)
+  const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool)
 
   const enemies: EnemyEntity[] = []
   if (!countdownRemaining && !sequenceCleared) {
@@ -252,7 +260,7 @@ export function buildMapWorld(
       enemies.push(spawnSequenceEnemy(base, mapDef, sequenceIndex))
     } else {
       for (let i = 0; i < mapDef.maxEnemies; i++) {
-        enemies.push(spawnEnemyAt(base, mapDef, pool))
+        enemies.push(spawnEnemyAt(base, mapDef, pool, janela))
       }
     }
   }
@@ -407,8 +415,8 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       world.countdownRemaining = null
       if (world.mapDef.sequence) world.enemies.push(spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex))
       else {
-        const pool = poolAtivo(world.mapDef.id, world.sala, world.mapDef.enemyPool)
-        for (let i = 0; i < world.mapDef.maxEnemies; i++) world.enemies.push(spawnEnemyAt(world, world.mapDef, pool))
+        const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
+        for (let i = 0; i < world.mapDef.maxEnemies; i++) world.enemies.push(spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela))
       }
     }
     if (!silent) updateAnimations(world, dt)
@@ -523,7 +531,8 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn) {
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
-      world.enemies.push(spawnEnemyAt(world, world.mapDef, poolAtivo(world.mapDef.id, world.sala, world.mapDef.enemyPool)))
+      const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
+      world.enemies.push(spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela))
       world.respawnTimer = world.mapDef.respawnDelay
     }
   } else if (world.mapDef.sequence && aliveCount === 0 && world.sequenceIndex < world.mapDef.sequence.length - 1) {
