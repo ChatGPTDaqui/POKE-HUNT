@@ -671,6 +671,30 @@ function syncSpeciesAndMoves(workbook, hunts) {
             // uma lista de chaves em data/abilities.ts. O catalogo do Ultra Sun
             // traz o alvo real de cada golpe.
             target: golpeRow['Alvo'] === 'aoe' ? 'aoe' : 'single',
+            // Campos de EFEITO (Leva B). A planilha de Gen2 nao tinha nenhum
+            // deles: golpe de status era so "fisico com 0 de poder", e efeito
+            // secundario (queimar, paralisar, drenar) nao existia como dado.
+            //
+            // Emitidos so quando NAO sao o valor neutro — sem isso, 486 golpes
+            // carregariam 8 campos zerados cada um, inflando o bundle do
+            // cliente com dado que nao diz nada. Quem le trata ausente como
+            // "nao tem efeito" (ver data/abilities.ts).
+            ...(golpeRow['Status'] ? {
+              status: golpeRow['Status'],
+              statusChance: golpeRow['Chance de Status'],
+            } : {}),
+            ...((golpeRow['Mudancas de Stat'] || []).length ? {
+              statChanges: golpeRow['Mudancas de Stat'],
+              statChance: golpeRow['Chance de Stat'],
+            } : {}),
+            ...(golpeRow['Chance de Flinch'] ? { flinchChance: golpeRow['Chance de Flinch'] } : {}),
+            ...(golpeRow['Estagios de Critico'] ? { critStages: golpeRow['Estagios de Critico'] } : {}),
+            ...(golpeRow['Dreno %'] ? { drainPercent: golpeRow['Dreno %'] } : {}),
+            ...(golpeRow['Cura %'] ? { healPercent: golpeRow['Cura %'] } : {}),
+            // Precisao SEMPRE sai, mesmo em 100: e o unico jeito de distinguir
+            // "golpe que sempre acerta" de "campo que ninguem preencheu", e ela
+            // e o que segura Horn Drill e Fissure (KO instantaneo com 30%).
+            accuracy: golpeRow['Precisão'] != null ? golpeRow['Precisão'] : 100,
           };
         }
       }
@@ -916,9 +940,41 @@ function main() {
 // `require(...)`, apenas expoe as funcoes — ver a nota de SKIP_WRITE acima.
 if (require.main === module) main();
 
+// Regras de status (scripts/usum/status.json) -> src/data/generated/status.generated.ts.
+//
+// Passa pelo mesmo emissor que o resto do catalogo em vez de o cliente ler o
+// JSON direto: `emitData` e quem poe o cabecalho de "nao edite a mao", escreve
+// o fallback vanilla e da a assinatura de tipo. Um `import ... from '.json'`
+// no cliente pularia os tres.
+//
+// As chaves `_comentario`/`_nota`/`_imunidade`/`fonte` do JSON sao a
+// PROCEDENCIA de cada numero (a citacao da Bulbapedia de onde ele saiu) e ficam
+// FORA do bundle: elas existem pra quem for mexer na regra, nao pra quem roda
+// o jogo.
+function syncStatus(tabela) {
+  console.log('Status:');
+  // `chave` e `nome` saem porque ja viram a CHAVE do mapa e a entrada de
+  // `nomes`; repetir os dois dentro do objeto so engorda o bundle e faria a
+  // checagem de propriedade extra do TypeScript reclamar.
+  const limpar = (o) => Object.fromEntries(
+    Object.entries(o).filter(([k]) => !k.startsWith('_') && k !== 'fonte' && k !== 'nome' && k !== 'chave')
+  );
+  const dados = {
+    naoVolateis: Object.fromEntries(tabela.naoVolateis.map((s) => [s.chave, limpar(s)])),
+    volateis: Object.fromEntries(tabela.volateis.map((s) => [s.chave, limpar(s)])),
+    nomes: Object.fromEntries([...tabela.naoVolateis, ...tabela.volateis].map((s) => [s.chave, s.nome])),
+    golpesDePo: limpar(tabela.golpesDePo),
+    reaplicacao: limpar(tabela.reaplicacao),
+  };
+  emitData('status', 'STATUS_RULES', 'StatusRules', toJsLiteral(dados));
+  console.log(`  ${tabela.naoVolateis.length} nao-volateis, ${tabela.volateis.length} volateis`);
+  return dados;
+}
+
 module.exports = {
   XLSX_PATH,
   readWorkbook,
+  syncStatus,
   syncFormulas,
   syncTypeChart,
   syncItemsFull,

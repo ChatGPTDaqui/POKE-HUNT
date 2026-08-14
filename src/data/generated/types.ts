@@ -33,6 +33,34 @@ export interface ItemDataEntry {
 // cura (Full Heal). O resto das condicoes volateis (flinch, trap, seed) nao tem
 // item e nao aparece aqui.
 export type StatusCondition = 'poison' | 'burn' | 'paralysis' | 'sleep' | 'freeze' | 'confusion'
+
+// Regras dos status, geradas de scripts/usum/status.json (Gen VII, conferidas
+// na Bulbapedia — a citacao de cada numero fica no JSON, fora do bundle).
+//
+// Campo ausente = aquele status nao tem aquele efeito. `duracaoEmTurnos: null`
+// = nao passa sozinho: so sai por item ou pelo Centro Pokemon, exatamente como
+// nos jogos.
+export interface StatusRule {
+  duracaoEmTurnos: [number, number] | null
+  imunidadesPorTipo: ElementType[]
+  danoPorTurnoFracaoDoMaximo?: number
+  multiplicadorDeDanoFisico?: number
+  multiplicadorDeVelocidade?: number
+  chanceDePerderOTurno?: number
+  chanceDeDescongelarPorTurno?: number
+  bloqueiaAcao?: boolean
+  descongelaComTipo?: ElementType
+  chanceDeSeAtacar?: number
+  poderDoAutoDano?: number
+}
+
+export interface StatusRules {
+  naoVolateis: Record<string, StatusRule>
+  volateis: Record<string, StatusRule>
+  nomes: Record<string, string>
+  golpesDePo: { imunesPorTipo: ElementType[]; golpes: string[] }
+  reaplicacao: { turnosDeImunidade: number }
+}
 export type ItemsData = Record<string, ItemDataEntry>
 
 export interface AbilityRef {
@@ -85,6 +113,13 @@ export type SpeciesData = Record<string, SpeciesDataEntry>
 // "fisico com 0 de poder".
 export type AbilityCategory = 'physical' | 'special' | 'status'
 
+// Uma mudanca de estagio de atributo. `estagios` vai de -6 a +6, como nos
+// jogos; positivo sobe, negativo desce.
+export interface StatChange {
+  stat: 'atkFis' | 'atkEsp' | 'def' | 'defEsp' | 'speed'
+  estagios: number
+}
+
 export interface AbilityDataEntry {
   id: string
   name: string
@@ -92,6 +127,24 @@ export interface AbilityDataEntry {
   category: AbilityCategory
   power: number
   pp: number
+  // Precisao real do golpe (1-100). Sempre presente: e o que separa "sempre
+  // acerta" de "campo nao preenchido", e e ela que segura Horn Drill/Fissure,
+  // que causam KO instantaneo com 30% de precisao.
+  accuracy: number
+  // --- Efeitos. Ausente = o golpe nao tem aquele efeito. -------------------
+  // Status que o golpe causa e a chance disso (100 para golpe de status puro).
+  status?: StatusCondition
+  statusChance?: number
+  // Mudancas de estagio de atributo e a chance (100 para golpe que so faz isso).
+  statChanges?: StatChange[]
+  statChance?: number
+  flinchChance?: number
+  // Estagios de critico ACIMA do normal, nao porcentagem (Slash tem 1).
+  critStages?: number
+  // % do dano causado que volta como cura (positivo) ou recuo (negativo).
+  drainPercent?: number
+  // % do HP maximo curada por golpe de cura pura (Recover = 50).
+  healPercent?: number
   // 'aoe' = o golpe acerta mais de um Pokemon de uma vez nos jogos originais
   // (alvo `all-opponents`/`all-other-pokemon`/`all`). Substituiu uma lista de 6
   // chaves escrita a mao em data/abilities.ts, que ja tinha se desatualizado em

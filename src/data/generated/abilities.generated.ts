@@ -12,7 +12,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 40,
-    "target": "aoe"
+    "target": "aoe",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "scratch": {
     "id": "scratch",
@@ -21,7 +29,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 40,
     "pp": 35,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "ember": {
     "id": "ember",
@@ -30,7 +39,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 40,
     "pp": 25,
-    "target": "single"
+    "target": "single",
+    "status": "burn",
+    "statusChance": 10,
+    "accuracy": 100
   },
   "smokescreen": {
     "id": "smokescreen",
@@ -39,7 +51,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "dragon_rage": {
     "id": "dragon_rage",
@@ -48,7 +61,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "scary_face": {
     "id": "scary_face",
@@ -57,7 +71,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": -2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "fire_fang": {
     "id": "fire_fang",
@@ -66,7 +88,11 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 65,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "burn",
+    "statusChance": 10,
+    "flinchChance": 10,
+    "accuracy": 95
   },
   "flame_burst": {
     "id": "flame_burst",
@@ -75,7 +101,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 70,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "slash": {
     "id": "slash",
@@ -84,7 +111,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 70,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "critStages": 1,
+    "accuracy": 100
   },
   "flamethrower": {
     "id": "flamethrower",
@@ -93,7 +122,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 90,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "burn",
+    "statusChance": 10,
+    "accuracy": 100
   },
   "fire_spin": {
     "id": "fire_spin",
@@ -102,7 +134,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 35,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 85
   },
   "inferno": {
     "id": "inferno",
@@ -111,7 +144,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 100,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "status": "burn",
+    "statusChance": 100,
+    "accuracy": 50
   },
   "tackle": {
     "id": "tackle",
@@ -120,7 +156,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 40,
     "pp": 35,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "tail_whip": {
     "id": "tail_whip",
@@ -129,7 +166,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "aoe"
+    "target": "aoe",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "water_gun": {
     "id": "water_gun",
@@ -138,7 +183,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 40,
     "pp": 25,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "withdraw": {
     "id": "withdraw",
@@ -147,7 +193,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 40,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "bubble": {
     "id": "bubble",
@@ -156,7 +210,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 40,
     "pp": 30,
-    "target": "aoe"
+    "target": "aoe",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": -1
+      }
+    ],
+    "statChance": 10,
+    "accuracy": 100
   },
   "bite": {
     "id": "bite",
@@ -165,7 +227,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 25,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 30,
+    "accuracy": 100
   },
   "rapid_spin": {
     "id": "rapid_spin",
@@ -174,7 +238,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 20,
     "pp": 40,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "protect": {
     "id": "protect",
@@ -183,7 +255,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "water_pulse": {
     "id": "water_pulse",
@@ -192,7 +265,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 60,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "status": "confusion",
+    "statusChance": 20,
+    "accuracy": 100
   },
   "aqua_tail": {
     "id": "aqua_tail",
@@ -201,7 +277,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 90,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "skull_bash": {
     "id": "skull_bash",
@@ -210,7 +287,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 130,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "iron_defense": {
     "id": "iron_defense",
@@ -219,7 +297,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": 2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "rain_dance": {
     "id": "rain_dance",
@@ -228,7 +314,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "hydro_pump": {
     "id": "hydro_pump",
@@ -237,7 +324,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 110,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 80
   },
   "leech_seed": {
     "id": "leech_seed",
@@ -246,7 +334,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "vine_whip": {
     "id": "vine_whip",
@@ -255,7 +344,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 45,
     "pp": 25,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "poison_powder": {
     "id": "poison_powder",
@@ -264,7 +354,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 35,
-    "target": "single"
+    "target": "single",
+    "status": "poison",
+    "statusChance": 100,
+    "accuracy": 75
   },
   "sleep_powder": {
     "id": "sleep_powder",
@@ -273,7 +366,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "sleep",
+    "statusChance": 100,
+    "accuracy": 75
   },
   "take_down": {
     "id": "take_down",
@@ -282,7 +378,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 90,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "drainPercent": -25,
+    "accuracy": 85
   },
   "razor_leaf": {
     "id": "razor_leaf",
@@ -291,7 +389,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 55,
     "pp": 25,
-    "target": "aoe"
+    "target": "aoe",
+    "critStages": 1,
+    "accuracy": 95
   },
   "sweet_scent": {
     "id": "sweet_scent",
@@ -300,7 +400,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "aoe"
+    "target": "aoe",
+    "accuracy": 100
   },
   "growth": {
     "id": "growth",
@@ -309,7 +410,19 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 1
+      },
+      {
+        "stat": "atkEsp",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "double_edge": {
     "id": "double_edge",
@@ -318,7 +431,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 120,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "drainPercent": -33,
+    "accuracy": 100
   },
   "worry_seed": {
     "id": "worry_seed",
@@ -327,7 +442,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "synthesis": {
     "id": "synthesis",
@@ -336,7 +452,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "healPercent": 50,
+    "accuracy": 100
   },
   "seed_bomb": {
     "id": "seed_bomb",
@@ -345,7 +463,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "gust": {
     "id": "gust",
@@ -354,7 +473,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 40,
     "pp": 35,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "powder_snow": {
     "id": "powder_snow",
@@ -363,7 +483,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 40,
     "pp": 25,
-    "target": "aoe"
+    "target": "aoe",
+    "status": "freeze",
+    "statusChance": 10,
+    "accuracy": 100
   },
   "mist": {
     "id": "mist",
@@ -372,7 +495,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "ice_shard": {
     "id": "ice_shard",
@@ -381,7 +505,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 40,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "mind_reader": {
     "id": "mind_reader",
@@ -390,7 +515,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "ancient_power": {
     "id": "ancient_power",
@@ -399,7 +525,31 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 60,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 1
+      },
+      {
+        "stat": "def",
+        "estagios": 1
+      },
+      {
+        "stat": "atkEsp",
+        "estagios": 1
+      },
+      {
+        "stat": "defEsp",
+        "estagios": 1
+      },
+      {
+        "stat": "speed",
+        "estagios": 1
+      }
+    ],
+    "statChance": 10,
+    "accuracy": 100
   },
   "agility": {
     "id": "agility",
@@ -408,7 +558,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": 2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "freeze_dry": {
     "id": "freeze_dry",
@@ -417,7 +575,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 70,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "status": "freeze",
+    "statusChance": 10,
+    "accuracy": 100
   },
   "reflect": {
     "id": "reflect",
@@ -426,7 +587,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "hail": {
     "id": "hail",
@@ -435,7 +597,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "tailwind": {
     "id": "tailwind",
@@ -444,7 +607,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "ice_beam": {
     "id": "ice_beam",
@@ -453,7 +617,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 90,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "status": "freeze",
+    "statusChance": 10,
+    "accuracy": 100
   },
   "blizzard": {
     "id": "blizzard",
@@ -462,7 +629,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 110,
     "pp": 5,
-    "target": "aoe"
+    "target": "aoe",
+    "status": "freeze",
+    "statusChance": 10,
+    "accuracy": 70
   },
   "roost": {
     "id": "roost",
@@ -471,7 +641,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "healPercent": 50,
+    "accuracy": 100
   },
   "hurricane": {
     "id": "hurricane",
@@ -480,7 +652,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 110,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "status": "confusion",
+    "statusChance": 30,
+    "accuracy": 70
   },
   "sheer_cold": {
     "id": "sheer_cold",
@@ -489,7 +664,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 30
   },
   "peck": {
     "id": "peck",
@@ -498,7 +674,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 35,
     "pp": 35,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "thunder_shock": {
     "id": "thunder_shock",
@@ -507,7 +684,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 40,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "status": "paralysis",
+    "statusChance": 10,
+    "accuracy": 100
   },
   "thunder_wave": {
     "id": "thunder_wave",
@@ -516,7 +696,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "status": "paralysis",
+    "statusChance": 100,
+    "accuracy": 90
   },
   "detect": {
     "id": "detect",
@@ -525,7 +708,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "pluck": {
     "id": "pluck",
@@ -534,7 +718,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "charge": {
     "id": "charge",
@@ -543,7 +728,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "defEsp",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "discharge": {
     "id": "discharge",
@@ -552,7 +745,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 80,
     "pp": 15,
-    "target": "aoe"
+    "target": "aoe",
+    "status": "paralysis",
+    "statusChance": 30,
+    "accuracy": 100
   },
   "light_screen": {
     "id": "light_screen",
@@ -561,7 +757,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "drill_peck": {
     "id": "drill_peck",
@@ -570,7 +767,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "thunder": {
     "id": "thunder",
@@ -579,7 +777,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 110,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "status": "paralysis",
+    "statusChance": 30,
+    "accuracy": 70
   },
   "magnetic_flux": {
     "id": "magnetic_flux",
@@ -588,7 +789,19 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": 1
+      },
+      {
+        "stat": "defEsp",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "zap_cannon": {
     "id": "zap_cannon",
@@ -597,7 +810,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 120,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "status": "paralysis",
+    "statusChance": 100,
+    "accuracy": 50
   },
   "wing_attack": {
     "id": "wing_attack",
@@ -606,7 +822,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 35,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "endure": {
     "id": "endure",
@@ -615,7 +832,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "safeguard": {
     "id": "safeguard",
@@ -624,7 +842,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 25,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "air_slash": {
     "id": "air_slash",
@@ -633,7 +852,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 75,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 30,
+    "accuracy": 95
   },
   "sunny_day": {
     "id": "sunny_day",
@@ -642,7 +863,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "heat_wave": {
     "id": "heat_wave",
@@ -651,7 +873,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 95,
     "pp": 10,
-    "target": "aoe"
+    "target": "aoe",
+    "status": "burn",
+    "statusChance": 10,
+    "accuracy": 90
   },
   "solar_beam": {
     "id": "solar_beam",
@@ -660,7 +885,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 120,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "sky_attack": {
     "id": "sky_attack",
@@ -669,7 +895,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 140,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 30,
+    "critStages": 1,
+    "accuracy": 90
   },
   "burn_up": {
     "id": "burn_up",
@@ -678,7 +907,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 130,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "extrasensory": {
     "id": "extrasensory",
@@ -687,7 +917,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 80,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 10,
+    "accuracy": 100
   },
   "leer": {
     "id": "leer",
@@ -696,7 +928,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "aoe"
+    "target": "aoe",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "roar": {
     "id": "roar",
@@ -705,7 +945,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "quick_attack": {
     "id": "quick_attack",
@@ -714,7 +955,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 40,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "spark": {
     "id": "spark",
@@ -723,7 +965,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 65,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "status": "paralysis",
+    "statusChance": 30,
+    "accuracy": 100
   },
   "crunch": {
     "id": "crunch",
@@ -732,7 +977,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": -1
+      }
+    ],
+    "statChance": 20,
+    "accuracy": 100
   },
   "thunder_fang": {
     "id": "thunder_fang",
@@ -741,7 +994,11 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 65,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "paralysis",
+    "statusChance": 10,
+    "flinchChance": 10,
+    "accuracy": 95
   },
   "calm_mind": {
     "id": "calm_mind",
@@ -750,7 +1007,19 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkEsp",
+        "estagios": 1
+      },
+      {
+        "stat": "defEsp",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "eruption": {
     "id": "eruption",
@@ -759,7 +1028,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 150,
     "pp": 5,
-    "target": "aoe"
+    "target": "aoe",
+    "accuracy": 100
   },
   "lava_plume": {
     "id": "lava_plume",
@@ -768,7 +1038,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 80,
     "pp": 15,
-    "target": "aoe"
+    "target": "aoe",
+    "status": "burn",
+    "statusChance": 30,
+    "accuracy": 100
   },
   "sacred_fire": {
     "id": "sacred_fire",
@@ -777,7 +1050,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 100,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "status": "burn",
+    "statusChance": 50,
+    "accuracy": 95
   },
   "stomp": {
     "id": "stomp",
@@ -786,7 +1062,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 65,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 30,
+    "accuracy": 100
   },
   "swagger": {
     "id": "swagger",
@@ -795,7 +1073,17 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "confusion",
+    "statusChance": 100,
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 85
   },
   "fire_blast": {
     "id": "fire_blast",
@@ -804,7 +1092,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 110,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "status": "burn",
+    "statusChance": 10,
+    "accuracy": 85
   },
   "bubble_beam": {
     "id": "bubble_beam",
@@ -813,7 +1104,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 65,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": -1
+      }
+    ],
+    "statChance": 10,
+    "accuracy": 100
   },
   "aurora_beam": {
     "id": "aurora_beam",
@@ -822,7 +1121,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 65,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": -1
+      }
+    ],
+    "statChance": 10,
+    "accuracy": 100
   },
   "mirror_coat": {
     "id": "mirror_coat",
@@ -831,7 +1138,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "ice_fang": {
     "id": "ice_fang",
@@ -840,7 +1148,11 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 65,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "freeze",
+    "statusChance": 10,
+    "flinchChance": 10,
+    "accuracy": 95
   },
   "weather_ball": {
     "id": "weather_ball",
@@ -849,7 +1161,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 50,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "whirlwind": {
     "id": "whirlwind",
@@ -858,7 +1171,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "dragon_rush": {
     "id": "dragon_rush",
@@ -867,7 +1181,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 100,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 20,
+    "accuracy": 75
   },
   "aeroblast": {
     "id": "aeroblast",
@@ -876,7 +1192,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 100,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "critStages": 1,
+    "accuracy": 95
   },
   "punishment": {
     "id": "punishment",
@@ -885,7 +1203,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "recover": {
     "id": "recover",
@@ -894,7 +1213,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "healPercent": 50,
+    "accuracy": 100
   },
   "future_sight": {
     "id": "future_sight",
@@ -903,7 +1224,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 120,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "natural_gift": {
     "id": "natural_gift",
@@ -912,7 +1234,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "brave_bird": {
     "id": "brave_bird",
@@ -921,7 +1244,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 120,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "drainPercent": -33,
+    "accuracy": 100
   },
   "confusion": {
     "id": "confusion",
@@ -930,7 +1255,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 50,
     "pp": 25,
-    "target": "single"
+    "target": "single",
+    "status": "confusion",
+    "statusChance": 10,
+    "accuracy": 100
   },
   "heal_bell": {
     "id": "heal_bell",
@@ -939,7 +1267,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "magical_leaf": {
     "id": "magical_leaf",
@@ -948,7 +1277,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 60,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "baton_pass": {
     "id": "baton_pass",
@@ -957,7 +1287,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 40,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "heal_block": {
     "id": "heal_block",
@@ -966,7 +1297,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "aoe"
+    "target": "aoe",
+    "accuracy": 100
   },
   "healing_wish": {
     "id": "healing_wish",
@@ -975,7 +1307,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "leaf_storm": {
     "id": "leaf_storm",
@@ -984,7 +1317,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 130,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkEsp",
+        "estagios": -2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 90
   },
   "perish_song": {
     "id": "perish_song",
@@ -993,7 +1334,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "disable": {
     "id": "disable",
@@ -1002,7 +1344,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "laser_focus": {
     "id": "laser_focus",
@@ -1011,7 +1354,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "psywave": {
     "id": "psywave",
@@ -1020,7 +1364,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "swift": {
     "id": "swift",
@@ -1029,7 +1374,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 60,
     "pp": 20,
-    "target": "aoe"
+    "target": "aoe",
+    "accuracy": 100
   },
   "psych_up": {
     "id": "psych_up",
@@ -1038,7 +1384,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "miracle_eye": {
     "id": "miracle_eye",
@@ -1047,7 +1394,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 40,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "psycho_cut": {
     "id": "psycho_cut",
@@ -1056,7 +1404,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 70,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "critStages": 1,
+    "accuracy": 100
   },
   "guard_swap": {
     "id": "guard_swap",
@@ -1065,7 +1415,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "power_swap": {
     "id": "power_swap",
@@ -1074,7 +1425,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "psychic": {
     "id": "psychic",
@@ -1083,7 +1435,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 90,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "defEsp",
+        "estagios": -1
+      }
+    ],
+    "statChance": 10,
+    "accuracy": 100
   },
   "barrier": {
     "id": "barrier",
@@ -1092,7 +1452,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": 2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "aura_sphere": {
     "id": "aura_sphere",
@@ -1101,7 +1469,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 80,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "amnesia": {
     "id": "amnesia",
@@ -1110,7 +1479,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "defEsp",
+        "estagios": 2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "me_first": {
     "id": "me_first",
@@ -1119,7 +1496,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "psystrike": {
     "id": "psystrike",
@@ -1128,7 +1506,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 100,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "pound": {
     "id": "pound",
@@ -1137,7 +1516,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 40,
     "pp": 35,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "reflect_type": {
     "id": "reflect_type",
@@ -1146,7 +1526,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "transform": {
     "id": "transform",
@@ -1155,7 +1536,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "mega_punch": {
     "id": "mega_punch",
@@ -1164,7 +1546,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 85
   },
   "metronome": {
     "id": "metronome",
@@ -1173,7 +1556,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "nasty_plot": {
     "id": "nasty_plot",
@@ -1182,7 +1566,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkEsp",
+        "estagios": 2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "defense_curl": {
     "id": "defense_curl",
@@ -1191,7 +1583,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 40,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "mud_sport": {
     "id": "mud_sport",
@@ -1200,7 +1600,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "rock_polish": {
     "id": "rock_polish",
@@ -1209,7 +1610,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": 2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "rollout": {
     "id": "rollout",
@@ -1218,7 +1627,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 30,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "magnitude": {
     "id": "magnitude",
@@ -1227,7 +1637,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 30,
-    "target": "aoe"
+    "target": "aoe",
+    "accuracy": 100
   },
   "rock_throw": {
     "id": "rock_throw",
@@ -1236,7 +1647,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 50,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "smack_down": {
     "id": "smack_down",
@@ -1245,7 +1657,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 50,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "bulldoze": {
     "id": "bulldoze",
@@ -1254,7 +1667,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 20,
-    "target": "aoe"
+    "target": "aoe",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "self_destruct": {
     "id": "self_destruct",
@@ -1263,7 +1684,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 200,
     "pp": 5,
-    "target": "aoe"
+    "target": "aoe",
+    "accuracy": 100
   },
   "stealth_rock": {
     "id": "stealth_rock",
@@ -1272,7 +1694,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "rock_blast": {
     "id": "rock_blast",
@@ -1281,7 +1704,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 25,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "earthquake": {
     "id": "earthquake",
@@ -1290,7 +1714,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 100,
     "pp": 10,
-    "target": "aoe"
+    "target": "aoe",
+    "accuracy": 100
   },
   "explosion": {
     "id": "explosion",
@@ -1299,7 +1724,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 250,
     "pp": 5,
-    "target": "aoe"
+    "target": "aoe",
+    "accuracy": 100
   },
   "stone_edge": {
     "id": "stone_edge",
@@ -1308,7 +1734,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 100,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "critStages": 1,
+    "accuracy": 80
   },
   "pursuit": {
     "id": "pursuit",
@@ -1317,7 +1745,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 40,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "fury_attack": {
     "id": "fury_attack",
@@ -1326,7 +1755,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 15,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 85
   },
   "aerial_ace": {
     "id": "aerial_ace",
@@ -1335,7 +1765,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "mirror_move": {
     "id": "mirror_move",
@@ -1344,7 +1775,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "assurance": {
     "id": "assurance",
@@ -1353,7 +1785,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "focus_energy": {
     "id": "focus_energy",
@@ -1362,7 +1795,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "hyper_fang": {
     "id": "hyper_fang",
@@ -1371,7 +1805,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 10,
+    "accuracy": 90
   },
   "sucker_punch": {
     "id": "sucker_punch",
@@ -1380,7 +1816,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 70,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "super_fang": {
     "id": "super_fang",
@@ -1389,7 +1826,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "endeavor": {
     "id": "endeavor",
@@ -1398,7 +1836,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "petal_dance": {
     "id": "petal_dance",
@@ -1407,7 +1846,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 120,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "petal_blizzard": {
     "id": "petal_blizzard",
@@ -1416,7 +1856,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 90,
     "pp": 15,
-    "target": "aoe"
+    "target": "aoe",
+    "accuracy": 100
   },
   "absorb": {
     "id": "absorb",
@@ -1425,7 +1866,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 20,
     "pp": 25,
-    "target": "single"
+    "target": "single",
+    "drainPercent": 50,
+    "accuracy": 100
   },
   "acid": {
     "id": "acid",
@@ -1434,7 +1877,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 40,
     "pp": 30,
-    "target": "aoe"
+    "target": "aoe",
+    "statChanges": [
+      {
+        "stat": "defEsp",
+        "estagios": -1
+      }
+    ],
+    "statChance": 10,
+    "accuracy": 100
   },
   "stun_spore": {
     "id": "stun_spore",
@@ -1443,7 +1894,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "status": "paralysis",
+    "statusChance": 100,
+    "accuracy": 75
   },
   "mega_drain": {
     "id": "mega_drain",
@@ -1452,7 +1906,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 40,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "drainPercent": 50,
+    "accuracy": 100
   },
   "lucky_chant": {
     "id": "lucky_chant",
@@ -1461,7 +1917,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "moonlight": {
     "id": "moonlight",
@@ -1470,7 +1927,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "healPercent": 50,
+    "accuracy": 100
   },
   "giga_drain": {
     "id": "giga_drain",
@@ -1479,7 +1938,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 75,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "drainPercent": 50,
+    "accuracy": 100
   },
   "toxic": {
     "id": "toxic",
@@ -1488,7 +1949,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "status": "poison",
+    "statusChance": 100,
+    "accuracy": 90
   },
   "moonblast": {
     "id": "moonblast",
@@ -1497,7 +1961,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 95,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkEsp",
+        "estagios": -1
+      }
+    ],
+    "statChance": 30,
+    "accuracy": 100
   },
   "grassy_terrain": {
     "id": "grassy_terrain",
@@ -1506,7 +1978,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "wrap": {
     "id": "wrap",
@@ -1515,7 +1988,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 15,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "knock_off": {
     "id": "knock_off",
@@ -1524,7 +1998,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 65,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "gastro_acid": {
     "id": "gastro_acid",
@@ -1533,7 +2008,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "poison_jab": {
     "id": "poison_jab",
@@ -1542,7 +2018,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "status": "poison",
+    "statusChance": 30,
+    "accuracy": 100
   },
   "slam": {
     "id": "slam",
@@ -1551,7 +2030,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 75
   },
   "wring_out": {
     "id": "wring_out",
@@ -1560,7 +2040,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "leaf_tornado": {
     "id": "leaf_tornado",
@@ -1569,7 +2050,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 65,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "spit_up": {
     "id": "spit_up",
@@ -1578,7 +2060,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "stockpile": {
     "id": "stockpile",
@@ -1587,7 +2070,19 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": 1
+      },
+      {
+        "stat": "defEsp",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "swallow": {
     "id": "swallow",
@@ -1596,7 +2091,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "healPercent": 25,
+    "accuracy": 100
   },
   "leaf_blade": {
     "id": "leaf_blade",
@@ -1605,7 +2102,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 90,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "critStages": 1,
+    "accuracy": 100
   },
   "barrage": {
     "id": "barrage",
@@ -1614,7 +2113,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 15,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 85
   },
   "hypnosis": {
     "id": "hypnosis",
@@ -1623,7 +2123,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "status": "sleep",
+    "statusChance": 100,
+    "accuracy": 60
   },
   "uproar": {
     "id": "uproar",
@@ -1632,7 +2135,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 90,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "bullet_seed": {
     "id": "bullet_seed",
@@ -1641,7 +2145,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 25,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "bestow": {
     "id": "bestow",
@@ -1650,7 +2155,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "constrict": {
     "id": "constrict",
@@ -1659,7 +2165,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 10,
     "pp": 35,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": -1
+      }
+    ],
+    "statChance": 10,
+    "accuracy": 100
   },
   "ingrain": {
     "id": "ingrain",
@@ -1668,7 +2182,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "bind": {
     "id": "bind",
@@ -1677,7 +2192,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 15,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 85
   },
   "tickle": {
     "id": "tickle",
@@ -1686,7 +2202,19 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": -1
+      },
+      {
+        "stat": "def",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "power_whip": {
     "id": "power_whip",
@@ -1695,7 +2223,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 120,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 85
   },
   "body_slam": {
     "id": "body_slam",
@@ -1704,7 +2233,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 85,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "paralysis",
+    "statusChance": 30,
+    "accuracy": 100
   },
   "aromatherapy": {
     "id": "aromatherapy",
@@ -1713,7 +2245,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "splash": {
     "id": "splash",
@@ -1722,7 +2255,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 40,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "fairy_wind": {
     "id": "fairy_wind",
@@ -1731,7 +2265,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 40,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "acrobatics": {
     "id": "acrobatics",
@@ -1740,7 +2275,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 55,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "rage_powder": {
     "id": "rage_powder",
@@ -1749,7 +2285,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "cotton_spore": {
     "id": "cotton_spore",
@@ -1758,7 +2295,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 40,
-    "target": "aoe"
+    "target": "aoe",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": -2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "u_turn": {
     "id": "u_turn",
@@ -1767,7 +2312,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 70,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "bounce": {
     "id": "bounce",
@@ -1776,7 +2322,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 85,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "status": "paralysis",
+    "statusChance": 30,
+    "accuracy": 85
   },
   "memento": {
     "id": "memento",
@@ -1785,7 +2334,19 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": -2
+      },
+      {
+        "stat": "atkEsp",
+        "estagios": -2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "grass_whistle": {
     "id": "grass_whistle",
@@ -1794,7 +2355,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "sleep",
+    "statusChance": 100,
+    "accuracy": 55
   },
   "flower_shield": {
     "id": "flower_shield",
@@ -1803,7 +2367,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "string_shot": {
     "id": "string_shot",
@@ -1812,7 +2384,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 40,
-    "target": "aoe"
+    "target": "aoe",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": -2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 95
   },
   "bug_bite": {
     "id": "bug_bite",
@@ -1821,7 +2401,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "harden": {
     "id": "harden",
@@ -1830,7 +2411,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "psybeam": {
     "id": "psybeam",
@@ -1839,7 +2428,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 65,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "status": "confusion",
+    "statusChance": 10,
+    "accuracy": 100
   },
   "silver_wind": {
     "id": "silver_wind",
@@ -1848,7 +2440,31 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 60,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 1
+      },
+      {
+        "stat": "def",
+        "estagios": 1
+      },
+      {
+        "stat": "atkEsp",
+        "estagios": 1
+      },
+      {
+        "stat": "defEsp",
+        "estagios": 1
+      },
+      {
+        "stat": "speed",
+        "estagios": 1
+      }
+    ],
+    "statChance": 10,
+    "accuracy": 100
   },
   "supersonic": {
     "id": "supersonic",
@@ -1857,7 +2473,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "status": "confusion",
+    "statusChance": 100,
+    "accuracy": 55
   },
   "bug_buzz": {
     "id": "bug_buzz",
@@ -1866,7 +2485,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 90,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "defEsp",
+        "estagios": -1
+      }
+    ],
+    "statChance": 10,
+    "accuracy": 100
   },
   "captivate": {
     "id": "captivate",
@@ -1875,7 +2502,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "aoe"
+    "target": "aoe",
+    "statChanges": [
+      {
+        "stat": "atkEsp",
+        "estagios": -2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "quiver_dance": {
     "id": "quiver_dance",
@@ -1884,7 +2519,23 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkEsp",
+        "estagios": 1
+      },
+      {
+        "stat": "defEsp",
+        "estagios": 1
+      },
+      {
+        "stat": "speed",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "poison_sting": {
     "id": "poison_sting",
@@ -1893,7 +2544,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 15,
     "pp": 35,
-    "target": "single"
+    "target": "single",
+    "status": "poison",
+    "statusChance": 30,
+    "accuracy": 100
   },
   "twineedle": {
     "id": "twineedle",
@@ -1902,7 +2556,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 25,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "status": "poison",
+    "statusChance": 20,
+    "accuracy": 100
   },
   "rage": {
     "id": "rage",
@@ -1911,7 +2568,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 20,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "venoshock": {
     "id": "venoshock",
@@ -1920,7 +2578,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 65,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "toxic_spikes": {
     "id": "toxic_spikes",
@@ -1929,7 +2588,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "pin_missile": {
     "id": "pin_missile",
@@ -1938,7 +2598,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 25,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 95
   },
   "fell_stinger": {
     "id": "fell_stinger",
@@ -1947,7 +2608,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 50,
     "pp": 25,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "fury_cutter": {
     "id": "fury_cutter",
@@ -1956,7 +2618,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 40,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 95
   },
   "spore": {
     "id": "spore",
@@ -1965,7 +2628,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "sleep",
+    "statusChance": 100,
+    "accuracy": 100
   },
   "x_scissor": {
     "id": "x_scissor",
@@ -1974,7 +2640,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "cross_poison": {
     "id": "cross_poison",
@@ -1983,7 +2650,11 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 70,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "status": "poison",
+    "statusChance": 10,
+    "critStages": 1,
+    "accuracy": 100
   },
   "foresight": {
     "id": "foresight",
@@ -1992,7 +2663,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 40,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "signal_beam": {
     "id": "signal_beam",
@@ -2001,7 +2673,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 75,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "confusion",
+    "statusChance": 10,
+    "accuracy": 100
   },
   "leech_life": {
     "id": "leech_life",
@@ -2010,7 +2685,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "drainPercent": 50,
+    "accuracy": 100
   },
   "zen_headbutt": {
     "id": "zen_headbutt",
@@ -2019,7 +2696,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 20,
+    "accuracy": 90
   },
   "poison_fang": {
     "id": "poison_fang",
@@ -2028,7 +2707,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 50,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "poison",
+    "statusChance": 50,
+    "accuracy": 100
   },
   "vacuum_wave": {
     "id": "vacuum_wave",
@@ -2037,7 +2719,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 40,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "false_swipe": {
     "id": "false_swipe",
@@ -2046,7 +2729,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 40,
     "pp": 40,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "razor_wind": {
     "id": "razor_wind",
@@ -2055,7 +2739,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 80,
     "pp": 10,
-    "target": "aoe"
+    "target": "aoe",
+    "critStages": 1,
+    "accuracy": 100
   },
   "double_team": {
     "id": "double_team",
@@ -2064,7 +2750,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "night_slash": {
     "id": "night_slash",
@@ -2073,7 +2760,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 70,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "critStages": 1,
+    "accuracy": 100
   },
   "double_hit": {
     "id": "double_hit",
@@ -2082,7 +2771,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 35,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "swords_dance": {
     "id": "swords_dance",
@@ -2091,7 +2781,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "feint": {
     "id": "feint",
@@ -2100,7 +2798,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 30,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "vice_grip": {
     "id": "vice_grip",
@@ -2109,7 +2808,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 55,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "seismic_toss": {
     "id": "seismic_toss",
@@ -2118,7 +2818,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "revenge": {
     "id": "revenge",
@@ -2127,7 +2828,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "vital_throw": {
     "id": "vital_throw",
@@ -2136,7 +2838,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 70,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "brick_break": {
     "id": "brick_break",
@@ -2145,7 +2848,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 75,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "submission": {
     "id": "submission",
@@ -2154,7 +2858,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "drainPercent": -25,
+    "accuracy": 80
   },
   "storm_throw": {
     "id": "storm_throw",
@@ -2163,7 +2869,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "critStages": 6,
+    "accuracy": 100
   },
   "thrash": {
     "id": "thrash",
@@ -2172,7 +2880,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 120,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "superpower": {
     "id": "superpower",
@@ -2181,7 +2890,19 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 120,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": -1
+      },
+      {
+        "stat": "def",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "guillotine": {
     "id": "guillotine",
@@ -2190,7 +2911,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 30
   },
   "mach_punch": {
     "id": "mach_punch",
@@ -2199,7 +2921,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 40,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "comet_punch": {
     "id": "comet_punch",
@@ -2208,7 +2931,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 18,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 85
   },
   "infestation": {
     "id": "infestation",
@@ -2217,7 +2941,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 20,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "night_shade": {
     "id": "night_shade",
@@ -2226,7 +2951,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "shadow_sneak": {
     "id": "shadow_sneak",
@@ -2235,7 +2961,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 40,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "fury_swipes": {
     "id": "fury_swipes",
@@ -2244,7 +2971,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 18,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 80
   },
   "spider_web": {
     "id": "spider_web",
@@ -2253,7 +2981,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "sticky_web": {
     "id": "sticky_web",
@@ -2262,7 +2991,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "toxic_thread": {
     "id": "toxic_thread",
@@ -2271,7 +3001,17 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "status": "poison",
+    "statusChance": 100,
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "venom_drench": {
     "id": "venom_drench",
@@ -2280,7 +3020,23 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "aoe"
+    "target": "aoe",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": -1
+      },
+      {
+        "stat": "atkEsp",
+        "estagios": -1
+      },
+      {
+        "stat": "speed",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "sonic_boom": {
     "id": "sonic_boom",
@@ -2289,7 +3045,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "screech": {
     "id": "screech",
@@ -2298,7 +3055,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 40,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": -2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 85
   },
   "bide": {
     "id": "bide",
@@ -2307,7 +3072,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "spikes": {
     "id": "spikes",
@@ -2316,7 +3082,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "payback": {
     "id": "payback",
@@ -2325,7 +3092,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 50,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "gyro_ball": {
     "id": "gyro_ball",
@@ -2334,7 +3102,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "autotomize": {
     "id": "autotomize",
@@ -2343,7 +3112,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": 2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "heavy_slam": {
     "id": "heavy_slam",
@@ -2352,7 +3129,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "magnet_rise": {
     "id": "magnet_rise",
@@ -2361,7 +3139,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "mirror_shot": {
     "id": "mirror_shot",
@@ -2370,7 +3149,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 65,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 85
   },
   "bullet_punch": {
     "id": "bullet_punch",
@@ -2379,7 +3159,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 40,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "metal_claw": {
     "id": "metal_claw",
@@ -2388,7 +3169,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 50,
     "pp": 35,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 1
+      }
+    ],
+    "statChance": 10,
+    "accuracy": 95
   },
   "iron_head": {
     "id": "iron_head",
@@ -2397,7 +3186,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 30,
+    "accuracy": 100
   },
   "arm_thrust": {
     "id": "arm_thrust",
@@ -2406,7 +3197,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 15,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "horn_attack": {
     "id": "horn_attack",
@@ -2415,7 +3207,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 65,
     "pp": 25,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "chip_away": {
     "id": "chip_away",
@@ -2424,7 +3217,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 70,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "counter": {
     "id": "counter",
@@ -2433,7 +3227,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "megahorn": {
     "id": "megahorn",
@@ -2442,7 +3237,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 120,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 85
   },
   "close_combat": {
     "id": "close_combat",
@@ -2451,7 +3247,19 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 120,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": -1
+      },
+      {
+        "stat": "defEsp",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "reversal": {
     "id": "reversal",
@@ -2460,7 +3268,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "flash_cannon": {
     "id": "flash_cannon",
@@ -2469,7 +3278,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 80,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "defEsp",
+        "estagios": -1
+      }
+    ],
+    "statChance": 10,
+    "accuracy": 100
   },
   "water_sport": {
     "id": "water_sport",
@@ -2478,7 +3295,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "soak": {
     "id": "soak",
@@ -2487,7 +3305,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "wonder_room": {
     "id": "wonder_room",
@@ -2496,7 +3315,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "aqua_jet": {
     "id": "aqua_jet",
@@ -2505,7 +3325,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 40,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "double_slap": {
     "id": "double_slap",
@@ -2514,7 +3335,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 15,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 85
   },
   "mud_shot": {
     "id": "mud_shot",
@@ -2523,7 +3345,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 55,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 95
   },
   "belly_drum": {
     "id": "belly_drum",
@@ -2532,7 +3362,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "wake_up_slap": {
     "id": "wake_up_slap",
@@ -2541,7 +3372,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 70,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "mud_bomb": {
     "id": "mud_bomb",
@@ -2550,7 +3382,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 65,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 85
   },
   "acid_spray": {
     "id": "acid_spray",
@@ -2559,7 +3392,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 40,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "defEsp",
+        "estagios": -2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "brine": {
     "id": "brine",
@@ -2568,7 +3409,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 65,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "hex": {
     "id": "hex",
@@ -2577,7 +3419,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 65,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "sludge_wave": {
     "id": "sludge_wave",
@@ -2586,7 +3429,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 95,
     "pp": 10,
-    "target": "aoe"
+    "target": "aoe",
+    "status": "poison",
+    "statusChance": 10,
+    "accuracy": 100
   },
   "curse": {
     "id": "curse",
@@ -2595,7 +3441,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "yawn": {
     "id": "yawn",
@@ -2604,7 +3451,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "headbutt": {
     "id": "headbutt",
@@ -2613,7 +3461,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 70,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 30,
+    "accuracy": 100
   },
   "slack_off": {
     "id": "slack_off",
@@ -2622,7 +3472,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "healPercent": 50,
+    "accuracy": 100
   },
   "heal_pulse": {
     "id": "heal_pulse",
@@ -2631,7 +3483,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "healPercent": 50,
+    "accuracy": 100
   },
   "icy_wind": {
     "id": "icy_wind",
@@ -2640,7 +3494,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 55,
     "pp": 15,
-    "target": "aoe"
+    "target": "aoe",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 95
   },
   "encore": {
     "id": "encore",
@@ -2649,7 +3511,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "rest": {
     "id": "rest",
@@ -2658,7 +3521,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "aqua_ring": {
     "id": "aqua_ring",
@@ -2667,7 +3531,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "dive": {
     "id": "dive",
@@ -2676,7 +3541,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "icicle_spear": {
     "id": "icicle_spear",
@@ -2685,7 +3551,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 25,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "clamp": {
     "id": "clamp",
@@ -2694,7 +3561,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 35,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 85
   },
   "razor_shell": {
     "id": "razor_shell",
@@ -2703,7 +3571,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 75,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": -1
+      }
+    ],
+    "statChance": 50,
+    "accuracy": 95
   },
   "whirlpool": {
     "id": "whirlpool",
@@ -2712,7 +3588,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 35,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 85
   },
   "shell_smash": {
     "id": "shell_smash",
@@ -2721,7 +3598,31 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": -1
+      },
+      {
+        "stat": "defEsp",
+        "estagios": -1
+      },
+      {
+        "stat": "atkFis",
+        "estagios": 2
+      },
+      {
+        "stat": "atkEsp",
+        "estagios": 2
+      },
+      {
+        "stat": "speed",
+        "estagios": 2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "crabhammer": {
     "id": "crabhammer",
@@ -2730,7 +3631,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 100,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "critStages": 1,
+    "accuracy": 90
   },
   "flail": {
     "id": "flail",
@@ -2739,7 +3642,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "wide_guard": {
     "id": "wide_guard",
@@ -2748,7 +3652,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "twister": {
     "id": "twister",
@@ -2757,7 +3662,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 40,
     "pp": 20,
-    "target": "aoe"
+    "target": "aoe",
+    "flinchChance": 20,
+    "accuracy": 100
   },
   "dragon_pulse": {
     "id": "dragon_pulse",
@@ -2766,7 +3673,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 85,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "dragon_dance": {
     "id": "dragon_dance",
@@ -2775,7 +3683,19 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 1
+      },
+      {
+        "stat": "speed",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "waterfall": {
     "id": "waterfall",
@@ -2784,7 +3704,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 20,
+    "accuracy": 100
   },
   "horn_drill": {
     "id": "horn_drill",
@@ -2793,7 +3715,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 30
   },
   "camouflage": {
     "id": "camouflage",
@@ -2802,7 +3725,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "minimize": {
     "id": "minimize",
@@ -2811,7 +3735,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "power_gem": {
     "id": "power_gem",
@@ -2820,7 +3745,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 80,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "confuse_ray": {
     "id": "confuse_ray",
@@ -2829,7 +3755,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "status": "confusion",
+    "statusChance": 100,
+    "accuracy": 100
   },
   "cosmic_power": {
     "id": "cosmic_power",
@@ -2838,7 +3767,19 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": 1
+      },
+      {
+        "stat": "defEsp",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "hyper_beam": {
     "id": "hyper_beam",
@@ -2847,7 +3788,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 150,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "sing": {
     "id": "sing",
@@ -2856,7 +3798,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "sleep",
+    "statusChance": 100,
+    "accuracy": 55
   },
   "electro_ball": {
     "id": "electro_ball",
@@ -2865,7 +3810,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "ion_deluge": {
     "id": "ion_deluge",
@@ -2874,7 +3820,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 25,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "eerie_impulse": {
     "id": "eerie_impulse",
@@ -2883,7 +3830,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkEsp",
+        "estagios": -2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "spotlight": {
     "id": "spotlight",
@@ -2892,7 +3847,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "helping_hand": {
     "id": "helping_hand",
@@ -2901,7 +3857,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "play_rough": {
     "id": "play_rough",
@@ -2910,7 +3867,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 90,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": -1
+      }
+    ],
+    "statChance": 10,
+    "accuracy": 90
   },
   "hyper_voice": {
     "id": "hyper_voice",
@@ -2919,7 +3884,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 90,
     "pp": 10,
-    "target": "aoe"
+    "target": "aoe",
+    "accuracy": 100
   },
   "haze": {
     "id": "haze",
@@ -2928,7 +3894,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "muddy_water": {
     "id": "muddy_water",
@@ -2937,7 +3904,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 90,
     "pp": 10,
-    "target": "aoe"
+    "target": "aoe",
+    "accuracy": 85
   },
   "destiny_bond": {
     "id": "destiny_bond",
@@ -2946,7 +3914,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "refresh": {
     "id": "refresh",
@@ -2955,7 +3924,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "spike_cannon": {
     "id": "spike_cannon",
@@ -2964,7 +3934,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 20,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "earth_power": {
     "id": "earth_power",
@@ -2973,7 +3944,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 90,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "defEsp",
+        "estagios": -1
+      }
+    ],
+    "statChance": 10,
+    "accuracy": 100
   },
   "lock_on": {
     "id": "lock_on",
@@ -2982,7 +3961,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "gunk_shot": {
     "id": "gunk_shot",
@@ -2991,7 +3971,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 120,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "status": "poison",
+    "statusChance": 30,
+    "accuracy": 80
   },
   "octazooka": {
     "id": "octazooka",
@@ -3000,7 +3983,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 65,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 85
   },
   "sand_attack": {
     "id": "sand_attack",
@@ -3009,7 +3993,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "feather_dance": {
     "id": "feather_dance",
@@ -3018,7 +4003,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": -2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "drill_run": {
     "id": "drill_run",
@@ -3027,7 +4020,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "critStages": 1,
+    "accuracy": 95
   },
   "play_nice": {
     "id": "play_nice",
@@ -3036,7 +4031,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "disarming_voice": {
     "id": "disarming_voice",
@@ -3045,7 +4048,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 40,
     "pp": 15,
-    "target": "aoe"
+    "target": "aoe",
+    "accuracy": 100
   },
   "round": {
     "id": "round",
@@ -3054,7 +4058,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 60,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "mimic": {
     "id": "mimic",
@@ -3063,7 +4068,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "fake_out": {
     "id": "fake_out",
@@ -3072,7 +4078,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 40,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 100,
+    "accuracy": 100
   },
   "feint_attack": {
     "id": "feint_attack",
@@ -3081,7 +4089,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "taunt": {
     "id": "taunt",
@@ -3090,7 +4099,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "pay_day": {
     "id": "pay_day",
@@ -3099,7 +4109,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 40,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "switcheroo": {
     "id": "switcheroo",
@@ -3108,7 +4119,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "air_cutter": {
     "id": "air_cutter",
@@ -3117,7 +4129,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 60,
     "pp": 25,
-    "target": "aoe"
+    "target": "aoe",
+    "critStages": 1,
+    "accuracy": 95
   },
   "acupressure": {
     "id": "acupressure",
@@ -3126,7 +4140,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "jump_kick": {
     "id": "jump_kick",
@@ -3135,7 +4150,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 100,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 95
   },
   "tri_attack": {
     "id": "tri_attack",
@@ -3144,7 +4160,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 80,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "lick": {
     "id": "lick",
@@ -3153,7 +4170,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 30,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "status": "paralysis",
+    "statusChance": 30,
+    "accuracy": 100
   },
   "dizzy_punch": {
     "id": "dizzy_punch",
@@ -3162,7 +4182,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 70,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "status": "confusion",
+    "statusChance": 20,
+    "accuracy": 100
   },
   "outrage": {
     "id": "outrage",
@@ -3171,7 +4194,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 120,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "work_up": {
     "id": "work_up",
@@ -3180,7 +4204,19 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 1
+      },
+      {
+        "stat": "atkEsp",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "giga_impact": {
     "id": "giga_impact",
@@ -3189,7 +4225,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 150,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "covet": {
     "id": "covet",
@@ -3198,7 +4235,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 25,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "baby_doll_eyes": {
     "id": "baby_doll_eyes",
@@ -3207,7 +4245,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "charm": {
     "id": "charm",
@@ -3216,7 +4262,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": -2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "last_resort": {
     "id": "last_resort",
@@ -3225,7 +4279,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 140,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "trump_card": {
     "id": "trump_card",
@@ -3234,7 +4289,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "conversion": {
     "id": "conversion",
@@ -3243,7 +4299,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "conversion_2": {
     "id": "conversion_2",
@@ -3252,7 +4309,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "sharpen": {
     "id": "sharpen",
@@ -3261,7 +4319,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "recycle": {
     "id": "recycle",
@@ -3270,7 +4336,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "magic_coat": {
     "id": "magic_coat",
@@ -3279,7 +4346,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "snore": {
     "id": "snore",
@@ -3288,7 +4356,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 50,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 30,
+    "accuracy": 100
   },
   "sleep_talk": {
     "id": "sleep_talk",
@@ -3297,7 +4367,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "block": {
     "id": "block",
@@ -3306,7 +4377,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "high_horsepower": {
     "id": "high_horsepower",
@@ -3315,7 +4387,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 95,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 95
   },
   "follow_me": {
     "id": "follow_me",
@@ -3324,7 +4397,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "coil": {
     "id": "coil",
@@ -3333,7 +4407,19 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 1
+      },
+      {
+        "stat": "def",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "echoed_voice": {
     "id": "echoed_voice",
@@ -3342,7 +4428,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 40,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "psycho_shift": {
     "id": "psycho_shift",
@@ -3351,7 +4438,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "synchronoise": {
     "id": "synchronoise",
@@ -3360,7 +4448,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 120,
     "pp": 10,
-    "target": "aoe"
+    "target": "aoe",
+    "accuracy": 100
   },
   "dream_eater": {
     "id": "dream_eater",
@@ -3369,7 +4458,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 100,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "drainPercent": 50,
+    "accuracy": 100
   },
   "sweet_kiss": {
     "id": "sweet_kiss",
@@ -3378,7 +4469,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "status": "confusion",
+    "statusChance": 100,
+    "accuracy": 75
   },
   "copycat": {
     "id": "copycat",
@@ -3387,7 +4481,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "astonish": {
     "id": "astonish",
@@ -3396,7 +4491,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 30,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 30,
+    "accuracy": 100
   },
   "fling": {
     "id": "fling",
@@ -3405,7 +4502,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "odor_sleuth": {
     "id": "odor_sleuth",
@@ -3414,7 +4512,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 40,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "spite": {
     "id": "spite",
@@ -3423,7 +4522,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "mud_slap": {
     "id": "mud_slap",
@@ -3432,7 +4532,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 20,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "dig": {
     "id": "dig",
@@ -3441,7 +4542,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "glare": {
     "id": "glare",
@@ -3450,7 +4552,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "status": "paralysis",
+    "statusChance": 100,
+    "accuracy": 100
   },
   "fake_tears": {
     "id": "fake_tears",
@@ -3459,7 +4564,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "defEsp",
+        "estagios": -2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "hammer_arm": {
     "id": "hammer_arm",
@@ -3468,7 +4581,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 100,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 90
   },
   "role_play": {
     "id": "role_play",
@@ -3477,7 +4598,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "imprison": {
     "id": "imprison",
@@ -3486,7 +4608,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "sketch": {
     "id": "sketch",
@@ -3495,7 +4618,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 1,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "milk_drink": {
     "id": "milk_drink",
@@ -3504,7 +4628,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "healPercent": 50,
+    "accuracy": 100
   },
   "steamroller": {
     "id": "steamroller",
@@ -3513,7 +4639,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 65,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 30,
+    "accuracy": 100
   },
   "rock_tomb": {
     "id": "rock_tomb",
@@ -3522,7 +4650,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 95
   },
   "dragon_breath": {
     "id": "dragon_breath",
@@ -3531,7 +4667,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 60,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "status": "paralysis",
+    "statusChance": 30,
+    "accuracy": 100
   },
   "rock_slide": {
     "id": "rock_slide",
@@ -3540,7 +4679,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 75,
     "pp": 10,
-    "target": "aoe"
+    "target": "aoe",
+    "flinchChance": 30,
+    "accuracy": 90
   },
   "sand_tomb": {
     "id": "sand_tomb",
@@ -3549,7 +4690,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 35,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 85
   },
   "iron_tail": {
     "id": "iron_tail",
@@ -3558,7 +4700,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 100,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": -1
+      }
+    ],
+    "statChance": 30,
+    "accuracy": 75
   },
   "sandstorm": {
     "id": "sandstorm",
@@ -3567,7 +4717,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "metal_sound": {
     "id": "metal_sound",
@@ -3576,7 +4727,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 40,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "defEsp",
+        "estagios": -2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 85
   },
   "sky_drop": {
     "id": "sky_drop",
@@ -3585,7 +4744,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "low_kick": {
     "id": "low_kick",
@@ -3594,7 +4754,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "wood_hammer": {
     "id": "wood_hammer",
@@ -3603,7 +4764,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 120,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "drainPercent": -33,
+    "accuracy": 100
   },
   "tearful_look": {
     "id": "tearful_look",
@@ -3612,7 +4775,19 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": -1
+      },
+      {
+        "stat": "atkEsp",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "head_smash": {
     "id": "head_smash",
@@ -3621,7 +4796,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 150,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "drainPercent": -50,
+    "accuracy": 80
   },
   "dark_pulse": {
     "id": "dark_pulse",
@@ -3630,7 +4807,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 80,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 20,
+    "accuracy": 100
   },
   "crush_claw": {
     "id": "crush_claw",
@@ -3639,7 +4818,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 75,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": -1
+      }
+    ],
+    "statChance": 50,
+    "accuracy": 95
   },
   "fissure": {
     "id": "fissure",
@@ -3648,7 +4835,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 30
   },
   "rototiller": {
     "id": "rototiller",
@@ -3657,7 +4845,19 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 1
+      },
+      {
+        "stat": "atkEsp",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "bone_club": {
     "id": "bone_club",
@@ -3666,7 +4866,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 65,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 10,
+    "accuracy": 85
   },
   "bonemerang": {
     "id": "bonemerang",
@@ -3675,7 +4877,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 50,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "stomping_tantrum": {
     "id": "stomping_tantrum",
@@ -3684,7 +4887,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 75,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "retaliate": {
     "id": "retaliate",
@@ -3693,7 +4897,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 70,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "bone_rush": {
     "id": "bone_rush",
@@ -3702,7 +4907,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 25,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "sky_uppercut": {
     "id": "sky_uppercut",
@@ -3711,7 +4917,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 85,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "dragon_claw": {
     "id": "dragon_claw",
@@ -3720,7 +4927,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "flare_blitz": {
     "id": "flare_blitz",
@@ -3729,7 +4937,11 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 120,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "burn",
+    "statusChance": 10,
+    "drainPercent": -33,
+    "accuracy": 100
   },
   "shadow_claw": {
     "id": "shadow_claw",
@@ -3738,7 +4950,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 70,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "critStages": 1,
+    "accuracy": 100
   },
   "flame_wheel": {
     "id": "flame_wheel",
@@ -3747,7 +4961,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 25,
-    "target": "single"
+    "target": "single",
+    "status": "burn",
+    "statusChance": 10,
+    "accuracy": 100
   },
   "extreme_speed": {
     "id": "extreme_speed",
@@ -3756,7 +4973,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "flame_charge": {
     "id": "flame_charge",
@@ -3765,7 +4983,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 50,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "smog": {
     "id": "smog",
@@ -3774,7 +5000,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 30,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "status": "poison",
+    "statusChance": 40,
+    "accuracy": 70
   },
   "clear_smog": {
     "id": "clear_smog",
@@ -3783,7 +5012,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 50,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "fire_punch": {
     "id": "fire_punch",
@@ -3792,7 +5022,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 75,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "burn",
+    "statusChance": 10,
+    "accuracy": 100
   },
   "incinerate": {
     "id": "incinerate",
@@ -3801,7 +5034,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 60,
     "pp": 15,
-    "target": "aoe"
+    "target": "aoe",
+    "accuracy": 100
   },
   "nuzzle": {
     "id": "nuzzle",
@@ -3810,7 +5044,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 20,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "status": "paralysis",
+    "statusChance": 100,
+    "accuracy": 100
   },
   "thunderbolt": {
     "id": "thunderbolt",
@@ -3819,7 +5056,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 90,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "paralysis",
+    "statusChance": 10,
+    "accuracy": 100
   },
   "wild_charge": {
     "id": "wild_charge",
@@ -3828,7 +5068,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 90,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "drainPercent": -25,
+    "accuracy": 100
   },
   "magnet_bomb": {
     "id": "magnet_bomb",
@@ -3837,7 +5079,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "electric_terrain": {
     "id": "electric_terrain",
@@ -3846,7 +5089,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "charge_beam": {
     "id": "charge_beam",
@@ -3855,7 +5099,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 50,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkEsp",
+        "estagios": 1
+      }
+    ],
+    "statChance": 70,
+    "accuracy": 90
   },
   "shock_wave": {
     "id": "shock_wave",
@@ -3864,7 +5116,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 60,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "thunder_punch": {
     "id": "thunder_punch",
@@ -3873,7 +5126,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 75,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "paralysis",
+    "statusChance": 10,
+    "accuracy": 100
   },
   "cotton_guard": {
     "id": "cotton_guard",
@@ -3882,7 +5138,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": 3
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "belch": {
     "id": "belch",
@@ -3891,7 +5155,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 120,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "double_kick": {
     "id": "double_kick",
@@ -3900,7 +5165,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 30,
     "pp": 30,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "flatter": {
     "id": "flatter",
@@ -3909,7 +5175,17 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "confusion",
+    "statusChance": 100,
+    "statChanges": [
+      {
+        "stat": "atkEsp",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "mean_look": {
     "id": "mean_look",
@@ -3918,7 +5194,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "quick_guard": {
     "id": "quick_guard",
@@ -3927,7 +5204,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "poison_gas": {
     "id": "poison_gas",
@@ -3936,7 +5214,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 40,
-    "target": "aoe"
+    "target": "aoe",
+    "status": "poison",
+    "statusChance": 100,
+    "accuracy": 90
   },
   "sludge": {
     "id": "sludge",
@@ -3945,7 +5226,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 65,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "status": "poison",
+    "statusChance": 30,
+    "accuracy": 100
   },
   "sludge_bomb": {
     "id": "sludge_bomb",
@@ -3954,7 +5238,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 90,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "status": "poison",
+    "statusChance": 30,
+    "accuracy": 100
   },
   "acid_armor": {
     "id": "acid_armor",
@@ -3963,7 +5250,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": 2
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "karate_chop": {
     "id": "karate_chop",
@@ -3972,7 +5267,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 50,
     "pp": 25,
-    "target": "single"
+    "target": "single",
+    "critStages": 1,
+    "accuracy": 100
   },
   "cross_chop": {
     "id": "cross_chop",
@@ -3981,7 +5278,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 100,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "critStages": 1,
+    "accuracy": 80
   },
   "final_gambit": {
     "id": "final_gambit",
@@ -3990,7 +5289,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "low_sweep": {
     "id": "low_sweep",
@@ -3999,7 +5299,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 65,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "speed",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "dual_chop": {
     "id": "dual_chop",
@@ -4008,7 +5316,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 40,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "bulk_up": {
     "id": "bulk_up",
@@ -4017,7 +5326,19 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 1
+      },
+      {
+        "stat": "def",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "dynamic_punch": {
     "id": "dynamic_punch",
@@ -4026,7 +5347,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 100,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "status": "confusion",
+    "statusChance": 100,
+    "accuracy": 50
   },
   "strength": {
     "id": "strength",
@@ -4035,7 +5359,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 80,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "meditate": {
     "id": "meditate",
@@ -4044,7 +5369,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 40,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "mega_kick": {
     "id": "mega_kick",
@@ -4053,7 +5386,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 120,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 75
   },
   "rolling_kick": {
     "id": "rolling_kick",
@@ -4062,7 +5396,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 30,
+    "accuracy": 85
   },
   "high_jump_kick": {
     "id": "high_jump_kick",
@@ -4071,7 +5407,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 130,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "blaze_kick": {
     "id": "blaze_kick",
@@ -4080,7 +5417,11 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 85,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "status": "burn",
+    "statusChance": 10,
+    "critStages": 1,
+    "accuracy": 90
   },
   "focus_punch": {
     "id": "focus_punch",
@@ -4089,7 +5430,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 150,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "ice_punch": {
     "id": "ice_punch",
@@ -4098,7 +5440,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 75,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "status": "freeze",
+    "statusChance": 10,
+    "accuracy": 100
   },
   "draining_kiss": {
     "id": "draining_kiss",
@@ -4107,7 +5452,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 50,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "drainPercent": 75,
+    "accuracy": 100
   },
   "lovely_kiss": {
     "id": "lovely_kiss",
@@ -4116,7 +5463,10 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "status": "sleep",
+    "statusChance": 100,
+    "accuracy": 75
   },
   "heart_stamp": {
     "id": "heart_stamp",
@@ -4125,7 +5475,9 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 25,
-    "target": "single"
+    "target": "single",
+    "flinchChance": 30,
+    "accuracy": 100
   },
   "avalanche": {
     "id": "avalanche",
@@ -4134,7 +5486,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "present": {
     "id": "present",
@@ -4143,7 +5496,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "steel_wing": {
     "id": "steel_wing",
@@ -4152,7 +5506,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 70,
     "pp": 25,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": 1
+      }
+    ],
+    "statChance": 10,
+    "accuracy": 90
   },
   "teleport": {
     "id": "teleport",
@@ -4161,7 +5523,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "stored_power": {
     "id": "stored_power",
@@ -4170,7 +5533,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 20,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "ominous_wind": {
     "id": "ominous_wind",
@@ -4179,7 +5543,31 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 60,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 1
+      },
+      {
+        "stat": "def",
+        "estagios": 1
+      },
+      {
+        "stat": "atkEsp",
+        "estagios": 1
+      },
+      {
+        "stat": "defEsp",
+        "estagios": 1
+      },
+      {
+        "stat": "speed",
+        "estagios": 1
+      }
+    ],
+    "statChance": 10,
+    "accuracy": 100
   },
   "wish": {
     "id": "wish",
@@ -4188,7 +5576,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "kinesis": {
     "id": "kinesis",
@@ -4197,7 +5586,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 80
   },
   "telekinesis": {
     "id": "telekinesis",
@@ -4206,7 +5596,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "ally_switch": {
     "id": "ally_switch",
@@ -4215,7 +5606,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "trick": {
     "id": "trick",
@@ -4224,7 +5616,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "psyshock": {
     "id": "psyshock",
@@ -4233,7 +5626,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 80,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "nightmare": {
     "id": "nightmare",
@@ -4242,7 +5636,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "hidden_power": {
     "id": "hidden_power",
@@ -4251,7 +5646,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 60,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "shadow_ball": {
     "id": "shadow_ball",
@@ -4260,7 +5656,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "special",
     "power": 80,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "defEsp",
+        "estagios": -1
+      }
+    ],
+    "statChance": 20,
+    "accuracy": 100
   },
   "shadow_punch": {
     "id": "shadow_punch",
@@ -4269,7 +5673,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "pain_split": {
     "id": "pain_split",
@@ -4278,7 +5683,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "grudge": {
     "id": "grudge",
@@ -4287,7 +5693,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 5,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "foul_play": {
     "id": "foul_play",
@@ -4296,7 +5703,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 95,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "torment": {
     "id": "torment",
@@ -4305,7 +5713,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "quash": {
     "id": "quash",
@@ -4314,7 +5723,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "hone_claws": {
     "id": "hone_claws",
@@ -4323,7 +5733,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "beat_up": {
     "id": "beat_up",
@@ -4332,7 +5750,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "snatch": {
     "id": "snatch",
@@ -4341,7 +5760,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "howl": {
     "id": "howl",
@@ -4350,7 +5770,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 40,
-    "target": "single"
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
   },
   "embargo": {
     "id": "embargo",
@@ -4359,7 +5787,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   },
   "dragon_tail": {
     "id": "dragon_tail",
@@ -4368,7 +5797,8 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "physical",
     "power": 60,
     "pp": 10,
-    "target": "single"
+    "target": "single",
+    "accuracy": 90
   },
   "after_you": {
     "id": "after_you",
@@ -4377,6 +5807,7 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 15,
-    "target": "single"
+    "target": "single",
+    "accuracy": 100
   }
 };

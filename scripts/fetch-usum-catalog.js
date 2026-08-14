@@ -93,6 +93,90 @@ const CURVA_POR_GROWTH_RATE = {
 // afeta o proprio usuario.
 const ALVOS_EM_AREA = new Set(['all-opponents', 'all-other-pokemon', 'all']);
 
+// --- Efeitos de golpe -------------------------------------------------------
+//
+// Os cinco status nao-volateis dos jogos mais a confusao — os unicos que este
+// jogo simula. A PokeAPI usa mais uns quinze nomes de `ailment` (trap,
+// leech-seed, infatuation, nightmare, disable, ...): todos viram `null` aqui,
+// de proposito e por escrito, em vez de aparecerem como status desconhecido no
+// meio do combate. Quando algum deles for implementado, entra nesta tabela.
+const STATUS_DA_POKEAPI = {
+  poison: 'poison',
+  burn: 'burn',
+  paralysis: 'paralysis',
+  sleep: 'sleep',
+  freeze: 'freeze',
+  confusion: 'confusion',
+};
+
+// Nomes de stat da PokeAPI -> nomes deste jogo (os mesmos de StatBlock).
+// `accuracy`/`evasion` nao existem aqui (nao ha calculo de acerto por estagio),
+// entao golpe que so mexe nesses dois sai sem mudanca de stat.
+const STAT_DE_ESTAGIO = {
+  attack: 'atkFis',
+  'special-attack': 'atkEsp',
+  defense: 'def',
+  'special-defense': 'defEsp',
+  speed: 'speed',
+};
+
+/**
+ * Efeitos de um golpe, no formato deste jogo.
+ *
+ * A REGRA DA CHANCE, que nao e obvia no dado cru: `meta.ailment_chance` vem 0
+ * para golpe de status PURO (Thunder Wave, Toxic, Stun Spore) — nao porque a
+ * chance seja zero, mas porque para eles nao ha "chance secundaria": o golpe E
+ * o status. O que separa os dois casos e `meta.category`, que vale 'ailment'
+ * no golpe puro e 'damage-ailment' no que causa dano e pode causar status de
+ * quebra. Ler `ailment_chance` direto deixaria Toxic e Thunder Wave com 0% de
+ * chance de fazer qualquer coisa.
+ *
+ * DURACAO NAO SAI DAQUI. `meta.min_turns`/`max_turns` da PokeAPI nao batem com
+ * a Gen VII (conferido na Bulbapedia: Confuse Ray vem 2-5 e o real e 1-4;
+ * Spore/Hypnosis/Sing vem 2-4 e o real e 1-3; Wrap nem internamente consistente
+ * e). Os turnos vem escritos a mao em scripts/usum/status.json e sao conferidos
+ * por `npm run usum:conferir`.
+ */
+function efeitosDoGolpe(m) {
+  const meta = m.meta || {};
+  const categoria = (meta.category && meta.category.name) || '';
+  const status = STATUS_DA_POKEAPI[(meta.ailment && meta.ailment.name) || 'none'] || null;
+
+  let chanceDeStatus = 0;
+  if (status) {
+    chanceDeStatus = meta.ailment_chance > 0 ? meta.ailment_chance : 100;
+  }
+
+  const mudancasDeStat = (m.stat_changes || [])
+    .filter((s) => STAT_DE_ESTAGIO[s.stat.name] && s.change !== 0)
+    .map((s) => ({ stat: STAT_DE_ESTAGIO[s.stat.name], estagios: s.change }));
+
+  // Mesma logica da chance de status: golpe que SO mexe em stat ('net-good-stats',
+  // 'damage+lower' com stat_chance 0) aplica sempre; o que mexe de quebra tem
+  // `stat_chance` real.
+  let chanceDeStat = 0;
+  if (mudancasDeStat.length) {
+    chanceDeStat = meta.stat_chance > 0 ? meta.stat_chance : 100;
+  }
+
+  return {
+    status,
+    chanceDeStatus,
+    mudancasDeStat,
+    chanceDeStat,
+    chanceDeFlinch: meta.flinch_chance || 0,
+    // `crit_rate` e o numero de ESTAGIOS de critico acima do normal (Slash e
+    // Razor Leaf tem 1), nao uma porcentagem.
+    estagiosDeCritico: meta.crit_rate || 0,
+    // Porcentagem do dano causado que volta como cura (positivo) ou como recuo
+    // (negativo, Double-Edge = -33).
+    drenoPercentual: meta.drain || 0,
+    // Porcentagem do HP MAXIMO curada por golpe de cura pura (Recover = 50).
+    curaPercentual: meta.healing || 0,
+    _categoriaPokeapi: categoria,
+  };
+}
+
 const STAT_POKEAPI = {
   hp: 'hp',
   attack: 'atkFis',
@@ -254,6 +338,7 @@ async function main() {
       poder: v.power == null ? 0 : v.power,
       precisao: v.accuracy == null ? 100 : v.accuracy,
       pp: v.pp == null ? 20 : v.pp,
+      ...efeitosDoGolpe(m),
     };
   });
   console.log(`  golpes: ${golpes.length}`);
@@ -274,15 +359,39 @@ async function main() {
   // com valor de outra geracao, `valoresDeGolpeNoUsum` quebrou. Rapid Spin
   // (20 na Gen7, 50 na Gen8) e o caso que motivou a funcao.
   const esperado = {
-    rapid_spin: { poder: 20 }, tackle: { poder: 40 }, bite: { poder: 60, tipo: 'DARK' },
-    absorb: { poder: 20 }, dig: { poder: 80 }, moonblast: { poder: 95, tipo: 'FAIRY' },
+    rapid_spin: { poder: 20 }, bite: { poder: 60, tipo: 'DARK' },
+    dig: { poder: 80 }, moonblast: { poder: 95, tipo: 'FAIRY' },
+
+    // Efeitos. Os tres primeiros travam a regra de chance que o dado cru NAO
+    // diz (ver efeitosDoGolpe): golpe de status puro vem com `ailment_chance`
+    // 0 na PokeAPI, e ler aquilo direto deixaria Thunder Wave e Toxic com 0%
+    // de chance de paralisar/envenenar — sem erro nenhum, so um golpe que
+    // nunca faz nada.
+    thunder_wave: { status: 'paralysis', chanceDeStatus: 100, precisao: 90 },
+    toxic: { status: 'poison', chanceDeStatus: 100 },
+    stun_spore: { status: 'paralysis', chanceDeStatus: 100, precisao: 75 },
+    poison_sting: { status: 'poison', chanceDeStatus: 30 },
+    fire_punch: { status: 'burn', chanceDeStatus: 10 },
+    blizzard: { status: 'freeze', chanceDeStatus: 10, precisao: 70 },
+    confuse_ray: { status: 'confusion', chanceDeStatus: 100 },
+    // Sem status: o mapa nao pode passar a inventar um.
+    tackle: { poder: 40, status: null, chanceDeStatus: 0 },
+    // Dreno, cura e critico — os outros tres campos novos.
+    absorb: { poder: 20, drenoPercentual: 50 },
+    recover: { curaPercentual: 50 },
+    slash: { estagiosDeCritico: 1 },
+    swords_dance: { mudancasDeStat: [{ stat: 'atkFis', estagios: 2 }], chanceDeStat: 100 },
+    growl: { mudancasDeStat: [{ stat: 'atkFis', estagios: -1 }], chanceDeStat: 100 },
   };
   for (const [chave, alvo] of Object.entries(esperado)) {
     const g = golpes.find((x) => x.chave === chave);
     if (!g) continue;
     for (const [campo, valor] of Object.entries(alvo)) {
-      if (g[campo] !== valor) {
-        throw new Error(`golpe ${chave}: ${campo} saiu ${g[campo]}, esperado ${valor} no Ultra Sun`);
+      // Comparacao por JSON porque `mudancasDeStat` e uma lista de objetos —
+      // `!==` nela passaria sempre, e a trava viraria enfeite.
+      const saiu = JSON.stringify(g[campo]);
+      if (saiu !== JSON.stringify(valor)) {
+        throw new Error(`golpe ${chave}: ${campo} saiu ${saiu}, esperado ${JSON.stringify(valor)} no Ultra Sun`);
       }
     }
   }

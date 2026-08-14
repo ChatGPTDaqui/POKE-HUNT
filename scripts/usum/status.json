@@ -1,0 +1,103 @@
+{
+  "_comentario": [
+    "Regras dos status, Pokemon Ultra Sun (Geracao VII). Escrito a mao, no padrao",
+    "de formulas.json e items.json.",
+    "",
+    "POR QUE NAO SAI DA POKEAPI: os campos `meta.min_turns`/`max_turns` de la nao",
+    "batem com a Gen VII. Conferido: Confuse Ray vem 2-5 (certo), mas Spore,",
+    "Hypnosis e Sing vem 2-4 quando o contador real de sono e 2-4 turnos com 1-3",
+    "de bloqueio, e Wrap vem 2-4 num lugar e 5-6 em outro — nem internamente",
+    "consistente. Duracao e regra de status saem da Bulbapedia; poder, precisao,",
+    "PP, tipo, alvo e chance de efeito continuam saindo da PokeAPI (catalog.json).",
+    "",
+    "Cada entrada cita a pagina da Bulbapedia de onde o numero veio.",
+    "",
+    "TURNO = TURNO_SEGUNDOS (formulas.json). Como o combate deste jogo e continuo,",
+    "'turno' aqui significa o intervalo de acao do POKE afetado, nao um turno de",
+    "batalha global."
+  ],
+
+  "naoVolateis": [
+    {
+      "chave": "poison",
+      "nome": "Envenenado",
+      "fonte": "Bulbapedia, Poison (status condition): 'A poisoned Pokemon will take damage equal to 1/8 of its maximum HP each turn.' (Geracao II em diante)",
+      "duracaoEmTurnos": null,
+      "danoPorTurnoFracaoDoMaximo": 0.125,
+      "imunidadesPorTipo": ["POISON", "STEEL"],
+      "_imunidade": "Bulbapedia: 'Poison-type Pokemon cannot be normally poisoned. [...] from Generation III onward, Steel-type Pokemon [...] cannot be poisoned.'"
+    },
+    {
+      "chave": "burn",
+      "nome": "Queimado",
+      "fonte": "Bulbapedia, Burn (status condition), secao 'Generation VII onward': 'A burned Pokemon once again takes damage equal to 1/16 of its maximum HP at the end of each turn.'",
+      "duracaoEmTurnos": null,
+      "danoPorTurnoFracaoDoMaximo": 0.0625,
+      "multiplicadorDeDanoFisico": 0.5,
+      "imunidadesPorTipo": ["FIRE"],
+      "_imunidade": "Bulbapedia: 'From Generation III onward, Fire-type Pokemon [...] cannot normally be burned.'"
+    },
+    {
+      "chave": "paralysis",
+      "nome": "Paralisado",
+      "fonte": "Bulbapedia, Paralysis (status condition): 'unable to attack (\"fully paralyzed\") a quarter of the time. Additionally, its Speed is reduced to 50% of its previous value (25% prior to Generation VII).'",
+      "duracaoEmTurnos": null,
+      "chanceDePerderOTurno": 0.25,
+      "multiplicadorDeVelocidade": 0.5,
+      "imunidadesPorTipo": ["ELECTRIC"],
+      "_imunidade": "Bulbapedia: 'From Generation VI onward, Electric-type Pokemon cannot be paralyzed.'"
+    },
+    {
+      "chave": "sleep",
+      "nome": "Dormindo",
+      "fonte": "Bulbapedia, Sleep (status condition), secao 'Generation V' (valendo na VII): 'Sleep now lasts 2-4 turns (with an equal chance for each), meaning it prevents movement for 1-3 turns.'",
+      "duracaoEmTurnos": [2, 4],
+      "bloqueiaAcao": true,
+      "imunidadesPorTipo": [],
+      "_imunidade": "Sono nao tem imunidade por tipo — so por habilidade (Insomnia/Vital Spirit), que este jogo nao modela. A unica imunidade que vale aqui e a de golpe de po (ver golpesDePo)."
+    },
+    {
+      "chave": "freeze",
+      "nome": "Congelado",
+      "fonte": "Bulbapedia, Freeze (status condition): 'A frozen Pokemon has a 20% chance of being thawed out on each of its turns.' (Geracao III em diante)",
+      "duracaoEmTurnos": null,
+      "chanceDeDescongelarPorTurno": 0.2,
+      "bloqueiaAcao": true,
+      "descongelaComTipo": "FIRE",
+      "imunidadesPorTipo": ["ICE"],
+      "_imunidade": "Bulbapedia: 'From Generation III onward, Ice-type Pokemon [...] cannot normally be frozen.'",
+      "_descongela": "Bulbapedia: 'being hit by a damaging Fire move that can inflict burn (i.e. any Fire-type move except Fire Spin)'"
+    }
+  ],
+
+  "volateis": [
+    {
+      "chave": "confusion",
+      "nome": "Confuso",
+      "fonte": "Bulbapedia, Confusion (status condition): 'attack itself instead of executing the selected move for a random 2-5 turns'; secao 'Generation VII onward': 'Pokemon now have a 33% chance to damage themselves during confusion.'",
+      "duracaoEmTurnos": [2, 5],
+      "chanceDeSeAtacar": 0.33,
+      "poderDoAutoDano": 40,
+      "_autoDano": "Bulbapedia: 'calculated as if it were a typeless physical move with a power of 40; it cannot score a critical hit, and does not receive STAB.'",
+      "imunidadesPorTipo": []
+    }
+  ],
+
+  "golpesDePo": {
+    "_nota": "A partir da Geracao VI, POKE de tipo GRASS e imune a golpe de po. Sem isto, Sleep Powder e Stun Spore acertariam justamente as especies que a regra real protege.",
+    "imunesPorTipo": ["GRASS"],
+    "golpes": ["spore", "sleep_powder", "stun_spore", "poison_powder", "cotton_spore", "rage_powder", "powder"]
+  },
+
+  "reaplicacao": {
+    "_nota": [
+      "DESVIO APROVADO, e o unico deste arquivo — nao e regra do jogo real.",
+      "Sem ele, um POKE curado com Antidoto pode ser reenvenenado no turno",
+      "seguinte, e o item vira ouro jogado fora: nos jogos originais a luta acaba,",
+      "aqui ela nao acaba nunca. Depois de o status sair (por cura ou naturalmente),",
+      "o mesmo POKE fica imune a reaplicacao por este tempo.",
+      "Vive aqui, e nao no codigo, pra ser ajustavel sem recompilar."
+    ],
+    "turnosDeImunidade": 3
+  }
+}

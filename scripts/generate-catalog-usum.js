@@ -90,6 +90,17 @@ function abaGolpes(catalogo) {
     'Precisão': g.precisao,
     'PP': g.pp,
     'Alvo': g.alvo,
+    // Efeitos. Sem eles todo golpe de status era inerte (184 dos 486 golpes do
+    // catalogo anterior) e todo efeito secundario — queimar, paralisar,
+    // drenar — simplesmente nao existia.
+    'Status': g.status || '',
+    'Chance de Status': g.chanceDeStatus,
+    'Mudancas de Stat': g.mudancasDeStat,
+    'Chance de Stat': g.chanceDeStat,
+    'Chance de Flinch': g.chanceDeFlinch,
+    'Estagios de Critico': g.estagiosDeCritico,
+    'Dreno %': g.drenoPercentual,
+    'Cura %': g.curaPercentual,
   }));
 }
 
@@ -159,6 +170,7 @@ function main() {
   const catalogo = lerJson(path.join(USUM_DIR, 'catalog.json'));
   const formulas = lerJson(path.join(USUM_DIR, 'formulas.json'));
   const itens = lerJson(path.join(USUM_DIR, 'items.json'));
+  const status = lerJson(path.join(USUM_DIR, 'status.json'));
 
   console.log(`Catalogo Ultra Sun: ${catalogo.especies.length} especies, ${catalogo.golpes.length} golpes, ${catalogo.tipos.length} tipos.\n`);
 
@@ -185,6 +197,7 @@ function main() {
   sync.syncFormulas(workbook);
   sync.syncTypeChart(workbook);
   sync.syncItemsFull(workbook);
+  sync.syncStatus(status);
 
   const { starter, brackets: johtoBrackets } = sync.computeJohtoBrackets(sync.pickTopHunts(workbook, sync.HUNT_COUNT));
   const brackets = [...johtoBrackets, ...sync.KANTO_BRACKETS];
