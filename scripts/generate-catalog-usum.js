@@ -23,10 +23,13 @@
 //          conferido contra a Bulbapedia por `npm run usum:conferir`)
 //   Formulas (dano, EXP, captura, critico, curvas de crescimento)
 //       -> scripts/usum/formulas.json (hand-authored, Gen VII)
-//   Itens e a GEOMETRIA das hunts (faixas de nivel dos brackets de Johto,
-//   hunt inicial)
+//   Itens (precos de loja do Ultra Sun, curas de status)
+//       -> scripts/usum/items.json (hand-authored). Antes vinha da aba 'Itens'
+//          da planilha, com precos de geracoes antigas.
+//   A GEOMETRIA das hunts (faixas de nivel dos brackets de Johto, hunt inicial)
 //       -> a planilha, via sync-planilha.js. Nao ha equivalente disso nos
-//          jogos: brackets e bounds sempre foram conceito deste idle.
+//          jogos: brackets e bounds sempre foram conceito deste idle. E a
+//          UNICA coisa que ainda sai do .xlsx.
 //   Taxa de aparicao (peso de spawn)
 //       -> scripts/spawn-tiers.json (Gen1/Gen2). Ver o cabecalho de
 //          fetch-usum-catalog.js para a medicao que sustenta essa escolha.
@@ -126,6 +129,19 @@ function abaFormulas(tabela) {
   }));
 }
 
+function abaItens(tabela) {
+  return tabela.itens.map((i) => ({
+    'Chave': i.chave.toUpperCase(),
+    'Nome': i.nome,
+    'Tipo (kind)': i.tipo,
+    'Preço de Compra': i.precoDeCompra,
+    'Multiplicador de Captura': i.multiplicadorDeCaptura,
+    'Cura de HP': i.curaDeHp,
+    'Cura % (revive)': i.curaPercentual,
+    'Cura de Status': Array.isArray(i.cura) ? i.cura.join(', ') : '',
+  }));
+}
+
 // ---------------------------------------------------------------------------
 function pesosDeSpawn() {
   const { tiers, especies } = lerJson(path.join(__dirname, 'spawn-tiers.json'));
@@ -142,6 +158,7 @@ function pesosDeSpawn() {
 function main() {
   const catalogo = lerJson(path.join(USUM_DIR, 'catalog.json'));
   const formulas = lerJson(path.join(USUM_DIR, 'formulas.json'));
+  const itens = lerJson(path.join(USUM_DIR, 'items.json'));
 
   console.log(`Catalogo Ultra Sun: ${catalogo.especies.length} especies, ${catalogo.golpes.length} golpes, ${catalogo.tipos.length} tipos.\n`);
 
@@ -157,7 +174,7 @@ function main() {
     'Espécies': abaEspecies(catalogo),
     'Golpes': abaGolpes(catalogo),
     'Movesets': abaMovesets(catalogo),
-    'Itens': planilha['Itens'],
+    'Itens': abaItens(itens),
     'TabelaDeTipos': abaTabelaDeTipos(catalogo),
     'Fórmulas': abaFormulas(formulas),
     // Geometria: usadas so por pickTopHunts/computeJohtoBrackets.

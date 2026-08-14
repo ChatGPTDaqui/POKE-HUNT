@@ -6,7 +6,8 @@
 // original — aqui viram id + lookup via findEntityById, unica mudanca de
 // forma permitida no port (risco de referencia obsoleta sob Immer).
 import { deriveRng, nextFloat, type Rng } from '@/core/rng'
-import { getAbility, BASIC_ATTACK, isDamagingAbility, type Ability } from '@/data/abilities'
+import { getAbility, BASIC_ATTACK, isDamagingAbility, TURNO_SEGUNDOS, type Ability } from '@/data/abilities'
+import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { SPECIES } from '@/data/pokes'
 import type { PokeInstance } from '@/data/pokes'
@@ -55,7 +56,12 @@ const SELF_DESTRUCT_HP_LOSS_PERCENT = 0.5
 // com fallback batendo o valor hardcoded antigo.
 const SPEED_REFERENCE = formulaEngine.evalOrDefault('ATTACK_SPEED_REFERENCE', 100)
 const BASE_ATTACK_INTERVAL = formulaEngine.evalOrDefault('BASIC_ATTACK_COOLDOWN', 2)
-const MIN_ACTION_GAP = 2 // cooldown global: nenhum atacante age de novo antes disso
+// O turno. Um numero so, em vez dos dois que existiam antes: o `TICK_MS` de
+// 1400ms (que convertia PP em cooldown) e este cooldown global de 2s, que na
+// pratica ja engolia o outro — 61% dos golpes de dano batiam no piso de 2s com
+// Velocidade 100, entao o ritmo real do combate sempre foi 2s, e o 1.4 so
+// mentia nos numeros de cooldown mostrados. Ver data/abilities.ts.
+const MIN_ACTION_GAP = TURNO_SEGUNDOS
 const MELEE_RANGE_PADDING = 10
 
 // Quao perto `attacker` precisa estar de `defender` pra lutar — sempre
@@ -157,6 +163,9 @@ function counterDamage(attackerEntity: WorldEntity, category: 'physical' | 'spec
 }
 
 const FIXED_DAMAGE_ABILITIES: Record<string, (attackerPoke: PokeInstance, defenderPoke: PokeInstance, attackerEntity: WorldEntity, rng: Rng) => number | null> = {
+  // horn_drill/fissure continuam aqui (a regra existe e funciona se o golpe
+  // chegar), mas `isDamagingAbility` nao os deixa ser escolhidos enquanto nao
+  // houver precisao — ver a nota em data/abilities.ts.
   seismic_toss: (attackerPoke) => attackerPoke.level,
   night_shade: (attackerPoke) => attackerPoke.level,
   dragon_rage: () => 40,
@@ -342,12 +351,26 @@ function basicAttackFor(attackerSpecies: { type: Ability['type'] }): Ability {
 function pickAbility(rng: Rng, entity: WorldEntity, defenderEntity: WorldEntity, aoeTargetCounter: (a: Ability) => number): Ability | null {
   const attackerSpecies = SPECIES[entity.poke.speciesId]
   const disabled = entity.poke.disabledAbilities || {}
-  const candidateIds = [...entity.poke.unlockedAbilities, BASIC_ATTACK.id].filter((id) => !disabled[id])
+  // No maximo 4 golpes (+ o AOE de nivel 50 pro POKE do jogador). Selvagem usa
+  // os 4 ultimos que a especie aprenderia naquele nivel, sem AOE — ver
+  // data/activeAbilities.ts.
+  const candidateIds = golpesUtilizaveis(entity.poke, attackerSpecies, entity.kind === 'enemy')
+    .filter((id) => !disabled[id])
   const ready = candidateIds
-    .map((id) => (id === BASIC_ATTACK.id ? basicAttackFor(attackerSpecies) : getAbility(id)))
+    .map((id) => getAbility(id))
     .filter((ability): ability is Ability => ability != null && isDamagingAbility(ability) && isAbilityReady(entity, ability.id))
 
-  if (ready.length === 0) return null
+  // Ataque Basico e o Struggle deste jogo: entra quando NENHUM dos golpes
+  // selecionados pode ser usado agora. Nos jogos reais Struggle dispara por
+  // falta de PP; aqui o cooldown E o PP, entao "todos em cooldown" e o mesmo
+  // estado. Sem isto, um POKE de poucos golpes de dano (Igglybuff tem 1, e
+  // Togepi/Unown/Forretress ficam perto disso) passaria metade dos turnos
+  // parado.
+  if (ready.length === 0) {
+    const basico = basicAttackFor(attackerSpecies)
+    if (disabled[BASIC_ATTACK.id] || !isAbilityReady(entity, BASIC_ATTACK.id)) return null
+    return basico
+  }
 
   const aoeReady = ready.filter((a) => a.target === 'aoe' && aoeTargetCounter(a) >= 2)
   const pool = aoeReady.length > 0 ? aoeReady : ready

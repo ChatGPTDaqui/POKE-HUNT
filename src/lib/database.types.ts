@@ -988,6 +988,7 @@ export type Database = {
       }
       pokemon_instances: {
         Row: {
+          active_abilities: string[] | null
           created_at: string
           disabled_abilities: Json
           exp: number
@@ -1018,6 +1019,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          active_abilities?: string[] | null
           created_at?: string
           disabled_abilities?: Json
           exp?: number
@@ -1048,6 +1050,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          active_abilities?: string[] | null
           created_at?: string
           disabled_abilities?: Json
           exp?: number

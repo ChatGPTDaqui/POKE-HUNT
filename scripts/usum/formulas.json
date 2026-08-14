@@ -159,10 +159,10 @@
       "descricao": "Pesca nao esta implementada (fora de escopo); a linha fica para nao perder o valor."
     },
     {
-      "chave": "TICK_MS",
-      "expressao": "1400",
+      "chave": "TURNO_SEGUNDOS",
+      "expressao": "2",
       "variaveis": [],
-      "descricao": "Ritmo deste jogo: um 'turno' de referencia em milissegundos. E o que converte PP em cooldown."
+      "descricao": "O turno deste jogo, em segundos. Faz dois papeis: converte PP em cooldown de golpe e e o intervalo minimo entre duas acoes de um mesmo POKE (MIN_ACTION_GAP no combatSystem). Substituiu TICK_MS=1400ms, que era um segundo ritmo paralelo: com o piso de 2s, 61% dos golpes de dano ja recarregavam em 2s de qualquer jeito."
     }
   ]
 }

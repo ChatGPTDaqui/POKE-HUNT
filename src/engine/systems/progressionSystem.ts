@@ -9,6 +9,7 @@
 // escreve de volta via `gameState.updatePokeInstance(uid, () => novoPoke)`.
 import { SPECIES, computeStatsAtLevel, totalExpForLevel, pokeExpForLevel, SPECIAL_EVOLUTION_STONE_COUNT, type PokeInstance, type StatBlock } from '@/data/pokes'
 import { getAbility, type Ability } from '@/data/abilities'
+import { activeAbilitiesPadrao, encaixarNovosGolpes } from '@/data/activeAbilities'
 import { stoneItemId } from '@/data/stones'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
@@ -130,7 +131,18 @@ export function evolvePokeInstance(pokeInstance: PokeInstance, gameState: GameSt
 
   if (stoneReq) gameState.removeItem(stoneReq.itemId, stoneReq.count)
 
-  const updatedPoke: PokeInstance = { ...pokeInstance, minLevel, speciesId: newSpecies.id, stats, hp, unlockedAbilities }
+  const updatedPoke: PokeInstance = {
+    ...pokeInstance,
+    minLevel,
+    speciesId: newSpecies.id,
+    stats,
+    hp,
+    unlockedAbilities,
+    activeAbilities: encaixarNovosGolpes(
+      pokeInstance.activeAbilities ?? activeAbilitiesPadrao(species, pokeInstance.level),
+      newAbilities.map((a) => a.id)
+    ),
+  }
   return { species: newSpecies, newAbilities, updatedPoke }
 }
 
@@ -210,7 +222,20 @@ export function grantExp(pokeInstance: PokeInstance, amount: number): GrantPokeE
     }
   }
 
-  const poke: PokeInstance = { ...pokeInstance, exp, level, stats, hp, unlockedAbilities }
+  // Golpe novo so ocupa slot VAZIO — com os 4 cheios, a escolha do jogador
+  // manda e a troca e explicita, na tela de Equipes.
+  const poke: PokeInstance = {
+    ...pokeInstance,
+    exp,
+    level,
+    stats,
+    hp,
+    unlockedAbilities,
+    activeAbilities: encaixarNovosGolpes(
+      pokeInstance.activeAbilities ?? activeAbilitiesPadrao(species, pokeInstance.level),
+      newAbilities.map((a) => a.id)
+    ),
+  }
   const statGains = leveledUp ? diffStats(pokeInstance.stats, stats) : null
   return { poke, leveledUp, newAbilities, level, statGains }
 }

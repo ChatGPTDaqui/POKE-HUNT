@@ -12,7 +12,7 @@ export type FormulasData = Record<string, FormulaEntry>
 export type TypeChartRow = Record<string, number>
 export type TypeChartData = Record<string, TypeChartRow>
 
-export type ItemKind = 'ball' | 'potion' | 'revive' | 'rod'
+export type ItemKind = 'ball' | 'potion' | 'revive' | 'status_heal' | 'rod'
 
 export interface ItemDataEntry {
   id: string
@@ -23,7 +23,16 @@ export interface ItemDataEntry {
   captureRate?: number
   healAmount?: number
   reviveHpPercent?: number
+  // Sempre lista, mesmo com um alvo so: o Full Heal cura seis status de uma
+  // vez, e um array unico evita um caso especial em quem consome.
+  healsStatus?: StatusCondition[]
 }
+
+// Os status "de verdade" do jogo: os cinco nao-volateis (persistem depois da
+// batalha) mais a confusao, que e volatil mas e a unica volatil que tem item de
+// cura (Full Heal). O resto das condicoes volateis (flinch, trap, seed) nao tem
+// item e nao aparece aqui.
+export type StatusCondition = 'poison' | 'burn' | 'paralysis' | 'sleep' | 'freeze' | 'confusion'
 export type ItemsData = Record<string, ItemDataEntry>
 
 export interface AbilityRef {

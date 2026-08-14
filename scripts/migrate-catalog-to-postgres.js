@@ -29,8 +29,10 @@ bloqueiaCatalogoAntigo(
   'npm run catalog:migrar',
   'Isto escreveria no Supabase o catalogo de Gen2 da planilha. A migracao para\n' +
   'Pokemon Ultra Sun nao passa pelo banco (decisao explicita do usuario): a fonte\n' +
-  'de build agora e scripts/usum/catalog.json, versionado no repo. Alem disso o\n' +
-  'enum `element_type` do banco nao tem FAIRY, entao a escrita nem chegaria ao fim.'
+  'de build agora e scripts/usum/catalog.json, versionado no repo.\n' +
+  'O catalogo do banco (species/moves/species_moves) segue sendo o de Gen2 e so\n' +
+  'existe como alvo de FK. As linhas que o progresso do jogador realmente aponta\n' +
+  '— `items` — sao mantidas por migration (ver 20260814120100).'
 );
 
 const ROOT = path.join(__dirname, '..');

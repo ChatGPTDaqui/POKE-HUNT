@@ -24,6 +24,9 @@ export type { PokeInstance } from '@/data/pokes'
 export { MAPS, getMap } from '@/data/maps'
 export { getEncounter } from '@/data/enemies'
 export { ITEMS, getItem } from '@/data/items'
+export {
+  MAX_ACTIVE_ABILITIES, activeAbilitiesPadrao, ehGolpeAoeDeNivel50, golpesUtilizaveis,
+} from '@/data/activeAbilities'
 
 export type { WorldState, WorldCounters } from './types'
 

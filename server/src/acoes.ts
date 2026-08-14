@@ -16,6 +16,7 @@ import {
   SPECIES, MAPS, getMap, getItem, createPokeInstance, createRng, randomSeed,
   buyItem, sellItem, sellAllItems, sellBagPoke, sellAllBagPokes, unlockMap,
   evolvePokeInstance, defaultGameStateData,
+  MAX_ACTIVE_ABILITIES, ehGolpeAoeDeNivel50,
   type GameStateData, type GameStateStore,
 } from '#engine'
 import { ErroHttp } from './db.js'
@@ -341,6 +342,42 @@ const MANIPULADORES: Record<string, Manipulador> = {
 
   alternarHabilidade(store, _estado, acao) {
     store.toggleAbilityDisabled(texto(acao.pokeUid, 'pokeUid'), texto(acao.abilityId, 'abilityId'))
+    return { ok: true }
+  },
+
+  // Os 4 golpes que o POKE leva pra luta. Escolha do jogador, feita no menu
+  // Equipes.
+  //
+  // A TRAVA DE HUNT MORA AQUI, e nao na tela: o botao desabilitado no cliente e
+  // conforto, nao regra. Desde a Fase D o cliente nao escreve progresso, entao
+  // uma validacao que existisse so la seria contornavel com um fetch. A regra e
+  // "nao troca de golpe no meio da cacada" — sair da hunt e o custo.
+  definirGolpesAtivos(store, estado, acao) {
+    if (estado.currentMapId) throw new ErroHttp(409, 'Saia da hunt para trocar os golpes.')
+
+    const uid = texto(acao.pokeUid, 'pokeUid')
+    const poke = [...estado.team, ...estado.bagPokes].find((p) => p.uid === uid)
+    if (!poke) throw new ErroHttp(404, 'POKE nao encontrado')
+
+    if (!Array.isArray(acao.abilityIds)) throw new ErroHttp(400, 'abilityIds invalido')
+    if (acao.abilityIds.length > MAX_ACTIVE_ABILITIES) {
+      throw new ErroHttp(400, `no maximo ${MAX_ACTIVE_ABILITIES} golpes`)
+    }
+
+    const conhecidos = new Set(poke.unlockedAbilities)
+    const escolhidos: string[] = []
+    for (const bruto of acao.abilityIds) {
+      const id = texto(bruto, 'abilityId')
+      if (escolhidos.includes(id)) throw new ErroHttp(400, 'golpe repetido')
+      // O AOE de nivel 50 e o Ataque Basico existem FORA dos 4 slots — aceitar
+      // qualquer um dos dois aqui deixaria o jogador gastar um slot num golpe
+      // que ele ja tem de graca, o que e so uma forma de se sabotar.
+      if (id === 'basic_attack' || ehGolpeAoeDeNivel50(id)) throw new ErroHttp(400, 'esse golpe nao ocupa slot')
+      if (!conhecidos.has(id)) throw new ErroHttp(400, 'esse POKE nao conhece esse golpe')
+      escolhidos.push(id)
+    }
+
+    store.updatePokeInstance(uid, (p) => ({ ...p, activeAbilities: escolhidos }))
     return { ok: true }
   },
 

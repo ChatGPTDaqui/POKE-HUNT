@@ -210,6 +210,10 @@ export interface GameStateActions {
   // (CombatSystem#pickAbility filtra contra `poke.disabledAbilities`).
   // Procura o poke em team E bagPokes, igual updatePokeInstance.
   toggleAbilityDisabled: (pokeUid: string, abilityId: string) => void
+  // Os no maximo 4 golpes que o POKE leva pra luta (data/activeAbilities.ts).
+  // Quem valida a lista e o servidor (server/src/acoes.ts#definirGolpesAtivos);
+  // aqui e so o caminho de escrita local.
+  setActiveAbilities: (pokeUid: string, abilityIds: string[]) => void
 
   // Equivalente a `Object.assign(gameState, new GameState())` do
   // controller.resetGame original — devolve toda a store persistente pros
@@ -617,6 +621,10 @@ export const useGameStateStore = create<GameStateStore>()(
           else disabled[abilityId] = true
           return { ...poke, disabledAbilities: disabled }
         })
+      },
+
+      setActiveAbilities: (pokeUid, abilityIds) => {
+        get().updatePokeInstance(pokeUid, (poke) => ({ ...poke, activeAbilities: [...abilityIds] }))
       },
 
       resetToDefaults: () => set(defaultGameStateData()),

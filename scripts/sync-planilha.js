@@ -182,6 +182,7 @@ const KIND_DESCRIPTIONS = {
   ball: 'Item de captura.',
   potion: 'Restaura HP.',
   revive: 'Reanima um POKE desmaiado.',
+  status_heal: 'Cura status.',
   rod: 'Vara de pesca (mecanica ainda nao implementada).',
 };
 
@@ -209,6 +210,14 @@ function syncItemsFull(workbook) {
       item.healAmount = typeof heal === 'string' && heal.toLowerCase().includes('infinito') ? Infinity : heal;
     } else if (kind === 'revive') {
       item.reviveHpPercent = row['Cura % (revive)'];
+    } else if (kind === 'status_heal') {
+      // Lista, e nao um unico status: Full Heal cura seis de uma vez. Manter
+      // um array ate pro Antidote evita um caso especial no consumidor.
+      item.healsStatus = String(row['Cura de Status'] || '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (!item.healsStatus.length) throw new Error(`item status_heal sem 'Cura de Status': ${ourKey}`);
     }
     itemsData[ourKey] = item;
   }

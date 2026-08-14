@@ -2,7 +2,7 @@
 // the spreadsheet sync (see abilities.generated.js) — `power` is the real
 // Gen2 base-power number fed into DAMAGE_BASE (CombatSystem), `type` drives
 // STAB/effectiveness, and `pp` drives `cooldown`: fewer PP means a slower-
-// recharging move — cooldown = TICK_MS * (PP_REFERENCE / pp). Each ability's
+// recharging move — cooldown = TURNO_SEGUNDOS * (PP_REFERENCE / pp). Each ability's
 // cooldown is tracked individually (CombatSystem.js), further scaled by the
 // user's Speed stat.
 //
@@ -42,11 +42,16 @@ export interface Ability {
 }
 
 const formulaEngine = createFormulaEngine(FORMULAS)
-const TICK_SECONDS = formulaEngine.eval('TICK_MS') / 1000
-const PP_REFERENCE = 20 // PP value that recharges at exactly TICK_SECONDS
+// O turno do jogo, em segundos. E a MESMA constante que o cooldown global do
+// combate (combatSystem#MIN_ACTION_GAP) — antes eram dois numeros diferentes
+// (TICK_MS=1.4s aqui, 2s la), e o menor nunca teve efeito: nenhum POKE conseguia
+// agir antes de 2s, entao golpe com cooldown calculado em 1.4s so exibia um
+// numero que o combate ignorava.
+export const TURNO_SEGUNDOS = formulaEngine.eval('TURNO_SEGUNDOS')
+const PP_REFERENCE = 20 // PP que recarrega em exatamente um turno
 
 function cooldownFromPp(pp: number): number {
-  return TICK_SECONDS * (PP_REFERENCE / Math.max(1, pp))
+  return TURNO_SEGUNDOS * (PP_REFERENCE / Math.max(1, pp))
 }
 
 export const BASIC_ATTACK: Ability = {
@@ -99,10 +104,32 @@ export function getAbility(id: string): Ability | null {
   return ABILITIES[id] || null
 }
 
-// Status/0-power moves are inert for now (see file header) — every
-// player-facing move list and the combat AI both filter through this.
+// Golpes que causam dano de verdade mas tem `power` 0 no catalogo, porque o
+// dano deles nao vem de poder base — vem de uma regra propria, implementada em
+// combatSystem#specialDamageFor (poder dinamico ou dano fixo).
+//
+// BUG QUE ISTO CORRIGE: `isDamagingAbility` filtrava por `power > 0`, entao
+// esses golpes eram descartados de `pickAbility` e das telas — codigo morto.
+// Passou a doer de verdade com o limite de 4 golpes: antes um golpe inerte era
+// 1 de ~15 na lista, agora seria 1 dos 4 slots.
+//
+// FORA DA LISTA, DE PROPOSITO: `horn_drill` e `fissure`. Os dois causam
+// `defenderPoke.hp` — KO instantaneo. Nos jogos reais o que os equilibra e a
+// precisao de 30% e a regra de nunca acertar alvo de nivel maior, e ESTE JOGO
+// NAO TEM PRECISAO (nem `Ability` nem o dado gerado tem o campo; todo golpe
+// sempre acerta). Liga-los hoje daria um botao de vitoria automatica pra toda
+// especie que os aprende. Voltam quando precisao existir.
+const DANO_SEM_PODER_BASE = new Set([
+  'magnitude', 'reversal', 'flail', 'present', 'hidden_power',
+  'seismic_toss', 'night_shade', 'dragon_rage', 'super_fang', 'psywave',
+  'counter', 'mirror_coat',
+])
+
+// Golpe de status continua inerte ate a Leva B — toda lista voltada pro jogador
+// e a IA de combate filtram por aqui.
 export function isDamagingAbility(ability: Ability | null | undefined): boolean {
-  return !!ability && ability.power > 0
+  if (!ability) return false
+  return ability.power > 0 || DANO_SEM_PODER_BASE.has(ability.id)
 }
 
 // `resolveAbilityCategory` mora em data/abilityCategory.ts — ela precisa de

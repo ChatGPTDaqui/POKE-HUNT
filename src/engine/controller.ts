@@ -163,6 +163,35 @@ export const controller = {
     })
   },
 
+  /**
+   * Troca os no maximo 4 golpes que o POKE leva pra luta.
+   *
+   * Quem recusa a troca dentro de uma hunt e o SERVIDOR
+   * (acoes.ts#definirGolpesAtivos) — a tela so esconde o botao. Por isso o
+   * `fallback` local nao roda nada quando ha hunt aberta: escrever no estado
+   * local uma troca que o servidor vai rejeitar deixaria os dois lados
+   * discordando ate o proximo carregamento.
+   *
+   * A escrita no `worldStore` acompanha `toggleAbility`: o POKE em campo e uma
+   * copia, e sem isto a troca so valeria na proxima cena.
+   */
+  setActiveAbilities(pokeUid: string, abilityIds: string[]): void {
+    const gameState = useGameStateStore.getState()
+    void pedirAcao(
+      { tipo: 'definirGolpesAtivos', pokeUid, abilityIds },
+      () => gameState.setActiveAbilities(pokeUid, abilityIds),
+    ).then((ok) => {
+      if (!ok) return
+      const atualizado = useGameStateStore.getState().team.find((p) => p.uid === pokeUid)
+      if (!atualizado) return
+      useWorldStore.getState().update((draft) => {
+        if (draft.player && draft.player.poke.uid === pokeUid) {
+          draft.player.poke = { ...draft.player.poke, activeAbilities: atualizado.activeAbilities }
+        }
+      })
+    })
+  },
+
   healTeam(): void {
     const gameState = useGameStateStore.getState()
     void pedirAcao({ tipo: 'curarEquipe' }, () => gameState.healTeamFully())

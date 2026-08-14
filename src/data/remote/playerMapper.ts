@@ -10,6 +10,7 @@ import type { GameStateData, AutoPotRule, AutoCatchConfig, AutoCatchRule, PerfSt
 import { SPECIES, computeStatsAtLevel, type PokeInstance, type StatBlock } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
 import { getAbility } from '@/data/abilities'
+import { activeAbilitiesPadrao } from '@/data/activeAbilities'
 
 type Json = Database['public']['Tables']['players']['Row']['auto_toggles']
 type Tables = Database['public']['Tables']
@@ -106,6 +107,18 @@ export function rowToPoke(row: PokemonRow): PokeInstance {
     // Coluna adicionada depois (migration 20260809150000): linha antiga volta
     // com o default `{}` do banco, entao nao ha migracao de dado a fazer.
     disabledAbilities: (row.disabled_abilities ?? {}) as Record<string, boolean>,
+    // LIDO da coluna, ao contrario de `unlockedAbilities` logo acima: este e o
+    // unico dos dois que nao e derivavel, e escolha do jogador.
+    //
+    // `null` (POKE anterior a migration 20260814120100, ou nunca configurado)
+    // vira o padrao — os 4 ultimos golpes aprendidos. Array VAZIO e mantido
+    // como esta: e a escolha valida de desligar tudo e lutar so com o Ataque
+    // Basico, e o `??` nao a confunde com null.
+    //
+    // O filtro por especie desconhecida acompanha `unlockedAbilities`: sem
+    // species nao ha padrao a montar.
+    activeAbilities: row.active_abilities
+      ?? (species ? activeAbilitiesPadrao(species, row.level) : undefined),
     locked: row.locked,
     capturedAt: row.created_at,
     originalTrainer: row.original_trainer ?? undefined,
@@ -214,6 +227,9 @@ export function pokeToRow(userId: string, poke: PokeInstance, location: 'team' |
     stat_hp: poke.stats.hp, stat_atk_fis: poke.stats.atkFis, stat_atk_esp: poke.stats.atkEsp,
     stat_def: poke.stats.def, stat_def_esp: poke.stats.defEsp, stat_speed: poke.stats.speed,
     unlocked_abilities: poke.unlockedAbilities,
+    // `?? null` pelo mesmo motivo de `original_trainer` acima. NULL aqui tem
+    // significado proprio (nunca configurado) e nao pode virar '{}'.
+    active_abilities: poke.activeAbilities ?? null,
     // Sem esta linha o golpe desligado a mao voltava ligado no proximo
     // carregamento — o combate respeitava o campo, mas ninguem o gravava.
     disabled_abilities: poke.disabledAbilities ?? {},

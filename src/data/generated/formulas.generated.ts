@@ -160,8 +160,8 @@ export const FORMULAS: FormulasData = {
     "expr": "51",
     "vars": []
   },
-  "TICK_MS": {
-    "expr": "1400",
+  "TURNO_SEGUNDOS": {
+    "expr": "2",
     "vars": []
   }
 };

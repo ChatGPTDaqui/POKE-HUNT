@@ -13,6 +13,7 @@ import { randInt, rollChance } from '@/core/random'
 import { RARITIES, rollRarity, type RarityKey } from './rarity'
 import type { Rng } from '@/core/rng'
 import { typedAoeMoveKey, TYPED_AOE_LEVEL } from './typedAoeMoves'
+import { activeAbilitiesPadrao } from './activeAbilities'
 import type { GrowthCurve, SpeciesBaseStats, SpeciesDataEntry } from './generated/types'
 
 export type StatKey = keyof SpeciesBaseStats
@@ -35,6 +36,13 @@ export interface PokeInstance {
   stats: StatBlock
   hp: number
   unlockedAbilities: string[]
+  // Os no maximo 4 golpes que o POKE leva pra luta (data/activeAbilities.ts).
+  // Diferente de `unlockedAbilities`, que e DERIVAVEL de especie+nivel, este e
+  // escolha do jogador — e o unico dos dois que precisa ser gravado.
+  // Ausente = nunca configurado; o leitor cai no padrao. Array vazio e
+  // escolha valida (desligar tudo e cair no Ataque Basico) e NAO e o mesmo que
+  // ausente.
+  activeAbilities?: string[]
   // Setados fora deste arquivo, em runtime (nao no momento da criacao) —
   // opcionais aqui pra todo call site existente continuar valido.
   locked?: boolean // BagMenu.js — trava contra venda (EconomySystem.js)
@@ -280,5 +288,9 @@ export function createPokeInstance(rng: Rng, speciesId: string, level = 1, { ivs
       .filter((entry) => entry.levelReq <= level)
       .map((entry) => entry.key)
       .filter((key) => getAbility(key)),
+    // Selvagem ignora este campo (`golpesUtilizaveis` deriva os 4 ultimos
+    // direto da especie), entao aqui vale sempre o padrao de POKE do jogador —
+    // e o valor que sobrevive se este POKE for capturado ou for o inicial.
+    activeAbilities: activeAbilitiesPadrao(species, level),
   }
 }
