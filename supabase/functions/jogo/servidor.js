@@ -49912,14 +49912,15 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 	});
 	const offline = segundos > 120;
 	world.pessimista = offline;
-	const resumo = simulateWorldSeconds({
+	const pausado = offline && true;
+	const resumo = pausado ? createEmptySummary() : simulateWorldSeconds({
 		world,
 		gameState: store,
 		seconds: segundos,
 		stepSeconds: OFFLINE_SIM_STEP_SECONDS,
 		stepFn: (w, dt, opts) => stepWorld(w, dt, store, opts)
 	});
-	const piso = offline ? aplicarPiso(store, estado, resumo, agora) : NENHUM_PISO;
+	const piso = offline && !pausado ? aplicarPiso(store, estado, resumo, agora) : NENHUM_PISO;
 	if (!offline) recordBatch(store, {
 		gold: resumo.gold,
 		xp: resumo.xp,

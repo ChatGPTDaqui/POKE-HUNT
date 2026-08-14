@@ -4,7 +4,7 @@ import {
   snapshotToGameState, gameStateToPlayerRow, gameStateToPokemonRows,
   gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
   defaultGameStateData, MAPS,
-  OFFLINE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS,
+  OFFLINE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary,
 } from '#engine'
 import {
@@ -40,6 +40,31 @@ const CONQUISTA_LANCE = 'boss_lance'
 // esquecida aberta por uma semana) de virar uma simulacao de dias num request.
 // O Farm Offline do cliente ja tinha um teto proprio pelo mesmo motivo.
 export const MAX_SEGUNDOS_POR_FLUSH = 6 * 3600
+
+/**
+ * FARM OFFLINE PAUSADO — chave temporaria, ligada a pedido do usuario.
+ *
+ * Com `true`, o intervalo que caracteriza AUSENCIA (acima de
+ * LIMIAR_OFFLINE_SEGUNDOS) deixa de ser simulado: o jogador que volta depois de
+ * horas fora nao recebe nada por esse tempo. Jogo AO VIVO nao e afetado — os
+ * flushes de 30 em 30 segundos continuam creditando normalmente, porque ficam
+ * abaixo do limiar.
+ *
+ * O TEMPO PARADO E DESCARTADO, nao acumulado. `last_flush_at` continua avancando
+ * pra agora no claim, entao retomar nao paga uma divida represada. E a mesma
+ * regra que este arquivo ja aplica ao teto de 6h logo acima ("creditar depois
+ * daria ao jogador o direito de acumular semanas paradas e sacar tudo de uma
+ * vez") — e, na pratica, evita que religar o farm despeje 6 horas de recompensa
+ * na conta de todo mundo no mesmo instante.
+ *
+ * A pausa vive NO SERVIDOR porque e ele quem simula: desde a Fase D o cliente
+ * so pede o resumo (ver useOfflineFarmOnBoot). Uma chave no cliente nao pausaria
+ * nada — so esconderia o relatorio de um farm que aconteceu.
+ *
+ * PARA RETOMAR: trocar para `false` e republicar a Edge Function
+ * (`npm run edge:publicar`). Nao basta mergear — o deploy dela e manual.
+ */
+export const FARM_OFFLINE_PAUSADO = true
 
 // LIMIAR_OFFLINE_SEGUNDOS vem do engine compartilhado (src/engine/simulation.ts)
 // — o farm offline sem servidor (GameShell.tsx) precisa do MESMO limiar pra
@@ -514,17 +539,32 @@ async function simularSessao(
   const offline = segundos > LIMIAR_OFFLINE_SEGUNDOS
   world.pessimista = offline
 
-  const resumo = simulateWorldSeconds({
-    world,
-    gameState: store,
-    seconds: segundos,
-    stepSeconds: OFFLINE_SIM_STEP_SECONDS,
-    stepFn: (w, dt, opts) => stepWorld(w, dt, store, opts),
-  })
+  // Farm offline pausado: o intervalo de AUSENCIA nao roda. Sai um resumo
+  // vazio, e o `last_flush_at` ja avancou pra agora la no claim — o tempo
+  // parado e descartado, nao represado. Ver FARM_OFFLINE_PAUSADO.
+  //
+  // Cai aqui DEPOIS de `buildMapWorld` de proposito: o mundo precisa existir
+  // pra o `rng_state` ser gravado adiante e a sequencia de sorteio nao voltar
+  // pro comeco quando o farm for religado.
+  const pausado = offline && FARM_OFFLINE_PAUSADO
+
+  const resumo = pausado
+    ? createEmptySummary()
+    : simulateWorldSeconds({
+      world,
+      gameState: store,
+      seconds: segundos,
+      stepSeconds: OFFLINE_SIM_STEP_SECONDS,
+      stepFn: (w, dt, opts) => stepWorld(w, dt, store, opts),
+    })
 
   // O piso so existe pra impedir que o pior caso degenere pra zero — nao tem o
   // que fazer num flush de jogo ao vivo.
-  const piso = offline ? aplicarPiso(store, estado, resumo, agora) : NENHUM_PISO
+  // O piso do farm offline (nunca menos que 50% da taxa online medida) tambem
+  // sai de cena enquanto pausado: ele existe pra impedir que o PIOR CASO da
+  // simulacao degenere pra zero. Com a simulacao desligada, zero e o resultado
+  // pretendido — aplicar o piso pagaria justamente o que a pausa quer nao pagar.
+  const piso = offline && !pausado ? aplicarPiso(store, estado, resumo, agora) : NENHUM_PISO
 
   // A taxa "online medida" que o piso usa de referencia so pode vir de jogo ao
   // vivo. Sem isto ela nunca sairia do zero: `recordKill` vive dentro de um
