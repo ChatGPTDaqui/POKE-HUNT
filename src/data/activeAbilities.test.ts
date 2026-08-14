@@ -64,6 +64,29 @@ describe('limite de 4 golpes', () => {
     }
   })
 
+  it('o padrao do jogador leva os 4 de maior dano efetivo, e nao os 4 ultimos', () => {
+    // A regressao que este teste guarda custou metade das kills/hora numa
+    // caçada limitada por dano — ver a nota em activeAbilitiesPadrao.
+    for (const species of Object.values(SPECIES)) {
+      for (const level of NIVEIS) {
+        const escolhidos = activeAbilitiesPadrao(species, level).map((k) => getAbility(k)!)
+        const dano = escolhidos.filter((a) => isDamagingAbility(a))
+        if (dano.length === 0) continue
+
+        const stab = (a: NonNullable<ReturnType<typeof getAbility>>) =>
+          a.power * (a.type === species.type || a.type === species.type2 ? 1.5 : 1)
+        const piorEscolhido = Math.min(...dano.map(stab))
+
+        const disponiveis = species.abilities
+          .filter((e) => e.levelReq <= level && e.key !== typedAoeMoveKey(species.type))
+          .map((e) => getAbility(e.key))
+          .filter((a): a is NonNullable<typeof a> => a != null && isDamagingAbility(a))
+        const fora = disponiveis.filter((a) => !escolhidos.some((e) => e.id === a.id))
+        for (const a of fora) expect(stab(a)).toBeLessThanOrEqual(piorEscolhido)
+      }
+    }
+  })
+
   it('o padrao do jogador prefere golpe de dano — nenhum POKE nasce com kit inerte', () => {
     for (const species of Object.values(SPECIES)) {
       for (const level of NIVEIS) {
