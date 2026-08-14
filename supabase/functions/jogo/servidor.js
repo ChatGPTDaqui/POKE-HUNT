@@ -26255,3474 +26255,1211 @@ var WATER_SPAWN_POINT = {
 	y: 86.56738461538407
 };
 //#endregion
-//#region src/data/generated/maps.generated.ts
-var MAPS_DATA = {
-	"route_46": {
-		"id": "route_46",
-		"name": "Route 46 (Inicial)",
-		"description": "Local selvagem: Route 46 (Inicial) (nivel 2-2).",
-		"levelRange": [2, 2],
-		"unlockCost": null,
-		"continent": "johto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#284b3c",
-			"secondary": "#2e5544",
-			"image": "assets/hunt-backgrounds/forest.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"route_46_geodude",
-			"route_46_spearow",
-			"route_46_rattata"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
+//#region src/data/biomas.ts
+var FAIXAS$1 = [
+	{
+		id: "faixa1",
+		nome: "I",
+		niveis: [1, 30],
+		zonaMaxima: 2
 	},
-	"lv_1_10_floresta": {
-		"id": "lv_1_10_floresta",
-		"name": "Zona Nivel 1-10 (Floresta)",
-		"description": "Local selvagem: Zona Nivel 1-10 (Floresta) (nivel 2-12).",
-		"levelRange": [2, 12],
-		"unlockCost": null,
-		"continent": "johto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#284b3c",
-			"secondary": "#2e5544",
-			"image": "assets/hunt-backgrounds/forest.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"lv_1_10_floresta_ivysaur",
-			"lv_1_10_floresta_venusaur",
-			"lv_1_10_floresta_oddish",
-			"lv_1_10_floresta_gloom",
-			"lv_1_10_floresta_bellsprout",
-			"lv_1_10_floresta_weepinbell",
-			"lv_1_10_floresta_victreebel",
-			"lv_1_10_floresta_exeggcute",
-			"lv_1_10_floresta_tangela",
-			"lv_1_10_floresta_chikorita",
-			"lv_1_10_floresta_bayleef",
-			"lv_1_10_floresta_meganium",
-			"lv_1_10_floresta_hoppip",
-			"lv_1_10_floresta_skiploom",
-			"lv_1_10_floresta_jumpluff",
-			"lv_1_10_floresta_sunkern",
-			"lv_1_10_floresta_sunflora"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
+	{
+		id: "faixa2",
+		nome: "II",
+		niveis: [31, 60],
+		zonaMaxima: 5
 	},
-	"lv_1_10_bosque": {
-		"id": "lv_1_10_bosque",
-		"name": "Zona Nivel 1-10 (Bosque)",
-		"description": "Local selvagem: Zona Nivel 1-10 (Bosque) (nivel 2-12).",
-		"levelRange": [2, 12],
-		"unlockCost": null,
-		"continent": "johto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#284b3c",
-			"secondary": "#2e5544",
-			"image": "assets/hunt-backgrounds/forest.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"lv_1_10_bosque_caterpie",
-			"lv_1_10_bosque_metapod",
-			"lv_1_10_bosque_butterfree",
-			"lv_1_10_bosque_weedle",
-			"lv_1_10_bosque_kakuna",
-			"lv_1_10_bosque_beedrill",
-			"lv_1_10_bosque_paras",
-			"lv_1_10_bosque_parasect",
-			"lv_1_10_bosque_venonat",
-			"lv_1_10_bosque_venomoth",
-			"lv_1_10_bosque_scyther",
-			"lv_1_10_bosque_pinsir",
-			"lv_1_10_bosque_ledyba",
-			"lv_1_10_bosque_ledian",
-			"lv_1_10_bosque_spinarak",
-			"lv_1_10_bosque_ariados",
-			"lv_1_10_bosque_yanma",
-			"lv_1_10_bosque_pineco",
-			"lv_1_10_bosque_forretress",
-			"lv_1_10_bosque_scizor",
-			"lv_1_10_bosque_heracross"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"lv_11_20_costa": {
-		"id": "lv_11_20_costa",
-		"name": "Zona Nivel 11-20 (Costa)",
-		"description": "Local selvagem: Zona Nivel 11-20 (Costa) (nivel 10-18).",
-		"levelRange": [10, 18],
-		"unlockCost": null,
-		"continent": "johto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#284b3c",
-			"secondary": "#2e5544",
-			"image": "assets/hunt-backgrounds/water.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"lv_11_20_costa_wartortle",
-			"lv_11_20_costa_blastoise",
-			"lv_11_20_costa_psyduck",
-			"lv_11_20_costa_golduck",
-			"lv_11_20_costa_poliwag",
-			"lv_11_20_costa_poliwhirl",
-			"lv_11_20_costa_tentacool",
-			"lv_11_20_costa_tentacruel",
-			"lv_11_20_costa_slowpoke",
-			"lv_11_20_costa_slowbro",
-			"lv_11_20_costa_seel",
-			"lv_11_20_costa_dewgong",
-			"lv_11_20_costa_shellder",
-			"lv_11_20_costa_krabby",
-			"lv_11_20_costa_kingler",
-			"lv_11_20_costa_horsea",
-			"lv_11_20_costa_seadra",
-			"lv_11_20_costa_goldeen",
-			"lv_11_20_costa_seaking",
-			"lv_11_20_costa_staryu",
-			"lv_11_20_costa_magikarp",
-			"lv_11_20_costa_gyarados",
-			"lv_11_20_costa_lapras",
-			"lv_11_20_costa_totodile",
-			"lv_11_20_costa_croconaw",
-			"lv_11_20_costa_feraligatr",
-			"lv_11_20_costa_chinchou",
-			"lv_11_20_costa_lanturn",
-			"lv_11_20_costa_marill",
-			"lv_11_20_costa_azumarill",
-			"lv_11_20_costa_politoed",
-			"lv_11_20_costa_wooper",
-			"lv_11_20_costa_quagsire",
-			"lv_11_20_costa_qwilfish",
-			"lv_11_20_costa_corsola",
-			"lv_11_20_costa_remoraid",
-			"lv_11_20_costa_octillery",
-			"lv_11_20_costa_mantine",
-			"lv_11_20_costa_kingdra"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"lv_11_20_planicie": {
-		"id": "lv_11_20_planicie",
-		"name": "Zona Nivel 11-20 (Planicie)",
-		"description": "Local selvagem: Zona Nivel 11-20 (Planicie) (nivel 10-18).",
-		"levelRange": [10, 18],
-		"unlockCost": null,
-		"continent": "johto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#284b3c",
-			"secondary": "#2e5544",
-			"image": "assets/hunt-backgrounds/forest.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"lv_11_20_planicie_pidgey",
-			"lv_11_20_planicie_pidgeotto",
-			"lv_11_20_planicie_pidgeot",
-			"lv_11_20_planicie_rattata",
-			"lv_11_20_planicie_raticate",
-			"lv_11_20_planicie_spearow",
-			"lv_11_20_planicie_fearow",
-			"lv_11_20_planicie_jigglypuff",
-			"lv_11_20_planicie_meowth",
-			"lv_11_20_planicie_persian",
-			"lv_11_20_planicie_farfetch_d",
-			"lv_11_20_planicie_doduo",
-			"lv_11_20_planicie_dodrio",
-			"lv_11_20_planicie_lickitung",
-			"lv_11_20_planicie_kangaskhan",
-			"lv_11_20_planicie_tauros",
-			"lv_11_20_planicie_ditto",
-			"lv_11_20_planicie_eevee",
-			"lv_11_20_planicie_porygon",
-			"lv_11_20_planicie_snorlax",
-			"lv_11_20_planicie_sentret",
-			"lv_11_20_planicie_furret",
-			"lv_11_20_planicie_hoothoot",
-			"lv_11_20_planicie_noctowl",
-			"lv_11_20_planicie_igglybuff",
-			"lv_11_20_planicie_aipom",
-			"lv_11_20_planicie_girafarig",
-			"lv_11_20_planicie_dunsparce",
-			"lv_11_20_planicie_teddiursa",
-			"lv_11_20_planicie_ursaring",
-			"lv_11_20_planicie_porygon2",
-			"lv_11_20_planicie_stantler",
-			"lv_11_20_planicie_smeargle",
-			"lv_11_20_planicie_miltank"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"lv_21_30_caverna": {
-		"id": "lv_21_30_caverna",
-		"name": "Zona Nivel 21-30 (Caverna)",
-		"description": "Local selvagem: Zona Nivel 21-30 (Caverna) (nivel 18-32).",
-		"levelRange": [18, 32],
-		"unlockCost": null,
-		"continent": "johto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#1c1c2b",
-			"secondary": "#242438",
-			"image": "assets/hunt-backgrounds/cave.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"lv_21_30_caverna_geodude",
-			"lv_21_30_caverna_graveler",
-			"lv_21_30_caverna_golem",
-			"lv_21_30_caverna_onix",
-			"lv_21_30_caverna_omanyte",
-			"lv_21_30_caverna_omastar",
-			"lv_21_30_caverna_kabuto",
-			"lv_21_30_caverna_kabutops",
-			"lv_21_30_caverna_aerodactyl",
-			"lv_21_30_caverna_sudowoodo",
-			"lv_21_30_caverna_larvitar",
-			"lv_21_30_caverna_pupitar",
-			"lv_21_30_caverna_tyranitar"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"lv_21_30_deserto": {
-		"id": "lv_21_30_deserto",
-		"name": "Zona Nivel 21-30 (Deserto)",
-		"description": "Local selvagem: Zona Nivel 21-30 (Deserto) (nivel 18-32).",
-		"levelRange": [18, 32],
-		"unlockCost": null,
-		"continent": "johto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#284b3c",
-			"secondary": "#2e5544",
-			"image": "assets/hunt-backgrounds/cave.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"lv_21_30_deserto_sandshrew",
-			"lv_21_30_deserto_sandslash",
-			"lv_21_30_deserto_diglett",
-			"lv_21_30_deserto_dugtrio",
-			"lv_21_30_deserto_cubone",
-			"lv_21_30_deserto_marowak",
-			"lv_21_30_deserto_rhyhorn",
-			"lv_21_30_deserto_rhydon",
-			"lv_21_30_deserto_gligar",
-			"lv_21_30_deserto_phanpy",
-			"lv_21_30_deserto_donphan"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"lv_31_40_vulcanico": {
-		"id": "lv_31_40_vulcanico",
-		"name": "Zona Nivel 31-40 (Vulcanico)",
-		"description": "Local selvagem: Zona Nivel 31-40 (Vulcanico) (nivel 15-51).",
-		"levelRange": [15, 51],
-		"unlockCost": null,
-		"continent": "johto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#1c1c2b",
-			"secondary": "#242438",
-			"image": "assets/hunt-backgrounds/fire.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"lv_31_40_vulcanico_charmeleon",
-			"lv_31_40_vulcanico_charizard",
-			"lv_31_40_vulcanico_growlithe",
-			"lv_31_40_vulcanico_arcanine",
-			"lv_31_40_vulcanico_ponyta",
-			"lv_31_40_vulcanico_rapidash",
-			"lv_31_40_vulcanico_magmar",
-			"lv_31_40_vulcanico_cyndaquil",
-			"lv_31_40_vulcanico_quilava",
-			"lv_31_40_vulcanico_typhlosion",
-			"lv_31_40_vulcanico_slugma",
-			"lv_31_40_vulcanico_magcargo",
-			"lv_31_40_vulcanico_magby"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"lv_31_40_usina": {
-		"id": "lv_31_40_usina",
-		"name": "Zona Nivel 31-40 (Usina)",
-		"description": "Local selvagem: Zona Nivel 31-40 (Usina) (nivel 15-51).",
-		"levelRange": [15, 51],
-		"unlockCost": null,
-		"continent": "johto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#1c1c2b",
-			"secondary": "#242438",
-			"image": "assets/hunt-backgrounds/eletric.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"lv_31_40_usina_pikachu",
-			"lv_31_40_usina_magnemite",
-			"lv_31_40_usina_magneton",
-			"lv_31_40_usina_voltorb",
-			"lv_31_40_usina_electrode",
-			"lv_31_40_usina_electabuzz",
-			"lv_31_40_usina_pichu",
-			"lv_31_40_usina_mareep",
-			"lv_31_40_usina_flaaffy",
-			"lv_31_40_usina_ampharos",
-			"lv_31_40_usina_elekid"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"lv_41_50_pantano": {
-		"id": "lv_41_50_pantano",
-		"name": "Zona Nivel 41-50 (Pantano)",
-		"description": "Local selvagem: Zona Nivel 41-50 (Pantano) (nivel 41-52).",
-		"levelRange": [41, 52],
-		"unlockCost": null,
-		"continent": "johto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#284b3c",
-			"secondary": "#2e5544",
-			"image": "assets/hunt-backgrounds/water.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"lv_41_50_pantano_ekans",
-			"lv_41_50_pantano_arbok",
-			"lv_41_50_pantano_nidoran_f",
-			"lv_41_50_pantano_nidorina",
-			"lv_41_50_pantano_nidoqueen",
-			"lv_41_50_pantano_nidoran_m",
-			"lv_41_50_pantano_nidorino",
-			"lv_41_50_pantano_nidoking",
-			"lv_41_50_pantano_zubat",
-			"lv_41_50_pantano_golbat",
-			"lv_41_50_pantano_grimer",
-			"lv_41_50_pantano_muk",
-			"lv_41_50_pantano_koffing",
-			"lv_41_50_pantano_weezing"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"lv_41_50_dojo": {
-		"id": "lv_41_50_dojo",
-		"name": "Zona Nivel 41-50 (Dojo)",
-		"description": "Local selvagem: Zona Nivel 41-50 (Dojo) (nivel 41-52).",
-		"levelRange": [41, 52],
-		"unlockCost": null,
-		"continent": "johto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#1c1c2b",
-			"secondary": "#242438",
-			"image": "assets/hunt-backgrounds/dojo.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"lv_41_50_dojo_mankey",
-			"lv_41_50_dojo_primeape",
-			"lv_41_50_dojo_machop",
-			"lv_41_50_dojo_machoke",
-			"lv_41_50_dojo_machamp",
-			"lv_41_50_dojo_hitmonlee",
-			"lv_41_50_dojo_hitmonchan",
-			"lv_41_50_dojo_tyrogue"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"kanto_lv_1_10_geleira": {
-		"id": "kanto_lv_1_10_geleira",
-		"name": "Kanto Zona Nivel 52-62 (Geleira)",
-		"description": "Local selvagem: Kanto Zona Nivel 52-62 (Geleira) (nivel 52-62).",
-		"levelRange": [52, 62],
-		"unlockCost": null,
-		"continent": "kanto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#1c1c2b",
-			"secondary": "#242438",
-			"image": "assets/hunt-backgrounds/cave.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"kanto_lv_1_10_geleira_jynx",
-			"kanto_lv_1_10_geleira_swinub",
-			"kanto_lv_1_10_geleira_piloswine",
-			"kanto_lv_1_10_geleira_delibird",
-			"kanto_lv_1_10_geleira_smoochum"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"kanto_lv_1_10_fabrica": {
-		"id": "kanto_lv_1_10_fabrica",
-		"name": "Kanto Zona Nivel 52-62 (Fabrica)",
-		"description": "Local selvagem: Kanto Zona Nivel 52-62 (Fabrica) (nivel 52-62).",
-		"levelRange": [52, 62],
-		"unlockCost": null,
-		"continent": "kanto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#1c1c2b",
-			"secondary": "#242438",
-			"image": "assets/hunt-backgrounds/cave.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"kanto_lv_1_10_fabrica_steelix",
-			"kanto_lv_1_10_fabrica_skarmory",
-			"kanto_lv_1_10_fabrica_magnemite",
-			"kanto_lv_1_10_fabrica_forretress",
-			"kanto_lv_1_10_fabrica_magneton",
-			"kanto_lv_1_10_fabrica_scizor"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"kanto_lv_11_20_penhascos": {
-		"id": "kanto_lv_11_20_penhascos",
-		"name": "Kanto Zona Nivel 60-70 (Penhascos)",
-		"description": "Local selvagem: Kanto Zona Nivel 60-70 (Penhascos) (nivel 60-70).",
-		"levelRange": [60, 70],
-		"unlockCost": null,
-		"continent": "kanto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#284b3c",
-			"secondary": "#2e5544",
-			"image": "assets/hunt-backgrounds/water.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"kanto_lv_11_20_penhascos_pidgey",
-			"kanto_lv_11_20_penhascos_spearow",
-			"kanto_lv_11_20_penhascos_zubat",
-			"kanto_lv_11_20_penhascos_hoothoot",
-			"kanto_lv_11_20_penhascos_ledyba",
-			"kanto_lv_11_20_penhascos_hoppip",
-			"kanto_lv_11_20_penhascos_doduo",
-			"kanto_lv_11_20_penhascos_natu",
-			"kanto_lv_11_20_penhascos_pidgeotto",
-			"kanto_lv_11_20_penhascos_skiploom",
-			"kanto_lv_11_20_penhascos_fearow",
-			"kanto_lv_11_20_penhascos_golbat",
-			"kanto_lv_11_20_penhascos_noctowl",
-			"kanto_lv_11_20_penhascos_ledian",
-			"kanto_lv_11_20_penhascos_xatu",
-			"kanto_lv_11_20_penhascos_yanma"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"kanto_lv_11_20_torre_mistica": {
-		"id": "kanto_lv_11_20_torre_mistica",
-		"name": "Kanto Zona Nivel 60-70 (Torre Mistica)",
-		"description": "Local selvagem: Kanto Zona Nivel 60-70 (Torre Mistica) (nivel 60-70).",
-		"levelRange": [60, 70],
-		"unlockCost": null,
-		"continent": "kanto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#3e2f23",
-			"secondary": "#4a3829",
-			"image": "assets/hunt-backgrounds/dojo.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"kanto_lv_11_20_torre_mistica_abra",
-			"kanto_lv_11_20_torre_mistica_kadabra",
-			"kanto_lv_11_20_torre_mistica_alakazam",
-			"kanto_lv_11_20_torre_mistica_drowzee",
-			"kanto_lv_11_20_torre_mistica_hypno",
-			"kanto_lv_11_20_torre_mistica_natu",
-			"kanto_lv_11_20_torre_mistica_xatu",
-			"kanto_lv_11_20_torre_mistica_unown",
-			"kanto_lv_11_20_torre_mistica_wobbuffet"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"kanto_lv_21_35_cemiterio": {
-		"id": "kanto_lv_21_35_cemiterio",
-		"name": "Kanto Zona Nivel 68-85 (Cemiterio)",
-		"description": "Local selvagem: Kanto Zona Nivel 68-85 (Cemiterio) (nivel 68-85).",
-		"levelRange": [68, 85],
-		"unlockCost": null,
-		"continent": "kanto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#3e2f23",
-			"secondary": "#4a3829",
-			"image": "assets/hunt-backgrounds/cave.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"kanto_lv_21_35_cemiterio_gastly",
-			"kanto_lv_21_35_cemiterio_haunter",
-			"kanto_lv_21_35_cemiterio_gengar",
-			"kanto_lv_21_35_cemiterio_misdreavus"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"kanto_lv_21_35_covil_sombrio": {
-		"id": "kanto_lv_21_35_covil_sombrio",
-		"name": "Kanto Zona Nivel 68-85 (Covil Sombrio)",
-		"description": "Local selvagem: Kanto Zona Nivel 68-85 (Covil Sombrio) (nivel 68-85).",
-		"levelRange": [68, 85],
-		"unlockCost": null,
-		"continent": "kanto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#1c1c2b",
-			"secondary": "#242438",
-			"image": "assets/hunt-backgrounds/cave.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"kanto_lv_21_35_covil_sombrio_murkrow",
-			"kanto_lv_21_35_covil_sombrio_sneasel",
-			"kanto_lv_21_35_covil_sombrio_houndour",
-			"kanto_lv_21_35_covil_sombrio_houndoom"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"kanto_lv_36_55_ruinas_ancestrais": {
-		"id": "kanto_lv_36_55_ruinas_ancestrais",
-		"name": "Kanto Zona Nivel 80-105 (Ruinas Ancestrais)",
-		"description": "Local selvagem: Kanto Zona Nivel 80-105 (Ruinas Ancestrais) (nivel 80-105).",
-		"levelRange": [80, 105],
-		"unlockCost": null,
-		"continent": "kanto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#3e2f23",
-			"secondary": "#4a3829",
-			"image": "assets/hunt-backgrounds/dragon.png"
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"kanto_lv_36_55_ruinas_ancestrais_dratini",
-			"kanto_lv_36_55_ruinas_ancestrais_dragonair",
-			"kanto_lv_36_55_ruinas_ancestrais_dragonite",
-			"kanto_lv_36_55_ruinas_ancestrais_kingdra"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
-	},
-	"kanto_lv_36_55_clareira_encantada": {
-		"id": "kanto_lv_36_55_clareira_encantada",
-		"name": "Kanto Zona Nivel 80-105 (Clareira Encantada)",
-		"description": "Local selvagem: Kanto Zona Nivel 80-105 (Clareira Encantada) (nivel 80-105).",
-		"levelRange": [80, 105],
-		"unlockCost": null,
-		"continent": "kanto",
-		"bounds": {
-			"width": 1400,
-			"height": 900
-		},
-		"playerSpawn": {
-			"x": 700,
-			"y": 450
-		},
-		"bg": {
-			"primary": "#284b3c",
-			"secondary": "#2e5544",
-			"image": null
-		},
-		"maxEnemies": 6,
-		"respawnDelay": 6,
-		"spawnPoints": [
-			{
-				"x": 500,
-				"y": 320
-			},
-			{
-				"x": 900,
-				"y": 320
-			},
-			{
-				"x": 500,
-				"y": 580
-			},
-			{
-				"x": 900,
-				"y": 580
-			},
-			{
-				"x": 700,
-				"y": 250
-			},
-			{
-				"x": 700,
-				"y": 650
-			}
-		],
-		"enemyPool": [
-			"kanto_lv_36_55_clareira_encantada_cleffa",
-			"kanto_lv_36_55_clareira_encantada_togepi",
-			"kanto_lv_36_55_clareira_encantada_snubbull",
-			"kanto_lv_36_55_clareira_encantada_granbull"
-		],
-		"itemDrops": [{
-			"itemId": "potion",
-			"chance": .15
-		}, {
-			"itemId": "poke_ball",
-			"chance": .1
-		}]
+	{
+		id: "faixa3",
+		nome: "III",
+		niveis: [61, 90],
+		zonaMaxima: 8
 	}
+];
+var FAIXAS_INICIAIS = ["faixa1", "faixa2"];
+var GRUPOS_DO_LANCE = ["faixa3", "nightmare"];
+var LOOT = {
+	basico: [{
+		itemId: "potion",
+		chance: .15
+	}, {
+		itemId: "poke_ball",
+		chance: .1
+	}],
+	civilizado: [
+		{
+			itemId: "potion",
+			chance: .18
+		},
+		{
+			itemId: "poke_ball",
+			chance: .14
+		},
+		{
+			itemId: "great_ball",
+			chance: .05
+		}
+	],
+	remoto: [
+		{
+			itemId: "super_potion",
+			chance: .1
+		},
+		{
+			itemId: "great_ball",
+			chance: .08
+		},
+		{
+			itemId: "revive",
+			chance: .03
+		}
+	],
+	profundo: [
+		{
+			itemId: "hyper_potion",
+			chance: .06
+		},
+		{
+			itemId: "ultra_ball",
+			chance: .05
+		},
+		{
+			itemId: "max_revive",
+			chance: .015
+		}
+	]
+};
+var ARTE = {
+	floresta: "assets/hunt-backgrounds/forest.png",
+	agua: "assets/hunt-backgrounds/water.png",
+	caverna: "assets/hunt-backgrounds/cave.png",
+	fogo: "assets/hunt-backgrounds/fire.png",
+	dojo: "assets/hunt-backgrounds/dojo.png",
+	eletrico: "assets/hunt-backgrounds/eletric.png",
+	dragao: "assets/hunt-backgrounds/dragon.png"
+};
+var BIOMAS = [
+	{
+		chave: "campo_aberto",
+		nome: "Campo Aberto",
+		tipo: "NORMAL",
+		bg: {
+			primary: "#3f5a34",
+			secondary: "#4a6a3d",
+			image: ARTE.floresta
+		},
+		subBiomas: [
+			{
+				chave: "plains",
+				nome: "Planicie",
+				peso: 10,
+				loot: "basico"
+			},
+			{
+				chave: "grass",
+				nome: "Relvado",
+				peso: 10,
+				loot: "basico"
+			},
+			{
+				chave: "meadow",
+				nome: "Campina",
+				peso: 6,
+				loot: "basico"
+			},
+			{
+				chave: "town",
+				nome: "Vilarejo",
+				peso: 6,
+				loot: "civilizado"
+			}
+		]
+	},
+	{
+		chave: "mata",
+		nome: "Mata",
+		tipo: "GRASS",
+		bg: {
+			primary: "#284b3c",
+			secondary: "#2e5544",
+			image: ARTE.floresta
+		},
+		subBiomas: [
+			{
+				chave: "forest",
+				nome: "Floresta",
+				peso: 10,
+				loot: "basico"
+			},
+			{
+				chave: "tall-grass",
+				nome: "Mato Alto",
+				peso: 10,
+				loot: "basico"
+			},
+			{
+				chave: "jungle",
+				nome: "Selva",
+				peso: 6,
+				loot: "remoto"
+			}
+		]
+	},
+	{
+		chave: "marinho",
+		nome: "Marinho",
+		tipo: "WATER",
+		bg: {
+			primary: "#1f3d52",
+			secondary: "#27506b",
+			image: ARTE.agua
+		},
+		subBiomas: [
+			{
+				chave: "sea",
+				nome: "Mar Aberto",
+				peso: 10,
+				loot: "basico"
+			},
+			{
+				chave: "beach",
+				nome: "Praia",
+				peso: 6,
+				loot: "civilizado"
+			},
+			{
+				chave: "seabed",
+				nome: "Leito Oceanico",
+				peso: 3,
+				loot: "profundo"
+			}
+		]
+	},
+	{
+		chave: "aguas_interiores",
+		nome: "Aguas Interiores",
+		tipo: "WATER",
+		bg: {
+			primary: "#24463f",
+			secondary: "#2c5850",
+			image: ARTE.agua
+		},
+		subBiomas: [{
+			chave: "lake",
+			nome: "Lago",
+			peso: 10,
+			loot: "basico"
+		}, {
+			chave: "swamp",
+			nome: "Pantano",
+			peso: 6,
+			loot: "remoto"
+		}]
+	},
+	{
+		chave: "aridos",
+		nome: "Aridos",
+		tipo: "GROUND",
+		bg: {
+			primary: "#5c4a30",
+			secondary: "#6d5838",
+			image: ARTE.caverna
+		},
+		subBiomas: [
+			{
+				chave: "badlands",
+				nome: "Ermos",
+				peso: 10,
+				loot: "basico"
+			},
+			{
+				chave: "desert",
+				nome: "Deserto",
+				peso: 6,
+				loot: "remoto"
+			},
+			{
+				chave: "wasteland",
+				nome: "Terra Devastada",
+				peso: 3,
+				loot: "profundo"
+			}
+		]
+	},
+	{
+		chave: "subterraneo",
+		nome: "Subterraneo",
+		tipo: "ROCK",
+		bg: {
+			primary: "#3a3340",
+			secondary: "#463d4d",
+			image: ARTE.caverna
+		},
+		subBiomas: [{
+			chave: "cave",
+			nome: "Caverna",
+			peso: 10,
+			loot: "basico"
+		}, {
+			chave: "mountain",
+			nome: "Montanha",
+			peso: 6,
+			loot: "remoto"
+		}]
+	},
+	{
+		chave: "gelido",
+		nome: "Gelido",
+		tipo: "ICE",
+		bg: {
+			primary: "#33505e",
+			secondary: "#3d6070",
+			image: ARTE.caverna
+		},
+		subBiomas: [{
+			chave: "ice-cave",
+			nome: "Caverna de Gelo",
+			peso: 10,
+			loot: "remoto"
+		}, {
+			chave: "snowy-forest",
+			nome: "Floresta Nevada",
+			peso: 6,
+			loot: "basico"
+		}]
+	},
+	{
+		chave: "igneo",
+		nome: "Igneo",
+		tipo: "FIRE",
+		bg: {
+			primary: "#5a2a1e",
+			secondary: "#6d3626",
+			image: ARTE.fogo
+		},
+		subBiomas: [{
+			chave: "volcano",
+			nome: "Vulcao",
+			peso: 10,
+			loot: "remoto"
+		}]
+	},
+	{
+		chave: "urbano",
+		nome: "Urbano",
+		tipo: "FIGHTING",
+		bg: {
+			primary: "#3d3a35",
+			secondary: "#4a4640",
+			image: ARTE.dojo
+		},
+		subBiomas: [
+			{
+				chave: "metropolis",
+				nome: "Metropole",
+				peso: 10,
+				loot: "civilizado"
+			},
+			{
+				chave: "slum",
+				nome: "Cortico",
+				peso: 6,
+				loot: "civilizado"
+			},
+			{
+				chave: "dojo",
+				nome: "Dojo",
+				peso: 6,
+				loot: "basico"
+			}
+		]
+	},
+	{
+		chave: "industrial",
+		nome: "Industrial",
+		tipo: "ELECTRIC",
+		bg: {
+			primary: "#3b3f4a",
+			secondary: "#474c59",
+			image: ARTE.eletrico
+		},
+		subBiomas: [
+			{
+				chave: "construction-site",
+				nome: "Obra",
+				peso: 10,
+				loot: "civilizado"
+			},
+			{
+				chave: "factory",
+				nome: "Fabrica",
+				peso: 6,
+				loot: "civilizado"
+			},
+			{
+				chave: "power-plant",
+				nome: "Usina",
+				peso: 6,
+				loot: "remoto"
+			},
+			{
+				chave: "laboratory",
+				nome: "Laboratorio",
+				peso: 3,
+				loot: "profundo"
+			}
+		]
+	},
+	{
+		chave: "sagrado",
+		nome: "Sagrado",
+		tipo: "PSYCHIC",
+		bg: {
+			primary: "#4a3a55",
+			secondary: "#584565",
+			image: ARTE.dojo
+		},
+		subBiomas: [
+			{
+				chave: "ruins",
+				nome: "Ruinas",
+				peso: 10,
+				loot: "remoto"
+			},
+			{
+				chave: "temple",
+				nome: "Templo",
+				peso: 6,
+				loot: "remoto"
+			},
+			{
+				chave: "fairy-cave",
+				nome: "Gruta Feerica",
+				peso: 3,
+				loot: "profundo"
+			}
+		]
+	},
+	{
+		chave: "sombrio",
+		nome: "Sombrio",
+		tipo: "GHOST",
+		bg: {
+			primary: "#2b2733",
+			secondary: "#35303f",
+			image: ARTE.caverna
+		},
+		subBiomas: [
+			{
+				chave: "graveyard",
+				nome: "Cemiterio",
+				peso: 10,
+				loot: "remoto"
+			},
+			{
+				chave: "abyss",
+				nome: "Abismo",
+				peso: 6,
+				loot: "profundo"
+			},
+			{
+				chave: "space",
+				nome: "Espaco",
+				peso: 3,
+				loot: "profundo"
+			}
+		]
+	}
+];
+var GEOMETRIA = {
+	bounds: {
+		width: 1400,
+		height: 900
+	},
+	playerSpawn: {
+		x: 700,
+		y: 450
+	},
+	maxEnemies: 6,
+	respawnDelay: 6,
+	spawnPoints: [
+		{
+			x: 500,
+			y: 320
+		},
+		{
+			x: 900,
+			y: 320
+		},
+		{
+			x: 500,
+			y: 580
+		},
+		{
+			x: 900,
+			y: 580
+		},
+		{
+			x: 700,
+			y: 250
+		},
+		{
+			x: 700,
+			y: 650
+		}
+	]
+};
+Object.fromEntries(BIOMAS.map((b) => [b.chave, b]));
+Object.fromEntries(FAIXAS$1.map((f) => [f.id, f]));
+/** Id da hunt de um bioma numa faixa. Estavel: e o que vai pro banco. */
+function huntId(bioma, faixa) {
+	return `${bioma}_${faixa}`;
+}
+var SUB_BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.flatMap((bioma) => bioma.subBiomas.map((sub) => [sub.chave, {
+	sub,
+	bioma
+}])));
+//#endregion
+//#region src/data/generated/subBiomas.generated.ts
+/** Especies do nosso catalogo que podem aparecer em cada sub-bioma. */
+var SUB_BIOMA_ESPECIES = {
+	"abyss": [
+		"zubat",
+		"golbat",
+		"paras",
+		"parasect",
+		"gastly",
+		"haunter",
+		"gengar",
+		"misdreavus",
+		"dunsparce",
+		"houndour",
+		"houndoom"
+	],
+	"badlands": [
+		"sandshrew",
+		"sandslash",
+		"diglett",
+		"dugtrio",
+		"geodude",
+		"graveler",
+		"golem",
+		"onix",
+		"cubone",
+		"marowak",
+		"rhyhorn",
+		"rhydon",
+		"gligar",
+		"steelix",
+		"phanpy",
+		"donphan"
+	],
+	"beach": [
+		"shellder",
+		"krabby",
+		"kingler",
+		"staryu"
+	],
+	"cave": [
+		"zubat",
+		"golbat",
+		"paras",
+		"parasect",
+		"geodude",
+		"graveler",
+		"golem",
+		"onix",
+		"steelix",
+		"teddiursa",
+		"ursaring"
+	],
+	"construction-site": [
+		"diglett",
+		"dugtrio",
+		"machop",
+		"machoke",
+		"machamp",
+		"magnemite",
+		"magneton",
+		"grimer",
+		"muk",
+		"onix",
+		"hitmonlee",
+		"koffing",
+		"weezing",
+		"rhyhorn",
+		"rhydon",
+		"ditto",
+		"steelix",
+		"phanpy",
+		"donphan",
+		"tyrogue"
+	],
+	"desert": [
+		"sandshrew",
+		"sandslash",
+		"doduo",
+		"dodrio",
+		"gligar"
+	],
+	"dojo": [
+		"mankey",
+		"primeape",
+		"hitmonlee",
+		"hitmonchan",
+		"tyrogue"
+	],
+	"factory": [
+		"machop",
+		"machoke",
+		"machamp",
+		"magnemite",
+		"magneton",
+		"voltorb",
+		"electrode",
+		"electabuzz",
+		"magmar",
+		"elekid",
+		"magby"
+	],
+	"fairy-cave": [
+		"jigglypuff",
+		"marill",
+		"azumarill"
+	],
+	"forest": [
+		"caterpie",
+		"metapod",
+		"butterfree",
+		"weedle",
+		"kakuna",
+		"beedrill",
+		"ekans",
+		"arbok",
+		"venonat",
+		"venomoth",
+		"bellsprout",
+		"weepinbell",
+		"victreebel",
+		"exeggcute",
+		"scyther",
+		"hoothoot",
+		"noctowl",
+		"spinarak",
+		"ariados",
+		"pineco",
+		"forretress",
+		"scizor",
+		"heracross",
+		"teddiursa",
+		"ursaring",
+		"stantler"
+	],
+	"grass": [
+		"ivysaur",
+		"venusaur",
+		"growlithe",
+		"arcanine",
+		"lickitung",
+		"sudowoodo",
+		"hoppip",
+		"skiploom",
+		"jumpluff",
+		"sunkern",
+		"sunflora",
+		"miltank"
+	],
+	"graveyard": [
+		"gastly",
+		"haunter",
+		"gengar",
+		"cubone",
+		"marowak",
+		"misdreavus"
+	],
+	"ice-cave": [
+		"seel",
+		"dewgong",
+		"jynx",
+		"lapras",
+		"sneasel",
+		"swinub",
+		"piloswine",
+		"delibird",
+		"smoochum"
+	],
+	"jungle": [
+		"exeggcute",
+		"tangela",
+		"kangaskhan",
+		"scyther",
+		"spinarak",
+		"ariados",
+		"aipom",
+		"yanma",
+		"scizor"
+	],
+	"laboratory": [
+		"magnemite",
+		"magneton",
+		"grimer",
+		"muk",
+		"voltorb",
+		"electrode",
+		"ditto"
+	],
+	"lake": [
+		"wartortle",
+		"blastoise",
+		"psyduck",
+		"golduck",
+		"slowpoke",
+		"slowbro",
+		"goldeen",
+		"seaking",
+		"magikarp",
+		"gyarados",
+		"marill",
+		"azumarill",
+		"wooper",
+		"quagsire"
+	],
+	"meadow": [
+		"jigglypuff",
+		"ponyta",
+		"rapidash",
+		"tauros",
+		"ledyba",
+		"ledian",
+		"mareep",
+		"flaaffy",
+		"ampharos",
+		"snubbull",
+		"granbull",
+		"miltank"
+	],
+	"metropolis": [
+		"rattata",
+		"raticate",
+		"pikachu",
+		"ditto",
+		"houndour",
+		"houndoom",
+		"smeargle"
+	],
+	"mountain": [
+		"pidgey",
+		"pidgeotto",
+		"pidgeot",
+		"spearow",
+		"fearow",
+		"machop",
+		"machoke",
+		"machamp",
+		"geodude",
+		"graveler",
+		"golem",
+		"rhyhorn",
+		"rhydon",
+		"natu",
+		"xatu",
+		"murkrow",
+		"slugma",
+		"magcargo",
+		"skarmory",
+		"larvitar",
+		"pupitar",
+		"tyranitar"
+	],
+	"plains": [
+		"pidgey",
+		"pidgeotto",
+		"pidgeot",
+		"spearow",
+		"fearow",
+		"pikachu",
+		"zubat",
+		"golbat",
+		"meowth",
+		"persian",
+		"mankey",
+		"primeape",
+		"abra",
+		"kadabra",
+		"alakazam",
+		"farfetch_d",
+		"doduo",
+		"dodrio",
+		"lickitung",
+		"ditto",
+		"snorlax",
+		"sentret",
+		"furret",
+		"dunsparce"
+	],
+	"power-plant": [
+		"pikachu",
+		"magnemite",
+		"magneton",
+		"voltorb",
+		"electrode",
+		"electabuzz",
+		"mareep",
+		"flaaffy",
+		"ampharos",
+		"elekid"
+	],
+	"ruins": [
+		"abra",
+		"kadabra",
+		"alakazam",
+		"drowzee",
+		"hypno",
+		"natu",
+		"xatu",
+		"unown",
+		"wobbuffet"
+	],
+	"sea": [
+		"poliwag",
+		"poliwhirl",
+		"tentacool",
+		"tentacruel",
+		"slowpoke",
+		"slowbro",
+		"shellder",
+		"horsea",
+		"seadra",
+		"goldeen",
+		"seaking",
+		"staryu",
+		"magikarp",
+		"gyarados",
+		"lapras",
+		"chinchou",
+		"lanturn",
+		"politoed",
+		"kingdra"
+	],
+	"seabed": [
+		"tentacool",
+		"tentacruel",
+		"shellder",
+		"omanyte",
+		"omastar",
+		"kabuto",
+		"kabutops",
+		"chinchou",
+		"lanturn",
+		"qwilfish",
+		"corsola",
+		"remoraid",
+		"octillery",
+		"mantine"
+	],
+	"slum": [
+		"rattata",
+		"raticate",
+		"grimer",
+		"muk",
+		"drowzee",
+		"hypno",
+		"koffing",
+		"weezing",
+		"murkrow",
+		"sneasel",
+		"houndour",
+		"houndoom"
+	],
+	"snowy-forest": [
+		"sentret",
+		"furret",
+		"sneasel",
+		"teddiursa",
+		"ursaring",
+		"swinub",
+		"piloswine",
+		"delibird",
+		"stantler"
+	],
+	"space": ["staryu", "cleffa"],
+	"swamp": [
+		"ekans",
+		"arbok",
+		"psyduck",
+		"golduck",
+		"poliwag",
+		"poliwhirl",
+		"totodile",
+		"croconaw",
+		"feraligatr",
+		"politoed",
+		"wooper",
+		"quagsire"
+	],
+	"tall-grass": [
+		"nidoran_f",
+		"nidorina",
+		"nidoqueen",
+		"nidoran_m",
+		"nidorino",
+		"nidoking",
+		"oddish",
+		"gloom",
+		"paras",
+		"parasect",
+		"venonat",
+		"venomoth",
+		"scyther",
+		"pinsir",
+		"chikorita",
+		"bayleef",
+		"meganium",
+		"spinarak",
+		"ariados",
+		"girafarig",
+		"scizor"
+	],
+	"temple": [
+		"gastly",
+		"haunter",
+		"gengar",
+		"cubone",
+		"marowak",
+		"natu",
+		"xatu"
+	],
+	"town": [
+		"caterpie",
+		"metapod",
+		"butterfree",
+		"weedle",
+		"kakuna",
+		"beedrill",
+		"pidgey",
+		"pidgeotto",
+		"pidgeot",
+		"rattata",
+		"raticate",
+		"spearow",
+		"fearow",
+		"ekans",
+		"arbok",
+		"nidoran_f",
+		"nidorina",
+		"nidoran_m",
+		"nidorino",
+		"oddish",
+		"gloom",
+		"paras",
+		"parasect",
+		"venonat",
+		"venomoth",
+		"meowth",
+		"persian",
+		"abra",
+		"kadabra",
+		"alakazam",
+		"bellsprout",
+		"weepinbell",
+		"ditto",
+		"sentret",
+		"furret",
+		"hoothoot",
+		"noctowl",
+		"ledyba",
+		"ledian",
+		"spinarak",
+		"ariados",
+		"pichu",
+		"cleffa",
+		"igglybuff",
+		"togepi",
+		"hoppip",
+		"skiploom",
+		"jumpluff",
+		"sunkern",
+		"sunflora"
+	],
+	"volcano": [
+		"charmeleon",
+		"charizard",
+		"growlithe",
+		"arcanine",
+		"ponyta",
+		"rapidash",
+		"magmar",
+		"cyndaquil",
+		"quilava",
+		"typhlosion",
+		"slugma",
+		"magcargo",
+		"magby"
+	],
+	"wasteland": [
+		"aerodactyl",
+		"dratini",
+		"dragonair",
+		"dragonite",
+		"larvitar",
+		"pupitar",
+		"tyranitar"
+	]
 };
 //#endregion
-//#region src/data/generated/enemies.generated.ts
-var ENCOUNTERS_DATA = {
-	"route_46_geodude": {
-		"id": "route_46_geodude",
-		"speciesId": "geodude",
-		"minLevel": 2,
-		"maxLevel": 2,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"route_46_spearow": {
-		"id": "route_46_spearow",
-		"speciesId": "spearow",
-		"minLevel": 2,
-		"maxLevel": 2,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"route_46_rattata": {
-		"id": "route_46_rattata",
-		"speciesId": "rattata",
-		"minLevel": 2,
-		"maxLevel": 2,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_1_10_floresta_ivysaur": {
-		"id": "lv_1_10_floresta_ivysaur",
-		"speciesId": "ivysaur",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_1_10_floresta_venusaur": {
-		"id": "lv_1_10_floresta_venusaur",
-		"speciesId": "venusaur",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_1_10_floresta_oddish": {
-		"id": "lv_1_10_floresta_oddish",
-		"speciesId": "oddish",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_1_10_floresta_gloom": {
-		"id": "lv_1_10_floresta_gloom",
-		"speciesId": "gloom",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_1_10_floresta_bellsprout": {
-		"id": "lv_1_10_floresta_bellsprout",
-		"speciesId": "bellsprout",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_1_10_floresta_weepinbell": {
-		"id": "lv_1_10_floresta_weepinbell",
-		"speciesId": "weepinbell",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_1_10_floresta_victreebel": {
-		"id": "lv_1_10_floresta_victreebel",
-		"speciesId": "victreebel",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_1_10_floresta_exeggcute": {
-		"id": "lv_1_10_floresta_exeggcute",
-		"speciesId": "exeggcute",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_1_10_floresta_tangela": {
-		"id": "lv_1_10_floresta_tangela",
-		"speciesId": "tangela",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_1_10_floresta_chikorita": {
-		"id": "lv_1_10_floresta_chikorita",
-		"speciesId": "chikorita",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_1_10_floresta_bayleef": {
-		"id": "lv_1_10_floresta_bayleef",
-		"speciesId": "bayleef",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_1_10_floresta_meganium": {
-		"id": "lv_1_10_floresta_meganium",
-		"speciesId": "meganium",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_1_10_floresta_hoppip": {
-		"id": "lv_1_10_floresta_hoppip",
-		"speciesId": "hoppip",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_1_10_floresta_skiploom": {
-		"id": "lv_1_10_floresta_skiploom",
-		"speciesId": "skiploom",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_1_10_floresta_jumpluff": {
-		"id": "lv_1_10_floresta_jumpluff",
-		"speciesId": "jumpluff",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_1_10_floresta_sunkern": {
-		"id": "lv_1_10_floresta_sunkern",
-		"speciesId": "sunkern",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_1_10_floresta_sunflora": {
-		"id": "lv_1_10_floresta_sunflora",
-		"speciesId": "sunflora",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_1_10_bosque_caterpie": {
-		"id": "lv_1_10_bosque_caterpie",
-		"speciesId": "caterpie",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_1_10_bosque_metapod": {
-		"id": "lv_1_10_bosque_metapod",
-		"speciesId": "metapod",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_1_10_bosque_butterfree": {
-		"id": "lv_1_10_bosque_butterfree",
-		"speciesId": "butterfree",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_1_10_bosque_weedle": {
-		"id": "lv_1_10_bosque_weedle",
-		"speciesId": "weedle",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_1_10_bosque_kakuna": {
-		"id": "lv_1_10_bosque_kakuna",
-		"speciesId": "kakuna",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_1_10_bosque_beedrill": {
-		"id": "lv_1_10_bosque_beedrill",
-		"speciesId": "beedrill",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_1_10_bosque_paras": {
-		"id": "lv_1_10_bosque_paras",
-		"speciesId": "paras",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_1_10_bosque_parasect": {
-		"id": "lv_1_10_bosque_parasect",
-		"speciesId": "parasect",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_1_10_bosque_venonat": {
-		"id": "lv_1_10_bosque_venonat",
-		"speciesId": "venonat",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_1_10_bosque_venomoth": {
-		"id": "lv_1_10_bosque_venomoth",
-		"speciesId": "venomoth",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_1_10_bosque_scyther": {
-		"id": "lv_1_10_bosque_scyther",
-		"speciesId": "scyther",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_1_10_bosque_pinsir": {
-		"id": "lv_1_10_bosque_pinsir",
-		"speciesId": "pinsir",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_1_10_bosque_ledyba": {
-		"id": "lv_1_10_bosque_ledyba",
-		"speciesId": "ledyba",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_1_10_bosque_ledian": {
-		"id": "lv_1_10_bosque_ledian",
-		"speciesId": "ledian",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_1_10_bosque_spinarak": {
-		"id": "lv_1_10_bosque_spinarak",
-		"speciesId": "spinarak",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_1_10_bosque_ariados": {
-		"id": "lv_1_10_bosque_ariados",
-		"speciesId": "ariados",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_1_10_bosque_yanma": {
-		"id": "lv_1_10_bosque_yanma",
-		"speciesId": "yanma",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_1_10_bosque_pineco": {
-		"id": "lv_1_10_bosque_pineco",
-		"speciesId": "pineco",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_1_10_bosque_forretress": {
-		"id": "lv_1_10_bosque_forretress",
-		"speciesId": "forretress",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_1_10_bosque_scizor": {
-		"id": "lv_1_10_bosque_scizor",
-		"speciesId": "scizor",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_1_10_bosque_heracross": {
-		"id": "lv_1_10_bosque_heracross",
-		"speciesId": "heracross",
-		"minLevel": 2,
-		"maxLevel": 12,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_costa_wartortle": {
-		"id": "lv_11_20_costa_wartortle",
-		"speciesId": "wartortle",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_costa_blastoise": {
-		"id": "lv_11_20_costa_blastoise",
-		"speciesId": "blastoise",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_11_20_costa_psyduck": {
-		"id": "lv_11_20_costa_psyduck",
-		"speciesId": "psyduck",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_golduck": {
-		"id": "lv_11_20_costa_golduck",
-		"speciesId": "golduck",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_costa_poliwag": {
-		"id": "lv_11_20_costa_poliwag",
-		"speciesId": "poliwag",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_poliwhirl": {
-		"id": "lv_11_20_costa_poliwhirl",
-		"speciesId": "poliwhirl",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_11_20_costa_tentacool": {
-		"id": "lv_11_20_costa_tentacool",
-		"speciesId": "tentacool",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_tentacruel": {
-		"id": "lv_11_20_costa_tentacruel",
-		"speciesId": "tentacruel",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_costa_slowpoke": {
-		"id": "lv_11_20_costa_slowpoke",
-		"speciesId": "slowpoke",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_slowbro": {
-		"id": "lv_11_20_costa_slowbro",
-		"speciesId": "slowbro",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_costa_seel": {
-		"id": "lv_11_20_costa_seel",
-		"speciesId": "seel",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_11_20_costa_dewgong": {
-		"id": "lv_11_20_costa_dewgong",
-		"speciesId": "dewgong",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_11_20_costa_shellder": {
-		"id": "lv_11_20_costa_shellder",
-		"speciesId": "shellder",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_11_20_costa_krabby": {
-		"id": "lv_11_20_costa_krabby",
-		"speciesId": "krabby",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_kingler": {
-		"id": "lv_11_20_costa_kingler",
-		"speciesId": "kingler",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_11_20_costa_horsea": {
-		"id": "lv_11_20_costa_horsea",
-		"speciesId": "horsea",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_seadra": {
-		"id": "lv_11_20_costa_seadra",
-		"speciesId": "seadra",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_costa_goldeen": {
-		"id": "lv_11_20_costa_goldeen",
-		"speciesId": "goldeen",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_seaking": {
-		"id": "lv_11_20_costa_seaking",
-		"speciesId": "seaking",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_11_20_costa_staryu": {
-		"id": "lv_11_20_costa_staryu",
-		"speciesId": "staryu",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_costa_magikarp": {
-		"id": "lv_11_20_costa_magikarp",
-		"speciesId": "magikarp",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_gyarados": {
-		"id": "lv_11_20_costa_gyarados",
-		"speciesId": "gyarados",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_11_20_costa_lapras": {
-		"id": "lv_11_20_costa_lapras",
-		"speciesId": "lapras",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_costa_totodile": {
-		"id": "lv_11_20_costa_totodile",
-		"speciesId": "totodile",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_costa_croconaw": {
-		"id": "lv_11_20_costa_croconaw",
-		"speciesId": "croconaw",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_costa_feraligatr": {
-		"id": "lv_11_20_costa_feraligatr",
-		"speciesId": "feraligatr",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_11_20_costa_chinchou": {
-		"id": "lv_11_20_costa_chinchou",
-		"speciesId": "chinchou",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_lanturn": {
-		"id": "lv_11_20_costa_lanturn",
-		"speciesId": "lanturn",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_costa_marill": {
-		"id": "lv_11_20_costa_marill",
-		"speciesId": "marill",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_costa_azumarill": {
-		"id": "lv_11_20_costa_azumarill",
-		"speciesId": "azumarill",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_costa_politoed": {
-		"id": "lv_11_20_costa_politoed",
-		"speciesId": "politoed",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_11_20_costa_wooper": {
-		"id": "lv_11_20_costa_wooper",
-		"speciesId": "wooper",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_quagsire": {
-		"id": "lv_11_20_costa_quagsire",
-		"speciesId": "quagsire",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_11_20_costa_qwilfish": {
-		"id": "lv_11_20_costa_qwilfish",
-		"speciesId": "qwilfish",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_corsola": {
-		"id": "lv_11_20_costa_corsola",
-		"speciesId": "corsola",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_costa_remoraid": {
-		"id": "lv_11_20_costa_remoraid",
-		"speciesId": "remoraid",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_octillery": {
-		"id": "lv_11_20_costa_octillery",
-		"speciesId": "octillery",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_costa_mantine": {
-		"id": "lv_11_20_costa_mantine",
-		"speciesId": "mantine",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_costa_kingdra": {
-		"id": "lv_11_20_costa_kingdra",
-		"speciesId": "kingdra",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_11_20_planicie_pidgey": {
-		"id": "lv_11_20_planicie_pidgey",
-		"speciesId": "pidgey",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_11_20_planicie_pidgeotto": {
-		"id": "lv_11_20_planicie_pidgeotto",
-		"speciesId": "pidgeotto",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_planicie_pidgeot": {
-		"id": "lv_11_20_planicie_pidgeot",
-		"speciesId": "pidgeot",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_11_20_planicie_rattata": {
-		"id": "lv_11_20_planicie_rattata",
-		"speciesId": "rattata",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_planicie_raticate": {
-		"id": "lv_11_20_planicie_raticate",
-		"speciesId": "raticate",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_planicie_spearow": {
-		"id": "lv_11_20_planicie_spearow",
-		"speciesId": "spearow",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_planicie_fearow": {
-		"id": "lv_11_20_planicie_fearow",
-		"speciesId": "fearow",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_planicie_jigglypuff": {
-		"id": "lv_11_20_planicie_jigglypuff",
-		"speciesId": "jigglypuff",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_11_20_planicie_meowth": {
-		"id": "lv_11_20_planicie_meowth",
-		"speciesId": "meowth",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_planicie_persian": {
-		"id": "lv_11_20_planicie_persian",
-		"speciesId": "persian",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_11_20_planicie_farfetch_d": {
-		"id": "lv_11_20_planicie_farfetch_d",
-		"speciesId": "farfetch_d",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_planicie_doduo": {
-		"id": "lv_11_20_planicie_doduo",
-		"speciesId": "doduo",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_planicie_dodrio": {
-		"id": "lv_11_20_planicie_dodrio",
-		"speciesId": "dodrio",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_11_20_planicie_lickitung": {
-		"id": "lv_11_20_planicie_lickitung",
-		"speciesId": "lickitung",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_11_20_planicie_kangaskhan": {
-		"id": "lv_11_20_planicie_kangaskhan",
-		"speciesId": "kangaskhan",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_planicie_tauros": {
-		"id": "lv_11_20_planicie_tauros",
-		"speciesId": "tauros",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_planicie_ditto": {
-		"id": "lv_11_20_planicie_ditto",
-		"speciesId": "ditto",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_planicie_eevee": {
-		"id": "lv_11_20_planicie_eevee",
-		"speciesId": "eevee",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_planicie_porygon": {
-		"id": "lv_11_20_planicie_porygon",
-		"speciesId": "porygon",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_planicie_snorlax": {
-		"id": "lv_11_20_planicie_snorlax",
-		"speciesId": "snorlax",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_planicie_sentret": {
-		"id": "lv_11_20_planicie_sentret",
-		"speciesId": "sentret",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_11_20_planicie_furret": {
-		"id": "lv_11_20_planicie_furret",
-		"speciesId": "furret",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_planicie_hoothoot": {
-		"id": "lv_11_20_planicie_hoothoot",
-		"speciesId": "hoothoot",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_11_20_planicie_noctowl": {
-		"id": "lv_11_20_planicie_noctowl",
-		"speciesId": "noctowl",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_planicie_igglybuff": {
-		"id": "lv_11_20_planicie_igglybuff",
-		"speciesId": "igglybuff",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_planicie_aipom": {
-		"id": "lv_11_20_planicie_aipom",
-		"speciesId": "aipom",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_11_20_planicie_girafarig": {
-		"id": "lv_11_20_planicie_girafarig",
-		"speciesId": "girafarig",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_11_20_planicie_dunsparce": {
-		"id": "lv_11_20_planicie_dunsparce",
-		"speciesId": "dunsparce",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_11_20_planicie_teddiursa": {
-		"id": "lv_11_20_planicie_teddiursa",
-		"speciesId": "teddiursa",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_11_20_planicie_ursaring": {
-		"id": "lv_11_20_planicie_ursaring",
-		"speciesId": "ursaring",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_planicie_porygon2": {
-		"id": "lv_11_20_planicie_porygon2",
-		"speciesId": "porygon2",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_planicie_stantler": {
-		"id": "lv_11_20_planicie_stantler",
-		"speciesId": "stantler",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_planicie_smeargle": {
-		"id": "lv_11_20_planicie_smeargle",
-		"speciesId": "smeargle",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_planicie_miltank": {
-		"id": "lv_11_20_planicie_miltank",
-		"speciesId": "miltank",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_21_30_caverna_geodude": {
-		"id": "lv_21_30_caverna_geodude",
-		"speciesId": "geodude",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_21_30_caverna_graveler": {
-		"id": "lv_21_30_caverna_graveler",
-		"speciesId": "graveler",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_21_30_caverna_golem": {
-		"id": "lv_21_30_caverna_golem",
-		"speciesId": "golem",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_21_30_caverna_onix": {
-		"id": "lv_21_30_caverna_onix",
-		"speciesId": "onix",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_21_30_caverna_omanyte": {
-		"id": "lv_21_30_caverna_omanyte",
-		"speciesId": "omanyte",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_21_30_caverna_omastar": {
-		"id": "lv_21_30_caverna_omastar",
-		"speciesId": "omastar",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_21_30_caverna_kabuto": {
-		"id": "lv_21_30_caverna_kabuto",
-		"speciesId": "kabuto",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_21_30_caverna_kabutops": {
-		"id": "lv_21_30_caverna_kabutops",
-		"speciesId": "kabutops",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_21_30_caverna_aerodactyl": {
-		"id": "lv_21_30_caverna_aerodactyl",
-		"speciesId": "aerodactyl",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_21_30_caverna_sudowoodo": {
-		"id": "lv_21_30_caverna_sudowoodo",
-		"speciesId": "sudowoodo",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_21_30_caverna_larvitar": {
-		"id": "lv_21_30_caverna_larvitar",
-		"speciesId": "larvitar",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_21_30_caverna_pupitar": {
-		"id": "lv_21_30_caverna_pupitar",
-		"speciesId": "pupitar",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_21_30_caverna_tyranitar": {
-		"id": "lv_21_30_caverna_tyranitar",
-		"speciesId": "tyranitar",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_21_30_deserto_sandshrew": {
-		"id": "lv_21_30_deserto_sandshrew",
-		"speciesId": "sandshrew",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_21_30_deserto_sandslash": {
-		"id": "lv_21_30_deserto_sandslash",
-		"speciesId": "sandslash",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_21_30_deserto_diglett": {
-		"id": "lv_21_30_deserto_diglett",
-		"speciesId": "diglett",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_21_30_deserto_dugtrio": {
-		"id": "lv_21_30_deserto_dugtrio",
-		"speciesId": "dugtrio",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_21_30_deserto_cubone": {
-		"id": "lv_21_30_deserto_cubone",
-		"speciesId": "cubone",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_21_30_deserto_marowak": {
-		"id": "lv_21_30_deserto_marowak",
-		"speciesId": "marowak",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_21_30_deserto_rhyhorn": {
-		"id": "lv_21_30_deserto_rhyhorn",
-		"speciesId": "rhyhorn",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_21_30_deserto_rhydon": {
-		"id": "lv_21_30_deserto_rhydon",
-		"speciesId": "rhydon",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_21_30_deserto_gligar": {
-		"id": "lv_21_30_deserto_gligar",
-		"speciesId": "gligar",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_21_30_deserto_phanpy": {
-		"id": "lv_21_30_deserto_phanpy",
-		"speciesId": "phanpy",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_21_30_deserto_donphan": {
-		"id": "lv_21_30_deserto_donphan",
-		"speciesId": "donphan",
-		"minLevel": 18,
-		"maxLevel": 32,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_31_40_vulcanico_charmeleon": {
-		"id": "lv_31_40_vulcanico_charmeleon",
-		"speciesId": "charmeleon",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_31_40_vulcanico_charizard": {
-		"id": "lv_31_40_vulcanico_charizard",
-		"speciesId": "charizard",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_31_40_vulcanico_growlithe": {
-		"id": "lv_31_40_vulcanico_growlithe",
-		"speciesId": "growlithe",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_31_40_vulcanico_arcanine": {
-		"id": "lv_31_40_vulcanico_arcanine",
-		"speciesId": "arcanine",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_31_40_vulcanico_ponyta": {
-		"id": "lv_31_40_vulcanico_ponyta",
-		"speciesId": "ponyta",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_31_40_vulcanico_rapidash": {
-		"id": "lv_31_40_vulcanico_rapidash",
-		"speciesId": "rapidash",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_31_40_vulcanico_magmar": {
-		"id": "lv_31_40_vulcanico_magmar",
-		"speciesId": "magmar",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_31_40_vulcanico_cyndaquil": {
-		"id": "lv_31_40_vulcanico_cyndaquil",
-		"speciesId": "cyndaquil",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_31_40_vulcanico_quilava": {
-		"id": "lv_31_40_vulcanico_quilava",
-		"speciesId": "quilava",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_31_40_vulcanico_typhlosion": {
-		"id": "lv_31_40_vulcanico_typhlosion",
-		"speciesId": "typhlosion",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_31_40_vulcanico_slugma": {
-		"id": "lv_31_40_vulcanico_slugma",
-		"speciesId": "slugma",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_31_40_vulcanico_magcargo": {
-		"id": "lv_31_40_vulcanico_magcargo",
-		"speciesId": "magcargo",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_31_40_vulcanico_magby": {
-		"id": "lv_31_40_vulcanico_magby",
-		"speciesId": "magby",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_31_40_usina_pikachu": {
-		"id": "lv_31_40_usina_pikachu",
-		"speciesId": "pikachu",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_31_40_usina_magnemite": {
-		"id": "lv_31_40_usina_magnemite",
-		"speciesId": "magnemite",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_31_40_usina_magneton": {
-		"id": "lv_31_40_usina_magneton",
-		"speciesId": "magneton",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_31_40_usina_voltorb": {
-		"id": "lv_31_40_usina_voltorb",
-		"speciesId": "voltorb",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_31_40_usina_electrode": {
-		"id": "lv_31_40_usina_electrode",
-		"speciesId": "electrode",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_31_40_usina_electabuzz": {
-		"id": "lv_31_40_usina_electabuzz",
-		"speciesId": "electabuzz",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_31_40_usina_pichu": {
-		"id": "lv_31_40_usina_pichu",
-		"speciesId": "pichu",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_31_40_usina_mareep": {
-		"id": "lv_31_40_usina_mareep",
-		"speciesId": "mareep",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_31_40_usina_flaaffy": {
-		"id": "lv_31_40_usina_flaaffy",
-		"speciesId": "flaaffy",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_31_40_usina_ampharos": {
-		"id": "lv_31_40_usina_ampharos",
-		"speciesId": "ampharos",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_31_40_usina_elekid": {
-		"id": "lv_31_40_usina_elekid",
-		"speciesId": "elekid",
-		"minLevel": 15,
-		"maxLevel": 51,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_41_50_pantano_ekans": {
-		"id": "lv_41_50_pantano_ekans",
-		"speciesId": "ekans",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_41_50_pantano_arbok": {
-		"id": "lv_41_50_pantano_arbok",
-		"speciesId": "arbok",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_41_50_pantano_nidoran_f": {
-		"id": "lv_41_50_pantano_nidoran_f",
-		"speciesId": "nidoran_f",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_41_50_pantano_nidorina": {
-		"id": "lv_41_50_pantano_nidorina",
-		"speciesId": "nidorina",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_41_50_pantano_nidoqueen": {
-		"id": "lv_41_50_pantano_nidoqueen",
-		"speciesId": "nidoqueen",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_41_50_pantano_nidoran_m": {
-		"id": "lv_41_50_pantano_nidoran_m",
-		"speciesId": "nidoran_m",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_41_50_pantano_nidorino": {
-		"id": "lv_41_50_pantano_nidorino",
-		"speciesId": "nidorino",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_41_50_pantano_nidoking": {
-		"id": "lv_41_50_pantano_nidoking",
-		"speciesId": "nidoking",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_41_50_pantano_zubat": {
-		"id": "lv_41_50_pantano_zubat",
-		"speciesId": "zubat",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_41_50_pantano_golbat": {
-		"id": "lv_41_50_pantano_golbat",
-		"speciesId": "golbat",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_41_50_pantano_grimer": {
-		"id": "lv_41_50_pantano_grimer",
-		"speciesId": "grimer",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_41_50_pantano_muk": {
-		"id": "lv_41_50_pantano_muk",
-		"speciesId": "muk",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_41_50_pantano_koffing": {
-		"id": "lv_41_50_pantano_koffing",
-		"speciesId": "koffing",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_41_50_pantano_weezing": {
-		"id": "lv_41_50_pantano_weezing",
-		"speciesId": "weezing",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_41_50_dojo_mankey": {
-		"id": "lv_41_50_dojo_mankey",
-		"speciesId": "mankey",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_41_50_dojo_primeape": {
-		"id": "lv_41_50_dojo_primeape",
-		"speciesId": "primeape",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_41_50_dojo_machop": {
-		"id": "lv_41_50_dojo_machop",
-		"speciesId": "machop",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_41_50_dojo_machoke": {
-		"id": "lv_41_50_dojo_machoke",
-		"speciesId": "machoke",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_41_50_dojo_machamp": {
-		"id": "lv_41_50_dojo_machamp",
-		"speciesId": "machamp",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_41_50_dojo_hitmonlee": {
-		"id": "lv_41_50_dojo_hitmonlee",
-		"speciesId": "hitmonlee",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_41_50_dojo_hitmonchan": {
-		"id": "lv_41_50_dojo_hitmonchan",
-		"speciesId": "hitmonchan",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_41_50_dojo_tyrogue": {
-		"id": "lv_41_50_dojo_tyrogue",
-		"speciesId": "tyrogue",
-		"minLevel": 41,
-		"maxLevel": 52,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_1_10_geleira_jynx": {
-		"id": "kanto_lv_1_10_geleira_jynx",
-		"speciesId": "jynx",
-		"minLevel": 52,
-		"maxLevel": 62,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_1_10_geleira_swinub": {
-		"id": "kanto_lv_1_10_geleira_swinub",
-		"speciesId": "swinub",
-		"minLevel": 52,
-		"maxLevel": 62,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"kanto_lv_1_10_geleira_piloswine": {
-		"id": "kanto_lv_1_10_geleira_piloswine",
-		"speciesId": "piloswine",
-		"minLevel": 52,
-		"maxLevel": 62,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_1_10_geleira_delibird": {
-		"id": "kanto_lv_1_10_geleira_delibird",
-		"speciesId": "delibird",
-		"minLevel": 52,
-		"maxLevel": 62,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_1_10_geleira_smoochum": {
-		"id": "kanto_lv_1_10_geleira_smoochum",
-		"speciesId": "smoochum",
-		"minLevel": 52,
-		"maxLevel": 62,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_1_10_fabrica_steelix": {
-		"id": "kanto_lv_1_10_fabrica_steelix",
-		"speciesId": "steelix",
-		"minLevel": 52,
-		"maxLevel": 62,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_1_10_fabrica_skarmory": {
-		"id": "kanto_lv_1_10_fabrica_skarmory",
-		"speciesId": "skarmory",
-		"minLevel": 52,
-		"maxLevel": 62,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"kanto_lv_1_10_fabrica_magnemite": {
-		"id": "kanto_lv_1_10_fabrica_magnemite",
-		"speciesId": "magnemite",
-		"minLevel": 52,
-		"maxLevel": 62,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"kanto_lv_1_10_fabrica_forretress": {
-		"id": "kanto_lv_1_10_fabrica_forretress",
-		"speciesId": "forretress",
-		"minLevel": 52,
-		"maxLevel": 62,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_1_10_fabrica_magneton": {
-		"id": "kanto_lv_1_10_fabrica_magneton",
-		"speciesId": "magneton",
-		"minLevel": 52,
-		"maxLevel": 62,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_1_10_fabrica_scizor": {
-		"id": "kanto_lv_1_10_fabrica_scizor",
-		"speciesId": "scizor",
-		"minLevel": 52,
-		"maxLevel": 62,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_11_20_penhascos_pidgey": {
-		"id": "kanto_lv_11_20_penhascos_pidgey",
-		"speciesId": "pidgey",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"kanto_lv_11_20_penhascos_spearow": {
-		"id": "kanto_lv_11_20_penhascos_spearow",
-		"speciesId": "spearow",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"kanto_lv_11_20_penhascos_zubat": {
-		"id": "kanto_lv_11_20_penhascos_zubat",
-		"speciesId": "zubat",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"kanto_lv_11_20_penhascos_hoothoot": {
-		"id": "kanto_lv_11_20_penhascos_hoothoot",
-		"speciesId": "hoothoot",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"kanto_lv_11_20_penhascos_ledyba": {
-		"id": "kanto_lv_11_20_penhascos_ledyba",
-		"speciesId": "ledyba",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_11_20_penhascos_hoppip": {
-		"id": "kanto_lv_11_20_penhascos_hoppip",
-		"speciesId": "hoppip",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_11_20_penhascos_doduo": {
-		"id": "kanto_lv_11_20_penhascos_doduo",
-		"speciesId": "doduo",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_11_20_penhascos_natu": {
-		"id": "kanto_lv_11_20_penhascos_natu",
-		"speciesId": "natu",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"kanto_lv_11_20_penhascos_pidgeotto": {
-		"id": "kanto_lv_11_20_penhascos_pidgeotto",
-		"speciesId": "pidgeotto",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_11_20_penhascos_skiploom": {
-		"id": "kanto_lv_11_20_penhascos_skiploom",
-		"speciesId": "skiploom",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_11_20_penhascos_fearow": {
-		"id": "kanto_lv_11_20_penhascos_fearow",
-		"speciesId": "fearow",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_11_20_penhascos_golbat": {
-		"id": "kanto_lv_11_20_penhascos_golbat",
-		"speciesId": "golbat",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_11_20_penhascos_noctowl": {
-		"id": "kanto_lv_11_20_penhascos_noctowl",
-		"speciesId": "noctowl",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_11_20_penhascos_ledian": {
-		"id": "kanto_lv_11_20_penhascos_ledian",
-		"speciesId": "ledian",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"kanto_lv_11_20_penhascos_xatu": {
-		"id": "kanto_lv_11_20_penhascos_xatu",
-		"speciesId": "xatu",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_11_20_penhascos_yanma": {
-		"id": "kanto_lv_11_20_penhascos_yanma",
-		"speciesId": "yanma",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"kanto_lv_11_20_torre_mistica_abra": {
-		"id": "kanto_lv_11_20_torre_mistica_abra",
-		"speciesId": "abra",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_11_20_torre_mistica_kadabra": {
-		"id": "kanto_lv_11_20_torre_mistica_kadabra",
-		"speciesId": "kadabra",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_11_20_torre_mistica_alakazam": {
-		"id": "kanto_lv_11_20_torre_mistica_alakazam",
-		"speciesId": "alakazam",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"kanto_lv_11_20_torre_mistica_drowzee": {
-		"id": "kanto_lv_11_20_torre_mistica_drowzee",
-		"speciesId": "drowzee",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"kanto_lv_11_20_torre_mistica_hypno": {
-		"id": "kanto_lv_11_20_torre_mistica_hypno",
-		"speciesId": "hypno",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_11_20_torre_mistica_natu": {
-		"id": "kanto_lv_11_20_torre_mistica_natu",
-		"speciesId": "natu",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"kanto_lv_11_20_torre_mistica_xatu": {
-		"id": "kanto_lv_11_20_torre_mistica_xatu",
-		"speciesId": "xatu",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_11_20_torre_mistica_unown": {
-		"id": "kanto_lv_11_20_torre_mistica_unown",
-		"speciesId": "unown",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"kanto_lv_11_20_torre_mistica_wobbuffet": {
-		"id": "kanto_lv_11_20_torre_mistica_wobbuffet",
-		"speciesId": "wobbuffet",
-		"minLevel": 60,
-		"maxLevel": 70,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_21_35_cemiterio_gastly": {
-		"id": "kanto_lv_21_35_cemiterio_gastly",
-		"speciesId": "gastly",
-		"minLevel": 68,
-		"maxLevel": 85,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"kanto_lv_21_35_cemiterio_haunter": {
-		"id": "kanto_lv_21_35_cemiterio_haunter",
-		"speciesId": "haunter",
-		"minLevel": 68,
-		"maxLevel": 85,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_21_35_cemiterio_gengar": {
-		"id": "kanto_lv_21_35_cemiterio_gengar",
-		"speciesId": "gengar",
-		"minLevel": 68,
-		"maxLevel": 85,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"kanto_lv_21_35_cemiterio_misdreavus": {
-		"id": "kanto_lv_21_35_cemiterio_misdreavus",
-		"speciesId": "misdreavus",
-		"minLevel": 68,
-		"maxLevel": 85,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_21_35_covil_sombrio_murkrow": {
-		"id": "kanto_lv_21_35_covil_sombrio_murkrow",
-		"speciesId": "murkrow",
-		"minLevel": 68,
-		"maxLevel": 85,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_21_35_covil_sombrio_sneasel": {
-		"id": "kanto_lv_21_35_covil_sombrio_sneasel",
-		"speciesId": "sneasel",
-		"minLevel": 68,
-		"maxLevel": 85,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"kanto_lv_21_35_covil_sombrio_houndour": {
-		"id": "kanto_lv_21_35_covil_sombrio_houndour",
-		"speciesId": "houndour",
-		"minLevel": 68,
-		"maxLevel": 85,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_21_35_covil_sombrio_houndoom": {
-		"id": "kanto_lv_21_35_covil_sombrio_houndoom",
-		"speciesId": "houndoom",
-		"minLevel": 68,
-		"maxLevel": 85,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_36_55_ruinas_ancestrais_dratini": {
-		"id": "kanto_lv_36_55_ruinas_ancestrais_dratini",
-		"speciesId": "dratini",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"kanto_lv_36_55_ruinas_ancestrais_dragonair": {
-		"id": "kanto_lv_36_55_ruinas_ancestrais_dragonair",
-		"speciesId": "dragonair",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_36_55_ruinas_ancestrais_dragonite": {
-		"id": "kanto_lv_36_55_ruinas_ancestrais_dragonite",
-		"speciesId": "dragonite",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"kanto_lv_36_55_ruinas_ancestrais_kingdra": {
-		"id": "kanto_lv_36_55_ruinas_ancestrais_kingdra",
-		"speciesId": "kingdra",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"kanto_lv_36_55_clareira_encantada_cleffa": {
-		"id": "kanto_lv_36_55_clareira_encantada_cleffa",
-		"speciesId": "cleffa",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_36_55_clareira_encantada_togepi": {
-		"id": "kanto_lv_36_55_clareira_encantada_togepi",
-		"speciesId": "togepi",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_36_55_clareira_encantada_snubbull": {
-		"id": "kanto_lv_36_55_clareira_encantada_snubbull",
-		"speciesId": "snubbull",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_36_55_clareira_encantada_granbull": {
-		"id": "kanto_lv_36_55_clareira_encantada_granbull",
-		"speciesId": "granbull",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	}
+//#region src/data/generated/spawnTiers.generated.ts
+var SPAWN_WEIGHT_BY_SPECIES = {
+	"abra": 10,
+	"aerodactyl": 5,
+	"aipom": 20,
+	"alakazam": 1,
+	"ampharos": 1,
+	"arbok": 5,
+	"arcanine": 5,
+	"ariados": 1,
+	"articuno": 1,
+	"azumarill": 5,
+	"bayleef": 5,
+	"beedrill": 1,
+	"bellossom": 1,
+	"bellsprout": 20,
+	"blastoise": 1,
+	"blissey": 5,
+	"bulbasaur": 10,
+	"butterfree": 1,
+	"caterpie": 10,
+	"celebi": 1,
+	"chansey": 1,
+	"charizard": 1,
+	"charmander": 10,
+	"charmeleon": 5,
+	"chikorita": 10,
+	"chinchou": 30,
+	"clefable": 1,
+	"clefairy": 1,
+	"cleffa": 10,
+	"cloyster": 5,
+	"corsola": 10,
+	"crobat": 1,
+	"croconaw": 5,
+	"cubone": 30,
+	"cyndaquil": 10,
+	"delibird": 10,
+	"dewgong": 1,
+	"diglett": 30,
+	"ditto": 5,
+	"dodrio": 1,
+	"doduo": 10,
+	"donphan": 5,
+	"dragonair": 10,
+	"dragonite": 1,
+	"dratini": 20,
+	"drowzee": 20,
+	"dugtrio": 10,
+	"dunsparce": 1,
+	"eevee": 10,
+	"ekans": 10,
+	"electabuzz": 5,
+	"electrode": 10,
+	"elekid": 10,
+	"entei": 1,
+	"espeon": 5,
+	"exeggcute": 20,
+	"exeggutor": 5,
+	"farfetch_d": 5,
+	"fearow": 10,
+	"feraligatr": 1,
+	"flaaffy": 10,
+	"flareon": 5,
+	"forretress": 5,
+	"furret": 5,
+	"gastly": 20,
+	"gengar": 1,
+	"geodude": 30,
+	"girafarig": 20,
+	"gligar": 10,
+	"gloom": 1,
+	"golbat": 10,
+	"goldeen": 30,
+	"golduck": 10,
+	"golem": 1,
+	"granbull": 1,
+	"graveler": 30,
+	"grimer": 30,
+	"growlithe": 5,
+	"gyarados": 20,
+	"haunter": 5,
+	"heracross": 5,
+	"hitmonchan": 5,
+	"hitmonlee": 5,
+	"hitmontop": 5,
+	"ho_oh": 1,
+	"hoothoot": 20,
+	"hoppip": 10,
+	"horsea": 30,
+	"houndoom": 5,
+	"houndour": 5,
+	"hypno": 5,
+	"igglybuff": 10,
+	"ivysaur": 5,
+	"jigglypuff": 1,
+	"jolteon": 5,
+	"jumpluff": 1,
+	"jynx": 5,
+	"kabuto": 10,
+	"kabutops": 5,
+	"kadabra": 5,
+	"kakuna": 5,
+	"kangaskhan": 5,
+	"kingdra": 1,
+	"kingler": 20,
+	"koffing": 30,
+	"krabby": 30,
+	"lanturn": 10,
+	"lapras": 5,
+	"larvitar": 5,
+	"ledian": 1,
+	"ledyba": 5,
+	"lickitung": 20,
+	"lugia": 1,
+	"machamp": 1,
+	"machoke": 10,
+	"machop": 20,
+	"magby": 10,
+	"magcargo": 5,
+	"magikarp": 30,
+	"magmar": 5,
+	"magnemite": 20,
+	"magneton": 10,
+	"mankey": 10,
+	"mantine": 5,
+	"mareep": 10,
+	"marill": 5,
+	"marowak": 1,
+	"meganium": 1,
+	"meowth": 10,
+	"metapod": 5,
+	"mew": 1,
+	"mewtwo": 1,
+	"miltank": 5,
+	"misdreavus": 5,
+	"moltres": 1,
+	"mr__mime": 5,
+	"muk": 5,
+	"murkrow": 5,
+	"natu": 30,
+	"nidoking": 1,
+	"nidoqueen": 1,
+	"nidoran_f": 20,
+	"nidoran_m": 20,
+	"nidorina": 30,
+	"nidorino": 30,
+	"ninetales": 5,
+	"noctowl": 5,
+	"octillery": 5,
+	"oddish": 10,
+	"omanyte": 10,
+	"omastar": 5,
+	"onix": 20,
+	"paras": 10,
+	"parasect": 5,
+	"persian": 1,
+	"phanpy": 1,
+	"pichu": 10,
+	"pidgeot": 1,
+	"pidgeotto": 10,
+	"pidgey": 20,
+	"pikachu": 5,
+	"piloswine": 5,
+	"pineco": 10,
+	"pinsir": 1,
+	"politoed": 1,
+	"poliwag": 30,
+	"poliwhirl": 20,
+	"poliwrath": 1,
+	"ponyta": 20,
+	"porygon": 10,
+	"porygon2": 5,
+	"primeape": 1,
+	"psyduck": 30,
+	"pupitar": 1,
+	"quagsire": 20,
+	"quilava": 5,
+	"qwilfish": 30,
+	"raichu": 5,
+	"raikou": 1,
+	"rapidash": 10,
+	"raticate": 10,
+	"rattata": 30,
+	"remoraid": 30,
+	"rhydon": 1,
+	"rhyhorn": 10,
+	"sandshrew": 10,
+	"sandslash": 5,
+	"scizor": 5,
+	"scyther": 1,
+	"seadra": 10,
+	"seaking": 20,
+	"seel": 20,
+	"sentret": 20,
+	"shellder": 20,
+	"shuckle": 5,
+	"skarmory": 1,
+	"skiploom": 5,
+	"slowbro": 10,
+	"slowking": 5,
+	"slowpoke": 30,
+	"slugma": 5,
+	"smeargle": 10,
+	"smoochum": 10,
+	"sneasel": 1,
+	"snorlax": 5,
+	"snubbull": 5,
+	"spearow": 30,
+	"spinarak": 5,
+	"squirtle": 10,
+	"stantler": 10,
+	"starmie": 5,
+	"staryu": 10,
+	"steelix": 5,
+	"sudowoodo": 5,
+	"suicune": 1,
+	"sunflora": 5,
+	"sunkern": 10,
+	"swinub": 30,
+	"tangela": 30,
+	"tauros": 5,
+	"teddiursa": 1,
+	"tentacool": 30,
+	"tentacruel": 10,
+	"togepi": 10,
+	"togetic": 5,
+	"totodile": 10,
+	"typhlosion": 1,
+	"tyranitar": 1,
+	"tyrogue": 10,
+	"umbreon": 5,
+	"unown": 30,
+	"ursaring": 10,
+	"vaporeon": 5,
+	"venomoth": 1,
+	"venonat": 5,
+	"venusaur": 1,
+	"victreebel": 1,
+	"vileplume": 1,
+	"voltorb": 30,
+	"vulpix": 5,
+	"wartortle": 5,
+	"weedle": 10,
+	"weepinbell": 10,
+	"weezing": 1,
+	"wigglytuff": 5,
+	"wobbuffet": 10,
+	"wooper": 30,
+	"xatu": 5,
+	"yanma": 1,
+	"zapdos": 1,
+	"zubat": 20
 };
 //#endregion
 //#region src/data/legendaries.ts
@@ -29915,10 +27652,10 @@ function buildLanceHunt() {
 		map: {
 			id: LANCE_MAP_ID,
 			name: "BOSS Campeao Lance",
-			description: "Batalha final de Johto contra o Campeao Lance — 6 POKEs Lendarios em sequencia (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o proximo POKE da equipe entra automaticamente. Captura desabilitada. Derrota-lo libera o Novo Continente (Kanto).",
+			description: "Batalha contra o Campeao Lance — 6 POKEs Lendarios em sequencia (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o proximo POKE da equipe entra automaticamente. Captura desabilitada. Derrota-lo libera a Faixa III e o Modo Pesadelo.",
 			levelRange: [55, 65],
 			unlockCost: null,
-			continent: "johto",
+			continent: "faixa2",
 			bounds: {
 				width: 1400,
 				height: 900
@@ -29937,7 +27674,7 @@ function buildLanceHunt() {
 			noCatch: true,
 			autoSwitchTeamOnFaint: true,
 			sequence: enemyPool,
-			unlocksContinentOnClear: "kanto",
+			unlocksContinentOnClear: GRUPOS_DO_LANCE,
 			startCountdown: 5,
 			keepCorpses: true,
 			respawnDelay: 3,
@@ -29963,8 +27700,8 @@ var BOSS_ENCOUNTERS_DATA = {
 };
 //#endregion
 //#region src/data/evolutionStage.ts
-var PRE_EVOLUCAO = {};
-for (const especie of Object.values(SPECIES)) if (especie.evolvesTo && SPECIES[especie.evolvesTo]) PRE_EVOLUCAO[especie.evolvesTo] = especie.id;
+var PRE_EVOLUCAO$1 = {};
+for (const especie of Object.values(SPECIES)) if (especie.evolvesTo && SPECIES[especie.evolvesTo]) PRE_EVOLUCAO$1[especie.evolvesTo] = especie.id;
 var PROFUNDIDADE_MAXIMA = 10;
 var CACHE = {};
 /** 1 = forma base, 2 = primeira evolucao, 3+ = segunda evolucao em diante. */
@@ -29973,16 +27710,12 @@ function evolutionStage(speciesId) {
 	if (memo != null) return memo;
 	let estagio = 1;
 	let atual = speciesId;
-	while (PRE_EVOLUCAO[atual] && estagio < PROFUNDIDADE_MAXIMA) {
-		atual = PRE_EVOLUCAO[atual];
+	while (PRE_EVOLUCAO$1[atual] && estagio < PROFUNDIDADE_MAXIMA) {
+		atual = PRE_EVOLUCAO$1[atual];
 		estagio += 1;
 	}
 	CACHE[speciesId] = estagio;
 	return estagio;
-}
-/** "Pokemon de 3a evolucao" no sentido do jogador: o fim de uma cadeia de tres. */
-function isTerceiraEvolucao(speciesId) {
-	return evolutionStage(speciesId) >= 3;
 }
 //#endregion
 //#region src/data/spawnStrength.ts
@@ -30047,82 +27780,7 @@ function zonaMinimaDaEspecie(speciesId) {
 	return Math.max(porForca, PISO_POR_ESTAGIO[estagio]);
 }
 //#endregion
-//#region src/data/regions.ts
-var LAST_KANTO_DEX = 151;
-var DEX_RE = /Nº\s*(\d+)/;
-var POKEDEX_NUMBER = Object.fromEntries(Object.entries(SPECIES_DATA).map(([id, species]) => {
-	const match = species.description.match(DEX_RE);
-	if (!match) throw new Error(`Especie "${id}" sem numero de Pokedex na descricao ("${species.description}") — sem ele nao da pra dizer se ela e de Kanto ou de Johto.`);
-	return [id, Number(match[1])];
-}));
-function pokedexNumber(speciesId) {
-	const dex = POKEDEX_NUMBER[speciesId];
-	if (dex == null) throw new Error(`Especie desconhecida: ${speciesId}`);
-	return dex;
-}
-function regionOfSpecies(speciesId) {
-	return pokedexNumber(speciesId) <= LAST_KANTO_DEX ? "kanto" : "johto";
-}
-var REGIONS = ["johto", "kanto"];
-var REGION_LABEL = {
-	johto: "Johto",
-	kanto: "Kanto"
-};
-var NON_WILD_SPECIES = /* @__PURE__ */ new Set([
-	"porygon",
-	"porygon2",
-	"eevee"
-]);
-//#endregion
 //#region src/data/huntSpawnOverrides.ts
-var HUNT_BIOME = {
-	lv_1_10_floresta: "GRASS",
-	lv_1_10_bosque: "BUG",
-	lv_11_20_costa: "WATER",
-	lv_11_20_planicie: "NORMAL",
-	lv_21_30_caverna: "ROCK",
-	lv_21_30_deserto: "GROUND",
-	lv_31_40_vulcanico: "FIRE",
-	lv_31_40_usina: "ELECTRIC",
-	lv_41_50_pantano: "POISON",
-	lv_41_50_dojo: "FIGHTING",
-	kanto_lv_1_10_geleira: "ICE",
-	kanto_lv_1_10_fabrica: "STEEL",
-	kanto_lv_11_20_penhascos: "FLYING",
-	kanto_lv_11_20_torre_mistica: "PSYCHIC",
-	kanto_lv_21_35_cemiterio: "GHOST",
-	kanto_lv_21_35_covil_sombrio: "DARK",
-	kanto_lv_36_55_ruinas_ancestrais: "DRAGON",
-	kanto_lv_36_55_clareira_encantada: "FAIRY"
-};
-var ZONA_POR_HUNT = {
-	lv_1_10_floresta: 0,
-	lv_1_10_bosque: 0,
-	lv_11_20_costa: 1,
-	lv_11_20_planicie: 1,
-	lv_21_30_caverna: 2,
-	lv_21_30_deserto: 2,
-	lv_31_40_vulcanico: 3,
-	lv_31_40_usina: 3,
-	lv_41_50_pantano: 4,
-	lv_41_50_dojo: 4,
-	kanto_lv_1_10_geleira: 5,
-	kanto_lv_1_10_fabrica: 5,
-	kanto_lv_11_20_penhascos: 6,
-	kanto_lv_11_20_torre_mistica: 6,
-	kanto_lv_21_35_cemiterio: 7,
-	kanto_lv_21_35_covil_sombrio: 7,
-	kanto_lv_36_55_ruinas_ancestrais: 8,
-	kanto_lv_36_55_clareira_encantada: 8
-};
-var NIVEIS_POR_ZONA = 10;
-function faixaDaZona(zona) {
-	return [zona * NIVEIS_POR_ZONA + 1, (zona + 1) * NIVEIS_POR_ZONA];
-}
-function rotuloDoBioma(baseName) {
-	const m = baseName.match(/\(([^)]+)\)\s*$/);
-	return m ? m[1] : baseName;
-}
 var STARTER_HUNT_ID = "route_46";
 var STARTER_HUNT_SPECIES = [
 	"sentret",
@@ -30136,139 +27794,167 @@ var STARTER_LEVEL_WEIGHTS = [{
 	level: 2,
 	weight: 20
 }];
-var SPECIES_BIOME_OVERRIDE = {
-	wooper: "GROUND",
-	quagsire: "GROUND"
-};
-var MIN_TYPE_POOL = 4;
-var BASE_STARTERS = /* @__PURE__ */ new Set([
-	"charmander",
-	"squirtle",
-	"bulbasaur"
-]);
-var LEGENDARY = new Set(LEGENDARY_SPECIES_IDS);
-var WILD_SPECIES_IDS = Object.keys(SPECIES_DATA).filter((id) => !BASE_STARTERS.has(id) && !LEGENDARY.has(id) && !NON_WILD_SPECIES.has(id)).sort((a, b) => pokedexNumber(a) - pokedexNumber(b));
-function biomeOf(speciesId) {
-	return SPECIES_BIOME_OVERRIDE[speciesId] ?? SPECIES_DATA[speciesId].type;
-}
-function poolFor(region, biome) {
-	const mine = WILD_SPECIES_IDS.filter((id) => regionOfSpecies(id) === region);
-	const primary = mine.filter((id) => biomeOf(id) === biome);
-	if (primary.length >= MIN_TYPE_POOL) return primary;
-	const secondary = mine.filter((id) => SPECIES_DATA[id].type2 === biome && !primary.includes(id));
-	return [...primary, ...secondary];
-}
-var WEIGHT_BY_SPECIES = {};
-for (const enc of Object.values(ENCOUNTERS_DATA)) WEIGHT_BY_SPECIES[enc.speciesId] = enc.weight;
 var DEFAULT_WEIGHT = 10;
+var PRE_EVOLUCAO = {};
+for (const especie of Object.values(SPECIES)) if (especie.evolvesTo && SPECIES[especie.evolvesTo]) PRE_EVOLUCAO[especie.evolvesTo] = especie.id;
+function primeiroNivelDaZona(zona) {
+	return (FAIXAS$1.find((f) => zona <= f.zonaMaxima) ?? FAIXAS$1[FAIXAS$1.length - 1]).niveis[0];
+}
+/**
+* A partir de que nivel `speciesId` deixa de ser o estagio correto da linha.
+*
+* Evolucao por NIVEL usa o nivel real do catalogo. As 9 evolucoes ESPECIAIS
+* (ex-troca: Kadabra->Alakazam, Onix->Steelix...) carregam
+* `evolvesAtLevel = 80`, que e a regra do JOGADOR (Nivel 80 + 20 Pedras, ver
+* data/pokes.ts) e nao faz sentido pro selvagem: usar 80 aqui trancaria
+* Alakazam, Gengar, Machamp, Steelix, Golem, Kingdra, Politoed e Scizor em
+* Lv80-90, uma fatia minuscula do jogo. Pro selvagem o gatilho e a FORCA — a
+* forma evoluida aparece a partir da primeira faixa que a zona minima dela
+* alcanca.
+*/
+function nivelDeTroca(speciesId) {
+	const especie = SPECIES[speciesId];
+	const alvo = especie?.evolvesTo;
+	if (!alvo || !SPECIES[alvo]) return null;
+	if (especie.isSpecialEvolution) return primeiroNivelDaZona(Math.max(zonaMinimaDaEspecie(alvo), zonaMinimaDaEspecie(speciesId) + 1));
+	return especie.evolvesAtLevel ?? null;
+}
+/** Raizes das linhas evolutivas presentes em `especies`, sem duplicar. */
+function raizesDe(especies) {
+	const raizes = [];
+	for (const id of especies) {
+		let atual = id;
+		for (let i = 0; i < 10 && PRE_EVOLUCAO[atual]; i++) atual = PRE_EVOLUCAO[atual];
+		if (!raizes.includes(atual)) raizes.push(atual);
+	}
+	return raizes;
+}
+/**
+* Recorta a linha que comeca em `raiz` na faixa [lo, hi]: um trecho por
+* estagio, com a sub-faixa de nivel em que aquele estagio e o correto.
+*
+* Um estagio e pulado quando (a) nao esta no elenco deste sub-bioma — a
+* heranca por familia do gerador da a mesma casa pra linha toda, mas duas
+* linhas podem se juntar com casas diferentes — ou (b) a zona minima dele
+* passa da faixa, que e o que impede Tyranitar de aparecer numa hunt Lv31-60.
+*/
+function trechosDaLinha(raiz, faixa, elenco) {
+	const [lo, hi] = faixa.niveis;
+	const trechos = [];
+	let atual = raiz;
+	let desde = 1;
+	for (let i = 0; i < 10 && atual; i++) {
+		const troca = nivelDeTroca(atual);
+		const ate = troca == null ? Number.POSITIVE_INFINITY : troca - 1;
+		const min = Math.max(lo, desde);
+		const max = Math.min(hi, ate);
+		if (min <= max && elenco.has(atual) && zonaMinimaDaEspecie(atual) <= faixa.zonaMaxima) trechos.push({
+			speciesId: atual,
+			minLevel: min,
+			maxLevel: max
+		});
+		if (troca == null) break;
+		desde = troca;
+		atual = SPECIES[atual].evolvesTo;
+	}
+	return trechos;
+}
 var maps = {};
 var encounters = {};
-function addEncounter(huntId, speciesId, minLevel, maxLevel, levelWeights) {
-	const id = `${huntId}_${speciesId}`;
-	encounters[id] = {
+/**
+* Encontros de cada SALA: `huntId -> chave do sub-bioma -> ids de encontro`.
+*
+* O `enemyPool` da hunt e a uniao disto. A sala troca o pool ativo em tempo de
+* execucao pelo do sub-bioma sorteado (ver engine/systems/salaSystem.ts).
+*/
+var POOL_POR_SALA = {};
+function addEncounter(huntKey, trecho, levelWeights) {
+	const id = `${huntKey}_${trecho.speciesId}`;
+	if (!encounters[id]) encounters[id] = {
 		id,
-		speciesId,
-		minLevel,
-		maxLevel,
+		speciesId: trecho.speciesId,
+		minLevel: trecho.minLevel,
+		maxLevel: trecho.maxLevel,
 		aggroRadius: 175,
 		wanderRadius: 60,
-		weight: WEIGHT_BY_SPECIES[speciesId] ?? DEFAULT_WEIGHT,
+		weight: SPAWN_WEIGHT_BY_SPECIES[trecho.speciesId] ?? DEFAULT_WEIGHT,
 		...levelWeights ? { levelWeights } : {}
 	};
 	return id;
 }
-var MIN_POOL_ZONA_AVANCADA = 3;
-/**
-* Junta as zonas avancadas magras, subindo o nivel de quem foi absorvido.
-*
-* Duas regras que nao sao arbitrarias:
-*
-* 1. **A zona BASE do bioma sempre sai como hunt propria**, mesmo com pool
-*    pequeno. Ela e a que carrega o id historico (`lv_1_10_bosque`), e esse id
-*    aparece em `unlocked_maps` e em `game_sessions.map_id` no Postgres —
-*    fundi-la deixaria sessao viva apontando pra hunt que nao existe mais.
-* 2. **A fusao so sobe de nivel, nunca desce.** `zonaMinimaDaEspecie` e um
-*    PISO: subir respeita todo mundo do grupo, descer colocaria de volta na
-*    hunt cedo exatamente o POKE que esta leva tirou de la.
-*
-* A sobra do topo vira hunt propria mesmo com uma especie so. A alternativa
-* (fundir pra baixo) apagaria a hunt cedo do bioma; e uma hunt de um POKE so —
-* Tyranitar na Zona 7 da Caverna, por exemplo — e conteudo legitimo, nao erro:
-* e o dado real de Johto ter poucas especies ROCK.
-*/
-function agruparZonasMagras(porZona, zonaBase) {
-	const saida = [];
-	const base = porZona.get(zonaBase);
-	if (base?.length) saida.push([zonaBase, base]);
-	const acima = [...porZona.entries()].filter(([z]) => z !== zonaBase).sort((a, b) => a[0] - b[0]);
-	let acumulado = [];
-	for (const [z, especies] of acima) {
-		acumulado = [...acumulado, ...especies];
-		if (acumulado.length >= MIN_POOL_ZONA_AVANCADA) {
-			saida.push([z, acumulado]);
-			acumulado = [];
-		}
+function montarHunt(bioma, faixa) {
+	const id = huntId(bioma.chave, faixa.id);
+	const [lo, hi] = faixa.niveis;
+	const porSala = {};
+	for (const sub of bioma.subBiomas) {
+		const doSub = new Set(SUB_BIOMA_ESPECIES[sub.chave] ?? []);
+		const ids = [];
+		for (const raiz of raizesDe(doSub)) for (const trecho of trechosDaLinha(raiz, faixa, doSub)) ids.push(addEncounter(id, trecho));
+		porSala[sub.chave] = ids;
 	}
-	if (acumulado.length) saida.push([acima[acima.length - 1][0], acumulado]);
-	return saida;
+	const enemyPool = [...new Set(Object.values(porSala).flat())];
+	if (enemyPool.length === 0) throw new Error(`Hunt "${id}" nasceria sem nenhum encontro (faixa ${faixa.nome}, Lv ${lo}-${hi}). Hunt vazia nao da erro em runtime: ela so nunca spawna nada e o jogador fica num mapa morto.`);
+	POOL_POR_SALA[id] = porSala;
+	maps[id] = {
+		id,
+		name: `${bioma.nome} ${faixa.nome}`,
+		description: `${bioma.nome} — niveis ${lo} a ${hi}. Sub-biomas: ${bioma.subBiomas.map((s) => s.nome).join(", ")}.`,
+		levelRange: [lo, hi],
+		unlockCost: null,
+		continent: faixa.id,
+		bounds: { ...GEOMETRIA.bounds },
+		playerSpawn: { ...GEOMETRIA.playerSpawn },
+		bg: { ...bioma.bg },
+		maxEnemies: GEOMETRIA.maxEnemies,
+		respawnDelay: GEOMETRIA.respawnDelay,
+		spawnPoints: GEOMETRIA.spawnPoints.map((p) => ({ ...p })),
+		enemyPool,
+		itemDrops: [...new Map(bioma.subBiomas.flatMap((s) => LOOT[s.loot]).map((d) => [d.itemId, d])).values()]
+	};
 }
-function nameFor(baseName, region, zona) {
-	return `${REGION_LABEL[region]} Zona ${zona} · ${rotuloDoBioma(baseName)}`;
+{
+	const pool = STARTER_HUNT_SPECIES.filter((id) => SPECIES[id]);
+	const lo = STARTER_LEVEL_WEIGHTS[0].level;
+	const hi = STARTER_LEVEL_WEIGHTS[STARTER_LEVEL_WEIGHTS.length - 1].level;
+	maps[STARTER_HUNT_ID] = {
+		id: STARTER_HUNT_ID,
+		name: "Route 46 (Inicial)",
+		description: "A primeira cacada. So POKEs de tipo Normal, nivel 1 a 2.",
+		levelRange: [lo, hi],
+		unlockCost: null,
+		continent: "faixa1",
+		bounds: { ...GEOMETRIA.bounds },
+		playerSpawn: { ...GEOMETRIA.playerSpawn },
+		bg: {
+			primary: "#3f5a34",
+			secondary: "#4a6a3d",
+			image: "assets/hunt-backgrounds/forest.png"
+		},
+		maxEnemies: GEOMETRIA.maxEnemies,
+		respawnDelay: GEOMETRIA.respawnDelay,
+		spawnPoints: GEOMETRIA.spawnPoints.map((p) => ({ ...p })),
+		enemyPool: pool.map((speciesId) => addEncounter(STARTER_HUNT_ID, {
+			speciesId,
+			minLevel: lo,
+			maxLevel: hi
+		}, STARTER_LEVEL_WEIGHTS)),
+		itemDrops: [...LOOT.basico]
+	};
 }
-for (const base of Object.values(MAPS_DATA)) {
-	if (base.id === STARTER_HUNT_ID) {
-		const pool = STARTER_HUNT_SPECIES.filter((id) => SPECIES_DATA[id]);
-		maps[base.id] = {
-			...base,
-			name: "Route 46 (Inicial)",
-			continent: "johto",
-			levelRange: [STARTER_LEVEL_WEIGHTS[0].level, STARTER_LEVEL_WEIGHTS[STARTER_LEVEL_WEIGHTS.length - 1].level],
-			enemyPool: pool.map((speciesId) => addEncounter(base.id, speciesId, STARTER_LEVEL_WEIGHTS[0].level, STARTER_LEVEL_WEIGHTS[STARTER_LEVEL_WEIGHTS.length - 1].level, STARTER_LEVEL_WEIGHTS))
-		};
-		continue;
-	}
-	const biome = HUNT_BIOME[base.id];
-	if (!biome) throw new Error(`Hunt "${base.id}" sem bioma em HUNT_BIOME (data/huntSpawnOverrides.ts). Toda hunt gerada precisa declarar o tipo elemental dela pro recorte por regiao funcionar.`);
-	const zona = ZONA_POR_HUNT[base.id];
-	if (zona == null) throw new Error(`Hunt "${base.id}" sem zona em ZONA_POR_HUNT (data/huntSpawnOverrides.ts). Sem numero de zona nao ha faixa de nivel — e era justamente a divergencia entre nome e nivel que esta tabela existe pra fechar.`);
-	for (const region of REGIONS) {
-		const pool = poolFor(region, biome);
-		if (!pool.length) continue;
-		const idBase = base.continent === region ? base.id : `${base.id}_${region}`;
-		const porZona = /* @__PURE__ */ new Map();
-		for (const speciesId of pool) {
-			const alvo = Math.max(zona, zonaMinimaDaEspecie(speciesId));
-			const lista = porZona.get(alvo);
-			if (lista) lista.push(speciesId);
-			else porZona.set(alvo, [speciesId]);
-		}
-		for (const [zonaAlvo, especies] of agruparZonasMagras(porZona, zona)) {
-			const id = zonaAlvo === zona ? idBase : `${idBase}_z${zonaAlvo}`;
-			const [lo, hi] = faixaDaZona(zonaAlvo);
-			const name = nameFor(base.name, region, zonaAlvo);
-			maps[id] = {
-				...base,
-				id,
-				name,
-				levelRange: [lo, hi],
-				description: `Local selvagem: ${name} (nivel ${lo}-${hi}).`,
-				continent: region,
-				enemyPool: especies.map((speciesId) => addEncounter(id, speciesId, lo, hi))
-			};
-		}
-	}
-}
-var SHARE_TERCEIRA_EVOLUCAO = .002;
-var LIMITE_ZONA_DE_FINAIS = .5;
+for (const bioma of BIOMAS) for (const faixa of FAIXAS$1) montarHunt(bioma, faixa);
+var TETO_DE_FATIA = .35;
+var POOL_MINIMO_PRA_TETO = 5;
 for (const map of Object.values(maps)) {
-	const fixos = map.enemyPool.filter((id) => isTerceiraEvolucao(encounters[id].speciesId));
-	if (!fixos.length) continue;
-	if (fixos.length / map.enemyPool.length >= LIMITE_ZONA_DE_FINAIS) continue;
-	const pesoDosOutros = map.enemyPool.filter((id) => !fixos.includes(id)).reduce((soma, id) => soma + encounters[id].weight, 0);
-	const denominador = 1 - SHARE_TERCEIRA_EVOLUCAO * fixos.length;
-	if (pesoDosOutros <= 0 || denominador <= 0) continue;
-	const peso = SHARE_TERCEIRA_EVOLUCAO * pesoDosOutros / denominador;
-	for (const id of fixos) encounters[id].weight = peso;
+	if (map.enemyPool.length < POOL_MINIMO_PRA_TETO) continue;
+	for (let volta = 0; volta < 10; volta++) {
+		const total = map.enemyPool.reduce((s, id) => s + encounters[id].weight, 0);
+		const acima = map.enemyPool.filter((id) => encounters[id].weight / total > .350000001);
+		if (acima.length === 0) break;
+		for (const id of acima) {
+			const resto = total - encounters[id].weight;
+			encounters[id].weight = TETO_DE_FATIA * resto / .65;
+		}
+	}
 }
 var nightmare = buildNightmareMirror(maps, encounters);
 var MAPS = {
@@ -30284,7 +27970,7 @@ var ENCOUNTERS = {
 //#endregion
 //#region src/data/maps.ts
 var RESPAWN_DELAY_MULTIPLIER = createFormulaEngine(FORMULAS).evalOrDefault("MOB_RESPAWN_DELAY_MULTIPLIER", .25);
-var WATER_HUNT_IDS = /* @__PURE__ */ new Set(["lv_11_20_costa", "kanto_lv_36_55_profundezas"]);
+var WATER_HUNT_IDS = new Set(["marinho", "aguas_interiores"].flatMap((bioma) => FAIXAS$1.map((faixa) => huntId(bioma, faixa.id))));
 function getMap(id) {
 	const map = MAPS[id];
 	if (!map) return null;
@@ -47875,7 +45561,7 @@ function pokemonBaseValue(level, baseExp, rarityKey) {
 	const multiplier = (rarityKey && RARITIES[rarityKey] || RARITIES.comum).sellMultiplier;
 	return Math.max(1, Math.floor(base * multiplier));
 }
-function awardKillLoot(rng, gameState, enemy, mapDef) {
+function awardKillLoot(rng, gameState, enemy, mapDef, drops = mapDef.itemDrops) {
 	const species = SPECIES[enemy.poke.speciesId];
 	const sellValue = pokemonBaseValue(enemy.poke.level, species.baseExp, enemy.poke.rarity);
 	const baseGold = Math.max(1, Math.floor(formulaEngine$1.eval("MONEY_FOR_KILL", {
@@ -47885,7 +45571,7 @@ function awardKillLoot(rng, gameState, enemy, mapDef) {
 	const gold = Math.max(1, Math.round(baseGold * KILL_GOLD_MULTIPLIER * GOLD_GLOBAL_MULTIPLIER));
 	gameState.addGold(gold);
 	const droppedItems = [];
-	for (const drop of mapDef.itemDrops) if (rollChance(rng, drop.chance)) {
+	for (const drop of drops) if (rollChance(rng, drop.chance)) {
 		gameState.addItem(drop.itemId, 1);
 		droppedItems.push(drop.itemId);
 	}
@@ -47916,6 +45602,135 @@ function recordBatch(gameState, { gold, xp, mobs, shinys }) {
 		mobs,
 		shinys
 	});
+}
+//#endregion
+//#region src/engine/systems/salaSystem.ts
+/** A hunt e percorrida em salas? Hunt inicial, BOSS e Lance nao sao. */
+function temSalas(mapId) {
+	return POOL_POR_SALA[mapId] != null;
+}
+/** Sub-biomas desta hunt que tem pelo menos um encontro nesta faixa. */
+function candidatas(mapId) {
+	const salas = POOL_POR_SALA[mapId];
+	if (!salas) return [];
+	const primeira = Object.keys(salas)[0];
+	const bioma = primeira ? SUB_BIOMA_POR_CHAVE[primeira]?.bioma : null;
+	if (!bioma) return [];
+	return bioma.subBiomas.filter((s) => (salas[s.chave]?.length ?? 0) > 0);
+}
+/**
+* Sorteia o sub-bioma da proxima sala, ponderado pelo `peso` de cada um.
+*
+* Consome a sequencia semeada do mundo de proposito: quem decide qual sala vem
+* e o servidor, pela mesma semente que decide shiny, IV e raridade.
+*/
+function sortearSala(rng, mapId) {
+	const opcoes = candidatas(mapId);
+	if (opcoes.length === 0) return null;
+	if (opcoes.length === 1) return opcoes[0].chave;
+	return weightedPick(rng, opcoes, (s) => s.peso).chave;
+}
+function novaSala(rng, mapId, indice, ciclos) {
+	const chave = sortearSala(rng, mapId);
+	if (!chave) return null;
+	return {
+		indice,
+		chave,
+		abates: 0,
+		ciclos
+	};
+}
+/**
+* A janela de nivel da sala: a hunt AFUNDA conforme as salas sao limpas.
+*
+* BUG DE BALANCEAMENTO QUE ISTO CORRIGE, medido no motor headless: uma faixa
+* cobre 30 niveis, entao sem janela a primeira sala da "Mata I" (Lv1-30) ja
+* podia jogar um Butterfree Lv30 contra um POKE recem-saido do Hospital. Um
+* Charmander Lv25 morreu em 4 abates numa simulacao de 30 minutos, gastando 21
+* pocoes no caminho. As zonas antigas tinham 10 niveis e nao expunham isso.
+*
+* A sala 1 fica na base da faixa e a 10 no topo — o que da a mecanica de salas
+* um significado mecanico (a hunt fica mais dura conforme voce avanca) alem da
+* variedade de sub-bioma.
+*/
+function janelaDaSala(faixa, indice) {
+	const [lo, hi] = faixa;
+	const largura = hi - lo;
+	if (largura <= 0) return [lo, hi];
+	const passo = largura / 10;
+	const inicio = Math.round(lo + passo * indice);
+	const fim = Math.round(lo + passo * (indice + 1));
+	return [Math.max(lo, inicio), Math.max(Math.max(lo, inicio), Math.min(hi, fim))];
+}
+/** Encontros que podem nascer agora: os da sala, ou os da hunt inteira. */
+function poolAtivo(mapId, sala, fallback) {
+	if (!sala) return fallback;
+	const pool = POOL_POR_SALA[mapId]?.[sala.chave];
+	return pool && pool.length > 0 ? pool : fallback;
+}
+/**
+* O que pode nascer AGORA: o pool da sala, recortado pela janela de nivel dela.
+*
+* O recorte tem fallback: se nenhum encontro da sala alcanca a janela (a sala 1
+* de uma faixa cujo sub-bioma so tem forma evoluida, por exemplo), vale o pool
+* inteiro da sala. Sala que nao spawna nada e pior que sala fora do nivel — o
+* jogador ficaria num mapa vazio sem nenhum erro na tela.
+*/
+function contextoDeSpawn(mapId, faixa, sala, fallback) {
+	const pool = poolAtivo(mapId, sala, fallback);
+	if (!sala) return { pool };
+	const janela = janelaDaSala(faixa, sala.indice);
+	const naJanela = pool.filter((id) => {
+		const enc = getEncounter(id);
+		return enc != null && enc.minLevel <= janela[1] && enc.maxLevel >= janela[0];
+	});
+	return {
+		pool: naJanela.length > 0 ? naJanela : pool,
+		janela
+	};
+}
+/** Loot que pode cair agora: o do sub-bioma, ou o da hunt inteira. */
+function lootAtivo(sala, fallback) {
+	if (!sala) return fallback;
+	const perfil = SUB_BIOMA_POR_CHAVE[sala.chave]?.sub.loot;
+	return perfil ? LOOT[perfil] : fallback;
+}
+function nomeDaSala(sala) {
+	if (!sala) return null;
+	return SUB_BIOMA_POR_CHAVE[sala.chave]?.sub.nome ?? sala.chave;
+}
+/**
+* Conta um abate na sala atual e avanca quando a quota fecha.
+*
+* Chamado de dentro do `stepWorld`, entao vale igual no combate ao vivo, no
+* catch-up de aba oculta e no farm offline — nao ha um segundo caminho de
+* abate que pudesse esquecer de contar.
+*/
+function registrarAbate(world, mapId) {
+	const sala = world.sala;
+	if (!sala) return {
+		avancou: false,
+		fechouCiclo: false
+	};
+	sala.abates += 1;
+	if (sala.abates < 12) return {
+		avancou: false,
+		fechouCiclo: false
+	};
+	const proximo = sala.indice + 1;
+	const fechouCiclo = proximo >= 10;
+	const indice = fechouCiclo ? 0 : proximo;
+	const ciclos = fechouCiclo ? sala.ciclos + 1 : sala.ciclos;
+	world.sala = novaSala(world.rng, mapId, indice, ciclos) ?? {
+		...sala,
+		indice,
+		abates: 0,
+		ciclos
+	};
+	return {
+		avancou: true,
+		fechouCiclo
+	};
 }
 //#endregion
 //#region src/engine/systems/pokedexSystem.ts
@@ -48680,6 +46495,7 @@ function emptyWorldState(seed = randomSeed()) {
 		sequenceIndex: 0,
 		sequenceCleared: false,
 		countdownRemaining: null,
+		sala: null,
 		rng: createRng(seed),
 		counters: {
 			entity: 1,
@@ -48704,7 +46520,10 @@ create()(immer((set) => ({
 			resultado = fn(draft.rng);
 		});
 		return resultado;
-	}
+	},
+	definirSala: (sala) => set((draft) => {
+		if (draft.mapDef) draft.sala = sala ? { ...sala } : null;
+	})
 })));
 //#endregion
 //#region src/stores/toastStore.ts
@@ -48793,13 +46612,16 @@ function randomSpawnPoint(rng, mapDef) {
 		y
 	};
 }
-function spawnEnemyAt(world, mapDef) {
+function spawnEnemyAt(world, mapDef, pool, janela) {
 	const { rng, counters } = world;
 	const point = randomSpawnPoint(rng, mapDef);
-	const encounterId = weightedPick(rng, mapDef.enemyPool, (id) => getEncounter(id)?.weight ?? 45);
+	const encounterId = weightedPick(rng, pool, (id) => getEncounter(id)?.weight ?? 45);
 	const encounter = getEncounter(encounterId);
 	if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
-	const level = encounter.levelWeights?.length ? weightedPick(rng, encounter.levelWeights, (entry) => entry.weight).level : randInt(rng, encounter.minLevel, encounter.maxLevel);
+	const [jmin, jmax] = janela ?? [encounter.minLevel, encounter.maxLevel];
+	const lo = Math.max(encounter.minLevel, Math.min(jmin, encounter.maxLevel));
+	const hi = Math.min(encounter.maxLevel, Math.max(jmax, encounter.minLevel));
+	const level = encounter.levelWeights?.length ? weightedPick(rng, encounter.levelWeights, (entry) => entry.weight).level : randInt(rng, Math.min(lo, hi), Math.max(lo, hi));
 	return createEnemyEntity(counters, {
 		poke: createPokeInstance(rng, encounter.speciesId, level),
 		x: point.x,
@@ -48843,7 +46665,7 @@ function spawnSequenceEnemy(world, mapDef, index) {
 		encounterId
 	});
 }
-function buildMapWorld(mapId, activePoke, carry) {
+function buildMapWorld(mapId, activePoke, carry, progresso) {
 	const mapDef = getMap(mapId);
 	if (!mapDef) throw new Error(`Mapa desconhecido: ${mapId}`);
 	const base = novoMundo(carry);
@@ -48853,10 +46675,15 @@ function buildMapWorld(mapId, activePoke, carry) {
 		y: mapDef.playerSpawn.y
 	});
 	if (isDead(player)) player.fainted = true;
+	const sequenceIndex = progresso?.sequenceIndex ?? 0;
+	const sequenceCleared = progresso?.sequenceCleared ?? false;
+	const countdownRemaining = sequenceIndex > 0 || sequenceCleared ? null : mapDef.startCountdown || null;
+	const sala = temSalas(mapId) ? progresso?.sala ?? novaSala(base.rng, mapId, 0, 0) : null;
+	const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool);
 	const enemies = [];
-	if (!mapDef.startCountdown) {
-		if (mapDef.sequence) enemies.push(spawnSequenceEnemy(base, mapDef, 0));
-		else for (let i = 0; i < mapDef.maxEnemies; i++) enemies.push(spawnEnemyAt(base, mapDef));
+	if (!countdownRemaining && !sequenceCleared) {
+		if (mapDef.sequence) enemies.push(spawnSequenceEnemy(base, mapDef, sequenceIndex));
+		else for (let i = 0; i < mapDef.maxEnemies; i++) enemies.push(spawnEnemyAt(base, mapDef, pool, janela));
 	}
 	return {
 		...base,
@@ -48868,9 +46695,10 @@ function buildMapWorld(mapId, activePoke, carry) {
 		autoTimers: { treinador: 0 },
 		reviveCountdown: null,
 		respawnTimer: mapDef.respawnDelay,
-		sequenceIndex: 0,
-		sequenceCleared: false,
-		countdownRemaining: mapDef.startCountdown || null
+		sequenceIndex,
+		sequenceCleared,
+		countdownRemaining,
+		sala
 	};
 }
 function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
@@ -48884,7 +46712,7 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 	gameState.updatePokeInstance(grantResult.poke.uid, () => grantResult.poke);
 	const trainerResult = grantTrainerExp(gameState.trainer, expGain);
 	gameState.setTrainer(trainerResult.trainer);
-	const loot = awardKillLoot(world.rng, gameState, enemy, world.mapDef);
+	const loot = awardKillLoot(world.rng, gameState, enemy, world.mapDef, lootAtivo(world.sala, world.mapDef.itemDrops));
 	const captureResult = world.mapDef.noCatch ? null : maybeAutoCatch(world.rng, gameState, enemy.poke);
 	recordPokedexKill(gameState, enemy.poke.speciesId, Boolean(enemy.poke.isShiny));
 	if (!silent) {
@@ -48973,7 +46801,10 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (world.countdownRemaining <= 0) {
 			world.countdownRemaining = null;
 			if (world.mapDef.sequence) world.enemies.push(spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex));
-			else for (let i = 0; i < world.mapDef.maxEnemies; i++) world.enemies.push(spawnEnemyAt(world, world.mapDef));
+			else {
+				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
+				for (let i = 0; i < world.mapDef.maxEnemies; i++) world.enemies.push(spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela));
+			}
 		}
 		if (!silent) updateAnimations(world, dt);
 		return [];
@@ -48988,6 +46819,11 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (!enemy) continue;
 		kills.push(handleEnemyDefeated(world, enemy, gameState, { silent }));
 		enemy.deathRemovalTimer = silent ? 0 : 4;
+		const avanco = registrarAbate(world, world.mapDef.id);
+		if (avanco.avancou && !silent) {
+			const nome = nomeDaSala(world.sala);
+			useToastStore.getState().pushToast(avanco.fechouCiclo ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.` : `Sala limpa! Avancando para a sala ${(world.sala?.indice ?? 0) + 1}: ${nome}.`, "success", "world");
+		}
 	}
 	for (const enemy of world.enemies) if (isDead(enemy) && enemy.deathRemovalTimer != null && enemy.deathRemovalTimer > 0) enemy.deathRemovalTimer -= dt;
 	world.enemies = world.enemies.filter((e) => !isDead(e) || (e.deathRemovalTimer ?? 0) > 0 || world.mapDef.keepCorpses);
@@ -49020,17 +46856,18 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (ev.type === "auto_revive") useToastStore.getState().pushToast("Auto-revive reanimou seu POKE!", "success", "combat");
 	}
 	const aliveCount = world.enemies.filter((e) => !isDead(e)).length;
-	if (world.mapDef.sequence && world.mapDef.unlocksContinentOnClear && !world.sequenceCleared && aliveCount === 0 && world.sequenceIndex === world.mapDef.sequence.length - 1) {
+	if (world.mapDef.sequence && world.mapDef.unlocksContinentOnClear?.length && !world.sequenceCleared && aliveCount === 0 && world.sequenceIndex === world.mapDef.sequence.length - 1) {
 		world.sequenceCleared = true;
-		const continent = world.mapDef.unlocksContinentOnClear;
-		const wasLocked = !gameState.isContinentUnlocked(continent);
-		gameState.unlockContinent(continent);
-		if (!silent && wasLocked) useToastStore.getState().pushToast("Voce derrotou o Campeao Lance! O Novo Continente foi desbloqueado.", "success", "world");
+		const grupos = world.mapDef.unlocksContinentOnClear;
+		const algumEstavaTrancado = grupos.some((g) => !gameState.isContinentUnlocked(g));
+		for (const grupo of grupos) gameState.unlockContinent(grupo);
+		if (!silent && algumEstavaTrancado) useToastStore.getState().pushToast("Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.", "success", "world");
 	}
 	if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
 		if (world.respawnTimer <= 0) {
-			world.enemies.push(spawnEnemyAt(world, world.mapDef));
+			const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
+			world.enemies.push(spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela));
 			world.respawnTimer = world.mapDef.respawnDelay;
 		}
 	} else if (world.mapDef.sequence && aliveCount === 0 && world.sequenceIndex < world.mapDef.sequence.length - 1) {
@@ -49200,7 +47037,7 @@ function defaultGameStateData() {
 			exp: 0
 		},
 		pokedexKills: {},
-		unlockedContinents: ["johto", "nightmare"]
+		unlockedContinents: [...FAIXAS_INICIAIS]
 	};
 }
 //#endregion
@@ -49909,6 +47746,15 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 			effect: 1,
 			pendingHit: 1
 		}
+	}, {
+		sequenceIndex: Number(sessao.sequence_index ?? 0),
+		sequenceCleared: Boolean(sessao.sequence_cleared),
+		sala: sessao.sala_chave ? {
+			indice: Number(sessao.sala_indice ?? 0),
+			chave: sessao.sala_chave,
+			abates: Number(sessao.sala_abates ?? 0),
+			ciclos: Number(sessao.ciclos ?? 0)
+		} : null
 	});
 	const offline = segundos > 120;
 	world.pessimista = offline;
@@ -49929,14 +47775,20 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 	});
 	estado.currentMapId = resumo.stoppedEarly ? null : sessao.map_id;
 	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt);
-	if (!continentesAntes.has("kanto") && estado.unlockedContinents.includes("kanto")) await inserir(cfg, "hall_da_fama", {
+	if (GRUPOS_DO_LANCE.some((g) => !continentesAntes.has(g) && estado.unlockedContinents.includes(g))) await inserir(cfg, "hall_da_fama", {
 		user_id: userId,
 		conquista: CONQUISTA_LANCE
 	}, { upsert: "user_id,conquista" });
 	await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, {
 		simulated_seconds: Number(sessao.simulated_seconds) + resumo.simulatedSeconds,
 		rng_state: world.rng.state,
-		rng_draws: world.rng.draws
+		rng_draws: world.rng.draws,
+		sequence_index: world.sequenceIndex,
+		sequence_cleared: world.sequenceCleared,
+		sala_indice: world.sala?.indice ?? 0,
+		sala_chave: world.sala?.chave ?? null,
+		sala_abates: world.sala?.abates ?? 0,
+		ciclos: world.sala?.ciclos ?? 0
 	});
 	return {
 		segundosCreditados: segundos,
@@ -49944,6 +47796,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		resumo,
 		estado,
 		piso,
+		sala: world.sala,
 		encerrada: resumo.stoppedEarly ? "desmaio" : null
 	};
 }
@@ -50044,8 +47897,8 @@ async function abrirSessao(cfg, userId, req) {
 	if (!poke) throw new ErroHttp(403, "este POKE nao esta na sua equipe");
 	if (poke.hp <= 0) throw new ErroHttp(409, "Seu POKE esta desmaiado. Cure na Enfermeira antes de cacar.");
 	if (MAPS[mapId].unlockCost != null && !estado.unlockedMaps.includes(mapId)) throw new ErroHttp(403, "hunt nao desbloqueada");
-	const continente = MAPS[mapId].continent || "johto";
-	if (!estado.unlockedContinents.includes(continente)) throw new ErroHttp(403, "continente nao desbloqueado");
+	const grupo = MAPS[mapId].continent;
+	if (!estado.unlockedContinents.includes(grupo)) throw new ErroHttp(403, "Derrote o Campeao Lance para acessar esta area.");
 	const anterior = await sessaoAberta(cfg, userId);
 	if (anterior) {
 		await aplicarFlush(cfg, userId, anterior);
@@ -50113,6 +47966,7 @@ async function flush(cfg, userId) {
 		resumo: resultado.resumo,
 		piso: resultado.piso,
 		sessaoEncerrada: resultado.encerrada,
+		sala: resultado.sala,
 		estado: resultado.estado
 	});
 }
