@@ -15,8 +15,9 @@ import {
   aplicarStatus, curarStatus, tickStatus, tentarAgir, statusVaiPegar,
   aplicarEfeitosDoGolpe, aplicarMudancasDeStat, limparEstadoVolatil,
 } from './statusSystem'
-import { getAbility } from '@/data/abilities'
+import { getAbility, ABILITIES } from '@/data/abilities'
 import type { WorldEntity } from '../types'
+import type { StatusCondition } from '@/data/statusEffects'
 
 function poke(speciesId: string, hpMax = 160): PokeInstance {
   const species = SPECIES[speciesId]
@@ -247,6 +248,35 @@ describe('a IA so tenta status que vai pegar', () => {
   it('tenta quando o alvo esta limpo e nao e imune', () => {
     expect(statusVaiPegar(entidade('rattata'), 'paralysis', 'thunder_wave')).toBe(true)
   })
+})
+
+describe('o caminho do GOLPE aplica os seis status', () => {
+  // Observando uma hora de hunt em seis mapas diferentes, cinco dos seis status
+  // apareceram sozinhos; congelamento nao. Nao por bug — sao 6 golpes no
+  // catalogo inteiro, quase todos com 10% de chance secundaria, e o alvo
+  // precisa nao ser ICE. Este teste cobre o que a sorte nao cobriu: percorre o
+  // catalogo, acha um golpe real para CADA status e confere que o caminho
+  // completo (`aplicarEfeitosDoGolpe`) aplica.
+  const TIPOS: StatusCondition[] = ['poison', 'burn', 'paralysis', 'sleep', 'freeze', 'confusion']
+
+  for (const tipo of TIPOS) {
+    it(`${tipo}: existe golpe no catalogo e ele aplica`, () => {
+      const golpe = Object.values(ABILITIES).find((a) => a.status === tipo)
+      expect(golpe, `nenhum golpe causa ${tipo}`).toBeTruthy()
+
+      // Alvo escolhido pra nao ser imune ao status em teste. Rattata e NORMAL
+      // puro: nao resiste a nenhum dos seis.
+      const alvo = entidade('rattata')
+      // A chance real do golpe pode ser 10%; o que se testa aqui e o CAMINHO,
+      // nao o sorteio (a chance ja tem teste proprio). Forca 100%.
+      const forcado = { ...golpe!, statusChance: 100 }
+      const aplicado = aplicarEfeitosDoGolpe(createRng(1), alvo, forcado)
+
+      expect(aplicado?.tipo).toBe(tipo)
+      const guardado = tipo === 'confusion' ? alvo.statusVolatil : alvo.poke.status
+      expect(guardado?.tipo).toBe(tipo)
+    })
+  }
 })
 
 describe('estagios de atributo', () => {
