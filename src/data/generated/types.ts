@@ -138,6 +138,9 @@ export interface AbilityDataEntry {
   // Mudancas de estagio de atributo e a chance (100 para golpe que so faz isso).
   statChanges?: StatChange[]
   statChance?: number
+  // Ausente = o efeito vai no ALVO (Growl baixa o Ataque de quem levou).
+  // 'self' = vai em quem usou (Swords Dance sobe o proprio Ataque).
+  statTarget?: 'self'
   flinchChance?: number
   // Estagios de critico ACIMA do normal, nao porcentagem (Slash tem 1).
   critStages?: number

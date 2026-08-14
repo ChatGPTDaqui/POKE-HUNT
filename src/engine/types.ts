@@ -18,7 +18,7 @@ import type { MapDef } from '@/data/maps'
 import type { ElementType } from '@/data/generated/types'
 import type { Ability } from '@/data/abilities'
 import type { ResolvedBattleAnim } from '@/data/battleSprites'
-import type { StatusAtivo } from '@/data/statusEffects'
+import type { StatusAtivo, EstagiosDeStat } from '@/data/statusEffects'
 import type { Rng } from '@/core/rng'
 
 export type EntityState = 'idle' | 'wander' | 'chase' | 'engaged' | 'dead'
@@ -78,6 +78,10 @@ export interface BaseEntity {
   // sai de campo ou a batalha acaba. Como este combate nao acaba, o analogo e
   // a entidade — que e recriada a cada troca de cena.
   statusVolatil: StatusAtivo | null
+  // Estagios de atributo (-6 a +6). Volateis pelo mesmo motivo da confusao:
+  // nos jogos zeram quando o POKE sai de campo, e a entidade e o que e
+  // recriado a cada troca de cena. Ausente = estagio 0 (multiplicador 1).
+  estagios: EstagiosDeStat
   // Segundos restantes de imunidade a novo status, contados depois que um
   // status sai (cura ou fim natural). Desvio aprovado, ver
   // scripts/usum/status.json#reaplicacao.

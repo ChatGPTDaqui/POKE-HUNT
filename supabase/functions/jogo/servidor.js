@@ -789,6 +789,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"bubble": {
@@ -887,6 +888,7 @@ var ABILITIES_DATA = {
 			"estagios": 2
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"rain_dance": {
@@ -1001,6 +1003,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"double_edge": {
@@ -1143,6 +1146,7 @@ var ABILITIES_DATA = {
 			"estagios": 2
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"freeze_dry": {
@@ -1311,6 +1315,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"discharge": {
@@ -1373,6 +1378,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"zap_cannon": {
@@ -1584,6 +1590,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"eruption": {
@@ -2013,6 +2020,7 @@ var ABILITIES_DATA = {
 			"estagios": 2
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"aura_sphere": {
@@ -2038,6 +2046,7 @@ var ABILITIES_DATA = {
 			"estagios": 2
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"me_first": {
@@ -2123,6 +2132,7 @@ var ABILITIES_DATA = {
 			"estagios": 2
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"defense_curl": {
@@ -2138,6 +2148,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"mud_sport": {
@@ -2163,6 +2174,7 @@ var ABILITIES_DATA = {
 			"estagios": 2
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"rollout": {
@@ -2618,6 +2630,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"swallow": {
@@ -2939,6 +2952,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"psybeam": {
@@ -3051,6 +3065,7 @@ var ABILITIES_DATA = {
 			}
 		],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"poison_sting": {
@@ -3303,6 +3318,7 @@ var ABILITIES_DATA = {
 			"estagios": 2
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"feint": {
@@ -3625,6 +3641,7 @@ var ABILITIES_DATA = {
 			"estagios": 2
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"heavy_slam": {
@@ -4112,6 +4129,7 @@ var ABILITIES_DATA = {
 			}
 		],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"crabhammer": {
@@ -4182,6 +4200,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"waterfall": {
@@ -4263,6 +4282,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"hyper_beam": {
@@ -4687,6 +4707,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"giga_impact": {
@@ -4792,6 +4813,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"recycle": {
@@ -4881,6 +4903,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"echoed_voice": {
@@ -5584,6 +5607,7 @@ var ABILITIES_DATA = {
 			"estagios": 3
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"belch": {
@@ -5692,6 +5716,7 @@ var ABILITIES_DATA = {
 			"estagios": 2
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"karate_chop": {
@@ -5767,6 +5792,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"dynamic_punch": {
@@ -5804,6 +5830,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"mega_kick": {
@@ -6162,6 +6189,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"beat_up": {
@@ -6197,6 +6225,7 @@ var ABILITIES_DATA = {
 			"estagios": 1
 		}],
 		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"embargo": {
@@ -30811,6 +30840,7 @@ function createPlayerEntity(counters, { poke, x, y }) {
 		attackAnimTimer: 0,
 		effectLanes: [],
 		statusVolatil: null,
+		estagios: {},
 		imunidadeDeStatus: 0,
 		proximoTurnoDeStatus: TURNO_SEGUNDOS,
 		pathWaypoints: null,
@@ -30862,6 +30892,7 @@ function createEnemyEntity(counters, { poke, x, y, encounterId }) {
 		attackAnimTimer: 0,
 		effectLanes: [],
 		statusVolatil: null,
+		estagios: {},
 		imunidadeDeStatus: 0,
 		proximoTurnoDeStatus: TURNO_SEGUNDOS,
 		pathWaypoints: null,
@@ -31227,6 +31258,22 @@ function descongelaCom(tipo, tipoDoGolpe, poderDoGolpe) {
 function chanceDeDescongelar(tipo) {
 	return regraDoStatus(tipo)?.chanceDeDescongelarPorTurno ?? 0;
 }
+/**
+* Multiplicador de um estagio, formula exata dos jogos: (2+n)/2 subindo e
+* 2/(2-n) descendo.
+*
+* A assimetria e de proposito e e do jogo original: +1 da 1.5x, mas -1 da
+* 0.67x, nao 0.5x. Usar `1 + n*0.5` dos dois lados (o "obvio") tornaria os
+* debuffs bem mais fortes do que sao — em -2 a diferenca ja e 0.5 contra 0.5,
+* mas em -6 seria 0 (imortal) contra 0.25.
+*/
+function multiplicadorDeEstagio(estagio) {
+	const n = Math.max(-6, Math.min(6, estagio));
+	return n >= 0 ? (2 + n) / 2 : 2 / (2 - n);
+}
+function multiplicadorDeStat(estagios, stat) {
+	return multiplicadorDeEstagio(estagios?.[stat] ?? 0);
+}
 //#endregion
 //#region src/data/statusColors.ts
 var CORES = {
@@ -31291,6 +31338,34 @@ function aplicarStatus(rng, alvo, tipo, chance, abilityId) {
 	else alvo.poke.status = status;
 	return status;
 }
+/**
+* Aplica as mudancas de estagio de atributo de um golpe ("power ups").
+*
+* `ability.statTarget === 'self'` manda no proprio usuario (Danca das Espadas);
+* ausente manda no alvo (Rosnado). Sem essa distincao, Danca das Espadas subiria
+* o Ataque do INIMIGO — e o dado cru da PokeAPI nao a carrega, ela vem de
+* `move.target` (ver fetch-usum-catalog.js).
+*
+* Devolve as mudancas que REALMENTE entraram: quem ja esta em +6 nao sobe mais,
+* e o chamador precisa saber disso pra nao anunciar um buff que nao houve.
+*/
+function aplicarMudancasDeStat(rng, atacante, alvo, ability) {
+	if (!ability.statChanges || !ability.statChance) return [];
+	if (nextFloat(rng) * 100 >= ability.statChance) return [];
+	const destino = ability.statTarget === "self" ? atacante : alvo;
+	const aplicadas = [];
+	for (const mudanca of ability.statChanges) {
+		const antes = destino.estagios[mudanca.stat] ?? 0;
+		const depois = Math.max(-6, Math.min(6, antes + mudanca.estagios));
+		if (depois === antes) continue;
+		destino.estagios[mudanca.stat] = depois;
+		aplicadas.push({
+			stat: mudanca.stat,
+			estagios: depois - antes
+		});
+	}
+	return aplicadas;
+}
 function aplicarEfeitosDoGolpe(rng, alvo, ability) {
 	const congelado = statusNaoVolatil(alvo);
 	if (congelado && descongelaCom(congelado.tipo, ability.type, ability.power)) curarStatus(alvo, congelado.tipo);
@@ -31316,6 +31391,18 @@ function curarStatus(entity, tipo) {
 	}
 	if (curou) entity.imunidadeDeStatus = SEGUNDOS_DE_IMUNIDADE_APOS_CURA;
 	return curou;
+}
+/**
+* Zera o que os jogos zeram no fim da batalha: estagios de atributo e status
+* volatil (confusao). O nao-volatil NAO sai daqui — ele sobrevive a batalha
+* nos jogos, e e por isso que existe Antidoto.
+*
+* A imunidade de reaplicacao tambem nao e mexida: ela e sobre o tempo desde a
+* ultima cura, nao sobre a batalha.
+*/
+function limparEstadoVolatil(entity) {
+	entity.statusVolatil = null;
+	entity.estagios = {};
 }
 /**
 * Passa o tempo dos status de UMA entidade. Chamado todo frame; so faz algo
@@ -46616,7 +46703,7 @@ function scaledCooldown(ability, speed) {
 	return (ability.cooldown ?? 0) * (SPEED_REFERENCE / Math.max(1, speed));
 }
 function velocidadeEfetiva(entity) {
-	return entity.poke.stats.speed * multiplicadorDeVelocidade(entity.poke.status?.tipo ?? null);
+	return entity.poke.stats.speed * multiplicadorDeVelocidade(entity.poke.status?.tipo ?? null) * multiplicadorDeStat(entity.estagios, "speed");
 }
 function danoDeConfusao(entity, poder) {
 	if (poder <= 0) return 0;
@@ -46761,6 +46848,24 @@ function estimateDamage(rng, attackerEntity, defenderEntity, ability) {
 	dmg *= effectivenessMultiplier;
 	return dmg;
 }
+var ESTAGIO_ALVO_DA_IA = 2;
+/**
+* Vale a pena usar este golpe de APOIO puro (sem dano, sem status) agora?
+*
+* Cobre os dois lados: buff em si mesmo (Danca das Espadas) e debuff no
+* oponente (Rosnado). Em ambos, so vale se o estagio ainda nao chegou no alvo
+* da IA — repetir um buff no teto e um turno jogado fora, e o jogador ve o POKE
+* "dancando" em vez de atacar.
+*/
+function golpeDeApoioUtil(entity, defenderEntity, ability) {
+	if (ability.healPercent) return entity.poke.hp / entity.poke.stats.hp <= 1 - ability.healPercent / 100;
+	if (!ability.statChanges || !ability.statChanges.length) return false;
+	const destino = ability.statTarget === "self" ? entity : defenderEntity;
+	return ability.statChanges.some((m) => {
+		const atual = destino.estagios[m.stat] ?? 0;
+		return m.estagios > 0 ? atual < ESTAGIO_ALVO_DA_IA : atual > -2;
+	});
+}
 /**
 * Dano estimado JA DESCONTADA a chance de errar.
 *
@@ -46790,8 +46895,8 @@ function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista 
 	if (special && special.mode === "fixed") dmg = effectivenessMultiplier === 0 ? 0 : special.amount;
 	else {
 		const isPhysical = resolveAbilityCategory(ability, attackerPoke) === "physical";
-		const atk = isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp;
-		const def = isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp;
+		const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp) * multiplicadorDeStat(attackerEntity.estagios, isPhysical ? "atkFis" : "atkEsp");
+		const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp) * multiplicadorDeStat(defenderEntity.estagios, isPhysical ? "def" : "defEsp");
 		const power = special && special.mode === "dynamicPower" ? special.power : ability.power;
 		dmg = formulaEngine$4.eval("DAMAGE_BASE", {
 			level: attackerPoke.level,
@@ -46802,7 +46907,8 @@ function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista 
 		if (isPhysical) dmg *= multiplicadorDeDanoFisico(attackerPoke.status?.tipo ?? null);
 		if (Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)) dmg *= STAB_MULTIPLIER;
 		dmg *= effectivenessMultiplier;
-		isCrit = pessimista ? false : rollChance(rng, CRIT_CHANCE);
+		const chanceDeCritico = CRIT_CHANCE * Math.pow(3, Math.min(3, ability.critStages ?? 0));
+		isCrit = pessimista ? false : rollChance(rng, Math.min(.5, chanceDeCritico));
 		if (isCrit) dmg *= CRIT_MULTIPLIER;
 		dmg *= pessimista ? DANO_VARIACAO_MINIMA : formulaEngine$4.eval("DAMAGE_VARIATION", {}, rng);
 	}
@@ -46862,9 +46968,9 @@ function pickAbility(rng, entity, defenderEntity, aoeTargetCounter) {
 	const disabled = entity.poke.disabledAbilities || {};
 	const prontos = golpesUtilizaveis(entity.poke, attackerSpecies, entity.kind === "enemy").filter((id) => !disabled[id]).map((id) => getAbility(id)).filter((a) => a != null && isAbilityReady(entity, a.id));
 	const ready = prontos.filter((ability) => isDamagingAbility(ability));
-	const statusPronto = prontos.filter((a) => a.power === 0 && a.status != null && statusVaiPegar(defenderEntity, a.status, a.id));
+	const statusPronto = prontos.filter((a) => a.power === 0 && (a.status != null && statusVaiPegar(defenderEntity, a.status, a.id) || golpeDeApoioUtil(entity, defenderEntity, a)));
 	if (statusPronto.length > 0) {
-		if (ready.reduce((max, a) => Math.max(max, danoEsperado(rng, entity, defenderEntity, a)), 0) < defenderEntity.poke.hp) return statusPronto.reduce((melhor, a) => (a.statusChance ?? 0) > (melhor.statusChance ?? 0) ? a : melhor);
+		if (ready.reduce((max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)), 0) < defenderEntity.poke.hp) return statusPronto.reduce((melhor, a) => (a.statusChance ?? 0) > (melhor.statusChance ?? 0) ? a : melhor);
 	}
 	if (ready.length === 0) {
 		const basico = basicAttackFor(attackerSpecies);
@@ -46903,6 +47009,27 @@ function anunciarStatus(world, alvo, tipo, quando = "entrou") {
 		text: quando === "entrou" ? `${nomeDoStatus(tipo)}!` : `${nomeDoStatus(tipo)} passou`,
 		color: corDoStatus(tipo),
 		duration: .8,
+		owner: alvo
+	}));
+}
+var ROTULO_DE_STAT = {
+	atkFis: "Ataque",
+	atkEsp: "Atq. Esp.",
+	def: "Defesa",
+	defEsp: "Def. Esp.",
+	speed: "Velocidade"
+};
+function anunciarEstagios(world, alvo, mudancas) {
+	const texto = mudancas.map((m) => `${ROTULO_DE_STAT[m.stat] ?? m.stat} ${(m.estagios > 0 ? "↑" : "↓").repeat(Math.abs(m.estagios))}`).join("  ");
+	world.effects.push(createWorldEffect(world.counters, {
+		type: "abilityName",
+		x: alvo.x,
+		y: alvo.y,
+		targetX: alvo.x,
+		targetY: alvo.y + getGroundOffset(alvo) + 14,
+		text: texto,
+		color: mudancas[0].estagios > 0 ? "#4ade80" : "#fb7185",
+		duration: .9,
 		owner: alvo
 	}));
 }
@@ -47058,6 +47185,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	const target = findEntityById(world.player, world.enemies, hit.targetId);
 	if (!target || isDead(target)) return;
 	const result = computeDamage(world.rng, attacker, target, ability, world.pessimista);
+	const danoCausado = Math.min(result.amount, target.poke.hp);
 	if (result.amount > 0) {
 		takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke));
 		if (!silent) spawnDamageNumber(world, target, result);
@@ -47065,6 +47193,50 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	if (!isDead(target)) {
 		const aplicado = aplicarEfeitosDoGolpe(world.rng, target, ability);
 		if (aplicado && !silent) anunciarStatus(world, target, aplicado.tipo, "entrou");
+		const mudancas = aplicarMudancasDeStat(world.rng, attacker, target, ability);
+		if (mudancas.length && !silent) anunciarEstagios(world, ability.statTarget === "self" ? attacker : target, mudancas);
+	}
+	if (ability.healPercent) {
+		const quanto = Math.max(1, Math.round(attacker.poke.stats.hp * ability.healPercent / 100));
+		heal(attacker, quanto);
+		if (!silent) spawnDamageNumber(world, attacker, {
+			amount: -quanto,
+			effectiveness: "normal",
+			effectivenessLabel: null,
+			isCrit: false
+		});
+	}
+	if (ability.flinchChance && nextFloat(world.rng) * 100 < ability.flinchChance) startGlobalCooldown(target, MIN_ACTION_GAP);
+	if (ability.drainPercent && danoCausado > 0) {
+		const quanto = Math.max(1, Math.round(danoCausado * Math.abs(ability.drainPercent) / 100));
+		if (ability.drainPercent > 0) {
+			heal(attacker, quanto);
+			if (!silent) spawnDamageNumber(world, attacker, {
+				amount: -quanto,
+				effectiveness: "normal",
+				effectivenessLabel: null,
+				isCrit: false
+			});
+		} else {
+			takeDamage(attacker, quanto);
+			if (!silent) spawnDamageNumber(world, attacker, {
+				amount: quanto,
+				effectiveness: "normal",
+				effectivenessLabel: null,
+				isCrit: false
+			});
+			if (isDead(attacker)) {
+				if (attacker.kind === "player") {
+					if (!attacker.fainted) {
+						attacker.fainted = true;
+						onPlayerFainted();
+					}
+				} else if (!attacker.deathHandled) {
+					attacker.deathHandled = true;
+					defeatedEnemyIds.push(attacker.id);
+				}
+			}
+		}
 	}
 	const isPlayerAttacker = attacker.kind === "player";
 	if (!(ability.target === "aoe") && !silent) world.effects.push(createWorldEffect(world.counters, {
@@ -47146,7 +47318,7 @@ function updateCombat(world, dt, opts = {}) {
 			if (isDead(enemy) || player.fainted) continue;
 			executeEnemyAction(world, enemy, player, silent);
 		}
-	}
+	} else limparEstadoVolatil(player);
 	return {
 		defeatedEnemyIds,
 		playerJustFainted

@@ -109,6 +109,11 @@ const STATUS_DA_POKEAPI = {
   confusion: 'confusion',
 };
 
+// `move.target` que significa "em mim mesmo". Todo o resto e no oponente.
+// 'users-field' e 'user-and-allies' entram porque neste jogo o time do jogador
+// e um POKE so em campo: o campo do usuario E o usuario.
+const ALVOS_NO_PROPRIO_USUARIO = new Set(['user', 'users-field', 'user-and-allies']);
+
 // Nomes de stat da PokeAPI -> nomes deste jogo (os mesmos de StatBlock).
 // `accuracy`/`evasion` nao existem aqui (nao ha calculo de acerto por estagio),
 // entao golpe que so mexe nesses dois sai sem mudanca de stat.
@@ -147,6 +152,11 @@ function efeitosDoGolpe(m) {
     chanceDeStatus = meta.ailment_chance > 0 ? meta.ailment_chance : 100;
   }
 
+  // Quem recebe o efeito. `stat_changes` da PokeAPI nao diz se o +2 de Ataque
+  // e no usuario (Swords Dance) ou no alvo (Growl) — quem diz e `move.target`.
+  // Sem isso, Danca das Espadas subiria o Ataque do INIMIGO.
+  const alvoDoEfeito = ALVOS_NO_PROPRIO_USUARIO.has(m.target.name) ? 'self' : 'target'
+
   const mudancasDeStat = (m.stat_changes || [])
     .filter((s) => STAT_DE_ESTAGIO[s.stat.name] && s.change !== 0)
     .map((s) => ({ stat: STAT_DE_ESTAGIO[s.stat.name], estagios: s.change }));
@@ -162,6 +172,7 @@ function efeitosDoGolpe(m) {
   return {
     status,
     chanceDeStatus,
+    alvoDoEfeito,
     mudancasDeStat,
     chanceDeStat,
     chanceDeFlinch: meta.flinch_chance || 0,
@@ -380,8 +391,8 @@ async function main() {
     absorb: { poder: 20, drenoPercentual: 50 },
     recover: { curaPercentual: 50 },
     slash: { estagiosDeCritico: 1 },
-    swords_dance: { mudancasDeStat: [{ stat: 'atkFis', estagios: 2 }], chanceDeStat: 100 },
-    growl: { mudancasDeStat: [{ stat: 'atkFis', estagios: -1 }], chanceDeStat: 100 },
+    swords_dance: { mudancasDeStat: [{ stat: 'atkFis', estagios: 2 }], chanceDeStat: 100, alvoDoEfeito: 'self' },
+    growl: { mudancasDeStat: [{ stat: 'atkFis', estagios: -1 }], chanceDeStat: 100, alvoDoEfeito: 'target' },
   };
   for (const [chave, alvo] of Object.entries(esperado)) {
     const g = golpes.find((x) => x.chave === chave);

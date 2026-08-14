@@ -18,6 +18,7 @@ import { useWorldStore } from '@/stores/worldStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { Meter } from '@/components/game/controls'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import { cn } from '@/lib/utils'
 
 export function ActivePokeCard() {
@@ -94,6 +95,13 @@ function RarityBadge({ poke }: { poke: { rarity?: string | null } }) {
 }
 
 function PokeVitals({ poke, species }: { poke: PokeInstance; species: (typeof SPECIES)[string] }) {
+  // A confusao NAO esta no `poke`: e volatil e vive na entidade de combate
+  // (ver engine/types.ts). Lida do worldStore pra o selo aparecer junto com o
+  // nao-volatil, que e o que o jogador espera ver — ele nao sabe (nem precisa
+  // saber) que um mora num lugar e o outro em outro.
+  const statusVolatil = useWorldStore((s) => (
+    s.player && s.player.poke.uid === poke.uid ? s.player.statusVolatil : null
+  ))
   const hpPct = Math.max(0, (poke.hp / poke.stats.hp) * 100)
   const progress = expProgressForInstance(poke, species)
   const expPct = Math.max(0, Math.min(100, (progress.into / progress.needed) * 100))
@@ -105,8 +113,13 @@ function PokeVitals({ poke, species }: { poke: PokeInstance; species: (typeof SP
       </div>
       <Meter pct={hpPct} height=".45em" color={hpPct < 30 ? 'var(--color-hp-low)' : 'var(--color-hp)'} />
       <Meter pct={expPct} height=".3em" color="var(--color-exp)" />
-      <div className="text-[.72em] text-n400">
-        HP {Math.floor(poke.hp)}/{poke.stats.hp}
+      <div className="flex items-center gap-[.4em] text-[.72em] text-n400">
+        <span>HP {Math.floor(poke.hp)}/{poke.stats.hp}</span>
+        {/* Ao lado do HP e nao numa linha propria: e o unico lugar do HUD que o
+            jogador ja olha o tempo todo, e um status que aparece fora do campo
+            de visao dele nao explica por que o POKE parou de agir. */}
+        <StatusBadge status={poke.status} />
+        <StatusBadge status={statusVolatil} />
       </div>
     </>
   )

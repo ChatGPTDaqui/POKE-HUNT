@@ -8,9 +8,16 @@
 import { deriveRng, nextFloat, type Rng } from '@/core/rng'
 import { getAbility, BASIC_ATTACK, isDamagingAbility, TURNO_SEGUNDOS, type Ability } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
-import { multiplicadorDeVelocidade, multiplicadorDeDanoFisico, nomeDoStatus, type StatusCondition } from '@/data/statusEffects'
+import {
+  multiplicadorDeVelocidade, multiplicadorDeDanoFisico, multiplicadorDeStat,
+  nomeDoStatus, type StatusCondition,
+} from '@/data/statusEffects'
 import { corDoStatus } from '@/data/statusColors'
-import { tickStatus, tentarAgir, aplicarEfeitosDoGolpe, statusVaiPegar } from './statusSystem'
+import type { StatChange } from '@/data/generated/types'
+import {
+  tickStatus, tentarAgir, aplicarEfeitosDoGolpe, statusVaiPegar, aplicarMudancasDeStat,
+  limparEstadoVolatil,
+} from './statusSystem'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { SPECIES } from '@/data/pokes'
 import type { PokeInstance } from '@/data/pokes'
@@ -23,7 +30,7 @@ import { triggerAttackAnim, ATTACK_ANIM_DURATION } from './animationSystem'
 import { createWorldEffect, effectDone, tickEffect } from '../effect'
 import {
   isDead, getGroundOffset, tickCooldowns, isAbilityReady,
-  startCooldown, canAct, startGlobalCooldown, takeDamage, releaseEffectLane, findEntityById,
+  startCooldown, canAct, startGlobalCooldown, takeDamage, heal, releaseEffectLane, findEntityById,
 } from '../entity'
 import type { EnemyEntity, PendingHit, PlayerEntity, WorldEntity, WorldState } from '../types'
 
@@ -88,7 +95,9 @@ function scaledCooldown(ability: Ability, speed: number): number {
 // corta pela metade na Gen VII (era 75% antes) — e aqui, onde Velocidade vira
 // ritmo de acao, isso significa literalmente agir na metade da frequencia.
 function velocidadeEfetiva(entity: WorldEntity): number {
-  return entity.poke.stats.speed * multiplicadorDeVelocidade(entity.poke.status?.tipo ?? null)
+  return entity.poke.stats.speed
+    * multiplicadorDeVelocidade(entity.poke.status?.tipo ?? null)
+    * multiplicadorDeStat(entity.estagios, 'speed')
 }
 
 // Dano que o POKE causa em si mesmo quando confuso: golpe fisico SEM TIPO de
@@ -252,6 +261,36 @@ function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: W
   return dmg
 }
 
+// Ate que estagio a IA se da ao trabalho de buffar/debuffar.
+//
+// O teto NAO e +6 de proposito. Cada uso de Danca das Espadas custa um turno
+// inteiro, e o ganho por estagio cai rapido: de 0 pra +2 o Ataque dobra, de +4
+// pra +6 sobe 33%. Sem teto o POKE gastaria seis turnos se preparando enquanto
+// apanha — que e um jeito de perder a luta com a stat mais alta da hunt.
+const ESTAGIO_ALVO_DA_IA = 2
+
+/**
+ * Vale a pena usar este golpe de APOIO puro (sem dano, sem status) agora?
+ *
+ * Cobre os dois lados: buff em si mesmo (Danca das Espadas) e debuff no
+ * oponente (Rosnado). Em ambos, so vale se o estagio ainda nao chegou no alvo
+ * da IA — repetir um buff no teto e um turno jogado fora, e o jogador ve o POKE
+ * "dancando" em vez de atacar.
+ */
+function golpeDeApoioUtil(entity: WorldEntity, defenderEntity: WorldEntity, ability: Ability): boolean {
+  // Cura pura (Recover): so quando ha HP de verdade a recuperar. O limiar existe
+  // pra o POKE nao gastar turno curando 5 de HP com a vida quase cheia.
+  if (ability.healPercent) {
+    return entity.poke.hp / entity.poke.stats.hp <= 1 - ability.healPercent / 100
+  }
+  if (!ability.statChanges || !ability.statChanges.length) return false
+  const destino = ability.statTarget === 'self' ? entity : defenderEntity
+  return ability.statChanges.some((m) => {
+    const atual = destino.estagios[m.stat] ?? 0
+    return m.estagios > 0 ? atual < ESTAGIO_ALVO_DA_IA : atual > -ESTAGIO_ALVO_DA_IA
+  })
+}
+
 /**
  * Dano estimado JA DESCONTADA a chance de errar.
  *
@@ -303,8 +342,13 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
     dmg = effectivenessMultiplier === 0 ? 0 : special.amount
   } else {
     const isPhysical = resolveAbilityCategory(ability, attackerPoke) === 'physical'
-    const atk = isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp
-    const def = isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp
+    // Estagios entram MULTIPLICANDO a stat crua, nao alterando-a: a ficha do
+    // POKE continua mostrando o Ataque de verdade, e o buff some quando ele sai
+    // de campo. E como os jogos fazem.
+    const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp)
+      * multiplicadorDeStat(attackerEntity.estagios, isPhysical ? 'atkFis' : 'atkEsp')
+    const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp)
+      * multiplicadorDeStat(defenderEntity.estagios, isPhysical ? 'def' : 'defEsp')
     const power = special && special.mode === 'dynamicPower' ? special.power : ability.power
 
     dmg = formulaEngine.eval('DAMAGE_BASE', { level: attackerPoke.level, power, atk, def })
@@ -321,7 +365,12 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
 
     dmg *= effectivenessMultiplier
 
-    isCrit = pessimista ? false : rollChance(rng, CRIT_CHANCE)
+    // Estagio de critico: Slash/Razor Leaf e outros 16 golpes tem +1 estagio,
+    // que na Gen VII e 1/8 em vez de 1/24. A tabela real vai ate +3 (1/2), mas
+    // nenhum golpe deste elenco passa de +1 — o `Math.min` existe pra ela nao
+    // virar um multiplicador solto se algum dia passar.
+    const chanceDeCritico = CRIT_CHANCE * Math.pow(3, Math.min(3, ability.critStages ?? 0))
+    isCrit = pessimista ? false : rollChance(rng, Math.min(0.5, chanceDeCritico))
     if (isCrit) dmg *= CRIT_MULTIPLIER
 
     dmg *= pessimista ? DANO_VARIACAO_MINIMA : formulaEngine.eval('DAMAGE_VARIATION', {}, rng)
@@ -426,11 +475,19 @@ function pickAbility(rng: Rng, entity: WorldEntity, defenderEntity: WorldEntity,
   // Com ela a regra vira a jogada certa do jogo real: paralisar quem vai
   // aguentar a troca, bater em quem nao vai.
   const statusPronto = prontos.filter((a) => (
-    a.power === 0 && a.status != null && statusVaiPegar(defenderEntity, a.status, a.id)
+    a.power === 0 && (
+      (a.status != null && statusVaiPegar(defenderEntity, a.status, a.id))
+      || golpeDeApoioUtil(entity, defenderEntity, a)
+    )
   ))
   if (statusPronto.length > 0) {
+    // Dano CRU aqui, nao o esperado: a pergunta e "esse golpe mata se acertar?",
+    // nao "quanto ele tira em media". Usar o esperado (ja descontado pela
+    // precisao) fazia um golpe de 70% que mata em cheio contar como se nao
+    // matasse — e o POKE ia buffar em vez de matar. Medido: com a comparacao
+    // errada, a hunt de nivel alto caiu de 1.052 pra 796 kills/hora.
     const maiorDano = ready.reduce(
-      (max, a) => Math.max(max, danoEsperado(rng, entity, defenderEntity, a)),
+      (max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)),
       0,
     )
     if (maiorDano < defenderEntity.poke.hp) {
@@ -489,6 +546,28 @@ function anunciarStatus(world: WorldState, alvo: WorldEntity, tipo: StatusCondit
     text: quando === 'entrou' ? `${nomeDoStatus(tipo)}!` : `${nomeDoStatus(tipo)} passou`,
     color: corDoStatus(tipo),
     duration: 0.8,
+    owner: alvo,
+  }))
+}
+
+// Texto flutuante de mudanca de atributo ("Ataque ↑↑", "Defesa ↓").
+// Uma seta por estagio: e o mesmo vocabulario dos jogos, e diz de relance se o
+// golpe subiu um ou dois.
+const ROTULO_DE_STAT: Record<string, string> = {
+  atkFis: 'Ataque', atkEsp: 'Atq. Esp.', def: 'Defesa', defEsp: 'Def. Esp.', speed: 'Velocidade',
+}
+
+function anunciarEstagios(world: WorldState, alvo: WorldEntity, mudancas: StatChange[]): void {
+  const texto = mudancas
+    .map((m) => `${ROTULO_DE_STAT[m.stat] ?? m.stat} ${(m.estagios > 0 ? '↑' : '↓').repeat(Math.abs(m.estagios))}`)
+    .join('  ')
+  world.effects.push(createWorldEffect(world.counters, {
+    type: 'abilityName',
+    x: alvo.x, y: alvo.y,
+    targetX: alvo.x, targetY: alvo.y + getGroundOffset(alvo) + 14,
+    text: texto,
+    color: mudancas[0].estagios > 0 ? '#4ade80' : '#fb7185',
+    duration: 0.9,
     owner: alvo,
   }))
 }
@@ -690,6 +769,16 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   if (!target || isDead(target)) return // ex: um aliado de AOE ja tinha finalizado antes
 
   const result = computeDamage(world.rng, attacker, target, ability, world.pessimista)
+  // Dano REALMENTE causado, limitado ao HP que o alvo tinha. `result.amount` e
+  // o numero cru da formula e pode passar MUITO do HP do alvo (um POKE Nivel 85
+  // batendo num Nivel 40 causa varias vezes a vida dele). E o que dreno e recuo
+  // precisam usar, como nos jogos: Double-Edge devolve 33% do que TIROU, nao
+  // 33% do que teria tirado num alvo infinito.
+  //
+  // BUG QUE ISTO CORRIGE: sem o teto, um golpe de recuo virava suicidio em
+  // qualquer hunt onde o jogador estivesse acima do nivel. Medido, custava um
+  // quarto das kills/hora no Nivel 85 — o POKE se matava sozinho.
+  const danoCausado = Math.min(result.amount, target.poke.hp)
   // Golpe de status causa 0 de dano — nao mostra "0" flutuando sobre o alvo
   // nem registra "ultimo dano recebido" (Counter/Mirror Coat refletiriam nada).
   if (result.amount > 0) {
@@ -703,6 +792,61 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   if (!isDead(target)) {
     const aplicado = aplicarEfeitosDoGolpe(world.rng, target, ability)
     if (aplicado && !silent) anunciarStatus(world, target, aplicado.tipo, 'entrou')
+
+    // Mudanca de atributo. O anuncio vai em quem RECEBEU (o proprio usuario num
+    // Danca das Espadas, o alvo num Rosnado) — mostrar "+Ataque" flutuando
+    // sobre o inimigo quando quem se fortaleceu foi voce leria como o contrario
+    // do que aconteceu.
+    const mudancas = aplicarMudancasDeStat(world.rng, attacker, target, ability)
+    if (mudancas.length && !silent) {
+      anunciarEstagios(world, ability.statTarget === 'self' ? attacker : target, mudancas)
+    }
+  }
+
+  // CURA PURA (Recover, Synthesis, Soft-Boiled — 10 golpes). Cura sempre o
+  // ATACANTE, nunca o alvo do hit: todos eles tem `target: 'user'` no catalogo,
+  // e o "alvo" so existe aqui porque a fila de hits deste motor sempre tem um.
+  if (ability.healPercent) {
+    const quanto = Math.max(1, Math.round(attacker.poke.stats.hp * ability.healPercent / 100))
+    heal(attacker, quanto)
+    if (!silent) spawnDamageNumber(world, attacker, { amount: -quanto, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+  }
+
+  // FLINCH: o alvo perde o proximo turno.
+  //
+  // DESVIO CONSCIENTE. Nos jogos flinch so pega se quem usou agir PRIMEIRO no
+  // turno — aqui nao ha ordem de turno pra consultar, o combate e continuo.
+  // Modelado como "o alvo leva um cooldown global extra", que e o efeito
+  // observavel do flinch. Mais fiel que ignorar (25 golpes voltariam a ser
+  // dado morto) e mais honesto que fingir uma ordem de turno que nao existe.
+  if (ability.flinchChance && nextFloat(world.rng) * 100 < ability.flinchChance) {
+    startGlobalCooldown(target, MIN_ACTION_GAP)
+  }
+
+  // DRENO e RECUO, os dois no mesmo campo: `drainPercent` positivo cura o
+  // atacante (Absorb = 50% do dano causado), negativo machuca (Double-Edge =
+  // -33%). E como a PokeAPI modela, e manter os dois juntos evita que um golpe
+  // de recuo passe a curar por engano de sinal.
+  if (ability.drainPercent && danoCausado > 0) {
+    const quanto = Math.max(1, Math.round(danoCausado * Math.abs(ability.drainPercent) / 100))
+    if (ability.drainPercent > 0) {
+      heal(attacker, quanto)
+      if (!silent) spawnDamageNumber(world, attacker, { amount: -quanto, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+    } else {
+      takeDamage(attacker, quanto)
+      if (!silent) spawnDamageNumber(world, attacker, { amount: quanto, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+      if (isDead(attacker)) {
+        if (attacker.kind === 'player') {
+          if (!attacker.fainted) {
+            attacker.fainted = true
+            onPlayerFainted()
+          }
+        } else if (!attacker.deathHandled) {
+          attacker.deathHandled = true
+          defeatedEnemyIds.push(attacker.id)
+        }
+      }
+    }
   }
 
   const isPlayerAttacker = attacker.kind === 'player'
@@ -805,6 +949,19 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
       if (isDead(enemy) || player.fainted) continue
       executeEnemyAction(world, enemy, player, silent)
     }
+  } else {
+    // FIM DE BATALHA. Sem nenhum inimigo engajado, a luta acabou — e nos jogos
+    // e exatamente ai que TODO estado volatil some: estagios de atributo voltam
+    // a zero e a confusao passa.
+    //
+    // Sem este ponto o jogo nao teria fim de batalha nenhum, e a consequencia
+    // nao e teorica: medida, ela custava 27% das kills/hora numa hunt de nivel
+    // alto. Cada inimigo novo empilhava mais um Rosnado ou String Shot no
+    // jogador, os estagios desciam ate -6 (Velocidade e Ataque a um quarto) e
+    // NUNCA voltavam, porque nao existe item que cure estagio nem batalha que
+    // termine. O POKE ia ficando permanentemente pior a cada inimigo que
+    // matava.
+    limparEstadoVolatil(player)
   }
 
   return { defeatedEnemyIds, playerJustFainted }

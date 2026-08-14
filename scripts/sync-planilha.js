@@ -686,6 +686,9 @@ function syncSpeciesAndMoves(workbook, hunts) {
             ...((golpeRow['Mudancas de Stat'] || []).length ? {
               statChanges: golpeRow['Mudancas de Stat'],
               statChance: golpeRow['Chance de Stat'],
+              // 'self' e a excecao (Danca das Espadas), 'target' e a regra —
+              // por isso so 'self' e emitido. Quem le trata ausente como alvo.
+              ...(golpeRow['Alvo do Efeito'] === 'self' ? { statTarget: 'self' } : {}),
             } : {}),
             ...(golpeRow['Chance de Flinch'] ? { flinchChance: golpeRow['Chance de Flinch'] } : {}),
             ...(golpeRow['Estagios de Critico'] ? { critStages: golpeRow['Estagios de Critico'] } : {}),

@@ -16,6 +16,7 @@ import { gen5SpriteUrl } from '@/data/gen5Sprites'
 import { rarityOf } from '@/data/rarity'
 import type { PokeInstance, Species } from '@/data/pokes'
 import { PokeNameTag } from './PokeNameTag'
+import { StatusBadge } from './StatusBadge'
 import { TypeChip } from './TypeChip'
 import { AbilityTooltip } from './AbilityTooltip'
 import { Meter } from '@/components/game/controls'
@@ -66,8 +67,11 @@ export function ProfileHero({ poke, species }: { poke: PokeInstance; species: Sp
           <TypeChip type={species.type} />
           {species.type2 && <TypeChip type={species.type2} />}
         </div>
-        <div className="text-[.75em] text-n400">
-          HP {Math.floor(poke.hp)}/{poke.stats.hp}
+        <div className="flex items-center gap-[.4em] text-[.75em] text-n400">
+          <span>HP {Math.floor(poke.hp)}/{poke.stats.hp}</span>
+          {/* So o nao-volatil aqui: a ficha abre pra qualquer POKE da equipe ou
+              da mochila, e confusao so existe pra quem esta em campo. */}
+          <StatusBadge status={poke.status} />
         </div>
         <Meter pct={hpPct} height=".45em" color={hpPct < 30 ? 'var(--color-hp-low)' : 'var(--color-hp)'} />
         <Meter pct={expPct} height=".3em" color="var(--color-exp)" />

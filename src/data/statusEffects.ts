@@ -138,3 +138,33 @@ export function descongelaCom(tipo: StatusCondition, tipoDoGolpe: ElementType, p
 export function chanceDeDescongelar(tipo: StatusCondition): number {
   return regraDoStatus(tipo)?.chanceDeDescongelarPorTurno ?? 0
 }
+
+// --- Estagios de atributo ("power ups") -------------------------------------
+//
+// Danca das Espadas, Rosnado, Aro de Ferro e outros 87 golpes mexem em ESTAGIO,
+// nao na stat. A stat da ficha nunca muda; o que muda e um multiplicador
+// temporario, que some quando o POKE sai de campo — igual a confusao, e pelo
+// mesmo motivo (nos jogos, sai da batalha, zera).
+export const ESTAGIO_MINIMO = -6
+export const ESTAGIO_MAXIMO = 6
+
+export type StatDeEstagio = 'atkFis' | 'atkEsp' | 'def' | 'defEsp' | 'speed'
+export type EstagiosDeStat = Partial<Record<StatDeEstagio, number>>
+
+/**
+ * Multiplicador de um estagio, formula exata dos jogos: (2+n)/2 subindo e
+ * 2/(2-n) descendo.
+ *
+ * A assimetria e de proposito e e do jogo original: +1 da 1.5x, mas -1 da
+ * 0.67x, nao 0.5x. Usar `1 + n*0.5` dos dois lados (o "obvio") tornaria os
+ * debuffs bem mais fortes do que sao — em -2 a diferenca ja e 0.5 contra 0.5,
+ * mas em -6 seria 0 (imortal) contra 0.25.
+ */
+export function multiplicadorDeEstagio(estagio: number): number {
+  const n = Math.max(ESTAGIO_MINIMO, Math.min(ESTAGIO_MAXIMO, estagio))
+  return n >= 0 ? (2 + n) / 2 : 2 / (2 - n)
+}
+
+export function multiplicadorDeStat(estagios: EstagiosDeStat | undefined, stat: StatDeEstagio): number {
+  return multiplicadorDeEstagio(estagios?.[stat] ?? 0)
+}

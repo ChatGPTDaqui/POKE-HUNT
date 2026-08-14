@@ -16,9 +16,10 @@ import { TURNO_SEGUNDOS } from '@/data/abilities'
 import {
   podeReceberStatus, sortearDuracao, danoPorTurno, ehVolatil, perdeOTurno,
   chanceDeDescongelar, descongelaCom, chanceDeSeAtacar, poderDoAutoDano,
-  SEGUNDOS_DE_IMUNIDADE_APOS_CURA,
+  SEGUNDOS_DE_IMUNIDADE_APOS_CURA, ESTAGIO_MINIMO, ESTAGIO_MAXIMO,
   type StatusAtivo, type StatusCondition,
 } from '@/data/statusEffects'
+import type { StatChange } from '@/data/generated/types'
 import type { Ability } from '@/data/abilities'
 import type { WorldEntity } from '../types'
 
@@ -93,6 +94,38 @@ export function aplicarStatus(
   return status
 }
 
+/**
+ * Aplica as mudancas de estagio de atributo de um golpe ("power ups").
+ *
+ * `ability.statTarget === 'self'` manda no proprio usuario (Danca das Espadas);
+ * ausente manda no alvo (Rosnado). Sem essa distincao, Danca das Espadas subiria
+ * o Ataque do INIMIGO — e o dado cru da PokeAPI nao a carrega, ela vem de
+ * `move.target` (ver fetch-usum-catalog.js).
+ *
+ * Devolve as mudancas que REALMENTE entraram: quem ja esta em +6 nao sobe mais,
+ * e o chamador precisa saber disso pra nao anunciar um buff que nao houve.
+ */
+export function aplicarMudancasDeStat(
+  rng: Rng,
+  atacante: WorldEntity,
+  alvo: WorldEntity,
+  ability: Ability,
+): StatChange[] {
+  if (!ability.statChanges || !ability.statChance) return []
+  if (nextFloat(rng) * 100 >= ability.statChance) return []
+
+  const destino = ability.statTarget === 'self' ? atacante : alvo
+  const aplicadas: StatChange[] = []
+  for (const mudanca of ability.statChanges) {
+    const antes = destino.estagios[mudanca.stat] ?? 0
+    const depois = Math.max(ESTAGIO_MINIMO, Math.min(ESTAGIO_MAXIMO, antes + mudanca.estagios))
+    if (depois === antes) continue // ja no teto ou no piso
+    destino.estagios[mudanca.stat] = depois
+    aplicadas.push({ stat: mudanca.stat, estagios: depois - antes })
+  }
+  return aplicadas
+}
+
 // Efeito colateral de golpe: le `ability.status`/`statusChance` e tenta aplicar.
 // Separado de `aplicarStatus` porque o golpe tambem PODE DESCONGELAR o alvo
 // (golpe de FIRE com dano), e as duas coisas acontecem no mesmo hit.
@@ -125,6 +158,19 @@ export function curarStatus(entity: WorldEntity, tipo?: StatusCondition): boolea
   }
   if (curou) entity.imunidadeDeStatus = SEGUNDOS_DE_IMUNIDADE_APOS_CURA
   return curou
+}
+
+/**
+ * Zera o que os jogos zeram no fim da batalha: estagios de atributo e status
+ * volatil (confusao). O nao-volatil NAO sai daqui — ele sobrevive a batalha
+ * nos jogos, e e por isso que existe Antidoto.
+ *
+ * A imunidade de reaplicacao tambem nao e mexida: ela e sobre o tempo desde a
+ * ultima cura, nao sobre a batalha.
+ */
+export function limparEstadoVolatil(entity: WorldEntity): void {
+  entity.statusVolatil = null
+  entity.estagios = {}
 }
 
 export interface TickDeStatus {

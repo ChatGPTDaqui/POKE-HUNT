@@ -95,6 +95,7 @@ function abaGolpes(catalogo) {
     // drenar — simplesmente nao existia.
     'Status': g.status || '',
     'Chance de Status': g.chanceDeStatus,
+    'Alvo do Efeito': g.alvoDoEfeito,
     'Mudancas de Stat': g.mudancasDeStat,
     'Chance de Stat': g.chanceDeStat,
     'Chance de Flinch': g.chanceDeFlinch,

@@ -9,11 +9,11 @@ import { createRng } from '@/core/rng'
 import { SPECIES, type PokeInstance } from '@/data/pokes'
 import {
   danoPorTurno, multiplicadorDeDanoFisico, multiplicadorDeVelocidade,
-  podeReceberStatus, sortearDuracao, TURNOS_DE_IMUNIDADE_APOS_CURA,
+  podeReceberStatus, sortearDuracao, TURNOS_DE_IMUNIDADE_APOS_CURA, multiplicadorDeEstagio,
 } from '@/data/statusEffects'
 import {
   aplicarStatus, curarStatus, tickStatus, tentarAgir, statusVaiPegar,
-  aplicarEfeitosDoGolpe,
+  aplicarEfeitosDoGolpe, aplicarMudancasDeStat, limparEstadoVolatil,
 } from './statusSystem'
 import { getAbility } from '@/data/abilities'
 import type { WorldEntity } from '../types'
@@ -41,6 +41,7 @@ function entidade(speciesId: string, hpMax = 160): WorldEntity {
     kind: 'enemy',
     poke: poke(speciesId, hpMax),
     statusVolatil: null,
+    estagios: {},
     imunidadeDeStatus: 0,
     proximoTurnoDeStatus: 2,
   } as unknown as WorldEntity
@@ -245,6 +246,64 @@ describe('a IA so tenta status que vai pegar', () => {
 
   it('tenta quando o alvo esta limpo e nao e imune', () => {
     expect(statusVaiPegar(entidade('rattata'), 'paralysis', 'thunder_wave')).toBe(true)
+  })
+})
+
+describe('estagios de atributo', () => {
+  it('a formula e a assimetrica dos jogos, nao 1 + n/2', () => {
+    // +1 da 1.5x mas -1 da 0.67x, nao 0.5x. Usar a simetrica "obvia" tornaria
+    // debuff bem mais forte do que e — em -6 daria 0 (alvo imortal) em vez de
+    // 0.25.
+    expect(multiplicadorDeEstagio(0)).toBe(1)
+    expect(multiplicadorDeEstagio(1)).toBeCloseTo(1.5)
+    expect(multiplicadorDeEstagio(2)).toBe(2)
+    expect(multiplicadorDeEstagio(6)).toBe(4)
+    expect(multiplicadorDeEstagio(-1)).toBeCloseTo(2 / 3)
+    expect(multiplicadorDeEstagio(-2)).toBe(0.5)
+    expect(multiplicadorDeEstagio(-6)).toBe(0.25)
+  })
+
+  it('nao passa de +6 nem de -6, mesmo com estagio absurdo', () => {
+    expect(multiplicadorDeEstagio(99)).toBe(4)
+    expect(multiplicadorDeEstagio(-99)).toBe(0.25)
+  })
+
+  it('Danca das Espadas sobe o Ataque de QUEM USOU, nao do alvo', () => {
+    const atacante = entidade('rattata')
+    const alvo = entidade('pidgey')
+    const aplicadas = aplicarMudancasDeStat(createRng(1), atacante, alvo, getAbility('swords_dance')!)
+    expect(aplicadas).toHaveLength(1)
+    expect(atacante.estagios.atkFis).toBe(2)
+    expect(alvo.estagios.atkFis).toBeUndefined()
+  })
+
+  it('Rosnado baixa o Ataque do ALVO', () => {
+    const atacante = entidade('rattata')
+    const alvo = entidade('pidgey')
+    aplicarMudancasDeStat(createRng(1), atacante, alvo, getAbility('growl')!)
+    expect(alvo.estagios.atkFis).toBe(-1)
+    expect(atacante.estagios.atkFis).toBeUndefined()
+  })
+
+  it('no teto de +6 o golpe nao reporta mudanca nenhuma', () => {
+    const atacante = entidade('rattata')
+    const alvo = entidade('pidgey')
+    atacante.estagios.atkFis = 6
+    expect(aplicarMudancasDeStat(createRng(1), atacante, alvo, getAbility('swords_dance')!)).toEqual([])
+  })
+
+  it('fim de batalha zera estagio e confusao, mas NAO o status nao-volatil', () => {
+    const e = entidade('rattata')
+    e.estagios.atkFis = -4
+    aplicarStatus(createRng(1), e, 'confusion', 100)
+    aplicarStatus(createRng(2), e, 'poison', 100)
+
+    limparEstadoVolatil(e)
+
+    expect(e.estagios).toEqual({})
+    expect(e.statusVolatil).toBeNull()
+    // Veneno sobrevive a batalha nos jogos — e por isso que existe Antidoto.
+    expect(e.poke.status?.tipo).toBe('poison')
   })
 })
 

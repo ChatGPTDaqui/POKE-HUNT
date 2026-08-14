@@ -201,6 +201,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "bubble": {
@@ -305,6 +306,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "rain_dance": {
@@ -422,6 +424,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "double_edge": {
@@ -566,6 +569,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "freeze_dry": {
@@ -736,6 +740,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "discharge": {
@@ -801,6 +806,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "zap_cannon": {
@@ -1019,6 +1025,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "eruption": {
@@ -1460,6 +1467,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "aura_sphere": {
@@ -1487,6 +1495,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "me_first": {
@@ -1574,6 +1583,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "defense_curl": {
@@ -1591,6 +1601,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "mud_sport": {
@@ -1618,6 +1629,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "rollout": {
@@ -2082,6 +2094,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "swallow": {
@@ -2419,6 +2432,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "psybeam": {
@@ -2535,6 +2549,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "poison_sting": {
@@ -2789,6 +2804,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "feint": {
@@ -3120,6 +3136,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "heavy_slam": {
@@ -3622,6 +3639,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "crabhammer": {
@@ -3695,6 +3713,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "waterfall": {
@@ -3779,6 +3798,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "hyper_beam": {
@@ -4216,6 +4236,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "giga_impact": {
@@ -4327,6 +4348,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "recycle": {
@@ -4419,6 +4441,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "echoed_voice": {
@@ -5146,6 +5169,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "belch": {
@@ -5258,6 +5282,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "karate_chop": {
@@ -5338,6 +5363,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "dynamic_punch": {
@@ -5377,6 +5403,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "mega_kick": {
@@ -5741,6 +5768,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "beat_up": {
@@ -5778,6 +5806,7 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "embargo": {

@@ -46,6 +46,7 @@ export interface Ability {
   statusChance?: number
   statChanges?: StatChange[]
   statChance?: number
+  statTarget?: 'self'
   flinchChance?: number
   critStages?: number
   drainPercent?: number
