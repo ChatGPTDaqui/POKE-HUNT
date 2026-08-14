@@ -6,6 +6,7 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
 import { COLLISION_GRIDS, COLLISION_GRID_CELL_SIZE } from './generated/collisionGrids.generated'
 import { WATER_COLLISION_GRID, WATER_SPAWN_POINT } from './generated/waterCollisionMask.generated'
+import { FAIXAS, huntId } from './biomas'
 import type { HuntMapDef } from './huntTypes'
 
 // Modo Pesadelo hunts (see nightmareMaps.js) and the hand-picked spawn-pool
@@ -36,15 +37,20 @@ const RESPAWN_DELAY_MULTIPLIER = formulaEngine.evalOrDefault('MOB_RESPAWN_DELAY_
 // all and isn't part of "wall block".
 const WALL_BLOCK_ENABLED = false
 
-// Explicit user request: reactivate wall-block EXCLUSIVELY for the two real
-// Water-type hunts, using a hand-painted mask
+// Explicit user request: reactivate wall-block EXCLUSIVELY for the real
+// Water hunts, using a hand-painted mask
 // (scripts/build-water-collision-mask.js) instead of the pixel-heuristic
-// grid above. Deliberately keyed by hunt id, not by `bg.image` — `Pantano`
-// (POISON) and `Penhascos` (FLYING) reuse the same water.png art (see
-// scripts/sync-planilha.js#TYPE_BACKGROUND_IMAGE) but are a different biome
-// and must NOT get this collision/spawn override; enabling by image key
-// would have leaked it onto both.
-const WATER_HUNT_IDS = new Set(['lv_11_20_costa', 'kanto_lv_36_55_profundezas'])
+// grid above.
+//
+// Keyed by BIOME, not by `bg.image`: art is shared between themes (see
+// data/biomas.ts#ARTE), so keying by image would leak the water collision
+// onto whatever else happens to reuse water.png. Derived from the biome list
+// rather than a hand-typed id list so a new level band never silently misses
+// the mask.
+const WATER_BIOMAS = ['marinho', 'aguas_interiores']
+const WATER_HUNT_IDS = new Set(
+  WATER_BIOMAS.flatMap((bioma) => FAIXAS.map((faixa) => huntId(bioma, faixa.id))),
+)
 
 // Only the 7 hunt themes with real background art (see
 // scripts/build-collision-grids.js) have a grid — every other hunt gets

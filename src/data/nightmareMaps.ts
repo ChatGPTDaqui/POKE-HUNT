@@ -11,6 +11,7 @@
 // next `npm run planilha:aplicar` clobbering it. Confirmed with the user:
 // totally free, no unlockCost anywhere in here.
 import { SPECIES } from './pokes'
+import { GRUPOS_DO_LANCE } from './biomas'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
 import type { ElementType, SpeciesDataEntry } from './generated/types'
 import type { HuntMapDef, HuntEncounter, StatBlock } from './huntTypes'
@@ -190,13 +191,13 @@ function buildLanceHunt(): { map: HuntMapDef; encounters: Record<string, HuntEnc
   const map: HuntMapDef = {
     id: LANCE_MAP_ID,
     name: 'BOSS Campeao Lance',
-    description: 'Batalha final de Johto contra o Campeao Lance — 6 POKEs Lendarios em sequencia (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o proximo POKE da equipe entra automaticamente. Captura desabilitada. Derrota-lo libera o Novo Continente (Kanto).',
+    description: 'Batalha contra o Campeao Lance — 6 POKEs Lendarios em sequencia (Gyarados, Dragonite, Charizard, Dragonite, Aerodactyl, Dragonite). Sem auto-pot/revive; ao desmaiar, o proximo POKE da equipe entra automaticamente. Captura desabilitada. Derrota-lo libera a Faixa III e o Modo Pesadelo.',
     levelRange: [55, 65],
     unlockCost: null,
-    // Johto's final hunt (explicit user request) — always free to enter like
-    // every other Johto/Kanto hunt, but clearing its sequence is what gates
-    // Kanto (see unlocksContinentOnClear, consumed by main.js#stepWorld).
-    continent: 'johto',
+    // Fica na faixa2 (Lv31-60), que e exatamente onde o time dele cai
+    // (Lv55-65): o jogador chega nele terminando a faixa2, e derrota-lo abre
+    // a faixa3 e o Modo Pesadelo (ver unlocksContinentOnClear abaixo).
+    continent: 'faixa2',
     bounds: { width: 1400, height: 900 },
     playerSpawn: { x: 700, y: 450 },
     bg: { primary: '#3e2f23', secondary: '#4a3829', image: TYPE_BACKGROUND_IMAGE.DRAGON ?? null },
@@ -205,7 +206,11 @@ function buildLanceHunt(): { map: HuntMapDef; encounters: Record<string, HuntEnc
     noCatch: true, // explicit user request — no capturing Lance's team
     autoSwitchTeamOnFaint: true,
     sequence: enemyPool, // ordered encounter ids — main.js walks through them one at a time instead of picking randomly
-    unlocksContinentOnClear: 'kanto', // consumed generically by main.js#stepWorld once the whole sequence is cleared
+    // Consumido genericamente por engine/simulation.ts#stepWorld quando a
+    // sequencia inteira cai. Virou LISTA porque o Lance passou a abrir duas
+    // coisas: a faixa de nivel seguinte e o Modo Pesadelo (com as 11 hunts
+    // BOSS dentro dele).
+    unlocksContinentOnClear: GRUPOS_DO_LANCE,
     startCountdown: 5, // explicit user request — 5..0 countdown before Lance's first POKE spawns (main.js#buildMapWorld/stepWorld)
     keepCorpses: true, // explicit user request — defeated POKEs here stay on the field as "bodies" instead of despawning after DEATH_ANIM_GRACE_PERIOD
     respawnDelay: 3,

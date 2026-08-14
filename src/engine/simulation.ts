@@ -452,15 +452,16 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   const aliveCount = world.enemies.filter((e) => !isDead(e)).length
 
   if (
-    world.mapDef.sequence && world.mapDef.unlocksContinentOnClear && !world.sequenceCleared
+    world.mapDef.sequence && world.mapDef.unlocksContinentOnClear?.length && !world.sequenceCleared
     && aliveCount === 0 && world.sequenceIndex === world.mapDef.sequence.length - 1
   ) {
     world.sequenceCleared = true
-    const continent = world.mapDef.unlocksContinentOnClear
-    const wasLocked = !gameState.isContinentUnlocked(continent)
-    gameState.unlockContinent(continent)
-    if (!silent && wasLocked) {
-      useToastStore.getState().pushToast('Voce derrotou o Campeao Lance! O Novo Continente foi desbloqueado.', 'success', 'world')
+    // Lista: o Lance abre a faixa de nivel seguinte E o Modo Pesadelo.
+    const grupos = world.mapDef.unlocksContinentOnClear
+    const algumEstavaTrancado = grupos.some((g) => !gameState.isContinentUnlocked(g))
+    for (const grupo of grupos) gameState.unlockContinent(grupo)
+    if (!silent && algumEstavaTrancado) {
+      useToastStore.getState().pushToast('Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.', 'success', 'world')
     }
   }
 

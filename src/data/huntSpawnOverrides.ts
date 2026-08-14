@@ -1,211 +1,157 @@
-// Onde a lista de especies de cada hunt e decidida de verdade.
+// Onde as hunts sao montadas de verdade.
 //
-// O sync (scripts/sync-planilha.js#buildTypeRoster) monta uma hunt por TIPO
-// elemental e joga toda especie daquele tipo dentro dela, sem olhar regiao —
-// e por isso a "Zona Nivel 11-20 (Planicie)" de Johto vinha com Pidgey,
-// Rattata, Meowth e Snorlax (todos Kanto) e a "Kanto Zona 60-70 (Penhascos)"
-// vinha com Hoothoot e Ledyba (Johto).
+// DESENHO ATUAL: 12 biomas (data/biomas.ts) x 3 faixas de nivel = 36 hunts.
+// Cada bioma tem de 1 a 4 SUB-BIOMAS (data/generated/subBiomas.generated.ts,
+// derivado das pools do PokeRogue), e a hunt sorteia um sub-bioma por sala.
 //
-// Pedido explicito do usuario: "Apenas Pokemon de Johto devem aparecer nas
-// hunts de Johto; o mesmo vale para Kanto".
+// O QUE ISTO SUBSTITUIU, E POR QUE: antes eram 69 hunts montadas por "1 tipo
+// elemental = 1 bioma" x zona de 10 niveis x regiao (Johto/Kanto). O recorte
+// por regiao NAO sobrevive a pools tematicas: medido nas 209 especies
+// alocadas, 12 dos 33 sub-biomas ficariam com menos de 3 especies numa das
+// regioes (Praia e Dojo sem NENHUMA de Johto, Floresta Nevada sem nenhuma de
+// Kanto). E a escada de 9 zonas nao sobrevive ao elenco: a zona 2 fica vazia
+// em 11 dos 12 biomas.
 //
-// POR QUE ISSO NAO E "SO FILTRAR O ARRAY": filtrar por regiao ESVAZIA hunt.
-// Medido no roster real (226 especies):
+// ---------------------------------------------------------------------------
+// A REGRA CENTRAL: UMA LINHA EVOLUTIVA, ESTAGIOS EM FAIXAS DISJUNTAS
+// ---------------------------------------------------------------------------
+// Uma faixa cobre 30 niveis. Jogar a linha inteira dentro dela produzia coisa
+// absurda: medido, 228 pares especie x hunt em que a especie ja deveria ter
+// evoluido (Caterpie, que evolui no 7, nascendo Lv60).
 //
-//   - Johto nao tem NENHUMA especie POISON primaria (Pantano ficaria vazia)
-//     nem DRAGON, e so 1 FIGHTING e 1 GHOST.
-//   - Kanto nao tem NENHUMA especie DARK nem STEEL primaria — os dois tipos
-//     so existem a partir da Gen2 (Covil Sombrio ficaria vazia).
-//   - Filtrando as 19 hunts pela regiao do rotulo `continent` atual, 3
-//     ficariam vazias e ~100 especies perderiam qualquer hunt onde spawnar.
+// Entao cada ESTAGIO da linha entra com a sub-faixa de nivel em que ele e o
+// estagio correto, e essas sub-faixas nao se sobrepoem:
 //
-// Solucao adotada: cada BIOMA passa a existir NAS DUAS regioes (quando a
-// regiao tem especie daquele tipo). A hunt original mantem id/nome/nivel e
-// fica com a regiao do rotulo dela; a regiao oposta ganha uma hunt IRMA, com
-// id novo (`${id}_${regiao}`), mesmo bioma e mesma faixa de nivel. Resultado
-// medido: 35 hunts (era 19), toda hunt com pelo menos 1 especie, e ZERO
-// especie orfa — cada uma cai na hunt do proprio tipo primario dentro da
-// propria regiao. A unica combinacao descartada e Kanto+DARK, que nao existe
-// no dado real.
+//   linha Caterpie na faixa I  (Lv 1-30):  Caterpie 1-6 | Metapod 7-9 | Butterfree 10-30
+//   linha Pidgey   na faixa II (Lv 31-60): Pidgeotto 31-35 | Pidgeot 36-60
+//   linha Pidgey   na faixa III (Lv 61-90): Pidgeot 61-90
 //
-// Consequencia assumida: cada regiao passa a ter uma escada completa de
-// nivel (Johto tambem chega a Lv105, Kanto tambem comeca em Lv2). O portao
-// do Campeao Lance continua valendo — ele libera o CONTINENTE Kanto inteiro,
-// ou seja, metade do elenco.
+// Duas consequencias que sao o ponto, nao efeito colateral:
 //
-// Este arquivo tambem e o unico ponto onde as hunts normais, o espelho do
-// Modo Pesadelo e as hunts BOSS/Lance sao juntados: `data/maps.ts` e
-// `data/enemies.ts` so reexportam cada metade do resultado.
-import { MAPS_DATA } from './generated/maps.generated'
+//   - Nenhum nivel absurdo, em nenhuma faixa.
+//   - O peso de spawn continua sendo o `spawn_tier` real do Gen1/Gen2 DO
+//     PROPRIO ESTAGIO. A alternativa (auto-evoluir no spawn, como o PokeRogue
+//     faz) faria o Gyarados herdar o peso `muito_comum` do Magikarp — o dado
+//     mais bem fundamentado do projeto destruido em silencio.
+import { SPECIES } from './pokes'
+import { SUB_BIOMA_ESPECIES } from './generated/subBiomas.generated'
 import { ENCOUNTERS_DATA } from './generated/enemies.generated'
 import { buildNightmareMirror, BOSS_MAPS_DATA, BOSS_ENCOUNTERS_DATA } from './nightmareMaps'
-import { SPECIES_DATA } from './generated/pokes.generated'
-import { LEGENDARY_SPECIES_IDS } from './legendaries'
-import { isTerceiraEvolucao } from './evolutionStage'
+import { BIOMAS, FAIXAS, GEOMETRIA, LOOT, huntId, type BiomaDef, type FaixaDef } from './biomas'
 import { zonaMinimaDaEspecie } from './spawnStrength'
-import { NON_WILD_SPECIES, REGIONS, REGION_LABEL, pokedexNumber, regionOfSpecies, type Region } from './regions'
-import type { ElementType } from './generated/types'
 import type { HuntMapDef, HuntEncounter } from './huntTypes'
 
 // ---------------------------------------------------------------------------
-// Tabela de bioma por hunt
+// Hunt inicial
 // ---------------------------------------------------------------------------
-// Escrita a mao porque o tipo do bioma NAO viaja no dado gerado: ele vive em
-// scripts/sync-planilha.js#TYPE_BIOME_PLAN e some na emissao (o `.generated`
-// so guarda o resultado). Sao 18 linhas fixas; qualquer hunt nova que o sync
-// crie sem entrada aqui ESTOURA no boot (ver a checagem no fim do arquivo),
-// em vez de nascer sem regra de spawn e sem ninguem notar.
-const HUNT_BIOME: Record<string, ElementType> = {
-  lv_1_10_floresta: 'GRASS',
-  lv_1_10_bosque: 'BUG',
-  lv_11_20_costa: 'WATER',
-  lv_11_20_planicie: 'NORMAL',
-  lv_21_30_caverna: 'ROCK',
-  lv_21_30_deserto: 'GROUND',
-  lv_31_40_vulcanico: 'FIRE',
-  lv_31_40_usina: 'ELECTRIC',
-  lv_41_50_pantano: 'POISON',
-  lv_41_50_dojo: 'FIGHTING',
-  kanto_lv_1_10_geleira: 'ICE',
-  kanto_lv_1_10_fabrica: 'STEEL',
-  kanto_lv_11_20_penhascos: 'FLYING',
-  kanto_lv_11_20_torre_mistica: 'PSYCHIC',
-  kanto_lv_21_35_cemiterio: 'GHOST',
-  kanto_lv_21_35_covil_sombrio: 'DARK',
-  kanto_lv_36_55_ruinas_ancestrais: 'DRAGON',
-  kanto_lv_36_55_profundezas: 'WATER',
-}
-
-// ---------------------------------------------------------------------------
-// Zonas: numero e faixa de nivel
-// ---------------------------------------------------------------------------
-// BUG REAL QUE ISTO CORRIGE: o nome da hunt NAO batia com o nivel que ela
-// spawnava. Medido no dado gerado, antes desta leva:
-//
-//   "Zona Nivel 1-10 (Floresta)"        spawnava Lv 2-12
-//   "Zona Nivel 11-20 (Planicie)"       spawnava Lv 10-18
-//   "Zona Nivel 31-40 (Vulcanico)"      spawnava Lv 15-51  (!)
-//   "Kanto Zona Nivel 52-62 (Geleira)"  spawnava Lv 52-62
-//
-// O nome vinha do BRACKET nominal do sync (`pickTopHunts`/`computeJohtoBrackets`
-// agrupam por nivel medio), e o `levelRange` vinha do min/max real das especies
-// agrupadas ali — dois numeros diferentes que ninguem cruzava. A "Zona 31-40"
-// entregando um POKE de nivel 15 e outro de 51 e exatamente o que o pedido
-// descreve.
-//
-// A correcao e fixar a faixa PRIMEIRO e derivar tudo dela: cada hunt declara
-// seu numero de zona aqui, a faixa e `[n*10+1, n*10+10]`, e todo encontro nasce
-// dentro dela. Nome e nivel deixam de ser duas fontes.
-//
-// Numeracao pedida explicitamente: Lv 1-10 = Zona 0, 11-20 = Zona 1, 21-30 =
-// Zona 2, e assim por diante. Como as zonas sao contiguas e sao 9, o teto do
-// jogo normal passou de Lv105 pra Lv90 — consequencia assumida do "respeite
-// estritamente a faixa"; o conteudo acima disso continua sendo o Modo Pesadelo
-// (+100, piso 150) e as hunts BOSS (Lv300).
-const ZONA_POR_HUNT: Record<string, number> = {
-  lv_1_10_floresta: 0,
-  lv_1_10_bosque: 0,
-  lv_11_20_costa: 1,
-  lv_11_20_planicie: 1,
-  lv_21_30_caverna: 2,
-  lv_21_30_deserto: 2,
-  lv_31_40_vulcanico: 3,
-  lv_31_40_usina: 3,
-  lv_41_50_pantano: 4,
-  lv_41_50_dojo: 4,
-  kanto_lv_1_10_geleira: 5,
-  kanto_lv_1_10_fabrica: 5,
-  kanto_lv_11_20_penhascos: 6,
-  kanto_lv_11_20_torre_mistica: 6,
-  kanto_lv_21_35_cemiterio: 7,
-  kanto_lv_21_35_covil_sombrio: 7,
-  kanto_lv_36_55_ruinas_ancestrais: 8,
-  kanto_lv_36_55_profundezas: 8,
-}
-
-const NIVEIS_POR_ZONA = 10
-
-export function faixaDaZona(zona: number): [number, number] {
-  return [zona * NIVEIS_POR_ZONA + 1, (zona + 1) * NIVEIS_POR_ZONA]
-}
-
-// "Zona Nivel 21-30 (Caverna)" -> "Caverna". O rotulo do bioma e a unica parte
-// do nome antigo que ainda diz alguma coisa: o resto (o intervalo) passou a ser
-// derivado da zona.
-function rotuloDoBioma(baseName: string): string {
-  const m = baseName.match(/\(([^)]+)\)\s*$/)
-  return m ? m[1] : baseName
-}
-
-// A hunt inicial nao e um bioma: e a primeira tela do jogo, com elenco curto
-// e escolhido a mao. Fica de fora da regra generica.
-const STARTER_HUNT_ID = 'route_46'
-// Pedido explicito: SO tipo NORMAL na primeira hunt, e exatamente estes tres.
-// Saiu Ledyba e Spinarak (BUG) — os dois continuam com casa no bioma Bosque,
-// entao ninguem fica sem hunt (o teste "toda especie selvagem tem pelo menos
-// uma hunt" cobre isso).
-//
-// Rattata e de KANTO e esta hunt e de Johto: e a UNICA excecao a regra de
-// regiao do jogo, e ela e deliberada. A hunt inicial ja era curada a mao
-// (elenco fixo, nivel 1-2, fora do sistema de biomas); o teste de regiao a
-// exclui por isso. Rattata veio nomeado no pedido.
+// Nao e um bioma: e a primeira tela do jogo, elenco curado a mao, Lv1-2, e
+// fica FORA do sistema de salas. Rattata e de Kanto e isso e deliberado — o
+// pedido nomeou os tres.
+export const STARTER_HUNT_ID = 'route_46'
 const STARTER_HUNT_SPECIES = ['sentret', 'hoothoot', 'rattata']
-// Pedido explicito: a primeira hunt sai 80% nivel 1 e 20% nivel 2.
 const STARTER_LEVEL_WEIGHTS = [
   { level: 1, weight: 80 },
   { level: 2, weight: 20 },
 ]
 
-// Especie que deve cair num bioma diferente do tipo primario dela. Pedido
-// explicito anterior do usuario (Wooper/Quagsire saem da hunt de Agua e vao
-// pra de Terra) — os dois sao WATER/GROUND de verdade, entao isto e a mesma
-// regra de "tipagem dupla pode spawnar no bioma de qualquer um dos dois
-// tipos" que o sync ja usa, so que escolhida a mao.
-const SPECIES_BIOME_OVERRIDE: Record<string, ElementType> = {
-  wooper: 'GROUND',
-  quagsire: 'GROUND',
-}
-
-// Abaixo disto o pool e reforcado com especies de tipagem SECUNDARIA igual —
-// mesmo numero e mesma regra do sync (MIN_TYPE_POOL). Sem isso, biomas como
-// Penhascos (FLYING nao e tipo primario de NINGUEM em Gen1/Gen2, fato real
-// do dado) nasceriam vazios.
-const MIN_TYPE_POOL = 4
-
 // ---------------------------------------------------------------------------
-// Elenco elegivel
+// Peso de spawn
 // ---------------------------------------------------------------------------
-// Os 3 iniciais base so saem da tela de escolha (as formas evoluidas deles
-// continuam selvagens normais); lendarios sao exclusivos de hunt BOSS; e
-// NON_WILD_SPECIES sao as de cassino/presente (ver data/regions.ts).
-const BASE_STARTERS = new Set(['charmander', 'squirtle', 'bulbasaur'])
-const LEGENDARY = new Set<string>(LEGENDARY_SPECIES_IDS)
-
-const WILD_SPECIES_IDS = Object.keys(SPECIES_DATA)
-  .filter((id) => !BASE_STARTERS.has(id) && !LEGENDARY.has(id) && !NON_WILD_SPECIES.has(id))
-  .sort((a, b) => pokedexNumber(a) - pokedexNumber(b))
-
-function biomeOf(speciesId: string): ElementType {
-  return SPECIES_BIOME_OVERRIDE[speciesId] ?? SPECIES_DATA[speciesId].type
-}
-
-function poolFor(region: Region, biome: ElementType): string[] {
-  const mine = WILD_SPECIES_IDS.filter((id) => regionOfSpecies(id) === region)
-  const primary = mine.filter((id) => biomeOf(id) === biome)
-  if (primary.length >= MIN_TYPE_POOL) return primary
-  const secondary = mine.filter((id) => SPECIES_DATA[id].type2 === biome && !primary.includes(id))
-  return [...primary, ...secondary]
-}
-
-// Peso de spawn (tier real do Gen1/Gen2, ver scripts/derive-spawn-tiers.js).
-// Ele ja viaja em todo encontro gerado e e o MESMO pra especie em qualquer
-// hunt — conferido: 212 especies, zero divergencia. Reaproveitar em vez de
-// reinventar mantem a raridade relativa que o jogo ja tinha.
+// Tier real do Gen1/Gen2 (scripts/derive-spawn-tiers.js), que ja viaja em todo
+// encontro gerado e e o MESMO pra especie em qualquer hunt.
 const WEIGHT_BY_SPECIES: Record<string, number> = {}
 for (const enc of Object.values(ENCOUNTERS_DATA)) WEIGHT_BY_SPECIES[enc.speciesId] = enc.weight
-// So cai aqui especie que hoje nao spawna em lugar nenhum e passou a spawnar
-// com a separacao por regiao. 10 = tier "incomum", o meio da escala.
+// Especie que nao spawnava em lugar nenhum antes desta leva. 10 = "incomum",
+// o meio da escala de 5 tiers.
 const DEFAULT_WEIGHT = 10
+
+// ---------------------------------------------------------------------------
+// Cadeia de evolucao
+// ---------------------------------------------------------------------------
+const PRE_EVOLUCAO: Record<string, string> = {}
+for (const especie of Object.values(SPECIES)) {
+  if (especie.evolvesTo && SPECIES[especie.evolvesTo]) PRE_EVOLUCAO[especie.evolvesTo] = especie.id
+}
+
+function primeiroNivelDaZona(zona: number): number {
+  const faixa = FAIXAS.find((f) => zona <= f.zonaMaxima) ?? FAIXAS[FAIXAS.length - 1]
+  return faixa.niveis[0]
+}
+
+/**
+ * A partir de que nivel `speciesId` deixa de ser o estagio correto da linha.
+ *
+ * Evolucao por NIVEL usa o nivel real do catalogo. As 9 evolucoes ESPECIAIS
+ * (ex-troca: Kadabra->Alakazam, Onix->Steelix...) carregam
+ * `evolvesAtLevel = 80`, que e a regra do JOGADOR (Nivel 80 + 20 Pedras, ver
+ * data/pokes.ts) e nao faz sentido pro selvagem: usar 80 aqui trancaria
+ * Alakazam, Gengar, Machamp, Steelix, Golem, Kingdra, Politoed e Scizor em
+ * Lv80-90, uma fatia minuscula do jogo. Pro selvagem o gatilho e a FORCA — a
+ * forma evoluida aparece a partir da primeira faixa que a zona minima dela
+ * alcanca.
+ */
+function nivelDeTroca(speciesId: string): number | null {
+  const especie = SPECIES[speciesId]
+  const alvo = especie?.evolvesTo
+  if (!alvo || !SPECIES[alvo]) return null
+  if (especie.isSpecialEvolution) {
+    // `zonaMinima(origem) + 1` e o que impede a origem de ser ESPREMIDA pra
+    // fora do jogo. Bug real, pego pelo teste "toda especie selvagem tem pelo
+    // menos uma hunt": Scyther tem zona minima 5 (so a partir de Lv31) e
+    // Scizor tambem 5, entao o gatilho caia em Lv31 e a faixa de Scyther
+    // ficava [1,30] — vazia justamente onde ele podia aparecer. A forma
+    // evoluida tem que ficar pelo menos uma faixa acima da origem.
+    const zona = Math.max(zonaMinimaDaEspecie(alvo), zonaMinimaDaEspecie(speciesId) + 1)
+    return primeiroNivelDaZona(zona)
+  }
+  return especie.evolvesAtLevel ?? null
+}
+
+/** Raizes das linhas evolutivas presentes em `especies`, sem duplicar. */
+function raizesDe(especies: Iterable<string>): string[] {
+  const raizes: string[] = []
+  for (const id of especies) {
+    let atual = id
+    for (let i = 0; i < 10 && PRE_EVOLUCAO[atual]; i++) atual = PRE_EVOLUCAO[atual]
+    if (!raizes.includes(atual)) raizes.push(atual)
+  }
+  return raizes
+}
+
+interface Trecho {
+  speciesId: string
+  minLevel: number
+  maxLevel: number
+}
+
+/**
+ * Recorta a linha que comeca em `raiz` na faixa [lo, hi]: um trecho por
+ * estagio, com a sub-faixa de nivel em que aquele estagio e o correto.
+ *
+ * Um estagio e pulado quando (a) nao esta no elenco deste sub-bioma — a
+ * heranca por familia do gerador da a mesma casa pra linha toda, mas duas
+ * linhas podem se juntar com casas diferentes — ou (b) a zona minima dele
+ * passa da faixa, que e o que impede Tyranitar de aparecer numa hunt Lv31-60.
+ */
+function trechosDaLinha(raiz: string, faixa: FaixaDef, elenco: Set<string>): Trecho[] {
+  const [lo, hi] = faixa.niveis
+  const trechos: Trecho[] = []
+  let atual: string | null = raiz
+  let desde = 1
+  for (let i = 0; i < 10 && atual; i++) {
+    const troca = nivelDeTroca(atual)
+    const ate = troca == null ? Number.POSITIVE_INFINITY : troca - 1
+    const min = Math.max(lo, desde)
+    const max = Math.min(hi, ate)
+    if (min <= max && elenco.has(atual) && zonaMinimaDaEspecie(atual) <= faixa.zonaMaxima) {
+      trechos.push({ speciesId: atual, minLevel: min, maxLevel: max })
+    }
+    if (troca == null) break
+    desde = troca
+    atual = SPECIES[atual].evolvesTo
+  }
+  return trechos
+}
 
 // ---------------------------------------------------------------------------
 // Montagem
@@ -213,221 +159,151 @@ const DEFAULT_WEIGHT = 10
 const maps: Record<string, HuntMapDef> = {}
 const encounters: Record<string, HuntEncounter> = {}
 
+/**
+ * Encontros de cada SALA: `huntId -> chave do sub-bioma -> ids de encontro`.
+ *
+ * O `enemyPool` da hunt e a uniao disto. A sala troca o pool ativo em tempo de
+ * execucao pelo do sub-bioma sorteado (ver engine/systems/salaSystem.ts).
+ */
+export const POOL_POR_SALA: Record<string, Record<string, string[]>> = {}
+
 function addEncounter(
-  huntId: string,
-  speciesId: string,
-  minLevel: number,
-  maxLevel: number,
+  huntKey: string,
+  trecho: Trecho,
   levelWeights?: { level: number; weight: number }[],
 ): string {
-  const id = `${huntId}_${speciesId}`
-  encounters[id] = {
-    id,
-    speciesId,
-    minLevel,
-    maxLevel,
-    // Mesmos valores fixos que todo encontro gerado usa
-    // (scripts/sync-planilha.js#syncMapsAndEncounters).
-    aggroRadius: 175,
-    wanderRadius: 60,
-    weight: WEIGHT_BY_SPECIES[speciesId] ?? DEFAULT_WEIGHT,
-    ...(levelWeights ? { levelWeights } : {}),
+  const id = `${huntKey}_${trecho.speciesId}`
+  if (!encounters[id]) {
+    encounters[id] = {
+      id,
+      speciesId: trecho.speciesId,
+      minLevel: trecho.minLevel,
+      maxLevel: trecho.maxLevel,
+      // Mesmos valores fixos de todo encontro gerado.
+      aggroRadius: 175,
+      wanderRadius: 60,
+      weight: WEIGHT_BY_SPECIES[trecho.speciesId] ?? DEFAULT_WEIGHT,
+      ...(levelWeights ? { levelWeights } : {}),
+    }
   }
   return id
 }
 
-// Abaixo disto, uma zona avancada e fundida com a de cima em vez de virar hunt
-// propria. Sem isso o recorte por forca produzia dezenas de hunts com 1 ou 2
-// especies (medido: 78 hunts, varias com uma so) — cada uma um cartao no menu
-// e uma entrada a mais no espelho do Modo Pesadelo, com pool pequeno demais pra
-// valer a visita.
-const MIN_POOL_ZONA_AVANCADA = 3
+function montarHunt(bioma: BiomaDef, faixa: FaixaDef): void {
+  const id = huntId(bioma.chave, faixa.id)
+  const [lo, hi] = faixa.niveis
 
-/**
- * Junta as zonas avancadas magras, subindo o nivel de quem foi absorvido.
- *
- * Duas regras que nao sao arbitrarias:
- *
- * 1. **A zona BASE do bioma sempre sai como hunt propria**, mesmo com pool
- *    pequeno. Ela e a que carrega o id historico (`lv_1_10_bosque`), e esse id
- *    aparece em `unlocked_maps` e em `game_sessions.map_id` no Postgres —
- *    fundi-la deixaria sessao viva apontando pra hunt que nao existe mais.
- * 2. **A fusao so sobe de nivel, nunca desce.** `zonaMinimaDaEspecie` e um
- *    PISO: subir respeita todo mundo do grupo, descer colocaria de volta na
- *    hunt cedo exatamente o POKE que esta leva tirou de la.
- *
- * A sobra do topo vira hunt propria mesmo com uma especie so. A alternativa
- * (fundir pra baixo) apagaria a hunt cedo do bioma; e uma hunt de um POKE so —
- * Tyranitar na Zona 7 da Caverna, por exemplo — e conteudo legitimo, nao erro:
- * e o dado real de Johto ter poucas especies ROCK.
- */
-function agruparZonasMagras(
-  porZona: Map<number, string[]>,
-  zonaBase: number,
-): [number, string[]][] {
-  const saida: [number, string[]][] = []
-  const base = porZona.get(zonaBase)
-  if (base?.length) saida.push([zonaBase, base])
-
-  const acima = [...porZona.entries()]
-    .filter(([z]) => z !== zonaBase)
-    .sort((a, b) => a[0] - b[0])
-
-  let acumulado: string[] = []
-  for (const [z, especies] of acima) {
-    acumulado = [...acumulado, ...especies]
-    if (acumulado.length >= MIN_POOL_ZONA_AVANCADA) {
-      saida.push([z, acumulado])
-      acumulado = []
+  const porSala: Record<string, string[]> = {}
+  for (const sub of bioma.subBiomas) {
+    const doSub = new Set(SUB_BIOMA_ESPECIES[sub.chave] ?? [])
+    const ids: string[] = []
+    for (const raiz of raizesDe(doSub)) {
+      for (const trecho of trechosDaLinha(raiz, faixa, doSub)) ids.push(addEncounter(id, trecho))
     }
+    porSala[sub.chave] = ids
   }
-  if (acumulado.length) saida.push([acima[acima.length - 1][0], acumulado])
-  return saida
+
+  const enemyPool = [...new Set(Object.values(porSala).flat())]
+  if (enemyPool.length === 0) {
+    throw new Error(
+      `Hunt "${id}" nasceria sem nenhum encontro (faixa ${faixa.nome}, Lv ${lo}-${hi}). ` +
+      'Hunt vazia nao da erro em runtime: ela so nunca spawna nada e o jogador ' +
+      'fica num mapa morto.'
+    )
+  }
+
+  POOL_POR_SALA[id] = porSala
+  const nome = `${bioma.nome} ${faixa.nome}`
+  maps[id] = {
+    id,
+    name: nome,
+    description: `${bioma.nome} — niveis ${lo} a ${hi}. Sub-biomas: ${bioma.subBiomas.map((s) => s.nome).join(', ')}.`,
+    levelRange: [lo, hi],
+    unlockCost: null,
+    // `continent` deixou de ser regiao e passou a ser o GRUPO DE GATE (ver
+    // data/biomas.ts): faixa1 e faixa2 nascem abertas, faixa3 e o Modo
+    // Pesadelo sao liberados por derrotar o Campeao Lance.
+    continent: faixa.id,
+    bounds: { ...GEOMETRIA.bounds },
+    playerSpawn: { ...GEOMETRIA.playerSpawn },
+    bg: { ...bioma.bg },
+    maxEnemies: GEOMETRIA.maxEnemies,
+    respawnDelay: GEOMETRIA.respawnDelay,
+    spawnPoints: GEOMETRIA.spawnPoints.map((p) => ({ ...p })),
+    enemyPool,
+    // Loot da hunt = uniao dos perfis dos sub-biomas dela. A sala restringe pro
+    // perfil do sub-bioma sorteado; a uniao e o fallback pra quando nao ha sala
+    // ativa (hunt BOSS, espelho, ou antes de o servidor responder).
+    itemDrops: [...new Map(
+      bioma.subBiomas.flatMap((s) => LOOT[s.loot]).map((d) => [d.itemId, d]),
+    ).values()],
+  }
 }
 
-// "Zona Nivel 11-20 (Planicie)" vira "Johto Zona 1 · Planicie".
+// Hunt inicial primeiro: e a unica que nao vem de bioma.
+{
+  const pool = STARTER_HUNT_SPECIES.filter((id) => SPECIES[id])
+  const lo = STARTER_LEVEL_WEIGHTS[0].level
+  const hi = STARTER_LEVEL_WEIGHTS[STARTER_LEVEL_WEIGHTS.length - 1].level
+  maps[STARTER_HUNT_ID] = {
+    id: STARTER_HUNT_ID,
+    name: 'Route 46 (Inicial)',
+    description: 'A primeira cacada. So POKEs de tipo Normal, nivel 1 a 2.',
+    levelRange: [lo, hi],
+    unlockCost: null,
+    continent: 'faixa1',
+    bounds: { ...GEOMETRIA.bounds },
+    playerSpawn: { ...GEOMETRIA.playerSpawn },
+    bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: 'assets/hunt-backgrounds/forest.png' },
+    maxEnemies: GEOMETRIA.maxEnemies,
+    respawnDelay: GEOMETRIA.respawnDelay,
+    spawnPoints: GEOMETRIA.spawnPoints.map((p) => ({ ...p })),
+    enemyPool: pool.map((speciesId) =>
+      addEncounter(STARTER_HUNT_ID, { speciesId, minLevel: lo, maxLevel: hi }, STARTER_LEVEL_WEIGHTS),
+    ),
+    itemDrops: [...LOOT.basico],
+  }
+}
+
+for (const bioma of BIOMAS) {
+  for (const faixa of FAIXAS) montarHunt(bioma, faixa)
+}
+
+// ---------------------------------------------------------------------------
+// Teto de fatia
+// ---------------------------------------------------------------------------
+// Nenhuma especie passa desta fatia de uma hunt.
 //
-// O prefixo de regiao esta em TODA hunt (nao so nas novas): com o mesmo bioma
-// existindo nas duas regioes, um nome sem regiao vira ambiguo no chat, no HUD e
-// no relatorio de farm offline, onde nao ha aba de continente por perto pra
-// desambiguar. O numero da zona substitui o intervalo escrito no nome — ele
-// mentia (ver ZONA_POR_HUNT) e o cartao da hunt ja mostra o intervalo real.
-function nameFor(baseName: string, region: Region, zona: number): string {
-  return `${REGION_LABEL[region]} Zona ${zona} · ${rotuloDoBioma(baseName)}`
-}
-
-for (const base of Object.values(MAPS_DATA)) {
-  if (base.id === STARTER_HUNT_ID) {
-    const pool = STARTER_HUNT_SPECIES.filter((id) => SPECIES_DATA[id])
-    maps[base.id] = {
-      ...base,
-      // A inicial mantem o nome proprio: ela nao e uma zona (nao segue a faixa
-      // de 10 niveis e tem elenco curado a mao).
-      name: 'Route 46 (Inicial)',
-      continent: 'johto',
-      levelRange: [
-        STARTER_LEVEL_WEIGHTS[0].level,
-        STARTER_LEVEL_WEIGHTS[STARTER_LEVEL_WEIGHTS.length - 1].level,
-      ],
-      enemyPool: pool.map((speciesId) =>
-        addEncounter(base.id, speciesId, STARTER_LEVEL_WEIGHTS[0].level, STARTER_LEVEL_WEIGHTS[STARTER_LEVEL_WEIGHTS.length - 1].level, STARTER_LEVEL_WEIGHTS)
-      ),
-    }
-    continue
-  }
-
-  const biome = HUNT_BIOME[base.id]
-  if (!biome) {
-    throw new Error(
-      `Hunt "${base.id}" sem bioma em HUNT_BIOME (data/huntSpawnOverrides.ts). ` +
-      'Toda hunt gerada precisa declarar o tipo elemental dela pro recorte por regiao funcionar.'
-    )
-  }
-  const zona = ZONA_POR_HUNT[base.id]
-  if (zona == null) {
-    throw new Error(
-      `Hunt "${base.id}" sem zona em ZONA_POR_HUNT (data/huntSpawnOverrides.ts). ` +
-      'Sem numero de zona nao ha faixa de nivel — e era justamente a divergencia entre nome e nivel que esta tabela existe pra fechar.'
-    )
-  }
-  // A faixa e a MESMA pro nome, pro cartao e pro spawn (antes o `levelRange`
-  // vinha do sync e o nome do bracket nominal — dois numeros que discordavam),
-  // e desde o recorte por forca ela e derivada por BUCKET dentro do laco
-  // abaixo: a mesma hunt-base pode gerar mais de uma zona.
-  for (const region of REGIONS) {
-    const pool = poolFor(region, biome)
-    if (!pool.length) continue // ex.: Kanto + DARK — nao existe no dado real
-    const isHome = base.continent === region
-    const idBase = isHome ? base.id : `${base.id}_${region}`
-
-    // AQUI mora a correcao de "Pokemon forte na hunt inicial". O bioma continua
-    // sendo o do tipo primario (Scizor nao vira POKE de Floresta), mas a ZONA
-    // passa a ser `max(zona do bioma, zona minima da especie)` — ver
-    // data/spawnStrength.ts. Uma especie forte num bioma cedo nao e removida do
-    // jogo: ela cai numa versao AVANCADA daquele mesmo bioma, criada aqui sob
-    // demanda ("Johto Zona 5 · Bosque" existe porque Scizor e Heracross
-    // precisam de casa, nao porque alguem escreveu a hunt a mao).
-    const porZona = new Map<number, string[]>()
-    for (const speciesId of pool) {
-      const alvo = Math.max(zona, zonaMinimaDaEspecie(speciesId))
-      const lista = porZona.get(alvo)
-      if (lista) lista.push(speciesId)
-      else porZona.set(alvo, [speciesId])
-    }
-
-    for (const [zonaAlvo, especies] of agruparZonasMagras(porZona, zona)) {
-      // A zona base MANTEM o id historico. Isso nao e estetica: `map_id` de uma
-      // sessao aberta e `unlocked_maps` no Postgres apontam pra esses ids, e
-      // renomear tudo deixaria sessao viva apontando pra hunt inexistente.
-      const id = zonaAlvo === zona ? idBase : `${idBase}_z${zonaAlvo}`
-      const [lo, hi] = faixaDaZona(zonaAlvo)
-      const name = nameFor(base.name, region, zonaAlvo)
-      maps[id] = {
-        ...base,
-        id,
-        name,
-        levelRange: [lo, hi],
-        description: `Local selvagem: ${name} (nivel ${lo}-${hi}).`,
-        continent: region,
-        enemyPool: especies.map((speciesId) => addEncounter(id, speciesId, lo, hi)),
-      }
-    }
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Chance FIXA de aparicao
-// ---------------------------------------------------------------------------
-// Pedido explicito: todo POKE de 3a evolucao aparece em exatamente 0,2% da
-// hunt. Antes, o peso vinha do tier real do Gen1/Gen2 (`WEIGHT_BY_SPECIES`) e
-// uma forma final podia ocupar dezenas de por cento de um pool pequeno.
+// O peso continua sendo o `spawn_tier` real do Gen1/Gen2 — o teto so apara o
+// caso em que um pool pequeno encontra um tier alto. Medido antes desta regra:
+// Unown ocupava 50,8% do Sagrado nas faixas II e III (nos jogos reais ele e
+// 100% das Ruinas de Alph, entao o tier esta certo; o que mudou foi o pool
+// ficar com 9 especies). Farmar o Sagrado seria farmar Unown.
 //
 // A conta sai do peso dos OUTROS, e nao de um numero absoluto: `weightedPick`
-// usa `peso / soma dos pesos`, entao um peso fixo mudaria de significado toda
-// vez que o pool mudasse. Com N especies fixadas em `s` cada uma e soma `S` no
-// resto:  w / (S + N*w) = s  =>  w = s*S / (1 - N*s).
-//
-// Isto SUBSTITUI o 1% que o Dragonite tinha por pedido anterior — ele e uma 3a
-// evolucao e cai na regra nova, que e mais recente e mais geral.
-const SHARE_TERCEIRA_EVOLUCAO = 0.002
-
-// A partir desta fatia do pool, a hunt E uma zona de formas finais e a regra
-// nao se aplica.
-//
-// Isto virou necessario com o recorte por forca desta leva. Antes, forma final
-// era sempre minoria num pool misturado. Agora existem zonas cujo elenco quase
-// todo e final — "Johto Zona 7 · Costa" tem Politoed, Feraligatr, Kingdra e
-// Octillery. Fixar tres deles em 0,2% dava 99,4% pro quarto: a zona criada
-// justamente pra abrigar as formas finais viraria uma fazenda de Octillery.
-//
-// O espirito do pedido original ("forma final tem que ser rara") vale pra hunt
-// COMUM, onde ela e a excecao no meio de POKE fraco. Onde ela e a regra, quem
-// manda e o tier de encontro real do Gen2, como em qualquer outro pool.
-const LIMITE_ZONA_DE_FINAIS = 0.5
+// usa `peso / soma`, entao peso fixo mudaria de significado a cada mudanca de
+// pool. Com fatia alvo `t` e soma `S` no resto:  w/(S+w) = t  =>  w = t*S/(1-t).
+const TETO_DE_FATIA = 0.35
+// Pool pequeno demais nao pode respeitar o teto (com 3 especies o minimo
+// possivel ja e 33%) e nesses casos o pool e curado a mao — a hunt inicial e o
+// unico caso hoje. Aparar ali seria mexer num balanceamento pedido.
+const POOL_MINIMO_PRA_TETO = 5
 
 for (const map of Object.values(maps)) {
-  const fixos = map.enemyPool.filter((id) => isTerceiraEvolucao(encounters[id].speciesId))
-  if (!fixos.length) continue
-  if (fixos.length / map.enemyPool.length >= LIMITE_ZONA_DE_FINAIS) continue
-
-  const pesoDosOutros = map.enemyPool
-    .filter((id) => !fixos.includes(id))
-    .reduce((soma, id) => soma + encounters[id].weight, 0)
-
-  // Hunt composta SO de formas finais (ou onde as fixas somariam 100%): nao
-  // existe peso que de 0,2% pra cada uma — o resto do pool e que paga essa
-  // conta. Deixa os pesos originais e segue; forcar aqui produziria uma hunt
-  // com soma de chances diferente de 100%, que e pior que a chance "errada".
-  const denominador = 1 - SHARE_TERCEIRA_EVOLUCAO * fixos.length
-  if (pesoDosOutros <= 0 || denominador <= 0) continue
-
-  const peso = (SHARE_TERCEIRA_EVOLUCAO * pesoDosOutros) / denominador
-  for (const id of fixos) encounters[id].weight = peso
+  if (map.enemyPool.length < POOL_MINIMO_PRA_TETO) continue
+  // Iterativo: aparar um encontro muda o denominador dos outros.
+  for (let volta = 0; volta < 10; volta++) {
+    const total = map.enemyPool.reduce((s, id) => s + encounters[id].weight, 0)
+    const acima = map.enemyPool.filter((id) => encounters[id].weight / total > TETO_DE_FATIA + 1e-9)
+    if (acima.length === 0) break
+    for (const id of acima) {
+      const resto = total - encounters[id].weight
+      encounters[id].weight = (TETO_DE_FATIA * resto) / (1 - TETO_DE_FATIA)
+    }
+  }
 }
 
-// Espelho do Modo Pesadelo tirado do resultado ACIMA (ja recortado por
-// regiao), nao do dado gerado cru — senao o Pesadelo continuaria com a
-// composicao misturada antiga e sem espelho pras hunts novas.
+// Espelho do Modo Pesadelo tirado do resultado ACIMA, nao do dado gerado cru.
 const nightmare = buildNightmareMirror(maps, encounters)
 
 export const MAPS: Record<string, HuntMapDef> = { ...maps, ...nightmare.maps, ...BOSS_MAPS_DATA }

@@ -126,12 +126,26 @@ for (const [sp, casas] of casaDireta) {
   for (const c of casas) porFamilia.get(f).add(c)
 }
 
-const casa = new Map(casaDireta)
+// A LINHA EVOLUTIVA INTEIRA MORA NOS MESMOS LUGARES.
+//
+// A versao anterior so dava casa a quem nao tinha nenhuma. Isso deixava buraco
+// por FAIXA DE NIVEL, nao por especie: o Templo tem Gastly, Haunter, Natu e
+// Cubone, todos estagios que ja evoluiram antes do Lv31 — e Gengar, Xatu e
+// Marowak tem casa propria noutro sub-bioma, entao nunca herdavam o Templo. O
+// Templo ficava com pool VAZIO nas faixas II e III: uma sala que sorteasse ele
+// nao spawnaria nada, sem erro nenhum.
+//
+// Espalhar a familia inteira e coerente com o resto do desenho (a hunt mostra
+// o estagio compativel com o nivel dela, ver huntSpawnOverrides.ts) e fecha o
+// buraco na origem em vez de remendar no consumidor.
+const casa = new Map()
 const herdadas = []
 for (const sp of Object.keys(SPECIES)) {
-  if (!elegivel(sp) || casa.has(sp)) continue
+  if (!elegivel(sp)) continue
   const f = porFamilia.get(acha(sp))
-  if (f?.size) { casa.set(sp, new Set(f)); herdadas.push(sp) }
+  if (!f?.size) continue
+  casa.set(sp, new Set(f))
+  if (!casaDireta.has(sp)) herdadas.push(sp)
 }
 
 const orfas = Object.keys(SPECIES).filter((k) => elegivel(k) && !casa.has(k))

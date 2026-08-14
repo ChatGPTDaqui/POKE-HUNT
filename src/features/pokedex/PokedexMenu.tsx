@@ -178,13 +178,22 @@ function SpeciesDetail({ species }: { species: Species }) {
   )
 }
 
-type Escopo = 'hunt' | 'continente' | 'tudo'
+// "Continente" era um escopo so, e a regiao vinha da hunt em que o jogador
+// estava. Hunt deixou de ter regiao (as hunts sao biomas tematicos agora, ver
+// data/biomas.ts), entao a regiao virou escolha explicita. A ESPECIE continua
+// tendo regiao — e o numero da Pokedex, ver data/regions.ts.
+type Escopo = 'hunt' | 'johto' | 'kanto' | 'tudo'
 
 const ESCOPOS: { value: Escopo; label: string }[] = [
   { value: 'hunt', label: 'Hunt Atual' },
-  { value: 'continente', label: 'Continente' },
+  { value: 'johto', label: 'Johto' },
+  { value: 'kanto', label: 'Kanto' },
   { value: 'tudo', label: 'Pokédex' },
 ]
+
+function regiaoDoEscopo(escopo: Escopo): Region | null {
+  return escopo === 'johto' || escopo === 'kanto' ? escopo : null
+}
 
 /** Ids das especies que podem aparecer numa hunt. */
 function especiesDaHunt(map: HuntMapDef): Set<string> {
@@ -213,11 +222,7 @@ export function PokedexMenu() {
   )
 
   const escopoAtivo: Escopo = escopo === 'hunt' && !mapaAtual ? 'tudo' : escopo
-  // Regiao do escopo "Continente": a do mapa onde o jogador esta. As hunts do
-  // Modo Pesadelo espelham as normais e carregam `continent: 'nightmare'`, que
-  // nao e regiao de especie nenhuma — nelas o escopo cai pra Johto, a regiao
-  // padrao do jogo.
-  const regiaoAtual: Region = mapaAtual?.continent === 'kanto' ? 'kanto' : 'johto'
+  const regiaoAtual = regiaoDoEscopo(escopoAtivo)
 
   const visible = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -226,7 +231,7 @@ export function PokedexMenu() {
         const ids = especiesDaHunt(mapaAtual)
         return allSpecies.filter((s) => ids.has(s.id))
       }
-      if (escopoAtivo === 'continente') {
+      if (regiaoAtual) {
         return allSpecies.filter((s) => regionOfSpecies(s.id) === regiaoAtual)
       }
       return allSpecies
@@ -258,7 +263,7 @@ export function PokedexMenu() {
           />
           <span className="text-[.75em] text-n500">
             {escopoAtivo === 'hunt' && mapaAtual && `${mapaAtual.name} · ${visible.length}`}
-            {escopoAtivo === 'continente' && `${REGION_LABEL[regiaoAtual]} · ${visible.length}`}
+            {regiaoAtual && `${REGION_LABEL[regiaoAtual]} · ${visible.length}`}
             {escopoAtivo === 'tudo' && `${visible.length} espécies`}
           </span>
         </div>

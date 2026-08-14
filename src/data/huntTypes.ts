@@ -15,7 +15,13 @@ export interface HuntMapDef extends MapDataEntry {
   noCatch?: boolean
   autoSwitchTeamOnFaint?: boolean
   sequence?: string[]
-  unlocksContinentOnClear?: string
+  /**
+   * Grupos de gate (`MapDataEntry['continent']`) liberados quando a
+   * `sequence` inteira desta hunt cai. Lista, e nao um valor so, porque o
+   * Campeao Lance abre dois de uma vez: a faixa de nivel seguinte e o Modo
+   * Pesadelo.
+   */
+  unlocksContinentOnClear?: string[]
   startCountdown?: number
   keepCorpses?: boolean
 }

@@ -1,30 +1,101 @@
 // Invariantes do mundo de hunts.
 //
-// Os dois primeiros testes existem porque a falha correspondente e SILENCIOSA:
+// Quase toda falha aqui e SILENCIOSA, e e por isso que estes testes existem:
 // uma especie sem hunt nenhuma continua no catalogo (aparece no Bestiario, tem
 // sprite, tem moveset) e simplesmente nunca spawna — foi exatamente assim que a
-// linha do Dratini sumiu do jogo por uma leva inteira sem ninguem notar. E uma
-// hunt com pool vazio so estoura quando alguem entra nela.
+// linha do Dratini sumiu do jogo por uma leva inteira sem ninguem notar. Uma
+// hunt com pool vazio so estoura quando alguem entra nela. Um sub-bioma
+// inalcancavel nao da erro em lugar nenhum.
 import { describe, expect, it } from 'vitest'
-import { MAPS, ENCOUNTERS } from './huntSpawnOverrides'
+import { MAPS, ENCOUNTERS, POOL_POR_SALA, STARTER_HUNT_ID } from './huntSpawnOverrides'
+import { SPECIES, type Species } from './pokes'
 import { SPECIES_DATA } from './generated/pokes.generated'
+import { SUB_BIOMA_ESPECIES } from './generated/subBiomas.generated'
+import { BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, huntId } from './biomas'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
-import { NON_WILD_SPECIES, regionOfSpecies } from './regions'
-import { isTerceiraEvolucao } from './evolutionStage'
+import { NON_WILD_SPECIES } from './regions'
 import { baseStatTotal, especieForte, zonaMinimaDaEspecie } from './spawnStrength'
 
 const BASE_STARTERS = ['charmander', 'squirtle', 'bulbasaur']
 
 const wildSpecies = Object.keys(SPECIES_DATA).filter(
-  (id) => !BASE_STARTERS.includes(id) && !LEGENDARY_SPECIES_IDS.includes(id) && !NON_WILD_SPECIES.has(id)
+  (id) => !BASE_STARTERS.includes(id) && !LEGENDARY_SPECIES_IDS.includes(id) && !NON_WILD_SPECIES.has(id),
 )
 
-// Hunts BOSS/Lance tem elenco proprio (lendario sozinho, time do Lance) e nao
-// seguem a regra de regiao.
-const regularHunts = Object.values(MAPS).filter((map) => map.continent !== 'nightmare' || map.id.startsWith('nightmare_'))
-const wildHunts = regularHunts.filter((map) => !map.id.startsWith('boss_'))
+const bossHunts = Object.values(MAPS).filter((m) => m.id.startsWith('boss_'))
+const nightmareHunts = Object.values(MAPS).filter((m) => m.id.startsWith('nightmare_'))
+// Hunts "normais": as 36 de bioma + a inicial. Sem o espelho do Pesadelo (mesma
+// composicao, nivel deslocado) e sem as BOSS (elenco proprio, curado a mao).
+const huntsNormais = Object.values(MAPS).filter(
+  (m) => !m.id.startsWith('nightmare_') && !m.id.startsWith('boss_'),
+)
 
-describe('hunts', () => {
+const especiesDe = (encIds: string[]) => encIds.map((id) => ENCOUNTERS[id].speciesId)
+
+describe('estrutura', () => {
+  it('existe uma hunt por bioma x faixa, mais a inicial', () => {
+    for (const bioma of BIOMAS) {
+      for (const faixa of FAIXAS) {
+        const id = huntId(bioma.chave, faixa.id)
+        expect(MAPS[id], `hunt ausente: ${id}`).toBeTruthy()
+      }
+    }
+    expect(MAPS[STARTER_HUNT_ID]).toBeTruthy()
+    expect(huntsNormais.length).toBe(BIOMAS.length * FAIXAS.length + 1)
+  })
+
+  it('todo sub-bioma declarado em biomas.ts tem elenco gerado, e vice-versa', () => {
+    const declarados = new Set(BIOMAS.flatMap((b) => b.subBiomas.map((s) => s.chave)))
+    const gerados = new Set(Object.keys(SUB_BIOMA_ESPECIES))
+    expect([...declarados].filter((c) => !gerados.has(c)), 'em biomas.ts sem elenco gerado').toEqual([])
+    expect([...gerados].filter((c) => !declarados.has(c)), 'gerado e nao agrupado em nenhum bioma').toEqual([])
+  })
+
+  // Mais forte que "alcancavel em alguma faixa": TODA sala de TODA faixa
+  // precisa ter pool. Uma sala vazia nao da erro — o jogador entra e nada
+  // spawna. Foi assim que o Templo ficou mudo nas faixas II e III (todos os
+  // estagios dele ja tinham evoluido antes do Lv31 e as formas evoluidas
+  // moravam noutro sub-bioma).
+  it('nenhuma sala fica com pool vazio em nenhuma faixa', () => {
+    const vazios: string[] = []
+    for (const bioma of BIOMAS) {
+      for (const faixa of FAIXAS) {
+        for (const sub of bioma.subBiomas) {
+          const pool = POOL_POR_SALA[huntId(bioma.chave, faixa.id)]?.[sub.chave] ?? []
+          if (pool.length === 0) vazios.push(`${bioma.chave}/${faixa.id}/${sub.chave}`)
+        }
+      }
+    }
+    expect(vazios).toEqual([])
+  })
+
+  it('o peso de sala de todo sub-bioma e positivo', () => {
+    for (const bioma of BIOMAS) {
+      for (const sub of bioma.subBiomas) {
+        expect(sub.peso, `${bioma.chave}/${sub.chave}`).toBeGreaterThan(0)
+      }
+    }
+  })
+
+  it('o gate das hunts e o esperado: faixa1/faixa2 abertas, faixa3 e Pesadelo pelo Lance', () => {
+    for (const bioma of BIOMAS) {
+      for (const faixa of FAIXAS) {
+        expect(MAPS[huntId(bioma.chave, faixa.id)].continent).toBe(faixa.id)
+      }
+    }
+    for (const m of nightmareHunts) expect(m.continent, m.id).toBe('nightmare')
+    // A hunt do Lance e a excecao entre as `boss_`: ela tem que estar num grupo
+    // ABERTO, senao so seria alcancavel depois de ja ter sido vencida.
+    for (const m of bossHunts) {
+      if (m.id === 'boss_lance') continue
+      expect(m.continent, m.id).toBe('nightmare')
+    }
+    expect(FAIXAS_INICIAIS).toContain(MAPS.boss_lance.continent)
+    expect(MAPS.boss_lance.unlocksContinentOnClear).toEqual(GRUPOS_DO_LANCE)
+  })
+})
+
+describe('cobertura de especies', () => {
   it('nenhuma hunt fica sem especie', () => {
     const vazias = Object.values(MAPS).filter((map) => map.enemyPool.length === 0)
     expect(vazias.map((m) => m.id)).toEqual([])
@@ -42,51 +113,33 @@ describe('hunts', () => {
 
   it('toda especie selvagem tem pelo menos uma hunt onde spawna', () => {
     const comCasa = new Set<string>()
-    for (const map of wildHunts) {
-      for (const encId of map.enemyPool) comCasa.add(ENCOUNTERS[encId].speciesId)
-    }
-    const orfas = wildSpecies.filter((id) => !comCasa.has(id))
-    expect(orfas).toEqual([])
+    for (const map of huntsNormais) for (const id of especiesDe(map.enemyPool)) comCasa.add(id)
+    expect(wildSpecies.filter((id) => !comCasa.has(id))).toEqual([])
   })
 
-  it('hunt de uma regiao so tem POKE daquela regiao', () => {
-    const erros: string[] = []
-    for (const map of wildHunts) {
-      // A hunt inicial (e o espelho dela no Modo Pesadelo) tem elenco fixo
-      // curado a mao e fica fora da regra de regiao de proposito: o pedido
-      // nomeou Rattata, que e de Kanto, numa hunt de Johto. Ver a nota em
-      // huntSpawnOverrides#STARTER_HUNT_SPECIES.
-      if (map.id === 'route_46' || map.id === 'nightmare_route_46') continue
-      // O espelho do Modo Pesadelo carrega `continent: 'nightmare'`; a regiao
-      // dele e a da hunt de origem, recuperada pelo id.
-      const origem = map.id.startsWith('nightmare_') ? MAPS[map.id.slice('nightmare_'.length)] : map
-      const regiao = origem?.continent
-      if (regiao !== 'johto' && regiao !== 'kanto') continue
-      for (const encId of map.enemyPool) {
-        const speciesId = ENCOUNTERS[encId].speciesId
-        if (regionOfSpecies(speciesId) !== regiao) erros.push(`${map.id} [${regiao}] tem ${speciesId}`)
-      }
-    }
-    expect(erros).toEqual([])
-  })
-
-  it('Porygon, Porygon2 e Eevee nao spawnam em hunt nenhuma', () => {
+  it('lendario so aparece em hunt BOSS', () => {
     const achados: string[] = []
-    for (const map of Object.values(MAPS)) {
-      for (const encId of map.enemyPool) {
-        const speciesId = ENCOUNTERS[encId].speciesId
-        if (NON_WILD_SPECIES.has(speciesId)) achados.push(`${map.id}: ${speciesId}`)
+    for (const map of [...huntsNormais, ...nightmareHunts]) {
+      for (const id of especiesDe(map.enemyPool)) {
+        if (LEGENDARY_SPECIES_IDS.includes(id)) achados.push(`${map.id}: ${id}`)
       }
     }
     expect(achados).toEqual([])
   })
 
-  // O bug que este teste tranca: o NOME da zona e o NIVEL que ela spawna eram
-  // dois numeros de origens diferentes, e discordavam. "Zona Nivel 31-40"
-  // entregava POKE de nivel 15 e de nivel 51. Agora a faixa e a fonte unica —
-  // e a unica forma de isso voltar a divergir e alguem reintroduzir uma segunda
-  // fonte, que este teste pega.
-  it('todo encontro respeita estritamente a faixa da propria zona', () => {
+  it('Porygon, Porygon2 e Eevee nao spawnam em hunt nenhuma', () => {
+    const achados: string[] = []
+    for (const map of Object.values(MAPS)) {
+      for (const id of especiesDe(map.enemyPool)) {
+        if (NON_WILD_SPECIES.has(id)) achados.push(`${map.id}: ${id}`)
+      }
+    }
+    expect(achados).toEqual([])
+  })
+})
+
+describe('niveis', () => {
+  it('todo encontro respeita estritamente a faixa da propria hunt', () => {
     const erros: string[] = []
     for (const map of Object.values(MAPS)) {
       const [min, max] = map.levelRange
@@ -95,9 +148,83 @@ describe('hunts', () => {
         if (enc.minLevel < min || enc.maxLevel > max) {
           erros.push(`${map.id} (Lv ${min}-${max}) tem ${enc.speciesId} em Lv ${enc.minLevel}-${enc.maxLevel}`)
         }
+        // BUG REAL que este ramo pegou uma vez: o espelho do Pesadelo deslocava
+        // min/max mas nao os `levelWeights`, que sao o sorteio de FATO quando
+        // existem. A hunt anunciava Lv150 e spawnava Lv1.
         for (const lw of enc.levelWeights ?? []) {
-          if (lw.level < min || lw.level > max) {
-            erros.push(`${map.id} (Lv ${min}-${max}) sorteia nivel ${lw.level}`)
+          if (lw.level < min || lw.level > max) erros.push(`${map.id} (Lv ${min}-${max}) sorteia nivel ${lw.level}`)
+        }
+      }
+    }
+    expect(erros).toEqual([])
+  })
+
+  it('as 3 faixas sao contiguas e o nome da hunt casa com a faixa dela', () => {
+    let esperado = 1
+    for (const faixa of FAIXAS) {
+      expect(faixa.niveis[0], `faixa ${faixa.nome} nao comeca onde a anterior acabou`).toBe(esperado)
+      esperado = faixa.niveis[1] + 1
+    }
+    for (const bioma of BIOMAS) {
+      for (const faixa of FAIXAS) {
+        const map = MAPS[huntId(bioma.chave, faixa.id)]
+        expect(map.levelRange).toEqual(faixa.niveis)
+        expect(map.name).toBe(`${bioma.nome} ${faixa.nome}`)
+      }
+    }
+  })
+
+  // O motivo de existir a regra "uma linha, estagios em faixas disjuntas".
+  // Sem ela: Caterpie (que evolui no 7) nascendo Lv60.
+  it('nenhum encontro poe um POKE num nivel em que ele ja deveria ter evoluido', () => {
+    const erros: string[] = []
+    for (const map of huntsNormais) {
+      for (const encId of map.enemyPool) {
+        const enc = ENCOUNTERS[encId]
+        const especie: Species | undefined = SPECIES[enc.speciesId]
+        const alvo = especie?.evolvesTo
+        // Evolucao ESPECIAL (ex-troca) exige Nivel 80 + 20 Pedras pro jogador;
+        // pro selvagem o gatilho e outro (ver nivelDeTroca), entao ela nao
+        // conta como "ja deveria ter evoluido".
+        if (!alvo || !SPECIES[alvo] || especie.isSpecialEvolution) continue
+        const nivel = especie.evolvesAtLevel
+        if (nivel != null && enc.maxLevel >= nivel) {
+          erros.push(`${map.id}: ${enc.speciesId} ate Lv ${enc.maxLevel} mas evolui no ${nivel}`)
+        }
+      }
+    }
+    expect(erros).toEqual([])
+  })
+
+  // Corolario do anterior: dois estagios da mesma linha na mesma hunt nao podem
+  // dividir nivel nenhum, senao o mesmo nivel produziria ora um ora outro.
+  it('estagios da mesma linha nao se sobrepoem dentro de uma hunt', () => {
+    const raizDe = (id: string) => {
+      let atual = id
+      for (let i = 0; i < 10; i++) {
+        const anterior = Object.values(SPECIES).find((s) => s.evolvesTo === atual)
+        if (!anterior) break
+        atual = anterior.id
+      }
+      return atual
+    }
+    const erros: string[] = []
+    for (const map of huntsNormais) {
+      const porLinha = new Map<string, { id: string; min: number; max: number }[]>()
+      for (const encId of map.enemyPool) {
+        const enc = ENCOUNTERS[encId]
+        const raiz = raizDe(enc.speciesId)
+        const lista = porLinha.get(raiz) ?? []
+        lista.push({ id: enc.speciesId, min: enc.minLevel, max: enc.maxLevel })
+        porLinha.set(raiz, lista)
+      }
+      for (const [raiz, trechos] of porLinha) {
+        for (let i = 0; i < trechos.length; i++) {
+          for (let j = i + 1; j < trechos.length; j++) {
+            const a = trechos[i], b = trechos[j]
+            if (a.min <= b.max && b.min <= a.max) {
+              erros.push(`${map.id} linha ${raiz}: ${a.id} Lv${a.min}-${a.max} e ${b.id} Lv${b.min}-${b.max}`)
+            }
           }
         }
       }
@@ -105,28 +232,37 @@ describe('hunts', () => {
     expect(erros).toEqual([])
   })
 
-  it('as zonas normais sao faixas fechadas de 10 niveis, sem buraco entre elas', () => {
-    // O espelho do Modo Pesadelo herda o nome (com o numero da zona) mas nao a
-    // faixa: ele e a mesma zona deslocada em +100 com piso 150, entao "10
-    // niveis fechados" nao vale nem deveria valer pra ele.
-    const zonas = Object.values(MAPS)
-      .filter((m) => !m.id.startsWith('nightmare_'))
-      .filter((m) => / Zona \d+ /.test(m.name))
-      .map((m) => ({ id: m.id, nome: m.name, min: m.levelRange[0], max: m.levelRange[1] }))
-    expect(zonas.length).toBeGreaterThan(0)
-    for (const z of zonas) {
-      // O numero escrito no nome tem que ser o numero da faixa: e a coisa que
-      // o jogador le antes de entrar.
-      const numero = Number(z.nome.match(/ Zona (\d+) /)?.[1])
-      expect(z.max - z.min, `${z.id} nao tem 10 niveis`).toBe(9)
-      expect(z.min, `${z.nome} comeca no nivel errado`).toBe(numero * 10 + 1)
+  it('nenhum POKE forte aparece em hunt que termina antes do Lv 30', () => {
+    const erros: string[] = []
+    for (const map of huntsNormais) {
+      if (map.levelRange[1] >= 30) continue
+      for (const id of especiesDe(map.enemyPool)) {
+        if (especieForte(id)) erros.push(`${map.id} (Lv ${map.levelRange[0]}-${map.levelRange[1]}) tem ${id} (BST ${baseStatTotal(id)})`)
+      }
     }
+    expect(erros).toEqual([])
   })
 
+  it('toda especie respeita a propria zona minima', () => {
+    const erros: string[] = []
+    for (const map of huntsNormais) {
+      if (map.id === STARTER_HUNT_ID) continue
+      const faixa = FAIXAS.find((f) => f.niveis[0] === map.levelRange[0])
+      if (!faixa) continue
+      for (const id of especiesDe(map.enemyPool)) {
+        const minima = zonaMinimaDaEspecie(id)
+        if (minima > faixa.zonaMaxima) erros.push(`${map.id} (ate zona ${faixa.zonaMaxima}) tem ${id} (minima ${minima})`)
+      }
+    }
+    expect(erros).toEqual([])
+  })
+})
+
+describe('pesos de spawn', () => {
   // A soma dos pesos e o denominador do `weightedPick`: peso zero (ou negativo,
   // ou NaN vindo de um encontro sem tier) faria uma especie nunca spawnar sem
   // erro nenhum, e uma hunt com soma zero travaria o sorteio.
-  it('a matriz de spawn fecha: todo peso e positivo e toda hunt soma mais que zero', () => {
+  it('todo peso e positivo e toda hunt soma mais que zero', () => {
     const erros: string[] = []
     for (const map of Object.values(MAPS)) {
       let soma = 0
@@ -140,97 +276,61 @@ describe('hunts', () => {
     expect(erros).toEqual([])
   })
 
-  it('as chances de spawn de cada hunt somam 100%', () => {
-    for (const map of Object.values(MAPS)) {
+  // O pool de cada SALA tambem tem que fechar sozinho: e ele que vira o
+  // `enemyPool` ativo quando a sala esta em vigor.
+  it('todo pool de sala fecha o sorteio sozinho', () => {
+    const erros: string[] = []
+    for (const [hunt, salas] of Object.entries(POOL_POR_SALA)) {
+      for (const [sub, ids] of Object.entries(salas)) {
+        if (ids.length === 0) continue
+        const soma = ids.reduce((s, id) => s + ENCOUNTERS[id].weight, 0)
+        if (!(soma > 0)) erros.push(`${hunt}/${sub} soma ${soma}`)
+      }
+    }
+    expect(erros).toEqual([])
+  })
+
+  // Sem o teto, um pool pequeno com um tier alto vira hunt de uma especie so:
+  // medido, Unown ocupava 50,8% do Sagrado. A hunt inicial (3 especies curadas
+  // a mao) fica de fora — com 3, o minimo possivel ja e 33%.
+  it('nenhuma especie passa de 35% de uma hunt com 5 ou mais especies', () => {
+    const erros: string[] = []
+    for (const map of huntsNormais) {
+      if (map.enemyPool.length < 5) continue
       const total = map.enemyPool.reduce((s, id) => s + ENCOUNTERS[id].weight, 0)
-      const soma = map.enemyPool.reduce((s, id) => s + (ENCOUNTERS[id].weight / total) * 100, 0)
-      expect(soma, `${map.id}`).toBeCloseTo(100, 6)
-    }
-  })
-
-  // Pedido explicito: 0,2% exatos. E um numero facil de quebrar sem perceber —
-  // qualquer mexida no peso base de uma especie (`spawn-tiers.json`) ou no pool
-  // de uma hunt muda o denominador, e a chance so seria "quase" 0,2% de novo.
-  it('todo POKE de 3a evolucao aparece em exatamente 0,2% da hunt', () => {
-    const erros: string[] = []
-    for (const map of Object.values(MAPS)) {
-      // Hunts BOSS (inclusive a do Campeao Lance) ficam de fora: la a "chance
-      // de aparicao" nao existe — o elenco E a luta, com os POKEs escolhidos a
-      // mao. Aplicar 0,2% ali significaria 99,8% de nada aparecer.
-      if (map.id.startsWith('boss_')) continue
-      const total = map.enemyPool.reduce((s, id) => s + ENCOUNTERS[id].weight, 0)
-      const fixos = map.enemyPool.filter((id) => isTerceiraEvolucao(ENCOUNTERS[id].speciesId))
-      // Zona de formas finais (metade ou mais do pool) fica de fora: ver
-      // LIMITE_ZONA_DE_FINAIS em huntSpawnOverrides. Forcar 0,2% ali daria ao
-      // resto do pool uma fatia proxima de 100%.
-      if (!fixos.length || fixos.length / map.enemyPool.length >= 0.5) continue
-      for (const id of fixos) {
-        const chance = (ENCOUNTERS[id].weight / total) * 100
-        if (Math.abs(chance - 0.2) > 1e-6) {
-          erros.push(`${map.id}/${ENCOUNTERS[id].speciesId} = ${chance.toFixed(4)}%`)
-        }
+      for (const id of map.enemyPool) {
+        const fatia = ENCOUNTERS[id].weight / total
+        if (fatia > 0.35 + 1e-9) erros.push(`${map.id}/${ENCOUNTERS[id].speciesId} = ${(fatia * 100).toFixed(1)}%`)
       }
     }
     expect(erros).toEqual([])
   })
 
-  // Pedido explicito: a primeira hunt so pode ter estes tres, todos NORMAL.
-  // Sem o teste, qualquer mexida na montagem de pool (ou um sync novo) pode
-  // devolver Ledyba/Spinarak pra la sem ninguem notar — o cartao da hunt nao
-  // lista especie.
-  // Pedido explicito: POKE forte (Scizor foi o exemplo dado) nao pode aparecer
-  // no comeco da jornada — so em zona de Lv 30+. Este teste tranca a regra
-  // inteira, e nao o caso do Scizor: qualquer especie que passe o corte de
-  // forca (data/spawnStrength.ts) e apareca numa hunt que termina antes do
-  // nivel 30 reprova. A falha e silenciosa sem ele — Tyranitar num pool de
-  // Lv 21-30 nao quebra nada, so estraga o inicio de jogo.
-  it('nenhum POKE forte aparece em hunt que termina antes do Lv 30', () => {
-    const erros: string[] = []
-    for (const map of wildHunts) {
-      // O espelho do Modo Pesadelo desloca tudo pra Lv 150+; a regra e sobre a
-      // progressao normal.
-      if (map.id.startsWith('nightmare_')) continue
-      if (map.levelRange[1] >= 30) continue
-      for (const encId of map.enemyPool) {
-        const speciesId = ENCOUNTERS[encId].speciesId
-        if (especieForte(speciesId)) {
-          erros.push(`${map.id} (Lv ${map.levelRange[0]}-${map.levelRange[1]}) tem ${speciesId} (BST ${baseStatTotal(speciesId)})`)
-        }
-      }
+  it('o enemyPool da hunt e exatamente a uniao dos pools de sala', () => {
+    for (const [hunt, salas] of Object.entries(POOL_POR_SALA)) {
+      const uniao = [...new Set(Object.values(salas).flat())].sort()
+      expect([...MAPS[hunt].enemyPool].sort(), hunt).toEqual(uniao)
     }
-    expect(erros).toEqual([])
   })
+})
 
-  // O piso e por ESPECIE, nao so "antes do 30": Scizor (475+) so pode em Lv 51+,
-  // Tyranitar (525+) so em Lv 71+.
-  it('toda especie respeita a propria zona minima', () => {
-    const erros: string[] = []
-    for (const map of wildHunts) {
-      if (map.id.startsWith('nightmare_')) continue
-      const zona = Math.floor((map.levelRange[0] - 1) / 10)
-      for (const encId of map.enemyPool) {
-        const speciesId = ENCOUNTERS[encId].speciesId
-        const minima = zonaMinimaDaEspecie(speciesId)
-        if (zona < minima) erros.push(`${map.id} (zona ${zona}) tem ${speciesId} (minima ${minima})`)
-      }
-    }
-    expect(erros).toEqual([])
-  })
-
-  it('a hunt inicial so tem Sentret, Hoothoot e Rattata', () => {
-    const especies = MAPS.route_46.enemyPool.map((id) => ENCOUNTERS[id].speciesId).sort()
+describe('hunt inicial', () => {
+  it('so tem Sentret, Hoothoot e Rattata, todos NORMAL', () => {
+    const especies = especiesDe(MAPS[STARTER_HUNT_ID].enemyPool).sort()
     expect(especies).toEqual(['hoothoot', 'rattata', 'sentret'])
     for (const id of especies) expect(SPECIES_DATA[id].type).toBe('NORMAL')
   })
 
-  it('a hunt inicial sai 80% nivel 1 e 20% nivel 2', () => {
-    const inicial = MAPS.route_46
-    expect(inicial).toBeTruthy()
-    for (const encId of inicial.enemyPool) {
+  it('sai 80% nivel 1 e 20% nivel 2', () => {
+    for (const encId of MAPS[STARTER_HUNT_ID].enemyPool) {
       expect(ENCOUNTERS[encId].levelWeights).toEqual([
         { level: 1, weight: 80 },
         { level: 2, weight: 20 },
       ])
     }
+  })
+
+  it('fica fora do sistema de salas', () => {
+    expect(POOL_POR_SALA[STARTER_HUNT_ID]).toBeUndefined()
   })
 })

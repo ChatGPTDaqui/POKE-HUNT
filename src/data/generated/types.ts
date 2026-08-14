@@ -86,7 +86,16 @@ export interface MapItemDrop {
   chance: number
 }
 
-export type Continent = 'johto' | 'kanto' | 'nightmare'
+// O GRUPO DE GATE de uma hunt — o que decide se o jogador ja pode entrar
+// nela. Era a regiao ('johto' | 'kanto'), que deixou de existir quando as
+// hunts passaram a ser montadas por bioma tematico (ver data/biomas.ts): as
+// pools do PokeRogue misturam as duas regioes e recortar por elas esvaziava
+// 12 dos 33 sub-biomas.
+//
+// `faixa1` e `faixa2` nascem abertas; `faixa3` e `nightmare` (que inclui as
+// 11 hunts BOSS) sao liberadas por derrotar o Campeao Lance, cujo time e
+// Lv55-65 — o fim exato da faixa2.
+export type Continent = 'faixa1' | 'faixa2' | 'faixa3' | 'nightmare'
 
 export interface MapDataEntry {
   id: string

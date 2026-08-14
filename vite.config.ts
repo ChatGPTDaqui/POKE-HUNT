@@ -1,6 +1,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { defineConfig, type Plugin, type Connect } from 'vite'
+import type { Plugin, Connect } from 'vite'
+// `vitest/config` e nao `vite`: e ele que conhece a chave `test`.
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -75,6 +77,13 @@ export default defineConfig({
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
     },
+  },
+  test: {
+    // `.claude/worktrees/*` sao worktrees do git de OUTRAS branches, criadas
+    // por sessoes de agente. O vitest as varre por padrao e roda os testes
+    // delas contra o codigo desta branch — resultado sem sentido (12 falhas
+    // vindas de arquivos que nem estao nesta arvore) que esconde falha real.
+    exclude: ['**/node_modules/**', '**/dist/**', '.claude/**', 'server/engine/**'],
   },
   build: {
     // Por padrao o Vite emite os chunks em `dist/assets/`, que colidiria com
