@@ -76,6 +76,10 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, './src'),
     },
   },
+  // Sem bloco `test` aqui de proposito: o padrao do Vitest ja e o ambiente
+  // 'node', que serve pra quase todo teste deste projeto (motor e dado puro).
+  // jsdom custa ~10x mais pra subir, entao so os testes de componente o pedem,
+  // cada um no proprio arquivo com `// @vitest-environment jsdom`.
   build: {
     // Por padrao o Vite emite os chunks em `dist/assets/`, que colidiria com
     // o `/assets/` da arte do jogo (mesmo prefixo de URL). Renomeado pra
