@@ -18,6 +18,8 @@
     "catalog:migrar": "node scripts/migrate-catalog-to-postgres.js",
     "catalog:verificar": "node scripts/verify-catalog-diff.js",
     "planilha:aplicar": "node scripts/sync-planilha.js",
+    "subbiomas:extrair": "node scripts/pokerogue/extrair-biomas.mjs",
+    "subbiomas:gerar": "node scripts/gerar-subbiomas.mjs",
     "db:wipe": "node scripts/wipe-todos-os-saves.js",
     "edge:publicar": "npm run build:edge && npx supabase functions deploy jogo"
   },
