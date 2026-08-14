@@ -23,6 +23,15 @@ process.env.SYNC_SKIP_WRITE = '1';
 const fs = require('fs');
 const path = require('path');
 const sync = require('./sync-planilha.js');
+const { bloqueiaCatalogoAntigo } = require('./lib/guarda-catalogo-gen2.js');
+
+bloqueiaCatalogoAntigo(
+  'npm run catalog:migrar',
+  'Isto escreveria no Supabase o catalogo de Gen2 da planilha. A migracao para\n' +
+  'Pokemon Ultra Sun nao passa pelo banco (decisao explicita do usuario): a fonte\n' +
+  'de build agora e scripts/usum/catalog.json, versionado no repo. Alem disso o\n' +
+  'enum `element_type` do banco nao tem FAIRY, entao a escrita nem chegaria ao fim.'
+);
 
 const ROOT = path.join(__dirname, '..');
 

@@ -247,7 +247,7 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
   const poke = player.poke
   const enemySpecies = SPECIES[enemy.poke.speciesId]
 
-  const expGain = expRewardForEnemy(enemy.poke)
+  const expGain = expRewardForEnemy(enemy.poke, poke.level)
   const grantResult = grantExp(poke, expGain)
   player.poke = grantResult.poke
   gameState.updatePokeInstance(grantResult.poke.uid, () => grantResult.poke)

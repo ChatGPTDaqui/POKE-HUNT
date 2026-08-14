@@ -30,6 +30,10 @@ import { cn } from '@/lib/utils'
 const CATEGORY_BORDER: Record<string, string> = {
   physical: 'var(--color-cat-physical)',
   special: 'var(--color-cat-special)',
+  // Golpe de status nao chega a barra (ela so mostra golpe com dano), mas a
+  // categoria existe no dado desde o Ultra Sun — sem esta linha ele cairia no
+  // fallback e apareceria como Fisico se algum dia a barra deixar de filtrar.
+  status: 'var(--color-n500)',
 }
 
 function shortLabel(name: string): string {

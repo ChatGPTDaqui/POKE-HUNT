@@ -13,6 +13,23 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '6.0',
+    date: '2026-08-14',
+    title: 'Tudo passou a ser Pokemon Ultra Sun — e o tipo Fada chegou',
+    highlights: [
+      'BASE DE DADOS NOVA. Atributos, tipos, taxas de captura, curvas de experiencia e movesets de todos os 251 Pokemon passaram a ser os de Pokemon Ultra Sun (Geracao VII), no lugar dos de Ouro/Prata. Os dados vem da PokeAPI e foram CONFERIDOS um a um contra a Bulbapedia: 251 fichas de atributo, 250 de tipagem, 251 de taxa de captura, 251 de curva de experiencia e as 324 celulas da tabela de tipos — zero divergencia.',
+      'TIPO FADA. O 18o tipo entrou por inteiro: tabela de efetividade da Gen VI (Fada bate 2x em Dragao, Sombrio e Lutador; Dragao nao causa NADA em Fada; Veneno e Aco batem 2x nela), cor propria, icone de golpe, efeito de impacto proprio, Pedra Fada e uma hunt nova — a Clareira Encantada, onde Cleffa, Togepi, Snubbull e Granbull passam a aparecer. Jigglypuff, Igglybuff, Marill e Azumarill viraram tipo duplo com Fada.',
+      'MUDANCA QUE ATINGE QUEM NAO E FADA: na Gen VI o tipo Aco DEIXOU de resistir a Fantasma e a Sombrio. Steelix, Scizor, Magneton e companhia ficaram mais vulneraveis a esses dois.',
+      'GOLPES: de 223 para 486. Os movesets da Gen VII trazem tudo que as geracoes III a VII adicionaram — Lâmina de Folha, Combate Fechado, Pulso Sombrio, Danca do Dragao, Terreno Eletrico, Luar Explosivo e centenas de outros. Todos com descricao em portugues.',
+      'GOLPES EM AREA CORRIGIDOS E MULTIPLICADOS. Antes so 6 golpes acertavam varios inimigos, por uma lista escrita a mao. Agora isso vem do alvo real do golpe: sao 26 golpes de area com dano, incluindo Terremoto, Nevasca, Deslizamento de Rochas, Onda de Calor, Descarga e Voz Encantadora.',
+      'FORMULAS DA GERACAO VII. Critico caiu de 1/16 para 1/24 e passou a multiplicar por 1.5 em vez de 2. A captura passou a usar a formula real de tres sacudidas (que leva o HP do alvo em conta). A experiencia por abate passou a usar a formula ESCALADA: derrotar alvo do proprio nivel rende o maximo, e farmar muito abaixo do seu nivel rende cada vez menos — vale a pena subir de zona.',
+      'BALANCEAMENTO PRESERVADO ONDE DAVA. O XP por abate contra alvo do proprio nivel e a chance MEDIA de captura do elenco continuam nos mesmos patamares de antes: os dois multiplicadores globais foram recalculados para isso. O que mudou de verdade e a forma das curvas, que agora e a dos jogos.',
+      'AJUSTES DE ATRIBUTO DA GEN VI: 23 especies ficaram mais fortes (Farfetch’d, Dugtrio, Pidgeot, Alakazam, Beedrill, Butterfree, Electrode, entre outras). Seus Pokemon ja salvos recebem os novos numeros na proxima vez que o jogo carregar — nao e preciso capturar de novo.',
+      'A ZONA "PROFUNDEZAS" deu lugar a Clareira Encantada. Os Pokemon de Agua fortes que moravam la (Gyarados, Lapras, Kingdra) continuam aparecendo em zonas de nivel alto da Costa.',
+      'Tyrogue passou a evoluir de verdade (nivel 20). As nove evolucoes especiais continuam iguais: nivel 80 mais 20 Pedras do tipo primario.',
+    ],
+  },
+  {
     version: '5.8',
     date: '2026-08-09',
     title: 'Progresso voltando atras e "falha ao falar com o banco" ao recarregar',

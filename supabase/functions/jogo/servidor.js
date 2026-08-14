@@ -277,6 +277,12 @@ var FUNCS = {
 	sqrt: Math.sqrt,
 	min: (a, b) => Math.min(a, b),
 	max: (a, b) => Math.max(a, b),
+	if: (cond, quandoVerdadeiro, quandoFalso) => cond ? quandoVerdadeiro : quandoFalso,
+	lt: (a, b) => a < b ? 1 : 0,
+	lte: (a, b) => a <= b ? 1 : 0,
+	gt: (a, b) => a > b ? 1 : 0,
+	gte: (a, b) => a >= b ? 1 : 0,
+	eq: (a, b) => a === b ? 1 : 0,
 	random: () => {
 		throw new Error("random() exige um Rng: passe world.rng em formulaEngine.eval(chave, contexto, rng)");
 	}
@@ -474,7 +480,7 @@ function createFormulaEngine(formulas) {
 //#region src/data/generated/formulas.generated.ts
 var FORMULAS = {
 	"DAMAGE_BASE": {
-		"expr": "floor(floor(2*level/5+2)*power*atk/def/50)+2",
+		"expr": "floor(floor(floor(2*level/5+2)*power*atk/def)/50)+2",
 		"vars": [
 			"level",
 			"power",
@@ -487,11 +493,11 @@ var FORMULAS = {
 		"vars": []
 	},
 	"CRIT_CHANCE": {
-		"expr": "1/16",
+		"expr": "1/24",
 		"vars": []
 	},
 	"CRIT_MULTIPLIER": {
-		"expr": "2",
+		"expr": "1.5",
 		"vars": []
 	},
 	"DAMAGE_VARIATION": {
@@ -499,8 +505,12 @@ var FORMULAS = {
 		"vars": []
 	},
 	"EXP_GAIN": {
-		"expr": "floor(baseExp*level/7)",
-		"vars": ["baseExp", "level"]
+		"expr": "floor(baseExp*level/5*((2*level+10)^2.5/(level+winnerLevel+10)^2.5))+1",
+		"vars": [
+			"baseExp",
+			"level",
+			"winnerLevel"
+		]
 	},
 	"STAT_FORMULA": {
 		"expr": "floor((2*base+iv)*level/100)+5",
@@ -519,16 +529,31 @@ var FORMULAS = {
 		]
 	},
 	"GLOBAL_CATCH_MULTIPLIER": {
-		"expr": "0.3",
+		"expr": "0.0925",
+		"vars": []
+	},
+	"CATCH_MODIFIED_RATE": {
+		"expr": "max(0.00001, (3*hpMax-2*hpAtual)/(3*hpMax)*catchRate*ballMultiplier*statusBonus*catchMultiplier)",
+		"vars": [
+			"hpMax",
+			"hpAtual",
+			"catchRate",
+			"ballMultiplier",
+			"statusBonus",
+			"catchMultiplier"
+		]
+	},
+	"CATCH_SHAKE_PROBABILITY": {
+		"expr": "min(1, (min(255, a)/255)^0.1875)",
+		"vars": ["a"]
+	},
+	"CATCH_SHAKES": {
+		"expr": "3",
 		"vars": []
 	},
 	"CATCH_CHANCE": {
-		"expr": "min(1, catchRate/255*ballMultiplier*catchMultiplier)",
-		"vars": [
-			"catchRate",
-			"ballMultiplier",
-			"catchMultiplier"
-		]
+		"expr": "min(1, shakeProbability^shakes)",
+		"vars": ["shakeProbability", "shakes"]
 	},
 	"SELL_ITEM_FRACTION": {
 		"expr": "0.5",
@@ -562,14 +587,6 @@ var FORMULAS = {
 		"expr": "n^3",
 		"vars": ["n (= level)"]
 	},
-	"GROWTH_SLIGHTLY_FAST": {
-		"expr": "floor(3/4*n^3+10*n^2-30)",
-		"vars": ["n (= level)"]
-	},
-	"GROWTH_SLIGHTLY_SLOW": {
-		"expr": "floor(3/4*n^3+20*n^2-70)",
-		"vars": ["n (= level)"]
-	},
 	"GROWTH_MEDIUM_SLOW": {
 		"expr": "floor(6/5*n^3-15*n^2+100*n-140)",
 		"vars": ["n (= level)"]
@@ -580,6 +597,14 @@ var FORMULAS = {
 	},
 	"GROWTH_SLOW": {
 		"expr": "floor(5/4*n^3)",
+		"vars": ["n (= level)"]
+	},
+	"GROWTH_ERRATIC": {
+		"expr": "floor(if(lt(n,50), n^3*(100-n)/50, if(lt(n,68), n^3*(150-n)/100, if(lt(n,98), n^3*floor((1911-10*n)/3)/500, n^3*(160-n)/100))))",
+		"vars": ["n (= level)"]
+	},
+	"GROWTH_FLUCTUATING": {
+		"expr": "floor(if(lt(n,15), n^3*(floor((n+1)/3)+24)/50, if(lt(n,36), n^3*(n+14)/50, n^3*(floor(n/2)+32)/50)))",
 		"vars": ["n (= level)"]
 	},
 	"FISH_BITE_CHANCE": {
@@ -594,21 +619,23 @@ var FORMULAS = {
 //#endregion
 //#region src/data/generated/abilities.generated.ts
 var ABILITIES_DATA = {
+	"growl": {
+		"id": "growl",
+		"name": "Growl",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "aoe"
+	},
 	"scratch": {
 		"id": "scratch",
 		"name": "Scratch",
 		"type": "NORMAL",
 		"category": "physical",
 		"power": 40,
-		"pp": 35
-	},
-	"growl": {
-		"id": "growl",
-		"name": "Growl",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 40
+		"pp": 35,
+		"target": "single"
 	},
 	"ember": {
 		"id": "ember",
@@ -616,39 +643,53 @@ var ABILITIES_DATA = {
 		"type": "FIRE",
 		"category": "special",
 		"power": 40,
-		"pp": 25
+		"pp": 25,
+		"target": "single"
 	},
 	"smokescreen": {
 		"id": "smokescreen",
 		"name": "Smokescreen",
 		"type": "NORMAL",
-		"category": "physical",
+		"category": "status",
 		"power": 0,
-		"pp": 20
+		"pp": 20,
+		"target": "single"
 	},
-	"rage": {
-		"id": "rage",
-		"name": "Rage",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 20,
-		"pp": 20
+	"dragon_rage": {
+		"id": "dragon_rage",
+		"name": "Dragon Rage",
+		"type": "DRAGON",
+		"category": "special",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
 	},
 	"scary_face": {
 		"id": "scary_face",
 		"name": "Scary Face",
 		"type": "NORMAL",
-		"category": "physical",
+		"category": "status",
 		"power": 0,
-		"pp": 10
+		"pp": 10,
+		"target": "single"
 	},
-	"flamethrower": {
-		"id": "flamethrower",
-		"name": "Flamethrower",
+	"fire_fang": {
+		"id": "fire_fang",
+		"name": "Fire Fang",
+		"type": "FIRE",
+		"category": "physical",
+		"power": 65,
+		"pp": 15,
+		"target": "single"
+	},
+	"flame_burst": {
+		"id": "flame_burst",
+		"name": "Flame Burst",
 		"type": "FIRE",
 		"category": "special",
-		"power": 95,
-		"pp": 15
+		"power": 70,
+		"pp": 15,
+		"target": "single"
 	},
 	"slash": {
 		"id": "slash",
@@ -656,55 +697,53 @@ var ABILITIES_DATA = {
 		"type": "NORMAL",
 		"category": "physical",
 		"power": 70,
-		"pp": 20
+		"pp": 20,
+		"target": "single"
 	},
-	"dragon_rage": {
-		"id": "dragon_rage",
-		"name": "Dragon Rage",
-		"type": "DRAGON",
+	"flamethrower": {
+		"id": "flamethrower",
+		"name": "Flamethrower",
+		"type": "FIRE",
 		"category": "special",
-		"power": 40,
-		"pp": 10
+		"power": 90,
+		"pp": 15,
+		"target": "single"
 	},
 	"fire_spin": {
 		"id": "fire_spin",
 		"name": "Fire Spin",
 		"type": "FIRE",
 		"category": "special",
-		"power": 15,
-		"pp": 15
+		"power": 35,
+		"pp": 15,
+		"target": "single"
+	},
+	"inferno": {
+		"id": "inferno",
+		"name": "Inferno",
+		"type": "FIRE",
+		"category": "special",
+		"power": 100,
+		"pp": 5,
+		"target": "single"
 	},
 	"tackle": {
 		"id": "tackle",
 		"name": "Tackle",
 		"type": "NORMAL",
 		"category": "physical",
-		"power": 35,
-		"pp": 35
+		"power": 40,
+		"pp": 35,
+		"target": "single"
 	},
 	"tail_whip": {
 		"id": "tail_whip",
 		"name": "Tail Whip",
 		"type": "NORMAL",
-		"category": "physical",
+		"category": "status",
 		"power": 0,
-		"pp": 30
-	},
-	"bubble": {
-		"id": "bubble",
-		"name": "Bubble",
-		"type": "WATER",
-		"category": "special",
-		"power": 20,
-		"pp": 30
-	},
-	"withdraw": {
-		"id": "withdraw",
-		"name": "Withdraw",
-		"type": "WATER",
-		"category": "special",
-		"power": 0,
-		"pp": 40
+		"pp": 30,
+		"target": "aoe"
 	},
 	"water_gun": {
 		"id": "water_gun",
@@ -712,15 +751,35 @@ var ABILITIES_DATA = {
 		"type": "WATER",
 		"category": "special",
 		"power": 40,
-		"pp": 25
+		"pp": 25,
+		"target": "single"
+	},
+	"withdraw": {
+		"id": "withdraw",
+		"name": "Withdraw",
+		"type": "WATER",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "single"
+	},
+	"bubble": {
+		"id": "bubble",
+		"name": "Bubble",
+		"type": "WATER",
+		"category": "special",
+		"power": 40,
+		"pp": 30,
+		"target": "aoe"
 	},
 	"bite": {
 		"id": "bite",
 		"name": "Bite",
 		"type": "DARK",
-		"category": "special",
+		"category": "physical",
 		"power": 60,
-		"pp": 25
+		"pp": 25,
+		"target": "single"
 	},
 	"rapid_spin": {
 		"id": "rapid_spin",
@@ -728,943 +787,107 @@ var ABILITIES_DATA = {
 		"type": "NORMAL",
 		"category": "physical",
 		"power": 20,
-		"pp": 40
+		"pp": 40,
+		"target": "single"
 	},
 	"protect": {
 		"id": "protect",
 		"name": "Protect",
 		"type": "NORMAL",
-		"category": "physical",
+		"category": "status",
 		"power": 0,
-		"pp": 10
+		"pp": 10,
+		"target": "single"
 	},
-	"rain_dance": {
-		"id": "rain_dance",
-		"name": "Rain Dance",
+	"water_pulse": {
+		"id": "water_pulse",
+		"name": "Water Pulse",
 		"type": "WATER",
 		"category": "special",
-		"power": 0,
-		"pp": 5
+		"power": 60,
+		"pp": 20,
+		"target": "single"
+	},
+	"aqua_tail": {
+		"id": "aqua_tail",
+		"name": "Aqua Tail",
+		"type": "WATER",
+		"category": "physical",
+		"power": 90,
+		"pp": 10,
+		"target": "single"
 	},
 	"skull_bash": {
 		"id": "skull_bash",
 		"name": "Skull Bash",
 		"type": "NORMAL",
 		"category": "physical",
-		"power": 100,
-		"pp": 15
+		"power": 130,
+		"pp": 10,
+		"target": "single"
+	},
+	"iron_defense": {
+		"id": "iron_defense",
+		"name": "Iron Defense",
+		"type": "STEEL",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"rain_dance": {
+		"id": "rain_dance",
+		"name": "Rain Dance",
+		"type": "WATER",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
 	},
 	"hydro_pump": {
 		"id": "hydro_pump",
 		"name": "Hydro Pump",
 		"type": "WATER",
 		"category": "special",
-		"power": 120,
-		"pp": 5
+		"power": 110,
+		"pp": 5,
+		"target": "single"
 	},
 	"leech_seed": {
 		"id": "leech_seed",
 		"name": "Leech Seed",
 		"type": "GRASS",
-		"category": "special",
+		"category": "status",
 		"power": 0,
-		"pp": 10
+		"pp": 10,
+		"target": "single"
 	},
 	"vine_whip": {
 		"id": "vine_whip",
 		"name": "Vine Whip",
 		"type": "GRASS",
-		"category": "special",
-		"power": 35,
-		"pp": 10
-	},
-	"poisonpowder": {
-		"id": "poisonpowder",
-		"name": "PoisonPowder",
-		"type": "POISON",
 		"category": "physical",
+		"power": 45,
+		"pp": 25,
+		"target": "single"
+	},
+	"poison_powder": {
+		"id": "poison_powder",
+		"name": "Poison Powder",
+		"type": "POISON",
+		"category": "status",
 		"power": 0,
-		"pp": 35
+		"pp": 35,
+		"target": "single"
 	},
 	"sleep_powder": {
 		"id": "sleep_powder",
 		"name": "Sleep Powder",
 		"type": "GRASS",
-		"category": "special",
+		"category": "status",
 		"power": 0,
-		"pp": 15
-	},
-	"razor_leaf": {
-		"id": "razor_leaf",
-		"name": "Razor Leaf",
-		"type": "GRASS",
-		"category": "special",
-		"power": 55,
-		"pp": 25
-	},
-	"sweet_scent": {
-		"id": "sweet_scent",
-		"name": "Sweet Scent",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 20
-	},
-	"growth": {
-		"id": "growth",
-		"name": "Growth",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 40
-	},
-	"synthesis": {
-		"id": "synthesis",
-		"name": "Synthesis",
-		"type": "GRASS",
-		"category": "special",
-		"power": 0,
-		"pp": 5
-	},
-	"solarbeam": {
-		"id": "solarbeam",
-		"name": "SolarBeam",
-		"type": "GRASS",
-		"category": "special",
-		"power": 120,
-		"pp": 10
-	},
-	"gust": {
-		"id": "gust",
-		"name": "Gust",
-		"type": "FLYING",
-		"category": "physical",
-		"power": 40,
-		"pp": 35
-	},
-	"powder_snow": {
-		"id": "powder_snow",
-		"name": "Powder Snow",
-		"type": "ICE",
-		"category": "special",
-		"power": 40,
-		"pp": 25
-	},
-	"mist": {
-		"id": "mist",
-		"name": "Mist",
-		"type": "ICE",
-		"category": "special",
-		"power": 0,
-		"pp": 30
-	},
-	"agility": {
-		"id": "agility",
-		"name": "Agility",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 0,
-		"pp": 30
-	},
-	"mind_reader": {
-		"id": "mind_reader",
-		"name": "Mind Reader",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 5
-	},
-	"ice_beam": {
-		"id": "ice_beam",
-		"name": "Ice Beam",
-		"type": "ICE",
-		"category": "special",
-		"power": 95,
-		"pp": 10
-	},
-	"reflect": {
-		"id": "reflect",
-		"name": "Reflect",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 0,
-		"pp": 20
-	},
-	"blizzard": {
-		"id": "blizzard",
-		"name": "Blizzard",
-		"type": "ICE",
-		"category": "special",
-		"power": 120,
-		"pp": 5
-	},
-	"peck": {
-		"id": "peck",
-		"name": "Peck",
-		"type": "FLYING",
-		"category": "physical",
-		"power": 35,
-		"pp": 35
-	},
-	"thundershock": {
-		"id": "thundershock",
-		"name": "Thunder Shock",
-		"type": "ELECTRIC",
-		"category": "special",
-		"power": 40,
-		"pp": 30
-	},
-	"thunder_wave": {
-		"id": "thunder_wave",
-		"name": "Thunder Wave",
-		"type": "ELECTRIC",
-		"category": "special",
-		"power": 0,
-		"pp": 20
-	},
-	"detect": {
-		"id": "detect",
-		"name": "Detect",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 0,
-		"pp": 5
-	},
-	"drill_peck": {
-		"id": "drill_peck",
-		"name": "Drill Peck",
-		"type": "FLYING",
-		"category": "physical",
-		"power": 80,
-		"pp": 20
-	},
-	"light_screen": {
-		"id": "light_screen",
-		"name": "Light Screen",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 0,
-		"pp": 30
-	},
-	"thunder": {
-		"id": "thunder",
-		"name": "Thunder",
-		"type": "ELECTRIC",
-		"category": "special",
-		"power": 120,
-		"pp": 10
-	},
-	"wing_attack": {
-		"id": "wing_attack",
-		"name": "Wing Attack",
-		"type": "FLYING",
-		"category": "physical",
-		"power": 60,
-		"pp": 35
-	},
-	"endure": {
-		"id": "endure",
-		"name": "Endure",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 10
-	},
-	"safeguard": {
-		"id": "safeguard",
-		"name": "Safeguard",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 25
-	},
-	"sky_attack": {
-		"id": "sky_attack",
-		"name": "Sky Attack",
-		"type": "FLYING",
-		"category": "physical",
-		"power": 140,
-		"pp": 5
-	},
-	"leer": {
-		"id": "leer",
-		"name": "Leer",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 30
-	},
-	"roar": {
-		"id": "roar",
-		"name": "Roar",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 20
-	},
-	"quick_attack": {
-		"id": "quick_attack",
-		"name": "Quick Attack",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 40,
-		"pp": 30
-	},
-	"spark": {
-		"id": "spark",
-		"name": "Spark",
-		"type": "ELECTRIC",
-		"category": "special",
-		"power": 65,
-		"pp": 20
-	},
-	"crunch": {
-		"id": "crunch",
-		"name": "Crunch",
-		"type": "DARK",
-		"category": "special",
-		"power": 80,
-		"pp": 15
-	},
-	"stomp": {
-		"id": "stomp",
-		"name": "Stomp",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 65,
-		"pp": 20
-	},
-	"swagger": {
-		"id": "swagger",
-		"name": "Swagger",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 15
-	},
-	"fire_blast": {
-		"id": "fire_blast",
-		"name": "Fire Blast",
-		"type": "FIRE",
-		"category": "special",
-		"power": 120,
-		"pp": 5
-	},
-	"bubblebeam": {
-		"id": "bubblebeam",
-		"name": "Bubblebeam",
-		"type": "WATER",
-		"category": "special",
-		"power": 65,
-		"pp": 20
-	},
-	"aurora_beam": {
-		"id": "aurora_beam",
-		"name": "Aurora Beam",
-		"type": "ICE",
-		"category": "special",
-		"power": 65,
-		"pp": 20
-	},
-	"mirror_coat": {
-		"id": "mirror_coat",
-		"name": "Mirror Coat",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 1,
-		"pp": 20
-	},
-	"aeroblast": {
-		"id": "aeroblast",
-		"name": "Aeroblast",
-		"type": "FLYING",
-		"category": "physical",
-		"power": 100,
-		"pp": 5
-	},
-	"recover": {
-		"id": "recover",
-		"name": "Recover",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 20
-	},
-	"swift": {
-		"id": "swift",
-		"name": "Swift",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 60,
-		"pp": 20
-	},
-	"whirlwind": {
-		"id": "whirlwind",
-		"name": "Whirlwind",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 20
-	},
-	"ancientpower": {
-		"id": "ancientpower",
-		"name": "AncientPower",
-		"type": "ROCK",
-		"category": "physical",
-		"power": 60,
-		"pp": 5
-	},
-	"future_sight": {
-		"id": "future_sight",
-		"name": "Future Sight",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 80,
-		"pp": 15
-	},
-	"sacred_fire": {
-		"id": "sacred_fire",
-		"name": "Sacred Fire",
-		"type": "FIRE",
-		"category": "special",
-		"power": 100,
-		"pp": 5
-	},
-	"sunny_day": {
-		"id": "sunny_day",
-		"name": "Sunny Day",
-		"type": "FIRE",
-		"category": "special",
-		"power": 0,
-		"pp": 5
-	},
-	"confusion": {
-		"id": "confusion",
-		"name": "Confusion",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 50,
-		"pp": 25
-	},
-	"heal_bell": {
-		"id": "heal_bell",
-		"name": "Heal Bell",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 5
-	},
-	"baton_pass": {
-		"id": "baton_pass",
-		"name": "Baton Pass",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 40
-	},
-	"perish_song": {
-		"id": "perish_song",
-		"name": "Perish Song",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 5
-	},
-	"disable": {
-		"id": "disable",
-		"name": "Disable",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 20
-	},
-	"barrier": {
-		"id": "barrier",
-		"name": "Barrier",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 0,
-		"pp": 30
-	},
-	"psych_up": {
-		"id": "psych_up",
-		"name": "Psych Up",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 10
-	},
-	"psychic_m": {
-		"id": "psychic_m",
-		"name": "Psychic",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 90,
-		"pp": 10
-	},
-	"amnesia": {
-		"id": "amnesia",
-		"name": "Amnesia",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 0,
-		"pp": 20
-	},
-	"pound": {
-		"id": "pound",
-		"name": "Pound",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 40,
-		"pp": 35
-	},
-	"transform": {
-		"id": "transform",
-		"name": "Transform",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 10
-	},
-	"mega_punch": {
-		"id": "mega_punch",
-		"name": "Mega Punch",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 80,
-		"pp": 20
-	},
-	"metronome": {
-		"id": "metronome",
-		"name": "Metronome",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 10
-	},
-	"defense_curl": {
-		"id": "defense_curl",
-		"name": "Defense Curl",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 40
-	},
-	"rock_throw": {
-		"id": "rock_throw",
-		"name": "Rock Throw",
-		"type": "ROCK",
-		"category": "physical",
-		"power": 50,
-		"pp": 15
-	},
-	"magnitude": {
-		"id": "magnitude",
-		"name": "Magnitude",
-		"type": "GROUND",
-		"category": "physical",
-		"power": 1,
-		"pp": 30
-	},
-	"selfdestruct": {
-		"id": "selfdestruct",
-		"name": "Self-Destruct",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 200,
-		"pp": 5
-	},
-	"harden": {
-		"id": "harden",
-		"name": "Harden",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 30
-	},
-	"rollout": {
-		"id": "rollout",
-		"name": "Rollout",
-		"type": "ROCK",
-		"category": "physical",
-		"power": 30,
-		"pp": 20
-	},
-	"earthquake": {
-		"id": "earthquake",
-		"name": "Earthquake",
-		"type": "GROUND",
-		"category": "physical",
-		"power": 100,
-		"pp": 10
-	},
-	"explosion": {
-		"id": "explosion",
-		"name": "Explosion",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 250,
-		"pp": 5
-	},
-	"fury_attack": {
-		"id": "fury_attack",
-		"name": "Fury Attack",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 15,
-		"pp": 20
-	},
-	"pursuit": {
-		"id": "pursuit",
-		"name": "Pursuit",
-		"type": "DARK",
-		"category": "special",
-		"power": 40,
-		"pp": 20
-	},
-	"mirror_move": {
-		"id": "mirror_move",
-		"name": "Mirror Move",
-		"type": "FLYING",
-		"category": "physical",
-		"power": 0,
-		"pp": 20
-	},
-	"hyper_fang": {
-		"id": "hyper_fang",
-		"name": "Hyper Fang",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 80,
-		"pp": 15
-	},
-	"focus_energy": {
-		"id": "focus_energy",
-		"name": "Focus Energy",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 30
-	},
-	"super_fang": {
-		"id": "super_fang",
-		"name": "Super Fang",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 1,
-		"pp": 10
-	},
-	"absorb": {
-		"id": "absorb",
-		"name": "Absorb",
-		"type": "GRASS",
-		"category": "special",
-		"power": 20,
-		"pp": 20
-	},
-	"stun_spore": {
-		"id": "stun_spore",
-		"name": "Stun Spore",
-		"type": "GRASS",
-		"category": "special",
-		"power": 0,
-		"pp": 30
-	},
-	"acid": {
-		"id": "acid",
-		"name": "Acid",
-		"type": "POISON",
-		"category": "physical",
-		"power": 40,
-		"pp": 30
-	},
-	"moonlight": {
-		"id": "moonlight",
-		"name": "Moonlight",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 5
-	},
-	"petal_dance": {
-		"id": "petal_dance",
-		"name": "Petal Dance",
-		"type": "GRASS",
-		"category": "special",
-		"power": 70,
-		"pp": 20
-	},
-	"wrap": {
-		"id": "wrap",
-		"name": "Wrap",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 15,
-		"pp": 20
-	},
-	"slam": {
-		"id": "slam",
-		"name": "Slam",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 80,
-		"pp": 20
-	},
-	"barrage": {
-		"id": "barrage",
-		"name": "Barrage",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 15,
-		"pp": 20
-	},
-	"hypnosis": {
-		"id": "hypnosis",
-		"name": "Hypnosis",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 0,
-		"pp": 20
-	},
-	"constrict": {
-		"id": "constrict",
-		"name": "Constrict",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 10,
-		"pp": 35
-	},
-	"bind": {
-		"id": "bind",
-		"name": "Bind",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 15,
-		"pp": 20
-	},
-	"mega_drain": {
-		"id": "mega_drain",
-		"name": "Mega Drain",
-		"type": "GRASS",
-		"category": "special",
-		"power": 40,
-		"pp": 10
-	},
-	"body_slam": {
-		"id": "body_slam",
-		"name": "Body Slam",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 85,
-		"pp": 15
-	},
-	"splash": {
-		"id": "splash",
-		"name": "Splash",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 40
-	},
-	"cotton_spore": {
-		"id": "cotton_spore",
-		"name": "Cotton Spore",
-		"type": "GRASS",
-		"category": "special",
-		"power": 0,
-		"pp": 40
-	},
-	"giga_drain": {
-		"id": "giga_drain",
-		"name": "Giga Drain",
-		"type": "GRASS",
-		"category": "special",
-		"power": 60,
-		"pp": 5
-	},
-	"string_shot": {
-		"id": "string_shot",
-		"name": "String Shot",
-		"type": "BUG",
-		"category": "physical",
-		"power": 0,
-		"pp": 40
-	},
-	"supersonic": {
-		"id": "supersonic",
-		"name": "Supersonic",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 20
-	},
-	"psybeam": {
-		"id": "psybeam",
-		"name": "Psybeam",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 65,
-		"pp": 20
-	},
-	"poison_sting": {
-		"id": "poison_sting",
-		"name": "Poison Sting",
-		"type": "POISON",
-		"category": "physical",
-		"power": 15,
-		"pp": 35
-	},
-	"twineedle": {
-		"id": "twineedle",
-		"name": "Twineedle",
-		"type": "BUG",
-		"category": "physical",
-		"power": 25,
-		"pp": 20
-	},
-	"pin_missile": {
-		"id": "pin_missile",
-		"name": "Pin Missile",
-		"type": "BUG",
-		"category": "physical",
-		"power": 14,
-		"pp": 20
-	},
-	"leech_life": {
-		"id": "leech_life",
-		"name": "Leech Life",
-		"type": "BUG",
-		"category": "physical",
-		"power": 20,
-		"pp": 15
-	},
-	"spore": {
-		"id": "spore",
-		"name": "Spore",
-		"type": "GRASS",
-		"category": "special",
-		"power": 0,
-		"pp": 15
-	},
-	"foresight": {
-		"id": "foresight",
-		"name": "Foresight",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 40
-	},
-	"false_swipe": {
-		"id": "false_swipe",
-		"name": "False Swipe",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 40,
-		"pp": 40
-	},
-	"swords_dance": {
-		"id": "swords_dance",
-		"name": "Swords Dance",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 30
-	},
-	"double_team": {
-		"id": "double_team",
-		"name": "Double Team",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 15
-	},
-	"vicegrip": {
-		"id": "vicegrip",
-		"name": "Vice Grip",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 55,
-		"pp": 30
-	},
-	"seismic_toss": {
-		"id": "seismic_toss",
-		"name": "Seismic Toss",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 1,
-		"pp": 20
-	},
-	"guillotine": {
-		"id": "guillotine",
-		"name": "Guillotine",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 5
-	},
-	"submission": {
-		"id": "submission",
-		"name": "Submission",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 80,
-		"pp": 25
-	},
-	"comet_punch": {
-		"id": "comet_punch",
-		"name": "Comet Punch",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 18,
-		"pp": 15
-	},
-	"double_edge": {
-		"id": "double_edge",
-		"name": "Double-Edge",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 120,
-		"pp": 15
-	},
-	"night_shade": {
-		"id": "night_shade",
-		"name": "Night Shade",
-		"type": "GHOST",
-		"category": "physical",
-		"power": 1,
-		"pp": 15
-	},
-	"fury_swipes": {
-		"id": "fury_swipes",
-		"name": "Fury Swipes",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 18,
-		"pp": 15
-	},
-	"spider_web": {
-		"id": "spider_web",
-		"name": "Spider Web",
-		"type": "BUG",
-		"category": "physical",
-		"power": 0,
-		"pp": 10
-	},
-	"sonicboom": {
-		"id": "sonicboom",
-		"name": "Sonic Boom",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 20,
-		"pp": 20
-	},
-	"screech": {
-		"id": "screech",
-		"name": "Screech",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 40
+		"pp": 15,
+		"target": "single"
 	},
 	"take_down": {
 		"id": "take_down",
@@ -1672,559 +895,1853 @@ var ABILITIES_DATA = {
 		"type": "NORMAL",
 		"category": "physical",
 		"power": 90,
-		"pp": 20
+		"pp": 20,
+		"target": "single"
 	},
-	"bide": {
-		"id": "bide",
-		"name": "Bide",
+	"razor_leaf": {
+		"id": "razor_leaf",
+		"name": "Razor Leaf",
+		"type": "GRASS",
+		"category": "physical",
+		"power": 55,
+		"pp": 25,
+		"target": "aoe"
+	},
+	"sweet_scent": {
+		"id": "sweet_scent",
+		"name": "Sweet Scent",
 		"type": "NORMAL",
-		"category": "physical",
+		"category": "status",
 		"power": 0,
-		"pp": 10
+		"pp": 20,
+		"target": "aoe"
 	},
-	"spikes": {
-		"id": "spikes",
-		"name": "Spikes",
-		"type": "GROUND",
-		"category": "physical",
-		"power": 0,
-		"pp": 20
-	},
-	"metal_claw": {
-		"id": "metal_claw",
-		"name": "Metal Claw",
-		"type": "STEEL",
-		"category": "physical",
-		"power": 50,
-		"pp": 35
-	},
-	"horn_attack": {
-		"id": "horn_attack",
-		"name": "Horn Attack",
+	"growth": {
+		"id": "growth",
+		"name": "Growth",
 		"type": "NORMAL",
-		"category": "physical",
-		"power": 65,
-		"pp": 25
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
 	},
-	"counter": {
-		"id": "counter",
-		"name": "Counter",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 1,
-		"pp": 20
-	},
-	"reversal": {
-		"id": "reversal",
-		"name": "Reversal",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 1,
-		"pp": 15
-	},
-	"megahorn": {
-		"id": "megahorn",
-		"name": "Megahorn",
-		"type": "BUG",
+	"double_edge": {
+		"id": "double_edge",
+		"name": "Double-Edge",
+		"type": "NORMAL",
 		"category": "physical",
 		"power": 120,
-		"pp": 10
+		"pp": 15,
+		"target": "single"
 	},
-	"flail": {
-		"id": "flail",
-		"name": "Flail",
-		"type": "NORMAL",
+	"worry_seed": {
+		"id": "worry_seed",
+		"name": "Worry Seed",
+		"type": "GRASS",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"synthesis": {
+		"id": "synthesis",
+		"name": "Synthesis",
+		"type": "GRASS",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"seed_bomb": {
+		"id": "seed_bomb",
+		"name": "Seed Bomb",
+		"type": "GRASS",
 		"category": "physical",
-		"power": 1,
-		"pp": 15
+		"power": 80,
+		"pp": 15,
+		"target": "single"
 	},
-	"haze": {
-		"id": "haze",
-		"name": "Haze",
+	"gust": {
+		"id": "gust",
+		"name": "Gust",
+		"type": "FLYING",
+		"category": "special",
+		"power": 40,
+		"pp": 35,
+		"target": "single"
+	},
+	"powder_snow": {
+		"id": "powder_snow",
+		"name": "Powder Snow",
+		"type": "ICE",
+		"category": "special",
+		"power": 40,
+		"pp": 25,
+		"target": "aoe"
+	},
+	"mist": {
+		"id": "mist",
+		"name": "Mist",
+		"type": "ICE",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single"
+	},
+	"ice_shard": {
+		"id": "ice_shard",
+		"name": "Ice Shard",
+		"type": "ICE",
+		"category": "physical",
+		"power": 40,
+		"pp": 30,
+		"target": "single"
+	},
+	"mind_reader": {
+		"id": "mind_reader",
+		"name": "Mind Reader",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"ancient_power": {
+		"id": "ancient_power",
+		"name": "Ancient Power",
+		"type": "ROCK",
+		"category": "special",
+		"power": 60,
+		"pp": 5,
+		"target": "single"
+	},
+	"agility": {
+		"id": "agility",
+		"name": "Agility",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single"
+	},
+	"freeze_dry": {
+		"id": "freeze_dry",
+		"name": "Freeze-Dry",
+		"type": "ICE",
+		"category": "special",
+		"power": 70,
+		"pp": 20,
+		"target": "single"
+	},
+	"reflect": {
+		"id": "reflect",
+		"name": "Reflect",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"hail": {
+		"id": "hail",
+		"name": "Hail",
+		"type": "ICE",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"tailwind": {
+		"id": "tailwind",
+		"name": "Tailwind",
+		"type": "FLYING",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"ice_beam": {
+		"id": "ice_beam",
+		"name": "Ice Beam",
+		"type": "ICE",
+		"category": "special",
+		"power": 90,
+		"pp": 10,
+		"target": "single"
+	},
+	"blizzard": {
+		"id": "blizzard",
+		"name": "Blizzard",
+		"type": "ICE",
+		"category": "special",
+		"power": 110,
+		"pp": 5,
+		"target": "aoe"
+	},
+	"roost": {
+		"id": "roost",
+		"name": "Roost",
+		"type": "FLYING",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"hurricane": {
+		"id": "hurricane",
+		"name": "Hurricane",
+		"type": "FLYING",
+		"category": "special",
+		"power": 110,
+		"pp": 10,
+		"target": "single"
+	},
+	"sheer_cold": {
+		"id": "sheer_cold",
+		"name": "Sheer Cold",
 		"type": "ICE",
 		"category": "special",
 		"power": 0,
-		"pp": 30
+		"pp": 5,
+		"target": "single"
 	},
-	"doubleslap": {
-		"id": "doubleslap",
-		"name": "DoubleSlap",
-		"type": "NORMAL",
+	"peck": {
+		"id": "peck",
+		"name": "Peck",
+		"type": "FLYING",
 		"category": "physical",
-		"power": 15,
-		"pp": 10
-	},
-	"belly_drum": {
-		"id": "belly_drum",
-		"name": "Belly Drum",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 10
-	},
-	"lock_on": {
-		"id": "lock_on",
-		"name": "Lock On",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 5
-	},
-	"hyper_beam": {
-		"id": "hyper_beam",
-		"name": "Hyper Beam",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 150,
-		"pp": 5
-	},
-	"twister": {
-		"id": "twister",
-		"name": "Twister",
-		"type": "DRAGON",
-		"category": "special",
-		"power": 40,
-		"pp": 20
-	},
-	"confuse_ray": {
-		"id": "confuse_ray",
-		"name": "Confuse Ray",
-		"type": "GHOST",
-		"category": "physical",
-		"power": 0,
-		"pp": 10
-	},
-	"clamp": {
-		"id": "clamp",
-		"name": "Clamp",
-		"type": "WATER",
-		"category": "special",
 		"power": 35,
-		"pp": 10
+		"pp": 35,
+		"target": "single"
 	},
-	"curse": {
-		"id": "curse",
-		"name": "Curse",
-		"type": "GHOST",
-		"category": "physical",
-		"power": 0,
-		"pp": 10
-	},
-	"headbutt": {
-		"id": "headbutt",
-		"name": "Headbutt",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 70,
-		"pp": 15
-	},
-	"rest": {
-		"id": "rest",
-		"name": "Rest",
-		"type": "PSYCHIC",
+	"thunder_shock": {
+		"id": "thunder_shock",
+		"name": "Thunder Shock",
+		"type": "ELECTRIC",
 		"category": "special",
-		"power": 0,
-		"pp": 10
-	},
-	"minimize": {
-		"id": "minimize",
-		"name": "Minimize",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 20
-	},
-	"waterfall": {
-		"id": "waterfall",
-		"name": "Waterfall",
-		"type": "WATER",
-		"category": "special",
-		"power": 80,
-		"pp": 15
-	},
-	"horn_drill": {
-		"id": "horn_drill",
-		"name": "Horn Drill",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 1,
-		"pp": 5
-	},
-	"spike_cannon": {
-		"id": "spike_cannon",
-		"name": "Spike Cannon",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 20,
-		"pp": 15
-	},
-	"crabhammer": {
-		"id": "crabhammer",
-		"name": "Crabhammer",
-		"type": "WATER",
-		"category": "special",
-		"power": 90,
-		"pp": 10
-	},
-	"sand_attack": {
-		"id": "sand_attack",
-		"name": "Sand Attack",
-		"type": "GROUND",
-		"category": "physical",
-		"power": 0,
-		"pp": 15
-	},
-	"sing": {
-		"id": "sing",
-		"name": "Sing",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 15
-	},
-	"pay_day": {
-		"id": "pay_day",
-		"name": "Pay Day",
-		"type": "NORMAL",
-		"category": "physical",
 		"power": 40,
-		"pp": 20
+		"pp": 30,
+		"target": "single"
 	},
-	"faint_attack": {
-		"id": "faint_attack",
-		"name": "Faint Attack",
-		"type": "DARK",
-		"category": "special",
+	"thunder_wave": {
+		"id": "thunder_wave",
+		"name": "Thunder Wave",
+		"type": "ELECTRIC",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"detect": {
+		"id": "detect",
+		"name": "Detect",
+		"type": "FIGHTING",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"pluck": {
+		"id": "pluck",
+		"name": "Pluck",
+		"type": "FLYING",
+		"category": "physical",
 		"power": 60,
-		"pp": 20
+		"pp": 20,
+		"target": "single"
 	},
-	"tri_attack": {
-		"id": "tri_attack",
-		"name": "Tri Attack",
-		"type": "NORMAL",
+	"charge": {
+		"id": "charge",
+		"name": "Charge",
+		"type": "ELECTRIC",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"discharge": {
+		"id": "discharge",
+		"name": "Discharge",
+		"type": "ELECTRIC",
+		"category": "special",
+		"power": 80,
+		"pp": 15,
+		"target": "aoe"
+	},
+	"light_screen": {
+		"id": "light_screen",
+		"name": "Light Screen",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single"
+	},
+	"drill_peck": {
+		"id": "drill_peck",
+		"name": "Drill Peck",
+		"type": "FLYING",
 		"category": "physical",
 		"power": 80,
-		"pp": 10
+		"pp": 20,
+		"target": "single"
 	},
-	"lick": {
-		"id": "lick",
-		"name": "Lick",
-		"type": "GHOST",
-		"category": "physical",
-		"power": 20,
-		"pp": 30
+	"thunder": {
+		"id": "thunder",
+		"name": "Thunder",
+		"type": "ELECTRIC",
+		"category": "special",
+		"power": 110,
+		"pp": 10,
+		"target": "single"
 	},
-	"dizzy_punch": {
-		"id": "dizzy_punch",
-		"name": "Dizzy Punch",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 70,
-		"pp": 10
-	},
-	"thrash": {
-		"id": "thrash",
-		"name": "Thrash",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 90,
-		"pp": 20
-	},
-	"conversion2": {
-		"id": "conversion2",
-		"name": "Conversion 2",
-		"type": "NORMAL",
-		"category": "physical",
+	"magnetic_flux": {
+		"id": "magnetic_flux",
+		"name": "Magnetic Flux",
+		"type": "ELECTRIC",
+		"category": "status",
 		"power": 0,
-		"pp": 30
-	},
-	"conversion": {
-		"id": "conversion",
-		"name": "Conversion",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 30
-	},
-	"sharpen": {
-		"id": "sharpen",
-		"name": "Sharpen",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 30
+		"pp": 20,
+		"target": "single"
 	},
 	"zap_cannon": {
 		"id": "zap_cannon",
 		"name": "Zap Cannon",
 		"type": "ELECTRIC",
 		"category": "special",
-		"power": 100,
-		"pp": 5
+		"power": 120,
+		"pp": 5,
+		"target": "single"
 	},
-	"snore": {
-		"id": "snore",
-		"name": "Snore",
+	"wing_attack": {
+		"id": "wing_attack",
+		"name": "Wing Attack",
+		"type": "FLYING",
+		"category": "physical",
+		"power": 60,
+		"pp": 35,
+		"target": "single"
+	},
+	"endure": {
+		"id": "endure",
+		"name": "Endure",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"safeguard": {
+		"id": "safeguard",
+		"name": "Safeguard",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 25,
+		"target": "single"
+	},
+	"air_slash": {
+		"id": "air_slash",
+		"name": "Air Slash",
+		"type": "FLYING",
+		"category": "special",
+		"power": 75,
+		"pp": 15,
+		"target": "single"
+	},
+	"sunny_day": {
+		"id": "sunny_day",
+		"name": "Sunny Day",
+		"type": "FIRE",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"heat_wave": {
+		"id": "heat_wave",
+		"name": "Heat Wave",
+		"type": "FIRE",
+		"category": "special",
+		"power": 95,
+		"pp": 10,
+		"target": "aoe"
+	},
+	"solar_beam": {
+		"id": "solar_beam",
+		"name": "Solar Beam",
+		"type": "GRASS",
+		"category": "special",
+		"power": 120,
+		"pp": 10,
+		"target": "single"
+	},
+	"sky_attack": {
+		"id": "sky_attack",
+		"name": "Sky Attack",
+		"type": "FLYING",
+		"category": "physical",
+		"power": 140,
+		"pp": 5,
+		"target": "single"
+	},
+	"burn_up": {
+		"id": "burn_up",
+		"name": "Burn Up",
+		"type": "FIRE",
+		"category": "special",
+		"power": 130,
+		"pp": 5,
+		"target": "single"
+	},
+	"extrasensory": {
+		"id": "extrasensory",
+		"name": "Extrasensory",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 80,
+		"pp": 20,
+		"target": "single"
+	},
+	"leer": {
+		"id": "leer",
+		"name": "Leer",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "aoe"
+	},
+	"roar": {
+		"id": "roar",
+		"name": "Roar",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"quick_attack": {
+		"id": "quick_attack",
+		"name": "Quick Attack",
 		"type": "NORMAL",
 		"category": "physical",
 		"power": 40,
-		"pp": 15
+		"pp": 30,
+		"target": "single"
 	},
-	"dream_eater": {
-		"id": "dream_eater",
-		"name": "Dream Eater",
+	"spark": {
+		"id": "spark",
+		"name": "Spark",
+		"type": "ELECTRIC",
+		"category": "physical",
+		"power": 65,
+		"pp": 20,
+		"target": "single"
+	},
+	"crunch": {
+		"id": "crunch",
+		"name": "Crunch",
+		"type": "DARK",
+		"category": "physical",
+		"power": 80,
+		"pp": 15,
+		"target": "single"
+	},
+	"thunder_fang": {
+		"id": "thunder_fang",
+		"name": "Thunder Fang",
+		"type": "ELECTRIC",
+		"category": "physical",
+		"power": 65,
+		"pp": 15,
+		"target": "single"
+	},
+	"calm_mind": {
+		"id": "calm_mind",
+		"name": "Calm Mind",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"eruption": {
+		"id": "eruption",
+		"name": "Eruption",
+		"type": "FIRE",
+		"category": "special",
+		"power": 150,
+		"pp": 5,
+		"target": "aoe"
+	},
+	"lava_plume": {
+		"id": "lava_plume",
+		"name": "Lava Plume",
+		"type": "FIRE",
+		"category": "special",
+		"power": 80,
+		"pp": 15,
+		"target": "aoe"
+	},
+	"sacred_fire": {
+		"id": "sacred_fire",
+		"name": "Sacred Fire",
+		"type": "FIRE",
+		"category": "physical",
+		"power": 100,
+		"pp": 5,
+		"target": "single"
+	},
+	"stomp": {
+		"id": "stomp",
+		"name": "Stomp",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 65,
+		"pp": 20,
+		"target": "single"
+	},
+	"swagger": {
+		"id": "swagger",
+		"name": "Swagger",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"fire_blast": {
+		"id": "fire_blast",
+		"name": "Fire Blast",
+		"type": "FIRE",
+		"category": "special",
+		"power": 110,
+		"pp": 5,
+		"target": "single"
+	},
+	"bubble_beam": {
+		"id": "bubble_beam",
+		"name": "Bubble Beam",
+		"type": "WATER",
+		"category": "special",
+		"power": 65,
+		"pp": 20,
+		"target": "single"
+	},
+	"aurora_beam": {
+		"id": "aurora_beam",
+		"name": "Aurora Beam",
+		"type": "ICE",
+		"category": "special",
+		"power": 65,
+		"pp": 20,
+		"target": "single"
+	},
+	"mirror_coat": {
+		"id": "mirror_coat",
+		"name": "Mirror Coat",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"ice_fang": {
+		"id": "ice_fang",
+		"name": "Ice Fang",
+		"type": "ICE",
+		"category": "physical",
+		"power": 65,
+		"pp": 15,
+		"target": "single"
+	},
+	"weather_ball": {
+		"id": "weather_ball",
+		"name": "Weather Ball",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 50,
+		"pp": 10,
+		"target": "single"
+	},
+	"whirlwind": {
+		"id": "whirlwind",
+		"name": "Whirlwind",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"dragon_rush": {
+		"id": "dragon_rush",
+		"name": "Dragon Rush",
+		"type": "DRAGON",
+		"category": "physical",
+		"power": 100,
+		"pp": 10,
+		"target": "single"
+	},
+	"aeroblast": {
+		"id": "aeroblast",
+		"name": "Aeroblast",
+		"type": "FLYING",
+		"category": "special",
+		"power": 100,
+		"pp": 5,
+		"target": "single"
+	},
+	"punishment": {
+		"id": "punishment",
+		"name": "Punishment",
+		"type": "DARK",
+		"category": "physical",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"recover": {
+		"id": "recover",
+		"name": "Recover",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"future_sight": {
+		"id": "future_sight",
+		"name": "Future Sight",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 120,
+		"pp": 10,
+		"target": "single"
+	},
+	"natural_gift": {
+		"id": "natural_gift",
+		"name": "Natural Gift",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"brave_bird": {
+		"id": "brave_bird",
+		"name": "Brave Bird",
+		"type": "FLYING",
+		"category": "physical",
+		"power": 120,
+		"pp": 15,
+		"target": "single"
+	},
+	"confusion": {
+		"id": "confusion",
+		"name": "Confusion",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 50,
+		"pp": 25,
+		"target": "single"
+	},
+	"heal_bell": {
+		"id": "heal_bell",
+		"name": "Heal Bell",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"magical_leaf": {
+		"id": "magical_leaf",
+		"name": "Magical Leaf",
+		"type": "GRASS",
+		"category": "special",
+		"power": 60,
+		"pp": 20,
+		"target": "single"
+	},
+	"baton_pass": {
+		"id": "baton_pass",
+		"name": "Baton Pass",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "single"
+	},
+	"heal_block": {
+		"id": "heal_block",
+		"name": "Heal Block",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "aoe"
+	},
+	"healing_wish": {
+		"id": "healing_wish",
+		"name": "Healing Wish",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"leaf_storm": {
+		"id": "leaf_storm",
+		"name": "Leaf Storm",
+		"type": "GRASS",
+		"category": "special",
+		"power": 130,
+		"pp": 5,
+		"target": "single"
+	},
+	"perish_song": {
+		"id": "perish_song",
+		"name": "Perish Song",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"disable": {
+		"id": "disable",
+		"name": "Disable",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"laser_focus": {
+		"id": "laser_focus",
+		"name": "Laser Focus",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single"
+	},
+	"psywave": {
+		"id": "psywave",
+		"name": "Psywave",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"swift": {
+		"id": "swift",
+		"name": "Swift",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 60,
+		"pp": 20,
+		"target": "aoe"
+	},
+	"psych_up": {
+		"id": "psych_up",
+		"name": "Psych Up",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"miracle_eye": {
+		"id": "miracle_eye",
+		"name": "Miracle Eye",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "single"
+	},
+	"psycho_cut": {
+		"id": "psycho_cut",
+		"name": "Psycho Cut",
+		"type": "PSYCHIC",
+		"category": "physical",
+		"power": 70,
+		"pp": 20,
+		"target": "single"
+	},
+	"guard_swap": {
+		"id": "guard_swap",
+		"name": "Guard Swap",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"power_swap": {
+		"id": "power_swap",
+		"name": "Power Swap",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"psychic": {
+		"id": "psychic",
+		"name": "Psychic",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 90,
+		"pp": 10,
+		"target": "single"
+	},
+	"barrier": {
+		"id": "barrier",
+		"name": "Barrier",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"aura_sphere": {
+		"id": "aura_sphere",
+		"name": "Aura Sphere",
+		"type": "FIGHTING",
+		"category": "special",
+		"power": 80,
+		"pp": 20,
+		"target": "single"
+	},
+	"amnesia": {
+		"id": "amnesia",
+		"name": "Amnesia",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"me_first": {
+		"id": "me_first",
+		"name": "Me First",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"psystrike": {
+		"id": "psystrike",
+		"name": "Psystrike",
 		"type": "PSYCHIC",
 		"category": "special",
 		"power": 100,
-		"pp": 15
+		"pp": 10,
+		"target": "single"
 	},
-	"charm": {
-		"id": "charm",
-		"name": "Charm",
+	"pound": {
+		"id": "pound",
+		"name": "Pound",
 		"type": "NORMAL",
 		"category": "physical",
-		"power": 0,
-		"pp": 20
+		"power": 40,
+		"pp": 35,
+		"target": "single"
 	},
-	"encore": {
-		"id": "encore",
-		"name": "Encore",
+	"reflect_type": {
+		"id": "reflect_type",
+		"name": "Reflect Type",
 		"type": "NORMAL",
-		"category": "physical",
+		"category": "status",
 		"power": 0,
-		"pp": 5
+		"pp": 15,
+		"target": "single"
 	},
-	"sweet_kiss": {
-		"id": "sweet_kiss",
-		"name": "Sweet Kiss",
+	"transform": {
+		"id": "transform",
+		"name": "Transform",
 		"type": "NORMAL",
-		"category": "physical",
+		"category": "status",
 		"power": 0,
-		"pp": 10
+		"pp": 10,
+		"target": "single"
 	},
-	"glare": {
-		"id": "glare",
-		"name": "Glare",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 30
-	},
-	"spite": {
-		"id": "spite",
-		"name": "Spite",
-		"type": "GHOST",
-		"category": "physical",
-		"power": 0,
-		"pp": 10
-	},
-	"sketch": {
-		"id": "sketch",
-		"name": "Sketch",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 1
-	},
-	"milk_drink": {
-		"id": "milk_drink",
-		"name": "Milk Drink",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 10
-	},
-	"sandstorm": {
-		"id": "sandstorm",
-		"name": "Sandstorm",
-		"type": "ROCK",
-		"category": "physical",
-		"power": 0,
-		"pp": 10
-	},
-	"mimic": {
-		"id": "mimic",
-		"name": "Mimic",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 0,
-		"pp": 10
-	},
-	"low_kick": {
-		"id": "low_kick",
-		"name": "Low Kick",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 50,
-		"pp": 20
-	},
-	"rock_slide": {
-		"id": "rock_slide",
-		"name": "Rock Slide",
-		"type": "ROCK",
-		"category": "physical",
-		"power": 75,
-		"pp": 10
-	},
-	"dig": {
-		"id": "dig",
-		"name": "Dig",
-		"type": "GROUND",
-		"category": "physical",
-		"power": 60,
-		"pp": 10
-	},
-	"fissure": {
-		"id": "fissure",
-		"name": "Fissure",
-		"type": "GROUND",
-		"category": "physical",
-		"power": 1,
-		"pp": 5
-	},
-	"bone_club": {
-		"id": "bone_club",
-		"name": "Bone Club",
-		"type": "GROUND",
-		"category": "physical",
-		"power": 65,
-		"pp": 20
-	},
-	"bonemerang": {
-		"id": "bonemerang",
-		"name": "Bonemerang",
-		"type": "GROUND",
-		"category": "physical",
-		"power": 50,
-		"pp": 10
-	},
-	"bone_rush": {
-		"id": "bone_rush",
-		"name": "Bone Rush",
-		"type": "GROUND",
-		"category": "physical",
-		"power": 25,
-		"pp": 10
-	},
-	"flame_wheel": {
-		"id": "flame_wheel",
-		"name": "Flame Wheel",
-		"type": "FIRE",
-		"category": "special",
-		"power": 60,
-		"pp": 25
-	},
-	"extremespeed": {
-		"id": "extremespeed",
-		"name": "Extreme Speed",
+	"mega_punch": {
+		"id": "mega_punch",
+		"name": "Mega Punch",
 		"type": "NORMAL",
 		"category": "physical",
 		"power": 80,
-		"pp": 5
+		"pp": 20,
+		"target": "single"
 	},
-	"smog": {
-		"id": "smog",
-		"name": "Smog",
-		"type": "POISON",
-		"category": "physical",
-		"power": 20,
-		"pp": 20
+	"metronome": {
+		"id": "metronome",
+		"name": "Metronome",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
 	},
-	"fire_punch": {
-		"id": "fire_punch",
-		"name": "Fire Punch",
-		"type": "FIRE",
-		"category": "special",
-		"power": 75,
-		"pp": 15
+	"nasty_plot": {
+		"id": "nasty_plot",
+		"name": "Nasty Plot",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
 	},
-	"thunderbolt": {
-		"id": "thunderbolt",
-		"name": "Thunderbolt",
-		"type": "ELECTRIC",
-		"category": "special",
-		"power": 95,
-		"pp": 15
+	"defense_curl": {
+		"id": "defense_curl",
+		"name": "Defense Curl",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "single"
 	},
-	"thunderpunch": {
-		"id": "thunderpunch",
-		"name": "Thunder Punch",
-		"type": "ELECTRIC",
-		"category": "special",
-		"power": 75,
-		"pp": 15
+	"mud_sport": {
+		"id": "mud_sport",
+		"name": "Mud Sport",
+		"type": "GROUND",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
 	},
-	"double_kick": {
-		"id": "double_kick",
-		"name": "Double Kick",
-		"type": "FIGHTING",
+	"rock_polish": {
+		"id": "rock_polish",
+		"name": "Rock Polish",
+		"type": "ROCK",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"rollout": {
+		"id": "rollout",
+		"name": "Rollout",
+		"type": "ROCK",
 		"category": "physical",
 		"power": 30,
-		"pp": 30
+		"pp": 20,
+		"target": "single"
 	},
-	"mean_look": {
-		"id": "mean_look",
-		"name": "Mean Look",
+	"magnitude": {
+		"id": "magnitude",
+		"name": "Magnitude",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 0,
+		"pp": 30,
+		"target": "aoe"
+	},
+	"rock_throw": {
+		"id": "rock_throw",
+		"name": "Rock Throw",
+		"type": "ROCK",
+		"category": "physical",
+		"power": 50,
+		"pp": 15,
+		"target": "single"
+	},
+	"smack_down": {
+		"id": "smack_down",
+		"name": "Smack Down",
+		"type": "ROCK",
+		"category": "physical",
+		"power": 50,
+		"pp": 15,
+		"target": "single"
+	},
+	"bulldoze": {
+		"id": "bulldoze",
+		"name": "Bulldoze",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 60,
+		"pp": 20,
+		"target": "aoe"
+	},
+	"self_destruct": {
+		"id": "self_destruct",
+		"name": "Self-Destruct",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 200,
+		"pp": 5,
+		"target": "aoe"
+	},
+	"stealth_rock": {
+		"id": "stealth_rock",
+		"name": "Stealth Rock",
+		"type": "ROCK",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"rock_blast": {
+		"id": "rock_blast",
+		"name": "Rock Blast",
+		"type": "ROCK",
+		"category": "physical",
+		"power": 25,
+		"pp": 10,
+		"target": "single"
+	},
+	"earthquake": {
+		"id": "earthquake",
+		"name": "Earthquake",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 100,
+		"pp": 10,
+		"target": "aoe"
+	},
+	"explosion": {
+		"id": "explosion",
+		"name": "Explosion",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 250,
+		"pp": 5,
+		"target": "aoe"
+	},
+	"stone_edge": {
+		"id": "stone_edge",
+		"name": "Stone Edge",
+		"type": "ROCK",
+		"category": "physical",
+		"power": 100,
+		"pp": 5,
+		"target": "single"
+	},
+	"pursuit": {
+		"id": "pursuit",
+		"name": "Pursuit",
+		"type": "DARK",
+		"category": "physical",
+		"power": 40,
+		"pp": 20,
+		"target": "single"
+	},
+	"fury_attack": {
+		"id": "fury_attack",
+		"name": "Fury Attack",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 15,
+		"pp": 20,
+		"target": "single"
+	},
+	"aerial_ace": {
+		"id": "aerial_ace",
+		"name": "Aerial Ace",
+		"type": "FLYING",
+		"category": "physical",
+		"power": 60,
+		"pp": 20,
+		"target": "single"
+	},
+	"mirror_move": {
+		"id": "mirror_move",
+		"name": "Mirror Move",
+		"type": "FLYING",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"assurance": {
+		"id": "assurance",
+		"name": "Assurance",
+		"type": "DARK",
+		"category": "physical",
+		"power": 60,
+		"pp": 10,
+		"target": "single"
+	},
+	"focus_energy": {
+		"id": "focus_energy",
+		"name": "Focus Energy",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single"
+	},
+	"hyper_fang": {
+		"id": "hyper_fang",
+		"name": "Hyper Fang",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 80,
+		"pp": 15,
+		"target": "single"
+	},
+	"sucker_punch": {
+		"id": "sucker_punch",
+		"name": "Sucker Punch",
+		"type": "DARK",
+		"category": "physical",
+		"power": 70,
+		"pp": 5,
+		"target": "single"
+	},
+	"super_fang": {
+		"id": "super_fang",
+		"name": "Super Fang",
 		"type": "NORMAL",
 		"category": "physical",
 		"power": 0,
-		"pp": 5
+		"pp": 10,
+		"target": "single"
 	},
-	"poison_gas": {
-		"id": "poison_gas",
-		"name": "Poison Gas",
-		"type": "POISON",
+	"endeavor": {
+		"id": "endeavor",
+		"name": "Endeavor",
+		"type": "NORMAL",
 		"category": "physical",
 		"power": 0,
-		"pp": 40
+		"pp": 5,
+		"target": "single"
 	},
-	"sludge": {
-		"id": "sludge",
-		"name": "Sludge",
-		"type": "POISON",
-		"category": "physical",
-		"power": 65,
-		"pp": 20
+	"petal_dance": {
+		"id": "petal_dance",
+		"name": "Petal Dance",
+		"type": "GRASS",
+		"category": "special",
+		"power": 120,
+		"pp": 10,
+		"target": "single"
 	},
-	"acid_armor": {
-		"id": "acid_armor",
-		"name": "Acid Armor",
-		"type": "POISON",
-		"category": "physical",
-		"power": 0,
-		"pp": 40
-	},
-	"sludge_bomb": {
-		"id": "sludge_bomb",
-		"name": "Sludge Bomb",
-		"type": "POISON",
+	"petal_blizzard": {
+		"id": "petal_blizzard",
+		"name": "Petal Blizzard",
+		"type": "GRASS",
 		"category": "physical",
 		"power": 90,
-		"pp": 10
+		"pp": 15,
+		"target": "aoe"
 	},
-	"destiny_bond": {
-		"id": "destiny_bond",
-		"name": "Destiny Bond",
-		"type": "GHOST",
-		"category": "physical",
+	"absorb": {
+		"id": "absorb",
+		"name": "Absorb",
+		"type": "GRASS",
+		"category": "special",
+		"power": 20,
+		"pp": 25,
+		"target": "single"
+	},
+	"acid": {
+		"id": "acid",
+		"name": "Acid",
+		"type": "POISON",
+		"category": "special",
+		"power": 40,
+		"pp": 30,
+		"target": "aoe"
+	},
+	"stun_spore": {
+		"id": "stun_spore",
+		"name": "Stun Spore",
+		"type": "GRASS",
+		"category": "status",
 		"power": 0,
-		"pp": 5
+		"pp": 30,
+		"target": "single"
 	},
-	"karate_chop": {
-		"id": "karate_chop",
-		"name": "Karate Chop",
-		"type": "FIGHTING",
+	"mega_drain": {
+		"id": "mega_drain",
+		"name": "Mega Drain",
+		"type": "GRASS",
+		"category": "special",
+		"power": 40,
+		"pp": 15,
+		"target": "single"
+	},
+	"lucky_chant": {
+		"id": "lucky_chant",
+		"name": "Lucky Chant",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single"
+	},
+	"moonlight": {
+		"id": "moonlight",
+		"name": "Moonlight",
+		"type": "FAIRY",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"giga_drain": {
+		"id": "giga_drain",
+		"name": "Giga Drain",
+		"type": "GRASS",
+		"category": "special",
+		"power": 75,
+		"pp": 10,
+		"target": "single"
+	},
+	"toxic": {
+		"id": "toxic",
+		"name": "Toxic",
+		"type": "POISON",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"moonblast": {
+		"id": "moonblast",
+		"name": "Moonblast",
+		"type": "FAIRY",
+		"category": "special",
+		"power": 95,
+		"pp": 15,
+		"target": "single"
+	},
+	"grassy_terrain": {
+		"id": "grassy_terrain",
+		"name": "Grassy Terrain",
+		"type": "GRASS",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"wrap": {
+		"id": "wrap",
+		"name": "Wrap",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 15,
+		"pp": 20,
+		"target": "single"
+	},
+	"knock_off": {
+		"id": "knock_off",
+		"name": "Knock Off",
+		"type": "DARK",
+		"category": "physical",
+		"power": 65,
+		"pp": 20,
+		"target": "single"
+	},
+	"gastro_acid": {
+		"id": "gastro_acid",
+		"name": "Gastro Acid",
+		"type": "POISON",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"poison_jab": {
+		"id": "poison_jab",
+		"name": "Poison Jab",
+		"type": "POISON",
+		"category": "physical",
+		"power": 80,
+		"pp": 20,
+		"target": "single"
+	},
+	"slam": {
+		"id": "slam",
+		"name": "Slam",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 80,
+		"pp": 20,
+		"target": "single"
+	},
+	"wring_out": {
+		"id": "wring_out",
+		"name": "Wring Out",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"leaf_tornado": {
+		"id": "leaf_tornado",
+		"name": "Leaf Tornado",
+		"type": "GRASS",
+		"category": "special",
+		"power": 65,
+		"pp": 10,
+		"target": "single"
+	},
+	"spit_up": {
+		"id": "spit_up",
+		"name": "Spit Up",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"stockpile": {
+		"id": "stockpile",
+		"name": "Stockpile",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"swallow": {
+		"id": "swallow",
+		"name": "Swallow",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"leaf_blade": {
+		"id": "leaf_blade",
+		"name": "Leaf Blade",
+		"type": "GRASS",
+		"category": "physical",
+		"power": 90,
+		"pp": 15,
+		"target": "single"
+	},
+	"barrage": {
+		"id": "barrage",
+		"name": "Barrage",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 15,
+		"pp": 20,
+		"target": "single"
+	},
+	"hypnosis": {
+		"id": "hypnosis",
+		"name": "Hypnosis",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"uproar": {
+		"id": "uproar",
+		"name": "Uproar",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 90,
+		"pp": 10,
+		"target": "single"
+	},
+	"bullet_seed": {
+		"id": "bullet_seed",
+		"name": "Bullet Seed",
+		"type": "GRASS",
+		"category": "physical",
+		"power": 25,
+		"pp": 30,
+		"target": "single"
+	},
+	"bestow": {
+		"id": "bestow",
+		"name": "Bestow",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"constrict": {
+		"id": "constrict",
+		"name": "Constrict",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 10,
+		"pp": 35,
+		"target": "single"
+	},
+	"ingrain": {
+		"id": "ingrain",
+		"name": "Ingrain",
+		"type": "GRASS",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"bind": {
+		"id": "bind",
+		"name": "Bind",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 15,
+		"pp": 20,
+		"target": "single"
+	},
+	"tickle": {
+		"id": "tickle",
+		"name": "Tickle",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"power_whip": {
+		"id": "power_whip",
+		"name": "Power Whip",
+		"type": "GRASS",
+		"category": "physical",
+		"power": 120,
+		"pp": 10,
+		"target": "single"
+	},
+	"body_slam": {
+		"id": "body_slam",
+		"name": "Body Slam",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 85,
+		"pp": 15,
+		"target": "single"
+	},
+	"aromatherapy": {
+		"id": "aromatherapy",
+		"name": "Aromatherapy",
+		"type": "GRASS",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"splash": {
+		"id": "splash",
+		"name": "Splash",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "single"
+	},
+	"fairy_wind": {
+		"id": "fairy_wind",
+		"name": "Fairy Wind",
+		"type": "FAIRY",
+		"category": "special",
+		"power": 40,
+		"pp": 30,
+		"target": "single"
+	},
+	"acrobatics": {
+		"id": "acrobatics",
+		"name": "Acrobatics",
+		"type": "FLYING",
+		"category": "physical",
+		"power": 55,
+		"pp": 15,
+		"target": "single"
+	},
+	"rage_powder": {
+		"id": "rage_powder",
+		"name": "Rage Powder",
+		"type": "BUG",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"cotton_spore": {
+		"id": "cotton_spore",
+		"name": "Cotton Spore",
+		"type": "GRASS",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "aoe"
+	},
+	"u_turn": {
+		"id": "u_turn",
+		"name": "U-turn",
+		"type": "BUG",
+		"category": "physical",
+		"power": 70,
+		"pp": 20,
+		"target": "single"
+	},
+	"bounce": {
+		"id": "bounce",
+		"name": "Bounce",
+		"type": "FLYING",
+		"category": "physical",
+		"power": 85,
+		"pp": 5,
+		"target": "single"
+	},
+	"memento": {
+		"id": "memento",
+		"name": "Memento",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"grass_whistle": {
+		"id": "grass_whistle",
+		"name": "Grass Whistle",
+		"type": "GRASS",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"flower_shield": {
+		"id": "flower_shield",
+		"name": "Flower Shield",
+		"type": "FAIRY",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"string_shot": {
+		"id": "string_shot",
+		"name": "String Shot",
+		"type": "BUG",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "aoe"
+	},
+	"bug_bite": {
+		"id": "bug_bite",
+		"name": "Bug Bite",
+		"type": "BUG",
+		"category": "physical",
+		"power": 60,
+		"pp": 20,
+		"target": "single"
+	},
+	"harden": {
+		"id": "harden",
+		"name": "Harden",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single"
+	},
+	"psybeam": {
+		"id": "psybeam",
+		"name": "Psybeam",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 65,
+		"pp": 20,
+		"target": "single"
+	},
+	"silver_wind": {
+		"id": "silver_wind",
+		"name": "Silver Wind",
+		"type": "BUG",
+		"category": "special",
+		"power": 60,
+		"pp": 5,
+		"target": "single"
+	},
+	"supersonic": {
+		"id": "supersonic",
+		"name": "Supersonic",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"bug_buzz": {
+		"id": "bug_buzz",
+		"name": "Bug Buzz",
+		"type": "BUG",
+		"category": "special",
+		"power": 90,
+		"pp": 10,
+		"target": "single"
+	},
+	"captivate": {
+		"id": "captivate",
+		"name": "Captivate",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "aoe"
+	},
+	"quiver_dance": {
+		"id": "quiver_dance",
+		"name": "Quiver Dance",
+		"type": "BUG",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"poison_sting": {
+		"id": "poison_sting",
+		"name": "Poison Sting",
+		"type": "POISON",
+		"category": "physical",
+		"power": 15,
+		"pp": 35,
+		"target": "single"
+	},
+	"twineedle": {
+		"id": "twineedle",
+		"name": "Twineedle",
+		"type": "BUG",
+		"category": "physical",
+		"power": 25,
+		"pp": 20,
+		"target": "single"
+	},
+	"rage": {
+		"id": "rage",
+		"name": "Rage",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 20,
+		"pp": 20,
+		"target": "single"
+	},
+	"venoshock": {
+		"id": "venoshock",
+		"name": "Venoshock",
+		"type": "POISON",
+		"category": "special",
+		"power": 65,
+		"pp": 10,
+		"target": "single"
+	},
+	"toxic_spikes": {
+		"id": "toxic_spikes",
+		"name": "Toxic Spikes",
+		"type": "POISON",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"pin_missile": {
+		"id": "pin_missile",
+		"name": "Pin Missile",
+		"type": "BUG",
+		"category": "physical",
+		"power": 25,
+		"pp": 20,
+		"target": "single"
+	},
+	"fell_stinger": {
+		"id": "fell_stinger",
+		"name": "Fell Stinger",
+		"type": "BUG",
 		"category": "physical",
 		"power": 50,
-		"pp": 25
+		"pp": 25,
+		"target": "single"
 	},
-	"cross_chop": {
-		"id": "cross_chop",
-		"name": "Cross Chop",
+	"fury_cutter": {
+		"id": "fury_cutter",
+		"name": "Fury Cutter",
+		"type": "BUG",
+		"category": "physical",
+		"power": 40,
+		"pp": 20,
+		"target": "single"
+	},
+	"spore": {
+		"id": "spore",
+		"name": "Spore",
+		"type": "GRASS",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"x_scissor": {
+		"id": "x_scissor",
+		"name": "X-Scissor",
+		"type": "BUG",
+		"category": "physical",
+		"power": 80,
+		"pp": 15,
+		"target": "single"
+	},
+	"cross_poison": {
+		"id": "cross_poison",
+		"name": "Cross Poison",
+		"type": "POISON",
+		"category": "physical",
+		"power": 70,
+		"pp": 20,
+		"target": "single"
+	},
+	"foresight": {
+		"id": "foresight",
+		"name": "Foresight",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "single"
+	},
+	"signal_beam": {
+		"id": "signal_beam",
+		"name": "Signal Beam",
+		"type": "BUG",
+		"category": "special",
+		"power": 75,
+		"pp": 15,
+		"target": "single"
+	},
+	"leech_life": {
+		"id": "leech_life",
+		"name": "Leech Life",
+		"type": "BUG",
+		"category": "physical",
+		"power": 80,
+		"pp": 10,
+		"target": "single"
+	},
+	"zen_headbutt": {
+		"id": "zen_headbutt",
+		"name": "Zen Headbutt",
+		"type": "PSYCHIC",
+		"category": "physical",
+		"power": 80,
+		"pp": 15,
+		"target": "single"
+	},
+	"poison_fang": {
+		"id": "poison_fang",
+		"name": "Poison Fang",
+		"type": "POISON",
+		"category": "physical",
+		"power": 50,
+		"pp": 15,
+		"target": "single"
+	},
+	"vacuum_wave": {
+		"id": "vacuum_wave",
+		"name": "Vacuum Wave",
+		"type": "FIGHTING",
+		"category": "special",
+		"power": 40,
+		"pp": 30,
+		"target": "single"
+	},
+	"false_swipe": {
+		"id": "false_swipe",
+		"name": "False Swipe",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 40,
+		"pp": 40,
+		"target": "single"
+	},
+	"razor_wind": {
+		"id": "razor_wind",
+		"name": "Razor Wind",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 80,
+		"pp": 10,
+		"target": "aoe"
+	},
+	"double_team": {
+		"id": "double_team",
+		"name": "Double Team",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"night_slash": {
+		"id": "night_slash",
+		"name": "Night Slash",
+		"type": "DARK",
+		"category": "physical",
+		"power": 70,
+		"pp": 15,
+		"target": "single"
+	},
+	"double_hit": {
+		"id": "double_hit",
+		"name": "Double Hit",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 35,
+		"pp": 10,
+		"target": "single"
+	},
+	"swords_dance": {
+		"id": "swords_dance",
+		"name": "Swords Dance",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"feint": {
+		"id": "feint",
+		"name": "Feint",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 30,
+		"pp": 10,
+		"target": "single"
+	},
+	"vice_grip": {
+		"id": "vice_grip",
+		"name": "Vise Grip",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 55,
+		"pp": 30,
+		"target": "single"
+	},
+	"seismic_toss": {
+		"id": "seismic_toss",
+		"name": "Seismic Toss",
 		"type": "FIGHTING",
 		"category": "physical",
-		"power": 100,
-		"pp": 5
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"revenge": {
+		"id": "revenge",
+		"name": "Revenge",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 60,
+		"pp": 10,
+		"target": "single"
 	},
 	"vital_throw": {
 		"id": "vital_throw",
@@ -2232,55 +2749,62 @@ var ABILITIES_DATA = {
 		"type": "FIGHTING",
 		"category": "physical",
 		"power": 70,
-		"pp": 10
+		"pp": 10,
+		"target": "single"
 	},
-	"meditate": {
-		"id": "meditate",
-		"name": "Meditate",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 0,
-		"pp": 40
+	"brick_break": {
+		"id": "brick_break",
+		"name": "Brick Break",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 75,
+		"pp": 15,
+		"target": "single"
 	},
-	"rolling_kick": {
-		"id": "rolling_kick",
-		"name": "Rolling Kick",
+	"submission": {
+		"id": "submission",
+		"name": "Submission",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 80,
+		"pp": 20,
+		"target": "single"
+	},
+	"storm_throw": {
+		"id": "storm_throw",
+		"name": "Storm Throw",
 		"type": "FIGHTING",
 		"category": "physical",
 		"power": 60,
-		"pp": 15
+		"pp": 10,
+		"target": "single"
 	},
-	"jump_kick": {
-		"id": "jump_kick",
-		"name": "Jump Kick",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 70,
-		"pp": 25
-	},
-	"hi_jump_kick": {
-		"id": "hi_jump_kick",
-		"name": "Hi Jump Kick",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 85,
-		"pp": 20
-	},
-	"mega_kick": {
-		"id": "mega_kick",
-		"name": "Mega Kick",
+	"thrash": {
+		"id": "thrash",
+		"name": "Thrash",
 		"type": "NORMAL",
 		"category": "physical",
 		"power": 120,
-		"pp": 5
+		"pp": 10,
+		"target": "single"
 	},
-	"ice_punch": {
-		"id": "ice_punch",
-		"name": "Ice Punch",
-		"type": "ICE",
-		"category": "special",
-		"power": 75,
-		"pp": 15
+	"superpower": {
+		"id": "superpower",
+		"name": "Superpower",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 120,
+		"pp": 5,
+		"target": "single"
+	},
+	"guillotine": {
+		"id": "guillotine",
+		"name": "Guillotine",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
 	},
 	"mach_punch": {
 		"id": "mach_punch",
@@ -2288,87 +2812,800 @@ var ABILITIES_DATA = {
 		"type": "FIGHTING",
 		"category": "physical",
 		"power": 40,
-		"pp": 30
+		"pp": 30,
+		"target": "single"
 	},
-	"lovely_kiss": {
-		"id": "lovely_kiss",
-		"name": "Lovely Kiss",
+	"comet_punch": {
+		"id": "comet_punch",
+		"name": "Comet Punch",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 18,
+		"pp": 15,
+		"target": "single"
+	},
+	"infestation": {
+		"id": "infestation",
+		"name": "Infestation",
+		"type": "BUG",
+		"category": "special",
+		"power": 20,
+		"pp": 20,
+		"target": "single"
+	},
+	"night_shade": {
+		"id": "night_shade",
+		"name": "Night Shade",
+		"type": "GHOST",
+		"category": "special",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"shadow_sneak": {
+		"id": "shadow_sneak",
+		"name": "Shadow Sneak",
+		"type": "GHOST",
+		"category": "physical",
+		"power": 40,
+		"pp": 30,
+		"target": "single"
+	},
+	"fury_swipes": {
+		"id": "fury_swipes",
+		"name": "Fury Swipes",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 18,
+		"pp": 15,
+		"target": "single"
+	},
+	"spider_web": {
+		"id": "spider_web",
+		"name": "Spider Web",
+		"type": "BUG",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"sticky_web": {
+		"id": "sticky_web",
+		"name": "Sticky Web",
+		"type": "BUG",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"toxic_thread": {
+		"id": "toxic_thread",
+		"name": "Toxic Thread",
+		"type": "POISON",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"venom_drench": {
+		"id": "venom_drench",
+		"name": "Venom Drench",
+		"type": "POISON",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "aoe"
+	},
+	"sonic_boom": {
+		"id": "sonic_boom",
+		"name": "Sonic Boom",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"screech": {
+		"id": "screech",
+		"name": "Screech",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "single"
+	},
+	"bide": {
+		"id": "bide",
+		"name": "Bide",
 		"type": "NORMAL",
 		"category": "physical",
 		"power": 0,
-		"pp": 10
+		"pp": 10,
+		"target": "single"
 	},
-	"present": {
-		"id": "present",
-		"name": "Present",
-		"type": "NORMAL",
+	"spikes": {
+		"id": "spikes",
+		"name": "Spikes",
+		"type": "GROUND",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"payback": {
+		"id": "payback",
+		"name": "Payback",
+		"type": "DARK",
 		"category": "physical",
-		"power": 1,
-		"pp": 15
+		"power": 50,
+		"pp": 10,
+		"target": "single"
 	},
-	"steel_wing": {
-		"id": "steel_wing",
-		"name": "Steel Wing",
+	"gyro_ball": {
+		"id": "gyro_ball",
+		"name": "Gyro Ball",
 		"type": "STEEL",
 		"category": "physical",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"autotomize": {
+		"id": "autotomize",
+		"name": "Autotomize",
+		"type": "STEEL",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"heavy_slam": {
+		"id": "heavy_slam",
+		"name": "Heavy Slam",
+		"type": "STEEL",
+		"category": "physical",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"magnet_rise": {
+		"id": "magnet_rise",
+		"name": "Magnet Rise",
+		"type": "ELECTRIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"mirror_shot": {
+		"id": "mirror_shot",
+		"name": "Mirror Shot",
+		"type": "STEEL",
+		"category": "special",
+		"power": 65,
+		"pp": 10,
+		"target": "single"
+	},
+	"bullet_punch": {
+		"id": "bullet_punch",
+		"name": "Bullet Punch",
+		"type": "STEEL",
+		"category": "physical",
+		"power": 40,
+		"pp": 30,
+		"target": "single"
+	},
+	"metal_claw": {
+		"id": "metal_claw",
+		"name": "Metal Claw",
+		"type": "STEEL",
+		"category": "physical",
+		"power": 50,
+		"pp": 35,
+		"target": "single"
+	},
+	"iron_head": {
+		"id": "iron_head",
+		"name": "Iron Head",
+		"type": "STEEL",
+		"category": "physical",
+		"power": 80,
+		"pp": 15,
+		"target": "single"
+	},
+	"arm_thrust": {
+		"id": "arm_thrust",
+		"name": "Arm Thrust",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 15,
+		"pp": 20,
+		"target": "single"
+	},
+	"horn_attack": {
+		"id": "horn_attack",
+		"name": "Horn Attack",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 65,
+		"pp": 25,
+		"target": "single"
+	},
+	"chip_away": {
+		"id": "chip_away",
+		"name": "Chip Away",
+		"type": "NORMAL",
+		"category": "physical",
 		"power": 70,
-		"pp": 25
+		"pp": 20,
+		"target": "single"
 	},
-	"teleport": {
-		"id": "teleport",
-		"name": "Teleport",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 0,
-		"pp": 20
-	},
-	"kinesis": {
-		"id": "kinesis",
-		"name": "Kinesis",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 0,
-		"pp": 15
-	},
-	"hidden_power": {
-		"id": "hidden_power",
-		"name": "Hidden Power",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 1,
-		"pp": 15
-	},
-	"psywave": {
-		"id": "psywave",
-		"name": "Psywave",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 1,
-		"pp": 15
-	},
-	"pain_split": {
-		"id": "pain_split",
-		"name": "Pain Split",
-		"type": "NORMAL",
+	"counter": {
+		"id": "counter",
+		"name": "Counter",
+		"type": "FIGHTING",
 		"category": "physical",
 		"power": 0,
-		"pp": 20
+		"pp": 20,
+		"target": "single"
 	},
-	"beat_up": {
-		"id": "beat_up",
-		"name": "Beat Up",
-		"type": "DARK",
+	"megahorn": {
+		"id": "megahorn",
+		"name": "Megahorn",
+		"type": "BUG",
+		"category": "physical",
+		"power": 120,
+		"pp": 10,
+		"target": "single"
+	},
+	"close_combat": {
+		"id": "close_combat",
+		"name": "Close Combat",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 120,
+		"pp": 5,
+		"target": "single"
+	},
+	"reversal": {
+		"id": "reversal",
+		"name": "Reversal",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"flash_cannon": {
+		"id": "flash_cannon",
+		"name": "Flash Cannon",
+		"type": "STEEL",
 		"category": "special",
-		"power": 10,
-		"pp": 10
+		"power": 80,
+		"pp": 10,
+		"target": "single"
 	},
-	"outrage": {
-		"id": "outrage",
-		"name": "Outrage",
+	"water_sport": {
+		"id": "water_sport",
+		"name": "Water Sport",
+		"type": "WATER",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"soak": {
+		"id": "soak",
+		"name": "Soak",
+		"type": "WATER",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"wonder_room": {
+		"id": "wonder_room",
+		"name": "Wonder Room",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"aqua_jet": {
+		"id": "aqua_jet",
+		"name": "Aqua Jet",
+		"type": "WATER",
+		"category": "physical",
+		"power": 40,
+		"pp": 20,
+		"target": "single"
+	},
+	"double_slap": {
+		"id": "double_slap",
+		"name": "Double Slap",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 15,
+		"pp": 10,
+		"target": "single"
+	},
+	"mud_shot": {
+		"id": "mud_shot",
+		"name": "Mud Shot",
+		"type": "GROUND",
+		"category": "special",
+		"power": 55,
+		"pp": 15,
+		"target": "single"
+	},
+	"belly_drum": {
+		"id": "belly_drum",
+		"name": "Belly Drum",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"wake_up_slap": {
+		"id": "wake_up_slap",
+		"name": "Wake-Up Slap",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 70,
+		"pp": 10,
+		"target": "single"
+	},
+	"mud_bomb": {
+		"id": "mud_bomb",
+		"name": "Mud Bomb",
+		"type": "GROUND",
+		"category": "special",
+		"power": 65,
+		"pp": 10,
+		"target": "single"
+	},
+	"acid_spray": {
+		"id": "acid_spray",
+		"name": "Acid Spray",
+		"type": "POISON",
+		"category": "special",
+		"power": 40,
+		"pp": 20,
+		"target": "single"
+	},
+	"brine": {
+		"id": "brine",
+		"name": "Brine",
+		"type": "WATER",
+		"category": "special",
+		"power": 65,
+		"pp": 10,
+		"target": "single"
+	},
+	"hex": {
+		"id": "hex",
+		"name": "Hex",
+		"type": "GHOST",
+		"category": "special",
+		"power": 65,
+		"pp": 10,
+		"target": "single"
+	},
+	"sludge_wave": {
+		"id": "sludge_wave",
+		"name": "Sludge Wave",
+		"type": "POISON",
+		"category": "special",
+		"power": 95,
+		"pp": 10,
+		"target": "aoe"
+	},
+	"curse": {
+		"id": "curse",
+		"name": "Curse",
+		"type": "GHOST",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"yawn": {
+		"id": "yawn",
+		"name": "Yawn",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"headbutt": {
+		"id": "headbutt",
+		"name": "Headbutt",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 70,
+		"pp": 15,
+		"target": "single"
+	},
+	"slack_off": {
+		"id": "slack_off",
+		"name": "Slack Off",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"heal_pulse": {
+		"id": "heal_pulse",
+		"name": "Heal Pulse",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"icy_wind": {
+		"id": "icy_wind",
+		"name": "Icy Wind",
+		"type": "ICE",
+		"category": "special",
+		"power": 55,
+		"pp": 15,
+		"target": "aoe"
+	},
+	"encore": {
+		"id": "encore",
+		"name": "Encore",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"rest": {
+		"id": "rest",
+		"name": "Rest",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"aqua_ring": {
+		"id": "aqua_ring",
+		"name": "Aqua Ring",
+		"type": "WATER",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"dive": {
+		"id": "dive",
+		"name": "Dive",
+		"type": "WATER",
+		"category": "physical",
+		"power": 80,
+		"pp": 10,
+		"target": "single"
+	},
+	"icicle_spear": {
+		"id": "icicle_spear",
+		"name": "Icicle Spear",
+		"type": "ICE",
+		"category": "physical",
+		"power": 25,
+		"pp": 30,
+		"target": "single"
+	},
+	"clamp": {
+		"id": "clamp",
+		"name": "Clamp",
+		"type": "WATER",
+		"category": "physical",
+		"power": 35,
+		"pp": 15,
+		"target": "single"
+	},
+	"razor_shell": {
+		"id": "razor_shell",
+		"name": "Razor Shell",
+		"type": "WATER",
+		"category": "physical",
+		"power": 75,
+		"pp": 10,
+		"target": "single"
+	},
+	"whirlpool": {
+		"id": "whirlpool",
+		"name": "Whirlpool",
+		"type": "WATER",
+		"category": "special",
+		"power": 35,
+		"pp": 15,
+		"target": "single"
+	},
+	"shell_smash": {
+		"id": "shell_smash",
+		"name": "Shell Smash",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"crabhammer": {
+		"id": "crabhammer",
+		"name": "Crabhammer",
+		"type": "WATER",
+		"category": "physical",
+		"power": 100,
+		"pp": 10,
+		"target": "single"
+	},
+	"flail": {
+		"id": "flail",
+		"name": "Flail",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"wide_guard": {
+		"id": "wide_guard",
+		"name": "Wide Guard",
+		"type": "ROCK",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"twister": {
+		"id": "twister",
+		"name": "Twister",
 		"type": "DRAGON",
 		"category": "special",
+		"power": 40,
+		"pp": 20,
+		"target": "aoe"
+	},
+	"dragon_pulse": {
+		"id": "dragon_pulse",
+		"name": "Dragon Pulse",
+		"type": "DRAGON",
+		"category": "special",
+		"power": 85,
+		"pp": 10,
+		"target": "single"
+	},
+	"dragon_dance": {
+		"id": "dragon_dance",
+		"name": "Dragon Dance",
+		"type": "DRAGON",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"waterfall": {
+		"id": "waterfall",
+		"name": "Waterfall",
+		"type": "WATER",
+		"category": "physical",
+		"power": 80,
+		"pp": 15,
+		"target": "single"
+	},
+	"horn_drill": {
+		"id": "horn_drill",
+		"name": "Horn Drill",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"camouflage": {
+		"id": "camouflage",
+		"name": "Camouflage",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"minimize": {
+		"id": "minimize",
+		"name": "Minimize",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"power_gem": {
+		"id": "power_gem",
+		"name": "Power Gem",
+		"type": "ROCK",
+		"category": "special",
+		"power": 80,
+		"pp": 20,
+		"target": "single"
+	},
+	"confuse_ray": {
+		"id": "confuse_ray",
+		"name": "Confuse Ray",
+		"type": "GHOST",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"cosmic_power": {
+		"id": "cosmic_power",
+		"name": "Cosmic Power",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"hyper_beam": {
+		"id": "hyper_beam",
+		"name": "Hyper Beam",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 150,
+		"pp": 5,
+		"target": "single"
+	},
+	"sing": {
+		"id": "sing",
+		"name": "Sing",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"electro_ball": {
+		"id": "electro_ball",
+		"name": "Electro Ball",
+		"type": "ELECTRIC",
+		"category": "special",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"ion_deluge": {
+		"id": "ion_deluge",
+		"name": "Ion Deluge",
+		"type": "ELECTRIC",
+		"category": "status",
+		"power": 0,
+		"pp": 25,
+		"target": "single"
+	},
+	"eerie_impulse": {
+		"id": "eerie_impulse",
+		"name": "Eerie Impulse",
+		"type": "ELECTRIC",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"spotlight": {
+		"id": "spotlight",
+		"name": "Spotlight",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"helping_hand": {
+		"id": "helping_hand",
+		"name": "Helping Hand",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"play_rough": {
+		"id": "play_rough",
+		"name": "Play Rough",
+		"type": "FAIRY",
+		"category": "physical",
 		"power": 90,
-		"pp": 15
+		"pp": 10,
+		"target": "single"
+	},
+	"hyper_voice": {
+		"id": "hyper_voice",
+		"name": "Hyper Voice",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 90,
+		"pp": 10,
+		"target": "aoe"
+	},
+	"haze": {
+		"id": "haze",
+		"name": "Haze",
+		"type": "ICE",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single"
+	},
+	"muddy_water": {
+		"id": "muddy_water",
+		"name": "Muddy Water",
+		"type": "WATER",
+		"category": "special",
+		"power": 90,
+		"pp": 10,
+		"target": "aoe"
+	},
+	"destiny_bond": {
+		"id": "destiny_bond",
+		"name": "Destiny Bond",
+		"type": "GHOST",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"refresh": {
+		"id": "refresh",
+		"name": "Refresh",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"spike_cannon": {
+		"id": "spike_cannon",
+		"name": "Spike Cannon",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 20,
+		"pp": 15,
+		"target": "single"
+	},
+	"earth_power": {
+		"id": "earth_power",
+		"name": "Earth Power",
+		"type": "GROUND",
+		"category": "special",
+		"power": 90,
+		"pp": 10,
+		"target": "single"
+	},
+	"lock_on": {
+		"id": "lock_on",
+		"name": "Lock-On",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"gunk_shot": {
+		"id": "gunk_shot",
+		"name": "Gunk Shot",
+		"type": "POISON",
+		"category": "physical",
+		"power": 120,
+		"pp": 5,
+		"target": "single"
 	},
 	"octazooka": {
 		"id": "octazooka",
@@ -2376,7 +3613,1385 @@ var ABILITIES_DATA = {
 		"type": "WATER",
 		"category": "special",
 		"power": 65,
-		"pp": 10
+		"pp": 10,
+		"target": "single"
+	},
+	"sand_attack": {
+		"id": "sand_attack",
+		"name": "Sand Attack",
+		"type": "GROUND",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"feather_dance": {
+		"id": "feather_dance",
+		"name": "Feather Dance",
+		"type": "FLYING",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"drill_run": {
+		"id": "drill_run",
+		"name": "Drill Run",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 80,
+		"pp": 10,
+		"target": "single"
+	},
+	"play_nice": {
+		"id": "play_nice",
+		"name": "Play Nice",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"disarming_voice": {
+		"id": "disarming_voice",
+		"name": "Disarming Voice",
+		"type": "FAIRY",
+		"category": "special",
+		"power": 40,
+		"pp": 15,
+		"target": "aoe"
+	},
+	"round": {
+		"id": "round",
+		"name": "Round",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 60,
+		"pp": 15,
+		"target": "single"
+	},
+	"mimic": {
+		"id": "mimic",
+		"name": "Mimic",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"fake_out": {
+		"id": "fake_out",
+		"name": "Fake Out",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 40,
+		"pp": 10,
+		"target": "single"
+	},
+	"feint_attack": {
+		"id": "feint_attack",
+		"name": "Feint Attack",
+		"type": "DARK",
+		"category": "physical",
+		"power": 60,
+		"pp": 20,
+		"target": "single"
+	},
+	"taunt": {
+		"id": "taunt",
+		"name": "Taunt",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"pay_day": {
+		"id": "pay_day",
+		"name": "Pay Day",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 40,
+		"pp": 20,
+		"target": "single"
+	},
+	"switcheroo": {
+		"id": "switcheroo",
+		"name": "Switcheroo",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"air_cutter": {
+		"id": "air_cutter",
+		"name": "Air Cutter",
+		"type": "FLYING",
+		"category": "special",
+		"power": 60,
+		"pp": 25,
+		"target": "aoe"
+	},
+	"acupressure": {
+		"id": "acupressure",
+		"name": "Acupressure",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single"
+	},
+	"jump_kick": {
+		"id": "jump_kick",
+		"name": "Jump Kick",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 100,
+		"pp": 10,
+		"target": "single"
+	},
+	"tri_attack": {
+		"id": "tri_attack",
+		"name": "Tri Attack",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 80,
+		"pp": 10,
+		"target": "single"
+	},
+	"lick": {
+		"id": "lick",
+		"name": "Lick",
+		"type": "GHOST",
+		"category": "physical",
+		"power": 30,
+		"pp": 30,
+		"target": "single"
+	},
+	"dizzy_punch": {
+		"id": "dizzy_punch",
+		"name": "Dizzy Punch",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 70,
+		"pp": 10,
+		"target": "single"
+	},
+	"outrage": {
+		"id": "outrage",
+		"name": "Outrage",
+		"type": "DRAGON",
+		"category": "physical",
+		"power": 120,
+		"pp": 10,
+		"target": "single"
+	},
+	"work_up": {
+		"id": "work_up",
+		"name": "Work Up",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single"
+	},
+	"giga_impact": {
+		"id": "giga_impact",
+		"name": "Giga Impact",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 150,
+		"pp": 5,
+		"target": "single"
+	},
+	"covet": {
+		"id": "covet",
+		"name": "Covet",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 60,
+		"pp": 25,
+		"target": "single"
+	},
+	"baby_doll_eyes": {
+		"id": "baby_doll_eyes",
+		"name": "Baby-Doll Eyes",
+		"type": "FAIRY",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single"
+	},
+	"charm": {
+		"id": "charm",
+		"name": "Charm",
+		"type": "FAIRY",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"last_resort": {
+		"id": "last_resort",
+		"name": "Last Resort",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 140,
+		"pp": 5,
+		"target": "single"
+	},
+	"trump_card": {
+		"id": "trump_card",
+		"name": "Trump Card",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"conversion": {
+		"id": "conversion",
+		"name": "Conversion",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single"
+	},
+	"conversion_2": {
+		"id": "conversion_2",
+		"name": "Conversion 2",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single"
+	},
+	"sharpen": {
+		"id": "sharpen",
+		"name": "Sharpen",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single"
+	},
+	"recycle": {
+		"id": "recycle",
+		"name": "Recycle",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"magic_coat": {
+		"id": "magic_coat",
+		"name": "Magic Coat",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"snore": {
+		"id": "snore",
+		"name": "Snore",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 50,
+		"pp": 15,
+		"target": "single"
+	},
+	"sleep_talk": {
+		"id": "sleep_talk",
+		"name": "Sleep Talk",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"block": {
+		"id": "block",
+		"name": "Block",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"high_horsepower": {
+		"id": "high_horsepower",
+		"name": "High Horsepower",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 95,
+		"pp": 10,
+		"target": "single"
+	},
+	"follow_me": {
+		"id": "follow_me",
+		"name": "Follow Me",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"coil": {
+		"id": "coil",
+		"name": "Coil",
+		"type": "POISON",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"echoed_voice": {
+		"id": "echoed_voice",
+		"name": "Echoed Voice",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 40,
+		"pp": 15,
+		"target": "single"
+	},
+	"psycho_shift": {
+		"id": "psycho_shift",
+		"name": "Psycho Shift",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"synchronoise": {
+		"id": "synchronoise",
+		"name": "Synchronoise",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 120,
+		"pp": 10,
+		"target": "aoe"
+	},
+	"dream_eater": {
+		"id": "dream_eater",
+		"name": "Dream Eater",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 100,
+		"pp": 15,
+		"target": "single"
+	},
+	"sweet_kiss": {
+		"id": "sweet_kiss",
+		"name": "Sweet Kiss",
+		"type": "FAIRY",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"copycat": {
+		"id": "copycat",
+		"name": "Copycat",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"astonish": {
+		"id": "astonish",
+		"name": "Astonish",
+		"type": "GHOST",
+		"category": "physical",
+		"power": 30,
+		"pp": 15,
+		"target": "single"
+	},
+	"fling": {
+		"id": "fling",
+		"name": "Fling",
+		"type": "DARK",
+		"category": "physical",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"odor_sleuth": {
+		"id": "odor_sleuth",
+		"name": "Odor Sleuth",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "single"
+	},
+	"spite": {
+		"id": "spite",
+		"name": "Spite",
+		"type": "GHOST",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"mud_slap": {
+		"id": "mud_slap",
+		"name": "Mud-Slap",
+		"type": "GROUND",
+		"category": "special",
+		"power": 20,
+		"pp": 10,
+		"target": "single"
+	},
+	"dig": {
+		"id": "dig",
+		"name": "Dig",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 80,
+		"pp": 10,
+		"target": "single"
+	},
+	"glare": {
+		"id": "glare",
+		"name": "Glare",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single"
+	},
+	"fake_tears": {
+		"id": "fake_tears",
+		"name": "Fake Tears",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"hammer_arm": {
+		"id": "hammer_arm",
+		"name": "Hammer Arm",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 100,
+		"pp": 10,
+		"target": "single"
+	},
+	"role_play": {
+		"id": "role_play",
+		"name": "Role Play",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"imprison": {
+		"id": "imprison",
+		"name": "Imprison",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"sketch": {
+		"id": "sketch",
+		"name": "Sketch",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 1,
+		"target": "single"
+	},
+	"milk_drink": {
+		"id": "milk_drink",
+		"name": "Milk Drink",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"steamroller": {
+		"id": "steamroller",
+		"name": "Steamroller",
+		"type": "BUG",
+		"category": "physical",
+		"power": 65,
+		"pp": 20,
+		"target": "single"
+	},
+	"rock_tomb": {
+		"id": "rock_tomb",
+		"name": "Rock Tomb",
+		"type": "ROCK",
+		"category": "physical",
+		"power": 60,
+		"pp": 15,
+		"target": "single"
+	},
+	"dragon_breath": {
+		"id": "dragon_breath",
+		"name": "Dragon Breath",
+		"type": "DRAGON",
+		"category": "special",
+		"power": 60,
+		"pp": 20,
+		"target": "single"
+	},
+	"rock_slide": {
+		"id": "rock_slide",
+		"name": "Rock Slide",
+		"type": "ROCK",
+		"category": "physical",
+		"power": 75,
+		"pp": 10,
+		"target": "aoe"
+	},
+	"sand_tomb": {
+		"id": "sand_tomb",
+		"name": "Sand Tomb",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 35,
+		"pp": 15,
+		"target": "single"
+	},
+	"iron_tail": {
+		"id": "iron_tail",
+		"name": "Iron Tail",
+		"type": "STEEL",
+		"category": "physical",
+		"power": 100,
+		"pp": 15,
+		"target": "single"
+	},
+	"sandstorm": {
+		"id": "sandstorm",
+		"name": "Sandstorm",
+		"type": "ROCK",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"metal_sound": {
+		"id": "metal_sound",
+		"name": "Metal Sound",
+		"type": "STEEL",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "single"
+	},
+	"sky_drop": {
+		"id": "sky_drop",
+		"name": "Sky Drop",
+		"type": "FLYING",
+		"category": "physical",
+		"power": 60,
+		"pp": 10,
+		"target": "single"
+	},
+	"low_kick": {
+		"id": "low_kick",
+		"name": "Low Kick",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"wood_hammer": {
+		"id": "wood_hammer",
+		"name": "Wood Hammer",
+		"type": "GRASS",
+		"category": "physical",
+		"power": 120,
+		"pp": 15,
+		"target": "single"
+	},
+	"tearful_look": {
+		"id": "tearful_look",
+		"name": "Tearful Look",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"head_smash": {
+		"id": "head_smash",
+		"name": "Head Smash",
+		"type": "ROCK",
+		"category": "physical",
+		"power": 150,
+		"pp": 5,
+		"target": "single"
+	},
+	"dark_pulse": {
+		"id": "dark_pulse",
+		"name": "Dark Pulse",
+		"type": "DARK",
+		"category": "special",
+		"power": 80,
+		"pp": 15,
+		"target": "single"
+	},
+	"crush_claw": {
+		"id": "crush_claw",
+		"name": "Crush Claw",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 75,
+		"pp": 10,
+		"target": "single"
+	},
+	"fissure": {
+		"id": "fissure",
+		"name": "Fissure",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"rototiller": {
+		"id": "rototiller",
+		"name": "Rototiller",
+		"type": "GROUND",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"bone_club": {
+		"id": "bone_club",
+		"name": "Bone Club",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 65,
+		"pp": 20,
+		"target": "single"
+	},
+	"bonemerang": {
+		"id": "bonemerang",
+		"name": "Bonemerang",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 50,
+		"pp": 10,
+		"target": "single"
+	},
+	"stomping_tantrum": {
+		"id": "stomping_tantrum",
+		"name": "Stomping Tantrum",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 75,
+		"pp": 10,
+		"target": "single"
+	},
+	"retaliate": {
+		"id": "retaliate",
+		"name": "Retaliate",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 70,
+		"pp": 5,
+		"target": "single"
+	},
+	"bone_rush": {
+		"id": "bone_rush",
+		"name": "Bone Rush",
+		"type": "GROUND",
+		"category": "physical",
+		"power": 25,
+		"pp": 10,
+		"target": "single"
+	},
+	"sky_uppercut": {
+		"id": "sky_uppercut",
+		"name": "Sky Uppercut",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 85,
+		"pp": 15,
+		"target": "single"
+	},
+	"dragon_claw": {
+		"id": "dragon_claw",
+		"name": "Dragon Claw",
+		"type": "DRAGON",
+		"category": "physical",
+		"power": 80,
+		"pp": 15,
+		"target": "single"
+	},
+	"flare_blitz": {
+		"id": "flare_blitz",
+		"name": "Flare Blitz",
+		"type": "FIRE",
+		"category": "physical",
+		"power": 120,
+		"pp": 15,
+		"target": "single"
+	},
+	"shadow_claw": {
+		"id": "shadow_claw",
+		"name": "Shadow Claw",
+		"type": "GHOST",
+		"category": "physical",
+		"power": 70,
+		"pp": 15,
+		"target": "single"
+	},
+	"flame_wheel": {
+		"id": "flame_wheel",
+		"name": "Flame Wheel",
+		"type": "FIRE",
+		"category": "physical",
+		"power": 60,
+		"pp": 25,
+		"target": "single"
+	},
+	"extreme_speed": {
+		"id": "extreme_speed",
+		"name": "Extreme Speed",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 80,
+		"pp": 5,
+		"target": "single"
+	},
+	"flame_charge": {
+		"id": "flame_charge",
+		"name": "Flame Charge",
+		"type": "FIRE",
+		"category": "physical",
+		"power": 50,
+		"pp": 20,
+		"target": "single"
+	},
+	"smog": {
+		"id": "smog",
+		"name": "Smog",
+		"type": "POISON",
+		"category": "special",
+		"power": 30,
+		"pp": 20,
+		"target": "single"
+	},
+	"clear_smog": {
+		"id": "clear_smog",
+		"name": "Clear Smog",
+		"type": "POISON",
+		"category": "special",
+		"power": 50,
+		"pp": 15,
+		"target": "single"
+	},
+	"fire_punch": {
+		"id": "fire_punch",
+		"name": "Fire Punch",
+		"type": "FIRE",
+		"category": "physical",
+		"power": 75,
+		"pp": 15,
+		"target": "single"
+	},
+	"incinerate": {
+		"id": "incinerate",
+		"name": "Incinerate",
+		"type": "FIRE",
+		"category": "special",
+		"power": 60,
+		"pp": 15,
+		"target": "aoe"
+	},
+	"nuzzle": {
+		"id": "nuzzle",
+		"name": "Nuzzle",
+		"type": "ELECTRIC",
+		"category": "physical",
+		"power": 20,
+		"pp": 20,
+		"target": "single"
+	},
+	"thunderbolt": {
+		"id": "thunderbolt",
+		"name": "Thunderbolt",
+		"type": "ELECTRIC",
+		"category": "special",
+		"power": 90,
+		"pp": 15,
+		"target": "single"
+	},
+	"wild_charge": {
+		"id": "wild_charge",
+		"name": "Wild Charge",
+		"type": "ELECTRIC",
+		"category": "physical",
+		"power": 90,
+		"pp": 15,
+		"target": "single"
+	},
+	"magnet_bomb": {
+		"id": "magnet_bomb",
+		"name": "Magnet Bomb",
+		"type": "STEEL",
+		"category": "physical",
+		"power": 60,
+		"pp": 20,
+		"target": "single"
+	},
+	"electric_terrain": {
+		"id": "electric_terrain",
+		"name": "Electric Terrain",
+		"type": "ELECTRIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"charge_beam": {
+		"id": "charge_beam",
+		"name": "Charge Beam",
+		"type": "ELECTRIC",
+		"category": "special",
+		"power": 50,
+		"pp": 10,
+		"target": "single"
+	},
+	"shock_wave": {
+		"id": "shock_wave",
+		"name": "Shock Wave",
+		"type": "ELECTRIC",
+		"category": "special",
+		"power": 60,
+		"pp": 20,
+		"target": "single"
+	},
+	"thunder_punch": {
+		"id": "thunder_punch",
+		"name": "Thunder Punch",
+		"type": "ELECTRIC",
+		"category": "physical",
+		"power": 75,
+		"pp": 15,
+		"target": "single"
+	},
+	"cotton_guard": {
+		"id": "cotton_guard",
+		"name": "Cotton Guard",
+		"type": "GRASS",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"belch": {
+		"id": "belch",
+		"name": "Belch",
+		"type": "POISON",
+		"category": "special",
+		"power": 120,
+		"pp": 10,
+		"target": "single"
+	},
+	"double_kick": {
+		"id": "double_kick",
+		"name": "Double Kick",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 30,
+		"pp": 30,
+		"target": "single"
+	},
+	"flatter": {
+		"id": "flatter",
+		"name": "Flatter",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"mean_look": {
+		"id": "mean_look",
+		"name": "Mean Look",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"quick_guard": {
+		"id": "quick_guard",
+		"name": "Quick Guard",
+		"type": "FIGHTING",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"poison_gas": {
+		"id": "poison_gas",
+		"name": "Poison Gas",
+		"type": "POISON",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "aoe"
+	},
+	"sludge": {
+		"id": "sludge",
+		"name": "Sludge",
+		"type": "POISON",
+		"category": "special",
+		"power": 65,
+		"pp": 20,
+		"target": "single"
+	},
+	"sludge_bomb": {
+		"id": "sludge_bomb",
+		"name": "Sludge Bomb",
+		"type": "POISON",
+		"category": "special",
+		"power": 90,
+		"pp": 10,
+		"target": "single"
+	},
+	"acid_armor": {
+		"id": "acid_armor",
+		"name": "Acid Armor",
+		"type": "POISON",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"karate_chop": {
+		"id": "karate_chop",
+		"name": "Karate Chop",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 50,
+		"pp": 25,
+		"target": "single"
+	},
+	"cross_chop": {
+		"id": "cross_chop",
+		"name": "Cross Chop",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 100,
+		"pp": 5,
+		"target": "single"
+	},
+	"final_gambit": {
+		"id": "final_gambit",
+		"name": "Final Gambit",
+		"type": "FIGHTING",
+		"category": "special",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"low_sweep": {
+		"id": "low_sweep",
+		"name": "Low Sweep",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 65,
+		"pp": 20,
+		"target": "single"
+	},
+	"dual_chop": {
+		"id": "dual_chop",
+		"name": "Dual Chop",
+		"type": "DRAGON",
+		"category": "physical",
+		"power": 40,
+		"pp": 15,
+		"target": "single"
+	},
+	"bulk_up": {
+		"id": "bulk_up",
+		"name": "Bulk Up",
+		"type": "FIGHTING",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"dynamic_punch": {
+		"id": "dynamic_punch",
+		"name": "Dynamic Punch",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 100,
+		"pp": 5,
+		"target": "single"
+	},
+	"strength": {
+		"id": "strength",
+		"name": "Strength",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 80,
+		"pp": 15,
+		"target": "single"
+	},
+	"meditate": {
+		"id": "meditate",
+		"name": "Meditate",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "single"
+	},
+	"mega_kick": {
+		"id": "mega_kick",
+		"name": "Mega Kick",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 120,
+		"pp": 5,
+		"target": "single"
+	},
+	"rolling_kick": {
+		"id": "rolling_kick",
+		"name": "Rolling Kick",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 60,
+		"pp": 15,
+		"target": "single"
+	},
+	"high_jump_kick": {
+		"id": "high_jump_kick",
+		"name": "High Jump Kick",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 130,
+		"pp": 10,
+		"target": "single"
+	},
+	"blaze_kick": {
+		"id": "blaze_kick",
+		"name": "Blaze Kick",
+		"type": "FIRE",
+		"category": "physical",
+		"power": 85,
+		"pp": 10,
+		"target": "single"
+	},
+	"focus_punch": {
+		"id": "focus_punch",
+		"name": "Focus Punch",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 150,
+		"pp": 20,
+		"target": "single"
+	},
+	"ice_punch": {
+		"id": "ice_punch",
+		"name": "Ice Punch",
+		"type": "ICE",
+		"category": "physical",
+		"power": 75,
+		"pp": 15,
+		"target": "single"
+	},
+	"draining_kiss": {
+		"id": "draining_kiss",
+		"name": "Draining Kiss",
+		"type": "FAIRY",
+		"category": "special",
+		"power": 50,
+		"pp": 10,
+		"target": "single"
+	},
+	"lovely_kiss": {
+		"id": "lovely_kiss",
+		"name": "Lovely Kiss",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"heart_stamp": {
+		"id": "heart_stamp",
+		"name": "Heart Stamp",
+		"type": "PSYCHIC",
+		"category": "physical",
+		"power": 60,
+		"pp": 25,
+		"target": "single"
+	},
+	"avalanche": {
+		"id": "avalanche",
+		"name": "Avalanche",
+		"type": "ICE",
+		"category": "physical",
+		"power": 60,
+		"pp": 10,
+		"target": "single"
+	},
+	"present": {
+		"id": "present",
+		"name": "Present",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"steel_wing": {
+		"id": "steel_wing",
+		"name": "Steel Wing",
+		"type": "STEEL",
+		"category": "physical",
+		"power": 70,
+		"pp": 25,
+		"target": "single"
+	},
+	"teleport": {
+		"id": "teleport",
+		"name": "Teleport",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"stored_power": {
+		"id": "stored_power",
+		"name": "Stored Power",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 20,
+		"pp": 10,
+		"target": "single"
+	},
+	"ominous_wind": {
+		"id": "ominous_wind",
+		"name": "Ominous Wind",
+		"type": "GHOST",
+		"category": "special",
+		"power": 60,
+		"pp": 5,
+		"target": "single"
+	},
+	"wish": {
+		"id": "wish",
+		"name": "Wish",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"kinesis": {
+		"id": "kinesis",
+		"name": "Kinesis",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"telekinesis": {
+		"id": "telekinesis",
+		"name": "Telekinesis",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"ally_switch": {
+		"id": "ally_switch",
+		"name": "Ally Switch",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"trick": {
+		"id": "trick",
+		"name": "Trick",
+		"type": "PSYCHIC",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"psyshock": {
+		"id": "psyshock",
+		"name": "Psyshock",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 80,
+		"pp": 10,
+		"target": "single"
+	},
+	"nightmare": {
+		"id": "nightmare",
+		"name": "Nightmare",
+		"type": "GHOST",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"hidden_power": {
+		"id": "hidden_power",
+		"name": "Hidden Power",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 60,
+		"pp": 15,
+		"target": "single"
+	},
+	"shadow_ball": {
+		"id": "shadow_ball",
+		"name": "Shadow Ball",
+		"type": "GHOST",
+		"category": "special",
+		"power": 80,
+		"pp": 15,
+		"target": "single"
+	},
+	"shadow_punch": {
+		"id": "shadow_punch",
+		"name": "Shadow Punch",
+		"type": "GHOST",
+		"category": "physical",
+		"power": 60,
+		"pp": 20,
+		"target": "single"
+	},
+	"pain_split": {
+		"id": "pain_split",
+		"name": "Pain Split",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single"
+	},
+	"grudge": {
+		"id": "grudge",
+		"name": "Grudge",
+		"type": "GHOST",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single"
+	},
+	"foul_play": {
+		"id": "foul_play",
+		"name": "Foul Play",
+		"type": "DARK",
+		"category": "physical",
+		"power": 95,
+		"pp": 15,
+		"target": "single"
+	},
+	"torment": {
+		"id": "torment",
+		"name": "Torment",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"quash": {
+		"id": "quash",
+		"name": "Quash",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"hone_claws": {
+		"id": "hone_claws",
+		"name": "Hone Claws",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"beat_up": {
+		"id": "beat_up",
+		"name": "Beat Up",
+		"type": "DARK",
+		"category": "physical",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"snatch": {
+		"id": "snatch",
+		"name": "Snatch",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single"
+	},
+	"howl": {
+		"id": "howl",
+		"name": "Howl",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 40,
+		"target": "single"
+	},
+	"embargo": {
+		"id": "embargo",
+		"name": "Embargo",
+		"type": "DARK",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
+	},
+	"dragon_tail": {
+		"id": "dragon_tail",
+		"name": "Dragon Tail",
+		"type": "DRAGON",
+		"category": "physical",
+		"power": 60,
+		"pp": 10,
+		"target": "single"
+	},
+	"after_you": {
+		"id": "after_you",
+		"name": "After You",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single"
 	}
 };
 //#endregion
@@ -2398,7 +5013,8 @@ var TYPE_COLORS = {
 	GHOST: "#6c5b7b",
 	DRAGON: "#5b6ee1",
 	DARK: "#4a4a4a",
-	STEEL: "#b0bec5"
+	STEEL: "#b0bec5",
+	FAIRY: "#f5a9d0"
 };
 var FALLBACK_COLOR = "#d1c7b7";
 function colorForType(type) {
@@ -2443,21 +5059,13 @@ var BASIC_ATTACK = {
 	power: 40,
 	pp: 35
 };
-var AOE_ABILITY_KEYS = /* @__PURE__ */ new Set([
-	"razor_leaf",
-	"bubble",
-	"earthquake",
-	"explosion",
-	"magnitude",
-	"selfdestruct",
-	...Object.keys(TYPED_AOE_MOVES)
-]);
+var AOE_ABILITY_KEYS = new Set(Object.keys(TYPED_AOE_MOVES));
 var ALL_ABILITIES_SOURCE = {
 	...ABILITIES_DATA,
 	...TYPED_AOE_MOVES
 };
 var ABILITIES = Object.fromEntries(Object.entries(ALL_ABILITIES_SOURCE).map(([key, ability]) => {
-	const isAoe = AOE_ABILITY_KEYS.has(key);
+	const isAoe = AOE_ABILITY_KEYS.has(key) || "target" in ability && ability.target === "aoe";
 	return [key, {
 		...ability,
 		target: isAoe ? "aoe" : "single",
@@ -2482,7 +5090,7 @@ var SPECIES_DATA = {
 		"type": "FIRE",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 65,
+		"baseExp": 62,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 39,
@@ -2494,11 +5102,11 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "scratch",
+				"key": "growl",
 				"levelReq": 1
 			},
 			{
-				"key": "growl",
+				"key": "scratch",
 				"levelReq": 1
 			},
 			{
@@ -2507,31 +5115,39 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "smokescreen",
-				"levelReq": 13
-			},
-			{
-				"key": "rage",
-				"levelReq": 19
-			},
-			{
-				"key": "scary_face",
-				"levelReq": 25
-			},
-			{
-				"key": "flamethrower",
-				"levelReq": 31
-			},
-			{
-				"key": "slash",
-				"levelReq": 37
+				"levelReq": 10
 			},
 			{
 				"key": "dragon_rage",
-				"levelReq": 43
+				"levelReq": 16
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 19
+			},
+			{
+				"key": "fire_fang",
+				"levelReq": 25
+			},
+			{
+				"key": "flame_burst",
+				"levelReq": 28
+			},
+			{
+				"key": "slash",
+				"levelReq": 34
+			},
+			{
+				"key": "flamethrower",
+				"levelReq": 37
 			},
 			{
 				"key": "fire_spin",
-				"levelReq": 49
+				"levelReq": 43
+			},
+			{
+				"key": "inferno",
+				"levelReq": 46
 			}
 		],
 		"evolvesTo": "charmeleon",
@@ -2544,7 +5160,7 @@ var SPECIES_DATA = {
 		"type": "WATER",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 66,
+		"baseExp": 63,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 44,
@@ -2564,7 +5180,7 @@ var SPECIES_DATA = {
 				"levelReq": 4
 			},
 			{
-				"key": "bubble",
+				"key": "water_gun",
 				"levelReq": 7
 			},
 			{
@@ -2572,32 +5188,44 @@ var SPECIES_DATA = {
 				"levelReq": 10
 			},
 			{
-				"key": "water_gun",
+				"key": "bubble",
 				"levelReq": 13
 			},
 			{
 				"key": "bite",
-				"levelReq": 18
+				"levelReq": 16
 			},
 			{
 				"key": "rapid_spin",
-				"levelReq": 23
+				"levelReq": 19
 			},
 			{
 				"key": "protect",
+				"levelReq": 22
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 25
+			},
+			{
+				"key": "aqua_tail",
 				"levelReq": 28
 			},
 			{
-				"key": "rain_dance",
-				"levelReq": 33
+				"key": "skull_bash",
+				"levelReq": 31
 			},
 			{
-				"key": "skull_bash",
-				"levelReq": 40
+				"key": "iron_defense",
+				"levelReq": 34
+			},
+			{
+				"key": "rain_dance",
+				"levelReq": 37
 			},
 			{
 				"key": "hydro_pump",
-				"levelReq": 47
+				"levelReq": 40
 			}
 		],
 		"evolvesTo": "wartortle",
@@ -2627,7 +5255,7 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "growl",
-				"levelReq": 4
+				"levelReq": 3
 			},
 			{
 				"key": "leech_seed",
@@ -2635,35 +5263,47 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "vine_whip",
-				"levelReq": 10
+				"levelReq": 9
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 15
+				"key": "poison_powder",
+				"levelReq": 13
 			},
 			{
 				"key": "sleep_powder",
+				"levelReq": 13
+			},
+			{
+				"key": "take_down",
 				"levelReq": 15
 			},
 			{
 				"key": "razor_leaf",
-				"levelReq": 20
+				"levelReq": 19
 			},
 			{
 				"key": "sweet_scent",
-				"levelReq": 25
+				"levelReq": 21
 			},
 			{
 				"key": "growth",
-				"levelReq": 32
+				"levelReq": 25
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 27
+			},
+			{
+				"key": "worry_seed",
+				"levelReq": 31
 			},
 			{
 				"key": "synthesis",
-				"levelReq": 39
+				"levelReq": 33
 			},
 			{
-				"key": "solarbeam",
-				"levelReq": 46
+				"key": "seed_bomb",
+				"levelReq": 37
 			}
 		],
 		"evolvesTo": "ivysaur",
@@ -2676,7 +5316,7 @@ var SPECIES_DATA = {
 		"type": "ICE",
 		"type2": "FLYING",
 		"catchRate": 3,
-		"baseExp": 215,
+		"baseExp": 261,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 90,
@@ -2697,27 +5337,59 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "mist",
-				"levelReq": 13
+				"levelReq": 8
 			},
 			{
-				"key": "agility",
-				"levelReq": 25
+				"key": "ice_shard",
+				"levelReq": 15
 			},
 			{
 				"key": "mind_reader",
-				"levelReq": 37
+				"levelReq": 22
 			},
 			{
-				"key": "ice_beam",
-				"levelReq": 49
+				"key": "ancient_power",
+				"levelReq": 29
+			},
+			{
+				"key": "agility",
+				"levelReq": 36
+			},
+			{
+				"key": "freeze_dry",
+				"levelReq": 43
 			},
 			{
 				"key": "reflect",
-				"levelReq": 61
+				"levelReq": 50
+			},
+			{
+				"key": "hail",
+				"levelReq": 57
+			},
+			{
+				"key": "tailwind",
+				"levelReq": 64
+			},
+			{
+				"key": "ice_beam",
+				"levelReq": 71
 			},
 			{
 				"key": "blizzard",
-				"levelReq": 73
+				"levelReq": 78
+			},
+			{
+				"key": "roost",
+				"levelReq": 85
+			},
+			{
+				"key": "hurricane",
+				"levelReq": 92
+			},
+			{
+				"key": "sheer_cold",
+				"levelReq": 99
 			}
 		],
 		"evolvesTo": null,
@@ -2730,7 +5402,7 @@ var SPECIES_DATA = {
 		"type": "ELECTRIC",
 		"type2": "FLYING",
 		"catchRate": 3,
-		"baseExp": 216,
+		"baseExp": 261,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 90,
@@ -2746,32 +5418,64 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "thundershock",
+				"key": "thunder_shock",
 				"levelReq": 1
 			},
 			{
 				"key": "thunder_wave",
-				"levelReq": 13
-			},
-			{
-				"key": "agility",
-				"levelReq": 25
+				"levelReq": 8
 			},
 			{
 				"key": "detect",
-				"levelReq": 37
+				"levelReq": 15
 			},
 			{
-				"key": "drill_peck",
-				"levelReq": 49
+				"key": "pluck",
+				"levelReq": 22
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 29
+			},
+			{
+				"key": "charge",
+				"levelReq": 36
+			},
+			{
+				"key": "agility",
+				"levelReq": 43
+			},
+			{
+				"key": "discharge",
+				"levelReq": 50
+			},
+			{
+				"key": "rain_dance",
+				"levelReq": 57
 			},
 			{
 				"key": "light_screen",
-				"levelReq": 61
+				"levelReq": 64
+			},
+			{
+				"key": "drill_peck",
+				"levelReq": 71
 			},
 			{
 				"key": "thunder",
-				"levelReq": 73
+				"levelReq": 78
+			},
+			{
+				"key": "roost",
+				"levelReq": 85
+			},
+			{
+				"key": "magnetic_flux",
+				"levelReq": 92
+			},
+			{
+				"key": "zap_cannon",
+				"levelReq": 99
 			}
 		],
 		"evolvesTo": null,
@@ -2784,7 +5488,7 @@ var SPECIES_DATA = {
 		"type": "FIRE",
 		"type2": "FLYING",
 		"catchRate": 3,
-		"baseExp": 217,
+		"baseExp": 261,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 90,
@@ -2796,36 +5500,68 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "wing_attack",
-				"levelReq": 1
-			},
-			{
 				"key": "ember",
 				"levelReq": 1
 			},
 			{
+				"key": "wing_attack",
+				"levelReq": 1
+			},
+			{
 				"key": "fire_spin",
-				"levelReq": 13
+				"levelReq": 8
 			},
 			{
 				"key": "agility",
-				"levelReq": 25
+				"levelReq": 15
 			},
 			{
 				"key": "endure",
-				"levelReq": 37
+				"levelReq": 22
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 29
 			},
 			{
 				"key": "flamethrower",
-				"levelReq": 49
+				"levelReq": 36
 			},
 			{
 				"key": "safeguard",
-				"levelReq": 61
+				"levelReq": 43
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 50
+			},
+			{
+				"key": "sunny_day",
+				"levelReq": 57
+			},
+			{
+				"key": "heat_wave",
+				"levelReq": 64
+			},
+			{
+				"key": "solar_beam",
+				"levelReq": 71
 			},
 			{
 				"key": "sky_attack",
-				"levelReq": 73
+				"levelReq": 78
+			},
+			{
+				"key": "roost",
+				"levelReq": 85
+			},
+			{
+				"key": "hurricane",
+				"levelReq": 92
+			},
+			{
+				"key": "burn_up",
+				"levelReq": 99
 			}
 		],
 		"evolvesTo": null,
@@ -2838,7 +5574,7 @@ var SPECIES_DATA = {
 		"type": "ELECTRIC",
 		"type2": null,
 		"catchRate": 3,
-		"baseExp": 216,
+		"baseExp": 261,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 90,
@@ -2854,36 +5590,64 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "discharge",
+				"levelReq": 1
+			},
+			{
+				"key": "extrasensory",
+				"levelReq": 1
+			},
+			{
 				"key": "leer",
 				"levelReq": 1
 			},
 			{
-				"key": "thundershock",
-				"levelReq": 11
+				"key": "thunder_shock",
+				"levelReq": 8
 			},
 			{
 				"key": "roar",
-				"levelReq": 21
+				"levelReq": 15
 			},
 			{
 				"key": "quick_attack",
-				"levelReq": 31
+				"levelReq": 22
 			},
 			{
 				"key": "spark",
-				"levelReq": 41
+				"levelReq": 29
 			},
 			{
 				"key": "reflect",
-				"levelReq": 51
+				"levelReq": 36
 			},
 			{
 				"key": "crunch",
-				"levelReq": 61
+				"levelReq": 43
+			},
+			{
+				"key": "thunder_fang",
+				"levelReq": 50
+			},
+			{
+				"key": "discharge",
+				"levelReq": 57
+			},
+			{
+				"key": "extrasensory",
+				"levelReq": 64
+			},
+			{
+				"key": "rain_dance",
+				"levelReq": 71
+			},
+			{
+				"key": "calm_mind",
+				"levelReq": 78
 			},
 			{
 				"key": "thunder",
-				"levelReq": 71
+				"levelReq": 85
 			}
 		],
 		"evolvesTo": null,
@@ -2896,7 +5660,7 @@ var SPECIES_DATA = {
 		"type": "FIRE",
 		"type2": null,
 		"catchRate": 3,
-		"baseExp": 217,
+		"baseExp": 261,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 115,
@@ -2912,36 +5676,72 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "eruption",
+				"levelReq": 1
+			},
+			{
+				"key": "extrasensory",
+				"levelReq": 1
+			},
+			{
+				"key": "lava_plume",
+				"levelReq": 1
+			},
+			{
 				"key": "leer",
 				"levelReq": 1
 			},
 			{
+				"key": "sacred_fire",
+				"levelReq": 1
+			},
+			{
 				"key": "ember",
-				"levelReq": 11
+				"levelReq": 8
 			},
 			{
 				"key": "roar",
-				"levelReq": 21
+				"levelReq": 15
 			},
 			{
 				"key": "fire_spin",
-				"levelReq": 31
+				"levelReq": 22
 			},
 			{
 				"key": "stomp",
-				"levelReq": 41
+				"levelReq": 29
 			},
 			{
 				"key": "flamethrower",
-				"levelReq": 51
+				"levelReq": 36
 			},
 			{
 				"key": "swagger",
-				"levelReq": 61
+				"levelReq": 43
+			},
+			{
+				"key": "fire_fang",
+				"levelReq": 50
+			},
+			{
+				"key": "lava_plume",
+				"levelReq": 57
+			},
+			{
+				"key": "extrasensory",
+				"levelReq": 64
 			},
 			{
 				"key": "fire_blast",
 				"levelReq": 71
+			},
+			{
+				"key": "calm_mind",
+				"levelReq": 78
+			},
+			{
+				"key": "eruption",
+				"levelReq": 85
 			}
 		],
 		"evolvesTo": null,
@@ -2954,7 +5754,7 @@ var SPECIES_DATA = {
 		"type": "WATER",
 		"type2": null,
 		"catchRate": 3,
-		"baseExp": 215,
+		"baseExp": 261,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 100,
@@ -2970,36 +5770,68 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "bubble_beam",
+				"levelReq": 1
+			},
+			{
 				"key": "leer",
 				"levelReq": 1
 			},
 			{
-				"key": "bubblebeam",
-				"levelReq": 11
+				"key": "rain_dance",
+				"levelReq": 1
+			},
+			{
+				"key": "sheer_cold",
+				"levelReq": 1
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 8
 			},
 			{
 				"key": "rain_dance",
-				"levelReq": 21
+				"levelReq": 15
 			},
 			{
 				"key": "gust",
-				"levelReq": 31
+				"levelReq": 22
 			},
 			{
 				"key": "aurora_beam",
-				"levelReq": 41
+				"levelReq": 29
 			},
 			{
 				"key": "mist",
-				"levelReq": 51
+				"levelReq": 36
 			},
 			{
 				"key": "mirror_coat",
-				"levelReq": 61
+				"levelReq": 43
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 50
+			},
+			{
+				"key": "tailwind",
+				"levelReq": 57
+			},
+			{
+				"key": "extrasensory",
+				"levelReq": 64
 			},
 			{
 				"key": "hydro_pump",
 				"levelReq": 71
+			},
+			{
+				"key": "calm_mind",
+				"levelReq": 78
+			},
+			{
+				"key": "blizzard",
+				"levelReq": 85
 			}
 		],
 		"evolvesTo": null,
@@ -3012,7 +5844,7 @@ var SPECIES_DATA = {
 		"type": "PSYCHIC",
 		"type2": "FLYING",
 		"catchRate": 3,
-		"baseExp": 220,
+		"baseExp": 306,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 106,
@@ -3024,43 +5856,67 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "aeroblast",
+				"key": "weather_ball",
 				"levelReq": 1
 			},
 			{
-				"key": "safeguard",
-				"levelReq": 11
+				"key": "whirlwind",
+				"levelReq": 1
 			},
 			{
 				"key": "gust",
-				"levelReq": 22
+				"levelReq": 9
 			},
 			{
-				"key": "recover",
-				"levelReq": 33
+				"key": "dragon_rush",
+				"levelReq": 15
 			},
 			{
-				"key": "hydro_pump",
-				"levelReq": 44
+				"key": "extrasensory",
+				"levelReq": 23
 			},
 			{
 				"key": "rain_dance",
-				"levelReq": 55
+				"levelReq": 29
 			},
 			{
-				"key": "swift",
-				"levelReq": 66
+				"key": "hydro_pump",
+				"levelReq": 37
 			},
 			{
-				"key": "whirlwind",
-				"levelReq": 77
+				"key": "aeroblast",
+				"levelReq": 43
 			},
 			{
-				"key": "ancientpower",
-				"levelReq": 88
+				"key": "punishment",
+				"levelReq": 50
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 57
+			},
+			{
+				"key": "safeguard",
+				"levelReq": 65
+			},
+			{
+				"key": "recover",
+				"levelReq": 71
 			},
 			{
 				"key": "future_sight",
+				"levelReq": 79
+			},
+			{
+				"key": "natural_gift",
+				"levelReq": 85
+			},
+			{
+				"key": "calm_mind",
+				"levelReq": 93
+			},
+			{
+				"key": "sky_attack",
 				"levelReq": 99
 			}
 		],
@@ -3074,7 +5930,7 @@ var SPECIES_DATA = {
 		"type": "FIRE",
 		"type2": "FLYING",
 		"catchRate": 3,
-		"baseExp": 220,
+		"baseExp": 306,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 106,
@@ -3086,43 +5942,67 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "sacred_fire",
+				"key": "weather_ball",
 				"levelReq": 1
 			},
 			{
-				"key": "safeguard",
-				"levelReq": 11
+				"key": "whirlwind",
+				"levelReq": 1
 			},
 			{
 				"key": "gust",
-				"levelReq": 22
+				"levelReq": 9
 			},
 			{
-				"key": "recover",
-				"levelReq": 33
+				"key": "brave_bird",
+				"levelReq": 15
 			},
 			{
-				"key": "fire_blast",
-				"levelReq": 44
+				"key": "extrasensory",
+				"levelReq": 23
 			},
 			{
 				"key": "sunny_day",
-				"levelReq": 55
+				"levelReq": 29
 			},
 			{
-				"key": "swift",
-				"levelReq": 66
+				"key": "fire_blast",
+				"levelReq": 37
 			},
 			{
-				"key": "whirlwind",
-				"levelReq": 77
+				"key": "sacred_fire",
+				"levelReq": 43
 			},
 			{
-				"key": "ancientpower",
-				"levelReq": 88
+				"key": "punishment",
+				"levelReq": 50
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 57
+			},
+			{
+				"key": "safeguard",
+				"levelReq": 65
+			},
+			{
+				"key": "recover",
+				"levelReq": 71
 			},
 			{
 				"key": "future_sight",
+				"levelReq": 79
+			},
+			{
+				"key": "natural_gift",
+				"levelReq": 85
+			},
+			{
+				"key": "calm_mind",
+				"levelReq": 93
+			},
+			{
+				"key": "sky_attack",
 				"levelReq": 99
 			}
 		],
@@ -3136,7 +6016,7 @@ var SPECIES_DATA = {
 		"type": "PSYCHIC",
 		"type2": "GRASS",
 		"catchRate": 45,
-		"baseExp": 64,
+		"baseExp": 270,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 100,
@@ -3148,15 +6028,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "leech_seed",
-				"levelReq": 1
-			},
-			{
 				"key": "confusion",
-				"levelReq": 1
-			},
-			{
-				"key": "recover",
 				"levelReq": 1
 			},
 			{
@@ -3164,24 +6036,52 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "leech_seed",
+				"levelReq": 1
+			},
+			{
+				"key": "recover",
+				"levelReq": 1
+			},
+			{
 				"key": "safeguard",
 				"levelReq": 10
 			},
 			{
-				"key": "ancientpower",
-				"levelReq": 20
+				"key": "magical_leaf",
+				"levelReq": 19
 			},
 			{
-				"key": "future_sight",
-				"levelReq": 30
+				"key": "ancient_power",
+				"levelReq": 28
 			},
 			{
 				"key": "baton_pass",
-				"levelReq": 40
+				"levelReq": 37
+			},
+			{
+				"key": "natural_gift",
+				"levelReq": 46
+			},
+			{
+				"key": "heal_block",
+				"levelReq": 55
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 64
+			},
+			{
+				"key": "healing_wish",
+				"levelReq": 73
+			},
+			{
+				"key": "leaf_storm",
+				"levelReq": 82
 			},
 			{
 				"key": "perish_song",
-				"levelReq": 50
+				"levelReq": 91
 			}
 		],
 		"evolvesTo": null,
@@ -3194,7 +6094,7 @@ var SPECIES_DATA = {
 		"type": "PSYCHIC",
 		"type2": null,
 		"catchRate": 3,
-		"baseExp": 220,
+		"baseExp": 306,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 106,
@@ -3214,40 +6114,76 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "barrier",
-				"levelReq": 11
+				"key": "laser_focus",
+				"levelReq": 1
 			},
 			{
-				"key": "swift",
-				"levelReq": 22
-			},
-			{
-				"key": "psych_up",
-				"levelReq": 33
-			},
-			{
-				"key": "future_sight",
-				"levelReq": 44
-			},
-			{
-				"key": "mist",
-				"levelReq": 55
-			},
-			{
-				"key": "psychic_m",
-				"levelReq": 66
-			},
-			{
-				"key": "amnesia",
-				"levelReq": 77
-			},
-			{
-				"key": "recover",
-				"levelReq": 88
+				"key": "psywave",
+				"levelReq": 1
 			},
 			{
 				"key": "safeguard",
-				"levelReq": 99
+				"levelReq": 1
+			},
+			{
+				"key": "swift",
+				"levelReq": 8
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 15
+			},
+			{
+				"key": "psych_up",
+				"levelReq": 22
+			},
+			{
+				"key": "miracle_eye",
+				"levelReq": 29
+			},
+			{
+				"key": "psycho_cut",
+				"levelReq": 36
+			},
+			{
+				"key": "guard_swap",
+				"levelReq": 43
+			},
+			{
+				"key": "power_swap",
+				"levelReq": 43
+			},
+			{
+				"key": "recover",
+				"levelReq": 50
+			},
+			{
+				"key": "psychic",
+				"levelReq": 57
+			},
+			{
+				"key": "barrier",
+				"levelReq": 64
+			},
+			{
+				"key": "aura_sphere",
+				"levelReq": 70
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 79
+			},
+			{
+				"key": "mist",
+				"levelReq": 86
+			},
+			{
+				"key": "me_first",
+				"levelReq": 93
+			},
+			{
+				"key": "psystrike",
+				"levelReq": 100
 			}
 		],
 		"evolvesTo": null,
@@ -3260,7 +6196,7 @@ var SPECIES_DATA = {
 		"type": "PSYCHIC",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 64,
+		"baseExp": 270,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 100,
@@ -3276,24 +6212,52 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "reflect_type",
+				"levelReq": 1
+			},
+			{
 				"key": "transform",
-				"levelReq": 10
+				"levelReq": 1
 			},
 			{
 				"key": "mega_punch",
-				"levelReq": 20
+				"levelReq": 10
 			},
 			{
 				"key": "metronome",
+				"levelReq": 20
+			},
+			{
+				"key": "psychic",
 				"levelReq": 30
 			},
 			{
-				"key": "psychic_m",
+				"key": "barrier",
 				"levelReq": 40
 			},
 			{
-				"key": "ancientpower",
+				"key": "ancient_power",
 				"levelReq": 50
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 60
+			},
+			{
+				"key": "me_first",
+				"levelReq": 70
+			},
+			{
+				"key": "baton_pass",
+				"levelReq": 80
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 90
+			},
+			{
+				"key": "aura_sphere",
+				"levelReq": 100
 			}
 		],
 		"evolvesTo": null,
@@ -3306,7 +6270,7 @@ var SPECIES_DATA = {
 		"type": "ROCK",
 		"type2": "GROUND",
 		"catchRate": 255,
-		"baseExp": 86,
+		"baseExp": 60,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 40,
@@ -3318,40 +6282,68 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "defense_curl",
+				"levelReq": 1
+			},
+			{
 				"key": "tackle",
 				"levelReq": 1
 			},
 			{
-				"key": "defense_curl",
+				"key": "mud_sport",
+				"levelReq": 4
+			},
+			{
+				"key": "rock_polish",
 				"levelReq": 6
 			},
 			{
-				"key": "rock_throw",
-				"levelReq": 11
+				"key": "rollout",
+				"levelReq": 10
 			},
 			{
 				"key": "magnitude",
+				"levelReq": 12
+			},
+			{
+				"key": "rock_throw",
 				"levelReq": 16
 			},
 			{
-				"key": "selfdestruct",
-				"levelReq": 21
+				"key": "smack_down",
+				"levelReq": 18
 			},
 			{
-				"key": "harden",
-				"levelReq": 26
+				"key": "bulldoze",
+				"levelReq": 22
 			},
 			{
-				"key": "rollout",
-				"levelReq": 31
+				"key": "self_destruct",
+				"levelReq": 24
+			},
+			{
+				"key": "stealth_rock",
+				"levelReq": 28
+			},
+			{
+				"key": "rock_blast",
+				"levelReq": 30
 			},
 			{
 				"key": "earthquake",
-				"levelReq": 36
+				"levelReq": 34
 			},
 			{
 				"key": "explosion",
-				"levelReq": 41
+				"levelReq": 36
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 40
+			},
+			{
+				"key": "stone_edge",
+				"levelReq": 42
 			}
 		],
 		"evolvesTo": "graveler",
@@ -3364,7 +6356,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": "FLYING",
 		"catchRate": 255,
-		"baseExp": 58,
+		"baseExp": 52,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 40,
@@ -3376,36 +6368,52 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "peck",
-				"levelReq": 1
-			},
-			{
 				"key": "growl",
 				"levelReq": 1
 			},
 			{
-				"key": "leer",
-				"levelReq": 7
+				"key": "peck",
+				"levelReq": 1
 			},
 			{
-				"key": "fury_attack",
-				"levelReq": 13
+				"key": "leer",
+				"levelReq": 4
 			},
 			{
 				"key": "pursuit",
-				"levelReq": 25
+				"levelReq": 8
+			},
+			{
+				"key": "fury_attack",
+				"levelReq": 11
+			},
+			{
+				"key": "aerial_ace",
+				"levelReq": 15
 			},
 			{
 				"key": "mirror_move",
-				"levelReq": 31
+				"levelReq": 18
 			},
 			{
-				"key": "drill_peck",
-				"levelReq": 37
+				"key": "assurance",
+				"levelReq": 22
 			},
 			{
 				"key": "agility",
-				"levelReq": 43
+				"levelReq": 25
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 29
+			},
+			{
+				"key": "roost",
+				"levelReq": 32
+			},
+			{
+				"key": "drill_peck",
+				"levelReq": 36
 			}
 		],
 		"evolvesTo": "fearow",
@@ -3418,7 +6426,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 255,
-		"baseExp": 57,
+		"baseExp": 51,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 30,
@@ -3439,22 +6447,46 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "quick_attack",
-				"levelReq": 7
-			},
-			{
-				"key": "hyper_fang",
-				"levelReq": 13
+				"levelReq": 4
 			},
 			{
 				"key": "focus_energy",
-				"levelReq": 20
+				"levelReq": 7
+			},
+			{
+				"key": "bite",
+				"levelReq": 10
 			},
 			{
 				"key": "pursuit",
-				"levelReq": 27
+				"levelReq": 13
+			},
+			{
+				"key": "hyper_fang",
+				"levelReq": 16
+			},
+			{
+				"key": "assurance",
+				"levelReq": 19
+			},
+			{
+				"key": "crunch",
+				"levelReq": 22
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 25
 			},
 			{
 				"key": "super_fang",
+				"levelReq": 28
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 31
+			},
+			{
+				"key": "endeavor",
 				"levelReq": 34
 			}
 		],
@@ -3468,7 +6500,7 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": "POISON",
 		"catchRate": 45,
-		"baseExp": 141,
+		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 60,
@@ -3480,10 +6512,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "growl",
 				"levelReq": 1
 			},
@@ -3492,8 +6520,12 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
 				"key": "growl",
-				"levelReq": 4
+				"levelReq": 3
 			},
 			{
 				"key": "leech_seed",
@@ -3501,35 +6533,47 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "vine_whip",
-				"levelReq": 10
+				"levelReq": 9
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 15
+				"key": "poison_powder",
+				"levelReq": 13
 			},
 			{
 				"key": "sleep_powder",
+				"levelReq": 13
+			},
+			{
+				"key": "take_down",
 				"levelReq": 15
 			},
 			{
 				"key": "razor_leaf",
-				"levelReq": 22
+				"levelReq": 20
 			},
 			{
 				"key": "sweet_scent",
-				"levelReq": 29
+				"levelReq": 23
 			},
 			{
 				"key": "growth",
-				"levelReq": 38
+				"levelReq": 28
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 31
+			},
+			{
+				"key": "worry_seed",
+				"levelReq": 36
 			},
 			{
 				"key": "synthesis",
-				"levelReq": 47
+				"levelReq": 39
 			},
 			{
-				"key": "solarbeam",
-				"levelReq": 56
+				"key": "solar_beam",
+				"levelReq": 44
 			}
 		],
 		"evolvesTo": "venusaur",
@@ -3542,7 +6586,7 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": "POISON",
 		"catchRate": 45,
-		"baseExp": 208,
+		"baseExp": 236,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 80,
@@ -3554,10 +6598,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "growl",
 				"levelReq": 1
 			},
@@ -3566,12 +6606,24 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "petal_dance",
+				"levelReq": 1
+			},
+			{
+				"key": "petal_dance",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
 				"key": "vine_whip",
 				"levelReq": 1
 			},
 			{
 				"key": "growl",
-				"levelReq": 4
+				"levelReq": 3
 			},
 			{
 				"key": "leech_seed",
@@ -3579,35 +6631,51 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "vine_whip",
-				"levelReq": 10
+				"levelReq": 9
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 15
+				"key": "poison_powder",
+				"levelReq": 13
 			},
 			{
 				"key": "sleep_powder",
+				"levelReq": 13
+			},
+			{
+				"key": "take_down",
 				"levelReq": 15
 			},
 			{
 				"key": "razor_leaf",
-				"levelReq": 22
+				"levelReq": 20
 			},
 			{
 				"key": "sweet_scent",
-				"levelReq": 29
+				"levelReq": 23
 			},
 			{
 				"key": "growth",
-				"levelReq": 41
+				"levelReq": 28
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 31
+			},
+			{
+				"key": "worry_seed",
+				"levelReq": 39
 			},
 			{
 				"key": "synthesis",
-				"levelReq": 53
+				"levelReq": 45
 			},
 			{
-				"key": "solarbeam",
-				"levelReq": 65
+				"key": "petal_blizzard",
+				"levelReq": 50
+			},
+			{
+				"key": "solar_beam",
+				"levelReq": 53
 			}
 		],
 		"evolvesTo": null,
@@ -3620,7 +6688,7 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": "POISON",
 		"catchRate": 255,
-		"baseExp": 78,
+		"baseExp": 64,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 45,
@@ -3636,32 +6704,64 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "growth",
+				"levelReq": 1
+			},
+			{
 				"key": "sweet_scent",
-				"levelReq": 7
-			},
-			{
-				"key": "poisonpowder",
-				"levelReq": 14
-			},
-			{
-				"key": "stun_spore",
-				"levelReq": 16
-			},
-			{
-				"key": "sleep_powder",
-				"levelReq": 18
+				"levelReq": 5
 			},
 			{
 				"key": "acid",
+				"levelReq": 9
+			},
+			{
+				"key": "poison_powder",
+				"levelReq": 13
+			},
+			{
+				"key": "stun_spore",
+				"levelReq": 14
+			},
+			{
+				"key": "sleep_powder",
+				"levelReq": 15
+			},
+			{
+				"key": "mega_drain",
+				"levelReq": 19
+			},
+			{
+				"key": "lucky_chant",
 				"levelReq": 23
 			},
 			{
 				"key": "moonlight",
-				"levelReq": 32
+				"levelReq": 27
+			},
+			{
+				"key": "giga_drain",
+				"levelReq": 31
+			},
+			{
+				"key": "toxic",
+				"levelReq": 35
+			},
+			{
+				"key": "natural_gift",
+				"levelReq": 39
+			},
+			{
+				"key": "moonblast",
+				"levelReq": 43
+			},
+			{
+				"key": "grassy_terrain",
+				"levelReq": 47
 			},
 			{
 				"key": "petal_dance",
-				"levelReq": 39
+				"levelReq": 51
 			}
 		],
 		"evolvesTo": "gloom",
@@ -3674,7 +6774,7 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": "POISON",
 		"catchRate": 120,
-		"baseExp": 132,
+		"baseExp": 138,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 60,
@@ -3690,40 +6790,72 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "acid",
+				"levelReq": 1
+			},
+			{
+				"key": "growth",
+				"levelReq": 1
+			},
+			{
 				"key": "sweet_scent",
 				"levelReq": 1
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 1
-			},
-			{
 				"key": "sweet_scent",
-				"levelReq": 7
-			},
-			{
-				"key": "poisonpowder",
-				"levelReq": 14
-			},
-			{
-				"key": "stun_spore",
-				"levelReq": 16
-			},
-			{
-				"key": "sleep_powder",
-				"levelReq": 18
+				"levelReq": 5
 			},
 			{
 				"key": "acid",
+				"levelReq": 9
+			},
+			{
+				"key": "poison_powder",
+				"levelReq": 13
+			},
+			{
+				"key": "stun_spore",
+				"levelReq": 14
+			},
+			{
+				"key": "sleep_powder",
+				"levelReq": 15
+			},
+			{
+				"key": "mega_drain",
+				"levelReq": 19
+			},
+			{
+				"key": "lucky_chant",
 				"levelReq": 24
 			},
 			{
 				"key": "moonlight",
-				"levelReq": 35
+				"levelReq": 29
+			},
+			{
+				"key": "giga_drain",
+				"levelReq": 34
+			},
+			{
+				"key": "toxic",
+				"levelReq": 39
+			},
+			{
+				"key": "natural_gift",
+				"levelReq": 44
+			},
+			{
+				"key": "petal_blizzard",
+				"levelReq": 49
+			},
+			{
+				"key": "grassy_terrain",
+				"levelReq": 54
 			},
 			{
 				"key": "petal_dance",
-				"levelReq": 44
+				"levelReq": 59
 			}
 		],
 		"evolvesTo": null,
@@ -3736,7 +6868,7 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": "POISON",
 		"catchRate": 255,
-		"baseExp": 84,
+		"baseExp": 60,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 50,
@@ -3753,7 +6885,7 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "growth",
-				"levelReq": 6
+				"levelReq": 7
 			},
 			{
 				"key": "wrap",
@@ -3761,31 +6893,47 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "sleep_powder",
+				"levelReq": 13
+			},
+			{
+				"key": "poison_powder",
 				"levelReq": 15
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 17
-			},
-			{
 				"key": "stun_spore",
-				"levelReq": 19
+				"levelReq": 17
 			},
 			{
 				"key": "acid",
 				"levelReq": 23
 			},
 			{
+				"key": "knock_off",
+				"levelReq": 27
+			},
+			{
 				"key": "sweet_scent",
-				"levelReq": 30
+				"levelReq": 29
+			},
+			{
+				"key": "gastro_acid",
+				"levelReq": 35
 			},
 			{
 				"key": "razor_leaf",
-				"levelReq": 37
+				"levelReq": 39
+			},
+			{
+				"key": "poison_jab",
+				"levelReq": 41
 			},
 			{
 				"key": "slam",
-				"levelReq": 45
+				"levelReq": 47
+			},
+			{
+				"key": "wring_out",
+				"levelReq": 50
 			}
 		],
 		"evolvesTo": "weepinbell",
@@ -3798,7 +6946,7 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": "POISON",
 		"catchRate": 120,
-		"baseExp": 151,
+		"baseExp": 137,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 65,
@@ -3810,11 +6958,11 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "vine_whip",
+				"key": "growth",
 				"levelReq": 1
 			},
 			{
-				"key": "growth",
+				"key": "vine_whip",
 				"levelReq": 1
 			},
 			{
@@ -3823,7 +6971,7 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "growth",
-				"levelReq": 6
+				"levelReq": 7
 			},
 			{
 				"key": "wrap",
@@ -3831,31 +6979,47 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "sleep_powder",
+				"levelReq": 13
+			},
+			{
+				"key": "poison_powder",
 				"levelReq": 15
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 17
-			},
-			{
 				"key": "stun_spore",
-				"levelReq": 19
+				"levelReq": 17
 			},
 			{
 				"key": "acid",
 				"levelReq": 24
 			},
 			{
+				"key": "knock_off",
+				"levelReq": 29
+			},
+			{
 				"key": "sweet_scent",
-				"levelReq": 33
+				"levelReq": 32
+			},
+			{
+				"key": "gastro_acid",
+				"levelReq": 39
 			},
 			{
 				"key": "razor_leaf",
-				"levelReq": 42
+				"levelReq": 44
+			},
+			{
+				"key": "poison_jab",
+				"levelReq": 47
 			},
 			{
 				"key": "slam",
 				"levelReq": 54
+			},
+			{
+				"key": "wring_out",
+				"levelReq": 58
 			}
 		],
 		"evolvesTo": null,
@@ -3868,19 +7032,27 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": "POISON",
 		"catchRate": 45,
-		"baseExp": 191,
+		"baseExp": 221,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 80,
 			"atkFis": 105,
 			"atkEsp": 100,
 			"def": 65,
-			"defEsp": 60,
+			"defEsp": 70,
 			"speed": 70
 		},
 		"abilities": [
 			{
-				"key": "vine_whip",
+				"key": "leaf_tornado",
+				"levelReq": 1
+			},
+			{
+				"key": "leaf_tornado",
+				"levelReq": 1
+			},
+			{
+				"key": "razor_leaf",
 				"levelReq": 1
 			},
 			{
@@ -3888,12 +7060,32 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "spit_up",
+				"levelReq": 1
+			},
+			{
+				"key": "stockpile",
+				"levelReq": 1
+			},
+			{
+				"key": "swallow",
+				"levelReq": 1
+			},
+			{
 				"key": "sweet_scent",
 				"levelReq": 1
 			},
 			{
-				"key": "razor_leaf",
+				"key": "vine_whip",
 				"levelReq": 1
+			},
+			{
+				"key": "leaf_storm",
+				"levelReq": 32
+			},
+			{
+				"key": "leaf_blade",
+				"levelReq": 44
 			}
 		],
 		"evolvesTo": null,
@@ -3906,7 +7098,7 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": "PSYCHIC",
 		"catchRate": 90,
-		"baseExp": 98,
+		"baseExp": 65,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 60,
@@ -3926,32 +7118,56 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "uproar",
+				"levelReq": 1
+			},
+			{
 				"key": "reflect",
 				"levelReq": 7
 			},
 			{
 				"key": "leech_seed",
-				"levelReq": 13
+				"levelReq": 11
 			},
 			{
-				"key": "confusion",
-				"levelReq": 19
+				"key": "bullet_seed",
+				"levelReq": 17
 			},
 			{
 				"key": "stun_spore",
-				"levelReq": 25
+				"levelReq": 19
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 31
+				"key": "poison_powder",
+				"levelReq": 21
 			},
 			{
 				"key": "sleep_powder",
+				"levelReq": 23
+			},
+			{
+				"key": "confusion",
+				"levelReq": 27
+			},
+			{
+				"key": "worry_seed",
+				"levelReq": 33
+			},
+			{
+				"key": "natural_gift",
 				"levelReq": 37
 			},
 			{
-				"key": "solarbeam",
+				"key": "solar_beam",
 				"levelReq": 43
+			},
+			{
+				"key": "extrasensory",
+				"levelReq": 47
+			},
+			{
+				"key": "bestow",
+				"levelReq": 50
 			}
 		],
 		"evolvesTo": null,
@@ -3964,7 +7180,7 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 166,
+		"baseExp": 87,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 65,
@@ -3980,40 +7196,76 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "ingrain",
+				"levelReq": 1
+			},
+			{
 				"key": "sleep_powder",
 				"levelReq": 4
+			},
+			{
+				"key": "vine_whip",
+				"levelReq": 7
 			},
 			{
 				"key": "absorb",
 				"levelReq": 10
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 13
-			},
-			{
-				"key": "vine_whip",
-				"levelReq": 19
+				"key": "poison_powder",
+				"levelReq": 14
 			},
 			{
 				"key": "bind",
-				"levelReq": 25
-			},
-			{
-				"key": "mega_drain",
-				"levelReq": 31
-			},
-			{
-				"key": "stun_spore",
-				"levelReq": 34
-			},
-			{
-				"key": "slam",
-				"levelReq": 40
+				"levelReq": 17
 			},
 			{
 				"key": "growth",
+				"levelReq": 20
+			},
+			{
+				"key": "mega_drain",
+				"levelReq": 23
+			},
+			{
+				"key": "knock_off",
+				"levelReq": 27
+			},
+			{
+				"key": "stun_spore",
+				"levelReq": 30
+			},
+			{
+				"key": "natural_gift",
+				"levelReq": 33
+			},
+			{
+				"key": "giga_drain",
+				"levelReq": 36
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 38
+			},
+			{
+				"key": "slam",
+				"levelReq": 41
+			},
+			{
+				"key": "tickle",
+				"levelReq": 44
+			},
+			{
+				"key": "wring_out",
 				"levelReq": 46
+			},
+			{
+				"key": "grassy_terrain",
+				"levelReq": 48
+			},
+			{
+				"key": "power_whip",
+				"levelReq": 50
 			}
 		],
 		"evolvesTo": null,
@@ -4038,44 +7290,60 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "growl",
 				"levelReq": 1
 			},
 			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
 				"key": "razor_leaf",
-				"levelReq": 8
+				"levelReq": 6
 			},
 			{
-				"key": "reflect",
-				"levelReq": 12
-			},
-			{
-				"key": "poisonpowder",
-				"levelReq": 15
+				"key": "poison_powder",
+				"levelReq": 9
 			},
 			{
 				"key": "synthesis",
-				"levelReq": 22
+				"levelReq": 12
 			},
 			{
-				"key": "body_slam",
-				"levelReq": 29
+				"key": "reflect",
+				"levelReq": 17
+			},
+			{
+				"key": "magical_leaf",
+				"levelReq": 20
+			},
+			{
+				"key": "natural_gift",
+				"levelReq": 23
+			},
+			{
+				"key": "sweet_scent",
+				"levelReq": 28
 			},
 			{
 				"key": "light_screen",
-				"levelReq": 36
+				"levelReq": 31
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 34
 			},
 			{
 				"key": "safeguard",
-				"levelReq": 43
+				"levelReq": 39
 			},
 			{
-				"key": "solarbeam",
-				"levelReq": 50
+				"key": "aromatherapy",
+				"levelReq": 42
+			},
+			{
+				"key": "solar_beam",
+				"levelReq": 45
 			}
 		],
 		"evolvesTo": "bayleef",
@@ -4088,7 +7356,7 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 141,
+		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 60,
@@ -4100,52 +7368,68 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "growl",
 				"levelReq": 1
 			},
 			{
-				"key": "razor_leaf",
-				"levelReq": 1
-			},
-			{
-				"key": "reflect",
+				"key": "poison_powder",
 				"levelReq": 1
 			},
 			{
 				"key": "razor_leaf",
-				"levelReq": 8
+				"levelReq": 1
 			},
 			{
-				"key": "reflect",
-				"levelReq": 12
+				"key": "tackle",
+				"levelReq": 1
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 15
+				"key": "razor_leaf",
+				"levelReq": 6
+			},
+			{
+				"key": "poison_powder",
+				"levelReq": 9
 			},
 			{
 				"key": "synthesis",
-				"levelReq": 23
+				"levelReq": 12
 			},
 			{
-				"key": "body_slam",
-				"levelReq": 31
+				"key": "reflect",
+				"levelReq": 18
+			},
+			{
+				"key": "magical_leaf",
+				"levelReq": 22
+			},
+			{
+				"key": "natural_gift",
+				"levelReq": 26
+			},
+			{
+				"key": "sweet_scent",
+				"levelReq": 32
 			},
 			{
 				"key": "light_screen",
-				"levelReq": 39
+				"levelReq": 36
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 40
 			},
 			{
 				"key": "safeguard",
-				"levelReq": 47
+				"levelReq": 46
 			},
 			{
-				"key": "solarbeam",
-				"levelReq": 55
+				"key": "aromatherapy",
+				"levelReq": 50
+			},
+			{
+				"key": "solar_beam",
+				"levelReq": 54
 			}
 		],
 		"evolvesTo": "meganium",
@@ -4158,7 +7442,7 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 208,
+		"baseExp": 236,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 80,
@@ -4170,52 +7454,84 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "growl",
 				"levelReq": 1
 			},
 			{
+				"key": "petal_blizzard",
+				"levelReq": 1
+			},
+			{
+				"key": "petal_dance",
+				"levelReq": 1
+			},
+			{
+				"key": "petal_dance",
+				"levelReq": 1
+			},
+			{
+				"key": "poison_powder",
+				"levelReq": 1
+			},
+			{
 				"key": "razor_leaf",
 				"levelReq": 1
 			},
 			{
-				"key": "reflect",
+				"key": "tackle",
 				"levelReq": 1
 			},
 			{
 				"key": "razor_leaf",
-				"levelReq": 8
+				"levelReq": 6
 			},
 			{
-				"key": "reflect",
-				"levelReq": 12
-			},
-			{
-				"key": "poisonpowder",
-				"levelReq": 15
+				"key": "poison_powder",
+				"levelReq": 9
 			},
 			{
 				"key": "synthesis",
-				"levelReq": 23
+				"levelReq": 12
 			},
 			{
-				"key": "body_slam",
-				"levelReq": 31
+				"key": "reflect",
+				"levelReq": 18
+			},
+			{
+				"key": "magical_leaf",
+				"levelReq": 22
+			},
+			{
+				"key": "natural_gift",
+				"levelReq": 26
+			},
+			{
+				"key": "sweet_scent",
+				"levelReq": 34
 			},
 			{
 				"key": "light_screen",
-				"levelReq": 41
+				"levelReq": 40
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 46
 			},
 			{
 				"key": "safeguard",
-				"levelReq": 51
+				"levelReq": 54
 			},
 			{
-				"key": "solarbeam",
-				"levelReq": 61
+				"key": "aromatherapy",
+				"levelReq": 60
+			},
+			{
+				"key": "solar_beam",
+				"levelReq": 66
+			},
+			{
+				"key": "petal_blizzard",
+				"levelReq": 70
 			}
 		],
 		"evolvesTo": null,
@@ -4228,7 +7544,7 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": "FLYING",
 		"catchRate": 255,
-		"baseExp": 74,
+		"baseExp": 50,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 35,
@@ -4240,44 +7556,84 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "absorb",
+				"levelReq": 1
+			},
+			{
 				"key": "splash",
 				"levelReq": 1
 			},
 			{
 				"key": "synthesis",
-				"levelReq": 5
+				"levelReq": 4
 			},
 			{
 				"key": "tail_whip",
-				"levelReq": 5
+				"levelReq": 6
 			},
 			{
 				"key": "tackle",
+				"levelReq": 8
+			},
+			{
+				"key": "fairy_wind",
 				"levelReq": 10
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 13
+				"key": "poison_powder",
+				"levelReq": 12
 			},
 			{
 				"key": "stun_spore",
-				"levelReq": 15
+				"levelReq": 14
 			},
 			{
 				"key": "sleep_powder",
-				"levelReq": 17
+				"levelReq": 16
+			},
+			{
+				"key": "bullet_seed",
+				"levelReq": 19
 			},
 			{
 				"key": "leech_seed",
-				"levelReq": 20
-			},
-			{
-				"key": "cotton_spore",
-				"levelReq": 25
+				"levelReq": 22
 			},
 			{
 				"key": "mega_drain",
-				"levelReq": 30
+				"levelReq": 25
+			},
+			{
+				"key": "acrobatics",
+				"levelReq": 28
+			},
+			{
+				"key": "rage_powder",
+				"levelReq": 31
+			},
+			{
+				"key": "cotton_spore",
+				"levelReq": 34
+			},
+			{
+				"key": "u_turn",
+				"levelReq": 37
+			},
+			{
+				"key": "worry_seed",
+				"levelReq": 40
+			},
+			{
+				"key": "giga_drain",
+				"levelReq": 43
+			},
+			{
+				"key": "bounce",
+				"levelReq": 46
+			},
+			{
+				"key": "memento",
+				"levelReq": 49
 			}
 		],
 		"evolvesTo": "skiploom",
@@ -4290,7 +7646,7 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": "FLYING",
 		"catchRate": 120,
-		"baseExp": 136,
+		"baseExp": 119,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 55,
@@ -4301,6 +7657,10 @@ var SPECIES_DATA = {
 			"speed": 80
 		},
 		"abilities": [
+			{
+				"key": "absorb",
+				"levelReq": 1
+			},
 			{
 				"key": "splash",
 				"levelReq": 1
@@ -4314,44 +7674,76 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "synthesis",
-				"levelReq": 5
+				"levelReq": 4
 			},
 			{
 				"key": "tail_whip",
-				"levelReq": 5
+				"levelReq": 6
 			},
 			{
 				"key": "tackle",
+				"levelReq": 8
+			},
+			{
+				"key": "fairy_wind",
 				"levelReq": 10
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 13
+				"key": "poison_powder",
+				"levelReq": 12
 			},
 			{
 				"key": "stun_spore",
-				"levelReq": 15
+				"levelReq": 14
 			},
 			{
 				"key": "sleep_powder",
-				"levelReq": 17
+				"levelReq": 16
+			},
+			{
+				"key": "bullet_seed",
+				"levelReq": 20
 			},
 			{
 				"key": "leech_seed",
-				"levelReq": 22
-			},
-			{
-				"key": "cotton_spore",
-				"levelReq": 29
+				"levelReq": 24
 			},
 			{
 				"key": "mega_drain",
+				"levelReq": 28
+			},
+			{
+				"key": "acrobatics",
+				"levelReq": 32
+			},
+			{
+				"key": "rage_powder",
 				"levelReq": 36
+			},
+			{
+				"key": "cotton_spore",
+				"levelReq": 40
+			},
+			{
+				"key": "u_turn",
+				"levelReq": 44
+			},
+			{
+				"key": "worry_seed",
+				"levelReq": 48
+			},
+			{
+				"key": "giga_drain",
+				"levelReq": 52
+			},
+			{
+				"key": "bounce",
+				"levelReq": 56
+			},
+			{
+				"key": "memento",
+				"levelReq": 60
 			}
 		],
 		"evolvesTo": "jumpluff",
@@ -4364,17 +7756,21 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": "FLYING",
 		"catchRate": 45,
-		"baseExp": 176,
+		"baseExp": 207,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 75,
 			"atkFis": 55,
 			"atkEsp": 55,
 			"def": 70,
-			"defEsp": 85,
+			"defEsp": 95,
 			"speed": 110
 		},
 		"abilities": [
+			{
+				"key": "absorb",
+				"levelReq": 1
+			},
 			{
 				"key": "splash",
 				"levelReq": 1
@@ -4388,44 +7784,76 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "synthesis",
-				"levelReq": 5
+				"levelReq": 4
 			},
 			{
 				"key": "tail_whip",
-				"levelReq": 5
+				"levelReq": 6
 			},
 			{
 				"key": "tackle",
+				"levelReq": 8
+			},
+			{
+				"key": "fairy_wind",
 				"levelReq": 10
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 13
+				"key": "poison_powder",
+				"levelReq": 12
 			},
 			{
 				"key": "stun_spore",
-				"levelReq": 15
+				"levelReq": 14
 			},
 			{
 				"key": "sleep_powder",
-				"levelReq": 17
+				"levelReq": 16
+			},
+			{
+				"key": "bullet_seed",
+				"levelReq": 20
 			},
 			{
 				"key": "leech_seed",
-				"levelReq": 22
-			},
-			{
-				"key": "cotton_spore",
-				"levelReq": 33
+				"levelReq": 24
 			},
 			{
 				"key": "mega_drain",
+				"levelReq": 29
+			},
+			{
+				"key": "acrobatics",
+				"levelReq": 34
+			},
+			{
+				"key": "rage_powder",
+				"levelReq": 39
+			},
+			{
+				"key": "cotton_spore",
 				"levelReq": 44
+			},
+			{
+				"key": "u_turn",
+				"levelReq": 49
+			},
+			{
+				"key": "worry_seed",
+				"levelReq": 54
+			},
+			{
+				"key": "giga_drain",
+				"levelReq": 59
+			},
+			{
+				"key": "bounce",
+				"levelReq": 64
+			},
+			{
+				"key": "memento",
+				"levelReq": 69
 			}
 		],
 		"evolvesTo": null,
@@ -4438,7 +7866,7 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": null,
 		"catchRate": 235,
-		"baseExp": 52,
+		"baseExp": 36,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 30,
@@ -4455,23 +7883,63 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "growth",
+				"levelReq": 1
+			},
+			{
+				"key": "ingrain",
 				"levelReq": 4
+			},
+			{
+				"key": "grass_whistle",
+				"levelReq": 7
 			},
 			{
 				"key": "mega_drain",
 				"levelReq": 10
 			},
 			{
-				"key": "sunny_day",
+				"key": "leech_seed",
+				"levelReq": 13
+			},
+			{
+				"key": "razor_leaf",
+				"levelReq": 16
+			},
+			{
+				"key": "worry_seed",
 				"levelReq": 19
 			},
 			{
+				"key": "giga_drain",
+				"levelReq": 22
+			},
+			{
+				"key": "endeavor",
+				"levelReq": 25
+			},
+			{
 				"key": "synthesis",
+				"levelReq": 28
+			},
+			{
+				"key": "natural_gift",
 				"levelReq": 31
 			},
 			{
-				"key": "giga_drain",
-				"levelReq": 46
+				"key": "solar_beam",
+				"levelReq": 34
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 37
+			},
+			{
+				"key": "sunny_day",
+				"levelReq": 40
+			},
+			{
+				"key": "seed_bomb",
+				"levelReq": 43
 			}
 		],
 		"evolvesTo": null,
@@ -4484,7 +7952,7 @@ var SPECIES_DATA = {
 		"type": "GRASS",
 		"type2": null,
 		"catchRate": 120,
-		"baseExp": 146,
+		"baseExp": 149,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 75,
@@ -4500,28 +7968,76 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "pound",
+				"key": "flower_shield",
 				"levelReq": 1
 			},
 			{
 				"key": "growth",
+				"levelReq": 1
+			},
+			{
+				"key": "pound",
+				"levelReq": 1
+			},
+			{
+				"key": "ingrain",
 				"levelReq": 4
 			},
 			{
-				"key": "razor_leaf",
+				"key": "grass_whistle",
+				"levelReq": 7
+			},
+			{
+				"key": "mega_drain",
 				"levelReq": 10
 			},
 			{
-				"key": "sunny_day",
+				"key": "leech_seed",
+				"levelReq": 13
+			},
+			{
+				"key": "razor_leaf",
+				"levelReq": 16
+			},
+			{
+				"key": "worry_seed",
 				"levelReq": 19
 			},
 			{
+				"key": "giga_drain",
+				"levelReq": 22
+			},
+			{
+				"key": "bullet_seed",
+				"levelReq": 25
+			},
+			{
 				"key": "petal_dance",
+				"levelReq": 28
+			},
+			{
+				"key": "natural_gift",
 				"levelReq": 31
 			},
 			{
-				"key": "solarbeam",
-				"levelReq": 46
+				"key": "solar_beam",
+				"levelReq": 34
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 37
+			},
+			{
+				"key": "sunny_day",
+				"levelReq": 40
+			},
+			{
+				"key": "leaf_storm",
+				"levelReq": 43
+			},
+			{
+				"key": "petal_blizzard",
+				"levelReq": 50
 			}
 		],
 		"evolvesTo": null,
@@ -4534,7 +8050,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": null,
 		"catchRate": 255,
-		"baseExp": 53,
+		"baseExp": 39,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 45,
@@ -4544,13 +8060,20 @@ var SPECIES_DATA = {
 			"defEsp": 20,
 			"speed": 45
 		},
-		"abilities": [{
-			"key": "tackle",
-			"levelReq": 1
-		}, {
-			"key": "string_shot",
-			"levelReq": 1
-		}],
+		"abilities": [
+			{
+				"key": "string_shot",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "bug_bite",
+				"levelReq": 9
+			}
+		],
 		"evolvesTo": "metapod",
 		"evolvesAtLevel": 7
 	},
@@ -4576,7 +8099,7 @@ var SPECIES_DATA = {
 			"levelReq": 1
 		}, {
 			"key": "harden",
-			"levelReq": 7
+			"levelReq": 1
 		}],
 		"evolvesTo": "butterfree",
 		"evolvesAtLevel": 10
@@ -4588,12 +8111,12 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "FLYING",
 		"catchRate": 45,
-		"baseExp": 160,
+		"baseExp": 178,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 60,
 			"atkFis": 45,
-			"atkEsp": 80,
+			"atkEsp": 90,
 			"def": 50,
 			"defEsp": 80,
 			"speed": 70
@@ -4604,40 +8127,72 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "confusion",
-				"levelReq": 10
+				"key": "gust",
+				"levelReq": 1
 			},
 			{
-				"key": "poisonpowder",
+				"key": "gust",
+				"levelReq": 1
+			},
+			{
+				"key": "confusion",
+				"levelReq": 11
+			},
+			{
+				"key": "poison_powder",
+				"levelReq": 13
+			},
+			{
+				"key": "sleep_powder",
 				"levelReq": 13
 			},
 			{
 				"key": "stun_spore",
-				"levelReq": 14
-			},
-			{
-				"key": "sleep_powder",
-				"levelReq": 15
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 18
-			},
-			{
-				"key": "whirlwind",
-				"levelReq": 23
-			},
-			{
-				"key": "gust",
-				"levelReq": 28
+				"levelReq": 13
 			},
 			{
 				"key": "psybeam",
-				"levelReq": 34
+				"levelReq": 17
+			},
+			{
+				"key": "silver_wind",
+				"levelReq": 19
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 23
 			},
 			{
 				"key": "safeguard",
-				"levelReq": 40
+				"levelReq": 25
+			},
+			{
+				"key": "whirlwind",
+				"levelReq": 29
+			},
+			{
+				"key": "bug_buzz",
+				"levelReq": 31
+			},
+			{
+				"key": "rage_powder",
+				"levelReq": 35
+			},
+			{
+				"key": "captivate",
+				"levelReq": 37
+			},
+			{
+				"key": "tailwind",
+				"levelReq": 41
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 43
+			},
+			{
+				"key": "quiver_dance",
+				"levelReq": 47
 			}
 		],
 		"evolvesTo": null,
@@ -4650,7 +8205,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "POISON",
 		"catchRate": 255,
-		"baseExp": 52,
+		"baseExp": 39,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 40,
@@ -4660,13 +8215,20 @@ var SPECIES_DATA = {
 			"defEsp": 20,
 			"speed": 50
 		},
-		"abilities": [{
-			"key": "poison_sting",
-			"levelReq": 1
-		}, {
-			"key": "string_shot",
-			"levelReq": 1
-		}],
+		"abilities": [
+			{
+				"key": "poison_sting",
+				"levelReq": 1
+			},
+			{
+				"key": "string_shot",
+				"levelReq": 1
+			},
+			{
+				"key": "bug_bite",
+				"levelReq": 9
+			}
+		],
 		"evolvesTo": "kakuna",
 		"evolvesAtLevel": 7
 	},
@@ -4677,7 +8239,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "POISON",
 		"catchRate": 120,
-		"baseExp": 71,
+		"baseExp": 72,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 45,
@@ -4692,7 +8254,7 @@ var SPECIES_DATA = {
 			"levelReq": 1
 		}, {
 			"key": "harden",
-			"levelReq": 7
+			"levelReq": 1
 		}],
 		"evolvesTo": "beedrill",
 		"evolvesAtLevel": 10
@@ -4704,11 +8266,11 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "POISON",
 		"catchRate": 45,
-		"baseExp": 159,
+		"baseExp": 178,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 65,
-			"atkFis": 80,
+			"atkFis": 90,
 			"atkEsp": 45,
 			"def": 40,
 			"defEsp": 80,
@@ -4720,32 +8282,60 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "fury_attack",
-				"levelReq": 10
-			},
-			{
-				"key": "focus_energy",
-				"levelReq": 15
+				"key": "twineedle",
+				"levelReq": 1
 			},
 			{
 				"key": "twineedle",
-				"levelReq": 20
+				"levelReq": 1
+			},
+			{
+				"key": "fury_attack",
+				"levelReq": 11
 			},
 			{
 				"key": "rage",
-				"levelReq": 25
+				"levelReq": 14
 			},
 			{
 				"key": "pursuit",
-				"levelReq": 30
+				"levelReq": 17
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 20
+			},
+			{
+				"key": "venoshock",
+				"levelReq": 23
+			},
+			{
+				"key": "assurance",
+				"levelReq": 26
+			},
+			{
+				"key": "toxic_spikes",
+				"levelReq": 29
 			},
 			{
 				"key": "pin_missile",
+				"levelReq": 32
+			},
+			{
+				"key": "poison_jab",
 				"levelReq": 35
 			},
 			{
 				"key": "agility",
-				"levelReq": 40
+				"levelReq": 38
+			},
+			{
+				"key": "endeavor",
+				"levelReq": 41
+			},
+			{
+				"key": "fell_stinger",
+				"levelReq": 44
 			}
 		],
 		"evolvesTo": null,
@@ -4758,7 +8348,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "GRASS",
 		"catchRate": 190,
-		"baseExp": 70,
+		"baseExp": 57,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 35,
@@ -4774,32 +8364,48 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "poison_powder",
+				"levelReq": 6
+			},
+			{
 				"key": "stun_spore",
-				"levelReq": 7
+				"levelReq": 6
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 13
+				"key": "absorb",
+				"levelReq": 11
 			},
 			{
-				"key": "leech_life",
-				"levelReq": 19
+				"key": "fury_cutter",
+				"levelReq": 17
 			},
 			{
 				"key": "spore",
-				"levelReq": 25
+				"levelReq": 22
 			},
 			{
 				"key": "slash",
-				"levelReq": 31
+				"levelReq": 27
 			},
 			{
 				"key": "growth",
-				"levelReq": 37
+				"levelReq": 33
 			},
 			{
 				"key": "giga_drain",
+				"levelReq": 38
+			},
+			{
+				"key": "aromatherapy",
 				"levelReq": 43
+			},
+			{
+				"key": "rage_powder",
+				"levelReq": 49
+			},
+			{
+				"key": "x_scissor",
+				"levelReq": 54
 			}
 		],
 		"evolvesTo": "parasect",
@@ -4812,7 +8418,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "GRASS",
 		"catchRate": 75,
-		"baseExp": 128,
+		"baseExp": 142,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 60,
@@ -4824,6 +8430,18 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "absorb",
+				"levelReq": 1
+			},
+			{
+				"key": "cross_poison",
+				"levelReq": 1
+			},
+			{
+				"key": "poison_powder",
+				"levelReq": 1
+			},
+			{
 				"key": "scratch",
 				"levelReq": 1
 			},
@@ -4832,36 +8450,48 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 1
+				"key": "poison_powder",
+				"levelReq": 6
 			},
 			{
 				"key": "stun_spore",
-				"levelReq": 7
+				"levelReq": 6
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 13
+				"key": "absorb",
+				"levelReq": 11
 			},
 			{
-				"key": "leech_life",
-				"levelReq": 19
+				"key": "fury_cutter",
+				"levelReq": 17
 			},
 			{
 				"key": "spore",
-				"levelReq": 28
+				"levelReq": 22
 			},
 			{
 				"key": "slash",
-				"levelReq": 37
+				"levelReq": 29
 			},
 			{
 				"key": "growth",
-				"levelReq": 46
+				"levelReq": 37
 			},
 			{
 				"key": "giga_drain",
-				"levelReq": 55
+				"levelReq": 44
+			},
+			{
+				"key": "aromatherapy",
+				"levelReq": 51
+			},
+			{
+				"key": "rage_powder",
+				"levelReq": 59
+			},
+			{
+				"key": "x_scissor",
+				"levelReq": 66
 			}
 		],
 		"evolvesTo": null,
@@ -4874,7 +8504,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "POISON",
 		"catchRate": 190,
-		"baseExp": 75,
+		"baseExp": 61,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 60,
@@ -4886,10 +8516,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "disable",
 				"levelReq": 1
 			},
@@ -4898,36 +8524,52 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
 				"key": "supersonic",
-				"levelReq": 9
+				"levelReq": 5
 			},
 			{
 				"key": "confusion",
-				"levelReq": 17
+				"levelReq": 11
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 20
-			},
-			{
-				"key": "leech_life",
-				"levelReq": 25
-			},
-			{
-				"key": "stun_spore",
-				"levelReq": 28
+				"key": "poison_powder",
+				"levelReq": 13
 			},
 			{
 				"key": "psybeam",
-				"levelReq": 33
+				"levelReq": 17
+			},
+			{
+				"key": "stun_spore",
+				"levelReq": 23
+			},
+			{
+				"key": "signal_beam",
+				"levelReq": 25
 			},
 			{
 				"key": "sleep_powder",
-				"levelReq": 36
+				"levelReq": 29
 			},
 			{
-				"key": "psychic_m",
+				"key": "leech_life",
+				"levelReq": 35
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 37
+			},
+			{
+				"key": "poison_fang",
 				"levelReq": 41
+			},
+			{
+				"key": "psychic",
+				"levelReq": 47
 			}
 		],
 		"evolvesTo": "venomoth",
@@ -4940,7 +8582,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "POISON",
 		"catchRate": 75,
-		"baseExp": 138,
+		"baseExp": 158,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 70,
@@ -4952,7 +8594,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "bug_buzz",
 				"levelReq": 1
 			},
 			{
@@ -4964,44 +8606,80 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "supersonic",
+				"key": "gust",
+				"levelReq": 1
+			},
+			{
+				"key": "gust",
+				"levelReq": 1
+			},
+			{
+				"key": "quiver_dance",
+				"levelReq": 1
+			},
+			{
+				"key": "silver_wind",
 				"levelReq": 1
 			},
 			{
 				"key": "supersonic",
-				"levelReq": 9
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 5
 			},
 			{
 				"key": "confusion",
-				"levelReq": 17
+				"levelReq": 11
 			},
 			{
-				"key": "poisonpowder",
-				"levelReq": 20
-			},
-			{
-				"key": "leech_life",
-				"levelReq": 25
-			},
-			{
-				"key": "stun_spore",
-				"levelReq": 28
-			},
-			{
-				"key": "gust",
-				"levelReq": 31
+				"key": "poison_powder",
+				"levelReq": 13
 			},
 			{
 				"key": "psybeam",
-				"levelReq": 36
+				"levelReq": 17
+			},
+			{
+				"key": "stun_spore",
+				"levelReq": 23
+			},
+			{
+				"key": "signal_beam",
+				"levelReq": 25
 			},
 			{
 				"key": "sleep_powder",
-				"levelReq": 42
+				"levelReq": 29
 			},
 			{
-				"key": "psychic_m",
-				"levelReq": 52
+				"key": "leech_life",
+				"levelReq": 37
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 41
+			},
+			{
+				"key": "poison_fang",
+				"levelReq": 47
+			},
+			{
+				"key": "psychic",
+				"levelReq": 55
+			},
+			{
+				"key": "bug_buzz",
+				"levelReq": 59
+			},
+			{
+				"key": "quiver_dance",
+				"levelReq": 63
 			}
 		],
 		"evolvesTo": null,
@@ -5014,7 +8692,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "FLYING",
 		"catchRate": 45,
-		"baseExp": 187,
+		"baseExp": 100,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 70,
@@ -5026,44 +8704,76 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "quick_attack",
-				"levelReq": 1
-			},
-			{
 				"key": "leer",
 				"levelReq": 1
 			},
 			{
+				"key": "quick_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "vacuum_wave",
+				"levelReq": 1
+			},
+			{
 				"key": "focus_energy",
-				"levelReq": 6
+				"levelReq": 5
 			},
 			{
 				"key": "pursuit",
-				"levelReq": 12
+				"levelReq": 9
 			},
 			{
 				"key": "false_swipe",
-				"levelReq": 18
+				"levelReq": 13
 			},
 			{
 				"key": "agility",
-				"levelReq": 24
+				"levelReq": 17
 			},
 			{
 				"key": "wing_attack",
-				"levelReq": 30
+				"levelReq": 21
+			},
+			{
+				"key": "fury_cutter",
+				"levelReq": 25
 			},
 			{
 				"key": "slash",
-				"levelReq": 36
+				"levelReq": 29
 			},
 			{
-				"key": "swords_dance",
-				"levelReq": 42
+				"key": "razor_wind",
+				"levelReq": 33
 			},
 			{
 				"key": "double_team",
-				"levelReq": 48
+				"levelReq": 37
+			},
+			{
+				"key": "x_scissor",
+				"levelReq": 41
+			},
+			{
+				"key": "night_slash",
+				"levelReq": 45
+			},
+			{
+				"key": "double_hit",
+				"levelReq": 49
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 50
+			},
+			{
+				"key": "swords_dance",
+				"levelReq": 57
+			},
+			{
+				"key": "feint",
+				"levelReq": 61
 			}
 		],
 		"evolvesTo": null,
@@ -5076,7 +8786,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 200,
+		"baseExp": 175,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 65,
@@ -5088,36 +8798,68 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "vicegrip",
+				"key": "focus_energy",
 				"levelReq": 1
 			},
 			{
-				"key": "focus_energy",
-				"levelReq": 7
+				"key": "vice_grip",
+				"levelReq": 1
 			},
 			{
 				"key": "bind",
-				"levelReq": 13
+				"levelReq": 4
 			},
 			{
 				"key": "seismic_toss",
-				"levelReq": 19
+				"levelReq": 8
 			},
 			{
 				"key": "harden",
-				"levelReq": 25
+				"levelReq": 11
 			},
 			{
-				"key": "guillotine",
-				"levelReq": 31
+				"key": "revenge",
+				"levelReq": 15
+			},
+			{
+				"key": "vital_throw",
+				"levelReq": 18
+			},
+			{
+				"key": "double_hit",
+				"levelReq": 22
+			},
+			{
+				"key": "brick_break",
+				"levelReq": 26
+			},
+			{
+				"key": "x_scissor",
+				"levelReq": 29
 			},
 			{
 				"key": "submission",
-				"levelReq": 37
+				"levelReq": 33
+			},
+			{
+				"key": "storm_throw",
+				"levelReq": 36
 			},
 			{
 				"key": "swords_dance",
+				"levelReq": 40
+			},
+			{
+				"key": "thrash",
 				"levelReq": 43
+			},
+			{
+				"key": "superpower",
+				"levelReq": 47
+			},
+			{
+				"key": "guillotine",
+				"levelReq": 50
 			}
 		],
 		"evolvesTo": null,
@@ -5130,7 +8872,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "FLYING",
 		"catchRate": 255,
-		"baseExp": 54,
+		"baseExp": 53,
 		"growthCurve": "FAST",
 		"base": {
 			"hp": 40,
@@ -5147,39 +8889,55 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "supersonic",
+				"levelReq": 5
+			},
+			{
+				"key": "swift",
 				"levelReq": 8
 			},
 			{
-				"key": "comet_punch",
-				"levelReq": 15
-			},
-			{
 				"key": "light_screen",
-				"levelReq": 22
+				"levelReq": 12
 			},
 			{
 				"key": "reflect",
-				"levelReq": 22
+				"levelReq": 12
 			},
 			{
 				"key": "safeguard",
+				"levelReq": 12
+			},
+			{
+				"key": "mach_punch",
+				"levelReq": 15
+			},
+			{
+				"key": "silver_wind",
+				"levelReq": 19
+			},
+			{
+				"key": "comet_punch",
 				"levelReq": 22
 			},
 			{
 				"key": "baton_pass",
-				"levelReq": 29
-			},
-			{
-				"key": "swift",
-				"levelReq": 36
+				"levelReq": 26
 			},
 			{
 				"key": "agility",
-				"levelReq": 43
+				"levelReq": 29
+			},
+			{
+				"key": "bug_buzz",
+				"levelReq": 33
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 36
 			},
 			{
 				"key": "double_edge",
-				"levelReq": 50
+				"levelReq": 40
 			}
 		],
 		"evolvesTo": "ledian",
@@ -5192,7 +8950,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "FLYING",
 		"catchRate": 90,
-		"baseExp": 134,
+		"baseExp": 137,
 		"growthCurve": "FAST",
 		"base": {
 			"hp": 55,
@@ -5204,48 +8962,68 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "supersonic",
+				"levelReq": 1
+			},
+			{
+				"key": "swift",
+				"levelReq": 1
+			},
+			{
 				"key": "tackle",
 				"levelReq": 1
 			},
 			{
 				"key": "supersonic",
-				"levelReq": 1
+				"levelReq": 5
 			},
 			{
-				"key": "supersonic",
+				"key": "swift",
 				"levelReq": 8
 			},
 			{
-				"key": "comet_punch",
-				"levelReq": 15
-			},
-			{
 				"key": "light_screen",
-				"levelReq": 24
+				"levelReq": 12
 			},
 			{
 				"key": "reflect",
-				"levelReq": 24
+				"levelReq": 12
 			},
 			{
 				"key": "safeguard",
+				"levelReq": 12
+			},
+			{
+				"key": "mach_punch",
+				"levelReq": 15
+			},
+			{
+				"key": "silver_wind",
+				"levelReq": 20
+			},
+			{
+				"key": "comet_punch",
 				"levelReq": 24
 			},
 			{
 				"key": "baton_pass",
-				"levelReq": 33
-			},
-			{
-				"key": "swift",
-				"levelReq": 42
+				"levelReq": 29
 			},
 			{
 				"key": "agility",
-				"levelReq": 51
+				"levelReq": 33
+			},
+			{
+				"key": "bug_buzz",
+				"levelReq": 38
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 42
 			},
 			{
 				"key": "double_edge",
-				"levelReq": 60
+				"levelReq": 47
 			}
 		],
 		"evolvesTo": null,
@@ -5258,7 +9036,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "POISON",
 		"catchRate": 255,
-		"baseExp": 54,
+		"baseExp": 50,
 		"growthCurve": "FAST",
 		"base": {
 			"hp": 40,
@@ -5270,6 +9048,10 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "constrict",
+				"levelReq": 1
+			},
+			{
 				"key": "poison_sting",
 				"levelReq": 1
 			},
@@ -5278,36 +9060,64 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "scary_face",
-				"levelReq": 6
+				"key": "absorb",
+				"levelReq": 5
 			},
 			{
-				"key": "constrict",
-				"levelReq": 11
+				"key": "infestation",
+				"levelReq": 8
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 12
 			},
 			{
 				"key": "night_shade",
-				"levelReq": 17
+				"levelReq": 15
 			},
 			{
-				"key": "leech_life",
-				"levelReq": 23
+				"key": "shadow_sneak",
+				"levelReq": 19
 			},
 			{
 				"key": "fury_swipes",
-				"levelReq": 30
+				"levelReq": 22
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 26
 			},
 			{
 				"key": "spider_web",
-				"levelReq": 37
+				"levelReq": 29
 			},
 			{
 				"key": "agility",
-				"levelReq": 45
+				"levelReq": 33
 			},
 			{
-				"key": "psychic_m",
-				"levelReq": 53
+				"key": "pin_missile",
+				"levelReq": 36
+			},
+			{
+				"key": "psychic",
+				"levelReq": 40
+			},
+			{
+				"key": "poison_jab",
+				"levelReq": 43
+			},
+			{
+				"key": "cross_poison",
+				"levelReq": 47
+			},
+			{
+				"key": "sticky_web",
+				"levelReq": 50
+			},
+			{
+				"key": "toxic_thread",
+				"levelReq": 54
 			}
 		],
 		"evolvesTo": "ariados",
@@ -5320,17 +9130,37 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "POISON",
 		"catchRate": 90,
-		"baseExp": 134,
+		"baseExp": 140,
 		"growthCurve": "FAST",
 		"base": {
 			"hp": 70,
 			"atkFis": 90,
 			"atkEsp": 60,
 			"def": 70,
-			"defEsp": 60,
+			"defEsp": 70,
 			"speed": 40
 		},
 		"abilities": [
+			{
+				"key": "absorb",
+				"levelReq": 1
+			},
+			{
+				"key": "bug_bite",
+				"levelReq": 1
+			},
+			{
+				"key": "constrict",
+				"levelReq": 1
+			},
+			{
+				"key": "fell_stinger",
+				"levelReq": 1
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 1
+			},
 			{
 				"key": "poison_sting",
 				"levelReq": 1
@@ -5340,43 +9170,75 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "scary_face",
+				"key": "swords_dance",
 				"levelReq": 1
 			},
 			{
-				"key": "constrict",
+				"key": "swords_dance",
 				"levelReq": 1
 			},
 			{
-				"key": "scary_face",
-				"levelReq": 6
+				"key": "venom_drench",
+				"levelReq": 1
 			},
 			{
-				"key": "constrict",
-				"levelReq": 11
+				"key": "absorb",
+				"levelReq": 5
+			},
+			{
+				"key": "infestation",
+				"levelReq": 8
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 12
 			},
 			{
 				"key": "night_shade",
-				"levelReq": 17
+				"levelReq": 15
 			},
 			{
-				"key": "leech_life",
-				"levelReq": 25
+				"key": "shadow_sneak",
+				"levelReq": 19
 			},
 			{
 				"key": "fury_swipes",
-				"levelReq": 34
+				"levelReq": 23
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 28
 			},
 			{
 				"key": "spider_web",
-				"levelReq": 43
+				"levelReq": 32
 			},
 			{
 				"key": "agility",
-				"levelReq": 53
+				"levelReq": 37
 			},
 			{
-				"key": "psychic_m",
+				"key": "pin_missile",
+				"levelReq": 41
+			},
+			{
+				"key": "psychic",
+				"levelReq": 46
+			},
+			{
+				"key": "poison_jab",
+				"levelReq": 50
+			},
+			{
+				"key": "cross_poison",
+				"levelReq": 55
+			},
+			{
+				"key": "sticky_web",
+				"levelReq": 58
+			},
+			{
+				"key": "toxic_thread",
 				"levelReq": 63
 			}
 		],
@@ -5390,7 +9252,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "FLYING",
 		"catchRate": 75,
-		"baseExp": 147,
+		"baseExp": 78,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 65,
@@ -5402,40 +9264,68 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "foresight",
 				"levelReq": 1
 			},
 			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
 				"key": "quick_attack",
-				"levelReq": 7
+				"levelReq": 6
 			},
 			{
 				"key": "double_team",
-				"levelReq": 13
+				"levelReq": 11
 			},
 			{
-				"key": "sonicboom",
-				"levelReq": 19
+				"key": "sonic_boom",
+				"levelReq": 14
 			},
 			{
 				"key": "detect",
-				"levelReq": 25
+				"levelReq": 17
 			},
 			{
 				"key": "supersonic",
-				"levelReq": 31
+				"levelReq": 22
+			},
+			{
+				"key": "uproar",
+				"levelReq": 27
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 30
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 33
+			},
+			{
+				"key": "hypnosis",
+				"levelReq": 38
 			},
 			{
 				"key": "wing_attack",
-				"levelReq": 37
+				"levelReq": 43
 			},
 			{
 				"key": "screech",
-				"levelReq": 43
+				"levelReq": 46
+			},
+			{
+				"key": "u_turn",
+				"levelReq": 49
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 54
+			},
+			{
+				"key": "bug_buzz",
+				"levelReq": 57
 			}
 		],
 		"evolvesTo": null,
@@ -5448,7 +9338,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": null,
 		"catchRate": 190,
-		"baseExp": 60,
+		"baseExp": 58,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 50,
@@ -5460,40 +9350,60 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "protect",
 				"levelReq": 1
 			},
 			{
-				"key": "selfdestruct",
-				"levelReq": 8
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "self_destruct",
+				"levelReq": 6
+			},
+			{
+				"key": "bug_bite",
+				"levelReq": 9
 			},
 			{
 				"key": "take_down",
-				"levelReq": 15
+				"levelReq": 12
 			},
 			{
 				"key": "rapid_spin",
-				"levelReq": 22
+				"levelReq": 17
 			},
 			{
 				"key": "bide",
-				"levelReq": 29
+				"levelReq": 20
 			},
 			{
-				"key": "explosion",
-				"levelReq": 36
+				"key": "natural_gift",
+				"levelReq": 23
 			},
 			{
 				"key": "spikes",
-				"levelReq": 43
+				"levelReq": 28
+			},
+			{
+				"key": "payback",
+				"levelReq": 31
+			},
+			{
+				"key": "explosion",
+				"levelReq": 34
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 39
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 42
 			},
 			{
 				"key": "double_edge",
-				"levelReq": 50
+				"levelReq": 45
 			}
 		],
 		"evolvesTo": "forretress",
@@ -5506,7 +9416,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "STEEL",
 		"catchRate": 75,
-		"baseExp": 118,
+		"baseExp": 163,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 75,
@@ -5518,7 +9428,31 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "autotomize",
+				"levelReq": 1
+			},
+			{
+				"key": "autotomize",
+				"levelReq": 1
+			},
+			{
+				"key": "bug_bite",
+				"levelReq": 1
+			},
+			{
+				"key": "heavy_slam",
+				"levelReq": 1
+			},
+			{
+				"key": "magnet_rise",
+				"levelReq": 1
+			},
+			{
+				"key": "mirror_shot",
+				"levelReq": 1
+			},
+			{
+				"key": "mirror_shot",
 				"levelReq": 1
 			},
 			{
@@ -5526,36 +9460,80 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "selfdestruct",
+				"key": "self_destruct",
 				"levelReq": 1
 			},
 			{
-				"key": "selfdestruct",
-				"levelReq": 8
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "toxic_spikes",
+				"levelReq": 1
+			},
+			{
+				"key": "zap_cannon",
+				"levelReq": 1
+			},
+			{
+				"key": "self_destruct",
+				"levelReq": 6
+			},
+			{
+				"key": "bug_bite",
+				"levelReq": 9
 			},
 			{
 				"key": "take_down",
-				"levelReq": 15
+				"levelReq": 12
 			},
 			{
 				"key": "rapid_spin",
-				"levelReq": 22
+				"levelReq": 17
 			},
 			{
 				"key": "bide",
-				"levelReq": 29
+				"levelReq": 20
 			},
 			{
-				"key": "explosion",
-				"levelReq": 39
+				"key": "natural_gift",
+				"levelReq": 23
 			},
 			{
 				"key": "spikes",
-				"levelReq": 49
+				"levelReq": 28
+			},
+			{
+				"key": "payback",
+				"levelReq": 32
+			},
+			{
+				"key": "explosion",
+				"levelReq": 36
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 42
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 46
 			},
 			{
 				"key": "double_edge",
-				"levelReq": 59
+				"levelReq": 50
+			},
+			{
+				"key": "magnet_rise",
+				"levelReq": 56
+			},
+			{
+				"key": "zap_cannon",
+				"levelReq": 60
+			},
+			{
+				"key": "heavy_slam",
+				"levelReq": 64
 			}
 		],
 		"evolvesTo": null,
@@ -5568,7 +9546,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "STEEL",
 		"catchRate": 25,
-		"baseExp": 200,
+		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 70,
@@ -5580,7 +9558,11 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "quick_attack",
+				"key": "bullet_punch",
+				"levelReq": 1
+			},
+			{
+				"key": "feint",
 				"levelReq": 1
 			},
 			{
@@ -5588,36 +9570,68 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "quick_attack",
+				"levelReq": 1
+			},
+			{
 				"key": "focus_energy",
-				"levelReq": 6
+				"levelReq": 5
 			},
 			{
 				"key": "pursuit",
-				"levelReq": 12
+				"levelReq": 9
 			},
 			{
 				"key": "false_swipe",
-				"levelReq": 18
+				"levelReq": 13
 			},
 			{
 				"key": "agility",
-				"levelReq": 24
+				"levelReq": 17
 			},
 			{
 				"key": "metal_claw",
-				"levelReq": 30
+				"levelReq": 21
+			},
+			{
+				"key": "fury_cutter",
+				"levelReq": 25
 			},
 			{
 				"key": "slash",
-				"levelReq": 36
+				"levelReq": 29
+			},
+			{
+				"key": "razor_wind",
+				"levelReq": 33
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 37
+			},
+			{
+				"key": "x_scissor",
+				"levelReq": 41
+			},
+			{
+				"key": "night_slash",
+				"levelReq": 45
+			},
+			{
+				"key": "double_hit",
+				"levelReq": 49
+			},
+			{
+				"key": "iron_head",
+				"levelReq": 50
 			},
 			{
 				"key": "swords_dance",
-				"levelReq": 42
+				"levelReq": 57
 			},
 			{
-				"key": "double_team",
-				"levelReq": 48
+				"key": "feint",
+				"levelReq": 61
 			}
 		],
 		"evolvesTo": null,
@@ -5630,7 +9644,7 @@ var SPECIES_DATA = {
 		"type": "BUG",
 		"type2": "FIGHTING",
 		"catchRate": 45,
-		"baseExp": 200,
+		"baseExp": 175,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 80,
@@ -5642,7 +9656,19 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "arm_thrust",
+				"levelReq": 1
+			},
+			{
+				"key": "bullet_seed",
+				"levelReq": 1
+			},
+			{
+				"key": "endure",
+				"levelReq": 1
+			},
+			{
+				"key": "horn_attack",
 				"levelReq": 1
 			},
 			{
@@ -5650,32 +9676,1856 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "horn_attack",
-				"levelReq": 6
+				"key": "night_slash",
+				"levelReq": 1
 			},
 			{
-				"key": "endure",
-				"levelReq": 12
+				"key": "tackle",
+				"levelReq": 1
 			},
 			{
-				"key": "fury_attack",
-				"levelReq": 19
+				"key": "feint",
+				"levelReq": 7
+			},
+			{
+				"key": "aerial_ace",
+				"levelReq": 10
+			},
+			{
+				"key": "chip_away",
+				"levelReq": 16
 			},
 			{
 				"key": "counter",
-				"levelReq": 27
+				"levelReq": 19
+			},
+			{
+				"key": "fury_attack",
+				"levelReq": 25
+			},
+			{
+				"key": "brick_break",
+				"levelReq": 28
+			},
+			{
+				"key": "pin_missile",
+				"levelReq": 31
 			},
 			{
 				"key": "take_down",
-				"levelReq": 35
+				"levelReq": 34
+			},
+			{
+				"key": "megahorn",
+				"levelReq": 37
+			},
+			{
+				"key": "close_combat",
+				"levelReq": 43
 			},
 			{
 				"key": "reversal",
+				"levelReq": 46
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"wartortle": {
+		"id": "wartortle",
+		"name": "Wartortle",
+		"description": "Pokedex Nº8 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 142,
+		"growthCurve": "MEDIUM_SLOW",
+		"base": {
+			"hp": 59,
+			"atkFis": 63,
+			"atkEsp": 65,
+			"def": 80,
+			"defEsp": 80,
+			"speed": 58
+		},
+		"abilities": [
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 4
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 7
+			},
+			{
+				"key": "withdraw",
+				"levelReq": 10
+			},
+			{
+				"key": "bubble",
+				"levelReq": 13
+			},
+			{
+				"key": "bite",
+				"levelReq": 17
+			},
+			{
+				"key": "rapid_spin",
+				"levelReq": 21
+			},
+			{
+				"key": "protect",
+				"levelReq": 25
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 29
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 33
+			},
+			{
+				"key": "skull_bash",
+				"levelReq": 37
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 41
+			},
+			{
+				"key": "rain_dance",
+				"levelReq": 45
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 49
+			}
+		],
+		"evolvesTo": "blastoise",
+		"evolvesAtLevel": 36
+	},
+	"blastoise": {
+		"id": "blastoise",
+		"name": "Blastoise",
+		"description": "Pokedex Nº9 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 239,
+		"growthCurve": "MEDIUM_SLOW",
+		"base": {
+			"hp": 79,
+			"atkFis": 83,
+			"atkEsp": 85,
+			"def": 100,
+			"defEsp": 105,
+			"speed": 78
+		},
+		"abilities": [
+			{
+				"key": "flash_cannon",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "withdraw",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 4
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 7
+			},
+			{
+				"key": "withdraw",
+				"levelReq": 10
+			},
+			{
+				"key": "bubble",
+				"levelReq": 13
+			},
+			{
+				"key": "bite",
+				"levelReq": 17
+			},
+			{
+				"key": "rapid_spin",
+				"levelReq": 21
+			},
+			{
+				"key": "protect",
+				"levelReq": 25
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 29
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 33
+			},
+			{
+				"key": "skull_bash",
+				"levelReq": 40
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 47
+			},
+			{
+				"key": "rain_dance",
+				"levelReq": 54
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 60
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"psyduck": {
+		"id": "psyduck",
+		"name": "Psyduck",
+		"description": "Pokedex Nº54 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 190,
+		"baseExp": 64,
+		"growthCurve": "MEDIUM_FAST",
+		"base": {
+			"hp": 50,
+			"atkFis": 52,
+			"atkEsp": 65,
+			"def": 48,
+			"defEsp": 50,
+			"speed": 55
+		},
+		"abilities": [
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "water_sport",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 4
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 7
+			},
+			{
+				"key": "confusion",
+				"levelReq": 10
+			},
+			{
+				"key": "fury_swipes",
+				"levelReq": 13
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 16
+			},
+			{
+				"key": "disable",
+				"levelReq": 19
+			},
+			{
+				"key": "screech",
+				"levelReq": 22
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 25
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 28
+			},
+			{
+				"key": "soak",
+				"levelReq": 31
+			},
+			{
+				"key": "psych_up",
+				"levelReq": 34
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 37
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 40
+			},
+			{
+				"key": "wonder_room",
+				"levelReq": 43
+			}
+		],
+		"evolvesTo": "golduck",
+		"evolvesAtLevel": 33
+	},
+	"golduck": {
+		"id": "golduck",
+		"name": "Golduck",
+		"description": "Pokedex Nº55 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 75,
+		"baseExp": 175,
+		"growthCurve": "MEDIUM_FAST",
+		"base": {
+			"hp": 80,
+			"atkFis": 82,
+			"atkEsp": 95,
+			"def": 78,
+			"defEsp": 80,
+			"speed": 85
+		},
+		"abilities": [
+			{
+				"key": "aqua_jet",
+				"levelReq": 1
+			},
+			{
+				"key": "me_first",
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "water_sport",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 4
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 7
+			},
+			{
+				"key": "confusion",
+				"levelReq": 10
+			},
+			{
+				"key": "fury_swipes",
+				"levelReq": 13
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 16
+			},
+			{
+				"key": "disable",
+				"levelReq": 19
+			},
+			{
+				"key": "screech",
+				"levelReq": 22
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 25
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 28
+			},
+			{
+				"key": "soak",
+				"levelReq": 31
+			},
+			{
+				"key": "psych_up",
+				"levelReq": 36
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 41
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 46
+			},
+			{
+				"key": "wonder_room",
+				"levelReq": 51
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"poliwag": {
+		"id": "poliwag",
+		"name": "Poliwag",
+		"description": "Pokedex Nº60 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 255,
+		"baseExp": 60,
+		"growthCurve": "MEDIUM_SLOW",
+		"base": {
+			"hp": 40,
+			"atkFis": 50,
+			"atkEsp": 40,
+			"def": 40,
+			"defEsp": 40,
+			"speed": 90
+		},
+		"abilities": [
+			{
+				"key": "water_sport",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 5
+			},
+			{
+				"key": "hypnosis",
+				"levelReq": 8
+			},
+			{
+				"key": "bubble",
+				"levelReq": 11
+			},
+			{
+				"key": "double_slap",
+				"levelReq": 15
+			},
+			{
+				"key": "rain_dance",
+				"levelReq": 18
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 21
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 25
+			},
+			{
+				"key": "mud_shot",
+				"levelReq": 28
+			},
+			{
+				"key": "belly_drum",
+				"levelReq": 31
+			},
+			{
+				"key": "wake_up_slap",
+				"levelReq": 35
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 38
+			},
+			{
+				"key": "mud_bomb",
+				"levelReq": 41
+			}
+		],
+		"evolvesTo": "poliwhirl",
+		"evolvesAtLevel": 25
+	},
+	"poliwhirl": {
+		"id": "poliwhirl",
+		"name": "Poliwhirl",
+		"description": "Pokedex Nº61 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 120,
+		"baseExp": 135,
+		"growthCurve": "MEDIUM_SLOW",
+		"base": {
+			"hp": 65,
+			"atkFis": 65,
+			"atkEsp": 50,
+			"def": 65,
+			"defEsp": 50,
+			"speed": 90
+		},
+		"abilities": [
+			{
+				"key": "hypnosis",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "water_sport",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 5
+			},
+			{
+				"key": "hypnosis",
+				"levelReq": 8
+			},
+			{
+				"key": "bubble",
+				"levelReq": 11
+			},
+			{
+				"key": "double_slap",
+				"levelReq": 15
+			},
+			{
+				"key": "rain_dance",
+				"levelReq": 18
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 21
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 27
+			},
+			{
+				"key": "mud_shot",
+				"levelReq": 32
+			},
+			{
+				"key": "belly_drum",
+				"levelReq": 37
+			},
+			{
+				"key": "wake_up_slap",
+				"levelReq": 43
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 48
+			},
+			{
+				"key": "mud_bomb",
+				"levelReq": 53
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"tentacool": {
+		"id": "tentacool",
+		"name": "Tentacool",
+		"description": "Pokedex Nº72 - tipo WATER/POISON.",
+		"type": "WATER",
+		"type2": "POISON",
+		"catchRate": 190,
+		"baseExp": 67,
+		"growthCurve": "SLOW",
+		"base": {
+			"hp": 40,
+			"atkFis": 40,
+			"atkEsp": 50,
+			"def": 35,
+			"defEsp": 100,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "poison_sting",
+				"levelReq": 1
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 4
+			},
+			{
+				"key": "constrict",
+				"levelReq": 7
+			},
+			{
+				"key": "acid",
+				"levelReq": 10
+			},
+			{
+				"key": "toxic_spikes",
+				"levelReq": 13
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 16
+			},
+			{
+				"key": "wrap",
+				"levelReq": 19
+			},
+			{
+				"key": "acid_spray",
+				"levelReq": 22
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 25
+			},
+			{
+				"key": "barrier",
+				"levelReq": 28
+			},
+			{
+				"key": "poison_jab",
+				"levelReq": 31
+			},
+			{
+				"key": "brine",
+				"levelReq": 34
+			},
+			{
+				"key": "screech",
+				"levelReq": 37
+			},
+			{
+				"key": "hex",
+				"levelReq": 40
+			},
+			{
+				"key": "sludge_wave",
+				"levelReq": 43
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 46
+			},
+			{
+				"key": "wring_out",
+				"levelReq": 49
+			}
+		],
+		"evolvesTo": "tentacruel",
+		"evolvesAtLevel": 30
+	},
+	"tentacruel": {
+		"id": "tentacruel",
+		"name": "Tentacruel",
+		"description": "Pokedex Nº73 - tipo WATER/POISON.",
+		"type": "WATER",
+		"type2": "POISON",
+		"catchRate": 60,
+		"baseExp": 180,
+		"growthCurve": "SLOW",
+		"base": {
+			"hp": 80,
+			"atkFis": 70,
+			"atkEsp": 80,
+			"def": 65,
+			"defEsp": 120,
+			"speed": 100
+		},
+		"abilities": [
+			{
+				"key": "acid",
+				"levelReq": 1
+			},
+			{
+				"key": "constrict",
+				"levelReq": 1
+			},
+			{
+				"key": "poison_sting",
+				"levelReq": 1
+			},
+			{
+				"key": "reflect_type",
+				"levelReq": 1
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 1
+			},
+			{
+				"key": "wring_out",
+				"levelReq": 1
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 4
+			},
+			{
+				"key": "constrict",
+				"levelReq": 7
+			},
+			{
+				"key": "acid",
+				"levelReq": 10
+			},
+			{
+				"key": "toxic_spikes",
+				"levelReq": 13
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 16
+			},
+			{
+				"key": "wrap",
+				"levelReq": 19
+			},
+			{
+				"key": "acid_spray",
+				"levelReq": 22
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 25
+			},
+			{
+				"key": "barrier",
+				"levelReq": 28
+			},
+			{
+				"key": "poison_jab",
+				"levelReq": 32
+			},
+			{
+				"key": "brine",
+				"levelReq": 36
+			},
+			{
+				"key": "screech",
+				"levelReq": 40
+			},
+			{
+				"key": "hex",
 				"levelReq": 44
+			},
+			{
+				"key": "sludge_wave",
+				"levelReq": 48
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 52
+			},
+			{
+				"key": "wring_out",
+				"levelReq": 56
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"slowpoke": {
+		"id": "slowpoke",
+		"name": "Slowpoke",
+		"description": "Pokedex Nº79 - tipo WATER/PSYCHIC.",
+		"type": "WATER",
+		"type2": "PSYCHIC",
+		"catchRate": 190,
+		"baseExp": 63,
+		"growthCurve": "MEDIUM_FAST",
+		"base": {
+			"hp": 90,
+			"atkFis": 65,
+			"atkEsp": 40,
+			"def": 65,
+			"defEsp": 40,
+			"speed": 15
+		},
+		"abilities": [
+			{
+				"key": "curse",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "yawn",
+				"levelReq": 1
+			},
+			{
+				"key": "growl",
+				"levelReq": 5
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 9
+			},
+			{
+				"key": "confusion",
+				"levelReq": 14
+			},
+			{
+				"key": "disable",
+				"levelReq": 19
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 23
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 28
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 32
+			},
+			{
+				"key": "slack_off",
+				"levelReq": 36
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 41
+			},
+			{
+				"key": "psychic",
+				"levelReq": 45
+			},
+			{
+				"key": "rain_dance",
+				"levelReq": 49
+			},
+			{
+				"key": "psych_up",
+				"levelReq": 54
+			},
+			{
+				"key": "heal_pulse",
+				"levelReq": 58
+			}
+		],
+		"evolvesTo": "slowbro",
+		"evolvesAtLevel": 37
+	},
+	"slowbro": {
+		"id": "slowbro",
+		"name": "Slowbro",
+		"description": "Pokedex Nº80 - tipo WATER/PSYCHIC.",
+		"type": "WATER",
+		"type2": "PSYCHIC",
+		"catchRate": 75,
+		"baseExp": 172,
+		"growthCurve": "MEDIUM_FAST",
+		"base": {
+			"hp": 95,
+			"atkFis": 75,
+			"atkEsp": 100,
+			"def": 110,
+			"defEsp": 80,
+			"speed": 30
+		},
+		"abilities": [
+			{
+				"key": "curse",
+				"levelReq": 1
+			},
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "heal_pulse",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "withdraw",
+				"levelReq": 1
+			},
+			{
+				"key": "withdraw",
+				"levelReq": 1
+			},
+			{
+				"key": "yawn",
+				"levelReq": 1
+			},
+			{
+				"key": "growl",
+				"levelReq": 5
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 9
+			},
+			{
+				"key": "confusion",
+				"levelReq": 14
+			},
+			{
+				"key": "disable",
+				"levelReq": 19
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 23
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 28
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 32
+			},
+			{
+				"key": "slack_off",
+				"levelReq": 36
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 43
+			},
+			{
+				"key": "psychic",
+				"levelReq": 49
+			},
+			{
+				"key": "rain_dance",
+				"levelReq": 55
+			},
+			{
+				"key": "psych_up",
+				"levelReq": 62
+			},
+			{
+				"key": "heal_pulse",
+				"levelReq": 68
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"seel": {
+		"id": "seel",
+		"name": "Seel",
+		"description": "Pokedex Nº86 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 190,
+		"baseExp": 65,
+		"growthCurve": "MEDIUM_FAST",
+		"base": {
+			"hp": 65,
+			"atkFis": 45,
+			"atkEsp": 45,
+			"def": 55,
+			"defEsp": 70,
+			"speed": 45
+		},
+		"abilities": [
+			{
+				"key": "headbutt",
+				"levelReq": 1
+			},
+			{
+				"key": "growl",
+				"levelReq": 3
+			},
+			{
+				"key": "water_sport",
+				"levelReq": 7
+			},
+			{
+				"key": "icy_wind",
+				"levelReq": 11
+			},
+			{
+				"key": "encore",
+				"levelReq": 13
+			},
+			{
+				"key": "ice_shard",
+				"levelReq": 17
+			},
+			{
+				"key": "rest",
+				"levelReq": 21
+			},
+			{
+				"key": "aqua_ring",
+				"levelReq": 23
+			},
+			{
+				"key": "aurora_beam",
+				"levelReq": 27
+			},
+			{
+				"key": "aqua_jet",
+				"levelReq": 31
+			},
+			{
+				"key": "brine",
+				"levelReq": 33
+			},
+			{
+				"key": "take_down",
+				"levelReq": 37
+			},
+			{
+				"key": "dive",
+				"levelReq": 41
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 43
+			},
+			{
+				"key": "ice_beam",
+				"levelReq": 47
+			},
+			{
+				"key": "safeguard",
+				"levelReq": 51
+			},
+			{
+				"key": "hail",
+				"levelReq": 53
+			}
+		],
+		"evolvesTo": "dewgong",
+		"evolvesAtLevel": 34
+	},
+	"dewgong": {
+		"id": "dewgong",
+		"name": "Dewgong",
+		"description": "Pokedex Nº87 - tipo WATER/ICE.",
+		"type": "WATER",
+		"type2": "ICE",
+		"catchRate": 75,
+		"baseExp": 166,
+		"growthCurve": "MEDIUM_FAST",
+		"base": {
+			"hp": 90,
+			"atkFis": 70,
+			"atkEsp": 70,
+			"def": 80,
+			"defEsp": 95,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 1
+			},
+			{
+				"key": "icy_wind",
+				"levelReq": 1
+			},
+			{
+				"key": "sheer_cold",
+				"levelReq": 1
+			},
+			{
+				"key": "sheer_cold",
+				"levelReq": 1
+			},
+			{
+				"key": "signal_beam",
+				"levelReq": 1
+			},
+			{
+				"key": "growl",
+				"levelReq": 3
+			},
+			{
+				"key": "signal_beam",
+				"levelReq": 7
+			},
+			{
+				"key": "icy_wind",
+				"levelReq": 11
+			},
+			{
+				"key": "encore",
+				"levelReq": 13
+			},
+			{
+				"key": "ice_shard",
+				"levelReq": 17
+			},
+			{
+				"key": "rest",
+				"levelReq": 21
+			},
+			{
+				"key": "aqua_ring",
+				"levelReq": 23
+			},
+			{
+				"key": "aurora_beam",
+				"levelReq": 27
+			},
+			{
+				"key": "aqua_jet",
+				"levelReq": 31
+			},
+			{
+				"key": "brine",
+				"levelReq": 33
+			},
+			{
+				"key": "take_down",
+				"levelReq": 39
+			},
+			{
+				"key": "dive",
+				"levelReq": 45
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 49
+			},
+			{
+				"key": "ice_beam",
+				"levelReq": 55
+			},
+			{
+				"key": "safeguard",
+				"levelReq": 61
+			},
+			{
+				"key": "hail",
+				"levelReq": 65
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"shellder": {
+		"id": "shellder",
+		"name": "Shellder",
+		"description": "Pokedex Nº90 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 190,
+		"baseExp": 61,
+		"growthCurve": "SLOW",
+		"base": {
+			"hp": 30,
+			"atkFis": 65,
+			"atkEsp": 45,
+			"def": 100,
+			"defEsp": 25,
+			"speed": 40
+		},
+		"abilities": [
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "withdraw",
+				"levelReq": 4
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 8
+			},
+			{
+				"key": "icicle_spear",
+				"levelReq": 13
+			},
+			{
+				"key": "protect",
+				"levelReq": 16
+			},
+			{
+				"key": "leer",
+				"levelReq": 20
+			},
+			{
+				"key": "clamp",
+				"levelReq": 25
+			},
+			{
+				"key": "ice_shard",
+				"levelReq": 28
+			},
+			{
+				"key": "razor_shell",
+				"levelReq": 32
+			},
+			{
+				"key": "aurora_beam",
+				"levelReq": 37
+			},
+			{
+				"key": "whirlpool",
+				"levelReq": 40
+			},
+			{
+				"key": "brine",
+				"levelReq": 44
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 49
+			},
+			{
+				"key": "ice_beam",
+				"levelReq": 52
+			},
+			{
+				"key": "shell_smash",
+				"levelReq": 56
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 61
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"krabby": {
+		"id": "krabby",
+		"name": "Krabby",
+		"description": "Pokedex Nº98 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 225,
+		"baseExp": 65,
+		"growthCurve": "MEDIUM_FAST",
+		"base": {
+			"hp": 30,
+			"atkFis": 105,
+			"atkEsp": 25,
+			"def": 90,
+			"defEsp": 25,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "bubble",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_sport",
+				"levelReq": 1
+			},
+			{
+				"key": "vice_grip",
+				"levelReq": 5
+			},
+			{
+				"key": "leer",
+				"levelReq": 9
+			},
+			{
+				"key": "harden",
+				"levelReq": 11
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 15
+			},
+			{
+				"key": "mud_shot",
+				"levelReq": 19
+			},
+			{
+				"key": "metal_claw",
+				"levelReq": 21
+			},
+			{
+				"key": "stomp",
+				"levelReq": 25
+			},
+			{
+				"key": "protect",
+				"levelReq": 29
+			},
+			{
+				"key": "guillotine",
+				"levelReq": 31
+			},
+			{
+				"key": "slam",
+				"levelReq": 35
+			},
+			{
+				"key": "brine",
+				"levelReq": 39
+			},
+			{
+				"key": "crabhammer",
+				"levelReq": 41
+			},
+			{
+				"key": "flail",
+				"levelReq": 45
+			}
+		],
+		"evolvesTo": "kingler",
+		"evolvesAtLevel": 28
+	},
+	"kingler": {
+		"id": "kingler",
+		"name": "Kingler",
+		"description": "Pokedex Nº99 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 60,
+		"baseExp": 166,
+		"growthCurve": "MEDIUM_FAST",
+		"base": {
+			"hp": 55,
+			"atkFis": 130,
+			"atkEsp": 50,
+			"def": 115,
+			"defEsp": 50,
+			"speed": 75
+		},
+		"abilities": [
+			{
+				"key": "bubble",
+				"levelReq": 1
+			},
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_sport",
+				"levelReq": 1
+			},
+			{
+				"key": "vice_grip",
+				"levelReq": 1
+			},
+			{
+				"key": "wide_guard",
+				"levelReq": 1
+			},
+			{
+				"key": "vice_grip",
+				"levelReq": 5
+			},
+			{
+				"key": "leer",
+				"levelReq": 9
+			},
+			{
+				"key": "harden",
+				"levelReq": 11
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 15
+			},
+			{
+				"key": "mud_shot",
+				"levelReq": 19
+			},
+			{
+				"key": "metal_claw",
+				"levelReq": 21
+			},
+			{
+				"key": "stomp",
+				"levelReq": 25
+			},
+			{
+				"key": "protect",
+				"levelReq": 32
+			},
+			{
+				"key": "guillotine",
+				"levelReq": 37
+			},
+			{
+				"key": "slam",
+				"levelReq": 44
+			},
+			{
+				"key": "brine",
+				"levelReq": 51
+			},
+			{
+				"key": "crabhammer",
+				"levelReq": 56
+			},
+			{
+				"key": "flail",
+				"levelReq": 63
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"horsea": {
+		"id": "horsea",
+		"name": "Horsea",
+		"description": "Pokedex Nº116 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 225,
+		"baseExp": 59,
+		"growthCurve": "MEDIUM_FAST",
+		"base": {
+			"hp": 30,
+			"atkFis": 40,
+			"atkEsp": 70,
+			"def": 70,
+			"defEsp": 25,
+			"speed": 60
+		},
+		"abilities": [
+			{
+				"key": "bubble",
+				"levelReq": 1
+			},
+			{
+				"key": "smokescreen",
+				"levelReq": 5
+			},
+			{
+				"key": "leer",
+				"levelReq": 9
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 13
+			},
+			{
+				"key": "twister",
+				"levelReq": 17
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 21
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 26
+			},
+			{
+				"key": "brine",
+				"levelReq": 31
+			},
+			{
+				"key": "agility",
+				"levelReq": 36
+			},
+			{
+				"key": "dragon_pulse",
+				"levelReq": 41
+			},
+			{
+				"key": "dragon_dance",
+				"levelReq": 46
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 52
+			}
+		],
+		"evolvesTo": "seadra",
+		"evolvesAtLevel": 32
+	},
+	"seadra": {
+		"id": "seadra",
+		"name": "Seadra",
+		"description": "Pokedex Nº117 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 75,
+		"baseExp": 154,
+		"growthCurve": "MEDIUM_FAST",
+		"base": {
+			"hp": 55,
+			"atkFis": 65,
+			"atkEsp": 95,
+			"def": 95,
+			"defEsp": 45,
+			"speed": 85
+		},
+		"abilities": [
+			{
+				"key": "bubble",
+				"levelReq": 1
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 1
+			},
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "smokescreen",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "smokescreen",
+				"levelReq": 5
+			},
+			{
+				"key": "leer",
+				"levelReq": 9
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 13
+			},
+			{
+				"key": "twister",
+				"levelReq": 17
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 21
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 26
+			},
+			{
+				"key": "brine",
+				"levelReq": 31
+			},
+			{
+				"key": "agility",
+				"levelReq": 38
+			},
+			{
+				"key": "dragon_pulse",
+				"levelReq": 45
+			},
+			{
+				"key": "dragon_dance",
+				"levelReq": 52
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 60
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"goldeen": {
+		"id": "goldeen",
+		"name": "Goldeen",
+		"description": "Pokedex Nº118 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 225,
+		"baseExp": 64,
+		"growthCurve": "MEDIUM_FAST",
+		"base": {
+			"hp": 45,
+			"atkFis": 67,
+			"atkEsp": 35,
+			"def": 60,
+			"defEsp": 50,
+			"speed": 63
+		},
+		"abilities": [
+			{
+				"key": "peck",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 1
+			},
+			{
+				"key": "water_sport",
+				"levelReq": 1
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 5
+			},
+			{
+				"key": "horn_attack",
+				"levelReq": 8
+			},
+			{
+				"key": "flail",
+				"levelReq": 13
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 16
+			},
+			{
+				"key": "aqua_ring",
+				"levelReq": 21
+			},
+			{
+				"key": "fury_attack",
+				"levelReq": 24
+			},
+			{
+				"key": "agility",
+				"levelReq": 29
+			},
+			{
+				"key": "waterfall",
+				"levelReq": 32
+			},
+			{
+				"key": "horn_drill",
+				"levelReq": 37
+			},
+			{
+				"key": "soak",
+				"levelReq": 40
+			},
+			{
+				"key": "megahorn",
+				"levelReq": 45
+			}
+		],
+		"evolvesTo": "seaking",
+		"evolvesAtLevel": 33
+	},
+	"seaking": {
+		"id": "seaking",
+		"name": "Seaking",
+		"description": "Pokedex Nº119 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 60,
+		"baseExp": 158,
+		"growthCurve": "MEDIUM_FAST",
+		"base": {
+			"hp": 80,
+			"atkFis": 92,
+			"atkEsp": 65,
+			"def": 65,
+			"defEsp": 80,
+			"speed": 68
+		},
+		"abilities": [
+			{
+				"key": "megahorn",
+				"levelReq": 1
+			},
+			{
+				"key": "peck",
+				"levelReq": 1
+			},
+			{
+				"key": "poison_jab",
+				"levelReq": 1
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 1
+			},
+			{
+				"key": "water_sport",
+				"levelReq": 1
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 5
+			},
+			{
+				"key": "horn_attack",
+				"levelReq": 8
+			},
+			{
+				"key": "flail",
+				"levelReq": 13
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 16
+			},
+			{
+				"key": "aqua_ring",
+				"levelReq": 21
+			},
+			{
+				"key": "fury_attack",
+				"levelReq": 24
+			},
+			{
+				"key": "agility",
+				"levelReq": 29
+			},
+			{
+				"key": "waterfall",
+				"levelReq": 32
+			},
+			{
+				"key": "horn_drill",
+				"levelReq": 40
+			},
+			{
+				"key": "soak",
+				"levelReq": 46
 			},
 			{
 				"key": "megahorn",
 				"levelReq": 54
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"staryu": {
+		"id": "staryu",
+		"name": "Staryu",
+		"description": "Pokedex Nº120 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 225,
+		"baseExp": 68,
+		"growthCurve": "SLOW",
+		"base": {
+			"hp": 30,
+			"atkFis": 45,
+			"atkEsp": 70,
+			"def": 55,
+			"defEsp": 55,
+			"speed": 85
+		},
+		"abilities": [
+			{
+				"key": "harden",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 4
+			},
+			{
+				"key": "rapid_spin",
+				"levelReq": 7
+			},
+			{
+				"key": "recover",
+				"levelReq": 10
+			},
+			{
+				"key": "psywave",
+				"levelReq": 13
+			},
+			{
+				"key": "swift",
+				"levelReq": 16
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 18
+			},
+			{
+				"key": "camouflage",
+				"levelReq": 22
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 24
+			},
+			{
+				"key": "brine",
+				"levelReq": 28
+			},
+			{
+				"key": "minimize",
+				"levelReq": 31
+			},
+			{
+				"key": "reflect_type",
+				"levelReq": 35
+			},
+			{
+				"key": "power_gem",
+				"levelReq": 37
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 40
+			},
+			{
+				"key": "psychic",
+				"levelReq": 42
+			},
+			{
+				"key": "light_screen",
+				"levelReq": 46
+			},
+			{
+				"key": "cosmic_power",
+				"levelReq": 49
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 53
 			}
 		],
 		"evolvesTo": null,
@@ -5688,7 +11538,7 @@ var SPECIES_DATA = {
 		"type": "WATER",
 		"type2": null,
 		"catchRate": 255,
-		"baseExp": 20,
+		"baseExp": 40,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 20,
@@ -5715,68 +11565,664 @@ var SPECIES_DATA = {
 		"evolvesTo": "gyarados",
 		"evolvesAtLevel": 20
 	},
-	"wooper": {
-		"id": "wooper",
-		"name": "Wooper",
-		"description": "Pokedex Nº194 - tipo WATER/GROUND.",
+	"gyarados": {
+		"id": "gyarados",
+		"name": "Gyarados",
+		"description": "Pokedex Nº130 - tipo WATER/FLYING.",
 		"type": "WATER",
-		"type2": "GROUND",
-		"catchRate": 255,
-		"baseExp": 52,
-		"growthCurve": "MEDIUM_FAST",
+		"type2": "FLYING",
+		"catchRate": 45,
+		"baseExp": 189,
+		"growthCurve": "SLOW",
 		"base": {
-			"hp": 55,
-			"atkFis": 45,
-			"atkEsp": 25,
-			"def": 45,
-			"defEsp": 25,
-			"speed": 15
+			"hp": 95,
+			"atkFis": 125,
+			"atkEsp": 60,
+			"def": 79,
+			"defEsp": 100,
+			"speed": 81
 		},
 		"abilities": [
+			{
+				"key": "bite",
+				"levelReq": 1
+			},
+			{
+				"key": "bite",
+				"levelReq": 1
+			},
+			{
+				"key": "thrash",
+				"levelReq": 1
+			},
+			{
+				"key": "leer",
+				"levelReq": 21
+			},
+			{
+				"key": "twister",
+				"levelReq": 24
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 27
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 30
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 33
+			},
+			{
+				"key": "dragon_rage",
+				"levelReq": 36
+			},
+			{
+				"key": "crunch",
+				"levelReq": 39
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 42
+			},
+			{
+				"key": "dragon_dance",
+				"levelReq": 45
+			},
+			{
+				"key": "hurricane",
+				"levelReq": 48
+			},
+			{
+				"key": "rain_dance",
+				"levelReq": 51
+			},
+			{
+				"key": "hyper_beam",
+				"levelReq": 54
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"lapras": {
+		"id": "lapras",
+		"name": "Lapras",
+		"description": "Pokedex Nº131 - tipo WATER/ICE.",
+		"type": "WATER",
+		"type2": "ICE",
+		"catchRate": 45,
+		"baseExp": 187,
+		"growthCurve": "SLOW",
+		"base": {
+			"hp": 130,
+			"atkFis": 85,
+			"atkEsp": 85,
+			"def": 80,
+			"defEsp": 95,
+			"speed": 60
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "sing",
+				"levelReq": 1
+			},
 			{
 				"key": "water_gun",
 				"levelReq": 1
 			},
 			{
-				"key": "tail_whip",
-				"levelReq": 1
+				"key": "mist",
+				"levelReq": 4
 			},
 			{
-				"key": "slam",
-				"levelReq": 11
+				"key": "confuse_ray",
+				"levelReq": 7
 			},
 			{
-				"key": "amnesia",
-				"levelReq": 21
+				"key": "ice_shard",
+				"levelReq": 10
 			},
 			{
-				"key": "earthquake",
-				"levelReq": 31
+				"key": "water_pulse",
+				"levelReq": 14
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 18
 			},
 			{
 				"key": "rain_dance",
+				"levelReq": 22
+			},
+			{
+				"key": "perish_song",
+				"levelReq": 27
+			},
+			{
+				"key": "ice_beam",
+				"levelReq": 32
+			},
+			{
+				"key": "brine",
+				"levelReq": 37
+			},
+			{
+				"key": "safeguard",
+				"levelReq": 43
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 47
+			},
+			{
+				"key": "sheer_cold",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"totodile": {
+		"id": "totodile",
+		"name": "Totodile",
+		"description": "Pokedex Nº158 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 63,
+		"growthCurve": "MEDIUM_SLOW",
+		"base": {
+			"hp": 50,
+			"atkFis": 65,
+			"atkEsp": 44,
+			"def": 64,
+			"defEsp": 48,
+			"speed": 43
+		},
+		"abilities": [
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 6
+			},
+			{
+				"key": "rage",
+				"levelReq": 8
+			},
+			{
+				"key": "bite",
+				"levelReq": 13
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 15
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 20
+			},
+			{
+				"key": "flail",
+				"levelReq": 22
+			},
+			{
+				"key": "crunch",
+				"levelReq": 27
+			},
+			{
+				"key": "chip_away",
+				"levelReq": 29
+			},
+			{
+				"key": "slash",
+				"levelReq": 34
+			},
+			{
+				"key": "screech",
+				"levelReq": 36
+			},
+			{
+				"key": "thrash",
 				"levelReq": 41
 			},
 			{
-				"key": "mist",
+				"key": "aqua_tail",
+				"levelReq": 43
+			},
+			{
+				"key": "superpower",
+				"levelReq": 48
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": "croconaw",
+		"evolvesAtLevel": 18
+	},
+	"croconaw": {
+		"id": "croconaw",
+		"name": "Croconaw",
+		"description": "Pokedex Nº159 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 142,
+		"growthCurve": "MEDIUM_SLOW",
+		"base": {
+			"hp": 65,
+			"atkFis": 80,
+			"atkEsp": 59,
+			"def": 80,
+			"defEsp": 63,
+			"speed": 58
+		},
+		"abilities": [
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 6
+			},
+			{
+				"key": "rage",
+				"levelReq": 8
+			},
+			{
+				"key": "bite",
+				"levelReq": 13
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 15
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 21
+			},
+			{
+				"key": "flail",
+				"levelReq": 24
+			},
+			{
+				"key": "crunch",
+				"levelReq": 30
+			},
+			{
+				"key": "chip_away",
+				"levelReq": 33
+			},
+			{
+				"key": "slash",
+				"levelReq": 39
+			},
+			{
+				"key": "screech",
+				"levelReq": 42
+			},
+			{
+				"key": "thrash",
+				"levelReq": 48
+			},
+			{
+				"key": "aqua_tail",
 				"levelReq": 51
 			},
 			{
-				"key": "haze",
-				"levelReq": 51
+				"key": "superpower",
+				"levelReq": 57
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 60
 			}
 		],
-		"evolvesTo": "quagsire",
-		"evolvesAtLevel": 20
+		"evolvesTo": "feraligatr",
+		"evolvesAtLevel": 30
+	},
+	"feraligatr": {
+		"id": "feraligatr",
+		"name": "Feraligatr",
+		"description": "Pokedex Nº160 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 239,
+		"growthCurve": "MEDIUM_SLOW",
+		"base": {
+			"hp": 85,
+			"atkFis": 105,
+			"atkEsp": 79,
+			"def": 100,
+			"defEsp": 83,
+			"speed": 78
+		},
+		"abilities": [
+			{
+				"key": "agility",
+				"levelReq": 1
+			},
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "rage",
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 6
+			},
+			{
+				"key": "rage",
+				"levelReq": 8
+			},
+			{
+				"key": "bite",
+				"levelReq": 13
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 15
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 21
+			},
+			{
+				"key": "flail",
+				"levelReq": 24
+			},
+			{
+				"key": "crunch",
+				"levelReq": 32
+			},
+			{
+				"key": "chip_away",
+				"levelReq": 37
+			},
+			{
+				"key": "slash",
+				"levelReq": 45
+			},
+			{
+				"key": "screech",
+				"levelReq": 50
+			},
+			{
+				"key": "thrash",
+				"levelReq": 58
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 63
+			},
+			{
+				"key": "superpower",
+				"levelReq": 71
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 76
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"chinchou": {
+		"id": "chinchou",
+		"name": "Chinchou",
+		"description": "Pokedex Nº170 - tipo WATER/ELECTRIC.",
+		"type": "WATER",
+		"type2": "ELECTRIC",
+		"catchRate": 190,
+		"baseExp": 66,
+		"growthCurve": "SLOW",
+		"base": {
+			"hp": 75,
+			"atkFis": 38,
+			"atkEsp": 56,
+			"def": 38,
+			"defEsp": 56,
+			"speed": 67
+		},
+		"abilities": [
+			{
+				"key": "bubble",
+				"levelReq": 1
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 6
+			},
+			{
+				"key": "electro_ball",
+				"levelReq": 9
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 12
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 17
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 20
+			},
+			{
+				"key": "spark",
+				"levelReq": 23
+			},
+			{
+				"key": "signal_beam",
+				"levelReq": 28
+			},
+			{
+				"key": "flail",
+				"levelReq": 31
+			},
+			{
+				"key": "discharge",
+				"levelReq": 34
+			},
+			{
+				"key": "take_down",
+				"levelReq": 39
+			},
+			{
+				"key": "aqua_ring",
+				"levelReq": 42
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 45
+			},
+			{
+				"key": "ion_deluge",
+				"levelReq": 47
+			},
+			{
+				"key": "charge",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": "lanturn",
+		"evolvesAtLevel": 27
+	},
+	"lanturn": {
+		"id": "lanturn",
+		"name": "Lanturn",
+		"description": "Pokedex Nº171 - tipo WATER/ELECTRIC.",
+		"type": "WATER",
+		"type2": "ELECTRIC",
+		"catchRate": 75,
+		"baseExp": 161,
+		"growthCurve": "SLOW",
+		"base": {
+			"hp": 125,
+			"atkFis": 58,
+			"atkEsp": 76,
+			"def": 58,
+			"defEsp": 76,
+			"speed": 67
+		},
+		"abilities": [
+			{
+				"key": "bubble",
+				"levelReq": 1
+			},
+			{
+				"key": "eerie_impulse",
+				"levelReq": 1
+			},
+			{
+				"key": "electro_ball",
+				"levelReq": 1
+			},
+			{
+				"key": "spit_up",
+				"levelReq": 1
+			},
+			{
+				"key": "spit_up",
+				"levelReq": 1
+			},
+			{
+				"key": "spotlight",
+				"levelReq": 1
+			},
+			{
+				"key": "stockpile",
+				"levelReq": 1
+			},
+			{
+				"key": "stockpile",
+				"levelReq": 1
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 1
+			},
+			{
+				"key": "swallow",
+				"levelReq": 1
+			},
+			{
+				"key": "swallow",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 6
+			},
+			{
+				"key": "electro_ball",
+				"levelReq": 9
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 12
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 17
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 20
+			},
+			{
+				"key": "spark",
+				"levelReq": 23
+			},
+			{
+				"key": "signal_beam",
+				"levelReq": 29
+			},
+			{
+				"key": "flail",
+				"levelReq": 33
+			},
+			{
+				"key": "discharge",
+				"levelReq": 37
+			},
+			{
+				"key": "take_down",
+				"levelReq": 43
+			},
+			{
+				"key": "aqua_ring",
+				"levelReq": 47
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 51
+			},
+			{
+				"key": "ion_deluge",
+				"levelReq": 54
+			},
+			{
+				"key": "charge",
+				"levelReq": 58
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
 	},
 	"marill": {
 		"id": "marill",
 		"name": "Marill",
-		"description": "Pokedex Nº183 - tipo WATER.",
+		"description": "Pokedex Nº183 - tipo WATER/FAIRY.",
 		"type": "WATER",
-		"type2": null,
+		"type2": "FAIRY",
 		"catchRate": 190,
-		"baseExp": 58,
+		"baseExp": 88,
 		"growthCurve": "FAST",
 		"base": {
 			"hp": 70,
@@ -5792,148 +12238,572 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "defense_curl",
-				"levelReq": 3
+				"key": "water_gun",
+				"levelReq": 1
 			},
 			{
 				"key": "tail_whip",
-				"levelReq": 6
+				"levelReq": 2
 			},
 			{
-				"key": "water_gun",
+				"key": "water_sport",
+				"levelReq": 5
+			},
+			{
+				"key": "bubble",
+				"levelReq": 7
+			},
+			{
+				"key": "defense_curl",
 				"levelReq": 10
 			},
 			{
 				"key": "rollout",
-				"levelReq": 15
+				"levelReq": 10
 			},
 			{
-				"key": "bubblebeam",
-				"levelReq": 21
+				"key": "bubble_beam",
+				"levelReq": 13
 			},
 			{
-				"key": "double_edge",
+				"key": "helping_hand",
+				"levelReq": 16
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 20
+			},
+			{
+				"key": "play_rough",
+				"levelReq": 23
+			},
+			{
+				"key": "aqua_ring",
 				"levelReq": 28
 			},
 			{
 				"key": "rain_dance",
-				"levelReq": 36
+				"levelReq": 31
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 37
+			},
+			{
+				"key": "superpower",
+				"levelReq": 40
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 47
 			}
 		],
 		"evolvesTo": "azumarill",
 		"evolvesAtLevel": 18
 	},
-	"totodile": {
-		"id": "totodile",
-		"name": "Totodile",
-		"description": "Pokedex Nº158 - tipo WATER.",
+	"azumarill": {
+		"id": "azumarill",
+		"name": "Azumarill",
+		"description": "Pokedex Nº184 - tipo WATER/FAIRY.",
 		"type": "WATER",
-		"type2": null,
-		"catchRate": 45,
-		"baseExp": 66,
-		"growthCurve": "MEDIUM_SLOW",
+		"type2": "FAIRY",
+		"catchRate": 75,
+		"baseExp": 189,
+		"growthCurve": "FAST",
 		"base": {
-			"hp": 50,
-			"atkFis": 65,
-			"atkEsp": 44,
-			"def": 64,
-			"defEsp": 48,
-			"speed": 43
+			"hp": 100,
+			"atkFis": 50,
+			"atkEsp": 60,
+			"def": 80,
+			"defEsp": 80,
+			"speed": 50
 		},
 		"abilities": [
 			{
-				"key": "scratch",
+				"key": "tackle",
 				"levelReq": 1
 			},
 			{
-				"key": "leer",
+				"key": "tail_whip",
 				"levelReq": 1
-			},
-			{
-				"key": "rage",
-				"levelReq": 7
 			},
 			{
 				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "water_sport",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 2
+			},
+			{
+				"key": "water_sport",
+				"levelReq": 5
+			},
+			{
+				"key": "bubble",
+				"levelReq": 7
+			},
+			{
+				"key": "defense_curl",
+				"levelReq": 10
+			},
+			{
+				"key": "rollout",
+				"levelReq": 10
+			},
+			{
+				"key": "bubble_beam",
 				"levelReq": 13
 			},
 			{
-				"key": "bite",
-				"levelReq": 20
+				"key": "helping_hand",
+				"levelReq": 16
 			},
 			{
-				"key": "scary_face",
-				"levelReq": 27
+				"key": "aqua_tail",
+				"levelReq": 21
 			},
 			{
-				"key": "slash",
+				"key": "play_rough",
+				"levelReq": 25
+			},
+			{
+				"key": "aqua_ring",
+				"levelReq": 31
+			},
+			{
+				"key": "rain_dance",
 				"levelReq": 35
 			},
 			{
-				"key": "screech",
-				"levelReq": 43
+				"key": "double_edge",
+				"levelReq": 42
+			},
+			{
+				"key": "superpower",
+				"levelReq": 46
 			},
 			{
 				"key": "hydro_pump",
-				"levelReq": 52
+				"levelReq": 55
 			}
 		],
-		"evolvesTo": "croconaw",
-		"evolvesAtLevel": 18
+		"evolvesTo": null,
+		"evolvesAtLevel": null
 	},
-	"poliwag": {
-		"id": "poliwag",
-		"name": "Poliwag",
-		"description": "Pokedex Nº60 - tipo WATER.",
+	"politoed": {
+		"id": "politoed",
+		"name": "Politoed",
+		"description": "Pokedex Nº186 - tipo WATER.",
 		"type": "WATER",
 		"type2": null,
-		"catchRate": 255,
-		"baseExp": 77,
+		"catchRate": 45,
+		"baseExp": 225,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
-			"hp": 40,
-			"atkFis": 50,
-			"atkEsp": 40,
-			"def": 40,
-			"defEsp": 40,
-			"speed": 90
+			"hp": 90,
+			"atkFis": 75,
+			"atkEsp": 90,
+			"def": 75,
+			"defEsp": 100,
+			"speed": 70
 		},
 		"abilities": [
 			{
-				"key": "bubble",
+				"key": "bubble_beam",
+				"levelReq": 1
+			},
+			{
+				"key": "double_slap",
 				"levelReq": 1
 			},
 			{
 				"key": "hypnosis",
-				"levelReq": 7
+				"levelReq": 1
 			},
 			{
-				"key": "water_gun",
-				"levelReq": 13
+				"key": "perish_song",
+				"levelReq": 1
 			},
 			{
-				"key": "doubleslap",
-				"levelReq": 19
+				"key": "swagger",
+				"levelReq": 27
 			},
 			{
-				"key": "rain_dance",
-				"levelReq": 25
-			},
-			{
-				"key": "body_slam",
-				"levelReq": 31
-			},
-			{
-				"key": "belly_drum",
+				"key": "bounce",
 				"levelReq": 37
 			},
 			{
-				"key": "hydro_pump",
-				"levelReq": 43
+				"key": "hyper_voice",
+				"levelReq": 48
 			}
 		],
-		"evolvesTo": "poliwhirl",
-		"evolvesAtLevel": 25
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"wooper": {
+		"id": "wooper",
+		"name": "Wooper",
+		"description": "Pokedex Nº194 - tipo WATER/GROUND.",
+		"type": "WATER",
+		"type2": "GROUND",
+		"catchRate": 255,
+		"baseExp": 42,
+		"growthCurve": "MEDIUM_FAST",
+		"base": {
+			"hp": 55,
+			"atkFis": 45,
+			"atkEsp": 25,
+			"def": 45,
+			"defEsp": 25,
+			"speed": 15
+		},
+		"abilities": [
+			{
+				"key": "tail_whip",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_sport",
+				"levelReq": 5
+			},
+			{
+				"key": "mud_shot",
+				"levelReq": 9
+			},
+			{
+				"key": "slam",
+				"levelReq": 15
+			},
+			{
+				"key": "mud_bomb",
+				"levelReq": 19
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 23
+			},
+			{
+				"key": "yawn",
+				"levelReq": 29
+			},
+			{
+				"key": "earthquake",
+				"levelReq": 33
+			},
+			{
+				"key": "rain_dance",
+				"levelReq": 37
+			},
+			{
+				"key": "haze",
+				"levelReq": 43
+			},
+			{
+				"key": "mist",
+				"levelReq": 43
+			},
+			{
+				"key": "muddy_water",
+				"levelReq": 47
+			}
+		],
+		"evolvesTo": "quagsire",
+		"evolvesAtLevel": 20
+	},
+	"quagsire": {
+		"id": "quagsire",
+		"name": "Quagsire",
+		"description": "Pokedex Nº195 - tipo WATER/GROUND.",
+		"type": "WATER",
+		"type2": "GROUND",
+		"catchRate": 90,
+		"baseExp": 151,
+		"growthCurve": "MEDIUM_FAST",
+		"base": {
+			"hp": 95,
+			"atkFis": 85,
+			"atkEsp": 65,
+			"def": 85,
+			"defEsp": 65,
+			"speed": 35
+		},
+		"abilities": [
+			{
+				"key": "mud_sport",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_sport",
+				"levelReq": 5
+			},
+			{
+				"key": "mud_shot",
+				"levelReq": 9
+			},
+			{
+				"key": "slam",
+				"levelReq": 15
+			},
+			{
+				"key": "mud_bomb",
+				"levelReq": 19
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 24
+			},
+			{
+				"key": "yawn",
+				"levelReq": 31
+			},
+			{
+				"key": "earthquake",
+				"levelReq": 36
+			},
+			{
+				"key": "rain_dance",
+				"levelReq": 41
+			},
+			{
+				"key": "haze",
+				"levelReq": 48
+			},
+			{
+				"key": "mist",
+				"levelReq": 48
+			},
+			{
+				"key": "muddy_water",
+				"levelReq": 53
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"qwilfish": {
+		"id": "qwilfish",
+		"name": "Qwilfish",
+		"description": "Pokedex Nº211 - tipo WATER/POISON.",
+		"type": "WATER",
+		"type2": "POISON",
+		"catchRate": 45,
+		"baseExp": 88,
+		"growthCurve": "MEDIUM_FAST",
+		"base": {
+			"hp": 65,
+			"atkFis": 95,
+			"atkEsp": 55,
+			"def": 85,
+			"defEsp": 55,
+			"speed": 85
+		},
+		"abilities": [
+			{
+				"key": "destiny_bond",
+				"levelReq": 1
+			},
+			{
+				"key": "fell_stinger",
+				"levelReq": 1
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 1
+			},
+			{
+				"key": "poison_sting",
+				"levelReq": 1
+			},
+			{
+				"key": "spikes",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "harden",
+				"levelReq": 9
+			},
+			{
+				"key": "minimize",
+				"levelReq": 9
+			},
+			{
+				"key": "bubble",
+				"levelReq": 13
+			},
+			{
+				"key": "rollout",
+				"levelReq": 17
+			},
+			{
+				"key": "toxic_spikes",
+				"levelReq": 21
+			},
+			{
+				"key": "spit_up",
+				"levelReq": 25
+			},
+			{
+				"key": "stockpile",
+				"levelReq": 25
+			},
+			{
+				"key": "revenge",
+				"levelReq": 29
+			},
+			{
+				"key": "brine",
+				"levelReq": 33
+			},
+			{
+				"key": "pin_missile",
+				"levelReq": 37
+			},
+			{
+				"key": "take_down",
+				"levelReq": 41
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 45
+			},
+			{
+				"key": "poison_jab",
+				"levelReq": 49
+			},
+			{
+				"key": "destiny_bond",
+				"levelReq": 53
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 57
+			},
+			{
+				"key": "fell_stinger",
+				"levelReq": 60
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"corsola": {
+		"id": "corsola",
+		"name": "Corsola",
+		"description": "Pokedex Nº222 - tipo WATER/ROCK.",
+		"type": "WATER",
+		"type2": "ROCK",
+		"catchRate": 60,
+		"baseExp": 144,
+		"growthCurve": "FAST",
+		"base": {
+			"hp": 65,
+			"atkFis": 55,
+			"atkEsp": 65,
+			"def": 95,
+			"defEsp": 95,
+			"speed": 35
+		},
+		"abilities": [
+			{
+				"key": "harden",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "bubble",
+				"levelReq": 4
+			},
+			{
+				"key": "recover",
+				"levelReq": 8
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 10
+			},
+			{
+				"key": "refresh",
+				"levelReq": 13
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 17
+			},
+			{
+				"key": "spike_cannon",
+				"levelReq": 20
+			},
+			{
+				"key": "lucky_chant",
+				"levelReq": 23
+			},
+			{
+				"key": "brine",
+				"levelReq": 27
+			},
+			{
+				"key": "iron_defense",
+				"levelReq": 29
+			},
+			{
+				"key": "rock_blast",
+				"levelReq": 31
+			},
+			{
+				"key": "endure",
+				"levelReq": 35
+			},
+			{
+				"key": "aqua_ring",
+				"levelReq": 38
+			},
+			{
+				"key": "power_gem",
+				"levelReq": 41
+			},
+			{
+				"key": "mirror_coat",
+				"levelReq": 45
+			},
+			{
+				"key": "earth_power",
+				"levelReq": 47
+			},
+			{
+				"key": "flail",
+				"levelReq": 50
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
 	},
 	"remoraid": {
 		"id": "remoraid",
@@ -5942,7 +12812,7 @@ var SPECIES_DATA = {
 		"type": "WATER",
 		"type2": null,
 		"catchRate": 190,
-		"baseExp": 78,
+		"baseExp": 60,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 35,
@@ -5959,380 +12829,202 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "lock_on",
-				"levelReq": 11
+				"levelReq": 6
 			},
 			{
 				"key": "psybeam",
-				"levelReq": 22
+				"levelReq": 10
 			},
 			{
 				"key": "aurora_beam",
-				"levelReq": 22
+				"levelReq": 14
 			},
 			{
-				"key": "bubblebeam",
-				"levelReq": 22
+				"key": "bubble_beam",
+				"levelReq": 18
 			},
 			{
 				"key": "focus_energy",
-				"levelReq": 33
+				"levelReq": 22
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 26
+			},
+			{
+				"key": "signal_beam",
+				"levelReq": 30
 			},
 			{
 				"key": "ice_beam",
-				"levelReq": 44
+				"levelReq": 34
+			},
+			{
+				"key": "bullet_seed",
+				"levelReq": 38
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 42
 			},
 			{
 				"key": "hyper_beam",
-				"levelReq": 55
+				"levelReq": 46
+			},
+			{
+				"key": "soak",
+				"levelReq": 50
 			}
 		],
 		"evolvesTo": "octillery",
 		"evolvesAtLevel": 25
 	},
-	"psyduck": {
-		"id": "psyduck",
-		"name": "Psyduck",
-		"description": "Pokedex Nº54 - tipo WATER.",
+	"octillery": {
+		"id": "octillery",
+		"name": "Octillery",
+		"description": "Pokedex Nº224 - tipo WATER.",
 		"type": "WATER",
 		"type2": null,
-		"catchRate": 190,
-		"baseExp": 80,
+		"catchRate": 75,
+		"baseExp": 168,
 		"growthCurve": "MEDIUM_FAST",
-		"base": {
-			"hp": 50,
-			"atkFis": 52,
-			"atkEsp": 65,
-			"def": 48,
-			"defEsp": 50,
-			"speed": 55
-		},
-		"abilities": [
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 5
-			},
-			{
-				"key": "disable",
-				"levelReq": 10
-			},
-			{
-				"key": "confusion",
-				"levelReq": 16
-			},
-			{
-				"key": "screech",
-				"levelReq": 23
-			},
-			{
-				"key": "psych_up",
-				"levelReq": 31
-			},
-			{
-				"key": "fury_swipes",
-				"levelReq": 40
-			},
-			{
-				"key": "hydro_pump",
-				"levelReq": 50
-			}
-		],
-		"evolvesTo": "golduck",
-		"evolvesAtLevel": 33
-	},
-	"horsea": {
-		"id": "horsea",
-		"name": "Horsea",
-		"description": "Pokedex Nº116 - tipo WATER.",
-		"type": "WATER",
-		"type2": null,
-		"catchRate": 225,
-		"baseExp": 83,
-		"growthCurve": "MEDIUM_FAST",
-		"base": {
-			"hp": 30,
-			"atkFis": 40,
-			"atkEsp": 70,
-			"def": 70,
-			"defEsp": 25,
-			"speed": 60
-		},
-		"abilities": [
-			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "smokescreen",
-				"levelReq": 8
-			},
-			{
-				"key": "leer",
-				"levelReq": 15
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 22
-			},
-			{
-				"key": "twister",
-				"levelReq": 29
-			},
-			{
-				"key": "agility",
-				"levelReq": 36
-			},
-			{
-				"key": "hydro_pump",
-				"levelReq": 43
-			}
-		],
-		"evolvesTo": "seadra",
-		"evolvesAtLevel": 32
-	},
-	"chinchou": {
-		"id": "chinchou",
-		"name": "Chinchou",
-		"description": "Pokedex Nº170 - tipo WATER/ELECTRIC.",
-		"type": "WATER",
-		"type2": "ELECTRIC",
-		"catchRate": 190,
-		"baseExp": 90,
-		"growthCurve": "SLOW",
 		"base": {
 			"hp": 75,
-			"atkFis": 38,
-			"atkEsp": 56,
-			"def": 38,
-			"defEsp": 56,
-			"speed": 67
-		},
-		"abilities": [
-			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_wave",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 5
-			},
-			{
-				"key": "flail",
-				"levelReq": 13
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 17
-			},
-			{
-				"key": "spark",
-				"levelReq": 25
-			},
-			{
-				"key": "confuse_ray",
-				"levelReq": 29
-			},
-			{
-				"key": "take_down",
-				"levelReq": 37
-			},
-			{
-				"key": "hydro_pump",
-				"levelReq": 41
-			}
-		],
-		"evolvesTo": "lanturn",
-		"evolvesAtLevel": 27
-	},
-	"shellder": {
-		"id": "shellder",
-		"name": "Shellder",
-		"description": "Pokedex Nº90 - tipo WATER.",
-		"type": "WATER",
-		"type2": null,
-		"catchRate": 190,
-		"baseExp": 97,
-		"growthCurve": "SLOW",
-		"base": {
-			"hp": 30,
-			"atkFis": 65,
-			"atkEsp": 45,
-			"def": 100,
-			"defEsp": 25,
-			"speed": 40
-		},
-		"abilities": [
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "withdraw",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 9
-			},
-			{
-				"key": "aurora_beam",
-				"levelReq": 17
-			},
-			{
-				"key": "protect",
-				"levelReq": 25
-			},
-			{
-				"key": "leer",
-				"levelReq": 33
-			},
-			{
-				"key": "clamp",
-				"levelReq": 41
-			},
-			{
-				"key": "ice_beam",
-				"levelReq": 49
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"slowpoke": {
-		"id": "slowpoke",
-		"name": "Slowpoke",
-		"description": "Pokedex Nº79 - tipo WATER/PSYCHIC.",
-		"type": "WATER",
-		"type2": "PSYCHIC",
-		"catchRate": 190,
-		"baseExp": 99,
-		"growthCurve": "MEDIUM_FAST",
-		"base": {
-			"hp": 90,
-			"atkFis": 65,
-			"atkEsp": 40,
-			"def": 65,
-			"defEsp": 40,
-			"speed": 15
-		},
-		"abilities": [
-			{
-				"key": "curse",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
-				"levelReq": 6
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 15
-			},
-			{
-				"key": "confusion",
-				"levelReq": 20
-			},
-			{
-				"key": "disable",
-				"levelReq": 29
-			},
-			{
-				"key": "headbutt",
-				"levelReq": 34
-			},
-			{
-				"key": "amnesia",
-				"levelReq": 43
-			},
-			{
-				"key": "psychic_m",
-				"levelReq": 48
-			}
-		],
-		"evolvesTo": "slowbro",
-		"evolvesAtLevel": 37
-	},
-	"seel": {
-		"id": "seel",
-		"name": "Seel",
-		"description": "Pokedex Nº86 - tipo WATER.",
-		"type": "WATER",
-		"type2": null,
-		"catchRate": 190,
-		"baseExp": 100,
-		"growthCurve": "MEDIUM_FAST",
-		"base": {
-			"hp": 65,
-			"atkFis": 45,
-			"atkEsp": 45,
-			"def": 55,
-			"defEsp": 70,
+			"atkFis": 105,
+			"atkEsp": 105,
+			"def": 75,
+			"defEsp": 75,
 			"speed": 45
 		},
 		"abilities": [
 			{
-				"key": "headbutt",
+				"key": "aurora_beam",
 				"levelReq": 1
 			},
 			{
-				"key": "growl",
-				"levelReq": 5
+				"key": "constrict",
+				"levelReq": 1
+			},
+			{
+				"key": "gunk_shot",
+				"levelReq": 1
+			},
+			{
+				"key": "octazooka",
+				"levelReq": 1
+			},
+			{
+				"key": "octazooka",
+				"levelReq": 1
+			},
+			{
+				"key": "psybeam",
+				"levelReq": 1
+			},
+			{
+				"key": "rock_blast",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "constrict",
+				"levelReq": 6
+			},
+			{
+				"key": "psybeam",
+				"levelReq": 10
 			},
 			{
 				"key": "aurora_beam",
-				"levelReq": 16
+				"levelReq": 14
 			},
 			{
-				"key": "rest",
-				"levelReq": 21
+				"key": "bubble_beam",
+				"levelReq": 18
 			},
 			{
-				"key": "take_down",
-				"levelReq": 32
+				"key": "focus_energy",
+				"levelReq": 22
+			},
+			{
+				"key": "wring_out",
+				"levelReq": 28
+			},
+			{
+				"key": "signal_beam",
+				"levelReq": 34
 			},
 			{
 				"key": "ice_beam",
-				"levelReq": 37
+				"levelReq": 40
 			},
 			{
-				"key": "safeguard",
-				"levelReq": 48
+				"key": "bullet_seed",
+				"levelReq": 46
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 52
+			},
+			{
+				"key": "hyper_beam",
+				"levelReq": 58
+			},
+			{
+				"key": "soak",
+				"levelReq": 64
 			}
 		],
-		"evolvesTo": "dewgong",
-		"evolvesAtLevel": 34
+		"evolvesTo": null,
+		"evolvesAtLevel": null
 	},
-	"qwilfish": {
-		"id": "qwilfish",
-		"name": "Qwilfish",
-		"description": "Pokedex Nº211 - tipo WATER/POISON.",
+	"mantine": {
+		"id": "mantine",
+		"name": "Mantine",
+		"description": "Pokedex Nº226 - tipo WATER/FLYING.",
 		"type": "WATER",
-		"type2": "POISON",
-		"catchRate": 45,
-		"baseExp": 100,
-		"growthCurve": "MEDIUM_FAST",
+		"type2": "FLYING",
+		"catchRate": 25,
+		"baseExp": 170,
+		"growthCurve": "SLOW",
 		"base": {
-			"hp": 65,
-			"atkFis": 95,
-			"atkEsp": 55,
-			"def": 75,
-			"defEsp": 55,
-			"speed": 85
+			"hp": 85,
+			"atkFis": 40,
+			"atkEsp": 80,
+			"def": 70,
+			"defEsp": 140,
+			"speed": 70
 		},
 		"abilities": [
 			{
-				"key": "spikes",
+				"key": "bubble",
+				"levelReq": 1
+			},
+			{
+				"key": "bubble_beam",
+				"levelReq": 1
+			},
+			{
+				"key": "bullet_seed",
+				"levelReq": 1
+			},
+			{
+				"key": "psybeam",
+				"levelReq": 1
+			},
+			{
+				"key": "roost",
+				"levelReq": 1
+			},
+			{
+				"key": "signal_beam",
+				"levelReq": 1
+			},
+			{
+				"key": "supersonic",
 				"levelReq": 1
 			},
 			{
@@ -6340,347 +13032,93 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "poison_sting",
-				"levelReq": 1
+				"key": "supersonic",
+				"levelReq": 3
 			},
 			{
-				"key": "harden",
-				"levelReq": 10
+				"key": "bubble_beam",
+				"levelReq": 7
 			},
 			{
-				"key": "minimize",
-				"levelReq": 10
+				"key": "confuse_ray",
+				"levelReq": 11
 			},
 			{
-				"key": "water_gun",
+				"key": "wing_attack",
+				"levelReq": 14
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 16
+			},
+			{
+				"key": "water_pulse",
 				"levelReq": 19
 			},
 			{
-				"key": "pin_missile",
-				"levelReq": 28
+				"key": "wide_guard",
+				"levelReq": 23
 			},
 			{
 				"key": "take_down",
-				"levelReq": 37
+				"levelReq": 27
 			},
 			{
-				"key": "hydro_pump",
-				"levelReq": 46
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"tentacool": {
-		"id": "tentacool",
-		"name": "Tentacool",
-		"description": "Pokedex Nº72 - tipo WATER/POISON.",
-		"type": "WATER",
-		"type2": "POISON",
-		"catchRate": 190,
-		"baseExp": 105,
-		"growthCurve": "SLOW",
-		"base": {
-			"hp": 40,
-			"atkFis": 40,
-			"atkEsp": 50,
-			"def": 35,
-			"defEsp": 100,
-			"speed": 70
-		},
-		"abilities": [
-			{
-				"key": "poison_sting",
-				"levelReq": 1
+				"key": "agility",
+				"levelReq": 32
 			},
 			{
-				"key": "supersonic",
-				"levelReq": 6
-			},
-			{
-				"key": "constrict",
-				"levelReq": 12
-			},
-			{
-				"key": "acid",
-				"levelReq": 19
-			},
-			{
-				"key": "bubblebeam",
-				"levelReq": 25
-			},
-			{
-				"key": "wrap",
-				"levelReq": 30
-			},
-			{
-				"key": "barrier",
+				"key": "air_slash",
 				"levelReq": 36
 			},
 			{
-				"key": "screech",
-				"levelReq": 43
+				"key": "aqua_ring",
+				"levelReq": 39
+			},
+			{
+				"key": "bounce",
+				"levelReq": 46
 			},
 			{
 				"key": "hydro_pump",
 				"levelReq": 49
 			}
 		],
-		"evolvesTo": "tentacruel",
-		"evolvesAtLevel": 30
+		"evolvesTo": null,
+		"evolvesAtLevel": null
 	},
-	"staryu": {
-		"id": "staryu",
-		"name": "Staryu",
-		"description": "Pokedex Nº120 - tipo WATER.",
+	"kingdra": {
+		"id": "kingdra",
+		"name": "Kingdra",
+		"description": "Pokedex Nº230 - tipo WATER/DRAGON.",
 		"type": "WATER",
-		"type2": null,
-		"catchRate": 225,
-		"baseExp": 106,
-		"growthCurve": "SLOW",
+		"type2": "DRAGON",
+		"catchRate": 45,
+		"baseExp": 243,
+		"growthCurve": "MEDIUM_FAST",
 		"base": {
-			"hp": 30,
-			"atkFis": 45,
-			"atkEsp": 70,
-			"def": 55,
-			"defEsp": 55,
+			"hp": 75,
+			"atkFis": 95,
+			"atkEsp": 95,
+			"def": 95,
+			"defEsp": 95,
 			"speed": 85
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "bubble",
 				"levelReq": 1
-			},
-			{
-				"key": "harden",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 7
-			},
-			{
-				"key": "rapid_spin",
-				"levelReq": 13
-			},
-			{
-				"key": "recover",
-				"levelReq": 19
-			},
-			{
-				"key": "swift",
-				"levelReq": 25
-			},
-			{
-				"key": "bubblebeam",
-				"levelReq": 31
-			},
-			{
-				"key": "minimize",
-				"levelReq": 37
-			},
-			{
-				"key": "light_screen",
-				"levelReq": 43
 			},
 			{
 				"key": "hydro_pump",
-				"levelReq": 50
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"goldeen": {
-		"id": "goldeen",
-		"name": "Goldeen",
-		"description": "Pokedex Nº118 - tipo WATER.",
-		"type": "WATER",
-		"type2": null,
-		"catchRate": 225,
-		"baseExp": 111,
-		"growthCurve": "MEDIUM_FAST",
-		"base": {
-			"hp": 45,
-			"atkFis": 67,
-			"atkEsp": 35,
-			"def": 60,
-			"defEsp": 50,
-			"speed": 63
-		},
-		"abilities": [
-			{
-				"key": "peck",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 10
-			},
-			{
-				"key": "horn_attack",
-				"levelReq": 15
-			},
-			{
-				"key": "flail",
-				"levelReq": 24
-			},
-			{
-				"key": "fury_attack",
-				"levelReq": 29
-			},
-			{
-				"key": "waterfall",
-				"levelReq": 38
-			},
-			{
-				"key": "horn_drill",
-				"levelReq": 43
-			},
-			{
-				"key": "agility",
-				"levelReq": 52
-			}
-		],
-		"evolvesTo": "seaking",
-		"evolvesAtLevel": 33
-	},
-	"corsola": {
-		"id": "corsola",
-		"name": "Corsola",
-		"description": "Pokedex Nº222 - tipo WATER/ROCK.",
-		"type": "WATER",
-		"type2": "ROCK",
-		"catchRate": 60,
-		"baseExp": 113,
-		"growthCurve": "FAST",
-		"base": {
-			"hp": 55,
-			"atkFis": 55,
-			"atkEsp": 65,
-			"def": 85,
-			"defEsp": 85,
-			"speed": 35
-		},
-		"abilities": [
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "harden",
-				"levelReq": 7
-			},
-			{
-				"key": "bubble",
-				"levelReq": 13
-			},
-			{
-				"key": "recover",
-				"levelReq": 19
-			},
-			{
-				"key": "bubblebeam",
-				"levelReq": 25
-			},
-			{
-				"key": "spike_cannon",
-				"levelReq": 31
-			},
-			{
-				"key": "mirror_coat",
-				"levelReq": 37
-			},
-			{
-				"key": "ancientpower",
-				"levelReq": 43
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"krabby": {
-		"id": "krabby",
-		"name": "Krabby",
-		"description": "Pokedex Nº98 - tipo WATER.",
-		"type": "WATER",
-		"type2": null,
-		"catchRate": 225,
-		"baseExp": 115,
-		"growthCurve": "MEDIUM_FAST",
-		"base": {
-			"hp": 30,
-			"atkFis": 105,
-			"atkEsp": 25,
-			"def": 90,
-			"defEsp": 25,
-			"speed": 50
-		},
-		"abilities": [
-			{
-				"key": "bubble",
 				"levelReq": 1
 			},
 			{
 				"key": "leer",
-				"levelReq": 5
-			},
-			{
-				"key": "vicegrip",
-				"levelReq": 12
-			},
-			{
-				"key": "harden",
-				"levelReq": 16
-			},
-			{
-				"key": "stomp",
-				"levelReq": 23
-			},
-			{
-				"key": "guillotine",
-				"levelReq": 27
-			},
-			{
-				"key": "protect",
-				"levelReq": 34
-			},
-			{
-				"key": "crabhammer",
-				"levelReq": 41
-			}
-		],
-		"evolvesTo": "kingler",
-		"evolvesAtLevel": 28
-	},
-	"poliwhirl": {
-		"id": "poliwhirl",
-		"name": "Poliwhirl",
-		"description": "Pokedex Nº61 - tipo WATER.",
-		"type": "WATER",
-		"type2": null,
-		"catchRate": 120,
-		"baseExp": 131,
-		"growthCurve": "MEDIUM_SLOW",
-		"base": {
-			"hp": 65,
-			"atkFis": 65,
-			"atkEsp": 50,
-			"def": 65,
-			"defEsp": 50,
-			"speed": 90
-		},
-		"abilities": [
-			{
-				"key": "bubble",
 				"levelReq": 1
 			},
 			{
-				"key": "hypnosis",
+				"key": "smokescreen",
 				"levelReq": 1
 			},
 			{
@@ -6688,86 +13126,52 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "hypnosis",
-				"levelReq": 7
+				"key": "yawn",
+				"levelReq": 1
+			},
+			{
+				"key": "smokescreen",
+				"levelReq": 5
+			},
+			{
+				"key": "leer",
+				"levelReq": 9
 			},
 			{
 				"key": "water_gun",
 				"levelReq": 13
 			},
 			{
-				"key": "doubleslap",
-				"levelReq": 19
+				"key": "twister",
+				"levelReq": 17
 			},
 			{
-				"key": "rain_dance",
-				"levelReq": 27
+				"key": "bubble_beam",
+				"levelReq": 21
 			},
 			{
-				"key": "body_slam",
-				"levelReq": 35
+				"key": "focus_energy",
+				"levelReq": 26
 			},
 			{
-				"key": "belly_drum",
-				"levelReq": 43
+				"key": "brine",
+				"levelReq": 31
+			},
+			{
+				"key": "agility",
+				"levelReq": 38
+			},
+			{
+				"key": "dragon_pulse",
+				"levelReq": 45
+			},
+			{
+				"key": "dragon_dance",
+				"levelReq": 52
 			},
 			{
 				"key": "hydro_pump",
-				"levelReq": 51
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"quagsire": {
-		"id": "quagsire",
-		"name": "Quagsire",
-		"description": "Pokedex Nº195 - tipo WATER/GROUND.",
-		"type": "WATER",
-		"type2": "GROUND",
-		"catchRate": 90,
-		"baseExp": 137,
-		"growthCurve": "MEDIUM_FAST",
-		"base": {
-			"hp": 95,
-			"atkFis": 85,
-			"atkEsp": 65,
-			"def": 85,
-			"defEsp": 65,
-			"speed": 35
-		},
-		"abilities": [
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "slam",
-				"levelReq": 11
-			},
-			{
-				"key": "amnesia",
-				"levelReq": 23
-			},
-			{
-				"key": "earthquake",
-				"levelReq": 35
-			},
-			{
-				"key": "rain_dance",
-				"levelReq": 47
-			},
-			{
-				"key": "mist",
-				"levelReq": 59
-			},
-			{
-				"key": "haze",
-				"levelReq": 59
+				"levelReq": 60
 			}
 		],
 		"evolvesTo": null,
@@ -6780,7 +13184,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": "FLYING",
 		"catchRate": 255,
-		"baseExp": 55,
+		"baseExp": 50,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 40,
@@ -6805,23 +13209,47 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "quick_attack",
-				"levelReq": 15
+				"levelReq": 13
 			},
 			{
 				"key": "whirlwind",
+				"levelReq": 17
+			},
+			{
+				"key": "twister",
 				"levelReq": 21
 			},
 			{
-				"key": "wing_attack",
-				"levelReq": 29
+				"key": "feather_dance",
+				"levelReq": 25
 			},
 			{
 				"key": "agility",
+				"levelReq": 29
+			},
+			{
+				"key": "wing_attack",
+				"levelReq": 33
+			},
+			{
+				"key": "roost",
 				"levelReq": 37
 			},
 			{
+				"key": "tailwind",
+				"levelReq": 41
+			},
+			{
 				"key": "mirror_move",
-				"levelReq": 47
+				"levelReq": 45
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 49
+			},
+			{
+				"key": "hurricane",
+				"levelReq": 53
 			}
 		],
 		"evolvesTo": "pidgeotto",
@@ -6834,7 +13262,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": "FLYING",
 		"catchRate": 120,
-		"baseExp": 113,
+		"baseExp": 122,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 63,
@@ -6846,7 +13274,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "gust",
 				"levelReq": 1
 			},
 			{
@@ -6854,7 +13282,7 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "gust",
+				"key": "tackle",
 				"levelReq": 1
 			},
 			{
@@ -6867,23 +13295,47 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "quick_attack",
-				"levelReq": 15
+				"levelReq": 13
 			},
 			{
 				"key": "whirlwind",
-				"levelReq": 23
+				"levelReq": 17
 			},
 			{
-				"key": "wing_attack",
-				"levelReq": 33
+				"key": "twister",
+				"levelReq": 22
+			},
+			{
+				"key": "feather_dance",
+				"levelReq": 27
 			},
 			{
 				"key": "agility",
-				"levelReq": 43
+				"levelReq": 32
+			},
+			{
+				"key": "wing_attack",
+				"levelReq": 37
+			},
+			{
+				"key": "roost",
+				"levelReq": 42
+			},
+			{
+				"key": "tailwind",
+				"levelReq": 47
 			},
 			{
 				"key": "mirror_move",
-				"levelReq": 55
+				"levelReq": 52
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 57
+			},
+			{
+				"key": "hurricane",
+				"levelReq": 62
 			}
 		],
 		"evolvesTo": "pidgeot",
@@ -6896,7 +13348,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": "FLYING",
 		"catchRate": 45,
-		"baseExp": 172,
+		"baseExp": 216,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 83,
@@ -6904,11 +13356,19 @@ var SPECIES_DATA = {
 			"atkEsp": 70,
 			"def": 75,
 			"defEsp": 70,
-			"speed": 91
+			"speed": 101
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "gust",
+				"levelReq": 1
+			},
+			{
+				"key": "hurricane",
+				"levelReq": 1
+			},
+			{
+				"key": "quick_attack",
 				"levelReq": 1
 			},
 			{
@@ -6916,11 +13376,7 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "gust",
-				"levelReq": 1
-			},
-			{
-				"key": "quick_attack",
+				"key": "tackle",
 				"levelReq": 1
 			},
 			{
@@ -6933,23 +13389,47 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "quick_attack",
-				"levelReq": 15
+				"levelReq": 13
 			},
 			{
 				"key": "whirlwind",
-				"levelReq": 23
+				"levelReq": 17
 			},
 			{
-				"key": "wing_attack",
-				"levelReq": 33
+				"key": "twister",
+				"levelReq": 22
+			},
+			{
+				"key": "feather_dance",
+				"levelReq": 27
 			},
 			{
 				"key": "agility",
-				"levelReq": 46
+				"levelReq": 32
+			},
+			{
+				"key": "wing_attack",
+				"levelReq": 38
+			},
+			{
+				"key": "roost",
+				"levelReq": 44
+			},
+			{
+				"key": "tailwind",
+				"levelReq": 50
 			},
 			{
 				"key": "mirror_move",
-				"levelReq": 61
+				"levelReq": 56
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 62
+			},
+			{
+				"key": "hurricane",
+				"levelReq": 68
 			}
 		],
 		"evolvesTo": null,
@@ -6961,8 +13441,8 @@ var SPECIES_DATA = {
 		"description": "Pokedex Nº20 - tipo NORMAL.",
 		"type": "NORMAL",
 		"type2": null,
-		"catchRate": 90,
-		"baseExp": 116,
+		"catchRate": 127,
+		"baseExp": 145,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 55,
@@ -6974,6 +13454,26 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "focus_energy",
+				"levelReq": 1
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 1
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 1
+			},
+			{
+				"key": "swords_dance",
+				"levelReq": 1
+			},
+			{
 				"key": "tackle",
 				"levelReq": 1
 			},
@@ -6983,27 +13483,47 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "quick_attack",
-				"levelReq": 1
+				"levelReq": 4
 			},
 			{
-				"key": "quick_attack",
+				"key": "focus_energy",
 				"levelReq": 7
 			},
 			{
-				"key": "hyper_fang",
-				"levelReq": 13
-			},
-			{
-				"key": "scary_face",
-				"levelReq": 20
+				"key": "bite",
+				"levelReq": 10
 			},
 			{
 				"key": "pursuit",
-				"levelReq": 30
+				"levelReq": 13
+			},
+			{
+				"key": "hyper_fang",
+				"levelReq": 16
+			},
+			{
+				"key": "assurance",
+				"levelReq": 19
+			},
+			{
+				"key": "crunch",
+				"levelReq": 24
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 29
 			},
 			{
 				"key": "super_fang",
-				"levelReq": 40
+				"levelReq": 34
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 39
+			},
+			{
+				"key": "endeavor",
+				"levelReq": 44
 			}
 		],
 		"evolvesTo": null,
@@ -7016,7 +13536,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": "FLYING",
 		"catchRate": 90,
-		"baseExp": 162,
+		"baseExp": 155,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 65,
@@ -7028,7 +13548,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "peck",
+				"key": "drill_run",
 				"levelReq": 1
 			},
 			{
@@ -7040,32 +13560,60 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "fury_attack",
+				"key": "peck",
+				"levelReq": 1
+			},
+			{
+				"key": "pluck",
+				"levelReq": 1
+			},
+			{
+				"key": "pursuit",
 				"levelReq": 1
 			},
 			{
 				"key": "leer",
-				"levelReq": 7
-			},
-			{
-				"key": "fury_attack",
-				"levelReq": 13
+				"levelReq": 4
 			},
 			{
 				"key": "pursuit",
-				"levelReq": 26
+				"levelReq": 8
+			},
+			{
+				"key": "fury_attack",
+				"levelReq": 11
+			},
+			{
+				"key": "aerial_ace",
+				"levelReq": 15
 			},
 			{
 				"key": "mirror_move",
-				"levelReq": 32
+				"levelReq": 18
 			},
 			{
-				"key": "drill_peck",
-				"levelReq": 40
+				"key": "assurance",
+				"levelReq": 23
 			},
 			{
 				"key": "agility",
-				"levelReq": 47
+				"levelReq": 27
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 32
+			},
+			{
+				"key": "roost",
+				"levelReq": 36
+			},
+			{
+				"key": "drill_peck",
+				"levelReq": 41
+			},
+			{
+				"key": "drill_run",
+				"levelReq": 45
 			}
 		],
 		"evolvesTo": null,
@@ -7074,11 +13622,11 @@ var SPECIES_DATA = {
 	"jigglypuff": {
 		"id": "jigglypuff",
 		"name": "Jigglypuff",
-		"description": "Pokedex Nº39 - tipo NORMAL.",
+		"description": "Pokedex Nº39 - tipo NORMAL/FAIRY.",
 		"type": "NORMAL",
-		"type2": null,
+		"type2": "FAIRY",
 		"catchRate": 170,
-		"baseExp": 76,
+		"baseExp": 95,
 		"growthCurve": "FAST",
 		"base": {
 			"hp": 115,
@@ -7095,35 +13643,75 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "defense_curl",
-				"levelReq": 4
+				"levelReq": 3
 			},
 			{
 				"key": "pound",
+				"levelReq": 5
+			},
+			{
+				"key": "play_nice",
 				"levelReq": 9
+			},
+			{
+				"key": "disarming_voice",
+				"levelReq": 11
 			},
 			{
 				"key": "disable",
 				"levelReq": 14
 			},
 			{
-				"key": "rollout",
-				"levelReq": 19
+				"key": "double_slap",
+				"levelReq": 17
 			},
 			{
-				"key": "doubleslap",
-				"levelReq": 24
+				"key": "rollout",
+				"levelReq": 20
+			},
+			{
+				"key": "round",
+				"levelReq": 22
+			},
+			{
+				"key": "spit_up",
+				"levelReq": 25
+			},
+			{
+				"key": "stockpile",
+				"levelReq": 25
+			},
+			{
+				"key": "swallow",
+				"levelReq": 25
+			},
+			{
+				"key": "wake_up_slap",
+				"levelReq": 27
 			},
 			{
 				"key": "rest",
-				"levelReq": 29
+				"levelReq": 30
 			},
 			{
 				"key": "body_slam",
-				"levelReq": 34
+				"levelReq": 32
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 35
+			},
+			{
+				"key": "mimic",
+				"levelReq": 38
+			},
+			{
+				"key": "hyper_voice",
+				"levelReq": 41
 			},
 			{
 				"key": "double_edge",
-				"levelReq": 39
+				"levelReq": 45
 			}
 		],
 		"evolvesTo": null,
@@ -7136,7 +13724,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 255,
-		"baseExp": 69,
+		"baseExp": 58,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 40,
@@ -7148,36 +13736,64 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
 				"key": "growl",
 				"levelReq": 1
 			},
 			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
 				"key": "bite",
-				"levelReq": 11
+				"levelReq": 6
 			},
 			{
-				"key": "pay_day",
-				"levelReq": 20
-			},
-			{
-				"key": "faint_attack",
-				"levelReq": 28
-			},
-			{
-				"key": "screech",
-				"levelReq": 35
+				"key": "fake_out",
+				"levelReq": 9
 			},
 			{
 				"key": "fury_swipes",
-				"levelReq": 41
+				"levelReq": 14
+			},
+			{
+				"key": "screech",
+				"levelReq": 17
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 22
+			},
+			{
+				"key": "taunt",
+				"levelReq": 25
+			},
+			{
+				"key": "pay_day",
+				"levelReq": 30
 			},
 			{
 				"key": "slash",
+				"levelReq": 33
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 38
+			},
+			{
+				"key": "assurance",
+				"levelReq": 41
+			},
+			{
+				"key": "captivate",
 				"levelReq": 46
+			},
+			{
+				"key": "night_slash",
+				"levelReq": 49
+			},
+			{
+				"key": "feint",
+				"levelReq": 50
 			}
 		],
 		"evolvesTo": "persian",
@@ -7190,7 +13806,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 90,
-		"baseExp": 148,
+		"baseExp": 154,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 65,
@@ -7202,7 +13818,11 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "scratch",
+				"key": "bite",
+				"levelReq": 1
+			},
+			{
+				"key": "fake_out",
 				"levelReq": 1
 			},
 			{
@@ -7210,32 +13830,76 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "bite",
+				"key": "play_rough",
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "swift",
+				"levelReq": 1
+			},
+			{
+				"key": "swift",
+				"levelReq": 1
+			},
+			{
+				"key": "switcheroo",
 				"levelReq": 1
 			},
 			{
 				"key": "bite",
-				"levelReq": 11
+				"levelReq": 6
 			},
 			{
-				"key": "pay_day",
-				"levelReq": 20
-			},
-			{
-				"key": "faint_attack",
-				"levelReq": 29
-			},
-			{
-				"key": "screech",
-				"levelReq": 38
+				"key": "fake_out",
+				"levelReq": 9
 			},
 			{
 				"key": "fury_swipes",
-				"levelReq": 46
+				"levelReq": 14
+			},
+			{
+				"key": "screech",
+				"levelReq": 17
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 22
+			},
+			{
+				"key": "taunt",
+				"levelReq": 25
+			},
+			{
+				"key": "power_gem",
+				"levelReq": 32
 			},
 			{
 				"key": "slash",
-				"levelReq": 53
+				"levelReq": 37
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 44
+			},
+			{
+				"key": "assurance",
+				"levelReq": 49
+			},
+			{
+				"key": "captivate",
+				"levelReq": 56
+			},
+			{
+				"key": "night_slash",
+				"levelReq": 61
+			},
+			{
+				"key": "feint",
+				"levelReq": 65
 			}
 		],
 		"evolvesTo": null,
@@ -7243,16 +13907,16 @@ var SPECIES_DATA = {
 	},
 	"farfetch_d": {
 		"id": "farfetch_d",
-		"name": "Farfetch'd",
+		"name": "Farfetch’d",
 		"description": "Pokedex Nº83 - tipo NORMAL/FLYING.",
 		"type": "NORMAL",
 		"type2": "FLYING",
 		"catchRate": 45,
-		"baseExp": 94,
+		"baseExp": 132,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 52,
-			"atkFis": 65,
+			"atkFis": 90,
 			"atkEsp": 58,
 			"def": 55,
 			"defEsp": 62,
@@ -7260,20 +13924,48 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "brave_bird",
+				"levelReq": 1
+			},
+			{
+				"key": "fury_cutter",
+				"levelReq": 1
+			},
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
 				"key": "peck",
 				"levelReq": 1
 			},
 			{
-				"key": "sand_attack",
-				"levelReq": 7
+				"key": "poison_jab",
+				"levelReq": 1
 			},
 			{
-				"key": "leer",
-				"levelReq": 13
+				"key": "sand_attack",
+				"levelReq": 1
 			},
 			{
 				"key": "fury_attack",
+				"levelReq": 7
+			},
+			{
+				"key": "aerial_ace",
+				"levelReq": 9
+			},
+			{
+				"key": "knock_off",
+				"levelReq": 13
+			},
+			{
+				"key": "slash",
 				"levelReq": 19
+			},
+			{
+				"key": "air_cutter",
+				"levelReq": 21
 			},
 			{
 				"key": "swords_dance",
@@ -7284,12 +13976,28 @@ var SPECIES_DATA = {
 				"levelReq": 31
 			},
 			{
-				"key": "slash",
+				"key": "night_slash",
+				"levelReq": 33
+			},
+			{
+				"key": "acrobatics",
 				"levelReq": 37
 			},
 			{
+				"key": "feint",
+				"levelReq": 43
+			},
+			{
 				"key": "false_swipe",
-				"levelReq": 44
+				"levelReq": 45
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 49
+			},
+			{
+				"key": "brave_bird",
+				"levelReq": 55
 			}
 		],
 		"evolvesTo": null,
@@ -7302,7 +14010,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": "FLYING",
 		"catchRate": 190,
-		"baseExp": 96,
+		"baseExp": 62,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 35,
@@ -7314,36 +14022,68 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "peck",
-				"levelReq": 1
-			},
-			{
 				"key": "growl",
 				"levelReq": 1
 			},
 			{
-				"key": "pursuit",
-				"levelReq": 9
+				"key": "peck",
+				"levelReq": 1
 			},
 			{
-				"key": "fury_attack",
-				"levelReq": 13
-			},
-			{
-				"key": "tri_attack",
-				"levelReq": 21
+				"key": "quick_attack",
+				"levelReq": 5
 			},
 			{
 				"key": "rage",
-				"levelReq": 25
+				"levelReq": 8
 			},
 			{
-				"key": "drill_peck",
-				"levelReq": 33
+				"key": "fury_attack",
+				"levelReq": 12
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 15
+			},
+			{
+				"key": "pluck",
+				"levelReq": 19
+			},
+			{
+				"key": "double_hit",
+				"levelReq": 22
 			},
 			{
 				"key": "agility",
-				"levelReq": 37
+				"levelReq": 26
+			},
+			{
+				"key": "uproar",
+				"levelReq": 29
+			},
+			{
+				"key": "acupressure",
+				"levelReq": 33
+			},
+			{
+				"key": "swords_dance",
+				"levelReq": 36
+			},
+			{
+				"key": "jump_kick",
+				"levelReq": 40
+			},
+			{
+				"key": "drill_peck",
+				"levelReq": 43
+			},
+			{
+				"key": "endeavor",
+				"levelReq": 47
+			},
+			{
+				"key": "thrash",
+				"levelReq": 50
 			}
 		],
 		"evolvesTo": "dodrio",
@@ -7356,7 +14096,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": "FLYING",
 		"catchRate": 45,
-		"baseExp": 158,
+		"baseExp": 165,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 60,
@@ -7364,48 +14104,88 @@ var SPECIES_DATA = {
 			"atkEsp": 60,
 			"def": 70,
 			"defEsp": 60,
-			"speed": 100
+			"speed": 110
 		},
 		"abilities": [
-			{
-				"key": "peck",
-				"levelReq": 1
-			},
 			{
 				"key": "growl",
 				"levelReq": 1
 			},
 			{
-				"key": "pursuit",
+				"key": "peck",
 				"levelReq": 1
 			},
 			{
-				"key": "fury_attack",
+				"key": "quick_attack",
 				"levelReq": 1
-			},
-			{
-				"key": "pursuit",
-				"levelReq": 9
-			},
-			{
-				"key": "fury_attack",
-				"levelReq": 13
-			},
-			{
-				"key": "tri_attack",
-				"levelReq": 21
 			},
 			{
 				"key": "rage",
-				"levelReq": 25
+				"levelReq": 1
 			},
 			{
-				"key": "drill_peck",
-				"levelReq": 38
+				"key": "tri_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "tri_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 5
+			},
+			{
+				"key": "rage",
+				"levelReq": 8
+			},
+			{
+				"key": "fury_attack",
+				"levelReq": 12
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 15
+			},
+			{
+				"key": "pluck",
+				"levelReq": 19
+			},
+			{
+				"key": "double_hit",
+				"levelReq": 22
 			},
 			{
 				"key": "agility",
+				"levelReq": 26
+			},
+			{
+				"key": "uproar",
+				"levelReq": 29
+			},
+			{
+				"key": "acupressure",
+				"levelReq": 34
+			},
+			{
+				"key": "swords_dance",
+				"levelReq": 38
+			},
+			{
+				"key": "jump_kick",
+				"levelReq": 43
+			},
+			{
+				"key": "drill_peck",
 				"levelReq": 47
+			},
+			{
+				"key": "endeavor",
+				"levelReq": 52
+			},
+			{
+				"key": "thrash",
+				"levelReq": 56
 			}
 		],
 		"evolvesTo": null,
@@ -7418,7 +14198,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 127,
+		"baseExp": 77,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 90,
@@ -7435,31 +14215,59 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "supersonic",
-				"levelReq": 7
+				"levelReq": 5
 			},
 			{
 				"key": "defense_curl",
+				"levelReq": 9
+			},
+			{
+				"key": "knock_off",
 				"levelReq": 13
 			},
 			{
-				"key": "stomp",
-				"levelReq": 19
+				"key": "wrap",
+				"levelReq": 17
 			},
 			{
-				"key": "wrap",
-				"levelReq": 25
+				"key": "stomp",
+				"levelReq": 21
 			},
 			{
 				"key": "disable",
-				"levelReq": 31
+				"levelReq": 25
 			},
 			{
 				"key": "slam",
+				"levelReq": 29
+			},
+			{
+				"key": "rollout",
+				"levelReq": 33
+			},
+			{
+				"key": "chip_away",
 				"levelReq": 37
 			},
 			{
+				"key": "me_first",
+				"levelReq": 41
+			},
+			{
+				"key": "refresh",
+				"levelReq": 45
+			},
+			{
 				"key": "screech",
-				"levelReq": 43
+				"levelReq": 49
+			},
+			{
+				"key": "power_whip",
+				"levelReq": 53
+			},
+			{
+				"key": "wring_out",
+				"levelReq": 57
 			}
 		],
 		"evolvesTo": null,
@@ -7472,7 +14280,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 175,
+		"baseExp": 172,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 105,
@@ -7489,35 +14297,59 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "fake_out",
 				"levelReq": 7
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 10
 			},
 			{
 				"key": "bite",
 				"levelReq": 13
 			},
 			{
-				"key": "tail_whip",
+				"key": "double_hit",
 				"levelReq": 19
+			},
+			{
+				"key": "rage",
+				"levelReq": 22
 			},
 			{
 				"key": "mega_punch",
 				"levelReq": 25
 			},
 			{
-				"key": "rage",
+				"key": "chip_away",
 				"levelReq": 31
 			},
 			{
-				"key": "endure",
+				"key": "dizzy_punch",
+				"levelReq": 34
+			},
+			{
+				"key": "crunch",
 				"levelReq": 37
 			},
 			{
-				"key": "dizzy_punch",
+				"key": "endure",
 				"levelReq": 43
 			},
 			{
-				"key": "reversal",
+				"key": "outrage",
+				"levelReq": 46
+			},
+			{
+				"key": "sucker_punch",
 				"levelReq": 49
+			},
+			{
+				"key": "reversal",
+				"levelReq": 50
 			}
 		],
 		"evolvesTo": null,
@@ -7530,7 +14362,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 211,
+		"baseExp": 172,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 75,
@@ -7547,35 +14379,59 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "tail_whip",
-				"levelReq": 4
+				"levelReq": 3
 			},
 			{
 				"key": "rage",
-				"levelReq": 8
+				"levelReq": 5
 			},
 			{
 				"key": "horn_attack",
-				"levelReq": 13
+				"levelReq": 8
 			},
 			{
 				"key": "scary_face",
-				"levelReq": 19
+				"levelReq": 11
 			},
 			{
 				"key": "pursuit",
-				"levelReq": 26
+				"levelReq": 15
 			},
 			{
 				"key": "rest",
-				"levelReq": 34
+				"levelReq": 19
 			},
 			{
-				"key": "thrash",
-				"levelReq": 43
+				"key": "payback",
+				"levelReq": 24
+			},
+			{
+				"key": "work_up",
+				"levelReq": 29
 			},
 			{
 				"key": "take_down",
-				"levelReq": 53
+				"levelReq": 35
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 41
+			},
+			{
+				"key": "swagger",
+				"levelReq": 48
+			},
+			{
+				"key": "thrash",
+				"levelReq": 55
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 63
+			},
+			{
+				"key": "giga_impact",
+				"levelReq": 71
 			}
 		],
 		"evolvesTo": null,
@@ -7588,7 +14444,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 35,
-		"baseExp": 61,
+		"baseExp": 101,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 48,
@@ -7612,7 +14468,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 92,
+		"baseExp": 65,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 55,
@@ -7624,6 +14480,18 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "covet",
+				"levelReq": 1
+			},
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 1
+			},
+			{
 				"key": "tackle",
 				"levelReq": 1
 			},
@@ -7633,27 +14501,51 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "sand_attack",
-				"levelReq": 8
+				"levelReq": 5
 			},
 			{
-				"key": "growl",
-				"levelReq": 16
+				"key": "baby_doll_eyes",
+				"levelReq": 9
 			},
 			{
 				"key": "quick_attack",
-				"levelReq": 23
+				"levelReq": 13
 			},
 			{
 				"key": "bite",
-				"levelReq": 30
+				"levelReq": 17
 			},
 			{
-				"key": "baton_pass",
-				"levelReq": 36
+				"key": "swift",
+				"levelReq": 17
+			},
+			{
+				"key": "refresh",
+				"levelReq": 20
 			},
 			{
 				"key": "take_down",
-				"levelReq": 42
+				"levelReq": 25
+			},
+			{
+				"key": "charm",
+				"levelReq": 29
+			},
+			{
+				"key": "baton_pass",
+				"levelReq": 33
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 37
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 41
+			},
+			{
+				"key": "trump_card",
+				"levelReq": 45
 			}
 		],
 		"evolvesTo": null,
@@ -7666,7 +14558,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 130,
+		"baseExp": 79,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 65,
@@ -7678,7 +14570,15 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "conversion2",
+				"key": "conversion",
+				"levelReq": 1
+			},
+			{
+				"key": "conversion_2",
+				"levelReq": 1
+			},
+			{
+				"key": "sharpen",
 				"levelReq": 1
 			},
 			{
@@ -7686,36 +14586,48 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "conversion",
-				"levelReq": 1
+				"key": "psybeam",
+				"levelReq": 7
 			},
 			{
 				"key": "agility",
-				"levelReq": 9
-			},
-			{
-				"key": "psybeam",
 				"levelReq": 12
 			},
 			{
 				"key": "recover",
-				"levelReq": 20
+				"levelReq": 18
 			},
 			{
-				"key": "sharpen",
-				"levelReq": 24
+				"key": "magnet_rise",
+				"levelReq": 23
+			},
+			{
+				"key": "signal_beam",
+				"levelReq": 29
+			},
+			{
+				"key": "recycle",
+				"levelReq": 34
+			},
+			{
+				"key": "discharge",
+				"levelReq": 40
 			},
 			{
 				"key": "lock_on",
-				"levelReq": 32
+				"levelReq": 45
 			},
 			{
 				"key": "tri_attack",
-				"levelReq": 36
+				"levelReq": 50
+			},
+			{
+				"key": "magic_coat",
+				"levelReq": 56
 			},
 			{
 				"key": "zap_cannon",
-				"levelReq": 44
+				"levelReq": 62
 			}
 		],
 		"evolvesTo": null,
@@ -7728,7 +14640,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 25,
-		"baseExp": 154,
+		"baseExp": 189,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 160,
@@ -7744,39 +14656,67 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "amnesia",
-				"levelReq": 8
-			},
-			{
 				"key": "defense_curl",
-				"levelReq": 15
+				"levelReq": 4
 			},
 			{
-				"key": "belly_drum",
-				"levelReq": 22
+				"key": "amnesia",
+				"levelReq": 9
 			},
 			{
-				"key": "headbutt",
-				"levelReq": 29
+				"key": "lick",
+				"levelReq": 12
 			},
 			{
-				"key": "snore",
-				"levelReq": 36
+				"key": "chip_away",
+				"levelReq": 17
 			},
 			{
-				"key": "rest",
-				"levelReq": 36
+				"key": "yawn",
+				"levelReq": 20
 			},
 			{
 				"key": "body_slam",
-				"levelReq": 43
+				"levelReq": 25
+			},
+			{
+				"key": "rest",
+				"levelReq": 28
+			},
+			{
+				"key": "snore",
+				"levelReq": 28
+			},
+			{
+				"key": "sleep_talk",
+				"levelReq": 33
+			},
+			{
+				"key": "giga_impact",
+				"levelReq": 35
 			},
 			{
 				"key": "rollout",
+				"levelReq": 36
+			},
+			{
+				"key": "block",
+				"levelReq": 41
+			},
+			{
+				"key": "belly_drum",
+				"levelReq": 44
+			},
+			{
+				"key": "crunch",
+				"levelReq": 49
+			},
+			{
+				"key": "heavy_slam",
 				"levelReq": 50
 			},
 			{
-				"key": "hyper_beam",
+				"key": "high_horsepower",
 				"levelReq": 57
 			}
 		],
@@ -7790,7 +14730,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 255,
-		"baseExp": 57,
+		"baseExp": 43,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 35,
@@ -7802,20 +14742,32 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "foresight",
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
 				"levelReq": 1
 			},
 			{
 				"key": "defense_curl",
-				"levelReq": 5
+				"levelReq": 4
 			},
 			{
 				"key": "quick_attack",
-				"levelReq": 11
+				"levelReq": 7
 			},
 			{
 				"key": "fury_swipes",
-				"levelReq": 17
+				"levelReq": 13
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 16
+			},
+			{
+				"key": "follow_me",
+				"levelReq": 19
 			},
 			{
 				"key": "slam",
@@ -7823,11 +14775,27 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "rest",
-				"levelReq": 33
+				"levelReq": 28
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 31
 			},
 			{
 				"key": "amnesia",
-				"levelReq": 41
+				"levelReq": 36
+			},
+			{
+				"key": "baton_pass",
+				"levelReq": 39
+			},
+			{
+				"key": "me_first",
+				"levelReq": 42
+			},
+			{
+				"key": "hyper_voice",
+				"levelReq": 47
 			}
 		],
 		"evolvesTo": "furret",
@@ -7840,7 +14808,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 90,
-		"baseExp": 116,
+		"baseExp": 145,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 85,
@@ -7852,28 +14820,52 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "agility",
+				"levelReq": 1
+			},
+			{
+				"key": "agility",
+				"levelReq": 1
+			},
+			{
+				"key": "coil",
+				"levelReq": 1
+			},
+			{
+				"key": "defense_curl",
+				"levelReq": 1
+			},
+			{
+				"key": "foresight",
+				"levelReq": 1
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 1
+			},
+			{
 				"key": "scratch",
 				"levelReq": 1
 			},
 			{
 				"key": "defense_curl",
-				"levelReq": 1
+				"levelReq": 4
 			},
 			{
 				"key": "quick_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "defense_curl",
-				"levelReq": 5
-			},
-			{
-				"key": "quick_attack",
-				"levelReq": 11
+				"levelReq": 7
 			},
 			{
 				"key": "fury_swipes",
-				"levelReq": 18
+				"levelReq": 13
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 17
+			},
+			{
+				"key": "follow_me",
+				"levelReq": 21
 			},
 			{
 				"key": "slam",
@@ -7881,11 +14873,27 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "rest",
-				"levelReq": 38
+				"levelReq": 32
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 36
 			},
 			{
 				"key": "amnesia",
-				"levelReq": 48
+				"levelReq": 42
+			},
+			{
+				"key": "baton_pass",
+				"levelReq": 46
+			},
+			{
+				"key": "me_first",
+				"levelReq": 50
+			},
+			{
+				"key": "hyper_voice",
+				"levelReq": 56
 			}
 		],
 		"evolvesTo": null,
@@ -7898,7 +14906,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": "FLYING",
 		"catchRate": 255,
-		"baseExp": 58,
+		"baseExp": 52,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 60,
@@ -7910,7 +14918,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "foresight",
 				"levelReq": 1
 			},
 			{
@@ -7918,32 +14926,68 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "foresight",
-				"levelReq": 6
-			},
-			{
-				"key": "peck",
-				"levelReq": 11
+				"key": "tackle",
+				"levelReq": 1
 			},
 			{
 				"key": "hypnosis",
+				"levelReq": 4
+			},
+			{
+				"key": "peck",
+				"levelReq": 7
+			},
+			{
+				"key": "confusion",
+				"levelReq": 10
+			},
+			{
+				"key": "echoed_voice",
+				"levelReq": 13
+			},
+			{
+				"key": "zen_headbutt",
 				"levelReq": 16
 			},
 			{
-				"key": "reflect",
+				"key": "psycho_shift",
+				"levelReq": 19
+			},
+			{
+				"key": "extrasensory",
 				"levelReq": 22
 			},
 			{
 				"key": "take_down",
+				"levelReq": 25
+			},
+			{
+				"key": "reflect",
 				"levelReq": 28
 			},
 			{
-				"key": "confusion",
+				"key": "air_slash",
+				"levelReq": 31
+			},
+			{
+				"key": "uproar",
 				"levelReq": 34
 			},
 			{
+				"key": "roost",
+				"levelReq": 37
+			},
+			{
+				"key": "moonblast",
+				"levelReq": 40
+			},
+			{
+				"key": "synchronoise",
+				"levelReq": 43
+			},
+			{
 				"key": "dream_eater",
-				"levelReq": 48
+				"levelReq": 46
 			}
 		],
 		"evolvesTo": "noctowl",
@@ -7956,19 +15000,23 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": "FLYING",
 		"catchRate": 90,
-		"baseExp": 162,
+		"baseExp": 158,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 100,
 			"atkFis": 50,
-			"atkEsp": 76,
+			"atkEsp": 86,
 			"def": 50,
 			"defEsp": 96,
 			"speed": 70
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "dream_eater",
+				"levelReq": 1
+			},
+			{
+				"key": "foresight",
 				"levelReq": 1
 			},
 			{
@@ -7976,82 +15024,76 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "foresight",
+				"key": "hypnosis",
 				"levelReq": 1
 			},
 			{
-				"key": "peck",
+				"key": "sky_attack",
 				"levelReq": 1
 			},
 			{
-				"key": "foresight",
-				"levelReq": 6
-			},
-			{
-				"key": "peck",
-				"levelReq": 11
+				"key": "tackle",
+				"levelReq": 1
 			},
 			{
 				"key": "hypnosis",
-				"levelReq": 16
-			},
-			{
-				"key": "reflect",
-				"levelReq": 25
-			},
-			{
-				"key": "take_down",
-				"levelReq": 33
-			},
-			{
-				"key": "confusion",
-				"levelReq": 41
-			},
-			{
-				"key": "dream_eater",
-				"levelReq": 57
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"cleffa": {
-		"id": "cleffa",
-		"name": "Cleffa",
-		"description": "Pokedex Nº173 - tipo NORMAL.",
-		"type": "NORMAL",
-		"type2": null,
-		"catchRate": 150,
-		"baseExp": 37,
-		"growthCurve": "FAST",
-		"base": {
-			"hp": 50,
-			"atkFis": 25,
-			"atkEsp": 45,
-			"def": 28,
-			"defEsp": 55,
-			"speed": 15
-		},
-		"abilities": [
-			{
-				"key": "pound",
-				"levelReq": 1
-			},
-			{
-				"key": "charm",
-				"levelReq": 1
-			},
-			{
-				"key": "encore",
 				"levelReq": 4
 			},
 			{
-				"key": "sing",
-				"levelReq": 8
+				"key": "peck",
+				"levelReq": 7
 			},
 			{
-				"key": "sweet_kiss",
+				"key": "confusion",
+				"levelReq": 10
+			},
+			{
+				"key": "echoed_voice",
 				"levelReq": 13
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 16
+			},
+			{
+				"key": "psycho_shift",
+				"levelReq": 19
+			},
+			{
+				"key": "extrasensory",
+				"levelReq": 23
+			},
+			{
+				"key": "take_down",
+				"levelReq": 27
+			},
+			{
+				"key": "reflect",
+				"levelReq": 31
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 35
+			},
+			{
+				"key": "uproar",
+				"levelReq": 39
+			},
+			{
+				"key": "roost",
+				"levelReq": 43
+			},
+			{
+				"key": "moonblast",
+				"levelReq": 47
+			},
+			{
+				"key": "synchronoise",
+				"levelReq": 51
+			},
+			{
+				"key": "dream_eater",
+				"levelReq": 55
 			}
 		],
 		"evolvesTo": null,
@@ -8060,11 +15102,11 @@ var SPECIES_DATA = {
 	"igglybuff": {
 		"id": "igglybuff",
 		"name": "Igglybuff",
-		"description": "Pokedex Nº174 - tipo NORMAL.",
+		"description": "Pokedex Nº174 - tipo NORMAL/FAIRY.",
 		"type": "NORMAL",
-		"type2": null,
+		"type2": "FAIRY",
 		"catchRate": 170,
-		"baseExp": 39,
+		"baseExp": 42,
 		"growthCurve": "FAST",
 		"base": {
 			"hp": 90,
@@ -8076,74 +15118,28 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "charm",
+				"levelReq": 1
+			},
+			{
 				"key": "sing",
 				"levelReq": 1
 			},
 			{
-				"key": "charm",
-				"levelReq": 1
-			},
-			{
 				"key": "defense_curl",
-				"levelReq": 4
+				"levelReq": 3
 			},
 			{
 				"key": "pound",
+				"levelReq": 5
+			},
+			{
+				"key": "sweet_kiss",
 				"levelReq": 9
 			},
 			{
-				"key": "sweet_kiss",
-				"levelReq": 14
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"togepi": {
-		"id": "togepi",
-		"name": "Togepi",
-		"description": "Pokedex Nº175 - tipo NORMAL.",
-		"type": "NORMAL",
-		"type2": null,
-		"catchRate": 190,
-		"baseExp": 74,
-		"growthCurve": "FAST",
-		"base": {
-			"hp": 35,
-			"atkFis": 20,
-			"atkEsp": 40,
-			"def": 65,
-			"defEsp": 65,
-			"speed": 20
-		},
-		"abilities": [
-			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "charm",
-				"levelReq": 1
-			},
-			{
-				"key": "metronome",
-				"levelReq": 7
-			},
-			{
-				"key": "sweet_kiss",
-				"levelReq": 18
-			},
-			{
-				"key": "encore",
-				"levelReq": 25
-			},
-			{
-				"key": "safeguard",
-				"levelReq": 31
-			},
-			{
-				"key": "double_edge",
-				"levelReq": 38
+				"key": "copycat",
+				"levelReq": 11
 			}
 		],
 		"evolvesTo": null,
@@ -8156,7 +15152,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 94,
+		"baseExp": 72,
 		"growthCurve": "FAST",
 		"base": {
 			"hp": 55,
@@ -8177,27 +15173,51 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "sand_attack",
-				"levelReq": 6
+				"levelReq": 4
+			},
+			{
+				"key": "astonish",
+				"levelReq": 8
 			},
 			{
 				"key": "baton_pass",
-				"levelReq": 12
+				"levelReq": 11
+			},
+			{
+				"key": "tickle",
+				"levelReq": 15
 			},
 			{
 				"key": "fury_swipes",
-				"levelReq": 19
+				"levelReq": 18
 			},
 			{
 				"key": "swift",
-				"levelReq": 27
+				"levelReq": 22
 			},
 			{
 				"key": "screech",
-				"levelReq": 36
+				"levelReq": 25
 			},
 			{
 				"key": "agility",
-				"levelReq": 46
+				"levelReq": 29
+			},
+			{
+				"key": "double_hit",
+				"levelReq": 32
+			},
+			{
+				"key": "fling",
+				"levelReq": 36
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 39
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 43
 			}
 		],
 		"evolvesTo": null,
@@ -8210,7 +15230,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": "PSYCHIC",
 		"catchRate": 60,
-		"baseExp": 149,
+		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 70,
@@ -8222,7 +15242,11 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "astonish",
+				"levelReq": 1
+			},
+			{
+				"key": "confusion",
 				"levelReq": 1
 			},
 			{
@@ -8230,36 +15254,60 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "confusion",
+				"key": "guard_swap",
 				"levelReq": 1
 			},
 			{
-				"key": "stomp",
+				"key": "power_swap",
 				"levelReq": 1
 			},
 			{
-				"key": "confusion",
-				"levelReq": 7
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "odor_sleuth",
+				"levelReq": 5
+			},
+			{
+				"key": "assurance",
+				"levelReq": 10
 			},
 			{
 				"key": "stomp",
-				"levelReq": 13
-			},
-			{
-				"key": "agility",
-				"levelReq": 20
-			},
-			{
-				"key": "baton_pass",
-				"levelReq": 30
+				"levelReq": 14
 			},
 			{
 				"key": "psybeam",
-				"levelReq": 41
+				"levelReq": 19
+			},
+			{
+				"key": "agility",
+				"levelReq": 23
+			},
+			{
+				"key": "double_hit",
+				"levelReq": 28
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 32
 			},
 			{
 				"key": "crunch",
-				"levelReq": 54
+				"levelReq": 37
+			},
+			{
+				"key": "baton_pass",
+				"levelReq": 41
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 46
+			},
+			{
+				"key": "psychic",
+				"levelReq": 50
 			}
 		],
 		"evolvesTo": null,
@@ -8272,7 +15320,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 190,
-		"baseExp": 75,
+		"baseExp": 145,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 100,
@@ -8284,147 +15332,91 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "defense_curl",
+				"levelReq": 1
+			},
+			{
 				"key": "rage",
 				"levelReq": 1
 			},
 			{
-				"key": "defense_curl",
-				"levelReq": 5
-			},
-			{
-				"key": "glare",
-				"levelReq": 13
+				"key": "rollout",
+				"levelReq": 3
 			},
 			{
 				"key": "spite",
-				"levelReq": 18
+				"levelReq": 6
 			},
 			{
 				"key": "pursuit",
-				"levelReq": 26
+				"levelReq": 8
 			},
 			{
 				"key": "screech",
-				"levelReq": 30
+				"levelReq": 11
 			},
 			{
-				"key": "take_down",
-				"levelReq": 38
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"snubbull": {
-		"id": "snubbull",
-		"name": "Snubbull",
-		"description": "Pokedex Nº209 - tipo NORMAL.",
-		"type": "NORMAL",
-		"type2": null,
-		"catchRate": 190,
-		"baseExp": 63,
-		"growthCurve": "FAST",
-		"base": {
-			"hp": 60,
-			"atkFis": 80,
-			"atkEsp": 40,
-			"def": 50,
-			"defEsp": 40,
-			"speed": 30
-		},
-		"abilities": [
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "scary_face",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 4
-			},
-			{
-				"key": "charm",
-				"levelReq": 8
-			},
-			{
-				"key": "bite",
+				"key": "mud_slap",
 				"levelReq": 13
 			},
 			{
-				"key": "lick",
-				"levelReq": 19
+				"key": "yawn",
+				"levelReq": 16
 			},
 			{
-				"key": "roar",
+				"key": "ancient_power",
+				"levelReq": 18
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 21
+			},
+			{
+				"key": "drill_run",
+				"levelReq": 23
+			},
+			{
+				"key": "roost",
 				"levelReq": 26
 			},
 			{
-				"key": "rage",
-				"levelReq": 34
-			},
-			{
 				"key": "take_down",
-				"levelReq": 43
-			}
-		],
-		"evolvesTo": "granbull",
-		"evolvesAtLevel": 23
-	},
-	"granbull": {
-		"id": "granbull",
-		"name": "Granbull",
-		"description": "Pokedex Nº210 - tipo NORMAL.",
-		"type": "NORMAL",
-		"type2": null,
-		"catchRate": 75,
-		"baseExp": 178,
-		"growthCurve": "FAST",
-		"base": {
-			"hp": 90,
-			"atkFis": 120,
-			"atkEsp": 60,
-			"def": 75,
-			"defEsp": 60,
-			"speed": 45
-		},
-		"abilities": [
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "scary_face",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 4
-			},
-			{
-				"key": "charm",
-				"levelReq": 8
-			},
-			{
-				"key": "bite",
-				"levelReq": 13
-			},
-			{
-				"key": "lick",
-				"levelReq": 19
-			},
-			{
-				"key": "roar",
 				"levelReq": 28
 			},
 			{
-				"key": "rage",
+				"key": "coil",
+				"levelReq": 31
+			},
+			{
+				"key": "dig",
+				"levelReq": 33
+			},
+			{
+				"key": "glare",
+				"levelReq": 36
+			},
+			{
+				"key": "double_edge",
 				"levelReq": 38
 			},
 			{
-				"key": "take_down",
+				"key": "endeavor",
+				"levelReq": 41
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 43
+			},
+			{
+				"key": "dragon_rush",
+				"levelReq": 46
+			},
+			{
+				"key": "endure",
+				"levelReq": 48
+			},
+			{
+				"key": "flail",
 				"levelReq": 51
 			}
 		],
@@ -8438,7 +15430,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 120,
-		"baseExp": 124,
+		"baseExp": 66,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 60,
@@ -8450,32 +15442,56 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "scratch",
+				"key": "baby_doll_eyes",
 				"levelReq": 1
 			},
 			{
-				"key": "leer",
+				"key": "covet",
+				"levelReq": 1
+			},
+			{
+				"key": "fake_tears",
+				"levelReq": 1
+			},
+			{
+				"key": "fling",
 				"levelReq": 1
 			},
 			{
 				"key": "lick",
-				"levelReq": 8
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
+				"levelReq": 1
 			},
 			{
 				"key": "fury_swipes",
+				"levelReq": 8
+			},
+			{
+				"key": "feint_attack",
 				"levelReq": 15
 			},
 			{
-				"key": "faint_attack",
+				"key": "sweet_scent",
 				"levelReq": 22
 			},
 			{
-				"key": "rest",
-				"levelReq": 29
+				"key": "play_nice",
+				"levelReq": 25
 			},
 			{
 				"key": "slash",
+				"levelReq": 29
+			},
+			{
+				"key": "charm",
 				"levelReq": 36
+			},
+			{
+				"key": "rest",
+				"levelReq": 43
 			},
 			{
 				"key": "snore",
@@ -8484,6 +15500,10 @@ var SPECIES_DATA = {
 			{
 				"key": "thrash",
 				"levelReq": 50
+			},
+			{
+				"key": "fling",
+				"levelReq": 57
 			}
 		],
 		"evolvesTo": "ursaring",
@@ -8496,7 +15516,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 60,
-		"baseExp": 189,
+		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 90,
@@ -8508,7 +15528,15 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "scratch",
+				"key": "covet",
+				"levelReq": 1
+			},
+			{
+				"key": "fake_tears",
+				"levelReq": 1
+			},
+			{
+				"key": "hammer_arm",
 				"levelReq": 1
 			},
 			{
@@ -8520,28 +15548,36 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "fury_swipes",
+				"key": "scratch",
 				"levelReq": 1
 			},
 			{
-				"key": "lick",
+				"key": "fury_swipes",
 				"levelReq": 8
 			},
 			{
-				"key": "fury_swipes",
+				"key": "feint_attack",
 				"levelReq": 15
 			},
 			{
-				"key": "faint_attack",
+				"key": "sweet_scent",
 				"levelReq": 22
 			},
 			{
-				"key": "rest",
-				"levelReq": 29
+				"key": "play_nice",
+				"levelReq": 25
 			},
 			{
 				"key": "slash",
-				"levelReq": 39
+				"levelReq": 29
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 38
+			},
+			{
+				"key": "rest",
+				"levelReq": 47
 			},
 			{
 				"key": "snore",
@@ -8549,7 +15585,11 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "thrash",
-				"levelReq": 59
+				"levelReq": 58
+			},
+			{
+				"key": "hammer_arm",
+				"levelReq": 67
 			}
 		],
 		"evolvesTo": null,
@@ -8574,7 +15614,19 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "conversion2",
+				"key": "conversion",
+				"levelReq": 1
+			},
+			{
+				"key": "conversion_2",
+				"levelReq": 1
+			},
+			{
+				"key": "defense_curl",
+				"levelReq": 1
+			},
+			{
+				"key": "magic_coat",
 				"levelReq": 1
 			},
 			{
@@ -8582,36 +15634,56 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "conversion",
+				"key": "zap_cannon",
 				"levelReq": 1
 			},
 			{
-				"key": "agility",
-				"levelReq": 9
+				"key": "psybeam",
+				"levelReq": 7
 			},
 			{
-				"key": "psybeam",
+				"key": "agility",
 				"levelReq": 12
 			},
 			{
 				"key": "recover",
-				"levelReq": 20
+				"levelReq": 18
 			},
 			{
-				"key": "defense_curl",
-				"levelReq": 24
+				"key": "magnet_rise",
+				"levelReq": 23
+			},
+			{
+				"key": "signal_beam",
+				"levelReq": 29
+			},
+			{
+				"key": "recycle",
+				"levelReq": 34
+			},
+			{
+				"key": "discharge",
+				"levelReq": 40
 			},
 			{
 				"key": "lock_on",
-				"levelReq": 32
+				"levelReq": 45
 			},
 			{
 				"key": "tri_attack",
-				"levelReq": 36
+				"levelReq": 50
+			},
+			{
+				"key": "magic_coat",
+				"levelReq": 56
 			},
 			{
 				"key": "zap_cannon",
-				"levelReq": 44
+				"levelReq": 62
+			},
+			{
+				"key": "hyper_beam",
+				"levelReq": 67
 			}
 		],
 		"evolvesTo": null,
@@ -8624,7 +15696,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 165,
+		"baseExp": 163,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 73,
@@ -8636,32 +15708,68 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "me_first",
+				"levelReq": 1
+			},
+			{
 				"key": "tackle",
 				"levelReq": 1
 			},
 			{
 				"key": "leer",
-				"levelReq": 8
+				"levelReq": 3
+			},
+			{
+				"key": "astonish",
+				"levelReq": 7
 			},
 			{
 				"key": "hypnosis",
-				"levelReq": 15
+				"levelReq": 10
 			},
 			{
 				"key": "stomp",
-				"levelReq": 23
+				"levelReq": 13
 			},
 			{
 				"key": "sand_attack",
-				"levelReq": 31
+				"levelReq": 16
 			},
 			{
 				"key": "take_down",
-				"levelReq": 40
+				"levelReq": 21
 			},
 			{
 				"key": "confuse_ray",
+				"levelReq": 23
+			},
+			{
+				"key": "calm_mind",
+				"levelReq": 27
+			},
+			{
+				"key": "role_play",
+				"levelReq": 33
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 38
+			},
+			{
+				"key": "jump_kick",
+				"levelReq": 43
+			},
+			{
+				"key": "imprison",
 				"levelReq": 49
+			},
+			{
+				"key": "captivate",
+				"levelReq": 50
+			},
+			{
+				"key": "me_first",
+				"levelReq": 55
 			}
 		],
 		"evolvesTo": null,
@@ -8674,7 +15782,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 106,
+		"baseExp": 88,
 		"growthCurve": "FAST",
 		"base": {
 			"hp": 55,
@@ -8736,7 +15844,7 @@ var SPECIES_DATA = {
 		"type": "NORMAL",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 200,
+		"baseExp": 172,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 95,
@@ -8753,35 +15861,51 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "growl",
-				"levelReq": 4
+				"levelReq": 3
 			},
 			{
 				"key": "defense_curl",
-				"levelReq": 8
+				"levelReq": 5
 			},
 			{
 				"key": "stomp",
-				"levelReq": 13
+				"levelReq": 8
 			},
 			{
 				"key": "milk_drink",
-				"levelReq": 19
+				"levelReq": 11
 			},
 			{
 				"key": "bide",
-				"levelReq": 26
+				"levelReq": 15
 			},
 			{
 				"key": "rollout",
-				"levelReq": 34
+				"levelReq": 19
 			},
 			{
 				"key": "body_slam",
-				"levelReq": 43
+				"levelReq": 24
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 29
+			},
+			{
+				"key": "captivate",
+				"levelReq": 35
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 41
 			},
 			{
 				"key": "heal_bell",
-				"levelReq": 53
+				"levelReq": 48
+			},
+			{
+				"key": "wake_up_slap",
+				"levelReq": 50
 			}
 		],
 		"evolvesTo": null,
@@ -8794,7 +15918,7 @@ var SPECIES_DATA = {
 		"type": "ROCK",
 		"type2": "GROUND",
 		"catchRate": 120,
-		"baseExp": 134,
+		"baseExp": 137,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 55,
@@ -8806,48 +15930,76 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "defense_curl",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_sport",
+				"levelReq": 1
+			},
+			{
+				"key": "rock_polish",
+				"levelReq": 1
+			},
+			{
 				"key": "tackle",
 				"levelReq": 1
 			},
 			{
-				"key": "defense_curl",
-				"levelReq": 1
+				"key": "mud_sport",
+				"levelReq": 4
 			},
 			{
-				"key": "rock_throw",
-				"levelReq": 1
-			},
-			{
-				"key": "defense_curl",
+				"key": "rock_polish",
 				"levelReq": 6
 			},
 			{
-				"key": "rock_throw",
-				"levelReq": 11
+				"key": "rollout",
+				"levelReq": 10
 			},
 			{
 				"key": "magnitude",
+				"levelReq": 12
+			},
+			{
+				"key": "rock_throw",
 				"levelReq": 16
 			},
 			{
-				"key": "selfdestruct",
-				"levelReq": 21
+				"key": "smack_down",
+				"levelReq": 18
 			},
 			{
-				"key": "harden",
-				"levelReq": 27
+				"key": "bulldoze",
+				"levelReq": 22
 			},
 			{
-				"key": "rollout",
+				"key": "self_destruct",
+				"levelReq": 24
+			},
+			{
+				"key": "stealth_rock",
+				"levelReq": 30
+			},
+			{
+				"key": "rock_blast",
 				"levelReq": 34
 			},
 			{
 				"key": "earthquake",
-				"levelReq": 41
+				"levelReq": 40
 			},
 			{
 				"key": "explosion",
-				"levelReq": 48
+				"levelReq": 44
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 50
+			},
+			{
+				"key": "stone_edge",
+				"levelReq": 54
 			}
 		],
 		"evolvesTo": null,
@@ -8860,11 +16012,11 @@ var SPECIES_DATA = {
 		"type": "ROCK",
 		"type2": "GROUND",
 		"catchRate": 45,
-		"baseExp": 177,
+		"baseExp": 223,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 80,
-			"atkFis": 110,
+			"atkFis": 120,
 			"atkEsp": 55,
 			"def": 130,
 			"defEsp": 65,
@@ -8872,52 +16024,84 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "defense_curl",
+				"levelReq": 1
+			},
+			{
+				"key": "heavy_slam",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_sport",
+				"levelReq": 1
+			},
+			{
+				"key": "rock_polish",
+				"levelReq": 1
+			},
+			{
 				"key": "tackle",
 				"levelReq": 1
 			},
 			{
-				"key": "defense_curl",
-				"levelReq": 1
+				"key": "mud_sport",
+				"levelReq": 4
 			},
 			{
-				"key": "rock_throw",
-				"levelReq": 1
-			},
-			{
-				"key": "magnitude",
-				"levelReq": 1
-			},
-			{
-				"key": "defense_curl",
+				"key": "rock_polish",
 				"levelReq": 6
 			},
 			{
-				"key": "rock_throw",
-				"levelReq": 11
+				"key": "steamroller",
+				"levelReq": 10
 			},
 			{
 				"key": "magnitude",
+				"levelReq": 12
+			},
+			{
+				"key": "rock_throw",
 				"levelReq": 16
 			},
 			{
-				"key": "selfdestruct",
-				"levelReq": 21
+				"key": "smack_down",
+				"levelReq": 18
 			},
 			{
-				"key": "harden",
-				"levelReq": 27
+				"key": "bulldoze",
+				"levelReq": 22
 			},
 			{
-				"key": "rollout",
+				"key": "self_destruct",
+				"levelReq": 24
+			},
+			{
+				"key": "stealth_rock",
+				"levelReq": 30
+			},
+			{
+				"key": "rock_blast",
 				"levelReq": 34
 			},
 			{
 				"key": "earthquake",
-				"levelReq": 41
+				"levelReq": 40
 			},
 			{
 				"key": "explosion",
-				"levelReq": 48
+				"levelReq": 44
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 50
+			},
+			{
+				"key": "stone_edge",
+				"levelReq": 54
+			},
+			{
+				"key": "heavy_slam",
+				"levelReq": 60
 			}
 		],
 		"evolvesTo": null,
@@ -8930,7 +16114,7 @@ var SPECIES_DATA = {
 		"type": "ROCK",
 		"type2": "GROUND",
 		"catchRate": 45,
-		"baseExp": 108,
+		"baseExp": 77,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 35,
@@ -8942,36 +16126,92 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "bind",
+				"levelReq": 1
+			},
+			{
+				"key": "harden",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_sport",
+				"levelReq": 1
+			},
+			{
 				"key": "tackle",
 				"levelReq": 1
 			},
 			{
-				"key": "screech",
-				"levelReq": 1
-			},
-			{
-				"key": "bind",
-				"levelReq": 10
+				"key": "curse",
+				"levelReq": 4
 			},
 			{
 				"key": "rock_throw",
-				"levelReq": 14
+				"levelReq": 7
 			},
 			{
-				"key": "harden",
-				"levelReq": 23
+				"key": "rock_tomb",
+				"levelReq": 10
 			},
 			{
 				"key": "rage",
-				"levelReq": 27
+				"levelReq": 13
 			},
 			{
-				"key": "sandstorm",
-				"levelReq": 36
+				"key": "stealth_rock",
+				"levelReq": 16
+			},
+			{
+				"key": "rock_polish",
+				"levelReq": 19
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 20
+			},
+			{
+				"key": "smack_down",
+				"levelReq": 22
+			},
+			{
+				"key": "dragon_breath",
+				"levelReq": 25
 			},
 			{
 				"key": "slam",
+				"levelReq": 28
+			},
+			{
+				"key": "screech",
+				"levelReq": 31
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 34
+			},
+			{
+				"key": "sand_tomb",
+				"levelReq": 37
+			},
+			{
+				"key": "iron_tail",
 				"levelReq": 40
+			},
+			{
+				"key": "dig",
+				"levelReq": 43
+			},
+			{
+				"key": "stone_edge",
+				"levelReq": 46
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 49
+			},
+			{
+				"key": "sandstorm",
+				"levelReq": 52
 			}
 		],
 		"evolvesTo": null,
@@ -8984,7 +16224,7 @@ var SPECIES_DATA = {
 		"type": "ROCK",
 		"type2": "WATER",
 		"catchRate": 45,
-		"baseExp": 120,
+		"baseExp": 71,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 35,
@@ -9005,23 +16245,47 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "bite",
-				"levelReq": 13
+				"levelReq": 7
 			},
 			{
 				"key": "water_gun",
-				"levelReq": 19
+				"levelReq": 10
+			},
+			{
+				"key": "rollout",
+				"levelReq": 16
 			},
 			{
 				"key": "leer",
-				"levelReq": 31
+				"levelReq": 19
+			},
+			{
+				"key": "mud_shot",
+				"levelReq": 25
+			},
+			{
+				"key": "brine",
+				"levelReq": 28
 			},
 			{
 				"key": "protect",
+				"levelReq": 34
+			},
+			{
+				"key": "ancient_power",
 				"levelReq": 37
 			},
 			{
-				"key": "ancientpower",
-				"levelReq": 49
+				"key": "tickle",
+				"levelReq": 43
+			},
+			{
+				"key": "rock_blast",
+				"levelReq": 46
+			},
+			{
+				"key": "shell_smash",
+				"levelReq": 50
 			},
 			{
 				"key": "hydro_pump",
@@ -9038,7 +16302,7 @@ var SPECIES_DATA = {
 		"type": "ROCK",
 		"type2": "WATER",
 		"catchRate": 45,
-		"baseExp": 199,
+		"baseExp": 173,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 70,
@@ -9050,7 +16314,23 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "bite",
+				"levelReq": 1
+			},
+			{
 				"key": "constrict",
+				"levelReq": 1
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 1
+			},
+			{
+				"key": "spike_cannon",
+				"levelReq": 1
+			},
+			{
+				"key": "spike_cannon",
 				"levelReq": 1
 			},
 			{
@@ -9059,35 +16339,51 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "bite",
-				"levelReq": 1
-			},
-			{
-				"key": "bite",
-				"levelReq": 13
+				"levelReq": 7
 			},
 			{
 				"key": "water_gun",
-				"levelReq": 19
+				"levelReq": 10
+			},
+			{
+				"key": "rollout",
+				"levelReq": 16
 			},
 			{
 				"key": "leer",
-				"levelReq": 31
+				"levelReq": 19
+			},
+			{
+				"key": "mud_shot",
+				"levelReq": 25
+			},
+			{
+				"key": "brine",
+				"levelReq": 28
 			},
 			{
 				"key": "protect",
+				"levelReq": 34
+			},
+			{
+				"key": "ancient_power",
 				"levelReq": 37
 			},
 			{
-				"key": "spike_cannon",
-				"levelReq": 40
+				"key": "tickle",
+				"levelReq": 48
 			},
 			{
-				"key": "ancientpower",
-				"levelReq": 54
+				"key": "rock_blast",
+				"levelReq": 56
+			},
+			{
+				"key": "shell_smash",
+				"levelReq": 67
 			},
 			{
 				"key": "hydro_pump",
-				"levelReq": 65
+				"levelReq": 75
 			}
 		],
 		"evolvesTo": null,
@@ -9100,7 +16396,7 @@ var SPECIES_DATA = {
 		"type": "ROCK",
 		"type2": "WATER",
 		"catchRate": 45,
-		"baseExp": 119,
+		"baseExp": 71,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 30,
@@ -9112,36 +16408,52 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
 				"key": "harden",
 				"levelReq": 1
 			},
 			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
 				"key": "absorb",
-				"levelReq": 10
+				"levelReq": 6
 			},
 			{
 				"key": "leer",
-				"levelReq": 19
+				"levelReq": 11
+			},
+			{
+				"key": "mud_shot",
+				"levelReq": 16
 			},
 			{
 				"key": "sand_attack",
-				"levelReq": 28
+				"levelReq": 21
 			},
 			{
 				"key": "endure",
-				"levelReq": 37
+				"levelReq": 26
+			},
+			{
+				"key": "aqua_jet",
+				"levelReq": 31
 			},
 			{
 				"key": "mega_drain",
+				"levelReq": 36
+			},
+			{
+				"key": "metal_sound",
+				"levelReq": 41
+			},
+			{
+				"key": "ancient_power",
 				"levelReq": 46
 			},
 			{
-				"key": "ancientpower",
-				"levelReq": 55
+				"key": "wring_out",
+				"levelReq": 50
 			}
 		],
 		"evolvesTo": "kabutops",
@@ -9154,7 +16466,7 @@ var SPECIES_DATA = {
 		"type": "ROCK",
 		"type2": "WATER",
 		"catchRate": 45,
-		"baseExp": 201,
+		"baseExp": 173,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 60,
@@ -9166,7 +16478,11 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "scratch",
+				"key": "absorb",
+				"levelReq": 1
+			},
+			{
+				"key": "feint",
 				"levelReq": 1
 			},
 			{
@@ -9174,36 +16490,68 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "absorb",
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "night_slash",
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "slash",
+				"levelReq": 1
+			},
+			{
+				"key": "slash",
 				"levelReq": 1
 			},
 			{
 				"key": "absorb",
-				"levelReq": 10
+				"levelReq": 6
 			},
 			{
 				"key": "leer",
-				"levelReq": 19
+				"levelReq": 11
+			},
+			{
+				"key": "mud_shot",
+				"levelReq": 16
 			},
 			{
 				"key": "sand_attack",
-				"levelReq": 28
+				"levelReq": 21
 			},
 			{
 				"key": "endure",
-				"levelReq": 37
+				"levelReq": 26
 			},
 			{
-				"key": "slash",
-				"levelReq": 40
+				"key": "aqua_jet",
+				"levelReq": 31
 			},
 			{
 				"key": "mega_drain",
-				"levelReq": 51
+				"levelReq": 36
 			},
 			{
-				"key": "ancientpower",
-				"levelReq": 65
+				"key": "metal_sound",
+				"levelReq": 45
+			},
+			{
+				"key": "ancient_power",
+				"levelReq": 54
+			},
+			{
+				"key": "wring_out",
+				"levelReq": 63
+			},
+			{
+				"key": "night_slash",
+				"levelReq": 72
 			}
 		],
 		"evolvesTo": null,
@@ -9216,7 +16564,7 @@ var SPECIES_DATA = {
 		"type": "ROCK",
 		"type2": "FLYING",
 		"catchRate": 45,
-		"baseExp": 202,
+		"baseExp": 180,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 80,
@@ -9228,36 +16576,76 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "bite",
+				"levelReq": 1
+			},
+			{
+				"key": "fire_fang",
+				"levelReq": 1
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 1
+			},
+			{
+				"key": "iron_head",
+				"levelReq": 1
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 1
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_fang",
+				"levelReq": 1
+			},
+			{
 				"key": "wing_attack",
 				"levelReq": 1
 			},
 			{
+				"key": "roar",
+				"levelReq": 9
+			},
+			{
 				"key": "agility",
-				"levelReq": 8
+				"levelReq": 17
 			},
 			{
-				"key": "bite",
-				"levelReq": 15
+				"key": "ancient_power",
+				"levelReq": 25
 			},
 			{
-				"key": "supersonic",
-				"levelReq": 22
-			},
-			{
-				"key": "ancientpower",
-				"levelReq": 29
-			},
-			{
-				"key": "scary_face",
-				"levelReq": 36
+				"key": "crunch",
+				"levelReq": 33
 			},
 			{
 				"key": "take_down",
-				"levelReq": 43
+				"levelReq": 41
+			},
+			{
+				"key": "sky_drop",
+				"levelReq": 49
+			},
+			{
+				"key": "iron_head",
+				"levelReq": 57
 			},
 			{
 				"key": "hyper_beam",
-				"levelReq": 50
+				"levelReq": 65
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 73
+			},
+			{
+				"key": "giga_impact",
+				"levelReq": 81
 			}
 		],
 		"evolvesTo": null,
@@ -9270,7 +16658,7 @@ var SPECIES_DATA = {
 		"type": "ROCK",
 		"type2": null,
 		"catchRate": 65,
-		"baseExp": 135,
+		"baseExp": 144,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 70,
@@ -9282,32 +16670,92 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "rock_throw",
-				"levelReq": 1
-			},
-			{
-				"key": "mimic",
+				"key": "copycat",
 				"levelReq": 1
 			},
 			{
 				"key": "flail",
-				"levelReq": 10
+				"levelReq": 1
 			},
 			{
 				"key": "low_kick",
-				"levelReq": 19
+				"levelReq": 1
 			},
 			{
-				"key": "rock_slide",
-				"levelReq": 28
-			},
-			{
-				"key": "faint_attack",
-				"levelReq": 37
+				"key": "rock_throw",
+				"levelReq": 1
 			},
 			{
 				"key": "slam",
-				"levelReq": 46
+				"levelReq": 1
+			},
+			{
+				"key": "slam",
+				"levelReq": 1
+			},
+			{
+				"key": "wood_hammer",
+				"levelReq": 1
+			},
+			{
+				"key": "flail",
+				"levelReq": 5
+			},
+			{
+				"key": "low_kick",
+				"levelReq": 8
+			},
+			{
+				"key": "rock_throw",
+				"levelReq": 12
+			},
+			{
+				"key": "mimic",
+				"levelReq": 15
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 19
+			},
+			{
+				"key": "tearful_look",
+				"levelReq": 22
+			},
+			{
+				"key": "rock_tomb",
+				"levelReq": 26
+			},
+			{
+				"key": "block",
+				"levelReq": 29
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 33
+			},
+			{
+				"key": "counter",
+				"levelReq": 36
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 40
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 43
+			},
+			{
+				"key": "stone_edge",
+				"levelReq": 47
+			},
+			{
+				"key": "hammer_arm",
+				"levelReq": 50
+			},
+			{
+				"key": "head_smash",
+				"levelReq": 54
 			}
 		],
 		"evolvesTo": null,
@@ -9320,7 +16768,7 @@ var SPECIES_DATA = {
 		"type": "ROCK",
 		"type2": "GROUND",
 		"catchRate": 45,
-		"baseExp": 67,
+		"baseExp": 60,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 50,
@@ -9341,35 +16789,51 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "sandstorm",
-				"levelReq": 8
+				"levelReq": 5
 			},
 			{
 				"key": "screech",
-				"levelReq": 15
+				"levelReq": 10
+			},
+			{
+				"key": "chip_away",
+				"levelReq": 14
 			},
 			{
 				"key": "rock_slide",
-				"levelReq": 22
-			},
-			{
-				"key": "thrash",
-				"levelReq": 29
+				"levelReq": 19
 			},
 			{
 				"key": "scary_face",
-				"levelReq": 36
+				"levelReq": 23
+			},
+			{
+				"key": "thrash",
+				"levelReq": 28
+			},
+			{
+				"key": "dark_pulse",
+				"levelReq": 32
+			},
+			{
+				"key": "payback",
+				"levelReq": 37
 			},
 			{
 				"key": "crunch",
-				"levelReq": 43
+				"levelReq": 41
 			},
 			{
 				"key": "earthquake",
+				"levelReq": 46
+			},
+			{
+				"key": "stone_edge",
 				"levelReq": 50
 			},
 			{
 				"key": "hyper_beam",
-				"levelReq": 57
+				"levelReq": 55
 			}
 		],
 		"evolvesTo": "pupitar",
@@ -9411,23 +16875,35 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "sandstorm",
-				"levelReq": 8
+				"levelReq": 5
 			},
 			{
 				"key": "screech",
-				"levelReq": 15
+				"levelReq": 10
+			},
+			{
+				"key": "chip_away",
+				"levelReq": 14
 			},
 			{
 				"key": "rock_slide",
-				"levelReq": 22
-			},
-			{
-				"key": "thrash",
-				"levelReq": 29
+				"levelReq": 19
 			},
 			{
 				"key": "scary_face",
-				"levelReq": 38
+				"levelReq": 23
+			},
+			{
+				"key": "thrash",
+				"levelReq": 28
+			},
+			{
+				"key": "dark_pulse",
+				"levelReq": 34
+			},
+			{
+				"key": "payback",
+				"levelReq": 41
 			},
 			{
 				"key": "crunch",
@@ -9435,11 +16911,15 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "earthquake",
-				"levelReq": 56
+				"levelReq": 54
+			},
+			{
+				"key": "stone_edge",
+				"levelReq": 60
 			},
 			{
 				"key": "hyper_beam",
-				"levelReq": 65
+				"levelReq": 67
 			}
 		],
 		"evolvesTo": "tyranitar",
@@ -9452,7 +16932,7 @@ var SPECIES_DATA = {
 		"type": "ROCK",
 		"type2": "DARK",
 		"catchRate": 45,
-		"baseExp": 218,
+		"baseExp": 270,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 100,
@@ -9468,6 +16948,14 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "fire_fang",
+				"levelReq": 1
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 1
+			},
+			{
 				"key": "leer",
 				"levelReq": 1
 			},
@@ -9480,24 +16968,40 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "thunder_fang",
+				"levelReq": 1
+			},
+			{
 				"key": "sandstorm",
-				"levelReq": 8
+				"levelReq": 5
 			},
 			{
 				"key": "screech",
-				"levelReq": 15
+				"levelReq": 10
+			},
+			{
+				"key": "chip_away",
+				"levelReq": 14
 			},
 			{
 				"key": "rock_slide",
-				"levelReq": 22
-			},
-			{
-				"key": "thrash",
-				"levelReq": 29
+				"levelReq": 19
 			},
 			{
 				"key": "scary_face",
-				"levelReq": 38
+				"levelReq": 23
+			},
+			{
+				"key": "thrash",
+				"levelReq": 28
+			},
+			{
+				"key": "dark_pulse",
+				"levelReq": 34
+			},
+			{
+				"key": "payback",
+				"levelReq": 41
 			},
 			{
 				"key": "crunch",
@@ -9505,11 +17009,19 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "earthquake",
-				"levelReq": 61
+				"levelReq": 54
+			},
+			{
+				"key": "stone_edge",
+				"levelReq": 63
 			},
 			{
 				"key": "hyper_beam",
-				"levelReq": 75
+				"levelReq": 73
+			},
+			{
+				"key": "giga_impact",
+				"levelReq": 82
 			}
 		],
 		"evolvesTo": null,
@@ -9522,7 +17034,7 @@ var SPECIES_DATA = {
 		"type": "GROUND",
 		"type2": null,
 		"catchRate": 255,
-		"baseExp": 93,
+		"baseExp": 60,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 50,
@@ -9534,36 +17046,72 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "defense_curl",
+				"levelReq": 1
+			},
+			{
 				"key": "scratch",
 				"levelReq": 1
 			},
 			{
-				"key": "defense_curl",
-				"levelReq": 6
-			},
-			{
 				"key": "sand_attack",
-				"levelReq": 11
+				"levelReq": 3
 			},
 			{
 				"key": "poison_sting",
-				"levelReq": 17
+				"levelReq": 5
 			},
 			{
-				"key": "slash",
-				"levelReq": 23
+				"key": "rollout",
+				"levelReq": 7
+			},
+			{
+				"key": "rapid_spin",
+				"levelReq": 9
+			},
+			{
+				"key": "fury_cutter",
+				"levelReq": 11
+			},
+			{
+				"key": "magnitude",
+				"levelReq": 14
 			},
 			{
 				"key": "swift",
-				"levelReq": 30
+				"levelReq": 17
 			},
 			{
 				"key": "fury_swipes",
-				"levelReq": 37
+				"levelReq": 20
+			},
+			{
+				"key": "sand_tomb",
+				"levelReq": 23
+			},
+			{
+				"key": "slash",
+				"levelReq": 26
+			},
+			{
+				"key": "dig",
+				"levelReq": 30
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 34
+			},
+			{
+				"key": "swords_dance",
+				"levelReq": 38
 			},
 			{
 				"key": "sandstorm",
-				"levelReq": 45
+				"levelReq": 42
+			},
+			{
+				"key": "earthquake",
+				"levelReq": 46
 			}
 		],
 		"evolvesTo": "sandslash",
@@ -9576,7 +17124,7 @@ var SPECIES_DATA = {
 		"type": "GROUND",
 		"type2": null,
 		"catchRate": 90,
-		"baseExp": 163,
+		"baseExp": 158,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 75,
@@ -9588,44 +17136,88 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "crush_claw",
+				"levelReq": 1
+			},
+			{
+				"key": "crush_claw",
+				"levelReq": 1
+			},
+			{
+				"key": "defense_curl",
+				"levelReq": 1
+			},
+			{
+				"key": "poison_sting",
+				"levelReq": 1
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 1
+			},
+			{
 				"key": "scratch",
 				"levelReq": 1
 			},
 			{
-				"key": "defense_curl",
-				"levelReq": 1
-			},
-			{
 				"key": "sand_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "defense_curl",
-				"levelReq": 6
-			},
-			{
-				"key": "sand_attack",
-				"levelReq": 11
+				"levelReq": 3
 			},
 			{
 				"key": "poison_sting",
-				"levelReq": 17
+				"levelReq": 5
 			},
 			{
-				"key": "slash",
-				"levelReq": 24
+				"key": "rollout",
+				"levelReq": 7
+			},
+			{
+				"key": "rapid_spin",
+				"levelReq": 9
+			},
+			{
+				"key": "fury_cutter",
+				"levelReq": 11
+			},
+			{
+				"key": "magnitude",
+				"levelReq": 14
 			},
 			{
 				"key": "swift",
-				"levelReq": 33
+				"levelReq": 17
 			},
 			{
 				"key": "fury_swipes",
-				"levelReq": 42
+				"levelReq": 20
+			},
+			{
+				"key": "sand_tomb",
+				"levelReq": 24
+			},
+			{
+				"key": "slash",
+				"levelReq": 28
+			},
+			{
+				"key": "dig",
+				"levelReq": 33
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 38
+			},
+			{
+				"key": "swords_dance",
+				"levelReq": 43
 			},
 			{
 				"key": "sandstorm",
-				"levelReq": 52
+				"levelReq": 48
+			},
+			{
+				"key": "earthquake",
+				"levelReq": 53
 			}
 		],
 		"evolvesTo": null,
@@ -9638,7 +17230,7 @@ var SPECIES_DATA = {
 		"type": "GROUND",
 		"type2": null,
 		"catchRate": 255,
-		"baseExp": 81,
+		"baseExp": 53,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 10,
@@ -9650,36 +17242,60 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "sand_attack",
+				"levelReq": 1
+			},
+			{
 				"key": "scratch",
 				"levelReq": 1
 			},
 			{
 				"key": "growl",
-				"levelReq": 5
+				"levelReq": 4
+			},
+			{
+				"key": "astonish",
+				"levelReq": 7
+			},
+			{
+				"key": "mud_slap",
+				"levelReq": 10
 			},
 			{
 				"key": "magnitude",
-				"levelReq": 9
+				"levelReq": 14
 			},
 			{
-				"key": "dig",
-				"levelReq": 17
+				"key": "bulldoze",
+				"levelReq": 18
 			},
 			{
-				"key": "sand_attack",
+				"key": "sucker_punch",
+				"levelReq": 22
+			},
+			{
+				"key": "mud_bomb",
 				"levelReq": 25
 			},
 			{
+				"key": "earth_power",
+				"levelReq": 28
+			},
+			{
+				"key": "dig",
+				"levelReq": 31
+			},
+			{
 				"key": "slash",
-				"levelReq": 33
+				"levelReq": 35
 			},
 			{
 				"key": "earthquake",
-				"levelReq": 41
+				"levelReq": 39
 			},
 			{
 				"key": "fissure",
-				"levelReq": 49
+				"levelReq": 43
 			}
 		],
 		"evolvesTo": "dugtrio",
@@ -9692,11 +17308,11 @@ var SPECIES_DATA = {
 		"type": "GROUND",
 		"type2": null,
 		"catchRate": 50,
-		"baseExp": 153,
+		"baseExp": 149,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 35,
-			"atkFis": 80,
+			"atkFis": 100,
 			"atkEsp": 50,
 			"def": 50,
 			"defEsp": 70,
@@ -9704,7 +17320,27 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tri_attack",
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "night_slash",
+				"levelReq": 1
+			},
+			{
+				"key": "rototiller",
+				"levelReq": 1
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "sand_tomb",
+				"levelReq": 1
+			},
+			{
+				"key": "sand_tomb",
 				"levelReq": 1
 			},
 			{
@@ -9712,40 +17348,56 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "magnitude",
+				"key": "tri_attack",
 				"levelReq": 1
 			},
 			{
 				"key": "growl",
-				"levelReq": 5
+				"levelReq": 4
+			},
+			{
+				"key": "astonish",
+				"levelReq": 7
+			},
+			{
+				"key": "mud_slap",
+				"levelReq": 10
 			},
 			{
 				"key": "magnitude",
-				"levelReq": 9
+				"levelReq": 14
 			},
 			{
-				"key": "dig",
-				"levelReq": 17
+				"key": "bulldoze",
+				"levelReq": 18
 			},
 			{
-				"key": "sand_attack",
+				"key": "sucker_punch",
+				"levelReq": 22
+			},
+			{
+				"key": "mud_bomb",
 				"levelReq": 25
 			},
 			{
+				"key": "earth_power",
+				"levelReq": 30
+			},
+			{
+				"key": "dig",
+				"levelReq": 35
+			},
+			{
 				"key": "slash",
-				"levelReq": 37
+				"levelReq": 41
 			},
 			{
 				"key": "earthquake",
-				"levelReq": 49
+				"levelReq": 47
 			},
 			{
 				"key": "fissure",
-				"levelReq": 61
+				"levelReq": 53
 			}
 		],
 		"evolvesTo": null,
@@ -9758,7 +17410,7 @@ var SPECIES_DATA = {
 		"type": "GROUND",
 		"type2": null,
 		"catchRate": 190,
-		"baseExp": 87,
+		"baseExp": 64,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 50,
@@ -9775,43 +17427,63 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "tail_whip",
-				"levelReq": 5
+				"levelReq": 3
 			},
 			{
 				"key": "bone_club",
-				"levelReq": 9
+				"levelReq": 7
 			},
 			{
 				"key": "headbutt",
-				"levelReq": 13
+				"levelReq": 11
 			},
 			{
 				"key": "leer",
-				"levelReq": 17
+				"levelReq": 13
 			},
 			{
 				"key": "focus_energy",
-				"levelReq": 21
+				"levelReq": 17
 			},
 			{
 				"key": "bonemerang",
-				"levelReq": 25
+				"levelReq": 21
 			},
 			{
 				"key": "rage",
-				"levelReq": 29
+				"levelReq": 23
 			},
 			{
 				"key": "false_swipe",
-				"levelReq": 33
+				"levelReq": 27
 			},
 			{
 				"key": "thrash",
+				"levelReq": 31
+			},
+			{
+				"key": "fling",
+				"levelReq": 33
+			},
+			{
+				"key": "stomping_tantrum",
 				"levelReq": 37
 			},
 			{
-				"key": "bone_rush",
+				"key": "endeavor",
 				"levelReq": 41
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 43
+			},
+			{
+				"key": "retaliate",
+				"levelReq": 47
+			},
+			{
+				"key": "bone_rush",
+				"levelReq": 51
 			}
 		],
 		"evolvesTo": "marowak",
@@ -9824,7 +17496,7 @@ var SPECIES_DATA = {
 		"type": "GROUND",
 		"type2": null,
 		"catchRate": 75,
-		"baseExp": 124,
+		"baseExp": 149,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 60,
@@ -9836,60 +17508,80 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "bone_club",
+				"levelReq": 1
+			},
+			{
 				"key": "growl",
 				"levelReq": 1
 			},
 			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "bone_club",
-				"levelReq": 1
-			},
-			{
 				"key": "headbutt",
 				"levelReq": 1
 			},
 			{
 				"key": "tail_whip",
-				"levelReq": 5
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 3
 			},
 			{
 				"key": "bone_club",
-				"levelReq": 9
+				"levelReq": 7
 			},
 			{
 				"key": "headbutt",
-				"levelReq": 13
+				"levelReq": 11
 			},
 			{
 				"key": "leer",
-				"levelReq": 17
+				"levelReq": 13
 			},
 			{
 				"key": "focus_energy",
-				"levelReq": 21
+				"levelReq": 17
 			},
 			{
 				"key": "bonemerang",
-				"levelReq": 25
+				"levelReq": 21
 			},
 			{
 				"key": "rage",
-				"levelReq": 32
+				"levelReq": 23
 			},
 			{
 				"key": "false_swipe",
-				"levelReq": 39
+				"levelReq": 27
 			},
 			{
 				"key": "thrash",
-				"levelReq": 46
+				"levelReq": 33
+			},
+			{
+				"key": "fling",
+				"levelReq": 37
+			},
+			{
+				"key": "stomping_tantrum",
+				"levelReq": 43
+			},
+			{
+				"key": "endeavor",
+				"levelReq": 49
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 53
+			},
+			{
+				"key": "retaliate",
+				"levelReq": 59
 			},
 			{
 				"key": "bone_rush",
-				"levelReq": 53
+				"levelReq": 65
 			}
 		],
 		"evolvesTo": null,
@@ -9902,7 +17594,7 @@ var SPECIES_DATA = {
 		"type": "GROUND",
 		"type2": "ROCK",
 		"catchRate": 120,
-		"baseExp": 135,
+		"baseExp": 69,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 80,
@@ -9922,28 +17614,56 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "stomp",
-				"levelReq": 13
-			},
-			{
 				"key": "fury_attack",
-				"levelReq": 19
+				"levelReq": 5
 			},
 			{
 				"key": "scary_face",
-				"levelReq": 31
+				"levelReq": 9
 			},
 			{
-				"key": "horn_drill",
-				"levelReq": 37
+				"key": "smack_down",
+				"levelReq": 13
+			},
+			{
+				"key": "stomp",
+				"levelReq": 17
+			},
+			{
+				"key": "bulldoze",
+				"levelReq": 21
+			},
+			{
+				"key": "chip_away",
+				"levelReq": 25
+			},
+			{
+				"key": "rock_blast",
+				"levelReq": 29
+			},
+			{
+				"key": "drill_run",
+				"levelReq": 33
 			},
 			{
 				"key": "take_down",
-				"levelReq": 49
+				"levelReq": 37
+			},
+			{
+				"key": "stone_edge",
+				"levelReq": 41
 			},
 			{
 				"key": "earthquake",
-				"levelReq": 55
+				"levelReq": 45
+			},
+			{
+				"key": "megahorn",
+				"levelReq": 49
+			},
+			{
+				"key": "horn_drill",
+				"levelReq": 53
 			}
 		],
 		"evolvesTo": "rhydon",
@@ -9956,7 +17676,7 @@ var SPECIES_DATA = {
 		"type": "GROUND",
 		"type2": "ROCK",
 		"catchRate": 60,
-		"baseExp": 204,
+		"baseExp": 170,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 105,
@@ -9968,7 +17688,27 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "fury_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "hammer_arm",
+				"levelReq": 1
+			},
+			{
+				"key": "hammer_arm",
+				"levelReq": 1
+			},
+			{
 				"key": "horn_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "horn_drill",
+				"levelReq": 1
+			},
+			{
+				"key": "scary_face",
 				"levelReq": 1
 			},
 			{
@@ -9976,36 +17716,56 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "stomp",
-				"levelReq": 1
-			},
-			{
 				"key": "fury_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "stomp",
-				"levelReq": 13
-			},
-			{
-				"key": "fury_attack",
-				"levelReq": 19
+				"levelReq": 5
 			},
 			{
 				"key": "scary_face",
-				"levelReq": 31
+				"levelReq": 9
 			},
 			{
-				"key": "horn_drill",
-				"levelReq": 37
+				"key": "smack_down",
+				"levelReq": 13
+			},
+			{
+				"key": "stomp",
+				"levelReq": 17
+			},
+			{
+				"key": "bulldoze",
+				"levelReq": 21
+			},
+			{
+				"key": "chip_away",
+				"levelReq": 25
+			},
+			{
+				"key": "rock_blast",
+				"levelReq": 29
+			},
+			{
+				"key": "drill_run",
+				"levelReq": 33
 			},
 			{
 				"key": "take_down",
-				"levelReq": 54
+				"levelReq": 37
+			},
+			{
+				"key": "stone_edge",
+				"levelReq": 41
 			},
 			{
 				"key": "earthquake",
-				"levelReq": 65
+				"levelReq": 48
+			},
+			{
+				"key": "megahorn",
+				"levelReq": 55
+			},
+			{
+				"key": "horn_drill",
+				"levelReq": 62
 			}
 		],
 		"evolvesTo": null,
@@ -10018,7 +17778,7 @@ var SPECIES_DATA = {
 		"type": "GROUND",
 		"type2": "FLYING",
 		"catchRate": 60,
-		"baseExp": 108,
+		"baseExp": 86,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 65,
@@ -10035,31 +17795,59 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "sand_attack",
-				"levelReq": 6
+				"levelReq": 4
 			},
 			{
 				"key": "harden",
-				"levelReq": 13
+				"levelReq": 7
+			},
+			{
+				"key": "knock_off",
+				"levelReq": 10
 			},
 			{
 				"key": "quick_attack",
-				"levelReq": 20
+				"levelReq": 13
 			},
 			{
-				"key": "faint_attack",
-				"levelReq": 28
+				"key": "fury_cutter",
+				"levelReq": 16
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 19
+			},
+			{
+				"key": "acrobatics",
+				"levelReq": 22
 			},
 			{
 				"key": "slash",
-				"levelReq": 36
+				"levelReq": 27
+			},
+			{
+				"key": "u_turn",
+				"levelReq": 30
 			},
 			{
 				"key": "screech",
-				"levelReq": 44
+				"levelReq": 35
+			},
+			{
+				"key": "x_scissor",
+				"levelReq": 40
+			},
+			{
+				"key": "sky_uppercut",
+				"levelReq": 45
+			},
+			{
+				"key": "swords_dance",
+				"levelReq": 50
 			},
 			{
 				"key": "guillotine",
-				"levelReq": 52
+				"levelReq": 55
 			}
 		],
 		"evolvesTo": null,
@@ -10072,7 +17860,7 @@ var SPECIES_DATA = {
 		"type": "GROUND",
 		"type2": null,
 		"catchRate": 120,
-		"baseExp": 124,
+		"baseExp": 66,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 90,
@@ -10084,7 +17872,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "defense_curl",
 				"levelReq": 1
 			},
 			{
@@ -10092,28 +17880,48 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "defense_curl",
-				"levelReq": 9
+				"key": "odor_sleuth",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
 			},
 			{
 				"key": "flail",
-				"levelReq": 17
-			},
-			{
-				"key": "take_down",
-				"levelReq": 25
+				"levelReq": 6
 			},
 			{
 				"key": "rollout",
-				"levelReq": 33
+				"levelReq": 10
+			},
+			{
+				"key": "natural_gift",
+				"levelReq": 15
 			},
 			{
 				"key": "endure",
-				"levelReq": 41
+				"levelReq": 19
+			},
+			{
+				"key": "slam",
+				"levelReq": 24
+			},
+			{
+				"key": "take_down",
+				"levelReq": 28
+			},
+			{
+				"key": "charm",
+				"levelReq": 33
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 37
 			},
 			{
 				"key": "double_edge",
-				"levelReq": 49
+				"levelReq": 42
 			}
 		],
 		"evolvesTo": "donphan",
@@ -10126,7 +17934,7 @@ var SPECIES_DATA = {
 		"type": "GROUND",
 		"type2": null,
 		"catchRate": 60,
-		"baseExp": 189,
+		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 90,
@@ -10138,7 +17946,23 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "horn_attack",
+				"key": "bulldoze",
+				"levelReq": 1
+			},
+			{
+				"key": "defense_curl",
+				"levelReq": 1
+			},
+			{
+				"key": "fire_fang",
+				"levelReq": 1
+			},
+			{
+				"key": "fury_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "fury_attack",
 				"levelReq": 1
 			},
 			{
@@ -10146,28 +17970,48 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "defense_curl",
-				"levelReq": 9
+				"key": "horn_attack",
+				"levelReq": 1
 			},
 			{
-				"key": "flail",
-				"levelReq": 17
-			},
-			{
-				"key": "fury_attack",
-				"levelReq": 25
-			},
-			{
-				"key": "rollout",
-				"levelReq": 33
+				"key": "thunder_fang",
+				"levelReq": 1
 			},
 			{
 				"key": "rapid_spin",
-				"levelReq": 41
+				"levelReq": 6
+			},
+			{
+				"key": "rollout",
+				"levelReq": 10
+			},
+			{
+				"key": "assurance",
+				"levelReq": 15
+			},
+			{
+				"key": "knock_off",
+				"levelReq": 19
+			},
+			{
+				"key": "slam",
+				"levelReq": 24
+			},
+			{
+				"key": "magnitude",
+				"levelReq": 30
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 37
 			},
 			{
 				"key": "earthquake",
-				"levelReq": 49
+				"levelReq": 43
+			},
+			{
+				"key": "giga_impact",
+				"levelReq": 50
 			}
 		],
 		"evolvesTo": null,
@@ -10192,7 +18036,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "scratch",
+				"key": "ember",
 				"levelReq": 1
 			},
 			{
@@ -10200,7 +18044,7 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "ember",
+				"key": "scratch",
 				"levelReq": 1
 			},
 			{
@@ -10209,31 +18053,39 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "smokescreen",
-				"levelReq": 13
-			},
-			{
-				"key": "rage",
-				"levelReq": 20
-			},
-			{
-				"key": "scary_face",
-				"levelReq": 27
-			},
-			{
-				"key": "flamethrower",
-				"levelReq": 34
-			},
-			{
-				"key": "slash",
-				"levelReq": 41
+				"levelReq": 10
 			},
 			{
 				"key": "dragon_rage",
-				"levelReq": 48
+				"levelReq": 17
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 21
+			},
+			{
+				"key": "fire_fang",
+				"levelReq": 28
+			},
+			{
+				"key": "flame_burst",
+				"levelReq": 32
+			},
+			{
+				"key": "slash",
+				"levelReq": 39
+			},
+			{
+				"key": "flamethrower",
+				"levelReq": 43
 			},
 			{
 				"key": "fire_spin",
-				"levelReq": 55
+				"levelReq": 50
+			},
+			{
+				"key": "inferno",
+				"levelReq": 54
 			}
 		],
 		"evolvesTo": "charizard",
@@ -10246,7 +18098,7 @@ var SPECIES_DATA = {
 		"type": "FIRE",
 		"type2": "FLYING",
 		"catchRate": 45,
-		"baseExp": 209,
+		"baseExp": 240,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 78,
@@ -10258,11 +18110,11 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "scratch",
+				"key": "air_slash",
 				"levelReq": 1
 			},
 			{
-				"key": "growl",
+				"key": "dragon_claw",
 				"levelReq": 1
 			},
 			{
@@ -10270,7 +18122,31 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "smokescreen",
+				"key": "flare_blitz",
+				"levelReq": 1
+			},
+			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "heat_wave",
+				"levelReq": 1
+			},
+			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "shadow_claw",
+				"levelReq": 1
+			},
+			{
+				"key": "wing_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "wing_attack",
 				"levelReq": 1
 			},
 			{
@@ -10279,35 +18155,47 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "smokescreen",
-				"levelReq": 13
-			},
-			{
-				"key": "rage",
-				"levelReq": 20
-			},
-			{
-				"key": "scary_face",
-				"levelReq": 27
-			},
-			{
-				"key": "flamethrower",
-				"levelReq": 34
-			},
-			{
-				"key": "wing_attack",
-				"levelReq": 36
-			},
-			{
-				"key": "slash",
-				"levelReq": 44
+				"levelReq": 10
 			},
 			{
 				"key": "dragon_rage",
-				"levelReq": 54
+				"levelReq": 17
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 21
+			},
+			{
+				"key": "fire_fang",
+				"levelReq": 28
+			},
+			{
+				"key": "flame_burst",
+				"levelReq": 32
+			},
+			{
+				"key": "slash",
+				"levelReq": 41
+			},
+			{
+				"key": "flamethrower",
+				"levelReq": 47
 			},
 			{
 				"key": "fire_spin",
-				"levelReq": 64
+				"levelReq": 56
+			},
+			{
+				"key": "inferno",
+				"levelReq": 62
+			},
+			{
+				"key": "heat_wave",
+				"levelReq": 71
+			},
+			{
+				"key": "flare_blitz",
+				"levelReq": 77
 			}
 		],
 		"evolvesTo": null,
@@ -10320,7 +18208,7 @@ var SPECIES_DATA = {
 		"type": "FIRE",
 		"type2": null,
 		"catchRate": 190,
-		"baseExp": 91,
+		"baseExp": 70,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 55,
@@ -10341,27 +18229,67 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "ember",
-				"levelReq": 9
+				"levelReq": 6
 			},
 			{
 				"key": "leer",
-				"levelReq": 18
+				"levelReq": 8
 			},
 			{
-				"key": "take_down",
-				"levelReq": 26
+				"key": "odor_sleuth",
+				"levelReq": 10
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 12
 			},
 			{
 				"key": "flame_wheel",
-				"levelReq": 34
+				"levelReq": 17
+			},
+			{
+				"key": "reversal",
+				"levelReq": 19
+			},
+			{
+				"key": "fire_fang",
+				"levelReq": 21
+			},
+			{
+				"key": "take_down",
+				"levelReq": 23
+			},
+			{
+				"key": "flame_burst",
+				"levelReq": 28
 			},
 			{
 				"key": "agility",
-				"levelReq": 42
+				"levelReq": 30
+			},
+			{
+				"key": "retaliate",
+				"levelReq": 32
 			},
 			{
 				"key": "flamethrower",
-				"levelReq": 50
+				"levelReq": 34
+			},
+			{
+				"key": "crunch",
+				"levelReq": 39
+			},
+			{
+				"key": "heat_wave",
+				"levelReq": 41
+			},
+			{
+				"key": "outrage",
+				"levelReq": 43
+			},
+			{
+				"key": "flare_blitz",
+				"levelReq": 45
 			}
 		],
 		"evolvesTo": null,
@@ -10374,7 +18302,7 @@ var SPECIES_DATA = {
 		"type": "FIRE",
 		"type2": null,
 		"catchRate": 75,
-		"baseExp": 213,
+		"baseExp": 194,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 90,
@@ -10386,24 +18314,28 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "bite",
+				"levelReq": 1
+			},
+			{
+				"key": "fire_fang",
+				"levelReq": 1
+			},
+			{
+				"key": "odor_sleuth",
+				"levelReq": 1
+			},
+			{
 				"key": "roar",
 				"levelReq": 1
 			},
 			{
-				"key": "leer",
+				"key": "thunder_fang",
 				"levelReq": 1
 			},
 			{
-				"key": "take_down",
-				"levelReq": 1
-			},
-			{
-				"key": "flame_wheel",
-				"levelReq": 1
-			},
-			{
-				"key": "extremespeed",
-				"levelReq": 50
+				"key": "extreme_speed",
+				"levelReq": 34
 			}
 		],
 		"evolvesTo": null,
@@ -10416,7 +18348,7 @@ var SPECIES_DATA = {
 		"type": "FIRE",
 		"type2": null,
 		"catchRate": 190,
-		"baseExp": 152,
+		"baseExp": 82,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 50,
@@ -10428,40 +18360,60 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "growl",
+				"levelReq": 1
+			},
+			{
 				"key": "tackle",
 				"levelReq": 1
 			},
 			{
-				"key": "growl",
+				"key": "tail_whip",
 				"levelReq": 4
 			},
 			{
-				"key": "tail_whip",
-				"levelReq": 8
+				"key": "ember",
+				"levelReq": 9
 			},
 			{
-				"key": "ember",
+				"key": "flame_wheel",
 				"levelReq": 13
 			},
 			{
 				"key": "stomp",
-				"levelReq": 19
+				"levelReq": 17
+			},
+			{
+				"key": "flame_charge",
+				"levelReq": 21
 			},
 			{
 				"key": "fire_spin",
-				"levelReq": 26
+				"levelReq": 25
 			},
 			{
 				"key": "take_down",
-				"levelReq": 34
+				"levelReq": 29
+			},
+			{
+				"key": "inferno",
+				"levelReq": 33
 			},
 			{
 				"key": "agility",
-				"levelReq": 43
+				"levelReq": 37
 			},
 			{
 				"key": "fire_blast",
-				"levelReq": 53
+				"levelReq": 41
+			},
+			{
+				"key": "bounce",
+				"levelReq": 45
+			},
+			{
+				"key": "flare_blitz",
+				"levelReq": 49
 			}
 		],
 		"evolvesTo": "rapidash",
@@ -10474,7 +18426,7 @@ var SPECIES_DATA = {
 		"type": "FIRE",
 		"type2": null,
 		"catchRate": 60,
-		"baseExp": 192,
+		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 65,
@@ -10486,11 +18438,31 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "ember",
+				"levelReq": 1
+			},
+			{
+				"key": "fury_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "fury_attack",
 				"levelReq": 1
 			},
 			{
 				"key": "growl",
+				"levelReq": 1
+			},
+			{
+				"key": "megahorn",
+				"levelReq": 1
+			},
+			{
+				"key": "poison_jab",
+				"levelReq": 1
+			},
+			{
+				"key": "quick_attack",
 				"levelReq": 1
 			},
 			{
@@ -10498,44 +18470,52 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "ember",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
+				"key": "tail_whip",
 				"levelReq": 4
 			},
 			{
-				"key": "tail_whip",
-				"levelReq": 8
+				"key": "ember",
+				"levelReq": 9
 			},
 			{
-				"key": "ember",
+				"key": "flame_wheel",
 				"levelReq": 13
 			},
 			{
 				"key": "stomp",
-				"levelReq": 19
+				"levelReq": 17
+			},
+			{
+				"key": "flame_charge",
+				"levelReq": 21
 			},
 			{
 				"key": "fire_spin",
-				"levelReq": 26
+				"levelReq": 25
 			},
 			{
 				"key": "take_down",
-				"levelReq": 34
+				"levelReq": 29
 			},
 			{
-				"key": "fury_attack",
-				"levelReq": 40
+				"key": "inferno",
+				"levelReq": 33
 			},
 			{
 				"key": "agility",
-				"levelReq": 47
+				"levelReq": 37
 			},
 			{
 				"key": "fire_blast",
-				"levelReq": 61
+				"levelReq": 41
+			},
+			{
+				"key": "bounce",
+				"levelReq": 45
+			},
+			{
+				"key": "flare_blitz",
+				"levelReq": 49
 			}
 		],
 		"evolvesTo": null,
@@ -10548,7 +18528,7 @@ var SPECIES_DATA = {
 		"type": "FIRE",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 167,
+		"baseExp": 173,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 65,
@@ -10572,40 +18552,52 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "fire_punch",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 7
-			},
-			{
-				"key": "smog",
-				"levelReq": 13
-			},
-			{
-				"key": "fire_punch",
-				"levelReq": 19
+				"key": "ember",
+				"levelReq": 5
 			},
 			{
 				"key": "smokescreen",
-				"levelReq": 25
+				"levelReq": 8
 			},
 			{
-				"key": "sunny_day",
-				"levelReq": 33
+				"key": "feint_attack",
+				"levelReq": 12
 			},
 			{
-				"key": "flamethrower",
-				"levelReq": 41
+				"key": "fire_spin",
+				"levelReq": 15
+			},
+			{
+				"key": "clear_smog",
+				"levelReq": 19
+			},
+			{
+				"key": "flame_burst",
+				"levelReq": 22
 			},
 			{
 				"key": "confuse_ray",
+				"levelReq": 26
+			},
+			{
+				"key": "fire_punch",
+				"levelReq": 29
+			},
+			{
+				"key": "lava_plume",
+				"levelReq": 36
+			},
+			{
+				"key": "sunny_day",
+				"levelReq": 42
+			},
+			{
+				"key": "flamethrower",
 				"levelReq": 49
 			},
 			{
 				"key": "fire_blast",
-				"levelReq": 57
+				"levelReq": 55
 			}
 		],
 		"evolvesTo": null,
@@ -10618,7 +18610,7 @@ var SPECIES_DATA = {
 		"type": "FIRE",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 65,
+		"baseExp": 62,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 39,
@@ -10630,11 +18622,11 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "leer",
 				"levelReq": 1
 			},
 			{
-				"key": "leer",
+				"key": "tackle",
 				"levelReq": 1
 			},
 			{
@@ -10643,23 +18635,55 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "ember",
-				"levelReq": 12
+				"levelReq": 10
 			},
 			{
 				"key": "quick_attack",
-				"levelReq": 19
+				"levelReq": 13
 			},
 			{
 				"key": "flame_wheel",
-				"levelReq": 27
+				"levelReq": 19
+			},
+			{
+				"key": "defense_curl",
+				"levelReq": 22
+			},
+			{
+				"key": "flame_charge",
+				"levelReq": 28
 			},
 			{
 				"key": "swift",
-				"levelReq": 36
+				"levelReq": 31
+			},
+			{
+				"key": "lava_plume",
+				"levelReq": 37
 			},
 			{
 				"key": "flamethrower",
+				"levelReq": 40
+			},
+			{
+				"key": "inferno",
 				"levelReq": 46
+			},
+			{
+				"key": "rollout",
+				"levelReq": 49
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 55
+			},
+			{
+				"key": "burn_up",
+				"levelReq": 58
+			},
+			{
+				"key": "eruption",
+				"levelReq": 64
 			}
 		],
 		"evolvesTo": "quilava",
@@ -10684,10 +18708,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "leer",
 				"levelReq": 1
 			},
@@ -10696,28 +18716,64 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
 				"key": "smokescreen",
 				"levelReq": 6
 			},
 			{
 				"key": "ember",
-				"levelReq": 12
+				"levelReq": 10
 			},
 			{
 				"key": "quick_attack",
-				"levelReq": 21
+				"levelReq": 13
 			},
 			{
 				"key": "flame_wheel",
-				"levelReq": 31
+				"levelReq": 20
+			},
+			{
+				"key": "defense_curl",
+				"levelReq": 24
 			},
 			{
 				"key": "swift",
+				"levelReq": 31
+			},
+			{
+				"key": "flame_charge",
+				"levelReq": 35
+			},
+			{
+				"key": "lava_plume",
 				"levelReq": 42
 			},
 			{
 				"key": "flamethrower",
-				"levelReq": 54
+				"levelReq": 46
+			},
+			{
+				"key": "inferno",
+				"levelReq": 53
+			},
+			{
+				"key": "rollout",
+				"levelReq": 57
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 64
+			},
+			{
+				"key": "burn_up",
+				"levelReq": 68
+			},
+			{
+				"key": "eruption",
+				"levelReq": 75
 			}
 		],
 		"evolvesTo": "typhlosion",
@@ -10730,7 +18786,7 @@ var SPECIES_DATA = {
 		"type": "FIRE",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 209,
+		"baseExp": 240,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 78,
@@ -10742,7 +18798,19 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "double_edge",
+				"levelReq": 1
+			},
+			{
+				"key": "ember",
+				"levelReq": 1
+			},
+			{
+				"key": "eruption",
+				"levelReq": 1
+			},
+			{
+				"key": "gyro_ball",
 				"levelReq": 1
 			},
 			{
@@ -10754,7 +18822,7 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "ember",
+				"key": "tackle",
 				"levelReq": 1
 			},
 			{
@@ -10763,23 +18831,55 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "ember",
-				"levelReq": 12
+				"levelReq": 10
 			},
 			{
 				"key": "quick_attack",
-				"levelReq": 21
+				"levelReq": 13
 			},
 			{
 				"key": "flame_wheel",
-				"levelReq": 31
+				"levelReq": 20
+			},
+			{
+				"key": "defense_curl",
+				"levelReq": 24
 			},
 			{
 				"key": "swift",
-				"levelReq": 45
+				"levelReq": 31
+			},
+			{
+				"key": "flame_charge",
+				"levelReq": 35
+			},
+			{
+				"key": "lava_plume",
+				"levelReq": 43
 			},
 			{
 				"key": "flamethrower",
-				"levelReq": 60
+				"levelReq": 48
+			},
+			{
+				"key": "inferno",
+				"levelReq": 56
+			},
+			{
+				"key": "rollout",
+				"levelReq": 61
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 69
+			},
+			{
+				"key": "burn_up",
+				"levelReq": 74
+			},
+			{
+				"key": "eruption",
+				"levelReq": 82
 			}
 		],
 		"evolvesTo": null,
@@ -10792,7 +18892,7 @@ var SPECIES_DATA = {
 		"type": "FIRE",
 		"type2": null,
 		"catchRate": 190,
-		"baseExp": 78,
+		"baseExp": 50,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 40,
@@ -10808,31 +18908,63 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "yawn",
+				"levelReq": 1
+			},
+			{
 				"key": "ember",
-				"levelReq": 8
+				"levelReq": 6
 			},
 			{
 				"key": "rock_throw",
-				"levelReq": 15
+				"levelReq": 8
 			},
 			{
 				"key": "harden",
+				"levelReq": 13
+			},
+			{
+				"key": "incinerate",
+				"levelReq": 15
+			},
+			{
+				"key": "clear_smog",
+				"levelReq": 20
+			},
+			{
+				"key": "ancient_power",
 				"levelReq": 22
 			},
 			{
-				"key": "amnesia",
-				"levelReq": 29
-			},
-			{
-				"key": "flamethrower",
-				"levelReq": 36
+				"key": "flame_burst",
+				"levelReq": 27
 			},
 			{
 				"key": "rock_slide",
-				"levelReq": 43
+				"levelReq": 29
+			},
+			{
+				"key": "lava_plume",
+				"levelReq": 34
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 36
 			},
 			{
 				"key": "body_slam",
+				"levelReq": 41
+			},
+			{
+				"key": "recover",
+				"levelReq": 43
+			},
+			{
+				"key": "flamethrower",
+				"levelReq": 48
+			},
+			{
+				"key": "earth_power",
 				"levelReq": 50
 			}
 		],
@@ -10846,56 +18978,100 @@ var SPECIES_DATA = {
 		"type": "FIRE",
 		"type2": "ROCK",
 		"catchRate": 75,
-		"baseExp": 154,
+		"baseExp": 151,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
-			"hp": 50,
+			"hp": 60,
 			"atkFis": 50,
-			"atkEsp": 80,
+			"atkEsp": 90,
 			"def": 120,
 			"defEsp": 80,
 			"speed": 30
 		},
 		"abilities": [
 			{
+				"key": "earth_power",
+				"levelReq": 1
+			},
+			{
+				"key": "ember",
+				"levelReq": 1
+			},
+			{
+				"key": "rock_throw",
+				"levelReq": 1
+			},
+			{
+				"key": "shell_smash",
+				"levelReq": 1
+			},
+			{
+				"key": "shell_smash",
+				"levelReq": 1
+			},
+			{
 				"key": "smog",
 				"levelReq": 1
 			},
 			{
-				"key": "ember",
+				"key": "yawn",
 				"levelReq": 1
+			},
+			{
+				"key": "ember",
+				"levelReq": 6
 			},
 			{
 				"key": "rock_throw",
-				"levelReq": 1
-			},
-			{
-				"key": "ember",
 				"levelReq": 8
 			},
 			{
-				"key": "rock_throw",
+				"key": "harden",
+				"levelReq": 13
+			},
+			{
+				"key": "incinerate",
 				"levelReq": 15
 			},
 			{
-				"key": "harden",
+				"key": "clear_smog",
+				"levelReq": 20
+			},
+			{
+				"key": "ancient_power",
 				"levelReq": 22
 			},
 			{
-				"key": "amnesia",
-				"levelReq": 29
-			},
-			{
-				"key": "flamethrower",
-				"levelReq": 36
+				"key": "flame_burst",
+				"levelReq": 27
 			},
 			{
 				"key": "rock_slide",
-				"levelReq": 48
+				"levelReq": 29
+			},
+			{
+				"key": "lava_plume",
+				"levelReq": 34
+			},
+			{
+				"key": "amnesia",
+				"levelReq": 36
 			},
 			{
 				"key": "body_slam",
-				"levelReq": 60
+				"levelReq": 43
+			},
+			{
+				"key": "recover",
+				"levelReq": 47
+			},
+			{
+				"key": "flamethrower",
+				"levelReq": 54
+			},
+			{
+				"key": "earth_power",
+				"levelReq": 58
 			}
 		],
 		"evolvesTo": null,
@@ -10908,7 +19084,7 @@ var SPECIES_DATA = {
 		"type": "FIRE",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 117,
+		"baseExp": 73,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 45,
@@ -10920,40 +19096,60 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "ember",
+				"key": "leer",
 				"levelReq": 1
 			},
 			{
-				"key": "leer",
-				"levelReq": 7
-			},
-			{
 				"key": "smog",
-				"levelReq": 13
+				"levelReq": 1
 			},
 			{
-				"key": "fire_punch",
-				"levelReq": 19
+				"key": "ember",
+				"levelReq": 5
 			},
 			{
 				"key": "smokescreen",
-				"levelReq": 25
+				"levelReq": 8
 			},
 			{
-				"key": "sunny_day",
-				"levelReq": 31
+				"key": "feint_attack",
+				"levelReq": 12
 			},
 			{
-				"key": "flamethrower",
-				"levelReq": 37
+				"key": "fire_spin",
+				"levelReq": 15
+			},
+			{
+				"key": "clear_smog",
+				"levelReq": 19
+			},
+			{
+				"key": "flame_burst",
+				"levelReq": 22
 			},
 			{
 				"key": "confuse_ray",
-				"levelReq": 43
+				"levelReq": 26
+			},
+			{
+				"key": "fire_punch",
+				"levelReq": 29
+			},
+			{
+				"key": "lava_plume",
+				"levelReq": 33
+			},
+			{
+				"key": "sunny_day",
+				"levelReq": 36
+			},
+			{
+				"key": "flamethrower",
+				"levelReq": 40
 			},
 			{
 				"key": "fire_blast",
-				"levelReq": 49
+				"levelReq": 43
 			}
 		],
 		"evolvesTo": "magmar",
@@ -10966,60 +19162,88 @@ var SPECIES_DATA = {
 		"type": "ELECTRIC",
 		"type2": null,
 		"catchRate": 190,
-		"baseExp": 82,
+		"baseExp": 112,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 35,
 			"atkFis": 55,
 			"atkEsp": 50,
-			"def": 30,
-			"defEsp": 40,
+			"def": 40,
+			"defEsp": 50,
 			"speed": 90
 		},
 		"abilities": [
 			{
-				"key": "thundershock",
+				"key": "tail_whip",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_shock",
 				"levelReq": 1
 			},
 			{
 				"key": "growl",
-				"levelReq": 1
+				"levelReq": 5
 			},
 			{
-				"key": "tail_whip",
-				"levelReq": 6
-			},
-			{
-				"key": "thunder_wave",
-				"levelReq": 8
+				"key": "play_nice",
+				"levelReq": 7
 			},
 			{
 				"key": "quick_attack",
-				"levelReq": 11
+				"levelReq": 10
+			},
+			{
+				"key": "electro_ball",
+				"levelReq": 13
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 18
+			},
+			{
+				"key": "feint",
+				"levelReq": 21
 			},
 			{
 				"key": "double_team",
-				"levelReq": 15
+				"levelReq": 23
 			},
 			{
-				"key": "slam",
-				"levelReq": 20
-			},
-			{
-				"key": "thunderbolt",
+				"key": "spark",
 				"levelReq": 26
 			},
 			{
-				"key": "agility",
-				"levelReq": 33
+				"key": "nuzzle",
+				"levelReq": 29
 			},
 			{
-				"key": "thunder",
-				"levelReq": 41
+				"key": "discharge",
+				"levelReq": 34
+			},
+			{
+				"key": "slam",
+				"levelReq": 37
+			},
+			{
+				"key": "thunderbolt",
+				"levelReq": 42
+			},
+			{
+				"key": "agility",
+				"levelReq": 45
+			},
+			{
+				"key": "wild_charge",
+				"levelReq": 50
 			},
 			{
 				"key": "light_screen",
-				"levelReq": 50
+				"levelReq": 53
+			},
+			{
+				"key": "thunder",
+				"levelReq": 58
 			}
 		],
 		"evolvesTo": null,
@@ -11032,7 +19256,7 @@ var SPECIES_DATA = {
 		"type": "ELECTRIC",
 		"type2": "STEEL",
 		"catchRate": 190,
-		"baseExp": 89,
+		"baseExp": 65,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 25,
@@ -11044,40 +19268,76 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "supersonic",
+				"levelReq": 1
+			},
+			{
 				"key": "tackle",
 				"levelReq": 1
 			},
 			{
-				"key": "thundershock",
-				"levelReq": 6
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 11
-			},
-			{
-				"key": "sonicboom",
-				"levelReq": 16
+				"key": "thunder_shock",
+				"levelReq": 5
 			},
 			{
 				"key": "thunder_wave",
-				"levelReq": 21
+				"levelReq": 7
 			},
 			{
-				"key": "lock_on",
-				"levelReq": 27
+				"key": "magnet_bomb",
+				"levelReq": 11
 			},
 			{
-				"key": "swift",
-				"levelReq": 33
+				"key": "light_screen",
+				"levelReq": 13
+			},
+			{
+				"key": "sonic_boom",
+				"levelReq": 17
+			},
+			{
+				"key": "spark",
+				"levelReq": 19
+			},
+			{
+				"key": "mirror_shot",
+				"levelReq": 23
+			},
+			{
+				"key": "metal_sound",
+				"levelReq": 25
+			},
+			{
+				"key": "electro_ball",
+				"levelReq": 29
+			},
+			{
+				"key": "flash_cannon",
+				"levelReq": 31
 			},
 			{
 				"key": "screech",
-				"levelReq": 39
+				"levelReq": 35
+			},
+			{
+				"key": "discharge",
+				"levelReq": 37
+			},
+			{
+				"key": "lock_on",
+				"levelReq": 41
+			},
+			{
+				"key": "magnet_rise",
+				"levelReq": 43
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 47
 			},
 			{
 				"key": "zap_cannon",
-				"levelReq": 45
+				"levelReq": 49
 			}
 		],
 		"evolvesTo": "magneton",
@@ -11090,7 +19350,7 @@ var SPECIES_DATA = {
 		"type": "ELECTRIC",
 		"type2": "STEEL",
 		"catchRate": 60,
-		"baseExp": 161,
+		"baseExp": 163,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 50,
@@ -11102,52 +19362,100 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "electric_terrain",
+				"levelReq": 1
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 1
+			},
+			{
 				"key": "tackle",
 				"levelReq": 1
 			},
 			{
-				"key": "thundershock",
+				"key": "thunder_shock",
 				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 1
-			},
-			{
-				"key": "sonicboom",
-				"levelReq": 1
-			},
-			{
-				"key": "thundershock",
-				"levelReq": 6
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 11
-			},
-			{
-				"key": "sonicboom",
-				"levelReq": 16
 			},
 			{
 				"key": "thunder_wave",
-				"levelReq": 21
-			},
-			{
-				"key": "lock_on",
-				"levelReq": 27
+				"levelReq": 1
 			},
 			{
 				"key": "tri_attack",
-				"levelReq": 35
+				"levelReq": 1
 			},
 			{
-				"key": "screech",
-				"levelReq": 43
+				"key": "tri_attack",
+				"levelReq": 1
 			},
 			{
 				"key": "zap_cannon",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_shock",
+				"levelReq": 5
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 7
+			},
+			{
+				"key": "magnet_bomb",
+				"levelReq": 11
+			},
+			{
+				"key": "light_screen",
+				"levelReq": 13
+			},
+			{
+				"key": "sonic_boom",
+				"levelReq": 17
+			},
+			{
+				"key": "spark",
+				"levelReq": 19
+			},
+			{
+				"key": "mirror_shot",
+				"levelReq": 23
+			},
+			{
+				"key": "metal_sound",
+				"levelReq": 25
+			},
+			{
+				"key": "electro_ball",
+				"levelReq": 29
+			},
+			{
+				"key": "flash_cannon",
+				"levelReq": 33
+			},
+			{
+				"key": "screech",
+				"levelReq": 39
+			},
+			{
+				"key": "discharge",
+				"levelReq": 43
+			},
+			{
+				"key": "lock_on",
+				"levelReq": 49
+			},
+			{
+				"key": "magnet_rise",
 				"levelReq": 53
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 59
+			},
+			{
+				"key": "zap_cannon",
+				"levelReq": 63
 			}
 		],
 		"evolvesTo": null,
@@ -11160,7 +19468,7 @@ var SPECIES_DATA = {
 		"type": "ELECTRIC",
 		"type2": null,
 		"catchRate": 190,
-		"baseExp": 103,
+		"baseExp": 66,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 40,
@@ -11172,40 +19480,72 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "charge",
+				"levelReq": 1
+			},
+			{
 				"key": "tackle",
 				"levelReq": 1
 			},
 			{
-				"key": "screech",
+				"key": "sonic_boom",
+				"levelReq": 4
+			},
+			{
+				"key": "eerie_impulse",
+				"levelReq": 6
+			},
+			{
+				"key": "spark",
 				"levelReq": 9
 			},
 			{
-				"key": "sonicboom",
-				"levelReq": 17
-			},
-			{
-				"key": "selfdestruct",
-				"levelReq": 23
-			},
-			{
 				"key": "rollout",
-				"levelReq": 29
+				"levelReq": 11
 			},
 			{
-				"key": "light_screen",
-				"levelReq": 33
+				"key": "screech",
+				"levelReq": 13
+			},
+			{
+				"key": "charge_beam",
+				"levelReq": 16
 			},
 			{
 				"key": "swift",
+				"levelReq": 20
+			},
+			{
+				"key": "electro_ball",
+				"levelReq": 22
+			},
+			{
+				"key": "self_destruct",
+				"levelReq": 26
+			},
+			{
+				"key": "light_screen",
+				"levelReq": 29
+			},
+			{
+				"key": "magnet_rise",
+				"levelReq": 34
+			},
+			{
+				"key": "discharge",
 				"levelReq": 37
 			},
 			{
 				"key": "explosion",
-				"levelReq": 39
+				"levelReq": 41
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 46
 			},
 			{
 				"key": "mirror_coat",
-				"levelReq": 41
+				"levelReq": 48
 			}
 		],
 		"evolvesTo": "electrode",
@@ -11218,7 +19558,7 @@ var SPECIES_DATA = {
 		"type": "ELECTRIC",
 		"type2": null,
 		"catchRate": 60,
-		"baseExp": 150,
+		"baseExp": 172,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 60,
@@ -11226,56 +19566,88 @@ var SPECIES_DATA = {
 			"atkEsp": 80,
 			"def": 70,
 			"defEsp": 80,
-			"speed": 140
+			"speed": 150
 		},
 		"abilities": [
+			{
+				"key": "charge",
+				"levelReq": 1
+			},
+			{
+				"key": "eerie_impulse",
+				"levelReq": 1
+			},
+			{
+				"key": "magnetic_flux",
+				"levelReq": 1
+			},
+			{
+				"key": "sonic_boom",
+				"levelReq": 1
+			},
 			{
 				"key": "tackle",
 				"levelReq": 1
 			},
 			{
-				"key": "screech",
-				"levelReq": 1
+				"key": "sonic_boom",
+				"levelReq": 4
 			},
 			{
-				"key": "sonicboom",
-				"levelReq": 1
+				"key": "eerie_impulse",
+				"levelReq": 6
 			},
 			{
-				"key": "selfdestruct",
-				"levelReq": 1
-			},
-			{
-				"key": "screech",
+				"key": "spark",
 				"levelReq": 9
 			},
 			{
-				"key": "sonicboom",
-				"levelReq": 17
-			},
-			{
-				"key": "selfdestruct",
-				"levelReq": 23
-			},
-			{
 				"key": "rollout",
-				"levelReq": 29
+				"levelReq": 11
 			},
 			{
-				"key": "light_screen",
-				"levelReq": 34
+				"key": "screech",
+				"levelReq": 13
+			},
+			{
+				"key": "charge_beam",
+				"levelReq": 16
 			},
 			{
 				"key": "swift",
-				"levelReq": 40
+				"levelReq": 20
+			},
+			{
+				"key": "electro_ball",
+				"levelReq": 22
+			},
+			{
+				"key": "self_destruct",
+				"levelReq": 26
+			},
+			{
+				"key": "light_screen",
+				"levelReq": 29
+			},
+			{
+				"key": "magnet_rise",
+				"levelReq": 36
+			},
+			{
+				"key": "discharge",
+				"levelReq": 41
 			},
 			{
 				"key": "explosion",
-				"levelReq": 44
+				"levelReq": 47
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 54
 			},
 			{
 				"key": "mirror_coat",
-				"levelReq": 48
+				"levelReq": 58
 			}
 		],
 		"evolvesTo": null,
@@ -11288,7 +19660,7 @@ var SPECIES_DATA = {
 		"type": "ELECTRIC",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 156,
+		"baseExp": 172,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 65,
@@ -11300,40 +19672,64 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "quick_attack",
-				"levelReq": 1
-			},
-			{
 				"key": "leer",
 				"levelReq": 1
 			},
 			{
-				"key": "thunderpunch",
+				"key": "quick_attack",
 				"levelReq": 1
 			},
 			{
-				"key": "thunderpunch",
-				"levelReq": 9
+				"key": "thunder_shock",
+				"levelReq": 1
 			},
 			{
-				"key": "light_screen",
-				"levelReq": 17
+				"key": "thunder_shock",
+				"levelReq": 5
+			},
+			{
+				"key": "low_kick",
+				"levelReq": 8
 			},
 			{
 				"key": "swift",
-				"levelReq": 25
+				"levelReq": 12
 			},
 			{
-				"key": "screech",
+				"key": "shock_wave",
+				"levelReq": 15
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 19
+			},
+			{
+				"key": "electro_ball",
+				"levelReq": 22
+			},
+			{
+				"key": "light_screen",
+				"levelReq": 26
+			},
+			{
+				"key": "thunder_punch",
+				"levelReq": 29
+			},
+			{
+				"key": "discharge",
 				"levelReq": 36
 			},
 			{
+				"key": "screech",
+				"levelReq": 42
+			},
+			{
 				"key": "thunderbolt",
-				"levelReq": 47
+				"levelReq": 49
 			},
 			{
 				"key": "thunder",
-				"levelReq": 58
+				"levelReq": 55
 			}
 		],
 		"evolvesTo": null,
@@ -11346,7 +19742,7 @@ var SPECIES_DATA = {
 		"type": "ELECTRIC",
 		"type2": null,
 		"catchRate": 190,
-		"baseExp": 42,
+		"baseExp": 41,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 20,
@@ -11358,24 +19754,28 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "thundershock",
-				"levelReq": 1
-			},
-			{
 				"key": "charm",
 				"levelReq": 1
 			},
 			{
-				"key": "tail_whip",
-				"levelReq": 6
+				"key": "thunder_shock",
+				"levelReq": 1
 			},
 			{
-				"key": "thunder_wave",
-				"levelReq": 8
+				"key": "tail_whip",
+				"levelReq": 5
 			},
 			{
 				"key": "sweet_kiss",
-				"levelReq": 11
+				"levelReq": 10
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 13
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 18
 			}
 		],
 		"evolvesTo": null,
@@ -11388,7 +19788,7 @@ var SPECIES_DATA = {
 		"type": "ELECTRIC",
 		"type2": null,
 		"catchRate": 235,
-		"baseExp": 59,
+		"baseExp": 56,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 55,
@@ -11400,32 +19800,64 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "growl",
 				"levelReq": 1
 			},
 			{
-				"key": "thundershock",
-				"levelReq": 9
+				"key": "tackle",
+				"levelReq": 1
 			},
 			{
 				"key": "thunder_wave",
-				"levelReq": 16
+				"levelReq": 4
+			},
+			{
+				"key": "thunder_shock",
+				"levelReq": 8
 			},
 			{
 				"key": "cotton_spore",
-				"levelReq": 23
+				"levelReq": 11
+			},
+			{
+				"key": "charge",
+				"levelReq": 15
+			},
+			{
+				"key": "take_down",
+				"levelReq": 18
+			},
+			{
+				"key": "electro_ball",
+				"levelReq": 22
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 25
+			},
+			{
+				"key": "power_gem",
+				"levelReq": 29
+			},
+			{
+				"key": "discharge",
+				"levelReq": 32
+			},
+			{
+				"key": "cotton_guard",
+				"levelReq": 36
+			},
+			{
+				"key": "signal_beam",
+				"levelReq": 39
 			},
 			{
 				"key": "light_screen",
-				"levelReq": 30
+				"levelReq": 43
 			},
 			{
 				"key": "thunder",
-				"levelReq": 37
+				"levelReq": 46
 			}
 		],
 		"evolvesTo": "flaaffy",
@@ -11438,7 +19870,7 @@ var SPECIES_DATA = {
 		"type": "ELECTRIC",
 		"type2": null,
 		"catchRate": 120,
-		"baseExp": 117,
+		"baseExp": 128,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 70,
@@ -11450,36 +19882,72 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "growl",
 				"levelReq": 1
 			},
 			{
-				"key": "thundershock",
+				"key": "tackle",
 				"levelReq": 1
 			},
 			{
-				"key": "thundershock",
-				"levelReq": 9
+				"key": "thunder_shock",
+				"levelReq": 1
 			},
 			{
 				"key": "thunder_wave",
-				"levelReq": 18
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 4
+			},
+			{
+				"key": "thunder_shock",
+				"levelReq": 8
 			},
 			{
 				"key": "cotton_spore",
-				"levelReq": 27
+				"levelReq": 11
+			},
+			{
+				"key": "charge",
+				"levelReq": 16
+			},
+			{
+				"key": "take_down",
+				"levelReq": 20
+			},
+			{
+				"key": "electro_ball",
+				"levelReq": 25
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 29
+			},
+			{
+				"key": "power_gem",
+				"levelReq": 34
+			},
+			{
+				"key": "discharge",
+				"levelReq": 38
+			},
+			{
+				"key": "cotton_guard",
+				"levelReq": 43
+			},
+			{
+				"key": "signal_beam",
+				"levelReq": 47
 			},
 			{
 				"key": "light_screen",
-				"levelReq": 36
+				"levelReq": 52
 			},
 			{
 				"key": "thunder",
-				"levelReq": 45
+				"levelReq": 56
 			}
 		],
 		"evolvesTo": "ampharos",
@@ -11492,19 +19960,23 @@ var SPECIES_DATA = {
 		"type": "ELECTRIC",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 194,
+		"baseExp": 230,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 90,
 			"atkFis": 75,
 			"atkEsp": 115,
-			"def": 75,
+			"def": 85,
 			"defEsp": 90,
 			"speed": 55
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "dragon_pulse",
+				"levelReq": 1
+			},
+			{
+				"key": "fire_punch",
 				"levelReq": 1
 			},
 			{
@@ -11512,7 +19984,27 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "thundershock",
+				"key": "ion_deluge",
+				"levelReq": 1
+			},
+			{
+				"key": "magnetic_flux",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_punch",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_punch",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_shock",
 				"levelReq": 1
 			},
 			{
@@ -11520,28 +20012,64 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "thundershock",
-				"levelReq": 9
+				"key": "zap_cannon",
+				"levelReq": 1
 			},
 			{
 				"key": "thunder_wave",
-				"levelReq": 18
+				"levelReq": 4
+			},
+			{
+				"key": "thunder_shock",
+				"levelReq": 8
 			},
 			{
 				"key": "cotton_spore",
-				"levelReq": 27
+				"levelReq": 11
 			},
 			{
-				"key": "thunderpunch",
-				"levelReq": 30
+				"key": "charge",
+				"levelReq": 16
+			},
+			{
+				"key": "take_down",
+				"levelReq": 20
+			},
+			{
+				"key": "electro_ball",
+				"levelReq": 25
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 29
+			},
+			{
+				"key": "power_gem",
+				"levelReq": 35
+			},
+			{
+				"key": "discharge",
+				"levelReq": 40
+			},
+			{
+				"key": "cotton_guard",
+				"levelReq": 46
+			},
+			{
+				"key": "signal_beam",
+				"levelReq": 51
 			},
 			{
 				"key": "light_screen",
-				"levelReq": 42
+				"levelReq": 57
 			},
 			{
 				"key": "thunder",
-				"levelReq": 57
+				"levelReq": 62
+			},
+			{
+				"key": "dragon_pulse",
+				"levelReq": 65
 			}
 		],
 		"evolvesTo": null,
@@ -11554,7 +20082,7 @@ var SPECIES_DATA = {
 		"type": "ELECTRIC",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 106,
+		"baseExp": 72,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 45,
@@ -11566,36 +20094,60 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "quick_attack",
-				"levelReq": 1
-			},
-			{
 				"key": "leer",
 				"levelReq": 1
 			},
 			{
-				"key": "thunderpunch",
-				"levelReq": 9
+				"key": "quick_attack",
+				"levelReq": 1
 			},
 			{
-				"key": "light_screen",
-				"levelReq": 17
+				"key": "thunder_shock",
+				"levelReq": 5
+			},
+			{
+				"key": "low_kick",
+				"levelReq": 8
 			},
 			{
 				"key": "swift",
-				"levelReq": 25
+				"levelReq": 12
 			},
 			{
-				"key": "screech",
+				"key": "shock_wave",
+				"levelReq": 15
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 19
+			},
+			{
+				"key": "electro_ball",
+				"levelReq": 22
+			},
+			{
+				"key": "light_screen",
+				"levelReq": 26
+			},
+			{
+				"key": "thunder_punch",
+				"levelReq": 29
+			},
+			{
+				"key": "discharge",
 				"levelReq": 33
 			},
 			{
+				"key": "screech",
+				"levelReq": 36
+			},
+			{
 				"key": "thunderbolt",
-				"levelReq": 41
+				"levelReq": 40
 			},
 			{
 				"key": "thunder",
-				"levelReq": 49
+				"levelReq": 43
 			}
 		],
 		"evolvesTo": "electabuzz",
@@ -11608,7 +20160,7 @@ var SPECIES_DATA = {
 		"type": "POISON",
 		"type2": null,
 		"catchRate": 255,
-		"baseExp": 62,
+		"baseExp": 58,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 35,
@@ -11620,36 +20172,72 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "wrap",
-				"levelReq": 1
-			},
-			{
 				"key": "leer",
 				"levelReq": 1
 			},
 			{
+				"key": "wrap",
+				"levelReq": 1
+			},
+			{
 				"key": "poison_sting",
-				"levelReq": 9
+				"levelReq": 4
 			},
 			{
 				"key": "bite",
-				"levelReq": 15
+				"levelReq": 9
 			},
 			{
 				"key": "glare",
-				"levelReq": 23
+				"levelReq": 12
 			},
 			{
 				"key": "screech",
-				"levelReq": 29
+				"levelReq": 17
 			},
 			{
 				"key": "acid",
-				"levelReq": 37
+				"levelReq": 20
+			},
+			{
+				"key": "spit_up",
+				"levelReq": 25
+			},
+			{
+				"key": "stockpile",
+				"levelReq": 25
+			},
+			{
+				"key": "swallow",
+				"levelReq": 25
+			},
+			{
+				"key": "acid_spray",
+				"levelReq": 28
+			},
+			{
+				"key": "mud_bomb",
+				"levelReq": 33
+			},
+			{
+				"key": "gastro_acid",
+				"levelReq": 36
+			},
+			{
+				"key": "belch",
+				"levelReq": 38
 			},
 			{
 				"key": "haze",
-				"levelReq": 43
+				"levelReq": 41
+			},
+			{
+				"key": "coil",
+				"levelReq": 44
+			},
+			{
+				"key": "gunk_shot",
+				"levelReq": 49
 			}
 		],
 		"evolvesTo": "arbok",
@@ -11662,11 +20250,11 @@ var SPECIES_DATA = {
 		"type": "POISON",
 		"type2": null,
 		"catchRate": 90,
-		"baseExp": 147,
+		"baseExp": 157,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 60,
-			"atkFis": 85,
+			"atkFis": 95,
 			"atkEsp": 65,
 			"def": 69,
 			"defEsp": 79,
@@ -11674,7 +20262,23 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "wrap",
+				"key": "bite",
+				"levelReq": 1
+			},
+			{
+				"key": "crunch",
+				"levelReq": 1
+			},
+			{
+				"key": "crunch",
+				"levelReq": 1
+			},
+			{
+				"key": "fire_fang",
+				"levelReq": 1
+			},
+			{
+				"key": "ice_fang",
 				"levelReq": 1
 			},
 			{
@@ -11686,32 +20290,72 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "bite",
+				"key": "thunder_fang",
+				"levelReq": 1
+			},
+			{
+				"key": "wrap",
 				"levelReq": 1
 			},
 			{
 				"key": "poison_sting",
-				"levelReq": 9
+				"levelReq": 4
 			},
 			{
 				"key": "bite",
-				"levelReq": 15
+				"levelReq": 9
 			},
 			{
 				"key": "glare",
-				"levelReq": 25
+				"levelReq": 12
 			},
 			{
 				"key": "screech",
-				"levelReq": 33
+				"levelReq": 17
 			},
 			{
 				"key": "acid",
-				"levelReq": 43
+				"levelReq": 20
+			},
+			{
+				"key": "spit_up",
+				"levelReq": 27
+			},
+			{
+				"key": "stockpile",
+				"levelReq": 27
+			},
+			{
+				"key": "swallow",
+				"levelReq": 27
+			},
+			{
+				"key": "acid_spray",
+				"levelReq": 32
+			},
+			{
+				"key": "mud_bomb",
+				"levelReq": 39
+			},
+			{
+				"key": "gastro_acid",
+				"levelReq": 44
+			},
+			{
+				"key": "belch",
+				"levelReq": 48
 			},
 			{
 				"key": "haze",
 				"levelReq": 51
+			},
+			{
+				"key": "coil",
+				"levelReq": 56
+			},
+			{
+				"key": "gunk_shot",
+				"levelReq": 63
 			}
 		],
 		"evolvesTo": null,
@@ -11724,7 +20368,7 @@ var SPECIES_DATA = {
 		"type": "POISON",
 		"type2": null,
 		"catchRate": 235,
-		"baseExp": 59,
+		"baseExp": 55,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 55,
@@ -11740,32 +20384,52 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "tackle",
+				"key": "scratch",
 				"levelReq": 1
 			},
 			{
-				"key": "scratch",
-				"levelReq": 8
+				"key": "tail_whip",
+				"levelReq": 7
 			},
 			{
 				"key": "double_kick",
-				"levelReq": 12
+				"levelReq": 9
 			},
 			{
 				"key": "poison_sting",
-				"levelReq": 17
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 23
-			},
-			{
-				"key": "bite",
-				"levelReq": 30
+				"levelReq": 13
 			},
 			{
 				"key": "fury_swipes",
-				"levelReq": 38
+				"levelReq": 19
+			},
+			{
+				"key": "bite",
+				"levelReq": 21
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 25
+			},
+			{
+				"key": "toxic_spikes",
+				"levelReq": 31
+			},
+			{
+				"key": "flatter",
+				"levelReq": 33
+			},
+			{
+				"key": "crunch",
+				"levelReq": 37
+			},
+			{
+				"key": "captivate",
+				"levelReq": 43
+			},
+			{
+				"key": "poison_fang",
+				"levelReq": 45
 			}
 		],
 		"evolvesTo": "nidorina",
@@ -11778,7 +20442,7 @@ var SPECIES_DATA = {
 		"type": "POISON",
 		"type2": null,
 		"catchRate": 120,
-		"baseExp": 117,
+		"baseExp": 128,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 70,
@@ -11794,32 +20458,52 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "tackle",
+				"key": "scratch",
 				"levelReq": 1
 			},
 			{
-				"key": "scratch",
-				"levelReq": 8
+				"key": "tail_whip",
+				"levelReq": 7
 			},
 			{
 				"key": "double_kick",
-				"levelReq": 12
+				"levelReq": 9
 			},
 			{
 				"key": "poison_sting",
-				"levelReq": 19
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 27
-			},
-			{
-				"key": "bite",
-				"levelReq": 36
+				"levelReq": 13
 			},
 			{
 				"key": "fury_swipes",
-				"levelReq": 46
+				"levelReq": 20
+			},
+			{
+				"key": "bite",
+				"levelReq": 23
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 28
+			},
+			{
+				"key": "toxic_spikes",
+				"levelReq": 35
+			},
+			{
+				"key": "flatter",
+				"levelReq": 38
+			},
+			{
+				"key": "crunch",
+				"levelReq": 43
+			},
+			{
+				"key": "captivate",
+				"levelReq": 50
+			},
+			{
+				"key": "poison_fang",
+				"levelReq": 58
 			}
 		],
 		"evolvesTo": null,
@@ -11832,11 +20516,11 @@ var SPECIES_DATA = {
 		"type": "POISON",
 		"type2": "GROUND",
 		"catchRate": 45,
-		"baseExp": 194,
+		"baseExp": 227,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 90,
-			"atkFis": 82,
+			"atkFis": 92,
 			"atkEsp": 75,
 			"def": 87,
 			"defEsp": 85,
@@ -11844,7 +20528,11 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "double_kick",
+				"levelReq": 1
+			},
+			{
+				"key": "poison_sting",
 				"levelReq": 1
 			},
 			{
@@ -11852,7 +20540,7 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "double_kick",
+				"key": "superpower",
 				"levelReq": 1
 			},
 			{
@@ -11860,8 +20548,20 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "body_slam",
+				"key": "chip_away",
 				"levelReq": 23
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 35
+			},
+			{
+				"key": "earth_power",
+				"levelReq": 43
+			},
+			{
+				"key": "superpower",
+				"levelReq": 58
 			}
 		],
 		"evolvesTo": null,
@@ -11874,7 +20574,7 @@ var SPECIES_DATA = {
 		"type": "POISON",
 		"type2": null,
 		"catchRate": 235,
-		"baseExp": 60,
+		"baseExp": 55,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 46,
@@ -11890,32 +20590,52 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "tackle",
+				"key": "peck",
 				"levelReq": 1
 			},
 			{
-				"key": "horn_attack",
-				"levelReq": 8
+				"key": "focus_energy",
+				"levelReq": 7
 			},
 			{
 				"key": "double_kick",
-				"levelReq": 12
+				"levelReq": 9
 			},
 			{
 				"key": "poison_sting",
-				"levelReq": 17
-			},
-			{
-				"key": "focus_energy",
-				"levelReq": 23
+				"levelReq": 13
 			},
 			{
 				"key": "fury_attack",
-				"levelReq": 30
+				"levelReq": 19
+			},
+			{
+				"key": "horn_attack",
+				"levelReq": 21
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 25
+			},
+			{
+				"key": "toxic_spikes",
+				"levelReq": 31
+			},
+			{
+				"key": "flatter",
+				"levelReq": 33
+			},
+			{
+				"key": "poison_jab",
+				"levelReq": 37
+			},
+			{
+				"key": "captivate",
+				"levelReq": 43
 			},
 			{
 				"key": "horn_drill",
-				"levelReq": 38
+				"levelReq": 45
 			}
 		],
 		"evolvesTo": "nidorino",
@@ -11928,7 +20648,7 @@ var SPECIES_DATA = {
 		"type": "POISON",
 		"type2": null,
 		"catchRate": 120,
-		"baseExp": 118,
+		"baseExp": 128,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 61,
@@ -11944,32 +20664,52 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "tackle",
+				"key": "peck",
 				"levelReq": 1
 			},
 			{
-				"key": "horn_attack",
-				"levelReq": 8
+				"key": "focus_energy",
+				"levelReq": 7
 			},
 			{
 				"key": "double_kick",
-				"levelReq": 12
+				"levelReq": 9
 			},
 			{
 				"key": "poison_sting",
-				"levelReq": 19
-			},
-			{
-				"key": "focus_energy",
-				"levelReq": 27
+				"levelReq": 13
 			},
 			{
 				"key": "fury_attack",
-				"levelReq": 36
+				"levelReq": 20
+			},
+			{
+				"key": "horn_attack",
+				"levelReq": 23
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 28
+			},
+			{
+				"key": "toxic_spikes",
+				"levelReq": 35
+			},
+			{
+				"key": "flatter",
+				"levelReq": 38
+			},
+			{
+				"key": "poison_jab",
+				"levelReq": 43
+			},
+			{
+				"key": "captivate",
+				"levelReq": 50
 			},
 			{
 				"key": "horn_drill",
-				"levelReq": 46
+				"levelReq": 58
 			}
 		],
 		"evolvesTo": null,
@@ -11982,11 +20722,11 @@ var SPECIES_DATA = {
 		"type": "POISON",
 		"type2": "GROUND",
 		"catchRate": 45,
-		"baseExp": 195,
+		"baseExp": 227,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 81,
-			"atkFis": 92,
+			"atkFis": 102,
 			"atkEsp": 85,
 			"def": 77,
 			"defEsp": 75,
@@ -11994,15 +20734,19 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "horn_attack",
-				"levelReq": 1
-			},
-			{
 				"key": "double_kick",
+				"levelReq": 1
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 1
+			},
+			{
+				"key": "megahorn",
+				"levelReq": 1
+			},
+			{
+				"key": "peck",
 				"levelReq": 1
 			},
 			{
@@ -12010,8 +20754,20 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "thrash",
+				"key": "chip_away",
 				"levelReq": 23
+			},
+			{
+				"key": "thrash",
+				"levelReq": 35
+			},
+			{
+				"key": "earth_power",
+				"levelReq": 43
+			},
+			{
+				"key": "megahorn",
+				"levelReq": 58
 			}
 		],
 		"evolvesTo": null,
@@ -12024,7 +20780,7 @@ var SPECIES_DATA = {
 		"type": "POISON",
 		"type2": "FLYING",
 		"catchRate": 255,
-		"baseExp": 54,
+		"baseExp": 49,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 40,
@@ -12036,32 +20792,64 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "leech_life",
+				"key": "absorb",
 				"levelReq": 1
 			},
 			{
 				"key": "supersonic",
-				"levelReq": 6
+				"levelReq": 5
+			},
+			{
+				"key": "astonish",
+				"levelReq": 7
 			},
 			{
 				"key": "bite",
-				"levelReq": 12
-			},
-			{
-				"key": "confuse_ray",
-				"levelReq": 19
+				"levelReq": 11
 			},
 			{
 				"key": "wing_attack",
-				"levelReq": 27
+				"levelReq": 13
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 17
+			},
+			{
+				"key": "air_cutter",
+				"levelReq": 19
+			},
+			{
+				"key": "swift",
+				"levelReq": 23
+			},
+			{
+				"key": "poison_fang",
+				"levelReq": 25
 			},
 			{
 				"key": "mean_look",
-				"levelReq": 36
+				"levelReq": 29
+			},
+			{
+				"key": "leech_life",
+				"levelReq": 31
 			},
 			{
 				"key": "haze",
-				"levelReq": 46
+				"levelReq": 35
+			},
+			{
+				"key": "venoshock",
+				"levelReq": 37
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 41
+			},
+			{
+				"key": "quick_guard",
+				"levelReq": 43
 			}
 		],
 		"evolvesTo": "golbat",
@@ -12074,7 +20862,7 @@ var SPECIES_DATA = {
 		"type": "POISON",
 		"type2": "FLYING",
 		"catchRate": 90,
-		"baseExp": 171,
+		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 75,
@@ -12086,40 +20874,80 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "absorb",
+				"levelReq": 1
+			},
+			{
+				"key": "astonish",
+				"levelReq": 1
+			},
+			{
+				"key": "bite",
+				"levelReq": 1
+			},
+			{
 				"key": "screech",
 				"levelReq": 1
 			},
 			{
-				"key": "leech_life",
-				"levelReq": 1
-			},
-			{
 				"key": "supersonic",
 				"levelReq": 1
 			},
 			{
 				"key": "supersonic",
-				"levelReq": 6
+				"levelReq": 5
+			},
+			{
+				"key": "astonish",
+				"levelReq": 7
 			},
 			{
 				"key": "bite",
-				"levelReq": 12
-			},
-			{
-				"key": "confuse_ray",
-				"levelReq": 19
+				"levelReq": 11
 			},
 			{
 				"key": "wing_attack",
-				"levelReq": 30
+				"levelReq": 13
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 17
+			},
+			{
+				"key": "air_cutter",
+				"levelReq": 19
+			},
+			{
+				"key": "swift",
+				"levelReq": 24
+			},
+			{
+				"key": "poison_fang",
+				"levelReq": 27
 			},
 			{
 				"key": "mean_look",
-				"levelReq": 42
+				"levelReq": 32
+			},
+			{
+				"key": "leech_life",
+				"levelReq": 35
 			},
 			{
 				"key": "haze",
-				"levelReq": 55
+				"levelReq": 40
+			},
+			{
+				"key": "venoshock",
+				"levelReq": 43
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 48
+			},
+			{
+				"key": "quick_guard",
+				"levelReq": 51
 			}
 		],
 		"evolvesTo": null,
@@ -12132,7 +20960,7 @@ var SPECIES_DATA = {
 		"type": "POISON",
 		"type2": null,
 		"catchRate": 190,
-		"baseExp": 90,
+		"baseExp": 65,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 80,
@@ -12153,31 +20981,59 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "harden",
-				"levelReq": 5
+				"levelReq": 4
+			},
+			{
+				"key": "mud_slap",
+				"levelReq": 7
 			},
 			{
 				"key": "disable",
-				"levelReq": 10
+				"levelReq": 12
 			},
 			{
 				"key": "sludge",
-				"levelReq": 16
+				"levelReq": 15
+			},
+			{
+				"key": "mud_bomb",
+				"levelReq": 18
 			},
 			{
 				"key": "minimize",
-				"levelReq": 23
+				"levelReq": 21
 			},
 			{
-				"key": "screech",
-				"levelReq": 31
-			},
-			{
-				"key": "acid_armor",
-				"levelReq": 40
+				"key": "fling",
+				"levelReq": 26
 			},
 			{
 				"key": "sludge_bomb",
-				"levelReq": 50
+				"levelReq": 29
+			},
+			{
+				"key": "sludge_wave",
+				"levelReq": 32
+			},
+			{
+				"key": "screech",
+				"levelReq": 37
+			},
+			{
+				"key": "gunk_shot",
+				"levelReq": 40
+			},
+			{
+				"key": "acid_armor",
+				"levelReq": 43
+			},
+			{
+				"key": "belch",
+				"levelReq": 46
+			},
+			{
+				"key": "memento",
+				"levelReq": 48
 			}
 		],
 		"evolvesTo": "muk",
@@ -12190,7 +21046,7 @@ var SPECIES_DATA = {
 		"type": "POISON",
 		"type2": null,
 		"catchRate": 75,
-		"baseExp": 157,
+		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 105,
@@ -12202,6 +21058,14 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "harden",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_slap",
+				"levelReq": 1
+			},
+			{
 				"key": "poison_gas",
 				"levelReq": 1
 			},
@@ -12210,36 +21074,68 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "harden",
+				"key": "venom_drench",
 				"levelReq": 1
 			},
 			{
-				"key": "minimize",
-				"levelReq": 23
-			},
-			{
-				"key": "screech",
-				"levelReq": 31
+				"key": "venom_drench",
+				"levelReq": 1
 			},
 			{
 				"key": "harden",
-				"levelReq": 33
+				"levelReq": 4
+			},
+			{
+				"key": "mud_slap",
+				"levelReq": 7
 			},
 			{
 				"key": "disable",
-				"levelReq": 37
+				"levelReq": 12
 			},
 			{
 				"key": "sludge",
-				"levelReq": 45
+				"levelReq": 15
 			},
 			{
-				"key": "acid_armor",
-				"levelReq": 45
+				"key": "mud_bomb",
+				"levelReq": 18
+			},
+			{
+				"key": "minimize",
+				"levelReq": 21
+			},
+			{
+				"key": "fling",
+				"levelReq": 26
 			},
 			{
 				"key": "sludge_bomb",
-				"levelReq": 60
+				"levelReq": 29
+			},
+			{
+				"key": "sludge_wave",
+				"levelReq": 32
+			},
+			{
+				"key": "screech",
+				"levelReq": 37
+			},
+			{
+				"key": "gunk_shot",
+				"levelReq": 40
+			},
+			{
+				"key": "acid_armor",
+				"levelReq": 46
+			},
+			{
+				"key": "belch",
+				"levelReq": 52
+			},
+			{
+				"key": "memento",
+				"levelReq": 57
 			}
 		],
 		"evolvesTo": null,
@@ -12252,7 +21148,7 @@ var SPECIES_DATA = {
 		"type": "POISON",
 		"type2": null,
 		"catchRate": 190,
-		"baseExp": 114,
+		"baseExp": 68,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 40,
@@ -12273,30 +21169,54 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "smog",
-				"levelReq": 9
-			},
-			{
-				"key": "selfdestruct",
-				"levelReq": 17
-			},
-			{
-				"key": "sludge",
-				"levelReq": 21
+				"levelReq": 4
 			},
 			{
 				"key": "smokescreen",
-				"levelReq": 25
+				"levelReq": 7
+			},
+			{
+				"key": "assurance",
+				"levelReq": 12
+			},
+			{
+				"key": "clear_smog",
+				"levelReq": 15
+			},
+			{
+				"key": "sludge",
+				"levelReq": 18
+			},
+			{
+				"key": "self_destruct",
+				"levelReq": 23
 			},
 			{
 				"key": "haze",
-				"levelReq": 33
+				"levelReq": 26
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 29
+			},
+			{
+				"key": "sludge_bomb",
+				"levelReq": 34
 			},
 			{
 				"key": "explosion",
-				"levelReq": 41
+				"levelReq": 37
 			},
 			{
 				"key": "destiny_bond",
+				"levelReq": 40
+			},
+			{
+				"key": "belch",
+				"levelReq": 42
+			},
+			{
+				"key": "memento",
 				"levelReq": 45
 			}
 		],
@@ -12310,7 +21230,7 @@ var SPECIES_DATA = {
 		"type": "POISON",
 		"type2": null,
 		"catchRate": 60,
-		"baseExp": 173,
+		"baseExp": 172,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 65,
@@ -12322,7 +21242,23 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "double_hit",
+				"levelReq": 1
+			},
+			{
+				"key": "double_hit",
+				"levelReq": 1
+			},
+			{
 				"key": "poison_gas",
+				"levelReq": 1
+			},
+			{
+				"key": "smog",
+				"levelReq": 1
+			},
+			{
+				"key": "smokescreen",
 				"levelReq": 1
 			},
 			{
@@ -12331,39 +21267,55 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "smog",
-				"levelReq": 1
-			},
-			{
-				"key": "selfdestruct",
-				"levelReq": 1
-			},
-			{
-				"key": "smog",
-				"levelReq": 9
-			},
-			{
-				"key": "selfdestruct",
-				"levelReq": 17
-			},
-			{
-				"key": "sludge",
-				"levelReq": 21
+				"levelReq": 4
 			},
 			{
 				"key": "smokescreen",
-				"levelReq": 25
+				"levelReq": 7
+			},
+			{
+				"key": "assurance",
+				"levelReq": 12
+			},
+			{
+				"key": "clear_smog",
+				"levelReq": 15
+			},
+			{
+				"key": "sludge",
+				"levelReq": 18
+			},
+			{
+				"key": "self_destruct",
+				"levelReq": 23
 			},
 			{
 				"key": "haze",
-				"levelReq": 33
+				"levelReq": 26
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 29
+			},
+			{
+				"key": "sludge_bomb",
+				"levelReq": 34
 			},
 			{
 				"key": "explosion",
-				"levelReq": 44
+				"levelReq": 40
 			},
 			{
 				"key": "destiny_bond",
+				"levelReq": 46
+			},
+			{
+				"key": "belch",
 				"levelReq": 51
+			},
+			{
+				"key": "memento",
+				"levelReq": 57
 			}
 		],
 		"evolvesTo": null,
@@ -12376,7 +21328,7 @@ var SPECIES_DATA = {
 		"type": "FIGHTING",
 		"type2": null,
 		"catchRate": 190,
-		"baseExp": 74,
+		"baseExp": 61,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 40,
@@ -12388,7 +21340,11 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "scratch",
+				"key": "covet",
+				"levelReq": 1
+			},
+			{
+				"key": "focus_energy",
 				"levelReq": 1
 			},
 			{
@@ -12397,35 +21353,67 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "low_kick",
-				"levelReq": 9
+				"levelReq": 1
 			},
 			{
-				"key": "karate_chop",
-				"levelReq": 15
+				"key": "scratch",
+				"levelReq": 1
 			},
 			{
 				"key": "fury_swipes",
-				"levelReq": 21
+				"levelReq": 5
 			},
 			{
-				"key": "focus_energy",
-				"levelReq": 27
+				"key": "karate_chop",
+				"levelReq": 8
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 12
 			},
 			{
 				"key": "seismic_toss",
-				"levelReq": 33
+				"levelReq": 15
+			},
+			{
+				"key": "swagger",
+				"levelReq": 19
 			},
 			{
 				"key": "cross_chop",
-				"levelReq": 39
+				"levelReq": 22
 			},
 			{
-				"key": "screech",
-				"levelReq": 45
+				"key": "assurance",
+				"levelReq": 26
+			},
+			{
+				"key": "punishment",
+				"levelReq": 29
 			},
 			{
 				"key": "thrash",
-				"levelReq": 51
+				"levelReq": 33
+			},
+			{
+				"key": "close_combat",
+				"levelReq": 36
+			},
+			{
+				"key": "screech",
+				"levelReq": 40
+			},
+			{
+				"key": "stomping_tantrum",
+				"levelReq": 43
+			},
+			{
+				"key": "outrage",
+				"levelReq": 47
+			},
+			{
+				"key": "final_gambit",
+				"levelReq": 50
 			}
 		],
 		"evolvesTo": "primeape",
@@ -12438,7 +21426,7 @@ var SPECIES_DATA = {
 		"type": "FIGHTING",
 		"type2": null,
 		"catchRate": 75,
-		"baseExp": 149,
+		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 65,
@@ -12450,7 +21438,15 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "scratch",
+				"key": "final_gambit",
+				"levelReq": 1
+			},
+			{
+				"key": "fling",
+				"levelReq": 1
+			},
+			{
+				"key": "focus_energy",
 				"levelReq": 1
 			},
 			{
@@ -12466,40 +21462,68 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "low_kick",
-				"levelReq": 9
+				"key": "rage",
+				"levelReq": 1
 			},
 			{
-				"key": "karate_chop",
-				"levelReq": 15
+				"key": "scratch",
+				"levelReq": 1
 			},
 			{
 				"key": "fury_swipes",
-				"levelReq": 21
+				"levelReq": 5
 			},
 			{
-				"key": "focus_energy",
-				"levelReq": 27
+				"key": "karate_chop",
+				"levelReq": 8
 			},
 			{
-				"key": "rage",
-				"levelReq": 28
+				"key": "pursuit",
+				"levelReq": 12
 			},
 			{
 				"key": "seismic_toss",
-				"levelReq": 36
+				"levelReq": 15
+			},
+			{
+				"key": "swagger",
+				"levelReq": 19
 			},
 			{
 				"key": "cross_chop",
-				"levelReq": 45
+				"levelReq": 22
 			},
 			{
-				"key": "screech",
-				"levelReq": 54
+				"key": "assurance",
+				"levelReq": 26
+			},
+			{
+				"key": "punishment",
+				"levelReq": 30
 			},
 			{
 				"key": "thrash",
-				"levelReq": 63
+				"levelReq": 35
+			},
+			{
+				"key": "close_combat",
+				"levelReq": 39
+			},
+			{
+				"key": "screech",
+				"levelReq": 44
+			},
+			{
+				"key": "stomping_tantrum",
+				"levelReq": 48
+			},
+			{
+				"key": "outrage",
+				"levelReq": 53
+			},
+			{
+				"key": "final_gambit",
+				"levelReq": 57
 			}
 		],
 		"evolvesTo": null,
@@ -12512,7 +21536,7 @@ var SPECIES_DATA = {
 		"type": "FIGHTING",
 		"type2": null,
 		"catchRate": 180,
-		"baseExp": 88,
+		"baseExp": 61,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 70,
@@ -12524,44 +21548,72 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "low_kick",
-				"levelReq": 1
-			},
-			{
 				"key": "leer",
 				"levelReq": 1
 			},
 			{
+				"key": "low_kick",
+				"levelReq": 1
+			},
+			{
 				"key": "focus_energy",
-				"levelReq": 7
+				"levelReq": 3
 			},
 			{
 				"key": "karate_chop",
+				"levelReq": 7
+			},
+			{
+				"key": "foresight",
+				"levelReq": 9
+			},
+			{
+				"key": "low_sweep",
 				"levelReq": 13
 			},
 			{
 				"key": "seismic_toss",
+				"levelReq": 15
+			},
+			{
+				"key": "revenge",
 				"levelReq": 19
 			},
 			{
-				"key": "foresight",
-				"levelReq": 25
+				"key": "knock_off",
+				"levelReq": 21
 			},
 			{
 				"key": "vital_throw",
+				"levelReq": 25
+			},
+			{
+				"key": "wake_up_slap",
+				"levelReq": 27
+			},
+			{
+				"key": "dual_chop",
 				"levelReq": 31
 			},
 			{
-				"key": "cross_chop",
+				"key": "submission",
+				"levelReq": 33
+			},
+			{
+				"key": "bulk_up",
 				"levelReq": 37
+			},
+			{
+				"key": "cross_chop",
+				"levelReq": 39
 			},
 			{
 				"key": "scary_face",
 				"levelReq": 43
 			},
 			{
-				"key": "submission",
-				"levelReq": 49
+				"key": "dynamic_punch",
+				"levelReq": 45
 			}
 		],
 		"evolvesTo": "machoke",
@@ -12574,7 +21626,7 @@ var SPECIES_DATA = {
 		"type": "FIGHTING",
 		"type2": null,
 		"catchRate": 90,
-		"baseExp": 146,
+		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 80,
@@ -12586,7 +21638,11 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "low_kick",
+				"key": "focus_energy",
+				"levelReq": 1
+			},
+			{
+				"key": "karate_chop",
 				"levelReq": 1
 			},
 			{
@@ -12594,40 +21650,68 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "focus_energy",
+				"key": "low_kick",
 				"levelReq": 1
 			},
 			{
 				"key": "focus_energy",
-				"levelReq": 8
+				"levelReq": 3
 			},
 			{
 				"key": "karate_chop",
-				"levelReq": 15
-			},
-			{
-				"key": "seismic_toss",
-				"levelReq": 19
+				"levelReq": 7
 			},
 			{
 				"key": "foresight",
-				"levelReq": 25
+				"levelReq": 9
+			},
+			{
+				"key": "low_sweep",
+				"levelReq": 13
+			},
+			{
+				"key": "seismic_toss",
+				"levelReq": 15
+			},
+			{
+				"key": "revenge",
+				"levelReq": 19
+			},
+			{
+				"key": "knock_off",
+				"levelReq": 21
 			},
 			{
 				"key": "vital_throw",
-				"levelReq": 34
+				"levelReq": 25
 			},
 			{
-				"key": "cross_chop",
-				"levelReq": 43
+				"key": "wake_up_slap",
+				"levelReq": 27
 			},
 			{
-				"key": "scary_face",
-				"levelReq": 52
+				"key": "dual_chop",
+				"levelReq": 33
 			},
 			{
 				"key": "submission",
-				"levelReq": 61
+				"levelReq": 37
+			},
+			{
+				"key": "bulk_up",
+				"levelReq": 43
+			},
+			{
+				"key": "cross_chop",
+				"levelReq": 47
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 53
+			},
+			{
+				"key": "dynamic_punch",
+				"levelReq": 57
 			}
 		],
 		"evolvesTo": null,
@@ -12640,7 +21724,7 @@ var SPECIES_DATA = {
 		"type": "FIGHTING",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 193,
+		"baseExp": 227,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 90,
@@ -12652,7 +21736,11 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "low_kick",
+				"key": "focus_energy",
+				"levelReq": 1
+			},
+			{
+				"key": "karate_chop",
 				"levelReq": 1
 			},
 			{
@@ -12660,40 +21748,80 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "focus_energy",
+				"key": "low_kick",
+				"levelReq": 1
+			},
+			{
+				"key": "strength",
+				"levelReq": 1
+			},
+			{
+				"key": "strength",
+				"levelReq": 1
+			},
+			{
+				"key": "wide_guard",
 				"levelReq": 1
 			},
 			{
 				"key": "focus_energy",
-				"levelReq": 8
+				"levelReq": 3
 			},
 			{
 				"key": "karate_chop",
-				"levelReq": 15
-			},
-			{
-				"key": "seismic_toss",
-				"levelReq": 19
+				"levelReq": 7
 			},
 			{
 				"key": "foresight",
-				"levelReq": 25
+				"levelReq": 9
+			},
+			{
+				"key": "low_sweep",
+				"levelReq": 13
+			},
+			{
+				"key": "seismic_toss",
+				"levelReq": 15
+			},
+			{
+				"key": "revenge",
+				"levelReq": 19
+			},
+			{
+				"key": "knock_off",
+				"levelReq": 21
 			},
 			{
 				"key": "vital_throw",
-				"levelReq": 34
+				"levelReq": 25
 			},
 			{
-				"key": "cross_chop",
-				"levelReq": 43
+				"key": "wake_up_slap",
+				"levelReq": 27
 			},
 			{
-				"key": "scary_face",
-				"levelReq": 52
+				"key": "dual_chop",
+				"levelReq": 33
 			},
 			{
 				"key": "submission",
-				"levelReq": 61
+				"levelReq": 37
+			},
+			{
+				"key": "bulk_up",
+				"levelReq": 43
+			},
+			{
+				"key": "cross_chop",
+				"levelReq": 47
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 53
+			},
+			{
+				"key": "dynamic_punch",
+				"levelReq": 57
 			}
 		],
 		"evolvesTo": null,
@@ -12706,7 +21834,7 @@ var SPECIES_DATA = {
 		"type": "FIGHTING",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 139,
+		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 50,
@@ -12718,48 +21846,100 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "close_combat",
+				"levelReq": 1
+			},
+			{
 				"key": "double_kick",
 				"levelReq": 1
 			},
 			{
-				"key": "meditate",
-				"levelReq": 6
-			},
-			{
-				"key": "rolling_kick",
-				"levelReq": 11
+				"key": "double_kick",
+				"levelReq": 1
 			},
 			{
 				"key": "jump_kick",
-				"levelReq": 16
+				"levelReq": 1
+			},
+			{
+				"key": "meditate",
+				"levelReq": 1
+			},
+			{
+				"key": "mega_kick",
+				"levelReq": 1
+			},
+			{
+				"key": "revenge",
+				"levelReq": 1
+			},
+			{
+				"key": "reversal",
+				"levelReq": 1
+			},
+			{
+				"key": "rolling_kick",
+				"levelReq": 1
+			},
+			{
+				"key": "meditate",
+				"levelReq": 5
+			},
+			{
+				"key": "rolling_kick",
+				"levelReq": 9
+			},
+			{
+				"key": "jump_kick",
+				"levelReq": 13
+			},
+			{
+				"key": "brick_break",
+				"levelReq": 17
 			},
 			{
 				"key": "focus_energy",
 				"levelReq": 21
 			},
 			{
-				"key": "hi_jump_kick",
-				"levelReq": 26
+				"key": "feint",
+				"levelReq": 25
+			},
+			{
+				"key": "high_jump_kick",
+				"levelReq": 29
 			},
 			{
 				"key": "mind_reader",
-				"levelReq": 31
+				"levelReq": 33
 			},
 			{
 				"key": "foresight",
-				"levelReq": 36
+				"levelReq": 37
 			},
 			{
-				"key": "endure",
+				"key": "wide_guard",
 				"levelReq": 41
 			},
 			{
+				"key": "blaze_kick",
+				"levelReq": 45
+			},
+			{
+				"key": "endure",
+				"levelReq": 49
+			},
+			{
 				"key": "mega_kick",
-				"levelReq": 46
+				"levelReq": 53
+			},
+			{
+				"key": "close_combat",
+				"levelReq": 57
 			},
 			{
 				"key": "reversal",
-				"levelReq": 51
+				"levelReq": 61
 			}
 		],
 		"evolvesTo": null,
@@ -12772,7 +21952,7 @@ var SPECIES_DATA = {
 		"type": "FIGHTING",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 140,
+		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 50,
@@ -12784,44 +21964,104 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "agility",
+				"levelReq": 1
+			},
+			{
+				"key": "close_combat",
+				"levelReq": 1
+			},
+			{
 				"key": "comet_punch",
 				"levelReq": 1
 			},
 			{
-				"key": "agility",
-				"levelReq": 7
-			},
-			{
-				"key": "pursuit",
-				"levelReq": 13
-			},
-			{
-				"key": "thunderpunch",
-				"levelReq": 26
-			},
-			{
-				"key": "ice_punch",
-				"levelReq": 26
-			},
-			{
-				"key": "fire_punch",
-				"levelReq": 26
-			},
-			{
-				"key": "mach_punch",
-				"levelReq": 32
-			},
-			{
-				"key": "mega_punch",
-				"levelReq": 38
-			},
-			{
-				"key": "detect",
-				"levelReq": 44
+				"key": "comet_punch",
+				"levelReq": 1
 			},
 			{
 				"key": "counter",
+				"levelReq": 1
+			},
+			{
+				"key": "focus_punch",
+				"levelReq": 1
+			},
+			{
+				"key": "mach_punch",
+				"levelReq": 1
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 1
+			},
+			{
+				"key": "revenge",
+				"levelReq": 1
+			},
+			{
+				"key": "agility",
+				"levelReq": 6
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 11
+			},
+			{
+				"key": "bullet_punch",
+				"levelReq": 16
+			},
+			{
+				"key": "mach_punch",
+				"levelReq": 16
+			},
+			{
+				"key": "feint",
+				"levelReq": 21
+			},
+			{
+				"key": "vacuum_wave",
+				"levelReq": 26
+			},
+			{
+				"key": "quick_guard",
+				"levelReq": 31
+			},
+			{
+				"key": "fire_punch",
+				"levelReq": 36
+			},
+			{
+				"key": "ice_punch",
+				"levelReq": 36
+			},
+			{
+				"key": "thunder_punch",
+				"levelReq": 36
+			},
+			{
+				"key": "sky_uppercut",
+				"levelReq": 41
+			},
+			{
+				"key": "mega_punch",
+				"levelReq": 46
+			},
+			{
+				"key": "detect",
 				"levelReq": 50
+			},
+			{
+				"key": "focus_punch",
+				"levelReq": 56
+			},
+			{
+				"key": "counter",
+				"levelReq": 61
+			},
+			{
+				"key": "close_combat",
+				"levelReq": 66
 			}
 		],
 		"evolvesTo": null,
@@ -12834,7 +22074,7 @@ var SPECIES_DATA = {
 		"type": "FIGHTING",
 		"type2": null,
 		"catchRate": 75,
-		"baseExp": 91,
+		"baseExp": 42,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 35,
@@ -12844,12 +22084,26 @@ var SPECIES_DATA = {
 			"defEsp": 35,
 			"speed": 35
 		},
-		"abilities": [{
-			"key": "tackle",
-			"levelReq": 1
-		}],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"abilities": [
+			{
+				"key": "fake_out",
+				"levelReq": 1
+			},
+			{
+				"key": "foresight",
+				"levelReq": 1
+			},
+			{
+				"key": "helping_hand",
+				"levelReq": 1
+			},
+			{
+				"key": "tackle",
+				"levelReq": 1
+			}
+		],
+		"evolvesTo": "hitmonlee",
+		"evolvesAtLevel": 20
 	},
 	"jynx": {
 		"id": "jynx",
@@ -12858,7 +22112,7 @@ var SPECIES_DATA = {
 		"type": "ICE",
 		"type2": "PSYCHIC",
 		"catchRate": 45,
-		"baseExp": 137,
+		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 65,
@@ -12870,7 +22124,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "pound",
+				"key": "draining_kiss",
 				"levelReq": 1
 			},
 			{
@@ -12882,40 +22136,72 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "perish_song",
+				"levelReq": 1
+			},
+			{
+				"key": "pound",
+				"levelReq": 1
+			},
+			{
 				"key": "powder_snow",
 				"levelReq": 1
 			},
 			{
+				"key": "lick",
+				"levelReq": 5
+			},
+			{
 				"key": "lovely_kiss",
-				"levelReq": 9
+				"levelReq": 8
 			},
 			{
 				"key": "powder_snow",
-				"levelReq": 13
+				"levelReq": 11
 			},
 			{
-				"key": "doubleslap",
-				"levelReq": 21
+				"key": "double_slap",
+				"levelReq": 15
 			},
 			{
 				"key": "ice_punch",
-				"levelReq": 25
+				"levelReq": 18
+			},
+			{
+				"key": "heart_stamp",
+				"levelReq": 21
 			},
 			{
 				"key": "mean_look",
-				"levelReq": 35
+				"levelReq": 25
+			},
+			{
+				"key": "fake_tears",
+				"levelReq": 28
+			},
+			{
+				"key": "wake_up_slap",
+				"levelReq": 33
+			},
+			{
+				"key": "avalanche",
+				"levelReq": 39
 			},
 			{
 				"key": "body_slam",
-				"levelReq": 41
+				"levelReq": 44
+			},
+			{
+				"key": "wring_out",
+				"levelReq": 49
 			},
 			{
 				"key": "perish_song",
-				"levelReq": 51
+				"levelReq": 55
 			},
 			{
 				"key": "blizzard",
-				"levelReq": 57
+				"levelReq": 60
 			}
 		],
 		"evolvesTo": null,
@@ -12928,7 +22214,7 @@ var SPECIES_DATA = {
 		"type": "ICE",
 		"type2": "GROUND",
 		"catchRate": 225,
-		"baseExp": 78,
+		"baseExp": 50,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 50,
@@ -12940,16 +22226,40 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "odor_sleuth",
+				"levelReq": 1
+			},
+			{
 				"key": "tackle",
 				"levelReq": 1
 			},
 			{
+				"key": "mud_sport",
+				"levelReq": 5
+			},
+			{
 				"key": "powder_snow",
-				"levelReq": 10
+				"levelReq": 8
+			},
+			{
+				"key": "mud_slap",
+				"levelReq": 11
 			},
 			{
 				"key": "endure",
-				"levelReq": 19
+				"levelReq": 14
+			},
+			{
+				"key": "mud_bomb",
+				"levelReq": 18
+			},
+			{
+				"key": "icy_wind",
+				"levelReq": 21
+			},
+			{
+				"key": "ice_shard",
+				"levelReq": 24
 			},
 			{
 				"key": "take_down",
@@ -12957,15 +22267,23 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "mist",
+				"levelReq": 35
+			},
+			{
+				"key": "earthquake",
 				"levelReq": 37
 			},
 			{
+				"key": "flail",
+				"levelReq": 40
+			},
+			{
 				"key": "blizzard",
-				"levelReq": 46
+				"levelReq": 44
 			},
 			{
 				"key": "amnesia",
-				"levelReq": 55
+				"levelReq": 48
 			}
 		],
 		"evolvesTo": "piloswine",
@@ -12978,7 +22296,7 @@ var SPECIES_DATA = {
 		"type": "ICE",
 		"type2": "GROUND",
 		"catchRate": 75,
-		"baseExp": 160,
+		"baseExp": 158,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 100,
@@ -12990,7 +22308,27 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "horn_attack",
+				"key": "ancient_power",
+				"levelReq": 1
+			},
+			{
+				"key": "fury_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "fury_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_sport",
+				"levelReq": 1
+			},
+			{
+				"key": "odor_sleuth",
+				"levelReq": 1
+			},
+			{
+				"key": "peck",
 				"levelReq": 1
 			},
 			{
@@ -12998,36 +22336,56 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "endure",
-				"levelReq": 1
+				"key": "mud_sport",
+				"levelReq": 5
 			},
 			{
 				"key": "powder_snow",
-				"levelReq": 10
+				"levelReq": 8
+			},
+			{
+				"key": "mud_slap",
+				"levelReq": 11
 			},
 			{
 				"key": "endure",
-				"levelReq": 19
+				"levelReq": 14
+			},
+			{
+				"key": "mud_bomb",
+				"levelReq": 18
+			},
+			{
+				"key": "icy_wind",
+				"levelReq": 21
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 24
 			},
 			{
 				"key": "take_down",
 				"levelReq": 28
 			},
 			{
-				"key": "fury_attack",
-				"levelReq": 33
+				"key": "mist",
+				"levelReq": 37
 			},
 			{
-				"key": "mist",
-				"levelReq": 42
+				"key": "thrash",
+				"levelReq": 41
+			},
+			{
+				"key": "earthquake",
+				"levelReq": 46
 			},
 			{
 				"key": "blizzard",
-				"levelReq": 56
+				"levelReq": 52
 			},
 			{
 				"key": "amnesia",
-				"levelReq": 70
+				"levelReq": 58
 			}
 		],
 		"evolvesTo": null,
@@ -13040,7 +22398,7 @@ var SPECIES_DATA = {
 		"type": "ICE",
 		"type2": "FLYING",
 		"catchRate": 45,
-		"baseExp": 183,
+		"baseExp": 116,
 		"growthCurve": "FAST",
 		"base": {
 			"hp": 45,
@@ -13053,6 +22411,9 @@ var SPECIES_DATA = {
 		"abilities": [{
 			"key": "present",
 			"levelReq": 1
+		}, {
+			"key": "drill_peck",
+			"levelReq": 25
 		}],
 		"evolvesTo": null,
 		"evolvesAtLevel": null
@@ -13064,7 +22425,7 @@ var SPECIES_DATA = {
 		"type": "ICE",
 		"type2": "PSYCHIC",
 		"catchRate": 45,
-		"baseExp": 87,
+		"baseExp": 61,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 45,
@@ -13081,31 +22442,51 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "lick",
-				"levelReq": 1
+				"levelReq": 5
 			},
 			{
 				"key": "sweet_kiss",
-				"levelReq": 9
+				"levelReq": 8
 			},
 			{
 				"key": "powder_snow",
-				"levelReq": 13
+				"levelReq": 11
 			},
 			{
 				"key": "confusion",
-				"levelReq": 21
+				"levelReq": 15
 			},
 			{
 				"key": "sing",
-				"levelReq": 25
+				"levelReq": 18
+			},
+			{
+				"key": "heart_stamp",
+				"levelReq": 21
 			},
 			{
 				"key": "mean_look",
-				"levelReq": 33
+				"levelReq": 25
 			},
 			{
-				"key": "psychic_m",
-				"levelReq": 37
+				"key": "fake_tears",
+				"levelReq": 28
+			},
+			{
+				"key": "lucky_chant",
+				"levelReq": 31
+			},
+			{
+				"key": "avalanche",
+				"levelReq": 35
+			},
+			{
+				"key": "psychic",
+				"levelReq": 38
+			},
+			{
+				"key": "copycat",
+				"levelReq": 41
 			},
 			{
 				"key": "perish_song",
@@ -13113,7 +22494,7 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "blizzard",
-				"levelReq": 49
+				"levelReq": 48
 			}
 		],
 		"evolvesTo": "jynx",
@@ -13126,7 +22507,7 @@ var SPECIES_DATA = {
 		"type": "STEEL",
 		"type2": "GROUND",
 		"catchRate": 25,
-		"baseExp": 196,
+		"baseExp": 179,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 75,
@@ -13138,40 +22519,104 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "bind",
+				"levelReq": 1
+			},
+			{
+				"key": "fire_fang",
+				"levelReq": 1
+			},
+			{
+				"key": "harden",
+				"levelReq": 1
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 1
+			},
+			{
+				"key": "mud_sport",
+				"levelReq": 1
+			},
+			{
 				"key": "tackle",
 				"levelReq": 1
 			},
 			{
-				"key": "screech",
+				"key": "thunder_fang",
 				"levelReq": 1
 			},
 			{
-				"key": "bind",
-				"levelReq": 10
+				"key": "curse",
+				"levelReq": 4
 			},
 			{
 				"key": "rock_throw",
-				"levelReq": 14
+				"levelReq": 7
 			},
 			{
-				"key": "harden",
-				"levelReq": 23
+				"key": "rock_tomb",
+				"levelReq": 10
 			},
 			{
 				"key": "rage",
-				"levelReq": 27
+				"levelReq": 13
 			},
 			{
-				"key": "sandstorm",
-				"levelReq": 36
+				"key": "stealth_rock",
+				"levelReq": 16
+			},
+			{
+				"key": "autotomize",
+				"levelReq": 19
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 20
+			},
+			{
+				"key": "smack_down",
+				"levelReq": 22
+			},
+			{
+				"key": "dragon_breath",
+				"levelReq": 25
 			},
 			{
 				"key": "slam",
-				"levelReq": 40
+				"levelReq": 28
+			},
+			{
+				"key": "screech",
+				"levelReq": 31
+			},
+			{
+				"key": "rock_slide",
+				"levelReq": 34
 			},
 			{
 				"key": "crunch",
+				"levelReq": 37
+			},
+			{
+				"key": "iron_tail",
+				"levelReq": 40
+			},
+			{
+				"key": "dig",
+				"levelReq": 43
+			},
+			{
+				"key": "stone_edge",
+				"levelReq": 46
+			},
+			{
+				"key": "double_edge",
 				"levelReq": 49
+			},
+			{
+				"key": "sandstorm",
+				"levelReq": 52
 			}
 		],
 		"evolvesTo": null,
@@ -13184,7 +22629,7 @@ var SPECIES_DATA = {
 		"type": "STEEL",
 		"type2": "FLYING",
 		"catchRate": 25,
-		"baseExp": 168,
+		"baseExp": 163,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 65,
@@ -13205,23 +22650,59 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "sand_attack",
-				"levelReq": 13
+				"levelReq": 6
 			},
 			{
-				"key": "swift",
-				"levelReq": 19
+				"key": "metal_claw",
+				"levelReq": 9
 			},
 			{
-				"key": "agility",
-				"levelReq": 25
+				"key": "air_cutter",
+				"levelReq": 12
 			},
 			{
 				"key": "fury_attack",
-				"levelReq": 37
+				"levelReq": 17
+			},
+			{
+				"key": "feint",
+				"levelReq": 20
+			},
+			{
+				"key": "swift",
+				"levelReq": 23
+			},
+			{
+				"key": "spikes",
+				"levelReq": 28
+			},
+			{
+				"key": "agility",
+				"levelReq": 31
 			},
 			{
 				"key": "steel_wing",
-				"levelReq": 49
+				"levelReq": 34
+			},
+			{
+				"key": "slash",
+				"levelReq": 39
+			},
+			{
+				"key": "metal_sound",
+				"levelReq": 42
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 45
+			},
+			{
+				"key": "autotomize",
+				"levelReq": 50
+			},
+			{
+				"key": "night_slash",
+				"levelReq": 53
 			}
 		],
 		"evolvesTo": null,
@@ -13234,7 +22715,7 @@ var SPECIES_DATA = {
 		"type": "PSYCHIC",
 		"type2": "FLYING",
 		"catchRate": 190,
-		"baseExp": 73,
+		"baseExp": 64,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 40,
@@ -13246,31 +22727,67 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "peck",
-				"levelReq": 1
-			},
-			{
 				"key": "leer",
 				"levelReq": 1
 			},
 			{
+				"key": "peck",
+				"levelReq": 1
+			},
+			{
 				"key": "night_shade",
-				"levelReq": 10
+				"levelReq": 6
 			},
 			{
 				"key": "teleport",
+				"levelReq": 9
+			},
+			{
+				"key": "lucky_chant",
+				"levelReq": 12
+			},
+			{
+				"key": "stored_power",
+				"levelReq": 17
+			},
+			{
+				"key": "ominous_wind",
 				"levelReq": 20
 			},
 			{
-				"key": "future_sight",
-				"levelReq": 30
-			},
-			{
 				"key": "confuse_ray",
-				"levelReq": 40
+				"levelReq": 23
 			},
 			{
-				"key": "psychic_m",
+				"key": "wish",
+				"levelReq": 28
+			},
+			{
+				"key": "psychic",
+				"levelReq": 33
+			},
+			{
+				"key": "miracle_eye",
+				"levelReq": 36
+			},
+			{
+				"key": "psycho_shift",
+				"levelReq": 39
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 44
+			},
+			{
+				"key": "guard_swap",
+				"levelReq": 47
+			},
+			{
+				"key": "power_swap",
+				"levelReq": 47
+			},
+			{
+				"key": "me_first",
 				"levelReq": 50
 			}
 		],
@@ -13284,7 +22801,7 @@ var SPECIES_DATA = {
 		"type": "PSYCHIC",
 		"type2": "FLYING",
 		"catchRate": 75,
-		"baseExp": 171,
+		"baseExp": 165,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 65,
@@ -13296,7 +22813,11 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "peck",
+				"key": "air_slash",
+				"levelReq": 1
+			},
+			{
+				"key": "air_slash",
 				"levelReq": 1
 			},
 			{
@@ -13308,24 +22829,72 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "night_shade",
-				"levelReq": 10
+				"key": "peck",
+				"levelReq": 1
+			},
+			{
+				"key": "tailwind",
+				"levelReq": 1
 			},
 			{
 				"key": "teleport",
+				"levelReq": 1
+			},
+			{
+				"key": "night_shade",
+				"levelReq": 6
+			},
+			{
+				"key": "teleport",
+				"levelReq": 9
+			},
+			{
+				"key": "lucky_chant",
+				"levelReq": 12
+			},
+			{
+				"key": "stored_power",
+				"levelReq": 17
+			},
+			{
+				"key": "ominous_wind",
 				"levelReq": 20
 			},
 			{
-				"key": "future_sight",
+				"key": "confuse_ray",
+				"levelReq": 23
+			},
+			{
+				"key": "wish",
+				"levelReq": 29
+			},
+			{
+				"key": "psychic",
 				"levelReq": 35
 			},
 			{
-				"key": "confuse_ray",
-				"levelReq": 50
+				"key": "miracle_eye",
+				"levelReq": 39
 			},
 			{
-				"key": "psychic_m",
-				"levelReq": 65
+				"key": "psycho_shift",
+				"levelReq": 43
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 49
+			},
+			{
+				"key": "guard_swap",
+				"levelReq": 53
+			},
+			{
+				"key": "power_swap",
+				"levelReq": 53
+			},
+			{
+				"key": "me_first",
+				"levelReq": 57
 			}
 		],
 		"evolvesTo": null,
@@ -13338,7 +22907,7 @@ var SPECIES_DATA = {
 		"type": "PSYCHIC",
 		"type2": null,
 		"catchRate": 200,
-		"baseExp": 73,
+		"baseExp": 62,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 25,
@@ -13362,7 +22931,7 @@ var SPECIES_DATA = {
 		"type": "PSYCHIC",
 		"type2": null,
 		"catchRate": 100,
-		"baseExp": 145,
+		"baseExp": 140,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 40,
@@ -13374,7 +22943,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "teleport",
+				"key": "confusion",
 				"levelReq": 1
 			},
 			{
@@ -13382,7 +22951,11 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "confusion",
+				"key": "kinesis",
+				"levelReq": 1
+			},
+			{
+				"key": "teleport",
 				"levelReq": 1
 			},
 			{
@@ -13398,20 +22971,44 @@ var SPECIES_DATA = {
 				"levelReq": 21
 			},
 			{
-				"key": "recover",
-				"levelReq": 26
-			},
-			{
-				"key": "future_sight",
-				"levelReq": 31
-			},
-			{
-				"key": "psychic_m",
-				"levelReq": 38
+				"key": "miracle_eye",
+				"levelReq": 23
 			},
 			{
 				"key": "reflect",
-				"levelReq": 45
+				"levelReq": 26
+			},
+			{
+				"key": "psycho_cut",
+				"levelReq": 28
+			},
+			{
+				"key": "recover",
+				"levelReq": 31
+			},
+			{
+				"key": "telekinesis",
+				"levelReq": 33
+			},
+			{
+				"key": "ally_switch",
+				"levelReq": 36
+			},
+			{
+				"key": "psychic",
+				"levelReq": 38
+			},
+			{
+				"key": "role_play",
+				"levelReq": 41
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 43
+			},
+			{
+				"key": "trick",
+				"levelReq": 46
 			}
 		],
 		"evolvesTo": null,
@@ -13424,19 +23021,19 @@ var SPECIES_DATA = {
 		"type": "PSYCHIC",
 		"type2": null,
 		"catchRate": 50,
-		"baseExp": 186,
+		"baseExp": 225,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 55,
 			"atkFis": 50,
 			"atkEsp": 135,
 			"def": 45,
-			"defEsp": 85,
+			"defEsp": 95,
 			"speed": 120
 		},
 		"abilities": [
 			{
-				"key": "teleport",
+				"key": "confusion",
 				"levelReq": 1
 			},
 			{
@@ -13444,7 +23041,11 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "confusion",
+				"key": "kinesis",
+				"levelReq": 1
+			},
+			{
+				"key": "teleport",
 				"levelReq": 1
 			},
 			{
@@ -13460,20 +23061,44 @@ var SPECIES_DATA = {
 				"levelReq": 21
 			},
 			{
-				"key": "recover",
-				"levelReq": 26
-			},
-			{
-				"key": "future_sight",
-				"levelReq": 31
-			},
-			{
-				"key": "psychic_m",
-				"levelReq": 38
+				"key": "miracle_eye",
+				"levelReq": 23
 			},
 			{
 				"key": "reflect",
-				"levelReq": 45
+				"levelReq": 26
+			},
+			{
+				"key": "psycho_cut",
+				"levelReq": 28
+			},
+			{
+				"key": "recover",
+				"levelReq": 31
+			},
+			{
+				"key": "telekinesis",
+				"levelReq": 33
+			},
+			{
+				"key": "ally_switch",
+				"levelReq": 36
+			},
+			{
+				"key": "psychic",
+				"levelReq": 38
+			},
+			{
+				"key": "calm_mind",
+				"levelReq": 41
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 43
+			},
+			{
+				"key": "trick",
+				"levelReq": 46
 			}
 		],
 		"evolvesTo": null,
@@ -13486,7 +23111,7 @@ var SPECIES_DATA = {
 		"type": "PSYCHIC",
 		"type2": null,
 		"catchRate": 190,
-		"baseExp": 102,
+		"baseExp": 66,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 60,
@@ -13498,44 +23123,72 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "pound",
-				"levelReq": 1
-			},
-			{
 				"key": "hypnosis",
 				"levelReq": 1
 			},
 			{
+				"key": "pound",
+				"levelReq": 1
+			},
+			{
 				"key": "disable",
-				"levelReq": 10
+				"levelReq": 5
 			},
 			{
 				"key": "confusion",
-				"levelReq": 18
+				"levelReq": 9
 			},
 			{
 				"key": "headbutt",
-				"levelReq": 25
+				"levelReq": 13
 			},
 			{
 				"key": "poison_gas",
-				"levelReq": 31
+				"levelReq": 17
 			},
 			{
 				"key": "meditate",
-				"levelReq": 36
+				"levelReq": 21
 			},
 			{
-				"key": "psychic_m",
-				"levelReq": 40
+				"key": "psybeam",
+				"levelReq": 25
+			},
+			{
+				"key": "wake_up_slap",
+				"levelReq": 29
 			},
 			{
 				"key": "psych_up",
-				"levelReq": 43
+				"levelReq": 33
+			},
+			{
+				"key": "synchronoise",
+				"levelReq": 37
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 41
+			},
+			{
+				"key": "swagger",
+				"levelReq": 45
+			},
+			{
+				"key": "psychic",
+				"levelReq": 49
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 53
+			},
+			{
+				"key": "psyshock",
+				"levelReq": 57
 			},
 			{
 				"key": "future_sight",
-				"levelReq": 45
+				"levelReq": 61
 			}
 		],
 		"evolvesTo": "hypno",
@@ -13548,7 +23201,7 @@ var SPECIES_DATA = {
 		"type": "PSYCHIC",
 		"type2": null,
 		"catchRate": 75,
-		"baseExp": 165,
+		"baseExp": 169,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 85,
@@ -13560,7 +23213,15 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "pound",
+				"key": "confusion",
+				"levelReq": 1
+			},
+			{
+				"key": "disable",
+				"levelReq": 1
+			},
+			{
+				"key": "future_sight",
 				"levelReq": 1
 			},
 			{
@@ -13568,44 +23229,80 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "disable",
+				"key": "nasty_plot",
 				"levelReq": 1
 			},
 			{
-				"key": "confusion",
+				"key": "nightmare",
+				"levelReq": 1
+			},
+			{
+				"key": "pound",
+				"levelReq": 1
+			},
+			{
+				"key": "switcheroo",
 				"levelReq": 1
 			},
 			{
 				"key": "disable",
-				"levelReq": 10
+				"levelReq": 5
 			},
 			{
 				"key": "confusion",
-				"levelReq": 18
+				"levelReq": 9
 			},
 			{
 				"key": "headbutt",
-				"levelReq": 25
+				"levelReq": 13
 			},
 			{
 				"key": "poison_gas",
-				"levelReq": 33
+				"levelReq": 17
 			},
 			{
 				"key": "meditate",
-				"levelReq": 40
+				"levelReq": 21
 			},
 			{
-				"key": "psychic_m",
-				"levelReq": 49
+				"key": "psybeam",
+				"levelReq": 25
+			},
+			{
+				"key": "wake_up_slap",
+				"levelReq": 29
 			},
 			{
 				"key": "psych_up",
-				"levelReq": 55
+				"levelReq": 33
+			},
+			{
+				"key": "synchronoise",
+				"levelReq": 37
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 41
+			},
+			{
+				"key": "swagger",
+				"levelReq": 45
+			},
+			{
+				"key": "psychic",
+				"levelReq": 49
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 53
+			},
+			{
+				"key": "psyshock",
+				"levelReq": 57
 			},
 			{
 				"key": "future_sight",
-				"levelReq": 60
+				"levelReq": 61
 			}
 		],
 		"evolvesTo": null,
@@ -13618,7 +23315,7 @@ var SPECIES_DATA = {
 		"type": "PSYCHIC",
 		"type2": null,
 		"catchRate": 225,
-		"baseExp": 61,
+		"baseExp": 118,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 48,
@@ -13642,7 +23339,7 @@ var SPECIES_DATA = {
 		"type": "PSYCHIC",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 177,
+		"baseExp": 142,
 		"growthCurve": "MEDIUM_FAST",
 		"base": {
 			"hp": 190,
@@ -13658,15 +23355,15 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "destiny_bond",
+				"levelReq": 1
+			},
+			{
 				"key": "mirror_coat",
 				"levelReq": 1
 			},
 			{
 				"key": "safeguard",
-				"levelReq": 1
-			},
-			{
-				"key": "destiny_bond",
 				"levelReq": 1
 			}
 		],
@@ -13680,7 +23377,7 @@ var SPECIES_DATA = {
 		"type": "GHOST",
 		"type2": "POISON",
 		"catchRate": 190,
-		"baseExp": 95,
+		"baseExp": 62,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 30,
@@ -13701,31 +23398,55 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "spite",
-				"levelReq": 8
+				"levelReq": 5
 			},
 			{
 				"key": "mean_look",
-				"levelReq": 13
+				"levelReq": 8
 			},
 			{
 				"key": "curse",
-				"levelReq": 16
+				"levelReq": 12
 			},
 			{
 				"key": "night_shade",
-				"levelReq": 21
+				"levelReq": 15
 			},
 			{
 				"key": "confuse_ray",
-				"levelReq": 28
+				"levelReq": 19
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 22
+			},
+			{
+				"key": "payback",
+				"levelReq": 26
+			},
+			{
+				"key": "shadow_ball",
+				"levelReq": 29
 			},
 			{
 				"key": "dream_eater",
 				"levelReq": 33
 			},
 			{
-				"key": "destiny_bond",
+				"key": "dark_pulse",
 				"levelReq": 36
+			},
+			{
+				"key": "destiny_bond",
+				"levelReq": 40
+			},
+			{
+				"key": "hex",
+				"levelReq": 43
+			},
+			{
+				"key": "nightmare",
+				"levelReq": 47
 			}
 		],
 		"evolvesTo": "haunter",
@@ -13738,7 +23459,7 @@ var SPECIES_DATA = {
 		"type": "GHOST",
 		"type2": "POISON",
 		"catchRate": 90,
-		"baseExp": 126,
+		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 45,
@@ -13758,36 +23479,68 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "shadow_punch",
+				"levelReq": 1
+			},
+			{
+				"key": "shadow_punch",
+				"levelReq": 1
+			},
+			{
 				"key": "spite",
 				"levelReq": 1
 			},
 			{
 				"key": "spite",
-				"levelReq": 8
+				"levelReq": 5
 			},
 			{
 				"key": "mean_look",
-				"levelReq": 13
+				"levelReq": 8
 			},
 			{
 				"key": "curse",
-				"levelReq": 16
+				"levelReq": 12
 			},
 			{
 				"key": "night_shade",
-				"levelReq": 21
+				"levelReq": 15
 			},
 			{
 				"key": "confuse_ray",
-				"levelReq": 31
+				"levelReq": 19
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 22
+			},
+			{
+				"key": "payback",
+				"levelReq": 28
+			},
+			{
+				"key": "shadow_ball",
+				"levelReq": 33
 			},
 			{
 				"key": "dream_eater",
 				"levelReq": 39
 			},
 			{
+				"key": "dark_pulse",
+				"levelReq": 44
+			},
+			{
 				"key": "destiny_bond",
-				"levelReq": 48
+				"levelReq": 50
+			},
+			{
+				"key": "hex",
+				"levelReq": 55
+			},
+			{
+				"key": "nightmare",
+				"levelReq": 61
 			}
 		],
 		"evolvesTo": null,
@@ -13800,7 +23553,7 @@ var SPECIES_DATA = {
 		"type": "GHOST",
 		"type2": "POISON",
 		"catchRate": 45,
-		"baseExp": 190,
+		"baseExp": 225,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 60,
@@ -13820,36 +23573,68 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "shadow_punch",
+				"levelReq": 1
+			},
+			{
+				"key": "shadow_punch",
+				"levelReq": 1
+			},
+			{
 				"key": "spite",
 				"levelReq": 1
 			},
 			{
 				"key": "spite",
-				"levelReq": 8
+				"levelReq": 5
 			},
 			{
 				"key": "mean_look",
-				"levelReq": 13
+				"levelReq": 8
 			},
 			{
 				"key": "curse",
-				"levelReq": 16
+				"levelReq": 12
 			},
 			{
 				"key": "night_shade",
-				"levelReq": 21
+				"levelReq": 15
 			},
 			{
 				"key": "confuse_ray",
-				"levelReq": 31
+				"levelReq": 19
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 22
+			},
+			{
+				"key": "payback",
+				"levelReq": 28
+			},
+			{
+				"key": "shadow_ball",
+				"levelReq": 33
 			},
 			{
 				"key": "dream_eater",
 				"levelReq": 39
 			},
 			{
+				"key": "dark_pulse",
+				"levelReq": 44
+			},
+			{
 				"key": "destiny_bond",
-				"levelReq": 48
+				"levelReq": 50
+			},
+			{
+				"key": "hex",
+				"levelReq": 55
+			},
+			{
+				"key": "nightmare",
+				"levelReq": 61
 			}
 		],
 		"evolvesTo": null,
@@ -13862,7 +23647,7 @@ var SPECIES_DATA = {
 		"type": "GHOST",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 147,
+		"baseExp": 87,
 		"growthCurve": "FAST",
 		"base": {
 			"hp": 60,
@@ -13883,27 +23668,51 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "spite",
-				"levelReq": 6
+				"levelReq": 5
+			},
+			{
+				"key": "astonish",
+				"levelReq": 10
 			},
 			{
 				"key": "confuse_ray",
-				"levelReq": 12
+				"levelReq": 14
 			},
 			{
 				"key": "mean_look",
 				"levelReq": 19
 			},
 			{
+				"key": "hex",
+				"levelReq": 23
+			},
+			{
 				"key": "psybeam",
-				"levelReq": 27
+				"levelReq": 28
 			},
 			{
 				"key": "pain_split",
-				"levelReq": 36
+				"levelReq": 32
+			},
+			{
+				"key": "payback",
+				"levelReq": 37
+			},
+			{
+				"key": "shadow_ball",
+				"levelReq": 41
 			},
 			{
 				"key": "perish_song",
 				"levelReq": 46
+			},
+			{
+				"key": "grudge",
+				"levelReq": 50
+			},
+			{
+				"key": "power_gem",
+				"levelReq": 55
 			}
 		],
 		"evolvesTo": null,
@@ -13916,7 +23725,7 @@ var SPECIES_DATA = {
 		"type": "DARK",
 		"type2": "FLYING",
 		"catchRate": 30,
-		"baseExp": 107,
+		"baseExp": 81,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 60,
@@ -13928,28 +23737,64 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
+				"key": "astonish",
+				"levelReq": 1
+			},
+			{
 				"key": "peck",
 				"levelReq": 1
 			},
 			{
 				"key": "pursuit",
-				"levelReq": 11
+				"levelReq": 5
 			},
 			{
 				"key": "haze",
-				"levelReq": 16
+				"levelReq": 11
+			},
+			{
+				"key": "wing_attack",
+				"levelReq": 15
 			},
 			{
 				"key": "night_shade",
-				"levelReq": 26
+				"levelReq": 21
 			},
 			{
-				"key": "faint_attack",
+				"key": "assurance",
+				"levelReq": 25
+			},
+			{
+				"key": "taunt",
 				"levelReq": 31
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 35
 			},
 			{
 				"key": "mean_look",
 				"levelReq": 41
+			},
+			{
+				"key": "foul_play",
+				"levelReq": 45
+			},
+			{
+				"key": "tailwind",
+				"levelReq": 50
+			},
+			{
+				"key": "sucker_punch",
+				"levelReq": 55
+			},
+			{
+				"key": "torment",
+				"levelReq": 61
+			},
+			{
+				"key": "quash",
+				"levelReq": 65
 			}
 		],
 		"evolvesTo": null,
@@ -13962,7 +23807,7 @@ var SPECIES_DATA = {
 		"type": "DARK",
 		"type2": "ICE",
 		"catchRate": 60,
-		"baseExp": 132,
+		"baseExp": 86,
 		"growthCurve": "MEDIUM_SLOW",
 		"base": {
 			"hp": 55,
@@ -13974,44 +23819,68 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
 				"key": "leer",
 				"levelReq": 1
 			},
 			{
+				"key": "scratch",
+				"levelReq": 1
+			},
+			{
+				"key": "taunt",
+				"levelReq": 1
+			},
+			{
 				"key": "quick_attack",
-				"levelReq": 9
+				"levelReq": 8
 			},
 			{
-				"key": "screech",
-				"levelReq": 17
+				"key": "feint_attack",
+				"levelReq": 10
 			},
 			{
-				"key": "faint_attack",
-				"levelReq": 25
+				"key": "icy_wind",
+				"levelReq": 14
 			},
 			{
 				"key": "fury_swipes",
-				"levelReq": 33
+				"levelReq": 16
 			},
 			{
 				"key": "agility",
-				"levelReq": 41
-			},
-			{
-				"key": "slash",
-				"levelReq": 49
-			},
-			{
-				"key": "beat_up",
-				"levelReq": 57
+				"levelReq": 20
 			},
 			{
 				"key": "metal_claw",
-				"levelReq": 65
+				"levelReq": 22
+			},
+			{
+				"key": "hone_claws",
+				"levelReq": 25
+			},
+			{
+				"key": "beat_up",
+				"levelReq": 28
+			},
+			{
+				"key": "screech",
+				"levelReq": 32
+			},
+			{
+				"key": "slash",
+				"levelReq": 35
+			},
+			{
+				"key": "snatch",
+				"levelReq": 40
+			},
+			{
+				"key": "punishment",
+				"levelReq": 44
+			},
+			{
+				"key": "ice_shard",
+				"levelReq": 47
 			}
 		],
 		"evolvesTo": null,
@@ -14024,7 +23893,7 @@ var SPECIES_DATA = {
 		"type": "DARK",
 		"type2": "FIRE",
 		"catchRate": 120,
-		"baseExp": 114,
+		"baseExp": 66,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 45,
@@ -14036,36 +23905,68 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
 				"key": "ember",
 				"levelReq": 1
 			},
 			{
-				"key": "roar",
-				"levelReq": 7
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "howl",
+				"levelReq": 4
 			},
 			{
 				"key": "smog",
+				"levelReq": 8
+			},
+			{
+				"key": "roar",
 				"levelReq": 13
 			},
 			{
 				"key": "bite",
+				"levelReq": 16
+			},
+			{
+				"key": "odor_sleuth",
 				"levelReq": 20
 			},
 			{
-				"key": "faint_attack",
-				"levelReq": 27
+				"key": "beat_up",
+				"levelReq": 25
+			},
+			{
+				"key": "fire_fang",
+				"levelReq": 28
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 32
+			},
+			{
+				"key": "embargo",
+				"levelReq": 37
+			},
+			{
+				"key": "foul_play",
+				"levelReq": 40
 			},
 			{
 				"key": "flamethrower",
-				"levelReq": 35
+				"levelReq": 44
 			},
 			{
 				"key": "crunch",
-				"levelReq": 43
+				"levelReq": 49
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 52
+			},
+			{
+				"key": "inferno",
+				"levelReq": 56
 			}
 		],
 		"evolvesTo": "houndoom",
@@ -14078,7 +23979,7 @@ var SPECIES_DATA = {
 		"type": "DARK",
 		"type2": "FIRE",
 		"catchRate": 45,
-		"baseExp": 204,
+		"baseExp": 175,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 75,
@@ -14090,36 +23991,88 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
 				"key": "ember",
 				"levelReq": 1
 			},
 			{
-				"key": "roar",
-				"levelReq": 7
+				"key": "howl",
+				"levelReq": 1
+			},
+			{
+				"key": "inferno",
+				"levelReq": 1
+			},
+			{
+				"key": "leer",
+				"levelReq": 1
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 1
 			},
 			{
 				"key": "smog",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_fang",
+				"levelReq": 1
+			},
+			{
+				"key": "howl",
+				"levelReq": 4
+			},
+			{
+				"key": "smog",
+				"levelReq": 8
+			},
+			{
+				"key": "roar",
 				"levelReq": 13
 			},
 			{
 				"key": "bite",
+				"levelReq": 16
+			},
+			{
+				"key": "odor_sleuth",
 				"levelReq": 20
 			},
 			{
-				"key": "faint_attack",
+				"key": "beat_up",
+				"levelReq": 26
+			},
+			{
+				"key": "fire_fang",
 				"levelReq": 30
 			},
 			{
-				"key": "flamethrower",
+				"key": "feint_attack",
+				"levelReq": 35
+			},
+			{
+				"key": "embargo",
 				"levelReq": 41
 			},
 			{
+				"key": "foul_play",
+				"levelReq": 45
+			},
+			{
+				"key": "flamethrower",
+				"levelReq": 50
+			},
+			{
 				"key": "crunch",
-				"levelReq": 52
+				"levelReq": 56
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 60
+			},
+			{
+				"key": "inferno",
+				"levelReq": 65
 			}
 		],
 		"evolvesTo": null,
@@ -14132,7 +24085,7 @@ var SPECIES_DATA = {
 		"type": "DRAGON",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 67,
+		"baseExp": 60,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 41,
@@ -14144,44 +24097,60 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "wrap",
-				"levelReq": 1
-			},
-			{
 				"key": "leer",
 				"levelReq": 1
 			},
 			{
+				"key": "wrap",
+				"levelReq": 1
+			},
+			{
 				"key": "thunder_wave",
-				"levelReq": 8
+				"levelReq": 5
 			},
 			{
 				"key": "twister",
-				"levelReq": 15
+				"levelReq": 11
 			},
 			{
 				"key": "dragon_rage",
-				"levelReq": 22
+				"levelReq": 15
 			},
 			{
 				"key": "slam",
-				"levelReq": 29
+				"levelReq": 21
 			},
 			{
 				"key": "agility",
-				"levelReq": 36
+				"levelReq": 25
+			},
+			{
+				"key": "dragon_tail",
+				"levelReq": 31
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 35
+			},
+			{
+				"key": "dragon_rush",
+				"levelReq": 41
 			},
 			{
 				"key": "safeguard",
-				"levelReq": 43
+				"levelReq": 45
+			},
+			{
+				"key": "dragon_dance",
+				"levelReq": 51
 			},
 			{
 				"key": "outrage",
-				"levelReq": 50
+				"levelReq": 55
 			},
 			{
 				"key": "hyper_beam",
-				"levelReq": 57
+				"levelReq": 61
 			}
 		],
 		"evolvesTo": "dragonair",
@@ -14194,7 +24163,7 @@ var SPECIES_DATA = {
 		"type": "DRAGON",
 		"type2": null,
 		"catchRate": 45,
-		"baseExp": 144,
+		"baseExp": 147,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 61,
@@ -14205,10 +24174,6 @@ var SPECIES_DATA = {
 			"speed": 70
 		},
 		"abilities": [
-			{
-				"key": "wrap",
-				"levelReq": 1
-			},
 			{
 				"key": "leer",
 				"levelReq": 1
@@ -14222,36 +24187,56 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "wrap",
+				"levelReq": 1
+			},
+			{
 				"key": "thunder_wave",
-				"levelReq": 8
+				"levelReq": 5
 			},
 			{
 				"key": "twister",
-				"levelReq": 15
+				"levelReq": 11
 			},
 			{
 				"key": "dragon_rage",
-				"levelReq": 22
+				"levelReq": 15
 			},
 			{
 				"key": "slam",
-				"levelReq": 29
+				"levelReq": 21
 			},
 			{
 				"key": "agility",
-				"levelReq": 38
+				"levelReq": 25
 			},
 			{
-				"key": "safeguard",
+				"key": "dragon_tail",
+				"levelReq": 33
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 39
+			},
+			{
+				"key": "dragon_rush",
 				"levelReq": 47
 			},
 			{
+				"key": "safeguard",
+				"levelReq": 53
+			},
+			{
+				"key": "dragon_dance",
+				"levelReq": 61
+			},
+			{
 				"key": "outrage",
-				"levelReq": 56
+				"levelReq": 67
 			},
 			{
 				"key": "hyper_beam",
-				"levelReq": 65
+				"levelReq": 75
 			}
 		],
 		"evolvesTo": "dragonite",
@@ -14264,7 +24249,7 @@ var SPECIES_DATA = {
 		"type": "DRAGON",
 		"type2": "FLYING",
 		"catchRate": 45,
-		"baseExp": 218,
+		"baseExp": 270,
 		"growthCurve": "SLOW",
 		"base": {
 			"hp": 91,
@@ -14276,7 +24261,11 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "wrap",
+				"key": "fire_punch",
+				"levelReq": 1
+			},
+			{
+				"key": "hurricane",
 				"levelReq": 1
 			},
 			{
@@ -14284,461 +24273,253 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
+				"key": "roost",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_punch",
+				"levelReq": 1
+			},
+			{
 				"key": "thunder_wave",
 				"levelReq": 1
 			},
 			{
 				"key": "twister",
 				"levelReq": 1
-			},
-			{
-				"key": "thunder_wave",
-				"levelReq": 8
-			},
-			{
-				"key": "twister",
-				"levelReq": 15
-			},
-			{
-				"key": "dragon_rage",
-				"levelReq": 22
-			},
-			{
-				"key": "slam",
-				"levelReq": 29
-			},
-			{
-				"key": "agility",
-				"levelReq": 38
-			},
-			{
-				"key": "safeguard",
-				"levelReq": 47
 			},
 			{
 				"key": "wing_attack",
-				"levelReq": 55
+				"levelReq": 1
+			},
+			{
+				"key": "wing_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "wrap",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 5
+			},
+			{
+				"key": "twister",
+				"levelReq": 11
+			},
+			{
+				"key": "dragon_rage",
+				"levelReq": 15
+			},
+			{
+				"key": "slam",
+				"levelReq": 21
+			},
+			{
+				"key": "agility",
+				"levelReq": 25
+			},
+			{
+				"key": "dragon_tail",
+				"levelReq": 33
+			},
+			{
+				"key": "aqua_tail",
+				"levelReq": 39
+			},
+			{
+				"key": "dragon_rush",
+				"levelReq": 47
+			},
+			{
+				"key": "safeguard",
+				"levelReq": 53
+			},
+			{
+				"key": "dragon_dance",
+				"levelReq": 61
 			},
 			{
 				"key": "outrage",
-				"levelReq": 61
+				"levelReq": 67
 			},
 			{
 				"key": "hyper_beam",
 				"levelReq": 75
+			},
+			{
+				"key": "hurricane",
+				"levelReq": 81
 			}
 		],
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
-	"kingdra": {
-		"id": "kingdra",
-		"name": "Kingdra",
-		"description": "Pokedex Nº230 - tipo WATER/DRAGON.",
-		"type": "WATER",
-		"type2": "DRAGON",
-		"catchRate": 45,
-		"baseExp": 207,
-		"growthCurve": "MEDIUM_FAST",
-		"base": {
-			"hp": 75,
-			"atkFis": 95,
-			"atkEsp": 95,
-			"def": 95,
-			"defEsp": 95,
-			"speed": 85
-		},
-		"abilities": [
-			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "smokescreen",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
-				"key": "smokescreen",
-				"levelReq": 8
-			},
-			{
-				"key": "leer",
-				"levelReq": 15
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 22
-			},
-			{
-				"key": "twister",
-				"levelReq": 29
-			},
-			{
-				"key": "agility",
-				"levelReq": 40
-			},
-			{
-				"key": "hydro_pump",
-				"levelReq": 51
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"wartortle": {
-		"id": "wartortle",
-		"name": "Wartortle",
-		"description": "Pokedex Nº8 - tipo WATER.",
-		"type": "WATER",
+	"cleffa": {
+		"id": "cleffa",
+		"name": "Cleffa",
+		"description": "Pokedex Nº173 - tipo FAIRY.",
+		"type": "FAIRY",
 		"type2": null,
-		"catchRate": 45,
-		"baseExp": 143,
-		"growthCurve": "MEDIUM_SLOW",
+		"catchRate": 150,
+		"baseExp": 44,
+		"growthCurve": "FAST",
 		"base": {
-			"hp": 59,
-			"atkFis": 63,
-			"atkEsp": 65,
-			"def": 80,
-			"defEsp": 80,
-			"speed": 58
+			"hp": 50,
+			"atkFis": 25,
+			"atkEsp": 45,
+			"def": 28,
+			"defEsp": 55,
+			"speed": 15
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "charm",
 				"levelReq": 1
 			},
 			{
-				"key": "tail_whip",
+				"key": "pound",
 				"levelReq": 1
 			},
 			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
+				"key": "encore",
 				"levelReq": 4
 			},
 			{
-				"key": "bubble",
+				"key": "sing",
 				"levelReq": 7
 			},
 			{
-				"key": "withdraw",
+				"key": "sweet_kiss",
 				"levelReq": 10
 			},
 			{
-				"key": "water_gun",
+				"key": "copycat",
 				"levelReq": 13
 			},
 			{
-				"key": "bite",
-				"levelReq": 19
-			},
-			{
-				"key": "rapid_spin",
-				"levelReq": 25
-			},
-			{
-				"key": "protect",
-				"levelReq": 31
-			},
-			{
-				"key": "rain_dance",
-				"levelReq": 37
-			},
-			{
-				"key": "skull_bash",
-				"levelReq": 45
-			},
-			{
-				"key": "hydro_pump",
-				"levelReq": 53
+				"key": "magical_leaf",
+				"levelReq": 16
 			}
 		],
-		"evolvesTo": "blastoise",
-		"evolvesAtLevel": 36
+		"evolvesTo": null,
+		"evolvesAtLevel": null
 	},
-	"croconaw": {
-		"id": "croconaw",
-		"name": "Croconaw",
-		"description": "Pokedex Nº159 - tipo WATER.",
-		"type": "WATER",
+	"togepi": {
+		"id": "togepi",
+		"name": "Togepi",
+		"description": "Pokedex Nº175 - tipo FAIRY.",
+		"type": "FAIRY",
 		"type2": null,
-		"catchRate": 45,
-		"baseExp": 143,
-		"growthCurve": "MEDIUM_SLOW",
-		"base": {
-			"hp": 65,
-			"atkFis": 80,
-			"atkEsp": 59,
-			"def": 80,
-			"defEsp": 63,
-			"speed": 58
-		},
-		"abilities": [
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "rage",
-				"levelReq": 1
-			},
-			{
-				"key": "rage",
-				"levelReq": 7
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 13
-			},
-			{
-				"key": "bite",
-				"levelReq": 21
-			},
-			{
-				"key": "scary_face",
-				"levelReq": 28
-			},
-			{
-				"key": "slash",
-				"levelReq": 37
-			},
-			{
-				"key": "screech",
-				"levelReq": 45
-			},
-			{
-				"key": "hydro_pump",
-				"levelReq": 55
-			}
-		],
-		"evolvesTo": "feraligatr",
-		"evolvesAtLevel": 30
-	},
-	"azumarill": {
-		"id": "azumarill",
-		"name": "Azumarill",
-		"description": "Pokedex Nº184 - tipo WATER.",
-		"type": "WATER",
-		"type2": null,
-		"catchRate": 75,
-		"baseExp": 153,
+		"catchRate": 190,
+		"baseExp": 49,
 		"growthCurve": "FAST",
 		"base": {
-			"hp": 100,
-			"atkFis": 50,
-			"atkEsp": 50,
-			"def": 80,
-			"defEsp": 80,
-			"speed": 50
+			"hp": 35,
+			"atkFis": 20,
+			"atkEsp": 40,
+			"def": 65,
+			"defEsp": 65,
+			"speed": 20
 		},
 		"abilities": [
 			{
-				"key": "tackle",
+				"key": "charm",
 				"levelReq": 1
 			},
 			{
-				"key": "defense_curl",
+				"key": "growl",
 				"levelReq": 1
 			},
 			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
-				"key": "defense_curl",
-				"levelReq": 3
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 6
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 10
-			},
-			{
-				"key": "rollout",
-				"levelReq": 15
-			},
-			{
-				"key": "bubblebeam",
-				"levelReq": 25
-			},
-			{
-				"key": "double_edge",
-				"levelReq": 36
-			},
-			{
-				"key": "rain_dance",
-				"levelReq": 48
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"seadra": {
-		"id": "seadra",
-		"name": "Seadra",
-		"description": "Pokedex Nº117 - tipo WATER.",
-		"type": "WATER",
-		"type2": null,
-		"catchRate": 75,
-		"baseExp": 155,
-		"growthCurve": "MEDIUM_FAST",
-		"base": {
-			"hp": 55,
-			"atkFis": 65,
-			"atkEsp": 95,
-			"def": 95,
-			"defEsp": 45,
-			"speed": 85
-		},
-		"abilities": [
-			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "smokescreen",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
-				"key": "smokescreen",
-				"levelReq": 8
-			},
-			{
-				"key": "leer",
-				"levelReq": 15
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 22
-			},
-			{
-				"key": "twister",
-				"levelReq": 29
-			},
-			{
-				"key": "agility",
-				"levelReq": 40
-			},
-			{
-				"key": "hydro_pump",
-				"levelReq": 51
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"lanturn": {
-		"id": "lanturn",
-		"name": "Lanturn",
-		"description": "Pokedex Nº171 - tipo WATER/ELECTRIC.",
-		"type": "WATER",
-		"type2": "ELECTRIC",
-		"catchRate": 75,
-		"baseExp": 156,
-		"growthCurve": "SLOW",
-		"base": {
-			"hp": 125,
-			"atkFis": 58,
-			"atkEsp": 76,
-			"def": 58,
-			"defEsp": 76,
-			"speed": 67
-		},
-		"abilities": [
-			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_wave",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
+				"key": "metronome",
 				"levelReq": 5
 			},
 			{
-				"key": "flail",
+				"key": "sweet_kiss",
+				"levelReq": 9
+			},
+			{
+				"key": "yawn",
 				"levelReq": 13
 			},
 			{
-				"key": "water_gun",
+				"key": "encore",
 				"levelReq": 17
 			},
 			{
-				"key": "spark",
+				"key": "follow_me",
+				"levelReq": 21
+			},
+			{
+				"key": "bestow",
 				"levelReq": 25
 			},
 			{
-				"key": "confuse_ray",
+				"key": "wish",
+				"levelReq": 29
+			},
+			{
+				"key": "ancient_power",
 				"levelReq": 33
 			},
 			{
-				"key": "take_down",
+				"key": "safeguard",
+				"levelReq": 37
+			},
+			{
+				"key": "baton_pass",
+				"levelReq": 41
+			},
+			{
+				"key": "double_edge",
 				"levelReq": 45
 			},
 			{
-				"key": "hydro_pump",
+				"key": "last_resort",
+				"levelReq": 49
+			},
+			{
+				"key": "after_you",
 				"levelReq": 53
 			}
 		],
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
-	"slowbro": {
-		"id": "slowbro",
-		"name": "Slowbro",
-		"description": "Pokedex Nº80 - tipo WATER/PSYCHIC.",
-		"type": "WATER",
-		"type2": "PSYCHIC",
-		"catchRate": 75,
-		"baseExp": 164,
-		"growthCurve": "MEDIUM_FAST",
+	"snubbull": {
+		"id": "snubbull",
+		"name": "Snubbull",
+		"description": "Pokedex Nº209 - tipo FAIRY.",
+		"type": "FAIRY",
+		"type2": null,
+		"catchRate": 190,
+		"baseExp": 60,
+		"growthCurve": "FAST",
 		"base": {
-			"hp": 95,
-			"atkFis": 75,
-			"atkEsp": 100,
-			"def": 110,
-			"defEsp": 80,
+			"hp": 60,
+			"atkFis": 80,
+			"atkEsp": 40,
+			"def": 50,
+			"defEsp": 40,
 			"speed": 30
 		},
 		"abilities": [
 			{
-				"key": "curse",
+				"key": "charm",
+				"levelReq": 1
+			},
+			{
+				"key": "fire_fang",
+				"levelReq": 1
+			},
+			{
+				"key": "ice_fang",
+				"levelReq": 1
+			},
+			{
+				"key": "scary_face",
 				"levelReq": 1
 			},
 			{
@@ -14746,780 +24527,134 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "growl",
+				"key": "tail_whip",
 				"levelReq": 1
 			},
 			{
-				"key": "water_gun",
+				"key": "thunder_fang",
 				"levelReq": 1
 			},
 			{
-				"key": "growl",
-				"levelReq": 6
+				"key": "bite",
+				"levelReq": 7
 			},
 			{
-				"key": "water_gun",
-				"levelReq": 15
-			},
-			{
-				"key": "confusion",
-				"levelReq": 20
-			},
-			{
-				"key": "disable",
-				"levelReq": 29
+				"key": "lick",
+				"levelReq": 13
 			},
 			{
 				"key": "headbutt",
-				"levelReq": 34
+				"levelReq": 19
 			},
 			{
-				"key": "withdraw",
+				"key": "roar",
+				"levelReq": 25
+			},
+			{
+				"key": "rage",
+				"levelReq": 31
+			},
+			{
+				"key": "play_rough",
 				"levelReq": 37
 			},
 			{
-				"key": "amnesia",
-				"levelReq": 46
+				"key": "payback",
+				"levelReq": 43
 			},
 			{
-				"key": "psychic_m",
-				"levelReq": 54
+				"key": "crunch",
+				"levelReq": 49
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "granbull",
+		"evolvesAtLevel": 23
 	},
-	"octillery": {
-		"id": "octillery",
-		"name": "Octillery",
-		"description": "Pokedex Nº224 - tipo WATER.",
-		"type": "WATER",
+	"granbull": {
+		"id": "granbull",
+		"name": "Granbull",
+		"description": "Pokedex Nº210 - tipo FAIRY.",
+		"type": "FAIRY",
 		"type2": null,
 		"catchRate": 75,
-		"baseExp": 164,
-		"growthCurve": "MEDIUM_FAST",
+		"baseExp": 158,
+		"growthCurve": "FAST",
 		"base": {
-			"hp": 75,
-			"atkFis": 105,
-			"atkEsp": 105,
+			"hp": 90,
+			"atkFis": 120,
+			"atkEsp": 60,
 			"def": 75,
-			"defEsp": 75,
+			"defEsp": 60,
 			"speed": 45
 		},
 		"abilities": [
 			{
-				"key": "water_gun",
+				"key": "charm",
 				"levelReq": 1
 			},
 			{
-				"key": "constrict",
-				"levelReq": 11
-			},
-			{
-				"key": "psybeam",
-				"levelReq": 22
-			},
-			{
-				"key": "aurora_beam",
-				"levelReq": 22
-			},
-			{
-				"key": "bubblebeam",
-				"levelReq": 22
-			},
-			{
-				"key": "octazooka",
-				"levelReq": 25
-			},
-			{
-				"key": "focus_energy",
-				"levelReq": 38
-			},
-			{
-				"key": "ice_beam",
-				"levelReq": 54
-			},
-			{
-				"key": "hyper_beam",
-				"levelReq": 70
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"mantine": {
-		"id": "mantine",
-		"name": "Mantine",
-		"description": "Pokedex Nº226 - tipo WATER/FLYING.",
-		"type": "WATER",
-		"type2": "FLYING",
-		"catchRate": 25,
-		"baseExp": 168,
-		"growthCurve": "SLOW",
-		"base": {
-			"hp": 65,
-			"atkFis": 40,
-			"atkEsp": 80,
-			"def": 70,
-			"defEsp": 140,
-			"speed": 70
-		},
-		"abilities": [
-			{
-				"key": "tackle",
+				"key": "fire_fang",
 				"levelReq": 1
 			},
 			{
-				"key": "bubble",
+				"key": "ice_fang",
 				"levelReq": 1
 			},
 			{
-				"key": "supersonic",
-				"levelReq": 10
-			},
-			{
-				"key": "bubblebeam",
-				"levelReq": 18
-			},
-			{
-				"key": "take_down",
-				"levelReq": 25
-			},
-			{
-				"key": "agility",
-				"levelReq": 32
-			},
-			{
-				"key": "wing_attack",
-				"levelReq": 40
-			},
-			{
-				"key": "confuse_ray",
-				"levelReq": 49
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"seaking": {
-		"id": "seaking",
-		"name": "Seaking",
-		"description": "Pokedex Nº119 - tipo WATER.",
-		"type": "WATER",
-		"type2": null,
-		"catchRate": 60,
-		"baseExp": 170,
-		"growthCurve": "MEDIUM_FAST",
-		"base": {
-			"hp": 80,
-			"atkFis": 92,
-			"atkEsp": 65,
-			"def": 65,
-			"defEsp": 80,
-			"speed": 68
-		},
-		"abilities": [
-			{
-				"key": "peck",
+				"key": "outrage",
 				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 10
-			},
-			{
-				"key": "horn_attack",
-				"levelReq": 15
-			},
-			{
-				"key": "flail",
-				"levelReq": 24
-			},
-			{
-				"key": "fury_attack",
-				"levelReq": 29
-			},
-			{
-				"key": "waterfall",
-				"levelReq": 41
-			},
-			{
-				"key": "horn_drill",
-				"levelReq": 49
-			},
-			{
-				"key": "agility",
-				"levelReq": 61
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"golduck": {
-		"id": "golduck",
-		"name": "Golduck",
-		"description": "Pokedex Nº55 - tipo WATER.",
-		"type": "WATER",
-		"type2": null,
-		"catchRate": 75,
-		"baseExp": 174,
-		"growthCurve": "MEDIUM_FAST",
-		"base": {
-			"hp": 80,
-			"atkFis": 82,
-			"atkEsp": 95,
-			"def": 78,
-			"defEsp": 80,
-			"speed": 85
-		},
-		"abilities": [
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "disable",
-				"levelReq": 1
-			},
-			{
-				"key": "confusion",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 5
-			},
-			{
-				"key": "disable",
-				"levelReq": 10
-			},
-			{
-				"key": "confusion",
-				"levelReq": 16
-			},
-			{
-				"key": "screech",
-				"levelReq": 23
-			},
-			{
-				"key": "psych_up",
-				"levelReq": 31
-			},
-			{
-				"key": "fury_swipes",
-				"levelReq": 44
-			},
-			{
-				"key": "hydro_pump",
-				"levelReq": 58
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"dewgong": {
-		"id": "dewgong",
-		"name": "Dewgong",
-		"description": "Pokedex Nº87 - tipo WATER/ICE.",
-		"type": "WATER",
-		"type2": "ICE",
-		"catchRate": 75,
-		"baseExp": 176,
-		"growthCurve": "MEDIUM_FAST",
-		"base": {
-			"hp": 90,
-			"atkFis": 70,
-			"atkEsp": 70,
-			"def": 80,
-			"defEsp": 95,
-			"speed": 70
-		},
-		"abilities": [
-			{
-				"key": "headbutt",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "aurora_beam",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
-				"levelReq": 5
-			},
-			{
-				"key": "aurora_beam",
-				"levelReq": 16
-			},
-			{
-				"key": "rest",
-				"levelReq": 21
-			},
-			{
-				"key": "take_down",
-				"levelReq": 32
-			},
-			{
-				"key": "ice_beam",
-				"levelReq": 43
-			},
-			{
-				"key": "safeguard",
-				"levelReq": 60
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"politoed": {
-		"id": "politoed",
-		"name": "Politoed",
-		"description": "Pokedex Nº186 - tipo WATER.",
-		"type": "WATER",
-		"type2": null,
-		"catchRate": 45,
-		"baseExp": 185,
-		"growthCurve": "MEDIUM_SLOW",
-		"base": {
-			"hp": 90,
-			"atkFis": 75,
-			"atkEsp": 90,
-			"def": 75,
-			"defEsp": 100,
-			"speed": 70
-		},
-		"abilities": [
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
-				"key": "hypnosis",
-				"levelReq": 1
-			},
-			{
-				"key": "doubleslap",
-				"levelReq": 1
-			},
-			{
-				"key": "perish_song",
-				"levelReq": 1
-			},
-			{
-				"key": "perish_song",
-				"levelReq": 35
-			},
-			{
-				"key": "swagger",
-				"levelReq": 51
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"tentacruel": {
-		"id": "tentacruel",
-		"name": "Tentacruel",
-		"description": "Pokedex Nº73 - tipo WATER/POISON.",
-		"type": "WATER",
-		"type2": "POISON",
-		"catchRate": 60,
-		"baseExp": 205,
-		"growthCurve": "SLOW",
-		"base": {
-			"hp": 80,
-			"atkFis": 70,
-			"atkEsp": 80,
-			"def": 65,
-			"defEsp": 120,
-			"speed": 100
-		},
-		"abilities": [
-			{
-				"key": "poison_sting",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 1
-			},
-			{
-				"key": "constrict",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 6
-			},
-			{
-				"key": "constrict",
-				"levelReq": 12
-			},
-			{
-				"key": "acid",
-				"levelReq": 19
-			},
-			{
-				"key": "bubblebeam",
-				"levelReq": 25
-			},
-			{
-				"key": "wrap",
-				"levelReq": 30
-			},
-			{
-				"key": "barrier",
-				"levelReq": 38
-			},
-			{
-				"key": "screech",
-				"levelReq": 47
-			},
-			{
-				"key": "hydro_pump",
-				"levelReq": 55
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"kingler": {
-		"id": "kingler",
-		"name": "Kingler",
-		"description": "Pokedex Nº99 - tipo WATER.",
-		"type": "WATER",
-		"type2": null,
-		"catchRate": 60,
-		"baseExp": 206,
-		"growthCurve": "MEDIUM_FAST",
-		"base": {
-			"hp": 55,
-			"atkFis": 130,
-			"atkEsp": 50,
-			"def": 115,
-			"defEsp": 50,
-			"speed": 75
-		},
-		"abilities": [
-			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "vicegrip",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 5
-			},
-			{
-				"key": "vicegrip",
-				"levelReq": 12
-			},
-			{
-				"key": "harden",
-				"levelReq": 16
-			},
-			{
-				"key": "stomp",
-				"levelReq": 23
-			},
-			{
-				"key": "guillotine",
-				"levelReq": 27
-			},
-			{
-				"key": "protect",
-				"levelReq": 38
-			},
-			{
-				"key": "crabhammer",
-				"levelReq": 49
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"blastoise": {
-		"id": "blastoise",
-		"name": "Blastoise",
-		"description": "Pokedex Nº9 - tipo WATER.",
-		"type": "WATER",
-		"type2": null,
-		"catchRate": 45,
-		"baseExp": 210,
-		"growthCurve": "MEDIUM_SLOW",
-		"base": {
-			"hp": 79,
-			"atkFis": 83,
-			"atkEsp": 85,
-			"def": 100,
-			"defEsp": 105,
-			"speed": 78
-		},
-		"abilities": [
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "withdraw",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 4
-			},
-			{
-				"key": "bubble",
-				"levelReq": 7
-			},
-			{
-				"key": "withdraw",
-				"levelReq": 10
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 13
-			},
-			{
-				"key": "bite",
-				"levelReq": 19
-			},
-			{
-				"key": "rapid_spin",
-				"levelReq": 25
-			},
-			{
-				"key": "protect",
-				"levelReq": 31
-			},
-			{
-				"key": "rain_dance",
-				"levelReq": 42
-			},
-			{
-				"key": "skull_bash",
-				"levelReq": 55
-			},
-			{
-				"key": "hydro_pump",
-				"levelReq": 68
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"feraligatr": {
-		"id": "feraligatr",
-		"name": "Feraligatr",
-		"description": "Pokedex Nº160 - tipo WATER.",
-		"type": "WATER",
-		"type2": null,
-		"catchRate": 45,
-		"baseExp": 210,
-		"growthCurve": "MEDIUM_SLOW",
-		"base": {
-			"hp": 85,
-			"atkFis": 105,
-			"atkEsp": 79,
-			"def": 100,
-			"defEsp": 83,
-			"speed": 78
-		},
-		"abilities": [
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "rage",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
-				"key": "rage",
-				"levelReq": 7
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 13
-			},
-			{
-				"key": "bite",
-				"levelReq": 21
 			},
 			{
 				"key": "scary_face",
-				"levelReq": 28
+				"levelReq": 1
 			},
 			{
-				"key": "slash",
-				"levelReq": 38
+				"key": "tackle",
+				"levelReq": 1
 			},
 			{
-				"key": "screech",
-				"levelReq": 47
+				"key": "tail_whip",
+				"levelReq": 1
 			},
 			{
-				"key": "hydro_pump",
-				"levelReq": 58
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"gyarados": {
-		"id": "gyarados",
-		"name": "Gyarados",
-		"description": "Pokedex Nº130 - tipo WATER/FLYING.",
-		"type": "WATER",
-		"type2": "FLYING",
-		"catchRate": 45,
-		"baseExp": 214,
-		"growthCurve": "SLOW",
-		"base": {
-			"hp": 95,
-			"atkFis": 125,
-			"atkEsp": 60,
-			"def": 79,
-			"defEsp": 100,
-			"speed": 81
-		},
-		"abilities": [
-			{
-				"key": "thrash",
+				"key": "thunder_fang",
 				"levelReq": 1
 			},
 			{
 				"key": "bite",
-				"levelReq": 20
+				"levelReq": 7
 			},
 			{
-				"key": "dragon_rage",
-				"levelReq": 25
+				"key": "lick",
+				"levelReq": 13
 			},
 			{
-				"key": "leer",
-				"levelReq": 30
+				"key": "headbutt",
+				"levelReq": 19
 			},
 			{
-				"key": "twister",
+				"key": "roar",
+				"levelReq": 27
+			},
+			{
+				"key": "rage",
 				"levelReq": 35
 			},
 			{
-				"key": "hydro_pump",
-				"levelReq": 40
-			},
-			{
-				"key": "rain_dance",
-				"levelReq": 45
-			},
-			{
-				"key": "hyper_beam",
-				"levelReq": 50
-			}
-		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
-	},
-	"lapras": {
-		"id": "lapras",
-		"name": "Lapras",
-		"description": "Pokedex Nº131 - tipo WATER/ICE.",
-		"type": "WATER",
-		"type2": "ICE",
-		"catchRate": 45,
-		"baseExp": 219,
-		"growthCurve": "SLOW",
-		"base": {
-			"hp": 130,
-			"atkFis": 85,
-			"atkEsp": 85,
-			"def": 80,
-			"defEsp": 95,
-			"speed": 60
-		},
-		"abilities": [
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "sing",
-				"levelReq": 1
-			},
-			{
-				"key": "mist",
-				"levelReq": 8
-			},
-			{
-				"key": "body_slam",
-				"levelReq": 15
-			},
-			{
-				"key": "confuse_ray",
-				"levelReq": 22
-			},
-			{
-				"key": "perish_song",
-				"levelReq": 29
-			},
-			{
-				"key": "ice_beam",
-				"levelReq": 36
-			},
-			{
-				"key": "rain_dance",
+				"key": "play_rough",
 				"levelReq": 43
 			},
 			{
-				"key": "safeguard",
-				"levelReq": 50
+				"key": "payback",
+				"levelReq": 51
 			},
 			{
-				"key": "hydro_pump",
-				"levelReq": 57
+				"key": "crunch",
+				"levelReq": 59
+			},
+			{
+				"key": "outrage",
+				"levelReq": 67
 			}
 		],
 		"evolvesTo": null,
@@ -15642,11 +24777,11 @@ var SHAPES = [
 ];
 var GROWTH_FORMULA_BY_CURVE = {
 	MEDIUM_FAST: "GROWTH_MEDIUM_FAST",
-	SLIGHTLY_FAST: "GROWTH_SLIGHTLY_FAST",
-	SLIGHTLY_SLOW: "GROWTH_SLIGHTLY_SLOW",
 	MEDIUM_SLOW: "GROWTH_MEDIUM_SLOW",
 	FAST: "GROWTH_FAST",
-	SLOW: "GROWTH_SLOW"
+	SLOW: "GROWTH_SLOW",
+	ERRATIC: "GROWTH_ERRATIC",
+	FLUCTUATING: "GROWTH_FLUCTUATING"
 };
 function totalExpForLevel(level, growthCurve) {
 	const formulaKey = GROWTH_FORMULA_BY_CURVE[growthCurve] || GROWTH_FORMULA_BY_CURVE.MEDIUM_SLOW;
@@ -16060,26 +25195,45 @@ var MAPS_DATA = {
 			}
 		],
 		"enemyPool": [
-			"lv_11_20_costa_magikarp",
-			"lv_11_20_costa_wooper",
-			"lv_11_20_costa_marill",
-			"lv_11_20_costa_totodile",
-			"lv_11_20_costa_poliwag",
-			"lv_11_20_costa_remoraid",
+			"lv_11_20_costa_wartortle",
+			"lv_11_20_costa_blastoise",
 			"lv_11_20_costa_psyduck",
-			"lv_11_20_costa_horsea",
-			"lv_11_20_costa_chinchou",
-			"lv_11_20_costa_shellder",
-			"lv_11_20_costa_slowpoke",
-			"lv_11_20_costa_seel",
-			"lv_11_20_costa_qwilfish",
-			"lv_11_20_costa_tentacool",
-			"lv_11_20_costa_staryu",
-			"lv_11_20_costa_goldeen",
-			"lv_11_20_costa_corsola",
-			"lv_11_20_costa_krabby",
+			"lv_11_20_costa_golduck",
+			"lv_11_20_costa_poliwag",
 			"lv_11_20_costa_poliwhirl",
-			"lv_11_20_costa_quagsire"
+			"lv_11_20_costa_tentacool",
+			"lv_11_20_costa_tentacruel",
+			"lv_11_20_costa_slowpoke",
+			"lv_11_20_costa_slowbro",
+			"lv_11_20_costa_seel",
+			"lv_11_20_costa_dewgong",
+			"lv_11_20_costa_shellder",
+			"lv_11_20_costa_krabby",
+			"lv_11_20_costa_kingler",
+			"lv_11_20_costa_horsea",
+			"lv_11_20_costa_seadra",
+			"lv_11_20_costa_goldeen",
+			"lv_11_20_costa_seaking",
+			"lv_11_20_costa_staryu",
+			"lv_11_20_costa_magikarp",
+			"lv_11_20_costa_gyarados",
+			"lv_11_20_costa_lapras",
+			"lv_11_20_costa_totodile",
+			"lv_11_20_costa_croconaw",
+			"lv_11_20_costa_feraligatr",
+			"lv_11_20_costa_chinchou",
+			"lv_11_20_costa_lanturn",
+			"lv_11_20_costa_marill",
+			"lv_11_20_costa_azumarill",
+			"lv_11_20_costa_politoed",
+			"lv_11_20_costa_wooper",
+			"lv_11_20_costa_quagsire",
+			"lv_11_20_costa_qwilfish",
+			"lv_11_20_costa_corsola",
+			"lv_11_20_costa_remoraid",
+			"lv_11_20_costa_octillery",
+			"lv_11_20_costa_mantine",
+			"lv_11_20_costa_kingdra"
 		],
 		"itemDrops": [{
 			"itemId": "potion",
@@ -16162,14 +25316,10 @@ var MAPS_DATA = {
 			"lv_11_20_planicie_furret",
 			"lv_11_20_planicie_hoothoot",
 			"lv_11_20_planicie_noctowl",
-			"lv_11_20_planicie_cleffa",
 			"lv_11_20_planicie_igglybuff",
-			"lv_11_20_planicie_togepi",
 			"lv_11_20_planicie_aipom",
 			"lv_11_20_planicie_girafarig",
 			"lv_11_20_planicie_dunsparce",
-			"lv_11_20_planicie_snubbull",
-			"lv_11_20_planicie_granbull",
 			"lv_11_20_planicie_teddiursa",
 			"lv_11_20_planicie_ursaring",
 			"lv_11_20_planicie_porygon2",
@@ -17057,10 +26207,10 @@ var MAPS_DATA = {
 			"chance": .1
 		}]
 	},
-	"kanto_lv_36_55_profundezas": {
-		"id": "kanto_lv_36_55_profundezas",
-		"name": "Kanto Zona Nivel 80-105 (Profundezas)",
-		"description": "Local selvagem: Kanto Zona Nivel 80-105 (Profundezas) (nivel 80-105).",
+	"kanto_lv_36_55_clareira_encantada": {
+		"id": "kanto_lv_36_55_clareira_encantada",
+		"name": "Kanto Zona Nivel 80-105 (Clareira Encantada)",
+		"description": "Local selvagem: Kanto Zona Nivel 80-105 (Clareira Encantada) (nivel 80-105).",
 		"levelRange": [80, 105],
 		"unlockCost": null,
 		"continent": "kanto",
@@ -17075,7 +26225,7 @@ var MAPS_DATA = {
 		"bg": {
 			"primary": "#284b3c",
 			"secondary": "#2e5544",
-			"image": "assets/hunt-backgrounds/water.png"
+			"image": null
 		},
 		"maxEnemies": 6,
 		"respawnDelay": 6,
@@ -17106,25 +26256,10 @@ var MAPS_DATA = {
 			}
 		],
 		"enemyPool": [
-			"kanto_lv_36_55_profundezas_wartortle",
-			"kanto_lv_36_55_profundezas_croconaw",
-			"kanto_lv_36_55_profundezas_azumarill",
-			"kanto_lv_36_55_profundezas_seadra",
-			"kanto_lv_36_55_profundezas_lanturn",
-			"kanto_lv_36_55_profundezas_slowbro",
-			"kanto_lv_36_55_profundezas_octillery",
-			"kanto_lv_36_55_profundezas_mantine",
-			"kanto_lv_36_55_profundezas_seaking",
-			"kanto_lv_36_55_profundezas_golduck",
-			"kanto_lv_36_55_profundezas_dewgong",
-			"kanto_lv_36_55_profundezas_politoed",
-			"kanto_lv_36_55_profundezas_tentacruel",
-			"kanto_lv_36_55_profundezas_kingler",
-			"kanto_lv_36_55_profundezas_kingdra",
-			"kanto_lv_36_55_profundezas_blastoise",
-			"kanto_lv_36_55_profundezas_feraligatr",
-			"kanto_lv_36_55_profundezas_gyarados",
-			"kanto_lv_36_55_profundezas_lapras"
+			"kanto_lv_36_55_clareira_encantada_cleffa",
+			"kanto_lv_36_55_clareira_encantada_togepi",
+			"kanto_lv_36_55_clareira_encantada_snubbull",
+			"kanto_lv_36_55_clareira_encantada_granbull"
 		],
 		"itemDrops": [{
 			"itemId": "potion",
@@ -17507,36 +26642,36 @@ var ENCOUNTERS_DATA = {
 		"wanderRadius": 60,
 		"weight": 5
 	},
-	"lv_11_20_costa_magikarp": {
-		"id": "lv_11_20_costa_magikarp",
-		"speciesId": "magikarp",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_wooper": {
-		"id": "lv_11_20_costa_wooper",
-		"speciesId": "wooper",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_marill": {
-		"id": "lv_11_20_costa_marill",
-		"speciesId": "marill",
+	"lv_11_20_costa_wartortle": {
+		"id": "lv_11_20_costa_wartortle",
+		"speciesId": "wartortle",
 		"minLevel": 10,
 		"maxLevel": 18,
 		"aggroRadius": 175,
 		"wanderRadius": 60,
 		"weight": 5
 	},
-	"lv_11_20_costa_totodile": {
-		"id": "lv_11_20_costa_totodile",
-		"speciesId": "totodile",
+	"lv_11_20_costa_blastoise": {
+		"id": "lv_11_20_costa_blastoise",
+		"speciesId": "blastoise",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 1
+	},
+	"lv_11_20_costa_psyduck": {
+		"id": "lv_11_20_costa_psyduck",
+		"speciesId": "psyduck",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 30
+	},
+	"lv_11_20_costa_golduck": {
+		"id": "lv_11_20_costa_golduck",
+		"speciesId": "golduck",
 		"minLevel": 10,
 		"maxLevel": 18,
 		"aggroRadius": 175,
@@ -17552,77 +26687,14 @@ var ENCOUNTERS_DATA = {
 		"wanderRadius": 60,
 		"weight": 30
 	},
-	"lv_11_20_costa_remoraid": {
-		"id": "lv_11_20_costa_remoraid",
-		"speciesId": "remoraid",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_psyduck": {
-		"id": "lv_11_20_costa_psyduck",
-		"speciesId": "psyduck",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_horsea": {
-		"id": "lv_11_20_costa_horsea",
-		"speciesId": "horsea",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_chinchou": {
-		"id": "lv_11_20_costa_chinchou",
-		"speciesId": "chinchou",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_shellder": {
-		"id": "lv_11_20_costa_shellder",
-		"speciesId": "shellder",
+	"lv_11_20_costa_poliwhirl": {
+		"id": "lv_11_20_costa_poliwhirl",
+		"speciesId": "poliwhirl",
 		"minLevel": 10,
 		"maxLevel": 18,
 		"aggroRadius": 175,
 		"wanderRadius": 60,
 		"weight": 20
-	},
-	"lv_11_20_costa_slowpoke": {
-		"id": "lv_11_20_costa_slowpoke",
-		"speciesId": "slowpoke",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
-	},
-	"lv_11_20_costa_seel": {
-		"id": "lv_11_20_costa_seel",
-		"speciesId": "seel",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"lv_11_20_costa_qwilfish": {
-		"id": "lv_11_20_costa_qwilfish",
-		"speciesId": "qwilfish",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 30
 	},
 	"lv_11_20_costa_tentacool": {
 		"id": "lv_11_20_costa_tentacool",
@@ -17633,9 +26705,90 @@ var ENCOUNTERS_DATA = {
 		"wanderRadius": 60,
 		"weight": 30
 	},
-	"lv_11_20_costa_staryu": {
-		"id": "lv_11_20_costa_staryu",
-		"speciesId": "staryu",
+	"lv_11_20_costa_tentacruel": {
+		"id": "lv_11_20_costa_tentacruel",
+		"speciesId": "tentacruel",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 10
+	},
+	"lv_11_20_costa_slowpoke": {
+		"id": "lv_11_20_costa_slowpoke",
+		"speciesId": "slowpoke",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 30
+	},
+	"lv_11_20_costa_slowbro": {
+		"id": "lv_11_20_costa_slowbro",
+		"speciesId": "slowbro",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 10
+	},
+	"lv_11_20_costa_seel": {
+		"id": "lv_11_20_costa_seel",
+		"speciesId": "seel",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 20
+	},
+	"lv_11_20_costa_dewgong": {
+		"id": "lv_11_20_costa_dewgong",
+		"speciesId": "dewgong",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 1
+	},
+	"lv_11_20_costa_shellder": {
+		"id": "lv_11_20_costa_shellder",
+		"speciesId": "shellder",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 20
+	},
+	"lv_11_20_costa_krabby": {
+		"id": "lv_11_20_costa_krabby",
+		"speciesId": "krabby",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 30
+	},
+	"lv_11_20_costa_kingler": {
+		"id": "lv_11_20_costa_kingler",
+		"speciesId": "kingler",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 20
+	},
+	"lv_11_20_costa_horsea": {
+		"id": "lv_11_20_costa_horsea",
+		"speciesId": "horsea",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 30
+	},
+	"lv_11_20_costa_seadra": {
+		"id": "lv_11_20_costa_seadra",
+		"speciesId": "seadra",
 		"minLevel": 10,
 		"maxLevel": 18,
 		"aggroRadius": 175,
@@ -17651,32 +26804,131 @@ var ENCOUNTERS_DATA = {
 		"wanderRadius": 60,
 		"weight": 30
 	},
-	"lv_11_20_costa_corsola": {
-		"id": "lv_11_20_costa_corsola",
-		"speciesId": "corsola",
+	"lv_11_20_costa_seaking": {
+		"id": "lv_11_20_costa_seaking",
+		"speciesId": "seaking",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 20
+	},
+	"lv_11_20_costa_staryu": {
+		"id": "lv_11_20_costa_staryu",
+		"speciesId": "staryu",
 		"minLevel": 10,
 		"maxLevel": 18,
 		"aggroRadius": 175,
 		"wanderRadius": 60,
 		"weight": 10
 	},
-	"lv_11_20_costa_krabby": {
-		"id": "lv_11_20_costa_krabby",
-		"speciesId": "krabby",
+	"lv_11_20_costa_magikarp": {
+		"id": "lv_11_20_costa_magikarp",
+		"speciesId": "magikarp",
 		"minLevel": 10,
 		"maxLevel": 18,
 		"aggroRadius": 175,
 		"wanderRadius": 60,
 		"weight": 30
 	},
-	"lv_11_20_costa_poliwhirl": {
-		"id": "lv_11_20_costa_poliwhirl",
-		"speciesId": "poliwhirl",
+	"lv_11_20_costa_gyarados": {
+		"id": "lv_11_20_costa_gyarados",
+		"speciesId": "gyarados",
 		"minLevel": 10,
 		"maxLevel": 18,
 		"aggroRadius": 175,
 		"wanderRadius": 60,
 		"weight": 20
+	},
+	"lv_11_20_costa_lapras": {
+		"id": "lv_11_20_costa_lapras",
+		"speciesId": "lapras",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 5
+	},
+	"lv_11_20_costa_totodile": {
+		"id": "lv_11_20_costa_totodile",
+		"speciesId": "totodile",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 10
+	},
+	"lv_11_20_costa_croconaw": {
+		"id": "lv_11_20_costa_croconaw",
+		"speciesId": "croconaw",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 5
+	},
+	"lv_11_20_costa_feraligatr": {
+		"id": "lv_11_20_costa_feraligatr",
+		"speciesId": "feraligatr",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 1
+	},
+	"lv_11_20_costa_chinchou": {
+		"id": "lv_11_20_costa_chinchou",
+		"speciesId": "chinchou",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 30
+	},
+	"lv_11_20_costa_lanturn": {
+		"id": "lv_11_20_costa_lanturn",
+		"speciesId": "lanturn",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 10
+	},
+	"lv_11_20_costa_marill": {
+		"id": "lv_11_20_costa_marill",
+		"speciesId": "marill",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 5
+	},
+	"lv_11_20_costa_azumarill": {
+		"id": "lv_11_20_costa_azumarill",
+		"speciesId": "azumarill",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 5
+	},
+	"lv_11_20_costa_politoed": {
+		"id": "lv_11_20_costa_politoed",
+		"speciesId": "politoed",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 1
+	},
+	"lv_11_20_costa_wooper": {
+		"id": "lv_11_20_costa_wooper",
+		"speciesId": "wooper",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 30
 	},
 	"lv_11_20_costa_quagsire": {
 		"id": "lv_11_20_costa_quagsire",
@@ -17686,6 +26938,60 @@ var ENCOUNTERS_DATA = {
 		"aggroRadius": 175,
 		"wanderRadius": 60,
 		"weight": 20
+	},
+	"lv_11_20_costa_qwilfish": {
+		"id": "lv_11_20_costa_qwilfish",
+		"speciesId": "qwilfish",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 30
+	},
+	"lv_11_20_costa_corsola": {
+		"id": "lv_11_20_costa_corsola",
+		"speciesId": "corsola",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 10
+	},
+	"lv_11_20_costa_remoraid": {
+		"id": "lv_11_20_costa_remoraid",
+		"speciesId": "remoraid",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 30
+	},
+	"lv_11_20_costa_octillery": {
+		"id": "lv_11_20_costa_octillery",
+		"speciesId": "octillery",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 5
+	},
+	"lv_11_20_costa_mantine": {
+		"id": "lv_11_20_costa_mantine",
+		"speciesId": "mantine",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 5
+	},
+	"lv_11_20_costa_kingdra": {
+		"id": "lv_11_20_costa_kingdra",
+		"speciesId": "kingdra",
+		"minLevel": 10,
+		"maxLevel": 18,
+		"aggroRadius": 175,
+		"wanderRadius": 60,
+		"weight": 1
 	},
 	"lv_11_20_planicie_pidgey": {
 		"id": "lv_11_20_planicie_pidgey",
@@ -17903,27 +27209,9 @@ var ENCOUNTERS_DATA = {
 		"wanderRadius": 60,
 		"weight": 5
 	},
-	"lv_11_20_planicie_cleffa": {
-		"id": "lv_11_20_planicie_cleffa",
-		"speciesId": "cleffa",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
 	"lv_11_20_planicie_igglybuff": {
 		"id": "lv_11_20_planicie_igglybuff",
 		"speciesId": "igglybuff",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"lv_11_20_planicie_togepi": {
-		"id": "lv_11_20_planicie_togepi",
-		"speciesId": "togepi",
 		"minLevel": 10,
 		"maxLevel": 18,
 		"aggroRadius": 175,
@@ -17951,24 +27239,6 @@ var ENCOUNTERS_DATA = {
 	"lv_11_20_planicie_dunsparce": {
 		"id": "lv_11_20_planicie_dunsparce",
 		"speciesId": "dunsparce",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"lv_11_20_planicie_snubbull": {
-		"id": "lv_11_20_planicie_snubbull",
-		"speciesId": "snubbull",
-		"minLevel": 10,
-		"maxLevel": 18,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"lv_11_20_planicie_granbull": {
-		"id": "lv_11_20_planicie_granbull",
-		"speciesId": "granbull",
 		"minLevel": 10,
 		"maxLevel": 18,
 		"aggroRadius": 175,
@@ -19091,176 +28361,41 @@ var ENCOUNTERS_DATA = {
 		"wanderRadius": 60,
 		"weight": 1
 	},
-	"kanto_lv_36_55_profundezas_wartortle": {
-		"id": "kanto_lv_36_55_profundezas_wartortle",
-		"speciesId": "wartortle",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_36_55_profundezas_croconaw": {
-		"id": "kanto_lv_36_55_profundezas_croconaw",
-		"speciesId": "croconaw",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_36_55_profundezas_azumarill": {
-		"id": "kanto_lv_36_55_profundezas_azumarill",
-		"speciesId": "azumarill",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_36_55_profundezas_seadra": {
-		"id": "kanto_lv_36_55_profundezas_seadra",
-		"speciesId": "seadra",
+	"kanto_lv_36_55_clareira_encantada_cleffa": {
+		"id": "kanto_lv_36_55_clareira_encantada_cleffa",
+		"speciesId": "cleffa",
 		"minLevel": 80,
 		"maxLevel": 105,
 		"aggroRadius": 175,
 		"wanderRadius": 60,
 		"weight": 10
 	},
-	"kanto_lv_36_55_profundezas_lanturn": {
-		"id": "kanto_lv_36_55_profundezas_lanturn",
-		"speciesId": "lanturn",
+	"kanto_lv_36_55_clareira_encantada_togepi": {
+		"id": "kanto_lv_36_55_clareira_encantada_togepi",
+		"speciesId": "togepi",
 		"minLevel": 80,
 		"maxLevel": 105,
 		"aggroRadius": 175,
 		"wanderRadius": 60,
 		"weight": 10
 	},
-	"kanto_lv_36_55_profundezas_slowbro": {
-		"id": "kanto_lv_36_55_profundezas_slowbro",
-		"speciesId": "slowbro",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_36_55_profundezas_octillery": {
-		"id": "kanto_lv_36_55_profundezas_octillery",
-		"speciesId": "octillery",
+	"kanto_lv_36_55_clareira_encantada_snubbull": {
+		"id": "kanto_lv_36_55_clareira_encantada_snubbull",
+		"speciesId": "snubbull",
 		"minLevel": 80,
 		"maxLevel": 105,
 		"aggroRadius": 175,
 		"wanderRadius": 60,
 		"weight": 5
 	},
-	"kanto_lv_36_55_profundezas_mantine": {
-		"id": "kanto_lv_36_55_profundezas_mantine",
-		"speciesId": "mantine",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
-	},
-	"kanto_lv_36_55_profundezas_seaking": {
-		"id": "kanto_lv_36_55_profundezas_seaking",
-		"speciesId": "seaking",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"kanto_lv_36_55_profundezas_golduck": {
-		"id": "kanto_lv_36_55_profundezas_golduck",
-		"speciesId": "golduck",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_36_55_profundezas_dewgong": {
-		"id": "kanto_lv_36_55_profundezas_dewgong",
-		"speciesId": "dewgong",
+	"kanto_lv_36_55_clareira_encantada_granbull": {
+		"id": "kanto_lv_36_55_clareira_encantada_granbull",
+		"speciesId": "granbull",
 		"minLevel": 80,
 		"maxLevel": 105,
 		"aggroRadius": 175,
 		"wanderRadius": 60,
 		"weight": 1
-	},
-	"kanto_lv_36_55_profundezas_politoed": {
-		"id": "kanto_lv_36_55_profundezas_politoed",
-		"speciesId": "politoed",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"kanto_lv_36_55_profundezas_tentacruel": {
-		"id": "kanto_lv_36_55_profundezas_tentacruel",
-		"speciesId": "tentacruel",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 10
-	},
-	"kanto_lv_36_55_profundezas_kingler": {
-		"id": "kanto_lv_36_55_profundezas_kingler",
-		"speciesId": "kingler",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"kanto_lv_36_55_profundezas_kingdra": {
-		"id": "kanto_lv_36_55_profundezas_kingdra",
-		"speciesId": "kingdra",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"kanto_lv_36_55_profundezas_blastoise": {
-		"id": "kanto_lv_36_55_profundezas_blastoise",
-		"speciesId": "blastoise",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"kanto_lv_36_55_profundezas_feraligatr": {
-		"id": "kanto_lv_36_55_profundezas_feraligatr",
-		"speciesId": "feraligatr",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 1
-	},
-	"kanto_lv_36_55_profundezas_gyarados": {
-		"id": "kanto_lv_36_55_profundezas_gyarados",
-		"speciesId": "gyarados",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 20
-	},
-	"kanto_lv_36_55_profundezas_lapras": {
-		"id": "kanto_lv_36_55_profundezas_lapras",
-		"speciesId": "lapras",
-		"minLevel": 80,
-		"maxLevel": 105,
-		"aggroRadius": 175,
-		"wanderRadius": 60,
-		"weight": 5
 	}
 };
 //#endregion
@@ -19297,7 +28432,8 @@ var TYPE_BACKGROUND_IMAGE = {
 	STEEL: "assets/hunt-backgrounds/cave.png",
 	PSYCHIC: "assets/hunt-backgrounds/dojo.png",
 	GHOST: "assets/hunt-backgrounds/cave.png",
-	DARK: "assets/hunt-backgrounds/cave.png"
+	DARK: "assets/hunt-backgrounds/cave.png",
+	FAIRY: "assets/hunt-backgrounds/forest.png"
 };
 function bossBackgroundImage(species) {
 	return TYPE_BACKGROUND_IMAGE[species.type] || (species.type2 ? TYPE_BACKGROUND_IMAGE[species.type2] : void 0) || null;
@@ -19631,7 +28767,7 @@ var HUNT_BIOME = {
 	kanto_lv_21_35_cemiterio: "GHOST",
 	kanto_lv_21_35_covil_sombrio: "DARK",
 	kanto_lv_36_55_ruinas_ancestrais: "DRAGON",
-	kanto_lv_36_55_profundezas: "WATER"
+	kanto_lv_36_55_clareira_encantada: "FAIRY"
 };
 var ZONA_POR_HUNT = {
 	lv_1_10_floresta: 0,
@@ -19651,7 +28787,7 @@ var ZONA_POR_HUNT = {
 	kanto_lv_21_35_cemiterio: 7,
 	kanto_lv_21_35_covil_sombrio: 7,
 	kanto_lv_36_55_ruinas_ancestrais: 8,
-	kanto_lv_36_55_profundezas: 8
+	kanto_lv_36_55_clareira_encantada: 8
 };
 var NIVEIS_POR_ZONA = 10;
 function faixaDaZona(zona) {
@@ -20623,7 +29759,8 @@ var TYPE_CHART = {
 		"GHOST": 0,
 		"DRAGON": 1,
 		"DARK": 1,
-		"STEEL": .5
+		"STEEL": .5,
+		"FAIRY": 1
 	},
 	"FIRE": {
 		"NORMAL": 1,
@@ -20642,7 +29779,8 @@ var TYPE_CHART = {
 		"GHOST": 1,
 		"DRAGON": .5,
 		"DARK": 1,
-		"STEEL": 2
+		"STEEL": 2,
+		"FAIRY": 1
 	},
 	"WATER": {
 		"NORMAL": 1,
@@ -20661,7 +29799,8 @@ var TYPE_CHART = {
 		"GHOST": 1,
 		"DRAGON": .5,
 		"DARK": 1,
-		"STEEL": 1
+		"STEEL": 1,
+		"FAIRY": 1
 	},
 	"ELECTRIC": {
 		"NORMAL": 1,
@@ -20680,7 +29819,8 @@ var TYPE_CHART = {
 		"GHOST": 1,
 		"DRAGON": .5,
 		"DARK": 1,
-		"STEEL": 1
+		"STEEL": 1,
+		"FAIRY": 1
 	},
 	"GRASS": {
 		"NORMAL": 1,
@@ -20699,7 +29839,8 @@ var TYPE_CHART = {
 		"GHOST": 1,
 		"DRAGON": .5,
 		"DARK": 1,
-		"STEEL": .5
+		"STEEL": .5,
+		"FAIRY": 1
 	},
 	"ICE": {
 		"NORMAL": 1,
@@ -20718,7 +29859,8 @@ var TYPE_CHART = {
 		"GHOST": 1,
 		"DRAGON": 2,
 		"DARK": 1,
-		"STEEL": .5
+		"STEEL": .5,
+		"FAIRY": 1
 	},
 	"FIGHTING": {
 		"NORMAL": 2,
@@ -20737,7 +29879,8 @@ var TYPE_CHART = {
 		"GHOST": 0,
 		"DRAGON": 1,
 		"DARK": 2,
-		"STEEL": 2
+		"STEEL": 2,
+		"FAIRY": .5
 	},
 	"POISON": {
 		"NORMAL": 1,
@@ -20756,7 +29899,8 @@ var TYPE_CHART = {
 		"GHOST": .5,
 		"DRAGON": 1,
 		"DARK": 1,
-		"STEEL": 0
+		"STEEL": 0,
+		"FAIRY": 2
 	},
 	"GROUND": {
 		"NORMAL": 1,
@@ -20775,7 +29919,8 @@ var TYPE_CHART = {
 		"GHOST": 1,
 		"DRAGON": 1,
 		"DARK": 1,
-		"STEEL": 2
+		"STEEL": 2,
+		"FAIRY": 1
 	},
 	"FLYING": {
 		"NORMAL": 1,
@@ -20794,7 +29939,8 @@ var TYPE_CHART = {
 		"GHOST": 1,
 		"DRAGON": 1,
 		"DARK": 1,
-		"STEEL": .5
+		"STEEL": .5,
+		"FAIRY": 1
 	},
 	"PSYCHIC": {
 		"NORMAL": 1,
@@ -20813,7 +29959,8 @@ var TYPE_CHART = {
 		"GHOST": 1,
 		"DRAGON": 1,
 		"DARK": 0,
-		"STEEL": .5
+		"STEEL": .5,
+		"FAIRY": 1
 	},
 	"BUG": {
 		"NORMAL": 1,
@@ -20832,7 +29979,8 @@ var TYPE_CHART = {
 		"GHOST": .5,
 		"DRAGON": 1,
 		"DARK": 2,
-		"STEEL": .5
+		"STEEL": .5,
+		"FAIRY": .5
 	},
 	"ROCK": {
 		"NORMAL": 1,
@@ -20851,7 +29999,8 @@ var TYPE_CHART = {
 		"GHOST": 1,
 		"DRAGON": 1,
 		"DARK": 1,
-		"STEEL": .5
+		"STEEL": .5,
+		"FAIRY": 1
 	},
 	"GHOST": {
 		"NORMAL": 0,
@@ -20870,7 +30019,8 @@ var TYPE_CHART = {
 		"GHOST": 2,
 		"DRAGON": 1,
 		"DARK": .5,
-		"STEEL": .5
+		"STEEL": 1,
+		"FAIRY": 1
 	},
 	"DRAGON": {
 		"NORMAL": 1,
@@ -20889,7 +30039,8 @@ var TYPE_CHART = {
 		"GHOST": 1,
 		"DRAGON": 2,
 		"DARK": 1,
-		"STEEL": .5
+		"STEEL": .5,
+		"FAIRY": 0
 	},
 	"DARK": {
 		"NORMAL": 1,
@@ -20908,7 +30059,8 @@ var TYPE_CHART = {
 		"GHOST": 2,
 		"DRAGON": 1,
 		"DARK": .5,
-		"STEEL": .5
+		"STEEL": 1,
+		"FAIRY": .5
 	},
 	"STEEL": {
 		"NORMAL": 1,
@@ -20927,7 +30079,28 @@ var TYPE_CHART = {
 		"GHOST": 1,
 		"DRAGON": 1,
 		"DARK": 1,
-		"STEEL": .5
+		"STEEL": .5,
+		"FAIRY": 2
+	},
+	"FAIRY": {
+		"NORMAL": 1,
+		"FIRE": .5,
+		"WATER": 1,
+		"ELECTRIC": 1,
+		"GRASS": 1,
+		"ICE": 1,
+		"FIGHTING": 2,
+		"POISON": .5,
+		"GROUND": 1,
+		"FLYING": 1,
+		"PSYCHIC": 1,
+		"BUG": 1,
+		"ROCK": 1,
+		"GHOST": 1,
+		"DRAGON": 2,
+		"DARK": 2,
+		"STEEL": .5,
+		"FAIRY": 1
 	}
 };
 function getEffectiveness(moveType, defType1, defType2) {
@@ -36390,6 +45563,33 @@ function updateMovement(world, dt) {
 var CAPTURE_LEVEL = 1;
 var formulaEngine$3 = createFormulaEngine(FORMULAS);
 var GLOBAL_CATCH_MULTIPLIER = formulaEngine$3.eval("GLOBAL_CATCH_MULTIPLIER");
+var STATUS_BONUS_SEM_STATUS = 1;
+/**
+* Chance de captura pela cadeia da Gen VII: taxa modificada -> probabilidade de
+* uma sacudida -> tres sacudidas.
+*
+* `hpAtual`/`hpMax` importam de verdade na Gen VII (alvo machucado e mais
+* facil). Neste jogo a bola so e jogada DEPOIS do POKE selvagem cair, entao o
+* termo de HP vale sempre 1 (o maximo) — mas ele fica na formula, e nao
+* simplificado pra 1, porque e o que torna a conta a mesma dos jogos e porque
+* qualquer captura futura com o alvo vivo passa a funcionar sozinha.
+*/
+function catchChance(catchRate, ballMultiplier, hpAtual, hpMax) {
+	const a = formulaEngine$3.eval("CATCH_MODIFIED_RATE", {
+		hpMax: Math.max(1, hpMax),
+		hpAtual: clamp(hpAtual, 0, Math.max(1, hpMax)),
+		catchRate,
+		ballMultiplier,
+		statusBonus: STATUS_BONUS_SEM_STATUS,
+		catchMultiplier: GLOBAL_CATCH_MULTIPLIER
+	});
+	const shakeProbability = formulaEngine$3.eval("CATCH_SHAKE_PROBABILITY", { a });
+	const shakes = formulaEngine$3.eval("CATCH_SHAKES");
+	return clamp(formulaEngine$3.eval("CATCH_CHANCE", {
+		shakeProbability,
+		shakes
+	}), 0, 1);
+}
 function attemptCapture(rng, gameState, defeatedPoke, ballItemId) {
 	const ball = getItem(ballItemId);
 	if (!ball || ball.kind !== "ball" || ball.captureRate == null) return {
@@ -36401,11 +45601,7 @@ function attemptCapture(rng, gameState, defeatedPoke, ballItemId) {
 		reason: "no_ball"
 	};
 	const species = SPECIES[defeatedPoke.speciesId];
-	const chance = clamp(formulaEngine$3.eval("CATCH_CHANCE", {
-		catchRate: species.catchRate,
-		ballMultiplier: ball.captureRate,
-		catchMultiplier: GLOBAL_CATCH_MULTIPLIER
-	}), 0, 1);
+	const chance = catchChance(species.catchRate, ball.captureRate, defeatedPoke.hp, defeatedPoke.stats.hp);
 	if (!rollChance(rng, chance)) return {
 		success: false,
 		reason: "roll_failed",
@@ -36498,13 +45694,27 @@ function maybeAutoCatch(rng, gameState, defeatedPoke) {
 //#endregion
 //#region src/engine/systems/progressionSystem.ts
 var formulaEngine$2 = createFormulaEngine(FORMULAS);
-var XP_GLOBAL_MULTIPLIER = formulaEngine$2.evalOrDefault("XP_GLOBAL_MULTIPLIER", .14);
+var XP_GLOBAL_MULTIPLIER = formulaEngine$2.evalOrDefault("XP_GLOBAL_MULTIPLIER", .1);
 var DEATH_EXP_LOSS_PERCENT = formulaEngine$2.evalOrDefault("DEATH_EXP_LOSS_PERCENT", .05);
-function expRewardForEnemy(enemyPoke) {
+/**
+* XP por abate, pela formula escalada da Gen VII.
+*
+* `winnerLevel` (o `Lp` da formula) e o nivel de QUEM VENCEU — o POKE em campo,
+* nao o Treinador. E parametro obrigatorio de proposito: um default aqui
+* (`= enemyPoke.level`, por exemplo) faria a formula parecer funcionar em todo
+* call site novo enquanto silenciosamente devolvia sempre o valor de nivel
+* empatado, que e o MAXIMO da curva — o erro renderia XP a mais e ninguem
+* notaria.
+*
+* O Treinador recebe a MESMA quantia (`simulation.ts` soma o mesmo valor nos
+* dois), como sempre foi: o nivel do Treinador nao entra na conta.
+*/
+function expRewardForEnemy(enemyPoke, winnerLevel) {
 	const species = SPECIES[enemyPoke.speciesId];
 	const base = formulaEngine$2.eval("EXP_GAIN", {
 		baseExp: species.baseExp,
-		level: enemyPoke.level
+		level: enemyPoke.level,
+		winnerLevel
 	});
 	return Math.max(1, Math.round(base * XP_GLOBAL_MULTIPLIER));
 }
@@ -37800,7 +47010,7 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 	const player = world.player;
 	const poke = player.poke;
 	const enemySpecies = SPECIES[enemy.poke.speciesId];
-	const expGain = expRewardForEnemy(enemy.poke);
+	const expGain = expRewardForEnemy(enemy.poke, poke.level);
 	const grantResult = grantExp(poke, expGain);
 	player.poke = grantResult.poke;
 	gameState.updatePokeInstance(grantResult.poke.uid, () => grantResult.poke);
@@ -59165,7 +68375,7 @@ function rowToPoke(row) {
 		rarity: row.rarity,
 		ivs,
 		stats,
-		unlockedAbilities: row.unlocked_abilities,
+		unlockedAbilities: species ? species.abilities.filter((a) => a.levelReq <= row.level).map((a) => a.key).filter((key) => getAbility(key)) : row.unlocked_abilities,
 		disabledAbilities: row.disabled_abilities ?? {},
 		locked: row.locked,
 		capturedAt: row.created_at,

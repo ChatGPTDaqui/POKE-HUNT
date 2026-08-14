@@ -80,13 +80,18 @@ const SHINY_RATE_MULTIPLIER = formulaEngine.evalOrDefault('SHINY_RATE_MULTIPLIER
 const SHINY_CHANCE_AT_MAX_CATCH_RATE = REAL_GEN2_SHINY_RATE * SHINY_RATE_MULTIPLIER
 const SHAPES = ['triangle', 'circle', 'square', 'diamond']
 
+// Os 6 grupos de experiencia reais dos jogos. ERRATIC e FLUCTUATING sao
+// funcoes POR PARTES (ver scripts/usum/formulas.json) e entraram no lugar de
+// SLIGHTLY_FAST/SLIGHTLY_SLOW, que nao correspondiam a grupo nenhum. Nenhuma
+// especie do dex 1-251 usa os dois novos — eles existem para o enum descrever
+// o conjunto real, em vez de dois nomes inventados.
 const GROWTH_FORMULA_BY_CURVE: Record<GrowthCurve, string> = {
   MEDIUM_FAST: 'GROWTH_MEDIUM_FAST',
-  SLIGHTLY_FAST: 'GROWTH_SLIGHTLY_FAST',
-  SLIGHTLY_SLOW: 'GROWTH_SLIGHTLY_SLOW',
   MEDIUM_SLOW: 'GROWTH_MEDIUM_SLOW',
   FAST: 'GROWTH_FAST',
   SLOW: 'GROWTH_SLOW',
+  ERRATIC: 'GROWTH_ERRATIC',
+  FLUCTUATING: 'GROWTH_FLUCTUATING',
 }
 
 // Total cumulative EXP required to BE at `level` (Gen2 growth-group curves

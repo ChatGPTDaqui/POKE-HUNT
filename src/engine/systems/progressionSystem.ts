@@ -21,15 +21,42 @@ const formulaEngine = createFormulaEngine(FORMULAS)
 // Este e o unico ponto de multiplicacao de XP do jogo — `expRewardForEnemy`
 // alimenta tanto o XP do POKE quanto o do Treinador (main/simulation somam o
 // mesmo valor nos dois), entao o corte vale pros dois de uma vez.
-const XP_GLOBAL_MULTIPLIER = formulaEngine.evalOrDefault('XP_GLOBAL_MULTIPLIER', 0.14)
+// 0.14 -> 0.10 junto com a troca de EXP_GAIN pela formula ESCALADA da Gen VII.
+// Nao e mudanca de balanceamento: e o fator que mantem o XP por abate IGUAL ao
+// de antes quando o POKE luta contra alvo do PROPRIO nivel. A formula antiga
+// (Gen I-IV) era `baseExp*L/7`; a da Gen VII e `baseExp*L/5 * (...)^2.5`, e o
+// termo escalado vale exatamente 1 quando os niveis empatam — logo o ganho
+// bruto subiu 7/5 = 1.4x, e 0.14/1.4 = 0.10 desfaz isso.
+//
+// O que MUDA de verdade e o resto da curva, e isso e a regra da Gen VII, nao
+// um knob: farmar muito abaixo do proprio nivel passa a render cada vez menos
+// (um POKE Lv90 num mob Lv5 recebe ~1.6% do que receberia contra um Lv90).
+const XP_GLOBAL_MULTIPLIER = formulaEngine.evalOrDefault('XP_GLOBAL_MULTIPLIER', 0.1)
 // 0.05 = pedido explicito do usuario: morrer custa 5% do EXP necessario pro
 // NIVEL ATUAL (o "needed" de expProgressForInstance), nao 5% do EXP
 // cumulativo total.
 const DEATH_EXP_LOSS_PERCENT = formulaEngine.evalOrDefault('DEATH_EXP_LOSS_PERCENT', 0.05)
 
-export function expRewardForEnemy(enemyPoke: PokeInstance): number {
+/**
+ * XP por abate, pela formula escalada da Gen VII.
+ *
+ * `winnerLevel` (o `Lp` da formula) e o nivel de QUEM VENCEU — o POKE em campo,
+ * nao o Treinador. E parametro obrigatorio de proposito: um default aqui
+ * (`= enemyPoke.level`, por exemplo) faria a formula parecer funcionar em todo
+ * call site novo enquanto silenciosamente devolvia sempre o valor de nivel
+ * empatado, que e o MAXIMO da curva — o erro renderia XP a mais e ninguem
+ * notaria.
+ *
+ * O Treinador recebe a MESMA quantia (`simulation.ts` soma o mesmo valor nos
+ * dois), como sempre foi: o nivel do Treinador nao entra na conta.
+ */
+export function expRewardForEnemy(enemyPoke: PokeInstance, winnerLevel: number): number {
   const species = SPECIES[enemyPoke.speciesId]
-  const base = formulaEngine.eval('EXP_GAIN', { baseExp: species.baseExp, level: enemyPoke.level })
+  const base = formulaEngine.eval('EXP_GAIN', {
+    baseExp: species.baseExp,
+    level: enemyPoke.level,
+    winnerLevel,
+  })
   return Math.max(1, Math.round(base * XP_GLOBAL_MULTIPLIER))
 }
 

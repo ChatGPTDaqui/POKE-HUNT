@@ -19,7 +19,10 @@
     "catalog:verificar": "node scripts/verify-catalog-diff.js",
     "planilha:aplicar": "node scripts/sync-planilha.js",
     "db:wipe": "node scripts/wipe-todos-os-saves.js",
-    "edge:publicar": "npm run build:edge && npx supabase functions deploy jogo"
+    "edge:publicar": "npm run build:edge && npx supabase functions deploy jogo",
+    "usum:baixar": "node scripts/fetch-usum-catalog.js",
+    "usum:gerar": "node scripts/generate-catalog-usum.js",
+    "usum:conferir": "node scripts/verify-usum-bulbapedia.js"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

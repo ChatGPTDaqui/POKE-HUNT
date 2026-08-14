@@ -399,6 +399,30 @@ function drawShapeParticle(ctx: CanvasRenderingContext2D, shape: ImpactShape, si
       ctx.fill()
       break
     }
+    // FAIRY. Um brilho de 4 pontas FINAS (pontas longas, cintura estreita),
+    // deliberadamente diferente da 'star' de LUTADOR, que e uma estrela cheia
+    // de 4 pontas grossas. As duas sao "estrela" de longe, entao a diferenca
+    // tem que estar na proporcao, nao so na cor.
+    case 'sparkle': {
+      ctx.beginPath()
+      for (let i = 0; i < 8; i++) {
+        const rad = i % 2 === 0 ? r : r * 0.14
+        const ang = (Math.PI / 4) * i - Math.PI / 2
+        const px = Math.cos(ang) * rad
+        const py = Math.sin(ang) * rad
+        if (i === 0) ctx.moveTo(px, py)
+        else ctx.lineTo(px, py)
+      }
+      ctx.closePath()
+      ctx.fill()
+      // Nucleo claro: sem ele o brilho some contra fundo escuro, que e
+      // metade das hunts (caverna/cemiterio/covil).
+      ctx.globalAlpha *= 0.8
+      ctx.beginPath()
+      ctx.arc(0, 0, r * 0.22, 0, Math.PI * 2)
+      ctx.fill()
+      break
+    }
     case 'bubble': {
       ctx.globalAlpha *= 0.7
       ctx.beginPath()

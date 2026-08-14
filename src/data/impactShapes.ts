@@ -15,7 +15,7 @@
 // far more differentiated than the single generic burst this replaces.
 import type { ElementType } from './generated/types'
 
-export type ImpactShape = 'flame' | 'droplet' | 'leaf' | 'shard' | 'bolt' | 'crystal' | 'star' | 'bubble' | 'chunk' | 'feather' | 'swirl' | 'wisp' | 'claw' | 'dot'
+export type ImpactShape = 'flame' | 'droplet' | 'leaf' | 'shard' | 'bolt' | 'crystal' | 'star' | 'bubble' | 'chunk' | 'feather' | 'swirl' | 'wisp' | 'claw' | 'dot' | 'sparkle'
 
 export const IMPACT_SHAPE_BY_TYPE: Record<ElementType, ImpactShape> = {
   FIRE: 'flame',
@@ -35,6 +35,11 @@ export const IMPACT_SHAPE_BY_TYPE: Record<ElementType, ImpactShape> = {
   DARK: 'claw',
   STEEL: 'shard',
   NORMAL: 'dot',
+  // FAIRY ganhou familia PROPRIA ('sparkle', brilho de 4 pontas) em vez de
+  // reusar 'star' do LUTADOR: sao os dois unicos tipos que leem como "estrela",
+  // e o rosa de Fada ao lado do vermelho de Lutador ja e pouca diferenca pra
+  // tambem compartilharem a forma.
+  FAIRY: 'sparkle',
 }
 
 export function impactShapeForType(type: ElementType | null | undefined): ImpactShape {

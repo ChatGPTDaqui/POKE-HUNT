@@ -21,6 +21,10 @@ export const TYPE_COLORS: Record<ElementType, string> = {
   DRAGON: '#5b6ee1',
   DARK: '#4a4a4a',
   STEEL: '#b0bec5',
+  // 18o tipo, entrou com a base de dados de Pokemon Ultra Sun (Gen VII).
+  // Rosa claro na mesma familia dessaturada do resto da paleta — nao o
+  // #EE99AC oficial, que sai mais chapado ao lado destes.
+  FAIRY: '#f5a9d0',
 }
 
 const FALLBACK_COLOR = '#d1c7b7'

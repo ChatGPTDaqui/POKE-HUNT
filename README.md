@@ -3,14 +3,26 @@
 Porte do jogo (antes HTML/CSS/JS puro na raiz do repo) para React + Vite +
 TypeScript + Tailwind + shadcn/ui + Zustand.
 
+## Documentacao
+
+**Arquitetura e regras de negocio: [`docs/`](docs/README.md).** Comece pelo indice.
+
 ## Rodar
 
 ```bash
-cd web
-npm install          # so na primeira vez
+npm install          # so na primeira vez (na RAIZ do repo — o app e a raiz)
 
 npm run dev          # desenvolvimento, http://localhost:5173
 npm start            # build + servidor de producao, http://localhost:5173
+```
+
+**O jogo NAO funciona sem o servidor de autoridade.** Desde que a RLS foi revogada
+(`supabase/migrations/*_cliente_perde_a_escrita.sql`), o cliente nao escreve progresso: sem
+`VITE_SERVIDOR_URL` apontando pra um servico vivo, o jogo carrega e nao salva. Isso e o
+recurso, nao um bug — ver [`docs/04-autoridade-do-servidor.md`](docs/04-autoridade-do-servidor.md).
+
+```bash
+cd server && npm run dev    # servico de autoridade local, porta 8787
 ```
 
 O jogo vanilla antigo NAO faz mais parte deste repositorio — foi movido pra fora
@@ -44,9 +56,20 @@ Vite, pra nao colidir com o `/assets/` da arte.
 (`novo-poke-idle:save`) e mesmo formato de payload. Um save do vanilla carrega
 aqui direto, e vice-versa.
 
-**Nao edite `src/data/generated/`.** Roda `npm run planilha:aplicar` na raiz
-do repo. Enquanto o vanilla existir, o sync escreve nos dois formatos (`.ts`
-aqui e `.js` la); o lado antigo se desliga sozinho quando `js/data/` sumir.
+**Nao edite `src/data/generated/`.** A fonte do catalogo e Pokemon Ultra Sun
+(Geracao VII), em `scripts/usum/catalog.json` + `scripts/usum/formulas.json`,
+os dois commitados:
+
+```bash
+npm run usum:baixar      # PokeAPI -> scripts/usum/catalog.json (so quando quiser re-baixar)
+npm run usum:conferir    # confere o catalogo contra a Bulbapedia; exit 1 se divergir
+npm run usum:gerar       # catalog.json -> src/data/generated/*.ts (offline)
+```
+
+`planilha:aplicar`, `catalog:gerar`, `catalog:migrar` e `catalog:verificar` sao
+os geradores ANTIGOS (Gen2, da planilha e do Postgres) e estao **bloqueados**:
+rodar qualquer um sobrescreveria o catalogo atual com dado de outra geracao sem
+nenhum erro. So rodam com `PERMITIR_CATALOGO_GEN2=1`.
 
 **HP e EXP do POKE em campo ficam no `worldStore` durante a hunt,** nao no
 `gameStateStore` — mudam a cada tick e so sincronizam com o save

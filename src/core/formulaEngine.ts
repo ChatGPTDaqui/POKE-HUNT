@@ -17,6 +17,20 @@ const FUNCS: Record<string, (...args: number[]) => number> = {
   sqrt: Math.sqrt,
   min: (a, b) => Math.min(a, b),
   max: (a, b) => Math.max(a, b),
+  // Funcoes por partes. Os grupos de experiencia Erratic e Fluctuating da Gen7
+  // sao funcoes POR PARTES (4 e 3 faixas de nivel) — sem isto elas nao teriam
+  // como ser escritas como dado, e as duas curvas teriam que virar codigo,
+  // quebrando a regra de "formula e dado" que o resto da tabela segue.
+  //
+  // `if` avalia os DOIS ramos antes de escolher (a linguagem so tem aritmetica
+  // pura, entao avaliar o ramo nao usado nao tem efeito colateral); qualquer
+  // expressao aqui precisa ser definida em todo o dominio, nao so no ramo dela.
+  if: (cond, quandoVerdadeiro, quandoFalso) => (cond ? quandoVerdadeiro : quandoFalso),
+  lt: (a, b) => (a < b ? 1 : 0),
+  lte: (a, b) => (a <= b ? 1 : 0),
+  gt: (a, b) => (a > b ? 1 : 0),
+  gte: (a, b) => (a >= b ? 1 : 0),
+  eq: (a, b) => (a === b ? 1 : 0),
   // Substituida em tempo de avaliacao quando um Rng e passado (ver evalNode).
   // Sem Rng isto ESTOURA em vez de cair num `Math.random()`: uma formula da
   // planilha que sorteia e, por definicao, parte da simulacao, e um fallback

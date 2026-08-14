@@ -14,6 +14,16 @@ import { PokeNameTag } from './PokeNameTag'
 import { TypeChip } from './TypeChip'
 import { AbilityTooltip } from './AbilityTooltip'
 import { Meter } from '@/components/game/controls'
+import type { AbilityCategory } from '@/data/generated/types'
+
+// Rotulo das 3 categorias reais. Antes era um ternario `physical ? ... : ...`,
+// que passou a mentir quando 'status' virou categoria de verdade com os dados
+// do Ultra Sun: todo golpe de status apareceria como "Especial".
+const ROTULO_CATEGORIA: Record<AbilityCategory, string> = {
+  physical: 'Fisico',
+  special: 'Especial',
+  status: 'Status',
+}
 
 export function ProfileHero({ poke, species }: { poke: PokeInstance; species: Species }) {
   const url = gen5SpriteUrl(poke.speciesId, poke.isShiny)
@@ -153,7 +163,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
               </AbilityTooltip>
               <span><TypeChip type={ability.type} /></span>
               <span className="text-n400">
-                {resolveAbilityCategory(ability, poke) === 'physical' ? 'Fisico' : 'Especial'}
+                {ROTULO_CATEGORIA[resolveAbilityCategory(ability, poke)]}
               </span>
               <span>{ability.power > 0 ? ability.power : '—'}</span>
               <span className="text-n400">{ability.target === 'aoe' ? '✓' : '—'}</span>

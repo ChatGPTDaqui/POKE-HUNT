@@ -59,15 +59,19 @@ export const BASIC_ATTACK: Ability = {
   pp: 35,
 }
 
-// Moves that hit every adjacent target in the real games, cross-referenced
-// against Bulbapedia's "moves that hit multiple Pokemon" list — only the
-// ones that already deal damage here get the AOE treatment (the matching
-// 0-power status moves, e.g. Growl/Tail Whip/Leer, stay inert per
-// isDamagingAbility, so tagging them 'aoe' would have no effect anyway).
-const AOE_ABILITY_KEYS = new Set([
-  'razor_leaf', 'bubble', 'earthquake', 'explosion', 'magnitude', 'selfdestruct',
-  ...Object.keys(TYPED_AOE_MOVES), // every level-50 typed move is AOE by design
-])
+// Golpe em area agora vem do DADO (`ability.target`, alvo real do golpe nos
+// jogos — ver AbilityDataEntry), nao de uma lista de chaves escrita a mao.
+//
+// POR QUE A LISTA SAIU: ela tinha 6 chaves e ja estava furada. Na migracao
+// para os dados de Pokemon Ultra Sun, `selfdestruct` virou `self_destruct` e a
+// entrada parou de casar — Explosao voltaria a ser golpe de alvo unico sem
+// nenhum erro em lugar nenhum. E, com o catalogo novo, sao 27 golpes de area
+// com dano de verdade (Terremoto, Nevasca, Deslizamento de Rochas, Onda de
+// Calor, Voz Encantadora, ...) contra os 6 que a lista conhecia.
+//
+// Os golpes de nivel 50 continuam sendo AOE por desenho: eles nao vem do
+// catalogo, sao conteudo proprio deste jogo.
+const AOE_ABILITY_KEYS = new Set(Object.keys(TYPED_AOE_MOVES))
 export const AOE_RADIUS = 240 // medium/high splash circle around the attacker (doubled per balance pass)
 
 // Merged in ahead of the spreadsheet moves — TYPED_AOE_MOVES's keys
@@ -77,7 +81,7 @@ const ALL_ABILITIES_SOURCE = { ...ABILITIES_DATA, ...TYPED_AOE_MOVES }
 
 export const ABILITIES: Record<string, Ability> = Object.fromEntries(
   Object.entries(ALL_ABILITIES_SOURCE).map(([key, ability]) => {
-    const isAoe = AOE_ABILITY_KEYS.has(key)
+    const isAoe = AOE_ABILITY_KEYS.has(key) || ('target' in ability && ability.target === 'aoe')
     return [
       key,
       {

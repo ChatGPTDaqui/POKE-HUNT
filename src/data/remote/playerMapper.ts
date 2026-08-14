@@ -9,6 +9,7 @@ import type { Database } from '@/lib/database.types'
 import type { GameStateData, AutoPotRule, AutoCatchConfig, AutoCatchRule, PerfStats, TrainerInfo, PokedexKillCount } from '@/stores/gameStateStore'
 import { SPECIES, computeStatsAtLevel, type PokeInstance, type StatBlock } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
+import { getAbility } from '@/data/abilities'
 
 type Json = Database['public']['Tables']['players']['Row']['auto_toggles']
 type Tables = Database['public']['Tables']
@@ -84,7 +85,24 @@ export function rowToPoke(row: PokemonRow): PokeInstance {
     rarity: row.rarity as RarityKey,
     ivs,
     stats,
-    unlockedAbilities: row.unlocked_abilities,
+    // DERIVADO da especie, nao lido da coluna — mesmo argumento dos atributos
+    // acima. O moveset e funcao de (especie, nivel), e todo caminho que cria ou
+    // sobe um POKE ja monta esta lista exatamente assim. Ler a coluna crua
+    // deixaria o save preso no learnset da versao em que o POKE foi criado.
+    //
+    // Deixou de ser teorico com a migracao para os dados de Pokemon Ultra Sun:
+    // os learnsets mudaram inteiros e 15 chaves de golpe trocaram de grafia
+    // (`solarbeam` -> `solar_beam`, `thundershock` -> `thunder_shock`,
+    // `psychic_m` -> `psychic`, ...). Sem isto, todo POKE ja salvo perderia em
+    // silencio os golpes renomeados — `getAbility` devolve null e o combate
+    // simplesmente pula. A coluna continua sendo GRAVADA (pokeToRow) para
+    // qualquer leitor externo e para nao virar um campo morto no schema.
+    unlockedAbilities: species
+      ? species.abilities
+          .filter((a) => a.levelReq <= row.level)
+          .map((a) => a.key)
+          .filter((key) => getAbility(key))
+      : row.unlocked_abilities,
     // Coluna adicionada depois (migration 20260809150000): linha antiga volta
     // com o default `{}` do banco, entao nao ha migracao de dado a fazer.
     disabledAbilities: (row.disabled_abilities ?? {}) as Record<string, boolean>,

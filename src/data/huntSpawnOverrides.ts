@@ -52,7 +52,7 @@ import type { HuntMapDef, HuntEncounter } from './huntTypes'
 // ---------------------------------------------------------------------------
 // Escrita a mao porque o tipo do bioma NAO viaja no dado gerado: ele vive em
 // scripts/sync-planilha.js#TYPE_BIOME_PLAN e some na emissao (o `.generated`
-// so guarda o resultado). Sao 18 linhas fixas; qualquer hunt nova que o sync
+// so guarda o resultado). Sao 18 linhas fixas (uma por tipo elemental); qualquer hunt nova que o sync
 // crie sem entrada aqui ESTOURA no boot (ver a checagem no fim do arquivo),
 // em vez de nascer sem regra de spawn e sem ninguem notar.
 const HUNT_BIOME: Record<string, ElementType> = {
@@ -73,7 +73,7 @@ const HUNT_BIOME: Record<string, ElementType> = {
   kanto_lv_21_35_cemiterio: 'GHOST',
   kanto_lv_21_35_covil_sombrio: 'DARK',
   kanto_lv_36_55_ruinas_ancestrais: 'DRAGON',
-  kanto_lv_36_55_profundezas: 'WATER',
+  kanto_lv_36_55_clareira_encantada: 'FAIRY',
 }
 
 // ---------------------------------------------------------------------------
@@ -120,7 +120,7 @@ const ZONA_POR_HUNT: Record<string, number> = {
   kanto_lv_21_35_cemiterio: 7,
   kanto_lv_21_35_covil_sombrio: 7,
   kanto_lv_36_55_ruinas_ancestrais: 8,
-  kanto_lv_36_55_profundezas: 8,
+  kanto_lv_36_55_clareira_encantada: 8,
 }
 
 const NIVEIS_POR_ZONA = 10
