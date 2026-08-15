@@ -1,16 +1,38 @@
 // Quem e o jogador que mandou este request.
 //
-// A verificacao e feita PERGUNTANDO AO SUPABASE (`GET /auth/v1/user` com o
-// token do jogador), e nao decodificando o JWT localmente. Custa uma ida de
-// rede por token novo, e essa e a troca consciente:
+// A verificacao e LOCAL: confere a assinatura do JWT com a chave PUBLICA do
+// projeto (ES256 / JWKS). Nenhuma ida de rede por request.
 //
-//  - decodificar local exige guardar o segredo de assinatura aqui e acertar
-//    algoritmo, `aud`, `exp`, rotacao de chave e revogacao. Errar qualquer um
-//    desses e uma falha de autenticacao silenciosa — o tipo de bug que so
-//    aparece quando alguem ja entrou na conta de outro;
-//  - perguntar ao Supabase respeita revogacao e logout na hora, de graca.
+// COMO CHEGAMOS AQUI (o caminho importa, porque duas abordagens obvias falham):
 //
-// POR TOKEN NOVO, e nao por request: ver o cache abaixo.
+// 1. A versao original perguntava ao Supabase — `GET /auth/v1/user` a cada
+//    request. Medido em producao com `pg_stat_statements` numa janela de 8 dias:
+//    ~44 mil dessas verificacoes contra ~1.065 transacoes de escrita do Auth
+//    (login, cadastro, refresh — o trafego legitimo). 97% do servico de Auth era
+//    reverificar o MESMO token, porque o cliente liquida a sessao de hunt a cada
+//    30s (INTERVALO_FLUSH_MS) e cada flush pagava a ida de rede inteira.
+//
+// 2. A primeira tentativa de conserto foi um cache por token em memoria. MEDIDO
+//    EM PRODUCAO DEPOIS DO DEPLOY: 20 chamadas seguidas gastaram 21
+//    verificacoes — zero acerto de cache. Estado de modulo NAO sobrevive entre
+//    requests na Edge Function; cada invocacao pega um isolate limpo. Qualquer
+//    solucao baseada em guardar coisa na memoria entre requests e inutil aqui, e
+//    e o tipo de coisa que so aparece medindo depois de publicar.
+//
+// 3. Sobra verificar local. O projeto assina com chave ASSIMETRICA (ES256, veja
+//    `alg` no cabecalho do token), entao o que este arquivo precisa e a chave
+//    PUBLICA — que o Supabase publica em `/auth/v1/.well-known/jwks.json`. Nao
+//    ha segredo pra guardar aqui, e foi justamente o medo de guardar segredo que
+//    manteve a versao 1 por tanto tempo.
+//
+// O QUE SE PERDE: revogacao imediata. `GET /auth/v1/user` recusava na hora um
+// token de quem deslogou ou foi banido; a verificacao local so para de aceitar
+// quando o token expira (1h, `jwt_expiry` no config.toml). Hoje isso nao custa
+// nada — nao existe coluna de ban em `players` e `auth.users.banned_until` esta
+// zerado em toda a base. Se banimento entrar, o lugar de barrar e no
+// carregamento do estado (todas as rotas ja leem a linha do jogador com a
+// service_role, entao a checagem sai de graca), NAO voltando a pagar uma ida de
+// rede por request.
 import { ErroHttp, type Config } from './db.js'
 
 export interface Jogador {
@@ -18,96 +40,86 @@ export interface Jogador {
   email: string | null
 }
 
-/**
- * Cache de verificacao, por token.
- *
- * Medido em producao (pg_stat_statements, janela de 8 dias): ~44 mil chamadas
- * de `GET /auth/v1/user` contra ~1.065 transacoes de escrita do Auth (login,
- * cadastro, refresh — o trafego legitimo). Ou seja 97% do que o servico de Auth
- * fazia era reverificar o MESMO token: o cliente liquida a sessao de hunt a
- * cada 30s (INTERVALO_FLUSH_MS), e cada flush pagava uma ida de rede completa
- * pra reconfirmar um token que nao mudou.
- *
- * O TTL e o unico parametro de seguranca aqui: ele e a JANELA em que um logout,
- * um ban ou uma revogacao ainda deixam o token passar. Expiracao normal NAO
- * depende disto — o gateway das Edge Functions valida assinatura e `exp` antes
- * do handler rodar (`verify_jwt`, ligado por padrao no `functions deploy`), e o
- * `exp` do proprio token ainda corta o cache mais cedo quando falta menos de
- * 5 min pra ele vencer.
- *
- * 5 minutos: derruba ~90% das chamadas (10 flushes por janela viram 1) e e
- * curto o bastante pra um banimento morder antes de o jogador terminar a
- * proxima cacada. Nao aumentar sem decidir que atraso de revogacao e aceitavel.
- */
-const TTL_MS = 5 * 60 * 1000
+// So ES256. Fixar o algoritmo e o que fecha o ataque de confusao de algoritmo:
+// sem isto, um token forjado com `"alg":"none"` (ou com HS256 usando a chave
+// publica como segredo compartilhado) passaria pela mesma funcao de verificacao.
+// O algoritmo NUNCA pode vir do token — o token e a parte nao confiavel.
+const ALGORITMO = 'ES256'
 
-/**
- * Teto de tokens guardados. O isolate da Edge Function vive minutos ou horas e
- * atende varios jogadores; sem teto, um pico de trafego deixaria um Map
- * crescendo ate o limite de memoria da invocacao. Com 200 cabe a base de
- * jogadores inteira com folga, e o descarte abaixo e o mais simples que
- * funciona (limpa vencidos; se ainda estourar, zera).
- */
-const MAX_ENTRADAS = 200
+// Tolerancia de relogio na expiracao. O gateway das Edge Functions ja recusa
+// token vencido antes de chegar aqui; esta folga existe so pra um desalinho de
+// alguns segundos entre maquinas nao virar 401 no ultimo tique de vida do token.
+const FOLGA_DE_RELOGIO_S = 30
 
-// A entrada guarda a PROMESSA, nao o valor: dois requests do mesmo jogador que
-// chegam juntos (flush + carregamento de tela) compartilham uma unica ida de
-// rede em vez de disparar duas. Promessa rejeitada e removida na hora, pra uma
-// falha de rede nao virar 401 grudado por 5 minutos.
-interface Entrada {
-  jogador: Promise<Jogador>
-  expiraEm: number
+// Cache de chave por `kid`. Vale dentro de UMA invocacao (ver ponto 2 acima:
+// nao ha estado entre requests). O que evita a busca de rede no caso normal e a
+// `jwksJson` injetada por env — o cache aqui e so pra nao reimportar a chave se
+// o mesmo isolate atender mais de um request, caso a plataforma passe a reusar.
+const chaves = new Map<string, CryptoKey>()
+
+interface Jwk { kid?: string; alg?: string; kty?: string; crv?: string; x?: string; y?: string }
+
+function base64UrlParaBytes(s: string): Uint8Array {
+  const base64 = s.replace(/-/g, '+').replace(/_/g, '/')
+  const binario = atob(base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '='))
+  const bytes = new Uint8Array(binario.length)
+  for (let i = 0; i < binario.length; i++) bytes[i] = binario.charCodeAt(i)
+  return bytes
 }
 
-const cache = new Map<string, Entrada>()
-
-/** Exposto so pra teste: o cache e estado de modulo e vaza entre casos. */
-export function limparCacheDeAutenticacao(): void {
-  cache.clear()
+function base64UrlParaJson<T>(s: string): T {
+  return JSON.parse(new TextDecoder().decode(base64UrlParaBytes(s))) as T
 }
 
-function podar(agora: number): void {
-  for (const [token, entrada] of cache) {
-    if (entrada.expiraEm <= agora) cache.delete(token)
+async function importar(jwk: Jwk): Promise<CryptoKey> {
+  return crypto.subtle.importKey(
+    'jwk',
+    jwk as JsonWebKey,
+    { name: 'ECDSA', namedCurve: 'P-256' },
+    false,
+    ['verify'],
+  )
+}
+
+/**
+ * A chave publica com este `kid`.
+ *
+ * Ordem: cache do isolate -> `jwksJson` do env -> busca no endpoint publico. A
+ * busca so acontece quando o `kid` e desconhecido, que na pratica e uma vez por
+ * ROTACAO de chave, nao por request. E isso e o que faz a rotacao ser segura sem
+ * intervencao: se a chave girar e o env ficar velho, o `kid` novo nao esta la, e
+ * o fallback resolve sozinho.
+ */
+async function chavePublica(cfg: Config, kid: string): Promise<CryptoKey> {
+  const emCache = chaves.get(kid)
+  if (emCache) return emCache
+
+  const deEnv = cfg.jwksJson ? (JSON.parse(cfg.jwksJson) as { keys?: Jwk[] }).keys ?? [] : []
+  const doEnv = deEnv.find((k) => k.kid === kid)
+  if (doEnv) {
+    const chave = await importar(doEnv)
+    chaves.set(kid, chave)
+    return chave
   }
-  if (cache.size >= MAX_ENTRADAS) cache.clear()
+
+  const resposta = await fetch(`${cfg.supabaseUrl}/auth/v1/.well-known/jwks.json`)
+  if (!resposta.ok) throw new ErroHttp(503, 'nao foi possivel validar a sessao agora')
+  const { keys } = (await resposta.json()) as { keys?: Jwk[] }
+  const jwk = (keys ?? []).find((k) => k.kid === kid)
+  // Token assinado por uma chave que o projeto nao publica: nao e nosso.
+  if (!jwk) throw new ErroHttp(401, 'sessao invalida ou expirada')
+
+  const chave = await importar(jwk)
+  chaves.set(kid, chave)
+  return chave
 }
 
-/**
- * Quando o cache pode valer, no maximo.
- *
- * Le o `exp` do JWT SEM verificar assinatura — e seguro porque o valor so pode
- * ENCURTAR a validade (o `Math.min` com o TTL), nunca estende-la. Um `exp`
- * forjado gigante cai no TTL; um `exp` proximo faz o cache morrer junto com o
- * token, em vez de manter vivo um token que o gateway ja vai recusar.
- */
-function validoAte(token: string, agora: number): number {
-  const teto = agora + TTL_MS
-  const partes = token.split('.')
-  if (partes.length !== 3) return teto
-  try {
-    const payload = JSON.parse(atob(partes[1].replace(/-/g, '+').replace(/_/g, '/'))) as { exp?: number }
-    if (typeof payload.exp !== 'number') return teto
-    return Math.min(teto, payload.exp * 1000)
-  } catch {
-    // Payload ilegivel nao e motivo pra recusar o request: quem decide se o
-    // token presta e o `/auth/v1/user` logo abaixo. So perdemos o corte extra.
-    return teto
-  }
-}
-
-async function consultarSupabase(cfg: Config, token: string): Promise<Jogador> {
-  // A `apikey` aqui e a service_role so pra o gateway aceitar a chamada; quem
-  // identifica o usuario e o Bearer com o token DELE. Nao trocar a ordem: usar
-  // a service_role como Bearer devolveria um usuario de servico, nao o jogador.
-  const resposta = await fetch(`${cfg.supabaseUrl}/auth/v1/user`, {
-    headers: { apikey: cfg.serviceRoleKey, Authorization: `Bearer ${token}` },
-  })
-  if (!resposta.ok) throw new ErroHttp(401, 'sessao invalida ou expirada')
-
-  const corpo = (await resposta.json()) as { id?: string; email?: string | null }
-  if (!corpo?.id) throw new ErroHttp(401, 'sessao sem usuario')
-  return { id: corpo.id, email: corpo.email ?? null }
+interface Payload {
+  sub?: string
+  email?: string | null
+  exp?: number
+  iss?: string
+  aud?: string | string[]
 }
 
 export async function autenticar(cfg: Config, req: Request): Promise<Jogador> {
@@ -115,26 +127,45 @@ export async function autenticar(cfg: Config, req: Request): Promise<Jogador> {
   const token = header.toLowerCase().startsWith('bearer ') ? header.slice(7).trim() : ''
   if (!token) throw new ErroHttp(401, 'faltou o token de sessao')
 
-  const agora = Date.now()
-  const emCache = cache.get(token)
-  if (emCache && emCache.expiraEm > agora) return emCache.jogador
+  const partes = token.split('.')
+  if (partes.length !== 3) throw new ErroHttp(401, 'sessao invalida ou expirada')
 
-  podar(agora)
-
-  const entrada: Entrada = {
-    // O `catch` nao engole nada — remove a entrada e relanca, pra quem chamou
-    // continuar recebendo o 401/erro de rede. Sem ele, uma falha viraria uma
-    // promessa rejeitada GUARDADA no Map, que o Deno/Node reporta como
-    // unhandled rejection.
-    //
-    // Confere a identidade antes de apagar: se um request posterior ja trocou a
-    // entrada deste token, apagar aqui derrubaria um cache valido do vizinho.
-    jogador: consultarSupabase(cfg, token).catch((erro: unknown) => {
-      if (cache.get(token) === entrada) cache.delete(token)
-      throw erro
-    }),
-    expiraEm: validoAte(token, agora),
+  let cabecalho: { alg?: string; kid?: string }
+  let payload: Payload
+  try {
+    cabecalho = base64UrlParaJson(partes[0])
+    payload = base64UrlParaJson(partes[1])
+  } catch {
+    throw new ErroHttp(401, 'sessao invalida ou expirada')
   }
-  cache.set(token, entrada)
-  return entrada.jogador
+
+  if (cabecalho.alg !== ALGORITMO || !cabecalho.kid) throw new ErroHttp(401, 'sessao invalida ou expirada')
+
+  const chave = await chavePublica(cfg, cabecalho.kid)
+  // A assinatura JWS de ES256 ja e R||S cru (64 bytes), que e exatamente o
+  // formato que o Web Crypto espera pra ECDSA — nao ha DER pra desembrulhar.
+  const assinatura = base64UrlParaBytes(partes[2])
+  const assinado = new TextEncoder().encode(`${partes[0]}.${partes[1]}`)
+  const ok = await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, chave, assinatura, assinado)
+  if (!ok) throw new ErroHttp(401, 'sessao invalida ou expirada')
+
+  // Assinatura boa nao basta. Sem estas tres checagens, um token legitimo de
+  // OUTRO proposito passaria: `exp` e o que faz o logout eventualmente valer,
+  // `iss` impede um token de outro projeto Supabase, e `aud` impede que um token
+  // de servico ou de outro publico seja lido como jogador.
+  const agora = Math.floor(Date.now() / 1000)
+  if (typeof payload.exp !== 'number' || payload.exp + FOLGA_DE_RELOGIO_S < agora) {
+    throw new ErroHttp(401, 'sessao invalida ou expirada')
+  }
+  if (payload.iss !== `${cfg.supabaseUrl}/auth/v1`) throw new ErroHttp(401, 'sessao invalida ou expirada')
+  const aud = Array.isArray(payload.aud) ? payload.aud : [payload.aud]
+  if (!aud.includes('authenticated')) throw new ErroHttp(401, 'sessao invalida ou expirada')
+  if (!payload.sub) throw new ErroHttp(401, 'sessao sem usuario')
+
+  return { id: payload.sub, email: payload.email ?? null }
+}
+
+/** Exposto so pra teste: o cache de chaves e estado de modulo e vaza entre casos. */
+export function limparCacheDeChaves(): void {
+  chaves.clear()
 }

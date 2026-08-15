@@ -178,91 +178,83 @@ async function apagar(cfg, caminho) {
 }
 //#endregion
 //#region server/src/auth.ts
-/**
-* Cache de verificacao, por token.
-*
-* Medido em producao (pg_stat_statements, janela de 8 dias): ~44 mil chamadas
-* de `GET /auth/v1/user` contra ~1.065 transacoes de escrita do Auth (login,
-* cadastro, refresh — o trafego legitimo). Ou seja 97% do que o servico de Auth
-* fazia era reverificar o MESMO token: o cliente liquida a sessao de hunt a
-* cada 30s (INTERVALO_FLUSH_MS), e cada flush pagava uma ida de rede completa
-* pra reconfirmar um token que nao mudou.
-*
-* O TTL e o unico parametro de seguranca aqui: ele e a JANELA em que um logout,
-* um ban ou uma revogacao ainda deixam o token passar. Expiracao normal NAO
-* depende disto — o gateway das Edge Functions valida assinatura e `exp` antes
-* do handler rodar (`verify_jwt`, ligado por padrao no `functions deploy`), e o
-* `exp` do proprio token ainda corta o cache mais cedo quando falta menos de
-* 5 min pra ele vencer.
-*
-* 5 minutos: derruba ~90% das chamadas (10 flushes por janela viram 1) e e
-* curto o bastante pra um banimento morder antes de o jogador terminar a
-* proxima cacada. Nao aumentar sem decidir que atraso de revogacao e aceitavel.
-*/
-var TTL_MS = 3e5;
-/**
-* Teto de tokens guardados. O isolate da Edge Function vive minutos ou horas e
-* atende varios jogadores; sem teto, um pico de trafego deixaria um Map
-* crescendo ate o limite de memoria da invocacao. Com 200 cabe a base de
-* jogadores inteira com folga, e o descarte abaixo e o mais simples que
-* funciona (limpa vencidos; se ainda estourar, zera).
-*/
-var MAX_ENTRADAS = 200;
-var cache = /* @__PURE__ */ new Map();
-function podar(agora) {
-	for (const [token, entrada] of cache) if (entrada.expiraEm <= agora) cache.delete(token);
-	if (cache.size >= MAX_ENTRADAS) cache.clear();
+var ALGORITMO = "ES256";
+var FOLGA_DE_RELOGIO_S = 30;
+var chaves = /* @__PURE__ */ new Map();
+function base64UrlParaBytes(s) {
+	const base64 = s.replace(/-/g, "+").replace(/_/g, "/");
+	const binario = atob(base64.padEnd(base64.length + (4 - base64.length % 4) % 4, "="));
+	const bytes = new Uint8Array(binario.length);
+	for (let i = 0; i < binario.length; i++) bytes[i] = binario.charCodeAt(i);
+	return bytes;
+}
+function base64UrlParaJson(s) {
+	return JSON.parse(new TextDecoder().decode(base64UrlParaBytes(s)));
+}
+async function importar(jwk) {
+	return crypto.subtle.importKey("jwk", jwk, {
+		name: "ECDSA",
+		namedCurve: "P-256"
+	}, false, ["verify"]);
 }
 /**
-* Quando o cache pode valer, no maximo.
+* A chave publica com este `kid`.
 *
-* Le o `exp` do JWT SEM verificar assinatura — e seguro porque o valor so pode
-* ENCURTAR a validade (o `Math.min` com o TTL), nunca estende-la. Um `exp`
-* forjado gigante cai no TTL; um `exp` proximo faz o cache morrer junto com o
-* token, em vez de manter vivo um token que o gateway ja vai recusar.
+* Ordem: cache do isolate -> `jwksJson` do env -> busca no endpoint publico. A
+* busca so acontece quando o `kid` e desconhecido, que na pratica e uma vez por
+* ROTACAO de chave, nao por request. E isso e o que faz a rotacao ser segura sem
+* intervencao: se a chave girar e o env ficar velho, o `kid` novo nao esta la, e
+* o fallback resolve sozinho.
 */
-function validoAte(token, agora) {
-	const teto = agora + TTL_MS;
-	const partes = token.split(".");
-	if (partes.length !== 3) return teto;
-	try {
-		const payload = JSON.parse(atob(partes[1].replace(/-/g, "+").replace(/_/g, "/")));
-		if (typeof payload.exp !== "number") return teto;
-		return Math.min(teto, payload.exp * 1e3);
-	} catch {
-		return teto;
+async function chavePublica(cfg, kid) {
+	const emCache = chaves.get(kid);
+	if (emCache) return emCache;
+	const doEnv = (cfg.jwksJson ? JSON.parse(cfg.jwksJson).keys ?? [] : []).find((k) => k.kid === kid);
+	if (doEnv) {
+		const chave = await importar(doEnv);
+		chaves.set(kid, chave);
+		return chave;
 	}
-}
-async function consultarSupabase(cfg, token) {
-	const resposta = await fetch(`${cfg.supabaseUrl}/auth/v1/user`, { headers: {
-		apikey: cfg.serviceRoleKey,
-		Authorization: `Bearer ${token}`
-	} });
-	if (!resposta.ok) throw new ErroHttp(401, "sessao invalida ou expirada");
-	const corpo = await resposta.json();
-	if (!corpo?.id) throw new ErroHttp(401, "sessao sem usuario");
-	return {
-		id: corpo.id,
-		email: corpo.email ?? null
-	};
+	const resposta = await fetch(`${cfg.supabaseUrl}/auth/v1/.well-known/jwks.json`);
+	if (!resposta.ok) throw new ErroHttp(503, "nao foi possivel validar a sessao agora");
+	const { keys } = await resposta.json();
+	const jwk = (keys ?? []).find((k) => k.kid === kid);
+	if (!jwk) throw new ErroHttp(401, "sessao invalida ou expirada");
+	const chave = await importar(jwk);
+	chaves.set(kid, chave);
+	return chave;
 }
 async function autenticar(cfg, req) {
 	const header = req.headers.get("authorization") || "";
 	const token = header.toLowerCase().startsWith("bearer ") ? header.slice(7).trim() : "";
 	if (!token) throw new ErroHttp(401, "faltou o token de sessao");
-	const agora = Date.now();
-	const emCache = cache.get(token);
-	if (emCache && emCache.expiraEm > agora) return emCache.jogador;
-	podar(agora);
-	const entrada = {
-		jogador: consultarSupabase(cfg, token).catch((erro) => {
-			if (cache.get(token) === entrada) cache.delete(token);
-			throw erro;
-		}),
-		expiraEm: validoAte(token, agora)
+	const partes = token.split(".");
+	if (partes.length !== 3) throw new ErroHttp(401, "sessao invalida ou expirada");
+	let cabecalho;
+	let payload;
+	try {
+		cabecalho = base64UrlParaJson(partes[0]);
+		payload = base64UrlParaJson(partes[1]);
+	} catch {
+		throw new ErroHttp(401, "sessao invalida ou expirada");
+	}
+	if (cabecalho.alg !== ALGORITMO || !cabecalho.kid) throw new ErroHttp(401, "sessao invalida ou expirada");
+	const chave = await chavePublica(cfg, cabecalho.kid);
+	const assinatura = base64UrlParaBytes(partes[2]);
+	const assinado = new TextEncoder().encode(`${partes[0]}.${partes[1]}`);
+	if (!await crypto.subtle.verify({
+		name: "ECDSA",
+		hash: "SHA-256"
+	}, chave, assinatura, assinado)) throw new ErroHttp(401, "sessao invalida ou expirada");
+	const agora = Math.floor(Date.now() / 1e3);
+	if (typeof payload.exp !== "number" || payload.exp + FOLGA_DE_RELOGIO_S < agora) throw new ErroHttp(401, "sessao invalida ou expirada");
+	if (payload.iss !== `${cfg.supabaseUrl}/auth/v1`) throw new ErroHttp(401, "sessao invalida ou expirada");
+	if (!(Array.isArray(payload.aud) ? payload.aud : [payload.aud]).includes("authenticated")) throw new ErroHttp(401, "sessao invalida ou expirada");
+	if (!payload.sub) throw new ErroHttp(401, "sessao sem usuario");
+	return {
+		id: payload.sub,
+		email: payload.email ?? null
 	};
-	cache.set(token, entrada);
-	return entrada.jogador;
 }
 //#endregion
 //#region src/core/rng.ts

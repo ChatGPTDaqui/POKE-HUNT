@@ -15,6 +15,11 @@ export interface Config {
   // Schema alvo no PostgREST (Accept-Profile/Content-Profile). Ausente ou
   // 'public' nao manda cabecalho nenhum -- comportamento padrao do PostgREST.
   schema?: string
+  // JWKS do projeto (o JSON cru de `/auth/v1/.well-known/jwks.json`), injetado
+  // por env pra `auth.ts` verificar o token sem ida de rede. So chave PUBLICA:
+  // nao e segredo, e nao ha risco em ela estar no ambiente. Ausente, `auth.ts`
+  // busca o JWKS sozinho -- funciona igual, so paga uma requisicao.
+  jwksJson?: string
 }
 
 export class ErroHttp extends Error {

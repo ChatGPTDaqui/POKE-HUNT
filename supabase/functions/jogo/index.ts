@@ -35,7 +35,18 @@ const origensPermitidas = (Deno.env.get('ORIGENS_PERMITIDAS') ?? 'http://localho
   .split(',')
   .map((o) => o.trim())
 
-const handler = criarApp({ supabaseUrl, serviceRoleKey, schema, origensPermitidas })
+// Chave PUBLICA do projeto (JWKS), usada por auth.ts pra conferir a assinatura
+// do token sem ida de rede. Nao e segredo — e o mesmo JSON servido em
+// `/auth/v1/.well-known/jwks.json`, aberto pra qualquer um. Esta aqui so pra
+// economizar a busca: sem a var, auth.ts busca sozinho e funciona igual.
+//
+//   supabase secrets set JOGO_JWKS="$(curl -s https://SEU-PROJETO.supabase.co/auth/v1/.well-known/jwks.json)"
+//
+// Se a chave do projeto girar e esta var ficar velha, nao quebra: o `kid` novo
+// nao vai estar aqui e auth.ts cai no fallback de busca sozinho.
+const jwksJson = Deno.env.get('JOGO_JWKS') ?? undefined
+
+const handler = criarApp({ supabaseUrl, serviceRoleKey, schema, origensPermitidas, jwksJson })
 
 // O gateway das Edge Functions prefixa a rota com o nome da funcao
 // (`/jogo/sessao/flush`). O app conhece as rotas sem esse prefixo, entao ele e
