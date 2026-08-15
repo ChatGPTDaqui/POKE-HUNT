@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { SPECIES, type PokeInstance } from '@/data/pokes'
-import { getAbility } from '@/data/abilities'
+import { getAbility, BASIC_ATTACK } from '@/data/abilities'
 import { typedAoeMoveKey } from '@/data/typedAoeMoves'
 import { activeAbilitiesPadrao } from '@/data/activeAbilities'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -17,8 +17,12 @@ import { useToastStore } from '@/stores/toastStore'
 import { MovesetTable } from './PokeStatDetail'
 
 const setActiveAbilities = vi.fn()
+const toggleAbility = vi.fn()
 vi.mock('@/engine/controller', () => ({
-  controller: { setActiveAbilities: (...args: unknown[]) => setActiveAbilities(...args) },
+  controller: {
+    setActiveAbilities: (...args: unknown[]) => setActiveAbilities(...args),
+    toggleAbility: (...args: unknown[]) => toggleAbility(...args),
+  },
 }))
 
 const ESPECIE = SPECIES.charmander
@@ -65,6 +69,7 @@ function nomeDoGolpe(key: string): string {
 
 beforeEach(() => {
   setActiveAbilities.mockClear()
+  toggleAbility.mockClear()
   useGameStateStore.setState({ team: [], bagPokes: [], currentMapId: null })
   useToastStore.setState({ toasts: [] })
 })
@@ -147,14 +152,38 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     expect(setActiveAbilities).not.toHaveBeenCalled()
   })
 
-  it('o AOE de Nivel 50 aparece como fixo, sem botao — nao ocupa slot', () => {
+  it('o AOE de Nivel 50 nao ocupa slot: checkbox de liga/desliga, nao do slot-de-4', async () => {
     const poke = pokeDoJogador()
     useGameStateStore.setState({ team: [poke] })
     render(<MovesetTable poke={poke} species={ESPECIE} />)
 
     const aoe = nomeDoGolpe(typedAoeMoveKey(ESPECIE.type))
-    expect(within(linhaDoGolpe(aoe)).getByText('fixo')).toBeTruthy()
-    expect(botaoUsar(aoe)).toBeNull()
+    const botao = botaoUsar(aoe)!
+    expect(botao.className).toContain('bg-primary') // ligado por padrao (disabledAbilities vazio)
+
+    await userEvent.click(botao)
+    expect(setActiveAbilities).not.toHaveBeenCalled()
+    expect(toggleAbility).toHaveBeenCalledWith(poke.uid, typedAoeMoveKey(ESPECIE.type))
+  })
+
+  it('AOE de Nivel 50 continua clicavel dentro de hunt (nao ocupa slot, sem trava)', async () => {
+    const poke = pokeDoJogador()
+    useGameStateStore.setState({ team: [poke], currentMapId: 'lv_1_10_floresta' })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+    const botao = botaoUsar(nomeDoGolpe(typedAoeMoveKey(ESPECIE.type)))!
+    expect(botao.disabled).toBe(false)
+    await userEvent.click(botao)
+    expect(toggleAbility).toHaveBeenCalledTimes(1)
+  })
+
+  it('AOE desligado (disabledAbilities) aparece desmarcado', () => {
+    const aoeKey = typedAoeMoveKey(ESPECIE.type)
+    const poke = pokeDoJogador({ disabledAbilities: { [aoeKey]: true } })
+    useGameStateStore.setState({ team: [poke] })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+    expect(botaoUsar(nomeDoGolpe(aoeKey))?.className).not.toContain('bg-primary')
   })
 
   it('golpe que o POKE ainda nao aprendeu nao pode ser escolhido', () => {
@@ -165,5 +194,35 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     const naoAprendido = ESPECIE.abilities.find((a) => a.levelReq > NIVEL && getAbility(a.key))
     if (!naoAprendido) return // especie sem golpe acima do nivel de teste
     expect(botaoUsar(nomeDoGolpe(naoAprendido.key))).toBeNull()
+  })
+
+  describe('Ataque Basico — sempre disponivel, liga/desliga fora dos 4 slots', () => {
+    it('aparece so pro POKE que e seu', () => {
+      render(<MovesetTable poke={pokeDoJogador()} species={ESPECIE} />)
+      expect(screen.queryByText(BASIC_ATTACK.name)).toBeNull()
+    })
+
+    it('ligado por padrao, e clicar desliga via toggleAbility (nunca setActiveAbilities)', async () => {
+      const poke = pokeDoJogador()
+      useGameStateStore.setState({ team: [poke] })
+      render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+      const botao = botaoUsar(BASIC_ATTACK.name)!
+      expect(botao.className).toContain('bg-primary')
+      await userEvent.click(botao)
+      expect(setActiveAbilities).not.toHaveBeenCalled()
+      expect(toggleAbility).toHaveBeenCalledWith(poke.uid, BASIC_ATTACK.id)
+    })
+
+    it('continua clicavel dentro de hunt', async () => {
+      const poke = pokeDoJogador()
+      useGameStateStore.setState({ team: [poke], currentMapId: 'lv_1_10_floresta' })
+      render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+      const botao = botaoUsar(BASIC_ATTACK.name)!
+      expect(botao.disabled).toBe(false)
+      await userEvent.click(botao)
+      expect(toggleAbility).toHaveBeenCalledTimes(1)
+    })
   })
 })

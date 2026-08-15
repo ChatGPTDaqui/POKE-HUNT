@@ -182,6 +182,10 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     autoPotRules: fromJson<AutoPotRule[]>(p.auto_pot_rules, defaults.autoPotRules),
     autoCatchConfig: fromJson<AutoCatchConfig>(p.auto_catch_config, defaults.autoCatchConfig),
     autoCatchRules,
+    // Item ausente do JSON = habilitado (o default e {}), entao nao precisa
+    // do merge-com-default que `autoToggles` faz — ausencia ja E o estado
+    // certo aqui.
+    autoStatusConfig: fromJson<Record<string, boolean>>(p.auto_status_config, defaults.autoStatusConfig),
     perfStats: fromJson<PerfStats>(p.perf_stats, defaults.perfStats),
     trainer: { name: p.trainer_name, level: p.trainer_level, exp: p.trainer_exp } satisfies TrainerInfo,
     pokedexKills,
@@ -205,6 +209,7 @@ export function gameStateToPlayerRow(userId: string, s: GameStateData): Tables['
     auto_toggles: toJson(s.autoToggles),
     auto_pot_rules: toJson(s.autoPotRules),
     auto_catch_config: toJson(s.autoCatchConfig),
+    auto_status_config: toJson(s.autoStatusConfig),
     perf_stats: toJson(s.perfStats),
   }
 }

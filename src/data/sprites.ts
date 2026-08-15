@@ -61,6 +61,11 @@ const ITEM_ICON_IDS: Set<string> = new Set([
   'poke_ball', 'great_ball', 'ultra_ball', 'premier_ball',
   'potion', 'super_potion', 'hyper_potion', 'max_potion',
   'revive', 'max_revive',
+  // Os 6 itens de cura de status (kind 'status_heal'), mesmo metodo dos
+  // acima: indice achado na lista de indice da Bulbapedia pra Geracao IX,
+  // conferido contra 11 ancoras ja usadas (bolas/pocoes/revives/Moon Stone)
+  // batendo exato antes de confiar no resto — nao e visual/palpite.
+  'antidote', 'burn_heal', 'ice_heal', 'awakening', 'paralyze_heal', 'full_heal',
 ]);
 
 // Every "Pedra <TYPE>" (data/stones.js) shares one neutral gem icon (that

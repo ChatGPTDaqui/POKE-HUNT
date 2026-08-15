@@ -278,6 +278,7 @@ export function sincronizarAuto(): void {
       catchConfig: s.autoCatchConfig,
       potRules: s.autoPotRules,
       catchRules: s.autoCatchRules,
+      statusItems: s.autoStatusConfig,
     },
   }).catch(reportarErro)
 }

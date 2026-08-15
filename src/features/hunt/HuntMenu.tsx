@@ -16,6 +16,7 @@ import type { HuntMapDef } from '@/data/huntTypes'
 import { getEncounter } from '@/data/enemies'
 import { SPECIES, type Species } from '@/data/pokes'
 import { colorForType, TYPE_COLORS } from '@/data/typeColors'
+import { bestOffensiveMultiplier } from '@/data/typeMatchups'
 import { faceIconUrl } from '@/data/sprites'
 import type { ElementType } from '@/data/generated/types'
 import { unlockMap } from '@/engine/systems/economySystem'
@@ -186,8 +187,21 @@ function SalasDaHunt({ mapId }: { mapId: string }) {
   )
 }
 
-function SpeciesRow({ sp, pct }: { sp: Species; pct: number }) {
+// Cor/rotulo do multiplicador ofensivo, mesma paleta de
+// `TypeWeaknessSection` (vantagem verde, fraqueza laranja/vermelha, imune
+// cinza) — nao inventa cor nova pro mesmo conceito.
+function badgeEfetividade(mult: number): { rotulo: string; cor: string } | null {
+  if (mult === 1) return null // neutro: nao informa nada, so ruido na lista
+  if (mult === 0) return { rotulo: 'imune', cor: 'var(--color-n500)' }
+  if (mult >= 4) return { rotulo: '4x', cor: '#4ade80' }
+  if (mult >= 2) return { rotulo: '2x', cor: '#4ade80' }
+  if (mult <= 0.25) return { rotulo: '¼x', cor: 'var(--color-warn)' }
+  return { rotulo: '½x', cor: 'var(--color-warn)' }
+}
+
+function SpeciesRow({ sp, pct, activeSpecies }: { sp: Species; pct: number; activeSpecies: Species | null }) {
   const url = faceIconUrl(sp.id)
+  const badge = activeSpecies ? badgeEfetividade(bestOffensiveMultiplier(activeSpecies, sp)) : null
   return (
     <div className="flex items-center gap-[.5em] text-[.85em]">
       {url ? (
@@ -198,6 +212,15 @@ function SpeciesRow({ sp, pct }: { sp: Species; pct: number }) {
       <TypeChip type={sp.type} />
       {sp.type2 && <TypeChip type={sp.type2} />}
       <span className="flex-1 truncate">{sp.name}</span>
+      {badge && (
+        <span
+          className="tabular-nums text-[.9em] font-semibold"
+          style={{ color: badge.cor }}
+          title={`Seu POKE ativo (${activeSpecies!.name}) contra ${sp.name}`}
+        >
+          {badge.rotulo}
+        </span>
+      )}
       <span className="tabular-nums text-n400">{pct.toFixed(1)}%</span>
     </div>
   )
@@ -248,6 +271,7 @@ export function HuntMenu() {
   )
 
   const activePoke = team[activeIndex] ?? null
+  const activeSpecies = activePoke ? (SPECIES[activePoke.speciesId] ?? null) : null
 
   const visibleMaps = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -379,7 +403,7 @@ export function HuntMenu() {
                   <span className="text-n600"> — chance considerando o sorteio de sala</span>
                 </div>
                 {odds.species.map(({ id, species: sp, pct }) => (
-                  <SpeciesRow key={id} sp={sp} pct={pct} />
+                  <SpeciesRow key={id} sp={sp} pct={pct} activeSpecies={activeSpecies} />
                 ))}
               </div>
             )}

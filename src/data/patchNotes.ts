@@ -13,6 +13,21 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '6.7',
+    date: '2026-08-15',
+    title: 'Escolher os 4 golpes voltou a funcionar de verdade, e mais 7 ajustes',
+    highlights: [
+      'A CAUSA RAIZ DE "NAO DA PRA ESCOLHER OS 4 GOLPES" ERA NO BANCO, NAO NA TELA. O catalogo que o servidor usa pra validar sua escolha ainda tinha os golpes antigos (Cleffa e Togepi la ainda apareciam como tipo Normal, nao Fada); todo POKE recem-nascido ou recem-evoluido saia com golpes que o servidor nao reconhecia. Resincronizado — starter novo e evolucao voltam a deixar escolher os 4 normalmente.',
+      'ATAQUE BASICO E EXPLOSAO ELEMENTAL SEMPRE FORAM OPCIONAIS — so nao dava pra ver isso. Os dois ja podiam ser desligados (duplo clique na barra de combate), mas a aba Golpes do perfil nem mostrava o Ataque Basico e escondia o botao da Explosao atras de um texto fixo. Agora os dois tem checkbox visivel ali, do jeito que sempre deveriam ter tido.',
+      '58 GOLPES DUPLICADOS NO CATALOGO, CORRIGIDOS NA FONTE. Bug da importacao do Ultra Sun: 58 especies (Venusaur, Charizard, Gengar, Dragonite, entre outras) tinham o mesmo golpe listado duas vezes no Nivel 1. Nao mudava combate, so inflava a lista "Golpes" do perfil — agora aparece uma vez so.',
+      'AUTO-STATUS GANHOU CONTROLE POR ITEM. Alem do interruptor geral, agora da pra desmarcar um item especifico (por exemplo, guardar suas Full Heal e deixar o bot so usar as curas baratas). De brinde, achamos que o interruptor GERAL do Auto-status nunca tinha persistido no servidor — ficava ligado so até você trocar de pagina.',
+      '6 ICONES NOVOS: Antidoto, Anti-Sono, Anti-Queimadura, Anti-Congelante, Anti-Paralisia e Cura Total agora tem sprite propria na mochila e na loja, em vez de ficarem sem icone nenhum.',
+      'BUG CORRIGIDO: POKE parado numa caçada, entre um alvo e outro, continuava com a animação de andar — agora fica parado (Idle) de verdade.',
+      'A LISTA DE HUNTS MOSTRA A EFETIVIDADE DO SEU POKE ATIVO contra cada especie que pode aparecer ali (2x, ½x, imune) — ajuda a escolher pra onde ir sem sair caçando às cegas.',
+      'BUG VISUAL CORRIGIDO: as colunas da aba Golpes desalinhavam quando a lista tinha barra de rolagem. E de brinde, o perfil do POKE agora atualiza o checkbox de golpe na hora — antes, marcar ou desmarcar funcionava por baixo dos panos mas a tela só mostrava a mudança depois de fechar e reabrir.',
+    ],
+  },
+  {
     version: '6.6',
     date: '2026-08-15',
     title: 'Golpe de fim de lista nao chega mais no Nivel 1, e o bot passa a curar status sozinho',

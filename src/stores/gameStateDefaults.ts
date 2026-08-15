@@ -103,6 +103,9 @@ export interface GameStateData {
   autoPotRules: AutoPotRule[]
   autoCatchConfig: AutoCatchConfig
   autoCatchRules: AutoCatchRule[]
+  // Item ausente = habilitado (mesmo padrao de "ausente = default" do resto
+  // do projeto) — so guarda excecao explicita (`false`) por item.
+  autoStatusConfig: Record<string, boolean>
   perfStats: PerfStats
   trainer: TrainerInfo
   pokedexKills: Record<string, PokedexKillCount>
@@ -130,6 +133,7 @@ export function defaultGameStateData(): GameStateData {
     autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
     autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
     autoCatchRules: [],
+    autoStatusConfig: {},
     perfStats: { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now() },
     trainer: { name: 'Treinador', level: 1, exp: 0 },
     pokedexKills: {},

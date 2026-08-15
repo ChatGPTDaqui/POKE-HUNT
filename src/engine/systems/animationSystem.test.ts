@@ -8,8 +8,8 @@
 // produziu o bug.
 import { describe, expect, it } from 'vitest'
 
-import { triggerAttackAnim, directionRowFromFacing } from './animationSystem'
-import type { PlayerEntity } from '../types'
+import { triggerAttackAnim, directionRowFromFacing, desiredAnimName } from './animationSystem'
+import type { EnemyEntity, PlayerEntity } from '../types'
 
 function atacante(): PlayerEntity {
   return { x: 100, y: 100, facing: { x: 0, y: 1 }, attackAnim: 'Shoot', attackAnimTimer: 0 } as PlayerEntity
@@ -39,5 +39,40 @@ describe('orientacao no ataque', () => {
     triggerAttackAnim(e, false, { x: e.x, y: e.y })
     expect(Number.isNaN(e.facing.x)).toBe(false)
     expect(e.facing).toEqual({ x: 1, y: 0 })
+  })
+})
+
+// 'wander' cobre duas fases (movementSystem.ts#wanderStep/wanderFreely):
+// perseguindo um wanderTarget de verdade, e pausado entre alvos
+// (wanderTarget null, wanderPause contando). So o state nao distingue as
+// duas — sem checar o alvo, o POKE parado na pausa ficava preso no frame de
+// "Walk" (bug real, so aparecia em hunt: no Hospital o state nunca sai de
+// 'idle', entao nunca reproduzia la).
+describe('animacao parada durante a pausa do wander', () => {
+  function inimigo(overrides: { hp?: number } & Partial<Omit<EnemyEntity, 'poke'>>): EnemyEntity {
+    const { hp, ...rest } = overrides
+    return {
+      state: 'wander',
+      wanderTarget: null,
+      attackAnimTimer: 0,
+      poke: { hp: hp ?? 10 } as EnemyEntity['poke'],
+      ...rest,
+    } as EnemyEntity
+  }
+
+  it('Idle quando pausado entre alvos (wanderTarget null)', () => {
+    expect(desiredAnimName(inimigo({ wanderTarget: null }))).toBe('Idle')
+  })
+
+  it('Walk enquanto anda de verdade rumo a um wanderTarget', () => {
+    expect(desiredAnimName(inimigo({ wanderTarget: { x: 10, y: 10 } }))).toBe('Walk')
+  })
+
+  it('chase sempre Walk, independente de wanderTarget', () => {
+    expect(desiredAnimName(inimigo({ state: 'chase', wanderTarget: null }))).toBe('Walk')
+  })
+
+  it('morto sempre Faint, mesmo com wanderTarget setado', () => {
+    expect(desiredAnimName(inimigo({ hp: 0, wanderTarget: { x: 1, y: 1 } }))).toBe('Faint')
   })
 })

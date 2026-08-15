@@ -1,6 +1,12 @@
 # Claude Code session data - not part of the game
 .claude/
 
+# scripts/seed-species-moves-usum.mjs: pasta temporaria pra construir o
+# bundle de ABILITIES/BASIC_ATTACK (precisa estar dentro do projeto pra
+# `vite build` resolver o proprio node_modules) — apagada no fim do script,
+# mas cai aqui como rede de seguranca se o script morrer no meio.
+.seed-tmp-*/
+
 # Rede de seguranca: a arte do jogo e servida por um plugin do Vite direto de
 # assets/ na raiz (ver web/vite.config.ts), NAO por copia/link dentro de
 # web/public. Se alguem recriar essa pasta por engano, o git seguiria e

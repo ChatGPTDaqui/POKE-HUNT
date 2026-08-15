@@ -46,6 +46,16 @@ export interface TypeAdvantages {
 // Lado ofensivo: quais tipos oponentes o(s) proprio(s) tipo(s) desta especie
 // acertam com 2x (vantagem de STAB relevante pra levar essa especie pra uma
 // luta).
+// Multiplicador ofensivo direto de um atacante contra um defensor especifico
+// (o melhor entre os 1-2 tipos do atacante) — diferente de `typeAdvantages`,
+// que devolve so a LISTA categorica de tipos contra quem a especie tem
+// vantagem, nao um numero por par. Usado no card de hunt (item 7): mostra a
+// efetividade do POKE ativo contra cada especie que pode aparecer ali.
+export function bestOffensiveMultiplier(attacker: Species, defender: Species): number {
+  const atkTypes = [attacker.type, attacker.type2].filter((t): t is ElementType => Boolean(t))
+  return Math.max(...atkTypes.map((t) => getEffectiveness(t, defender.type, defender.type2)))
+}
+
 export function typeAdvantages(species: Species): TypeAdvantages {
   const atkTypes = [species.type, species.type2].filter((t): t is ElementType => Boolean(t))
   const advantage2x: ElementType[] = []

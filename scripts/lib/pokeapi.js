@@ -186,8 +186,22 @@ function golpesDeNivelNoUsum(pokemon) {
   // requisito 0 deixaria o golpe fora do filtro `levelReq <= level` de um
   // POKE nivel 1 em alguns pontos e dentro em outros.
   for (const g of saida) if (!g.level || g.level < 1) g.level = 1;
-  saida.sort((a, b) => a.level - b.level || a.move.localeCompare(b.move));
-  return saida;
+  // A PokeAPI as vezes repete a MESMA linha de `version_group_details` pro
+  // version_group ja resolvido (visto em ~48 especies, sempre no nivel 1
+  // pos-normalizacao acima — plausivel efeito colateral de Ultra Sun/Ultra
+  // Moon serem dois jogos fundidos num version_group so). Golpe repetido no
+  // MESMO nivel nunca e dado real (diferente do caso legitimo de reaprender
+  // em outro nivel, que este dedupe preserva: so remove match exato de
+  // move+level). Achado rodando um dedupe-check contra o catalogo gerado.
+  const vistos = new Set();
+  const semDuplicata = saida.filter((g) => {
+    const chave = `${g.move}@${g.level}`;
+    if (vistos.has(chave)) return false;
+    vistos.add(chave);
+    return true;
+  });
+  semDuplicata.sort((a, b) => a.level - b.level || a.move.localeCompare(b.move));
+  return semDuplicata;
 }
 
 module.exports = {

@@ -91,6 +91,7 @@ export interface GameStateActions {
   // e chamavam `controller.save()` na sequencia. Zustand nao detecta mutacao
   // em lugar, entao cada uma vira uma action explicita aqui.
   setAutoToggle: (key: keyof GameStateData['autoToggles'], value: boolean) => void
+  setAutoStatusItem: (itemId: string, enabled: boolean) => void
   addAutoPotRule: (rule: AutoPotRule) => void
   updateAutoPotRule: (index: number, patch: Partial<AutoPotRule>) => void
   removeAutoPotRule: (index: number) => void
@@ -475,6 +476,10 @@ export const useGameStateStore = create<GameStateStore>()(
 
       setAutoToggle: (key, value) => {
         set((state) => ({ autoToggles: { ...state.autoToggles, [key]: value } }))
+      },
+
+      setAutoStatusItem: (itemId, enabled) => {
+        set((state) => ({ autoStatusConfig: { ...state.autoStatusConfig, [itemId]: enabled } }))
       },
 
       addAutoPotRule: (rule) => {

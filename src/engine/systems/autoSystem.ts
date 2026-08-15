@@ -55,6 +55,10 @@ function melhorCuraDeStatus(gameState: GameStateStore, status: StatusCondition):
       && Array.isArray((item as GeneratedItem).healsStatus)
       && ((item as GeneratedItem).healsStatus as string[]).includes(status)
       && gameState.hasItem(item.id, 1)
+      // Ausente = habilitado (mesmo padrao de default do resto do config de
+      // auto) — so `false` explicito no config do jogador tira o item da
+      // lista de candidatos do bot.
+      && gameState.autoStatusConfig[item.id] !== false
     ))
     .sort((a, b) => a.buyPrice - b.buyPrice)
   return candidatos[0] ?? null

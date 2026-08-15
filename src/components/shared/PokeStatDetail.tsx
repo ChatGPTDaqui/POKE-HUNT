@@ -5,7 +5,7 @@
 // fosse remontado a cada clique de aba, a animacao do GIF reiniciaria do zero.
 import type { ReactNode } from 'react'
 import { expProgressForInstance } from '@/engine/systems/progressionSystem'
-import { getAbility } from '@/data/abilities'
+import { getAbility, BASIC_ATTACK } from '@/data/abilities'
 import { activeAbilitiesPadrao, ehGolpeAoeDeNivel50, MAX_ACTIVE_ABILITIES } from '@/data/activeAbilities'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { controller } from '@/engine/controller'
@@ -138,21 +138,21 @@ export function StatDetail({ poke, weaknessSection }: { poke: PokeInstance; weak
 
 const MOVE_GRID = 'grid grid-cols-[2.4em_1fr_3.4em_3.8em_3em_2.4em_2.6em] items-center gap-[.4em]'
 
-// A celula da coluna "Usar". Tres estados sem toggle: golpe ainda nao
-// aprendido (nada), o AOE de nivel 50 (sempre disponivel, fora dos 4 slots) e
-// dentro de hunt (mostra a marca, mas nao clica).
-function CelulaUsar(
-  { aoe50, aprendido, ativo, habilitado, onClick }:
-  { aoe50: boolean; aprendido: boolean; ativo: boolean; habilitado: boolean; onClick: () => void },
+// Checkbox generico da coluna "Usar" — usado tanto pro slot-de-4 (`ativo` =
+// esta nos 4 escolhidos) quanto pro liga/desliga do Ataque Basico e do AOE do
+// Nivel 50 (`ativo` = nao esta em `disabledAbilities`). Os dois ja
+// funcionavam por baixo (double-click no AbilityHud, `disabledAbilities`) —
+// aqui so torna a escolha visivel e explicavel na tela de perfil.
+function CelulaCheckbox(
+  { ativo, habilitado, tituloAtivo, tituloInativo, tituloDesabilitado, onClick }:
+  { ativo: boolean; habilitado: boolean; tituloAtivo: string; tituloInativo: string; tituloDesabilitado: string; onClick: () => void },
 ) {
-  if (!aprendido) return <span className="text-n700">—</span>
-  if (aoe50) return <span className="text-n500" title="Golpe de area do Nivel 50: sempre disponivel, nao ocupa slot.">fixo</span>
   return (
     <button
       type="button"
       disabled={!habilitado}
       onClick={onClick}
-      title={habilitado ? (ativo ? 'Remover dos golpes ativos' : 'Usar este golpe') : 'Saia da hunt para trocar de golpe'}
+      title={habilitado ? (ativo ? tituloAtivo : tituloInativo) : tituloDesabilitado}
       className={cn(
         'h-[1.4em] w-[1.4em] rounded-[.25em] border font-[inherit] leading-none',
         ativo ? 'border-primary bg-primary text-n900' : 'border-n700 bg-transparent text-transparent',
@@ -161,6 +161,41 @@ function CelulaUsar(
     >
       ✓
     </button>
+  )
+}
+
+// A celula da coluna "Usar" das linhas do learnset normal. Dois estados sem
+// toggle: golpe ainda nao aprendido (nada), e dentro de hunt pro slot-de-4
+// (mostra a marca, mas nao clica — a RPC `definir_golpes_ativos` recusa
+// trocar golpe com sessao de hunt aberta). O AOE do Nivel 50 usa
+// `CelulaCheckbox` direto (liga/desliga, nunca ocupa slot, sem trava de
+// hunt — `alternar_habilidade` nao tem essa restricao).
+function CelulaUsar(
+  { aoe50, aprendido, ativo, habilitado, onClick }:
+  { aoe50: boolean; aprendido: boolean; ativo: boolean; habilitado: boolean; onClick: () => void },
+) {
+  if (!aprendido) return <span className="text-n700">—</span>
+  if (aoe50) {
+    return (
+      <CelulaCheckbox
+        ativo={ativo}
+        habilitado={habilitado}
+        tituloAtivo="Desligar este golpe (nao ocupa slot, so entra/sai do combate)"
+        tituloInativo="Ligar este golpe"
+        tituloDesabilitado=""
+        onClick={onClick}
+      />
+    )
+  }
+  return (
+    <CelulaCheckbox
+      ativo={ativo}
+      habilitado={habilitado}
+      tituloAtivo="Remover dos golpes ativos"
+      tituloInativo="Usar este golpe"
+      tituloDesabilitado="Saia da hunt para trocar de golpe"
+      onClick={onClick}
+    />
   )
 }
 
@@ -181,8 +216,22 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
   const emHunt = useGameStateStore((s) => s.currentMapId) != null
   const meu = [...equipe, ...mochila].some((p) => p.uid === poke.uid)
 
-  const ativos = poke.activeAbilities ?? activeAbilitiesPadrao(species, poke.level)
+  // `poke` e a prop que o chamador passou — pro perfil aberto de um POKE
+  // seu, isso e um SNAPSHOT tirado no clique que abriu o modal
+  // (usePokeProfileStore#showProfile grava o objeto, nao um uid), que nunca
+  // mais atualiza sozinho. Bug real achado ao vivo: marcar/desmarcar um
+  // golpe aqui dentro chamava a acao certa (RPC ida, estado global mudava),
+  // mas o proprio checkbox clicado continuava mostrando o valor antigo ate
+  // fechar e reabrir o modal — mesmo o slot-de-4 preexistente ja tinha esse
+  // problema, so nunca tinha um teste ao vivo que clicasse e conferisse a
+  // tela sem reabrir. Resolvido lendo do POKE AO VIVO (equipe/mochila) por
+  // uid quando ele e seu; POKE de preview (Pokedex/ranking) nao esta em
+  // nenhum dos dois arrays, entao cai de volta na prop como sempre.
+  const pokeVivo = equipe.find((p) => p.uid === poke.uid) ?? mochila.find((p) => p.uid === poke.uid) ?? poke
+
+  const ativos = pokeVivo.activeAbilities ?? activeAbilitiesPadrao(species, pokeVivo.level)
   const podeEscolher = meu && !emHunt
+  const desabilitados = pokeVivo.disabledAbilities ?? {}
 
   function alternar(key: string): void {
     if (!podeEscolher) return
@@ -192,6 +241,14 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
       return
     }
     controller.setActiveAbilities(poke.uid, ja ? ativos.filter((k) => k !== key) : [...ativos, key])
+  }
+
+  // Ataque Basico e o AOE do Nivel 50 nunca ocupam slot: sao liga/desliga
+  // puro em `disabledAbilities`, mesmo caminho do double-click no AbilityHud
+  // (sem trava de hunt — `alternar_habilidade` nao tem essa restricao).
+  function alternarOpcional(key: string): void {
+    if (!meu) return
+    controller.toggleAbility(poke.uid, key)
   }
 
   return (
@@ -206,12 +263,45 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
           </span>
         </div>
       )}
-      <div className={`${MOVE_GRID} border-b border-n800 bg-n800/60 px-[.5em] py-[.3em] font-medium`}>
+      <div
+        className={`${MOVE_GRID} overflow-y-hidden border-b border-n800 bg-n800/60 px-[.5em] py-[.3em] font-medium`}
+        style={{ scrollbarGutter: 'stable' }}
+      >
         <span>Nv</span><span>Golpe</span><span>Tipo</span><span>Cat.</span><span>Dano</span><span>AOE</span><span>Usar</span>
       </div>
-      <div className="max-h-[18em] overflow-y-auto">
+      {/* `scrollbar-gutter: stable` nos dois: sem isso, a barra de rolagem
+          nativa (so aparece aqui, quando a lista estoura 18em) reduz a
+          largura util so do corpo, desalinhando as colunas contra o
+          cabecalho de cima (que nunca rola). Reservando o gutter sempre nos
+          dois, a largura util fica igual com ou sem overflow. */}
+      <div className="max-h-[18em] overflow-y-auto" style={{ scrollbarGutter: 'stable' }}>
+        {meu && (
+          <div className={`${MOVE_GRID} border-b border-n800 bg-n900 px-[.5em] py-[.3em] text-foreground`}>
+            <span className="text-n400">—</span>
+            <AbilityTooltip ability={BASIC_ATTACK} poke={pokeVivo}>
+              <span className="cursor-help truncate underline decoration-dotted underline-offset-2">
+                {BASIC_ATTACK.name}
+              </span>
+            </AbilityTooltip>
+            <span><TypeChip type={BASIC_ATTACK.type} /></span>
+            <span className="text-n400">{ROTULO_CATEGORIA[resolveAbilityCategory(BASIC_ATTACK, pokeVivo)]}</span>
+            <span>{BASIC_ATTACK.power > 0 ? BASIC_ATTACK.power : '—'}</span>
+            <span className="text-n400">—</span>
+            <span>
+              <CelulaCheckbox
+                ativo={!desabilitados[BASIC_ATTACK.id]}
+                habilitado={meu}
+                tituloAtivo="Desligar o Ataque Basico (fallback universal — sem ele, o POKE fica sem opcao quando os golpes ativos estao em cooldown)"
+                tituloInativo="Ligar o Ataque Basico"
+                tituloDesabilitado=""
+                onClick={() => alternarOpcional(BASIC_ATTACK.id)}
+              />
+            </span>
+          </div>
+        )}
         {rows.map(({ entry, ability }, index) => {
-          const learned = entry.levelReq <= poke.level
+          const learned = entry.levelReq <= pokeVivo.level
+          const aoe50 = ehGolpeAoeDeNivel50(entry.key)
           return (
             <div
               // A chave inclui o indice porque uma especie PODE aprender o
@@ -223,23 +313,23 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
               }`}
             >
               <span className="text-n400">{entry.levelReq}</span>
-              <AbilityTooltip ability={ability} poke={poke}>
+              <AbilityTooltip ability={ability} poke={pokeVivo}>
                 <span className="cursor-help truncate underline decoration-dotted underline-offset-2">
                   {ability.name}
                 </span>
               </AbilityTooltip>
               <span><TypeChip type={ability.type} /></span>
               <span className="text-n400">
-                {ROTULO_CATEGORIA[resolveAbilityCategory(ability, poke)]}
+                {ROTULO_CATEGORIA[resolveAbilityCategory(ability, pokeVivo)]}
               </span>
               <span>{ability.power > 0 ? ability.power : '—'}</span>
               <span className="text-n400">{ability.target === 'aoe' ? '✓' : '—'}</span>
               <span>{meu && <CelulaUsar
-                aoe50={ehGolpeAoeDeNivel50(entry.key)}
+                aoe50={aoe50}
                 aprendido={learned}
-                ativo={ativos.includes(entry.key)}
-                habilitado={podeEscolher}
-                onClick={() => alternar(entry.key)}
+                ativo={aoe50 ? !desabilitados[entry.key] : ativos.includes(entry.key)}
+                habilitado={aoe50 ? meu : podeEscolher}
+                onClick={() => (aoe50 ? alternarOpcional(entry.key) : alternar(entry.key))}
               />}</span>
             </div>
           )

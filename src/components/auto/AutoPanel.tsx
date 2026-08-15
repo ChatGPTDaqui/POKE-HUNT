@@ -22,7 +22,7 @@ import { BEST_POTION_OPTION } from '@/engine/systems/autoSystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { sincronizarAuto } from '@/data/remote/autoridade'
 import { useWorldStore } from '@/stores/worldStore'
-import { GameButton, GameInput, GameSelect, GameSwitch } from '@/components/game/controls'
+import { GameButton, GameCheck, GameInput, GameSelect, GameSwitch } from '@/components/game/controls'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { estoqueDoItemDeRegra, itensEmUso, LIMIAR_ESTOQUE_BAIXO } from './estoqueBaixo'
 import { usePrevisaoDeConsumo, formatarTempoRestante, rotuloDoRecurso } from './consumo'
@@ -156,7 +156,9 @@ export function AutoPanel() {
   const autoPotRules = useGameStateStore((s) => s.autoPotRules)
   const autoCatchConfig = useGameStateStore((s) => s.autoCatchConfig)
   const autoCatchRules = useGameStateStore((s) => s.autoCatchRules)
+  const autoStatusConfig = useGameStateStore((s) => s.autoStatusConfig)
   const setAutoToggle = useGameStateStore((s) => s.setAutoToggle)
+  const setAutoStatusItem = useGameStateStore((s) => s.setAutoStatusItem)
   const addAutoPotRule = useGameStateStore((s) => s.addAutoPotRule)
   const updateAutoPotRule = useGameStateStore((s) => s.updateAutoPotRule)
   const removeAutoPotRule = useGameStateStore((s) => s.removeAutoPotRule)
@@ -179,7 +181,7 @@ export function AutoPanel() {
       return
     }
     sincronizarAuto()
-  }, [autoToggles, autoPotRules, autoCatchConfig, autoCatchRules])
+  }, [autoToggles, autoPotRules, autoCatchConfig, autoCatchRules, autoStatusConfig])
 
   const huntSpecies = useCurrentHuntSpecies()
   const opcoesPocao = useOpcoes(POTION_OPTIONS, autoToggles.autoPot, {
@@ -342,16 +344,21 @@ export function AutoPanel() {
         ligado={autoToggles.autoStatus}
         aoLigar={(v) => setAutoToggle('autoStatus', v)}
       >
-        {/* Sem escolha de item de proposito, mesma razao do Auto-revive: quem
-            escolhe e o bot, e ele pega sempre o MAIS BARATO que cobre o status
-            que o POKE tem (autoSystem.ts#melhorCuraDeStatus) — um Despertar de
-            30 no lugar de um Full Heal de 120. A lista aqui e so o estoque, que
-            e a informacao de que o jogador precisa: cura de status acaba rapido
-            e sem ela o toggle fica ligado sem fazer nada. */}
+        {/* O bot pega sempre o MAIS BARATO que cobre o status que o POKE tem
+            (autoSystem.ts#melhorCuraDeStatus) — um Despertar de 30 no lugar de
+            um Full Heal de 120. O checkbox de cada linha NAO escolhe qual
+            usar (isso continua automatico): so tira aquele item especifico
+            da lista de candidatos, pro jogador guardar um item sem precisar
+            desligar a automacao inteira. */}
         <div className="flex flex-col gap-[.25em]">
           {opcoesCuraDeStatus.map((o) => (
             <div key={o.id} className="flex items-center justify-between gap-[.5em] text-n400">
-              <span>{o.nome}</span>
+              <GameCheck
+                checked={autoStatusConfig[o.id] !== false}
+                onChange={(v) => setAutoStatusItem(o.id, v)}
+              >
+                {o.nome}
+              </GameCheck>
               <span className={cn('tabular-nums', o.alerta && 'font-semibold text-bad')}>x{o.quantidade}</span>
             </div>
           ))}

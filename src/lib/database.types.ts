@@ -1003,6 +1003,7 @@ export type Database = {
           active_team_index: number
           auto_catch_config: Json
           auto_pot_rules: Json
+          auto_status_config: Json
           auto_toggles: Json
           created_at: string
           current_map_id: string | null
@@ -1021,6 +1022,7 @@ export type Database = {
           active_team_index?: number
           auto_catch_config?: Json
           auto_pot_rules?: Json
+          auto_status_config?: Json
           auto_toggles?: Json
           created_at?: string
           current_map_id?: string | null
@@ -1039,6 +1041,7 @@ export type Database = {
           active_team_index?: number
           auto_catch_config?: Json
           auto_pot_rules?: Json
+          auto_status_config?: Json
           auto_toggles?: Json
           created_at?: string
           current_map_id?: string | null

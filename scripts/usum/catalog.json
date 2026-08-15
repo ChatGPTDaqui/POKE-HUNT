@@ -582,10 +582,6 @@
      "nivel": 1
     },
     {
-     "chave": "petal_dance",
-     "nivel": 1
-    },
-    {
      "chave": "tackle",
      "nivel": 1
     },
@@ -845,10 +841,6 @@
     },
     {
      "chave": "shadow_claw",
-     "nivel": 1
-    },
-    {
-     "chave": "wing_attack",
      "nivel": 1
     },
     {
@@ -1220,10 +1212,6 @@
     {
      "chave": "harden",
      "nivel": 1
-    },
-    {
-     "chave": "harden",
-     "nivel": 1
     }
    ]
   },
@@ -1249,10 +1237,6 @@
    "golpes": [
     {
      "chave": "confusion",
-     "nivel": 1
-    },
-    {
-     "chave": "gust",
      "nivel": 1
     },
     {
@@ -1378,10 +1362,6 @@
     {
      "chave": "harden",
      "nivel": 1
-    },
-    {
-     "chave": "harden",
-     "nivel": 1
     }
    ]
   },
@@ -1407,10 +1387,6 @@
    "golpes": [
     {
      "chave": "fury_attack",
-     "nivel": 1
-    },
-    {
-     "chave": "twineedle",
      "nivel": 1
     },
     {
@@ -1832,10 +1808,6 @@
      "nivel": 1
     },
     {
-     "chave": "scary_face",
-     "nivel": 1
-    },
-    {
      "chave": "swords_dance",
      "nivel": 1
     },
@@ -2172,10 +2144,6 @@
      "nivel": 1
     },
     {
-     "chave": "crunch",
-     "nivel": 1
-    },
-    {
      "chave": "fire_fang",
      "nivel": 1
     },
@@ -2503,10 +2471,6 @@
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "golpes": [
-    {
-     "chave": "crush_claw",
-     "nivel": 1
-    },
     {
      "chave": "crush_claw",
      "nivel": 1
@@ -4134,10 +4098,6 @@
      "nivel": 1
     },
     {
-     "chave": "gust",
-     "nivel": 1
-    },
-    {
      "chave": "quiver_dance",
      "nivel": 1
     },
@@ -4326,10 +4286,6 @@
      "nivel": 1
     },
     {
-     "chave": "sand_tomb",
-     "nivel": 1
-    },
-    {
      "chave": "scratch",
      "nivel": 1
     },
@@ -4507,10 +4463,6 @@
     },
     {
      "chave": "scratch",
-     "nivel": 1
-    },
-    {
-     "chave": "swift",
      "nivel": 1
     },
     {
@@ -4899,10 +4851,6 @@
     },
     {
      "chave": "low_kick",
-     "nivel": 1
-    },
-    {
-     "chave": "rage",
      "nivel": 1
     },
     {
@@ -5308,10 +5256,6 @@
      "nivel": 1
     },
     {
-     "chave": "submission",
-     "nivel": 1
-    },
-    {
      "chave": "dynamic_punch",
      "nivel": 32
     },
@@ -5373,10 +5317,6 @@
    "golpes": [
     {
      "chave": "confusion",
-     "nivel": 1
-    },
-    {
-     "chave": "kinesis",
      "nivel": 1
     },
     {
@@ -5463,10 +5403,6 @@
    "golpes": [
     {
      "chave": "confusion",
-     "nivel": 1
-    },
-    {
-     "chave": "kinesis",
      "nivel": 1
     },
     {
@@ -5760,10 +5696,6 @@
      "nivel": 1
     },
     {
-     "chave": "strength",
-     "nivel": 1
-    },
-    {
      "chave": "wide_guard",
      "nivel": 1
     },
@@ -6013,10 +5945,6 @@
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "golpes": [
-    {
-     "chave": "leaf_tornado",
-     "nivel": 1
-    },
     {
      "chave": "leaf_tornado",
      "nivel": 1
@@ -6648,10 +6576,6 @@
      "nivel": 1
     },
     {
-     "chave": "fury_attack",
-     "nivel": 1
-    },
-    {
      "chave": "growl",
      "nivel": 1
     },
@@ -6848,10 +6772,6 @@
      "nivel": 1
     },
     {
-     "chave": "withdraw",
-     "nivel": 1
-    },
-    {
      "chave": "yawn",
      "nivel": 1
     },
@@ -7041,10 +6961,6 @@
     },
     {
      "chave": "thunder_wave",
-     "nivel": 1
-    },
-    {
-     "chave": "tri_attack",
      "nivel": 1
     },
     {
@@ -7346,10 +7262,6 @@
      "nivel": 1
     },
     {
-     "chave": "tri_attack",
-     "nivel": 1
-    },
-    {
      "chave": "quick_attack",
      "nivel": 5
     },
@@ -7527,10 +7439,6 @@
     },
     {
      "chave": "icy_wind",
-     "nivel": 1
-    },
-    {
-     "chave": "sheer_cold",
      "nivel": 1
     },
     {
@@ -7727,10 +7635,6 @@
     },
     {
      "chave": "pound",
-     "nivel": 1
-    },
-    {
-     "chave": "venom_drench",
      "nivel": 1
     },
     {
@@ -8062,10 +7966,6 @@
      "nivel": 1
     },
     {
-     "chave": "shadow_punch",
-     "nivel": 1
-    },
-    {
      "chave": "spite",
      "nivel": 1
     },
@@ -8149,10 +8049,6 @@
     },
     {
      "chave": "lick",
-     "nivel": 1
-    },
-    {
-     "chave": "shadow_punch",
      "nivel": 1
     },
     {
@@ -9022,10 +8918,6 @@
      "nivel": 1
     },
     {
-     "chave": "stomp",
-     "nivel": 1
-    },
-    {
      "chave": "psyshock",
      "nivel": 17
     },
@@ -9256,10 +9148,6 @@
      "nivel": 1
     },
     {
-     "chave": "double_kick",
-     "nivel": 1
-    },
-    {
      "chave": "jump_kick",
      "nivel": 1
     },
@@ -9371,10 +9259,6 @@
     },
     {
      "chave": "close_combat",
-     "nivel": 1
-    },
-    {
-     "chave": "comet_punch",
      "nivel": 1
     },
     {
@@ -9656,10 +9540,6 @@
      "nivel": 1
     },
     {
-     "chave": "double_hit",
-     "nivel": 1
-    },
-    {
      "chave": "poison_gas",
      "nivel": 1
     },
@@ -9833,10 +9713,6 @@
    "golpes": [
     {
      "chave": "fury_attack",
-     "nivel": 1
-    },
-    {
-     "chave": "hammer_arm",
      "nivel": 1
     },
     {
@@ -11368,10 +11244,6 @@
      "nivel": 1
     },
     {
-     "chave": "bite",
-     "nivel": 1
-    },
-    {
      "chave": "thrash",
      "nivel": 1
     },
@@ -11660,10 +11532,6 @@
      "nivel": 1
     },
     {
-     "chave": "water_gun",
-     "nivel": 1
-    },
-    {
      "chave": "sand_attack",
      "nivel": 5
     },
@@ -11746,10 +11614,6 @@
      "nivel": 1
     },
     {
-     "chave": "thunder_shock",
-     "nivel": 1
-    },
-    {
      "chave": "sand_attack",
      "nivel": 5
     },
@@ -11815,10 +11679,6 @@
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "golpes": [
-    {
-     "chave": "ember",
-     "nivel": 1
-    },
     {
      "chave": "ember",
      "nivel": 1
@@ -12078,10 +11938,6 @@
      "nivel": 1
     },
     {
-     "chave": "spike_cannon",
-     "nivel": 1
-    },
-    {
      "chave": "withdraw",
      "nivel": 1
     },
@@ -12247,10 +12103,6 @@
     },
     {
      "chave": "scratch",
-     "nivel": 1
-    },
-    {
-     "chave": "slash",
      "nivel": 1
     },
     {
@@ -12962,10 +12814,6 @@
      "nivel": 1
     },
     {
-     "chave": "wing_attack",
-     "nivel": 1
-    },
-    {
      "chave": "wrap",
      "nivel": 1
     },
@@ -13389,10 +13237,6 @@
     },
     {
      "chave": "petal_blizzard",
-     "nivel": 1
-    },
-    {
-     "chave": "petal_dance",
      "nivel": 1
     },
     {
@@ -14124,10 +13968,6 @@
      "nivel": 1
     },
     {
-     "chave": "agility",
-     "nivel": 1
-    },
-    {
      "chave": "coil",
      "nivel": 1
     },
@@ -14708,10 +14548,6 @@
      "nivel": 1
     },
     {
-     "chave": "swords_dance",
-     "nivel": 1
-    },
-    {
      "chave": "venom_drench",
      "nivel": 1
     },
@@ -14807,10 +14643,6 @@
     },
     {
      "chave": "bite",
-     "nivel": 1
-    },
-    {
-     "chave": "cross_poison",
      "nivel": 1
     },
     {
@@ -15006,10 +14838,6 @@
      "nivel": 1
     },
     {
-     "chave": "spit_up",
-     "nivel": 1
-    },
-    {
      "chave": "spotlight",
      "nivel": 1
     },
@@ -15018,15 +14846,7 @@
      "nivel": 1
     },
     {
-     "chave": "stockpile",
-     "nivel": 1
-    },
-    {
      "chave": "supersonic",
-     "nivel": 1
-    },
-    {
-     "chave": "swallow",
      "nivel": 1
     },
     {
@@ -15528,10 +15348,6 @@
      "nivel": 1
     },
     {
-     "chave": "air_slash",
-     "nivel": 1
-    },
-    {
      "chave": "leer",
      "nivel": 1
     },
@@ -15830,10 +15646,6 @@
      "nivel": 1
     },
     {
-     "chave": "thunder_punch",
-     "nivel": 1
-    },
-    {
      "chave": "thunder_shock",
      "nivel": 1
     },
@@ -15929,10 +15741,6 @@
     },
     {
      "chave": "leaf_storm",
-     "nivel": 1
-    },
-    {
-     "chave": "magical_leaf",
      "nivel": 1
     },
     {
@@ -16187,10 +15995,6 @@
     },
     {
      "chave": "rock_throw",
-     "nivel": 1
-    },
-    {
-     "chave": "slam",
      "nivel": 1
     },
     {
@@ -17160,10 +16964,6 @@
      "nivel": 1
     },
     {
-     "chave": "confusion",
-     "nivel": 1
-    },
-    {
      "chave": "helping_hand",
      "nivel": 1
     },
@@ -17243,10 +17043,6 @@
    "golpes": [
     {
      "chave": "helping_hand",
-     "nivel": 1
-    },
-    {
-     "chave": "pursuit",
      "nivel": 1
     },
     {
@@ -17822,10 +17618,6 @@
      "nivel": 1
     },
     {
-     "chave": "autotomize",
-     "nivel": 1
-    },
-    {
      "chave": "bug_bite",
      "nivel": 1
     },
@@ -17835,10 +17627,6 @@
     },
     {
      "chave": "magnet_rise",
-     "nivel": 1
-    },
-    {
-     "chave": "mirror_shot",
      "nivel": 1
     },
     {
@@ -19202,10 +18990,6 @@
      "nivel": 1
     },
     {
-     "chave": "shell_smash",
-     "nivel": 1
-    },
-    {
      "chave": "smog",
      "nivel": 1
     },
@@ -19375,10 +19159,6 @@
    "golpes": [
     {
      "chave": "ancient_power",
-     "nivel": 1
-    },
-    {
-     "chave": "fury_attack",
      "nivel": 1
     },
     {
@@ -19653,10 +19433,6 @@
     },
     {
      "chave": "gunk_shot",
-     "nivel": 1
-    },
-    {
-     "chave": "octazooka",
      "nivel": 1
     },
     {
@@ -20340,10 +20116,6 @@
      "nivel": 1
     },
     {
-     "chave": "fury_attack",
-     "nivel": 1
-    },
-    {
      "chave": "growl",
      "nivel": 1
     },
@@ -20719,10 +20491,6 @@
     },
     {
      "chave": "revenge",
-     "nivel": 1
-    },
-    {
-     "chave": "rolling_kick",
      "nivel": 1
     },
     {

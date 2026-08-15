@@ -83,6 +83,27 @@ describe('auto-status', () => {
       .toEqual([{ type: 'auto_status', itemId: 'burn_heal' }])
   })
 
+  // Item 4 da leva QoL: checkbox por item na secao Auto-status. `false`
+  // explicito tira o item da lista de candidatos do bot, mesmo com estoque —
+  // ausente continua habilitado (default), que os cenarios acima ja cobrem
+  // implicitamente (nenhum seta `autoStatusConfig`).
+  it('item desligado no config nao e usado mesmo com estoque', () => {
+    const { world, player } = cenario('poison', { antidote: 5, awakening: 5 })
+    useGameStateStore.setState({ autoStatusConfig: { antidote: false } })
+
+    expect(updateAutoHeal(world, useGameStateStore.getState(), 0.1)).toEqual([])
+    expect(player.poke.status?.tipo).toBe('poison')
+    expect(useGameStateStore.getState().items.antidote).toBe(5)
+  })
+
+  it('com o mais barato desligado, cai pro proximo que cobre o status', () => {
+    const { world } = cenario('sleep', { awakening: 1, full_heal: 1 })
+    useGameStateStore.setState({ autoStatusConfig: { awakening: false } })
+
+    expect(updateAutoHeal(world, useGameStateStore.getState(), 0.1))
+      .toEqual([{ type: 'auto_status', itemId: 'full_heal' }])
+  })
+
   it('a confusao (volatil) tambem e curada', () => {
     const rng = createRng(3)
     const poke = createPokeInstance(rng, 'charmander', 30)

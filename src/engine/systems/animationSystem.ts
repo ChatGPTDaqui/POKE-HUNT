@@ -20,10 +20,15 @@ export function directionRowFromFacing(facing: Point): number {
   return SECTOR_TO_ROW[sector]
 }
 
-function desiredAnimName(entity: PlayerEntity | EnemyEntity): AnimName {
+export function desiredAnimName(entity: PlayerEntity | EnemyEntity): AnimName {
   if (isDead(entity)) return 'Faint'
   if (entity.attackAnimTimer > 0) return entity.attackAnim as AnimName
-  if (entity.state === 'wander' || entity.state === 'chase') return 'Walk'
+  if (entity.state === 'chase') return 'Walk'
+  // 'wander' cobre duas fases (ver movementSystem.ts#wanderStep/wanderFreely):
+  // perseguindo um wanderTarget (anda de verdade) e pausado entre alvos
+  // (wanderTarget null, wanderPause contando). Sem checar o alvo, o POKE
+  // parado na pausa continuava com o frame de "Walk".
+  if (entity.state === 'wander') return entity.wanderTarget ? 'Walk' : 'Idle'
   return 'Idle'
 }
 
