@@ -58,6 +58,7 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     get autoPotRules() { return s.autoPotRules },
     get autoCatchConfig() { return s.autoCatchConfig },
     get autoCatchRules() { return s.autoCatchRules },
+    get autoStatusConfig() { return s.autoStatusConfig },
     get perfStats() { return s.perfStats },
     get trainer() { return s.trainer },
     get pokedexKills() { return s.pokedexKills },

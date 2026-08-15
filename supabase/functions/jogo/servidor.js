@@ -1170,14 +1170,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "discharge",
-				"levelReq": 1
-			},
-			{
-				"key": "extrasensory",
-				"levelReq": 1
-			},
-			{
 				"key": "leer",
 				"levelReq": 1
 			},
@@ -1253,18 +1245,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "bite",
-				"levelReq": 1
-			},
-			{
-				"key": "eruption",
-				"levelReq": 1
-			},
-			{
-				"key": "extrasensory",
-				"levelReq": 1
-			},
-			{
-				"key": "lava_plume",
 				"levelReq": 1
 			},
 			{
@@ -1350,15 +1330,7 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "bubble_beam",
-				"levelReq": 1
-			},
-			{
 				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "rain_dance",
 				"levelReq": 1
 			},
 			{
@@ -2093,18 +2065,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "leech_seed",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
 				"levelReq": 3
 			},
 			{
@@ -2179,26 +2139,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "leech_seed",
-				"levelReq": 1
-			},
-			{
-				"key": "petal_dance",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "vine_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
 				"levelReq": 3
 			},
 			{
@@ -2236,6 +2176,10 @@ var SPECIES_DATA = {
 			{
 				"key": "double_edge",
 				"levelReq": 31
+			},
+			{
+				"key": "petal_dance",
+				"levelReq": 32
 			},
 			{
 				"key": "worry_seed",
@@ -2361,22 +2305,6 @@ var SPECIES_DATA = {
 			"speed": 40
 		},
 		"abilities": [
-			{
-				"key": "absorb",
-				"levelReq": 1
-			},
-			{
-				"key": "acid",
-				"levelReq": 1
-			},
-			{
-				"key": "growth",
-				"levelReq": 1
-			},
-			{
-				"key": "sweet_scent",
-				"levelReq": 1
-			},
 			{
 				"key": "sweet_scent",
 				"levelReq": 5
@@ -2533,18 +2461,6 @@ var SPECIES_DATA = {
 			"speed": 55
 		},
 		"abilities": [
-			{
-				"key": "growth",
-				"levelReq": 1
-			},
-			{
-				"key": "vine_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "wrap",
-				"levelReq": 1
-			},
 			{
 				"key": "growth",
 				"levelReq": 7
@@ -2940,22 +2856,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "poison_powder",
-				"levelReq": 1
-			},
-			{
-				"key": "razor_leaf",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "razor_leaf",
 				"levelReq": 6
 			},
@@ -3026,30 +2926,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "petal_blizzard",
-				"levelReq": 1
-			},
-			{
-				"key": "petal_dance",
-				"levelReq": 1
-			},
-			{
-				"key": "poison_powder",
-				"levelReq": 1
-			},
-			{
-				"key": "razor_leaf",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "razor_leaf",
 				"levelReq": 6
 			},
@@ -3072,6 +2948,10 @@ var SPECIES_DATA = {
 			{
 				"key": "natural_gift",
 				"levelReq": 26
+			},
+			{
+				"key": "petal_dance",
+				"levelReq": 32
 			},
 			{
 				"key": "sweet_scent",
@@ -3226,22 +3106,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "absorb",
-				"levelReq": 1
-			},
-			{
-				"key": "splash",
-				"levelReq": 1
-			},
-			{
-				"key": "synthesis",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
 				"key": "synthesis",
 				"levelReq": 4
 			},
@@ -3335,22 +3199,6 @@ var SPECIES_DATA = {
 			"speed": 110
 		},
 		"abilities": [
-			{
-				"key": "absorb",
-				"levelReq": 1
-			},
-			{
-				"key": "splash",
-				"levelReq": 1
-			},
-			{
-				"key": "synthesis",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
 			{
 				"key": "synthesis",
 				"levelReq": 4
@@ -3664,7 +3512,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [{
 			"key": "harden",
-			"levelReq": 1
+			"levelReq": 7
 		}],
 		"evolvesTo": "butterfree",
 		"evolvesAtLevel": 10
@@ -3688,12 +3536,8 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "confusion",
-				"levelReq": 1
-			},
-			{
 				"key": "gust",
-				"levelReq": 1
+				"levelReq": 10
 			},
 			{
 				"key": "confusion",
@@ -3812,7 +3656,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [{
 			"key": "harden",
-			"levelReq": 1
+			"levelReq": 7
 		}],
 		"evolvesTo": "beedrill",
 		"evolvesAtLevel": 10
@@ -3836,12 +3680,8 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "fury_attack",
-				"levelReq": 1
-			},
-			{
 				"key": "twineedle",
-				"levelReq": 1
+				"levelReq": 10
 			},
 			{
 				"key": "fury_attack",
@@ -3983,26 +3823,6 @@ var SPECIES_DATA = {
 			"speed": 30
 		},
 		"abilities": [
-			{
-				"key": "absorb",
-				"levelReq": 1
-			},
-			{
-				"key": "cross_poison",
-				"levelReq": 1
-			},
-			{
-				"key": "poison_powder",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "stun_spore",
-				"levelReq": 1
-			},
 			{
 				"key": "poison_powder",
 				"levelReq": 6
@@ -4148,38 +3968,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "bug_buzz",
-				"levelReq": 1
-			},
-			{
-				"key": "disable",
-				"levelReq": 1
-			},
-			{
-				"key": "foresight",
-				"levelReq": 1
-			},
-			{
-				"key": "gust",
-				"levelReq": 1
-			},
-			{
-				"key": "quiver_dance",
-				"levelReq": 1
-			},
-			{
-				"key": "silver_wind",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "supersonic",
 				"levelReq": 5
 			},
@@ -4206,6 +3994,10 @@ var SPECIES_DATA = {
 			{
 				"key": "sleep_powder",
 				"levelReq": 29
+			},
+			{
+				"key": "gust",
+				"levelReq": 31
 			},
 			{
 				"key": "leech_life",
@@ -4513,18 +4305,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "supersonic",
-				"levelReq": 1
-			},
-			{
-				"key": "swift",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
 				"levelReq": 5
 			},
 			{
@@ -4693,42 +4473,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "absorb",
-				"levelReq": 1
-			},
-			{
-				"key": "bug_bite",
-				"levelReq": 1
-			},
-			{
-				"key": "constrict",
-				"levelReq": 1
-			},
-			{
-				"key": "fell_stinger",
-				"levelReq": 1
-			},
-			{
-				"key": "focus_energy",
-				"levelReq": 1
-			},
-			{
-				"key": "poison_sting",
-				"levelReq": 1
-			},
-			{
-				"key": "string_shot",
-				"levelReq": 1
-			},
-			{
-				"key": "swords_dance",
-				"levelReq": 1
-			},
-			{
-				"key": "venom_drench",
-				"levelReq": 1
-			},
-			{
-				"key": "absorb",
 				"levelReq": 5
 			},
 			{
@@ -4746,6 +4490,10 @@ var SPECIES_DATA = {
 			{
 				"key": "shadow_sneak",
 				"levelReq": 19
+			},
+			{
+				"key": "swords_dance",
+				"levelReq": 22
 			},
 			{
 				"key": "fury_swipes",
@@ -4974,46 +4722,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "autotomize",
-				"levelReq": 1
-			},
-			{
-				"key": "bug_bite",
-				"levelReq": 1
-			},
-			{
-				"key": "heavy_slam",
-				"levelReq": 1
-			},
-			{
-				"key": "magnet_rise",
-				"levelReq": 1
-			},
-			{
-				"key": "mirror_shot",
-				"levelReq": 1
-			},
-			{
-				"key": "protect",
-				"levelReq": 1
-			},
-			{
-				"key": "self_destruct",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "toxic_spikes",
-				"levelReq": 1
-			},
-			{
-				"key": "zap_cannon",
-				"levelReq": 1
-			},
-			{
 				"key": "self_destruct",
 				"levelReq": 6
 			},
@@ -5040,6 +4748,14 @@ var SPECIES_DATA = {
 			{
 				"key": "spikes",
 				"levelReq": 28
+			},
+			{
+				"key": "autotomize",
+				"levelReq": 31
+			},
+			{
+				"key": "mirror_shot",
+				"levelReq": 31
 			},
 			{
 				"key": "payback",
@@ -5097,10 +4813,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "bullet_punch",
-				"levelReq": 1
-			},
-			{
-				"key": "feint",
 				"levelReq": 1
 			},
 			{
@@ -5288,18 +5000,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
 				"key": "tail_whip",
 				"levelReq": 4
 			},
@@ -5373,26 +5073,6 @@ var SPECIES_DATA = {
 			"speed": 78
 		},
 		"abilities": [
-			{
-				"key": "flash_cannon",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
-				"key": "withdraw",
-				"levelReq": 1
-			},
 			{
 				"key": "tail_whip",
 				"levelReq": 4
@@ -5554,30 +5234,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "aqua_jet",
-				"levelReq": 1
-			},
-			{
-				"key": "me_first",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
-				"key": "water_sport",
-				"levelReq": 1
-			},
-			{
 				"key": "tail_whip",
 				"levelReq": 4
 			},
@@ -5729,18 +5385,6 @@ var SPECIES_DATA = {
 			"speed": 90
 		},
 		"abilities": [
-			{
-				"key": "hypnosis",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
-				"key": "water_sport",
-				"levelReq": 1
-			},
 			{
 				"key": "water_gun",
 				"levelReq": 5
@@ -5901,30 +5545,6 @@ var SPECIES_DATA = {
 			"speed": 100
 		},
 		"abilities": [
-			{
-				"key": "acid",
-				"levelReq": 1
-			},
-			{
-				"key": "constrict",
-				"levelReq": 1
-			},
-			{
-				"key": "poison_sting",
-				"levelReq": 1
-			},
-			{
-				"key": "reflect_type",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 1
-			},
-			{
-				"key": "wring_out",
-				"levelReq": 1
-			},
 			{
 				"key": "supersonic",
 				"levelReq": 4
@@ -6098,30 +5718,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "curse",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "heal_pulse",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "withdraw",
-				"levelReq": 1
-			},
-			{
-				"key": "yawn",
-				"levelReq": 1
-			},
-			{
 				"key": "growl",
 				"levelReq": 5
 			},
@@ -6152,6 +5748,10 @@ var SPECIES_DATA = {
 			{
 				"key": "slack_off",
 				"levelReq": 36
+			},
+			{
+				"key": "withdraw",
+				"levelReq": 37
 			},
 			{
 				"key": "amnesia",
@@ -6287,26 +5887,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "headbutt",
-				"levelReq": 1
-			},
-			{
-				"key": "icy_wind",
-				"levelReq": 1
-			},
-			{
-				"key": "sheer_cold",
-				"levelReq": 1
-			},
-			{
-				"key": "signal_beam",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
 				"levelReq": 3
 			},
 			{
@@ -6344,6 +5924,10 @@ var SPECIES_DATA = {
 			{
 				"key": "brine",
 				"levelReq": 33
+			},
+			{
+				"key": "sheer_cold",
+				"levelReq": 34
 			},
 			{
 				"key": "take_down",
@@ -6564,26 +6148,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "mud_sport",
-				"levelReq": 1
-			},
-			{
-				"key": "vice_grip",
-				"levelReq": 1
-			},
-			{
-				"key": "wide_guard",
-				"levelReq": 1
-			},
-			{
 				"key": "vice_grip",
 				"levelReq": 5
 			},
@@ -6728,26 +6292,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "hydro_pump",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "smokescreen",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
 				"key": "smokescreen",
 				"levelReq": 5
 			},
@@ -6891,30 +6435,6 @@ var SPECIES_DATA = {
 			"speed": 68
 		},
 		"abilities": [
-			{
-				"key": "megahorn",
-				"levelReq": 1
-			},
-			{
-				"key": "peck",
-				"levelReq": 1
-			},
-			{
-				"key": "poison_jab",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "water_sport",
-				"levelReq": 1
-			},
 			{
 				"key": "supersonic",
 				"levelReq": 5
@@ -7115,11 +6635,7 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "bite",
-				"levelReq": 1
-			},
-			{
-				"key": "thrash",
-				"levelReq": 1
+				"levelReq": 20
 			},
 			{
 				"key": "leer",
@@ -7360,18 +6876,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
 				"key": "water_gun",
 				"levelReq": 6
 			},
@@ -7449,26 +6953,6 @@ var SPECIES_DATA = {
 			"speed": 78
 		},
 		"abilities": [
-			{
-				"key": "agility",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "rage",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
 			{
 				"key": "water_gun",
 				"levelReq": 6
@@ -7634,42 +7118,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "eerie_impulse",
-				"levelReq": 1
-			},
-			{
-				"key": "electro_ball",
-				"levelReq": 1
-			},
-			{
-				"key": "spit_up",
-				"levelReq": 1
-			},
-			{
-				"key": "spotlight",
-				"levelReq": 1
-			},
-			{
-				"key": "stockpile",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 1
-			},
-			{
-				"key": "swallow",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_wave",
-				"levelReq": 1
-			},
-			{
 				"key": "thunder_wave",
 				"levelReq": 6
 			},
@@ -7692,6 +7140,18 @@ var SPECIES_DATA = {
 			{
 				"key": "spark",
 				"levelReq": 23
+			},
+			{
+				"key": "spit_up",
+				"levelReq": 27
+			},
+			{
+				"key": "stockpile",
+				"levelReq": 27
+			},
+			{
+				"key": "swallow",
+				"levelReq": 27
 			},
 			{
 				"key": "signal_beam",
@@ -7833,22 +7293,6 @@ var SPECIES_DATA = {
 			"speed": 50
 		},
 		"abilities": [
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
-				"key": "water_sport",
-				"levelReq": 1
-			},
 			{
 				"key": "tail_whip",
 				"levelReq": 2
@@ -8053,18 +7497,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "mud_sport",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
-				"key": "mud_sport",
 				"levelReq": 5
 			},
 			{
@@ -8129,18 +7561,6 @@ var SPECIES_DATA = {
 			"speed": 85
 		},
 		"abilities": [
-			{
-				"key": "destiny_bond",
-				"levelReq": 1
-			},
-			{
-				"key": "fell_stinger",
-				"levelReq": 1
-			},
-			{
-				"key": "hydro_pump",
-				"levelReq": 1
-			},
 			{
 				"key": "poison_sting",
 				"levelReq": 1
@@ -8412,34 +7832,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "aurora_beam",
-				"levelReq": 1
-			},
-			{
-				"key": "constrict",
-				"levelReq": 1
-			},
-			{
-				"key": "gunk_shot",
-				"levelReq": 1
-			},
-			{
-				"key": "octazooka",
-				"levelReq": 1
-			},
-			{
-				"key": "psybeam",
-				"levelReq": 1
-			},
-			{
-				"key": "rock_blast",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
 				"key": "constrict",
 				"levelReq": 6
 			},
@@ -8458,6 +7850,10 @@ var SPECIES_DATA = {
 			{
 				"key": "focus_energy",
 				"levelReq": 22
+			},
+			{
+				"key": "octazooka",
+				"levelReq": 25
 			},
 			{
 				"key": "wring_out",
@@ -8514,10 +7910,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "bubble_beam",
-				"levelReq": 1
-			},
-			{
 				"key": "bullet_seed",
 				"levelReq": 1
 			},
@@ -8531,10 +7923,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "signal_beam",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
 				"levelReq": 1
 			},
 			{
@@ -8617,22 +8005,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "hydro_pump",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "smokescreen",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
 				"levelReq": 1
 			},
 			{
@@ -8784,18 +8156,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "gust",
-				"levelReq": 1
-			},
-			{
-				"key": "sand_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "sand_attack",
 				"levelReq": 5
 			},
@@ -8869,26 +8229,6 @@ var SPECIES_DATA = {
 			"speed": 101
 		},
 		"abilities": [
-			{
-				"key": "gust",
-				"levelReq": 1
-			},
-			{
-				"key": "hurricane",
-				"levelReq": 1
-			},
-			{
-				"key": "quick_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "sand_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
 			{
 				"key": "sand_attack",
 				"levelReq": 5
@@ -8964,30 +8304,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "focus_energy",
-				"levelReq": 1
-			},
-			{
-				"key": "quick_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "scary_face",
-				"levelReq": 1
-			},
-			{
-				"key": "swords_dance",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
 				"key": "quick_attack",
 				"levelReq": 4
 			},
@@ -9010,6 +8326,10 @@ var SPECIES_DATA = {
 			{
 				"key": "assurance",
 				"levelReq": 19
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 20
 			},
 			{
 				"key": "crunch",
@@ -9053,30 +8373,6 @@ var SPECIES_DATA = {
 			"speed": 100
 		},
 		"abilities": [
-			{
-				"key": "drill_run",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "peck",
-				"levelReq": 1
-			},
-			{
-				"key": "pluck",
-				"levelReq": 1
-			},
-			{
-				"key": "pursuit",
-				"levelReq": 1
-			},
 			{
 				"key": "leer",
 				"levelReq": 4
@@ -9325,34 +8621,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "bite",
-				"levelReq": 1
-			},
-			{
-				"key": "fake_out",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "play_rough",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "swift",
-				"levelReq": 1
-			},
-			{
-				"key": "switcheroo",
-				"levelReq": 1
-			},
-			{
-				"key": "bite",
 				"levelReq": 6
 			},
 			{
@@ -9374,6 +8642,10 @@ var SPECIES_DATA = {
 			{
 				"key": "taunt",
 				"levelReq": 25
+			},
+			{
+				"key": "swift",
+				"levelReq": 28
 			},
 			{
 				"key": "power_gem",
@@ -9425,10 +8697,6 @@ var SPECIES_DATA = {
 			"speed": 60
 		},
 		"abilities": [
-			{
-				"key": "brave_bird",
-				"levelReq": 1
-			},
 			{
 				"key": "fury_cutter",
 				"levelReq": 1
@@ -9610,26 +8878,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "peck",
-				"levelReq": 1
-			},
-			{
-				"key": "quick_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "rage",
-				"levelReq": 1
-			},
-			{
-				"key": "tri_attack",
-				"levelReq": 1
-			},
-			{
 				"key": "quick_attack",
 				"levelReq": 5
 			},
@@ -9660,6 +8908,10 @@ var SPECIES_DATA = {
 			{
 				"key": "uproar",
 				"levelReq": 29
+			},
+			{
+				"key": "tri_attack",
+				"levelReq": 31
 			},
 			{
 				"key": "acupressure",
@@ -10318,30 +9570,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "agility",
-				"levelReq": 1
-			},
-			{
-				"key": "coil",
-				"levelReq": 1
-			},
-			{
-				"key": "defense_curl",
-				"levelReq": 1
-			},
-			{
-				"key": "foresight",
-				"levelReq": 1
-			},
-			{
-				"key": "quick_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
 				"key": "defense_curl",
 				"levelReq": 4
 			},
@@ -10352,6 +9580,10 @@ var SPECIES_DATA = {
 			{
 				"key": "fury_swipes",
 				"levelReq": 13
+			},
+			{
+				"key": "agility",
+				"levelReq": 15
 			},
 			{
 				"key": "helping_hand",
@@ -10505,30 +9737,6 @@ var SPECIES_DATA = {
 			"speed": 70
 		},
 		"abilities": [
-			{
-				"key": "dream_eater",
-				"levelReq": 1
-			},
-			{
-				"key": "foresight",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "hypnosis",
-				"levelReq": 1
-			},
-			{
-				"key": "sky_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
 			{
 				"key": "hypnosis",
 				"levelReq": 4
@@ -10948,10 +10156,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "fling",
-				"levelReq": 1
-			},
-			{
 				"key": "lick",
 				"levelReq": 1
 			},
@@ -11021,30 +10225,6 @@ var SPECIES_DATA = {
 			"speed": 55
 		},
 		"abilities": [
-			{
-				"key": "covet",
-				"levelReq": 1
-			},
-			{
-				"key": "fake_tears",
-				"levelReq": 1
-			},
-			{
-				"key": "hammer_arm",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "lick",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
 			{
 				"key": "fury_swipes",
 				"levelReq": 8
@@ -11120,15 +10300,7 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "magic_coat",
-				"levelReq": 1
-			},
-			{
 				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "zap_cannon",
 				"levelReq": 1
 			},
 			{
@@ -11201,10 +10373,6 @@ var SPECIES_DATA = {
 			"speed": 85
 		},
 		"abilities": [
-			{
-				"key": "me_first",
-				"levelReq": 1
-			},
 			{
 				"key": "tackle",
 				"levelReq": 1
@@ -11286,48 +10454,10 @@ var SPECIES_DATA = {
 			"defEsp": 45,
 			"speed": 75
 		},
-		"abilities": [
-			{
-				"key": "sketch",
-				"levelReq": 1
-			},
-			{
-				"key": "sketch",
-				"levelReq": 11
-			},
-			{
-				"key": "sketch",
-				"levelReq": 21
-			},
-			{
-				"key": "sketch",
-				"levelReq": 31
-			},
-			{
-				"key": "sketch",
-				"levelReq": 41
-			},
-			{
-				"key": "sketch",
-				"levelReq": 51
-			},
-			{
-				"key": "sketch",
-				"levelReq": 61
-			},
-			{
-				"key": "sketch",
-				"levelReq": 71
-			},
-			{
-				"key": "sketch",
-				"levelReq": 81
-			},
-			{
-				"key": "sketch",
-				"levelReq": 91
-			}
-		],
+		"abilities": [{
+			"key": "sketch",
+			"levelReq": 11
+		}],
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
@@ -11424,22 +10554,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "defense_curl",
-				"levelReq": 1
-			},
-			{
-				"key": "mud_sport",
-				"levelReq": 1
-			},
-			{
-				"key": "rock_polish",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "mud_sport",
 				"levelReq": 4
 			},
@@ -11519,18 +10633,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "defense_curl",
-				"levelReq": 1
-			},
-			{
-				"key": "heavy_slam",
-				"levelReq": 1
-			},
-			{
-				"key": "mud_sport",
-				"levelReq": 1
-			},
-			{
-				"key": "rock_polish",
 				"levelReq": 1
 			},
 			{
@@ -11809,26 +10911,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "bite",
-				"levelReq": 1
-			},
-			{
-				"key": "constrict",
-				"levelReq": 1
-			},
-			{
-				"key": "hydro_pump",
-				"levelReq": 1
-			},
-			{
-				"key": "spike_cannon",
-				"levelReq": 1
-			},
-			{
-				"key": "withdraw",
-				"levelReq": 1
-			},
-			{
-				"key": "bite",
 				"levelReq": 7
 			},
 			{
@@ -11858,6 +10940,10 @@ var SPECIES_DATA = {
 			{
 				"key": "ancient_power",
 				"levelReq": 37
+			},
+			{
+				"key": "spike_cannon",
+				"levelReq": 40
 			},
 			{
 				"key": "tickle",
@@ -11969,34 +11055,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "absorb",
-				"levelReq": 1
-			},
-			{
-				"key": "feint",
-				"levelReq": 1
-			},
-			{
-				"key": "harden",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "night_slash",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "slash",
-				"levelReq": 1
-			},
-			{
-				"key": "absorb",
 				"levelReq": 6
 			},
 			{
@@ -12022,6 +11080,10 @@ var SPECIES_DATA = {
 			{
 				"key": "mega_drain",
 				"levelReq": 36
+			},
+			{
+				"key": "slash",
+				"levelReq": 40
 			},
 			{
 				"key": "metal_sound",
@@ -12071,10 +11133,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "ice_fang",
-				"levelReq": 1
-			},
-			{
-				"key": "iron_head",
 				"levelReq": 1
 			},
 			{
@@ -12157,18 +11215,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "copycat",
-				"levelReq": 1
-			},
-			{
-				"key": "flail",
-				"levelReq": 1
-			},
-			{
-				"key": "low_kick",
-				"levelReq": 1
-			},
-			{
-				"key": "rock_throw",
 				"levelReq": 1
 			},
 			{
@@ -12340,22 +11386,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "bite",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "sandstorm",
-				"levelReq": 1
-			},
-			{
-				"key": "screech",
-				"levelReq": 1
-			},
-			{
 				"key": "sandstorm",
 				"levelReq": 5
 			},
@@ -12425,34 +11455,6 @@ var SPECIES_DATA = {
 			"speed": 61
 		},
 		"abilities": [
-			{
-				"key": "bite",
-				"levelReq": 1
-			},
-			{
-				"key": "fire_fang",
-				"levelReq": 1
-			},
-			{
-				"key": "ice_fang",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "sandstorm",
-				"levelReq": 1
-			},
-			{
-				"key": "screech",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_fang",
-				"levelReq": 1
-			},
 			{
 				"key": "sandstorm",
 				"levelReq": 5
@@ -12618,26 +11620,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "crush_claw",
-				"levelReq": 1
-			},
-			{
-				"key": "defense_curl",
-				"levelReq": 1
-			},
-			{
-				"key": "poison_sting",
-				"levelReq": 1
-			},
-			{
-				"key": "sand_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
 				"key": "sand_attack",
 				"levelReq": 3
 			},
@@ -12668,6 +11650,10 @@ var SPECIES_DATA = {
 			{
 				"key": "fury_swipes",
 				"levelReq": 20
+			},
+			{
+				"key": "crush_claw",
+				"levelReq": 22
 			},
 			{
 				"key": "sand_tomb",
@@ -12799,34 +11785,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "night_slash",
-				"levelReq": 1
-			},
-			{
-				"key": "rototiller",
-				"levelReq": 1
-			},
-			{
-				"key": "sand_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "sand_tomb",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "tri_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
 				"levelReq": 4
 			},
 			{
@@ -12852,6 +11810,10 @@ var SPECIES_DATA = {
 			{
 				"key": "mud_bomb",
 				"levelReq": 25
+			},
+			{
+				"key": "sand_tomb",
+				"levelReq": 26
 			},
 			{
 				"key": "earth_power",
@@ -12981,22 +11943,6 @@ var SPECIES_DATA = {
 			"speed": 45
 		},
 		"abilities": [
-			{
-				"key": "bone_club",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "headbutt",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
 			{
 				"key": "tail_whip",
 				"levelReq": 3
@@ -13163,30 +12109,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "fury_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "hammer_arm",
-				"levelReq": 1
-			},
-			{
-				"key": "horn_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "horn_drill",
-				"levelReq": 1
-			},
-			{
-				"key": "scary_face",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "fury_attack",
 				"levelReq": 5
 			},
 			{
@@ -13224,6 +12146,10 @@ var SPECIES_DATA = {
 			{
 				"key": "stone_edge",
 				"levelReq": 41
+			},
+			{
+				"key": "hammer_arm",
+				"levelReq": 42
 			},
 			{
 				"key": "earthquake",
@@ -13416,34 +12342,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "bulldoze",
-				"levelReq": 1
-			},
-			{
-				"key": "defense_curl",
-				"levelReq": 1
-			},
-			{
-				"key": "fire_fang",
-				"levelReq": 1
-			},
-			{
-				"key": "fury_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "horn_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_fang",
-				"levelReq": 1
-			},
-			{
 				"key": "rapid_spin",
 				"levelReq": 6
 			},
@@ -13462,6 +12360,10 @@ var SPECIES_DATA = {
 			{
 				"key": "slam",
 				"levelReq": 24
+			},
+			{
+				"key": "fury_attack",
+				"levelReq": 25
 			},
 			{
 				"key": "magnitude",
@@ -13501,18 +12403,6 @@ var SPECIES_DATA = {
 			"speed": 80
 		},
 		"abilities": [
-			{
-				"key": "ember",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
 			{
 				"key": "ember",
 				"levelReq": 7
@@ -13576,42 +12466,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "air_slash",
-				"levelReq": 1
-			},
-			{
-				"key": "dragon_claw",
-				"levelReq": 1
-			},
-			{
-				"key": "ember",
-				"levelReq": 1
-			},
-			{
-				"key": "flare_blitz",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "heat_wave",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "shadow_claw",
-				"levelReq": 1
-			},
-			{
-				"key": "wing_attack",
-				"levelReq": 1
-			},
-			{
 				"key": "ember",
 				"levelReq": 7
 			},
@@ -13634,6 +12488,10 @@ var SPECIES_DATA = {
 			{
 				"key": "flame_burst",
 				"levelReq": 32
+			},
+			{
+				"key": "wing_attack",
+				"levelReq": 36
 			},
 			{
 				"key": "slash",
@@ -13900,34 +12758,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "ember",
-				"levelReq": 1
-			},
-			{
-				"key": "fury_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "megahorn",
-				"levelReq": 1
-			},
-			{
-				"key": "poison_jab",
-				"levelReq": 1
-			},
-			{
-				"key": "quick_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
 				"key": "tail_whip",
 				"levelReq": 4
 			},
@@ -13964,6 +12794,10 @@ var SPECIES_DATA = {
 				"levelReq": 37
 			},
 			{
+				"key": "fury_attack",
+				"levelReq": 40
+			},
+			{
 				"key": "fire_blast",
 				"levelReq": 41
 			},
@@ -13997,18 +12831,6 @@ var SPECIES_DATA = {
 			"speed": 93
 		},
 		"abilities": [
-			{
-				"key": "ember",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "smog",
-				"levelReq": 1
-			},
 			{
 				"key": "ember",
 				"levelReq": 5
@@ -14166,18 +12988,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "smokescreen",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "smokescreen",
 				"levelReq": 6
 			},
@@ -14255,34 +13065,6 @@ var SPECIES_DATA = {
 			"speed": 100
 		},
 		"abilities": [
-			{
-				"key": "double_edge",
-				"levelReq": 1
-			},
-			{
-				"key": "ember",
-				"levelReq": 1
-			},
-			{
-				"key": "eruption",
-				"levelReq": 1
-			},
-			{
-				"key": "gyro_ball",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "smokescreen",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
 			{
 				"key": "smokescreen",
 				"levelReq": 6
@@ -14448,30 +13230,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "earth_power",
-				"levelReq": 1
-			},
-			{
-				"key": "ember",
-				"levelReq": 1
-			},
-			{
-				"key": "rock_throw",
-				"levelReq": 1
-			},
-			{
-				"key": "shell_smash",
-				"levelReq": 1
-			},
-			{
-				"key": "smog",
-				"levelReq": 1
-			},
-			{
-				"key": "yawn",
-				"levelReq": 1
-			},
-			{
 				"key": "ember",
 				"levelReq": 6
 			},
@@ -14510,6 +13268,10 @@ var SPECIES_DATA = {
 			{
 				"key": "amnesia",
 				"levelReq": 36
+			},
+			{
+				"key": "shell_smash",
+				"levelReq": 38
 			},
 			{
 				"key": "body_slam",
@@ -14816,34 +13578,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "electric_terrain",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_shock",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_wave",
-				"levelReq": 1
-			},
-			{
-				"key": "tri_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "zap_cannon",
-				"levelReq": 1
-			},
-			{
 				"key": "thunder_shock",
 				"levelReq": 5
 			},
@@ -14878,6 +13612,10 @@ var SPECIES_DATA = {
 			{
 				"key": "electro_ball",
 				"levelReq": 29
+			},
+			{
+				"key": "tri_attack",
+				"levelReq": 30
 			},
 			{
 				"key": "flash_cannon",
@@ -15020,26 +13758,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "charge",
-				"levelReq": 1
-			},
-			{
-				"key": "eerie_impulse",
-				"levelReq": 1
-			},
-			{
-				"key": "magnetic_flux",
-				"levelReq": 1
-			},
-			{
-				"key": "sonic_boom",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "sonic_boom",
 				"levelReq": 4
 			},
@@ -15121,18 +13839,6 @@ var SPECIES_DATA = {
 			"speed": 105
 		},
 		"abilities": [
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "quick_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_shock",
-				"levelReq": 1
-			},
 			{
 				"key": "thunder_shock",
 				"levelReq": 5
@@ -15332,22 +14038,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_shock",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_wave",
-				"levelReq": 1
-			},
-			{
 				"key": "thunder_wave",
 				"levelReq": 4
 			},
@@ -15422,46 +14112,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "dragon_pulse",
-				"levelReq": 1
-			},
-			{
-				"key": "fire_punch",
-				"levelReq": 1
-			},
-			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "ion_deluge",
-				"levelReq": 1
-			},
-			{
-				"key": "magnetic_flux",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_punch",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_shock",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_wave",
-				"levelReq": 1
-			},
-			{
-				"key": "zap_cannon",
-				"levelReq": 1
-			},
-			{
 				"key": "thunder_wave",
 				"levelReq": 4
 			},
@@ -15488,6 +14138,10 @@ var SPECIES_DATA = {
 			{
 				"key": "confuse_ray",
 				"levelReq": 29
+			},
+			{
+				"key": "thunder_punch",
+				"levelReq": 30
 			},
 			{
 				"key": "power_gem",
@@ -15708,38 +14362,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "bite",
-				"levelReq": 1
-			},
-			{
-				"key": "crunch",
-				"levelReq": 1
-			},
-			{
-				"key": "fire_fang",
-				"levelReq": 1
-			},
-			{
-				"key": "ice_fang",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "poison_sting",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_fang",
-				"levelReq": 1
-			},
-			{
-				"key": "wrap",
-				"levelReq": 1
-			},
-			{
 				"key": "poison_sting",
 				"levelReq": 4
 			},
@@ -15758,6 +14380,10 @@ var SPECIES_DATA = {
 			{
 				"key": "acid",
 				"levelReq": 20
+			},
+			{
+				"key": "crunch",
+				"levelReq": 22
 			},
 			{
 				"key": "spit_up",
@@ -15896,14 +14522,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "growl",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
 				"key": "tail_whip",
 				"levelReq": 7
 			},
@@ -15979,10 +14597,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "superpower",
 				"levelReq": 1
 			},
 			{
@@ -16102,14 +14716,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "peck",
-				"levelReq": 1
-			},
-			{
 				"key": "focus_energy",
 				"levelReq": 7
 			},
@@ -16181,10 +14787,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "focus_energy",
-				"levelReq": 1
-			},
-			{
-				"key": "megahorn",
 				"levelReq": 1
 			},
 			{
@@ -16315,26 +14917,6 @@ var SPECIES_DATA = {
 			"speed": 90
 		},
 		"abilities": [
-			{
-				"key": "absorb",
-				"levelReq": 1
-			},
-			{
-				"key": "astonish",
-				"levelReq": 1
-			},
-			{
-				"key": "bite",
-				"levelReq": 1
-			},
-			{
-				"key": "screech",
-				"levelReq": 1
-			},
-			{
-				"key": "supersonic",
-				"levelReq": 1
-			},
 			{
 				"key": "supersonic",
 				"levelReq": 5
@@ -16501,26 +15083,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "harden",
-				"levelReq": 1
-			},
-			{
-				"key": "mud_slap",
-				"levelReq": 1
-			},
-			{
-				"key": "poison_gas",
-				"levelReq": 1
-			},
-			{
-				"key": "pound",
-				"levelReq": 1
-			},
-			{
-				"key": "venom_drench",
-				"levelReq": 1
-			},
-			{
-				"key": "harden",
 				"levelReq": 4
 			},
 			{
@@ -16558,6 +15120,10 @@ var SPECIES_DATA = {
 			{
 				"key": "screech",
 				"levelReq": 37
+			},
+			{
+				"key": "venom_drench",
+				"levelReq": 38
 			},
 			{
 				"key": "gunk_shot",
@@ -16680,26 +15246,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "double_hit",
-				"levelReq": 1
-			},
-			{
-				"key": "poison_gas",
-				"levelReq": 1
-			},
-			{
-				"key": "smog",
-				"levelReq": 1
-			},
-			{
-				"key": "smokescreen",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "smog",
 				"levelReq": 4
 			},
@@ -16734,6 +15280,10 @@ var SPECIES_DATA = {
 			{
 				"key": "sludge_bomb",
 				"levelReq": 34
+			},
+			{
+				"key": "double_hit",
+				"levelReq": 35
 			},
 			{
 				"key": "explosion",
@@ -16872,34 +15422,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "final_gambit",
-				"levelReq": 1
-			},
-			{
-				"key": "fling",
-				"levelReq": 1
-			},
-			{
-				"key": "focus_energy",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "low_kick",
-				"levelReq": 1
-			},
-			{
-				"key": "rage",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
 				"key": "fury_swipes",
 				"levelReq": 5
 			},
@@ -16926,6 +15448,10 @@ var SPECIES_DATA = {
 			{
 				"key": "assurance",
 				"levelReq": 26
+			},
+			{
+				"key": "rage",
+				"levelReq": 28
 			},
 			{
 				"key": "punishment",
@@ -17069,22 +15595,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "focus_energy",
-				"levelReq": 1
-			},
-			{
-				"key": "karate_chop",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "low_kick",
-				"levelReq": 1
-			},
-			{
-				"key": "focus_energy",
 				"levelReq": 3
 			},
 			{
@@ -17165,14 +15675,6 @@ var SPECIES_DATA = {
 			"speed": 55
 		},
 		"abilities": [
-			{
-				"key": "focus_energy",
-				"levelReq": 1
-			},
-			{
-				"key": "karate_chop",
-				"levelReq": 1
-			},
 			{
 				"key": "leer",
 				"levelReq": 1
@@ -17272,38 +15774,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "close_combat",
-				"levelReq": 1
-			},
-			{
-				"key": "double_kick",
-				"levelReq": 1
-			},
-			{
-				"key": "jump_kick",
-				"levelReq": 1
-			},
-			{
-				"key": "meditate",
-				"levelReq": 1
-			},
-			{
-				"key": "mega_kick",
-				"levelReq": 1
-			},
-			{
-				"key": "revenge",
-				"levelReq": 1
-			},
-			{
-				"key": "reversal",
-				"levelReq": 1
-			},
-			{
-				"key": "rolling_kick",
-				"levelReq": 1
-			},
-			{
 				"key": "meditate",
 				"levelReq": 5
 			},
@@ -17318,6 +15788,10 @@ var SPECIES_DATA = {
 			{
 				"key": "brick_break",
 				"levelReq": 17
+			},
+			{
+				"key": "double_kick",
+				"levelReq": 20
 			},
 			{
 				"key": "focus_energy",
@@ -17386,31 +15860,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "agility",
-				"levelReq": 1
-			},
-			{
-				"key": "close_combat",
-				"levelReq": 1
-			},
-			{
 				"key": "comet_punch",
-				"levelReq": 1
-			},
-			{
-				"key": "counter",
-				"levelReq": 1
-			},
-			{
-				"key": "focus_punch",
-				"levelReq": 1
-			},
-			{
-				"key": "mach_punch",
-				"levelReq": 1
-			},
-			{
-				"key": "pursuit",
 				"levelReq": 1
 			},
 			{
@@ -17541,30 +15991,6 @@ var SPECIES_DATA = {
 			"speed": 95
 		},
 		"abilities": [
-			{
-				"key": "draining_kiss",
-				"levelReq": 1
-			},
-			{
-				"key": "lick",
-				"levelReq": 1
-			},
-			{
-				"key": "lovely_kiss",
-				"levelReq": 1
-			},
-			{
-				"key": "perish_song",
-				"levelReq": 1
-			},
-			{
-				"key": "pound",
-				"levelReq": 1
-			},
-			{
-				"key": "powder_snow",
-				"levelReq": 1
-			},
 			{
 				"key": "lick",
 				"levelReq": 5
@@ -17726,30 +16152,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "ancient_power",
-				"levelReq": 1
-			},
-			{
-				"key": "fury_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "mud_sport",
-				"levelReq": 1
-			},
-			{
-				"key": "odor_sleuth",
-				"levelReq": 1
-			},
-			{
-				"key": "peck",
-				"levelReq": 1
-			},
-			{
-				"key": "powder_snow",
-				"levelReq": 1
-			},
-			{
 				"key": "mud_sport",
 				"levelReq": 5
 			},
@@ -17780,6 +16182,10 @@ var SPECIES_DATA = {
 			{
 				"key": "take_down",
 				"levelReq": 28
+			},
+			{
+				"key": "fury_attack",
+				"levelReq": 33
 			},
 			{
 				"key": "mist",
@@ -18227,30 +16633,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "air_slash",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "night_shade",
-				"levelReq": 1
-			},
-			{
-				"key": "peck",
-				"levelReq": 1
-			},
-			{
-				"key": "tailwind",
-				"levelReq": 1
-			},
-			{
-				"key": "teleport",
-				"levelReq": 1
-			},
-			{
 				"key": "night_shade",
 				"levelReq": 6
 			},
@@ -18273,6 +16655,10 @@ var SPECIES_DATA = {
 			{
 				"key": "confuse_ray",
 				"levelReq": 23
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 25
 			},
 			{
 				"key": "wish",
@@ -18354,18 +16740,10 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "confusion",
-				"levelReq": 1
+				"levelReq": 16
 			},
 			{
 				"key": "kinesis",
-				"levelReq": 1
-			},
-			{
-				"key": "teleport",
-				"levelReq": 1
-			},
-			{
-				"key": "confusion",
 				"levelReq": 16
 			},
 			{
@@ -18438,10 +16816,6 @@ var SPECIES_DATA = {
 			"speed": 120
 		},
 		"abilities": [
-			{
-				"key": "confusion",
-				"levelReq": 1
-			},
 			{
 				"key": "kinesis",
 				"levelReq": 1
@@ -18614,38 +16988,6 @@ var SPECIES_DATA = {
 			"speed": 67
 		},
 		"abilities": [
-			{
-				"key": "confusion",
-				"levelReq": 1
-			},
-			{
-				"key": "disable",
-				"levelReq": 1
-			},
-			{
-				"key": "future_sight",
-				"levelReq": 1
-			},
-			{
-				"key": "hypnosis",
-				"levelReq": 1
-			},
-			{
-				"key": "nasty_plot",
-				"levelReq": 1
-			},
-			{
-				"key": "nightmare",
-				"levelReq": 1
-			},
-			{
-				"key": "pound",
-				"levelReq": 1
-			},
-			{
-				"key": "switcheroo",
-				"levelReq": 1
-			},
 			{
 				"key": "disable",
 				"levelReq": 5
@@ -18873,22 +17215,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "hypnosis",
-				"levelReq": 1
-			},
-			{
-				"key": "lick",
-				"levelReq": 1
-			},
-			{
-				"key": "shadow_punch",
-				"levelReq": 1
-			},
-			{
-				"key": "spite",
-				"levelReq": 1
-			},
-			{
 				"key": "spite",
 				"levelReq": 5
 			},
@@ -18911,6 +17237,10 @@ var SPECIES_DATA = {
 			{
 				"key": "sucker_punch",
 				"levelReq": 22
+			},
+			{
+				"key": "shadow_punch",
+				"levelReq": 25
 			},
 			{
 				"key": "payback",
@@ -18972,10 +17302,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "shadow_punch",
-				"levelReq": 1
-			},
-			{
-				"key": "spite",
 				"levelReq": 1
 			},
 			{
@@ -19385,34 +17711,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "ember",
-				"levelReq": 1
-			},
-			{
-				"key": "howl",
-				"levelReq": 1
-			},
-			{
-				"key": "inferno",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "nasty_plot",
-				"levelReq": 1
-			},
-			{
-				"key": "smog",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_fang",
-				"levelReq": 1
-			},
-			{
 				"key": "howl",
 				"levelReq": 4
 			},
@@ -19569,22 +17867,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_wave",
-				"levelReq": 1
-			},
-			{
-				"key": "twister",
-				"levelReq": 1
-			},
-			{
-				"key": "wrap",
-				"levelReq": 1
-			},
-			{
 				"key": "thunder_wave",
 				"levelReq": 5
 			},
@@ -19655,42 +17937,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "fire_punch",
-				"levelReq": 1
-			},
-			{
-				"key": "hurricane",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "roost",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_punch",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_wave",
-				"levelReq": 1
-			},
-			{
-				"key": "twister",
-				"levelReq": 1
-			},
-			{
-				"key": "wing_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "wrap",
-				"levelReq": 1
-			},
-			{
 				"key": "thunder_wave",
 				"levelReq": 5
 			},
@@ -19725,6 +17971,10 @@ var SPECIES_DATA = {
 			{
 				"key": "safeguard",
 				"levelReq": 53
+			},
+			{
+				"key": "wing_attack",
+				"levelReq": 55
 			},
 			{
 				"key": "dragon_dance",
@@ -19978,38 +18228,6 @@ var SPECIES_DATA = {
 			"speed": 45
 		},
 		"abilities": [
-			{
-				"key": "charm",
-				"levelReq": 1
-			},
-			{
-				"key": "fire_fang",
-				"levelReq": 1
-			},
-			{
-				"key": "ice_fang",
-				"levelReq": 1
-			},
-			{
-				"key": "outrage",
-				"levelReq": 1
-			},
-			{
-				"key": "scary_face",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_fang",
-				"levelReq": 1
-			},
 			{
 				"key": "bite",
 				"levelReq": 7
@@ -21094,17 +19312,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"extrasensory": {
-		"id": "extrasensory",
-		"name": "Extrasensory",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 80,
-		"pp": 20,
-		"target": "single",
-		"flinchChance": 10,
-		"accuracy": 100
-	},
 	"leer": {
 		"id": "leer",
 		"name": "Leer",
@@ -21180,6 +19387,17 @@ var ABILITIES_DATA = {
 		"flinchChance": 10,
 		"accuracy": 95
 	},
+	"extrasensory": {
+		"id": "extrasensory",
+		"name": "Extrasensory",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 80,
+		"pp": 20,
+		"target": "single",
+		"flinchChance": 10,
+		"accuracy": 100
+	},
 	"calm_mind": {
 		"id": "calm_mind",
 		"name": "Calm Mind",
@@ -21197,28 +19415,6 @@ var ABILITIES_DATA = {
 		}],
 		"statChance": 100,
 		"statTarget": "self",
-		"accuracy": 100
-	},
-	"eruption": {
-		"id": "eruption",
-		"name": "Eruption",
-		"type": "FIRE",
-		"category": "special",
-		"power": 150,
-		"pp": 5,
-		"target": "aoe",
-		"accuracy": 100
-	},
-	"lava_plume": {
-		"id": "lava_plume",
-		"name": "Lava Plume",
-		"type": "FIRE",
-		"category": "special",
-		"power": 80,
-		"pp": 15,
-		"target": "aoe",
-		"status": "burn",
-		"statusChance": 30,
 		"accuracy": 100
 	},
 	"sacred_fire": {
@@ -21261,6 +19457,18 @@ var ABILITIES_DATA = {
 		"statChance": 100,
 		"accuracy": 85
 	},
+	"lava_plume": {
+		"id": "lava_plume",
+		"name": "Lava Plume",
+		"type": "FIRE",
+		"category": "special",
+		"power": 80,
+		"pp": 15,
+		"target": "aoe",
+		"status": "burn",
+		"statusChance": 30,
+		"accuracy": 100
+	},
 	"fire_blast": {
 		"id": "fire_blast",
 		"name": "Fire Blast",
@@ -21272,6 +19480,16 @@ var ABILITIES_DATA = {
 		"status": "burn",
 		"statusChance": 10,
 		"accuracy": 85
+	},
+	"eruption": {
+		"id": "eruption",
+		"name": "Eruption",
+		"type": "FIRE",
+		"category": "special",
+		"power": 150,
+		"pp": 5,
+		"target": "aoe",
+		"accuracy": 100
 	},
 	"bubble_beam": {
 		"id": "bubble_beam",
@@ -22780,19 +20998,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"cross_poison": {
-		"id": "cross_poison",
-		"name": "Cross Poison",
-		"type": "POISON",
-		"category": "physical",
-		"power": 70,
-		"pp": 20,
-		"target": "single",
-		"status": "poison",
-		"statusChance": 10,
-		"critStages": 1,
-		"accuracy": 100
-	},
 	"foresight": {
 		"id": "foresight",
 		"name": "Foresight",
@@ -23117,6 +21322,19 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
+	"cross_poison": {
+		"id": "cross_poison",
+		"name": "Cross Poison",
+		"type": "POISON",
+		"category": "physical",
+		"power": 70,
+		"pp": 20,
+		"target": "single",
+		"status": "poison",
+		"statusChance": 10,
+		"critStages": 1,
+		"accuracy": 100
+	},
 	"sticky_web": {
 		"id": "sticky_web",
 		"name": "Sticky Web",
@@ -23141,31 +21359,6 @@ var ABILITIES_DATA = {
 			"stat": "speed",
 			"estagios": -1
 		}],
-		"statChance": 100,
-		"accuracy": 100
-	},
-	"venom_drench": {
-		"id": "venom_drench",
-		"name": "Venom Drench",
-		"type": "POISON",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "aoe",
-		"statChanges": [
-			{
-				"stat": "atkFis",
-				"estagios": -1
-			},
-			{
-				"stat": "atkEsp",
-				"estagios": -1
-			},
-			{
-				"stat": "speed",
-				"estagios": -1
-			}
-		],
 		"statChance": 100,
 		"accuracy": 100
 	},
@@ -23250,15 +21443,15 @@ var ABILITIES_DATA = {
 		"statTarget": "self",
 		"accuracy": 100
 	},
-	"heavy_slam": {
-		"id": "heavy_slam",
-		"name": "Heavy Slam",
+	"mirror_shot": {
+		"id": "mirror_shot",
+		"name": "Mirror Shot",
 		"type": "STEEL",
-		"category": "physical",
-		"power": 0,
+		"category": "special",
+		"power": 65,
 		"pp": 10,
 		"target": "single",
-		"accuracy": 100
+		"accuracy": 85
 	},
 	"magnet_rise": {
 		"id": "magnet_rise",
@@ -23270,15 +21463,15 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"mirror_shot": {
-		"id": "mirror_shot",
-		"name": "Mirror Shot",
+	"heavy_slam": {
+		"id": "heavy_slam",
+		"name": "Heavy Slam",
 		"type": "STEEL",
-		"category": "special",
-		"power": 65,
+		"category": "physical",
+		"power": 0,
 		"pp": 10,
 		"target": "single",
-		"accuracy": 85
+		"accuracy": 100
 	},
 	"bullet_punch": {
 		"id": "bullet_punch",
@@ -23394,21 +21587,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"flash_cannon": {
-		"id": "flash_cannon",
-		"name": "Flash Cannon",
-		"type": "STEEL",
-		"category": "special",
-		"power": 80,
-		"pp": 10,
-		"target": "single",
-		"statChanges": [{
-			"stat": "defEsp",
-			"estagios": -1
-		}],
-		"statChance": 10,
-		"accuracy": 100
-	},
 	"water_sport": {
 		"id": "water_sport",
 		"name": "Water Sport",
@@ -23436,16 +21614,6 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single",
-		"accuracy": 100
-	},
-	"aqua_jet": {
-		"id": "aqua_jet",
-		"name": "Aqua Jet",
-		"type": "WATER",
-		"category": "physical",
-		"power": 40,
-		"pp": 20,
 		"target": "single",
 		"accuracy": 100
 	},
@@ -23649,6 +21817,16 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
+	"aqua_jet": {
+		"id": "aqua_jet",
+		"name": "Aqua Jet",
+		"type": "WATER",
+		"category": "physical",
+		"power": 40,
+		"pp": 20,
+		"target": "single",
+		"accuracy": 100
+	},
 	"dive": {
 		"id": "dive",
 		"name": "Dive",
@@ -23756,16 +21934,6 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 0,
 		"pp": 15,
-		"target": "single",
-		"accuracy": 100
-	},
-	"wide_guard": {
-		"id": "wide_guard",
-		"name": "Wide Guard",
-		"type": "ROCK",
-		"category": "status",
-		"power": 0,
-		"pp": 10,
 		"target": "single",
 		"accuracy": 100
 	},
@@ -23933,31 +22101,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"eerie_impulse": {
-		"id": "eerie_impulse",
-		"name": "Eerie Impulse",
-		"type": "ELECTRIC",
-		"category": "status",
-		"power": 0,
-		"pp": 15,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkEsp",
-			"estagios": -2
-		}],
-		"statChance": 100,
-		"accuracy": 100
-	},
-	"spotlight": {
-		"id": "spotlight",
-		"name": "Spotlight",
-		"type": "NORMAL",
-		"category": "status",
-		"power": 0,
-		"pp": 15,
-		"target": "single",
-		"accuracy": 100
-	},
 	"helping_hand": {
 		"id": "helping_hand",
 		"name": "Helping Hand",
@@ -24068,18 +22211,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"gunk_shot": {
-		"id": "gunk_shot",
-		"name": "Gunk Shot",
-		"type": "POISON",
-		"category": "physical",
-		"power": 120,
-		"pp": 5,
-		"target": "single",
-		"status": "poison",
-		"statusChance": 30,
-		"accuracy": 80
-	},
 	"octazooka": {
 		"id": "octazooka",
 		"name": "Octazooka",
@@ -24089,6 +22220,16 @@ var ABILITIES_DATA = {
 		"pp": 10,
 		"target": "single",
 		"accuracy": 85
+	},
+	"wide_guard": {
+		"id": "wide_guard",
+		"name": "Wide Guard",
+		"type": "ROCK",
+		"category": "status",
+		"power": 0,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
 	},
 	"sand_attack": {
 		"id": "sand_attack",
@@ -24209,16 +22350,6 @@ var ABILITIES_DATA = {
 		"category": "physical",
 		"power": 40,
 		"pp": 20,
-		"target": "single",
-		"accuracy": 100
-	},
-	"switcheroo": {
-		"id": "switcheroo",
-		"name": "Switcheroo",
-		"type": "DARK",
-		"category": "status",
-		"power": 0,
-		"pp": 10,
 		"target": "single",
 		"accuracy": 100
 	},
@@ -24493,25 +22624,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"coil": {
-		"id": "coil",
-		"name": "Coil",
-		"type": "POISON",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": 1
-		}, {
-			"stat": "def",
-			"estagios": 1
-		}],
-		"statChance": 100,
-		"statTarget": "self",
-		"accuracy": 100
-	},
 	"echoed_voice": {
 		"id": "echoed_voice",
 		"name": "Echoed Voice",
@@ -24624,6 +22736,25 @@ var ABILITIES_DATA = {
 		"power": 20,
 		"pp": 10,
 		"target": "single",
+		"accuracy": 100
+	},
+	"coil": {
+		"id": "coil",
+		"name": "Coil",
+		"type": "POISON",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}, {
+			"stat": "def",
+			"estagios": 1
+		}],
+		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"dig": {
@@ -24828,16 +22959,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"low_kick": {
-		"id": "low_kick",
-		"name": "Low Kick",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"accuracy": 100
-	},
 	"wood_hammer": {
 		"id": "wood_hammer",
 		"name": "Wood Hammer",
@@ -24847,6 +22968,16 @@ var ABILITIES_DATA = {
 		"pp": 15,
 		"target": "single",
 		"drainPercent": -33,
+		"accuracy": 100
+	},
+	"low_kick": {
+		"id": "low_kick",
+		"name": "Low Kick",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
 		"accuracy": 100
 	},
 	"tearful_look": {
@@ -24914,24 +23045,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 30
 	},
-	"rototiller": {
-		"id": "rototiller",
-		"name": "Rototiller",
-		"type": "GROUND",
-		"category": "status",
-		"power": 0,
-		"pp": 10,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": 1
-		}, {
-			"stat": "atkEsp",
-			"estagios": 1
-		}],
-		"statChance": 100,
-		"accuracy": 100
-	},
 	"bone_club": {
 		"id": "bone_club",
 		"name": "Bone Club",
@@ -24993,16 +23106,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 90
 	},
-	"dragon_claw": {
-		"id": "dragon_claw",
-		"name": "Dragon Claw",
-		"type": "DRAGON",
-		"category": "physical",
-		"power": 80,
-		"pp": 15,
-		"target": "single",
-		"accuracy": 100
-	},
 	"flare_blitz": {
 		"id": "flare_blitz",
 		"name": "Flare Blitz",
@@ -25014,17 +23117,6 @@ var ABILITIES_DATA = {
 		"status": "burn",
 		"statusChance": 10,
 		"drainPercent": -33,
-		"accuracy": 100
-	},
-	"shadow_claw": {
-		"id": "shadow_claw",
-		"name": "Shadow Claw",
-		"type": "GHOST",
-		"category": "physical",
-		"power": 70,
-		"pp": 15,
-		"target": "single",
-		"critStages": 1,
 		"accuracy": 100
 	},
 	"flame_wheel": {
@@ -25064,18 +23156,6 @@ var ABILITIES_DATA = {
 		"statChance": 100,
 		"accuracy": 100
 	},
-	"smog": {
-		"id": "smog",
-		"name": "Smog",
-		"type": "POISON",
-		"category": "special",
-		"power": 30,
-		"pp": 20,
-		"target": "single",
-		"status": "poison",
-		"statusChance": 40,
-		"accuracy": 70
-	},
 	"clear_smog": {
 		"id": "clear_smog",
 		"name": "Clear Smog",
@@ -25097,6 +23177,18 @@ var ABILITIES_DATA = {
 		"status": "burn",
 		"statusChance": 10,
 		"accuracy": 100
+	},
+	"smog": {
+		"id": "smog",
+		"name": "Smog",
+		"type": "POISON",
+		"category": "special",
+		"power": 30,
+		"pp": 20,
+		"target": "single",
+		"status": "poison",
+		"statusChance": 40,
+		"accuracy": 70
 	},
 	"incinerate": {
 		"id": "incinerate",
@@ -25153,14 +23245,34 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"electric_terrain": {
-		"id": "electric_terrain",
-		"name": "Electric Terrain",
+	"flash_cannon": {
+		"id": "flash_cannon",
+		"name": "Flash Cannon",
+		"type": "STEEL",
+		"category": "special",
+		"power": 80,
+		"pp": 10,
+		"target": "single",
+		"statChanges": [{
+			"stat": "defEsp",
+			"estagios": -1
+		}],
+		"statChance": 10,
+		"accuracy": 100
+	},
+	"eerie_impulse": {
+		"id": "eerie_impulse",
+		"name": "Eerie Impulse",
 		"type": "ELECTRIC",
 		"category": "status",
 		"power": 0,
-		"pp": 10,
+		"pp": 15,
 		"target": "single",
+		"statChanges": [{
+			"stat": "atkEsp",
+			"estagios": -2
+		}],
+		"statChance": 100,
 		"accuracy": 100
 	},
 	"charge_beam": {
@@ -25225,6 +23337,18 @@ var ABILITIES_DATA = {
 		"pp": 10,
 		"target": "single",
 		"accuracy": 90
+	},
+	"gunk_shot": {
+		"id": "gunk_shot",
+		"name": "Gunk Shot",
+		"type": "POISON",
+		"category": "physical",
+		"power": 120,
+		"pp": 5,
+		"target": "single",
+		"status": "poison",
+		"statusChance": 30,
+		"accuracy": 80
 	},
 	"double_kick": {
 		"id": "double_kick",
@@ -25323,6 +23447,31 @@ var ABILITIES_DATA = {
 		}],
 		"statChance": 100,
 		"statTarget": "self",
+		"accuracy": 100
+	},
+	"venom_drench": {
+		"id": "venom_drench",
+		"name": "Venom Drench",
+		"type": "POISON",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "aoe",
+		"statChanges": [
+			{
+				"stat": "atkFis",
+				"estagios": -1
+			},
+			{
+				"stat": "atkEsp",
+				"estagios": -1
+			},
+			{
+				"stat": "speed",
+				"estagios": -1
+			}
+		],
+		"statChance": 100,
 		"accuracy": 100
 	},
 	"karate_chop": {
@@ -25439,16 +23588,6 @@ var ABILITIES_DATA = {
 		"statTarget": "self",
 		"accuracy": 100
 	},
-	"mega_kick": {
-		"id": "mega_kick",
-		"name": "Mega Kick",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 120,
-		"pp": 5,
-		"target": "single",
-		"accuracy": 75
-	},
 	"rolling_kick": {
 		"id": "rolling_kick",
 		"name": "Rolling Kick",
@@ -25483,15 +23622,15 @@ var ABILITIES_DATA = {
 		"critStages": 1,
 		"accuracy": 90
 	},
-	"focus_punch": {
-		"id": "focus_punch",
-		"name": "Focus Punch",
-		"type": "FIGHTING",
+	"mega_kick": {
+		"id": "mega_kick",
+		"name": "Mega Kick",
+		"type": "NORMAL",
 		"category": "physical",
-		"power": 150,
-		"pp": 20,
+		"power": 120,
+		"pp": 5,
 		"target": "single",
-		"accuracy": 100
+		"accuracy": 75
 	},
 	"ice_punch": {
 		"id": "ice_punch",
@@ -25505,15 +23644,14 @@ var ABILITIES_DATA = {
 		"statusChance": 10,
 		"accuracy": 100
 	},
-	"draining_kiss": {
-		"id": "draining_kiss",
-		"name": "Draining Kiss",
-		"type": "FAIRY",
-		"category": "special",
-		"power": 50,
-		"pp": 10,
+	"focus_punch": {
+		"id": "focus_punch",
+		"name": "Focus Punch",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 150,
+		"pp": 20,
 		"target": "single",
-		"drainPercent": 75,
 		"accuracy": 100
 	},
 	"lovely_kiss": {
@@ -25687,16 +23825,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"nightmare": {
-		"id": "nightmare",
-		"name": "Nightmare",
-		"type": "GHOST",
-		"category": "status",
-		"power": 0,
-		"pp": 15,
-		"target": "single",
-		"accuracy": 100
-	},
 	"hidden_power": {
 		"id": "hidden_power",
 		"name": "Hidden Power",
@@ -25720,6 +23848,16 @@ var ABILITIES_DATA = {
 			"estagios": -1
 		}],
 		"statChance": 20,
+		"accuracy": 100
+	},
+	"nightmare": {
+		"id": "nightmare",
+		"name": "Nightmare",
+		"type": "GHOST",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
 		"accuracy": 100
 	},
 	"shadow_punch": {
@@ -25918,79 +24056,25 @@ function isDamagingAbility(ability) {
 }
 var STAB_MULTIPLIER$1 = createFormulaEngine(FORMULAS).eval("STAB_MULTIPLIER");
 /**
-* De qual especie cada uma evolui, e em que nivel.
+* O nivel em que o POKE passa a poder usar cada golpe.
 *
-* O dado gerado so aponta pra frente (`evolvesTo`), entao o caminho de volta e
-* montado uma vez aqui. `min` entre varios pais: uma especie alcancavel por
-* mais de um caminho existe a partir do MAIS CEDO deles.
-*/
-var paiDe = /* @__PURE__ */ new Map();
-for (const especie of Object.values(SPECIES_DATA)) {
-	if (!especie.evolvesTo || !especie.evolvesAtLevel) continue;
-	const atual = paiDe.get(especie.evolvesTo);
-	if (!atual || especie.evolvesAtLevel < atual.nivel) paiDe.set(especie.evolvesTo, {
-		id: especie.id,
-		nivel: especie.evolvesAtLevel
-	});
-}
-/**
-* O nivel em que o POKE REALMENTE passa a poder usar cada golpe.
-*
-* O CASO QUE ISTO CONSERTA (relatado como "Typhlosion tem golpe forte demais no
-* nivel 1"): no Ultra Sun, o learnset de uma especie evoluida traz um bloco de
-* nivel 1 com os golpes REMEMORAVEIS — inclusive os de fim de lista. Typhlosion
-* aparece com Eruption (150 de poder) e Double-Edge (120) no nivel 1, e isso
-* esta certo no jogo original: conferido contra a Bulbapedia, 251 de 251
-* especies batem (`npm run usum:learnsets`). O bloco existe pro Recordador de
-* Golpes, nao pra descrever o que um POKE daquele nivel sabe.
-*
-* Sao 108 das 251 especies com esse bloco, e 38 delas ofereciam um golpe de
-* poder >= 100 ja no nivel 1 — Forretress chegava a Explosion, com 200.
-*
-* COMO O JOGADOR CHEGAVA NESSE ESTADO: capturar reseta o POKE pro nivel 1
-* (CAPTURE_LEVEL, captureSystem.ts). Capturava-se um Typhlosion selvagem de
-* nivel 40 e ele voltava nivel 1 — com o bloco de rememoraveis inteiro na mao.
-*
-* Tres regras, nesta ordem:
-*
-*  1. o golpe que aparece no nivel 1 E TAMBEM num nivel maior vale pelo nivel
-*     maior. Eruption e 82, nao 1. Resolve 25 das 38;
-*  2. o que aparece SO no nivel 1 vale pelo nivel em que a LINHA EVOLUTIVA o
-*     aprende. Tackle e Ember estao no nivel 1 do Typhlosion porque Cyndaquil
-*     os aprende cedo — entao continuam cedo, e um Typhlosion recem-capturado
-*     nao fica sem golpe nenhum;
-*  3. o que nem a linha aprende por nivel e rememoravel puro: vale pelo nivel
-*     da evolucao, que e o mais cedo em que aquele POKE pode existir. Venusaur
-*     com Double-Edge passa a exigir 32 — e no jogo original um Venusaur de
-*     nivel 32 rememora Double-Edge mesmo, entao nao ha restricao inventada.
-*
-* O CATALOGO NAO E TOCADO de proposito: ele descreve o Ultra Sun e agora ha um
-* verificador provando isso (`npm run usum:learnsets`). Esta e uma regra do
-* jogo aplicada em cima do dado fiel, no unico ponto por onde combate, HUD e
-* tela de Equipes ja passam.
+* Historico: o catalogo Ultra Sun (fonte PokeAPI) trazia, ate a migracao
+* `1dd5302`, o bloco de golpes do Recordador de Golpes junto com o learnset de
+* nivel de cada especie evoluida (Typhlosion aparecia com Eruption, 150 de
+* poder, ja no nivel 1). Aquela migracao corrigiu o SINTOMA aqui, em runtime,
+* sem tocar o catalogo. Decisao de jogo seguinte: um POKE so aprende golpe que
+* tem nivel real na SUA propria especie — sem atalho de Recordador — e essa
+* regra foi pra fonte (`scripts/lib/pokeapi.js#removerGolpesDeRecordador`,
+* `npm run usum:baixar`). O catalogo gerado ja sai com no maximo UM nivel por
+* golpe por especie; esta funcao fica so como porta unica, sem ambiguidade pra
+* resolver.
 */
 var cache = /* @__PURE__ */ new Map();
 function nivelExigido(species) {
 	const pronto = cache.get(species.id);
 	if (pronto) return pronto;
-	const porGolpe = /* @__PURE__ */ new Map();
-	for (const entry of species.abilities) {
-		const niveis = porGolpe.get(entry.key);
-		if (niveis) niveis.push(entry.levelReq);
-		else porGolpe.set(entry.key, [entry.levelReq]);
-	}
-	const pai = paiDe.get(species.id);
-	const doPai = pai && SPECIES_DATA[pai.id] ? nivelExigido(SPECIES_DATA[pai.id]) : null;
 	const saida = /* @__PURE__ */ new Map();
-	for (const [key, niveis] of porGolpe) {
-		const acimaDeUm = niveis.filter((n) => n > 1);
-		if (acimaDeUm.length) {
-			saida.set(key, Math.min(...acimaDeUm));
-			continue;
-		}
-		const naLinha = doPai?.get(key);
-		saida.set(key, naLinha ?? (pai ? pai.nivel : 1));
-	}
+	for (const entry of species.abilities) saida.set(entry.key, entry.levelReq);
 	cache.set(species.id, saida);
 	return saida;
 }
@@ -31566,6 +29650,16 @@ var BATTLE_SPRITE_ANIMS = {
 		}
 	},
 	"beedrill": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				4,
+				4
+			]
+		},
 		"Walk": {
 			"frameWidth": 32,
 			"frameHeight": 48,
@@ -47243,6 +45337,9 @@ function criarEstadoDoJogador(dados) {
 			},
 			get autoCatchRules() {
 				return s.autoCatchRules;
+			},
+			get autoStatusConfig() {
+				return s.autoStatusConfig;
 			},
 			get perfStats() {
 				return s.perfStats;
