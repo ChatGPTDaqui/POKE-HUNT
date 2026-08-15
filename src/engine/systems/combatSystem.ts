@@ -22,6 +22,7 @@ import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { SPECIES } from '@/data/pokes'
 import type { PokeInstance } from '@/data/pokes'
 import { colorForType } from '@/data/typeColors'
+import { direcaoDoGolpeDeStatus } from '@/data/statusVfx'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
@@ -743,6 +744,14 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
         duration: AOE_EFFECT_DURATION,
         worldSize: (ability.radius ?? 0) * 2,
         elementType: ability.type,
+        // Anel unico do cast AOE inteiro (nao um por alvo) — gate por
+        // `power === 0` aqui e o mais fino que da pra fazer sem duplicar
+        // a checagem de sucesso por alvo (statusVaiPegar corre depois, por
+        // hit individual). Golpe de status em area troca pra arte de
+        // buff/debuff mesmo que acerte 0 alvos de verdade — mesmo espirito
+        // do resto do jogo, que mostra a animacao do golpe independente do
+        // resultado (ver announceAbility).
+        statusDirection: ability.power === 0 ? direcaoDoGolpeDeStatus(ability.statChanges) : undefined,
       }))
     }
 
@@ -789,17 +798,26 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // Efeito de status DEPOIS do dano, como nos jogos: um golpe que mata nao
   // chega a envenenar. `aplicarEfeitosDoGolpe` tambem descongela o alvo quando
   // o golpe e de FIRE.
+  //
+  // `statusRecebeuEm` guarda quem de fato recebeu ALGUM efeito (pra decidir,
+  // logo abaixo, se mostra o VFX de status e em cima de quem) — nao existia
+  // antes desta leva porque nada fora deste `if` precisava saber.
+  let statusRecebeuEm: WorldEntity | null = null
   if (!isDead(target)) {
     const aplicado = aplicarEfeitosDoGolpe(world.rng, target, ability)
-    if (aplicado && !silent) anunciarStatus(world, target, aplicado.tipo, 'entrou')
+    if (aplicado) {
+      statusRecebeuEm = target
+      if (!silent) anunciarStatus(world, target, aplicado.tipo, 'entrou')
+    }
 
     // Mudanca de atributo. O anuncio vai em quem RECEBEU (o proprio usuario num
     // Danca das Espadas, o alvo num Rosnado) — mostrar "+Ataque" flutuando
     // sobre o inimigo quando quem se fortaleceu foi voce leria como o contrario
     // do que aconteceu.
     const mudancas = aplicarMudancasDeStat(world.rng, attacker, target, ability)
-    if (mudancas.length && !silent) {
-      anunciarEstagios(world, ability.statTarget === 'self' ? attacker : target, mudancas)
+    if (mudancas.length) {
+      statusRecebeuEm = ability.statTarget === 'self' ? attacker : target
+      if (!silent) anunciarEstagios(world, statusRecebeuEm, mudancas)
     }
   }
 
@@ -851,15 +869,22 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
 
   const isPlayerAttacker = attacker.kind === 'player'
   const isAoe = ability.target === 'aoe'
-  if (!isAoe && !silent) {
+  // Golpe de status alvo-unico: SO mostra VFX quando algo de fato pegou
+  // (`statusRecebeuEm`) — golpe que falhou (imunidade, ja tinha status,
+  // janela de reaplicacao) nao fica com um circulo colorido em cima de nada
+  // ter acontecido. Em cima de quem RECEBEU, nao sempre do alvo do hit
+  // (Danca das Espadas acerta o proprio atacante).
+  if (!isAoe && !silent && (ability.power > 0 || statusRecebeuEm)) {
+    const local = ability.power === 0 && statusRecebeuEm ? statusRecebeuEm : target
     world.effects.push(createWorldEffect(world.counters, {
       type: 'abilityEffect',
-      x: target.x, y: target.y,
-      targetX: target.x, targetY: target.y - target.radius * 0.6,
+      x: local.x, y: local.y,
+      targetX: local.x, targetY: local.y - local.radius * 0.6,
       color: colorForType(ability.type),
       isAoe: false,
       duration: IMPACT_EFFECT_DURATION,
       elementType: ability.type,
+      statusDirection: ability.power === 0 ? direcaoDoGolpeDeStatus(ability.statChanges) : undefined,
     }))
   }
 

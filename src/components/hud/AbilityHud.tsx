@@ -17,7 +17,7 @@
 //
 // Cooldown vem do `WorldEntity` (worldStore), nao do PokeInstance salvo: e
 // estado de combate ao vivo, atualizado a cada tick.
-import { getAbility, BASIC_ATTACK, isDamagingAbility, type Ability } from '@/data/abilities'
+import { getAbility, BASIC_ATTACK, type Ability } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { SPECIES } from '@/data/pokes'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
@@ -32,9 +32,12 @@ import { cn } from '@/lib/utils'
 const CATEGORY_BORDER: Record<string, string> = {
   physical: 'var(--color-cat-physical)',
   special: 'var(--color-cat-special)',
-  // Golpe de status nao chega a barra (ela so mostra golpe com dano), mas a
-  // categoria existe no dado desde o Ultra Sun — sem esta linha ele cairia no
-  // fallback e apareceria como Fisico se algum dia a barra deixar de filtrar.
+  // BUG REAL CORRIGIDO: a barra so mostrava golpe com dano (`isDamagingAbility`
+  // filtrava golpe de status fora). Jogador que escolhia um golpe de status
+  // como um dos 4 ativos (aba Golpes, PokeStatDetail) via a selecao "sumir" da
+  // barra — sem icone, sem slot, nada dizendo que o golpe estava mesmo ativo.
+  // A IA (combatSystem#pickAbility) sempre considerou golpe de status pra
+  // selecao; so a barra que nao mostrava.
   status: 'var(--color-n500)',
 }
 
@@ -80,7 +83,7 @@ export function AbilityHud() {
   // escolhidos esta pronto — continua visivel pra o jogador poder desliga-lo.
   const abilities = [...golpesUtilizaveis(poke, SPECIES[poke.speciesId], false), BASIC_ATTACK.id]
     .map((id) => getAbility(id))
-    .filter((a): a is Ability => isDamagingAbility(a))
+    .filter((a): a is Ability => a != null)
 
   if (abilities.length === 0) return null
 
@@ -172,7 +175,7 @@ export function AbilityHud() {
             {/* z-[2] pra faixa de dano continuar legivel POR CIMA do overlay de
                 cooldown, que cobre o slot inteiro. */}
             <span className="absolute inset-x-0 bottom-0 z-[2] rounded-b-[.32em] bg-black/70 text-center text-[.72em] text-[#e5e5e5]">
-              {ability.power}
+              {ability.power > 0 ? ability.power : '—'}
             </span>
           </div>
           </AbilityTooltip>

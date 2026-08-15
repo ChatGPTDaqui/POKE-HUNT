@@ -22,6 +22,7 @@ import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
 import { impactShapeForType, type ImpactShape } from '@/data/impactShapes'
 import { CAPTURE_ANIM_URL, CAPTURE_ANIM_FRAME_DURATION, captureAnimFrameRect } from '@/data/captureAnim'
 import { vfxDoElemento } from '@/data/elementVfx'
+import { statusVfxUrl } from '@/data/statusVfx'
 import type { Species } from '@/data/pokes'
 import type { WorldEntity, WorldEffect, WorldState } from '@/engine/types'
 import type { MapBackground } from '@/data/generated/types'
@@ -659,7 +660,39 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
   ctx.restore()
 }
 
+// Golpe de status usa GIF nativo (nao um array de PNGs pisado por
+// `effect.age` como `drawVfxDeElemento`): o navegador ja anima uma
+// `Image()` apontada pra um `.gif` sozinho, e este loop de desenho ja
+// redesenha tudo a cada frame — `drawImage` so pega o quadro que o GIF
+// esta mostrando naquele instante, de graca. Ver data/statusVfx.ts.
+const STATUS_VFX_ALTURA = 48
+
+function drawStatusEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): boolean {
+  const url = statusVfxUrl(effect.elementType, effect.statusDirection!)
+  if (!url || !isImageReady(url)) return false
+  const img = getOrLoadImage(url)
+
+  const progress = effectProgress(effect)
+  const fade = progress < HOLD_PORTION ? 1 : 1 - (progress - HOLD_PORTION) / (1 - HOLD_PORTION)
+  const alpha = Math.max(0, Math.min(1, fade)) * SOLID_OPACITY
+
+  const altura = STATUS_VFX_ALTURA
+  const largura = altura * (img.naturalWidth / img.naturalHeight)
+
+  ctx.save()
+  ctx.globalAlpha = alpha
+  ctx.imageSmoothingEnabled = false
+  ctx.drawImage(img, effect.targetX! - largura / 2, effect.targetY! - altura / 2, largura, altura)
+  ctx.restore()
+  return true
+}
+
 function drawAbilityEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
+  // Tenta a arte de status primeiro; sem ela (FLYING/DRAGON, sem sheet no
+  // catalogo — ver statusVfx.ts) ou enquanto o GIF ainda baixa, cai no
+  // burst/anel procedural de sempre — mesmo padrao de fallback do resto do
+  // arquivo, nao um caminho de erro novo.
+  if (effect.statusDirection && drawStatusEffect(ctx, effect)) return
   if (effect.isAoe) drawAoeRing(ctx, effect)
   else drawImpactBurst(ctx, effect)
 }
