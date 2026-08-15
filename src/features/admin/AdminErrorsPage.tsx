@@ -50,6 +50,18 @@ export function AdminErrorsPage() {
     busca.trim() === '' ? true : (linha.rota ?? '').toLowerCase().includes(busca.trim().toLowerCase()),
   )
 
+  const userIds = [...new Set(linhas.map((l) => l.user_id).filter((id): id is string => id != null))]
+
+  const { data: nicks } = useQuery({
+    queryKey: ['admin-audit-logs-nicks', userIds],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('players').select('user_id, trainer_name').in('user_id', userIds)
+      if (error) throw error
+      return Object.fromEntries(data.map((p) => [p.user_id, p.trainer_name])) as Record<string, string>
+    },
+    enabled: userIds.length > 0,
+  })
+
   return (
     <div className="min-h-svh bg-background p-6 text-foreground">
       <h1 className="mb-4 text-lg font-semibold">Erros — client + servidor</h1>
@@ -104,8 +116,8 @@ export function AdminErrorsPage() {
                 <tr key={linha.id} className="border-b border-n800">
                   <td className="py-2 pr-3">{linha.fonte}</td>
                   <td className="py-2 pr-3 font-mono text-xs">{linha.rota ?? '—'}</td>
-                  <td className="py-2 pr-3 font-mono text-xs">
-                    {linha.user_id ? linha.user_id.slice(0, 8) : '—'}
+                  <td className="py-2 pr-3 text-xs">
+                    {linha.user_id ? (nicks?.[linha.user_id] ?? linha.user_id.slice(0, 8)) : '—'}
                   </td>
                   <td className="py-2 pr-3 max-w-[480px] truncate" title={linha.mensagem}>{linha.mensagem}</td>
                   <td className="py-2 pr-3 text-xs">{new Date(linha.ocorrido_em).toLocaleString('pt-BR')}</td>
