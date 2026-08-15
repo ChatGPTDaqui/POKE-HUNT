@@ -16,8 +16,9 @@ import { corDoStatus } from '@/data/statusColors'
 import type { StatChange } from '@/data/generated/types'
 import {
   tickStatus, tentarAgir, aplicarEfeitosDoGolpe, statusVaiPegar, aplicarMudancasDeStat,
-  limparEstadoVolatil,
+  limparEstadoVolatil, aplicarStatus,
 } from './statusSystem'
+import { traitOf } from '@/data/traits'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { SPECIES } from '@/data/pokes'
 import type { PokeInstance } from '@/data/pokes'
@@ -784,6 +785,93 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   if (result.amount > 0) {
     takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke))
     if (!silent) spawnDamageNumber(world, target, result)
+  }
+
+  // HABILIDADES PASSIVAS DE PUNICAO POR CONTATO (Static, Flame Body, Poison
+  // Point, Rough Skin, Aftermath, Effect Spore, Iron Barbs).
+  //
+  // SIMPLIFICACAO CONSCIENTE: este catalogo de golpes nao tem um campo
+  // "contact"/"makesContact" como a PokeAPI real -- `ability.category ===
+  // 'physical'` e usado aqui como aproximacao de "golpe de contato" (na
+  // Pokedex de verdade a maioria dos golpes fisicos encosta no alvo; os
+  // poucos que nao encostam ficam fora de escopo).
+  //
+  // A Trait pertence a quem FOI ATINGIDO (`target`) e reage contra quem
+  // golpeou (`attacker`) -- como nos jogos: encostar num POKE com Static
+  // pode paralisar VOCE, nao ele.
+  if (ability.category === 'physical' && result.amount > 0) {
+    const trait = traitOf(target.poke.speciesId)
+    switch (trait) {
+      case 'static':
+        aplicarStatus(world.rng, attacker, 'paralysis', 30)
+        break
+      case 'flame_body':
+        aplicarStatus(world.rng, attacker, 'burn', 30)
+        break
+      case 'poison_point':
+        aplicarStatus(world.rng, attacker, 'poison', 30)
+        break
+      case 'effect_spore': {
+        // Golpe de po real (Spore/Stun Spore/etc) e imune pra GRASS -- aqui
+        // e uma Trait, nao um golpe, entao a checagem de tipo e manual: se o
+        // ATACANTE (quem receberia o status) e GRASS, nem sorteia.
+        const especieAtacante = SPECIES[attacker.poke.speciesId]
+        const atacanteEhGrass = especieAtacante.type === 'GRASS' || especieAtacante.type2 === 'GRASS'
+        if (!atacanteEhGrass && nextFloat(world.rng) * 100 < 30) {
+          const opcoes: StatusCondition[] = ['poison', 'paralysis', 'sleep']
+          const escolhido = opcoes[Math.floor(nextFloat(world.rng) * opcoes.length)]
+          aplicarStatus(world.rng, attacker, escolhido, 100)
+        }
+        break
+      }
+      case 'rough_skin':
+      case 'iron_barbs': {
+        // Sempre dispara (nao e chance) -- recoil de 1/8 do HP MAXIMO do
+        // atacante, minimo 1. Mesmo guard de morte em cascata que
+        // SELF_DESTRUCT_ABILITY_KEYS usa acima: se o recoil matar o
+        // atacante, credita o kill/desmaio corretamente.
+        const recoil = Math.max(1, Math.round(attacker.poke.stats.hp / 8))
+        takeDamage(attacker, recoil)
+        if (!silent) spawnDamageNumber(world, attacker, { amount: recoil, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+        if (isDead(attacker)) {
+          if (attacker.kind === 'player') {
+            if (!attacker.fainted) {
+              attacker.fainted = true
+              onPlayerFainted()
+            }
+          } else if (!attacker.deathHandled) {
+            attacker.deathHandled = true
+            defeatedEnemyIds.push(attacker.id)
+          }
+        }
+        break
+      }
+      case 'aftermath': {
+        // Diferente das outras: so dispara quando o ALVO (portador da
+        // Trait) DESMAIA por este hit fisico. `target` ja tomou o dano
+        // acima nesta mesma resolveHit, entao isDead(target) aqui reflete
+        // o resultado real deste hit.
+        if (isDead(target)) {
+          const recoil = Math.round(attacker.poke.stats.hp / 4)
+          takeDamage(attacker, recoil)
+          if (!silent) spawnDamageNumber(world, attacker, { amount: recoil, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+          if (isDead(attacker)) {
+            if (attacker.kind === 'player') {
+              if (!attacker.fainted) {
+                attacker.fainted = true
+                onPlayerFainted()
+              }
+            } else if (!attacker.deathHandled) {
+              attacker.deathHandled = true
+              defeatedEnemyIds.push(attacker.id)
+            }
+          }
+        }
+        break
+      }
+      default:
+        break
+    }
   }
 
   // Efeito de status DEPOIS do dano, como nos jogos: um golpe que mata nao
