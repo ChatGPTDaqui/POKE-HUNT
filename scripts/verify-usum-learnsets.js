@@ -11,10 +11,12 @@
 // em disco, pra nao pesar no `usum:conferir` do dia a dia.
 //
 // E foi exatamente a lacuna que deixou passar o relato "Typhlosion tem golpes
-// fortes demais no nivel 1". A conferencia mostrou que o CATALOGO esta certo
-// (Eruption no nivel 1 e real no Ultra Sun, e um bloco de golpes rememoraveis);
-// o defeito estava em como o jogo escolhia os 4 golpes. Sem esta verificacao
-// nao daria pra separar as duas coisas com confianca.
+// fortes demais no nivel 1". A conferencia mostrou que o CATALOGO era fiel ao
+// Ultra Sun (Eruption no nivel 1 e real no jogo original — bloco do Recordador
+// de Golpes). Decisao de jogo posterior removeu esse bloco da fonte (ver
+// `scripts/lib/pokeapi.js#removerGolpesDeRecordador`): este verificador aplica
+// a MESMA remocao no lado da Bulbapedia antes de comparar, senao ficaria
+// vermelho pra sempre nas linhas removidas de proposito.
 //
 // As paginas sao lidas como WIKITEXTO CRU (`action=raw`), no mesmo molde do
 // outro verificador: os dados vivem em `{{learnlist/level7|NIVEL|Golpe|...}}`,
@@ -25,6 +27,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const api = require('./lib/pokeapi.js');
 
 const CATALOGO = path.join(__dirname, 'usum', 'catalog.json');
 const CACHE_DIR = path.join(__dirname, '.cache', 'bulbapedia-learnsets');
@@ -92,11 +95,16 @@ function golpesDeNivel(wiki) {
   // USUM. `{{learnlist/level7|NIVEL|Golpe|...}}`.
   for (const m of bloco.matchAll(/\{\{learnlist\/level7\|([^|]*)\|([^|]*)\|/g)) {
     const nivelCru = m[1].trim();
-    // Alguns golpes vem com nivel em texto (`Evo.`, `—`). Tratados como 1, que
-    // e o que o proprio catalogo faz com o nivel 0 da PokeAPI.
+    // "Evo." e o marcador real de golpe GANHO AO EVOLUIR (era
+    // `{{tt|Evo.|Learned upon evolving}}` antes do desembrulho acima) — mesma
+    // semantica do nivel 0 cru da PokeAPI, e a marca que
+    // `removerGolpesDeRecordador` usa pra distinguir golpe de evolucao de
+    // verdade do bloco de Recordador. Outro texto (`—`) vira nivel 1 sem
+    // marca, igual o catalogo faz pro caso generico.
     const nivel = /^\d+$/.test(nivelCru) ? Number(nivelCru) : 1;
+    const evolucao = nivelCru === 'Evo.';
     const campos = m[0].split('|');
-    golpes.push({ nome: normalizar(m[2]), nivel, poder: numero(campos[5]), precisao: numero(campos[6]) });
+    golpes.push({ nome: normalizar(m[2]), nivel, evolucao, poder: numero(campos[5]), precisao: numero(campos[6]) });
   }
   if (golpes.length) return golpes;
 
@@ -123,6 +131,7 @@ function golpesDeNivel(wiki) {
     golpes.push({
       nome: normalizar(nome),
       nivel: /^\d+$/.test(nivelCru) ? Number(nivelCru) : 1,
+      evolucao: nivelCru === 'Evo.',
       poder: numero(partes[versoes.length + 3]),
       precisao: numero(partes[versoes.length + 4]),
     });
@@ -214,6 +223,10 @@ async function main() {
   const semPagina = [];
   const divergentes = [];
 
+  // Fase 1: so busca. `wikiPorEspecie` guarda o learnset CRU da Bulbapedia —
+  // com o bloco de Recordador ainda misturado, igual a PokeAPI antes de
+  // `removerGolpesDeRecordador` rodar.
+  const wikiPorEspecie = new Map();
   for (const especie of especies) {
     const titulo = tituloDaPagina(especie.nome);
     const wiki = await wikitexto(titulo);
@@ -223,9 +236,34 @@ async function main() {
     if (!daWiki) { semPagina.push(`${especie.chave} (sem bloco de nivel)`); continue; }
 
     for (const g of daWiki) if (!daWikiPorGolpe.has(g.nome)) daWikiPorGolpe.set(g.nome, g);
+    wikiPorEspecie.set(especie.chave, daWiki);
+  }
+
+  // Fase 2: aplica a MESMA regra de remocao de Recordador (scripts/lib/
+  // pokeapi.js) no lado da wiki, reaproveitando evolvesTo/evolvesAtLevel do
+  // catalogo inteiro (nao so do subconjunto filtrado por --especie) — senao
+  // uma checagem de especie unica perderia a cadeia de evolucao. Sem este
+  // passo o verificador ficaria vermelho pra sempre nas ~460 linhas que
+  // `removerGolpesDeRecordador` corta de proposito: catalogo e wiki passam a
+  // ser comparados no MESMO recorte (so golpe com nivel real por especie),
+  // nao "catalogo filtrado" contra "wiki crua".
+  const especiesSinteticas = catalogo.especies.map((e) => ({
+    chave: e.chave,
+    evolvesTo: e.evolvesTo,
+    evolvesAtLevel: e.evolvesAtLevel,
+    golpes: (wikiPorEspecie.get(e.chave) || []).map((g) => ({ chave: g.nome, nivel: g.nivel, evolucao: g.evolucao })),
+  }));
+  api.removerGolpesDeRecordador(especiesSinteticas);
+  const wikiFiltradaPorEspecie = new Map(
+    especiesSinteticas.map((e) => [e.chave, e.golpes.map((g) => ({ nome: g.chave, nivel: g.nivel }))]),
+  );
+
+  for (const especie of especies) {
+    const daWikiFiltrada = wikiFiltradaPorEspecie.get(especie.chave);
+    if (!daWikiFiltrada) continue; // ja registrada em semPagina na fase 1
 
     const doCatalogo = especie.golpes.map((g) => ({ nome: nomeDoGolpe[g.chave] || normalizar(g.chave), nivel: g.nivel }));
-    const problemas = comparar(doCatalogo, daWiki);
+    const problemas = comparar(doCatalogo, daWikiFiltrada);
     if (problemas.length) divergentes.push({ especie: especie.chave, problemas });
     else ok++;
   }

@@ -322,7 +322,6 @@ async function main() {
     if (evo.descartadas.length) evolucoesDescartadas[chave] = evo.descartadas;
 
     const golpes = api.golpesDeNivelNoUsum(p);
-    for (const g of golpes) golpesUsados.add(g.move);
 
     especies.push({
       dex: dexes[i],
@@ -336,10 +335,28 @@ async function main() {
       curva,
       evolvesTo: evo.evolvesTo,
       evolvesAtLevel: evo.evolvesAtLevel,
-      golpes: golpes.map((g) => ({ chave: g.move.replace(/-/g, '_'), nivel: g.level })),
+      golpes: golpes.map((g) => ({
+        chave: g.move.replace(/-/g, '_'),
+        nivel: g.level,
+        // So gravado quando true (a maioria e false) — mantem o diff do
+        // catalogo pequeno pras ~150 linhas que realmente sao golpe de
+        // evolucao, em vez de marcar as ~5.700 linhas todas.
+        ...(g.evolucao ? { evolucao: true } : {}),
+      })),
     });
   }
   console.log(`  especies: ${especies.length}`);
+
+  // So golpe com nivel real, aprendido pela propria especie — sem bloco de
+  // Recordador (ver cabecalho de `removerGolpesDeRecordador`). `golpesUsados`
+  // e reconstruido a partir do resultado JA FILTRADO, senao a lista de golpes
+  // buscados na PokeAPI abaixo traria entrada de golpe que nenhuma especie
+  // aprende mais.
+  const golpesRemovidos = api.removerGolpesDeRecordador(especies);
+  console.log(`  golpes de recordador removidos: ${golpesRemovidos} linhas`);
+  for (const especie of especies) {
+    for (const g of especie.golpes) golpesUsados.add(g.chave.replace(/_/g, '-'));
+  }
 
   // --- Golpes -------------------------------------------------------------
   const nomesDeGolpe = [...golpesUsados].sort();

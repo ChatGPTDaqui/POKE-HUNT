@@ -161,38 +161,41 @@ describe('encaixarNovosGolpes', () => {
   })
 })
 
-// O relato que originou esta regra: "Typhlosion possui golpes extremamente
-// fortes no lvl 1". O caminho real e a CAPTURA, que reseta o POKE pro nivel 1
-// (CAPTURE_LEVEL) — capturava-se um Typhlosion selvagem de nivel 40 e ele
-// voltava nivel 1 sabendo Eruption, de 150 de poder.
+// O relato que originou a regra original: "Typhlosion possui golpes
+// extremamente fortes no lvl 1". O caminho real e a CAPTURA, que reseta o
+// POKE pro nivel 1 (CAPTURE_LEVEL) — capturava-se um Typhlosion selvagem de
+// nivel 40 e ele voltava nivel 1 sabendo Eruption, de 150 de poder.
 //
-// O dado do catalogo esta CERTO: conferido contra a Bulbapedia, as 251 especies
-// batem (`npm run usum:learnsets`). O bloco de nivel 1 de uma especie evoluida
-// e a lista de golpes REMEMORAVEIS do Ultra Sun, nao o que um POKE daquele
-// nivel sabe.
-describe('bloco de golpes rememoraveis do nivel 1', () => {
-  it('Typhlosion nivel 1 nao sabe Eruption (que e do nivel 82)', () => {
-    const aprendidos = golpesAprendidosAte(SPECIES.typhlosion, 1)
-    expect(aprendidos).not.toContain('eruption')
-    expect(aprendidos).not.toContain('double_edge')
+// Decisao de jogo (pedido explicito do usuario): um POKE so aprende golpe com
+// nivel real na SUA propria especie — sem atalho de Recordador de Golpes.
+// Corrigido na FONTE (`scripts/lib/pokeapi.js#removerGolpesDeRecordador`,
+// `npm run usum:baixar`), nao mais em runtime: Typhlosion nao tem mais NENHUM
+// golpe herdado do bloco de nivel 1 do Cyndaquil/Quilava — nem Tackle, nem
+// Ember. Quem quer esses golpes evolui/mantem o POKE na forma que os aprende
+// de verdade.
+describe('golpes de recordador removidos do catalogo', () => {
+  it('Typhlosion nivel 1 nao sabe Eruption nem golpe nenhum — o primeiro real e Smokescreen, no nivel 6', () => {
+    expect(golpesAprendidosAte(SPECIES.typhlosion, 1)).toEqual([])
+    expect(golpesAprendidosAte(SPECIES.typhlosion, 5)).toEqual([])
+    expect(golpesAprendidosAte(SPECIES.typhlosion, 6)).toContain('smokescreen')
   })
 
-  it('...mas sabe no nivel 82, que e quando o jogo original ensina', () => {
+  it('...e Eruption so no nivel 82, que e quando o jogo original ensina', () => {
     expect(golpesAprendidosAte(SPECIES.typhlosion, 82)).toContain('eruption')
     expect(golpesAprendidosAte(SPECIES.typhlosion, 81)).not.toContain('eruption')
   })
 
-  it('o golpe cedo da LINHA continua cedo — Typhlosion capturado nao fica sem nada', () => {
-    // Tackle e Ember estao no bloco de nivel 1 do Typhlosion porque Cyndaquil os
-    // aprende cedo. Empurra-los pro nivel 36 (o da evolucao) deixaria um POKE
-    // recem-capturado so com o Ataque Basico por dezenas de niveis.
-    expect(golpesAprendidosAte(SPECIES.typhlosion, 10)).toContain('ember')
-    expect(golpesAprendidosAte(SPECIES.typhlosion, 1)).toContain('tackle')
+  it('Tackle e Ember NAO existem mais no learnset do Typhlosion — so no do Cyndaquil, que os aprende de verdade', () => {
+    expect(golpesAprendidosAte(SPECIES.typhlosion, 100)).not.toContain('tackle')
+    expect(golpesAprendidosAte(SPECIES.cyndaquil, 100)).toContain('tackle')
+  })
+
+  it('golpe de evolucao de verdade (nivel 0 cru na PokeAPI) fica, exigindo o nivel da evolucao — Metapod nasce sabendo Harden', () => {
+    expect(golpesAprendidosAte(SPECIES.metapod, 6)).not.toContain('harden')
+    expect(golpesAprendidosAte(SPECIES.metapod, 7)).toContain('harden')
   })
 
   it('especie BASE nao e afetada: nivel 1 dela e nivel 1 de verdade', () => {
-    // Cyndaquil nao evolui de ninguem, entao o bloco de nivel 1 e o kit inicial
-    // real e nao pode ser reescrito.
     expect(golpesAprendidosAte(SPECIES.cyndaquil, 1)).toContain('tackle')
   })
 

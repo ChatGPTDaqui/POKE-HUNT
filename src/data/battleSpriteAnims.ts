@@ -2148,6 +2148,16 @@ export const BATTLE_SPRITE_ANIMS: Record<string, BattleSpriteAnimSet> = {
     }
   },
   "beedrill": {
+    "Idle": {
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "durations": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
     "Walk": {
       "frameWidth": 32,
       "frameHeight": 48,
