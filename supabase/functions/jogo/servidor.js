@@ -27534,6 +27534,7 @@ function buildNightmareMirror(sourceMaps, sourceEncounters) {
 			continent: "nightmare",
 			levelRange: [shiftLevel(map.levelRange[0]), shiftLevel(map.levelRange[1])],
 			unlockCost: null,
+			maxEnemies: GEOMETRIA.maxEnemies,
 			enemyPool
 		};
 	}
@@ -27930,7 +27931,7 @@ function montarHunt(bioma, faixa) {
 			secondary: "#4a6a3d",
 			image: "assets/hunt-backgrounds/forest.png"
 		},
-		maxEnemies: GEOMETRIA.maxEnemies,
+		maxEnemies: 1,
 		respawnDelay: GEOMETRIA.respawnDelay,
 		spawnPoints: GEOMETRIA.spawnPoints.map((p) => ({ ...p })),
 		enemyPool: pool.map((speciesId) => addEncounter(STARTER_HUNT_ID, {

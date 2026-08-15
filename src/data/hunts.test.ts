@@ -11,7 +11,9 @@ import { MAPS, ENCOUNTERS, POOL_POR_SALA, STARTER_HUNT_ID } from './huntSpawnOve
 import { SPECIES, type Species } from './pokes'
 import { SPECIES_DATA } from './generated/pokes.generated'
 import { SUB_BIOMA_ESPECIES } from './generated/subBiomas.generated'
-import { BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, huntId } from './biomas'
+import {
+  BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, MAX_INIMIGOS_HUNT_INICIAL, huntId,
+} from './biomas'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
 import { NON_WILD_SPECIES } from './regions'
 import { baseStatTotal, especieForte, zonaMinimaDaEspecie } from './spawnStrength'
@@ -344,5 +346,18 @@ describe('hunt inicial', () => {
 
   it('fica fora do sistema de salas', () => {
     expect(POOL_POR_SALA[STARTER_HUNT_ID]).toBeUndefined()
+  })
+
+  // Sem isto, "unificar a geometria das hunts" devolve os 6 inimigos em campo
+  // e a hunt inicial volta a matar um POKE Lv1 (medido: 8/20 mortes em 30
+  // minutos contra 2/20 com dois inimigos). Nada no jogo lanca erro quando isso
+  // acontece — o jogador so morre no primeiro minuto e nao entende por que.
+  it('poe menos inimigos em campo que qualquer hunt de bioma', () => {
+    const inicial = MAPS[STARTER_HUNT_ID].maxEnemies
+    expect(inicial).toBe(MAX_INIMIGOS_HUNT_INICIAL)
+    for (const map of Object.values(MAPS)) {
+      if (map.id === STARTER_HUNT_ID || map.noRespawn) continue
+      expect(inicial, map.id).toBeLessThan(map.maxEnemies)
+    }
   })
 })

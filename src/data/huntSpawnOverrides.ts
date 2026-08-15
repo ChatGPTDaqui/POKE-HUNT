@@ -37,7 +37,10 @@ import { SPECIES } from './pokes'
 import { SUB_BIOMA_ESPECIES } from './generated/subBiomas.generated'
 import { SPAWN_WEIGHT_BY_SPECIES } from './generated/spawnTiers.generated'
 import { buildNightmareMirror, BOSS_MAPS_DATA, BOSS_ENCOUNTERS_DATA } from './nightmareMaps'
-import { BIOMAS, FAIXAS, GEOMETRIA, LOOT, huntId, type BiomaDef, type FaixaDef } from './biomas'
+import {
+  BIOMAS, FAIXAS, GEOMETRIA, LOOT, MAX_INIMIGOS_HUNT_INICIAL, huntId,
+  type BiomaDef, type FaixaDef,
+} from './biomas'
 import { zonaMinimaDaEspecie } from './spawnStrength'
 import type { HuntMapDef, HuntEncounter } from './huntTypes'
 
@@ -254,7 +257,10 @@ function montarHunt(bioma: BiomaDef, faixa: FaixaDef): void {
     bounds: { ...GEOMETRIA.bounds },
     playerSpawn: { ...GEOMETRIA.playerSpawn },
     bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: 'assets/hunt-backgrounds/forest.png' },
-    maxEnemies: GEOMETRIA.maxEnemies,
+    // Menos inimigos em campo que qualquer hunt de bioma: um inicial Lv1 tem
+    // 12 HP e nao sobrevive a varios de uma vez. Ver o porque medido em
+    // data/biomas.ts#MAX_INIMIGOS_HUNT_INICIAL.
+    maxEnemies: MAX_INIMIGOS_HUNT_INICIAL,
     respawnDelay: GEOMETRIA.respawnDelay,
     spawnPoints: GEOMETRIA.spawnPoints.map((p) => ({ ...p })),
     enemyPool: pool.map((speciesId) =>

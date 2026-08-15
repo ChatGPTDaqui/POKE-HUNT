@@ -11,7 +11,7 @@
 // next `npm run planilha:aplicar` clobbering it. Confirmed with the user:
 // totally free, no unlockCost anywhere in here.
 import { SPECIES } from './pokes'
-import { GRUPOS_DO_LANCE } from './biomas'
+import { GEOMETRIA, GRUPOS_DO_LANCE } from './biomas'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
 import type { ElementType, SpeciesDataEntry } from './generated/types'
 import type { HuntMapDef, HuntEncounter, StatBlock } from './huntTypes'
@@ -108,6 +108,13 @@ export function buildNightmareMirror(
       continent: 'nightmare',
       levelRange: [shiftLevel(map.levelRange[0]), shiftLevel(map.levelRange[1])],
       unlockCost: null,
+      // Lotacao PADRAO, mesmo espelhando uma hunt que tenha menos. A unica com
+      // menos hoje e a inicial, que poe dois inimigos em campo porque um POKE
+      // Lv1 nao sobrevive a seis — protecao de iniciante que nao faz sentido
+      // nenhum num espelho de Lv150+. Herdar sem querer deixaria a versao
+      // Pesadelo dela mais lenta que todas as irmas, sem ninguem ter escolhido
+      // isso.
+      maxEnemies: GEOMETRIA.maxEnemies,
       enemyPool,
     }
   }

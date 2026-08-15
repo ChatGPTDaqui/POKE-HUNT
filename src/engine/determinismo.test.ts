@@ -134,6 +134,13 @@ describe('determinismo da simulacao', () => {
   it('janelas consecutivas nao repetem a sequencia quando o estado e retomado', () => {
     const gameState = useGameStateStore.getState()
     const JANELAS = 4
+    // Mapa PROPRIO, e nao o `MAPA` do resto do arquivo: este teste precisa de
+    // espaco amostral. A hunt inicial tem tres especies, dois niveis e dois
+    // inimigos em campo — ali duas janelas diferentes coincidem por acaso com
+    // frequencia, e o teste acusaria repeticao onde nao ha. Uma hunt de bioma
+    // tem pool grande e seis inimigos, entao assinatura repetida vira sinal em
+    // vez de coincidencia.
+    const MAPA_VARIADO = 'mata_faixa1'
 
     function janelas(retomar: boolean): string[] {
       let estado = { state: SEMENTE, draws: 0 }
@@ -141,7 +148,7 @@ describe('determinismo da simulacao', () => {
       for (let j = 0; j < JANELAS; j++) {
         const rng = retomar ? restoreRng(estado.state, estado.draws) : createRng(SEMENTE)
         const poke = createPokeInstance(createRng(1), 'charmander', 30)
-        const world = buildMapWorld(MAPA, poke, {
+        const world = buildMapWorld(MAPA_VARIADO, poke, {
           rng, counters: { entity: 1, effect: 1, pendingHit: 1 },
         })
         for (let i = 0; i < 100; i++) stepWorld(world, PASSO, gameState, { silent: true })

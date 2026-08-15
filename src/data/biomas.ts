@@ -285,6 +285,42 @@ export const GEOMETRIA = {
   ],
 } as const
 
+/**
+ * Quantos inimigos ficam em campo ao mesmo tempo NA HUNT INICIAL.
+ *
+ * A hunt inicial existe pra um POKE recem-escolhido subir de nivel sem risco,
+ * e ela tinha parado de cumprir isso — nao por causa do elenco (Sentret,
+ * Hoothoot e Rattata, Lv1-2) nem do nivel, que continuam certos, mas porque um
+ * inicial Lv1 tem 12 HP e enfrentava SEIS inimigos de uma vez. O combate ficou
+ * mais duro quando entraram precisao, status e o cooldown unico de item do
+ * Treinador (1,5s pra qualquer cura): seis fontes de dano somam mais rapido do
+ * que uma pocao repoe, por mais pocao que haja na mochila.
+ *
+ * O numero foi escolhido MEDINDO CONTRA O SERVIDOR PUBLICADO, com contas
+ * novas de verdade e flush de 30 em 30 segundos — nao no motor headless. Os
+ * dois discordam por quase 6x aqui (o headless dava ~7% de morte onde a conta
+ * real dava 40%), e quem manda e o jogo:
+ *
+ *   6 inimigos (era)  ->  o POKE morria no primeiro minuto, sem chegar ao Lv2
+ *   2 inimigos        ->  4 de 10 contas ainda morriam no primeiro minuto
+ *   1 inimigo (este)  ->  0 de 10 morreram; todas terminaram Lv3-4 com
+ *                         106-120 abates em 20 minutos
+ *
+ * A morte, quando acontece, e sempre nos primeiros 30-60 segundos de vida da
+ * conta: passada essa janela o POKE ja esta Lv2+ e atravessa os 20 minutos
+ * inteiros. Nao existe meio-termo — ou morre logo, ou nao morre.
+ *
+ * O custo de um inimigo so, medido: o POKE upa um pouco mais devagar (Lv4.8
+ * contra Lv5.0 em 30 minutos). E barato perto de perder o jogador no primeiro
+ * minuto, e quem quiser ritmo tem as hunts de bioma logo ao lado.
+ *
+ * `respawnDelay` fica no valor comum de proposito: aumenta-lo piora o quadro
+ * (medido: 14s -> 4/10 mortes contra 2/10 em 6s). Respawn lento significa
+ * menos EXP por minuto, e o POKE passa mais tempo fraco, que e justamente
+ * quando ele morre.
+ */
+export const MAX_INIMIGOS_HUNT_INICIAL = 1
+
 // ---------------------------------------------------------------------------
 // Salas
 // ---------------------------------------------------------------------------
