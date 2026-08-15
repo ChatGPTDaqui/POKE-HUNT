@@ -13,6 +13,18 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '6.8',
+    date: '2026-08-15',
+    title: 'Golpe de Recordador nao entra mais no aprendizado por nivel',
+    highlights: [
+      'MUDANCA DE REGRA: SEU POKE SO APRENDE GOLPE COM NIVEL DE VERDADE. A versao 6.6 tinha corrigido o SINTOMA (Typhlosion nao usava mais Eruption no Nivel 1) sem mexer no catalogo, porque aquele bloco de golpes era dado real do Recordador de Golpes do Ultra Sun. Decisao nova: o Recordador sai do jogo. Um POKE so aprende golpe que ele mesmo conquista subindo de nivel — quem quer um golpe que so a linha evolutiva anterior aprendia (Tackle do Cyndaquil, por exemplo) precisa manter o POKE nessa forma, ou aceitar que o golpe nao vem mais de graca ao evoluir.',
+      'GOLPE SEM NIVEL NENHUM NA LINHA TAMBEM SAIU, mesmo quando era forte: Charizard perde Air Slash, Dragon Claw, Shadow Claw e Wing Attack do aprendizado por nivel (so existiam via Recordador, sem equivalente em nivel nenhum da linha Charmander-Charmeleon-Charizard). Ao todo, 462 linhas de golpe saem do catalogo, afetando 108 das 251 especies.',
+      'GOLPE GANHO NA HORA DE EVOLUIR CONTINUA VALENDO — isso NAO e Recordador. Metapod e Kakuna, por exemplo, nascem sabendo Harden no instante em que evoluem (Nivel 7); a marca que a PokeAPI usa pra isso (Nivel 0 cru, distinto do bloco de Recordador que tambem aparecia como Nivel 1) foi preservada na importacao pra nao confundir os dois e deixar essas duas especies sem NENHUM golpe.',
+      'CONFERIDO PONTA A PONTA CONTRA A BULBAPEDIA DE NOVO apos o corte: as 251 especies continuam batendo (agora comparando so golpe com nivel real dos dois lados).',
+      'POKES QUE JA EXISTIAM FORAM AJUSTADOS: quem tinha um desses golpes escolhido ou aprendido antes desta mudanca teve a lista corrigida — 670 POKEs no total. Se um dos seus tinha Air Slash, Dragon Claw ou outro golpe de Recordador escolhido, ele pode ter perdido esse golpe agora; abra o perfil dele e escolha outro no lugar.',
+    ],
+  },
+  {
     version: '6.7',
     date: '2026-08-15',
     title: 'Escolher os 4 golpes voltou a funcionar de verdade, e mais 7 ajustes',

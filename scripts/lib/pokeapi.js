@@ -178,13 +178,19 @@ function golpesDeNivelNoUsum(pokemon) {
     for (const det of entrada.version_group_details) {
       if (det.version_group.name !== USUM_VERSION_GROUP) continue;
       if (det.move_learn_method.name !== 'level-up') continue;
-      saida.push({ move: entrada.move.name, level: det.level_learned_at });
+      // Nivel 0 cru da PokeAPI = golpe GANHO AO EVOLUIR (ex.: Metapod nasce
+      // sabendo Harden). Guardado ANTES da normalizacao abaixo, porque depois
+      // dela fica identico, byte a byte, a uma linha do bloco de Recordador
+      // de Golpes (que tambem normaliza pra nivel 1) — sem esta marca,
+      // `removerGolpesDeRecordador` nao teria como distinguir "golpe real de
+      // evolucao" de "so acessivel via Recordador" e removeria os dois iguais
+      // (achado ao vivo: Metapod/Kakuna ficavam com ZERO golpes).
+      saida.push({ move: entrada.move.name, level: det.level_learned_at, evolucao: det.level_learned_at === 0 });
     }
   }
-  // Nivel 0 existe no dado da PokeAPI para golpes de "evolucao" (aprendidos
-  // ao evoluir). Aqui viram nivel 1: este jogo so tem "levelReq", e um
-  // requisito 0 deixaria o golpe fora do filtro `levelReq <= level` de um
-  // POKE nivel 1 em alguns pontos e dentro em outros.
+  // Nivel 0 vira nivel 1: este jogo so tem "levelReq", e um requisito 0
+  // deixaria o golpe fora do filtro `levelReq <= level` de um POKE nivel 1
+  // em alguns pontos e dentro em outros.
   for (const g of saida) if (!g.level || g.level < 1) g.level = 1;
   // A PokeAPI as vezes repete a MESMA linha de `version_group_details` pro
   // version_group ja resolvido (visto em ~48 especies, sempre no nivel 1
@@ -193,15 +199,88 @@ function golpesDeNivelNoUsum(pokemon) {
   // MESMO nivel nunca e dado real (diferente do caso legitimo de reaprender
   // em outro nivel, que este dedupe preserva: so remove match exato de
   // move+level). Achado rodando um dedupe-check contra o catalogo gerado.
-  const vistos = new Set();
-  const semDuplicata = saida.filter((g) => {
+  const vistos = new Map();
+  const semDuplicata = [];
+  for (const g of saida) {
     const chave = `${g.move}@${g.level}`;
-    if (vistos.has(chave)) return false;
-    vistos.add(chave);
-    return true;
-  });
+    const existente = vistos.get(chave);
+    if (existente) { existente.evolucao = existente.evolucao || g.evolucao; continue; }
+    vistos.set(chave, g);
+    semDuplicata.push(g);
+  }
   semDuplicata.sort((a, b) => a.level - b.level || a.move.localeCompare(b.move));
   return semDuplicata;
+}
+
+/**
+ * Remove do learnset de cada especie o que NAO e golpe aprendido por NIVEL
+ * pela propria especie — so o Recordador de Golpes entrega.
+ *
+ * DECISAO DE JOGO (pedido explicito do usuario, ciente da perda de conteudo):
+ * um POKE so aprende golpe que TEM nivel real na SUA propria linha evolutiva.
+ * Sem Recordador. Quem quiser um golpe de nivel mais alto evolui/sobe de
+ * nivel ate la — nao ha mais atalho.
+ *
+ * Contra ~251 especies do dex 1-251, o bloco de nivel 1 de uma especie
+ * evoluida (a lista do Recordador, ver `golpesDeNivelNoUsum`) mistura DOIS
+ * tipos de linha:
+ *
+ *  1. golpe no nivel 1 E num nivel maior (mesma especie) -> mantido, so no
+ *     nivel maior (a linha 1 e a entrada do Recordador do MESMO golpe).
+ *  2. golpe SO no nivel 1, marcado `evolucao` (era nivel 0 cru na PokeAPI,
+ *     "aprendido ao evoluir") -> mantido, exigindo o nivel em que a especie
+ *     PASSA A EXISTIR (o de evolucao). Nao e Recordador: Metapod nasce
+ *     sabendo Harden, nao precisa ir atras de ninguem pra reaprender.
+ *  3. golpe SO no nivel 1, sem a marca -> Recordador puro. Removido, sem
+ *     substituto — o jogo original so entrega isso via Recordador, esteja
+ *     ele tambem na linha do ancestral (Tackle do Cyndaquil, no bloco do
+ *     Typhlosion) ou em especie nenhuma.
+ *
+ * Base stage (sem evolucao anterior) nunca perde golpe de nivel 1: ali
+ * "nivel 1" e o kit inicial de verdade, nao bloco de Recordador.
+ *
+ * Muta `especies` in-place (mesmo padrao de `golpesDeNivelNoUsum`, que ja
+ * dedupe linha exata antes disto rodar).
+ */
+function removerGolpesDeRecordador(especies) {
+  const paiDe = new Map();
+  for (const e of especies) {
+    if (!e.evolvesTo || !e.evolvesAtLevel) continue;
+    const atual = paiDe.get(e.evolvesTo);
+    if (!atual || e.evolvesAtLevel < atual.nivel) paiDe.set(e.evolvesTo, { id: e.chave, nivel: e.evolvesAtLevel });
+  }
+
+  let removidos = 0;
+  for (const especie of especies) {
+    const porGolpe = new Map();
+    for (const g of especie.golpes) {
+      const info = porGolpe.get(g.chave);
+      if (info) { info.niveis.push(g.nivel); info.evolucao = info.evolucao || (g.nivel === 1 && !!g.evolucao); }
+      else porGolpe.set(g.chave, { niveis: [g.nivel], evolucao: g.nivel === 1 && !!g.evolucao });
+    }
+
+    const pai = paiDe.get(especie.chave);
+    const golpesNovos = [];
+    for (const [golpe, info] of porGolpe) {
+      const acimaDeUm = info.niveis.filter((n) => n > 1);
+      if (acimaDeUm.length) {
+        golpesNovos.push({ chave: golpe, nivel: Math.min(...acimaDeUm) });
+        removidos += info.niveis.length - 1;
+        continue;
+      }
+      // So sobrou nivel 1. Base stage: kit inicial real, mantido.
+      if (!pai) { golpesNovos.push({ chave: golpe, nivel: info.niveis[0] }); continue; }
+      // Especie evoluida, golpe SO no nivel 1: golpe de evolucao de verdade
+      // (marca preservada por golpesDeNivelNoUsum) fica, exigindo o nivel em
+      // que a especie evoluiu pra existir; o resto e bloco de Recordador puro.
+      if (info.evolucao) { golpesNovos.push({ chave: golpe, nivel: pai.nivel }); continue; }
+      removidos += info.niveis.length;
+    }
+
+    golpesNovos.sort((a, b) => a.nivel - b.nivel || a.chave.localeCompare(b.chave));
+    especie.golpes = golpesNovos;
+  }
+  return removidos;
 }
 
 module.exports = {
@@ -214,5 +293,6 @@ module.exports = {
   valoresDeGolpeNoUsum,
   tiposNoUsum,
   golpesDeNivelNoUsum,
+  removerGolpesDeRecordador,
   estatisticasDeCache,
 };

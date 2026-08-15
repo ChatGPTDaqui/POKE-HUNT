@@ -14,10 +14,6 @@ import { getAbility, isDamagingAbility, BASIC_ATTACK, type Ability } from './abi
 import { typedAoeMoveKey, TYPED_AOE_MOVES } from './typedAoeMoves'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
-// Direto do dado gerado, e nao de `./pokes`: `pokes.ts` importa ESTE modulo, e
-// puxar um valor de la fecharia um ciclo em tempo de execucao. Os `type` acima
-// nao contam — sao apagados na compilacao.
-import { SPECIES_DATA } from './generated/pokes.generated'
 import type { Species, PokeInstance } from './pokes'
 
 export const MAX_ACTIVE_ABILITIES = 4
@@ -25,56 +21,18 @@ export const MAX_ACTIVE_ABILITIES = 4
 const STAB_MULTIPLIER = createFormulaEngine(FORMULAS).eval('STAB_MULTIPLIER')
 
 /**
- * De qual especie cada uma evolui, e em que nivel.
+ * O nivel em que o POKE passa a poder usar cada golpe.
  *
- * O dado gerado so aponta pra frente (`evolvesTo`), entao o caminho de volta e
- * montado uma vez aqui. `min` entre varios pais: uma especie alcancavel por
- * mais de um caminho existe a partir do MAIS CEDO deles.
- */
-const paiDe = new Map<string, { id: string; nivel: number }>()
-for (const especie of Object.values(SPECIES_DATA)) {
-  if (!especie.evolvesTo || !especie.evolvesAtLevel) continue
-  const atual = paiDe.get(especie.evolvesTo)
-  if (!atual || especie.evolvesAtLevel < atual.nivel) {
-    paiDe.set(especie.evolvesTo, { id: especie.id, nivel: especie.evolvesAtLevel })
-  }
-}
-
-/**
- * O nivel em que o POKE REALMENTE passa a poder usar cada golpe.
- *
- * O CASO QUE ISTO CONSERTA (relatado como "Typhlosion tem golpe forte demais no
- * nivel 1"): no Ultra Sun, o learnset de uma especie evoluida traz um bloco de
- * nivel 1 com os golpes REMEMORAVEIS — inclusive os de fim de lista. Typhlosion
- * aparece com Eruption (150 de poder) e Double-Edge (120) no nivel 1, e isso
- * esta certo no jogo original: conferido contra a Bulbapedia, 251 de 251
- * especies batem (`npm run usum:learnsets`). O bloco existe pro Recordador de
- * Golpes, nao pra descrever o que um POKE daquele nivel sabe.
- *
- * Sao 108 das 251 especies com esse bloco, e 38 delas ofereciam um golpe de
- * poder >= 100 ja no nivel 1 — Forretress chegava a Explosion, com 200.
- *
- * COMO O JOGADOR CHEGAVA NESSE ESTADO: capturar reseta o POKE pro nivel 1
- * (CAPTURE_LEVEL, captureSystem.ts). Capturava-se um Typhlosion selvagem de
- * nivel 40 e ele voltava nivel 1 — com o bloco de rememoraveis inteiro na mao.
- *
- * Tres regras, nesta ordem:
- *
- *  1. o golpe que aparece no nivel 1 E TAMBEM num nivel maior vale pelo nivel
- *     maior. Eruption e 82, nao 1. Resolve 25 das 38;
- *  2. o que aparece SO no nivel 1 vale pelo nivel em que a LINHA EVOLUTIVA o
- *     aprende. Tackle e Ember estao no nivel 1 do Typhlosion porque Cyndaquil
- *     os aprende cedo — entao continuam cedo, e um Typhlosion recem-capturado
- *     nao fica sem golpe nenhum;
- *  3. o que nem a linha aprende por nivel e rememoravel puro: vale pelo nivel
- *     da evolucao, que e o mais cedo em que aquele POKE pode existir. Venusaur
- *     com Double-Edge passa a exigir 32 — e no jogo original um Venusaur de
- *     nivel 32 rememora Double-Edge mesmo, entao nao ha restricao inventada.
- *
- * O CATALOGO NAO E TOCADO de proposito: ele descreve o Ultra Sun e agora ha um
- * verificador provando isso (`npm run usum:learnsets`). Esta e uma regra do
- * jogo aplicada em cima do dado fiel, no unico ponto por onde combate, HUD e
- * tela de Equipes ja passam.
+ * Historico: o catalogo Ultra Sun (fonte PokeAPI) trazia, ate a migracao
+ * `1dd5302`, o bloco de golpes do Recordador de Golpes junto com o learnset de
+ * nivel de cada especie evoluida (Typhlosion aparecia com Eruption, 150 de
+ * poder, ja no nivel 1). Aquela migracao corrigiu o SINTOMA aqui, em runtime,
+ * sem tocar o catalogo. Decisao de jogo seguinte: um POKE so aprende golpe que
+ * tem nivel real na SUA propria especie — sem atalho de Recordador — e essa
+ * regra foi pra fonte (`scripts/lib/pokeapi.js#removerGolpesDeRecordador`,
+ * `npm run usum:baixar`). O catalogo gerado ja sai com no maximo UM nivel por
+ * golpe por especie; esta funcao fica so como porta unica, sem ambiguidade pra
+ * resolver.
  */
 const cache = new Map<string, Map<string, number>>()
 
@@ -82,26 +40,8 @@ function nivelExigido(species: Species): Map<string, number> {
   const pronto = cache.get(species.id)
   if (pronto) return pronto
 
-  const porGolpe = new Map<string, number[]>()
-  for (const entry of species.abilities) {
-    const niveis = porGolpe.get(entry.key)
-    if (niveis) niveis.push(entry.levelReq)
-    else porGolpe.set(entry.key, [entry.levelReq])
-  }
-
-  const pai = paiDe.get(species.id)
-  // Recursao ate a raiz da linha. Sem risco de laco: `evolvesAtLevel` e sempre
-  // pra frente e o dex 1-251 nao tem ciclo — e o `cache` corta o caminho ja
-  // percorrido de qualquer forma.
-  const doPai = pai && SPECIES_DATA[pai.id] ? nivelExigido(SPECIES_DATA[pai.id] as Species) : null
-
   const saida = new Map<string, number>()
-  for (const [key, niveis] of porGolpe) {
-    const acimaDeUm = niveis.filter((n) => n > 1)
-    if (acimaDeUm.length) { saida.set(key, Math.min(...acimaDeUm)); continue }
-    const naLinha = doPai?.get(key)
-    saida.set(key, naLinha ?? (pai ? pai.nivel : 1))
-  }
+  for (const entry of species.abilities) saida.set(entry.key, entry.levelReq)
 
   cache.set(species.id, saida)
   return saida

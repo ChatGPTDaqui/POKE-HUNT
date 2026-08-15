@@ -512,14 +512,6 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 1
       },
       {
-        "key": "discharge",
-        "levelReq": 1
-      },
-      {
-        "key": "extrasensory",
-        "levelReq": 1
-      },
-      {
         "key": "leer",
         "levelReq": 1
       },
@@ -595,18 +587,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "bite",
-        "levelReq": 1
-      },
-      {
-        "key": "eruption",
-        "levelReq": 1
-      },
-      {
-        "key": "extrasensory",
-        "levelReq": 1
-      },
-      {
-        "key": "lava_plume",
         "levelReq": 1
       },
       {
@@ -692,15 +672,7 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 1
       },
       {
-        "key": "bubble_beam",
-        "levelReq": 1
-      },
-      {
         "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "rain_dance",
         "levelReq": 1
       },
       {
@@ -1435,18 +1407,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "leech_seed",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "growl",
         "levelReq": 3
       },
       {
@@ -1521,26 +1481,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "leech_seed",
-        "levelReq": 1
-      },
-      {
-        "key": "petal_dance",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "vine_whip",
-        "levelReq": 1
-      },
-      {
-        "key": "growl",
         "levelReq": 3
       },
       {
@@ -1578,6 +1518,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "double_edge",
         "levelReq": 31
+      },
+      {
+        "key": "petal_dance",
+        "levelReq": 32
       },
       {
         "key": "worry_seed",
@@ -1703,22 +1647,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 40
     },
     "abilities": [
-      {
-        "key": "absorb",
-        "levelReq": 1
-      },
-      {
-        "key": "acid",
-        "levelReq": 1
-      },
-      {
-        "key": "growth",
-        "levelReq": 1
-      },
-      {
-        "key": "sweet_scent",
-        "levelReq": 1
-      },
       {
         "key": "sweet_scent",
         "levelReq": 5
@@ -1875,18 +1803,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 55
     },
     "abilities": [
-      {
-        "key": "growth",
-        "levelReq": 1
-      },
-      {
-        "key": "vine_whip",
-        "levelReq": 1
-      },
-      {
-        "key": "wrap",
-        "levelReq": 1
-      },
       {
         "key": "growth",
         "levelReq": 7
@@ -2282,22 +2198,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "poison_powder",
-        "levelReq": 1
-      },
-      {
-        "key": "razor_leaf",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
         "key": "razor_leaf",
         "levelReq": 6
       },
@@ -2368,30 +2268,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "petal_blizzard",
-        "levelReq": 1
-      },
-      {
-        "key": "petal_dance",
-        "levelReq": 1
-      },
-      {
-        "key": "poison_powder",
-        "levelReq": 1
-      },
-      {
-        "key": "razor_leaf",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
         "key": "razor_leaf",
         "levelReq": 6
       },
@@ -2414,6 +2290,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "natural_gift",
         "levelReq": 26
+      },
+      {
+        "key": "petal_dance",
+        "levelReq": 32
       },
       {
         "key": "sweet_scent",
@@ -2568,22 +2448,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "absorb",
-        "levelReq": 1
-      },
-      {
-        "key": "splash",
-        "levelReq": 1
-      },
-      {
-        "key": "synthesis",
-        "levelReq": 1
-      },
-      {
-        "key": "tail_whip",
-        "levelReq": 1
-      },
-      {
         "key": "synthesis",
         "levelReq": 4
       },
@@ -2677,22 +2541,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 110
     },
     "abilities": [
-      {
-        "key": "absorb",
-        "levelReq": 1
-      },
-      {
-        "key": "splash",
-        "levelReq": 1
-      },
-      {
-        "key": "synthesis",
-        "levelReq": 1
-      },
-      {
-        "key": "tail_whip",
-        "levelReq": 1
-      },
       {
         "key": "synthesis",
         "levelReq": 4
@@ -3007,7 +2855,7 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "harden",
-        "levelReq": 1
+        "levelReq": 7
       }
     ],
     "evolvesTo": "butterfree",
@@ -3032,12 +2880,8 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "confusion",
-        "levelReq": 1
-      },
-      {
         "key": "gust",
-        "levelReq": 1
+        "levelReq": 10
       },
       {
         "key": "confusion",
@@ -3157,7 +3001,7 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "harden",
-        "levelReq": 1
+        "levelReq": 7
       }
     ],
     "evolvesTo": "beedrill",
@@ -3182,12 +3026,8 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "fury_attack",
-        "levelReq": 1
-      },
-      {
         "key": "twineedle",
-        "levelReq": 1
+        "levelReq": 10
       },
       {
         "key": "fury_attack",
@@ -3329,26 +3169,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 30
     },
     "abilities": [
-      {
-        "key": "absorb",
-        "levelReq": 1
-      },
-      {
-        "key": "cross_poison",
-        "levelReq": 1
-      },
-      {
-        "key": "poison_powder",
-        "levelReq": 1
-      },
-      {
-        "key": "scratch",
-        "levelReq": 1
-      },
-      {
-        "key": "stun_spore",
-        "levelReq": 1
-      },
       {
         "key": "poison_powder",
         "levelReq": 6
@@ -3494,38 +3314,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "bug_buzz",
-        "levelReq": 1
-      },
-      {
-        "key": "disable",
-        "levelReq": 1
-      },
-      {
-        "key": "foresight",
-        "levelReq": 1
-      },
-      {
-        "key": "gust",
-        "levelReq": 1
-      },
-      {
-        "key": "quiver_dance",
-        "levelReq": 1
-      },
-      {
-        "key": "silver_wind",
-        "levelReq": 1
-      },
-      {
-        "key": "supersonic",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
         "key": "supersonic",
         "levelReq": 5
       },
@@ -3552,6 +3340,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "sleep_powder",
         "levelReq": 29
+      },
+      {
+        "key": "gust",
+        "levelReq": 31
       },
       {
         "key": "leech_life",
@@ -3859,18 +3651,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "supersonic",
-        "levelReq": 1
-      },
-      {
-        "key": "swift",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "supersonic",
         "levelReq": 5
       },
       {
@@ -4039,42 +3819,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "absorb",
-        "levelReq": 1
-      },
-      {
-        "key": "bug_bite",
-        "levelReq": 1
-      },
-      {
-        "key": "constrict",
-        "levelReq": 1
-      },
-      {
-        "key": "fell_stinger",
-        "levelReq": 1
-      },
-      {
-        "key": "focus_energy",
-        "levelReq": 1
-      },
-      {
-        "key": "poison_sting",
-        "levelReq": 1
-      },
-      {
-        "key": "string_shot",
-        "levelReq": 1
-      },
-      {
-        "key": "swords_dance",
-        "levelReq": 1
-      },
-      {
-        "key": "venom_drench",
-        "levelReq": 1
-      },
-      {
-        "key": "absorb",
         "levelReq": 5
       },
       {
@@ -4092,6 +3836,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "shadow_sneak",
         "levelReq": 19
+      },
+      {
+        "key": "swords_dance",
+        "levelReq": 22
       },
       {
         "key": "fury_swipes",
@@ -4320,46 +4068,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "autotomize",
-        "levelReq": 1
-      },
-      {
-        "key": "bug_bite",
-        "levelReq": 1
-      },
-      {
-        "key": "heavy_slam",
-        "levelReq": 1
-      },
-      {
-        "key": "magnet_rise",
-        "levelReq": 1
-      },
-      {
-        "key": "mirror_shot",
-        "levelReq": 1
-      },
-      {
-        "key": "protect",
-        "levelReq": 1
-      },
-      {
-        "key": "self_destruct",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "toxic_spikes",
-        "levelReq": 1
-      },
-      {
-        "key": "zap_cannon",
-        "levelReq": 1
-      },
-      {
         "key": "self_destruct",
         "levelReq": 6
       },
@@ -4386,6 +4094,14 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "spikes",
         "levelReq": 28
+      },
+      {
+        "key": "autotomize",
+        "levelReq": 31
+      },
+      {
+        "key": "mirror_shot",
+        "levelReq": 31
       },
       {
         "key": "payback",
@@ -4443,10 +4159,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "bullet_punch",
-        "levelReq": 1
-      },
-      {
-        "key": "feint",
         "levelReq": 1
       },
       {
@@ -4634,18 +4346,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "tail_whip",
-        "levelReq": 1
-      },
-      {
-        "key": "water_gun",
-        "levelReq": 1
-      },
-      {
         "key": "tail_whip",
         "levelReq": 4
       },
@@ -4719,26 +4419,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 78
     },
     "abilities": [
-      {
-        "key": "flash_cannon",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "tail_whip",
-        "levelReq": 1
-      },
-      {
-        "key": "water_gun",
-        "levelReq": 1
-      },
-      {
-        "key": "withdraw",
-        "levelReq": 1
-      },
       {
         "key": "tail_whip",
         "levelReq": 4
@@ -4900,30 +4580,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "aqua_jet",
-        "levelReq": 1
-      },
-      {
-        "key": "me_first",
-        "levelReq": 1
-      },
-      {
-        "key": "scratch",
-        "levelReq": 1
-      },
-      {
-        "key": "tail_whip",
-        "levelReq": 1
-      },
-      {
-        "key": "water_gun",
-        "levelReq": 1
-      },
-      {
-        "key": "water_sport",
-        "levelReq": 1
-      },
-      {
         "key": "tail_whip",
         "levelReq": 4
       },
@@ -5075,18 +4731,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 90
     },
     "abilities": [
-      {
-        "key": "hypnosis",
-        "levelReq": 1
-      },
-      {
-        "key": "water_gun",
-        "levelReq": 1
-      },
-      {
-        "key": "water_sport",
-        "levelReq": 1
-      },
       {
         "key": "water_gun",
         "levelReq": 5
@@ -5247,30 +4891,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 100
     },
     "abilities": [
-      {
-        "key": "acid",
-        "levelReq": 1
-      },
-      {
-        "key": "constrict",
-        "levelReq": 1
-      },
-      {
-        "key": "poison_sting",
-        "levelReq": 1
-      },
-      {
-        "key": "reflect_type",
-        "levelReq": 1
-      },
-      {
-        "key": "supersonic",
-        "levelReq": 1
-      },
-      {
-        "key": "wring_out",
-        "levelReq": 1
-      },
       {
         "key": "supersonic",
         "levelReq": 4
@@ -5444,30 +5064,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "curse",
-        "levelReq": 1
-      },
-      {
-        "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "heal_pulse",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "withdraw",
-        "levelReq": 1
-      },
-      {
-        "key": "yawn",
-        "levelReq": 1
-      },
-      {
         "key": "growl",
         "levelReq": 5
       },
@@ -5498,6 +5094,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "slack_off",
         "levelReq": 36
+      },
+      {
+        "key": "withdraw",
+        "levelReq": 37
       },
       {
         "key": "amnesia",
@@ -5633,26 +5233,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "headbutt",
-        "levelReq": 1
-      },
-      {
-        "key": "icy_wind",
-        "levelReq": 1
-      },
-      {
-        "key": "sheer_cold",
-        "levelReq": 1
-      },
-      {
-        "key": "signal_beam",
-        "levelReq": 1
-      },
-      {
-        "key": "growl",
         "levelReq": 3
       },
       {
@@ -5690,6 +5270,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "brine",
         "levelReq": 33
+      },
+      {
+        "key": "sheer_cold",
+        "levelReq": 34
       },
       {
         "key": "take_down",
@@ -5910,26 +5494,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "bubble",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "mud_sport",
-        "levelReq": 1
-      },
-      {
-        "key": "vice_grip",
-        "levelReq": 1
-      },
-      {
-        "key": "wide_guard",
-        "levelReq": 1
-      },
-      {
         "key": "vice_grip",
         "levelReq": 5
       },
@@ -6074,26 +5638,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "bubble",
-        "levelReq": 1
-      },
-      {
-        "key": "hydro_pump",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "smokescreen",
-        "levelReq": 1
-      },
-      {
-        "key": "water_gun",
-        "levelReq": 1
-      },
-      {
         "key": "smokescreen",
         "levelReq": 5
       },
@@ -6237,30 +5781,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 68
     },
     "abilities": [
-      {
-        "key": "megahorn",
-        "levelReq": 1
-      },
-      {
-        "key": "peck",
-        "levelReq": 1
-      },
-      {
-        "key": "poison_jab",
-        "levelReq": 1
-      },
-      {
-        "key": "supersonic",
-        "levelReq": 1
-      },
-      {
-        "key": "tail_whip",
-        "levelReq": 1
-      },
-      {
-        "key": "water_sport",
-        "levelReq": 1
-      },
       {
         "key": "supersonic",
         "levelReq": 5
@@ -6461,11 +5981,7 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "bite",
-        "levelReq": 1
-      },
-      {
-        "key": "thrash",
-        "levelReq": 1
+        "levelReq": 20
       },
       {
         "key": "leer",
@@ -6706,18 +6222,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "scratch",
-        "levelReq": 1
-      },
-      {
-        "key": "water_gun",
-        "levelReq": 1
-      },
-      {
         "key": "water_gun",
         "levelReq": 6
       },
@@ -6795,26 +6299,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 78
     },
     "abilities": [
-      {
-        "key": "agility",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "rage",
-        "levelReq": 1
-      },
-      {
-        "key": "scratch",
-        "levelReq": 1
-      },
-      {
-        "key": "water_gun",
-        "levelReq": 1
-      },
       {
         "key": "water_gun",
         "levelReq": 6
@@ -6980,42 +6464,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "bubble",
-        "levelReq": 1
-      },
-      {
-        "key": "eerie_impulse",
-        "levelReq": 1
-      },
-      {
-        "key": "electro_ball",
-        "levelReq": 1
-      },
-      {
-        "key": "spit_up",
-        "levelReq": 1
-      },
-      {
-        "key": "spotlight",
-        "levelReq": 1
-      },
-      {
-        "key": "stockpile",
-        "levelReq": 1
-      },
-      {
-        "key": "supersonic",
-        "levelReq": 1
-      },
-      {
-        "key": "swallow",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_wave",
-        "levelReq": 1
-      },
-      {
         "key": "thunder_wave",
         "levelReq": 6
       },
@@ -7038,6 +6486,18 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "spark",
         "levelReq": 23
+      },
+      {
+        "key": "spit_up",
+        "levelReq": 27
+      },
+      {
+        "key": "stockpile",
+        "levelReq": 27
+      },
+      {
+        "key": "swallow",
+        "levelReq": 27
       },
       {
         "key": "signal_beam",
@@ -7179,22 +6639,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 50
     },
     "abilities": [
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "tail_whip",
-        "levelReq": 1
-      },
-      {
-        "key": "water_gun",
-        "levelReq": 1
-      },
-      {
-        "key": "water_sport",
-        "levelReq": 1
-      },
       {
         "key": "tail_whip",
         "levelReq": 2
@@ -7399,18 +6843,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "mud_sport",
-        "levelReq": 1
-      },
-      {
-        "key": "tail_whip",
-        "levelReq": 1
-      },
-      {
-        "key": "water_gun",
-        "levelReq": 1
-      },
-      {
-        "key": "mud_sport",
         "levelReq": 5
       },
       {
@@ -7475,18 +6907,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 85
     },
     "abilities": [
-      {
-        "key": "destiny_bond",
-        "levelReq": 1
-      },
-      {
-        "key": "fell_stinger",
-        "levelReq": 1
-      },
-      {
-        "key": "hydro_pump",
-        "levelReq": 1
-      },
       {
         "key": "poison_sting",
         "levelReq": 1
@@ -7758,34 +7178,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "aurora_beam",
-        "levelReq": 1
-      },
-      {
-        "key": "constrict",
-        "levelReq": 1
-      },
-      {
-        "key": "gunk_shot",
-        "levelReq": 1
-      },
-      {
-        "key": "octazooka",
-        "levelReq": 1
-      },
-      {
-        "key": "psybeam",
-        "levelReq": 1
-      },
-      {
-        "key": "rock_blast",
-        "levelReq": 1
-      },
-      {
-        "key": "water_gun",
-        "levelReq": 1
-      },
-      {
         "key": "constrict",
         "levelReq": 6
       },
@@ -7804,6 +7196,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "focus_energy",
         "levelReq": 22
+      },
+      {
+        "key": "octazooka",
+        "levelReq": 25
       },
       {
         "key": "wring_out",
@@ -7860,10 +7256,6 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 1
       },
       {
-        "key": "bubble_beam",
-        "levelReq": 1
-      },
-      {
         "key": "bullet_seed",
         "levelReq": 1
       },
@@ -7877,10 +7269,6 @@ export const SPECIES_DATA: SpeciesData = {
       },
       {
         "key": "signal_beam",
-        "levelReq": 1
-      },
-      {
-        "key": "supersonic",
         "levelReq": 1
       },
       {
@@ -7963,22 +7351,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "bubble",
-        "levelReq": 1
-      },
-      {
-        "key": "hydro_pump",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "smokescreen",
-        "levelReq": 1
-      },
-      {
-        "key": "water_gun",
         "levelReq": 1
       },
       {
@@ -8130,18 +7502,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "gust",
-        "levelReq": 1
-      },
-      {
-        "key": "sand_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
         "key": "sand_attack",
         "levelReq": 5
       },
@@ -8215,26 +7575,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 101
     },
     "abilities": [
-      {
-        "key": "gust",
-        "levelReq": 1
-      },
-      {
-        "key": "hurricane",
-        "levelReq": 1
-      },
-      {
-        "key": "quick_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "sand_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
       {
         "key": "sand_attack",
         "levelReq": 5
@@ -8310,30 +7650,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "focus_energy",
-        "levelReq": 1
-      },
-      {
-        "key": "quick_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "scary_face",
-        "levelReq": 1
-      },
-      {
-        "key": "swords_dance",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "tail_whip",
-        "levelReq": 1
-      },
-      {
         "key": "quick_attack",
         "levelReq": 4
       },
@@ -8356,6 +7672,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "assurance",
         "levelReq": 19
+      },
+      {
+        "key": "scary_face",
+        "levelReq": 20
       },
       {
         "key": "crunch",
@@ -8399,30 +7719,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 100
     },
     "abilities": [
-      {
-        "key": "drill_run",
-        "levelReq": 1
-      },
-      {
-        "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "peck",
-        "levelReq": 1
-      },
-      {
-        "key": "pluck",
-        "levelReq": 1
-      },
-      {
-        "key": "pursuit",
-        "levelReq": 1
-      },
       {
         "key": "leer",
         "levelReq": 4
@@ -8671,34 +7967,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "bite",
-        "levelReq": 1
-      },
-      {
-        "key": "fake_out",
-        "levelReq": 1
-      },
-      {
-        "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "play_rough",
-        "levelReq": 1
-      },
-      {
-        "key": "scratch",
-        "levelReq": 1
-      },
-      {
-        "key": "swift",
-        "levelReq": 1
-      },
-      {
-        "key": "switcheroo",
-        "levelReq": 1
-      },
-      {
-        "key": "bite",
         "levelReq": 6
       },
       {
@@ -8720,6 +7988,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "taunt",
         "levelReq": 25
+      },
+      {
+        "key": "swift",
+        "levelReq": 28
       },
       {
         "key": "power_gem",
@@ -8771,10 +8043,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 60
     },
     "abilities": [
-      {
-        "key": "brave_bird",
-        "levelReq": 1
-      },
       {
         "key": "fury_cutter",
         "levelReq": 1
@@ -8956,26 +8224,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "peck",
-        "levelReq": 1
-      },
-      {
-        "key": "quick_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "rage",
-        "levelReq": 1
-      },
-      {
-        "key": "tri_attack",
-        "levelReq": 1
-      },
-      {
         "key": "quick_attack",
         "levelReq": 5
       },
@@ -9006,6 +8254,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "uproar",
         "levelReq": 29
+      },
+      {
+        "key": "tri_attack",
+        "levelReq": 31
       },
       {
         "key": "acupressure",
@@ -9666,30 +8918,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "agility",
-        "levelReq": 1
-      },
-      {
-        "key": "coil",
-        "levelReq": 1
-      },
-      {
-        "key": "defense_curl",
-        "levelReq": 1
-      },
-      {
-        "key": "foresight",
-        "levelReq": 1
-      },
-      {
-        "key": "quick_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "scratch",
-        "levelReq": 1
-      },
-      {
         "key": "defense_curl",
         "levelReq": 4
       },
@@ -9700,6 +8928,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "fury_swipes",
         "levelReq": 13
+      },
+      {
+        "key": "agility",
+        "levelReq": 15
       },
       {
         "key": "helping_hand",
@@ -9853,30 +9085,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 70
     },
     "abilities": [
-      {
-        "key": "dream_eater",
-        "levelReq": 1
-      },
-      {
-        "key": "foresight",
-        "levelReq": 1
-      },
-      {
-        "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "hypnosis",
-        "levelReq": 1
-      },
-      {
-        "key": "sky_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
       {
         "key": "hypnosis",
         "levelReq": 4
@@ -10296,10 +9504,6 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 1
       },
       {
-        "key": "fling",
-        "levelReq": 1
-      },
-      {
         "key": "lick",
         "levelReq": 1
       },
@@ -10369,30 +9573,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 55
     },
     "abilities": [
-      {
-        "key": "covet",
-        "levelReq": 1
-      },
-      {
-        "key": "fake_tears",
-        "levelReq": 1
-      },
-      {
-        "key": "hammer_arm",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "lick",
-        "levelReq": 1
-      },
-      {
-        "key": "scratch",
-        "levelReq": 1
-      },
       {
         "key": "fury_swipes",
         "levelReq": 8
@@ -10468,15 +9648,7 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 1
       },
       {
-        "key": "magic_coat",
-        "levelReq": 1
-      },
-      {
         "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "zap_cannon",
         "levelReq": 1
       },
       {
@@ -10549,10 +9721,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 85
     },
     "abilities": [
-      {
-        "key": "me_first",
-        "levelReq": 1
-      },
       {
         "key": "tackle",
         "levelReq": 1
@@ -10637,43 +9805,7 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "sketch",
-        "levelReq": 1
-      },
-      {
-        "key": "sketch",
         "levelReq": 11
-      },
-      {
-        "key": "sketch",
-        "levelReq": 21
-      },
-      {
-        "key": "sketch",
-        "levelReq": 31
-      },
-      {
-        "key": "sketch",
-        "levelReq": 41
-      },
-      {
-        "key": "sketch",
-        "levelReq": 51
-      },
-      {
-        "key": "sketch",
-        "levelReq": 61
-      },
-      {
-        "key": "sketch",
-        "levelReq": 71
-      },
-      {
-        "key": "sketch",
-        "levelReq": 81
-      },
-      {
-        "key": "sketch",
-        "levelReq": 91
       }
     ],
     "evolvesTo": null,
@@ -10772,22 +9904,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "defense_curl",
-        "levelReq": 1
-      },
-      {
-        "key": "mud_sport",
-        "levelReq": 1
-      },
-      {
-        "key": "rock_polish",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
         "key": "mud_sport",
         "levelReq": 4
       },
@@ -10867,18 +9983,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "defense_curl",
-        "levelReq": 1
-      },
-      {
-        "key": "heavy_slam",
-        "levelReq": 1
-      },
-      {
-        "key": "mud_sport",
-        "levelReq": 1
-      },
-      {
-        "key": "rock_polish",
         "levelReq": 1
       },
       {
@@ -11157,26 +10261,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "bite",
-        "levelReq": 1
-      },
-      {
-        "key": "constrict",
-        "levelReq": 1
-      },
-      {
-        "key": "hydro_pump",
-        "levelReq": 1
-      },
-      {
-        "key": "spike_cannon",
-        "levelReq": 1
-      },
-      {
-        "key": "withdraw",
-        "levelReq": 1
-      },
-      {
-        "key": "bite",
         "levelReq": 7
       },
       {
@@ -11206,6 +10290,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "ancient_power",
         "levelReq": 37
+      },
+      {
+        "key": "spike_cannon",
+        "levelReq": 40
       },
       {
         "key": "tickle",
@@ -11317,34 +10405,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "absorb",
-        "levelReq": 1
-      },
-      {
-        "key": "feint",
-        "levelReq": 1
-      },
-      {
-        "key": "harden",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "night_slash",
-        "levelReq": 1
-      },
-      {
-        "key": "scratch",
-        "levelReq": 1
-      },
-      {
-        "key": "slash",
-        "levelReq": 1
-      },
-      {
-        "key": "absorb",
         "levelReq": 6
       },
       {
@@ -11370,6 +10430,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "mega_drain",
         "levelReq": 36
+      },
+      {
+        "key": "slash",
+        "levelReq": 40
       },
       {
         "key": "metal_sound",
@@ -11419,10 +10483,6 @@ export const SPECIES_DATA: SpeciesData = {
       },
       {
         "key": "ice_fang",
-        "levelReq": 1
-      },
-      {
-        "key": "iron_head",
         "levelReq": 1
       },
       {
@@ -11505,18 +10565,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "copycat",
-        "levelReq": 1
-      },
-      {
-        "key": "flail",
-        "levelReq": 1
-      },
-      {
-        "key": "low_kick",
-        "levelReq": 1
-      },
-      {
-        "key": "rock_throw",
         "levelReq": 1
       },
       {
@@ -11688,22 +10736,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "bite",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "sandstorm",
-        "levelReq": 1
-      },
-      {
-        "key": "screech",
-        "levelReq": 1
-      },
-      {
         "key": "sandstorm",
         "levelReq": 5
       },
@@ -11773,34 +10805,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 61
     },
     "abilities": [
-      {
-        "key": "bite",
-        "levelReq": 1
-      },
-      {
-        "key": "fire_fang",
-        "levelReq": 1
-      },
-      {
-        "key": "ice_fang",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "sandstorm",
-        "levelReq": 1
-      },
-      {
-        "key": "screech",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_fang",
-        "levelReq": 1
-      },
       {
         "key": "sandstorm",
         "levelReq": 5
@@ -11966,26 +10970,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "crush_claw",
-        "levelReq": 1
-      },
-      {
-        "key": "defense_curl",
-        "levelReq": 1
-      },
-      {
-        "key": "poison_sting",
-        "levelReq": 1
-      },
-      {
-        "key": "sand_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "scratch",
-        "levelReq": 1
-      },
-      {
         "key": "sand_attack",
         "levelReq": 3
       },
@@ -12016,6 +11000,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "fury_swipes",
         "levelReq": 20
+      },
+      {
+        "key": "crush_claw",
+        "levelReq": 22
       },
       {
         "key": "sand_tomb",
@@ -12147,34 +11135,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "night_slash",
-        "levelReq": 1
-      },
-      {
-        "key": "rototiller",
-        "levelReq": 1
-      },
-      {
-        "key": "sand_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "sand_tomb",
-        "levelReq": 1
-      },
-      {
-        "key": "scratch",
-        "levelReq": 1
-      },
-      {
-        "key": "tri_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "growl",
         "levelReq": 4
       },
       {
@@ -12200,6 +11160,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "mud_bomb",
         "levelReq": 25
+      },
+      {
+        "key": "sand_tomb",
+        "levelReq": 26
       },
       {
         "key": "earth_power",
@@ -12329,22 +11293,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 45
     },
     "abilities": [
-      {
-        "key": "bone_club",
-        "levelReq": 1
-      },
-      {
-        "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "headbutt",
-        "levelReq": 1
-      },
-      {
-        "key": "tail_whip",
-        "levelReq": 1
-      },
       {
         "key": "tail_whip",
         "levelReq": 3
@@ -12511,30 +11459,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "fury_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "hammer_arm",
-        "levelReq": 1
-      },
-      {
-        "key": "horn_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "horn_drill",
-        "levelReq": 1
-      },
-      {
-        "key": "scary_face",
-        "levelReq": 1
-      },
-      {
-        "key": "tail_whip",
-        "levelReq": 1
-      },
-      {
-        "key": "fury_attack",
         "levelReq": 5
       },
       {
@@ -12572,6 +11496,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "stone_edge",
         "levelReq": 41
+      },
+      {
+        "key": "hammer_arm",
+        "levelReq": 42
       },
       {
         "key": "earthquake",
@@ -12764,34 +11692,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "bulldoze",
-        "levelReq": 1
-      },
-      {
-        "key": "defense_curl",
-        "levelReq": 1
-      },
-      {
-        "key": "fire_fang",
-        "levelReq": 1
-      },
-      {
-        "key": "fury_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "horn_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_fang",
-        "levelReq": 1
-      },
-      {
         "key": "rapid_spin",
         "levelReq": 6
       },
@@ -12810,6 +11710,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "slam",
         "levelReq": 24
+      },
+      {
+        "key": "fury_attack",
+        "levelReq": 25
       },
       {
         "key": "magnitude",
@@ -12849,18 +11753,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 80
     },
     "abilities": [
-      {
-        "key": "ember",
-        "levelReq": 1
-      },
-      {
-        "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "scratch",
-        "levelReq": 1
-      },
       {
         "key": "ember",
         "levelReq": 7
@@ -12924,42 +11816,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "air_slash",
-        "levelReq": 1
-      },
-      {
-        "key": "dragon_claw",
-        "levelReq": 1
-      },
-      {
-        "key": "ember",
-        "levelReq": 1
-      },
-      {
-        "key": "flare_blitz",
-        "levelReq": 1
-      },
-      {
-        "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "heat_wave",
-        "levelReq": 1
-      },
-      {
-        "key": "scratch",
-        "levelReq": 1
-      },
-      {
-        "key": "shadow_claw",
-        "levelReq": 1
-      },
-      {
-        "key": "wing_attack",
-        "levelReq": 1
-      },
-      {
         "key": "ember",
         "levelReq": 7
       },
@@ -12982,6 +11838,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "flame_burst",
         "levelReq": 32
+      },
+      {
+        "key": "wing_attack",
+        "levelReq": 36
       },
       {
         "key": "slash",
@@ -13248,34 +12108,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "ember",
-        "levelReq": 1
-      },
-      {
-        "key": "fury_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "megahorn",
-        "levelReq": 1
-      },
-      {
-        "key": "poison_jab",
-        "levelReq": 1
-      },
-      {
-        "key": "quick_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "tail_whip",
-        "levelReq": 1
-      },
-      {
         "key": "tail_whip",
         "levelReq": 4
       },
@@ -13312,6 +12144,10 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 37
       },
       {
+        "key": "fury_attack",
+        "levelReq": 40
+      },
+      {
         "key": "fire_blast",
         "levelReq": 41
       },
@@ -13345,18 +12181,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 93
     },
     "abilities": [
-      {
-        "key": "ember",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "smog",
-        "levelReq": 1
-      },
       {
         "key": "ember",
         "levelReq": 5
@@ -13514,18 +12338,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "smokescreen",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
         "key": "smokescreen",
         "levelReq": 6
       },
@@ -13603,34 +12415,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 100
     },
     "abilities": [
-      {
-        "key": "double_edge",
-        "levelReq": 1
-      },
-      {
-        "key": "ember",
-        "levelReq": 1
-      },
-      {
-        "key": "eruption",
-        "levelReq": 1
-      },
-      {
-        "key": "gyro_ball",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "smokescreen",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
       {
         "key": "smokescreen",
         "levelReq": 6
@@ -13796,30 +12580,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "earth_power",
-        "levelReq": 1
-      },
-      {
-        "key": "ember",
-        "levelReq": 1
-      },
-      {
-        "key": "rock_throw",
-        "levelReq": 1
-      },
-      {
-        "key": "shell_smash",
-        "levelReq": 1
-      },
-      {
-        "key": "smog",
-        "levelReq": 1
-      },
-      {
-        "key": "yawn",
-        "levelReq": 1
-      },
-      {
         "key": "ember",
         "levelReq": 6
       },
@@ -13858,6 +12618,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "amnesia",
         "levelReq": 36
+      },
+      {
+        "key": "shell_smash",
+        "levelReq": 38
       },
       {
         "key": "body_slam",
@@ -14164,34 +12928,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "electric_terrain",
-        "levelReq": 1
-      },
-      {
-        "key": "supersonic",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_shock",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_wave",
-        "levelReq": 1
-      },
-      {
-        "key": "tri_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "zap_cannon",
-        "levelReq": 1
-      },
-      {
         "key": "thunder_shock",
         "levelReq": 5
       },
@@ -14226,6 +12962,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "electro_ball",
         "levelReq": 29
+      },
+      {
+        "key": "tri_attack",
+        "levelReq": 30
       },
       {
         "key": "flash_cannon",
@@ -14368,26 +13108,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "charge",
-        "levelReq": 1
-      },
-      {
-        "key": "eerie_impulse",
-        "levelReq": 1
-      },
-      {
-        "key": "magnetic_flux",
-        "levelReq": 1
-      },
-      {
-        "key": "sonic_boom",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
         "key": "sonic_boom",
         "levelReq": 4
       },
@@ -14469,18 +13189,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 105
     },
     "abilities": [
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "quick_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_shock",
-        "levelReq": 1
-      },
       {
         "key": "thunder_shock",
         "levelReq": 5
@@ -14680,22 +13388,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_shock",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_wave",
-        "levelReq": 1
-      },
-      {
         "key": "thunder_wave",
         "levelReq": 4
       },
@@ -14770,46 +13462,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "dragon_pulse",
-        "levelReq": 1
-      },
-      {
-        "key": "fire_punch",
-        "levelReq": 1
-      },
-      {
-        "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "ion_deluge",
-        "levelReq": 1
-      },
-      {
-        "key": "magnetic_flux",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_punch",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_shock",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_wave",
-        "levelReq": 1
-      },
-      {
-        "key": "zap_cannon",
-        "levelReq": 1
-      },
-      {
         "key": "thunder_wave",
         "levelReq": 4
       },
@@ -14836,6 +13488,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "confuse_ray",
         "levelReq": 29
+      },
+      {
+        "key": "thunder_punch",
+        "levelReq": 30
       },
       {
         "key": "power_gem",
@@ -15056,38 +13712,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "bite",
-        "levelReq": 1
-      },
-      {
-        "key": "crunch",
-        "levelReq": 1
-      },
-      {
-        "key": "fire_fang",
-        "levelReq": 1
-      },
-      {
-        "key": "ice_fang",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "poison_sting",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_fang",
-        "levelReq": 1
-      },
-      {
-        "key": "wrap",
-        "levelReq": 1
-      },
-      {
         "key": "poison_sting",
         "levelReq": 4
       },
@@ -15106,6 +13730,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "acid",
         "levelReq": 20
+      },
+      {
+        "key": "crunch",
+        "levelReq": 22
       },
       {
         "key": "spit_up",
@@ -15244,14 +13872,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "growl",
-        "levelReq": 1
-      },
-      {
-        "key": "scratch",
-        "levelReq": 1
-      },
-      {
         "key": "tail_whip",
         "levelReq": 7
       },
@@ -15327,10 +13947,6 @@ export const SPECIES_DATA: SpeciesData = {
       },
       {
         "key": "scratch",
-        "levelReq": 1
-      },
-      {
-        "key": "superpower",
         "levelReq": 1
       },
       {
@@ -15450,14 +14066,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "peck",
-        "levelReq": 1
-      },
-      {
         "key": "focus_energy",
         "levelReq": 7
       },
@@ -15529,10 +14137,6 @@ export const SPECIES_DATA: SpeciesData = {
       },
       {
         "key": "focus_energy",
-        "levelReq": 1
-      },
-      {
-        "key": "megahorn",
         "levelReq": 1
       },
       {
@@ -15663,26 +14267,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 90
     },
     "abilities": [
-      {
-        "key": "absorb",
-        "levelReq": 1
-      },
-      {
-        "key": "astonish",
-        "levelReq": 1
-      },
-      {
-        "key": "bite",
-        "levelReq": 1
-      },
-      {
-        "key": "screech",
-        "levelReq": 1
-      },
-      {
-        "key": "supersonic",
-        "levelReq": 1
-      },
       {
         "key": "supersonic",
         "levelReq": 5
@@ -15849,26 +14433,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "harden",
-        "levelReq": 1
-      },
-      {
-        "key": "mud_slap",
-        "levelReq": 1
-      },
-      {
-        "key": "poison_gas",
-        "levelReq": 1
-      },
-      {
-        "key": "pound",
-        "levelReq": 1
-      },
-      {
-        "key": "venom_drench",
-        "levelReq": 1
-      },
-      {
-        "key": "harden",
         "levelReq": 4
       },
       {
@@ -15906,6 +14470,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "screech",
         "levelReq": 37
+      },
+      {
+        "key": "venom_drench",
+        "levelReq": 38
       },
       {
         "key": "gunk_shot",
@@ -16028,26 +14596,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "double_hit",
-        "levelReq": 1
-      },
-      {
-        "key": "poison_gas",
-        "levelReq": 1
-      },
-      {
-        "key": "smog",
-        "levelReq": 1
-      },
-      {
-        "key": "smokescreen",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
         "key": "smog",
         "levelReq": 4
       },
@@ -16082,6 +14630,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "sludge_bomb",
         "levelReq": 34
+      },
+      {
+        "key": "double_hit",
+        "levelReq": 35
       },
       {
         "key": "explosion",
@@ -16220,34 +14772,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "final_gambit",
-        "levelReq": 1
-      },
-      {
-        "key": "fling",
-        "levelReq": 1
-      },
-      {
-        "key": "focus_energy",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "low_kick",
-        "levelReq": 1
-      },
-      {
-        "key": "rage",
-        "levelReq": 1
-      },
-      {
-        "key": "scratch",
-        "levelReq": 1
-      },
-      {
         "key": "fury_swipes",
         "levelReq": 5
       },
@@ -16274,6 +14798,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "assurance",
         "levelReq": 26
+      },
+      {
+        "key": "rage",
+        "levelReq": 28
       },
       {
         "key": "punishment",
@@ -16417,22 +14945,6 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "focus_energy",
-        "levelReq": 1
-      },
-      {
-        "key": "karate_chop",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "low_kick",
-        "levelReq": 1
-      },
-      {
-        "key": "focus_energy",
         "levelReq": 3
       },
       {
@@ -16513,14 +15025,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 55
     },
     "abilities": [
-      {
-        "key": "focus_energy",
-        "levelReq": 1
-      },
-      {
-        "key": "karate_chop",
-        "levelReq": 1
-      },
       {
         "key": "leer",
         "levelReq": 1
@@ -16620,38 +15124,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "close_combat",
-        "levelReq": 1
-      },
-      {
-        "key": "double_kick",
-        "levelReq": 1
-      },
-      {
-        "key": "jump_kick",
-        "levelReq": 1
-      },
-      {
-        "key": "meditate",
-        "levelReq": 1
-      },
-      {
-        "key": "mega_kick",
-        "levelReq": 1
-      },
-      {
-        "key": "revenge",
-        "levelReq": 1
-      },
-      {
-        "key": "reversal",
-        "levelReq": 1
-      },
-      {
-        "key": "rolling_kick",
-        "levelReq": 1
-      },
-      {
         "key": "meditate",
         "levelReq": 5
       },
@@ -16666,6 +15138,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "brick_break",
         "levelReq": 17
+      },
+      {
+        "key": "double_kick",
+        "levelReq": 20
       },
       {
         "key": "focus_energy",
@@ -16734,31 +15210,7 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "agility",
-        "levelReq": 1
-      },
-      {
-        "key": "close_combat",
-        "levelReq": 1
-      },
-      {
         "key": "comet_punch",
-        "levelReq": 1
-      },
-      {
-        "key": "counter",
-        "levelReq": 1
-      },
-      {
-        "key": "focus_punch",
-        "levelReq": 1
-      },
-      {
-        "key": "mach_punch",
-        "levelReq": 1
-      },
-      {
-        "key": "pursuit",
         "levelReq": 1
       },
       {
@@ -16889,30 +15341,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 95
     },
     "abilities": [
-      {
-        "key": "draining_kiss",
-        "levelReq": 1
-      },
-      {
-        "key": "lick",
-        "levelReq": 1
-      },
-      {
-        "key": "lovely_kiss",
-        "levelReq": 1
-      },
-      {
-        "key": "perish_song",
-        "levelReq": 1
-      },
-      {
-        "key": "pound",
-        "levelReq": 1
-      },
-      {
-        "key": "powder_snow",
-        "levelReq": 1
-      },
       {
         "key": "lick",
         "levelReq": 5
@@ -17074,30 +15502,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "ancient_power",
-        "levelReq": 1
-      },
-      {
-        "key": "fury_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "mud_sport",
-        "levelReq": 1
-      },
-      {
-        "key": "odor_sleuth",
-        "levelReq": 1
-      },
-      {
-        "key": "peck",
-        "levelReq": 1
-      },
-      {
-        "key": "powder_snow",
-        "levelReq": 1
-      },
-      {
         "key": "mud_sport",
         "levelReq": 5
       },
@@ -17128,6 +15532,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "take_down",
         "levelReq": 28
+      },
+      {
+        "key": "fury_attack",
+        "levelReq": 33
       },
       {
         "key": "mist",
@@ -17578,30 +15986,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "air_slash",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "night_shade",
-        "levelReq": 1
-      },
-      {
-        "key": "peck",
-        "levelReq": 1
-      },
-      {
-        "key": "tailwind",
-        "levelReq": 1
-      },
-      {
-        "key": "teleport",
-        "levelReq": 1
-      },
-      {
         "key": "night_shade",
         "levelReq": 6
       },
@@ -17624,6 +16008,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "confuse_ray",
         "levelReq": 23
+      },
+      {
+        "key": "air_slash",
+        "levelReq": 25
       },
       {
         "key": "wish",
@@ -17707,18 +16095,10 @@ export const SPECIES_DATA: SpeciesData = {
     "abilities": [
       {
         "key": "confusion",
-        "levelReq": 1
+        "levelReq": 16
       },
       {
         "key": "kinesis",
-        "levelReq": 1
-      },
-      {
-        "key": "teleport",
-        "levelReq": 1
-      },
-      {
-        "key": "confusion",
         "levelReq": 16
       },
       {
@@ -17791,10 +16171,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 120
     },
     "abilities": [
-      {
-        "key": "confusion",
-        "levelReq": 1
-      },
       {
         "key": "kinesis",
         "levelReq": 1
@@ -17967,38 +16343,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 67
     },
     "abilities": [
-      {
-        "key": "confusion",
-        "levelReq": 1
-      },
-      {
-        "key": "disable",
-        "levelReq": 1
-      },
-      {
-        "key": "future_sight",
-        "levelReq": 1
-      },
-      {
-        "key": "hypnosis",
-        "levelReq": 1
-      },
-      {
-        "key": "nasty_plot",
-        "levelReq": 1
-      },
-      {
-        "key": "nightmare",
-        "levelReq": 1
-      },
-      {
-        "key": "pound",
-        "levelReq": 1
-      },
-      {
-        "key": "switcheroo",
-        "levelReq": 1
-      },
       {
         "key": "disable",
         "levelReq": 5
@@ -18228,22 +16572,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "hypnosis",
-        "levelReq": 1
-      },
-      {
-        "key": "lick",
-        "levelReq": 1
-      },
-      {
-        "key": "shadow_punch",
-        "levelReq": 1
-      },
-      {
-        "key": "spite",
-        "levelReq": 1
-      },
-      {
         "key": "spite",
         "levelReq": 5
       },
@@ -18266,6 +16594,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "sucker_punch",
         "levelReq": 22
+      },
+      {
+        "key": "shadow_punch",
+        "levelReq": 25
       },
       {
         "key": "payback",
@@ -18327,10 +16659,6 @@ export const SPECIES_DATA: SpeciesData = {
       },
       {
         "key": "shadow_punch",
-        "levelReq": 1
-      },
-      {
-        "key": "spite",
         "levelReq": 1
       },
       {
@@ -18740,34 +17068,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "ember",
-        "levelReq": 1
-      },
-      {
-        "key": "howl",
-        "levelReq": 1
-      },
-      {
-        "key": "inferno",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "nasty_plot",
-        "levelReq": 1
-      },
-      {
-        "key": "smog",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_fang",
-        "levelReq": 1
-      },
-      {
         "key": "howl",
         "levelReq": 4
       },
@@ -18924,22 +17224,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_wave",
-        "levelReq": 1
-      },
-      {
-        "key": "twister",
-        "levelReq": 1
-      },
-      {
-        "key": "wrap",
-        "levelReq": 1
-      },
-      {
         "key": "thunder_wave",
         "levelReq": 5
       },
@@ -19010,42 +17294,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "fire_punch",
-        "levelReq": 1
-      },
-      {
-        "key": "hurricane",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "roost",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_punch",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_wave",
-        "levelReq": 1
-      },
-      {
-        "key": "twister",
-        "levelReq": 1
-      },
-      {
-        "key": "wing_attack",
-        "levelReq": 1
-      },
-      {
-        "key": "wrap",
-        "levelReq": 1
-      },
-      {
         "key": "thunder_wave",
         "levelReq": 5
       },
@@ -19080,6 +17328,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "safeguard",
         "levelReq": 53
+      },
+      {
+        "key": "wing_attack",
+        "levelReq": 55
       },
       {
         "key": "dragon_dance",
@@ -19333,38 +17585,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 45
     },
     "abilities": [
-      {
-        "key": "charm",
-        "levelReq": 1
-      },
-      {
-        "key": "fire_fang",
-        "levelReq": 1
-      },
-      {
-        "key": "ice_fang",
-        "levelReq": 1
-      },
-      {
-        "key": "outrage",
-        "levelReq": 1
-      },
-      {
-        "key": "scary_face",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "tail_whip",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_fang",
-        "levelReq": 1
-      },
       {
         "key": "bite",
         "levelReq": 7
