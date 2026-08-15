@@ -70,6 +70,60 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          contexto: Json
+          criado_em: string
+          fonte: string
+          id: string
+          mensagem: string
+          nivel: string
+          ocorrido_em: string
+          rota: string | null
+          user_id: string | null
+        }
+        Insert: {
+          contexto?: Json
+          criado_em?: string
+          fonte: string
+          id?: string
+          mensagem: string
+          nivel?: string
+          ocorrido_em?: string
+          rota?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          contexto?: Json
+          criado_em?: string
+          fonte?: string
+          id?: string
+          mensagem?: string
+          nivel?: string
+          ocorrido_em?: string
+          rota?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      audit_logs_cursor: {
+        Row: {
+          id: string
+          processando_desde: string | null
+          ultimo_processado: string
+        }
+        Insert: {
+          id: string
+          processando_desde?: string | null
+          ultimo_processado: string
+        }
+        Update: {
+          id?: string
+          processando_desde?: string | null
+          ultimo_processado?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           anexos: Json
@@ -112,42 +166,6 @@ export type Database = {
           percent?: number
           slot?: number
           slot_count?: number
-        }
-        Relationships: []
-      }
-      error_logs: {
-        Row: {
-          assinatura: string
-          contexto: Json | null
-          id: string
-          mensagem: string
-          ocorrencias: number
-          origem: string
-          primeira_vez: string
-          rota: string | null
-          ultima_vez: string
-        }
-        Insert: {
-          assinatura: string
-          contexto?: Json | null
-          id?: string
-          mensagem: string
-          ocorrencias?: number
-          origem: string
-          primeira_vez?: string
-          rota?: string | null
-          ultima_vez?: string
-        }
-        Update: {
-          assinatura?: string
-          contexto?: Json | null
-          id?: string
-          mensagem?: string
-          ocorrencias?: number
-          origem?: string
-          primeira_vez?: string
-          rota?: string | null
-          ultima_vez?: string
         }
         Relationships: []
       }
@@ -237,6 +255,7 @@ export type Database = {
       }
       game_sessions: {
         Row: {
+          ciclos: number
           closed_at: string | null
           flushing_since: string | null
           id: string
@@ -245,12 +264,18 @@ export type Database = {
           poke_uid: string
           rng_draws: number
           rng_state: number
+          sala_abates: number
+          sala_chave: string | null
+          sala_indice: number
           seed: number
+          sequence_cleared: boolean
+          sequence_index: number
           simulated_seconds: number
           started_at: string
           user_id: string
         }
         Insert: {
+          ciclos?: number
           closed_at?: string | null
           flushing_since?: string | null
           id?: string
@@ -259,12 +284,18 @@ export type Database = {
           poke_uid: string
           rng_draws?: number
           rng_state: number
+          sala_abates?: number
+          sala_chave?: string | null
+          sala_indice?: number
           seed: number
+          sequence_cleared?: boolean
+          sequence_index?: number
           simulated_seconds?: number
           started_at?: string
           user_id: string
         }
         Update: {
+          ciclos?: number
           closed_at?: string | null
           flushing_since?: string | null
           id?: string
@@ -273,7 +304,12 @@ export type Database = {
           poke_uid?: string
           rng_draws?: number
           rng_state?: number
+          sala_abates?: number
+          sala_chave?: string | null
+          sala_indice?: number
           seed?: number
+          sequence_cleared?: boolean
+          sequence_index?: number
           simulated_seconds?: number
           started_at?: string
           user_id?: string
@@ -336,6 +372,7 @@ export type Database = {
           description: string | null
           heal_amount: number | null
           heals_full: boolean
+          heals_status: string[] | null
           id: string
           kind: Database["public"]["Enums"]["item_kind"]
           name: string
@@ -351,6 +388,7 @@ export type Database = {
           description?: string | null
           heal_amount?: number | null
           heals_full?: boolean
+          heals_status?: string[] | null
           id: string
           kind: Database["public"]["Enums"]["item_kind"]
           name: string
@@ -366,6 +404,7 @@ export type Database = {
           description?: string | null
           heal_amount?: number | null
           heals_full?: boolean
+          heals_status?: string[] | null
           id?: string
           kind?: Database["public"]["Enums"]["item_kind"]
           name?: string
@@ -614,7 +653,7 @@ export type Database = {
           is_shiny: boolean
           iv_percent: number
           level: number
-          poke_uid: string
+          poke_uid: string | null
           price: number | null
           rarity: Database["public"]["Enums"]["rarity_tier"]
           seller_id: string
@@ -631,7 +670,7 @@ export type Database = {
           is_shiny?: boolean
           iv_percent?: number
           level: number
-          poke_uid: string
+          poke_uid?: string | null
           price?: number | null
           rarity: Database["public"]["Enums"]["rarity_tier"]
           seller_id: string
@@ -648,7 +687,7 @@ export type Database = {
           is_shiny?: boolean
           iv_percent?: number
           level?: number
-          poke_uid?: string
+          poke_uid?: string | null
           price?: number | null
           rarity?: Database["public"]["Enums"]["rarity_tier"]
           seller_id?: string
@@ -1084,9 +1123,9 @@ export type Database = {
           stat_def: number
           stat_def_esp: number
           stat_hp: number
+          stat_speed: number
           status: string | null
           status_turns: number | null
-          stat_speed: number
           team_slot: number | null
           unlocked_abilities: string[]
           updated_at: string
@@ -1150,9 +1189,9 @@ export type Database = {
           stat_def?: number
           stat_def_esp?: number
           stat_hp?: number
+          stat_speed?: number
           status?: string | null
           status_turns?: number | null
-          stat_speed?: number
           team_slot?: number | null
           unlocked_abilities?: string[]
           updated_at?: string
@@ -1578,6 +1617,10 @@ export type Database = {
       }
       curar_equipe: { Args: never; Returns: Json }
       definir_ativo: { Args: { p_poke_id: string }; Returns: Json }
+      definir_golpes_ativos: {
+        Args: { p_ability_ids: string[]; p_poke_id: string }
+        Returns: Json
+      }
       definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       escolher_starter: { Args: { p_species_id: string }; Returns: Json }
@@ -1598,16 +1641,16 @@ export type Database = {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
         Returns: number
       }
-      reiniciar_jogo: { Args: never; Returns: undefined }
-      reportar_erro: {
+      registrar_evento_auditoria: {
         Args: {
           p_contexto?: Json
           p_mensagem: string
-          p_origem: string
+          p_nivel?: string
           p_rota: string
         }
         Returns: undefined
       }
+      reiniciar_jogo: { Args: never; Returns: undefined }
       responder_oferta: {
         Args: { p_aceitar: boolean; p_oferta_id: string }
         Returns: Json
@@ -1674,7 +1717,8 @@ export type Database = {
         | "DRAGON"
         | "DARK"
         | "STEEL"
-      item_kind: "ball" | "potion" | "revive" | "rod" | "stone"
+        | "FAIRY"
+      item_kind: "ball" | "potion" | "revive" | "rod" | "stone" | "status_heal"
       map_continent: "johto" | "kanto"
       move_category: "physical" | "special"
       move_target: "single" | "aoe"
@@ -1833,8 +1877,9 @@ export const Constants = {
         "DRAGON",
         "DARK",
         "STEEL",
+        "FAIRY",
       ],
-      item_kind: ["ball", "potion", "revive", "rod", "stone"],
+      item_kind: ["ball", "potion", "revive", "rod", "stone", "status_heal"],
       map_continent: ["johto", "kanto"],
       move_category: ["physical", "special"],
       move_target: ["single", "aoe"],

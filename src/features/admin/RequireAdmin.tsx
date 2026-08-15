@@ -1,6 +1,6 @@
 // Gate de /admin. Igual RequireAuth (UX, nao controle de acesso de verdade —
-// quem impede leitura de quem nao e admin e a RLS de error_logs, policy
-// "so admin le error_logs"). A policy "admin reads own row" de `admins` ja
+// quem impede leitura de quem nao e admin e a RLS de audit_logs, policy
+// "so admin le audit_logs"). A policy "admin reads own row" de `admins` ja
 // existia antes desta feature, cobre exatamente este SELECT.
 import { type ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'

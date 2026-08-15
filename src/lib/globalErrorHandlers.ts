@@ -4,8 +4,12 @@
 // Registrado uma vez, em main.tsx, antes do primeiro render.
 import { supabase } from '@/lib/supabase'
 
-function reportar(rota: string, mensagem: string): void {
-  void supabase.rpc('reportar_erro', { p_origem: 'client', p_rota: rota, p_mensagem: mensagem }).then(() => {}, () => {})
+function reportar(tipo: string, mensagem: string): void {
+  void supabase.rpc('registrar_evento_auditoria', {
+    p_rota: window.location.pathname,
+    p_mensagem: mensagem,
+    p_contexto: { tipo },
+  }).then(() => {}, () => {})
 }
 
 export function registrarErrosGlobais(): void {

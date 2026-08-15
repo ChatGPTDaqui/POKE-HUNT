@@ -20,8 +20,10 @@ export function iniciarCapturaDeErroDeToast(): void {
     for (const toast of novos) {
       if (toast.type !== 'error') continue
       // `.catch` mudo de proposito: reportar erro nao pode gerar outro erro.
-      void supabase.rpc('reportar_erro', {
-        p_origem: 'client', p_rota: `toast:${toast.channel}`, p_mensagem: toast.message,
+      void supabase.rpc('registrar_evento_auditoria', {
+        p_rota: window.location.pathname,
+        p_mensagem: toast.message,
+        p_contexto: { canal: toast.channel },
       }).then(() => {}, () => {})
     }
   })

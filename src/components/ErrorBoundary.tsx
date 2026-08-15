@@ -21,10 +21,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
-    void supabase.rpc('reportar_erro', {
-      p_origem: 'client',
-      p_rota: 'render-crash',
+    void supabase.rpc('registrar_evento_auditoria', {
+      p_rota: window.location.pathname,
       p_mensagem: `${error.message}\n${info.componentStack ?? ''}`,
+      p_contexto: { tipo: 'render-crash' },
     }).then(() => {}, () => {})
   }
 

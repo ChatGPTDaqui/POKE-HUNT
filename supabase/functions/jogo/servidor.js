@@ -2190,10 +2190,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "petal_dance",
-				"levelReq": 1
-			},
-			{
 				"key": "tackle",
 				"levelReq": 1
 			},
@@ -2628,10 +2624,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "leaf_tornado",
-				"levelReq": 1
-			},
-			{
 				"key": "razor_leaf",
 				"levelReq": 1
 			},
@@ -3039,10 +3031,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "petal_blizzard",
-				"levelReq": 1
-			},
-			{
-				"key": "petal_dance",
 				"levelReq": 1
 			},
 			{
@@ -3677,9 +3665,6 @@ var SPECIES_DATA = {
 		"abilities": [{
 			"key": "harden",
 			"levelReq": 1
-		}, {
-			"key": "harden",
-			"levelReq": 1
 		}],
 		"evolvesTo": "butterfree",
 		"evolvesAtLevel": 10
@@ -3704,10 +3689,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "confusion",
-				"levelReq": 1
-			},
-			{
-				"key": "gust",
 				"levelReq": 1
 			},
 			{
@@ -3832,9 +3813,6 @@ var SPECIES_DATA = {
 		"abilities": [{
 			"key": "harden",
 			"levelReq": 1
-		}, {
-			"key": "harden",
-			"levelReq": 1
 		}],
 		"evolvesTo": "beedrill",
 		"evolvesAtLevel": 10
@@ -3859,10 +3837,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "fury_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "twineedle",
 				"levelReq": 1
 			},
 			{
@@ -4183,10 +4157,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "foresight",
-				"levelReq": 1
-			},
-			{
-				"key": "gust",
 				"levelReq": 1
 			},
 			{
@@ -4754,10 +4724,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "swords_dance",
-				"levelReq": 1
-			},
-			{
 				"key": "venom_drench",
 				"levelReq": 1
 			},
@@ -5012,10 +4978,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "autotomize",
-				"levelReq": 1
-			},
-			{
 				"key": "bug_bite",
 				"levelReq": 1
 			},
@@ -5025,10 +4987,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "magnet_rise",
-				"levelReq": 1
-			},
-			{
-				"key": "mirror_shot",
 				"levelReq": 1
 			},
 			{
@@ -6160,10 +6118,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "withdraw",
-				"levelReq": 1
-			},
-			{
 				"key": "yawn",
 				"levelReq": 1
 			},
@@ -6341,10 +6295,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "icy_wind",
-				"levelReq": 1
-			},
-			{
-				"key": "sheer_cold",
 				"levelReq": 1
 			},
 			{
@@ -7168,10 +7118,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "bite",
-				"levelReq": 1
-			},
-			{
 				"key": "thrash",
 				"levelReq": 1
 			},
@@ -7704,10 +7650,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "spit_up",
-				"levelReq": 1
-			},
-			{
 				"key": "spotlight",
 				"levelReq": 1
 			},
@@ -7716,15 +7658,7 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "stockpile",
-				"levelReq": 1
-			},
-			{
 				"key": "supersonic",
-				"levelReq": 1
-			},
-			{
-				"key": "swallow",
 				"levelReq": 1
 			},
 			{
@@ -8494,10 +8428,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "octazooka",
-				"levelReq": 1
-			},
-			{
 				"key": "psybeam",
 				"levelReq": 1
 			},
@@ -9046,10 +8976,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "scary_face",
-				"levelReq": 1
-			},
-			{
 				"key": "swords_dance",
 				"levelReq": 1
 			},
@@ -9422,10 +9348,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "swift",
-				"levelReq": 1
-			},
-			{
 				"key": "switcheroo",
 				"levelReq": 1
 			},
@@ -9701,10 +9623,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "rage",
-				"levelReq": 1
-			},
-			{
-				"key": "tri_attack",
 				"levelReq": 1
 			},
 			{
@@ -10399,10 +10317,6 @@ var SPECIES_DATA = {
 			"speed": 90
 		},
 		"abilities": [
-			{
-				"key": "agility",
-				"levelReq": 1
-			},
 			{
 				"key": "agility",
 				"levelReq": 1
@@ -11910,10 +11824,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "spike_cannon",
-				"levelReq": 1
-			},
-			{
 				"key": "withdraw",
 				"levelReq": 1
 			},
@@ -12079,10 +11989,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "slash",
 				"levelReq": 1
 			},
 			{
@@ -12263,10 +12169,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "rock_throw",
-				"levelReq": 1
-			},
-			{
-				"key": "slam",
 				"levelReq": 1
 			},
 			{
@@ -12720,10 +12622,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "crush_claw",
-				"levelReq": 1
-			},
-			{
 				"key": "defense_curl",
 				"levelReq": 1
 			},
@@ -12913,10 +12811,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "sand_attack",
-				"levelReq": 1
-			},
-			{
-				"key": "sand_tomb",
 				"levelReq": 1
 			},
 			{
@@ -13276,10 +13170,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "hammer_arm",
-				"levelReq": 1
-			},
-			{
 				"key": "horn_attack",
 				"levelReq": 1
 			},
@@ -13542,10 +13432,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "fury_attack",
-				"levelReq": 1
-			},
-			{
 				"key": "growl",
 				"levelReq": 1
 			},
@@ -13719,10 +13605,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "shadow_claw",
-				"levelReq": 1
-			},
-			{
-				"key": "wing_attack",
 				"levelReq": 1
 			},
 			{
@@ -14019,10 +13901,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "ember",
-				"levelReq": 1
-			},
-			{
-				"key": "fury_attack",
 				"levelReq": 1
 			},
 			{
@@ -14586,10 +14464,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "shell_smash",
-				"levelReq": 1
-			},
-			{
 				"key": "smog",
 				"levelReq": 1
 			},
@@ -14959,10 +14833,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "thunder_wave",
-				"levelReq": 1
-			},
-			{
-				"key": "tri_attack",
 				"levelReq": 1
 			},
 			{
@@ -15580,10 +15450,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "thunder_punch",
-				"levelReq": 1
-			},
-			{
 				"key": "thunder_shock",
 				"levelReq": 1
 			},
@@ -15843,10 +15709,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "bite",
-				"levelReq": 1
-			},
-			{
-				"key": "crunch",
 				"levelReq": 1
 			},
 			{
@@ -16658,10 +16520,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "venom_drench",
-				"levelReq": 1
-			},
-			{
 				"key": "harden",
 				"levelReq": 4
 			},
@@ -16821,10 +16679,6 @@ var SPECIES_DATA = {
 			"speed": 60
 		},
 		"abilities": [
-			{
-				"key": "double_hit",
-				"levelReq": 1
-			},
 			{
 				"key": "double_hit",
 				"levelReq": 1
@@ -17035,10 +16889,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "low_kick",
-				"levelReq": 1
-			},
-			{
-				"key": "rage",
 				"levelReq": 1
 			},
 			{
@@ -17336,10 +17186,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "strength",
-				"levelReq": 1
-			},
-			{
 				"key": "wide_guard",
 				"levelReq": 1
 			},
@@ -17427,10 +17273,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "close_combat",
-				"levelReq": 1
-			},
-			{
-				"key": "double_kick",
 				"levelReq": 1
 			},
 			{
@@ -17549,10 +17391,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "close_combat",
-				"levelReq": 1
-			},
-			{
-				"key": "comet_punch",
 				"levelReq": 1
 			},
 			{
@@ -17889,10 +17727,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "ancient_power",
-				"levelReq": 1
-			},
-			{
-				"key": "fury_attack",
 				"levelReq": 1
 			},
 			{
@@ -18397,10 +18231,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "air_slash",
-				"levelReq": 1
-			},
-			{
 				"key": "leer",
 				"levelReq": 1
 			},
@@ -18531,10 +18361,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "kinesis",
-				"levelReq": 1
-			},
-			{
 				"key": "teleport",
 				"levelReq": 1
 			},
@@ -18614,10 +18440,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "confusion",
-				"levelReq": 1
-			},
-			{
-				"key": "kinesis",
 				"levelReq": 1
 			},
 			{
@@ -19063,10 +18885,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "shadow_punch",
-				"levelReq": 1
-			},
-			{
 				"key": "spite",
 				"levelReq": 1
 			},
@@ -19150,10 +18968,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "lick",
-				"levelReq": 1
-			},
-			{
-				"key": "shadow_punch",
 				"levelReq": 1
 			},
 			{
@@ -19866,10 +19680,6 @@ var SPECIES_DATA = {
 			},
 			{
 				"key": "twister",
-				"levelReq": 1
-			},
-			{
-				"key": "wing_attack",
 				"levelReq": 1
 			},
 			{
@@ -44479,7 +44289,8 @@ var ATTACK_ANIM_DURATION = .5;
 function desiredAnimName(entity) {
 	if (isDead(entity)) return "Faint";
 	if (entity.attackAnimTimer > 0) return entity.attackAnim;
-	if (entity.state === "wander" || entity.state === "chase") return "Walk";
+	if (entity.state === "chase") return "Walk";
+	if (entity.state === "wander") return entity.wanderTarget ? "Walk" : "Idle";
 	return "Idle";
 }
 function tickAttackAnimTimers(world, dt) {
@@ -45482,7 +45293,7 @@ function resolveRulePotionId(gameState, rule) {
 * jogador tem.
 */
 function melhorCuraDeStatus(gameState, status) {
-	return Object.values(ITEMS).filter((item) => "kind" in item && item.kind === "status_heal" && Array.isArray(item.healsStatus) && item.healsStatus.includes(status) && gameState.hasItem(item.id, 1)).sort((a, b) => a.buyPrice - b.buyPrice)[0] ?? null;
+	return Object.values(ITEMS).filter((item) => "kind" in item && item.kind === "status_heal" && Array.isArray(item.healsStatus) && item.healsStatus.includes(status) && gameState.hasItem(item.id, 1) && gameState.autoStatusConfig[item.id] !== false).sort((a, b) => a.buyPrice - b.buyPrice)[0] ?? null;
 }
 function updateAutoHeal(world, gameState, dt) {
 	const player = world.player;
@@ -47184,6 +46995,7 @@ function defaultGameStateData() {
 		autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
 		autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
 		autoCatchRules: [],
+		autoStatusConfig: {},
 		perfStats: {
 			gold: 0,
 			xp: 0,
@@ -47289,6 +47101,7 @@ function snapshotToGameState(snap, defaults) {
 		autoPotRules: fromJson(p.auto_pot_rules, defaults.autoPotRules),
 		autoCatchConfig: fromJson(p.auto_catch_config, defaults.autoCatchConfig),
 		autoCatchRules,
+		autoStatusConfig: fromJson(p.auto_status_config, defaults.autoStatusConfig),
 		perfStats: fromJson(p.perf_stats, defaults.perfStats),
 		trainer: {
 			name: p.trainer_name,
@@ -47313,6 +47126,7 @@ function gameStateToPlayerRow(userId, s) {
 		auto_toggles: toJson(s.autoToggles),
 		auto_pot_rules: toJson(s.autoPotRules),
 		auto_catch_config: toJson(s.autoCatchConfig),
+		auto_status_config: toJson(s.autoStatusConfig),
 		perf_stats: toJson(s.perfStats)
 	};
 }
@@ -47995,10 +47809,10 @@ function criarApp(cfg) {
 			if (erro instanceof ErroHttp) resposta = json({ erro: erro.message }, erro.status);
 			else {
 				console.error("erro nao tratado:", erro);
-				await chamarRpc(cfg, "reportar_erro", {
-					p_origem: "server",
+				await chamarRpc(cfg, "registrar_evento_auditoria", {
 					p_rota: url.pathname,
-					p_mensagem: String(erro)
+					p_mensagem: String(erro),
+					p_contexto: { origem_execucao: "server" }
 				}).catch(() => {});
 				resposta = json({ erro: "erro interno" }, 500);
 			}

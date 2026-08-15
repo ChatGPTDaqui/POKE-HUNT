@@ -54,8 +54,8 @@ export function criarApp(cfg: OpcoesApp) {
         // arriscava o report nunca terminar. `.catch` mudo de proposito —
         // reportar o erro nunca pode virar outro erro (se o banco esta fora
         // do ar, e exatamente isso que estamos tentando registrar).
-        await chamarRpc(cfg, 'reportar_erro', {
-          p_origem: 'server', p_rota: url.pathname, p_mensagem: String(erro),
+        await chamarRpc(cfg, 'registrar_evento_auditoria', {
+          p_rota: url.pathname, p_mensagem: String(erro), p_contexto: { origem_execucao: 'server' },
         }).catch(() => {})
         resposta = json({ erro: 'erro interno' }, 500)
       }
