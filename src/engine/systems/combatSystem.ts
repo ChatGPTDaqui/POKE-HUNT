@@ -32,7 +32,7 @@ import {
   isDead, getGroundOffset, tickCooldowns, isAbilityReady,
   startCooldown, canAct, startGlobalCooldown, takeDamage, heal, releaseEffectLane, findEntityById,
 } from '../entity'
-import type { EnemyEntity, PendingHit, PlayerEntity, WorldEntity, WorldState } from '../types'
+import type { EnemyEntity, Escudos, PendingHit, PlayerEntity, WorldEntity, WorldState } from '../types'
 
 // Dano/efeitos/tratamento-de-derrota acontecem esse tempo depois do golpe
 // disparar, pra aparecerem em sincronia com a pose Shoot/Charge terminando
@@ -61,6 +61,29 @@ const CRIT_MULTIPLIER = formulaEngine.eval('CRIT_MULTIPLIER')
 // vez por uso).
 const SELF_DESTRUCT_ABILITY_KEYS = new Set(['explosion', 'selfdestruct'])
 const SELF_DESTRUCT_HP_LOSS_PERCENT = 0.5
+
+// Escudos ("Screens"): golpe -> chave de `Escudos` que ele liga em quem usou.
+// Todos os 6 SEMPRE afetam quem usou (`attacker` do hit), nunca `hit.target`
+// — mesmo padrao de cura pura (`ability.healPercent`, ver resolveHit): o
+// catalogo (ABILITIES em data/abilities.ts) forca `target: 'single'|'aoe'`
+// pra todo golpe sem excecao, entao golpe self-target continua chegando aqui
+// com `target: 'single'` e um `hit.targetId` que e o INIMIGO, nao quem usou.
+//
+// quick_guard (bloqueia golpe de prioridade) fica DE FORA de proposito: este
+// motor nao tem conceito de prioridade de golpe (todo golpe "pousa" no mesmo
+// pipeline de hit, sem ordem de turno), entao nao ha nada pra quick_guard
+// bloquear. Fica no catalogo/kit como golpe de status comum, mas sem
+// nenhum efeito mecanico — golpe morto de verdade, e nao um esquecimento.
+const ESCUDO_ABILITIES: Record<string, keyof Escudos> = {
+  reflect: 'reflect',
+  light_screen: 'lightScreen',
+  safeguard: 'safeguard',
+  mist: 'mist',
+  lucky_chant: 'luckyChant',
+  wide_guard: 'wideGuard',
+}
+const ESCUDO_DURACAO_TURNOS = 5 // igual aos jogos reais (Gen2-VII, fora de Dobrado item/Light Clay)
+const ESCUDO_DURACAO_SEGUNDOS = ESCUDO_DURACAO_TURNOS * TURNO_SEGUNDOS
 
 // Ambos editaveis pela planilha (ver CLAUDE.md "Balanceamento de economia")
 // com fallback batendo o valor hardcoded antigo.
@@ -283,6 +306,12 @@ function golpeDeApoioUtil(entity: WorldEntity, defenderEntity: WorldEntity, abil
   if (ability.healPercent) {
     return entity.poke.hp / entity.poke.stats.hp <= 1 - ability.healPercent / 100
   }
+  // Escudo (Screen): so vale usar se o proprio escudo daquele golpe ainda nao
+  // esta de pe — repetir Reflect com 4s restantes de 10s e turno jogado fora.
+  const chaveDeEscudo = ESCUDO_ABILITIES[ability.id]
+  if (chaveDeEscudo) {
+    return (entity.escudos?.[chaveDeEscudo] ?? 0) <= 0
+  }
   if (!ability.statChanges || !ability.statChanges.length) return false
   const destino = ability.statTarget === 'self' ? entity : defenderEntity
   return ability.statChanges.some((m) => {
@@ -365,12 +394,22 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
 
     dmg *= effectivenessMultiplier
 
+    // Reflect/Light Screen: escudo do DEFENSOR corta pela metade o dano da
+    // categoria correspondente. Reflect cobre fisico, Light Screen cobre
+    // especial — os dois podem estar de pe ao mesmo tempo sem se somar (cada
+    // um so mexe na sua propria categoria).
+    if (isPhysical && (defenderEntity.escudos?.reflect ?? 0) > 0) dmg *= 0.5
+    if (!isPhysical && (defenderEntity.escudos?.lightScreen ?? 0) > 0) dmg *= 0.5
+
     // Estagio de critico: Slash/Razor Leaf e outros 16 golpes tem +1 estagio,
     // que na Gen VII e 1/8 em vez de 1/24. A tabela real vai ate +3 (1/2), mas
     // nenhum golpe deste elenco passa de +1 — o `Math.min` existe pra ela nao
     // virar um multiplicador solto se algum dia passar.
     const chanceDeCritico = CRIT_CHANCE * Math.pow(3, Math.min(3, ability.critStages ?? 0))
-    isCrit = pessimista ? false : rollChance(rng, Math.min(0.5, chanceDeCritico))
+    // Lucky Chant: escudo do DEFENSOR ignora o sorteio inteiro — nunca critico
+    // contra quem esta protegido, nao so "chance reduzida".
+    const protegidoPorLuckyChant = (defenderEntity.escudos?.luckyChant ?? 0) > 0
+    isCrit = protegidoPorLuckyChant ? false : (pessimista ? false : rollChance(rng, Math.min(0.5, chanceDeCritico)))
     if (isCrit) dmg *= CRIT_MULTIPLIER
 
     dmg *= pessimista ? DANO_VARIACAO_MINIMA : formulaEngine.eval('DAMAGE_VARIATION', {}, rng)
@@ -768,6 +807,12 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   const target = findEntityById(world.player, world.enemies, hit.targetId)
   if (!target || isDead(target)) return // ex: um aliado de AOE ja tinha finalizado antes
 
+  // Wide Guard: escudo do ALVO cancela o hit de AREA inteiro nele — sem dano,
+  // sem efeito colateral, como se o golpe nunca tivesse pousado. So mexe em
+  // AOE (`ability.target === 'aoe'`); golpe de alvo unico passa direto, igual
+  // aos jogos reais (Wide Guard nao bloqueia golpe single-target).
+  if (ability.target === 'aoe' && (target.escudos?.wideGuard ?? 0) > 0) return
+
   const result = computeDamage(world.rng, attacker, target, ability, world.pessimista)
   // Dano REALMENTE causado, limitado ao HP que o alvo tinha. `result.amount` e
   // o numero cru da formula e pode passar MUITO do HP do alvo (um POKE Nivel 85
@@ -810,6 +855,16 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     const quanto = Math.max(1, Math.round(attacker.poke.stats.hp * ability.healPercent / 100))
     heal(attacker, quanto)
     if (!silent) spawnDamageNumber(world, attacker, { amount: -quanto, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+  }
+
+  // ESCUDOS (Screens: Reflect/Light Screen/Safeguard/Mist/Lucky Chant/Wide
+  // Guard). Mesma logica de "self-target" da cura pura acima: liga o timer no
+  // proprio ATACANTE, nunca no `target` do hit — ver ESCUDO_ABILITIES no topo
+  // do arquivo pro porque disso.
+  const chaveDeEscudo = ESCUDO_ABILITIES[ability.id]
+  if (chaveDeEscudo) {
+    attacker.escudos ??= {}
+    attacker.escudos[chaveDeEscudo] = ESCUDO_DURACAO_SEGUNDOS
   }
 
   // FLINCH: o alvo perde o proximo turno.
