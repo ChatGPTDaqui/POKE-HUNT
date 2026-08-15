@@ -63,9 +63,24 @@ export const useAuthStore = create<AuthState>(() => ({
   loading: true,
   emRecuperacaoDeSenha: false,
 
+  // Um dispositivo logado por vez. `scope: 'others'` (Supabase Auth) revoga o
+  // REFRESH TOKEN de toda sessao anterior deste usuario, sem precisar saber
+  // quantas existem nem onde. O dispositivo antigo nao e derrubado NA HORA —
+  // o access token dele (JWT, `jwt_expiry = 3600` em supabase/config.toml)
+  // continua validando localmente ate expirar, porque o servidor verifica a
+  // assinatura do JWT sem bater no banco (commit "verifica o JWT localmente":
+  // decisao de performance, reintroduzir checagem por sessao aqui desfaria
+  // aquilo). Na pratica: login novo aqui, o outro aparelho perde a sessao na
+  // proxima renovacao de token — em ate 1h, nao instantaneo.
   signIn: async (email, password) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return { error: error ? traduzErro(error.message) : null }
+    if (error) return { error: traduzErro(error.message) }
+    await supabase.auth.signOut({ scope: 'others' }).catch(() => {
+      // Revogar as outras sessoes e um bonus, nao um requisito pro login
+      // funcionar — se essa chamada falhar (rede, etc.), o jogador continua
+      // logado normalmente aqui.
+    })
+    return { error: null }
   },
 
   // O nome do treinador viaja em `options.data` (= `raw_user_meta_data` no
