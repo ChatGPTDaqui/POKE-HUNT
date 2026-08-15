@@ -27,10 +27,32 @@ interface AuthState {
   // ja faz isso pra sessao normal), pulando a troca de senha que era o motivo
   // do link. Some assim que a senha nova e confirmada.
   emRecuperacaoDeSenha: boolean
+  // `true` quando o login desta aba detectou outra sessao ainda viva pra este
+  // usuario. Enquanto isso, o app mostra a tela de "Jogar por aqui?" no lugar
+  // do jogo (App.tsx) — a sessao NOVA ja existe (login foi aceito), so o
+  // dispositivo antigo ainda nao foi avisado. Ver `assumirControle`.
+  precisaConfirmarDispositivo: boolean
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signUp: (email: string, password: string, trainerName?: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
   atualizarSenha: (novaSenha: string) => Promise<{ error: string | null }>
+  // Confirma a troca: derruba a(s) outra(s) sessao(oes) e libera o jogo aqui.
+  assumirControle: () => Promise<void>
+  // Desiste da troca: desfaz o login desta aba, devolve pra tela de entrar —
+  // o dispositivo antigo nunca chega a saber que isto aconteceu.
+  cancelarTrocaDeDispositivo: () => Promise<void>
+}
+
+type RpcSemArgs = (nome: string) => Promise<{ data: unknown; error: { message: string } | null }>
+// `database.types.ts` (gerado antes da RPC existir) nao conhece esta funcao —
+// mesmo cast local que `acoesRpc.ts#rpcDinamica` ja usa, mesmo motivo (nao
+// regenerar o arquivo inteiro no meio de uma migracao pequena).
+const rpcSemArgs = ((nome: string) => supabase.rpc(nome as never)) as unknown as RpcSemArgs
+
+async function temOutraSessaoAtiva(): Promise<boolean> {
+  const { data, error } = await rpcSemArgs('tem_outra_sessao_de_auth_ativa')
+  if (error) return false // rede ruim aqui nao pode travar login — so pula o aviso
+  return data === true
 }
 
 // Mensagens do Supabase vem em ingles e algumas sao cripticas para o jogador.
@@ -62,10 +84,43 @@ export const useAuthStore = create<AuthState>(() => ({
   user: null,
   loading: true,
   emRecuperacaoDeSenha: false,
+  precisaConfirmarDispositivo: false,
 
+  // Um dispositivo logado por vez, mas quem decide QUANDO derrubar o antigo e
+  // o jogador — pedido explicito: mostrar "Jogar por aqui?" no aparelho NOVO
+  // em vez de kickar sozinho. O login em si sempre autentica normalmente
+  // (senha certa = sessao criada); so a REVOGACAO da(s) sessao(oes) antiga(s)
+  // fica pendurada em `precisaConfirmarDispositivo` ate `assumirControle`.
+  //
+  // `scope: 'others'` (Supabase Auth) revoga o REFRESH TOKEN de toda sessao
+  // anterior deste usuario, sem precisar saber quantas existem nem onde. O
+  // dispositivo antigo nao e derrubado NA HORA mesmo apos confirmado — o
+  // access token dele (JWT, `jwt_expiry = 3600` em supabase/config.toml)
+  // continua validando localmente ate expirar, porque o servidor verifica a
+  // assinatura do JWT sem bater no banco (commit "verifica o JWT localmente":
+  // decisao de performance, reintroduzir checagem por sessao aqui desfaria
+  // aquilo) — perde a sessao na proxima renovacao de token, em ate 1h.
   signIn: async (email, password) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return { error: error ? traduzErro(error.message) : null }
+    if (error) return { error: traduzErro(error.message) }
+    const outraViva = await temOutraSessaoAtiva()
+    if (outraViva) {
+      useAuthStore.setState({ precisaConfirmarDispositivo: true })
+    }
+    return { error: null }
+  },
+
+  assumirControle: async () => {
+    await supabase.auth.signOut({ scope: 'others' }).catch(() => {
+      // Falha aqui (rede) nao pode travar o jogador nesta tela pra sempre —
+      // ele so nao vai ter derrubado o outro aparelho desta vez.
+    })
+    useAuthStore.setState({ precisaConfirmarDispositivo: false })
+  },
+
+  cancelarTrocaDeDispositivo: async () => {
+    await supabase.auth.signOut()
+    useAuthStore.setState({ precisaConfirmarDispositivo: false })
   },
 
   // O nome do treinador viaja em `options.data` (= `raw_user_meta_data` no

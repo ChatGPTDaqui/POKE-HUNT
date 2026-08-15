@@ -164,12 +164,11 @@ function CelulaCheckbox(
   )
 }
 
-// A celula da coluna "Usar" das linhas do learnset normal. Dois estados sem
-// toggle: golpe ainda nao aprendido (nada), e dentro de hunt pro slot-de-4
-// (mostra a marca, mas nao clica — a RPC `definir_golpes_ativos` recusa
-// trocar golpe com sessao de hunt aberta). O AOE do Nivel 50 usa
-// `CelulaCheckbox` direto (liga/desliga, nunca ocupa slot, sem trava de
-// hunt — `alternar_habilidade` nao tem essa restricao).
+// A celula da coluna "Usar" das linhas do learnset normal. Um estado sem
+// toggle: golpe ainda nao aprendido (nada). Fora isso, liga/desliga a
+// qualquer momento — trocar golpe nao tem trava de hunt (removida por pedido
+// do usuario, ver migration 20260815170000). O AOE do Nivel 50 usa
+// `CelulaCheckbox` direto do mesmo jeito (liga/desliga, nunca ocupa slot).
 function CelulaUsar(
   { aoe50, aprendido, ativo, habilitado, onClick }:
   { aoe50: boolean; aprendido: boolean; ativo: boolean; habilitado: boolean; onClick: () => void },
@@ -193,7 +192,7 @@ function CelulaUsar(
       habilitado={habilitado}
       tituloAtivo="Remover dos golpes ativos"
       tituloInativo="Usar este golpe"
-      tituloDesabilitado="Saia da hunt para trocar de golpe"
+      tituloDesabilitado=""
       onClick={onClick}
     />
   )
@@ -213,7 +212,6 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
   // que cada chamador teria que lembrar de passar.
   const equipe = useGameStateStore((s) => s.team)
   const mochila = useGameStateStore((s) => s.bagPokes)
-  const emHunt = useGameStateStore((s) => s.currentMapId) != null
   const meu = [...equipe, ...mochila].some((p) => p.uid === poke.uid)
 
   // `poke` e a prop que o chamador passou — pro perfil aberto de um POKE
@@ -230,7 +228,12 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
   const pokeVivo = equipe.find((p) => p.uid === poke.uid) ?? mochila.find((p) => p.uid === poke.uid) ?? poke
 
   const ativos = pokeVivo.activeAbilities ?? activeAbilitiesPadrao(species, pokeVivo.level)
-  const podeEscolher = meu && !emHunt
+  // Trocar golpe funciona a qualquer momento, inclusive dentro de uma hunt —
+  // pedido explicito do usuario (personalizar os 4 golpes livremente). O
+  // servidor reconstroi o mundo do zero a partir de active_abilities a cada
+  // janela de flush (<=30s), entao trocar no meio da cacada nao corrompe nada,
+  // so vale a partir da proxima janela.
+  const podeEscolher = meu
   const desabilitados = pokeVivo.disabledAbilities ?? {}
 
   function alternar(key: string): void {
@@ -258,9 +261,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
           <span className="text-n400">
             Golpes ativos <span className="text-foreground">{ativos.length}/{MAX_ACTIVE_ABILITIES}</span>
           </span>
-          <span className="text-n500">
-            {emHunt ? 'Saia da hunt para trocar de golpe.' : 'Clique na coluna Usar para escolher.'}
-          </span>
+          <span className="text-n500">Clique na coluna Usar para escolher.</span>
         </div>
       )}
       <div

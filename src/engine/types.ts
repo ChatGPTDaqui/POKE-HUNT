@@ -139,6 +139,9 @@ export interface WorldEffect {
   isAoe?: boolean
   worldSize?: number
   elementType?: ElementType
+  // Presente so em `abilityEffect` de golpe de STATUS (ver data/statusVfx.ts)
+  // — troca o burst de impacto normal pela arte de buff/debuff por tipo.
+  statusDirection?: 'aumenta' | 'diminui'
   ballItemId?: string
   success?: boolean
   laneSize: number

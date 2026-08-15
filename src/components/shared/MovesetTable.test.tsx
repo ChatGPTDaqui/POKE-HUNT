@@ -2,9 +2,9 @@
 //
 // A selecao dos 4 golpes ativos, pela TELA. O resto da Leva A ja e coberto por
 // teste de dado (activeAbilities.test.ts) e pela RPC no banco; o que so existe
-// aqui e a fiacao: clique -> controller -> acao, mais as tres condicoes que
-// escondem ou travam o controle (POKE que nao e seu, golpe nao aprendido,
-// jogador dentro de hunt).
+// aqui e a fiacao: clique -> controller -> acao, mais as duas condicoes que
+// escondem o controle (POKE que nao e seu, golpe nao aprendido) — dentro de
+// hunt NAO trava mais (pedido do usuario, ver o teste de hunt abaixo).
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -139,17 +139,23 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     expect(lista).toEqual([...escolhidos, deFora])
   })
 
-  it('dentro de hunt o controle fica travado e nao dispara acao', async () => {
+  // BUG REAL CORRIGIDO: golpe so podia ser trocado FORA de hunt (RPC recusava
+  // com sessao aberta) — pedido explicito do usuario pra poder personalizar a
+  // qualquer momento. A troca so vale a partir da proxima janela de flush
+  // (servidor reconstroi o mundo do zero de `active_abilities` a cada uma,
+  // <=30s), sem corromper a que ja esta rodando — ver migration
+  // 20260815170000_definir_golpes_ativos_sem_trava_de_hunt.sql.
+  it('dentro de hunt o controle continua liberado (trava removida)', async () => {
     const poke = pokeDoJogador()
     useGameStateStore.setState({ team: [poke], currentMapId: 'lv_1_10_floresta' })
     render(<MovesetTable poke={poke} species={ESPECIE} />)
 
-    expect(screen.getByText(/Saia da hunt/)).toBeTruthy()
+    expect(screen.queryByText(/Saia da hunt/)).toBeNull()
     const botao = botaoUsar(nomeDoGolpe(poke.activeAbilities![0]))!
-    expect(botao.disabled).toBe(true)
+    expect(botao.disabled).toBe(false)
 
     await userEvent.click(botao)
-    expect(setActiveAbilities).not.toHaveBeenCalled()
+    expect(setActiveAbilities).toHaveBeenCalledTimes(1)
   })
 
   it('o AOE de Nivel 50 nao ocupa slot: checkbox de liga/desliga, nao do slot-de-4', async () => {

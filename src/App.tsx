@@ -16,6 +16,7 @@ import { LoginPage } from '@/features/auth/LoginPage'
 import { RegisterPage } from '@/features/auth/RegisterPage'
 import { RequireAuth } from '@/features/auth/RequireAuth'
 import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage'
+import { DeviceTakeoverPage } from '@/features/auth/DeviceTakeoverPage'
 import { GameShell } from '@/features/game/GameShell'
 import { RequireAdmin } from '@/features/admin/RequireAdmin'
 import { AdminErrorsPage } from '@/features/admin/AdminErrorsPage'
@@ -29,11 +30,18 @@ function App() {
   // (depende do Site URL configurado no Supabase), entao a troca de senha
   // precisa interceptar antes do roteamento normal decidir pra onde ir.
   const emRecuperacaoDeSenha = useAuthStore((s) => s.emRecuperacaoDeSenha)
+  // Mesmo desvio de ResetPasswordPage, fora do <Routes>: o login pode ter
+  // acontecido em qualquer path (Home ou /login), entao a checagem de
+  // "outro aparelho conectado" precisa interceptar antes do roteamento
+  // normal decidir pra onde ir — nao so na rota /jogo.
+  const precisaConfirmarDispositivo = useAuthStore((s) => s.precisaConfirmarDispositivo)
 
   return (
     <BrowserRouter>
       {emRecuperacaoDeSenha ? (
         <ResetPasswordPage />
+      ) : precisaConfirmarDispositivo ? (
+        <DeviceTakeoverPage />
       ) : (
         <Routes>
           <Route path="/" element={<HomePage />} />

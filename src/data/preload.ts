@@ -22,6 +22,7 @@ import { getEncounter } from './enemies'
 import { faceIconUrl, spriteUrl } from './sprites'
 import { todosOsQuadrosDeVfx } from './elementVfx'
 import { todosOsIconesDeHabilidade } from './abilityIcons'
+import { todosOsVfxDeStatus } from './statusVfx'
 import { primeImage } from '@/render/sprites'
 import { CENA_HOSPITAL } from './hospital'
 
@@ -109,6 +110,6 @@ export async function preloadHunt(mapId: string, jogador: EspeciePreload | null)
   // usar: o proprio POKE do jogador muda de golpe ao subir de nivel e ao
   // evoluir, e "quais tipos vao aparecer" nao e uma pergunta que da pra
   // responder na entrada da hunt. Sao PNGs de 32x32, ~66 arquivos.
-  const efeitos = [...todosOsQuadrosDeVfx(), ...todosOsIconesDeHabilidade()].map(primeImage)
+  const efeitos = [...todosOsQuadrosDeVfx(), ...todosOsIconesDeHabilidade(), ...todosOsVfxDeStatus()].map(primeImage)
   await Promise.all([preloadEspecies(especies), ...fundo, ...efeitos])
 }

@@ -13,6 +13,18 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '6.9',
+    date: '2026-08-15',
+    title: 'Personalize os 4 golpes a qualquer momento, um dispositivo por vez, e golpe de status ganhou sprite',
+    highlights: [
+      'ESCOLHER OS 4 GOLPES ATIVOS NAO EXIGE MAIS SAIR DA HUNT. A trava "saia da hunt para trocar de golpe" nao protegia nada tecnico — o servidor reconstroi o combate do zero a cada ~30 segundos, e a troca so valia a partir da proxima janela de qualquer jeito. Removida: personalize os golpes do seu POKE na hora, inclusive no meio de uma caçada, escolhendo livremente entre os que ele ja aprendeu (ate 4, e pode ser so 1 se preferir).',
+      'GOLPE DE STATUS GANHOU ICONE E VFX DE VERDADE. A barra de combate escondia qualquer golpe sem dano (Growl, Supersonic, Danca das Espadas, ...) — se voce escolhia um deles como um dos 4 ativos, ele "sumia" da barra sem explicacao. Agora aparece com o icone do tipo normal e "—" no lugar do dano. De brinde, golpe de status ganhou uma animacao propria (eleva atributo = brilho pra cima, baixa atributo ou aplica uma condicao = pra baixo) em vez de reusar o mesmo impacto de golpe de dano, em 16 dos 18 tipos elementais.',
+      'LOGIN NOVO NAO DERRUBA MAIS EM SILENCIO. So um dispositivo pode estar logado por vez, mas agora o aparelho NOVO pergunta antes: "Jogar por aqui?" — so ao confirmar e que o outro aparelho perde a sessao (na proxima vez que ele tentar renovar o login, em ate 1 hora). Cancelar desfaz o login sem mexer no outro aparelho.',
+      'BUG REAL CORRIGIDO: "Iniciar novo jogo" zerava a mochila e NUNCA devolvia as bolas/pocoes/revives iniciais — toda conta resetada ficava com zero itens, e o bot (auto-pocao, ligado por padrao) nao tinha nada pra usar. Corrigido na fonte: reset volta a dar o kit inicial completo.',
+      'BUG REAL CORRIGIDO: o chat do Correio as vezes gerava um erro no console e parava de atualizar sozinho (precisava recarregar a pagina) se voce abrisse a tela rapido demais — duas tentativas de conexao ao mesmo canal em sequencia, a segunda batendo numa ja aberta. Corrigido.',
+    ],
+  },
+  {
     version: '6.8',
     date: '2026-08-15',
     title: 'Golpe de Recordador nao entra mais no aprendizado por nivel',

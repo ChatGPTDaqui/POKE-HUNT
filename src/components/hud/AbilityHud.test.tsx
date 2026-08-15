@@ -84,4 +84,23 @@ describe('AbilityHud', () => {
     render(<AbilityHud />)
     expect(screen.queryAllByTitle(/duplo clique/i)).toHaveLength(0)
   })
+
+  // BUG REAL CORRIGIDO: a barra filtrava golpe de status fora (so mostrava
+  // golpe com dano), entao escolher um como um dos 4 ativos o fazia "sumir"
+  // da barra sem nenhum aviso. `growl` (status, Charmander nivel 1) prova que
+  // ele agora ocupa slot igual a qualquer outro golpe escolhido.
+  it('golpe de status escolhido ocupa slot na barra', () => {
+    const growl = getAbility('growl')!
+    expect(isDamagingAbility(growl)).toBe(false)
+    const poke = pokeEmCampo({ activeAbilities: ['growl'] })
+    porEmCampo(poke)
+    render(<AbilityHud />)
+
+    // AOE de Nivel 50 + Ataque Basico + growl.
+    expect(slots()).toHaveLength(3)
+    // Golpe de status tambem ganha icone (mesmo esquema por tipo dos outros);
+    // so o poder na faixa de baixo vira "—" em vez de um numero, ja que ele
+    // nao tem power > 0.
+    expect(screen.getByText('—')).toBeTruthy()
+  })
 })
