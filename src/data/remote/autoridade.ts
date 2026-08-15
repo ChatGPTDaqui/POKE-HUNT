@@ -149,6 +149,7 @@ export function registrarEncerramentoDeSessao(cb: () => void): () => void {
 
 const MOTIVO_ENCERRAMENTO: Record<string, string> = {
   desmaio: 'Seu POKE desmaiou e a cacada foi encerrada. Cure na Enfermeira para voltar a cacar.',
+  sumiu: 'A cacada foi encerrada — voce entrou em outra hunt ou saiu por outra aba.',
 }
 
 function tratarEncerramento(motivo: string | null | undefined): void {
@@ -180,9 +181,26 @@ export async function liquidar(): Promise<void> {
       )
     }
   } catch (erro) {
-    // 409 = nao ha sessao aberta. Acontece em corrida normal (fechou a hunt
-    // enquanto o timer disparava) e nao e problema do jogador.
-    if (erro instanceof ErroServidor && erro.status === 409) return
+    // 409 = nao ha sessao aberta. NUNCA e transitorio: se o servidor nao acha a
+    // sessao, nao existe intervalo pra creditar e a proxima tentativa vai dar o
+    // mesmo 409.
+    //
+    // Quem discrimina os dois casos e o proprio timer:
+    //
+    //  - timer JA parado — corrida normal. `fecharSessaoDeHunt` chama
+    //    `pararFlushPeriodico()` ANTES do request, e `commitAgora` usa
+    //    `liquidar()` fora de hunt de proposito. Nada a fazer, nada a avisar.
+    //  - timer AINDA rodando — a sessao morreu pelas costas do cliente (a
+    //    mesma conta abriu outra hunt em outra aba, ou o servidor a fechou por
+    //    um caminho que so devolve 409, ver appSessao.ts#flush). Este era um
+    //    vazamento real: o `return` mudo deixava o timer batendo em
+    //    `/sessao/flush` a cada 30s PARA SEMPRE, uma verificacao de auth por
+    //    tick, numa cacada que o jogador continuava vendo render na tela sem
+    //    creditar nada.
+    if (erro instanceof ErroServidor && erro.status === 409) {
+      if (timerFlush) tratarEncerramento('sumiu')
+      return
+    }
     reportarErro(erro)
   }
 }

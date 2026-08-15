@@ -178,10 +178,62 @@ async function apagar(cfg, caminho) {
 }
 //#endregion
 //#region server/src/auth.ts
-async function autenticar(cfg, req) {
-	const header = req.headers.get("authorization") || "";
-	const token = header.toLowerCase().startsWith("bearer ") ? header.slice(7).trim() : "";
-	if (!token) throw new ErroHttp(401, "faltou o token de sessao");
+/**
+* Cache de verificacao, por token.
+*
+* Medido em producao (pg_stat_statements, janela de 8 dias): ~44 mil chamadas
+* de `GET /auth/v1/user` contra ~1.065 transacoes de escrita do Auth (login,
+* cadastro, refresh — o trafego legitimo). Ou seja 97% do que o servico de Auth
+* fazia era reverificar o MESMO token: o cliente liquida a sessao de hunt a
+* cada 30s (INTERVALO_FLUSH_MS), e cada flush pagava uma ida de rede completa
+* pra reconfirmar um token que nao mudou.
+*
+* O TTL e o unico parametro de seguranca aqui: ele e a JANELA em que um logout,
+* um ban ou uma revogacao ainda deixam o token passar. Expiracao normal NAO
+* depende disto — o gateway das Edge Functions valida assinatura e `exp` antes
+* do handler rodar (`verify_jwt`, ligado por padrao no `functions deploy`), e o
+* `exp` do proprio token ainda corta o cache mais cedo quando falta menos de
+* 5 min pra ele vencer.
+*
+* 5 minutos: derruba ~90% das chamadas (10 flushes por janela viram 1) e e
+* curto o bastante pra um banimento morder antes de o jogador terminar a
+* proxima cacada. Nao aumentar sem decidir que atraso de revogacao e aceitavel.
+*/
+var TTL_MS = 3e5;
+/**
+* Teto de tokens guardados. O isolate da Edge Function vive minutos ou horas e
+* atende varios jogadores; sem teto, um pico de trafego deixaria um Map
+* crescendo ate o limite de memoria da invocacao. Com 200 cabe a base de
+* jogadores inteira com folga, e o descarte abaixo e o mais simples que
+* funciona (limpa vencidos; se ainda estourar, zera).
+*/
+var MAX_ENTRADAS = 200;
+var cache = /* @__PURE__ */ new Map();
+function podar(agora) {
+	for (const [token, entrada] of cache) if (entrada.expiraEm <= agora) cache.delete(token);
+	if (cache.size >= MAX_ENTRADAS) cache.clear();
+}
+/**
+* Quando o cache pode valer, no maximo.
+*
+* Le o `exp` do JWT SEM verificar assinatura — e seguro porque o valor so pode
+* ENCURTAR a validade (o `Math.min` com o TTL), nunca estende-la. Um `exp`
+* forjado gigante cai no TTL; um `exp` proximo faz o cache morrer junto com o
+* token, em vez de manter vivo um token que o gateway ja vai recusar.
+*/
+function validoAte(token, agora) {
+	const teto = agora + TTL_MS;
+	const partes = token.split(".");
+	if (partes.length !== 3) return teto;
+	try {
+		const payload = JSON.parse(atob(partes[1].replace(/-/g, "+").replace(/_/g, "/")));
+		if (typeof payload.exp !== "number") return teto;
+		return Math.min(teto, payload.exp * 1e3);
+	} catch {
+		return teto;
+	}
+}
+async function consultarSupabase(cfg, token) {
 	const resposta = await fetch(`${cfg.supabaseUrl}/auth/v1/user`, { headers: {
 		apikey: cfg.serviceRoleKey,
 		Authorization: `Bearer ${token}`
@@ -193,6 +245,24 @@ async function autenticar(cfg, req) {
 		id: corpo.id,
 		email: corpo.email ?? null
 	};
+}
+async function autenticar(cfg, req) {
+	const header = req.headers.get("authorization") || "";
+	const token = header.toLowerCase().startsWith("bearer ") ? header.slice(7).trim() : "";
+	if (!token) throw new ErroHttp(401, "faltou o token de sessao");
+	const agora = Date.now();
+	const emCache = cache.get(token);
+	if (emCache && emCache.expiraEm > agora) return emCache.jogador;
+	podar(agora);
+	const entrada = {
+		jogador: consultarSupabase(cfg, token).catch((erro) => {
+			if (cache.get(token) === entrada) cache.delete(token);
+			throw erro;
+		}),
+		expiraEm: validoAte(token, agora)
+	};
+	cache.set(token, entrada);
+	return entrada.jogador;
 }
 //#endregion
 //#region src/core/rng.ts
