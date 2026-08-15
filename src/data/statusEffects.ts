@@ -148,7 +148,7 @@ export function chanceDeDescongelar(tipo: StatusCondition): number {
 export const ESTAGIO_MINIMO = -6
 export const ESTAGIO_MAXIMO = 6
 
-export type StatDeEstagio = 'atkFis' | 'atkEsp' | 'def' | 'defEsp' | 'speed'
+export type StatDeEstagio = 'atkFis' | 'atkEsp' | 'def' | 'defEsp' | 'speed' | 'accuracy' | 'evasion'
 export type EstagiosDeStat = Partial<Record<StatDeEstagio, number>>
 
 /**
@@ -167,4 +167,18 @@ export function multiplicadorDeEstagio(estagio: number): number {
 
 export function multiplicadorDeStat(estagios: EstagiosDeStat | undefined, stat: StatDeEstagio): number {
   return multiplicadorDeEstagio(estagios?.[stat] ?? 0)
+}
+
+/**
+ * Multiplicador de estagio de precisao/evasao — formula exata dos jogos, e
+ * DIFERENTE da formula generica acima: base 3, nao base 2. (3+n)/3 subindo,
+ * 3/(3-n) descendo. +1 da 1.33x (nao 1.5x); -1 da 0.75x (nao 0.67x).
+ *
+ * Eixo separado de proposito: accuracy/evasion nunca reusa `multiplicadorDeEstagio`
+ * porque as duas fórmulas divergem — usar a de base 2 aqui deixaria Areia-Fina/
+ * Duplo Time mais fortes do que sao nos jogos reais.
+ */
+export function multiplicadorDeAccuracyOuEvasion(estagio: number): number {
+  const n = Math.max(ESTAGIO_MINIMO, Math.min(ESTAGIO_MAXIMO, estagio))
+  return n >= 0 ? (3 + n) / 3 : 3 / (3 - n)
 }
