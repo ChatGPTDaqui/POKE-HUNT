@@ -27280,6 +27280,170 @@ function tentarAgir(rng, entity, calcularAutoDano) {
 	return { agir: true };
 }
 //#endregion
+//#region src/data/traits.ts
+var SPECIES_TRAIT = {
+	gastly: "levitate",
+	haunter: "levitate",
+	gengar: "levitate",
+	koffing: "levitate",
+	weezing: "levitate",
+	misdreavus: "levitate",
+	unown: "levitate",
+	chinchou: "volt_absorb",
+	lanturn: "volt_absorb",
+	lapras: "water_absorb",
+	quagsire: "water_absorb",
+	wooper: "water_absorb",
+	poliwag: "water_absorb",
+	poliwhirl: "water_absorb",
+	mantine: "water_absorb",
+	growlithe: "flash_fire",
+	arcanine: "flash_fire",
+	houndour: "flash_fire",
+	houndoom: "flash_fire",
+	ponyta: "flash_fire",
+	rapidash: "flash_fire",
+	miltank: "sap_sipper",
+	girafarig: "sap_sipper",
+	stantler: "sap_sipper",
+	rhyhorn: "lightning_rod",
+	rhydon: "lightning_rod",
+	arbok: "intimidate",
+	gyarados: "intimidate",
+	snubbull: "intimidate",
+	granbull: "intimidate",
+	qwilfish: "intimidate",
+	porygon: "download",
+	porygon2: "download",
+	pikachu: "static",
+	voltorb: "static",
+	electrode: "static",
+	electabuzz: "static",
+	elekid: "static",
+	mareep: "static",
+	flaaffy: "static",
+	ampharos: "static",
+	zapdos: "static",
+	magmar: "flame_body",
+	magby: "flame_body",
+	slugma: "flame_body",
+	magcargo: "flame_body",
+	nidoran_f: "poison_point",
+	nidorina: "poison_point",
+	nidoqueen: "poison_point",
+	nidoran_m: "poison_point",
+	nidorino: "poison_point",
+	nidoking: "poison_point",
+	paras: "effect_spore",
+	parasect: "effect_spore",
+	snorlax: "immunity",
+	ditto: "limber",
+	meowth: "limber",
+	persian: "limber",
+	murkrow: "insomnia",
+	spinarak: "insomnia",
+	ariados: "insomnia",
+	mankey: "vital_spirit",
+	primeape: "vital_spirit",
+	delibird: "vital_spirit",
+	goldeen: "water_veil",
+	seaking: "water_veil",
+	slowpoke: "own_tempo",
+	slowbro: "own_tempo",
+	smeargle: "own_tempo",
+	zubat: "inner_focus",
+	golbat: "inner_focus",
+	sneasel: "inner_focus",
+	drowzee: "inner_focus",
+	hypno: "inner_focus",
+	marill: "huge_power",
+	azumarill: "huge_power",
+	corsola: "hustle",
+	machop: "guts",
+	machoke: "guts",
+	machamp: "guts",
+	heracross: "guts",
+	tyrogue: "guts",
+	ursaring: "guts",
+	teddiursa: "quick_feet",
+	horsea: "swift_swim",
+	seadra: "swift_swim",
+	kingdra: "swift_swim",
+	magikarp: "swift_swim",
+	psyduck: "swift_swim",
+	golduck: "swift_swim",
+	omanyte: "swift_swim",
+	omastar: "swift_swim",
+	kabuto: "swift_swim",
+	kabutops: "swift_swim",
+	oddish: "chlorophyll",
+	gloom: "chlorophyll",
+	bellsprout: "chlorophyll",
+	weepinbell: "chlorophyll",
+	victreebel: "chlorophyll",
+	exeggcute: "chlorophyll",
+	tangela: "chlorophyll",
+	hoppip: "chlorophyll",
+	skiploom: "chlorophyll",
+	jumpluff: "chlorophyll",
+	sunkern: "chlorophyll",
+	sunflora: "chlorophyll",
+	sandshrew: "sand_rush",
+	sandslash: "sand_rush",
+	charmander: "blaze",
+	charmeleon: "blaze",
+	charizard: "blaze",
+	cyndaquil: "blaze",
+	quilava: "blaze",
+	typhlosion: "blaze",
+	squirtle: "torrent",
+	wartortle: "torrent",
+	blastoise: "torrent",
+	totodile: "torrent",
+	croconaw: "torrent",
+	feraligatr: "torrent",
+	bulbasaur: "overgrow",
+	ivysaur: "overgrow",
+	venusaur: "overgrow",
+	chikorita: "overgrow",
+	bayleef: "overgrow",
+	meganium: "overgrow",
+	beedrill: "swarm",
+	scyther: "swarm",
+	scizor: "swarm",
+	ledyba: "swarm",
+	ledian: "swarm",
+	politoed: "drizzle",
+	tyranitar: "sand_stream",
+	seel: "ice_body",
+	dewgong: "ice_body",
+	diglett: "sand_veil",
+	dugtrio: "sand_veil",
+	gligar: "sand_veil",
+	larvitar: "sand_veil",
+	pupitar: "sand_veil",
+	phanpy: "sand_veil",
+	donphan: "sand_veil",
+	swinub: "snow_cloak",
+	piloswine: "snow_cloak",
+	articuno: "snow_cloak",
+	geodude: "sturdy",
+	graveler: "sturdy",
+	golem: "sturdy",
+	steelix: "sturdy",
+	dragonite: "multiscale",
+	lugia: "multiscale",
+	abra: "synchronize",
+	kadabra: "synchronize",
+	alakazam: "synchronize",
+	natu: "synchronize",
+	xatu: "synchronize",
+	mew: "synchronize"
+};
+function traitOf(speciesId) {
+	return SPECIES_TRAIT[speciesId] ?? null;
+}
+//#endregion
 //#region src/data/abilityCategory.ts
 /** O bloco de atributos que este POKE tem (ou tera) exatamente no nivel 50. */
 function statsAtTypedAoeLevel(poke) {
@@ -42511,6 +42675,15 @@ var formulaEngine$4 = createFormulaEngine(FORMULAS);
 var STAB_MULTIPLIER = formulaEngine$4.eval("STAB_MULTIPLIER");
 var CRIT_CHANCE = formulaEngine$4.eval("CRIT_CHANCE");
 var CRIT_MULTIPLIER = formulaEngine$4.eval("CRIT_MULTIPLIER");
+var LOW_HP_TRAIT_TYPE_MULTIPLIER = {
+	blaze: "FIRE",
+	torrent: "WATER",
+	overgrow: "GRASS",
+	swarm: "BUG"
+};
+var LOW_HP_TRAIT_HP_FRACTION = 1 / 3;
+var LOW_HP_TRAIT_MULTIPLIER = 1.5;
+var MULTISCALE_MULTIPLIER = .5;
 var SELF_DESTRUCT_ABILITY_KEYS = /* @__PURE__ */ new Set(["explosion", "selfdestruct"]);
 var SELF_DESTRUCT_HP_LOSS_PERCENT = .5;
 var SPEED_REFERENCE = formulaEngine$4.evalOrDefault("ATTACK_SPEED_REFERENCE", 100);
@@ -42667,6 +42840,8 @@ function estimateDamage(rng, attackerEntity, defenderEntity, ability) {
 		def
 	});
 	if (Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)) dmg *= STAB_MULTIPLIER;
+	const attackerTraitEstimate = traitOf(attackerSpecies.id);
+	if (attackerTraitEstimate && LOW_HP_TRAIT_TYPE_MULTIPLIER[attackerTraitEstimate] === ability.type && attackerPoke.hp / attackerPoke.stats.hp < LOW_HP_TRAIT_HP_FRACTION) dmg *= LOW_HP_TRAIT_MULTIPLIER;
 	dmg *= effectivenessMultiplier;
 	return dmg;
 }
@@ -42728,7 +42903,10 @@ function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista 
 		});
 		if (isPhysical) dmg *= multiplicadorDeDanoFisico(attackerPoke.status?.tipo ?? null);
 		if (Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)) dmg *= STAB_MULTIPLIER;
+		const attackerTrait = traitOf(attackerSpecies.id);
+		if (attackerTrait && LOW_HP_TRAIT_TYPE_MULTIPLIER[attackerTrait] === ability.type && attackerPoke.hp / attackerPoke.stats.hp < LOW_HP_TRAIT_HP_FRACTION) dmg *= LOW_HP_TRAIT_MULTIPLIER;
 		dmg *= effectivenessMultiplier;
+		if (traitOf(defenderSpecies.id) === "multiscale" && defenderPoke.hp === defenderPoke.stats.hp) dmg *= MULTISCALE_MULTIPLIER;
 		const chanceDeCritico = CRIT_CHANCE * Math.pow(3, Math.min(3, ability.critStages ?? 0));
 		isCrit = pessimista ? false : rollChance(rng, Math.min(.5, chanceDeCritico));
 		if (isCrit) dmg *= CRIT_MULTIPLIER;
@@ -43013,6 +43191,74 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	if (result.amount > 0) {
 		takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke));
 		if (!silent) spawnDamageNumber(world, target, result);
+	}
+	if (ability.category === "physical" && result.amount > 0) switch (traitOf(target.poke.speciesId)) {
+		case "static":
+			aplicarStatus(world.rng, attacker, "paralysis", 30);
+			break;
+		case "flame_body":
+			aplicarStatus(world.rng, attacker, "burn", 30);
+			break;
+		case "poison_point":
+			aplicarStatus(world.rng, attacker, "poison", 30);
+			break;
+		case "effect_spore": {
+			const especieAtacante = SPECIES[attacker.poke.speciesId];
+			if (!(especieAtacante.type === "GRASS" || especieAtacante.type2 === "GRASS") && nextFloat(world.rng) * 100 < 30) {
+				const opcoes = [
+					"poison",
+					"paralysis",
+					"sleep"
+				];
+				const escolhido = opcoes[Math.floor(nextFloat(world.rng) * opcoes.length)];
+				aplicarStatus(world.rng, attacker, escolhido, 100);
+			}
+			break;
+		}
+		case "rough_skin":
+		case "iron_barbs": {
+			const recoil = Math.max(1, Math.round(attacker.poke.stats.hp / 8));
+			takeDamage(attacker, recoil);
+			if (!silent) spawnDamageNumber(world, attacker, {
+				amount: recoil,
+				effectiveness: "normal",
+				effectivenessLabel: null,
+				isCrit: false
+			});
+			if (isDead(attacker)) {
+				if (attacker.kind === "player") {
+					if (!attacker.fainted) {
+						attacker.fainted = true;
+						onPlayerFainted();
+					}
+				} else if (!attacker.deathHandled) {
+					attacker.deathHandled = true;
+					defeatedEnemyIds.push(attacker.id);
+				}
+			}
+			break;
+		}
+		case "aftermath": if (isDead(target)) {
+			const recoil = Math.round(attacker.poke.stats.hp / 4);
+			takeDamage(attacker, recoil);
+			if (!silent) spawnDamageNumber(world, attacker, {
+				amount: recoil,
+				effectiveness: "normal",
+				effectivenessLabel: null,
+				isCrit: false
+			});
+			if (isDead(attacker)) {
+				if (attacker.kind === "player") {
+					if (!attacker.fainted) {
+						attacker.fainted = true;
+						onPlayerFainted();
+					}
+				} else if (!attacker.deathHandled) {
+					attacker.deathHandled = true;
+					defeatedEnemyIds.push(attacker.id);
+				}
+			}
+		}
 	}
 	let statusRecebeuEm = null;
 	if (!isDead(target)) {
