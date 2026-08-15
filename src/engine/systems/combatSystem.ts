@@ -19,6 +19,7 @@ import {
   limparEstadoVolatil,
 } from './statusSystem'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
+import { traitOf } from '@/data/traits'
 import { SPECIES } from '@/data/pokes'
 import type { PokeInstance } from '@/data/pokes'
 import { colorForType } from '@/data/typeColors'
@@ -50,6 +51,23 @@ const formulaEngine = createFormulaEngine(FORMULAS)
 const STAB_MULTIPLIER = formulaEngine.eval('STAB_MULTIPLIER')
 const CRIT_CHANCE = formulaEngine.eval('CRIT_CHANCE')
 const CRIT_MULTIPLIER = formulaEngine.eval('CRIT_MULTIPLIER')
+
+// Habilidades passivas condicionadas a fracao de HP (Gen VI+): abaixo de 1/3
+// do HP maximo, o atacante ganha +50% de dano nos golpes do seu tipo
+// correspondente. Mapa trait -> tipo porque cada trait so amplifica o
+// proprio elemento (blaze/FIRE, torrent/WATER, overgrow/GRASS, swarm/BUG).
+const LOW_HP_TRAIT_TYPE_MULTIPLIER: Record<string, string> = {
+  blaze: 'FIRE',
+  torrent: 'WATER',
+  overgrow: 'GRASS',
+  swarm: 'BUG',
+}
+const LOW_HP_TRAIT_HP_FRACTION = 1 / 3
+const LOW_HP_TRAIT_MULTIPLIER = 1.5
+
+// Multiscale: dano recebido pela metade enquanto o HP esta CHEIO (nao so
+// alto) — perde o efeito no primeiro hit que tirar HP.
+const MULTISCALE_MULTIPLIER = 0.5
 
 // Golpes reais de auto-KO Gen1/2 — bug relatado explicitamente pelo usuario:
 // causavam dano no ALVO sem nenhum recoil no usuario, diferente dos jogos
@@ -257,6 +275,12 @@ function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: W
   const isStab = Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)
   if (isStab) dmg *= STAB_MULTIPLIER
 
+  const attackerTraitEstimate = traitOf(attackerSpecies.id)
+  if (attackerTraitEstimate && LOW_HP_TRAIT_TYPE_MULTIPLIER[attackerTraitEstimate] === ability.type
+    && attackerPoke.hp / attackerPoke.stats.hp < LOW_HP_TRAIT_HP_FRACTION) {
+    dmg *= LOW_HP_TRAIT_MULTIPLIER
+  }
+
   dmg *= effectivenessMultiplier
   return dmg
 }
@@ -363,7 +387,21 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
     const isStab = Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)
     if (isStab) dmg *= STAB_MULTIPLIER
 
+    const attackerTrait = traitOf(attackerSpecies.id)
+    if (attackerTrait && LOW_HP_TRAIT_TYPE_MULTIPLIER[attackerTrait] === ability.type
+      && attackerPoke.hp / attackerPoke.stats.hp < LOW_HP_TRAIT_HP_FRACTION) {
+      dmg *= LOW_HP_TRAIT_MULTIPLIER
+    }
+
     dmg *= effectivenessMultiplier
+
+    // Multiscale: HP do defensor CHEIO (nao so alto) corta o dano recebido
+    // pela metade. Depois da efetividade de tipo, igual ao pipeline real —
+    // um multiplicador de "estado do defensor" empilha sobre o resto.
+    const defenderTrait = traitOf(defenderSpecies.id)
+    if (defenderTrait === 'multiscale' && defenderPoke.hp === defenderPoke.stats.hp) {
+      dmg *= MULTISCALE_MULTIPLIER
+    }
 
     // Estagio de critico: Slash/Razor Leaf e outros 16 golpes tem +1 estagio,
     // que na Gen VII e 1/8 em vez de 1/24. A tabela real vai ate +3 (1/2), mas
