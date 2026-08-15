@@ -83,6 +83,32 @@ dentro de `GameCanvas`, lendo `useWorldStore.getState()` direto. Canvas nao
 tem virtual DOM pra reconciliar, entao rotear o desenho pelo React so somaria
 overhead.
 
+## Conta de teste: uma so, e o resto se apaga
+
+Em 8 dias o projeto acumulou **72 contas de teste contra 5 jogadores reais** —
+apagadas em 2026-08-14. Nenhuma nasceu de descuido: cada sessao escrevia um
+script proprio (`jogavel_<timestamp>@...`, `smoke52-...`, `t54akz...`), usava
+uma vez e ia embora. O lixo veio de nao existir um lugar combinado pra criar e
+pra limpar.
+
+1. **Reusar a conta canonica** — `claude@teste.pokehunt.local`, credenciais em
+   `CONTA_TESTE_EMAIL` / `CONTA_TESTE_SENHA` no `.env` da raiz.
+   `npm run conta:criar` provisiona de novo se sumir (rodar duas vezes nao cria
+   duas).
+2. **Conta extra so quando o teste exige duas de verdade** (cadastro, troca no
+   Mercado, correio entre jogadores) e obrigatoriamente terminando em
+   `@teste.pokehunt.local`.
+3. **`npm run conta:limpar` antes de encerrar a tarefa** — apaga tudo no
+   dominio reservado menos a canonica.
+
+O dominio reservado e o que torna a limpeza segura: jogador de verdade nunca vai
+ter email nele, entao o delete nao alcanca ninguem, mesmo rodado distraido. E
+por isso que o filtro e por dominio e nao por uma lista de quem fica — a lista
+de emails reais nao pode viver em arquivo versionado, e "dominio parece de
+teste" ja falhou na pratica: duas das 72 contas apagadas estavam em `gmail.com`.
+
+`npm run conta:teste` mostra o estado sem mexer em nada.
+
 ## Armadilha ao testar no browser
 
 Nao leia estado do jogo via `import('/src/stores/...')` no console ou em
