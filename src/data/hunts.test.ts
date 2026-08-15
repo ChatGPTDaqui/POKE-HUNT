@@ -28,9 +28,11 @@ const wildSpecies = Object.keys(SPECIES_DATA).filter(
 const bossHunts = Object.values(MAPS).filter((m) => m.id.startsWith('boss_'))
 const nightmareHunts = Object.values(MAPS).filter((m) => m.id.startsWith('nightmare_'))
 // Hunts "normais": as 36 de bioma + a inicial. Sem o espelho do Pesadelo (mesma
-// composicao, nivel deslocado) e sem as BOSS (elenco proprio, curado a mao).
+// composicao, nivel deslocado), sem as BOSS (elenco proprio, curado a mao) e sem
+// o Treinamento (`noRewards`, ver data/trainingDummy.ts — fixture de teste, nao
+// concorre com bioma nenhum na grade nem no numero de inimigos em campo).
 const huntsNormais = Object.values(MAPS).filter(
-  (m) => !m.id.startsWith('nightmare_') && !m.id.startsWith('boss_'),
+  (m) => !m.id.startsWith('nightmare_') && !m.id.startsWith('boss_') && !m.noRewards,
 )
 
 const especiesDe = (encIds: string[]) => encIds.map((id) => ENCOUNTERS[id].speciesId)
@@ -356,7 +358,9 @@ describe('hunt inicial', () => {
     const inicial = MAPS[STARTER_HUNT_ID].maxEnemies
     expect(inicial).toBe(MAX_INIMIGOS_HUNT_INICIAL)
     for (const map of Object.values(MAPS)) {
-      if (map.id === STARTER_HUNT_ID || map.noRespawn) continue
+      // Treinamento (`noRewards`) e um fixture de teste, nao uma hunt de
+      // caça — 1 boneco em campo e o design, nao um esquecimento.
+      if (map.id === STARTER_HUNT_ID || map.noRespawn || map.noRewards) continue
       expect(inicial, map.id).toBeLessThan(map.maxEnemies)
     }
   })

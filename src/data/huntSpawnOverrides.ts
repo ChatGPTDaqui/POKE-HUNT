@@ -37,6 +37,7 @@ import { SPECIES } from './pokes'
 import { SUB_BIOMA_ESPECIES } from './generated/subBiomas.generated'
 import { SPAWN_WEIGHT_BY_SPECIES } from './generated/spawnTiers.generated'
 import { buildNightmareMirror, BOSS_MAPS_DATA, BOSS_ENCOUNTERS_DATA } from './nightmareMaps'
+import { TRAINING_MAP, TRAINING_MAP_ID, TRAINING_ENCOUNTER } from './trainingDummy'
 import {
   BIOMAS, FAIXAS, GEOMETRIA, LOOT, MAX_INIMIGOS_HUNT_INICIAL, huntId,
   type BiomaDef, type FaixaDef,
@@ -311,5 +312,13 @@ for (const map of Object.values(maps)) {
 // Espelho do Modo Pesadelo tirado do resultado ACIMA, nao do dado gerado cru.
 const nightmare = buildNightmareMirror(maps, encounters)
 
-export const MAPS: Record<string, HuntMapDef> = { ...maps, ...nightmare.maps, ...BOSS_MAPS_DATA }
-export const ENCOUNTERS: Record<string, HuntEncounter> = { ...encounters, ...nightmare.encounters, ...BOSS_ENCOUNTERS_DATA }
+// Treinamento entra DEPOIS do espelho do Modo Pesadelo de proposito: e um
+// fixture de teste, nao teria sentido nenhum um "nightmare_treinamento" a
+// +100 niveis — mesmo motivo que BOSS_MAPS_DATA/o Lance ficam de fora do
+// mirror.
+export const MAPS: Record<string, HuntMapDef> = {
+  ...maps, ...nightmare.maps, ...BOSS_MAPS_DATA, [TRAINING_MAP_ID]: TRAINING_MAP,
+}
+export const ENCOUNTERS: Record<string, HuntEncounter> = {
+  ...encounters, ...nightmare.encounters, ...BOSS_ENCOUNTERS_DATA, [TRAINING_ENCOUNTER.id]: TRAINING_ENCOUNTER,
+}

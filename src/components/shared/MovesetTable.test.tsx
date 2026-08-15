@@ -2,9 +2,9 @@
 //
 // A selecao dos 4 golpes ativos, pela TELA. O resto da Leva A ja e coberto por
 // teste de dado (activeAbilities.test.ts) e pela RPC no banco; o que so existe
-// aqui e a fiacao: clique -> controller -> acao, mais as duas condicoes que
-// escondem o controle (POKE que nao e seu, golpe nao aprendido) — dentro de
-// hunt NAO trava mais (pedido do usuario, ver o teste de hunt abaixo).
+// aqui e a fiacao: clique -> controller -> acao, mais as condicoes que
+// escondem/desabilitam o controle (POKE que nao e seu, golpe nao aprendido,
+// dentro de hunt — trava reintroduzida, ver os testes de hunt abaixo).
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -139,23 +139,22 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     expect(lista).toEqual([...escolhidos, deFora])
   })
 
-  // BUG REAL CORRIGIDO: golpe so podia ser trocado FORA de hunt (RPC recusava
-  // com sessao aberta) — pedido explicito do usuario pra poder personalizar a
-  // qualquer momento. A troca so vale a partir da proxima janela de flush
-  // (servidor reconstroi o mundo do zero de `active_abilities` a cada uma,
-  // <=30s), sem corromper a que ja esta rodando — ver migration
-  // 20260815170000_definir_golpes_ativos_sem_trava_de_hunt.sql.
-  it('dentro de hunt o controle continua liberado (trava removida)', async () => {
+  // Trava reintroduzida a pedido do usuario (revertendo a leva anterior, que a
+  // tinha removido a pedido DELE tambem): build fixo durante o combate. A
+  // RPC (`definir_golpes_ativos`/`alternar_habilidade`) recusa com sessao
+  // viva — ver migration 20260815190000 — e a tela so espelha desabilitando o
+  // botao, sem nem chamar o controller.
+  it('dentro de hunt o controle fica bloqueado, com aviso', async () => {
     const poke = pokeDoJogador()
     useGameStateStore.setState({ team: [poke], currentMapId: 'lv_1_10_floresta' })
     render(<MovesetTable poke={poke} species={ESPECIE} />)
 
-    expect(screen.queryByText(/Saia da hunt/)).toBeNull()
+    expect(screen.getByText(/Saia da hunt/)).toBeTruthy()
     const botao = botaoUsar(nomeDoGolpe(poke.activeAbilities![0]))!
-    expect(botao.disabled).toBe(false)
+    expect(botao.disabled).toBe(true)
 
     await userEvent.click(botao)
-    expect(setActiveAbilities).toHaveBeenCalledTimes(1)
+    expect(setActiveAbilities).not.toHaveBeenCalled()
   })
 
   it('o AOE de Nivel 50 nao ocupa slot: checkbox de liga/desliga, nao do slot-de-4', async () => {
@@ -172,15 +171,15 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     expect(toggleAbility).toHaveBeenCalledWith(poke.uid, typedAoeMoveKey(ESPECIE.type))
   })
 
-  it('AOE de Nivel 50 continua clicavel dentro de hunt (nao ocupa slot, sem trava)', async () => {
+  it('AOE de Nivel 50 tambem bloqueia dentro de hunt (mesma trava do slot-de-4)', async () => {
     const poke = pokeDoJogador()
     useGameStateStore.setState({ team: [poke], currentMapId: 'lv_1_10_floresta' })
     render(<MovesetTable poke={poke} species={ESPECIE} />)
 
     const botao = botaoUsar(nomeDoGolpe(typedAoeMoveKey(ESPECIE.type)))!
-    expect(botao.disabled).toBe(false)
+    expect(botao.disabled).toBe(true)
     await userEvent.click(botao)
-    expect(toggleAbility).toHaveBeenCalledTimes(1)
+    expect(toggleAbility).not.toHaveBeenCalled()
   })
 
   it('AOE desligado (disabledAbilities) aparece desmarcado', () => {
@@ -220,15 +219,15 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
       expect(toggleAbility).toHaveBeenCalledWith(poke.uid, BASIC_ATTACK.id)
     })
 
-    it('continua clicavel dentro de hunt', async () => {
+    it('tambem bloqueia dentro de hunt (mesma trava dos outros golpes)', async () => {
       const poke = pokeDoJogador()
       useGameStateStore.setState({ team: [poke], currentMapId: 'lv_1_10_floresta' })
       render(<MovesetTable poke={poke} species={ESPECIE} />)
 
       const botao = botaoUsar(BASIC_ATTACK.name)!
-      expect(botao.disabled).toBe(false)
+      expect(botao.disabled).toBe(true)
       await userEvent.click(botao)
-      expect(toggleAbility).toHaveBeenCalledTimes(1)
+      expect(toggleAbility).not.toHaveBeenCalled()
     })
   })
 })

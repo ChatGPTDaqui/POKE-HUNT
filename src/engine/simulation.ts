@@ -303,6 +303,22 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
   const poke = player.poke
   const enemySpecies = SPECIES[enemy.poke.speciesId]
 
+  // Boneco de treino (data/trainingDummy.ts): abate nao rende NADA — sai
+  // antes de tocar EXP/ouro/loot/captura/Pokedex, e sem toast (o feedback do
+  // treino ja e o numero de dano flutuante durante a luta, nao um resumo de
+  // recompensa que so diria "+0"). `isShiny` continua honesto por curiosidade
+  // — nao capturavel (`noCatch`), entao ver um shiny aqui nao vale nada alem
+  // de flavor.
+  if (world.mapDef!.noRewards) {
+    if (!silent) {
+      recordKill(gameState, { gold: 0, xp: 0, isShiny: Boolean(enemy.poke.isShiny) })
+    }
+    return {
+      gold: 0, xp: 0, leveledUp: false, trainerLeveledUp: false,
+      isShiny: Boolean(enemy.poke.isShiny), captured: false, capturedPoke: null, droppedItems: [],
+    }
+  }
+
   const expGain = expRewardForEnemy(enemy.poke, poke.level)
   const grantResult = grantExp(poke, expGain)
   player.poke = grantResult.poke

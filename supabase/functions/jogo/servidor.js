@@ -25752,6 +25752,62 @@ var BOSS_ENCOUNTERS_DATA = {
 	...lance.encounters
 };
 //#endregion
+//#region src/data/trainingDummy.ts
+var TRAINING_MAP_ID = "treinamento";
+var TRAINING_ENCOUNTER_ID = "treinamento_wobbuffet";
+var TREINO_IVS = {
+	hp: 31,
+	atkFis: 0,
+	atkEsp: 0,
+	def: 15,
+	defEsp: 15,
+	speed: 0
+};
+var TREINO_LEVEL = 60;
+var TRAINING_ENCOUNTER = {
+	id: TRAINING_ENCOUNTER_ID,
+	speciesId: "wobbuffet",
+	minLevel: TREINO_LEVEL,
+	maxLevel: TREINO_LEVEL,
+	aggroRadius: 260,
+	wanderRadius: 15,
+	weight: 1,
+	rarity: "comum",
+	ivs: TREINO_IVS
+};
+var TRAINING_MAP = {
+	id: TRAINING_MAP_ID,
+	name: "Treinamento",
+	description: "Um boneco de treino (Wobbuffet, nunca revida) pra testar a forca do seu time com seguranca. Sem ouro, XP, item ou captura — so pra medir: acompanhe \"Mobs/h\" no Hunt Analyzer.",
+	levelRange: [TREINO_LEVEL, TREINO_LEVEL],
+	unlockCost: null,
+	continent: "faixa1",
+	bounds: {
+		width: 1e3,
+		height: 700
+	},
+	playerSpawn: {
+		x: 500,
+		y: 470
+	},
+	bg: {
+		primary: "#2c2f3a",
+		secondary: "#3a3f52",
+		image: "assets/hunt-backgrounds/dojo.png"
+	},
+	maxEnemies: 1,
+	respawnDelay: 2,
+	spawnPoints: [{
+		x: 500,
+		y: 280
+	}],
+	enemyPool: [TRAINING_ENCOUNTER_ID],
+	itemDrops: [],
+	noCatch: true,
+	noRewards: true,
+	passiveEnemies: true
+};
+//#endregion
 //#region src/data/evolutionStage.ts
 var PRE_EVOLUCAO$1 = {};
 for (const especie of Object.values(SPECIES)) if (especie.evolvesTo && SPECIES[especie.evolvesTo]) PRE_EVOLUCAO$1[especie.evolvesTo] = especie.id;
@@ -26013,12 +26069,14 @@ var nightmare = buildNightmareMirror(maps, encounters);
 var MAPS = {
 	...maps,
 	...nightmare.maps,
-	...BOSS_MAPS_DATA
+	...BOSS_MAPS_DATA,
+	[TRAINING_MAP_ID]: TRAINING_MAP
 };
 var ENCOUNTERS = {
 	...encounters,
 	...nightmare.encounters,
-	...BOSS_ENCOUNTERS_DATA
+	...BOSS_ENCOUNTERS_DATA,
+	[TRAINING_ENCOUNTER.id]: TRAINING_ENCOUNTER
 };
 //#endregion
 //#region src/data/maps.ts
@@ -26725,7 +26783,7 @@ function findEntityById(player, enemies, id) {
 //#endregion
 //#region src/engine/effect.ts
 function createWorldEffect(counters, params) {
-	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, ballItemId, success } = params;
+	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, ballItemId, success, statusDirection } = params;
 	const id = `effect-${counters.effect++}`;
 	const lane = owner ? claimEffectLane(owner, id, laneSize) : 0;
 	return {
@@ -26750,6 +26808,7 @@ function createWorldEffect(counters, params) {
 		elementType,
 		ballItemId,
 		success,
+		statusDirection,
 		laneSize,
 		ownerId: owner ? owner.id : null,
 		lane
@@ -27232,6 +27291,19 @@ function resolveAbilityCategory(ability, poke) {
 	if (ability.category !== "dynamic") return ability.category;
 	const stats = statsAtTypedAoeLevel(poke);
 	return stats.atkFis >= stats.atkEsp ? "physical" : "special";
+}
+//#endregion
+//#region src/data/statusVfx.ts
+/**
+* A direcao do golpe: eleva atributo (`aumenta`) ou baixa/aplica condicao
+* negativa (`diminui`). Deriva do PRIMEIRO `statChanges` com sinal — golpe
+* misto (raro no dataset) usa so o primeiro. Sem `statChanges` (confusao,
+* veneno, sono, ...) cai em `diminui`: nenhum desses 18 status e benefico pra
+* quem recebe.
+*/
+function direcaoDoGolpeDeStatus(statChanges) {
+	const primeiro = statChanges?.[0];
+	return primeiro && primeiro.estagios > 0 ? "aumenta" : "diminui";
 }
 //#endregion
 //#region src/data/generated/typeChart.generated.ts
@@ -42876,6 +42948,7 @@ function executePlayerAction(world, player, engagedEnemies, silent) {
 	if (ability.target === "aoe") queueAoeVisual(world, player, ability);
 }
 function executeEnemyAction(world, enemy, player, silent) {
+	if (world.mapDef?.passiveEnemies) return;
 	if (!canAct(enemy)) return;
 	if (statusImpedeAcao(world, enemy, silent)) return;
 	const ability = pickAbility(world.rng, enemy, player, () => 1);
@@ -42907,7 +42980,8 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			isAoe: true,
 			duration: AOE_EFFECT_DURATION,
 			worldSize: (ability.radius ?? 0) * 2,
-			elementType: ability.type
+			elementType: ability.type,
+			statusDirection: ability.power === 0 ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0
 		}));
 		if (SELF_DESTRUCT_ABILITY_KEYS.has(ability.id) && !isDead(attacker)) {
 			const recoil = Math.round(attacker.poke.hp * SELF_DESTRUCT_HP_LOSS_PERCENT);
@@ -42940,11 +43014,18 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke));
 		if (!silent) spawnDamageNumber(world, target, result);
 	}
+	let statusRecebeuEm = null;
 	if (!isDead(target)) {
 		const aplicado = aplicarEfeitosDoGolpe(world.rng, target, ability);
-		if (aplicado && !silent) anunciarStatus(world, target, aplicado.tipo, "entrou");
+		if (aplicado) {
+			statusRecebeuEm = target;
+			if (!silent) anunciarStatus(world, target, aplicado.tipo, "entrou");
+		}
 		const mudancas = aplicarMudancasDeStat(world.rng, attacker, target, ability);
-		if (mudancas.length && !silent) anunciarEstagios(world, ability.statTarget === "self" ? attacker : target, mudancas);
+		if (mudancas.length) {
+			statusRecebeuEm = ability.statTarget === "self" ? attacker : target;
+			if (!silent) anunciarEstagios(world, statusRecebeuEm, mudancas);
+		}
 	}
 	if (ability.healPercent) {
 		const quanto = Math.max(1, Math.round(attacker.poke.stats.hp * ability.healPercent / 100));
@@ -42989,17 +43070,21 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		}
 	}
 	const isPlayerAttacker = attacker.kind === "player";
-	if (!(ability.target === "aoe") && !silent) world.effects.push(createWorldEffect(world.counters, {
-		type: "abilityEffect",
-		x: target.x,
-		y: target.y,
-		targetX: target.x,
-		targetY: target.y - target.radius * .6,
-		color: colorForType(ability.type),
-		isAoe: false,
-		duration: IMPACT_EFFECT_DURATION,
-		elementType: ability.type
-	}));
+	if (!(ability.target === "aoe") && !silent && (ability.power > 0 || statusRecebeuEm)) {
+		const local = ability.power === 0 && statusRecebeuEm ? statusRecebeuEm : target;
+		world.effects.push(createWorldEffect(world.counters, {
+			type: "abilityEffect",
+			x: local.x,
+			y: local.y,
+			targetX: local.x,
+			targetY: local.y - local.radius * .6,
+			color: colorForType(ability.type),
+			isAoe: false,
+			duration: IMPACT_EFFECT_DURATION,
+			elementType: ability.type,
+			statusDirection: ability.power === 0 ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0
+		}));
+	}
 	if (!isDead(target)) return;
 	if (isPlayerAttacker) {
 		if (!target.deathHandled) {
@@ -44770,6 +44855,23 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 	const player = world.player;
 	const poke = player.poke;
 	const enemySpecies = SPECIES[enemy.poke.speciesId];
+	if (world.mapDef.noRewards) {
+		if (!silent) recordKill(gameState, {
+			gold: 0,
+			xp: 0,
+			isShiny: Boolean(enemy.poke.isShiny)
+		});
+		return {
+			gold: 0,
+			xp: 0,
+			leveledUp: false,
+			trainerLeveledUp: false,
+			isShiny: Boolean(enemy.poke.isShiny),
+			captured: false,
+			capturedPoke: null,
+			droppedItems: []
+		};
+	}
 	const expGain = expRewardForEnemy(enemy.poke, poke.level);
 	const grantResult = grantExp(poke, expGain);
 	player.poke = grantResult.poke;

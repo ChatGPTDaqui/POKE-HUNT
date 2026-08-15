@@ -164,11 +164,12 @@ function CelulaCheckbox(
   )
 }
 
-// A celula da coluna "Usar" das linhas do learnset normal. Um estado sem
-// toggle: golpe ainda nao aprendido (nada). Fora isso, liga/desliga a
-// qualquer momento — trocar golpe nao tem trava de hunt (removida por pedido
-// do usuario, ver migration 20260815170000). O AOE do Nivel 50 usa
-// `CelulaCheckbox` direto do mesmo jeito (liga/desliga, nunca ocupa slot).
+// A celula da coluna "Usar" das linhas do learnset normal. Dois estados sem
+// toggle: golpe ainda nao aprendido (nada), e dentro de hunt (mostra a marca,
+// mas nao clica — as RPCs `definir_golpes_ativos` E `alternar_habilidade`
+// recusam mudar golpe com sessao de hunt aberta, ver migration
+// 20260815190000: reintroduzida a pedido do usuario, cobrindo tambem o AOE do
+// Nivel 50 desta vez — antes so o slot-de-4 tinha trava).
 function CelulaUsar(
   { aoe50, aprendido, ativo, habilitado, onClick }:
   { aoe50: boolean; aprendido: boolean; ativo: boolean; habilitado: boolean; onClick: () => void },
@@ -181,7 +182,7 @@ function CelulaUsar(
         habilitado={habilitado}
         tituloAtivo="Desligar este golpe (nao ocupa slot, so entra/sai do combate)"
         tituloInativo="Ligar este golpe"
-        tituloDesabilitado=""
+        tituloDesabilitado="Saia da hunt para trocar de golpe"
         onClick={onClick}
       />
     )
@@ -192,7 +193,7 @@ function CelulaUsar(
       habilitado={habilitado}
       tituloAtivo="Remover dos golpes ativos"
       tituloInativo="Usar este golpe"
-      tituloDesabilitado=""
+      tituloDesabilitado="Saia da hunt para trocar de golpe"
       onClick={onClick}
     />
   )
@@ -212,6 +213,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
   // que cada chamador teria que lembrar de passar.
   const equipe = useGameStateStore((s) => s.team)
   const mochila = useGameStateStore((s) => s.bagPokes)
+  const emHunt = useGameStateStore((s) => s.currentMapId) != null
   const meu = [...equipe, ...mochila].some((p) => p.uid === poke.uid)
 
   // `poke` e a prop que o chamador passou — pro perfil aberto de um POKE
@@ -228,12 +230,14 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
   const pokeVivo = equipe.find((p) => p.uid === poke.uid) ?? mochila.find((p) => p.uid === poke.uid) ?? poke
 
   const ativos = pokeVivo.activeAbilities ?? activeAbilitiesPadrao(species, pokeVivo.level)
-  // Trocar golpe funciona a qualquer momento, inclusive dentro de uma hunt —
-  // pedido explicito do usuario (personalizar os 4 golpes livremente). O
-  // servidor reconstroi o mundo do zero a partir de active_abilities a cada
-  // janela de flush (<=30s), entao trocar no meio da cacada nao corrompe nada,
-  // so vale a partir da proxima janela.
-  const podeEscolher = meu
+  // Pedido explicito do usuario (revertendo uma leva anterior, que a tinha
+  // removido a pedido DELE tambem): build fixo durante o combate, editavel so
+  // fora da hunt. Tecnicamente nao havia risco de corromper nada (o servidor
+  // so le `active_abilities`/`disabled_abilities` na proxima janela de flush,
+  // <=30s) — a trava aqui e regra de jogo, nao protecao de dado, e a RPC quem
+  // decide de verdade (`definir_golpes_ativos`/`alternar_habilidade`, ambas
+  // recusando com sessao viva — migration 20260815190000). A tela so espelha.
+  const podeEscolher = meu && !emHunt
   const desabilitados = pokeVivo.disabledAbilities ?? {}
 
   function alternar(key: string): void {
@@ -246,11 +250,12 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
     controller.setActiveAbilities(poke.uid, ja ? ativos.filter((k) => k !== key) : [...ativos, key])
   }
 
-  // Ataque Basico e o AOE do Nivel 50 nunca ocupam slot: sao liga/desliga
-  // puro em `disabledAbilities`, mesmo caminho do double-click no AbilityHud
-  // (sem trava de hunt — `alternar_habilidade` nao tem essa restricao).
+  // Ataque Basico e o AOE do Nivel 50 nunca ocupam slot: sao liga/desliga puro
+  // em `disabledAbilities`, mesmo caminho do double-click no AbilityHud —
+  // mesma trava de hunt de `alternar`, ja que `alternar_habilidade` tambem
+  // passou a recusar com sessao viva.
   function alternarOpcional(key: string): void {
-    if (!meu) return
+    if (!podeEscolher) return
     controller.toggleAbility(poke.uid, key)
   }
 
@@ -261,7 +266,9 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
           <span className="text-n400">
             Golpes ativos <span className="text-foreground">{ativos.length}/{MAX_ACTIVE_ABILITIES}</span>
           </span>
-          <span className="text-n500">Clique na coluna Usar para escolher.</span>
+          <span className="text-n500">
+            {emHunt ? 'Saia da hunt para trocar de golpe.' : 'Clique na coluna Usar para escolher.'}
+          </span>
         </div>
       )}
       <div
@@ -291,10 +298,10 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
             <span>
               <CelulaCheckbox
                 ativo={!desabilitados[BASIC_ATTACK.id]}
-                habilitado={meu}
+                habilitado={podeEscolher}
                 tituloAtivo="Desligar o Ataque Basico (fallback universal — sem ele, o POKE fica sem opcao quando os golpes ativos estao em cooldown)"
                 tituloInativo="Ligar o Ataque Basico"
-                tituloDesabilitado=""
+                tituloDesabilitado="Saia da hunt para trocar de golpe"
                 onClick={() => alternarOpcional(BASIC_ATTACK.id)}
               />
             </span>
@@ -329,7 +336,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
                 aoe50={aoe50}
                 aprendido={learned}
                 ativo={aoe50 ? !desabilitados[entry.key] : ativos.includes(entry.key)}
-                habilitado={aoe50 ? meu : podeEscolher}
+                habilitado={podeEscolher}
                 onClick={() => (aoe50 ? alternarOpcional(entry.key) : alternar(entry.key))}
               />}</span>
             </div>
