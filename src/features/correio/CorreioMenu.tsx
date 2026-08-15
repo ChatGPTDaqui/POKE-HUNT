@@ -42,14 +42,28 @@ export function CorreioMenu() {
 
   // Realtime substitui o poll de 15s: qualquer INSERT/UPDATE nas MINHAS
   // mensagens (pedido novo, resposta, mensagem de sistema) invalida a query.
+  //
+  // BUG REAL CORRIGIDO: `assinarCorreioAoVivo` usa `supabase.channel('correio-'+userId)`,
+  // nome fixo por usuario — chamar de novo com o mesmo nome ANTES do primeiro canal
+  // ser removido devolve o MESMO canal ja inscrito, e `.on()` nele estoura
+  // ("cannot add postgres_changes callbacks... after subscribe()"). Como a
+  // inscricao so acontece dentro do `.then()` de `getSession()` (gap assincrono),
+  // o StrictMode do React (ou so um remount rapido de verdade) roda o efeito de
+  // novo ANTES desse `.then()` resolver — a limpeza da 1a rodada ainda achava
+  // `parar` nulo (a inscricao nem tinha terminado) e nao desfazia nada; a 2a
+  // rodada inscrevia no mesmo canal ja vivo. `cancelado` fecha essa janela: se
+  // a limpeza ja rodou quando o `.then()` finalmente resolve, a inscricao nem
+  // comeca.
   useEffect(() => {
+    let cancelado = false
     let parar: (() => void) | null = null
     void supabase.auth.getSession().then(({ data: sessao }) => {
+      if (cancelado) return
       const userId = sessao.session?.user.id
       if (!userId) return
       parar = correioRpc.assinarCorreioAoVivo(userId, () => { void qc.invalidateQueries({ queryKey: ['correio'] }) })
     })
-    return () => parar?.()
+    return () => { cancelado = true; parar?.() }
   }, [qc])
 
   const adicionar = useMutation({
