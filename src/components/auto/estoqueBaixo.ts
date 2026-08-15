@@ -27,7 +27,7 @@ export function estoqueDoItemDeRegra(items: Record<string, number>, itemId: stri
 
 /** Ids (ou `BEST_POTION_OPTION`) que alguma automacao ligada consumiria. */
 export function itensEmUso(estado: {
-  autoToggles: { autoPot: boolean; autoCatch: boolean; autoRevive: boolean }
+  autoToggles: { autoPot: boolean; autoCatch: boolean; autoRevive: boolean; autoStatus: boolean }
   autoPotRules: { itemId: string }[]
   autoCatchConfig: { ballId: string; shinyBallId: string; catchShinyEnabled: boolean }
   autoCatchRules: { ballItemId: string }[]
@@ -40,6 +40,12 @@ export function itensEmUso(estado: {
     ids.push(...estado.autoCatchRules.map((r) => r.ballItemId))
   }
   if (estado.autoToggles.autoRevive) ids.push('revive')
+  // Todos os itens de cura de status, e nao um escolhido: o bot pega o mais
+  // barato que cobre o status do momento, entao qualquer um deles pode ser o
+  // proximo a ser consumido.
+  if (estado.autoToggles.autoStatus) {
+    ids.push(...Object.values(ITEMS).filter((i) => i.kind === 'status_heal').map((i) => i.id))
+  }
   return [...new Set(ids)]
 }
 

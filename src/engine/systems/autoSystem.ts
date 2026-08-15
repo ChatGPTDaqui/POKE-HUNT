@@ -134,7 +134,11 @@ export function updateAutoHeal(world: WorldState, gameState: GameStateStore, dt:
 
   if (fracaoDeHp <= HP_CRITICO && usarPocao()) return events
 
-  if (gameState.autoToggles.autoPot) {
+  // Interruptor PROPRIO, e nao mais carona no `autoPot`: sao decisoes
+  // diferentes. Quem quer o bot curando veneno mas nao gastando pocao (ou o
+  // contrario) nao tinha como pedir isso, e quem desligava a pocao perdia a cura
+  // de status sem nenhuma pista do motivo.
+  if (gameState.autoToggles.autoStatus) {
     // Nao-volatil primeiro (persiste e drena HP), confusao depois.
     //
     // A confusao quase ficou de fora daqui, pelo argumento de que passa sozinha

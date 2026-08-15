@@ -29,7 +29,8 @@
     "edge:publicar": "npm run build:edge && npx supabase functions deploy jogo",
     "usum:baixar": "node scripts/fetch-usum-catalog.js",
     "usum:gerar": "node scripts/generate-catalog-usum.js",
-    "usum:conferir": "node scripts/verify-usum-bulbapedia.js"
+    "usum:conferir": "node scripts/verify-usum-bulbapedia.js",
+    "usum:learnsets": "node scripts/verify-usum-learnsets.js"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

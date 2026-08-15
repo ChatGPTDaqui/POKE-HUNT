@@ -13,6 +13,20 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '6.6',
+    date: '2026-08-15',
+    title: 'Golpe de fim de lista nao chega mais no Nivel 1, e o bot passa a curar status sozinho',
+    highlights: [
+      'SEU POKE PODE TER MUDADO DE GOLPES — E ISSO E O CONSERTO. Um Typhlosion capturado vinha pro Nivel 1 sabendo Eruption, de 150 de poder. Nao era um numero errado no jogo: no Ultra Sun o Typhlosion TEM Eruption listado no Nivel 1 mesmo, porque essa lista e a dos golpes que o Recordador de Golpes pode devolver, e nao o que um POKE daquele nivel sabe. O jogo estava lendo a lista errada. Agora o Eruption exige Nivel 82, que e quando o jogo original ensina.',
+      'ISSO VALE PRA 108 DAS 251 ESPECIES, e 38 delas entregavam golpe de 100 de poder ou mais ja no Nivel 1 — o Forretress chegava a Explosion, com 200. Como capturar reseta o POKE pro Nivel 1, bastava capturar qualquer especie evoluida pra sair com um golpe de fim de jogo na mao.',
+      'NENHUM POKE FICOU SEM GOLPE POR CAUSA DISSO. Onde a correcao tirou um golpe que voce tinha escolhido, o slot foi recomposto com o melhor golpe disponivel pro nivel — a escolha muda, o POKE nao fica pelado. O Typhlosion de Nivel 1 agora comeca com Tackle e Leer, que e o kit inicial do jogo original.',
+      'O ELENCO INTEIRO FOI CONFERIDO CONTRA A BULBAPEDIA: os learnsets das 251 especies, e o poder e a precisao dos 501 golpes. Tudo bateu. A unica diferenca encontrada era de NOME — a fonte automatica chamava o golpe de "Vise Grip", que e o nome da Geracao VIII; no Ultra Sun ele se chama "Vice Grip". Corrigido.',
+      'AUTO-STATUS: o bot agora cura veneno, queimadura, paralisia, sono, congelamento e confusao sozinho, escolhendo sempre o item MAIS BARATO que resolve — um Despertar de 30 de ouro no lugar de um Full Heal de 120. Ele ja fazia isso escondido dentro do Auto-pocao; agora tem interruptor proprio no painel Auto, com o estoque de cada cura a vista. Nasce ligado.',
+      'A precisao dos golpes foi conferida ponta a ponta: Inferno com 50% erra metade das vezes de verdade, e a escolha automatica ja desconta a precisao — o POKE prefere um golpe de 90 que sempre acerta a um de 100 que erra metade.',
+      'O XP por abate foi conferido contra a formula real da Geracao VII em 144 combinacoes de nivel, e o valor de EXP base de todas as 251 especies foi conferido um a um. Nada mudou: ja estava certo.',
+    ],
+  },
+  {
     version: '6.5',
     date: '2026-08-15',
     title: 'O Centro Pokemon virou um lugar de verdade',

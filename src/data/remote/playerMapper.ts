@@ -9,8 +9,7 @@ import type { Database } from '@/lib/database.types'
 import type { GameStateData, AutoPotRule, AutoCatchConfig, AutoCatchRule, PerfStats, TrainerInfo, PokedexKillCount } from '@/stores/gameStateStore'
 import { SPECIES, computeStatsAtLevel, type PokeInstance, type StatBlock } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
-import { getAbility } from '@/data/abilities'
-import { activeAbilitiesPadrao } from '@/data/activeAbilities'
+import { activeAbilitiesPadrao, golpesAprendidosAte } from '@/data/activeAbilities'
 import type { StatusCondition } from '@/data/statusEffects'
 
 type Json = Database['public']['Tables']['players']['Row']['auto_toggles']
@@ -99,12 +98,7 @@ export function rowToPoke(row: PokemonRow): PokeInstance {
     // silencio os golpes renomeados — `getAbility` devolve null e o combate
     // simplesmente pula. A coluna continua sendo GRAVADA (pokeToRow) para
     // qualquer leitor externo e para nao virar um campo morto no schema.
-    unlockedAbilities: species
-      ? species.abilities
-          .filter((a) => a.levelReq <= row.level)
-          .map((a) => a.key)
-          .filter((key) => getAbility(key))
-      : row.unlocked_abilities,
+    unlockedAbilities: species ? golpesAprendidosAte(species, row.level) : row.unlocked_abilities,
     // Coluna adicionada depois (migration 20260809150000): linha antiga volta
     // com o default `{}` do banco, entao nao ha migracao de dado a fazer.
     disabledAbilities: (row.disabled_abilities ?? {}) as Record<string, boolean>,
@@ -179,7 +173,12 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     currentMapId: p.current_map_id,
     // Campos JSONB: ver `fromJson` — valor ausente ou corrompido cai no
     // default do jogo em vez de propagar undefined.
-    autoToggles: fromJson(p.auto_toggles, defaults.autoToggles),
+    // MERGE com o default, nao substituicao. `fromJson` devolve o objeto do
+    // banco inteiro quando ele existe, entao um toggle NOVO (a coluna e um
+    // JSONB gravado antes de ele existir) voltaria `undefined` — falsy — e a
+    // automacao nasceria desligada pra todo jogador antigo, sem nada no jogo
+    // explicando por que. Foi o que aconteceria com `autoStatus`.
+    autoToggles: { ...defaults.autoToggles, ...fromJson(p.auto_toggles, defaults.autoToggles) },
     autoPotRules: fromJson<AutoPotRule[]>(p.auto_pot_rules, defaults.autoPotRules),
     autoCatchConfig: fromJson<AutoCatchConfig>(p.auto_catch_config, defaults.autoCatchConfig),
     autoCatchRules,

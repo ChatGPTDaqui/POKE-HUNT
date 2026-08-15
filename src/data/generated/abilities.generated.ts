@@ -2819,7 +2819,7 @@ export const ABILITIES_DATA: AbilitiesData = {
   },
   "vice_grip": {
     "id": "vice_grip",
-    "name": "Vise Grip",
+    "name": "Vice Grip",
     "type": "NORMAL",
     "category": "physical",
     "power": 55,

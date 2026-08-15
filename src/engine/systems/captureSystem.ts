@@ -2,8 +2,7 @@
 import type { Rng } from '@/core/rng'
 import { SPECIES, computeStatsAtLevel, pokeExpForLevel, novoPokeUid, type PokeInstance } from '@/data/pokes'
 import { getItem } from '@/data/items'
-import { getAbility } from '@/data/abilities'
-import { activeAbilitiesPadrao } from '@/data/activeAbilities'
+import { activeAbilitiesPadrao, golpesAprendidosAte } from '@/data/activeAbilities'
 import { rollChance, clamp } from '@/core/random'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
@@ -80,10 +79,7 @@ export function attemptCapture(rng: Rng, gameState: GameStateStore, defeatedPoke
     originalTrainer: gameState.trainer.name,
     stats,
     hp: stats.hp,
-    unlockedAbilities: species.abilities
-      .filter((entry) => entry.levelReq <= CAPTURE_LEVEL)
-      .map((entry) => entry.key)
-      .filter((key) => getAbility(key)),
+    unlockedAbilities: golpesAprendidosAte(species, CAPTURE_LEVEL),
     // O POKE selvagem lutava com os 4 ultimos golpes da especie no nivel dele;
     // capturado, ele volta pro Nivel 1 e o conjunto tem que ser remontado —
     // manter o do selvagem deixaria golpes que ele ainda nao "sabe".

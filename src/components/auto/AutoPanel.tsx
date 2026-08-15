@@ -191,6 +191,10 @@ export function AutoPanel() {
     Object.values(ITEMS).filter((i) => i.kind === 'revive'),
     autoToggles.autoRevive,
   )
+  const opcoesCuraDeStatus = useOpcoes(
+    Object.values(ITEMS).filter((i) => i.kind === 'status_heal'),
+    autoToggles.autoStatus,
+  )
 
   return (
     <div className="flex flex-col gap-[.45em] text-[.8em]">
@@ -330,6 +334,28 @@ export function AutoPanel() {
         >
           + Adicionar regra
         </GameButton>
+      </BlocoAuto>
+
+      <BlocoAuto
+        titulo="Auto-status"
+        dica="Cura veneno, queimadura, paralisia, sono, congelamento e confusao com o item mais barato que resolver."
+        ligado={autoToggles.autoStatus}
+        aoLigar={(v) => setAutoToggle('autoStatus', v)}
+      >
+        {/* Sem escolha de item de proposito, mesma razao do Auto-revive: quem
+            escolhe e o bot, e ele pega sempre o MAIS BARATO que cobre o status
+            que o POKE tem (autoSystem.ts#melhorCuraDeStatus) — um Despertar de
+            30 no lugar de um Full Heal de 120. A lista aqui e so o estoque, que
+            e a informacao de que o jogador precisa: cura de status acaba rapido
+            e sem ela o toggle fica ligado sem fazer nada. */}
+        <div className="flex flex-col gap-[.25em]">
+          {opcoesCuraDeStatus.map((o) => (
+            <div key={o.id} className="flex items-center justify-between gap-[.5em] text-n400">
+              <span>{o.nome}</span>
+              <span className={cn('tabular-nums', o.alerta && 'font-semibold text-bad')}>x{o.quantidade}</span>
+            </div>
+          ))}
+        </div>
       </BlocoAuto>
 
       <BlocoAuto

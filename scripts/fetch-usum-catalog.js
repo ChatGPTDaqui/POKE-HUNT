@@ -74,6 +74,20 @@ const TIPOS = [
 // PokeAPI -> enum do jogo. Os 6 grupos de experiencia da Gen7 sao exatamente
 // estes; `slow-then-very-fast`/`fast-then-very-slow` sao os nomes que a API da
 // para Erratic/Fluctuating.
+// Golpes que a PokeAPI devolve com o nome ATUAL, e nao com o nome que o golpe
+// tinha no Ultra Sun. O endpoint versiona poder/precisao/tipo (`past_values`),
+// mas NAO versiona o nome — entao renomeacao posterior vaza pro catalogo.
+//
+// Achado por `npm run usum:learnsets`, que compara nome a nome contra a
+// Bulbapedia: era a unica divergencia sobrando em 251 especies (Krabby,
+// Kingler e Pinsir), e os niveis batiam — so o nome era de outra geracao.
+const NOME_NO_USUM = {
+  // A chave da PokeAPI ficou no nome ANTIGO (`vice-grip`) e so o rotulo em
+  // `names` foi atualizado pro novo. Ou seja: chave velha, nome novo — dava
+  // `vice_grip = "Vise Grip"` no catalogo.
+  'vice-grip': 'Vice Grip', // renomeado para "Vise Grip" na Gen VIII
+};
+
 const CURVA_POR_GROWTH_RATE = {
   fast: 'FAST',
   medium: 'MEDIUM_FAST',
@@ -337,7 +351,7 @@ async function main() {
     if (!TIPOS.includes(tipo)) throw new Error(`golpe ${nome}: tipo desconhecido "${tipo}"`);
     return {
       chave: nome.replace(/-/g, '_'),
-      nome: m.names.find((n) => n.language.name === 'en')?.name || m.name,
+      nome: NOME_NO_USUM[nome] || m.names.find((n) => n.language.name === 'en')?.name || m.name,
       tipo,
       categoria: m.damage_class.name, // physical | special | status
       // `move.target` da PokeAPI. Interessa so pra separar golpe que acerta

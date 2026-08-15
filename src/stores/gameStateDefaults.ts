@@ -99,7 +99,7 @@ export interface GameStateData {
   wallet: { gold: number; diamonds: number }
   unlockedMaps: string[]
   currentMapId: string | null
-  autoToggles: { autoPot: boolean; autoCatch: boolean; autoRevive: boolean }
+  autoToggles: { autoPot: boolean; autoCatch: boolean; autoRevive: boolean; autoStatus: boolean }
   autoPotRules: AutoPotRule[]
   autoCatchConfig: AutoCatchConfig
   autoCatchRules: AutoCatchRule[]
@@ -121,7 +121,12 @@ export function defaultGameStateData(): GameStateData {
     wallet: { gold: 1000, diamonds: 0 },
     unlockedMaps: defaultUnlockedMaps(),
     currentMapId: null,
-    autoToggles: { autoPot: true, autoCatch: false, autoRevive: false },
+    // `autoStatus` nasce LIGADO, ao contrario de autoCatch/autoRevive: status
+    // negativo e a unica coisa aqui que faz o POKE perder turno sozinho, e o
+    // save antigo (que nao tem a chave) cai neste default via o merge em
+    // gameStateStore — ou seja, quem ja jogava ganha a cura sem precisar
+    // descobrir o interruptor.
+    autoToggles: { autoPot: true, autoCatch: false, autoRevive: false, autoStatus: true },
     autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
     autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
     autoCatchRules: [],

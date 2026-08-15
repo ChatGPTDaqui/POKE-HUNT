@@ -9,7 +9,7 @@
 // escreve de volta via `gameState.updatePokeInstance(uid, () => novoPoke)`.
 import { SPECIES, computeStatsAtLevel, totalExpForLevel, pokeExpForLevel, SPECIAL_EVOLUTION_STONE_COUNT, type PokeInstance, type StatBlock } from '@/data/pokes'
 import { getAbility, type Ability } from '@/data/abilities'
-import { activeAbilitiesPadrao, encaixarNovosGolpes } from '@/data/activeAbilities'
+import { activeAbilitiesPadrao, encaixarNovosGolpes, golpesAprendidosAte, nivelDeAprendizado } from '@/data/activeAbilities'
 import { stoneItemId } from '@/data/stones'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
@@ -123,11 +123,15 @@ export function evolvePokeInstance(pokeInstance: PokeInstance, gameState: GameSt
 
   const unlockedAbilities = [...pokeInstance.unlockedAbilities]
   const newAbilities: Ability[] = []
-  for (const entry of newSpecies.abilities) {
-    if (entry.levelReq > pokeInstance.level || unlockedAbilities.includes(entry.key)) continue
-    const ability = getAbility(entry.key)
+  // `golpesAprendidosAte` e nao `newSpecies.abilities` cru: e a evolucao que
+  // traz o bloco de golpes rememoraveis do nivel 1 (ver activeAbilities.ts).
+  // Sem isto, evoluir pra Typhlosion entregava Eruption na hora, em qualquer
+  // nivel — o caminho mais provavel do relato original.
+  for (const key of golpesAprendidosAte(newSpecies, pokeInstance.level)) {
+    if (unlockedAbilities.includes(key)) continue
+    const ability = getAbility(key)
     if (!ability) continue
-    unlockedAbilities.push(entry.key)
+    unlockedAbilities.push(key)
     newAbilities.push(ability)
   }
 
@@ -213,11 +217,14 @@ export function grantExp(pokeInstance: PokeInstance, amount: number): GrantPokeE
     const hpGain = stats.hp - previousMaxHp
     hp = Math.min(stats.hp, hp + hpGain)
 
-    for (const entry of species.abilities) {
-      if (entry.levelReq !== level || unlockedAbilities.includes(entry.key)) continue
-      const ability = getAbility(entry.key)
+    // Pelo nivel EXIGIDO de verdade (ver activeAbilities.ts), nao pelo
+    // `levelReq` cru: senao um POKE que sobe pro nivel 1... nao existe, mas um
+    // que EVOLUI e sobe de nivel receberia o bloco de rememoraveis inteiro.
+    for (const [key, exigido] of nivelDeAprendizado(species)) {
+      if (exigido !== level || unlockedAbilities.includes(key)) continue
+      const ability = getAbility(key)
       if (!ability) continue
-      unlockedAbilities.push(entry.key)
+      unlockedAbilities.push(key)
       newAbilities.push(ability)
     }
   }

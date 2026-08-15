@@ -8,7 +8,7 @@ import { getAbility, isDamagingAbility } from './abilities'
 import { typedAoeMoveKey, TYPED_AOE_LEVEL } from './typedAoeMoves'
 import {
   MAX_ACTIVE_ABILITIES, activeAbilitiesPadrao, activeAbilitiesSelvagem,
-  encaixarNovosGolpes, golpesUtilizaveis, ehGolpeAoeDeNivel50,
+  encaixarNovosGolpes, golpesUtilizaveis, ehGolpeAoeDeNivel50, golpesAprendidosAte,
 } from './activeAbilities'
 import type { PokeInstance } from './pokes'
 
@@ -77,9 +77,11 @@ describe('limite de 4 golpes', () => {
           a.power * (a.type === species.type || a.type === species.type2 ? 1.5 : 1)
         const piorEscolhido = Math.min(...dano.map(stab))
 
-        const disponiveis = species.abilities
-          .filter((e) => e.levelReq <= level && e.key !== typedAoeMoveKey(species.type))
-          .map((e) => getAbility(e.key))
+        // Mesmo motivo do outro caso: `levelReq` cru inclui o bloco de golpes
+        // rememoraveis do nivel 1, que o POKE nao sabe de verdade naquele nivel.
+        const disponiveis = golpesAprendidosAte(species, level)
+          .filter((k) => k !== typedAoeMoveKey(species.type))
+          .map((k) => getAbility(k))
           .filter((a): a is NonNullable<typeof a> => a != null && isDamagingAbility(a))
         const fora = disponiveis.filter((a) => !escolhidos.some((e) => e.id === a.id))
         for (const a of fora) expect(stab(a)).toBeLessThanOrEqual(piorEscolhido)
@@ -90,9 +92,13 @@ describe('limite de 4 golpes', () => {
   it('o padrao do jogador prefere golpe de dano — nenhum POKE nasce com kit inerte', () => {
     for (const species of Object.values(SPECIES)) {
       for (const level of NIVEIS) {
-        const learnset = species.abilities
-          .filter((a) => a.levelReq <= level && a.key !== typedAoeMoveKey(species.type))
-          .map((a) => getAbility(a.key))
+        // `golpesAprendidosAte` e nao `species.abilities` cru: o `levelReq` do
+        // catalogo traz o bloco de golpes rememoraveis do nivel 1 das especies
+        // evoluidas, que o POKE daquele nivel nao sabe de verdade. Usar o dado
+        // cru aqui faria o teste exigir dano de um Typhlosion nivel 1.
+        const learnset = golpesAprendidosAte(species, level)
+          .filter((k) => k !== typedAoeMoveKey(species.type))
+          .map((k) => getAbility(k))
         const temDano = learnset.some((a) => isDamagingAbility(a))
         if (!temDano) continue
         const escolhidos = activeAbilitiesPadrao(species, level).map((k) => getAbility(k))
@@ -152,5 +158,93 @@ describe('encaixarNovosGolpes', () => {
     const aoe = typedAoeMoveKey('FIRE')
     expect(ehGolpeAoeDeNivel50(aoe)).toBe(true)
     expect(encaixarNovosGolpes(['ember'], [aoe, 'basic_attack'])).toEqual(['ember'])
+  })
+})
+
+// O relato que originou esta regra: "Typhlosion possui golpes extremamente
+// fortes no lvl 1". O caminho real e a CAPTURA, que reseta o POKE pro nivel 1
+// (CAPTURE_LEVEL) — capturava-se um Typhlosion selvagem de nivel 40 e ele
+// voltava nivel 1 sabendo Eruption, de 150 de poder.
+//
+// O dado do catalogo esta CERTO: conferido contra a Bulbapedia, as 251 especies
+// batem (`npm run usum:learnsets`). O bloco de nivel 1 de uma especie evoluida
+// e a lista de golpes REMEMORAVEIS do Ultra Sun, nao o que um POKE daquele
+// nivel sabe.
+describe('bloco de golpes rememoraveis do nivel 1', () => {
+  it('Typhlosion nivel 1 nao sabe Eruption (que e do nivel 82)', () => {
+    const aprendidos = golpesAprendidosAte(SPECIES.typhlosion, 1)
+    expect(aprendidos).not.toContain('eruption')
+    expect(aprendidos).not.toContain('double_edge')
+  })
+
+  it('...mas sabe no nivel 82, que e quando o jogo original ensina', () => {
+    expect(golpesAprendidosAte(SPECIES.typhlosion, 82)).toContain('eruption')
+    expect(golpesAprendidosAte(SPECIES.typhlosion, 81)).not.toContain('eruption')
+  })
+
+  it('o golpe cedo da LINHA continua cedo — Typhlosion capturado nao fica sem nada', () => {
+    // Tackle e Ember estao no bloco de nivel 1 do Typhlosion porque Cyndaquil os
+    // aprende cedo. Empurra-los pro nivel 36 (o da evolucao) deixaria um POKE
+    // recem-capturado so com o Ataque Basico por dezenas de niveis.
+    expect(golpesAprendidosAte(SPECIES.typhlosion, 10)).toContain('ember')
+    expect(golpesAprendidosAte(SPECIES.typhlosion, 1)).toContain('tackle')
+  })
+
+  it('especie BASE nao e afetada: nivel 1 dela e nivel 1 de verdade', () => {
+    // Cyndaquil nao evolui de ninguem, entao o bloco de nivel 1 e o kit inicial
+    // real e nao pode ser reescrito.
+    expect(golpesAprendidosAte(SPECIES.cyndaquil, 1)).toContain('tackle')
+  })
+
+  // Sem esta recomposicao a correcao acima seria uma regressao pior que o bug.
+  // Medido contra o banco de producao antes de publicar: dos 7.184 POKEs salvos
+  // com golpes escolhidos, 3.188 perdiam ao menos um e 714 ficavam com ZERO,
+  // lutando so de Ataque Basico sem nada na tela dizendo por que.
+  describe('escolha do jogador que aponta pra golpe nao mais conhecido', () => {
+    it('recompoe o slot com o padrao em vez de deixar o POKE sem golpe', () => {
+      const species = SPECIES.typhlosion
+      const poke = pokeFalso('typhlosion', 40, {
+        // O estado real de um save antigo: Eruption estava valendo no nivel 40
+        // pela regra velha, e agora exige 82.
+        activeAbilities: ['eruption', 'double_edge'],
+        unlockedAbilities: golpesAprendidosAte(species, 40),
+      })
+
+      const usaveis = golpesUtilizaveis(poke, species, false)
+      expect(usaveis).not.toContain('eruption')
+      expect(usaveis.length).toBeGreaterThan(0)
+    })
+
+    it('escolha VAZIA continua vazia — e a opcao de lutar so com o Ataque Basico', () => {
+      const species = SPECIES.typhlosion
+      const poke = pokeFalso('typhlosion', 40, {
+        activeAbilities: [],
+        unlockedAbilities: golpesAprendidosAte(species, 40),
+      })
+
+      expect(golpesUtilizaveis(poke, species, false).filter((k) => !ehGolpeAoeDeNivel50(k))).toEqual([])
+    })
+
+    it('escolha inteira valida nao e mexida', () => {
+      const species = SPECIES.typhlosion
+      const escolha = ['ember', 'flame_wheel']
+      const poke = pokeFalso('typhlosion', 40, {
+        activeAbilities: escolha,
+        unlockedAbilities: golpesAprendidosAte(species, 40),
+      })
+
+      expect(golpesUtilizaveis(poke, species, false).filter((k) => !ehGolpeAoeDeNivel50(k))).toEqual(escolha)
+    })
+  })
+
+  it('nenhuma especie EVOLUIDA entrega golpe de poder >= 100 no nivel 1', () => {
+    for (const species of Object.values(SPECIES)) {
+      const evoluida = Object.values(SPECIES).some((s) => s.evolvesTo === species.id)
+      if (!evoluida) continue
+      for (const key of golpesAprendidosAte(species, 1)) {
+        const poder = getAbility(key)?.power ?? 0
+        expect(poder, `${species.id} entrega ${key} (${poder} de poder) no nivel 1`).toBeLessThan(100)
+      }
+    }
   })
 })

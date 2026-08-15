@@ -4,7 +4,6 @@
 // stat-at-level formula, IV rolling, and a deterministic placeholder
 // shape/color per species (real spritesheets can replace this later without
 // touching any other file — see render/Sprites.js).
-import { getAbility } from './abilities'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
 import { SPECIES_DATA } from './generated/pokes.generated'
@@ -13,7 +12,7 @@ import { randInt, rollChance } from '@/core/random'
 import { RARITIES, rollRarity, type RarityKey } from './rarity'
 import type { Rng } from '@/core/rng'
 import { typedAoeMoveKey, TYPED_AOE_LEVEL } from './typedAoeMoves'
-import { activeAbilitiesPadrao } from './activeAbilities'
+import { activeAbilitiesPadrao, golpesAprendidosAte } from './activeAbilities'
 import type { StatusAtivo } from './statusEffects'
 import type { GrowthCurve, SpeciesBaseStats, SpeciesDataEntry } from './generated/types'
 
@@ -290,10 +289,7 @@ export function createPokeInstance(rng: Rng, speciesId: string, level = 1, { ivs
     ivs,
     stats,
     hp: stats.hp,
-    unlockedAbilities: species.abilities
-      .filter((entry) => entry.levelReq <= level)
-      .map((entry) => entry.key)
-      .filter((key) => getAbility(key)),
+    unlockedAbilities: golpesAprendidosAte(species, level),
     // Selvagem ignora este campo (`golpesUtilizaveis` deriva os 4 ultimos
     // direto da especie), entao aqui vale sempre o padrao de POKE do jogador —
     // e o valor que sobrevive se este POKE for capturado ou for o inicial.
