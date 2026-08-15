@@ -19,8 +19,8 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useRendererStore } from '@/stores/rendererStore'
 import { controller } from '@/engine/controller'
 import { buildHospitalWorld, syncActivePokeToGameState } from '@/engine/simulation'
+import { preloadHospital } from '@/data/preload'
 
-const NURSE_CLICK_RADIUS = 30
 // Sincronia periodica de baixa frequencia: copia o HP/EXP ao vivo do POKE em
 // campo (worldStore, muda a cada tick de combate) de volta pra
 // gameStateStore.team (a fonte persistida via zustand/persist) sem martelar
@@ -41,6 +41,7 @@ export function GameCanvas() {
     const canvas = canvasRef.current
     if (!canvas) return
     const renderer = new Renderer(canvas)
+    void preloadHospital()
     // Publica o renderer pro ZoomControl (que vive fora do canvas e precisa
     // chamar zoomStep/ler o % atual) — ver stores/rendererStore.ts.
     useRendererStore.getState().setRenderer(renderer)
@@ -77,23 +78,32 @@ export function GameCanvas() {
       return { x: (event.clientX - rect.left) * scaleX, y: (event.clientY - rect.top) * scaleY }
     }
 
+    // Estado de hover do rotulo "Curar". Fica numa variavel local (lida pelo
+    // rAF de desenho) e nao no React: mudaria muitas vezes por segundo durante
+    // um movimento de mouse, e re-renderizar a arvore por causa de um brilho
+    // no canvas nao paga.
+    let enfermeiraEmFoco = false
+
     function handleClick(event: MouseEvent) {
       if (useWorldStore.getState().mapDef) return // enfermeira so existe na cena do Hospital
       const { x, y } = canvasPointFromEvent(event)
-      const nursePos = renderer.hospitalNursePos
-      if (Math.hypot(x - nursePos.x, y - nursePos.y) <= NURSE_CLICK_RADIUS) {
-        controller.healTeam()
-      }
+      if (renderer.hospitalClickOnNurse(x, y)) controller.healTeam()
     }
 
     function handleMouseMove(event: MouseEvent) {
       if (useWorldStore.getState().mapDef) {
         canvas!.style.cursor = 'default'
+        enfermeiraEmFoco = false
         return
       }
       const { x, y } = canvasPointFromEvent(event)
-      const nursePos = renderer.hospitalNursePos
-      canvas!.style.cursor = Math.hypot(x - nursePos.x, y - nursePos.y) <= NURSE_CLICK_RADIUS ? 'pointer' : 'default'
+      enfermeiraEmFoco = renderer.hospitalClickOnNurse(x, y)
+      canvas!.style.cursor = enfermeiraEmFoco ? 'pointer' : 'default'
+    }
+
+    function handleMouseLeave() {
+      enfermeiraEmFoco = false
+      canvas!.style.cursor = 'default'
     }
 
     function handleWheel(event: WheelEvent) {
@@ -105,12 +115,13 @@ export function GameCanvas() {
 
     canvas.addEventListener('click', handleClick)
     canvas.addEventListener('mousemove', handleMouseMove)
+    canvas.addEventListener('mouseleave', handleMouseLeave)
     canvas.addEventListener('wheel', handleWheel, { passive: false })
 
     let rafId = requestAnimationFrame(function draw() {
       const world = useWorldStore.getState()
       if (world.mapDef) renderer.renderMap(world.mapDef, world)
-      else renderer.renderHospital(world.player)
+      else renderer.renderHospital(world.player, enfermeiraEmFoco)
       rafId = requestAnimationFrame(draw)
     })
 
@@ -122,6 +133,7 @@ export function GameCanvas() {
       window.removeEventListener('resize', resize)
       canvas.removeEventListener('click', handleClick)
       canvas.removeEventListener('mousemove', handleMouseMove)
+      canvas.removeEventListener('mouseleave', handleMouseLeave)
       canvas.removeEventListener('wheel', handleWheel)
       cancelAnimationFrame(rafId)
       clearInterval(syncInterval)

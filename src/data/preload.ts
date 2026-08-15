@@ -23,6 +23,7 @@ import { faceIconUrl, spriteUrl } from './sprites'
 import { todosOsQuadrosDeVfx } from './elementVfx'
 import { todosOsIconesDeHabilidade } from './abilityIcons'
 import { primeImage } from '@/render/sprites'
+import { CENA_HOSPITAL } from './hospital'
 
 // Teto de tempo pra NAO transformar uma rede ruim em "o botao Entrar nao
 // funciona". Estourado o prazo, a cena entra do mesmo jeito e o que faltou
@@ -37,6 +38,17 @@ function comTimeout(promessa: Promise<unknown>, ms: number): Promise<void> {
       resolve()
     })
   })
+}
+
+/**
+ * Arte do Centro Pokemon. Vale o preload proprio porque o Hospital e a
+ * PRIMEIRA cena de toda sessao (e a unica de quem so abriu o jogo): sem isto,
+ * o saguao aparece como um retangulo escuro por alguns frames enquanto o JPEG
+ * de 600kB decodifica. Chamado no boot, nao ao entrar em cena — quando o
+ * jogador volta da hunt a imagem ja tem que estar quente.
+ */
+export function preloadHospital(): Promise<void> {
+  return primeImage(CENA_HOSPITAL.imagem)
 }
 
 /** Toda URL de spritesheet de batalha que esta especie pode desenhar. */

@@ -82,6 +82,17 @@ export function isImageReady(url: string): boolean {
   return Boolean(img && img.complete && img.naturalWidth > 0)
 }
 
+/**
+ * A imagem desta URL pronta pra desenhar, ou null se ainda nao esta. Comeca o
+ * download na primeira chamada (mesmo cache do resto do desenho), entao quem
+ * chama nao precisa de preload — o preload so evita o intervalo em que isto
+ * devolve null.
+ */
+export function readyImage(url: string): HTMLImageElement | null {
+  const img = getOrLoadImage(url)
+  return img.complete && img.naturalWidth > 0 ? img : null
+}
+
 function drawPlaceholderShape(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
   const { shape, color } = getSpecies(entity)
   const r = entity.radius
@@ -777,28 +788,11 @@ export function drawEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect, w
   if (effect.type === 'captureAnim') return drawCaptureAnim(ctx, effect)
 }
 
-export function drawNpcMarker(ctx: CanvasRenderingContext2D, x: number, y: number, label?: string, color = '#eae2b7'): void {
-  ctx.save()
-  ctx.fillStyle = color
-  ctx.strokeStyle = '#000000'
-  ctx.lineWidth = 2
-  ctx.fillRect(x - 16, y - 16, 32, 32)
-  ctx.strokeRect(x - 16, y - 16, 32, 32)
-  ctx.fillStyle = '#d62828'
-  ctx.fillRect(x - 3, y - 10, 6, 20)
-  ctx.fillRect(x - 10, y - 3, 20, 6)
-  if (label) {
-    ctx.font = '10px monospace'
-    ctx.textAlign = 'center'
-    ctx.lineWidth = 3
-    ctx.lineJoin = 'round'
-    ctx.strokeStyle = '#000000'
-    ctx.strokeText(label, x, y + 32)
-    ctx.fillStyle = '#f1f1f6'
-    ctx.fillText(label, x, y + 32)
-  }
-  ctx.restore()
-}
+// `drawNpcMarker` (quadrado branco com cruz vermelha) vivia aqui e era o unico
+// NPC do jogo: a enfermeira do Hospital. Saiu junto com o fundo quadriculado —
+// a enfermeira agora e a moca desenhada na propria arte do Centro Pokemon
+// (ver render/renderer.ts#renderHospital e data/hospital.ts). Nao ha outro NPC
+// pra desenhar, entao a funcao foi removida em vez de ficar como codigo morto.
 
 const HUNT_BG_TILE_SCALE = 0.8
 

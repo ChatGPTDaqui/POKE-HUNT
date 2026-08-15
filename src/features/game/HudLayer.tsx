@@ -37,10 +37,16 @@ import { ChatLog } from '@/components/toasts/ChatLog'
 import { AutoButton, AutoWindow } from '@/components/auto/AutoFloatingPanel'
 import { MainMenu } from '@/features/nav/MainMenu'
 import { useBreakpoints, useUiStore } from '@/stores/uiStore'
+import { useWorldStore } from '@/stores/worldStore'
 import { useEffect, useRef } from 'react'
 
 export function HudLayer() {
   const { narrow, mid, colStack } = useBreakpoints()
+  // O zoom e controle de CAMERA sobre o mapa da hunt. O Hospital e um cenario
+  // fixo desenhado pra caber na tela (ver Renderer#_hospitalLayout), entao la
+  // o controle nao teria efeito nenhum — botao que nao faz nada e pior que
+  // botao ausente. Seletor booleano: so re-renderiza na troca de cena.
+  const emHunt = useWorldStore((s) => s.mapDef !== null)
   const footerHeight = useUiStore((s) => s.footerHeight)
   const setFooterHeight = useUiStore((s) => s.setFooterHeight)
 
@@ -97,9 +103,11 @@ export function HudLayer() {
         <SideMenuColumn />
       </div>
 
-      <div className="absolute left-[.8em] z-[21]" style={{ top: zoomTop }}>
-        <ZoomControl />
-      </div>
+      {emHunt && (
+        <div className="absolute left-[.8em] z-[21]" style={{ top: zoomTop }}>
+          <ZoomControl />
+        </div>
+      )}
 
       {/* rodape-centro: golpes acima do menu. Os dois juntos formam a "faixa
           segura" do rodape — o canvas desenha nome/HP/texto de combate ate uns

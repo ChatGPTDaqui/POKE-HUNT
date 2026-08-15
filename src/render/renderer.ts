@@ -13,12 +13,20 @@
 // resultado visual, sem mutar nada do store, e de brinde evita o hazard que
 // a nota original ja mencionava ("dois desenhos no mesmo tick, ex.
 // StrictMode double-invoke, podem corromper a posicao").
-import { drawEntity, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, drawNpcMarker } from './sprites'
+import { drawEntity, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage } from './sprites'
+import { CENA_HOSPITAL, escalaDoPoke } from '@/data/hospital'
 import type { WorldEntity, WorldState } from '@/engine/types'
 import type { MapDef } from '@/data/maps'
-import type { MapBackground } from '@/data/generated/types'
 
-const HOSPITAL_BG: MapBackground = { primary: '#2b2f45', secondary: '#333a5c', image: null }
+// Cor de fundo enquanto a arte do Centro Pokemon nao terminou de decodificar.
+// Escura de proposito: a propria arte tem fundo preto em volta do predio,
+// entao a troca "cor solida -> imagem" nao pisca.
+const HOSPITAL_FALLBACK = '#0d0d10'
+
+// Tamanho de tela do nome/nivel e da barra de HP do POKE no Hospital. 1.5 e o
+// zoom padrao com que a hunt desenha os mesmos elementos, entao o rotulo tem
+// ali a mesma legibilidade que tem no combate.
+const ESCALA_ROTULO_POKE = 1.5
 
 const MIN_ZOOM = 0.5
 const MAX_ZOOM = 2.5
@@ -30,6 +38,17 @@ const PLAYER_ANCHOR_Y = 0.58
 export interface ScreenPoint {
   x: number
   y: number
+}
+
+function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void {
+  const radius = Math.min(r, h / 2, w / 2)
+  ctx.beginPath()
+  ctx.moveTo(x + radius, y)
+  ctx.arcTo(x + w, y, x + w, y + h, radius)
+  ctx.arcTo(x + w, y + h, x, y + h, radius)
+  ctx.arcTo(x, y + h, x, y, radius)
+  ctx.arcTo(x, y, x + w, y, radius)
+  ctx.closePath()
 }
 
 export class Renderer {
@@ -68,57 +87,153 @@ export class Renderer {
     this.ctx.clearRect(0, 0, this.width, this.height)
   }
 
-  // O POKE fica no centro EXATO da tela (pedido explicito: ele estava baixo
-  // demais, quase encostando no rodape da HUD em telas curtas). A enfermeira
-  // sobe junto pra manter a mesma distancia visual entre os dois; deixa-la em
-  // 0.35 colaria as duas figuras.
-  private _hospitalBaseNursePos(): ScreenPoint {
-    return { x: this.width / 2, y: this.height * 0.24 }
+  /**
+   * Como a arte do Centro Pokemon (quadrada) e encaixada nesta tela: `cover`
+   * (preenche, cortando o excedente), nunca `contain`.
+   *
+   * Cover corta as bordas, e isso e seguro AQUI porque os dois pontos que
+   * importam — a enfermeira e o tapete — ficam colados no eixo central da
+   * imagem: sobrevivem tanto ao corte lateral do retrato (celular) quanto ao
+   * corte de topo/rodape do ultrawide. Contain deixaria tarja preta em toda
+   * tela que nao fosse quadrada.
+   *
+   * O ZOOM NAO ENTRA NESTA CONTA de proposito. Zoom e controle de CAMERA sobre
+   * um mapa maior que a tela; o Hospital e um cenario fixo. Aplicar zoom aqui
+   * so cortaria mais o cenario, e no maximo (2.5x) o tapete — onde fica o POKE
+   * — sai inteiro da tela. Pior: com a enfermeira virando o botao de curar, um
+   * nivel de zoom que a esconde e um beco sem saida. O ZoomControl fica oculto
+   * fora da hunt (ver HudLayer) pra nao virar um botao que nao faz nada.
+   */
+  private _hospitalLayout(): { escala: number; ox: number; oy: number } {
+    const escala = Math.max(this.width / CENA_HOSPITAL.largura, this.height / CENA_HOSPITAL.altura)
+    return {
+      escala,
+      ox: (this.width - CENA_HOSPITAL.largura * escala) / 2,
+      oy: (this.height - CENA_HOSPITAL.altura * escala) / 2,
+    }
   }
 
-  private _hospitalBasePlayerPos(): ScreenPoint {
-    return { x: this.width / 2, y: this.height * 0.5 }
-  }
-
-  private _applyHospitalZoom({ x, y }: ScreenPoint): ScreenPoint {
-    const cx = this.width / 2
-    const cy = this.height / 2
-    return { x: cx + (x - cx) * this.zoom, y: cy + (y - cy) * this.zoom }
-  }
-
-  get hospitalNursePos(): ScreenPoint {
-    return this._applyHospitalZoom(this._hospitalBaseNursePos())
+  /** Fracao da imagem -> pixel da tela. */
+  private _hospitalParaTela(fx: number, fy: number): ScreenPoint {
+    const { escala, ox, oy } = this._hospitalLayout()
+    return { x: ox + fx * CENA_HOSPITAL.largura * escala, y: oy + fy * CENA_HOSPITAL.altura * escala }
   }
 
   get hospitalPlayerPos(): ScreenPoint {
-    return this._applyHospitalZoom(this._hospitalBasePlayerPos())
+    return this._hospitalParaTela(CENA_HOSPITAL.tapete.x, CENA_HOSPITAL.tapete.y)
   }
 
-  renderHospital(playerEntity: WorldEntity | null): void {
+  /** Este ponto da tela esta sobre a enfermeira (ou sobre o rotulo "Curar")? */
+  hospitalClickOnNurse(x: number, y: number): boolean {
+    const { escala, ox, oy } = this._hospitalLayout()
+    if (!(escala > 0)) return false
+    const fx = (x - ox) / (CENA_HOSPITAL.largura * escala)
+    const fy = (y - oy) / (CENA_HOSPITAL.altura * escala)
+    const a = CENA_HOSPITAL.alvo
+    return fx >= a.x1 && fx <= a.x2 && fy >= a.y1 && fy <= a.y2
+  }
+
+  renderHospital(playerEntity: WorldEntity | null, nurseHovered = false): void {
     const ctx = this.ctx
     this.clear()
-    const hospitalMap = { bounds: { width: this.width, height: this.height }, bg: HOSPITAL_BG }
-    const cx = this.width / 2
-    const cy = this.height / 2
+    ctx.fillStyle = HOSPITAL_FALLBACK
+    ctx.fillRect(0, 0, this.width, this.height)
+
+    const { escala, ox, oy } = this._hospitalLayout()
+    if (!(escala > 0)) return // canvas ainda sem tamanho (primeiro frame antes do resize)
+    const fundo = readyImage(CENA_HOSPITAL.imagem)
 
     ctx.save()
-    ctx.translate(cx, cy)
-    ctx.scale(this.zoom, this.zoom)
-    ctx.translate(-cx, -cy)
+    // Daqui pra baixo tudo e desenhado em COORDENADA DA IMAGEM (0..2000): e o
+    // unico sistema em que os pontos medidos sobre a arte continuam valendo
+    // quando a janela muda de tamanho.
+    ctx.translate(ox, oy)
+    ctx.scale(escala, escala)
 
-    const viewportW = this.width / this.zoom
-    const viewportH = this.height / this.zoom
-    drawMapBackground(ctx, hospitalMap, { x: cx - viewportW / 2, y: cy - viewportH / 2, w: viewportW, h: viewportH })
+    if (fundo) ctx.drawImage(fundo, 0, 0, CENA_HOSPITAL.largura, CENA_HOSPITAL.altura)
+    if (playerEntity) this._drawHospitalPoke(ctx, playerEntity, escala)
+    this._drawHealLabel(ctx, nurseHovered)
 
-    const nursePos = this._hospitalBaseNursePos()
-    drawNpcMarker(ctx, nursePos.x, nursePos.y, 'Enfermeira')
-    if (playerEntity) {
-      const playerPos = this._hospitalBasePlayerPos()
-      const displayEntity: WorldEntity = { ...playerEntity, x: playerPos.x, y: playerPos.y }
-      drawEntity(ctx, displayEntity)
-      drawHpBar(ctx, displayEntity)
-      drawNameLevelTag(ctx, displayEntity)
+    ctx.restore()
+  }
+
+  private _drawHospitalPoke(ctx: CanvasRenderingContext2D, playerEntity: WorldEntity, escala: number): void {
+    const pes = {
+      x: CENA_HOSPITAL.tapete.x * CENA_HOSPITAL.largura,
+      y: CENA_HOSPITAL.tapete.y * CENA_HOSPITAL.altura,
     }
+    const k = escalaDoPoke(playerEntity.battleAnim?.frameHeight ?? 0)
+    // Virado pra camera: `facing` fica com o que sobrou da ultima hunt, entao
+    // sem isto o POKE aparece de costas no saguao. Row 0 do sheet PMD e Down —
+    // ver SECTOR_TO_ROW em animationSystem.
+    const display: WorldEntity = { ...playerEntity, x: pes.x, y: pes.y, facing: { x: 0, y: 1 } }
+
+    ctx.save()
+    ctx.translate(pes.x, pes.y)
+    ctx.scale(k, k)
+    ctx.translate(-pes.x, -pes.y)
+    drawEntity(ctx, display)
+    ctx.restore()
+
+    // Barra de HP e nome NAO entram na escala do sprite: a 5x, a fonte de 9px
+    // viraria 45px e o nome ficaria maior que a enfermeira.
+    //
+    // Tambem nao podem sair na escala da IMAGEM: numa janela quase quadrada o
+    // cover fica em ~0.64, e o nome sairia com 6px de tela — ilegivel (visto ao
+    // vivo). Entao eles sao desenhados numa escala que CANCELA a da imagem e
+    // fixa o tamanho em pixel de tela, no mesmo tamanho aparente que tem dentro
+    // da hunt (que desenha com zoom 1.5 por padrao).
+    //
+    // A ancora vertical usa `frameHeight * k` porque e exatamente isso que
+    // `visualTopOffset` le pra decidir a que altura o rotulo fica — o sprite ja
+    // esta ampliado, o rotulo tem que subir junto.
+    const legivel = ESCALA_ROTULO_POKE / escala
+    const anim = display.battleAnim
+    // `k / legivel` e o que faz o rotulo pousar no topo do sprite APESAR de o
+    // contexto estar em outra escala: `visualTopOffset` e linear no
+    // frameHeight, entao dividir aqui cancela o `scale(legivel)` de baixo e
+    // sobra exatamente o `k` do sprite.
+    const ancora: WorldEntity = anim
+      ? { ...display, battleAnim: { ...anim, frameHeight: (anim.frameHeight * k) / legivel } }
+      : display
+    ctx.save()
+    ctx.translate(pes.x, pes.y)
+    ctx.scale(legivel, legivel)
+    ctx.translate(-pes.x, -pes.y)
+    drawHpBar(ctx, ancora)
+    drawNameLevelTag(ctx, ancora)
+    ctx.restore()
+  }
+
+  // "Curar" acima da cabeca da enfermeira. E o unico aviso de que ela e
+  // clicavel, entao vem numa pilula com contorno em vez de texto solto: o
+  // balcao atras e cheio de detalhe e texto puro se perderia nele.
+  private _drawHealLabel(ctx: CanvasRenderingContext2D, hovered: boolean): void {
+    const x = CENA_HOSPITAL.rotulo.x * CENA_HOSPITAL.largura
+    const y = CENA_HOSPITAL.rotulo.y * CENA_HOSPITAL.altura
+    const texto = 'Curar'
+
+    ctx.save()
+    ctx.font = 'bold 26px monospace'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    const w = ctx.measureText(texto).width + 34
+    const h = 44
+
+    if (hovered) {
+      ctx.shadowColor = 'rgba(255, 214, 120, 0.9)'
+      ctx.shadowBlur = 22
+    }
+    roundedRect(ctx, x - w / 2, y - h / 2, w, h, h / 2)
+    ctx.fillStyle = hovered ? 'rgba(24, 18, 10, 0.94)' : 'rgba(12, 12, 16, 0.86)'
+    ctx.fill()
+    ctx.shadowBlur = 0
+    ctx.lineWidth = 3
+    ctx.strokeStyle = hovered ? '#ffd678' : '#c9a24a'
+    ctx.stroke()
+
+    ctx.fillStyle = hovered ? '#fff3d4' : '#ffe9a8'
+    ctx.fillText(texto, x, y + 1)
     ctx.restore()
   }
 

@@ -13,6 +13,17 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '6.5',
+    date: '2026-08-15',
+    title: 'O Centro Pokemon virou um lugar de verdade',
+    highlights: [
+      'O HOSPITAL GANHOU CENARIO. O saguao do Centro Pokemon — balcao, maquina de cura, poltronas, o tapete redondo no meio — substituiu o fundo quadriculado que estava la desde o comeco.',
+      'SEU POKE FICA EM CIMA DO TAPETE, no centro do saguao, e num tamanho coerente com a moca do balcao. Pokemon grande aparece grande: o tamanho vem do sprite de cada especie, entao um Gyarados domina a sala e um Pichu chega na altura do balcao.',
+      'A MOCA DO BALCAO VIROU O BOTAO DE CURAR. Em cima da cabeca dela tem um "Curar" que acende quando o mouse passa; clicar nela cura a equipe inteira, de graca, como sempre foi. O quadradinho branco com a cruz vermelha que fazia esse papel saiu.',
+      'O CONTROLE DE ZOOM SO APARECE DENTRO DA CAÇADA. No Hospital ele nao tinha o que fazer — a sala e desenhada pra caber na tela — e ainda dava pra usar o zoom pra esconder a enfermeira, ou seja, esconder o proprio botao de curar.',
+    ],
+  },
+  {
     version: '6.4',
     date: '2026-08-14',
     title: 'Hunts em salas: 12 biomas, 33 sub-biomas e o Campeao Lance como portao',
