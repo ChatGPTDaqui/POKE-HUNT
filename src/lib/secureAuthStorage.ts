@@ -22,7 +22,18 @@ if (!STORAGE_SECRET && import.meta.env.PROD) {
 }
 
 function encryptValue(value: string): string {
-  return ENCRYPTION_PREFIX + CryptoJS.AES.encrypt(value, STORAGE_SECRET!).toString()
+  // Simetrico com `decryptValue`: nunca lanca. Sem isso, uma falha aqui
+  // estourava dentro do `setItem` que o supabase-js chama pra persistir o
+  // token depois de um refresh bem-sucedido — o refresh acontecia na rede
+  // mas nunca gravava local, entao a proxima leitura pegava token velho ou
+  // nenhum. Cai pra texto puro (que `decryptValue` ja sabe ler, por nao ter
+  // o prefixo) em vez de perder a escrita.
+  try {
+    return ENCRYPTION_PREFIX + CryptoJS.AES.encrypt(value, STORAGE_SECRET!).toString()
+  } catch (erro) {
+    console.error('secureAuthStorage: falha ao criptografar, gravando sem criptografia', erro)
+    return value
+  }
 }
 
 function decryptValue(value: string): string | null {
