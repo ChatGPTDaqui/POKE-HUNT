@@ -209,3 +209,167 @@ describe('AOE elemental e Ataque Basico sao opcionais', () => {
     expect(impreciso).toBeGreaterThan(certeiro * 0.2)
   })
 })
+
+// Golpes novos de tick volatil: leech_seed, curse (variante Ghost),
+// nightmare, ingrain/aqua_ring, wish. Todos power:0/category:status no
+// catalogo (sem `ability.status`/`statChanges`/`healPercent`), entao o efeito
+// E a heuristica de selecao (golpeDeApoioUtil) sao 100% custom — ver
+// combatSystem.ts#resolveHit e #golpeDeApoioUtil.
+describe('golpes novos de tick volatil', () => {
+  function construirCenarioGolpe(golpeId: string, especieJogador: string, nivel = 50) {
+    const rng = createRng(3)
+    const counters = { entity: 1, effect: 1, pendingHit: 1 }
+    const jogadorPoke = createPokeInstance(rng, especieJogador, nivel)
+    jogadorPoke.unlockedAbilities = [...jogadorPoke.unlockedAbilities, golpeId]
+    jogadorPoke.activeAbilities = [golpeId]
+    // O AOE de nivel 50 vive fora dos 4 slots e pode ja estar desbloqueado
+    // neste nivel — desligado pra sobrar SO o golpe sob teste (mesmo cuidado
+    // do teste de precisao acima).
+    jogadorPoke.disabledAbilities = { [typedAoeMoveKey(SPECIES[especieJogador].type)]: true }
+    const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
+    const player = world.player!
+    player.cooldowns = {}
+    player.globalCooldown = 0
+
+    const enemyPoke = createPokeInstance(rng, 'rattata', nivel)
+    // O inimigo precisa ficar ENGAJADO pro jogador sequer agir (ver
+    // `engagedEnemies` em updateCombat) -- mas os testes abaixo medem valores
+    // EXATOS do golpe sob teste (custo do Curse, HoT do Ingrain, etc), e um
+    // contra-ataque de verdade do inimigo somaria ruido nao-deterministico em
+    // cima disso. Silenciado aqui: nenhuma habilidade dele (incluindo o
+    // Ataque Basico) fica disponivel, entao pickAbility devolve null e
+    // executeEnemyAction nunca enfileira nada.
+    const enemySpecies = SPECIES[enemyPoke.speciesId]
+    enemyPoke.disabledAbilities = Object.fromEntries(
+      [...golpesUtilizaveis(enemyPoke, enemySpecies, true), BASIC_ATTACK.id].map((id) => [id, true]),
+    )
+    const enemy = createEnemyEntity(world.counters, {
+      poke: enemyPoke, x: player.x, y: player.y, encounterId: 'route_46_rattata',
+    })
+    enemy.state = 'engaged'
+    enemy.targetId = player.id
+    world.enemies = [enemy]
+    return { world, player, enemy }
+  }
+
+  describe('leech_seed', () => {
+    it('semeia o alvo (nao-GRASS) e drena 1/8 do HP maximo dele pro atacante a cada turno', () => {
+      const { world, player, enemy } = construirCenarioGolpe('leech_seed', 'charmander')
+
+      updateCombat(world, 0) // enfileira o hit
+      updateCombat(world, 999) // pousa -> aplica seeded (rattata e NORMAL, nao imune)
+      expect(enemy.seeded).toEqual({ sourceId: player.id })
+
+      // Espaco pra ver a cura chegando: HP baixo, bem abaixo do teto.
+      player.poke.hp = 1
+      const enemyHpAntes = enemy.poke.hp
+      updateCombat(world, 0) // proximoTurnoDeStatus ja ficou negativo pelo dt=999 acima -> tick imediato
+      expect(enemy.poke.hp).toBeLessThan(enemyHpAntes)
+      expect(player.poke.hp).toBeGreaterThan(1)
+    })
+
+    it('nao semeia um alvo GRASS', () => {
+      const { world, enemy } = construirCenarioGolpe('leech_seed', 'charmander')
+      // Mesma entidade/encontro do cenario padrao, so troca o POKE por um
+      // GRASS puro -- encounterId real ja validado, sem precisar de um novo.
+      const rng = createRng(9)
+      enemy.poke = createPokeInstance(rng, 'bulbasaur', 50)
+
+      updateCombat(world, 0)
+      updateCombat(world, 999)
+      expect(enemy.seeded).toBeUndefined()
+    })
+  })
+
+  describe('curse (variante Ghost)', () => {
+    it('atacante NAO-Ghost nunca usa curse (cai pro Ataque Basico)', () => {
+      const { world, player } = construirCenarioGolpe('curse', 'charmander')
+      const usados = new Set<string>()
+      for (let i = 0; i < 20; i++) {
+        player.cooldowns = {}
+        player.globalCooldown = 0
+        updateCombat(world, 0, { silent: true })
+        for (const hit of world.pendingHits) {
+          if (hit.attackerId === player.id) usados.add(hit.ability.id)
+        }
+      }
+      expect(usados.has('curse')).toBe(false)
+    })
+
+    it('atacante GHOST usa curse: paga 50% do proprio HP MAXIMO e marca curseDot no alvo', () => {
+      const { world, player, enemy } = construirCenarioGolpe('curse', 'gastly')
+      const hpMax = player.poke.stats.hp
+      const hpAntes = player.poke.hp
+
+      updateCombat(world, 0)
+      updateCombat(world, 999)
+
+      expect(enemy.curseDot).toBe(true)
+      expect(hpAntes - player.poke.hp).toBe(Math.max(1, Math.round(hpMax * 0.5)))
+    })
+  })
+
+  describe('nightmare', () => {
+    it('so causa dano no alvo enquanto ele estiver com status sleep', () => {
+      const { world, enemy } = construirCenarioGolpe('nightmare', 'gastly')
+      // Forca o alvo a dormir antes do golpe pousar — sem isto golpeDeApoioUtil
+      // nunca escolheria nightmare (so e util contra quem JA esta dormindo).
+      enemy.poke.status = { tipo: 'sleep', turnosRestantes: 10 }
+
+      updateCombat(world, 0)
+      updateCombat(world, 999)
+      expect(enemy.nightmareDot).toBe(true)
+
+      const hpAntes = enemy.poke.hp
+      updateCombat(world, 0) // clock ja negativo -> tick imediato
+      expect(enemy.poke.hp).toBeLessThan(hpAntes)
+
+      // Acordou -> nightmareDot continua true, mas para de causar dano.
+      enemy.poke.status = null
+      const hpDepoisDeAcordar = enemy.poke.hp
+      updateCombat(world, 0)
+      expect(enemy.poke.hp).toBe(hpDepoisDeAcordar)
+    })
+  })
+
+  describe('ingrain / aqua_ring', () => {
+    it.each(['ingrain', 'aqua_ring'])('%s cura 1/16 do proprio HP maximo por turno', (golpeId) => {
+      const { world, player } = construirCenarioGolpe(golpeId, 'charmander')
+      player.poke.hp = 1
+
+      updateCombat(world, 0)
+      updateCombat(world, 999)
+      expect(player.regenPercent).toBe(1 / 16)
+
+      const hpAntes = player.poke.hp
+      updateCombat(world, 0) // clock ja negativo -> tick imediato
+      expect(player.poke.hp).toBeGreaterThan(hpAntes)
+    })
+  })
+
+  describe('wish', () => {
+    it('cura 50% do proprio HP MAXIMO de quem lancou, 2 turnos (nao no mesmo tick) depois', () => {
+      const { world, player } = construirCenarioGolpe('wish', 'charmander')
+      const hpMax = player.poke.stats.hp
+      player.poke.hp = 1
+
+      updateCombat(world, 0) // enfileira o hit
+      updateCombat(world, 0.6) // hit pousa (HIT_LAND_DELAY=0.5) -> wish entra na fila
+      expect(world.pendingWishes.length).toBe(1)
+      expect(player.poke.hp).toBe(1) // ainda nao curou -- e uma cura ATRASADA
+
+      updateCombat(world, 999) // avanca os 2 turnos da fila
+      expect(world.pendingWishes.length).toBe(0)
+      const esperado = Math.max(1, Math.round(hpMax * 0.5))
+      expect(player.poke.hp).toBe(Math.min(hpMax, 1 + esperado))
+    })
+
+    it('fizzle silencioso se a entidade que lancou nao existir mais', () => {
+      const { world } = construirCenarioGolpe('wish', 'gastly')
+      world.pendingWishes = [{ timer: 0.01, healAmount: 999, targetId: 'entidade-que-nao-existe-mais' }]
+
+      expect(() => updateCombat(world, 1)).not.toThrow()
+      expect(world.pendingWishes.length).toBe(0)
+    })
+  })
+})

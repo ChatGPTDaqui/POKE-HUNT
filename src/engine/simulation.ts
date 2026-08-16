@@ -277,7 +277,7 @@ export function buildMapWorld(
 
   return {
     ...base,
-    mapDef, player, enemies, effects: [], pendingHits: [],
+    mapDef, player, enemies, effects: [], pendingHits: [], pendingWishes: [],
     autoTimers: { treinador: 0 },
     reviveCountdown: null,
     respawnTimer: mapDef.respawnDelay,

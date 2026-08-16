@@ -22,6 +22,17 @@ import {
 import type { StatChange } from '@/data/generated/types'
 import type { Ability } from '@/data/abilities'
 import type { WorldEntity, Escudos, ClimaTipo } from '../types'
+import { heal } from '../entity'
+
+// Fracoes de HP MAXIMO por turno dos golpes de tick volatil novos (ver
+// BaseEntity#seeded/curseDot/nightmareDot/regenPercent em engine/types.ts).
+// Vivem aqui (nao em combatSystem.ts) porque so sao lidas dentro de
+// tickStatus — quem SETA cada flag e resolveHit (combatSystem.ts), que tem
+// suas proprias constantes de aplicacao (custo do Curse, regenPercent do
+// Ingrain/Aqua Ring, etc).
+const LEECH_SEED_DRAIN_PERCENT = 1 / 8
+const CURSE_DOT_PERCENT = 1 / 4
+const NIGHTMARE_DOT_PERCENT = 1 / 4
 
 export function statusNaoVolatil(entity: WorldEntity): StatusAtivo | null {
   return entity.poke.status ?? null
@@ -202,6 +213,13 @@ export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.tormentedUntil = 0
   entity.estagioDeCritico = undefined
   entity.proximoGolpeCriticoGarantido = undefined
+  // Golpes de tick volatil novos (leech_seed/curse/nightmare/ingrain/aqua_ring)
+  // sao a mesma familia de "some no fim da batalha" do statusVolatil/estagios
+  // acima — sem timer proprio, entao sem este ponto nunca sairiam sozinhos.
+  entity.seeded = undefined
+  entity.curseDot = undefined
+  entity.nightmareDot = undefined
+  entity.regenPercent = undefined
 }
 
 // Dano de clima por turno (Gen3+): 1/16 do HP MAXIMO, minimo 1, pra quem nao
@@ -224,6 +242,14 @@ export interface TickDeStatus {
   dano: number
   /** Status que sairam sozinhos neste turno (sono acabou, descongelou, ...). */
   expirados: StatusCondition[]
+  /**
+   * Leech Seed: quanto curar em quem PLANTOU a semente, e o id dele.
+   * Ausente = nada a drenar. A cura em si e cross-entity (precisa achar a
+   * origem em `world.player`/`world.enemies`), entao quem aplica de fato e o
+   * chamador (combatSystem.ts#updateCombat) — mesmo motivo de `dano` nao ser
+   * aplicado aqui dentro (ver comentario da funcao).
+   */
+  drenoParaOrigem?: { sourceId: string; amount: number }
 }
 
 /**
@@ -324,7 +350,36 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
   // de novo no mesmo instante.
   if (expirados.length) entity.imunidadeDeStatus = SEGUNDOS_DE_IMUNIDADE_APOS_CURA
 
-  return { dano, expirados }
+  // --- Golpes de tick volatil novos (leech_seed/curse/nightmare/ingrain/
+  // aqua_ring) --------------------------------------------------------------
+  // Mesmo relogio de turno de cima (proximoTurnoDeStatus ja fechou, ou o
+  // early-return no topo desta funcao teria saido antes de chegar aqui).
+  // Somam no MESMO `dano` agregado que veneno/queimadura ja usa acima —
+  // combatSystem aplica tudo junto num unico takeDamage/spawnDamageNumber.
+  // CUIDADO se outra fase (clima) tambem mexer em `dano` aqui: somar, nunca
+  // substituir.
+  let drenoParaOrigem: { sourceId: string; amount: number } | undefined
+  if (entity.seeded) {
+    const quanto = Math.max(1, Math.round(entity.poke.stats.hp * LEECH_SEED_DRAIN_PERCENT))
+    dano += quanto
+    drenoParaOrigem = { sourceId: entity.seeded.sourceId, amount: quanto }
+  }
+  if (entity.curseDot) {
+    dano += Math.max(1, Math.round(entity.poke.stats.hp * CURSE_DOT_PERCENT))
+  }
+  // Nightmare so causa dano ENQUANTO o alvo estiver dormindo — se ele acordar
+  // a flag fica ligada (nao precisa limpar), mas simplesmente para de fazer
+  // nada, exatamente como pedido.
+  if (entity.nightmareDot && entity.poke.status?.tipo === 'sleep') {
+    dano += Math.max(1, Math.round(entity.poke.stats.hp * NIGHTMARE_DOT_PERCENT))
+  }
+  // Ingrain/Aqua Ring (mesmo campo `regenPercent` pros dois): HoT puro, sem
+  // dreno de ninguem, cura sempre a propria entidade.
+  if (entity.regenPercent) {
+    heal(entity, Math.max(1, Math.round(entity.poke.stats.hp * entity.regenPercent)))
+  }
+
+  return { dano, expirados, drenoParaOrigem }
 }
 
 export type ResultadoDaAcao =
