@@ -125,6 +125,30 @@ export interface BaseEntity {
   // em diante. Permanente-ate-fim-de-luta, como os jogos — sem timer, so
   // `limparEstadoVolatil` desliga.
   flashFireAtivo?: boolean
+
+  // --- Lock/disable (Taunt/Spite/Disable/Encore/Torment) --------------------
+  // Ultimo golpe (nao-Ataque-Basico) que esta entidade escolheu e executou.
+  // Spite/Disable/Encore agem sobre "o golpe que o alvo acabou de usar" — sem
+  // isto nao ha o que travar/forcar/punir. Null enquanto a entidade nao usou
+  // nenhum golpe ainda (o efeito falha nesse caso, ver combatSystem#resolveHit).
+  lastUsedAbilityId?: string | null
+  // Taunt: segundos restantes de silencio. Enquanto > 0, pickAbility pula
+  // inteiro o bloco de golpe de status e vai direto pro golpe de dano.
+  silenciadoAte?: number
+  // Disable: golpe especifico travado + segundos restantes. Enquanto o timer
+  // e > 0, esse id fica fora dos candidatos de pickAbility (mesmo ponto de
+  // filtro que golpe permanentemente desligado pelo jogador via config).
+  disabledAbilityId?: string | null
+  disabledAbilityUntil?: number
+  // Encore: golpe forcado + segundos restantes. Enquanto o timer e > 0,
+  // pickAbility so pode escolher este id (cai pro Ataque Basico se ele
+  // estiver em cooldown no momento).
+  forcedAbilityId?: string | null
+  forcedAbilityUntil?: number
+  // Torment: segundos restantes. Enquanto > 0, pickAbility exclui
+  // `lastUsedAbilityId` dos candidatos, recalculado a cada escolha (nunca
+  // deixa repetir o golpe anterior, mas qual foi o anterior muda a cada turno).
+  tormentedUntil?: number
 }
 
 export interface PlayerEntity extends BaseEntity {
