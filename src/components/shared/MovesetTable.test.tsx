@@ -95,6 +95,16 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     }
   })
 
+  it('mostra a ORDEM (1/2/3/4) na coluna Usar, nao so um check — reflete o indice em activeAbilities', () => {
+    const poke = pokeDoJogador()
+    useGameStateStore.setState({ team: [poke] })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+    poke.activeAbilities!.forEach((key, i) => {
+      expect(botaoUsar(nomeDoGolpe(key))?.textContent).toBe(String(i + 1))
+    })
+  })
+
   it('desmarcar manda a lista SEM o golpe', async () => {
     const poke = pokeDoJogador()
     useGameStateStore.setState({ team: [poke] })
