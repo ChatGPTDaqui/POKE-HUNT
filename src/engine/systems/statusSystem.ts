@@ -184,6 +184,8 @@ export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.estagios = {}
   entity.revelado = undefined
   entity.escudos = undefined
+  entity.imuneAoTipoVolatil = undefined
+  entity.flashFireAtivo = undefined
 }
 
 export interface TickDeStatus {

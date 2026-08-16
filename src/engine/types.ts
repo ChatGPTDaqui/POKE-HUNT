@@ -113,6 +113,18 @@ export interface BaseEntity {
   // golpe de Screen numa hunt — evita inicializar mais um objeto por entidade
   // criada quando nenhuma delas nunca vai usar.
   escudos?: Escudos
+  // Imunidade de TIPO temporaria concedida por um golpe (hoje so Magnet Rise,
+  // self-target: tipo='GROUND'). Diferente de `revelado` (que so IGNORA uma
+  // imunidade natural), este campo CRIA uma — ver
+  // combatSystem.ts#resolverImunidadeDeTipo. `restante` conta em segundos e
+  // desce em entity.ts#tickCooldowns, que zera o campo quando acaba. Ausente =
+  // nao esta imune a nenhum tipo por golpe agora.
+  imuneAoTipoVolatil?: { tipo: ElementType; restante: number }
+  // Trait Flash Fire: liga quando este POKE absorve um golpe FIRE (ver
+  // resolverImunidadeDeTipo) e da +50% de dano aos PROPRIOS golpes FIRE dali
+  // em diante. Permanente-ate-fim-de-luta, como os jogos — sem timer, so
+  // `limparEstadoVolatil` desliga.
+  flashFireAtivo?: boolean
 }
 
 export interface PlayerEntity extends BaseEntity {
