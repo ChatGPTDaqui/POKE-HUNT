@@ -43660,7 +43660,7 @@ function pickAbilityDaFila(world, entity, defenderEntity, candidatos, estaSilenc
 	const n = candidatos.length;
 	if (n === 0) return null;
 	const inicio = ((entity.filaGolpeIndex ?? 0) % n + n) % n;
-	const prontosDeDano = candidatos.filter((a) => isDamagingAbility(a) && isAbilityReady(entity, a.id));
+	const prontosDeDano = candidatos.filter((a) => a.id !== BASIC_ATTACK.id && isDamagingAbility(a) && isAbilityReady(entity, a.id));
 	let maiorDanoCache = null;
 	const maiorDanoSePronto = () => {
 		if (maiorDanoCache == null) maiorDanoCache = prontosDeDano.reduce((max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)), 0);
@@ -43685,9 +43685,12 @@ function pickAbility(world, entity, defenderEntity, aoeTargetCounter) {
 	const attackerSpecies = SPECIES[entity.poke.speciesId];
 	const disabled = entity.poke.disabledAbilities || {};
 	const candidateIds = golpesUtilizaveis(entity.poke, attackerSpecies, entity.kind === "enemy").filter((id) => !disabled[id]).filter((id) => !(entity.disabledAbilityUntil && entity.disabledAbilityUntil > 0 && id === entity.disabledAbilityId)).filter((id) => !(entity.tormentedUntil && entity.tormentedUntil > 0 && id === entity.lastUsedAbilityId)).filter((id) => id !== "curse" || attackerSpecies.type === "GHOST" || attackerSpecies.type2 === "GHOST");
-	const candidatosFinais = !!(entity.forcedAbilityUntil && entity.forcedAbilityUntil > 0 && entity.forcedAbilityId) ? candidateIds.filter((id) => id === entity.forcedAbilityId) : candidateIds;
+	const encoreAtivo = !!(entity.forcedAbilityUntil && entity.forcedAbilityUntil > 0 && entity.forcedAbilityId);
+	const candidatosFinais = encoreAtivo ? candidateIds.filter((id) => id === entity.forcedAbilityId) : candidateIds;
 	const estaSilenciado = !!(entity.silenciadoAte && entity.silenciadoAte > 0);
-	return (entity.kind === "enemy" ? pickAbilityGreedy(world, entity, defenderEntity, candidatosFinais.map((id) => getAbility(id)).filter((a) => a != null && isAbilityReady(entity, a.id)), estaSilenciado, clima, aoeTargetCounter) : pickAbilityDaFila(world, entity, defenderEntity, candidatosFinais.map((id) => getAbility(id)).filter((a) => a != null), estaSilenciado, clima)) ?? tentarAtaqueBasico(entity, attackerSpecies, disabled);
+	const abilidadesFinais = candidatosFinais.map((id) => getAbility(id)).filter((a) => a != null);
+	const rotacaoDoJogador = !encoreAtivo && !disabled[BASIC_ATTACK.id] ? [basicAttackFor(attackerSpecies), ...abilidadesFinais] : abilidadesFinais;
+	return (entity.kind === "enemy" ? pickAbilityGreedy(world, entity, defenderEntity, abilidadesFinais.filter((a) => isAbilityReady(entity, a.id)), estaSilenciado, clima, aoeTargetCounter) : pickAbilityDaFila(world, entity, defenderEntity, rotacaoDoJogador, estaSilenciado, clima)) ?? tentarAtaqueBasico(entity, attackerSpecies, disabled);
 }
 function queueHit(world, attacker, target, ability) {
 	world.pendingHits.push({
