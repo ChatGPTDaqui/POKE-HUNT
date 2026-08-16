@@ -181,7 +181,7 @@ export async function liquidar(): Promise<void> {
       )
     }
   } catch (erro) {
-    // 409 = nao ha sessao aberta. NUNCA e transitorio: se o servidor nao acha a
+    // "nenhuma sessao aberta" = NUNCA e transitorio: se o servidor nao acha a
     // sessao, nao existe intervalo pra creditar e a proxima tentativa vai dar o
     // mesmo 409.
     //
@@ -197,7 +197,19 @@ export async function liquidar(): Promise<void> {
     //    `/sessao/flush` a cada 30s PARA SEMPRE, uma verificacao de auth por
     //    tick, numa cacada que o jogador continuava vendo render na tela sem
     //    creditar nada.
-    if (erro instanceof ErroServidor && erro.status === 409) {
+    //
+    // MAS nem todo 409 de `/sessao/flush` significa "sessao sumiu" — o CAS de
+    // `gravarEstado` (server/src/progresso.ts) tambem responde 409 quando OUTRA
+    // escrita em `players` (config de auto, comprar, vender) colidiu com o
+    // flush, e essa colisao E transitoria (o server ja retenta algumas vezes
+    // sozinho antes de desistir). BUG REAL que isto corrigia: tratar esse 409
+    // como "sessao sumiu" parava o timer de flush no meio de uma cacada viva —
+    // no pior caso, bem na hora de fechar a sequencia do Campeao Lance, jogando
+    // fora o "derrotou" e ainda avisando "a cacada foi encerrada" por cima.
+    // Mensagem exata do servidor discrimina os dois; qualquer outra causa de
+    // 409 cai no `reportarErro` de baixo e a proxima tentativa (30s ou
+    // `commitAgora`) tenta de novo sozinha.
+    if (erro instanceof ErroServidor && erro.status === 409 && erro.message === 'nenhuma sessao aberta') {
       if (timerFlush) tratarEncerramento('sumiu')
       return
     }

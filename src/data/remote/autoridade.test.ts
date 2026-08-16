@@ -82,6 +82,32 @@ describe('liquidar() com 409 (nenhuma sessao aberta)', () => {
     expect(pushToast).not.toHaveBeenCalled()
   })
 
+  // BUG REAL: `/sessao/flush` tambem responde 409 quando o CAS de `gravarEstado`
+  // (server/src/progresso.ts) colide com OUTRA escrita em `players` (config de
+  // auto, comprar, vender) — sem relacao com a sessao existir ou nao. Tratar
+  // como "sessao sumiu" derrubava o timer no meio de uma cacada viva; o pior
+  // caso medido foi bem na hora de fechar a sequencia do Campeao Lance, que
+  // reiniciava do zero. So a mensagem exata "nenhuma sessao aberta" pode
+  // encerrar a hunt; qualquer outro texto de 409 e so mais um erro reportado, e
+  // a proxima tentativa periodica segue tentando sozinha.
+  it('409 por colisao de escrita (nao "sessao sumiu"): so reporta, nao derruba a hunt', async () => {
+    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'route_46' })
+    mock.flush.mockRejectedValue(new ErroServidor(409, 'outro comando em andamento — tente de novo'))
+    const aoEncerrar = vi.fn()
+    registrarEncerramentoDeSessao(aoEncerrar)
+
+    await abrirSessaoDeHunt('route_46', 'poke-1')
+    await liquidar()
+
+    expect(aoEncerrar).not.toHaveBeenCalled()
+    expect(pushToast).toHaveBeenCalledTimes(1)
+
+    // Timer continua vivo — a proxima tentativa periodica ainda vai tentar.
+    mock.flush.mockClear()
+    await vi.advanceTimersByTimeAsync(INTERVALO_FLUSH_MS)
+    expect(mock.flush).toHaveBeenCalled()
+  })
+
   it('erro que NAO e 409 continua so reportando, sem derrubar a hunt', async () => {
     mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'route_46' })
     mock.flush.mockRejectedValue(new ErroServidor(503, 'servidor fora do ar'))

@@ -47243,8 +47243,9 @@ async function comEstadoParaEscrita(cfg, userId, fn, opcoes = {}) {
 *    anuncio ainda de pe, ou seja, o mesmo POKE em dois lugares — e revertia
 *    pro vendedor um POKE que o comprador ja tinha pago.
 */
+var CONFLITO_ESCRITA_JOGADOR = "outro comando em andamento — tente de novo";
 async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAtEsperado) {
-	if (!(await atualizarRetornando(cfg, `players?user_id=eq.${userId}&updated_at=eq.${encodeURIComponent(playerUpdatedAtEsperado)}`, gameStateToPlayerRow(userId, estado))).length) throw new ErroHttp(409, "outro comando em andamento — tente de novo");
+	if (!(await atualizarRetornando(cfg, `players?user_id=eq.${userId}&updated_at=eq.${encodeURIComponent(playerUpdatedAtEsperado)}`, gameStateToPlayerRow(userId, estado))).length) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR);
 	const linhasPoke = gameStateToPokemonRows(userId, estado);
 	const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id) => id != null));
 	const idsDeInteresse = [.../* @__PURE__ */ new Set([...pokeIdsNoLoad, ...idsAgora])];
@@ -47284,6 +47285,24 @@ async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAtE
 * estado lido antes dele.
 */
 var FLUSH_OCUPADO = "ocupado";
+var MAX_TENTATIVAS_ESCRITA = 3;
+/**
+* Roda `fn` de novo se ela falhar por CAUSA do CAS de `gravarEstado`
+* (`CONFLITO_ESCRITA_JOGADOR`) — nunca por qualquer outro motivo.
+*
+* Exportada em vez de inline pra ser testavel isolada: a logica "quais erros
+* merecem retry e quantas vezes" e exatamente o tipo de decisao que uma
+* mudanca futura (ex: alguem adicionando outro 409 no meio) pode inverter sem
+* querer, e o sintoma so aparece como "as vezes perde progresso", nao como
+* teste vermelho.
+*/
+async function comRetryDeColisao(fn) {
+	for (let tentativa = 1;; tentativa++) try {
+		return await fn();
+	} catch (erro) {
+		if (!(erro instanceof ErroHttp && erro.status === 409 && erro.message === "outro comando em andamento — tente de novo") || tentativa >= MAX_TENTATIVAS_ESCRITA) throw erro;
+	}
+}
 /**
 * O coracao da Fase D: simula do ultimo flush ate agora e grava.
 *
@@ -47302,7 +47321,7 @@ async function aplicarFlush(cfg, userId, sessao) {
 	});
 	if (!reivindicada) return FLUSH_OCUPADO;
 	try {
-		return await comEstadoParaEscrita(cfg, userId, async (ctx) => {
+		return await comRetryDeColisao(() => comEstadoParaEscrita(cfg, userId, async (ctx) => {
 			const resultado = await simularSessao(cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, ctx.playerUpdatedAt, {
 				agora,
 				segundos,
@@ -47310,7 +47329,7 @@ async function aplicarFlush(cfg, userId, sessao) {
 			});
 			if (!resultado) await devolverEntregas(cfg, ctx.entregas);
 			return resultado;
-		}, { esperarFlush: false });
+		}, { esperarFlush: false }));
 	} finally {
 		await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { flushing_since: null });
 	}

@@ -280,6 +280,11 @@ interface LinhaLocalizacao {
  *    anuncio ainda de pe, ou seja, o mesmo POKE em dois lugares — e revertia
  *    pro vendedor um POKE que o comprador ja tinha pago.
  */
+// Mensagem do CAS de `gravarEstado` — exportada pra `aplicarFlush` poder
+// identificar ESTE 409 especifico (colisao efemera, seguro retentar) e nao
+// confundir com qualquer outro 409 do jogo (ouro insuficiente, item travado).
+export const CONFLITO_ESCRITA_JOGADOR = 'outro comando em andamento — tente de novo'
+
 export async function gravarEstado(
   cfg: Config,
   userId: string,
@@ -299,7 +304,7 @@ export async function gravarEstado(
     `players?user_id=eq.${userId}&updated_at=eq.${encodeURIComponent(playerUpdatedAtEsperado)}`,
     gameStateToPlayerRow(userId, estado),
   )
-  if (!gravada.length) throw new ErroHttp(409, 'outro comando em andamento — tente de novo')
+  if (!gravada.length) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR)
 
   const linhasPoke = gameStateToPokemonRows(userId, estado)
   // `id` e opcional so no tipo `Insert` (coluna tem default no banco) — aqui
@@ -427,6 +432,34 @@ export interface ResultadoFlush {
 export const FLUSH_OCUPADO = 'ocupado' as const
 export type ResultadoFlushOuOcupado = ResultadoFlush | null | typeof FLUSH_OCUPADO
 
+// Tentativas antes de desistir e deixar o 409 subir de verdade. 3 e generoso
+// pra colisao efemera (uma unica escrita concorrente): se ainda colidir depois
+// disso, algo mais persistente esta acontecendo e vale reportar em vez de
+// tentar pra sempre.
+const MAX_TENTATIVAS_ESCRITA = 3
+
+/**
+ * Roda `fn` de novo se ela falhar por CAUSA do CAS de `gravarEstado`
+ * (`CONFLITO_ESCRITA_JOGADOR`) — nunca por qualquer outro motivo.
+ *
+ * Exportada em vez de inline pra ser testavel isolada: a logica "quais erros
+ * merecem retry e quantas vezes" e exatamente o tipo de decisao que uma
+ * mudanca futura (ex: alguem adicionando outro 409 no meio) pode inverter sem
+ * querer, e o sintoma so aparece como "as vezes perde progresso", nao como
+ * teste vermelho.
+ */
+export async function comRetryDeColisao<T>(fn: () => Promise<T>): Promise<T> {
+  for (let tentativa = 1; ; tentativa++) {
+    try {
+      return await fn()
+    } catch (erro) {
+      const colisaoEfemera = erro instanceof ErroHttp
+        && erro.status === 409 && erro.message === CONFLITO_ESCRITA_JOGADOR
+      if (!colisaoEfemera || tentativa >= MAX_TENTATIVAS_ESCRITA) throw erro
+    }
+  }
+}
+
 /**
  * O coracao da Fase D: simula do ultimo flush ate agora e grava.
  *
@@ -487,15 +520,33 @@ export async function aplicarFlush(
     // Toda saida daqui pra baixo que NAO grave (POKE sumiu, hunt sumiu, erro de
     // simulacao) tem que devolver as entregas reivindicadas — senao o ouro de uma
     // venda no Mercado some porque o jogador tirou o POKE da equipe.
-    return await comEstadoParaEscrita(cfg, userId, async (ctx) => {
-      const resultado = await simularSessao(
-        cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, ctx.playerUpdatedAt, { agora, segundos, truncado },
-      )
-      // `null` = sessao insimulavel; sai SEM gravar, entao as entregas voltam pra
-      // fila (o `catch` do embrulho so cobre excecao, e aqui nao ha excecao).
-      if (!resultado) await devolverEntregas(cfg, ctx.entregas)
-      return resultado
-    }, { esperarFlush: false })
+    //
+    // RETRY no CAS de `gravarEstado` (BUG REAL: sequencia do Campeao Lance
+    // nunca fechava mesmo com time forte o bastante). `esperarFlush:false`
+    // acima cobre flush-contra-flush (via `flushing_since`), mas nao cobre
+    // flush-contra-QUALQUER-OUTRA-escrita em `players` (config de auto,
+    // comprar, vender — RPC-everything, que nao conhece essa marca). Qualquer
+    // uma delas bate `updated_at` e o CAS final de `gravarEstado` falha com
+    // 409, mesmo sem conflito de DADO nenhum (colunas diferentes). Sem retry,
+    // isso jogava fora a JANELA INTEIRA — inclusive `sequenceIndex`/
+    // `sequenceCleared`, que so persistem no mesmo golpe de escrita — e o
+    // cliente (que trata qualquer 409 de flush como "sessao sumiu") encerrava
+    // a cacada. Pra quem estava terminando de vencer o Lance, era voltar pro
+    // encontro 0 sem aviso nenhum do motivo.
+    //
+    // `sessao`/`janela` sao reusados sem mudanca: nada no banco (rng_state,
+    // sequence_index) foi escrito na tentativa que falhou, entao reler o
+    // jogador e rodar `simularSessao` de novo e seguro e idempotente.
+    return await comRetryDeColisao(() =>
+      comEstadoParaEscrita(cfg, userId, async (ctx) => {
+        const resultado = await simularSessao(
+          cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, ctx.playerUpdatedAt, { agora, segundos, truncado },
+        )
+        // `null` = sessao insimulavel; sai SEM gravar, entao as entregas voltam pra
+        // fila (o `catch` do embrulho so cobre excecao, e aqui nao ha excecao).
+        if (!resultado) await devolverEntregas(cfg, ctx.entregas)
+        return resultado
+      }, { esperarFlush: false }))
   } finally {
     // No `finally` porque uma marca que sobrevive a um erro (inclusive o 409
     // do proprio CAS de gravarEstado, se AINDA colidir depois da espera) faria

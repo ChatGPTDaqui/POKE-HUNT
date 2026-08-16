@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { defaultGameStateData } from '#engine'
 import { ErroHttp, type Config } from './db.js'
-import { gravarEstado } from './progresso.js'
+import { gravarEstado, comRetryDeColisao, CONFLITO_ESCRITA_JOGADOR } from './progresso.js'
 
 // Fake minimo da linha de `players`: so o suficiente pra exercitar o CAS de
 // gravarEstado() sem banco real. As outras tabelas que gravarEstado toca
@@ -59,5 +59,45 @@ describe('gravarEstado() — CAS na linha de players (PH-5)', () => {
 
     await gravarEstado(cfg, 'jogador-1', estado, new Set(), apósPrimeira)
     expect(tabelaPlayers.updated_at).not.toBe(apósPrimeira)
+  })
+})
+
+describe('comRetryDeColisao() — BUG REAL: janela inteira (inclusive a sequencia do Lance) descartada por uma colisao efemera', () => {
+  it('retenta uma colisao de escrita e devolve o resultado da tentativa que deu certo', async () => {
+    let chamadas = 0
+    const resultado = await comRetryDeColisao(async () => {
+      chamadas += 1
+      if (chamadas < 3) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR)
+      return 'sequencia gravada'
+    })
+    expect(resultado).toBe('sequencia gravada')
+    expect(chamadas).toBe(3)
+  })
+
+  it('desiste depois do teto de tentativas e deixa o 409 subir', async () => {
+    let chamadas = 0
+    await expect(comRetryDeColisao(async () => {
+      chamadas += 1
+      throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR)
+    })).rejects.toThrow(CONFLITO_ESCRITA_JOGADOR)
+    expect(chamadas).toBe(3)
+  })
+
+  it('NAO retenta um 409 de outro motivo (ex: "nenhuma sessao aberta")', async () => {
+    let chamadas = 0
+    await expect(comRetryDeColisao(async () => {
+      chamadas += 1
+      throw new ErroHttp(409, 'nenhuma sessao aberta')
+    })).rejects.toThrow('nenhuma sessao aberta')
+    expect(chamadas).toBe(1)
+  })
+
+  it('NAO retenta erro que nao e ErroHttp', async () => {
+    let chamadas = 0
+    await expect(comRetryDeColisao(async () => {
+      chamadas += 1
+      throw new Error('estouro de verdade, nao colisao')
+    })).rejects.toThrow('estouro de verdade')
+    expect(chamadas).toBe(1)
   })
 })
