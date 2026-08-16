@@ -81,6 +81,22 @@ const MULTISCALE_MULTIPLIER = 0.5
 const SELF_DESTRUCT_ABILITY_KEYS = new Set(['explosion', 'selfdestruct'])
 const SELF_DESTRUCT_HP_LOSS_PERCENT = 0.5
 
+// Golpes de disable/lock (imprison/embargo descartados por decisao anterior,
+// nao entram). Duracao em SEGUNDOS, nao turnos -- mesma convencao de
+// imunidadeDeStatus, decrementada por dt em statusSystem#tickStatus, com
+// TURNO_SEGUNDOS so pra manter a leitura em "quantos turnos" o resto do
+// balanceamento do jogo usa.
+const TAUNT_DURATION = TURNO_SEGUNDOS * 3 // Taunt: 3 turnos sem golpe de status (Gen6+)
+const DISABLE_DURATION = TURNO_SEGUNDOS * 4 // Disable: 4 turnos travando 1 golpe especifico
+const ENCORE_DURATION = TURNO_SEGUNDOS * 3 // Encore: 3 turnos forcando repetir o ultimo golpe
+// Torment nos jogos reais dura ate o POKE trocar de campo -- sem troca nesta
+// hunt continua, 3 turnos e a aproximacao (mesma janela de Taunt/Encore).
+const TORMENT_DURATION = TURNO_SEGUNDOS * 3
+// Spite: "reduz 4 PP do ultimo golpe" mapeado pro cooldown deste motor (PP e
+// cooldown sao o mesmo conceito aqui, ver TURNO_SEGUNDOS acima) -- 4 PP vira
+// 4 turnos de cooldown extra.
+const SPITE_COOLDOWN_BONUS = TURNO_SEGUNDOS * 4
+
 // Ambos editaveis pela planilha (ver CLAUDE.md "Balanceamento de economia")
 // com fallback batendo o valor hardcoded antigo.
 const SPEED_REFERENCE = formulaEngine.evalOrDefault('ATTACK_SPEED_REFERENCE', 100)
@@ -303,6 +319,23 @@ const ESTAGIO_ALVO_DA_IA = 2
  * "dancando" em vez de atacar.
  */
 function golpeDeApoioUtil(entity: WorldEntity, defenderEntity: WorldEntity, ability: Ability): boolean {
+  // Golpes de disable/lock (Taunt/Spite/Disable/Encore/Torment): nenhum tem
+  // `status` nem `statChanges` no catalogo, entao sem este bloco eles NUNCA
+  // entrariam em statusPronto -- ficariam catalogados mas inalcancaveis pela
+  // IA. So vale a pena se o efeito ainda vai pegar em algo (senao e um turno
+  // jogado fora re-taunting quem ja esta calado, por exemplo).
+  if (ability.id === 'taunt') return !(defenderEntity.silenciadoAte && defenderEntity.silenciadoAte > 0)
+  if (ability.id === 'torment') return !(defenderEntity.tormentedUntil && defenderEntity.tormentedUntil > 0)
+  if (ability.id === 'disable') {
+    return !!defenderEntity.lastUsedAbilityId
+      && !(defenderEntity.disabledAbilityUntil && defenderEntity.disabledAbilityUntil > 0)
+  }
+  if (ability.id === 'encore') {
+    return !!defenderEntity.lastUsedAbilityId
+      && !(defenderEntity.forcedAbilityUntil && defenderEntity.forcedAbilityUntil > 0)
+  }
+  if (ability.id === 'spite') return !!defenderEntity.lastUsedAbilityId
+
   // Cura pura (Recover): so quando ha HP de verdade a recuperar. O limiar existe
   // pra o POKE nao gastar turno curando 5 de HP com a vida quase cheia.
   if (ability.healPercent) {
@@ -489,7 +522,24 @@ function pickAbility(rng: Rng, entity: WorldEntity, defenderEntity: WorldEntity,
   // data/activeAbilities.ts.
   const candidateIds = golpesUtilizaveis(entity.poke, attackerSpecies, entity.kind === 'enemy')
     .filter((id) => !disabled[id])
-  const prontos = candidateIds
+    // Disable: golpe especifico temporariamente fora dos candidatos enquanto
+    // o timer nao zera -- mesmo ponto de filtro do "desligado pelo jogador"
+    // acima, so que temporario (ver types.ts#disabledAbilityId).
+    .filter((id) => !(entity.disabledAbilityUntil && entity.disabledAbilityUntil > 0 && id === entity.disabledAbilityId))
+    // Torment: nunca deixa repetir o ultimo golpe usado enquanto o timer nao
+    // zera. Recalculado a cada chamada (nao fixado no momento do cast): "o
+    // ultimo usado" muda de golpe a cada turno.
+    .filter((id) => !(entity.tormentedUntil && entity.tormentedUntil > 0 && id === entity.lastUsedAbilityId))
+
+  // Encore: enquanto o timer nao zera, SO o golpe forcado entra na escolha.
+  // Se ele estiver em cooldown, `prontos` fica vazio e o fallback pro Ataque
+  // Basico (mais abaixo) ja cobre o caso, sem logica nova.
+  const encoreAtivo = !!(entity.forcedAbilityUntil && entity.forcedAbilityUntil > 0 && entity.forcedAbilityId)
+  const candidatosFinais = encoreAtivo
+    ? candidateIds.filter((id) => id === entity.forcedAbilityId)
+    : candidateIds
+
+  const prontos = candidatosFinais
     .map((id) => getAbility(id))
     .filter((a): a is Ability => a != null && isAbilityReady(entity, a.id))
 
@@ -513,7 +563,11 @@ function pickAbility(rng: Rng, entity: WorldEntity, defenderEntity: WorldEntity,
   //
   // Com ela a regra vira a jogada certa do jogo real: paralisar quem vai
   // aguentar a troca, bater em quem nao vai.
-  const statusPronto = prontos.filter((a) => (
+  // Taunt: enquanto silenciado, pula INTEIRO o bloco de golpe de status e vai
+  // direto pro golpe de dano (ready, abaixo) -- estar calado nos jogos
+  // significa exatamente isso, so golpe de dano entra na escolha.
+  const estaSilenciado = !!(entity.silenciadoAte && entity.silenciadoAte > 0)
+  const statusPronto = estaSilenciado ? [] : prontos.filter((a) => (
     a.power === 0 && (
       (a.status != null && statusVaiPegar(defenderEntity, a.status, a.id))
       || golpeDeApoioUtil(entity, defenderEntity, a)
@@ -702,6 +756,12 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   )
   if (!ability) return
 
+  // Registrado no momento da ESCOLHA, nao do acerto: nos jogos o "ultimo
+  // golpe usado" (o que Spite/Disable/Encore leem) e fixado quando o golpe e
+  // usado, PP gasto ou nao, golpe acertando ou nao. Ataque Basico fica de
+  // fora -- e o Struggle deste jogo, nao um golpe de moveset de verdade.
+  if (ability.id !== BASIC_ATTACK.id) player.lastUsedAbilityId = ability.id
+
   startCooldown(player, ability.id, scaledCooldown(ability, velocidadeEfetiva(player)))
   startGlobalCooldown(player, MIN_ACTION_GAP)
   triggerAttackAnim(player, ability.target === 'aoe', primaryTarget)
@@ -735,6 +795,10 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
 
   const ability = pickAbility(world.rng, enemy, player, () => 1) // inimigos so miram no jogador unico
   if (!ability) return
+
+  // Mesma logica de executePlayerAction acima -- registrado na escolha, nao
+  // no acerto.
+  if (ability.id !== BASIC_ATTACK.id) enemy.lastUsedAbilityId = ability.id
 
   startCooldown(enemy, ability.id, scaledCooldown(ability, velocidadeEfetiva(enemy)))
   startGlobalCooldown(enemy, MIN_ACTION_GAP)
@@ -943,6 +1007,51 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     if (mudancas.length) {
       statusRecebeuEm = ability.statTarget === 'self' ? attacker : target
       if (!silent) anunciarEstagios(world, statusRecebeuEm, mudancas)
+    }
+
+    // Golpes de disable/lock (Taunt/Spite/Disable/Encore/Torment). Depois do
+    // dano, como o resto dos efeitos colaterais acima: golpe que mata nao
+    // chega a travar nada. Spite/Disable/Encore agem sobre o ULTIMO golpe que
+    // o ALVO usou (`target.lastUsedAbilityId`) -- se o alvo nunca usou nenhum
+    // golpe ainda, o efeito falha em silencio, sem VFX (mesmo espirito de
+    // statusVaiPegar acima: nao ha "acertou nada" pra anunciar).
+    switch (ability.id) {
+      case 'taunt':
+        target.silenciadoAte = TAUNT_DURATION
+        statusRecebeuEm = target
+        break
+      case 'torment':
+        target.tormentedUntil = TORMENT_DURATION
+        statusRecebeuEm = target
+        break
+      case 'spite': {
+        const golpeAnterior = target.lastUsedAbilityId
+        if (golpeAnterior) {
+          target.cooldowns[golpeAnterior] = (target.cooldowns[golpeAnterior] ?? 0) + SPITE_COOLDOWN_BONUS
+          statusRecebeuEm = target
+        }
+        break
+      }
+      case 'disable': {
+        const golpeAnterior = target.lastUsedAbilityId
+        if (golpeAnterior) {
+          target.disabledAbilityId = golpeAnterior
+          target.disabledAbilityUntil = DISABLE_DURATION
+          statusRecebeuEm = target
+        }
+        break
+      }
+      case 'encore': {
+        const golpeAnterior = target.lastUsedAbilityId
+        if (golpeAnterior) {
+          target.forcedAbilityId = golpeAnterior
+          target.forcedAbilityUntil = ENCORE_DURATION
+          statusRecebeuEm = target
+        }
+        break
+      }
+      default:
+        break
     }
   }
 

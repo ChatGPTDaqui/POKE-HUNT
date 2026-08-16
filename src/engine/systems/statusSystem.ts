@@ -171,6 +171,16 @@ export function curarStatus(entity: WorldEntity, tipo?: StatusCondition): boolea
 export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.statusVolatil = null
   entity.estagios = {}
+  // Lock/disable (Taunt/Spite/Disable/Encore/Torment) tambem e volatil pelo
+  // mesmo motivo: sem fim de batalha real, sem isto o jogador acumularia
+  // Encore/Disable/Torment de um inimigo pro proximo, pra sempre.
+  entity.lastUsedAbilityId = null
+  entity.silenciadoAte = 0
+  entity.disabledAbilityId = null
+  entity.disabledAbilityUntil = 0
+  entity.forcedAbilityId = null
+  entity.forcedAbilityUntil = 0
+  entity.tormentedUntil = 0
 }
 
 export interface TickDeStatus {
@@ -191,6 +201,26 @@ export interface TickDeStatus {
 export function tickStatus(rng: Rng, entity: WorldEntity, dt: number): TickDeStatus {
   if (entity.imunidadeDeStatus > 0) {
     entity.imunidadeDeStatus = Math.max(0, entity.imunidadeDeStatus - dt)
+  }
+
+  // Timers de lock/disable (Taunt/Spite/Disable/Encore/Torment) — mesma forma
+  // que imunidadeDeStatus acima: contam em segundos corridos, fora do
+  // relogio de turno, e limpam o id associado quando zeram (senao
+  // disabledAbilityId/forcedAbilityId ficariam com um id "morto" penduradas
+  // depois do timer acabar).
+  if (entity.silenciadoAte && entity.silenciadoAte > 0) {
+    entity.silenciadoAte = Math.max(0, entity.silenciadoAte - dt)
+  }
+  if (entity.disabledAbilityUntil && entity.disabledAbilityUntil > 0) {
+    entity.disabledAbilityUntil = Math.max(0, entity.disabledAbilityUntil - dt)
+    if (entity.disabledAbilityUntil <= 0) entity.disabledAbilityId = null
+  }
+  if (entity.forcedAbilityUntil && entity.forcedAbilityUntil > 0) {
+    entity.forcedAbilityUntil = Math.max(0, entity.forcedAbilityUntil - dt)
+    if (entity.forcedAbilityUntil <= 0) entity.forcedAbilityId = null
+  }
+  if (entity.tormentedUntil && entity.tormentedUntil > 0) {
+    entity.tormentedUntil = Math.max(0, entity.tormentedUntil - dt)
   }
 
   entity.proximoTurnoDeStatus -= dt
