@@ -59,7 +59,7 @@ const chaves = new Map<string, CryptoKey>()
 
 interface Jwk { kid?: string; alg?: string; kty?: string; crv?: string; x?: string; y?: string }
 
-function base64UrlParaBytes(s: string): Uint8Array {
+function base64UrlParaBytes(s: string): Uint8Array<ArrayBuffer> {
   const base64 = s.replace(/-/g, '+').replace(/_/g, '/')
   const binario = atob(base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '='))
   const bytes = new Uint8Array(binario.length)

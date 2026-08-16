@@ -155,6 +155,7 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
 
     // ----- acoes de UI: existem pro tipo fechar, nao sao usadas na simulacao -----
     setAutoToggle: (key, value) => { s.autoToggles[key] = value },
+    setAutoStatusItem: (itemId, enabled) => { s.autoStatusConfig[itemId] = enabled },
     addAutoPotRule: (rule: AutoPotRule) => { s.autoPotRules.push(rule) },
     updateAutoPotRule: (index, patch) => {
       if (s.autoPotRules[index]) s.autoPotRules[index] = { ...s.autoPotRules[index], ...patch }

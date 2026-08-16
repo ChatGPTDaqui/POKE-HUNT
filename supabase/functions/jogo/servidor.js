@@ -24023,10 +24023,57 @@ var ALL_ABILITIES_SOURCE = {
 	...ABILITIES_DATA,
 	...TYPED_AOE_MOVES
 };
+var STAT_CHANGE_OVERRIDES = {
+	sand_attack: {
+		statChanges: [{
+			stat: "accuracy",
+			estagios: -1
+		}],
+		statChance: 100
+	},
+	smokescreen: {
+		statChanges: [{
+			stat: "accuracy",
+			estagios: -1
+		}],
+		statChance: 100
+	},
+	kinesis: {
+		statChanges: [{
+			stat: "accuracy",
+			estagios: -1
+		}],
+		statChance: 100
+	},
+	double_team: {
+		statChanges: [{
+			stat: "evasion",
+			estagios: 1
+		}],
+		statChance: 100,
+		statTarget: "self"
+	},
+	minimize: {
+		statChanges: [{
+			stat: "evasion",
+			estagios: 2
+		}],
+		statChance: 100,
+		statTarget: "self"
+	}
+};
+var HAZARD_OVERRIDES = {
+	spikes: { hazard: "spikes" },
+	toxic_spikes: { hazard: "toxic_spikes" },
+	stealth_rock: { hazard: "stealth_rock" },
+	sticky_web: { hazard: "sticky_web" }
+};
 var ABILITIES = Object.fromEntries(Object.entries(ALL_ABILITIES_SOURCE).map(([key, ability]) => {
 	const isAoe = AOE_ABILITY_KEYS.has(key) || "target" in ability && ability.target === "aoe";
 	return [key, {
 		...ability,
+		...STAT_CHANGE_OVERRIDES[key],
+		...HAZARD_OVERRIDES[key],
 		target: isAoe ? "aoe" : "single",
 		radius: isAoe ? 240 : void 0,
 		cooldown: cooldownFromPp(ability.pp)
@@ -24054,6 +24101,12 @@ function isDamagingAbility(ability) {
 	if (!ability) return false;
 	return ability.power > 0 || DANO_SEM_PODER_BASE.has(ability.id);
 }
+var CLIMA_DO_GOLPE = {
+	rain_dance: "chuva",
+	sunny_day: "sol",
+	hail: "granizo",
+	sandstorm: "areia"
+};
 var STAB_MULTIPLIER$1 = createFormulaEngine(FORMULAS).eval("STAB_MULTIPLIER");
 /**
 * O nivel em que o POKE passa a poder usar cada golpe.
@@ -24377,13 +24430,34 @@ var LOOT = {
 	]
 };
 var ARTE = {
-	floresta: "assets/hunt-backgrounds/forest.png",
-	agua: "assets/hunt-backgrounds/water.png",
-	caverna: "assets/hunt-backgrounds/cave.png",
-	fogo: "assets/hunt-backgrounds/fire.png",
 	dojo: "assets/hunt-backgrounds/dojo.png",
-	eletrico: "assets/hunt-backgrounds/eletric.png",
-	dragao: "assets/hunt-backgrounds/dragon.png"
+	planicie: "assets/hunt-backgrounds/plains.jpg",
+	campina: "assets/hunt-backgrounds/meadow.jpg",
+	vilarejo: "assets/hunt-backgrounds/town.jpg",
+	vilarejoNoturno: "assets/hunt-backgrounds/town-night.jpg",
+	florestaPadrao: "assets/hunt-backgrounds/forest.jpg",
+	matoAlto: "assets/hunt-backgrounds/tall-grass.jpg",
+	selva: "assets/hunt-backgrounds/jungle.jpg",
+	ilha: "assets/hunt-backgrounds/island.jpg",
+	marAberto: "assets/hunt-backgrounds/sea.jpg",
+	praia: "assets/hunt-backgrounds/beach.jpg",
+	lago: "assets/hunt-backgrounds/lake.jpg",
+	pantano: "assets/hunt-backgrounds/swamp.jpg",
+	ermos: "assets/hunt-backgrounds/badlands.jpg",
+	deserto: "assets/hunt-backgrounds/desert.jpg",
+	terraDevastada: "assets/hunt-backgrounds/wasteland.jpg",
+	montanha: "assets/hunt-backgrounds/mountain.jpg",
+	cavernaVulcanica: "assets/hunt-backgrounds/cave-volcanic.jpg",
+	cavernaDeGelo: "assets/hunt-backgrounds/ice-cave.jpg",
+	montanhaDeGelo: "assets/hunt-backgrounds/ice-mountain.png",
+	vulcao: "assets/hunt-backgrounds/volcano.jpg",
+	obra: "assets/hunt-backgrounds/construction-site.jpg",
+	industrial: "assets/hunt-backgrounds/industrial.jpg",
+	ruinas: "assets/hunt-backgrounds/ruins.jpg",
+	temploMistico: "assets/hunt-backgrounds/temple.png",
+	grutaFeerica: "assets/hunt-backgrounds/fairy-cave.jpg",
+	florestaQueimada: "assets/hunt-backgrounds/burnt-forest.jpg",
+	abismo: "assets/hunt-backgrounds/abyss.jpg"
 };
 var BIOMAS = [
 	{
@@ -24393,14 +24467,19 @@ var BIOMAS = [
 		bg: {
 			primary: "#3f5a34",
 			secondary: "#4a6a3d",
-			image: ARTE.floresta
+			image: ARTE.campina
 		},
 		subBiomas: [
 			{
 				chave: "plains",
 				nome: "Planicie",
 				peso: 10,
-				loot: "basico"
+				loot: "basico",
+				bg: {
+					primary: "#3f5a34",
+					secondary: "#4a6a3d",
+					image: ARTE.planicie
+				}
 			},
 			{
 				chave: "grass",
@@ -24418,7 +24497,12 @@ var BIOMAS = [
 				chave: "town",
 				nome: "Vilarejo",
 				peso: 6,
-				loot: "civilizado"
+				loot: "civilizado",
+				bg: {
+					primary: "#3f5a34",
+					secondary: "#4a6a3d",
+					image: ARTE.vilarejo
+				}
 			}
 		]
 	},
@@ -24429,7 +24513,7 @@ var BIOMAS = [
 		bg: {
 			primary: "#284b3c",
 			secondary: "#2e5544",
-			image: ARTE.floresta
+			image: ARTE.florestaPadrao
 		},
 		subBiomas: [
 			{
@@ -24442,13 +24526,23 @@ var BIOMAS = [
 				chave: "tall-grass",
 				nome: "Mato Alto",
 				peso: 10,
-				loot: "basico"
+				loot: "basico",
+				bg: {
+					primary: "#284b3c",
+					secondary: "#2e5544",
+					image: ARTE.matoAlto
+				}
 			},
 			{
 				chave: "jungle",
 				nome: "Selva",
 				peso: 6,
-				loot: "remoto"
+				loot: "remoto",
+				bg: {
+					primary: "#284b3c",
+					secondary: "#2e5544",
+					image: ARTE.selva
+				}
 			}
 		]
 	},
@@ -24459,20 +24553,30 @@ var BIOMAS = [
 		bg: {
 			primary: "#1f3d52",
 			secondary: "#27506b",
-			image: ARTE.agua
+			image: ARTE.ilha
 		},
 		subBiomas: [
 			{
 				chave: "sea",
 				nome: "Mar Aberto",
 				peso: 10,
-				loot: "basico"
+				loot: "basico",
+				bg: {
+					primary: "#1f3d52",
+					secondary: "#27506b",
+					image: ARTE.marAberto
+				}
 			},
 			{
 				chave: "beach",
 				nome: "Praia",
 				peso: 6,
-				loot: "civilizado"
+				loot: "civilizado",
+				bg: {
+					primary: "#1f3d52",
+					secondary: "#27506b",
+					image: ARTE.praia
+				}
 			},
 			{
 				chave: "seabed",
@@ -24489,7 +24593,7 @@ var BIOMAS = [
 		bg: {
 			primary: "#24463f",
 			secondary: "#2c5850",
-			image: ARTE.agua
+			image: ARTE.lago
 		},
 		subBiomas: [{
 			chave: "lake",
@@ -24500,7 +24604,12 @@ var BIOMAS = [
 			chave: "swamp",
 			nome: "Pantano",
 			peso: 6,
-			loot: "remoto"
+			loot: "remoto",
+			bg: {
+				primary: "#24463f",
+				secondary: "#2c5850",
+				image: ARTE.pantano
+			}
 		}]
 	},
 	{
@@ -24510,7 +24619,7 @@ var BIOMAS = [
 		bg: {
 			primary: "#5c4a30",
 			secondary: "#6d5838",
-			image: ARTE.caverna
+			image: ARTE.ermos
 		},
 		subBiomas: [
 			{
@@ -24523,13 +24632,23 @@ var BIOMAS = [
 				chave: "desert",
 				nome: "Deserto",
 				peso: 6,
-				loot: "remoto"
+				loot: "remoto",
+				bg: {
+					primary: "#5c4a30",
+					secondary: "#6d5838",
+					image: ARTE.deserto
+				}
 			},
 			{
 				chave: "wasteland",
 				nome: "Terra Devastada",
 				peso: 3,
-				loot: "profundo"
+				loot: "profundo",
+				bg: {
+					primary: "#5c4a30",
+					secondary: "#6d5838",
+					image: ARTE.terraDevastada
+				}
 			}
 		]
 	},
@@ -24540,13 +24659,18 @@ var BIOMAS = [
 		bg: {
 			primary: "#3a3340",
 			secondary: "#463d4d",
-			image: ARTE.caverna
+			image: ARTE.montanha
 		},
 		subBiomas: [{
 			chave: "cave",
 			nome: "Caverna",
 			peso: 10,
-			loot: "basico"
+			loot: "basico",
+			bg: {
+				primary: "#3a3340",
+				secondary: "#463d4d",
+				image: ARTE.cavernaVulcanica
+			}
 		}, {
 			chave: "mountain",
 			nome: "Montanha",
@@ -24561,13 +24685,18 @@ var BIOMAS = [
 		bg: {
 			primary: "#33505e",
 			secondary: "#3d6070",
-			image: ARTE.caverna
+			image: ARTE.montanhaDeGelo
 		},
 		subBiomas: [{
 			chave: "ice-cave",
 			nome: "Caverna de Gelo",
 			peso: 10,
-			loot: "remoto"
+			loot: "remoto",
+			bg: {
+				primary: "#33505e",
+				secondary: "#3d6070",
+				image: ARTE.cavernaDeGelo
+			}
 		}, {
 			chave: "snowy-forest",
 			nome: "Floresta Nevada",
@@ -24582,7 +24711,7 @@ var BIOMAS = [
 		bg: {
 			primary: "#5a2a1e",
 			secondary: "#6d3626",
-			image: ARTE.fogo
+			image: ARTE.vulcao
 		},
 		subBiomas: [{
 			chave: "volcano",
@@ -24598,7 +24727,7 @@ var BIOMAS = [
 		bg: {
 			primary: "#3d3a35",
 			secondary: "#4a4640",
-			image: ARTE.dojo
+			image: ARTE.vilarejoNoturno
 		},
 		subBiomas: [
 			{
@@ -24617,7 +24746,12 @@ var BIOMAS = [
 				chave: "dojo",
 				nome: "Dojo",
 				peso: 6,
-				loot: "basico"
+				loot: "basico",
+				bg: {
+					primary: "#3d3a35",
+					secondary: "#4a4640",
+					image: ARTE.dojo
+				}
 			}
 		]
 	},
@@ -24628,14 +24762,19 @@ var BIOMAS = [
 		bg: {
 			primary: "#3b3f4a",
 			secondary: "#474c59",
-			image: ARTE.eletrico
+			image: ARTE.industrial
 		},
 		subBiomas: [
 			{
 				chave: "construction-site",
 				nome: "Obra",
 				peso: 10,
-				loot: "civilizado"
+				loot: "civilizado",
+				bg: {
+					primary: "#3b3f4a",
+					secondary: "#474c59",
+					image: ARTE.obra
+				}
 			},
 			{
 				chave: "factory",
@@ -24664,14 +24803,19 @@ var BIOMAS = [
 		bg: {
 			primary: "#4a3a55",
 			secondary: "#584565",
-			image: ARTE.dojo
+			image: ARTE.temploMistico
 		},
 		subBiomas: [
 			{
 				chave: "ruins",
 				nome: "Ruinas",
 				peso: 10,
-				loot: "remoto"
+				loot: "remoto",
+				bg: {
+					primary: "#4a3a55",
+					secondary: "#584565",
+					image: ARTE.ruinas
+				}
 			},
 			{
 				chave: "temple",
@@ -24683,7 +24827,12 @@ var BIOMAS = [
 				chave: "fairy-cave",
 				nome: "Gruta Feerica",
 				peso: 3,
-				loot: "profundo"
+				loot: "profundo",
+				bg: {
+					primary: "#4a3a55",
+					secondary: "#584565",
+					image: ARTE.grutaFeerica
+				}
 			}
 		]
 	},
@@ -24694,7 +24843,7 @@ var BIOMAS = [
 		bg: {
 			primary: "#2b2733",
 			secondary: "#35303f",
-			image: ARTE.caverna
+			image: ARTE.florestaQueimada
 		},
 		subBiomas: [
 			{
@@ -24707,13 +24856,23 @@ var BIOMAS = [
 				chave: "abyss",
 				nome: "Abismo",
 				peso: 6,
-				loot: "profundo"
+				loot: "profundo",
+				bg: {
+					primary: "#2b2733",
+					secondary: "#35303f",
+					image: ARTE.abismo
+				}
 			},
 			{
 				chave: "space",
 				nome: "Espaco",
 				peso: 3,
-				loot: "profundo"
+				loot: "profundo",
+				bg: {
+					primary: "#2b2733",
+					secondary: "#35303f",
+					image: ARTE.abismo
+				}
 			}
 		]
 	}
@@ -25526,24 +25685,24 @@ var LEGENDARY_SPECIES_IDS = [
 //#endregion
 //#region src/data/nightmareMaps.ts
 var TYPE_BACKGROUND_IMAGE = {
-	FIRE: "assets/hunt-backgrounds/fire.png",
-	WATER: "assets/hunt-backgrounds/water.png",
-	GRASS: "assets/hunt-backgrounds/forest.png",
-	ROCK: "assets/hunt-backgrounds/cave.png",
+	FIRE: "assets/hunt-backgrounds/volcano.jpg",
+	WATER: "assets/hunt-backgrounds/sea.jpg",
+	GRASS: "assets/hunt-backgrounds/forest.jpg",
+	ROCK: "assets/hunt-backgrounds/mountain.jpg",
 	FIGHTING: "assets/hunt-backgrounds/dojo.png",
-	ELECTRIC: "assets/hunt-backgrounds/eletric.png",
+	ELECTRIC: "assets/hunt-backgrounds/industrial.jpg",
 	DRAGON: "assets/hunt-backgrounds/dragon.png",
-	BUG: "assets/hunt-backgrounds/forest.png",
-	NORMAL: "assets/hunt-backgrounds/forest.png",
-	POISON: "assets/hunt-backgrounds/water.png",
-	FLYING: "assets/hunt-backgrounds/water.png",
-	GROUND: "assets/hunt-backgrounds/cave.png",
-	ICE: "assets/hunt-backgrounds/cave.png",
-	STEEL: "assets/hunt-backgrounds/cave.png",
-	PSYCHIC: "assets/hunt-backgrounds/dojo.png",
-	GHOST: "assets/hunt-backgrounds/cave.png",
-	DARK: "assets/hunt-backgrounds/cave.png",
-	FAIRY: "assets/hunt-backgrounds/forest.png"
+	BUG: "assets/hunt-backgrounds/jungle.jpg",
+	NORMAL: "assets/hunt-backgrounds/plains.jpg",
+	POISON: "assets/hunt-backgrounds/swamp.jpg",
+	FLYING: "assets/hunt-backgrounds/mountain.jpg",
+	GROUND: "assets/hunt-backgrounds/desert.jpg",
+	ICE: "assets/hunt-backgrounds/ice-mountain.png",
+	STEEL: "assets/hunt-backgrounds/construction-site.jpg",
+	PSYCHIC: "assets/hunt-backgrounds/temple.png",
+	GHOST: "assets/hunt-backgrounds/abyss.jpg",
+	DARK: "assets/hunt-backgrounds/burnt-forest.jpg",
+	FAIRY: "assets/hunt-backgrounds/fairy-cave.jpg"
 };
 function bossBackgroundImage(species) {
 	return TYPE_BACKGROUND_IMAGE[species.type] || (species.type2 ? TYPE_BACKGROUND_IMAGE[species.type2] : void 0) || null;
@@ -26032,7 +26191,7 @@ function montarHunt(bioma, faixa) {
 		bg: {
 			primary: "#3f5a34",
 			secondary: "#4a6a3d",
-			image: "assets/hunt-backgrounds/forest.png"
+			image: "assets/hunt-backgrounds/forest.jpg"
 		},
 		maxEnemies: 1,
 		respawnDelay: GEOMETRIA.respawnDelay,
@@ -26322,6 +26481,539 @@ var ITEMS = {
 };
 function getItem(id) {
 	return ITEMS[id] || null;
+}
+//#endregion
+//#region src/data/traits.ts
+var SPECIES_TRAIT = {
+	gastly: "levitate",
+	haunter: "levitate",
+	gengar: "levitate",
+	koffing: "levitate",
+	weezing: "levitate",
+	misdreavus: "levitate",
+	unown: "levitate",
+	chinchou: "volt_absorb",
+	lanturn: "volt_absorb",
+	lapras: "water_absorb",
+	quagsire: "water_absorb",
+	wooper: "water_absorb",
+	poliwag: "water_absorb",
+	poliwhirl: "water_absorb",
+	mantine: "water_absorb",
+	growlithe: "flash_fire",
+	arcanine: "flash_fire",
+	houndour: "flash_fire",
+	houndoom: "flash_fire",
+	ponyta: "flash_fire",
+	rapidash: "flash_fire",
+	miltank: "sap_sipper",
+	girafarig: "sap_sipper",
+	stantler: "sap_sipper",
+	rhyhorn: "lightning_rod",
+	rhydon: "lightning_rod",
+	arbok: "intimidate",
+	gyarados: "intimidate",
+	snubbull: "intimidate",
+	granbull: "intimidate",
+	qwilfish: "intimidate",
+	porygon: "download",
+	porygon2: "download",
+	pikachu: "static",
+	voltorb: "static",
+	electrode: "static",
+	electabuzz: "static",
+	elekid: "static",
+	mareep: "static",
+	flaaffy: "static",
+	ampharos: "static",
+	zapdos: "static",
+	magmar: "flame_body",
+	magby: "flame_body",
+	slugma: "flame_body",
+	magcargo: "flame_body",
+	nidoran_f: "poison_point",
+	nidorina: "poison_point",
+	nidoqueen: "poison_point",
+	nidoran_m: "poison_point",
+	nidorino: "poison_point",
+	nidoking: "poison_point",
+	paras: "effect_spore",
+	parasect: "effect_spore",
+	snorlax: "immunity",
+	ditto: "limber",
+	meowth: "limber",
+	persian: "limber",
+	murkrow: "insomnia",
+	spinarak: "insomnia",
+	ariados: "insomnia",
+	mankey: "vital_spirit",
+	primeape: "vital_spirit",
+	delibird: "vital_spirit",
+	goldeen: "water_veil",
+	seaking: "water_veil",
+	slowpoke: "own_tempo",
+	slowbro: "own_tempo",
+	smeargle: "own_tempo",
+	zubat: "inner_focus",
+	golbat: "inner_focus",
+	sneasel: "inner_focus",
+	drowzee: "inner_focus",
+	hypno: "inner_focus",
+	marill: "huge_power",
+	azumarill: "huge_power",
+	corsola: "hustle",
+	machop: "guts",
+	machoke: "guts",
+	machamp: "guts",
+	heracross: "guts",
+	tyrogue: "guts",
+	ursaring: "guts",
+	teddiursa: "quick_feet",
+	horsea: "swift_swim",
+	seadra: "swift_swim",
+	kingdra: "swift_swim",
+	magikarp: "swift_swim",
+	psyduck: "swift_swim",
+	golduck: "swift_swim",
+	omanyte: "swift_swim",
+	omastar: "swift_swim",
+	kabuto: "swift_swim",
+	kabutops: "swift_swim",
+	oddish: "chlorophyll",
+	gloom: "chlorophyll",
+	bellsprout: "chlorophyll",
+	weepinbell: "chlorophyll",
+	victreebel: "chlorophyll",
+	exeggcute: "chlorophyll",
+	tangela: "chlorophyll",
+	hoppip: "chlorophyll",
+	skiploom: "chlorophyll",
+	jumpluff: "chlorophyll",
+	sunkern: "chlorophyll",
+	sunflora: "chlorophyll",
+	sandshrew: "sand_rush",
+	sandslash: "sand_rush",
+	charmander: "blaze",
+	charmeleon: "blaze",
+	charizard: "blaze",
+	cyndaquil: "blaze",
+	quilava: "blaze",
+	typhlosion: "blaze",
+	squirtle: "torrent",
+	wartortle: "torrent",
+	blastoise: "torrent",
+	totodile: "torrent",
+	croconaw: "torrent",
+	feraligatr: "torrent",
+	bulbasaur: "overgrow",
+	ivysaur: "overgrow",
+	venusaur: "overgrow",
+	chikorita: "overgrow",
+	bayleef: "overgrow",
+	meganium: "overgrow",
+	beedrill: "swarm",
+	scyther: "swarm",
+	scizor: "swarm",
+	ledyba: "swarm",
+	ledian: "swarm",
+	politoed: "drizzle",
+	tyranitar: "sand_stream",
+	seel: "ice_body",
+	dewgong: "ice_body",
+	diglett: "sand_veil",
+	dugtrio: "sand_veil",
+	gligar: "sand_veil",
+	larvitar: "sand_veil",
+	pupitar: "sand_veil",
+	phanpy: "sand_veil",
+	donphan: "sand_veil",
+	swinub: "snow_cloak",
+	piloswine: "snow_cloak",
+	articuno: "snow_cloak",
+	geodude: "sturdy",
+	graveler: "sturdy",
+	golem: "sturdy",
+	steelix: "sturdy",
+	dragonite: "multiscale",
+	lugia: "multiscale",
+	abra: "synchronize",
+	kadabra: "synchronize",
+	alakazam: "synchronize",
+	natu: "synchronize",
+	xatu: "synchronize",
+	mew: "synchronize"
+};
+function traitOf(speciesId) {
+	return SPECIES_TRAIT[speciesId] ?? null;
+}
+//#endregion
+//#region src/data/generated/typeChart.generated.ts
+var TYPE_CHART = {
+	"NORMAL": {
+		"NORMAL": 1,
+		"FIRE": 1,
+		"WATER": 1,
+		"ELECTRIC": 1,
+		"GRASS": 1,
+		"ICE": 1,
+		"FIGHTING": 1,
+		"POISON": 1,
+		"GROUND": 1,
+		"FLYING": 1,
+		"PSYCHIC": 1,
+		"BUG": 1,
+		"ROCK": .5,
+		"GHOST": 0,
+		"DRAGON": 1,
+		"DARK": 1,
+		"STEEL": .5,
+		"FAIRY": 1
+	},
+	"FIRE": {
+		"NORMAL": 1,
+		"FIRE": .5,
+		"WATER": .5,
+		"ELECTRIC": 1,
+		"GRASS": 2,
+		"ICE": 2,
+		"FIGHTING": 1,
+		"POISON": 1,
+		"GROUND": 1,
+		"FLYING": 1,
+		"PSYCHIC": 1,
+		"BUG": 2,
+		"ROCK": .5,
+		"GHOST": 1,
+		"DRAGON": .5,
+		"DARK": 1,
+		"STEEL": 2,
+		"FAIRY": 1
+	},
+	"WATER": {
+		"NORMAL": 1,
+		"FIRE": 2,
+		"WATER": .5,
+		"ELECTRIC": 1,
+		"GRASS": .5,
+		"ICE": 1,
+		"FIGHTING": 1,
+		"POISON": 1,
+		"GROUND": 2,
+		"FLYING": 1,
+		"PSYCHIC": 1,
+		"BUG": 1,
+		"ROCK": 2,
+		"GHOST": 1,
+		"DRAGON": .5,
+		"DARK": 1,
+		"STEEL": 1,
+		"FAIRY": 1
+	},
+	"ELECTRIC": {
+		"NORMAL": 1,
+		"FIRE": 1,
+		"WATER": 2,
+		"ELECTRIC": .5,
+		"GRASS": .5,
+		"ICE": 1,
+		"FIGHTING": 1,
+		"POISON": 1,
+		"GROUND": 0,
+		"FLYING": 2,
+		"PSYCHIC": 1,
+		"BUG": 1,
+		"ROCK": 1,
+		"GHOST": 1,
+		"DRAGON": .5,
+		"DARK": 1,
+		"STEEL": 1,
+		"FAIRY": 1
+	},
+	"GRASS": {
+		"NORMAL": 1,
+		"FIRE": .5,
+		"WATER": 2,
+		"ELECTRIC": 1,
+		"GRASS": .5,
+		"ICE": 1,
+		"FIGHTING": 1,
+		"POISON": .5,
+		"GROUND": 2,
+		"FLYING": .5,
+		"PSYCHIC": 1,
+		"BUG": .5,
+		"ROCK": 2,
+		"GHOST": 1,
+		"DRAGON": .5,
+		"DARK": 1,
+		"STEEL": .5,
+		"FAIRY": 1
+	},
+	"ICE": {
+		"NORMAL": 1,
+		"FIRE": .5,
+		"WATER": .5,
+		"ELECTRIC": 1,
+		"GRASS": 2,
+		"ICE": .5,
+		"FIGHTING": 1,
+		"POISON": 1,
+		"GROUND": 2,
+		"FLYING": 2,
+		"PSYCHIC": 1,
+		"BUG": 1,
+		"ROCK": 1,
+		"GHOST": 1,
+		"DRAGON": 2,
+		"DARK": 1,
+		"STEEL": .5,
+		"FAIRY": 1
+	},
+	"FIGHTING": {
+		"NORMAL": 2,
+		"FIRE": 1,
+		"WATER": 1,
+		"ELECTRIC": 1,
+		"GRASS": 1,
+		"ICE": 2,
+		"FIGHTING": 1,
+		"POISON": .5,
+		"GROUND": 1,
+		"FLYING": .5,
+		"PSYCHIC": .5,
+		"BUG": .5,
+		"ROCK": 2,
+		"GHOST": 0,
+		"DRAGON": 1,
+		"DARK": 2,
+		"STEEL": 2,
+		"FAIRY": .5
+	},
+	"POISON": {
+		"NORMAL": 1,
+		"FIRE": 1,
+		"WATER": 1,
+		"ELECTRIC": 1,
+		"GRASS": 2,
+		"ICE": 1,
+		"FIGHTING": 1,
+		"POISON": .5,
+		"GROUND": .5,
+		"FLYING": 1,
+		"PSYCHIC": 1,
+		"BUG": 1,
+		"ROCK": .5,
+		"GHOST": .5,
+		"DRAGON": 1,
+		"DARK": 1,
+		"STEEL": 0,
+		"FAIRY": 2
+	},
+	"GROUND": {
+		"NORMAL": 1,
+		"FIRE": 2,
+		"WATER": 1,
+		"ELECTRIC": 2,
+		"GRASS": .5,
+		"ICE": 1,
+		"FIGHTING": 1,
+		"POISON": 2,
+		"GROUND": 1,
+		"FLYING": 0,
+		"PSYCHIC": 1,
+		"BUG": .5,
+		"ROCK": 2,
+		"GHOST": 1,
+		"DRAGON": 1,
+		"DARK": 1,
+		"STEEL": 2,
+		"FAIRY": 1
+	},
+	"FLYING": {
+		"NORMAL": 1,
+		"FIRE": 1,
+		"WATER": 1,
+		"ELECTRIC": .5,
+		"GRASS": 2,
+		"ICE": 1,
+		"FIGHTING": 2,
+		"POISON": 1,
+		"GROUND": 1,
+		"FLYING": 1,
+		"PSYCHIC": 1,
+		"BUG": 2,
+		"ROCK": .5,
+		"GHOST": 1,
+		"DRAGON": 1,
+		"DARK": 1,
+		"STEEL": .5,
+		"FAIRY": 1
+	},
+	"PSYCHIC": {
+		"NORMAL": 1,
+		"FIRE": 1,
+		"WATER": 1,
+		"ELECTRIC": 1,
+		"GRASS": 1,
+		"ICE": 1,
+		"FIGHTING": 2,
+		"POISON": 2,
+		"GROUND": 1,
+		"FLYING": 1,
+		"PSYCHIC": .5,
+		"BUG": 1,
+		"ROCK": 1,
+		"GHOST": 1,
+		"DRAGON": 1,
+		"DARK": 0,
+		"STEEL": .5,
+		"FAIRY": 1
+	},
+	"BUG": {
+		"NORMAL": 1,
+		"FIRE": .5,
+		"WATER": 1,
+		"ELECTRIC": 1,
+		"GRASS": 2,
+		"ICE": 1,
+		"FIGHTING": .5,
+		"POISON": .5,
+		"GROUND": 1,
+		"FLYING": .5,
+		"PSYCHIC": 2,
+		"BUG": 1,
+		"ROCK": 1,
+		"GHOST": .5,
+		"DRAGON": 1,
+		"DARK": 2,
+		"STEEL": .5,
+		"FAIRY": .5
+	},
+	"ROCK": {
+		"NORMAL": 1,
+		"FIRE": 2,
+		"WATER": 1,
+		"ELECTRIC": 1,
+		"GRASS": 1,
+		"ICE": 2,
+		"FIGHTING": .5,
+		"POISON": 1,
+		"GROUND": .5,
+		"FLYING": 2,
+		"PSYCHIC": 1,
+		"BUG": 2,
+		"ROCK": 1,
+		"GHOST": 1,
+		"DRAGON": 1,
+		"DARK": 1,
+		"STEEL": .5,
+		"FAIRY": 1
+	},
+	"GHOST": {
+		"NORMAL": 0,
+		"FIRE": 1,
+		"WATER": 1,
+		"ELECTRIC": 1,
+		"GRASS": 1,
+		"ICE": 1,
+		"FIGHTING": 1,
+		"POISON": 1,
+		"GROUND": 1,
+		"FLYING": 1,
+		"PSYCHIC": 2,
+		"BUG": 1,
+		"ROCK": 1,
+		"GHOST": 2,
+		"DRAGON": 1,
+		"DARK": .5,
+		"STEEL": 1,
+		"FAIRY": 1
+	},
+	"DRAGON": {
+		"NORMAL": 1,
+		"FIRE": 1,
+		"WATER": 1,
+		"ELECTRIC": 1,
+		"GRASS": 1,
+		"ICE": 1,
+		"FIGHTING": 1,
+		"POISON": 1,
+		"GROUND": 1,
+		"FLYING": 1,
+		"PSYCHIC": 1,
+		"BUG": 1,
+		"ROCK": 1,
+		"GHOST": 1,
+		"DRAGON": 2,
+		"DARK": 1,
+		"STEEL": .5,
+		"FAIRY": 0
+	},
+	"DARK": {
+		"NORMAL": 1,
+		"FIRE": 1,
+		"WATER": 1,
+		"ELECTRIC": 1,
+		"GRASS": 1,
+		"ICE": 1,
+		"FIGHTING": .5,
+		"POISON": 1,
+		"GROUND": 1,
+		"FLYING": 1,
+		"PSYCHIC": 2,
+		"BUG": 1,
+		"ROCK": 1,
+		"GHOST": 2,
+		"DRAGON": 1,
+		"DARK": .5,
+		"STEEL": 1,
+		"FAIRY": .5
+	},
+	"STEEL": {
+		"NORMAL": 1,
+		"FIRE": .5,
+		"WATER": .5,
+		"ELECTRIC": .5,
+		"GRASS": 1,
+		"ICE": 2,
+		"FIGHTING": 1,
+		"POISON": 1,
+		"GROUND": 1,
+		"FLYING": 1,
+		"PSYCHIC": 1,
+		"BUG": 1,
+		"ROCK": 2,
+		"GHOST": 1,
+		"DRAGON": 1,
+		"DARK": 1,
+		"STEEL": .5,
+		"FAIRY": 2
+	},
+	"FAIRY": {
+		"NORMAL": 1,
+		"FIRE": .5,
+		"WATER": 1,
+		"ELECTRIC": 1,
+		"GRASS": 1,
+		"ICE": 1,
+		"FIGHTING": 2,
+		"POISON": .5,
+		"GROUND": 1,
+		"FLYING": 1,
+		"PSYCHIC": 1,
+		"BUG": 1,
+		"ROCK": 1,
+		"GHOST": 1,
+		"DRAGON": 2,
+		"DARK": 2,
+		"STEEL": .5,
+		"FAIRY": 1
+	}
+};
+function getEffectiveness(moveType, defType1, defType2) {
+	const row = TYPE_CHART[moveType];
+	if (!row) return 1;
+	return (defType1 in row ? row[defType1] : 1) * (defType2 && defType2 in row ? row[defType2] : 1);
 }
 var CAPTURE_ANIM_FRAME_DURATION = .07;
 function captureAnimRowCount(success) {
@@ -26746,6 +27438,10 @@ function tickCooldowns(entity, dt) {
 	if (entity.flashTimer > 0) entity.flashTimer = Math.max(0, entity.flashTimer - dt);
 	entity.lastDamageTaken.physical.age += dt;
 	entity.lastDamageTaken.special.age += dt;
+	if (entity.imuneAoTipoVolatil) {
+		entity.imuneAoTipoVolatil.restante -= dt;
+		if (entity.imuneAoTipoVolatil.restante <= 0) entity.imuneAoTipoVolatil = void 0;
+	}
 }
 function isAbilityReady(entity, abilityId) {
 	return !entity.cooldowns[abilityId];
@@ -27067,6 +27763,19 @@ function multiplicadorDeEstagio(estagio) {
 function multiplicadorDeStat(estagios, stat) {
 	return multiplicadorDeEstagio(estagios?.[stat] ?? 0);
 }
+/**
+* Multiplicador de estagio de precisao/evasao — formula exata dos jogos, e
+* DIFERENTE da formula generica acima: base 3, nao base 2. (3+n)/3 subindo,
+* 3/(3-n) descendo. +1 da 1.33x (nao 1.5x); -1 da 0.75x (nao 0.67x).
+*
+* Eixo separado de proposito: accuracy/evasion nunca reusa `multiplicadorDeEstagio`
+* porque as duas fórmulas divergem — usar a de base 2 aqui deixaria Areia-Fina/
+* Duplo Time mais fortes do que sao nos jogos reais.
+*/
+function multiplicadorDeAccuracyOuEvasion(estagio) {
+	const n = Math.max(-6, Math.min(6, estagio));
+	return n >= 0 ? (3 + n) / 3 : 3 / (3 - n);
+}
 //#endregion
 //#region src/data/statusColors.ts
 var CORES = {
@@ -27082,6 +27791,22 @@ function corDoStatus(tipo) {
 }
 //#endregion
 //#region src/engine/systems/statusSystem.ts
+var LEECH_SEED_DRAIN_PERCENT = 1 / 8;
+var CURSE_DOT_PERCENT = 1 / 4;
+var NIGHTMARE_DOT_PERCENT = 1 / 4;
+var TRAIT_STATUS_IMUNIDADE = {
+	immunity: "poison",
+	limber: "paralysis",
+	insomnia: "sleep",
+	vital_spirit: "sleep",
+	water_veil: "burn",
+	magma_armor: "freeze",
+	own_tempo: "confusion"
+};
+function traitBloqueiaStatus(alvo, tipo) {
+	const trait = traitOf(alvo.poke.speciesId);
+	return trait != null && TRAIT_STATUS_IMUNIDADE[trait] === tipo;
+}
 function statusNaoVolatil(entity) {
 	return entity.poke.status ?? null;
 }
@@ -27097,7 +27822,9 @@ function statusNaoVolatil(entity) {
 */
 function statusVaiPegar(alvo, tipo, abilityId) {
 	if (alvo.imunidadeDeStatus > 0) return false;
+	if ((alvo.escudos?.safeguard ?? 0) > 0) return false;
 	if (ehVolatil(tipo) && alvo.statusVolatil) return false;
+	if (traitBloqueiaStatus(alvo, tipo)) return false;
 	const especie = SPECIES[alvo.poke.speciesId];
 	return podeReceberStatus(tipo, {
 		tipo1: especie.type,
@@ -27115,6 +27842,8 @@ function statusVaiPegar(alvo, tipo, abilityId) {
 */
 function aplicarStatus(rng, alvo, tipo, chance, abilityId) {
 	if (alvo.imunidadeDeStatus > 0) return null;
+	if ((alvo.escudos?.safeguard ?? 0) > 0) return null;
+	if (traitBloqueiaStatus(alvo, tipo)) return null;
 	const especie = SPECIES[alvo.poke.speciesId];
 	if (!podeReceberStatus(tipo, {
 		tipo1: especie.type,
@@ -27146,8 +27875,10 @@ function aplicarMudancasDeStat(rng, atacante, alvo, ability) {
 	if (!ability.statChanges || !ability.statChance) return [];
 	if (nextFloat(rng) * 100 >= ability.statChance) return [];
 	const destino = ability.statTarget === "self" ? atacante : alvo;
+	const bloqueadoPorMist = ability.statTarget !== "self" && (alvo.escudos?.mist ?? 0) > 0;
 	const aplicadas = [];
 	for (const mudanca of ability.statChanges) {
+		if (bloqueadoPorMist && mudanca.estagios < 0) continue;
 		const antes = destino.estagios[mudanca.stat] ?? 0;
 		const depois = Math.max(-6, Math.min(6, antes + mudanca.estagios));
 		if (depois === antes) continue;
@@ -27158,6 +27889,24 @@ function aplicarMudancasDeStat(rng, atacante, alvo, ability) {
 		});
 	}
 	return aplicadas;
+}
+/**
+* Aplica UMA mudanca de estagio direto, sem `Ability` por tras — usada pelo
+* HOOK DE ENTRADA EM COMBATE de Trait (Intimidate/Download, ver
+* combatSystem.ts#resolveEntryHook), que nao tem `ability.statChanges` pra
+* passar por `aplicarMudancasDeStat`. Mesmo clamp e mesma forma de retorno
+* (StatChange|null, null quando ja no teto/piso) pro chamador decidir se
+* anuncia o toast.
+*/
+function aplicarEstagioUnico(alvo, stat, delta) {
+	const antes = alvo.estagios[stat] ?? 0;
+	const depois = Math.max(-6, Math.min(6, antes + delta));
+	if (depois === antes) return null;
+	alvo.estagios[stat] = depois;
+	return {
+		stat,
+		estagios: depois - antes
+	};
 }
 function aplicarEfeitosDoGolpe(rng, alvo, ability) {
 	const congelado = statusNaoVolatil(alvo);
@@ -27186,16 +27935,58 @@ function curarStatus(entity, tipo) {
 	return curou;
 }
 /**
-* Zera o que os jogos zeram no fim da batalha: estagios de atributo e status
-* volatil (confusao). O nao-volatil NAO sai daqui — ele sobrevive a batalha
-* nos jogos, e e por isso que existe Antidoto.
+* Zera o que os jogos zeram no fim da batalha: estagios de atributo, status
+* volatil (confusao) e o hook de entrada em combate (Intimidate/Download/
+* clima automatico — ver combatSystem.ts#resolveEntryHook). O nao-volatil NAO
+* sai daqui — ele sobrevive a batalha nos jogos, e e por isso que existe
+* Antidoto.
 *
 * A imunidade de reaplicacao tambem nao e mexida: ela e sobre o tempo desde a
 * ultima cura, nao sobre a batalha.
+*
+* `estagioDeCritico` (Focus Energy) e `proximoGolpeCriticoGarantido` (Laser
+* Focus) sao volateis pelo mesmo motivo de `estagios`: contador/flag por
+* entidade de campo, nao pelo POKE — zeram junto no fim de luta.
 */
 function limparEstadoVolatil(entity) {
 	entity.statusVolatil = null;
 	entity.estagios = {};
+	entity.revelado = void 0;
+	entity.escudos = void 0;
+	entity.imuneAoTipoVolatil = void 0;
+	entity.flashFireAtivo = void 0;
+	entity.lastUsedAbilityId = null;
+	entity.silenciadoAte = 0;
+	entity.disabledAbilityId = null;
+	entity.disabledAbilityUntil = 0;
+	entity.forcedAbilityId = null;
+	entity.forcedAbilityUntil = 0;
+	entity.tormentedUntil = 0;
+	entity.estagioDeCritico = void 0;
+	entity.proximoGolpeCriticoGarantido = void 0;
+	entity.seeded = void 0;
+	entity.curseDot = void 0;
+	entity.nightmareDot = void 0;
+	entity.regenPercent = void 0;
+	entity.entradaProcessada = false;
+	entity.enduraAtiva = false;
+	entity.protegida = false;
+	entity.destinyBondAtiva = false;
+	entity.curaBloqueadaAte = 0;
+	entity.miraGarantidaAlvoId = null;
+	entity.tipoForcado = void 0;
+	entity.perishCountdown = null;
+	entity.yawnTurnos = null;
+}
+var AREIA_TIPOS_IMUNES = /* @__PURE__ */ new Set([
+	"ROCK",
+	"GROUND",
+	"STEEL"
+]);
+function danoDeClimaPorTurno(clima, hpMax, tipo1, tipo2) {
+	if (clima === "granizo" && tipo1 !== "ICE" && tipo2 !== "ICE") return Math.max(1, Math.floor(hpMax / 16));
+	if (clima === "areia" && !AREIA_TIPOS_IMUNES.has(tipo1) && !(tipo2 && AREIA_TIPOS_IMUNES.has(tipo2))) return Math.max(1, Math.floor(hpMax / 16));
+	return 0;
 }
 /**
 * Passa o tempo dos status de UMA entidade. Chamado todo frame; so faz algo
@@ -27205,19 +27996,38 @@ function limparEstadoVolatil(entity) {
 * decidir sobre numero flutuante, morte e loot com o mesmo caminho que ja usa
 * pro resto do dano.
 */
-function tickStatus(rng, entity, dt) {
+function tickStatus(rng, entity, dt, clima = null) {
 	if (entity.imunidadeDeStatus > 0) entity.imunidadeDeStatus = Math.max(0, entity.imunidadeDeStatus - dt);
+	if (entity.curaBloqueadaAte && entity.curaBloqueadaAte > 0) entity.curaBloqueadaAte = Math.max(0, entity.curaBloqueadaAte - dt);
+	if (entity.escudos) for (const chave of Object.keys(entity.escudos)) {
+		const restante = entity.escudos[chave] ?? 0;
+		if (restante > 0) entity.escudos[chave] = Math.max(0, restante - dt);
+	}
+	if (entity.silenciadoAte && entity.silenciadoAte > 0) entity.silenciadoAte = Math.max(0, entity.silenciadoAte - dt);
+	if (entity.disabledAbilityUntil && entity.disabledAbilityUntil > 0) {
+		entity.disabledAbilityUntil = Math.max(0, entity.disabledAbilityUntil - dt);
+		if (entity.disabledAbilityUntil <= 0) entity.disabledAbilityId = null;
+	}
+	if (entity.forcedAbilityUntil && entity.forcedAbilityUntil > 0) {
+		entity.forcedAbilityUntil = Math.max(0, entity.forcedAbilityUntil - dt);
+		if (entity.forcedAbilityUntil <= 0) entity.forcedAbilityId = null;
+	}
+	if (entity.tormentedUntil && entity.tormentedUntil > 0) entity.tormentedUntil = Math.max(0, entity.tormentedUntil - dt);
 	entity.proximoTurnoDeStatus -= dt;
 	if (entity.proximoTurnoDeStatus > 1e-9) return {
 		dano: 0,
-		expirados: []
+		expirados: [],
+		pereceu: false
 	};
 	entity.proximoTurnoDeStatus += TURNO_SEGUNDOS;
 	const expirados = [];
 	let dano = 0;
 	const nv = statusNaoVolatil(entity);
 	if (nv) {
-		dano += danoPorTurno(nv.tipo, entity.poke.stats.hp);
+		if (nv.tipo === "poison" && traitOf(entity.poke.speciesId) === "poison_heal") {
+			const cura = danoPorTurno(nv.tipo, entity.poke.stats.hp);
+			entity.poke.hp = Math.min(entity.poke.stats.hp, entity.poke.hp + cura);
+		} else dano += danoPorTurno(nv.tipo, entity.poke.stats.hp);
 		const chanceDeSair = chanceDeDescongelar(nv.tipo);
 		if (chanceDeSair > 0) {
 			if (nextFloat(rng) < chanceDeSair) {
@@ -27232,6 +28042,10 @@ function tickStatus(rng, entity, dt) {
 			}
 		}
 	}
+	if (clima) {
+		const especie = SPECIES[entity.poke.speciesId];
+		dano += danoDeClimaPorTurno(clima, entity.poke.stats.hp, especie.type, especie.type2);
+	}
 	const vol = entity.statusVolatil;
 	if (vol && vol.turnosRestantes != null) {
 		vol.turnosRestantes -= 1;
@@ -27241,9 +28055,38 @@ function tickStatus(rng, entity, dt) {
 		}
 	}
 	if (expirados.length) entity.imunidadeDeStatus = SEGUNDOS_DE_IMUNIDADE_APOS_CURA;
+	let drenoParaOrigem;
+	if (entity.seeded) {
+		const quanto = Math.max(1, Math.round(entity.poke.stats.hp * LEECH_SEED_DRAIN_PERCENT));
+		dano += quanto;
+		drenoParaOrigem = {
+			sourceId: entity.seeded.sourceId,
+			amount: quanto
+		};
+	}
+	if (entity.curseDot) dano += Math.max(1, Math.round(entity.poke.stats.hp * CURSE_DOT_PERCENT));
+	if (entity.nightmareDot && entity.poke.status?.tipo === "sleep") dano += Math.max(1, Math.round(entity.poke.stats.hp * NIGHTMARE_DOT_PERCENT));
+	if (entity.regenPercent) heal(entity, Math.max(1, Math.round(entity.poke.stats.hp * entity.regenPercent)));
+	if (entity.yawnTurnos != null) {
+		entity.yawnTurnos -= 1;
+		if (entity.yawnTurnos <= 0) {
+			entity.yawnTurnos = null;
+			aplicarStatus(rng, entity, "sleep", 100);
+		}
+	}
+	let pereceu = false;
+	if (entity.perishCountdown != null) {
+		entity.perishCountdown -= 1;
+		if (entity.perishCountdown <= 0) {
+			entity.perishCountdown = null;
+			pereceu = true;
+		}
+	}
 	return {
 		dano,
-		expirados
+		expirados,
+		drenoParaOrigem,
+		pereceu
 	};
 }
 /**
@@ -27275,170 +28118,6 @@ function tentarAgir(rng, entity, calcularAutoDano) {
 	return { agir: true };
 }
 //#endregion
-//#region src/data/traits.ts
-var SPECIES_TRAIT = {
-	gastly: "levitate",
-	haunter: "levitate",
-	gengar: "levitate",
-	koffing: "levitate",
-	weezing: "levitate",
-	misdreavus: "levitate",
-	unown: "levitate",
-	chinchou: "volt_absorb",
-	lanturn: "volt_absorb",
-	lapras: "water_absorb",
-	quagsire: "water_absorb",
-	wooper: "water_absorb",
-	poliwag: "water_absorb",
-	poliwhirl: "water_absorb",
-	mantine: "water_absorb",
-	growlithe: "flash_fire",
-	arcanine: "flash_fire",
-	houndour: "flash_fire",
-	houndoom: "flash_fire",
-	ponyta: "flash_fire",
-	rapidash: "flash_fire",
-	miltank: "sap_sipper",
-	girafarig: "sap_sipper",
-	stantler: "sap_sipper",
-	rhyhorn: "lightning_rod",
-	rhydon: "lightning_rod",
-	arbok: "intimidate",
-	gyarados: "intimidate",
-	snubbull: "intimidate",
-	granbull: "intimidate",
-	qwilfish: "intimidate",
-	porygon: "download",
-	porygon2: "download",
-	pikachu: "static",
-	voltorb: "static",
-	electrode: "static",
-	electabuzz: "static",
-	elekid: "static",
-	mareep: "static",
-	flaaffy: "static",
-	ampharos: "static",
-	zapdos: "static",
-	magmar: "flame_body",
-	magby: "flame_body",
-	slugma: "flame_body",
-	magcargo: "flame_body",
-	nidoran_f: "poison_point",
-	nidorina: "poison_point",
-	nidoqueen: "poison_point",
-	nidoran_m: "poison_point",
-	nidorino: "poison_point",
-	nidoking: "poison_point",
-	paras: "effect_spore",
-	parasect: "effect_spore",
-	snorlax: "immunity",
-	ditto: "limber",
-	meowth: "limber",
-	persian: "limber",
-	murkrow: "insomnia",
-	spinarak: "insomnia",
-	ariados: "insomnia",
-	mankey: "vital_spirit",
-	primeape: "vital_spirit",
-	delibird: "vital_spirit",
-	goldeen: "water_veil",
-	seaking: "water_veil",
-	slowpoke: "own_tempo",
-	slowbro: "own_tempo",
-	smeargle: "own_tempo",
-	zubat: "inner_focus",
-	golbat: "inner_focus",
-	sneasel: "inner_focus",
-	drowzee: "inner_focus",
-	hypno: "inner_focus",
-	marill: "huge_power",
-	azumarill: "huge_power",
-	corsola: "hustle",
-	machop: "guts",
-	machoke: "guts",
-	machamp: "guts",
-	heracross: "guts",
-	tyrogue: "guts",
-	ursaring: "guts",
-	teddiursa: "quick_feet",
-	horsea: "swift_swim",
-	seadra: "swift_swim",
-	kingdra: "swift_swim",
-	magikarp: "swift_swim",
-	psyduck: "swift_swim",
-	golduck: "swift_swim",
-	omanyte: "swift_swim",
-	omastar: "swift_swim",
-	kabuto: "swift_swim",
-	kabutops: "swift_swim",
-	oddish: "chlorophyll",
-	gloom: "chlorophyll",
-	bellsprout: "chlorophyll",
-	weepinbell: "chlorophyll",
-	victreebel: "chlorophyll",
-	exeggcute: "chlorophyll",
-	tangela: "chlorophyll",
-	hoppip: "chlorophyll",
-	skiploom: "chlorophyll",
-	jumpluff: "chlorophyll",
-	sunkern: "chlorophyll",
-	sunflora: "chlorophyll",
-	sandshrew: "sand_rush",
-	sandslash: "sand_rush",
-	charmander: "blaze",
-	charmeleon: "blaze",
-	charizard: "blaze",
-	cyndaquil: "blaze",
-	quilava: "blaze",
-	typhlosion: "blaze",
-	squirtle: "torrent",
-	wartortle: "torrent",
-	blastoise: "torrent",
-	totodile: "torrent",
-	croconaw: "torrent",
-	feraligatr: "torrent",
-	bulbasaur: "overgrow",
-	ivysaur: "overgrow",
-	venusaur: "overgrow",
-	chikorita: "overgrow",
-	bayleef: "overgrow",
-	meganium: "overgrow",
-	beedrill: "swarm",
-	scyther: "swarm",
-	scizor: "swarm",
-	ledyba: "swarm",
-	ledian: "swarm",
-	politoed: "drizzle",
-	tyranitar: "sand_stream",
-	seel: "ice_body",
-	dewgong: "ice_body",
-	diglett: "sand_veil",
-	dugtrio: "sand_veil",
-	gligar: "sand_veil",
-	larvitar: "sand_veil",
-	pupitar: "sand_veil",
-	phanpy: "sand_veil",
-	donphan: "sand_veil",
-	swinub: "snow_cloak",
-	piloswine: "snow_cloak",
-	articuno: "snow_cloak",
-	geodude: "sturdy",
-	graveler: "sturdy",
-	golem: "sturdy",
-	steelix: "sturdy",
-	dragonite: "multiscale",
-	lugia: "multiscale",
-	abra: "synchronize",
-	kadabra: "synchronize",
-	alakazam: "synchronize",
-	natu: "synchronize",
-	xatu: "synchronize",
-	mew: "synchronize"
-};
-function traitOf(speciesId) {
-	return SPECIES_TRAIT[speciesId] ?? null;
-}
-//#endregion
 //#region src/data/abilityCategory.ts
 /** O bloco de atributos que este POKE tem (ou tera) exatamente no nivel 50. */
 function statsAtTypedAoeLevel(poke) {
@@ -27463,375 +28142,6 @@ function resolveAbilityCategory(ability, poke) {
 function direcaoDoGolpeDeStatus(statChanges) {
 	const primeiro = statChanges?.[0];
 	return primeiro && primeiro.estagios > 0 ? "aumenta" : "diminui";
-}
-//#endregion
-//#region src/data/generated/typeChart.generated.ts
-var TYPE_CHART = {
-	"NORMAL": {
-		"NORMAL": 1,
-		"FIRE": 1,
-		"WATER": 1,
-		"ELECTRIC": 1,
-		"GRASS": 1,
-		"ICE": 1,
-		"FIGHTING": 1,
-		"POISON": 1,
-		"GROUND": 1,
-		"FLYING": 1,
-		"PSYCHIC": 1,
-		"BUG": 1,
-		"ROCK": .5,
-		"GHOST": 0,
-		"DRAGON": 1,
-		"DARK": 1,
-		"STEEL": .5,
-		"FAIRY": 1
-	},
-	"FIRE": {
-		"NORMAL": 1,
-		"FIRE": .5,
-		"WATER": .5,
-		"ELECTRIC": 1,
-		"GRASS": 2,
-		"ICE": 2,
-		"FIGHTING": 1,
-		"POISON": 1,
-		"GROUND": 1,
-		"FLYING": 1,
-		"PSYCHIC": 1,
-		"BUG": 2,
-		"ROCK": .5,
-		"GHOST": 1,
-		"DRAGON": .5,
-		"DARK": 1,
-		"STEEL": 2,
-		"FAIRY": 1
-	},
-	"WATER": {
-		"NORMAL": 1,
-		"FIRE": 2,
-		"WATER": .5,
-		"ELECTRIC": 1,
-		"GRASS": .5,
-		"ICE": 1,
-		"FIGHTING": 1,
-		"POISON": 1,
-		"GROUND": 2,
-		"FLYING": 1,
-		"PSYCHIC": 1,
-		"BUG": 1,
-		"ROCK": 2,
-		"GHOST": 1,
-		"DRAGON": .5,
-		"DARK": 1,
-		"STEEL": 1,
-		"FAIRY": 1
-	},
-	"ELECTRIC": {
-		"NORMAL": 1,
-		"FIRE": 1,
-		"WATER": 2,
-		"ELECTRIC": .5,
-		"GRASS": .5,
-		"ICE": 1,
-		"FIGHTING": 1,
-		"POISON": 1,
-		"GROUND": 0,
-		"FLYING": 2,
-		"PSYCHIC": 1,
-		"BUG": 1,
-		"ROCK": 1,
-		"GHOST": 1,
-		"DRAGON": .5,
-		"DARK": 1,
-		"STEEL": 1,
-		"FAIRY": 1
-	},
-	"GRASS": {
-		"NORMAL": 1,
-		"FIRE": .5,
-		"WATER": 2,
-		"ELECTRIC": 1,
-		"GRASS": .5,
-		"ICE": 1,
-		"FIGHTING": 1,
-		"POISON": .5,
-		"GROUND": 2,
-		"FLYING": .5,
-		"PSYCHIC": 1,
-		"BUG": .5,
-		"ROCK": 2,
-		"GHOST": 1,
-		"DRAGON": .5,
-		"DARK": 1,
-		"STEEL": .5,
-		"FAIRY": 1
-	},
-	"ICE": {
-		"NORMAL": 1,
-		"FIRE": .5,
-		"WATER": .5,
-		"ELECTRIC": 1,
-		"GRASS": 2,
-		"ICE": .5,
-		"FIGHTING": 1,
-		"POISON": 1,
-		"GROUND": 2,
-		"FLYING": 2,
-		"PSYCHIC": 1,
-		"BUG": 1,
-		"ROCK": 1,
-		"GHOST": 1,
-		"DRAGON": 2,
-		"DARK": 1,
-		"STEEL": .5,
-		"FAIRY": 1
-	},
-	"FIGHTING": {
-		"NORMAL": 2,
-		"FIRE": 1,
-		"WATER": 1,
-		"ELECTRIC": 1,
-		"GRASS": 1,
-		"ICE": 2,
-		"FIGHTING": 1,
-		"POISON": .5,
-		"GROUND": 1,
-		"FLYING": .5,
-		"PSYCHIC": .5,
-		"BUG": .5,
-		"ROCK": 2,
-		"GHOST": 0,
-		"DRAGON": 1,
-		"DARK": 2,
-		"STEEL": 2,
-		"FAIRY": .5
-	},
-	"POISON": {
-		"NORMAL": 1,
-		"FIRE": 1,
-		"WATER": 1,
-		"ELECTRIC": 1,
-		"GRASS": 2,
-		"ICE": 1,
-		"FIGHTING": 1,
-		"POISON": .5,
-		"GROUND": .5,
-		"FLYING": 1,
-		"PSYCHIC": 1,
-		"BUG": 1,
-		"ROCK": .5,
-		"GHOST": .5,
-		"DRAGON": 1,
-		"DARK": 1,
-		"STEEL": 0,
-		"FAIRY": 2
-	},
-	"GROUND": {
-		"NORMAL": 1,
-		"FIRE": 2,
-		"WATER": 1,
-		"ELECTRIC": 2,
-		"GRASS": .5,
-		"ICE": 1,
-		"FIGHTING": 1,
-		"POISON": 2,
-		"GROUND": 1,
-		"FLYING": 0,
-		"PSYCHIC": 1,
-		"BUG": .5,
-		"ROCK": 2,
-		"GHOST": 1,
-		"DRAGON": 1,
-		"DARK": 1,
-		"STEEL": 2,
-		"FAIRY": 1
-	},
-	"FLYING": {
-		"NORMAL": 1,
-		"FIRE": 1,
-		"WATER": 1,
-		"ELECTRIC": .5,
-		"GRASS": 2,
-		"ICE": 1,
-		"FIGHTING": 2,
-		"POISON": 1,
-		"GROUND": 1,
-		"FLYING": 1,
-		"PSYCHIC": 1,
-		"BUG": 2,
-		"ROCK": .5,
-		"GHOST": 1,
-		"DRAGON": 1,
-		"DARK": 1,
-		"STEEL": .5,
-		"FAIRY": 1
-	},
-	"PSYCHIC": {
-		"NORMAL": 1,
-		"FIRE": 1,
-		"WATER": 1,
-		"ELECTRIC": 1,
-		"GRASS": 1,
-		"ICE": 1,
-		"FIGHTING": 2,
-		"POISON": 2,
-		"GROUND": 1,
-		"FLYING": 1,
-		"PSYCHIC": .5,
-		"BUG": 1,
-		"ROCK": 1,
-		"GHOST": 1,
-		"DRAGON": 1,
-		"DARK": 0,
-		"STEEL": .5,
-		"FAIRY": 1
-	},
-	"BUG": {
-		"NORMAL": 1,
-		"FIRE": .5,
-		"WATER": 1,
-		"ELECTRIC": 1,
-		"GRASS": 2,
-		"ICE": 1,
-		"FIGHTING": .5,
-		"POISON": .5,
-		"GROUND": 1,
-		"FLYING": .5,
-		"PSYCHIC": 2,
-		"BUG": 1,
-		"ROCK": 1,
-		"GHOST": .5,
-		"DRAGON": 1,
-		"DARK": 2,
-		"STEEL": .5,
-		"FAIRY": .5
-	},
-	"ROCK": {
-		"NORMAL": 1,
-		"FIRE": 2,
-		"WATER": 1,
-		"ELECTRIC": 1,
-		"GRASS": 1,
-		"ICE": 2,
-		"FIGHTING": .5,
-		"POISON": 1,
-		"GROUND": .5,
-		"FLYING": 2,
-		"PSYCHIC": 1,
-		"BUG": 2,
-		"ROCK": 1,
-		"GHOST": 1,
-		"DRAGON": 1,
-		"DARK": 1,
-		"STEEL": .5,
-		"FAIRY": 1
-	},
-	"GHOST": {
-		"NORMAL": 0,
-		"FIRE": 1,
-		"WATER": 1,
-		"ELECTRIC": 1,
-		"GRASS": 1,
-		"ICE": 1,
-		"FIGHTING": 1,
-		"POISON": 1,
-		"GROUND": 1,
-		"FLYING": 1,
-		"PSYCHIC": 2,
-		"BUG": 1,
-		"ROCK": 1,
-		"GHOST": 2,
-		"DRAGON": 1,
-		"DARK": .5,
-		"STEEL": 1,
-		"FAIRY": 1
-	},
-	"DRAGON": {
-		"NORMAL": 1,
-		"FIRE": 1,
-		"WATER": 1,
-		"ELECTRIC": 1,
-		"GRASS": 1,
-		"ICE": 1,
-		"FIGHTING": 1,
-		"POISON": 1,
-		"GROUND": 1,
-		"FLYING": 1,
-		"PSYCHIC": 1,
-		"BUG": 1,
-		"ROCK": 1,
-		"GHOST": 1,
-		"DRAGON": 2,
-		"DARK": 1,
-		"STEEL": .5,
-		"FAIRY": 0
-	},
-	"DARK": {
-		"NORMAL": 1,
-		"FIRE": 1,
-		"WATER": 1,
-		"ELECTRIC": 1,
-		"GRASS": 1,
-		"ICE": 1,
-		"FIGHTING": .5,
-		"POISON": 1,
-		"GROUND": 1,
-		"FLYING": 1,
-		"PSYCHIC": 2,
-		"BUG": 1,
-		"ROCK": 1,
-		"GHOST": 2,
-		"DRAGON": 1,
-		"DARK": .5,
-		"STEEL": 1,
-		"FAIRY": .5
-	},
-	"STEEL": {
-		"NORMAL": 1,
-		"FIRE": .5,
-		"WATER": .5,
-		"ELECTRIC": .5,
-		"GRASS": 1,
-		"ICE": 2,
-		"FIGHTING": 1,
-		"POISON": 1,
-		"GROUND": 1,
-		"FLYING": 1,
-		"PSYCHIC": 1,
-		"BUG": 1,
-		"ROCK": 2,
-		"GHOST": 1,
-		"DRAGON": 1,
-		"DARK": 1,
-		"STEEL": .5,
-		"FAIRY": 2
-	},
-	"FAIRY": {
-		"NORMAL": 1,
-		"FIRE": .5,
-		"WATER": 1,
-		"ELECTRIC": 1,
-		"GRASS": 1,
-		"ICE": 1,
-		"FIGHTING": 2,
-		"POISON": .5,
-		"GROUND": 1,
-		"FLYING": 1,
-		"PSYCHIC": 1,
-		"BUG": 1,
-		"ROCK": 1,
-		"GHOST": 1,
-		"DRAGON": 2,
-		"DARK": 2,
-		"STEEL": .5,
-		"FAIRY": 1
-	}
-};
-function getEffectiveness(moveType, defType1, defType2) {
-	const row = TYPE_CHART[moveType];
-	if (!row) return 1;
-	return (defType1 in row ? row[defType1] : 1) * (defType2 && defType2 in row ? row[defType2] : 1);
 }
 //#endregion
 //#region src/data/battleSpriteAnims.ts
@@ -42679,8 +42989,134 @@ var LOW_HP_TRAIT_TYPE_MULTIPLIER = {
 var LOW_HP_TRAIT_HP_FRACTION = 1 / 3;
 var LOW_HP_TRAIT_MULTIPLIER = 1.5;
 var MULTISCALE_MULTIPLIER = .5;
+var IMUNIDADE_POR_TRAIT = {
+	levitate: "GROUND",
+	volt_absorb: "ELECTRIC",
+	water_absorb: "WATER",
+	flash_fire: "FIRE",
+	sap_sipper: "GRASS",
+	lightning_rod: "ELECTRIC",
+	storm_drain: "WATER",
+	motor_drive: "ELECTRIC"
+};
+var ESTAGIO_DE_ABSORCAO = {
+	sap_sipper: "atkFis",
+	lightning_rod: "atkEsp",
+	storm_drain: "atkEsp",
+	motor_drive: "speed"
+};
+var HP_CURADO_POR_ABSORCAO = 1 / 4;
+var MAGNET_RISE_TURNOS = 5;
+var FLASH_FIRE_MULTIPLIER = 1.5;
+/**
+* Resolve as DUAS fontes de imunidade a um TIPO de golpe que a tabela de
+* tipos (`getEffectiveness`) nao sabe: imunidade TEMPORARIA concedida por um
+* golpe (Magnet Rise, self-target) e imunidade PERMANENTE de Trait (Levitate
+* e as 7 Traits de absorcao). Chamada de dentro de computeDamage E
+* estimateDamage — a IA usa a segunda pra ranquear golpes, e sem isto ela
+* escolheria Terremoto contra um Levitate achando que causa dano de verdade.
+*
+* `aplicarEfeitos=false` e o modo LEITURA usado por `estimateDamage`: ela
+* documentadamente nao pode mutar nada (nem avancar o rng principal nem
+* curar/buffar de verdade) — so devolve SE seria imune, pra ranquear. So
+* `computeDamage`, resolvendo o hit de verdade, cura o HP / sobe o estagio /
+* liga `flashFireAtivo`.
+*/
+function resolverImunidadeDeTipo(rng, tipoDoGolpe, defensor, aplicarEfeitos) {
+	if (defensor.imuneAoTipoVolatil && defensor.imuneAoTipoVolatil.tipo === tipoDoGolpe) return { imune: true };
+	const trait = traitOf(defensor.poke.speciesId);
+	if (!trait || IMUNIDADE_POR_TRAIT[trait] !== tipoDoGolpe) return { imune: false };
+	if (trait === "levitate") return { imune: true };
+	if (trait === "volt_absorb" || trait === "water_absorb") {
+		if (aplicarEfeitos) heal(defensor, Math.round(getMaxHp(defensor) * HP_CURADO_POR_ABSORCAO));
+		return {
+			imune: true,
+			curou: true
+		};
+	}
+	if (trait === "flash_fire") {
+		if (aplicarEfeitos) defensor.flashFireAtivo = true;
+		return { imune: true };
+	}
+	const stat = ESTAGIO_DE_ABSORCAO[trait];
+	if (stat) {
+		if (aplicarEfeitos) aplicarMudancasDeStat(rng, defensor, defensor, {
+			...BASIC_ATTACK,
+			statChanges: [{
+				stat,
+				estagios: 1
+			}],
+			statChance: 100,
+			statTarget: "self"
+		});
+		return {
+			imune: true,
+			buffouEstagio: true
+		};
+	}
+	return { imune: true };
+}
+var REVELA_IMUNIDADE = {
+	foresight: "ghost",
+	miracle_eye: "dark",
+	odor_sleuth: "ghost"
+};
+/**
+* Multiplicador de efetividade de tipo, mas ignorando UMA imunidade NATURAL
+* (nao a de Trait) se o defensor foi "revelado" (Foresight/Miracle
+* Eye/Odor Sleuth). So entra quando o multiplicador cru JA DEU ZERO — nao
+* mexe em resistencia parcial (0.5x), so em imunidade total, exatamente como
+* os golpes reais funcionam.
+*
+* A outra metade do efeito real (ignorar a PROPRIA Evasao do defensor contra
+* este atacante) mora em `golpeErrou`, que ja consulta `defensor.revelado`
+* direto — nao repetido aqui.
+*/
+function efetividadeConsiderandoRevelado(multiplicadorCru, ability, defenderEntity, defenderSpecies) {
+	if (multiplicadorCru !== 0 || !defenderEntity.revelado) return multiplicadorCru;
+	const ehFantasma = defenderSpecies.type === "GHOST" || defenderSpecies.type2 === "GHOST";
+	const ehSombrio = defenderSpecies.type === "DARK" || defenderSpecies.type2 === "DARK";
+	if (defenderEntity.revelado === "ghost" && ehFantasma && (ability.type === "NORMAL" || ability.type === "FIGHTING")) return 1;
+	if (defenderEntity.revelado === "dark" && ehSombrio && ability.type === "PSYCHIC") return 1;
+	return multiplicadorCru;
+}
+var CLIMA_MULTIPLICADOR_FAVORECIDO = 1.5;
+var CLIMA_MULTIPLICADOR_DESFAVORECIDO = .5;
+function multiplicadorDeAtaquePorTrait(trait, isPhysical, temStatus) {
+	if (!isPhysical) return 1;
+	if (trait === "huge_power" || trait === "pure_power") return 2;
+	if (trait === "hustle") return 1.5;
+	if (trait === "guts" && temStatus) return 1.5;
+	return 1;
+}
+function multiplicadorDeDefesaPorTrait(trait, isPhysical, temStatus) {
+	if (!isPhysical) return 1;
+	if (trait === "marvel_scale" && temStatus) return 1.5;
+	return 1;
+}
+function tiposEfetivosParaEfetividade(entity, species) {
+	if (entity.tipoForcado) return [entity.tipoForcado, null];
+	return [species.type, species.type2];
+}
 var SELF_DESTRUCT_ABILITY_KEYS = /* @__PURE__ */ new Set(["explosion", "selfdestruct"]);
 var SELF_DESTRUCT_HP_LOSS_PERCENT = .5;
+var ESCUDO_ABILITIES = {
+	reflect: "reflect",
+	light_screen: "lightScreen",
+	safeguard: "safeguard",
+	mist: "mist",
+	lucky_chant: "luckyChant",
+	wide_guard: "wideGuard"
+};
+var ESCUDO_DURACAO_SEGUNDOS = 5 * TURNO_SEGUNDOS;
+var TAUNT_DURATION = TURNO_SEGUNDOS * 3;
+var DISABLE_DURATION = TURNO_SEGUNDOS * 4;
+var ENCORE_DURATION = TURNO_SEGUNDOS * 3;
+var TORMENT_DURATION = TURNO_SEGUNDOS * 3;
+var SPITE_COOLDOWN_BONUS = TURNO_SEGUNDOS * 4;
+var CURSE_SELF_MAX_HP_LOSS_PERCENT = .5;
+var INGRAIN_AQUA_RING_REGEN_PERCENT = 1 / 16;
+var WISH_HEAL_PERCENT = .5;
 var SPEED_REFERENCE = formulaEngine$4.evalOrDefault("ATTACK_SPEED_REFERENCE", 100);
 var BASE_ATTACK_INTERVAL = formulaEngine$4.evalOrDefault("BASIC_ATTACK_COOLDOWN", 2);
 var MIN_ACTION_GAP = TURNO_SEGUNDOS;
@@ -42693,6 +43129,7 @@ function scaledCooldown(ability, speed) {
 	return (ability.cooldown ?? 0) * (SPEED_REFERENCE / Math.max(1, speed));
 }
 function velocidadeEfetiva(entity) {
+	if (traitOf(entity.poke.speciesId) === "quick_feet" && entity.poke.status) return entity.poke.stats.speed * 1.5 * multiplicadorDeStat(entity.estagios, "speed");
 	return entity.poke.stats.speed * multiplicadorDeVelocidade(entity.poke.status?.tipo ?? null) * multiplicadorDeStat(entity.estagios, "speed");
 }
 function danoDeConfusao(entity, poder) {
@@ -42820,14 +43257,19 @@ function estimateDamage(rng, attackerEntity, defenderEntity, ability) {
 	const defenderPoke = defenderEntity.poke;
 	const attackerSpecies = SPECIES[attackerPoke.speciesId];
 	const defenderSpecies = SPECIES[defenderPoke.speciesId];
-	const effectivenessMultiplier = getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2);
+	const [defType1, defType2] = tiposEfetivosParaEfetividade(defenderEntity, defenderSpecies);
+	const effectivenessMultiplier = efetividadeConsiderandoRevelado(getEffectiveness(ability.type, defType1, defType2), ability, defenderEntity, defenderSpecies);
+	if (resolverImunidadeDeTipo(deriveRng(rng.state, "estimate-imunidade"), ability.type, defenderEntity, false).imune) return 0;
 	if (effectivenessMultiplier === 0) return 0;
 	const special = specialDamageFor(deriveRng(rng.state, "estimate"), ability, attackerEntity, defenderEntity);
 	if (special && special.mode === "fixed") return special.amount;
 	const isPhysical = resolveAbilityCategory(ability, attackerPoke) === "physical";
-	const atk = isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp;
-	const def = isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp;
+	const attackerTraitEstimate = traitOf(attackerSpecies.id);
+	const defenderTraitEstimate = traitOf(defenderSpecies.id);
+	const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp) * multiplicadorDeAtaquePorTrait(attackerTraitEstimate, isPhysical, Boolean(attackerPoke.status));
+	const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp) * multiplicadorDeDefesaPorTrait(defenderTraitEstimate, isPhysical, Boolean(defenderPoke.status));
 	const power = special && special.mode === "dynamicPower" ? special.power : ability.power;
+	if (power === 0) return 0;
 	let dmg = formulaEngine$4.eval("DAMAGE_BASE", {
 		level: attackerPoke.level,
 		power,
@@ -42835,28 +43277,108 @@ function estimateDamage(rng, attackerEntity, defenderEntity, ability) {
 		def
 	});
 	if (Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)) dmg *= STAB_MULTIPLIER;
-	const attackerTraitEstimate = traitOf(attackerSpecies.id);
 	if (attackerTraitEstimate && LOW_HP_TRAIT_TYPE_MULTIPLIER[attackerTraitEstimate] === ability.type && attackerPoke.hp / attackerPoke.stats.hp < LOW_HP_TRAIT_HP_FRACTION) dmg *= LOW_HP_TRAIT_MULTIPLIER;
+	if (attackerEntity.flashFireAtivo && ability.type === "FIRE") dmg *= FLASH_FIRE_MULTIPLIER;
 	dmg *= effectivenessMultiplier;
 	return dmg;
 }
 var ESTAGIO_ALVO_DA_IA = 2;
+var FOCUS_ENERGY_TETO_DA_IA = 3;
 /**
 * Vale a pena usar este golpe de APOIO puro (sem dano, sem status) agora?
 *
-* Cobre os dois lados: buff em si mesmo (Danca das Espadas) e debuff no
-* oponente (Rosnado). Em ambos, so vale se o estagio ainda nao chegou no alvo
-* da IA — repetir um buff no teto e um turno jogado fora, e o jogador ve o POKE
-* "dancando" em vez de atacar.
+* Cobre buff em si mesmo (Danca das Espadas), debuff no oponente (Rosnado) e
+* ARMADILHA DE CAMPO (Spikes/Toxic Spikes/Stealth Rock/Sticky Web). Nos dois
+* primeiros, so vale se o estagio ainda nao chegou no alvo da IA — repetir um
+* buff no teto e um turno jogado fora, e o jogador ve o POKE "dancando" em
+* vez de atacar. No terceiro, so vale enquanto o teto daquela armadilha (3
+* camadas de Spikes, 2 de Toxic Spikes, 1 flag de Stealth Rock/Sticky Web)
+* ainda nao foi atingido do lado INIMIGO.
+*
+* Focus Energy e Laser Focus NAO usam StatChange (contador/flag paralelos, ver
+* types.ts), entao caem fora do `ability.statChanges` generico abaixo e
+* precisam de um `if` proprio cada. Golpe de clima (Rain Dance/Sunny
+* Day/Hail/Sandstorm) entra pelo mesmo crivo: so vale usar se o clima ativo
+* agora NAO for o que este golpe ligaria — sem isso a IA repetiria Chuva a
+* cada cooldown com Chuva ja ativa, jogando o turno fora (e sobrescrevendo os
+* mesmos 5 turnos por cima dos que ja tinha).
 */
-function golpeDeApoioUtil(entity, defenderEntity, ability) {
+function somaDeEstagios(entity) {
+	return Object.values(entity.estagios).reduce((soma, v) => soma + (v ?? 0), 0);
+}
+function golpeDeApoioUtil(world, entity, defenderEntity, ability, golpesDeDanoProntos, clima) {
+	if (ability.id === "taunt") return !(defenderEntity.silenciadoAte && defenderEntity.silenciadoAte > 0);
+	if (ability.id === "torment") return !(defenderEntity.tormentedUntil && defenderEntity.tormentedUntil > 0);
+	if (ability.id === "disable") return !!defenderEntity.lastUsedAbilityId && !(defenderEntity.disabledAbilityUntil && defenderEntity.disabledAbilityUntil > 0);
+	if (ability.id === "encore") return !!defenderEntity.lastUsedAbilityId && !(defenderEntity.forcedAbilityUntil && defenderEntity.forcedAbilityUntil > 0);
+	if (ability.id === "spite") return !!defenderEntity.lastUsedAbilityId;
+	switch (ability.id) {
+		case "leech_seed": {
+			if (defenderEntity.seeded) return false;
+			const especie = SPECIES[defenderEntity.poke.speciesId];
+			return especie.type !== "GRASS" && especie.type2 !== "GRASS";
+		}
+		case "curse":
+			if (defenderEntity.curseDot) return false;
+			return entity.poke.hp > entity.poke.stats.hp * CURSE_SELF_MAX_HP_LOSS_PERCENT;
+		case "nightmare": return !defenderEntity.nightmareDot && defenderEntity.poke.status?.tipo === "sleep";
+		case "ingrain":
+		case "aqua_ring": return !entity.regenPercent && entity.poke.hp < entity.poke.stats.hp;
+		case "wish": return entity.poke.hp / entity.poke.stats.hp <= .5;
+	}
 	if (ability.healPercent) return entity.poke.hp / entity.poke.stats.hp <= 1 - ability.healPercent / 100;
-	if (!ability.statChanges || !ability.statChanges.length) return false;
-	const destino = ability.statTarget === "self" ? entity : defenderEntity;
-	return ability.statChanges.some((m) => {
-		const atual = destino.estagios[m.stat] ?? 0;
-		return m.estagios > 0 ? atual < ESTAGIO_ALVO_DA_IA : atual > -2;
-	});
+	const chaveDeEscudo = ESCUDO_ABILITIES[ability.id];
+	if (chaveDeEscudo) return (entity.escudos?.[chaveDeEscudo] ?? 0) <= 0;
+	if (ability.id === "magnet_rise") return !entity.imuneAoTipoVolatil || entity.imuneAoTipoVolatil.tipo !== "GROUND";
+	if (ability.id === "odor_sleuth") {
+		const especieAlvo = SPECIES[defenderEntity.poke.speciesId];
+		return (especieAlvo.type === "GHOST" || especieAlvo.type2 === "GHOST") && defenderEntity.revelado !== "ghost";
+	}
+	if (ability.id === "focus_energy") return (entity.estagioDeCritico ?? 0) < FOCUS_ENERGY_TETO_DA_IA;
+	if (ability.id === "laser_focus") return golpesDeDanoProntos.length > 0;
+	const climaDoGolpe = CLIMA_DO_GOLPE[ability.id];
+	if (climaDoGolpe) return clima !== climaDoGolpe;
+	if (ability.hazard) {
+		if (entity.kind !== "player") return false;
+		const hazards = world.enemyHazards;
+		switch (ability.hazard) {
+			case "spikes": return (hazards?.spikes ?? 0) < 3;
+			case "toxic_spikes": return (hazards?.toxicSpikes ?? 0) < 2;
+			case "stealth_rock": return !hazards?.stealthRock;
+			case "sticky_web": return !hazards?.stickyWeb;
+		}
+	}
+	if (ability.statChanges && ability.statChanges.length) {
+		const destino = ability.statTarget === "self" ? entity : defenderEntity;
+		return ability.statChanges.some((m) => {
+			const atual = destino.estagios[m.stat] ?? 0;
+			return m.estagios > 0 ? atual < ESTAGIO_ALVO_DA_IA : atual > -2;
+		});
+	}
+	switch (ability.id) {
+		case "rest": return entity.poke.hp / entity.poke.stats.hp <= .5 && !entity.poke.status;
+		case "belly_drum": return (entity.estagios.atkFis ?? 0) < 6 && entity.poke.hp / entity.poke.stats.hp > .5;
+		case "acupressure": return true;
+		case "endure": return entity.poke.hp / entity.poke.stats.hp <= .25 && !entity.enduraAtiva;
+		case "protect":
+		case "detect": return !entity.protegida;
+		case "destiny_bond": return entity.poke.hp / entity.poke.stats.hp <= .15 && !entity.destinyBondAtiva;
+		case "aromatherapy":
+		case "heal_bell": return Boolean(entity.poke.status);
+		case "yawn": return !defenderEntity.poke.status;
+		case "heal_block": return !(defenderEntity.curaBloqueadaAte && defenderEntity.curaBloqueadaAte > 0);
+		case "soak": return defenderEntity.tipoForcado !== "WATER";
+		case "perish_song": return entity.perishCountdown == null;
+		case "lock_on":
+		case "mind_reader": return entity.miraGarantidaAlvoId !== defenderEntity.id;
+		case "psycho_shift": return Boolean(entity.poke.status) && !defenderEntity.poke.status;
+		case "guard_swap": return (defenderEntity.estagios.def ?? 0) + (defenderEntity.estagios.defEsp ?? 0) > (entity.estagios.def ?? 0) + (entity.estagios.defEsp ?? 0);
+		case "power_swap": return (defenderEntity.estagios.atkFis ?? 0) + (defenderEntity.estagios.atkEsp ?? 0) > (entity.estagios.atkFis ?? 0) + (entity.estagios.atkEsp ?? 0);
+		case "psych_up": return somaDeEstagios(defenderEntity) > somaDeEstagios(entity);
+		case "haze": return somaDeEstagios(entity) < 0 || somaDeEstagios(defenderEntity) > 0;
+		case "pain_split": return defenderEntity.poke.hp > entity.poke.hp;
+		default: return false;
+	}
 }
 /**
 * Dano estimado JA DESCONTADA a chance de errar.
@@ -42875,22 +43397,26 @@ function danoEsperado(rng, atacante, defensor, ability) {
 	return estimateDamage(rng, atacante, defensor, ability) * ((ability.accuracy ?? 100) / 100);
 }
 var DANO_VARIACAO_MINIMA = .85;
-function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista = false) {
+function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista = false, clima = null) {
 	const attackerPoke = attackerEntity.poke;
 	const defenderPoke = defenderEntity.poke;
 	const attackerSpecies = SPECIES[attackerPoke.speciesId];
 	const defenderSpecies = SPECIES[defenderPoke.speciesId];
-	const effectivenessMultiplier = getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2);
+	const attackerTrait = traitOf(attackerSpecies.id);
+	const defenderTrait = traitOf(defenderSpecies.id);
+	const [defType1, defType2] = tiposEfetivosParaEfetividade(defenderEntity, defenderSpecies);
+	let effectivenessMultiplier = efetividadeConsiderandoRevelado(getEffectiveness(ability.type, defType1, defType2), ability, defenderEntity, defenderSpecies);
+	if (resolverImunidadeDeTipo(rng, ability.type, defenderEntity, true).imune) effectivenessMultiplier = 0;
 	const special = specialDamageFor(rng, ability, attackerEntity, defenderEntity);
 	let dmg;
 	let isCrit = false;
 	if (special && special.mode === "fixed") dmg = effectivenessMultiplier === 0 ? 0 : special.amount;
 	else {
 		const isPhysical = resolveAbilityCategory(ability, attackerPoke) === "physical";
-		const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp) * multiplicadorDeStat(attackerEntity.estagios, isPhysical ? "atkFis" : "atkEsp");
-		const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp) * multiplicadorDeStat(defenderEntity.estagios, isPhysical ? "def" : "defEsp");
+		const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp) * multiplicadorDeStat(attackerEntity.estagios, isPhysical ? "atkFis" : "atkEsp") * multiplicadorDeAtaquePorTrait(attackerTrait, isPhysical, Boolean(attackerPoke.status));
+		const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp) * multiplicadorDeStat(defenderEntity.estagios, isPhysical ? "def" : "defEsp") * multiplicadorDeDefesaPorTrait(defenderTrait, isPhysical, Boolean(defenderPoke.status));
 		const power = special && special.mode === "dynamicPower" ? special.power : ability.power;
-		dmg = formulaEngine$4.eval("DAMAGE_BASE", {
+		dmg = power === 0 ? 0 : formulaEngine$4.eval("DAMAGE_BASE", {
 			level: attackerPoke.level,
 			power,
 			atk,
@@ -42898,12 +43424,27 @@ function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista 
 		});
 		if (isPhysical) dmg *= multiplicadorDeDanoFisico(attackerPoke.status?.tipo ?? null);
 		if (Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)) dmg *= STAB_MULTIPLIER;
-		const attackerTrait = traitOf(attackerSpecies.id);
 		if (attackerTrait && LOW_HP_TRAIT_TYPE_MULTIPLIER[attackerTrait] === ability.type && attackerPoke.hp / attackerPoke.stats.hp < LOW_HP_TRAIT_HP_FRACTION) dmg *= LOW_HP_TRAIT_MULTIPLIER;
+		if (attackerEntity.flashFireAtivo && ability.type === "FIRE") dmg *= FLASH_FIRE_MULTIPLIER;
 		dmg *= effectivenessMultiplier;
-		if (traitOf(defenderSpecies.id) === "multiscale" && defenderPoke.hp === defenderPoke.stats.hp) dmg *= MULTISCALE_MULTIPLIER;
-		const chanceDeCritico = CRIT_CHANCE * Math.pow(3, Math.min(3, ability.critStages ?? 0));
-		isCrit = pessimista ? false : rollChance(rng, Math.min(.5, chanceDeCritico));
+		if (clima === "chuva") {
+			if (ability.type === "WATER") dmg *= CLIMA_MULTIPLICADOR_FAVORECIDO;
+			else if (ability.type === "FIRE") dmg *= CLIMA_MULTIPLICADOR_DESFAVORECIDO;
+		} else if (clima === "sol") {
+			if (ability.type === "FIRE") dmg *= CLIMA_MULTIPLICADOR_FAVORECIDO;
+			else if (ability.type === "WATER") dmg *= CLIMA_MULTIPLICADOR_DESFAVORECIDO;
+		}
+		if (defenderTrait === "multiscale" && defenderPoke.hp === defenderPoke.stats.hp) dmg *= MULTISCALE_MULTIPLIER;
+		if (isPhysical && (defenderEntity.escudos?.reflect ?? 0) > 0) dmg *= .5;
+		if (!isPhysical && (defenderEntity.escudos?.lightScreen ?? 0) > 0) dmg *= .5;
+		const critStagesTotal = (ability.critStages ?? 0) + (attackerEntity.estagioDeCritico ?? 0);
+		const chanceDeCritico = CRIT_CHANCE * Math.pow(3, Math.min(3, critStagesTotal));
+		const protegidoPorLuckyChant = (defenderEntity.escudos?.luckyChant ?? 0) > 0;
+		const criticoGarantido = ability.power > 0 && attackerEntity.proximoGolpeCriticoGarantido === true;
+		if (criticoGarantido) attackerEntity.proximoGolpeCriticoGarantido = false;
+		if (protegidoPorLuckyChant) isCrit = false;
+		else if (criticoGarantido) isCrit = true;
+		else isCrit = pessimista ? false : rollChance(rng, Math.min(.5, chanceDeCritico));
 		if (isCrit) dmg *= CRIT_MULTIPLIER;
 		dmg *= pessimista ? DANO_VARIACAO_MINIMA : formulaEngine$4.eval("DAMAGE_VARIATION", {}, rng);
 	}
@@ -42958,12 +43499,15 @@ function basicAttackFor(attackerSpecies) {
 		type: attackerSpecies.type
 	};
 }
-function pickAbility(rng, entity, defenderEntity, aoeTargetCounter) {
+function pickAbility(world, entity, defenderEntity, aoeTargetCounter) {
+	const rng = world.rng;
+	const clima = world.clima?.tipo ?? null;
 	const attackerSpecies = SPECIES[entity.poke.speciesId];
 	const disabled = entity.poke.disabledAbilities || {};
-	const prontos = golpesUtilizaveis(entity.poke, attackerSpecies, entity.kind === "enemy").filter((id) => !disabled[id]).map((id) => getAbility(id)).filter((a) => a != null && isAbilityReady(entity, a.id));
+	const candidateIds = golpesUtilizaveis(entity.poke, attackerSpecies, entity.kind === "enemy").filter((id) => !disabled[id]).filter((id) => !(entity.disabledAbilityUntil && entity.disabledAbilityUntil > 0 && id === entity.disabledAbilityId)).filter((id) => !(entity.tormentedUntil && entity.tormentedUntil > 0 && id === entity.lastUsedAbilityId)).filter((id) => id !== "curse" || attackerSpecies.type === "GHOST" || attackerSpecies.type2 === "GHOST");
+	const prontos = (!!(entity.forcedAbilityUntil && entity.forcedAbilityUntil > 0 && entity.forcedAbilityId) ? candidateIds.filter((id) => id === entity.forcedAbilityId) : candidateIds).map((id) => getAbility(id)).filter((a) => a != null && isAbilityReady(entity, a.id));
 	const ready = prontos.filter((ability) => isDamagingAbility(ability));
-	const statusPronto = prontos.filter((a) => a.power === 0 && (a.status != null && statusVaiPegar(defenderEntity, a.status, a.id) || golpeDeApoioUtil(entity, defenderEntity, a)));
+	const statusPronto = !!(entity.silenciadoAte && entity.silenciadoAte > 0) ? [] : prontos.filter((a) => a.power === 0 && (a.status != null && statusVaiPegar(defenderEntity, a.status, a.id) || golpeDeApoioUtil(world, entity, defenderEntity, a, ready, clima)));
 	if (statusPronto.length > 0) {
 		if (ready.reduce((max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)), 0) < defenderEntity.poke.hp) return statusPronto.reduce((melhor, a) => (a.statusChance ?? 0) > (melhor.statusChance ?? 0) ? a : melhor);
 	}
@@ -43012,7 +43556,9 @@ var ROTULO_DE_STAT = {
 	atkEsp: "Atq. Esp.",
 	def: "Defesa",
 	defEsp: "Def. Esp.",
-	speed: "Velocidade"
+	speed: "Velocidade",
+	accuracy: "Precisão",
+	evasion: "Evasão"
 };
 function anunciarEstagios(world, alvo, mudancas) {
 	const texto = mudancas.map((m) => `${ROTULO_DE_STAT[m.stat] ?? m.stat} ${(m.estagios > 0 ? "↑" : "↓").repeat(Math.abs(m.estagios))}`).join("  ");
@@ -43066,11 +43612,26 @@ function nearbyAliveEnemies(world) {
 * contra cada alvo; aqui o AOE ja e uma aproximacao (raio em pixels, sem
 * posicionamento de batalha), e rolar por alvo so somaria variancia invisivel
 * a uma mecanica que o jogador nem ve alvo a alvo.
+*
+* PRECISAO EFETIVA leva em conta os estagios de Precisao do atacante e Evasao
+* do defensor (Areia-Fina, Fumaca, Duplo Time, ...) — formula real dos jogos,
+* base 3 (`multiplicadorDeAccuracyOuEvasion`), NAO a formula generica de
+* estagio (base 2) que atkFis/def usam. Precisao do atacante SOBE a chance de
+* acerto; Evasao do defensor DESCE. Foresight/Miracle Eye (`revelado`) fazem o
+* defensor ignorar a propria Evasao contra este atacante.
+*
+* Hustle (Fase 12): +50% de Ataque Fisico custa -20% de precisao nos golpes
+* FISICOS do proprio portador — aplicado ANTES dos estagios de accuracy/evasao.
 */
-function golpeErrou(rng, ability) {
-	const precisao = ability.accuracy ?? 100;
-	if (precisao >= 100) return false;
-	return nextFloat(rng) * 100 >= precisao;
+function golpeErrou(rng, ability, atacante, defensor) {
+	const trait = traitOf(atacante.poke.speciesId);
+	const isPhysical = resolveAbilityCategory(ability, atacante.poke) === "physical";
+	const precisaoBase = (ability.accuracy ?? 100) * (trait === "hustle" && isPhysical ? .8 : 1);
+	const multAtacante = multiplicadorDeAccuracyOuEvasion(atacante.estagios.accuracy ?? 0);
+	const multDefensor = defensor.revelado ? 1 : multiplicadorDeAccuracyOuEvasion(defensor.estagios.evasion ?? 0);
+	const precisaoEfetiva = precisaoBase * multAtacante / multDefensor;
+	if (precisaoEfetiva >= 100) return false;
+	return nextFloat(rng) * 100 >= precisaoEfetiva;
 }
 function anunciarErro(world, atacante) {
 	world.effects.push(createWorldEffect(world.counters, {
@@ -43106,13 +43667,16 @@ function executePlayerAction(world, player, engagedEnemies, silent) {
 	if (statusImpedeAcao(world, player, silent)) return;
 	const primaryTarget = engagedEnemies[0];
 	const allEnemies = nearbyAliveEnemies(world);
-	const ability = pickAbility(world.rng, player, primaryTarget, (a) => allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length);
+	const ability = pickAbility(world, player, primaryTarget, (a) => allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length);
 	if (!ability) return;
+	if (ability.id !== BASIC_ATTACK.id) player.lastUsedAbilityId = ability.id;
 	startCooldown(player, ability.id, scaledCooldown(ability, velocidadeEfetiva(player)));
 	startGlobalCooldown(player, MIN_ACTION_GAP);
 	triggerAttackAnim(player, ability.target === "aoe", primaryTarget);
 	announceAbility(world, player, ability);
-	if (golpeErrou(world.rng, ability)) {
+	const miraGarantida = player.miraGarantidaAlvoId != null && player.miraGarantidaAlvoId === primaryTarget?.id;
+	if (miraGarantida) player.miraGarantidaAlvoId = null;
+	if (!miraGarantida && golpeErrou(world.rng, ability, player, primaryTarget)) {
 		if (!silent) anunciarErro(world, player);
 		return;
 	}
@@ -43124,18 +43688,107 @@ function executeEnemyAction(world, enemy, player, silent) {
 	if (world.mapDef?.passiveEnemies) return;
 	if (!canAct(enemy)) return;
 	if (statusImpedeAcao(world, enemy, silent)) return;
-	const ability = pickAbility(world.rng, enemy, player, () => 1);
+	const ability = pickAbility(world, enemy, player, () => 1);
 	if (!ability) return;
+	if (ability.id !== BASIC_ATTACK.id) enemy.lastUsedAbilityId = ability.id;
 	startCooldown(enemy, ability.id, scaledCooldown(ability, velocidadeEfetiva(enemy)));
 	startGlobalCooldown(enemy, MIN_ACTION_GAP);
 	triggerAttackAnim(enemy, ability.target === "aoe", player);
 	announceAbility(world, enemy, ability);
-	if (golpeErrou(world.rng, ability)) {
+	const miraGarantida = enemy.miraGarantidaAlvoId != null && enemy.miraGarantidaAlvoId === player.id;
+	if (miraGarantida) enemy.miraGarantidaAlvoId = null;
+	if (!miraGarantida && golpeErrou(world.rng, ability, enemy, player)) {
 		if (!silent) anunciarErro(world, enemy);
 		return;
 	}
 	queueHit(world, enemy, player, ability);
 	if (ability.target === "aoe") queueAoeVisual(world, enemy, ability);
+}
+function creditarMorteSeNecessario(entity, defeatedEnemyIds, onPlayerFainted) {
+	if (!isDead(entity)) return;
+	if (entity.kind === "player") {
+		if (!entity.fainted) {
+			entity.fainted = true;
+			onPlayerFainted();
+		}
+	} else if (!entity.deathHandled) {
+		entity.deathHandled = true;
+		defeatedEnemyIds.push(entity.id);
+	}
+}
+var PROTECT_BYPASS_ABILITY_IDS = /* @__PURE__ */ new Set([
+	"endure",
+	"protect",
+	"detect",
+	"destiny_bond",
+	"rest",
+	"belly_drum",
+	"acupressure",
+	"aromatherapy",
+	"heal_bell",
+	"haze",
+	"psych_up",
+	"perish_song",
+	"rage_powder"
+]);
+function golpeAtingeOAlvo(ability) {
+	if (ability.statTarget === "self") return false;
+	if (ability.healPercent) return false;
+	if (PROTECT_BYPASS_ABILITY_IDS.has(ability.id)) return false;
+	return true;
+}
+function anunciarProtegido(world, alvo) {
+	world.effects.push(createWorldEffect(world.counters, {
+		type: "abilityName",
+		x: alvo.x,
+		y: alvo.y,
+		targetX: alvo.x,
+		targetY: alvo.y + getGroundOffset(alvo) + 14,
+		text: "Protegido!",
+		color: "#94a3b8",
+		duration: .7,
+		owner: alvo
+	}));
+}
+function anunciarAguentou(world, alvo) {
+	world.effects.push(createWorldEffect(world.counters, {
+		type: "abilityName",
+		x: alvo.x,
+		y: alvo.y,
+		targetX: alvo.x,
+		targetY: alvo.y + getGroundOffset(alvo) + 14,
+		text: "Aguentou!",
+		color: "#facc15",
+		duration: .7,
+		owner: alvo
+	}));
+}
+function anunciarPereceu(world, alvo) {
+	world.effects.push(createWorldEffect(world.counters, {
+		type: "abilityName",
+		x: alvo.x,
+		y: alvo.y,
+		targetX: alvo.x,
+		targetY: alvo.y + getGroundOffset(alvo) + 14,
+		text: "Perish Song!",
+		color: "#c084fc",
+		duration: .9,
+		owner: alvo
+	}));
+}
+var HEAL_BLOCK_SEGUNDOS = 5 * TURNO_SEGUNDOS;
+function curaBloqueada(entity) {
+	return Boolean(entity.curaBloqueadaAte && entity.curaBloqueadaAte > 0);
+}
+function trocarEstagios(a, b, stats) {
+	for (const stat of stats) {
+		const av = a.estagios[stat];
+		const bv = b.estagios[stat];
+		if (bv === void 0) delete a.estagios[stat];
+		else a.estagios[stat] = bv;
+		if (av === void 0) delete b.estagios[stat];
+		else b.estagios[stat] = av;
+	}
 }
 function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	const attacker = findEntityById(world.player, world.enemies, hit.attackerId);
@@ -43181,13 +43834,63 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	}
 	const target = findEntityById(world.player, world.enemies, hit.targetId);
 	if (!target || isDead(target)) return;
-	const result = computeDamage(world.rng, attacker, target, ability, world.pessimista);
-	const danoCausado = Math.min(result.amount, target.poke.hp);
-	if (result.amount > 0) {
-		takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke));
-		if (!silent) spawnDamageNumber(world, target, result);
+	if (ability.target === "aoe" && (target.escudos?.wideGuard ?? 0) > 0) return;
+	if (target.protegida && golpeAtingeOAlvo(ability)) {
+		target.protegida = false;
+		if (!silent) anunciarProtegido(world, target);
+		return;
 	}
-	if (ability.category === "physical" && result.amount > 0) switch (traitOf(target.poke.speciesId)) {
+	const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null);
+	let danoFinal = result.amount;
+	const enduraGolpe = target.enduraAtiva === true;
+	if (enduraGolpe) target.enduraAtiva = false;
+	const sturdyTrait = !enduraGolpe && traitOf(target.poke.speciesId) === "sturdy" && target.poke.hp === target.poke.stats.hp;
+	const aguentou = (enduraGolpe || sturdyTrait) && danoFinal >= target.poke.hp && target.poke.hp > 0;
+	if (aguentou) danoFinal = target.poke.hp - 1;
+	const danoCausado = Math.min(danoFinal, target.poke.hp);
+	if (danoFinal > 0) {
+		takeDamage(target, danoFinal, resolveAbilityCategory(ability, attacker.poke));
+		if (!silent) spawnDamageNumber(world, target, {
+			...result,
+			amount: danoFinal
+		});
+		if (aguentou && !silent) anunciarAguentou(world, target);
+	}
+	if (target.destinyBondAtiva && isDead(target)) {
+		target.destinyBondAtiva = false;
+		const contraAtaque = attacker.poke.hp;
+		if (contraAtaque > 0) {
+			takeDamage(attacker, contraAtaque);
+			if (!silent) spawnDamageNumber(world, attacker, {
+				amount: contraAtaque,
+				effectiveness: "normal",
+				effectivenessLabel: null,
+				isCrit: false
+			});
+			creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted);
+		}
+	}
+	if (ability.hazard && attacker.kind === "player") {
+		world.enemyHazards ??= {
+			spikes: 0,
+			toxicSpikes: 0,
+			stealthRock: false,
+			stickyWeb: false
+		};
+		switch (ability.hazard) {
+			case "spikes":
+				world.enemyHazards.spikes = Math.min(3, world.enemyHazards.spikes + 1);
+				break;
+			case "toxic_spikes":
+				world.enemyHazards.toxicSpikes = Math.min(2, world.enemyHazards.toxicSpikes + 1);
+				break;
+			case "stealth_rock":
+				world.enemyHazards.stealthRock = true;
+				break;
+			case "sticky_web": world.enemyHazards.stickyWeb = true;
+		}
+	}
+	if (ability.category === "physical" && danoFinal > 0) switch (traitOf(target.poke.speciesId)) {
 		case "static":
 			aplicarStatus(world.rng, attacker, "paralysis", 30);
 			break;
@@ -43220,17 +43923,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 				effectivenessLabel: null,
 				isCrit: false
 			});
-			if (isDead(attacker)) {
-				if (attacker.kind === "player") {
-					if (!attacker.fainted) {
-						attacker.fainted = true;
-						onPlayerFainted();
-					}
-				} else if (!attacker.deathHandled) {
-					attacker.deathHandled = true;
-					defeatedEnemyIds.push(attacker.id);
-				}
-			}
+			creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted);
 			break;
 		}
 		case "aftermath": if (isDead(target)) {
@@ -43242,33 +43935,78 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 				effectivenessLabel: null,
 				isCrit: false
 			});
-			if (isDead(attacker)) {
-				if (attacker.kind === "player") {
-					if (!attacker.fainted) {
-						attacker.fainted = true;
-						onPlayerFainted();
-					}
-				} else if (!attacker.deathHandled) {
-					attacker.deathHandled = true;
-					defeatedEnemyIds.push(attacker.id);
-				}
-			}
+			creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted);
 		}
 	}
+	const climaDoGolpe = CLIMA_DO_GOLPE[ability.id];
+	if (climaDoGolpe) world.clima = {
+		tipo: climaDoGolpe,
+		turnosRestantes: 5
+	};
 	let statusRecebeuEm = null;
 	if (!isDead(target)) {
 		const aplicado = aplicarEfeitosDoGolpe(world.rng, target, ability);
 		if (aplicado) {
 			statusRecebeuEm = target;
 			if (!silent) anunciarStatus(world, target, aplicado.tipo, "entrou");
+			if ((aplicado.tipo === "poison" || aplicado.tipo === "paralysis" || aplicado.tipo === "burn") && traitOf(target.poke.speciesId) === "synchronize") aplicarStatus(world.rng, attacker, aplicado.tipo, 100);
 		}
 		const mudancas = aplicarMudancasDeStat(world.rng, attacker, target, ability);
 		if (mudancas.length) {
 			statusRecebeuEm = ability.statTarget === "self" ? attacker : target;
 			if (!silent) anunciarEstagios(world, statusRecebeuEm, mudancas);
 		}
+		const imunidadeRevelada = REVELA_IMUNIDADE[ability.id];
+		if (imunidadeRevelada) target.revelado = imunidadeRevelada;
+		if (ability.id === "magnet_rise") attacker.imuneAoTipoVolatil = {
+			tipo: "GROUND",
+			restante: MAGNET_RISE_TURNOS * TURNO_SEGUNDOS
+		};
+		switch (ability.id) {
+			case "taunt":
+				target.silenciadoAte = TAUNT_DURATION;
+				statusRecebeuEm = target;
+				break;
+			case "torment":
+				target.tormentedUntil = TORMENT_DURATION;
+				statusRecebeuEm = target;
+				break;
+			case "spite": {
+				const golpeAnterior = target.lastUsedAbilityId;
+				if (golpeAnterior) {
+					target.cooldowns[golpeAnterior] = (target.cooldowns[golpeAnterior] ?? 0) + SPITE_COOLDOWN_BONUS;
+					statusRecebeuEm = target;
+				}
+				break;
+			}
+			case "disable": {
+				const golpeAnterior = target.lastUsedAbilityId;
+				if (golpeAnterior) {
+					target.disabledAbilityId = golpeAnterior;
+					target.disabledAbilityUntil = DISABLE_DURATION;
+					statusRecebeuEm = target;
+				}
+				break;
+			}
+			case "encore": {
+				const golpeAnterior = target.lastUsedAbilityId;
+				if (golpeAnterior) {
+					target.forcedAbilityId = golpeAnterior;
+					target.forcedAbilityUntil = ENCORE_DURATION;
+					statusRecebeuEm = target;
+				}
+				break;
+			}
+		}
+		if (ability.id === "leech_seed" && !target.seeded) {
+			const especieAlvo = SPECIES[target.poke.speciesId];
+			if (!(especieAlvo.type === "GRASS" || especieAlvo.type2 === "GRASS")) target.seeded = { sourceId: attacker.id };
+		}
+		if (ability.id === "nightmare") target.nightmareDot = true;
 	}
-	if (ability.healPercent) {
+	if (ability.id === "focus_energy") attacker.estagioDeCritico = (attacker.estagioDeCritico ?? 0) + 2;
+	if (ability.id === "laser_focus") attacker.proximoGolpeCriticoGarantido = true;
+	if (ability.healPercent && !curaBloqueada(attacker)) {
 		const quanto = Math.max(1, Math.round(attacker.poke.stats.hp * ability.healPercent / 100));
 		heal(attacker, quanto);
 		if (!silent) spawnDamageNumber(world, attacker, {
@@ -43278,25 +44016,23 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			isCrit: false
 		});
 	}
-	if (ability.flinchChance && nextFloat(world.rng) * 100 < ability.flinchChance) startGlobalCooldown(target, MIN_ACTION_GAP);
-	if (ability.drainPercent && danoCausado > 0) {
-		const quanto = Math.max(1, Math.round(danoCausado * Math.abs(ability.drainPercent) / 100));
-		if (ability.drainPercent > 0) {
-			heal(attacker, quanto);
+	const chaveDeEscudo = ESCUDO_ABILITIES[ability.id];
+	if (chaveDeEscudo) {
+		attacker.escudos ??= {};
+		attacker.escudos[chaveDeEscudo] = ESCUDO_DURACAO_SEGUNDOS;
+	}
+	if (ability.id === "curse") {
+		const especieAtacante = SPECIES[attacker.poke.speciesId];
+		if ((especieAtacante.type === "GHOST" || especieAtacante.type2 === "GHOST") && !isDead(attacker)) {
+			const custo = Math.max(1, Math.round(attacker.poke.stats.hp * CURSE_SELF_MAX_HP_LOSS_PERCENT));
+			takeDamage(attacker, custo);
 			if (!silent) spawnDamageNumber(world, attacker, {
-				amount: -quanto,
+				amount: custo,
 				effectiveness: "normal",
 				effectivenessLabel: null,
 				isCrit: false
 			});
-		} else {
-			takeDamage(attacker, quanto);
-			if (!silent) spawnDamageNumber(world, attacker, {
-				amount: quanto,
-				effectiveness: "normal",
-				effectivenessLabel: null,
-				isCrit: false
-			});
+			if (!isDead(target)) target.curseDot = true;
 			if (isDead(attacker)) {
 				if (attacker.kind === "player") {
 					if (!attacker.fainted) {
@@ -43308,6 +44044,132 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 					defeatedEnemyIds.push(attacker.id);
 				}
 			}
+		}
+	}
+	if (ability.id === "ingrain" || ability.id === "aqua_ring") attacker.regenPercent = INGRAIN_AQUA_RING_REGEN_PERCENT;
+	if (ability.id === "wish") {
+		const healAmount = Math.max(1, Math.round(attacker.poke.stats.hp * WISH_HEAL_PERCENT));
+		world.pendingWishes.push({
+			timer: 2 * TURNO_SEGUNDOS,
+			healAmount,
+			targetId: attacker.id
+		});
+	}
+	if (ability.flinchChance && nextFloat(world.rng) * 100 < ability.flinchChance && traitOf(target.poke.speciesId) !== "inner_focus") startGlobalCooldown(target, MIN_ACTION_GAP);
+	if (ability.drainPercent && danoCausado > 0) {
+		const quanto = Math.max(1, Math.round(danoCausado * Math.abs(ability.drainPercent) / 100));
+		if (ability.drainPercent > 0) {
+			if (!curaBloqueada(attacker)) {
+				heal(attacker, quanto);
+				if (!silent) spawnDamageNumber(world, attacker, {
+					amount: -quanto,
+					effectiveness: "normal",
+					effectivenessLabel: null,
+					isCrit: false
+				});
+			}
+		} else {
+			takeDamage(attacker, quanto);
+			if (!silent) spawnDamageNumber(world, attacker, {
+				amount: quanto,
+				effectiveness: "normal",
+				effectivenessLabel: null,
+				isCrit: false
+			});
+			creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted);
+		}
+	}
+	switch (ability.id) {
+		case "endure":
+			attacker.enduraAtiva = true;
+			break;
+		case "protect":
+		case "detect":
+			attacker.protegida = true;
+			break;
+		case "destiny_bond":
+			attacker.destinyBondAtiva = true;
+			break;
+		case "haze":
+			attacker.estagios = {};
+			if (!isDead(target)) target.estagios = {};
+			break;
+		case "psych_up":
+			if (!isDead(target)) attacker.estagios = { ...target.estagios };
+			break;
+		case "pain_split":
+			if (!isDead(target)) {
+				const media = Math.round((attacker.poke.hp + target.poke.hp) / 2);
+				attacker.poke.hp = Math.min(attacker.poke.stats.hp, media);
+				target.poke.hp = Math.min(target.poke.stats.hp, media);
+			}
+			break;
+		case "heal_block":
+			if (!isDead(target)) target.curaBloqueadaAte = HEAL_BLOCK_SEGUNDOS;
+			break;
+		case "rest": {
+			attacker.poke.hp = attacker.poke.stats.hp;
+			const traitAttacker = traitOf(attacker.poke.speciesId);
+			if (traitAttacker !== "insomnia" && traitAttacker !== "vital_spirit") {
+				attacker.poke.status = {
+					tipo: "sleep",
+					turnosRestantes: 2
+				};
+				attacker.imunidadeDeStatus = 0;
+			}
+			break;
+		}
+		case "yawn":
+			if (!isDead(target) && !target.poke.status) target.yawnTurnos = 2;
+			break;
+		case "belly_drum": {
+			const perda = Math.round(attacker.poke.stats.hp / 2);
+			attacker.poke.hp = Math.max(1, attacker.poke.hp - perda);
+			attacker.estagios.atkFis = 6;
+			break;
+		}
+		case "acupressure": {
+			const stats = [
+				"atkFis",
+				"atkEsp",
+				"def",
+				"defEsp",
+				"speed"
+			];
+			const stat = stats[Math.floor(nextFloat(world.rng) * stats.length)];
+			const atual = attacker.estagios[stat] ?? 0;
+			attacker.estagios[stat] = Math.min(6, atual + 2);
+			break;
+		}
+		case "aromatherapy":
+		case "heal_bell":
+			curarStatus(attacker);
+			break;
+		case "lock_on":
+		case "mind_reader":
+			if (!isDead(target)) attacker.miraGarantidaAlvoId = target.id;
+			break;
+		case "guard_swap":
+			if (!isDead(target)) trocarEstagios(attacker, target, ["def", "defEsp"]);
+			break;
+		case "power_swap":
+			if (!isDead(target)) trocarEstagios(attacker, target, ["atkFis", "atkEsp"]);
+			break;
+		case "rage_powder": break;
+		case "soak":
+			if (!isDead(target)) target.tipoForcado = "WATER";
+			break;
+		case "perish_song":
+			if (attacker.perishCountdown == null) attacker.perishCountdown = 3;
+			if (!isDead(target) && target.perishCountdown == null) target.perishCountdown = 3;
+			break;
+		case "psycho_shift": {
+			const meuStatus = attacker.poke.status;
+			if (meuStatus && !isDead(target) && statusVaiPegar(target, meuStatus.tipo)) {
+				target.poke.status = { ...meuStatus };
+				attacker.poke.status = null;
+			}
+			break;
 		}
 	}
 	const isPlayerAttacker = attacker.kind === "player";
@@ -43337,6 +44199,43 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		onPlayerFainted();
 	}
 }
+var TRAIT_CLIMA = {
+	drizzle: "chuva",
+	sand_stream: "areia",
+	snow_warning: "granizo",
+	drought: "sol"
+};
+var CLIMA_DE_TRAIT_TURNOS = Infinity;
+/**
+* HOOK DE ENTRADA EM COMBATE: dispara UMA vez, no primeiro frame em que
+* `self` fica engajado (ver updateCombat#entradaProcessada), pra Traits que
+* reagem a "acabou de entrar em campo" — Intimidate, Download, e o clima
+* automatico (Drizzle/Sand Stream/Snow Warning/Drought). Chamado
+* simetricamente: uma vez pro jogador contra o alvo principal, e uma vez por
+* cada inimigo que acabou de engajar contra o jogador.
+*/
+function resolveEntryHook(world, self, opponent, silent) {
+	const trait = traitOf(self.poke.speciesId);
+	if (!trait) return;
+	const climaTipo = TRAIT_CLIMA[trait];
+	if (climaTipo) {
+		if (world.clima?.tipo !== climaTipo) world.clima = {
+			tipo: climaTipo,
+			turnosRestantes: CLIMA_DE_TRAIT_TURNOS
+		};
+		return;
+	}
+	if (trait === "intimidate") {
+		const mudanca = aplicarEstagioUnico(opponent, "atkFis", -1);
+		if (mudanca && !silent) anunciarEstagios(world, opponent, [mudanca]);
+		return;
+	}
+	if (trait === "download") {
+		const opponentPoke = opponent.poke;
+		const mudanca = aplicarEstagioUnico(self, opponentPoke.stats.def * multiplicadorDeStat(opponent.estagios, "def") <= opponentPoke.stats.defEsp * multiplicadorDeStat(opponent.estagios, "defEsp") ? "atkFis" : "atkEsp", 1);
+		if (mudanca && !silent) anunciarEstagios(world, self, [mudanca]);
+	}
+}
 function updateCombat(world, dt, opts = {}) {
 	const silent = opts.silent ?? false;
 	const { player, enemies } = world;
@@ -43348,28 +44247,40 @@ function updateCombat(world, dt, opts = {}) {
 	let playerJustFainted = false;
 	tickCooldowns(player, dt);
 	for (const enemy of enemies) tickCooldowns(enemy, dt);
+	const turnoDeClimaFechou = !isDead(player) && player.proximoTurnoDeStatus - dt <= 1e-9;
 	for (const entity of [player, ...enemies]) {
 		if (isDead(entity)) continue;
-		const { dano, expirados } = tickStatus(world.rng, entity, dt);
+		const { dano, expirados, drenoParaOrigem, pereceu } = tickStatus(world.rng, entity, dt, world.clima?.tipo ?? null);
 		if (!silent) for (const tipo of expirados) anunciarStatus(world, entity, tipo, "saiu");
-		if (dano <= 0) continue;
-		takeDamage(entity, dano);
+		if (pereceu && !silent) anunciarPereceu(world, entity);
+		const danoDoTurno = pereceu ? Math.max(dano, entity.poke.hp) : dano;
+		if (danoDoTurno <= 0) continue;
+		takeDamage(entity, danoDoTurno);
 		if (!silent) spawnDamageNumber(world, entity, {
-			amount: dano,
+			amount: danoDoTurno,
 			effectiveness: "normal",
 			effectivenessLabel: null,
 			isCrit: false
 		});
-		if (!isDead(entity)) continue;
-		if (entity.kind === "player") {
-			if (!player.fainted) {
-				player.fainted = true;
-				playerJustFainted = true;
+		if (drenoParaOrigem) {
+			const origem = findEntityById(player, enemies, drenoParaOrigem.sourceId);
+			if (origem && !isDead(origem)) {
+				heal(origem, drenoParaOrigem.amount);
+				if (!silent) spawnDamageNumber(world, origem, {
+					amount: -drenoParaOrigem.amount,
+					effectiveness: "normal",
+					effectivenessLabel: null,
+					isCrit: false
+				});
 			}
-		} else if (!entity.deathHandled) {
-			entity.deathHandled = true;
-			defeatedEnemyIds.push(entity.id);
 		}
+		creditarMorteSeNecessario(entity, defeatedEnemyIds, () => {
+			playerJustFainted = true;
+		});
+	}
+	if (turnoDeClimaFechou && world.clima) {
+		world.clima.turnosRestantes -= 1;
+		if (world.clima.turnosRestantes <= 0) world.clima = null;
 	}
 	for (const effect of world.effects) tickEffect(effect, dt);
 	for (const effect of world.effects) if (effectDone(effect) && effect.ownerId) {
@@ -43383,18 +44294,47 @@ function updateCombat(world, dt, opts = {}) {
 	for (const hit of landed) resolveHit(world, hit, defeatedEnemyIds, () => {
 		playerJustFainted = true;
 	}, silent);
+	for (const wish of world.pendingWishes) wish.timer -= dt;
+	const wishesResolvidas = world.pendingWishes.filter((w) => w.timer <= 0);
+	world.pendingWishes = world.pendingWishes.filter((w) => w.timer > 0);
+	for (const wish of wishesResolvidas) {
+		const alvo = findEntityById(player, enemies, wish.targetId);
+		if (alvo && !isDead(alvo)) {
+			heal(alvo, wish.healAmount);
+			if (!silent) spawnDamageNumber(world, alvo, {
+				amount: -wish.healAmount,
+				effectiveness: "normal",
+				effectivenessLabel: null,
+				isCrit: false
+			});
+		}
+	}
 	if (player.fainted) return {
 		defeatedEnemyIds,
 		playerJustFainted
 	};
+	if (player.state !== "engaged" && player.entradaProcessada) player.entradaProcessada = false;
+	for (const enemy of enemies) if (enemy.state !== "engaged" && enemy.entradaProcessada) enemy.entradaProcessada = false;
 	const engagedEnemies = enemies.filter((e) => !isDead(e) && e.state === "engaged" && e.targetId === player.id);
 	if (engagedEnemies.length > 0) {
+		const primaryTarget = engagedEnemies[0];
+		if (!player.entradaProcessada) {
+			player.entradaProcessada = true;
+			resolveEntryHook(world, player, primaryTarget, silent);
+		}
+		for (const enemy of engagedEnemies) if (!enemy.entradaProcessada) {
+			enemy.entradaProcessada = true;
+			resolveEntryHook(world, enemy, player, silent);
+		}
 		executePlayerAction(world, player, engagedEnemies, silent);
 		for (const enemy of engagedEnemies) {
 			if (isDead(enemy) || player.fainted) continue;
 			executeEnemyAction(world, enemy, player, silent);
 		}
-	} else limparEstadoVolatil(player);
+	} else {
+		limparEstadoVolatil(player);
+		world.clima = null;
+	}
 	return {
 		defeatedEnemyIds,
 		playerJustFainted
@@ -44879,6 +45819,7 @@ function emptyWorldState(seed = randomSeed()) {
 		enemies: [],
 		effects: [],
 		pendingHits: [],
+		pendingWishes: [],
 		autoTimers: { treinador: 0 },
 		reviveCountdown: null,
 		respawnTimer: null,
@@ -44892,7 +45833,8 @@ function emptyWorldState(seed = randomSeed()) {
 			effect: 1,
 			pendingHit: 1
 		},
-		pessimista: false
+		pessimista: false,
+		clima: null
 	};
 }
 create()(immer((set) => ({
@@ -45055,6 +45997,22 @@ function spawnSequenceEnemy(world, mapDef, index) {
 		encounterId
 	});
 }
+function aplicarHazardsAoInimigo(rng, hazards, enemy) {
+	if (!hazards) return;
+	const species = SPECIES[enemy.poke.speciesId];
+	if (species.type === "FLYING" || species.type2 === "FLYING" || traitOf(species.id) === "levitate") return;
+	const maxHp = enemy.poke.stats.hp;
+	if (hazards.spikes > 0) {
+		const fracao = hazards.spikes === 1 ? 1 / 8 : hazards.spikes === 2 ? 1 / 6 : 1 / 4;
+		takeDamage(enemy, Math.max(1, Math.round(maxHp * fracao)));
+	}
+	if (hazards.toxicSpikes > 0) aplicarStatus(rng, enemy, "poison", 100);
+	if (hazards.stealthRock) {
+		const efetividade = getEffectiveness("ROCK", species.type, species.type2);
+		takeDamage(enemy, Math.max(1, Math.round(maxHp / 8 * efetividade)));
+	}
+	if (hazards.stickyWeb) enemy.estagios.speed = (enemy.estagios.speed ?? 0) - 1;
+}
 function buildMapWorld(mapId, activePoke, carry, progresso) {
 	const mapDef = getMap(mapId);
 	if (!mapDef) throw new Error(`Mapa desconhecido: ${mapId}`);
@@ -45072,8 +46030,15 @@ function buildMapWorld(mapId, activePoke, carry, progresso) {
 	const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool);
 	const enemies = [];
 	if (!countdownRemaining && !sequenceCleared) {
-		if (mapDef.sequence) enemies.push(spawnSequenceEnemy(base, mapDef, sequenceIndex));
-		else for (let i = 0; i < mapDef.maxEnemies; i++) enemies.push(spawnEnemyAt(base, mapDef, pool, janela));
+		if (mapDef.sequence) {
+			const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex);
+			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
+			enemies.push(enemy);
+		} else for (let i = 0; i < mapDef.maxEnemies; i++) {
+			const enemy = spawnEnemyAt(base, mapDef, pool, janela);
+			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
+			enemies.push(enemy);
+		}
 	}
 	return {
 		...base,
@@ -45082,6 +46047,7 @@ function buildMapWorld(mapId, activePoke, carry, progresso) {
 		enemies,
 		effects: [],
 		pendingHits: [],
+		pendingWishes: [],
 		autoTimers: { treinador: 0 },
 		reviveCountdown: null,
 		respawnTimer: mapDef.respawnDelay,
@@ -45207,10 +46173,17 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		world.countdownRemaining -= dt;
 		if (world.countdownRemaining <= 0) {
 			world.countdownRemaining = null;
-			if (world.mapDef.sequence) world.enemies.push(spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex));
-			else {
+			if (world.mapDef.sequence) {
+				const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex);
+				aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
+				world.enemies.push(enemy);
+			} else {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
-				for (let i = 0; i < world.mapDef.maxEnemies; i++) world.enemies.push(spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela));
+				for (let i = 0; i < world.mapDef.maxEnemies; i++) {
+					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela);
+					aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
+					world.enemies.push(enemy);
+				}
 			}
 		}
 		if (!silent) updateAnimations(world, dt);
@@ -45221,16 +46194,25 @@ function stepWorld(world, dt, gameState, opts = {}) {
 	tickAttackAnimTimers(world, dt);
 	if (!silent) updateAnimations(world, dt);
 	const kills = [];
+	let salaTrocou = false;
 	if (defeatedEnemyIds.length > 0) for (const enemyId of defeatedEnemyIds) {
 		const enemy = world.enemies.find((e) => e.id === enemyId);
 		if (!enemy) continue;
 		kills.push(handleEnemyDefeated(world, enemy, gameState, { silent }));
 		enemy.deathRemovalTimer = silent ? 0 : 4;
 		const avanco = registrarAbate(world, world.mapDef.id);
-		if (avanco.avancou && !silent) {
-			const nome = nomeDaSala(world.sala);
-			useToastStore.getState().pushToast(avanco.fechouCiclo ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.` : `Sala limpa! Avancando para a sala ${(world.sala?.indice ?? 0) + 1}: ${nome}.`, "success", "world");
+		if (avanco.avancou) {
+			salaTrocou = true;
+			if (!silent) {
+				const nome = nomeDaSala(world.sala);
+				useToastStore.getState().pushToast(avanco.fechouCiclo ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.` : `Sala limpa! Avancando para a sala ${(world.sala?.indice ?? 0) + 1}: ${nome}.`, "success", "world");
+			}
 		}
+	}
+	if (salaTrocou && world.sala) {
+		const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
+		const permitidas = new Set(ctx.pool.map((id) => getEncounter(id)?.speciesId).filter((id) => id != null));
+		world.enemies = world.enemies.filter((e) => isDead(e) || permitidas.has(e.poke.speciesId));
 	}
 	for (const enemy of world.enemies) if (isDead(enemy) && enemy.deathRemovalTimer != null && enemy.deathRemovalTimer > 0) enemy.deathRemovalTimer -= dt;
 	world.enemies = world.enemies.filter((e) => !isDead(e) || (e.deathRemovalTimer ?? 0) > 0 || world.mapDef.keepCorpses);
@@ -45274,14 +46256,18 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
 		if (world.respawnTimer <= 0) {
 			const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
-			world.enemies.push(spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela));
+			const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela);
+			aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
+			world.enemies.push(enemy);
 			world.respawnTimer = world.mapDef.respawnDelay;
 		}
 	} else if (world.mapDef.sequence && aliveCount === 0 && world.sequenceIndex < world.mapDef.sequence.length - 1) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
 		if (world.respawnTimer <= 0) {
 			world.sequenceIndex += 1;
-			world.enemies.push(spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex));
+			const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex);
+			aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
+			world.enemies.push(enemy);
 			world.respawnTimer = world.mapDef.respawnDelay;
 		}
 	}
@@ -45815,6 +46801,9 @@ function criarEstadoDoJogador(dados) {
 			setAutoToggle: (key, value) => {
 				s.autoToggles[key] = value;
 			},
+			setAutoStatusItem: (itemId, enabled) => {
+				s.autoStatusConfig[itemId] = enabled;
+			},
 			addAutoPotRule: (rule) => {
 				s.autoPotRules.push(rule);
 			},
@@ -46094,17 +47083,17 @@ async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAtE
 	const linhasItens = gameStateToItemRows(userId, estado);
 	const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id));
 	const removerItens = (await selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=item_id`)).map((l) => l.item_id).filter((id) => !itemIdsAgora.has(id));
-	if (removerItens.length) await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${removerItens.join(",")})`);
+	for (const lote of porLotesDeId(removerItens)) await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(",")})`);
 	if (linhasItens.length) await inserir(cfg, "player_items", linhasItens, { upsert: "user_id,item_id" });
 	const linhasDex = gameStateToPokedexRows(userId, estado);
 	const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id));
 	const removerDex = (await selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id));
-	if (removerDex.length) await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${removerDex.join(",")})`);
+	for (const lote of porLotesDeId(removerDex)) await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(",")})`);
 	if (linhasDex.length) await inserir(cfg, "player_pokedex", linhasDex, { upsert: "user_id,species_id" });
 	const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado);
 	const especiesAgora = new Set(linhasAuto.map((l) => l.species_id));
 	const removerAuto = (await selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !especiesAgora.has(id));
-	if (removerAuto.length) await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${removerAuto.join(",")})`);
+	for (const lote of porLotesDeId(removerAuto)) await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${lote.join(",")})`);
 	if (linhasAuto.length) await inserir(cfg, "player_auto_catch_rules", linhasAuto, { upsert: "user_id,species_id" });
 }
 /**
