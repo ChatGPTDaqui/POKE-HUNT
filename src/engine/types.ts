@@ -90,6 +90,15 @@ export interface BaseEntity {
   // contador de sono, roll de descongelar). Conta separado do cooldown de
   // acao: um POKE dormindo nao age, mas o sono precisa continuar passando.
   proximoTurnoDeStatus: number
+  // Guarda contra reaplicar o HOOK DE ENTRADA EM COMBATE (Intimidate/Download/
+  // clima automatico — ver combatSystem.ts#resolveEntryHook) todo frame
+  // enquanto o estado continua 'engaged'. Ausente/false = ainda nao disparou
+  // pra esta "entrada em campo". Reseta pra false quando a entidade desengaja
+  // (ver updateCombat e limparEstadoVolatil) — a proxima vez que reengajar, o
+  // hook dispara de novo, como uma troca de POKE nos jogos reais. Uma
+  // entidade NOVA ja nasce com isto undefined, entao nunca precisa de reset
+  // manual na criacao.
+  entradaProcessada?: boolean
 }
 
 export interface PlayerEntity extends BaseEntity {
@@ -205,6 +214,28 @@ export interface SalaAtiva {
   ciclos: number
 }
 
+// Clima automatico de campo, ligado por Trait no hook de entrada em combate
+// (Drizzle -> chuva, Sand Stream -> areia, Snow Warning -> granizo, Drought ->
+// sol — ver combatSystem.ts#resolveEntryHook). `null` = ceu limpo.
+export type ClimaTipo = 'chuva' | 'areia' | 'granizo' | 'sol'
+
+export interface Clima {
+  tipo: ClimaTipo
+  turnosRestantes: number
+}
+
+// Armadilhas de campo do lado INIMIGO (Spikes/Toxic Spikes/Stealth Rock/
+// Sticky Web) — setadas pelo JOGADOR usando o golpe correspondente (ver
+// combatSystem.ts#resolveHit) e descarregadas no INIMIGO no instante do spawn
+// (ver simulation.ts#aplicarHazardsAoInimigo). Contadores, nao booleanos puros,
+// porque Spikes empilha ate 3 camadas e Toxic Spikes ate 2.
+export interface EnemyHazards {
+  spikes: number
+  toxicSpikes: number
+  stealthRock: boolean
+  stickyWeb: boolean
+}
+
 export interface WorldState {
   mapDef: MapDef | null
   player: PlayerEntity | null
@@ -237,4 +268,16 @@ export interface WorldState {
   // Vive no WorldState (e nao num parametro solto) porque o combate decide no
   // meio de um respawn, longe de quem iniciou a simulacao.
   pessimista: boolean
+  // Ver `Clima` acima. `null` = ceu limpo (default). Volatil como
+  // estagios/statusVolatil: nao atravessa reconstrucao de mundo (novoMundo
+  // nao herda `clima` do `carry`), entao um flush do servidor limpa o clima
+  // igual limpa estagio de atributo.
+  clima: Clima | null
+  // Ver `EnemyHazards` acima. Ausente = nenhuma armadilha plantada ainda.
+  // MESMO DESVIO que `clima`: nao atravessa reconstrucao de mundo (fora do
+  // `ProgressoDaSessao` que `sala`/`sequenceIndex` usam pra sobreviver ao
+  // flush do servidor) — plantar Spikes vale so dentro da MESMA janela de
+  // simulacao. Se a persistencia entre flushes vier a importar, precisa
+  // entrar em `ProgressoDaSessao` (engine/simulation.ts) explicitamente.
+  enemyHazards?: EnemyHazards
 }
