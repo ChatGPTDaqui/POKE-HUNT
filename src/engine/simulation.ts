@@ -23,6 +23,8 @@ import { mapDefParaSala, spawnPointParaSala, mapWalkRadius, isCellBlocked, type 
 import { getEncounter } from '@/data/enemies'
 import { getItem } from '@/data/items'
 import { isDamagingAbility } from '@/data/abilities'
+import { traitOf } from '@/data/traits'
+import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { randInt, randRange, weightedPick } from '@/core/random'
@@ -31,10 +33,11 @@ import { CAPTURE_ANIM_FRAME_DURATION, captureAnimRowCount } from '@/data/capture
 import { rarityOf, realceDaRaridade } from '@/data/rarity'
 import { formatStatGains } from '@/data/statLabels'
 
-import { createPlayerEntity, createEnemyEntity, isDead } from './entity'
+import { createPlayerEntity, createEnemyEntity, isDead, takeDamage } from './entity'
 import { createWorldEffect } from './effect'
 import { updateMovement } from './systems/movementSystem'
 import { updateCombat } from './systems/combatSystem'
+import { aplicarStatus } from './systems/statusSystem'
 import { updateAnimations, tickAttackAnimTimers } from './systems/animationSystem'
 import { updateAutoHeal, maybeAutoCatch } from './systems/autoSystem'
 import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } from './systems/progressionSystem'
@@ -47,7 +50,7 @@ import type { KillResult } from './systems/offlineSimSystem'
 import type { GameStateStore } from '@/stores/gameStateStore'
 import { emptyWorldState } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
-import type { EnemyEntity, Point, SalaAtiva, WorldState } from './types'
+import type { EnemyEntity, EnemyHazards, Point, SalaAtiva, WorldState } from './types'
 
 export const STARTER_LEVEL = 1
 // Starters sempre saem previsiveis — raridade Comum, IV 75% (23/31) em toda
@@ -219,6 +222,42 @@ function spawnSequenceEnemy(world: SequenciaDeSorteio, mapDef: MapDef, index: nu
   return createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId })
 }
 
+// PARTE B (hazard): descarrega no INIMIGO recem-criado a armadilha de campo
+// que o JOGADOR plantou contra o lado inimigo (Spikes/Toxic Spikes/Stealth
+// Rock/Sticky Web — ver combatSystem.ts#resolveHit). Chamado logo apos CADA
+// criacao de EnemyEntity (spawnEnemyAt/spawnSequenceEnemy, nos 4 pontos de
+// chamada abaixo) — mesma regra dos jogos reais: FLYING e quem tem a Trait
+// levitate nunca sofrem hazard de chao, entao pulam o bloco inteiro.
+function aplicarHazardsAoInimigo(rng: Rng, hazards: EnemyHazards | undefined, enemy: EnemyEntity): void {
+  if (!hazards) return
+  const species = SPECIES[enemy.poke.speciesId]
+  const imuneATerra = species.type === 'FLYING' || species.type2 === 'FLYING' || traitOf(species.id) === 'levitate'
+  if (imuneATerra) return
+
+  const maxHp = enemy.poke.stats.hp
+
+  if (hazards.spikes > 0) {
+    // 1 camada = 1/8, 2 = 1/6, 3 = 1/4 do HP maximo — mesma escala dos jogos.
+    const fracao = hazards.spikes === 1 ? 1 / 8 : hazards.spikes === 2 ? 1 / 6 : 1 / 4
+    takeDamage(enemy, Math.max(1, Math.round(maxHp * fracao)))
+  }
+
+  if (hazards.toxicSpikes > 0) {
+    // So existe 1 nivel de veneno neste motor — a distincao leve/grave dos
+    // jogos reais (1 camada = poison normal, 2 = toxic) se perde de proposito.
+    aplicarStatus(rng, enemy, 'poison', 100)
+  }
+
+  if (hazards.stealthRock) {
+    const efetividade = getEffectiveness('ROCK', species.type, species.type2)
+    takeDamage(enemy, Math.max(1, Math.round((maxHp / 8) * efetividade)))
+  }
+
+  if (hazards.stickyWeb) {
+    enemy.estagios.speed = (enemy.estagios.speed ?? 0) - 1
+  }
+}
+
 /**
  * Progresso que precisa ATRAVESSAR a reconstrucao do mundo.
  *
@@ -272,17 +311,21 @@ export function buildMapWorld(
   const enemies: EnemyEntity[] = []
   if (!countdownRemaining && !sequenceCleared) {
     if (mapDef.sequence) {
-      enemies.push(spawnSequenceEnemy(base, mapDef, sequenceIndex))
+      const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex)
+      aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
+      enemies.push(enemy)
     } else {
       for (let i = 0; i < mapDef.maxEnemies; i++) {
-        enemies.push(spawnEnemyAt(base, mapDef, pool, janela))
+        const enemy = spawnEnemyAt(base, mapDef, pool, janela)
+        aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
+        enemies.push(enemy)
       }
     }
   }
 
   return {
     ...base,
-    mapDef, player, enemies, effects: [], pendingHits: [],
+    mapDef, player, enemies, effects: [], pendingHits: [], pendingWishes: [],
     autoTimers: { treinador: 0 },
     reviveCountdown: null,
     respawnTimer: mapDef.respawnDelay,
@@ -444,10 +487,17 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     world.countdownRemaining -= dt
     if (world.countdownRemaining <= 0) {
       world.countdownRemaining = null
-      if (world.mapDef.sequence) world.enemies.push(spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex))
-      else {
+      if (world.mapDef.sequence) {
+        const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex)
+        aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
+        world.enemies.push(enemy)
+      } else {
         const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
-        for (let i = 0; i < world.mapDef.maxEnemies; i++) world.enemies.push(spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela))
+        for (let i = 0; i < world.mapDef.maxEnemies; i++) {
+          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela)
+          aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
+          world.enemies.push(enemy)
+        }
       }
     }
     if (!silent) updateAnimations(world, dt)
@@ -464,6 +514,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   if (!silent) updateAnimations(world, dt)
 
   const kills: KillResult[] = []
+  let salaTrocou = false
   if (defeatedEnemyIds.length > 0) {
     for (const enemyId of defeatedEnemyIds) {
       const enemy = world.enemies.find((e) => e.id === enemyId)
@@ -475,16 +526,27 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       // oculta e o farm offline contam pela mesma regra sem nenhum deles
       // precisar lembrar.
       const avanco = registrarAbate(world, world.mapDef.id)
-      if (avanco.avancou && !silent) {
-        const nome = nomeDaSala(world.sala)
-        useToastStore.getState().pushToast(
-          avanco.fechouCiclo
-            ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.`
-            : `Sala limpa! Avancando para a sala ${(world.sala?.indice ?? 0) + 1}: ${nome}.`,
-          'success', 'world',
-        )
+      if (avanco.avancou) {
+        salaTrocou = true
+        if (!silent) {
+          const nome = nomeDaSala(world.sala)
+          useToastStore.getState().pushToast(
+            avanco.fechouCiclo
+              ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.`
+              : `Sala limpa! Avancando para a sala ${(world.sala?.indice ?? 0) + 1}: ${nome}.`,
+            'success', 'world',
+          )
+        }
       }
     }
+  }
+  // Sala avancou com outro inimigo ainda vivo em campo (maxEnemies > 1): esse
+  // inimigo veio do pool da sala anterior. Sem isso ele fica em campo com
+  // especie fora do pool ate morrer por conta propria.
+  if (salaTrocou && world.sala) {
+    const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
+    const permitidas = new Set(ctx.pool.map((id) => getEncounter(id)?.speciesId).filter((id): id is string => id != null))
+    world.enemies = world.enemies.filter((e) => isDead(e) || permitidas.has(e.poke.speciesId))
   }
   for (const enemy of world.enemies) {
     if (isDead(enemy) && enemy.deathRemovalTimer != null && enemy.deathRemovalTimer > 0) enemy.deathRemovalTimer -= dt
@@ -563,14 +625,18 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
       const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
-      world.enemies.push(spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela))
+      const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela)
+      aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
+      world.enemies.push(enemy)
       world.respawnTimer = world.mapDef.respawnDelay
     }
   } else if (world.mapDef.sequence && aliveCount === 0 && world.sequenceIndex < world.mapDef.sequence.length - 1) {
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
       world.sequenceIndex += 1
-      world.enemies.push(spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex))
+      const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex)
+      aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
+      world.enemies.push(enemy)
       world.respawnTimer = world.mapDef.respawnDelay
     }
   }

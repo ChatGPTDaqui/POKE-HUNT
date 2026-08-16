@@ -163,6 +163,13 @@ export function tickCooldowns(entity: BaseEntity, dt: number): void {
   if (entity.flashTimer > 0) entity.flashTimer = Math.max(0, entity.flashTimer - dt)
   entity.lastDamageTaken.physical.age += dt
   entity.lastDamageTaken.special.age += dt
+  // Imunidade de tipo temporaria por golpe (Magnet Rise) — mesmo padrao dos
+  // outros timers deste metodo: desce a cada frame, zera o campo quando acaba
+  // (ver types.ts#imuneAoTipoVolatil).
+  if (entity.imuneAoTipoVolatil) {
+    entity.imuneAoTipoVolatil.restante -= dt
+    if (entity.imuneAoTipoVolatil.restante <= 0) entity.imuneAoTipoVolatil = undefined
+  }
 }
 
 export function isAbilityReady(entity: BaseEntity, abilityId: string): boolean {

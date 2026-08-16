@@ -7,10 +7,10 @@
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, Gift, UserPlus, X } from '@phosphor-icons/react'
-import { ErroServidor, type MensagemCorreio } from '@/data/remote/servidor'
+import { ErroServidor, detalheDeErro, type MensagemCorreio } from '@/data/remote/servidor'
 import * as correioRpc from '@/data/remote/correioRealtime'
 import { supabase } from '@/lib/supabase'
-import { useToastStore } from '@/stores/toastStore'
+import { useToastStore, type ToastErroDetalhe } from '@/stores/toastStore'
 import { getItem } from '@/data/items'
 import { itemIconUrl } from '@/data/sprites'
 import {
@@ -20,8 +20,8 @@ import { cn } from '@/lib/utils'
 
 const STALE_MS = 15000
 
-function toast(mensagem: string, tipo: 'success' | 'error' = 'success') {
-  useToastStore.getState().pushToast(mensagem, tipo, 'world')
+function toast(mensagem: string, tipo: 'success' | 'error' = 'success', erroDetalhe?: ToastErroDetalhe) {
+  useToastStore.getState().pushToast(mensagem, tipo, 'world', undefined, erroDetalhe)
 }
 
 const ROTULO_TIPO: Record<MensagemCorreio['tipo'], string> = {
@@ -73,7 +73,7 @@ export function CorreioMenu() {
       setNick('')
       void qc.invalidateQueries({ queryKey: ['correio'] })
     },
-    onError: (e) => toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel enviar o pedido.', 'error'),
+    onError: (e) => toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel enviar o pedido.', 'error', detalheDeErro(e)),
   })
 
   const responder = useMutation({
@@ -82,7 +82,7 @@ export function CorreioMenu() {
       toast(r.mensagem)
       void qc.invalidateQueries({ queryKey: ['correio'] })
     },
-    onError: (e) => toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel responder.', 'error'),
+    onError: (e) => toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel responder.', 'error', detalheDeErro(e)),
   })
 
   const marcarLida = useMutation({
@@ -99,7 +99,7 @@ export function CorreioMenu() {
       toast(r.mensagem)
       void qc.invalidateQueries({ queryKey: ['correio'] })
     },
-    onError: (e) => toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel coletar.', 'error'),
+    onError: (e) => toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel coletar.', 'error', detalheDeErro(e)),
   })
 
   return (

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { ErroServidor } from '@/data/remote/servidor'
+import { ErroServidor, detalheDeErro } from '@/data/remote/servidor'
 import { toast } from '../utils'
 
 /** Toda mutacao do Mercado segue o mesmo ciclo: manda intencao, sobrescreve o
@@ -15,7 +15,11 @@ export function useAcaoMercado<T>(fn: (arg: T) => Promise<{ mensagem?: string }>
       void qc.invalidateQueries({ queryKey: ['mercado'] })
     },
     onError: (erro) => {
-      toast(erro instanceof ErroServidor ? erro.message : 'Nao foi possivel falar com o Mercado.', 'error')
+      toast(
+        erro instanceof ErroServidor ? erro.message : 'Nao foi possivel falar com o Mercado.',
+        'error',
+        detalheDeErro(erro),
+      )
     },
   })
 }

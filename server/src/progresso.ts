@@ -343,8 +343,8 @@ export async function gravarEstado(
   const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id))
   const itensNoBanco = await selecionarTudo<{ item_id: string }>(cfg, `player_items?user_id=eq.${userId}&select=item_id`)
   const removerItens = itensNoBanco.map((l) => l.item_id).filter((id) => !itemIdsAgora.has(id))
-  if (removerItens.length) {
-    await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${removerItens.join(',')})`)
+  for (const lote of porLotesDeId(removerItens)) {
+    await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(',')})`)
   }
   if (linhasItens.length) await inserir(cfg, 'player_items', linhasItens, { upsert: 'user_id,item_id' })
 
@@ -355,8 +355,8 @@ export async function gravarEstado(
   const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id))
   const dexNoBanco = await selecionarTudo<{ species_id: string }>(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)
   const removerDex = dexNoBanco.map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id))
-  if (removerDex.length) {
-    await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${removerDex.join(',')})`)
+  for (const lote of porLotesDeId(removerDex)) {
+    await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
   }
   if (linhasDex.length) await inserir(cfg, 'player_pokedex', linhasDex, { upsert: 'user_id,species_id' })
 
@@ -383,8 +383,8 @@ export async function gravarEstado(
     cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`,
   )
   const removerAuto = autoNoBanco.map((l) => l.species_id).filter((id) => !especiesAgora.has(id))
-  if (removerAuto.length) {
-    await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${removerAuto.join(',')})`)
+  for (const lote of porLotesDeId(removerAuto)) {
+    await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
   }
   if (linhasAuto.length) {
     await inserir(cfg, 'player_auto_catch_rules', linhasAuto, { upsert: 'user_id,species_id' })

@@ -116,7 +116,7 @@ export type AbilityCategory = 'physical' | 'special' | 'status'
 // Uma mudanca de estagio de atributo. `estagios` vai de -6 a +6, como nos
 // jogos; positivo sobe, negativo desce.
 export interface StatChange {
-  stat: 'atkFis' | 'atkEsp' | 'def' | 'defEsp' | 'speed'
+  stat: 'atkFis' | 'atkEsp' | 'def' | 'defEsp' | 'speed' | 'accuracy' | 'evasion'
   estagios: number
 }
 

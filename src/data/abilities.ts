@@ -29,6 +29,11 @@ import type { AbilityCategory, ElementType, StatusCondition, StatChange } from '
 
 export type AbilityTarget = 'single' | 'aoe'
 
+// Golpe de ARMADILHA DE CAMPO (Spikes/Toxic Spikes/Stealth Rock/Sticky Web):
+// sem alvo real, so incrementa o placar do lado inimigo (ver
+// combatSystem.ts#resolveHit e WorldState#enemyHazards em engine/types.ts).
+export type HazardId = 'spikes' | 'toxic_spikes' | 'stealth_rock' | 'sticky_web'
+
 export interface Ability {
   id: string
   name: string
@@ -51,6 +56,7 @@ export interface Ability {
   critStages?: number
   drainPercent?: number
   healPercent?: number
+  hazard?: HazardId
 }
 
 const formulaEngine = createFormulaEngine(FORMULAS)
@@ -99,6 +105,40 @@ export const AOE_RADIUS = 240 // medium/high splash circle around the attacker (
 // keys, so a plain object spread is enough.
 const ALL_ABILITIES_SOURCE = { ...ABILITIES_DATA, ...TYPED_AOE_MOVES }
 
+// Patch por cima do catalogo gerado (Ultra Sun): esses 7 golpes vinham como
+// stub vazio (so type/power/pp/accuracy, sem nenhum efeito real). Sand Attack/
+// Smokescreen/Kinesis baixam Precisao do alvo; Double Team/Minimize sobem a
+// propria Evasao. `accuracy` de cada um continua vindo do dado gerado
+// (Kinesis e 80%, os outros 100%) — este patch so preenche statChanges.
+//
+// FORA DE ESCOPO, DESCARTADO: Minimize nao dobra o dano recebido de golpes
+// contra alvo minimizado nos jogos reais — nao implementado aqui.
+//
+// Foresight/Miracle Eye NAO entram aqui: o efeito deles (ignorar uma
+// imunidade de tipo + a evasao do alvo) e resolvido em combatSystem.ts via
+// `entity.revelado`, fora do vocabulario de statChanges.
+const STAT_CHANGE_OVERRIDES: Partial<Record<string, Pick<Ability, 'statChanges' | 'statChance' | 'statTarget'>>> = {
+  sand_attack: { statChanges: [{ stat: 'accuracy', estagios: -1 }], statChance: 100 },
+  smokescreen: { statChanges: [{ stat: 'accuracy', estagios: -1 }], statChance: 100 },
+  kinesis: { statChanges: [{ stat: 'accuracy', estagios: -1 }], statChance: 100 },
+  double_team: { statChanges: [{ stat: 'evasion', estagios: 1 }], statChance: 100, statTarget: 'self' },
+  minimize: { statChanges: [{ stat: 'evasion', estagios: 2 }], statChance: 100, statTarget: 'self' },
+}
+
+// Patch por cima do catalogo gerado (Ultra Sun): estes 4 golpes vinham como
+// stub vazio (so type/power/pp/accuracy, sem nenhum efeito real, categoria
+// 'status', poder 0) — plantar armadilha nao existe na planilha sincronizada.
+// Overlay hand-authored, mesmo espirito do resto deste arquivo: o dado gerado
+// nunca e editado direto, so complementado por cima. O efeito de fato (dano/
+// status no INIMIGO que nasce depois) nao acontece no HIT — acontece no
+// SPAWN do proximo inimigo, ver simulation.ts#aplicarHazardsAoInimigo.
+const HAZARD_OVERRIDES: Partial<Record<string, Pick<Ability, 'hazard'>>> = {
+  spikes: { hazard: 'spikes' },
+  toxic_spikes: { hazard: 'toxic_spikes' },
+  stealth_rock: { hazard: 'stealth_rock' },
+  sticky_web: { hazard: 'sticky_web' },
+}
+
 export const ABILITIES: Record<string, Ability> = Object.fromEntries(
   Object.entries(ALL_ABILITIES_SOURCE).map(([key, ability]) => {
     const isAoe = AOE_ABILITY_KEYS.has(key) || ('target' in ability && ability.target === 'aoe')
@@ -106,6 +146,8 @@ export const ABILITIES: Record<string, Ability> = Object.fromEntries(
       key,
       {
         ...ability,
+        ...STAT_CHANGE_OVERRIDES[key],
+        ...HAZARD_OVERRIDES[key],
         target: isAoe ? 'aoe' : 'single',
         radius: isAoe ? AOE_RADIUS : undefined,
         cooldown: cooldownFromPp(ability.pp),
@@ -140,11 +182,35 @@ const DANO_SEM_PODER_BASE = new Set([
   'counter', 'mirror_coat',
 ])
 
+// quick_guard (bloqueia golpe de PRIORIDADE) fica sem implementacao mecanica
+// de proposito, ao contrario dos outros 5 golpes do elenco Screens (Reflect,
+// Light Screen, Safeguard, Mist, Lucky Chant, Wide Guard — ver `Escudos` em
+// engine/types.ts e ESCUDO_ABILITIES em engine/systems/combatSystem.ts). ESTE
+// MOTOR NAO TEM CONCEITO DE PRIORIDADE DE GOLPE: todo golpe pousa pelo mesmo
+// pipeline de hit (queueHit -> resolveHit), sem ordem de turno nem "golpe que
+// age primeiro" pra quick_guard bloquear. Fica no catalogo/kit como golpe de
+// status comum — golpe morto de verdade, nao um esquecimento.
+
 // Golpe de status continua inerte ate a Leva B — toda lista voltada pro jogador
 // e a IA de combate filtram por aqui.
 export function isDamagingAbility(ability: Ability | null | undefined): boolean {
   if (!ability) return false
   return ability.power > 0 || DANO_SEM_PODER_BASE.has(ability.id)
+}
+
+// Golpes de clima (Rain Dance/Sunny Day/Hail/Sandstorm): vazios no catalogo
+// gerado (so tem type/power/pp/target/accuracy -- nenhum campo de efeito).
+// Mesmo padrao das outras camadas hand-authored deste arquivo/pasta
+// (DANO_SEM_PODER_BASE acima, traits.ts, typedAoeMoves.ts): patch por cima do
+// dado gerado, sem tocar abilities.generated.ts. O tipo do valor casa
+// estruturalmente com `ClimaTipo` (engine/types.ts) sem importa-lo daqui --
+// engine/types.ts ja importa `Ability` deste arquivo, e o import reverso
+// fecharia um ciclo.
+export const CLIMA_DO_GOLPE: Record<string, 'chuva' | 'sol' | 'granizo' | 'areia'> = {
+  rain_dance: 'chuva',
+  sunny_day: 'sol',
+  hail: 'granizo',
+  sandstorm: 'areia',
 }
 
 // `resolveAbilityCategory` mora em data/abilityCategory.ts — ela precisa de

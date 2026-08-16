@@ -23,7 +23,12 @@ export function iniciarCapturaDeErroDeToast(): void {
       void supabase.rpc('registrar_evento_auditoria', {
         p_rota: window.location.pathname,
         p_mensagem: toast.message,
-        p_contexto: { canal: toast.channel },
+        p_contexto: {
+          canal: toast.channel,
+          tipo_erro: toast.erroDetalhe?.tipo,
+          codigo_erro: toast.erroDetalhe?.codigo,
+          mensagem_backend: toast.erroDetalhe?.mensagemBackend,
+        },
       }).then(() => {}, () => {})
     }
   })

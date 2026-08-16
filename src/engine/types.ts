@@ -24,6 +24,20 @@ import type { Rng } from '@/core/rng'
 export type EntityState = 'idle' | 'wander' | 'chase' | 'engaged' | 'dead'
 export type AttackAnimKind = 'Shoot' | 'Charge'
 
+// Escudos ("Screens"): Reflect/Light Screen/Safeguard/Mist/Lucky Chant/Wide
+// Guard. Cada valor e segundos restantes (mesmo padrao de `imunidadeDeStatus`
+// abaixo) — ausente ou 0 = inativo. Volateis pelo mesmo motivo de
+// `estagios`/`statusVolatil`: nos jogos zeram quando o POKE sai de campo, e a
+// entidade e o que e recriado a cada troca de cena.
+export interface Escudos {
+  reflect?: number
+  lightScreen?: number
+  safeguard?: number
+  mist?: number
+  luckyChant?: number
+  wideGuard?: number
+}
+
 export interface Point {
   x: number
   y: number
@@ -93,6 +107,24 @@ export interface BaseEntity {
   // nos jogos zeram quando o POKE sai de campo, e a entidade e o que e
   // recriado a cada troca de cena. Ausente = estagio 0 (multiplicador 1).
   estagios: EstagiosDeStat
+  // Foresight/Miracle Eye: remove UMA imunidade de tipo especifica deste alvo
+  // (Fantasma vs Normal/Lutador, ou Sombrio vs Psiquico) e ignora o estagio de
+  // evasao dele, pelo resto da luta — sem timer, so `limparEstadoVolatil` tira.
+  // Ausente = nenhuma das duas foi usada nele ainda.
+  revelado?: 'ghost' | 'dark'
+  // Contador PARALELO de estagio de critico (Focus Energy). NAO reaproveita
+  // `estagios`/StatChange porque aqueles sao presos aos 5 stats do catalogo
+  // gerado (+ accuracy/evasion, ja mesclado) — critico nao e um desses stats.
+  // Sem timer proprio: persiste ate fim de luta, igual `estagios`. Ausente =
+  // 0 estagios extra. Volatil pelo mesmo motivo de `estagios`: zerado em
+  // `limparEstadoVolatil`.
+  estagioDeCritico?: number
+  // Flag de uso unico (Laser Focus): o PROXIMO golpe de DANO que esta entidade
+  // usar sai critico garantido (ver computeDamage), e a flag e consumida
+  // (volta a false) nesse momento. Golpe de status nao consome. Tambem
+  // zerada em `limparEstadoVolatil` no fim de luta (nao deve sobreviver pra
+  // proxima).
+  proximoGolpeCriticoGarantido?: boolean
   // Segundos restantes de imunidade a novo status, contados depois que um
   // status sai (cura ou fim natural). Desvio aprovado, ver
   // scripts/usum/status.json#reaplicacao.
@@ -101,6 +133,124 @@ export interface BaseEntity {
   // contador de sono, roll de descongelar). Conta separado do cooldown de
   // acao: um POKE dormindo nao age, mas o sono precisa continuar passando.
   proximoTurnoDeStatus: number
+  // Ver `Escudos` acima. Opcional porque nem toda entidade chega a usar um
+  // golpe de Screen numa hunt — evita inicializar mais um objeto por entidade
+  // criada quando nenhuma delas nunca vai usar.
+  escudos?: Escudos
+  // Imunidade de TIPO temporaria concedida por um golpe (hoje so Magnet Rise,
+  // self-target: tipo='GROUND'). Diferente de `revelado` (que so IGNORA uma
+  // imunidade natural), este campo CRIA uma — ver
+  // combatSystem.ts#resolverImunidadeDeTipo. `restante` conta em segundos e
+  // desce em entity.ts#tickCooldowns, que zera o campo quando acaba. Ausente =
+  // nao esta imune a nenhum tipo por golpe agora.
+  imuneAoTipoVolatil?: { tipo: ElementType; restante: number }
+  // Trait Flash Fire: liga quando este POKE absorve um golpe FIRE (ver
+  // resolverImunidadeDeTipo) e da +50% de dano aos PROPRIOS golpes FIRE dali
+  // em diante. Permanente-ate-fim-de-luta, como os jogos — sem timer, so
+  // `limparEstadoVolatil` desliga.
+  flashFireAtivo?: boolean
+
+  // --- Lock/disable (Taunt/Spite/Disable/Encore/Torment) --------------------
+  // Ultimo golpe (nao-Ataque-Basico) que esta entidade escolheu e executou.
+  // Spite/Disable/Encore agem sobre "o golpe que o alvo acabou de usar" — sem
+  // isto nao ha o que travar/forcar/punir. Null enquanto a entidade nao usou
+  // nenhum golpe ainda (o efeito falha nesse caso, ver combatSystem#resolveHit).
+  lastUsedAbilityId?: string | null
+  // Taunt: segundos restantes de silencio. Enquanto > 0, pickAbility pula
+  // inteiro o bloco de golpe de status e vai direto pro golpe de dano.
+  silenciadoAte?: number
+  // Disable: golpe especifico travado + segundos restantes. Enquanto o timer
+  // e > 0, esse id fica fora dos candidatos de pickAbility (mesmo ponto de
+  // filtro que golpe permanentemente desligado pelo jogador via config).
+  disabledAbilityId?: string | null
+  disabledAbilityUntil?: number
+  // Encore: golpe forcado + segundos restantes. Enquanto o timer e > 0,
+  // pickAbility so pode escolher este id (cai pro Ataque Basico se ele
+  // estiver em cooldown no momento).
+  forcedAbilityId?: string | null
+  forcedAbilityUntil?: number
+  // Torment: segundos restantes. Enquanto > 0, pickAbility exclui
+  // `lastUsedAbilityId` dos candidatos, recalculado a cada escolha (nunca
+  // deixa repetir o golpe anterior, mas qual foi o anterior muda a cada turno).
+  tormentedUntil?: number
+  // Proximo indice a tentar em `poke.activeAbilities` (fila do jogador, na
+  // ordem que ele escolheu). So avanca quando um golpe da fila E de fato
+  // usado — pular por cooldown/filtro NAO avanca, pra tentar o mesmo golpe de
+  // novo no proximo turno em vez de "perder a vez dele" pra sempre.
+  filaGolpeIndex?: number
+
+  // --- Golpes de tick volatil (leech_seed/curse/nightmare/ingrain/aqua_ring) -
+  // Mesma familia do statusVolatil/estagios acima: nascem no combate, morrem
+  // no fim dele (ver limparEstadoVolatil em statusSystem.ts) ou quando o
+  // portador desmaia. Tickados dentro de tickStatus, no MESMO relogio de
+  // proximoTurnoDeStatus (ver systems/statusSystem.ts#tickStatus).
+  /** Leech Seed: quem plantou a semente, pra tickStatus saber quem curar. */
+  seeded?: { sourceId: string }
+  /** Curse (variante Ghost): 1/4 do HP MAXIMO por turno, sem timer. */
+  curseDot?: boolean
+  /** Nightmare: 1/4 do HP MAXIMO por turno, SO enquanto o alvo estiver com status sleep. */
+  nightmareDot?: boolean
+  /** Ingrain/Aqua Ring (mesmo campo pros dois): fracao do HP MAXIMO curada por turno (1/16). */
+  regenPercent?: number
+
+  // Guarda contra reaplicar o HOOK DE ENTRADA EM COMBATE (Intimidate/Download/
+  // clima automatico — ver combatSystem.ts#resolveEntryHook) todo frame
+  // enquanto o estado continua 'engaged'. Ausente/false = ainda nao disparou
+  // pra esta "entrada em campo". Reseta pra false quando a entidade desengaja
+  // (ver updateCombat e limparEstadoVolatil) — a proxima vez que reengajar, o
+  // hook dispara de novo, como uma troca de POKE nos jogos reais. Uma
+  // entidade NOVA ja nasce com isto undefined, entao nunca precisa de reset
+  // manual na criacao.
+  entradaProcessada?: boolean
+
+  // --- Fase 12: golpes sem-dano e Traits passivas ----------------------------
+  // Todos volateis (fim de batalha limpa, ver statusSystem#limparEstadoVolatil)
+  // e todos opcionais: entidade que nunca usou/recebeu o efeito correspondente
+  // simplesmente nao tem o campo.
+  /**
+   * Endure usado neste turno: sobrevive com 1 HP se o PROXIMO golpe recebido
+   * mataria. Consumida nesse hit — mate ele ou nao — depois volta a false.
+   */
+  enduraAtiva?: boolean
+  /**
+   * Protect/Detect ativo: bloqueia o proximo golpe recebido que realmente mire
+   * nesta entidade (golpe de auto-alvo, tipo Danca das Espadas ou Recover,
+   * ignora — ver combatSystem#golpeAtingeOAlvo). Consumida no hit bloqueado.
+   */
+  protegida?: boolean
+  /**
+   * Destiny Bond primado neste turno: se esta entidade morrer enquanto isto
+   * for true, quem a matou tambem morre.
+   */
+  destinyBondAtiva?: boolean
+  /**
+   * Segundos restantes de Heal Block: golpe de cura ou dreno positivo nao faz
+   * nada enquanto isto for > 0. Mesmo padrao de decaimento por dt que
+   * `imunidadeDeStatus`, so que trava cura em vez de reaplicacao de status.
+   */
+  curaBloqueadaAte?: number
+  /**
+   * Id do alvo contra quem o PROXIMO ataque desta entidade acerta garantido
+   * (Lock-On/Mind Reader). Consumido no proximo golpe usado contra esse alvo,
+   * independente de precisar do sorteio de precisao.
+   */
+  miraGarantidaAlvoId?: string | null
+  /**
+   * Tipo que Soak forcou sobre esta entidade. Usado NO LUGAR do tipo da
+   * especie so pro calculo de efetividade do dano que ela RECEBE — nao mexe
+   * em STAB nem em imunidade de status.
+   */
+  tipoForcado?: ElementType
+  /**
+   * Turnos restantes ate a Cancao da Perdicao matar esta entidade
+   * (Perish Song). `null`/ausente = sem contador ativo.
+   */
+  perishCountdown?: number | null
+  /**
+   * Turnos restantes ate o sono atrasado de Yawn pegar. `null`/ausente = sem
+   * Yawn pendente nesta entidade.
+   */
+  yawnTurnos?: number | null
 }
 
 export interface PlayerEntity extends BaseEntity {
@@ -169,6 +319,18 @@ export interface PendingHit {
   isAoeVisual?: boolean
 }
 
+// Fila de Wish (cura atrasada 2 turnos) — MESMO padrao de PendingHit: tick
+// down, resolve quando timer<=0, lookup por id (findEntityById) em vez de
+// referencia direta. `targetId` guarda o id da ENTIDADE que lancou o golpe
+// (world.player ou o enemy), nao o id do poke: world.player mantem o mesmo id
+// mesmo trocando de poke ativo por desmaio (ver simulation.ts —
+// autoSwitchTeamOnFaint troca `player.poke`, nunca `player.id`).
+export interface PendingWish {
+  timer: number
+  healAmount: number
+  targetId: string
+}
+
 // UM cooldown so, do TREINADOR — nao um por tipo de item.
 //
 // Antes eram dois (`pot` e `revive`, 1s cada), o que deixava o bot usar pocao e
@@ -216,12 +378,39 @@ export interface SalaAtiva {
   ciclos: number
 }
 
+// Clima de combate (Gen3+): efeito de CAMPO, nao de entidade -- um unico
+// valor no WorldState (nao por-lado), afeta jogador e inimigos por igual.
+// Golpe novo SOBRESCREVE o clima atual (last-caster-wins, sem empilhar) --
+// ver rain_dance/sunny_day/hail/sandstorm em data/abilities.ts#CLIMA_DO_GOLPE.
+// Tambem ligado automaticamente por Trait no hook de entrada em combate
+// (Drizzle -> chuva, Sand Stream -> areia, Snow Warning -> granizo, Drought ->
+// sol — ver combatSystem.ts#resolveEntryHook).
+export type ClimaTipo = 'chuva' | 'sol' | 'granizo' | 'areia'
+
+export interface Clima {
+  tipo: ClimaTipo
+  turnosRestantes: number
+}
+
+// Armadilhas de campo do lado INIMIGO (Spikes/Toxic Spikes/Stealth Rock/
+// Sticky Web) — setadas pelo JOGADOR usando o golpe correspondente (ver
+// combatSystem.ts#resolveHit) e descarregadas no INIMIGO no instante do spawn
+// (ver simulation.ts#aplicarHazardsAoInimigo). Contadores, nao booleanos puros,
+// porque Spikes empilha ate 3 camadas e Toxic Spikes ate 2.
+export interface EnemyHazards {
+  spikes: number
+  toxicSpikes: number
+  stealthRock: boolean
+  stickyWeb: boolean
+}
+
 export interface WorldState {
   mapDef: MapDef | null
   player: PlayerEntity | null
   enemies: EnemyEntity[]
   effects: WorldEffect[]
   pendingHits: PendingHit[]
+  pendingWishes: PendingWish[]
   autoTimers: AutoTimers
   reviveCountdown: number | null
   respawnTimer: number | null
@@ -248,4 +437,16 @@ export interface WorldState {
   // Vive no WorldState (e nao num parametro solto) porque o combate decide no
   // meio de um respawn, longe de quem iniciou a simulacao.
   pessimista: boolean
+  // Ver `Clima` acima. `null` = ceu limpo (default). Volatil como
+  // estagios/statusVolatil: nao atravessa reconstrucao de mundo (novoMundo
+  // nao herda `clima` do `carry`), entao um flush do servidor limpa o clima
+  // igual limpa estagio de atributo.
+  clima: Clima | null
+  // Ver `EnemyHazards` acima. Ausente = nenhuma armadilha plantada ainda.
+  // MESMO DESVIO que `clima`: nao atravessa reconstrucao de mundo (fora do
+  // `ProgressoDaSessao` que `sala`/`sequenceIndex` usam pra sobreviver ao
+  // flush do servidor) — plantar Spikes vale so dentro da MESMA janela de
+  // simulacao. Se a persistencia entre flushes vier a importar, precisa
+  // entrar em `ProgressoDaSessao` (engine/simulation.ts) explicitamente.
+  enemyHazards?: EnemyHazards
 }

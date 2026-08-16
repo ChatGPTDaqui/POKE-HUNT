@@ -1,4 +1,4 @@
-import { useToastStore } from '@/stores/toastStore'
+import { useToastStore, type ToastErroDetalhe } from '@/stores/toastStore'
 
 export const fmt = new Intl.NumberFormat('pt-BR')
 // Vitrine muda com o que os outros fazem, entao o cache e curto — mas nao
@@ -14,6 +14,6 @@ export const ABAS: { value: Aba; label: string }[] = [
   { value: 'historico', label: 'Histórico' },
 ]
 
-export function toast(mensagem: string, tipo: 'success' | 'error' | 'info' = 'success') {
-  useToastStore.getState().pushToast(mensagem, tipo, 'trade')
+export function toast(mensagem: string, tipo: 'success' | 'error' | 'info' = 'success', erroDetalhe?: ToastErroDetalhe) {
+  useToastStore.getState().pushToast(mensagem, tipo, 'trade', undefined, erroDetalhe)
 }
