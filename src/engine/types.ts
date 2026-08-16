@@ -101,6 +101,19 @@ export interface BaseEntity {
   // evasao dele, pelo resto da luta — sem timer, so `limparEstadoVolatil` tira.
   // Ausente = nenhuma das duas foi usada nele ainda.
   revelado?: 'ghost' | 'dark'
+  // Contador PARALELO de estagio de critico (Focus Energy). NAO reaproveita
+  // `estagios`/StatChange porque aqueles sao presos aos 5 stats do catalogo
+  // gerado (+ accuracy/evasion, ja mesclado) — critico nao e um desses stats.
+  // Sem timer proprio: persiste ate fim de luta, igual `estagios`. Ausente =
+  // 0 estagios extra. Volatil pelo mesmo motivo de `estagios`: zerado em
+  // `limparEstadoVolatil`.
+  estagioDeCritico?: number
+  // Flag de uso unico (Laser Focus): o PROXIMO golpe de DANO que esta entidade
+  // usar sai critico garantido (ver computeDamage), e a flag e consumida
+  // (volta a false) nesse momento. Golpe de status nao consome. Tambem
+  // zerada em `limparEstadoVolatil` no fim de luta (nao deve sobreviver pra
+  // proxima).
+  proximoGolpeCriticoGarantido?: boolean
   // Segundos restantes de imunidade a novo status, contados depois que um
   // status sai (cura ou fim natural). Desvio aprovado, ver
   // scripts/usum/status.json#reaplicacao.
