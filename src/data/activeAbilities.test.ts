@@ -1,11 +1,10 @@
-// Invariantes do limite de 4 golpes. Pedido explicito do usuario (revertendo
-// uma decisao anterior desta mesma sessao): Ataque Basico e o AOE de nivel 50
-// PARARAM de ser tratamento especial pro POKE do jogador — os dois competem
-// pelos mesmos 4 slots, escolhiveis/removiveis como qualquer golpe. Selvagem
-// continua sem os dois (nunca "escolhe" nada, fora do escopo do pedido).
+// Invariantes do limite de 4 golpes. Estes testes existem porque a regra tem
+// tres modos diferentes (selvagem, padrao do jogador, escolha do jogador) e o
+// erro mais provavel — o AOE de nivel 50 escorregar pra dentro de um slot — nao
+// causa erro nenhum, so come 25% do kit em silencio.
 import { describe, it, expect } from 'vitest'
 import { SPECIES } from './pokes'
-import { getAbility, isDamagingAbility, BASIC_ATTACK } from './abilities'
+import { getAbility, isDamagingAbility } from './abilities'
 import { typedAoeMoveKey, TYPED_AOE_LEVEL } from './typedAoeMoves'
 import {
   MAX_ACTIVE_ABILITIES, activeAbilitiesPadrao, activeAbilitiesSelvagem,
@@ -45,20 +44,20 @@ describe('limite de 4 golpes', () => {
     }
   })
 
-  it('o AOE de nivel 50 nunca ocupa slot do selvagem (o padrao do jogador PODE escolhe-lo)', () => {
+  it('o AOE de nivel 50 nunca ocupa slot, nem no padrao nem no selvagem', () => {
     for (const species of Object.values(SPECIES)) {
       const aoe = typedAoeMoveKey(species.type)
       for (const level of [TYPED_AOE_LEVEL, TYPED_AOE_LEVEL + 30]) {
+        expect(activeAbilitiesPadrao(species, level)).not.toContain(aoe)
         expect(activeAbilitiesSelvagem(species, level)).not.toContain(aoe)
       }
     }
   })
 
-  it('so escolhe golpe que a especie ja aprendeu naquele nivel (Ataque Basico e a unica excecao, sempre permitido)', () => {
+  it('so escolhe golpe que a especie ja aprendeu naquele nivel', () => {
     for (const species of Object.values(SPECIES)) {
       for (const level of NIVEIS) {
         const permitidos = new Set(species.abilities.filter((a) => a.levelReq <= level).map((a) => a.key))
-        permitidos.add(BASIC_ATTACK.id)
         for (const key of activeAbilitiesPadrao(species, level)) expect(permitidos.has(key)).toBe(true)
         for (const key of activeAbilitiesSelvagem(species, level)) expect(permitidos.has(key)).toBe(true)
       }
@@ -80,10 +79,8 @@ describe('limite de 4 golpes', () => {
 
         // Mesmo motivo do outro caso: `levelReq` cru inclui o bloco de golpes
         // rememoraveis do nivel 1, que o POKE nao sabe de verdade naquele nivel.
-        // Ataque Basico e o AOE entram como candidatos de verdade agora — se
-        // um dos dois bate os outros em dano efetivo, tem que estar entre os
-        // escolhidos, nao "fora sem penalidade".
-        const disponiveis = [...golpesAprendidosAte(species, level), BASIC_ATTACK.id]
+        const disponiveis = golpesAprendidosAte(species, level)
+          .filter((k) => k !== typedAoeMoveKey(species.type))
           .map((k) => getAbility(k))
           .filter((a): a is NonNullable<typeof a> => a != null && isDamagingAbility(a))
         const fora = disponiveis.filter((a) => !escolhidos.some((e) => e.id === a.id))
@@ -120,21 +117,12 @@ describe('golpesUtilizaveis', () => {
     expect(pool.length).toBeLessThanOrEqual(MAX_ACTIVE_ABILITIES)
   })
 
-  it('POKE do jogador nunca passa de 4, mesmo com o AOE desbloqueado', () => {
+  it('POKE do jogador recebe o AOE FORA dos 4 slots', () => {
     const species = SPECIES.charizard
     const poke = pokeFalso('charizard', 80)
     const pool = golpesUtilizaveis(poke, species, false)
-    expect(pool.length).toBeLessThanOrEqual(MAX_ACTIVE_ABILITIES)
-  })
-
-  it('AOE de nivel 50 escolhido explicitamente ocupa 1 dos 4 slots — nao um extra', () => {
-    const species = SPECIES.charizard
-    const aoe = typedAoeMoveKey(species.type)
-    const reais = golpesAprendidosAte(species, 80).filter((k) => k !== aoe).slice(0, 3)
-    const poke = pokeFalso('charizard', 80, { activeAbilities: [aoe, ...reais] })
-    const pool = golpesUtilizaveis(poke, species, false)
-    expect(pool).toEqual([aoe, ...reais])
-    expect(pool.length).toBe(4)
+    expect(pool).toContain(typedAoeMoveKey(species.type))
+    expect(pool.length).toBe(MAX_ACTIVE_ABILITIES + 1)
   })
 
   it('selvagem ignora a escolha gravada — ele deriva da especie', () => {
@@ -143,10 +131,10 @@ describe('golpesUtilizaveis', () => {
     expect(golpesUtilizaveis(poke, species, true).length).toBeGreaterThan(0)
   })
 
-  it('lista vazia e escolha valida: barra fica vazia, nada de graca (nem AOE, nem Ataque Basico)', () => {
+  it('lista vazia e escolha valida: o POKE do jogador fica so com o AOE', () => {
     const species = SPECIES.charizard
     const poke = pokeFalso('charizard', 80, { activeAbilities: [] })
-    expect(golpesUtilizaveis(poke, species, false)).toEqual([])
+    expect(golpesUtilizaveis(poke, species, false)).toEqual([typedAoeMoveKey(species.type)])
   })
 
   it('descarta escolha que o POKE nao conhece mais (especie trocada por evolucao)', () => {
@@ -166,10 +154,10 @@ describe('encaixarNovosGolpes', () => {
     expect(encaixarNovosGolpes(cheio, ['flamethrower'])).toEqual(cheio)
   })
 
-  it('encaixa o AOE de nivel 50 como golpe novo (pedido do usuario), mas nunca o Ataque Basico (nunca e "recem-aprendido")', () => {
+  it('nunca encaixa o AOE de nivel 50 nem o Ataque Basico', () => {
     const aoe = typedAoeMoveKey('FIRE')
     expect(ehGolpeAoeDeNivel50(aoe)).toBe(true)
-    expect(encaixarNovosGolpes(['ember'], [aoe, 'basic_attack'])).toEqual(['ember', aoe])
+    expect(encaixarNovosGolpes(['ember'], [aoe, 'basic_attack'])).toEqual(['ember'])
   })
 })
 

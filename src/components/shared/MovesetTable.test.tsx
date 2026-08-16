@@ -5,11 +5,6 @@
 // aqui e a fiacao: clique -> controller -> acao, mais as condicoes que
 // escondem/desabilitam o controle (POKE que nao e seu, golpe nao aprendido,
 // dentro de hunt — trava reintroduzida, ver os testes de hunt abaixo).
-//
-// Ataque Basico e o AOE de Nivel 50 pararam de ter linha/mecanismo especial
-// (pedido explicito do usuario: "nao sao diferentes... podem ser retirados
-// como qualquer outro golpe") — os dois viram linha normal da tabela, usando
-// o MESMO `setActiveAbilities`/cap-de-4 de qualquer golpe aprendido.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -120,7 +115,9 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     useGameStateStore.setState({ team: [poke] })
     render(<MovesetTable poke={poke} species={ESPECIE} />)
 
-    const deFora = poke.unlockedAbilities.find((k) => !poke.activeAbilities!.includes(k))!
+    const deFora = poke.unlockedAbilities.find(
+      (k) => !poke.activeAbilities!.includes(k) && k !== typedAoeMoveKey(ESPECIE.type),
+    )!
     await userEvent.click(botaoUsar(nomeDoGolpe(deFora))!)
 
     expect(setActiveAbilities).not.toHaveBeenCalled()
@@ -133,7 +130,9 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     useGameStateStore.setState({ team: [poke] })
     render(<MovesetTable poke={poke} species={ESPECIE} />)
 
-    const deFora = poke.unlockedAbilities.find((k) => !escolhidos.includes(k))!
+    const deFora = poke.unlockedAbilities.find(
+      (k) => !escolhidos.includes(k) && k !== typedAoeMoveKey(ESPECIE.type),
+    )!
     await userEvent.click(botaoUsar(nomeDoGolpe(deFora))!)
 
     const [, lista] = setActiveAbilities.mock.calls[0]
@@ -142,9 +141,9 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
 
   // Trava reintroduzida a pedido do usuario (revertendo a leva anterior, que a
   // tinha removido a pedido DELE tambem): build fixo durante o combate. A
-  // RPC `definir_golpes_ativos` recusa com sessao viva — ver migration
-  // 20260815190000 — e a tela so espelha desabilitando o botao, sem nem
-  // chamar o controller.
+  // RPC (`definir_golpes_ativos`/`alternar_habilidade`) recusa com sessao
+  // viva — ver migration 20260815190000 — e a tela so espelha desabilitando o
+  // botao, sem nem chamar o controller.
   it('dentro de hunt o controle fica bloqueado, com aviso', async () => {
     const poke = pokeDoJogador()
     useGameStateStore.setState({ team: [poke], currentMapId: 'lv_1_10_floresta' })
@@ -158,6 +157,40 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     expect(setActiveAbilities).not.toHaveBeenCalled()
   })
 
+  it('o AOE de Nivel 50 nao ocupa slot: checkbox de liga/desliga, nao do slot-de-4', async () => {
+    const poke = pokeDoJogador()
+    useGameStateStore.setState({ team: [poke] })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+    const aoe = nomeDoGolpe(typedAoeMoveKey(ESPECIE.type))
+    const botao = botaoUsar(aoe)!
+    expect(botao.className).toContain('bg-primary') // ligado por padrao (disabledAbilities vazio)
+
+    await userEvent.click(botao)
+    expect(setActiveAbilities).not.toHaveBeenCalled()
+    expect(toggleAbility).toHaveBeenCalledWith(poke.uid, typedAoeMoveKey(ESPECIE.type))
+  })
+
+  it('AOE de Nivel 50 tambem bloqueia dentro de hunt (mesma trava do slot-de-4)', async () => {
+    const poke = pokeDoJogador()
+    useGameStateStore.setState({ team: [poke], currentMapId: 'lv_1_10_floresta' })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+    const botao = botaoUsar(nomeDoGolpe(typedAoeMoveKey(ESPECIE.type)))!
+    expect(botao.disabled).toBe(true)
+    await userEvent.click(botao)
+    expect(toggleAbility).not.toHaveBeenCalled()
+  })
+
+  it('AOE desligado (disabledAbilities) aparece desmarcado', () => {
+    const aoeKey = typedAoeMoveKey(ESPECIE.type)
+    const poke = pokeDoJogador({ disabledAbilities: { [aoeKey]: true } })
+    useGameStateStore.setState({ team: [poke] })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+    expect(botaoUsar(nomeDoGolpe(aoeKey))?.className).not.toContain('bg-primary')
+  })
+
   it('golpe que o POKE ainda nao aprendeu nao pode ser escolhido', () => {
     const poke = pokeDoJogador()
     useGameStateStore.setState({ team: [poke] })
@@ -168,58 +201,25 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     expect(botaoUsar(nomeDoGolpe(naoAprendido.key))).toBeNull()
   })
 
-  describe('Ataque Basico e AOE de Nivel 50 — golpes normais, sem mecanismo proprio', () => {
-    it('Ataque Basico aparece na tabela mesmo pro POKE nivel 60 (linha sintetica, sempre "aprendido")', () => {
+  describe('Ataque Basico — sempre disponivel, liga/desliga fora dos 4 slots', () => {
+    it('aparece so pro POKE que e seu', () => {
+      render(<MovesetTable poke={pokeDoJogador()} species={ESPECIE} />)
+      expect(screen.queryByText(BASIC_ATTACK.name)).toBeNull()
+    })
+
+    it('ligado por padrao, e clicar desliga via toggleAbility (nunca setActiveAbilities)', async () => {
       const poke = pokeDoJogador()
       useGameStateStore.setState({ team: [poke] })
       render(<MovesetTable poke={poke} species={ESPECIE} />)
-      expect(screen.getByText(BASIC_ATTACK.name)).toBeTruthy()
-    })
 
-    it('marcar Ataque Basico usa setActiveAbilities (nunca toggleAbility) e respeita o cap de 4', async () => {
-      const escolhidos = activeAbilitiesPadrao(ESPECIE, NIVEL).slice(0, 3)
-      const poke = pokeDoJogador({ activeAbilities: escolhidos })
-      useGameStateStore.setState({ team: [poke] })
-      render(<MovesetTable poke={poke} species={ESPECIE} />)
-
-      await userEvent.click(botaoUsar(BASIC_ATTACK.name)!)
-
-      expect(toggleAbility).not.toHaveBeenCalled()
-      expect(setActiveAbilities).toHaveBeenCalledTimes(1)
-      const [uid, lista] = setActiveAbilities.mock.calls[0]
-      expect(uid).toBe(poke.uid)
-      expect(lista).toEqual([...escolhidos, BASIC_ATTACK.id])
-    })
-
-    it('AOE de Nivel 50 usa setActiveAbilities e conta pro cap de 4 igual a qualquer golpe', async () => {
-      const aoe = typedAoeMoveKey(ESPECIE.type)
-      const escolhidos = activeAbilitiesPadrao(ESPECIE, NIVEL).filter((k) => k !== aoe).slice(0, 3)
-      const poke = pokeDoJogador({ activeAbilities: escolhidos })
-      useGameStateStore.setState({ team: [poke] })
-      render(<MovesetTable poke={poke} species={ESPECIE} />)
-
-      await userEvent.click(botaoUsar(nomeDoGolpe(aoe))!)
-
-      expect(toggleAbility).not.toHaveBeenCalled()
-      const [, lista] = setActiveAbilities.mock.calls[0]
-      expect(lista).toEqual([...escolhidos, aoe])
-      expect(lista).toHaveLength(4)
-    })
-
-    it('4 slots cheios (incluindo Ataque Basico) recusa o AOE como quinto', async () => {
-      const aoe = typedAoeMoveKey(ESPECIE.type)
-      const escolhidos = [BASIC_ATTACK.id, ...activeAbilitiesPadrao(ESPECIE, NIVEL).filter((k) => k !== aoe).slice(0, 3)]
-      const poke = pokeDoJogador({ activeAbilities: escolhidos })
-      useGameStateStore.setState({ team: [poke] })
-      render(<MovesetTable poke={poke} species={ESPECIE} />)
-
-      await userEvent.click(botaoUsar(nomeDoGolpe(aoe))!)
-
+      const botao = botaoUsar(BASIC_ATTACK.name)!
+      expect(botao.className).toContain('bg-primary')
+      await userEvent.click(botao)
       expect(setActiveAbilities).not.toHaveBeenCalled()
-      expect(useToastStore.getState().toasts.some((t) => /Maximo de 4/.test(t.message))).toBe(true)
+      expect(toggleAbility).toHaveBeenCalledWith(poke.uid, BASIC_ATTACK.id)
     })
 
-    it('Ataque Basico tambem bloqueia dentro de hunt (mesma trava dos outros golpes)', async () => {
+    it('tambem bloqueia dentro de hunt (mesma trava dos outros golpes)', async () => {
       const poke = pokeDoJogador()
       useGameStateStore.setState({ team: [poke], currentMapId: 'lv_1_10_floresta' })
       render(<MovesetTable poke={poke} species={ESPECIE} />)
@@ -227,7 +227,7 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
       const botao = botaoUsar(BASIC_ATTACK.name)!
       expect(botao.disabled).toBe(true)
       await userEvent.click(botao)
-      expect(setActiveAbilities).not.toHaveBeenCalled()
+      expect(toggleAbility).not.toHaveBeenCalled()
     })
   })
 })

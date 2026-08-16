@@ -103,29 +103,12 @@ describe('salas', () => {
     }
 
     // E o respawn, que roda por outro caminho no stepWorld, tambem.
-    //
-    // O inimigo nao e removido so porque a sala avancou (avancar e por
-    // ABATE, e um inimigo fora do alcance de aggro pode ficar vivo por varias
-    // salas) — entao a checagem certa e "todo inimigo vivo nasceu de ALGUMA
-    // sala por onde este mundo ja passou", nao "bate com a sala de AGORA".
-    // Amostrar so no final e checar so contra `world.sala` no fim e assercao
-    // MAIS FORTE do que o jogo garante, e falha em falso sempre que um
-    // inimigo sobrevive a uma virada de sala — daqui pra frente, acumula
-    // todas as salas visitadas.
     const gameState = useGameStateStore.getState()
-    const salasVisitadas = new Set<string>([world.sala!.chave])
-    for (let i = 0; i < 3000; i++) {
-      stepWorld(world, 0.1, gameState, { silent: true })
-      salasVisitadas.add(world.sala!.chave)
-    }
-    const permitidas = new Set(
-      [...salasVisitadas].flatMap((chave) => POOL_POR_SALA[HUNT][chave].map((id) => ENCOUNTERS[id].speciesId)),
-    )
+    for (let i = 0; i < 3000; i++) stepWorld(world, 0.1, gameState, { silent: true })
+    const salaAgora = world.sala!.chave
+    const permitidas = new Set(POOL_POR_SALA[HUNT][salaAgora].map((id) => ENCOUNTERS[id].speciesId))
     for (const inimigo of world.enemies) {
-      expect(
-        permitidas.has(inimigo.poke.speciesId),
-        `${inimigo.poke.speciesId} fora de todas as salas visitadas (${[...salasVisitadas].join(', ')})`,
-      ).toBe(true)
+      expect(permitidas.has(inimigo.poke.speciesId), `${inimigo.poke.speciesId} fora da sala ${salaAgora}`).toBe(true)
     }
   })
 
