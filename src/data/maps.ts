@@ -6,6 +6,7 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
 import { COLLISION_GRIDS, COLLISION_GRID_CELL_SIZE } from './generated/collisionGrids.generated'
 import { WATER_COLLISION_GRID, WATER_SPAWN_POINT } from './generated/waterCollisionMask.generated'
+import { SUB_BIOMA_COLLISION } from './generated/subBiomaCollision.generated'
 import { FAIXAS, huntId } from './biomas'
 import type { HuntMapDef } from './huntTypes'
 
@@ -19,6 +20,17 @@ export { MAPS }
 
 export interface MapDef extends HuntMapDef {
   collisionGrid: string[] | null
+  /**
+   * A grade de colisao desta sala e pintada a mao (scripts/build-sub-bioma-collision.js)
+   * e JA define os limites reais do espaco jogavel — o vermelho da
+   * referencia e a fronteira, nao so um extra por cima do circulo padrao.
+   * Setado por `mapDefParaSala`; consumido por `mapWalkRadius` (devolve um
+   * raio grande o bastante pra nunca recortar celula nenhuma da grade, em
+   * vez do circulo inscrito no retangulo que toda outra hunt usa) — pedido
+   * explicito do usuario: a pintura manda, o circulo generico nao pode
+   * cortar area que ela marca como andavel.
+   */
+  colisaoDefineLimite?: boolean
 }
 
 const formulaEngine = createFormulaEngine(FORMULAS)
@@ -73,13 +85,88 @@ export function getMap(id: string): MapDef | null {
   return { ...map, respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER, collisionGrid }
 }
 
+// Colisao/spawn por SALA (sub-bioma), pintados a mao — ver
+// scripts/build-sub-bioma-collision.js. Diferente do body-block antigo
+// (WALL_BLOCK_ENABLED/COLLISION_GRIDS, por HUNT INTEIRA via `bg.image`):
+// aqui o sub-bioma pode mudar VARIAS vezes dentro da mesma hunt (o sistema
+// de salas), entao a grade que vale e a da sala ATUAL, nao a do bioma-mae.
+// `sala` aceita a forma minima (so `chave`) pra nao importar SalaAtiva de
+// engine/types.ts, que ja importa MapDef DESTE arquivo — ciclo de tipo e
+// seguro em TS (apagado na compilacao), mas a interface estrutural evita
+// depender disso.
+export function mapDefParaSala(mapId: string, sala: { chave: string } | null): MapDef | null {
+  const map = getMap(mapId)
+  if (!map) return null
+  const override = sala && SUB_BIOMA_COLLISION[sala.chave]
+  if (!override) return map
+  return { ...map, collisionGrid: override.grid, colisaoDefineLimite: true }
+}
+
+export function spawnPointParaSala(sala: { chave: string } | null): { x: number; y: number } | null {
+  return (sala && SUB_BIOMA_COLLISION[sala.chave]?.spawnPoint) ?? null
+}
+
 export function isCellBlocked(mapDef: MapDef, x: number, y: number): boolean {
   const grid = mapDef.collisionGrid
   if (!grid) return false
   const col = Math.floor(x / COLLISION_GRID_CELL_SIZE)
   const row = Math.floor(y / COLLISION_GRID_CELL_SIZE)
-  if (row < 0 || row >= grid.length || col < 0 || col >= grid[0].length) return false
+  const foraDaGrade = row < 0 || row >= grid.length || col < 0 || col >= grid[0].length
+  if (foraDaGrade) {
+    // `colisaoDefineLimite` (body-block por sala): a grade JA cobre o
+    // retangulo inteiro do mapa (35x23 celulas = 1400x900), entao "fora
+    // dela" e fora do mapa de verdade — tem que bloquear. Sem isso,
+    // `mapWalkRadius` devolvendo o raio que inscreve o retangulo (pra nao
+    // cortar o anel pintado) tambem libera as 4 "pontas" do circulo que
+    // ficam FORA do retangulo, e wander/spawn levavam inimigo (e o
+    // proprio jogador) pra fora da grade — bug real, achado ao vivo:
+    // alvo em (579,1124), fora das 23 linhas da grade, virava perseguicao
+    // eterna e impossivel (findPath nunca alcanca fora da grade).
+    // Grades ANTIGAS (por hunt inteira, sem este flag) mantem o
+    // comportamento leniente de sempre: um check pontual perto da borda
+    // do mapa e seguro tratar como aberto, e mudar isso agora arriscaria
+    // regressao em algo que ja funciona ha varias levas.
+    return Boolean(mapDef.colisaoDefineLimite)
+  }
   return grid[row][col] === '1'
+}
+
+/**
+ * Celula andavel mais proxima de (x,y) nesta grade, em espiral quadrada
+ * crescente — devolve o CENTRO dela. `null` se nao achar nenhuma no raio de
+ * busca (grade sem nenhuma celula andavel, nao deveria acontecer com uma
+ * grade real).
+ *
+ * Existe pro caso de troca de SALA (ver salaSystem.ts#registrarAbate): uma
+ * entidade que estava numa sala SEM colisao (aberta, pode estar em
+ * qualquer canto do mapa) pode ficar de pe numa celula que a nova sala
+ * marca como bloqueada — e pior, uma celula cujos 8 vizinhos TAMBEM sao
+ * bloqueados, sem nenhum passo unico de escape possivel (bug real, achado
+ * ao vivo: jogador congelado 40+ segundos numa celula cercada). Nem A*
+ * nem slideToward resolvem "comecar dentro da parede" sozinhos; a unica
+ * saida e reposicionar pro ponto andavel mais perto ANTES do proximo tick
+ * de movimento tentar sair dali.
+ */
+export function nearestOpenPoint(mapDef: MapDef, x: number, y: number): { x: number; y: number } | null {
+  const grid = mapDef.collisionGrid
+  if (!grid) return { x, y }
+  const cols = grid[0].length, rows = grid.length
+  const startCol = Math.floor(x / COLLISION_GRID_CELL_SIZE)
+  const startRow = Math.floor(y / COLLISION_GRID_CELL_SIZE)
+  const maxRadius = Math.max(cols, rows)
+  for (let radius = 0; radius <= maxRadius; radius++) {
+    for (let dr = -radius; dr <= radius; dr++) {
+      for (let dc = -radius; dc <= radius; dc++) {
+        if (Math.max(Math.abs(dr), Math.abs(dc)) !== radius) continue
+        const c = startCol + dc, r = startRow + dr
+        if (r < 0 || r >= rows || c < 0 || c >= cols) continue
+        if (grid[r][c] === '0') {
+          return { x: c * COLLISION_GRID_CELL_SIZE + COLLISION_GRID_CELL_SIZE / 2, y: r * COLLISION_GRID_CELL_SIZE + COLLISION_GRID_CELL_SIZE / 2 }
+        }
+      }
+    }
+  }
+  return null
 }
 
 // The walkable area is a circle (not the full rectangular bounds — those
@@ -87,6 +174,17 @@ export function isCellBlocked(mapDef: MapDef, x: number, y: number): boolean {
 // the two dimensions, centered on the map. Shared by movement clamping
 // (MovementSystem.js) and enemy/wander spawn placement (main.js) so both
 // always agree on exactly where the invisible edge is.
-export function mapWalkRadius(mapDef: { bounds: { width: number; height: number } }): number {
+//
+// `colisaoDefineLimite` (sala com body-block pintado a mao) e a excecao:
+// devolve o raio que inscreve o RETANGULO INTEIRO (metade da diagonal),
+// grande o bastante pra nunca cortar nenhuma celula da grade — a pintura
+// (vermelho = parede) ja e o limite real, sobrepor o circulo padrao por
+// cima cortaria area que ela marca como andavel. Mesma funcao/assinatura
+// pra todo consumidor existente (pathfinding, wander, spawn) nao precisar
+// saber da diferenca.
+export function mapWalkRadius(mapDef: { bounds: { width: number; height: number }; colisaoDefineLimite?: boolean }): number {
+  if (mapDef.colisaoDefineLimite) {
+    return Math.hypot(mapDef.bounds.width, mapDef.bounds.height) / 2
+  }
   return Math.min(mapDef.bounds.width, mapDef.bounds.height) / 2
 }

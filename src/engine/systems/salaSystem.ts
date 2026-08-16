@@ -28,6 +28,7 @@ import type { Rng } from '@/core/rng'
 import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, LOOT, type SubBiomaDef } from '@/data/biomas'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { getEncounter } from '@/data/enemies'
+import { mapDefParaSala, isCellBlocked, nearestOpenPoint } from '@/data/maps'
 import type { MapItemDrop } from '@/data/generated/types'
 import type { SalaAtiva, WorldState } from '../types'
 
@@ -174,6 +175,31 @@ export function registrarAbate(world: WorldState, mapId: string): AvancoDeSala {
   // idle precisa.
   const nova = novaSala(world.rng, mapId, indice, ciclos)
   world.sala = nova ?? { ...sala, indice, abates: 0, ciclos }
+  // A colisao/spawn de body-block e por SALA (ver mapDefParaSala) — trocar
+  // de sala no meio da hunt precisa reavaliar a grade, senao um sub-bioma
+  // com pintura propria so valeria na sala em que o mundo foi construido
+  // (a proxima janela do servidor ja corrigiria sozinha, mas o combate ao
+  // vivo entre uma janela e outra ficaria com a grade da sala anterior).
+  const novoMapDef = mapDefParaSala(mapId, world.sala)
+  if (novoMapDef) {
+    world.mapDef = novoMapDef
+    // A sala anterior podia nao ter colisao nenhuma (jogador/inimigo em
+    // QUALQUER canto do mapa); se a nova sala tem body-block e a posicao
+    // atual caiu numa celula agora bloqueada, reposiciona pro ponto
+    // andavel mais perto ANTES do proximo tick tentar mover — bug real,
+    // achado ao vivo: jogador que herdava uma celula cercada por 8
+    // vizinhos tambem bloqueados ficava congelado pra sempre (nem A* nem
+    // slideToward escapam de "comecar dentro da parede").
+    if (world.player && isCellBlocked(novoMapDef, world.player.x, world.player.y)) {
+      const ponto = nearestOpenPoint(novoMapDef, world.player.x, world.player.y)
+      if (ponto) { world.player.x = ponto.x; world.player.y = ponto.y }
+    }
+    for (const enemy of world.enemies) {
+      if (!isCellBlocked(novoMapDef, enemy.x, enemy.y)) continue
+      const ponto = nearestOpenPoint(novoMapDef, enemy.x, enemy.y)
+      if (ponto) { enemy.x = ponto.x; enemy.y = ponto.y }
+    }
+  }
   return { avancou: true, fechouCiclo }
 }
 

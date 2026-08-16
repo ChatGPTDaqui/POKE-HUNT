@@ -68,6 +68,17 @@ export interface BaseEntity {
   pathRecalcTimer: number
   pathTargetX: number | null
   pathTargetY: number | null
+  /**
+   * Segundos seguidos em que `slideToward` nao conseguiu mover nada (os 3
+   * jeitos — diagonal, so X, so Y — cairam em celula bloqueada). Bug real
+   * achado testando body-block com geometria irregular (o abismo):
+   * `hasLineOfSight` amostra a cada meia celula e pode pular uma parede
+   * fina entre duas amostras, entao "linha limpa" as vezes mente pro
+   * slide, que fica preso pra sempre num canto concavo sem tentar de
+   * novo — o mesmo (tx,ty) recalculado da EXATAMENTE o mesmo resultado.
+   * Ver movementSystem.ts#moveToward.
+   */
+  pathStuckSeconds: number
 
   // --- Status ---------------------------------------------------------------
   // O status NAO-VOLATIL (veneno, queimadura, paralisia, sono, congelamento)

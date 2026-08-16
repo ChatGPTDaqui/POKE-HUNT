@@ -26,6 +26,15 @@ const PATH_TARGET_DRIFT = 60
 // perseguir o jogador, ou vice-versa) pula o timer de recalculo por
 // completo.
 const PATH_TARGET_BIG_JUMP = 150
+// `hasLineOfSight` amostra o segmento a cada meia celula — barato, mas pode
+// pular uma parede fina de 1 celula entre duas amostras numa geometria
+// irregular (achado testando o body-block do abismo). Quando isso acontece,
+// `slideToward` fica preso (os 3 jeitos de deslizar caem em celula
+// bloqueada) e o (tx,ty) cacheado nunca muda o bastante pra forcar um novo
+// calculo — a entidade congela pra sempre. Depois desse tanto de tempo
+// preso, o proximo recalculo pula o atalho de "linha limpa" e vai direto
+// pro A* real, que contorna a parede que o atalho nao via.
+const PATH_STUCK_THRESHOLD_SECONDS = 0.3
 
 // A pegada de colisao de um POKE e exatamente 1 caixa da grade
 // (COLLISION_GRID_CELL_SIZE) por pedido explicito do usuario — checar so o
@@ -95,6 +104,7 @@ interface Movable {
   pathRecalcTimer: number
   pathTargetX: number | null
   pathTargetY: number | null
+  pathStuckSeconds: number
 }
 
 // Move uma entidade em direcao a (tx,ty), contornando obstaculos via A*
@@ -116,8 +126,12 @@ function moveToward(entity: Movable, tx: number, ty: number, speed: number, dt: 
   const targetJump = Math.hypot(tx - (entity.pathTargetX ?? tx), ty - (entity.pathTargetY ?? ty))
   const drifted = targetJump > PATH_TARGET_DRIFT
   const bigJump = targetJump > PATH_TARGET_BIG_JUMP
-  if (entity.pathWaypoints == null || bigJump || (drifted && entity.pathRecalcTimer <= 0)) {
-    if (hasLineOfSight(mapDef, entity.x, entity.y, tx, ty)) {
+  // Preso ha tempo o bastante: forca a entrada neste bloco mesmo sem drift
+  // (senao um alvo que mal se move nunca solta a rota congelada) e pula o
+  // atalho de linha-de-visao, que foi o que mentiu da primeira vez.
+  const travado = entity.pathStuckSeconds >= PATH_STUCK_THRESHOLD_SECONDS
+  if (entity.pathWaypoints == null || bigJump || (drifted && entity.pathRecalcTimer <= 0) || travado) {
+    if (!travado && hasLineOfSight(mapDef, entity.x, entity.y, tx, ty)) {
       entity.pathWaypoints = [] // linha limpa — anda reto, sem rota necessaria
     } else {
       const route = findPath(mapDef, entity.x, entity.y, tx, ty)
@@ -127,9 +141,11 @@ function moveToward(entity: Movable, tx: number, ty: number, speed: number, dt: 
     entity.pathTargetX = tx
     entity.pathTargetY = ty
     entity.pathRecalcTimer = PATH_RECALC_INTERVAL
+    if (travado) entity.pathStuckSeconds = 0
   }
 
   if (entity.pathWaypoints.length > 0) {
+    entity.pathStuckSeconds = 0
     const wp = entity.pathWaypoints[entity.pathIndex]
     const arrivedAtWaypoint = stepDirect(entity, wp.x, wp.y, speed, dt)
     if (arrivedAtWaypoint) {
@@ -141,8 +157,14 @@ function moveToward(entity: Movable, tx: number, ty: number, speed: number, dt: 
 
   // Sem rota necessaria (linha limpa) ou nenhuma encontrada (alvo
   // inalcancavel) — anda reto, ainda deslizando no que encostar em vez de
-  // congelar.
-  return slideToward(entity, tx, ty, speed, dt, mapDef)
+  // congelar. Quando nem isso move a entidade, acumula o tempo preso pra
+  // eventualmente forcar o A* real (acima).
+  const beforeX = entity.x, beforeY = entity.y
+  const arrived = slideToward(entity, tx, ty, speed, dt, mapDef)
+  entity.pathStuckSeconds = (!arrived && entity.x === beforeX && entity.y === beforeY)
+    ? entity.pathStuckSeconds + dt
+    : 0
+  return arrived
 }
 
 // Puxa (x, y) de volta pra borda circular caminhavel do mapa se caiu fora

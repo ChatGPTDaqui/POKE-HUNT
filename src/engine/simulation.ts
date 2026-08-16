@@ -19,7 +19,7 @@
 // Um comparador acusaria jogador honesto. E re-simular pra conferir custa a
 // MESMA CPU que simular; se vai gastar, gaste sendo a autoridade.
 import { SPECIES, createPokeInstance, type PokeInstance } from '@/data/pokes'
-import { getMap, mapWalkRadius, isCellBlocked, type MapDef } from '@/data/maps'
+import { mapDefParaSala, spawnPointParaSala, mapWalkRadius, isCellBlocked, type MapDef } from '@/data/maps'
 import { getEncounter } from '@/data/enemies'
 import { getItem } from '@/data/items'
 import { isDamagingAbility } from '@/data/abilities'
@@ -242,10 +242,22 @@ export function buildMapWorld(
   carry?: SequenciaDeSorteio,
   progresso?: ProgressoDaSessao,
 ): WorldState {
-  const mapDef = getMap(mapId)
-  if (!mapDef) throw new Error(`Mapa desconhecido: ${mapId}`)
   const base = novoMundo(carry)
-  const player = createPlayerEntity(base.counters, { poke: activePoke, x: mapDef.playerSpawn.x, y: mapDef.playerSpawn.y })
+
+  // A sala tem que ser decidida ANTES do primeiro spawn: e ela que diz qual
+  // pool esta ativo (e, com body-block por sala, qual grade de colisao/ponto
+  // de nascimento valem — ver mapDefParaSala/spawnPointParaSala).
+  // Retomar a sala salva (e nao sortear uma nova por janela) e o mesmo
+  // motivo do `sequenceIndex` — o mundo e reconstruido a cada flush, e
+  // sortear aqui faria a sala trocar de 30 em 30 segundos sozinha.
+  const sala = temSalas(mapId)
+    ? (progresso?.sala ?? novaSala(base.rng, mapId, 0, 0))
+    : null
+  const mapDef = mapDefParaSala(mapId, sala)
+  if (!mapDef) throw new Error(`Mapa desconhecido: ${mapId}`)
+
+  const spawn = spawnPointParaSala(sala) ?? mapDef.playerSpawn
+  const player = createPlayerEntity(base.counters, { poke: activePoke, x: spawn.x, y: spawn.y })
   if (isDead(player)) player.fainted = true
 
   const sequenceIndex = progresso?.sequenceIndex ?? 0
@@ -255,13 +267,6 @@ export function buildMapWorld(
   const retomando = sequenceIndex > 0 || sequenceCleared
   const countdownRemaining = retomando ? null : (mapDef.startCountdown || null)
 
-  // A sala tem que ser decidida ANTES do primeiro spawn: e ela que diz qual
-  // pool esta ativo. Retomar a sala salva (e nao sortear uma nova por janela) e
-  // o mesmo motivo do `sequenceIndex` — o mundo e reconstruido a cada flush, e
-  // sortear aqui faria a sala trocar de 30 em 30 segundos sozinha.
-  const sala = temSalas(mapId)
-    ? (progresso?.sala ?? novaSala(base.rng, mapId, 0, 0))
-    : null
   const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool)
 
   const enemies: EnemyEntity[] = []
