@@ -65,8 +65,9 @@ export function GameWindow({
   // `[data-keep-open]` marca quem NAO deve disparar o fechamento: os botoes de
   // menu ja alternam a tela por conta propria, e fechar aqui antes do onClick
   // deles transformaria "clicar de novo pra fechar" em "fecha e reabre".
+  const temBackdrop = !!backdrop
   useEffect(() => {
-    if (!backdrop) return
+    if (!temBackdrop) return
     function onDown(event: MouseEvent) {
       const alvo = event.target as HTMLElement | null
       if (!alvo) return
@@ -76,7 +77,12 @@ export function GameWindow({
     }
     document.addEventListener('mousedown', onDown)
     return () => document.removeEventListener('mousedown', onDown)
-  }, [backdrop, winKey, onClose])
+    // `temBackdrop` (booleano) em vez de `backdrop` (objeto): os chamadores
+    // passam `backdrop={{ zIndex: 30 }}` inline, objeto novo a cada render —
+    // o efeito nunca le `backdrop.zIndex` (isso e lido direto no JSX abaixo),
+    // so a existencia. Com o objeto na dependencia, o listener remontava a
+    // cada render do pai, nao so quando backdrop aparecia/sumia de verdade.
+  }, [temBackdrop, winKey, onClose])
 
   // Enquanto nao foi arrastada a janela e centrada por calculo (e nao por
   // `translateX(-50%)`) porque o `transform` briga com o `resize: both`: o

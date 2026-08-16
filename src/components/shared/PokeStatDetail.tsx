@@ -334,6 +334,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
         {rows.map(({ entry, ability }, index) => {
           const learned = entry.levelReq <= pokeVivo.level
           const aoe50 = ehGolpeAoeDeNivel50(entry.key)
+          const idxNaFila = ativos.indexOf(entry.key)
           return (
             <div
               // A chave inclui o indice porque uma especie PODE aprender o
@@ -366,7 +367,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
               ) : (
                 <CelulaOrdem
                   aprendido={learned}
-                  ordem={ativos.includes(entry.key) ? ativos.indexOf(entry.key) + 1 : null}
+                  ordem={idxNaFila === -1 ? null : idxNaFila + 1}
                   habilitado={podeEscolher}
                   onClick={() => alternar(entry.key)}
                 />

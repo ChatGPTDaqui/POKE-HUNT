@@ -48,7 +48,10 @@ export function useAcaoPendente(): AcaoPendente {
 
   return {
     pendingKey,
-    isPending: useCallback((key: string) => pendingKey === key, [pendingKey]),
+    // Sem useCallback: a dependencia e o proprio `pendingKey`, entao a funcao
+    // ja seria recriada toda vez que o resultado de `isPending` mudasse -- o
+    // memo nao estabilizava nada, so pagava o custo da comparacao de deps.
+    isPending: (key: string) => pendingKey === key,
     run,
   }
 }

@@ -92,8 +92,11 @@ export function PokemonsTab() {
   // regra de seguranca do "Vender Tudo", que nunca toca em shiny.
   const selectable = filtered.filter(({ poke }) => !poke.locked && (shinyOnly || !poke.isShiny))
   const selectableUids = selectable.map(({ poke }) => poke.uid)
+  // Set em vez de `.includes()` no array: a mochila chega a centenas de POKE,
+  // e `.includes()` dentro do `.filter()` abaixo virava O(n*m) a cada render.
+  const selectableUidSet = new Set(selectableUids)
   const allSelected = selectableUids.length > 0 && selectableUids.every((uid) => selectedUids.has(uid))
-  const activeSelection = [...selectedUids].filter((uid) => selectableUids.includes(uid))
+  const activeSelection = [...selectedUids].filter((uid) => selectableUidSet.has(uid))
 
   async function venderLote(uids: string[], extras?: { shiny: number; locked: number }) {
     const { ok, local } = await pedirAcaoComLocal(

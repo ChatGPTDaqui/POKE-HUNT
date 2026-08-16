@@ -5,11 +5,11 @@
 // O cabecalho (ProfileHero, com a sprite gen5 animada) fica FORA do corpo
 // trocado pelas abas: se ele fosse remontado a cada clique de aba, a animacao
 // do GIF reiniciaria do zero. Ele tambem e a alca de arraste da janela.
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { GameWindow } from '@/components/game/GameWindow'
 import { ProfileHero, StatDetail, MovesetTable } from '@/components/shared/PokeStatDetail'
 import { TypeWeaknessSection } from '@/components/shared/TypeWeaknessSection'
-import { usePokeProfileStore } from '@/stores/pokeProfileStore'
+import { usePokeProfileStore, type PokeProfileTarget } from '@/stores/pokeProfileStore'
 import { cn } from '@/lib/utils'
 
 type ProfileTab = 'status' | 'golpes'
@@ -17,15 +17,19 @@ type ProfileTab = 'status' | 'golpes'
 export function PokeProfileModal() {
   const open = usePokeProfileStore((s) => s.open)
   const close = usePokeProfileStore((s) => s.close)
-  const [activeTab, setActiveTab] = useState<ProfileTab>('status')
-
-  // Trocar de POKE volta pra aba Status (o vanilla recriava o modal inteiro,
-  // entao isso vinha de graca).
-  useEffect(() => {
-    if (open) setActiveTab('status')
-  }, [open?.poke.uid])
-
   if (!open) return null
+  // `key` pelo uid: trocar de POKE remonta o corpo inteiro (o vanilla
+  // recriava o modal inteiro, entao a aba voltar pra Status vinha de graca) —
+  // sem isso um `useEffect` resetando `activeTab` corria DEPOIS do primeiro
+  // render com o POKE novo, e a aba antiga piscava na tela por um frame antes
+  // de corrigir. Trocar so de ABA (mesmo uid) nao remonta, preserva estado.
+  return <PokeProfileModalBody key={open.poke.uid} open={open} close={close} />
+}
+
+function PokeProfileModalBody(
+  { open, close }: { open: PokeProfileTarget; close: () => void },
+) {
+  const [activeTab, setActiveTab] = useState<ProfileTab>('status')
   const { poke, species } = open
 
   return (
