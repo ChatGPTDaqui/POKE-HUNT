@@ -24,6 +24,20 @@ import type { Rng } from '@/core/rng'
 export type EntityState = 'idle' | 'wander' | 'chase' | 'engaged' | 'dead'
 export type AttackAnimKind = 'Shoot' | 'Charge'
 
+// Escudos ("Screens"): Reflect/Light Screen/Safeguard/Mist/Lucky Chant/Wide
+// Guard. Cada valor e segundos restantes (mesmo padrao de `imunidadeDeStatus`
+// abaixo) — ausente ou 0 = inativo. Volateis pelo mesmo motivo de
+// `estagios`/`statusVolatil`: nos jogos zeram quando o POKE sai de campo, e a
+// entidade e o que e recriado a cada troca de cena.
+export interface Escudos {
+  reflect?: number
+  lightScreen?: number
+  safeguard?: number
+  mist?: number
+  luckyChant?: number
+  wideGuard?: number
+}
+
 export interface Point {
   x: number
   y: number
@@ -95,6 +109,10 @@ export interface BaseEntity {
   // contador de sono, roll de descongelar). Conta separado do cooldown de
   // acao: um POKE dormindo nao age, mas o sono precisa continuar passando.
   proximoTurnoDeStatus: number
+  // Ver `Escudos` acima. Opcional porque nem toda entidade chega a usar um
+  // golpe de Screen numa hunt — evita inicializar mais um objeto por entidade
+  // criada quando nenhuma delas nunca vai usar.
+  escudos?: Escudos
 }
 
 export interface PlayerEntity extends BaseEntity {

@@ -161,6 +161,15 @@ const DANO_SEM_PODER_BASE = new Set([
   'counter', 'mirror_coat',
 ])
 
+// quick_guard (bloqueia golpe de PRIORIDADE) fica sem implementacao mecanica
+// de proposito, ao contrario dos outros 5 golpes do elenco Screens (Reflect,
+// Light Screen, Safeguard, Mist, Lucky Chant, Wide Guard — ver `Escudos` em
+// engine/types.ts e ESCUDO_ABILITIES em engine/systems/combatSystem.ts). ESTE
+// MOTOR NAO TEM CONCEITO DE PRIORIDADE DE GOLPE: todo golpe pousa pelo mesmo
+// pipeline de hit (queueHit -> resolveHit), sem ordem de turno nem "golpe que
+// age primeiro" pra quick_guard bloquear. Fica no catalogo/kit como golpe de
+// status comum — golpe morto de verdade, nao um esquecimento.
+
 // Golpe de status continua inerte ate a Leva B — toda lista voltada pro jogador
 // e a IA de combate filtram por aqui.
 export function isDamagingAbility(ability: Ability | null | undefined): boolean {

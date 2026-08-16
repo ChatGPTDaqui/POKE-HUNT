@@ -21,7 +21,7 @@ import {
 } from '@/data/statusEffects'
 import type { StatChange } from '@/data/generated/types'
 import type { Ability } from '@/data/abilities'
-import type { WorldEntity } from '../types'
+import type { WorldEntity, Escudos } from '../types'
 
 export function statusNaoVolatil(entity: WorldEntity): StatusAtivo | null {
   return entity.poke.status ?? null
@@ -47,6 +47,7 @@ export function statusAtivos(entity: WorldEntity): StatusAtivo[] {
  */
 export function statusVaiPegar(alvo: WorldEntity, tipo: StatusCondition, abilityId?: string): boolean {
   if (alvo.imunidadeDeStatus > 0) return false
+  if ((alvo.escudos?.safeguard ?? 0) > 0) return false
   if (ehVolatil(tipo) && alvo.statusVolatil) return false
   const especie = SPECIES[alvo.poke.speciesId]
   return podeReceberStatus(tipo, {
@@ -74,6 +75,11 @@ export function aplicarStatus(
   // A imunidade de reaplicacao vale pros dois tipos de status: e ela que
   // impede o Antidoto de virar ouro jogado fora num combate que nao acaba.
   if (alvo.imunidadeDeStatus > 0) return null
+
+  // Safeguard: bloqueia qualquer status NOVO enquanto ativo. Nao mexe em
+  // status que o alvo ja tinha antes de ativar o escudo — este guard so
+  // impede a ENTRADA de um status daqui pra frente.
+  if ((alvo.escudos?.safeguard ?? 0) > 0) return null
 
   const especie = SPECIES[alvo.poke.speciesId]
   const podeReceber = podeReceberStatus(tipo, {
@@ -115,8 +121,13 @@ export function aplicarMudancasDeStat(
   if (nextFloat(rng) * 100 >= ability.statChance) return []
 
   const destino = ability.statTarget === 'self' ? atacante : alvo
+  // Mist: bloqueia queda de estagio vinda de golpe do OPONENTE (statTarget
+  // ausente/nao-'self', ou seja, o destino e o `alvo`). Nao mexe em queda
+  // auto-infligida pelo proprio usuario (ex: golpe que baixa a propria stat).
+  const bloqueadoPorMist = ability.statTarget !== 'self' && (alvo.escudos?.mist ?? 0) > 0
   const aplicadas: StatChange[] = []
   for (const mudanca of ability.statChanges) {
+    if (bloqueadoPorMist && mudanca.estagios < 0) continue
     const antes = destino.estagios[mudanca.stat] ?? 0
     const depois = Math.max(ESTAGIO_MINIMO, Math.min(ESTAGIO_MAXIMO, antes + mudanca.estagios))
     if (depois === antes) continue // ja no teto ou no piso
@@ -172,6 +183,7 @@ export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.statusVolatil = null
   entity.estagios = {}
   entity.revelado = undefined
+  entity.escudos = undefined
 }
 
 export interface TickDeStatus {
@@ -192,6 +204,16 @@ export interface TickDeStatus {
 export function tickStatus(rng: Rng, entity: WorldEntity, dt: number): TickDeStatus {
   if (entity.imunidadeDeStatus > 0) {
     entity.imunidadeDeStatus = Math.max(0, entity.imunidadeDeStatus - dt)
+  }
+
+  // Escudos (Screens): mesmo padrao de `imunidadeDeStatus` acima — contam em
+  // segundos reais, nao em "turnos", entao decrementam todo frame, nao so
+  // quando o relogio de turno desta entidade fecha.
+  if (entity.escudos) {
+    for (const chave of Object.keys(entity.escudos) as (keyof Escudos)[]) {
+      const restante = entity.escudos[chave] ?? 0
+      if (restante > 0) entity.escudos[chave] = Math.max(0, restante - dt)
+    }
   }
 
   entity.proximoTurnoDeStatus -= dt
