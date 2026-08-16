@@ -24,6 +24,14 @@ export interface HuntMapDef extends MapDataEntry {
   unlocksContinentOnClear?: string[]
   startCountdown?: number
   keepCorpses?: boolean
+  // Hunt-alvo de teste (ver data/trainingDummy.ts): abate nao concede EXP,
+  // ouro, item nem captura. `handleEnemyDefeated` sai cedo com um resumo
+  // zerado antes de tocar em qualquer uma dessas quatro coisas.
+  noRewards?: boolean
+  // Mesma hunt de teste: o inimigo NUNCA revida (`executeEnemyAction` sai
+  // antes de `pickAbility`). IV de ataque no minimo sozinho nao bastava —
+  // o gap de NIVEL na formula de dano ainda deixava passar dano real.
+  passiveEnemies?: boolean
 }
 
 export interface HuntEncounter extends EncounterDataEntry {

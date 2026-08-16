@@ -90,10 +90,14 @@ describe('silent pula criacao de WorldEffect sem afetar dano (PH-11)', () => {
 // "A explosao elemental ele aprende, mas nao e obrigado a usar, e o ataque
 // basico ele aprende, mas tambem nao e obrigado a usar."
 //
-// Os dois vivem FORA dos 4 slots (activeAbilities.ts) e por isso nao aparecem
-// na tela de Equipes — o jeito de recusar cada um e o duplo-clique na barra de
-// golpes, que grava em `disabledAbilities` (RPC `alternar_habilidade`). Estes
-// testes travam o outro lado do contrato: que o combate REALMENTE obedece.
+// Pedido explicito do usuario (revertendo uma decisao anterior desta mesma
+// sessao): os dois PARARAM de viver fora dos 4 slots — sao golpes normais,
+// aparecem na tela de Equipes, escolhidos/removidos pelo mesmo
+// `setActiveAbilities` de qualquer golpe. O duplo-clique na barra
+// (`disabledAbilities`, RPC `alternar_habilidade`) continua existindo como
+// liga/desliga GENERICO de qualquer golpe ja escolhido — nao e mais exclusivo
+// destes dois. Estes testes travam que o combate obedece os dois caminhos:
+// tirar do slot-de-4, ou desligar via toggle.
 describe('AOE elemental e Ataque Basico sao opcionais', () => {
   function cenario(nivel: number) {
     const rng = createRng(7)
@@ -139,16 +143,25 @@ describe('AOE elemental e Ataque Basico sao opcionais', () => {
     return usados
   }
 
-  it('o AOE de nivel 50 some da rotacao quando desligado', () => {
+  it('o AOE de nivel 50 some da rotacao quando desligado (via disabledAbilities) ou tirado do slot', () => {
     const aoe = typedAoeMoveKey(SPECIES.charmander.type)
+    // Golpe normal agora: precisa estar EXPLICITAMENTE nos 4 escolhidos pra
+    // entrar em rotacao (nao e mais garantido por padrao).
+    const escolha = [aoe, 'ember', 'scratch', 'growl']
 
     const ligado = cenario(60)
-    // Pre-condicao: sem desligar, ele ESTA disponivel pro combate.
+    ligado.player.poke.activeAbilities = escolha
+    // Pre-condicao: escolhido e sem desligar, ele ESTA disponivel pro combate.
     expect(golpesUtilizaveis(ligado.player.poke, SPECIES[ligado.player.poke.speciesId], false)).toContain(aoe)
 
-    const desligado = cenario(60)
-    desligado.player.poke.disabledAbilities = { [aoe]: true }
-    expect(golpesUsados(desligado, 40).has(aoe)).toBe(false)
+    const desligadoPorToggle = cenario(60)
+    desligadoPorToggle.player.poke.activeAbilities = escolha
+    desligadoPorToggle.player.poke.disabledAbilities = { [aoe]: true }
+    expect(golpesUsados(desligadoPorToggle, 40).has(aoe)).toBe(false)
+
+    const removidoDoSlot = cenario(60)
+    removidoDoSlot.player.poke.activeAbilities = ['ember', 'scratch', 'growl']
+    expect(golpesUsados(removidoDoSlot, 40).has(aoe)).toBe(false)
   })
 
   it('o Ataque Basico some da rotacao quando desligado, mesmo sendo o ultimo recurso', () => {

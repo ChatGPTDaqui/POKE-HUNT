@@ -113,6 +113,13 @@ export interface SubBiomaDef {
    */
   peso: number
   loot: PerfilDeLoot
+  /**
+   * Fundo PROPRIO do sub-bioma, so quando difere do bioma-pai. Ausente = herda
+   * `bioma.bg` (ver `backgroundParaSala`). Antes de 2026-08-15 nao existia —
+   * as 33 sub-biomas de um bioma sempre mostravam a mesma imagem, mesmo com o
+   * HUD ja anunciando "Mato Alto Lv18-21" a cada troca de sala.
+   */
+  bg?: { primary: string; secondary: string; image: string }
 }
 
 export interface BiomaDef {
@@ -124,14 +131,45 @@ export interface BiomaDef {
   subBiomas: SubBiomaDef[]
 }
 
+// As 7 imagens antigas (uma por bioma, compartilhada por todos os sub-biomas
+// dele) saem de uso aqui, substituidas pela leva de 2026-08-15 — ficam no
+// disco sem referencia, nada foi apagado. `dojo` e a UNICA que continua:
+// segue exclusiva do sub-bioma "Dojo" (e da hunt de Treinamento, em
+// trainingDummy.ts), preservada de proposito em vez de cair no fundo novo do
+// bioma Urbano.
 const ARTE = {
-  floresta: 'assets/hunt-backgrounds/forest.png',
-  agua: 'assets/hunt-backgrounds/water.png',
-  caverna: 'assets/hunt-backgrounds/cave.png',
-  fogo: 'assets/hunt-backgrounds/fire.png',
   dojo: 'assets/hunt-backgrounds/dojo.png',
-  eletrico: 'assets/hunt-backgrounds/eletric.png',
-  dragao: 'assets/hunt-backgrounds/dragon.png',
+
+  // Bioma-padrao (usado pelo bioma inteiro e por todo sub-bioma sem imagem
+  // propria) + os sub-biomas com correspondencia EXATA de nome — ver o
+  // mapeamento completo na mensagem que acompanhou esta leva.
+  planicie: 'assets/hunt-backgrounds/plains.jpg',
+  campina: 'assets/hunt-backgrounds/meadow.jpg',
+  vilarejo: 'assets/hunt-backgrounds/town.jpg',
+  vilarejoNoturno: 'assets/hunt-backgrounds/town-night.jpg',
+  florestaPadrao: 'assets/hunt-backgrounds/forest.jpg',
+  matoAlto: 'assets/hunt-backgrounds/tall-grass.jpg',
+  selva: 'assets/hunt-backgrounds/jungle.jpg',
+  ilha: 'assets/hunt-backgrounds/island.jpg',
+  marAberto: 'assets/hunt-backgrounds/sea.jpg',
+  praia: 'assets/hunt-backgrounds/beach.jpg',
+  lago: 'assets/hunt-backgrounds/lake.jpg',
+  pantano: 'assets/hunt-backgrounds/swamp.jpg',
+  ermos: 'assets/hunt-backgrounds/badlands.jpg',
+  deserto: 'assets/hunt-backgrounds/desert.jpg',
+  terraDevastada: 'assets/hunt-backgrounds/wasteland.jpg',
+  montanha: 'assets/hunt-backgrounds/mountain.jpg',
+  cavernaVulcanica: 'assets/hunt-backgrounds/cave-volcanic.jpg',
+  cavernaDeGelo: 'assets/hunt-backgrounds/ice-cave.jpg',
+  montanhaDeGelo: 'assets/hunt-backgrounds/ice-mountain.png',
+  vulcao: 'assets/hunt-backgrounds/volcano.jpg',
+  obra: 'assets/hunt-backgrounds/construction-site.jpg',
+  industrial: 'assets/hunt-backgrounds/industrial.jpg',
+  ruinas: 'assets/hunt-backgrounds/ruins.jpg',
+  temploMistico: 'assets/hunt-backgrounds/temple.png',
+  grutaFeerica: 'assets/hunt-backgrounds/fairy-cave.jpg',
+  florestaQueimada: 'assets/hunt-backgrounds/burnt-forest.jpg',
+  abismo: 'assets/hunt-backgrounds/abyss.jpg',
 } as const
 
 export const BIOMAS: BiomaDef[] = [
@@ -139,33 +177,35 @@ export const BIOMAS: BiomaDef[] = [
     chave: 'campo_aberto',
     nome: 'Campo Aberto',
     tipo: 'NORMAL',
-    bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.floresta },
+    bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.campina },
     subBiomas: [
-      { chave: 'plains', nome: 'Planicie', peso: 10, loot: 'basico' },
+      { chave: 'plains', nome: 'Planicie', peso: 10, loot: 'basico', bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.planicie } },
+      // Sem arte propria entre os 27 arquivos novos — herda o fundo do bioma.
       { chave: 'grass', nome: 'Relvado', peso: 10, loot: 'basico' },
       { chave: 'meadow', nome: 'Campina', peso: 6, loot: 'basico' },
-      { chave: 'town', nome: 'Vilarejo', peso: 6, loot: 'civilizado' },
+      { chave: 'town', nome: 'Vilarejo', peso: 6, loot: 'civilizado', bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: ARTE.vilarejo } },
     ],
   },
   {
     chave: 'mata',
     nome: 'Mata',
     tipo: 'GRASS',
-    bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.floresta },
+    bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.florestaPadrao },
     subBiomas: [
       { chave: 'forest', nome: 'Floresta', peso: 10, loot: 'basico' },
-      { chave: 'tall-grass', nome: 'Mato Alto', peso: 10, loot: 'basico' },
-      { chave: 'jungle', nome: 'Selva', peso: 6, loot: 'remoto' },
+      { chave: 'tall-grass', nome: 'Mato Alto', peso: 10, loot: 'basico', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.matoAlto } },
+      { chave: 'jungle', nome: 'Selva', peso: 6, loot: 'remoto', bg: { primary: '#284b3c', secondary: '#2e5544', image: ARTE.selva } },
     ],
   },
   {
     chave: 'marinho',
     nome: 'Marinho',
     tipo: 'WATER',
-    bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.agua },
+    bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.ilha },
     subBiomas: [
-      { chave: 'sea', nome: 'Mar Aberto', peso: 10, loot: 'basico' },
-      { chave: 'beach', nome: 'Praia', peso: 6, loot: 'civilizado' },
+      { chave: 'sea', nome: 'Mar Aberto', peso: 10, loot: 'basico', bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.marAberto } },
+      { chave: 'beach', nome: 'Praia', peso: 6, loot: 'civilizado', bg: { primary: '#1f3d52', secondary: '#27506b', image: ARTE.praia } },
+      // Sem arte propria — herda o fundo do bioma (a ilha).
       { chave: 'seabed', nome: 'Leito Oceanico', peso: 3, loot: 'profundo' },
     ],
   },
@@ -173,30 +213,30 @@ export const BIOMAS: BiomaDef[] = [
     chave: 'aguas_interiores',
     nome: 'Aguas Interiores',
     tipo: 'WATER',
-    bg: { primary: '#24463f', secondary: '#2c5850', image: ARTE.agua },
+    bg: { primary: '#24463f', secondary: '#2c5850', image: ARTE.lago },
     subBiomas: [
       { chave: 'lake', nome: 'Lago', peso: 10, loot: 'basico' },
-      { chave: 'swamp', nome: 'Pantano', peso: 6, loot: 'remoto' },
+      { chave: 'swamp', nome: 'Pantano', peso: 6, loot: 'remoto', bg: { primary: '#24463f', secondary: '#2c5850', image: ARTE.pantano } },
     ],
   },
   {
     chave: 'aridos',
     nome: 'Aridos',
     tipo: 'GROUND',
-    bg: { primary: '#5c4a30', secondary: '#6d5838', image: ARTE.caverna },
+    bg: { primary: '#5c4a30', secondary: '#6d5838', image: ARTE.ermos },
     subBiomas: [
       { chave: 'badlands', nome: 'Ermos', peso: 10, loot: 'basico' },
-      { chave: 'desert', nome: 'Deserto', peso: 6, loot: 'remoto' },
-      { chave: 'wasteland', nome: 'Terra Devastada', peso: 3, loot: 'profundo' },
+      { chave: 'desert', nome: 'Deserto', peso: 6, loot: 'remoto', bg: { primary: '#5c4a30', secondary: '#6d5838', image: ARTE.deserto } },
+      { chave: 'wasteland', nome: 'Terra Devastada', peso: 3, loot: 'profundo', bg: { primary: '#5c4a30', secondary: '#6d5838', image: ARTE.terraDevastada } },
     ],
   },
   {
     chave: 'subterraneo',
     nome: 'Subterraneo',
     tipo: 'ROCK',
-    bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.caverna },
+    bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.montanha },
     subBiomas: [
-      { chave: 'cave', nome: 'Caverna', peso: 10, loot: 'basico' },
+      { chave: 'cave', nome: 'Caverna', peso: 10, loot: 'basico', bg: { primary: '#3a3340', secondary: '#463d4d', image: ARTE.cavernaVulcanica } },
       { chave: 'mountain', nome: 'Montanha', peso: 6, loot: 'remoto' },
     ],
   },
@@ -204,9 +244,10 @@ export const BIOMAS: BiomaDef[] = [
     chave: 'gelido',
     nome: 'Gelido',
     tipo: 'ICE',
-    bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.caverna },
+    bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.montanhaDeGelo },
     subBiomas: [
-      { chave: 'ice-cave', nome: 'Caverna de Gelo', peso: 10, loot: 'remoto' },
+      { chave: 'ice-cave', nome: 'Caverna de Gelo', peso: 10, loot: 'remoto', bg: { primary: '#33505e', secondary: '#3d6070', image: ARTE.cavernaDeGelo } },
+      // Sem arte propria — herda o fundo do bioma (montanha de gelo).
       { chave: 'snowy-forest', nome: 'Floresta Nevada', peso: 6, loot: 'basico' },
     ],
   },
@@ -214,7 +255,7 @@ export const BIOMAS: BiomaDef[] = [
     chave: 'igneo',
     nome: 'Igneo',
     tipo: 'FIRE',
-    bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.fogo },
+    bg: { primary: '#5a2a1e', secondary: '#6d3626', image: ARTE.vulcao },
     subBiomas: [
       { chave: 'volcano', nome: 'Vulcao', peso: 10, loot: 'remoto' },
     ],
@@ -223,20 +264,23 @@ export const BIOMAS: BiomaDef[] = [
     chave: 'urbano',
     nome: 'Urbano',
     tipo: 'FIGHTING',
-    bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.dojo },
+    bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.vilarejoNoturno },
     subBiomas: [
       { chave: 'metropolis', nome: 'Metropole', peso: 10, loot: 'civilizado' },
       { chave: 'slum', nome: 'Cortico', peso: 6, loot: 'civilizado' },
-      { chave: 'dojo', nome: 'Dojo', peso: 6, loot: 'basico' },
+      // Dojo preserva a arte propria (ARTE.dojo) — nao herda o fundo novo do
+      // bioma, de proposito (ver comentario no topo de ARTE).
+      { chave: 'dojo', nome: 'Dojo', peso: 6, loot: 'basico', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.dojo } },
     ],
   },
   {
     chave: 'industrial',
     nome: 'Industrial',
     tipo: 'ELECTRIC',
-    bg: { primary: '#3b3f4a', secondary: '#474c59', image: ARTE.eletrico },
+    bg: { primary: '#3b3f4a', secondary: '#474c59', image: ARTE.industrial },
     subBiomas: [
-      { chave: 'construction-site', nome: 'Obra', peso: 10, loot: 'civilizado' },
+      { chave: 'construction-site', nome: 'Obra', peso: 10, loot: 'civilizado', bg: { primary: '#3b3f4a', secondary: '#474c59', image: ARTE.obra } },
+      // factory/power-plant/laboratory sem arte propria — herdam o fundo do bioma.
       { chave: 'factory', nome: 'Fabrica', peso: 6, loot: 'civilizado' },
       { chave: 'power-plant', nome: 'Usina', peso: 6, loot: 'remoto' },
       { chave: 'laboratory', nome: 'Laboratorio', peso: 3, loot: 'profundo' },
@@ -246,22 +290,24 @@ export const BIOMAS: BiomaDef[] = [
     chave: 'sagrado',
     nome: 'Sagrado',
     tipo: 'PSYCHIC',
-    bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.dojo },
+    bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.temploMistico },
     subBiomas: [
-      { chave: 'ruins', nome: 'Ruinas', peso: 10, loot: 'remoto' },
+      { chave: 'ruins', nome: 'Ruinas', peso: 10, loot: 'remoto', bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.ruinas } },
       { chave: 'temple', nome: 'Templo', peso: 6, loot: 'remoto' },
-      { chave: 'fairy-cave', nome: 'Gruta Feerica', peso: 3, loot: 'profundo' },
+      { chave: 'fairy-cave', nome: 'Gruta Feerica', peso: 3, loot: 'profundo', bg: { primary: '#4a3a55', secondary: '#584565', image: ARTE.grutaFeerica } },
     ],
   },
   {
     chave: 'sombrio',
     nome: 'Sombrio',
     tipo: 'GHOST',
-    bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.caverna },
+    bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.florestaQueimada },
     subBiomas: [
+      // Sem arte propria — herda o fundo do bioma (floresta queimada).
       { chave: 'graveyard', nome: 'Cemiterio', peso: 10, loot: 'remoto' },
-      { chave: 'abyss', nome: 'Abismo', peso: 6, loot: 'profundo' },
-      { chave: 'space', nome: 'Espaco', peso: 3, loot: 'profundo' },
+      { chave: 'abyss', nome: 'Abismo', peso: 6, loot: 'profundo', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.abismo } },
+      // Reaproveita o Abismo: vazio/cosmico e o mais proximo dos 27 arquivos novos.
+      { chave: 'space', nome: 'Espaco', peso: 3, loot: 'profundo', bg: { primary: '#2b2733', secondary: '#35303f', image: ARTE.abismo } },
     ],
   },
 ]

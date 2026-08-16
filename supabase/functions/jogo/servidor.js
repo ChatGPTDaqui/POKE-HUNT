@@ -24097,14 +24097,14 @@ function nivelDeAprendizado(species) {
 	return nivelExigido(species);
 }
 function learnsetAte(species, level) {
-	const aoe = typedAoeMoveKey(species.type);
-	return golpesAprendidosAte(species, level).filter((key) => key !== aoe);
+	return golpesAprendidosAte(species, level);
 }
 function activeAbilitiesSelvagem(species, level) {
-	return learnsetAte(species, level).slice(-4);
+	const aoe = typedAoeMoveKey(species.type);
+	return learnsetAte(species, level).filter((key) => key !== aoe).slice(-4);
 }
 function activeAbilitiesPadrao(species, level) {
-	const learnset = learnsetAte(species, level);
+	const learnset = [...learnsetAte(species, level), BASIC_ATTACK.id];
 	const dano = learnset.map((key, i) => ({
 		key,
 		i,
@@ -24123,26 +24123,21 @@ function encaixarNovosGolpes(atuais, novos) {
 	for (const key of novos) {
 		if (saida.length >= 4) break;
 		if (saida.includes(key) || key === BASIC_ATTACK.id) continue;
-		if (ehGolpeAoeDeNivel50(key)) continue;
 		if (!getAbility(key)) continue;
 		saida.push(key);
 	}
 	return saida;
 }
-function ehGolpeAoeDeNivel50(key) {
-	return key in TYPED_AOE_MOVES;
-}
 function golpesUtilizaveis(poke, species, selvagem) {
 	if (selvagem) return activeAbilitiesSelvagem(species, poke.level);
-	const conhecidos = new Set(poke.unlockedAbilities);
+	const conhecidos = /* @__PURE__ */ new Set([...poke.unlockedAbilities, BASIC_ATTACK.id]);
 	const escolha = poke.activeAbilities ?? activeAbilitiesPadrao(species, poke.level);
 	const escolhidos = escolha.filter((key) => conhecidos.has(key)).slice(0, 4);
 	if (escolha.length > 0 && escolhidos.length < Math.min(escolha.length, 4)) for (const key of activeAbilitiesPadrao(species, poke.level)) {
 		if (escolhidos.length >= 4) break;
 		if (!escolhidos.includes(key) && conhecidos.has(key)) escolhidos.push(key);
 	}
-	const aoe = typedAoeMoveKey(species.type);
-	return conhecidos.has(aoe) ? [...escolhidos, aoe] : escolhidos;
+	return escolhidos;
 }
 //#endregion
 //#region src/data/pokes.ts
@@ -25752,6 +25747,62 @@ var BOSS_ENCOUNTERS_DATA = {
 	...lance.encounters
 };
 //#endregion
+//#region src/data/trainingDummy.ts
+var TRAINING_MAP_ID = "treinamento";
+var TRAINING_ENCOUNTER_ID = "treinamento_wobbuffet";
+var TREINO_IVS = {
+	hp: 31,
+	atkFis: 0,
+	atkEsp: 0,
+	def: 15,
+	defEsp: 15,
+	speed: 0
+};
+var TREINO_LEVEL = 60;
+var TRAINING_ENCOUNTER = {
+	id: TRAINING_ENCOUNTER_ID,
+	speciesId: "wobbuffet",
+	minLevel: TREINO_LEVEL,
+	maxLevel: TREINO_LEVEL,
+	aggroRadius: 260,
+	wanderRadius: 15,
+	weight: 1,
+	rarity: "comum",
+	ivs: TREINO_IVS
+};
+var TRAINING_MAP = {
+	id: TRAINING_MAP_ID,
+	name: "Treinamento",
+	description: "Um boneco de treino (Wobbuffet, nunca revida) pra testar a forca do seu time com seguranca. Sem ouro, XP, item ou captura — so pra medir: acompanhe \"Mobs/h\" no Hunt Analyzer.",
+	levelRange: [TREINO_LEVEL, TREINO_LEVEL],
+	unlockCost: null,
+	continent: "faixa1",
+	bounds: {
+		width: 1e3,
+		height: 700
+	},
+	playerSpawn: {
+		x: 500,
+		y: 470
+	},
+	bg: {
+		primary: "#2c2f3a",
+		secondary: "#3a3f52",
+		image: "assets/hunt-backgrounds/dojo.png"
+	},
+	maxEnemies: 1,
+	respawnDelay: 2,
+	spawnPoints: [{
+		x: 500,
+		y: 280
+	}],
+	enemyPool: [TRAINING_ENCOUNTER_ID],
+	itemDrops: [],
+	noCatch: true,
+	noRewards: true,
+	passiveEnemies: true
+};
+//#endregion
 //#region src/data/evolutionStage.ts
 var PRE_EVOLUCAO$1 = {};
 for (const especie of Object.values(SPECIES)) if (especie.evolvesTo && SPECIES[especie.evolvesTo]) PRE_EVOLUCAO$1[especie.evolvesTo] = especie.id;
@@ -26013,12 +26064,14 @@ var nightmare = buildNightmareMirror(maps, encounters);
 var MAPS = {
 	...maps,
 	...nightmare.maps,
-	...BOSS_MAPS_DATA
+	...BOSS_MAPS_DATA,
+	[TRAINING_MAP_ID]: TRAINING_MAP
 };
 var ENCOUNTERS = {
 	...encounters,
 	...nightmare.encounters,
-	...BOSS_ENCOUNTERS_DATA
+	...BOSS_ENCOUNTERS_DATA,
+	[TRAINING_ENCOUNTER.id]: TRAINING_ENCOUNTER
 };
 //#endregion
 //#region src/data/maps.ts
@@ -26725,7 +26778,7 @@ function findEntityById(player, enemies, id) {
 //#endregion
 //#region src/engine/effect.ts
 function createWorldEffect(counters, params) {
-	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, ballItemId, success } = params;
+	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, ballItemId, success, statusDirection } = params;
 	const id = `effect-${counters.effect++}`;
 	const lane = owner ? claimEffectLane(owner, id, laneSize) : 0;
 	return {
@@ -26750,6 +26803,7 @@ function createWorldEffect(counters, params) {
 		elementType,
 		ballItemId,
 		success,
+		statusDirection,
 		laneSize,
 		ownerId: owner ? owner.id : null,
 		lane
@@ -27221,6 +27275,170 @@ function tentarAgir(rng, entity, calcularAutoDano) {
 	return { agir: true };
 }
 //#endregion
+//#region src/data/traits.ts
+var SPECIES_TRAIT = {
+	gastly: "levitate",
+	haunter: "levitate",
+	gengar: "levitate",
+	koffing: "levitate",
+	weezing: "levitate",
+	misdreavus: "levitate",
+	unown: "levitate",
+	chinchou: "volt_absorb",
+	lanturn: "volt_absorb",
+	lapras: "water_absorb",
+	quagsire: "water_absorb",
+	wooper: "water_absorb",
+	poliwag: "water_absorb",
+	poliwhirl: "water_absorb",
+	mantine: "water_absorb",
+	growlithe: "flash_fire",
+	arcanine: "flash_fire",
+	houndour: "flash_fire",
+	houndoom: "flash_fire",
+	ponyta: "flash_fire",
+	rapidash: "flash_fire",
+	miltank: "sap_sipper",
+	girafarig: "sap_sipper",
+	stantler: "sap_sipper",
+	rhyhorn: "lightning_rod",
+	rhydon: "lightning_rod",
+	arbok: "intimidate",
+	gyarados: "intimidate",
+	snubbull: "intimidate",
+	granbull: "intimidate",
+	qwilfish: "intimidate",
+	porygon: "download",
+	porygon2: "download",
+	pikachu: "static",
+	voltorb: "static",
+	electrode: "static",
+	electabuzz: "static",
+	elekid: "static",
+	mareep: "static",
+	flaaffy: "static",
+	ampharos: "static",
+	zapdos: "static",
+	magmar: "flame_body",
+	magby: "flame_body",
+	slugma: "flame_body",
+	magcargo: "flame_body",
+	nidoran_f: "poison_point",
+	nidorina: "poison_point",
+	nidoqueen: "poison_point",
+	nidoran_m: "poison_point",
+	nidorino: "poison_point",
+	nidoking: "poison_point",
+	paras: "effect_spore",
+	parasect: "effect_spore",
+	snorlax: "immunity",
+	ditto: "limber",
+	meowth: "limber",
+	persian: "limber",
+	murkrow: "insomnia",
+	spinarak: "insomnia",
+	ariados: "insomnia",
+	mankey: "vital_spirit",
+	primeape: "vital_spirit",
+	delibird: "vital_spirit",
+	goldeen: "water_veil",
+	seaking: "water_veil",
+	slowpoke: "own_tempo",
+	slowbro: "own_tempo",
+	smeargle: "own_tempo",
+	zubat: "inner_focus",
+	golbat: "inner_focus",
+	sneasel: "inner_focus",
+	drowzee: "inner_focus",
+	hypno: "inner_focus",
+	marill: "huge_power",
+	azumarill: "huge_power",
+	corsola: "hustle",
+	machop: "guts",
+	machoke: "guts",
+	machamp: "guts",
+	heracross: "guts",
+	tyrogue: "guts",
+	ursaring: "guts",
+	teddiursa: "quick_feet",
+	horsea: "swift_swim",
+	seadra: "swift_swim",
+	kingdra: "swift_swim",
+	magikarp: "swift_swim",
+	psyduck: "swift_swim",
+	golduck: "swift_swim",
+	omanyte: "swift_swim",
+	omastar: "swift_swim",
+	kabuto: "swift_swim",
+	kabutops: "swift_swim",
+	oddish: "chlorophyll",
+	gloom: "chlorophyll",
+	bellsprout: "chlorophyll",
+	weepinbell: "chlorophyll",
+	victreebel: "chlorophyll",
+	exeggcute: "chlorophyll",
+	tangela: "chlorophyll",
+	hoppip: "chlorophyll",
+	skiploom: "chlorophyll",
+	jumpluff: "chlorophyll",
+	sunkern: "chlorophyll",
+	sunflora: "chlorophyll",
+	sandshrew: "sand_rush",
+	sandslash: "sand_rush",
+	charmander: "blaze",
+	charmeleon: "blaze",
+	charizard: "blaze",
+	cyndaquil: "blaze",
+	quilava: "blaze",
+	typhlosion: "blaze",
+	squirtle: "torrent",
+	wartortle: "torrent",
+	blastoise: "torrent",
+	totodile: "torrent",
+	croconaw: "torrent",
+	feraligatr: "torrent",
+	bulbasaur: "overgrow",
+	ivysaur: "overgrow",
+	venusaur: "overgrow",
+	chikorita: "overgrow",
+	bayleef: "overgrow",
+	meganium: "overgrow",
+	beedrill: "swarm",
+	scyther: "swarm",
+	scizor: "swarm",
+	ledyba: "swarm",
+	ledian: "swarm",
+	politoed: "drizzle",
+	tyranitar: "sand_stream",
+	seel: "ice_body",
+	dewgong: "ice_body",
+	diglett: "sand_veil",
+	dugtrio: "sand_veil",
+	gligar: "sand_veil",
+	larvitar: "sand_veil",
+	pupitar: "sand_veil",
+	phanpy: "sand_veil",
+	donphan: "sand_veil",
+	swinub: "snow_cloak",
+	piloswine: "snow_cloak",
+	articuno: "snow_cloak",
+	geodude: "sturdy",
+	graveler: "sturdy",
+	golem: "sturdy",
+	steelix: "sturdy",
+	dragonite: "multiscale",
+	lugia: "multiscale",
+	abra: "synchronize",
+	kadabra: "synchronize",
+	alakazam: "synchronize",
+	natu: "synchronize",
+	xatu: "synchronize",
+	mew: "synchronize"
+};
+function traitOf(speciesId) {
+	return SPECIES_TRAIT[speciesId] ?? null;
+}
+//#endregion
 //#region src/data/abilityCategory.ts
 /** O bloco de atributos que este POKE tem (ou tera) exatamente no nivel 50. */
 function statsAtTypedAoeLevel(poke) {
@@ -27232,6 +27450,19 @@ function resolveAbilityCategory(ability, poke) {
 	if (ability.category !== "dynamic") return ability.category;
 	const stats = statsAtTypedAoeLevel(poke);
 	return stats.atkFis >= stats.atkEsp ? "physical" : "special";
+}
+//#endregion
+//#region src/data/statusVfx.ts
+/**
+* A direcao do golpe: eleva atributo (`aumenta`) ou baixa/aplica condicao
+* negativa (`diminui`). Deriva do PRIMEIRO `statChanges` com sinal — golpe
+* misto (raro no dataset) usa so o primeiro. Sem `statChanges` (confusao,
+* veneno, sono, ...) cai em `diminui`: nenhum desses 18 status e benefico pra
+* quem recebe.
+*/
+function direcaoDoGolpeDeStatus(statChanges) {
+	const primeiro = statChanges?.[0];
+	return primeiro && primeiro.estagios > 0 ? "aumenta" : "diminui";
 }
 //#endregion
 //#region src/data/generated/typeChart.generated.ts
@@ -42439,6 +42670,15 @@ var formulaEngine$4 = createFormulaEngine(FORMULAS);
 var STAB_MULTIPLIER = formulaEngine$4.eval("STAB_MULTIPLIER");
 var CRIT_CHANCE = formulaEngine$4.eval("CRIT_CHANCE");
 var CRIT_MULTIPLIER = formulaEngine$4.eval("CRIT_MULTIPLIER");
+var LOW_HP_TRAIT_TYPE_MULTIPLIER = {
+	blaze: "FIRE",
+	torrent: "WATER",
+	overgrow: "GRASS",
+	swarm: "BUG"
+};
+var LOW_HP_TRAIT_HP_FRACTION = 1 / 3;
+var LOW_HP_TRAIT_MULTIPLIER = 1.5;
+var MULTISCALE_MULTIPLIER = .5;
 var SELF_DESTRUCT_ABILITY_KEYS = /* @__PURE__ */ new Set(["explosion", "selfdestruct"]);
 var SELF_DESTRUCT_HP_LOSS_PERCENT = .5;
 var SPEED_REFERENCE = formulaEngine$4.evalOrDefault("ATTACK_SPEED_REFERENCE", 100);
@@ -42595,6 +42835,8 @@ function estimateDamage(rng, attackerEntity, defenderEntity, ability) {
 		def
 	});
 	if (Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)) dmg *= STAB_MULTIPLIER;
+	const attackerTraitEstimate = traitOf(attackerSpecies.id);
+	if (attackerTraitEstimate && LOW_HP_TRAIT_TYPE_MULTIPLIER[attackerTraitEstimate] === ability.type && attackerPoke.hp / attackerPoke.stats.hp < LOW_HP_TRAIT_HP_FRACTION) dmg *= LOW_HP_TRAIT_MULTIPLIER;
 	dmg *= effectivenessMultiplier;
 	return dmg;
 }
@@ -42656,7 +42898,10 @@ function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista 
 		});
 		if (isPhysical) dmg *= multiplicadorDeDanoFisico(attackerPoke.status?.tipo ?? null);
 		if (Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)) dmg *= STAB_MULTIPLIER;
+		const attackerTrait = traitOf(attackerSpecies.id);
+		if (attackerTrait && LOW_HP_TRAIT_TYPE_MULTIPLIER[attackerTrait] === ability.type && attackerPoke.hp / attackerPoke.stats.hp < LOW_HP_TRAIT_HP_FRACTION) dmg *= LOW_HP_TRAIT_MULTIPLIER;
 		dmg *= effectivenessMultiplier;
+		if (traitOf(defenderSpecies.id) === "multiscale" && defenderPoke.hp === defenderPoke.stats.hp) dmg *= MULTISCALE_MULTIPLIER;
 		const chanceDeCritico = CRIT_CHANCE * Math.pow(3, Math.min(3, ability.critStages ?? 0));
 		isCrit = pessimista ? false : rollChance(rng, Math.min(.5, chanceDeCritico));
 		if (isCrit) dmg *= CRIT_MULTIPLIER;
@@ -42876,6 +43121,7 @@ function executePlayerAction(world, player, engagedEnemies, silent) {
 	if (ability.target === "aoe") queueAoeVisual(world, player, ability);
 }
 function executeEnemyAction(world, enemy, player, silent) {
+	if (world.mapDef?.passiveEnemies) return;
 	if (!canAct(enemy)) return;
 	if (statusImpedeAcao(world, enemy, silent)) return;
 	const ability = pickAbility(world.rng, enemy, player, () => 1);
@@ -42907,7 +43153,8 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			isAoe: true,
 			duration: AOE_EFFECT_DURATION,
 			worldSize: (ability.radius ?? 0) * 2,
-			elementType: ability.type
+			elementType: ability.type,
+			statusDirection: ability.power === 0 ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0
 		}));
 		if (SELF_DESTRUCT_ABILITY_KEYS.has(ability.id) && !isDead(attacker)) {
 			const recoil = Math.round(attacker.poke.hp * SELF_DESTRUCT_HP_LOSS_PERCENT);
@@ -42940,11 +43187,86 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke));
 		if (!silent) spawnDamageNumber(world, target, result);
 	}
+	if (ability.category === "physical" && result.amount > 0) switch (traitOf(target.poke.speciesId)) {
+		case "static":
+			aplicarStatus(world.rng, attacker, "paralysis", 30);
+			break;
+		case "flame_body":
+			aplicarStatus(world.rng, attacker, "burn", 30);
+			break;
+		case "poison_point":
+			aplicarStatus(world.rng, attacker, "poison", 30);
+			break;
+		case "effect_spore": {
+			const especieAtacante = SPECIES[attacker.poke.speciesId];
+			if (!(especieAtacante.type === "GRASS" || especieAtacante.type2 === "GRASS") && nextFloat(world.rng) * 100 < 30) {
+				const opcoes = [
+					"poison",
+					"paralysis",
+					"sleep"
+				];
+				const escolhido = opcoes[Math.floor(nextFloat(world.rng) * opcoes.length)];
+				aplicarStatus(world.rng, attacker, escolhido, 100);
+			}
+			break;
+		}
+		case "rough_skin":
+		case "iron_barbs": {
+			const recoil = Math.max(1, Math.round(attacker.poke.stats.hp / 8));
+			takeDamage(attacker, recoil);
+			if (!silent) spawnDamageNumber(world, attacker, {
+				amount: recoil,
+				effectiveness: "normal",
+				effectivenessLabel: null,
+				isCrit: false
+			});
+			if (isDead(attacker)) {
+				if (attacker.kind === "player") {
+					if (!attacker.fainted) {
+						attacker.fainted = true;
+						onPlayerFainted();
+					}
+				} else if (!attacker.deathHandled) {
+					attacker.deathHandled = true;
+					defeatedEnemyIds.push(attacker.id);
+				}
+			}
+			break;
+		}
+		case "aftermath": if (isDead(target)) {
+			const recoil = Math.round(attacker.poke.stats.hp / 4);
+			takeDamage(attacker, recoil);
+			if (!silent) spawnDamageNumber(world, attacker, {
+				amount: recoil,
+				effectiveness: "normal",
+				effectivenessLabel: null,
+				isCrit: false
+			});
+			if (isDead(attacker)) {
+				if (attacker.kind === "player") {
+					if (!attacker.fainted) {
+						attacker.fainted = true;
+						onPlayerFainted();
+					}
+				} else if (!attacker.deathHandled) {
+					attacker.deathHandled = true;
+					defeatedEnemyIds.push(attacker.id);
+				}
+			}
+		}
+	}
+	let statusRecebeuEm = null;
 	if (!isDead(target)) {
 		const aplicado = aplicarEfeitosDoGolpe(world.rng, target, ability);
-		if (aplicado && !silent) anunciarStatus(world, target, aplicado.tipo, "entrou");
+		if (aplicado) {
+			statusRecebeuEm = target;
+			if (!silent) anunciarStatus(world, target, aplicado.tipo, "entrou");
+		}
 		const mudancas = aplicarMudancasDeStat(world.rng, attacker, target, ability);
-		if (mudancas.length && !silent) anunciarEstagios(world, ability.statTarget === "self" ? attacker : target, mudancas);
+		if (mudancas.length) {
+			statusRecebeuEm = ability.statTarget === "self" ? attacker : target;
+			if (!silent) anunciarEstagios(world, statusRecebeuEm, mudancas);
+		}
 	}
 	if (ability.healPercent) {
 		const quanto = Math.max(1, Math.round(attacker.poke.stats.hp * ability.healPercent / 100));
@@ -42989,17 +43311,21 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		}
 	}
 	const isPlayerAttacker = attacker.kind === "player";
-	if (!(ability.target === "aoe") && !silent) world.effects.push(createWorldEffect(world.counters, {
-		type: "abilityEffect",
-		x: target.x,
-		y: target.y,
-		targetX: target.x,
-		targetY: target.y - target.radius * .6,
-		color: colorForType(ability.type),
-		isAoe: false,
-		duration: IMPACT_EFFECT_DURATION,
-		elementType: ability.type
-	}));
+	if (!(ability.target === "aoe") && !silent && (ability.power > 0 || statusRecebeuEm)) {
+		const local = ability.power === 0 && statusRecebeuEm ? statusRecebeuEm : target;
+		world.effects.push(createWorldEffect(world.counters, {
+			type: "abilityEffect",
+			x: local.x,
+			y: local.y,
+			targetX: local.x,
+			targetY: local.y - local.radius * .6,
+			color: colorForType(ability.type),
+			isAoe: false,
+			duration: IMPACT_EFFECT_DURATION,
+			elementType: ability.type,
+			statusDirection: ability.power === 0 ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0
+		}));
+	}
 	if (!isDead(target)) return;
 	if (isPlayerAttacker) {
 		if (!target.deathHandled) {
@@ -44770,6 +45096,23 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 	const player = world.player;
 	const poke = player.poke;
 	const enemySpecies = SPECIES[enemy.poke.speciesId];
+	if (world.mapDef.noRewards) {
+		if (!silent) recordKill(gameState, {
+			gold: 0,
+			xp: 0,
+			isShiny: Boolean(enemy.poke.isShiny)
+		});
+		return {
+			gold: 0,
+			xp: 0,
+			leveledUp: false,
+			trainerLeveledUp: false,
+			isShiny: Boolean(enemy.poke.isShiny),
+			captured: false,
+			capturedPoke: null,
+			droppedItems: []
+		};
+	}
 	const expGain = expRewardForEnemy(enemy.poke, poke.level);
 	const grantResult = grantExp(poke, expGain);
 	player.poke = grantResult.poke;

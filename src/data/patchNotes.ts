@@ -13,6 +13,18 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '7.0',
+    date: '2026-08-15',
+    title: 'Hunt de Treinamento pra medir a forca do time, trava de golpes de volta em hunt, e o icone que sumia ao desligar',
+    highlights: [
+      'NOVA HUNT: TREINAMENTO. Um boneco de treino (Wobbuffet, nunca revida) sempre liberado, pra testar a forca do seu time sem risco e sem afetar a economia — abater ele nao rende ouro, XP, item nem captura, de proposito. Acompanhe "Mobs/h" no Hunt Analyzer como o placar de comparacao entre builds.',
+      'BUG REAL CORRIGIDO NA PROPRIA CONSTRUCAO DA HUNT ACIMA: a primeira versao so zerava os atributos ofensivos do boneco, e mesmo assim ele desmaiou um POKE Lv1 de 11 HP com o proprio Ataque Basico — o termo de NIVEL da formula de dano pesa mais que o ATK quase zerado. Corrigido travando o ataque no motor: o boneco literalmente nunca ataca, seguro pra qualquer nivel.',
+      'ESCOLHER OS 4 GOLPES ATIVOS VOLTOU A EXIGIR SAIR DA HUNT. Pedido explicito do usuario, revertendo a leva anterior (que tinha removido a pedido dele tambem) — build fixo durante o combate, editavel so fora dele. Agora cobre tambem o liga/desliga do Ataque Basico e do golpe de Nivel 50, que antes escapavam da trava.',
+      'BUG REAL CORRIGIDO: o icone do golpe na barra de combate ficava praticamente invisivel ao desligar Ataque Basico ou o golpe de Nivel 50 (overlay preto quase solido por cima). Agora o golpe desligado so fica dessaturado e escurecido — continua reconhecivel qual e.',
+      'LUTA DO CAMPEAO LANCE: investigada a fundo (simulacao isolada e ao vivo contra o jogo publicado) — os 6 POKEs dele ja entram um a um corretamente ate a equipe se esgotar, e o time do jogador ja troca de POKE a cada desmaio do mesmo jeito. Nenhum defeito encontrado; a mecanica ganhou testes automatizados permanentes pra continuar assim.',
+    ],
+  },
+  {
     version: '6.9',
     date: '2026-08-15',
     title: 'Personalize os 4 golpes a qualquer momento, um dispositivo por vez, e golpe de status ganhou sprite',

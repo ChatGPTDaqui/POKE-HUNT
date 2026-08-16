@@ -1308,6 +1308,14 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
 }
 
 function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: PlayerEntity, silent: boolean): void {
+  // Boneco de treino (data/trainingDummy.ts, `HuntMapDef.passiveEnemies`):
+  // NUNCA revida. Apanha a distancia inteira (IVs de ataque no minimo,
+  // ver TREINO_IVS) nao bastava — medido AO VIVO nesta leva, um Wobbuffet
+  // Lv60 desmaiou um Charmander Lv2 de 11 HP com o proprio Ataque Basico so
+  // pelo tamanho do gap de nivel na formula de dano (o termo de nivel pesa
+  // mais que o ATK quase zerado). "Seguro pra qualquer time" so fica
+  // verdadeiro travando o ataque aqui, nao ajustando atributo.
+  if (world.mapDef?.passiveEnemies) return
   if (!canAct(enemy)) return
   if (statusImpedeAcao(world, enemy, silent)) return
 

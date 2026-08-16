@@ -17,7 +17,7 @@
 //
 // Cooldown vem do `WorldEntity` (worldStore), nao do PokeInstance salvo: e
 // estado de combate ao vivo, atualizado a cada tick.
-import { getAbility, BASIC_ATTACK, type Ability } from '@/data/abilities'
+import { getAbility, type Ability } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { SPECIES } from '@/data/pokes'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
@@ -74,14 +74,13 @@ export function AbilityHud() {
   const fonteRotulo = TAMANHO_ROTULO[regime]
 
   const disabled = poke.disabledAbilities || {}
-  // Os 4 escolhidos + o AOE de nivel 50, e nao o learnset inteiro: a barra
-  // mostra exatamente o que a IA pode usar (combatSystem#pickAbility le a mesma
-  // funcao). Antes ela crescia com o nivel ate 8+ slots, e a maioria deles era
-  // golpe que o POKE nunca usaria.
-  //
-  // O Ataque Basico entra no fim porque agora ele so e usado quando nenhum dos
-  // escolhidos esta pronto — continua visivel pra o jogador poder desliga-lo.
-  const abilities = [...golpesUtilizaveis(poke, SPECIES[poke.speciesId], false), BASIC_ATTACK.id]
+  // Exatamente os 4 escolhidos, nunca mais que isso: a barra mostra o que a
+  // IA pode usar (combatSystem#pickAbility le a mesma funcao). Pedido
+  // explicito do usuario, revertendo uma decisao anterior desta sessao —
+  // Ataque Basico e o AOE de nivel 50 nao anexam mais de graca fora do cap;
+  // se aparecem aqui e porque o jogador os escolheu como um dos 4 (tela de
+  // Golpes), igual a qualquer outro golpe.
+  const abilities = golpesUtilizaveis(poke, SPECIES[poke.speciesId], false)
     .map((id) => getAbility(id))
     .filter((a): a is Ability => a != null)
 
@@ -132,17 +131,32 @@ export function AbilityHud() {
               //
               // `pixelated` porque a arte e 32x32 desenhada pra ser vista
               // grande; suavizar borraria a pixel-art.
+              //
+              // BUG REAL CORRIGIDO: golpe desligado (Ataque Basico e o AOE de
+              // Nivel 50 sao os dois que o jogador realmente desliga, ja que os
+              // 4 escolhidos raramente saem de rotacao) ficava com o icone
+              // ILEGIVEL — o overlay "OFF" antigo era `bg-black/75` cobrindo o
+              // slot inteiro por CIMA da imagem, sobrando so 25% de opacidade
+              // do desenho original por baixo de um preto quase solido. Na
+              // pratica o jogador via um quadrado preto com "OFF" escrito, sem
+              // nenhuma pista de qual golpe era aquele. Agora o desligamento
+              // dessatura e escurece o PROPRIO icone (`grayscale` +
+              // `opacity-40`) em vez de tapa-lo com uma camada opaca — o
+              // desenho continua reconhecivel, so visivelmente "apagado".
               <img
                 src={icone}
                 alt=""
                 aria-hidden
                 draggable={false}
-                className="pointer-events-none h-full w-full object-cover"
+                className={cn(
+                  'pointer-events-none h-full w-full object-cover',
+                  isOff && 'grayscale opacity-40',
+                )}
                 style={{ imageRendering: 'pixelated', mixBlendMode: 'screen' }}
               />
             ) : (
               <span
-                className="font-mono font-bold text-white"
+                className={cn('font-mono font-bold text-white', isOff && 'opacity-40')}
                 style={{ fontSize: fonteRotulo, textShadow: '0 1px 3px rgba(0,0,0,.8)' }}
               >
                 {shortLabel(ability.name)}
@@ -164,9 +178,13 @@ export function AbilityHud() {
               </span>
             )}
             {isOff && (
+              // Faixa no rodape, nao cobertura total: o icone dessaturado (ver
+              // acima) e quem carrega a informacao de QUAL golpe esta desligado
+              // agora; este rotulo so confirma o estado, mesmo padrao visual da
+              // faixa de dano logo abaixo dele (que continua por cima, z-[2]).
               <span
-                className="absolute inset-0 flex items-center justify-center rounded-[.32em] tracking-[.08em] bg-black/75 text-n400"
-                style={{ fontSize: fonteRotulo }}
+                className="absolute inset-x-0 top-0 rounded-t-[.32em] bg-black/70 text-center tracking-[.08em] text-n300"
+                style={{ fontSize: `calc(${fonteRotulo} * .78)` }}
               >
                 OFF
               </span>

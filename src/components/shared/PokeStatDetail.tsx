@@ -6,7 +6,7 @@
 import type { ReactNode } from 'react'
 import { expProgressForInstance } from '@/engine/systems/progressionSystem'
 import { getAbility, BASIC_ATTACK } from '@/data/abilities'
-import { activeAbilitiesPadrao, ehGolpeAoeDeNivel50, MAX_ACTIVE_ABILITIES } from '@/data/activeAbilities'
+import { activeAbilitiesPadrao, MAX_ACTIVE_ABILITIES } from '@/data/activeAbilities'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { controller } from '@/engine/controller'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -164,35 +164,24 @@ function CelulaCheckbox(
   )
 }
 
-// A celula da coluna "Usar" das linhas do learnset normal. Um estado sem
-// toggle: golpe ainda nao aprendido (nada). Fora isso, liga/desliga a
-// qualquer momento — trocar golpe nao tem trava de hunt (removida por pedido
-// do usuario, ver migration 20260815170000). O AOE do Nivel 50 usa
-// `CelulaCheckbox` direto do mesmo jeito (liga/desliga, nunca ocupa slot).
+// A celula da coluna "Usar" das linhas do learnset — inclui Ataque Basico e o
+// AOE de Nivel 50, que pararam de ter tratamento especial (pedido explicito
+// do usuario: sao golpes normais, competem pelos mesmos 4 slots). Dois
+// estados sem toggle: golpe ainda nao aprendido (nada), e dentro de hunt
+// (mostra a marca, mas nao clica — a RPC `definir_golpes_ativos` recusa mudar
+// golpe com sessao de hunt aberta, ver migration 20260815190000).
 function CelulaUsar(
-  { aoe50, aprendido, ativo, habilitado, onClick }:
-  { aoe50: boolean; aprendido: boolean; ativo: boolean; habilitado: boolean; onClick: () => void },
+  { aprendido, ativo, habilitado, onClick }:
+  { aprendido: boolean; ativo: boolean; habilitado: boolean; onClick: () => void },
 ) {
   if (!aprendido) return <span className="text-n700">—</span>
-  if (aoe50) {
-    return (
-      <CelulaCheckbox
-        ativo={ativo}
-        habilitado={habilitado}
-        tituloAtivo="Desligar este golpe (nao ocupa slot, so entra/sai do combate)"
-        tituloInativo="Ligar este golpe"
-        tituloDesabilitado=""
-        onClick={onClick}
-      />
-    )
-  }
   return (
     <CelulaCheckbox
       ativo={ativo}
       habilitado={habilitado}
       tituloAtivo="Remover dos golpes ativos"
       tituloInativo="Usar este golpe"
-      tituloDesabilitado=""
+      tituloDesabilitado="Saia da hunt para trocar de golpe"
       onClick={onClick}
     />
   )
@@ -201,9 +190,16 @@ function CelulaUsar(
 export function MovesetTable({ poke, species }: { poke: PokeInstance; species: Species }) {
   // O learnset COMPLETO da especie, nao so `poke.unlockedAbilities`: a tabela
   // tambem serve como preview de "o que vem por ai".
-  const rows = species.abilities
-    .map((entry) => ({ entry, ability: getAbility(entry.key) }))
-    .filter((r): r is { entry: typeof r.entry; ability: NonNullable<typeof r.ability> } => Boolean(r.ability))
+  // Ataque Basico entra como linha SINTETICA (nivel 1, sempre "aprendido") —
+  // ele nunca esteve em `species.abilities`, e um fallback hand-authored (ver
+  // abilities.ts). Pedido explicito do usuario: ele e o AOE de Nivel 50
+  // pararam de ter tratamento especial e viraram golpe normal, na mesma
+  // tabela, competindo pelos mesmos 4 slots.
+  const rows = [
+    { entry: { key: BASIC_ATTACK.id, levelReq: 1 }, ability: BASIC_ATTACK },
+    ...species.abilities.map((entry) => ({ entry, ability: getAbility(entry.key) })),
+  ]
+    .filter((r): r is { entry: { key: string; levelReq: number }; ability: NonNullable<typeof r.ability> } => Boolean(r.ability))
     .sort((a, b) => a.entry.levelReq - b.entry.levelReq)
 
   // A selecao dos 4 so aparece pra POKE QUE E SEU. Este mesmo componente abre
@@ -212,6 +208,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
   // que cada chamador teria que lembrar de passar.
   const equipe = useGameStateStore((s) => s.team)
   const mochila = useGameStateStore((s) => s.bagPokes)
+  const emHunt = useGameStateStore((s) => s.currentMapId) != null
   const meu = [...equipe, ...mochila].some((p) => p.uid === poke.uid)
 
   // `poke` e a prop que o chamador passou — pro perfil aberto de um POKE
@@ -228,13 +225,14 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
   const pokeVivo = equipe.find((p) => p.uid === poke.uid) ?? mochila.find((p) => p.uid === poke.uid) ?? poke
 
   const ativos = pokeVivo.activeAbilities ?? activeAbilitiesPadrao(species, pokeVivo.level)
-  // Trocar golpe funciona a qualquer momento, inclusive dentro de uma hunt —
-  // pedido explicito do usuario (personalizar os 4 golpes livremente). O
-  // servidor reconstroi o mundo do zero a partir de active_abilities a cada
-  // janela de flush (<=30s), entao trocar no meio da cacada nao corrompe nada,
-  // so vale a partir da proxima janela.
-  const podeEscolher = meu
-  const desabilitados = pokeVivo.disabledAbilities ?? {}
+  // Pedido explicito do usuario (revertendo uma leva anterior, que a tinha
+  // removido a pedido DELE tambem): build fixo durante o combate, editavel so
+  // fora da hunt. Tecnicamente nao havia risco de corromper nada (o servidor
+  // so le `active_abilities`/`disabled_abilities` na proxima janela de flush,
+  // <=30s) — a trava aqui e regra de jogo, nao protecao de dado, e a RPC quem
+  // decide de verdade (`definir_golpes_ativos`/`alternar_habilidade`, ambas
+  // recusando com sessao viva — migration 20260815190000). A tela so espelha.
+  const podeEscolher = meu && !emHunt
 
   function alternar(key: string): void {
     if (!podeEscolher) return
@@ -246,14 +244,6 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
     controller.setActiveAbilities(poke.uid, ja ? ativos.filter((k) => k !== key) : [...ativos, key])
   }
 
-  // Ataque Basico e o AOE do Nivel 50 nunca ocupam slot: sao liga/desliga
-  // puro em `disabledAbilities`, mesmo caminho do double-click no AbilityHud
-  // (sem trava de hunt — `alternar_habilidade` nao tem essa restricao).
-  function alternarOpcional(key: string): void {
-    if (!meu) return
-    controller.toggleAbility(poke.uid, key)
-  }
-
   return (
     <div className="overflow-hidden rounded-[.4em] border border-n800 text-[.8em]">
       {meu && (
@@ -261,7 +251,9 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
           <span className="text-n400">
             Golpes ativos <span className="text-foreground">{ativos.length}/{MAX_ACTIVE_ABILITIES}</span>
           </span>
-          <span className="text-n500">Clique na coluna Usar para escolher.</span>
+          <span className="text-n500">
+            {emHunt ? 'Saia da hunt para trocar de golpe.' : 'Clique na coluna Usar para escolher.'}
+          </span>
         </div>
       )}
       <div
@@ -276,33 +268,8 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
           cabecalho de cima (que nunca rola). Reservando o gutter sempre nos
           dois, a largura util fica igual com ou sem overflow. */}
       <div className="max-h-[18em] overflow-y-auto" style={{ scrollbarGutter: 'stable' }}>
-        {meu && (
-          <div className={`${MOVE_GRID} border-b border-n800 bg-n900 px-[.5em] py-[.3em] text-foreground`}>
-            <span className="text-n400">—</span>
-            <AbilityTooltip ability={BASIC_ATTACK} poke={pokeVivo}>
-              <span className="cursor-help truncate underline decoration-dotted underline-offset-2">
-                {BASIC_ATTACK.name}
-              </span>
-            </AbilityTooltip>
-            <span><TypeChip type={BASIC_ATTACK.type} /></span>
-            <span className="text-n400">{ROTULO_CATEGORIA[resolveAbilityCategory(BASIC_ATTACK, pokeVivo)]}</span>
-            <span>{BASIC_ATTACK.power > 0 ? BASIC_ATTACK.power : '—'}</span>
-            <span className="text-n400">—</span>
-            <span>
-              <CelulaCheckbox
-                ativo={!desabilitados[BASIC_ATTACK.id]}
-                habilitado={meu}
-                tituloAtivo="Desligar o Ataque Basico (fallback universal — sem ele, o POKE fica sem opcao quando os golpes ativos estao em cooldown)"
-                tituloInativo="Ligar o Ataque Basico"
-                tituloDesabilitado=""
-                onClick={() => alternarOpcional(BASIC_ATTACK.id)}
-              />
-            </span>
-          </div>
-        )}
         {rows.map(({ entry, ability }, index) => {
           const learned = entry.levelReq <= pokeVivo.level
-          const aoe50 = ehGolpeAoeDeNivel50(entry.key)
           return (
             <div
               // A chave inclui o indice porque uma especie PODE aprender o
@@ -326,11 +293,10 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
               <span>{ability.power > 0 ? ability.power : '—'}</span>
               <span className="text-n400">{ability.target === 'aoe' ? '✓' : '—'}</span>
               <span>{meu && <CelulaUsar
-                aoe50={aoe50}
                 aprendido={learned}
-                ativo={aoe50 ? !desabilitados[entry.key] : ativos.includes(entry.key)}
-                habilitado={aoe50 ? meu : podeEscolher}
-                onClick={() => (aoe50 ? alternarOpcional(entry.key) : alternar(entry.key))}
+                ativo={ativos.includes(entry.key)}
+                habilitado={podeEscolher}
+                onClick={() => alternar(entry.key)}
               />}</span>
             </div>
           )

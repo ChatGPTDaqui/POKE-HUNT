@@ -828,6 +828,12 @@ export function drawEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect, w
 // pra desenhar, entao a funcao foi removida em vez de ficar como codigo morto.
 
 const HUNT_BG_TILE_SCALE = 0.8
+// Folga alem do minimo pra cobrir o mapa (as imagens antigas ja tinham essa
+// sobra, calibrada a olho). So entra em jogo quando a imagem NAO e grande o
+// bastante em 0.8 — as artes normais (~2048px nativos) nunca chegam perto
+// deste teto, ele existe pra imagem de resolucao menor nao deixar buraco de
+// cor solida nas bordas do mapa.
+const HUNT_BG_COVERAGE_MARGIN = 1.15
 
 export interface MapBackgroundDef {
   bg: MapBackground
@@ -852,8 +858,20 @@ export function drawMapBackground(ctx: CanvasRenderingContext2D, map: MapBackgro
     const baseMargin = 300
     ctx.fillRect(viewport.x - baseMargin, viewport.y - baseMargin, viewport.w + baseMargin * 2, viewport.h + baseMargin * 2)
 
-    const iw = img.naturalWidth * HUNT_BG_TILE_SCALE
-    const ih = img.naturalHeight * HUNT_BG_TILE_SCALE
+    // Escala por imagem, nao mais uma constante cega: com a leva de
+    // backgrounds novos, achamos 2 arquivos na metade da resolucao dos
+    // outros (1254px contra ~2048px) — em 0.8 fixo, isso desenhava menos
+    // largura que o proprio mapa (buraco visivel nas bordas em zoom normal,
+    // nao so no zoom-out extremo que ja era aceito). A escala agora nunca
+    // desenha a imagem menor do que o necessario pra cobrir o mapa, qualquer
+    // que seja a resolucao nativa do arquivo.
+    const escalaMinima = Math.max(
+      (map.bounds.width * HUNT_BG_COVERAGE_MARGIN) / img.naturalWidth,
+      (map.bounds.height * HUNT_BG_COVERAGE_MARGIN) / img.naturalHeight,
+    )
+    const escala = Math.max(HUNT_BG_TILE_SCALE, escalaMinima)
+    const iw = img.naturalWidth * escala
+    const ih = img.naturalHeight * escala
     const mapCx = map.bounds.width / 2
     const mapCy = map.bounds.height / 2
     ctx.drawImage(img, mapCx - iw / 2, mapCy - ih / 2, iw, ih)

@@ -17,32 +17,34 @@ import type { ElementType, SpeciesDataEntry } from './generated/types'
 import type { HuntMapDef, HuntEncounter, StatBlock } from './huntTypes'
 import type { RarityKey } from './rarity'
 
-// Same all-18-types real per-type background art as the regular hunts (see
-// scripts/sync-planilha.js#TYPE_BACKGROUND_IMAGE — only 7 real images exist
-// on disk, the other 10 types reuse the closest-fitting one so no hunt is
-// ever left on the procedural checkerboard) — duplicated here rather than
-// shared, since this file runs as an ES module at runtime while the sync
-// script is a plain Node/CJS build script (no clean way to import one from
-// the other).
+// Same all-18-types real per-type background art as the regular hunts —
+// atualizado em 2026-08-15 com a leva de backgrounds novos (so 7 imagens
+// genericas existiam antes; agora cada tipo pega o arquivo tematicamente mais
+// proximo entre os 27 novos, em vez de reaproveitar so 7). Duplicado aqui em
+// vez de compartilhado com biomas.ts: nenhum dos 12 biomas cobre TODOS os 18
+// tipos (BUG/POISON/FLYING/STEEL/DARK/DRAGON/FAIRY nao tem bioma-tipo
+// dedicado — o roster deles se espalha por sub-biomas de varios biomas via
+// generated/subBiomas.generated.ts), entao nao ha uma unica fonte "tipo ->
+// bioma" pra derivar disso sem inventar cobertura que o dado nao tem.
 const TYPE_BACKGROUND_IMAGE: Partial<Record<ElementType, string>> = {
-  FIRE: 'assets/hunt-backgrounds/fire.png',
-  WATER: 'assets/hunt-backgrounds/water.png',
-  GRASS: 'assets/hunt-backgrounds/forest.png',
-  ROCK: 'assets/hunt-backgrounds/cave.png',
+  FIRE: 'assets/hunt-backgrounds/volcano.jpg',
+  WATER: 'assets/hunt-backgrounds/sea.jpg',
+  GRASS: 'assets/hunt-backgrounds/forest.jpg',
+  ROCK: 'assets/hunt-backgrounds/mountain.jpg',
   FIGHTING: 'assets/hunt-backgrounds/dojo.png',
-  ELECTRIC: 'assets/hunt-backgrounds/eletric.png',
+  ELECTRIC: 'assets/hunt-backgrounds/industrial.jpg',
   DRAGON: 'assets/hunt-backgrounds/dragon.png',
-  BUG: 'assets/hunt-backgrounds/forest.png',
-  NORMAL: 'assets/hunt-backgrounds/forest.png',
-  POISON: 'assets/hunt-backgrounds/water.png',
-  FLYING: 'assets/hunt-backgrounds/water.png',
-  GROUND: 'assets/hunt-backgrounds/cave.png',
-  ICE: 'assets/hunt-backgrounds/cave.png',
-  STEEL: 'assets/hunt-backgrounds/cave.png',
-  PSYCHIC: 'assets/hunt-backgrounds/dojo.png',
-  GHOST: 'assets/hunt-backgrounds/cave.png',
-  DARK: 'assets/hunt-backgrounds/cave.png',
-  FAIRY: 'assets/hunt-backgrounds/forest.png',
+  BUG: 'assets/hunt-backgrounds/jungle.jpg',
+  NORMAL: 'assets/hunt-backgrounds/plains.jpg',
+  POISON: 'assets/hunt-backgrounds/swamp.jpg',
+  FLYING: 'assets/hunt-backgrounds/mountain.jpg',
+  GROUND: 'assets/hunt-backgrounds/desert.jpg',
+  ICE: 'assets/hunt-backgrounds/ice-mountain.png',
+  STEEL: 'assets/hunt-backgrounds/construction-site.jpg',
+  PSYCHIC: 'assets/hunt-backgrounds/temple.png',
+  GHOST: 'assets/hunt-backgrounds/abyss.jpg',
+  DARK: 'assets/hunt-backgrounds/burnt-forest.jpg',
+  FAIRY: 'assets/hunt-backgrounds/fairy-cave.jpg',
 }
 
 // BOSS hunts have no "bracket" of mixed types to average like regular hunts

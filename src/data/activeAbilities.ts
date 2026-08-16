@@ -7,9 +7,14 @@
 // unica que precisa ser gravada (ver a coluna `active_abilities` em
 // supabase/migrations/20260814120100).
 //
-// O golpe de nivel 50 do proprio tipo (typedAoeMoves.ts) fica FORA dos 4 para o
-// POKE do jogador — decisao explicita: ele e conteudo deste idle, nao ocupa
-// slot. Selvagem nao tem esse golpe de jeito nenhum.
+// O golpe de nivel 50 do proprio tipo (typedAoeMoves.ts) e o Ataque Basico
+// (abilities.ts) NAO tem tratamento especial pro POKE do jogador — pedido
+// explicito do usuario revertendo uma decisao anterior: "o ataque basico e a
+// explosao elemental nao sao diferentes... podem ser retirados como qualquer
+// outro golpe". Os dois competem pelos mesmos 4 slots, escolhiveis/removiveis
+// como qualquer golpe aprendido. Selvagem continua sem os dois (ver
+// `activeAbilitiesSelvagem`) — fora do escopo do pedido, que era sobre a
+// escolha do treinador.
 import { getAbility, isDamagingAbility, BASIC_ATTACK, type Ability } from './abilities'
 import { typedAoeMoveKey, TYPED_AOE_MOVES } from './typedAoeMoves'
 import { createFormulaEngine } from '@/core/formulaEngine'
@@ -73,21 +78,30 @@ export function nivelDeAprendizado(species: Species): Map<string, number> {
   return nivelExigido(species)
 }
 
-// Learnset real do POKE naquele nivel, em ordem de aprendizado e ja sem o AOE
-// de nivel 50 (que e injetado em `species.abilities` no fim da lista, com
-// levelReq 50 — sem o filtro ele cairia dentro da janela dos "4 ultimos" de
-// qualquer POKE nivel 50+).
+// Learnset real do POKE naquele nivel, em ordem de aprendizado. Inclui o AOE
+// de nivel 50 quando desbloqueado — pedido explicito do usuario: "ataque
+// basico e a explosao elemental nao sao diferentes... podem ser retirados
+// como qualquer outro golpe" — os dois competem pelos mesmos 4 slots, nao tem
+// mais um "de graca" fora do cap.
 function learnsetAte(species: Species, level: number): string[] {
-  const aoe = typedAoeMoveKey(species.type)
-  return golpesAprendidosAte(species, level).filter((key) => key !== aoe)
+  return golpesAprendidosAte(species, level)
 }
 
 // Selvagem: os 4 ultimos golpes aprendidos, sem filtrar categoria. E a regra
 // dos jogos, e e o que faz golpe de status puro chegar as maos do inimigo (na
 // pratica, quase nunca: medido, so 3% das especies tem um golpe de status puro
 // entre os 4 ultimos no nivel 50).
+//
+// Exclui o AOE de nivel 50 aqui (so aqui): selvagem nunca "escolhe" golpe —
+// deixar o AOE entrar na janela dos "4 ultimos" faria todo encontro nivel 50+
+// da MESMA especie repetir o mesmo golpe forte, empurrando pra fora o que
+// varia por individuo. Fora do escopo do pedido do usuario (era sobre a
+// escolha do TREINADOR); poke do jogador continua livre pra escolher o AOE.
 export function activeAbilitiesSelvagem(species: Species, level: number): string[] {
-  return learnsetAte(species, level).slice(-MAX_ACTIVE_ABILITIES)
+  const aoe = typedAoeMoveKey(species.type)
+  return learnsetAte(species, level)
+    .filter((key) => key !== aoe)
+    .slice(-MAX_ACTIVE_ABILITIES)
 }
 
 // POKE do jogador: os 4 golpes de MAIOR DANO, com o bonus de tipo (STAB) ja
@@ -112,7 +126,11 @@ export function activeAbilitiesSelvagem(species: Species, level: number): string
 // Isto e o DEFAULT, nao uma regra: a escolha do jogador nao tem restricao
 // nenhuma — ele pode deixar os 4 slots com golpe de status se quiser.
 export function activeAbilitiesPadrao(species: Species, level: number): string[] {
-  const learnset = learnsetAte(species, level)
+  // Ataque Basico entra no pool de candidatos: e ele quem garante que um POKE
+  // sem golpe de dano ainda (Hoppip nivel 1-9) receba pelo menos um default
+  // que causa dano de verdade — o proprio motivo dele existir, so que agora
+  // via selecao normal, nao mais via append escondido.
+  const learnset = [...learnsetAte(species, level), BASIC_ATTACK.id]
   const dano = learnset
     .map((key, i) => ({ key, i, ability: getAbility(key)! }))
     .filter((r) => isDamagingAbility(r.ability))
@@ -147,11 +165,12 @@ export function encaixarNovosGolpes(atuais: string[], novos: string[]): string[]
   const saida = [...atuais]
   for (const key of novos) {
     if (saida.length >= MAX_ACTIVE_ABILITIES) break
+    // Ataque Basico nunca chega aqui como "golpe novo" — ele nao vem do
+    // aprendizado por nivel, e sempre disponivel desde o inicio.
     if (saida.includes(key) || key === BASIC_ATTACK.id) continue
-    // O AOE de nivel 50 chega como "golpe novo" no level-up (e de novo numa
-    // evolucao que muda o tipo). Ele nunca ocupa slot — sem este filtro, o
-    // primeiro slot livre de todo POKE seria comido por ele no nivel 50.
-    if (ehGolpeAoeDeNivel50(key)) continue
+    // O AOE de nivel 50 agora e um golpe normal (pedido do usuario): se
+    // sobrar slot vazio quando ele desbloqueia, preenche como qualquer outro
+    // golpe recem-aprendido.
     if (!getAbility(key)) continue
     saida.push(key)
   }
@@ -171,7 +190,10 @@ export function ehGolpeAoeDeNivel50(key: string): boolean {
 export function golpesUtilizaveis(poke: PokeInstance, species: Species, selvagem: boolean): string[] {
   if (selvagem) return activeAbilitiesSelvagem(species, poke.level)
 
-  const conhecidos = new Set(poke.unlockedAbilities)
+  // Ataque Basico nunca esteve em `species.abilities`/`unlockedAbilities` —
+  // e um fallback hand-authored (ver abilities.ts), nao golpe aprendido por
+  // nivel. Precisa entrar aqui pra ser candidato valido nos mesmos 4 slots.
+  const conhecidos = new Set([...poke.unlockedAbilities, BASIC_ATTACK.id])
   const escolha = poke.activeAbilities ?? activeAbilitiesPadrao(species, poke.level)
   const escolhidos = escolha.filter((key) => conhecidos.has(key)).slice(0, MAX_ACTIVE_ABILITIES)
 
@@ -198,7 +220,5 @@ export function golpesUtilizaveis(poke: PokeInstance, species: Species, selvagem
     }
   }
 
-  // O AOE de nivel 50 entra fora dos slots, e so depois de desbloqueado.
-  const aoe = typedAoeMoveKey(species.type)
-  return conhecidos.has(aoe) ? [...escolhidos, aoe] : escolhidos
+  return escolhidos
 }
