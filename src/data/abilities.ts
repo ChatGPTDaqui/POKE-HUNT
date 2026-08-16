@@ -177,6 +177,21 @@ export function isDamagingAbility(ability: Ability | null | undefined): boolean 
   return ability.power > 0 || DANO_SEM_PODER_BASE.has(ability.id)
 }
 
+// Golpes de clima (Rain Dance/Sunny Day/Hail/Sandstorm): vazios no catalogo
+// gerado (so tem type/power/pp/target/accuracy -- nenhum campo de efeito).
+// Mesmo padrao das outras camadas hand-authored deste arquivo/pasta
+// (DANO_SEM_PODER_BASE acima, traits.ts, typedAoeMoves.ts): patch por cima do
+// dado gerado, sem tocar abilities.generated.ts. O tipo do valor casa
+// estruturalmente com `ClimaTipo` (engine/types.ts) sem importa-lo daqui --
+// engine/types.ts ja importa `Ability` deste arquivo, e o import reverso
+// fecharia um ciclo.
+export const CLIMA_DO_GOLPE: Record<string, 'chuva' | 'sol' | 'granizo' | 'areia'> = {
+  rain_dance: 'chuva',
+  sunny_day: 'sol',
+  hail: 'granizo',
+  sandstorm: 'areia',
+}
+
 // `resolveAbilityCategory` mora em data/abilityCategory.ts — ela precisa de
 // `computeStatsAtLevel` (data/pokes.ts), e pokes.ts importa ESTE arquivo, entao
 // trazer a funcao pra ca fecharia um ciclo de import.
