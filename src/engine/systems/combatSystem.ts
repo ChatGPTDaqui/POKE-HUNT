@@ -13,12 +13,12 @@ import {
   nomeDoStatus, type StatusCondition,
 } from '@/data/statusEffects'
 import { corDoStatus } from '@/data/statusColors'
-import type { StatChange } from '@/data/generated/types'
+import type { StatChange, ElementType } from '@/data/generated/types'
 import {
   tickStatus, tentarAgir, aplicarEfeitosDoGolpe, statusVaiPegar, aplicarMudancasDeStat,
   limparEstadoVolatil, aplicarStatus,
 } from './statusSystem'
-import { traitOf } from '@/data/traits'
+import { traitOf, type TraitId } from '@/data/traits'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { SPECIES } from '@/data/pokes'
 import type { PokeInstance } from '@/data/pokes'
@@ -32,7 +32,7 @@ import { triggerAttackAnim, ATTACK_ANIM_DURATION } from './animationSystem'
 import { createWorldEffect, effectDone, tickEffect } from '../effect'
 import {
   isDead, getGroundOffset, tickCooldowns, isAbilityReady,
-  startCooldown, canAct, startGlobalCooldown, takeDamage, heal, releaseEffectLane, findEntityById,
+  startCooldown, canAct, startGlobalCooldown, takeDamage, heal, getMaxHp, releaseEffectLane, findEntityById,
 } from '../entity'
 import type { EnemyEntity, PendingHit, PlayerEntity, WorldEntity, WorldState } from '../types'
 
@@ -69,6 +69,152 @@ const LOW_HP_TRAIT_MULTIPLIER = 1.5
 // Multiscale: dano recebido pela metade enquanto o HP esta CHEIO (nao so
 // alto) — perde o efeito no primeiro hit que tirar HP.
 const MULTISCALE_MULTIPLIER = 0.5
+
+// --- Imunidade de tipo por Trait (permanente) + por golpe (temporaria) ----
+//
+// Trait -> tipo do qual ela e imune. Cobre as 8 Traits pedidas: Levitate (sem
+// efeito colateral), Volt Absorb/Water Absorb (curam 1/4 do HP maximo em vez
+// de zerar so o dano), Flash Fire (liga `flashFireAtivo`, +50% nos PROPRIOS
+// golpes FIRE dali em diante — ver o multiplicador logo abaixo de
+// LOW_HP_TRAIT em computeDamage/estimateDamage), Sap Sipper/Lightning
+// Rod/Storm Drain/Motor Drive (+1 estagio no defensor). Redirecionamento de
+// golpe em dupla (o que Lightning Rod/Storm Drain tambem fazem nos jogos) NAO
+// e modelado — este motor nao tem multiplos aliados em campo, so
+// atacante-vs-alvo — por isso as duas so dao o +1 de estagio, sem redirect.
+const IMUNIDADE_POR_TRAIT: Partial<Record<TraitId, ElementType>> = {
+  levitate: 'GROUND',
+  volt_absorb: 'ELECTRIC',
+  water_absorb: 'WATER',
+  flash_fire: 'FIRE',
+  sap_sipper: 'GRASS',
+  lightning_rod: 'ELECTRIC',
+  storm_drain: 'WATER',
+  motor_drive: 'ELECTRIC',
+}
+// Qual stat cada Trait de absorcao sobe (+1 estagio) no proprio defensor.
+// Levitate e Flash Fire ficam de fora de proposito: a primeira nao tem efeito
+// colateral nenhum, a segunda vira buff de ataque (`flashFireAtivo`), nao
+// estagio.
+const ESTAGIO_DE_ABSORCAO: Partial<Record<TraitId, 'atkFis' | 'atkEsp' | 'speed'>> = {
+  sap_sipper: 'atkFis',
+  lightning_rod: 'atkEsp',
+  storm_drain: 'atkEsp',
+  motor_drive: 'speed',
+}
+const HP_CURADO_POR_ABSORCAO = 1 / 4
+// ~5 turnos de imunidade a GROUND (Magnet Rise), self-target.
+const MAGNET_RISE_TURNOS = 5
+// Fire absorvido por Flash Fire amplifica os PROPRIOS golpes FIRE do
+// defensor dali em diante — mesmo formato de multiplicador condicional que
+// LOW_HP_TRAIT_MULTIPLIER, so que gatilho e "ja absorveu 1 vez", nao HP baixo.
+const FLASH_FIRE_MULTIPLIER = 1.5
+
+export interface ResultadoImunidadeDeTipo {
+  imune: boolean
+  curou?: boolean
+  buffouEstagio?: boolean
+}
+
+/**
+ * Resolve as DUAS fontes de imunidade a um TIPO de golpe que a tabela de
+ * tipos (`getEffectiveness`) nao sabe: imunidade TEMPORARIA concedida por um
+ * golpe (Magnet Rise, self-target) e imunidade PERMANENTE de Trait (Levitate
+ * e as 7 Traits de absorcao). Chamada de dentro de computeDamage E
+ * estimateDamage — a IA usa a segunda pra ranquear golpes, e sem isto ela
+ * escolheria Terremoto contra um Levitate achando que causa dano de verdade.
+ *
+ * `aplicarEfeitos=false` e o modo LEITURA usado por `estimateDamage`: ela
+ * documentadamente nao pode mutar nada (nem avancar o rng principal nem
+ * curar/buffar de verdade) — so devolve SE seria imune, pra ranquear. So
+ * `computeDamage`, resolvendo o hit de verdade, cura o HP / sobe o estagio /
+ * liga `flashFireAtivo`.
+ */
+function resolverImunidadeDeTipo(
+  rng: Rng,
+  tipoDoGolpe: ElementType,
+  defensor: WorldEntity,
+  aplicarEfeitos: boolean,
+): ResultadoImunidadeDeTipo {
+  // (a) Imunidade temporaria por golpe (Magnet Rise) — so o tipo marcado, so
+  // enquanto o timer nao zerar (tickCooldowns em entity.ts derruba o campo).
+  if (defensor.imuneAoTipoVolatil && defensor.imuneAoTipoVolatil.tipo === tipoDoGolpe) {
+    return { imune: true }
+  }
+
+  // (b) Imunidade permanente de Trait.
+  const trait = traitOf(defensor.poke.speciesId)
+  if (!trait || IMUNIDADE_POR_TRAIT[trait] !== tipoDoGolpe) return { imune: false }
+
+  if (trait === 'levitate') return { imune: true }
+
+  if (trait === 'volt_absorb' || trait === 'water_absorb') {
+    if (aplicarEfeitos) heal(defensor, Math.round(getMaxHp(defensor) * HP_CURADO_POR_ABSORCAO))
+    return { imune: true, curou: true }
+  }
+
+  if (trait === 'flash_fire') {
+    if (aplicarEfeitos) defensor.flashFireAtivo = true
+    return { imune: true }
+  }
+
+  const stat = ESTAGIO_DE_ABSORCAO[trait]
+  if (stat) {
+    if (aplicarEfeitos) {
+      // Reaproveita aplicarMudancasDeStat (clamp de -6/+6 incluso) em vez de
+      // duplicar a matematica de estagio — so precisa de um `Ability` valido
+      // pro formato, daí o spread de BASIC_ATTACK com os 3 campos que
+      // importam sobrescritos.
+      aplicarMudancasDeStat(rng, defensor, defensor, {
+        ...BASIC_ATTACK,
+        statChanges: [{ stat, estagios: 1 }],
+        statChance: 100,
+        statTarget: 'self',
+      })
+    }
+    return { imune: true, buffouEstagio: true }
+  }
+
+  return { imune: true }
+}
+
+// Foresight/Miracle Eye/Odor Sleuth: golpes de status sem statChanges (nao
+// mexem em estagio nenhum) — o efeito deles e todo em `entity.revelado`, ver
+// BaseEntity#revelado. Cada chave diz qual imunidade NATURAL de tipo (nao a
+// de Trait acima) aquele golpe remove do alvo pelo resto da luta.
+const REVELA_IMUNIDADE: Partial<Record<string, 'ghost' | 'dark'>> = {
+  foresight: 'ghost',
+  miracle_eye: 'dark',
+  // Golpe desta leva: mesmo efeito de Foresight (ignora Fantasma vs
+  // Normal/Lutador) — ver moveDescriptions.ts#odor_sleuth.
+  odor_sleuth: 'ghost',
+}
+
+/**
+ * Multiplicador de efetividade de tipo, mas ignorando UMA imunidade NATURAL
+ * (nao a de Trait) se o defensor foi "revelado" (Foresight/Miracle
+ * Eye/Odor Sleuth). So entra quando o multiplicador cru JA DEU ZERO — nao
+ * mexe em resistencia parcial (0.5x), so em imunidade total, exatamente como
+ * os golpes reais funcionam.
+ *
+ * DESVIO DE ESCOPO: nos jogos reais estes 3 golpes tambem fazem o defensor
+ * ignorar a PROPRIA Evasao contra este atacante — nao implementado aqui
+ * porque este motor ainda nao tem estagio de Precisao/Evasao (mecanica de
+ * outra leva, nao mesclada nesta worktree). So a parte de imunidade de tipo
+ * entra.
+ */
+function efetividadeConsiderandoRevelado(
+  multiplicadorCru: number,
+  ability: Ability,
+  defenderEntity: WorldEntity,
+  defenderSpecies: { type: ElementType; type2: ElementType | null },
+): number {
+  if (multiplicadorCru !== 0 || !defenderEntity.revelado) return multiplicadorCru
+  const ehFantasma = defenderSpecies.type === 'GHOST' || defenderSpecies.type2 === 'GHOST'
+  const ehSombrio = defenderSpecies.type === 'DARK' || defenderSpecies.type2 === 'DARK'
+  if (defenderEntity.revelado === 'ghost' && ehFantasma && (ability.type === 'NORMAL' || ability.type === 'FIGHTING')) return 1
+  if (defenderEntity.revelado === 'dark' && ehSombrio && ability.type === 'PSYCHIC') return 1
+  return multiplicadorCru
+}
 
 // Golpes reais de auto-KO Gen1/2 — bug relatado explicitamente pelo usuario:
 // causavam dano no ALVO sem nenhum recoil no usuario, diferente dos jogos
@@ -260,7 +406,12 @@ function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: W
   const defenderPoke = defenderEntity.poke
   const attackerSpecies = SPECIES[attackerPoke.speciesId]
   const defenderSpecies = SPECIES[defenderPoke.speciesId]
-  const effectivenessMultiplier = getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2)
+  let effectivenessMultiplier = getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2)
+  effectivenessMultiplier = efetividadeConsiderandoRevelado(effectivenessMultiplier, ability, defenderEntity, defenderSpecies)
+  // Leitura, nao aplica efeito (`aplicarEfeitos=false`): estimar dano nao pode
+  // curar/buffar de verdade, so responder "esse golpe seria inutil aqui" pra
+  // IA nao rankear Terremoto contra um Levitate como se causasse dano.
+  if (resolverImunidadeDeTipo(deriveRng(rng.state, 'estimate-imunidade'), ability.type, defenderEntity, false).imune) return 0
   if (effectivenessMultiplier === 0) return 0
 
   const special = specialDamageFor(deriveRng(rng.state, 'estimate'), ability, attackerEntity, defenderEntity)
@@ -281,6 +432,10 @@ function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: W
     && attackerPoke.hp / attackerPoke.stats.hp < LOW_HP_TRAIT_HP_FRACTION) {
     dmg *= LOW_HP_TRAIT_MULTIPLIER
   }
+  // Flash Fire: buff permanente-ate-fim-de-luta no ATACANTE (nao no
+  // defensor), ligado quando ele mesmo absorveu um golpe FIRE antes — ver
+  // resolverImunidadeDeTipo.
+  if (attackerEntity.flashFireAtivo && ability.type === 'FIRE') dmg *= FLASH_FIRE_MULTIPLIER
 
   dmg *= effectivenessMultiplier
   return dmg
@@ -307,6 +462,21 @@ function golpeDeApoioUtil(entity: WorldEntity, defenderEntity: WorldEntity, abil
   // pra o POKE nao gastar turno curando 5 de HP com a vida quase cheia.
   if (ability.healPercent) {
     return entity.poke.hp / entity.poke.stats.hp <= 1 - ability.healPercent / 100
+  }
+  // Magnet Rise: self-buff sem statChanges (nao ativa nenhum estagio) — so
+  // vale enquanto a imunidade a GROUND nao esta ativa nele mesmo. Sem esta
+  // checagem o golpe nunca entraria em `statusPronto` (nao tem `.status` nem
+  // `.statChanges`) e ficaria inerte mesmo escolhido pro moveset.
+  if (ability.id === 'magnet_rise') {
+    return !entity.imuneAoTipoVolatil || entity.imuneAoTipoVolatil.tipo !== 'GROUND'
+  }
+  // Odor Sleuth: so vale contra um alvo Fantasma ainda nao revelado — e o
+  // unico caso em que ele desbloqueia dano de verdade (Normal/Lutador contra
+  // Fantasma, ver REVELA_IMUNIDADE/efetividadeConsiderandoRevelado).
+  if (ability.id === 'odor_sleuth') {
+    const especieAlvo = SPECIES[defenderEntity.poke.speciesId]
+    const ehFantasma = especieAlvo.type === 'GHOST' || especieAlvo.type2 === 'GHOST'
+    return ehFantasma && defenderEntity.revelado !== 'ghost'
   }
   if (!ability.statChanges || !ability.statChanges.length) return false
   const destino = ability.statTarget === 'self' ? entity : defenderEntity
@@ -357,7 +527,12 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
   const defenderPoke = defenderEntity.poke
   const attackerSpecies = SPECIES[attackerPoke.speciesId]
   const defenderSpecies = SPECIES[defenderPoke.speciesId]
-  const effectivenessMultiplier = getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2)
+  let effectivenessMultiplier = getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2)
+  effectivenessMultiplier = efetividadeConsiderandoRevelado(effectivenessMultiplier, ability, defenderEntity, defenderSpecies)
+  // Hit de verdade (`aplicarEfeitos=true`): imunidade de Trait/golpe zera o
+  // multiplicador igual a imunidade natural de tipo, e AQUI de fato cura o
+  // HP / sobe o estagio / liga `flashFireAtivo` quando a Trait pedir.
+  if (resolverImunidadeDeTipo(rng, ability.type, defenderEntity, true).imune) effectivenessMultiplier = 0
   const special = specialDamageFor(rng, ability, attackerEntity, defenderEntity)
 
   let dmg: number
@@ -393,6 +568,9 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
       && attackerPoke.hp / attackerPoke.stats.hp < LOW_HP_TRAIT_HP_FRACTION) {
       dmg *= LOW_HP_TRAIT_MULTIPLIER
     }
+    // Flash Fire: buff permanente-ate-fim-de-luta no ATACANTE, ligado quando
+    // ele mesmo absorveu um golpe FIRE antes (ver resolverImunidadeDeTipo).
+    if (attackerEntity.flashFireAtivo && ability.type === 'FIRE') dmg *= FLASH_FIRE_MULTIPLIER
 
     dmg *= effectivenessMultiplier
 
@@ -943,6 +1121,20 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     if (mudancas.length) {
       statusRecebeuEm = ability.statTarget === 'self' ? attacker : target
       if (!silent) anunciarEstagios(world, statusRecebeuEm, mudancas)
+    }
+
+    // Odor Sleuth/Foresight/Miracle Eye: ignora UMA imunidade natural de tipo
+    // do ALVO pelo resto da luta — sem timer, so `limparEstadoVolatil` (fim
+    // de luta) tira. Generico por id (mesmo golpe novo que entrar no mapa
+    // funciona sem tocar aqui de novo) — ver REVELA_IMUNIDADE.
+    const imunidadeRevelada = REVELA_IMUNIDADE[ability.id]
+    if (imunidadeRevelada) target.revelado = imunidadeRevelada
+
+    // Magnet Rise: self-target, ~5 turnos de imunidade a GROUND. Golpe de
+    // status sem statChanges (nao passa por aplicarMudancasDeStat acima) —
+    // por isso o id do golpe e checado direto, mesmo padrao do bloco acima.
+    if (ability.id === 'magnet_rise') {
+      attacker.imuneAoTipoVolatil = { tipo: 'GROUND', restante: MAGNET_RISE_TURNOS * TURNO_SEGUNDOS }
     }
   }
 

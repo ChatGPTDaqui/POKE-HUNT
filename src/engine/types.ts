@@ -90,6 +90,26 @@ export interface BaseEntity {
   // contador de sono, roll de descongelar). Conta separado do cooldown de
   // acao: um POKE dormindo nao age, mas o sono precisa continuar passando.
   proximoTurnoDeStatus: number
+
+  // Foresight/Miracle Eye/Odor Sleuth: qual imunidade NATURAL de tipo (nao a
+  // de Trait) este POKE deixa de ter contra o usuario do golpe que a revelou
+  // (Fantasma vs Normal/Lutador, Sombrio vs Psiquico) — ver
+  // combatSystem.ts#REVELA_IMUNIDADE / efetividadeConsiderandoRevelado. Sem
+  // timer: dura ate `limparEstadoVolatil` (fim de luta). Ausente = nenhum dos
+  // golpes foi usado nele ainda.
+  revelado?: 'ghost' | 'dark'
+  // Imunidade de TIPO temporaria concedida por um golpe (hoje so Magnet Rise,
+  // self-target: tipo='GROUND'). Diferente de `revelado` (que so IGNORA uma
+  // imunidade natural), este campo CRIA uma — ver
+  // combatSystem.ts#resolverImunidadeDeTipo. `restante` conta em segundos e
+  // desce em entity.ts#tickCooldowns, que zera o campo quando acaba. Ausente =
+  // nao esta imune a nenhum tipo por golpe agora.
+  imuneAoTipoVolatil?: { tipo: ElementType; restante: number }
+  // Trait Flash Fire: liga quando este POKE absorve um golpe FIRE (ver
+  // resolverImunidadeDeTipo) e da +50% de dano aos PROPRIOS golpes FIRE dali
+  // em diante. Permanente-ate-fim-de-luta, como os jogos — sem timer, so
+  // `limparEstadoVolatil` desliga.
+  flashFireAtivo?: boolean
 }
 
 export interface PlayerEntity extends BaseEntity {

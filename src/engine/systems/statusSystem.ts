@@ -171,6 +171,9 @@ export function curarStatus(entity: WorldEntity, tipo?: StatusCondition): boolea
 export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.statusVolatil = null
   entity.estagios = {}
+  entity.revelado = undefined
+  entity.imuneAoTipoVolatil = undefined
+  entity.flashFireAtivo = undefined
 }
 
 export interface TickDeStatus {
