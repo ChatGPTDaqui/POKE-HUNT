@@ -1010,12 +1010,16 @@ function basicAttackFor(attackerSpecies: { type: Ability['type'] }): Ability {
 // campo setado, entao o filtro e um no-op pra eles.
 // `aoeTargetCounter` e uma funcao (ability) => numero de alvos que um cast
 // AOE atingiria, usada pra preferir AOE quando atingiria 2+ alvos.
-// Ataque Basico e o Struggle deste jogo: entra quando NENHUM dos golpes
-// selecionados pode ser usado agora. Nos jogos reais Struggle dispara por
-// falta de PP; aqui o cooldown E o PP, entao "todos em cooldown" e o mesmo
-// estado. Sem isto, um POKE de poucos golpes de dano (Igglybuff tem 1, e
-// Togepi/Unown/Forretress ficam perto disso) passaria metade dos turnos
-// parado.
+// Ataque Basico e o Struggle deste jogo pro caminho GREEDY (inimigo): entra
+// quando NENHUM dos golpes selecionados pode ser usado agora. Nos jogos
+// reais Struggle dispara por falta de PP; aqui o cooldown E o PP, entao
+// "todos em cooldown" e o mesmo estado. Sem isto, um POKE de poucos golpes de
+// dano (Igglybuff tem 1, e Togepi/Unown/Forretress ficam perto disso)
+// passaria metade dos turnos parado.
+//
+// Pro POKE do jogador, `pickAbilityDaFila` ja injeta Ataque Basico como
+// posicao FIXA do loop (ver comentario la) — esta funcao so entra como
+// ultimo recurso se a fila inteira (basico incluso) nao tiver nada pronto.
 function tentarAtaqueBasico(entity: WorldEntity, attackerSpecies: { type: Ability['type'] }, disabled: Record<string, boolean>): Ability | null {
   if (disabled[BASIC_ATTACK.id] || !isAbilityReady(entity, BASIC_ATTACK.id)) return null
   return basicAttackFor(attackerSpecies)
@@ -1072,8 +1076,9 @@ function pickAbilityGreedy(
   ))
 }
 
-// POKE do jogador: percorre `activeAbilities` NA ORDEM que ele escolheu na
-// tela de golpes (ver data/activeAbilities.ts), comecando de
+// POKE do jogador: percorre a rotacao NA ORDEM (ver pickAbility — Ataque
+// Basico primeiro, depois `activeAbilities` na ordem escolhida na tela de
+// golpes, ver data/activeAbilities.ts), comecando de
 // `entity.filaGolpeIndex`. Golpe da vez em cooldown/filtrado nao trava o
 // turno — pula pro proximo da fila, sem avancar o indice (ele tenta de novo
 // no proximo turno, e nao "perde a vez" pra sempre). So avanca o indice
@@ -1083,6 +1088,12 @@ function pickAbilityGreedy(
 // quem decide QUANDO usar cada um e o jogador pela ordem dos slots — nao mais
 // uma IA que sempre repete os 1-2 golpes de maior dano esperado e deixa o
 // resto do moveset parado.
+//
+// Ataque Basico ENTRA NA FILA (pickAbility injeta como 1a posicao) em vez de
+// so fallback de ultimo recurso: pedido explicito do usuario — ele executa
+// toda vez que a vez dele chega e nao esta em cooldown, mesmo com golpe de
+// verdade pronto. Custa DPS de proposito (cooldown curto e fixo de Basico
+// rouba turno de golpe real com frequencia) — decisao de design, nao bug.
 function pickAbilityDaFila(
   world: WorldState, entity: WorldEntity, defenderEntity: WorldEntity,
   candidatos: Ability[], estaSilenciado: boolean, clima: ClimaTipo | null,
@@ -1091,7 +1102,14 @@ function pickAbilityDaFila(
   const n = candidatos.length
   if (n === 0) return null
   const inicio = ((entity.filaGolpeIndex ?? 0) % n + n) % n
-  const prontosDeDano = candidatos.filter((a) => isDamagingAbility(a) && isAbilityReady(entity, a.id))
+  // Ataque Basico FICA FORA desta conta: ele quase sempre esta pronto (rotina
+  // curta e fixa), entao incluir ele aqui faria o overkill-guard abaixo achar
+  // que sempre ha dano letal pronto e nunca deixar nenhum golpe de status
+  // executar — o guard e sobre o MOVESET escolhido (4 slots + AOE), nao sobre
+  // o fallback que sempre esta disponivel.
+  const prontosDeDano = candidatos.filter((a) => (
+    a.id !== BASIC_ATTACK.id && isDamagingAbility(a) && isAbilityReady(entity, a.id)
+  ))
 
   // So calcula (e so uma vez) se algum golpe de status da fila realmente
   // pedir a checagem de overkill abaixo.
@@ -1164,15 +1182,24 @@ function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: Wor
   // jogos, estar calado significa exatamente isso).
   const estaSilenciado = !!(entity.silenciadoAte && entity.silenciadoAte > 0)
 
+  const abilidadesFinais = candidatosFinais.map((id) => getAbility(id)).filter((a): a is Ability => a != null)
+
+  // So injeta Basico na rotacao do jogador fora de Encore — senao o jogador
+  // escaparia da trava do Encore (que forca UM golpe so) trocando pra Basico
+  // sempre que a vez dele chegasse no loop.
+  const rotacaoDoJogador = !encoreAtivo && !disabled[BASIC_ATTACK.id]
+    ? [basicAttackFor(attackerSpecies), ...abilidadesFinais]
+    : abilidadesFinais
+
   const escolhido = entity.kind === 'enemy'
     ? pickAbilityGreedy(
       world, entity, defenderEntity,
-      candidatosFinais.map((id) => getAbility(id)).filter((a): a is Ability => a != null && isAbilityReady(entity, a.id)),
+      abilidadesFinais.filter((a) => isAbilityReady(entity, a.id)),
       estaSilenciado, clima, aoeTargetCounter,
     )
     : pickAbilityDaFila(
       world, entity, defenderEntity,
-      candidatosFinais.map((id) => getAbility(id)).filter((a): a is Ability => a != null),
+      rotacaoDoJogador,
       estaSilenciado, clima,
     )
 

@@ -228,7 +228,14 @@ describe('POKE do jogador usa os golpes na ordem escolhida (fila), nao so o de m
     // greedy antigo travaria sempre no de maior dano esperado, flamethrower).
     jogadorPoke.unlockedAbilities = [...jogadorPoke.unlockedAbilities, 'flamethrower']
     jogadorPoke.activeAbilities = ['scratch', 'ember', 'flamethrower']
-    jogadorPoke.disabledAbilities = { [typedAoeMoveKey(SPECIES.charmander.type)]: true }
+    // Ataque Basico agora tem posicao fixa na fila (pickAbility injeta) —
+    // desligado aqui pra isolar a ordem dos 3 slots escolhidos, que e o que
+    // este cenario testa. Comportamento do Basico tem describe proprio mais
+    // abaixo.
+    jogadorPoke.disabledAbilities = {
+      [typedAoeMoveKey(SPECIES.charmander.type)]: true,
+      [BASIC_ATTACK.id]: true,
+    }
     const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
     const player = world.player!
     player.cooldowns = {}
@@ -288,6 +295,85 @@ describe('POKE do jogador usa os golpes na ordem escolhida (fila), nao so o de m
   })
 })
 
+// Pedido explicito do usuario: Ataque Basico vira posicao FIXA da fila do
+// jogador (basico -> slot1 -> slot2 -> slot3 -> slot4 -> AOE -> basico...),
+// nao so fallback de ultimo recurso -- executa toda vez que a vez dele chega
+// e ele nao esta em cooldown, mesmo com golpe de verdade pronto (custa DPS
+// de proposito). Basico NAO atualiza `lastUsedAbilityId` (e o Struggle deste
+// jogo, ver executePlayerAction) -- o sinal de que ele foi escolhido e o
+// proprio `cooldowns[BASIC_ATTACK.id]` ficando setado.
+describe('Ataque Basico ocupa posicao fixa na fila do jogador', () => {
+  function cenarioFilaComBasico() {
+    const rng = createRng(3)
+    const counters = { entity: 1, effect: 1, pendingHit: 1 }
+    const jogadorPoke = createPokeInstance(rng, 'charmander', 60)
+    jogadorPoke.unlockedAbilities = [...jogadorPoke.unlockedAbilities, 'flamethrower']
+    jogadorPoke.activeAbilities = ['scratch', 'ember', 'flamethrower']
+    // Ataque Basico fica LIGADO aqui de proposito -- e o que este describe
+    // testa (nos outros cenarios de fila ele fica desligado pra isolar a
+    // ordem dos 4 slots escolhidos).
+    jogadorPoke.disabledAbilities = { [typedAoeMoveKey(SPECIES.charmander.type)]: true }
+    const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
+    const player = world.player!
+    player.cooldowns = {}
+    player.globalCooldown = 0
+    player.poke.stats = { ...player.poke.stats, hp: 999999 }
+    player.poke.hp = 999999
+
+    const enemyPoke = createPokeInstance(rng, 'rattata', 60)
+    enemyPoke.stats = { ...enemyPoke.stats, hp: 999999, atkFis: 1, atkEsp: 1 }
+    enemyPoke.hp = 999999
+    const enemy = createEnemyEntity(world.counters, {
+      poke: enemyPoke, x: player.x, y: player.y, encounterId: 'route_46_rattata',
+    })
+    enemy.state = 'engaged'
+    enemy.targetId = player.id
+    world.enemies = [enemy]
+    return { world, player, enemy }
+  }
+
+  it('executa na 1a posicao da fila mesmo com golpe de verdade pronto', () => {
+    const { world, player } = cenarioFilaComBasico()
+    updateCombat(world, 1, { silent: true })
+    expect(player.cooldowns[BASIC_ATTACK.id]).toBeGreaterThan(0)
+    expect(player.lastUsedAbilityId).toBeUndefined()
+
+    // Fila avancou pra posicao 1 (scratch), que atualiza lastUsedAbilityId.
+    player.globalCooldown = 0
+    updateCombat(world, 1, { silent: true })
+    expect(player.lastUsedAbilityId).toBe('scratch')
+  })
+
+  it('pula Ataque Basico quando ele esta em cooldown, sem travar o turno', () => {
+    const { world, player } = cenarioFilaComBasico()
+    player.cooldowns[BASIC_ATTACK.id] = 999
+    updateCombat(world, 1, { silent: true })
+    expect(player.lastUsedAbilityId).toBe('scratch')
+  })
+
+  it('loop e ciclico: volta pro Ataque Basico depois do ultimo slot', () => {
+    const { world, player } = cenarioFilaComBasico()
+    const usouBasico: boolean[] = []
+    // 4 posicoes: basico, scratch, ember, flamethrower. 5 voltas cobre um
+    // ciclo completo + a volta seguinte, provando que nao para no ultimo.
+    for (let i = 0; i < 5; i++) {
+      player.cooldowns = {}
+      player.globalCooldown = 0
+      updateCombat(world, 1, { silent: true })
+      usouBasico.push((player.cooldowns[BASIC_ATTACK.id] ?? 0) > 0)
+    }
+    expect(usouBasico).toEqual([true, false, false, false, true])
+  })
+
+  it('desligado pelo jogador, sai completamente da rotacao', () => {
+    const { world, player } = cenarioFilaComBasico()
+    player.poke.disabledAbilities = { ...player.poke.disabledAbilities, [BASIC_ATTACK.id]: true }
+    updateCombat(world, 1, { silent: true })
+    expect(player.lastUsedAbilityId).toBe('scratch')
+    expect(player.cooldowns[BASIC_ATTACK.id]).toBeUndefined()
+  })
+})
+
 // Golpes novos de tick volatil: leech_seed, curse (variante Ghost),
 // nightmare, ingrain/aqua_ring, wish. Todos power:0/category:status no
 // catalogo (sem `ability.status`/`statChanges`/`healPercent`), entao o efeito
@@ -302,8 +388,13 @@ describe('golpes novos de tick volatil', () => {
     jogadorPoke.activeAbilities = [golpeId]
     // O AOE de nivel 50 vive fora dos 4 slots e pode ja estar desbloqueado
     // neste nivel — desligado pra sobrar SO o golpe sob teste (mesmo cuidado
-    // do teste de precisao acima).
-    jogadorPoke.disabledAbilities = { [typedAoeMoveKey(SPECIES[especieJogador].type)]: true }
+    // do teste de precisao acima). Ataque Basico agora tem posicao fixa na
+    // fila (pickAbility injeta) — desligado pelo mesmo motivo, senao ele
+    // rouba o primeiro turno do golpe sob teste.
+    jogadorPoke.disabledAbilities = {
+      [typedAoeMoveKey(SPECIES[especieJogador].type)]: true,
+      [BASIC_ATTACK.id]: true,
+    }
     const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
     const player = world.player!
     player.cooldowns = {}
