@@ -75,11 +75,19 @@ export async function coletarAnexo(mensagemId: string): Promise<{ ok: boolean; i
   const uid = await userIdAtual()
   const idsUnicos = [...new Set(resultado.itens.map((i) => i.itemId))]
   if (idsUnicos.length > 0) {
-    const { data: linhas } = await supabase.from('player_items').select('item_id, quantity').eq('user_id', uid).in('item_id', idsUnicos)
-    const porId = new Map((linhas ?? []).map((r) => [r.item_id, r.quantity]))
-    useGameStateStore.setState((s) => ({
-      items: { ...s.items, ...Object.fromEntries(idsUnicos.map((id) => [id, porId.get(id) ?? 0])) },
-    }))
+    const { data: linhas, error: erroRefetch } = await supabase
+      .from('player_items').select('item_id, quantity').eq('user_id', uid).in('item_id', idsUnicos)
+    // A RPC ja creditou de verdade (linha 72) — se so o refetch de exibicao
+    // falhar, zerar aqui mostraria quantidade errada pra um item que o
+    // jogador acabou de receber. Loga e mantem o estado local.
+    if (erroRefetch) {
+      console.error('coletarAnexo: refetch de itens falhou, mantendo estado local', erroRefetch)
+    } else {
+      const porId = new Map((linhas ?? []).map((r) => [r.item_id, r.quantity]))
+      useGameStateStore.setState((s) => ({
+        items: { ...s.items, ...Object.fromEntries(idsUnicos.map((id) => [id, porId.get(id) ?? 0])) },
+      }))
+    }
   }
   return resultado
 }

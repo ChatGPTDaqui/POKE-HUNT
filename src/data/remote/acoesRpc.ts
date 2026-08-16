@@ -68,12 +68,19 @@ async function refetchJogador(): Promise<void> {
 
 async function refetchItem(itemId: string): Promise<void> {
   const uid = await userIdAtual()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('player_items')
     .select('quantity, locked')
     .eq('user_id', uid)
     .eq('item_id', itemId)
     .maybeSingle()
+  // `data == null` sem `error` e "o jogador nunca teve esse item" — zerar e
+  // certo. `error` e falha de rede/query — zerar aqui apagaria um item real
+  // da tela por causa de um problema transitorio, entao so loga e mantem.
+  if (error) {
+    console.error(`refetchItem(${itemId}) falhou, mantendo estado local`, error)
+    return
+  }
   useGameStateStore.setState((s) => {
     const lockedItems = { ...s.lockedItems }
     if (data?.locked) lockedItems[itemId] = true
@@ -84,14 +91,22 @@ async function refetchItem(itemId: string): Promise<void> {
 
 async function refetchTodosItens(): Promise<void> {
   const uid = await userIdAtual()
-  const { data } = await supabase.from('player_items').select('item_id, quantity').eq('user_id', uid)
+  const { data, error } = await supabase.from('player_items').select('item_id, quantity').eq('user_id', uid)
+  if (error) {
+    console.error('refetchTodosItens falhou, mantendo estado local', error)
+    return
+  }
   const items: Record<string, number> = {}
   for (const row of data ?? []) items[row.item_id] = row.quantity
   useGameStateStore.setState({ items })
 }
 
 async function refetchPoke(pokeId: string): Promise<void> {
-  const { data } = await supabase.from('pokemon_instances').select('*').eq('id', pokeId).maybeSingle()
+  const { data, error } = await supabase.from('pokemon_instances').select('*').eq('id', pokeId).maybeSingle()
+  if (error) {
+    console.error(`refetchPoke(${pokeId}) falhou, mantendo estado local`, error)
+    return
+  }
   useGameStateStore.setState((s) => {
     if (!data) {
       // Vendido/removido: some das duas listas, seja onde estivesse.
@@ -112,12 +127,16 @@ async function refetchEquipeInteira(): Promise<void> {
   // `team[0]` = ativo (ver controller.ts#setActiveTeamIndex). Sem o order, o
   // Postgres devolve em ordem arbitraria e o campo so mostrava o POKE certo
   // depois de um F5 (que recarrega ordenado por outro caminho).
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('pokemon_instances')
     .select('*')
     .eq('user_id', uid)
     .eq('location', 'team')
     .order('team_slot', { ascending: true })
+  if (error) {
+    console.error('refetchEquipeInteira falhou, mantendo estado local', error)
+    return
+  }
   useGameStateStore.setState({ team: (data ?? []).map(rowToPoke) })
 }
 
