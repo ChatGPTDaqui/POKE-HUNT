@@ -9,12 +9,15 @@ import { describe, expect, it } from 'vitest'
 
 import { createRng } from '@/core/rng'
 import { createPokeInstance, SPECIES } from '@/data/pokes'
-import { BASIC_ATTACK } from '@/data/abilities'
+import { BASIC_ATTACK, getAbility, TURNO_SEGUNDOS, type Ability } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { typedAoeMoveKey } from '@/data/typedAoeMoves'
 import { createEnemyEntity } from '../entity'
 import { buildMapWorld } from '../simulation'
-import { updateCombat } from './combatSystem'
+import type { EnemyEntity } from '../types'
+import {
+  updateCombat, multiplicadorDeAtaquePorTrait, multiplicadorDeDefesaPorTrait, velocidadeEfetiva,
+} from './combatSystem'
 
 function construirCenarioExplosao() {
   const rng = createRng(1)
@@ -371,5 +374,442 @@ describe('golpes novos de tick volatil', () => {
       expect(() => updateCombat(world, 1)).not.toThrow()
       expect(world.pendingWishes.length).toBe(0)
     })
+  })
+})
+// ============================================================================
+// FASE 12: golpes sem-dano e Traits passivas.
+//
+// `resolveHit` nao e exportada (e interna ao modulo, disparada por
+// updateCombat quando um PendingHit.timer chega a 0) — os testes abaixo
+// injetam o PendingHit diretamente em `world.pendingHits` com timer 0 e
+// chamam `updateCombat(world, 0, { silent: true })` pra resolve-lo, o MESMO
+// caminho que queueHit/resolveHit usam de verdade, so sem depender da
+// escolha de golpe da IA (pickAbility), que o describe acima ja cobre.
+// ============================================================================
+
+// Enemy manual (sem createEnemyEntity/getEncounter): varios testes precisam
+// de uma especie com Trait especifica que nem sempre tem encontro cadastrado
+// no mapa usado pelos outros testes deste arquivo (route_46).
+function criarInimigoDeTeste(world: ReturnType<typeof buildMapWorld>, speciesId: string, level: number, junto: { x: number; y: number }): EnemyEntity {
+  const enemyPoke = createPokeInstance(createRng(2), speciesId, level)
+  const enemy: EnemyEntity = {
+    id: `entity-${world.counters.entity++}`,
+    kind: 'enemy',
+    poke: enemyPoke,
+    x: junto.x, y: junto.y,
+    facing: { x: 0, y: 1 },
+    radius: 15,
+    state: 'engaged',
+    cooldowns: {},
+    globalCooldown: 999, // trava a propria acao -- so o hit injetado pelo teste resolve
+    targetId: null,
+    deathHandled: false,
+    flashTimer: 0,
+    lastDamageTaken: { physical: { amount: 0, age: Infinity }, special: { amount: 0, age: Infinity } },
+    battleAnim: null,
+    animFrame: 0,
+    animElapsed: 0,
+    attackAnim: null,
+    attackAnimTimer: 0,
+    effectLanes: [],
+    statusVolatil: null,
+    estagios: {},
+    imunidadeDeStatus: 0,
+    proximoTurnoDeStatus: TURNO_SEGUNDOS,
+    pathWaypoints: null,
+    pathIndex: 0,
+    pathRecalcTimer: 0,
+    pathTargetX: null,
+    pathTargetY: null,
+    encounterId: 'teste',
+    spawnPoint: { x: junto.x, y: junto.y },
+    moveSpeed: 0,
+    wanderTarget: null,
+    wanderPause: 0,
+    aggroRadius: 0,
+    wanderRadius: 0,
+    leashRadius: 0,
+    deathRemovalTimer: null,
+  }
+  return enemy
+}
+
+// Jogador + UM inimigo engajado, globalCooldown alto nos dois lados (trava
+// qualquer ACAO nova neste tick). `enemy.state === 'engaged'` continua
+// verdadeiro pra `engagedEnemies.length > 0` e o combate NAO cair no ramo de
+// "fim de batalha" (que chamaria `limparEstadoVolatil` e apagaria os campos
+// volateis que os testes acabaram de setar).
+function cenarioDeSuporte(especieJogador: string, especieInimigo: string, nivel = 50) {
+  const rng = createRng(1)
+  const jogadorPoke = createPokeInstance(rng, especieJogador, nivel)
+  const world = buildMapWorld('route_46', jogadorPoke, { rng, counters: { entity: 1, effect: 1, pendingHit: 1 } })
+  const player = world.player!
+  player.cooldowns = {}
+  player.globalCooldown = 999
+
+  const enemy = criarInimigoDeTeste(world, especieInimigo, nivel, { x: player.x, y: player.y })
+  enemy.targetId = player.id
+  world.enemies = [enemy]
+
+  return { world, player, enemy }
+}
+
+function resolverHitComAbility(world: ReturnType<typeof buildMapWorld>, attackerId: string, targetId: string, ability: Ability): void {
+  world.pendingHits.push({ id: `hit-${world.counters.pendingHit++}`, timer: 0, attackerId, targetId, ability })
+  updateCombat(world, 0, { silent: true })
+}
+
+function resolverHit(world: ReturnType<typeof buildMapWorld>, attackerId: string, targetId: string, abilityId: string): void {
+  resolverHitComAbility(world, attackerId, targetId, getAbility(abilityId)!)
+}
+
+describe('Fase 12: golpes de suporte sem dano', () => {
+  it('Endure sobrevive com 1 HP no golpe que mataria, e a flag some depois', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    player.poke.stats = { ...player.poke.stats, hp: 200 }
+    player.poke.hp = 10
+    player.enduraAtiva = true
+    enemy.poke.level = 50 // seismic_toss = dano fixo = nivel do atacante = 50
+
+    resolverHit(world, enemy.id, player.id, 'seismic_toss')
+
+    expect(player.poke.hp).toBe(1)
+    expect(player.enduraAtiva).toBe(false)
+  })
+
+  it('Endure consome a flag no proximo hit recebido mesmo quando ele NAO mataria', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    player.poke.stats = { ...player.poke.stats, hp: 200 }
+    player.poke.hp = 100
+    player.enduraAtiva = true
+    enemy.poke.level = 50 // 50 de dano fixo, nao mata hp=100
+
+    resolverHit(world, enemy.id, player.id, 'seismic_toss')
+
+    expect(player.poke.hp).toBe(50)
+    expect(player.enduraAtiva).toBe(false)
+  })
+
+  it('Protect/Detect bloqueia o proximo golpe recebido inteiro, e consome a flag', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    player.protegida = true
+    const hpAntes = player.poke.hp
+
+    resolverHit(world, enemy.id, player.id, 'seismic_toss')
+
+    expect(player.poke.hp).toBe(hpAntes)
+    expect(player.protegida).toBe(false)
+  })
+
+  it('golpe de auto-alvo (Synthesis) ignora o Protect do "alvo" da fila — nunca mirou nele de verdade', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    enemy.protegida = true
+    player.poke.hp = Math.floor(player.poke.stats.hp / 2)
+    const hpAntes = player.poke.hp
+
+    resolverHit(world, player.id, enemy.id, 'synthesis')
+
+    expect(player.poke.hp).toBeGreaterThan(hpAntes)
+    expect(enemy.protegida).toBe(true) // nunca foi "recebido" -- nao consumiu
+  })
+
+  it('Destiny Bond: quem mata o usuario tambem morre', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    player.poke.hp = 1
+    player.destinyBondAtiva = true
+    enemy.poke.stats = { ...enemy.poke.stats, hp: 999 }
+    enemy.poke.hp = 999
+
+    resolverHit(world, enemy.id, player.id, 'seismic_toss')
+
+    expect(player.poke.hp).toBe(0)
+    expect(enemy.poke.hp).toBe(0)
+  })
+
+  it('Haze zera TODOS os estagios dos dois lados', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    player.estagios = { atkFis: 3, speed: -2 }
+    enemy.estagios = { def: -4 }
+
+    resolverHit(world, player.id, enemy.id, 'haze')
+
+    expect(player.estagios).toEqual({})
+    expect(enemy.estagios).toEqual({})
+  })
+
+  it('Psych Up copia os estagios do ALVO pro usuario', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    player.estagios = { atkFis: -1 }
+    enemy.estagios = { atkFis: 3, speed: 1 }
+
+    resolverHit(world, player.id, enemy.id, 'psych_up')
+
+    expect(player.estagios).toEqual({ atkFis: 3, speed: 1 })
+  })
+
+  it('Pain Split soma o HP dos dois e divide igual', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    player.poke.stats = { ...player.poke.stats, hp: 300 }
+    player.poke.hp = 300
+    enemy.poke.stats = { ...enemy.poke.stats, hp: 300 }
+    enemy.poke.hp = 100
+
+    resolverHit(world, player.id, enemy.id, 'pain_split')
+
+    expect(player.poke.hp).toBe(200)
+    expect(enemy.poke.hp).toBe(200)
+  })
+
+  it('Heal Block impede golpe de cura enquanto ativo', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    player.curaBloqueadaAte = 10
+    player.poke.hp = Math.floor(player.poke.stats.hp / 2)
+    const hpAntes = player.poke.hp
+
+    resolverHit(world, player.id, enemy.id, 'synthesis')
+
+    expect(player.poke.hp).toBe(hpAntes)
+  })
+
+  it('...mas cura normalmente quando nao esta bloqueado (prova que o teste acima vale)', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    player.poke.hp = Math.floor(player.poke.stats.hp / 2)
+    const hpAntes = player.poke.hp
+
+    resolverHit(world, player.id, enemy.id, 'synthesis')
+
+    expect(player.poke.hp).toBeGreaterThan(hpAntes)
+  })
+
+  it('usar Heal Block no alvo trava a cura DELE por alguns turnos', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+
+    resolverHit(world, player.id, enemy.id, 'heal_block')
+
+    expect(enemy.curaBloqueadaAte).toBeGreaterThan(0)
+  })
+
+  it('Rest cura 100% do HP e aplica sleep de 2 turnos no proprio usuario', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    player.poke.hp = 1
+
+    resolverHit(world, player.id, enemy.id, 'rest')
+
+    expect(player.poke.hp).toBe(player.poke.stats.hp)
+    expect(player.poke.status).toEqual({ tipo: 'sleep', turnosRestantes: 2 })
+  })
+
+  it('Belly Drum perde metade do HP MAXIMO e sobe Ataque Fisico ao teto (+6) de uma vez', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    player.poke.stats = { ...player.poke.stats, hp: 200 }
+    player.poke.hp = 200
+
+    resolverHit(world, player.id, enemy.id, 'belly_drum')
+
+    expect(player.poke.hp).toBe(100)
+    expect(player.estagios.atkFis).toBe(6)
+  })
+
+  it('Acupressure sobe UM stat aleatorio em +2', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+
+    resolverHit(world, player.id, enemy.id, 'acupressure')
+
+    const estagios = Object.values(player.estagios)
+    expect(estagios).toHaveLength(1)
+    expect(estagios[0]).toBe(2)
+  })
+
+  it('Aromatherapy/Heal Bell cura o proprio status (sem time de reserva neste motor)', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    player.poke.status = { tipo: 'poison', turnosRestantes: null }
+
+    resolverHit(world, player.id, enemy.id, 'aromatherapy')
+
+    expect(player.poke.status).toBeNull()
+  })
+
+  it('Lock-On/Mind Reader marca o proximo golpe do usuario contra aquele alvo', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+
+    resolverHit(world, player.id, enemy.id, 'lock_on')
+
+    expect(player.miraGarantidaAlvoId).toBe(enemy.id)
+  })
+
+  it('Guard Swap troca def/defEsp entre usuario e alvo (nao mexe em atkFis/atkEsp)', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    player.estagios = { def: 2, atkFis: 1 }
+    enemy.estagios = { defEsp: -1 }
+
+    resolverHit(world, player.id, enemy.id, 'guard_swap')
+
+    expect(player.estagios).toEqual({ defEsp: -1, atkFis: 1 })
+    expect(enemy.estagios).toEqual({ def: 2 })
+  })
+
+  it('Power Swap troca atkFis/atkEsp entre usuario e alvo (nao mexe em def/defEsp)', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    player.estagios = { atkFis: 2, def: 1 }
+    enemy.estagios = { atkEsp: -3 }
+
+    resolverHit(world, player.id, enemy.id, 'power_swap')
+
+    expect(player.estagios).toEqual({ atkEsp: -3, def: 1 })
+    expect(enemy.estagios).toEqual({ atkFis: 2 })
+  })
+
+  it('Soak forca o tipo do alvo pra Water (usado so na efetividade de dano recebido)', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'pikachu')
+
+    resolverHit(world, player.id, enemy.id, 'soak')
+
+    expect(enemy.tipoForcado).toBe('WATER')
+  })
+
+  it('Perish Song conta 3 turnos pros dois lados presentes e mata os dois', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+
+    resolverHit(world, player.id, enemy.id, 'perish_song')
+    expect(player.perishCountdown).toBe(3)
+    expect(enemy.perishCountdown).toBe(3)
+
+    for (let i = 0; i < 3; i++) updateCombat(world, TURNO_SEGUNDOS, { silent: true })
+
+    expect(player.poke.hp).toBe(0)
+    expect(enemy.poke.hp).toBe(0)
+  })
+
+  it('Psycho Shift transfere o status do usuario pro alvo e cura o usuario', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    player.poke.status = { tipo: 'burn', turnosRestantes: null }
+
+    resolverHit(world, player.id, enemy.id, 'psycho_shift')
+
+    expect(player.poke.status).toBeNull()
+    expect(enemy.poke.status?.tipo).toBe('burn')
+  })
+})
+
+describe('Fase 12: Traits passivas', () => {
+  it('Sturdy (Geodude): sobrevive com 1 HP em cheio, mas so uma vez', () => {
+    const { world, player, enemy } = cenarioDeSuporte('geodude', 'rattata')
+    player.poke.stats = { ...player.poke.stats, hp: 30 }
+    player.poke.hp = 30 // cheio
+    enemy.poke.level = 50 // seismic_toss = 50 >= 30
+
+    resolverHit(world, enemy.id, player.id, 'seismic_toss')
+    expect(player.poke.hp).toBe(1)
+
+    // HP nao esta mais cheio -- Sturdy nao segura uma segunda vez.
+    resolverHit(world, enemy.id, player.id, 'seismic_toss')
+    expect(player.poke.hp).toBe(0)
+  })
+
+  it('Synchronize (Abra): reflete paralisia de volta em quem aplicou', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'abra')
+    const golpeForcado = { ...getAbility('thunder_wave')!, statusChance: 100 }
+
+    resolverHitComAbility(world, player.id, enemy.id, golpeForcado)
+
+    expect(enemy.poke.status?.tipo).toBe('paralysis')
+    expect(player.poke.status?.tipo).toBe('paralysis')
+  })
+
+  it('Inner Focus (Zubat): imune a flinch', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'zubat')
+    const golpeComFlinch = { ...getAbility('tackle')!, flinchChance: 100 }
+
+    resolverHitComAbility(world, player.id, enemy.id, golpeComFlinch)
+
+    // startGlobalCooldown SOBRESCREVE o valor (nao soma) -- se o flinch tivesse
+    // pegado, isto teria caido pra TURNO_SEGUNDOS em vez de continuar em 999.
+    expect(enemy.globalCooldown).toBe(999)
+  })
+
+  it('...sem Inner Focus, o mesmo flinch tranca o proximo turno normalmente', () => {
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'rattata')
+    const golpeComFlinch = { ...getAbility('tackle')!, flinchChance: 100 }
+
+    resolverHitComAbility(world, player.id, enemy.id, golpeComFlinch)
+
+    expect(enemy.globalCooldown).toBe(TURNO_SEGUNDOS)
+  })
+
+  it('Quick Feet (Teddiursa): +50% Velocidade com status ativo, ignorando o corte de paralisia', () => {
+    const { player } = cenarioDeSuporte('teddiursa', 'rattata')
+    player.poke.stats = { ...player.poke.stats, speed: 100 }
+    player.poke.status = { tipo: 'paralysis', turnosRestantes: null }
+
+    // Sem Quick Feet, paralisia cortaria pela metade (50). Com Quick Feet
+    // ativo, sobe 50% em vez disso (150) -- o oposto do que paralisia faria.
+    expect(velocidadeEfetiva(player)).toBeCloseTo(150)
+  })
+
+  it('...sem status ativo, Quick Feet nao muda a Velocidade', () => {
+    const { player } = cenarioDeSuporte('teddiursa', 'rattata')
+    player.poke.stats = { ...player.poke.stats, speed: 100 }
+
+    expect(velocidadeEfetiva(player)).toBe(100)
+  })
+
+  // Hustle/Guts/Huge Power em modo PESSIMISTA (sem critico, variacao fixa em
+  // 0.85) pra dano deterministico: mesma DAMAGE_BASE calculada a mao —
+  // floor(floor(floor(2*50/5+2)*40*atk/100)/50)+2, depois *0.85 e arredondado.
+  // Tackle e NORMAL e nenhuma das tres especies usadas e NORMAL, entao STAB
+  // nunca entra — o unico multiplicador em jogo e o da propria Trait.
+  it('Hustle (Corsola): +50% de Ataque Fisico no dano real', () => {
+    expect(multiplicadorDeAtaquePorTrait('hustle', true, false)).toBeCloseTo(1.5)
+    expect(multiplicadorDeAtaquePorTrait('hustle', false, false)).toBe(1) // so no fisico
+
+    const { world, player, enemy } = cenarioDeSuporte('corsola', 'rattata')
+    world.pessimista = true
+    player.poke.stats = { ...player.poke.stats, atkFis: 100 }
+    enemy.poke.stats = { ...enemy.poke.stats, def: 100, hp: 999 }
+    enemy.poke.hp = 999
+
+    resolverHit(world, player.id, enemy.id, 'tackle')
+
+    expect(enemy.poke.hp).toBe(999 - 24) // atk efetivo 150 -> dano 24 (ver conta acima)
+  })
+
+  it('Guts (Machop): +50% de Ataque Fisico SO com status alterado ativo', () => {
+    const comStatus = cenarioDeSuporte('machop', 'rattata')
+    comStatus.world.pessimista = true
+    comStatus.player.poke.stats = { ...comStatus.player.poke.stats, atkFis: 100 }
+    comStatus.enemy.poke.stats = { ...comStatus.enemy.poke.stats, def: 100, hp: 999 }
+    comStatus.enemy.poke.hp = 999
+    comStatus.player.poke.status = { tipo: 'poison', turnosRestantes: null } // poison nao mexe em dano fisico (so Guts entra)
+
+    resolverHit(comStatus.world, comStatus.player.id, comStatus.enemy.id, 'tackle')
+    expect(comStatus.enemy.poke.hp).toBe(999 - 24)
+
+    const semStatus = cenarioDeSuporte('machop', 'rattata')
+    semStatus.world.pessimista = true
+    semStatus.player.poke.stats = { ...semStatus.player.poke.stats, atkFis: 100 }
+    semStatus.enemy.poke.stats = { ...semStatus.enemy.poke.stats, def: 100, hp: 999 }
+    semStatus.enemy.poke.hp = 999
+
+    resolverHit(semStatus.world, semStatus.player.id, semStatus.enemy.id, 'tackle')
+    expect(semStatus.enemy.poke.hp).toBe(999 - 16) // atk cru 100 -> dano 16, sem o bonus
+  })
+
+  it('Huge Power (Marill): dobra o Ataque Fisico no dano real', () => {
+    const { world, player, enemy } = cenarioDeSuporte('marill', 'rattata')
+    world.pessimista = true
+    player.poke.stats = { ...player.poke.stats, atkFis: 100 }
+    enemy.poke.stats = { ...enemy.poke.stats, def: 100, hp: 999 }
+    enemy.poke.hp = 999
+
+    resolverHit(world, player.id, enemy.id, 'tackle')
+
+    expect(enemy.poke.hp).toBe(999 - 31) // atk efetivo 200 -> dano 31
+  })
+
+  it('Pure Power/Marvel Scale (funcao pura — sem dono no roster Gen1/2 atual)', () => {
+    expect(multiplicadorDeAtaquePorTrait('pure_power', true, false)).toBe(2)
+    expect(multiplicadorDeDefesaPorTrait('marvel_scale', true, true)).toBeCloseTo(1.5)
+    expect(multiplicadorDeDefesaPorTrait('marvel_scale', true, false)).toBe(1) // so com status ativo
+    expect(multiplicadorDeDefesaPorTrait('marvel_scale', false, true)).toBe(1) // so no fisico
   })
 })

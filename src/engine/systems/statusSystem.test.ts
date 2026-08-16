@@ -392,3 +392,121 @@ describe('o desvio aprovado esta onde diz que esta', () => {
     expect(TURNOS_DE_IMUNIDADE_APOS_CURA).toBe(3)
   })
 })
+
+// Fase 12: Traits de imunidade a status (Immunity/Limber/Insomnia/
+// Vital Spirit/Water Veil/Own Tempo). Cada caso usa uma especie REAL do
+// roster que ja tem a Trait atribuida em SPECIES_TRAIT — Magma Armor nao
+// entra aqui porque nenhuma especie da Gen1/2 atual leva ela (documentado em
+// traits.ts); o mecanismo e identico ao de Water Veil/Insomnia, so a chave do
+// mapa muda.
+describe('Traits de imunidade a status (Fase 12)', () => {
+  it('Immunity (Snorlax) bloqueia veneno', () => {
+    const alvo = entidade('snorlax')
+    expect(statusVaiPegar(alvo, 'poison', 'toxic')).toBe(false)
+    expect(aplicarStatus(createRng(1), alvo, 'poison', 100)).toBeNull()
+  })
+
+  it('Limber (Meowth) bloqueia paralisia', () => {
+    const alvo = entidade('meowth')
+    expect(statusVaiPegar(alvo, 'paralysis', 'thunder_wave')).toBe(false)
+    expect(aplicarStatus(createRng(1), alvo, 'paralysis', 100)).toBeNull()
+  })
+
+  it('Insomnia (Murkrow) bloqueia sono', () => {
+    const alvo = entidade('murkrow')
+    expect(statusVaiPegar(alvo, 'sleep', 'hypnosis')).toBe(false)
+    expect(aplicarStatus(createRng(1), alvo, 'sleep', 100)).toBeNull()
+  })
+
+  it('Vital Spirit (Mankey) tambem bloqueia sono', () => {
+    const alvo = entidade('mankey')
+    expect(statusVaiPegar(alvo, 'sleep', 'hypnosis')).toBe(false)
+    expect(aplicarStatus(createRng(1), alvo, 'sleep', 100)).toBeNull()
+  })
+
+  it('Water Veil (Goldeen) bloqueia queimadura', () => {
+    const alvo = entidade('goldeen')
+    expect(statusVaiPegar(alvo, 'burn', 'ember')).toBe(false)
+    expect(aplicarStatus(createRng(1), alvo, 'burn', 100)).toBeNull()
+  })
+
+  it('Own Tempo (Slowpoke) bloqueia confusao', () => {
+    const alvo = entidade('slowpoke')
+    expect(statusVaiPegar(alvo, 'confusion')).toBe(false)
+    expect(aplicarStatus(createRng(1), alvo, 'confusion', 100)).toBeNull()
+  })
+
+  it('a Trait so bloqueia O PROPRIO status — Snorlax continua paralisavel', () => {
+    const alvo = entidade('snorlax')
+    expect(statusVaiPegar(alvo, 'paralysis', 'thunder_wave')).toBe(true)
+    expect(aplicarStatus(createRng(1), alvo, 'paralysis', 100)).not.toBeNull()
+  })
+})
+
+describe('Heal Block / Yawn / Perish Song (Fase 12)', () => {
+  it('curaBloqueadaAte decai por dt, igual a imunidadeDeStatus', () => {
+    const alvo = entidade('rattata')
+    alvo.curaBloqueadaAte = 1
+    tickStatus(createRng(1), alvo, 0.4)
+    expect(alvo.curaBloqueadaAte).toBeCloseTo(0.6)
+    tickStatus(createRng(1), alvo, 0.4)
+    expect(alvo.curaBloqueadaAte).toBeCloseTo(0.2)
+    tickStatus(createRng(1), alvo, 0.4)
+    expect(alvo.curaBloqueadaAte).toBe(0)
+  })
+
+  it('Yawn: sono NAO pega no fechamento do turno em que foi usado, so no seguinte', () => {
+    const alvo = entidade('rattata')
+    // 2, nao 1: o combatSystem tambem agenda 2 ao usar Yawn (ver
+    // resolveHit#'yawn') — o primeiro tickStatus fecha o turno ATUAL (sem
+    // sono ainda), o segundo fecha o PROXIMO turno de verdade.
+    alvo.yawnTurnos = 2
+    const r1 = tickStatus(createRng(1), alvo, 2)
+    expect(alvo.poke.status).toBeNull()
+    expect(r1.expirados).toEqual([])
+    const r2 = tickStatus(createRng(1), alvo, 2)
+    expect(alvo.poke.status?.tipo).toBe('sleep')
+    expect(alvo.yawnTurnos).toBeNull()
+    expect(r2).toBeTruthy()
+  })
+
+  it('Perish Song: contador de 3 turnos chega a 0 e reporta `pereceu`', () => {
+    const alvo = entidade('rattata')
+    alvo.perishCountdown = 3
+    expect(tickStatus(createRng(1), alvo, 2).pereceu).toBe(false)
+    expect(tickStatus(createRng(1), alvo, 2).pereceu).toBe(false)
+    const r3 = tickStatus(createRng(1), alvo, 2)
+    expect(r3.pereceu).toBe(true)
+    expect(alvo.perishCountdown).toBeNull()
+  })
+
+  it('sem perishCountdown ativo, tickStatus nunca reporta pereceu', () => {
+    const alvo = entidade('rattata')
+    expect(tickStatus(createRng(1), alvo, 2).pereceu).toBe(false)
+  })
+})
+
+describe('limparEstadoVolatil zera todo campo novo da Fase 12', () => {
+  it('endure/protect/destinyBond/curaBloqueada/mira/tipoForcado/perish/yawn voltam ao neutro', () => {
+    const e = entidade('rattata')
+    e.enduraAtiva = true
+    e.protegida = true
+    e.destinyBondAtiva = true
+    e.curaBloqueadaAte = 5
+    e.miraGarantidaAlvoId = 'alvo-x'
+    e.tipoForcado = 'WATER'
+    e.perishCountdown = 2
+    e.yawnTurnos = 1
+
+    limparEstadoVolatil(e)
+
+    expect(e.enduraAtiva).toBe(false)
+    expect(e.protegida).toBe(false)
+    expect(e.destinyBondAtiva).toBe(false)
+    expect(e.curaBloqueadaAte).toBe(0)
+    expect(e.miraGarantidaAlvoId).toBeNull()
+    expect(e.tipoForcado).toBeUndefined()
+    expect(e.perishCountdown).toBeNull()
+    expect(e.yawnTurnos).toBeNull()
+  })
+})

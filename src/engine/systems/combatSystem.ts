@@ -10,13 +10,13 @@ import { getAbility, BASIC_ATTACK, isDamagingAbility, TURNO_SEGUNDOS, CLIMA_DO_G
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import {
   multiplicadorDeVelocidade, multiplicadorDeDanoFisico, multiplicadorDeStat,
-  multiplicadorDeAccuracyOuEvasion, nomeDoStatus, type StatusCondition, type StatDeEstagio,
+  multiplicadorDeAccuracyOuEvasion, nomeDoStatus, ESTAGIO_MAXIMO, type StatusCondition, type StatDeEstagio,
 } from '@/data/statusEffects'
 import { corDoStatus } from '@/data/statusColors'
 import type { StatChange, ElementType } from '@/data/generated/types'
 import {
   tickStatus, tentarAgir, aplicarEfeitosDoGolpe, statusVaiPegar, aplicarMudancasDeStat,
-  limparEstadoVolatil, aplicarStatus, aplicarEstagioUnico,
+  limparEstadoVolatil, aplicarStatus, aplicarEstagioUnico, curarStatus,
 } from './statusSystem'
 import { traitOf, type TraitId } from '@/data/traits'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
@@ -220,6 +220,40 @@ function efetividadeConsiderandoRevelado(
 const CLIMA_MULTIPLICADOR_FAVORECIDO = 1.5
 const CLIMA_MULTIPLICADOR_DESFAVORECIDO = 0.5
 
+// --- Fase 12: Traits que multiplicam ATAQUE/DEFESA FISICOS -----------------
+//
+// Todas as quatro so mexem no fisico (Gen VII): Huge Power/Pure Power dobram
+// a stat de Ataque Fisico do portador; Hustle da +50% nela sempre; Guts da
+// +50% nela SO com status alterado ativo; Marvel Scale da +50% na Defesa
+// fisica do portador, tambem so com status ativo. Multiplicam a stat CRUA,
+// mesma entrada que os estagios de atributo — a ficha do POKE continua
+// mostrando o numero real.
+// Exportadas so pra teste unitario direto (Huge/Pure Power e Marvel Scale
+// nao tem dono no roster Gen1/2 atual — ver traits.ts — entao nao da pra
+// exercitar via especie real; testar a funcao pura evita depender disso).
+export function multiplicadorDeAtaquePorTrait(trait: TraitId | null, isPhysical: boolean, temStatus: boolean): number {
+  if (!isPhysical) return 1
+  if (trait === 'huge_power' || trait === 'pure_power') return 2
+  if (trait === 'hustle') return 1.5
+  if (trait === 'guts' && temStatus) return 1.5
+  return 1
+}
+
+export function multiplicadorDeDefesaPorTrait(trait: TraitId | null, isPhysical: boolean, temStatus: boolean): number {
+  if (!isPhysical) return 1
+  if (trait === 'marvel_scale' && temStatus) return 1.5
+  return 1
+}
+
+// Soak (Fase 12): tipo forcado pelo golpe substitui o tipo da especie SO pro
+// calculo de efetividade do dano recebido (ver types.ts#tipoForcado) — nao
+// mexe em STAB nem em imunidade de status, que continuam olhando a especie
+// real.
+function tiposEfetivosParaEfetividade(entity: WorldEntity, species: { type: ElementType; type2: ElementType | null }): [ElementType, ElementType | null] {
+  if (entity.tipoForcado) return [entity.tipoForcado, null]
+  return [species.type, species.type2]
+}
+
 // Golpes reais de auto-KO Gen1/2 — bug relatado explicitamente pelo usuario:
 // causavam dano no ALVO sem nenhum recoil no usuario, diferente dos jogos
 // reais. Corrigido por spec explicita: usar qualquer um dos dois custa ao
@@ -317,7 +351,16 @@ function scaledCooldown(ability: Ability, speed: number): number {
 // A Velocidade que conta pro cooldown, ja com o efeito de status. Paralisia
 // corta pela metade na Gen VII (era 75% antes) — e aqui, onde Velocidade vira
 // ritmo de acao, isso significa literalmente agir na metade da frequencia.
-function velocidadeEfetiva(entity: WorldEntity): number {
+//
+// Quick Feet (Fase 12): com QUALQUER status alterado ativo, da +50% de
+// Velocidade E IGNORA o multiplicador normal do status (nos jogos reais isso
+// existe justamente pra apagar o corte de paralisia — um POKE paralisado com
+// Quick Feet fica mais rapido do que o normal, nao mais lento).
+export function velocidadeEfetiva(entity: WorldEntity): number {
+  const trait = traitOf(entity.poke.speciesId)
+  if (trait === 'quick_feet' && entity.poke.status) {
+    return entity.poke.stats.speed * 1.5 * multiplicadorDeStat(entity.estagios, 'speed')
+  }
   return entity.poke.stats.speed
     * multiplicadorDeVelocidade(entity.poke.status?.tipo ?? null)
     * multiplicadorDeStat(entity.estagios, 'speed')
@@ -464,8 +507,9 @@ function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: W
   const defenderPoke = defenderEntity.poke
   const attackerSpecies = SPECIES[attackerPoke.speciesId]
   const defenderSpecies = SPECIES[defenderPoke.speciesId]
+  const [defType1, defType2] = tiposEfetivosParaEfetividade(defenderEntity, defenderSpecies)
   const effectivenessMultiplier = efetividadeConsiderandoRevelado(
-    getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2),
+    getEffectiveness(ability.type, defType1, defType2),
     ability, defenderEntity, defenderSpecies,
   )
   // Leitura, nao aplica efeito (`aplicarEfeitos=false`): estimar dano nao pode
@@ -478,8 +522,12 @@ function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: W
   if (special && special.mode === 'fixed') return special.amount
 
   const isPhysical = resolveAbilityCategory(ability, attackerPoke) === 'physical'
-  const atk = isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp
-  const def = isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp
+  const attackerTraitEstimate = traitOf(attackerSpecies.id)
+  const defenderTraitEstimate = traitOf(defenderSpecies.id)
+  const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp)
+    * multiplicadorDeAtaquePorTrait(attackerTraitEstimate, isPhysical, Boolean(attackerPoke.status))
+  const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp)
+    * multiplicadorDeDefesaPorTrait(defenderTraitEstimate, isPhysical, Boolean(defenderPoke.status))
   const power = special && special.mode === 'dynamicPower' ? special.power : ability.power
   if (power === 0) return 0
 
@@ -488,7 +536,6 @@ function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: W
   const isStab = Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)
   if (isStab) dmg *= STAB_MULTIPLIER
 
-  const attackerTraitEstimate = traitOf(attackerSpecies.id)
   if (attackerTraitEstimate && LOW_HP_TRAIT_TYPE_MULTIPLIER[attackerTraitEstimate] === ability.type
     && attackerPoke.hp / attackerPoke.stats.hp < LOW_HP_TRAIT_HP_FRACTION) {
     dmg *= LOW_HP_TRAIT_MULTIPLIER
@@ -539,6 +586,13 @@ const FOCUS_ENERGY_TETO_DA_IA = 3
  * cada cooldown com Chuva ja ativa, jogando o turno fora (e sobrescrevendo os
  * mesmos 5 turnos por cima dos que ja tinha).
  */
+// Soma de todos os estagios de uma entidade — usada so pelas heuristicas
+// abaixo (Haze/Psych Up) pra comparar "quem esta mais buffado" sem precisar
+// somar stat a stat toda vez.
+function somaDeEstagios(entity: WorldEntity): number {
+  return Object.values(entity.estagios).reduce((soma: number, v) => soma + (v ?? 0), 0)
+}
+
 function golpeDeApoioUtil(
   world: WorldState,
   entity: WorldEntity,
@@ -653,12 +707,66 @@ function golpeDeApoioUtil(
       case 'sticky_web': return !hazards?.stickyWeb
     }
   }
-  if (!ability.statChanges || !ability.statChanges.length) return false
-  const destino = ability.statTarget === 'self' ? entity : defenderEntity
-  return ability.statChanges.some((m) => {
-    const atual = destino.estagios[m.stat] ?? 0
-    return m.estagios > 0 ? atual < ESTAGIO_ALVO_DA_IA : atual > -ESTAGIO_ALVO_DA_IA
-  })
+  if (ability.statChanges && ability.statChanges.length) {
+    const destino = ability.statTarget === 'self' ? entity : defenderEntity
+    return ability.statChanges.some((m) => {
+      const atual = destino.estagios[m.stat] ?? 0
+      return m.estagios > 0 ? atual < ESTAGIO_ALVO_DA_IA : atual > -ESTAGIO_ALVO_DA_IA
+    })
+  }
+
+  // Golpes de suporte da Fase 12: nao tem `statChanges`/`healPercent` no
+  // catalogo (o efeito inteiro e hardcoded por id em resolveHit), entao cada
+  // um precisa da propria heuristica de "vale usar agora" aqui.
+  switch (ability.id) {
+    case 'rest':
+      return entity.poke.hp / entity.poke.stats.hp <= 0.5 && !entity.poke.status
+    case 'belly_drum':
+      return (entity.estagios.atkFis ?? 0) < ESTAGIO_MAXIMO && entity.poke.hp / entity.poke.stats.hp > 0.5
+    case 'acupressure':
+      return true // sempre sobe algum stat aleatorio em +2 — nunca e turno jogado fora
+    case 'endure':
+      return entity.poke.hp / entity.poke.stats.hp <= 0.25 && !entity.enduraAtiva
+    case 'protect':
+    case 'detect':
+      return !entity.protegida
+    case 'destiny_bond':
+      return entity.poke.hp / entity.poke.stats.hp <= 0.15 && !entity.destinyBondAtiva
+    case 'aromatherapy':
+    case 'heal_bell':
+      return Boolean(entity.poke.status)
+    case 'yawn':
+      return !defenderEntity.poke.status
+    case 'heal_block':
+      return !(defenderEntity.curaBloqueadaAte && defenderEntity.curaBloqueadaAte > 0)
+    case 'soak':
+      return defenderEntity.tipoForcado !== 'WATER'
+    case 'perish_song':
+      return entity.perishCountdown == null
+    case 'lock_on':
+    case 'mind_reader':
+      return entity.miraGarantidaAlvoId !== defenderEntity.id
+    case 'psycho_shift':
+      return Boolean(entity.poke.status) && !defenderEntity.poke.status
+    case 'guard_swap':
+      return (defenderEntity.estagios.def ?? 0) + (defenderEntity.estagios.defEsp ?? 0)
+        > (entity.estagios.def ?? 0) + (entity.estagios.defEsp ?? 0)
+    case 'power_swap':
+      return (defenderEntity.estagios.atkFis ?? 0) + (defenderEntity.estagios.atkEsp ?? 0)
+        > (entity.estagios.atkFis ?? 0) + (entity.estagios.atkEsp ?? 0)
+    case 'psych_up':
+      return somaDeEstagios(defenderEntity) > somaDeEstagios(entity)
+    case 'haze':
+      return somaDeEstagios(entity) < 0 || somaDeEstagios(defenderEntity) > 0
+    case 'pain_split':
+      return defenderEntity.poke.hp > entity.poke.hp
+    // Rage Powder: no-op estrutural (ver resolveHit) — engine e sempre 1
+    // jogador vs N inimigos, sem aliado do jogador pra redirecionar aggro.
+    // Nunca vale a pena escolher.
+    case 'rage_powder':
+    default:
+      return false
+  }
 }
 
 /**
@@ -702,8 +810,11 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
   const defenderPoke = defenderEntity.poke
   const attackerSpecies = SPECIES[attackerPoke.speciesId]
   const defenderSpecies = SPECIES[defenderPoke.speciesId]
+  const attackerTrait = traitOf(attackerSpecies.id)
+  const defenderTrait = traitOf(defenderSpecies.id)
+  const [defType1, defType2] = tiposEfetivosParaEfetividade(defenderEntity, defenderSpecies)
   let effectivenessMultiplier = efetividadeConsiderandoRevelado(
-    getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2),
+    getEffectiveness(ability.type, defType1, defType2),
     ability, defenderEntity, defenderSpecies,
   )
   // Hit de verdade (`aplicarEfeitos=true`): imunidade de Trait/golpe zera o
@@ -721,11 +832,15 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
     const isPhysical = resolveAbilityCategory(ability, attackerPoke) === 'physical'
     // Estagios entram MULTIPLICANDO a stat crua, nao alterando-a: a ficha do
     // POKE continua mostrando o Ataque de verdade, e o buff some quando ele sai
-    // de campo. E como os jogos fazem.
+    // de campo. E como os jogos fazem. Traits de Fase 12 (Huge/Pure Power,
+    // Hustle, Guts, Marvel Scale) empilham do mesmo jeito, multiplicando a
+    // stat crua.
     const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp)
       * multiplicadorDeStat(attackerEntity.estagios, isPhysical ? 'atkFis' : 'atkEsp')
+      * multiplicadorDeAtaquePorTrait(attackerTrait, isPhysical, Boolean(attackerPoke.status))
     const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp)
       * multiplicadorDeStat(defenderEntity.estagios, isPhysical ? 'def' : 'defEsp')
+      * multiplicadorDeDefesaPorTrait(defenderTrait, isPhysical, Boolean(defenderPoke.status))
     const power = special && special.mode === 'dynamicPower' ? special.power : ability.power
 
     // DAMAGE_BASE tem um +2 fixo na formula (Gen2 legitimo pra golpe de dano
@@ -743,7 +858,6 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
     const isStab = Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)
     if (isStab) dmg *= STAB_MULTIPLIER
 
-    const attackerTrait = traitOf(attackerSpecies.id)
     if (attackerTrait && LOW_HP_TRAIT_TYPE_MULTIPLIER[attackerTrait] === ability.type
       && attackerPoke.hp / attackerPoke.stats.hp < LOW_HP_TRAIT_HP_FRACTION) {
       dmg *= LOW_HP_TRAIT_MULTIPLIER
@@ -769,7 +883,6 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
     // Multiscale: HP do defensor CHEIO (nao so alto) corta o dano recebido
     // pela metade. Depois da efetividade de tipo, igual ao pipeline real —
     // um multiplicador de "estado do defensor" empilha sobre o resto.
-    const defenderTrait = traitOf(defenderSpecies.id)
     if (defenderTrait === 'multiscale' && defenderPoke.hp === defenderPoke.stats.hp) {
       dmg *= MULTISCALE_MULTIPLIER
     }
@@ -1104,9 +1217,14 @@ function nearbyAliveEnemies(world: WorldState): EnemyEntity[] {
  * estagio (base 2) que atkFis/def usam. Precisao do atacante SOBE a chance de
  * acerto; Evasao do defensor DESCE. Foresight/Miracle Eye (`revelado`) fazem o
  * defensor ignorar a propria Evasao contra este atacante.
+ *
+ * Hustle (Fase 12): +50% de Ataque Fisico custa -20% de precisao nos golpes
+ * FISICOS do proprio portador — aplicado ANTES dos estagios de accuracy/evasao.
  */
 function golpeErrou(rng: Rng, ability: Ability, atacante: WorldEntity, defensor: WorldEntity): boolean {
-  const precisaoBase = ability.accuracy ?? 100
+  const trait = traitOf(atacante.poke.speciesId)
+  const isPhysical = resolveAbilityCategory(ability, atacante.poke) === 'physical'
+  const precisaoBase = (ability.accuracy ?? 100) * (trait === 'hustle' && isPhysical ? 0.8 : 1)
   const multAtacante = multiplicadorDeAccuracyOuEvasion(atacante.estagios.accuracy ?? 0)
   const multDefensor = defensor.revelado ? 1 : multiplicadorDeAccuracyOuEvasion(defensor.estagios.evasion ?? 0)
   const precisaoEfetiva = precisaoBase * multAtacante / multDefensor
@@ -1161,7 +1279,13 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   triggerAttackAnim(player, ability.target === 'aoe', primaryTarget)
   announceAbility(world, player, ability)
 
-  if (golpeErrou(world.rng, ability, player, primaryTarget)) {
+  // Lock-On/Mind Reader (Fase 12): garantia de acerto e "uma vez, contra
+  // aquele alvo especifico" — consumida aqui, acerte ou nao precisasse do
+  // sorteio, exatamente como nos jogos (o proximo golpe usado contra o alvo
+  // marcado e o unico que se beneficia).
+  const miraGarantida = player.miraGarantidaAlvoId != null && player.miraGarantidaAlvoId === primaryTarget?.id
+  if (miraGarantida) player.miraGarantidaAlvoId = null
+  if (!miraGarantida && golpeErrou(world.rng, ability, player, primaryTarget)) {
     if (!silent) anunciarErro(world, player)
     return
   }
@@ -1199,7 +1323,9 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   triggerAttackAnim(enemy, ability.target === 'aoe', player)
   announceAbility(world, enemy, ability)
 
-  if (golpeErrou(world.rng, ability, enemy, player)) {
+  const miraGarantida = enemy.miraGarantidaAlvoId != null && enemy.miraGarantidaAlvoId === player.id
+  if (miraGarantida) enemy.miraGarantidaAlvoId = null
+  if (!miraGarantida && golpeErrou(world.rng, ability, enemy, player)) {
     if (!silent) anunciarErro(world, enemy)
     return
   }
@@ -1208,6 +1334,107 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   // AOE (PH-10).
   queueHit(world, enemy, player, ability)
   if (ability.target === 'aoe') queueAoeVisual(world, enemy, ability)
+}
+
+// Credita a morte de `entity` pelo mesmo caminho que qualquer outra —
+// recoil de Explosao, Rough Skin/Iron Barbs, Aftermath, drenagem negativa,
+// Destiny Bond. Helper pra nao repetir o mesmo par de ifs em cada ponto do
+// hit que pode matar alguem fora do dano principal.
+function creditarMorteSeNecessario(entity: WorldEntity, defeatedEnemyIds: string[], onPlayerFainted: () => void): void {
+  if (!isDead(entity)) return
+  if (entity.kind === 'player') {
+    if (!entity.fainted) {
+      entity.fainted = true
+      onPlayerFainted()
+    }
+  } else if (!entity.deathHandled) {
+    entity.deathHandled = true
+    defeatedEnemyIds.push(entity.id)
+  }
+}
+
+// Golpes de suporte da Fase 12 cujo "alvo" na fila de hits deste motor
+// (`hit.targetId`) e so um inimigo pra fila TER alguem — o efeito de
+// verdade e todo no proprio usuario (Endure, Protect/Detect, Destiny Bond,
+// Rest, Belly Drum, Acupressure, Aromatherapy/Heal Bell) ou nao mira
+// ninguem de verdade (Haze e campo inteiro; Psych Up, por regra dos jogos
+// reais, ignora Protect). Protect/Detect do ALVO nao bloqueia nenhum
+// destes — mesma excecao dos jogos reais pro Psych Up, generalizada pros
+// golpes de auto-alvo deste catalogo.
+const PROTECT_BYPASS_ABILITY_IDS = new Set([
+  'endure', 'protect', 'detect', 'destiny_bond', 'rest', 'belly_drum',
+  'acupressure', 'aromatherapy', 'heal_bell', 'haze', 'psych_up',
+  'perish_song', 'rage_powder',
+])
+
+// Alem da lista acima, qualquer golpe pre-existente que ja mirava o proprio
+// usuario (Danca das Espadas, Recover, ...) tambem nao e "recebido" por quem
+// tem Protect ativo — ele nunca tocou no alvo pra comecar.
+function golpeAtingeOAlvo(ability: Ability): boolean {
+  if (ability.statTarget === 'self') return false
+  if (ability.healPercent) return false
+  if (PROTECT_BYPASS_ABILITY_IDS.has(ability.id)) return false
+  return true
+}
+
+function anunciarProtegido(world: WorldState, alvo: WorldEntity): void {
+  world.effects.push(createWorldEffect(world.counters, {
+    type: 'abilityName',
+    x: alvo.x, y: alvo.y,
+    targetX: alvo.x, targetY: alvo.y + getGroundOffset(alvo) + 14,
+    text: 'Protegido!',
+    color: '#94a3b8',
+    duration: 0.7,
+    owner: alvo,
+  }))
+}
+
+function anunciarAguentou(world: WorldState, alvo: WorldEntity): void {
+  world.effects.push(createWorldEffect(world.counters, {
+    type: 'abilityName',
+    x: alvo.x, y: alvo.y,
+    targetX: alvo.x, targetY: alvo.y + getGroundOffset(alvo) + 14,
+    text: 'Aguentou!',
+    color: '#facc15',
+    duration: 0.7,
+    owner: alvo,
+  }))
+}
+
+function anunciarPereceu(world: WorldState, alvo: WorldEntity): void {
+  world.effects.push(createWorldEffect(world.counters, {
+    type: 'abilityName',
+    x: alvo.x, y: alvo.y,
+    targetX: alvo.x, targetY: alvo.y + getGroundOffset(alvo) + 14,
+    text: 'Perish Song!',
+    color: '#c084fc',
+    duration: 0.9,
+    owner: alvo,
+  }))
+}
+
+// Heal Block (Fase 12): dura alguns turnos, convertidos em segundos pelo
+// mesmo padrao de `SEGUNDOS_DE_IMUNIDADE_APOS_CURA`.
+const HEAL_BLOCK_TURNOS = 5
+const HEAL_BLOCK_SEGUNDOS = HEAL_BLOCK_TURNOS * TURNO_SEGUNDOS
+
+function curaBloqueada(entity: WorldEntity): boolean {
+  return Boolean(entity.curaBloqueadaAte && entity.curaBloqueadaAte > 0)
+}
+
+// Troca os estagios de `stats` entre duas entidades (Guard Swap/Power Swap).
+// `delete` em vez de setar 0 — estagio ausente e estagio 0, mas o objeto fica
+// mais limpo e bate com o resto do codebase (aplicarMudancasDeStat nunca
+// grava estagio 0 explicito).
+function trocarEstagios(a: WorldEntity, b: WorldEntity, stats: StatDeEstagio[]): void {
+  for (const stat of stats) {
+    const av = a.estagios[stat]
+    const bv = b.estagios[stat]
+    if (bv === undefined) delete a.estagios[stat]
+    else a.estagios[stat] = bv
+    if (av === undefined) delete b.estagios[stat]
+    else b.estagios[stat] = av
+  }
 }
 
 // Aplica o dano/texto/efeito-de-golpe/tratamento-de-derrota de um hit
@@ -1279,7 +1506,32 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // aos jogos reais (Wide Guard nao bloqueia golpe single-target).
   if (ability.target === 'aoe' && (target.escudos?.wideGuard ?? 0) > 0) return
 
+  // PROTECT/DETECT (Fase 12): bloqueia o hit INTEIRO — dano, status, estagio
+  // — exceto os golpes de auto-alvo que nunca miraram o `target` de verdade
+  // (ver golpeAtingeOAlvo). Consumida por este hit, bloqueado ou nao seria o
+  // caso de bloquear.
+  if (target.protegida && golpeAtingeOAlvo(ability)) {
+    target.protegida = false
+    if (!silent) anunciarProtegido(world, target)
+    return
+  }
+
   const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null)
+
+  // ENDURE / STURDY (Fase 12): sobrevive com 1 HP num golpe que mataria.
+  // Endure e um golpe (flag consumida no proximo hit recebido, mate ele ou
+  // nao); Sturdy e a MESMA mecanica sempre ativa via Trait, mas so em HP
+  // CHEIO — perde o efeito no primeiro hit que ja tirou HP, igual ao
+  // Multiscale acima.
+  let danoFinal = result.amount
+  const enduraGolpe = target.enduraAtiva === true
+  if (enduraGolpe) target.enduraAtiva = false
+  const sturdyTrait = !enduraGolpe
+    && traitOf(target.poke.speciesId) === 'sturdy'
+    && target.poke.hp === target.poke.stats.hp
+  const aguentou = (enduraGolpe || sturdyTrait) && danoFinal >= target.poke.hp && target.poke.hp > 0
+  if (aguentou) danoFinal = target.poke.hp - 1
+
   // Dano REALMENTE causado, limitado ao HP que o alvo tinha. `result.amount` e
   // o numero cru da formula e pode passar MUITO do HP do alvo (um POKE Nivel 85
   // batendo num Nivel 40 causa varias vezes a vida dele). E o que dreno e recuo
@@ -1289,12 +1541,29 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // BUG QUE ISTO CORRIGE: sem o teto, um golpe de recuo virava suicidio em
   // qualquer hunt onde o jogador estivesse acima do nivel. Medido, custava um
   // quarto das kills/hora no Nivel 85 — o POKE se matava sozinho.
-  const danoCausado = Math.min(result.amount, target.poke.hp)
+  const danoCausado = Math.min(danoFinal, target.poke.hp)
   // Golpe de status causa 0 de dano — nao mostra "0" flutuando sobre o alvo
   // nem registra "ultimo dano recebido" (Counter/Mirror Coat refletiriam nada).
-  if (result.amount > 0) {
-    takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke))
-    if (!silent) spawnDamageNumber(world, target, result)
+  if (danoFinal > 0) {
+    takeDamage(target, danoFinal, resolveAbilityCategory(ability, attacker.poke))
+    if (!silent) spawnDamageNumber(world, target, { ...result, amount: danoFinal })
+    if (aguentou && !silent) anunciarAguentou(world, target)
+  }
+
+  // DESTINY BOND (Fase 12): se quem primou o vinculo morreu NESTE hit, quem
+  // matou tambem morre — dano fixo = HP atual do atacante (equivale a zerar
+  // o HP dele). So cobre morte por dano DIRETO deste hit (o caso comum); nao
+  // persegue morte por dano residual (veneno/recoil) num tick separado —
+  // simplificacao deliberada, documentada aqui em vez de tentar interceptar
+  // toda chamada de takeDamage do arquivo.
+  if (target.destinyBondAtiva && isDead(target)) {
+    target.destinyBondAtiva = false
+    const contraAtaque = attacker.poke.hp
+    if (contraAtaque > 0) {
+      takeDamage(attacker, contraAtaque)
+      if (!silent) spawnDamageNumber(world, attacker, { amount: contraAtaque, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+      creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted)
+    }
   }
 
   // ARMADILHA DE CAMPO (Spikes/Toxic Spikes/Stealth Rock/Sticky Web): golpe
@@ -1333,7 +1602,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // A Trait pertence a quem FOI ATINGIDO (`target`) e reage contra quem
   // golpeou (`attacker`) -- como nos jogos: encostar num POKE com Static
   // pode paralisar VOCE, nao ele.
-  if (ability.category === 'physical' && result.amount > 0) {
+  if (ability.category === 'physical' && danoFinal > 0) {
     const trait = traitOf(target.poke.speciesId)
     switch (trait) {
       case 'static':
@@ -1367,17 +1636,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
         const recoil = Math.max(1, Math.round(attacker.poke.stats.hp / 8))
         takeDamage(attacker, recoil)
         if (!silent) spawnDamageNumber(world, attacker, { amount: recoil, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
-        if (isDead(attacker)) {
-          if (attacker.kind === 'player') {
-            if (!attacker.fainted) {
-              attacker.fainted = true
-              onPlayerFainted()
-            }
-          } else if (!attacker.deathHandled) {
-            attacker.deathHandled = true
-            defeatedEnemyIds.push(attacker.id)
-          }
-        }
+        creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted)
         break
       }
       case 'aftermath': {
@@ -1389,17 +1648,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
           const recoil = Math.round(attacker.poke.stats.hp / 4)
           takeDamage(attacker, recoil)
           if (!silent) spawnDamageNumber(world, attacker, { amount: recoil, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
-          if (isDead(attacker)) {
-            if (attacker.kind === 'player') {
-              if (!attacker.fainted) {
-                attacker.fainted = true
-                onPlayerFainted()
-              }
-            } else if (!attacker.deathHandled) {
-              attacker.deathHandled = true
-              defeatedEnemyIds.push(attacker.id)
-            }
-          }
+          creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted)
         }
         break
       }
@@ -1431,6 +1680,18 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     if (aplicado) {
       statusRecebeuEm = target
       if (!silent) anunciarStatus(world, target, aplicado.tipo, 'entrou')
+
+      // Synchronize (Fase 12): se quem RECEBEU o status tem a Trait, o
+      // ATACANTE (quem aplicou) leva o mesmo de volta — so pros tres status
+      // que o jogo real cobre (poison/paralysis/burn; sleep e freeze ficam de
+      // fora mesmo nos jogos). `aplicarStatus` de novo, nao um assignment
+      // direto: o atacante ainda pode ser imune por tipo/trait/ja ter status.
+      if (
+        (aplicado.tipo === 'poison' || aplicado.tipo === 'paralysis' || aplicado.tipo === 'burn')
+        && traitOf(target.poke.speciesId) === 'synchronize'
+      ) {
+        aplicarStatus(world.rng, attacker, aplicado.tipo, 100)
+      }
     }
 
     // Mudanca de atributo. O anuncio vai em quem RECEBEU (o proprio usuario num
@@ -1535,7 +1796,8 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // CURA PURA (Recover, Synthesis, Soft-Boiled — 10 golpes). Cura sempre o
   // ATACANTE, nunca o alvo do hit: todos eles tem `target: 'user'` no catalogo,
   // e o "alvo" so existe aqui porque a fila de hits deste motor sempre tem um.
-  if (ability.healPercent) {
+  // Heal Block (Fase 12) trava isto: nao cura nada enquanto ativo.
+  if (ability.healPercent && !curaBloqueada(attacker)) {
     const quanto = Math.max(1, Math.round(attacker.poke.stats.hp * ability.healPercent / 100))
     heal(attacker, quanto)
     if (!silent) spawnDamageNumber(world, attacker, { amount: -quanto, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
@@ -1602,34 +1864,156 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // Modelado como "o alvo leva um cooldown global extra", que e o efeito
   // observavel do flinch. Mais fiel que ignorar (25 golpes voltariam a ser
   // dado morto) e mais honesto que fingir uma ordem de turno que nao existe.
-  if (ability.flinchChance && nextFloat(world.rng) * 100 < ability.flinchChance) {
+  //
+  // Inner Focus (Fase 12): imune a flinch — nunca perde o turno por isto.
+  if (
+    ability.flinchChance && nextFloat(world.rng) * 100 < ability.flinchChance
+    && traitOf(target.poke.speciesId) !== 'inner_focus'
+  ) {
     startGlobalCooldown(target, MIN_ACTION_GAP)
   }
 
   // DRENO e RECUO, os dois no mesmo campo: `drainPercent` positivo cura o
   // atacante (Absorb = 50% do dano causado), negativo machuca (Double-Edge =
   // -33%). E como a PokeAPI modela, e manter os dois juntos evita que um golpe
-  // de recuo passe a curar por engano de sinal.
+  // de recuo passe a curar por engano de sinal. Heal Block so trava o lado
+  // POSITIVO (e cura); o recuo negativo continua machucando normalmente.
   if (ability.drainPercent && danoCausado > 0) {
     const quanto = Math.max(1, Math.round(danoCausado * Math.abs(ability.drainPercent) / 100))
     if (ability.drainPercent > 0) {
-      heal(attacker, quanto)
-      if (!silent) spawnDamageNumber(world, attacker, { amount: -quanto, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+      if (!curaBloqueada(attacker)) {
+        heal(attacker, quanto)
+        if (!silent) spawnDamageNumber(world, attacker, { amount: -quanto, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+      }
     } else {
       takeDamage(attacker, quanto)
       if (!silent) spawnDamageNumber(world, attacker, { amount: quanto, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
-      if (isDead(attacker)) {
-        if (attacker.kind === 'player') {
-          if (!attacker.fainted) {
-            attacker.fainted = true
-            onPlayerFainted()
-          }
-        } else if (!attacker.deathHandled) {
-          attacker.deathHandled = true
-          defeatedEnemyIds.push(attacker.id)
-        }
-      }
+      creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted)
     }
+  }
+
+  // --- GOLPES DE SUPORTE SEM DANO (Fase 12) ---------------------------------
+  //
+  // Nenhum destes vem com `status`/`statChanges`/`healPercent` no catalogo —
+  // o efeito inteiro e hardcoded por id aqui, no mesmo espirito de
+  // FIXED_DAMAGE_ABILITIES/DYNAMIC_POWER_ABILITIES la em cima. `golpeDeApoioUtil`
+  // decide QUANDO a IA usa cada um; aqui e so O QUE acontece quando usa.
+  switch (ability.id) {
+    case 'endure':
+      attacker.enduraAtiva = true
+      break
+    case 'protect':
+    case 'detect':
+      attacker.protegida = true
+      break
+    case 'destiny_bond':
+      attacker.destinyBondAtiva = true
+      break
+    case 'haze':
+      // Reseta TODOS os estagios dos DOIS lados — nao mexe em status (nem o
+      // nao-volatil nem a confusao), so nos estagios de atributo.
+      attacker.estagios = {}
+      if (!isDead(target)) target.estagios = {}
+      break
+    case 'psych_up':
+      // Copia os estagios do ALVO pro usuario — golpe reconhecidamente ignora
+      // Protect nos jogos reais (ver PROTECT_BYPASS_ABILITY_IDS).
+      if (!isDead(target)) attacker.estagios = { ...target.estagios }
+      break
+    case 'pain_split':
+      if (!isDead(target)) {
+        const media = Math.round((attacker.poke.hp + target.poke.hp) / 2)
+        attacker.poke.hp = Math.min(attacker.poke.stats.hp, media)
+        target.poke.hp = Math.min(target.poke.stats.hp, media)
+      }
+      break
+    case 'heal_block':
+      if (!isDead(target)) target.curaBloqueadaAte = HEAL_BLOCK_SEGUNDOS
+      break
+    case 'rest': {
+      // Cura 100% e aplica sono de 2 turnos no proprio usuario — sempre, sem
+      // sorteio de chance nem checagem de "ja tem status" (Rest SUBSTITUI
+      // qualquer status que o usuario tivesse, como nos jogos). Insomnia/
+      // Vital Spirit ainda assim impedem o proprio sono — o portador so cura.
+      attacker.poke.hp = attacker.poke.stats.hp
+      const traitAttacker = traitOf(attacker.poke.speciesId)
+      if (traitAttacker !== 'insomnia' && traitAttacker !== 'vital_spirit') {
+        attacker.poke.status = { tipo: 'sleep', turnosRestantes: 2 }
+        attacker.imunidadeDeStatus = 0
+      }
+      break
+    }
+    case 'yawn':
+      // Sono ATRASADO: nao pega no fechamento do turno em que foi usado, so
+      // no seguinte — por isso 2, nao 1 (o primeiro tickStatus so fecha o
+      // turno ATUAL; o segundo e que fecha "o proximo turno" de verdade,
+      // batendo com a regra real: "falls asleep at the end of the next
+      // turn"). So agenda o contador aqui; quem realmente aplica o sono
+      // (respeitando imunidade no momento em que pega) e tickStatus, ver
+      // statusSystem.ts.
+      if (!isDead(target) && !target.poke.status) target.yawnTurnos = 2
+      break
+    case 'belly_drum': {
+      // Perde 50% do HP MAXIMO (nao do atual — bate com o poder real do
+      // golpe), nunca menos que 1 HP restante, em troca sobe Ataque Fisico
+      // pro TETO de uma vez.
+      const perda = Math.round(attacker.poke.stats.hp / 2)
+      attacker.poke.hp = Math.max(1, attacker.poke.hp - perda)
+      attacker.estagios.atkFis = ESTAGIO_MAXIMO
+      break
+    }
+    case 'acupressure': {
+      const stats: StatDeEstagio[] = ['atkFis', 'atkEsp', 'def', 'defEsp', 'speed']
+      const stat = stats[Math.floor(nextFloat(world.rng) * stats.length)]
+      const atual = attacker.estagios[stat] ?? 0
+      attacker.estagios[stat] = Math.min(ESTAGIO_MAXIMO, atual + 2)
+      break
+    }
+    case 'aromatherapy':
+    case 'heal_bell':
+      // Nos jogos cura o TIME inteiro; sem time de reserva neste motor 1v1,
+      // cura so o proprio usuario (ver instrucao da Fase 12).
+      curarStatus(attacker)
+      break
+    case 'lock_on':
+    case 'mind_reader':
+      if (!isDead(target)) attacker.miraGarantidaAlvoId = target.id
+      break
+    case 'guard_swap':
+      if (!isDead(target)) trocarEstagios(attacker, target, ['def', 'defEsp'])
+      break
+    case 'power_swap':
+      if (!isDead(target)) trocarEstagios(attacker, target, ['atkFis', 'atkEsp'])
+      break
+    case 'rage_powder':
+      // No-op ESTRUTURAL, documentado: este motor e sempre 1 jogador vs N
+      // inimigos — nunca ha um ALIADO do jogador pra redirecionar aggro, e
+      // todo inimigo engajado ja mira so no jogador de qualquer forma. Nao
+      // ha estado nenhum pra setar.
+      break
+    case 'soak':
+      if (!isDead(target)) target.tipoForcado = 'WATER'
+      break
+    case 'perish_song':
+      // Contador independente pros DOIS lados que estavam em campo quando o
+      // golpe foi usado — chegar a 0 mata (ver tickStatus#pereceu).
+      if (attacker.perishCountdown == null) attacker.perishCountdown = 3
+      if (!isDead(target) && target.perishCountdown == null) target.perishCountdown = 3
+      break
+    case 'psycho_shift': {
+      // Transfere o proprio status nao-volatil pro alvo (se ele puder
+      // receber) e cura o usuario. `statusVaiPegar` ja cobre imunidade por
+      // tipo/trait/status atual — so falta reaplicar manualmente porque o
+      // status esta pronto (nao e um sorteio de chance, e uma transferencia).
+      const meuStatus = attacker.poke.status
+      if (meuStatus && !isDead(target) && statusVaiPegar(target, meuStatus.tipo)) {
+        target.poke.status = { ...meuStatus }
+        attacker.poke.status = null
+      }
+      break
+    }
+    default:
+      break
   }
 
   const isPlayerAttacker = attacker.kind === 'player'
@@ -1750,14 +2134,18 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
   // creditar o kill seria um buraco silencioso na economia.
   for (const entity of [player, ...enemies]) {
     if (isDead(entity)) continue
-    const { dano, expirados, drenoParaOrigem } = tickStatus(world.rng, entity, dt, world.clima?.tipo ?? null)
+    const { dano, expirados, drenoParaOrigem, pereceu } = tickStatus(world.rng, entity, dt, world.clima?.tipo ?? null)
     if (!silent) {
       for (const tipo of expirados) anunciarStatus(world, entity, tipo, 'saiu')
     }
-    if (dano <= 0) continue
+    // Perish Song (Fase 12): contador chegou a 0 — mata pelo mesmo caminho de
+    // qualquer outro dano de turno (veneno/queimadura), so que sempre letal.
+    if (pereceu && !silent) anunciarPereceu(world, entity)
+    const danoDoTurno = pereceu ? Math.max(dano, entity.poke.hp) : dano
+    if (danoDoTurno <= 0) continue
 
-    takeDamage(entity, dano)
-    if (!silent) spawnDamageNumber(world, entity, { amount: dano, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+    takeDamage(entity, danoDoTurno)
+    if (!silent) spawnDamageNumber(world, entity, { amount: danoDoTurno, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
 
     // LEECH_SEED: dreno vai pra quem plantou a semente, se ela ainda estiver
     // viva. Se a origem ja saiu de campo (derrotada/removida), fizzle
@@ -1770,16 +2158,9 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
       }
     }
 
-    if (!isDead(entity)) continue
-    if (entity.kind === 'player') {
-      if (!player.fainted) {
-        player.fainted = true
-        playerJustFainted = true
-      }
-    } else if (!entity.deathHandled) {
-      entity.deathHandled = true
-      defeatedEnemyIds.push(entity.id)
-    }
+    creditarMorteSeNecessario(entity, defeatedEnemyIds, () => {
+      playerJustFainted = true
+    })
   }
 
   if (turnoDeClimaFechou && world.clima) {
