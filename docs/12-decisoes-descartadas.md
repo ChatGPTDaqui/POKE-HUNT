@@ -384,9 +384,12 @@ gerado.
 
 ## Fora de escopo por decisão explícita
 
-Não implementar sem pedir:
+**Lista corrigida após a leva de combate** (ver [03](03-motor-de-simulacao.md#combate-combatsystemts)):
+status, alteração de atributo, dano fixo e mecânicas tipo-recoil **saíram** desta lista —
+existem de verdade agora. Não implementar sem pedir:
 
 - Pesca e varas (as varas sincronizam, mas não são vendidas)
 - PP como recurso consumível — PP é só a entrada do cooldown
-- Mecânicas de golpe além de dano, tipo, STAB, efetividade e cooldown: status, alteração de
-  atributo, prioridade, multi-hit, recoil, dano fixo, "sempre acerta"
+- Prioridade de golpe, multi-hit, OHKO de verdade (Horn Drill/Fissure ficam fora de
+  `isDamagingAbility`, nunca selecionáveis — não há fórmula de precisão dedicada pra
+  equilibrar um "sempre mata")

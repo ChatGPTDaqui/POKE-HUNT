@@ -349,15 +349,17 @@ registrado), dado real que diz o que é.
   só tem descrição por **categoria** ("Restaura HP." nas quatro poções), que não responde a
   única pergunta do jogador: "esta é melhor que a que eu tenho?". `Infinity` (o valor real da
   Max Potion) vira "restaura TODO o HP" em vez de vazar detalhe interno.
-- **Golpe** (`data/moveDescriptions.ts`): 223 descrições, uma por golpe, conferidas por script
-  contra `ABILITIES_DATA` (223/223, zero faltando, zero sobrando). Escritas em português a
-  partir dos efeitos reais da Gen 1/2.
+- **Golpe** (`data/moveDescriptions.ts`): 479 descrições (catálogo Ultra Sun/Gen VII, 18 tipos
+  incluindo FAIRY), uma por golpe, conferidas por script contra `ABILITIES_DATA` (zero
+  faltando, zero sobrando). Escritas em português a partir dos efeitos reais dos jogos.
 
-  **O ponto delicado:** este jogo simula dano, tipo, STAB, efetividade e cooldown; não simula
-  status, alteração de atributo, prioridade, multi-hit nem recoil. Descrever "reduz o Ataque do
-  alvo" sem avisar seria mentir sobre a mecânica. Por isso `AVISO_SEM_DANO` aparece
-  automaticamente em todo golpe de potência 0 — que é exatamente o conjunto cujo efeito inteiro
-  não existe aqui.
+  **`AVISO_SEM_DANO` está desatualizado desde a leva de combate** (ver
+  [03](03-motor-de-simulacao.md#continua-fora-de-escopo-decisão-explícita)). Ele aparece em
+  TODO golpe de potência 0, presumindo que nenhum tem efeito real aqui — verdade até essa
+  leva, falsa depois dela: status, estágio de atributo, clima, escudos, Leech Seed/Curse/
+  Taunt/Protect e boa parte da lista de golpes de potência 0 agora TÊM efeito real. O aviso
+  precisa passar a distinguir "sem efeito nenhum" de "sem dano, mas com efeito" — não foi
+  corrigido nesta rodada, só documentado como pendência.
 
 ## VFX de combate
 

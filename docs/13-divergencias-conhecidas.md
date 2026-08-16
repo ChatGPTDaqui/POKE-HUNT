@@ -2,6 +2,24 @@
 
 Levantado em 2026-08-11, conferindo `CLAUDE.md` e `README.md` contra o código.
 
+**Atualizado em 2026-08-16** (leva de combate): `STONE_DROP_CHANCE`, `XP_GLOBAL_MULTIPLIER`,
+`BASIC_ATTACK_COOLDOWN` e `AUTO_REVIVE_DELAY` foram corrigidos no `CLAUDE.md` nesta rodada —
+ver a tabela abaixo, que marca cada um. `GOLD_GLOBAL_MULTIPLIER` **continua sem decisão**, de
+propósito: nenhum dos dois lados tem pista de qual é o intencional, e essa é exatamente a
+classe de caso que só quem mantém o projeto pode resolver.
+
+Achado maior da mesma rodada, categoria nova: **um sistema inteiro (combate — clima, traits,
+escudos, Protect/Endure/Destiny Bond, Leech Seed/Curse/Nightmare, Taunt/Disable/Encore/
+Torment, golpes de potência variável, hazards) existia no código, testado e funcionando, sem
+NENHUM registro em `CLAUDE.md` nem em `docs/`.** Não chegou a essa lista como "constante
+errada" porque não havia constante nenhuma pra conferir — era o próprio texto do `CLAUDE.md`
+afirmando "fora de escopo" sobre algo que já tinha sido implementado numa sessão paralela.
+Documentado agora em [03](03-motor-de-simulacao.md); a Wiki in-game (abas "Status"/"Combate")
+é a versão pro jogador. Achado ao escrever a documentação do jogador (Wiki), não numa auditoria
+de código — reforça o argumento central desta pasta: sem conferir contra o código, a
+documentação apodrece **silenciosamente**, na direção de "menos capaz do que é", não só
+"números errados".
+
 **Nada aqui foi corrigido no código.** São achados que precisam de decisão: em cada caso, ou o
 código está errado (e é bug de balanceamento) ou o documento está errado (e é ruído). Só quem
 mantém o projeto sabe qual.
@@ -17,28 +35,32 @@ manda citar símbolo em vez de repetir número.
 Todos os valores do código conferidos em `evalOrDefault(...)`, e **nenhuma dessas chaves existe
 em `formulas.generated.ts`** — então o fallback é o valor efetivo.
 
-| Chave | `CLAUDE.md` | Código | Onde |
-|---|---|---|---|
-| `GOLD_GLOBAL_MULTIPLIER` | `4` (linha 732, "+300%") | **1** | `economySystem.ts:22` |
-| `STONE_DROP_CHANCE` | `0.2` (linha 940, "5% → 20%") | **0.05** | `economySystem.ts:20` |
-| `XP_GLOBAL_MULTIPLIER` | `0.4` (linha 733, tabela) | **0.14** | `progressionSystem.ts:24` |
-| `BASIC_ATTACK_COOLDOWN` | `1.5` (linha 736, tabela) | **2** | `combatSystem.ts:57` |
-| `AUTO_REVIVE_DELAY` | `3s` (linha 183) | **5.0** | `autoSystem.ts:12` |
+| Chave | `CLAUDE.md` (era) | Código | Onde | Status |
+|---|---|---|---|---|
+| `GOLD_GLOBAL_MULTIPLIER` | `4` ("+300%") | **1** | `economySystem.ts:22` | **pendente — decisão de balanceamento real, não tocado** |
+| `STONE_DROP_CHANCE` | `0.2` ("5% → 20%") | **0.05** | `economySystem.ts:20` | corrigido em `CLAUDE.md` 2026-08-16 |
+| `XP_GLOBAL_MULTIPLIER` | `0.4` (tabela) | **0.14** | `progressionSystem.ts:24` | corrigido em `CLAUDE.md` 2026-08-16 |
+| `BASIC_ATTACK_COOLDOWN` | `1.5` (tabela) | **2** | `combatSystem.ts:57` | corrigido em `CLAUDE.md` 2026-08-16 |
+| `AUTO_REVIVE_DELAY` | `3s` | **5.0** | `autoSystem.ts:12` | corrigido em `CLAUDE.md` 2026-08-16 |
 
 ### Qual lado provavelmente está certo, caso a caso
 
-- **`XP_GLOBAL_MULTIPLIER`**: a **tabela** está velha; o texto da leva 5.x (linha 2188) já
-  registra `0.28 → 0.14`. O código concorda com o texto. **A tabela é que não foi atualizada.**
-  Correção: editar a tabela.
+- **`XP_GLOBAL_MULTIPLIER`**: a **tabela antiga** estava velha; o texto narrativo da leva 5.x já
+  registrava `0.28 → 0.14`, o código concordava com o texto — só a tabela é que não tinha sido
+  atualizada. A tabela de knobs em `CLAUDE.md` foi **substituída por um ponteiro** para
+  [02](02-dados-e-catalogo.md#knobs-de-economia-disponíveis), que cita símbolo em vez de
+  copiar valor — a classe inteira desse tipo de divergência para de poder acontecer.
 - **`STONE_DROP_CHANCE`**: o código tem comentário explícito — *"0.05 = pedido explícito do
-  usuário (revertido de 0.2)"*. **A reversão aconteceu e o `CLAUDE.md` não registrou.**
-  Correção: editar o documento.
-- **`GOLD_GLOBAL_MULTIPLIER`**: aqui não há pista no código. O `CLAUDE.md` registra um pedido
+  usuário (revertido de 0.2)"*. A reversão tinha acontecido no código sem o `CLAUDE.md`
+  registrar. Coberto pelo mesmo ponteiro acima.
+- **`GOLD_GLOBAL_MULTIPLIER`**: aqui não há pista no código. O `CLAUDE.md` registrava um pedido
   explícito de "+300%", e o valor efetivo hoje é `1` — ou seja, **o ouro está 4x menor do que o
   último pedido registrado**. Este é o único da lista com potencial de ser bug de balanceamento
-  de verdade. **Precisa de decisão.**
-- **`BASIC_ATTACK_COOLDOWN`** e **`AUTO_REVIVE_DELAY`**: mudanças pequenas sem registro. Sem
-  pista de qual lado é o intencional.
+  de verdade. **Continua sem decisão — não foi tocado nesta rodada.**
+- **`BASIC_ATTACK_COOLDOWN`** e **`AUTO_REVIVE_DELAY`**: mudanças pequenas sem registro do
+  motivo. Sem pista de qual lado era o intencional — corrigidos para bater com o código
+  (o comportamento que os jogadores de fato experimentam), citando símbolo em vez de valor daqui
+  pra frente.
 
 ---
 
