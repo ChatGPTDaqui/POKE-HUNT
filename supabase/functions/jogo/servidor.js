@@ -47387,6 +47387,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		simulated_seconds: Number(sessao.simulated_seconds) + resumo.simulatedSeconds,
 		rng_state: world.rng.state,
 		rng_draws: world.rng.draws,
+		poke_uid: world.player.poke.uid,
 		sequence_index: world.sequenceIndex,
 		sequence_cleared: world.sequenceCleared,
 		sala_indice: world.sala?.indice ?? 0,

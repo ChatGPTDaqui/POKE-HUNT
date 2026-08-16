@@ -701,6 +701,23 @@ async function simularSessao(
     // entao ler daqui pega o estado ja avancado pela simulacao inteira.
     rng_state: world.rng.state,
     rng_draws: world.rng.draws,
+    // BUG REAL (achado com o Campeao Lance): `poke_uid` so era gravado na
+    // ABERTURA da sessao (`/sessao/abrir`) e nunca mais mudava.
+    // `autoSwitchTeamOnFaint` troca `world.player.poke` dentro da simulacao
+    // (cada POKE do Lance derrotado avanca pro proximo membro vivo da
+    // equipe) — mas a linha 579 usa `sessao.poke_uid`, nao
+    // `estado.activeIndex`, pra decidir QUEM simular. Como a luta contra o
+    // Lance raramente cabe numa unica janela de ~30s, a janela SEGUINTE
+    // reconstruia o mundo com o POKE ORIGINAL da abertura — que, se ja tinha
+    // desmaiado (o caso comum), chegava com HP 0 e `fainted` verdadeiro. Sem
+    // um evento de desmaio FRESCO nesta janela pra disparar
+    // `autoSwitchTeamOnFaint`, a simulacao so via um cadaver parado em campo:
+    // sessao encerrada por "desmaio sem revive" (kick pro Hospital com o
+    // resto da equipe intacta e viva), e nunca mais avancava a sequencia —
+    // como se o Lance fosse inganhavel a partir da primeira troca de POKE.
+    // Gravar aqui o UID de quem estava de fato em campo no fim desta janela
+    // fecha o ciclo: a proxima reconstroi exatamente de onde a luta parou.
+    poke_uid: world.player!.poke.uid,
     sequence_index: world.sequenceIndex,
     sequence_cleared: world.sequenceCleared,
     sala_indice: world.sala?.indice ?? 0,
