@@ -17,7 +17,7 @@
 //
 // Cooldown vem do `WorldEntity` (worldStore), nao do PokeInstance salvo: e
 // estado de combate ao vivo, atualizado a cada tick.
-import { getAbility, BASIC_ATTACK, type Ability } from '@/data/abilities'
+import { getAbility, type Ability } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { SPECIES } from '@/data/pokes'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
@@ -74,14 +74,13 @@ export function AbilityHud() {
   const fonteRotulo = TAMANHO_ROTULO[regime]
 
   const disabled = poke.disabledAbilities || {}
-  // Os 4 escolhidos + o AOE de nivel 50, e nao o learnset inteiro: a barra
-  // mostra exatamente o que a IA pode usar (combatSystem#pickAbility le a mesma
-  // funcao). Antes ela crescia com o nivel ate 8+ slots, e a maioria deles era
-  // golpe que o POKE nunca usaria.
-  //
-  // O Ataque Basico entra no fim porque agora ele so e usado quando nenhum dos
-  // escolhidos esta pronto — continua visivel pra o jogador poder desliga-lo.
-  const abilities = [...golpesUtilizaveis(poke, SPECIES[poke.speciesId], false), BASIC_ATTACK.id]
+  // Exatamente os 4 escolhidos, nunca mais que isso: a barra mostra o que a
+  // IA pode usar (combatSystem#pickAbility le a mesma funcao). Pedido
+  // explicito do usuario, revertendo uma decisao anterior desta sessao —
+  // Ataque Basico e o AOE de nivel 50 nao anexam mais de graca fora do cap;
+  // se aparecem aqui e porque o jogador os escolheu como um dos 4 (tela de
+  // Golpes), igual a qualquer outro golpe.
+  const abilities = golpesUtilizaveis(poke, SPECIES[poke.speciesId], false)
     .map((id) => getAbility(id))
     .filter((a): a is Ability => a != null)
 

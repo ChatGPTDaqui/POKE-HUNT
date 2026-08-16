@@ -24097,14 +24097,14 @@ function nivelDeAprendizado(species) {
 	return nivelExigido(species);
 }
 function learnsetAte(species, level) {
-	const aoe = typedAoeMoveKey(species.type);
-	return golpesAprendidosAte(species, level).filter((key) => key !== aoe);
+	return golpesAprendidosAte(species, level);
 }
 function activeAbilitiesSelvagem(species, level) {
-	return learnsetAte(species, level).slice(-4);
+	const aoe = typedAoeMoveKey(species.type);
+	return learnsetAte(species, level).filter((key) => key !== aoe).slice(-4);
 }
 function activeAbilitiesPadrao(species, level) {
-	const learnset = learnsetAte(species, level);
+	const learnset = [...learnsetAte(species, level), BASIC_ATTACK.id];
 	const dano = learnset.map((key, i) => ({
 		key,
 		i,
@@ -24123,26 +24123,21 @@ function encaixarNovosGolpes(atuais, novos) {
 	for (const key of novos) {
 		if (saida.length >= 4) break;
 		if (saida.includes(key) || key === BASIC_ATTACK.id) continue;
-		if (ehGolpeAoeDeNivel50(key)) continue;
 		if (!getAbility(key)) continue;
 		saida.push(key);
 	}
 	return saida;
 }
-function ehGolpeAoeDeNivel50(key) {
-	return key in TYPED_AOE_MOVES;
-}
 function golpesUtilizaveis(poke, species, selvagem) {
 	if (selvagem) return activeAbilitiesSelvagem(species, poke.level);
-	const conhecidos = new Set(poke.unlockedAbilities);
+	const conhecidos = /* @__PURE__ */ new Set([...poke.unlockedAbilities, BASIC_ATTACK.id]);
 	const escolha = poke.activeAbilities ?? activeAbilitiesPadrao(species, poke.level);
 	const escolhidos = escolha.filter((key) => conhecidos.has(key)).slice(0, 4);
 	if (escolha.length > 0 && escolhidos.length < Math.min(escolha.length, 4)) for (const key of activeAbilitiesPadrao(species, poke.level)) {
 		if (escolhidos.length >= 4) break;
 		if (!escolhidos.includes(key) && conhecidos.has(key)) escolhidos.push(key);
 	}
-	const aoe = typedAoeMoveKey(species.type);
-	return conhecidos.has(aoe) ? [...escolhidos, aoe] : escolhidos;
+	return escolhidos;
 }
 //#endregion
 //#region src/data/pokes.ts

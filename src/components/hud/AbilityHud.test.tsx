@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
 //
-// A barra de golpes do POKE em campo. O que este teste tranca: ela mostra o que
-// a IA PODE usar, e nao o learnset inteiro. Antes do limite de 4 ela crescia com
-// o nivel — um POKE nivel 60 enchia a barra de golpes que nunca seriam
-// escolhidos, e nada quebraria se a barra voltasse a fazer isso.
+// A barra de golpes do POKE em campo. O que este teste tranca: ela mostra
+// EXATAMENTE `activeAbilities` (ate 4), nunca mais que isso. Pedido explicito
+// do usuario, revertendo uma decisao anterior desta sessao: Ataque Basico e o
+// AOE de Nivel 50 nao anexam mais de graca fora do cap — se aparecem na
+// barra e porque o jogador os escolheu como um dos 4 (tela de Golpes), igual
+// a qualquer outro golpe.
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import { SPECIES, type PokeInstance } from '@/data/pokes'
@@ -54,30 +56,26 @@ beforeEach(() => { useWorldStore.setState({ player: null }) })
 afterEach(cleanup)
 
 describe('AbilityHud', () => {
-  it('mostra so os 4 escolhidos + AOE + Ataque Basico, nao o learnset inteiro', () => {
+  it('mostra exatamente os escolhidos (nunca o learnset inteiro)', () => {
     const poke = pokeEmCampo()
     porEmCampo(poke)
     render(<AbilityHud />)
 
-    const esperado = [...golpesUtilizaveis(poke, ESPECIE, false), BASIC_ATTACK.id]
-      .map((id) => getAbility(id))
-      .filter((a) => isDamagingAbility(a))
-
+    const esperado = golpesUtilizaveis(poke, ESPECIE, false)
     expect(slots()).toHaveLength(esperado.length)
+    expect(esperado.length).toBeLessThanOrEqual(4)
 
     // A guarda que importa: o POKE conhece MUITO mais do que isso.
     const conhecidosComDano = poke.unlockedAbilities.filter((k) => isDamagingAbility(getAbility(k)))
     expect(conhecidosComDano.length).toBeGreaterThan(esperado.length)
   })
 
-  it('trocar a selecao troca o que a barra mostra', () => {
+  it('escolha vazia mostra barra vazia — nao reaparece Ataque Basico nem AOE de graca', () => {
     const poke = pokeEmCampo({ activeAbilities: [] })
     porEmCampo(poke)
     render(<AbilityHud />)
 
-    // Sem nenhum golpe selecionado sobram o AOE de Nivel 50 e o Ataque Basico.
-    expect(slots()).toHaveLength(2)
-    expect(getAbility(typedAoeMoveKey(ESPECIE.type))).toBeTruthy()
+    expect(screen.queryAllByTitle(/duplo clique/i)).toHaveLength(0)
   })
 
   it('sem POKE em campo nao desenha nada', () => {
@@ -96,11 +94,26 @@ describe('AbilityHud', () => {
     porEmCampo(poke)
     render(<AbilityHud />)
 
-    // AOE de Nivel 50 + Ataque Basico + growl.
-    expect(slots()).toHaveLength(3)
+    expect(slots()).toHaveLength(1)
     // Golpe de status tambem ganha icone (mesmo esquema por tipo dos outros);
     // so o poder na faixa de baixo vira "—" em vez de um numero, ja que ele
     // nao tem power > 0.
     expect(screen.getByText('—')).toBeTruthy()
+  })
+
+  // O BUG RELATADO PELO USUARIO: escolher os 4 slots com Ataque Basico e o
+  // AOE de Nivel 50 dentro deles nao pode virar 5-6 icones na barra — os dois
+  // sao golpes normais agora, contam pro mesmo cap de 4.
+  it('4 escolhidos incluindo Ataque Basico e AOE mostram exatamente 4 icones', () => {
+    const aoe = typedAoeMoveKey(ESPECIE.type)
+    const escolha = [BASIC_ATTACK.id, aoe, 'scratch', 'growl']
+    const poke = pokeEmCampo({
+      unlockedAbilities: [...pokeEmCampo().unlockedAbilities, aoe],
+      activeAbilities: escolha,
+    })
+    porEmCampo(poke)
+    render(<AbilityHud />)
+
+    expect(slots()).toHaveLength(4)
   })
 })
