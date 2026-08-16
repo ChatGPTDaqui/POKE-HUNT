@@ -29,6 +29,11 @@ import type { AbilityCategory, ElementType, StatusCondition, StatChange } from '
 
 export type AbilityTarget = 'single' | 'aoe'
 
+// Golpe de ARMADILHA DE CAMPO (Spikes/Toxic Spikes/Stealth Rock/Sticky Web):
+// sem alvo real, so incrementa o placar do lado inimigo (ver
+// combatSystem.ts#resolveHit e WorldState#enemyHazards em engine/types.ts).
+export type HazardId = 'spikes' | 'toxic_spikes' | 'stealth_rock' | 'sticky_web'
+
 export interface Ability {
   id: string
   name: string
@@ -51,6 +56,7 @@ export interface Ability {
   critStages?: number
   drainPercent?: number
   healPercent?: number
+  hazard?: HazardId
 }
 
 const formulaEngine = createFormulaEngine(FORMULAS)
@@ -119,6 +125,20 @@ const STAT_CHANGE_OVERRIDES: Partial<Record<string, Pick<Ability, 'statChanges' 
   minimize: { statChanges: [{ stat: 'evasion', estagios: 2 }], statChance: 100, statTarget: 'self' },
 }
 
+// Patch por cima do catalogo gerado (Ultra Sun): estes 4 golpes vinham como
+// stub vazio (so type/power/pp/accuracy, sem nenhum efeito real, categoria
+// 'status', poder 0) — plantar armadilha nao existe na planilha sincronizada.
+// Overlay hand-authored, mesmo espirito do resto deste arquivo: o dado gerado
+// nunca e editado direto, so complementado por cima. O efeito de fato (dano/
+// status no INIMIGO que nasce depois) nao acontece no HIT — acontece no
+// SPAWN do proximo inimigo, ver simulation.ts#aplicarHazardsAoInimigo.
+const HAZARD_OVERRIDES: Partial<Record<string, Pick<Ability, 'hazard'>>> = {
+  spikes: { hazard: 'spikes' },
+  toxic_spikes: { hazard: 'toxic_spikes' },
+  stealth_rock: { hazard: 'stealth_rock' },
+  sticky_web: { hazard: 'sticky_web' },
+}
+
 export const ABILITIES: Record<string, Ability> = Object.fromEntries(
   Object.entries(ALL_ABILITIES_SOURCE).map(([key, ability]) => {
     const isAoe = AOE_ABILITY_KEYS.has(key) || ('target' in ability && ability.target === 'aoe')
@@ -127,6 +147,7 @@ export const ABILITIES: Record<string, Ability> = Object.fromEntries(
       {
         ...ability,
         ...STAT_CHANGE_OVERRIDES[key],
+        ...HAZARD_OVERRIDES[key],
         target: isAoe ? 'aoe' : 'single',
         radius: isAoe ? AOE_RADIUS : undefined,
         cooldown: cooldownFromPp(ability.pp),

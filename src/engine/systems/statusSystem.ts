@@ -17,7 +17,7 @@ import {
   podeReceberStatus, sortearDuracao, danoPorTurno, ehVolatil, perdeOTurno,
   chanceDeDescongelar, descongelaCom, chanceDeSeAtacar, poderDoAutoDano,
   SEGUNDOS_DE_IMUNIDADE_APOS_CURA, ESTAGIO_MINIMO, ESTAGIO_MAXIMO,
-  type StatusAtivo, type StatusCondition,
+  type StatusAtivo, type StatusCondition, type StatDeEstagio,
 } from '@/data/statusEffects'
 import type { StatChange } from '@/data/generated/types'
 import type { Ability } from '@/data/abilities'
@@ -148,6 +148,22 @@ export function aplicarMudancasDeStat(
   return aplicadas
 }
 
+/**
+ * Aplica UMA mudanca de estagio direto, sem `Ability` por tras — usada pelo
+ * HOOK DE ENTRADA EM COMBATE de Trait (Intimidate/Download, ver
+ * combatSystem.ts#resolveEntryHook), que nao tem `ability.statChanges` pra
+ * passar por `aplicarMudancasDeStat`. Mesmo clamp e mesma forma de retorno
+ * (StatChange|null, null quando ja no teto/piso) pro chamador decidir se
+ * anuncia o toast.
+ */
+export function aplicarEstagioUnico(alvo: WorldEntity, stat: StatDeEstagio, delta: number): StatChange | null {
+  const antes = alvo.estagios[stat] ?? 0
+  const depois = Math.max(ESTAGIO_MINIMO, Math.min(ESTAGIO_MAXIMO, antes + delta))
+  if (depois === antes) return null
+  alvo.estagios[stat] = depois
+  return { stat, estagios: depois - antes }
+}
+
 // Efeito colateral de golpe: le `ability.status`/`statusChance` e tenta aplicar.
 // Separado de `aplicarStatus` porque o golpe tambem PODE DESCONGELAR o alvo
 // (golpe de FIRE com dano), e as duas coisas acontecem no mesmo hit.
@@ -183,9 +199,11 @@ export function curarStatus(entity: WorldEntity, tipo?: StatusCondition): boolea
 }
 
 /**
- * Zera o que os jogos zeram no fim da batalha: estagios de atributo e status
- * volatil (confusao). O nao-volatil NAO sai daqui — ele sobrevive a batalha
- * nos jogos, e e por isso que existe Antidoto.
+ * Zera o que os jogos zeram no fim da batalha: estagios de atributo, status
+ * volatil (confusao) e o hook de entrada em combate (Intimidate/Download/
+ * clima automatico — ver combatSystem.ts#resolveEntryHook). O nao-volatil NAO
+ * sai daqui — ele sobrevive a batalha nos jogos, e e por isso que existe
+ * Antidoto.
  *
  * A imunidade de reaplicacao tambem nao e mexida: ela e sobre o tempo desde a
  * ultima cura, nao sobre a batalha.
@@ -220,6 +238,7 @@ export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.curseDot = undefined
   entity.nightmareDot = undefined
   entity.regenPercent = undefined
+  entity.entradaProcessada = false
 }
 
 // Dano de clima por turno (Gen3+): 1/16 do HP MAXIMO, minimo 1, pra quem nao

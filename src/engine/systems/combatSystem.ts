@@ -10,13 +10,13 @@ import { getAbility, BASIC_ATTACK, isDamagingAbility, TURNO_SEGUNDOS, CLIMA_DO_G
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import {
   multiplicadorDeVelocidade, multiplicadorDeDanoFisico, multiplicadorDeStat,
-  multiplicadorDeAccuracyOuEvasion, nomeDoStatus, type StatusCondition,
+  multiplicadorDeAccuracyOuEvasion, nomeDoStatus, type StatusCondition, type StatDeEstagio,
 } from '@/data/statusEffects'
 import { corDoStatus } from '@/data/statusColors'
 import type { StatChange, ElementType } from '@/data/generated/types'
 import {
   tickStatus, tentarAgir, aplicarEfeitosDoGolpe, statusVaiPegar, aplicarMudancasDeStat,
-  limparEstadoVolatil, aplicarStatus,
+  limparEstadoVolatil, aplicarStatus, aplicarEstagioUnico,
 } from './statusSystem'
 import { traitOf, type TraitId } from '@/data/traits'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
@@ -522,10 +522,13 @@ const FOCUS_ENERGY_TETO_DA_IA = 3
 /**
  * Vale a pena usar este golpe de APOIO puro (sem dano, sem status) agora?
  *
- * Cobre os dois lados: buff em si mesmo (Danca das Espadas) e debuff no
- * oponente (Rosnado). Em ambos, so vale se o estagio ainda nao chegou no alvo
- * da IA — repetir um buff no teto e um turno jogado fora, e o jogador ve o POKE
- * "dancando" em vez de atacar.
+ * Cobre buff em si mesmo (Danca das Espadas), debuff no oponente (Rosnado) e
+ * ARMADILHA DE CAMPO (Spikes/Toxic Spikes/Stealth Rock/Sticky Web). Nos dois
+ * primeiros, so vale se o estagio ainda nao chegou no alvo da IA — repetir um
+ * buff no teto e um turno jogado fora, e o jogador ve o POKE "dancando" em
+ * vez de atacar. No terceiro, so vale enquanto o teto daquela armadilha (3
+ * camadas de Spikes, 2 de Toxic Spikes, 1 flag de Stealth Rock/Sticky Web)
+ * ainda nao foi atingido do lado INIMIGO.
  *
  * Focus Energy e Laser Focus NAO usam StatChange (contador/flag paralelos, ver
  * types.ts), entao caem fora do `ability.statChanges` generico abaixo e
@@ -536,6 +539,7 @@ const FOCUS_ENERGY_TETO_DA_IA = 3
  * mesmos 5 turnos por cima dos que ja tinha).
  */
 function golpeDeApoioUtil(
+  world: WorldState,
   entity: WorldEntity,
   defenderEntity: WorldEntity,
   ability: Ability,
@@ -635,6 +639,19 @@ function golpeDeApoioUtil(
   }
   const climaDoGolpe = CLIMA_DO_GOLPE[ability.id]
   if (climaDoGolpe) return clima !== climaDoGolpe
+  if (ability.hazard) {
+    // So a IA do JOGADOR planta armadilha — ela mira o campo INIMIGO
+    // (`world.enemyHazards`), que so faz sentido do lado de quem caca. O
+    // selvagem nao tem conceito de "seu proprio lado" pra isto.
+    if (entity.kind !== 'player') return false
+    const hazards = world.enemyHazards
+    switch (ability.hazard) {
+      case 'spikes': return (hazards?.spikes ?? 0) < 3
+      case 'toxic_spikes': return (hazards?.toxicSpikes ?? 0) < 2
+      case 'stealth_rock': return !hazards?.stealthRock
+      case 'sticky_web': return !hazards?.stickyWeb
+    }
+  }
   if (!ability.statChanges || !ability.statChanges.length) return false
   const destino = ability.statTarget === 'self' ? entity : defenderEntity
   return ability.statChanges.some((m) => {
@@ -867,7 +884,9 @@ function basicAttackFor(attackerSpecies: { type: Ability['type'] }): Ability {
 // campo setado, entao o filtro e um no-op pra eles.
 // `aoeTargetCounter` e uma funcao (ability) => numero de alvos que um cast
 // AOE atingiria, usada pra preferir AOE quando atingiria 2+ alvos.
-function pickAbility(rng: Rng, entity: WorldEntity, defenderEntity: WorldEntity, aoeTargetCounter: (a: Ability) => number, clima: ClimaTipo | null): Ability | null {
+function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: WorldEntity, aoeTargetCounter: (a: Ability) => number): Ability | null {
+  const rng = world.rng
+  const clima = world.clima?.tipo ?? null
   const attackerSpecies = SPECIES[entity.poke.speciesId]
   const disabled = entity.poke.disabledAbilities || {}
   // No maximo 4 golpes (+ o AOE de nivel 50 pro POKE do jogador). Selvagem usa
@@ -930,7 +949,7 @@ function pickAbility(rng: Rng, entity: WorldEntity, defenderEntity: WorldEntity,
   const statusPronto = estaSilenciado ? [] : prontos.filter((a) => (
     a.power === 0 && (
       (a.status != null && statusVaiPegar(defenderEntity, a.status, a.id))
-      || golpeDeApoioUtil(entity, defenderEntity, a, ready, clima)
+      || golpeDeApoioUtil(world, entity, defenderEntity, a, ready, clima)
     )
   ))
   if (statusPronto.length > 0) {
@@ -1122,10 +1141,8 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
 
   const primaryTarget = engagedEnemies[0]
   const allEnemies = nearbyAliveEnemies(world)
-  const ability = pickAbility(
-    world.rng, player, primaryTarget,
-    (a) => allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length,
-    world.clima?.tipo ?? null,
+  const ability = pickAbility(world, player, primaryTarget, (a) =>
+    allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length,
   )
   if (!ability) return
 
@@ -1166,7 +1183,7 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   if (!canAct(enemy)) return
   if (statusImpedeAcao(world, enemy, silent)) return
 
-  const ability = pickAbility(world.rng, enemy, player, () => 1, world.clima?.tipo ?? null) // inimigos so miram no jogador unico
+  const ability = pickAbility(world, enemy, player, () => 1) // inimigos so miram no jogador unico
   if (!ability) return
 
   // Mesma logica de executePlayerAction acima -- registrado na escolha, nao
@@ -1274,6 +1291,30 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   if (result.amount > 0) {
     takeDamage(target, result.amount, resolveAbilityCategory(ability, attacker.poke))
     if (!silent) spawnDamageNumber(world, target, result)
+  }
+
+  // ARMADILHA DE CAMPO (Spikes/Toxic Spikes/Stealth Rock/Sticky Web): golpe
+  // sem alvo real de verdade — o "hit" acima e so o veiculo que o resto do
+  // pipeline exige, o efeito de fato e incrementar o placar do lado INIMIGO
+  // (`world.enemyHazards`), descarregado no proximo inimigo que nascer (ver
+  // simulation.ts#aplicarHazardsAoInimigo). So o JOGADOR planta — golpeDeApoioUtil
+  // acima ja restringe a IA a so considerar isto util nesse lado.
+  if (ability.hazard && attacker.kind === 'player') {
+    world.enemyHazards ??= { spikes: 0, toxicSpikes: 0, stealthRock: false, stickyWeb: false }
+    switch (ability.hazard) {
+      case 'spikes':
+        world.enemyHazards.spikes = Math.min(3, world.enemyHazards.spikes + 1)
+        break
+      case 'toxic_spikes':
+        world.enemyHazards.toxicSpikes = Math.min(2, world.enemyHazards.toxicSpikes + 1)
+        break
+      case 'stealth_rock':
+        world.enemyHazards.stealthRock = true
+        break
+      case 'sticky_web':
+        world.enemyHazards.stickyWeb = true
+        break
+    }
   }
 
   // HABILIDADES PASSIVAS DE PUNICAO POR CONTATO (Static, Flame Body, Poison
@@ -1620,6 +1661,61 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   }
 }
 
+// Trait -> tipo de clima que ela liga automaticamente (Drizzle/Sand Stream/
+// Snow Warning/Drought — ver data/traits.ts). So estas 4 tem efeito aqui.
+const TRAIT_CLIMA: Partial<Record<TraitId, ClimaTipo>> = {
+  drizzle: 'chuva',
+  sand_stream: 'areia',
+  snow_warning: 'granizo',
+  drought: 'sol',
+}
+
+// Clima ligado por TRAIT (Drizzle/Sand Stream/Snow Warning/Drought) e
+// INDEFINIDO nos jogos reais — dura ate outra Trait ou golpe de clima
+// substituir, sem contagem de turnos (diferente do clima ligado por GOLPE tipo
+// Rain Dance, que dura 5 turnos e nao existe neste motor ainda). `Infinity` e
+// o mesmo sentinela de "sem timer" que `lastDamageTaken.age` ja usa neste
+// motor (ver engine/entity.ts).
+const CLIMA_DE_TRAIT_TURNOS = Infinity
+
+/**
+ * HOOK DE ENTRADA EM COMBATE: dispara UMA vez, no primeiro frame em que
+ * `self` fica engajado (ver updateCombat#entradaProcessada), pra Traits que
+ * reagem a "acabou de entrar em campo" — Intimidate, Download, e o clima
+ * automatico (Drizzle/Sand Stream/Snow Warning/Drought). Chamado
+ * simetricamente: uma vez pro jogador contra o alvo principal, e uma vez por
+ * cada inimigo que acabou de engajar contra o jogador.
+ */
+function resolveEntryHook(world: WorldState, self: WorldEntity, opponent: WorldEntity, silent: boolean): void {
+  const trait = traitOf(self.poke.speciesId)
+  if (!trait) return
+
+  const climaTipo = TRAIT_CLIMA[trait]
+  if (climaTipo) {
+    if (world.clima?.tipo !== climaTipo) {
+      world.clima = { tipo: climaTipo, turnosRestantes: CLIMA_DE_TRAIT_TURNOS }
+    }
+    return
+  }
+
+  if (trait === 'intimidate') {
+    const mudanca = aplicarEstagioUnico(opponent, 'atkFis', -1)
+    if (mudanca && !silent) anunciarEstagios(world, opponent, [mudanca])
+    return
+  }
+
+  if (trait === 'download') {
+    // Mesmos valores (stat crua x multiplicador de estagio) que computeDamage
+    // usa pro calculo de dano fisico/especial — ver computeDamage#def acima.
+    const opponentPoke = opponent.poke
+    const defFis = opponentPoke.stats.def * multiplicadorDeStat(opponent.estagios, 'def')
+    const defEsp = opponentPoke.stats.defEsp * multiplicadorDeStat(opponent.estagios, 'defEsp')
+    const stat: StatDeEstagio = defFis <= defEsp ? 'atkFis' : 'atkEsp'
+    const mudanca = aplicarEstagioUnico(self, stat, 1)
+    if (mudanca && !silent) anunciarEstagios(world, self, [mudanca])
+  }
+}
+
 export interface CombatResult {
   defeatedEnemyIds: string[]
   playerJustFainted: boolean
@@ -1725,9 +1821,36 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     return { defeatedEnemyIds, playerJustFainted }
   }
 
+  // Reset por-entidade do HOOK DE ENTRADA EM COMBATE (ver resolveEntryHook):
+  // quem desengajou (perdeu o aggro, ou o jogador se afastou) esquece que ja
+  // disparou — a proxima vez que reengajar, Intimidate/Download/clima
+  // automatico disparam de novo, como uma troca de POKE nos jogos reais. Roda
+  // TODO frame, nao so no fim de luta: um unico inimigo pode desengajar
+  // enquanto outros continuam engajados com o jogador.
+  if (player.state !== 'engaged' && player.entradaProcessada) player.entradaProcessada = false
+  for (const enemy of enemies) {
+    if (enemy.state !== 'engaged' && enemy.entradaProcessada) enemy.entradaProcessada = false
+  }
+
   const engagedEnemies = enemies.filter((e) => !isDead(e) && e.state === 'engaged' && e.targetId === player.id)
 
   if (engagedEnemies.length > 0) {
+    const primaryTarget = engagedEnemies[0]
+
+    // HOOK DE ENTRADA EM COMBATE — dispara so no primeiro frame de cada lado
+    // engajado (ver resolveEntryHook), simetrico: o jogador contra o alvo
+    // principal, e cada inimigo recem-engajado contra o jogador.
+    if (!player.entradaProcessada) {
+      player.entradaProcessada = true
+      resolveEntryHook(world, player, primaryTarget, silent)
+    }
+    for (const enemy of engagedEnemies) {
+      if (!enemy.entradaProcessada) {
+        enemy.entradaProcessada = true
+        resolveEntryHook(world, enemy, player, silent)
+      }
+    }
+
     executePlayerAction(world, player, engagedEnemies, silent)
 
     for (const enemy of engagedEnemies) {
