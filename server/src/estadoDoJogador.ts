@@ -96,7 +96,12 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     isMapUnlocked: (mapId) => s.unlockedMaps.includes(mapId),
     unlockContinent: (c) => { if (!s.unlockedContinents.includes(c)) s.unlockedContinents.push(c) },
     isContinentUnlocked: (c) => s.unlockedContinents.includes(c),
-    healTeamFully: () => { s.team = s.team.map((p) => ({ ...p, hp: p.stats.hp })) },
+    // Tira o status junto com o HP (o mesmo que o Centro Pokemon faz nos
+    // jogos e que o fallback local ja fazia — ver gameStateStore.ts). Sem
+    // isso, curar sob autoridade do servidor devolvia o POKE de HP cheio e
+    // AINDA envenenado/queimado/paralisado: exatamente o estado que o
+    // jogador foi ao Hospital resolver. Bug real, achado nesta leva.
+    healTeamFully: () => { s.team = s.team.map((p) => ({ ...p, hp: p.stats.hp, status: null })) },
     setCurrentMapId: (mapId) => { s.currentMapId = mapId },
     addPokeToTeam: (poke) => { s.team.push(poke) },
     moveTeamIndexToFront: (index) => {
