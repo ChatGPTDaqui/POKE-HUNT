@@ -279,6 +279,56 @@ describe('o caminho do GOLPE aplica os seis status', () => {
   }
 })
 
+describe('golpes de tick volatil novos (leech_seed/curse/nightmare/ingrain/aqua_ring)', () => {
+  it('leech_seed tira 1/8 do HP maximo do alvo e devolve quem drenar', () => {
+    const alvo = entidade('rattata', 160)
+    alvo.seeded = { sourceId: 'origem-1' }
+    const r = tickStatus(createRng(1), alvo, 2)
+    expect(r.dano).toBe(20) // 160/8
+    expect(r.drenoParaOrigem).toEqual({ sourceId: 'origem-1', amount: 20 })
+  })
+
+  it('curseDot tira 1/4 do HP maximo por turno, sem timer (continua ligado)', () => {
+    const alvo = entidade('rattata', 160)
+    alvo.curseDot = true
+    const r = tickStatus(createRng(1), alvo, 2)
+    expect(r.dano).toBe(40) // 160/4
+    expect(alvo.curseDot).toBe(true) // so sai quando o alvo desmaiar/a batalha acabar
+  })
+
+  it('nightmareDot so causa dano enquanto o alvo estiver com status sleep', () => {
+    const acordado = entidade('rattata', 160)
+    acordado.nightmareDot = true
+    expect(tickStatus(createRng(1), acordado, 2).dano).toBe(0)
+
+    const dormindo = entidade('rattata', 160)
+    dormindo.nightmareDot = true
+    aplicarStatus(createRng(1), dormindo, 'sleep', 100)
+    expect(tickStatus(createRng(1), dormindo, 2).dano).toBe(40) // 160/4
+  })
+
+  it('regenPercent (Ingrain/Aqua Ring, mesmo campo pros dois) cura 1/16 do HP maximo por turno', () => {
+    const alvo = entidade('rattata', 160)
+    alvo.poke.hp = 100
+    alvo.regenPercent = 1 / 16
+    tickStatus(createRng(1), alvo, 2)
+    expect(alvo.poke.hp).toBe(110) // 100 + 160/16
+  })
+
+  it('limparEstadoVolatil zera os quatro campos novos junto com statusVolatil/estagios', () => {
+    const e = entidade('rattata')
+    e.seeded = { sourceId: 'x' }
+    e.curseDot = true
+    e.nightmareDot = true
+    e.regenPercent = 1 / 16
+    limparEstadoVolatil(e)
+    expect(e.seeded).toBeUndefined()
+    expect(e.curseDot).toBeUndefined()
+    expect(e.nightmareDot).toBeUndefined()
+    expect(e.regenPercent).toBeUndefined()
+  })
+})
+
 describe('estagios de atributo', () => {
   it('a formula e a assimetrica dos jogos, nao 1 + n/2', () => {
     // +1 da 1.5x mas -1 da 0.67x, nao 0.5x. Usar a simetrica "obvia" tornaria

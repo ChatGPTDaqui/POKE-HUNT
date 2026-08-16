@@ -90,6 +90,20 @@ export interface BaseEntity {
   // contador de sono, roll de descongelar). Conta separado do cooldown de
   // acao: um POKE dormindo nao age, mas o sono precisa continuar passando.
   proximoTurnoDeStatus: number
+
+  // --- Golpes de tick volatil (leech_seed/curse/nightmare/ingrain/aqua_ring) -
+  // Mesma familia do statusVolatil/estagios acima: nascem no combate, morrem
+  // no fim dele (ver limparEstadoVolatil em statusSystem.ts) ou quando o
+  // portador desmaia. Tickados dentro de tickStatus, no MESMO relogio de
+  // proximoTurnoDeStatus (ver systems/statusSystem.ts#tickStatus).
+  /** Leech Seed: quem plantou a semente, pra tickStatus saber quem curar. */
+  seeded?: { sourceId: string }
+  /** Curse (variante Ghost): 1/4 do HP MAXIMO por turno, sem timer. */
+  curseDot?: boolean
+  /** Nightmare: 1/4 do HP MAXIMO por turno, SO enquanto o alvo estiver com status sleep. */
+  nightmareDot?: boolean
+  /** Ingrain/Aqua Ring (mesmo campo pros dois): fracao do HP MAXIMO curada por turno (1/16). */
+  regenPercent?: number
 }
 
 export interface PlayerEntity extends BaseEntity {
@@ -158,6 +172,18 @@ export interface PendingHit {
   isAoeVisual?: boolean
 }
 
+// Fila de Wish (cura atrasada 2 turnos) — MESMO padrao de PendingHit: tick
+// down, resolve quando timer<=0, lookup por id (findEntityById) em vez de
+// referencia direta. `targetId` guarda o id da ENTIDADE que lancou o golpe
+// (world.player ou o enemy), nao o id do poke: world.player mantem o mesmo id
+// mesmo trocando de poke ativo por desmaio (ver simulation.ts —
+// autoSwitchTeamOnFaint troca `player.poke`, nunca `player.id`).
+export interface PendingWish {
+  timer: number
+  healAmount: number
+  targetId: string
+}
+
 // UM cooldown so, do TREINADOR — nao um por tipo de item.
 //
 // Antes eram dois (`pot` e `revive`, 1s cada), o que deixava o bot usar pocao e
@@ -211,6 +237,7 @@ export interface WorldState {
   enemies: EnemyEntity[]
   effects: WorldEffect[]
   pendingHits: PendingHit[]
+  pendingWishes: PendingWish[]
   autoTimers: AutoTimers
   reviveCountdown: number | null
   respawnTimer: number | null

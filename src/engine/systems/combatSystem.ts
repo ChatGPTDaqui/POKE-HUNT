@@ -81,6 +81,21 @@ const MULTISCALE_MULTIPLIER = 0.5
 const SELF_DESTRUCT_ABILITY_KEYS = new Set(['explosion', 'selfdestruct'])
 const SELF_DESTRUCT_HP_LOSS_PERCENT = 0.5
 
+// Golpes novos de tick volatil (leech_seed/curse/nightmare/ingrain/aqua_ring/
+// wish) — nenhum vem com campo dedicado no catalogo (ver
+// data/generated/abilities.generated.ts: todos sao so {type, category:
+// 'status', power:0}), entao o efeito de cada um e por `ability.id`, mesmo
+// padrao de SELF_DESTRUCT_ABILITY_KEYS acima.
+//
+// Curse (variante Ghost): diferente de SELF_DESTRUCT_HP_LOSS_PERCENT (que e
+// sobre o HP ATUAL do atacante), este custo e sobre o HP MAXIMO — variante
+// dedicada porque o helper de cima esta hardcoded pro HP atual.
+const CURSE_SELF_MAX_HP_LOSS_PERCENT = 0.5
+// Ingrain/Aqua Ring: mesmo campo `regenPercent` pros dois, mesma fracao.
+const INGRAIN_AQUA_RING_REGEN_PERCENT = 1 / 16
+// Wish: 50% do HP MAXIMO de quem lanca, virando cura atrasada 2 turnos.
+const WISH_HEAL_PERCENT = 0.5
+
 // Ambos editaveis pela planilha (ver CLAUDE.md "Balanceamento de economia")
 // com fallback batendo o valor hardcoded antigo.
 const SPEED_REFERENCE = formulaEngine.evalOrDefault('ATTACK_SPEED_REFERENCE', 100)
@@ -303,6 +318,41 @@ const ESTAGIO_ALVO_DA_IA = 2
  * "dancando" em vez de atacar.
  */
 function golpeDeApoioUtil(entity: WorldEntity, defenderEntity: WorldEntity, ability: Ability): boolean {
+  // Golpes novos de tick volatil (leech_seed/curse/nightmare/ingrain/aqua_ring/
+  // wish): nenhum usa `ability.status`/`statChanges`/`healPercent` do
+  // catalogo — o efeito inteiro e custom (ver resolveHit) — entao a
+  // heuristica de "vale a pena usar" tambem precisa ser custom por golpe.
+  // SEM ISTO os 6 nunca sairiam do papel: `pickAbility` so considera um golpe
+  // power:0 quando `ability.status` pega OU `golpeDeApoioUtil` diz sim — e
+  // nenhum dos 6 tem `ability.status` setado.
+  switch (ability.id) {
+    case 'leech_seed': {
+      if (defenderEntity.seeded) return false
+      const especie = SPECIES[defenderEntity.poke.speciesId]
+      return especie.type !== 'GRASS' && especie.type2 !== 'GRASS'
+    }
+    case 'curse': {
+      // So vale se o alvo ainda nao tiver, e o atacante sobreviver ao custo
+      // de 50% do proprio HP MAXIMO — sem este segundo check o POKE Ghost se
+      // suicidaria toda vez que Curse saisse do cooldown.
+      if (defenderEntity.curseDot) return false
+      return entity.poke.hp > entity.poke.stats.hp * CURSE_SELF_MAX_HP_LOSS_PERCENT
+    }
+    case 'nightmare':
+      // So e util se o alvo JA estiver dormindo agora — nao ha timer aqui pra
+      // "esperar ele dormir depois".
+      return !defenderEntity.nightmareDot && defenderEntity.poke.status?.tipo === 'sleep'
+    case 'ingrain':
+    case 'aqua_ring':
+      return !entity.regenPercent && entity.poke.hp < entity.poke.stats.hp
+    case 'wish':
+      // Mesmo limiar que healPercent usa embaixo (so vale gastar o turno se
+      // realmente falta HP pra recuperar), com a fracao equivalente de Wish.
+      return entity.poke.hp / entity.poke.stats.hp <= 1 - WISH_HEAL_PERCENT
+    default:
+      break
+  }
+
   // Cura pura (Recover): so quando ha HP de verdade a recuperar. O limiar existe
   // pra o POKE nao gastar turno curando 5 de HP com a vida quase cheia.
   if (ability.healPercent) {
@@ -489,6 +539,13 @@ function pickAbility(rng: Rng, entity: WorldEntity, defenderEntity: WorldEntity,
   // data/activeAbilities.ts.
   const candidateIds = golpesUtilizaveis(entity.poke, attackerSpecies, entity.kind === 'enemy')
     .filter((id) => !disabled[id])
+    // Curse (variante Ghost): a variante pra outros tipos (buff proprio, sem
+    // custo de HP) nao esta implementada neste motor — fora do tipo GHOST o
+    // golpe fica descartado aqui mesmo, antes de golpeDeApoioUtil decidir se
+    // "vale a pena". Sem precedente de golpe restrito por tipo neste arquivo
+    // (conferido: nenhum outro golpe filtra `candidateIds` por tipo do
+    // atacante) — checagem nova.
+    .filter((id) => id !== 'curse' || attackerSpecies.type === 'GHOST' || attackerSpecies.type2 === 'GHOST')
   const prontos = candidateIds
     .map((id) => getAbility(id))
     .filter((a): a is Ability => a != null && isAbilityReady(entity, a.id))
@@ -944,6 +1001,18 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       statusRecebeuEm = ability.statTarget === 'self' ? attacker : target
       if (!silent) anunciarEstagios(world, statusRecebeuEm, mudancas)
     }
+
+    // LEECH_SEED / NIGHTMARE: setam flag volatil no ALVO, sem timer —
+    // tickada por tickStatus (statusSystem.ts) a cada turno DELE. Nenhum dos
+    // dois usa o sistema de `ability.status` do catalogo (paralysis/poison/
+    // etc), entao a aplicacao e toda custom aqui, no mesmo espirito do resto
+    // desta secao.
+    if (ability.id === 'leech_seed' && !target.seeded) {
+      const especieAlvo = SPECIES[target.poke.speciesId]
+      const alvoEhGrass = especieAlvo.type === 'GRASS' || especieAlvo.type2 === 'GRASS'
+      if (!alvoEhGrass) target.seeded = { sourceId: attacker.id }
+    }
+    if (ability.id === 'nightmare') target.nightmareDot = true
   }
 
   // CURA PURA (Recover, Synthesis, Soft-Boiled — 10 golpes). Cura sempre o
@@ -953,6 +1022,50 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     const quanto = Math.max(1, Math.round(attacker.poke.stats.hp * ability.healPercent / 100))
     heal(attacker, quanto)
     if (!silent) spawnDamageNumber(world, attacker, { amount: -quanto, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+  }
+
+  // CURSE (variante Ghost): custa 50% do PROPRIO HP MAXIMO do atacante
+  // (CURSE_SELF_MAX_HP_LOSS_PERCENT — variante de SELF_DESTRUCT_HP_LOSS_PERCENT
+  // com HP maximo em vez de atual). Gate por tipo GHOST ja filtra em
+  // pickAbility/candidateIds; repetido aqui como defesa — se por algum motivo
+  // um curse escapar do filtro (ex.: chamado direto num teste), fizzla
+  // silenciosamente em vez de aplicar o efeito errado num atacante nao-Ghost.
+  if (ability.id === 'curse') {
+    const especieAtacante = SPECIES[attacker.poke.speciesId]
+    const atacanteEhGhost = especieAtacante.type === 'GHOST' || especieAtacante.type2 === 'GHOST'
+    if (atacanteEhGhost && !isDead(attacker)) {
+      const custo = Math.max(1, Math.round(attacker.poke.stats.hp * CURSE_SELF_MAX_HP_LOSS_PERCENT))
+      takeDamage(attacker, custo)
+      if (!silent) spawnDamageNumber(world, attacker, { amount: custo, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+      if (!isDead(target)) target.curseDot = true
+      if (isDead(attacker)) {
+        if (attacker.kind === 'player') {
+          if (!attacker.fainted) {
+            attacker.fainted = true
+            onPlayerFainted()
+          }
+        } else if (!attacker.deathHandled) {
+          attacker.deathHandled = true
+          defeatedEnemyIds.push(attacker.id)
+        }
+      }
+    }
+  }
+
+  // INGRAIN / AQUA RING: mesmo campo `regenPercent` pros dois (HoT self-target
+  // sem timer, dura ate o fim da luta — ver limparEstadoVolatil).
+  if (ability.id === 'ingrain' || ability.id === 'aqua_ring') {
+    attacker.regenPercent = INGRAIN_AQUA_RING_REGEN_PERCENT
+  }
+
+  // WISH: enfileira uma cura atrasada 2 turnos, MESMO PADRAO de pendingHits
+  // (tick down em updateCombat, resolve quando timer<=0, lookup por id em vez
+  // de referencia direta). `targetId` e o id da ENTIDADE que lancou (nao do
+  // poke): world.player mantem o mesmo id mesmo trocando de poke ativo por
+  // desmaio (autoSwitchTeamOnFaint em simulation.ts so troca `player.poke`).
+  if (ability.id === 'wish') {
+    const healAmount = Math.max(1, Math.round(attacker.poke.stats.hp * WISH_HEAL_PERCENT))
+    world.pendingWishes.push({ timer: 2 * TURNO_SEGUNDOS, healAmount, targetId: attacker.id })
   }
 
   // FLINCH: o alvo perde o proximo turno.
@@ -1049,7 +1162,7 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
   // creditar o kill seria um buraco silencioso na economia.
   for (const entity of [player, ...enemies]) {
     if (isDead(entity)) continue
-    const { dano, expirados } = tickStatus(world.rng, entity, dt)
+    const { dano, expirados, drenoParaOrigem } = tickStatus(world.rng, entity, dt)
     if (!silent) {
       for (const tipo of expirados) anunciarStatus(world, entity, tipo, 'saiu')
     }
@@ -1057,6 +1170,18 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
 
     takeDamage(entity, dano)
     if (!silent) spawnDamageNumber(world, entity, { amount: dano, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+
+    // LEECH_SEED: dreno vai pra quem plantou a semente, se ela ainda estiver
+    // viva. Se a origem ja saiu de campo (derrotada/removida), fizzle
+    // parcial — o dano acima ja foi aplicado, so a cura falha em silencio.
+    if (drenoParaOrigem) {
+      const origem = findEntityById(player, enemies, drenoParaOrigem.sourceId)
+      if (origem && !isDead(origem)) {
+        heal(origem, drenoParaOrigem.amount)
+        if (!silent) spawnDamageNumber(world, origem, { amount: -drenoParaOrigem.amount, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+      }
+    }
+
     if (!isDead(entity)) continue
     if (entity.kind === 'player') {
       if (!player.fainted) {
@@ -1084,6 +1209,22 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     resolveHit(world, hit, defeatedEnemyIds, () => {
       playerJustFainted = true
     }, silent)
+  }
+
+  // WISH: mesmo padrao de pendingHits acima (tick down, resolve quando
+  // timer<=0, lookup por id).
+  for (const wish of world.pendingWishes) wish.timer -= dt
+  const wishesResolvidas = world.pendingWishes.filter((w) => w.timer <= 0)
+  world.pendingWishes = world.pendingWishes.filter((w) => w.timer > 0)
+  for (const wish of wishesResolvidas) {
+    // Se nao encontrar (lado inimigo, quem lancou ja foi derrotado e removido
+    // de world.enemies) ou a entidade estiver morta, a wish fizzla em
+    // silencio — sem erro, sem efeito.
+    const alvo = findEntityById(player, enemies, wish.targetId)
+    if (alvo && !isDead(alvo)) {
+      heal(alvo, wish.healAmount)
+      if (!silent) spawnDamageNumber(world, alvo, { amount: -wish.healAmount, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+    }
   }
 
   if (player.fainted) {
