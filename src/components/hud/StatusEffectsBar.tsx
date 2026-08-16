@@ -22,7 +22,20 @@ import { STAT_LABEL } from '@/data/statLabels'
 import type { StatDeEstagio } from '@/data/statusEffects'
 import { useWorldStore } from '@/stores/worldStore'
 
-const ESTAGIOS_ORDEM: StatDeEstagio[] = ['atkFis', 'atkEsp', 'def', 'defEsp', 'speed']
+const ESTAGIOS_ORDEM: StatDeEstagio[] = ['atkFis', 'atkEsp', 'def', 'defEsp', 'speed', 'accuracy', 'evasion']
+// `accuracy`/`evasion` nao sao um dos 6 stats reais (STAT_LABEL, indexado por
+// `keyof StatBlock`) — sao eixo de combate a parte (sand_attack/smokescreen
+// etc, golpes novos desta mesma leva). Rotulo proprio so pros dois; o resto
+// reusa STAT_LABEL pra nao duplicar os nomes ja centralizados la.
+const ROTULO_ESTAGIO: Record<StatDeEstagio, string> = {
+  atkFis: STAT_LABEL.atkFis,
+  atkEsp: STAT_LABEL.atkEsp,
+  def: STAT_LABEL.def,
+  defEsp: STAT_LABEL.defEsp,
+  speed: STAT_LABEL.speed,
+  accuracy: 'Precisão',
+  evasion: 'Evasão',
+}
 
 interface Badge {
   key: string
@@ -63,7 +76,7 @@ export function StatusEffectsBar() {
       badges.push({
         key: `estagio-${stat}`,
         url: statusVfxUrl(species.type, valor > 0 ? 'aumenta' : 'diminui'),
-        titulo: `${STAT_LABEL[stat]} ${valor > 0 ? 'aumentado' : 'diminuido'} (${valor > 0 ? '+' : ''}${valor})`,
+        titulo: `${ROTULO_ESTAGIO[stat]} ${valor > 0 ? 'aumentado' : 'diminuido'} (${valor > 0 ? '+' : ''}${valor})`,
         contador: `${valor > 0 ? '+' : ''}${valor}`,
         aumenta: valor > 0,
       })

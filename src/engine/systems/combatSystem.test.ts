@@ -509,6 +509,7 @@ function criarInimigoDeTeste(world: ReturnType<typeof buildMapWorld>, speciesId:
     pathRecalcTimer: 0,
     pathTargetX: null,
     pathTargetY: null,
+    pathStuckSeconds: 0,
     encounterId: 'teste',
     spawnPoint: { x: junto.x, y: junto.y },
     moveSpeed: 0,
