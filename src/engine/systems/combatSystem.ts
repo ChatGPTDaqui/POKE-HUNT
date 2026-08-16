@@ -47,6 +47,15 @@ const HIT_LAND_DELAY = ATTACK_ANIM_DURATION
 // antes de sumir.
 const IMPACT_EFFECT_DURATION = 0.35
 const AOE_EFFECT_DURATION = 0.55
+// Golpe de status usa GIF real (statusVfx.ts), nao os quadros PNG do burst
+// procedural: um GIF de servico Tibia costuma ter 8-20 quadros a
+// ~100-150ms cada (0,8-3s por ciclo). Nos 0,35/0,55s dos outros dois, o
+// efeito era destruido bem antes do GIF terminar de tocar uma volta —
+// pedido explicito do usuario ("sprites com maior duracao... pra ficarem
+// mais tempo na tela"). So o TEMPO DE VIDA do efeito muda; o GIF em si
+// continua tocando/repetindo sozinho via `<img>` nativo (ver
+// drawStatusEffect em render/sprites.ts).
+const STATUS_VFX_DURATION = 1.1
 
 const formulaEngine = createFormulaEngine(FORMULAS)
 const STAB_MULTIPLIER = formulaEngine.eval('STAB_MULTIPLIER')
@@ -787,7 +796,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
         targetX: attacker.x, targetY: attacker.y - attacker.radius * 0.6,
         color: colorForType(ability.type),
         isAoe: true,
-        duration: AOE_EFFECT_DURATION,
+        duration: ability.power === 0 ? STATUS_VFX_DURATION : AOE_EFFECT_DURATION,
         worldSize: (ability.radius ?? 0) * 2,
         elementType: ability.type,
         // Anel unico do cast AOE inteiro (nao um por alvo) — gate por
@@ -1015,7 +1024,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       targetX: local.x, targetY: local.y - local.radius * 0.6,
       color: colorForType(ability.type),
       isAoe: false,
-      duration: IMPACT_EFFECT_DURATION,
+      duration: ability.power === 0 ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
       elementType: ability.type,
       statusDirection: ability.power === 0 ? direcaoDoGolpeDeStatus(ability.statChanges) : undefined,
     }))

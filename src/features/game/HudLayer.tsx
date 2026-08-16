@@ -33,6 +33,7 @@ import { CenterBlock } from '@/components/hud/CenterBlock'
 import { TrainerCard, SideMenuColumn } from '@/components/hud/TrainerCard'
 import { ZoomControl } from '@/components/hud/ZoomControl'
 import { AbilityHud } from '@/components/hud/AbilityHud'
+import { StatusEffectsBar } from '@/components/hud/StatusEffectsBar'
 import { ChatLog } from '@/components/toasts/ChatLog'
 import { AutoButton, AutoWindow } from '@/components/auto/AutoFloatingPanel'
 import { MainMenu } from '@/features/nav/MainMenu'
@@ -114,6 +115,7 @@ export function HudLayer() {
           90px acima do sprite, e antes disso essa area estava livre pra colidir
           com a barra de golpes. */}
       <div ref={footerRef} className="absolute bottom-[.8em] left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-[.5em]">
+        <StatusEffectsBar />
         <AbilityHud />
         <MainMenu />
       </div>
