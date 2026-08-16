@@ -1001,8 +1001,124 @@ function basicAttackFor(attackerSpecies: { type: Ability['type'] }): Ability {
 // campo setado, entao o filtro e um no-op pra eles.
 // `aoeTargetCounter` e uma funcao (ability) => numero de alvos que um cast
 // AOE atingiria, usada pra preferir AOE quando atingiria 2+ alvos.
-function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: WorldEntity, aoeTargetCounter: (a: Ability) => number): Ability | null {
+// Ataque Basico e o Struggle deste jogo: entra quando NENHUM dos golpes
+// selecionados pode ser usado agora. Nos jogos reais Struggle dispara por
+// falta de PP; aqui o cooldown E o PP, entao "todos em cooldown" e o mesmo
+// estado. Sem isto, um POKE de poucos golpes de dano (Igglybuff tem 1, e
+// Togepi/Unown/Forretress ficam perto disso) passaria metade dos turnos
+// parado.
+function tentarAtaqueBasico(entity: WorldEntity, attackerSpecies: Species, disabled: Record<string, boolean>): Ability | null {
+  if (disabled[BASIC_ATTACK.id] || !isAbilityReady(entity, BASIC_ATTACK.id)) return null
+  return basicAttackFor(attackerSpecies)
+}
+
+// Selvagem nao tem `activeAbilities` escolhido por ninguem (ver
+// data/activeAbilities.ts#activeAbilitiesSelvagem) — sem uma ORDEM com
+// significado pra respeitar, mantem a heuristica antiga: golpe de maior dano
+// esperado entre os prontos, com golpe de status entrando so quando vale a
+// pena (ver golpeDeApoioUtil) e preferencia por AOE que atinge 2+ alvos.
+function pickAbilityGreedy(
+  world: WorldState, entity: WorldEntity, defenderEntity: WorldEntity,
+  prontos: Ability[], estaSilenciado: boolean, clima: ClimaTipo | null,
+  aoeTargetCounter: (a: Ability) => number,
+): Ability | null {
   const rng = world.rng
+  const ready = prontos.filter((ability) => isDamagingAbility(ability))
+
+  // ...MAS SO SE O ALVO FOR SOBREVIVER AO MELHOR GOLPE DE DANO.
+  //
+  // Sem essa condicao o POKE abre TODA luta com um golpe de status, inclusive
+  // contra inimigo que ele mata em um golpe — e ai o status e um turno jogado
+  // fora num alvo que nem chega a sofrer o efeito. Medido: sem a checagem, uma
+  // hunt onde o jogador esta muito acima do nivel (Clareira Nv85) caiu de 1.308
+  // para 997 kills/hora, um quarto do farm, porque metade dos turnos virava
+  // abertura de status inutil.
+  const statusPronto = estaSilenciado ? [] : prontos.filter((a) => (
+    a.power === 0 && (
+      (a.status != null && statusVaiPegar(defenderEntity, a.status, a.id))
+      || golpeDeApoioUtil(world, entity, defenderEntity, a, ready, clima)
+    )
+  ))
+  if (statusPronto.length > 0) {
+    // Dano CRU aqui, nao o esperado: a pergunta e "esse golpe mata se acertar?",
+    // nao "quanto ele tira em media". Medido: com a comparacao errada, a hunt
+    // de nivel alto caiu de 1.052 pra 796 kills/hora.
+    const maiorDano = ready.reduce(
+      (max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)),
+      0,
+    )
+    if (maiorDano < defenderEntity.poke.hp) {
+      return statusPronto.reduce((melhor, a) => (
+        (a.statusChance ?? 0) > (melhor.statusChance ?? 0) ? a : melhor
+      ))
+    }
+  }
+
+  if (ready.length === 0) return null
+
+  const aoeReady = ready.filter((a) => a.target === 'aoe' && aoeTargetCounter(a) >= 2)
+  const pool = aoeReady.length > 0 ? aoeReady : ready
+  return pool.reduce((best, a) => (
+    danoEsperado(rng, entity, defenderEntity, a) > danoEsperado(rng, entity, defenderEntity, best) ? a : best
+  ))
+}
+
+// POKE do jogador: percorre `activeAbilities` NA ORDEM que ele escolheu na
+// tela de golpes (ver data/activeAbilities.ts), comecando de
+// `entity.filaGolpeIndex`. Golpe da vez em cooldown/filtrado nao trava o
+// turno — pula pro proximo da fila, sem avancar o indice (ele tenta de novo
+// no proximo turno, e nao "perde a vez" pra sempre). So avanca o indice
+// quando um golpe da fila e de fato escolhido.
+//
+// Pedido explicito do usuario: com golpes de buff/debuff/area no jogo agora,
+// quem decide QUANDO usar cada um e o jogador pela ordem dos slots — nao mais
+// uma IA que sempre repete os 1-2 golpes de maior dano esperado e deixa o
+// resto do moveset parado.
+function pickAbilityDaFila(
+  world: WorldState, entity: WorldEntity, defenderEntity: WorldEntity,
+  candidatos: Ability[], estaSilenciado: boolean, clima: ClimaTipo | null,
+): Ability | null {
+  const rng = world.rng
+  const n = candidatos.length
+  if (n === 0) return null
+  const inicio = ((entity.filaGolpeIndex ?? 0) % n + n) % n
+  const prontosDeDano = candidatos.filter((a) => isDamagingAbility(a) && isAbilityReady(entity, a.id))
+
+  // So calcula (e so uma vez) se algum golpe de status da fila realmente
+  // pedir a checagem de overkill abaixo.
+  let maiorDanoCache: number | null = null
+  const maiorDanoSePronto = () => {
+    if (maiorDanoCache == null) {
+      maiorDanoCache = prontosDeDano.reduce(
+        (max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)), 0,
+      )
+    }
+    return maiorDanoCache
+  }
+
+  for (let passo = 0; passo < n; passo++) {
+    const idx = (inicio + passo) % n
+    const ability = candidatos[idx]
+    if (!isAbilityReady(entity, ability.id)) continue
+    if (ability.power === 0) {
+      // Mesma sanidade do caminho selvagem: nao gastar o turno com status que
+      // nao vai pegar (Taunt/silencio, alvo ja com o status, buff saturado) —
+      // isso e "golpe sem efeito nenhum agora", nao uma escolha estrategica.
+      if (estaSilenciado) continue
+      const statusVale = (ability.status != null && statusVaiPegar(defenderEntity, ability.status, ability.id))
+        || golpeDeApoioUtil(world, entity, defenderEntity, ability, prontosDeDano, clima)
+      if (!statusVale) continue
+      // Mesmo overkill-guard do caminho selvagem: se um golpe de dano pronto
+      // ja mata o alvo, nao abre com status na frente dele.
+      if (maiorDanoSePronto() >= defenderEntity.poke.hp) continue
+    }
+    entity.filaGolpeIndex = (idx + 1) % n
+    return ability
+  }
+  return null
+}
+
+function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: WorldEntity, aoeTargetCounter: (a: Ability) => number): Ability | null {
   const clima = world.clima?.tipo ?? null
   const attackerSpecies = SPECIES[entity.poke.speciesId]
   const disabled = entity.poke.disabledAbilities || {}
@@ -1028,81 +1144,30 @@ function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: Wor
     .filter((id) => id !== 'curse' || attackerSpecies.type === 'GHOST' || attackerSpecies.type2 === 'GHOST')
 
   // Encore: enquanto o timer nao zera, SO o golpe forcado entra na escolha.
-  // Se ele estiver em cooldown, `prontos` fica vazio e o fallback pro Ataque
-  // Basico (mais abaixo) ja cobre o caso, sem logica nova.
+  // Se ele estiver em cooldown, o fallback pro Ataque Basico (mais abaixo) ja
+  // cobre o caso, sem logica nova.
   const encoreAtivo = !!(entity.forcedAbilityUntil && entity.forcedAbilityUntil > 0 && entity.forcedAbilityId)
   const candidatosFinais = encoreAtivo
     ? candidateIds.filter((id) => id === entity.forcedAbilityId)
     : candidateIds
 
-  const prontos = candidatosFinais
-    .map((id) => getAbility(id))
-    .filter((a): a is Ability => a != null && isAbilityReady(entity, a.id))
-
-  // GOLPE DE STATUS PURO entra na escolha (Leva B). A regra e simples e
-  // deliberadamente conservadora: so vale a pena se o status REALMENTE for
-  // pegar no alvo agora — nao pegou por imunidade de tipo, por o alvo ja ter
-  // status, ou por estar na janela de reaplicacao, e o golpe volta a ser
-  // ignorado. Sem essa checagem o POKE gastaria turnos jogando Thunder Wave
-  // em quem ja esta paralisado, e a leitura seria "parou de atacar do nada".
-  //
-  const ready = prontos.filter((ability) => isDamagingAbility(ability))
-
-  // ...MAS SO SE O ALVO FOR SOBREVIVER AO MELHOR GOLPE DE DANO.
-  //
-  // Sem essa condicao o POKE abre TODA luta com um golpe de status, inclusive
-  // contra inimigo que ele mata em um golpe — e ai o status e um turno jogado
-  // fora num alvo que nem chega a sofrer o efeito. Medido: sem a checagem, uma
-  // hunt onde o jogador esta muito acima do nivel (Clareira Nv85) caiu de 1.308
-  // para 997 kills/hora, um quarto do farm, porque metade dos turnos virava
-  // abertura de status inutil.
-  //
-  // Com ela a regra vira a jogada certa do jogo real: paralisar quem vai
-  // aguentar a troca, bater em quem nao vai.
-  // Taunt: enquanto silenciado, pula INTEIRO o bloco de golpe de status e vai
-  // direto pro golpe de dano (ready, abaixo) -- estar calado nos jogos
-  // significa exatamente isso, so golpe de dano entra na escolha.
+  // Taunt: enquanto silenciado, golpe de status nunca entra na escolha (nos
+  // jogos, estar calado significa exatamente isso).
   const estaSilenciado = !!(entity.silenciadoAte && entity.silenciadoAte > 0)
-  const statusPronto = estaSilenciado ? [] : prontos.filter((a) => (
-    a.power === 0 && (
-      (a.status != null && statusVaiPegar(defenderEntity, a.status, a.id))
-      || golpeDeApoioUtil(world, entity, defenderEntity, a, ready, clima)
-    )
-  ))
-  if (statusPronto.length > 0) {
-    // Dano CRU aqui, nao o esperado: a pergunta e "esse golpe mata se acertar?",
-    // nao "quanto ele tira em media". Usar o esperado (ja descontado pela
-    // precisao) fazia um golpe de 70% que mata em cheio contar como se nao
-    // matasse — e o POKE ia buffar em vez de matar. Medido: com a comparacao
-    // errada, a hunt de nivel alto caiu de 1.052 pra 796 kills/hora.
-    const maiorDano = ready.reduce(
-      (max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)),
-      0,
-    )
-    if (maiorDano < defenderEntity.poke.hp) {
-      return statusPronto.reduce((melhor, a) => (
-        (a.statusChance ?? 0) > (melhor.statusChance ?? 0) ? a : melhor
-      ))
-    }
-  }
 
-  // Ataque Basico e o Struggle deste jogo: entra quando NENHUM dos golpes
-  // selecionados pode ser usado agora. Nos jogos reais Struggle dispara por
-  // falta de PP; aqui o cooldown E o PP, entao "todos em cooldown" e o mesmo
-  // estado. Sem isto, um POKE de poucos golpes de dano (Igglybuff tem 1, e
-  // Togepi/Unown/Forretress ficam perto disso) passaria metade dos turnos
-  // parado.
-  if (ready.length === 0) {
-    const basico = basicAttackFor(attackerSpecies)
-    if (disabled[BASIC_ATTACK.id] || !isAbilityReady(entity, BASIC_ATTACK.id)) return null
-    return basico
-  }
+  const escolhido = entity.kind === 'enemy'
+    ? pickAbilityGreedy(
+      world, entity, defenderEntity,
+      candidatosFinais.map((id) => getAbility(id)).filter((a): a is Ability => a != null && isAbilityReady(entity, a.id)),
+      estaSilenciado, clima, aoeTargetCounter,
+    )
+    : pickAbilityDaFila(
+      world, entity, defenderEntity,
+      candidatosFinais.map((id) => getAbility(id)).filter((a): a is Ability => a != null),
+      estaSilenciado, clima,
+    )
 
-  const aoeReady = ready.filter((a) => a.target === 'aoe' && aoeTargetCounter(a) >= 2)
-  const pool = aoeReady.length > 0 ? aoeReady : ready
-  return pool.reduce((best, a) => (
-    danoEsperado(rng, entity, defenderEntity, a) > danoEsperado(rng, entity, defenderEntity, best) ? a : best
-  ))
+  return escolhido ?? tentarAtaqueBasico(entity, attackerSpecies, disabled)
 }
 
 // Contador no WorldState, nao em modulo — ver a nota em types.ts#WorldCounters.

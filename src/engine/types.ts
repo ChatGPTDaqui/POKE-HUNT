@@ -162,6 +162,11 @@ export interface BaseEntity {
   // `lastUsedAbilityId` dos candidatos, recalculado a cada escolha (nunca
   // deixa repetir o golpe anterior, mas qual foi o anterior muda a cada turno).
   tormentedUntil?: number
+  // Proximo indice a tentar em `poke.activeAbilities` (fila do jogador, na
+  // ordem que ele escolheu). So avanca quando um golpe da fila E de fato
+  // usado — pular por cooldown/filtro NAO avanca, pra tentar o mesmo golpe de
+  // novo no proximo turno em vez de "perder a vez dele" pra sempre.
+  filaGolpeIndex?: number
 
   // --- Golpes de tick volatil (leech_seed/curse/nightmare/ingrain/aqua_ring) -
   // Mesma familia do statusVolatil/estagios acima: nascem no combate, morrem

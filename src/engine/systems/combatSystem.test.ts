@@ -226,6 +226,81 @@ describe('AOE elemental e Ataque Basico sao opcionais', () => {
   })
 })
 
+// Pedido explicito do usuario: com golpes de buff/debuff/area no jogo, quem
+// decide QUANDO usar cada golpe e o jogador pela ordem dos 4 slots — nao mais
+// uma IA que sempre repete o(s) golpe(s) de maior dano esperado e deixa o
+// resto do moveset parado. `pickAbilityDaFila` percorre `activeAbilities` a
+// partir de `filaGolpeIndex`, avancando so quando um golpe da fila e de fato
+// escolhido.
+describe('POKE do jogador usa os golpes na ordem escolhida (fila), nao so o de maior dano', () => {
+  function cenarioFila() {
+    const rng = createRng(3)
+    const counters = { entity: 1, effect: 1, pendingHit: 1 }
+    const jogadorPoke = createPokeInstance(rng, 'charmander', 60)
+    // scratch/ember/flamethrower: dano bem diferente entre si (o ranking
+    // greedy antigo travaria sempre no de maior dano esperado, flamethrower).
+    jogadorPoke.unlockedAbilities = [...jogadorPoke.unlockedAbilities, 'flamethrower']
+    jogadorPoke.activeAbilities = ['scratch', 'ember', 'flamethrower']
+    jogadorPoke.disabledAbilities = { [typedAoeMoveKey(SPECIES.charmander.type)]: true }
+    const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
+    const player = world.player!
+    player.cooldowns = {}
+    player.globalCooldown = 0
+    player.poke.stats = { ...player.poke.stats, hp: 999999 }
+    player.poke.hp = 999999
+
+    const enemyPoke = createPokeInstance(rng, 'rattata', 60)
+    enemyPoke.stats = { ...enemyPoke.stats, hp: 999999, atkFis: 1, atkEsp: 1 }
+    enemyPoke.hp = 999999
+    const enemy = createEnemyEntity(world.counters, {
+      poke: enemyPoke, x: player.x, y: player.y, encounterId: 'route_46_rattata',
+    })
+    enemy.state = 'engaged'
+    enemy.targetId = player.id
+    world.enemies = [enemy]
+    return { world, player, enemy }
+  }
+
+  it('percorre os 3 golpes de dano na ordem dos slots em vez de travar no de maior dano esperado', () => {
+    const { world, player } = cenarioFila()
+    const escolhas: string[] = []
+    // Cooldown zerado a cada volta (mesmo truque do teste de precisao acima):
+    // isola a ESCOLHA de pickAbility do tempo real de recarga de cada golpe.
+    for (let i = 0; i < 6; i++) {
+      player.cooldowns = {}
+      player.globalCooldown = 0
+      updateCombat(world, 1, { silent: true })
+      if (player.lastUsedAbilityId) escolhas.push(player.lastUsedAbilityId)
+    }
+    // Prova o bug relatado: o ranking antigo (maior dano esperado) escolheria
+    // SEMPRE flamethrower (90 de poder) e nunca scratch/ember — os 6 turnos
+    // seriam ['flamethrower', 'flamethrower', ...]. Com a fila, os 3 primeiros
+    // turnos ja cobrem os 3 slots na ordem exata escolhida.
+    expect(escolhas.slice(0, 3)).toEqual(['scratch', 'ember', 'flamethrower'])
+    // E a fila e CICLICA: volta pro comeco em vez de parar no ultimo.
+    expect(escolhas.slice(3, 6)).toEqual(['scratch', 'ember', 'flamethrower'])
+  })
+
+  it('golpe da vez em cooldown nao trava o turno — pula pro proximo pronto sem perder a ordem', () => {
+    const { world, player } = cenarioFila()
+    // scratch (1o da fila) fica preso em cooldown por varios turnos —
+    // ember/flamethrower devem continuar sendo usados no meio tempo.
+    player.cooldowns = { scratch: 999 }
+    player.globalCooldown = 0
+    updateCombat(world, 1, { silent: true })
+    expect(player.lastUsedAbilityId).toBe('ember')
+    player.globalCooldown = 0
+    updateCombat(world, 1, { silent: true })
+    expect(player.lastUsedAbilityId).toBe('flamethrower')
+
+    // scratch libera: a fila retoma dele, sem ter "perdido a vez" pra sempre.
+    player.cooldowns = {}
+    player.globalCooldown = 0
+    updateCombat(world, 1, { silent: true })
+    expect(player.lastUsedAbilityId).toBe('scratch')
+  })
+})
+
 // Golpes novos de tick volatil: leech_seed, curse (variante Ghost),
 // nightmare, ingrain/aqua_ring, wish. Todos power:0/category:status no
 // catalogo (sem `ability.status`/`statChanges`/`healPercent`), entao o efeito
