@@ -41,6 +41,18 @@ export interface ToastRealce {
   cor: string
 }
 
+/**
+ * Detalhe do erro original, por tras da mensagem amigavel que vira texto do
+ * toast. So existe pra quem observa a store de fora (captura de erro pro
+ * admin) conseguir gravar tipo/codigo/mensagem real do backend — a UI nunca
+ * le isto, so exibe `message`.
+ */
+export interface ToastErroDetalhe {
+  tipo: string
+  codigo?: string | number
+  mensagemBackend?: string
+}
+
 export interface ToastEntry {
   id: string
   message: string
@@ -49,6 +61,7 @@ export interface ToastEntry {
   // So pra quem observa a store de fora (ex: captura de erro) saber de onde
   // veio sem precisar re-derivar. Ninguem dentro deste arquivo le isto.
   channel: ToastChannel
+  erroDetalhe?: ToastErroDetalhe
 }
 
 export interface ChatLine {
@@ -74,7 +87,7 @@ function makeId(): string {
 interface ToastState {
   toasts: ToastEntry[]
   chatLines: Record<LogTab, ChatLine[]>
-  pushToast: (message: string, type: ToastType, channel: ToastChannel, realce?: ToastRealce) => void
+  pushToast: (message: string, type: ToastType, channel: ToastChannel, realce?: ToastRealce, erroDetalhe?: ToastErroDetalhe) => void
   dismissToast: (id: string) => void
 }
 
@@ -82,7 +95,7 @@ export const useToastStore = create<ToastState>((set) => ({
   toasts: [],
   chatLines: { sistema: [], trade: [], log: [] },
 
-  pushToast: (message, type, channel, realce) => {
+  pushToast: (message, type, channel, realce, erroDetalhe) => {
     const tab = CHANNEL_TO_TAB[channel] || 'sistema'
     const line: ChatLine = { id: makeId(), message, type, realce }
     set((state) => {
@@ -90,7 +103,7 @@ export const useToastStore = create<ToastState>((set) => ({
       if (nextTabLines.length > MAX_CHAT_LINES) nextTabLines.shift()
       const chatLines = { ...state.chatLines, [tab]: nextTabLines }
       if (channel === 'combat') return { chatLines }
-      const toastEntry: ToastEntry = { id: line.id, message, type, realce, channel }
+      const toastEntry: ToastEntry = { id: line.id, message, type, realce, channel, erroDetalhe }
       return { chatLines, toasts: [...state.toasts, toastEntry] }
     })
   },

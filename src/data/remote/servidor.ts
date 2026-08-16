@@ -37,6 +37,20 @@ export class ErroServidor extends Error {
   }
 }
 
+/**
+ * Extrai tipo/codigo/mensagem real de um erro de catch pra reportar pro
+ * admin — separado da mensagem amigavel que vira texto do toast/popup.
+ */
+export function detalheDeErro(erro: unknown): { tipo: string; codigo?: string | number; mensagemBackend?: string } {
+  if (erro instanceof ErroServidor) {
+    return { tipo: 'ErroServidor', codigo: erro.status, mensagemBackend: erro.message }
+  }
+  if (erro instanceof Error) {
+    return { tipo: erro.name, mensagemBackend: erro.message }
+  }
+  return { tipo: 'desconhecido', mensagemBackend: String(erro) }
+}
+
 // Sem timeout, uma conexao que trava (wifi caindo, celular trocando de rede,
 // Edge Function em cold start) deixa a promessa pendurada PRA SEMPRE: o
 // jogador ve o jogo "parado" e nenhum erro. `AbortSignal.timeout` corta.

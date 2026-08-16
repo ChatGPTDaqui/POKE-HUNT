@@ -21,6 +21,23 @@ interface AuditLogRow {
 
 const PAGE_SIZE = 50
 
+interface DetalheErro {
+  tipoErro?: string
+  codigoErro?: string | number
+  mensagemBackend?: string
+}
+
+function extrairDetalheErro(contexto: unknown): DetalheErro {
+  if (!contexto || typeof contexto !== 'object') return {}
+  const c = contexto as Record<string, unknown>
+  return {
+    tipoErro: typeof c.tipo_erro === 'string' ? c.tipo_erro : undefined,
+    codigoErro:
+      typeof c.codigo_erro === 'string' || typeof c.codigo_erro === 'number' ? c.codigo_erro : undefined,
+    mensagemBackend: typeof c.mensagem_backend === 'string' ? c.mensagem_backend : undefined,
+  }
+}
+
 export function AdminErrorsPage() {
   const [page, setPage] = useState(0)
   const [fonte, setFonte] = useState<'todas' | 'client' | 'log-puller'>('todas')
@@ -107,22 +124,36 @@ export function AdminErrorsPage() {
                 <th className="py-2 pr-3">Fonte</th>
                 <th className="py-2 pr-3">Rota</th>
                 <th className="py-2 pr-3">Usuário</th>
-                <th className="py-2 pr-3">Mensagem</th>
+                <th className="py-2 pr-3">Tipo</th>
+                <th className="py-2 pr-3">Código</th>
+                <th className="py-2 pr-3">Mensagem (popup)</th>
+                <th className="py-2 pr-3">Mensagem real (backend)</th>
                 <th className="py-2 pr-3">Momento</th>
               </tr>
             </thead>
             <tbody>
-              {linhas.map((linha) => (
-                <tr key={linha.id} className="border-b border-n800">
-                  <td className="py-2 pr-3">{linha.fonte}</td>
-                  <td className="py-2 pr-3 font-mono text-xs">{linha.rota ?? '—'}</td>
-                  <td className="py-2 pr-3 text-xs">
-                    {linha.user_id ? (nicks?.[linha.user_id] ?? linha.user_id.slice(0, 8)) : '—'}
-                  </td>
-                  <td className="py-2 pr-3 max-w-[480px] truncate" title={linha.mensagem}>{linha.mensagem}</td>
-                  <td className="py-2 pr-3 text-xs">{new Date(linha.ocorrido_em).toLocaleString('pt-BR')}</td>
-                </tr>
-              ))}
+              {linhas.map((linha) => {
+                const detalhe = extrairDetalheErro(linha.contexto)
+                return (
+                  <tr key={linha.id} className="border-b border-n800">
+                    <td className="py-2 pr-3">{linha.fonte}</td>
+                    <td className="py-2 pr-3 font-mono text-xs">{linha.rota ?? '—'}</td>
+                    <td className="py-2 pr-3 text-xs">
+                      {linha.user_id ? (nicks?.[linha.user_id] ?? linha.user_id.slice(0, 8)) : '—'}
+                    </td>
+                    <td className="py-2 pr-3 text-xs font-mono">{detalhe.tipoErro ?? '—'}</td>
+                    <td className="py-2 pr-3 text-xs font-mono">{detalhe.codigoErro ?? '—'}</td>
+                    <td className="py-2 pr-3 max-w-[320px] truncate" title={linha.mensagem}>{linha.mensagem}</td>
+                    <td
+                      className="py-2 pr-3 max-w-[320px] truncate"
+                      title={detalhe.mensagemBackend}
+                    >
+                      {detalhe.mensagemBackend ?? '—'}
+                    </td>
+                    <td className="py-2 pr-3 text-xs">{new Date(linha.ocorrido_em).toLocaleString('pt-BR')}</td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

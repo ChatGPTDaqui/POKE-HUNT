@@ -8,7 +8,7 @@
 import { useGameStateStore, type GameStateData } from '@/stores/gameStateStore'
 import { useToastStore } from '@/stores/toastStore'
 import { useWorldStore } from '@/stores/worldStore'
-import { servidor, servidorAtivo, ErroServidor, type RespostaFlush } from './servidor'
+import { servidor, servidorAtivo, ErroServidor, detalheDeErro, type RespostaFlush } from './servidor'
 import { executarAcaoRpc } from './acoesRpc'
 import { flushAgora } from './gameStatePersistence'
 
@@ -30,7 +30,7 @@ function reportarErro(erro: unknown): void {
   const anterior = ultimoAviso.get(mensagem)
   if (anterior != null && agora - anterior < JANELA_ANTI_REPETICAO_MS) return
   ultimoAviso.set(mensagem, agora)
-  useToastStore.getState().pushToast(mensagem, 'error', 'world')
+  useToastStore.getState().pushToast(mensagem, 'error', 'world', undefined, detalheDeErro(erro))
 }
 
 /**
