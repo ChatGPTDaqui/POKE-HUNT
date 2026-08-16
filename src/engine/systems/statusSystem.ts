@@ -21,7 +21,7 @@ import {
 } from '@/data/statusEffects'
 import type { StatChange } from '@/data/generated/types'
 import type { Ability } from '@/data/abilities'
-import type { WorldEntity } from '../types'
+import type { WorldEntity, ClimaTipo } from '../types'
 
 export function statusNaoVolatil(entity: WorldEntity): StatusAtivo | null {
   return entity.poke.status ?? null
@@ -173,6 +173,21 @@ export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.estagios = {}
 }
 
+// Dano de clima por turno (Gen3+): 1/16 do HP MAXIMO, minimo 1, pra quem nao
+// e imune ao clima ativo. Granizo poupa ICE; Areia poupa ROCK/GROUND/STEEL
+// (qualquer um dos dois tipos da especie ja isenta).
+const AREIA_TIPOS_IMUNES = new Set(['ROCK', 'GROUND', 'STEEL'])
+
+function danoDeClimaPorTurno(clima: ClimaTipo | null, hpMax: number, tipo1: string, tipo2: string | null): number {
+  if (clima === 'granizo' && tipo1 !== 'ICE' && tipo2 !== 'ICE') {
+    return Math.max(1, Math.floor(hpMax / 16))
+  }
+  if (clima === 'areia' && !AREIA_TIPOS_IMUNES.has(tipo1) && !(tipo2 && AREIA_TIPOS_IMUNES.has(tipo2))) {
+    return Math.max(1, Math.floor(hpMax / 16))
+  }
+  return 0
+}
+
 export interface TickDeStatus {
   /** Dano de veneno/queimadura aplicado neste turno (0 se nenhum). */
   dano: number
@@ -188,7 +203,7 @@ export interface TickDeStatus {
  * decidir sobre numero flutuante, morte e loot com o mesmo caminho que ja usa
  * pro resto do dano.
  */
-export function tickStatus(rng: Rng, entity: WorldEntity, dt: number): TickDeStatus {
+export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: ClimaTipo | null = null): TickDeStatus {
   if (entity.imunidadeDeStatus > 0) {
     entity.imunidadeDeStatus = Math.max(0, entity.imunidadeDeStatus - dt)
   }
@@ -223,6 +238,15 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number): TickDeSta
         expirados.push(nv.tipo)
       }
     }
+  }
+
+  // Dano de clima: mesmo tick que ja resolve veneno/queimadura acima, mesmo
+  // ponto de soma em `dano` -- combatSystem aplica os dois juntos, num unico
+  // `takeDamage`/numero flutuante por turno, igual ao jogo real (granizo e
+  // veneno no mesmo turno tiram um numero so, nao dois).
+  if (clima) {
+    const especie = SPECIES[entity.poke.speciesId]
+    dano += danoDeClimaPorTurno(clima, entity.poke.stats.hp, especie.type, especie.type2)
   }
 
   const vol = entity.statusVolatil

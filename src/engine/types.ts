@@ -205,6 +205,12 @@ export interface SalaAtiva {
   ciclos: number
 }
 
+// Clima de combate (Gen3+): efeito de CAMPO, nao de entidade -- um unico
+// valor no WorldState (nao por-lado), afeta jogador e inimigos por igual.
+// Golpe novo SOBRESCREVE o clima atual (last-caster-wins, sem empilhar) --
+// ver rain_dance/sunny_day/hail/sandstorm em data/abilities.ts#CLIMA_DO_GOLPE.
+export type ClimaTipo = 'chuva' | 'sol' | 'granizo' | 'areia'
+
 export interface WorldState {
   mapDef: MapDef | null
   player: PlayerEntity | null
@@ -237,4 +243,7 @@ export interface WorldState {
   // Vive no WorldState (e nao num parametro solto) porque o combate decide no
   // meio de um respawn, longe de quem iniciou a simulacao.
   pessimista: boolean
+  /** Clima ativo no combate agora, ou null se nao ha nenhum. Turno unico
+   * para os dois lados -- ver `ClimaTipo` acima. */
+  clima: { tipo: ClimaTipo, turnosRestantes: number } | null
 }

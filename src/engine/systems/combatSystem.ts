@@ -6,7 +6,7 @@
 // original — aqui viram id + lookup via findEntityById, unica mudanca de
 // forma permitida no port (risco de referencia obsoleta sob Immer).
 import { deriveRng, nextFloat, type Rng } from '@/core/rng'
-import { getAbility, BASIC_ATTACK, isDamagingAbility, TURNO_SEGUNDOS, type Ability } from '@/data/abilities'
+import { getAbility, BASIC_ATTACK, isDamagingAbility, TURNO_SEGUNDOS, CLIMA_DO_GOLPE, type Ability } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import {
   multiplicadorDeVelocidade, multiplicadorDeDanoFisico, multiplicadorDeStat,
@@ -34,7 +34,7 @@ import {
   isDead, getGroundOffset, tickCooldowns, isAbilityReady,
   startCooldown, canAct, startGlobalCooldown, takeDamage, heal, releaseEffectLane, findEntityById,
 } from '../entity'
-import type { EnemyEntity, PendingHit, PlayerEntity, WorldEntity, WorldState } from '../types'
+import type { ClimaTipo, EnemyEntity, PendingHit, PlayerEntity, WorldEntity, WorldState } from '../types'
 
 // Dano/efeitos/tratamento-de-derrota acontecem esse tempo depois do golpe
 // disparar, pra aparecerem em sincronia com a pose Shoot/Charge terminando
@@ -69,6 +69,12 @@ const LOW_HP_TRAIT_MULTIPLIER = 1.5
 // Multiscale: dano recebido pela metade enquanto o HP esta CHEIO (nao so
 // alto) — perde o efeito no primeiro hit que tirar HP.
 const MULTISCALE_MULTIPLIER = 0.5
+
+// Clima de combate (Gen3+, sem item): Chuva favorece WATER e enfraquece FIRE,
+// Sol faz o oposto. Afeta os dois lados por igual -- computeDamage e o mesmo
+// pipeline pro jogador e pro inimigo, entao nao ha lado "dono" do clima.
+const CLIMA_MULTIPLICADOR_FAVORECIDO = 1.5
+const CLIMA_MULTIPLICADOR_DESFAVORECIDO = 0.5
 
 // Golpes reais de auto-KO Gen1/2 — bug relatado explicitamente pelo usuario:
 // causavam dano no ALVO sem nenhum recoil no usuario, diferente dos jogos
@@ -301,13 +307,20 @@ const ESTAGIO_ALVO_DA_IA = 2
  * oponente (Rosnado). Em ambos, so vale se o estagio ainda nao chegou no alvo
  * da IA — repetir um buff no teto e um turno jogado fora, e o jogador ve o POKE
  * "dancando" em vez de atacar.
+ *
+ * Golpe de clima (Rain Dance/Sunny Day/Hail/Sandstorm) entra pelo mesmo crivo:
+ * so vale usar se o clima ativo agora NAO for o que este golpe ligaria — sem
+ * isso a IA repetiria Chuva a cada cooldown com Chuva ja ativa, jogando o
+ * turno fora (e sobrescrevendo os mesmos 5 turnos por cima dos que ja tinha).
  */
-function golpeDeApoioUtil(entity: WorldEntity, defenderEntity: WorldEntity, ability: Ability): boolean {
+function golpeDeApoioUtil(entity: WorldEntity, defenderEntity: WorldEntity, ability: Ability, clima: ClimaTipo | null): boolean {
   // Cura pura (Recover): so quando ha HP de verdade a recuperar. O limiar existe
   // pra o POKE nao gastar turno curando 5 de HP com a vida quase cheia.
   if (ability.healPercent) {
     return entity.poke.hp / entity.poke.stats.hp <= 1 - ability.healPercent / 100
   }
+  const climaDoGolpe = CLIMA_DO_GOLPE[ability.id]
+  if (climaDoGolpe) return clima !== climaDoGolpe
   if (!ability.statChanges || !ability.statChanges.length) return false
   const destino = ability.statTarget === 'self' ? entity : defenderEntity
   return ability.statChanges.some((m) => {
@@ -352,7 +365,7 @@ export interface DamageResult {
 // so sabe sortear dentro dela.
 const DANO_VARIACAO_MINIMA = 0.85
 
-function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity, ability: Ability, pessimista = false): DamageResult {
+function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity, ability: Ability, pessimista = false, clima: ClimaTipo | null = null): DamageResult {
   const attackerPoke = attackerEntity.poke
   const defenderPoke = defenderEntity.poke
   const attackerSpecies = SPECIES[attackerPoke.speciesId]
@@ -395,6 +408,18 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
     }
 
     dmg *= effectivenessMultiplier
+
+    // Clima: Chuva/Sol -- entra depois da efetividade de tipo, igual ao
+    // Multiscale logo abaixo (mais um multiplicador de "estado do combate"
+    // empilhando sobre o resto). So mexe em golpe WATER/FIRE; qualquer outro
+    // tipo passa ileso pelos dois climas.
+    if (clima === 'chuva') {
+      if (ability.type === 'WATER') dmg *= CLIMA_MULTIPLICADOR_FAVORECIDO
+      else if (ability.type === 'FIRE') dmg *= CLIMA_MULTIPLICADOR_DESFAVORECIDO
+    } else if (clima === 'sol') {
+      if (ability.type === 'FIRE') dmg *= CLIMA_MULTIPLICADOR_FAVORECIDO
+      else if (ability.type === 'WATER') dmg *= CLIMA_MULTIPLICADOR_DESFAVORECIDO
+    }
 
     // Multiscale: HP do defensor CHEIO (nao so alto) corta o dano recebido
     // pela metade. Depois da efetividade de tipo, igual ao pipeline real —
@@ -481,7 +506,7 @@ function basicAttackFor(attackerSpecies: { type: Ability['type'] }): Ability {
 // campo setado, entao o filtro e um no-op pra eles.
 // `aoeTargetCounter` e uma funcao (ability) => numero de alvos que um cast
 // AOE atingiria, usada pra preferir AOE quando atingiria 2+ alvos.
-function pickAbility(rng: Rng, entity: WorldEntity, defenderEntity: WorldEntity, aoeTargetCounter: (a: Ability) => number): Ability | null {
+function pickAbility(rng: Rng, entity: WorldEntity, defenderEntity: WorldEntity, aoeTargetCounter: (a: Ability) => number, clima: ClimaTipo | null): Ability | null {
   const attackerSpecies = SPECIES[entity.poke.speciesId]
   const disabled = entity.poke.disabledAbilities || {}
   // No maximo 4 golpes (+ o AOE de nivel 50 pro POKE do jogador). Selvagem usa
@@ -516,7 +541,7 @@ function pickAbility(rng: Rng, entity: WorldEntity, defenderEntity: WorldEntity,
   const statusPronto = prontos.filter((a) => (
     a.power === 0 && (
       (a.status != null && statusVaiPegar(defenderEntity, a.status, a.id))
-      || golpeDeApoioUtil(entity, defenderEntity, a)
+      || golpeDeApoioUtil(entity, defenderEntity, a, clima)
     )
   ))
   if (statusPronto.length > 0) {
@@ -697,8 +722,10 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
 
   const primaryTarget = engagedEnemies[0]
   const allEnemies = nearbyAliveEnemies(world)
-  const ability = pickAbility(world.rng, player, primaryTarget, (a) =>
-    allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length,
+  const ability = pickAbility(
+    world.rng, player, primaryTarget,
+    (a) => allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length,
+    world.clima?.tipo ?? null,
   )
   if (!ability) return
 
@@ -733,7 +760,7 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   if (!canAct(enemy)) return
   if (statusImpedeAcao(world, enemy, silent)) return
 
-  const ability = pickAbility(world.rng, enemy, player, () => 1) // inimigos so miram no jogador unico
+  const ability = pickAbility(world.rng, enemy, player, () => 1, world.clima?.tipo ?? null) // inimigos so miram no jogador unico
   if (!ability) return
 
   startCooldown(enemy, ability.id, scaledCooldown(ability, velocidadeEfetiva(enemy)))
@@ -815,7 +842,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   const target = findEntityById(world.player, world.enemies, hit.targetId)
   if (!target || isDead(target)) return // ex: um aliado de AOE ja tinha finalizado antes
 
-  const result = computeDamage(world.rng, attacker, target, ability, world.pessimista)
+  const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null)
   // Dano REALMENTE causado, limitado ao HP que o alvo tinha. `result.amount` e
   // o numero cru da formula e pode passar MUITO do HP do alvo (um POKE Nivel 85
   // batendo num Nivel 40 causa varias vezes a vida dele). E o que dreno e recuo
@@ -918,6 +945,16 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       default:
         break
     }
+  }
+
+  // Golpes de clima (Rain Dance/Sunny Day/Hail/Sandstorm): efeito de CAMPO, nao
+  // de status numa entidade -- sobrescreve o clima atual (last-caster-wins,
+  // sem empilhar) e passa a afetar os dois lados do combate dali em diante.
+  // Fora do `if (!isDead(target))` de proposito: poder 0, nunca mata ninguem,
+  // e o efeito nao depende do alvo ter sobrevivido.
+  const climaDoGolpe = CLIMA_DO_GOLPE[ability.id]
+  if (climaDoGolpe) {
+    world.clima = { tipo: climaDoGolpe, turnosRestantes: 5 }
   }
 
   // Efeito de status DEPOIS do dano, como nos jogos: um golpe que mata nao
@@ -1043,13 +1080,19 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
   tickCooldowns(player, dt)
   for (const enemy of enemies) tickCooldowns(enemy, dt)
 
+  // Turno de clima fecha na MESMA cadencia do relogio de status do jogador
+  // (`proximoTurnoDeStatus`, mesmo epsilon que tickStatus usa) -- capturado
+  // ANTES do loop abaixo mutar esse relogio. Decrementa uma vez por
+  // updateCombat, nao por entidade: o clima e do WORLD, nao de cada POKE.
+  const turnoDeClimaFechou = !isDead(player) && player.proximoTurnoDeStatus - dt <= 1e-9
+
   // Status ANTES das acoes: veneno/queimadura podem derrubar o POKE neste
   // frame, e um POKE derrubado nao age. Passa pelo mesmo caminho de morte que
   // o dano de golpe (loot, EXP, desmaio) — dano de veneno que matasse sem
   // creditar o kill seria um buraco silencioso na economia.
   for (const entity of [player, ...enemies]) {
     if (isDead(entity)) continue
-    const { dano, expirados } = tickStatus(world.rng, entity, dt)
+    const { dano, expirados } = tickStatus(world.rng, entity, dt, world.clima?.tipo ?? null)
     if (!silent) {
       for (const tipo of expirados) anunciarStatus(world, entity, tipo, 'saiu')
     }
@@ -1068,6 +1111,12 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
       defeatedEnemyIds.push(entity.id)
     }
   }
+
+  if (turnoDeClimaFechou && world.clima) {
+    world.clima.turnosRestantes -= 1
+    if (world.clima.turnosRestantes <= 0) world.clima = null
+  }
+
   for (const effect of world.effects) tickEffect(effect, dt)
   for (const effect of world.effects) {
     if (effectDone(effect) && effect.ownerId) {
@@ -1112,6 +1161,11 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     // termine. O POKE ia ficando permanentemente pior a cada inimigo que
     // matava.
     limparEstadoVolatil(player)
+    // Clima e do WORLD, nao da entidade -- por isso reset separado aqui, e
+    // nao dentro de `limparEstadoVolatil` (que so mexe em campos de
+    // WorldEntity). Mesmo ponto porque e aqui que "fim de batalha" e
+    // detectado e quem chama ja tem `world` em maos.
+    world.clima = null
   }
 
   return { defeatedEnemyIds, playerJustFainted }
