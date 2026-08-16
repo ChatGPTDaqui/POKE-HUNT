@@ -22,6 +22,7 @@ import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
 import { impactShapeForType, type ImpactShape } from '@/data/impactShapes'
 import { CAPTURE_ANIM_URL, CAPTURE_ANIM_FRAME_DURATION, captureAnimFrameRect } from '@/data/captureAnim'
 import { vfxDoElemento } from '@/data/elementVfx'
+import { elementoVfxGifUrl } from '@/data/elementVfxGif'
 import { statusVfxUrl } from '@/data/statusVfx'
 import type { Species } from '@/data/pokes'
 import type { WorldEntity, WorldEffect, WorldState } from '@/engine/types'
@@ -561,6 +562,13 @@ function drawImpactBurst(ctx: CanvasRenderingContext2D, effect: WorldEffect): vo
     const tamanho = (effect.worldSize || IMPACT_BASE_SIZE) * ESCALA_VFX_SINGLE * (arte.escala?.single ?? 1)
     if (drawVfxDeElemento(ctx, effect, arte.single, tamanho)) return
   }
+  // 8 tipos sem PNG-sequence (ver elementVfxGif.ts) — GIF nativo, mesmo
+  // tamanho-base que os outros 8 ja usam.
+  const gifUrl = elementoVfxGifUrl(effect.elementType)
+  if (gifUrl) {
+    const tamanho = (effect.worldSize || IMPACT_BASE_SIZE) * ESCALA_VFX_SINGLE
+    if (drawGifEffect(ctx, effect, gifUrl, tamanho)) return
+  }
 
   const x = effect.targetX!
   const y = effect.targetY!
@@ -612,6 +620,11 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
     const tamanho = effect.worldSize! * ESCALA_VFX_AOE * (arte.escala?.aoe ?? 1)
     if (drawVfxDeElemento(ctx, effect, arte.aoe, tamanho)) return
   }
+  const gifUrl = elementoVfxGifUrl(effect.elementType)
+  if (gifUrl) {
+    const tamanho = effect.worldSize! * ESCALA_VFX_AOE
+    if (drawGifEffect(ctx, effect, gifUrl, tamanho)) return
+  }
 
   const x = effect.targetX!
   const y = effect.targetY!
@@ -660,23 +673,22 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
   ctx.restore()
 }
 
-// Golpe de status usa GIF nativo (nao um array de PNGs pisado por
-// `effect.age` como `drawVfxDeElemento`): o navegador ja anima uma
-// `Image()` apontada pra um `.gif` sozinho, e este loop de desenho ja
-// redesenha tudo a cada frame — `drawImage` so pega o quadro que o GIF
-// esta mostrando naquele instante, de graca. Ver data/statusVfx.ts.
-const STATUS_VFX_ALTURA = 48
-
-function drawStatusEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): boolean {
-  const url = statusVfxUrl(effect.elementType, effect.statusDirection!)
-  if (!url || !isImageReady(url)) return false
+// GIF nativo (nao um array de PNGs pisado por `effect.age` como
+// `drawVfxDeElemento`): o navegador ja anima uma `Image()` apontada pra um
+// `.gif` sozinho, e este loop de desenho ja redesenha tudo a cada frame —
+// `drawImage` so pega o quadro que o GIF esta mostrando naquele instante,
+// de graca. Compartilhado por golpe de STATUS (data/statusVfx.ts, altura
+// fixa) e por golpe de DANO nos 8 tipos sem PNG-sequence
+// (data/elementVfxGif.ts, tamanho = area real do golpe, mesma regra do
+// lote PNG).
+function drawGifEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect, url: string, altura: number): boolean {
+  if (!isImageReady(url)) return false
   const img = getOrLoadImage(url)
 
   const progress = effectProgress(effect)
   const fade = progress < HOLD_PORTION ? 1 : 1 - (progress - HOLD_PORTION) / (1 - HOLD_PORTION)
   const alpha = Math.max(0, Math.min(1, fade)) * SOLID_OPACITY
 
-  const altura = STATUS_VFX_ALTURA
   const largura = altura * (img.naturalWidth / img.naturalHeight)
 
   ctx.save()
@@ -685,6 +697,14 @@ function drawStatusEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): b
   ctx.drawImage(img, effect.targetX! - largura / 2, effect.targetY! - altura / 2, largura, altura)
   ctx.restore()
   return true
+}
+
+const STATUS_VFX_ALTURA = 48
+
+function drawStatusEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): boolean {
+  const url = statusVfxUrl(effect.elementType, effect.statusDirection!)
+  if (!url) return false
+  return drawGifEffect(ctx, effect, url, STATUS_VFX_ALTURA)
 }
 
 function drawAbilityEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
