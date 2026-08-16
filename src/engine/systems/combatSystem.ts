@@ -294,6 +294,16 @@ function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: W
 // apanha — que e um jeito de perder a luta com a stat mais alta da hunt.
 const ESTAGIO_ALVO_DA_IA = 2
 
+// Teto de `estagioDeCritico` (Focus Energy) que a IA persegue. Nao e um valor
+// arbitrario tipo ESTAGIO_ALVO_DA_IA: a formula de critico (computeDamage) usa
+// `Math.pow(3, Math.min(3, critStagesTotal))`, entao qualquer total >= 3 JA
+// SATURA no teto de 50% de chance (CRIT_CHANCE=1/24, 3^3=27 -> 27/24 > 0.5).
+// Cada uso soma +2: comecando de 0, a IA usa em 0 (0<3), fica em 2, usa nao
+// de novo (2<3), fica em 4 -- primeiro total >= 3, para. Um teto menor (ex:
+// 2) pararia em 37.5% pra sempre sem nunca saturar; um teto maior (ex: 6)
+// gastaria mais um turno inteiro depois de ja estar saturado.
+const FOCUS_ENERGY_TETO_DA_IA = 3
+
 /**
  * Vale a pena usar este golpe de APOIO puro (sem dano, sem status) agora?
  *
@@ -301,12 +311,29 @@ const ESTAGIO_ALVO_DA_IA = 2
  * oponente (Rosnado). Em ambos, so vale se o estagio ainda nao chegou no alvo
  * da IA — repetir um buff no teto e um turno jogado fora, e o jogador ve o POKE
  * "dancando" em vez de atacar.
+ *
+ * Focus Energy e Laser Focus NAO usam StatChange (contador/flag paralelos, ver
+ * types.ts), entao caem fora do `ability.statChanges` generico abaixo e
+ * precisam de um `if` proprio cada.
  */
-function golpeDeApoioUtil(entity: WorldEntity, defenderEntity: WorldEntity, ability: Ability): boolean {
+function golpeDeApoioUtil(entity: WorldEntity, defenderEntity: WorldEntity, ability: Ability, golpesDeDanoProntos: Ability[]): boolean {
   // Cura pura (Recover): so quando ha HP de verdade a recuperar. O limiar existe
   // pra o POKE nao gastar turno curando 5 de HP com a vida quase cheia.
   if (ability.healPercent) {
     return entity.poke.hp / entity.poke.stats.hp <= 1 - ability.healPercent / 100
+  }
+  // Focus Energy: so vale enquanto o estagio de critico nao saturou (ver
+  // FOCUS_ENERGY_TETO_DA_IA acima).
+  if (ability.id === 'focus_energy') {
+    return (entity.estagioDeCritico ?? 0) < FOCUS_ENERGY_TETO_DA_IA
+  }
+  // Laser Focus: so vale se tiver um golpe de DANO pronto pra render o
+  // critico garantido no proximo turno — gastar o turno nisso sem golpe de
+  // dano pronto pra seguir e um turno perdido esperando cooldown, o mesmo
+  // raciocinio de "so abre status se o alvo for sobreviver" mais abaixo em
+  // pickAbility.
+  if (ability.id === 'laser_focus') {
+    return golpesDeDanoProntos.length > 0
   }
   if (!ability.statChanges || !ability.statChanges.length) return false
   const destino = ability.statTarget === 'self' ? entity : defenderEntity
@@ -408,8 +435,29 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
     // que na Gen VII e 1/8 em vez de 1/24. A tabela real vai ate +3 (1/2), mas
     // nenhum golpe deste elenco passa de +1 — o `Math.min` existe pra ela nao
     // virar um multiplicador solto se algum dia passar.
-    const chanceDeCritico = CRIT_CHANCE * Math.pow(3, Math.min(3, ability.critStages ?? 0))
-    isCrit = pessimista ? false : rollChance(rng, Math.min(0.5, chanceDeCritico))
+    //
+    // Focus Energy soma `estagioDeCritico` (contador PARALELO, ver types.ts)
+    // ao estagio do PROPRIO golpe antes do teto — mesma formula, so mais
+    // estagio somado. O `Math.min(3, ...)` de baixo ja tampa os dois juntos.
+    const critStagesTotal = (ability.critStages ?? 0) + (attackerEntity.estagioDeCritico ?? 0)
+    const chanceDeCritico = CRIT_CHANCE * Math.pow(3, Math.min(3, critStagesTotal))
+
+    // Laser Focus: flag de uso unico que forca o PROXIMO golpe de DANO
+    // (power > 0) a sair critico garantido — bypass completo do roll e do
+    // teto de 50% logo abaixo. So conta pra golpe de DANO de verdade: este
+    // mesmo pipeline roda ate pra golpe de status (power 0, dmg fica 0), e
+    // esse caso nao pode consumir a flag (ver types.ts#proximoGolpeCriticoGarantido).
+    // Nao gated por `pessimista` de proposito: e uma garantia determinada
+    // pela propria entidade, nao um sorteio de sorte — pessimista so zera
+    // ALEATORIEDADE (ver PH-15), e aplica identico nos dois modos, entao nao
+    // quebra a invariante de "farm offline nunca renderiza melhor que ao vivo".
+    const criticoGarantido = ability.power > 0 && attackerEntity.proximoGolpeCriticoGarantido === true
+    if (criticoGarantido) {
+      isCrit = true
+      attackerEntity.proximoGolpeCriticoGarantido = false
+    } else {
+      isCrit = pessimista ? false : rollChance(rng, Math.min(0.5, chanceDeCritico))
+    }
     if (isCrit) dmg *= CRIT_MULTIPLIER
 
     dmg *= pessimista ? DANO_VARIACAO_MINIMA : formulaEngine.eval('DAMAGE_VARIATION', {}, rng)
@@ -516,7 +564,7 @@ function pickAbility(rng: Rng, entity: WorldEntity, defenderEntity: WorldEntity,
   const statusPronto = prontos.filter((a) => (
     a.power === 0 && (
       (a.status != null && statusVaiPegar(defenderEntity, a.status, a.id))
-      || golpeDeApoioUtil(entity, defenderEntity, a)
+      || golpeDeApoioUtil(entity, defenderEntity, a, ready)
     )
   ))
   if (statusPronto.length > 0) {
@@ -944,6 +992,23 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       statusRecebeuEm = ability.statTarget === 'self' ? attacker : target
       if (!silent) anunciarEstagios(world, statusRecebeuEm, mudancas)
     }
+  }
+
+  // FOCUS ENERGY (self-target): soma +2 num contador PARALELO de estagio de
+  // critico (`estagioDeCritico`, ver types.ts), que persiste ate fim de luta
+  // sem timer proprio — igual `estagios`, mas NAO e um deles (aqueles estao
+  // presos aos 5 stats do catalogo gerado). Consumido pela formula de critico
+  // em computeDamage.
+  if (ability.id === 'focus_energy') {
+    attacker.estagioDeCritico = (attacker.estagioDeCritico ?? 0) + 2
+  }
+
+  // LASER FOCUS (self-target): seta a flag de uso unico que garante critico
+  // no PROXIMO golpe de DANO deste atacante (ver computeDamage, que consome a
+  // flag). Nada acontece aqui alem de setar a flag — o bypass e a chance
+  // moram todos no calculo de dano.
+  if (ability.id === 'laser_focus') {
+    attacker.proximoGolpeCriticoGarantido = true
   }
 
   // CURA PURA (Recover, Synthesis, Soft-Boiled — 10 golpes). Cura sempre o

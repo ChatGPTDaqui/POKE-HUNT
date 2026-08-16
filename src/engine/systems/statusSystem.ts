@@ -167,10 +167,16 @@ export function curarStatus(entity: WorldEntity, tipo?: StatusCondition): boolea
  *
  * A imunidade de reaplicacao tambem nao e mexida: ela e sobre o tempo desde a
  * ultima cura, nao sobre a batalha.
+ *
+ * `estagioDeCritico` (Focus Energy) e `proximoGolpeCriticoGarantido` (Laser
+ * Focus) sao volateis pelo mesmo motivo de `estagios`: contador/flag por
+ * entidade de campo, nao pelo POKE — zeram junto no fim de luta.
  */
 export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.statusVolatil = null
   entity.estagios = {}
+  entity.estagioDeCritico = undefined
+  entity.proximoGolpeCriticoGarantido = undefined
 }
 
 export interface TickDeStatus {
