@@ -181,9 +181,11 @@ export async function liquidar(): Promise<void> {
       )
     }
   } catch (erro) {
-    // "nenhuma sessao aberta" = NUNCA e transitorio: se o servidor nao acha a
-    // sessao, nao existe intervalo pra creditar e a proxima tentativa vai dar o
-    // mesmo 409.
+    // 409 com mensagem exata "nenhuma sessao aberta" = servidor nao acha a
+    // sessao. 401 = nao ha token local (`pedir` em servidor.ts lanca antes de
+    // chegar na rede quando `getSession()` nao devolve token). Nenhum dos
+    // dois e transitorio: se a sessao sumiu de um dos lados, a proxima
+    // tentativa vai dar o mesmo erro.
     //
     // Quem discrimina os dois casos e o proprio timer:
     //
@@ -191,12 +193,13 @@ export async function liquidar(): Promise<void> {
     //    `pararFlushPeriodico()` ANTES do request, e `commitAgora` usa
     //    `liquidar()` fora de hunt de proposito. Nada a fazer, nada a avisar.
     //  - timer AINDA rodando — a sessao morreu pelas costas do cliente (a
-    //    mesma conta abriu outra hunt em outra aba, ou o servidor a fechou por
-    //    um caminho que so devolve 409, ver appSessao.ts#flush). Este era um
-    //    vazamento real: o `return` mudo deixava o timer batendo em
-    //    `/sessao/flush` a cada 30s PARA SEMPRE, uma verificacao de auth por
-    //    tick, numa cacada que o jogador continuava vendo render na tela sem
-    //    creditar nada.
+    //    mesma conta abriu outra hunt em outra aba, o servidor a fechou por
+    //    um caminho que so devolve 409, ver appSessao.ts#flush, ou o token
+    //    local sumiu). Este era um vazamento real: o `return` mudo deixava
+    //    o timer batendo em `/sessao/flush` a cada 30s PARA SEMPRE, uma
+    //    verificacao de auth por tick, numa cacada que o jogador continuava
+    //    vendo render na tela sem creditar nada. So cobrir o 409 nao bastou:
+    //    o 401 (token local sumido) escapava por este mesmo buraco.
     //
     // MAS nem todo 409 de `/sessao/flush` significa "sessao sumiu" — o CAS de
     // `gravarEstado` (server/src/progresso.ts) tambem responde 409 quando OUTRA
@@ -208,8 +211,12 @@ export async function liquidar(): Promise<void> {
     // fora o "derrotou" e ainda avisando "a cacada foi encerrada" por cima.
     // Mensagem exata do servidor discrimina os dois; qualquer outra causa de
     // 409 cai no `reportarErro` de baixo e a proxima tentativa (30s ou
-    // `commitAgora`) tenta de novo sozinha.
-    if (erro instanceof ErroServidor && erro.status === 409 && erro.message === 'nenhuma sessao aberta') {
+    // `commitAgora`) tenta de novo sozinha. 401 nao tem esse ambiguidade —
+    // token local sumido so tem um significado.
+    if (
+      erro instanceof ErroServidor
+      && ((erro.status === 409 && erro.message === 'nenhuma sessao aberta') || erro.status === 401)
+    ) {
       if (timerFlush) tratarEncerramento('sumiu')
       return
     }

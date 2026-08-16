@@ -190,7 +190,12 @@ export interface EstadoParaEscrita {
 export async function lerSnapshot(cfg: Config, userId: string): Promise<EstadoParaEscrita> {
   const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
     selecionar<PlayerSnapshot['player']>(cfg, `players?user_id=eq.${userId}&select=*`),
-    selecionarTudo<PlayerSnapshot['pokemon'][number]>(cfg, `pokemon_instances?user_id=eq.${userId}&select=*`),
+    // `order=id` fixa a ordem entre as paginas de `selecionarTudo` (Range em
+    // lotes de 1000). Sem isso o PostgREST nao garante posicao estavel entre
+    // duas requests separadas — uma linha pode deslizar e ser lida duas vezes
+    // (uma em cada pagina), gerando duplicata no array e um upsert que quebra
+    // com "ON CONFLICT DO UPDATE cannot affect row a second time" (502).
+    selecionarTudo<PlayerSnapshot['pokemon'][number]>(cfg, `pokemon_instances?user_id=eq.${userId}&select=*&order=id`),
     selecionarTudo<PlayerSnapshot['items'][number]>(cfg, `player_items?user_id=eq.${userId}&select=*`),
     selecionarTudo<PlayerSnapshot['pokedex'][number]>(cfg, `player_pokedex?user_id=eq.${userId}&select=*`),
     selecionarTudo<PlayerSnapshot['autoCatchRules'][number]>(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=*`),

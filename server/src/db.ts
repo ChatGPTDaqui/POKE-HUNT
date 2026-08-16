@@ -164,6 +164,30 @@ export async function contar(cfg: Config, caminho: string): Promise<number> {
 }
 
 export async function inserir<T>(cfg: Config, tabela: string, linhas: unknown, opcoes: { retornar?: boolean; upsert?: string } = {}): Promise<T[]> {
+  // Diagnostico do bug de 502 em `pokemon_instances` (ON CONFLICT DO UPDATE
+  // cannot affect row a second time): o PostgREST rejeita a statement inteira
+  // sem dizer QUAL linha colidiu, e a request nunca era logada. Isto loga so
+  // as linhas duplicadas (nao o array inteiro, que pode ter milhares) ANTES
+  // de mandar pro PostgREST -- se o upsert falhar de novo, o log mostra a
+  // chave e o conteudo exato de quem colidiu.
+  if (opcoes.upsert && Array.isArray(linhas) && linhas.length > 1) {
+    const chaves = opcoes.upsert.split(',')
+    const porChave = new Map<string, Record<string, unknown>[]>()
+    for (const linha of linhas as Record<string, unknown>[]) {
+      const chave = chaves.map((c) => linha[c]).join('|')
+      const grupo = porChave.get(chave)
+      if (grupo) grupo.push(linha)
+      else porChave.set(chave, [linha])
+    }
+    const duplicadas = [...porChave.entries()].filter(([, grupo]) => grupo.length > 1)
+    if (duplicadas.length) {
+      console.error(
+        `DUPLICATA antes do upsert em ${tabela} (${linhas.length} linhas no total): `
+        + JSON.stringify(duplicadas.map(([chave, grupo]) => ({ chave, linhas: grupo }))),
+      )
+    }
+  }
+
   const prefer = [
     opcoes.retornar ? 'return=representation' : 'return=minimal',
     opcoes.upsert ? 'resolution=merge-duplicates' : null,

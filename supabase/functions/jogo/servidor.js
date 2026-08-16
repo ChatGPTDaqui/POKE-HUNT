@@ -119,6 +119,21 @@ async function selecionarTudo(cfg, caminho, pagina = 1e3) {
 	}
 }
 async function inserir(cfg, tabela, linhas, opcoes = {}) {
+	if (opcoes.upsert && Array.isArray(linhas) && linhas.length > 1) {
+		const chaves = opcoes.upsert.split(",");
+		const porChave = /* @__PURE__ */ new Map();
+		for (const linha of linhas) {
+			const chave = chaves.map((c) => linha[c]).join("|");
+			const grupo = porChave.get(chave);
+			if (grupo) grupo.push(linha);
+			else porChave.set(chave, [linha]);
+		}
+		const duplicadas = [...porChave.entries()].filter(([, grupo]) => grupo.length > 1);
+		if (duplicadas.length) console.error(`DUPLICATA antes do upsert em ${tabela} (${linhas.length} linhas no total): ` + JSON.stringify(duplicadas.map(([chave, grupo]) => ({
+			chave,
+			linhas: grupo
+		}))));
+	}
 	const prefer = [opcoes.retornar ? "return=representation" : "return=minimal", opcoes.upsert ? "resolution=merge-duplicates" : null].filter(Boolean).join(",");
 	return await pedir(cfg, `${tabela}${opcoes.upsert ? `?on_conflict=${opcoes.upsert}` : ""}`, {
 		method: "POST",
@@ -47168,7 +47183,7 @@ async function aguardarFlushEmAndamento(cfg, userId) {
 async function lerSnapshot(cfg, userId) {
 	const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
 		selecionar(cfg, `players?user_id=eq.${userId}&select=*`),
-		selecionarTudo(cfg, `pokemon_instances?user_id=eq.${userId}&select=*`),
+		selecionarTudo(cfg, `pokemon_instances?user_id=eq.${userId}&select=*&order=id`),
 		selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=*`),
 		selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=*`),
 		selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=*`)
