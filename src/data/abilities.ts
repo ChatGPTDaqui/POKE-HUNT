@@ -18,9 +18,12 @@
 // single POKE always has, its cooldown is a fixed BASE_ATTACK_INTERVAL (see
 // CombatSystem.js) — not PP-based, and not Speed-scaled like the rest.
 //
-// Status/0-power moves are excluded from combat and from every player-facing
-// list (isDamagingAbility) — they stay in the data below untouched, in case
-// their mechanics (stat drops, etc) get implemented later.
+// Status/0-power moves are excluded from `isDamagingAbility` specifically —
+// that function means "usable as a DAMAGE move", not "does nothing here".
+// Most status/support moves (stat drops, Taunt, Leech Seed, screens, ...) DO
+// have real mechanics implemented (combatSystem.ts) and compete for the same
+// active-ability slots as damaging moves; see moveDescriptions.ts#golpeTemEfeitoReal
+// for which power-0 moves are genuinely inert here vs which ones do something.
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
 import { ABILITIES_DATA } from './generated/abilities.generated'

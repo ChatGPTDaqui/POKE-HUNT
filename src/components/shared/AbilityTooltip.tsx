@@ -6,15 +6,16 @@
 import type { ReactNode } from 'react'
 import { AOE_RADIUS, type Ability } from '@/data/abilities'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
-import { AVISO_SEM_DANO, MOVE_DESCRIPTIONS } from '@/data/moveDescriptions'
+import { AVISO_SEM_DANO, MOVE_DESCRIPTIONS, golpeTemEfeitoReal } from '@/data/moveDescriptions'
 import { colorForType } from '@/data/typeColors'
 import type { PokeInstance } from '@/data/pokes'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 // 'status' e categoria de verdade desde a base de dados do Ultra Sun (ate a
 // Gen III a categoria era decidida pelo TIPO do golpe e nao existia uma
-// terceira). Golpe de status continua inerte aqui — o aviso logo abaixo, que ja
-// aparecia em todo golpe de poder 0, e quem explica isso ao jogador.
+// terceira). Golpe de status pode ou nao ter efeito real aqui — ver
+// `golpeTemEfeitoReal` (data/moveDescriptions.ts), que decide se o aviso logo
+// abaixo aparece.
 const ROTULO_CATEGORIA: Record<string, string> = { physical: 'Fisico', special: 'Especial', status: 'Status' }
 
 export function descricaoDoGolpe(ability: Ability): string {
@@ -42,7 +43,7 @@ export function AbilityTooltip({
   const categoria = poke ? resolveAbilityCategory(ability, poke) : ability.category
   const cor = colorForType(ability.type)
   const descricao = descricaoDoGolpe(ability)
-  const semDano = ability.power <= 0
+  const semDano = ability.power <= 0 && !golpeTemEfeitoReal(ability)
 
   return (
     <Tooltip>
@@ -67,9 +68,8 @@ export function AbilityTooltip({
           </div>
 
           <span className="opacity-85">{descricao}</span>
-          {/* Ver a nota de topo de data/moveDescriptions.ts: descrever o efeito
-              original sem avisar que ele nao roda aqui seria mentir sobre a
-              mecanica. */}
+          {/* So golpe SEM efeito real nenhum implementado aqui (nem dano, nem
+              status/estagio/clima/escudo/etc) — ver golpeTemEfeitoReal. */}
           {semDano && <span className="text-[.85em] text-warn">{AVISO_SEM_DANO}</span>}
         </div>
       </TooltipContent>

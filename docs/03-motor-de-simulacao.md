@@ -247,12 +247,17 @@ no instante da decisão.
 
 Prioridade de golpe (nenhum golpe age antes de outro por "prioridade" — é por isso que Wide
 Guard/Quick Guard existem no catálogo sem essa parte funcionar), multi-hit (golpe que acerta
-2-5 vezes numa investida só), OHKO de verdade, pesca/varas, PP como recurso consumível. O
-tooltip de golpe (`data/moveDescriptions.ts#AVISO_SEM_DANO`) ainda avisa em TODO golpe de
-potência 0 como se nada dele funcionasse aqui — **isso ficou desatualizado com esta leva**:
-Taunt/Leech Seed/Protect/Thunder Wave e dezenas de outros golpes de potência 0 têm efeito
-real agora. Vale revisar esse aviso pra distinguir "sem efeito nenhum aqui" de "sem DANO, mas
-com efeito real".
+2-5 vezes numa investida só), OHKO de verdade, pesca/varas, PP como recurso consumível.
+
+**`AVISO_SEM_DANO` corrigido na mesma leva.** Avisava em TODO golpe de potência 0, mesmo nos que
+ganharam efeito real (Taunt/Leech Seed/Protect/Thunder Wave/...). `golpeTemEfeitoReal`
+(`data/moveDescriptions.ts`) agora decide caso a caso — dado no próprio golpe
+(`status`/`statChanges`/`hazard`/`healPercent`/`drainPercent`) ou id hardcoded conhecido
+(`GOLPES_COM_EFEITO_HARDCODED`/`GOLPES_DE_ESCUDO`/`CLIMA_DO_GOLPE`, mantidos em sincronia com
+`combatSystem.ts#golpeDeApoioUtil` por comentário) — e só mostra o aviso nos golpes GENUINAMENTE
+inertes (Splash, Transform, Sleep Talk, Rage Powder, Quick Guard). Testado
+(`moveDescriptions.test.ts`): toda chave das listas hardcoded existe no catálogo, e amostras dos
+dois lados (com/sem efeito) batem.
 
 ## Determinismo
 

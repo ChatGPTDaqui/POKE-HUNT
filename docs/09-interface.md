@@ -353,13 +353,12 @@ registrado), dado real que diz o que é.
   incluindo FAIRY), uma por golpe, conferidas por script contra `ABILITIES_DATA` (zero
   faltando, zero sobrando). Escritas em português a partir dos efeitos reais dos jogos.
 
-  **`AVISO_SEM_DANO` está desatualizado desde a leva de combate** (ver
-  [03](03-motor-de-simulacao.md#continua-fora-de-escopo-decisão-explícita)). Ele aparece em
-  TODO golpe de potência 0, presumindo que nenhum tem efeito real aqui — verdade até essa
-  leva, falsa depois dela: status, estágio de atributo, clima, escudos, Leech Seed/Curse/
-  Taunt/Protect e boa parte da lista de golpes de potência 0 agora TÊM efeito real. O aviso
-  precisa passar a distinguir "sem efeito nenhum" de "sem dano, mas com efeito" — não foi
-  corrigido nesta rodada, só documentado como pendência.
+  **`AVISO_SEM_DANO` corrigido** (ver
+  [03](03-motor-de-simulacao.md#continua-fora-de-escopo-decisão-explícita)). Avisava em TODO
+  golpe de potência 0 — presumindo que nenhum tem efeito real, verdade antes da leva de
+  combate, falsa depois. `golpeTemEfeitoReal` agora só deixa o aviso acender nos golpes
+  GENUINAMENTE inertes (Splash, Transform, Sleep Talk, ...), lendo o mesmo dado/id que o motor
+  de combate usa (sem duplicar a lógica de "o que cada golpe faz").
 
 ## VFX de combate
 

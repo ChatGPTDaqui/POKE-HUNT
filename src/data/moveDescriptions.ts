@@ -1,3 +1,5 @@
+import { CLIMA_DO_GOLPE } from './abilities'
+
 // Descricao de cada golpe, pro tooltip da barra de habilidades e da aba
 // "Golpes" do perfil.
 //
@@ -13,16 +15,75 @@
 // `psychic_m` -> `psychic`, `hi_jump_kick` -> `high_jump_kick`, ...).
 //
 // AVISO QUE O TOOLTIP MOSTRA JUNTO, E QUE E O PONTO DELICADO DESTE ARQUIVO:
-// este jogo simula dano, tipo, STAB, efetividade e cooldown (derivado do PP).
-// Nao simula status, alteracao de atributo, prioridade, multi-hit nem recoil —
-// isso esta registrado como "fora de escopo" no CLAUDE.md desde o inicio.
-// Entao um golpe descrito como "reduz o Ataque do alvo" NAO reduz nada aqui.
-// Descrever o efeito original e util (o jogador reconhece o golpe), mas
-// descrever sem avisar seria mentir sobre a mecanica — por isso `AVISO_SEM_DANO`
-// aparece automaticamente em todo golpe de poder 0, que e exatamente o conjunto
-// dos golpes cujo efeito inteiro nao existe neste jogo.
+// nem todo golpe de poder 0 e "sem efeito nenhum" — desde a leva de combate
+// (clima/traits/escudos/etc, ver docs/03-motor-de-simulacao.md), dezenas de
+// golpes de status/suporte TEM efeito real implementado (Taunt trava golpe de
+// status do alvo, Leech Seed drena HP, Thunder Wave paraliza, Reflect ergue
+// escudo...). `golpeTemEfeitoReal` (abaixo) e quem sabe distinguir os dois
+// casos, olhando o mesmo dado/id que o motor de combate usa — por isso
+// `AVISO_SEM_DANO` so aparece nos golpes que SAO mesmo inertes aqui (ex:
+// Splash, Transform, Sleep Talk — catalogados, sem mecanica nenhuma
+// implementada).
 export const AVISO_SEM_DANO =
-  'Neste jogo este golpe nao causa dano: os efeitos de status/atributo do jogo original nao sao simulados.'
+  'Neste jogo este golpe nao causa dano, e nao tem nenhum efeito extra implementado aqui.'
+
+// Golpes de poder 0 cujo efeito e HARDCODED por id em combatSystem.ts (o
+// catalogo nao tem coluna pra eles — nada em `Ability` denuncia sozinho que
+// fazem algo). MANTER EM SINCRONIA com combatSystem.ts#golpeDeApoioUtil e o
+// switch "GOLPES DE SUPORTE SEM DANO" logo depois de resolveHit — cada id
+// aqui tem um `case` la que faz algo de verdade quando o golpe e usado.
+export const GOLPES_COM_EFEITO_HARDCODED = new Set([
+  // trava/lock do oponente
+  'taunt', 'torment', 'disable', 'encore', 'spite',
+  // dreno/regeneracao continua
+  'leech_seed', 'curse', 'nightmare', 'ingrain', 'aqua_ring', 'wish',
+  // imunidade temporaria / revela fraqueza natural
+  'magnet_rise', 'foresight', 'miracle_eye', 'odor_sleuth',
+  // estagio de critico
+  'focus_energy', 'laser_focus',
+  // "GOLPES DE SUPORTE SEM DANO" (switch dedicado em resolveHit)
+  'endure', 'protect', 'detect', 'destiny_bond', 'haze', 'psych_up',
+  'pain_split', 'heal_block', 'rest', 'yawn', 'belly_drum', 'acupressure',
+  'aromatherapy', 'heal_bell', 'lock_on', 'mind_reader', 'guard_swap',
+  'power_swap', 'soak', 'perish_song', 'psycho_shift',
+])
+
+// Golpes de escudo (Reflect/Light Screen/Safeguard/Mist/Lucky Chant/Wide
+// Guard) — mesmas chaves de combatSystem.ts#ESCUDO_ABILITIES.
+export const GOLPES_DE_ESCUDO = new Set([
+  'reflect', 'light_screen', 'safeguard', 'mist', 'lucky_chant', 'wide_guard',
+])
+
+/**
+ * Este golpe tem ALGUM efeito real implementado aqui, mesmo sem causar dano?
+ *
+ * So decide SE `AVISO_SEM_DANO` aparece — nunca decide nada de combate de
+ * verdade (isso continua 100% em combatSystem.ts). Dois jeitos de reconhecer
+ * efeito: DADO no proprio golpe (`status`/`statChanges`/`hazard`/
+ * `healPercent`/`drainPercent`, que o motor le sem precisar saber o id) ou
+ * HARDCODED por id (`GOLPES_COM_EFEITO_HARDCODED`/`GOLPES_DE_ESCUDO`/
+ * `CLIMA_DO_GOLPE`, golpes cujo efeito inteiro vive em combatSystem.ts).
+ * Golpes de dano fixo (Seismic Toss, Dragon Rage, ...) nao entram aqui: eles
+ * tem `power > 0` na pratica (o motor so usa o poder deles pra outra coisa),
+ * entao `semDano` no tooltip nunca chega a perguntar sobre eles.
+ */
+export function golpeTemEfeitoReal(ability: {
+  id: string
+  status?: unknown
+  statChanges?: unknown[]
+  hazard?: unknown
+  healPercent?: number
+  drainPercent?: number
+}): boolean {
+  if (ability.status) return true
+  if (ability.statChanges && ability.statChanges.length > 0) return true
+  if (ability.hazard) return true
+  if (ability.healPercent) return true
+  if (ability.drainPercent) return true
+  if (CLIMA_DO_GOLPE[ability.id]) return true
+  if (GOLPES_DE_ESCUDO.has(ability.id)) return true
+  return GOLPES_COM_EFEITO_HARDCODED.has(ability.id)
+}
 
 export const MOVE_DESCRIPTIONS: Record<string, string> = {
   scratch: 'Arranha o alvo com garras afiadas.',
