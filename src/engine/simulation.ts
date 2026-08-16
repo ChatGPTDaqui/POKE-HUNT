@@ -493,6 +493,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   if (!silent) updateAnimations(world, dt)
 
   const kills: KillResult[] = []
+  let salaTrocou = false
   if (defeatedEnemyIds.length > 0) {
     for (const enemyId of defeatedEnemyIds) {
       const enemy = world.enemies.find((e) => e.id === enemyId)
@@ -504,16 +505,27 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       // oculta e o farm offline contam pela mesma regra sem nenhum deles
       // precisar lembrar.
       const avanco = registrarAbate(world, world.mapDef.id)
-      if (avanco.avancou && !silent) {
-        const nome = nomeDaSala(world.sala)
-        useToastStore.getState().pushToast(
-          avanco.fechouCiclo
-            ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.`
-            : `Sala limpa! Avancando para a sala ${(world.sala?.indice ?? 0) + 1}: ${nome}.`,
-          'success', 'world',
-        )
+      if (avanco.avancou) {
+        salaTrocou = true
+        if (!silent) {
+          const nome = nomeDaSala(world.sala)
+          useToastStore.getState().pushToast(
+            avanco.fechouCiclo
+              ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.`
+              : `Sala limpa! Avancando para a sala ${(world.sala?.indice ?? 0) + 1}: ${nome}.`,
+            'success', 'world',
+          )
+        }
       }
     }
+  }
+  // Sala avancou com outro inimigo ainda vivo em campo (maxEnemies > 1): esse
+  // inimigo veio do pool da sala anterior. Sem isso ele fica em campo com
+  // especie fora do pool ate morrer por conta propria.
+  if (salaTrocou && world.sala) {
+    const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
+    const permitidas = new Set(ctx.pool.map((id) => getEncounter(id)?.speciesId).filter((id): id is string => id != null))
+    world.enemies = world.enemies.filter((e) => isDead(e) || permitidas.has(e.poke.speciesId))
   }
   for (const enemy of world.enemies) {
     if (isDead(enemy) && enemy.deathRemovalTimer != null && enemy.deathRemovalTimer > 0) enemy.deathRemovalTimer -= dt
