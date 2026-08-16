@@ -24355,6 +24355,72 @@ var WATER_SPAWN_POINT = {
 	y: 86.56738461538407
 };
 //#endregion
+//#region src/data/generated/subBiomaCollision.generated.ts
+var SUB_BIOMA_COLLISION = {
+	"abyss": {
+		"grid": [
+			"00000000000011111111111100000000111",
+			"00000000000111111111111110000000111",
+			"00000000001111111111111111100000000",
+			"00000000111111111111111111100000000",
+			"00000001111111111111111111100000000",
+			"00000011111111111111111111110000000",
+			"00000011111111111111111111111000000",
+			"00000111111111111111111111111111001",
+			"00000111111111111111111111111100000",
+			"00000011111111111111111111111000000",
+			"00000011111111111111111111111000000",
+			"00000001111111111111111111110000000",
+			"00000000111111111111111111000000000",
+			"00000000111111111111111110000000000",
+			"00000000001111111111111110000000000",
+			"10000000001111111111111110000000000",
+			"00000000001111111111111100000000000",
+			"10000000011111111111100000000000011",
+			"00000000011100011111000000000000001",
+			"00000000000000001111000000000011111",
+			"00000001000000000000000000000111111",
+			"10001111000000000000000000011111111",
+			"11000110000000000111000000011111111"
+		],
+		"spawnPoint": {
+			"x": 260,
+			"y": 460
+		}
+	},
+	"space": {
+		"grid": [
+			"00000000000011111111111100000000111",
+			"00000000000111111111111110000000111",
+			"00000000001111111111111111100000000",
+			"00000000111111111111111111100000000",
+			"00000001111111111111111111100000000",
+			"00000011111111111111111111110000000",
+			"00000011111111111111111111111000000",
+			"00000111111111111111111111111111001",
+			"00000111111111111111111111111100000",
+			"00000011111111111111111111111000000",
+			"00000011111111111111111111111000000",
+			"00000001111111111111111111110000000",
+			"00000000111111111111111111000000000",
+			"00000000111111111111111110000000000",
+			"00000000001111111111111110000000000",
+			"10000000001111111111111110000000000",
+			"00000000001111111111111100000000000",
+			"10000000011111111111100000000000011",
+			"00000000011100011111000000000000001",
+			"00000000000000001111000000000011111",
+			"00000001000000000000000000000111111",
+			"10001111000000000000000000011111111",
+			"11000110000000000111000000011111111"
+		],
+		"spawnPoint": {
+			"x": 260,
+			"y": 460
+		}
+	}
+};
+//#endregion
 //#region src/data/biomas.ts
 var FAIXAS$1 = [
 	{
@@ -26252,15 +26318,67 @@ function getMap(id) {
 		collisionGrid
 	};
 }
+function mapDefParaSala(mapId, sala) {
+	const map = getMap(mapId);
+	if (!map) return null;
+	const override = sala && SUB_BIOMA_COLLISION[sala.chave];
+	if (!override) return map;
+	return {
+		...map,
+		collisionGrid: override.grid,
+		colisaoDefineLimite: true
+	};
+}
+function spawnPointParaSala(sala) {
+	return (sala && SUB_BIOMA_COLLISION[sala.chave]?.spawnPoint) ?? null;
+}
 function isCellBlocked(mapDef, x, y) {
 	const grid = mapDef.collisionGrid;
 	if (!grid) return false;
 	const col = Math.floor(x / 40);
 	const row = Math.floor(y / 40);
-	if (row < 0 || row >= grid.length || col < 0 || col >= grid[0].length) return false;
+	if (row < 0 || row >= grid.length || col < 0 || col >= grid[0].length) return Boolean(mapDef.colisaoDefineLimite);
 	return grid[row][col] === "1";
 }
+/**
+* Celula andavel mais proxima de (x,y) nesta grade, em espiral quadrada
+* crescente — devolve o CENTRO dela. `null` se nao achar nenhuma no raio de
+* busca (grade sem nenhuma celula andavel, nao deveria acontecer com uma
+* grade real).
+*
+* Existe pro caso de troca de SALA (ver salaSystem.ts#registrarAbate): uma
+* entidade que estava numa sala SEM colisao (aberta, pode estar em
+* qualquer canto do mapa) pode ficar de pe numa celula que a nova sala
+* marca como bloqueada — e pior, uma celula cujos 8 vizinhos TAMBEM sao
+* bloqueados, sem nenhum passo unico de escape possivel (bug real, achado
+* ao vivo: jogador congelado 40+ segundos numa celula cercada). Nem A*
+* nem slideToward resolvem "comecar dentro da parede" sozinhos; a unica
+* saida e reposicionar pro ponto andavel mais perto ANTES do proximo tick
+* de movimento tentar sair dali.
+*/
+function nearestOpenPoint(mapDef, x, y) {
+	const grid = mapDef.collisionGrid;
+	if (!grid) return {
+		x,
+		y
+	};
+	const cols = grid[0].length, rows = grid.length;
+	const startCol = Math.floor(x / 40);
+	const startRow = Math.floor(y / 40);
+	const maxRadius = Math.max(cols, rows);
+	for (let radius = 0; radius <= maxRadius; radius++) for (let dr = -radius; dr <= radius; dr++) for (let dc = -radius; dc <= radius; dc++) {
+		if (Math.max(Math.abs(dr), Math.abs(dc)) !== radius) continue;
+		const c = startCol + dc, r = startRow + dr;
+		if (r < 0 || r >= rows || c < 0 || c >= cols) continue;
+		if (grid[r][c] === "0") return {
+			x: c * 40 + 20,
+			y: r * 40 + 20
+		};
+	}
+	return null;
+}
 function mapWalkRadius(mapDef) {
+	if (mapDef.colisaoDefineLimite) return Math.hypot(mapDef.bounds.width, mapDef.bounds.height) / 2;
 	return Math.min(mapDef.bounds.width, mapDef.bounds.height) / 2;
 }
 //#endregion
@@ -27332,6 +27450,7 @@ function createPlayerEntity(counters, { poke, x, y }) {
 		pathRecalcTimer: 0,
 		pathTargetX: null,
 		pathTargetY: null,
+		pathStuckSeconds: 0,
 		moveSpeed: PLAYER_MOVE_SPEED,
 		wanderTarget: null,
 		wanderPause: 0,
@@ -27384,6 +27503,7 @@ function createEnemyEntity(counters, { poke, x, y, encounterId }) {
 		pathRecalcTimer: 0,
 		pathTargetX: null,
 		pathTargetY: null,
+		pathStuckSeconds: 0,
 		encounterId,
 		spawnPoint: {
 			x,
@@ -42976,6 +43096,7 @@ function triggerAttackAnim(entity, isAoe, target) {
 var HIT_LAND_DELAY = ATTACK_ANIM_DURATION;
 var IMPACT_EFFECT_DURATION = .35;
 var AOE_EFFECT_DURATION = .55;
+var STATUS_VFX_DURATION = 1.1;
 var formulaEngine$4 = createFormulaEngine(FORMULAS);
 var STAB_MULTIPLIER = formulaEngine$4.eval("STAB_MULTIPLIER");
 var CRIT_CHANCE = formulaEngine$4.eval("CRIT_CHANCE");
@@ -43499,25 +43620,54 @@ function basicAttackFor(attackerSpecies) {
 		type: attackerSpecies.type
 	};
 }
-function pickAbility(world, entity, defenderEntity, aoeTargetCounter) {
+function tentarAtaqueBasico(entity, attackerSpecies, disabled) {
+	if (disabled[BASIC_ATTACK.id] || !isAbilityReady(entity, BASIC_ATTACK.id)) return null;
+	return basicAttackFor(attackerSpecies);
+}
+function pickAbilityGreedy(world, entity, defenderEntity, prontos, estaSilenciado, clima, aoeTargetCounter) {
 	const rng = world.rng;
+	const ready = prontos.filter((ability) => isDamagingAbility(ability));
+	const statusPronto = estaSilenciado ? [] : prontos.filter((a) => a.power === 0 && (a.status != null && statusVaiPegar(defenderEntity, a.status, a.id) || golpeDeApoioUtil(world, entity, defenderEntity, a, ready, clima)));
+	if (statusPronto.length > 0) {
+		if (ready.reduce((max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)), 0) < defenderEntity.poke.hp) return statusPronto.reduce((melhor, a) => (a.statusChance ?? 0) > (melhor.statusChance ?? 0) ? a : melhor);
+	}
+	if (ready.length === 0) return null;
+	const aoeReady = ready.filter((a) => a.target === "aoe" && aoeTargetCounter(a) >= 2);
+	return (aoeReady.length > 0 ? aoeReady : ready).reduce((best, a) => danoEsperado(rng, entity, defenderEntity, a) > danoEsperado(rng, entity, defenderEntity, best) ? a : best);
+}
+function pickAbilityDaFila(world, entity, defenderEntity, candidatos, estaSilenciado, clima) {
+	const rng = world.rng;
+	const n = candidatos.length;
+	if (n === 0) return null;
+	const inicio = ((entity.filaGolpeIndex ?? 0) % n + n) % n;
+	const prontosDeDano = candidatos.filter((a) => isDamagingAbility(a) && isAbilityReady(entity, a.id));
+	let maiorDanoCache = null;
+	const maiorDanoSePronto = () => {
+		if (maiorDanoCache == null) maiorDanoCache = prontosDeDano.reduce((max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)), 0);
+		return maiorDanoCache;
+	};
+	for (let passo = 0; passo < n; passo++) {
+		const idx = (inicio + passo) % n;
+		const ability = candidatos[idx];
+		if (!isAbilityReady(entity, ability.id)) continue;
+		if (ability.power === 0) {
+			if (estaSilenciado) continue;
+			if (!(ability.status != null && statusVaiPegar(defenderEntity, ability.status, ability.id) || golpeDeApoioUtil(world, entity, defenderEntity, ability, prontosDeDano, clima))) continue;
+			if (maiorDanoSePronto() >= defenderEntity.poke.hp) continue;
+		}
+		entity.filaGolpeIndex = (idx + 1) % n;
+		return ability;
+	}
+	return null;
+}
+function pickAbility(world, entity, defenderEntity, aoeTargetCounter) {
 	const clima = world.clima?.tipo ?? null;
 	const attackerSpecies = SPECIES[entity.poke.speciesId];
 	const disabled = entity.poke.disabledAbilities || {};
 	const candidateIds = golpesUtilizaveis(entity.poke, attackerSpecies, entity.kind === "enemy").filter((id) => !disabled[id]).filter((id) => !(entity.disabledAbilityUntil && entity.disabledAbilityUntil > 0 && id === entity.disabledAbilityId)).filter((id) => !(entity.tormentedUntil && entity.tormentedUntil > 0 && id === entity.lastUsedAbilityId)).filter((id) => id !== "curse" || attackerSpecies.type === "GHOST" || attackerSpecies.type2 === "GHOST");
-	const prontos = (!!(entity.forcedAbilityUntil && entity.forcedAbilityUntil > 0 && entity.forcedAbilityId) ? candidateIds.filter((id) => id === entity.forcedAbilityId) : candidateIds).map((id) => getAbility(id)).filter((a) => a != null && isAbilityReady(entity, a.id));
-	const ready = prontos.filter((ability) => isDamagingAbility(ability));
-	const statusPronto = !!(entity.silenciadoAte && entity.silenciadoAte > 0) ? [] : prontos.filter((a) => a.power === 0 && (a.status != null && statusVaiPegar(defenderEntity, a.status, a.id) || golpeDeApoioUtil(world, entity, defenderEntity, a, ready, clima)));
-	if (statusPronto.length > 0) {
-		if (ready.reduce((max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)), 0) < defenderEntity.poke.hp) return statusPronto.reduce((melhor, a) => (a.statusChance ?? 0) > (melhor.statusChance ?? 0) ? a : melhor);
-	}
-	if (ready.length === 0) {
-		const basico = basicAttackFor(attackerSpecies);
-		if (disabled[BASIC_ATTACK.id] || !isAbilityReady(entity, BASIC_ATTACK.id)) return null;
-		return basico;
-	}
-	const aoeReady = ready.filter((a) => a.target === "aoe" && aoeTargetCounter(a) >= 2);
-	return (aoeReady.length > 0 ? aoeReady : ready).reduce((best, a) => danoEsperado(rng, entity, defenderEntity, a) > danoEsperado(rng, entity, defenderEntity, best) ? a : best);
+	const candidatosFinais = !!(entity.forcedAbilityUntil && entity.forcedAbilityUntil > 0 && entity.forcedAbilityId) ? candidateIds.filter((id) => id === entity.forcedAbilityId) : candidateIds;
+	const estaSilenciado = !!(entity.silenciadoAte && entity.silenciadoAte > 0);
+	return (entity.kind === "enemy" ? pickAbilityGreedy(world, entity, defenderEntity, candidatosFinais.map((id) => getAbility(id)).filter((a) => a != null && isAbilityReady(entity, a.id)), estaSilenciado, clima, aoeTargetCounter) : pickAbilityDaFila(world, entity, defenderEntity, candidatosFinais.map((id) => getAbility(id)).filter((a) => a != null), estaSilenciado, clima)) ?? tentarAtaqueBasico(entity, attackerSpecies, disabled);
 }
 function queueHit(world, attacker, target, ability) {
 	world.pendingHits.push({
@@ -43804,7 +43954,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			targetY: attacker.y - attacker.radius * .6,
 			color: colorForType(ability.type),
 			isAoe: true,
-			duration: AOE_EFFECT_DURATION,
+			duration: ability.power === 0 ? STATUS_VFX_DURATION : AOE_EFFECT_DURATION,
 			worldSize: (ability.radius ?? 0) * 2,
 			elementType: ability.type,
 			statusDirection: ability.power === 0 ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0
@@ -44183,7 +44333,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			targetY: local.y - local.radius * .6,
 			color: colorForType(ability.type),
 			isAoe: false,
-			duration: IMPACT_EFFECT_DURATION,
+			duration: ability.power === 0 ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
 			elementType: ability.type,
 			statusDirection: ability.power === 0 ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0
 		}));
@@ -44349,6 +44499,7 @@ var WANDER_PAUSE_MAX = 3;
 var PATH_RECALC_INTERVAL = 1;
 var PATH_TARGET_DRIFT = 60;
 var PATH_TARGET_BIG_JUMP = 150;
+var PATH_STUCK_THRESHOLD_SECONDS = .3;
 function canOccupy(mapDef, x, y) {
 	return !isCellBlocked(mapDef, x, y);
 }
@@ -44404,8 +44555,9 @@ function moveToward(entity, tx, ty, speed, dt, mapDef) {
 	const targetJump = Math.hypot(tx - (entity.pathTargetX ?? tx), ty - (entity.pathTargetY ?? ty));
 	const drifted = targetJump > PATH_TARGET_DRIFT;
 	const bigJump = targetJump > PATH_TARGET_BIG_JUMP;
-	if (entity.pathWaypoints == null || bigJump || drifted && entity.pathRecalcTimer <= 0) {
-		if (hasLineOfSight(mapDef, entity.x, entity.y, tx, ty)) entity.pathWaypoints = [];
+	const travado = entity.pathStuckSeconds >= PATH_STUCK_THRESHOLD_SECONDS;
+	if (entity.pathWaypoints == null || bigJump || drifted && entity.pathRecalcTimer <= 0 || travado) {
+		if (!travado && hasLineOfSight(mapDef, entity.x, entity.y, tx, ty)) entity.pathWaypoints = [];
 		else {
 			entity.pathWaypoints = findPath(mapDef, entity.x, entity.y, tx, ty) || [];
 			entity.pathIndex = 0;
@@ -44413,8 +44565,10 @@ function moveToward(entity, tx, ty, speed, dt, mapDef) {
 		entity.pathTargetX = tx;
 		entity.pathTargetY = ty;
 		entity.pathRecalcTimer = PATH_RECALC_INTERVAL;
+		if (travado) entity.pathStuckSeconds = 0;
 	}
 	if (entity.pathWaypoints.length > 0) {
+		entity.pathStuckSeconds = 0;
 		const wp = entity.pathWaypoints[entity.pathIndex];
 		if (stepDirect(entity, wp.x, wp.y, speed, dt)) {
 			entity.pathIndex += 1;
@@ -44422,7 +44576,10 @@ function moveToward(entity, tx, ty, speed, dt, mapDef) {
 		}
 		return false;
 	}
-	return slideToward(entity, tx, ty, speed, dt, mapDef);
+	const beforeX = entity.x, beforeY = entity.y;
+	const arrived = slideToward(entity, tx, ty, speed, dt, mapDef);
+	entity.pathStuckSeconds = !arrived && entity.x === beforeX && entity.y === beforeY ? entity.pathStuckSeconds + dt : 0;
+	return arrived;
 }
 function clampToMapCircle(x, y, mapCx, mapCy, mapRadius) {
 	const dx = x - mapCx;
@@ -45057,6 +45214,25 @@ function registrarAbate(world, mapId) {
 		abates: 0,
 		ciclos
 	};
+	const novoMapDef = mapDefParaSala(mapId, world.sala);
+	if (novoMapDef) {
+		world.mapDef = novoMapDef;
+		if (world.player && isCellBlocked(novoMapDef, world.player.x, world.player.y)) {
+			const ponto = nearestOpenPoint(novoMapDef, world.player.x, world.player.y);
+			if (ponto) {
+				world.player.x = ponto.x;
+				world.player.y = ponto.y;
+			}
+		}
+		for (const enemy of world.enemies) {
+			if (!isCellBlocked(novoMapDef, enemy.x, enemy.y)) continue;
+			const ponto = nearestOpenPoint(novoMapDef, enemy.x, enemy.y);
+			if (ponto) {
+				enemy.x = ponto.x;
+				enemy.y = ponto.y;
+			}
+		}
+	}
 	return {
 		avancou: true,
 		fechouCiclo
@@ -45876,7 +46052,7 @@ var useToastStore = create((set) => ({
 		trade: [],
 		log: []
 	},
-	pushToast: (message, type, channel, realce) => {
+	pushToast: (message, type, channel, realce, erroDetalhe) => {
 		const tab = CHANNEL_TO_TAB[channel] || "sistema";
 		const line = {
 			id: makeId(),
@@ -45897,7 +46073,8 @@ var useToastStore = create((set) => ({
 				message,
 				type,
 				realce,
-				channel
+				channel,
+				erroDetalhe
 			};
 			return {
 				chatLines,
@@ -46014,19 +46191,20 @@ function aplicarHazardsAoInimigo(rng, hazards, enemy) {
 	if (hazards.stickyWeb) enemy.estagios.speed = (enemy.estagios.speed ?? 0) - 1;
 }
 function buildMapWorld(mapId, activePoke, carry, progresso) {
-	const mapDef = getMap(mapId);
-	if (!mapDef) throw new Error(`Mapa desconhecido: ${mapId}`);
 	const base = novoMundo(carry);
+	const sala = temSalas(mapId) ? progresso?.sala ?? novaSala(base.rng, mapId, 0, 0) : null;
+	const mapDef = mapDefParaSala(mapId, sala);
+	if (!mapDef) throw new Error(`Mapa desconhecido: ${mapId}`);
+	const spawn = spawnPointParaSala(sala) ?? mapDef.playerSpawn;
 	const player = createPlayerEntity(base.counters, {
 		poke: activePoke,
-		x: mapDef.playerSpawn.x,
-		y: mapDef.playerSpawn.y
+		x: spawn.x,
+		y: spawn.y
 	});
 	if (isDead(player)) player.fainted = true;
 	const sequenceIndex = progresso?.sequenceIndex ?? 0;
 	const sequenceCleared = progresso?.sequenceCleared ?? false;
 	const countdownRemaining = sequenceIndex > 0 || sequenceCleared ? null : mapDef.startCountdown || null;
-	const sala = temSalas(mapId) ? progresso?.sala ?? novaSala(base.rng, mapId, 0, 0) : null;
 	const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool);
 	const enemies = [];
 	if (!countdownRemaining && !sequenceCleared) {
@@ -46731,7 +46909,8 @@ function criarEstadoDoJogador(dados) {
 			healTeamFully: () => {
 				s.team = s.team.map((p) => ({
 					...p,
-					hp: p.stats.hp
+					hp: p.stats.hp,
+					status: null
 				}));
 			},
 			setCurrentMapId: (mapId) => {
