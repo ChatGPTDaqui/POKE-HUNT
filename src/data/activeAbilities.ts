@@ -173,7 +173,12 @@ export function golpesUtilizaveis(poke: PokeInstance, species: Species, selvagem
 
   const conhecidos = new Set(poke.unlockedAbilities)
   const escolha = poke.activeAbilities ?? activeAbilitiesPadrao(species, poke.level)
-  const escolhidos = escolha.filter((key) => conhecidos.has(key)).slice(0, MAX_ACTIVE_ABILITIES)
+  // `escolha` pode ter golpe repetido (dado salvo antes da validacao existir —
+  // ver `pokemon_instances.active_abilities` em producao). Duplicata aqui vira
+  // `key` React duplicada em toda UI que mapeia por `ability.id`
+  // (`AbilityHud`), e key duplicada corrompe a reconciliacao: o node extra fica
+  // orfao e sobrevive a troca de POKE seguinte mostrando o golpe antigo.
+  const escolhidos = [...new Set(escolha.filter((key) => conhecidos.has(key)))].slice(0, MAX_ACTIVE_ABILITIES)
 
   // RECOMPOE O SLOT QUE O FILTRO ESVAZIOU.
   //

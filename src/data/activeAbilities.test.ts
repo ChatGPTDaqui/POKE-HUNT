@@ -142,6 +142,22 @@ describe('golpesUtilizaveis', () => {
     const poke = pokeFalso('charizard', 80, { activeAbilities: ['golpe_que_nao_existe', 'ember'] })
     expect(golpesUtilizaveis(poke, species, false)).not.toContain('golpe_que_nao_existe')
   })
+
+  // BUG REAL REPRODUZIDO AO VIVO: `active_abilities` com golpe repetido (dado
+  // salvo antes de existir validacao contra duplicata — 10 linhas achadas em
+  // producao) virava `key` React duplicada em `AbilityHud` (`key={ability.id}`).
+  // Key duplicada corrompe a reconciliacao do proximo render: ao trocar de POKE
+  // em campo, o node extra ficava orfao e continuava mostrando o golpe do POKE
+  // ANTERIOR na barra, permanentemente.
+  it('golpe repetido na escolha salva nao aparece duas vezes (evita key React duplicada)', () => {
+    const species = SPECIES.charizard
+    const poke = pokeFalso('charizard', 80, {
+      activeAbilities: ['flare_blitz', 'flare_blitz', 'inferno', 'heat_wave'],
+    })
+    const pool = golpesUtilizaveis(poke, species, false)
+    const golpesDeDano = pool.filter((k) => k !== typedAoeMoveKey(species.type))
+    expect(new Set(golpesDeDano).size).toBe(golpesDeDano.length)
+  })
 })
 
 describe('encaixarNovosGolpes', () => {
