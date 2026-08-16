@@ -15,8 +15,19 @@
 // StrictMode double-invoke, podem corromper a posicao").
 import { drawEntity, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage } from './sprites'
 import { CENA_HOSPITAL, escalaDoPoke } from '@/data/hospital'
+import { SUB_BIOMA_POR_CHAVE } from '@/data/biomas'
 import type { WorldEntity, WorldState } from '@/engine/types'
 import type { MapDef } from '@/data/maps'
+
+// Fundo por sub-bioma: a sala troca de sub-bioma a cada quota de abates (ver
+// salaSystem.ts) mas ate 2026-08-15 o FUNDO ficava parado no do bioma inteiro
+// — inconsistente com o HUD ja anunciando o sub-bioma novo. Sub-bioma sem
+// `bg` proprio (a maioria: so os que ganharam arte na leva de backgrounds
+// novos tem) cai no fundo do bioma-pai, como sempre foi.
+function backgroundParaSala(mapDef: MapDef, sala: WorldState['sala']): MapDef['bg'] {
+  const chave = sala?.chave
+  return (chave && SUB_BIOMA_POR_CHAVE[chave]?.sub.bg) || mapDef.bg
+}
 
 // Cor de fundo enquanto a arte do Centro Pokemon nao terminou de decodificar.
 // Escura de proposito: a propria arte tem fundo preto em volta do predio,
@@ -246,7 +257,11 @@ export class Renderer {
     ctx.scale(this.zoom, this.zoom)
     ctx.translate(-camera.x, -camera.y)
 
-    drawMapBackground(ctx, mapDef, { x: camera.x, y: camera.y, w: this.width / this.zoom, h: this.height / this.zoom })
+    drawMapBackground(
+      ctx,
+      { bg: backgroundParaSala(mapDef, world.sala), bounds: mapDef.bounds },
+      { x: camera.x, y: camera.y, w: this.width / this.zoom, h: this.height / this.zoom },
+    )
 
     for (const enemy of world.enemies) {
       drawEntity(ctx, enemy)

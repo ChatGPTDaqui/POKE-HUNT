@@ -257,7 +257,8 @@ function montarHunt(bioma: BiomaDef, faixa: FaixaDef): void {
     continent: 'faixa1',
     bounds: { ...GEOMETRIA.bounds },
     playerSpawn: { ...GEOMETRIA.playerSpawn },
-    bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: 'assets/hunt-backgrounds/forest.png' },
+    // "hunt inicial e floresta padrão.jpg" — nome literal do arquivo pra essa hunt (leva 2026-08-15).
+    bg: { primary: '#3f5a34', secondary: '#4a6a3d', image: 'assets/hunt-backgrounds/forest.jpg' },
     // Menos inimigos em campo que qualquer hunt de bioma: um inicial Lv1 tem
     // 12 HP e nao sobrevive a varios de uma vez. Ver o porque medido em
     // data/biomas.ts#MAX_INIMIGOS_HUNT_INICIAL.
