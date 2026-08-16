@@ -3,15 +3,22 @@
 // (TYPE_CHART, RARITIES). Nenhum estado do jogador e lido aqui.
 import { useState, type ReactNode } from 'react'
 import {
-  Backpack, BookOpen, Books, FirstAid, Gear, MapTrifold, Robot, Storefront,
-  UsersThree, type Icon,
+  Backpack, BookOpen, Books, Drop, FirstAid, Fire, Gear, Lightning, MapTrifold, Moon,
+  Question, Robot, Snowflake, Storefront, UsersThree, type Icon,
 } from '@phosphor-icons/react'
 import { TYPE_CHART, getEffectiveness } from '@/data/generated/typeChart.generated'
 import { colorForType, TYPE_COLORS } from '@/data/typeColors'
 import { RARITIES, RARITY_ORDER } from '@/data/rarity'
-import type { ElementType } from '@/data/generated/types'
+import type { ElementType, StatusCondition } from '@/data/generated/types'
 import { GameSelect, SegmentedTabs } from '@/components/game/controls'
 import { TypeChip as SharedTypeChip } from '@/components/shared/TypeChip'
+import {
+  STATUS_NAO_VOLATEIS, STATUS_VOLATEIS, TURNOS_DE_IMUNIDADE_APOS_CURA,
+  regraDoStatus, nomeDoStatus, poderDoAutoDano,
+} from '@/data/statusEffects'
+import { TURNO_SEGUNDOS, getAbility } from '@/data/abilities'
+import { ITEMS, type GeneratedItem } from '@/data/items'
+import { STATUS_RULES } from '@/data/generated/status.generated'
 
 const ALL_TYPES = Object.keys(TYPE_COLORS) as ElementType[]
 
@@ -383,7 +390,189 @@ function MecanicasTab() {
   )
 }
 
-type WikiTab = 'inicio' | 'tipos' | 'raridades' | 'mecanicas'
+const STATUS_ICON: Record<StatusCondition, Icon> = {
+  poison: Drop,
+  burn: Fire,
+  paralysis: Lightning,
+  sleep: Moon,
+  freeze: Snowflake,
+  confusion: Question,
+}
+
+const STATUS_COLOR: Record<StatusCondition, string> = {
+  poison: '#a855f7',
+  burn: '#f97316',
+  paralysis: '#eab308',
+  sleep: '#94a3b8',
+  freeze: '#38bdf8',
+  confusion: '#ec4899',
+}
+
+function formatPercent(fracao: number): string {
+  return `${Math.round(fracao * 100)}%`
+}
+
+function itensQueCuram(tipo: StatusCondition): GeneratedItem[] {
+  return Object.values(ITEMS)
+    .filter((item): item is GeneratedItem =>
+      'kind' in item && item.kind === 'status_heal'
+      && Array.isArray(item.healsStatus) && item.healsStatus.includes(tipo))
+    .sort((a, b) => a.buyPrice - b.buyPrice)
+}
+
+// Cada numero abaixo sai DIRETO de `data/generated/status.generated.ts`
+// (Gen VII/Ultra Sun, conferido na Bulbapedia — ver data/statusEffects.ts) —
+// nada aqui e hardcoded: se um golpe/planilha mudar a regra, a Wiki muda
+// junto sozinha.
+function StatusCard({ tipo }: { tipo: StatusCondition }) {
+  const regra = regraDoStatus(tipo)
+  if (!regra) return null
+  const StatusIcon = STATUS_ICON[tipo]
+  const cor = STATUS_COLOR[tipo]
+
+  const linhas: ReactNode[] = []
+
+  if (regra.bloqueiaAcao) {
+    linhas.push(<li key="acao">Impede agir em <b>todo</b> turno enquanto durar.</li>)
+  } else if (regra.chanceDePerderOTurno) {
+    linhas.push(
+      <li key="acao">{formatPercent(regra.chanceDePerderOTurno)} de chance de perder o turno (nao agir) a cada acao tentada.</li>,
+    )
+  }
+
+  if (regra.danoPorTurnoFracaoDoMaximo) {
+    linhas.push(
+      <li key="dano">
+        Tira {formatPercent(regra.danoPorTurnoFracaoDoMaximo)} do HP <b>maximo</b> a cada {TURNO_SEGUNDOS}s (minimo 1
+        de dano, mesmo em HP maximo baixo).
+      </li>,
+    )
+  }
+
+  if (regra.multiplicadorDeVelocidade && regra.multiplicadorDeVelocidade !== 1) {
+    linhas.push(<li key="vel">Velocidade do POKE multiplicada por {regra.multiplicadorDeVelocidade}x.</li>)
+  }
+  if (regra.multiplicadorDeDanoFisico && regra.multiplicadorDeDanoFisico !== 1) {
+    linhas.push(
+      <li key="fis">Dano de golpes <b>Fisicos</b> causados por este POKE multiplicado por {regra.multiplicadorDeDanoFisico}x.</li>,
+    )
+  }
+
+  if (regra.duracaoEmTurnos) {
+    const [min, max] = regra.duracaoEmTurnos
+    linhas.push(
+      <li key="dur">
+        Passa sozinho depois de {min} a {max} turnos ({min * TURNO_SEGUNDOS}s a {max * TURNO_SEGUNDOS}s), sorteado
+        no momento em que pega.
+      </li>,
+    )
+  } else if (regra.chanceDeDescongelarPorTurno) {
+    linhas.push(
+      <li key="desc">{formatPercent(regra.chanceDeDescongelarPorTurno)} de chance de sair sozinho a cada turno — sem prazo fixo, pode durar 1 turno ou 20.</li>,
+    )
+  } else {
+    linhas.push(<li key="dur">Nao passa sozinho com o tempo — so sai com item ou curando no Hospital.</li>)
+  }
+
+  if (regra.descongelaComTipo) {
+    linhas.push(
+      <li key="degelo" className="flex items-center gap-1">
+        Um golpe de tipo <TypeChip type={regra.descongelaComTipo} /> que cause dano tambem tira este status na hora,
+        alem do proprio dano do golpe.
+      </li>,
+    )
+  }
+
+  if (regra.chanceDeSeAtacar) {
+    linhas.push(
+      <li key="auto">
+        {formatPercent(regra.chanceDeSeAtacar)} de chance, a cada acao tentada, de se atacar sozinho em vez de agir —
+        um golpe tipico (sem tipo, sem STAB) de poder {poderDoAutoDano(tipo)}.
+      </li>,
+    )
+  }
+
+  const curas = itensQueCuram(tipo)
+
+  return (
+    <div className="rounded-lg border bg-n900 p-3">
+      <div className="mb-1.5 flex items-center gap-1.5 text-[.9em] font-medium">
+        <StatusIcon className="text-[1.2em]" style={{ color: cor }} weight="fill" />
+        {nomeDoStatus(tipo)}
+      </div>
+      <ul className="mb-2 list-disc space-y-1 pl-4 text-[.8em] leading-relaxed text-n400">{linhas}</ul>
+      {regra.imunidadesPorTipo.length > 0 && (
+        <div className="mb-2 flex flex-wrap items-center gap-1.5 text-[.8em] text-n400">
+          Imune por tipo: <ChipList types={regra.imunidadesPorTipo} />
+        </div>
+      )}
+      <div className="text-[.8em] text-n400">
+        Cura: {curas.length === 0 ? 'so no Hospital' : `${curas.map((i) => i.name).join(', ')}, ou o Hospital de graca`}
+      </div>
+    </div>
+  )
+}
+
+function StatusTab() {
+  return (
+    <div className="space-y-2">
+      <WikiCard title="Como funciona o sistema de status">
+        Um status e um efeito que gruda no seu POKE (ou no inimigo) alem do dano normal do golpe — os jogos
+        originais resolvem isso por <b>turno</b> de batalha; aqui o combate e continuo, entao um "turno" equivale a{' '}
+        <b>{TURNO_SEGUNDOS} segundos</b> reais, o mesmo intervalo minimo entre duas acoes do POKE. Existem duas
+        familias:
+        <ul className="mt-[.5em] list-disc space-y-1 pl-4">
+          <li>
+            <b>Nao-volateis</b> (Envenenado, Queimado, Paralisado, Dormindo, Congelado) — so cabe <b>um por vez</b>{' '}
+            no POKE, igual aos jogos originais: se ele ja esta paralisado, um golpe de veneno simplesmente falha.
+            Sobrevivem entre combates (voltar pra hunt com um POKE queimado ainda o mantem queimado) — so saem com
+            item ou no Hospital.
+          </li>
+          <li>
+            <b>Volateis</b> (Confuso) — convive normalmente com um status nao-volatil (dá pra estar envenenado E
+            confuso ao mesmo tempo) e some sozinho ao sair da hunt/trocar de cena, mesmo sem cura nenhuma.
+          </li>
+        </ul>
+      </WikiCard>
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        {STATUS_NAO_VOLATEIS.map((tipo) => <StatusCard key={tipo} tipo={tipo} />)}
+        {STATUS_VOLATEIS.map((tipo) => <StatusCard key={tipo} tipo={tipo} />)}
+      </div>
+
+      <WikiCard title="Barra de status em campo">
+        Enquanto seu POKE ativo (ou o inimigo) estiver com algum status ou atributo alterado, um icone aparece numa
+        fileira fixa logo acima da barra de golpes — some sozinho quando o status passa ou e curado. E so
+        informativo (nao precisa clicar em nada); passe o mouse pra ver o nome exato.
+      </WikiCard>
+
+      <WikiCard title="Imunidade de reaplicacao">
+        Todo status que sai — seja curado por item, no Hospital, ou expirando sozinho (sono acabando, degelo) —
+        deixa o POKE <b>imune a receber outro status por {TURNOS_DE_IMUNIDADE_APOS_CURA} turnos</b> (
+        {TURNOS_DE_IMUNIDADE_APOS_CURA * TURNO_SEGUNDOS}s). Sem isso, curar um Antidoto no meio de uma luta contra
+        um POKE selvagem que so usa golpe de veneno seria dinheiro jogado fora — ele reenvenenaria no proximo
+        golpe.
+      </WikiCard>
+
+      <WikiCard title={`Golpes de po (${STATUS_RULES.golpesDePo.golpes.map((id) => getAbility(id)?.name ?? id).join(', ')})`}>
+        POKEs de tipo <TypeChip type="GRASS" /> sao imunes a qualquer golpe dessa familia especifica, mesmo que o
+        STATUS que ele causaria normalmente pudesse pegar neles — e uma regra sobre o GOLPE usado, nao sobre o tipo
+        de status. Essa imunidade e diferente (e além) das imunidades por tipo listadas em cada card acima.
+      </WikiCard>
+
+      <WikiCard title="Curando status">
+        Os itens de cura de status (Antidote, Awakening, Burn Heal, Ice Heal, Paralyze Heal e o Full Heal, que cura
+        os seis de uma vez) ficam disponiveis na Loja. O painel 🤖 Auto tem uma automacao dedicada a isso: com ela
+        ligada, assim que seu POKE ativo pega um status o bot usa sozinho o item MAIS BARATO que voce possui capaz
+        de curar aquele status especifico — o Full Heal (mais caro, cura tudo) só entra quando é o único que
+        sobrou no seu inventário. E sempre possivel curar os seis de graça e na hora indo ate a Enfermeira no
+        Hospital.
+      </WikiCard>
+    </div>
+  )
+}
+
+type WikiTab = 'inicio' | 'tipos' | 'raridades' | 'mecanicas' | 'status'
 
 export function WikiMenu() {
   const [tab, setTab] = useState<WikiTab>('inicio')
@@ -397,12 +586,14 @@ export function WikiMenu() {
           { value: 'tipos', label: 'Efetividade' },
           { value: 'raridades', label: 'Raridades' },
           { value: 'mecanicas', label: 'Mecanicas' },
+          { value: 'status', label: 'Status' },
         ]}
       />
       {tab === 'inicio' && <InicioTab />}
       {tab === 'tipos' && <TiposTab />}
       {tab === 'raridades' && <RaridadesTab />}
       {tab === 'mecanicas' && <MecanicasTab />}
+      {tab === 'status' && <StatusTab />}
     </div>
   )
 }
