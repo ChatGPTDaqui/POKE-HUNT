@@ -481,6 +481,7 @@ function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: W
   const atk = isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp
   const def = isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp
   const power = special && special.mode === 'dynamicPower' ? special.power : ability.power
+  if (power === 0) return 0
 
   let dmg = formulaEngine.eval('DAMAGE_BASE', { level: attackerPoke.level, power, atk, def })
 
@@ -727,7 +728,10 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
       * multiplicadorDeStat(defenderEntity.estagios, isPhysical ? 'def' : 'defEsp')
     const power = special && special.mode === 'dynamicPower' ? special.power : ability.power
 
-    dmg = formulaEngine.eval('DAMAGE_BASE', { level: attackerPoke.level, power, atk, def })
+    // DAMAGE_BASE tem um +2 fixo na formula (Gen2 legitimo pra golpe de dano
+    // real), mas golpe de status puro (power 0, sem dynamicPower/fixed) nao
+    // pode causar esse chip damage silencioso.
+    dmg = power === 0 ? 0 : formulaEngine.eval('DAMAGE_BASE', { level: attackerPoke.level, power, atk, def })
 
     // Queimadura corta o dano FISICO do atacante pela metade (Gen VII). Entra
     // aqui, e nao na stat de Ataque, exatamente como nos jogos desde a Gen IV:
