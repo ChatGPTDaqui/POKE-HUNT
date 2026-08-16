@@ -1007,7 +1007,7 @@ function basicAttackFor(attackerSpecies: { type: Ability['type'] }): Ability {
 // estado. Sem isto, um POKE de poucos golpes de dano (Igglybuff tem 1, e
 // Togepi/Unown/Forretress ficam perto disso) passaria metade dos turnos
 // parado.
-function tentarAtaqueBasico(entity: WorldEntity, attackerSpecies: Species, disabled: Record<string, boolean>): Ability | null {
+function tentarAtaqueBasico(entity: WorldEntity, attackerSpecies: { type: Ability['type'] }, disabled: Record<string, boolean>): Ability | null {
   if (disabled[BASIC_ATTACK.id] || !isAbilityReady(entity, BASIC_ATTACK.id)) return null
   return basicAttackFor(attackerSpecies)
 }
