@@ -10,10 +10,10 @@ import { getAbility, BASIC_ATTACK, isDamagingAbility, TURNO_SEGUNDOS, type Abili
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import {
   multiplicadorDeVelocidade, multiplicadorDeDanoFisico, multiplicadorDeStat,
-  nomeDoStatus, type StatusCondition,
+  multiplicadorDeAccuracyOuEvasion, nomeDoStatus, type StatusCondition,
 } from '@/data/statusEffects'
 import { corDoStatus } from '@/data/statusColors'
-import type { StatChange } from '@/data/generated/types'
+import type { StatChange, ElementType } from '@/data/generated/types'
 import {
   tickStatus, tentarAgir, aplicarEfeitosDoGolpe, statusVaiPegar, aplicarMudancasDeStat,
   limparEstadoVolatil, aplicarStatus,
@@ -80,6 +80,14 @@ const MULTISCALE_MULTIPLIER = 0.5
 // vez por uso).
 const SELF_DESTRUCT_ABILITY_KEYS = new Set(['explosion', 'selfdestruct'])
 const SELF_DESTRUCT_HP_LOSS_PERCENT = 0.5
+
+// Foresight/Miracle Eye: sem statChanges (nao mexem em estagio nenhum), o
+// efeito deles e todo em `entity.revelado` — ver BaseEntity#revelado. Cada
+// chave diz qual imunidade especifica de tipo aquele golpe remove do alvo.
+const REVELA_IMUNIDADE: Record<string, 'ghost' | 'dark'> = {
+  foresight: 'ghost',
+  miracle_eye: 'dark',
+}
 
 // Ambos editaveis pela planilha (ver CLAUDE.md "Balanceamento de economia")
 // com fallback batendo o valor hardcoded antigo.
@@ -247,6 +255,30 @@ function specialDamageFor(rng: Rng, ability: Ability, attackerEntity: WorldEntit
   return null
 }
 
+/**
+ * Multiplicador de efetividade de tipo, mas ignorando UMA imunidade
+ * especifica se o defensor foi "revelado" (Foresight/Miracle Eye).
+ *
+ * Golpes reais que isso desbloqueia: Fantasma deixa de ser imune a
+ * Normal/Lutador (`revelado === 'ghost'`), Sombrio deixa de ser imune a
+ * Psiquico (`revelado === 'dark'`). So entra quando o multiplicador cru JA
+ * DEU ZERO — nao mexe em resistencia parcial (0.5x), so em imunidade total,
+ * exatamente como os golpes reais funcionam.
+ */
+function efetividadeConsiderandoRevelado(
+  multiplicadorCru: number,
+  ability: Ability,
+  defenderEntity: WorldEntity,
+  defenderSpecies: { type: ElementType; type2: ElementType | null },
+): number {
+  if (multiplicadorCru !== 0 || !defenderEntity.revelado) return multiplicadorCru
+  const ehFantasma = defenderSpecies.type === 'GHOST' || defenderSpecies.type2 === 'GHOST'
+  const ehSombrio = defenderSpecies.type === 'DARK' || defenderSpecies.type2 === 'DARK'
+  if (defenderEntity.revelado === 'ghost' && ehFantasma && (ability.type === 'NORMAL' || ability.type === 'FIGHTING')) return 1
+  if (defenderEntity.revelado === 'dark' && ehSombrio && ability.type === 'PSYCHIC') return 1
+  return multiplicadorCru
+}
+
 // Estimativa aproximada de dano (sem crit, sem variacao de roll) usada so
 // pra ranquear golpes candidatos contra um alvo especifico — espelha o
 // pipeline de computeDamage menos os 2 passos aleatorios.
@@ -260,7 +292,10 @@ function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: W
   const defenderPoke = defenderEntity.poke
   const attackerSpecies = SPECIES[attackerPoke.speciesId]
   const defenderSpecies = SPECIES[defenderPoke.speciesId]
-  const effectivenessMultiplier = getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2)
+  const effectivenessMultiplier = efetividadeConsiderandoRevelado(
+    getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2),
+    ability, defenderEntity, defenderSpecies,
+  )
   if (effectivenessMultiplier === 0) return 0
 
   const special = specialDamageFor(deriveRng(rng.state, 'estimate'), ability, attackerEntity, defenderEntity)
@@ -357,7 +392,10 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
   const defenderPoke = defenderEntity.poke
   const attackerSpecies = SPECIES[attackerPoke.speciesId]
   const defenderSpecies = SPECIES[defenderPoke.speciesId]
-  const effectivenessMultiplier = getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2)
+  const effectivenessMultiplier = efetividadeConsiderandoRevelado(
+    getEffectiveness(ability.type, defenderSpecies.type, defenderSpecies.type2),
+    ability, defenderEntity, defenderSpecies,
+  )
   const special = specialDamageFor(rng, ability, attackerEntity, defenderEntity)
 
   let dmg: number
@@ -594,6 +632,7 @@ function anunciarStatus(world: WorldState, alvo: WorldEntity, tipo: StatusCondit
 // golpe subiu um ou dois.
 const ROTULO_DE_STAT: Record<string, string> = {
   atkFis: 'Ataque', atkEsp: 'Atq. Esp.', def: 'Defesa', defEsp: 'Def. Esp.', speed: 'Velocidade',
+  accuracy: 'Precisão', evasion: 'Evasão',
 }
 
 function anunciarEstagios(world: WorldState, alvo: WorldEntity, mudancas: StatChange[]): void {
@@ -659,11 +698,21 @@ function nearbyAliveEnemies(world: WorldState): EnemyEntity[] {
  * contra cada alvo; aqui o AOE ja e uma aproximacao (raio em pixels, sem
  * posicionamento de batalha), e rolar por alvo so somaria variancia invisivel
  * a uma mecanica que o jogador nem ve alvo a alvo.
+ *
+ * PRECISAO EFETIVA leva em conta os estagios de Precisao do atacante e Evasao
+ * do defensor (Areia-Fina, Fumaca, Duplo Time, ...) — formula real dos jogos,
+ * base 3 (`multiplicadorDeAccuracyOuEvasion`), NAO a formula generica de
+ * estagio (base 2) que atkFis/def usam. Precisao do atacante SOBE a chance de
+ * acerto; Evasao do defensor DESCE. Foresight/Miracle Eye (`revelado`) fazem o
+ * defensor ignorar a propria Evasao contra este atacante.
  */
-function golpeErrou(rng: Rng, ability: Ability): boolean {
-  const precisao = ability.accuracy ?? 100
-  if (precisao >= 100) return false
-  return nextFloat(rng) * 100 >= precisao
+function golpeErrou(rng: Rng, ability: Ability, atacante: WorldEntity, defensor: WorldEntity): boolean {
+  const precisaoBase = ability.accuracy ?? 100
+  const multAtacante = multiplicadorDeAccuracyOuEvasion(atacante.estagios.accuracy ?? 0)
+  const multDefensor = defensor.revelado ? 1 : multiplicadorDeAccuracyOuEvasion(defensor.estagios.evasion ?? 0)
+  const precisaoEfetiva = precisaoBase * multAtacante / multDefensor
+  if (precisaoEfetiva >= 100) return false
+  return nextFloat(rng) * 100 >= precisaoEfetiva
 }
 
 function anunciarErro(world: WorldState, atacante: WorldEntity): void {
@@ -707,7 +756,7 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   triggerAttackAnim(player, ability.target === 'aoe', primaryTarget)
   announceAbility(world, player, ability)
 
-  if (golpeErrou(world.rng, ability)) {
+  if (golpeErrou(world.rng, ability, player, primaryTarget)) {
     if (!silent) anunciarErro(world, player)
     return
   }
@@ -741,7 +790,7 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   triggerAttackAnim(enemy, ability.target === 'aoe', player)
   announceAbility(world, enemy, ability)
 
-  if (golpeErrou(world.rng, ability)) {
+  if (golpeErrou(world.rng, ability, enemy, player)) {
     if (!silent) anunciarErro(world, enemy)
     return
   }
@@ -944,6 +993,11 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       statusRecebeuEm = ability.statTarget === 'self' ? attacker : target
       if (!silent) anunciarEstagios(world, statusRecebeuEm, mudancas)
     }
+
+    // Foresight/Miracle Eye: sem timer, dura ate `limparEstadoVolatil` (fim da
+    // luta) — ver BaseEntity#revelado.
+    const imunidadeRevelada = REVELA_IMUNIDADE[ability.id]
+    if (imunidadeRevelada) target.revelado = imunidadeRevelada
   }
 
   // CURA PURA (Recover, Synthesis, Soft-Boiled — 10 golpes). Cura sempre o

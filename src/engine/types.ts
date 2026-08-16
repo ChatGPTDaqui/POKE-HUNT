@@ -82,6 +82,11 @@ export interface BaseEntity {
   // nos jogos zeram quando o POKE sai de campo, e a entidade e o que e
   // recriado a cada troca de cena. Ausente = estagio 0 (multiplicador 1).
   estagios: EstagiosDeStat
+  // Foresight/Miracle Eye: remove UMA imunidade de tipo especifica deste alvo
+  // (Fantasma vs Normal/Lutador, ou Sombrio vs Psiquico) e ignora o estagio de
+  // evasao dele, pelo resto da luta — sem timer, so `limparEstadoVolatil` tira.
+  // Ausente = nenhuma das duas foi usada nele ainda.
+  revelado?: 'ghost' | 'dark'
   // Segundos restantes de imunidade a novo status, contados depois que um
   // status sai (cura ou fim natural). Desvio aprovado, ver
   // scripts/usum/status.json#reaplicacao.

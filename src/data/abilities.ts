@@ -99,6 +99,26 @@ export const AOE_RADIUS = 240 // medium/high splash circle around the attacker (
 // keys, so a plain object spread is enough.
 const ALL_ABILITIES_SOURCE = { ...ABILITIES_DATA, ...TYPED_AOE_MOVES }
 
+// Patch por cima do catalogo gerado (Ultra Sun): esses 7 golpes vinham como
+// stub vazio (so type/power/pp/accuracy, sem nenhum efeito real). Sand Attack/
+// Smokescreen/Kinesis baixam Precisao do alvo; Double Team/Minimize sobem a
+// propria Evasao. `accuracy` de cada um continua vindo do dado gerado
+// (Kinesis e 80%, os outros 100%) — este patch so preenche statChanges.
+//
+// FORA DE ESCOPO, DESCARTADO: Minimize nao dobra o dano recebido de golpes
+// contra alvo minimizado nos jogos reais — nao implementado aqui.
+//
+// Foresight/Miracle Eye NAO entram aqui: o efeito deles (ignorar uma
+// imunidade de tipo + a evasao do alvo) e resolvido em combatSystem.ts via
+// `entity.revelado`, fora do vocabulario de statChanges.
+const STAT_CHANGE_OVERRIDES: Partial<Record<string, Pick<Ability, 'statChanges' | 'statChance' | 'statTarget'>>> = {
+  sand_attack: { statChanges: [{ stat: 'accuracy', estagios: -1 }], statChance: 100 },
+  smokescreen: { statChanges: [{ stat: 'accuracy', estagios: -1 }], statChance: 100 },
+  kinesis: { statChanges: [{ stat: 'accuracy', estagios: -1 }], statChance: 100 },
+  double_team: { statChanges: [{ stat: 'evasion', estagios: 1 }], statChance: 100, statTarget: 'self' },
+  minimize: { statChanges: [{ stat: 'evasion', estagios: 2 }], statChance: 100, statTarget: 'self' },
+}
+
 export const ABILITIES: Record<string, Ability> = Object.fromEntries(
   Object.entries(ALL_ABILITIES_SOURCE).map(([key, ability]) => {
     const isAoe = AOE_ABILITY_KEYS.has(key) || ('target' in ability && ability.target === 'aoe')
@@ -106,6 +126,7 @@ export const ABILITIES: Record<string, Ability> = Object.fromEntries(
       key,
       {
         ...ability,
+        ...STAT_CHANGE_OVERRIDES[key],
         target: isAoe ? 'aoe' : 'single',
         radius: isAoe ? AOE_RADIUS : undefined,
         cooldown: cooldownFromPp(ability.pp),
