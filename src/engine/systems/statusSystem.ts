@@ -21,7 +21,25 @@ import {
 } from '@/data/statusEffects'
 import type { StatChange } from '@/data/generated/types'
 import type { Ability } from '@/data/abilities'
+import { traitOf, type TraitId } from '@/data/traits'
 import type { WorldEntity } from '../types'
+
+// Traits que impedem um status especifico de pegar (Fase 12). Cada uma cobre
+// UM status so — nao existe trait "imune a tudo" neste catalogo.
+const TRAIT_STATUS_IMUNIDADE: Partial<Record<TraitId, StatusCondition>> = {
+  immunity: 'poison',
+  limber: 'paralysis',
+  insomnia: 'sleep',
+  vital_spirit: 'sleep',
+  water_veil: 'burn',
+  magma_armor: 'freeze',
+  own_tempo: 'confusion',
+}
+
+function traitBloqueiaStatus(alvo: WorldEntity, tipo: StatusCondition): boolean {
+  const trait = traitOf(alvo.poke.speciesId)
+  return trait != null && TRAIT_STATUS_IMUNIDADE[trait] === tipo
+}
 
 export function statusNaoVolatil(entity: WorldEntity): StatusAtivo | null {
   return entity.poke.status ?? null
@@ -48,6 +66,7 @@ export function statusAtivos(entity: WorldEntity): StatusAtivo[] {
 export function statusVaiPegar(alvo: WorldEntity, tipo: StatusCondition, abilityId?: string): boolean {
   if (alvo.imunidadeDeStatus > 0) return false
   if (ehVolatil(tipo) && alvo.statusVolatil) return false
+  if (traitBloqueiaStatus(alvo, tipo)) return false
   const especie = SPECIES[alvo.poke.speciesId]
   return podeReceberStatus(tipo, {
     tipo1: especie.type,
@@ -74,6 +93,11 @@ export function aplicarStatus(
   // A imunidade de reaplicacao vale pros dois tipos de status: e ela que
   // impede o Antidoto de virar ouro jogado fora num combate que nao acaba.
   if (alvo.imunidadeDeStatus > 0) return null
+
+  // Traits de imunidade (Fase 12): Immunity/Limber/Insomnia/Vital Spirit/
+  // Water Veil/Magma Armor/Own Tempo. Cada uma bloqueia so o SEU status —
+  // ver TRAIT_STATUS_IMUNIDADE no topo do arquivo.
+  if (traitBloqueiaStatus(alvo, tipo)) return null
 
   const especie = SPECIES[alvo.poke.speciesId]
   const podeReceber = podeReceberStatus(tipo, {
@@ -171,6 +195,17 @@ export function curarStatus(entity: WorldEntity, tipo?: StatusCondition): boolea
 export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.statusVolatil = null
   entity.estagios = {}
+  // Fase 12: todo campo volatil novo tem que zerar aqui tambem — fim de
+  // batalha e fim de batalha pra qualquer estado que nao sobrevive a troca de
+  // cena, nao so pra confusao/estagio.
+  entity.enduraAtiva = false
+  entity.protegida = false
+  entity.destinyBondAtiva = false
+  entity.curaBloqueadaAte = 0
+  entity.miraGarantidaAlvoId = null
+  entity.tipoForcado = undefined
+  entity.perishCountdown = null
+  entity.yawnTurnos = null
 }
 
 export interface TickDeStatus {
@@ -178,6 +213,12 @@ export interface TickDeStatus {
   dano: number
   /** Status que sairam sozinhos neste turno (sono acabou, descongelou, ...). */
   expirados: StatusCondition[]
+  /**
+   * Cancao da Perdicao chegou a 0 neste turno (Fase 12) — o chamador
+   * (combatSystem) precisa matar a entidade e creditar o kill/desmaio pelo
+   * mesmo caminho que qualquer outra morte por dano de turno.
+   */
+  pereceu: boolean
 }
 
 /**
@@ -192,6 +233,12 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number): TickDeSta
   if (entity.imunidadeDeStatus > 0) {
     entity.imunidadeDeStatus = Math.max(0, entity.imunidadeDeStatus - dt)
   }
+  // Heal Block (Fase 12): mesmo padrao de decaimento por dt de
+  // `imunidadeDeStatus` acima, so que trava CURA em vez de reaplicacao de
+  // status — ver os pontos de checagem em combatSystem#resolveHit.
+  if (entity.curaBloqueadaAte && entity.curaBloqueadaAte > 0) {
+    entity.curaBloqueadaAte = Math.max(0, entity.curaBloqueadaAte - dt)
+  }
 
   entity.proximoTurnoDeStatus -= dt
   // EPSILON, e nao `> 0`: dez frames de 0.2s somam 1.9999999999999998, nao 2.
@@ -199,7 +246,7 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number): TickDeSta
   // pro frame seguinte por causa de um erro de ponto flutuante — inofensivo
   // num tick, mas e o tipo de coisa que faz um teste de "quantos turnos ate
   // acordar" falhar de forma intermitente.
-  if (entity.proximoTurnoDeStatus > 1e-9) return { dano: 0, expirados: [] }
+  if (entity.proximoTurnoDeStatus > 1e-9) return { dano: 0, expirados: [], pereceu: false }
   entity.proximoTurnoDeStatus += TURNO_SEGUNDOS
 
   const expirados: StatusCondition[] = []
@@ -207,7 +254,16 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number): TickDeSta
 
   const nv = statusNaoVolatil(entity)
   if (nv) {
-    dano += danoPorTurno(nv.tipo, entity.poke.stats.hp)
+    // Poison Heal (Fase 12): em vez de tomar o dano de veneno por turno, CURA
+    // a mesma fracao. Nao entra no `dano` reportado — o chamador
+    // (combatSystem) so aplica dano de verdade, entao a cura acontece direto
+    // aqui, no HP do proprio POKE.
+    if (nv.tipo === 'poison' && traitOf(entity.poke.speciesId) === 'poison_heal') {
+      const cura = danoPorTurno(nv.tipo, entity.poke.stats.hp)
+      entity.poke.hp = Math.min(entity.poke.stats.hp, entity.poke.hp + cura)
+    } else {
+      dano += danoPorTurno(nv.tipo, entity.poke.stats.hp)
+    }
 
     // Congelamento nao tem contador: e um sorteio por turno. Sono tem.
     const chanceDeSair = chanceDeDescongelar(nv.tipo)
@@ -239,7 +295,34 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number): TickDeSta
   // de novo no mesmo instante.
   if (expirados.length) entity.imunidadeDeStatus = SEGUNDOS_DE_IMUNIDADE_APOS_CURA
 
-  return { dano, expirados }
+  // Yawn (Fase 12): sono ATRASADO em 1 turno. `aplicarStatus` (nao um
+  // assignment direto) porque o sono ainda respeita imunidade de trait/
+  // reaplicacao no momento em que realmente pega — exatamente como nos jogos,
+  // onde o Yawn pode "falhar" se o alvo ganhar outro status entre o uso e o
+  // proprio turno de pegar no sono.
+  if (entity.yawnTurnos != null) {
+    entity.yawnTurnos -= 1
+    if (entity.yawnTurnos <= 0) {
+      entity.yawnTurnos = null
+      aplicarStatus(rng, entity, 'sleep', 100)
+    }
+  }
+
+  // Perish Song (Fase 12): contador de 3 turnos rodando pros dois lados que
+  // estavam em campo quando o golpe foi usado (ver combatSystem#resolveHit).
+  // Chegar a 0 mata — o chamador (combatSystem) e quem aplica o dano letal e
+  // credita o kill/desmaio, pelo mesmo caminho que qualquer outra morte por
+  // dano de turno.
+  let pereceu = false
+  if (entity.perishCountdown != null) {
+    entity.perishCountdown -= 1
+    if (entity.perishCountdown <= 0) {
+      entity.perishCountdown = null
+      pereceu = true
+    }
+  }
+
+  return { dano, expirados, pereceu }
 }
 
 export type ResultadoDaAcao =

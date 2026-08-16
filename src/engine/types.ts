@@ -90,6 +90,55 @@ export interface BaseEntity {
   // contador de sono, roll de descongelar). Conta separado do cooldown de
   // acao: um POKE dormindo nao age, mas o sono precisa continuar passando.
   proximoTurnoDeStatus: number
+
+  // --- Fase 12: golpes sem-dano e Traits passivas ----------------------------
+  // Todos volateis (fim de batalha limpa, ver statusSystem#limparEstadoVolatil)
+  // e todos opcionais: entidade que nunca usou/recebeu o efeito correspondente
+  // simplesmente nao tem o campo.
+  /**
+   * Endure usado neste turno: sobrevive com 1 HP se o PROXIMO golpe recebido
+   * mataria. Consumida nesse hit — mate ele ou nao — depois volta a false.
+   */
+  enduraAtiva?: boolean
+  /**
+   * Protect/Detect ativo: bloqueia o proximo golpe recebido que realmente mire
+   * nesta entidade (golpe de auto-alvo, tipo Danca das Espadas ou Recover,
+   * ignora — ver combatSystem#golpeAtingeOAlvo). Consumida no hit bloqueado.
+   */
+  protegida?: boolean
+  /**
+   * Destiny Bond primado neste turno: se esta entidade morrer enquanto isto
+   * for true, quem a matou tambem morre.
+   */
+  destinyBondAtiva?: boolean
+  /**
+   * Segundos restantes de Heal Block: golpe de cura ou dreno positivo nao faz
+   * nada enquanto isto for > 0. Mesmo padrao de decaimento por dt que
+   * `imunidadeDeStatus`, so que trava cura em vez de reaplicacao de status.
+   */
+  curaBloqueadaAte?: number
+  /**
+   * Id do alvo contra quem o PROXIMO ataque desta entidade acerta garantido
+   * (Lock-On/Mind Reader). Consumido no proximo golpe usado contra esse alvo,
+   * independente de precisar do sorteio de precisao.
+   */
+  miraGarantidaAlvoId?: string | null
+  /**
+   * Tipo que Soak forcou sobre esta entidade. Usado NO LUGAR do tipo da
+   * especie so pro calculo de efetividade do dano que ela RECEBE — nao mexe
+   * em STAB nem em imunidade de status.
+   */
+  tipoForcado?: ElementType
+  /**
+   * Turnos restantes ate a Cancao da Perdicao matar esta entidade
+   * (Perish Song). `null`/ausente = sem contador ativo.
+   */
+  perishCountdown?: number | null
+  /**
+   * Turnos restantes ate o sono atrasado de Yawn pegar. `null`/ausente = sem
+   * Yawn pendente nesta entidade.
+   */
+  yawnTurnos?: number | null
 }
 
 export interface PlayerEntity extends BaseEntity {
