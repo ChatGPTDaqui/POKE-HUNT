@@ -20,7 +20,7 @@ import { hpBarFillColor } from '@/data/hpBar'
 import { AURA_COLORS } from '@/data/auraColors'
 import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
 import { impactShapeForType, type ImpactShape } from '@/data/impactShapes'
-import { CAPTURE_ANIM_FRAME_DURATION, captureAnimFrameRect } from '@/data/captureAnim'
+import { captureAnimFrameDuration, captureAnimFrameRect } from '@/data/captureAnim'
 import { vfxDoElemento } from '@/data/elementVfx'
 import { elementoVfxGifUrl } from '@/data/elementVfxGif'
 import { statusVfxUrl } from '@/data/statusVfx'
@@ -724,7 +724,7 @@ const CAPTURE_ANIM_DRAW_WIDTH = 40
 
 function drawCaptureAnim(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
   if (effect.age < effect.delay) return
-  const frameIndex = Math.floor((effect.age - effect.delay) / CAPTURE_ANIM_FRAME_DURATION)
+  const frameIndex = Math.floor((effect.age - effect.delay) / captureAnimFrameDuration(effect.ballItemId!))
   const frame = captureAnimFrameRect(effect.ballItemId!, Boolean(effect.success), frameIndex)
   if (!frame) return
   const img = getOrLoadImage(frame.url)

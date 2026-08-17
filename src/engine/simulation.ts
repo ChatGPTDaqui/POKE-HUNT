@@ -29,7 +29,7 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { randInt, randRange, weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
-import { CAPTURE_ANIM_FRAME_DURATION, captureAnimRowCount } from '@/data/captureAnim'
+import { captureAnimFrameDuration, captureAnimRowCount } from '@/data/captureAnim'
 import { rarityOf, realceDaRaridade } from '@/data/rarity'
 import { formatStatGains } from '@/data/statLabels'
 
@@ -482,7 +482,7 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
         type: 'captureAnim', x: enemy.x, y: enemy.y, targetX: enemy.x, targetY: enemy.y,
         ballItemId: captureResult.ballItemId, success: captureResult.success,
         delay: DEATH_ANIM_GRACE_PERIOD,
-        duration: rowCount * CAPTURE_ANIM_FRAME_DURATION + 0.3,
+        duration: rowCount * captureAnimFrameDuration(captureResult.ballItemId) + 0.3,
       }))
     }
 

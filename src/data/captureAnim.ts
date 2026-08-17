@@ -83,6 +83,24 @@ const CAPTURE_ANIM_FILES: Record<string, { success: string; fail: string }> = {
 
 export const CAPTURE_ANIM_FRAME_DURATION = 0.07 // seconds per frame
 
+// Duracao real medida na ferramenta de sprite do usuario (metadados do
+// object builder pra effect 730/731, a premier ball): 60 frames de 100ms
+// pro sucesso (6000ms), 44 de 100ms pra falha (4400ms) — a planilha que
+// temos so guarda 23/17 linhas (uma amostra reduzida da animacao real, nao
+// as 60/44 completas), entao pra bater com a duracao TOTAL real cada linha
+// precisa segurar mais tempo: 6000/23≈261ms, 4400/17≈259ms — as duas contas
+// batem entre si (~1% de diferenca, indices independentes), 0.07s estava
+// 3.7x rapido demais. Escopado so pra premier_ball por pedido explicito do
+// usuario (testar 1 bola antes de aplicar nas outras 3, que usam o mesmo
+// 0.07 de sempre ate confirmar).
+const CAPTURE_ANIM_FRAME_DURATION_BY_BALL: Record<string, number> = {
+  premier_ball: 0.26,
+}
+
+export function captureAnimFrameDuration(ballItemId: string): number {
+  return CAPTURE_ANIM_FRAME_DURATION_BY_BALL[ballItemId] ?? CAPTURE_ANIM_FRAME_DURATION
+}
+
 export function captureAnimRowCount(success: boolean): number {
   return success ? CAPTURE_ANIM_SUCCESS_ROWS : CAPTURE_ANIM_FAIL_ROWS
 }
