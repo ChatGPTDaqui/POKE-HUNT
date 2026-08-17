@@ -1,328 +1,370 @@
 # 06 — Mundo, hunts e spawn
 
-## Como uma hunt é montada
+> **Este documento foi reescrito por inteiro.** A versão anterior descrevia um desenho de
+> hunts — "1 tipo elemental = 1 bioma" × 9 zonas de 10 níveis × recorte por região
+> (Johto/Kanto) — que o próprio código já chama de "o desenho antigo" e que foi **substituído**
+> pelo sistema de biomas/sub-biomas/salas abaixo. Manter aquela versão como se fosse atual
+> seria pior que não ter documento nenhum: alguém tomaria decisão de balanceamento em cima de
+> uma arquitetura que não roda mais. Ver [13](13-divergencias-conhecidas.md) para o registro
+> dessa classe de erro ("sistema inteiro faltando/trocado", não só constante desatualizada).
 
-Três camadas empilhadas, cada uma resolvendo um problema que a anterior não resolvia:
+## Como uma hunt é montada hoje
+
+Tudo em `src/data/huntSpawnOverrides.ts`, `biomas.ts` e `spawnStrength.ts`, em runtime:
 
 ```
-1. TIPO ELEMENTAL define o BIOMA        (scripts/sync-planilha.js#TYPE_BIOME_PLAN)
-2. REGIÃO separa o elenco               (src/data/regions.ts)
-3. FORÇA define em que ZONA cada um cabe (src/data/spawnStrength.ts)
+1. BIOMA (12) agrupa sub-biomas tematicamente     (data/biomas.ts)
+2. FAIXA (3) recorta a faixa de nível              (data/biomas.ts#FAIXAS)
+3. FORÇA decide em que faixa cada espécie cabe     (data/spawnStrength.ts)
+4. SALA sorteia qual sub-bioma está ativo agora    (engine/systems/salaSystem.ts)
 ```
 
-O resultado final é montado em `src/data/huntSpawnOverrides.ts`, em runtime.
+12 biomas × 3 faixas = **36 hunts**, mais a inicial (`route_46`), mais o espelho do Modo
+Pesadelo (mesma composição, nível +100), mais as 11 hunts BOSS + a do Campeão Lance (elenco
+próprio, fora do pipeline de biomas).
 
-## Camada 1 — um tipo elemental, um bioma
+### O que isto substituiu, e por quê
 
-Antes, sete biomas "empacotados" de 2 a 3 tipos cada (`Sombrio` = GHOST + DARK + POISON) eram
-rotacionados por `BIOME_ORDER[(seed*2) % 7]`, e cada faixa de 10 níveis só testava contra os
-dois biomas sorteados para ela.
+Antes eram **69 hunts**: 1 tipo elemental = 1 bioma (`scripts/sync-planilha.js#TYPE_BIOME_PLAN`)
+× 9 zonas de 10 níveis (`zonaMinimaDaEspecie` como eixo de força *entre* zonas) × recorte por
+região. Duas partes desse desenho não sobreviveram ao elenco real (209 espécies alocadas nos
+12 biomas atuais):
 
-**Duas falhas somadas, e a segunda apagava espécies do jogo:**
+- **O recorte por região esvaziava hunt.** 12 dos 33 sub-biomas de então ficariam com menos de
+  3 espécies numa das duas regiões — Praia e Dojo sem **nenhuma** espécie de Johto, Floresta
+  Nevada sem **nenhuma** de Kanto.
+- **A escada de 9 zonas não sobrevivia ao elenco.** Medido: a zona 2 ficava **vazia** em 11 dos
+  12 biomas. Nove degraus sobre esse dado produziam hunts de uma espécie só.
 
-1. `allSpeciesKeys` (a lista final de espécies sincronizadas) vinha das hunts **depois** do
-   corte por bioma. Espécie cujo bioma não batesse com a única faixa em que estava listada
-   não ficava só sem spawn — **desaparecia inteira**. Medido: DRATINI, DRAGONAIR e DRAGONITE
-   não existiam em `pokes.generated`; só 137 das ~226 espécies esperadas estavam
-   sincronizadas.
-2. Tipo populoso empacotado com tipo raro fazia o preenchimento esgotar as vagas no maior
-   antes do menor: `Mistico` sempre enchia com PSYCHIC (13 espécies, Pokedex baixo) antes de
-   DRAGON (3 espécies, Pokedex alto) ganhar uma vaga.
+`src/data/regions.ts` (`regionOfSpecies`) continua existindo, mas só serve o filtro de
+Continente do Bestiário/Pokedex — **não separa mais hunt nenhuma**. Uma hunt de bioma hoje
+mistura Johto e Kanto livremente.
 
-Hoje: `TYPE_BIOME_PLAN` é uma **tabela explícita e auditável**, não rotação por aritmética
-modular — que era a causa raiz.
+## Camada 1 — bioma e sub-bioma
 
-Os 17 tipos reais deste dataset Gen 2 (não existe Fada/Fairy, que é da Gen 6; a lista de "18
-tipos" do pedido original foi conferida contra a planilha e ajustada, sem inventar tabela de
-tipos para tipo inexistente):
+`src/data/biomas.ts#BIOMAS`: 12 biomas, cada um com 1 a 4 sub-biomas. Cada sub-bioma carrega:
 
-| Grupo | Biomas |
+| Campo | Para quê |
 |---|---|
-| Natureza | Floresta (GRASS), Bosque (BUG), Costa + Profundezas (WATER, ×2), Geleira (ICE) |
-| Físico | Planície (NORMAL), Dojo (FIGHTING), Penhascos (FLYING), Deserto (GROUND), Caverna (ROCK), Fábrica (STEEL) |
-| Místico | Vulcânico (FIRE), Usina (ELECTRIC), Torre Mística (PSYCHIC), Cemitério (GHOST), Covil Sombrio (DARK), Pântano (POISON), Ruínas Ancestrais (DRAGON) |
+| `peso` | Chance relativa de uma sala cair nele, dentro do bioma (10 = corriqueiro, 3 = raro) |
+| `loot` | Um de 4 perfis (`LOOT`): `basico`, `civilizado`, `remoto`, `profundo` — antes toda hunt dropava exatamente `potion 15% / poke_ball 10%`, hoje o loot diz algo sobre o lugar |
+| `bg` | Fundo próprio, só quando difere do bioma-pai (ausente = herda) |
 
-WATER ganhou a vaga extra (Costa cedo, Profundezas no fim) por ser disparado o tipo mais
-populoso do elenco com arte (40 espécies). As duas metades saem por `baseExp` ascendente, não
-aleatório.
+`quem aparece` em cada sub-bioma vem de `data/generated/subBiomas.generated.ts`, derivado das
+pools do PokeRogue (`npm run subbiomas:gerar`) — **dado gerado**, não escrito à mão; só o
+agrupamento temático, peso e loot são decisão de design.
 
-### Tipo com poucos membros ganha reforço por tipagem dupla
+Pedras (`data/stones.ts`) ficam fora do loot por sub-bioma: caem por um roll universal de 20%
+por abate, tipo primário do inimigo (`economySystem.ts#awardKillLoot`), não por hunt.
 
-`MIN_TYPE_POOL = 4`. Abaixo disso, o pool é reforçado com espécies cuja tipagem
-**secundária** bate o tipo (Magnemite e Scizor reforçam Fábrica/STEEL sendo ELECTRIC/BUG
-primário).
+## Camada 2 — faixa
 
-Caso extremo: **FLYING não tem nenhuma espécie com tipo primário Voador neste dataset.** É
-fato real — nenhum Pokémon de Gen 1/2 tem Flying como tipo 1. Penhascos existe inteiramente
-via tipagem secundária (Pidgey, Zubat, Charizard, Dodrio…), com 31 candidatos cortados em 16
-por `TYPE2_FALLBACK_CAP`.
+`src/data/biomas.ts#FAIXAS`, 3 faixas fechadas de nível, teto Lv 90:
 
-A duplicação (mesma espécie na hunt do tipo primário e numa de reforço do secundário) é
-intencional e é a única forma de Penhascos, Fábrica e Ruínas Ancestrais terem população que
-valha a visita.
-
-### População vem do elenco real, não de listas escritas por faixa
-
-`buildTypeRoster()` varre a aba inteira de espécies (National Dex #1-251) e inclui **toda**
-espécie com arte real (`assets/battle-sprites/{id}/`) que não seja lendária (BOSS-only) nem
-um dos 3 iniciais base (Charmander, Squirtle, Bulbasaur seguem exclusivos da tela de escolha
-— só as formas **evoluídas** viram POKE selvagem).
-
-Isso substituiu listas manuais por faixa, em que cada espécie aparecia numa faixa só, sem
-fallback se aquela faixa não desse match de bioma — o que causou o bug do Dragão.
-
-`reportTypeCoverage()` roda no fim do sync e imprime, por tipo, quantas espécies primárias
-existem contra quantas spawnam, avisando se alguma ficar sem hunt. Troca "espero que a
-rotação cubra tudo" por checagem real a cada sync.
-
-## Camada 2 — região
-
-Pedido: "apenas Pokémon de Johto nas hunts de Johto; o mesmo vale para Kanto".
-
-**Filtrar o array esvaziava hunts.** Medido antes de mexer: filtrar pelo rótulo `continent`
-existente deixaria **3 hunts vazias e ~100 espécies sem lugar nenhum**, porque o dado real
-não coopera:
-
-- Johto não tem **nenhuma** espécie POISON nem DRAGON primária, e tem 1 FIGHTING e 1 GHOST.
-- Kanto não tem **nenhuma** DARK nem STEEL primária — os dois tipos só existem a partir da
-  Gen 2.
-
-Solução: **cada bioma existe nas duas regiões.** A hunt original mantém id, nome e nível e
-fica com a região do rótulo; a região oposta ganha uma hunt irmã (`${id}_${regiao}`, mesmo
-bioma, mesma faixa).
-
-Resultado: nenhuma hunt vazia, **zero espécie órfã**. Única combinação descartada:
-Kanto + DARK, que não existe.
-
-`src/data/regions.ts` extrai o número da Pokedex de `species.description` ("Pokedex Nº4"),
-que o sync já emite — em vez de uma segunda tabela de 226 linhas que divergiria no primeiro
-sync. **Estoura** se alguma espécie não casar: uma espécie sem número viraria "Johto" em
-silêncio.
-
-`NON_WILD_SPECIES` = porygon, porygon2, eevee (cassino e presente). Lista explícita e curta:
-derivar de `spawn-tiers.json#origem === 'regra'` pegaria as 94 sem encontro selvagem real e
-esvaziaria metade das hunts.
-
-`HUNT_BIOME` tem 18 linhas escritas à mão porque **o tipo do bioma não viaja no dado
-gerado** — ele vive em `TYPE_BIOME_PLAN` no sync e some na emissão. Hunt gerada sem entrada
-aqui **estoura no boot**, o que é o comportamento certo.
-
-**Consequência assumida:** cada região passa a ter escada completa de nível. O portão do
-Campeão Lance continua valendo — ele libera o continente Kanto inteiro, ou seja, metade do
-elenco.
-
-## Camada 3 — força define a zona
-
-Sem um eixo de força, toda espécie de tipo GRASS — do Bellsprout ao Venusaur — caía na mesma
-hunt de Lv 1-10, porque Floresta é a zona de GRASS. Medido antes:
-
-| Hunt | Faixa | Tinha |
+| Faixa | Níveis | `zonaMaxima` |
 |---|---|---|
-| Johto Zona 0 · Bosque | Lv 1-10 | Scizor (500), Heracross (500) |
-| Kanto Zona 0 · Bosque | Lv 1-10 | Scyther (500), Pinsir (500) |
-| Johto/Kanto Zona 0 · Floresta | Lv 1-10 | Meganium / Venusaur (525) |
-| Kanto Zona 1 · Costa | Lv 11-20 | Gyarados (540), Lapras (535), Blastoise (530) |
-| **Johto Zona 2 · Caverna** | **Lv 21-30** | **Tyranitar (600)** |
+| I | 1–30 | 2 |
+| II | 31–60 | 5 |
+| III | 61–90 | 8 |
 
-"Tirar o Scizor da lista" não resolve: sem um segundo eixo, ele ou fica no começo ou some do
-jogo.
+Acima de Lv 90 é Modo Pesadelo (+100, piso 150) e hunts BOSS (Lv 300) — nunca faixa normal.
 
-`zonaMinimaDaEspecie(speciesId)` = máximo entre a faixa de BST e um piso por estágio de
-evolução.
+`FAIXAS_INICIAIS = ['faixa1', 'faixa2']` nascem abertas. `GRUPOS_DO_LANCE = ['faixa3',
+'nightmare']` são liberados de uma vez ao derrotar o Campeão Lance (`boss_lance`, time Lv
+55–65 — exatamente o fim da faixa II).
 
-| BST mínimo | Zona | Faixa | Exemplos |
-|---|---|---|---|
-| 525 | 7 | Lv 71-80 | Tyranitar, Dragonite, Snorlax, Venusaur |
-| 475 | 5 | Lv 51-60 | Scizor, Heracross, Gengar, Machamp |
-| 425 | 3 | Lv 31-40 | primeiro degrau acima de 30 |
-| 350 | 1 | Lv 11-20 | — |
-| 0 | 0 | Lv 1-10 | — |
+`GRUPOS_LEGADOS` (`Set(['johto', 'kanto', 'nightmare'])`) — grupos do desenho por-região
+antigo. Save/linha de `players.unlocked_continents` que ainda os carrega é traduzido na
+carga, nunca propagado: `'kanto'` vira o que o Lance libera hoje, os outros dois somem. Manter
+`'nightmare'` sem tradução daria de graça o conteúdo que virou gate do Lance.
 
-Os cortes saem da distribuição real do elenco (226 espécies): 300-349 é a moda (49), 450-499
-vem atrás (41), e só 14 passam de 550. São os degraus onde a população muda de patamar, não
-números redondos.
+## Camada 3 — força define a zona mínima dentro da faixa
 
-`PISO_POR_ESTAGIO = [0, 0, 1, 2]` — 3ª evolução nunca abaixo da zona 2. Existe porque BST
-sozinho deixa passar forma final fraca: Butterfree e Beedrill (395) são 3ªs evoluções e
-cairiam na Zona 1 junto com o Caterpie que virou eles.
+Sem um eixo de força **dentro** de cada bioma, toda espécie de um tipo caía junto — do
+Bellsprout ao Venusaur na mesma faixa de Mata. `src/data/spawnStrength.ts#zonaMinimaDaEspecie`
+é esse eixo: não move a espécie de bioma (quebraria a coerência temática), diz a partir de que
+**zona interna** ela pode nascer.
 
-`ZONA_MINIMA_DOS_FORTES = 3` — exportado para o teste, para não repetir o corte em dois
-lugares.
+| BST mínimo | Zona | Exemplos |
+|---|---|---|
+| 525 | 7 | Tyranitar, Dragonite, Snorlax, Venusaur |
+| 475 | 5 | Scizor, Heracross, Gengar, Machamp |
+| 425 | 3 | primeiro degrau acima de Lv 30 |
+| 350 | 1 | — |
+| 0 | 0 | — |
 
-### A hunt nova nasce sozinha
+Cortes tirados da distribuição real do elenco (226 espécies): 300–349 é a moda (49), 450–499
+vem logo atrás (41), só 14 passam de 550 — não são números redondos, são os degraus onde a
+população muda de patamar. `ZONA_MINIMA_DOS_FORTES = 3` (exportada para o teste, `especieForte`)
+é o piso pedido explicitamente: BST ≥ 425 nunca aparece antes de Lv 30.
 
-`huntSpawnOverrides` agrupa o pool por `max(zona do bioma, zona mínima da espécie)` e emite
-uma hunt por balde. **"Johto Zona 5 · Bosque" existe porque Scizor e Heracross precisam de
-casa** — ninguém escreveu essa hunt. Resultado: 36 → 69 hunts normais, e o bioma continua
-sendo o do tipo primário (Scizor não virou POKE de Floresta).
+`PISO_POR_ESTAGIO = [0, 0, 1, 2]` (indexado por `evolutionStage`) — BST sozinho deixa passar
+forma final fraca: Butterfree e Beedrill (395) são 3ªs evoluções e cairiam na zona 1, junto
+com o Caterpie que virou eles.
 
-Três regras que não são arbitrárias:
+Uma espécie só entra na hunt cuja faixa alcança a `zonaMaxima` necessária —
+`trechosDaLinha()` filtra por `zonaMinimaDaEspecie(atual) <= faixa.zonaMaxima`.
 
-1. **A zona base do bioma sempre sai como hunt própria**, mesmo com pool pequeno. É ela que
-   carrega o id histórico (`lv_1_10_bosque`), e esse id aparece em `unlocked_maps` e em
-   `game_sessions.map_id`. As zonas novas ganham sufixo (`_z5`), nunca o contrário.
-2. **Balde magro (< `MIN_POOL_ZONA_AVANCADA` = 3) é fundido com o de cima**, subindo o nível
-   de quem foi absorvido — nunca descendo. `zonaMinimaDaEspecie` é um **piso**: descer
-   devolveria para a hunt cedo exatamente quem foi tirado de lá. Sem essa fusão davam 78
-   hunts, várias com uma espécie só.
-3. **A sobra do topo vira hunt própria mesmo com uma espécie.** Fundir para baixo apagaria a
-   hunt cedo do bioma. Uma hunt de um POKE só (Tyranitar na Zona 7 da Caverna) é conteúdo
-   legítimo: é o dado real de Johto ter poucas espécies ROCK.
+## Uma linha evolutiva, estágios em faixas disjuntas
 
-## Zonas: o nome mentia sobre o nível
+Uma faixa cobre 30 níveis. Jogar a linha evolutiva inteira dentro dela produzia absurdo:
+medido, **228 pares espécie × hunt** em que a espécie já deveria ter evoluído (Caterpie, que
+evolui no nível 7, nascendo Lv 60 na faixa I).
 
-**Bug real e grave.** Medido no dado gerado, antes:
+Corrigido: cada **estágio** entra só na sub-faixa de nível em que ele é o estágio correto, e
+essas sub-faixas não se sobrepõem (`huntSpawnOverrides.ts#trechosDaLinha`):
 
-| Nome | Spawnava |
-|---|---|
-| "Zona Nivel 1-10 (Floresta)" | Lv 2-12 |
-| "Zona Nivel 11-20 (Planicie)" | Lv 10-18 |
-| **"Zona Nivel 31-40 (Vulcanico)"** | **Lv 15-51** |
+```
+linha Caterpie na faixa I  (Lv 1-30):  Caterpie 1-6 | Metapod 7-9 | Butterfree 10-30
+linha Pidgey   na faixa II (Lv 31-60): Pidgeotto 31-35 | Pidgeot 36-60
+```
 
-O nome vinha do bracket nominal do sync (agrupamento por nível médio) e o `levelRange` vinha
-do min/max real das espécies agrupadas — dois números de origens diferentes que ninguém
-cruzava.
+`nivelDeTroca(speciesId)` decide o corte: evolução por nível usa `species.evolvesAtLevel`
+normal; as 9 evoluções **especiais** (ex-troca: Kadabra→Alakazam, Onix→Steelix…, ver
+[05](05-regras-de-negocio.md)) carregam `evolvesAtLevel = 80` — a regra do JOGADOR (Nível 80 +
+20 Pedras), sem sentido para o selvagem. Para essas, o gatilho selvagem é a própria
+**força**: a forma evoluída aparece a partir da primeira faixa cuja `zonaMaxima` alcança
+`zonaMinimaDaEspecie(alvo)`.
 
-Corrigido fixando a faixa **primeiro** e derivando tudo dela: `ZONA_POR_HUNT` (tabela
-explícita, ao lado de `HUNT_BIOME`) declara o número de cada hunt, a faixa é
-`[n × 10 + 1, n × 10 + 10]` (`NIVEIS_POR_ZONA` = 10), e nome, cartão e spawn saem da mesma
-fonte. Nome final: `Johto Zona 3 · Vulcânico`.
+**Bug real achado por isso**: `zonaMinimaDaEspecie('scyther') === zonaMinimaDaEspecie('scizor')
+=== 5`, então o gatilho de troca caía exatamente em Lv 31 — a faixa de Scyther virava `[1, 30]`,
+vazia bem onde ele deveria aparecer. Corrigido: a forma evoluída (ex-troca) fica pelo menos
+**uma faixa acima** da origem (`Math.max(zonaMinimaDaEspecie(alvo), zonaMinimaDaEspecie(origem)
++ 1)`), nunca na mesma.
 
-**Consequência assumida:** nove zonas contíguas de dez níveis cobrem Lv 1-90, então o teto
-das hunts normais é Lv 90. Conteúdo acima disso vive no Modo Pesadelo e nas hunts BOSS.
+Duas consequências que são o ponto, não efeito colateral:
 
-## A hunt inicial
+- Nenhum nível absurdo, em nenhuma faixa.
+- O peso de spawn continua sendo o `spawn_tier` real do Gen 1/2 do **próprio estágio**. A
+  alternativa (auto-evoluir no spawn, como o PokeRogue faz) faria o Gyarados herdar o peso
+  `muito_comum` do Magikarp — ver [02](02-dados-e-catalogo.md#tier-de-spawn-por-que-o-peso-deixou-de-ser-catchrate).
 
-`STARTER_HUNT_ID` = `route_46`, elenco curado à mão, fora do sistema de biomas.
+## A hunt vira salas
 
-`STARTER_HUNT_SPECIES` = `sentret`, `hoothoot`, `rattata` — os três NORMAL.
+Uma hunt não é mais um único mapa fixo: é percorrida em **`SALAS_POR_HUNT` = 10 salas**
+(`biomas.ts`), cada uma um sub-bioma sorteado (com reposição, ponderado por `peso`) do bioma
+daquela hunt — `engine/systems/salaSystem.ts#sortearSala`.
 
-**Rattata é de Kanto e a hunt é de Johto.** É a única exceção deliberada à regra de região,
-nomeada no pedido. O teste de região exclui a hunt inicial explicitamente.
+### Por que quota de abates, e não "zerar o campo"
 
-`STARTER_LEVEL_WEIGHTS`: 80% Lv1 / 20% Lv2. Uniforme daria 50/50.
+O servidor é a autoridade e simula por **janelas**: a cada flush (~30s) reconstrói o mundo do
+zero com `buildMapWorld` (ver [04](04-autoridade-do-servidor.md)). O inimigo em campo **não**
+sobrevive de uma janela para outra — um contador sobrevive. "Limpar a sala" como "zerar o campo"
+seria uma condição que o servidor nunca observaria inteira, e a hunt travaria na sala 1 para
+sempre.
 
-O cartão da hunt não lista espécie, então um sync futuro poderia devolver Ledyba para lá sem
-ninguém notar — por isso o elenco exato é trancado por teste.
+`ABATES_POR_SALA = 30` fecha a quota (`registrarAbate`, chamado do **único** ponto de abate do
+motor — vale igual no combate ao vivo, no catch-up de aba oculta e no farm offline).
 
-## Nível ponderado
+### Sorteio no avanço, não plano antecipado
 
-`HuntEncounter.levelWeights?: { level, weight }[]`. `spawnEnemyAt` usa `weightedPick` quando
-presente, senão o `randInt` uniforme. Único uso hoje: a hunt inicial.
+A próxima sala é sorteada **quando a quota fecha**, não como um plano de 10 salas na abertura
+da hunt. Um plano teria que ser mandado (o jogador leria "sala 7 é a boa" e faria reroll
+grátis saindo/entrando) ou escondido (o cliente não teria o que mostrar). Sorteando no
+avanço, o futuro simplesmente não existe para ser espiado — o único estado a persistir é a
+sala **atual** (`ProgressoDaSessao#sala`, atravessa reconstrução de janela como
+`sequenceIndex` do Lance).
 
-## Spawn ponderado por raridade de encontro
+O anti-reroll que sobra é o custo: sair da hunt fecha a sessão, e voltar recomeça no ciclo 1,
+sala 1.
 
-`encounter.weight` é o peso do **tier de spawn**, derivado da chance real de encontro
-selvagem da Gen 1/2 — ver [02](02-dados-e-catalogo.md#tier-de-spawn-por-que-o-peso-deixou-de-ser-catchrate).
+### Transição com contagem regressiva — "Entrando em nova área"
 
-`spawnEnemyAt` sorteia do `enemyPool` com `weightedPick`, não uniforme. O menu de hunts usa o
-mesmo peso para mostrar a porcentagem real, não `1 / poolSize`.
+Fechar a quota **não troca de sala na hora**. `registrarAbate` sorteia a próxima sala de
+imediato (o "carregamento" adiantado — mundo estático, sem I/O real, mas resolve o RNG e
+decide pool/loot da sala seguinte enquanto o overlay cobre a tela) e arma
+`world.salaCountdownRemaining = SALA_TRANSITION_COUNTDOWN` (3s). `stepWorld` congela
+movimento/combate enquanto ela conta — mesmo padrão do `countdownRemaining` de intro do
+Campeão Lance, só disparado no **meio** da hunt em vez de na entrada.
 
-Constantes de posicionamento: `SPAWN_MIN_DISTANCE` = 250 (do jogador), `SPAWN_MARGIN` = 60,
-`SPAWN_POINT_MAX_ATTEMPTS` = 40.
+Ao zerar, `aplicarTransicaoDeSala` troca `world.sala` para a pendente, reavalia
+`mapDefParaSala` (mapa/colisão da nova sala) e **zera** `enemies`/`effects`/`pendingHits` —
+"área nova do zero" é literal, não um filtro do que sobrou da sala anterior. `stepWorld`
+então faz o spawn inicial da sala nova no mesmo tick em que a contagem chega a zero.
+`SalaCountdownModal` (componente React) cobre o campo com "Entrando em nova área..." e a
+contagem 3-2-1 enquanto isso corre.
 
-## Terceiras evoluções em 0,2%
+Sem o congelamento, um inimigo que sobrasse da sala anterior (`maxEnemies > 1`) continuaria em
+campo com espécie fora do pool novo até morrer por conta própria — era assim antes desta leva
+(filtro por `permitidas.has(speciesId)` em vez de reset total).
 
-`SHARE_TERCEIRA_EVOLUCAO = 0.002` em `huntSpawnOverrides`.
+### Loot e janela de nível por sala
 
-A conta sai do peso dos **outros**, não de um número absoluto (`weightedPick` usa
-`peso / soma`): com N espécies fixadas em `s` cada e soma `S` no resto,
-`w = s × S / (1 - N × s)`.
+- **Loot ativo**: o perfil (`LOOT[sub.loot]`) do sub-bioma da sala atual; sem sala (hunt sem
+  sistema de salas), o da hunt inteira (`lootAtivo`).
+- **Janela de nível**: `janelaDaSala(faixa.niveis, sala.indice)` divide a faixa (30 níveis) em
+  10 degraus — sala 1 na base, sala 10 no topo. **Bug real que isto corrige**: sem janela, a
+  primeira sala de uma faixa de 30 níveis já podia jogar um POKE Lv 30 contra quem acabou de
+  sair do Hospital. Medido no motor headless: um Charmander Lv 25 morreu em 4 abates em 30
+  minutos de simulação; com a janela, fez 114 abates e chegou à sala 10. Dá à mecânica de
+  salas um segundo papel além da variedade de sub-bioma: a hunt afunda conforme o jogador
+  avança.
 
-"3ª evolução" sai de `SPECIES`, **não** de `SPECIES_DATA` (`data/evolutionStage.ts`): as 9
-cadeias de evolução por troca não existem na planilha, são costuradas em tempo de load.
-Contando pelo dado cru, Alakazam, Machamp, Gengar, Steelix, Scizor, Kingdra, Golem, Politoed
-e Porygon2 apareceriam como forma **base**.
+### Hunts sem sistema de salas
 
-### `LIMITE_ZONA_DE_FINAIS = 0.5`
+`temSalas(mapId)` = `POOL_POR_SALA[mapId] != null`. A hunt inicial, as 11 BOSS e a do Campeão
+Lance ficam de fora — elenco curado à mão ou lendário único, sala não faz sentido para
+nenhuma delas.
 
-A regra dos 0,2% foi criada quando forma final era sempre minoria num pool misturado. Com as
-zonas por força isso deixou de valer: "Johto Zona 7 · Costa" tem Politoed, Feraligatr, Kingdra
-e Octillery — fixar três em 0,2% dava **99,4% para o Octillery**. A zona criada para abrigar
-as formas finais viraria uma fazenda de Octillery.
+## Wall-block por sub-bioma (colisão pintada à mão)
 
-Com metade ou mais do pool em formas finais, a hunt **é** uma zona de finais e quem manda é o
-tier de encontro real. O espírito do pedido ("forma final tem que ser rara") continua valendo
-onde ela é a exceção.
+`src/data/maps.ts#mapDefParaSala` troca a grade de colisão pela do **sub-bioma da sala atual**,
+não a do bioma inteiro — diferente do body-block antigo (por hunt inteira, via `bg.image`),
+necessário porque agora o sub-bioma muda várias vezes dentro da mesma hunt.
 
-Hunts BOSS ficam de fora: lá o elenco **é** a luta, e 0,2% por Dragonite significaria 99,8%
-de nada aparecer.
+Fonte: `scripts/build-sub-bioma-collision.js`, 18 referências pintadas à mão
+(`scripts/body-block-refs/*.png`, fora de `assets/` **de propósito** — mantém 111MB de
+imagem-referência fora do bundle de produção, que só copia tudo sob `assets/`, ver
+`scripts/copiar-assets.mjs`). Dois modos de leitura, por entrada do manifesto:
+
+- **`vermelho_bloqueia`** (só `abismo.png`, o desenho mais antigo): vermelho = parede,
+  qualquer outra cor = andável.
+- **`rosa_anda`** (as outras 17): pintura lilás/rosa é o **único** lugar andável/spawnável —
+  tudo o resto bloqueia. Convenção invertida da anterior; ambas coexistem via um campo `modo`
+  por entrada, para não arriscar quebrar `abismo.png` (já testada) só por unificar convenção.
+
+A grade resultante (`SUB_BIOMA_COLLISION[chave]`, gerada) tem `colisaoDefineLimite: true` — o
+retângulo INTEIRO da grade é o limite real (a pintura já é a fronteira), então
+`mapWalkRadius` devolve o raio que inscreve o retângulo inteiro (nunca corta a grade), ao
+contrário do círculo inscrito na menor dimensão que toda outra hunt usa. Fora da grade conta
+como bloqueado (não o comportamento leniente das grades antigas por-hunt) — sem isso, spawn
+ou wander podia levar entidade (inclusive o jogador) para fora da área pintada, gerando
+perseguição impossível.
+
+`isCellBlocked`/`nearestOpenPoint` (`maps.ts`) são compartilhados por: construção inicial do
+mundo (`buildMapWorld`, snap se o `playerSpawn` cair em célula bloqueada), e troca de sala em
+andamento (`salaSystem.ts#aplicarTransicaoDeSala`, mesmo snap para jogador **e** inimigos —
+sem isso, uma entidade podia herdar uma célula cercada por 8 vizinhos também bloqueados e
+ficar presa, já que nem A* nem `slideToward` escapam de "começar dentro da parede").
+
+A hunt inicial (`route_46`, fora do sistema de salas) reusa a grade pintada de `forest`
+(mesma arte de fundo) — sem esse fallback explícito em `mapDefParaSala`, ela nunca ganharia
+wall-block nenhum apesar de ter referência pintada própria.
+
+## Spawn: distância média e cone de visão
+
+Pedido explícito: POKE selvagem só nasce a **média distância** e dentro do **cone de visão**
+do jogador — a direção para onde ele está virado (`player.facing`, mantido pelo
+`movementSystem`) — para dar a sensação de "explorar" o mapa em vez de tudo aparecer ao redor
+de onde o jogador já está parado.
+
+`engine/simulation.ts#randomSpawnPoint`: sorteia um ângulo dentro de
+`±SPAWN_CONE_HALF_ANGLE` (~55°, cone total ~110°) a partir de `facing`, e uma distância entre
+`SPAWN_CONE_MIN_DISTANCE` (250) e `SPAWN_CONE_MAX_DISTANCE` (550) — nunca colado no jogador,
+nem no fim do mapa. Até `SPAWN_POINT_MAX_ATTEMPTS` tentativas descartando pontos fora do raio
+caminhável ou em célula bloqueada.
+
+**Fallback, não substituição**: sem tentativa bem-sucedida (corredor de body-block estreito
+demais para caber a faixa/ângulo pedidos), ou sem jogador ainda disponível, cai no sorteio
+antigo (`randomSpawnPointFullMap`, raio do mapa inteiro, sem depender de para onde o jogador
+olha) — um mapa apertado deixar de spawnar qualquer inimigo seria pior que nascer fora do
+cone.
+
+## Raio de AOE = raio de agressão selvagem
+
+`src/data/huntTypes.ts#WILD_AGGRO_RADIUS = 175` — o raio em que um POKE selvagem nota e vem
+para cima do jogador (`engine/entity.ts#createEnemyEntity`,
+`AGGRO_RADIUS_MULTIPLIER = 1`, sem boost). Hardcoded como `aggroRadius: 175` nos 3 pontos que
+constroem `HuntEncounter` (`huntSpawnOverrides.ts`, `nightmareMaps.ts` × 2) — `WILD_AGGRO_RADIUS`
+existe para `data/abilities.ts#AOE_RADIUS` ter uma fonte compartilhada em vez de reescrever o
+mesmo número mágico uma 4ª vez, não porque os 3 pontos o importam hoje.
+
+Pedido explícito: raio de golpe AOE = raio de agressão do selvagem. `AOE_RADIUS =
+WILD_AGGRO_RADIUS` — ver [03](03-motor-de-simulacao.md#combate-combatsystemts) para o resto
+do pipeline de dano.
 
 ## Modo Pesadelo e hunts BOSS
 
-`src/data/nightmareMaps.ts`, gerado em **runtime** — fora do pipeline de sync, portanto
-seguro contra o próximo `planilha:aplicar`. **Totalmente grátis**, sem gate nem custo.
+`src/data/nightmareMaps.ts`, gerado em **runtime** — fora do pipeline de sync, seguro contra
+o próximo `npm run planilha:aplicar`. **Totalmente grátis**, sem gate nem custo.
 
-`buildNightmareMirror(maps, encounters)` clona as hunts normais (exceto as BOSS) com
-`id: nightmare_${id}`, nome + " (Pesadelo)", `continent: 'nightmare'`, e nível deslocado por
-`shiftLevel(level) = max(level + 100, 150)`.
+`buildNightmareMirror(maps, encounters)` recebe as 37 hunts normais **já montadas** (bioma ×
+faixa + inicial) e clona cada uma com `id: nightmare_${id}`, `continent: 'nightmare'`, nível
+deslocado por `shiftLevel(level) = max(level + 100, NIGHTMARE_MIN_LEVEL)` (piso 150 — a hunt
+mais fraca, Lv 1–2, só chegaria a Lv 102 com o offset plano). Recebe por parâmetro em vez de
+ler dado bruto: espelhar o dado errado congelaria composição antiga.
 
-O piso de 150 existe porque a hunt mais fraca (Lv 1-2) só chegaria a Lv 102 com o offset.
+**Bug real, achado por teste**: o espelho deslocava `minLevel`/`maxLevel` mas não os
+`levelWeights` (o sorteio de nível de fato, quando existem — `spawnEnemyAt` os prefere ao
+`randInt`). O Pesadelo da hunt inicial anunciava Lv 150 e spawnava POKE de nível 1 e 2 — a hunt
+mais difícil do início do jogo era a mais fácil dele. `hunts.test.ts` trava faixa por
+encontro **e** por `levelWeights`.
 
-**Bug irmão, achado pelo teste:** o espelho deslocava `minLevel`/`maxLevel` mas **não** os
-`levelWeights` — que são o sorteio de nível de fato quando existem. O Pesadelo da hunt
-inicial anunciava Lv 150 e spawnava nível 1 e 2: a hunt mais difícil do começo era a mais
-fácil dele.
+Hunts BOSS: 11 (uma por lendário, `data/legendaries.ts#LEGENDARY_SPECIES_IDS`), `maxEnemies:
+1`, `noRespawn: true`, nível fixo 300, sem loot. `noRespawn` também é o que marca "sem rede de
+segurança" para o `autoSystem` — ver [05](05-regras-de-negocio.md#automação).
 
-`buildNightmareMirror` recebe os mapas por parâmetro. Antes tirava de `MAPS_DATA` cru, o que
-congelaria a composição misturada antiga **e** deixaria as hunts novas sem espelho.
-
-`BOSS_MAPS_DATA` / `BOSS_ENCOUNTERS_DATA` são exportados separados: BOSS e Lance não dependem
-das hunts normais.
-
-Hunts BOSS: 11 (uma por lendário), `maxEnemies: 1`, `noRespawn: true`, encontro fixo em
-nível 300. O respawn do mundo respeita `!world.mapDef.noRespawn` — o BOSS spawna uma vez por
-visita e volta ao reentrar (`world.enemies` nunca é persistido; sem estado novo).
-
-`noRespawn` também é o que marca "sem rede de segurança" para o `autoSystem` — ver
-[05](05-regras-de-negocio.md#automação).
+Campeão Lance (`boss_lance`) é a exceção estrutural: **sequência** ordenada de 6 POKE
+(`sequence`, não pool aleatório), `autoSwitchTeamOnFaint` (o próximo membro da equipe do
+jogador entra sozinho ao desmaiar, em vez do modal de derrota padrão), `noCatch: true`,
+`keepCorpses: true` (POKE derrotado fica em campo como "corpo"), `startCountdown: 5` (contagem
+antes do 1º POKE dele nascer). Vitória contra a sequência inteira dispara
+`unlocksContinentOnClear: GRUPOS_DO_LANCE` — as duas coisas de uma vez, faixa III e Modo
+Pesadelo.
 
 ## Desbloqueio de hunt
 
-A regra real é **"hunt sem custo nasce liberada; hunt com custo exige ter pago"**, não "tem
-que estar na coluna `unlocked_maps`".
-
-A diferença importa: Modo Pesadelo e BOSS são runtime e nunca entraram na tabela `maps`,
-logo nunca apareceriam naquela coluna. Checar só a coluna trancava o Modo Pesadelo inteiro
-em silêncio.
-
-Nenhum mapa real tem `unlockCost` hoje (a antiga "Câmara dos Lendários" paga em ouro foi
-removida; lendários são BOSS-only). `unlockMap` continua existindo para o dia em que um mapa
-pago voltar.
+A regra real é **"hunt sem custo nasce liberada; hunt com custo exige ter pago"** — não "está
+na coluna `unlocked_maps`". Nenhum mapa hoje tem `unlockCost` (a antiga "Câmara dos Lendários"
+paga em ouro foi removida). A diferença importa porque Modo Pesadelo e BOSS são runtime e
+nunca entraram na tabela `maps` — checar só a coluna trancaria o Modo Pesadelo inteiro em
+silêncio.
 
 ## Geometria e visual da hunt
 
-- `bounds` 2800×1800, `playerSpawn` no centro (1400, 900). Valores escritos à mão no sync,
-  não vindos da planilha.
-- Limite caminhável circular (ver [03](03-motor-de-simulacao.md#movimento-movementsystemts)).
-- Fundo: `drawImage` único centrado no mapa, **não** `createPattern('repeat')`. A imagem é
-  uma cena única detalhada, não uma textura feita para repetir sem costura. Com o mapa
-  dobrado, o círculo passou a tocar a borda dos bounds, e o wrap do pattern aparecia como
-  risca escura cortando o mapa em zoom out. A imagem escalada já é maior que o mapa nas duas
-  dimensões, então um desenho cobre tudo. Só em zoom out extremo a câmera vê além dela,
-  caindo num preenchimento liso da cor de tema do bioma.
-- O ícone da hunt no menu usa `colorForType()` sobre o tipo elemental dominante (ponderado
-  pelo peso real), não as 3 cores fixas de tema. Nenhum dicionário de cores novo foi criado:
-  `data/typeColors.ts` já cobria os 17 tipos.
-- Lista de hunts ordenada por `levelRange[0]`, desempate por teto e nome. A ordem anterior
-  era a de inserção em `MAPS`, agrupada por bioma — a lista pulava de Lv 1-10 para Lv 71-80 e
-  voltava.
+- `GEOMETRIA` (`biomas.ts`): `bounds` 1400×900, `playerSpawn` no centro (700, 450),
+  `maxEnemies: 6`, `respawnDelay: 6`. Valores conferidos contra o `maps.generated.ts` antigo
+  antes da migração — nunca vieram da planilha, são conceito nosso de idle-game.
+- `MAX_INIMIGOS_HUNT_INICIAL = 1`: a hunt inicial usa **menos** inimigos em campo que qualquer
+  outra. Medido contra o servidor publicado, com conta nova de verdade (não o motor
+  headless — os dois discordaram por quase 6×): 6 inimigos matava o POKE Lv 1 (12 HP) no
+  primeiro minuto quase sempre; 1 inimigo, zero mortes em 10 contas de teste. Ver o comentário
+  completo em `biomas.ts` para a tabela de medição.
+- Limite caminhável circular por padrão (`mapWalkRadius`, ver
+  [03](03-motor-de-simulacao.md#movimento-movementsystemts)); retangular-pintado nas salas com
+  wall-block (ver acima).
+- Fundo: `drawImage` único centrado no mapa, não `createPattern('repeat')` — a arte é uma cena
+  única, não uma textura para repetir sem costura.
+- Ícone da hunt no menu usa `colorForType()` sobre o tipo elemental dominante do bioma
+  (ponderado pelo peso real), não cor fixa de tema.
+- Lista de hunts ordenada por `levelRange[0]`, desempate por teto e nome.
+
+## Terceiras evoluções em 0,2% — ainda vale, com um limite novo
+
+`SHARE_TERCEIRA_EVOLUCAO = 0.002` em `huntSpawnOverrides.ts`. A conta sai do peso dos
+**outros** (`weightedPick` usa `peso / soma`): com `N` espécies fixadas em `s` cada e soma `S`
+no resto, `w = s × S / (1 - N × s)`.
+
+`LIMITE_ZONA_DE_FINAIS = 0.5`: quando metade ou mais do pool de uma hunt já é forma final
+(comum nas faixas altas, onde várias linhas evolutivas terminam ao mesmo tempo), a regra dos
+0,2% **não se aplica** — fixar três finais em 0,2% cada dava 99,4% de chance para um só dos
+outros. Nesse caso quem manda é o tier de encontro real do Gen 1/2. Hunts BOSS ficam de fora
+inteiramente: lá o elenco **é** a luta.
 
 ## Invariantes trancados por teste
 
-`src/data/hunts.test.ts`, 23 casos. Essas falhas são **silenciosas** — uma espécie sem hunt
-continua no Bestiário e com sprite, só nunca aparece. Foi assim que o Dratini sumiu por uma
-leva inteira.
+`src/data/hunts.test.ts`. Toda falha aqui é silenciosa — uma espécie sem hunt continua no
+Bestiário, com sprite e moveset, só nunca aparece. Foi assim que a linha do Dratini sumiu do
+jogo por uma leva inteira sem ninguém notar.
 
-- Nenhuma hunt vazia
-- Todo encontro aponta para espécie real
-- **Zero espécie órfã**
-- Hunt de uma região só com POKE daquela região (hunt inicial excluída)
-- Nenhum POKE de cassino spawnando
-- Elenco e distribuição 80/20 da hunt inicial
-- Faixa estrita por encontro **e** por `levelWeights`
-- Zonas de 10 níveis com o número do nome batendo com a faixa
-- Todo peso de spawn positivo, com soma > 0
-- Soma das chances de cada hunt fechando 100%
-- Nenhuma espécie forte em hunt que termina antes do Lv 30
-- Toda espécie respeitando a própria zona mínima
+- Existe uma hunt por bioma × faixa, mais a inicial
+- Todo sub-bioma declarado em `biomas.ts` tem elenco gerado, e vice-versa
+- **Nenhuma sala fica com pool vazio em nenhuma faixa** (mais forte que "alcançável em alguma
+  faixa" — toda sala de toda faixa precisa ter pool)
+- Peso de sala de todo sub-bioma é positivo
+- Gate esperado: faixa1/faixa2 abertas, faixa3 e Pesadelo só pelo Lance
+- Nenhuma hunt sem espécie; todo encontro aponta para espécie e hunt reais
+- Toda espécie selvagem tem pelo menos uma hunt onde spawna; lendário só em BOSS
+- Porygon/Porygon2/Eevee nunca spawnam
+- Todo encontro respeita estritamente a faixa da própria hunt (min/max **e** `levelWeights`)
+- As 3 faixas são contíguas; nome da hunt bate com a faixa
+- Nenhum encontro põe POKE num nível em que já deveria ter evoluído
+- Estágios da mesma linha não se sobrepõem dentro de uma hunt
+- Nenhum POKE forte (`especieForte`) em hunt que termina antes do Lv 30
+- Toda espécie respeita a própria zona mínima
+- Todo peso de spawn positivo, toda hunt (e todo pool de sala) soma mais que zero
+- Nenhuma espécie passa de 35% de uma hunt com 5+ espécies
+- As chances mostradas no cartão da hunt somam 100% (soma sobre `P(sala) × P(espécie | sala)`)
+- `enemyPool` da hunt é exatamente a união dos pools de sala
+- Hunt inicial: só Sentret/Hoothoot/Rattata (todos NORMAL), 80/20 Lv1/Lv2, fora do sistema de
+  salas, menos inimigos em campo que qualquer outra hunt

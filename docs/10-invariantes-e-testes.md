@@ -1,6 +1,6 @@
 # 10 — Invariantes e testes
 
-`cd . && npm test` (vitest). 10 arquivos.
+`cd . && npm test` (vitest). 11 arquivos.
 
 O critério para um invariante virar teste neste projeto é específico:
 
@@ -18,7 +18,8 @@ Um bug que estoura já tem quem o denuncie. Os daqui, não.
 | `engine/systems/economySystem.test.ts` | — | Piso de venda vazando para o ouro por abate |
 | `engine/systems/progressionSystem.test.ts` | 3 | Barra de EXP medindo curva diferente do level-up |
 | `engine/systems/animationSystem.test.ts` | — | POKE atacando virado para o lado errado |
-| `data/hunts.test.ts` | 23 | Espécie órfã, zona mentindo sobre o nível, hunt vazia |
+| `data/hunts.test.ts` | 25 | Espécie órfã, sala sem pool, faixa não batendo com o nome, hunt vazia |
+| `engine/salas.test.ts` | 9 | Sala não avançando na quota certa, transição não congelando o mundo |
 | `data/elementVfx.test.ts` | — | Caminho de arte errado caindo no procedural em silêncio |
 | `lib/erroDeRede.test.ts` | — | "Verifique sua internet" acusando o bloqueador do jogador |
 
@@ -78,11 +79,15 @@ despercebida.
 
 ## Hunts
 
-`data/hunts.test.ts`, 23 casos. Ver a lista completa em
+`data/hunts.test.ts`, 25 casos. Ver a lista completa em
 [06](06-mundo-hunts-e-spawn.md#invariantes-trancados-por-teste).
 
 O motivo dele existir: uma espécie sem hunt **continua no Bestiário e com sprite** — só nunca
 aparece. Foi assim que o Dratini sumiu do jogo por uma leva inteira sem ninguém notar.
+
+`engine/salas.test.ts`, 9 casos — a máquina de salas em si (quota de abates, sorteio da
+próxima sala, ciclo reiniciando em vez de "acabar a hunt", e a contagem regressiva de
+transição congelando `stepWorld` até zerar). Ver [06](06-mundo-hunts-e-spawn.md#a-hunt-vira-salas).
 
 ## Onde os testes não alcançam, e o que se faz no lugar
 

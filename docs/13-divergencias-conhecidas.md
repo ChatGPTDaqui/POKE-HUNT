@@ -20,6 +20,18 @@ de código — reforça o argumento central desta pasta: sem conferir contra o c
 documentação apodrece **silenciosamente**, na direção de "menos capaz do que é", não só
 "números errados".
 
+**Atualizado em 2026-08-17**: mesma categoria ("sistema inteiro faltando"), achada de novo —
+[06](06-mundo-hunts-e-spawn.md) descrevia por inteiro a arquitetura de hunts **substituída**
+pela leva "hunts em salas" (12 biomas × 3 faixas × 10 salas sorteadas, `data/biomas.ts`)
+como se fosse a atual: 69 hunts por "1 tipo elemental = 1 bioma" × 9 zonas × recorte por
+região, quando o próprio `biomas.ts` diz no topo "este arquivo SUBSTITUI o desenho antigo".
+Pior que a lacuna do combate porque não era silêncio — era afirmação ativa de algo que não
+roda mais (bounds errado, 2800×1800 contra os 1400×900 reais; camada de região que não separa
+hunt nenhuma há uma leva inteira). Reescrito por inteiro nesta rodada, incluindo o que mudou
+na MESMA sessão (contagem regressiva entre salas, `ABATES_POR_SALA` 12→30, wall-block por
+sub-bioma pintado à mão, cone de spawn, `AOE_RADIUS = WILD_AGGRO_RADIUS`) — nenhum desses
+tinha registro em `docs/` antes.
+
 **Nada aqui foi corrigido no código.** São achados que precisam de decisão: em cada caso, ou o
 código está errado (e é bug de balanceamento) ou o documento está errado (e é ruído). Só quem
 mantém o projeto sabe qual.

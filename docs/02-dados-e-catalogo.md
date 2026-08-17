@@ -17,9 +17,13 @@ feito à mão com um escritor de XML improvisado.
 
 Não é inércia. Dois motivos:
 
-1. A **curadoria de hunts** vive em `scripts/sync-planilha.js` (`TYPE_BIOME_PLAN`,
-   `buildTypeRoster`, `buildTypeDrivenHunts`) e o gerador novo a reusa sem alteração —
-   duplicar essa curadoria faria as duas divergirem no primeiro ajuste.
+1. A **curadoria de espécies/movesets** (`buildTypeRoster` e afins) vive em
+   `scripts/sync-planilha.js` e o gerador novo a reusa sem alteração — duplicar isso faria as
+   duas divergirem no primeiro ajuste. **A curadoria de HUNTS não é mais uma delas**:
+   `TYPE_BIOME_PLAN`/`buildTypeDrivenHunts` foram substituídos pelo sistema de biomas/salas
+   (`src/data/biomas.ts`, hand-authored) — ver [06](06-mundo-hunts-e-spawn.md). O que ainda sai
+   daqui é só o roster de espécies com stats/moveset/arte; onde cada uma pode nascer é decidido
+   inteiramente em runtime, fora deste pipeline.
 2. Ela é o **lado esquerdo do diff byte a byte** que prova que trocar de fonte não mudou o
    jogo.
 
