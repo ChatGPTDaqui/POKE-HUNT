@@ -45704,8 +45704,6 @@ function recordBatch(gameState, { gold, xp, mobs, shinys }) {
 		shinys
 	});
 }
-//#endregion
-//#region src/engine/systems/salaSystem.ts
 /** A hunt e percorrida em salas? Hunt inicial, BOSS e Lance nao sao. */
 function temSalas(mapId) {
 	return POOL_POR_SALA[mapId] != null;
@@ -45801,7 +45799,13 @@ function nomeDaSala(sala) {
 	return SUB_BIOMA_POR_CHAVE[sala.chave]?.sub.nome ?? sala.chave;
 }
 /**
-* Conta um abate na sala atual e avanca quando a quota fecha.
+* Conta um abate na sala atual. Ao fechar a quota, NAO troca de sala na
+* hora — sorteia a proxima (o "carregamento" adiantado, pra UI ja saber o
+* nome/pool antes do overlay sumir) e arma `salaCountdownRemaining`.
+* `stepWorld` congela o jogo enquanto ela conta e so chama
+* `aplicarTransicaoDeSala` quando zera — mesmo padrao do
+* `countdownRemaining` de intro do Campeao Lance, so disparado no MEIO da
+* hunt em vez de na entrada.
 *
 * Chamado de dentro do `stepWorld`, entao vale igual no combate ao vivo, no
 * catch-up de aba oculta e no farm offline — nao ha um segundo caminho de
@@ -45814,7 +45818,12 @@ function registrarAbate(world, mapId) {
 		fechouCiclo: false
 	};
 	sala.abates += 1;
-	if (sala.abates < 12) return {
+	if (sala.abates < 30) return {
+		avancou: false,
+		fechouCiclo: false
+	};
+	sala.abates = 30;
+	if (world.salaCountdownRemaining != null) return {
 		avancou: false,
 		fechouCiclo: false
 	};
@@ -45822,35 +45831,51 @@ function registrarAbate(world, mapId) {
 	const fechouCiclo = proximo >= 10;
 	const indice = fechouCiclo ? 0 : proximo;
 	const ciclos = fechouCiclo ? sala.ciclos + 1 : sala.ciclos;
-	world.sala = novaSala(world.rng, mapId, indice, ciclos) ?? {
+	world.salaPendente = novaSala(world.rng, mapId, indice, ciclos) ?? {
 		...sala,
 		indice,
 		abates: 0,
 		ciclos
 	};
-	const novoMapDef = mapDefParaSala(mapId, world.sala);
-	if (novoMapDef) {
-		world.mapDef = novoMapDef;
-		if (world.player && isCellBlocked(novoMapDef, world.player.x, world.player.y)) {
-			const ponto = nearestOpenPoint(novoMapDef, world.player.x, world.player.y);
-			if (ponto) {
-				world.player.x = ponto.x;
-				world.player.y = ponto.y;
-			}
-		}
-		for (const enemy of world.enemies) {
-			if (!isCellBlocked(novoMapDef, enemy.x, enemy.y)) continue;
-			const ponto = nearestOpenPoint(novoMapDef, enemy.x, enemy.y);
-			if (ponto) {
-				enemy.x = ponto.x;
-				enemy.y = ponto.y;
-			}
-		}
-	}
+	world.salaCountdownRemaining = 3;
 	return {
 		avancou: true,
 		fechouCiclo
 	};
+}
+/**
+* Aplica a sala ja sorteada (`world.salaPendente`) quando a contagem
+* regressiva zera: troca mapa/colisao e reposiciona pro spawn point da nova
+* sala. "Area nova do zero" (pedido explicito do usuario) — zera tambem
+* inimigos/efeitos/hits pendentes em vez de so filtrar quem sobrou da sala
+* anterior; quem chama (`stepWorld`) faz o spawn fresco logo em seguida.
+*/
+function aplicarTransicaoDeSala(world, mapId) {
+	const pendente = world.salaPendente;
+	if (!pendente) return;
+	world.sala = pendente;
+	world.salaPendente = null;
+	world.enemies = [];
+	world.effects = [];
+	world.pendingHits = [];
+	world.respawnTimer = null;
+	const novoMapDef = mapDefParaSala(mapId, world.sala);
+	if (!novoMapDef) return;
+	world.mapDef = novoMapDef;
+	if (!world.player) return;
+	const ponto = spawnPointParaSala(world.sala);
+	if (ponto) {
+		world.player.x = ponto.x;
+		world.player.y = ponto.y;
+		return;
+	}
+	if (isCellBlocked(novoMapDef, world.player.x, world.player.y)) {
+		const escape = nearestOpenPoint(novoMapDef, world.player.x, world.player.y);
+		if (escape) {
+			world.player.x = escape.x;
+			world.player.y = escape.y;
+		}
+	}
 }
 //#endregion
 //#region src/engine/systems/pokedexSystem.ts
@@ -46617,6 +46642,8 @@ function emptyWorldState(seed = randomSeed()) {
 		sequenceCleared: false,
 		countdownRemaining: null,
 		sala: null,
+		salaCountdownRemaining: null,
+		salaPendente: null,
 		rng: createRng(seed),
 		counters: {
 			entity: 1,
@@ -47005,30 +47032,40 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (!silent) updateAnimations(world, dt);
 		return [];
 	}
+	if (world.salaCountdownRemaining != null) {
+		world.salaCountdownRemaining -= dt;
+		if (world.salaCountdownRemaining <= 0) {
+			world.salaCountdownRemaining = null;
+			const fechouCiclo = world.salaPendente?.indice === 0;
+			aplicarTransicaoDeSala(world, world.mapDef.id);
+			if (world.mapDef) {
+				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
+				for (let i = 0; i < world.mapDef.maxEnemies; i++) {
+					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player);
+					aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
+					world.enemies.push(enemy);
+				}
+				world.respawnTimer = world.mapDef.respawnDelay;
+				if (!silent) {
+					const nome = nomeDaSala(world.sala);
+					useToastStore.getState().pushToast(fechouCiclo ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.` : `Entrando em nova area: ${nome}.`, "success", "world");
+				}
+			}
+		}
+		if (!silent) updateAnimations(world, dt);
+		return [];
+	}
 	updateMovement(world, dt);
 	const { defeatedEnemyIds, playerJustFainted } = updateCombat(world, dt, { silent });
 	tickAttackAnimTimers(world, dt);
 	if (!silent) updateAnimations(world, dt);
 	const kills = [];
-	let salaTrocou = false;
 	if (defeatedEnemyIds.length > 0) for (const enemyId of defeatedEnemyIds) {
 		const enemy = world.enemies.find((e) => e.id === enemyId);
 		if (!enemy) continue;
 		kills.push(handleEnemyDefeated(world, enemy, gameState, { silent }));
 		enemy.deathRemovalTimer = silent ? 0 : 4;
-		const avanco = registrarAbate(world, world.mapDef.id);
-		if (avanco.avancou) {
-			salaTrocou = true;
-			if (!silent) {
-				const nome = nomeDaSala(world.sala);
-				useToastStore.getState().pushToast(avanco.fechouCiclo ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.` : `Sala limpa! Avancando para a sala ${(world.sala?.indice ?? 0) + 1}: ${nome}.`, "success", "world");
-			}
-		}
-	}
-	if (salaTrocou && world.sala) {
-		const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
-		const permitidas = new Set(ctx.pool.map((id) => getEncounter(id)?.speciesId).filter((id) => id != null));
-		world.enemies = world.enemies.filter((e) => isDead(e) || permitidas.has(e.poke.speciesId));
+		registrarAbate(world, world.mapDef.id);
 	}
 	for (const enemy of world.enemies) if (isDead(enemy) && enemy.deathRemovalTimer != null && enemy.deathRemovalTimer > 0) enemy.deathRemovalTimer -= dt;
 	world.enemies = world.enemies.filter((e) => !isDead(e) || (e.deathRemovalTimer ?? 0) > 0 || world.mapDef.keepCorpses);
