@@ -419,6 +419,19 @@ export interface WorldState {
   countdownRemaining: number | null
   /** Nulo nas hunts sem salas: a inicial, as 11 BOSS e a do Campeao Lance. */
   sala: SalaAtiva | null
+  /**
+   * Contagem regressiva "Entrando em nova area" (ver
+   * engine/systems/salaSystem.ts#registrarAbate/aplicarTransicaoDeSala).
+   * Nao nulo == quota de abates da sala atual ja fechou e o jogo esta
+   * congelado ate a proxima sala entrar. Efemero de proposito, igual
+   * `clima`: nao precisa atravessar reconstrucao de mundo por janela do
+   * servidor — se um flush cortar bem no meio dela, a proxima janela so
+   * reincide o gatilho no abate seguinte, autocurativo.
+   */
+  salaCountdownRemaining: number | null
+  /** Sala ja sorteada (o "carregamento" adiantado) esperando a contagem
+   *  regressiva zerar pra virar `sala` de verdade. */
+  salaPendente: SalaAtiva | null
   // Toda aleatoriedade da simulacao sai daqui. Ver core/rng.ts pro porque e
   // pros limites (isto torna a SEQUENCIA DE SORTEIOS reproduzivel; nao promete
   // replay bit-a-bit de coordenadas entre engines diferentes).

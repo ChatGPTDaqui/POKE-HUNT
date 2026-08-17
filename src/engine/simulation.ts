@@ -43,7 +43,7 @@ import { updateAutoHeal, maybeAutoCatch } from './systems/autoSystem'
 import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } from './systems/progressionSystem'
 import { awardKillLoot } from './systems/economySystem'
 import { recordKill } from './systems/farmRates'
-import { contextoDeSpawn, lootAtivo, novaSala, nomeDaSala, registrarAbate, temSalas } from './systems/salaSystem'
+import { contextoDeSpawn, lootAtivo, novaSala, nomeDaSala, registrarAbate, temSalas, aplicarTransicaoDeSala } from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
 
@@ -557,6 +557,40 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     return []
   }
 
+  // Contagem regressiva "Entrando em nova area" entre salas (ver
+  // salaSystem.ts#registrarAbate/aplicarTransicaoDeSala): a quota de abates
+  // da sala atual ja fechou e a proxima ja foi sorteada
+  // (world.salaPendente) — movimento/combate ficam congelados ate zerar,
+  // mesmo padrao do countdown de intro do Lance acima.
+  if (world.salaCountdownRemaining != null) {
+    world.salaCountdownRemaining -= dt
+    if (world.salaCountdownRemaining <= 0) {
+      world.salaCountdownRemaining = null
+      const fechouCiclo = world.salaPendente?.indice === 0
+      aplicarTransicaoDeSala(world, world.mapDef.id)
+      if (world.mapDef) {
+        const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
+        for (let i = 0; i < world.mapDef.maxEnemies; i++) {
+          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player)
+          aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
+          world.enemies.push(enemy)
+        }
+        world.respawnTimer = world.mapDef.respawnDelay
+        if (!silent) {
+          const nome = nomeDaSala(world.sala)
+          useToastStore.getState().pushToast(
+            fechouCiclo
+              ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.`
+              : `Entrando em nova area: ${nome}.`,
+            'success', 'world',
+          )
+        }
+      }
+    }
+    if (!silent) updateAnimations(world, dt)
+    return []
+  }
+
   updateMovement(world, dt)
   const { defeatedEnemyIds, playerJustFainted } = updateCombat(world, dt, { silent })
   // attackAnimTimer precisa decrementar todo tick independente de `silent`
@@ -567,7 +601,6 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   if (!silent) updateAnimations(world, dt)
 
   const kills: KillResult[] = []
-  let salaTrocou = false
   if (defeatedEnemyIds.length > 0) {
     for (const enemyId of defeatedEnemyIds) {
       const enemy = world.enemies.find((e) => e.id === enemyId)
@@ -577,29 +610,10 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       // Conta pra quota da sala AQUI, e nao em quem chama: este e o unico
       // ponto de abate do jogo, entao o combate ao vivo, o catch-up de aba
       // oculta e o farm offline contam pela mesma regra sem nenhum deles
-      // precisar lembrar.
-      const avanco = registrarAbate(world, world.mapDef.id)
-      if (avanco.avancou) {
-        salaTrocou = true
-        if (!silent) {
-          const nome = nomeDaSala(world.sala)
-          useToastStore.getState().pushToast(
-            avanco.fechouCiclo
-              ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.`
-              : `Sala limpa! Avancando para a sala ${(world.sala?.indice ?? 0) + 1}: ${nome}.`,
-            'success', 'world',
-          )
-        }
-      }
+      // precisar lembrar. So arma a contagem regressiva (world.salaCountdownRemaining) —
+      // a troca de fato acontece la em cima, no gate do proximo tick.
+      registrarAbate(world, world.mapDef.id)
     }
-  }
-  // Sala avancou com outro inimigo ainda vivo em campo (maxEnemies > 1): esse
-  // inimigo veio do pool da sala anterior. Sem isso ele fica em campo com
-  // especie fora do pool ate morrer por conta propria.
-  if (salaTrocou && world.sala) {
-    const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
-    const permitidas = new Set(ctx.pool.map((id) => getEncounter(id)?.speciesId).filter((id): id is string => id != null))
-    world.enemies = world.enemies.filter((e) => isDead(e) || permitidas.has(e.poke.speciesId))
   }
   for (const enemy of world.enemies) {
     if (isDead(enemy) && enemy.deathRemovalTimer != null && enemy.deathRemovalTimer > 0) enemy.deathRemovalTimer -= dt

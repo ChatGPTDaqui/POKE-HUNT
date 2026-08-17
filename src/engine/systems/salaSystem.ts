@@ -28,9 +28,18 @@ import type { Rng } from '@/core/rng'
 import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, LOOT, type SubBiomaDef } from '@/data/biomas'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { getEncounter } from '@/data/enemies'
-import { mapDefParaSala, isCellBlocked, nearestOpenPoint } from '@/data/maps'
+import { mapDefParaSala, spawnPointParaSala, isCellBlocked, nearestOpenPoint } from '@/data/maps'
 import type { MapItemDrop } from '@/data/generated/types'
 import type { SalaAtiva, WorldState } from '../types'
+
+/**
+ * Duracao do aviso "Entrando em nova area" entre salas — congela
+ * movimento/combate (mesmo padrao do `countdownRemaining` de intro do
+ * Campeao Lance, ver simulation.ts#stepWorld), tempo que a UI aproveita pra
+ * cobrir a tela com o overlay em vez do jogador ver o mapa antigo trocar de
+ * repente.
+ */
+export const SALA_TRANSITION_COUNTDOWN = 3
 
 /** A hunt e percorrida em salas? Hunt inicial, BOSS e Lance nao sao. */
 export function temSalas(mapId: string): boolean {
@@ -145,14 +154,20 @@ export function nomeDaSala(sala: SalaAtiva | null): string | null {
 }
 
 export interface AvancoDeSala {
-  /** Trocou de sala neste abate. */
+  /** Quota fechou neste abate — a contagem regressiva de transicao comecou. */
   avancou: boolean
-  /** Fechou as 10 salas e recomecou o ciclo. */
+  /** A sala que vai entrar em vigor e a primeira do ciclo seguinte. */
   fechouCiclo: boolean
 }
 
 /**
- * Conta um abate na sala atual e avanca quando a quota fecha.
+ * Conta um abate na sala atual. Ao fechar a quota, NAO troca de sala na
+ * hora — sorteia a proxima (o "carregamento" adiantado, pra UI ja saber o
+ * nome/pool antes do overlay sumir) e arma `salaCountdownRemaining`.
+ * `stepWorld` congela o jogo enquanto ela conta e so chama
+ * `aplicarTransicaoDeSala` quando zera — mesmo padrao do
+ * `countdownRemaining` de intro do Campeao Lance, so disparado no MEIO da
+ * hunt em vez de na entrada.
  *
  * Chamado de dentro do `stepWorld`, entao vale igual no combate ao vivo, no
  * catch-up de aba oculta e no farm offline — nao ha um segundo caminho de
@@ -164,6 +179,16 @@ export function registrarAbate(world: WorldState, mapId: string): AvancoDeSala {
 
   sala.abates += 1
   if (sala.abates < ABATES_POR_SALA) return { avancou: false, fechouCiclo: false }
+  // Cap: sem isto, matar mais de um inimigo no MESMO tick (AOE) ou o jogo
+  // continuar rodando por um instante antes do proximo tick congelar
+  // deixaria `sala.abates` crescer sem limite enquanto a contagem regressiva
+  // ja esta armada — inofensivo pro jogo, mas polui o valor persistido
+  // (server/src/progresso.ts#sala_abates) com numero que nunca reflete a
+  // quota real.
+  sala.abates = ABATES_POR_SALA
+  // Transicao ja armada por outro abate neste mesmo tick (AOE matando 2+ de
+  // uma vez): nao reamarra, nao resorteia.
+  if (world.salaCountdownRemaining != null) return { avancou: false, fechouCiclo: false }
 
   const proximo = sala.indice + 1
   const fechouCiclo = proximo >= SALAS_POR_HUNT
@@ -173,34 +198,47 @@ export function registrarAbate(world: WorldState, mapId: string): AvancoDeSala {
   // Nao ha "fim de hunt": o ciclo reinicia. Um fim faria 6 horas de farm
   // offline valerem os poucos minutos ate a sala 10 — o oposto do que um jogo
   // idle precisa.
-  const nova = novaSala(world.rng, mapId, indice, ciclos)
-  world.sala = nova ?? { ...sala, indice, abates: 0, ciclos }
-  // A colisao/spawn de body-block e por SALA (ver mapDefParaSala) — trocar
-  // de sala no meio da hunt precisa reavaliar a grade, senao um sub-bioma
-  // com pintura propria so valeria na sala em que o mundo foi construido
-  // (a proxima janela do servidor ja corrigiria sozinha, mas o combate ao
-  // vivo entre uma janela e outra ficaria com a grade da sala anterior).
-  const novoMapDef = mapDefParaSala(mapId, world.sala)
-  if (novoMapDef) {
-    world.mapDef = novoMapDef
-    // A sala anterior podia nao ter colisao nenhuma (jogador/inimigo em
-    // QUALQUER canto do mapa); se a nova sala tem body-block e a posicao
-    // atual caiu numa celula agora bloqueada, reposiciona pro ponto
-    // andavel mais perto ANTES do proximo tick tentar mover — bug real,
-    // achado ao vivo: jogador que herdava uma celula cercada por 8
-    // vizinhos tambem bloqueados ficava congelado pra sempre (nem A* nem
-    // slideToward escapam de "comecar dentro da parede").
-    if (world.player && isCellBlocked(novoMapDef, world.player.x, world.player.y)) {
-      const ponto = nearestOpenPoint(novoMapDef, world.player.x, world.player.y)
-      if (ponto) { world.player.x = ponto.x; world.player.y = ponto.y }
-    }
-    for (const enemy of world.enemies) {
-      if (!isCellBlocked(novoMapDef, enemy.x, enemy.y)) continue
-      const ponto = nearestOpenPoint(novoMapDef, enemy.x, enemy.y)
-      if (ponto) { enemy.x = ponto.x; enemy.y = ponto.y }
-    }
-  }
+  world.salaPendente = novaSala(world.rng, mapId, indice, ciclos) ?? { ...sala, indice, abates: 0, ciclos }
+  world.salaCountdownRemaining = SALA_TRANSITION_COUNTDOWN
   return { avancou: true, fechouCiclo }
+}
+
+/**
+ * Aplica a sala ja sorteada (`world.salaPendente`) quando a contagem
+ * regressiva zera: troca mapa/colisao e reposiciona pro spawn point da nova
+ * sala. "Area nova do zero" (pedido explicito do usuario) — zera tambem
+ * inimigos/efeitos/hits pendentes em vez de so filtrar quem sobrou da sala
+ * anterior; quem chama (`stepWorld`) faz o spawn fresco logo em seguida.
+ */
+export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
+  const pendente = world.salaPendente
+  if (!pendente) return
+  world.sala = pendente
+  world.salaPendente = null
+  world.enemies = []
+  world.effects = []
+  world.pendingHits = []
+  world.respawnTimer = null
+
+  const novoMapDef = mapDefParaSala(mapId, world.sala)
+  if (!novoMapDef) return
+  world.mapDef = novoMapDef
+
+  if (!world.player) return
+  const ponto = spawnPointParaSala(world.sala)
+  if (ponto) {
+    world.player.x = ponto.x
+    world.player.y = ponto.y
+    return
+  }
+  // Sala sem ponto de spawn proprio (sem body-block pintado): mantem a
+  // posicao do jogador, so escapando de uma celula que a nova grade marque
+  // como bloqueada — mesmo snap que `buildMapWorld` ja faz na construcao
+  // inicial do mundo.
+  if (isCellBlocked(novoMapDef, world.player.x, world.player.y)) {
+    const escape = nearestOpenPoint(novoMapDef, world.player.x, world.player.y)
+    if (escape) { world.player.x = escape.x; world.player.y = escape.y }
+  }
 }
 
 export { SALAS_POR_HUNT, ABATES_POR_SALA }

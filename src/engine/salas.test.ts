@@ -11,7 +11,9 @@ import { describe, expect, it, beforeEach } from 'vitest'
 import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
 import { buildMapWorld, stepWorld } from './simulation'
-import { janelaDaSala, poolAtivo, registrarAbate, temSalas } from './systems/salaSystem'
+import {
+  janelaDaSala, poolAtivo, registrarAbate, temSalas, aplicarTransicaoDeSala, SALA_TRANSITION_COUNTDOWN,
+} from './systems/salaSystem'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { ABATES_POR_SALA, SALAS_POR_HUNT } from '@/data/biomas'
 import { ENCOUNTERS } from '@/data/huntSpawnOverrides'
@@ -29,10 +31,22 @@ function mundo(semente: number, mapa = HUNT): WorldState {
   })
 }
 
-/** Conta abates direto, sem esperar o combate — o alvo aqui e a maquina de salas. */
+/**
+ * Conta abates direto, sem esperar o combate — o alvo aqui e a maquina de
+ * salas. Ao fechar a quota, `registrarAbate` so ARMA a transicao (ver
+ * salaSystem.ts); resolve na hora (equivalente a um tick de `stepWorld` com
+ * dt >= SALA_TRANSITION_COUNTDOWN) pra poder continuar contando abates da
+ * sala seguinte no mesmo loop.
+ */
 function abater(world: WorldState, quantos: number) {
   const eventos = []
-  for (let i = 0; i < quantos; i++) eventos.push(registrarAbate(world, world.mapDef!.id))
+  for (let i = 0; i < quantos; i++) {
+    eventos.push(registrarAbate(world, world.mapDef!.id))
+    if (world.salaCountdownRemaining != null) {
+      aplicarTransicaoDeSala(world, world.mapDef!.id)
+      world.salaCountdownRemaining = null
+    }
+  }
   return eventos
 }
 
@@ -65,16 +79,52 @@ describe('salas', () => {
     expect(parciais.every((e) => !e.avancou)).toBe(true)
     expect(world.sala!.indice).toBe(0)
     expect(world.sala!.abates).toBe(ABATES_POR_SALA - 1)
+    expect(world.salaCountdownRemaining).toBeNull()
 
-    const [ultimo] = abater(world, 1)
+    // O abate que fecha a quota so ARMA a transicao — a sala AINDA e a
+    // antiga ate a contagem regressiva zerar (ver salaSystem.ts).
+    const ultimo = registrarAbate(world, world.mapDef!.id)
     expect(ultimo.avancou).toBe(true)
     expect(ultimo.fechouCiclo).toBe(false)
+    expect(world.sala!.indice).toBe(0)
+    expect(world.salaCountdownRemaining).toBe(SALA_TRANSITION_COUNTDOWN)
+    expect(world.salaPendente).not.toBeNull()
+    expect(world.salaPendente!.indice).toBe(1)
+
+    aplicarTransicaoDeSala(world, world.mapDef!.id)
     expect(world.sala!.indice).toBe(1)
     expect(world.sala!.abates).toBe(0)
+    expect(world.salaPendente).toBeNull()
     // A sala nova pode calhar de ser o mesmo sub-bioma (o sorteio e com
     // reposicao); o que nao pode e o contador nao zerar.
     expect(typeof world.sala!.chave).toBe('string')
     expect(antes).toBeTruthy()
+  })
+
+  it('a contagem regressiva entre salas congela o mundo e troca tudo do zero ao zerar', () => {
+    const world = mundo(6)
+    const gameState = useGameStateStore.getState()
+
+    for (let i = 0; i < ABATES_POR_SALA; i++) registrarAbate(world, world.mapDef!.id)
+    expect(world.salaCountdownRemaining).toBe(SALA_TRANSITION_COUNTDOWN)
+    expect(world.sala!.indice).toBe(0)
+
+    // Congelado: um tick pequeno so desconta a contagem, nada mais muda.
+    const enemiesAntes = world.enemies.length
+    stepWorld(world, 0.1, gameState, { silent: true })
+    expect(world.sala!.indice).toBe(0)
+    expect(world.enemies.length).toBe(enemiesAntes)
+
+    // Tick grande o bastante zera a contagem: sala nova, area do zero.
+    stepWorld(world, SALA_TRANSITION_COUNTDOWN, gameState, { silent: true })
+    expect(world.salaCountdownRemaining).toBeNull()
+    expect(world.sala!.indice).toBe(1)
+    expect(world.sala!.abates).toBe(0)
+    expect(world.enemies.length).toBeGreaterThan(0)
+    const daSalaNova = new Set(POOL_POR_SALA[HUNT][world.sala!.chave].map((id) => ENCOUNTERS[id].speciesId))
+    for (const inimigo of world.enemies) {
+      expect(daSalaNova.has(inimigo.poke.speciesId)).toBe(true)
+    }
   })
 
   it('fechar as 10 salas reinicia o ciclo em vez de acabar a hunt', () => {

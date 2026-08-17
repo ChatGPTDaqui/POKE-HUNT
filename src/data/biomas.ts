@@ -381,7 +381,7 @@ export const SALAS_POR_HUNT = 10
  * (ver server/src/progresso.ts), entao o inimigo em campo nao sobrevive de uma
  * janela pra outra. Um contador sobrevive.
  */
-export const ABATES_POR_SALA = 12
+export const ABATES_POR_SALA = 30
 
 export const BIOMA_POR_CHAVE: Record<string, BiomaDef> = Object.fromEntries(
   BIOMAS.map((b) => [b.chave, b])

@@ -45,6 +45,8 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     sequenceCleared: false,
     countdownRemaining: null,
     sala: null,
+    salaCountdownRemaining: null,
+    salaPendente: null,
     rng: createRng(seed),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
     pessimista: false,

@@ -11,17 +11,31 @@
 //
 // Geometria medida direto no PNG (zlib-inflate + unfilter,
 // scripts/lib/png.js), nao suposta: 512x736px, grade de 8 colunas x 23
-// linhas de 64x32px. As 8 colunas NAO sao 8 frames — sao ate 3 copias
-// SIMULTANEAS e IDENTICAS da mesma bola por linha (mesma opacidade media
-// medida pixel a pixel: sem diferenca de brilho entre elas, entao nao e
-// trilha/motion-blur com fade), espacadas 3 colunas uma da outra. Padrao de
-// origem (provavel: efeito pensado pra ate 3 alvos simultaneos numa cena de
-// batalha RPG Maker) irrelevante aqui — como as copias sao pixel-a-pixel
-// iguais, a coluna usada nao importa, so precisa ser uma que EXISTE naquela
-// linha (varias ficam vazias). `CAPTURE_ANIM_FRAME_COLUMN[row]` guarda a
-// primeira coluna preenchida de cada linha (medido nos 4 pares de arquivo —
-// coreografia identica nos 4, so a cor muda), pra nunca cair numa celula em
-// branco.
+// linhas de 64x32px.
+//
+// CORRIGIDO (leva seguinte): a 1a medicao ("8 colunas sao ate 3 copias
+// IDENTICAS por linha, a coluna nao importa") estava ERRADA — so parecia
+// certa porque a amostra comparou MEDIA de opacidade, nao pixel a pixel, e
+// so pras linhas do meio (o "wobble" parado, onde as copias realmente sao
+// quase identicas). Reexaminado com dump visual (scripts/scratch_dump_*,
+// descartaveis) linha por linha: nas linhas 0-3 (arremesso + estouro de
+// impacto) as "copias" tem tamanho/silhueta DIFERENTES — nao sao copias, sao
+// VARIANTES DE TAMANHO da mesma pose, uma por "banda" de coluna. A escolha
+// antiga (`CAPTURE_ANIM_FRAME_COLUMN`, primeira coluna nao-vazia de cada
+// linha) pulava de banda em banda sem padrao (0,1,0,0,1,2,0,1,2,...) —
+// a bola "teleportava" de tamanho/posicao entre frames, o "impacto visual
+// negativo" relatado.
+//
+// O padrao real: `coluna_ativa ≡ linha (mod 3)` em TODA linha das 8
+// planilhas (2 resultados x 4 bolas) — confirmado por varredura (nenhuma das
+// 23+17 linhas fica em branco na coluna `linha % 3`). E o desenho classico de
+// folha de animacao RPG Maker com ate 3 variantes de tamanho pre-renderizadas
+// por frame (fraca/media/forte); usar sempre a MESMA banda (`linha % 3`, a
+// mais a esquerda) da uma trajetoria unica e coerente, sem pulo — verificado
+// visualmente com filmstrip da banda escolhida: arremesso, estouro de
+// impacto, bola assentando, e SO no sucesso um brilho verde de captura antes
+// de sumir (a falha termina com a bola "estourando" branco/azul, sem o
+// brilho verde) — as duas sequencias fazem sentido narrativo frame a frame.
 export const CAPTURE_ANIM_CELL_WIDTH = 64
 export const CAPTURE_ANIM_CELL_HEIGHT = 32
 
@@ -32,12 +46,6 @@ export const CAPTURE_ANIM_CELL_HEIGHT = 32
 // identico nos 4 pares de bola.
 export const CAPTURE_ANIM_SUCCESS_ROWS = 23
 export const CAPTURE_ANIM_FAIL_ROWS = 17
-
-// Primeira coluna nao-vazia de cada linha 0-22 (sucesso usa todas; falha usa
-// so as 17 primeiras, que sao byte-a-byte a mesma introducao/ciclo).
-const CAPTURE_ANIM_FRAME_COLUMN = [
-  0, 1, 0, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1,
-] as const
 
 // So os 4 itens de captura reais deste jogo (js/data/items.generated.js)
 // tem par de arquivo — sem equivalente de Master/Cherish/etc, como no sheet
@@ -83,7 +91,7 @@ export function captureAnimFrameRect(ballItemId: string, success: boolean, frame
   if (!files) return null
   const rowCount = captureAnimRowCount(success)
   const row = Math.min(Math.max(0, frameIndex), rowCount - 1)
-  const col = CAPTURE_ANIM_FRAME_COLUMN[row] ?? 0
+  const col = row % 3
   return {
     url: success ? files.success : files.fail,
     sx: col * CAPTURE_ANIM_CELL_WIDTH,
