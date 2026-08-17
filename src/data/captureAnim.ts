@@ -30,12 +30,24 @@
 // planilhas (2 resultados x 4 bolas) — confirmado por varredura (nenhuma das
 // 23+17 linhas fica em branco na coluna `linha % 3`). E o desenho classico de
 // folha de animacao RPG Maker com ate 3 variantes de tamanho pre-renderizadas
-// por frame (fraca/media/forte); usar sempre a MESMA banda (`linha % 3`, a
-// mais a esquerda) da uma trajetoria unica e coerente, sem pulo — verificado
-// visualmente com filmstrip da banda escolhida: arremesso, estouro de
-// impacto, bola assentando, e SO no sucesso um brilho verde de captura antes
-// de sumir (a falha termina com a bola "estourando" branco/azul, sem o
-// brilho verde) — as duas sequencias fazem sentido narrativo frame a frame.
+// por frame (fraca/media/forte); usar sempre a MESMA banda (`linha % 3`) da
+// uma trajetoria unica e coerente, sem pulo entre tamanhos.
+//
+// CORRIGIDO nesta rodada (relatado pelo usuario com print: "bola fica
+// duplicada"): o passo acima estava certo sobre QUAL banda usar, mas errado
+// sobre ONDE ela fica dentro da banda. Cada bola nao fica CENTRADA dentro do
+// seu bloco de 64px — ela fica CENTRADA NA COSTURA entre dois blocos (x=0,
+// 64, 128, ... 448, confirmado com deteccao de componentes conexos +
+// conferencia visual com linhas de grade). Recortar `[col*64, col*64+64)`
+// (alinhado ao bloco) pega so a METADE DIREITA da bola daquela costura MAIS
+// a METADE ESQUERDA da bola da costura seguinte — duas meia-bolas no mesmo
+// frame, uma em cada canto, exatamente o "duplicada" do print. Corrigido
+// deslocando o recorte 32px pra CENTRALIZAR na costura
+// (`slot*64 - CAPTURE_ANIM_CELL_WIDTH/2`) — e pulando a costura x=0 (so tem
+// metade direita disponivel, o resto seria fora do PNG) trocando por x=192
+// (`slot 3`, mesma fase mod 3, bola inteira disponivel). Reverificado com
+// recorte simulado pixel a pixel: toda banda vira 1 bola so, cheia, sem
+// fragmento na borda.
 export const CAPTURE_ANIM_CELL_WIDTH = 64
 export const CAPTURE_ANIM_CELL_HEIGHT = 32
 
@@ -91,10 +103,13 @@ export function captureAnimFrameRect(ballItemId: string, success: boolean, frame
   if (!files) return null
   const rowCount = captureAnimRowCount(success)
   const row = Math.min(Math.max(0, frameIndex), rowCount - 1)
-  const col = row % 3
+  const phase = row % 3
+  // Costura x=0 nao tem metade esquerda (fora do PNG) — usa a costura
+  // x=192 (slot 3), mesma fase (3 % 3 === 0), bola inteira disponivel.
+  const slot = phase === 0 ? 3 : phase
   return {
     url: success ? files.success : files.fail,
-    sx: col * CAPTURE_ANIM_CELL_WIDTH,
+    sx: slot * CAPTURE_ANIM_CELL_WIDTH - CAPTURE_ANIM_CELL_WIDTH / 2,
     sy: row * CAPTURE_ANIM_CELL_HEIGHT,
     sw: CAPTURE_ANIM_CELL_WIDTH,
     sh: CAPTURE_ANIM_CELL_HEIGHT,
