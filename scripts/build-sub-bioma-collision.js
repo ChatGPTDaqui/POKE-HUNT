@@ -1,21 +1,54 @@
 // Deriva grade de colisao + ponto de spawn POR SUB-BIOMA a partir de
 // referencias pintadas a mao pelo usuario
-// (assets/hunt-backgrounds/body-block/<slug>.png), diferente do
-// build-collision-grids.js antigo (heuristica de pixel escuro/agua) e do
-// build-water-collision-mask.js (mascara por bioma inteiro, nao por sala).
+// (scripts/body-block-refs/<slug>.png), diferente do build-collision-
+// grids.js antigo (heuristica de pixel escuro/agua) e do build-water-
+// collision-mask.js (mascara por bioma inteiro, nao por sala).
 //
-// Convencao da referencia (spec do usuario, confirmada):
-//   VERMELHO = area onde NAO deve andar. E a UNICA cor que bloqueia.
-//   Sem vermelho = pode andar — inclui o lilas/rosa (guia visual do
-//     caminho, pintado pelo usuario por cima) e a arte original sem
-//     pintura nenhuma ao redor dele.
-//   AMARELO = marcador de spawn do jogador (centroide).
+// As referencias moraram em assets/hunt-backgrounds/body-block/ ate a leva
+// 2026-08-16 (17 arquivos novos, 111MB): `scripts/copiar-assets.mjs` copia
+// TUDO que esta debaixo de assets/ pro build publicado, e nenhum codigo em
+// runtime nunca le essas referencias (so este script, uma vez, no build).
+// Mudaram pra scripts/body-block-refs/ (fora da arvore que vira deploy,
+// mesmo espirito de scripts/usum/ e scripts/pokerogue/ ja guardarem o
+// proprio insumo do build ali do lado) pra nao inflar o site publicado com
+// 111MB que o jogador nunca ve.
 //
-// Escopo: TESTE, so o bioma Sombrio (subs 'abyss'/'space', que
-// compartilham a mesma arte real assets/hunt-backgrounds/abyss.jpg — ver
-// data/biomas.ts). Generalizavel: acrescentar entradas no MANIFESTO abaixo
-// aplica o mesmo pipeline a outro sub-bioma, desde que exista uma
-// referencia body-block/<nome>.png pixel-alinhada com a arte real dela.
+// DUAS CONVENCOES DE COR, uma por referencia (`modo` no MANIFESTO abaixo) —
+// a leva 2026-08-16 trouxe 17 referencias novas com a convencao INVERTIDA da
+// original, e as duas convivem porque `abismo.png` (1a rodada) ja estava
+// testado e publicado com a convencao antiga:
+//
+//   modo 'vermelho_bloqueia' (abismo.png, original):
+//     VERMELHO = area onde NAO deve andar. E a UNICA cor que bloqueia.
+//     Sem vermelho = pode andar — inclui o lilas/rosa (que ali era so guia
+//       visual do caminho, decorativo) e a arte original sem pintura.
+//     AMARELO = marcador de spawn do jogador (centroide), obrigatorio.
+//
+//   modo 'rosa_anda' (as 17 novas, leva 2026-08-16 — spec do usuario:
+//   "pintei de lilas/rosa o UNICO lugar onde pokemons podem spawnar e
+//   transitar"):
+//     ROSA/LILAS = UNICA area andavel. Tudo mais (arte original sem
+//       pintura, qualquer outra cor) e bloqueado.
+//     Sem marcador de spawn dedicado nestas 17 (nenhuma tem um blob amarelo
+//       grande e deliberado — so ruido incidental da arte em varias, ex.
+//       cogumelo/flor amarela). Spawn sai do CENTROIDE da propria area rosa.
+//
+// Cobertura (leva 2026-08-16): as 17 referencias novas do usuario
+// (scripts/body-block-refs/{meadow,desert,badlands,burnt-forest,tall-grass,
+// forest,industrial,sea,ice-mountain,mountain,construction-site,swamp,
+// plains,beach,ruins,jungle,temple}.png — convertidas de .jpg/.png
+// originais em "POKE/Assets/hunt background body block/pintados/", mesmo
+// passo de conversao JPG->PNG do abismo.png original) cobrem 19 sub-biomas
+// (contando o par abyss/space da 1a rodada). Os 14 sub-biomas restantes sem
+// arte propria pintada (grass, town, seabed, lake, wasteland, cave,
+// ice-cave, volcano, metropolis, slum, dojo, fairy-cave — mais os 2 do
+// bioma Igneo/1 sub) ficam sem grade (fallback do circulo aberto de
+// sempre), ate ganharem referencia.
+//
+// `forest.png` cobre TAMBEM a hunt inicial (route_46): ela usa a mesma arte
+// real forest.jpg (huntSpawnOverrides.ts) mas fica FORA do sistema de salas
+// (temSalas() falso pra ela), entao nunca teria `sala.chave='forest'` pra
+// casar aqui — `getMap()` (data/maps.ts) faz o special-case direto.
 //
 // Precisa espelhar EXATAMENTE a transformacao mundo<->imagem de
 // render/sprites.ts#drawMapBackground (HUNT_BG_TILE_SCALE,
@@ -48,14 +81,26 @@ function isYellow(r, g, b) {
 function isRed(r, g, b) {
   return r > 120 && r > g * 1.5 && r > b * 1.5;
 }
+// Rosa/lilas saturado (amostrado nos arquivos reais das 17 novas
+// referencias: ~[255,115,255] — pico em R e B, G bem mais baixo que os
+// dois). Distinto de vermelho puro (isRed acima: B baixo tambem) e do
+// magenta/roxo incidental da arte (cogumelo, flor), que nao chega tao alto
+// nos dois canais simultaneamente na amostragem por celula.
+function isPink(r, g, b) {
+  return r > 180 && b > 150 && g < r - 60 && g < b - 60;
+}
 // Maioria simples: celula bloqueada quando metade ou mais das amostras
 // caem no vermelho — mesmo RED_CELL_RATIO do build-water-collision-mask.js
 // (nao precisa do ajuste fino que o LILAC_CELL_RATIO antigo precisou: aqui
 // e a AUSENCIA de vermelho que conta como andavel, entao uma celula de
 // transicao/borda cai pro lado seguro sozinha).
 const RED_CELL_RATIO = 0.5;
+// Inverso pro modo rosa_anda: andavel so quando METADE OU MAIS das amostras
+// da celula sao rosa — celula de transicao/borda do traco pintado cai pro
+// lado seguro (bloqueada) sozinha, mesmo espirito do RED_CELL_RATIO.
+const PINK_CELL_RATIO = 0.5;
 
-const refDir = path.join(__dirname, '..', 'assets', 'hunt-backgrounds', 'body-block');
+const refDir = path.join(__dirname, 'body-block-refs');
 const bgDir = path.join(__dirname, '..', 'assets', 'hunt-backgrounds');
 const outFile = path.join(__dirname, '..', 'src', 'data', 'generated', 'subBiomaCollision.generated.ts');
 
@@ -63,7 +108,24 @@ const outFile = path.join(__dirname, '..', 'src', 'data', 'generated', 'subBioma
 // devem usar essa grade (mais de uma quando varios subs reaproveitam a
 // mesma arte real, ex. abyss+space reaproveitam abyss.jpg).
 const MANIFESTO = {
-  'abismo.png': { chaves: ['abyss', 'space'], bg: 'abyss.jpg' },
+  'abismo.png': { chaves: ['abyss', 'space'], bg: 'abyss.jpg', modo: 'vermelho_bloqueia' },
+  'meadow.png': { chaves: ['meadow'], bg: 'meadow.jpg', modo: 'rosa_anda' },
+  'desert.png': { chaves: ['desert'], bg: 'desert.jpg', modo: 'rosa_anda' },
+  'badlands.png': { chaves: ['badlands'], bg: 'badlands.jpg', modo: 'rosa_anda' },
+  'burnt-forest.png': { chaves: ['graveyard'], bg: 'burnt-forest.jpg', modo: 'rosa_anda' },
+  'tall-grass.png': { chaves: ['tall-grass'], bg: 'tall-grass.jpg', modo: 'rosa_anda' },
+  'forest.png': { chaves: ['forest'], bg: 'forest.jpg', modo: 'rosa_anda' },
+  'industrial.png': { chaves: ['factory', 'power-plant', 'laboratory'], bg: 'industrial.jpg', modo: 'rosa_anda' },
+  'sea.png': { chaves: ['sea'], bg: 'sea.jpg', modo: 'rosa_anda' },
+  'ice-mountain.png': { chaves: ['snowy-forest'], bg: 'ice-mountain.png', modo: 'rosa_anda' },
+  'mountain.png': { chaves: ['mountain'], bg: 'mountain.jpg', modo: 'rosa_anda' },
+  'construction-site.png': { chaves: ['construction-site'], bg: 'construction-site.jpg', modo: 'rosa_anda' },
+  'swamp.png': { chaves: ['swamp'], bg: 'swamp.jpg', modo: 'rosa_anda' },
+  'plains.png': { chaves: ['plains'], bg: 'plains.jpg', modo: 'rosa_anda' },
+  'beach.png': { chaves: ['beach'], bg: 'beach.jpg', modo: 'rosa_anda' },
+  'ruins.png': { chaves: ['ruins'], bg: 'ruins.jpg', modo: 'rosa_anda' },
+  'jungle.png': { chaves: ['jungle'], bg: 'jungle.jpg', modo: 'rosa_anda' },
+  'temple.png': { chaves: ['temple'], bg: 'temple.png', modo: 'rosa_anda' },
 };
 
 const cols = Math.ceil(MAP_BOUNDS.width / CELL_SIZE);
@@ -91,7 +153,7 @@ function transformFor(imgWidth, imgHeight) {
 
 const results = {};
 
-for (const [refFile, { chaves, bg }] of Object.entries(MANIFESTO)) {
+for (const [refFile, { chaves, bg, modo }] of Object.entries(MANIFESTO)) {
   const refPath = path.join(refDir, refFile);
   const bgPath = path.join(bgDir, bg);
   if (!fs.existsSync(refPath)) { console.warn(`Pulando ${refFile}: referencia nao encontrada`); continue; }
@@ -105,31 +167,48 @@ for (const [refFile, { chaves, bg }] of Object.entries(MANIFESTO)) {
   const { width, height, rgba } = ref;
   const { escala, originX, originY } = transformFor(width, height);
 
-  // 1) Centroide do marcador amarelo (spawn).
-  let ySumX = 0, ySumY = 0, yCount = 0;
+  // 1) Marcador de spawn — fonte depende do modo.
+  //    'vermelho_bloqueia': centroide do marcador AMARELO, obrigatorio
+  //      (mesma regra desde a 1a rodada, abismo.png).
+  //    'rosa_anda': sem marcador dedicado — centroide da propria area ROSA
+  //      (a UNICA area andavel neste modo, entao o meio dela e sempre um
+  //      ponto razoavel pra nascer; o snap-pra-celula-valida abaixo cobre o
+  //      caso do centroide cair numa reentrancia bloqueada do proprio traco).
+  let sumX = 0, sumY = 0, count = 0;
+  const corDoMarcador = modo === 'rosa_anda' ? isPink : isYellow;
   for (let iy = 0; iy < height; iy++) {
     for (let ix = 0; ix < width; ix++) {
       const idx = (iy * width + ix) * 4;
       const r = rgba[idx], g = rgba[idx + 1], b = rgba[idx + 2], alpha = rgba[idx + 3];
       if (alpha < 10) continue;
-      if (isYellow(r, g, b)) { ySumX += ix; ySumY += iy; yCount++; }
+      if (corDoMarcador(r, g, b)) { sumX += ix; sumY += iy; count++; }
     }
   }
-  if (yCount === 0) throw new Error(`${refFile}: nenhum marcador amarelo de spawn encontrado.`);
-  const yImgX = ySumX / yCount, yImgY = ySumY / yCount;
-  let spawnWorldX = originX + yImgX * escala;
-  let spawnWorldY = originY + yImgY * escala;
+  if (count === 0) {
+    throw new Error(
+      modo === 'rosa_anda'
+        ? `${refFile}: nenhum pixel rosa/lilas encontrado — referencia sem area andavel marcada.`
+        : `${refFile}: nenhum marcador amarelo de spawn encontrado.`,
+    );
+  }
+  const markerImgX = sumX / count, markerImgY = sumY / count;
+  let spawnWorldX = originX + markerImgX * escala;
+  let spawnWorldY = originY + markerImgY * escala;
 
-  // 2) Grade de colisao: bloqueada SO onde a MAIORIA das amostras da celula
-  // e vermelha — tudo mais (lilas ou arte original sem pintura) e andavel
-  // por omissao (ver nota de topo do arquivo).
+  // 2) Grade de colisao — criterio inverso por modo:
+  //    'vermelho_bloqueia': bloqueada SO onde a MAIORIA das amostras da
+  //      celula e vermelha; tudo mais (lilas decorativo ou arte original) e
+  //      andavel por omissao.
+  //    'rosa_anda': ANDAVEL SO onde a MAIORIA das amostras da celula e
+  //      rosa/lilas; tudo mais (arte original sem pintura, qualquer outra
+  //      cor) e bloqueado por omissao — exatamente invertido.
   const rowStrings = [];
   let walkableCount = 0;
   for (let row = 0; row < rows; row++) {
     let line = '';
     for (let col = 0; col < cols; col++) {
       const wx0 = col * CELL_SIZE, wy0 = row * CELL_SIZE;
-      let redSamples = 0, samples = 0;
+      let matchSamples = 0, samples = 0;
       for (let sy = 0; sy < SAMPLE_STRIDE; sy++) {
         for (let sx = 0; sx < SAMPLE_STRIDE; sx++) {
           const wx = wx0 + ((sx + 0.5) / SAMPLE_STRIDE) * CELL_SIZE;
@@ -137,13 +216,20 @@ for (const [refFile, { chaves, bg }] of Object.entries(MANIFESTO)) {
           const ix = Math.round((wx - originX) / escala);
           const iy = Math.round((wy - originY) / escala);
           samples++;
-          if (ix < 0 || iy < 0 || ix >= width || iy >= height) { redSamples++; continue; } // fora da imagem = bloqueado
+          if (ix < 0 || iy < 0 || ix >= width || iy >= height) {
+            // Fora da imagem: sempre bloqueado, nos dois modos.
+            if (modo !== 'rosa_anda') matchSamples++; // "e vermelho" -> conta como match (bloqueia)
+            continue; // modo rosa_anda: "e rosa" fica false (nao soma) -> bloqueia por ausencia de match
+          }
           const idx = (iy * width + ix) * 4;
           const r = rgba[idx], g = rgba[idx + 1], b = rgba[idx + 2], alpha = rgba[idx + 3];
-          if (alpha < 10 || isRed(r, g, b)) redSamples++;
+          const cor = alpha >= 10 && (modo === 'rosa_anda' ? isPink(r, g, b) : isRed(r, g, b));
+          if (modo === 'rosa_anda') { if (cor) matchSamples++; }
+          else { if (alpha < 10 || cor) matchSamples++; }
         }
       }
-      const walkable = samples > 0 && redSamples / samples < RED_CELL_RATIO;
+      const ratio = samples > 0 ? matchSamples / samples : 0;
+      const walkable = modo === 'rosa_anda' ? ratio >= PINK_CELL_RATIO : ratio < RED_CELL_RATIO;
       if (walkable) walkableCount++;
       line += walkable ? '0' : '1';
     }
@@ -262,10 +348,12 @@ for (const [refFile, { chaves, bg }] of Object.entries(MANIFESTO)) {
 }
 
 const header = `// AUTO-GERADO por \`node scripts/build-sub-bioma-collision.js\` a partir das
-// referencias pintadas a mao em assets/hunt-backgrounds/body-block/*.png
-// (lilas = andavel, amarelo = spawn, tudo mais = bloqueado). Nao editar a
-// mao — rode o script de novo apos repintar uma referencia. Ver o proprio
-// script pra convencao de cor e a lista de sub-biomas cobertos.
+// referencias pintadas a mao em assets/hunt-backgrounds/body-block/*.png.
+// DUAS convencoes de cor coexistem (\`modo\` por arquivo no MANIFESTO do
+// proprio script): abismo.png e vermelho=bloqueia/amarelo=spawn (original);
+// as 17 demais sao rosa/lilas=UNICA area andavel, tudo mais bloqueado, spawn
+// no centroide da propria area rosa. Nao editar a mao — rode o script de
+// novo apos repintar uma referencia. Ver o proprio script pra detalhe.
 export interface SubBiomaColisao {
   grid: string[];
   spawnPoint: { x: number; y: number };

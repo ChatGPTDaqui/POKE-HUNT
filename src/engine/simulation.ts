@@ -19,7 +19,7 @@
 // Um comparador acusaria jogador honesto. E re-simular pra conferir custa a
 // MESMA CPU que simular; se vai gastar, gaste sendo a autoridade.
 import { SPECIES, createPokeInstance, type PokeInstance } from '@/data/pokes'
-import { mapDefParaSala, spawnPointParaSala, mapWalkRadius, isCellBlocked, type MapDef } from '@/data/maps'
+import { mapDefParaSala, spawnPointParaSala, mapWalkRadius, isCellBlocked, nearestOpenPoint, type MapDef } from '@/data/maps'
 import { getEncounter } from '@/data/enemies'
 import { getItem } from '@/data/items'
 import { isDamagingAbility } from '@/data/abilities'
@@ -119,7 +119,24 @@ const SPAWN_MIN_DISTANCE = 250
 const SPAWN_MARGIN = 60
 const SPAWN_POINT_MAX_ATTEMPTS = 40
 
-function randomSpawnPoint(rng: Rng, mapDef: MapDef): Point {
+// Pedido explicito do usuario: POKE selvagem so nasce a media distancia e na
+// LINHA DE VISAO do jogador — um cone a frente de pra onde ele esta virado
+// (`player.facing`, ja mantido por MovementSystem a cada passo). Faz o
+// jogador ter que andar/virar pra "descobrir" spawn novo em vez de tudo
+// aparecer ao redor do ponto onde ele esta parado — o pedido era
+// literalmente "criar a ideia de explorar o mapa".
+const SPAWN_CONE_MIN_DISTANCE = 250 // "media distancia": nunca colado no jogador
+const SPAWN_CONE_MAX_DISTANCE = 550 // nem no fim do mapa — se a tentativa nao achar celula livre nessa faixa, cai no sorteio antigo (raio do mapa inteiro) abaixo
+const SPAWN_CONE_HALF_ANGLE = (55 * Math.PI) / 180 // ~110 graus de cone total
+
+// Sorteio antigo (raio do mapa inteiro, sem depender de onde o jogador esta
+// olhando) — vira FALLBACK: cobre o caso sem jogador ainda (nao deveria
+// acontecer nos 3 call sites reais, mas o parametro e opcional por
+// seguranca) e o caso do cone nao achar celula livre em
+// `SPAWN_POINT_MAX_ATTEMPTS` tentativas (corredor de body-block estreito
+// demais pra caber a faixa/angulo pedidos) — sem isso um mapa apertado
+// deixaria de spawnar QUALQUER inimigo, pior que nascer fora do cone.
+function randomSpawnPointFullMap(rng: Rng, mapDef: MapDef): Point {
   const cx = mapDef.bounds.width / 2
   const cy = mapDef.bounds.height / 2
   const radius = mapWalkRadius(mapDef) - SPAWN_MARGIN
@@ -138,9 +155,35 @@ function randomSpawnPoint(rng: Rng, mapDef: MapDef): Point {
   return { x, y }
 }
 
-function spawnEnemyAt(world: SequenciaDeSorteio, mapDef: MapDef, pool: string[], janela?: [number, number]): EnemyEntity {
+function randomSpawnPoint(rng: Rng, mapDef: MapDef, player: { x: number; y: number; facing: Point } | null): Point {
+  if (!player) return randomSpawnPointFullMap(rng, mapDef)
+
+  const cx = mapDef.bounds.width / 2
+  const cy = mapDef.bounds.height / 2
+  const radius = mapWalkRadius(mapDef)
+  const facingAngle = Math.atan2(player.facing.y, player.facing.x)
+
+  for (let attempts = 0; attempts < SPAWN_POINT_MAX_ATTEMPTS; attempts++) {
+    const angle = facingAngle + randRange(rng, -SPAWN_CONE_HALF_ANGLE, SPAWN_CONE_HALF_ANGLE)
+    const dist = randRange(rng, SPAWN_CONE_MIN_DISTANCE, SPAWN_CONE_MAX_DISTANCE)
+    const x = player.x + Math.cos(angle) * dist
+    const y = player.y + Math.sin(angle) * dist
+    if (Math.hypot(x - cx, y - cy) > radius) continue
+    if (isCellBlocked(mapDef, x, y)) continue
+    return { x, y }
+  }
+  return randomSpawnPointFullMap(rng, mapDef)
+}
+
+function spawnEnemyAt(
+  world: SequenciaDeSorteio,
+  mapDef: MapDef,
+  pool: string[],
+  janela?: [number, number],
+  player?: { x: number; y: number; facing: Point } | null,
+): EnemyEntity {
   const { rng, counters } = world
-  const point = randomSpawnPoint(rng, mapDef)
+  const point = randomSpawnPoint(rng, mapDef, player ?? null)
   // Ponderado pelo TIER de spawn da especie, derivado da chance real de
   // encontro selvagem do Gen1/Gen2 (ver scripts/derive-spawn-tiers.js) — quem e
   // comum nos jogos reais aparece mais que quem e raro, dentro da mesma hunt.
@@ -296,7 +339,17 @@ export function buildMapWorld(
   if (!mapDef) throw new Error(`Mapa desconhecido: ${mapId}`)
 
   const spawn = spawnPointParaSala(sala) ?? mapDef.playerSpawn
-  const player = createPlayerEntity(base.counters, { poke: activePoke, x: spawn.x, y: spawn.y })
+  // `spawnPointParaSala` ja devolve um ponto andavel quando a sala tem body-
+  // block (o proprio script de build ja resolve isso). O fallback
+  // (`mapDef.playerSpawn`, GEOMETRIA fixa) NAO passa por essa checagem —
+  // hunt sem sala mas com grade propria (ex.: route_46 reusando o body-
+  // block da 'forest', ver maps.ts#mapDefParaSala) podia nascer o jogador
+  // DENTRO de uma parede pintada. Mesmo snap que `registrarAbate` ja faz na
+  // troca de sala, aplicado aqui na construcao inicial do mundo.
+  const spawnFinal = (mapDef.collisionGrid && isCellBlocked(mapDef, spawn.x, spawn.y))
+    ? nearestOpenPoint(mapDef, spawn.x, spawn.y) ?? spawn
+    : spawn
+  const player = createPlayerEntity(base.counters, { poke: activePoke, x: spawnFinal.x, y: spawnFinal.y })
   if (isDead(player)) player.fainted = true
 
   const sequenceIndex = progresso?.sequenceIndex ?? 0
@@ -316,7 +369,7 @@ export function buildMapWorld(
       enemies.push(enemy)
     } else {
       for (let i = 0; i < mapDef.maxEnemies; i++) {
-        const enemy = spawnEnemyAt(base, mapDef, pool, janela)
+        const enemy = spawnEnemyAt(base, mapDef, pool, janela, player)
         aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
         enemies.push(enemy)
       }
@@ -494,7 +547,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       } else {
         const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
         for (let i = 0; i < world.mapDef.maxEnemies; i++) {
-          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela)
+          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player)
           aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
           world.enemies.push(enemy)
         }
@@ -625,7 +678,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
       const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
-      const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela)
+      const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player)
       aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
       world.enemies.push(enemy)
       world.respawnTimer = world.mapDef.respawnDelay

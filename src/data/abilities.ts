@@ -28,6 +28,7 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
 import { ABILITIES_DATA } from './generated/abilities.generated'
 import { TYPED_AOE_MOVES } from './typedAoeMoves'
+import { WILD_AGGRO_RADIUS } from './huntTypes'
 import type { AbilityCategory, ElementType, StatusCondition, StatChange } from './generated/types'
 
 export type AbilityTarget = 'single' | 'aoe'
@@ -101,7 +102,13 @@ export const BASIC_ATTACK: Ability = {
 // Os golpes de nivel 50 continuam sendo AOE por desenho: eles nao vem do
 // catalogo, sao conteudo proprio deste jogo.
 const AOE_ABILITY_KEYS = new Set(Object.keys(TYPED_AOE_MOVES))
-export const AOE_RADIUS = 240 // medium/high splash circle around the attacker (doubled per balance pass)
+// Pedido explicito do usuario: o raio de golpe AOE passa a ser o MESMO raio
+// de "lure" (aggro) do POKE selvagem — o alcance em que o jogador ja teria
+// puxado o inimigo pra perto de qualquer forma. Era 240 (splash medio/alto,
+// dobrado numa leva de balanceamento anterior); agora deriva do mesmo numero
+// que `createEnemyEntity` usa (huntTypes.ts#WILD_AGGRO_RADIUS), sem
+// reescrever o 175 uma 4a vez.
+export const AOE_RADIUS = WILD_AGGRO_RADIUS
 
 // Merged in ahead of the spreadsheet moves — TYPED_AOE_MOVES's keys
 // (aoe50_fire, aoe50_water, ...) never collide with real spreadsheet move

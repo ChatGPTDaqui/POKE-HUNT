@@ -9,6 +9,16 @@ import type { RarityKey } from './rarity'
 
 export type StatBlock = SpeciesBaseStats
 
+// Raio de "lure" (aggro) do POKE selvagem: distancia em que ele nota e vem
+// pra cima do jogador (ver engine/entity.ts#createEnemyEntity,
+// AGGRO_RADIUS_MULTIPLIER=1 la aplica esse valor sem boost, pedido explicito
+// do usuario). Hardcoded nos 3 pontos que constroem `HuntEncounter`
+// (huntSpawnOverrides.ts, nightmareMaps.ts x2) — trazido pra ca so pra
+// `data/abilities.ts#AOE_RADIUS` ter uma fonte compartilhada em vez de
+// reescrever o mesmo numero magico uma 4a vez (pedido: raio de AOE = raio de
+// lure do selvagem).
+export const WILD_AGGRO_RADIUS = 175
+
 export interface HuntMapDef extends MapDataEntry {
   collisionGrid?: string[] | null
   noRespawn?: boolean

@@ -15,7 +15,7 @@ import type { HuntMapDef } from './huntTypes'
 // the spreadsheet sync — huntSpawnOverrides.js is the one place that does
 // this merge, since it needs to patch both this file's enemyPools AND
 // data/enemies.js's encounters together.
-import { MAPS } from './huntSpawnOverrides'
+import { MAPS, STARTER_HUNT_ID } from './huntSpawnOverrides'
 export { MAPS }
 
 export interface MapDef extends HuntMapDef {
@@ -97,7 +97,14 @@ export function getMap(id: string): MapDef | null {
 export function mapDefParaSala(mapId: string, sala: { chave: string } | null): MapDef | null {
   const map = getMap(mapId)
   if (!map) return null
-  const override = sala && SUB_BIOMA_COLLISION[sala.chave]
+  // A hunt inicial (route_46) fica FORA do sistema de salas (temSalas() e
+  // falso pra ela — salaSystem.ts), entao `sala` nunca casa aqui. Ela usa a
+  // MESMA arte real da 'forest' (huntSpawnOverrides.ts: bg = forest.jpg),
+  // entao reusa a grade pintada dessa sub-bioma direto — sem isso a hunt
+  // inicial nunca ganharia body-block nenhum, mesmo tendo referencia
+  // pintada propria (body-block/forest.png).
+  const chave = sala?.chave ?? (mapId === STARTER_HUNT_ID ? 'forest' : null)
+  const override = chave && SUB_BIOMA_COLLISION[chave]
   if (!override) return map
   return { ...map, collisionGrid: override.grid, colisaoDefineLimite: true }
 }

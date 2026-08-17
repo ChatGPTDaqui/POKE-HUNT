@@ -20,7 +20,7 @@ import { hpBarFillColor } from '@/data/hpBar'
 import { AURA_COLORS } from '@/data/auraColors'
 import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
 import { impactShapeForType, type ImpactShape } from '@/data/impactShapes'
-import { CAPTURE_ANIM_URL, CAPTURE_ANIM_FRAME_DURATION, captureAnimFrameRect } from '@/data/captureAnim'
+import { CAPTURE_ANIM_FRAME_DURATION, captureAnimFrameRect } from '@/data/captureAnim'
 import { vfxDoElemento } from '@/data/elementVfx'
 import { elementoVfxGifUrl } from '@/data/elementVfxGif'
 import { statusVfxUrl } from '@/data/statusVfx'
@@ -717,22 +717,26 @@ function drawAbilityEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): 
   else drawImpactBurst(ctx, effect)
 }
 
-const CAPTURE_ANIM_DRAW_SIZE = 40
+// Celula da arte nova e 64x32 (2:1), nao mais o 64x64 quadrado do sheet
+// antigo — a largura de destino continua a mesma de sempre, a altura sai
+// PROPORCIONAL ao frame (sh/sw) pra nao esticar a bola verticalmente.
+const CAPTURE_ANIM_DRAW_WIDTH = 40
 
 function drawCaptureAnim(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
   if (effect.age < effect.delay) return
-  const img = getOrLoadImage(CAPTURE_ANIM_URL)
-  if (!img.complete || img.naturalWidth === 0) return
   const frameIndex = Math.floor((effect.age - effect.delay) / CAPTURE_ANIM_FRAME_DURATION)
   const frame = captureAnimFrameRect(effect.ballItemId!, Boolean(effect.success), frameIndex)
   if (!frame) return
+  const img = getOrLoadImage(frame.url)
+  if (!img.complete || img.naturalWidth === 0) return
 
+  const drawHeight = CAPTURE_ANIM_DRAW_WIDTH * (frame.sh / frame.sw)
   ctx.save()
   ctx.imageSmoothingEnabled = false
   ctx.drawImage(
     img, frame.sx, frame.sy, frame.sw, frame.sh,
-    effect.targetX! - CAPTURE_ANIM_DRAW_SIZE / 2, effect.targetY! - CAPTURE_ANIM_DRAW_SIZE / 2,
-    CAPTURE_ANIM_DRAW_SIZE, CAPTURE_ANIM_DRAW_SIZE,
+    effect.targetX! - CAPTURE_ANIM_DRAW_WIDTH / 2, effect.targetY! - drawHeight / 2,
+    CAPTURE_ANIM_DRAW_WIDTH, drawHeight,
   )
   ctx.restore()
 }
