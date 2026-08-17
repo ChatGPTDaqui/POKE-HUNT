@@ -68,12 +68,55 @@ manda citar símbolo em vez de repetir número.
 
 ---
 
-## Constantes onde `CLAUDE.md` contradiz o código
+## Higienização de 2026-08-17 — o diário saiu do `CLAUDE.md`
+
+Pedido explícito ("higienização do contexto do projeto, retirar informação obsoleta"). Medido
+antes de mexer: `CLAUDE.md` eram **4.594 linhas / 320KB ≈ 80k tokens carregados em toda sessão**,
+e mais da metade descrevia código que não existe. Resultado: **4.594 → ~330 linhas**, com o
+diário movido íntegro para `HISTORICO.md` (versionado, não auto-carregado) — cópia conferida por
+`diff`, nada deletado.
+
+O que estava obsoleto, por classe:
+
+| Classe | Volume | Situação |
+|---|---|---|
+| Levas 2 a 9 + "Estado atual" + "Sistema de raridade" + "Movimento e mecânica" | ~1.080 linhas | descreviam `js/`, `css/`, `main.js` — o jogo vanilla, cortado. 67 referências |
+| Levas 5.0–5.8 | ~1.200 linhas | descrevem em detalhe `server/src/app.ts`, `acoes.ts`, `mercado.ts`, `social.ts`, `ranking.ts`, `reiniciar.ts`, `node.ts` — **todos deletados** em `29a4da4`. Pior que obsoleto: um agente grepa e não acha |
+| "Fonte de dados: o Postgres é a verdade" + prova byte-a-byte | ~68 linhas | fonte virou PokeAPI/Ultra Sun; os três geradores estão bloqueados |
+| Fase D (D1/D2/D3) + "o cliente ainda é autoritativo" + "Plano detalhado" + "Migração React+Vite" | ~566 linhas | fases concluídas, narradas em tempo presente |
+| 14 referências a `web/src` / `cd web` | — | `web/` é **diretório vazio**; o app é a raiz desde `70d5561` |
+
+### Dois achados que não eram documentação — eram coisa quebrada
+
+1. **`cd server && npm run dev` não existe** e era citado em `CLAUDE.md` **e em quatro páginas
+   desta pasta**, incluindo [11](11-operacao.md) na tabela de comandos e como "**primeiro passo,
+   sempre**" para diagnosticar 502. `server/src/node.ts` foi deletado em `29a4da4`;
+   `server/package.json` tem só `build` e não sobrou nenhum `listen()` em `server/src/`. A
+   receita mais citada de diagnóstico do projeto estava morta e apontada como primeira escolha.
+   Corrigido nos cinco lugares, com o substituto real (reproduzir a query por
+   `db query --linked`).
+2. **`scripts/import-kanto-sprites.js` está quebrado** — `COLLAB_ROOT` (linha 24) aponta para
+   `assets/SpriteCollab-master (1)/SpriteCollab-master/`, checkout de 1.6GB **removido do disco**.
+   A arte já importada ficou; importar espécie nova falha. Registrado no `CLAUDE.md`, não
+   consertado (exige decidir entre reobter o checkout ou reescrever o script para a rede).
+
+Correção de rota registrada: ao escrever o `CLAUDE.md` novo eu afirmei três coisas de memória que
+a verificação derrubou — `.gitignore:11` (é 17), o checkout do SpriteCollab como disponível (não
+está), e `npx supabase functions serve` como caminho conhecido (não testado nesta máquina).
+Todas as três estavam no texto antigo ou eram inferência plausível. **Documento novo não é
+imune ao mesmo apodrecimento que ele conserta.**
+
+## Constantes onde o histórico contradiz o código
 
 Todos os valores do código conferidos em `evalOrDefault(...)`, e **nenhuma dessas chaves existe
 em `formulas.generated.ts`** — então o fallback é o valor efetivo.
 
-| Chave | `CLAUDE.md` (era) | Código | Onde | Status |
+> Levantado quando estas afirmações viviam em `CLAUDE.md`. Desde a higienização de 2026-08-17
+> elas estão em `HISTORICO.md`, e o `CLAUDE.md` não cita nenhum valor de balanceamento — a única
+> tabela de knobs viva é [02](02-dados-e-catalogo.md#knobs-de-economia-disponíveis), que cita
+> símbolo em vez de copiar valor. Os "corrigido em `CLAUDE.md`" abaixo são registro histórico.
+
+| Chave | Doc (era) | Código | Onde | Status |
 |---|---|---|---|---|
 | `GOLD_GLOBAL_MULTIPLIER` | `4` ("+300%") | **1** | `economySystem.ts:22` | **pendente — decisão de balanceamento real, não tocado** |
 | `STONE_DROP_CHANCE` | `0.2` ("5% → 20%") | **0.05** | `economySystem.ts:20` | corrigido em `CLAUDE.md` 2026-08-16 |
@@ -148,9 +191,11 @@ Duas coisas, ambas corrigidas ao criar esta pasta:
 1. Mandava `cd web` antes de `npm install`. **O app é a raiz do repositório** desde que a
    subpasta foi promovida (commit `70d5561`). Seguir a instrução dava erro de diretório
    inexistente.
-2. Não mencionava que **rodar o jogo exige o servidor de autoridade**
-   (`cd server && npm run dev` + `VITE_SERVIDOR_URL`). Desde que a RLS foi revogada, seguir as
-   instruções levava a um jogo que carrega e não salva — e o sintoma não aponta para a causa.
+2. Não mencionava que **rodar o jogo exige o servidor de autoridade** (`VITE_SERVIDOR_URL`
+   apontando para um serviço vivo). Desde que a RLS foi revogada, seguir as instruções levava a
+   um jogo que carrega e não salva — e o sintoma não aponta para a causa. (O `cd server &&
+   npm run dev` citado na versão original desta entrada também morreu; ver a entrada de
+   2026-08-17 abaixo.)
 
 ---
 
@@ -174,8 +219,18 @@ foi feito é a forma mais cara de documentação errada.** Ninguém vai verifica
    do `STONE_DROP_CHANCE` existe porque a reversão foi feita no código e não no documento.
 3. **Ao afirmar "feito", conferir.** O caso do `_redirects` custou uma rodada de diagnóstico.
 
+4. **Ao mover um sistema, grepar o nome do arquivo antigo em `docs/` e `CLAUDE.md` no mesmo
+   commit.** As duas migrações grandes (catálogo Ultra Sun, RPC-everything) deixaram ~28
+   referências a arquivos deletados espalhadas, uma delas apontada como "primeiro passo, sempre"
+   para diagnóstico. O grep custa segundos; achar isso depois custou uma auditoria inteira.
+
 Uma verificação automática cobriria a primeira classe (constantes) — um script que leia os
 `evalOrDefault` do código e compare com uma tabela declarada. **Não foi construído**: seria mais
-uma peça a manter, e o problema real é a duplicação com `CLAUDE.md`, não a ausência de gate.
+uma peça a manter, e a duplicação que motivava esse risco foi resolvida na origem em 2026-08-17
+(nenhum documento fora de `docs/02` cita valor de balanceamento).
+
+A quarta regra é a que teria mais retorno automatizada: um script que grepe caminhos de arquivo
+citados em `docs/*.md` e `CLAUDE.md` e falhe se o arquivo não existir. **Também não foi
+construído** — mas, ao contrário do gate de constantes, aqui há dano medido em duas auditorias.
 Resolver a duplicação torna o gate desnecessário; construir o gate sem resolver a duplicação só
 formaliza o problema.

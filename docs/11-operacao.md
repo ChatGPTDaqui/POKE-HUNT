@@ -12,11 +12,18 @@
 | `npm run preview` | Preview do build, porta 4173 |
 | `npm test` | vitest |
 | `npm run lint` | oxlint |
-| `cd server && npm run dev` | Serviço de autoridade local, porta 8787 |
+| `npm run edge:publicar` | Publica o serviço de autoridade (build:edge + deploy) |
 
 **Rodar o jogo exige o servidor de autoridade.** Desde que a RLS foi revogada, o cliente não
 escreve progresso: sem `VITE_SERVIDOR_URL` apontando para um serviço vivo, o jogo não
 funciona. Isso é o recurso, não um bug.
+
+**Não existe mais serviço de autoridade local.** `server/src/node.ts` (o adaptador `node:http`,
+porta 8787) foi deletado em `29a4da4` — `server/package.json` tem só `build`, e nenhum
+`listen()` sobrou em `server/src/`. `.env.local` aponta `VITE_SERVIDOR_URL` direto para a Edge
+Function publicada, e é assim que se desenvolve hoje: `npm run dev` no cliente contra a função
+em produção. Consequência a aceitar: **testar mudança no servidor exige `npm run edge:publicar`
+antes** — não há ciclo local.
 
 ### Dados
 
@@ -198,12 +205,22 @@ Sequência em `supabase/migrations/`, ordenada por timestamp. Marcos:
 
 ## Diagnóstico de 502
 
-**Primeiro passo, sempre:** `cd server && npm run dev` e repetir o request contra
-`localhost:8787`.
-
 A Edge Function **não repassa o corpo do erro do PostgREST** — o que é correto, porque ele traz
-nome de coluna e constraint. Lá o erro é opaco; localmente ele diz exatamente o que quebrou.
-Isso já resolveu dois diagnósticos em minutos que estavam parados.
+nome de coluna e constraint. Lá o erro é opaco.
+
+**A receita que resolvia isso morreu.** Até `29a4da4`, o primeiro passo era subir o serviço local
+(`cd server && npm run dev`, porta 8787) e repetir o request — o erro completo aparecia. Aquele
+adaptador Node não existe mais. O que sobrou, em ordem de custo:
+
+1. **Reproduzir a query com `npx supabase db query --linked`.** Funciona sempre e é o mais rápido
+   quando você já sabe qual tabela está envolvida — o erro vem completo.
+2. **Log da função publicada** (`npx supabase functions logs jogo`, ou o painel).
+3. `npx supabase functions serve jogo` — daria o ciclo local de volta com erro completo, mas
+   **não foi testado nesta máquina** e provavelmente exige Docker, que todos os outros caminhos
+   de Supabase daqui evitam de propósito.
+
+Dois diagnósticos que estavam parados foram resolvidos em minutos pela receita antiga; vale
+reconstituir o equivalente antes de precisar dele sob pressão.
 
 ## Variáveis de ambiente
 

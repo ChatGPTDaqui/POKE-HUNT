@@ -55,26 +55,39 @@ esses pontos. Tornar o repositório público exige, antes, decidir o que sai daq
 
 | Arquivo | Versionado | Papel |
 |---|---|---|
-| `CLAUDE.md` | **não** (`.gitignore:11`) | Histórico cronológico por leva + regras operacionais para agentes. Organizado por *quando* algo foi feito, não por *o que* é. |
+| `CLAUDE.md` | **não** (`.gitignore:17`) | Regra operacional de agente: layout do repo, comandos, gotchas, disciplina de teste, fora-de-escopo. Carregado em toda sessão — por isso é curto. |
+| `HISTORICO.md` | sim | Diário cronológico por leva. Organizado por *quando* algo foi feito. **Não** é auto-carregado; consultado por `grep`. |
 | `README.md` | sim | Como rodar. Curto de propósito. |
 | `UI-INVENTARIO.md` | sim | Inventário de superfícies de UI, tirado num momento específico. |
 | `SPEC-supabase-migration.md` | sim | Especificação da migração para Supabase, histórica. |
 | `docs/` (esta pasta) | sim | Arquitetura e regras de negócio, por assunto. |
 
-### `CLAUDE.md` não está no git — e isso é o argumento mais forte para esta pasta existir
+### A duplicação entre `CLAUDE.md` e esta pasta foi resolvida em 2026-08-17
 
-`.gitignore:11` o exclui. São **3.982 linhas** com o registro mais denso de decisão do projeto
-— incluindo medições que custaram sessões inteiras de investigação — e elas existem **só nesta
-máquina**. Um `git clone` traz o código e não traz nenhum desse contexto.
+Até essa data `CLAUDE.md` eram **4.594 linhas** (≈80k tokens carregados em *toda* sessão)
+misturando três coisas: diário por leva, descrição de sistema — duplicando esta pasta — e regra
+operacional. Metade descrevia código já cortado do repositório: 67 referências a `js/` (jogo
+vanilla), 14 a `web/src` (o app é a raiz desde `70d5561`; `web/` é diretório vazio) e ~23 a
+arquivos de servidor deletados na migração RPC-everything (`app.ts`, `acoes.ts`, `mercado.ts`,
+`social.ts`, `ranking.ts`, `reiniciar.ts`, `node.ts`).
 
-Isso reenquadra a duplicação entre os dois:
+Aplicada a resolução que esta seção propunha:
 
-- **Não é ruído para colaborador**: ele nunca vê os dois, só este.
-- **É risco de perda total**: nada versionado guarda o *porquê* das decisões. Esta pasta é a
-  primeira vez que ele entra no repositório.
+- **Regra operacional** ficou em `CLAUDE.md` (~330 linhas), com links para cá.
+- **Diário** foi para `HISTORICO.md`, cópia byte-a-byte conferida por `diff`, com um cabeçalho
+  novo mapeando cada caminho morto para a realidade atual.
+- **Descrição de sistema** é responsabilidade só desta pasta.
 
-**A resolução proposta** — não executada, porque é decisão de quem mantém o projeto —
-é `CLAUDE.md` ficar com o que é genuinamente específico de agente (gotchas de ambiente,
-comandos, disciplina de teste, o diário por leva) e delegar a descrição de sistema para cá,
-com links. Enquanto isso não acontecer, **quando as duas divergirem, o código decide, e depois
-esta pasta** — que foi escrita lendo o código.
+Ordem de autoridade quando divergirem: **o código, depois esta pasta, depois `HISTORICO.md`** —
+o histórico descreve o código como ele era em cada rodada, não como está.
+
+### Por que o diário entrou no git
+
+Ele era o registro mais denso de decisão do projeto — incluindo medições que custaram sessões
+inteiras — e existia **só numa máquina**. Um `git clone` trazia o código e nenhum desse contexto.
+Decidido que o risco de perda total pesava mais que o de exposição.
+
+**Consequência:** `HISTORICO.md` entra na mesma advertência que este arquivo já faz sobre
+[04](04-autoridade-do-servidor.md) e [07](07-farm-offline.md) — ele documenta sem filtro os
+limiares anti-abuso do servidor. Se o repositório virar público, são **três** arquivos a revisar
+antes, não dois.

@@ -463,9 +463,10 @@ concedida a `authenticated` por engano.
 **A conclusão original — "o jogo parou de funcionar sem o servidor" — continua verdadeira,
 só que "o servidor" hoje é dois: sem `service_role` (sessão HTTP), não há como abrir/flushar
 hunt; sem as RPCs (que não dependem do serviço Node/Edge, só do Postgres estar de pé), não há
-como comprar, vender, evoluir, negociar ou conversar.** Rodar a sessão local exige
-`cd server && npm run dev` mais `VITE_SERVIDOR_URL`; as RPCs funcionam contra qualquer
-projeto Supabase linkado, sem precisar do servidor Node rodando.
+como comprar, vender, evoluir, negociar ou conversar.** As RPCs funcionam contra qualquer projeto
+Supabase linkado; a sessão HTTP exige `VITE_SERVIDOR_URL` apontando para a Edge Function
+publicada — **não há mais como rodá-la local** (`server/src/node.ts` foi deletado em `29a4da4`;
+ver [11-operacao.md](11-operacao.md#comandos)).
 
 ### Teste adversarial
 

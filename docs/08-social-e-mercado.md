@@ -280,9 +280,10 @@ só não pode mais falhar por 502 de constraint: a função nunca escreve `'Trei
 de um nick existente.
 
 **Lição de diagnóstico:** a Edge Function não repassa o corpo do erro do PostgREST (correto —
-traz nome de coluna e constraint). Rodar `cd server && npm run dev` e repetir o request contra
-`localhost:8787` mostrou a causa em um minuto. Vale como primeiro passo para qualquer 502 do
-serviço.
+traz nome de coluna e constraint). Na época, rodar o serviço local (`cd server && npm run dev`,
+porta 8787) e repetir o request mostrou a causa em um minuto. **Aquele serviço local não existe
+mais** (deletado em `29a4da4`) — o substituto está em
+[11-operacao.md](11-operacao.md#diagnóstico-de-502).
 
 ### O que o reset ainda deixava para trás
 
