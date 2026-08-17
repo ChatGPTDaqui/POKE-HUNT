@@ -717,10 +717,18 @@ function drawAbilityEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): 
   else drawImpactBurst(ctx, effect)
 }
 
-// Celula da arte nova e 64x32 (2:1), nao mais o 64x64 quadrado do sheet
-// antigo — a largura de destino continua a mesma de sempre, a altura sai
-// PROPORCIONAL ao frame (sh/sw) pra nao esticar a bola verticalmente.
-const CAPTURE_ANIM_DRAW_WIDTH = 40
+// 32, nao 40: precisa ser um divisor INTEIRO da largura da fonte (64px),
+// pra escala de reducao ficar em 2:1 exato. Com 40 (fator 1.6, nao inteiro)
+// e `imageSmoothingEnabled=false`, minificacao nao-inteira nao e garantida
+// como point-sampling puro em todo motor/GPU — alguns aplicam algo tipo
+// mipmap mesmo com suavizacao desligada (ela so controla a AMPLIACAO, nao a
+// reducao), e podem descartar metade dos pixels da bola dependendo do
+// alinhamento. Print do usuario ("so esta metade") bate exatamente com
+// esse padrao; a simulacao Node (point-sampling ingenuo) nunca reproduziria
+// isso, porque o navegador real nao necessariamente reduz do mesmo jeito.
+// 32 elimina a variavel: toda reducao 2:1 e trivial e identica em qualquer
+// motor. A altura sai PROPORCIONAL ao frame (sh/sw) pra nao esticar a bola.
+const CAPTURE_ANIM_DRAW_WIDTH = 32
 
 function drawCaptureAnim(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
   if (effect.age < effect.delay) return
