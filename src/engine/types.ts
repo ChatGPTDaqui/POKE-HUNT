@@ -300,6 +300,11 @@ export interface WorldEffect {
   isAoe?: boolean
   worldSize?: number
   elementType?: ElementType
+  // Id do golpe que criou este efeito. So o desenho usa (data/moveVfx.ts —
+  // arte por GOLPE, consultada antes da arte por TIPO); a simulacao nunca le.
+  // Existe porque `elementType` nao distingue Bullet Punch de Metal Claw, e os
+  // dois desenhariam o mesmo efeito de aco.
+  abilityId?: string
   // Presente so em `abilityEffect` de golpe de STATUS (ver data/statusVfx.ts)
   // — troca o burst de impacto normal pela arte de buff/debuff por tipo.
   statusDirection?: 'aumenta' | 'diminui'

@@ -1576,6 +1576,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
         duration: ability.power === 0 ? STATUS_VFX_DURATION : AOE_EFFECT_DURATION,
         worldSize: (ability.radius ?? 0) * 2,
         elementType: ability.type,
+        abilityId: ability.id,
         // Anel unico do cast AOE inteiro (nao um por alvo) — gate por
         // `power === 0` aqui e o mais fino que da pra fazer sem duplicar
         // a checagem de sucesso por alvo (statusVaiPegar corre depois, por
@@ -2142,6 +2143,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       isAoe: false,
       duration: ability.power === 0 ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
       elementType: ability.type,
+      abilityId: ability.id,
       statusDirection: ability.power === 0 ? direcaoDoGolpeDeStatus(ability.statChanges) : undefined,
     }))
   }

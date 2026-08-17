@@ -23,6 +23,7 @@ import { impactShapeForType, type ImpactShape } from '@/data/impactShapes'
 import { captureAnimFrameDuration, captureAnimFrameRect } from '@/data/captureAnim'
 import { vfxDoElemento } from '@/data/elementVfx'
 import { elementoVfxGifUrl } from '@/data/elementVfxGif'
+import { vfxDoGolpe } from '@/data/moveVfx'
 import { statusVfxUrl } from '@/data/statusVfx'
 import type { Species } from '@/data/pokes'
 import type { WorldEntity, WorldEffect, WorldState } from '@/engine/types'
@@ -557,6 +558,14 @@ function drawVfxDeElemento(
 }
 
 function drawImpactBurst(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
+  // Arte POR GOLPE antes da arte por tipo (data/moveVfx.ts): Bullet Punch e
+  // STEEL, e sem esta consulta ele desenharia o mesmo aco de Metal Claw.
+  const arteDoGolpe = vfxDoGolpe(effect.abilityId)
+  if (arteDoGolpe) {
+    const tamanho = (effect.worldSize || IMPACT_BASE_SIZE) * ESCALA_VFX_SINGLE * (arteDoGolpe.escala?.single ?? 1)
+    if (drawVfxDeElemento(ctx, effect, arteDoGolpe.single, tamanho)) return
+  }
+
   const arte = vfxDoElemento(effect.elementType)
   if (arte) {
     const tamanho = (effect.worldSize || IMPACT_BASE_SIZE) * ESCALA_VFX_SINGLE * (arte.escala?.single ?? 1)
@@ -615,6 +624,15 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
   // `worldSize` e o DIAMETRO real da area de efeito (ability.radius * 2), entao
   // a arte sai exatamente do tamanho do que o golpe atinge — a mesma regra que
   // o anel procedural ja seguia.
+  // Mesma precedencia do impacto alvo-unico. `aoe` e opcional em VfxDeGolpe:
+  // golpe alvo-unico (o caso de Bullet Punch) nao tem arte de area, e cair pro
+  // caminho de tipo/procedural aqui e o certo.
+  const arteDoGolpe = vfxDoGolpe(effect.abilityId)
+  if (arteDoGolpe?.aoe) {
+    const tamanho = effect.worldSize! * ESCALA_VFX_AOE * (arteDoGolpe.escala?.aoe ?? 1)
+    if (drawVfxDeElemento(ctx, effect, arteDoGolpe.aoe, tamanho)) return
+  }
+
   const arte = vfxDoElemento(effect.elementType)
   if (arte) {
     const tamanho = effect.worldSize! * ESCALA_VFX_AOE * (arte.escala?.aoe ?? 1)
