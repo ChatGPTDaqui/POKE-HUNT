@@ -2,6 +2,32 @@
 
 Levantado em 2026-08-11, conferindo `CLAUDE.md` e `README.md` contra o código.
 
+**Auditoria completa em 2026-08-17** — as 13 páginas de `docs/`, uma por uma, contra o código
+atual (pedido explícito: "audita docs por completo e veja se tem algo desatualizado"). Achado
+maior: **um pente-fino em duas branches paralelas** (a migração de catálogo para dados de
+Ultra Sun, e a migração "RPC-everything" do servidor de mercado/social/economia para o
+Postgres) tinha acontecido sem nenhuma das duas ser documentada aqui — o mesmo padrão de "leva
+inteira sem registro" da entrada de 2026-08-16, agora em dois lugares diferentes:
+
+| Página | Severidade | O que estava errado |
+|---|---|---|
+| [02](02-dados-e-catalogo.md) | **grave** | Descrevia "a fonte de verdade é o Postgres" — verdade até a troca para PokeAPI/Ultra Sun (Gen VII). Os três geradores antigos (planilha, Postgres, diff byte-a-byte) estão **bloqueados** (`scripts/lib/guarda-catalogo-gen2.js`, `PERMITIR_CATALOGO_GEN2=1`), não deletados — rodar `npm run catalog:gerar` hoje reverteria o catálogo em silêncio |
+| [04](04-autoridade-do-servidor.md) | **grave** | `server/src/app.ts`, `acoes.ts`, `mercado.ts`, `social.ts`, `reiniciar.ts`, `node.ts` — a autoridade inteira que o documento descrevia — **foram deletados**. Compra/venda/evolução/mercado/chat/correio/ranking/reset viraram ~20 funções `security definer` do Postgres, chamadas direto do cliente via `supabase.rpc(...)`. Só a sessão de hunt (4 rotas, não ~20) continua HTTP |
+| [08](08-social-e-mercado.md) | **grave**, mesma causa | Descrevia a mesma lógica de mercado/social como função TypeScript nomeada — toda referência a `comprarAnuncio`/`responderOferta`/`saneiaAnexos`/`reiniciar.ts` apontava para código que não existe mais |
+| [03](03-motor-de-simulacao.md) | menor | "39 das 53 Traits têm mecânica" — aritmética não fechava (39+10≠53); real é 43, os 7 traits de imunidade a status estavam fora da lista |
+| [05](05-regras-de-negocio.md) | moderado | `XP_GLOBAL_MULTIPLIER` fallback citado como 0.14 (código: 0.10, mudou quando `EXP_GAIN` virou a fórmula escalada de Gen VII); "13 itens reais" (código: 19, faltava a categoria `status_heal`); `AUTO_ACTION_COOLDOWN` citado não existe (é `COOLDOWN_DO_TREINADOR = 1.5`); "11 hunts BOSS" sem contar a do Campeão Lance (12) |
+| [07](07-farm-offline.md) | operacional, não-doc | O sistema descrito está correto, mas está **desligado em produção agora** (`FARM_OFFLINE_PAUSADO = true`, pedido explícito do usuário) — nenhuma versão anterior deste arquivo mencionava um estado assim, porque a flag não existia |
+| 01, 09, 10 (parcial), 11, 12 | conferem | Achados pequenos (README "cd web" já corrigido citado como pendente; contagem de `assets/` desatualizada; `hunts.test.ts` com 23 casos, real 25) |
+
+`docs/06` já tinha sido reescrito por completo um pouco antes desta auditoria (mesma sessão),
+pelo mesmo motivo — ver a entrada de 2026-08-17 mais abaixo neste arquivo.
+
+Método: cada página lida por inteiro, toda alegação concreta (caminho de arquivo, nome de
+função/constante, contagem, comando) conferida contra o repositório real — não contra a
+versão anterior deste documento. Onde um valor específico não pôde ser verificado com certeza
+alta (ex.: alcance exato de uma policy de RLS aberta pela leva RPC), o texto corrigido foi
+escrito com a reserva apropriada em vez de afirmar um número não conferido.
+
 **Atualizado em 2026-08-16** (leva de combate): `STONE_DROP_CHANCE`, `XP_GLOBAL_MULTIPLIER`,
 `BASIC_ATTACK_COOLDOWN` e `AUTO_REVIVE_DELAY` foram corrigidos no `CLAUDE.md` nesta rodada —
 ver a tabela abaixo, que marca cada um. `GOLD_GLOBAL_MULTIPLIER` **continua sem decisão**, de

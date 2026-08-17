@@ -2,45 +2,68 @@
 
 > Este documento descreve limiares e janelas anti-abuso. Ver a nota sobre
 > publicação no [README](README.md#esta-pasta-não-é-publicada).
+>
+> **Reescrito por inteiro em 2026-08-17.** A versão anterior descrevia `server/src/app.ts`,
+> `acoes.ts`, `mercado.ts`, `social.ts`, `reiniciar.ts` e `node.ts` como a autoridade inteira.
+> **Esses arquivos foram deletados** numa migração batizada "RPC-everything" (2026-08-11 a
+> 2026-08-16, ~50 migrations): compra/venda/evolução/mercado/chat/correio/ranking/reset viraram
+> **funções `security definer` do Postgres**, chamadas direto pelo cliente via
+> `supabase.rpc(...)`. Só a sessão de hunt (abrir/flush/fechar/estado) continua HTTP — é a
+> única parte que precisa rodar o motor de simulação real (`stepWorld`), que não roda em
+> `plpgsql`. Ver [13](13-divergencias-conhecidas.md) para o registro do achado.
 
-## O princípio
+## O princípio, atualizado para dois mecanismos de autoridade
 
-**O cliente manda intenção. Nunca resultado.**
+**O cliente manda intenção. Nunca resultado.** Isso continua valendo nos dois mecanismos —
+só o *como* mudou:
 
-O jogador declara "estou na hunt X com o POKE Y". O servidor simula o intervalo pelo
-relógio **dele**, decide o que aconteceu e grava. A simulação local vira predição
-cosmética, igual a client-side prediction de FPS.
+1. **Sessão de hunt (HTTP, `server/src/appSessao.ts`)**: o jogador declara "estou na hunt X
+   com o POKE Y". O servidor simula o intervalo pelo relógio **dele**, com o motor de jogo
+   real (`stepWorld`), e grava. A simulação local vira predição cosmética.
+2. **Tudo o mais (RPC do Postgres, `supabase.rpc('nome_da_funcao', {...})`)**: o jogador diz
+   "quero comprar 5 poções" (uma **intenção**, não um resultado); a função SQL lê o preço do
+   catálogo e o saldo do jogador **dentro da própria transação** e decide. Não existem RPCs
+   `addGold`, `addItem` nem `setTrainer` — todo efeito é um delta relativo calculado a partir
+   de estado lido no mesmo `update`, nunca um valor absoluto que o cliente entrega pronto
+   (a única exceção estrutural é a própria gravação de sessão, abaixo, que por rodar o motor
+   em TypeScript **precisa** escrever um resultado pós-simulação — isso é HTTP + `service_role`,
+   nunca RPC).
 
-Nenhuma ação aceita valor do cliente. Ele diz "quero comprar 5 poções"; o preço sai do
-catálogo no servidor. Não existem ações `addGold`, `addItem` nem `setTrainer` — **ganho só
-nasce de simulação**.
+## Onde a autoridade mora hoje
 
-## Onde a autoridade mora
-
-| Arquivo | Papel |
+| Peça | Papel |
 |---|---|
-| `server/src/app.ts` | Roteamento, CORS, validação de intenção |
-| `server/src/progresso.ts` | Carregar, simular, gravar. O coração |
-| `server/src/acoes.ts` | Lista branca de 19 ações |
-| `server/src/estadoDoJogador.ts` | Implementa `GameStateStore` sobre dados puros |
-| `server/src/mercado.ts` | Negociação entre jogadores |
-| `server/src/social.ts` | Chat, correio, amizades |
-| `server/src/farmOffline.ts` | O piso do farm offline |
-| `server/src/db.ts` | Cliente PostgREST com retry |
-| `server/src/auth.ts` | Verificação de token |
-| `server/src/reiniciar.ts` | O que `gravarEstado` não alcança |
-| `server/src/node.ts` / `edge.ts` | Adaptadores de plataforma |
+| `server/src/appSessao.ts` | Router mínimo: só as 4 rotas de sessão (abaixo). Roda como HTTP porque precisa do motor de simulação real |
+| `server/src/progresso.ts` | Carregar, simular, gravar a sessão. O coração do lado HTTP — praticamente inalterado pela migração RPC |
+| `server/src/estadoDoJogador.ts` | Implementa `GameStateStore` sobre `GameStateData` puro, para a simulação de sessão |
+| `server/src/farmOffline.ts` | O piso do farm offline (ver [07](07-farm-offline.md)) |
+| `server/src/entregas.ts` | Fila de entregas do mercado (`market_deliveries`), reivindicada em toda gravação de sessão |
+| `server/src/db.ts` | Cliente PostgREST com retry, usado pelo lado HTTP |
+| `server/src/auth.ts` | Verificação de token, usada pelo lado HTTP |
+| `server/src/edge.ts` | Adaptador de plataforma (Deno/Edge Function) |
+| `supabase/migrations/*rpc*.sql` | As funções `dev.*`/`public.*` que substituíram `acoes.ts`/`mercado.ts`/`social.ts`/`reiniciar.ts` — ver "O que virou RPC" abaixo |
+| `src/data/remote/acoesRpc.ts` | Cliente: despacha ~19 tipos de ação para a RPC certa |
+| `src/data/remote/mercadoRpc.ts` | Cliente: leituras de mercado via view/RLS, escritas via RPC |
+| `src/data/remote/rankingRpc.ts` | Cliente: leituras de ranking via view/RLS, `meu_perfil` via RPC |
+| `src/data/remote/correioRealtime.ts`, `chatRealtime.ts` | Cliente: leitura/escrita direta via RLS + Realtime, ações sensíveis (marcar lido, coletar anexo, amizade) via RPC |
 
 `server/src/estadoDoJogador.ts` implementa o tipo `GameStateStore` **inteiro** sobre
 `GameStateData` puro. Esquecer um método quebra o type-check em vez de estourar no meio de
 uma simulação de 6 horas em produção.
 
+**Não existe hoje nenhum script de smoke-test commitado para a camada de RPC.** A migração
+foi validada com contas de teste descartáveis, criadas e apagadas na hora — nenhuma delas
+ficou como registro auditável de comportamento esperado. `scripts/conta-de-teste.js` existe
+por causa disso (ver [11](11-operacao.md)): antes dele, cada sessão criava um script próprio
+de teste e ia embora, chegando a 72 contas de teste acumuladas contra 5 jogadores reais.
+
 ## A forma do serviço
 
 `fetch(Request) => Response`, sem framework. Um Worker do Cloudflare **é** exatamente
 `export default { fetch }`, e o Node 22 tem `Request`/`Response` nativos: o mesmo arquivo
-roda nos dois. `node.ts` (adaptador `node:http`) e `supabase/functions/jogo/index.ts` (casca
-Deno) são os únicos com código de plataforma.
+roda nos dois. `server/src/edge.ts` e `supabase/functions/jogo/index.ts` (casca Deno) são os
+únicos com código de plataforma. Isso vale só para as 4 rotas de sessão que sobraram — a
+camada RPC não tem "forma de serviço" nenhuma, é função de banco.
 
 Isso manteve a escolha de hospedagem aberta de graça enquanto ela estava indefinida.
 
@@ -54,7 +77,7 @@ Hoje o serviço roda como Edge Function do Supabase (`supabase/functions/jogo/`)
 porque o servidor usa `#engine` (subpath import do Node) e especificadores `.js` apontando
 para `.ts`, e o resolvedor do Deno não aceita nenhum dos dois.
 
-## Rotas
+## Rotas HTTP — só sessão de hunt
 
 | Rota | Método | O que faz |
 |---|---|---|
@@ -63,13 +86,12 @@ para `.ts`, e o resolvedor do Deno não aceita nenhum dos dois.
 | `/sessao/abrir` | POST | Valida a intenção, gera a semente, abre a sessão |
 | `/sessao/flush` | POST | Simula do último flush até agora e grava |
 | `/sessao/fechar` | POST | Flush final + fecha, devolvendo o resumo |
-| `/acao` | POST | Uma ação da lista branca |
-| `/mercado/*` | GET, POST | 11 rotas de negociação |
-| `/chat`, `/correio/*` | GET, POST | 6 rotas sociais |
-| `/perfil` | GET | Dados do próprio jogador |
-| `/ranking/*` | GET | Treinadores, pokémon, hall da fama |
 
-Toda rota exceto `/saude` exige jogador autenticado.
+Toda rota exceto `/saude` exige jogador autenticado. **Não há mais `/acao`, `/mercado/*`,
+`/chat`, `/correio/*`, `/perfil` nem `/ranking/*`** — essas 5 rotas somem quando as ações
+viram RPC; qualquer erro não tratado que ainda passe por `appSessao.ts` é reportado pela
+própria função RPC `registrar_evento_auditoria` (a mesma que o cliente chama), não por um log
+HTTP próprio.
 
 **`/estado` é um GET que grava, de propósito.** É o único caminho por onde um jogador que só
 abriu o jogo — sem entrar em hunt nem comprar nada — recebe o que vendeu enquanto estava
@@ -347,75 +369,103 @@ A correção não foi "lembrar de tratar o erro" — a versão sem embrulho falh
 carrega, roda e devolve as entregas se `fn` abortar. `aplicarFlush` também devolve quando
 sai por `null`, que é saída sem exceção e o `catch` não cobriria.
 
-## As 19 ações da lista branca
+## O que virou RPC
 
-`server/src/acoes.ts`. `aplicarAcao` é **síncrona e pura** sobre a store do jogador — é isso
-que faz o arquivo ser auditável.
+`acoes.ts` (lista branca de ~19 ações, síncrona e pura sobre a store) não existe mais como
+arquivo TypeScript — virou ~20 funções `security definer` do Postgres, uma por ação, cada
+uma na sua própria transação SQL. `src/data/remote/acoesRpc.ts` mantém a mesma lista de
+**tipos** de ação no cliente (`DESPACHO`, um dicionário tipo → nome da função RPC), então a
+superfície pro jogador não mudou — só onde a regra roda:
 
-| Grupo | Ações |
+| Grupo | Função RPC (`dev.*`/`public.*`) |
 |---|---|
-| Início | `escolherStarter`, `definirNomeDoTreinador`, `reiniciarJogo` |
-| Economia | `comprarItem`, `venderItem`, `venderTodosItens`, `venderPoke`, `venderPokes` |
-| POKE | `usarItem`, `curarEquipe`, `evoluirPoke`, `definirAtivo`, `tirarDaEquipe`, `porNaEquipe` |
-| Mundo | `desbloquearHunt` |
-| Preferência | `alternarTravaItem`, `alternarTravaPoke`, `alternarHabilidade`, `configurarAuto` |
+| Início | `escolher_starter`, `definir_nome_do_treinador`, `reiniciar_jogo` |
+| Economia | `comprar_item`, `vender_item`, `vender_todos_itens`, `vender_poke`, `vender_pokes` |
+| POKE | `usar_item`, `curar_equipe`, `evoluir_poke`, `definir_ativo`, `tirar_da_equipe`, `por_na_equipe`, `definir_golpes_ativos` |
+| Mundo | `desbloquear_hunt` |
+| Preferência | `alternar_trava_item`, `alternar_trava_poke`, `alternar_habilidade`, `configurar_auto` |
 
-**Uma ação por request de propósito.** Em lote, uma ação inválida no meio deixaria o cliente
-sem saber quais das outras foram aplicadas — e o cliente sobrescreve o estado local com a
-resposta, então ambiguidade ali vira dessincronização.
+Mercado e social (compra/venda entre jogadores, chat, correio, amizades, ranking) também são
+RPC hoje, mas ficam documentados em [08](08-social-e-mercado.md) — são operações que tocam
+linha de **outro** jogador, categoria própria.
 
-**Se há sessão de hunt aberta, ela é liquidada ANTES da ação.** Sem isso, vender o POKE que
-está caçando (ou usar a última poção) mudaria o estado sob os pés de uma simulação ainda não
-creditada.
+**Todo `security definer` segue o mesmo padrão**, visto em toda função lida (ex.:
+`comprar_item`, `criar_ordem_mercado`):
 
-O mercado tem rotas próprias, não entradas nesta lista, porque toda operação de mercado é
-assíncrona e toca linhas de **outro** jogador. Enfiar I/O em `aplicarAcao` quebraria a
-garantia de pureza.
+```sql
+create function dev.comprar_item(p_item_id text, p_qtd int default 1)
+returns jsonb language plpgsql security definer
+set search_path = dev, public   -- trava contra injeção de search_path em funcao definer
+as $$
+declare v_user_id uuid := auth.uid();  -- quem age, resolvido do JWT, NUNCA parametro
+begin
+  if v_user_id is null then raise exception 'nao autenticado' using errcode = '28000'; end if;
+  update dev.players set gold = gold - v_custo
+    where user_id = v_user_id and gold >= v_custo;      -- UPDATE condicional = lock de linha
+  if not found then raise exception 'Ouro insuficiente.' using errcode = 'P0001'; end if;
+  ...
+```
 
-### Validações que só existem no servidor
+- **A identidade de quem age nunca é parâmetro** — só `auth.uid()`, lido dentro da função a
+  partir do JWT que o Supabase já validou. Não há como uma RPC aceitar "aja como o
+  jogador X"; os parâmetros são sempre alvos (id do item, do anúncio, da oferta), nunca o
+  ator.
+- **`UPDATE ... WHERE ... IF NOT FOUND THEN RAISE` é ao mesmo tempo a validação e o lock de
+  concorrência.** Duas compras simultâneas do mesmo jogador serializam pelo lock de linha do
+  próprio `UPDATE` — não precisa de um CAS separado como o lado HTTP (`players.updated_at`)
+  precisa, porque aqui não há reconstrução de estado em memória entre ler e escrever.
+- **Mensagem de recusa em português direto no `RAISE EXCEPTION`** (`errcode = 'P0001'`), não
+  um código traduzido depois: `acoesRpc.ts` relança `error.message` quase verbatim
+  (`ErroServidor(statusPorErrcode(error.code), error.message)`). Antes (`acoes.ts`) a tradução
+  morava no servidor Node porque o cliente não sabia o preço; hoje a mensagem já nasce em
+  português porque quem calculou o preço foi a própria função que está recusando.
 
-- **`escolherStarter`** tem lista branca explícita. Sem ela, "escolher inicial" viraria "me
-  dá um Mewtwo nível 1 de graça".
-- **`definirNomeDoTreinador`** só aceita com a conta sem nenhum POKE. Livre para trocar a
-  qualquer hora, o nick viraria um jeito barato de se desassociar do próprio histórico
-  social (chat, ranking, `original_trainer`). Regras: 3 a 16 caracteres, `[A-Za-z0-9_]`.
-- **A unicidade do nick é checada em `app.ts`, não na ação** — é pergunta de banco, e
-  `aplicarAcao` é síncrona. Sem a checagem, um nome repetido só estouraria no índice único e
-  voltaria como 502 "falha ao falar com o banco": erro de servidor para um erro de jogador.
-- **A checagem usa RPC, não `ilike`.** `_` é caractere válido de nick **e** curinga de uma
-  letra em LIKE: `trainer_name=ilike.ash_1` casaria com `ashX1` de outra pessoa. Mesmo
-  problema já explorado na busca de amigo — `{"nick":"%"}` mandava pedido de amizade para um
-  jogador arbitrário e permitia enumerar a base.
-- **`configurarAuto`** era o único ponto que persistia um objeto do cliente sem validação.
-  Medido: **5.000 regras de poção aceitas e gravadas**, e `{itemId: 42, hpPercent: "abc"}`
-  também. Não é só sujeira: `updateAutoHeal` percorre as regras a cada tique, e uma
-  simulação de 6h faz ~216 mil tiques. Milhares de regras viram bilhões de iterações, a Edge
-  Function bate no teto de 2s de CPU e o request morre — e **com o claim atômico, morrer no
-  meio custa o intervalo**. Dava para travar a própria conta. Hoje: `MAX_REGRAS_AUTO` = 20 +
-  validação de tipo e faixa.
-- **O critério do ranking de POKE** vira nome de coluna numa URL do PostgREST, então passa
-  por lista branca (`COLUNA_POR_CRITERIO`). Interpolar o que o cliente mandou seria injeção
-  de query.
-- **`MAX_TEAM_SIZE` é exportado do motor** e usado nos dois lados. Antes só o cliente tinha
-  a guarda, e o que segurava no servidor era a check `team_slot <= 5` do banco — que só
-  estoura na hora de gravar, então o 7º POKE virava 502.
+### Validações que sobreviveram à migração (mudou onde, não a regra)
 
-### Mensagens de recusa são traduzidas no servidor
+- **`escolher_starter`** continua com lista branca explícita dos 3 iniciais.
+- **`definir_nome_do_treinador`** continua só aceitando com a conta sem nenhum POKE, e a
+  unicidade do nick continua checada por função de banco — não virou `ilike` (o mesmo
+  problema de sempre: `_` é curinga de uma letra em LIKE, e `{"nick":"%"}` enumeraria a base).
+- **`configurar_auto`** ainda valida `MAX_REGRAS_AUTO = 20` e tipo/faixa de cada regra — a RPC
+  reusa a mesma validação que existia em `acoes.ts`, só movida de lugar.
+- **`MAX_TEAM_SIZE`** continua exportado do motor compartilhado e usado nos dois lados.
+- **`definir_golpes_ativos` é a RPC com mais churn de toda a migração**: 5 revisões em 2 dias
+  (trava de hunt ligada, depois desligada, depois religada, ataque-básico-ocupa-slot ligado e
+  no dia seguinte **revertido**). Se esta seção descrever um comportamento que não bate com o
+  jogo, é a primeira suspeita.
 
-`buyItem`/`sellItem`/`unlockMap` devolvem um **código** (`insufficient_gold`), não uma
-frase. Como sob autoridade o cliente não executa a ação nem sabe o preço, ele só exibe a
-mensagem que volta — então a tradução mora no servidor (`MENSAGEM_ERRO_ECONOMIA`). Antes o
-chat mostrava literalmente "insufficient_gold".
-
-## RLS: o cliente perdeu a escrita
+## RLS: o cliente perdeu a escrita — e ganhou um segundo escritor legítimo
 
 Migration `20260807030000_cliente_perde_a_escrita`: `own rows all`
-(select + insert + update + delete) virou **select apenas**, e a policy de update de
-`players` foi removida. Escrita nas cinco tabelas de jogador só pela `service_role`.
+(select + insert + update + delete) virou **select apenas** nas cinco tabelas de jogador
+(`players`, `pokemon_instances`, `player_items`, `player_pokedex`,
+`player_auto_catch_rules`), e a policy de update de `players` foi removida. **Essa RLS
+continua exatamente assim** — nenhuma migration da era RPC-everything reabriu policy de
+escrita nessas tabelas.
 
-**Consequência que é o ponto, não efeito colateral: o jogo parou de funcionar sem o
-servidor.** O fallback local escrevia direto no Postgres e agora falha — era a brecha
-fechada. Rodar exige `cd server && npm run dev` mais `VITE_SERVIDOR_URL`.
+**O que mudou é que existem hoje DOIS escritores legítimos, não um:**
+
+1. **`service_role`** (o servidor de sessão, `server/src/db.ts`) — ignora RLS por completo,
+   é a chave usada por `gravarEstado` para escrever o resultado de uma simulação.
+2. **Funções `security definer`** (as RPC) — não ignoram RLS por uma chave ambiente; cada uma
+   roda com o privilégio do **dono da função** (o papel que aplicou a migration), escopado a
+   essa função só, e **revalida `auth.uid()` e a posse de cada linha por dentro do próprio
+   SQL** antes de tocar nela. `anon` não pode chamar nenhuma delas (`grant execute ... to
+   authenticated` só, exceto as duas RPCs de log de erro, liberadas também pra `anon` de
+   propósito — telemetria tem que funcionar mesmo em estado de auth incerto).
+
+Funções auxiliares internas (`dev._valor_venda_poke`, `dev._calcular_stat`,
+`dev.recusar_ofertas_pendentes`) têm `execute` **revogado** de `authenticated`/`public` — só
+são chamáveis de dentro de outra função `security definer`, nunca direto pelo cliente. Uma
+delas (`recusar_ofertas_pendentes`) foi corrigida numa migration própria depois de ter sido
+concedida a `authenticated` por engano.
+
+**A conclusão original — "o jogo parou de funcionar sem o servidor" — continua verdadeira,
+só que "o servidor" hoje é dois: sem `service_role` (sessão HTTP), não há como abrir/flushar
+hunt; sem as RPCs (que não dependem do serviço Node/Edge, só do Postgres estar de pé), não há
+como comprar, vender, evoluir, negociar ou conversar.** Rodar a sessão local exige
+`cd server && npm run dev` mais `VITE_SERVIDOR_URL`; as RPCs funcionam contra qualquer
+projeto Supabase linkado, sem precisar do servidor Node rodando.
 
 ### Teste adversarial
 
@@ -430,12 +480,25 @@ aberto. Todo caso afirma o **efeito no banco**.
 
 ## O interruptor `VITE_SERVIDOR_URL`
 
-`src/data/remote/autoridade.ts` — `pedirAcao(acao, fallback)`:
+`src/data/remote/autoridade.ts` — `pedirAcao(acao, fallback)`, o único caminho de mutação em
+toda tela do jogo. A checagem `servidorAtivo()` (a variável estar definida) segue sendo o
+único interruptor, mesmo depois da migração RPC — inclusive para ações que **tecnicamente**
+não precisam do servidor Node/Edge (uma RPC fala direto com o Postgres). Ligar/desligar
+autoridade continua sendo um flag só, não um por mecanismo.
 
-- **Com servidor**: manda intenção e **sobrescreve o estado local com a resposta**.
-- **Sem servidor**: roda `fallback` local.
+- **Sem servidor**: roda `fallback()` local — o comportamento pré-autoridade, preservado
+  inteiro, não um "modo degradado".
+- **Com servidor**: `pedirAcao` chama `executarAcaoRpc(acao)` (`acoesRpc.ts`) — que despacha
+  pro `supabase.rpc(...)` certo. **A resposta de uma RPC é só `{ok, mensagem}`, nunca o
+  estado inteiro do jogador** — diferença real do desenho antigo (HTTP `/acao`, que devolvia
+  o snapshot completo e o cliente sobrescrevia tudo). Cada tipo de ação tem seu próprio
+  "refetch cirúrgico" depois (`refetchGold`, `refetchItem`, `refetchPoke`,
+  `refetchEquipeInteira`...) — só relê a tabela/coluna que aquela ação especificamente pode
+  ter mudado, em vez de recarregar o jogador inteiro a cada compra.
 
-Um caminho por tela. Ligar ou desligar autoridade não mexe em tela nenhuma.
+  A **sessão de hunt** (abrir/flush/fechar/estado) é a exceção que continua devolvendo o
+  snapshot inteiro — porque ela roda o motor de simulação de verdade, e o resultado de uma
+  simulação não tem como ser "cirurgicamente" relido, é o próprio propósito da chamada.
 
 `gameStatePersistence.ts` é **onde o cliente deixa de ser autoritativo**: sob servidor,
 `setItem` faz early-return (não grava) e `getItem` lê do servidor. Sem esse return, o
@@ -446,6 +509,12 @@ tela só fecha se a entrada foi aceita. Antes, `void abrirSessaoDeHunt(...)` tro
 sem esperar — com recusa (hunt trancada, POKE fora da equipe, serviço fora do ar), o jogador
 entrava, via combate, não ganhava nada, e não recebia aviso: a simulação local continua
 desenhando. Só aparecia como "o jogo parou de dar ouro".
+
+`src/data/remote/servidor.ts` ficou **menor** com a migração: hoje exporta só 4 membros
+(`estado`, `abrirSessao`, `flush`, `fecharSessao`) — tudo que não é sessão de hunt saiu de
+lá. Ranking, mercado, chat e correio têm seus próprios módulos (`rankingRpc.ts`,
+`mercadoRpc.ts`, `correioRealtime.ts`) e não passam mais por `servidor.ts` nem por
+`pedirAcao`.
 
 ### Recusa é traduzida, e "sem resposta" não acusa a internet do jogador
 
@@ -503,6 +572,13 @@ O toast de erro tem janela anti-repetição de 20s por mensagem: um flush de 30s
 empilhava o mesmo aviso indefinidamente.
 
 ## Bugs achados por auditoria, com o mecanismo
+
+Achados **antes** da migração RPC-everything, no código Node que existia então. Os dois
+primeiros (FK de mapa, hunt de conta nova) continuam vivendo no lado HTTP/sessão, intocado
+pela migração. O de mercado ("duas ofertas aceitas") e o de perfil (`perfilDoJogador`)
+descreviam código que **hoje é RPC** (`dev.responder_oferta`, `dev.meu_perfil`) — mantidos
+aqui como registro histórico do bug e do raciocínio da correção; ver
+[08](08-social-e-mercado.md) para a forma atual desses dois.
 
 - **`game_sessions.map_id` tinha FK para `maps(id)`**, mas as 19 hunts do Modo Pesadelo e as
   11 hunts BOSS são geradas em **runtime** e nunca entram na tabela `maps`. O INSERT violava

@@ -1,5 +1,15 @@
 # 08 — Social e mercado
 
+> **Atualizado em 2026-08-17.** A lógica descrita aqui (invariantes de escrow, claim de
+> entrega, modelo de dados) continua valendo — o que mudou é a **camada**: toda mutação
+> (`comprarAnuncio`, `responderOferta`, `reiniciarJogo`, `saneiaAnexos`...) que este documento
+> descrevia como função TypeScript em `server/src/mercado.ts`/`social.ts`/`reiniciar.ts` foi
+> migrada para função `security definer` do Postgres (`dev.*`/`public.*`) numa leva chamada
+> "RPC-everything" (2026-08-11 a 2026-08-16). Esses três arquivos **não existem mais**. Nomes
+> de função ao longo deste documento foram atualizados para o RPC equivalente; ver
+> [04](04-autoridade-do-servidor.md#o-que-virou-rpc) para o padrão geral (toda RPC é
+> `security definer`, identidade sempre `auth.uid()`, nunca parâmetro).
+
 ## O invariante que sustenta tudo aqui
 
 O servidor grava progresso reescrevendo o **snapshot inteiro** do jogador
@@ -42,14 +52,16 @@ por Mewtwo.
 o ouro **agora**. Sem isso, duas ordens de venda do mesmo estoque vendem o dobro do que
 existe.
 
-**2. Nenhum valor vem do cliente além de preço e quantidade** — mesma regra de `acoes.ts`.
+**2. Nenhum valor vem do cliente além de preço e quantidade** — mesma regra de toda RPC (ver
+[04](04-autoridade-do-servidor.md#o-que-virou-rpc)).
 
-**3. Toda escrita concorrente é compare-and-swap.** Não há transação entre duas chamadas ao
-PostgREST (serverless), então cada baixa numa ordem alheia manda o valor antigo no filtro
-(`&remaining=eq.7`); resposta vazia = perdi a corrida, sigo para a próxima.
-
-`atualizarRetornando` (`db.ts`) existe para isso: com `return=minimal`, perder a corrida seria
-indistinguível de sucesso.
+**3. Toda escrita concorrente é serializada.** Cada RPC de mercado roda inteira numa
+transação SQL só, e a baixa numa ordem alheia é um `UPDATE ... WHERE remaining >= p_qtd`
+condicional — o lock de linha do próprio `UPDATE` resolve a corrida (perdeu a corrida = zero
+linhas afetadas, tenta a ordem seguinte do livro), sem precisar de compare-and-swap manual
+entre duas chamadas HTTP separadas como o desenho anterior (PostgREST puro, sem transação
+entre requests) exigia. `criar_ordem_mercado` casa contra o livro com `for update skip
+locked`, para duas ordens não tentarem casar com a mesma linha ao mesmo tempo.
 
 ## POKE anunciado sai do inventário via `location='market'`
 
@@ -84,15 +96,14 @@ Anunciar POKE respondia **502**.
 Reescrita como `case when location='team' then team_slot is not null else team_slot is null
 end`: expressa a regra real, e um valor novo do enum passa a valer sozinho.
 
-## Ordem deliberada em `comprarAnuncio`: cobrar e gravar ANTES de mover o POKE
+## `dev.comprar_anuncio`: cobrar e mover o POKE na MESMA transação
 
-O estado do comprador é gravado como snapshot com diff de remoção. Se o POKE fosse
-transferido primeiro, o `gravarEstado` — montado de um estado carregado **antes** da
-transferência — não teria a linha nova e a apagaria: o comprador pagaria e o POKE sumiria do
-jogo.
-
-O risco invertido (falhar depois de cobrar) existe, mas erra a favor do jogador e fica
-visível.
+Como RPC, cobrar e transferir o POKE acontecem dentro da mesma transação SQL — o problema que
+o desenho anterior tinha (cobrar via um snapshot HTTP, mover o POKE por outro caminho, e um
+flush concorrente gravando por cima de um dos dois) não existe mais estruturalmente: ou a
+transação inteira aplica, ou nenhuma parte aplica. O raciocínio de ordem ("cobrar antes de
+mover", preferir o erro que aparece visível ao erro que apaga POKE) continua sendo o
+princípio geral que guia toda RPC de mercado, só não precisa mais ser garantido à mão.
 
 ## Modo "Somente Lance"
 
@@ -122,28 +133,47 @@ Aceitar fecha o anúncio por CAS. Perder esse CAS (o anúncio saiu no meio) **de
 desta oferta** antes de responder 409 — não dá para entregar um POKE que já não está lá, e
 reter o dinheiro seria o pior dos dois erros.
 
-**Bug corrigido:** `responderOferta` faz CAS na oferta e depois CAS no anúncio. Com dois
-"Aceitar" simultâneos, as duas ofertas passavam pelo primeiro CAS; a perdedora tinha o escrow
-devolvido corretamente, mas ficava gravada como **aceita**. O dinheiro estava certo; o
-registro é que mentia — e um histórico de negociação existe justamente para não fazer isso.
-Hoje a perdedora volta para 'recusada'.
+**Bug corrigido** (na época em que isto era `responderOferta`, TypeScript sobre PostgREST sem
+transação entre chamadas): CAS na oferta e depois CAS no anúncio, dois passos separados. Com
+dois "Aceitar" simultâneos, as duas ofertas passavam pelo primeiro CAS; a perdedora tinha o
+escrow devolvido corretamente, mas ficava gravada como **aceita**. O dinheiro estava certo; o
+registro é que mentia. Corrigido para a perdedora voltar para 'recusada' — e, como
+`dev.responder_oferta` hoje é uma RPC (transação única), essa classe específica de corrida
+entre dois passos não-atômicos deixou de ser possível estruturalmente; o fix de nomenclatura
+sobrevive como a regra de negócio (perdedor de uma disputa de oferta é 'recusada', nunca
+'aceita').
 
 Compra direta em anúncio de lance responde 409 explícito. A ordenação por preço manda anúncio
 sem preço para o **fim**, em vez de tratá-lo como 0 (o mais barato do mercado).
 
-## RLS do mercado
+## RLS do mercado e do social — leitura pública chegou, escrita continua fechada
 
-`market_offers`, `market_listings` e `hall_da_fama` têm RLS ligada e **nenhuma policy** para
-`authenticated`. Só a `service_role` enxerga.
+A leva RPC-everything **abriu leitura pública** onde fazia sentido de negócio, algo que a
+versão anterior deste documento (RLS 100% fechada, tudo passando por rota de servidor) ainda
+não tinha: `market_listings`/`market_orders` ganharam `select` público para linhas **ativas**
+(a vitrine precisa ser vista por todo mundo) mais `select` do próprio dono para o histórico
+completo; `market_trades` ganhou `select` só para quem participou da negociação; e
+`players` ganhou uma view `treinadores_publico` (projeção segura — sem ouro, sem
+diamantes) para ranking e nomes.
 
-Uma policy de leitura em `market_offers` exporia quanto cada jogador está disposto a pagar
-antes de a oferta ser respondida.
+**`market_offers` continua sem nenhuma policy para `authenticated`** — só a `service_role`
+(sessão) e as próprias RPCs (que rodam como `security definer`, não como o papel
+`authenticated`) enxergam. O motivo não mudou: uma policy de leitura ali exporia quanto cada
+jogador está disposto a pagar antes de a oferta ser respondida.
 
-## Chat Mundo: polling pelo servidor, não Realtime
+Toda escrita nas tabelas de mercado/social continua sem policy de INSERT/UPDATE/DELETE para
+`authenticated` — só chega por RPC `security definer`, mesmo padrão de
+[04](04-autoridade-do-servidor.md#rls-o-cliente-perdeu-a-escrita--e-ganhou-um-segundo-escritor-legítimo).
 
-Realtime exigiria policy de SELECT para `authenticated` na tabela — ou seja, cliente lendo
-tabela direto, que é exatamente o que a Fase D fechou. Com dezenas de jogadores, uma leitura
-a cada 6s é barata e não abre porta nenhuma.
+## Chat Mundo: Realtime, não mais polling
+
+**Isto mudou de verdade, não só de nome.** A versão anterior deste documento explicava por
+que Realtime era proibido — exigiria policy de SELECT para `authenticated` direto na tabela,
+que era exatamente o que a Fase D tinha fechado. Com a leitura pública liberada
+(`dev.chat_messages`/`mail_messages` ganharam `select`+`insert` sob RLS na mesma leva), essa
+restrição deixou de existir, e o chat migrou de fato: `src/data/remote/chatRealtime.ts`
+assina `supabase.channel('chat-mundo').on('postgres_changes', {event:'INSERT', schema:'dev',
+table:'chat_messages'}, ...)` em vez de reler a cada 6 segundos.
 
 A aba "Mundo" é **só** mensagem de jogador. Os avisos do jogo foram para a aba **"Sistema"**
 (`CHANNEL_TO_TAB.world` → `'sistema'`). `ChatTab` deixou de ser redeclarado no `uiStore` — as
@@ -151,7 +181,9 @@ duas cópias já divergiram uma vez.
 
 ### Anexo guarda SNAPSHOT, não id
 
-`saneiaAnexos` em `social.ts`. Duas coisas de uma vez:
+Antes vivia em `social.ts#saneiaAnexos` (arquivo removido); a mesma sanitização hoje acontece
+no cliente antes de montar a mensagem (o servidor nunca resolve um id de POKE por conta
+própria — só grava e retransmite o que o autor já exibiu). Duas coisas de uma vez:
 
 1. O link continua mostrando o que foi mostrado na hora (o POKE pode ser vendido ou evoluir
    depois).
@@ -195,11 +227,16 @@ erra contra ele, mas não imprime item, que é o lado certo de errar.
 O crédito reusa `market_deliveries` (nome histórico; ela é a fila genérica de "creditar isto
 no próximo request que grava").
 
-**Bug corrigido ao vivo:** a primeira versão chamava `liquidar()` depois de coletar.
-`liquidar()` é `/sessao/flush`, que responde 409 sem hunt aberta — e coletar no Hospital é
-exatamente esse caso. A mensagem virava "Recebido" e o item só aparecia quando o jogador
-entrasse numa hunt. Corrigido com `recarregarEstado()` (`GET /estado`, que carrega para
-escrita e grava).
+**Bug corrigido ao vivo** (na época em que a coleta era ação HTTP): a primeira versão chamava
+`liquidar()` depois de coletar. `liquidar()` era `/sessao/flush`, que respondia 409 sem hunt
+aberta — e coletar no Hospital é exatamente esse caso. A mensagem virava "Recebido" e o item
+só aparecia quando o jogador entrasse numa hunt. Corrigido então com `recarregarEstado()`
+(`GET /estado`). Hoje a coleta é a RPC `dev.coletar_anexo_correio`, que credita o item **na
+própria transação** (não enfileira em `market_deliveries` como o desenho antigo fazia) — a
+classe de bug (esperar um flush que não vai acontecer) não se aplica mais estruturalmente.
+Marcar como lida também é RPC (`dev.marcar_correio_lido`), de propósito e não um simples
+`update` sob RLS: "não marcar como lida enquanto o anexo não foi coletado" é um invariante
+que o servidor precisa impor, não o cliente.
 
 ## Nome do treinador é único
 
@@ -215,7 +252,8 @@ após o cadastro — é proibida pela RLS e deixaria uma janela com o nome errad
 
 Colisão no trigger desambigua com sufixo em vez de derrubar o cadastro: perder a conta por
 causa de um nick é desproporcional. A tela checa antes por RPC
-(`nome_de_treinador_disponivel`, chamável por `anon` porque devolve boolean e nada mais).
+(`nome_de_treinador_disponivel`, chamável por `anon` porque devolve boolean e nada mais — essa
+função já era RPC antes da leva "RPC-everything", não faz parte dela).
 
 **O wipe não reseta `trainer_name`.** Dois motivos: com o índice único, N linhas voltando para
 o mesmo nome abortam o wipe inteiro; e o nick deixou de ser cosmético — é a identidade
@@ -230,13 +268,16 @@ PostgREST 409 em players?user_id=eq.<uid>:
 {"code":"23505","details":"Key (lower(trainer_name))=(treinador) already exists."}
 ```
 
-`reiniciarJogo` zerava o estado com `defaultGameStateData()`, cujo `trainer.name` é
-`'Treinador'`. Desde que o nick virou único, gravar esse nome colide com quem já o tem — o
-UPDATE de `players` falhava e **toda a ação voltava 502**. O reset nunca chegou a apagar nada
-depois daquela migration.
+`reiniciarJogo` (então uma ação HTTP) zerava o estado com `defaultGameStateData()`, cujo
+`trainer.name` é `'Treinador'`. Desde que o nick virou único, gravar esse nome colide com
+quem já o tem — o UPDATE de `players` falhava e **toda a ação voltava 502**. O reset nunca
+chegou a apagar nada depois daquela migration.
 
-Hoje o nick sobrevive ao reset, nos dois caminhos. É o correto pelo conteúdo também: reset
-apaga **progresso**.
+Hoje o nick sobrevive ao reset, e a lógica inteira é a RPC `dev.reiniciar_jogo()`
+(`security definer`, ver [04](04-autoridade-do-servidor.md#o-que-virou-rpc)) — o mesmo
+princípio (nick é identidade pública, reset apaga progresso, não identidade) continua valendo,
+só não pode mais falhar por 502 de constraint: a função nunca escreve `'Treinador'` por cima
+de um nick existente.
 
 **Lição de diagnóstico:** a Edge Function não repassa o corpo do erro do PostgREST (correto —
 traz nome de coluna e constraint). Rodar `cd server && npm run dev` e repetir o request contra
@@ -255,17 +296,21 @@ nasceu depois desse desenho sobrevivia:
   recém-zerada
 - **Histórico de `game_sessions`**, de onde o Perfil tira o tempo de jogo
 
-`server/src/reiniciar.ts` apaga os quatro, **nessa ordem** — anúncio antes do POKE, porque
+A RPC de reset apaga os quatro, **nessa ordem** — anúncio antes do POKE, porque
 `market_listings.poke_uid` tem `on delete restrict`.
 
 Chat, correio, amizades e Hall da Fama **não** são apagados: são o registro social do
 jogador, não o save dele.
 
-## Ranking e Perfil são rotas do servidor
+## Ranking e Perfil
 
-O cliente **não** pode consultar isso direto: a RLS (corretamente) não deixa ler a linha de
-outro jogador, e afrouxar para montar ranking exporia ouro, itens e equipe de todo mundo — o
-ranking precisa de dois campos, não da linha inteira.
+O cliente ainda **não** lê a tabela `players` de outro jogador diretamente — afrouxar RLS ali
+exporia ouro, itens e equipe de todo mundo. A leva RPC-everything resolveu isso com uma
+**view pública restrita** (`treinadores_publico`, sem ouro nem diamantes) em vez de rota de
+servidor: listas de ranking/nome (`rankingRpc.ts#rankingTreinadores`/`rankingPokemon`/
+`hallDaFama`) são `select` simples nessa view e em `ranking_pokemon`/`hall_da_fama` sob RLS.
+Só o perfil agregado do **próprio** jogador (`meu_perfil()`) continua sendo RPC — juntar dados
+de várias tabelas por trás de uma projeção seria estranho de expressar como RLS simples.
 
 - **`rank` é contado, não ordenado**: "quantos têm mais EXP que eu, +1". Ordenar a base para
   achar uma posição daria o mesmo número por muito mais.
@@ -279,13 +324,15 @@ ranking precisa de dois campos, não da linha inteira.
 
 ### O ranking devolve o POKE inteiro, não um resumo
 
-`rankingDePokemon` selecionava 11 colunas. Para abrir o cartão de perfil (que mostra IV, EXP e
-HP reais) faltava quase tudo — e sintetizar a partir de (espécie, nível) daria números
-plausíveis e **errados** numa tela cuja única função é comparar POKEs de jogadores diferentes.
+A view/consulta de ranking de POKE selecionava só 11 colunas, num desenho anterior. Para
+abrir o cartão de perfil (que mostra IV, EXP e HP reais) faltava quase tudo — e sintetizar a
+partir de (espécie, nível) daria números plausíveis e **errados** numa tela cuja única função
+é comparar POKEs de jogadores diferentes.
 
-Hoje seleciona `*` e mapeia com `rowToPoke` — o **mesmo** mapper que carrega o save do dono,
-reexportado por `headless.ts`. Sem uma segunda tradução linha→POKE vivendo no servidor.
-`pokemon_instances` não guarda nada privado além do `user_id`, que já era devolvido.
+A correção — selecionar a linha inteira e mapear com `rowToPoke`, o **mesmo** mapper que
+carrega o save do dono — é uma decisão de modelagem que sobrevive independente da migração:
+`pokemon_instances` não guarda nada privado além do `user_id`, que já é devolvido pela leitura
+pública de ranking.
 
 `EntradaPoke` carrega `treinador` (dono agora) e `treinadorOriginal` (quem capturou)
 separados — a lista mostra o original.

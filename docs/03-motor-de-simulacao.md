@@ -140,7 +140,9 @@ Resultado sempre `Math.max(1, round(...))`, ou `0` se o defensor for imune ao ti
 Uma por espécie (`traitOf(speciesId)`), no máximo. **Não confundir com `Ability`** (golpe) —
 o nome "Trait" existe só pra não colidir com esse vocabulário já ocupado.
 
-39 das 53 `TraitId` têm mecânica real implementada em `combatSystem.ts`/`statusSystem.ts`:
+**43** das 53 `TraitId` têm mecânica real implementada em `combatSystem.ts`/`statusSystem.ts`
+(53 − as 10 sem mecânica abaixo — a conta fecha por subtração, não por enumeração: a lista de
+nomes a seguir é ilustrativa, não exaustiva):
 imunidade de tipo (Levitate/GROUND), imunidade+absorção-e-cura (Volt Absorb, Water Absorb,
 1/4 do HP máx), imunidade+estágio (Sap Sipper/Lightning Rod/Storm Drain/Motor Drive, +1),
 Flash Fire, entrada em combate (Intimidate: −1 atkFis no oponente; Download: +1 no próprio
@@ -150,10 +152,14 @@ status no atacante; Rough Skin/Iron Barbs/Aftermath: dano de retorno), multiplic
 stat (Huge Power/Pure Power/Hustle/Guts/Marvel Scale/Quick Feet — ver pipeline acima),
 HP baixo (Blaze/Torrent/Overgrow/Swarm), Sturdy/Multiscale (condicionados a HP máximo exato),
 Synchronize (reflete status recebido), Poison Heal (veneno cura em vez de ferir), Inner
-Focus (imune a flinch). As **10 restantes** (Swift Swim, Chlorophyll, Sand Rush, Ice Body,
-Sand Veil, Snow Cloak, Speed Boost, Moxie, Shed Skin, Rain Dish) existem no `TraitId` e têm
-espécie atribuída, mas **sem mecânica nenhuma** — decorativas até o roster crescer o bastante
-pra justificar implementar (comentário no topo de `traits.ts` explica a curadoria).
+Focus (imune a flinch), e **imunidade a um status específico** via `TRAIT_STATUS_IMUNIDADE`
+(`statusSystem.ts`: Immunity/veneno, Limber/paralisia, Insomnia/sono, Vital Spirit/sono,
+Water Veil/queimadura, Magma Armor/congelamento, Own Tempo/confusão — 7 traits que a
+enumeração anterior desta seção deixava de fora, por isso "39" estava errado). As **10
+restantes** (Swift Swim, Chlorophyll, Sand Rush, Ice Body, Sand Veil, Snow Cloak, Speed
+Boost, Moxie, Shed Skin, Rain Dish) existem no `TraitId` e têm espécie atribuída, mas **sem
+mecânica nenhuma** — decorativas até o roster crescer o bastante pra justificar implementar
+(comentário no topo de `traits.ts` explica a curadoria).
 
 ### Clima (`ClimaTipo`, 4 tipos: chuva/sol/granizo/areia)
 

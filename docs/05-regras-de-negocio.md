@@ -8,12 +8,25 @@ que acontece quando isso não é feito.
 
 ### EXP
 
-`expRewardForEnemy` = `EXP_GAIN(baseExp, level)` da planilha × `XP_GLOBAL_MULTIPLIER`
-(`progressionSystem.ts`, fallback **0.14**).
+`expRewardForEnemy(enemyPoke, winnerLevel)` = `EXP_GAIN(baseExp, level, winnerLevel)` ×
+`XP_GLOBAL_MULTIPLIER` (`progressionSystem.ts`, fallback **0.1**).
 
-0.14 é o resultado de dois cortes empilhados (0.4 → 0.28 → 0.14): **-86% da taxa original da
-planilha**. Este é o único ponto de multiplicação de XP do jogo — `expRewardForEnemy`
-alimenta o POKE **e** o Treinador, então o corte vale para os dois.
+`winnerLevel` é parâmetro **obrigatório**, de propósito — um default (`= enemyPoke.level`,
+por exemplo) faria a fórmula parecer funcionar em todo call site novo enquanto devolvia
+sempre o valor de nível empatado, o **máximo** da curva, sem ninguém notar o excesso de XP.
+
+`EXP_GAIN` é a fórmula escalada de Ultra Sun (Gen VII, ver [02](02-dados-e-catalogo.md)):
+`floor(baseExp × level / 5 × ((2×level + 10) / (level + winnerLevel + 10))^2.5) + 1`. Ela
+**pune farm abaixo do próprio nível**: o termo escalado vale exatamente 1 quando os níveis
+empatam (POKE Lv90 contra alvo Lv90 rende o EXP "cheio"), mas cai para ~1.6% quando o alvo
+está muito abaixo do POKE (Lv90 contra Lv5) — pressão real para subir de zona em vez de
+farmar hunt fácil pra sempre.
+
+`0.1` desfaz o fator de escala da fórmula nova no ponto de nível empatado: a Gen VII rende
+7/5 = 1.4× o valor da fórmula antiga nesse ponto, e `0.14 / 1.4 = 0.1` mantém o XP contra
+alvo do próprio nível igual ao de antes da troca de fórmula — só o resto da curva mudou.
+`expRewardForEnemy` alimenta o POKE **e** o Treinador (`simulation.ts` soma o mesmo valor nos
+dois; o nível do Treinador não entra na conta).
 
 ### A curva do POKE tem 30% a mais que a do Treinador
 
@@ -265,15 +278,20 @@ Mínimo de 1.
 
 ### Itens
 
-Os 13 reais da planilha (bolas, poções, revives, varas). A Loja vende os 10 que não são
-vara; as varas sincronizam mas a pesca não é implementada (fora de escopo).
+**19** itens no catálogo (`src/data/generated/items.generated.ts`, gerado do catálogo Ultra
+Sun — ver [02](02-dados-e-catalogo.md)): 4 `ball`, 4 `potion`, 2 `revive`, **6 `status_heal`**
+(entraram junto com os status de combate — Antidote e afins, cada um cura o status
+correspondente), 3 `rod`. A Loja vende os **16** que não são `rod`
+(`KINDS_FORA_DA_LOJA = new Set(['rod'])`, `data/items.ts`); varas sincronizam mas a pesca não
+é implementada (fora de escopo).
 
 `sellPrice` é sempre **derivado** de `SELL_ITEM_PRICE(buyPrice, SELL_ITEM_FRACTION)`, nunca
 armazenado — mexer na fração rebalanceia todo item de uma vez.
 
-**Desconto de 70% na compra de bola e poção** (`BALL_POTION_BUY_DISCOUNT`, fallback 0.7),
-aplicado em `data/items.ts` e não no dado gerado (regra do projeto: `*.generated.ts` é
-sobrescrito e a planilha não é escrita).
+**Desconto de 70% na compra de bola, poção e cura de status** (`BALL_POTION_BUY_DISCOUNT`,
+fallback 0.7, `KINDS_COM_DESCONTO = new Set(['ball', 'potion', 'status_heal'])`), aplicado em
+`data/items.ts` e não no dado gerado (regra do projeto: `*.generated.ts` é sobrescrito e o
+catálogo de origem não é editado por script nenhum).
 
 **O desconto entra ANTES do `sellPrice`, e isso não é detalhe:** venda é 50% da compra.
 Descontar só a compra deixaria a Poke Ball custando 60 e vendendo por 100 — impressora de
@@ -323,15 +341,18 @@ destrancar mandaria o item para uma posição aleatória em vez de devolvê-lo a
 | Auto-captura | desligado | — |
 | Auto-revive | desligado, delay 5s | `AUTO_REVIVE_DELAY` |
 
-`AUTO_ACTION_COOLDOWN` = 1.0s entre ações do bot.
+`COOLDOWN_DO_TREINADOR = 1.5` (`autoSystem.ts`) — intervalo mínimo entre ações do bot
+(poção, revive, e cura de status desde a leva de itens `status_heal`); um único cooldown
+compartilhado, não um por tipo de ação.
 
 `BEST_POTION_OPTION = 'best'` não é um item: é a instrução "escolha a melhor poção
 disponível". O estoque relevante nela é a **soma** das poções.
 
 **Hunts BOSS não têm rede de segurança.** `isBossHunt = Boolean(world.mapDef?.noRespawn)` —
-o campo já marcava exatamente as 11 hunts BOSS, sem campo novo. Com ele, auto-poção,
-auto-revive e a contagem de revive são pulados **independente** dos toggles. Morte em BOSS é
-definitiva naquela visita.
+o campo marca as 11 hunts BOSS de lendário **e** a hunt do Campeão Lance (`noRespawn: true`
+nos dois casos, `nightmareMaps.ts`), **12** hunts ao todo. Com ele, auto-poção, auto-revive e
+a contagem de revive são pulados **independente** dos toggles. Morte em BOSS é definitiva
+naquela visita.
 
 ### Alerta de consumível acabando
 

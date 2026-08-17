@@ -3,6 +3,16 @@
 > Este documento descreve limiares anti-abuso. Ver a nota sobre publicação no
 > [README](README.md#esta-pasta-não-é-publicada).
 
+> **Farm offline está DESLIGADO em produção agora** (`server/src/progresso.ts#FARM_OFFLINE_PAUSADO
+> = true`, a pedido explícito do usuário). O jogador que volta depois de horas fora não recebe
+> nada por esse tempo — o intervalo é descartado, não represado (mesma regra do teto de 6h:
+> religar não pode despejar dias de recompensa de uma vez). **O jogo AO VIVO não é afetado** —
+> os flushes de 30s continuam creditando normalmente, porque ficam abaixo de
+> `LIMIAR_OFFLINE_SEGUNDOS`. Retomar exige trocar a constante para `false` **e** republicar a
+> Edge Function (`npm run edge:publicar`) — mergear sozinho não basta. Tudo que segue neste
+> documento descreve o sistema **como ele se comporta quando ligado**; a chave está desligada
+> hoje, não a lógica.
+
 ## A regra do jogo
 
 **Offline nunca pode render mais que jogar acordado, mas não pode degenerar para zero.**
