@@ -286,8 +286,16 @@ cascade, e a sessão fica apontando para um POKE fora da equipe.
 ## Leitura parcial: o flush não carrega a mochila
 
 `lerSnapshot(cfg, userId, { comBag: false })` lê `pokemon_instances` filtrada por
-`location=eq.team`. É o modo que **todo flush** usa (e `/sessao/abrir` também). O modo
-completo sobrou para `GET /estado`, que é quem monta a tela da Mochila no cliente.
+`location=eq.team`. É o modo que **todo flush** usa, e também `/sessao/abrir` e
+`GET /estado?parcial=1` — ou seja, hoje, todo caminho que um cliente atual percorre. O modo
+completo sobrou só para `GET /estado` **sem** o parâmetro, que é o que um cliente anterior a
+esta mudança pede.
+
+O cliente atual busca a mochila por conta própria, direto no PostgREST, quando abre uma tela
+que a usa (`mochilaRemota.ts` / `mochilaStore`) — assim a leitura atravessa **uma** perna de
+egress em vez de duas, e quem nunca abre a Mochila não paga por ela. Medido ao vivo na conta
+de teste (458 POKEs): `/estado?parcial=1` responde **4.575 bytes** contra **226.184** do modo
+completo.
 
 **Por que:** o snapshot completo cresce sem limite. Auto-catch despeja captura na mochila e
 nada sai sozinho. Medido em produção em 2026-08-17: uma conta com 5035 POKEs custava
@@ -323,11 +331,16 @@ estado parcial: sai a predição, entra a linha real, o resto da mochila fica. A
 mudança o mesmo efeito vinha de graça — a resposta trazia a mochila inteira e o `setState`
 jogava a predição fora junto.
 
-**Compatibilidade:** o modo enxuto só vale para quem manda `{"parcial":true}` no corpo de
-`/sessao/flush` e `/sessao/fechar`. Aba aberta antes do deploy manda corpo vazio e continua
-recebendo o estado completo — sem isso ela ficaria com a Mochila vazia na tela até o F5.
-Medido ao vivo na conta de teste (456 POKEs): flush parcial **5.077 bytes**, flush completo
-**225.711 bytes**.
+**Compatibilidade:** o modo enxuto só vale para quem pede — `{"parcial":true}` no corpo de
+`/sessao/flush` e `/sessao/fechar`, `?parcial=1` na query de `/estado`. Aba aberta antes do
+deploy não pede e continua recebendo o estado completo; sem isso ela ficaria com a Mochila
+vazia na tela até o F5. Medido ao vivo na conta de teste (456 POKEs): flush parcial
+**5.077 bytes**, flush completo **225.711 bytes**.
+
+`mochilaStore.carregada` é o que, no cliente, separa "o jogador não tem POKE guardado" de "a
+lista ainda não veio". Toda fusão de estado e todo refetch cirúrgico de RPC consulta essa
+chave antes de tocar em `bagPokes` — sem ela, as capturas de uma janela de flush viravam "a
+mochila inteira" numa conta de milhares.
 
 ## Gravação de estado
 

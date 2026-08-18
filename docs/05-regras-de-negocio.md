@@ -340,6 +340,33 @@ destrancar mandaria o item para uma posição aleatória em vez de devolvê-lo a
 | Auto-poção | ligado, 70% de HP | `DEFAULT_AUTO_POT_RULES` |
 | Auto-captura | desligado | — |
 | Auto-revive | desligado, delay 5s | `AUTO_REVIVE_DELAY` |
+| Auto-venda | desligado, nenhuma raridade | `DEFAULT_AUTO_SELL_CONFIG` |
+
+### Auto-venda: vende na captura, não varrendo a mochila
+
+`autoVendeEstaCaptura` (`captureSystem`) decide, e `attemptCapture` credita o ouro e devolve
+`location: 'vendido'` — o POKE **nunca entra na mochila**. Config em
+`players.auto_sell_config` (`{ligado, raridades}`), validada por whitelist no bloco
+`sellConfig` de `configurar_auto`.
+
+**Por que na captura.** A alternativa óbvia — varrer a mochila de tempo em tempo — obrigaria
+o flush a carregar a mochila de volta, que é exatamente o custo que a leitura parcial
+eliminou (`docs/04`, "Leitura parcial"). Vendendo na captura, o custo por flush não muda e a
+mochila nunca chega a encher. O bot existe justamente porque ela enchia: uma conta real
+acumulou 5035 POKEs, e a mochila é o maior dado de um jogador.
+
+**Shiny nunca é vendido**, esteja a raridade dele marcada ou não. A regra vive no motor, e
+não na tela, então nem UI nem request forjada a contorna. POKE trancado não entra na questão:
+o bot só decide sobre a captura, que nunca nasce trancada.
+
+O gravador da config usa **substituição** (`jsonb_build_object`), não merge `||`: com merge
+um array vazio seria ignorado e o jogador não conseguiria desmarcar a última raridade — o bot
+continuaria vendendo.
+
+POKE auto-vendido **não** entra em `summary.captures` (listar como captura mandaria o jogador
+procurar na mochila o que não está lá). Vira `autoVendidos` + `ouroDeAutoVenda`, e o ouro
+entra em `summary.gold` — portanto também na taxa de ouro/h e no piso do farm offline, que
+medem o que o jogador de fato ganhou.
 
 `COOLDOWN_DO_TREINADOR = 1.5` (`autoSystem.ts`) — intervalo mínimo entre ações do bot
 (poção, revive, e cura de status desde a leva de itens `status_heal`); um único cooldown
