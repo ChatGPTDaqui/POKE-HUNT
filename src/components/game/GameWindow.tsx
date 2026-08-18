@@ -55,6 +55,11 @@ export function GameWindow({
     if (el && !el.style.width) el.style.width = `${widthEm}em`
   }, [widthEm])
 
+  // `pointerdown` e nao `mousedown`: no toque o navegador so emite o evento de
+  // mouse de compatibilidade DEPOIS do `touchend`, e nao emite nenhum quando o
+  // gesto vira rolagem — ou seja, tocar fora da janela ora fechava com atraso,
+  // ora nao fechava. `pointerdown` cobre dedo, caneta e mouse no mesmo evento.
+  //
   // Fechar-ao-clicar-fora por listener de documento, e NAO por um backdrop que
   // captura o clique. A diferenca importa: um backdrop `inset-0` com
   // `pointer-events:auto` fica por cima de toda a HUD, entao clicar num botao
@@ -68,15 +73,15 @@ export function GameWindow({
   const temBackdrop = !!backdrop
   useEffect(() => {
     if (!temBackdrop) return
-    function onDown(event: MouseEvent) {
+    function onDown(event: PointerEvent) {
       const alvo = event.target as HTMLElement | null
       if (!alvo) return
       if (alvo.closest(`[data-window="${winKey}"]`)) return
       if (alvo.closest('[data-keep-open]')) return
       onClose()
     }
-    document.addEventListener('mousedown', onDown)
-    return () => document.removeEventListener('mousedown', onDown)
+    document.addEventListener('pointerdown', onDown)
+    return () => document.removeEventListener('pointerdown', onDown)
     // `temBackdrop` (booleano) em vez de `backdrop` (objeto): os chamadores
     // passam `backdrop={{ zIndex: 30 }}` inline, objeto novo a cada render —
     // o efeito nunca le `backdrop.zIndex` (isso e lido direto no JSX abaixo),

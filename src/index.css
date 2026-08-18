@@ -265,3 +265,101 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse-alerta { animation: none }
 }
+
+/* ============================================================================
+   BLACK GLASS — linguagem de superficie da HUD mobile-first (v8)
+   ============================================================================
+   Substitui progressivamente `.hud-surface`, que era uma coisa so (85% de
+   background + blur 6px) usada em card, pilula e chat sem hierarquia nenhuma.
+   Aqui a elevacao e expressa por TRES coisas juntas — opacidade, raio do blur e
+   fio de luz na borda de cima — porque sombra espalhada nao le em fundo preto.
+
+   Tres niveis, e nada alem deles:
+     .vidro        superficie ancorada na borda da tela (trilho, doca)
+     .vidro-flutua card/pilula solto sobre o jogo
+     .vidro-alto   sheet/janela aberta por cima de tudo
+
+   O tom NAO e cinza puro: `--vidro-tinta` tem um leve azul (#101218). Vidro
+   sobre um jogo colorido puxa a cor do que esta atras; sem a tinta fria as
+   superficies ficavam com um bege sujo em cima do mapa de deserto. */
+.hud-root {
+  --vidro-tinta: #101218;
+  --vidro-fio: rgba(255, 255, 255, .085);
+  --vidro-luz: inset 0 1px 0 rgba(255, 255, 255, .06);
+  --vidro-sombra: 0 .5em 1.5em -.6em rgba(0, 0, 0, .75);
+
+  /* Recortes do aparelho (notch, home indicator, cantos arredondados). O
+     `index.html` pede `viewport-fit=cover` desde sempre, mas NENHUM ponto do
+     CSS lia o `env()` — no iPhone o menu do rodape ficava sob o home indicator
+     e, deitado, o notch cobria o card da esquerda. O fallback `0px` e
+     obrigatorio: sem ele o `env()` sem suporte invalida a declaracao inteira. */
+  --sa-top: env(safe-area-inset-top, 0px);
+  --sa-right: env(safe-area-inset-right, 0px);
+  --sa-bottom: env(safe-area-inset-bottom, 0px);
+  --sa-left: env(safe-area-inset-left, 0px);
+}
+
+.vidro,
+.vidro-flutua,
+.vidro-alto {
+  border: 1px solid var(--vidro-fio);
+  background: color-mix(in srgb, var(--vidro-tinta) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(1.35);
+  box-shadow: var(--vidro-luz);
+}
+
+.vidro-flutua {
+  background: color-mix(in srgb, var(--vidro-tinta) 78%, transparent);
+  box-shadow: var(--vidro-luz), var(--vidro-sombra);
+}
+
+/* Sheet e janela cobrem conteudo que o jogador precisa LER. Mais opaco e mais
+   blur: texto de 12px sobre sprite animado com 78% de opacidade e ilegivel. */
+.vidro-alto {
+  background: color-mix(in srgb, var(--vidro-tinta) 93%, transparent);
+  backdrop-filter: blur(22px) saturate(1.25);
+  box-shadow: var(--vidro-luz), 0 1.2em 3em -.8em rgba(0, 0, 0, .85);
+}
+
+/* Chave de desligar o blur. `backdrop-filter` sobre um canvas a 60fps forca uma
+   recomposicao por frame POR CAMADA, e o custo aparece em Android intermediario
+   — nao no desktop onde isto e escrito. Com o blur fora, a mesma superficie
+   sobe pra opaca: vidro transparente SEM blur nao e um efeito, e ruido em cima
+   do jogo. Ligado por `data-blur="off"` na `.hud-root` (Configuracoes). */
+.hud-root[data-blur='off'] .vidro,
+.hud-root[data-blur='off'] .vidro-flutua,
+.hud-root[data-blur='off'] .vidro-alto,
+.hud-root[data-blur='off'] .hud-surface {
+  backdrop-filter: none;
+  background: color-mix(in srgb, var(--vidro-tinta) 96%, transparent);
+}
+
+/* Camada onde a HUD vive: a tela inteira MENOS os recortes do aparelho. O
+   canvas continua sangrando por baixo do notch (ele e irmao desta camada, nao
+   filho). Filho posicionado por `absolute` resolve contra o padding box do
+   ancestral, ou seja, padding aqui NAO afastaria nada — por isso sao `inset`
+   de verdade. */
+.hud-safe {
+  position: absolute;
+  top: var(--sa-top);
+  right: var(--sa-right);
+  bottom: var(--sa-bottom);
+  left: var(--sa-left);
+}
+
+/* Alvo minimo de toque. 44px e o piso da Apple HIG e o mais rigoroso dos dois
+   (Android pede 48dp, que da os mesmos ~44-48px em densidade tipica). Em px
+   fixo de proposito: `em` acompanha o `hudScale`, e um jogador que diminui a
+   HUD pra ver mais mapa nao esta pedindo alvos menores que o dedo dele. */
+.alvo-toque {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Sem realce azul de toque do WebKit e sem selecao acidental de texto ao segurar
+   um botao. Restrito a controles: texto de painel continua selecionavel. */
+.hud-root button,
+.hud-root [role='button'] {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}

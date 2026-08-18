@@ -69,15 +69,15 @@ export function ItemPicker({
     if (!aberto) return
     let armado = false
     const timer = setTimeout(() => { armado = true }, 0)
-    function onDown(e: MouseEvent) {
+    function onDown(e: PointerEvent) {
       if (!armado) return
       if (ref.current?.contains(e.target as Node)) return
       setAberto(false)
     }
-    document.addEventListener('mousedown', onDown, true)
+    document.addEventListener('pointerdown', onDown, true)
     return () => {
       clearTimeout(timer)
-      document.removeEventListener('mousedown', onDown, true)
+      document.removeEventListener('pointerdown', onDown, true)
     }
   }, [aberto])
 

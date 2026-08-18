@@ -61,7 +61,14 @@ export function JogoCarregado() {
       <div className="pointer-events-none absolute inset-0">
         {hasStarter && (
           <>
-            <HudLayer />
+            {/* `.hud-safe` recorta SO a HUD pelas areas inseguras do aparelho
+                (notch, home indicator). O canvas fica de fora de proposito: ele
+                e irmao desta camada e continua sangrando ate a borda fisica —
+                cortar o cenario pra caber no retangulo seguro deixaria duas
+                tarjas pretas em vez de imagem. */}
+            <div className="hud-safe">
+              <HudLayer />
+            </div>
             <ScreenOverlay />
             <ReviveCountdownModal />
             <DefeatModal />

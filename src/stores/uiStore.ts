@@ -30,6 +30,14 @@ export type WindowKey = 'panel' | 'profile' | 'offline' | 'auto' | 'chat' | 'per
 
 export type WindowPositions = Partial<Record<WindowKey, { x: number; y: number }>>
 
+// `matchMedia` nao existe no jsdom dos testes nem em SSR. Ausencia = ambiente
+// sem dedo, que e o default certo: com `coarse` ligado por engano toda a HUD
+// entraria em modo toque numa maquina de mouse.
+function pontoGrosso(): boolean {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false
+  return window.matchMedia('(pointer: coarse)').matches
+}
+
 const HUD_SCALE_KEY = 'novo-poke-idle:hud-scale'
 // 0.7 (era 0.8) porque a fonte base da HUD subiu 3px nesta leva: sem descer o
 // minimo, quem jogava confortavel no tamanho antigo perdeu a opcao de voltar.
@@ -92,17 +100,27 @@ interface UiState {
   footerHeight: number
   setFooterHeight: (height: number) => void
 
-  // Largura do viewport em px. Vive na store (e nao num `useState` por
-  // componente) porque 8 superficies diferentes decidem posicao a partir dela:
-  // um listener de resize compartilhado em vez de oito.
+  // Largura E ALTURA do viewport em px. Vivem na store (e nao num `useState`
+  // por componente) porque varias superficies decidem posicao a partir delas:
+  // um listener de resize compartilhado em vez de um por superficie.
+  //
+  // A altura entrou porque so a largura nao descreve um celular: deitado ele
+  // mede 844x390 e caia no regime DESKTOP com 390px de altura util — cards do
+  // topo e rodape se sobrepondo, sem nenhum breakpoint acusando.
   viewportWidth: number
+  viewportHeight: number
+
+  // `(pointer: coarse)` = dedo, nao mouse. Separado da largura de proposito:
+  // uma janela de navegador estreita num desktop NAO e um celular (hover
+  // funciona, alvo de 32px e clicavel) e um tablet largo NAO e um desktop.
+  coarsePointer: boolean
 
   winPos: WindowPositions
   setWinPos: (key: WindowKey, pos: { x: number; y: number }) => void
   // Chamado no resize do viewport: uma janela arrastada pro canto direito de
   // uma tela larga fica FORA da tela quando ela encolhe, e sem barra de titulo
   // visivel nao ha como trazer de volta.
-  handleViewportResize: (width: number) => void
+  handleViewportResize: (width: number, height: number, coarse: boolean) => void
 
   hudScale: number
   setHudScale: (scale: number) => void
@@ -170,10 +188,37 @@ export const useUiStore = create<UiState>((set, get) => ({
   },
 
   viewportWidth: typeof window === 'undefined' ? 1280 : window.innerWidth,
+  viewportHeight: typeof window === 'undefined' ? 800 : window.innerHeight,
+  coarsePointer: pontoGrosso(),
 
   winPos: {},
   setWinPos: (key, pos) => set((s) => ({ winPos: { ...s.winPos, [key]: pos } })),
-  handleViewportResize: (viewportWidth) => set({ viewportWidth, winPos: {} }),
+  // Chamado por resize, orientationchange E visualViewport. Este ultimo dispara
+  // a cada pixel que a barra de URL do celular sobe ou desce, entao duas
+  // protecoes sao obrigatorias aqui, nao no chamador:
+  //
+  //  - sair sem `set` quando nada mudou, senao a barra de URL re-renderiza a
+  //    HUD inteira a cada frame de rolagem;
+  //  - zerar `winPos` so numa mudanca ESTRUTURAL (largura, ou altura > 120px).
+  //    A barra de URL muda a altura em ~60px o tempo todo; com o `winPos: {}`
+  //    incondicional, uma janela que o jogador arrastou voltava sozinha pro
+  //    centro quando ele rolava a lista dentro dela.
+  handleViewportResize: (viewportWidth, viewportHeight, coarsePointer) => {
+    const s = get()
+    if (
+      s.viewportWidth === viewportWidth
+      && s.viewportHeight === viewportHeight
+      && s.coarsePointer === coarsePointer
+    ) return
+    const estrutural = s.viewportWidth !== viewportWidth
+      || Math.abs(s.viewportHeight - viewportHeight) > 120
+    set({
+      viewportWidth,
+      viewportHeight,
+      coarsePointer,
+      ...(estrutural ? { winPos: {} } : null),
+    })
+  },
 
   hudScale: readHudScale(),
   setHudScale: (raw) => {
@@ -221,5 +266,67 @@ export function useBreakpoints(): Breakpoints {
     colStack: width < BP_STACK,
     mid: width < BP_MID,
     chatNarrow: width < BP_CHAT,
+  }
+}
+
+// --- modo de dispositivo (v8, HUD mobile-first) ------------------------------
+// Substitui progressivamente os breakpoints acima. A diferenca nao e de valor,
+// e de EIXO: `useBreakpoints` decide tudo por largura, e por isso nao enxerga
+// celular deitado (844x390 le como desktop) nem tablet com dedo.
+//
+// Tres regimes, e cada um e um LAYOUT diferente — nao o mesmo layout encolhido:
+//
+//   'compacto'   celular em pe:     trilho no topo, doca no rodape, sheets
+//   'deitado'    celular deitado:   trilho fino no topo, doca em coluna lateral
+//   'amplo'      desktop/tablet:    trilho espalhado, doca centrada, janelas
+//
+// O piso de 820px (e nao 640) e proposital: entre 640 e 820 a HUD antiga ja
+// vivia colidindo — 640 era o ponto em que ela QUEBRAVA, nao o ponto em que
+// ainda cabia.
+export const BP_COMPACTO = 820  // abaixo disso, layout de celular em pe
+export const BP_BAIXO = 520     // abaixo disso, altura de celular deitado
+
+export type DeviceMode = 'compacto' | 'deitado' | 'amplo'
+
+export interface DeviceInfo {
+  mode: DeviceMode
+  width: number
+  height: number
+  /** Dedo em vez de mouse: sem hover, sem `title`, alvo minimo de 44px. */
+  coarse: boolean
+  /** Atalho: qualquer regime de celular. */
+  compacto: boolean
+  /** Painel abre como bottom sheet (compacto/deitado) ou como janela (amplo). */
+  usaSheet: boolean
+}
+
+/**
+ * Regime de layout do aparelho.
+ *
+ * A altura entra ANTES da largura na decisao porque tela baixa e o caso que
+ * mais quebra: um layout empilhado precisa de altura, nao de largura, e e
+ * exatamente isso que o celular deitado nao tem.
+ */
+export function useDeviceMode(): DeviceInfo {
+  const width = useUiStore((s) => s.viewportWidth)
+  const height = useUiStore((s) => s.viewportHeight)
+  const coarse = useUiStore((s) => s.coarsePointer)
+  return deviceModeDe(width, height, coarse)
+}
+
+/** Forma pura, pra teste e pra uso fora de componente. */
+export function deviceModeDe(width: number, height: number, coarse: boolean): DeviceInfo {
+  // Tela baixa E larga = deitado. O `coarse || width < 1024` evita classificar
+  // como celular uma janela de desktop que o usuario apenas achatou: ali o
+  // hover funciona e a densidade do layout amplo continua utilizavel.
+  const deitado = height < BP_BAIXO && width > height && (coarse || width < 1024)
+  const mode: DeviceMode = deitado ? 'deitado' : width < BP_COMPACTO ? 'compacto' : 'amplo'
+  return {
+    mode,
+    width,
+    height,
+    coarse,
+    compacto: mode !== 'amplo',
+    usaSheet: mode !== 'amplo',
   }
 }

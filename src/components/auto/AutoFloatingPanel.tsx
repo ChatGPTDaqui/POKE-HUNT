@@ -68,7 +68,7 @@ export function AutoWindow() {
     const timer = setTimeout(() => {
       armado = true
     }, 0)
-    function onDown(e: MouseEvent) {
+    function onDown(e: PointerEvent) {
       if (!armado) return
       const target = e.target as HTMLElement
       if (ref.current?.contains(target)) return
@@ -77,10 +77,10 @@ export function AutoWindow() {
       if (target.closest('[data-auto-toggle]')) return
       setOpen(false)
     }
-    document.addEventListener('mousedown', onDown, true)
+    document.addEventListener('pointerdown', onDown, true)
     return () => {
       clearTimeout(timer)
-      document.removeEventListener('mousedown', onDown, true)
+      document.removeEventListener('pointerdown', onDown, true)
     }
   }, [open, setOpen])
 
