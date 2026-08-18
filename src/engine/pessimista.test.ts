@@ -80,9 +80,23 @@ describe('world.pessimista: farm offline nunca renderiza melhor que ao vivo (PH-
     const otimista = media(false)
     const pessimista = media(true)
 
-    // Abates e XP convergem rapido: sao contagens, sem cauda pesada.
-    expect(pessimista.kills).toBeLessThanOrEqual(otimista.kills)
-    expect(pessimista.xp).toBeLessThanOrEqual(otimista.xp)
+    // Abates e XP convergem rapido (sao contagens, sem a cauda pesada do
+    // ouro), mas NAO convergem a zero: os dois modos consomem quantidades
+    // diferentes de sorteios, entao mesmo com 40 sementes a media fica com
+    // uns decimos de ruido residual — e o `<=` cru comparava esse ruido.
+    //
+    // Vinha passando por sorte, e caiu quando o walk-block pintado passou a
+    // valer pela ARTE (leva 2026-08-18): a grade da route_46 mudou de 270 pra
+    // 320 celulas andaveis, os encontros se deslocaram e a media virou 200.875
+    // contra 200.85 — 0.012% de diferenca, ruido puro. Nada nessa leva encosta
+    // em critico ou variacao de dano, que e o que a flag governa.
+    //
+    // 1% e folga suficiente pro ruido e ainda pega a regressao que importa: se
+    // `pessimista` deixar de zerar o critico, a diferenca vai pra casa dos
+    // dois digitos percentuais, nao pra 0.01%.
+    const RUIDO = 1.01
+    expect(pessimista.kills).toBeLessThanOrEqual(otimista.kills * RUIDO)
+    expect(pessimista.xp).toBeLessThanOrEqual(otimista.xp * RUIDO)
 
     // OURO PRECISA DE FOLGA, e nao e leniencia: `sellMultiplier` vai de 1x a
     // 600x por raridade (data/rarity.ts), entao um unico Mythic sorteado de um

@@ -57,10 +57,10 @@ export const GRUPOS_DO_LANCE: string[] = ['faixa3', 'nightmare']
 
 // Grupos que existiam antes das faixas e que nenhuma hunt usa mais. Save
 // antigo (localStorage) e linha antiga de `players.unlocked_continents` os
-// carregam; sao traduzidos na carga, nunca propagados — 'kanto' vira o que o
+// carregam; sao traduzidos na carga, nunca propagados — kanto vira o que o
 // Lance libera hoje, os outros dois somem. Nao basta ignorar: manter
-// 'nightmare' daria de graca o conteudo que acabou de virar gate do Lance.
-export const GRUPOS_LEGADOS: ReadonlySet<string> = new Set(['johto', 'kanto', 'nightmare'])
+// nightmare daria de graca o conteudo que acabou de virar gate do Lance.
+export const GRUPOS_LEGADOS: ReadonlySet<string> = new Set([johto, kanto, nightmare])
 
 // ---------------------------------------------------------------------------
 // Loot por sub-bioma
@@ -147,6 +147,8 @@ const ARTE = {
   campina: 'assets/hunt-backgrounds/meadow.jpg',
   vilarejo: 'assets/hunt-backgrounds/town.jpg',
   vilarejoNoturno: 'assets/hunt-backgrounds/town-night.jpg',
+  metropole: 'assets/hunt-backgrounds/metropolis.jpg',
+  cortico: 'assets/hunt-backgrounds/slum.jpg',
   florestaPadrao: 'assets/hunt-backgrounds/forest.jpg',
   matoAlto: 'assets/hunt-backgrounds/tall-grass.jpg',
   selva: 'assets/hunt-backgrounds/jungle.jpg',
@@ -266,8 +268,11 @@ export const BIOMAS: BiomaDef[] = [
     tipo: 'FIGHTING',
     bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.vilarejoNoturno },
     subBiomas: [
-      { chave: 'metropolis', nome: 'Metropole', peso: 10, loot: 'civilizado' },
-      { chave: 'slum', nome: 'Cortico', peso: 6, loot: 'civilizado' },
+      // Arte propria importada na leva 2026-08-18, junto com o walk-block
+      // pintado das duas. Antes herdavam o fundo do bioma (vilarejo noturno),
+      // que e uma clareira de floresta — nada a ver com "metropole"/"cortico".
+      { chave: 'metropolis', nome: 'Metropole', peso: 10, loot: 'civilizado', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.metropole } },
+      { chave: 'slum', nome: 'Cortico', peso: 6, loot: 'civilizado', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.cortico } },
       // Dojo preserva a arte propria (ARTE.dojo) — nao herda o fundo novo do
       // bioma, de proposito (ver comentario no topo de ARTE).
       { chave: 'dojo', nome: 'Dojo', peso: 6, loot: 'basico', bg: { primary: '#3d3a35', secondary: '#4a4640', image: ARTE.dojo } },

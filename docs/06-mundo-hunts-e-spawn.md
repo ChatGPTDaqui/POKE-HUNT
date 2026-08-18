@@ -206,24 +206,50 @@ campo com espécie fora do pool novo até morrer por conta própria — era assi
 Lance ficam de fora — elenco curado à mão ou lendário único, sala não faz sentido para
 nenhuma delas.
 
-## Wall-block por sub-bioma (colisão pintada à mão)
+## Wall-block pela ARTE de fundo (colisão pintada à mão)
 
-`src/data/maps.ts#mapDefParaSala` troca a grade de colisão pela do **sub-bioma da sala atual**,
-não a do bioma inteiro — diferente do body-block antigo (por hunt inteira, via `bg.image`),
-necessário porque agora o sub-bioma muda várias vezes dentro da mesma hunt.
+`src/data/maps.ts#mapDefParaSala` escolhe a grade de colisão pela **imagem que está na tela**,
+não pela chave do sub-bioma. A imagem sai de `maps.ts#backgroundParaSala` — sub-bioma com arte
+própria manda, senão vale a arte da hunt (que é a do bioma) —, a mesma função que o renderer
+usa para desenhar.
 
-Fonte: `scripts/build-sub-bioma-collision.js`, 18 referências pintadas à mão
-(`scripts/body-block-refs/*.png`, fora de `assets/` **de propósito** — mantém 111MB de
-imagem-referência fora do bundle de produção, que só copia tudo sob `assets/`, ver
-`scripts/copiar-assets.mjs`). Dois modos de leitura, por entrada do manifesto:
+**Por que pela arte** (mudou em 2026-08-18; antes era `SUB_BIOMA_COLLISION[chave]`): toda hunt
+fora do sistema de salas — Modo Pesadelo, as 11 BOSS, o Campeão Lance, o treino — não tem
+`sala`, então não casava com chave nenhuma e rodava **sem wall-block**, atravessando as mesmas
+paredes que a hunt normal respeita. Não dava erro; parecia só "o Pesadelo não tem wall block".
+A `route_46` escapava por um `if (mapId === STARTER_HUNT_ID)` escrito à mão, que saiu junto: ela
+mostra `forest.jpg` e herda a grade dessa arte como qualquer outro. A regra agora é uma só —
+**quem mostra a imagem herda o walk-block dela** — e conteúdo novo entra sem cadastro paralelo.
+Trancado por `src/data/walkBlock.test.ts`.
+
+Fonte: `scripts/build-sub-bioma-collision.js`, 29 referências pintadas à mão
+(`scripts/body-block-refs/*.png`, fora de `assets/` **de propósito** — mantém a imagem-referência
+fora do bundle de produção, que só copia tudo sob `assets/`, ver `scripts/copiar-assets.mjs`).
+Dois modos de leitura e duas fontes de spawn, por entrada do manifesto:
 
 - **`vermelho_bloqueia`** (só `abismo.png`, o desenho mais antigo): vermelho = parede,
   qualquer outra cor = andável.
-- **`rosa_anda`** (as outras 17): pintura lilás/rosa é o **único** lugar andável/spawnável —
+- **`rosa_anda`** (as outras 28): pintura lilás/rosa é o **único** lugar andável/spawnável —
   tudo o resto bloqueia. Convenção invertida da anterior; ambas coexistem via um campo `modo`
   por entrada, para não arriscar quebrar `abismo.png` (já testada) só por unificar convenção.
+- **`spawn: 'amarelo'`** usa o **maior blob contíguo** de amarelo (círculo pintado pelo
+  usuário); `'centroide-rosa'` nasce no meio da própria área rosa. Blob, e nunca o centroide de
+  todo pixel amarelo: várias artes têm amarelo incidental (flor, lâmpada, lava) e a média cai
+  num ponto que não existe.
 
-A grade resultante (`SUB_BIOMA_COLLISION[chave]`, gerada) tem `colisaoDefineLimite: true` — o
+`PINK_CELL_RATIO = 0.3` — quanto de uma célula (40px de mundo = 50px de imagem) precisa estar
+pintada para ela ser andável. Era 0.5 e isso **cortava a malha das artes urbanas**: rua de
+cidade tem cerca de uma célula de largura, qualquer estreitamento caía abaixo da maioria, e a
+poda por desconexão apagava tudo do outro lado do corte (medido: `town-night` perdia 224
+células, `metropolis` 116). Em 0.3 os dois vão a zero e 0.2 não conserta mais nada.
+
+**A pintura só vale no recorte que vira mundo.** A arte é ~2048², mas os bounds são 1400x900 em
+paisagem: só `x[149..1899] y[462..1587]` da imagem aparece. O que for pintado fora disso é
+descartado em silêncio — inclusive o círculo amarelo de spawn, caso em que o script avisa e cai
+no centroide rosa. `node scripts/conferir-walk-block.mjs` gera, por arte, a referência recortada
+nessa janela com a grade por cima, que é o único jeito de ver desalinhamento sem entrar no jogo.
+
+A grade resultante (`COLISAO_POR_ARTE[caminho da arte]`, gerada) tem `colisaoDefineLimite: true` — o
 retângulo INTEIRO da grade é o limite real (a pintura já é a fronteira), então
 `mapWalkRadius` devolve o raio que inscreve o retângulo inteiro (nunca corta a grade), ao
 contrário do círculo inscrito na menor dimensão que toda outra hunt usa. Fora da grade conta
@@ -237,9 +263,9 @@ andamento (`salaSystem.ts#aplicarTransicaoDeSala`, mesmo snap para jogador **e**
 sem isso, uma entidade podia herdar uma célula cercada por 8 vizinhos também bloqueados e
 ficar presa, já que nem A* nem `slideToward` escapam de "começar dentro da parede").
 
-A hunt inicial (`route_46`, fora do sistema de salas) reusa a grade pintada de `forest`
-(mesma arte de fundo) — sem esse fallback explícito em `mapDefParaSala`, ela nunca ganharia
-wall-block nenhum apesar de ter referência pintada própria.
+Sem referência pintada hoje: só `dojo.png`. Toda outra sala mostra alguma arte que tem grade,
+seja a própria ou a do bioma — a lista de exceção fica explícita em `walkBlock.test.ts`, para
+uma arte nova não entrar de carona no "ainda faltam algumas".
 
 ## Spawn: distância média e cone de visão
 

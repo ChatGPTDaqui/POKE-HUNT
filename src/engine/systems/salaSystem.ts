@@ -225,7 +225,7 @@ export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
   world.mapDef = novoMapDef
 
   if (!world.player) return
-  const ponto = spawnPointParaSala(world.sala)
+  const ponto = spawnPointParaSala(mapId, world.sala)
   if (ponto) {
     world.player.x = ponto.x
     world.player.y = ponto.y

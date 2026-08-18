@@ -6,8 +6,8 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
 import { COLLISION_GRIDS, COLLISION_GRID_CELL_SIZE } from './generated/collisionGrids.generated'
 import { WATER_COLLISION_GRID, WATER_SPAWN_POINT } from './generated/waterCollisionMask.generated'
-import { SUB_BIOMA_COLLISION } from './generated/subBiomaCollision.generated'
-import { FAIXAS, huntId } from './biomas'
+import { COLISAO_POR_ARTE } from './generated/subBiomaCollision.generated'
+import { FAIXAS, huntId, SUB_BIOMA_POR_CHAVE } from './biomas'
 import type { HuntMapDef } from './huntTypes'
 
 // Modo Pesadelo hunts (see nightmareMaps.js) and the hand-picked spawn-pool
@@ -15,7 +15,7 @@ import type { HuntMapDef } from './huntTypes'
 // the spreadsheet sync — huntSpawnOverrides.js is the one place that does
 // this merge, since it needs to patch both this file's enemyPools AND
 // data/enemies.js's encounters together.
-import { MAPS, STARTER_HUNT_ID } from './huntSpawnOverrides'
+import { MAPS } from './huntSpawnOverrides'
 export { MAPS }
 
 export interface MapDef extends HuntMapDef {
@@ -85,32 +85,65 @@ export function getMap(id: string): MapDef | null {
   return { ...map, respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER, collisionGrid }
 }
 
-// Colisao/spawn por SALA (sub-bioma), pintados a mao — ver
-// scripts/build-sub-bioma-collision.js. Diferente do body-block antigo
-// (WALL_BLOCK_ENABLED/COLLISION_GRIDS, por HUNT INTEIRA via `bg.image`):
-// aqui o sub-bioma pode mudar VARIAS vezes dentro da mesma hunt (o sistema
-// de salas), entao a grade que vale e a da sala ATUAL, nao a do bioma-mae.
-// `sala` aceita a forma minima (so `chave`) pra nao importar SalaAtiva de
-// engine/types.ts, que ja importa MapDef DESTE arquivo — ciclo de tipo e
-// seguro em TS (apagado na compilacao), mas a interface estrutural evita
-// depender disso.
+/**
+ * Fundo que a cena REALMENTE mostra: sub-bioma com arte propria manda, senao
+ * vale a arte da hunt (que e a do bioma). Sub-bioma sem `bg` proprio e a
+ * maioria — so os que ganharam arte nas levas de background novo tem.
+ *
+ * Mora aqui, e nao no renderer que a inventou, porque virou regra de DADO e
+ * nao de desenho: e ela que decide qual walk-block pintado vale (ver
+ * `mapDefParaSala` logo abaixo). Uma segunda copia da regra em `render/` ia
+ * divergir em silencio — a grade de colisao passaria a ser de uma imagem e o
+ * pixel na tela de outra, que e a classe de bug mais cara deste sistema.
+ * `render/renderer.ts` importa daqui.
+ */
+export function backgroundParaSala(map: MapDef, sala: { chave: string } | null): MapDef['bg'] {
+  return (sala && SUB_BIOMA_POR_CHAVE[sala.chave]?.sub.bg) || map.bg
+}
+
+/**
+ * Colisao/spawn pintados a mao (scripts/build-sub-bioma-collision.js),
+ * resolvidos pela ARTE que a cena mostra.
+ *
+ * POR QUE PELA ARTE, E NAO PELA CHAVE DA SALA. Ate 2026-08-18 a tabela era
+ * indexada por chave de sub-bioma, e isso deixava um furo silencioso: toda
+ * hunt que nao passa pelo sistema de salas — Modo Pesadelo, BOSS, Campeao
+ * Lance, treino, e qualquer conteudo futuro — nao tem `sala` nenhuma, entao
+ * nao casava com nada e rodava SEM body-block, atravessando exatamente as
+ * mesmas paredes que a hunt normal respeita. O `route_46` so escapava por um
+ * special-case escrito a mao aqui (`mapId === STARTER_HUNT_ID -> 'forest'`),
+ * que agora sai: ele mostra forest.jpg, entao herda a grade de forest.jpg
+ * sozinho.
+ *
+ * A regra vira: quem MOSTRA a imagem herda o walk-block dela. Sub-bioma com
+ * arte propria, sub-bioma sem arte (que mostra a do bioma) e hunt sem salas
+ * caem todos no mesmo caminho, sem cadastro paralelo pra alguem esquecer de
+ * atualizar quando entrar conteudo novo.
+ *
+ * `sala` aceita a forma minima (so `chave`) pra nao importar SalaAtiva de
+ * engine/types.ts, que ja importa MapDef DESTE arquivo — ciclo de tipo e
+ * seguro em TS (apagado na compilacao), mas a interface estrutural evita
+ * depender disso.
+ */
 export function mapDefParaSala(mapId: string, sala: { chave: string } | null): MapDef | null {
   const map = getMap(mapId)
   if (!map) return null
-  // A hunt inicial (route_46) fica FORA do sistema de salas (temSalas() e
-  // falso pra ela — salaSystem.ts), entao `sala` nunca casa aqui. Ela usa a
-  // MESMA arte real da 'forest' (huntSpawnOverrides.ts: bg = forest.jpg),
-  // entao reusa a grade pintada dessa sub-bioma direto — sem isso a hunt
-  // inicial nunca ganharia body-block nenhum, mesmo tendo referencia
-  // pintada propria (body-block/forest.png).
-  const chave = sala?.chave ?? (mapId === STARTER_HUNT_ID ? 'forest' : null)
-  const override = chave && SUB_BIOMA_COLLISION[chave]
-  if (!override) return map
-  return { ...map, collisionGrid: override.grid, colisaoDefineLimite: true }
+  const arte = backgroundParaSala(map, sala).image
+  const pintada = arte ? COLISAO_POR_ARTE[arte] : undefined
+  if (!pintada) return map
+  return { ...map, collisionGrid: pintada.grid, colisaoDefineLimite: true }
 }
 
-export function spawnPointParaSala(sala: { chave: string } | null): { x: number; y: number } | null {
-  return (sala && SUB_BIOMA_COLLISION[sala.chave]?.spawnPoint) ?? null
+/**
+ * Ponto de nascimento pintado pra cena atual, ou `null` se aquela arte nao
+ * tem referencia. Recebe `mapId` (e nao so a sala) pelo mesmo motivo acima:
+ * hunt sem sala tambem tem arte, e tambem merece o spawn pintado dela.
+ */
+export function spawnPointParaSala(mapId: string, sala: { chave: string } | null): { x: number; y: number } | null {
+  const map = getMap(mapId)
+  if (!map) return null
+  const arte = backgroundParaSala(map, sala).image
+  return (arte ? COLISAO_POR_ARTE[arte]?.spawnPoint : undefined) ?? null
 }
 
 export function isCellBlocked(mapDef: MapDef, x: number, y: number): boolean {

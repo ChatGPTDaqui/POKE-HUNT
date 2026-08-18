@@ -29,7 +29,7 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { randInt, randRange, weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
-import { captureAnimFrameDuration, captureAnimRowCount } from '@/data/captureAnim'
+import { captureAnimFrameDuration, captureAnimFrameCount } from '@/data/captureAnim'
 import { rarityOf, realceDaRaridade } from '@/data/rarity'
 import { formatStatGains } from '@/data/statLabels'
 
@@ -338,7 +338,7 @@ export function buildMapWorld(
   const mapDef = mapDefParaSala(mapId, sala)
   if (!mapDef) throw new Error(`Mapa desconhecido: ${mapId}`)
 
-  const spawn = spawnPointParaSala(sala) ?? mapDef.playerSpawn
+  const spawn = spawnPointParaSala(mapId, sala) ?? mapDef.playerSpawn
   // `spawnPointParaSala` ja devolve um ponto andavel quando a sala tem body-
   // block (o proprio script de build ja resolve isso). O fallback
   // (`mapDef.playerSpawn`, GEOMETRIA fixa) NAO passa por essa checagem —
@@ -477,12 +477,12 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
 
     // Animacao de arremesso de Pokebola — so pra uma tentativa de verdade.
     if (captureResult && 'ballItemId' in captureResult && captureResult.ballItemId) {
-      const rowCount = captureAnimRowCount(captureResult.success)
+      const quadros = captureAnimFrameCount(captureResult.success)
       world.effects.push(createWorldEffect(world.counters, {
         type: 'captureAnim', x: enemy.x, y: enemy.y, targetX: enemy.x, targetY: enemy.y,
         ballItemId: captureResult.ballItemId, success: captureResult.success,
         delay: DEATH_ANIM_GRACE_PERIOD,
-        duration: rowCount * captureAnimFrameDuration(captureResult.ballItemId) + 0.3,
+        duration: quadros * captureAnimFrameDuration() + 0.3,
       }))
     }
 

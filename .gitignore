@@ -76,3 +76,7 @@ npm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Imagens de conferencia do walk-block (scripts/conferir-walk-block.mjs) — 15MB de
+# diagnostico regeravel, nao versionado.
+scripts/body-block-refs/_conferencia/
