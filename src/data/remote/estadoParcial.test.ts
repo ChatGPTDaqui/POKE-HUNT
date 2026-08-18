@@ -10,6 +10,7 @@ import { createPokeInstance } from '@/data/pokes'
 import { useGameStateStore, type GameStateData } from '@/stores/gameStateStore'
 import { aplicarEstadoDoServidor } from './autoridade'
 import { ativarPredicoesDeCaptura } from './predicoesDeCaptura'
+import { useMochilaStore } from '@/stores/mochilaStore'
 import { defaultGameStateData } from '@/stores/gameStateDefaults'
 
 const rng = createRng(7)
@@ -24,6 +25,10 @@ function respostaParcial(bag: ReturnType<typeof poke>[], gold = 0): GameStateDat
 beforeEach(() => {
   useGameStateStore.setState({ ...defaultGameStateData() })
   ativarPredicoesDeCaptura(true)
+  // A mochila so e reconciliada quando ELA JA FOI CARREGADA nesta sessao — o
+  // resto destes casos parte disso. O caminho "nao carregada" tem teste proprio
+  // no fim do arquivo.
+  useMochilaStore.setState({ carregada: true, carregando: false, erro: null })
 })
 
 describe('aplicarEstadoDoServidor(estado, parcial = true)', () => {
@@ -72,6 +77,31 @@ describe('aplicarEstadoDoServidor(estado, parcial = true)', () => {
     useGameStateStore.getState().addCapturedPoke(poke('predicao-orfa'))
     aplicarEstadoDoServidor(respostaParcial([]), true)
     expect(useGameStateStore.getState().bagPokes).toEqual([])
+  })
+})
+
+describe('mochila NAO carregada — o estado normal desde que ela virou sob demanda', () => {
+  beforeEach(() => {
+    useMochilaStore.setState({ carregada: false, carregando: false, erro: null })
+  })
+
+  it('nao monta uma mochila a partir das capturas da janela', () => {
+    // O sintoma que isto impede: a tela da Mochila mostrando "2 POKEs" pra quem
+    // tem mil, porque o flush mandou as duas capturas daquela janela e o cliente
+    // as tratou como se fossem a mochila.
+    aplicarEstadoDoServidor(respostaParcial([poke('capturado-agora')]), true)
+    expect(useGameStateStore.getState().bagPokes).toEqual([])
+  })
+
+  it('descarta a predicao local tambem — ela reapareceria como mochila de um item', () => {
+    useGameStateStore.getState().addCapturedPoke(poke('predicao-local'))
+    aplicarEstadoDoServidor(respostaParcial([]), true)
+    expect(useGameStateStore.getState().bagPokes).toEqual([])
+  })
+
+  it('o resto do estado continua sendo aplicado normalmente', () => {
+    aplicarEstadoDoServidor(respostaParcial([poke('x')], 777), true)
+    expect(useGameStateStore.getState().wallet.gold).toBe(777)
   })
 })
 

@@ -48154,10 +48154,16 @@ async function rotear(cfg, req, url) {
 	if (url.pathname === "/sessao/abrir" && req.method === "POST") return abrirSessao(cfg, jogador.id, req);
 	if (url.pathname === "/sessao/flush" && req.method === "POST") return flush(cfg, jogador.id, await aceitaEstadoParcial(req));
 	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id, await aceitaEstadoParcial(req));
-	if (url.pathname === "/estado" && req.method === "GET") return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas }) => {
-		if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt);
-		return json({ estado });
-	});
+	if (url.pathname === "/estado" && req.method === "GET") {
+		const parcial = url.searchParams.get("parcial") === "1";
+		return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas }) => {
+			if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt);
+			return json({
+				estado,
+				estadoParcial: parcial
+			});
+		}, { comBag: !parcial });
+	}
 	return json({ erro: "rota desconhecida" }, 404);
 }
 /**

@@ -14,6 +14,7 @@ import { flushAgora } from './gameStatePersistence'
 import {
   ativarPredicoesDeCaptura, ehCapturaPredita, limparCapturasPreditas,
 } from './predicoesDeCaptura'
+import { mochilaCarregada } from '@/stores/mochilaStore'
 
 // Sem servidor nao ha nada pra reconciliar — a mochila local JA e a verdade.
 // Desligar so evita a lista de uids crescer a sessao inteira sem ninguem ler.
@@ -42,6 +43,16 @@ export function aplicarEstadoDoServidor(estado: unknown, parcial = false): void 
     return
   }
   const novos = Array.isArray(doServidor.bagPokes) ? doServidor.bagPokes : []
+  // Mochila nao carregada nesta sessao (ver mochilaStore): nao ha lista local
+  // pra reconciliar, e guardar SO as capturas desta janela faria a tela mostrar
+  // "2 POKEs" numa conta de milhares. A mochila fica vazia de proposito — quem
+  // abrir a tela dispara a leitura paginada e recebe a verdade, capturas novas
+  // incluidas.
+  if (!mochilaCarregada()) {
+    useGameStateStore.setState({ ...doServidor, bagPokes: [] })
+    limparCapturasPreditas()
+    return
+  }
   const idsNovos = new Set(novos.map((p) => p.uid))
   useGameStateStore.setState((local) => ({
     ...doServidor,
@@ -165,8 +176,8 @@ export async function abrirSessaoDeHunt(mapId: string, pokeUid: string): Promise
 export async function recarregarEstado(): Promise<void> {
   if (!servidorAtivo()) return
   try {
-    const { estado } = await servidor.estado()
-    aplicarEstadoDoServidor(estado)
+    const r = await servidor.estado()
+    aplicarEstadoDoServidor(r.estado, r.estadoParcial === true)
   } catch (erro) {
     reportarErro(erro)
   }

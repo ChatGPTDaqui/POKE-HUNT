@@ -107,10 +107,15 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
     // snapshot identico ao que acabou de ler) que so aumentava a chance de
     // colidir com um flush em andamento — metade do que causava progresso
     // regredindo em recarga perto do tique de 30s.
+    // `?parcial=1`: o cliente busca a mochila por conta propria (direto no
+    // PostgREST, quando abre uma tela que a usa) e nao quer os megabytes dela
+    // aqui. Medido: numa conta de 456 POKEs, 97,8% desta resposta era mochila.
+    // Sem o parametro, responde completo — cliente antigo depende disso.
+    const parcial = url.searchParams.get('parcial') === '1'
     return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas }) => {
       if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt)
-      return json({ estado })
-    })
+      return json({ estado, estadoParcial: parcial })
+    }, { comBag: !parcial })
   }
   return json({ erro: 'rota desconhecida' }, 404)
 }

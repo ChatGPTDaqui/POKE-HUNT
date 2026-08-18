@@ -152,6 +152,12 @@ function mensagemDeRede(erro: unknown): string {
 // verdade vem daqui.
 export interface RespostaComEstado {
   estado: unknown
+  /**
+   * `estado.bagPokes` NAO e a mochila do jogador — traz so o que aquela resposta
+   * tem a dizer sobre ela (nada, em `/estado?parcial=1`; as capturas da janela,
+   * num flush). Ver `aplicarEstadoDoServidor`.
+   */
+  estadoParcial?: boolean
   mensagem?: string
 }
 
@@ -344,7 +350,10 @@ export interface AmigoRemoto { userId: string; nome: string; nivel: number }
 // rankingRpc.ts) — só sessão continua HTTP, é a única coisa que ainda precisa
 // da Edge Function (simulação real de combate, ver _Architecture.md).
 export const servidor = {
-  estado: () => pedir<RespostaComEstado>('/estado', { retentavel: true }),
+  // `?parcial=1`: sem a mochila. O cliente a busca sozinho, direto no
+  // PostgREST, quando abre uma tela que a usa (ver mochilaRemota.ts). Medido
+  // numa conta de 456 POKEs: tirou 97,8% desta resposta.
+  estado: () => pedir<RespostaComEstado>('/estado?parcial=1', { retentavel: true }),
 
   // Abrir sessao fecha a anterior e gera semente nova. Repetir depois de um
   // erro de rede geraria uma segunda sessao — sem duplicar ouro (so a mais

@@ -19,6 +19,7 @@ import { trainerExpProgress } from '@/engine/systems/progressionSystem'
 import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
 import { rarityOf } from '@/data/rarity'
+import { carregarCapturasRecentes } from '@/data/remote/mochilaRemota'
 import { GameWindow } from '@/components/game/GameWindow'
 import { GameButton, GameCard, Meter, SectionLabel, SegmentedTabs } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
@@ -53,9 +54,6 @@ export function PerfilTreinador() {
   const trainer = useGameStateStore((s) => s.trainer)
   const wallet = useGameStateStore((s) => s.wallet)
   const pokedexKills = useGameStateStore((s) => s.pokedexKills)
-  const team = useGameStateStore((s) => s.team)
-  const bagPokes = useGameStateStore((s) => s.bagPokes)
-
   // So consulta o servidor com o modal aberto: rank e tempo de jogo nao
   // interessam a ninguem enquanto ele esta fechado.
   const { data: remoto } = useQuery({
@@ -63,6 +61,17 @@ export function PerfilTreinador() {
     queryFn: () => perfil(),
     enabled: aberto,
     staleTime: 60000,
+  })
+
+  // O log de aquisicoes vem do banco, e nao de `team` + `bagPokes`: a mochila
+  // deixou de ser carregada no boot (ver mochilaStore) e puxar 5 mil POKEs pra
+  // mostrar dez linhas seria pagar a mochila inteira por uma listinha. So
+  // consulta com a ABA aberta — quem nunca abre "Capturas" nao paga nada.
+  const { data: capturas = [] } = useQuery({
+    queryKey: ['capturas-recentes'],
+    queryFn: () => carregarCapturasRecentes(CAPTURAS_NO_LOG),
+    enabled: aberto && aba === 'capturas',
+    staleTime: 30000,
   })
 
   if (!aberto) return null
@@ -83,11 +92,6 @@ export function PerfilTreinador() {
     batalhas += (contagem.normal ?? 0) + (contagem.shiny ?? 0)
     batalhasShiny += contagem.shiny ?? 0
   }
-
-  const capturas = [...team, ...bagPokes]
-    .filter((p) => p.capturedAt)
-    .sort((a, b) => (b.capturedAt ?? '').localeCompare(a.capturedAt ?? ''))
-    .slice(0, CAPTURAS_NO_LOG)
 
   return (
     <GameWindow

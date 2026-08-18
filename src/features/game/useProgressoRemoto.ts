@@ -12,6 +12,7 @@
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/stores/authStore'
 import { useGameStateStore, defaultGameStateData } from '@/stores/gameStateStore'
+import { useMochilaStore } from '@/stores/mochilaStore'
 import {
   configurarPersistencia, limparPersistencia, flushAgora, erroDaUltimaCarga,
 } from '@/data/remote/gameStatePersistence'
@@ -31,6 +32,12 @@ export function useProgressoRemoto(): EstadoProgresso {
     setEstado({ fase: 'carregando' })
 
     const minhaGeracao = configurarPersistencia(userId, defaultGameStateData())
+
+    // A mochila e carregada sob demanda e vive FORA do save (ver mochilaStore).
+    // Sem zerar aqui, entrar noutra conta na mesma aba encontraria a mochila
+    // "ja carregada" e a tela mostraria os POKEs do jogador ANTERIOR: o modulo
+    // sobrevive a troca de sessao, o jogador nao.
+    useMochilaStore.getState().reiniciar()
 
     useGameStateStore.persist
       .rehydrate()

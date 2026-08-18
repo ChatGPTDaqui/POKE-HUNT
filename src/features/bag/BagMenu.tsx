@@ -26,6 +26,8 @@ import {
 } from '@/components/game/controls'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
 import { cn } from '@/lib/utils'
+import { useMochila } from './useMochila'
+import { EstadoDaMochila } from './EstadoDaMochila'
 
 type SortKey = 'rarity' | 'iv' | 'level'
 const SORT_LABELS: Record<SortKey, string> = { rarity: 'Raridade', iv: 'IV', level: 'Nivel' }
@@ -55,6 +57,9 @@ function LockButton({ locked, onToggle, disabled }: { locked: boolean; onToggle:
 }
 
 function PokemonsTab() {
+  // A mochila nao vem mais no carregamento da pagina — chega quando uma tela
+  // que a usa abre. Ver `useMochila`/`mochilaStore`.
+  const { carregada } = useMochila()
   const bagPokes = useGameStateStore((s) => s.bagPokes)
   const teamLength = useGameStateStore((s) => s.team.length)
   const moveBagToTeam = useGameStateStore((s) => s.moveBagToTeam)
@@ -93,6 +98,7 @@ function PokemonsTab() {
   // inteira, so a renderizacao e limitada — ver a nota em Paginacao.tsx.
   const paginado = usePaginacao(visible)
 
+  if (!carregada) return <EstadoDaMochila />
   if (bagPokes.length === 0) return <p className="text-n500">Nenhum POKE na mochila.</p>
 
   const canMove = teamLength < MAX_TEAM_SIZE
