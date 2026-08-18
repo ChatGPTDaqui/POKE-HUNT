@@ -98,6 +98,26 @@ O teste roda a simulação real com auto-captura ligada e exige que **nenhum aba
 Sem o teste, a próxima refatoração que "simplificar" as duas funções numa só passa
 despercebida.
 
+### Crédito incremental de RPC vs escrita absoluta do flush
+
+`server/src/progresso.test.ts`, 3 casos. **13 RPCs** creditam por `gold = gold + X` enquanto
+`gravarEstado` grava o valor ABSOLUTO de um snapshot lido antes. O que impede a segunda de
+apagar a primeira é o CAS em `updated_at` mais o trigger que avança `updated_at` em todo
+UPDATE — ver [08](08-social-e-mercado.md#o-invariante-que-sustenta-tudo-aqui).
+
+1. Venda concorrente **não** é apagada: o CAS recusa a escrita velha e o retry soma as duas
+2. A recusa vem com **exatamente** `CONFLITO_ESCRITA_JOGADOR` — com outra mensagem,
+   `comRetryDeColisao` não a reconhece como colisão efêmera e joga fora a janela de caçada
+3. **Contrafactual:** a mesma sequência com o trigger neutralizado, mostrando o ouro sumindo
+   sem erro nenhum
+
+O caso 3 existe porque a proteção é invisível: nada no código de uma RPC diz que ela depende
+de um trigger. Quem tornar o trigger condicional um dia vê o caso 1 ficar vermelho e o caso 3
+explicando por quê.
+
+O que o teste **não** alcança: o trigger em si (é DB, e não há Postgres local aqui). Confira
+com o comando em [08](08-social-e-mercado.md#o-invariante-que-sustenta-tudo-aqui).
+
 ## Hunts
 
 `data/hunts.test.ts`, 25 casos. Ver a lista completa em

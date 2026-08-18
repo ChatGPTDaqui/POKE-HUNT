@@ -13,18 +13,44 @@
 ## O invariante que sustenta tudo aqui
 
 O servidor grava progresso reescrevendo a **linha inteira** de `players` com valores
-ABSOLUTOS (`gravarEstado`) — inclusive `gold`. Logo:
+ABSOLUTOS (`gravarEstado`) — inclusive `gold`. As RPCs de economia creditam por
+**incremento** (`gold = gold + X`), num UPDATE próprio. As duas escrevem a mesma coluna sem
+se conhecer, e o que impede a segunda de apagar a primeira são **duas coisas juntas**:
 
-> **Nunca creditar outro jogador com `update players set gold = gold + X`.**
+> 1. `gravarEstado` grava com **CAS** em `players.updated_at` (o valor lido no snapshot).
+> 2. O trigger `players_set_updated_at` faz `new.updated_at = now()` em **TODO** UPDATE da
+>    linha — sem condição de coluna.
 
-Se A compra de B e o crédito de B for um UPDATE direto, o próximo flush de B — que pode estar
-caçando nesse segundo — grava por cima o ouro que **ele** tinha em memória. B simplesmente
-não recebe, sem erro em lugar nenhum. É a mesma classe de bug que já mordeu `player_items` e
-`player_auto_catch_rules` (ver [04](04-autoridade-do-servidor.md)).
+Com as duas, a sequência perigosa termina certa: o flush lê (ouro G0, versão U0), a RPC
+credita e a versão vira U1, o flush tenta gravar com `where updated_at = U0`, acerta **zero
+linhas**, recebe 409 e `comRetryDeColisao` relê e soma os dois. Medido em produção em
+2026-08-18: 26 rodadas com venda disparada no meio de um flush (atraso de 0, 50, 400 e
+800ms) — **zero divergência de ouro, zero flush descartado**.
 
-O crédito vira **linha** (`market_deliveries`), reivindicada com claim atômico
-(`update ... where claimed_at is null returning`) dentro do próximo request do próprio B, e
-aplicada ao estado que aquele request já vai gravar.
+**O que quebra isso** (e quebra em silêncio, nas 13 RPCs que creditam por incremento, de uma
+vez): tornar o trigger condicional ("só avança se a coluna X mudou"), tirar o CAS de
+`gravarEstado`, ou fazer o retry reaproveitar o snapshot velho em vez de reler. Trancado em
+`server/src/progresso.test.ts` — inclusive com um caso **contrafactual** que roda a mesma
+sequência sem o trigger e mostra o ouro evaporando.
+
+Verificar o trigger no banco (não há como um teste de unidade alcançá-lo):
+
+```
+npx supabase db query --linked "select pg_get_triggerdef(oid) from pg_trigger where tgrelid='public.players'::regclass and not tgisinternal"
+```
+
+Sobra um buraco teórico: `now()` é o timestamp da **transação**, então duas transações que
+carimbassem o mesmo microssegundo passariam pelo CAS. Fecharia com uma coluna `version`
+inteira em vez de timestamp; não foi feito porque o custo é mexer na linha que impede perda
+de progresso, para eliminar uma colisão que exige duas escritas na mesma linha no mesmo
+microssegundo.
+
+**Antes do CAS (PH-5) a regra era outra:** crédito de terceiro tinha que virar **linha** em
+`market_deliveries`, reivindicada com claim atômico
+(`update ... where claimed_at is null returning`) dentro do próximo request do próprio B. Essa
+fila ainda existe e ainda é assentada em `/estado`, mas **nenhuma RPC client-facing escreve
+nela hoje** (ver o comentário da rota em `appSessao.ts`) — a migração RPC-everything trocou
+isso por crédito direto de propósito, apoiada no CAS.
 
 `carregarEstadoParaEscrita` é a única porta para isso, e **só pode ser usada por quem vai
 gravar em seguida** — `/sessao/abrir`, que só valida intenção, continua no `carregarEstado`
@@ -221,11 +247,12 @@ inventário em silêncio é indistinguível de bug ("meu save mudou sozinho").
 `anexo_coletado_em` é timestamp e não booleano porque a coluna **é** o claim atômico:
 `update ... where anexo_coletado_em is null returning` não acha linha na segunda vez.
 
-O claim vem **antes** de enfileirar: se o enfileiramento falhar, o jogador perde o anexo —
-erra contra ele, mas não imprime item, que é o lado certo de errar.
+O claim vem **antes** do crédito: se o crédito falhar, o jogador perde o anexo — erra contra
+ele, mas não imprime item, que é o lado certo de errar.
 
-O crédito reusa `market_deliveries` (nome histórico; ela é a fila genérica de "creditar isto
-no próximo request que grava").
+> **Cuidado ao ler o parágrafo abaixo:** ele descreve o desenho ANTIGO (coleta por HTTP,
+> crédito enfileirado em `market_deliveries`). Hoje a RPC credita na própria transação — o
+> claim e o crédito são a mesma unidade atômica, e não há fila no meio.
 
 **Bug corrigido ao vivo** (na época em que a coleta era ação HTTP): a primeira versão chamava
 `liquidar()` depois de coletar. `liquidar()` era `/sessao/flush`, que respondia 409 sem hunt

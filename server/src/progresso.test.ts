@@ -101,3 +101,86 @@ describe('comRetryDeColisao() — BUG REAL: janela inteira (inclusive a sequenci
     expect(chamadas).toBe(1)
   })
 })
+
+// ---------------------------------------------------------------------------
+// O invariante que sustenta as 13 RPCs que creditam por `gold = gold + X`
+//
+// `gravarEstado` grava a linha de `players` com valor ABSOLUTO, calculado de um
+// snapshot lido antes. Toda RPC de economia (vender POKE/item, comprar, mercado,
+// desbloquear hunt) credita por INCREMENTO, num UPDATE proprio. As duas coisas
+// escrevem a mesma coluna, e nada as coordena — exceto o CAS em `updated_at`
+// mais o trigger `players_set_updated_at`, que avanca `updated_at` em TODO
+// UPDATE da linha (`new.updated_at = now()`, sem condicao de coluna).
+//
+// Medido em producao em 2026-08-18: 26 rodadas disparando venda no meio de um
+// flush (atraso de 0, 50, 400 e 800ms), zero divergencia de ouro e zero flush
+// descartado. Ou seja: o desenho funciona — mas funciona por causa de tres fatos
+// que ninguem estava trancando. Se o trigger virar condicional, se o CAS sair de
+// `gravarEstado`, ou se o retry parar de reler, o ouro passa a evaporar em
+// silencio nas 13 funcoes de uma vez.
+//
+// O segundo teste abaixo e o que documenta isso: ele exercita a MESMA sequencia
+// com o trigger neutralizado e mostra o dinheiro sumindo. Se alguem tornar o
+// trigger condicional um dia, o primeiro teste fica vermelho e o segundo explica
+// por que.
+describe('credito incremental de RPC vs escrita absoluta do flush', () => {
+  const LOOT = 30
+  const VENDA = 1010
+
+  // O que o trigger faz. Isolado numa funcao pra o teste seguinte poder OMITIR.
+  function creditoDeRpc(valor: number, comTrigger: boolean) {
+    tabelaPlayers.gold = (tabelaPlayers.gold as number) + valor
+    if (comTrigger) {
+      tabelaPlayers.updated_at = new Date(new Date(tabelaPlayers.updated_at).getTime() + 1).toISOString()
+    }
+  }
+
+  // Um ciclo de flush: le o ouro do banco, simula (LOOT), grava o ABSOLUTO. A
+  // RPC entra entre a leitura e a escrita — a janela perigosa.
+  function cicloDeFlush(opcoes: { creditarAgora: boolean; comTrigger: boolean }) {
+    return async () => {
+      const versaoNoLoad = tabelaPlayers.updated_at
+      const estado = defaultGameStateData()
+      estado.wallet.gold = (tabelaPlayers.gold as number) + LOOT
+
+      if (opcoes.creditarAgora) creditoDeRpc(VENDA, opcoes.comTrigger)
+
+      await gravarEstado(cfg, 'jogador-1', estado, new Set(), versaoNoLoad)
+    }
+  }
+
+  it('venda concorrente NAO e apagada: o CAS recusa a escrita velha e o retry soma as duas', async () => {
+    tabelaPlayers.gold = 1000
+    let primeira = true
+
+    await comRetryDeColisao(async () => {
+      const creditarAgora = primeira
+      primeira = false
+      await cicloDeFlush({ creditarAgora, comTrigger: true })()
+    })
+
+    expect(tabelaPlayers.gold).toBe(1000 + VENDA + LOOT)
+  })
+
+  it('a escrita velha e recusada com o 409 que o retry conhece — nao com outro erro', async () => {
+    tabelaPlayers.gold = 1000
+    // Sem retry: a primeira tentativa TEM que estourar exatamente
+    // CONFLITO_ESCRITA_JOGADOR, senao `comRetryDeColisao` nao a reconhece como
+    // colisao efemera e desiste (jogando fora a janela de caçada inteira).
+    await expect(cicloDeFlush({ creditarAgora: true, comTrigger: true })())
+      .rejects.toThrow(CONFLITO_ESCRITA_JOGADOR)
+    // E a venda continua no banco: a escrita velha nao passou.
+    expect(tabelaPlayers.gold).toBe(1000 + VENDA)
+  })
+
+  it('CONTRAFACTUAL: sem o trigger avancando a versao, a venda e APAGADA em silencio', async () => {
+    tabelaPlayers.gold = 1000
+
+    // Nenhum erro, nenhum retry: o CAS passa porque `updated_at` nao mudou.
+    await cicloDeFlush({ creditarAgora: true, comTrigger: false })()
+
+    // Os 1010 da venda sumiram sem nada aparecer. E ISTO que o trigger impede —
+    // por isso ele nao pode virar condicional ("so avanca se a coluna X mudou").
+    expect(tabelaPlayers.gold).toBe(1000 + LOOT)
+  })
+})
