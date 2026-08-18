@@ -135,9 +135,40 @@ describe('orientacao das tiras direcionais', () => {
     expect(o.girar).toBeCloseTo(0, 6)
   })
 
-  it('sem angulo (golpe em si mesmo, area) nada gira e a ancora volta pro centro', () => {
+  it('sem angulo (golpe em si mesmo, area) nada gira, nada recorta, ancora no centro', () => {
+    // O caminho do AOE. Recorte de 1 aqui NAO e detalhe: `recorteX` corta a
+    // cauda do jato pro impacto alvo-unico caber nos 39px de alcance, e a
+    // area de efeito nao tem cauda pra cortar — recortar o AOE mentiria sobre
+    // o raio do golpe, que e o unico dado que aquele desenho carrega.
     const o = orientacaoDaTira(TIRA_POR_ELEMENTO.FIRE, undefined)
-    expect(o).toEqual({ girar: 0, espelharY: false, ancoraX: 0.5 })
+    expect(o).toEqual({ girar: 0, espelharY: false, ancoraX: 0.5, recorteX: 1 })
+  })
+
+  it('o recorte reposiciona a ancora, senao o impacto desliza do alvo', () => {
+    // A conta que erra em silencio. `ancoraX` e medida no quadro INTEIRO, mas
+    // o desenho recebe so a fatia da direita: sem reposicionar, o ponto de
+    // impacto do FIRE (0.78 do quadro) cairia em 0.78 DA FATIA, que e outro
+    // lugar — o fogo passa a acertar ao lado do inimigo, e nada quebra.
+    //
+    // Com recorteX 0.68, a fatia comeca em 0.32 do quadro. A ancora de 0.78
+    // fica em (0.78 - 0.32) / 0.68 = 0.676 da fatia.
+    const o = orientacaoDaTira(TIRA_POR_ELEMENTO.FIRE, 0)
+    expect(o.recorteX).toBeCloseTo(0.68, 6)
+    expect(o.ancoraX).toBeCloseTo((0.78 - 0.32) / 0.68, 4)
+  })
+
+  it('recorte nunca zera nem passa de 1', () => {
+    // Fatia de largura 0 nao desenha nada e fatia maior que o quadro leria
+    // fora dele. Os dois casos sao clamp, nao erro: um valor bobo no cadastro
+    // tem que degradar pra arte inteira, nao pra tela vazia.
+    const zerado = orientacaoDaTira(
+      { url: 'x', quadros: 1, direcional: { anguloBaseGraus: 0, recorteX: 0 } } as TiraDeVfx, 0,
+    )
+    expect(zerado.recorteX).toBeGreaterThan(0)
+    const estourado = orientacaoDaTira(
+      { url: 'x', quadros: 1, direcional: { anguloBaseGraus: 0, recorteX: 3 } } as TiraDeVfx, 0,
+    )
+    expect(estourado.recorteX).toBe(1)
   })
 
   it('a ancora fica dentro do quadro e a base dentro de meia volta', () => {

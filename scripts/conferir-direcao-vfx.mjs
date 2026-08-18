@@ -1,10 +1,19 @@
-// Mede, quadro a quadro, se a arte de um efeito e RADIAL (pode ser desenhada
-// sem girar) ou DIRECIONAL (aponta pra algum lado e precisa ser girada pro
-// alvo).
+// Mede a arte de efeito nos DOIS eixos em que ela erra: DIRECAO (aponta pra
+// algum lado e precisa girar pro alvo, ou e radial e nao pode girar) e
+// ESCALA (o tamanho com que aparece na tela, comparado ao POKE).
 //
-// Existe porque o julgamento a olho nao escala e ja errou aqui: o lote das 18
-// tiras por tipo elemental foi cadastrado como "simetrico" em bloco, sem
-// ninguem medir uma por uma.
+// Existe porque o julgamento a olho nao escala e ja errou aqui duas vezes: o
+// lote das 18 tiras por tipo foi cadastrado como "simetrico" em bloco sem
+// ninguem medir uma por uma, e o campo `escala` de cada tira foi posto a olho
+// (1.15 no FIRE, 1.2 no DARK) sem ninguem comparar uma com as outras.
+//
+// A SEGUNDA TABELA (escala) mede o que o jogador ve, nao o arquivo. A altura
+// pedida no desenho e a MESMA pra todas as tiras — 44 x 1.6 x escala — e a
+// largura sai da proporcao do quadro. Duas consequencias que so aparecem
+// medindo: uma tira de quadro 2:1 fica com o DOBRO da largura de uma quadrada
+// com a mesma altura, e o conteudo real de cada quadro ocupa uma fracao
+// diferente do quadro, entao duas artes com a mesma altura de arquivo podem
+// aparecer com metade do tamanho uma da outra.
 //
 // COMO MEDE (tudo sobre o canal ALPHA, que e onde mora a silhueta):
 //
@@ -37,13 +46,27 @@ const RAIZ = dirname(dirname(fileURLToPath(import.meta.url)));
 
 // Le o cadastro real em vez de repetir a lista aqui: se uma tira entrar ou
 // mudar de numero de quadros, a conferencia acompanha sozinha.
+const LINHA = String.fromCharCode(10);
+
 function tirasCadastradas() {
   const src = readFileSync(join(RAIZ, 'src', 'data', 'vfxTiras.ts'), 'utf8');
   const saida = [];
-  const re = /(\w+):\s*\{\s*url:\s*`\$\{(RAIZ|RAIZ_STATUS)\}\/([\w-]+\.png)`,\s*quadros:\s*(\d+)/g;
+  const re = /(\w+):\s*\{\s*url:\s*`\$\{(RAIZ|RAIZ_STATUS)\}\/([\w-]+\.png)`,\s*quadros:\s*(\d+)([^}]*)/g;
   for (const m of src.matchAll(re)) {
     const pasta = m[2] === 'RAIZ' ? join('assets', 'move-vfx', 'tiras') : join('assets', 'status-vfx');
-    saida.push({ nome: m[1], arquivo: join(pasta, m[3]), quadros: Number(m[4]) });
+    // Tira COMENTARIO antes de procurar o campo: o bloco entre `quadros:` e o
+    // fim da entrada tem justificativa em prosa, e a justificativa cita os
+    // proprios valores ("a `escala: 1.15` que estava aqui foi posta a olho").
+    // Sem isto o medidor lia o comentario e reportava um valor que o codigo
+    // nao tem mais — errando sobre o campo que ele existe pra auditar.
+    const corpo = (m[5] ?? '').split(LINHA).filter((l) => !l.trim().startsWith('//')).join(LINHA);
+    const escala = /escala:\s*([\d.]+)/.exec(corpo);
+    const recorte = /recorteX:\s*([\d.]+)/.exec(corpo);
+    saida.push({
+      nome: m[1], arquivo: join(pasta, m[3]), quadros: Number(m[4]),
+      escala: escala ? Number(escala[1]) : 1,
+      recorteX: recorte ? Number(recorte[1]) : 1,
+    });
   }
   return saida;
 }
@@ -178,6 +201,19 @@ function classificar(m) {
   const eixoDeitado = Math.abs(m.anguloGraus) <= 20;
   const vertical = m.simY >= VERTICAL_SIMY && m.simY > m.simX * 1.4 && (!alongada || eixoDeitado);
 
+  // Eixo EM PE e estavel: tornado, coluna, jorro pra cima. O tratamento e o
+  // mesmo de VERTICAL (nao gira), mas o rotulo importa — o tornado do FLYING
+  // saia aqui como RADIAL por nao bater o limiar de assimetria, e "radial" e um
+  // convite pra alguem achar que da pra girar. Da nao: girar um tornado pro
+  // inimigo o deita no chao, que e o mesmo erro da cupula do PSYCHIC.
+  const eixoEmPe = Math.abs(Math.abs(m.anguloGraus) - 90) <= 20;
+  if (!vertical && eixoEmPe && eixoEstavel && m.alonga >= 1.25) {
+    return {
+      veredito: 'VERTICAL',
+      motivos: [`eixo em pe ${m.anguloGraus.toFixed(0)}° +-${m.anguloDesvio.toFixed(0)}°, alonga ${m.alonga.toFixed(2)}x`],
+    };
+  }
+
   if (vertical) {
     return {
       veredito: 'VERTICAL',
@@ -282,5 +318,105 @@ for (const tira of tirasCadastradas()) {
         `simX ${m.simX.toFixed(2)} simY ${m.simY.toFixed(2)}`,
       );
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// SEGUNDA TABELA: ESCALA
+// ---------------------------------------------------------------------------
+// As tres constantes vem de render/sprites.ts por regex, e nao copiadas, pelo
+// mesmo motivo do cadastro de tiras: quando alguem mexer no desenho, a
+// medicao acompanha em vez de mentir com numero velho.
+function constanteDoDesenho(nome, padrao) {
+  const src = readFileSync(join(RAIZ, 'src', 'render', 'sprites.ts'), 'utf8');
+  const m = new RegExp('const ' + nome + '\\s*=\\s*([\\d.]+)').exec(src);
+  return m ? Number(m[1]) : padrao;
+}
+
+const IMPACT_BASE_SIZE = constanteDoDesenho('IMPACT_BASE_SIZE', 44);
+const ESCALA_VFX_SINGLE = constanteDoDesenho('ESCALA_VFX_SINGLE', 1.6);
+
+// Diametro do POKE em pixels de mundo. `radius` de jogador e inimigo fica em
+// 14-15 (engine/entity.ts), entao ~29 de ponta a ponta. E a unica referencia
+// de tamanho que o jogador tem na tela: o efeito e lido como grande ou pequeno
+// EM RELACAO ao POKE, nunca em absoluto.
+const POKE_DIAMETRO = 29;
+
+// Caixa do conteudo (nao do quadro) no quadro de pico, em fracao do quadro.
+// E o que decide o tamanho aparente: um quadro de 220x119 cujo desenho ocupa
+// 40% da altura aparece com 40% da altura pedida, e nao com ela toda.
+function caixaDoPico(arquivo, quadros) {
+  const { width, height, rgba } = decodePng(readFileSync(join(RAIZ, arquivo)));
+  const largura = Math.floor(width / quadros);
+  let melhor = null;
+  for (let f = 0; f < quadros; f++) {
+    const x0 = f * largura;
+    let massa = 0, xmin = largura, xmax = -1, ymin = height, ymax = -1;
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < largura; x++) {
+        const a = rgba[((y * width) + x0 + x) * 4 + 3];
+        if (a < ALPHA_MINIMO) continue;
+        massa += a;
+        if (x < xmin) xmin = x; if (x > xmax) xmax = x;
+        if (y < ymin) ymin = y; if (y > ymax) ymax = y;
+      }
+    }
+    if (xmax < 0) continue;
+    if (!melhor || massa > melhor.massa) {
+      melhor = { massa, f, fw: (xmax - xmin + 1) / largura, fh: (ymax - ymin + 1) / height };
+    }
+  }
+  return { largura, altura: height, pico: melhor };
+}
+
+console.log('');
+console.log('ESCALA (alvo unico; altura pedida = ' + IMPACT_BASE_SIZE + ' x ' + ESCALA_VFX_SINGLE + ' x escala)');
+console.log('tira            quadro      prop  escala   pedido HxL    conteudo HxL   vs POKE');
+console.log('-'.repeat(88));
+
+const linhas = [];
+for (const tira of tirasCadastradas()) {
+  const { largura, altura, pico } = caixaDoPico(tira.arquivo, tira.quadros);
+  if (!pico) { console.log(tira.nome.padEnd(14), ' quadro vazio'); continue; }
+  const prop = largura / altura;
+  const alturaPedida = IMPACT_BASE_SIZE * ESCALA_VFX_SINGLE * tira.escala;
+  // `recorteX` corta a largura ANTES de chegar na tela, entao a tabela tem que
+  // aplica-lo: sem isso o FIRE aparece aqui como 2.8x o POKE quando o desenho
+  // real, recortado, sai em 1.9x — e a tabela existe justamente pra decidir isso.
+  const larguraPedida = alturaPedida * prop * tira.recorteX;
+  // O que o jogador ve: a caixa do conteudo, nao a do quadro.
+  const h = alturaPedida * pico.fh;
+  const l = larguraPedida * pico.fw;
+  const maior = Math.max(h, l);
+  linhas.push({ nome: tira.nome, escala: tira.escala, maior });
+  console.log(
+    tira.nome.padEnd(14),
+    `${largura}x${altura}`.padStart(8),
+    prop.toFixed(2).padStart(9),
+    tira.escala.toFixed(2).padStart(7),
+    `${alturaPedida.toFixed(0)}x${larguraPedida.toFixed(0)}`.padStart(9),
+    `${h.toFixed(0)}x${l.toFixed(0)}`.padStart(14),
+    `${(maior / POKE_DIAMETRO).toFixed(1)}x`.padStart(9),
+  );
+}
+
+// A conclusao que a tabela existe pra dar: quanto o lote esta ESPALHADO. Se a
+// maior arte aparece com 4x o tamanho da menor, nao ha `escala` global que
+// conserte — cada tira precisa da sua.
+if (linhas.length) {
+  const ordenado = [...linhas].sort((a, b) => a.maior - b.maior);
+  const menor = ordenado[0], maior = ordenado[ordenado.length - 1];
+  const mediana = ordenado[Math.floor(ordenado.length / 2)].maior;
+  console.log('');
+  console.log(`ESPALHAMENTO: ${(maior.maior / menor.maior).toFixed(1)}x entre a maior (${maior.nome}, ` +
+    `${maior.maior.toFixed(0)}px) e a menor (${menor.nome}, ${menor.maior.toFixed(0)}px).`);
+  console.log(`Mediana ${mediana.toFixed(0)}px = ${(mediana / POKE_DIAMETRO).toFixed(1)}x o POKE.`);
+  console.log('');
+  console.log('escala sugerida pra igualar todas a mediana:');
+  for (const l of ordenado) {
+    const sugerida = l.escala * (mediana / l.maior);
+    const delta = Math.abs(sugerida - l.escala) / l.escala;
+    const marca = delta > 0.25 ? '  <-- fora' : '';
+    console.log(`   ${l.nome.padEnd(12)} ${l.escala.toFixed(2)} -> ${sugerida.toFixed(2)}${marca}`);
   }
 }

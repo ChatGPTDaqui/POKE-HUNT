@@ -37,3 +37,26 @@ tamanho de jogo contra assets/hunt-backgrounds/ — nao em folha de
 contato. Duas escolhas aprovadas em cinza/verde-escuro ficaram invisiveis
 em jogo. Um efeito invisivel e pior que o desenho procedural que ele
 substitui.
+
+3. MATIZ CERTO NAO E ARTE CERTA. A revisao de 2026-08-18 achou duas
+   tiras escolhidas por cor e tamanho que desenhavam a coisa errada: o
+   FLYING tinha um SPRITE DE ITEM embutido, com a palavra DROP escrita, e
+   o FAIRY desenhava CAVEIRAS (rosa e o matiz certo pra fada; caveira nao
+   e). As duas passaram porque a selecao foi por varredura de matiz e
+   numero de quadros, sem ninguem olhar quadro a quadro.
+
+   Ferramenta pra isso: node scripts/conferir-vfx-visual.mjs, que
+   desenha na geometria REAL do combate — atacante, alvo, e os 39px entre
+   os dois — em cima de fundo escuro. Aceita candidato avulso antes de
+   cadastrar: node scripts/conferir-vfx-visual.mjs caminho.png@quadros.
+
+4. TAMANHO SE MEDE CONTRA O POKE, nunca em absoluto. O POKE tem 29px de
+   diametro. node scripts/conferir-direcao-vfx.mjs imprime, por tira, o
+   tamanho com que ela chega na tela e a razao contra esse 29 — o lote
+   inteiro estava em 2 a 5 vezes o POKE e cobria o alvo. Hoje fica entre
+   1.3x e 1.9x.
+
+REGERAR UMA TIRA (a ferramenta monta os tiles sozinha, ja recortando):
+  py POKE/PXG_2026/objectbuilder/tira_efeito.py <id> --projeto pxg \
+     --recortar --out assets/move-vfx/tiras/<tipo>.png
+O <id> esta no nome dos arquivos de POKE/Assets/move sprites/nomeados/.

@@ -382,6 +382,48 @@ conferência sobre o fundo real da hunt.
 `TiraDeVfx.escala` corrige o que o recorte não resolve: um relâmpago longilíneo e um estouro
 redondo com a mesma altura de arquivo não têm o mesmo peso na tela.
 
+### Escala: o que foi medido, e o que estava errado
+
+A altura pedida no desenho é a MESMA para todas as tiras — `IMPACT_BASE_SIZE (44) ×
+ESCALA_VFX_SINGLE × escala` — e a largura sai da proporção do quadro. Duas consequências que só
+aparecem medindo: uma tira de quadro 2:1 fica com o dobro da largura de uma quadrada de mesma
+altura, e o conteúdo real de cada quadro ocupa uma fração diferente do quadro.
+
+`ESCALA_VFX_SINGLE` era **1.6**, e isso punha todo impacto em 59–143px de mundo contra um POKE
+de 29px de diâmetro. O efeito **cobria** o alvo: o jogador via o golpe e não via quem levou.
+Hoje é **1.05**, o que dá ≈46px — uma vez e meia o POKE, lê como "acertou aqui" e ainda deixa a
+silhueta aparecer. Também para de alcançar o atacante, que está a 39px.
+
+O AOE não leva esse tratamento de propósito: ali o tamanho da sprite **é** o diâmetro da área
+(`effect.worldSize = ability.radius * 2`), e encolher mentiria sobre o alcance do golpe.
+
+Depois do ajuste, as 18 caem entre 1.3x e 1.9x o POKE — espalhamento de 1.5x, contra 2.4x antes.
+Duas precisaram de correção individual, as duas com `escala` que havia sido posta a olho:
+
+- **FIRE** aparecia com 4.9x o POKE, o dobro da segunda maior. O quadro é 220×119, então a altura
+  virava 150px de LARGURA. O conserto não é encolher — é um jato, e encolher o jato encolhe o
+  estouro que o jogador precisa ver. `recorteX: 0.68` corta a cauda de trás; a conta está no
+  próprio cadastro.
+- **DARK** tinha `escala: 1.2` sem motivo medido, e era a segunda maior. Sem escala, cai na
+  mediana exata do lote.
+
+### O que a revisão de 2026-08-18 trocou de arte
+
+Duas tiras estavam erradas por motivo que escala e rotação não consertam:
+
+- **FLYING** tinha um **sprite de item embutido** — um objeto amarelo com a palavra DROP escrita —
+  visível em 2 de 5 quadros amostrados. Texto de outro jogo no meio de um golpe. Trocada por um
+  tornado.
+- **FAIRY** desenhava **caveiras** rosa: leitura de morte, não de fada. A escolha original tinha
+  sido por matiz e tamanho — rosa é o matiz certo para o tipo, e ninguém olhou o que o rosa
+  estava desenhando. Trocada por anéis de partículas, que ganham nos dois eixos medidos
+  (luminância 112 contra 98; 35% de pixels claros contra 22%).
+
+**DARK foi avaliada e mantida.** O talho é marrom e não lê como escuridão — a crítica é justa. Mas
+os três candidatos escuros do banco medem luminância 21, 1 e 0, com zero por cento de pixels
+claros, e esta já é a mais escura das 18 (luminância 50) com 10%. Preto puro sobre o fundo de uma
+caverna é um golpe que não acontece na tela. Trocar semântica por invisibilidade é piorar.
+
 ### Direção da arte: três classes, não duas
 
 O lote nasceu marcado como "simétrico" em bloco, sem ninguém medir.
@@ -391,11 +433,27 @@ segundo momento, alongamento, e estabilidade do eixo entre quadros — e achou t
 | classe | quantas | o que o desenho faz |
 |---|---|---|
 | RADIAL | 12 | anel, estouro, emaranhado. Sem lado alto — desenha como está |
-| VERTICAL | 4 | PSYCHIC, FLYING, POISON, FAIRY. Assimétricas, mas com o eixo principal DEITADO: têm "pra cima", não "pra o alvo" |
+| VERTICAL | 3 | PSYCHIC (cúpula deitada), POISON (nuvem), FLYING (tornado, eixo em pé). Têm "pra cima", não "pra o alvo" |
 | DIRECIONAL | 3 | FIRE, BUG, DARK. Apontam para algum lado e giram para acompanhar o golpe |
 
-A distinção importa porque o teste ingênuo — "é assimétrica? então gira" — **piora** as quatro
-verticais: girar a cúpula do PSYCHIC na direção do inimigo a deita no chão.
+A distinção importa porque o teste ingênuo — "é assimétrica? então gira" — **piora** as verticais:
+girar a cúpula do PSYCHIC ou o tornado do FLYING na direção do inimigo os deita no chão.
+
+O classificador reconhece VERTICAL por dois caminhos, e o segundo foi acrescentado porque o
+tornado escapava do primeiro: assimetria vertical alta (cúpula, nuvem), **ou** eixo principal em
+pé e estável (−84° ± 2° no FLYING). Os dois recebem o mesmo tratamento — não giram —, mas o
+rótulo importa: "RADIAL" num tornado é um convite para alguém achar que dá para girar.
+
+### As 15 que não giram também apontam — pelo POSICIONAMENTO
+
+Um anel desenhado no centro exato do alvo fica idêntico venha o golpe da esquerda, de cima ou de
+trás. O impacto passou a recuar 8px do centro do alvo **na direção do atacante**
+(`RECUO_DO_IMPACTO`, em `render/sprites.ts`), encostando na face que levou a pancada.
+
+8px sai do raio: o POKE tem raio 14–15, então recuar 8 põe o centro do efeito a pouco mais da
+metade do corpo, com o desenho (≈44px) ainda cobrindo o alvo inteiro. Recuar o raio cheio
+deixaria o efeito entre os dois, parecendo que errou. Arte `direcional` não recebe o recuo — ali
+o `ancoraX` já resolve o posicionamento, e deslocar de novo empurraria a faísca para fora.
 
 Só a classe DIRECIONAL ganha o campo `direcional`. `anguloBaseGraus` é para onde a arte aponta
 DENTRO do arquivo (0° = direita, positivo = para baixo, a convenção do `Math.atan2` do mundo); o

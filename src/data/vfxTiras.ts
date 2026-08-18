@@ -75,6 +75,18 @@ export interface TiraDeVfx {
   direcional?: {
     anguloBaseGraus: number
     /**
+     * Fracao da largura que continua sendo desenhada, contada do lado do
+     * IMPACTO. Encurta rastro comprido demais.
+     *
+     * Nao da pra resolver isso com `escala`: encolher a tira inteira encolhe
+     * o estouro junto, e o estouro e a parte que o jogador precisa ver. E o
+     * mesmo campo que `moveVfx.ts` ja usa no Bullet Punch, pelo mesmo motivo
+     * medido: o combate acontece a 39px de distancia (raio 14 + raio 15 +
+     * padding 10), entao um rastro de 100px nao "chega no alvo" — ele
+     * atravessa o proprio atacante e sai por tras dele.
+     */
+    recorteX?: number
+    /**
      * Onde, na largura do quadro, fica o PONTO DE IMPACTO — a fracao que cai
      * em cima do alvo. Sem isso a arte e centralizada e um jato comprido
      * atravessa o inimigo com o meio do desenho. Mesma ideia do `ancoraX` de
@@ -102,8 +114,23 @@ export const TIRA_POR_ELEMENTO: Record<ElementType, TiraDeVfx> = {
   // p75 da massa (0.78), que e onde fica o estouro; centralizar enfiava metade
   // do jato pra dentro do inimigo.
   FIRE: {
-    url: `${RAIZ}/fire.png`, quadros: 16, escala: 1.15,          // 2465 — labareda larga
-    direcional: { anguloBaseGraus: 0, ancoraX: 0.78 },
+    url: `${RAIZ}/fire.png`, quadros: 16,                        // 2465 — labareda larga
+    // A UNICA tira fora de escala do lote, e nao por pouco: o quadro e 220x119
+    // (proporcao 1.85), entao a altura pedida virava 150px de LARGURA na tela —
+    // 4,9x o POKE, contra 2,3x da mediana das outras 17. A `escala: 1.15` que
+    // estava aqui foi posta a olho e PIOROU o caso.
+    //
+    // O conserto nao e encolher: e um jato, e encolher o jato encolhe o estouro
+    // que o jogador precisa ver. `recorteX` corta a cauda do lado de tras,
+    // mesmo tratamento que o Bullet Punch (moveVfx.ts) recebeu pelo mesmo
+    // motivo medido.
+    //
+    // 0.68 sai da conta, nao do olho: com altura 46px a largura fica 85px, a
+    // ancora em 0.78 punha 66px de jato ATRAS do alvo, e o atacante esta a
+    // 39px — o fogo atravessava quem lancou e saia pelas costas dele. Recortado
+    // em 0.68, o rastro atras do alvo mede 85 x (0.68 - 0.22) = 39px, exatamente
+    // a distancia do atacante.
+    direcional: { anguloBaseGraus: 0, ancoraX: 0.78, recorteX: 0.68 },
   },
   WATER: { url: `${RAIZ}/water.png`, quadros: 25 },              // 641  — estouro azul
   ELECTRIC: { url: `${RAIZ}/electric.png`, quadros: 14 },        // 2572 — arcos amarelos
@@ -112,7 +139,13 @@ export const TIRA_POR_ELEMENTO: Record<ElementType, TiraDeVfx> = {
   FIGHTING: { url: `${RAIZ}/fighting.png`, quadros: 21 },        // 2079 — anel de impacto
   POISON: { url: `${RAIZ}/poison.png`, quadros: 30 },            // 2707 — vortice roxo
   GROUND: { url: `${RAIZ}/ground.png`, quadros: 24 },            // 2495 — redemoinho de terra
-  FLYING: { url: `${RAIZ}/flying.png`, quadros: 40 },            // 1029 — coluna de vento
+  // TROCADA em 2026-08-18. A arte anterior (efeito 1029) tinha um SPRITE DE
+  // ITEM embutido — um objeto amarelo com a palavra DROP escrita — visivel em
+  // 2 dos 5 quadros amostrados. Texto de outro jogo no meio de um golpe. Nao
+  // era ajuste de escala nem de direcao: a arte estava imprestavel, e passou
+  // porque a escolha original foi feita por varredura de matiz/tamanho, sem
+  // ninguem OLHAR quadro a quadro.
+  FLYING: { url: `${RAIZ}/flying.png`, quadros: 20 },            // 4735 — tornado
   PSYCHIC: { url: `${RAIZ}/psychic.png`, quadros: 20 },          // 4468 — arco magenta
   // Respingo com inclinacao ESTAVEL de 49° (+-3° entre os 16 quadros): nao e
   // um projetil, mas tambem nao e redondo — ficava sempre tombado pro mesmo
@@ -135,11 +168,41 @@ export const TIRA_POR_ELEMENTO: Record<ElementType, TiraDeVfx> = {
   // na mesma diagonal, mesmo com o inimigo do lado oposto. Ancora centrada — um
   // talho corta EM CIMA do alvo.
   DARK: {
-    url: `${RAIZ}/dark.png`, quadros: 20, escala: 1.2,           // 4881 — corte escuro
-    direcional: { anguloBaseGraus: -41 },
+    url: `${RAIZ}/dark.png`, quadros: 20,                        // 4881 — corte escuro
+    // MANTIDA depois de medir, e nao por falta de candidato. O talho e
+    // marrom e nao le como "escuridao" — a critica e justa. Mas os tres
+    // candidatos escuros do banco (efeitos 4547, 4548 e 4936) medem
+    // luminancia 21, 1 e 0, com ZERO por cento de pixels claros; esta, que
+    // ja e a tira mais escura das 18 (luminancia 50), ainda tem 10%.
+    //
+    // Preto puro sobre o fundo de uma caverna e um golpe que nao acontece na
+    // tela, e esse erro exato ja foi cometido duas vezes neste projeto (ver
+    // assets/move-vfx/NOTAS.txt). Trocar semantica por invisibilidade e piorar.
+    // Um DARK certo precisa de arte com contorno claro sobre nucleo escuro,
+    // que este banco nao tem.
+    // `escala: 1.2` saiu daqui: foi posta a olho e nao tinha motivo medido. O
+    // quadro e 64x63 e o conteudo ja preenche quase tudo, entao sem escala a
+    // tira cai em 70px — a mediana exata do lote. Com 1.2 ela era a segunda
+    // maior de todas.
+    // ancoraX 0.63 e o p75 da massa medido no quadro de pico (o script imprime
+    // esse percentil pra toda tira direcional). Centralizado em 0.5, a PONTA do
+    // talho caia 23px adiante do alvo — o corte passava do inimigo em vez de
+    // acertar nele. Nao precisa de recorteX: com 47px de largura, a metade de
+    // tras mede 17px e o atacante esta a 39px, entao nao chega nele.
+    direcional: { anguloBaseGraus: -41, ancoraX: 0.63 },
   },
   STEEL: { url: `${RAIZ}/steel.png`, quadros: 22 },              // 3297 — anel metalico
-  FAIRY: { url: `${RAIZ}/fairy.png`, quadros: 14 },              // 4073 — anel de particulas rosa
+  // TROCADA em 2026-08-18. A arte anterior (efeito 4073) desenhava CAVEIRAS
+  // rosa — leitura de morte/veneno, nao de fada. Passou porque a escolha do
+  // lote foi por matiz e tamanho: rosa e o matiz certo pro tipo, e ninguem
+  // olhou o que o rosa estava desenhando.
+  //
+  // 4836 ganha nos dois eixos que importam aqui, medidos: luminancia 112
+  // contra 98 e 35% de pixels claros contra 22% (mais visivel sobre fundo
+  // escuro de hunt), e sao aneis de particulas, que e o que "fada" desenha.
+  // O outro candidato (5345) tem luminancia 195 e 88% claros — viraria um
+  // borrao branco no tamanho de jogo.
+  FAIRY: { url: `${RAIZ}/fairy.png`, quadros: 14 },              // 4836 — aneis de particulas
 }
 
 export function tiraDoElemento(tipo: string | null | undefined): TiraDeVfx | null {
@@ -163,15 +226,26 @@ export function tiraDoElemento(tipo: string | null | undefined): TiraDeVfx | nul
 export function orientacaoDaTira(
   tira: TiraDeVfx,
   anguloDeAtaque: number | undefined,
-): { girar: number; espelharY: boolean; ancoraX: number } {
+): { girar: number; espelharY: boolean; ancoraX: number; recorteX: number } {
   if (!tira.direcional || anguloDeAtaque == null) {
-    return { girar: 0, espelharY: false, ancoraX: 0.5 }
+    return { girar: 0, espelharY: false, ancoraX: 0.5, recorteX: 1 }
   }
   const girar = anguloDeAtaque - (tira.direcional.anguloBaseGraus * Math.PI) / 180
+  const recorteX = Math.min(1, Math.max(0.05, tira.direcional.recorteX ?? 1))
+  const ancoraNoQuadro = tira.direcional.ancoraX ?? 0.5
+  // A ancora e medida no quadro INTEIRO, mas o desenho recebe so a fatia da
+  // direita. Reposicionar aqui, e nao no canvas, e o ponto de esta funcao ser
+  // pura: sem isso o impacto desliza junto com o recorte e ninguem ve — o
+  // golpe so passa a acertar um pouco ao lado.
+  const inicioDaFatia = 1 - recorteX
+  const ancoraNaFatia = recorteX >= 1
+    ? ancoraNoQuadro
+    : Math.min(1, Math.max(0, (ancoraNoQuadro - inicioDaFatia) / recorteX))
   return {
     girar,
     espelharY: Math.abs(girar) > Math.PI / 2,
-    ancoraX: tira.direcional.ancoraX ?? 0.5,
+    recorteX,
+    ancoraX: ancoraNaFatia,
   }
 }
 

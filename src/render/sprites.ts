@@ -134,17 +134,26 @@ function drawQuadroDeTira(
   // A conta de orientacao mora em data/vfxTiras.ts, como funcao pura: sinal
   // trocado num canvas nao lanca erro nenhum, so espelha a arte, e e o tipo de
   // bug que sobrevive a revisao. Aqui fica so a aplicacao.
-  const { girar, espelharY, ancoraX } = orientacaoDaTira(tira, anguloDeAtaque)
-  if (girar === 0 && !espelharY && ancoraX === 0.5) {
+  const { girar, espelharY, ancoraX, recorteX } = orientacaoDaTira(tira, anguloDeAtaque)
+  if (girar === 0 && !espelharY && ancoraX === 0.5 && recorteX === 1) {
     ctx.drawImage(img, indice * sw, 0, sw, sh, cx - largura / 2, cy - altura / 2, largura, altura)
     ctx.restore()
     return true
   }
 
+  // Fatia da direita do quadro — o lado do impacto. `recorteX === 1` devolve o
+  // quadro inteiro, entao a conta vale pros dois casos sem ramo extra.
+  const larguraFonte = sw * recorteX
+  const inicioFonte = indice * sw + (sw - larguraFonte)
+  const larguraDestino = largura * recorteX
+
   ctx.translate(cx, cy)
   ctx.rotate(girar)
   if (espelharY) ctx.scale(1, -1)
-  ctx.drawImage(img, indice * sw, 0, sw, sh, -largura * ancoraX, -altura / 2, largura, altura)
+  ctx.drawImage(
+    img, inicioFonte, 0, larguraFonte, sh,
+    -larguraDestino * ancoraX, -altura / 2, larguraDestino, altura,
+  )
   ctx.restore()
   return true
 }
@@ -699,7 +708,23 @@ function drawShapeParticle(ctx: CanvasRenderingContext2D, shape: ImpactShape, si
 // ela substitui. Os quadros do Crawl sao 32x32 com margem transparente
 // generosa; desenhados no tamanho cru, o fogo fica visivelmente menor que o
 // burst procedural do mesmo golpe.
-const ESCALA_VFX_SINGLE = 1.6
+// ERA 1.6 e isso deixava TODO impacto com mais de duas vezes o tamanho do POKE.
+// Medido em 2026-08-18 com `node scripts/conferir-direcao-vfx.mjs`: a altura
+// pedida saia em 70px de mundo e o conteudo de cada quadro chegava na tela com
+// 59 a 143px, contra um POKE de 29px de diametro (raio 14-15 em
+// engine/entity.ts). O efeito COBRIA o alvo — o jogador via o golpe e nao via
+// quem levou.
+//
+// 1.05 poe o impacto em ~46px, uma vez e meia o POKE: le como "acertou aqui" e
+// ainda deixa a silhueta do alvo aparecer nas bordas. Tambem para de alcancar o
+// atacante, que fica a 39px (raio 14 + raio 15 + padding 10).
+//
+// A conferencia visual e `node scripts/conferir-vfx-visual.mjs`, que desenha na
+// geometria real do combate — atacante, alvo e a distancia entre os dois.
+const ESCALA_VFX_SINGLE = 1.05
+// O AOE NAO leva esse tratamento de proposito: ali o tamanho da sprite E o
+// diametro da area de efeito (`effect.worldSize = ability.radius * 2`), entao
+// encolher mentiria sobre o alcance do golpe.
 const ESCALA_VFX_AOE = 1.15
 
 /**
@@ -707,10 +732,10 @@ const ESCALA_VFX_AOE = 1.15
  * ja estiver decodificada.
  *
  * Devolve `false` quando nao ha o que desenhar — e ai quem chamou segue com o
- * desenho procedural. Isso NAO e so fallback de erro: e o caminho de 16 dos 17
- * tipos (so FOGO tem arte hoje) e tambem o do primeiro golpe enquanto o PNG
- * ainda baixa. Sem a checagem de "pronto", o primeiro Ember de uma sessao
- * apareceria sem efeito nenhum.
+ * desenho procedural. Desde a leva das tiras os 18 tipos TEM arte, entao o
+ * procedural deixou de ser o caminho comum e virou o que ele diz ser: a rede
+ * pro intervalo em que o PNG ainda esta baixando. Sem a checagem de "pronto", o
+ * primeiro Ember de uma sessao apareceria sem efeito nenhum.
  */
 function drawVfxDeElemento(
   ctx: CanvasRenderingContext2D,
@@ -805,6 +830,29 @@ function opacidadeDoEfeito(effect: WorldEffect): number {
   return Math.max(0, Math.min(1, fade)) * SOLID_OPACITY
 }
 
+/**
+ * Quanto o impacto recua do centro do alvo NA DIRECAO do atacante, em px de
+ * mundo. Um golpe acerta a face virada pra quem bateu, nao o miolo do bicho.
+ *
+ * Vale so pra arte que NAO gira. A que gira (`direcional`) ja resolve o
+ * posicionamento pelo proprio `ancoraX` — deslocar tambem empurraria a faisca
+ * pra fora do alvo, que e o defeito oposto.
+ *
+ * 8px sai do raio: o POKE tem raio 14-15, entao recuar 8 poe o centro do
+ * efeito a pouco mais da metade do corpo, com o desenho ainda cobrindo o alvo
+ * inteiro (o impacto mede ~44px contra 29px de POKE). Recuar o raio cheio
+ * deixaria o efeito entre os dois, parecendo que errou.
+ */
+const RECUO_DO_IMPACTO = 8
+
+function encostoNoAlvo(effect: WorldEffect, tira: TiraDeVfx): [number, number] {
+  if (tira.direcional || effect.anguloDeAtaque == null) return [0, 0]
+  return [
+    -Math.cos(effect.anguloDeAtaque) * RECUO_DO_IMPACTO,
+    -Math.sin(effect.anguloDeAtaque) * RECUO_DO_IMPACTO,
+  ]
+}
+
 function drawImpactBurst(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
   // Arte POR GOLPE antes da arte por tipo (data/moveVfx.ts): Bullet Punch e
   // STEEL, e sem esta consulta ele desenharia o mesmo aco de Metal Claw.
@@ -819,7 +867,15 @@ function drawImpactBurst(ctx: CanvasRenderingContext2D, effect: WorldEffect): vo
     const tamanho = (effect.worldSize || IMPACT_BASE_SIZE) * ESCALA_VFX_SINGLE * (tira.escala ?? 1)
     // O angulo so entra no impacto ALVO-UNICO. `drawAoeRing` nao passa: area e
     // um circulo centrado em quem lancou, e nao aponta pra ninguem.
-    if (drawQuadroDeTira(ctx, tira, faseDaTira(effect, tira), effect.targetX!, effect.targetY!, tamanho, opacidadeDoEfeito(effect), effect.anguloDeAtaque)) return
+    //
+    // O DESLOCAMENTO e o que da direcao pras 15 tiras que NAO giram. Elas sao
+    // radiais de verdade (anel, estouro, cupula) e girar piora — mas
+    // desenhadas no centro exato do alvo elas tambem nao dizem de onde o golpe
+    // veio: o mesmo desenho aparece igual quer o atacante esteja a esquerda,
+    // acima ou atras. Encostar o efeito na FACE do alvo virada pro atacante
+    // devolve essa leitura sem tocar na arte.
+    const [dx, dy] = encostoNoAlvo(effect, tira)
+    if (drawQuadroDeTira(ctx, tira, faseDaTira(effect, tira), effect.targetX! + dx, effect.targetY! + dy, tamanho, opacidadeDoEfeito(effect), effect.anguloDeAtaque)) return
   }
 
   const x = effect.targetX!
