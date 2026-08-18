@@ -17,7 +17,7 @@ function LivroDoItem({ itemId }: { itemId: string }) {
   const gold = useGameStateStore((s) => s.wallet.gold)
   const [preco, setPreco] = useState(0)
   const [qtd, setQtd] = useState(1)
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['mercado', 'livro', itemId],
     queryFn: () => mercadoRpc.mercadoLivro(itemId),
     staleTime: STALE_MS,
@@ -30,6 +30,13 @@ function LivroDoItem({ itemId }: { itemId: string }) {
   // casos, e ele ainda pode baixar pra deixar a ordem descansando no livro.
   const precoEfetivo = preco > 0 ? preco : melhorVenda
   const custo = precoEfetivo * qtd
+
+  // Sai antes de desenhar qualquer coisa porque TUDO aqui depende do livro, e
+  // sem essa guarda o painel mentia em quatro lugares ao mesmo tempo enquanto
+  // a query estava no ar: "Ninguem vendendo", "Ninguem procurando", "Nenhum
+  // negocio ainda" — e, pior que os tres textos, o campo de preco nascia em 0
+  // (`melhorVenda` sem dado e 0), que e um numero em que da pra clicar.
+  if (isLoading) return <Carregando />
 
   return (
     <div className="flex flex-col gap-[.45em]">
@@ -82,7 +89,8 @@ function LivroDoItem({ itemId }: { itemId: string }) {
         </div>
         <GameButton
           variant="primary"
-          disabled={acao.isPending('criar-ordem') || precoEfetivo <= 0 || custo > gold}
+          carregando={acao.isPending('criar-ordem')}
+          disabled={precoEfetivo <= 0 || custo > gold}
           // `useAcaoPendente.run` cobre o round-trip inteiro pra fechar a janela de
           // duplo clique (PH-8, mesmo defeito do PH-13) — `mutateAsync` rejeita no
           // erro (diferente de `mutate`), e o `.catch` aqui e so pra `run` nao
@@ -90,7 +98,7 @@ function LivroDoItem({ itemId }: { itemId: string }) {
           // useAcaoMercado.
           onClick={() => void acao.run('criar-ordem', () => criar.mutateAsync({ itemId, side: 'compra', unitPrice: precoEfetivo, quantity: qtd }).catch(() => {}))}
         >
-          {acao.isPending('criar-ordem') ? '...' : 'Comprar'}
+          Comprar
         </GameButton>
       </GameCard>
 

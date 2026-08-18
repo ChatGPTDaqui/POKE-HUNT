@@ -230,7 +230,8 @@ export function ComprarPokes() {
                 />
                 <GameButton
                   variant="primary"
-                  disabled={ofertar.isPending || !(lance[a.id] > 0)}
+                  carregando={ofertar.isPending}
+                  disabled={!(lance[a.id] > 0)}
                   onClick={() => ofertar.mutate({ anuncioId: a.id, valor: lance[a.id] })}
                 >
                   Ofertar
@@ -241,7 +242,7 @@ export function ComprarPokes() {
                 <Moeda valor={a.price ?? 0} tipo={a.currency} />
                 <GameButton
                   variant="primary"
-                  disabled={comprar.isPending}
+                  carregando={comprar.isPending}
                   onClick={() => comprar.mutate(a.id)}
                 >
                   Comprar

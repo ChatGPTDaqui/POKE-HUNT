@@ -21,7 +21,7 @@ import { faceIconUrl } from '@/data/sprites'
 import { rarityOf } from '@/data/rarity'
 import { carregarCapturasRecentes } from '@/data/remote/mochilaRemota'
 import { GameWindow } from '@/components/game/GameWindow'
-import { GameButton, GameCard, Meter, SectionLabel, SegmentedTabs } from '@/components/game/controls'
+import { Carregando, GameButton, GameCard, Meter, SectionLabel, SegmentedTabs } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 
 const TOTAL_ESPECIES = Object.keys(SPECIES).length
@@ -67,7 +67,7 @@ export function PerfilTreinador() {
   // deixou de ser carregada no boot (ver mochilaStore) e puxar 5 mil POKEs pra
   // mostrar dez linhas seria pagar a mochila inteira por uma listinha. So
   // consulta com a ABA aberta — quem nunca abre "Capturas" nao paga nada.
-  const { data: capturas = [] } = useQuery({
+  const { data: capturas = [], isLoading: carregandoCapturas } = useQuery({
     queryKey: ['capturas-recentes'],
     queryFn: () => carregarCapturasRecentes(CAPTURAS_NO_LOG),
     enabled: aberto && aba === 'capturas',
@@ -199,7 +199,14 @@ export function PerfilTreinador() {
       {aba === 'capturas' && (
         <div className="flex flex-col gap-[.4em]">
           <SectionLabel>Últimas {CAPTURAS_NO_LOG} aquisições</SectionLabel>
-          {capturas.length === 0 ? (
+          {/* O carregamento vem ANTES do estado vazio de proposito. Enquanto a
+              query estava no ar esta tela dizia "Nenhuma captura registrada
+              ainda. Ligue o Auto-Catch" para quem tem mochila cheia — nao e
+              falta de indicador, e uma informacao falsa, e ainda manda ligar
+              um bot que ja pode estar ligado. */}
+          {carregandoCapturas ? (
+            <Carregando texto="Carregando suas capturas..." />
+          ) : capturas.length === 0 ? (
             <div className="p-[1.2em] text-center text-[.85em] text-n400">
               Nenhuma captura registrada ainda. Ligue o Auto-Catch no painel do Bot.
             </div>

@@ -79,7 +79,8 @@ export function VenderPokes() {
       )}
       <GameButton
         variant="primary"
-        disabled={anunciar.isPending || !escolhido}
+        carregando={anunciar.isPending}
+        disabled={!escolhido}
         onClick={() => escolhido && anunciar.mutate({
           pokeUid: escolhido.uid,
           price: apenasOferta ? null : preco,
@@ -87,7 +88,7 @@ export function VenderPokes() {
           apenasOferta,
         })}
       >
-        {anunciar.isPending ? '...' : apenasOferta ? 'Abrir para lances' : 'Colocar a venda'}
+        {apenasOferta ? 'Abrir para lances' : 'Colocar a venda'}
       </GameButton>
     </GameCard>
   )

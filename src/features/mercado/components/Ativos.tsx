@@ -55,14 +55,14 @@ export function Ativos() {
               <div className="flex gap-[.35em]">
                 <GameButton
                   variant="primary"
-                  disabled={responder.isPending}
+                  carregando={responder.isPending}
                   onClick={() => responder.mutate({ id: o.id, aceitar: true })}
                 >
                   Aceitar
                 </GameButton>
                 <GameButton
                   variant="ghost"
-                  disabled={responder.isPending}
+                  carregando={responder.isPending}
                   onClick={() => responder.mutate({ id: o.id, aceitar: false })}
                 >
                   Recusar
@@ -83,7 +83,7 @@ export function Ativos() {
                 Lance enviado · valor retido até o vendedor responder
               </div>
               <Moeda valor={o.valor} tipo={o.currency} />
-              <GameButton variant="danger" disabled={cancelarOferta.isPending} onClick={() => cancelarOferta.mutate(o.id)}>
+              <GameButton variant="danger" carregando={cancelarOferta.isPending} onClick={() => cancelarOferta.mutate(o.id)}>
                 <X /> Cancelar
               </GameButton>
             </GameCard>
@@ -104,7 +104,7 @@ export function Ativos() {
               {o.side === 'compra' && o.gold_retido > 0 && ` · ${fmt.format(o.gold_retido)} de ouro retido`}
             </div>
           </div>
-          <GameButton variant="danger" disabled={cancelarOrdem.isPending} onClick={() => cancelarOrdem.mutate(o.id)}>
+          <GameButton variant="danger" carregando={cancelarOrdem.isPending} onClick={() => cancelarOrdem.mutate(o.id)}>
             <X /> Cancelar
           </GameButton>
         </GameCard>
@@ -124,7 +124,7 @@ export function Ativos() {
           {a.apenas_oferta
             ? <span className="flex items-center gap-[.25em] text-[.8em] text-warn"><Gavel weight="fill" /> lances</span>
             : <Moeda valor={a.price ?? 0} tipo={a.currency} />}
-          <GameButton variant="danger" disabled={cancelarAnuncio.isPending} onClick={() => cancelarAnuncio.mutate(a.id)}>
+          <GameButton variant="danger" carregando={cancelarAnuncio.isPending} onClick={() => cancelarAnuncio.mutate(a.id)}>
             <X /> Retirar
           </GameButton>
         </GameCard>

@@ -9,6 +9,7 @@
 // proprio card (aconteceu de verdade no prototipo, com o input de % do
 // auto-pot). Os primitivos do shadcn continuam em uso nas telas FORA do jogo
 // (login/cadastro/home), onde nao ha escala fluida.
+import { CircleNotch } from '@phosphor-icons/react'
 import { useId } from 'react'
 import type {
   ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes,
@@ -30,15 +31,32 @@ const BUTTON_VARIANT: Record<ButtonVariant, string> = {
 export interface GameButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
   block?: boolean
+  /**
+   * Round-trip em andamento: desabilita e mostra um giro no lugar do rotulo.
+   *
+   * Existe porque `disabled` sozinho NAO e feedback. Botao que so apaga por
+   * um ou dois segundos e indistinguivel de botao quebrado — e o mesmo modo
+   * de falha do "Entrar" da hunt, que custou uma sessao inteira de
+   * diagnostico antes de virar aviso de tela.
+   *
+   * O rotulo continua ocupando o espaco (`invisible`, nao `hidden`) e o giro
+   * vem sobreposto: sem isso o botao encolhe no clique e a lista inteira
+   * pula, que e pior que nao ter indicador nenhum.
+   */
+  carregando?: boolean
 }
 
-export function GameButton({ variant = 'secondary', block, className, ...props }: GameButtonProps) {
+export function GameButton({
+  variant = 'secondary', block, carregando, className, children, disabled, ...props
+}: GameButtonProps) {
   return (
     <button
       type="button"
       {...props}
+      disabled={disabled || carregando}
+      aria-busy={carregando || undefined}
       className={cn(
-        'inline-flex shrink-0 cursor-pointer items-center justify-center gap-[.35em] rounded-[.5em] border',
+        'relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-[.35em] rounded-[.5em] border',
         'px-[.55em] py-[.32em] font-[inherit] text-[.85em] leading-[1.35] whitespace-nowrap transition-colors',
         'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
         'disabled:cursor-not-allowed disabled:opacity-45',
@@ -46,7 +64,40 @@ export function GameButton({ variant = 'secondary', block, className, ...props }
         block && 'w-full',
         className,
       )}
-    />
+    >
+      {/* Sem `carregando`, o filho vai direto pro botao — os botoes que nao
+          usam a prop renderizam exatamente como antes. */}
+      {carregando == null ? children : (
+        <>
+          <span className={cn('inline-flex items-center gap-[.35em]', carregando && 'invisible')}>
+            {children}
+          </span>
+          {carregando && (
+            <CircleNotch className="absolute animate-spin" aria-hidden />
+          )}
+        </>
+      )}
+    </button>
+  )
+}
+
+/**
+ * "Carregando..." para uma LISTA ou painel inteiro que ainda nao tem dado.
+ *
+ * Existe separado do `carregando` do botao porque o modo de falha e outro, e
+ * pior: uma lista que renderiza vazia enquanto a query esta no ar mostra o
+ * estado vazio — "Nenhuma captura registrada ainda", "voce nao tem ofertas" —
+ * e isso nao e ausencia de feedback, e feedback ERRADO. O jogador le que nao
+ * tem nada, e o que estava acontecendo era que o dado nao tinha chegado.
+ *
+ * Regra: onde houver um estado vazio com texto, o caminho de carregamento tem
+ * que vir ANTES dele no `if`.
+ */
+export function Carregando({ texto = 'Carregando...' }: { texto?: string }) {
+  return (
+    <p className="flex items-center gap-[.4em] p-[.6em] text-[.85em] text-n500">
+      <CircleNotch className="animate-spin" aria-hidden /> {texto}
+    </p>
   )
 }
 

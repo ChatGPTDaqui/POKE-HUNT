@@ -54,8 +54,8 @@ export function ItemCompraCard({
           Total: <b className={custo > gold ? 'text-bad' : 'text-gold'}>{fmt.format(custo)}</b>
           {custo > gold && <span className="text-bad"> · ouro insuficiente</span>}
         </span>
-        <GameButton disabled={ocupado || custo > gold} onClick={onComprar}>
-          {isPending ? '...' : 'Comprar'}
+        <GameButton carregando={isPending} disabled={ocupado || custo > gold} onClick={onComprar}>
+          Comprar
         </GameButton>
       </div>
     </GameCard>

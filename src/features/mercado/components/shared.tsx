@@ -1,4 +1,4 @@
-import { CircleNotch, Coin, Diamond } from '@phosphor-icons/react'
+import { Coin, Diamond } from '@phosphor-icons/react'
 import { itemIconUrl, itemIconBorderColor } from '@/data/sprites'
 import { cn } from '@/lib/utils'
 import { fmt } from '../utils'
@@ -17,13 +17,10 @@ export function IconeItem({ itemId }: { itemId: string }) {
   )
 }
 
-export function Carregando() {
-  return (
-    <p className="flex items-center gap-[.4em] text-n500">
-      <CircleNotch className="animate-spin" /> Carregando...
-    </p>
-  )
-}
+// Reexportado do controle compartilhado — a copia que vivia aqui era a unica
+// do jogo, e telas fora do mercado (perfil, correio) acabavam escrevendo a
+// sua propria string solta.
+export { Carregando } from '@/components/game/controls'
 
 export function Moeda({ valor, tipo }: { valor: number; tipo: 'gold' | 'diamond' }) {
   return (

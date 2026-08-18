@@ -39,11 +39,11 @@ function sortValue(poke: PokeInstance, key: SortKey): number {
   return poke.level
 }
 
-function LockButton({ locked, onToggle, disabled }: { locked: boolean; onToggle: () => void; disabled?: boolean }) {
+function LockButton({ locked, onToggle, carregando }: { locked: boolean; onToggle: () => void; carregando?: boolean }) {
   return (
     <GameIconButton
       variant="ghost"
-      disabled={disabled}
+      carregando={carregando}
       title={locked ? 'Destrancar' : 'Trancar (nunca sera vendido)'}
       aria-label={locked ? 'Destrancar' : 'Trancar'}
       onClick={(e) => {
@@ -155,7 +155,7 @@ function PokemonsTab() {
               </div>
               <LockButton
                 locked={Boolean(poke.locked)}
-                disabled={acao.isPending(`lock:${poke.uid}`)}
+                carregando={acao.isPending(`lock:${poke.uid}`)}
                 onToggle={() => {
                   void acao.run(`lock:${poke.uid}`, () =>
                     pedirAcao({ tipo: 'alternarTravaPoke', pokeUid: poke.uid }, () =>
@@ -165,6 +165,7 @@ function PokemonsTab() {
               />
               {canMove ? (
                 <GameButton
+                  carregando={acao.isPending(`team:${poke.uid}`)}
                   disabled={acao.pendingKey != null}
                   onClick={(e) => {
                     e.stopPropagation()
@@ -275,7 +276,7 @@ function ItensTab() {
             </ItemTooltip>
             <LockButton
               locked={locked}
-              disabled={acao.isPending(`lock:${itemId}`)}
+              carregando={acao.isPending(`lock:${itemId}`)}
               onToggle={() => {
                 void acao.run(`lock:${itemId}`, () =>
                   pedirAcao({ tipo: 'alternarTravaItem', itemId }, () => toggleItemLock(itemId)),

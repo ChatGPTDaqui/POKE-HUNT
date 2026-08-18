@@ -57,10 +57,11 @@ export function VenderItens() {
       </div>
       <GameButton
         variant="primary"
-        disabled={acao.isPending('criar-ordem') || maximo === 0}
+        carregando={acao.isPending('criar-ordem')}
+        disabled={maximo === 0}
         onClick={() => void acao.run('criar-ordem', () => criar.mutateAsync({ itemId: escolhido, side: 'venda', unitPrice: preco, quantity: Math.min(qtd, maximo) }).catch(() => {}))}
       >
-        {acao.isPending('criar-ordem') ? '...' : 'Colocar a venda'}
+        Colocar a venda
       </GameButton>
     </GameCard>
   )

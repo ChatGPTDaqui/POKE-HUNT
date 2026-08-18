@@ -116,7 +116,8 @@ export function CorreioMenu() {
         </label>
         <GameButton
           variant="primary"
-          disabled={adicionar.isPending || !nick.trim()}
+          carregando={adicionar.isPending}
+          disabled={!nick.trim()}
           onClick={() => adicionar.mutate(nick.trim())}
         >
           <UserPlus /> Enviar pedido
@@ -179,7 +180,7 @@ export function CorreioMenu() {
                   ) : (
                     <GameButton
                       variant="primary"
-                      disabled={coletar.isPending}
+                      carregando={coletar.isPending}
                       onClick={() => coletar.mutate(m.id)}
                     >
                       <Gift /> Coletar
@@ -191,14 +192,14 @@ export function CorreioMenu() {
                   <div className="flex gap-[.35em]">
                     <GameButton
                       variant="primary"
-                      disabled={responder.isPending}
+                      carregando={responder.isPending}
                       onClick={() => responder.mutate({ id: m.id, aceitar: true })}
                     >
                       <Check /> Aceitar
                     </GameButton>
                     <GameButton
                       variant="ghost"
-                      disabled={responder.isPending}
+                      carregando={responder.isPending}
                       onClick={() => responder.mutate({ id: m.id, aceitar: false })}
                     >
                       <X /> Recusar
