@@ -18,9 +18,9 @@
 escreve progresso: sem `VITE_SERVIDOR_URL` apontando para um serviço vivo, o jogo não
 funciona. Isso é o recurso, não um bug.
 
-**Não existe mais serviço de autoridade local.** `server/src/node.ts` (o adaptador `node:http`,
-porta 8787) foi deletado em `29a4da4` — `server/package.json` tem só `build`, e nenhum
-`listen()` sobrou em `server/src/`. `.env.local` aponta `VITE_SERVIDOR_URL` direto para a Edge
+**Não existe mais serviço de autoridade local.** `authority/src/node.ts` (o adaptador `node:http`,
+porta 8787) foi deletado em `29a4da4` — `authority/package.json` tem só `build`, e nenhum
+`listen()` sobrou em `authority/src/`. `.env.local` aponta `VITE_SERVIDOR_URL` direto para a Edge
 Function publicada, e é assim que se desenvolve hoje: `npm run dev` no cliente contra a função
 em produção. Consequência a aceitar: **testar mudança no servidor exige `npm run edge:publicar`
 antes** — não há ciclo local.

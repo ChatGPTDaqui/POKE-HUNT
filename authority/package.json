@@ -1,5 +1,5 @@
 {
-  "name": "novo-poke-idle-server",
+  "name": "novo-poke-idle-authority",
   "private": true,
   "type": "module",
   "imports": {

@@ -21,7 +21,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 	enumerable: true
 }) : target, mod));
 //#endregion
-//#region server/src/db.ts
+//#region authority/src/db.ts
 var ErroHttp = class extends Error {
 	status;
 	constructor(status, message) {
@@ -192,7 +192,7 @@ async function apagar(cfg, caminho) {
 	});
 }
 //#endregion
-//#region server/src/auth.ts
+//#region authority/src/auth.ts
 var ALGORITMO = "ES256";
 var FOLGA_DE_RELOGIO_S = 30;
 var chaves = /* @__PURE__ */ new Map();
@@ -49883,7 +49883,7 @@ function gameStateToAutoCatchRuleRows(userId, s) {
 	}));
 }
 //#endregion
-//#region server/src/estadoDoJogador.ts
+//#region authority/src/estadoDoJogador.ts
 function criarEstadoDoJogador(dados) {
 	const s = structuredClone(dados);
 	const acharPoke = (uid) => {
@@ -50142,7 +50142,7 @@ function criarEstadoDoJogador(dados) {
 	};
 }
 //#endregion
-//#region server/src/farmOffline.ts
+//#region authority/src/farmOffline.ts
 var FRACAO_DO_PISO = .5;
 var NENHUM_PISO = {
 	aplicado: false,
@@ -50190,7 +50190,7 @@ function aplicarPiso(store, estado, resumo, agoraMs) {
 	};
 }
 //#endregion
-//#region server/src/entregas.ts
+//#region authority/src/entregas.ts
 /**
 * Reivindica (de forma atomica) tudo que esta pendente pra este jogador.
 *
@@ -50233,7 +50233,7 @@ function aplicarEntregasNoEstado(estado, entregas) {
 	}
 }
 //#endregion
-//#region server/src/progresso.ts
+//#region authority/src/progresso.ts
 var TAMANHO_LOTE_ID = 100;
 function porLotesDeId(ids) {
 	const lotes = [];
@@ -50513,7 +50513,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 	};
 }
 //#endregion
-//#region server/src/appSessao.ts
+//#region authority/src/appSessao.ts
 function json(dado, status = 200) {
 	return new Response(JSON.stringify(dado), {
 		status,

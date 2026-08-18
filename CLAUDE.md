@@ -37,8 +37,8 @@ histórico ou decisão que este arquivo não cobre.
 ## Regras críticas
 
 - **`assets/` (~270MB) fica na raiz do repo**, fora de `public/` — nunca copiar/linkar pra `public/assets`, git duplicaria ~6.300 arquivos. Servido via plugin (`vite.config.ts`) em dev, `serve.js` em produção.
-- **`server/` não builda sem `npm run build:engine` (raiz) rodado antes** — `server/package.json` importa `#engine`, gerado só por esse script, gitignored. Sem isso: `Cannot find module '#engine'` em cascata.
-- **`.env` da raiz é o MESMO pra local e remoto** — `server/src/node.ts` e scripts (`catalog:migrar`/`db:wipe`/`edge:publicar`) só leem `SUPABASE_URL`/`SERVICE_ROLE_KEY` do `.env` raiz, nunca `.env.local`. Sem mecanismo de override — errar o `.env` roda `db:wipe` contra o ambiente errado sem avisar.
+- **`authority/` não builda sem `npm run build:engine` (raiz) rodado antes** — `authority/package.json` importa `#engine`, gerado só por esse script, gitignored. Sem isso: `Cannot find module '#engine'` em cascata.
+- **`.env` da raiz é o MESMO pra local e remoto** — `scripts/*` (`catalog:migrar`/`db:wipe`/etc) e `edge:publicar` só leem `SUPABASE_URL`/`SERVICE_ROLE_KEY` do `.env` raiz, nunca `.env.local`. Sem mecanismo de override — errar o `.env` roda `db:wipe` contra o ambiente errado sem avisar.
 - **Limite de negócio só no cliente vira 502, não erro tratado** (`MAX_TEAM_SIZE` já bateu constraint de banco direto) — todo limite precisa revalidar no adaptador do servidor.
 - **`.length` em resultado do PostgREST mente acima de 1000 linhas**, corta sem erro — contagem real precisa `Range 0-0` + header `Content-Range`.
 - **Zustand `persist` engole erro de storage silenciosamente** — `hydrate()` nunca rejeita a promise mesmo em falha; gate de "erro real vs conta nova" precisa checar flag registrada em `getItem`, não esperar rejeição.

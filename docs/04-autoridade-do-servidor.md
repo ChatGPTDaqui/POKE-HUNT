@@ -3,7 +3,7 @@
 > Este documento descreve limiares e janelas anti-abuso. Ver a nota sobre
 > publicação no [README](README.md#esta-pasta-não-é-publicada).
 >
-> **Reescrito por inteiro em 2026-08-17.** A versão anterior descrevia `server/src/app.ts`,
+> **Reescrito por inteiro em 2026-08-17.** A versão anterior descrevia `authority/src/app.ts`,
 > `acoes.ts`, `mercado.ts`, `social.ts`, `reiniciar.ts` e `node.ts` como a autoridade inteira.
 > **Esses arquivos foram deletados** numa migração batizada "RPC-everything" (2026-08-11 a
 > 2026-08-16, ~50 migrations): compra/venda/evolução/mercado/chat/correio/ranking/reset viraram
@@ -17,7 +17,7 @@
 **O cliente manda intenção. Nunca resultado.** Isso continua valendo nos dois mecanismos —
 só o *como* mudou:
 
-1. **Sessão de hunt (HTTP, `server/src/appSessao.ts`)**: o jogador declara "estou na hunt X
+1. **Sessão de hunt (HTTP, `authority/src/appSessao.ts`)**: o jogador declara "estou na hunt X
    com o POKE Y". O servidor simula o intervalo pelo relógio **dele**, com o motor de jogo
    real (`stepWorld`), e grava. A simulação local vira predição cosmética.
 2. **Tudo o mais (RPC do Postgres, `supabase.rpc('nome_da_funcao', {...})`)**: o jogador diz
@@ -33,21 +33,21 @@ só o *como* mudou:
 
 | Peça | Papel |
 |---|---|
-| `server/src/appSessao.ts` | Router mínimo: só as 4 rotas de sessão (abaixo). Roda como HTTP porque precisa do motor de simulação real |
-| `server/src/progresso.ts` | Carregar, simular, gravar a sessão. O coração do lado HTTP — praticamente inalterado pela migração RPC |
-| `server/src/estadoDoJogador.ts` | Implementa `GameStateStore` sobre `GameStateData` puro, para a simulação de sessão |
-| `server/src/farmOffline.ts` | O piso do farm offline (ver [07](07-farm-offline.md)) |
-| `server/src/entregas.ts` | Fila de entregas do mercado (`market_deliveries`), reivindicada em toda gravação de sessão |
-| `server/src/db.ts` | Cliente PostgREST com retry, usado pelo lado HTTP |
-| `server/src/auth.ts` | Verificação de token, usada pelo lado HTTP |
-| `server/src/edge.ts` | Adaptador de plataforma (Deno/Edge Function) |
+| `authority/src/appSessao.ts` | Router mínimo: só as 4 rotas de sessão (abaixo). Roda como HTTP porque precisa do motor de simulação real |
+| `authority/src/progresso.ts` | Carregar, simular, gravar a sessão. O coração do lado HTTP — praticamente inalterado pela migração RPC |
+| `authority/src/estadoDoJogador.ts` | Implementa `GameStateStore` sobre `GameStateData` puro, para a simulação de sessão |
+| `authority/src/farmOffline.ts` | O piso do farm offline (ver [07](07-farm-offline.md)) |
+| `authority/src/entregas.ts` | Fila de entregas do mercado (`market_deliveries`), reivindicada em toda gravação de sessão |
+| `authority/src/db.ts` | Cliente PostgREST com retry, usado pelo lado HTTP |
+| `authority/src/auth.ts` | Verificação de token, usada pelo lado HTTP |
+| `authority/src/edge.ts` | Adaptador de plataforma (Deno/Edge Function) |
 | `supabase/migrations/*rpc*.sql` | As funções `dev.*`/`public.*` que substituíram `acoes.ts`/`mercado.ts`/`social.ts`/`reiniciar.ts` — ver "O que virou RPC" abaixo |
 | `src/data/remote/acoesRpc.ts` | Cliente: despacha ~19 tipos de ação para a RPC certa |
 | `src/data/remote/mercadoRpc.ts` | Cliente: leituras de mercado via view/RLS, escritas via RPC |
 | `src/data/remote/rankingRpc.ts` | Cliente: leituras de ranking via view/RLS, `meu_perfil` via RPC |
 | `src/data/remote/correioRealtime.ts`, `chatRealtime.ts` | Cliente: leitura/escrita direta via RLS + Realtime, ações sensíveis (marcar lido, coletar anexo, amizade) via RPC |
 
-`server/src/estadoDoJogador.ts` implementa o tipo `GameStateStore` **inteiro** sobre
+`authority/src/estadoDoJogador.ts` implementa o tipo `GameStateStore` **inteiro** sobre
 `GameStateData` puro. Esquecer um método quebra o type-check em vez de estourar no meio de
 uma simulação de 6 horas em produção.
 
@@ -61,7 +61,7 @@ de teste e ia embora, chegando a 72 contas de teste acumuladas contra 5 jogadore
 
 `fetch(Request) => Response`, sem framework. Um Worker do Cloudflare **é** exatamente
 `export default { fetch }`, e o Node 22 tem `Request`/`Response` nativos: o mesmo arquivo
-roda nos dois. `server/src/edge.ts` e `supabase/functions/jogo/index.ts` (casca Deno) são os
+roda nos dois. `authority/src/edge.ts` e `supabase/functions/jogo/index.ts` (casca Deno) são os
 únicos com código de plataforma. Isso vale só para as 4 rotas de sessão que sobraram — a
 camada RPC não tem "forma de serviço" nenhuma, é função de banco.
 
@@ -312,7 +312,7 @@ egress; três jogadores fecharam o dia em 23,5 GB de PostgREST + 2,4 GB de Funct
   é exatamente o conjunto que precisa ser gravado;
 - `pokeIdsNoLoad` fica com os ids do time, e como o diff de remoção de `gravarEstado` é
   dirigido por ele (ver a seção abaixo), **nenhuma linha de mochila é alcançável por um
-  flush**. Trancado em `server/src/snapshotParcial.test.ts`.
+  flush**. Trancado em `authority/src/snapshotParcial.test.ts`.
 
 `ctx.bagCarregada` diz qual modo produziu o estado. `bagPokes` vazio com
 `bagCarregada: false` significa "não carregada", **não** "mochila vazia" — quem confundir os
@@ -504,7 +504,7 @@ escrita nessas tabelas.
 
 **O que mudou é que existem hoje DOIS escritores legítimos, não um:**
 
-1. **`service_role`** (o servidor de sessão, `server/src/db.ts`) — ignora RLS por completo,
+1. **`service_role`** (o servidor de sessão, `authority/src/db.ts`) — ignora RLS por completo,
    é a chave usada por `gravarEstado` para escrever o resultado de uma simulação.
 2. **Funções `security definer`** (as RPC) — não ignoram RLS por uma chave ambiente; cada uma
    roda com o privilégio do **dono da função** (o papel que aplicou a migration), escopado a
@@ -524,7 +524,7 @@ só que "o servidor" hoje é dois: sem `service_role` (sessão HTTP), não há c
 hunt; sem as RPCs (que não dependem do serviço Node/Edge, só do Postgres estar de pé), não há
 como comprar, vender, evoluir, negociar ou conversar.** As RPCs funcionam contra qualquer projeto
 Supabase linkado; a sessão HTTP exige `VITE_SERVIDOR_URL` apontando para a Edge Function
-publicada — **não há mais como rodá-la local** (`server/src/node.ts` foi deletado em `29a4da4`;
+publicada — **não há mais como rodá-la local** (`authority/src/node.ts` foi deletado em `29a4da4`;
 ver [11-operacao.md](11-operacao.md#comandos)).
 
 ### Teste adversarial

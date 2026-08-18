@@ -1,4 +1,4 @@
-// Reads "Planilha mestra/dados_do_jogo.xlsx" and regenerates the
+// Reads "master-spreadsheet/dados_do_jogo.xlsx" and regenerates the
 // js/data/*.generated.js files the game reads ALL its formulas/species/
 // moves/items/maps/encounters from. Read-only on the spreadsheet — never
 // writes back into it.
@@ -11,7 +11,7 @@ const path = require('path');
 const { readWorkbook } = require('./xlsx-reader.js');
 
 const ROOT = path.join(__dirname, '..');
-const XLSX_PATH = path.join(ROOT, 'Planilha mestra', 'dados_do_jogo.xlsx');
+const XLSX_PATH = path.join(ROOT, 'master-spreadsheet', 'dados_do_jogo.xlsx');
 // Migracao React: os *.generated.ts passam a viver dentro do app Vite
 // (web/src/data/generated/), tipados contra web/src/data/generated/types.ts
 // (nao gerado, escrito a mao uma vez). O jogo vanilla antigo (js/data/) fica

@@ -1,7 +1,7 @@
 # 10 — Invariantes e testes
 
 `npm test` (vitest). 42 arquivos — cobre cliente **e** servidor num comando só (o `test.exclude`
-do `vite.config.ts` só tira `.claude/**` e `server/engine/**`, então os `server/src/*.test.ts`
+do `vite.config.ts` só tira `.claude/**` e `authority/engine/**`, então os `authority/src/*.test.ts`
 entram). A tabela abaixo é um recorte dos que valem explicação, não a lista completa.
 
 O critério para um invariante virar teste neste projeto é específico:
@@ -108,7 +108,7 @@ despercebida.
 
 ### Crédito incremental de RPC vs escrita absoluta do flush
 
-`server/src/progresso.test.ts`, 3 casos. **13 RPCs** creditam por `gold = gold + X` enquanto
+`authority/src/progresso.test.ts`, 3 casos. **13 RPCs** creditam por `gold = gold + X` enquanto
 `gravarEstado` grava o valor ABSOLUTO de um snapshot lido antes. O que impede a segunda de
 apagar a primeira é o CAS em `updated_at` mais o trigger que avança `updated_at` em todo
 UPDATE — ver [08](08-social-e-mercado.md#o-invariante-que-sustenta-tudo-aqui).
@@ -188,8 +188,8 @@ pasta **não têm equivalente** — por isso a regra de citar símbolo em vez de
 
 ```bash
 npx tsc -b                 # cliente
-cd server && npx tsc --noEmit   # servidor (após npm run build:engine)
-npx oxlint                 # src/ e server/src/
+cd authority && npx tsc --noEmit   # servidor (após npm run build:engine)
+npx oxlint                 # src/ e authority/src/
 npm test                   # vitest
 npm run build              # inclui a cópia de arte
 ```
