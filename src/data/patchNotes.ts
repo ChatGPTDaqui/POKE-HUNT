@@ -13,6 +13,23 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '7.2',
+    date: '2026-08-18',
+    title: 'Parede virou parede em TODA hunt, os 4 golpes sao seus pra escolher, e o Lance nao desfaz mais o que liberou',
+    highlights: [
+      'BUG GRAVE CORRIGIDO: METADE DAS HUNTS NAO TINHA PAREDE. Modo Pesadelo, as 11 hunts de CHEFE, a luta do Campeao Lance, a hunt de Treinamento e a Rota 46 nao carregavam a area andavel do mapa — o POKE atravessava rocha, agua e precipicio e andava por cima do cenario inteiro. As hunts comuns tinham a delimitacao certa; essas nunca tiveram. A regra mudou de raiz: a area andavel agora vem grudada na ARTE do mapa, entao qualquer conteudo novo que reaproveite um fundo ja pintado ja nasce com a delimitacao certa, sem depender de ninguem lembrar de configurar.',
+      '10 MAPAS GANHARAM AREA ANDAVEL PINTADA A MAO: caverna de gelo, gruta feerica, ilha, lago, metropole, cortico, terra devastada, vilarejo, vilarejo noturno e vulcao. As ruas estreitas da metropole obrigaram a afinar o criterio — no ajuste anterior uma rua de uma celula de largura era "arredondada" pra parede, e o mapa inteiro alem dela virava area proibida.',
+      'METROPOLE E CORTICO GANHARAM ARTE PROPRIA. Ate agora as duas herdavam o fundo do bioma, que e uma clareira de floresta noturna — nada a ver com o nome.',
+      'OS 4 GOLPES AGORA SAO INTEIRAMENTE SEUS. Ataque Basico e Explosao Elemental viraram golpes comuns: ocupam um dos 4 slots como qualquer outro, e cabe a voce decidir se valem a vaga. Ataque Basico continua entrando sozinho como ultimo recurso quando os 4 escolhidos estao em recarga, mas so e usado em combate se estiver num slot.',
+      'BUG REAL CORRIGIDO: A CONTAGEM DE RECARGA NA TELA MENTIA. Existem dois relogios — o do golpe e um intervalo minimo de 2 segundos entre acoes quaisquer — e a barra so mostrava o primeiro. Um golpe de 1 segundo de recarga aparecia como "pronto" e nao disparava. Agora a contagem mostra o tempo que o jogo de fato exige.',
+      'BUG REAL CORRIGIDO: O LANCE LIBERAVA O MODO PESADELO E DESFAZIA NO RELOAD. Derrotar o Campeao abria as hunts, o servidor gravava certo, e ao recarregar a pagina as 11 hunts voltavam a "Bloqueado — Derrote o Campeao Lance", com a conquista registrada no Hall da Fama. Uma limpeza de dado antigo estava jogando fora justamente o grupo que o Lance concede. O bug enganava porque quando havia resumo de tempo offline logo depois de abrir o jogo, a resposta do servidor corrigia sozinha e o Pesadelo "voltava".',
+      'DORMIR E CONGELAR AGORA PRENDEM O POKE NO LUGAR. Quem esta sob sono ou congelamento para de se deslocar ate acordar ou descongelar. Paralisia continua sem prender de proposito: ela nao passa sozinha neste jogo, e um POKE que nao anda nunca mais encontra inimigo — a caçada travaria ate alguem curar.',
+      'ARTE DE GOLPE NOVA NOS 18 TIPOS, E ELA APONTA PRO ALVO. O efeito de impacto foi refeito com animacao de verdade (de 14 a 40 quadros por tipo, contra os poucos de antes) e o jogo carrega 18 arquivos no lugar de mais de 400. Alem disso, os efeitos que TEM um lado — o jato de fogo, o respingo de inseto, o corte sombrio — agora giram na direcao do inimigo em vez de sair sempre pro mesmo lado. Os que nao tem lado (aneis, estouros) e os que apontam pra cima (a cupula psiquica, a coluna de vento) ficam de fora de proposito: girar esses ultimos os deitaria no chao.',
+      'BUG REAL CORRIGIDO: O EFEITO DO SOCO-BALA APARECIA PELA SEXTA PARTE. A arte estava fatiada errado e o jogo animava um pedaco do desenho por vez em vez do golpe inteiro.',
+      'BUG REAL CORRIGIDO: "ENTRAR" NA HUNT PODIA NAO FAZER NADA, SEM DIZER POR QUE. Quando o slot ativo estava vazio, quando o POKE em campo estava desmaiado ou quando o servidor recusava, o botao simplesmente nao respondia — nenhum aviso na tela. Agora todos esses casos falam, e dizem o que fazer.',
+    ],
+  },
+  {
     version: '7.1',
     date: '2026-08-18',
     title: 'Bot de auto-venda, mochila que carrega ao abrir a tela, e o jogo trafegando ~50x menos dado',
