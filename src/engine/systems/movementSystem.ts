@@ -6,6 +6,7 @@ import { COLLISION_GRID_CELL_SIZE } from '@/data/generated/collisionGrids.genera
 import { findPath } from '@/core/pathfinding'
 import { engageRangeFor } from './combatSystem'
 import { isDead, distanceTo } from '../entity'
+import { imobilizadoPorStatus } from './statusSystem'
 import type { EnemyEntity, PlayerEntity, Point, WorldState } from '../types'
 
 const WANDER_MARGIN = 40
@@ -264,6 +265,28 @@ function wanderFreely(rng: Rng, entity: Wanderer, dt: number, cx: number, cy: nu
   entity.wanderTarget = { x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist }
 }
 
+/**
+ * Sono e paralisia travam o POKE onde ele esta (data/statusEffects.ts#imobiliza).
+ *
+ * O que e pulado e SO o deslocamento — o resto da maquina de estado continua
+ * rodando. Isso e proposital e nao detalhe: `updateCombat` filtra os inimigos
+ * por `state === 'engaged'`, entao um inimigo adormecido que saisse de
+ * 'engaged' pararia de poder ser ATACADO, e o jogador ficaria parado ao lado
+ * de um alvo dormindo sem fazer nada. Mantendo o estado, o combate segue
+ * normal e quem decide se o POKE age e `statusImpedeAcao`, como sempre foi.
+ *
+ * A pose de "parado" nao e responsabilidade daqui: quem imobiliza tambem
+ * cairia na pose de andar por continuar em 'chase'/'wander', e e
+ * animationSystem#desiredAnimName que resolve isso num lugar so.
+ *
+ * POR QUE SO SONO E CONGELAMENTO IMOBILIZAM, e nao paralisia: os dois acabam
+ * sozinhos (sono em 2-4 turnos; congelamento com 20% de chance por turno, ou
+ * na hora com um golpe de FOGO). Paralisia e PERMANENTE neste motor, e um
+ * jogador que nao anda nunca mais encontra inimigo — o raio de aggro do
+ * selvagem e 175px e o spawn nasce entre 250 e 550px
+ * (simulation.ts#SPAWN_CONE_MIN_DISTANCE), entao a hunt travaria ate alguem
+ * curar. Ver data/statusEffects.ts#STATUS_QUE_IMOBILIZAM.
+ */
 export function updateMovement(world: WorldState, dt: number): void {
   const { player, enemies, mapDef } = world
   if (!player || !mapDef) return
@@ -291,12 +314,13 @@ export function updateMovement(world: WorldState, dt: number): void {
         player.state = 'engaged'
       } else {
         player.state = 'chase'
-        moveToward(player, targetEnemy.x, targetEnemy.y, player.moveSpeed, dt, mapDef)
+        if (!imobilizadoPorStatus(player)) moveToward(player, targetEnemy.x, targetEnemy.y, player.moveSpeed, dt, mapDef)
         player.wanderTarget = null
       }
     } else {
       player.state = 'wander'
-      wanderFreely(world.rng, player, dt, mapCx, mapCy, mapRadius, mapDef)
+      if (imobilizadoPorStatus(player)) player.wanderTarget = null
+      else wanderFreely(world.rng, player, dt, mapCx, mapCy, mapRadius, mapDef)
     }
   }
 
@@ -312,10 +336,13 @@ export function updateMovement(world: WorldState, dt: number): void {
       continue
     }
 
+    const enemyImobilizado = imobilizadoPorStatus(enemy)
+
     if (player.fainted) {
       enemy.state = 'wander'
       enemy.targetId = null
-      wanderStep(world.rng, enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef)
+      if (enemyImobilizado) enemy.wanderTarget = null
+      else wanderStep(world.rng, enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef)
       continue
     }
 
@@ -330,16 +357,20 @@ export function updateMovement(world: WorldState, dt: number): void {
       enemy.state = 'chase'
       enemy.targetId = player.id
       enemy.wanderTarget = null
-      moveToward(enemy, player.x, player.y, enemy.moveSpeed, dt, mapDef)
+      if (!enemyImobilizado) moveToward(enemy, player.x, player.y, enemy.moveSpeed, dt, mapDef)
     } else {
       enemy.state = 'wander'
       enemy.targetId = null
-      const distToSpawn = Math.hypot(enemy.x - enemy.spawnPoint.x, enemy.y - enemy.spawnPoint.y)
-      if (distToSpawn > enemy.wanderRadius) {
-        moveToward(enemy, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.moveSpeed, dt, mapDef)
+      if (enemyImobilizado) {
         enemy.wanderTarget = null
       } else {
-        wanderStep(world.rng, enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef)
+        const distToSpawn = Math.hypot(enemy.x - enemy.spawnPoint.x, enemy.y - enemy.spawnPoint.y)
+        if (distToSpawn > enemy.wanderRadius) {
+          moveToward(enemy, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.moveSpeed, dt, mapDef)
+          enemy.wanderTarget = null
+        } else {
+          wanderStep(world.rng, enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef)
+        }
       }
     }
   }

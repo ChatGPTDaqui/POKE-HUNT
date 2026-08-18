@@ -119,6 +119,29 @@ export function perdeOTurno(rng: Rng, status: StatusAtivo | null): boolean {
   return false
 }
 
+// Status que TRAVAM o POKE no lugar (movementSystem nao move quem esta com um
+// deles). Escrito a mao aqui, e nao derivado de STATUS_RULES, porque nao tem
+// equivalente nos jogos: la a batalha e por turnos e ninguem "anda". E uma
+// regra deste jogo, que tem mundo continuo.
+//
+// Sao exatamente os dois que ja tem `bloqueiaAcao` — quem nao pode agir
+// tambem nao sai do lugar. E os dois ACABAM SOZINHOS, o que e o que torna a
+// regra segura: sono dura 2-4 turnos, e congelamento tem 20% de chance de
+// descongelar por turno (~5 turnos em media) alem de derreter na hora com
+// qualquer golpe de FOGO que cause dano.
+//
+// PARALISIA FICA DE FORA, por decisao do usuario depois de ver o numero: ela
+// e PERMANENTE aqui (`duracaoEmTurnos: null`, so item ou Centro curam) e o
+// raio de aggro do selvagem (175px) e menor que a distancia minima de spawn
+// (250px). Um jogador paralisado que nao anda nunca mais encontraria inimigo
+// — a hunt travava ate alguem curar. Paralisia continua so cortando
+// velocidade pela metade e fazendo perder 25% dos turnos, como nos jogos.
+const STATUS_QUE_IMOBILIZAM = new Set<StatusCondition>(['sleep', 'freeze'])
+
+export function imobiliza(tipo: StatusCondition | null | undefined): boolean {
+  return tipo != null && STATUS_QUE_IMOBILIZAM.has(tipo)
+}
+
 export function chanceDeSeAtacar(tipo: StatusCondition): number {
   return regraDoStatus(tipo)?.chanceDeSeAtacar ?? 0
 }

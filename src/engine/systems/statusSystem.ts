@@ -15,14 +15,14 @@ import { SPECIES } from '@/data/pokes'
 import { TURNO_SEGUNDOS } from '@/data/abilities'
 import {
   podeReceberStatus, sortearDuracao, danoPorTurno, ehVolatil, perdeOTurno,
-  chanceDeDescongelar, descongelaCom, chanceDeSeAtacar, poderDoAutoDano,
+  chanceDeDescongelar, descongelaCom, chanceDeSeAtacar, poderDoAutoDano, imobiliza,
   SEGUNDOS_DE_IMUNIDADE_APOS_CURA, ESTAGIO_MINIMO, ESTAGIO_MAXIMO,
   type StatusAtivo, type StatusCondition, type StatDeEstagio,
 } from '@/data/statusEffects'
 import type { StatChange } from '@/data/generated/types'
 import type { Ability } from '@/data/abilities'
 import type { WorldEntity, Escudos, ClimaTipo } from '../types'
-import { heal } from '../entity'
+import { heal, VFX_CURA_DURACAO } from '../entity'
 import { traitOf, type TraitId } from '@/data/traits'
 
 // Fracoes de HP MAXIMO por turno dos golpes de tick volatil novos (ver
@@ -54,6 +54,16 @@ function traitBloqueiaStatus(alvo: WorldEntity, tipo: StatusCondition): boolean 
 
 export function statusNaoVolatil(entity: WorldEntity): StatusAtivo | null {
   return entity.poke.status ?? null
+}
+
+/**
+ * Este POKE esta travado no lugar por status?
+ *
+ * So o nao-volatil conta: confusao (volatil) faz perder o turno e se atacar,
+ * mas nao prende ninguem no chao.
+ */
+export function imobilizadoPorStatus(entity: WorldEntity): boolean {
+  return imobiliza(entity.poke.status?.tipo)
 }
 
 export function statusAtivos(entity: WorldEntity): StatusAtivo[] {
@@ -217,7 +227,17 @@ export function curarStatus(entity: WorldEntity, tipo?: StatusCondition): boolea
     entity.statusVolatil = null
     curou = true
   }
-  if (curou) entity.imunidadeDeStatus = SEGUNDOS_DE_IMUNIDADE_APOS_CURA
+  if (curou) {
+    entity.imunidadeDeStatus = SEGUNDOS_DE_IMUNIDADE_APOS_CURA
+    // Faisca verde de "curou status". Fica AQUI, e nao no tick de status, de
+    // proposito: esta funcao e o caminho de toda cura por fonte EXTERNA
+    // (Antidoto, Heal Bell, Centro, o Fogo derretendo o congelamento), e o
+    // sono/congelamento/confusao que acabam sozinhos zeram
+    // `poke.status`/`statusVolatil` direto no `tickStatus` sem passar por
+    // aqui. Ou seja, a distincao que o pedido pede sai de graca da estrutura
+    // que ja existia.
+    entity.vfxCuraStatus = VFX_CURA_DURACAO
+  }
   return curou
 }
 
