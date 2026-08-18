@@ -13,7 +13,7 @@ import { GameWindow } from './GameWindow'
 import { Sheet, type SheetSnap } from './Sheet'
 
 export interface PainelProps {
-  winKey: 'panel' | 'profile' | 'perfil' | 'analyzer' | 'auto' | 'offline'
+  winKey: 'panel' | 'profile' | 'perfil' | 'analyzer' | 'auto' | 'offline' | 'tutorial'
   /** Largura da JANELA, em `em`. Ignorada no sheet, que ocupa a tela. */
   widthEm: number
   zIndex: number

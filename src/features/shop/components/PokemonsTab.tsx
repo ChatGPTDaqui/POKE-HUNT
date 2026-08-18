@@ -12,7 +12,7 @@ import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { PokeNameTag } from '@/components/shared/PokeNameTag'
 import { linkarPoke, tratouComoLink } from '@/components/shared/linkarNoChat'
 import {
-  GameButton, GameCard, GameCheck, GameInput, SectionLabel,
+  GameButton, GameCard, GameCheck, GameInput, Recolhivel, SectionLabel,
 } from '@/components/game/controls'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
 import type { ConfirmRequest } from '@/stores/confirmDialogStore'
@@ -147,10 +147,26 @@ export function PokemonsTab() {
     void acao.run('sell-all-pokes', () => venderLote(uids, { shiny, locked }))
   }
 
+  // Le do estado dos filtros, e nao da contagem do resultado: o jogador quer
+  // saber POR QUE a lista esta curta, e "5 de 6 raridades" responde isso.
+  const resumoDosFiltros = [
+    search.trim() && `"${search.trim()}"`,
+    `${selectedRarities.size}/${Object.keys(RARITIES).length} raridades`,
+    (ivMin > 0 || ivMax < 100) && `IV ${ivMin}-${ivMax}`,
+    shinyOnly && 'só shiny',
+  ].filter(Boolean).join(' · ')
+
   return (
     <div className="flex flex-col gap-[.45em]">
       <SectionLabel>VENDER POKES EXTRAS (MOCHILA)</SectionLabel>
 
+      {/* Filtros atras de um toque. Somados, busca + faixa de IV + as seis
+          raridades + "somente shiny" ocupavam ~330px do painel; com a barra de
+          acao logo abaixo, sobravam quatro POKEs visiveis na lista que a tela
+          existe pra mostrar. O resumo na barra mantem visivel o que esta
+          filtrado — esconder o ESTADO seria pior que a secao sempre aberta. */}
+      <Recolhivel titulo="Filtros" resumo={resumoDosFiltros}>
+      <div className="flex flex-col gap-[.45em]">
       <div className="flex flex-wrap items-center gap-[.5em]">
         <GameInput
           placeholder="Buscar por nome..."
@@ -206,6 +222,8 @@ export function PokemonsTab() {
           </span>
         </GameCheck>
       </div>
+      </div>
+      </Recolhivel>
 
       <div className="flex flex-wrap items-center justify-between gap-[.5em]">
         <GameCheck
