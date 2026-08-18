@@ -110,5 +110,15 @@ describe('world.pessimista: farm offline nunca renderiza melhor que ao vivo (PH-
     // Nao pode ser so um empate por falha de setup: precisa ter havido
     // combate real pra comparacao significar algo.
     expect(otimista.kills).toBeGreaterThan(0)
-  }, 15000) // 40 sementes (~7s) passa do timeout default de 5s
+  // 45s, nao 15s. As 40 sementes custavam ~7s quando este teste nasceu e
+  // passaram a custar ~12,8s isoladas depois que o walk-block pintado passou a
+  // valer pela ARTE: a route_46 foi de 270 pra 320 celulas andaveis, os
+  // caminhos ficaram mais longos e a simulacao anda mais passos. Com 15s a
+  // margem era de 15% e o teste FALHOU POR TIMEOUT dentro da suite completa,
+  // onde ele divide CPU com os outros 45 arquivos — verde sozinho, vermelho
+  // junto, que e o pior modo de falhar.
+  //
+  // Nao da pra cortar semente: 40 e o minimo pro ouro convergir (a cauda do
+  // sellMultiplier chega a 600x). Entao a folga vai no relogio.
+  }, 45000)
 })
