@@ -203,6 +203,54 @@ Sequência em `supabase/migrations/`, ordenada por timestamp. Marcos:
   Sobrescrever escolha de jogador com "novo balanceamento" é o tipo de mudança que aparece como
   bug para quem a sofre.
 
+## Fluxo de mudança de schema
+
+Escrito assumindo **zero contexto de sessão anterior** — vale tanto pra um humano quanto pra
+outra instância de Claude Code (ou qualquer outro agente) que nunca viu este projeto antes.
+Motivo de existir: em 2026-08-18 alguém aplicou 2 colunas novas (`pokemon_instances.nature`,
+`.trait`) direto no banco, sem nunca criar migration — o gate de CI (abaixo) achou isso sozinho na
+primeira vez que rodou. Sem o gate, ninguém saberia que aquilo existia até quebrar em outra
+máquina. Histórico completo em [15-coordenacao-supabase.md](15-coordenacao-supabase.md).
+
+### Regra de ouro
+
+**Nunca aplicar DDL direto no banco** — nem `db query`, nem dashboard do Supabase, nem MCP tool
+`apply_migration` sem também criar o arquivo correspondente. Toda mudança de estrutura (tabela,
+coluna, função, policy, índice, grant) vira arquivo em `supabase/migrations/`, sempre, sem
+exceção — mesmo pra teste rápido, mesmo achando que vai desfazer depois.
+
+### Passo a passo
+
+1. Criar `supabase/migrations/<timestamp>_<nome_descritivo>.sql` — timestamp formato
+   `YYYYMMDDHHmmss`, maior que o mais recente já existente no diretório.
+2. **Este projeto tem 2 schemas espelhados: `public` (produção) e `dev` (clone de teste).** Se a
+   mudança afeta uma tabela/função/policy do jogo (não algo `public`-only por natureza, tipo grant
+   de sistema), criar **os dois arquivos**, um por schema, timestamps próximos — convenção já em
+   uso, ver `supabase/migrations/2026081*_..._public.sql` / `..._dev.sql`.
+3. Aplicar: `npx supabase db push` (precisa estar linkado uma vez por máquina —
+   `npx supabase link --project-ref cffbihbmhiuudahsgjsn`).
+4. Se mudou tabela/coluna/tipo: `npm run db:types` — regenera `src/lib/database.types.ts`.
+   Commitar junto da migration, no mesmo commit.
+5. `git add` migration(s) + `database.types.ts` → commit → push.
+6. PR abre → `supabase-check.yml` roda sozinho e reprova se algo ficou pra trás. Seguir a
+   mensagem de erro — ela diz exatamente o que falta (ver seção abaixo).
+7. Merge em `main` → `supabase-deploy.yml` aplica de verdade em produção. **Não rodar `db
+   push`/`edge:publicar` manual fora desse fluxo**, a menos que seja diagnóstico pontual (a seção
+   de Diagnóstico de 502 abaixo já é esse caso legítimo).
+
+### Se o gate (`supabase-check.yml`) falhar e não estiver claro por quê
+
+- **"Migration aplicada no remoto sem arquivo local"** → `npx supabase migration list --linked`
+  mostra quais versões estão descasadas. Se for migration de outro dev já mesclada que você não
+  puxou ainda: `git pull`. Se for mudança aplicada direto no banco (o erro que este documento
+  existe pra evitar): reconstruir o `.sql` com o **mesmo timestamp** já registrado — `select
+  version, name from supabase_migrations.schema_migrations where version = '<versao>'` (via `db
+  query`) dá o nome; `information_schema.columns` + `pg_constraint` dão a definição real pra
+  reconstruir o `alter table`/`create ...` com precisão, não achismo.
+- **"database.types.ts esta desatualizado"** → `npm run db:types`, commitar o resultado.
+- **"Migration nova mexe em dev sem mexer em public" (ou vice-versa)** → falta o arquivo par do
+  passo 2 acima.
+
 ## Diagnóstico de 502
 
 A Edge Function **não repassa o corpo do erro do PostgREST** — o que é correto, porque ele traz

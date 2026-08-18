@@ -1,5 +1,8 @@
-# Claude Code session data - not part of the game
-.claude/
+# Claude Code session data - not part of the game.
+# settings.json E versionado de proposito (regra de time, ex: pedir confirmacao
+# antes de mexer no schema do Supabase) — so o resto da pasta fica de fora.
+.claude/*
+!.claude/settings.json
 
 # scripts/seed-species-moves-usum.mjs: pasta temporaria pra construir o
 # bundle de ABILITIES/BASIC_ATTACK (precisa estar dentro do projeto pra
@@ -13,11 +16,12 @@
 # duplicaria ~6.300 arquivos (270MB) que ja estao versionados em assets/.
 web/public/assets/
 
-# Project documentation - not needed to run the game (kept out per request)
-CLAUDE.md
-# Backups manuais do CLAUDE.md. Como ele nao esta no git, editar em bloco exige
-# copia antes — e sao ~300KB cada, que ninguem quer commitar por acidente.
+# CLAUDE.md agora e versionado (regra de time). CLAUDE.local.md e pessoal —
+# hoje so a referencia ao vault Obsidian de cada dev, nao serve pro resto do time.
+CLAUDE.local.md
+# Backups manuais de CLAUDE*.md. ~300KB cada, ninguem quer commitar por acidente.
 CLAUDE.md.backup-*
+CLAUDE.local.md.backup-*
 
 # Unused source-art leftovers: already consumed by import scripts / superseded
 # by generated assets, never referenced at runtime (see CLAUDE.md history).

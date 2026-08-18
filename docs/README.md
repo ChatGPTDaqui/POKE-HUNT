@@ -51,6 +51,7 @@ esses pontos. Tornar o repositório público exige, antes, decidir o que sai daq
 | [12-decisoes-descartadas.md](12-decisoes-descartadas.md) | O que foi tentado, medido e rejeitado |
 | [13-divergencias-conhecidas.md](13-divergencias-conhecidas.md) | Onde a documentação existente mente hoje |
 | [14-habilidades.md](14-habilidades.md) | Habilidade, Natureza e Característica: o que vale, o que não vale e por quê |
+| [15-coordenacao-supabase.md](15-coordenacao-supabase.md) | Como o time evita pisar um no outro no Supabase e no `CLAUDE.md` |
 
 ## Como isto se relaciona com os outros arquivos do repositório
 
