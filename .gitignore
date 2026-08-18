@@ -1,5 +1,8 @@
-# Claude Code session data - not part of the game
-.claude/
+# Claude Code session data - not part of the game.
+# settings.json E versionado de proposito (regra de time, ex: pedir confirmacao
+# antes de mexer no schema do Supabase) — so o resto da pasta fica de fora.
+.claude/*
+!.claude/settings.json
 
 # scripts/seed-species-moves-usum.mjs: pasta temporaria pra construir o
 # bundle de ABILITIES/BASIC_ATTACK (precisa estar dentro do projeto pra
