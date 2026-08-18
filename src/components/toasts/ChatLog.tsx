@@ -24,7 +24,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { TextoComRealce } from '@/components/shared/TextoComRealce'
 import { cn } from '@/lib/utils'
 
-const TABS: { key: ChatTab; label: string }[] = [
+export const TABS: { key: ChatTab; label: string }[] = [
   { key: 'mundo', label: 'Mundo' },
   { key: 'sistema', label: 'Sistema' },
   { key: 'trade', label: 'Comercio' },
@@ -40,8 +40,6 @@ const TYPE_COLOR: Record<ToastType, string> = {
   'capture-fail': 'var(--color-warn)',
   info: 'var(--color-n300)',
 }
-
-const SEM_LINHAS: never[] = []
 
 function horaDe(iso: string): string {
   const d = new Date(iso)
@@ -93,7 +91,7 @@ function LinkAnexo({ anexo }: { anexo: AnexoChat }) {
   )
 }
 
-function AbaMundo() {
+export function AbaMundo() {
   const mensagens = useChatStore((s) => s.mensagens)
   const rascunho = useChatStore((s) => s.rascunho)
   const setRascunho = useChatStore((s) => s.setRascunho)
@@ -155,27 +153,48 @@ function AbaMundo() {
   )
 }
 
+/**
+ * Lista de linhas de UMA aba (tudo menos "Mundo", que tem campo de digitacao e
+ * fonte propria). Extraida da janela porque o chat do celular mostra o mesmo
+ * conteudo dentro de um sheet — duas molduras, um corpo so.
+ */
+export function LinhasDaAba({ tab }: { tab: Exclude<ChatTab, 'mundo'> }) {
+  const chatLines = useToastStore((s) => s.chatLines)
+  const lines = chatLines[tab]
+  const linesRef = useRef<HTMLDivElement>(null)
+
+  // Rola pro fim sempre que chegar linha nova.
+  useEffect(() => {
+    const el = linesRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [lines])
+
+  return (
+    <div
+      ref={linesRef}
+      className="flex min-h-0 flex-1 flex-col gap-[.25em] overflow-auto overscroll-contain px-[.55em] pt-[.3em] pb-[.6em] text-[.76em]"
+    >
+      {lines.length === 0 ? (
+        <div className="text-n500">Nada por aqui ainda.</div>
+      ) : (
+        lines.map((line) => (
+          <div key={line.id} style={{ color: TYPE_COLOR[line.type] ?? TYPE_COLOR.info }}>
+            <TextoComRealce texto={line.message} realce={line.realce} />
+          </div>
+        ))
+      )}
+    </div>
+  )
+}
+
 export function ChatLog() {
   const activeTab = useUiStore((s) => s.chatTab)
   const setActiveTab = useUiStore((s) => s.setChatTab)
   const open = useUiStore((s) => s.chatOpen)
   const setOpen = useUiStore((s) => s.setChatOpen)
   const footerHeight = useUiStore((s) => s.footerHeight)
-  const chatLines = useToastStore((s) => s.chatLines)
   const { narrow, colStack, chatNarrow } = useBreakpoints()
   const { pos, onPointerDown } = useWindowDrag('chat')
-  const linesRef = useRef<HTMLDivElement>(null)
-
-  // Constante compartilhada, e nao `[]` inline: um literal novo a cada render
-  // faria o efeito de auto-scroll abaixo rodar em TODO render (a aba "Mundo"
-  // tem o proprio scroll, esta lista nem existe la).
-  const lines = activeTab === 'mundo' ? SEM_LINHAS : chatLines[activeTab]
-
-  // Rola pro fim sempre que chegar linha nova na aba visivel.
-  useEffect(() => {
-    const el = linesRef.current
-    if (el) el.scrollTop = el.scrollHeight
-  }, [lines])
 
   // O chat ganhou uma aba a mais e um campo de digitacao: nas larguras onde ele
   // ja era estreito, 4 abas em `13em` quebravam em duas fileiras e comiam a
@@ -234,24 +253,7 @@ export function ChatLog() {
         </button>
       </div>
 
-      {open && (activeTab === 'mundo' ? (
-        <AbaMundo />
-      ) : (
-        <div
-          ref={linesRef}
-          className="flex min-h-0 flex-1 flex-col gap-[.25em] overflow-auto px-[.55em] pt-[.3em] pb-[.6em] text-[.76em]"
-        >
-          {lines.length === 0 ? (
-            <div className="text-n500">Nada por aqui ainda.</div>
-          ) : (
-            lines.map((line) => (
-              <div key={line.id} style={{ color: TYPE_COLOR[line.type] ?? TYPE_COLOR.info }}>
-                <TextoComRealce texto={line.message} realce={line.realce} />
-              </div>
-            ))
-          )}
-        </div>
-      ))}
+      {open && (activeTab === 'mundo' ? <AbaMundo /> : <LinhasDaAba tab={activeTab} />)}
     </div>
   )
 }

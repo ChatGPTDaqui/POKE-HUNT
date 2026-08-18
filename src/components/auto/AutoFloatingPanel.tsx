@@ -1,18 +1,17 @@
-// Botao Auto (pilula, canto inferior direito) + badge com as bolas que o bot
-// esta usando + a janela flutuante de automacoes.
+// Janela flutuante de automacoes. O BOTAO que a abre vive na doca
+// (`ActionDock#BotaoAuto`): solto no canto ele tinha que medir a altura do
+// rodape a cada regime pra nao ficar por tras do menu.
 //
 // A janela e FLUTUANTE de proposito e nao passa pelo backdrop das telas de
 // menu: o pedido original era poder ver o campo de batalha enquanto mexe nas
 // automacoes. Por isso ela vive em z-40 (acima do painel de menu) sem escurecer
 // nada atras.
 import { useEffect, useRef, type CSSProperties } from 'react'
-import { Robot, Storefront, Warning, X } from '@phosphor-icons/react'
+import { Storefront, X } from '@phosphor-icons/react'
 import { useUiStore, useBreakpoints } from '@/stores/uiStore'
 import { useWindowDrag } from '@/hooks/useWindowDrag'
 import { GameIconButton } from '@/components/game/controls'
 import { AutoPanel } from './AutoPanel'
-import { useEstoqueBaixoNoAuto, LIMIAR_ESTOQUE_BAIXO } from './estoqueBaixo'
-import { cn } from '@/lib/utils'
 
 // O badge de contagem de bolas que ficava logo ABAIXO do botao "auto" foi
 // removido (pedido explicito do usuario, limpeza de interface). A informacao nao
@@ -20,37 +19,6 @@ import { cn } from '@/lib/utils'
 // DENTRO do painel Auto (`AutoPanel`, `.item-count-badge`), que e onde o jogador
 // esta quando essa informacao importa. Fora dali era um bloco permanente sobre o
 // campo de batalha repetindo dado que ninguem estava olhando.
-
-export function AutoButton() {
-  const open = useUiStore((s) => s.autoOpen)
-  const setOpen = useUiStore((s) => s.setAutoOpen)
-  // O alerta tambem vive AQUI, e nao so nos badges dentro do painel: o painel
-  // fica fechado quase o tempo todo, e um aviso de "as bolas estao acabando"
-  // que so aparece depois de abrir o painel chega tarde demais pra servir.
-  const estoqueBaixo = useEstoqueBaixoNoAuto()
-
-  return (
-    <div className="pointer-events-auto flex flex-col items-end gap-[.4em]">
-      <button
-        type="button"
-        title={estoqueBaixo ? `Automacoes — um consumivel em uso esta abaixo de ${LIMIAR_ESTOQUE_BAIXO}` : 'Automacoes'}
-        data-auto-toggle
-        onClick={() => setOpen(!open)}
-        className={cn(
-          'hud-surface flex cursor-pointer items-center gap-[.5em] rounded-full border px-[.7em] py-[.5em]',
-          'font-[inherit] text-[.9em] shadow-lg transition-colors',
-          'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
-          open ? 'border-primary text-n100' : 'border-n700 text-foreground hover:border-primary',
-          estoqueBaixo && 'animate-pulse-alerta border-bad text-bad',
-        )}
-      >
-        <Robot className="text-[1.25em]" />
-        auto
-        {estoqueBaixo && <Warning className="text-[1.1em]" weight="fill" />}
-      </button>
-    </div>
-  )
-}
 
 export function AutoWindow() {
   const open = useUiStore((s) => s.autoOpen)
