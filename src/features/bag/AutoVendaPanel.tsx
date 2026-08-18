@@ -78,7 +78,11 @@ export function AutoVendaPanel() {
               aria-pressed={marcada}
               onClick={() => alternarRaridade(chave)}
               className={cn(
-                'cursor-pointer rounded-[.35em] border px-[.5em] py-[.25em] text-[.72em] transition-colors',
+                // `jogo-botao`: gancho do alvo minimo de toque (ver index.css).
+                // Sao seis chips lado a lado e, com 20px de altura, errar o
+                // vizinho no dedo liga a venda automatica de uma raridade que
+                // o jogador nao escolheu.
+                'jogo-botao flex cursor-pointer items-center rounded-[.35em] border px-[.5em] py-[.25em] text-[.72em] transition-colors',
                 marcada ? 'border-transparent font-semibold text-[#0b0e18]' : 'border-n700 text-n400',
               )}
               style={marcada ? { backgroundColor: def.color } : undefined}

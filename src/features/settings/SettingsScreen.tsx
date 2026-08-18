@@ -4,7 +4,7 @@ import { sortedPatchNotes } from '@/data/patchNotes'
 import { controller } from '@/engine/controller'
 import { useConfirmDialogStore } from '@/stores/confirmDialogStore'
 import { useUiStore, HUD_SCALE_MIN, HUD_SCALE_MAX } from '@/stores/uiStore'
-import { GameButton, GameCard, SegmentedTabs } from '@/components/game/controls'
+import { GameButton, GameCard, GameCheck, SegmentedTabs } from '@/components/game/controls'
 
 function GeralTab() {
   const askConfirm = useConfirmDialogStore((s) => s.confirm)
@@ -30,7 +30,7 @@ function GeralTab() {
             step={0.05}
             value={hudScale}
             onChange={(e) => setHudScale(Number(e.target.value))}
-            className="h-[1em] flex-1 cursor-pointer accent-primary"
+            className="jogo-range h-[1em] flex-1 cursor-pointer accent-primary"
             aria-label="Escala da interface"
           />
           <span className="w-[3.5em] text-right tabular-nums text-n300">
@@ -46,16 +46,9 @@ function GeralTab() {
           As superfícies da interface desfocam o jogo por trás. O desfoque é recalculado a cada quadro em cada
           camada — em celular mais simples isso derruba a taxa de quadros. Desligado, elas ficam quase opacas.
         </div>
-        <label className="flex cursor-pointer items-center gap-[.5em] self-start">
-          <input
-            type="checkbox"
-            name="vidro-fosco"
-            checked={vidroFosco}
-            onChange={(e) => setVidroFosco(e.target.checked)}
-            className="h-[1.1em] w-[1.1em] cursor-pointer accent-primary"
-          />
-          <span className="text-[.85em]">Desligar o desfoque</span>
-        </label>
+        <GameCheck checked={vidroFosco} onChange={setVidroFosco} className="self-start">
+          Desligar o desfoque
+        </GameCheck>
       </GameCard>
 
       <GameCard className="flex flex-col gap-[.4em] p-[.6em]">

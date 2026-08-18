@@ -204,8 +204,15 @@ function useCamadaHud(): HTMLElement | null {
   const [alvo, setAlvo] = useState<HTMLElement | null>(
     () => (typeof document === 'undefined' ? null : document.getElementById('camada-hud')),
   )
+  // Sem lista de dependencias de proposito: alem de achar o no na primeira
+  // montagem, isto RECUPERA de um no que deixou de existir. O elemento fica
+  // guardado em estado, e se a arvore do jogo remonta (troca de conta, reset do
+  // ErrorBoundary, hot-reload em desenvolvimento) a referencia velha aponta pra
+  // um no fora do documento: o portal continua "funcionando" e desenha num lugar
+  // que ninguem ve — foi exatamente o que aconteceu depois de um hot-reload
+  // aqui, com o painel marcado como aberto na doca e nada na tela.
   useEffect(() => {
-    if (!alvo) setAlvo(document.getElementById('camada-hud'))
-  }, [alvo])
+    if (!alvo || !alvo.isConnected) setAlvo(document.getElementById('camada-hud'))
+  })
   return alvo
 }

@@ -30,6 +30,7 @@ export function JogoCarregado() {
   const hasStarter = useHasStarter()
   const hudScale = useUiStore((s) => s.hudScale)
   const vidroFosco = useUiStore((s) => s.vidroFosco)
+  const coarse = useUiStore((s) => s.coarsePointer)
   const { summary, dismiss } = useOfflineFarmOnBoot()
   useBackgroundCatchUp()
   useSaidaAoEncerrarSessao()
@@ -47,6 +48,9 @@ export function JogoCarregado() {
       // que multiplica esse ajuste em vez de substitui-lo.
       className="hud-root relative h-svh w-svw overflow-hidden bg-background text-foreground"
       data-blur={vidroFosco ? 'off' : undefined}
+      // Dedo em vez de mouse: o CSS usa isto pra dar 44px de alvo minimo aos
+      // primitivos de controle. Ver "alvo de toque" no index.css.
+      data-toque={coarse ? '1' : undefined}
       style={{ '--hud-scale': hudScale } as React.CSSProperties}
     >
       <GameCanvas />

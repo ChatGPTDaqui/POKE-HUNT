@@ -1,5 +1,12 @@
 // Controles da HUD, dimensionados em `em`.
 //
+// Cada primitivo carrega uma classe estavel (`jogo-botao`, `jogo-campo`,
+// `jogo-check`, `jogo-switch`). Ela nao pinta nada: e o gancho por onde o CSS
+// aplica o alvo minimo de toque quando o aparelho tem dedo em vez de mouse
+// (ver `[data-toque]` no index.css). Fazer isso por CSS, e nao por prop, evita
+// passar `coarse` por ~200 pontos de chamada — e um controle novo nasce com o
+// tamanho certo so por usar o primitivo.
+//
 // Por que nao usar os componentes do shadcn aqui: eles sao dimensionados em
 // `rem` (`h-8`, `text-sm`, `px-3`), ou seja, ancorados no font-size da RAIZ do
 // documento. O contrato de layout desta interface e o oposto — tudo escala com
@@ -56,7 +63,7 @@ export function GameButton({
       disabled={disabled || carregando}
       aria-busy={carregando || undefined}
       className={cn(
-        'relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-[.35em] rounded-[.5em] border',
+        'jogo-botao relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-[.35em] rounded-[.5em] border',
         'px-[.55em] py-[.32em] font-[inherit] text-[.85em] leading-[1.35] whitespace-nowrap transition-colors',
         'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
         'disabled:cursor-not-allowed disabled:opacity-45',
@@ -106,7 +113,7 @@ export function GameIconButton({ className, ...props }: GameButtonProps) {
   return (
     <GameButton
       {...props}
-      className={cn('h-[1.9em] w-[1.9em] shrink-0 px-0 py-0 text-[1em]', className)}
+      className={cn('jogo-botao-icone h-[1.9em] w-[1.9em] shrink-0 px-0 py-0 text-[1em]', className)}
     />
   )
 }
@@ -123,7 +130,7 @@ export function GameInput({ className, ...props }: InputHTMLAttributes<HTMLInput
       {...props}
       name={props.name ?? props.id ?? autoId}
       className={cn(
-        'min-w-0 rounded-[.45em] border border-n700 bg-n900 px-[.55em] py-[.32em]',
+        'jogo-campo min-w-0 rounded-[.45em] border border-n700 bg-n900 px-[.55em] py-[.32em]',
         'font-[inherit] text-[.85em] text-foreground placeholder:text-n500',
         'focus-visible:border-n500 focus-visible:outline-none',
         'disabled:cursor-not-allowed disabled:opacity-45',
@@ -140,7 +147,7 @@ export function GameSelect({ className, ...props }: SelectHTMLAttributes<HTMLSel
       {...props}
       name={props.name ?? props.id ?? autoId}
       className={cn(
-        'min-w-0 cursor-pointer rounded-[.45em] border border-n700 bg-n900 px-[.4em] py-[.32em]',
+        'jogo-campo min-w-0 cursor-pointer rounded-[.45em] border border-n700 bg-n900 px-[.4em] py-[.32em]',
         'font-[inherit] text-[.85em] text-foreground',
         'focus-visible:border-n500 focus-visible:outline-none',
         'disabled:cursor-not-allowed disabled:opacity-45',
@@ -164,7 +171,7 @@ export function GameCheck({
   return (
     <label
       className={cn(
-        'inline-flex cursor-pointer items-center gap-[.4em] text-[.85em] text-n300 select-none',
+        'jogo-check-rotulo inline-flex cursor-pointer items-center gap-[.4em] text-[.85em] text-n300 select-none',
         disabled && 'cursor-not-allowed opacity-45',
         className,
       )}
@@ -175,7 +182,7 @@ export function GameCheck({
         checked={checked}
         disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
-        className="h-[1em] w-[1em] shrink-0 cursor-pointer accent-primary"
+        className="jogo-check h-[1em] w-[1em] shrink-0 cursor-pointer accent-primary"
       />
       {children}
     </label>
@@ -198,7 +205,7 @@ export function GameSwitch({
       aria-label={label}
       onClick={() => onChange(!checked)}
       className={cn(
-        'relative h-[1.4em] w-[2.6em] shrink-0 cursor-pointer rounded-full border transition-colors',
+        'jogo-switch relative h-[1.4em] w-[2.6em] shrink-0 cursor-pointer rounded-full border transition-colors',
         'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
         checked ? 'border-primary bg-primary' : 'border-n600 bg-n800',
       )}

@@ -364,3 +364,50 @@
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
 }
+
+/* --- alvo de toque nos primitivos ------------------------------------------
+   Aplicado so quando o aparelho tem DEDO (`data-toque`, escrito pelo
+   JogoCarregado a partir de `(pointer: coarse)`). No mouse os mesmos controles
+   continuam compactos: um botao de 44px numa lista densa de desktop e desperdicio
+   de altura, e desktop nao tem o problema que isto resolve.
+
+   Medido em 390px antes disto: 157 dos 341 alvos da Loja e 75 dos 75 da Mochila
+   tinham menos de 40px de altura. */
+.hud-root[data-toque] .jogo-botao,
+.hud-root[data-toque] .jogo-campo {
+  min-height: 44px;
+}
+
+.hud-root[data-toque] .jogo-botao-icone {
+  min-width: 44px;
+}
+
+/* O alvo do checkbox e o ROTULO (um `<label>` repassa o clique pro input), e
+   nao a caixinha. A caixinha so cresce um pouco — e em px: `em` dentro de um
+   `<input>` resolve contra o font-size do proprio controle, que o navegador
+   define sozinho (~11.5px), e por isso `1.4em` virava 16px em vez de 22. */
+.hud-root[data-toque] .jogo-check {
+  width: 22px;
+  height: 22px;
+}
+
+.hud-root[data-toque] .jogo-check-rotulo {
+  min-height: 44px;
+}
+
+/* Deslizador: a trilha continua fina (e so um desenho), o que cresce e a area
+   que recebe o dedo. Sem isto o ajuste de escala da HUD e uma faixa de 16px —
+   o unico controle da tela que o jogador precisa ARRASTAR, e o mais dificil de
+   pegar. */
+.hud-root[data-toque] .jogo-range {
+  min-height: 44px;
+}
+
+/* O switch nao pode crescer — ele e um desenho, nao uma caixa de texto. Em vez
+   disso o ALVO cresce por baixo, com um pseudo-elemento invisivel: mesma
+   aparencia, area de toque de 44px. */
+.hud-root[data-toque] .jogo-switch::after {
+  content: '';
+  position: absolute;
+  inset: -11px -8px;
+}
