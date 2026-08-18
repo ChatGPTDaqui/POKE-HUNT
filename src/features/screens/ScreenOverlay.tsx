@@ -9,10 +9,9 @@
 //    mesmo, e a posicao se mantem sozinha.
 //  - O padrao de "DOM incremental" pra nao quebrar clique: o reconciler do
 //    React ja resolve isso.
-import { useUiStore, useDeviceMode, type ScreenName } from '@/stores/uiStore'
+import { useUiStore, type ScreenName } from '@/stores/uiStore'
 import { useGameStateStore, MAX_TEAM_SIZE } from '@/stores/gameStateStore'
-import { GameWindow } from '@/components/game/GameWindow'
-import { Sheet } from '@/components/game/Sheet'
+import { Painel } from '@/components/game/Painel'
 import { TeamMenu } from '@/features/team/TeamMenu'
 import { BagMenu } from '@/features/bag/BagMenu'
 import { ShopMenu } from '@/features/shop/ShopMenu'
@@ -81,7 +80,6 @@ export function ScreenOverlay() {
   const currentScreen = useUiStore((s) => s.currentScreen)
   const closeScreen = useUiStore((s) => s.closeScreen)
   const teamSize = useGameStateStore((s) => s.team.length)
-  const { usaSheet } = useDeviceMode()
 
   if (!currentScreen) return null
   const Panel = PANELS[currentScreen]
@@ -92,28 +90,19 @@ export function ScreenOverlay() {
     ? `Equipe (${teamSize}/${MAX_TEAM_SIZE})`
     : TITLES[currentScreen]
 
-  // No celular o painel e um bottom sheet; no amplo, a janela arrastavel de
-  // sempre. A LARGURA em `em` so existe do lado da janela — num sheet ela nao
-  // significa nada (ele ocupa a largura da tela), e era isso que fazia a Loja
-  // (52em) nascer colada nas duas bordas.
-  if (usaSheet) {
-    return (
-      <Sheet winKey="panel" zIndex={31} onClose={closeScreen} title={title}>
-        <Panel />
-      </Sheet>
-    )
-  }
-
   return (
-    <GameWindow
+    // A largura em `em` so existe do lado da JANELA: num sheet ela nao
+    // significa nada (ele ocupa a tela), e era ela que fazia a Loja (52em)
+    // nascer colada nas duas bordas do celular.
+    <Painel
       winKey="panel"
       widthEm={WIDTHS[currentScreen] ?? DEFAULT_WIDTH}
       zIndex={31}
-      backdrop={{ zIndex: 30 }}
+      backdropZIndex={30}
       onClose={closeScreen}
       title={title}
     >
       <Panel />
-    </GameWindow>
+    </Painel>
   )
 }

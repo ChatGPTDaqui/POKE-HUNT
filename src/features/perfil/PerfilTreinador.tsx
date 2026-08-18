@@ -20,7 +20,7 @@ import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
 import { rarityOf } from '@/data/rarity'
 import { carregarCapturasRecentes } from '@/data/remote/mochilaRemota'
-import { GameWindow } from '@/components/game/GameWindow'
+import { Painel } from '@/components/game/Painel'
 import { Carregando, GameButton, GameCard, Meter, SectionLabel, SegmentedTabs } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 
@@ -94,11 +94,11 @@ export function PerfilTreinador() {
   }
 
   return (
-    <GameWindow
+    <Painel
       winKey="perfil"
       widthEm={32}
       zIndex={46}
-      backdrop={{ zIndex: 45 }}
+      backdropZIndex={45}
       onClose={() => setAberto(false)}
       title="Perfil do Treinador"
       header={
@@ -260,7 +260,7 @@ export function PerfilTreinador() {
           </GameCard>
         </div>
       )}
-    </GameWindow>
+    </Painel>
   )
 }
 

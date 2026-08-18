@@ -27,6 +27,12 @@ export interface GameWindowProps {
    * de proposito nao escurece nada.
    */
   backdrop?: { zIndex: number }
+  /**
+   * Fecha ao tocar fora. Por padrao acompanha o backdrop, mas os dois nao sao a
+   * mesma coisa: o painel Auto nao escurece nada e MESMO ASSIM sempre fechou
+   * ao clicar fora.
+   */
+  fecharAoTocarFora?: boolean
   onClose: () => void
   title?: ReactNode
   /** Cabecalho custom (perfil do POKE usa a arte como alca de arraste). */
@@ -41,7 +47,7 @@ export interface GameWindowProps {
 }
 
 export function GameWindow({
-  winKey, widthEm, defaultTop = '7.5vh', zIndex, backdrop,
+  winKey, widthEm, defaultTop = '7.5vh', zIndex, backdrop, fecharAoTocarFora,
   onClose, title, header, subheader, footer, children, className, bodyClassName,
 }: GameWindowProps) {
   const { pos, onPointerDown } = useWindowDrag(winKey)
@@ -70,9 +76,9 @@ export function GameWindow({
   // `[data-keep-open]` marca quem NAO deve disparar o fechamento: os botoes de
   // menu ja alternam a tela por conta propria, e fechar aqui antes do onClick
   // deles transformaria "clicar de novo pra fechar" em "fecha e reabre".
-  const temBackdrop = !!backdrop
+  const fechaFora = fecharAoTocarFora ?? !!backdrop
   useEffect(() => {
-    if (!temBackdrop) return
+    if (!fechaFora) return
     function onDown(event: PointerEvent) {
       const alvo = event.target as HTMLElement | null
       if (!alvo) return
@@ -82,12 +88,12 @@ export function GameWindow({
     }
     document.addEventListener('pointerdown', onDown)
     return () => document.removeEventListener('pointerdown', onDown)
-    // `temBackdrop` (booleano) em vez de `backdrop` (objeto): os chamadores
-    // passam `backdrop={{ zIndex: 30 }}` inline, objeto novo a cada render —
-    // o efeito nunca le `backdrop.zIndex` (isso e lido direto no JSX abaixo),
-    // so a existencia. Com o objeto na dependencia, o listener remontava a
-    // cada render do pai, nao so quando backdrop aparecia/sumia de verdade.
-  }, [temBackdrop, winKey, onClose])
+    // Booleano na dependencia, e nao o objeto `backdrop`: os chamadores passam
+    // `backdrop={{ zIndex: 30 }}` inline, objeto novo a cada render — o efeito
+    // nunca le `backdrop.zIndex` (isso e lido direto no JSX abaixo), so a
+    // existencia. Com o objeto na dependencia, o listener remontava a cada
+    // render do pai, nao so quando o backdrop aparecia ou sumia de verdade.
+  }, [fechaFora, winKey, onClose])
 
   // Enquanto nao foi arrastada a janela e centrada por calculo (e nao por
   // `translateX(-50%)`) porque o `transform` briga com o `resize: both`: o

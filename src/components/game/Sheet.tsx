@@ -61,6 +61,12 @@ export interface SheetProps {
   winKey: string
   onClose: () => void
   title?: ReactNode
+  /**
+   * Cabecalho custom no lugar do titulo (a arte do POKE, o cartao do
+   * treinador). O botao de fechar passa a flutuar por cima dele: o conteudo
+   * ocupa a largura toda e reservar uma coluna pro X desalinharia o desenho.
+   */
+  header?: ReactNode
   /** Faixa fixa entre o cabecalho e o corpo rolavel (abas). */
   subheader?: ReactNode
   footer?: ReactNode
@@ -73,7 +79,7 @@ export interface SheetProps {
 }
 
 export function Sheet({
-  winKey, onClose, title, subheader, footer,
+  winKey, onClose, title, header, subheader, footer,
   snap = 'cheia', zIndex = 31, backdrop = true, children, bodyClassName,
 }: SheetProps) {
   const footerHeight = useUiStore((s) => s.footerHeight)
@@ -169,12 +175,23 @@ export function Sheet({
           <span className="h-[.28em] w-[2.6em] rounded-full bg-n600" />
         </div>
 
-        <div className="flex shrink-0 items-center justify-between gap-[.5em] px-[.9em] pt-[.15em] pb-[.5em]">
-          <span className="truncate text-[1.02em] font-medium tracking-[-.01em]">{title}</span>
-          <GameIconButton variant="ghost" onClick={onClose} aria-label="Fechar" className="alvo-toque">
-            <X />
-          </GameIconButton>
-        </div>
+        {header ? (
+          <div className="relative shrink-0">
+            {header}
+            <div className="absolute top-[.35em] right-[.5em]">
+              <GameIconButton variant="ghost" onClick={onClose} aria-label="Fechar" className="alvo-toque">
+                <X />
+              </GameIconButton>
+            </div>
+          </div>
+        ) : (
+          <div className="flex shrink-0 items-center justify-between gap-[.5em] px-[.9em] pt-[.15em] pb-[.5em]">
+            <span className="truncate text-[1.02em] font-medium tracking-[-.01em]">{title}</span>
+            <GameIconButton variant="ghost" onClick={onClose} aria-label="Fechar" className="alvo-toque">
+              <X />
+            </GameIconButton>
+          </div>
+        )}
 
         {subheader && <div className="shrink-0">{subheader}</div>}
 

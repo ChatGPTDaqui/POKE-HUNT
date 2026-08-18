@@ -193,23 +193,21 @@ export function ChatLog() {
   const open = useUiStore((s) => s.chatOpen)
   const setOpen = useUiStore((s) => s.setChatOpen)
   const footerHeight = useUiStore((s) => s.footerHeight)
-  const { narrow, colStack, chatNarrow } = useBreakpoints()
+  const { narrow, chatNarrow } = useBreakpoints()
   const { pos, onPointerDown } = useWindowDrag('chat')
 
   // O chat ganhou uma aba a mais e um campo de digitacao: nas larguras onde ele
   // ja era estreito, 4 abas em `13em` quebravam em duas fileiras e comiam a
   // area de leitura.
   const width = narrow ? '16.5em' : chatNarrow ? '15em' : '21em'
-  // Abaixo de 780px o menu do rodape se aproxima do chat (canto inferior
-  // esquerdo) e cresce em fileiras. Em vez de um offset `em` chutado (que ja
-  // deixou a barra de golpes por baixo do chat em 390px, mesmo depois de
-  // ajustada a mao duas vezes), o chat sobe pela altura REAL do rodape, medida
-  // no HudLayer. Acima de 780px o rodape e uma fileira central estreita, longe
-  // do chat, entao ele fica colado embaixo. O fallback so vale ate a primeira
-  // medida chegar.
-  const bottom = colStack
-    ? footerHeight ? `calc(${footerHeight}px + .8em)` : (narrow ? '13.5em' : '10.6em')
-    : '.8em'
+  // SEMPRE acima do rodape medido, e nao so em tela estreita. A doca da HUD
+  // nova ocupa ate 52em centralizados: em 1440px isso vai de x=202 a x=1237, e
+  // o chat ancorado no canto inferior esquerdo cobria os slots Equipe e
+  // Mochila — verificado na tela, com o rotulo "Mochila" aparecendo cortado
+  // atras da janela. A regra antiga ("acima de 780px o rodape e uma fileira
+  // central estreita, longe do chat") descrevia o menu de circulos, que nao
+  // existe mais. O fallback so vale ate a primeira medida chegar.
+  const bottom = footerHeight ? `calc(${footerHeight}px + .8em)` : (narrow ? '13.5em' : '10.6em')
   const style: CSSProperties = pos
     ? { left: pos.x, top: pos.y, width }
     : { left: '.8em', bottom, width }
