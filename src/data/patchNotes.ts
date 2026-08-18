@@ -13,6 +13,18 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '7.5',
+    date: '2026-08-18',
+    title: '22 golpes ganharam efeito visual PROPRIO, em vez de dividir o mesmo desenho do tipo elemental',
+    highlights: [
+      'ATE AGORA TODO GOLPE DE UM TIPO DESENHAVA A MESMA COISA. Metal Claw, Iron Head e Bullet Punch mostravam o mesmo efeito de aco; Scratch e Fury Swipes, o mesmo estouro de normal. Agora 22 golpes tem animacao propria: Scratch e Fury Swipes (garras), Comet Punch e Shadow Punch (socos), X-Scissor, Stomp, Dig, Earthquake, Whirlpool, Whirlwind, Petal Dance, Fire Fang, Thunder Fang, Ice Fang, Flamethrower, Fire Spin, Mud Shot, Charm, Taunt, Dragon Dance, Spider Web e Bullet Punch.',
+      'CINCO DELES APONTAM PRA ONDE VOCE ESTA MIRANDO. Scratch, Mud Shot, Flamethrower, Charm e Bullet Punch tem uma direcao propria no desenho e giram pra sair na linha do golpe. Os outros 17 nao giram de proposito — sao anel, coluna ou estouro, e girar so os deitaria de lado.',
+      'O JOGO NAO FICOU MAIS PESADO PRA CARREGAR. A arte nova NAO entra no carregamento inicial: ela chega quando o golpe e usado pela primeira vez. Voce ve os golpes que o SEU time sabe, meia duzia, e nao faria sentido baixar os outros 470 antes de entrar no jogo. Na primeira vez que cada golpe aparece, o efeito antigo cobre a fracao de segundo ate a arte chegar.',
+      'UM GOLPE FOI DESCARTADO DEPOIS DE PRONTO: Aqua Jet. A arte disponivel e uma coluna estreitissima que, no tamanho de jogo, virava um fio de 6 pixels de largura — invisivel na pratica. Ele continua usando o efeito de agua padrao, que da pra ver.',
+      'QUATRO GOLPES PEDIDOS NAO EXISTEM NESTE JOGO: Rock Smash, Cut, Drain Punch e Energy Ball. Sao golpes de MT/MO, e o catalogo daqui so tem o que se aprende SUBINDO DE NIVEL desde que o Recordador de Golpes saiu (v6.8).',
+    ],
+  },
+  {
     version: '7.4',
     date: '2026-08-18',
     title: 'Efeito de golpe no tamanho certo, apontando pro inimigo, e duas artes que estavam simplesmente erradas',
