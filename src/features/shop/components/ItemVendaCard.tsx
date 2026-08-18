@@ -36,7 +36,7 @@ export function ItemVendaCard({
             {item.name} <span className="text-n400">x{owned}</span>
           </div>
           <div className="text-[.78em] text-n500">
-            Venda: <span className="text-gold">{fmt.format(item.sellPrice)} ouro</span>
+            unidade <span className="text-gold">{fmt.format(item.sellPrice)}</span>
           </div>
         </div>
         <GameIconButton
@@ -50,27 +50,38 @@ export function ItemVendaCard({
         </GameIconButton>
       </div>
       {!locked && (
-        <div className="flex flex-wrap items-center gap-[.45em]">
-          <QtyInput value={qty} max={owned} onChange={onQtyChange} />
-          <AtalhosDeTransacao max={owned} verbo="Vender" ocupado={ocupado} onExecutar={onExecutarAtalho} />
-          <span className="w-full text-[.78em] text-n400 sm:ml-auto sm:w-auto">
-            Recebe: <b className="text-gold">{fmt.format(item.sellPrice * qty)}</b>
-          </span>
-          <GameButton disabled={ocupado} onClick={onVender}>
-            Vender
-          </GameButton>
-          {/* "Vender tudo" POR ITEM (pedido explicito). O "Vender Tudo"
-              global do topo esvazia a mochila inteira — sao coisas
-              diferentes e a confusao entre elas custa caro. */}
-          <GameButton
-            variant="accent"
-            disabled={ocupado}
-            title={`Vender as ${owned} unidades por ${fmt.format(item.sellPrice * owned)} de ouro`}
-            onClick={onVenderTudo}
-          >
-            Vender tudo ({fmt.format(item.sellPrice * owned)})
-          </GameButton>
-        </div>
+        <>
+          <div className="flex items-center gap-[.35em]">
+            <QtyInput value={qty} max={owned} onChange={onQtyChange} />
+            <AtalhosDeTransacao max={owned} verbo="Vender" ocupado={ocupado} onExecutar={onExecutarAtalho} />
+          </div>
+          {/* Quanto entra no bolso vai DENTRO do rotulo, mesmo motivo do card de
+              compra: com os alvos em 44px, total e botoes em linhas separadas
+              faziam cada item ocupar meia tela de celular. */}
+          <div className="flex gap-[.35em]">
+            <GameButton
+              block
+              variant="primary"
+              disabled={ocupado}
+              onClick={onVender}
+              className="justify-center"
+            >
+              Vender {fmt.format(qty)} · {fmt.format(item.sellPrice * qty)}
+            </GameButton>
+            {/* "Vender tudo" POR ITEM (pedido explicito). O "Vender Tudo"
+                global do topo esvazia a mochila inteira — sao coisas
+                diferentes e a confusao entre elas custa caro. */}
+            <GameButton
+              variant="accent"
+              disabled={ocupado}
+              title={`Vender as ${owned} unidades por ${fmt.format(item.sellPrice * owned)} de ouro`}
+              onClick={onVenderTudo}
+              className="justify-center whitespace-nowrap"
+            >
+              Tudo · {fmt.format(item.sellPrice * owned)}
+            </GameButton>
+          </div>
+        </>
       )}
     </GameCard>
   )

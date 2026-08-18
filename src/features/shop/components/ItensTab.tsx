@@ -3,10 +3,11 @@ import { pedirAcao, pedirAcaoComLocal } from '@/data/remote/autoridade'
 import { SHOP_STOCK, getItem, ITEMS } from '@/data/items'
 import { buyItem, sellItem, sellAllItems } from '@/engine/systems/economySystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
-import { useBreakpoints } from '@/stores/uiStore'
+import { useDeviceMode } from '@/stores/uiStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
-import { GameButton, SectionLabel } from '@/components/game/controls'
+import { GameButton, SectionLabel, SegmentedTabs } from '@/components/game/controls'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
+import { cn } from '@/lib/utils'
 import { fmt, toast } from '../utils'
 import { ItemCompraCard } from './ItemCompraCard'
 import { ItemVendaCard } from './ItemVendaCard'
@@ -16,11 +17,17 @@ export function ItensTab() {
   const items = useGameStateStore((s) => s.items)
   const lockedItems = useGameStateStore((s) => s.lockedItems)
   const toggleItemLock = useGameStateStore((s) => s.toggleItemLock)
-  const { colStack } = useBreakpoints()
+  const { compacto } = useDeviceMode()
   const acao = useAcaoPendente()
 
   const [buyQty, setBuyQty] = useState<Record<string, number>>({})
   const [sellQty, setSellQty] = useState<Record<string, number>>({})
+  // No celular as duas colunas viram duas ABAS, nao duas secoes empilhadas:
+  // empilhadas, chegar em "vender" exigia rolar por dez cards de compra — e
+  // vender e justamente o que o jogador faz depois de uma hunt cheia.
+  const [lado, setLado] = useState<'comprar' | 'vender'>('comprar')
+  const mostrarCompra = !compacto || lado === 'comprar'
+  const mostrarVenda = !compacto || lado === 'vender'
 
   // Item TRAVADO vai pro fim (mesma regra da Mochila): ele nao pode ser vendido,
   // entao ficar no topo da lista de VENDA e ruido puro.
@@ -64,9 +71,18 @@ export function ItensTab() {
     // janela quando ela e redimensionada pra estreita. Sem isso o botao ficava
     // cortado e inalcancavel; a rolagem horizontal e local a coluna, entao a
     // janela inteira nunca rola de lado.
-    <div className={colStack ? 'flex flex-col gap-[.65em]' : 'grid grid-cols-2 gap-[.65em]'}>
-      <div className="flex min-w-0 flex-col gap-[.5em] overflow-x-auto">
-        <SectionLabel>COMPRAR</SectionLabel>
+    <div className="flex flex-col gap-[.65em]">
+      {compacto && (
+        <SegmentedTabs
+          value={lado}
+          onChange={setLado}
+          options={[{ value: 'comprar', label: 'Comprar' }, { value: 'vender', label: 'Vender' }]}
+        />
+      )}
+
+      <div className={compacto ? 'flex flex-col gap-[.65em]' : 'grid grid-cols-2 gap-[.65em]'}>
+      <div className={cn('flex min-w-0 flex-col gap-[.5em] overflow-x-auto', !mostrarCompra && 'hidden')}>
+        {!compacto && <SectionLabel>COMPRAR</SectionLabel>}
         {SHOP_STOCK.map((stock) => {
           const item = getItem(stock.itemId)
           if (!item || item.kind === 'stone') return null
@@ -90,7 +106,7 @@ export function ItensTab() {
         })}
       </div>
 
-      <div className="flex min-w-0 flex-col gap-[.5em] overflow-x-auto">
+      <div className={cn('flex min-w-0 flex-col gap-[.5em] overflow-x-auto', !mostrarVenda && 'hidden')}>
         <div className="flex items-center justify-between">
           <SectionLabel>VENDER ITENS</SectionLabel>
           <GameButton
@@ -142,6 +158,7 @@ export function ItensTab() {
         })}
 
         <Paginacao estado={paginadoVenda} rotulo="itens" />
+      </div>
       </div>
     </div>
   )

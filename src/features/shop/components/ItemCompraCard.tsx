@@ -20,11 +20,13 @@ export function ItemCompraCard({
   const maxAffordable = Math.max(1, Math.floor(gold / item.buyPrice))
   const custo = item.buyPrice * qty
 
+  const semOuro = custo > gold
+
   return (
-    // Duas linhas fixas (info / controles) em vez de um flex-wrap unico com
-    // 6 elementos: a linha de info (icone+nome) nao competia mais por espaco
-    // com qty/atalhos/total/botao, entao a quebra fica previsivel em vez de
-    // variar card a card conforme a largura do nome do item.
+    // Tres faixas fixas: identidade / quantidade / confirmar. A versao anterior
+    // punha total e botao no MESMO flex-wrap dos atalhos, e com os alvos de
+    // toque em 44px isso virava uma pilha de cinco linhas por item — um card
+    // de ~400px de altura no celular, quatro itens por tela inteira.
     <GameCard className="flex flex-col gap-[.4em] p-[.55em]">
       <div className="flex items-center gap-[.45em]">
         <ItemTooltip item={item}>
@@ -33,13 +35,13 @@ export function ItemCompraCard({
           </span>
         </ItemTooltip>
         <div className="min-w-[6em] flex-1">
-          <div className="font-medium">
-            {item.name} <span className="text-[.78em] text-n500">(tem: {owned})</span>
-          </div>
-          <div className="text-[.78em] text-gold">{fmt.format(item.buyPrice)} ouro</div>
+          <div className="font-medium">{item.name}</div>
+          <div className="text-[.78em] text-n500">tem {fmt.format(owned)}</div>
         </div>
+        <span className="shrink-0 text-[.82em] text-gold">{fmt.format(item.buyPrice)}</span>
       </div>
-      <div className="flex flex-wrap items-center gap-[.45em]">
+
+      <div className="flex items-center gap-[.35em]">
         <QtyInput value={qty} max={maxAffordable} onChange={onQtyChange} />
         <AtalhosDeTransacao
           max={Math.floor(gold / item.buyPrice)}
@@ -47,17 +49,22 @@ export function ItemCompraCard({
           ocupado={ocupado}
           onExecutar={onExecutarAtalho}
         />
-        {/* Montante final ANTES de confirmar (pedido explicito). Fica em
-            linha propria e nao so dentro do botao: com x1000 selecionado o
-            numero passa de 6 digitos e o rotulo do botao quebrava. */}
-        <span className="w-full text-[.78em] text-n400 sm:ml-auto sm:w-auto">
-          Total: <b className={custo > gold ? 'text-bad' : 'text-gold'}>{fmt.format(custo)}</b>
-          {custo > gold && <span className="text-bad"> · ouro insuficiente</span>}
-        </span>
-        <GameButton carregando={isPending} disabled={ocupado || custo > gold} onClick={onComprar}>
-          Comprar
-        </GameButton>
       </div>
+
+      {/* O total entrou DENTRO do rotulo. Ele estava numa linha propria porque
+          "com x1000 o numero passa de 6 digitos e o rotulo quebrava" — com o
+          botao ocupando a largura toda isso deixou de acontecer, e o jogador
+          le o quanto vai pagar no mesmo lugar em que confirma. */}
+      <GameButton
+        block
+        variant={semOuro ? 'secondary' : 'primary'}
+        carregando={isPending}
+        disabled={ocupado || semOuro}
+        onClick={onComprar}
+        className="justify-center"
+      >
+        {semOuro ? 'Ouro insuficiente' : `Comprar ${fmt.format(qty)} · ${fmt.format(custo)}`}
+      </GameButton>
     </GameCard>
   )
 }
