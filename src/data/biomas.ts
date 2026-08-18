@@ -56,11 +56,31 @@ export const FAIXAS_INICIAIS: string[] = ['faixa1', 'faixa2']
 export const GRUPOS_DO_LANCE: string[] = ['faixa3', 'nightmare']
 
 // Grupos que existiam antes das faixas e que nenhuma hunt usa mais. Save
-// antigo (localStorage) e linha antiga de `players.unlocked_continents` os
-// carregam; sao traduzidos na carga, nunca propagados — kanto vira o que o
-// Lance libera hoje, os outros dois somem. Nao basta ignorar: manter
-// nightmare daria de graca o conteudo que acabou de virar gate do Lance.
-export const GRUPOS_LEGADOS: ReadonlySet<string> = new Set([johto, kanto, nightmare])
+// antigo os carrega; sao traduzidos na carga, nunca propagados — 'kanto' vira
+// o que o Lance libera hoje, 'johto' some (as faixas iniciais entram sempre).
+//
+// 'nightmare' SAIU DESTA LISTA em 2026-08-18, e a remocao E o conserto de um
+// bug de progresso apagado. Ele estava aqui porque no esquema antigo nascia
+// aberto pra todo mundo, e mante-lo daria de graca o conteudo que virou gate
+// do Lance. Só que 'nightmare' TAMBEM e um dos dois grupos que o Lance
+// concede hoje (GRUPOS_DO_LANCE logo acima) — e o filtro nao sabe distinguir
+// "veio de graca do esquema velho" de "foi conquistado ontem". Resultado: o
+// jogador derrotava o Lance, o Modo Pesadelo abria, o servidor gravava
+// direitinho em `players.unlocked_continents`... e o merge da carga seguinte
+// jogava fora, toda vez. Na tela: "Bloqueado — Derrote o Campeao Lance" em
+// todas as 11 hunts, com a conquista registrada no banco e no Hall da Fama.
+//
+// Reproduzido ao vivo antes do fix, e o bug era INTERMITENTE de um jeito que
+// atrasa o diagnostico: quando havia catch-up offline logo depois da carga, a
+// resposta do servidor sobrescrevia a store com a lista correta e o Pesadelo
+// "voltava" sozinho.
+//
+// Tirar daqui e seguro porque o esquema antigo ja foi limpo NO BANCO pela
+// migration 20260814140000: ela reescreveu `unlocked_continents` de TODA linha
+// (faixas iniciais + os dois grupos do Lance so pra quem tinha 'kanto'),
+// entao nenhuma linha carrega mais o 'nightmare' gratuito que este filtro
+// existia pra barrar. O unico 'nightmare' que chega aqui hoje foi conquistado.
+export const GRUPOS_LEGADOS: ReadonlySet<string> = new Set(['johto', 'kanto'])
 
 // ---------------------------------------------------------------------------
 // Loot por sub-bioma
