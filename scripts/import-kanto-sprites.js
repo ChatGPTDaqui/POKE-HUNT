@@ -20,7 +20,7 @@ const { readWorkbook } = require('./xlsx-reader.js');
 const { decodePng } = require('./lib/png.js');
 
 const ROOT = path.join(__dirname, '..');
-const XLSX_PATH = path.join(ROOT, 'Planilha mestra', 'dados_do_jogo.xlsx');
+const XLSX_PATH = path.join(ROOT, 'master-spreadsheet', 'dados_do_jogo.xlsx');
 const COLLAB_ROOT = path.join(ROOT, 'assets', 'SpriteCollab-master (1)', 'SpriteCollab-master');
 const SPRITE_ROOT = path.join(COLLAB_ROOT, 'sprite');
 const PORTRAIT_ROOT = path.join(COLLAB_ROOT, 'portrait');
