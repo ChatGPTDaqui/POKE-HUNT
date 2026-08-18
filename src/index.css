@@ -211,13 +211,14 @@
    sem quebrar o encaixe. E font-size (estilo puro), nao layout — por isso media
    query, e nao o mesmo caminho JS dos breakpoints de posicionamento. */
 @media (max-width: 640px) {
-  /* Mesmos +3px (13->16, 9->12, 16->19). CONSEQUENCIA REAL do aumento global: o
-     encaixe de 360px foi calibrado no piso antigo (13px), entao no piso novo o
-     multiplicador manual passou a ser o unico ajuste que sobra — por isso o teto
-     dele aqui caiu de 1.15 pra 1, e o minimo global desceu pra 0.7 (uiStore),
-     dando ao jogador de celular como voltar ao tamanho anterior se quiser. */
+  /* O teto do multiplicador manual voltou de 1 pra 1.2 com a HUD nova. Ele foi
+     travado em 1 porque o layout antigo (cinco ancoras negociando a mesma
+     faixa) ja colidia no tamanho normal — aumentar era garantir sobreposicao.
+     O trilho e a doca nao disputam espaco com ninguem: eles ocupam a largura
+     toda e o que cresce e o texto dentro. 1.2 e o ponto em que a barra de
+     navegacao ainda cabe em cinco slots numa tela de 360px. */
   .hud-root {
-    font-size: calc(clamp(16px, 0.55vw + 12px, 19px) * min(var(--hud-scale, 1), 1));
+    font-size: calc(clamp(16px, 0.55vw + 12px, 19px) * min(var(--hud-scale, 1), 1.2));
   }
 }
 

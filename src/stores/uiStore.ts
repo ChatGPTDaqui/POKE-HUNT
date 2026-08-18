@@ -39,6 +39,7 @@ function pontoGrosso(): boolean {
 }
 
 const HUD_SCALE_KEY = 'novo-poke-idle:hud-scale'
+const VIDRO_KEY = 'novo-poke-idle:vidro-fosco'
 // 0.7 (era 0.8) porque a fonte base da HUD subiu 3px nesta leva: sem descer o
 // minimo, quem jogava confortavel no tamanho antigo perdeu a opcao de voltar.
 export const HUD_SCALE_MIN = 0.7
@@ -59,6 +60,20 @@ function readHudScale(): number {
     // Safari em navegacao privada lanca no acesso ao localStorage. Preferencia
     // de escala nao vale derrubar o jogo.
     return 1
+  }
+}
+
+// Preferencia de VIDRO. `backdrop-filter` custa uma recomposicao por frame por
+// camada sobre um canvas a 60fps, e a conta e paga no aparelho do jogador — nao
+// na maquina onde isto foi escrito. Desligar troca o vidro por superficie
+// quase-opaca, que e a mesma leitura sem o custo.
+function lerVidroFosco(): boolean {
+  try {
+    return localStorage.getItem(VIDRO_KEY) === '1'
+  } catch {
+    // Safari privado lanca no acesso ao localStorage; preferencia de video nao
+    // vale derrubar o jogo.
+    return false
   }
 }
 
@@ -124,6 +139,10 @@ interface UiState {
 
   hudScale: number
   setHudScale: (scale: number) => void
+
+  /** Desliga o `backdrop-filter` de toda superficie de vidro. */
+  vidroFosco: boolean
+  setVidroFosco: (fosco: boolean) => void
 
   // Filtros da tela de Hunts. Ficam aqui (e nao em useState local do
   // HuntMenu) por um motivo unico e concreto: a Pokedex precisa escrever
@@ -229,6 +248,16 @@ export const useUiStore = create<UiState>((set, get) => ({
       // idem readHudScale: preferencia perdida e aceitavel, crash nao.
     }
     set({ hudScale })
+  },
+
+  vidroFosco: lerVidroFosco(),
+  setVidroFosco: (vidroFosco) => {
+    try {
+      localStorage.setItem(VIDRO_KEY, vidroFosco ? '1' : '0')
+    } catch {
+      // idem: preferencia perdida e aceitavel, crash nao.
+    }
+    set({ vidroFosco })
   },
 
   huntContinent: 'faixa1',

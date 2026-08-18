@@ -55,7 +55,12 @@ function fmtTaxa(valor: number): string {
 }
 
 export function StatusRail() {
-  const { compacto } = useDeviceMode()
+  // 'deitado' conta como LARGO aqui, nao como celular: a tela tem 844px de
+  // largura sobrando e esconder local/taxas atras de um toque so criaria um
+  // toque a mais. O que falta deitado e altura, e nada do que entra na faixa
+  // do meio aumenta a altura do trilho.
+  const mode = useDeviceMode().mode
+  const estreito = mode === 'compacto'
   const [gavetaAberta, setGavetaAberta] = useState(false)
 
   return (
@@ -67,9 +72,13 @@ export function StatusRail() {
       >
         <FacePoke />
         <VitaisPoke />
-        {!compacto && <ResumoLocal inline />}
-        {!compacto && <TaxasInline />}
-        <Carteira />
+        {!estreito && <ResumoLocal />}
+        {/* Taxas so no amplo. Deitado a largura parece sobrar e nao sobra: com
+            as taxas na faixa do meio, o nome do POKE truncava pra "Ent…" com a
+            barra de HP em 180px enquanto o ouro exibia 13 digitos. O dado menos
+            urgente e o que sai. */}
+        {mode === 'amplo' && <TaxasInline />}
+        <Carteira abreviada={mode !== 'amplo'} />
         <BotaoDetalhes aberta={gavetaAberta} onToggle={() => setGavetaAberta((v) => !v)} />
         <AvatarTreinador />
       </div>
@@ -130,7 +139,10 @@ function VitaisPoke() {
   const expPct = Math.max(0, Math.min(100, (progress.into / progress.needed) * 100))
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-[.18em]">
+    // `min-w-[9em]`: o nome do POKE e a barra de HP sao o conteudo mais
+    // importante do trilho e eram os primeiros a encolher, porque todo vizinho
+    // e `shrink-0`. Com o piso, quem cede espaco e a faixa do meio.
+    <div className="flex min-w-[9em] flex-1 flex-col gap-[.18em]">
       <div className="flex min-w-0 items-center gap-[.35em] text-[.82em] leading-none">
         <span className={cn('truncate font-medium', poke.isShiny && 'text-shiny')}>
           {poke.isShiny && '✨'}{species.name}
@@ -163,16 +175,15 @@ function Barra({ pct, altura, cor }: { pct: number; altura: string; cor: string 
 }
 
 // --- carteira e treinador ----------------------------------------------------
-function Carteira() {
+function Carteira({ abreviada }: { abreviada: boolean }) {
   const gold = useGameStateStore((s) => s.wallet.gold)
   const diamonds = useGameStateStore((s) => s.wallet.diamonds)
-  const { compacto } = useDeviceMode()
-  const fmt = compacto ? fmtCurto : fmtCheio.format.bind(fmtCheio)
+  const fmt = abreviada ? fmtCurto : fmtCheio.format.bind(fmtCheio)
   return (
     <div
       className={cn(
         'shrink-0 text-[.72em] leading-[1.15] tabular-nums',
-        compacto ? 'flex flex-col items-end' : 'flex items-center gap-[.6em]',
+        abreviada ? 'flex flex-col items-end' : 'flex items-center gap-[.6em]',
       )}
       title={`${fmtCheio.format(gold)} ouro · ${fmtCheio.format(diamonds)} diamantes`}
     >
@@ -189,7 +200,7 @@ function Carteira() {
 function AvatarTreinador() {
   const trainer = useGameStateStore((s) => s.trainer)
   const setPerfilOpen = useUiStore((s) => s.setPerfilOpen)
-  const { compacto } = useDeviceMode()
+  const compacto = useDeviceMode().mode === 'compacto'
   const progress = trainerExpProgress(trainer)
   const expPct = Math.max(0, Math.min(100, (progress.into / progress.needed) * 100))
 
@@ -247,12 +258,12 @@ function useTaxas() {
   return getPerfStats({ perfStats } as Parameters<typeof getPerfStats>[0])
 }
 
-function ResumoLocal({ inline }: { inline?: boolean }) {
+function ResumoLocal() {
   const pokedexKills = useGameStateStore((s) => s.pokedexKills)
   const huntName = useWorldStore((s) => s.mapDef?.name ?? 'Hospital')
   const registradas = Object.keys(pokedexKills).length
   return (
-    <div className={cn('min-w-0 text-[.72em] text-n400', inline ? 'shrink-0 text-right' : 'flex justify-between')}>
+    <div className="shrink-0 text-right text-[.72em] text-n400">
       <div className="truncate text-n300">{huntName}</div>
       <div>Pokedex <b className="font-medium text-n200">{registradas}/{TOTAL_ESPECIES}</b></div>
     </div>

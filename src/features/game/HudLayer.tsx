@@ -40,6 +40,7 @@ import { ChatLog } from '@/components/toasts/ChatLog'
 import { ChatMobile } from '@/components/toasts/ChatMobile'
 import { AutoWindow } from '@/components/auto/AutoFloatingPanel'
 import { useDeviceMode, useUiStore } from '@/stores/uiStore'
+import { cn } from '@/lib/utils'
 
 // Acima disto o chat volta a ser janela flutuante no canto: e a largura em que
 // ela cabe ao lado da doca sem encostar nela. Abaixo, ticker de uma linha —
@@ -84,15 +85,25 @@ export function HudLayer() {
         ref={footerRef}
         className="absolute inset-x-[.5em] bottom-[.5em] z-20 flex flex-col items-center gap-[.35em]"
       >
-        <div className="flex w-full max-w-[52em] flex-col items-stretch gap-[.35em]">
+        {/* Deitado a doca NAO se estica: numa faixa de 844px os cinco slots
+            ficariam a 200px um do outro e o polegar teria que atravessar a tela
+            pra trocar de aba. Cluster central, mais perto do dedo e mais perto
+            do desenho compacto. */}
+        <div
+          className={cn(
+            'flex w-full flex-col items-stretch gap-[.35em]',
+            mode === 'deitado' ? 'max-w-[38em]' : 'max-w-[52em]',
+          )}
+        >
           {!chatFlutuante && <ChatMobile />}
           <ActionDock />
         </div>
       </div>
 
-      {/* Irmaos da doca, nao filhos: um `absolute` resolve contra o ancestral
-          posicionado mais proximo, e dentro do rodape eles herdariam a caixa
-          dele em vez da tela. */}
+      {/* Camadas que abrem por cima de tudo. O sheet se desenha por portal na
+          camada da HUD (ver Sheet), entao o lugar dele na arvore aqui e so
+          organizacao — a janela do Auto e que precisa mesmo ficar fora da doca,
+          porque ela SIM posiciona contra o ancestral. */}
       <SheetMais />
       <AutoWindow />
       {chatFlutuante && <ChatLog />}

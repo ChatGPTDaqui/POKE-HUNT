@@ -12,10 +12,18 @@
 //    obriga a fechar antes de trocar de tela, ou seja, dois toques pra fazer o
 //    que a barra faz em um. Mesma razao do backdrop nao capturar clique.
 //
-// 2. `overscroll-behavior: contain` no corpo. Sem isso, chegar ao fim da lista
+// 2. Ele e desenhado por PORTAL na camada da HUD (`#camada-hud`), nunca onde
+//    foi escrito. Um `absolute` resolve contra o ancestral posicionado mais
+//    proximo: um sheet declarado dentro da doca (que e absoluta e tem a
+//    largura do conteudo) herdaria aquela caixa, e o "inset-x-0" dele viraria
+//    a largura da doca em vez da tela. Com portal, quem abre um sheet nao
+//    precisa saber onde esta na arvore.
+//
+// 3. `overscroll-behavior: contain` no corpo. Sem isso, chegar ao fim da lista
 //    dentro do sheet propaga a rolagem pro documento — no iOS isso arrasta a
 //    pagina inteira e o gesto seguinte fecha o sheet sem o jogador ter pedido.
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from '@phosphor-icons/react'
 import { useUiStore } from '@/stores/uiStore'
 import { GameIconButton } from './controls'
@@ -71,6 +79,7 @@ export function Sheet({
   const footerHeight = useUiStore((s) => s.footerHeight)
   const [arrasto, setArrasto] = useState(0)
   const inicio = useRef<number | null>(null)
+  const alvo = useCamadaHud()
 
   // Fechar ao tocar FORA. Mesmo desenho da GameWindow (listener de documento em
   // vez de backdrop clicavel) pra doca e trilho continuarem vivos com o sheet
@@ -114,7 +123,9 @@ export function Sheet({
     })
   }, [onClose])
 
-  return (
+  if (!alvo) return null
+
+  return createPortal(
     <>
       {backdrop && (
         <div
@@ -178,6 +189,23 @@ export function Sheet({
 
         {footer && <div className="shrink-0 border-t border-n800 px-[.9em] py-[.6em]">{footer}</div>}
       </div>
-    </>
+    </>,
+    alvo,
   )
+}
+
+/**
+ * A camada da HUD (`.hud-safe`), ja recortada pelas areas inseguras do
+ * aparelho. O `useEffect` existe porque o no so passa a existir no commit: um
+ * componente irmao que renderize ANTES dele nao o encontra na primeira
+ * passada, e sem o segundo tento o sheet nunca apareceria.
+ */
+function useCamadaHud(): HTMLElement | null {
+  const [alvo, setAlvo] = useState<HTMLElement | null>(
+    () => (typeof document === 'undefined' ? null : document.getElementById('camada-hud')),
+  )
+  useEffect(() => {
+    if (!alvo) setAlvo(document.getElementById('camada-hud'))
+  }, [alvo])
+  return alvo
 }

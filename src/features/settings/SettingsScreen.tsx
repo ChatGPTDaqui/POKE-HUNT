@@ -10,6 +10,8 @@ function GeralTab() {
   const askConfirm = useConfirmDialogStore((s) => s.confirm)
   const hudScale = useUiStore((s) => s.hudScale)
   const setHudScale = useUiStore((s) => s.setHudScale)
+  const vidroFosco = useUiStore((s) => s.vidroFosco)
+  const setVidroFosco = useUiStore((s) => s.setVidroFosco)
 
   return (
     <div className="flex flex-col gap-[.5em]">
@@ -36,6 +38,24 @@ function GeralTab() {
           </span>
           <GameButton variant="ghost" onClick={() => setHudScale(1)}>Padrao</GameButton>
         </div>
+      </GameCard>
+
+      <GameCard className="flex flex-col gap-[.4em] p-[.6em]">
+        <div className="font-medium">Reduzir transparência</div>
+        <div className="text-[.8em] text-n500">
+          As superfícies da interface desfocam o jogo por trás. O desfoque é recalculado a cada quadro em cada
+          camada — em celular mais simples isso derruba a taxa de quadros. Desligado, elas ficam quase opacas.
+        </div>
+        <label className="flex cursor-pointer items-center gap-[.5em] self-start">
+          <input
+            type="checkbox"
+            name="vidro-fosco"
+            checked={vidroFosco}
+            onChange={(e) => setVidroFosco(e.target.checked)}
+            className="h-[1.1em] w-[1.1em] cursor-pointer accent-primary"
+          />
+          <span className="text-[.85em]">Desligar o desfoque</span>
+        </label>
       </GameCard>
 
       <GameCard className="flex flex-col gap-[.4em] p-[.6em]">

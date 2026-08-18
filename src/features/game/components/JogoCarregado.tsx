@@ -21,6 +21,7 @@ import { useBackgroundCatchUp } from '../hooks/useBackgroundCatchUp'
 import { useSaidaAoEncerrarSessao } from '../hooks/useSaidaAoEncerrarSessao'
 import { useSyncOnUnload } from '../hooks/useSyncOnUnload'
 import { useViewportTracking } from '../hooks/useViewportTracking'
+import { useVoltarFechaPainel } from '../hooks/useVoltarFechaPainel'
 import { useCommitOnLevelUp } from '../hooks/useCommitOnLevelUp'
 import { useTutorialInicial } from '../hooks/useTutorialInicial'
 import { useAvisoDeEstoqueNoChat } from '../hooks/useAvisoDeEstoqueNoChat'
@@ -28,11 +29,13 @@ import { useAvisoDeEstoqueNoChat } from '../hooks/useAvisoDeEstoqueNoChat'
 export function JogoCarregado() {
   const hasStarter = useHasStarter()
   const hudScale = useUiStore((s) => s.hudScale)
+  const vidroFosco = useUiStore((s) => s.vidroFosco)
   const { summary, dismiss } = useOfflineFarmOnBoot()
   useBackgroundCatchUp()
   useSaidaAoEncerrarSessao()
   useSyncOnUnload()
   useViewportTracking()
+  useVoltarFechaPainel()
   useCommitOnLevelUp()
   useTutorialInicial(hasStarter)
   useAvisoDeEstoqueNoChat()
@@ -43,6 +46,7 @@ export function JogoCarregado() {
       // interface deriva; `--hud-scale` e a preferencia do jogador (0.8–1.4),
       // que multiplica esse ajuste em vez de substitui-lo.
       className="hud-root relative h-svh w-svw overflow-hidden bg-background text-foreground"
+      data-blur={vidroFosco ? 'off' : undefined}
       style={{ '--hud-scale': hudScale } as React.CSSProperties}
     >
       <GameCanvas />
@@ -66,7 +70,7 @@ export function JogoCarregado() {
                 e irmao desta camada e continua sangrando ate a borda fisica —
                 cortar o cenario pra caber no retangulo seguro deixaria duas
                 tarjas pretas em vez de imagem. */}
-            <div className="hud-safe">
+            <div id="camada-hud" className="hud-safe">
               <HudLayer />
             </div>
             <ScreenOverlay />
