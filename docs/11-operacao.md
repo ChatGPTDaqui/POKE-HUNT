@@ -210,7 +210,7 @@ outra instância de Claude Code (ou qualquer outro agente) que nunca viu este pr
 Motivo de existir: em 2026-08-18 alguém aplicou 2 colunas novas (`pokemon_instances.nature`,
 `.trait`) direto no banco, sem nunca criar migration — o gate de CI (abaixo) achou isso sozinho na
 primeira vez que rodou. Sem o gate, ninguém saberia que aquilo existia até quebrar em outra
-máquina. Histórico completo em [14-coordenacao-supabase.md](14-coordenacao-supabase.md).
+máquina. Histórico completo em [15-coordenacao-supabase.md](15-coordenacao-supabase.md).
 
 ### Regra de ouro
 
