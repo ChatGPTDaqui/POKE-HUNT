@@ -58,6 +58,7 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     get autoPotRules() { return s.autoPotRules },
     get autoCatchConfig() { return s.autoCatchConfig },
     get autoCatchRules() { return s.autoCatchRules },
+    get autoSellConfig() { return s.autoSellConfig },
     get autoStatusConfig() { return s.autoStatusConfig },
     get perfStats() { return s.perfStats },
     get trainer() { return s.trainer },
@@ -167,6 +168,7 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     },
     removeAutoPotRule: (index) => { s.autoPotRules.splice(index, 1) },
     setAutoCatchConfig: (patch) => { s.autoCatchConfig = { ...s.autoCatchConfig, ...patch } },
+    setAutoSellConfig: (patch) => { s.autoSellConfig = { ...s.autoSellConfig, ...patch } },
     addAutoCatchRule: (rule: AutoCatchRule) => { s.autoCatchRules.push(rule) },
     updateAutoCatchRule: (index, patch) => {
       if (s.autoCatchRules[index]) s.autoCatchRules[index] = { ...s.autoCatchRules[index], ...patch }

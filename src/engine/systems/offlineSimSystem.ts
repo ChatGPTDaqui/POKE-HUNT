@@ -18,7 +18,15 @@ import type { GameStateStore } from '@/stores/gameStateStore'
 import type { WorldState } from '../types'
 
 export interface KillResult {
+  /** Loot do abate MAIS o que a auto-venda rendeu neste evento, se rendeu. */
   gold: number
+  /**
+   * Ouro que veio da AUTO-VENDA da captura deste abate (0 quando nao houve).
+   *
+   * Separado de `gold` so pra o relatorio poder dizer de onde o ouro veio — o
+   * total ja esta em `gold`, e e ele que alimenta taxa e resumo.
+   */
+  ouroDeAutoVenda: number
   xp: number
   leveledUp: boolean
   trainerLeveledUp: boolean
@@ -71,6 +79,9 @@ export interface OfflineSimSummary {
   captures: { speciesId: string; level: number; isShiny: boolean; rarity: RarityKey }[]
   shinySeen: number
   shinyCaptured: number
+  /** Quantas capturas a auto-venda vendeu na hora, e por quanto no total. */
+  autoVendidos: number
+  ouroDeAutoVenda: number
   itemsGained: Record<string, number>
   itemsConsumed: Record<string, number>
   pokeLeveledUp: boolean
@@ -105,6 +116,8 @@ export function createEmptySummary(): OfflineSimSummary {
     captures: [],
     shinySeen: 0,
     shinyCaptured: 0,
+    autoVendidos: 0,
+    ouroDeAutoVenda: 0,
     itemsGained: {},
     itemsConsumed: {},
     pokeLeveledUp: false,
@@ -171,6 +184,14 @@ export function simulateWorldSeconds({
       if (result.leveledUp) summary.pokeLeveledUp = true
       if (result.trainerLeveledUp) summary.trainerLeveledUp = true
       if (result.isShiny) summary.shinySeen += 1
+      if (result.ouroDeAutoVenda > 0) {
+        summary.autoVendidos += 1
+        summary.ouroDeAutoVenda += result.ouroDeAutoVenda
+      }
+      // POKE auto-vendido NAO entra em `captures`: essa lista alimenta o "o que
+      // voce capturou" do relatorio, e listar um POKE que nao esta na mochila
+      // manda o jogador procurar o que ele nao vai achar. O que ele recebeu
+      // aparece como ouro (em `gold`) e na contagem de `autoVendidos`.
       if (result.captured && result.capturedPoke) {
         summary.captures.push({
           speciesId: result.capturedPoke.speciesId,

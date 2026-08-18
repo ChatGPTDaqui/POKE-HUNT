@@ -26,6 +26,7 @@ import {
 } from '@/components/game/controls'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
 import { cn } from '@/lib/utils'
+import { AutoVendaPanel } from './AutoVendaPanel'
 import { useMochila } from './useMochila'
 import { EstadoDaMochila } from './EstadoDaMochila'
 
@@ -307,6 +308,7 @@ export function BagMenu() {
           ]}
         />
       </StickyHeader>
+      {tab === 'pokemons' && <AutoVendaPanel />}
       {tab === 'pokemons' ? <PokemonsTab /> : <ItensTab />}
     </div>
   )

@@ -7,6 +7,7 @@
 // localStorage (inexistente no Deno) e crasha toda requisicao. Este arquivo
 // nao pode importar nada de `data/remote/*`.
 import type { PokeInstance } from '@/data/pokes'
+import type { RarityKey } from '@/data/rarity'
 import { MAPS } from '@/data/maps'
 import { FAIXAS_INICIAIS } from '@/data/biomas'
 
@@ -47,6 +48,17 @@ export interface AutoCatchRule {
   ballItemId: string
 }
 
+export interface AutoSellConfig {
+  ligado: boolean
+  /**
+   * Raridades que o bot vende. Lista explicita, e nao um "vende abaixo de X":
+   * as raridades nao formam uma escala unica que o jogador queira cortar num
+   * ponto (o `sellMultiplier` vai de 1x a 600x), e marcar caixinha e mais claro
+   * que adivinhar uma ordem.
+   */
+  raridades: RarityKey[]
+}
+
 export interface PerfStats {
   gold: number
   xp: number
@@ -81,6 +93,11 @@ export interface PokedexKillCount {
 // parcial, em vez de reconstruir o objeto inteiro com defaultGameStateData().
 export const DEFAULT_AUTO_POT_RULES: AutoPotRule[] = [{ hpPercent: 70, itemId: 'potion' }]
 export const DEFAULT_AUTO_CATCH_CONFIG: AutoCatchConfig = { ballId: 'poke_ball', catchShinyEnabled: true, shinyBallId: 'great_ball' }
+// Nasce DESLIGADA e sem raridade marcada. Automacao que APAGA POKE do jogador
+// em troca de ouro nao pode chegar ligada por default num save que ja existe —
+// e os defaults daqui sao exatamente o que um save antigo (sem a chave) recebe
+// no merge do `persist`.
+export const DEFAULT_AUTO_SELL_CONFIG: AutoSellConfig = { ligado: false, raridades: [] }
 
 // Toda hunt sem unlockCost comeca desbloqueada — hoje so a hunt lendaria
 // carrega um custo (ver CLAUDE.md).
@@ -103,6 +120,19 @@ export interface GameStateData {
   autoPotRules: AutoPotRule[]
   autoCatchConfig: AutoCatchConfig
   autoCatchRules: AutoCatchRule[]
+  /**
+   * Auto-venda: vende a captura NO INSTANTE em que ela acontece, antes de o POKE
+   * entrar na mochila.
+   *
+   * Por que na captura, e nao varrendo a mochila: a mochila deixou de ser
+   * carregada a cada flush (custava megabytes por request — ver
+   * `OpcoesDeLeitura` em server/src/progresso.ts) e uma varredura periodica
+   * traria esse custo de volta multiplicado. Vender na captura ainda ataca a
+   * causa em vez do sintoma — a mochila nunca enche de lixo.
+   *
+   * Shiny NUNCA e vendido por aqui, esteja a raridade dele marcada ou nao.
+   */
+  autoSellConfig: AutoSellConfig
   // Item ausente = habilitado (mesmo padrao de "ausente = default" do resto
   // do projeto) — so guarda excecao explicita (`false`) por item.
   autoStatusConfig: Record<string, boolean>
@@ -133,6 +163,7 @@ export function defaultGameStateData(): GameStateData {
     autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
     autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
     autoCatchRules: [],
+    autoSellConfig: { ...DEFAULT_AUTO_SELL_CONFIG, raridades: [] },
     autoStatusConfig: {},
     perfStats: { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now() },
     trainer: { name: 'Treinador', level: 1, exp: 0 },
