@@ -7,7 +7,7 @@ import { SPECIES, createPokeInstance } from '@/data/pokes'
 import { getItem } from '@/data/items'
 import { evolvePokeInstance } from './systems/progressionSystem'
 import { resetStats } from './systems/farmRates'
-import { isDead, heal } from './entity'
+import { isDead, heal, VFX_CURA_DURACAO } from './entity'
 import {
   buildHospitalWorld, buildMapWorld, shinyPrefix, syncActivePokeToGameState,
   STARTER_LEVEL, STARTER_IVS, STARTER_RARITY,
@@ -39,7 +39,19 @@ export const controller = {
   async enterMap(mapId: string): Promise<boolean> {
     const gameState = useGameStateStore.getState()
     const activePoke = gameState.team[gameState.activeIndex]
-    if (!activePoke) return false
+    // Slot ativo vazio. Era um `return false` MUDO, e custou uma sessao inteira
+    // de diagnostico: o botao "Entrar" simplesmente nao fazia nada — sem aviso,
+    // sem request, sem erro no console —, e a leitura obvia era "o clique nao
+    // esta registrando". Acontece quando `activeIndex` aponta pra um slot que
+    // deixou de existir (POKE vendido, liberado, ou o time reordenado por outra
+    // aba), e o HUD nao denuncia porque ele desenha o POKE do `worldStore`, que
+    // ainda tem o antigo em memoria.
+    if (!activePoke) {
+      useToastStore.getState().pushToast(
+        'Nenhum POKE selecionado na equipe. Abra Equipe e coloque um em campo.', 'error', 'world',
+      )
+      return false
+    }
     // POKE caido nao luta, e uma cacada com ele so queima o relogio: a simulacao
     // para no primeiro passo e cada flush credita o intervalo por 0,1 segundo de
     // jogo. O servidor tambem recusa (defesa em profundidade), mas aqui a
@@ -199,6 +211,11 @@ export const controller = {
     if (world.player) {
       useWorldStore.getState().update((draft) => {
         if (!draft.player) return
+        // A faisca de cura e marcada a mao aqui porque este caminho NAO passa
+        // por `heal()` — ele troca o `poke` inteiro pra reidratar o objeto, e
+        // nao soma HP. Sem esta linha a enfermeira seria a unica fonte de cura
+        // sem retorno visual.
+        if (draft.player.poke.hp < draft.player.poke.stats.hp) draft.player.vfxCuraHp = VFX_CURA_DURACAO
         draft.player.poke = { ...draft.player.poke, hp: draft.player.poke.stats.hp }
         // Repor o HP nao bastava: `fainted`/`state` continuavam em desmaiado.
         // Bug real reproduzido ao vivo — curar na enfermeira mostrava HP 14/14 e

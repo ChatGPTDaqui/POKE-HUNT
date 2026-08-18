@@ -55,7 +55,13 @@ async function acionarHunt(map: HuntMapDef, unlocked: boolean, continentGated: b
     return
   }
   const resolved = getMap(map.id)
-  if (!resolved) return
+  if (!resolved) {
+    // Nao deveria acontecer (a lista sai de MAPS), mas era o terceiro `return`
+    // mudo deste caminho — e um botao que nao faz nada e sempre lido como
+    // clique perdido, nunca como erro.
+    useToastStore.getState().pushToast(`Hunt "${map.id}" nao existe mais.`, 'error', 'world')
+    return
+  }
   const desbloqueou = await pedirAcao(
     { tipo: 'desbloquearHunt', mapId: map.id },
     () => unlockMap(useGameStateStore.getState(), resolved).success,

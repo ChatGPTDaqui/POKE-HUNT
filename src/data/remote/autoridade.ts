@@ -24,11 +24,23 @@ export function aplicarEstadoDoServidor(estado: unknown): void {
 const JANELA_ANTI_REPETICAO_MS = 20000
 const ultimoAviso = new Map<string, number>()
 
-function reportarErro(erro: unknown): void {
+/**
+ * `sempreAvisar` desliga a janela anti-repeticao.
+ *
+ * A janela existe pro caminho de FUNDO: o flush roda de 30 em 30 segundos
+ * sozinho, e uma queda de rede viraria uma torre de toasts iguais. Mas ela
+ * tambem calava o caminho em que o JOGADOR acabou de clicar em alguma coisa —
+ * e ai o silencio le como "o botao nao funciona", nao como "deu erro de novo".
+ *
+ * Foi metade do diagnostico perdido de 2026-08-18: o primeiro "Entrar" numa
+ * hunt avisava, e os 20 segundos seguintes de cliques nao diziam nada. Acao
+ * disparada por clique sempre responde alguma coisa.
+ */
+function reportarErro(erro: unknown, sempreAvisar = false): void {
   const mensagem = erro instanceof ErroServidor ? erro.message : 'nao foi possivel falar com o servidor'
   const agora = Date.now()
   const anterior = ultimoAviso.get(mensagem)
-  if (anterior != null && agora - anterior < JANELA_ANTI_REPETICAO_MS) return
+  if (!sempreAvisar && anterior != null && agora - anterior < JANELA_ANTI_REPETICAO_MS) return
   ultimoAviso.set(mensagem, agora)
   useToastStore.getState().pushToast(mensagem, 'error', 'world', undefined, detalheDeErro(erro))
 }
@@ -105,7 +117,11 @@ export async function abrirSessaoDeHunt(mapId: string, pokeUid: string): Promise
     timerFlush = setInterval(() => { void liquidar() }, INTERVALO_FLUSH_MS)
     return true
   } catch (erro) {
-    reportarErro(erro)
+    // Sempre avisa: so ha um chamador (`controller.enterMap`) e ele nasce de um
+    // clique em "Entrar". Recusa do servidor (hunt trancada, POKE que nao e da
+    // equipe, sessao invalida) TEM que aparecer em toda tentativa — calar a
+    // segunda faz o botao parecer quebrado.
+    reportarErro(erro, true)
     return false
   }
 }
