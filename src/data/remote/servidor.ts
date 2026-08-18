@@ -155,9 +155,27 @@ export interface RespostaComEstado {
   mensagem?: string
 }
 
+/**
+ * Corpo fixo de `/sessao/flush` e `/sessao/fechar`: declara que ESTE cliente
+ * sabe receber `estado` sem a mochila inteira dentro (ver `estadoParcial`).
+ *
+ * Existe como declaracao explicita, e nao como comportamento padrao do
+ * servidor, por causa da janela de deploy: uma aba aberta antes desta versao
+ * sobrescreveria a Mochila com a lista curta e ficaria mostrando mochila vazia
+ * ate o F5. Corpo ausente = servidor responde do jeito antigo.
+ */
+const CORPO_PARCIAL = JSON.stringify({ parcial: true })
+
 export interface RespostaFlush extends RespostaComEstado {
   segundosCreditados: number
   truncado: boolean
+  /**
+   * `estado.bagPokes` traz SO as capturas desta janela, nao a mochila inteira.
+   * Sempre `true` com um cliente desta versao — o campo existe pra a resposta
+   * ser auto-descritiva e pra um servidor antigo (que nao manda o campo) cair
+   * no caminho de substituicao completa, que e o correto pra ele.
+   */
+  estadoParcial?: boolean
   // O MESMO tipo que a simulacao local produz — o modal de Farm Offline le os
   // dois sem saber de onde vieram, porque o servidor roda exatamente o mesmo
   // `simulateWorldSeconds`.
@@ -337,9 +355,16 @@ export const servidor = {
       body: JSON.stringify({ mapId, pokeUid }),
     }),
 
-  flush: () => pedir<RespostaFlush>('/sessao/flush', { method: 'POST', retentavel: true, timeoutMs: TIMEOUT_FLUSH_MS }),
+  flush: () => pedir<RespostaFlush>('/sessao/flush', {
+    method: 'POST', retentavel: true, timeoutMs: TIMEOUT_FLUSH_MS, body: CORPO_PARCIAL,
+  }),
 
-  fecharSessao: () => pedir<{ fechada: boolean; resumo?: RespostaFlush['resumo']; piso?: RespostaFlush['piso'] } & Partial<RespostaComEstado>>('/sessao/fechar', { method: 'POST', retentavel: true, timeoutMs: TIMEOUT_FLUSH_MS }),
+  fecharSessao: () => pedir<
+    { fechada: boolean; resumo?: RespostaFlush['resumo']; piso?: RespostaFlush['piso']; estadoParcial?: boolean }
+    & Partial<RespostaComEstado>
+  >('/sessao/fechar', {
+    method: 'POST', retentavel: true, timeoutMs: TIMEOUT_FLUSH_MS, body: CORPO_PARCIAL,
+  }),
 }
 
 /**
@@ -357,6 +382,10 @@ export async function flushAoSair(): Promise<void> {
       method: 'POST',
       keepalive: true,
       headers: { Authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      // Ninguem le a resposta aqui, mas sem `parcial` o servidor monta o estado
+      // COMPLETO pra responder — a leitura cara justamente no request que a
+      // pagina dispara ao ser fechada.
+      body: CORPO_PARCIAL,
     })
   } catch {
     // Saindo da pagina: nao ha a quem reportar, e o proximo flush cobre o

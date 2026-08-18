@@ -181,13 +181,60 @@ export interface EstadoParaEscrita {
    * silencio o efeito da outra.
    */
   playerUpdatedAt: string
+  /**
+   * Se a mochila veio junto (ver `OpcoesDeLeitura`).
+   *
+   * `false` significa que `estado.bagPokes` NAO e a mochila do jogador: e so o
+   * que esta janela adicionou a ela. Quem for mandar esse estado pro cliente
+   * tem que avisar que ele e PARCIAL — senao o cliente troca a mochila inteira
+   * por essa lista curta.
+   */
+  bagCarregada: boolean
+}
+
+/**
+ * Opcoes de leitura do snapshot.
+ *
+ * `comBag: false` e o que separa um flush de ~35 KB de um flush de MEGABYTES.
+ *
+ * O snapshot completo le `pokemon_instances` INTEIRA do jogador — inclusive a
+ * mochila, que so cresce (auto-catch despeja tudo la e nada sai sozinho). Medido
+ * em producao em 2026-08-17: uma conta com 5035 POKEs custava 3,23 MB POR
+ * LEITURA, e o flush le a cada 30s (ou a cada 5s, quando `commitAgora` dispara
+ * por level-up). Um unico jogador ativo queimava ~2 GB/h de egress; tres
+ * jogadores estouraram 10x a cota do plano.
+ *
+ * A simulacao de hunt NAO precisa da mochila: o unico caminho que a toca durante
+ * um flush e `addCapturedPoke`, que so faz `push`. Vender/soltar/mover POKE sao
+ * RPC (`acoesRpc`/`mercadoRpc`), nao passam por aqui. Entao, no modo parcial:
+ *
+ *  - le so `location=eq.team` (5 linhas em vez de 5 mil);
+ *  - `estado.bagPokes` comeca VAZIO e termina contendo apenas as capturas desta
+ *    janela — que e exatamente o conjunto que precisa ser gravado;
+ *  - `pokeIdsNoLoad` fica com os ids do time, entao o diff de remocao de
+ *    `gravarEstado` nao alcanca (nem pode apagar) nenhuma linha da mochila.
+ *
+ * Quem PRECISA da mochila inteira: `/estado` (o cliente monta a tela da Mochila
+ * com ela) e qualquer caminho que va decidir algo olhando POKE guardado.
+ */
+export interface OpcoesDeLeitura {
+  comBag?: boolean
 }
 
 // Exportada (sem side-effect, ao contrario de `carregarEstadoParaEscrita`, que
 // tambem reivindica entregas) pra permitir recarregar estado fresco no meio
 // de uma escrita ja em andamento — usado pelo retry de `criarOrdem` (PH-8)
 // quando o CAS final perde a corrida depois de um casamento real ja gravado.
-export async function lerSnapshot(cfg: Config, userId: string): Promise<EstadoParaEscrita> {
+export async function lerSnapshot(
+  cfg: Config,
+  userId: string,
+  opcoes: OpcoesDeLeitura = {},
+): Promise<EstadoParaEscrita> {
+  const comBag = opcoes.comBag !== false
+  // `location=eq.team` e nao `not.eq.bag`: linha em `market` (POKE anunciado)
+  // tambem nao entra em `GameStateData` — `snapshotToGameState` so mapeia team
+  // e bag —, entao ler market seria pagar por dado que o mapper joga fora.
+  const filtroDeLocal = comBag ? '' : '&location=eq.team'
   const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
     selecionar<PlayerSnapshot['player']>(cfg, `players?user_id=eq.${userId}&select=*`),
     // `order=id` fixa a ordem entre as paginas de `selecionarTudo` (Range em
@@ -195,7 +242,7 @@ export async function lerSnapshot(cfg: Config, userId: string): Promise<EstadoPa
     // duas requests separadas — uma linha pode deslizar e ser lida duas vezes
     // (uma em cada pagina), gerando duplicata no array e um upsert que quebra
     // com "ON CONFLICT DO UPDATE cannot affect row a second time" (502).
-    selecionarTudo<PlayerSnapshot['pokemon'][number]>(cfg, `pokemon_instances?user_id=eq.${userId}&select=*&order=id`),
+    selecionarTudo<PlayerSnapshot['pokemon'][number]>(cfg, `pokemon_instances?user_id=eq.${userId}${filtroDeLocal}&select=*&order=id`),
     selecionarTudo<PlayerSnapshot['items'][number]>(cfg, `player_items?user_id=eq.${userId}&select=*`),
     selecionarTudo<PlayerSnapshot['pokedex'][number]>(cfg, `player_pokedex?user_id=eq.${userId}&select=*`),
     selecionarTudo<PlayerSnapshot['autoCatchRules'][number]>(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=*`),
@@ -210,11 +257,16 @@ export async function lerSnapshot(cfg: Config, userId: string): Promise<EstadoPa
     pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)),
     entregas: [],
     playerUpdatedAt: player[0].updated_at,
+    bagCarregada: comBag,
   }
 }
 
-export async function carregarEstado(cfg: Config, userId: string): Promise<GameStateData> {
-  return (await lerSnapshot(cfg, userId)).estado
+export async function carregarEstado(
+  cfg: Config,
+  userId: string,
+  opcoes: OpcoesDeLeitura = {},
+): Promise<GameStateData> {
+  return (await lerSnapshot(cfg, userId, opcoes)).estado
 }
 
 /**
@@ -226,8 +278,12 @@ export async function carregarEstado(cfg: Config, userId: string): Promise<GameS
  * perderia o credito. Por isso `/sessao/abrir` (que so valida a intencao)
  * continua usando `carregarEstado` cru.
  */
-export async function carregarEstadoParaEscrita(cfg: Config, userId: string): Promise<EstadoParaEscrita> {
-  const snapshot = await lerSnapshot(cfg, userId)
+export async function carregarEstadoParaEscrita(
+  cfg: Config,
+  userId: string,
+  opcoes: OpcoesDeLeitura = {},
+): Promise<EstadoParaEscrita> {
+  const snapshot = await lerSnapshot(cfg, userId, opcoes)
   const entregas = await reivindicarEntregas(cfg, userId)
   if (entregas.length) aplicarEntregasNoEstado(snapshot.estado, entregas)
   snapshot.entregas = entregas
@@ -248,12 +304,13 @@ export async function comEstadoParaEscrita<T>(
   cfg: Config,
   userId: string,
   fn: (ctx: EstadoParaEscrita) => Promise<T>,
-  // So o proprio flush passa `false`: ele E o dono da marca, entao esperaria
-  // por si mesmo ate o teto.
-  opcoes: { esperarFlush?: boolean } = {},
+  // So o proprio flush passa `esperarFlush: false`: ele E o dono da marca,
+  // entao esperaria por si mesmo ate o teto. E so ele passa `comBag: false` —
+  // ver `OpcoesDeLeitura`.
+  opcoes: { esperarFlush?: boolean } & OpcoesDeLeitura = {},
 ): Promise<T> {
   if (opcoes.esperarFlush !== false) await aguardarFlushEmAndamento(cfg, userId)
-  const ctx = await carregarEstadoParaEscrita(cfg, userId)
+  const ctx = await carregarEstadoParaEscrita(cfg, userId, { comBag: opcoes.comBag })
   try {
     return await fn(ctx)
   } catch (erro) {
@@ -405,6 +462,11 @@ export interface ResultadoFlush {
   segundosCreditados: number
   truncado: boolean
   resumo: OfflineSimSummary
+  /**
+   * O estado do jogador depois da janela — PARCIAL: `bagPokes` traz so o que
+   * esta janela capturou, nao a mochila inteira (ver `OpcoesDeLeitura`). Quem
+   * responde ao cliente tem que marcar `estadoParcial: true` junto.
+   */
   estado: GameStateData
   piso: ResultadoPiso
   /** Sala em que a hunt parou. Nulo nas hunts sem salas. */
@@ -476,6 +538,12 @@ export async function aplicarFlush(
   cfg: Config,
   userId: string,
   sessao: LinhaSessao,
+  // So existe pra CLIENTE ANTIGO: uma aba aberta antes deste deploy sobrescreve
+  // a mochila local com `estado.bagPokes` sem saber que ele e parcial, e ficaria
+  // com a Mochila vazia na tela ate recarregar. Quem declara `parcial: true` no
+  // corpo do flush recebe o estado enxuto; quem nao declara paga a leitura
+  // inteira, como antes. Nada no banco muda entre os dois modos.
+  opcoes: OpcoesDeLeitura = {},
 ): Promise<ResultadoFlushOuOcupado> {
   const agora = Date.now()
   const desde = new Date(sessao.last_flush_at).getTime()
@@ -543,6 +611,9 @@ export async function aplicarFlush(
     // sequence_index) foi escrito na tentativa que falhou, entao reler o
     // jogador e rodar `simularSessao` de novo e seguro e idempotente.
     return await comRetryDeColisao(() =>
+      // `comBag: false`: a simulacao de hunt so ADICIONA POKE na mochila
+      // (`addCapturedPoke`), nunca le nem remove — ver `OpcoesDeLeitura`. Ler a
+      // mochila inteira aqui era o que fazia um flush custar megabytes.
       comEstadoParaEscrita(cfg, userId, async (ctx) => {
         const resultado = await simularSessao(
           cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, ctx.playerUpdatedAt, { agora, segundos, truncado },
@@ -551,7 +622,7 @@ export async function aplicarFlush(
         // fila (o `catch` do embrulho so cobre excecao, e aqui nao ha excecao).
         if (!resultado) await devolverEntregas(cfg, ctx.entregas)
         return resultado
-      }, { esperarFlush: false }))
+      }, { esperarFlush: false, comBag: opcoes.comBag === true }))
   } finally {
     // No `finally` porque uma marca que sobrevive a um erro (inclusive o 409
     // do proprio CAS de gravarEstado, se AINDA colidir depois da espera) faria

@@ -18,6 +18,7 @@ import { useToastStore } from '@/stores/toastStore'
 // Sem ciclo em runtime: os modulos de `data/remote` so importam TIPOS deste
 // arquivo (`import type`, apagado na compilacao).
 import { postgresStorage, flushAgora, ultimoSavedAt, aoFalharSave } from '@/data/remote/gameStatePersistence'
+import { registrarCapturaPredita } from '@/data/remote/predicoesDeCaptura'
 // Tipos/defaults puros do save, sem import de `data/remote/*` — extraidos pro
 // `#engine` (edge/server) poder reexportar sem trazer o client Supabase de
 // browser pro bundle da Edge Function (PH-6, incidente de boot). Ver
@@ -330,6 +331,12 @@ export const useGameStateStore = create<GameStateStore>()(
 
       // Toda captura cai na mochila; mover pro time e acao manual do jogador.
       addCapturedPoke: (pokeInstance) => {
+        // Sob autoridade do servidor, ESTA captura e predicao: quem grava e o
+        // flush, com `uid` proprio. Marcar aqui — no unico ponto do cliente por
+        // onde toda captura passa — e o que permite trocar a predicao pela
+        // linha real sem exibir o mesmo POKE duas vezes. Ver
+        // `predicoesDeCaptura.ts`.
+        registrarCapturaPredita(pokeInstance.uid)
         set((state) => ({ bagPokes: [...state.bagPokes, detachPoke(pokeInstance)] }))
         return 'bag'
       },

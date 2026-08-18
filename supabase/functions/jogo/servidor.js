@@ -27744,7 +27744,10 @@ function getEffectiveness(moveType, defType1, defType2) {
 	if (!row) return 1;
 	return (defType1 in row ? row[defType1] : 1) * (defType2 && defType2 in row ? row[defType2] : 1);
 }
-var CAPTURE_ANIM_FRAME_DURATION = .07;
+var CAPTURE_ANIM_FRAME_DURATION_BY_BALL = { premier_ball: .26 };
+function captureAnimFrameDuration(ballItemId) {
+	return CAPTURE_ANIM_FRAME_DURATION_BY_BALL[ballItemId] ?? .07;
+}
 function captureAnimRowCount(success) {
 	return success ? 23 : 17;
 }
@@ -45894,7 +45897,7 @@ function recordPokedexKill(gameState, speciesId, isShiny) {
 	gameState.setPokedexKillEntry(speciesId, next);
 }
 //#endregion
-//#region node_modules/zustand/esm/vanilla.mjs
+//#region ../../../node_modules/zustand/esm/vanilla.mjs
 var createStoreImpl = (createState) => {
 	let state;
 	const listeners = /* @__PURE__ */ new Set();
@@ -45923,7 +45926,7 @@ var createStoreImpl = (createState) => {
 };
 var createStore = ((createState) => createState ? createStoreImpl(createState) : createStoreImpl);
 //#endregion
-//#region node_modules/react/cjs/react.production.js
+//#region ../../../node_modules/react/cjs/react.production.js
 /**
 * @license React
 * react.production.js
@@ -45986,7 +45989,7 @@ var require_react_production = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 }));
 //#endregion
-//#region node_modules/zustand/esm/react.mjs
+//#region ../../../node_modules/zustand/esm/react.mjs
 var import_react = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_production();
 })))(), 1);
@@ -46004,7 +46007,7 @@ var createImpl = (createState) => {
 };
 var create = ((createState) => createState ? createImpl(createState) : createImpl);
 //#endregion
-//#region node_modules/immer/dist/immer.mjs
+//#region ../../../node_modules/immer/dist/immer.mjs
 var NOTHING = Symbol.for("immer-nothing");
 var DRAFTABLE = Symbol.for("immer-draftable");
 var DRAFT_STATE = Symbol.for("immer-state");
@@ -46617,7 +46620,7 @@ function currentImpl(value) {
 }
 var produce = new Immer2().produce;
 //#endregion
-//#region node_modules/zustand/esm/middleware/immer.mjs
+//#region ../../../node_modules/zustand/esm/middleware/immer.mjs
 var immerImpl = (initializer) => (set, get, store) => {
 	store.setState = (updater, replace, ...args) => {
 		return set(typeof updater === "function" ? produce(updater) : updater, replace, ...args);
@@ -46983,7 +46986,7 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 				ballItemId: captureResult.ballItemId,
 				success: captureResult.success,
 				delay: 4,
-				duration: rowCount * CAPTURE_ANIM_FRAME_DURATION + .3
+				duration: rowCount * captureAnimFrameDuration(captureResult.ballItemId) + .3
 			}));
 		}
 		if (captureResult) {
@@ -47840,10 +47843,12 @@ async function aguardarFlushEmAndamento(cfg, userId) {
 		await dormir(INTERVALO_DE_SONDAGEM_MS);
 	}
 }
-async function lerSnapshot(cfg, userId) {
+async function lerSnapshot(cfg, userId, opcoes = {}) {
+	const comBag = opcoes.comBag !== false;
+	const filtroDeLocal = comBag ? "" : "&location=eq.team";
 	const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
 		selecionar(cfg, `players?user_id=eq.${userId}&select=*`),
-		selecionarTudo(cfg, `pokemon_instances?user_id=eq.${userId}&select=*&order=id`),
+		selecionarTudo(cfg, `pokemon_instances?user_id=eq.${userId}${filtroDeLocal}&select=*&order=id`),
 		selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=*`),
 		selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=*`),
 		selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=*`)
@@ -47859,11 +47864,12 @@ async function lerSnapshot(cfg, userId) {
 		}, defaultGameStateData()),
 		pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)),
 		entregas: [],
-		playerUpdatedAt: player[0].updated_at
+		playerUpdatedAt: player[0].updated_at,
+		bagCarregada: comBag
 	};
 }
-async function carregarEstado(cfg, userId) {
-	return (await lerSnapshot(cfg, userId)).estado;
+async function carregarEstado(cfg, userId, opcoes = {}) {
+	return (await lerSnapshot(cfg, userId, opcoes)).estado;
 }
 /**
 * Como `carregarEstado`, mas tambem REIVINDICA as entregas pendentes do
@@ -47874,8 +47880,8 @@ async function carregarEstado(cfg, userId) {
 * perderia o credito. Por isso `/sessao/abrir` (que so valida a intencao)
 * continua usando `carregarEstado` cru.
 */
-async function carregarEstadoParaEscrita(cfg, userId) {
-	const snapshot = await lerSnapshot(cfg, userId);
+async function carregarEstadoParaEscrita(cfg, userId, opcoes = {}) {
+	const snapshot = await lerSnapshot(cfg, userId, opcoes);
 	const entregas = await reivindicarEntregas(cfg, userId);
 	if (entregas.length) aplicarEntregasNoEstado(snapshot.estado, entregas);
 	snapshot.entregas = entregas;
@@ -47893,7 +47899,7 @@ async function carregarEstadoParaEscrita(cfg, userId) {
 */
 async function comEstadoParaEscrita(cfg, userId, fn, opcoes = {}) {
 	if (opcoes.esperarFlush !== false) await aguardarFlushEmAndamento(cfg, userId);
-	const ctx = await carregarEstadoParaEscrita(cfg, userId);
+	const ctx = await carregarEstadoParaEscrita(cfg, userId, { comBag: opcoes.comBag });
 	try {
 		return await fn(ctx);
 	} catch (erro) {
@@ -47985,7 +47991,7 @@ async function comRetryDeColisao(fn) {
 * (sai de `now()` menos `last_flush_at`), nem quantos kills houve, nem quanto
 * ouro. O cliente so declarou, na abertura da sessao, em qual hunt esta.
 */
-async function aplicarFlush(cfg, userId, sessao) {
+async function aplicarFlush(cfg, userId, sessao, opcoes = {}) {
 	const agora = Date.now();
 	const bruto = (agora - new Date(sessao.last_flush_at).getTime()) / 1e3;
 	const segundos = Math.max(0, Math.min(bruto, MAX_SEGUNDOS_POR_FLUSH));
@@ -48004,7 +48010,10 @@ async function aplicarFlush(cfg, userId, sessao) {
 			});
 			if (!resultado) await devolverEntregas(cfg, ctx.entregas);
 			return resultado;
-		}, { esperarFlush: false }));
+		}, {
+			esperarFlush: false,
+			comBag: opcoes.comBag === true
+		}));
 	} finally {
 		await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { flushing_since: null });
 	}
@@ -48124,12 +48133,27 @@ function criarApp(cfg) {
 		return resposta;
 	};
 }
+/**
+* O cliente sabe lidar com um `estado` que traz so as capturas da janela em
+* `bagPokes`, em vez da mochila inteira?
+*
+* Isto e uma trava de COMPATIBILIDADE, nao uma opcao de produto: uma aba aberta
+* antes deste deploy faz `setState(estado)` cru e ficaria com a Mochila vazia na
+* tela ate o proximo F5. Ela declara `{"parcial":true}` no corpo; cliente antigo
+* manda corpo vazio e continua recebendo o estado inteiro.
+*
+* Custo de ler o corpo: nenhum — as duas rotas que usam isto nao tinham corpo.
+* Corpo ausente/invalido cai em `false`, o lado seguro.
+*/
+async function aceitaEstadoParcial(req) {
+	return (await req.json().catch(() => null))?.parcial === true;
+}
 async function rotear(cfg, req, url) {
 	if (url.pathname === "/saude") return json({ ok: true });
 	const jogador = await autenticar(cfg, req);
 	if (url.pathname === "/sessao/abrir" && req.method === "POST") return abrirSessao(cfg, jogador.id, req);
-	if (url.pathname === "/sessao/flush" && req.method === "POST") return flush(cfg, jogador.id);
-	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id);
+	if (url.pathname === "/sessao/flush" && req.method === "POST") return flush(cfg, jogador.id, await aceitaEstadoParcial(req));
+	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id, await aceitaEstadoParcial(req));
 	if (url.pathname === "/estado" && req.method === "GET") return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas }) => {
 		if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt);
 		return json({ estado });
@@ -48172,7 +48196,7 @@ async function abrirSessao(cfg, userId, req) {
 	const pokeUid = corpo?.pokeUid;
 	if (!mapId || !pokeUid) throw new ErroHttp(400, "mapId e pokeUid sao obrigatorios");
 	if (!MAPS[mapId]) throw new ErroHttp(400, "hunt desconhecida");
-	const estado = await carregarEstado(cfg, userId);
+	const estado = await carregarEstado(cfg, userId, { comBag: false });
 	const poke = estado.team.find((p) => p.uid === pokeUid);
 	if (!poke) throw new ErroHttp(403, "este POKE nao esta na sua equipe");
 	if (poke.hp <= 0) throw new ErroHttp(409, "Seu POKE esta desmaiado. Cure na Enfermeira antes de cacar.");
@@ -48220,10 +48244,10 @@ async function abrirSessao(cfg, userId, req) {
 		iniciadaEm: criada.last_flush_at
 	});
 }
-async function flush(cfg, userId) {
+async function flush(cfg, userId, parcial) {
 	const sessao = await sessaoAberta(cfg, userId);
 	if (!sessao) throw new ErroHttp(409, "nenhuma sessao aberta");
-	const resultado = await aplicarFlush(cfg, userId, sessao);
+	const resultado = await aplicarFlush(cfg, userId, sessao, { comBag: !parcial });
 	if (resultado === "ocupado") return json({
 		segundosCreditados: 0,
 		truncado: false,
@@ -48233,7 +48257,8 @@ async function flush(cfg, userId) {
 			ouroAdicionado: 0,
 			xpAdicionado: 0
 		},
-		estado: await carregarEstado(cfg, userId)
+		estadoParcial: parcial,
+		estado: await carregarEstado(cfg, userId, { comBag: !parcial })
 	});
 	if (!resultado) {
 		await sairDaHunt(cfg, userId, sessao.id);
@@ -48247,19 +48272,21 @@ async function flush(cfg, userId) {
 		piso: resultado.piso,
 		sessaoEncerrada: resultado.encerrada,
 		sala: resultado.sala,
+		estadoParcial: parcial,
 		estado: resultado.estado
 	});
 }
-async function fechar(cfg, userId) {
+async function fechar(cfg, userId, parcial) {
 	const sessao = await sessaoAberta(cfg, userId);
 	if (!sessao) return json({ fechada: false });
-	const resultado = await aplicarFlush(cfg, userId, sessao);
+	const resultado = await aplicarFlush(cfg, userId, sessao, { comBag: !parcial });
 	await sairDaHunt(cfg, userId, sessao.id);
 	if (!resultado || resultado === "ocupado") return json({ fechada: false });
 	return json({
 		fechada: true,
 		resumo: resultado.resumo,
 		piso: resultado.piso,
+		estadoParcial: parcial,
 		estado: resultado.estado
 	});
 }
