@@ -11,6 +11,17 @@
 export interface ColisaoPintada {
   grid: string[];
   spawnPoint: { x: number; y: number };
+  /**
+   * De onde saiu o spawnPoint.
+   *
+   *   'amarelo'            circulo pintado, dentro da janela visivel. Exato.
+   *   'amarelo-projetado'  circulo pintado FORA da janela visivel (a arte e
+   *                        maior que o mundo e so a faixa central dela
+   *                        aparece na tela). A DIRECAO que o circulo indica
+   *                        vale; o ponto foi trazido pra borda mais proxima.
+   *   'centroide-rosa'     sem circulo — nasce no meio da area andavel.
+   */
+  spawnOrigem: 'amarelo' | 'amarelo-projetado' | 'centroide-rosa';
 }
 
 export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
@@ -43,7 +54,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 260,
       "y": 60
-    }
+    },
+    "spawnOrigem": "amarelo"
   },
   "assets/hunt-backgrounds/meadow.jpg": {
     "grid": [
@@ -74,7 +86,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 740,
       "y": 540
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/desert.jpg": {
     "grid": [
@@ -105,7 +118,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 620,
       "y": 540
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/badlands.jpg": {
     "grid": [
@@ -136,7 +150,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 540,
       "y": 420
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/burnt-forest.jpg": {
     "grid": [
@@ -167,7 +182,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 660,
       "y": 500
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/tall-grass.jpg": {
     "grid": [
@@ -198,7 +214,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 620,
       "y": 660
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/forest.jpg": {
     "grid": [
@@ -229,7 +246,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 620,
       "y": 380
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/industrial.jpg": {
     "grid": [
@@ -260,7 +278,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 780,
       "y": 540
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/sea.jpg": {
     "grid": [
@@ -291,7 +310,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 860,
       "y": 340
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/ice-mountain.png": {
     "grid": [
@@ -322,7 +342,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 620,
       "y": 500
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/mountain.jpg": {
     "grid": [
@@ -353,7 +374,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 660,
       "y": 540
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/construction-site.jpg": {
     "grid": [
@@ -384,7 +406,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 380,
       "y": 300
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/swamp.jpg": {
     "grid": [
@@ -415,7 +438,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 540,
       "y": 460
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/plains.jpg": {
     "grid": [
@@ -446,7 +470,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 780,
       "y": 620
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/beach.jpg": {
     "grid": [
@@ -477,7 +502,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 700,
       "y": 540
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/ruins.jpg": {
     "grid": [
@@ -508,7 +534,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 580,
       "y": 500
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/jungle.jpg": {
     "grid": [
@@ -539,7 +566,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 700,
       "y": 460
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/temple.png": {
     "grid": [
@@ -570,7 +598,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 700,
       "y": 580
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/cave-volcanic.jpg": {
     "grid": [
@@ -601,7 +630,8 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     "spawnPoint": {
       "x": 660,
       "y": 380
-    }
+    },
+    "spawnOrigem": "centroide-rosa"
   },
   "assets/hunt-backgrounds/ice-cave.jpg": {
     "grid": [
@@ -630,9 +660,10 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
       "10011111111111100111111111111111111"
     ],
     "spawnPoint": {
-      "x": 740,
-      "y": 740
-    }
+      "x": 1260,
+      "y": 700
+    },
+    "spawnOrigem": "amarelo-projetado"
   },
   "assets/hunt-backgrounds/fairy-cave.jpg": {
     "grid": [
@@ -661,9 +692,10 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
       "11100111111111111001111111111111111"
     ],
     "spawnPoint": {
-      "x": 660,
-      "y": 580
-    }
+      "x": 700,
+      "y": 860
+    },
+    "spawnOrigem": "amarelo-projetado"
   },
   "assets/hunt-backgrounds/island.jpg": {
     "grid": [
@@ -692,9 +724,10 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
       "11111111111111111000000000000000011"
     ],
     "spawnPoint": {
-      "x": 740,
-      "y": 460
-    }
+      "x": 1100,
+      "y": 860
+    },
+    "spawnOrigem": "amarelo-projetado"
   },
   "assets/hunt-backgrounds/lake.jpg": {
     "grid": [
@@ -723,9 +756,10 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
       "11111100000000111111111111111111111"
     ],
     "spawnPoint": {
-      "x": 340,
-      "y": 500
-    }
+      "x": 620,
+      "y": 20
+    },
+    "spawnOrigem": "amarelo-projetado"
   },
   "assets/hunt-backgrounds/metropolis.jpg": {
     "grid": [
@@ -754,9 +788,10 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
       "11111010001111111111111111111110011"
     ],
     "spawnPoint": {
-      "x": 580,
-      "y": 460
-    }
+      "x": 1300,
+      "y": 820
+    },
+    "spawnOrigem": "amarelo-projetado"
   },
   "assets/hunt-backgrounds/slum.jpg": {
     "grid": [
@@ -785,9 +820,10 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
       "11100001111111110001111111001000111"
     ],
     "spawnPoint": {
-      "x": 660,
-      "y": 620
-    }
+      "x": 60,
+      "y": 700
+    },
+    "spawnOrigem": "amarelo-projetado"
   },
   "assets/hunt-backgrounds/wasteland.jpg": {
     "grid": [
@@ -816,9 +852,10 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
       "00011110000000000000000000111111111"
     ],
     "spawnPoint": {
-      "x": 700,
+      "x": 1060,
       "y": 620
-    }
+    },
+    "spawnOrigem": "amarelo-projetado"
   },
   "assets/hunt-backgrounds/town-night.jpg": {
     "grid": [
@@ -847,9 +884,10 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
       "10000000000000000000000111111111111"
     ],
     "spawnPoint": {
-      "x": 580,
-      "y": 380
-    }
+      "x": 1020,
+      "y": 660
+    },
+    "spawnOrigem": "amarelo-projetado"
   },
   "assets/hunt-backgrounds/town.jpg": {
     "grid": [
@@ -879,8 +917,9 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     ],
     "spawnPoint": {
       "x": 700,
-      "y": 460
-    }
+      "y": 860
+    },
+    "spawnOrigem": "amarelo-projetado"
   },
   "assets/hunt-backgrounds/volcano.jpg": {
     "grid": [
@@ -909,8 +948,9 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
       "11111111111111001100000000000000011"
     ],
     "spawnPoint": {
-      "x": 780,
+      "x": 60,
       "y": 420
-    }
+    },
+    "spawnOrigem": "amarelo-projetado"
   }
 };

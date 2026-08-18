@@ -15,6 +15,10 @@
 //    manifesto, e a sala 'cave' passou duas levas sem grade.
 // 4. Ponto de spawn pintado que cai em celula bloqueada — o jogador nasce
 //    dentro da parede e o motor tem que resgatar.
+// 5. Circulo amarelo de spawn que a deteccao deixa de enxergar. Este e o
+//    mais silencioso de todos: o mapa continua jogavel, o spawn so volta
+//    pro centroide da area rosa (o meio do mapa), e a unica pessoa capaz de
+//    notar e quem pintou o circulo — meses depois, se notar.
 import { describe, expect, it } from 'vitest'
 
 import { BIOMAS } from './biomas'
@@ -104,6 +108,51 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
         expect(isCellBlocked(mapDef, ponto.x, ponto.y), `${sub.chave} nasce dentro da parede`).toBe(false)
       }
     }
+  })
+
+  it('toda arte com circulo amarelo pintado nasce dele, nao do centroide', () => {
+    // A lista CRESCE quando o usuario pinta circulo em mais mapas — ele
+    // avisou que vai. O jeito de atualizar e rodar
+    // `node scripts/build-sub-bioma-collision.js` e copiar daqui quem saiu
+    // com [amarelo] ou [amarelo projetado] no log.
+    //
+    // Duplicar a lista aqui e o ponto: se fosse derivada do proprio arquivo
+    // gerado, o teste concordaria com qualquer regressao do gerador.
+    const COM_CIRCULO = [
+      'abyss.jpg', 'ice-cave.jpg', 'fairy-cave.jpg', 'island.jpg', 'lake.jpg',
+      'metropolis.jpg', 'slum.jpg', 'wasteland.jpg', 'town-night.jpg',
+      'town.jpg', 'volcano.jpg',
+    ]
+
+    const semCirculo: string[] = []
+    for (const arte of COM_CIRCULO) {
+      const chave = `assets/hunt-backgrounds/${arte}`
+      const pintada = COLISAO_POR_ARTE[chave]
+      expect(pintada, `${arte} sumiu do arquivo gerado`).toBeDefined()
+      if (!pintada.spawnOrigem.startsWith('amarelo')) semCirculo.push(`${arte} (${pintada.spawnOrigem})`)
+    }
+    expect(
+      semCirculo,
+      'estas artes tem circulo amarelo pintado mas o spawn saiu do centroide rosa — ' +
+        'a deteccao de cor em scripts/build-sub-bioma-collision.js#isYellow parou de ver o circulo',
+    ).toEqual([])
+  })
+
+  it('nenhuma arte SEM circulo inventa um marcador', () => {
+    // O lado oposto, e o motivo de `isYellow` ser estrito: o teste frouxo
+    // anterior ('r>180 && g>180 && b<100') via areia, lava e luz de poste como
+    // marcador. Numa referencia sem circulo isso poria o spawn num pedaco
+    // qualquer de arte amarela — sem erro, sem aviso, so um nascimento no
+    // lugar errado.
+    const inventados = Object.entries(COLISAO_POR_ARTE)
+      .filter(([, c]) => c.spawnOrigem.startsWith('amarelo'))
+      .map(([arte]) => arte.replace('assets/hunt-backgrounds/', ''))
+      .sort()
+    expect(inventados).toEqual([
+      'abyss.jpg', 'fairy-cave.jpg', 'ice-cave.jpg', 'island.jpg', 'lake.jpg',
+      'metropolis.jpg', 'slum.jpg', 'town-night.jpg', 'town.jpg',
+      'volcano.jpg', 'wasteland.jpg',
+    ])
   })
 
   it('toda grade tem o tamanho do mapa inteiro (35x23 celulas de 40px)', () => {

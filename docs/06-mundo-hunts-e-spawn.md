@@ -232,10 +232,21 @@ Dois modos de leitura e duas fontes de spawn, por entrada do manifesto:
 - **`rosa_anda`** (as outras 28): pintura lilás/rosa é o **único** lugar andável/spawnável —
   tudo o resto bloqueia. Convenção invertida da anterior; ambas coexistem via um campo `modo`
   por entrada, para não arriscar quebrar `abismo.png` (já testada) só por unificar convenção.
-- **`spawn: 'amarelo'`** usa o **maior blob contíguo** de amarelo (círculo pintado pelo
-  usuário); `'centroide-rosa'` nasce no meio da própria área rosa. Blob, e nunca o centroide de
-  todo pixel amarelo: várias artes têm amarelo incidental (flor, lâmpada, lava) e a média cai
-  num ponto que não existe.
+- **O círculo amarelo é DETECTADO**, não declarado. Não há campo `spawn` no manifesto: se a
+  referência tem um blob contíguo de tinta amarela chapada acima de 1200px, ele é o spawn;
+  senão, nasce no centroide da área rosa. Blob e nunca o centroide de todo pixel amarelo —
+  várias artes têm amarelo incidental (flor, lâmpada, lava) e a média cai num ponto que não
+  existe.
+
+  `isYellow` é **estrito** (`r≥235 && g≥215 && b≤45 && |r−g|≤45`) porque a tinta é chapada e
+  sempre a mesma, (254,242,0). O teste frouxo anterior (`r>180 && g>180 && b<100`) via areia,
+  luz de poste e lava: em `fairy-cave` o "amarelo" cobria quase a imagem inteira, e o maior
+  blob ainda ser o círculo era sorte. Medido nas 29 referências com o teste estrito: quem tem
+  círculo tem **um** blob de 2144 a 4512px e o segundo maior fica em 0–16px. Duas ordens de
+  grandeza de separação — é o que permite detectar em vez de cadastrar.
+
+  **Para dar círculo a mais uma arte:** pintar o círculo (≈60px de diâmetro) na referência e
+  rodar o script. Não há nada a cadastrar.
 
 `PINK_CELL_RATIO = 0.3` — quanto de uma célula (40px de mundo = 50px de imagem) precisa estar
 pintada para ela ser andável. Era 0.5 e isso **cortava a malha das artes urbanas**: rua de
@@ -244,10 +255,25 @@ poda por desconexão apagava tudo do outro lado do corte (medido: `town-night` p
 células, `metropolis` 116). Em 0.3 os dois vão a zero e 0.2 não conserta mais nada.
 
 **A pintura só vale no recorte que vira mundo.** A arte é ~2048², mas os bounds são 1400x900 em
-paisagem: só `x[149..1899] y[462..1587]` da imagem aparece. O que for pintado fora disso é
-descartado em silêncio — inclusive o círculo amarelo de spawn, caso em que o script avisa e cai
-no centroide rosa. `node scripts/conferir-walk-block.mjs` gera, por arte, a referência recortada
-nessa janela com a grade por cima, que é o único jeito de ver desalinhamento sem entrar no jogo.
+paisagem: só `x[149..1899] y[462..1587]` da imagem aparece. O que for pintado de walk-block fora
+disso é descartado em silêncio.
+
+**O círculo de spawn NÃO é descartado — é projetado.** Os 10 círculos da leva 2026-08-18 caíram
+de 30 a 370px fora dessa janela (a maioria no rodapé, dois na lateral), porque quem pinta olha a
+imagem inteira e não tem como adivinhar onde a faixa visível termina. Descartá-los, como a
+primeira versão fazia, jogava fora a única informação que o círculo carrega: **a intenção de
+onde**. Um círculo no canto inferior direito quer dizer "nasce no canto inferior direito", e o
+centroide rosa manda para o meio do mapa.
+
+O ponto é levado (clamp) para dentro do retângulo do mundo, recuado uma célula das bordas, e o
+snap para a célula andável mais próxima decide o ponto final. `spawnOrigem` no arquivo gerado
+registra qual dos três casos ocorreu (`amarelo`, `amarelo-projetado`, `centroide-rosa`) — sem
+esse campo, um círculo que a detecção deixasse de enxergar viraria centroide em silêncio.
+
+`node scripts/conferir-walk-block.mjs` gera **duas** imagens por arte:
+`_conferencia/<arte>.png` é a janela recortada com a grade por cima (para conferir o que já foi
+pintado), e `_conferencia/gabarito/<arte>.png` é a referência inteira com tudo fora da janela
+escurecido e a moldura em ciano — é onde se vê, antes de pintar, o que chega à tela.
 
 A grade resultante (`COLISAO_POR_ARTE[caminho da arte]`, gerada) tem `colisaoDefineLimite: true` — o
 retângulo INTEIRO da grade é o limite real (a pintura já é a fronteira), então

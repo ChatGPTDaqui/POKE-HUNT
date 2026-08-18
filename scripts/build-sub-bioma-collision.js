@@ -70,9 +70,22 @@ const MAP_CY = MAP_BOUNDS.height / 2;
 function isRed(r, g, b) {
   return r > 120 && r > g * 1.5 && r > b * 1.5;
 }
-// Amarelo do marcador de spawn (amostrado: ~[255,222,0]).
+// Amarelo do marcador de spawn. A tinta e CHAPADA e sempre a mesma: amostrada
+// no centro dos 10 circulos desta leva, da (254,242,0) em 150+ de 189 pixels
+// lidos, com o resto a um ou dois niveis de distancia.
+//
+// O teste ANTERIOR era "r>180 && g>180 && b<100", e isso pegava a arte: areia
+// de praia, luz de poste, lava, grama seca. Numa referencia como fairy-cave o
+// "amarelo" detectado cobria x[122..1976] y[502..1998] — praticamente a imagem
+// inteira. O maior blob contiguo ainda costumava ser o circulo, mas isso era
+// sorte, e sorte nao aguenta as referencias novas que o usuario vai pintar.
+//
+// Medido com o teste estrito nas 29 referencias: quem tem circulo tem UM blob
+// de 2144 a 4512 px e o segundo maior fica em 0-16 px; quem nao tem circulo
+// (meadow, forest, ...) nao tem blob nenhum. Separacao de duas ordens de
+// grandeza — e por isso que a deteccao pode ser automatica.
 function isYellow(r, g, b) {
-  return r > 180 && g > 180 && b < 100;
+  return r >= 235 && g >= 215 && b <= 45 && Math.abs(r - g) <= 45;
 }
 // Rosa/lilas saturado (amostrado nos arquivos reais: ~[255,115,255] — pico
 // em R e B, G bem mais baixo que os dois). Distinto de vermelho puro (isRed:
@@ -117,42 +130,49 @@ const outFile = path.join(__dirname, '..', 'src', 'data', 'generated', 'subBioma
 // referencia pintada -> arte real que ela cobre. A arte e a CHAVE do
 // resultado: quem usa a imagem herda a grade, seja sub-bioma com arte
 // propria, sub-bioma sem arte (herda a do bioma) ou hunt sem salas.
+//
+// NAO HA MAIS CAMPO "spawn" AQUI. O circulo amarelo e DETECTADO: se a
+// referencia tem um blob de tinta amarela chapada acima do limiar, ele e o
+// spawn; se nao tem, cai no centroide da area rosa. O usuario disse que vai
+// pintar circulo em mais mapas, e ter de vir aqui marcar "spawn: amarelo" a
+// cada um seria exatamente o tipo de passo que se esquece — e o esquecimento
+// falha em silencio (o circulo fica na imagem, ignorado, e ninguem percebe).
 const MANIFESTO = {
-  'abismo.png': { bg: 'abyss.jpg', modo: 'vermelho_bloqueia', spawn: 'amarelo' },
-  'meadow.png': { bg: 'meadow.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'desert.png': { bg: 'desert.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'badlands.png': { bg: 'badlands.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'burnt-forest.png': { bg: 'burnt-forest.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'tall-grass.png': { bg: 'tall-grass.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'forest.png': { bg: 'forest.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'industrial.png': { bg: 'industrial.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'sea.png': { bg: 'sea.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'ice-mountain.png': { bg: 'ice-mountain.png', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'mountain.png': { bg: 'mountain.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'construction-site.png': { bg: 'construction-site.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'swamp.png': { bg: 'swamp.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'plains.png': { bg: 'plains.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'beach.png': { bg: 'beach.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'ruins.png': { bg: 'ruins.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'jungle.png': { bg: 'jungle.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
-  'temple.png': { bg: 'temple.png', modo: 'rosa_anda', spawn: 'centroide-rosa' },
+  'abismo.png': { bg: 'abyss.jpg', modo: 'vermelho_bloqueia' },
+  'meadow.png': { bg: 'meadow.jpg', modo: 'rosa_anda' },
+  'desert.png': { bg: 'desert.jpg', modo: 'rosa_anda' },
+  'badlands.png': { bg: 'badlands.jpg', modo: 'rosa_anda' },
+  'burnt-forest.png': { bg: 'burnt-forest.jpg', modo: 'rosa_anda' },
+  'tall-grass.png': { bg: 'tall-grass.jpg', modo: 'rosa_anda' },
+  'forest.png': { bg: 'forest.jpg', modo: 'rosa_anda' },
+  'industrial.png': { bg: 'industrial.jpg', modo: 'rosa_anda' },
+  'sea.png': { bg: 'sea.jpg', modo: 'rosa_anda' },
+  'ice-mountain.png': { bg: 'ice-mountain.png', modo: 'rosa_anda' },
+  'mountain.png': { bg: 'mountain.jpg', modo: 'rosa_anda' },
+  'construction-site.png': { bg: 'construction-site.jpg', modo: 'rosa_anda' },
+  'swamp.png': { bg: 'swamp.jpg', modo: 'rosa_anda' },
+  'plains.png': { bg: 'plains.jpg', modo: 'rosa_anda' },
+  'beach.png': { bg: 'beach.jpg', modo: 'rosa_anda' },
+  'ruins.png': { bg: 'ruins.jpg', modo: 'rosa_anda' },
+  'jungle.png': { bg: 'jungle.jpg', modo: 'rosa_anda' },
+  'temple.png': { bg: 'temple.png', modo: 'rosa_anda' },
   // Pintada junto com as 17 acima mas nunca cadastrada — a sala 'cave' ficou
   // sem grade por esquecimento, nao por decisao. Sem marcador amarelo (a
   // arte e lava: amarelo incidental demais pra confiar num blob).
-  'cave-volcanic.png': { bg: 'cave-volcanic.jpg', modo: 'rosa_anda', spawn: 'centroide-rosa' },
+  'cave-volcanic.png': { bg: 'cave-volcanic.jpg', modo: 'rosa_anda' },
 
   // Leva 2026-08-18: 10 referencias novas, todas com circulo amarelo de
   // spawn pintado.
-  'ice-cave.png': { bg: 'ice-cave.jpg', modo: 'rosa_anda', spawn: 'amarelo' },
-  'fairy-cave.png': { bg: 'fairy-cave.jpg', modo: 'rosa_anda', spawn: 'amarelo' },
-  'island.png': { bg: 'island.jpg', modo: 'rosa_anda', spawn: 'amarelo' },
-  'lake.png': { bg: 'lake.jpg', modo: 'rosa_anda', spawn: 'amarelo' },
-  'metropolis.png': { bg: 'metropolis.jpg', modo: 'rosa_anda', spawn: 'amarelo' },
-  'slum.png': { bg: 'slum.jpg', modo: 'rosa_anda', spawn: 'amarelo' },
-  'wasteland.png': { bg: 'wasteland.jpg', modo: 'rosa_anda', spawn: 'amarelo' },
-  'town-night.png': { bg: 'town-night.jpg', modo: 'rosa_anda', spawn: 'amarelo' },
-  'town.png': { bg: 'town.jpg', modo: 'rosa_anda', spawn: 'amarelo' },
-  'volcano.png': { bg: 'volcano.jpg', modo: 'rosa_anda', spawn: 'amarelo' },
+  'ice-cave.png': { bg: 'ice-cave.jpg', modo: 'rosa_anda' },
+  'fairy-cave.png': { bg: 'fairy-cave.jpg', modo: 'rosa_anda' },
+  'island.png': { bg: 'island.jpg', modo: 'rosa_anda' },
+  'lake.png': { bg: 'lake.jpg', modo: 'rosa_anda' },
+  'metropolis.png': { bg: 'metropolis.jpg', modo: 'rosa_anda' },
+  'slum.png': { bg: 'slum.jpg', modo: 'rosa_anda' },
+  'wasteland.png': { bg: 'wasteland.jpg', modo: 'rosa_anda' },
+  'town-night.png': { bg: 'town-night.jpg', modo: 'rosa_anda' },
+  'town.png': { bg: 'town.jpg', modo: 'rosa_anda' },
+  'volcano.png': { bg: 'volcano.jpg', modo: 'rosa_anda' },
 };
 
 const cols = Math.ceil(MAP_BOUNDS.width / CELL_SIZE);
@@ -232,16 +252,16 @@ function centroide(width, height, rgba, testeDeCor) {
   return n > 0 ? { x: somaX / n, y: somaY / n, n } : null;
 }
 
-// Um blob amarelo menor que isto e ruido da propria arte (flor, lampada,
-// reflexo), nao o circulo que o usuario pintou — os circulos reais medem de
-// 2200 a 4700 px nesta leva, e o maior ruido medido numa referencia SEM
-// marcador (meadow.png) fica na casa das centenas.
+// Um blob amarelo menor que isto nao e o circulo pintado. Com o teste de cor
+// estrito a margem e enorme: circulo real vai de 2144 a 4512 px, e o maior
+// falso-positivo em TODAS as 29 referencias e de 16 px. 1200 fica no meio do
+// vazio — nem um circulo pequeno escapa, nem um respingo entra.
 const MIN_PIXELS_DO_MARCADOR = 1200;
 
 const resultados = {};
 const avisos = [];
 
-for (const [refFile, { bg, modo, spawn }] of Object.entries(MANIFESTO)) {
+for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
   const refPath = path.join(refDir, refFile);
   const bgPath = path.join(bgDir, bg);
   if (!fs.existsSync(refPath)) { console.warn(`Pulando ${refFile}: referencia nao encontrada`); continue; }
@@ -294,36 +314,67 @@ for (const [refFile, { bg, modo, spawn }] of Object.entries(MANIFESTO)) {
     throw new Error(`${refFile}: nenhuma celula andavel — nada pintado dentro da janela visivel do mapa.`);
   }
 
-  // 2) Ponto de spawn. O marcador amarelo so vale se for um blob grande o
-  //    bastante pra ser pintura E cair dentro do mapa: o usuario pinta na
-  //    imagem inteira (2048^2), mas so a faixa central dela vira mundo (o
-  //    aviso abaixo diz qual faixa e). Marcador invalido cai no centroide
-  //    rosa, que e sempre uma area de verdade.
+  // 2) Ponto de spawn.
+  //
+  //    O CIRCULO MANDA SEMPRE QUE EXISTIR — inclusive quando cai fora da
+  //    janela visivel do mapa, que e o caso dos 10 desta leva.
+  //
+  //    Por que ele cai fora: a arte e 2048x2048 e o mundo e 1400x900, entao o
+  //    desenho cobre o mundo com sobra e SO a faixa central da imagem
+  //    (x[149..1899] y[462..1587] num 2048^2) aparece na tela. O usuario pinta
+  //    olhando a imagem inteira, e os 10 circulos estao de 30 a 370 px de
+  //    imagem fora dessa faixa — a maioria no rodape, dois na lateral.
+  //
+  //    A versao anterior DESCARTAVA esses e caia no centroide rosa, o que joga
+  //    fora a unica coisa que o circulo carrega: a INTENCAO DE ONDE. Um
+  //    circulo no canto inferior direito quer dizer "nasce no canto inferior
+  //    direito", e o centroide rosa manda pro meio do mapa.
+  //
+  //    Agora o ponto e projetado (clamp) pra dentro do retangulo do mundo, e o
+  //    snap do passo 3 acha a celula andavel mais proxima dali. Direcao
+  //    preservada, ponto sempre valido. Pintar dentro da faixa continua sendo
+  //    melhor — ai o ponto e exato em vez de aproximado —, e o aviso diz
+  //    quanto cada um saiu e qual e a faixa boa.
   const areaRosa = centroide(width, height, rgba, isPink);
   let spawnImg = null;
   let origemDoSpawn = 'centroide rosa';
-  if (spawn === 'amarelo') {
-    const blob = maiorBlob(width, height, rgba, isYellow);
-    const mundo = blob && paraMundo(blob.x, blob.y);
-    if (!blob || blob.pixels < MIN_PIXELS_DO_MARCADOR) {
-      avisos.push(`${refFile}: marcador amarelo ausente ou pequeno demais (${blob ? blob.pixels : 0}px < ${MIN_PIXELS_DO_MARCADOR}px) — caiu no centroide da area rosa.`);
-    } else if (!dentroDoMapa(mundo)) {
-      avisos.push(
-        `${refFile}: circulo amarelo em img(${blob.x | 0},${blob.y | 0}) cai FORA do mundo — daria (${mundo.x.toFixed(0)},${mundo.y.toFixed(0)}) ` +
-        `num mapa de ${MAP_BOUNDS.width}x${MAP_BOUNDS.height}. Caiu no centroide da area rosa. ` +
-        `So o recorte x[${Math.round((0 - originX) / escala)}..${Math.round((MAP_BOUNDS.width - originX) / escala)}] ` +
-        `y[${Math.round((0 - originY) / escala)}..${Math.round((MAP_BOUNDS.height - originY) / escala)}] da imagem vira mundo.`,
-      );
-    } else {
-      spawnImg = blob;
-      origemDoSpawn = 'amarelo';
-    }
+  const blobAmarelo = maiorBlob(width, height, rgba, isYellow);
+  if (blobAmarelo && blobAmarelo.pixels >= MIN_PIXELS_DO_MARCADOR) {
+    spawnImg = blobAmarelo;
+    origemDoSpawn = 'amarelo';
+  } else if (blobAmarelo) {
+    avisos.push(
+      `${refFile}: ha tinta amarela mas o maior blob tem so ${blobAmarelo.pixels}px (< ${MIN_PIXELS_DO_MARCADOR}px) — ` +
+      'tratado como ruido da arte, nao como marcador. Caiu no centroide da area rosa.',
+    );
   }
   if (!spawnImg) {
-    if (!areaRosa) throw new Error(`${refFile}: sem marcador amarelo valido e sem area rosa pra cair de volta.`);
+    if (!areaRosa) throw new Error(`${refFile}: sem marcador amarelo e sem area rosa pra cair de volta.`);
     spawnImg = areaRosa;
   }
   let { x: spawnWorldX, y: spawnWorldY } = paraMundo(spawnImg.x, spawnImg.y);
+
+  if (origemDoSpawn === 'amarelo' && !dentroDoMapa({ x: spawnWorldX, y: spawnWorldY })) {
+    const antesX = spawnWorldX, antesY = spawnWorldY;
+    // Uma celula de margem, nao a borda crua. A grade tem 23 fileiras de 40px
+    // cobrindo um mapa de 900px, entao a ultima fileira vai de 880 a 920 e o
+    // centro dela cai em y=900 — a borda EXATA do mundo. Clampar em 0/900
+    // punha o nascimento colado nela: o POKE aparece na beirada da tela com
+    // o mapa inteiro atras dele. Recuar CELL_SIZE mantem a direcao (o desvio
+    // e de uma celula num deslocamento de dezenas) e nasce dentro do mapa.
+    const margem = CELL_SIZE;
+    spawnWorldX = Math.min(Math.max(spawnWorldX, margem), MAP_BOUNDS.width - margem);
+    spawnWorldY = Math.min(Math.max(spawnWorldY, margem), MAP_BOUNDS.height - margem);
+    origemDoSpawn = 'amarelo projetado';
+    const faixaX = `${Math.round((0 - originX) / escala)}..${Math.round((MAP_BOUNDS.width - originX) / escala)}`;
+    const faixaY = `${Math.round((0 - originY) / escala)}..${Math.round((MAP_BOUNDS.height - originY) / escala)}`;
+    avisos.push(
+      `${refFile}: circulo amarelo em img(${blobAmarelo.x | 0},${blobAmarelo.y | 0}) cai fora da janela visivel ` +
+      `(daria ${antesX.toFixed(0)},${antesY.toFixed(0)} num mundo de ${MAP_BOUNDS.width}x${MAP_BOUNDS.height}). ` +
+      `Projetado pra ${spawnWorldX.toFixed(0)},${spawnWorldY.toFixed(0)} — a DIRECAO que voce marcou vale, o ponto e aproximado. ` +
+      `Pra ficar exato, pinte dentro de x[${faixaX}] y[${faixaY}] da imagem.`,
+    );
+  }
 
   // 3) Snap: o ponto acima e um centroide, entao pode cair numa reentrancia
   //    bloqueada do proprio traco (ou fora do retangulo). Busca a celula
@@ -394,13 +445,35 @@ for (const [refFile, { bg, modo, spawn }] of Object.entries(MANIFESTO)) {
     );
   }
 
-  resultados[`assets/hunt-backgrounds/${bg}`] = { grid: rowStrings, spawnPoint: { x: spawnWorldX, y: spawnWorldY } };
+  // `spawnOrigem` vai pro arquivo gerado de proposito: sem ele, um circulo
+  // amarelo que a deteccao deixasse de enxergar viraria centroide rosa em
+  // silencio — o mapa continua jogavel, o spawn so muda de lugar, e ninguem
+  // olha. Com o campo, `data/walkBlock.test.ts` compara contra a lista de quem
+  // tem circulo pintado, e a regressao vira teste vermelho.
+  resultados[`assets/hunt-backgrounds/${bg}`] = {
+    grid: rowStrings,
+    spawnPoint: { x: spawnWorldX, y: spawnWorldY },
+    spawnOrigem: origemDoSpawn === 'centroide rosa' ? 'centroide-rosa'
+      : origemDoSpawn === 'amarelo projetado' ? 'amarelo-projetado' : 'amarelo',
+  };
 }
 
 if (avisos.length) {
   console.log('\nAVISOS:');
   for (const a of avisos) console.log(`  - ${a}`);
 }
+
+// Resumo do marcador de spawn. Existe porque o proximo circulo vai ser
+// pintado por quem nao leu este arquivo: a linha abaixo diz, sem abrir nada,
+// quantas artes ja tem circulo e o que fazer pra dar circulo a mais uma.
+const comCirculo = Object.values(resultados).filter((r) => r.spawnOrigem !== 'centroide-rosa').length;
+const total = Object.keys(resultados).length;
+console.log(`\nSPAWN: ${comCirculo} das ${total} artes nascem de circulo amarelo pintado; ` +
+  `as outras ${total - comCirculo} nascem no centroide da area rosa.`);
+console.log('Pra dar circulo a mais uma: pinte um circulo de AMARELO CHAPADO (254,242,0),');
+console.log('de uns 60px de diametro, na referencia em scripts/body-block-refs/ e rode este');
+console.log('script de novo — nao ha nada pra cadastrar. `node scripts/conferir-walk-block.mjs`');
+console.log('gera o gabarito com a moldura do que aparece na tela.');
 
 const header = `// AUTO-GERADO por \`node scripts/build-sub-bioma-collision.js\` a partir das
 // referencias pintadas a mao em scripts/body-block-refs/*.png.
@@ -415,6 +488,17 @@ const header = `// AUTO-GERADO por \`node scripts/build-sub-bioma-collision.js\`
 export interface ColisaoPintada {
   grid: string[];
   spawnPoint: { x: number; y: number };
+  /**
+   * De onde saiu o spawnPoint.
+   *
+   *   'amarelo'            circulo pintado, dentro da janela visivel. Exato.
+   *   'amarelo-projetado'  circulo pintado FORA da janela visivel (a arte e
+   *                        maior que o mundo e so a faixa central dela
+   *                        aparece na tela). A DIRECAO que o circulo indica
+   *                        vale; o ponto foi trazido pra borda mais proxima.
+   *   'centroide-rosa'     sem circulo — nasce no meio da area andavel.
+   */
+  spawnOrigem: 'amarelo' | 'amarelo-projetado' | 'centroide-rosa';
 }
 
 export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = ${JSON.stringify(resultados, null, 2)};

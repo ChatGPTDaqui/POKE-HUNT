@@ -4,9 +4,27 @@
 // se a grade esta ALINHADA com a pintura — desalinhamento nao lanca erro
 // nenhum, so vira parede invisivel no lugar errado.
 //
-// Sai em scripts/body-block-refs/_conferencia/<arte>.png. A pasta comeca com
-// "_" e fica fora de assets/ de proposito: e material de diagnostico, nao
-// entra no site publicado.
+// Gera DUAS imagens por arte:
+//
+//   _conferencia/<arte>.png           a janela que vira mundo, com a grade
+//                                     por cima. Serve pra conferir o que ja
+//                                     foi pintado.
+//   _conferencia/gabarito/<arte>.png  a referencia INTEIRA, com tudo que
+//                                     fica fora da janela escurecido e a
+//                                     moldura marcada. Serve pra pintar o
+//                                     proximo circulo NO LUGAR CERTO.
+//
+// O gabarito existe porque a arte e maior que o mundo: um PNG de 2048x2048
+// vira 1638x1638 de mundo contra um mapa de 1400x900, entao sobra imagem
+// nos quatro lados e SO a faixa central aparece na tela. Quem pinta olhando
+// a imagem inteira nao tem como adivinhar onde essa faixa termina — foi o
+// que aconteceu com os 10 circulos de spawn da leva 2026-08-18, todos
+// pintados de 30 a 370 px fora dela. O jogo agora projeta o circulo pra
+// borda mais proxima e a direcao vale, mas dentro da moldura o ponto e
+// exato.
+//
+// A pasta comeca com "_" e fica fora de assets/ de proposito: e material de
+// diagnostico, nao entra no site publicado.
 //
 //   node scripts/conferir-walk-block.mjs
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
@@ -76,7 +94,16 @@ function png(width, height, rgba) {
   ]);
 }
 
+const gabaritoDir = join(saidaDir, 'gabarito');
 mkdirSync(saidaDir, { recursive: true });
+mkdirSync(gabaritoDir, { recursive: true });
+
+// Largura da borda da moldura, em pixels da imagem de saida.
+const BORDA = 3;
+
+// A imagem inteira reduzida pra caber num visualizador sem esforco. 1024 de
+// lado maior mantem o circulo (52-76 px na original) visivel com folga.
+const GABARITO_LADO = 1024;
 const alvos = process.argv.slice(2);
 
 for (const [ref, arte] of Object.entries(PARES)) {
@@ -117,5 +144,48 @@ for (const [ref, arte] of Object.entries(PARES)) {
     }
   }
   writeFileSync(join(saidaDir, `${arte.replace(/\.(jpg|png)$/, '')}.png`), png(W, H, saida));
-  console.log(`${arte} -> _conferencia/${arte.replace(/\.(jpg|png)$/, '')}.png`);
+
+  // --- Gabarito: a imagem INTEIRA, com a janela visivel emoldurada. ---
+  //
+  // A janela em coordenadas de IMAGEM e o retangulo cujos cantos, levados
+  // pro mundo pela mesma transformacao do desenho, dao (0,0) e
+  // (LARGURA, ALTURA). Invertendo: ix = (wx - ox) / escala.
+  const janela = {
+    x0: (0 - ox) / escala, y0: (0 - oy) / escala,
+    x1: (LARGURA - ox) / escala, y1: (ALTURA - oy) / escala,
+  };
+  const reducao = Math.max(width, height) / GABARITO_LADO;
+  const GW = Math.round(width / reducao), GH = Math.round(height / reducao);
+  const gab = Buffer.alloc(GW * GH * 4);
+  for (let sy = 0; sy < GH; sy++) {
+    for (let sx = 0; sx < GW; sx++) {
+      const ix = Math.round(sx * reducao), iy = Math.round(sy * reducao);
+      let r = 0, g = 0, b = 0;
+      if (ix < width && iy < height) {
+        const i = (iy * width + ix) * 4;
+        r = rgba[i]; g = rgba[i + 1]; b = rgba[i + 2];
+      }
+      const dentro = ix >= janela.x0 && ix <= janela.x1 && iy >= janela.y0 && iy <= janela.y1;
+      // Fora da janela: escurece forte. Nao apaga — o usuario precisa ver o
+      // que ele pintou la fora pra entender que aquilo nao chega na tela.
+      if (!dentro) { r = (r * 0.28) | 0; g = (g * 0.28) | 0; b = (b * 0.28) | 0; }
+      // Moldura ciano: cor que nao existe nem na tinta rosa nem na amarela.
+      const naBorda =
+        (Math.abs(ix - janela.x0) < BORDA * reducao || Math.abs(ix - janela.x1) < BORDA * reducao)
+          ? iy >= janela.y0 - BORDA * reducao && iy <= janela.y1 + BORDA * reducao
+          : (Math.abs(iy - janela.y0) < BORDA * reducao || Math.abs(iy - janela.y1) < BORDA * reducao)
+            && ix >= janela.x0 - BORDA * reducao && ix <= janela.x1 + BORDA * reducao;
+      if (naBorda) { r = 0; g = 255; b = 255; }
+      const o = (sy * GW + sx) * 4;
+      gab[o] = Math.min(255, r); gab[o + 1] = Math.min(255, g); gab[o + 2] = Math.min(255, b); gab[o + 3] = 255;
+    }
+  }
+  writeFileSync(join(gabaritoDir, `${arte.replace(/\.(jpg|png)$/, '')}.png`), png(GW, GH, gab));
+
+  const origem = COLISAO[chave].spawnOrigem ?? '?';
+  console.log(`${arte.padEnd(24)} spawn ${String(origem).padEnd(18)} -> _conferencia/ + gabarito/`);
 }
+
+console.log('\nNo gabarito, a moldura ciano e o que aparece na tela. Circulo amarelo');
+console.log('pintado FORA dela e projetado pra borda mais proxima: a direcao vale, o');
+console.log('ponto e aproximado.');
