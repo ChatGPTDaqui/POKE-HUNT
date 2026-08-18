@@ -1042,6 +1042,7 @@ export type Database = {
           active_team_index: number
           auto_catch_config: Json
           auto_pot_rules: Json
+          auto_sell_config: Json
           auto_status_config: Json
           auto_toggles: Json
           created_at: string
@@ -1061,6 +1062,7 @@ export type Database = {
           active_team_index?: number
           auto_catch_config?: Json
           auto_pot_rules?: Json
+          auto_sell_config?: Json
           auto_status_config?: Json
           auto_toggles?: Json
           created_at?: string
@@ -1080,6 +1082,7 @@ export type Database = {
           active_team_index?: number
           auto_catch_config?: Json
           auto_pot_rules?: Json
+          auto_sell_config?: Json
           auto_status_config?: Json
           auto_toggles?: Json
           created_at?: string
@@ -1659,6 +1662,7 @@ export type Database = {
         Args: { p_aceitar: boolean; p_mensagem_id: string }
         Returns: Json
       }
+      tem_outra_sessao_de_auth_ativa: { Args: never; Returns: boolean }
       tirar_da_equipe: { Args: { p_poke_id: string }; Returns: Json }
       usar_item: { Args: { p_item_id: string }; Returns: Json }
       vender_item: {

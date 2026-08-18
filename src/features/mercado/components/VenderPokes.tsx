@@ -6,8 +6,12 @@ import { rarityOf } from '@/data/rarity'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { GameButton, GameCard, GameCheck, GameInput, GameSelect, SectionLabel } from '@/components/game/controls'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
+import { useMochila } from '@/features/bag/useMochila'
+import { EstadoDaMochila } from '@/features/bag/EstadoDaMochila'
 
 export function VenderPokes() {
+  // Mochila sob demanda: anunciar exige a lista, entao esta tela a pede.
+  const { carregada } = useMochila()
   const bagPokes = useGameStateStore((s) => s.bagPokes)
   const [uid, setUid] = useState('')
   const [preco, setPreco] = useState(5000)
@@ -19,6 +23,8 @@ export function VenderPokes() {
   // mochila por engano, e anunciar e sair da mochila.
   const elegiveis = bagPokes.filter((p) => !p.locked && SPECIES[p.speciesId])
   const escolhido = elegiveis.find((p) => p.uid === uid) ?? elegiveis[0]
+
+  if (!carregada) return <EstadoDaMochila />
 
   if (elegiveis.length === 0) {
     return <p className="text-n500">Nenhum POKE destravado na mochila para anunciar.</p>

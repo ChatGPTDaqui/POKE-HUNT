@@ -13,6 +13,20 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '7.1',
+    date: '2026-08-18',
+    title: 'Bot de auto-venda, mochila que carrega ao abrir a tela, e o jogo trafegando ~50x menos dado',
+    highlights: [
+      'NOVO BOT: AUTO-VENDA, na tela da Mochila. Ligue e marque as raridades que voce quer vender: a captura e vendida NA HORA, antes de entrar na mochila, e o ouro cai direto na carteira. SHINY NUNCA E VENDIDO, mesmo com a raridade dele marcada — a regra vive no motor do jogo, nao na tela, entao nao ha jeito de contornar por engano. POKE que ja esta guardado na mochila nao e tocado; o bot decide so sobre a captura nova.',
+      'POR QUE VENDER NA CAPTURA, E NAO VARRENDO A MOCHILA: porque assim a mochila nunca chega a encher. Era o problema de fundo — o auto-catch despeja tudo nela e nada sai sozinho. Uma conta real chegou a 5035 POKEs guardados.',
+      'A CAUSA RAIZ DE UM CUSTO QUE QUASE DERRUBOU O JOGO: a cada 30 segundos (e a cada 5, quando voce subia de nivel) o servidor lia e devolvia a SUA MOCHILA INTEIRA pra simular a caçada — 3,23 MB por leitura numa conta de 5 mil POKEs. Um unico jogador ativo queimava ~2 GB por hora de trafego; tres jogadores fecharam o dia 17/08 em 49,59 GB contra uma cota mensal de 5 GB. A caçada nunca precisou da mochila (a simulacao so ADICIONA captura nela), entao ela saiu do caminho.',
+      'MEDIDO DEPOIS DA CORRECAO, na mesma conta: o pacote de cada liquidacao de caçada caiu de 225.711 para 5.077 bytes, e o do carregamento da pagina de 226.184 para 4.575. Numa conta de 5 mil POKEs a diferenca e maior ainda — o pacote novo nao cresce com o tamanho da mochila.',
+      'A MOCHILA AGORA CARREGA QUANDO VOCE ABRE A TELA, e nao mais junto do jogo. Entrar no jogo ficou mais leve; em troca, na primeira vez que voce abre Mochila, Loja (aba Pokemons) ou "Anunciar POKE" no Mercado, aparece "Carregando a mochila..." por um instante. Quem nunca abre essas telas nao paga esse custo em sessao nenhuma.',
+      'A LISTA NOVA E PAGINADA E CONFERE O TOTAL COM O BANCO. O limite de 1000 linhas por consulta ja e menor que duas mochilas reais do jogo (1328 e 813 POKEs), e ele corta a lista SEM dar erro — como as telas que leem essa lista oferecem venda em lote, uma mochila cortada pela metade seria indistinguivel de "vendi tudo". Se o total nao bater, a tela avisa em vez de mostrar lista curta.',
+      'INVESTIGADO, NENHUM DEFEITO ENCONTRADO: vender POKE no meio de uma caçada nao perde ouro. A suspeita era concreta (a venda soma ao ouro enquanto a caçada regrava o total, e as duas podem acontecer no mesmo segundo), e foi medida no jogo publicado — 26 rodadas disparando venda dentro da janela de liquidacao, com quatro atrasos diferentes: zero divergencia de ouro e zero caçada descartada. A protecao que segura isso ganhou testes permanentes pra continuar assim.',
+    ],
+  },
+  {
     version: '7.0',
     date: '2026-08-15',
     title: 'Hunt de Treinamento pra medir a forca do time, trava de golpes de volta em hunt, e o icone que sumia ao desligar',

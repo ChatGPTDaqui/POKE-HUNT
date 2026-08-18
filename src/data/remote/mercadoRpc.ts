@@ -8,6 +8,7 @@
 import { supabase } from '@/lib/supabase'
 import { ErroServidor } from './servidor'
 import { useGameStateStore } from '@/stores/gameStateStore'
+import { mochilaCarregada } from '@/stores/mochilaStore'
 import { rowToPoke } from './playerMapper'
 import type {
   AnuncioMercado, NegocioMercado, NivelDePreco, OfertaMercado, OfertaRecebida, OrdemMercado, ResumoItemMercado,
@@ -62,6 +63,10 @@ async function refetchAposAnuncio(pokeUid?: string): Promise<void> {
   await refetchCarteira()
   if (!pokeUid) return
   const { data } = await db.from('pokemon_instances').select('*').eq('id', pokeUid).maybeSingle()
+  // Sem a mochila carregada nao ha lista local pra reconciliar (ver
+  // mochilaStore): inserir um POKE numa lista vazia faria a tela da Mochila
+  // mostrar UM POKE numa conta de milhares. A abertura da tela busca a verdade.
+  if (!mochilaCarregada()) return
   useGameStateStore.setState((s) => {
     if (!data || data.location !== 'bag') return { bagPokes: s.bagPokes.filter((p) => p.uid !== pokeUid) }
     const poke = rowToPoke(data)

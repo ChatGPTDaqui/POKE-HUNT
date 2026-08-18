@@ -18,19 +18,20 @@ import { useToastStore } from '@/stores/toastStore'
 // Sem ciclo em runtime: os modulos de `data/remote` so importam TIPOS deste
 // arquivo (`import type`, apagado na compilacao).
 import { postgresStorage, flushAgora, ultimoSavedAt, aoFalharSave } from '@/data/remote/gameStatePersistence'
+import { registrarCapturaPredita } from '@/data/remote/predicoesDeCaptura'
 // Tipos/defaults puros do save, sem import de `data/remote/*` — extraidos pro
 // `#engine` (edge/server) poder reexportar sem trazer o client Supabase de
 // browser pro bundle da Edge Function (PH-6, incidente de boot). Ver
 // gameStateDefaults.ts pro porque.
 import {
   MAX_TEAM_SIZE, defaultGameStateData, defaultUnlockedMaps,
-  DEFAULT_AUTO_POT_RULES, DEFAULT_AUTO_CATCH_CONFIG,
-  type AutoPotRule, type AutoCatchConfig, type AutoCatchRule,
+  DEFAULT_AUTO_POT_RULES, DEFAULT_AUTO_CATCH_CONFIG, DEFAULT_AUTO_SELL_CONFIG,
+  type AutoPotRule, type AutoCatchConfig, type AutoCatchRule, type AutoSellConfig,
   type PerfStats, type TrainerInfo, type PokedexKillCount, type GameStateData,
 } from '@/stores/gameStateDefaults'
 
 export { MAX_TEAM_SIZE, defaultGameStateData }
-export type { AutoPotRule, AutoCatchConfig, AutoCatchRule, PerfStats, TrainerInfo, PokedexKillCount, GameStateData }
+export type { AutoPotRule, AutoCatchConfig, AutoCatchRule, AutoSellConfig, PerfStats, TrainerInfo, PokedexKillCount, GameStateData }
 
 export interface GameStateActions {
   setActiveIndex: (index: number) => void
@@ -96,6 +97,7 @@ export interface GameStateActions {
   updateAutoPotRule: (index: number, patch: Partial<AutoPotRule>) => void
   removeAutoPotRule: (index: number) => void
   setAutoCatchConfig: (patch: Partial<AutoCatchConfig>) => void
+  setAutoSellConfig: (patch: Partial<AutoSellConfig>) => void
   addAutoCatchRule: (rule: AutoCatchRule) => void
   updateAutoCatchRule: (index: number, patch: Partial<AutoCatchRule>) => void
   removeAutoCatchRule: (index: number) => void
@@ -330,6 +332,12 @@ export const useGameStateStore = create<GameStateStore>()(
 
       // Toda captura cai na mochila; mover pro time e acao manual do jogador.
       addCapturedPoke: (pokeInstance) => {
+        // Sob autoridade do servidor, ESTA captura e predicao: quem grava e o
+        // flush, com `uid` proprio. Marcar aqui — no unico ponto do cliente por
+        // onde toda captura passa — e o que permite trocar a predicao pela
+        // linha real sem exibir o mesmo POKE duas vezes. Ver
+        // `predicoesDeCaptura.ts`.
+        registrarCapturaPredita(pokeInstance.uid)
         set((state) => ({ bagPokes: [...state.bagPokes, detachPoke(pokeInstance)] }))
         return 'bag'
       },
@@ -500,6 +508,10 @@ export const useGameStateStore = create<GameStateStore>()(
         set((state) => ({ autoCatchConfig: { ...state.autoCatchConfig, ...patch } }))
       },
 
+      setAutoSellConfig: (patch) => {
+        set((state) => ({ autoSellConfig: { ...state.autoSellConfig, ...patch } }))
+      },
+
       addAutoCatchRule: (rule) => {
         set((state) => ({ autoCatchRules: [...state.autoCatchRules, rule] }))
       },
@@ -575,6 +587,10 @@ export const useGameStateStore = create<GameStateStore>()(
               : DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
           autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG, ...(persisted.autoCatchConfig || {}) },
           autoCatchRules: persisted.autoCatchRules || [],
+          // Save escrito antes desta leva nao tem a chave: cai no default
+          // DESLIGADO. Uma automacao que apaga POKE nao pode nascer ligada num
+          // save que ja existe.
+          autoSellConfig: { ...DEFAULT_AUTO_SELL_CONFIG, ...(persisted.autoSellConfig || {}) },
           perfStats: { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now(), ...(persisted.perfStats || {}) },
           trainer: { name: 'Treinador', level: 1, exp: 0, ...(persisted.trainer || {}) },
           pokedexKills: persisted.pokedexKills || {},

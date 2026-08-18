@@ -182,6 +182,10 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     autoPotRules: fromJson<AutoPotRule[]>(p.auto_pot_rules, defaults.autoPotRules),
     autoCatchConfig: fromJson<AutoCatchConfig>(p.auto_catch_config, defaults.autoCatchConfig),
     autoCatchRules,
+    // MERGE com o default pelo mesmo motivo do `autoToggles` acima: linha
+    // gravada antes desta coluna existir volta sem a chave, e um `undefined`
+    // aqui faria `config.raridades.includes(...)` estourar dentro da simulacao.
+    autoSellConfig: { ...defaults.autoSellConfig, ...fromJson(p.auto_sell_config, defaults.autoSellConfig) },
     // Item ausente do JSON = habilitado (o default e {}), entao nao precisa
     // do merge-com-default que `autoToggles` faz — ausencia ja E o estado
     // certo aqui.
@@ -209,6 +213,7 @@ export function gameStateToPlayerRow(userId: string, s: GameStateData): Tables['
     auto_toggles: toJson(s.autoToggles),
     auto_pot_rules: toJson(s.autoPotRules),
     auto_catch_config: toJson(s.autoCatchConfig),
+    auto_sell_config: toJson(s.autoSellConfig),
     auto_status_config: toJson(s.autoStatusConfig),
     perf_stats: toJson(s.perfStats),
   }

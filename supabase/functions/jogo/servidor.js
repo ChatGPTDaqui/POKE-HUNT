@@ -27744,7 +27744,10 @@ function getEffectiveness(moveType, defType1, defType2) {
 	if (!row) return 1;
 	return (defType1 in row ? row[defType1] : 1) * (defType2 && defType2 in row ? row[defType2] : 1);
 }
-var CAPTURE_ANIM_FRAME_DURATION = .07;
+var CAPTURE_ANIM_FRAME_DURATION_BY_BALL = { premier_ball: .26 };
+function captureAnimFrameDuration(ballItemId) {
+	return CAPTURE_ANIM_FRAME_DURATION_BY_BALL[ballItemId] ?? .07;
+}
 function captureAnimRowCount(success) {
 	return success ? 23 : 17;
 }
@@ -45335,10 +45338,76 @@ function updateMovement(world, dt) {
 	}
 }
 //#endregion
+//#region src/engine/systems/economySystem.ts
+var formulaEngine$3 = createFormulaEngine(FORMULAS);
+var POKEMON_SELL_DIVISOR = formulaEngine$3.eval("POKEMON_SELL_DIVISOR");
+var KILL_MONEY_DIVISOR = formulaEngine$3.eval("KILL_MONEY_DIVISOR");
+var STONE_DROP_CHANCE = formulaEngine$3.evalOrDefault("STONE_DROP_CHANCE", .05);
+var KILL_GOLD_MULTIPLIER = formulaEngine$3.evalOrDefault("KILL_GOLD_MULTIPLIER", 5);
+var GOLD_GLOBAL_MULTIPLIER = formulaEngine$3.evalOrDefault("GOLD_GLOBAL_MULTIPLIER", 1);
+var MIN_POKEMON_SELL_VALUE = formulaEngine$3.evalOrDefault("MIN_POKEMON_SELL_VALUE", 1e3);
+/**
+* Valor bruto de um POKE pela formula da planilha, SEM o piso de venda.
+*
+* Existe separado de `pokemonSellValue` porque o ouro por kill deriva do mesmo
+* numero (`MONEY_FOR_KILL = sellValue / killDivisor`). Aplicar o piso de 1000
+* aqui dentro nao subiria so o preco de venda: com o divisor atual (15) e os
+* multiplicadores de kill, o ouro por abate saltaria de ~5 para ~330 na hunt
+* inicial — 60x, sem ninguem ter pedido inflacao de farm. Piso e regra de
+* VENDA; deixar os dois na mesma funcao juntaria duas decisoes de
+* balanceamento que precisam poder andar separadas.
+*/
+function pokemonBaseValue(level, baseExp, rarityKey) {
+	const base = formulaEngine$3.eval("POKEMON_SELL_VALUE", {
+		level,
+		baseExp,
+		sellDivisor: POKEMON_SELL_DIVISOR
+	});
+	const multiplier = (rarityKey && RARITIES[rarityKey] || RARITIES.comum).sellMultiplier;
+	return Math.max(1, Math.floor(base * multiplier));
+}
+/**
+* Preco de venda: BASE + modificadores, nao `max(BASE, modificadores)`.
+*
+* A diferenca e o pedido explicito desta leva. Com `max`, os 1000 de piso
+* ENGOLIAM todo o resto ate a formula passar de 1000 sozinha — na pratica um
+* POKE comum de nivel 40 valia o mesmo que um de nivel 1, e nivel/raridade so
+* comecavam a valer bem depois. Somando, cada modificador continua rendendo
+* desde o primeiro nivel e o piso vira o que ele diz ser: o valor de um POKE
+* sem nenhum diferencial.
+*/
+function pokemonSellValue(level, baseExp, rarityKey) {
+	return MIN_POKEMON_SELL_VALUE + pokemonBaseValue(level, baseExp, rarityKey);
+}
+function awardKillLoot(rng, gameState, enemy, mapDef, drops = mapDef.itemDrops) {
+	const species = SPECIES[enemy.poke.speciesId];
+	const sellValue = pokemonBaseValue(enemy.poke.level, species.baseExp, enemy.poke.rarity);
+	const baseGold = Math.max(1, Math.floor(formulaEngine$3.eval("MONEY_FOR_KILL", {
+		sellValue,
+		killDivisor: KILL_MONEY_DIVISOR
+	})));
+	const gold = Math.max(1, Math.round(baseGold * KILL_GOLD_MULTIPLIER * GOLD_GLOBAL_MULTIPLIER));
+	gameState.addGold(gold);
+	const droppedItems = [];
+	for (const drop of drops) if (rollChance(rng, drop.chance)) {
+		gameState.addItem(drop.itemId, 1);
+		droppedItems.push(drop.itemId);
+	}
+	if (rollChance(rng, STONE_DROP_CHANCE)) {
+		const stoneId = stoneItemId(species.type);
+		gameState.addItem(stoneId, 1);
+		droppedItems.push(stoneId);
+	}
+	return {
+		gold,
+		droppedItems
+	};
+}
+//#endregion
 //#region src/engine/systems/captureSystem.ts
 var CAPTURE_LEVEL = 1;
-var formulaEngine$3 = createFormulaEngine(FORMULAS);
-var GLOBAL_CATCH_MULTIPLIER = formulaEngine$3.eval("GLOBAL_CATCH_MULTIPLIER");
+var formulaEngine$2 = createFormulaEngine(FORMULAS);
+var GLOBAL_CATCH_MULTIPLIER = formulaEngine$2.eval("GLOBAL_CATCH_MULTIPLIER");
 var STATUS_BONUS_SEM_STATUS = 1;
 /**
 * Chance de captura pela cadeia da Gen VII: taxa modificada -> probabilidade de
@@ -45351,7 +45420,7 @@ var STATUS_BONUS_SEM_STATUS = 1;
 * qualquer captura futura com o alvo vivo passa a funcionar sozinha.
 */
 function catchChance(catchRate, ballMultiplier, hpAtual, hpMax) {
-	const a = formulaEngine$3.eval("CATCH_MODIFIED_RATE", {
+	const a = formulaEngine$2.eval("CATCH_MODIFIED_RATE", {
 		hpMax: Math.max(1, hpMax),
 		hpAtual: clamp(hpAtual, 0, Math.max(1, hpMax)),
 		catchRate,
@@ -45359,12 +45428,24 @@ function catchChance(catchRate, ballMultiplier, hpAtual, hpMax) {
 		statusBonus: STATUS_BONUS_SEM_STATUS,
 		catchMultiplier: GLOBAL_CATCH_MULTIPLIER
 	});
-	const shakeProbability = formulaEngine$3.eval("CATCH_SHAKE_PROBABILITY", { a });
-	const shakes = formulaEngine$3.eval("CATCH_SHAKES");
-	return clamp(formulaEngine$3.eval("CATCH_CHANCE", {
+	const shakeProbability = formulaEngine$2.eval("CATCH_SHAKE_PROBABILITY", { a });
+	const shakes = formulaEngine$2.eval("CATCH_SHAKES");
+	return clamp(formulaEngine$2.eval("CATCH_CHANCE", {
 		shakeProbability,
 		shakes
 	}), 0, 1);
+}
+/**
+* A auto-venda pega ESTA captura?
+*
+* Shiny fica fora sempre, independente da raridade marcada — decisao explicita
+* do usuario, e a unica regra do bot que nao e configuravel. Um shiny escapando
+* por engano e irreversivel.
+*/
+function autoVendeEstaCaptura(config, poke) {
+	if (!config?.ligado) return false;
+	if (poke.isShiny) return false;
+	return config.raridades.includes(poke.rarity);
 }
 function attemptCapture(rng, gameState, defeatedPoke, ballItemId) {
 	const ball = getItem(ballItemId);
@@ -45397,6 +45478,18 @@ function attemptCapture(rng, gameState, defeatedPoke, ballItemId) {
 		activeAbilities: activeAbilitiesPadrao(species, CAPTURE_LEVEL),
 		status: null
 	};
+	if (autoVendeEstaCaptura(gameState.autoSellConfig, newPoke)) {
+		const valor = pokemonSellValue(newPoke.level, species.baseExp, newPoke.rarity);
+		gameState.addGold(valor);
+		return {
+			success: true,
+			location: "vendido",
+			vendidoPor: valor,
+			chance,
+			poke: newPoke,
+			ballItemId
+		};
+	}
 	gameState.addCapturedPoke(newPoke);
 	return {
 		success: true,
@@ -45507,9 +45600,9 @@ function maybeAutoCatch(rng, gameState, defeatedPoke) {
 }
 //#endregion
 //#region src/engine/systems/progressionSystem.ts
-var formulaEngine$2 = createFormulaEngine(FORMULAS);
-var XP_GLOBAL_MULTIPLIER = formulaEngine$2.evalOrDefault("XP_GLOBAL_MULTIPLIER", .1);
-var DEATH_EXP_LOSS_PERCENT = formulaEngine$2.evalOrDefault("DEATH_EXP_LOSS_PERCENT", .05);
+var formulaEngine$1 = createFormulaEngine(FORMULAS);
+var XP_GLOBAL_MULTIPLIER = formulaEngine$1.evalOrDefault("XP_GLOBAL_MULTIPLIER", .1);
+var DEATH_EXP_LOSS_PERCENT = formulaEngine$1.evalOrDefault("DEATH_EXP_LOSS_PERCENT", .05);
 /**
 * XP por abate, pela formula escalada da Gen VII.
 *
@@ -45525,7 +45618,7 @@ var DEATH_EXP_LOSS_PERCENT = formulaEngine$2.evalOrDefault("DEATH_EXP_LOSS_PERCE
 */
 function expRewardForEnemy(enemyPoke, winnerLevel) {
 	const species = SPECIES[enemyPoke.speciesId];
-	const base = formulaEngine$2.eval("EXP_GAIN", {
+	const base = formulaEngine$1.eval("EXP_GAIN", {
 		baseExp: species.baseExp,
 		level: enemyPoke.level,
 		winnerLevel
@@ -45631,59 +45724,6 @@ function applyDeathExpPenalty(pokeInstance) {
 		},
 		leveledDown,
 		level
-	};
-}
-//#endregion
-//#region src/engine/systems/economySystem.ts
-var formulaEngine$1 = createFormulaEngine(FORMULAS);
-var POKEMON_SELL_DIVISOR = formulaEngine$1.eval("POKEMON_SELL_DIVISOR");
-var KILL_MONEY_DIVISOR = formulaEngine$1.eval("KILL_MONEY_DIVISOR");
-var STONE_DROP_CHANCE = formulaEngine$1.evalOrDefault("STONE_DROP_CHANCE", .05);
-var KILL_GOLD_MULTIPLIER = formulaEngine$1.evalOrDefault("KILL_GOLD_MULTIPLIER", 5);
-var GOLD_GLOBAL_MULTIPLIER = formulaEngine$1.evalOrDefault("GOLD_GLOBAL_MULTIPLIER", 1);
-formulaEngine$1.evalOrDefault("MIN_POKEMON_SELL_VALUE", 1e3);
-/**
-* Valor bruto de um POKE pela formula da planilha, SEM o piso de venda.
-*
-* Existe separado de `pokemonSellValue` porque o ouro por kill deriva do mesmo
-* numero (`MONEY_FOR_KILL = sellValue / killDivisor`). Aplicar o piso de 1000
-* aqui dentro nao subiria so o preco de venda: com o divisor atual (15) e os
-* multiplicadores de kill, o ouro por abate saltaria de ~5 para ~330 na hunt
-* inicial — 60x, sem ninguem ter pedido inflacao de farm. Piso e regra de
-* VENDA; deixar os dois na mesma funcao juntaria duas decisoes de
-* balanceamento que precisam poder andar separadas.
-*/
-function pokemonBaseValue(level, baseExp, rarityKey) {
-	const base = formulaEngine$1.eval("POKEMON_SELL_VALUE", {
-		level,
-		baseExp,
-		sellDivisor: POKEMON_SELL_DIVISOR
-	});
-	const multiplier = (rarityKey && RARITIES[rarityKey] || RARITIES.comum).sellMultiplier;
-	return Math.max(1, Math.floor(base * multiplier));
-}
-function awardKillLoot(rng, gameState, enemy, mapDef, drops = mapDef.itemDrops) {
-	const species = SPECIES[enemy.poke.speciesId];
-	const sellValue = pokemonBaseValue(enemy.poke.level, species.baseExp, enemy.poke.rarity);
-	const baseGold = Math.max(1, Math.floor(formulaEngine$1.eval("MONEY_FOR_KILL", {
-		sellValue,
-		killDivisor: KILL_MONEY_DIVISOR
-	})));
-	const gold = Math.max(1, Math.round(baseGold * KILL_GOLD_MULTIPLIER * GOLD_GLOBAL_MULTIPLIER));
-	gameState.addGold(gold);
-	const droppedItems = [];
-	for (const drop of drops) if (rollChance(rng, drop.chance)) {
-		gameState.addItem(drop.itemId, 1);
-		droppedItems.push(drop.itemId);
-	}
-	if (rollChance(rng, STONE_DROP_CHANCE)) {
-		const stoneId = stoneItemId(species.type);
-		gameState.addItem(stoneId, 1);
-		droppedItems.push(stoneId);
-	}
-	return {
-		gold,
-		droppedItems
 	};
 }
 //#endregion
@@ -45894,7 +45934,7 @@ function recordPokedexKill(gameState, speciesId, isShiny) {
 	gameState.setPokedexKillEntry(speciesId, next);
 }
 //#endregion
-//#region node_modules/zustand/esm/vanilla.mjs
+//#region ../../../node_modules/zustand/esm/vanilla.mjs
 var createStoreImpl = (createState) => {
 	let state;
 	const listeners = /* @__PURE__ */ new Set();
@@ -45923,7 +45963,7 @@ var createStoreImpl = (createState) => {
 };
 var createStore = ((createState) => createState ? createStoreImpl(createState) : createStoreImpl);
 //#endregion
-//#region node_modules/react/cjs/react.production.js
+//#region ../../../node_modules/react/cjs/react.production.js
 /**
 * @license React
 * react.production.js
@@ -45986,7 +46026,7 @@ var require_react_production = /* @__PURE__ */ __commonJSMin(((exports) => {
 	};
 }));
 //#endregion
-//#region node_modules/zustand/esm/react.mjs
+//#region ../../../node_modules/zustand/esm/react.mjs
 var import_react = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_production();
 })))(), 1);
@@ -46004,7 +46044,7 @@ var createImpl = (createState) => {
 };
 var create = ((createState) => createState ? createImpl(createState) : createImpl);
 //#endregion
-//#region node_modules/immer/dist/immer.mjs
+//#region ../../../node_modules/immer/dist/immer.mjs
 var NOTHING = Symbol.for("immer-nothing");
 var DRAFTABLE = Symbol.for("immer-draftable");
 var DRAFT_STATE = Symbol.for("immer-state");
@@ -46617,7 +46657,7 @@ function currentImpl(value) {
 }
 var produce = new Immer2().produce;
 //#endregion
-//#region node_modules/zustand/esm/middleware/immer.mjs
+//#region ../../../node_modules/zustand/esm/middleware/immer.mjs
 var immerImpl = (initializer) => (set, get, store) => {
 	store.setState = (updater, replace, ...args) => {
 		return set(typeof updater === "function" ? produce(updater) : updater, replace, ...args);
@@ -46914,6 +46954,7 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 		return {
 			gold: 0,
 			xp: 0,
+			ouroDeAutoVenda: 0,
 			leveledUp: false,
 			trainerLeveledUp: false,
 			isShiny: Boolean(enemy.poke.isShiny),
@@ -46931,9 +46972,10 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 	const loot = awardKillLoot(world.rng, gameState, enemy, world.mapDef, lootAtivo(world.sala, world.mapDef.itemDrops));
 	const captureResult = world.mapDef.noCatch ? null : maybeAutoCatch(world.rng, gameState, enemy.poke);
 	recordPokedexKill(gameState, enemy.poke.speciesId, Boolean(enemy.poke.isShiny));
+	const ouroDeAutoVenda = captureResult?.success && captureResult.location === "vendido" ? captureResult.vendidoPor : 0;
 	if (!silent) {
 		recordKill(gameState, {
-			gold: loot.gold,
+			gold: loot.gold + ouroDeAutoVenda,
 			xp: expGain,
 			isShiny: enemy.poke.isShiny
 		});
@@ -46983,25 +47025,27 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 				ballItemId: captureResult.ballItemId,
 				success: captureResult.success,
 				delay: 4,
-				duration: rowCount * CAPTURE_ANIM_FRAME_DURATION + .3
+				duration: rowCount * captureAnimFrameDuration(captureResult.ballItemId) + .3
 			}));
 		}
 		if (captureResult) {
-			if (captureResult.success) {
-				const location = captureResult.location === "bag" ? "mochila" : captureResult.location;
+			if (captureResult.success && captureResult.location === "vendido") useToastStore.getState().pushToast(`${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
+			else if (captureResult.success) {
+				const location = "mochila";
 				const raridade = rarityOf(captureResult.poke).label;
 				useToastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
 			} else if (captureResult.reason === "roll_failed") useToastStore.getState().pushToast("A captura falhou!", "capture-fail", "combat");
 		}
 	}
 	return {
-		gold: loot.gold,
+		gold: loot.gold + ouroDeAutoVenda,
+		ouroDeAutoVenda,
 		xp: expGain,
 		leveledUp: grantResult.leveledUp,
 		trainerLeveledUp: trainerResult.leveledUp,
 		isShiny: Boolean(enemy.poke.isShiny),
-		captured: Boolean(captureResult && captureResult.success),
-		capturedPoke: captureResult && captureResult.success ? captureResult.poke : null,
+		captured: Boolean(captureResult?.success && captureResult.location === "bag"),
+		capturedPoke: captureResult?.success && captureResult.location === "bag" ? captureResult.poke : null,
 		droppedItems: loot.droppedItems
 	};
 }
@@ -47146,6 +47190,8 @@ function createEmptySummary() {
 		captures: [],
 		shinySeen: 0,
 		shinyCaptured: 0,
+		autoVendidos: 0,
+		ouroDeAutoVenda: 0,
 		itemsGained: {},
 		itemsConsumed: {},
 		pokeLeveledUp: false,
@@ -47185,6 +47231,10 @@ function simulateWorldSeconds({ world, gameState, seconds, stepSeconds, stepFn, 
 			if (result.leveledUp) summary.pokeLeveledUp = true;
 			if (result.trainerLeveledUp) summary.trainerLeveledUp = true;
 			if (result.isShiny) summary.shinySeen += 1;
+			if (result.ouroDeAutoVenda > 0) {
+				summary.autoVendidos += 1;
+				summary.ouroDeAutoVenda += result.ouroDeAutoVenda;
+			}
 			if (result.captured && result.capturedPoke) {
 				summary.captures.push({
 					speciesId: result.capturedPoke.speciesId,
@@ -47246,6 +47296,10 @@ var DEFAULT_AUTO_CATCH_CONFIG = {
 	catchShinyEnabled: true,
 	shinyBallId: "great_ball"
 };
+var DEFAULT_AUTO_SELL_CONFIG = {
+	ligado: false,
+	raridades: []
+};
 function defaultUnlockedMaps() {
 	return Object.values(MAPS).filter((map) => !map.unlockCost).map((map) => map.id);
 }
@@ -47271,6 +47325,10 @@ function defaultGameStateData() {
 		autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
 		autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
 		autoCatchRules: [],
+		autoSellConfig: {
+			...DEFAULT_AUTO_SELL_CONFIG,
+			raridades: []
+		},
 		autoStatusConfig: {},
 		perfStats: {
 			gold: 0,
@@ -47377,6 +47435,10 @@ function snapshotToGameState(snap, defaults) {
 		autoPotRules: fromJson(p.auto_pot_rules, defaults.autoPotRules),
 		autoCatchConfig: fromJson(p.auto_catch_config, defaults.autoCatchConfig),
 		autoCatchRules,
+		autoSellConfig: {
+			...defaults.autoSellConfig,
+			...fromJson(p.auto_sell_config, defaults.autoSellConfig)
+		},
 		autoStatusConfig: fromJson(p.auto_status_config, defaults.autoStatusConfig),
 		perfStats: fromJson(p.perf_stats, defaults.perfStats),
 		trainer: {
@@ -47402,6 +47464,7 @@ function gameStateToPlayerRow(userId, s) {
 		auto_toggles: toJson(s.autoToggles),
 		auto_pot_rules: toJson(s.autoPotRules),
 		auto_catch_config: toJson(s.autoCatchConfig),
+		auto_sell_config: toJson(s.autoSellConfig),
 		auto_status_config: toJson(s.autoStatusConfig),
 		perf_stats: toJson(s.perfStats)
 	};
@@ -47519,6 +47582,9 @@ function criarEstadoDoJogador(dados) {
 			},
 			get autoCatchRules() {
 				return s.autoCatchRules;
+			},
+			get autoSellConfig() {
+				return s.autoSellConfig;
 			},
 			get autoStatusConfig() {
 				return s.autoStatusConfig;
@@ -47673,6 +47739,12 @@ function criarEstadoDoJogador(dados) {
 			setAutoCatchConfig: (patch) => {
 				s.autoCatchConfig = {
 					...s.autoCatchConfig,
+					...patch
+				};
+			},
+			setAutoSellConfig: (patch) => {
+				s.autoSellConfig = {
+					...s.autoSellConfig,
 					...patch
 				};
 			},
@@ -47840,10 +47912,12 @@ async function aguardarFlushEmAndamento(cfg, userId) {
 		await dormir(INTERVALO_DE_SONDAGEM_MS);
 	}
 }
-async function lerSnapshot(cfg, userId) {
+async function lerSnapshot(cfg, userId, opcoes = {}) {
+	const comBag = opcoes.comBag !== false;
+	const filtroDeLocal = comBag ? "" : "&location=eq.team";
 	const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
 		selecionar(cfg, `players?user_id=eq.${userId}&select=*`),
-		selecionarTudo(cfg, `pokemon_instances?user_id=eq.${userId}&select=*&order=id`),
+		selecionarTudo(cfg, `pokemon_instances?user_id=eq.${userId}${filtroDeLocal}&select=*&order=id`),
 		selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=*`),
 		selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=*`),
 		selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=*`)
@@ -47859,11 +47933,12 @@ async function lerSnapshot(cfg, userId) {
 		}, defaultGameStateData()),
 		pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)),
 		entregas: [],
-		playerUpdatedAt: player[0].updated_at
+		playerUpdatedAt: player[0].updated_at,
+		bagCarregada: comBag
 	};
 }
-async function carregarEstado(cfg, userId) {
-	return (await lerSnapshot(cfg, userId)).estado;
+async function carregarEstado(cfg, userId, opcoes = {}) {
+	return (await lerSnapshot(cfg, userId, opcoes)).estado;
 }
 /**
 * Como `carregarEstado`, mas tambem REIVINDICA as entregas pendentes do
@@ -47874,8 +47949,8 @@ async function carregarEstado(cfg, userId) {
 * perderia o credito. Por isso `/sessao/abrir` (que so valida a intencao)
 * continua usando `carregarEstado` cru.
 */
-async function carregarEstadoParaEscrita(cfg, userId) {
-	const snapshot = await lerSnapshot(cfg, userId);
+async function carregarEstadoParaEscrita(cfg, userId, opcoes = {}) {
+	const snapshot = await lerSnapshot(cfg, userId, opcoes);
 	const entregas = await reivindicarEntregas(cfg, userId);
 	if (entregas.length) aplicarEntregasNoEstado(snapshot.estado, entregas);
 	snapshot.entregas = entregas;
@@ -47893,7 +47968,7 @@ async function carregarEstadoParaEscrita(cfg, userId) {
 */
 async function comEstadoParaEscrita(cfg, userId, fn, opcoes = {}) {
 	if (opcoes.esperarFlush !== false) await aguardarFlushEmAndamento(cfg, userId);
-	const ctx = await carregarEstadoParaEscrita(cfg, userId);
+	const ctx = await carregarEstadoParaEscrita(cfg, userId, { comBag: opcoes.comBag });
 	try {
 		return await fn(ctx);
 	} catch (erro) {
@@ -47985,7 +48060,7 @@ async function comRetryDeColisao(fn) {
 * (sai de `now()` menos `last_flush_at`), nem quantos kills houve, nem quanto
 * ouro. O cliente so declarou, na abertura da sessao, em qual hunt esta.
 */
-async function aplicarFlush(cfg, userId, sessao) {
+async function aplicarFlush(cfg, userId, sessao, opcoes = {}) {
 	const agora = Date.now();
 	const bruto = (agora - new Date(sessao.last_flush_at).getTime()) / 1e3;
 	const segundos = Math.max(0, Math.min(bruto, MAX_SEGUNDOS_POR_FLUSH));
@@ -48004,7 +48079,10 @@ async function aplicarFlush(cfg, userId, sessao) {
 			});
 			if (!resultado) await devolverEntregas(cfg, ctx.entregas);
 			return resultado;
-		}, { esperarFlush: false }));
+		}, {
+			esperarFlush: false,
+			comBag: opcoes.comBag === true
+		}));
 	} finally {
 		await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { flushing_since: null });
 	}
@@ -48124,16 +48202,37 @@ function criarApp(cfg) {
 		return resposta;
 	};
 }
+/**
+* O cliente sabe lidar com um `estado` que traz so as capturas da janela em
+* `bagPokes`, em vez da mochila inteira?
+*
+* Isto e uma trava de COMPATIBILIDADE, nao uma opcao de produto: uma aba aberta
+* antes deste deploy faz `setState(estado)` cru e ficaria com a Mochila vazia na
+* tela ate o proximo F5. Ela declara `{"parcial":true}` no corpo; cliente antigo
+* manda corpo vazio e continua recebendo o estado inteiro.
+*
+* Custo de ler o corpo: nenhum — as duas rotas que usam isto nao tinham corpo.
+* Corpo ausente/invalido cai em `false`, o lado seguro.
+*/
+async function aceitaEstadoParcial(req) {
+	return (await req.json().catch(() => null))?.parcial === true;
+}
 async function rotear(cfg, req, url) {
 	if (url.pathname === "/saude") return json({ ok: true });
 	const jogador = await autenticar(cfg, req);
 	if (url.pathname === "/sessao/abrir" && req.method === "POST") return abrirSessao(cfg, jogador.id, req);
-	if (url.pathname === "/sessao/flush" && req.method === "POST") return flush(cfg, jogador.id);
-	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id);
-	if (url.pathname === "/estado" && req.method === "GET") return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas }) => {
-		if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt);
-		return json({ estado });
-	});
+	if (url.pathname === "/sessao/flush" && req.method === "POST") return flush(cfg, jogador.id, await aceitaEstadoParcial(req));
+	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id, await aceitaEstadoParcial(req));
+	if (url.pathname === "/estado" && req.method === "GET") {
+		const parcial = url.searchParams.get("parcial") === "1";
+		return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas }) => {
+			if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt);
+			return json({
+				estado,
+				estadoParcial: parcial
+			});
+		}, { comBag: !parcial });
+	}
 	return json({ erro: "rota desconhecida" }, 404);
 }
 /**
@@ -48172,7 +48271,7 @@ async function abrirSessao(cfg, userId, req) {
 	const pokeUid = corpo?.pokeUid;
 	if (!mapId || !pokeUid) throw new ErroHttp(400, "mapId e pokeUid sao obrigatorios");
 	if (!MAPS[mapId]) throw new ErroHttp(400, "hunt desconhecida");
-	const estado = await carregarEstado(cfg, userId);
+	const estado = await carregarEstado(cfg, userId, { comBag: false });
 	const poke = estado.team.find((p) => p.uid === pokeUid);
 	if (!poke) throw new ErroHttp(403, "este POKE nao esta na sua equipe");
 	if (poke.hp <= 0) throw new ErroHttp(409, "Seu POKE esta desmaiado. Cure na Enfermeira antes de cacar.");
@@ -48220,10 +48319,10 @@ async function abrirSessao(cfg, userId, req) {
 		iniciadaEm: criada.last_flush_at
 	});
 }
-async function flush(cfg, userId) {
+async function flush(cfg, userId, parcial) {
 	const sessao = await sessaoAberta(cfg, userId);
 	if (!sessao) throw new ErroHttp(409, "nenhuma sessao aberta");
-	const resultado = await aplicarFlush(cfg, userId, sessao);
+	const resultado = await aplicarFlush(cfg, userId, sessao, { comBag: !parcial });
 	if (resultado === "ocupado") return json({
 		segundosCreditados: 0,
 		truncado: false,
@@ -48233,7 +48332,8 @@ async function flush(cfg, userId) {
 			ouroAdicionado: 0,
 			xpAdicionado: 0
 		},
-		estado: await carregarEstado(cfg, userId)
+		estadoParcial: parcial,
+		estado: await carregarEstado(cfg, userId, { comBag: !parcial })
 	});
 	if (!resultado) {
 		await sairDaHunt(cfg, userId, sessao.id);
@@ -48247,19 +48347,21 @@ async function flush(cfg, userId) {
 		piso: resultado.piso,
 		sessaoEncerrada: resultado.encerrada,
 		sala: resultado.sala,
+		estadoParcial: parcial,
 		estado: resultado.estado
 	});
 }
-async function fechar(cfg, userId) {
+async function fechar(cfg, userId, parcial) {
 	const sessao = await sessaoAberta(cfg, userId);
 	if (!sessao) return json({ fechada: false });
-	const resultado = await aplicarFlush(cfg, userId, sessao);
+	const resultado = await aplicarFlush(cfg, userId, sessao, { comBag: !parcial });
 	await sairDaHunt(cfg, userId, sessao.id);
 	if (!resultado || resultado === "ocupado") return json({ fechada: false });
 	return json({
 		fechada: true,
 		resumo: resultado.resumo,
 		piso: resultado.piso,
+		estadoParcial: parcial,
 		estado: resultado.estado
 	});
 }

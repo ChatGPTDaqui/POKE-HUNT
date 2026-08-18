@@ -8,6 +8,7 @@
 // o usuario pra nao pagar o preco de reconsultar equipe+mochila+pokedex
 // inteiros numa acao tao pequena quanto travar um item.
 import { supabase } from '@/lib/supabase'
+import { mochilaCarregada, useMochilaStore } from '@/stores/mochilaStore'
 import { rowToPoke } from './playerMapper'
 import { useGameStateStore, type GameStateData } from '@/stores/gameStateStore'
 import { ErroServidor } from './servidor'
@@ -116,6 +117,11 @@ async function refetchPoke(pokeId: string): Promise<void> {
     if (data.location === 'team') {
       return { team: upsertPorUid(s.team, poke), bagPokes: s.bagPokes.filter((p) => p.uid !== pokeId) }
     }
+    // O POKE foi pra mochila. Sem a mochila carregada nao ha lista pra
+    // atualizar — inserir nela faria a tela da Mochila mostrar UM POKE numa
+    // conta de milhares. O `carregar()` do `mochilaStore` traz a verdade quando
+    // a tela abrir.
+    if (!mochilaCarregada()) return { team: s.team.filter((p) => p.uid !== pokeId) }
     return { bagPokes: upsertPorUid(s.bagPokes, poke), team: s.team.filter((p) => p.uid !== pokeId) }
   })
 }
@@ -154,6 +160,12 @@ async function refetchTudo(): Promise<void> {
   const { loadPlayerState } = await import('./playerRepository')
   const resultado = await loadPlayerState(uid, useGameStateStore.getState() as GameStateData)
   if (resultado) useGameStateStore.setState(resultado.data)
+  // `loadPlayerState` le `pokemon_instances` sem paginar, entao a mochila que
+  // ele traz nao serve como verdade (o PostgREST corta em 1000 linhas sem
+  // erro). Invalidar forca a leitura paginada de verdade na proxima abertura da
+  // tela. Nos dois casos que usam isto — inicial e reset — a mochila esta
+  // vazia, mas o desenho nao pode depender disso.
+  useMochilaStore.getState().invalidar()
 }
 
 // --- despacho por tipo de acao -----------------------------------------------

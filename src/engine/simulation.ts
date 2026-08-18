@@ -415,7 +415,7 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
       recordKill(gameState, { gold: 0, xp: 0, isShiny: Boolean(enemy.poke.isShiny) })
     }
     return {
-      gold: 0, xp: 0, leveledUp: false, trainerLeveledUp: false,
+      gold: 0, xp: 0, ouroDeAutoVenda: 0, leveledUp: false, trainerLeveledUp: false,
       isShiny: Boolean(enemy.poke.isShiny), captured: false, capturedPoke: null, droppedItems: [],
     }
   }
@@ -434,8 +434,16 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
   const captureResult = world.mapDef!.noCatch ? null : maybeAutoCatch(world.rng, gameState, enemy.poke)
   recordPokedexKill(gameState, enemy.poke.speciesId, Boolean(enemy.poke.isShiny))
 
+  // Ouro que a auto-venda gerou neste abate. Ja esta na carteira (creditado
+  // dentro de `attemptCapture`); daqui pra baixo ele entra nas MEDIDAS — taxa
+  // de ouro/h e resumo —, senao o jogador com o bot ligado veria a barra de
+  // ouro andar sem a taxa acompanhar.
+  const ouroDeAutoVenda = captureResult?.success && captureResult.location === 'vendido'
+    ? captureResult.vendidoPor
+    : 0
+
   if (!silent) {
-    recordKill(gameState, { gold: loot.gold, xp: expGain, isShiny: enemy.poke.isShiny })
+    recordKill(gameState, { gold: loot.gold + ouroDeAutoVenda, xp: expGain, isShiny: enemy.poke.isShiny })
 
     world.effects.push(createWorldEffect(world.counters, {
       type: 'rewardText', x: enemy.x, y: enemy.y,
@@ -487,8 +495,18 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
     }
 
     if (captureResult) {
-      if (captureResult.success) {
-        const location = captureResult.location === 'bag' ? 'mochila' : captureResult.location
+      if (captureResult.success && captureResult.location === 'vendido') {
+        // Toast proprio: dizer "capturado! Foi para a mochila" e depois nao ter
+        // nada na mochila e a forma mais rapida de o jogador achar que perdeu
+        // POKE. A raridade fica porque e ela que explica o valor.
+        useToastStore.getState().pushToast(
+          `${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`,
+          'capture-success', 'world',
+          realceDaRaridade(captureResult.poke),
+        )
+      } else if (captureResult.success) {
+        // So sobra `location: 'bag'` aqui — o outro caso saiu no `if` acima.
+        const location = 'mochila'
         // Raridade concatenada no relatorio (pedido explicito): ela multiplica
         // atributo e valor de venda em ate 600x, entao e o dado que decide se
         // aquela captura importou — e o chat era o unico lugar que nao dizia.
@@ -507,13 +525,17 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
   }
 
   return {
-    gold: loot.gold,
+    gold: loot.gold + ouroDeAutoVenda,
+    ouroDeAutoVenda,
     xp: expGain,
     leveledUp: grantResult.leveledUp,
     trainerLeveledUp: trainerResult.leveledUp,
     isShiny: Boolean(enemy.poke.isShiny),
-    captured: Boolean(captureResult && captureResult.success),
-    capturedPoke: captureResult && captureResult.success ? captureResult.poke : null,
+    // "Capturado" aqui significa ENTROU NA MOCHILA: o que a auto-venda pegou
+    // nunca chegou lá, e contá-lo como captura faria o relatório listar POKE
+    // que o jogador não tem.
+    captured: Boolean(captureResult?.success && captureResult.location === 'bag'),
+    capturedPoke: captureResult?.success && captureResult.location === 'bag' ? captureResult.poke : null,
     droppedItems: loot.droppedItems,
   }
 }

@@ -273,9 +273,23 @@ alheio por id.
 
 ---
 
-## Crédito de venda por `update players set gold = gold + X`
+## ~~Crédito de venda por `update players set gold = gold + X`~~ — REABILITADO
 
-**Descartado**, e é o invariante que sustenta o mercado inteiro. Ver
+**Foi descartado, e voltou.** Descartado no desenho em que `gravarEstado` gravava o snapshot
+absoluto **sem CAS**: ali o crédito incremental era mesmo apagado pelo flush seguinte, e o
+conserto foi a fila `market_deliveries`.
+
+O CAS em `players.updated_at` (PH-5) mudou a premissa. Com ele mais o trigger que avança
+`updated_at` em todo UPDATE, o flush que tentar gravar por cima acerta zero linhas, leva 409 e
+relê — o crédito sobrevive. A migração RPC-everything então adotou o incremento direto de
+propósito, em 13 RPCs, e a fila deixou de receber escrita nova.
+
+Medido em produção em 2026-08-18, 26 rodadas com venda disparada no meio de um flush (0, 50,
+400 e 800ms de atraso): zero divergência de ouro, zero flush descartado.
+
+Fica aqui, e não apagado, porque a frase "nunca credite por `gold = gold + X`" circulou como
+regra absoluta e ainda pode ser encontrada em contexto antigo. A regra **verdadeira** é
+condicional, e as condições estão em
 [08](08-social-e-mercado.md#o-invariante-que-sustenta-tudo-aqui).
 
 ---

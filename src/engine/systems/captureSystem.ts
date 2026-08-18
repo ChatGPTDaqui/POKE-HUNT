@@ -4,6 +4,7 @@ import { SPECIES, computeStatsAtLevel, pokeExpForLevel, novoPokeUid, type PokeIn
 import { getItem } from '@/data/items'
 import { activeAbilitiesPadrao, golpesAprendidosAte } from '@/data/activeAbilities'
 import { rollChance, clamp } from '@/core/random'
+import { pokemonSellValue } from './economySystem'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import type { GameStateStore } from '@/stores/gameStateStore'
@@ -52,6 +53,23 @@ export type CaptureResult =
   | { success: false; reason: 'invalid_ball' | 'no_ball' }
   | { success: false; reason: 'roll_failed'; chance: number; ballItemId: string }
   | { success: true; location: 'bag'; chance: number; poke: PokeInstance; ballItemId: string }
+  // Auto-venda ligada e a raridade marcada: o POKE foi capturado e vendido no
+  // mesmo instante, e NUNCA entrou na mochila. O ouro ja esta na carteira; quem
+  // chama so precisa disso pra reportar (toast, resumo, taxa de ouro/h).
+  | { success: true; location: 'vendido'; vendidoPor: number; chance: number; poke: PokeInstance; ballItemId: string }
+
+/**
+ * A auto-venda pega ESTA captura?
+ *
+ * Shiny fica fora sempre, independente da raridade marcada — decisao explicita
+ * do usuario, e a unica regra do bot que nao e configuravel. Um shiny escapando
+ * por engano e irreversivel.
+ */
+export function autoVendeEstaCaptura(config: GameStateStore['autoSellConfig'], poke: PokeInstance): boolean {
+  if (!config?.ligado) return false
+  if (poke.isShiny) return false
+  return config.raridades.includes(poke.rarity)
+}
 
 export function attemptCapture(rng: Rng, gameState: GameStateStore, defeatedPoke: PokeInstance, ballItemId: string): CaptureResult {
   const ball = getItem(ballItemId)
@@ -90,6 +108,17 @@ export function attemptCapture(rng: Rng, gameState: GameStateStore, defeatedPoke
     // coisa da luta a sobreviver, e o jogador comecaria devendo um Antidoto.
     status: null,
   }
+  // Auto-venda: o POKE nunca chega a entrar na mochila. Isto e o que impede a
+  // mochila de virar um deposito de milhares de POKEs nivel 1 — o problema que
+  // originou o bot (uma conta real chegou a 5035, e a mochila e o maior dado do
+  // jogador). Vender aqui, e nao varrendo a mochila depois, tambem e o unico
+  // desenho que nao obriga o flush a carregar a mochila de volta.
+  if (autoVendeEstaCaptura(gameState.autoSellConfig, newPoke)) {
+    const valor = pokemonSellValue(newPoke.level, species.baseExp, newPoke.rarity)
+    gameState.addGold(valor)
+    return { success: true, location: 'vendido', vendidoPor: valor, chance, poke: newPoke, ballItemId }
+  }
+
   gameState.addCapturedPoke(newPoke)
   return { success: true, location: 'bag', chance, poke: newPoke, ballItemId }
 }

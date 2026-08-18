@@ -11,11 +11,60 @@ import { useWorldStore } from '@/stores/worldStore'
 import { servidor, servidorAtivo, ErroServidor, detalheDeErro, type RespostaFlush } from './servidor'
 import { executarAcaoRpc } from './acoesRpc'
 import { flushAgora } from './gameStatePersistence'
+import {
+  ativarPredicoesDeCaptura, ehCapturaPredita, limparCapturasPreditas,
+} from './predicoesDeCaptura'
+import { mochilaCarregada } from '@/stores/mochilaStore'
 
-/** Substitui o estado local pelo que o servidor considera verdade. */
-export function aplicarEstadoDoServidor(estado: unknown): void {
+// Sem servidor nao ha nada pra reconciliar — a mochila local JA e a verdade.
+// Desligar so evita a lista de uids crescer a sessao inteira sem ninguem ler.
+ativarPredicoesDeCaptura(servidorAtivo())
+
+/**
+ * Substitui o estado local pelo que o servidor considera verdade.
+ *
+ * `parcial` = a resposta veio de `/sessao/flush` ou `/sessao/fechar` com o
+ * estado enxuto: `bagPokes` traz SO as capturas daquela janela, nao a mochila
+ * inteira (ver `OpcoesDeLeitura` em server/src/progresso.ts — o snapshot
+ * completo custava 3,2 MB por flush numa conta grande). Nesse caso a mochila
+ * local e preservada, menos as predicoes locais, que sao substituidas pelas
+ * linhas reais que vieram junto.
+ *
+ * Todo o RESTO do estado (ouro, XP, itens, time, pokedex) continua sendo
+ * substituido, parcial ou nao: nada disso e grande, e a regra "a verdade vem do
+ * servidor" nao muda.
+ */
+export function aplicarEstadoDoServidor(estado: unknown, parcial = false): void {
   if (!estado || typeof estado !== 'object') return
-  useGameStateStore.setState(estado as GameStateData)
+  const doServidor = estado as GameStateData
+  if (!parcial) {
+    limparCapturasPreditas()
+    useGameStateStore.setState(doServidor)
+    return
+  }
+  const novos = Array.isArray(doServidor.bagPokes) ? doServidor.bagPokes : []
+  // Mochila nao carregada nesta sessao (ver mochilaStore): nao ha lista local
+  // pra reconciliar, e guardar SO as capturas desta janela faria a tela mostrar
+  // "2 POKEs" numa conta de milhares. A mochila fica vazia de proposito — quem
+  // abrir a tela dispara a leitura paginada e recebe a verdade, capturas novas
+  // incluidas.
+  if (!mochilaCarregada()) {
+    useGameStateStore.setState({ ...doServidor, bagPokes: [] })
+    limparCapturasPreditas()
+    return
+  }
+  const idsNovos = new Set(novos.map((p) => p.uid))
+  useGameStateStore.setState((local) => ({
+    ...doServidor,
+    bagPokes: [
+      // Fora: o que era predicao (a linha real dela esta em `novos`) e qualquer
+      // uid que o servidor esteja mandando agora — sem o segundo filtro, um
+      // flush repetido pela camada de retry duplicaria a mesma captura.
+      ...local.bagPokes.filter((p) => !ehCapturaPredita(p.uid) && !idsNovos.has(p.uid)),
+      ...novos,
+    ],
+  }))
+  limparCapturasPreditas()
 }
 
 // Um erro de rede num flush de 30s vira um toast a cada 30s enquanto a
@@ -143,8 +192,8 @@ export async function abrirSessaoDeHunt(mapId: string, pokeUid: string): Promise
 export async function recarregarEstado(): Promise<void> {
   if (!servidorAtivo()) return
   try {
-    const { estado } = await servidor.estado()
-    aplicarEstadoDoServidor(estado)
+    const r = await servidor.estado()
+    aplicarEstadoDoServidor(r.estado, r.estadoParcial === true)
   } catch (erro) {
     reportarErro(erro)
   }
@@ -184,7 +233,7 @@ export async function liquidar(): Promise<void> {
   if (!servidorAtivo()) return
   try {
     const r = await servidor.flush()
-    aplicarEstadoDoServidor(r.estado)
+    aplicarEstadoDoServidor(r.estado, r.estadoParcial === true)
     // A sala do servidor manda. A simulacao local sorteia a propria (ela e
     // predicao e tem sequencia de sorteio propria), entao sem esta linha a
     // sala exibida seria um palpite — e o pool/loot que o jogador de fato
@@ -287,7 +336,7 @@ export async function fecharSessaoDeHunt(): Promise<void> {
   pararFlushPeriodico()
   try {
     const r = await servidor.fecharSessao()
-    if (r.estado) aplicarEstadoDoServidor(r.estado)
+    if (r.estado) aplicarEstadoDoServidor(r.estado, r.estadoParcial === true)
   } catch (erro) {
     reportarErro(erro)
   }
@@ -314,6 +363,7 @@ export function sincronizarAuto(): void {
       potRules: s.autoPotRules,
       catchRules: s.autoCatchRules,
       statusItems: s.autoStatusConfig,
+      sellConfig: s.autoSellConfig,
     },
   }).catch(reportarErro)
 }
@@ -340,7 +390,7 @@ export async function assentarSessaoPendente(): Promise<RespostaFlush['resumo'] 
   try {
     const r = await servidor.fecharSessao()
     if (!r.fechada) return null
-    if (r.estado) aplicarEstadoDoServidor(r.estado)
+    if (r.estado) aplicarEstadoDoServidor(r.estado, r.estadoParcial === true)
     return r.resumo ?? null
   } catch (erro) {
     reportarErro(erro)

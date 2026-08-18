@@ -65,6 +65,23 @@ export function criarApp(cfg: OpcoesApp) {
   }
 }
 
+/**
+ * O cliente sabe lidar com um `estado` que traz so as capturas da janela em
+ * `bagPokes`, em vez da mochila inteira?
+ *
+ * Isto e uma trava de COMPATIBILIDADE, nao uma opcao de produto: uma aba aberta
+ * antes deste deploy faz `setState(estado)` cru e ficaria com a Mochila vazia na
+ * tela ate o proximo F5. Ela declara `{"parcial":true}` no corpo; cliente antigo
+ * manda corpo vazio e continua recebendo o estado inteiro.
+ *
+ * Custo de ler o corpo: nenhum — as duas rotas que usam isto nao tinham corpo.
+ * Corpo ausente/invalido cai em `false`, o lado seguro.
+ */
+async function aceitaEstadoParcial(req: Request): Promise<boolean> {
+  const corpo = (await req.json().catch(() => null)) as { parcial?: unknown } | null
+  return corpo?.parcial === true
+}
+
 async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response> {
   if (url.pathname === '/saude') return json({ ok: true })
 
@@ -75,10 +92,10 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
     return abrirSessao(cfg, jogador.id, req)
   }
   if (url.pathname === '/sessao/flush' && req.method === 'POST') {
-    return flush(cfg, jogador.id)
+    return flush(cfg, jogador.id, await aceitaEstadoParcial(req))
   }
   if (url.pathname === '/sessao/fechar' && req.method === 'POST') {
-    return fechar(cfg, jogador.id)
+    return fechar(cfg, jogador.id, await aceitaEstadoParcial(req))
   }
   if (url.pathname === '/estado' && req.method === 'GET') {
     // Le E LIQUIDA as entregas pendentes do Mercado (uso interno, ver
@@ -90,10 +107,15 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
     // snapshot identico ao que acabou de ler) que so aumentava a chance de
     // colidir com um flush em andamento — metade do que causava progresso
     // regredindo em recarga perto do tique de 30s.
+    // `?parcial=1`: o cliente busca a mochila por conta propria (direto no
+    // PostgREST, quando abre uma tela que a usa) e nao quer os megabytes dela
+    // aqui. Medido: numa conta de 456 POKEs, 97,8% desta resposta era mochila.
+    // Sem o parametro, responde completo — cliente antigo depende disso.
+    const parcial = url.searchParams.get('parcial') === '1'
     return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas }) => {
       if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt)
-      return json({ estado })
-    })
+      return json({ estado, estadoParcial: parcial })
+    }, { comBag: !parcial })
   }
   return json({ erro: 'rota desconhecida' }, 404)
 }
@@ -142,7 +164,10 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
 
   if (!MAPS[mapId]) throw new ErroHttp(400, 'hunt desconhecida')
 
-  const estado = await carregarEstado(cfg, userId)
+  // `comBag: false`: esta rota so olha `team`, `unlockedMaps` e
+  // `unlockedContinents`. Nao devolve estado nenhum pro cliente, entao nao ha
+  // nem a questao de parcial — ler a mochila aqui era desperdicio puro.
+  const estado = await carregarEstado(cfg, userId, { comBag: false })
   const poke = estado.team.find((p) => p.uid === pokeUid)
   if (!poke) throw new ErroHttp(403, 'este POKE nao esta na sua equipe')
   if (poke.hp <= 0) {
@@ -191,17 +216,18 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
   return json({ sessaoId: criada.id, mapId, iniciadaEm: criada.last_flush_at })
 }
 
-async function flush(cfg: Config, userId: string): Promise<Response> {
+async function flush(cfg: Config, userId: string, parcial: boolean): Promise<Response> {
   const sessao = await sessaoAberta(cfg, userId)
   if (!sessao) throw new ErroHttp(409, 'nenhuma sessao aberta')
-  const resultado = await aplicarFlush(cfg, userId, sessao)
+  const resultado = await aplicarFlush(cfg, userId, sessao, { comBag: !parcial })
   if (resultado === FLUSH_OCUPADO) {
     return json({
       segundosCreditados: 0,
       truncado: false,
       resumo: createEmptySummary(),
       piso: { aplicado: false, ouroAdicionado: 0, xpAdicionado: 0 },
-      estado: await carregarEstado(cfg, userId),
+      estadoParcial: parcial,
+      estado: await carregarEstado(cfg, userId, { comBag: !parcial }),
     })
   }
   if (!resultado) {
@@ -218,15 +244,26 @@ async function flush(cfg: Config, userId: string): Promise<Response> {
     // Idem pra sala: o cliente sorteia a propria como predicao, e quem decidiu
     // o pool e o loot que de fato foram creditados foi esta aqui.
     sala: resultado.sala,
+    // `estadoParcial` anda SEMPRE junto de `estado`: e ele que diz ao cliente se
+    // `bagPokes` e a mochila inteira ou so as capturas desta janela. Mandar o
+    // estado sem a marca e a unica forma de esta otimizacao virar perda de dado
+    // na tela do jogador.
+    estadoParcial: parcial,
     estado: resultado.estado,
   })
 }
 
-async function fechar(cfg: Config, userId: string): Promise<Response> {
+async function fechar(cfg: Config, userId: string, parcial: boolean): Promise<Response> {
   const sessao = await sessaoAberta(cfg, userId)
   if (!sessao) return json({ fechada: false })
-  const resultado = await aplicarFlush(cfg, userId, sessao)
+  const resultado = await aplicarFlush(cfg, userId, sessao, { comBag: !parcial })
   await sairDaHunt(cfg, userId, sessao.id)
   if (!resultado || resultado === FLUSH_OCUPADO) return json({ fechada: false })
-  return json({ fechada: true, resumo: resultado.resumo, piso: resultado.piso, estado: resultado.estado })
+  return json({
+    fechada: true,
+    resumo: resultado.resumo,
+    piso: resultado.piso,
+    estadoParcial: parcial,
+    estado: resultado.estado,
+  })
 }

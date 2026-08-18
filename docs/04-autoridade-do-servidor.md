@@ -283,6 +283,65 @@ novo inicial funcionava depois de "Iniciar novo jogo". O caminho realmente alcan
 tirar da equipe o POKE que está caçando: a linha sobrevive (`location='bag'`), não há
 cascade, e a sessão fica apontando para um POKE fora da equipe.
 
+## Leitura parcial: o flush não carrega a mochila
+
+`lerSnapshot(cfg, userId, { comBag: false })` lê `pokemon_instances` filtrada por
+`location=eq.team`. É o modo que **todo flush** usa, e também `/sessao/abrir` e
+`GET /estado?parcial=1` — ou seja, hoje, todo caminho que um cliente atual percorre. O modo
+completo sobrou só para `GET /estado` **sem** o parâmetro, que é o que um cliente anterior a
+esta mudança pede.
+
+O cliente atual busca a mochila por conta própria, direto no PostgREST, quando abre uma tela
+que a usa (`mochilaRemota.ts` / `mochilaStore`) — assim a leitura atravessa **uma** perna de
+egress em vez de duas, e quem nunca abre a Mochila não paga por ela. Medido ao vivo na conta
+de teste (458 POKEs): `/estado?parcial=1` responde **4.575 bytes** contra **226.184** do modo
+completo.
+
+**Por que:** o snapshot completo cresce sem limite. Auto-catch despeja captura na mochila e
+nada sai sozinho. Medido em produção em 2026-08-17: uma conta com 5035 POKEs custava
+**3,23 MB por leitura**, e o flush lê a cada 30s — ou a cada 5s, quando `commitAgora`
+dispara por level-up (`INTERVALO_MINIMO_COMMIT_MS`). Um jogador ativo queimava ~2 GB/h de
+egress; três jogadores fecharam o dia em 23,5 GB de PostgREST + 2,4 GB de Functions, contra
+5 GB/mês de cota.
+
+**Por que é seguro:** a simulação de hunt só *adiciona* POKE na mochila
+(`addCapturedPoke`, um `push`). Vender, soltar, mover e anunciar são RPC — não passam por
+`aplicarFlush`. Então, no modo parcial:
+
+- `estado.bagPokes` começa vazio e termina contendo **só as capturas daquela janela** — que
+  é exatamente o conjunto que precisa ser gravado;
+- `pokeIdsNoLoad` fica com os ids do time, e como o diff de remoção de `gravarEstado` é
+  dirigido por ele (ver a seção abaixo), **nenhuma linha de mochila é alcançável por um
+  flush**. Trancado em `server/src/snapshotParcial.test.ts`.
+
+`ctx.bagCarregada` diz qual modo produziu o estado. `bagPokes` vazio com
+`bagCarregada: false` significa "não carregada", **não** "mochila vazia" — quem confundir os
+dois apaga a mochila do jogador.
+
+### O cliente reconcilia em vez de substituir
+
+A resposta do flush vem com `estadoParcial: true`. O cliente não pode mais trocar a mochila
+local pela resposta: ela traria só as capturas da janela. Também não pode somar, porque a
+mesma captura apareceria duas vezes — a simulação local roda o mesmo `captureSystem` como
+predição e gera `uid` próprio, diferente do que o servidor gravou.
+
+`predicoesDeCaptura.ts` guarda quais uids da mochila local são predição (registrados em
+`addCapturedPoke`, o único ponto do cliente por onde toda captura passa). Ao aplicar um
+estado parcial: sai a predição, entra a linha real, o resto da mochila fica. Antes desta
+mudança o mesmo efeito vinha de graça — a resposta trazia a mochila inteira e o `setState`
+jogava a predição fora junto.
+
+**Compatibilidade:** o modo enxuto só vale para quem pede — `{"parcial":true}` no corpo de
+`/sessao/flush` e `/sessao/fechar`, `?parcial=1` na query de `/estado`. Aba aberta antes do
+deploy não pede e continua recebendo o estado completo; sem isso ela ficaria com a Mochila
+vazia na tela até o F5. Medido ao vivo na conta de teste (456 POKEs): flush parcial
+**5.077 bytes**, flush completo **225.711 bytes**.
+
+`mochilaStore.carregada` é o que, no cliente, separa "o jogador não tem POKE guardado" de "a
+lista ainda não veio". Toda fusão de estado e todo refetch cirúrgico de RPC consulta essa
+chave antes de tocar em `bagPokes` — sem ela, as capturas de uma janela de flush viravam "a
+mochila inteira" numa conta de milhares.
+
 ## Gravação de estado
 
 `gravarEstado(cfg, userId, estado, pokeIdsNoLoad)` escreve o snapshot nas cinco tabelas:
@@ -497,9 +556,11 @@ autoridade continua sendo um flag só, não um por mecanismo.
   `refetchEquipeInteira`...) — só relê a tabela/coluna que aquela ação especificamente pode
   ter mudado, em vez de recarregar o jogador inteiro a cada compra.
 
-  A **sessão de hunt** (abrir/flush/fechar/estado) é a exceção que continua devolvendo o
-  snapshot inteiro — porque ela roda o motor de simulação de verdade, e o resultado de uma
-  simulação não tem como ser "cirurgicamente" relido, é o próprio propósito da chamada.
+  A **sessão de hunt** (abrir/flush/fechar/estado) é a exceção que continua devolvendo
+  estado — porque ela roda o motor de simulação de verdade, e o resultado de uma simulação
+  não tem como ser "cirurgicamente" relido, é o próprio propósito da chamada. Só `/estado`
+  devolve o snapshot **inteiro**; flush e fechar devolvem estado **parcial** (sem a mochila,
+  ver "Leitura parcial" acima).
 
 `gameStatePersistence.ts` é **onde o cliente deixa de ser autoritativo**: sob servidor,
 `setItem` faz early-return (não grava) e `getItem` lê do servidor. Sem esse return, o

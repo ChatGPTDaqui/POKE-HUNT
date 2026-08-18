@@ -17,6 +17,8 @@ import {
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
 import type { ConfirmRequest } from '@/stores/confirmDialogStore'
 import { fmt, toast } from '../utils'
+import { useMochila } from '@/features/bag/useMochila'
+import { EstadoDaMochila } from '@/features/bag/EstadoDaMochila'
 import type { PokeInstance, Species } from '@/data/pokes'
 
 function venderUmPoke(
@@ -48,6 +50,8 @@ function venderUmPoke(
 }
 
 export function PokemonsTab() {
+  // Mochila sob demanda: ela nao vem no carregamento da pagina.
+  const { carregada } = useMochila()
   const bagPokes = useGameStateStore((s) => s.bagPokes)
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const askConfirm = useConfirmDialogStore((s) => s.confirm)
@@ -226,8 +230,9 @@ export function PokemonsTab() {
       {ivMin > ivMax && (
         <p className="text-[.78em] text-warn">IV min maior que IV max — invertido automaticamente para filtrar.</p>
       )}
-      {bagPokes.length === 0 && <p className="text-n500">Nenhum POKE extra na mochila.</p>}
-      {bagPokes.length > 0 && filtered.length === 0 && (
+      {!carregada && <EstadoDaMochila />}
+      {carregada && bagPokes.length === 0 && <p className="text-n500">Nenhum POKE extra na mochila.</p>}
+      {carregada && bagPokes.length > 0 && filtered.length === 0 && (
         <p className="text-n500">Nenhum POKE corresponde aos filtros.</p>
       )}
 

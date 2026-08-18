@@ -59,6 +59,27 @@ Nenhum destes lança exceção quando quebra: HP negativo desenha barra vazia, i
 
 Passaram sem alteração no motor — são rede de segurança, não correção.
 
+## Mochila sob demanda e auto-venda
+
+Três arquivos, todos trancando falha que **não lança nada** — só mente na tela ou apaga POKE.
+
+`data/remote/mochilaRemota.test.ts` (4 casos) — o corte de 1000 linhas do PostgREST. Duas
+contas reais já passam disso (1328 e 813 POKEs) e o corte vem como `200 OK` com lista curta.
+Cobre: paginar acima de 1000, uma request só quando cabe, mochila vazia, e **estourar** quando
+o total declarado pelo banco não bate com o que chegou. Devolver lista curta em silêncio seria
+indistinguível de "o jogador vendeu tudo" — e as telas que leem essa lista oferecem venda em
+lote.
+
+`data/remote/estadoParcial.test.ts` (10 casos) — reconciliação do estado parcial. O que ele
+impede: a Mochila mostrando "2 POKEs" pra quem tem mil (as capturas da janela tratadas como se
+fossem a mochila), a mesma captura aparecendo duas vezes (predição local + linha real, uids
+diferentes), e predição órfã ficando na tela pra sempre.
+
+`engine/systems/autoVenda.test.ts` (8 casos) — a regra que apaga POKE em troca de ouro.
+Trancado: **shiny nunca vendido** (nem com a raridade marcada), nada vendido com o bot
+desligado, nada vendido fora da lista de raridades, bola consumida igual nos dois caminhos, e
+POKE vendido **não** entrando na mochila nem em `summary.captures`.
+
 ## Fluxo de loot
 
 `engine/lootFlow.test.ts`.
@@ -83,6 +104,26 @@ O teste roda a simulação real com auto-captura ligada e exige que **nenhum aba
 
 Sem o teste, a próxima refatoração que "simplificar" as duas funções numa só passa
 despercebida.
+
+### Crédito incremental de RPC vs escrita absoluta do flush
+
+`server/src/progresso.test.ts`, 3 casos. **13 RPCs** creditam por `gold = gold + X` enquanto
+`gravarEstado` grava o valor ABSOLUTO de um snapshot lido antes. O que impede a segunda de
+apagar a primeira é o CAS em `updated_at` mais o trigger que avança `updated_at` em todo
+UPDATE — ver [08](08-social-e-mercado.md#o-invariante-que-sustenta-tudo-aqui).
+
+1. Venda concorrente **não** é apagada: o CAS recusa a escrita velha e o retry soma as duas
+2. A recusa vem com **exatamente** `CONFLITO_ESCRITA_JOGADOR` — com outra mensagem,
+   `comRetryDeColisao` não a reconhece como colisão efêmera e joga fora a janela de caçada
+3. **Contrafactual:** a mesma sequência com o trigger neutralizado, mostrando o ouro sumindo
+   sem erro nenhum
+
+O caso 3 existe porque a proteção é invisível: nada no código de uma RPC diz que ela depende
+de um trigger. Quem tornar o trigger condicional um dia vê o caso 1 ficar vermelho e o caso 3
+explicando por quê.
+
+O que o teste **não** alcança: o trigger em si (é DB, e não há Postgres local aqui). Confira
+com o comando em [08](08-social-e-mercado.md#o-invariante-que-sustenta-tudo-aqui).
 
 ## Hunts
 
