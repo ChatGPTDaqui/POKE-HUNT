@@ -31,20 +31,34 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
 
-      - name: Schema remoto diverge do que as migrations do repo esperam?
-        # public E dev — o projeto tem os 2 (dev.config.toml:13), dev e o clone
-        # de teste (ver supabase/migrations/*_dev.sql). graphql_public fica de
-        # fora: e gerado automatico, nao e controlado por migration.
+      - name: Existe migration aplicada no remoto que nao existe local?
+        # NAO usa 'db diff' — ele reconstroi o banco do zero so com as
+        # migrations do repo (shadow database), e esse rebuild esta quebrado
+        # pra este projeto: o schema `dev` (~30 tabelas) foi clonado de
+        # `public` fora da trilha de migration muito antes de qualquer
+        # convencao de arquivo _dev existir, entao o replay historico falha
+        # ("schema dev does not exist") pra QUALQUER schema, nao so dev.
+        # Consertar isso e cirurgia de historico, fora de escopo aqui.
+        #
+        # 'migration list --linked' faz a pergunta certa sem precisar
+        # reconstruir nada: compara os arquivos locais contra o que o
+        # Supabase tem registrado como aplicado. Pega os dois lados do
+        # mesmo incidente — migration commitada e nunca aplicada, E
+        # (o caso mais perigoso) migration aplicada direto sem nunca virar
+        # arquivo commitado.
         run: |
-          supabase db diff --linked --schema public --schema dev > /tmp/schema-diff.sql
-          if [ -s /tmp/schema-diff.sql ]; then
-            echo "::error::Schema remoto diverge das migrations em supabase/migrations/."
-            echo "Ou falta 'supabase db push' de uma migration ja commitada, ou alguem"
-            echo "aplicou mudanca de schema direto (db query) sem criar migration."
-            cat /tmp/schema-diff.sql
+          LISTA=$(supabase migration list --linked --output-format json)
+          echo "$LISTA" | jq -c '.migrations[]'
+          ORFAS=$(echo "$LISTA" | jq -r '.migrations[] | select(.local == "") | .remote')
+          if [ -n "$ORFAS" ]; then
+            echo "::error::Migration(s) aplicada(s) no banco remoto sem arquivo local correspondente: $ORFAS"
+            echo "Ou alguem aplicou mudanca direto (db query/dashboard) sem criar migration,"
+            echo "ou esta branch esta atrasada em relacao a uma migration ja mesclada em main."
+            echo "Resolver: 'git pull' pra ver se e so atraso; se nao for, criar o .sql que falta"
+            echo "e registrar com 'supabase migration repair --status applied <versao>'."
             exit 1
           fi
-          echo "Schema remoto bate com as migrations do repo."
+          echo "Toda migration aplicada no remoto tem arquivo local correspondente."
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
