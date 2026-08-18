@@ -63,10 +63,12 @@ function readHudScale(): number {
   }
 }
 
-// Preferencia de VIDRO. `backdrop-filter` custa uma recomposicao por frame por
-// camada sobre um canvas a 60fps, e a conta e paga no aparelho do jogador — nao
-// na maquina onde isto foi escrito. Desligar troca o vidro por superficie
-// quase-opaca, que e a mesma leitura sem o custo.
+// Preferencia de VIDRO. Desligar troca o `backdrop-filter` por superficie
+// quase-opaca. O custo do blur NAO foi medido (ver a nota longa no index.css:
+// sem throttle o quadro bate no teto de 60fps e a diferenca some; com CPU 4x o
+// loop do jogo varia mais entre rodadas do que o efeito). A chave existe porque
+// e barata e porque o custo e real em GPU movel fraca — nao porque um numero
+// desta maquina provou alguma coisa.
 function lerVidroFosco(): boolean {
   try {
     return localStorage.getItem(VIDRO_KEY) === '1'

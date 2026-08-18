@@ -139,6 +139,10 @@ function PokemonsTab() {
           onClick={() => setShinyOnly(!shinyOnly)}
         >
           <Sparkle weight="fill" className={shinyOnly ? undefined : 'text-shiny'} />
+          {/* Onde ha largura, o rotulo volta: no desktop o `title` do hover
+              cobre o icone sozinho, mas ler "Shiny" e mais rapido que passar o
+              mouse por cima pra descobrir. */}
+          {!compacto && 'Shiny'}
         </GameButton>
       </div>
 

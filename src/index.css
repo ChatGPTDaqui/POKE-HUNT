@@ -322,11 +322,26 @@
   box-shadow: var(--vidro-luz), 0 1.2em 3em -.8em rgba(0, 0, 0, .85);
 }
 
-/* Chave de desligar o blur. `backdrop-filter` sobre um canvas a 60fps forca uma
-   recomposicao por frame POR CAMADA, e o custo aparece em Android intermediario
-   — nao no desktop onde isto e escrito. Com o blur fora, a mesma superficie
-   sobe pra opaca: vidro transparente SEM blur nao e um efeito, e ruido em cima
-   do jogo. Ligado por `data-blur="off"` na `.hud-root` (Configuracoes). */
+/* Chave de desligar o blur (Configuracoes -> "Reduzir transparencia").
+
+   O CUSTO NAO FOI MEDIDO — e a chave existe apesar disso, nao por causa disso.
+   Duas tentativas nesta maquina, dentro de uma hunt, com o A/B intercalado:
+     - sem throttle, os dois lados batem no teto de 60fps (16,68ms) e a
+       diferenca fica em 0,08ms, ou seja, invisivel sob o vsync;
+     - com CPU 4x, o proprio loop do jogo domina (~10fps) e a media varia de
+       65ms a 134ms ENTRE RODADAS do mesmo lado — mais que qualquer efeito do
+       blur. A primeira leitura, sequencial, sugeriu +17ms; intercalada, some.
+   Ou seja: o navegador de desktop nao mostra o custo, e o throttle de CPU nao
+   isola compositing. Quem tem a resposta e um aparelho real.
+
+   O que se sabe sem medir: `backdrop-filter` obriga o compositor a reamostrar o
+   que esta ATRAS da camada, e aqui isso e um canvas que muda todo quadro. Numa
+   GPU movel fraca isso e um custo real. A chave e barata (uma classe) e
+   reversivel, entao ela fica — mas nenhum numero e afirmado ate alguem rodar
+   isto num celular.
+
+   Com o blur fora, a superficie sobe pra quase opaca: vidro transparente SEM
+   blur nao e um efeito, e ruido em cima do jogo. */
 .hud-root[data-blur='off'] .vidro,
 .hud-root[data-blur='off'] .vidro-flutua,
 .hud-root[data-blur='off'] .vidro-alto,
@@ -432,4 +447,34 @@
 
 .fileira-abas::-webkit-scrollbar {
   height: 0;
+}
+
+/* Entrada de sheet e chegada de linha no ticker.
+   Sao os dois unicos movimentos da HUD nova, e existem pelo mesmo motivo: dizer
+   DE ONDE a coisa veio. Um painel que aparece pronto no meio da tela nao explica
+   que veio de baixo, e uma linha que troca de texto sem transicao nao avisa que
+   e nova. */
+@keyframes sheet-sobe {
+  from { transform: translateY(12%); opacity: .4 }
+  to { transform: none; opacity: 1 }
+}
+
+.sheet-entrada {
+  animation: sheet-sobe .2s cubic-bezier(.22, 1, .36, 1);
+}
+
+@keyframes ticker-chega {
+  from { opacity: 0; transform: translateY(.35em) }
+  to { opacity: 1; transform: none }
+}
+
+.hud-ticker-linha {
+  animation: ticker-chega .22s ease-out;
+}
+
+/* Movimento e exatamente o que a preferencia de movimento reduzido desliga. O
+   conteudo (o sheet, a linha) continua aparecendo — so nao desliza. */
+@media (prefers-reduced-motion: reduce) {
+  .sheet-entrada,
+  .hud-ticker-linha { animation: none }
 }

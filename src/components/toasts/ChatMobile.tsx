@@ -27,14 +27,29 @@ export function ChatMobile() {
   )
 }
 
+// Mesma escala do chat e do toast: no compacto o ticker e o UNICO canal de
+// feedback que sobra, entao a cor tem que carregar a mesma informacao que
+// carregava no toast (verde capturou, laranja escapou, vermelho falhou).
+const COR_POR_TIPO: Record<string, string> = {
+  gold: 'var(--color-gold)',
+  levelup: '#7dd3fc',
+  success: 'var(--color-ok)',
+  error: 'var(--color-bad)',
+  'capture-success': 'var(--color-ok)',
+  'capture-fail': 'var(--color-warn)',
+  info: 'var(--color-n300)',
+}
+
 function Ticker({ onOpen }: { onOpen: () => void }) {
   const linhasLog = useToastStore((s) => s.chatLines.log)
   const linhasSistema = useToastStore((s) => s.chatLines.sistema)
+  const linhasTrade = useToastStore((s) => s.chatLines.trade)
   // A mais recente das duas fontes. Sem timestamp comparavel nas linhas, o
   // criterio e a ordem de chegada dentro de cada lista — pegar a ultima de cada
   // e preferir Sistema empata a favor do aviso ao jogador, que e o que ele
   // precisa ver.
-  const ultima = linhasSistema.at(-1) ?? linhasLog.at(-1)
+  const ultima = linhasSistema.at(-1) ?? linhasTrade.at(-1) ?? linhasLog.at(-1)
+  const cor = ultima ? COR_POR_TIPO[ultima.type] ?? COR_POR_TIPO.info : undefined
 
   return (
     <button
@@ -48,7 +63,14 @@ function Ticker({ onOpen }: { onOpen: () => void }) {
       )}
     >
       <ChatCircleDots className="shrink-0 text-[.95em] text-n400" />
-      <span className="min-w-0 flex-1 truncate text-[.72em] text-n300">
+      <span
+        // `key` na mensagem: sem ela o React reaproveita o node e a animacao de
+        // chegada nao reinicia — linha nova entrava sem nenhum sinal de que era
+        // nova, que e justamente o que o ticker precisa dizer.
+        key={ultima?.id}
+        className="hud-ticker-linha min-w-0 flex-1 truncate text-[.72em]"
+        style={{ color: cor }}
+      >
         {ultima ? <TextoComRealce texto={ultima.message} realce={ultima.realce} /> : 'Chat'}
       </span>
     </button>

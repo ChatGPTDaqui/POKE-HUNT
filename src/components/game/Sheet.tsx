@@ -157,7 +157,7 @@ export function Sheet({
           transition: arrasto ? 'none' : 'transform .18s ease-out',
         }}
         className={cn(
-          'vidro-alto pointer-events-auto absolute inset-x-0 flex flex-col overflow-hidden',
+          'vidro-alto sheet-entrada pointer-events-auto absolute inset-x-0 flex flex-col overflow-hidden',
           // Cantos so em cima: o sheet encosta na doca, e arredondar embaixo
           // deixaria duas fatias do jogo aparecendo entre as duas superficies.
           'rounded-t-[1.15em]',

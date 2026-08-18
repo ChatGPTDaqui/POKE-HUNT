@@ -43,8 +43,9 @@ function GeralTab() {
       <GameCard className="flex flex-col gap-[.4em] p-[.6em]">
         <div className="font-medium">Reduzir transparência</div>
         <div className="text-[.8em] text-n500">
-          As superfícies da interface desfocam o jogo por trás. O desfoque é recalculado a cada quadro em cada
-          camada — em celular mais simples isso derruba a taxa de quadros. Desligado, elas ficam quase opacas.
+          As superfícies da interface desfocam o jogo por trás, e o desfoque é recalculado enquanto o jogo se
+          move. Em celular mais simples isso pode derrubar a taxa de quadros — se o seu engasgar, desligue aqui:
+          as superfícies ficam quase opacas e o resto continua igual.
         </div>
         <GameCheck checked={vidroFosco} onChange={setVidroFosco} className="self-start">
           Desligar o desfoque

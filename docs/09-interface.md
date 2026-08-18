@@ -228,10 +228,27 @@ preto.
 A tinta nao e cinza puro (`#101218`, levemente fria): vidro sobre um jogo colorido puxa a cor do
 que esta atras, e sem isso as superficies ficavam com um bege sujo em cima do mapa de deserto.
 
-**`backdrop-filter` custa uma recomposicao por quadro POR CAMADA sobre um canvas a 60fps**, e a
-conta e paga no aparelho do jogador. Configuracoes tem "Reduzir transparencia"
-(`data-blur="off"`), que troca o vidro por superficie quase opaca — vidro transparente **sem**
-blur nao e um efeito, e ruido em cima do jogo.
+### O custo do blur nao foi medido, e a chave existe assim mesmo
+
+Configuracoes tem "Reduzir transparencia" (`data-blur="off"`), que troca o vidro por superficie
+quase opaca — vidro transparente **sem** blur nao e um efeito, e ruido em cima do jogo.
+
+**Duas tentativas de medir, dentro de uma hunt, com A/B intercalado:**
+
+| Cenario | Com blur | Sem blur | Conclusao |
+|---|---|---|---|
+| Sem throttle | 16,76ms | 16,68ms | Os dois batem no teto de 60fps; a diferenca some sob o vsync |
+| CPU 4x, 4 rodadas | 101,2ms | 101,5ms | O loop do jogo domina (~10fps) e varia de 65ms a 134ms ENTRE rodadas do mesmo lado |
+
+A primeira leitura, **sequencial** (um lado depois do outro, sem intercalar), deu +17ms para o
+blur. Intercalando, o efeito desaparece: aqueles 17ms eram a deriva do proprio jogo ficando mais
+pesado com mais inimigos em campo. **Lembrete do metodo: A/B nao intercalado mede a deriva, nao o
+tratamento.**
+
+O que se sabe sem medir: `backdrop-filter` obriga o compositor a reamostrar o que esta atras da
+camada, e aqui isso e um canvas que muda todo quadro. Numa GPU movel fraca e um custo real. A
+chave e uma classe CSS, barata e reversivel, entao fica — mas nenhum numero e afirmado ate alguem
+rodar isto num celular de verdade.
 
 ## Bug de clique em botão dentro de painel re-renderizado a 60fps
 
