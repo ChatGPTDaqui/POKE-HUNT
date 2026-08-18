@@ -13,6 +13,19 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '7.4',
+    date: '2026-08-18',
+    title: 'Efeito de golpe no tamanho certo, apontando pro inimigo, e duas artes que estavam simplesmente erradas',
+    highlights: [
+      'O EFEITO DO GOLPE PAROU DE ESCONDER QUEM LEVOU. Todo impacto era desenhado de duas a cinco vezes maior que o POKE — a arte cobria o alvo inteiro e voce via o golpe, nao a luta. Agora fica em uma vez e meia o tamanho do POKE: da pra ler que acertou E continuar vendo quem apanhou.',
+      'OS EFEITOS AGORA APONTAM PRA DIREÇAO DO GOLPE. Antes o impacto nascia no centro exato do inimigo, identico viesse o ataque da esquerda, de cima ou por tras. Agora ele encosta no lado do alvo que levou a pancada. Os golpes que TEM uma direcao propria — o jato de fogo, o respingo de inseto, o talho sombrio — ja giravam; o resto ganhou a leitura pelo posicionamento, porque girar um anel ou uma cupula so os deitaria no chao.',
+      'BUG REAL CORRIGIDO: O JATO DE FOGO ATRAVESSAVA QUEM LANÇAVA. A arte tem 150 pixels de comprimento e a luta acontece a 39 de distancia, entao a labareda passava pelo inimigo, voltava por cima do seu POKE e saia pelas costas dele. O rastro foi cortado pra terminar exatamente onde o atacante esta.',
+      'BUG REAL CORRIGIDO E ESTRANHO: O GOLPE DE VOADOR TINHA UM ITEM DE OUTRO JOGO DESENHADO DENTRO. Um objeto amarelo com a palavra DROP escrita, aparecendo no meio da animacao. A arte foi trocada por um tornado.',
+      'GOLPE DE FADA NAO DESENHA MAIS CAVEIRAS. A arte antiga era rosa — o matiz certo pro tipo — mas o que ela desenhava eram cranios, que e leitura de veneno e morte, nao de fada. Trocada por aneis de particulas, que de brinde aparecem melhor sobre fundo escuro.',
+      'INVESTIGADO, MANTIDO COMO ESTAVA: o golpe de SOMBRIO continua com o talho marrom, que reconhecidamente nao le como escuridao. As tres alternativas escuras disponiveis medem praticamente preto puro e sumiriam contra o fundo de uma caverna — um golpe invisivel e pior que um golpe de cor discutivel.',
+    ],
+  },
+  {
     version: '7.3',
     date: '2026-08-18',
     title: 'Voce nasce onde o mapa manda, e a tela para de fingir que nao tem nada quando so esta carregando',
