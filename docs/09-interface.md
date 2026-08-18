@@ -364,6 +364,28 @@ registrado), dado real que diz o que é.
 
 Duas camadas: arte real por tipo elemental, e desenho procedural como rede embaixo dela.
 
+### Duas camadas: por GOLPE e por TIPO
+
+O desenho consulta nesta ordem: **golpe → tipo → procedural**. `data/moveVfx.ts` cobre 22 golpes
+com arte nomeada; `data/vfxTiras.ts` cobre os 18 tipos; o procedural é a rede enquanto a imagem
+baixa. Golpe sem entrada na primeira camada não muda de comportamento em nada.
+
+A camada por golpe existe porque Bullet Punch é STEEL: trocar "a arte do Bullet Punch" mexendo na
+tira de aço trocaria junto Metal Claw, Iron Head e todo o resto do tipo.
+
+**As duas usam o MESMO formato e o MESMO desenho desde 2026-08-18.** A camada por golpe era PNG
+solto por quadro, o que fazia sentido com um golpe (8 quadros = 8 requests) e deixou de fazer com
+22 (de 4 a 20 quadros cada, ~300 arquivos — e o catálogo tem 479 golpes). Migrar apagou junto uma
+duplicação perigosa: as funções de PNG-solto e de tira tinham a **mesma conta** de recorte, âncora,
+giro e espelho escrita duas vezes no mesmo arquivo, e corrigir geometria em só uma delas não quebra
+nada — apenas desalinha metade dos golpes.
+
+**A arte por golpe NÃO entra no preload**, de propósito. Um jogador vê os golpes que o time dele
+sabe, meia dúzia, e nunca os outros 470; aquecer 844 KB que a sessão não vai usar troca boot rápido
+por nada. O custo é o primeiro uso de cada golpe cair no procedural por alguns frames — que é o que
+o fallback existe para fazer. As 18 tiras por TIPO continuam no preload (968 KB), porque todo
+combate usa todas.
+
 ### Arte real — uma TIRA por tipo
 
 `data/vfxTiras.ts` cobre os **18 tipos**, um PNG cada em `assets/move-vfx/tiras/`, com os
@@ -500,6 +522,14 @@ lado de quem recebe).
    procedural pelo menos brilha.
 
 ### O que o teste tranca
+
+`src/data/moveVfx.test.ts` cobre os três modos de falha da camada por golpe, nenhum dos quais
+lança exceção: caminho de arquivo errado (o desenho cai na tira do tipo, que é uma arte válida e
+do elemento certo — ninguém nota), id de golpe que não existe no catálogo (a entrada fica lá e
+nunca é encontrada), e arte exportada que ficou fora do cadastro (peso no deploy sem aparecer no
+jogo). Um quarto modo — `quadros` diferente do que a tira tem, que faz o desenho mostrar pedaço de
+dois quadros ao mesmo tempo — precisa ler os bytes do PNG e por isso vive em
+`scripts/conferir-direcao-vfx.mjs`, que **falha com código de saída** se a largura não dividir.
 
 `src/data/vfxTiras.test.ts` cobre o que falha em silêncio: o desenho devolve `false` quando a
 imagem não está pronta e quem chama cai no procedural — comportamento certo, mas significa que

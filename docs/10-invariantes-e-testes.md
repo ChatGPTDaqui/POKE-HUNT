@@ -23,6 +23,7 @@ Um bug que estoura já tem quem o denuncie. Os daqui, não.
 | `data/hunts.test.ts` | 25 | Espécie órfã, sala sem pool, faixa não batendo com o nome, hunt vazia |
 | `engine/salas.test.ts` | 9 | Sala não avançando na quota certa, transição não congelando o mundo |
 | `data/vfxTiras.test.ts` | — | Caminho de arte errado caindo no procedural em silêncio; arte não-direcional girando |
+| `data/moveVfx.test.ts` | 7 | Arte de golpe com caminho errado (cai na do tipo, sem sinal), id fora do catálogo, tira exportada e esquecida fora do cadastro |
 | `data/walkBlock.test.ts` | 7 | Hunt sem sala (Pesadelo, BOSS, Lance) ficando sem walk-block; pintura órfã; spawn em célula bloqueada |
 | `engine/avisoDeEntradaNaHunt.test.ts` | 4 | "Entrar" recusando em silêncio — indistinguível de UI quebrada |
 | `engine/cooldownVisivel.test.ts` | — | Contagem na tela dessincronizada do cooldown que o motor aplica |

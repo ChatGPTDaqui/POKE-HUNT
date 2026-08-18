@@ -523,7 +523,7 @@ export function drawNameLevelTag(ctx: CanvasRenderingContext2D, entity: WorldEnt
 
 const IMPACT_BASE_SIZE = 44
 // Opacidade de TODA sprite/efeito de ataque: 90% solida, 10% transparente.
-// Vale pro desenho procedural e pra arte real (drawVfxDeElemento) — os dois
+// Vale pro desenho procedural e pra arte real (drawQuadroDeTira) — os dois
 // multiplicam o proprio fade por ela.
 const SOLID_OPACITY = 0.9
 const HOLD_PORTION = 0.6
@@ -727,89 +727,6 @@ const ESCALA_VFX_SINGLE = 1.05
 // encolher mentiria sobre o alcance do golpe.
 const ESCALA_VFX_AOE = 1.15
 
-/**
- * Desenha a animacao de arte real de um efeito, se o tipo dele tiver arte E ela
- * ja estiver decodificada.
- *
- * Devolve `false` quando nao ha o que desenhar — e ai quem chamou segue com o
- * desenho procedural. Desde a leva das tiras os 18 tipos TEM arte, entao o
- * procedural deixou de ser o caminho comum e virou o que ele diz ser: a rede
- * pro intervalo em que o PNG ainda esta baixando. Sem a checagem de "pronto", o
- * primeiro Ember de uma sessao apareceria sem efeito nenhum.
- */
-function drawVfxDeElemento(
-  ctx: CanvasRenderingContext2D,
-  effect: WorldEffect,
-  quadros: string[],
-  tamanho: number,
-  direcional?: { ancoraX: number; recorteX?: number },
-  repeticoes = 1,
-): boolean {
-  if (!quadros.length) return false
-  const progress = effectProgress(effect)
-  // A animacao ocupa a vida inteira do efeito: a duracao ja e diferente entre
-  // single (0.35s) e AOE (0.55s), entao amarrar o passo ao progresso mantem as
-  // duas terminando junto com o proprio efeito, sem constante de fps nova.
-  // Com `repeticoes > 1` a lista toca varias voltas dentro da vida do efeito —
-  // e a vida ja foi esticada na mesma proporcao (combatSystem.ts), entao cada
-  // quadro segura o mesmo tempo de antes. O clamp antes do modulo evita que
-  // `progress === 1` volte pro quadro 0 no ultimo frame desenhado.
-  const passos = quadros.length * repeticoes
-  const passo = Math.min(passos - 1, Math.floor(progress * passos))
-  const indice = passo % quadros.length
-  const url = quadros[indice]
-  if (!isImageReady(url)) return false
-
-  const fade = progress < HOLD_PORTION ? 1 : 1 - (progress - HOLD_PORTION) / (1 - HOLD_PORTION)
-  ctx.save()
-  // `SOLID_OPACITY` (90%) tambem aqui, e nao so no desenho procedural: pedido
-  // explicito de que TODA sprite de ataque fique 90% solida. Sem isso a arte
-  // real sairia opaca e o efeito procedural translucido — dois VFX do mesmo
-  // jogo com peso visual diferente.
-  ctx.globalAlpha = Math.max(0, Math.min(1, fade)) * SOLID_OPACITY
-  ctx.imageSmoothingEnabled = false
-  // `tamanho` e a ALTURA; a largura sai da proporcao natural do quadro, igual
-  // ao que `drawGifEffect` ja fazia. Desenhar quadrado so era invisivel porque
-  // toda a arte antiga era 32x32 — o primeiro quadro nao-quadrado (Bullet
-  // Punch, 96x64) sairia espremido a 2/3 da largura.
-  const img = getOrLoadImage(url)
-
-  // `recorteX` corta o quadro pelo lado de TRAS (esquerda no arquivo, ver a
-  // convencao em data/moveVfx.ts) e desenha so a fracao pedida. Serve pra
-  // encurtar rastro comprido demais sem encolher o impacto junto — que e o que
-  // acontece se a correcao for por `escala`.
-  const manter = direcional?.recorteX ?? 1
-  const recorteLargura = img.naturalWidth * manter
-  const recorteInicio = img.naturalWidth - recorteLargura
-  const largura = tamanho * (recorteLargura / img.naturalHeight)
-
-  const angulo = direcional ? effect.anguloDeAtaque : undefined
-  if (angulo == null) {
-    // Burst radial (o lote inteiro por tipo elemental): sem rotacao, centrado
-    // no alvo. Tambem o caminho de arte direcional cujo efeito nao trouxe
-    // angulo — golpe em si mesmo, ou efeito criado por um caminho que ainda
-    // nao grava direcao. Desenhar sem girar e o comportamento antigo, nao um
-    // erro.
-    ctx.drawImage(img, recorteInicio, 0, recorteLargura, img.naturalHeight,
-      effect.targetX! - largura / 2, effect.targetY! - tamanho / 2, largura, tamanho)
-  } else {
-    ctx.translate(effect.targetX!, effect.targetY!)
-    ctx.rotate(angulo)
-    // Girar mais de 90 graus deixa a arte de cabeca pra baixo (inimigo a
-    // esquerda). Espelhar no eixo Y DEPOIS de girar mantem a direcao do golpe
-    // e devolve o "em pe" — o mesmo truque de sprite de projetil lateral.
-    if (Math.abs(angulo) > Math.PI / 2) ctx.scale(1, -1)
-    // O ponto de impacto da arte (nao o centro dela) e que cai sobre o alvo.
-    // `ancoraX` e medido no quadro INTEIRO; com recorte, ele precisa ser
-    // reexpresso dentro do pedaco que sobrou, senao encurtar o rastro moveria
-    // a faisca de lugar.
-    const ancora = Math.min(1, Math.max(0, (direcional!.ancoraX - (1 - manter)) / manter))
-    ctx.drawImage(img, recorteInicio, 0, recorteLargura, img.naturalHeight,
-      -largura * ancora, -tamanho / 2, largura, tamanho)
-  }
-  ctx.restore()
-  return true
-}
 
 /**
  * Fase 0..1 dentro da tira. Uma volta ocupa a vida INTEIRA do efeito: a
@@ -859,7 +776,14 @@ function drawImpactBurst(ctx: CanvasRenderingContext2D, effect: WorldEffect): vo
   const arteDoGolpe = vfxDoGolpe(effect.abilityId)
   if (arteDoGolpe) {
     const tamanho = (effect.worldSize || IMPACT_BASE_SIZE) * ESCALA_VFX_SINGLE * (arteDoGolpe.escala?.single ?? 1)
-    if (drawVfxDeElemento(ctx, effect, arteDoGolpe.single, tamanho, arteDoGolpe.direcional, arteDoGolpe.repeticoes)) return
+    // Arte de golpe e arte de tipo passam pelo MESMO desenho desde a migracao
+    // pra tira: recorte, ancora, giro e espelho vivem num lugar so.
+    const [dxg, dyg] = encostoNoAlvo(effect, arteDoGolpe.single)
+    if (drawQuadroDeTira(
+      ctx, arteDoGolpe.single, faseDaTira(effect, arteDoGolpe.single),
+      effect.targetX! + dxg, effect.targetY! + dyg, tamanho,
+      opacidadeDoEfeito(effect), effect.anguloDeAtaque,
+    )) return
   }
 
   const tira = tiraDoElemento(effect.elementType)
@@ -929,7 +853,11 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
   const arteDoGolpe = vfxDoGolpe(effect.abilityId)
   if (arteDoGolpe?.aoe) {
     const tamanho = effect.worldSize! * ESCALA_VFX_AOE * (arteDoGolpe.escala?.aoe ?? 1)
-    if (drawVfxDeElemento(ctx, effect, arteDoGolpe.aoe, tamanho, undefined, arteDoGolpe.repeticoes)) return
+    // Sem angulo e sem recuo: area e um circulo, nao aponta pra ninguem.
+    if (drawQuadroDeTira(
+      ctx, arteDoGolpe.aoe, faseDaTira(effect, arteDoGolpe.aoe),
+      effect.targetX!, effect.targetY!, tamanho, opacidadeDoEfeito(effect),
+    )) return
   }
 
   // Mesma tira do impacto alvo-unico, so que desenhada no DIAMETRO real do
@@ -990,7 +918,7 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
 }
 
 // GIF nativo (nao uma tira de quadros pisada por `effect.age` como
-// `drawVfxDeElemento`): o navegador ja anima uma `Image()` apontada pra um
+// `drawQuadroDeTira`): o navegador ja anima uma `Image()` apontada pra um
 // `.gif` sozinho, e este loop de desenho ja redesenha tudo a cada frame —
 // `drawImage` so pega o quadro que o GIF esta mostrando naquele instante,
 // de graca. Usado so por golpe de STATUS (data/statusVfx.ts, altura fixa):

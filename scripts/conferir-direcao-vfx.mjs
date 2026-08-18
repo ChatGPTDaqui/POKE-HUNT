@@ -48,7 +48,8 @@ const RAIZ = dirname(dirname(fileURLToPath(import.meta.url)));
 // mudar de numero de quadros, a conferencia acompanha sozinha.
 const LINHA = String.fromCharCode(10);
 
-function tirasCadastradas() {
+// As tiras por TIPO (data/vfxTiras.ts). Sao as que todo combate usa.
+function tirasPorTipo() {
   const src = readFileSync(join(RAIZ, 'src', 'data', 'vfxTiras.ts'), 'utf8');
   const saida = [];
   const re = /(\w+):\s*\{\s*url:\s*`\$\{(RAIZ|RAIZ_STATUS)\}\/([\w-]+\.png)`,\s*quadros:\s*(\d+)([^}]*)/g;
@@ -66,9 +67,47 @@ function tirasCadastradas() {
       nome: m[1], arquivo: join(pasta, m[3]), quadros: Number(m[4]),
       escala: escala ? Number(escala[1]) : 1,
       recorteX: recorte ? Number(recorte[1]) : 1,
+      camada: 'tipo',
     });
   }
   return saida;
+}
+
+// As tiras por GOLPE (data/moveVfx.ts). Sao 23 e o catalogo tem 479 golpes,
+// entao esta lista cresce — auditar as duas camadas no mesmo lugar e o que
+// impede a de golpe de virar um canto sem medicao, que foi exatamente como a
+// por tipo nasceu.
+//
+// O formato do cadastro e outro (helper `tira('arquivo', quadros, extra)` em vez
+// de objeto literal), entao o regex e proprio. Mesma regra sobre comentario: o
+// corpo e lido sem as linhas de prosa.
+function tirasPorGolpe() {
+  const src = readFileSync(join(RAIZ, 'src', 'data', 'moveVfx.ts'), 'utf8');
+  const saida = [];
+  const re = /(\w+):\s*\{\s*single:\s*tira\('([\w-]+)',\s*(\d+)([^)]*)\)([^}]*)/g;
+  for (const m of src.matchAll(re)) {
+    const semComentario = (t) => (t ?? '').split(LINHA).filter((l) => !l.trim().startsWith('//')).join(LINHA);
+    const dentroDaTira = semComentario(m[4]);
+    const depoisDaTira = semComentario(m[5]);
+    const escala = /single:\s*([\d.]+)/.exec(depoisDaTira);
+    const recorte = /recorteX:\s*([\d.]+)/.exec(dentroDaTira);
+    saida.push({
+      nome: m[1],
+      arquivo: join('assets', 'move-vfx', 'golpes', m[2] + '.png'),
+      quadros: Number(m[3]),
+      escala: escala ? Number(escala[1]) : 1,
+      recorteX: recorte ? Number(recorte[1]) : 1,
+      camada: 'golpe',
+    });
+  }
+  return saida;
+}
+
+function tirasCadastradas() {
+  const so = process.argv.includes('--golpes') ? 'golpe'
+    : process.argv.includes('--tipos') ? 'tipo' : null;
+  const todas = [...tirasPorTipo(), ...tirasPorGolpe()];
+  return so ? todas.filter((t) => t.camada === so) : todas;
 }
 
 // Alpha abaixo disto e franja de anti-alias: entra na conta como ruido e
@@ -235,8 +274,17 @@ console.log(
 );
 console.log('-'.repeat(88));
 
+// `quadros` errado no cadastro nao quebra o desenho — a largura do quadro sai de
+// `naturalWidth / quadros`, entao um numero fora mostra pedaco de dois quadros ao
+// mesmo tempo, na animacao inteira, sem erro nenhum. Aqui e o unico lugar que le
+// os bytes do PNG e pode conferir, entao o script FALHA em vez de so avisar.
+const desalinhadas = [];
+
 for (const tira of tirasCadastradas()) {
   const { width, height, rgba } = decodePng(readFileSync(join(RAIZ, tira.arquivo)));
+  if (width % tira.quadros !== 0) {
+    desalinhadas.push(`${tira.nome}: ${width}px nao divide por ${tira.quadros} quadros (sobra ${width % tira.quadros}px)`);
+  }
   const largura = Math.floor(width / tira.quadros);
   const medidas = [];
   for (let f = 0; f < tira.quadros; f++) {
@@ -264,7 +312,7 @@ for (const tira of tirasCadastradas()) {
   const { veredito, motivos } = classificar(resumo);
 
   console.log(
-    tira.nome.padEnd(14),
+    (tira.camada === 'golpe' ? '* ' : '  ') + tira.nome.padEnd(12),
     String(tira.quadros).padStart(3),
     `${resumo.cx >= 0 ? '+' : ''}${resumo.cx.toFixed(2)},${resumo.cy >= 0 ? '+' : ''}${resumo.cy.toFixed(2)}`.padStart(7),
     resumo.alonga.toFixed(2).padStart(7),
@@ -419,4 +467,10 @@ if (linhas.length) {
     const marca = delta > 0.25 ? '  <-- fora' : '';
     console.log(`   ${l.nome.padEnd(12)} ${l.escala.toFixed(2)} -> ${sugerida.toFixed(2)}${marca}`);
   }
+}
+
+if (desalinhadas.length) {
+  console.error(LINHA + 'FALHA — `quadros` nao bate com a largura da tira:');
+  for (const d of desalinhadas) console.error('  - ' + d);
+  process.exit(1);
 }

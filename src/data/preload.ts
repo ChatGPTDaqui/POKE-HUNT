@@ -20,7 +20,6 @@ import { battleSpriteUrl } from './battleSprites'
 import { getMap } from './maps'
 import { getEncounter } from './enemies'
 import { faceIconUrl, spriteUrl } from './sprites'
-import { todosOsQuadrosDeGolpe } from './moveVfx'
 import { todasAsTirasDeVfx } from './vfxTiras'
 import { todosOsIconesDeHabilidade } from './abilityIcons'
 import { todosOsVfxDeStatus } from './statusVfx'
@@ -115,6 +114,12 @@ export async function preloadHunt(mapId: string, jogador: EspeciePreload | null)
   // As tiras somam ~1 MB (PNG-8; eram 4,5 MB em RGBA). E o item mais pesado
   // deste preload, e o teto de PRELOAD_TIMEOUT_MS existe justamente pra rede
   // ruim nao transformar isso em "o botao Entrar nao funciona".
-  const efeitos = [...todasAsTirasDeVfx(), ...todosOsQuadrosDeGolpe(), ...todosOsIconesDeHabilidade(), ...todosOsVfxDeStatus()].map(primeImage)
+  // Arte por GOLPE nao entra aqui de proposito (ver o cabecalho de
+  // data/moveVfx.ts): sao 23 tiras hoje, e um jogador ve os golpes que o
+  // time dele sabe — meia duzia. Aquecer arquivo que a sessao nao vai usar
+  // troca boot rapido por nada; o primeiro uso de cada golpe cai no
+  // procedural por alguns frames enquanto a tira baixa, que e exatamente o
+  // que o fallback existe pra fazer.
+  const efeitos = [...todasAsTirasDeVfx(), ...todosOsIconesDeHabilidade(), ...todosOsVfxDeStatus()].map(primeImage)
   await Promise.all([preloadEspecies(especies), ...fundo, ...efeitos])
 }
