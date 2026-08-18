@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # precisa do historico completo pro git diff contra origin/main mais abaixo
 
       - uses: supabase/setup-cli@v1
         with:
