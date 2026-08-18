@@ -77,8 +77,15 @@ durações abaixo (status, escudo, trava) — não um turno de batalha de verdad
   fila assim que pronto, pulando (sem gastar a vez) um golpe de apoio que não faria nada
   agora. Não prioriza AOE sozinho.
 
-Os dois caem em `BASIC_ATTACK` (o "Struggle" embutido) como fallback final — nenhuma espécie
-em nenhum nível fica sem golpe utilizável.
+**Os 4 slots são 4 mesmo (2026-08-18).** O Ataque Básico e a Explosão Elemental de nível 50
+disputam slot como qualquer outro golpe. Antes os dois viviam fora da conta — o Básico era
+injetado como primeira posição fixa da rotação e a Explosão era anexada depois dos escolhidos,
+então o POKE lutava com até 6 enquanto a tela dizia "4/4".
+
+Só o **selvagem** cai em `BASIC_ATTACK` como fallback final (o "Struggle" embutido): o moveset
+dele é derivado, sem escolha de ninguém, e uma espécie de 1 golpe de dano passaria metade dos
+turnos parada. O POKE do jogador **não** tem essa rede: quem quiser a garantia gasta um slot no
+Básico — e `activeAbilitiesPadrao` já faz isso sozinho quando o learnset não preenche os 4.
 
 ### Acerto ou erro (`golpeErrou`)
 

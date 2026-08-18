@@ -2,8 +2,8 @@
 //
 // Antes, o slot mostrava as 3 primeiras letras do nome do golpe ("EMB", "FLA")
 // sobre um quadrado da cor do tipo. Isso trocou por arte de verdade (icones de
-// magia do Dungeon Crawl Stone Soup, gui/spells — procedencia e licenca em
-// assets/move-vfx/CREDITOS.txt), um por tipo.
+// magia — notas em
+// assets/move-vfx/NOTAS.txt), um por tipo.
 //
 // Por TIPO e nao por GOLPE de proposito: sao 223 golpes no dataset e o
 // repositorio de origem nao tem equivalente pra cada um. Mapear "os que dao"
@@ -34,7 +34,7 @@ const ARQUIVO: Record<ElementType, string> = {
   STEEL: 'steel',
   // `jinxbite` do Crawl (enchantment/) — literalmente uma fada alada, entao
   // nao colide visualmente com nenhum dos outros 17. Ver
-  // assets/move-vfx/CREDITOS.txt.
+  // assets/move-vfx/NOTAS.txt.
   FAIRY: 'fairy',
 }
 

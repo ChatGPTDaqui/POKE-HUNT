@@ -167,18 +167,23 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     expect(setActiveAbilities).not.toHaveBeenCalled()
   })
 
-  it('o AOE de Nivel 50 nao ocupa slot: checkbox de liga/desliga, nao do slot-de-4', async () => {
-    const poke = pokeDoJogador()
+  it('a Explosao Elemental ocupa slot como qualquer outro golpe', async () => {
+    // Um slot livre de proposito: com os 4 cheios `alternar` recusa e so mostra
+    // o aviso de teto, que e outro caminho (ja coberto noutro teste).
+    const poke = pokeDoJogador({ activeAbilities: ['ember'] })
     useGameStateStore.setState({ team: [poke] })
     render(<MovesetTable poke={poke} species={ESPECIE} />)
 
     const aoe = nomeDoGolpe(typedAoeMoveKey(ESPECIE.type))
     const botao = botaoUsar(aoe)!
-    expect(botao.className).toContain('bg-primary') // ligado por padrao (disabledAbilities vazio)
+    // Fora dos escolhidos por padrao (o default pega os 4 de maior dano do
+    // learnset), entao a celula comeca VAZIA — e clicar ADICIONA a fila, em vez
+    // de chamar o liga/desliga que ela usava quando ficava fora dos slots.
+    expect(botao.className).not.toContain('bg-primary')
 
     await userEvent.click(botao)
-    expect(setActiveAbilities).not.toHaveBeenCalled()
-    expect(toggleAbility).toHaveBeenCalledWith(poke.uid, typedAoeMoveKey(ESPECIE.type))
+    expect(toggleAbility).not.toHaveBeenCalled()
+    expect(setActiveAbilities).toHaveBeenCalled()
   })
 
   it('AOE de Nivel 50 tambem bloqueia dentro de hunt (mesma trava do slot-de-4)', async () => {
@@ -211,22 +216,23 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     expect(botaoUsar(nomeDoGolpe(naoAprendido.key))).toBeNull()
   })
 
-  describe('Ataque Basico — sempre disponivel, liga/desliga fora dos 4 slots', () => {
+  describe('Ataque Basico — golpe comum, ocupa um dos 4 slots', () => {
     it('aparece so pro POKE que e seu', () => {
       render(<MovesetTable poke={pokeDoJogador()} species={ESPECIE} />)
       expect(screen.queryByText(BASIC_ATTACK.name)).toBeNull()
     })
 
-    it('ligado por padrao, e clicar desliga via toggleAbility (nunca setActiveAbilities)', async () => {
-      const poke = pokeDoJogador()
+    it('clicar poe/tira da fila via setActiveAbilities (nunca toggleAbility)', async () => {
+      const poke = pokeDoJogador({ activeAbilities: ['ember'] })
       useGameStateStore.setState({ team: [poke] })
       render(<MovesetTable poke={poke} species={ESPECIE} />)
 
       const botao = botaoUsar(BASIC_ATTACK.name)!
-      expect(botao.className).toContain('bg-primary')
+      // Fora da escolha, entao a celula comeca vazia.
+      expect(botao.className).not.toContain('bg-primary')
       await userEvent.click(botao)
-      expect(setActiveAbilities).not.toHaveBeenCalled()
-      expect(toggleAbility).toHaveBeenCalledWith(poke.uid, BASIC_ATTACK.id)
+      expect(toggleAbility).not.toHaveBeenCalled()
+      expect(setActiveAbilities).toHaveBeenCalled()
     })
 
     it('tambem bloqueia dentro de hunt (mesma trava dos outros golpes)', async () => {

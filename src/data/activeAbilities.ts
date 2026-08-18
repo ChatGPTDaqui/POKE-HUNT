@@ -7,9 +7,28 @@
 // unica que precisa ser gravada (ver a coluna `active_abilities` em
 // supabase/migrations/20260814120100).
 //
-// O golpe de nivel 50 do proprio tipo (typedAoeMoves.ts) fica FORA dos 4 para o
-// POKE do jogador — decisao explicita: ele e conteudo deste idle, nao ocupa
-// slot. Selvagem nao tem esse golpe de jeito nenhum.
+// ---------------------------------------------------------------------------
+// 4 E 4: ATAQUE BASICO E EXPLOSAO ELEMENTAL OCUPAM SLOT (2026-08-18)
+// ---------------------------------------------------------------------------
+// Ate esta leva os dois viviam FORA dos 4: o Ataque Basico era injetado como
+// primeira posicao fixa da fila (combatSystem#pickAbility) e a Explosao
+// Elemental de nivel 50 (typedAoeMoves.ts) era anexada depois dos escolhidos.
+// Na pratica o POKE do jogador lutava com SEIS golpes, e a tela dizia "4/4".
+// Os dois eram liga/desliga em `disabledAbilities`, nao escolha de slot.
+//
+// Pedido explicito do usuario: o maximo e 4, ponto, e os dois sao golpes
+// comuns que disputam slot com o resto do moveset. Consequencias que vieram
+// junto, todas deliberadas:
+//
+//  - Nao ha mais rede de seguranca escondida. Um POKE que nao escolher o
+//    Ataque Basico e ficar com os 4 slots em cooldown simplesmente espera. O
+//    fallback continua existindo pro SELVAGEM (e o Struggle dele, ver
+//    combatSystem#tentarAtaqueBasico), nunca pro jogador.
+//  - `activeAbilitiesPadrao` passa a completar slot vago com o Ataque Basico,
+//    justamente pra um POKE de learnset curto (nivel baixo, Igglybuff,
+//    Togepi) nao nascer com slot vazio e lutando menos do que antes.
+//  - A RPC `definir_golpes_ativos` recusava as duas chaves com "esse golpe nao
+//    ocupa slot"; liberado na migration 20260818120000.
 import { getAbility, isDamagingAbility, BASIC_ATTACK, type Ability } from './abilities'
 import { typedAoeMoveKey, TYPED_AOE_MOVES } from './typedAoeMoves'
 import { createFormulaEngine } from '@/core/formulaEngine'
@@ -129,7 +148,18 @@ export function activeAbilitiesPadrao(species: Species, level: number): string[]
   // Enquanto a Leva B nao entrega os efeitos eles sao inertes, mas ocupar o
   // slot com eles nao tira nada de ninguem — nao ha golpe de dano restante.
   const status = learnset.filter((key) => !isDamagingAbility(getAbility(key))).reverse()
-  return [...dano, ...status].slice(0, MAX_ACTIVE_ABILITIES)
+  const escolha = [...dano, ...status].slice(0, MAX_ACTIVE_ABILITIES)
+
+  // AINDA sobrou slot: entra o Ataque Basico. Desde que ele passou a ocupar
+  // slot (ver o topo do arquivo) ele deixou de ser gratuito, e um POKE de
+  // learnset curto — nivel baixo, ou Igglybuff/Togepi/Unown, que tem 1 ou 2
+  // golpes de dano no moveset inteiro — nasceria com slot VAZIO e atacando
+  // menos do que atacava antes desta leva. Preenchendo aqui, o default
+  // continua sendo a melhor jogada possivel; o jogador tira se quiser.
+  while (escolha.length < MAX_ACTIVE_ABILITIES && !escolha.includes(BASIC_ATTACK.id)) {
+    escolha.push(BASIC_ATTACK.id)
+  }
+  return escolha
 }
 
 // Poder base ponderado pelo bonus de tipo. Nao e o dano real (falta o alvo,
@@ -147,11 +177,15 @@ export function encaixarNovosGolpes(atuais: string[], novos: string[]): string[]
   const saida = [...atuais]
   for (const key of novos) {
     if (saida.length >= MAX_ACTIVE_ABILITIES) break
+    // A Explosao Elemental chega aqui como "golpe novo" no nivel 50 (e de novo
+    // numa evolucao que muda o tipo) e desde 2026-08-18 ela ocupa slot como
+    // qualquer outro golpe — entao pode preencher slot VAGO, mas continua sem
+    // poder derrubar escolha nenhuma, que e a regra desta funcao inteira.
+    //
+    // O Ataque Basico fica de fora: ele nao e "aprendido" em nivel nenhum,
+    // entao nunca chega como novidade — quem o coloca e o default
+    // (`activeAbilitiesPadrao`) ou o proprio jogador.
     if (saida.includes(key) || key === BASIC_ATTACK.id) continue
-    // O AOE de nivel 50 chega como "golpe novo" no level-up (e de novo numa
-    // evolucao que muda o tipo). Ele nunca ocupa slot — sem este filtro, o
-    // primeiro slot livre de todo POKE seria comido por ele no nivel 50.
-    if (ehGolpeAoeDeNivel50(key)) continue
     if (!getAbility(key)) continue
     saida.push(key)
   }
@@ -171,7 +205,10 @@ export function ehGolpeAoeDeNivel50(key: string): boolean {
 export function golpesUtilizaveis(poke: PokeInstance, species: Species, selvagem: boolean): string[] {
   if (selvagem) return activeAbilitiesSelvagem(species, poke.level)
 
-  const conhecidos = new Set(poke.unlockedAbilities)
+  // O Ataque Basico nunca esta em `unlockedAbilities` — ele nao e aprendido em
+  // nivel nenhum, todo POKE simplesmente tem. Sem entrar aqui, o filtro logo
+  // abaixo o descartaria da escolha do jogador e ele nunca chegaria ao combate.
+  const conhecidos = new Set([...poke.unlockedAbilities, BASIC_ATTACK.id])
   const escolha = poke.activeAbilities ?? activeAbilitiesPadrao(species, poke.level)
   // `escolha` pode ter golpe repetido (dado salvo antes da validacao existir —
   // ver `pokemon_instances.active_abilities` em producao). Duplicata aqui vira
@@ -203,7 +240,8 @@ export function golpesUtilizaveis(poke: PokeInstance, species: Species, selvagem
     }
   }
 
-  // O AOE de nivel 50 entra fora dos slots, e so depois de desbloqueado.
-  const aoe = typedAoeMoveKey(species.type)
-  return conhecidos.has(aoe) ? [...escolhidos, aoe] : escolhidos
+  // NAO ha mais anexo depois dos slots. A Explosao Elemental costumava entrar
+  // aqui, fora da conta dos 4 — desde 2026-08-18 ela e um golpe comum e so
+  // luta se estiver entre os escolhidos (ver o topo do arquivo).
+  return escolhidos
 }

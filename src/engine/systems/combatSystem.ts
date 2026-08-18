@@ -24,6 +24,7 @@ import { SPECIES } from '@/data/pokes'
 import type { PokeInstance } from '@/data/pokes'
 import { colorForType } from '@/data/typeColors'
 import { direcaoDoGolpeDeStatus } from '@/data/statusVfx'
+
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
@@ -41,12 +42,20 @@ import type { ClimaTipo, EnemyEntity, Escudos, PendingHit, PlayerEntity, WorldEn
 // em vez de no instante em que o golpe e usado.
 const HIT_LAND_DELAY = ATTACK_ANIM_DURATION
 
-// Duracoes procedurais de efeito de golpe por tipo (ver Sprites.ts):
-// single-target e um "burst fluido" rapido; AOE e um anel que expande ate o
-// raio real do splash, entao precisa de mais tempo pra terminar de crescer
-// antes de sumir.
-const IMPACT_EFFECT_DURATION = 0.35
-const AOE_EFFECT_DURATION = 0.55
+// Tempo de tela de um efeito de golpe.
+//
+// Eram 0,35s (impacto) e 0,55s (area) — herdados de quando TODO golpe era o
+// burst procedural de 3 particulas, que nao tinha o que mostrar por mais
+// tempo. A arte nova por tipo (data/vfxTiras.ts) tem de 14 a 40 quadros; em
+// 0,35s um lote de 30 quadros roda a 11ms cada, ou seja, ninguem ve a
+// animacao — ve um borrao. Pedido explicito: pelo menos 1 segundo na tela.
+//
+// Nestes valores as tiras rodam entre 25 e 40 quadros por segundo, que e a
+// faixa em que a animacao le como movimento e nao como sequencia de imagens.
+// Continua bem abaixo do MIN_ACTION_GAP (2s), entao dois golpes seguidos do
+// mesmo POKE nao empilham efeito.
+const IMPACT_EFFECT_DURATION = 1.0
+const AOE_EFFECT_DURATION = 1.2
 // Golpe de status usa GIF real (statusVfx.ts), nao os quadros PNG do burst
 // procedural: um GIF de servico Tibia costuma ter 8-20 quadros a
 // ~100-150ms cada (0,8-3s por ciclo). Nos 0,35/0,55s dos outros dois, o
@@ -1017,9 +1026,9 @@ function basicAttackFor(attackerSpecies: { type: Ability['type'] }): Ability {
 // dano (Igglybuff tem 1, e Togepi/Unown/Forretress ficam perto disso)
 // passaria metade dos turnos parado.
 //
-// Pro POKE do jogador, `pickAbilityDaFila` ja injeta Ataque Basico como
-// posicao FIXA do loop (ver comentario la) — esta funcao so entra como
-// ultimo recurso se a fila inteira (basico incluso) nao tiver nada pronto.
+// SO PRO SELVAGEM desde 2026-08-18. O POKE do jogador escolhe os 4 golpes, e
+// o Ataque Basico e um deles se ele quiser — dar de graca aqui devolveria por
+// baixo o slot gratis que a leva tirou.
 function tentarAtaqueBasico(entity: WorldEntity, attackerSpecies: { type: Ability['type'] }, disabled: Record<string, boolean>): Ability | null {
   if (disabled[BASIC_ATTACK.id] || !isAbilityReady(entity, BASIC_ATTACK.id)) return null
   return basicAttackFor(attackerSpecies)
@@ -1076,9 +1085,9 @@ function pickAbilityGreedy(
   ))
 }
 
-// POKE do jogador: percorre a rotacao NA ORDEM (ver pickAbility — Ataque
-// Basico primeiro, depois `activeAbilities` na ordem escolhida na tela de
-// golpes, ver data/activeAbilities.ts), comecando de
+// POKE do jogador: percorre a rotacao NA ORDEM — `activeAbilities`, do jeito
+// que o jogador ordenou na tela de golpes (ver data/activeAbilities.ts) —
+// comecando de
 // `entity.filaGolpeIndex`. Golpe da vez em cooldown/filtrado nao trava o
 // turno — pula pro proximo da fila, sem avancar o indice (ele tenta de novo
 // no proximo turno, e nao "perde a vez" pra sempre). So avanca o indice
@@ -1089,11 +1098,11 @@ function pickAbilityGreedy(
 // uma IA que sempre repete os 1-2 golpes de maior dano esperado e deixa o
 // resto do moveset parado.
 //
-// Ataque Basico ENTRA NA FILA (pickAbility injeta como 1a posicao) em vez de
-// so fallback de ultimo recurso: pedido explicito do usuario — ele executa
-// toda vez que a vez dele chega e nao esta em cooldown, mesmo com golpe de
-// verdade pronto. Custa DPS de proposito (cooldown curto e fixo de Basico
-// rouba turno de golpe real com frequencia) — decisao de design, nao bug.
+// O Ataque Basico participa da fila como QUALQUER outro golpe, se o jogador
+// tiver gasto um dos 4 slots nele. Quando esta na fila ele executa toda vez
+// que a vez dele chega e nao esta em cooldown, mesmo com golpe forte pronto —
+// custa DPS de proposito (cooldown curto e fixo rouba turno de golpe real), e
+// isso agora e uma escolha do jogador, nao uma imposicao do motor.
 function pickAbilityDaFila(
   world: WorldState, entity: WorldEntity, defenderEntity: WorldEntity,
   candidatos: Ability[], estaSilenciado: boolean, clima: ClimaTipo | null,
@@ -1102,11 +1111,12 @@ function pickAbilityDaFila(
   const n = candidatos.length
   if (n === 0) return null
   const inicio = ((entity.filaGolpeIndex ?? 0) % n + n) % n
-  // Ataque Basico FICA FORA desta conta: ele quase sempre esta pronto (rotina
-  // curta e fixa), entao incluir ele aqui faria o overkill-guard abaixo achar
-  // que sempre ha dano letal pronto e nunca deixar nenhum golpe de status
-  // executar — o guard e sobre o MOVESET escolhido (4 slots + AOE), nao sobre
-  // o fallback que sempre esta disponivel.
+  // Ataque Basico FICA FORA desta conta mesmo agora que ele ocupa slot: o
+  // cooldown dele e curto e fixo, entao ele quase sempre esta pronto, e
+  // inclui-lo faria o overkill-guard abaixo concluir que SEMPRE ha dano letal
+  // disponivel — nenhum golpe de status executaria nunca. O guard pergunta
+  // "o alvo sobrevive ao meu melhor golpe?", e o Basico nao e resposta pra
+  // isso em POKE nenhum.
   const prontosDeDano = candidatos.filter((a) => (
     a.id !== BASIC_ATTACK.id && isDamagingAbility(a) && isAbilityReady(entity, a.id)
   ))
@@ -1184,12 +1194,19 @@ function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: Wor
 
   const abilidadesFinais = candidatosFinais.map((id) => getAbility(id)).filter((a): a is Ability => a != null)
 
-  // So injeta Basico na rotacao do jogador fora de Encore — senao o jogador
-  // escaparia da trava do Encore (que forca UM golpe so) trocando pra Basico
-  // sempre que a vez dele chegasse no loop.
-  const rotacaoDoJogador = !encoreAtivo && !disabled[BASIC_ATTACK.id]
-    ? [basicAttackFor(attackerSpecies), ...abilidadesFinais]
-    : abilidadesFinais
+  // O Ataque Basico do JOGADOR nao e mais injetado aqui. Ate 2026-08-18 ele
+  // entrava como primeira posicao fixa da fila, de graca, alem dos 4 slots —
+  // o POKE lutava com 5 (6 com a Explosao Elemental) enquanto a tela dizia
+  // "4/4". Agora ele so luta se o jogador o tiver escolhido, e ai ja chega em
+  // `abilidadesFinais` como qualquer outro golpe, na posicao que o jogador
+  // deu a ele. Ver data/activeAbilities.ts.
+  //
+  // `basicAttackFor` continua sendo a fonte do objeto: o Ataque Basico assume
+  // o tipo primario do atacante, e o `getAbility` que montou `abilidadesFinais`
+  // devolve a versao NORMAL, module-level.
+  const rotacaoDoJogador = abilidadesFinais.map(
+    (a) => (a.id === BASIC_ATTACK.id ? basicAttackFor(attackerSpecies) : a),
+  )
 
   const escolhido = entity.kind === 'enemy'
     ? pickAbilityGreedy(
@@ -1203,7 +1220,14 @@ function pickAbility(world: WorldState, entity: WorldEntity, defenderEntity: Wor
       estaSilenciado, clima,
     )
 
-  return escolhido ?? tentarAtaqueBasico(entity, attackerSpecies, disabled)
+  // Fallback SO pro selvagem. E o Struggle dele: o moveset selvagem e derivado
+  // (4 ultimos aprendidos, sem escolha de ninguem), entao uma especie com 1
+  // golpe de dano passaria metade dos turnos parada. O jogador nao tem esse
+  // problema — ele escolhe os 4, e se quiser a rede de seguranca basta por o
+  // Ataque Basico num slot. Dar a ele um golpe que ele NAO escolheu seria
+  // desfazer o pedido desta leva por outro caminho.
+  if (escolhido) return escolhido
+  return entity.kind === 'enemy' ? tentarAtaqueBasico(entity, attackerSpecies, disabled) : null
 }
 
 // Contador no WorldState, nao em modulo — ver a nota em types.ts#WorldCounters.
@@ -2135,10 +2159,14 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // (Danca das Espadas acerta o proprio atacante).
   if (!isAoe && !silent && (ability.power > 0 || statusRecebeuEm)) {
     const local = ability.power === 0 && statusRecebeuEm ? statusRecebeuEm : target
+    // Golpe em si mesmo (Danca das Espadas e afins) nao tem direcao: dx=dy=0
+    // sairia como angulo 0 e apontaria a arte pra direita sem motivo.
+    const mesmoLugar = local.x === attacker.x && local.y === attacker.y
     world.effects.push(createWorldEffect(world.counters, {
       type: 'abilityEffect',
       x: local.x, y: local.y,
       targetX: local.x, targetY: local.y - local.radius * 0.6,
+      anguloDeAtaque: mesmoLugar ? undefined : Math.atan2(local.y - attacker.y, local.x - attacker.x),
       color: colorForType(ability.type),
       isAoe: false,
       duration: ability.power === 0 ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,

@@ -17,13 +17,14 @@
 //
 // Cooldown vem do `WorldEntity` (worldStore), nao do PokeInstance salvo: e
 // estado de combate ao vivo, atualizado a cada tick.
-import { getAbility, BASIC_ATTACK, type Ability } from '@/data/abilities'
+import { getAbility, type Ability } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { SPECIES } from '@/data/pokes'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { abilityIconUrl } from '@/data/abilityIcons'
 import { colorForType } from '@/data/typeColors'
 import { controller } from '@/engine/controller'
+import { segundosAtePoderUsar } from '@/engine/entity'
 import { useWorldStore } from '@/stores/worldStore'
 import { useBreakpoints } from '@/stores/uiStore'
 import { AbilityTooltip } from '@/components/shared/AbilityTooltip'
@@ -63,10 +64,10 @@ const TAMANHO_SLOT = { largo: '2.6em', medio: '2.35em', estreito: '2.05em' } as 
 const TAMANHO_ROTULO = { largo: '.8em', medio: '.75em', estreito: '.68em' } as const
 
 export function AbilityHud() {
-  const poke = useWorldStore((s) => s.player?.poke ?? null)
-  const cooldowns = useWorldStore((s) => s.player?.cooldowns ?? null)
+  const player = useWorldStore((s) => s.player)
   const { narrow, colStack } = useBreakpoints()
 
+  const poke = player?.poke ?? null
   if (!poke) return null
 
   const regime = narrow ? 'estreito' : colStack ? 'medio' : 'largo'
@@ -74,14 +75,15 @@ export function AbilityHud() {
   const fonteRotulo = TAMANHO_ROTULO[regime]
 
   const disabled = poke.disabledAbilities || {}
-  // Os 4 escolhidos + o AOE de nivel 50, e nao o learnset inteiro: a barra
-  // mostra exatamente o que a IA pode usar (combatSystem#pickAbility le a mesma
-  // funcao). Antes ela crescia com o nivel ate 8+ slots, e a maioria deles era
-  // golpe que o POKE nunca usaria.
+  // EXATAMENTE os slots escolhidos, no maximo 4 — a mesma funcao que
+  // `combatSystem#pickAbility` le, entao a barra nunca mostra golpe que a IA
+  // nao pode usar nem esconde um que ela pode.
   //
-  // O Ataque Basico entra no fim porque agora ele so e usado quando nenhum dos
-  // escolhidos esta pronto — continua visivel pra o jogador poder desliga-lo.
-  const abilities = [...golpesUtilizaveis(poke, SPECIES[poke.speciesId], false), BASIC_ATTACK.id]
+  // O Ataque Basico deixou de ser anexado no fim: desde 2026-08-18 ele so
+  // aparece se o jogador tiver gasto um slot nele (ver data/activeAbilities.ts).
+  // Enquanto ele era anexo, a barra mostrava 5 ou 6 icones e a tela de Golpes
+  // dizia "4/4" logo ao lado.
+  const abilities = golpesUtilizaveis(poke, SPECIES[poke.speciesId], false)
     .map((id) => getAbility(id))
     .filter((a): a is Ability => a != null)
 
@@ -91,7 +93,9 @@ export function AbilityHud() {
     <div className="pointer-events-auto flex flex-wrap justify-center gap-[.45em]">
       {abilities.map((ability) => {
         const isOff = Boolean(disabled[ability.id])
-        const cd = cooldowns?.[ability.id] ?? 0
+        // Conta os DOIS relogios (cooldown do golpe e turno global) — ver
+        // engine/entity.ts#segundosAtePoderUsar pro bug que isto corrige.
+        const cd = player ? segundosAtePoderUsar(player, ability.id) : 0
         const ready = cd <= 0 && !isOff
         const borderColor = CATEGORY_BORDER[resolveAbilityCategory(ability, poke)] || CATEGORY_BORDER.physical
         const icone = abilityIconUrl(ability.type)

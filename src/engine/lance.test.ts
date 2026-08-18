@@ -29,7 +29,11 @@ function pokeFragil(uid: string): PokeInstance {
     stats: { hp: 20, atkFis: 10, atkEsp: 10, def: 5, defEsp: 5, speed: 10 },
     hp: 20,
     unlockedAbilities: [],
-    activeAbilities: [],
+    // Precisa gastar um slot no Ataque Basico desde 2026-08-18: antes ele era
+    // injetado de graca como posicao fixa da rotacao, e estas fixtures nao
+    // conhecem golpe NENHUM. Sem isto o POKE fica sem nada pra usar e os testes
+    // de sequencia falham por um motivo que nao tem a ver com a sequencia.
+    activeAbilities: ['basic_attack'],
   }
 }
 
@@ -47,7 +51,11 @@ function pokeAbsurdo(): PokeInstance {
     stats: { hp: 99999, atkFis: 99999, atkEsp: 99999, def: 99999, defEsp: 99999, speed: 500 },
     hp: 99999,
     unlockedAbilities: [],
-    activeAbilities: [],
+    // Precisa gastar um slot no Ataque Basico desde 2026-08-18: antes ele era
+    // injetado de graca como posicao fixa da rotacao, e estas fixtures nao
+    // conhecem golpe NENHUM. Sem isto o POKE fica sem nada pra usar e os testes
+    // de sequencia falham por um motivo que nao tem a ver com a sequencia.
+    activeAbilities: ['basic_attack'],
   }
 }
 

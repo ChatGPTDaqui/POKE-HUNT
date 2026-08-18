@@ -57,7 +57,13 @@ describe('limite de 4 golpes', () => {
   it('so escolhe golpe que a especie ja aprendeu naquele nivel', () => {
     for (const species of Object.values(SPECIES)) {
       for (const level of NIVEIS) {
-        const permitidos = new Set(species.abilities.filter((a) => a.levelReq <= level).map((a) => a.key))
+        // O Ataque Basico entra na lista de permitidos: ele nao e aprendido em
+        // nivel nenhum (todo POKE tem), e desde 2026-08-18 o padrao o usa pra
+        // completar slot que o learnset nao preenche.
+        const permitidos = new Set([
+          ...species.abilities.filter((a) => a.levelReq <= level).map((a) => a.key),
+          'basic_attack',
+        ])
         for (const key of activeAbilitiesPadrao(species, level)) expect(permitidos.has(key)).toBe(true)
         for (const key of activeAbilitiesSelvagem(species, level)) expect(permitidos.has(key)).toBe(true)
       }
@@ -117,12 +123,32 @@ describe('golpesUtilizaveis', () => {
     expect(pool.length).toBeLessThanOrEqual(MAX_ACTIVE_ABILITIES)
   })
 
-  it('POKE do jogador recebe o AOE FORA dos 4 slots', () => {
+  // A REGRA INVERTEU em 2026-08-18, a pedido do usuario. A Explosao Elemental
+  // era anexada DEPOIS dos 4 escolhidos e o Ataque Basico era injetado como
+  // primeira posicao fixa da rotacao — o POKE lutava com ate 6 golpes enquanto
+  // a tela de Golpes dizia "4/4". Agora os dois disputam slot como o resto.
+  it('o POKE do jogador nunca passa de 4, nem com a Explosao Elemental desbloqueada', () => {
     const species = SPECIES.charizard
     const poke = pokeFalso('charizard', 80)
     const pool = golpesUtilizaveis(poke, species, false)
-    expect(pool).toContain(typedAoeMoveKey(species.type))
-    expect(pool.length).toBe(MAX_ACTIVE_ABILITIES + 1)
+    expect(pool.length).toBeLessThanOrEqual(MAX_ACTIVE_ABILITIES)
+    expect(pool).not.toContain(typedAoeMoveKey(species.type))
+  })
+
+  it('a Explosao Elemental entra quando o jogador gasta um slot nela', () => {
+    const species = SPECIES.charizard
+    const aoe = typedAoeMoveKey(species.type)
+    const poke = pokeFalso('charizard', 80, { activeAbilities: [aoe, 'ember'] })
+    expect(golpesUtilizaveis(poke, species, false)).toEqual([aoe, 'ember'])
+  })
+
+  it('o Ataque Basico entra quando o jogador gasta um slot nele', () => {
+    // Ele NAO esta em `unlockedAbilities` — nao e aprendido em nivel nenhum —,
+    // entao o filtro de "golpe que o POKE conhece" o descartaria em silencio
+    // sem a isencao explicita em `golpesUtilizaveis`.
+    const species = SPECIES.charizard
+    const poke = pokeFalso('charizard', 80, { activeAbilities: ['basic_attack', 'ember'] })
+    expect(golpesUtilizaveis(poke, species, false)).toEqual(['basic_attack', 'ember'])
   })
 
   it('selvagem ignora a escolha gravada — ele deriva da especie', () => {
@@ -131,10 +157,13 @@ describe('golpesUtilizaveis', () => {
     expect(golpesUtilizaveis(poke, species, true).length).toBeGreaterThan(0)
   })
 
-  it('lista vazia e escolha valida: o POKE do jogador fica so com o AOE', () => {
+  it('lista vazia e escolha valida: o POKE do jogador fica sem golpe nenhum', () => {
+    // E o jogador PODE se enfiar nisso. Nao ha mais rede de seguranca
+    // escondida: o Ataque Basico so luta se ocupar um slot, e o fallback de
+    // ultimo recurso em combatSystem#pickAbility ficou so pro selvagem.
     const species = SPECIES.charizard
     const poke = pokeFalso('charizard', 80, { activeAbilities: [] })
-    expect(golpesUtilizaveis(poke, species, false)).toEqual([typedAoeMoveKey(species.type)])
+    expect(golpesUtilizaveis(poke, species, false)).toEqual([])
   })
 
   it('descarta escolha que o POKE nao conhece mais (especie trocada por evolucao)', () => {
@@ -170,10 +199,20 @@ describe('encaixarNovosGolpes', () => {
     expect(encaixarNovosGolpes(cheio, ['flamethrower'])).toEqual(cheio)
   })
 
-  it('nunca encaixa o AOE de nivel 50 nem o Ataque Basico', () => {
+  // A Explosao Elemental virou golpe comum e PODE preencher slot vago (ela
+  // chega como novidade no nivel 50, e de novo numa evolucao que troca o tipo).
+  // O Ataque Basico continua fora: ele nao e aprendido em nivel nenhum, entao
+  // nunca chega aqui como "golpe novo" — quem o coloca e o default ou o
+  // proprio jogador.
+  it('encaixa a Explosao Elemental em slot vago, nunca o Ataque Basico', () => {
     const aoe = typedAoeMoveKey('FIRE')
     expect(ehGolpeAoeDeNivel50(aoe)).toBe(true)
-    expect(encaixarNovosGolpes(['ember'], [aoe, 'basic_attack'])).toEqual(['ember'])
+    expect(encaixarNovosGolpes(['ember'], [aoe, 'basic_attack'])).toEqual(['ember', aoe])
+  })
+
+  it('com os 4 cheios, a Explosao Elemental nao derruba escolha nenhuma', () => {
+    const cheio = ['ember', 'scratch', 'growl', 'leer']
+    expect(encaixarNovosGolpes(cheio, [typedAoeMoveKey('FIRE')])).toEqual(cheio)
   })
 })
 

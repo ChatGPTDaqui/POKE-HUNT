@@ -6,7 +6,7 @@
 import type { ReactNode } from 'react'
 import { expProgressForInstance } from '@/engine/systems/progressionSystem'
 import { getAbility, BASIC_ATTACK } from '@/data/abilities'
-import { activeAbilitiesPadrao, ehGolpeAoeDeNivel50, MAX_ACTIVE_ABILITIES } from '@/data/activeAbilities'
+import { activeAbilitiesPadrao, MAX_ACTIVE_ABILITIES } from '@/data/activeAbilities'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { controller } from '@/engine/controller'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -138,41 +138,21 @@ export function StatDetail({ poke, weaknessSection }: { poke: PokeInstance; weak
 
 const MOVE_GRID = 'grid grid-cols-[2.4em_1fr_3.4em_3.8em_3em_2.4em_2.6em] items-center gap-[.4em]'
 
-// Checkbox generico da coluna "Usar" — usado tanto pro slot-de-4 (`ativo` =
-// esta nos 4 escolhidos) quanto pro liga/desliga do Ataque Basico e do AOE do
-// Nivel 50 (`ativo` = nao esta em `disabledAbilities`). Os dois ja
-// funcionavam por baixo (double-click no AbilityHud, `disabledAbilities`) —
-// aqui so torna a escolha visivel e explicavel na tela de perfil.
-function CelulaCheckbox(
-  { ativo, habilitado, tituloAtivo, tituloInativo, tituloDesabilitado, onClick }:
-  { ativo: boolean; habilitado: boolean; tituloAtivo: string; tituloInativo: string; tituloDesabilitado: string; onClick: () => void },
-) {
-  return (
-    <button
-      type="button"
-      disabled={!habilitado}
-      onClick={onClick}
-      title={habilitado ? (ativo ? tituloAtivo : tituloInativo) : tituloDesabilitado}
-      className={cn(
-        'h-[1.4em] w-[1.4em] rounded-[.25em] border font-[inherit] leading-none',
-        ativo ? 'border-primary bg-primary text-n900' : 'border-n700 bg-transparent text-transparent',
-        habilitado ? 'cursor-pointer' : 'cursor-not-allowed opacity-45',
-      )}
-    >
-      ✓
-    </button>
-  )
-}
-
-// Celula da coluna "Usar" pros golpes REAIS do slot-de-4 (Ataque Basico e o
-// AOE de Nivel 50 ficam fora do slot e continuam checkbox simples, ver
-// CelulaUsar abaixo). Mostra a ORDEM (1o/2o/3o/4o) baseada no indice em
-// `activeAbilities` em vez de um check — reflete a fila que o motor respeita
-// de verdade (posicao importa: golpe na ordem 1 e o primeiro depois do
-// Ataque Basico na rotacao, ver pickAbilityDaFila em combatSystem.ts).
+// Celula da coluna "Usar". Desde 2026-08-18 vale pra TODOS os golpes,
+// inclusive Ataque Basico e Explosao Elemental — os dois deixaram de ser
+// liga/desliga fora do slot e passaram a disputar os 4 como o resto.
+//
+// Mostra a ORDEM (1o/2o/3o/4o) baseada no indice em `activeAbilities` em vez
+// de um check: a posicao importa de verdade, a rotacao percorre a fila nessa
+// ordem (ver pickAbilityDaFila em combatSystem.ts).
+//
+// `desligado` e um estado SEPARADO da ordem: o golpe pode ocupar slot e ainda
+// estar fora da rotacao pelo duplo-clique no AbilityHud
+// (`disabledAbilities`). Sem mostrar isso aqui, o jogador via "2º na fila"
+// num golpe que o motor estava ignorando, sem nada explicando por que.
 function CelulaOrdem(
-  { aprendido, ordem, habilitado, onClick }:
-  { aprendido: boolean; ordem: number | null; habilitado: boolean; onClick: () => void },
+  { aprendido, ordem, habilitado, desligado, onClick }:
+  { aprendido: boolean; ordem: number | null; habilitado: boolean; desligado?: boolean; onClick: () => void },
 ) {
   if (!aprendido) return <span className="text-n700">—</span>
   const ativo = ordem != null
@@ -185,41 +165,18 @@ function CelulaOrdem(
         !habilitado
           ? 'Saia da hunt para trocar de golpe'
           : ativo
-            ? `${ordem}º na fila — clique pra remover`
+            ? `${ordem}º na fila — clique pra remover${desligado ? ' (desligado no HUD: duplo clique no ícone religa)' : ''}`
             : 'Adicionar ao fim da fila'
       }
       className={cn(
         'h-[1.4em] w-[1.4em] rounded-[.25em] border font-[inherit] text-[.85em] leading-none',
         ativo ? 'border-primary bg-primary text-n900' : 'border-n700 bg-transparent text-n700',
+        ativo && desligado && 'border-n600 bg-n600 text-n900 line-through',
         habilitado ? 'cursor-pointer' : 'cursor-not-allowed opacity-45',
       )}
     >
       {ativo ? ordem : ''}
     </button>
-  )
-}
-
-// A celula da coluna "Usar" do AOE do Nivel 50 — fica FORA do slot-de-4
-// (liga/desliga puro, sem ordem — Ataque Basico usa CelulaCheckbox direto,
-// ver mais abaixo), dentro de hunt (mostra a marca, mas nao clica — as RPCs
-// `definir_golpes_ativos` E `alternar_habilidade` recusam mudar golpe com
-// sessao de hunt aberta, ver migration 20260815190000: reintroduzida a
-// pedido do usuario, cobrindo tambem o AOE do Nivel 50 desta vez — antes so
-// o slot-de-4 tinha trava).
-function CelulaUsar(
-  { aprendido, ativo, habilitado, onClick }:
-  { aprendido: boolean; ativo: boolean; habilitado: boolean; onClick: () => void },
-) {
-  if (!aprendido) return <span className="text-n700">—</span>
-  return (
-    <CelulaCheckbox
-      ativo={ativo}
-      habilitado={habilitado}
-      tituloAtivo="Desligar este golpe (nao ocupa slot, so entra/sai do combate)"
-      tituloInativo="Ligar este golpe"
-      tituloDesabilitado="Saia da hunt para trocar de golpe"
-      onClick={onClick}
-    />
   )
 }
 
@@ -274,15 +231,6 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
     controller.setActiveAbilities(poke.uid, ja ? ativos.filter((k) => k !== key) : [...ativos, key])
   }
 
-  // Ataque Basico e o AOE do Nivel 50 nunca ocupam slot: sao liga/desliga puro
-  // em `disabledAbilities`, mesmo caminho do double-click no AbilityHud —
-  // mesma trava de hunt de `alternar`, ja que `alternar_habilidade` tambem
-  // passou a recusar com sessao viva.
-  function alternarOpcional(key: string): void {
-    if (!podeEscolher) return
-    controller.toggleAbility(poke.uid, key)
-  }
-
   return (
     <div className="overflow-hidden rounded-[.4em] border border-n800 text-[.8em]">
       {meu && (
@@ -320,20 +268,21 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
             <span>{BASIC_ATTACK.power > 0 ? BASIC_ATTACK.power : '—'}</span>
             <span className="text-n400">—</span>
             <span>
-              <CelulaCheckbox
-                ativo={!desabilitados[BASIC_ATTACK.id]}
+              {/* Golpe comum desde 2026-08-18: ocupa um dos 4 slots como
+                  qualquer outro, com a mesma celula de ORDEM. Todo POKE
+                  "conhece" o Ataque Basico, entao `aprendido` e sempre true. */}
+              <CelulaOrdem
+                aprendido
+                ordem={ativos.indexOf(BASIC_ATTACK.id) === -1 ? null : ativos.indexOf(BASIC_ATTACK.id) + 1}
                 habilitado={podeEscolher}
-                tituloAtivo="Desligar o Ataque Basico (posicao fixa da fila — executa toda vez que a vez dele chega e nao esta em cooldown, mesmo com golpe de verdade pronto)"
-                tituloInativo="Ligar o Ataque Basico"
-                tituloDesabilitado="Saia da hunt para trocar de golpe"
-                onClick={() => alternarOpcional(BASIC_ATTACK.id)}
+                desligado={Boolean(desabilitados[BASIC_ATTACK.id])}
+                onClick={() => alternar(BASIC_ATTACK.id)}
               />
             </span>
           </div>
         )}
         {rows.map(({ entry, ability }, index) => {
           const learned = entry.levelReq <= pokeVivo.level
-          const aoe50 = ehGolpeAoeDeNivel50(entry.key)
           const idxNaFila = ativos.indexOf(entry.key)
           return (
             <div
@@ -357,21 +306,18 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
               </span>
               <span>{ability.power > 0 ? ability.power : '—'}</span>
               <span className="text-n400">{ability.target === 'aoe' ? '✓' : '—'}</span>
-              <span>{meu && (aoe50 ? (
-                <CelulaUsar
-                  aprendido={learned}
-                  ativo={!desabilitados[entry.key]}
-                  habilitado={podeEscolher}
-                  onClick={() => alternarOpcional(entry.key)}
-                />
-              ) : (
+              {/* A Explosao Elemental (aoe50) usava uma celula propria de
+                  liga/desliga porque nao ocupava slot. Desde 2026-08-18 ela e
+                  golpe comum e cai na MESMA celula de ordem do resto. */}
+              <span>{meu && (
                 <CelulaOrdem
                   aprendido={learned}
                   ordem={idxNaFila === -1 ? null : idxNaFila + 1}
                   habilitado={podeEscolher}
+                  desligado={Boolean(desabilitados[entry.key])}
                   onClick={() => alternar(entry.key)}
                 />
-              ))}</span>
+              )}</span>
             </div>
           )
         })}

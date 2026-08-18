@@ -139,23 +139,27 @@ describe('AOE elemental e Ataque Basico sao opcionais', () => {
     return usados
   }
 
-  it('o AOE de nivel 50 some da rotacao quando desligado', () => {
+  it('a Explosao Elemental some da rotacao quando desligada', () => {
     const aoe = typedAoeMoveKey(SPECIES.charmander.type)
 
+    // Desde 2026-08-18 ela SO entra se o jogador gastar um slot nela — nao ha
+    // mais anexo automatico depois dos 4. O liga/desliga continua existindo em
+    // cima disso, e e o que este teste cobre.
     const ligado = cenario(60)
-    // Pre-condicao: sem desligar, ele ESTA disponivel pro combate.
+    ligado.player.poke.activeAbilities = [aoe]
     expect(golpesUtilizaveis(ligado.player.poke, SPECIES[ligado.player.poke.speciesId], false)).toContain(aoe)
 
     const desligado = cenario(60)
+    desligado.player.poke.activeAbilities = [aoe]
     desligado.player.poke.disabledAbilities = { [aoe]: true }
     expect(golpesUsados(desligado, 40).has(aoe)).toBe(false)
   })
 
-  it('o Ataque Basico some da rotacao quando desligado, mesmo sendo o ultimo recurso', () => {
+  it('o Ataque Basico some da rotacao quando desligado, mesmo sendo o unico slot', () => {
     const mundo = cenario(3)
-    // Sem nenhum golpe escolhido, o Ataque Basico e a UNICA saida — e o caso em
-    // que ele seria usado a forca.
-    mundo.player.poke.activeAbilities = []
+    // Unico golpe escolhido: se o desligamento nao valesse, ele seria usado a
+    // forca — e o caso mais apertado do contrato.
+    mundo.player.poke.activeAbilities = [BASIC_ATTACK.id]
     mundo.player.poke.disabledAbilities = { [BASIC_ATTACK.id]: true }
 
     expect(golpesUsados(mundo, 40).has(BASIC_ATTACK.id)).toBe(false)
@@ -163,9 +167,20 @@ describe('AOE elemental e Ataque Basico sao opcionais', () => {
 
   it('...e continua sendo usado quando NAO esta desligado (prova que o teste acima vale)', () => {
     const mundo = cenario(3)
-    mundo.player.poke.activeAbilities = []
+    mundo.player.poke.activeAbilities = [BASIC_ATTACK.id]
 
     expect(golpesUsados(mundo, 40).has(BASIC_ATTACK.id)).toBe(true)
+  })
+
+  // O outro lado da mesma regra, e a mudanca de comportamento mais facil de
+  // confundir com bug: SEM o Ataque Basico num slot, o POKE do jogador nao
+  // recebe nenhum golpe de graca. Ate 2026-08-18 ele era injetado na rotacao
+  // pelo motor; agora quem nao o escolhe simplesmente nao o usa.
+  it('sem nenhum slot escolhido, o jogador NAO ganha o Ataque Basico de graca', () => {
+    const mundo = cenario(3)
+    mundo.player.poke.activeAbilities = []
+
+    expect(golpesUsados(mundo, 40).size).toBe(0)
   })
 
   // A precisao de cada golpe bate com o Ultra Sun — 501 golpes conferidos contra
@@ -295,23 +310,24 @@ describe('POKE do jogador usa os golpes na ordem escolhida (fila), nao so o de m
   })
 })
 
-// Pedido explicito do usuario: Ataque Basico vira posicao FIXA da fila do
-// jogador (basico -> slot1 -> slot2 -> slot3 -> slot4 -> AOE -> basico...),
-// nao so fallback de ultimo recurso -- executa toda vez que a vez dele chega
-// e ele nao esta em cooldown, mesmo com golpe de verdade pronto (custa DPS
-// de proposito). Basico NAO atualiza `lastUsedAbilityId` (e o Struggle deste
-// jogo, ver executePlayerAction) -- o sinal de que ele foi escolhido e o
-// proprio `cooldowns[BASIC_ATTACK.id]` ficando setado.
-describe('Ataque Basico ocupa posicao fixa na fila do jogador', () => {
+// O Ataque Basico participa da fila como QUALQUER outro golpe, na posicao em
+// que o jogador o colocou. Ate 2026-08-18 ele era injetado pelo motor como
+// posicao fixa e gratuita antes dos 4 slots; agora ele gasta um dos 4 (pedido
+// explicito do usuario). O que NAO mudou: quando esta na fila, ele executa
+// toda vez que a vez dele chega e nao esta em cooldown, mesmo com golpe forte
+// pronto — custa DPS, e agora isso e escolha do jogador.
+//
+// Ele NAO atualiza `lastUsedAbilityId` (ver executePlayerAction), entao o
+// sinal de que foi escolhido e o proprio `cooldowns[BASIC_ATTACK.id]`.
+describe('Ataque Basico na fila do jogador', () => {
   function cenarioFilaComBasico() {
     const rng = createRng(3)
     const counters = { entity: 1, effect: 1, pendingHit: 1 }
     const jogadorPoke = createPokeInstance(rng, 'charmander', 60)
     jogadorPoke.unlockedAbilities = [...jogadorPoke.unlockedAbilities, 'flamethrower']
-    jogadorPoke.activeAbilities = ['scratch', 'ember', 'flamethrower']
-    // Ataque Basico fica LIGADO aqui de proposito -- e o que este describe
-    // testa (nos outros cenarios de fila ele fica desligado pra isolar a
-    // ordem dos 4 slots escolhidos).
+    // Basico na PRIMEIRA posicao: e a mesma ordem que o describe testava
+    // quando o motor o injetava sozinho, agora escrita como escolha.
+    jogadorPoke.activeAbilities = [BASIC_ATTACK.id, 'scratch', 'ember', 'flamethrower']
     jogadorPoke.disabledAbilities = { [typedAoeMoveKey(SPECIES.charmander.type)]: true }
     const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
     const player = world.player!

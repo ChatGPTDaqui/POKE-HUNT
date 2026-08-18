@@ -7,7 +7,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import { SPECIES, type PokeInstance } from '@/data/pokes'
-import { getAbility, isDamagingAbility, BASIC_ATTACK } from '@/data/abilities'
+import { getAbility, isDamagingAbility } from '@/data/abilities'
 import { typedAoeMoveKey } from '@/data/typedAoeMoves'
 import { activeAbilitiesPadrao, golpesUtilizaveis } from '@/data/activeAbilities'
 import { useWorldStore } from '@/stores/worldStore'
@@ -54,12 +54,12 @@ beforeEach(() => { useWorldStore.setState({ player: null }) })
 afterEach(cleanup)
 
 describe('AbilityHud', () => {
-  it('mostra so os 4 escolhidos + AOE + Ataque Basico, nao o learnset inteiro', () => {
+  it('mostra so os slots escolhidos, nao o learnset inteiro', () => {
     const poke = pokeEmCampo()
     porEmCampo(poke)
     render(<AbilityHud />)
 
-    const esperado = [...golpesUtilizaveis(poke, ESPECIE, false), BASIC_ATTACK.id]
+    const esperado = golpesUtilizaveis(poke, ESPECIE, false)
       .map((id) => getAbility(id))
       .filter((a) => isDamagingAbility(a))
 
@@ -75,8 +75,11 @@ describe('AbilityHud', () => {
     porEmCampo(poke)
     render(<AbilityHud />)
 
-    // Sem nenhum golpe selecionado sobram o AOE de Nivel 50 e o Ataque Basico.
-    expect(slots()).toHaveLength(2)
+    // Sem nenhum golpe selecionado a barra fica VAZIA: desde 2026-08-18 nem a
+    // Explosao Elemental nem o Ataque Basico sao anexados de graca.
+    // `queryAll` e nao `slots()`: `getAllByTitle` estoura quando nao acha nada,
+    // e "nao achar nada" e exatamente o que este teste afirma.
+    expect(screen.queryAllByTitle(/duplo clique/i)).toHaveLength(0)
     expect(getAbility(typedAoeMoveKey(ESPECIE.type))).toBeTruthy()
   })
 
@@ -96,8 +99,8 @@ describe('AbilityHud', () => {
     porEmCampo(poke)
     render(<AbilityHud />)
 
-    // AOE de Nivel 50 + Ataque Basico + growl.
-    expect(slots()).toHaveLength(3)
+    // So o growl: nada mais e anexado por fora dos slots.
+    expect(slots()).toHaveLength(1)
     // Golpe de status tambem ganha icone (mesmo esquema por tipo dos outros);
     // so o poder na faixa de baixo vira "—" em vez de um numero, ja que ele
     // nao tem power > 0.

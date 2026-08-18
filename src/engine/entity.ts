@@ -176,6 +176,24 @@ export function isAbilityReady(entity: BaseEntity, abilityId: string): boolean {
   return !entity.cooldowns[abilityId]
 }
 
+/**
+ * Quantos segundos FALTAM pra este golpe poder sair de verdade.
+ *
+ * Sao DOIS relogios, e ignorar o segundo foi um bug real de tela: alem do
+ * cooldown proprio do golpe (`cooldowns[id]`), toda acao passa pelo
+ * `globalCooldown` (MIN_ACTION_GAP, o turno de 2s — ver
+ * combatSystem#executePlayerAction, que chama `canAct` antes de qualquer
+ * coisa). O HUD mostrava so o primeiro, entao o slot apagava a contagem e
+ * acendia o anel de "pronto" enquanto o POKE ainda estava travado pelo turno,
+ * e um golpe marcado "0.4s" so saia 1.6s depois. O jogador via a barra
+ * dessincronizada do combate sem nada explicando por que.
+ *
+ * `Math.max` e nao soma: os dois correm ao mesmo tempo, quem manda e o maior.
+ */
+export function segundosAtePoderUsar(entity: BaseEntity, abilityId: string): number {
+  return Math.max(entity.cooldowns[abilityId] ?? 0, entity.globalCooldown ?? 0)
+}
+
 export function startCooldown(entity: BaseEntity, abilityId: string, seconds: number): void {
   entity.cooldowns[abilityId] = seconds
 }
@@ -202,8 +220,23 @@ export function takeDamage(entity: BaseEntity, amount: number, category?: Abilit
   }
 }
 
+// Quanto tempo a faisca de cura fica na tela. Uma volta inteira dos 16
+// quadros da arte; nao acompanha nenhuma duracao de combate porque nao e
+// consequencia de um golpe — Ingrain e poção usam o mesmo tempo.
+export const VFX_CURA_DURACAO = 0.9
+
+/**
+ * Unico caminho de cura de HP do motor — por isso o marcador visual mora
+ * aqui e nao em cada chamador (ver a nota em types.ts#vfxCuraHp).
+ *
+ * Só marca quando o HP REALMENTE subiu: curar 0, ou curar um POKE ja em HP
+ * cheio (Leftovers/Ingrain a cada turno, o caso mais comum de todos),
+ * piscaria a faisca pra sempre sem nada ter acontecido.
+ */
 export function heal(entity: BaseEntity, amount: number): void {
+  const antes = entity.poke.hp
   entity.poke.hp = Math.min(getMaxHp(entity), entity.poke.hp + amount)
+  if (entity.poke.hp > antes) entity.vfxCuraHp = VFX_CURA_DURACAO
 }
 
 // Helper compartilhado por combatSystem/movementSystem/controller — acha uma
