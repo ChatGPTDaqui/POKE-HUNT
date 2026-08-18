@@ -23,7 +23,7 @@ desenhado em `<canvas>`, nunca em DOM.
 └──────────────────────────────────────────────────────────────┘
                     │ intenção (nunca resultado)
                     ▼
-┌─ Servidor de autoridade (server/, publicado como Edge Function) ┐
+┌─ Servidor de autoridade (authority/, publicado como Edge Function) ┐
 │  MESMO motor, importado via `#engine`                           │
 │  Simula, decide, grava                                          │
 └─────────────────────────────────────────────────────────────────┘
@@ -138,7 +138,7 @@ nas transições. Quem mostra HP ao vivo (HUD, barra de golpes) lê do `worldSto
 | `src/stores/` | Estado Zustand |
 | `src/features/` | Telas |
 | `src/components/game/` | Primitivos de UI em `em` (ver [09](09-interface.md)) |
-| `server/src/` | Serviço de autoridade |
+| `authority/src/` | Serviço de autoridade |
 | `supabase/` | Migrations e a Edge Function publicada |
 | `scripts/` | Geradores de catálogo, importadores de arte, wipe |
 

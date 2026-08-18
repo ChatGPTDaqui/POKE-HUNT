@@ -30,7 +30,7 @@ linhas**, recebe 409 e `comRetryDeColisao` relê e soma os dois. Medido em produ
 **O que quebra isso** (e quebra em silêncio, nas 13 RPCs que creditam por incremento, de uma
 vez): tornar o trigger condicional ("só avança se a coluna X mudou"), tirar o CAS de
 `gravarEstado`, ou fazer o retry reaproveitar o snapshot velho em vez de reler. Trancado em
-`server/src/progresso.test.ts` — inclusive com um caso **contrafactual** que roda a mesma
+`authority/src/progresso.test.ts` — inclusive com um caso **contrafactual** que roda a mesma
 sequência sem o trigger e mostra o ouro evaporando.
 
 Verificar o trigger no banco (não há como um teste de unidade alcançá-lo):

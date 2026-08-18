@@ -17,7 +17,7 @@ export default defineConfig({
     },
   },
   build: {
-    ssr: 'server/src/edge.ts',
+    ssr: 'authority/src/edge.ts',
     outDir: 'supabase/functions/jogo',
     emptyOutDir: false,
     target: 'es2022',

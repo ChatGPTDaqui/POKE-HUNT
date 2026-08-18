@@ -3,7 +3,7 @@
 > Este documento descreve limiares anti-abuso. Ver a nota sobre publicação no
 > [README](README.md#esta-pasta-não-é-publicada).
 
-> **Farm offline está DESLIGADO em produção agora** (`server/src/progresso.ts#FARM_OFFLINE_PAUSADO
+> **Farm offline está DESLIGADO em produção agora** (`authority/src/progresso.ts#FARM_OFFLINE_PAUSADO
 > = true`, a pedido explícito do usuário). O jogador que volta depois de horas fora não recebe
 > nada por esse tempo — o intervalo é descartado, não represado (mesma regra do teto de 6h:
 > religar não pode despejar dias de recompensa de uma vez). **O jogo AO VIVO não é afetado** —
@@ -35,7 +35,7 @@ que o modo pessimista muda é **como o combate resolve**, não quem resolve.
 
 ## Os dois regimes
 
-`LIMIAR_OFFLINE_SEGUNDOS = 120` (`server/src/progresso.ts`). O cliente liquida a cada 30s
+`LIMIAR_OFFLINE_SEGUNDOS = 120` (`authority/src/progresso.ts`). O cliente liquida a cada 30s
 com o jogo aberto, então 120s deixa folga confortável para um flush atrasado por rede sem ser
 confundido com ausência.
 
@@ -107,7 +107,7 @@ O honesto é a média sobre várias sementes, **40 no mínimo para ouro**.
 
 ## O piso de 50%
 
-`server/src/farmOffline.ts`. Se o pessimista render abaixo de metade da taxa online medida, o
+`authority/src/farmOffline.ts`. Se o pessimista render abaixo de metade da taxa online medida, o
 servidor completa a diferença em ouro e XP.
 
 ```

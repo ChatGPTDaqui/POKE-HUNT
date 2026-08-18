@@ -21,9 +21,11 @@ npm start            # build + servidor de producao, http://localhost:5173
 `VITE_SERVIDOR_URL` apontando pra um servico vivo, o jogo carrega e nao salva. Isso e o
 recurso, nao um bug — ver [`docs/04-autoridade-do-servidor.md`](docs/04-autoridade-do-servidor.md).
 
-```bash
-cd server && npm run dev    # servico de autoridade local, porta 8787
-```
+**Nao existe mais servico de autoridade local** (o adaptador `node:http` foi deletado em
+`29a4da4`). `.env.local` aponta `VITE_SERVIDOR_URL` direto pra Edge Function publicada — e e
+assim que se desenvolve hoje: `npm run dev` no cliente contra a funcao em producao. Testar
+mudanca de servidor exige `npm run edge:publicar` antes (ver
+[`docs/11-operacao.md`](docs/11-operacao.md)), nao ha ciclo local.
 
 O jogo vanilla antigo NAO faz mais parte deste repositorio — foi movido pra fora
 no corte da migracao. Enquanto ele ficava aqui, era publicado por acidente
