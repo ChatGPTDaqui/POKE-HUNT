@@ -12,8 +12,8 @@
 
 ## O invariante que sustenta tudo aqui
 
-O servidor grava progresso reescrevendo o **snapshot inteiro** do jogador
-(`gravarEstado`). Logo:
+O servidor grava progresso reescrevendo a **linha inteira** de `players` com valores
+ABSOLUTOS (`gravarEstado`) — inclusive `gold`. Logo:
 
 > **Nunca creditar outro jogador com `update players set gold = gold + X`.**
 
