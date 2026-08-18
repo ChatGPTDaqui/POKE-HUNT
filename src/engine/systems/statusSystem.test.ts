@@ -36,11 +36,15 @@ function poke(speciesId: string, hpMax = 160): PokeInstance {
   }
 }
 
-function entidade(speciesId: string, hpMax = 160): WorldEntity {
+// `trait` explicita desde 2026-08-18: a habilidade deixou de ser propriedade da
+// ESPECIE e passou a ser sorteio por INDIVIDUO entre os slots reais dela
+// (src/data/traits.ts). Meowth pode nascer Pickup ou Limber; um teste que quer
+// medir Limber precisa dizer qual dos dois esta na frente.
+function entidade(speciesId: string, hpMax = 160, trait?: string): WorldEntity {
   return {
     id: `e-${speciesId}`,
     kind: 'enemy',
-    poke: poke(speciesId, hpMax),
+    poke: { ...poke(speciesId, hpMax), trait },
     statusVolatil: null,
     estagios: {},
     imunidadeDeStatus: 0,
@@ -393,51 +397,50 @@ describe('o desvio aprovado esta onde diz que esta', () => {
   })
 })
 
-// Fase 12: Traits de imunidade a status (Immunity/Limber/Insomnia/
-// Vital Spirit/Water Veil/Own Tempo). Cada caso usa uma especie REAL do
-// roster que ja tem a Trait atribuida em SPECIES_TRAIT — Magma Armor nao
-// entra aqui porque nenhuma especie da Gen1/2 atual leva ela (documentado em
-// traits.ts); o mecanismo e identico ao de Water Veil/Insomnia, so a chave do
-// mapa muda.
+// Traits de imunidade a status (Immunity/Limber/Insomnia/Vital Spirit/
+// Water Veil/Own Tempo). Cada caso usa uma especie REAL que de fato PODE ter
+// aquela habilidade no Ultra Sun, com a chave passada explicitamente — desde
+// 2026-08-18 a habilidade e sorteio por individuo entre os slots da especie,
+// entao "Meowth" sozinho nao determina mais Limber (o slot 1 dele e Pickup).
 describe('Traits de imunidade a status (Fase 12)', () => {
   it('Immunity (Snorlax) bloqueia veneno', () => {
-    const alvo = entidade('snorlax')
+    const alvo = entidade('snorlax', 160, 'immunity')
     expect(statusVaiPegar(alvo, 'poison', 'toxic')).toBe(false)
     expect(aplicarStatus(createRng(1), alvo, 'poison', 100)).toBeNull()
   })
 
   it('Limber (Meowth) bloqueia paralisia', () => {
-    const alvo = entidade('meowth')
+    const alvo = entidade('meowth', 160, 'limber')
     expect(statusVaiPegar(alvo, 'paralysis', 'thunder_wave')).toBe(false)
     expect(aplicarStatus(createRng(1), alvo, 'paralysis', 100)).toBeNull()
   })
 
   it('Insomnia (Murkrow) bloqueia sono', () => {
-    const alvo = entidade('murkrow')
+    const alvo = entidade('murkrow', 160, 'insomnia')
     expect(statusVaiPegar(alvo, 'sleep', 'hypnosis')).toBe(false)
     expect(aplicarStatus(createRng(1), alvo, 'sleep', 100)).toBeNull()
   })
 
   it('Vital Spirit (Mankey) tambem bloqueia sono', () => {
-    const alvo = entidade('mankey')
+    const alvo = entidade('mankey', 160, 'vital_spirit')
     expect(statusVaiPegar(alvo, 'sleep', 'hypnosis')).toBe(false)
     expect(aplicarStatus(createRng(1), alvo, 'sleep', 100)).toBeNull()
   })
 
   it('Water Veil (Goldeen) bloqueia queimadura', () => {
-    const alvo = entidade('goldeen')
+    const alvo = entidade('goldeen', 160, 'water_veil')
     expect(statusVaiPegar(alvo, 'burn', 'ember')).toBe(false)
     expect(aplicarStatus(createRng(1), alvo, 'burn', 100)).toBeNull()
   })
 
   it('Own Tempo (Slowpoke) bloqueia confusao', () => {
-    const alvo = entidade('slowpoke')
+    const alvo = entidade('slowpoke', 160, 'own_tempo')
     expect(statusVaiPegar(alvo, 'confusion')).toBe(false)
     expect(aplicarStatus(createRng(1), alvo, 'confusion', 100)).toBeNull()
   })
 
   it('a Trait so bloqueia O PROPRIO status — Snorlax continua paralisavel', () => {
-    const alvo = entidade('snorlax')
+    const alvo = entidade('snorlax', 160, 'immunity')
     expect(statusVaiPegar(alvo, 'paralysis', 'thunder_wave')).toBe(true)
     expect(aplicarStatus(createRng(1), alvo, 'paralysis', 100)).not.toBeNull()
   })

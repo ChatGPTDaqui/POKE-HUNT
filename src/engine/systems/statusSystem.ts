@@ -23,7 +23,13 @@ import type { StatChange } from '@/data/generated/types'
 import type { Ability } from '@/data/abilities'
 import type { WorldEntity, Escudos, ClimaTipo } from '../types'
 import { heal, VFX_CURA_DURACAO } from '../entity'
-import { traitOf, type TraitId } from '@/data/traits'
+import { traitDoPoke, type TraitId } from '@/data/traits'
+import {
+  TRAIT_IMUNE_A_DANO_DE_CLIMA, CURA_POR_CLIMA, DANO_POR_CLIMA, TRAIT_SO_DANO_DIRETO,
+  TRAIT_LEAF_GUARD, TRAIT_EARLY_BIRD, SHED_SKIN_CHANCE, TRAIT_HYDRATION,
+  TRAIT_SPEED_BOOST, TRAIT_MOODY, PROTECAO_DE_ESTAGIO, TRAIT_CONTRARY,
+  REACAO_A_QUEDA_DE_ESTAGIO,
+} from '@/data/traitEffects'
 
 // Fracoes de HP MAXIMO por turno dos golpes de tick volatil novos (ver
 // BaseEntity#seeded/curseDot/nightmareDot/regenPercent em engine/types.ts).
@@ -48,7 +54,7 @@ const TRAIT_STATUS_IMUNIDADE: Partial<Record<TraitId, StatusCondition>> = {
 }
 
 function traitBloqueiaStatus(alvo: WorldEntity, tipo: StatusCondition): boolean {
-  const trait = traitOf(alvo.poke.speciesId)
+  const trait = traitDoPoke(alvo.poke)
   return trait != null && TRAIT_STATUS_IMUNIDADE[trait] === tipo
 }
 
@@ -84,11 +90,24 @@ export function statusAtivos(entity: WorldEntity): StatusAtivo[] {
  *
  * Nao sorteia nada: e a pergunta "pode pegar", nao "pegou".
  */
-export function statusVaiPegar(alvo: WorldEntity, tipo: StatusCondition, abilityId?: string): boolean {
+export function statusVaiPegar(
+  alvo: WorldEntity, tipo: StatusCondition, abilityId?: string,
+  /**
+   * Clima ativo. So LEAF GUARD precisa dele (imunidade a status enquanto ha
+   * sol forte). Opcional pra todo chamador antigo continuar valido — sem ele a
+   * habilidade simplesmente nao pega, que e o comportamento anterior.
+   */
+  clima?: ClimaTipo | null,
+): boolean {
   if (alvo.imunidadeDeStatus > 0) return false
   if ((alvo.escudos?.safeguard ?? 0) > 0) return false
   if (ehVolatil(tipo) && alvo.statusVolatil) return false
   if (traitBloqueiaStatus(alvo, tipo)) return false
+  // LEAF GUARD: imune a QUALQUER status nao-volatil enquanto o sol estiver
+  // forte. Nao e imunidade a um status especifico como as sete de
+  // TRAIT_STATUS_IMUNIDADE — e condicional ao campo, por isso fora daquela
+  // tabela.
+  if (clima === 'sol' && traitDoPoke(alvo.poke) === TRAIT_LEAF_GUARD) return false
   const especie = SPECIES[alvo.poke.speciesId]
   return podeReceberStatus(tipo, {
     tipo1: especie.type,
@@ -111,6 +130,8 @@ export function aplicarStatus(
   tipo: StatusCondition,
   chance: number,
   abilityId?: string,
+  /** Ver o mesmo parametro em `statusVaiPegar` — so LEAF GUARD o consome. */
+  clima?: ClimaTipo | null,
 ): StatusAtivo | null {
   // A imunidade de reaplicacao vale pros dois tipos de status: e ela que
   // impede o Antidoto de virar ouro jogado fora num combate que nao acaba.
@@ -124,6 +145,12 @@ export function aplicarStatus(
   // Water Veil/Magma Armor/Own Tempo. Cada uma bloqueia so o SEU status —
   // ver TRAIT_STATUS_IMUNIDADE no topo do arquivo.
   if (traitBloqueiaStatus(alvo, tipo)) return null
+  // LEAF GUARD, o par do guard em `statusVaiPegar`. Repetido aqui e nao
+  // delegado porque as duas funcoes tem assinaturas diferentes de proposito:
+  // `statusVaiPegar` e consulta da IA, esta e o caminho que APLICA, e um dos
+  // dois esquecer a habilidade seria uma imunidade que a tela mostra e o
+  // combate ignora.
+  if (clima === 'sol' && traitDoPoke(alvo.poke) === TRAIT_LEAF_GUARD) return null
 
   const especie = SPECIES[alvo.poke.speciesId]
   const podeReceber = podeReceberStatus(tipo, {
@@ -169,14 +196,40 @@ export function aplicarMudancasDeStat(
   // ausente/nao-'self', ou seja, o destino e o `alvo`). Nao mexe em queda
   // auto-infligida pelo proprio usuario (ex: golpe que baixa a propria stat).
   const bloqueadoPorMist = ability.statTarget !== 'self' && (alvo.escudos?.mist ?? 0) > 0
+  const vemDoOponente = ability.statTarget !== 'self'
+  const traitDoDestino = traitDoPoke(destino.poke)
+  // CONTRARY inverte TODA mudanca de estagio no portador — inclusive as boas.
+  // Por isso o sinal e trocado antes de qualquer guard: uma queda que virou
+  // subida nao pode mais ser barrada por Clear Body.
+  const inverte = traitDoDestino === TRAIT_CONTRARY
   const aplicadas: StatChange[] = []
+  let sofreuQuedaDoOponente = false
   for (const mudanca of ability.statChanges) {
-    if (bloqueadoPorMist && mudanca.estagios < 0) continue
+    const delta = inverte ? -mudanca.estagios : mudanca.estagios
+    if (bloqueadoPorMist && delta < 0) continue
+    // PROTECAO DE ESTAGIO (Clear Body, Hyper Cutter, Big Pecks, Keen Eye): so
+    // contra QUEDA, e so contra queda vinda do OPONENTE — nos jogos nenhuma
+    // delas impede o portador de baixar a propria stat (Belly Drum, Hammer Arm).
+    const protegido = traitDoDestino ? PROTECAO_DE_ESTAGIO[traitDoDestino] : undefined
+    const protegeEsteStat = traitDoDestino != null && traitDoDestino in PROTECAO_DE_ESTAGIO
+      && (protegido === null || protegido === mudanca.stat)
+    if (delta < 0 && vemDoOponente && protegeEsteStat) continue
+
     const antes = destino.estagios[mudanca.stat] ?? 0
-    const depois = Math.max(ESTAGIO_MINIMO, Math.min(ESTAGIO_MAXIMO, antes + mudanca.estagios))
+    const depois = Math.max(ESTAGIO_MINIMO, Math.min(ESTAGIO_MAXIMO, antes + delta))
     if (depois === antes) continue // ja no teto ou no piso
     destino.estagios[mudanca.stat] = depois
     aplicadas.push({ stat: mudanca.stat, estagios: depois - antes })
+    if (delta < 0 && vemDoOponente) sofreuQuedaDoOponente = true
+  }
+
+  // DEFIANT / COMPETITIVE: levar um estagio rebaixado pelo oponente vira +2 em
+  // Ataque (Defiant) ou Ataque Especial (Competitive). Uma unica vez por golpe,
+  // por mais estagios que ele tenha derrubado — e como os jogos contam.
+  const reacao = traitDoDestino ? REACAO_A_QUEDA_DE_ESTAGIO[traitDoDestino] : undefined
+  if (sofreuQuedaDoOponente && reacao) {
+    const subida = aplicarEstagioUnico(destino, reacao.stat, reacao.estagios)
+    if (subida) aplicadas.push(subida)
   }
   return aplicadas
 }
@@ -200,14 +253,18 @@ export function aplicarEstagioUnico(alvo: WorldEntity, stat: StatDeEstagio, delt
 // Efeito colateral de golpe: le `ability.status`/`statusChance` e tenta aplicar.
 // Separado de `aplicarStatus` porque o golpe tambem PODE DESCONGELAR o alvo
 // (golpe de FIRE com dano), e as duas coisas acontecem no mesmo hit.
-export function aplicarEfeitosDoGolpe(rng: Rng, alvo: WorldEntity, ability: Ability): StatusAtivo | null {
+export function aplicarEfeitosDoGolpe(
+  rng: Rng, alvo: WorldEntity, ability: Ability,
+  /** Repassado a `aplicarStatus` — so LEAF GUARD o consome. */
+  clima?: ClimaTipo | null,
+): StatusAtivo | null {
   const congelado = statusNaoVolatil(alvo)
   if (congelado && descongelaCom(congelado.tipo, ability.type, ability.power)) {
     curarStatus(alvo, congelado.tipo)
   }
 
   if (!ability.status || !ability.statusChance) return null
-  return aplicarStatus(rng, alvo, ability.status, ability.statusChance, ability.id)
+  return aplicarStatus(rng, alvo, ability.status, ability.statusChance, ability.id, clima)
 }
 
 /**
@@ -287,6 +344,15 @@ export function limparEstadoVolatil(entity: WorldEntity): void {
   // cena, nao so pra confusao/estagio.
   entity.enduraAtiva = false
   entity.protegida = false
+  // Contador de protecoes seguidas (Protect/Detect/Endure). Volatil como o
+  // resto: uma batalha nova comeca com a chance cheia.
+  entity.protecoesSeguidas = 0
+  // TRACE: devolve a habilidade original. Sem isto o POKE do jogador sairia da
+  // hunt com a habilidade copiada gravada no save — ver types.ts#traitOriginal.
+  if (entity.traitOriginal !== undefined) {
+    entity.poke.trait = entity.traitOriginal ?? undefined
+    entity.traitOriginal = undefined
+  }
   entity.destinyBondAtiva = false
   entity.curaBloqueadaAte = 0
   entity.miraGarantidaAlvoId = null
@@ -398,7 +464,7 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
     // a mesma fracao. Nao entra no `dano` reportado — o chamador
     // (combatSystem) so aplica dano de verdade, entao a cura acontece direto
     // aqui, no HP do proprio POKE.
-    if (nv.tipo === 'poison' && traitOf(entity.poke.speciesId) === 'poison_heal') {
+    if (nv.tipo === 'poison' && traitDoPoke(entity.poke) === 'poison_heal') {
       const cura = danoPorTurno(nv.tipo, entity.poke.stats.hp)
       entity.poke.hp = Math.min(entity.poke.stats.hp, entity.poke.hp + cura)
     } else {
@@ -413,7 +479,13 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
         expirados.push(nv.tipo)
       }
     } else if (nv.turnosRestantes != null) {
-      nv.turnosRestantes -= 1
+      // EARLY BIRD: o sono passa em METADE dos turnos. Implementado como
+      // "descontar 2 por turno" e nao como "metade da duracao no momento em que
+      // o sono pega": assim a habilidade vale mesmo se o POKE for trocado por
+      // uma que a tenha no meio do sono, e o numero na tela continua sendo o
+      // que falta de verdade.
+      const passo = nv.tipo === 'sleep' && traitDoPoke(entity.poke) === TRAIT_EARLY_BIRD ? 2 : 1
+      nv.turnosRestantes -= passo
       if (nv.turnosRestantes <= 0) {
         entity.poke.status = null
         expirados.push(nv.tipo)
@@ -425,9 +497,62 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
   // ponto de soma em `dano` -- combatSystem aplica os dois juntos, num unico
   // `takeDamage`/numero flutuante por turno, igual ao jogo real (granizo e
   // veneno no mesmo turno tiram um numero so, nao dois).
+  const traitDaEntidade = traitDoPoke(entity.poke)
   if (clima) {
     const especie = SPECIES[entity.poke.speciesId]
-    dano += danoDeClimaPorTurno(clima, entity.poke.stats.hp, especie.type, especie.type2)
+    // Sand Veil, Snow Cloak, Ice Body, Sand Rush, Sand Force e Overcoat citam
+    // "protege contra o dano do clima" na propria descricao. Magic Guard entra
+    // pela regra geral dela (so dano DIRETO de golpe).
+    const imuneAoClima = Boolean(traitDaEntidade && TRAIT_IMUNE_A_DANO_DE_CLIMA.has(traitDaEntidade))
+    if (!imuneAoClima) {
+      dano += danoDeClimaPorTurno(clima, entity.poke.stats.hp, especie.type, especie.type2)
+    }
+
+    // CURA POR CLIMA (Rain Dish, Ice Body, Dry Skin na chuva) e CUSTO POR CLIMA
+    // (Solar Power e Dry Skin no sol). A cura entra direto no HP, como
+    // Poison Heal acima — `dano` e o agregado que o chamador vai APLICAR, e
+    // somar uma cura negativa ali confundiria os dois sinais.
+    const cura = traitDaEntidade ? CURA_POR_CLIMA[traitDaEntidade] : undefined
+    if (cura && cura.clima === clima) {
+      heal(entity, Math.max(1, Math.round(entity.poke.stats.hp * cura.fracao)))
+    }
+    const custo = traitDaEntidade ? DANO_POR_CLIMA[traitDaEntidade] : undefined
+    if (custo && custo.clima === clima) {
+      dano += Math.max(1, Math.round(entity.poke.stats.hp * custo.fracao))
+    }
+  }
+
+  // HABILIDADES DE FIM DE TURNO que mexem em status/estagio.
+  //
+  //   Shed Skin   33% de curar o status nao-volatil
+  //   Hydration   cura o status SEMPRE, enquanto chover (nao e chance)
+  //   Speed Boost +1 de Velocidade por turno
+  //   Moody       +2 num atributo sorteado, -1 em outro
+  //
+  // Todas depois do bloco de status acima de proposito: curar aqui significa
+  // "o turno passou COM o status", que e o que os jogos fazem — o dano de
+  // veneno deste turno ja foi contabilizado.
+  if (traitDaEntidade && entity.poke.status) {
+    const curaPorHydration = traitDaEntidade === TRAIT_HYDRATION && clima === 'chuva'
+    const curaPorShedSkin = traitDaEntidade === 'shed_skin' && nextFloat(rng) * 100 < SHED_SKIN_CHANCE
+    if (curaPorHydration || curaPorShedSkin) {
+      expirados.push(entity.poke.status.tipo)
+      entity.poke.status = null
+    }
+  }
+  if (traitDaEntidade === TRAIT_SPEED_BOOST) {
+    aplicarEstagioUnico(entity, 'speed', 1)
+  }
+  if (traitDaEntidade === TRAIT_MOODY) {
+    // Sobe 2 num atributo sorteado e desce 1 em OUTRO. Os dois sorteios saem da
+    // mesma lista de estagios que o resto do motor usa; o segundo exclui o
+    // primeiro pra nao subir e descer o mesmo (nos jogos tambem sao distintos).
+    const opcoes: StatDeEstagio[] = ['atkFis', 'atkEsp', 'def', 'defEsp', 'speed', 'accuracy', 'evasion']
+    const sobe = opcoes[Math.floor(nextFloat(rng) * opcoes.length)]
+    const restantes = opcoes.filter((o) => o !== sobe)
+    const desce = restantes[Math.floor(nextFloat(rng) * restantes.length)]
+    aplicarEstagioUnico(entity, sobe, 2)
+    aplicarEstagioUnico(entity, desce, -1)
   }
 
   const vol = entity.statusVolatil
@@ -491,6 +616,18 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
   // Chegar a 0 mata — o chamador (combatSystem) e quem aplica o dano letal e
   // credita o kill/desmaio, pelo mesmo caminho que qualquer outra morte por
   // dano de turno.
+  // MAGIC GUARD: "so sofre dano nao causado diretamente por um golpe" —
+  // veneno, queimadura, clima, Leech Seed, Curse, Nightmare e recuo. Zerado
+  // AQUI, no fim, e nao em cada somatorio: assim nenhuma fonte nova de dano de
+  // turno pode esquecer de consultar a habilidade.
+  //
+  // Perish Song fica de FORA da protecao (mesma regra dos jogos: e um KO
+  // marcado, nao dano) — por isso este ponto vem antes do bloco dele.
+  if (traitDaEntidade === TRAIT_SO_DANO_DIRETO) {
+    dano = 0
+    drenoParaOrigem = undefined
+  }
+
   let pereceu = false
   if (entity.perishCountdown != null) {
     entity.perishCountdown -= 1

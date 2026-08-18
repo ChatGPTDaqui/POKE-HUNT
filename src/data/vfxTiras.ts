@@ -210,6 +210,55 @@ export function tiraDoElemento(tipo: string | null | undefined): TiraDeVfx | nul
   return TIRA_POR_ELEMENTO[tipo as ElementType] ?? null
 }
 
+const RAIZ_AOE = 'assets/move-vfx/tiras-aoe'
+
+/**
+ * Arte de AREA por tipo elemental — a terceira camada, entre a arte por GOLPE
+ * (`moveVfx.ts`) e a tira de impacto acima.
+ *
+ * POR QUE ELA EXISTE. Ate 2026-08-18 golpe de area desenhava a MESMA tira do
+ * impacto alvo-unico, so que esticada pro diametro real do splash. A
+ * justificativa de entao ("a leitura de 'isto pegou uma area' vem do tamanho,
+ * nao de um desenho diferente") vale pras tiras RADIAIS, mas quebra feio nas
+ * quatro DIRECIONAIS: a do FIRE e um jato de 2,30x medido, e Eruption — um
+ * vulcao que cobre a tela inteira nos jogos — saia como um lanca-chamas
+ * horizontal deitado, esticado ate o diametro da area. Reclamacao explicita do
+ * usuario, e o mesmo defeito atingia Lava Plume, Heat Wave, Discharge,
+ * Blizzard e as 18 Explosoes Elementais de nivel 50.
+ *
+ * O CRITERIO DA ESCOLHA e o do resto do arquivo: efeito RADIAL, que cresce do
+ * centro pra fora (anel, estouro, cupula), julgado no fundo real da hunt no
+ * tamanho de jogo (`node scripts/conferir-vfx-visual.mjs <arquivo>@<quadros>`).
+ * Nenhum id se repete entre esta tabela e a de impacto — arte igual nas duas
+ * camadas seria o mesmo desenho que esta camada existe pra evitar.
+ *
+ * PARCIAL DE PROPOSITO. FIGHTING, ROCK, GHOST e STEEL nao entram: nenhum
+ * candidato do banco passou no julgamento sobre fundo escuro (o de FIGHTING lia
+ * como GRASS, o de ROCK sumia no tamanho de jogo, os dois de STEEL sao feixes
+ * horizontais, nao areas). Tipo ausente cai na tira de impacto exatamente como
+ * antes — a camada so ADICIONA.
+ */
+export const TIRA_AOE_POR_ELEMENTO: Partial<Record<ElementType, TiraDeVfx>> = {
+  NORMAL: { url: `${RAIZ_AOE}/normal.png`, quadros: 5 },         // 5556 — aneis brancos abrindo
+  FIRE: { url: `${RAIZ_AOE}/fire.png`, quadros: 11 },            // 5467 — coluna de fogo subindo
+  WATER: { url: `${RAIZ_AOE}/water.png`, quadros: 8 },           // 4286 — respingo azul
+  ELECTRIC: { url: `${RAIZ_AOE}/electric.png`, quadros: 14 },    // 5621 — anel de faiscas
+  GRASS: { url: `${RAIZ_AOE}/grass.png`, quadros: 12 },          // 5471 — anel de folhas
+  ICE: { url: `${RAIZ_AOE}/ice.png`, quadros: 18 },              // 4276 — esfera ciano
+  POISON: { url: `${RAIZ_AOE}/poison.png`, quadros: 6 },         // 5489 — anel roxo
+  GROUND: { url: `${RAIZ_AOE}/ground.png`, quadros: 8 },         // 5538 — anel de terra
+  FLYING: { url: `${RAIZ_AOE}/flying.png`, quadros: 16 },        // 4313 — redemoinho branco
+  PSYCHIC: { url: `${RAIZ_AOE}/psychic.png`, quadros: 33 },      // 4382 — estrela rosa
+  BUG: { url: `${RAIZ_AOE}/bug.png`, quadros: 17 },              // 4326 — enxame verde
+  DRAGON: { url: `${RAIZ_AOE}/dragon.png`, quadros: 18 },        // 4275 — esfera azul
+  DARK: { url: `${RAIZ_AOE}/dark.png`, quadros: 10 },            // 5648 — esfera roxa
+}
+
+export function tiraDeAreaDoElemento(tipo: string | null | undefined): TiraDeVfx | null {
+  if (!tipo) return null
+  return TIRA_AOE_POR_ELEMENTO[tipo as ElementType] ?? null
+}
+
 /**
  * Como esta tira deve ser desenhada pra apontar na direcao do golpe.
  *
@@ -302,6 +351,11 @@ export const FORCA_DA_TINTA_DE_STATUS = 0.45
 export function todasAsTirasDeVfx(): string[] {
   return [
     ...Object.values(TIRA_POR_ELEMENTO).map((t) => t.url),
+    // A camada de AREA entra no preload junto com a de impacto, e nao fica de
+    // fora como a de GOLPE: sao 13 arquivos que TODO combate usa (a Explosao
+    // Elemental de nivel 50 e area, e toda especie ganha a do proprio tipo), e
+    // nao 22 que o jogador talvez nunca veja.
+    ...Object.values(TIRA_AOE_POR_ELEMENTO).map((t) => t.url),
     TIRA_CURA_HP.url, TIRA_CURA_STATUS.url, TIRA_CONFUSAO.url, TIRA_SONO.url,
   ]
 }

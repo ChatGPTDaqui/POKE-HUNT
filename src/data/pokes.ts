@@ -10,6 +10,9 @@ import { SPECIES_DATA } from './generated/pokes.generated'
 import { colorForType } from './typeColors'
 import { randInt, rollChance } from '@/core/random'
 import { RARITIES, rollRarity, type RarityKey } from './rarity'
+import { LEGENDARY_SPECIES_IDS } from './legendaries'
+import { multiplicadorDeNatureza, NATURE_LIST, type NatureKey } from './natures'
+import { sortearTrait } from './traits'
 import type { Rng } from '@/core/rng'
 import { typedAoeMoveKey, TYPED_AOE_LEVEL } from './typedAoeMoves'
 import { activeAbilitiesPadrao, golpesAprendidosAte } from './activeAbilities'
@@ -35,6 +38,23 @@ export interface PokeInstance {
   ivs: StatBlock
   stats: StatBlock
   hp: number
+  /**
+   * NATUREZA (data/natures.ts): +10% num atributo, -10% em outro, sorteada no
+   * nascimento. Opcional porque POKE salvo antes de 2026-08-18 nao tem uma —
+   * nesses, `computeStatsAtLevel` trata a ausencia como natureza neutra, e a
+   * migration de backfill escolheu justamente uma das 5 neutras pra que
+   * ninguem acordasse com o time 10% pior.
+   */
+  nature?: NatureKey
+  /**
+   * HABILIDADE passiva (data/traits.ts — chamada "Trait" aqui pra nao colidir
+   * com o GOLPE, que ja e `Ability` em todo o codigo). Sorteada entre os slots
+   * normais da especie, com chance pequena de sair a oculta.
+   *
+   * Opcional pelo mesmo motivo da natureza: save antigo nao tem, e
+   * `traitDoPoke` cai no slot 1 da especie nesses casos.
+   */
+  trait?: string
   unlockedAbilities: string[]
   // Os no maximo 4 golpes que o POKE leva pra luta (data/activeAbilities.ts).
   // Diferente de `unlockedAbilities`, que e DERIVAVEL de especie+nivel, este e
@@ -212,14 +232,28 @@ for (const [fromId, toId] of Object.entries(SPECIAL_EVOLUTIONS)) {
 // up at 1.5 * 3 = 4.5x, not additive).
 export const SHINY_STAT_MULTIPLIER = 1.5
 
-export function computeStatsAtLevel(species: Species, level: number, ivs: StatBlock, rarityKey?: RarityKey, isShiny?: boolean): StatBlock {
+export function computeStatsAtLevel(species: Species, level: number, ivs: StatBlock, rarityKey?: RarityKey, isShiny?: boolean, nature?: NatureKey | null): StatBlock {
   const lvl = Math.max(1, level)
   const rarityMultiplier = (rarityKey && RARITIES[rarityKey] || RARITIES.comum).statMultiplier
   const stats = {} as StatBlock
   for (const key of Object.keys(species.base) as StatKey[]) {
     const formulaKey = key === 'hp' ? 'HP_FORMULA' : 'STAT_FORMULA'
     const base = formulaEngine.eval(formulaKey, { base: species.base[key], level: lvl, iv: ivs[key] })
-    const shinyBase = isShiny ? base * SHINY_STAT_MULTIPLIER : base
+    // ORDEM DOS TRES MULTIPLICADORES, e por que ela e essa:
+    //
+    //   formula base -> NATUREZA -> shiny -> raridade
+    //
+    // A natureza vem primeiro porque e a unica das tres que existe nos jogos
+    // reais, e la ela se aplica sobre o resultado da formula de stat — nao
+    // sobre um valor ja inflado. Shiny e raridade sao invencao deste jogo e
+    // empilham por cima, do jeito que ja empilhavam entre si. `Math.round` uma
+    // vez so, no fim: arredondar a cada etapa acumularia erro em favor do
+    // jogador (tres arredondamentos pra cima num Mythic shiny de natureza boa).
+    //
+    // A natureza NUNCA alcanca HP — quem garante isso e `NATURE_STATS`
+    // (data/natures.ts), que so lista os outros cinco.
+    const comNatureza = base * multiplicadorDeNatureza(nature, key)
+    const shinyBase = isShiny ? comNatureza * SHINY_STAT_MULTIPLIER : comNatureza
     stats[key] = Math.max(1, Math.round(shinyBase * rarityMultiplier))
   }
   return stats
@@ -228,8 +262,34 @@ export function computeStatsAtLevel(species: Species, level: number, ivs: StatBl
 const IV_MAX = 31
 const IV_STAT_COUNT = 6
 
-function rollIvs(rng: Rng): StatBlock {
-  return {
+// Conferido contra Pokemon Ultra Sun/Ultra Moon (Gen VII), 2026-08-18.
+//
+// A REGRA GERAL JA ESTAVA CERTA e nao mudou: cada um dos 6 IVs de um encontro
+// selvagem e um sorteio UNIFORME e INDEPENDENTE em 0..31. Nao ha media, nao ha
+// peso por especie, nao ha correlacao entre os seis, e nao ha piso por nivel ou
+// por raridade. O sorteio deste jogo (`randInt(rng, 0, 31)` seis vezes) e
+// exatamente isso.
+//
+// O QUE FALTAVA: a Gen VII garante 3 IVs PERFEITOS (31) em sorteio de
+// Lendario/Mitico — a mesma regra que vale para Ultra Beasts e Pokemon Totem
+// naqueles jogos. Quais dos 6 stats recebem o 31 e sorteado; os outros 3
+// continuam uniformes em 0..31 (e podem, por acaso, sair 31 tambem, o que
+// resulta em 4+ perfeitos).
+//
+// O QUE NAO ENTRA, e por que: as outras duas fontes de IV garantido da Gen VII
+// nao tem equivalente aqui. Cadeia de SOS (1 IV perfeito a partir de 5 chamados,
+// 2 aos 10, 3 aos 20, 4 aos 25) exige que o inimigo chame reforco, mecanica que
+// este motor nao tem; e Criacao (Destiny Knot/Everstone) exige criadouro, que o
+// jogo nao tem. Nature e EV tambem sao Gen III+ e continuam FORA de proposito —
+// nao existem no save nem na formula de stat deste jogo (ver STAT_FORMULA em
+// generated/formulas.generated.ts), e liga-los mudaria o valor de todo POKE ja
+// capturado.
+const IV_PERFEITOS_DE_LENDARIO = 3
+
+const STAT_KEYS: StatKey[] = ['hp', 'atkFis', 'atkEsp', 'def', 'defEsp', 'speed']
+
+function rollIvs(rng: Rng, speciesId?: string): StatBlock {
+  const ivs = {
     hp: randInt(rng, 0, IV_MAX),
     atkFis: randInt(rng, 0, IV_MAX),
     atkEsp: randInt(rng, 0, IV_MAX),
@@ -237,6 +297,17 @@ function rollIvs(rng: Rng): StatBlock {
     defEsp: randInt(rng, 0, IV_MAX),
     speed: randInt(rng, 0, IV_MAX),
   }
+  if (!speciesId || !LEGENDARY_SPECIES_IDS.includes(speciesId)) return ivs
+
+  // Sorteio dos 3 stats que recebem 31, sem repetir. Fisher-Yates parcial sobre
+  // uma copia: sortear "3 numeros de 0 a 5" com repeticao daria as vezes so 2
+  // stats perfeitos, e a regra da Gen VII e 3 DISTINTOS.
+  const restantes = [...STAT_KEYS]
+  for (let i = 0; i < IV_PERFEITOS_DE_LENDARIO; i++) {
+    const escolhido = restantes.splice(randInt(rng, 0, restantes.length - 1), 1)[0]
+    ivs[escolhido] = IV_MAX
+  }
+  return ivs
 }
 
 // Overall IV quality as a 0-100% average across all 6 stats — used for the
@@ -262,20 +333,27 @@ export function novoPokeUid(): string {
 export interface CreatePokeInstanceOptions {
   ivs?: StatBlock
   rarity?: RarityKey
+  nature?: NatureKey
 }
 
 // `rng` e o primeiro parametro (e obrigatorio) de proposito: os tres sorteios
 // aqui — IV, raridade e shiny — sao exatamente os que o servidor precisa poder
 // reconferir na Fase D. Um default pra `Math.random()` deixaria um caminho
 // silencioso de volta pro nao-verificavel.
-export function createPokeInstance(rng: Rng, speciesId: string, level = 1, { ivs: fixedIvs, rarity: fixedRarity }: CreatePokeInstanceOptions = {}): PokeInstance {
+export function createPokeInstance(rng: Rng, speciesId: string, level = 1, { ivs: fixedIvs, rarity: fixedRarity, nature: fixedNature }: CreatePokeInstanceOptions = {}): PokeInstance {
   const species = SPECIES[speciesId]
   if (!species) throw new Error(`Especie desconhecida: ${speciesId}`)
-  const ivs = fixedIvs || rollIvs(rng)
+  const ivs = fixedIvs || rollIvs(rng, speciesId)
   const rarity = fixedRarity || rollRarity(rng)
   const shinyChance = (species.catchRate / MAX_CATCH_RATE) * SHINY_CHANCE_AT_MAX_CATCH_RATE
   const isShiny = rollChance(rng, shinyChance)
-  const stats = computeStatsAtLevel(species, level, ivs, rarity, isShiny)
+  // Os TRES tracos individuais dos jogos, sorteados aqui e so aqui:
+  // NATUREZA (uniforme entre as 25, como nos jogos), HABILIDADE (entre os slots
+  // normais da especie, com chance pequena de oculta) e CARACTERISTICA — esta
+  // ultima nao e sorteada nem gravada: sai dos IVs (data/characteristics.ts).
+  const nature = fixedNature ?? NATURE_LIST[randInt(rng, 0, NATURE_LIST.length - 1)].key
+  const trait = sortearTrait(rng, speciesId) ?? undefined
+  const stats = computeStatsAtLevel(species, level, ivs, rarity, isShiny, nature)
   return {
     uid: novoPokeUid(),
     speciesId,
@@ -287,6 +365,8 @@ export function createPokeInstance(rng: Rng, speciesId: string, level = 1, { ivs
     // before its progress bar (and grantExp's level-up check) show any movement.
     exp: pokeExpForLevel(level, species.growthCurve),
     ivs,
+    nature,
+    trait,
     stats,
     hp: stats.hp,
     unlockedAbilities: golpesAprendidosAte(species, level),

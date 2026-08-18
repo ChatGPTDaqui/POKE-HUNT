@@ -937,7 +937,55 @@ function CombateTab() {
   )
 }
 
-type WikiTab = 'inicio' | 'tipos' | 'raridades' | 'mecanicas' | 'status' | 'combate'
+// A aba dos TRES tracos individuais. Existe porque os tres sao invisiveis no
+// combate: ninguem "ve" a Natureza mudando um atributo, nem a Habilidade
+// negando um golpe. Sem uma pagina que diga que eles existem, o jogador so
+// percebe que dois POKE iguais nao sao iguais — e nao entende por que.
+function TracosTab() {
+  return (
+    <div className="space-y-2">
+      <WikiCard title="Cada POKE e um individuo">
+        Dois Charmander do mesmo nivel nao sao iguais. Alem dos IVs, cada POKE nasce com tres
+        tracos proprios, todos visiveis na ficha dele (toque no POKE {'>'} aba Status):
+        <ul className="mt-1 list-disc space-y-0.5 pl-4">
+          <li><b>Natureza</b> — sobe um atributo e desce outro.</li>
+          <li><b>Habilidade</b> — um efeito passivo que vale a luta inteira.</li>
+          <li><b>Caracteristica</b> — uma frase que denuncia qual IV dele e o mais alto.</li>
+        </ul>
+      </WikiCard>
+
+      <WikiCard title="Natureza">
+        Sao 25. Cada uma sobe UM atributo em 10% e desce OUTRO em 10% — e cinco delas sobem e
+        descem o mesmo, ou seja, nao mexem em nada (a ficha marca essas como "neutra").
+        <br /><br />
+        <b>O HP nunca e afetado por natureza</b>, em nenhuma das 25. Ela e sorteada no nascimento
+        e nao muda nunca: nao ha item nem NPC que troque a natureza de um POKE.
+      </WikiCard>
+
+      <WikiCard title="Habilidade">
+        Cada especie tem 1 ou 2 habilidades normais e, as vezes, uma <b>oculta</b>. O POKE sorteia
+        a dele quando aparece — dois Marill selvagens podem sair um com Thick Fat e outro com Huge
+        Power, que dobra o Ataque Fisico. A oculta e rara (5% dos encontros) e a ficha a marca
+        com um selo.
+        <br /><br />
+        A habilidade e passiva: nao ocupa slot de golpe e nao precisa ser ativada. A descricao do
+        que a sua faz esta na ficha do POKE.
+        <br /><br />
+        <b>Nem toda habilidade funciona aqui.</b> Algumas dependem de coisas que este jogo nao tem
+        — trocar de POKE no meio da luta, item equipado, aliado em campo, fuga. Quando for o caso,
+        a ficha diz isso em amarelo, com o motivo. Preferimos avisar a fingir.
+      </WikiCard>
+
+      <WikiCard title="Caracteristica">
+        A frase da ficha ("Gosta de se debater", "Cochila muito") nao e enfeite: ela aponta qual
+        dos seis IVs do POKE e o mais alto. Como a ficha ja mostra os IVs em numero, ela vale mais
+        como sabor — mas a informacao e real e sempre confere.
+      </WikiCard>
+    </div>
+  )
+}
+
+type WikiTab = 'inicio' | 'tipos' | 'raridades' | 'mecanicas' | 'tracos' | 'status' | 'combate'
 
 export function WikiMenu() {
   const [tab, setTab] = useState<WikiTab>('inicio')
@@ -951,6 +999,7 @@ export function WikiMenu() {
           { value: 'tipos', label: 'Efetividade' },
           { value: 'raridades', label: 'Raridades' },
           { value: 'mecanicas', label: 'Mecanicas' },
+          { value: 'tracos', label: 'Natureza e Habilidade' },
           { value: 'status', label: 'Status' },
           { value: 'combate', label: 'Combate' },
         ]}
@@ -959,6 +1008,7 @@ export function WikiMenu() {
       {tab === 'tipos' && <TiposTab />}
       {tab === 'raridades' && <RaridadesTab />}
       {tab === 'mecanicas' && <MecanicasTab />}
+      {tab === 'tracos' && <TracosTab />}
       {tab === 'status' && <StatusTab />}
       {tab === 'combate' && <CombateTab />}
     </div>

@@ -9,6 +9,7 @@ import { describe, expect, it, beforeEach } from 'vitest'
 import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
 import { SPECIES } from '@/data/pokes'
+import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
 import { buildMapWorld, stepWorld } from './simulation'
 import { useGameStateStore } from '@/stores/gameStateStore'
 
@@ -123,5 +124,48 @@ describe('invariantes da simulacao', () => {
       }
     }
     expect(kills).toBeGreaterThan(0)
+  })
+})
+
+// --- IV: a regra do Ultra Sun ---------------------------------------------
+//
+// Conferido em 2026-08-18 contra Gen VII. Selvagem comum: 6 sorteios uniformes
+// independentes em 0..31 (ja era o comportamento). Lendario/Mitico: 3 IVs
+// GARANTIDOS em 31, escolhidos aleatoriamente entre os 6 (era o que faltava).
+//
+// Falha silenciosa que isto tranca: a garantia mora dentro de `rollIvs`, que
+// nao lanca nada se o bloco de lendario for removido — o unico sintoma seria
+// Mewtwo saindo com IV medio de POKE de rota, coisa que ninguem nota olhando
+// uma captura.
+describe('IV conforme Ultra Sun', () => {
+  const IV_MAX = 31
+  const perfeitos = (ivs: object) => Object.values(ivs).filter((v) => v === IV_MAX).length
+
+  it('lendario sai com pelo menos 3 IVs perfeitos, sempre', () => {
+    for (const speciesId of LEGENDARY_SPECIES_IDS) {
+      for (let semente = 0; semente < 40; semente++) {
+        const poke = createPokeInstance(createRng(semente), speciesId, 50)
+        expect(perfeitos(poke.ivs), `${speciesId} semente ${semente}`).toBeGreaterThanOrEqual(3)
+      }
+    }
+  })
+
+  it('especie comum NAO ganha piso de IV — a distribuicao segue uniforme em 0..31', () => {
+    let soma = 0
+    let n = 0
+    let viuZeroOuPerto = false
+    for (let semente = 0; semente < 400; semente++) {
+      const poke = createPokeInstance(createRng(semente), 'rattata', 50)
+      for (const v of Object.values(poke.ivs)) {
+        soma += v
+        n++
+        if (v <= 1) viuZeroOuPerto = true
+      }
+    }
+    // Media de uma uniforme 0..31 e 15,5. A folga cobre a variancia da amostra.
+    expect(soma / n).toBeGreaterThan(13)
+    expect(soma / n).toBeLessThan(18)
+    // Um piso escondido apareceria aqui: sem ele, IV 0-1 tem que acontecer.
+    expect(viuZeroOuPerto).toBe(true)
   })
 })

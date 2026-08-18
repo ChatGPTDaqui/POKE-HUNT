@@ -30,3 +30,21 @@ export function formatStatGains(gains: StatBlock | null | undefined): string {
     .map((key) => `+${gains[key]} ${STAT_LABEL[key]}`)
     .join(', ')
 }
+
+/**
+ * Nome legivel das 6 curvas de EXP. Existia so como a chave crua
+ * (`MEDIUM_SLOW`) nas telas que mostravam a curva — que nao diz nada a quem
+ * nao conhece o dado, e ainda por cima em ingles no meio de uma tela em
+ * portugues.
+ *
+ * A ordem do texto entre parenteses e o que o jogador realmente usa: quanto
+ * mais lenta a curva, mais EXP o POKE precisa por nivel.
+ */
+export const GROWTH_LABEL: Record<string, string> = {
+  ERRATIC: 'Erratica',
+  FAST: 'Rapida',
+  MEDIUM_FAST: 'Media-rapida',
+  MEDIUM_SLOW: 'Media-lenta',
+  SLOW: 'Lenta',
+  FLUCTUATING: 'Flutuante',
+}

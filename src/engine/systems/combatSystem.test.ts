@@ -13,8 +13,8 @@ import { BASIC_ATTACK, getAbility, TURNO_SEGUNDOS, type Ability } from '@/data/a
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { typedAoeMoveKey } from '@/data/typedAoeMoves'
 import { createEnemyEntity } from '../entity'
+import { criarInimigoDeTeste } from '../testes/inimigoDeTeste'
 import { buildMapWorld } from '../simulation'
-import type { EnemyEntity } from '../types'
 import {
   updateCombat, multiplicadorDeAtaquePorTrait, multiplicadorDeDefesaPorTrait, velocidadeEfetiva,
 } from './combatSystem'
@@ -572,65 +572,35 @@ describe('golpes novos de tick volatil', () => {
 // Enemy manual (sem createEnemyEntity/getEncounter): varios testes precisam
 // de uma especie com Trait especifica que nem sempre tem encontro cadastrado
 // no mapa usado pelos outros testes deste arquivo (route_46).
-function criarInimigoDeTeste(world: ReturnType<typeof buildMapWorld>, speciesId: string, level: number, junto: { x: number; y: number }): EnemyEntity {
-  const enemyPoke = createPokeInstance(createRng(2), speciesId, level)
-  const enemy: EnemyEntity = {
-    id: `entity-${world.counters.entity++}`,
-    kind: 'enemy',
-    poke: enemyPoke,
-    x: junto.x, y: junto.y,
-    facing: { x: 0, y: 1 },
-    radius: 15,
-    state: 'engaged',
-    cooldowns: {},
-    globalCooldown: 999, // trava a propria acao -- so o hit injetado pelo teste resolve
-    targetId: null,
-    deathHandled: false,
-    flashTimer: 0,
-    lastDamageTaken: { physical: { amount: 0, age: Infinity }, special: { amount: 0, age: Infinity } },
-    battleAnim: null,
-    animFrame: 0,
-    animElapsed: 0,
-    attackAnim: null,
-    attackAnimTimer: 0,
-    effectLanes: [],
-    statusVolatil: null,
-    estagios: {},
-    imunidadeDeStatus: 0,
-    proximoTurnoDeStatus: TURNO_SEGUNDOS,
-    pathWaypoints: null,
-    pathIndex: 0,
-    pathRecalcTimer: 0,
-    pathTargetX: null,
-    pathTargetY: null,
-    pathStuckSeconds: 0,
-    encounterId: 'teste',
-    spawnPoint: { x: junto.x, y: junto.y },
-    moveSpeed: 0,
-    wanderTarget: null,
-    wanderPause: 0,
-    aggroRadius: 0,
-    wanderRadius: 0,
-    leashRadius: 0,
-    deathRemovalTimer: null,
-  }
-  return enemy
-}
 
 // Jogador + UM inimigo engajado, globalCooldown alto nos dois lados (trava
 // qualquer ACAO nova neste tick). `enemy.state === 'engaged'` continua
 // verdadeiro pra `engagedEnemies.length > 0` e o combate NAO cair no ramo de
 // "fim de batalha" (que chamaria `limparEstadoVolatil` e apagaria os campos
 // volateis que os testes acabaram de setar).
-function cenarioDeSuporte(especieJogador: string, especieInimigo: string, nivel = 50) {
+/**
+ * `traits` explicitas desde 2026-08-18: a habilidade deixou de ser propriedade
+ * da ESPECIE e virou sorteio por INDIVIDUO entre os slots reais dela
+ * (src/data/traits.ts). Marill nasce Thick Fat OU Huge Power; um teste que
+ * mede Huge Power precisa dizer qual dos dois este Marill tirou, senao ele
+ * mede o sorteio e nao a mecanica.
+ */
+function cenarioDeSuporte(
+  especieJogador: string,
+  especieInimigo: string,
+  nivel = 50,
+  traits: { jogador?: string; inimigo?: string } = {},
+) {
   const rng = createRng(1)
   const jogadorPoke = createPokeInstance(rng, especieJogador, nivel)
+  if (traits.jogador) jogadorPoke.trait = traits.jogador
   const world = buildMapWorld('route_46', jogadorPoke, { rng, counters: { entity: 1, effect: 1, pendingHit: 1 } })
   const player = world.player!
   player.cooldowns = {}
   player.globalCooldown = 999
 
   const enemy = criarInimigoDeTeste(world, especieInimigo, nivel, { x: player.x, y: player.y })
+  if (traits.inimigo) enemy.poke.trait = traits.inimigo
   enemy.targetId = player.id
   world.enemies = [enemy]
 
@@ -876,7 +846,7 @@ describe('Fase 12: golpes de suporte sem dano', () => {
 
 describe('Fase 12: Traits passivas', () => {
   it('Sturdy (Geodude): sobrevive com 1 HP em cheio, mas so uma vez', () => {
-    const { world, player, enemy } = cenarioDeSuporte('geodude', 'rattata')
+    const { world, player, enemy } = cenarioDeSuporte('geodude', 'rattata', 50, { jogador: 'sturdy' })
     player.poke.stats = { ...player.poke.stats, hp: 30 }
     player.poke.hp = 30 // cheio
     enemy.poke.level = 50 // seismic_toss = 50 >= 30
@@ -890,7 +860,7 @@ describe('Fase 12: Traits passivas', () => {
   })
 
   it('Synchronize (Abra): reflete paralisia de volta em quem aplicou', () => {
-    const { world, player, enemy } = cenarioDeSuporte('rattata', 'abra')
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'abra', 50, { inimigo: 'synchronize' })
     const golpeForcado = { ...getAbility('thunder_wave')!, statusChance: 100 }
 
     resolverHitComAbility(world, player.id, enemy.id, golpeForcado)
@@ -900,7 +870,7 @@ describe('Fase 12: Traits passivas', () => {
   })
 
   it('Inner Focus (Zubat): imune a flinch', () => {
-    const { world, player, enemy } = cenarioDeSuporte('rattata', 'zubat')
+    const { world, player, enemy } = cenarioDeSuporte('rattata', 'zubat', 50, { inimigo: 'inner_focus' })
     const golpeComFlinch = { ...getAbility('tackle')!, flinchChance: 100 }
 
     resolverHitComAbility(world, player.id, enemy.id, golpeComFlinch)
@@ -920,7 +890,7 @@ describe('Fase 12: Traits passivas', () => {
   })
 
   it('Quick Feet (Teddiursa): +50% Velocidade com status ativo, ignorando o corte de paralisia', () => {
-    const { player } = cenarioDeSuporte('teddiursa', 'rattata')
+    const { player } = cenarioDeSuporte('teddiursa', 'rattata', 50, { jogador: 'quick_feet' })
     player.poke.stats = { ...player.poke.stats, speed: 100 }
     player.poke.status = { tipo: 'paralysis', turnosRestantes: null }
 
@@ -930,7 +900,7 @@ describe('Fase 12: Traits passivas', () => {
   })
 
   it('...sem status ativo, Quick Feet nao muda a Velocidade', () => {
-    const { player } = cenarioDeSuporte('teddiursa', 'rattata')
+    const { player } = cenarioDeSuporte('teddiursa', 'rattata', 50, { jogador: 'quick_feet' })
     player.poke.stats = { ...player.poke.stats, speed: 100 }
 
     expect(velocidadeEfetiva(player)).toBe(100)
@@ -945,7 +915,7 @@ describe('Fase 12: Traits passivas', () => {
     expect(multiplicadorDeAtaquePorTrait('hustle', true, false)).toBeCloseTo(1.5)
     expect(multiplicadorDeAtaquePorTrait('hustle', false, false)).toBe(1) // so no fisico
 
-    const { world, player, enemy } = cenarioDeSuporte('corsola', 'rattata')
+    const { world, player, enemy } = cenarioDeSuporte('corsola', 'rattata', 50, { jogador: 'hustle' })
     world.pessimista = true
     player.poke.stats = { ...player.poke.stats, atkFis: 100 }
     enemy.poke.stats = { ...enemy.poke.stats, def: 100, hp: 999 }
@@ -957,7 +927,7 @@ describe('Fase 12: Traits passivas', () => {
   })
 
   it('Guts (Machop): +50% de Ataque Fisico SO com status alterado ativo', () => {
-    const comStatus = cenarioDeSuporte('machop', 'rattata')
+    const comStatus = cenarioDeSuporte('machop', 'rattata', 50, { jogador: 'guts' })
     comStatus.world.pessimista = true
     comStatus.player.poke.stats = { ...comStatus.player.poke.stats, atkFis: 100 }
     comStatus.enemy.poke.stats = { ...comStatus.enemy.poke.stats, def: 100, hp: 999 }
@@ -967,7 +937,7 @@ describe('Fase 12: Traits passivas', () => {
     resolverHit(comStatus.world, comStatus.player.id, comStatus.enemy.id, 'tackle')
     expect(comStatus.enemy.poke.hp).toBe(999 - 24)
 
-    const semStatus = cenarioDeSuporte('machop', 'rattata')
+    const semStatus = cenarioDeSuporte('machop', 'rattata', 50, { jogador: 'guts' })
     semStatus.world.pessimista = true
     semStatus.player.poke.stats = { ...semStatus.player.poke.stats, atkFis: 100 }
     semStatus.enemy.poke.stats = { ...semStatus.enemy.poke.stats, def: 100, hp: 999 }
@@ -978,7 +948,7 @@ describe('Fase 12: Traits passivas', () => {
   })
 
   it('Huge Power (Marill): dobra o Ataque Fisico no dano real', () => {
-    const { world, player, enemy } = cenarioDeSuporte('marill', 'rattata')
+    const { world, player, enemy } = cenarioDeSuporte('marill', 'rattata', 50, { jogador: 'huge_power' })
     world.pessimista = true
     player.poke.stats = { ...player.poke.stats, atkFis: 100 }
     enemy.poke.stats = { ...enemy.poke.stats, def: 100, hp: 999 }

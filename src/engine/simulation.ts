@@ -23,7 +23,7 @@ import { mapDefParaSala, spawnPointParaSala, mapWalkRadius, isCellBlocked, neare
 import { getEncounter } from '@/data/enemies'
 import { getItem } from '@/data/items'
 import { isDamagingAbility } from '@/data/abilities'
-import { traitOf } from '@/data/traits'
+import { traitDoPoke } from '@/data/traits'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
@@ -274,7 +274,7 @@ function spawnSequenceEnemy(world: SequenciaDeSorteio, mapDef: MapDef, index: nu
 function aplicarHazardsAoInimigo(rng: Rng, hazards: EnemyHazards | undefined, enemy: EnemyEntity): void {
   if (!hazards) return
   const species = SPECIES[enemy.poke.speciesId]
-  const imuneATerra = species.type === 'FLYING' || species.type2 === 'FLYING' || traitOf(species.id) === 'levitate'
+  const imuneATerra = species.type === 'FLYING' || species.type2 === 'FLYING' || traitDoPoke(enemy.poke) === 'levitate'
   if (imuneATerra) return
 
   const maxHp = enemy.poke.stats.hp

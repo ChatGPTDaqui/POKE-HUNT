@@ -37,7 +37,7 @@ export function statsAtTypedAoeLevel(poke: PokeInstance): StatBlock {
   // POKE com especie invalida (save legado) nao pode derrubar o combate — cai
   // nos atributos atuais, que e o comportamento anterior a esta regra.
   if (!species) return poke.stats
-  return computeStatsAtLevel(species, TYPED_AOE_LEVEL, poke.ivs, poke.rarity, poke.isShiny)
+  return computeStatsAtLevel(species, TYPED_AOE_LEVEL, poke.ivs, poke.rarity, poke.isShiny, poke.nature)
 }
 
 export function resolveAbilityCategory(ability: Ability, poke: PokeInstance): AbilityCategory {

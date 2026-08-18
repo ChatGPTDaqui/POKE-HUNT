@@ -118,7 +118,7 @@ export function evolvePokeInstance(pokeInstance: PokeInstance, gameState: GameSt
   // Piso pra applyDeathExpPenalty abaixo — um POKE evoluido nunca pode
   // de-evoluir, mesmo depois de um level-down por penalidade de morte.
   const minLevel = Math.max(pokeInstance.minLevel || 1, species.evolvesAtLevel as number)
-  const stats = computeStatsAtLevel(newSpecies, pokeInstance.level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny)
+  const stats = computeStatsAtLevel(newSpecies, pokeInstance.level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny, pokeInstance.nature)
   const hp = Math.max(1, Math.round(stats.hp * hpRatio))
 
   const unlockedAbilities = [...pokeInstance.unlockedAbilities]
@@ -213,7 +213,7 @@ export function grantExp(pokeInstance: PokeInstance, amount: number): GrantPokeE
     level += 1
     leveledUp = true
 
-    stats = computeStatsAtLevel(species, level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny)
+    stats = computeStatsAtLevel(species, level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny, pokeInstance.nature)
     const hpGain = stats.hp - previousMaxHp
     hp = Math.min(stats.hp, hp + hpGain)
 
@@ -279,7 +279,7 @@ export function applyDeathExpPenalty(pokeInstance: PokeInstance): DeathPenaltyRe
   while (level > floor && exp < pokeExpForLevel(level, species.growthCurve)) {
     level -= 1
     leveledDown = true
-    stats = computeStatsAtLevel(species, level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny)
+    stats = computeStatsAtLevel(species, level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny, pokeInstance.nature)
     hp = Math.min(hp, stats.hp)
   }
 

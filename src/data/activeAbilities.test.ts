@@ -79,8 +79,15 @@ describe('limite de 4 golpes', () => {
         const dano = escolhidos.filter((a) => isDamagingAbility(a))
         if (dano.length === 0) continue
 
+        // Espelha `danoEfetivo` (data/activeAbilities.ts): poder x STAB x
+        // PRECISAO x (1 - recuo). Precisao e recuo entraram em 2026-08-18 —
+        // sem eles o padrao escolhia Inferno (50% de precisao) e Double-Edge
+        // (-33% de recuo) na frente de golpe com STAB e 100% de precisao.
         const stab = (a: NonNullable<ReturnType<typeof getAbility>>) =>
-          a.power * (a.type === species.type || a.type === species.type2 ? 1.5 : 1)
+          a.power
+          * (a.type === species.type || a.type === species.type2 ? 1.5 : 1)
+          * ((a.accuracy ?? 100) / 100)
+          * (1 - Math.max(0, -(a.drainPercent ?? 0)) / 100)
         const piorEscolhido = Math.min(...dano.map(stab))
 
         // Mesmo motivo do outro caso: `levelReq` cru inclui o bloco de golpes

@@ -335,6 +335,25 @@ async function main() {
       curva,
       evolvesTo: evo.evolvesTo,
       evolvesAtLevel: evo.evolvesAtLevel,
+      // HABILIDADE (o que os jogos chamam de "Ability" — a passiva da especie,
+      // nao o golpe). `slot` 1 e 2 sao as normais, sorteadas no encontro
+      // selvagem; `is_hidden` e a Habilidade Oculta, que no Ultra Sun so sai
+      // por Island Scan/SOS/transferencia e por isso e rara aqui tambem.
+      //
+      // CAVEAT DA FONTE, dito em voz alta: `pokemon.abilities` da PokeAPI NAO
+      // tem `past_values` como `move` tem — ela devolve a atribuicao ATUAL, nao
+      // a do Ultra Sun. Pro elenco 1-251 a diferenca e nula ou minima (as
+      // mudancas de habilidade concentradas em Gen VI ja estao dentro do
+      // recorte), mas se um dia o elenco crescer pra Gen VIII+, conferir na
+      // Bulbapedia antes de confiar.
+      habilidades: p.abilities
+        .slice()
+        .sort((a, b) => a.slot - b.slot)
+        .map((a) => ({
+          chave: a.ability.name.replace(/-/g, '_'),
+          slot: a.slot,
+          ...(a.is_hidden ? { oculta: true } : {}),
+        })),
       golpes: golpes.map((g) => ({
         chave: g.move.replace(/-/g, '_'),
         nivel: g.level,
@@ -384,6 +403,28 @@ async function main() {
     };
   });
   console.log(`  golpes: ${golpes.length}`);
+
+  // --- Habilidades (a passiva) ---------------------------------------------
+  const nomesDeHabilidade = [...new Set(
+    especies.flatMap((e) => e.habilidades.map((h) => h.chave.replace(/_/g, '-')))
+  )].sort();
+  const habilidadesApi = await api.emParalelo(nomesDeHabilidade, 12, (n) =>
+    api.getJson(`${api.BASE}/ability/${n}`)
+  );
+  const habilidades = nomesDeHabilidade.map((nome, i) => {
+    const h = habilidadesApi[i];
+    const en = (entries) => entries.find((e) => e.language.name === 'en');
+    // `short_effect` e a frase de UMA linha que descreve a mecanica ("Strengthens
+    // Fire moves to inflict 1.5x damage at 1/3 max HP or less"). E ela que serve
+    // de contrato pra implementacao — o flavor text do jogo e vago de proposito.
+    const efeito = en(h.effect_entries || []);
+    return {
+      chave: nome.replace(/-/g, '_'),
+      nome: en(h.names || [])?.name || h.name,
+      efeito: efeito ? efeito.short_effect.replace(/\s+/g, ' ').trim() : null,
+    };
+  });
+  console.log(`  habilidades: ${habilidades.length}`);
 
   // --- Conferencias que devem ESTOURAR, nunca avisar ----------------------
   const chavesConhecidas = new Set(Object.keys(JSON.parse(
@@ -470,6 +511,7 @@ async function main() {
     tabelaDeTipos,
     especies,
     golpes,
+    habilidades,
     evolucoesDescartadas,
   };
   fs.writeFileSync(path.join(OUT_DIR, 'catalog.json'), JSON.stringify(catalogo, null, 1) + '\n');

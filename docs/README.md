@@ -50,6 +50,7 @@ esses pontos. Tornar o repositório público exige, antes, decidir o que sai daq
 | [11-operacao.md](11-operacao.md) | Comandos, deploy, banco, wipe |
 | [12-decisoes-descartadas.md](12-decisoes-descartadas.md) | O que foi tentado, medido e rejeitado |
 | [13-divergencias-conhecidas.md](13-divergencias-conhecidas.md) | Onde a documentação existente mente hoje |
+| [14-habilidades.md](14-habilidades.md) | Habilidade, Natureza e Característica: o que vale, o que não vale e por quê |
 
 ## Como isto se relaciona com os outros arquivos do repositório
 

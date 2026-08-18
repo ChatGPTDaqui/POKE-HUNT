@@ -404,6 +404,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "ivysaur",
    "evolvesAtLevel": 16,
+   "habilidades": [
+    {
+     "chave": "overgrow",
+     "slot": 1
+    },
+    {
+     "chave": "chlorophyll",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tackle",
@@ -482,6 +493,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "venusaur",
    "evolvesAtLevel": 32,
+   "habilidades": [
+    {
+     "chave": "overgrow",
+     "slot": 1
+    },
+    {
+     "chave": "chlorophyll",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -556,6 +578,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "overgrow",
+     "slot": 1
+    },
+    {
+     "chave": "chlorophyll",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -638,6 +671,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "charmeleon",
    "evolvesAtLevel": 16,
+   "habilidades": [
+    {
+     "chave": "blaze",
+     "slot": 1
+    },
+    {
+     "chave": "solar_power",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -708,6 +752,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "charizard",
    "evolvesAtLevel": 36,
+   "habilidades": [
+    {
+     "chave": "blaze",
+     "slot": 1
+    },
+    {
+     "chave": "solar_power",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "ember",
@@ -770,6 +825,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "blaze",
+     "slot": 1
+    },
+    {
+     "chave": "solar_power",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "ember",
@@ -844,6 +910,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "wartortle",
    "evolvesAtLevel": 16,
+   "habilidades": [
+    {
+     "chave": "torrent",
+     "slot": 1
+    },
+    {
+     "chave": "rain_dish",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tackle",
@@ -922,6 +999,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "blastoise",
    "evolvesAtLevel": 36,
+   "habilidades": [
+    {
+     "chave": "torrent",
+     "slot": 1
+    },
+    {
+     "chave": "rain_dish",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tail_whip",
@@ -996,6 +1084,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "torrent",
+     "slot": 1
+    },
+    {
+     "chave": "rain_dish",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tail_whip",
@@ -1070,6 +1169,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "metapod",
    "evolvesAtLevel": 7,
+   "habilidades": [
+    {
+     "chave": "shield_dust",
+     "slot": 1
+    },
+    {
+     "chave": "run_away",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "string_shot",
@@ -1104,6 +1214,12 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "butterfree",
    "evolvesAtLevel": 10,
+   "habilidades": [
+    {
+     "chave": "shed_skin",
+     "slot": 1
+    }
+   ],
    "golpes": [
     {
      "chave": "harden",
@@ -1130,6 +1246,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "compound_eyes",
+     "slot": 1
+    },
+    {
+     "chave": "tinted_lens",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "gust",
@@ -1216,6 +1343,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "kakuna",
    "evolvesAtLevel": 7,
+   "habilidades": [
+    {
+     "chave": "shield_dust",
+     "slot": 1
+    },
+    {
+     "chave": "run_away",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "poison_sting",
@@ -1250,6 +1388,12 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "beedrill",
    "evolvesAtLevel": 10,
+   "habilidades": [
+    {
+     "chave": "shed_skin",
+     "slot": 1
+    }
+   ],
    "golpes": [
     {
      "chave": "harden",
@@ -1276,6 +1420,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "swarm",
+     "slot": 1
+    },
+    {
+     "chave": "sniper",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "twineedle",
@@ -1350,6 +1505,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "pidgeotto",
    "evolvesAtLevel": 18,
+   "habilidades": [
+    {
+     "chave": "keen_eye",
+     "slot": 1
+    },
+    {
+     "chave": "tangled_feet",
+     "slot": 2
+    },
+    {
+     "chave": "big_pecks",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tackle",
@@ -1428,6 +1598,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "pidgeot",
    "evolvesAtLevel": 36,
+   "habilidades": [
+    {
+     "chave": "keen_eye",
+     "slot": 1
+    },
+    {
+     "chave": "tangled_feet",
+     "slot": 2
+    },
+    {
+     "chave": "big_pecks",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "sand_attack",
@@ -1502,6 +1687,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "keen_eye",
+     "slot": 1
+    },
+    {
+     "chave": "tangled_feet",
+     "slot": 2
+    },
+    {
+     "chave": "big_pecks",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "sand_attack",
@@ -1576,6 +1776,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "raticate",
    "evolvesAtLevel": 20,
+   "habilidades": [
+    {
+     "chave": "run_away",
+     "slot": 1
+    },
+    {
+     "chave": "guts",
+     "slot": 2
+    },
+    {
+     "chave": "hustle",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tackle",
@@ -1650,6 +1865,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "run_away",
+     "slot": 1
+    },
+    {
+     "chave": "guts",
+     "slot": 2
+    },
+    {
+     "chave": "hustle",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "quick_attack",
@@ -1720,6 +1950,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "fearow",
    "evolvesAtLevel": 20,
+   "habilidades": [
+    {
+     "chave": "keen_eye",
+     "slot": 1
+    },
+    {
+     "chave": "sniper",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -1790,6 +2031,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "keen_eye",
+     "slot": 1
+    },
+    {
+     "chave": "sniper",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leer",
@@ -1856,6 +2108,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "arbok",
    "evolvesAtLevel": 22,
+   "habilidades": [
+    {
+     "chave": "intimidate",
+     "slot": 1
+    },
+    {
+     "chave": "shed_skin",
+     "slot": 2
+    },
+    {
+     "chave": "unnerve",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leer",
@@ -1946,6 +2213,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "intimidate",
+     "slot": 1
+    },
+    {
+     "chave": "shed_skin",
+     "slot": 2
+    },
+    {
+     "chave": "unnerve",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "poison_sting",
@@ -2032,6 +2314,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "static",
+     "slot": 1
+    },
+    {
+     "chave": "lightning_rod",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tail_whip",
@@ -2126,6 +2419,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "static",
+     "slot": 1
+    },
+    {
+     "chave": "lightning_rod",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "quick_attack",
@@ -2164,6 +2468,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "sandslash",
    "evolvesAtLevel": 22,
+   "habilidades": [
+    {
+     "chave": "sand_veil",
+     "slot": 1
+    },
+    {
+     "chave": "sand_rush",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "defense_curl",
@@ -2254,6 +2569,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "sand_veil",
+     "slot": 1
+    },
+    {
+     "chave": "sand_rush",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "sand_attack",
@@ -2340,6 +2666,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "nidorina",
    "evolvesAtLevel": 16,
+   "habilidades": [
+    {
+     "chave": "poison_point",
+     "slot": 1
+    },
+    {
+     "chave": "rivalry",
+     "slot": 2
+    },
+    {
+     "chave": "hustle",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -2414,6 +2755,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "poison_point",
+     "slot": 1
+    },
+    {
+     "chave": "rivalry",
+     "slot": 2
+    },
+    {
+     "chave": "hustle",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tail_whip",
@@ -2480,6 +2836,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "poison_point",
+     "slot": 1
+    },
+    {
+     "chave": "rivalry",
+     "slot": 2
+    },
+    {
+     "chave": "sheer_force",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "double_kick",
@@ -2534,6 +2905,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "nidorino",
    "evolvesAtLevel": 16,
+   "habilidades": [
+    {
+     "chave": "poison_point",
+     "slot": 1
+    },
+    {
+     "chave": "rivalry",
+     "slot": 2
+    },
+    {
+     "chave": "hustle",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leer",
@@ -2608,6 +2994,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "poison_point",
+     "slot": 1
+    },
+    {
+     "chave": "rivalry",
+     "slot": 2
+    },
+    {
+     "chave": "hustle",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "focus_energy",
@@ -2674,6 +3075,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "poison_point",
+     "slot": 1
+    },
+    {
+     "chave": "rivalry",
+     "slot": 2
+    },
+    {
+     "chave": "sheer_force",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "double_kick",
@@ -2728,6 +3144,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "cute_charm",
+     "slot": 1
+    },
+    {
+     "chave": "magic_guard",
+     "slot": 2
+    },
+    {
+     "chave": "friend_guard",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "disarming_voice",
@@ -2842,6 +3273,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "cute_charm",
+     "slot": 1
+    },
+    {
+     "chave": "magic_guard",
+     "slot": 2
+    },
+    {
+     "chave": "unaware",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "disarming_voice",
@@ -2888,6 +3334,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "flash_fire",
+     "slot": 1
+    },
+    {
+     "chave": "drought",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "ember",
@@ -2990,6 +3447,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "flash_fire",
+     "slot": 1
+    },
+    {
+     "chave": "drought",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "confuse_ray",
@@ -3036,6 +3504,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "cute_charm",
+     "slot": 1
+    },
+    {
+     "chave": "competitive",
+     "slot": 2
+    },
+    {
+     "chave": "friend_guard",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "sing",
@@ -3134,6 +3617,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "cute_charm",
+     "slot": 1
+    },
+    {
+     "chave": "competitive",
+     "slot": 2
+    },
+    {
+     "chave": "frisk",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "defense_curl",
@@ -3180,6 +3678,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "golbat",
    "evolvesAtLevel": 22,
+   "habilidades": [
+    {
+     "chave": "inner_focus",
+     "slot": 1
+    },
+    {
+     "chave": "infiltrator",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "absorb",
@@ -3262,6 +3771,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "inner_focus",
+     "slot": 1
+    },
+    {
+     "chave": "infiltrator",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "supersonic",
@@ -3340,6 +3860,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "gloom",
    "evolvesAtLevel": 21,
+   "habilidades": [
+    {
+     "chave": "chlorophyll",
+     "slot": 1
+    },
+    {
+     "chave": "run_away",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "absorb",
@@ -3426,6 +3957,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "chlorophyll",
+     "slot": 1
+    },
+    {
+     "chave": "stench",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "sweet_scent",
@@ -3504,6 +4046,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "chlorophyll",
+     "slot": 1
+    },
+    {
+     "chave": "effect_spore",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "aromatherapy",
@@ -3554,6 +4107,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "parasect",
    "evolvesAtLevel": 24,
+   "habilidades": [
+    {
+     "chave": "effect_spore",
+     "slot": 1
+    },
+    {
+     "chave": "dry_skin",
+     "slot": 2
+    },
+    {
+     "chave": "damp",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "scratch",
@@ -3624,6 +4192,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "effect_spore",
+     "slot": 1
+    },
+    {
+     "chave": "dry_skin",
+     "slot": 2
+    },
+    {
+     "chave": "damp",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "poison_powder",
@@ -3690,6 +4273,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "venomoth",
    "evolvesAtLevel": 31,
+   "habilidades": [
+    {
+     "chave": "compound_eyes",
+     "slot": 1
+    },
+    {
+     "chave": "tinted_lens",
+     "slot": 2
+    },
+    {
+     "chave": "run_away",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "disable",
@@ -3768,6 +4366,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "shield_dust",
+     "slot": 1
+    },
+    {
+     "chave": "tinted_lens",
+     "slot": 2
+    },
+    {
+     "chave": "wonder_skin",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "supersonic",
@@ -3846,6 +4459,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "dugtrio",
    "evolvesAtLevel": 26,
+   "habilidades": [
+    {
+     "chave": "sand_veil",
+     "slot": 1
+    },
+    {
+     "chave": "arena_trap",
+     "slot": 2
+    },
+    {
+     "chave": "sand_force",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "sand_attack",
@@ -3924,6 +4552,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "sand_veil",
+     "slot": 1
+    },
+    {
+     "chave": "arena_trap",
+     "slot": 2
+    },
+    {
+     "chave": "sand_force",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -3998,6 +4641,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "persian",
    "evolvesAtLevel": 28,
+   "habilidades": [
+    {
+     "chave": "pickup",
+     "slot": 1
+    },
+    {
+     "chave": "technician",
+     "slot": 2
+    },
+    {
+     "chave": "unnerve",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -4080,6 +4738,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "limber",
+     "slot": 1
+    },
+    {
+     "chave": "technician",
+     "slot": 2
+    },
+    {
+     "chave": "unnerve",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bite",
@@ -4158,6 +4831,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "golduck",
    "evolvesAtLevel": 33,
+   "habilidades": [
+    {
+     "chave": "damp",
+     "slot": 1
+    },
+    {
+     "chave": "cloud_nine",
+     "slot": 2
+    },
+    {
+     "chave": "swift_swim",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "scratch",
@@ -4244,6 +4932,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "damp",
+     "slot": 1
+    },
+    {
+     "chave": "cloud_nine",
+     "slot": 2
+    },
+    {
+     "chave": "swift_swim",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tail_whip",
@@ -4322,6 +5025,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "primeape",
    "evolvesAtLevel": 28,
+   "habilidades": [
+    {
+     "chave": "vital_spirit",
+     "slot": 1
+    },
+    {
+     "chave": "anger_point",
+     "slot": 2
+    },
+    {
+     "chave": "defiant",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "covet",
@@ -4420,6 +5138,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "vital_spirit",
+     "slot": 1
+    },
+    {
+     "chave": "anger_point",
+     "slot": 2
+    },
+    {
+     "chave": "defiant",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "fury_swipes",
@@ -4502,6 +5235,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "intimidate",
+     "slot": 1
+    },
+    {
+     "chave": "flash_fire",
+     "slot": 2
+    },
+    {
+     "chave": "justified",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bite",
@@ -4596,6 +5344,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "intimidate",
+     "slot": 1
+    },
+    {
+     "chave": "flash_fire",
+     "slot": 2
+    },
+    {
+     "chave": "justified",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bite",
@@ -4642,6 +5405,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "poliwhirl",
    "evolvesAtLevel": 25,
+   "habilidades": [
+    {
+     "chave": "water_absorb",
+     "slot": 1
+    },
+    {
+     "chave": "damp",
+     "slot": 2
+    },
+    {
+     "chave": "swift_swim",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "water_sport",
@@ -4716,6 +5494,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "water_absorb",
+     "slot": 1
+    },
+    {
+     "chave": "damp",
+     "slot": 2
+    },
+    {
+     "chave": "swift_swim",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "water_gun",
@@ -4786,6 +5579,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "water_absorb",
+     "slot": 1
+    },
+    {
+     "chave": "damp",
+     "slot": 2
+    },
+    {
+     "chave": "swift_swim",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bubble_beam",
@@ -4836,6 +5644,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "kadabra",
    "evolvesAtLevel": 16,
+   "habilidades": [
+    {
+     "chave": "synchronize",
+     "slot": 1
+    },
+    {
+     "chave": "inner_focus",
+     "slot": 2
+    },
+    {
+     "chave": "magic_guard",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "teleport",
@@ -4862,6 +5685,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "synchronize",
+     "slot": 1
+    },
+    {
+     "chave": "inner_focus",
+     "slot": 2
+    },
+    {
+     "chave": "magic_guard",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "confusion",
@@ -4940,6 +5778,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "synchronize",
+     "slot": 1
+    },
+    {
+     "chave": "inner_focus",
+     "slot": 2
+    },
+    {
+     "chave": "magic_guard",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "kinesis",
@@ -5022,6 +5875,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "machoke",
    "evolvesAtLevel": 28,
+   "habilidades": [
+    {
+     "chave": "guts",
+     "slot": 1
+    },
+    {
+     "chave": "no_guard",
+     "slot": 2
+    },
+    {
+     "chave": "steadfast",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leer",
@@ -5112,6 +5980,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "guts",
+     "slot": 1
+    },
+    {
+     "chave": "no_guard",
+     "slot": 2
+    },
+    {
+     "chave": "steadfast",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "focus_energy",
@@ -5194,6 +6077,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "guts",
+     "slot": 1
+    },
+    {
+     "chave": "no_guard",
+     "slot": 2
+    },
+    {
+     "chave": "steadfast",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leer",
@@ -5292,6 +6190,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "weepinbell",
    "evolvesAtLevel": 21,
+   "habilidades": [
+    {
+     "chave": "chlorophyll",
+     "slot": 1
+    },
+    {
+     "chave": "gluttony",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "vine_whip",
@@ -5370,6 +6279,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "chlorophyll",
+     "slot": 1
+    },
+    {
+     "chave": "gluttony",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growth",
@@ -5444,6 +6364,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "chlorophyll",
+     "slot": 1
+    },
+    {
+     "chave": "gluttony",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leaf_tornado",
@@ -5506,6 +6437,21 @@
    "curva": "SLOW",
    "evolvesTo": "tentacruel",
    "evolvesAtLevel": 30,
+   "habilidades": [
+    {
+     "chave": "clear_body",
+     "slot": 1
+    },
+    {
+     "chave": "liquid_ooze",
+     "slot": 2
+    },
+    {
+     "chave": "rain_dish",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "poison_sting",
@@ -5596,6 +6542,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "clear_body",
+     "slot": 1
+    },
+    {
+     "chave": "liquid_ooze",
+     "slot": 2
+    },
+    {
+     "chave": "rain_dish",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "supersonic",
@@ -5682,6 +6643,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "graveler",
    "evolvesAtLevel": 25,
+   "habilidades": [
+    {
+     "chave": "rock_head",
+     "slot": 1
+    },
+    {
+     "chave": "sturdy",
+     "slot": 2
+    },
+    {
+     "chave": "sand_veil",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "defense_curl",
@@ -5768,6 +6744,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "rock_head",
+     "slot": 1
+    },
+    {
+     "chave": "sturdy",
+     "slot": 2
+    },
+    {
+     "chave": "sand_veil",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "mud_sport",
@@ -5846,6 +6837,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "rock_head",
+     "slot": 1
+    },
+    {
+     "chave": "sturdy",
+     "slot": 2
+    },
+    {
+     "chave": "sand_veil",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "defense_curl",
@@ -5936,6 +6942,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "rapidash",
    "evolvesAtLevel": 40,
+   "habilidades": [
+    {
+     "chave": "run_away",
+     "slot": 1
+    },
+    {
+     "chave": "flash_fire",
+     "slot": 2
+    },
+    {
+     "chave": "flame_body",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -6014,6 +7035,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "run_away",
+     "slot": 1
+    },
+    {
+     "chave": "flash_fire",
+     "slot": 2
+    },
+    {
+     "chave": "flame_body",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tail_whip",
@@ -6088,6 +7124,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "slowbro",
    "evolvesAtLevel": 37,
+   "habilidades": [
+    {
+     "chave": "oblivious",
+     "slot": 1
+    },
+    {
+     "chave": "own_tempo",
+     "slot": 2
+    },
+    {
+     "chave": "regenerator",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "curse",
@@ -6174,6 +7225,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "oblivious",
+     "slot": 1
+    },
+    {
+     "chave": "own_tempo",
+     "slot": 2
+    },
+    {
+     "chave": "regenerator",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -6252,6 +7318,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "magneton",
    "evolvesAtLevel": 30,
+   "habilidades": [
+    {
+     "chave": "magnet_pull",
+     "slot": 1
+    },
+    {
+     "chave": "sturdy",
+     "slot": 2
+    },
+    {
+     "chave": "analytic",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "supersonic",
@@ -6346,6 +7427,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "magnet_pull",
+     "slot": 1
+    },
+    {
+     "chave": "sturdy",
+     "slot": 2
+    },
+    {
+     "chave": "analytic",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "thunder_shock",
@@ -6436,6 +7532,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "keen_eye",
+     "slot": 1
+    },
+    {
+     "chave": "inner_focus",
+     "slot": 2
+    },
+    {
+     "chave": "defiant",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "fury_cutter",
@@ -6530,6 +7641,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "dodrio",
    "evolvesAtLevel": 31,
+   "habilidades": [
+    {
+     "chave": "run_away",
+     "slot": 1
+    },
+    {
+     "chave": "early_bird",
+     "slot": 2
+    },
+    {
+     "chave": "tangled_feet",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -6616,6 +7742,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "run_away",
+     "slot": 1
+    },
+    {
+     "chave": "early_bird",
+     "slot": 2
+    },
+    {
+     "chave": "tangled_feet",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "quick_attack",
@@ -6698,6 +7839,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "dewgong",
    "evolvesAtLevel": 34,
+   "habilidades": [
+    {
+     "chave": "thick_fat",
+     "slot": 1
+    },
+    {
+     "chave": "hydration",
+     "slot": 2
+    },
+    {
+     "chave": "ice_body",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "headbutt",
@@ -6788,6 +7944,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "thick_fat",
+     "slot": 1
+    },
+    {
+     "chave": "hydration",
+     "slot": 2
+    },
+    {
+     "chave": "ice_body",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -6878,6 +8049,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "muk",
    "evolvesAtLevel": 38,
+   "habilidades": [
+    {
+     "chave": "stench",
+     "slot": 1
+    },
+    {
+     "chave": "sticky_hold",
+     "slot": 2
+    },
+    {
+     "chave": "poison_touch",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "poison_gas",
@@ -6964,6 +8150,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "stench",
+     "slot": 1
+    },
+    {
+     "chave": "sticky_hold",
+     "slot": 2
+    },
+    {
+     "chave": "poison_touch",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "harden",
@@ -7046,6 +8247,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "shell_armor",
+     "slot": 1
+    },
+    {
+     "chave": "skill_link",
+     "slot": 2
+    },
+    {
+     "chave": "overcoat",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tackle",
@@ -7136,6 +8352,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "shell_armor",
+     "slot": 1
+    },
+    {
+     "chave": "skill_link",
+     "slot": 2
+    },
+    {
+     "chave": "overcoat",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "aurora_beam",
@@ -7198,6 +8429,12 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "haunter",
    "evolvesAtLevel": 25,
+   "habilidades": [
+    {
+     "chave": "levitate",
+     "slot": 1
+    }
+   ],
    "golpes": [
     {
      "chave": "hypnosis",
@@ -7280,6 +8517,12 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "levitate",
+     "slot": 1
+    }
+   ],
    "golpes": [
     {
      "chave": "spite",
@@ -7358,6 +8601,12 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "cursed_body",
+     "slot": 1
+    }
+   ],
    "golpes": [
     {
      "chave": "hypnosis",
@@ -7444,6 +8693,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "rock_head",
+     "slot": 1
+    },
+    {
+     "chave": "sturdy",
+     "slot": 2
+    },
+    {
+     "chave": "weak_armor",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bind",
@@ -7554,6 +8818,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "hypno",
    "evolvesAtLevel": 26,
+   "habilidades": [
+    {
+     "chave": "insomnia",
+     "slot": 1
+    },
+    {
+     "chave": "forewarn",
+     "slot": 2
+    },
+    {
+     "chave": "inner_focus",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "hypnosis",
@@ -7644,6 +8923,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "insomnia",
+     "slot": 1
+    },
+    {
+     "chave": "forewarn",
+     "slot": 2
+    },
+    {
+     "chave": "inner_focus",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "disable",
@@ -7726,6 +9020,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "kingler",
    "evolvesAtLevel": 28,
+   "habilidades": [
+    {
+     "chave": "hyper_cutter",
+     "slot": 1
+    },
+    {
+     "chave": "shell_armor",
+     "slot": 2
+    },
+    {
+     "chave": "sheer_force",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bubble",
@@ -7808,6 +9117,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "hyper_cutter",
+     "slot": 1
+    },
+    {
+     "chave": "shell_armor",
+     "slot": 2
+    },
+    {
+     "chave": "sheer_force",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "vice_grip",
@@ -7882,6 +9206,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "electrode",
    "evolvesAtLevel": 30,
+   "habilidades": [
+    {
+     "chave": "soundproof",
+     "slot": 1
+    },
+    {
+     "chave": "static",
+     "slot": 2
+    },
+    {
+     "chave": "aftermath",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "charge",
@@ -7972,6 +9311,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "soundproof",
+     "slot": 1
+    },
+    {
+     "chave": "static",
+     "slot": 2
+    },
+    {
+     "chave": "aftermath",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "sonic_boom",
@@ -8054,6 +9408,17 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "chlorophyll",
+     "slot": 1
+    },
+    {
+     "chave": "harvest",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "barrage",
@@ -8136,6 +9501,17 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "chlorophyll",
+     "slot": 1
+    },
+    {
+     "chave": "harvest",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "barrage",
@@ -8194,6 +9570,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "marowak",
    "evolvesAtLevel": 28,
+   "habilidades": [
+    {
+     "chave": "rock_head",
+     "slot": 1
+    },
+    {
+     "chave": "lightning_rod",
+     "slot": 2
+    },
+    {
+     "chave": "battle_armor",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -8280,6 +9671,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "rock_head",
+     "slot": 1
+    },
+    {
+     "chave": "lightning_rod",
+     "slot": 2
+    },
+    {
+     "chave": "battle_armor",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tail_whip",
@@ -8362,6 +9768,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "limber",
+     "slot": 1
+    },
+    {
+     "chave": "reckless",
+     "slot": 2
+    },
+    {
+     "chave": "unburden",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "meditate",
@@ -8448,6 +9869,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "keen_eye",
+     "slot": 1
+    },
+    {
+     "chave": "iron_fist",
+     "slot": 2
+    },
+    {
+     "chave": "inner_focus",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "comet_punch",
@@ -8542,6 +9978,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "own_tempo",
+     "slot": 1
+    },
+    {
+     "chave": "oblivious",
+     "slot": 2
+    },
+    {
+     "chave": "cloud_nine",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "lick",
@@ -8624,6 +10075,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "weezing",
    "evolvesAtLevel": 35,
+   "habilidades": [
+    {
+     "chave": "levitate",
+     "slot": 1
+    },
+    {
+     "chave": "neutralizing_gas",
+     "slot": 2
+    },
+    {
+     "chave": "stench",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "poison_gas",
@@ -8706,6 +10172,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "levitate",
+     "slot": 1
+    },
+    {
+     "chave": "neutralizing_gas",
+     "slot": 2
+    },
+    {
+     "chave": "stench",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "smog",
@@ -8784,6 +10265,21 @@
    "curva": "SLOW",
    "evolvesTo": "rhydon",
    "evolvesAtLevel": 42,
+   "habilidades": [
+    {
+     "chave": "lightning_rod",
+     "slot": 1
+    },
+    {
+     "chave": "rock_head",
+     "slot": 2
+    },
+    {
+     "chave": "reckless",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "horn_attack",
@@ -8866,6 +10362,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "lightning_rod",
+     "slot": 1
+    },
+    {
+     "chave": "rock_head",
+     "slot": 2
+    },
+    {
+     "chave": "reckless",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "fury_attack",
@@ -8944,6 +10455,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "natural_cure",
+     "slot": 1
+    },
+    {
+     "chave": "serene_grace",
+     "slot": 2
+    },
+    {
+     "chave": "healer",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "defense_curl",
@@ -9034,6 +10560,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "chlorophyll",
+     "slot": 1
+    },
+    {
+     "chave": "leaf_guard",
+     "slot": 2
+    },
+    {
+     "chave": "regenerator",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "constrict",
@@ -9132,6 +10673,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "early_bird",
+     "slot": 1
+    },
+    {
+     "chave": "scrappy",
+     "slot": 2
+    },
+    {
+     "chave": "inner_focus",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "comet_punch",
@@ -9214,6 +10770,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "seadra",
    "evolvesAtLevel": 32,
+   "habilidades": [
+    {
+     "chave": "swift_swim",
+     "slot": 1
+    },
+    {
+     "chave": "sniper",
+     "slot": 2
+    },
+    {
+     "chave": "damp",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bubble",
@@ -9284,6 +10855,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "poison_point",
+     "slot": 1
+    },
+    {
+     "chave": "sniper",
+     "slot": 2
+    },
+    {
+     "chave": "damp",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "smokescreen",
@@ -9350,6 +10936,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "seaking",
    "evolvesAtLevel": 33,
+   "habilidades": [
+    {
+     "chave": "swift_swim",
+     "slot": 1
+    },
+    {
+     "chave": "water_veil",
+     "slot": 2
+    },
+    {
+     "chave": "lightning_rod",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "peck",
@@ -9428,6 +11029,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "swift_swim",
+     "slot": 1
+    },
+    {
+     "chave": "water_veil",
+     "slot": 2
+    },
+    {
+     "chave": "lightning_rod",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "supersonic",
@@ -9494,6 +11110,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "illuminate",
+     "slot": 1
+    },
+    {
+     "chave": "natural_cure",
+     "slot": 2
+    },
+    {
+     "chave": "analytic",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "harden",
@@ -9592,6 +11223,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "illuminate",
+     "slot": 1
+    },
+    {
+     "chave": "natural_cure",
+     "slot": 2
+    },
+    {
+     "chave": "analytic",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "hydro_pump",
@@ -9642,6 +11288,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "soundproof",
+     "slot": 1
+    },
+    {
+     "chave": "filter",
+     "slot": 2
+    },
+    {
+     "chave": "technician",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "barrier",
@@ -9764,6 +11425,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "swarm",
+     "slot": 1
+    },
+    {
+     "chave": "technician",
+     "slot": 2
+    },
+    {
+     "chave": "steadfast",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leer",
@@ -9858,6 +11534,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "oblivious",
+     "slot": 1
+    },
+    {
+     "chave": "forewarn",
+     "slot": 2
+    },
+    {
+     "chave": "dry_skin",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "lick",
@@ -9936,6 +11627,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "static",
+     "slot": 1
+    },
+    {
+     "chave": "vital_spirit",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "thunder_shock",
@@ -10006,6 +11708,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "flame_body",
+     "slot": 1
+    },
+    {
+     "chave": "vital_spirit",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "ember",
@@ -10076,6 +11789,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "hyper_cutter",
+     "slot": 1
+    },
+    {
+     "chave": "mold_breaker",
+     "slot": 2
+    },
+    {
+     "chave": "moxie",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "focus_energy",
@@ -10162,6 +11890,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "intimidate",
+     "slot": 1
+    },
+    {
+     "chave": "anger_point",
+     "slot": 2
+    },
+    {
+     "chave": "sheer_force",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tackle",
@@ -10244,6 +11987,17 @@
    "curva": "SLOW",
    "evolvesTo": "gyarados",
    "evolvesAtLevel": 20,
+   "habilidades": [
+    {
+     "chave": "swift_swim",
+     "slot": 1
+    },
+    {
+     "chave": "rattled",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "splash",
@@ -10278,6 +12032,17 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "intimidate",
+     "slot": 1
+    },
+    {
+     "chave": "moxie",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bite",
@@ -10352,6 +12117,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "water_absorb",
+     "slot": 1
+    },
+    {
+     "chave": "shell_armor",
+     "slot": 2
+    },
+    {
+     "chave": "hydration",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -10434,6 +12214,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "limber",
+     "slot": 1
+    },
+    {
+     "chave": "imposter",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "transform",
@@ -10460,6 +12251,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "run_away",
+     "slot": 1
+    },
+    {
+     "chave": "adaptability",
+     "slot": 2
+    },
+    {
+     "chave": "anticipation",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "covet",
@@ -10550,6 +12356,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "water_absorb",
+     "slot": 1
+    },
+    {
+     "chave": "hydration",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "helping_hand",
@@ -10632,6 +12449,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "volt_absorb",
+     "slot": 1
+    },
+    {
+     "chave": "quick_feet",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "helping_hand",
@@ -10714,6 +12542,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "flash_fire",
+     "slot": 1
+    },
+    {
+     "chave": "guts",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "ember",
@@ -10796,6 +12635,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "trace",
+     "slot": 1
+    },
+    {
+     "chave": "download",
+     "slot": 2
+    },
+    {
+     "chave": "analytic",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "conversion",
@@ -10878,6 +12732,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "omastar",
    "evolvesAtLevel": 40,
+   "habilidades": [
+    {
+     "chave": "swift_swim",
+     "slot": 1
+    },
+    {
+     "chave": "shell_armor",
+     "slot": 2
+    },
+    {
+     "chave": "weak_armor",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "constrict",
@@ -10956,6 +12825,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "swift_swim",
+     "slot": 1
+    },
+    {
+     "chave": "shell_armor",
+     "slot": 2
+    },
+    {
+     "chave": "weak_armor",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bite",
@@ -11030,6 +12914,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "kabutops",
    "evolvesAtLevel": 40,
+   "habilidades": [
+    {
+     "chave": "swift_swim",
+     "slot": 1
+    },
+    {
+     "chave": "battle_armor",
+     "slot": 2
+    },
+    {
+     "chave": "weak_armor",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "harden",
@@ -11100,6 +12999,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "swift_swim",
+     "slot": 1
+    },
+    {
+     "chave": "battle_armor",
+     "slot": 2
+    },
+    {
+     "chave": "weak_armor",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "absorb",
@@ -11170,6 +13084,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "rock_head",
+     "slot": 1
+    },
+    {
+     "chave": "pressure",
+     "slot": 2
+    },
+    {
+     "chave": "unnerve",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bite",
@@ -11260,6 +13189,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "immunity",
+     "slot": 1
+    },
+    {
+     "chave": "thick_fat",
+     "slot": 2
+    },
+    {
+     "chave": "gluttony",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tackle",
@@ -11350,6 +13294,17 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "pressure",
+     "slot": 1
+    },
+    {
+     "chave": "snow_cloak",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "gust",
@@ -11436,6 +13391,17 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "pressure",
+     "slot": 1
+    },
+    {
+     "chave": "static",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "peck",
@@ -11522,6 +13488,17 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "pressure",
+     "slot": 1
+    },
+    {
+     "chave": "flame_body",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "ember",
@@ -11608,6 +13585,17 @@
    "curva": "SLOW",
    "evolvesTo": "dragonair",
    "evolvesAtLevel": 30,
+   "habilidades": [
+    {
+     "chave": "shed_skin",
+     "slot": 1
+    },
+    {
+     "chave": "marvel_scale",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leer",
@@ -11686,6 +13674,17 @@
    "curva": "SLOW",
    "evolvesTo": "dragonite",
    "evolvesAtLevel": 55,
+   "habilidades": [
+    {
+     "chave": "shed_skin",
+     "slot": 1
+    },
+    {
+     "chave": "marvel_scale",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "thunder_wave",
@@ -11756,6 +13755,17 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "inner_focus",
+     "slot": 1
+    },
+    {
+     "chave": "multiscale",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "thunder_wave",
@@ -11834,6 +13844,17 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "pressure",
+     "slot": 1
+    },
+    {
+     "chave": "unnerve",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "confusion",
@@ -11936,6 +13957,12 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "synchronize",
+     "slot": 1
+    }
+   ],
    "golpes": [
     {
      "chave": "pound",
@@ -12010,6 +14037,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "bayleef",
    "evolvesAtLevel": 16,
+   "habilidades": [
+    {
+     "chave": "overgrow",
+     "slot": 1
+    },
+    {
+     "chave": "leaf_guard",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -12088,6 +14126,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "meganium",
    "evolvesAtLevel": 32,
+   "habilidades": [
+    {
+     "chave": "overgrow",
+     "slot": 1
+    },
+    {
+     "chave": "leaf_guard",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "razor_leaf",
@@ -12158,6 +14207,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "overgrow",
+     "slot": 1
+    },
+    {
+     "chave": "leaf_guard",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "razor_leaf",
@@ -12236,6 +14296,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "quilava",
    "evolvesAtLevel": 14,
+   "habilidades": [
+    {
+     "chave": "blaze",
+     "slot": 1
+    },
+    {
+     "chave": "flash_fire",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leer",
@@ -12322,6 +14393,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "typhlosion",
    "evolvesAtLevel": 36,
+   "habilidades": [
+    {
+     "chave": "blaze",
+     "slot": 1
+    },
+    {
+     "chave": "flash_fire",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "smokescreen",
@@ -12400,6 +14482,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "blaze",
+     "slot": 1
+    },
+    {
+     "chave": "flash_fire",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "smokescreen",
@@ -12478,6 +14571,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "croconaw",
    "evolvesAtLevel": 18,
+   "habilidades": [
+    {
+     "chave": "torrent",
+     "slot": 1
+    },
+    {
+     "chave": "sheer_force",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leer",
@@ -12564,6 +14668,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "feraligatr",
    "evolvesAtLevel": 30,
+   "habilidades": [
+    {
+     "chave": "torrent",
+     "slot": 1
+    },
+    {
+     "chave": "sheer_force",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "water_gun",
@@ -12642,6 +14757,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "torrent",
+     "slot": 1
+    },
+    {
+     "chave": "sheer_force",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "water_gun",
@@ -12720,6 +14846,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "furret",
    "evolvesAtLevel": 15,
+   "habilidades": [
+    {
+     "chave": "run_away",
+     "slot": 1
+    },
+    {
+     "chave": "keen_eye",
+     "slot": 2
+    },
+    {
+     "chave": "frisk",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "foresight",
@@ -12798,6 +14939,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "run_away",
+     "slot": 1
+    },
+    {
+     "chave": "keen_eye",
+     "slot": 2
+    },
+    {
+     "chave": "frisk",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "defense_curl",
@@ -12872,6 +15028,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "noctowl",
    "evolvesAtLevel": 20,
+   "habilidades": [
+    {
+     "chave": "insomnia",
+     "slot": 1
+    },
+    {
+     "chave": "keen_eye",
+     "slot": 2
+    },
+    {
+     "chave": "tinted_lens",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "foresight",
@@ -12966,6 +15137,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "insomnia",
+     "slot": 1
+    },
+    {
+     "chave": "keen_eye",
+     "slot": 2
+    },
+    {
+     "chave": "tinted_lens",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "hypnosis",
@@ -13048,6 +15234,21 @@
    "curva": "FAST",
    "evolvesTo": "ledian",
    "evolvesAtLevel": 18,
+   "habilidades": [
+    {
+     "chave": "swarm",
+     "slot": 1
+    },
+    {
+     "chave": "early_bird",
+     "slot": 2
+    },
+    {
+     "chave": "rattled",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tackle",
@@ -13126,6 +15327,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "swarm",
+     "slot": 1
+    },
+    {
+     "chave": "early_bird",
+     "slot": 2
+    },
+    {
+     "chave": "iron_fist",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "supersonic",
@@ -13200,6 +15416,21 @@
    "curva": "FAST",
    "evolvesTo": "ariados",
    "evolvesAtLevel": 22,
+   "habilidades": [
+    {
+     "chave": "swarm",
+     "slot": 1
+    },
+    {
+     "chave": "insomnia",
+     "slot": 2
+    },
+    {
+     "chave": "sniper",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "constrict",
@@ -13294,6 +15525,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "swarm",
+     "slot": 1
+    },
+    {
+     "chave": "insomnia",
+     "slot": 2
+    },
+    {
+     "chave": "sniper",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "absorb",
@@ -13380,6 +15626,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "inner_focus",
+     "slot": 1
+    },
+    {
+     "chave": "infiltrator",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "absorb",
@@ -13470,6 +15727,21 @@
    "curva": "SLOW",
    "evolvesTo": "lanturn",
    "evolvesAtLevel": 27,
+   "habilidades": [
+    {
+     "chave": "volt_absorb",
+     "slot": 1
+    },
+    {
+     "chave": "illuminate",
+     "slot": 2
+    },
+    {
+     "chave": "water_absorb",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bubble",
@@ -13556,6 +15828,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "volt_absorb",
+     "slot": 1
+    },
+    {
+     "chave": "illuminate",
+     "slot": 2
+    },
+    {
+     "chave": "water_absorb",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "thunder_wave",
@@ -13646,6 +15933,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "static",
+     "slot": 1
+    },
+    {
+     "chave": "lightning_rod",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "charm",
@@ -13692,6 +15990,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "cute_charm",
+     "slot": 1
+    },
+    {
+     "chave": "magic_guard",
+     "slot": 2
+    },
+    {
+     "chave": "friend_guard",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "charm",
@@ -13742,6 +16055,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "cute_charm",
+     "slot": 1
+    },
+    {
+     "chave": "competitive",
+     "slot": 2
+    },
+    {
+     "chave": "friend_guard",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "charm",
@@ -13788,6 +16116,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "hustle",
+     "slot": 1
+    },
+    {
+     "chave": "serene_grace",
+     "slot": 2
+    },
+    {
+     "chave": "super_luck",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "charm",
@@ -13870,6 +16213,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "hustle",
+     "slot": 1
+    },
+    {
+     "chave": "serene_grace",
+     "slot": 2
+    },
+    {
+     "chave": "super_luck",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "charm",
@@ -13960,6 +16318,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "xatu",
    "evolvesAtLevel": 25,
+   "habilidades": [
+    {
+     "chave": "synchronize",
+     "slot": 1
+    },
+    {
+     "chave": "early_bird",
+     "slot": 2
+    },
+    {
+     "chave": "magic_bounce",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leer",
@@ -14046,6 +16419,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "synchronize",
+     "slot": 1
+    },
+    {
+     "chave": "early_bird",
+     "slot": 2
+    },
+    {
+     "chave": "magic_bounce",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "night_shade",
@@ -14128,6 +16516,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "flaaffy",
    "evolvesAtLevel": 15,
+   "habilidades": [
+    {
+     "chave": "static",
+     "slot": 1
+    },
+    {
+     "chave": "plus",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -14210,6 +16609,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "ampharos",
    "evolvesAtLevel": 30,
+   "habilidades": [
+    {
+     "chave": "static",
+     "slot": 1
+    },
+    {
+     "chave": "plus",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "thunder_wave",
@@ -14284,6 +16694,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "static",
+     "slot": 1
+    },
+    {
+     "chave": "plus",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "thunder_wave",
@@ -14366,6 +16787,17 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "chlorophyll",
+     "slot": 1
+    },
+    {
+     "chave": "healer",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leaf_blade",
@@ -14428,6 +16860,21 @@
    "curva": "FAST",
    "evolvesTo": "azumarill",
    "evolvesAtLevel": 18,
+   "habilidades": [
+    {
+     "chave": "thick_fat",
+     "slot": 1
+    },
+    {
+     "chave": "huge_power",
+     "slot": 2
+    },
+    {
+     "chave": "sap_sipper",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tackle",
@@ -14514,6 +16961,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "thick_fat",
+     "slot": 1
+    },
+    {
+     "chave": "huge_power",
+     "slot": 2
+    },
+    {
+     "chave": "sap_sipper",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tail_whip",
@@ -14592,6 +17054,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "sturdy",
+     "slot": 1
+    },
+    {
+     "chave": "rock_head",
+     "slot": 2
+    },
+    {
+     "chave": "rattled",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "copycat",
@@ -14686,6 +17163,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "water_absorb",
+     "slot": 1
+    },
+    {
+     "chave": "damp",
+     "slot": 2
+    },
+    {
+     "chave": "drizzle",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bubble_beam",
@@ -14736,6 +17228,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "skiploom",
    "evolvesAtLevel": 18,
+   "habilidades": [
+    {
+     "chave": "chlorophyll",
+     "slot": 1
+    },
+    {
+     "chave": "leaf_guard",
+     "slot": 2
+    },
+    {
+     "chave": "infiltrator",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "absorb",
@@ -14838,6 +17345,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": "jumpluff",
    "evolvesAtLevel": 27,
+   "habilidades": [
+    {
+     "chave": "chlorophyll",
+     "slot": 1
+    },
+    {
+     "chave": "leaf_guard",
+     "slot": 2
+    },
+    {
+     "chave": "infiltrator",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "synthesis",
@@ -14932,6 +17454,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "chlorophyll",
+     "slot": 1
+    },
+    {
+     "chave": "leaf_guard",
+     "slot": 2
+    },
+    {
+     "chave": "infiltrator",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "synthesis",
@@ -15026,6 +17563,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "run_away",
+     "slot": 1
+    },
+    {
+     "chave": "pickup",
+     "slot": 2
+    },
+    {
+     "chave": "skill_link",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "scratch",
@@ -15104,6 +17656,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "chlorophyll",
+     "slot": 1
+    },
+    {
+     "chave": "solar_power",
+     "slot": 2
+    },
+    {
+     "chave": "early_bird",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "absorb",
@@ -15190,6 +17757,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "chlorophyll",
+     "slot": 1
+    },
+    {
+     "chave": "solar_power",
+     "slot": 2
+    },
+    {
+     "chave": "early_bird",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "absorb",
@@ -15288,6 +17870,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "speed_boost",
+     "slot": 1
+    },
+    {
+     "chave": "compound_eyes",
+     "slot": 2
+    },
+    {
+     "chave": "frisk",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "foresight",
@@ -15374,6 +17971,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "quagsire",
    "evolvesAtLevel": 20,
+   "habilidades": [
+    {
+     "chave": "damp",
+     "slot": 1
+    },
+    {
+     "chave": "water_absorb",
+     "slot": 2
+    },
+    {
+     "chave": "unaware",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tail_whip",
@@ -15448,6 +18060,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "damp",
+     "slot": 1
+    },
+    {
+     "chave": "water_absorb",
+     "slot": 2
+    },
+    {
+     "chave": "unaware",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "mud_sport",
@@ -15514,6 +18141,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "synchronize",
+     "slot": 1
+    },
+    {
+     "chave": "magic_bounce",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "confusion",
@@ -15596,6 +18234,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "synchronize",
+     "slot": 1
+    },
+    {
+     "chave": "inner_focus",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "helping_hand",
@@ -15678,6 +18327,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "insomnia",
+     "slot": 1
+    },
+    {
+     "chave": "super_luck",
+     "slot": 2
+    },
+    {
+     "chave": "prankster",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "astonish",
@@ -15760,6 +18424,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "oblivious",
+     "slot": 1
+    },
+    {
+     "chave": "own_tempo",
+     "slot": 2
+    },
+    {
+     "chave": "regenerator",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "curse",
@@ -15854,6 +18533,12 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "levitate",
+     "slot": 1
+    }
+   ],
    "golpes": [
     {
      "chave": "growl",
@@ -15932,6 +18617,12 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "levitate",
+     "slot": 1
+    }
+   ],
    "golpes": [
     {
      "chave": "hidden_power",
@@ -15958,6 +18649,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "shadow_tag",
+     "slot": 1
+    },
+    {
+     "chave": "telepathy",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "counter",
@@ -15996,6 +18698,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "inner_focus",
+     "slot": 1
+    },
+    {
+     "chave": "early_bird",
+     "slot": 2
+    },
+    {
+     "chave": "sap_sipper",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "astonish",
@@ -16086,6 +18803,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "forretress",
    "evolvesAtLevel": 31,
+   "habilidades": [
+    {
+     "chave": "sturdy",
+     "slot": 1
+    },
+    {
+     "chave": "overcoat",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "protect",
@@ -16164,6 +18892,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "sturdy",
+     "slot": 1
+    },
+    {
+     "chave": "overcoat",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "self_destruct",
@@ -16254,6 +18993,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "serene_grace",
+     "slot": 1
+    },
+    {
+     "chave": "run_away",
+     "slot": 2
+    },
+    {
+     "chave": "rattled",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "defense_curl",
@@ -16364,6 +19118,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "hyper_cutter",
+     "slot": 1
+    },
+    {
+     "chave": "sand_veil",
+     "slot": 2
+    },
+    {
+     "chave": "immunity",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "poison_sting",
@@ -16446,6 +19215,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "rock_head",
+     "slot": 1
+    },
+    {
+     "chave": "sturdy",
+     "slot": 2
+    },
+    {
+     "chave": "sheer_force",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bind",
@@ -16568,6 +19352,21 @@
    "curva": "FAST",
    "evolvesTo": "granbull",
    "evolvesAtLevel": 23,
+   "habilidades": [
+    {
+     "chave": "intimidate",
+     "slot": 1
+    },
+    {
+     "chave": "run_away",
+     "slot": 2
+    },
+    {
+     "chave": "rattled",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "charm",
@@ -16650,6 +19449,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "intimidate",
+     "slot": 1
+    },
+    {
+     "chave": "quick_feet",
+     "slot": 2
+    },
+    {
+     "chave": "rattled",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bite",
@@ -16708,6 +19522,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "poison_point",
+     "slot": 1
+    },
+    {
+     "chave": "swift_swim",
+     "slot": 2
+    },
+    {
+     "chave": "intimidate",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "poison_sting",
@@ -16810,6 +19639,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "swarm",
+     "slot": 1
+    },
+    {
+     "chave": "technician",
+     "slot": 2
+    },
+    {
+     "chave": "light_metal",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bullet_punch",
@@ -16904,6 +19748,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "sturdy",
+     "slot": 1
+    },
+    {
+     "chave": "gluttony",
+     "slot": 2
+    },
+    {
+     "chave": "contrary",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bide",
@@ -17002,6 +19861,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "swarm",
+     "slot": 1
+    },
+    {
+     "chave": "guts",
+     "slot": 2
+    },
+    {
+     "chave": "moxie",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "arm_thrust",
@@ -17096,6 +19970,21 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "inner_focus",
+     "slot": 1
+    },
+    {
+     "chave": "keen_eye",
+     "slot": 2
+    },
+    {
+     "chave": "pickpocket",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leer",
@@ -17182,6 +20071,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "ursaring",
    "evolvesAtLevel": 30,
+   "habilidades": [
+    {
+     "chave": "pickup",
+     "slot": 1
+    },
+    {
+     "chave": "quick_feet",
+     "slot": 2
+    },
+    {
+     "chave": "honey_gather",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "baby_doll_eyes",
@@ -17264,6 +20168,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "guts",
+     "slot": 1
+    },
+    {
+     "chave": "quick_feet",
+     "slot": 2
+    },
+    {
+     "chave": "unnerve",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "fury_swipes",
@@ -17326,6 +20245,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "magcargo",
    "evolvesAtLevel": 38,
+   "habilidades": [
+    {
+     "chave": "magma_armor",
+     "slot": 1
+    },
+    {
+     "chave": "flame_body",
+     "slot": 2
+    },
+    {
+     "chave": "weak_armor",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "smog",
@@ -17412,6 +20346,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "magma_armor",
+     "slot": 1
+    },
+    {
+     "chave": "flame_body",
+     "slot": 2
+    },
+    {
+     "chave": "weak_armor",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "ember",
@@ -17494,6 +20443,21 @@
    "curva": "SLOW",
    "evolvesTo": "piloswine",
    "evolvesAtLevel": 33,
+   "habilidades": [
+    {
+     "chave": "oblivious",
+     "slot": 1
+    },
+    {
+     "chave": "snow_cloak",
+     "slot": 2
+    },
+    {
+     "chave": "thick_fat",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "odor_sleuth",
@@ -17576,6 +20540,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "oblivious",
+     "slot": 1
+    },
+    {
+     "chave": "snow_cloak",
+     "slot": 2
+    },
+    {
+     "chave": "thick_fat",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "mud_sport",
@@ -17654,6 +20633,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "hustle",
+     "slot": 1
+    },
+    {
+     "chave": "natural_cure",
+     "slot": 2
+    },
+    {
+     "chave": "regenerator",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "harden",
@@ -17748,6 +20742,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "octillery",
    "evolvesAtLevel": 25,
+   "habilidades": [
+    {
+     "chave": "hustle",
+     "slot": 1
+    },
+    {
+     "chave": "sniper",
+     "slot": 2
+    },
+    {
+     "chave": "moody",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "water_gun",
@@ -17822,6 +20831,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "suction_cups",
+     "slot": 1
+    },
+    {
+     "chave": "sniper",
+     "slot": 2
+    },
+    {
+     "chave": "moody",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "constrict",
@@ -17896,6 +20920,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "vital_spirit",
+     "slot": 1
+    },
+    {
+     "chave": "hustle",
+     "slot": 2
+    },
+    {
+     "chave": "insomnia",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "present",
@@ -17926,6 +20965,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "swift_swim",
+     "slot": 1
+    },
+    {
+     "chave": "water_absorb",
+     "slot": 2
+    },
+    {
+     "chave": "water_veil",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bubble",
@@ -18024,6 +21078,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "keen_eye",
+     "slot": 1
+    },
+    {
+     "chave": "sturdy",
+     "slot": 2
+    },
+    {
+     "chave": "weak_armor",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leer",
@@ -18110,6 +21179,21 @@
    "curva": "SLOW",
    "evolvesTo": "houndoom",
    "evolvesAtLevel": 24,
+   "habilidades": [
+    {
+     "chave": "early_bird",
+     "slot": 1
+    },
+    {
+     "chave": "flash_fire",
+     "slot": 2
+    },
+    {
+     "chave": "unnerve",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "ember",
@@ -18196,6 +21280,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "early_bird",
+     "slot": 1
+    },
+    {
+     "chave": "flash_fire",
+     "slot": 2
+    },
+    {
+     "chave": "unnerve",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "howl",
@@ -18274,6 +21373,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "swift_swim",
+     "slot": 1
+    },
+    {
+     "chave": "sniper",
+     "slot": 2
+    },
+    {
+     "chave": "damp",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bubble",
@@ -18348,6 +21462,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "donphan",
    "evolvesAtLevel": 25,
+   "habilidades": [
+    {
+     "chave": "pickup",
+     "slot": 1
+    },
+    {
+     "chave": "sand_veil",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "defense_curl",
@@ -18422,6 +21547,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "sturdy",
+     "slot": 1
+    },
+    {
+     "chave": "sand_veil",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "rapid_spin",
@@ -18484,6 +21620,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "trace",
+     "slot": 1
+    },
+    {
+     "chave": "download",
+     "slot": 2
+    },
+    {
+     "chave": "analytic",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "conversion",
@@ -18570,6 +21721,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "intimidate",
+     "slot": 1
+    },
+    {
+     "chave": "frisk",
+     "slot": 2
+    },
+    {
+     "chave": "sap_sipper",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tackle",
@@ -18652,6 +21818,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "own_tempo",
+     "slot": 1
+    },
+    {
+     "chave": "technician",
+     "slot": 2
+    },
+    {
+     "chave": "moody",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "sketch",
@@ -18678,6 +21859,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "hitmonlee",
    "evolvesAtLevel": 20,
+   "habilidades": [
+    {
+     "chave": "guts",
+     "slot": 1
+    },
+    {
+     "chave": "steadfast",
+     "slot": 2
+    },
+    {
+     "chave": "vital_spirit",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "fake_out",
@@ -18716,6 +21912,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "intimidate",
+     "slot": 1
+    },
+    {
+     "chave": "technician",
+     "slot": 2
+    },
+    {
+     "chave": "steadfast",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "revenge",
@@ -18802,6 +22013,21 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "jynx",
    "evolvesAtLevel": 30,
+   "habilidades": [
+    {
+     "chave": "oblivious",
+     "slot": 1
+    },
+    {
+     "chave": "forewarn",
+     "slot": 2
+    },
+    {
+     "chave": "hydration",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "pound",
@@ -18884,6 +22110,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "electabuzz",
    "evolvesAtLevel": 30,
+   "habilidades": [
+    {
+     "chave": "static",
+     "slot": 1
+    },
+    {
+     "chave": "vital_spirit",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leer",
@@ -18962,6 +22199,17 @@
    "curva": "MEDIUM_FAST",
    "evolvesTo": "magmar",
    "evolvesAtLevel": 30,
+   "habilidades": [
+    {
+     "chave": "flame_body",
+     "slot": 1
+    },
+    {
+     "chave": "vital_spirit",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "leer",
@@ -19040,6 +22288,21 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "thick_fat",
+     "slot": 1
+    },
+    {
+     "chave": "scrappy",
+     "slot": 2
+    },
+    {
+     "chave": "sap_sipper",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "tackle",
@@ -19114,6 +22377,21 @@
    "curva": "FAST",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "natural_cure",
+     "slot": 1
+    },
+    {
+     "chave": "serene_grace",
+     "slot": 2
+    },
+    {
+     "chave": "healer",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "defense_curl",
@@ -19204,6 +22482,17 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "pressure",
+     "slot": 1
+    },
+    {
+     "chave": "inner_focus",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bite",
@@ -19282,6 +22571,17 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "pressure",
+     "slot": 1
+    },
+    {
+     "chave": "inner_focus",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bite",
@@ -19364,6 +22664,17 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "pressure",
+     "slot": 1
+    },
+    {
+     "chave": "inner_focus",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bite",
@@ -19446,6 +22757,17 @@
    "curva": "SLOW",
    "evolvesTo": "pupitar",
    "evolvesAtLevel": 30,
+   "habilidades": [
+    {
+     "chave": "guts",
+     "slot": 1
+    },
+    {
+     "chave": "sand_veil",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "bite",
@@ -19524,6 +22846,12 @@
    "curva": "SLOW",
    "evolvesTo": "tyranitar",
    "evolvesAtLevel": 55,
+   "habilidades": [
+    {
+     "chave": "shed_skin",
+     "slot": 1
+    }
+   ],
    "golpes": [
     {
      "chave": "sandstorm",
@@ -19594,6 +22922,17 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "sand_stream",
+     "slot": 1
+    },
+    {
+     "chave": "unnerve",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "sandstorm",
@@ -19668,6 +23007,17 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "pressure",
+     "slot": 1
+    },
+    {
+     "chave": "multiscale",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "weather_ball",
@@ -19754,6 +23104,17 @@
    "curva": "SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "pressure",
+     "slot": 1
+    },
+    {
+     "chave": "regenerator",
+     "slot": 3,
+     "oculta": true
+    }
+   ],
    "golpes": [
     {
      "chave": "weather_ball",
@@ -19840,6 +23201,12 @@
    "curva": "MEDIUM_SLOW",
    "evolvesTo": null,
    "evolvesAtLevel": null,
+   "habilidades": [
+    {
+     "chave": "natural_cure",
+     "slot": 1
+    }
+   ],
    "golpes": [
     {
      "chave": "confusion",
@@ -30376,6 +33743,668 @@
    "drenoPercentual": 0,
    "curaPercentual": 0,
    "_categoriaPokeapi": "damage"
+  }
+ ],
+ "habilidades": [
+  {
+   "chave": "adaptability",
+   "nome": "Adaptability",
+   "efeito": "Increases the same-type attack bonus from 1.5× to 2×."
+  },
+  {
+   "chave": "aftermath",
+   "nome": "Aftermath",
+   "efeito": "Damages the attacker for 1/4 its max HP when knocked out by a contact move."
+  },
+  {
+   "chave": "analytic",
+   "nome": "Analytic",
+   "efeito": "Strengthens moves to 1.3× their power when moving last."
+  },
+  {
+   "chave": "anger_point",
+   "nome": "Anger Point",
+   "efeito": "Raises Attack to the maximum of six stages upon receiving a critical hit."
+  },
+  {
+   "chave": "anticipation",
+   "nome": "Anticipation",
+   "efeito": "Notifies all trainers upon entering battle if an opponent has a super-effective move, Self-Destruct, Explosion, or a one-hit KO move."
+  },
+  {
+   "chave": "arena_trap",
+   "nome": "Arena Trap",
+   "efeito": "Prevents opponents from fleeing or switching out. Eluded by Flying-types and Pokémon in the air."
+  },
+  {
+   "chave": "battle_armor",
+   "nome": "Battle Armor",
+   "efeito": "Protects against critical hits."
+  },
+  {
+   "chave": "big_pecks",
+   "nome": "Big Pecks",
+   "efeito": "Protects against Defense drops."
+  },
+  {
+   "chave": "blaze",
+   "nome": "Blaze",
+   "efeito": "Strengthens Fire moves to inflict 1.5× damage at 1/3 max HP or less."
+  },
+  {
+   "chave": "chlorophyll",
+   "nome": "Chlorophyll",
+   "efeito": "Doubles Speed during strong sunlight."
+  },
+  {
+   "chave": "clear_body",
+   "nome": "Clear Body",
+   "efeito": "Prevents stats from being lowered by other Pokémon."
+  },
+  {
+   "chave": "cloud_nine",
+   "nome": "Cloud Nine",
+   "efeito": "Negates all effects of weather, but does not prevent the weather itself."
+  },
+  {
+   "chave": "competitive",
+   "nome": "Competitive",
+   "efeito": "Raises Special Attack by two stages upon having any stat lowered."
+  },
+  {
+   "chave": "compound_eyes",
+   "nome": "Compound Eyes",
+   "efeito": "Increases moves' accuracy to 1.3×."
+  },
+  {
+   "chave": "contrary",
+   "nome": "Contrary",
+   "efeito": "Inverts stat changes."
+  },
+  {
+   "chave": "cursed_body",
+   "nome": "Cursed Body",
+   "efeito": "Has a 30% chance of Disabling any move that hits the Pokémon."
+  },
+  {
+   "chave": "cute_charm",
+   "nome": "Cute Charm",
+   "efeito": "Has a 30% chance of infatuating attacking Pokémon on contact."
+  },
+  {
+   "chave": "damp",
+   "nome": "Damp",
+   "efeito": "Prevents Self-Destruct, Explosion, and Aftermath from working while the Pokémon is in battle."
+  },
+  {
+   "chave": "defiant",
+   "nome": "Defiant",
+   "efeito": "Raises Attack two stages upon having any stat lowered."
+  },
+  {
+   "chave": "download",
+   "nome": "Download",
+   "efeito": "Raises the attack stat corresponding to the opponents' weaker defense one stage upon entering battle."
+  },
+  {
+   "chave": "drizzle",
+   "nome": "Drizzle",
+   "efeito": "Summons rain that lasts indefinitely upon entering battle."
+  },
+  {
+   "chave": "drought",
+   "nome": "Drought",
+   "efeito": "Summons strong sunlight that lasts indefinitely upon entering battle."
+  },
+  {
+   "chave": "dry_skin",
+   "nome": "Dry Skin",
+   "efeito": "Causes 1/8 max HP in damage each turn during strong sunlight, but heals for 1/8 max HP during rain. Increases damage from Fire moves to 1.25×, but absorbs Water moves, healing for 1/4 max HP."
+  },
+  {
+   "chave": "early_bird",
+   "nome": "Early Bird",
+   "efeito": "Makes sleep pass twice as quickly."
+  },
+  {
+   "chave": "effect_spore",
+   "nome": "Effect Spore",
+   "efeito": "Has a 30% chance of inflcting either paralysis, poison, or sleep on attacking Pokémon on contact."
+  },
+  {
+   "chave": "filter",
+   "nome": "Filter",
+   "efeito": "Decreases damage taken from super-effective moves by 1/4."
+  },
+  {
+   "chave": "flame_body",
+   "nome": "Flame Body",
+   "efeito": "Has a 30% chance of burning attacking Pokémon on contact."
+  },
+  {
+   "chave": "flash_fire",
+   "nome": "Flash Fire",
+   "efeito": "Protects against Fire moves. Once one has been blocked, the Pokémon's own Fire moves inflict 1.5× damage until it leaves battle."
+  },
+  {
+   "chave": "forewarn",
+   "nome": "Forewarn",
+   "efeito": "Reveals the opponents' strongest move upon entering battle."
+  },
+  {
+   "chave": "friend_guard",
+   "nome": "Friend Guard",
+   "efeito": "Decreases all direct damage taken by friendly Pokémon to 0.75×."
+  },
+  {
+   "chave": "frisk",
+   "nome": "Frisk",
+   "efeito": "Reveals an opponent's held item upon entering battle."
+  },
+  {
+   "chave": "gluttony",
+   "nome": "Gluttony",
+   "efeito": "Makes the Pokémon eat any held Berry triggered by low HP below 1/2 its max HP."
+  },
+  {
+   "chave": "guts",
+   "nome": "Guts",
+   "efeito": "Increases Attack to 1.5× with a major status ailment."
+  },
+  {
+   "chave": "harvest",
+   "nome": "Harvest",
+   "efeito": "Has a 50% chance of restoring a used Berry after each turn if the Pokémon has held no items in the meantime."
+  },
+  {
+   "chave": "healer",
+   "nome": "Healer",
+   "efeito": "Has a 30% chance of curing each adjacent ally of any major status ailment after each turn."
+  },
+  {
+   "chave": "honey_gather",
+   "nome": "Honey Gather",
+   "efeito": "The Pokémon may pick up Honey after battle."
+  },
+  {
+   "chave": "huge_power",
+   "nome": "Huge Power",
+   "efeito": "Doubles Attack in battle."
+  },
+  {
+   "chave": "hustle",
+   "nome": "Hustle",
+   "efeito": "Strengthens physical moves to inflict 1.5× damage, but decreases their accuracy to 0.8×."
+  },
+  {
+   "chave": "hydration",
+   "nome": "Hydration",
+   "efeito": "Cures any major status ailment after each turn during rain."
+  },
+  {
+   "chave": "hyper_cutter",
+   "nome": "Hyper Cutter",
+   "efeito": "Prevents Attack from being lowered by other Pokémon."
+  },
+  {
+   "chave": "ice_body",
+   "nome": "Ice Body",
+   "efeito": "Heals for 1/16 max HP after each turn during hail. Protects against hail damage."
+  },
+  {
+   "chave": "illuminate",
+   "nome": "Illuminate",
+   "efeito": "Doubles the wild encounter rate."
+  },
+  {
+   "chave": "immunity",
+   "nome": "Immunity",
+   "efeito": "Prevents poison."
+  },
+  {
+   "chave": "imposter",
+   "nome": "Imposter",
+   "efeito": "Transforms upon entering battle."
+  },
+  {
+   "chave": "infiltrator",
+   "nome": "Infiltrator",
+   "efeito": "Bypasses Light Screen, Reflect, and Safeguard."
+  },
+  {
+   "chave": "inner_focus",
+   "nome": "Inner Focus",
+   "efeito": "Prevents flinching."
+  },
+  {
+   "chave": "insomnia",
+   "nome": "Insomnia",
+   "efeito": "Prevents sleep."
+  },
+  {
+   "chave": "intimidate",
+   "nome": "Intimidate",
+   "efeito": "Lowers opponents' Attack one stage upon entering battle."
+  },
+  {
+   "chave": "iron_fist",
+   "nome": "Iron Fist",
+   "efeito": "Strengthens punch-based moves to 1.2× their power."
+  },
+  {
+   "chave": "justified",
+   "nome": "Justified",
+   "efeito": "Raises Attack one stage upon taking damage from a Dark move."
+  },
+  {
+   "chave": "keen_eye",
+   "nome": "Keen Eye",
+   "efeito": "Prevents accuracy from being lowered."
+  },
+  {
+   "chave": "leaf_guard",
+   "nome": "Leaf Guard",
+   "efeito": "Protects against major status ailments during strong sunlight."
+  },
+  {
+   "chave": "levitate",
+   "nome": "Levitate",
+   "efeito": "Evades Ground moves."
+  },
+  {
+   "chave": "light_metal",
+   "nome": "Light Metal",
+   "efeito": "Halves the Pokémon's weight."
+  },
+  {
+   "chave": "lightning_rod",
+   "nome": "Lightning Rod",
+   "efeito": "Redirects single-target Electric moves to this Pokémon where possible. Absorbs Electric moves, raising Special Attack one stage."
+  },
+  {
+   "chave": "limber",
+   "nome": "Limber",
+   "efeito": "Prevents paralysis."
+  },
+  {
+   "chave": "liquid_ooze",
+   "nome": "Liquid Ooze",
+   "efeito": "Damages opponents using leeching moves for as much as they would heal."
+  },
+  {
+   "chave": "magic_bounce",
+   "nome": "Magic Bounce",
+   "efeito": "Reflects most non-damaging moves back at their user."
+  },
+  {
+   "chave": "magic_guard",
+   "nome": "Magic Guard",
+   "efeito": "Protects against damage not directly caused by a move."
+  },
+  {
+   "chave": "magma_armor",
+   "nome": "Magma Armor",
+   "efeito": "Prevents freezing."
+  },
+  {
+   "chave": "magnet_pull",
+   "nome": "Magnet Pull",
+   "efeito": "Prevents Steel opponents from fleeing or switching out."
+  },
+  {
+   "chave": "marvel_scale",
+   "nome": "Marvel Scale",
+   "efeito": "Increases Defense to 1.5× with a major status ailment."
+  },
+  {
+   "chave": "mold_breaker",
+   "nome": "Mold Breaker",
+   "efeito": "Bypasses targets' abilities if they could hinder or prevent a move."
+  },
+  {
+   "chave": "moody",
+   "nome": "Moody",
+   "efeito": "Raises a random stat two stages and lowers another one stage after each turn."
+  },
+  {
+   "chave": "moxie",
+   "nome": "Moxie",
+   "efeito": "Raises Attack one stage upon KOing a Pokémon."
+  },
+  {
+   "chave": "multiscale",
+   "nome": "Multiscale",
+   "efeito": "Halves damage taken from full HP."
+  },
+  {
+   "chave": "natural_cure",
+   "nome": "Natural Cure",
+   "efeito": "Cures any major status ailment upon switching out."
+  },
+  {
+   "chave": "neutralizing_gas",
+   "nome": "Neutralizing Gas",
+   "efeito": "Neutralizes abilities of all Pokémon in battle."
+  },
+  {
+   "chave": "no_guard",
+   "nome": "No Guard",
+   "efeito": "Ensures all moves used by and against the Pokémon hit."
+  },
+  {
+   "chave": "oblivious",
+   "nome": "Oblivious",
+   "efeito": "Prevents infatuation and protects against Captivate."
+  },
+  {
+   "chave": "overcoat",
+   "nome": "Overcoat",
+   "efeito": "Protects against damage from weather."
+  },
+  {
+   "chave": "overgrow",
+   "nome": "Overgrow",
+   "efeito": "Strengthens Grass moves to inflict 1.5× damage at 1/3 max HP or less."
+  },
+  {
+   "chave": "own_tempo",
+   "nome": "Own Tempo",
+   "efeito": "Prevents confusion."
+  },
+  {
+   "chave": "pickpocket",
+   "nome": "Pickpocket",
+   "efeito": "Steals attacking Pokémon's held items on contact."
+  },
+  {
+   "chave": "pickup",
+   "nome": "Pickup",
+   "efeito": "Picks up other Pokémon's used and Flung held items. May also pick up an item after battle."
+  },
+  {
+   "chave": "plus",
+   "nome": "Plus",
+   "efeito": "Increases Special Attack to 1.5× when a friendly Pokémon has Plus or Minus."
+  },
+  {
+   "chave": "poison_point",
+   "nome": "Poison Point",
+   "efeito": "Has a 30% chance of poisoning attacking Pokémon on contact."
+  },
+  {
+   "chave": "poison_touch",
+   "nome": "Poison Touch",
+   "efeito": "Has a 30% chance of poisoning target Pokémon upon contact."
+  },
+  {
+   "chave": "prankster",
+   "nome": "Prankster",
+   "efeito": "Raises non-damaging moves' priority by one stage."
+  },
+  {
+   "chave": "pressure",
+   "nome": "Pressure",
+   "efeito": "Increases the PP cost of moves targetting the Pokémon by one."
+  },
+  {
+   "chave": "quick_feet",
+   "nome": "Quick Feet",
+   "efeito": "Increases Speed to 1.5× with a major status ailment."
+  },
+  {
+   "chave": "rain_dish",
+   "nome": "Rain Dish",
+   "efeito": "Heals for 1/16 max HP after each turn during rain."
+  },
+  {
+   "chave": "rattled",
+   "nome": "Rattled",
+   "efeito": "Raises Speed one stage upon being hit by a Dark, Ghost, or Bug move."
+  },
+  {
+   "chave": "reckless",
+   "nome": "Reckless",
+   "efeito": "Strengthens recoil moves to 1.2× their power."
+  },
+  {
+   "chave": "regenerator",
+   "nome": "Regenerator",
+   "efeito": "Heals for 1/3 max HP upon switching out."
+  },
+  {
+   "chave": "rivalry",
+   "nome": "Rivalry",
+   "efeito": "Increases damage inflicted to 1.25× against Pokémon of the same gender, but decreases damage to 0.75× against the opposite gender."
+  },
+  {
+   "chave": "rock_head",
+   "nome": "Rock Head",
+   "efeito": "Protects against recoil damage."
+  },
+  {
+   "chave": "run_away",
+   "nome": "Run Away",
+   "efeito": "Ensures success fleeing from wild battles."
+  },
+  {
+   "chave": "sand_force",
+   "nome": "Sand Force",
+   "efeito": "Strengthens Rock, Ground, and Steel moves to 1.3× their power during a sandstorm. Protects against sandstorm damage."
+  },
+  {
+   "chave": "sand_rush",
+   "nome": "Sand Rush",
+   "efeito": "Doubles Speed during a sandstorm. Protects against sandstorm damage."
+  },
+  {
+   "chave": "sand_stream",
+   "nome": "Sand Stream",
+   "efeito": "Summons a sandstorm that lasts indefinitely upon entering battle."
+  },
+  {
+   "chave": "sand_veil",
+   "nome": "Sand Veil",
+   "efeito": "Increases evasion to 1.25× during a sandstorm. Protects against sandstorm damage."
+  },
+  {
+   "chave": "sap_sipper",
+   "nome": "Sap Sipper",
+   "efeito": "Absorbs Grass moves, raising Attack one stage."
+  },
+  {
+   "chave": "scrappy",
+   "nome": "Scrappy",
+   "efeito": "Lets the Pokémon's Normal and Fighting moves hit Ghost Pokémon."
+  },
+  {
+   "chave": "serene_grace",
+   "nome": "Serene Grace",
+   "efeito": "Doubles the chance of moves' extra effects occurring."
+  },
+  {
+   "chave": "shadow_tag",
+   "nome": "Shadow Tag",
+   "efeito": "Prevents opponents from fleeing or switching out."
+  },
+  {
+   "chave": "shed_skin",
+   "nome": "Shed Skin",
+   "efeito": "Has a 33% chance of curing any major status ailment after each turn."
+  },
+  {
+   "chave": "sheer_force",
+   "nome": "Sheer Force",
+   "efeito": "Strengthens moves with extra effects to 1.3× their power, but prevents their extra effects."
+  },
+  {
+   "chave": "shell_armor",
+   "nome": "Shell Armor",
+   "efeito": "Protects against critical hits."
+  },
+  {
+   "chave": "shield_dust",
+   "nome": "Shield Dust",
+   "efeito": "Protects against incoming moves' extra effects."
+  },
+  {
+   "chave": "skill_link",
+   "nome": "Skill Link",
+   "efeito": "Extends two-to-five-hit moves and Triple Kick to their full length every time."
+  },
+  {
+   "chave": "sniper",
+   "nome": "Sniper",
+   "efeito": "Strengthens critical hits to inflict 3× damage rather than 2×."
+  },
+  {
+   "chave": "snow_cloak",
+   "nome": "Snow Cloak",
+   "efeito": "Increases evasion to 1.25× during hail. Protects against hail damage."
+  },
+  {
+   "chave": "solar_power",
+   "nome": "Solar Power",
+   "efeito": "Increases Special Attack to 1.5× but costs 1/8 max HP after each turn during strong sunlight."
+  },
+  {
+   "chave": "soundproof",
+   "nome": "Soundproof",
+   "efeito": "Protects against sound-based moves."
+  },
+  {
+   "chave": "speed_boost",
+   "nome": "Speed Boost",
+   "efeito": "Raises Speed one stage after each turn."
+  },
+  {
+   "chave": "static",
+   "nome": "Static",
+   "efeito": "Has a 30% chance of paralyzing attacking Pokémon on contact."
+  },
+  {
+   "chave": "steadfast",
+   "nome": "Steadfast",
+   "efeito": "Raises Speed one stage upon flinching."
+  },
+  {
+   "chave": "stench",
+   "nome": "Stench",
+   "efeito": "Has a 10% chance of making target Pokémon flinch with each hit."
+  },
+  {
+   "chave": "sticky_hold",
+   "nome": "Sticky Hold",
+   "efeito": "Prevents a held item from being removed by other Pokémon."
+  },
+  {
+   "chave": "sturdy",
+   "nome": "Sturdy",
+   "efeito": "Prevents being KOed from full HP, leaving 1 HP instead. Protects against the one-hit KO moves regardless of HP."
+  },
+  {
+   "chave": "suction_cups",
+   "nome": "Suction Cups",
+   "efeito": "Prevents being forced out of battle by other Pokémon's moves."
+  },
+  {
+   "chave": "super_luck",
+   "nome": "Super Luck",
+   "efeito": "Raises moves' critical hit rates one stage."
+  },
+  {
+   "chave": "swarm",
+   "nome": "Swarm",
+   "efeito": "Strengthens Bug moves to inflict 1.5× damage at 1/3 max HP or less."
+  },
+  {
+   "chave": "swift_swim",
+   "nome": "Swift Swim",
+   "efeito": "Doubles Speed during rain."
+  },
+  {
+   "chave": "synchronize",
+   "nome": "Synchronize",
+   "efeito": "Copies burns, paralysis, and poison received onto the Pokémon that inflicted them."
+  },
+  {
+   "chave": "tangled_feet",
+   "nome": "Tangled Feet",
+   "efeito": "Doubles evasion when confused."
+  },
+  {
+   "chave": "technician",
+   "nome": "Technician",
+   "efeito": "Strengthens moves of 60 base power or less to 1.5× their power."
+  },
+  {
+   "chave": "telepathy",
+   "nome": "Telepathy",
+   "efeito": "Protects against friendly Pokémon's damaging moves."
+  },
+  {
+   "chave": "thick_fat",
+   "nome": "Thick Fat",
+   "efeito": "Halves damage from Fire and Ice moves."
+  },
+  {
+   "chave": "tinted_lens",
+   "nome": "Tinted Lens",
+   "efeito": "Doubles damage inflicted with not-very-effective moves."
+  },
+  {
+   "chave": "torrent",
+   "nome": "Torrent",
+   "efeito": "Strengthens Water moves to inflict 1.5× damage at 1/3 max HP or less."
+  },
+  {
+   "chave": "trace",
+   "nome": "Trace",
+   "efeito": "Copies an opponent's ability upon entering battle."
+  },
+  {
+   "chave": "unaware",
+   "nome": "Unaware",
+   "efeito": "Ignores other Pokémon's stat modifiers for damage and accuracy calculation."
+  },
+  {
+   "chave": "unburden",
+   "nome": "Unburden",
+   "efeito": "Doubles Speed upon using or losing a held item."
+  },
+  {
+   "chave": "unnerve",
+   "nome": "Unnerve",
+   "efeito": "Prevents opposing Pokémon from eating held Berries."
+  },
+  {
+   "chave": "vital_spirit",
+   "nome": "Vital Spirit",
+   "efeito": "Prevents sleep."
+  },
+  {
+   "chave": "volt_absorb",
+   "nome": "Volt Absorb",
+   "efeito": "Absorbs Electric moves, healing for 1/4 max HP."
+  },
+  {
+   "chave": "water_absorb",
+   "nome": "Water Absorb",
+   "efeito": "Absorbs Water moves, healing for 1/4 max HP."
+  },
+  {
+   "chave": "water_veil",
+   "nome": "Water Veil",
+   "efeito": "Prevents burns."
+  },
+  {
+   "chave": "weak_armor",
+   "nome": "Weak Armor",
+   "efeito": "Raises Speed and lowers Defense by one stage each upon being hit by a physical move."
+  },
+  {
+   "chave": "wonder_skin",
+   "nome": "Wonder Skin",
+   "efeito": "Lowers incoming non-damaging moves' base accuracy to exactly 50%."
   }
  ],
  "evolucoesDescartadas": {

@@ -9,6 +9,7 @@ import type { Database } from '@/lib/database.types'
 import type { GameStateData, AutoPotRule, AutoCatchConfig, AutoCatchRule, PerfStats, TrainerInfo, PokedexKillCount } from '@/stores/gameStateStore'
 import { SPECIES, computeStatsAtLevel, type PokeInstance, type StatBlock } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
+import { NATURES_NEUTRAS, type NatureKey } from '@/data/natures'
 import { activeAbilitiesPadrao, golpesAprendidosAte } from '@/data/activeAbilities'
 import type { StatusCondition } from '@/data/statusEffects'
 
@@ -68,8 +69,22 @@ export function rowToPoke(row: PokemonRow): PokeInstance {
     def: row.stat_def, defEsp: row.stat_def_esp, speed: row.stat_speed,
   }
   const species = SPECIES[row.species_id]
+  // `nature` NULL vira uma das 5 NEUTRAS, escolhida pelo uuid da propria linha.
+  //
+  // POR QUE NAO `undefined`: os atributos ficariam certos de qualquer jeito
+  // (`multiplicadorDeNatureza` devolve 1 pra chave ausente), mas a ficha do POKE
+  // mostraria "Natureza —" pra sempre. E "pra sempre" nao e exagero: o snapshot
+  // da sessao de hunt regrava a linha INTEIRA a cada flush, entao o POKE que
+  // carregou sem natureza tambem GRAVA sem natureza, e o backfill da migration
+  // e desfeito na primeira caçada. Medido em producao no Entei da conta de
+  // teste, que voltou a `null` depois de um flush.
+  //
+  // Neutra, e nao sorteada entre as 25, pelo mesmo motivo da migration: um POKE
+  // que ja existia nao pode acordar 10% pior num atributo. Derivada do uuid pra
+  // ser ESTAVEL — sortear aqui daria natureza diferente a cada carga.
+  const nature = (row.nature as NatureKey | null) ?? naturezaNeutraEstavel(row.id)
   const stats = species
-    ? computeStatsAtLevel(species, row.level, ivs, row.rarity as RarityKey, row.is_shiny)
+    ? computeStatsAtLevel(species, row.level, ivs, row.rarity as RarityKey, row.is_shiny, nature)
     : gravados
   return {
     // O uid do jogo passa a SER o uuid do Postgres. Antes era um contador de
@@ -85,6 +100,11 @@ export function rowToPoke(row: PokemonRow): PokeInstance {
     isShiny: row.is_shiny,
     rarity: row.rarity as RarityKey,
     ivs,
+    nature,
+    // LIDO da coluna, como a natureza, e nao derivado da especie: e sorteio por
+    // individuo. NULL cai no slot 1 da especie dentro de `traitDoPoke` — ver a
+    // nota de backfill na migration.
+    trait: row.trait ?? undefined,
     stats,
     // DERIVADO da especie, nao lido da coluna — mesmo argumento dos atributos
     // acima. O moveset e funcao de (especie, nivel), e todo caminho que cria ou
@@ -219,6 +239,20 @@ export function gameStateToPlayerRow(userId: string, s: GameStateData): Tables['
   }
 }
 
+/**
+ * Uma das 5 naturezas NEUTRAS, sempre a mesma para o mesmo uuid.
+ *
+ * Espelha a expressao da migration 20260818140000 (hash do id, modulo 5) — nao
+ * precisa dar o MESMO resultado que ela (nenhuma das 5 muda atributo nenhum),
+ * mas precisa dar sempre o mesmo resultado pra si mesma: natureza que muda a
+ * cada carga apareceria como um POKE trocando de personalidade sozinho.
+ */
+function naturezaNeutraEstavel(id: string): NatureKey {
+  let h = 0
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0
+  return NATURES_NEUTRAS[h % NATURES_NEUTRAS.length]
+}
+
 export function pokeToRow(userId: string, poke: PokeInstance, location: 'team' | 'bag', teamSlot: number | null): Tables['pokemon_instances']['Insert'] {
   return {
     id: poke.uid,
@@ -231,6 +265,12 @@ export function pokeToRow(userId: string, poke: PokeInstance, location: 'team' |
     hp: Math.round(poke.hp),
     is_shiny: poke.isShiny,
     rarity: poke.rarity,
+    // `?? null` pelo mesmo motivo de `original_trainer` logo abaixo: com
+    // undefined a chave sumiria do JSON do upsert e o PostgREST manteria o
+    // valor antigo — que e justamente o caso que este par de colunas nao pode
+    // ter (um POKE trocando de natureza em silencio).
+    nature: poke.nature ?? null,
+    trait: poke.trait ?? null,
     locked: poke.locked ?? false,
     // `?? null` e nao `?? undefined`: com undefined a chave sumiria do JSON do
     // upsert e o PostgREST manteria o valor antigo da linha. Aqui as duas

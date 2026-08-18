@@ -14,6 +14,11 @@ import { useToastStore } from '@/stores/toastStore'
 import { cn } from '@/lib/utils'
 import { gen5SpriteUrl } from '@/data/gen5Sprites'
 import { rarityOf } from '@/data/rarity'
+import { descricaoDaNatureza } from '@/data/natures'
+import { STAT_LABEL } from '@/data/statLabels'
+import { traitDoPoke, nomeDaTrait, traitEhOculta } from '@/data/traits'
+import { descricaoDaTrait, motivoSemEfeito } from '@/data/traitInfo'
+import { caracteristicaDe } from '@/data/characteristics'
 import type { PokeInstance, Species } from '@/data/pokes'
 import { PokeNameTag } from './PokeNameTag'
 import { StatusBadge } from './StatusBadge'
@@ -87,9 +92,66 @@ const IV_LABELS: Record<string, string> = {
 // leitura de "vale a pena investir neste POKE" ser instantanea.
 const IV_MAX = 31
 
+/**
+ * Os TRES tracos individuais dos jogos, na ficha do POKE.
+ *
+ * Ficam JUNTOS e no topo de proposito: os tres respondem a mesma pergunta ("o
+ * que este individuo tem de diferente de outro da mesma especie e nivel") e
+ * separa-los faria a Natureza parecer parte dos atributos e a Caracteristica,
+ * enfeite. A Caracteristica em especial so faz sentido lida ao lado dos IVs
+ * logo abaixo — ela e uma PISTA do IV mais alto.
+ */
+function TracosIndividuais({ poke }: { poke: PokeInstance }) {
+  const trait = traitDoPoke(poke)
+  const oculta = traitEhOculta(poke.speciesId, trait)
+  const semEfeito = motivoSemEfeito(trait)
+  const caracteristica = caracteristicaDe(poke.ivs)
+
+  return (
+    <div className="flex flex-col gap-[.35em] rounded-[.4em] border border-n800 bg-n900 px-[.55em] py-[.45em] text-[.85em]">
+      <div className="flex items-baseline justify-between gap-[.5em]">
+        <span className="shrink-0 text-n500">Natureza</span>
+        <b className="min-w-0 truncate text-right font-medium">
+          {descricaoDaNatureza(poke.nature, (s) => STAT_LABEL[s])}
+        </b>
+      </div>
+
+      {trait && (
+        <div className="flex flex-col gap-[.15em]">
+          <div className="flex items-baseline justify-between gap-[.5em]">
+            <span className="shrink-0 text-n500">Habilidade</span>
+            <b className="min-w-0 truncate text-right font-medium">
+              {nomeDaTrait(trait)}
+              {/* Habilidade OCULTA e rara (5% no nascimento) e nao aparece em
+                  nenhum outro lugar do jogo — sem a marca, o jogador nao teria
+                  como saber que tirou uma. */}
+              {oculta && <span className="ml-[.35em] text-[.85em] text-amber-400">oculta</span>}
+            </b>
+          </div>
+          <p className="text-[.85em] leading-tight text-n500">{descricaoDaTrait(trait)}</p>
+          {/* Habilidade sem efeito AQUI e dita em voz alta, com o motivo. O
+              contrario — mostrar a descricao real de uma habilidade que o motor
+              ignora — seria a ficha mentindo pro jogador. */}
+          {semEfeito && (
+            <p className="text-[.8em] leading-tight text-amber-500/80">Sem efeito neste jogo: {semEfeito}</p>
+          )}
+        </div>
+      )}
+
+      {caracteristica && (
+        <div className="flex items-baseline justify-between gap-[.5em]">
+          <span className="shrink-0 text-n500">Caracteristica</span>
+          <b className="min-w-0 truncate text-right font-medium">{caracteristica.texto}</b>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function StatDetail({ poke, weaknessSection }: { poke: PokeInstance; weaknessSection: ReactNode }) {
   return (
     <div className="flex flex-col gap-[.5em]">
+      <TracosIndividuais poke={poke} />
       {/* Ausente em POKE anterior a coluna `original_trainer` que o backfill
           nao alcancou (nenhum hoje) — a linha some em vez de mostrar vazio. */}
       {poke.originalTrainer && (
@@ -136,7 +198,21 @@ export function StatDetail({ poke, weaknessSection }: { poke: PokeInstance; weak
   )
 }
 
-const MOVE_GRID = 'grid grid-cols-[2.4em_1fr_3.4em_3.8em_3em_2.4em_2.6em] items-center gap-[.4em]'
+// A coluna de PRECISAO entrou em 2026-08-18 a pedido do usuario, e o motivo e
+// mecanico: a IA de combate ja ranqueia golpe por DANO ESPERADO (poder x
+// precisao — ver combatSystem#danoEsperado), entao um golpe de 110 de poder com
+// 70% de precisao vale menos que um de 90 com 100%. Sem a coluna, a tela pedia
+// ao jogador uma escolha que ela nao tinha como informar.
+const MOVE_GRID = 'grid grid-cols-[2.4em_1fr_3.4em_3.8em_3em_3em_2.4em_2.6em] items-center gap-[.4em]'
+
+/**
+ * "100%" / "70%". Golpe SEM dano nao mostra precisao — Danca das Espadas com
+ * "100%" ao lado sugere um teste de acerto que nao existe pra ele.
+ */
+function textoDePrecisao(ability: { accuracy?: number; power: number }): string {
+  if (ability.power <= 0) return '—'
+  return `${ability.accuracy ?? 100}%`
+}
 
 // Celula da coluna "Usar". Desde 2026-08-18 vale pra TODOS os golpes,
 // inclusive Ataque Basico e Explosao Elemental — os dois deixaram de ser
@@ -247,7 +323,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
         className={`${MOVE_GRID} overflow-y-hidden border-b border-n800 bg-n800/60 px-[.5em] py-[.3em] font-medium`}
         style={{ scrollbarGutter: 'stable' }}
       >
-        <span>Nv</span><span>Golpe</span><span>Tipo</span><span>Cat.</span><span>Dano</span><span>AOE</span><span>Usar</span>
+        <span>Nv</span><span>Golpe</span><span>Tipo</span><span>Cat.</span><span>Dano</span><span>Prec.</span><span>AOE</span><span>Usar</span>
       </div>
       {/* `scrollbar-gutter: stable` nos dois: sem isso, a barra de rolagem
           nativa (so aparece aqui, quando a lista estoura 18em) reduz a
@@ -266,6 +342,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
             <span><TypeChip type={BASIC_ATTACK.type} /></span>
             <span className="text-n400">{ROTULO_CATEGORIA[resolveAbilityCategory(BASIC_ATTACK, pokeVivo)]}</span>
             <span>{BASIC_ATTACK.power > 0 ? BASIC_ATTACK.power : '—'}</span>
+            <span className="text-n400">{textoDePrecisao(BASIC_ATTACK)}</span>
             <span className="text-n400">—</span>
             <span>
               {/* Golpe comum desde 2026-08-18: ocupa um dos 4 slots como
@@ -305,6 +382,12 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
                 {ROTULO_CATEGORIA[resolveAbilityCategory(ability, pokeVivo)]}
               </span>
               <span>{ability.power > 0 ? ability.power : '—'}</span>
+              {/* Abaixo de 100% em amarelo: o numero cru some no meio da linha,
+                  e "esse golpe erra" e exatamente a informacao que muda a
+                  escolha. 100% fica em cinza pra nao virar ruido em toda linha. */}
+              <span className={(ability.accuracy ?? 100) < 100 && ability.power > 0 ? 'text-warn' : 'text-n400'}>
+                {textoDePrecisao(ability)}
+              </span>
               <span className="text-n400">{ability.target === 'aoe' ? '✓' : '—'}</span>
               {/* A Explosao Elemental (aoe50) usava uma celula propria de
                   liga/desliga porque nao ocupava slot. Desde 2026-08-18 ela e

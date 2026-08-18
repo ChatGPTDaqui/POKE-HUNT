@@ -13,6 +13,24 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '7.6',
+    date: '2026-08-18',
+    title: 'Habilidade, Natureza e Caracteristica — e o inimigo que nao morria',
+    highlights: [
+      'HABILIDADE: cada POKE sorteia a dele entre as da especie, com chance pequena de sair a OCULTA. 133 no total, 102 com efeito de verdade (Intimidate, Technician, Sniper, Thick Fat, Huge Power, Speed Boost, Moxie, Trace...). As 31 que dependem de coisa que este jogo nao tem (troca de POKE, item equipado, aliado em campo) ficam marcadas em amarelo na ficha, com o motivo — em vez de fingir. A lista antiga era escrita a mao, deixava 76 especies sem nada e errava algumas (Gengar tinha Levitate, que ele perdeu na setima geracao).',
+      'NATUREZA: 25 possibilidades, +10% num atributo e -10% em outro, sorteada no nascimento. HP nunca e afetado. Todo POKE que voce JA tinha recebeu uma natureza NEUTRA de proposito — ninguem acorda com o time pior.',
+      'CARACTERISTICA: a frase nova na ficha aponta qual dos seis IVs do seu POKE e o mais alto.',
+      'BUG: O INIMIGO QUE FICAVA COM A VIDA VAZIA E NAO MORRIA. Era o Endure. Agora vale a regra dos jogos — repetir Protect/Detect/Endure tem metade da chance a cada vez, e usar outro golpe zera a conta. Medido: de minutos para 25 segundos.',
+      'BUG: DOZE GOLPES OCUPAVAM SLOT E NUNCA DISPARAVAM (Flail, Reversal, Seismic Toss, Night Shade, Dragon Rage, Super Fang, Psywave, Magnitude, Present, Hidden Power, Counter, Mirror Coat). Quem mais sofria era o Magikarp, cujo unico golpe forte e o Flail.',
+      'O KIT AUTOMATICO PAROU DE ESCOLHER GOLPE RUIM: agora conta precisao e recuo, nao so o poder. Typhlosion Nv70 contra Kangaskhan de mesmo nivel terminava com 51 de vida; agora termina com 129.',
+      'PRECISAO DO GOLPE APARECE na tabela de golpes e no tooltip, em amarelo abaixo de 100%.',
+      'O ICONE DE CADA GOLPE MOSTRA A RECARGA DELE, e nao o mesmo numero em todos os quatro slots.',
+      'POKEDEX COMPLETA: linha evolutiva com o nivel de cada passo (inclusive a regra de Nivel 80 + pedras, que nao aparecia em lugar nenhum), ficha com dex/EXP/curva/captura/regiao, habilidades possiveis, e setas Anterior/Proximo pra navegar sem fechar.',
+      'IV DE LENDARIO segue o Ultra Sun: pelo menos tres IVs perfeitos garantidos.',
+      'GOLPE DE AREA GANHOU ARTE PROPRIA em 13 tipos — Eruption saia como um lanca-chamas deitado.',
+    ],
+  },
+  {
     version: '7.5',
     date: '2026-08-18',
     title: '22 golpes ganharam efeito visual PROPRIO, em vez de dividir o mesmo desenho do tipo elemental',

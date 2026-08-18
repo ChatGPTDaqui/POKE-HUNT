@@ -29,7 +29,7 @@ import {
 import { vfxDoGolpe } from '@/data/moveVfx'
 import { statusVfxUrl } from '@/data/statusVfx'
 import {
-  tiraDoElemento, orientacaoDaTira, TIRA_CURA_HP, TIRA_CURA_STATUS, TIRA_CONFUSAO, TIRA_SONO,
+  tiraDoElemento, tiraDeAreaDoElemento, orientacaoDaTira, TIRA_CURA_HP, TIRA_CURA_STATUS, TIRA_CONFUSAO, TIRA_SONO,
   COR_DE_STATUS_NO_CORPO, FORCA_DA_TINTA_DE_STATUS, type TiraDeVfx,
 } from '@/data/vfxTiras'
 import { VFX_CURA_DURACAO } from '@/engine/entity'
@@ -860,10 +860,21 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
     )) return
   }
 
-  // Mesma tira do impacto alvo-unico, so que desenhada no DIAMETRO real do
-  // splash. E a mesma regra que o lote de GIF ja seguia, e evita ter que
-  // achar e conferir 18 artes de area alem das 18 de impacto — a leitura de
-  // "isto pegou uma area" vem do tamanho, nao de um desenho diferente.
+  // Arte de AREA por TIPO (data/vfxTiras.ts#TIRA_AOE_POR_ELEMENTO), a camada
+  // que faltava. Sem ela, area caia direto na tira de IMPACTO logo abaixo — e
+  // as quatro tiras direcionais desse lote sao jatos, nao areas: Eruption
+  // desenhava um lanca-chamas horizontal esticado ate o diametro do splash.
+  // Sem angulo, como todo desenho de area: o circulo e centrado em quem lancou
+  // e nao aponta pra ninguem.
+  const tiraDeArea = tiraDeAreaDoElemento(effect.elementType)
+  if (tiraDeArea) {
+    const tamanho = effect.worldSize! * ESCALA_VFX_AOE * (tiraDeArea.escala ?? 1)
+    if (drawQuadroDeTira(ctx, tiraDeArea, faseDaTira(effect, tiraDeArea), effect.targetX!, effect.targetY!, tamanho, opacidadeDoEfeito(effect))) return
+  }
+
+  // Ultimo recurso antes do procedural: a tira do IMPACTO alvo-unico, esticada
+  // pro diametro real do splash. Continua sendo o caminho dos 4 tipos que a
+  // camada acima nao cobre (FIGHTING, ROCK, GHOST, STEEL).
   const tira = tiraDoElemento(effect.elementType)
   if (tira) {
     const tamanho = effect.worldSize! * ESCALA_VFX_AOE * (tira.escala ?? 1)

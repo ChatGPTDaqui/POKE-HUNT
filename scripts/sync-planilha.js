@@ -985,9 +985,40 @@ function syncStatus(tabela) {
   return dados;
 }
 
+// TRAIT = a habilidade PASSIVA da especie (o que os jogos chamam de "Ability").
+// O nome nao pode ser "ability" neste projeto: essa palavra ja e o GOLPE em
+// todo o codigo (`abilities.generated.ts`, `type Ability`, `pickAbility`). Ver
+// o cabecalho de src/data/traits.ts, que fixou esse vocabulario antes deste
+// gerador existir.
+//
+// DOIS MAPAS, nao um: o CATALOGO (o que cada habilidade faz, 132 entradas) e a
+// ATRIBUICAO (que habilidades cada especie pode ter). Separados porque a
+// atribuicao tem 226 linhas que repetem as mesmas 132 chaves — junta-los
+// multiplicaria o texto do efeito por cada dono.
+function syncTraits(catalogo, especiesNoJogo) {
+  console.log('Traits (habilidades passivas):');
+  const catalogoDeTraits = Object.fromEntries(
+    catalogo.habilidades.map((h) => [h.chave, { nome: h.nome, efeito: h.efeito }])
+  );
+  const porEspecie = {};
+  for (const e of catalogo.especies) {
+    if (especiesNoJogo && !especiesNoJogo.has(e.chave)) continue;
+    const normais = e.habilidades.filter((h) => !h.oculta).map((h) => h.chave);
+    const oculta = e.habilidades.find((h) => h.oculta);
+    porEspecie[e.chave] = { normais, oculta: oculta ? oculta.chave : null };
+  }
+  emitData('traits', 'TRAITS_DATA', 'TraitsData', toJsLiteral({
+    catalogo: catalogoDeTraits,
+    porEspecie,
+  }));
+  const semOculta = Object.values(porEspecie).filter((t) => !t.oculta).length;
+  console.log(`  ${Object.keys(catalogoDeTraits).length} habilidades, ${Object.keys(porEspecie).length} especies (${semOculta} sem oculta)`);
+}
+
 module.exports = {
   XLSX_PATH,
   readWorkbook,
+  syncTraits,
   syncStatus,
   syncFormulas,
   syncTypeChart,

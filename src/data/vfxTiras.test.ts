@@ -18,13 +18,13 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  TIRA_POR_ELEMENTO, TIRA_CURA_HP, TIRA_CURA_STATUS, TIRA_CONFUSAO, TIRA_SONO,
+  TIRA_POR_ELEMENTO, TIRA_AOE_POR_ELEMENTO, TIRA_CURA_HP, TIRA_CURA_STATUS, TIRA_CONFUSAO, TIRA_SONO,
   todasAsTirasDeVfx, COR_DE_STATUS_NO_CORPO, orientacaoDaTira, type TiraDeVfx,
 } from './vfxTiras'
 import { TYPE_COLORS } from './typeColors'
 import type { ElementType } from './generated/types'
 
-const ARQUIVOS = import.meta.glob('/assets/{move-vfx/tiras,status-vfx}/*.png', {
+const ARQUIVOS = import.meta.glob('/assets/{move-vfx/tiras,move-vfx/tiras-aoe,status-vfx}/*.png', {
   query: '?inline', import: 'default', eager: true,
 }) as Record<string, string>
 
@@ -39,6 +39,7 @@ function dimensoes(url: string): { largura: number; altura: number } {
 
 const TODAS: [string, TiraDeVfx][] = [
   ...Object.entries(TIRA_POR_ELEMENTO),
+  ...Object.entries(TIRA_AOE_POR_ELEMENTO).map(([t, tira]): [string, TiraDeVfx] => [`${t}-aoe`, tira!]),
   ['cura-hp', TIRA_CURA_HP],
   ['cura-status', TIRA_CURA_STATUS],
   ['confusao', TIRA_CONFUSAO],
@@ -73,6 +74,21 @@ describe('tiras de VFX', () => {
       })
       .filter((t) => t.proporcao < 0.35 || t.proporcao > 3)
     expect(fora).toEqual([])
+  })
+
+  // A camada de AREA e PARCIAL de proposito (4 tipos sem candidato aprovado —
+  // ver o cabecalho de TIRA_AOE_POR_ELEMENTO). O que NAO pode acontecer e ela
+  // repetir a arte da camada de impacto: seria desenhar exatamente o mesmo
+  // efeito que ela existe pra substituir, e nada no jogo denunciaria isso.
+  it('nenhuma tira de area repete o arquivo da tira de impacto', () => {
+    // Compara o CONTEUDO, nao o caminho: os dois lotes usam o nome do tipo como
+    // nome de arquivo (`tiras/fire.png` e `tiras-aoe/fire.png`), entao comparar
+    // caminho nao acusaria nada e comparar nome acusaria tudo.
+    const impacto = new Set(Object.values(TIRA_POR_ELEMENTO).map((t) => ARQUIVOS[`/${t.url}`]))
+    const repetidas = Object.entries(TIRA_AOE_POR_ELEMENTO)
+      .filter(([, tira]) => impacto.has(ARQUIVOS[`/${tira!.url}`]))
+      .map(([tipo]) => tipo)
+    expect(repetidas).toEqual([])
   })
 
   it('os 18 tipos elementais tem tira', () => {

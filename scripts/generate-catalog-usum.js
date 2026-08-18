@@ -206,6 +206,15 @@ function main() {
   const hunts = [starter, ...sync.buildTypeDrivenHunts(brackets, roster)];
 
   sync.syncSpeciesAndMoves(workbook, hunts);
+  // Depois de `syncSpeciesAndMoves` de proposito: so as especies que de fato
+  // entraram no jogo (o elenco e menor que o dex 1-251 do catalogo) recebem
+  // atribuicao de habilidade, senao o bundle carregaria linha para especie que
+  // nao existe em lugar nenhum.
+  sync.syncTraits(catalogo, new Set(Object.keys(
+    JSON.parse(fs.readFileSync(path.join(ROOT, 'src', 'data', 'generated', 'pokes.generated.ts'), 'utf8')
+      .replace(/^[\s\S]*?SPECIES_DATA: SpeciesData = /, '')
+      .replace(/;\s*$/, ''))
+  )));
   sync.syncMapsAndEncounters(hunts, pesosDeSpawn());
   sync.reportTypeCoverage(hunts, roster);
 

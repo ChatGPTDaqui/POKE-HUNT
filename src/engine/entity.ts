@@ -191,7 +191,20 @@ export function isAbilityReady(entity: BaseEntity, abilityId: string): boolean {
  * `Math.max` e nao soma: os dois correm ao mesmo tempo, quem manda e o maior.
  */
 export function segundosAtePoderUsar(entity: BaseEntity, abilityId: string): number {
-  return Math.max(entity.cooldowns[abilityId] ?? 0, entity.globalCooldown ?? 0)
+  return Math.max(cooldownProprio(entity, abilityId), entity.globalCooldown ?? 0)
+}
+
+/**
+ * So o relogio DO GOLPE, sem o turno global.
+ *
+ * O par com `segundosAtePoderUsar` existe porque a tela precisa dos dois
+ * separados: o turno global e IGUAL nos quatro slots, entao mostra-lo como "o
+ * cooldown do golpe" apagava justamente a diferenca entre eles — quatro numeros
+ * identicos contando junto. Quem decide se o golpe SAI continua sendo o maior
+ * dos dois (`segundosAtePoderUsar`); este aqui e o que o jogador quer LER.
+ */
+export function cooldownProprio(entity: BaseEntity, abilityId: string): number {
+  return entity.cooldowns[abilityId] ?? 0
 }
 
 export function startCooldown(entity: BaseEntity, abilityId: string, seconds: number): void {

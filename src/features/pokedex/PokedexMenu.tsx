@@ -7,7 +7,14 @@
 // detalhe que tinha acabado de abrir. Abrir o perfil agora e um botao explicito
 // dentro do detalhe.
 import { useMemo, useState } from 'react'
-import { SPECIES, createPokeInstance, type Species } from '@/data/pokes'
+import {
+  SPECIES, createPokeInstance, SPECIAL_EVOLUTION_LEVEL, SPECIAL_EVOLUTION_STONE_COUNT,
+  type Species,
+} from '@/data/pokes'
+import { stoneName } from '@/data/stones'
+import { traitsDaEspecie, nomeDaTrait } from '@/data/traits'
+import { descricaoDaTrait, motivoSemEfeito } from '@/data/traitInfo'
+import { GROWTH_LABEL } from '@/data/statLabels'
 // Preview da Pokedex nao e simulacao: usa uma sequencia DERIVADA do id da
 // especie em vez da do mundo. Consumir a sequencia principal pra desenhar um
 // cartao dessincronizaria o replay que o servidor verifica (Fase D) — e de
@@ -69,15 +76,59 @@ function killCountFrom(kills: Record<string, PokedexKillCount>, speciesId: strin
   return shinyOnly ? entry.shiny : entry.normal + entry.shiny
 }
 
+/** De quem esta especie EVOLUI. Derivado, porque o dado so aponta pra frente. */
+function evoluiDe(speciesId: string): Species | null {
+  return Object.values(SPECIES).find((s) => s.evolvesTo === speciesId) ?? null
+}
+
+/**
+ * A condicao de evolucao, em texto.
+ *
+ * Sao DUAS regras neste jogo, e a segunda nao existe em lugar nenhum da tela
+ * hoje: alem da evolucao por nivel normal (`evolvesAtLevel`), as 9 especies que
+ * nos jogos reais evoluiam por TROCA usam Nivel 80 + pedras do tipo primario
+ * (ver o patch de SPECIAL_EVOLUTIONS em data/pokes.ts). Quem tem um Kadabra Nv75
+ * nao tinha como saber que faltava juntar pedra.
+ */
+function condicaoDeEvolucao(species: Species): string | null {
+  if (!species.evolvesTo || species.evolvesAtLevel == null) return null
+  if (species.isSpecialEvolution) {
+    return `Nivel ${SPECIAL_EVOLUTION_LEVEL} + ${SPECIAL_EVOLUTION_STONE_COUNT} ${stoneName(species.type)}`
+  }
+  return `Nivel ${species.evolvesAtLevel}`
+}
+
+/** A linha evolutiva inteira, do primeiro estagio ao ultimo. */
+function linhaEvolutiva(species: Species): Species[] {
+  let raiz = species
+  // Guarda de ciclo: o dado e hand-patched (SPECIAL_EVOLUTIONS) e um dia pode
+  // ganhar um A->B->A por engano. Sem o teto isso trava a tela inteira.
+  for (let i = 0; i < 10; i++) {
+    const anterior = evoluiDe(raiz.id)
+    if (!anterior || anterior.id === species.id) break
+    raiz = anterior
+  }
+  const linha = [raiz]
+  for (let i = 0; i < 10; i++) {
+    const proximo = linha[linha.length - 1].evolvesTo
+    if (!proximo || !SPECIES[proximo] || linha.some((s) => s.id === proximo)) break
+    linha.push(SPECIES[proximo])
+  }
+  return linha
+}
+
 const BASE_STAT_ROWS = [
   ['HP', 'hp'], ['Atk Fis', 'atkFis'], ['Atk Esp', 'atkEsp'],
   ['Defesa', 'def'], ['Def Esp', 'defEsp'], ['Velocidade', 'speed'],
 ] as const
 
-function SpeciesDetail({ species }: { species: Species }) {
+function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (delta: number) => void }) {
   const hunts = huntsForSpecies(species.id)
   const openScreen = useUiStore((s) => s.openScreen)
   const showProfile = usePokeProfileStore((s) => s.showProfile)
+  const linha = linhaEvolutiva(species)
+  const traits = traitsDaEspecie(species.id)
+  const bst = BASE_STAT_ROWS.reduce((soma, [, key]) => soma + species.base[key], 0)
 
   const moves = species.abilities
     .map((entry) => ({ entry, ability: getAbility(entry.key) }))
@@ -86,6 +137,90 @@ function SpeciesDetail({ species }: { species: Species }) {
 
   return (
     <div className="flex flex-col gap-[.55em] border-t border-n800 p-[.55em]">
+      {/* NAVEGACAO ANTERIOR/PROXIMO: sem ela, ver o Pokemon seguinte exigia
+          fechar o card, rolar a lista ate achar o proximo e abrir de novo — e a
+          lista tem 226 linhas. As setas percorrem a lista VISIVEL (ja filtrada
+          por busca e escopo), nao o dex inteiro: navegar pra fora do filtro que
+          o jogador acabou de aplicar seria mais confuso que util. */}
+      {onNavegar && (
+        <div className="flex items-center justify-between gap-[.4em]">
+          <GameButton onClick={(e) => { e.stopPropagation(); onNavegar(-1) }}>← Anterior</GameButton>
+          <span className="text-[.75em] text-n500">#{dexNumber(species)} · {species.name}</span>
+          <GameButton onClick={(e) => { e.stopPropagation(); onNavegar(1) }}>Proximo →</GameButton>
+        </div>
+      )}
+
+      <div>
+        <div className="mb-[.4em] font-medium">Ficha</div>
+        <div className="grid grid-cols-2 gap-[.4em] sm:grid-cols-3">
+          {([
+            ['Pokedex', `#${dexNumber(species)}`],
+            ['Total base', String(bst)],
+            ['EXP base', String(species.baseExp)],
+            ['Curva de EXP', GROWTH_LABEL[species.growthCurve] ?? species.growthCurve],
+            // `catchRate` e 0-255 e nao significa nada pro jogador nessa escala.
+            // Convertido pra rotulo, que e o que ele usa pra decidir bola.
+            ['Captura', `${species.catchRate}/255`],
+            ['Regiao', REGION_LABEL[regionOfSpecies(species.id)] ?? '—'],
+          ] as const).map(([label, valor]) => (
+            <div key={label} className="flex justify-between rounded-[.4em] border border-n800 bg-background px-[.5em] py-[.35em] text-[.8em]">
+              <span className="text-n500">{label}</span>
+              <b className="min-w-0 truncate pl-[.3em] font-medium">{valor}</b>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <div className="mb-[.4em] font-medium">Evolucao</div>
+        {linha.length === 1 ? (
+          <span className="text-[.8em] text-n500">Nao evolui e nao vem de nenhuma evolucao.</span>
+        ) : (
+          <div className="flex flex-col gap-[.3em] text-[.8em]">
+            {linha.map((etapa, i) => {
+              const condicao = condicaoDeEvolucao(etapa)
+              const proximo = etapa.evolvesTo ? SPECIES[etapa.evolvesTo] : null
+              const atual = etapa.id === species.id
+              return (
+                <div key={etapa.id} className="flex flex-wrap items-center gap-[.35em]">
+                  <span className={atual ? 'font-medium text-foreground' : 'text-n400'}>
+                    {i + 1}. {etapa.name}{atual && ' (este)'}
+                  </span>
+                  {proximo && condicao && (
+                    <>
+                      <span className="text-n600">→</span>
+                      <span className="text-n400">{proximo.name}</span>
+                      <span className={etapa.isSpecialEvolution ? 'text-warn' : 'text-n500'}>({condicao})</span>
+                    </>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {traits && (
+        <div>
+          <div className="mb-[.4em] font-medium">Habilidades possiveis</div>
+          <div className="flex flex-col gap-[.3em] text-[.8em]">
+            {[...traits.normais.map((k) => [k, false] as const), ...(traits.oculta ? [[traits.oculta, true] as const] : [])]
+              .map(([chave, oculta]) => (
+                <div key={chave} className="rounded-[.4em] border border-n800 bg-background px-[.5em] py-[.35em]">
+                  <div className="flex items-center gap-[.35em]">
+                    <b className="font-medium">{nomeDaTrait(chave) ?? chave}</b>
+                    {oculta && <span className="text-[.85em] text-amber-400">oculta</span>}
+                  </div>
+                  <p className="leading-tight text-n500">{descricaoDaTrait(chave)}</p>
+                  {motivoSemEfeito(chave) && (
+                    <p className="text-[.9em] leading-tight text-amber-500/80">Sem efeito neste jogo.</p>
+                  )}
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
       <div>
         <div className="mb-[.4em] font-medium">Status base</div>
         <div className="grid grid-cols-3 gap-[.4em]">
@@ -106,8 +241,8 @@ function SpeciesDetail({ species }: { species: Species }) {
       <div>
         <div className="mb-[.4em] font-medium">Golpes aprendidos</div>
         <div className="overflow-hidden rounded-[.4em] border border-n800 text-[.8em]">
-          <div className="grid grid-cols-[2.4em_1fr_3.4em_4em_3em_2.4em] gap-[.4em] border-b border-n800 bg-n800/60 px-[.5em] py-[.3em] font-medium">
-            <span>Nv</span><span>Golpe</span><span>Tipo</span><span>Cat.</span><span>Dano</span><span>AOE</span>
+          <div className="grid grid-cols-[2.4em_1fr_3.4em_4em_3em_3em_2.4em] gap-[.4em] border-b border-n800 bg-n800/60 px-[.5em] py-[.3em] font-medium">
+            <span>Nv</span><span>Golpe</span><span>Tipo</span><span>Cat.</span><span>Dano</span><span>Prec.</span><span>AOE</span>
           </div>
           <div className="max-h-[16em] overflow-y-auto">
             {moves.map(({ entry, ability }) => {
@@ -121,13 +256,18 @@ function SpeciesDetail({ species }: { species: Species }) {
               return (
                 <div
                   key={entry.key}
-                  className="grid grid-cols-[2.4em_1fr_3.4em_4em_3em_2.4em] items-center gap-[.4em] border-b border-n800 px-[.5em] py-[.3em] last:border-b-0"
+                  className="grid grid-cols-[2.4em_1fr_3.4em_4em_3em_3em_2.4em] items-center gap-[.4em] border-b border-n800 px-[.5em] py-[.3em] last:border-b-0"
                 >
                   <span className="text-n400">{entry.levelReq}</span>
                   <span className="truncate">{ability.name}</span>
                   <span><TypeChip type={ability.type} /></span>
                   <span className="text-n400">{category === 'physical' ? 'Fisico' : 'Especial'}</span>
                   <span>{ability.power > 0 ? ability.power : '—'}</span>
+                  {/* Mesma regra da ficha do POKE: precisao so pra golpe de
+                      dano, e em amarelo quando erra. */}
+                  <span className={ability.power > 0 && (ability.accuracy ?? 100) < 100 ? 'text-warn' : 'text-n400'}>
+                    {ability.power > 0 ? `${ability.accuracy ?? 100}%` : '—'}
+                  </span>
                   <span className="text-n400">{ability.target === 'aoe' ? '✓' : '—'}</span>
                 </div>
               )
@@ -294,7 +434,19 @@ export function PokedexMenu() {
                 {shinyView ? `✨ ${kills}` : `Abates: ${kills}`}
               </span>
             </div>
-            {expanded && <SpeciesDetail species={species} />}
+            {expanded && (
+              <SpeciesDetail
+                species={species}
+                onNavegar={(delta) => {
+                  const i = visible.findIndex((s) => s.id === species.id)
+                  // Circular de proposito: chegar no fim da lista e ficar com um
+                  // botao morto seria pior que voltar ao comeco, ainda mais numa
+                  // lista filtrada que pode ter 3 itens.
+                  const alvo = visible[(i + delta + visible.length) % visible.length]
+                  if (alvo) setExpandedSpeciesId(alvo.id)
+                }}
+              />
+            )}
           </div>
         )
       })}

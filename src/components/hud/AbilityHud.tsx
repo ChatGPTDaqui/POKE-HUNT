@@ -24,7 +24,8 @@ import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { abilityIconUrl } from '@/data/abilityIcons'
 import { colorForType } from '@/data/typeColors'
 import { controller } from '@/engine/controller'
-import { segundosAtePoderUsar } from '@/engine/entity'
+import { segundosAtePoderUsar, cooldownProprio } from '@/engine/entity'
+import { cooldownTotalDoGolpe } from '@/engine/systems/combatSystem'
 import { useWorldStore } from '@/stores/worldStore'
 import { useBreakpoints } from '@/stores/uiStore'
 import { AbilityTooltip } from '@/components/shared/AbilityTooltip'
@@ -65,6 +66,10 @@ const TAMANHO_ROTULO = { largo: '.8em', medio: '.75em', estreito: '.68em' } as c
 
 export function AbilityHud() {
   const player = useWorldStore((s) => s.player)
+  // Clima entra na conta da recarga por causa de Chlorophyll/Swift Swim/Sand
+  // Rush, que DOBRAM a Velocidade — sem ele a barra do HUD contaria mais devagar
+  // que o combate de verdade.
+  const clima = useWorldStore((s) => s.clima?.tipo ?? null)
   const { narrow, colStack } = useBreakpoints()
 
   const poke = player?.poke ?? null
@@ -93,10 +98,28 @@ export function AbilityHud() {
     <div className="pointer-events-auto flex flex-wrap justify-center gap-[.45em]">
       {abilities.map((ability) => {
         const isOff = Boolean(disabled[ability.id])
-        // Conta os DOIS relogios (cooldown do golpe e turno global) — ver
-        // engine/entity.ts#segundosAtePoderUsar pro bug que isto corrige.
+        // TRES numeros, e os tres importam por motivos diferentes:
+        //
+        //   cdProprio  a recarga DESTE golpe. E o que o jogador pediu pra ver
+        //              individualmente, e o que diferencia os slots entre si.
+        //   cd         o maior entre `cdProprio` e o turno global de 2s — e ele
+        //              que decide se o golpe pode SAIR agora (`ready`).
+        //   cdTotal    a recarga cheia deste golpe pra ESTE POKE, ja escalada
+        //              pela Velocidade. Serve de denominador da barra.
+        //
+        // Ate esta leva a barra mostrava so `cd`, e o efeito colateral era que
+        // os quatro slots exibiam O MESMO numero enquanto o turno global
+        // mandasse — ou seja, exatamente a informacao que NAO distingue um
+        // golpe do outro. Agora o numero grande e o proprio do golpe, e o
+        // bloqueio por turno aparece como uma cortina mais leve.
+        const cdProprio = player ? cooldownProprio(player, ability.id) : 0
         const cd = player ? segundosAtePoderUsar(player, ability.id) : 0
+        const cdTotal = player ? cooldownTotalDoGolpe(player, ability, clima) : 0
         const ready = cd <= 0 && !isOff
+        // Fracao JA RECARREGADA deste golpe. 1 = pronto. `cdTotal` pode ser 0
+        // (golpe sem cooldown no catalogo) — nesse caso a barra fica cheia em
+        // vez de dividir por zero.
+        const fracaoPronta = cdTotal > 0 ? Math.max(0, Math.min(1, 1 - cdProprio / cdTotal)) : 1
         const borderColor = CATEGORY_BORDER[resolveAbilityCategory(ability, poke)] || CATEGORY_BORDER.physical
         const icone = abilityIconUrl(ability.type)
 
@@ -172,14 +195,30 @@ export function AbilityHud() {
               <span className="absolute -top-[.3em] -right-[.3em] h-[.8em] w-[.8em] rounded-full border border-[#052e16] bg-[#4ade80]" />
             )}
 
-            {!ready && !isOff && (
-              // Fonte acompanha o slot: "12.3s" em `.85em` fixo transbordava o
-              // slot estreito.
+            {/* CORTINA DE RECARGA DO PROPRIO GOLPE: sobe de baixo pra cima na
+                proporcao do que falta. Diferente do numero, ela le de relance —
+                quatro slots com alturas diferentes dizem na hora qual esta mais
+                perto de sair. */}
+            {cdProprio > 0 && !isOff && (
               <span
-                className="absolute inset-0 flex items-center justify-center rounded-[.32em] bg-black/65 tabular-nums text-white"
+                className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] rounded-b-[.32em] bg-black/55"
+                style={{ height: `${(1 - fracaoPronta) * 100}%` }}
+              />
+            )}
+
+            {!ready && !isOff && (
+              // O numero e o cooldown DO GOLPE quando ele existe; so cai pro
+              // relogio global (que e igual nos quatro slots) quando o golpe ja
+              // esta recarregado e o que falta e a vez de agir. Fonte acompanha
+              // o slot: "12.3s" em `.85em` fixo transbordava o slot estreito.
+              <span
+                className={cn(
+                  'absolute inset-0 z-[1] flex items-center justify-center rounded-[.32em] tabular-nums',
+                  cdProprio > 0 ? 'text-white' : 'text-n300',
+                )}
                 style={{ fontSize: fonteRotulo }}
               >
-                {cd.toFixed(1)}s
+                {(cdProprio > 0 ? cdProprio : cd).toFixed(1)}s
               </span>
             )}
             {isOff && (

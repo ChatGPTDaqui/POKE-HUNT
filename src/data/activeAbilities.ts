@@ -162,12 +162,31 @@ export function activeAbilitiesPadrao(species: Species, level: number): string[]
   return escolha
 }
 
-// Poder base ponderado pelo bonus de tipo. Nao e o dano real (falta o alvo,
-// que so existe em combate) — e o suficiente pra ordenar golpes do MESMO POKE
-// entre si, que e tudo que este default precisa.
+// Poder base ponderado pelo bonus de tipo, pela PRECISAO e pelo RECUO. Nao e o
+// dano real (falta o alvo, que so existe em combate) — e o suficiente pra
+// ordenar golpes do MESMO POKE entre si, que e tudo que este default precisa.
+//
+// POR QUE PRECISAO E RECUO ENTRAM AQUI: sem eles, este default escolhia golpe
+// que a propria IA de combate ja sabia ser pior. `combatSystem#danoEsperado` ja
+// desconta precisao ha levas ("so essa troca vale 15% das kills/hora"), mas
+// quem MONTA os 4 slots ranqueava por poder cru — entao o golpe bom nem chegava
+// a ser candidato. Caso medido: Typhlosion Nv70 nascia com Inferno (100 de
+// poder, 50% de precisao, cooldown 8s) e Double-Edge (120 de poder, -33% de
+// recuo, sem STAB) ocupando dois dos quatro slots, na frente de Lava Plume
+// (80 de poder, STAB, 100% de precisao). Resultado em duelo contra Kangaskhan
+// de mesmo nivel: metade dos turnos jogada fora errando e o proprio POKE se
+// machucando ate morrer antes de derrubar o alvo.
+//
+// O recuo entra como desconto proporcional (`drainPercent` negativo, a mesma
+// fonte que `combatSystem#resolveHit` usa pra aplicar o dano em quem usou):
+// Double-Edge vale 67% do que valeria sem recuo. Dreno POSITIVO (Absorb, Giga
+// Drain) NAO ganha bonus — curar nao e dano, e inflar a nota faria golpe fraco
+// de dreno passar na frente de golpe forte.
 function danoEfetivo(ability: Ability, species: Species): number {
   const temStab = ability.type === species.type || ability.type === species.type2
-  return ability.power * (temStab ? STAB_MULTIPLIER : 1)
+  const precisao = (ability.accuracy ?? 100) / 100
+  const recuo = Math.max(0, -(ability.drainPercent ?? 0)) / 100
+  return ability.power * (temStab ? STAB_MULTIPLIER : 1) * precisao * (1 - recuo)
 }
 
 // Preenche slot VAZIO com golpe recem-aprendido, sem nunca derrubar escolha do

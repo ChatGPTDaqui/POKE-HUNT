@@ -18414,6 +18414,1567 @@ function realceDaRaridade(poke) {
 	};
 }
 //#endregion
+//#region src/data/legendaries.ts
+var LEGENDARY_SPECIES_IDS = [
+	"articuno",
+	"zapdos",
+	"moltres",
+	"raikou",
+	"entei",
+	"suicune",
+	"lugia",
+	"ho_oh",
+	"celebi",
+	"mewtwo",
+	"mew"
+];
+//#endregion
+//#region src/data/natures.ts
+var NATURE_BONUS = 1.1;
+var NATURE_PENALTY = .9;
+var NATURE_STATS = [
+	"atkFis",
+	"def",
+	"speed",
+	"atkEsp",
+	"defEsp"
+];
+var NATURES = Object.fromEntries([
+	[
+		"Hardy",
+		"Lonely",
+		"Brave",
+		"Adamant",
+		"Naughty"
+	],
+	[
+		"Bold",
+		"Docile",
+		"Relaxed",
+		"Impish",
+		"Lax"
+	],
+	[
+		"Timid",
+		"Hasty",
+		"Serious",
+		"Jolly",
+		"Naive"
+	],
+	[
+		"Modest",
+		"Mild",
+		"Quiet",
+		"Bashful",
+		"Rash"
+	],
+	[
+		"Calm",
+		"Gentle",
+		"Sassy",
+		"Careful",
+		"Quirky"
+	]
+].flatMap((linha, i) => linha.map((nome, j) => {
+	const key = nome.toLowerCase();
+	const neutra = i === j;
+	return [key, {
+		key,
+		nome,
+		sobe: neutra ? null : NATURE_STATS[i],
+		desce: neutra ? null : NATURE_STATS[j]
+	}];
+})));
+var NATURE_LIST = Object.values(NATURES);
+/** As 5 sem efeito nenhum. Uteis pra backfill de save antigo (ver a migration). */
+var NATURES_NEUTRAS = NATURE_LIST.filter((n) => !n.sobe).map((n) => n.key);
+/**
+* Multiplicador desta natureza sobre um atributo. 1 quando ela nao alcanca
+* aquele atributo — e o caso da MAIORIA das combinacoes (cada natureza mexe em
+* 2 dos 6) e o de HP sempre.
+*/
+function multiplicadorDeNatureza(nature, stat) {
+	const def = nature ? NATURES[nature] : null;
+	if (!def) return 1;
+	if (def.sobe === stat) return NATURE_BONUS;
+	if (def.desce === stat) return NATURE_PENALTY;
+	return 1;
+}
+//#endregion
+//#region src/data/generated/traits.generated.ts
+var TRAITS_DATA = {
+	"catalogo": {
+		"adaptability": {
+			"nome": "Adaptability",
+			"efeito": "Increases the same-type attack bonus from 1.5× to 2×."
+		},
+		"aftermath": {
+			"nome": "Aftermath",
+			"efeito": "Damages the attacker for 1/4 its max HP when knocked out by a contact move."
+		},
+		"analytic": {
+			"nome": "Analytic",
+			"efeito": "Strengthens moves to 1.3× their power when moving last."
+		},
+		"anger_point": {
+			"nome": "Anger Point",
+			"efeito": "Raises Attack to the maximum of six stages upon receiving a critical hit."
+		},
+		"anticipation": {
+			"nome": "Anticipation",
+			"efeito": "Notifies all trainers upon entering battle if an opponent has a super-effective move, Self-Destruct, Explosion, or a one-hit KO move."
+		},
+		"arena_trap": {
+			"nome": "Arena Trap",
+			"efeito": "Prevents opponents from fleeing or switching out. Eluded by Flying-types and Pokémon in the air."
+		},
+		"battle_armor": {
+			"nome": "Battle Armor",
+			"efeito": "Protects against critical hits."
+		},
+		"big_pecks": {
+			"nome": "Big Pecks",
+			"efeito": "Protects against Defense drops."
+		},
+		"blaze": {
+			"nome": "Blaze",
+			"efeito": "Strengthens Fire moves to inflict 1.5× damage at 1/3 max HP or less."
+		},
+		"chlorophyll": {
+			"nome": "Chlorophyll",
+			"efeito": "Doubles Speed during strong sunlight."
+		},
+		"clear_body": {
+			"nome": "Clear Body",
+			"efeito": "Prevents stats from being lowered by other Pokémon."
+		},
+		"cloud_nine": {
+			"nome": "Cloud Nine",
+			"efeito": "Negates all effects of weather, but does not prevent the weather itself."
+		},
+		"competitive": {
+			"nome": "Competitive",
+			"efeito": "Raises Special Attack by two stages upon having any stat lowered."
+		},
+		"compound_eyes": {
+			"nome": "Compound Eyes",
+			"efeito": "Increases moves' accuracy to 1.3×."
+		},
+		"contrary": {
+			"nome": "Contrary",
+			"efeito": "Inverts stat changes."
+		},
+		"cursed_body": {
+			"nome": "Cursed Body",
+			"efeito": "Has a 30% chance of Disabling any move that hits the Pokémon."
+		},
+		"cute_charm": {
+			"nome": "Cute Charm",
+			"efeito": "Has a 30% chance of infatuating attacking Pokémon on contact."
+		},
+		"damp": {
+			"nome": "Damp",
+			"efeito": "Prevents Self-Destruct, Explosion, and Aftermath from working while the Pokémon is in battle."
+		},
+		"defiant": {
+			"nome": "Defiant",
+			"efeito": "Raises Attack two stages upon having any stat lowered."
+		},
+		"download": {
+			"nome": "Download",
+			"efeito": "Raises the attack stat corresponding to the opponents' weaker defense one stage upon entering battle."
+		},
+		"drizzle": {
+			"nome": "Drizzle",
+			"efeito": "Summons rain that lasts indefinitely upon entering battle."
+		},
+		"drought": {
+			"nome": "Drought",
+			"efeito": "Summons strong sunlight that lasts indefinitely upon entering battle."
+		},
+		"dry_skin": {
+			"nome": "Dry Skin",
+			"efeito": "Causes 1/8 max HP in damage each turn during strong sunlight, but heals for 1/8 max HP during rain. Increases damage from Fire moves to 1.25×, but absorbs Water moves, healing for 1/4 max HP."
+		},
+		"early_bird": {
+			"nome": "Early Bird",
+			"efeito": "Makes sleep pass twice as quickly."
+		},
+		"effect_spore": {
+			"nome": "Effect Spore",
+			"efeito": "Has a 30% chance of inflcting either paralysis, poison, or sleep on attacking Pokémon on contact."
+		},
+		"filter": {
+			"nome": "Filter",
+			"efeito": "Decreases damage taken from super-effective moves by 1/4."
+		},
+		"flame_body": {
+			"nome": "Flame Body",
+			"efeito": "Has a 30% chance of burning attacking Pokémon on contact."
+		},
+		"flash_fire": {
+			"nome": "Flash Fire",
+			"efeito": "Protects against Fire moves. Once one has been blocked, the Pokémon's own Fire moves inflict 1.5× damage until it leaves battle."
+		},
+		"forewarn": {
+			"nome": "Forewarn",
+			"efeito": "Reveals the opponents' strongest move upon entering battle."
+		},
+		"friend_guard": {
+			"nome": "Friend Guard",
+			"efeito": "Decreases all direct damage taken by friendly Pokémon to 0.75×."
+		},
+		"frisk": {
+			"nome": "Frisk",
+			"efeito": "Reveals an opponent's held item upon entering battle."
+		},
+		"gluttony": {
+			"nome": "Gluttony",
+			"efeito": "Makes the Pokémon eat any held Berry triggered by low HP below 1/2 its max HP."
+		},
+		"guts": {
+			"nome": "Guts",
+			"efeito": "Increases Attack to 1.5× with a major status ailment."
+		},
+		"harvest": {
+			"nome": "Harvest",
+			"efeito": "Has a 50% chance of restoring a used Berry after each turn if the Pokémon has held no items in the meantime."
+		},
+		"healer": {
+			"nome": "Healer",
+			"efeito": "Has a 30% chance of curing each adjacent ally of any major status ailment after each turn."
+		},
+		"honey_gather": {
+			"nome": "Honey Gather",
+			"efeito": "The Pokémon may pick up Honey after battle."
+		},
+		"huge_power": {
+			"nome": "Huge Power",
+			"efeito": "Doubles Attack in battle."
+		},
+		"hustle": {
+			"nome": "Hustle",
+			"efeito": "Strengthens physical moves to inflict 1.5× damage, but decreases their accuracy to 0.8×."
+		},
+		"hydration": {
+			"nome": "Hydration",
+			"efeito": "Cures any major status ailment after each turn during rain."
+		},
+		"hyper_cutter": {
+			"nome": "Hyper Cutter",
+			"efeito": "Prevents Attack from being lowered by other Pokémon."
+		},
+		"ice_body": {
+			"nome": "Ice Body",
+			"efeito": "Heals for 1/16 max HP after each turn during hail. Protects against hail damage."
+		},
+		"illuminate": {
+			"nome": "Illuminate",
+			"efeito": "Doubles the wild encounter rate."
+		},
+		"immunity": {
+			"nome": "Immunity",
+			"efeito": "Prevents poison."
+		},
+		"imposter": {
+			"nome": "Imposter",
+			"efeito": "Transforms upon entering battle."
+		},
+		"infiltrator": {
+			"nome": "Infiltrator",
+			"efeito": "Bypasses Light Screen, Reflect, and Safeguard."
+		},
+		"inner_focus": {
+			"nome": "Inner Focus",
+			"efeito": "Prevents flinching."
+		},
+		"insomnia": {
+			"nome": "Insomnia",
+			"efeito": "Prevents sleep."
+		},
+		"intimidate": {
+			"nome": "Intimidate",
+			"efeito": "Lowers opponents' Attack one stage upon entering battle."
+		},
+		"iron_fist": {
+			"nome": "Iron Fist",
+			"efeito": "Strengthens punch-based moves to 1.2× their power."
+		},
+		"justified": {
+			"nome": "Justified",
+			"efeito": "Raises Attack one stage upon taking damage from a Dark move."
+		},
+		"keen_eye": {
+			"nome": "Keen Eye",
+			"efeito": "Prevents accuracy from being lowered."
+		},
+		"leaf_guard": {
+			"nome": "Leaf Guard",
+			"efeito": "Protects against major status ailments during strong sunlight."
+		},
+		"levitate": {
+			"nome": "Levitate",
+			"efeito": "Evades Ground moves."
+		},
+		"light_metal": {
+			"nome": "Light Metal",
+			"efeito": "Halves the Pokémon's weight."
+		},
+		"lightning_rod": {
+			"nome": "Lightning Rod",
+			"efeito": "Redirects single-target Electric moves to this Pokémon where possible. Absorbs Electric moves, raising Special Attack one stage."
+		},
+		"limber": {
+			"nome": "Limber",
+			"efeito": "Prevents paralysis."
+		},
+		"liquid_ooze": {
+			"nome": "Liquid Ooze",
+			"efeito": "Damages opponents using leeching moves for as much as they would heal."
+		},
+		"magic_bounce": {
+			"nome": "Magic Bounce",
+			"efeito": "Reflects most non-damaging moves back at their user."
+		},
+		"magic_guard": {
+			"nome": "Magic Guard",
+			"efeito": "Protects against damage not directly caused by a move."
+		},
+		"magma_armor": {
+			"nome": "Magma Armor",
+			"efeito": "Prevents freezing."
+		},
+		"magnet_pull": {
+			"nome": "Magnet Pull",
+			"efeito": "Prevents Steel opponents from fleeing or switching out."
+		},
+		"marvel_scale": {
+			"nome": "Marvel Scale",
+			"efeito": "Increases Defense to 1.5× with a major status ailment."
+		},
+		"mold_breaker": {
+			"nome": "Mold Breaker",
+			"efeito": "Bypasses targets' abilities if they could hinder or prevent a move."
+		},
+		"moody": {
+			"nome": "Moody",
+			"efeito": "Raises a random stat two stages and lowers another one stage after each turn."
+		},
+		"moxie": {
+			"nome": "Moxie",
+			"efeito": "Raises Attack one stage upon KOing a Pokémon."
+		},
+		"multiscale": {
+			"nome": "Multiscale",
+			"efeito": "Halves damage taken from full HP."
+		},
+		"natural_cure": {
+			"nome": "Natural Cure",
+			"efeito": "Cures any major status ailment upon switching out."
+		},
+		"neutralizing_gas": {
+			"nome": "Neutralizing Gas",
+			"efeito": "Neutralizes abilities of all Pokémon in battle."
+		},
+		"no_guard": {
+			"nome": "No Guard",
+			"efeito": "Ensures all moves used by and against the Pokémon hit."
+		},
+		"oblivious": {
+			"nome": "Oblivious",
+			"efeito": "Prevents infatuation and protects against Captivate."
+		},
+		"overcoat": {
+			"nome": "Overcoat",
+			"efeito": "Protects against damage from weather."
+		},
+		"overgrow": {
+			"nome": "Overgrow",
+			"efeito": "Strengthens Grass moves to inflict 1.5× damage at 1/3 max HP or less."
+		},
+		"own_tempo": {
+			"nome": "Own Tempo",
+			"efeito": "Prevents confusion."
+		},
+		"pickpocket": {
+			"nome": "Pickpocket",
+			"efeito": "Steals attacking Pokémon's held items on contact."
+		},
+		"pickup": {
+			"nome": "Pickup",
+			"efeito": "Picks up other Pokémon's used and Flung held items. May also pick up an item after battle."
+		},
+		"plus": {
+			"nome": "Plus",
+			"efeito": "Increases Special Attack to 1.5× when a friendly Pokémon has Plus or Minus."
+		},
+		"poison_point": {
+			"nome": "Poison Point",
+			"efeito": "Has a 30% chance of poisoning attacking Pokémon on contact."
+		},
+		"poison_touch": {
+			"nome": "Poison Touch",
+			"efeito": "Has a 30% chance of poisoning target Pokémon upon contact."
+		},
+		"prankster": {
+			"nome": "Prankster",
+			"efeito": "Raises non-damaging moves' priority by one stage."
+		},
+		"pressure": {
+			"nome": "Pressure",
+			"efeito": "Increases the PP cost of moves targetting the Pokémon by one."
+		},
+		"quick_feet": {
+			"nome": "Quick Feet",
+			"efeito": "Increases Speed to 1.5× with a major status ailment."
+		},
+		"rain_dish": {
+			"nome": "Rain Dish",
+			"efeito": "Heals for 1/16 max HP after each turn during rain."
+		},
+		"rattled": {
+			"nome": "Rattled",
+			"efeito": "Raises Speed one stage upon being hit by a Dark, Ghost, or Bug move."
+		},
+		"reckless": {
+			"nome": "Reckless",
+			"efeito": "Strengthens recoil moves to 1.2× their power."
+		},
+		"regenerator": {
+			"nome": "Regenerator",
+			"efeito": "Heals for 1/3 max HP upon switching out."
+		},
+		"rivalry": {
+			"nome": "Rivalry",
+			"efeito": "Increases damage inflicted to 1.25× against Pokémon of the same gender, but decreases damage to 0.75× against the opposite gender."
+		},
+		"rock_head": {
+			"nome": "Rock Head",
+			"efeito": "Protects against recoil damage."
+		},
+		"run_away": {
+			"nome": "Run Away",
+			"efeito": "Ensures success fleeing from wild battles."
+		},
+		"sand_force": {
+			"nome": "Sand Force",
+			"efeito": "Strengthens Rock, Ground, and Steel moves to 1.3× their power during a sandstorm. Protects against sandstorm damage."
+		},
+		"sand_rush": {
+			"nome": "Sand Rush",
+			"efeito": "Doubles Speed during a sandstorm. Protects against sandstorm damage."
+		},
+		"sand_stream": {
+			"nome": "Sand Stream",
+			"efeito": "Summons a sandstorm that lasts indefinitely upon entering battle."
+		},
+		"sand_veil": {
+			"nome": "Sand Veil",
+			"efeito": "Increases evasion to 1.25× during a sandstorm. Protects against sandstorm damage."
+		},
+		"sap_sipper": {
+			"nome": "Sap Sipper",
+			"efeito": "Absorbs Grass moves, raising Attack one stage."
+		},
+		"scrappy": {
+			"nome": "Scrappy",
+			"efeito": "Lets the Pokémon's Normal and Fighting moves hit Ghost Pokémon."
+		},
+		"serene_grace": {
+			"nome": "Serene Grace",
+			"efeito": "Doubles the chance of moves' extra effects occurring."
+		},
+		"shadow_tag": {
+			"nome": "Shadow Tag",
+			"efeito": "Prevents opponents from fleeing or switching out."
+		},
+		"shed_skin": {
+			"nome": "Shed Skin",
+			"efeito": "Has a 33% chance of curing any major status ailment after each turn."
+		},
+		"sheer_force": {
+			"nome": "Sheer Force",
+			"efeito": "Strengthens moves with extra effects to 1.3× their power, but prevents their extra effects."
+		},
+		"shell_armor": {
+			"nome": "Shell Armor",
+			"efeito": "Protects against critical hits."
+		},
+		"shield_dust": {
+			"nome": "Shield Dust",
+			"efeito": "Protects against incoming moves' extra effects."
+		},
+		"skill_link": {
+			"nome": "Skill Link",
+			"efeito": "Extends two-to-five-hit moves and Triple Kick to their full length every time."
+		},
+		"sniper": {
+			"nome": "Sniper",
+			"efeito": "Strengthens critical hits to inflict 3× damage rather than 2×."
+		},
+		"snow_cloak": {
+			"nome": "Snow Cloak",
+			"efeito": "Increases evasion to 1.25× during hail. Protects against hail damage."
+		},
+		"solar_power": {
+			"nome": "Solar Power",
+			"efeito": "Increases Special Attack to 1.5× but costs 1/8 max HP after each turn during strong sunlight."
+		},
+		"soundproof": {
+			"nome": "Soundproof",
+			"efeito": "Protects against sound-based moves."
+		},
+		"speed_boost": {
+			"nome": "Speed Boost",
+			"efeito": "Raises Speed one stage after each turn."
+		},
+		"static": {
+			"nome": "Static",
+			"efeito": "Has a 30% chance of paralyzing attacking Pokémon on contact."
+		},
+		"steadfast": {
+			"nome": "Steadfast",
+			"efeito": "Raises Speed one stage upon flinching."
+		},
+		"stench": {
+			"nome": "Stench",
+			"efeito": "Has a 10% chance of making target Pokémon flinch with each hit."
+		},
+		"sticky_hold": {
+			"nome": "Sticky Hold",
+			"efeito": "Prevents a held item from being removed by other Pokémon."
+		},
+		"sturdy": {
+			"nome": "Sturdy",
+			"efeito": "Prevents being KOed from full HP, leaving 1 HP instead. Protects against the one-hit KO moves regardless of HP."
+		},
+		"suction_cups": {
+			"nome": "Suction Cups",
+			"efeito": "Prevents being forced out of battle by other Pokémon's moves."
+		},
+		"super_luck": {
+			"nome": "Super Luck",
+			"efeito": "Raises moves' critical hit rates one stage."
+		},
+		"swarm": {
+			"nome": "Swarm",
+			"efeito": "Strengthens Bug moves to inflict 1.5× damage at 1/3 max HP or less."
+		},
+		"swift_swim": {
+			"nome": "Swift Swim",
+			"efeito": "Doubles Speed during rain."
+		},
+		"synchronize": {
+			"nome": "Synchronize",
+			"efeito": "Copies burns, paralysis, and poison received onto the Pokémon that inflicted them."
+		},
+		"tangled_feet": {
+			"nome": "Tangled Feet",
+			"efeito": "Doubles evasion when confused."
+		},
+		"technician": {
+			"nome": "Technician",
+			"efeito": "Strengthens moves of 60 base power or less to 1.5× their power."
+		},
+		"telepathy": {
+			"nome": "Telepathy",
+			"efeito": "Protects against friendly Pokémon's damaging moves."
+		},
+		"thick_fat": {
+			"nome": "Thick Fat",
+			"efeito": "Halves damage from Fire and Ice moves."
+		},
+		"tinted_lens": {
+			"nome": "Tinted Lens",
+			"efeito": "Doubles damage inflicted with not-very-effective moves."
+		},
+		"torrent": {
+			"nome": "Torrent",
+			"efeito": "Strengthens Water moves to inflict 1.5× damage at 1/3 max HP or less."
+		},
+		"trace": {
+			"nome": "Trace",
+			"efeito": "Copies an opponent's ability upon entering battle."
+		},
+		"unaware": {
+			"nome": "Unaware",
+			"efeito": "Ignores other Pokémon's stat modifiers for damage and accuracy calculation."
+		},
+		"unburden": {
+			"nome": "Unburden",
+			"efeito": "Doubles Speed upon using or losing a held item."
+		},
+		"unnerve": {
+			"nome": "Unnerve",
+			"efeito": "Prevents opposing Pokémon from eating held Berries."
+		},
+		"vital_spirit": {
+			"nome": "Vital Spirit",
+			"efeito": "Prevents sleep."
+		},
+		"volt_absorb": {
+			"nome": "Volt Absorb",
+			"efeito": "Absorbs Electric moves, healing for 1/4 max HP."
+		},
+		"water_absorb": {
+			"nome": "Water Absorb",
+			"efeito": "Absorbs Water moves, healing for 1/4 max HP."
+		},
+		"water_veil": {
+			"nome": "Water Veil",
+			"efeito": "Prevents burns."
+		},
+		"weak_armor": {
+			"nome": "Weak Armor",
+			"efeito": "Raises Speed and lowers Defense by one stage each upon being hit by a physical move."
+		},
+		"wonder_skin": {
+			"nome": "Wonder Skin",
+			"efeito": "Lowers incoming non-damaging moves' base accuracy to exactly 50%."
+		}
+	},
+	"porEspecie": {
+		"bulbasaur": {
+			"normais": ["overgrow"],
+			"oculta": "chlorophyll"
+		},
+		"ivysaur": {
+			"normais": ["overgrow"],
+			"oculta": "chlorophyll"
+		},
+		"venusaur": {
+			"normais": ["overgrow"],
+			"oculta": "chlorophyll"
+		},
+		"charmander": {
+			"normais": ["blaze"],
+			"oculta": "solar_power"
+		},
+		"charmeleon": {
+			"normais": ["blaze"],
+			"oculta": "solar_power"
+		},
+		"charizard": {
+			"normais": ["blaze"],
+			"oculta": "solar_power"
+		},
+		"squirtle": {
+			"normais": ["torrent"],
+			"oculta": "rain_dish"
+		},
+		"wartortle": {
+			"normais": ["torrent"],
+			"oculta": "rain_dish"
+		},
+		"blastoise": {
+			"normais": ["torrent"],
+			"oculta": "rain_dish"
+		},
+		"caterpie": {
+			"normais": ["shield_dust"],
+			"oculta": "run_away"
+		},
+		"metapod": {
+			"normais": ["shed_skin"],
+			"oculta": null
+		},
+		"butterfree": {
+			"normais": ["compound_eyes"],
+			"oculta": "tinted_lens"
+		},
+		"weedle": {
+			"normais": ["shield_dust"],
+			"oculta": "run_away"
+		},
+		"kakuna": {
+			"normais": ["shed_skin"],
+			"oculta": null
+		},
+		"beedrill": {
+			"normais": ["swarm"],
+			"oculta": "sniper"
+		},
+		"pidgey": {
+			"normais": ["keen_eye", "tangled_feet"],
+			"oculta": "big_pecks"
+		},
+		"pidgeotto": {
+			"normais": ["keen_eye", "tangled_feet"],
+			"oculta": "big_pecks"
+		},
+		"pidgeot": {
+			"normais": ["keen_eye", "tangled_feet"],
+			"oculta": "big_pecks"
+		},
+		"rattata": {
+			"normais": ["run_away", "guts"],
+			"oculta": "hustle"
+		},
+		"raticate": {
+			"normais": ["run_away", "guts"],
+			"oculta": "hustle"
+		},
+		"spearow": {
+			"normais": ["keen_eye"],
+			"oculta": "sniper"
+		},
+		"fearow": {
+			"normais": ["keen_eye"],
+			"oculta": "sniper"
+		},
+		"ekans": {
+			"normais": ["intimidate", "shed_skin"],
+			"oculta": "unnerve"
+		},
+		"arbok": {
+			"normais": ["intimidate", "shed_skin"],
+			"oculta": "unnerve"
+		},
+		"pikachu": {
+			"normais": ["static"],
+			"oculta": "lightning_rod"
+		},
+		"sandshrew": {
+			"normais": ["sand_veil"],
+			"oculta": "sand_rush"
+		},
+		"sandslash": {
+			"normais": ["sand_veil"],
+			"oculta": "sand_rush"
+		},
+		"nidoran_f": {
+			"normais": ["poison_point", "rivalry"],
+			"oculta": "hustle"
+		},
+		"nidorina": {
+			"normais": ["poison_point", "rivalry"],
+			"oculta": "hustle"
+		},
+		"nidoqueen": {
+			"normais": ["poison_point", "rivalry"],
+			"oculta": "sheer_force"
+		},
+		"nidoran_m": {
+			"normais": ["poison_point", "rivalry"],
+			"oculta": "hustle"
+		},
+		"nidorino": {
+			"normais": ["poison_point", "rivalry"],
+			"oculta": "hustle"
+		},
+		"nidoking": {
+			"normais": ["poison_point", "rivalry"],
+			"oculta": "sheer_force"
+		},
+		"jigglypuff": {
+			"normais": ["cute_charm", "competitive"],
+			"oculta": "friend_guard"
+		},
+		"zubat": {
+			"normais": ["inner_focus"],
+			"oculta": "infiltrator"
+		},
+		"golbat": {
+			"normais": ["inner_focus"],
+			"oculta": "infiltrator"
+		},
+		"oddish": {
+			"normais": ["chlorophyll"],
+			"oculta": "run_away"
+		},
+		"gloom": {
+			"normais": ["chlorophyll"],
+			"oculta": "stench"
+		},
+		"paras": {
+			"normais": ["effect_spore", "dry_skin"],
+			"oculta": "damp"
+		},
+		"parasect": {
+			"normais": ["effect_spore", "dry_skin"],
+			"oculta": "damp"
+		},
+		"venonat": {
+			"normais": ["compound_eyes", "tinted_lens"],
+			"oculta": "run_away"
+		},
+		"venomoth": {
+			"normais": ["shield_dust", "tinted_lens"],
+			"oculta": "wonder_skin"
+		},
+		"diglett": {
+			"normais": ["sand_veil", "arena_trap"],
+			"oculta": "sand_force"
+		},
+		"dugtrio": {
+			"normais": ["sand_veil", "arena_trap"],
+			"oculta": "sand_force"
+		},
+		"meowth": {
+			"normais": ["pickup", "technician"],
+			"oculta": "unnerve"
+		},
+		"persian": {
+			"normais": ["limber", "technician"],
+			"oculta": "unnerve"
+		},
+		"psyduck": {
+			"normais": ["damp", "cloud_nine"],
+			"oculta": "swift_swim"
+		},
+		"golduck": {
+			"normais": ["damp", "cloud_nine"],
+			"oculta": "swift_swim"
+		},
+		"mankey": {
+			"normais": ["vital_spirit", "anger_point"],
+			"oculta": "defiant"
+		},
+		"primeape": {
+			"normais": ["vital_spirit", "anger_point"],
+			"oculta": "defiant"
+		},
+		"growlithe": {
+			"normais": ["intimidate", "flash_fire"],
+			"oculta": "justified"
+		},
+		"arcanine": {
+			"normais": ["intimidate", "flash_fire"],
+			"oculta": "justified"
+		},
+		"poliwag": {
+			"normais": ["water_absorb", "damp"],
+			"oculta": "swift_swim"
+		},
+		"poliwhirl": {
+			"normais": ["water_absorb", "damp"],
+			"oculta": "swift_swim"
+		},
+		"abra": {
+			"normais": ["synchronize", "inner_focus"],
+			"oculta": "magic_guard"
+		},
+		"kadabra": {
+			"normais": ["synchronize", "inner_focus"],
+			"oculta": "magic_guard"
+		},
+		"alakazam": {
+			"normais": ["synchronize", "inner_focus"],
+			"oculta": "magic_guard"
+		},
+		"machop": {
+			"normais": ["guts", "no_guard"],
+			"oculta": "steadfast"
+		},
+		"machoke": {
+			"normais": ["guts", "no_guard"],
+			"oculta": "steadfast"
+		},
+		"machamp": {
+			"normais": ["guts", "no_guard"],
+			"oculta": "steadfast"
+		},
+		"bellsprout": {
+			"normais": ["chlorophyll"],
+			"oculta": "gluttony"
+		},
+		"weepinbell": {
+			"normais": ["chlorophyll"],
+			"oculta": "gluttony"
+		},
+		"victreebel": {
+			"normais": ["chlorophyll"],
+			"oculta": "gluttony"
+		},
+		"tentacool": {
+			"normais": ["clear_body", "liquid_ooze"],
+			"oculta": "rain_dish"
+		},
+		"tentacruel": {
+			"normais": ["clear_body", "liquid_ooze"],
+			"oculta": "rain_dish"
+		},
+		"geodude": {
+			"normais": ["rock_head", "sturdy"],
+			"oculta": "sand_veil"
+		},
+		"graveler": {
+			"normais": ["rock_head", "sturdy"],
+			"oculta": "sand_veil"
+		},
+		"golem": {
+			"normais": ["rock_head", "sturdy"],
+			"oculta": "sand_veil"
+		},
+		"ponyta": {
+			"normais": ["run_away", "flash_fire"],
+			"oculta": "flame_body"
+		},
+		"rapidash": {
+			"normais": ["run_away", "flash_fire"],
+			"oculta": "flame_body"
+		},
+		"slowpoke": {
+			"normais": ["oblivious", "own_tempo"],
+			"oculta": "regenerator"
+		},
+		"slowbro": {
+			"normais": ["oblivious", "own_tempo"],
+			"oculta": "regenerator"
+		},
+		"magnemite": {
+			"normais": ["magnet_pull", "sturdy"],
+			"oculta": "analytic"
+		},
+		"magneton": {
+			"normais": ["magnet_pull", "sturdy"],
+			"oculta": "analytic"
+		},
+		"farfetch_d": {
+			"normais": ["keen_eye", "inner_focus"],
+			"oculta": "defiant"
+		},
+		"doduo": {
+			"normais": ["run_away", "early_bird"],
+			"oculta": "tangled_feet"
+		},
+		"dodrio": {
+			"normais": ["run_away", "early_bird"],
+			"oculta": "tangled_feet"
+		},
+		"seel": {
+			"normais": ["thick_fat", "hydration"],
+			"oculta": "ice_body"
+		},
+		"dewgong": {
+			"normais": ["thick_fat", "hydration"],
+			"oculta": "ice_body"
+		},
+		"grimer": {
+			"normais": ["stench", "sticky_hold"],
+			"oculta": "poison_touch"
+		},
+		"muk": {
+			"normais": ["stench", "sticky_hold"],
+			"oculta": "poison_touch"
+		},
+		"shellder": {
+			"normais": ["shell_armor", "skill_link"],
+			"oculta": "overcoat"
+		},
+		"gastly": {
+			"normais": ["levitate"],
+			"oculta": null
+		},
+		"haunter": {
+			"normais": ["levitate"],
+			"oculta": null
+		},
+		"gengar": {
+			"normais": ["cursed_body"],
+			"oculta": null
+		},
+		"onix": {
+			"normais": ["rock_head", "sturdy"],
+			"oculta": "weak_armor"
+		},
+		"drowzee": {
+			"normais": ["insomnia", "forewarn"],
+			"oculta": "inner_focus"
+		},
+		"hypno": {
+			"normais": ["insomnia", "forewarn"],
+			"oculta": "inner_focus"
+		},
+		"krabby": {
+			"normais": ["hyper_cutter", "shell_armor"],
+			"oculta": "sheer_force"
+		},
+		"kingler": {
+			"normais": ["hyper_cutter", "shell_armor"],
+			"oculta": "sheer_force"
+		},
+		"voltorb": {
+			"normais": ["soundproof", "static"],
+			"oculta": "aftermath"
+		},
+		"electrode": {
+			"normais": ["soundproof", "static"],
+			"oculta": "aftermath"
+		},
+		"exeggcute": {
+			"normais": ["chlorophyll"],
+			"oculta": "harvest"
+		},
+		"cubone": {
+			"normais": ["rock_head", "lightning_rod"],
+			"oculta": "battle_armor"
+		},
+		"marowak": {
+			"normais": ["rock_head", "lightning_rod"],
+			"oculta": "battle_armor"
+		},
+		"hitmonlee": {
+			"normais": ["limber", "reckless"],
+			"oculta": "unburden"
+		},
+		"hitmonchan": {
+			"normais": ["keen_eye", "iron_fist"],
+			"oculta": "inner_focus"
+		},
+		"lickitung": {
+			"normais": ["own_tempo", "oblivious"],
+			"oculta": "cloud_nine"
+		},
+		"koffing": {
+			"normais": ["levitate", "neutralizing_gas"],
+			"oculta": "stench"
+		},
+		"weezing": {
+			"normais": ["levitate", "neutralizing_gas"],
+			"oculta": "stench"
+		},
+		"rhyhorn": {
+			"normais": ["lightning_rod", "rock_head"],
+			"oculta": "reckless"
+		},
+		"rhydon": {
+			"normais": ["lightning_rod", "rock_head"],
+			"oculta": "reckless"
+		},
+		"tangela": {
+			"normais": ["chlorophyll", "leaf_guard"],
+			"oculta": "regenerator"
+		},
+		"kangaskhan": {
+			"normais": ["early_bird", "scrappy"],
+			"oculta": "inner_focus"
+		},
+		"horsea": {
+			"normais": ["swift_swim", "sniper"],
+			"oculta": "damp"
+		},
+		"seadra": {
+			"normais": ["poison_point", "sniper"],
+			"oculta": "damp"
+		},
+		"goldeen": {
+			"normais": ["swift_swim", "water_veil"],
+			"oculta": "lightning_rod"
+		},
+		"seaking": {
+			"normais": ["swift_swim", "water_veil"],
+			"oculta": "lightning_rod"
+		},
+		"staryu": {
+			"normais": ["illuminate", "natural_cure"],
+			"oculta": "analytic"
+		},
+		"scyther": {
+			"normais": ["swarm", "technician"],
+			"oculta": "steadfast"
+		},
+		"jynx": {
+			"normais": ["oblivious", "forewarn"],
+			"oculta": "dry_skin"
+		},
+		"electabuzz": {
+			"normais": ["static"],
+			"oculta": "vital_spirit"
+		},
+		"magmar": {
+			"normais": ["flame_body"],
+			"oculta": "vital_spirit"
+		},
+		"pinsir": {
+			"normais": ["hyper_cutter", "mold_breaker"],
+			"oculta": "moxie"
+		},
+		"tauros": {
+			"normais": ["intimidate", "anger_point"],
+			"oculta": "sheer_force"
+		},
+		"magikarp": {
+			"normais": ["swift_swim"],
+			"oculta": "rattled"
+		},
+		"gyarados": {
+			"normais": ["intimidate"],
+			"oculta": "moxie"
+		},
+		"lapras": {
+			"normais": ["water_absorb", "shell_armor"],
+			"oculta": "hydration"
+		},
+		"ditto": {
+			"normais": ["limber"],
+			"oculta": "imposter"
+		},
+		"eevee": {
+			"normais": ["run_away", "adaptability"],
+			"oculta": "anticipation"
+		},
+		"porygon": {
+			"normais": ["trace", "download"],
+			"oculta": "analytic"
+		},
+		"omanyte": {
+			"normais": ["swift_swim", "shell_armor"],
+			"oculta": "weak_armor"
+		},
+		"omastar": {
+			"normais": ["swift_swim", "shell_armor"],
+			"oculta": "weak_armor"
+		},
+		"kabuto": {
+			"normais": ["swift_swim", "battle_armor"],
+			"oculta": "weak_armor"
+		},
+		"kabutops": {
+			"normais": ["swift_swim", "battle_armor"],
+			"oculta": "weak_armor"
+		},
+		"aerodactyl": {
+			"normais": ["rock_head", "pressure"],
+			"oculta": "unnerve"
+		},
+		"snorlax": {
+			"normais": ["immunity", "thick_fat"],
+			"oculta": "gluttony"
+		},
+		"articuno": {
+			"normais": ["pressure"],
+			"oculta": "snow_cloak"
+		},
+		"zapdos": {
+			"normais": ["pressure"],
+			"oculta": "static"
+		},
+		"moltres": {
+			"normais": ["pressure"],
+			"oculta": "flame_body"
+		},
+		"dratini": {
+			"normais": ["shed_skin"],
+			"oculta": "marvel_scale"
+		},
+		"dragonair": {
+			"normais": ["shed_skin"],
+			"oculta": "marvel_scale"
+		},
+		"dragonite": {
+			"normais": ["inner_focus"],
+			"oculta": "multiscale"
+		},
+		"mewtwo": {
+			"normais": ["pressure"],
+			"oculta": "unnerve"
+		},
+		"mew": {
+			"normais": ["synchronize"],
+			"oculta": null
+		},
+		"chikorita": {
+			"normais": ["overgrow"],
+			"oculta": "leaf_guard"
+		},
+		"bayleef": {
+			"normais": ["overgrow"],
+			"oculta": "leaf_guard"
+		},
+		"meganium": {
+			"normais": ["overgrow"],
+			"oculta": "leaf_guard"
+		},
+		"cyndaquil": {
+			"normais": ["blaze"],
+			"oculta": "flash_fire"
+		},
+		"quilava": {
+			"normais": ["blaze"],
+			"oculta": "flash_fire"
+		},
+		"typhlosion": {
+			"normais": ["blaze"],
+			"oculta": "flash_fire"
+		},
+		"totodile": {
+			"normais": ["torrent"],
+			"oculta": "sheer_force"
+		},
+		"croconaw": {
+			"normais": ["torrent"],
+			"oculta": "sheer_force"
+		},
+		"feraligatr": {
+			"normais": ["torrent"],
+			"oculta": "sheer_force"
+		},
+		"sentret": {
+			"normais": ["run_away", "keen_eye"],
+			"oculta": "frisk"
+		},
+		"furret": {
+			"normais": ["run_away", "keen_eye"],
+			"oculta": "frisk"
+		},
+		"hoothoot": {
+			"normais": ["insomnia", "keen_eye"],
+			"oculta": "tinted_lens"
+		},
+		"noctowl": {
+			"normais": ["insomnia", "keen_eye"],
+			"oculta": "tinted_lens"
+		},
+		"ledyba": {
+			"normais": ["swarm", "early_bird"],
+			"oculta": "rattled"
+		},
+		"ledian": {
+			"normais": ["swarm", "early_bird"],
+			"oculta": "iron_fist"
+		},
+		"spinarak": {
+			"normais": ["swarm", "insomnia"],
+			"oculta": "sniper"
+		},
+		"ariados": {
+			"normais": ["swarm", "insomnia"],
+			"oculta": "sniper"
+		},
+		"chinchou": {
+			"normais": ["volt_absorb", "illuminate"],
+			"oculta": "water_absorb"
+		},
+		"lanturn": {
+			"normais": ["volt_absorb", "illuminate"],
+			"oculta": "water_absorb"
+		},
+		"pichu": {
+			"normais": ["static"],
+			"oculta": "lightning_rod"
+		},
+		"cleffa": {
+			"normais": ["cute_charm", "magic_guard"],
+			"oculta": "friend_guard"
+		},
+		"igglybuff": {
+			"normais": ["cute_charm", "competitive"],
+			"oculta": "friend_guard"
+		},
+		"togepi": {
+			"normais": ["hustle", "serene_grace"],
+			"oculta": "super_luck"
+		},
+		"natu": {
+			"normais": ["synchronize", "early_bird"],
+			"oculta": "magic_bounce"
+		},
+		"xatu": {
+			"normais": ["synchronize", "early_bird"],
+			"oculta": "magic_bounce"
+		},
+		"mareep": {
+			"normais": ["static"],
+			"oculta": "plus"
+		},
+		"flaaffy": {
+			"normais": ["static"],
+			"oculta": "plus"
+		},
+		"ampharos": {
+			"normais": ["static"],
+			"oculta": "plus"
+		},
+		"marill": {
+			"normais": ["thick_fat", "huge_power"],
+			"oculta": "sap_sipper"
+		},
+		"azumarill": {
+			"normais": ["thick_fat", "huge_power"],
+			"oculta": "sap_sipper"
+		},
+		"sudowoodo": {
+			"normais": ["sturdy", "rock_head"],
+			"oculta": "rattled"
+		},
+		"politoed": {
+			"normais": ["water_absorb", "damp"],
+			"oculta": "drizzle"
+		},
+		"hoppip": {
+			"normais": ["chlorophyll", "leaf_guard"],
+			"oculta": "infiltrator"
+		},
+		"skiploom": {
+			"normais": ["chlorophyll", "leaf_guard"],
+			"oculta": "infiltrator"
+		},
+		"jumpluff": {
+			"normais": ["chlorophyll", "leaf_guard"],
+			"oculta": "infiltrator"
+		},
+		"aipom": {
+			"normais": ["run_away", "pickup"],
+			"oculta": "skill_link"
+		},
+		"sunkern": {
+			"normais": ["chlorophyll", "solar_power"],
+			"oculta": "early_bird"
+		},
+		"sunflora": {
+			"normais": ["chlorophyll", "solar_power"],
+			"oculta": "early_bird"
+		},
+		"yanma": {
+			"normais": ["speed_boost", "compound_eyes"],
+			"oculta": "frisk"
+		},
+		"wooper": {
+			"normais": ["damp", "water_absorb"],
+			"oculta": "unaware"
+		},
+		"quagsire": {
+			"normais": ["damp", "water_absorb"],
+			"oculta": "unaware"
+		},
+		"murkrow": {
+			"normais": ["insomnia", "super_luck"],
+			"oculta": "prankster"
+		},
+		"misdreavus": {
+			"normais": ["levitate"],
+			"oculta": null
+		},
+		"unown": {
+			"normais": ["levitate"],
+			"oculta": null
+		},
+		"wobbuffet": {
+			"normais": ["shadow_tag"],
+			"oculta": "telepathy"
+		},
+		"girafarig": {
+			"normais": ["inner_focus", "early_bird"],
+			"oculta": "sap_sipper"
+		},
+		"pineco": {
+			"normais": ["sturdy"],
+			"oculta": "overcoat"
+		},
+		"forretress": {
+			"normais": ["sturdy"],
+			"oculta": "overcoat"
+		},
+		"dunsparce": {
+			"normais": ["serene_grace", "run_away"],
+			"oculta": "rattled"
+		},
+		"gligar": {
+			"normais": ["hyper_cutter", "sand_veil"],
+			"oculta": "immunity"
+		},
+		"steelix": {
+			"normais": ["rock_head", "sturdy"],
+			"oculta": "sheer_force"
+		},
+		"snubbull": {
+			"normais": ["intimidate", "run_away"],
+			"oculta": "rattled"
+		},
+		"granbull": {
+			"normais": ["intimidate", "quick_feet"],
+			"oculta": "rattled"
+		},
+		"qwilfish": {
+			"normais": ["poison_point", "swift_swim"],
+			"oculta": "intimidate"
+		},
+		"scizor": {
+			"normais": ["swarm", "technician"],
+			"oculta": "light_metal"
+		},
+		"heracross": {
+			"normais": ["swarm", "guts"],
+			"oculta": "moxie"
+		},
+		"sneasel": {
+			"normais": ["inner_focus", "keen_eye"],
+			"oculta": "pickpocket"
+		},
+		"teddiursa": {
+			"normais": ["pickup", "quick_feet"],
+			"oculta": "honey_gather"
+		},
+		"ursaring": {
+			"normais": ["guts", "quick_feet"],
+			"oculta": "unnerve"
+		},
+		"slugma": {
+			"normais": ["magma_armor", "flame_body"],
+			"oculta": "weak_armor"
+		},
+		"magcargo": {
+			"normais": ["magma_armor", "flame_body"],
+			"oculta": "weak_armor"
+		},
+		"swinub": {
+			"normais": ["oblivious", "snow_cloak"],
+			"oculta": "thick_fat"
+		},
+		"piloswine": {
+			"normais": ["oblivious", "snow_cloak"],
+			"oculta": "thick_fat"
+		},
+		"corsola": {
+			"normais": ["hustle", "natural_cure"],
+			"oculta": "regenerator"
+		},
+		"remoraid": {
+			"normais": ["hustle", "sniper"],
+			"oculta": "moody"
+		},
+		"octillery": {
+			"normais": ["suction_cups", "sniper"],
+			"oculta": "moody"
+		},
+		"delibird": {
+			"normais": ["vital_spirit", "hustle"],
+			"oculta": "insomnia"
+		},
+		"mantine": {
+			"normais": ["swift_swim", "water_absorb"],
+			"oculta": "water_veil"
+		},
+		"skarmory": {
+			"normais": ["keen_eye", "sturdy"],
+			"oculta": "weak_armor"
+		},
+		"houndour": {
+			"normais": ["early_bird", "flash_fire"],
+			"oculta": "unnerve"
+		},
+		"houndoom": {
+			"normais": ["early_bird", "flash_fire"],
+			"oculta": "unnerve"
+		},
+		"kingdra": {
+			"normais": ["swift_swim", "sniper"],
+			"oculta": "damp"
+		},
+		"phanpy": {
+			"normais": ["pickup"],
+			"oculta": "sand_veil"
+		},
+		"donphan": {
+			"normais": ["sturdy"],
+			"oculta": "sand_veil"
+		},
+		"porygon2": {
+			"normais": ["trace", "download"],
+			"oculta": "analytic"
+		},
+		"stantler": {
+			"normais": ["intimidate", "frisk"],
+			"oculta": "sap_sipper"
+		},
+		"smeargle": {
+			"normais": ["own_tempo", "technician"],
+			"oculta": "moody"
+		},
+		"tyrogue": {
+			"normais": ["guts", "steadfast"],
+			"oculta": "vital_spirit"
+		},
+		"smoochum": {
+			"normais": ["oblivious", "forewarn"],
+			"oculta": "hydration"
+		},
+		"elekid": {
+			"normais": ["static"],
+			"oculta": "vital_spirit"
+		},
+		"magby": {
+			"normais": ["flame_body"],
+			"oculta": "vital_spirit"
+		},
+		"miltank": {
+			"normais": ["thick_fat", "scrappy"],
+			"oculta": "sap_sipper"
+		},
+		"raikou": {
+			"normais": ["pressure"],
+			"oculta": "inner_focus"
+		},
+		"entei": {
+			"normais": ["pressure"],
+			"oculta": "inner_focus"
+		},
+		"suicune": {
+			"normais": ["pressure"],
+			"oculta": "inner_focus"
+		},
+		"larvitar": {
+			"normais": ["guts"],
+			"oculta": "sand_veil"
+		},
+		"pupitar": {
+			"normais": ["shed_skin"],
+			"oculta": null
+		},
+		"tyranitar": {
+			"normais": ["sand_stream"],
+			"oculta": "unnerve"
+		},
+		"lugia": {
+			"normais": ["pressure"],
+			"oculta": "multiscale"
+		},
+		"ho_oh": {
+			"normais": ["pressure"],
+			"oculta": "regenerator"
+		},
+		"celebi": {
+			"normais": ["natural_cure"],
+			"oculta": null
+		}
+	}
+};
+//#endregion
+//#region src/data/traits.ts
+var TRAITS = TRAITS_DATA.catalogo;
+/** Quais habilidades cada especie pode ter, na forma dos jogos. */
+function traitsDaEspecie(speciesId) {
+	return TRAITS_DATA.porEspecie[speciesId] ?? null;
+}
+/**
+* Sorteia a habilidade de UM POKE. `rng` obrigatorio e primeiro parametro pelo
+* mesmo motivo de `createPokeInstance`: e um sorteio que o servidor precisa
+* poder reconferir, e um default pra `Math.random()` abriria um caminho
+* silencioso de volta pro nao-verificavel.
+*/
+function sortearTrait(rng, speciesId) {
+	const disponiveis = traitsDaEspecie(speciesId);
+	if (!disponiveis) return null;
+	if (disponiveis.oculta && rollChance(rng, .05)) return disponiveis.oculta;
+	if (disponiveis.normais.length === 0) return disponiveis.oculta;
+	return disponiveis.normais[randInt(rng, 0, disponiveis.normais.length - 1)];
+}
+/**
+* A habilidade DESTE POKE.
+*
+* O fallback pro slot 1 da especie NAO e defensividade a toa: todo POKE salvo
+* antes desta leva tem `trait` ausente, e sao milhares. Sem ele, um time
+* inteiro perderia habilidade de uma vez na primeira carga depois do deploy —
+* e a habilidade e invisivel no combate (ninguem "ve" o Intimidate faltando),
+* entao o sintoma seria so "o jogo ficou mais fraco".
+*/
+function traitDoPoke(poke) {
+	if (!poke) return null;
+	if (poke.trait && TRAITS[poke.trait]) return poke.trait;
+	return traitsDaEspecie(poke.speciesId)?.normais[0] ?? null;
+}
+//#endregion
 //#region src/data/typedAoeMoves.ts
 var TYPED_AOE_POWER = 70;
 var TYPED_AOE_PP = 7;
@@ -24187,7 +25748,9 @@ function activeAbilitiesPadrao(species, level) {
 }
 function danoEfetivo(ability, species) {
 	const temStab = ability.type === species.type || ability.type === species.type2;
-	return ability.power * (temStab ? STAB_MULTIPLIER$1 : 1);
+	const precisao = (ability.accuracy ?? 100) / 100;
+	const recuo = Math.max(0, -(ability.drainPercent ?? 0)) / 100;
+	return ability.power * (temStab ? STAB_MULTIPLIER$1 : 1) * precisao * (1 - recuo);
 }
 function encaixarNovosGolpes(atuais, novos) {
 	const saida = [...atuais];
@@ -24290,25 +25853,34 @@ for (const [fromId, toId] of Object.entries({
 	}
 }
 var SHINY_STAT_MULTIPLIER = 1.5;
-function computeStatsAtLevel(species, level, ivs, rarityKey, isShiny) {
+function computeStatsAtLevel(species, level, ivs, rarityKey, isShiny, nature) {
 	const lvl = Math.max(1, level);
 	const rarityMultiplier = (rarityKey && RARITIES[rarityKey] || RARITIES.comum).statMultiplier;
 	const stats = {};
 	for (const key of Object.keys(species.base)) {
 		const formulaKey = key === "hp" ? "HP_FORMULA" : "STAT_FORMULA";
-		const base = formulaEngine$6.eval(formulaKey, {
+		const comNatureza = formulaEngine$6.eval(formulaKey, {
 			base: species.base[key],
 			level: lvl,
 			iv: ivs[key]
-		});
-		const shinyBase = isShiny ? base * SHINY_STAT_MULTIPLIER : base;
+		}) * multiplicadorDeNatureza(nature, key);
+		const shinyBase = isShiny ? comNatureza * SHINY_STAT_MULTIPLIER : comNatureza;
 		stats[key] = Math.max(1, Math.round(shinyBase * rarityMultiplier));
 	}
 	return stats;
 }
 var IV_MAX = 31;
-function rollIvs(rng) {
-	return {
+var IV_PERFEITOS_DE_LENDARIO = 3;
+var STAT_KEYS = [
+	"hp",
+	"atkFis",
+	"atkEsp",
+	"def",
+	"defEsp",
+	"speed"
+];
+function rollIvs(rng, speciesId) {
+	const ivs = {
 		hp: randInt(rng, 0, IV_MAX),
 		atkFis: randInt(rng, 0, IV_MAX),
 		atkEsp: randInt(rng, 0, IV_MAX),
@@ -24316,17 +25888,26 @@ function rollIvs(rng) {
 		defEsp: randInt(rng, 0, IV_MAX),
 		speed: randInt(rng, 0, IV_MAX)
 	};
+	if (!speciesId || !LEGENDARY_SPECIES_IDS.includes(speciesId)) return ivs;
+	const restantes = [...STAT_KEYS];
+	for (let i = 0; i < IV_PERFEITOS_DE_LENDARIO; i++) {
+		const escolhido = restantes.splice(randInt(rng, 0, restantes.length - 1), 1)[0];
+		ivs[escolhido] = IV_MAX;
+	}
+	return ivs;
 }
 function novoPokeUid() {
 	return crypto.randomUUID();
 }
-function createPokeInstance(rng, speciesId, level = 1, { ivs: fixedIvs, rarity: fixedRarity } = {}) {
+function createPokeInstance(rng, speciesId, level = 1, { ivs: fixedIvs, rarity: fixedRarity, nature: fixedNature } = {}) {
 	const species = SPECIES[speciesId];
 	if (!species) throw new Error(`Especie desconhecida: ${speciesId}`);
-	const ivs = fixedIvs || rollIvs(rng);
+	const ivs = fixedIvs || rollIvs(rng, speciesId);
 	const rarity = fixedRarity || rollRarity(rng);
 	const isShiny = rollChance(rng, species.catchRate / MAX_CATCH_RATE * SHINY_CHANCE_AT_MAX_CATCH_RATE);
-	const stats = computeStatsAtLevel(species, level, ivs, rarity, isShiny);
+	const nature = fixedNature ?? NATURE_LIST[randInt(rng, 0, NATURE_LIST.length - 1)].key;
+	const trait = sortearTrait(rng, speciesId) ?? void 0;
+	const stats = computeStatsAtLevel(species, level, ivs, rarity, isShiny, nature);
 	return {
 		uid: novoPokeUid(),
 		speciesId,
@@ -24335,6 +25916,8 @@ function createPokeInstance(rng, speciesId, level = 1, { ivs: fixedIvs, rarity: 
 		rarity,
 		exp: pokeExpForLevel(level, species.growthCurve),
 		ivs,
+		nature,
+		trait,
 		stats,
 		hp: stats.hp,
 		unlockedAbilities: golpesAprendidosAte(species, level),
@@ -26630,21 +28213,6 @@ var SPAWN_WEIGHT_BY_SPECIES = {
 	"zubat": 20
 };
 //#endregion
-//#region src/data/legendaries.ts
-var LEGENDARY_SPECIES_IDS = [
-	"articuno",
-	"zapdos",
-	"moltres",
-	"raikou",
-	"entei",
-	"suicune",
-	"lugia",
-	"ho_oh",
-	"celebi",
-	"mewtwo",
-	"mew"
-];
-//#endregion
 //#region src/data/nightmareMaps.ts
 var TYPE_BACKGROUND_IMAGE = {
 	FIRE: "assets/hunt-backgrounds/volcano.jpg",
@@ -27543,170 +29111,6 @@ var ITEMS = {
 };
 function getItem(id) {
 	return ITEMS[id] || null;
-}
-//#endregion
-//#region src/data/traits.ts
-var SPECIES_TRAIT = {
-	gastly: "levitate",
-	haunter: "levitate",
-	gengar: "levitate",
-	koffing: "levitate",
-	weezing: "levitate",
-	misdreavus: "levitate",
-	unown: "levitate",
-	chinchou: "volt_absorb",
-	lanturn: "volt_absorb",
-	lapras: "water_absorb",
-	quagsire: "water_absorb",
-	wooper: "water_absorb",
-	poliwag: "water_absorb",
-	poliwhirl: "water_absorb",
-	mantine: "water_absorb",
-	growlithe: "flash_fire",
-	arcanine: "flash_fire",
-	houndour: "flash_fire",
-	houndoom: "flash_fire",
-	ponyta: "flash_fire",
-	rapidash: "flash_fire",
-	miltank: "sap_sipper",
-	girafarig: "sap_sipper",
-	stantler: "sap_sipper",
-	rhyhorn: "lightning_rod",
-	rhydon: "lightning_rod",
-	arbok: "intimidate",
-	gyarados: "intimidate",
-	snubbull: "intimidate",
-	granbull: "intimidate",
-	qwilfish: "intimidate",
-	porygon: "download",
-	porygon2: "download",
-	pikachu: "static",
-	voltorb: "static",
-	electrode: "static",
-	electabuzz: "static",
-	elekid: "static",
-	mareep: "static",
-	flaaffy: "static",
-	ampharos: "static",
-	zapdos: "static",
-	magmar: "flame_body",
-	magby: "flame_body",
-	slugma: "flame_body",
-	magcargo: "flame_body",
-	nidoran_f: "poison_point",
-	nidorina: "poison_point",
-	nidoqueen: "poison_point",
-	nidoran_m: "poison_point",
-	nidorino: "poison_point",
-	nidoking: "poison_point",
-	paras: "effect_spore",
-	parasect: "effect_spore",
-	snorlax: "immunity",
-	ditto: "limber",
-	meowth: "limber",
-	persian: "limber",
-	murkrow: "insomnia",
-	spinarak: "insomnia",
-	ariados: "insomnia",
-	mankey: "vital_spirit",
-	primeape: "vital_spirit",
-	delibird: "vital_spirit",
-	goldeen: "water_veil",
-	seaking: "water_veil",
-	slowpoke: "own_tempo",
-	slowbro: "own_tempo",
-	smeargle: "own_tempo",
-	zubat: "inner_focus",
-	golbat: "inner_focus",
-	sneasel: "inner_focus",
-	drowzee: "inner_focus",
-	hypno: "inner_focus",
-	marill: "huge_power",
-	azumarill: "huge_power",
-	corsola: "hustle",
-	machop: "guts",
-	machoke: "guts",
-	machamp: "guts",
-	heracross: "guts",
-	tyrogue: "guts",
-	ursaring: "guts",
-	teddiursa: "quick_feet",
-	horsea: "swift_swim",
-	seadra: "swift_swim",
-	kingdra: "swift_swim",
-	magikarp: "swift_swim",
-	psyduck: "swift_swim",
-	golduck: "swift_swim",
-	omanyte: "swift_swim",
-	omastar: "swift_swim",
-	kabuto: "swift_swim",
-	kabutops: "swift_swim",
-	oddish: "chlorophyll",
-	gloom: "chlorophyll",
-	bellsprout: "chlorophyll",
-	weepinbell: "chlorophyll",
-	victreebel: "chlorophyll",
-	exeggcute: "chlorophyll",
-	tangela: "chlorophyll",
-	hoppip: "chlorophyll",
-	skiploom: "chlorophyll",
-	jumpluff: "chlorophyll",
-	sunkern: "chlorophyll",
-	sunflora: "chlorophyll",
-	sandshrew: "sand_rush",
-	sandslash: "sand_rush",
-	charmander: "blaze",
-	charmeleon: "blaze",
-	charizard: "blaze",
-	cyndaquil: "blaze",
-	quilava: "blaze",
-	typhlosion: "blaze",
-	squirtle: "torrent",
-	wartortle: "torrent",
-	blastoise: "torrent",
-	totodile: "torrent",
-	croconaw: "torrent",
-	feraligatr: "torrent",
-	bulbasaur: "overgrow",
-	ivysaur: "overgrow",
-	venusaur: "overgrow",
-	chikorita: "overgrow",
-	bayleef: "overgrow",
-	meganium: "overgrow",
-	beedrill: "swarm",
-	scyther: "swarm",
-	scizor: "swarm",
-	ledyba: "swarm",
-	ledian: "swarm",
-	politoed: "drizzle",
-	tyranitar: "sand_stream",
-	seel: "ice_body",
-	dewgong: "ice_body",
-	diglett: "sand_veil",
-	dugtrio: "sand_veil",
-	gligar: "sand_veil",
-	larvitar: "sand_veil",
-	pupitar: "sand_veil",
-	phanpy: "sand_veil",
-	donphan: "sand_veil",
-	swinub: "snow_cloak",
-	piloswine: "snow_cloak",
-	articuno: "snow_cloak",
-	geodude: "sturdy",
-	graveler: "sturdy",
-	golem: "sturdy",
-	steelix: "sturdy",
-	dragonite: "multiscale",
-	lugia: "multiscale",
-	abra: "synchronize",
-	kadabra: "synchronize",
-	alakazam: "synchronize",
-	natu: "synchronize",
-	xatu: "synchronize",
-	mew: "synchronize"
-};
-function traitOf(speciesId) {
-	return SPECIES_TRAIT[speciesId] ?? null;
 }
 //#endregion
 //#region src/data/generated/typeChart.generated.ts
@@ -28874,6 +30278,276 @@ function corDoStatus(tipo) {
 	return CORES[tipo] ?? "#e5e5e5";
 }
 //#endregion
+//#region src/data/traitEffects.ts
+/** Dobra a Velocidade no clima correspondente (Gen VII: 2x, nao 1.5x). */
+var VELOCIDADE_DOBRADA_NO_CLIMA = {
+	chlorophyll: "sol",
+	swift_swim: "chuva",
+	sand_rush: "areia"
+};
+function multiplicadorDeVelocidadePorTrait(trait, clima) {
+	if (!trait || !clima) return 1;
+	return VELOCIDADE_DOBRADA_NO_CLIMA[trait] === clima ? 2 : 1;
+}
+/**
+* Nao toma dano de tempestade de areia / granizo.
+*
+* Sand Force e Sand Rush entram porque a descricao delas diz isso
+* explicitamente ("Protects against sandstorm damage"), nao por simetria.
+* Magic Guard entra porque dano de clima e dano INDIRETO, que e exatamente o
+* que ela anula.
+*/
+var TRAIT_IMUNE_A_DANO_DE_CLIMA = /* @__PURE__ */ new Set([
+	"sand_veil",
+	"sand_rush",
+	"sand_force",
+	"snow_cloak",
+	"ice_body",
+	"overcoat",
+	"magic_guard"
+]);
+/** Fracao do HP MAXIMO curada por turno no clima certo. */
+var CURA_POR_CLIMA = {
+	rain_dish: {
+		clima: "chuva",
+		fracao: 1 / 16
+	},
+	ice_body: {
+		clima: "granizo",
+		fracao: 1 / 16
+	},
+	dry_skin: {
+		clima: "chuva",
+		fracao: 1 / 8
+	}
+};
+/** Fracao do HP MAXIMO PERDIDA por turno no clima certo. */
+var DANO_POR_CLIMA = {
+	dry_skin: {
+		clima: "sol",
+		fracao: 1 / 8
+	},
+	solar_power: {
+		clima: "sol",
+		fracao: 1 / 8
+	}
+};
+/** Evasao 1.25x no clima certo (o que reduz a precisao de quem ataca). */
+var EVASAO_POR_CLIMA = {
+	sand_veil: "areia",
+	snow_cloak: "granizo"
+};
+/** Cloud Nine / Air Lock: o clima continua no campo, mas nao surte efeito. */
+var TRAIT_ANULA_CLIMA = /* @__PURE__ */ new Set(["cloud_nine", "air_lock"]);
+var GOLPES_DE_SOCO = /* @__PURE__ */ new Set([
+	"comet_punch",
+	"mega_punch",
+	"fire_punch",
+	"ice_punch",
+	"thunder_punch",
+	"dizzy_punch",
+	"mach_punch",
+	"dynamic_punch",
+	"focus_punch",
+	"bullet_punch",
+	"shadow_punch",
+	"hammer_arm",
+	"sky_uppercut"
+]);
+var GOLPES_DE_SOM = /* @__PURE__ */ new Set([
+	"growl",
+	"roar",
+	"sing",
+	"supersonic",
+	"screech",
+	"snore",
+	"perish_song",
+	"heal_bell",
+	"uproar",
+	"hyper_voice",
+	"metal_sound",
+	"grass_whistle",
+	"howl",
+	"bug_buzz",
+	"round",
+	"echoed_voice",
+	"disarming_voice"
+]);
+/**
+* Golpe com efeito SECUNDARIO (status, mudanca de stat ou flinch pendurados num
+* golpe que causa dano). Sheer Force, Shield Dust e Serene Grace giram todas em
+* volta desta definicao.
+*
+* Golpe de status puro NAO conta: nele o efeito e o principal, nao o
+* secundario — Sheer Force nao fortalece Thunder Wave, e Shield Dust nao
+* protege dela.
+*/
+function temEfeitoSecundario(ability) {
+	if (ability.power <= 0) return false;
+	return Boolean(ability.status && (ability.statusChance ?? 0) > 0 || ability.statChanges?.length && (ability.statChance ?? 0) > 0 || (ability.flinchChance ?? 0) > 0);
+}
+var SHEER_FORCE_BONUS = 1.3;
+var TECHNICIAN_TETO_DE_PODER = 60;
+var TIPOS_DO_SAND_FORCE = [
+	"ROCK",
+	"GROUND",
+	"STEEL"
+];
+/**
+* Multiplicador sobre o PODER do golpe, vindo da habilidade de quem ATACA.
+* Empilham entre si — nenhuma especie tem duas ao mesmo tempo hoje, mas a
+* conta nao depende disso.
+*/
+function multiplicadorDePoderPorTrait(trait, ability, clima) {
+	if (!trait) return 1;
+	let m = 1;
+	if (trait === "technician" && ability.power > 0 && ability.power <= TECHNICIAN_TETO_DE_PODER) m *= 1.5;
+	if (trait === "iron_fist" && GOLPES_DE_SOCO.has(ability.id)) m *= 1.2;
+	if (trait === "reckless" && (ability.drainPercent ?? 0) < 0) m *= 1.2;
+	if (trait === "sheer_force" && temEfeitoSecundario(ability)) m *= SHEER_FORCE_BONUS;
+	if (trait === "sand_force" && clima === "areia" && TIPOS_DO_SAND_FORCE.includes(ability.type)) m *= 1.3;
+	return m;
+}
+/** STAB: Adaptability sobe de 1.5x para 2x. */
+function stabPorTrait(trait, stabPadrao) {
+	return trait === "adaptability" ? 2 : stabPadrao;
+}
+var TIPOS_DO_THICK_FAT = ["FIRE", "ICE"];
+/**
+* Multiplicador sobre o dano recebido, vindo da habilidade do DEFENSOR.
+* `efetividade` e o multiplicador de tipo ja calculado — Filter/Solid Rock
+* dependem dele.
+*/
+function multiplicadorDeDanoRecebidoPorTrait(trait, ability, efetividade) {
+	if (!trait) return 1;
+	let m = 1;
+	if (trait === "thick_fat" && TIPOS_DO_THICK_FAT.includes(ability.type)) m *= .5;
+	if (trait === "dry_skin" && ability.type === "FIRE") m *= 1.25;
+	if ((trait === "filter" || trait === "solid_rock") && efetividade > 1) m *= .75;
+	return m;
+}
+/** Tinted Lens: golpe pouco efetivo do PORTADOR causa o dobro. Habilidade de quem ATACA. */
+function multiplicadorDeDanoCausadoPorTrait(trait, efetividade) {
+	if (trait === "tinted_lens" && efetividade > 0 && efetividade < 1) return 2;
+	return 1;
+}
+/** Nao pode receber critico. */
+var TRAIT_SEM_CRITICO_RECEBIDO = /* @__PURE__ */ new Set(["shell_armor", "battle_armor"]);
+/** Estagios de critico somados pela habilidade de quem ataca. */
+function estagiosDeCriticoPorTrait(trait) {
+	return trait === "super_luck" ? 1 : 0;
+}
+/**
+* Sniper. Nos jogos o critico passa de 2x para 3x — 1.5x a mais. Este motor usa
+* critico de 1.5x (CRIT_MULTIPLIER, formula da planilha), entao o fiel e
+* multiplicar POR 1.5 de novo (1.5 -> 2.25), preservando a PROPORCAO e nao o
+* numero absoluto de outra geracao.
+*/
+var SNIPER_MULTIPLICADOR = 1.5;
+/** Multiplicador de precisao dos golpes do PORTADOR. */
+function multiplicadorDePrecisaoPorTrait(trait, isPhysical) {
+	if (trait === "compound_eyes") return 1.3;
+	if (trait === "hustle" && isPhysical) return .8;
+	return 1;
+}
+/** Keen Eye e Unaware ignoram a Evasao do alvo (motivos diferentes, mesmo efeito aqui). */
+var TRAIT_IGNORA_EVASAO = /* @__PURE__ */ new Set(["keen_eye", "unaware"]);
+/**
+* Habilidades que barram QUEDA de estagio causada pelo oponente.
+* `null` no valor = protege TODOS os atributos (Clear Body e afins);
+* uma chave = protege so aquele.
+*/
+var PROTECAO_DE_ESTAGIO = {
+	clear_body: null,
+	white_smoke: null,
+	full_metal_body: null,
+	hyper_cutter: "atkFis",
+	big_pecks: "def",
+	keen_eye: "accuracy"
+};
+/** Contrary: toda mudanca de estagio no portador troca de sinal. */
+var TRAIT_CONTRARY = "contrary";
+/** Reage a ter um atributo REBAIXADO pelo oponente: sobe outro. */
+var REACAO_A_QUEDA_DE_ESTAGIO = {
+	defiant: {
+		stat: "atkFis",
+		estagios: 2
+	},
+	competitive: {
+		stat: "atkEsp",
+		estagios: 2
+	}
+};
+/**
+* Habilidades cujo efeito e "sobe um estagio quando levo um hit". A tabela diz
+* O QUE sobe; o gatilho fica no motor (resolveHit).
+*/
+var REACAO_A_HIT = {
+	justified: {
+		tipos: ["DARK"],
+		stat: "atkFis",
+		estagios: 1
+	},
+	rattled: {
+		tipos: [
+			"DARK",
+			"GHOST",
+			"BUG"
+		],
+		stat: "speed",
+		estagios: 1
+	},
+	weak_armor: {
+		stat: "speed",
+		estagios: 2,
+		soFisico: true
+	},
+	anger_point: {
+		stat: "atkFis",
+		estagios: 12
+	}
+};
+/** Ignora a habilidade DEFENSIVA do alvo (imunidade, reducao de dano, protecao de estagio). */
+var TRAIT_QUEBRA_HABILIDADE = /* @__PURE__ */ new Set([
+	"mold_breaker",
+	"teravolt",
+	"turboblaze"
+]);
+/** Infiltrator: ignora Reflect/Light Screen/Safeguard/Mist do alvo. */
+var TRAIT_INFILTRATOR = "infiltrator";
+/** Unaware: ignora os estagios de atributo do oponente na conta de dano. */
+var TRAIT_UNAWARE = "unaware";
+/** Soundproof: imune a golpe de som. */
+function ehGolpeDeSom(abilityId) {
+	return GOLPES_DE_SOM.has(abilityId);
+}
+/** Solar Power: +50% de Ataque Especial sob sol (o custo esta em DANO_POR_CLIMA). */
+var SOLAR_POWER_BONUS = 1.5;
+/**
+* Habilidades que Trace NAO copia (regra dos jogos — sao as que so fazem
+* sentido no dono original, ou que criariam copia infinita).
+*/
+var TRACE_NAO_COPIA = /* @__PURE__ */ new Set([
+	"trace",
+	"forecast",
+	"flower_gift",
+	"multitype",
+	"illusion",
+	"imposter",
+	"stance_change",
+	"power_of_alchemy",
+	"receiver",
+	"disguise",
+	"rks_system",
+	"schooling",
+	"comatose",
+	"shields_down",
+	"battle_bond",
+	"power_construct",
+	"neutralizing_gas",
+	"zen_mode"
+]);
+//#endregion
 //#region src/engine/systems/statusSystem.ts
 var LEECH_SEED_DRAIN_PERCENT = 1 / 8;
 var CURSE_DOT_PERCENT = 1 / 4;
@@ -28888,7 +30562,7 @@ var TRAIT_STATUS_IMUNIDADE = {
 	own_tempo: "confusion"
 };
 function traitBloqueiaStatus(alvo, tipo) {
-	const trait = traitOf(alvo.poke.speciesId);
+	const trait = traitDoPoke(alvo.poke);
 	return trait != null && TRAIT_STATUS_IMUNIDADE[trait] === tipo;
 }
 function statusNaoVolatil(entity) {
@@ -28913,11 +30587,12 @@ function imobilizadoPorStatus(entity) {
 *
 * Nao sorteia nada: e a pergunta "pode pegar", nao "pegou".
 */
-function statusVaiPegar(alvo, tipo, abilityId) {
+function statusVaiPegar(alvo, tipo, abilityId, clima) {
 	if (alvo.imunidadeDeStatus > 0) return false;
 	if ((alvo.escudos?.safeguard ?? 0) > 0) return false;
 	if (ehVolatil(tipo) && alvo.statusVolatil) return false;
 	if (traitBloqueiaStatus(alvo, tipo)) return false;
+	if (clima === "sol" && traitDoPoke(alvo.poke) === "leaf_guard") return false;
 	const especie = SPECIES[alvo.poke.speciesId];
 	return podeReceberStatus(tipo, {
 		tipo1: especie.type,
@@ -28933,10 +30608,11 @@ function statusVaiPegar(alvo, tipo, abilityId) {
 * `abilityId` entra porque a imunidade a golpe de PO depende do GOLPE, nao do
 * status: GRASS ignora Sleep Powder mas nao ignora Hypnosis.
 */
-function aplicarStatus(rng, alvo, tipo, chance, abilityId) {
+function aplicarStatus(rng, alvo, tipo, chance, abilityId, clima) {
 	if (alvo.imunidadeDeStatus > 0) return null;
 	if ((alvo.escudos?.safeguard ?? 0) > 0) return null;
 	if (traitBloqueiaStatus(alvo, tipo)) return null;
+	if (clima === "sol" && traitDoPoke(alvo.poke) === "leaf_guard") return null;
 	const especie = SPECIES[alvo.poke.speciesId];
 	if (!podeReceberStatus(tipo, {
 		tipo1: especie.type,
@@ -28969,17 +30645,31 @@ function aplicarMudancasDeStat(rng, atacante, alvo, ability) {
 	if (nextFloat(rng) * 100 >= ability.statChance) return [];
 	const destino = ability.statTarget === "self" ? atacante : alvo;
 	const bloqueadoPorMist = ability.statTarget !== "self" && (alvo.escudos?.mist ?? 0) > 0;
+	const vemDoOponente = ability.statTarget !== "self";
+	const traitDoDestino = traitDoPoke(destino.poke);
+	const inverte = traitDoDestino === TRAIT_CONTRARY;
 	const aplicadas = [];
+	let sofreuQuedaDoOponente = false;
 	for (const mudanca of ability.statChanges) {
-		if (bloqueadoPorMist && mudanca.estagios < 0) continue;
+		const delta = inverte ? -mudanca.estagios : mudanca.estagios;
+		if (bloqueadoPorMist && delta < 0) continue;
+		const protegido = traitDoDestino ? PROTECAO_DE_ESTAGIO[traitDoDestino] : void 0;
+		const protegeEsteStat = traitDoDestino != null && traitDoDestino in PROTECAO_DE_ESTAGIO && (protegido === null || protegido === mudanca.stat);
+		if (delta < 0 && vemDoOponente && protegeEsteStat) continue;
 		const antes = destino.estagios[mudanca.stat] ?? 0;
-		const depois = Math.max(-6, Math.min(6, antes + mudanca.estagios));
+		const depois = Math.max(-6, Math.min(6, antes + delta));
 		if (depois === antes) continue;
 		destino.estagios[mudanca.stat] = depois;
 		aplicadas.push({
 			stat: mudanca.stat,
 			estagios: depois - antes
 		});
+		if (delta < 0 && vemDoOponente) sofreuQuedaDoOponente = true;
+	}
+	const reacao = traitDoDestino ? REACAO_A_QUEDA_DE_ESTAGIO[traitDoDestino] : void 0;
+	if (sofreuQuedaDoOponente && reacao) {
+		const subida = aplicarEstagioUnico(destino, reacao.stat, reacao.estagios);
+		if (subida) aplicadas.push(subida);
 	}
 	return aplicadas;
 }
@@ -29001,11 +30691,11 @@ function aplicarEstagioUnico(alvo, stat, delta) {
 		estagios: depois - antes
 	};
 }
-function aplicarEfeitosDoGolpe(rng, alvo, ability) {
+function aplicarEfeitosDoGolpe(rng, alvo, ability, clima) {
 	const congelado = statusNaoVolatil(alvo);
 	if (congelado && descongelaCom(congelado.tipo, ability.type, ability.power)) curarStatus(alvo, congelado.tipo);
 	if (!ability.status || !ability.statusChance) return null;
-	return aplicarStatus(rng, alvo, ability.status, ability.statusChance, ability.id);
+	return aplicarStatus(rng, alvo, ability.status, ability.statusChance, ability.id, clima);
 }
 /**
 * Tira um status e liga a imunidade de reaplicacao.
@@ -29067,6 +30757,11 @@ function limparEstadoVolatil(entity) {
 	entity.entradaProcessada = false;
 	entity.enduraAtiva = false;
 	entity.protegida = false;
+	entity.protecoesSeguidas = 0;
+	if (entity.traitOriginal !== void 0) {
+		entity.poke.trait = entity.traitOriginal ?? void 0;
+		entity.traitOriginal = void 0;
+	}
 	entity.destinyBondAtiva = false;
 	entity.curaBloqueadaAte = 0;
 	entity.miraGarantidaAlvoId = null;
@@ -29120,7 +30815,7 @@ function tickStatus(rng, entity, dt, clima = null) {
 	let dano = 0;
 	const nv = statusNaoVolatil(entity);
 	if (nv) {
-		if (nv.tipo === "poison" && traitOf(entity.poke.speciesId) === "poison_heal") {
+		if (nv.tipo === "poison" && traitDoPoke(entity.poke) === "poison_heal") {
 			const cura = danoPorTurno(nv.tipo, entity.poke.stats.hp);
 			entity.poke.hp = Math.min(entity.poke.stats.hp, entity.poke.hp + cura);
 		} else dano += danoPorTurno(nv.tipo, entity.poke.stats.hp);
@@ -29131,16 +30826,47 @@ function tickStatus(rng, entity, dt, clima = null) {
 				expirados.push(nv.tipo);
 			}
 		} else if (nv.turnosRestantes != null) {
-			nv.turnosRestantes -= 1;
+			const passo = nv.tipo === "sleep" && traitDoPoke(entity.poke) === "early_bird" ? 2 : 1;
+			nv.turnosRestantes -= passo;
 			if (nv.turnosRestantes <= 0) {
 				entity.poke.status = null;
 				expirados.push(nv.tipo);
 			}
 		}
 	}
+	const traitDaEntidade = traitDoPoke(entity.poke);
 	if (clima) {
 		const especie = SPECIES[entity.poke.speciesId];
-		dano += danoDeClimaPorTurno(clima, entity.poke.stats.hp, especie.type, especie.type2);
+		if (!Boolean(traitDaEntidade && TRAIT_IMUNE_A_DANO_DE_CLIMA.has(traitDaEntidade))) dano += danoDeClimaPorTurno(clima, entity.poke.stats.hp, especie.type, especie.type2);
+		const cura = traitDaEntidade ? CURA_POR_CLIMA[traitDaEntidade] : void 0;
+		if (cura && cura.clima === clima) heal(entity, Math.max(1, Math.round(entity.poke.stats.hp * cura.fracao)));
+		const custo = traitDaEntidade ? DANO_POR_CLIMA[traitDaEntidade] : void 0;
+		if (custo && custo.clima === clima) dano += Math.max(1, Math.round(entity.poke.stats.hp * custo.fracao));
+	}
+	if (traitDaEntidade && entity.poke.status) {
+		const curaPorHydration = traitDaEntidade === "hydration" && clima === "chuva";
+		const curaPorShedSkin = traitDaEntidade === "shed_skin" && nextFloat(rng) * 100 < 33;
+		if (curaPorHydration || curaPorShedSkin) {
+			expirados.push(entity.poke.status.tipo);
+			entity.poke.status = null;
+		}
+	}
+	if (traitDaEntidade === "speed_boost") aplicarEstagioUnico(entity, "speed", 1);
+	if (traitDaEntidade === "moody") {
+		const opcoes = [
+			"atkFis",
+			"atkEsp",
+			"def",
+			"defEsp",
+			"speed",
+			"accuracy",
+			"evasion"
+		];
+		const sobe = opcoes[Math.floor(nextFloat(rng) * opcoes.length)];
+		const restantes = opcoes.filter((o) => o !== sobe);
+		const desce = restantes[Math.floor(nextFloat(rng) * restantes.length)];
+		aplicarEstagioUnico(entity, sobe, 2);
+		aplicarEstagioUnico(entity, desce, -1);
 	}
 	const vol = entity.statusVolatil;
 	if (vol && vol.turnosRestantes != null) {
@@ -29169,6 +30895,10 @@ function tickStatus(rng, entity, dt, clima = null) {
 			entity.yawnTurnos = null;
 			aplicarStatus(rng, entity, "sleep", 100);
 		}
+	}
+	if (traitDaEntidade === "magic_guard") {
+		dano = 0;
+		drenoParaOrigem = void 0;
 	}
 	let pereceu = false;
 	if (entity.perishCountdown != null) {
@@ -29219,7 +30949,7 @@ function tentarAgir(rng, entity, calcularAutoDano) {
 function statsAtTypedAoeLevel(poke) {
 	const species = SPECIES[poke.speciesId];
 	if (!species) return poke.stats;
-	return computeStatsAtLevel(species, 50, poke.ivs, poke.rarity, poke.isShiny);
+	return computeStatsAtLevel(species, 50, poke.ivs, poke.rarity, poke.isShiny, poke.nature);
 }
 function resolveAbilityCategory(ability, poke) {
 	if (ability.category !== "dynamic") return ability.category;
@@ -44105,6 +45835,7 @@ var IMUNIDADE_POR_TRAIT = {
 	levitate: "GROUND",
 	volt_absorb: "ELECTRIC",
 	water_absorb: "WATER",
+	dry_skin: "WATER",
 	flash_fire: "FIRE",
 	sap_sipper: "GRASS",
 	lightning_rod: "ELECTRIC",
@@ -44134,12 +45865,12 @@ var FLASH_FIRE_MULTIPLIER = 1.5;
 * `computeDamage`, resolvendo o hit de verdade, cura o HP / sobe o estagio /
 * liga `flashFireAtivo`.
 */
-function resolverImunidadeDeTipo(rng, tipoDoGolpe, defensor, aplicarEfeitos) {
+function resolverImunidadeDeTipo(rng, tipoDoGolpe, defensor, aplicarEfeitos, traitDoDefensor) {
 	if (defensor.imuneAoTipoVolatil && defensor.imuneAoTipoVolatil.tipo === tipoDoGolpe) return { imune: true };
-	const trait = traitOf(defensor.poke.speciesId);
+	const trait = traitDoDefensor !== void 0 ? traitDoDefensor : traitDoPoke(defensor.poke);
 	if (!trait || IMUNIDADE_POR_TRAIT[trait] !== tipoDoGolpe) return { imune: false };
 	if (trait === "levitate") return { imune: true };
-	if (trait === "volt_absorb" || trait === "water_absorb") {
+	if (trait === "volt_absorb" || trait === "water_absorb" || trait === "dry_skin") {
 		if (aplicarEfeitos) heal(defensor, Math.round(getMaxHp(defensor) * HP_CURADO_POR_ABSORCAO));
 		return {
 			imune: true,
@@ -44206,6 +45937,39 @@ function multiplicadorDeDefesaPorTrait(trait, isPhysical, temStatus) {
 	if (trait === "marvel_scale" && temStatus) return 1.5;
 	return 1;
 }
+function traitsDoConfronto(attackerEntity, defenderEntity) {
+	const atacante = traitDoPoke(attackerEntity.poke);
+	const defensor = traitDoPoke(defenderEntity.poke);
+	if (atacante === "neutralizing_gas") return {
+		atacante,
+		defensor: null
+	};
+	if (defensor === "neutralizing_gas") return {
+		atacante: null,
+		defensor
+	};
+	if (atacante && TRAIT_QUEBRA_HABILIDADE.has(atacante)) return {
+		atacante,
+		defensor: null
+	};
+	return {
+		atacante,
+		defensor
+	};
+}
+/**
+* O clima que de fato SURTE EFEITO neste confronto.
+*
+* Cloud Nine / Air Lock nao apagam o clima do campo — apagam os efeitos dele.
+* Como a diferenca so aparece quando alguem tenta LER o clima, o lugar certo de
+* resolver isso e aqui, e nao em `world.clima`.
+*/
+function climaEfetivo(clima, traits) {
+	if (!clima) return null;
+	if (traits.atacante && TRAIT_ANULA_CLIMA.has(traits.atacante)) return null;
+	if (traits.defensor && TRAIT_ANULA_CLIMA.has(traits.defensor)) return null;
+	return clima;
+}
 function tiposEfetivosParaEfetividade(entity, species) {
 	if (entity.tipoForcado) return [entity.tipoForcado, null];
 	return [species.type, species.type2];
@@ -44240,9 +46004,11 @@ function scaledCooldown(ability, speed) {
 	if (ability.id === BASIC_ATTACK.id) return BASE_ATTACK_INTERVAL;
 	return (ability.cooldown ?? 0) * (SPEED_REFERENCE / Math.max(1, speed));
 }
-function velocidadeEfetiva(entity) {
-	if (traitOf(entity.poke.speciesId) === "quick_feet" && entity.poke.status) return entity.poke.stats.speed * 1.5 * multiplicadorDeStat(entity.estagios, "speed");
-	return entity.poke.stats.speed * multiplicadorDeVelocidade(entity.poke.status?.tipo ?? null) * multiplicadorDeStat(entity.estagios, "speed");
+function velocidadeEfetiva(entity, clima = null) {
+	const trait = traitDoPoke(entity.poke);
+	const porClima = multiplicadorDeVelocidadePorTrait(trait, clima);
+	if (trait === "quick_feet" && entity.poke.status) return entity.poke.stats.speed * 1.5 * porClima * multiplicadorDeStat(entity.estagios, "speed");
+	return entity.poke.stats.speed * multiplicadorDeVelocidade(entity.poke.status?.tipo ?? null) * porClima * multiplicadorDeStat(entity.estagios, "speed");
 }
 function danoDeConfusao(entity, poder) {
 	if (poder <= 0) return 0;
@@ -44371,16 +46137,15 @@ function estimateDamage(rng, attackerEntity, defenderEntity, ability) {
 	const defenderSpecies = SPECIES[defenderPoke.speciesId];
 	const [defType1, defType2] = tiposEfetivosParaEfetividade(defenderEntity, defenderSpecies);
 	const effectivenessMultiplier = efetividadeConsiderandoRevelado(getEffectiveness(ability.type, defType1, defType2), ability, defenderEntity, defenderSpecies);
-	if (resolverImunidadeDeTipo(deriveRng(rng.state, "estimate-imunidade"), ability.type, defenderEntity, false).imune) return 0;
+	if (resolverImunidadeDeTipo(deriveRng(rng.state, "estimate-imunidade"), ability.type, defenderEntity, false, traitsDoConfronto(attackerEntity, defenderEntity).defensor).imune) return 0;
 	if (effectivenessMultiplier === 0) return 0;
 	const special = specialDamageFor(deriveRng(rng.state, "estimate"), ability, attackerEntity, defenderEntity);
 	if (special && special.mode === "fixed") return special.amount;
 	const isPhysical = resolveAbilityCategory(ability, attackerPoke) === "physical";
-	const attackerTraitEstimate = traitOf(attackerSpecies.id);
-	const defenderTraitEstimate = traitOf(defenderSpecies.id);
+	const { atacante: attackerTraitEstimate, defensor: defenderTraitEstimate } = traitsDoConfronto(attackerEntity, defenderEntity);
 	const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp) * multiplicadorDeAtaquePorTrait(attackerTraitEstimate, isPhysical, Boolean(attackerPoke.status));
 	const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp) * multiplicadorDeDefesaPorTrait(defenderTraitEstimate, isPhysical, Boolean(defenderPoke.status));
-	const power = special && special.mode === "dynamicPower" ? special.power : ability.power;
+	const power = (special && special.mode === "dynamicPower" ? special.power : ability.power) * multiplicadorDePoderPorTrait(attackerTraitEstimate, ability, null);
 	if (power === 0) return 0;
 	let dmg = formulaEngine$4.eval("DAMAGE_BASE", {
 		level: attackerPoke.level,
@@ -44388,10 +46153,12 @@ function estimateDamage(rng, attackerEntity, defenderEntity, ability) {
 		atk,
 		def
 	});
-	if (Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)) dmg *= STAB_MULTIPLIER;
+	if (Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)) dmg *= stabPorTrait(attackerTraitEstimate, STAB_MULTIPLIER);
 	if (attackerTraitEstimate && LOW_HP_TRAIT_TYPE_MULTIPLIER[attackerTraitEstimate] === ability.type && attackerPoke.hp / attackerPoke.stats.hp < LOW_HP_TRAIT_HP_FRACTION) dmg *= LOW_HP_TRAIT_MULTIPLIER;
 	if (attackerEntity.flashFireAtivo && ability.type === "FIRE") dmg *= FLASH_FIRE_MULTIPLIER;
 	dmg *= effectivenessMultiplier;
+	dmg *= multiplicadorDeDanoRecebidoPorTrait(defenderTraitEstimate, ability, effectivenessMultiplier);
+	dmg *= multiplicadorDeDanoCausadoPorTrait(attackerTraitEstimate, effectivenessMultiplier);
 	return dmg;
 }
 var ESTAGIO_ALVO_DA_IA = 2;
@@ -44417,6 +46184,47 @@ var FOCUS_ENERGY_TETO_DA_IA = 3;
 */
 function somaDeEstagios(entity) {
 	return Object.values(entity.estagios).reduce((soma, v) => soma + (v ?? 0), 0);
+}
+/**
+* GOLPE DE PROTECAO: Protect, Detect e Endure.
+*
+* Os tres anulam o resultado do golpe recebido, e por isso sao os unicos do
+* elenco que, repetidos, impedem a batalha de TERMINAR em vez de so mudar o
+* ritmo dela. O caso relatado pelo usuario era literalmente esse: um Kangaskhan
+* selvagem (que leva Endure no kit a partir do Nv50) parado em 1 de HP enquanto
+* o POKE do jogador batia nele por minutos.
+*
+* A REGRA QUE OS EQUILIBRA NOS JOGOS NAO E O PP — E A FALHA POR USO
+* CONSECUTIVO. Desde a Gen V, cada uso seguido bem-sucedido de um golpe de
+* protecao tem 1/2 da chance do anterior: 100%, 50%, 25%, 12,5%... Usar
+* QUALQUER outro golpe zera o contador. E o que impede exatamente este travamento
+* no jogo real, e nao o PP (que so limitaria depois de 10 usos).
+*
+* POR QUE NAO O PP: este motor nao gasta PP de proposito — o PP e a BASE DO
+* COOLDOWN (`abilities.ts#cooldownFromPp`), e um golpe de 5 PP ja recarrega em
+* 8s por causa disso. Contar usos aqui seria inventar um segundo significado pro
+* mesmo campo.
+*/
+var PROTECAO_ABILITY_KEYS = /* @__PURE__ */ new Set([
+	"protect",
+	"detect",
+	"endure"
+]);
+/**
+* Chance de o golpe de protecao FUNCIONAR agora, dado quantas vezes seguidas ele
+* ja funcionou. 1 no primeiro uso, metade a cada repeticao.
+*/
+function chanceDeProtecao(entity) {
+	return 1 / Math.pow(2, entity.protecoesSeguidas ?? 0);
+}
+/**
+* Zera o contador de protecoes seguidas quando o POKE usa OUTRA coisa.
+*
+* Chamado no momento do CAST (nao do acerto), pros dois lados, porque e assim
+* que os jogos contam: o que reseta e ter USADO outro golpe, acerte ele ou nao.
+*/
+function registrarUsoParaProtecao(entity, ability) {
+	if (!PROTECAO_ABILITY_KEYS.has(ability.id)) entity.protecoesSeguidas = 0;
 }
 function golpeDeApoioUtil(world, entity, defenderEntity, ability, golpesDeDanoProntos, clima) {
 	if (ability.id === "taunt") return !(defenderEntity.silenciadoAte && defenderEntity.silenciadoAte > 0);
@@ -44514,20 +46322,28 @@ function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista 
 	const defenderPoke = defenderEntity.poke;
 	const attackerSpecies = SPECIES[attackerPoke.speciesId];
 	const defenderSpecies = SPECIES[defenderPoke.speciesId];
-	const attackerTrait = traitOf(attackerSpecies.id);
-	const defenderTrait = traitOf(defenderSpecies.id);
+	const { atacante: attackerTrait, defensor: defenderTrait } = traitsDoConfronto(attackerEntity, defenderEntity);
+	const climaAtivo = climaEfetivo(clima, {
+		atacante: attackerTrait,
+		defensor: defenderTrait
+	});
 	const [defType1, defType2] = tiposEfetivosParaEfetividade(defenderEntity, defenderSpecies);
 	let effectivenessMultiplier = efetividadeConsiderandoRevelado(getEffectiveness(ability.type, defType1, defType2), ability, defenderEntity, defenderSpecies);
-	if (resolverImunidadeDeTipo(rng, ability.type, defenderEntity, true).imune) effectivenessMultiplier = 0;
+	if (resolverImunidadeDeTipo(rng, ability.type, defenderEntity, true, defenderTrait).imune) effectivenessMultiplier = 0;
+	if (attackerTrait === "scrappy" && effectivenessMultiplier === 0 && (ability.type === "NORMAL" || ability.type === "FIGHTING")) {
+		if (defType1 === "GHOST" || defType2 === "GHOST") effectivenessMultiplier = getEffectiveness(ability.type, defType1 === "GHOST" ? "NORMAL" : defType1, defType2 === "GHOST" ? null : defType2);
+	}
 	const special = specialDamageFor(rng, ability, attackerEntity, defenderEntity);
 	let dmg;
 	let isCrit = false;
 	if (special && special.mode === "fixed") dmg = effectivenessMultiplier === 0 ? 0 : special.amount;
 	else {
 		const isPhysical = resolveAbilityCategory(ability, attackerPoke) === "physical";
-		const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp) * multiplicadorDeStat(attackerEntity.estagios, isPhysical ? "atkFis" : "atkEsp") * multiplicadorDeAtaquePorTrait(attackerTrait, isPhysical, Boolean(attackerPoke.status));
-		const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp) * multiplicadorDeStat(defenderEntity.estagios, isPhysical ? "def" : "defEsp") * multiplicadorDeDefesaPorTrait(defenderTrait, isPhysical, Boolean(defenderPoke.status));
-		const power = special && special.mode === "dynamicPower" ? special.power : ability.power;
+		const estagiosDoDefensorValem = attackerTrait !== TRAIT_UNAWARE;
+		const estagiosDoAtacanteValem = defenderTrait !== TRAIT_UNAWARE;
+		const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp) * (estagiosDoAtacanteValem ? multiplicadorDeStat(attackerEntity.estagios, isPhysical ? "atkFis" : "atkEsp") : 1) * multiplicadorDeAtaquePorTrait(attackerTrait, isPhysical, Boolean(attackerPoke.status)) * (attackerTrait === "solar_power" && !isPhysical && climaAtivo === "sol" ? SOLAR_POWER_BONUS : 1);
+		const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp) * (estagiosDoDefensorValem ? multiplicadorDeStat(defenderEntity.estagios, isPhysical ? "def" : "defEsp") : 1) * multiplicadorDeDefesaPorTrait(defenderTrait, isPhysical, Boolean(defenderPoke.status));
+		const power = (special && special.mode === "dynamicPower" ? special.power : ability.power) * multiplicadorDePoderPorTrait(attackerTrait, ability, climaAtivo);
 		dmg = power === 0 ? 0 : formulaEngine$4.eval("DAMAGE_BASE", {
 			level: attackerPoke.level,
 			power,
@@ -44535,29 +46351,33 @@ function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista 
 			def
 		});
 		if (isPhysical) dmg *= multiplicadorDeDanoFisico(attackerPoke.status?.tipo ?? null);
-		if (Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)) dmg *= STAB_MULTIPLIER;
+		if (Boolean(ability.type) && (ability.type === attackerSpecies.type || ability.type === attackerSpecies.type2)) dmg *= stabPorTrait(attackerTrait, STAB_MULTIPLIER);
 		if (attackerTrait && LOW_HP_TRAIT_TYPE_MULTIPLIER[attackerTrait] === ability.type && attackerPoke.hp / attackerPoke.stats.hp < LOW_HP_TRAIT_HP_FRACTION) dmg *= LOW_HP_TRAIT_MULTIPLIER;
 		if (attackerEntity.flashFireAtivo && ability.type === "FIRE") dmg *= FLASH_FIRE_MULTIPLIER;
 		dmg *= effectivenessMultiplier;
-		if (clima === "chuva") {
+		if (climaAtivo === "chuva") {
 			if (ability.type === "WATER") dmg *= CLIMA_MULTIPLICADOR_FAVORECIDO;
 			else if (ability.type === "FIRE") dmg *= CLIMA_MULTIPLICADOR_DESFAVORECIDO;
-		} else if (clima === "sol") {
+		} else if (climaAtivo === "sol") {
 			if (ability.type === "FIRE") dmg *= CLIMA_MULTIPLICADOR_FAVORECIDO;
 			else if (ability.type === "WATER") dmg *= CLIMA_MULTIPLICADOR_DESFAVORECIDO;
 		}
+		dmg *= multiplicadorDeDanoRecebidoPorTrait(defenderTrait, ability, effectivenessMultiplier);
+		dmg *= multiplicadorDeDanoCausadoPorTrait(attackerTrait, effectivenessMultiplier);
 		if (defenderTrait === "multiscale" && defenderPoke.hp === defenderPoke.stats.hp) dmg *= MULTISCALE_MULTIPLIER;
-		if (isPhysical && (defenderEntity.escudos?.reflect ?? 0) > 0) dmg *= .5;
-		if (!isPhysical && (defenderEntity.escudos?.lightScreen ?? 0) > 0) dmg *= .5;
-		const critStagesTotal = (ability.critStages ?? 0) + (attackerEntity.estagioDeCritico ?? 0);
+		const escudosValem = attackerTrait !== TRAIT_INFILTRATOR;
+		if (escudosValem && isPhysical && (defenderEntity.escudos?.reflect ?? 0) > 0) dmg *= .5;
+		if (escudosValem && !isPhysical && (defenderEntity.escudos?.lightScreen ?? 0) > 0) dmg *= .5;
+		const critStagesTotal = (ability.critStages ?? 0) + (attackerEntity.estagioDeCritico ?? 0) + estagiosDeCriticoPorTrait(attackerTrait);
 		const chanceDeCritico = CRIT_CHANCE * Math.pow(3, Math.min(3, critStagesTotal));
+		const imuneACritico = Boolean(defenderTrait && TRAIT_SEM_CRITICO_RECEBIDO.has(defenderTrait));
 		const protegidoPorLuckyChant = (defenderEntity.escudos?.luckyChant ?? 0) > 0;
 		const criticoGarantido = ability.power > 0 && attackerEntity.proximoGolpeCriticoGarantido === true;
 		if (criticoGarantido) attackerEntity.proximoGolpeCriticoGarantido = false;
-		if (protegidoPorLuckyChant) isCrit = false;
+		if (protegidoPorLuckyChant || imuneACritico) isCrit = false;
 		else if (criticoGarantido) isCrit = true;
 		else isCrit = pessimista ? false : rollChance(rng, Math.min(.5, chanceDeCritico));
-		if (isCrit) dmg *= CRIT_MULTIPLIER;
+		if (isCrit) dmg *= CRIT_MULTIPLIER * (attackerTrait === "sniper" ? SNIPER_MULTIPLICADOR : 1);
 		dmg *= pessimista ? DANO_VARIACAO_MINIMA : formulaEngine$4.eval("DAMAGE_VARIATION", {}, rng);
 	}
 	let effectiveness = "normal";
@@ -44618,7 +46438,7 @@ function tentarAtaqueBasico(entity, attackerSpecies, disabled) {
 function pickAbilityGreedy(world, entity, defenderEntity, prontos, estaSilenciado, clima, aoeTargetCounter) {
 	const rng = world.rng;
 	const ready = prontos.filter((ability) => isDamagingAbility(ability));
-	const statusPronto = estaSilenciado ? [] : prontos.filter((a) => a.power === 0 && (a.status != null && statusVaiPegar(defenderEntity, a.status, a.id) || golpeDeApoioUtil(world, entity, defenderEntity, a, ready, clima)));
+	const statusPronto = estaSilenciado ? [] : prontos.filter((a) => !isDamagingAbility(a) && (a.status != null && statusVaiPegar(defenderEntity, a.status, a.id) || golpeDeApoioUtil(world, entity, defenderEntity, a, ready, clima)));
 	if (statusPronto.length > 0) {
 		if (ready.reduce((max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)), 0) < defenderEntity.poke.hp) return statusPronto.reduce((melhor, a) => (a.statusChance ?? 0) > (melhor.statusChance ?? 0) ? a : melhor);
 	}
@@ -44641,7 +46461,7 @@ function pickAbilityDaFila(world, entity, defenderEntity, candidatos, estaSilenc
 		const idx = (inicio + passo) % n;
 		const ability = candidatos[idx];
 		if (!isAbilityReady(entity, ability.id)) continue;
-		if (ability.power === 0) {
+		if (!isDamagingAbility(ability)) {
 			if (estaSilenciado) continue;
 			if (!(ability.status != null && statusVaiPegar(defenderEntity, ability.status, ability.id) || golpeDeApoioUtil(world, entity, defenderEntity, ability, prontosDeDano, clima))) continue;
 			if (maiorDanoSePronto() >= defenderEntity.poke.hp) continue;
@@ -44768,12 +46588,19 @@ function nearbyAliveEnemies(world) {
 * Hustle (Fase 12): +50% de Ataque Fisico custa -20% de precisao nos golpes
 * FISICOS do proprio portador — aplicado ANTES dos estagios de accuracy/evasao.
 */
-function golpeErrou(rng, ability, atacante, defensor) {
-	const trait = traitOf(atacante.poke.speciesId);
+function golpeErrou(rng, ability, atacante, defensor, clima = null) {
+	const { atacante: traitAtk, defensor: traitDef } = traitsDoConfronto(atacante, defensor);
+	if (traitAtk === "no_guard" || traitDef === "no_guard") return false;
 	const isPhysical = resolveAbilityCategory(ability, atacante.poke) === "physical";
-	const precisaoBase = (ability.accuracy ?? 100) * (trait === "hustle" && isPhysical ? .8 : 1);
+	let precisaoBase = (ability.accuracy ?? 100) * multiplicadorDePrecisaoPorTrait(traitAtk, isPhysical);
+	if (traitDef === "wonder_skin" && ability.power <= 0) precisaoBase = Math.min(precisaoBase, 50);
 	const multAtacante = multiplicadorDeAccuracyOuEvasion(atacante.estagios.accuracy ?? 0);
-	const multDefensor = defensor.revelado ? 1 : multiplicadorDeAccuracyOuEvasion(defensor.estagios.evasion ?? 0);
+	const ignoraEvasao = defensor.revelado || traitAtk != null && TRAIT_IGNORA_EVASAO.has(traitAtk);
+	let multDefensor = ignoraEvasao ? 1 : multiplicadorDeAccuracyOuEvasion(defensor.estagios.evasion ?? 0);
+	if (!ignoraEvasao) {
+		if (traitDef && EVASAO_POR_CLIMA[traitDef] && EVASAO_POR_CLIMA[traitDef] === clima) multDefensor *= 1.25;
+		if (traitDef === "tangled_feet" && defensor.statusVolatil?.tipo === "confusion") multDefensor *= 2;
+	}
 	const precisaoEfetiva = precisaoBase * multAtacante / multDefensor;
 	if (precisaoEfetiva >= 100) return false;
 	return nextFloat(rng) * 100 >= precisaoEfetiva;
@@ -44815,13 +46642,14 @@ function executePlayerAction(world, player, engagedEnemies, silent) {
 	const ability = pickAbility(world, player, primaryTarget, (a) => allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (a.radius ?? 0)).length);
 	if (!ability) return;
 	if (ability.id !== BASIC_ATTACK.id) player.lastUsedAbilityId = ability.id;
-	startCooldown(player, ability.id, scaledCooldown(ability, velocidadeEfetiva(player)));
+	registrarUsoParaProtecao(player, ability);
+	startCooldown(player, ability.id, scaledCooldown(ability, velocidadeEfetiva(player, world.clima?.tipo ?? null)));
 	startGlobalCooldown(player, MIN_ACTION_GAP);
 	triggerAttackAnim(player, ability.target === "aoe", primaryTarget);
 	announceAbility(world, player, ability);
 	const miraGarantida = player.miraGarantidaAlvoId != null && player.miraGarantidaAlvoId === primaryTarget?.id;
 	if (miraGarantida) player.miraGarantidaAlvoId = null;
-	if (!miraGarantida && golpeErrou(world.rng, ability, player, primaryTarget)) {
+	if (!miraGarantida && golpeErrou(world.rng, ability, player, primaryTarget, world.clima?.tipo ?? null)) {
 		if (!silent) anunciarErro(world, player);
 		return;
 	}
@@ -44836,13 +46664,14 @@ function executeEnemyAction(world, enemy, player, silent) {
 	const ability = pickAbility(world, enemy, player, () => 1);
 	if (!ability) return;
 	if (ability.id !== BASIC_ATTACK.id) enemy.lastUsedAbilityId = ability.id;
-	startCooldown(enemy, ability.id, scaledCooldown(ability, velocidadeEfetiva(enemy)));
+	registrarUsoParaProtecao(enemy, ability);
+	startCooldown(enemy, ability.id, scaledCooldown(ability, velocidadeEfetiva(enemy, world.clima?.tipo ?? null)));
 	startGlobalCooldown(enemy, MIN_ACTION_GAP);
 	triggerAttackAnim(enemy, ability.target === "aoe", player);
 	announceAbility(world, enemy, ability);
 	const miraGarantida = enemy.miraGarantidaAlvoId != null && enemy.miraGarantidaAlvoId === player.id;
 	if (miraGarantida) enemy.miraGarantidaAlvoId = null;
-	if (!miraGarantida && golpeErrou(world.rng, ability, enemy, player)) {
+	if (!miraGarantida && golpeErrou(world.rng, ability, enemy, player, world.clima?.tipo ?? null)) {
 		if (!silent) anunciarErro(world, enemy);
 		return;
 	}
@@ -44890,6 +46719,23 @@ function anunciarProtegido(world, alvo) {
 		targetX: alvo.x,
 		targetY: alvo.y + getGroundOffset(alvo) + 14,
 		text: "Protegido!",
+		color: "#94a3b8",
+		duration: .7,
+		owner: alvo
+	}));
+}
+/**
+* "Falhou!" — o golpe foi usado, gastou o turno e nao surtiu efeito. Hoje so o
+* sorteio de uso consecutivo de Protect/Detect/Endure produz isso.
+*/
+function anunciarFalhou(world, alvo) {
+	world.effects.push(createWorldEffect(world.counters, {
+		type: "abilityName",
+		x: alvo.x,
+		y: alvo.y,
+		targetX: alvo.x,
+		targetY: alvo.y + getGroundOffset(alvo) + 14,
+		text: "Falhou!",
 		color: "#94a3b8",
 		duration: .7,
 		owner: alvo
@@ -44949,13 +46795,14 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			targetY: attacker.y - attacker.radius * .6,
 			color: colorForType(ability.type),
 			isAoe: true,
-			duration: ability.power === 0 ? STATUS_VFX_DURATION : AOE_EFFECT_DURATION,
+			duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : AOE_EFFECT_DURATION,
 			worldSize: (ability.radius ?? 0) * 2,
 			elementType: ability.type,
 			abilityId: ability.id,
-			statusDirection: ability.power === 0 ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0
+			statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0
 		}));
-		if (SELF_DESTRUCT_ABILITY_KEYS.has(ability.id) && !isDead(attacker)) {
+		const alguemComDamp = [world.player, ...world.enemies].some((e) => e && !isDead(e) && traitDoPoke(e.poke) === "damp");
+		if (SELF_DESTRUCT_ABILITY_KEYS.has(ability.id) && !isDead(attacker) && !alguemComDamp) {
 			const recoil = Math.round(attacker.poke.hp * SELF_DESTRUCT_HP_LOSS_PERCENT);
 			takeDamage(attacker, recoil);
 			if (!silent) spawnDamageNumber(world, attacker, {
@@ -44978,8 +46825,11 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		}
 		return;
 	}
-	const target = findEntityById(world.player, world.enemies, hit.targetId);
-	if (!target || isDead(target)) return;
+	const alvoDoHit = findEntityById(world.player, world.enemies, hit.targetId);
+	if (!alvoDoHit || isDead(alvoDoHit)) return;
+	if (traitDoPoke(alvoDoHit.poke) === "soundproof" && ehGolpeDeSom(ability.id)) return;
+	const target = ability.power <= 0 && golpeAtingeOAlvo(ability) && traitDoPoke(alvoDoHit.poke) === "magic_bounce" && alvoDoHit.id !== attacker.id ? attacker : alvoDoHit;
+	if (isDead(target)) return;
 	if (ability.target === "aoe" && (target.escudos?.wideGuard ?? 0) > 0) return;
 	if (target.protegida && golpeAtingeOAlvo(ability)) {
 		target.protegida = false;
@@ -44990,7 +46840,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	let danoFinal = result.amount;
 	const enduraGolpe = target.enduraAtiva === true;
 	if (enduraGolpe) target.enduraAtiva = false;
-	const sturdyTrait = !enduraGolpe && traitOf(target.poke.speciesId) === "sturdy" && target.poke.hp === target.poke.stats.hp;
+	const sturdyTrait = !enduraGolpe && traitDoPoke(target.poke) === "sturdy" && target.poke.hp === target.poke.stats.hp;
 	const aguentou = (enduraGolpe || sturdyTrait) && danoFinal >= target.poke.hp && target.poke.hp > 0;
 	if (aguentou) danoFinal = target.poke.hp - 1;
 	const danoCausado = Math.min(danoFinal, target.poke.hp);
@@ -45001,6 +46851,22 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			amount: danoFinal
 		});
 		if (aguentou && !silent) anunciarAguentou(world, target);
+	}
+	if (danoFinal > 0 && !isDead(target)) {
+		const traitDoAlvo = traitsDoConfronto(attacker, target).defensor;
+		const reacao = traitDoAlvo ? REACAO_A_HIT[traitDoAlvo] : void 0;
+		const ehFisico = resolveAbilityCategory(ability, attacker.poke) === "physical";
+		const tipoBate = !reacao?.tipos || reacao.tipos.includes(ability.type);
+		const categoriaBate = !reacao?.soFisico || ehFisico;
+		const gatilhoDeAngerPoint = traitDoAlvo !== "anger_point" || result.isCrit;
+		if (reacao && tipoBate && categoriaBate && gatilhoDeAngerPoint) {
+			const mudanca = aplicarEstagioUnico(target, reacao.stat, reacao.estagios);
+			if (mudanca && !silent) anunciarEstagios(world, target, [mudanca]);
+			if (traitDoAlvo === "weak_armor") {
+				const queda = aplicarEstagioUnico(target, "def", -1);
+				if (queda && !silent) anunciarEstagios(world, target, [queda]);
+			}
+		}
 	}
 	if (target.destinyBondAtiva && isDead(target)) {
 		target.destinyBondAtiva = false;
@@ -45036,7 +46902,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			case "sticky_web": world.enemyHazards.stickyWeb = true;
 		}
 	}
-	if (ability.category === "physical" && danoFinal > 0) switch (traitOf(target.poke.speciesId)) {
+	if (ability.category === "physical" && danoFinal > 0) switch (traitDoPoke(target.poke)) {
 		case "static":
 			aplicarStatus(world.rng, attacker, "paralysis", 30);
 			break;
@@ -45072,7 +46938,13 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted);
 			break;
 		}
-		case "aftermath": if (isDead(target)) {
+		case "cursed_body":
+			if (nextFloat(world.rng) * 100 < 30) {
+				attacker.disabledAbilityId = ability.id;
+				attacker.disabledAbilityUntil = DISABLE_DURATION;
+			}
+			break;
+		case "aftermath": if (isDead(target) && traitDoPoke(attacker.poke) !== "damp") {
 			const recoil = Math.round(attacker.poke.stats.hp / 4);
 			takeDamage(attacker, recoil);
 			if (!silent) spawnDamageNumber(world, attacker, {
@@ -45084,6 +46956,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted);
 		}
 	}
+	if (ability.category === "physical" && danoFinal > 0 && !isDead(target) && traitsDoConfronto(attacker, target).atacante === "poison_touch") aplicarStatus(world.rng, target, "poison", 30);
 	const climaDoGolpe = CLIMA_DO_GOLPE[ability.id];
 	if (climaDoGolpe) world.clima = {
 		tipo: climaDoGolpe,
@@ -45091,13 +46964,27 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	};
 	let statusRecebeuEm = null;
 	if (!isDead(target)) {
-		const aplicado = aplicarEfeitosDoGolpe(world.rng, target, ability);
+		const traits = traitsDoConfronto(attacker, target);
+		const secundario = temEfeitoSecundario(ability);
+		let abilityEfetiva = ability;
+		if (secundario && traits.defensor === "shield_dust") abilityEfetiva = {
+			...ability,
+			statusChance: 0,
+			statChance: 0,
+			flinchChance: 0
+		};
+		else if (secundario && traits.atacante === "serene_grace") abilityEfetiva = {
+			...ability,
+			statusChance: Math.min(100, (ability.statusChance ?? 0) * 2),
+			statChance: Math.min(100, (ability.statChance ?? 0) * 2)
+		};
+		const aplicado = aplicarEfeitosDoGolpe(world.rng, target, abilityEfetiva, world.clima?.tipo ?? null);
 		if (aplicado) {
 			statusRecebeuEm = target;
 			if (!silent) anunciarStatus(world, target, aplicado.tipo, "entrou");
-			if ((aplicado.tipo === "poison" || aplicado.tipo === "paralysis" || aplicado.tipo === "burn") && traitOf(target.poke.speciesId) === "synchronize") aplicarStatus(world.rng, attacker, aplicado.tipo, 100);
+			if ((aplicado.tipo === "poison" || aplicado.tipo === "paralysis" || aplicado.tipo === "burn") && traitDoPoke(target.poke) === "synchronize") aplicarStatus(world.rng, attacker, aplicado.tipo, 100);
 		}
-		const mudancas = aplicarMudancasDeStat(world.rng, attacker, target, ability);
+		const mudancas = aplicarMudancasDeStat(world.rng, attacker, target, abilityEfetiva);
 		if (mudancas.length) {
 			statusRecebeuEm = ability.statTarget === "self" ? attacker : target;
 			if (!silent) anunciarEstagios(world, statusRecebeuEm, mudancas);
@@ -45110,8 +46997,10 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		};
 		switch (ability.id) {
 			case "taunt":
-				target.silenciadoAte = TAUNT_DURATION;
-				statusRecebeuEm = target;
+				if (traitDoPoke(target.poke) !== "oblivious") {
+					target.silenciadoAte = TAUNT_DURATION;
+					statusRecebeuEm = target;
+				}
 				break;
 			case "torment":
 				target.tormentedUntil = TORMENT_DURATION;
@@ -45201,11 +47090,33 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			targetId: attacker.id
 		});
 	}
-	if (ability.flinchChance && nextFloat(world.rng) * 100 < ability.flinchChance && traitOf(target.poke.speciesId) !== "inner_focus") startGlobalCooldown(target, MIN_ACTION_GAP);
+	{
+		const { atacante: traitAtk, defensor: traitDef } = traitsDoConfronto(attacker, target);
+		const chanceDoGolpe = (ability.flinchChance ?? 0) * (traitAtk === "serene_grace" ? 2 : 1);
+		const chanceDoStench = danoFinal > 0 && traitAtk === "stench" ? 10 : 0;
+		const chance = Math.max(chanceDoGolpe, chanceDoStench);
+		if (chance > 0 && !(traitDef === "shield_dust" && chanceDoGolpe > 0 && chanceDoStench === 0) && nextFloat(world.rng) * 100 < chance && traitDef !== "inner_focus") {
+			startGlobalCooldown(target, MIN_ACTION_GAP);
+			if (traitDef === "steadfast") {
+				const mudanca = aplicarEstagioUnico(target, "speed", 1);
+				if (mudanca && !silent) anunciarEstagios(world, target, [mudanca]);
+			}
+		}
+	}
 	if (ability.drainPercent && danoCausado > 0) {
 		const quanto = Math.max(1, Math.round(danoCausado * Math.abs(ability.drainPercent) / 100));
+		const { atacante: traitAtk, defensor: traitDef } = traitsDoConfronto(attacker, target);
 		if (ability.drainPercent > 0) {
-			if (!curaBloqueada(attacker)) {
+			if (traitDef === "liquid_ooze") {
+				takeDamage(attacker, quanto);
+				if (!silent) spawnDamageNumber(world, attacker, {
+					amount: quanto,
+					effectiveness: "normal",
+					effectivenessLabel: null,
+					isCrit: false
+				});
+				creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted);
+			} else if (!curaBloqueada(attacker)) {
 				heal(attacker, quanto);
 				if (!silent) spawnDamageNumber(world, attacker, {
 					amount: -quanto,
@@ -45214,7 +47125,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 					isCrit: false
 				});
 			}
-		} else {
+		} else if (traitAtk !== "rock_head") {
 			takeDamage(attacker, quanto);
 			if (!silent) spawnDamageNumber(world, attacker, {
 				amount: quanto,
@@ -45227,11 +47138,16 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	}
 	switch (ability.id) {
 		case "endure":
-			attacker.enduraAtiva = true;
-			break;
 		case "protect":
 		case "detect":
-			attacker.protegida = true;
+			if (world.pessimista ? attacker.kind === "enemy" : rollChance(world.rng, chanceDeProtecao(attacker))) {
+				if (ability.id === "endure") attacker.enduraAtiva = true;
+				else attacker.protegida = true;
+				attacker.protecoesSeguidas = (attacker.protecoesSeguidas ?? 0) + 1;
+			} else {
+				attacker.protecoesSeguidas = 0;
+				if (!silent) anunciarFalhou(world, attacker);
+			}
 			break;
 		case "destiny_bond":
 			attacker.destinyBondAtiva = true;
@@ -45255,7 +47171,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			break;
 		case "rest": {
 			attacker.poke.hp = attacker.poke.stats.hp;
-			const traitAttacker = traitOf(attacker.poke.speciesId);
+			const traitAttacker = traitDoPoke(attacker.poke);
 			if (traitAttacker !== "insomnia" && traitAttacker !== "vital_spirit") {
 				attacker.poke.status = {
 					tipo: "sleep",
@@ -45320,7 +47236,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	}
 	const isPlayerAttacker = attacker.kind === "player";
 	if (!(ability.target === "aoe") && !silent && (ability.power > 0 || statusRecebeuEm)) {
-		const local = ability.power === 0 && statusRecebeuEm ? statusRecebeuEm : target;
+		const local = !isDamagingAbility(ability) && statusRecebeuEm ? statusRecebeuEm : target;
 		const mesmoLugar = local.x === attacker.x && local.y === attacker.y;
 		world.effects.push(createWorldEffect(world.counters, {
 			type: "abilityEffect",
@@ -45331,13 +47247,17 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			anguloDeAtaque: mesmoLugar ? void 0 : Math.atan2(local.y - attacker.y, local.x - attacker.x),
 			color: colorForType(ability.type),
 			isAoe: false,
-			duration: ability.power === 0 ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
+			duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
 			elementType: ability.type,
 			abilityId: ability.id,
-			statusDirection: ability.power === 0 ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0
+			statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0
 		}));
 	}
 	if (!isDead(target)) return;
+	if (traitDoPoke(attacker.poke) === "moxie" && !isDead(attacker)) {
+		const mudanca = aplicarEstagioUnico(attacker, "atkFis", 1);
+		if (mudanca && !silent) anunciarEstagios(world, attacker, [mudanca]);
+	}
 	if (isPlayerAttacker) {
 		if (!target.deathHandled) {
 			target.deathHandled = true;
@@ -45364,7 +47284,7 @@ var CLIMA_DE_TRAIT_TURNOS = Infinity;
 * cada inimigo que acabou de engajar contra o jogador.
 */
 function resolveEntryHook(world, self, opponent, silent) {
-	const trait = traitOf(self.poke.speciesId);
+	const trait = traitDoPoke(self.poke);
 	if (!trait) return;
 	const climaTipo = TRAIT_CLIMA[trait];
 	if (climaTipo) {
@@ -45377,6 +47297,14 @@ function resolveEntryHook(world, self, opponent, silent) {
 	if (trait === "intimidate") {
 		const mudanca = aplicarEstagioUnico(opponent, "atkFis", -1);
 		if (mudanca && !silent) anunciarEstagios(world, opponent, [mudanca]);
+		return;
+	}
+	if (trait === "trace") {
+		const alvo = traitDoPoke(opponent.poke);
+		if (alvo && !TRACE_NAO_COPIA.has(alvo)) {
+			self.traitOriginal ??= self.poke.trait ?? null;
+			self.poke.trait = alvo;
+		}
 		return;
 	}
 	if (trait === "download") {
@@ -46073,7 +48001,7 @@ function grantExp(pokeInstance, amount) {
 		const previousMaxHp = stats.hp;
 		level += 1;
 		leveledUp = true;
-		stats = computeStatsAtLevel(species, level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny);
+		stats = computeStatsAtLevel(species, level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny, pokeInstance.nature);
 		const hpGain = stats.hp - previousMaxHp;
 		hp = Math.min(stats.hp, hp + hpGain);
 		for (const [key, exigido] of nivelDeAprendizado(species)) {
@@ -46119,7 +48047,7 @@ function applyDeathExpPenalty(pokeInstance) {
 	while (level > floor && exp < pokeExpForLevel(level, species.growthCurve)) {
 		level -= 1;
 		leveledDown = true;
-		stats = computeStatsAtLevel(species, level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny);
+		stats = computeStatsAtLevel(species, level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny, pokeInstance.nature);
 		hp = Math.min(hp, stats.hp);
 	}
 	return {
@@ -47289,7 +49217,7 @@ function spawnSequenceEnemy(world, mapDef, index) {
 function aplicarHazardsAoInimigo(rng, hazards, enemy) {
 	if (!hazards) return;
 	const species = SPECIES[enemy.poke.speciesId];
-	if (species.type === "FLYING" || species.type2 === "FLYING" || traitOf(species.id) === "levitate") return;
+	if (species.type === "FLYING" || species.type2 === "FLYING" || traitDoPoke(enemy.poke) === "levitate") return;
 	const maxHp = enemy.poke.stats.hp;
 	if (hazards.spikes > 0) {
 		const fracao = hazards.spikes === 1 ? 1 / 8 : hazards.spikes === 2 ? 1 / 6 : 1 / 4;
@@ -47781,7 +49709,8 @@ function rowToPoke(row) {
 		speed: row.stat_speed
 	};
 	const species = SPECIES[row.species_id];
-	const stats = species ? computeStatsAtLevel(species, row.level, ivs, row.rarity, row.is_shiny) : gravados;
+	const nature = row.nature ?? naturezaNeutraEstavel(row.id);
+	const stats = species ? computeStatsAtLevel(species, row.level, ivs, row.rarity, row.is_shiny, nature) : gravados;
 	return {
 		uid: row.id,
 		speciesId: row.species_id,
@@ -47791,6 +49720,8 @@ function rowToPoke(row) {
 		isShiny: row.is_shiny,
 		rarity: row.rarity,
 		ivs,
+		nature,
+		trait: row.trait ?? void 0,
 		stats,
 		unlockedAbilities: species ? golpesAprendidosAte(species, row.level) : row.unlocked_abilities,
 		disabledAbilities: row.disabled_abilities ?? {},
@@ -47877,6 +49808,19 @@ function gameStateToPlayerRow(userId, s) {
 		perf_stats: toJson(s.perfStats)
 	};
 }
+/**
+* Uma das 5 naturezas NEUTRAS, sempre a mesma para o mesmo uuid.
+*
+* Espelha a expressao da migration 20260818140000 (hash do id, modulo 5) — nao
+* precisa dar o MESMO resultado que ela (nenhuma das 5 muda atributo nenhum),
+* mas precisa dar sempre o mesmo resultado pra si mesma: natureza que muda a
+* cada carga apareceria como um POKE trocando de personalidade sozinho.
+*/
+function naturezaNeutraEstavel(id) {
+	let h = 0;
+	for (let i = 0; i < id.length; i++) h = h * 31 + id.charCodeAt(i) >>> 0;
+	return NATURES_NEUTRAS[h % NATURES_NEUTRAS.length];
+}
 function pokeToRow(userId, poke, location, teamSlot) {
 	return {
 		id: poke.uid,
@@ -47889,6 +49833,8 @@ function pokeToRow(userId, poke, location, teamSlot) {
 		hp: Math.round(poke.hp),
 		is_shiny: poke.isShiny,
 		rarity: poke.rarity,
+		nature: poke.nature ?? null,
+		trait: poke.trait ?? null,
 		locked: poke.locked ?? false,
 		original_trainer: poke.originalTrainer ?? null,
 		iv_hp: poke.ivs.hp,

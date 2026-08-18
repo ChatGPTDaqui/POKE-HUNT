@@ -227,6 +227,36 @@ export interface BaseEntity {
    */
   enduraAtiva?: boolean
   /**
+   * Quantas vezes SEGUIDAS um golpe de protecao (Protect/Detect/Endure) ja
+   * funcionou nesta entidade.
+   *
+   * REGRA REAL (Gen V+): cada uso consecutivo bem-sucedido tem METADE da chance
+   * do anterior — 100%, 50%, 25%, 12,5%. Usar qualquer outro golpe zera.
+   *
+   * POR QUE ISTO EXISTE, e o bug que ele fecha: sem a regra, um selvagem com
+   * Endure fica em 1 de HP para sempre. Endure recarrega em 4s e o POKE do
+   * jogador ataca a cada ~2-3s, entao o hit que mataria caia em cima da flag
+   * quase toda vez. Relatado pelo usuario como "o Kangaskhan ficava com a vida
+   * vazia e nao morria por minutos"; medido depois num duelo controlado.
+   *
+   * Nao e PP: o PP deste jogo e a base do COOLDOWN e nada mais. A regra que
+   * equilibra protecao nos jogos reais e esta, nao o PP.
+   */
+  protecoesSeguidas?: number
+  /**
+   * A habilidade que este POKE tinha ANTES de TRACE sobrescrever `poke.trait`.
+   *
+   * Trace grava no proprio POKE porque todo o motor le a habilidade de la — e
+   * o POKE do jogador e GRAVADO no banco pelo snapshot da sessao de hunt. Sem
+   * este backup, um Porygon que copiou Intimidate de um Gyarados sairia da
+   * hunt sendo um Porygon com Intimidate, permanentemente, e nada no jogo
+   * explicaria por que. `limparEstadoVolatil` (fim de batalha) devolve o valor.
+   *
+   * `null` e valor legitimo aqui: significa "o POKE nao tinha habilidade
+   * gravada", diferente de `undefined`, que significa "Trace nao rodou".
+   */
+  traitOriginal?: string | null
+  /**
    * Protect/Detect ativo: bloqueia o proximo golpe recebido que realmente mire
    * nesta entidade (golpe de auto-alvo, tipo Danca das Espadas ou Recover,
    * ignora — ver combatSystem#golpeAtingeOAlvo). Consumida no hit bloqueado.

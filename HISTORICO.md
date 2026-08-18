@@ -4622,3 +4622,177 @@ Pokebola: mesma bateria de testes a cada rodada (geometria/timing/render nao toc
 conferido via grep no JS minificado apos cada deploy, nao so "o build passou". Docs: nenhuma
 mudanca de codigo, sem verificacao de build alem da leitura cruzada linha a linha contra as
 fontes reais citadas em cada correcao.
+
+
+## 2026-08-18 — v7.6: Habilidade/Natureza/Caracteristica, e o bug de "a vida vazia que nao morre"
+
+Cinco pedidos numa leva. Os dois primeiros achados sao o que vale reler.
+
+### 1. O bug relatado ("Typhlosion nao mata Kangaskhan") NAO era dano — era ENDURE
+
+A primeira hipotese — e a errada — foi raridade. Medido: um Kangaskhan RARO de mesmo nivel de fato
+ganha de um Typhlosion Nv60 comum, e um MYTHIC Nv60 mata um Typhlosion Nv90 (multiplicador de 3x
+nos SEIS atributos). Numero real, mas nao era o sintoma descrito: *"ficava com a vida vazia e o
+typhlosion batendo nele por muitos minutos sem que ele morresse"*.
+
+**Kangaskhan leva Endure no kit selvagem a partir do Nv50.** Endure recarrega em 4s (PP 10, e
+neste jogo PP e a base do cooldown) e o POKE do jogador ataca a cada ~2-3s: o hit que mataria caia
+em cima da flag quase toda vez. Vida vazia (1 HP) e nao morre — literalmente o relato.
+
+**A regra que fecha isso nos jogos NAO e o PP — e a falha por USO CONSECUTIVO** (Gen V+): cada uso
+seguido de Protect/Detect/Endure tem metade da chance do anterior, e usar outro golpe zera a
+conta. Implementada em `combatSystem.ts#chanceDeProtecao`. Kangaskhan Nv60 caiu de "minutos" pra
+**25,3s**.
+
+Assimetria deliberada no modo pessimista (farm offline): a protecao do JOGADOR sempre falha, a do
+INIMIGO sempre pega. "Pessimista" e sempre-pior-pro-jogador, e zerar os dois lados faria o farm
+offline render MELHOR que a mesma luta ao vivo.
+
+### 1b. O caminho errado que quase entrou: cap de PP
+
+Antes de achar o Endure, uma varredura das 87 hunts com o jogador IMORTAL apontou golpe de CURA
+como causa:
+
+    ty40 vs noctowl60: hp0=194  MORREU=false em 600s | curou 112x (+7.946 hp)
+
+Virou um cap de `ability.pp` usos por batalha pra cura e protecao. **Revertido no mesmo dia, a
+pedido do usuario, e ele estava certo**: PP neste jogo e a BASE DO COOLDOWN e nada mais — um golpe
+de 5 PP ja recarrega em 8s por causa disso, e contar usos daria um segundo significado ao mesmo
+campo.
+
+O numero que fecha o assunto veio de refazer a medicao com o jogador **MORTAL**, que e o jogo de
+verdade:
+
+    ty40 vs noctowl60  JOGADOR CAIU em  9s
+    ty50 vs noctowl60  JOGADOR CAIU em  9s
+    ty55 vs noctowl60  inimigo caiu em 15s
+    ty60 vs noctowl60  inimigo caiu em  9s
+
+Nao existe faixa de nivel em que a luta nao termine. **O travamento de cura era artefato do
+ARNES** — jogador imortal e a unica situacao em que uma cura de 50% a cada 8s nunca perde a
+corrida. Licao registrada no cabecalho de `batalhaTermina.test.ts`, junto com o mesmo defeito na
+lista de Gengar/Haunter (dreno se alimentando do alvo imortal).
+
+### 2. Doze golpes ocupavam slot e nunca disparavam
+
+`pickAbilityDaFila` decidia "isto e golpe de status" por `ability.power === 0`. Os 12 golpes de
+`DANO_SEM_PODER_BASE` (Flail, Reversal, Seismic Toss, Night Shade, Dragon Rage, Super Fang,
+Psywave, Magnitude, Present, Hidden Power, Counter, Mirror Coat) tem `power` 0 no catalogo — o dano
+deles nasce em `specialDamageFor`. Caiam na perna de status, nao tinham `status` nem valiam como
+apoio, e o `continue` os pulava PARA SEMPRE.
+
+`activeAbilitiesPadrao` usa `isDamagingAbility`, que os ACEITA — entao o Magikarp Nv30+ recebia
+Flail num dos 4 slots, o HUD mostrava o slot cheio, e o golpe nunca saia. Era o "magikarp nao causa
+dano" do pedido 4.
+
+O mesmo `power === 0` estava decidindo VFX: Flail e Seismic Toss desenhavam efeito de status.
+
+### 3. IV: a regra geral ja estava certa
+
+Conferido contra o Ultra Sun. Selvagem comum: 6 sorteios uniformes independentes em 0..31 — era
+exatamente o que `rollIvs` fazia. Faltava a garantia de **3 IVs perfeitos em lendario/mitico**
+(mesma regra de Ultra Beast e Totem naqueles jogos), implementada com Fisher-Yates parcial pra os
+tres serem DISTINTOS.
+
+Fora, com motivo: cadeia de SOS (exige o inimigo chamar reforco) e criacao (exige criadouro).
+
+### 4. Kit automatico ranqueava por poder cru
+
+`danoEfetivo` (que monta os 4 slots) so olhava `power * STAB`, enquanto `danoEsperado` (a IA de
+combate) ja descontava precisao ha levas. Typhlosion Nv70 nascia com Inferno (50% de precisao,
+cooldown 8s) e Double-Edge (-33% de recuo, sem STAB) na frente de Lava Plume. Passou a contar
+precisao e recuo: duelo contra Kangaskhan de mesmo nivel terminava com 51/203 de HP, agora termina
+com 129/203.
+
+### 5. Habilidades: a atribuicao hand-authored estava errada, nao so incompleta
+
+`traits.ts` era `speciesId -> 1 trait` escrita a olho. Alem de 76 das 226 especies sem habilidade,
+tinha atribuicao INVENTADA: Gengar com `levitate`, que ele perdeu de verdade na Gen VII (no Ultra
+Sun so tem Cursed Body).
+
+Agora vem do dado: `pokemon.abilities` da PokeAPI entra no `catalog.json` e vira
+`generated/traits.generated.ts` (catalogo de 133 + atribuicao por especie, slots normais e oculta).
+Cada POKE sorteia a dele no nascimento.
+
+**Caveat da fonte, dito em voz alta no gerador**: `pokemon.abilities` da PokeAPI NAO tem
+`past_values` como `move` tem — devolve a atribuicao ATUAL. Pro elenco 1-251 a diferenca e nula ou
+minima; se o elenco crescer pra Gen VIII+, conferir na Bulbapedia antes de confiar.
+
+**102 das 133 tem efeito mecanico.** As 31 restantes estao em `docs/14-habilidades.md` com o motivo
+ESTRUTURAL de cada uma (nao ha troca de POKE, item equipado, aliado em campo, ordem de turno, PP
+gasto, fuga). A ficha do POKE mostra o motivo ao jogador — mostrar a descricao real de uma
+habilidade que o motor ignora seria a ficha mentindo.
+
+**A porta unica que essa leva criou**: `combatSystem.ts#traitsDoConfronto`. Neutralizing Gas e Mold
+Breaker DESLIGAM outras habilidades, e as duas precisam ser consultadas antes de qualquer leitura
+de trait. O primeiro bug dessa natureza apareceu na hora: Mold Breaker atravessava tudo MENOS a
+imunidade de tipo, porque `resolverImunidadeDeTipo` lia `traitDoPoke` direto.
+
+**Trace obrigou um backup.** Ela grava em `poke.trait` (todo o motor le de la), e o POKE do jogador
+e GRAVADO no banco pelo snapshot da sessao. Sem `WorldEntity#traitOriginal`, um Porygon que
+copiasse Intimidate sairia da hunt sendo um Porygon com Intimidate, permanentemente.
+
+### 6. Natureza e Caracteristica
+
+Natureza: 25, +10%/-10%, HP nunca afetado. Entra em `computeStatsAtLevel` ANTES de shiny e
+raridade, que sao invencao deste jogo.
+
+**Backfill NEUTRO de proposito.** Sortear natureza real pros POKE que ja existiam mudaria o time de
+todo jogador pra pior em metade dos casos, sem explicacao no jogo.
+
+**E o backfill quase foi desfeito sozinho.** Testando em localhost, a ficha do Entei da conta de
+teste mostrava "Natureza —" com o banco tendo `hardy`. Causa: `pokeToRow` grava o snapshot INTEIRO,
+entao um POKE carregado com `nature: undefined` GRAVA `null` no flush seguinte, e o backfill morre
+na primeira cacada. Corrigido resolvendo `null` na LEITURA
+(`playerMapper.ts#naturezaNeutraEstavel`). Vale pra todo campo novo por-POKE.
+
+Caracteristica: derivada dos IVs, sem coluna. Unico desvio: o desempate entre IVs iguais usa
+`STAT_ORDER` no lugar do Personality Value, que este jogo nao tem.
+
+### 7. VFX de area (o "eruption com sprite ruim")
+
+Golpe de area desenhava a MESMA tira do alvo-unico, esticada pro diametro do splash. A
+justificativa antiga ("a leitura de area vem do tamanho") vale pras tiras RADIAIS e quebra nas 4
+DIRECIONAIS: a do FIRE e um jato de 2,30x medido, e Eruption saia como um lanca-chamas deitado.
+
+13 tipos ganharam tira de AREA propria (`TIRA_AOE_POR_ELEMENTO`), julgadas sobre fundo escuro no
+tamanho de jogo. FIGHTING, ROCK, GHOST e STEEL ficaram de fora: o candidato de FIGHTING lia como
+GRASS, o de ROCK sumia, e os dois de STEEL sao feixes horizontais. Um candidato de FIRE foi
+rejeitado por ser um KANJI.
+
+### Verificacao
+
+`tsc -b` e `vitest` limpos (519 testes, 54 arquivos — 49 novos nesta leva), `build`,
+`build:engine` e a migration `20260818140000/140100` aplicada com `db push`. Conferido ao vivo em
+`localhost` com a conta de teste: ficha do POKE mostrando os tres tracos, e a tira de area de FIRE
+desenhando em combate real.
+
+**Pendente de publicacao**: `edge:publicar` e push da `main`. Enquanto a Edge Function nao for
+republicada a natureza nao aparece na tela — o cliente le o estado de `/estado`, que roda o bundle
+ANTIGO do `playerMapper`.
+
+### 8. Correcao de rota do usuario: PP NAO e recurso, e o cap foi revertido
+
+Pedido literal: *"Nao temos pp no jogo, o pp serve para ter uma base para o tempo de recarga do
+golpe."* Estava certo, e a reversao expos um erro de METODO meu, nao so de codigo: a medicao que
+justificava o cap (Noctowl imortalizando a luta) rodava com o jogador IMORTAL. Refeita com jogador
+mortal, nao existe faixa de nivel em que a luta nao termine.
+
+O travamento real era Endure, e a regra que o fecha e a falha por uso consecutivo — que ja e a
+regra dos jogos e nao encosta em PP.
+
+### 9. Tres melhorias de tela pedidas na mesma leva
+
+- **Pokedex**: linha evolutiva com o NIVEL de cada passo e a condicao completa das 9 especies de
+  Nivel 80 + pedra (regra que existia no motor e nao aparecia em tela nenhuma); ficha com dex,
+  BST, EXP base, curva, captura, regiao e habilidades possiveis; setas Anterior/Proximo dentro do
+  card, percorrendo a lista JA FILTRADA.
+- **Precisao do golpe** na tabela de moveset (ficha e Pokedex) e no tooltip, em amarelo abaixo de
+  100%. Motivo mecanico: `combatSystem#danoEsperado` ja ranqueia por poder x precisao ha levas, e
+  a tela pedia uma escolha que ela nao informava.
+- **Recarga individual no HUD de golpes**. `segundosAtePoderUsar` devolve o MAIOR entre o cooldown
+  do golpe e o turno global — correto pra decidir se o golpe sai, e errado pra exibir: os quatro
+  slots mostravam o mesmo numero justamente quando o turno global mandava. Novo `cooldownProprio`
+  (entity.ts) e `cooldownTotalDoGolpe` (combatSystem.ts, ja escalado pela Velocidade efetiva, com
+  clima) alimentam o numero e a cortina de recarga. Conferido ao vivo: os slots passaram de
+  "1.3s | 1.3s | 1.3s | 1.3s" para "0.4s | 1.3s | 1.3s | 1.3s".

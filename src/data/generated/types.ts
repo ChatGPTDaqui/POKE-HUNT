@@ -215,3 +215,30 @@ export type CollisionGrids = Record<string, string[]>
 // planilha — cruza as pools do PokeRogue com o nosso catalogo).
 export type SubBiomaEspecies = Record<string, string[]>
 export type SubBiomaLinks = Record<string, { bioma: string; peso: number }[]>
+
+// TRAIT = habilidade PASSIVA da especie (o que os jogos chamam de "Ability").
+// O nome existe porque "Ability" ja e o GOLPE em todo este codigo — ver o
+// cabecalho de src/data/traits.ts, que fixou o vocabulario.
+export interface TraitCatalogEntry {
+  nome: string
+  /**
+   * `short_effect` da PokeAPI, em ingles, uma linha. E o CONTRATO da
+   * implementacao: o flavor text que o jogo mostra e vago de proposito
+   * ("Powers up Fire-type moves in a pinch"), o short_effect nao
+   * ("Strengthens Fire moves to inflict 1.5x damage at 1/3 max HP or less").
+   * A traducao que o jogador le mora em src/data/traitInfo.ts.
+   */
+  efeito: string | null
+}
+
+export interface SpeciesTraits {
+  /** Slots 1 e 2 — as habilidades que um encontro selvagem pode sortear. */
+  normais: string[]
+  /** Habilidade Oculta. `null` quando a especie nao tem uma. */
+  oculta: string | null
+}
+
+export interface TraitsData {
+  catalogo: Record<string, TraitCatalogEntry>
+  porEspecie: Record<string, SpeciesTraits>
+}

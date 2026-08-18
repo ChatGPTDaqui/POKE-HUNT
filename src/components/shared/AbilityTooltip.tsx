@@ -62,6 +62,14 @@ export function AbilityTooltip({
 
           <div className="flex flex-wrap gap-x-[.55em] text-[.9em] opacity-85">
             <span>Dano base {ability.power}</span>
+            {/* Precisao so pra golpe de DANO: golpe de status passa pelo mesmo
+                sorteio no motor, mas mostrar "100%" nele sugere um teste de
+                acerto que na pratica nunca falha. */}
+            {ability.power > 0 && (
+              <span className={(ability.accuracy ?? 100) < 100 ? 'text-warn' : undefined}>
+                Precisao {ability.accuracy ?? 100}%
+              </span>
+            )}
             <span>PP {ability.pp}</span>
             {ability.cooldown != null && <span>Recarga {ability.cooldown.toFixed(1)}s</span>}
             {ability.target === 'aoe' && <span>Area (raio {ability.radius ?? AOE_RADIUS})</span>}
