@@ -207,7 +207,11 @@ backdrop, então com o Analyzer aberto, clicar em "Mercado" abria o Mercado **po
   fonte de dano, precisao, recarga e descricao era inalcancavel, sem sinal de que existia. No
   toque o slot abre um sheet com o mesmo conteudo, que tambem hospeda o liga/desliga (o
   duplo-clique do desktop e um gesto que o celular usa para zoom).
-- **Chat vira ticker de uma linha** mais sheet, abaixo de 1200px de largura.
+- **Chat vira ticker de uma linha** mais sheet, abaixo de 1200px de largura. E, no
+  compacto, o ticker e o UNICO canal: so `error` continua virando toast. Todo toast
+  tambem vira linha de chat (`pushToast` escreve nos dois), entao no celular o toast
+  era a MESMA frase, uma segunda vez, por cima do campo de batalha. Erro fica porque
+  significa que uma acao falhou — isso precisa interromper.
 - **Recortes do aparelho.** `index.html` pede `viewport-fit=cover` desde sempre e nenhum ponto do
   CSS lia `env(safe-area-inset-*)`: no iPhone a doca ficava sob o home indicator e, deitado, o
   notch cobria o card da esquerda. A camada `.hud-safe` recorta so a HUD — o canvas continua
@@ -249,6 +253,51 @@ O que se sabe sem medir: `backdrop-filter` obriga o compositor a reamostrar o qu
 camada, e aqui isso e um canvas que muda todo quadro. Numa GPU movel fraca e um custo real. A
 chave e uma classe CSS, barata e reversivel, entao fica — mas nenhum numero e afirmado ate alguem
 rodar isto num celular de verdade.
+
+## O eixo que faltava nos paineis: altura util
+
+Nenhum painel transbordava de LADO no celular — a escala fluida em `em` ja
+resolvia isso sozinha. O problema era vertical, e so aparece quando se mede a
+distancia entre o topo do corpo do painel e a primeira linha de CONTEUDO.
+
+Com trilho e doca, o corpo do sheet tem ~553px em 390x844. Antes desta leva:
+
+| Painel | Cabecalho + filtros | Itens visiveis |
+|---|---|---|
+| Mochila | ~480px (auto-venda 300 + filtros 180) | 4 POKEs |
+| Loja > Pokemons | ~330px | 4 POKEs |
+| Mercado > Comprar > Pokemon | ~330px | 2 anuncios |
+| Wiki | ~150px so de abas quebradas em 2 fileiras | — |
+| Calculadora | 300px so nos seis atributos | — |
+
+Tres regras sairam disso:
+
+1. **Configuracao que se mexe uma vez nao pode empurrar a lista que se olha
+   todo dia.** Vira `Recolhivel` (controls.tsx). Auto-venda, filtros da Loja,
+   filtros do Mercado.
+2. **Um acordeao que esconde o ESTADO e pior que a secao sempre aberta.** Por
+   isso `Recolhivel` tem `resumo`: fechado, a barra continua dizendo
+   "5/6 raridades · IV 20-100" ou "auto-venda: COMUM, RARO". Sem isso, a
+   primeira captura vendida sem querer vira bug reportado.
+3. **Dado que ja esta no trilho nao se repete no painel.** A carteira saiu do
+   cabecalho da Loja e do Mercado: ela esta dois centimetros acima, e no
+   Mercado empurrava as abas pra uma segunda fileira.
+
+E dois erros de layout que so aparecem no estreito:
+
+- **`block` (w-full) em dois botoes da mesma fileira soma 200%** e o segundo sai
+  da tela. Na Equipe isso criou uma barra de rolagem horizontal no painel; o
+  certo e `flex-1`.
+- **Detalhe embaixo de uma grade longa e detalhe invisivel.** No Bestiario, com
+  226 especies em quatro colunas, o painel de detalhe ficava a vinte fileiras de
+  rolagem do toque que o abriu — tocar numa especie parecia nao fazer nada. Virou
+  sheet.
+
+### Como medir isto de novo
+
+O mesmo script da secao anterior, com outro criterio: para cada painel, abrir e
+comparar `clientHeight` do corpo com o `offsetTop` do primeiro item da lista. Se
+o cabecalho passa de ~1/3 da altura util, ele esta no lugar do conteudo.
 
 ## Bug de clique em botão dentro de painel re-renderizado a 60fps
 

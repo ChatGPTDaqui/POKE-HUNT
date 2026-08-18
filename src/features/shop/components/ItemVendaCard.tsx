@@ -59,12 +59,15 @@ export function ItemVendaCard({
               compra: com os alvos em 44px, total e botoes em linhas separadas
               faziam cada item ocupar meia tela de celular. */}
           <div className="flex gap-[.35em]">
+            {/* `flex-1`, e nao `block`: `block` e `w-full`, e com o botao de
+                "Tudo" na mesma fileira a soma passa de 100% — na coluna de
+                venda da Loja em desktop isso cortava o segundo botao pela
+                borda. */}
             <GameButton
-              block
               variant="primary"
               disabled={ocupado}
               onClick={onVender}
-              className="justify-center"
+              className="min-w-0 flex-1 justify-center"
             >
               Vender {fmt.format(qty)} · {fmt.format(item.sellPrice * qty)}
             </GameButton>
@@ -76,7 +79,7 @@ export function ItemVendaCard({
               disabled={ocupado}
               title={`Vender as ${owned} unidades por ${fmt.format(item.sellPrice * owned)} de ouro`}
               onClick={onVenderTudo}
-              className="justify-center whitespace-nowrap"
+              className="shrink-0 justify-center whitespace-nowrap"
             >
               Tudo · {fmt.format(item.sellPrice * owned)}
             </GameButton>
