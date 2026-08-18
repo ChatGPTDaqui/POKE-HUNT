@@ -1,0 +1,23 @@
+Arte de efeito de golpe de STATUS (buff/debuff/condicao), por tipo
+elemental. Consumido por src/data/statusVfx.ts.
+
+  aumenta/<tipo>.gif  -> golpe que ELEVA um atributo. A direcao e do
+                         EFEITO, nao de quem lanca: Growl no oponente e
+                         "diminui" do lado de quem recebe.
+  diminui/<tipo>.gif  -> golpe que baixa atributo, ou aplica condicao
+                         (confusao/veneno/sono/etc — sem estagio pra
+                         medir direcao, tratado como "diminui").
+
+FLYING e DRAGON nao tem arte: caem no mesmo fallback procedural que os
+outros tipos sem VFX dedicado. Comportamento padrao, nao modo degradado.
+
+GIF, nao PNG-sequence: `drawImage` de uma <img> apontada pra um GIF anima
+sozinho — o navegador atualiza o bitmap conforme o GIF avanca, e o motor
+so precisa desenhar a MESMA Image() a cada frame. Sem fatiar quadro a
+quadro.
+
+PENDENCIA: a selecao destes 32 GIFs foi feita por opacidade de pixel
+(descartando quadro vazio e quadro quase totalmente opaco), nao por
+julgamento visual contra o fundo da hunt. CONFERIR NO JOGO antes de
+considerar definitivo — e o mesmo criterio de contraste descrito em
+../NOTAS.txt.

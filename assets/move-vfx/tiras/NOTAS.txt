@@ -1,0 +1,56 @@
+TIRAS DE VFX POR TIPO ELEMENTAL
+===============================
+
+Uma tira por tipo, 18 no total. Quadros ja montados, lado a lado na
+horizontal, altura cheia: o quadro N ocupa [N*L, N*L+L). `L` NAO esta escrito
+em lugar nenhum — sai de `naturalWidth / quadros` no desenho
+(src/data/vfxTiras.ts guarda so a contagem).
+
+DE ONDE VEM
+-----------
+Do banco .dat/.spr local (POKE/PXG_2026/objectbuilder/). Um efeito ali nao
+guarda quadro pronto: guarda `width x height` TILES de 32x32 por quadro, e o
+quadro so existe depois de montar os tiles. Essa geometria vive SO no .dat —
+nenhuma imagem exportada carrega. Fatiar uma folha exportada em celulas de 32
+entrega tiles tratados como quadros, e a animacao mostra um pedaco da arte por
+vez. Ja aconteceu duas vezes (Bullet Punch e as 4 pokebolas).
+
+REGERAR
+-------
+  py POKE/PXG_2026/objectbuilder/tira_efeito.py <id> --recortar \
+     --out assets/move-vfx/tiras/<tipo>.png
+
+`--recortar` tira a moldura transparente comum a TODOS os quadros. Sem ela a
+arte e desenhada na altura do QUADRO, e um desenho de 60px dentro de uma
+moldura de 192px vira uma manchinha no meio de nada.
+
+Depois quantizar pra PNG-8 (255 cores, FASTOCTREE): 4,5 MB -> 1,0 MB no lote
+inteiro, sem diferenca visivel no tamanho de jogo (conferido lado a lado).
+
+  from PIL import Image
+  im = Image.open(p).convert('RGBA')
+  im.quantize(colors=255, method=Image.FASTOCTREE).save(p, optimize=True)
+
+O id de cada tipo esta anotado ao lado da linha correspondente em
+src/data/vfxTiras.ts — e o unico jeito de reencontrar a arte, porque o banco
+nao guarda nome nenhum.
+
+COMO ESCOLHER ARTE NOVA
+-----------------------
+1. `py perfil_efeitos.py` varre os 5691 efeitos e grava matiz/saturacao/
+   tamanho/quadros de cada um.
+2. `py sugerir_por_cor.py FIRE --limite 48` devolve os candidatos.
+3. `py catalogo_efeitos.py <ids> --out folha.png` pra olhar.
+4. `py verificar_vfx.py "FIRE=2465,..." --out conf.png` — e ESTE que decide:
+   desenha cada candidato NO FUNDO REAL DA HUNT, no tamanho de jogo. Folha de
+   contato (fundo cinza, arte ampliada) ja aprovou arte que sumia em jogo.
+
+DUAS ARMADILHAS QUE JA CUSTARAM ESCOLHA
+---------------------------------------
+- Conjunto de 4 ou 8 ids seguidos com a mesma arte = DIRECOES do mesmo efeito,
+  nao quadros de animacao (886-889 sao o Bullet Punch pra cima/direita/baixo/
+  esquerda).
+- Arte de AREA CHEIA e OPACA nao serve pra impacto: com 1,0s de duracao ela
+  esconde o POKE por um segundo inteiro. Foi o caso do efeito 4109 no DARK,
+  trocado por um corte. Anel, corte e particula podem preencher; disco solido
+  nao.

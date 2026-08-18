@@ -94,6 +94,20 @@ export interface BaseEntity {
    */
   pathStuckSeconds: number
 
+  // --- Marcadores visuais de cura -------------------------------------------
+  // Segundos que ainda faltam pra faisca de cura terminar de tocar sobre o
+  // corpo. Sao TIMERS NA ENTIDADE, e nao `WorldEffect` como o resto do VFX,
+  // por um motivo concreto: cura acontece em nove lugares diferentes
+  // (poção, dreno, Wish, Ingrain, Water Absorb, Poison Heal, ...) e a
+  // maioria deles so tem a entidade em maos, nao o `world` — enfileirar um
+  // efeito exigiria passar `world.effects`/`world.counters` por toda essa
+  // cadeia. Marcados aqui, `heal()`/`curarStatus()` cobrem TODA fonte de uma
+  // vez, que e exatamente o pedido ("curado por qualquer fonte").
+  // Descontados em animationSystem#tickAttackAnimTimers. Ausente = nao esta
+  // tocando.
+  vfxCuraHp?: number
+  vfxCuraStatus?: number
+
   // --- Status ---------------------------------------------------------------
   // O status NAO-VOLATIL (veneno, queimadura, paralisia, sono, congelamento)
   // mora no `poke`, nao aqui: ele sobrevive a hunt e vai pro banco, como nos
@@ -305,6 +319,14 @@ export interface WorldEffect {
   // Existe porque `elementType` nao distingue Bullet Punch de Metal Claw, e os
   // dois desenhariam o mesmo efeito de aco.
   abilityId?: string
+  // Angulo (radianos) do ATACANTE para o ALVO, no momento em que o golpe
+  // concretizou. So o desenho usa, e so pra arte marcada `direcional` em
+  // data/moveVfx.ts: burst radial (todo o lote por tipo elemental) ignora.
+  // Fica no efeito, e nao e recalculado na hora de desenhar, porque o efeito
+  // sobrevive ao atacante — POKE pode morrer, trocar de alvo ou andar dentro
+  // dos 0,35s de vida do impacto, e a arte apontaria pra outro lugar no meio
+  // da animacao.
+  anguloDeAtaque?: number
   // Presente so em `abilityEffect` de golpe de STATUS (ver data/statusVfx.ts)
   // — troca o burst de impacto normal pela arte de buff/debuff por tipo.
   statusDirection?: 'aumenta' | 'diminui'

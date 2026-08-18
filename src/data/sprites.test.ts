@@ -1,5 +1,5 @@
 // Item 5 (leva QoL): os 6 icones de cura de status. `import.meta.glob` em vez
-// de `node:fs` — mesmo motivo de elementVfx.test.ts: confere contra o que o
+// de `node:fs` — mesmo motivo de vfxTiras.test.ts: confere contra o que o
 // Vite realmente empacota, nao o disco cru.
 import { describe, expect, it } from 'vitest'
 import { itemIconUrl } from './sprites'

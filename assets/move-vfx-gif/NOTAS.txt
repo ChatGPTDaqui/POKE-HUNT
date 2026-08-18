@@ -1,0 +1,17 @@
+Arte de impacto de golpe (dano), por tipo elemental — lote ANTIGO, dos 8
+tipos que nao tinham PNG-sequence em assets/move-vfx/. SEM CONSUMIDOR: o
+modulo que lia daqui foi removido quando o impacto por tipo migrou pra
+tira unica (src/data/vfxTiras.ts, arte em assets/move-vfx/tiras/).
+
+Cobertos: ICE, POISON, GROUND, PSYCHIC, GHOST, DARK, STEEL, FAIRY.
+FLYING e DRAGON ficam de fora e caem no desenho procedural existente —
+comportamento padrao, nao modo degradado.
+
+GIF pelo mesmo motivo do lote de status: a arte ja vem animada e o canvas
+pega o quadro atual sozinho, sem fatiar.
+
+CRITERIO: contraste sobre o fundo real da hunt, verificado no tamanho de
+jogo. Dois candidatos foram descartados por invisibilidade antes de
+fechar — GROUND (forma vertical fina, sem leitura de impacto) e DARK
+(preto solido, sumia contra fundo de pedra escura; trocado por um roxo
+mais claro e saturado, testado sobre burnt-forest.jpg).

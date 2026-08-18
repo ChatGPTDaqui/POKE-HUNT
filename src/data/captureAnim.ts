@@ -1,67 +1,63 @@
-// Post-battle Pokeball-throw animation (render/sprites.ts#drawCaptureAnim,
-// triggered from engine/simulation.ts#handleEnemyDefeated).
+// Animacao de arremesso de Pokebola pos-batalha (render/sprites.ts#drawCaptureAnim,
+// disparada por engine/simulation.ts#handleEnemyDefeated).
 //
-// Trocado (leva 2026-08-16) para o pacote novo do usuario
-// (assets/pokeball-throw/*.png, copiado de
-// "POKE/Assets/pokebolas/oficiais/effect-{730,731,736,737,739,740,745,746}-sprites.png").
-// Diferente do sheet antigo (pokeball-bounce.png, 1 arquivo unico com a bola
-// selecionada por COLUNA): aqui cada arquivo ja e de UMA bola so, e
-// sucesso/falha sao DOIS ARQUIVOS separados, nao duas faixas de linha no
-// mesmo arquivo.
+// FORMATO: uma tira horizontal por arquivo, quadros de 64x96 lado a lado, ja
+// MONTADOS. Quadro N fica em `[N*64, N*64+64)`, altura cheia. Nao ha linha, nao
+// ha coluna, nao ha variante de tamanho — so quadros em ordem.
 //
-// Geometria medida direto no PNG (zlib-inflate + unfilter,
-// scripts/lib/png.js), nao suposta: 512x736px, grade de 8 colunas x 23
-// linhas de 64x32px.
+// POR QUE ISTO E UMA REESCRITA, E NAO UM AJUSTE
 //
-// CORRIGIDO (leva seguinte): a 1a medicao ("8 colunas sao ate 3 copias
-// IDENTICAS por linha, a coluna nao importa") estava ERRADA — so parecia
-// certa porque a amostra comparou MEDIA de opacidade, nao pixel a pixel, e
-// so pras linhas do meio (o "wobble" parado, onde as copias realmente sao
-// quase identicas). Reexaminado com dump visual (scripts/scratch_dump_*,
-// descartaveis) linha por linha: nas linhas 0-3 (arremesso + estouro de
-// impacto) as "copias" tem tamanho/silhueta DIFERENTES — nao sao copias, sao
-// VARIANTES DE TAMANHO da mesma pose, uma por "banda" de coluna. A escolha
-// antiga (`CAPTURE_ANIM_FRAME_COLUMN`, primeira coluna nao-vazia de cada
-// linha) pulava de banda em banda sem padrao (0,1,0,0,1,2,0,1,2,...) —
-// a bola "teleportava" de tamanho/posicao entre frames, o "impacto visual
-// negativo" relatado.
+// As tiras antigas eram DUMP DE TILE, nao de quadro: 512x736 = 16x23 celulas de
+// 32x32, guardando os 360 tiles crus na ordem em que o banco os armazena. O
+// quadro de verdade tem 2x3 TILES (64x96 px) e a animacao tem 60 quadros —
+// 60 x 6 = 360 tiles, que em 16 por linha dao exatamente as 23 linhas do
+// arquivo antigo (e 44 x 6 = 264 tiles dao as 17 da falha). Ou seja: o que o
+// codigo chamava de "linha da animacao" era um TERCO de um quadro, e o que ele
+// chamava de "coluna/variante de tamanho" eram tiles vizinhos de quadros
+// diferentes.
 //
-// O padrao real: `coluna_ativa ≡ linha (mod 3)` em TODA linha das 8
-// planilhas (2 resultados x 4 bolas) — confirmado por varredura (nenhuma das
-// 23+17 linhas fica em branco na coluna `linha % 3`). E o desenho classico de
-// folha de animacao RPG Maker com ate 3 variantes de tamanho pre-renderizadas
-// por frame (fraca/media/forte); usar sempre a MESMA banda (`linha % 3`) da
-// uma trajetoria unica e coerente, sem pulo entre tamanhos.
+// Cada tentativa anterior de consertar isso partia da tira achatada e tentava
+// adivinhar a grade pela imagem — foi assim que sairam, em ordem, "as 8 colunas
+// sao copias", depois "coluna_ativa = linha % 3", depois "a bola fica centrada
+// na costura entre blocos". Cada uma explicava um sintoma e criava o proximo,
+// porque a geometria nao esta na imagem: esta no banco .dat de origem, que diz
+// `2x3 tiles, 1 camada, 1 pattern, 60 frames`. Com isso, montar o quadro e
+// mecanico e nao sobra nada pra deduzir.
 //
-// CORRIGIDO nesta rodada (relatado pelo usuario com print: "bola fica
-// duplicada"): o passo acima estava certo sobre QUAL banda usar, mas errado
-// sobre ONDE ela fica dentro da banda. Cada bola nao fica CENTRADA dentro do
-// seu bloco de 64px — ela fica CENTRADA NA COSTURA entre dois blocos (x=0,
-// 64, 128, ... 448, confirmado com deteccao de componentes conexos +
-// conferencia visual com linhas de grade). Recortar `[col*64, col*64+64)`
-// (alinhado ao bloco) pega so a METADE DIREITA da bola daquela costura MAIS
-// a METADE ESQUERDA da bola da costura seguinte — duas meia-bolas no mesmo
-// frame, uma em cada canto, exatamente o "duplicada" do print. Corrigido
-// deslocando o recorte 32px pra CENTRALIZAR na costura
-// (`slot*64 - CAPTURE_ANIM_CELL_WIDTH/2`) — e pulando a costura x=0 (so tem
-// metade direita disponivel, o resto seria fora do PNG) trocando por x=192
-// (`slot 3`, mesma fase mod 3, bola inteira disponivel). Reverificado com
-// recorte simulado pixel a pixel: toda banda vira 1 bola so, cheia, sem
-// fragmento na borda.
+// Regenerar (as 8 de uma vez):
+//   py POKE/PXG_2026/objectbuilder/export_sprites.py export effect \
+//      730,731,736,737,739,740,745,746 --projeto pxg --out <pasta> --atlas-only
+// e cortar cada `atlas.png` no numero de quadros com conteudo (60 / 44).
 export const CAPTURE_ANIM_CELL_WIDTH = 64
-export const CAPTURE_ANIM_CELL_HEIGHT = 32
+export const CAPTURE_ANIM_CELL_HEIGHT = 96
 
-// "Sucesso" tem mais linhas (a bola completa o giro e desaparece com um
-// brilho final); "falha" corta a sequencia mais cedo (a bola quica e solta
-// o POKE de volta, sem o brilho). Contagem real medida nos 8 arquivos:
-// sucesso preenche ate a linha 22 (23 linhas), falha ate a 16 (17 linhas) —
-// identico nos 4 pares de bola.
-export const CAPTURE_ANIM_SUCCESS_ROWS = 23
-export const CAPTURE_ANIM_FAIL_ROWS = 17
+// Contagem medida quadro a quadro nos 8 arquivos (bbox vazio = quadro em
+// branco): sucesso preenche os 60, falha para no 44. Identico nos 4 pares —
+// a diferenca entre sucesso e falha e a cauda da animacao (confirmacao com
+// faisca verde + a bola sumindo), que a falha nao tem.
+export const CAPTURE_ANIM_SUCCESS_FRAMES = 60
+export const CAPTURE_ANIM_FAIL_FRAMES = 44
 
-// So os 4 itens de captura reais deste jogo (js/data/items.generated.js)
-// tem par de arquivo — sem equivalente de Master/Cherish/etc, como no sheet
-// antigo.
+// 100ms por quadro, uniforme — lido da tabela de duracao do proprio banco
+// (todos os 60 quadros das 8 animacoes tem min=max=100). Da 6,0s no sucesso e
+// 4,4s na falha.
+//
+// O valor antigo (0,07s pra 3 bolas, 0,26s so pra premier_ball) era uma
+// tentativa de fazer 23 "linhas" durarem os 6s reais. Some junto com o modelo
+// de linha: agora a contagem de quadros e a real, entao a duracao por quadro
+// tambem e a real, e vale igual pras 4 bolas.
+export const CAPTURE_ANIM_FRAME_DURATION = 0.1
+
+// Onde, dentro do quadro, fica a bola em repouso — e o ponto que deve cair
+// sobre o POKE. Centroide dos pixels opacos nos quadros de "chacoalhar"
+// (12/20/30/55, todos identicos): (31, 88) de 64x96. Nao e o centro do
+// quadro: o terco de cima so e usado pelo arremesso e pelo estouro, e centrar
+// deixaria a bola parada meio quadro abaixo do alvo.
+export const CAPTURE_ANIM_ANCHOR_X = 31 / CAPTURE_ANIM_CELL_WIDTH
+export const CAPTURE_ANIM_ANCHOR_Y = 88 / CAPTURE_ANIM_CELL_HEIGHT
+
+// So os 4 itens de captura reais deste jogo (data/generated/items.generated.ts)
+// tem par de arquivo.
 const CAPTURE_ANIM_FILES: Record<string, { success: string; fail: string }> = {
   poke_ball: {
     success: 'assets/pokeball-throw/poke_ball-success.png',
@@ -81,28 +77,12 @@ const CAPTURE_ANIM_FILES: Record<string, { success: string; fail: string }> = {
   },
 }
 
-export const CAPTURE_ANIM_FRAME_DURATION = 0.07 // seconds per frame
-
-// Duracao real medida na ferramenta de sprite do usuario (metadados do
-// object builder pra effect 730/731, a premier ball): 60 frames de 100ms
-// pro sucesso (6000ms), 44 de 100ms pra falha (4400ms) — a planilha que
-// temos so guarda 23/17 linhas (uma amostra reduzida da animacao real, nao
-// as 60/44 completas), entao pra bater com a duracao TOTAL real cada linha
-// precisa segurar mais tempo: 6000/23≈261ms, 4400/17≈259ms — as duas contas
-// batem entre si (~1% de diferenca, indices independentes), 0.07s estava
-// 3.7x rapido demais. Escopado so pra premier_ball por pedido explicito do
-// usuario (testar 1 bola antes de aplicar nas outras 3, que usam o mesmo
-// 0.07 de sempre ate confirmar).
-const CAPTURE_ANIM_FRAME_DURATION_BY_BALL: Record<string, number> = {
-  premier_ball: 0.26,
+export function captureAnimFrameDuration(): number {
+  return CAPTURE_ANIM_FRAME_DURATION
 }
 
-export function captureAnimFrameDuration(ballItemId: string): number {
-  return CAPTURE_ANIM_FRAME_DURATION_BY_BALL[ballItemId] ?? CAPTURE_ANIM_FRAME_DURATION
-}
-
-export function captureAnimRowCount(success: boolean): number {
-  return success ? CAPTURE_ANIM_SUCCESS_ROWS : CAPTURE_ANIM_FAIL_ROWS
+export function captureAnimFrameCount(success: boolean): number {
+  return success ? CAPTURE_ANIM_SUCCESS_FRAMES : CAPTURE_ANIM_FAIL_FRAMES
 }
 
 export interface CaptureAnimFrameRect {
@@ -113,22 +93,17 @@ export interface CaptureAnimFrameRect {
   sh: number
 }
 
-// Source-rect (+ arquivo certo) pra um frame, clamped so holding on
-// `frameIndex` past the end just freezes on the sequence's last frame
-// instead of reading garbage rows.
+// Source-rect (+ arquivo certo) de um quadro. `frameIndex` alem do fim congela
+// no ultimo em vez de ler lixo depois da borda da tira.
 export function captureAnimFrameRect(ballItemId: string, success: boolean, frameIndex: number): CaptureAnimFrameRect | null {
   const files = CAPTURE_ANIM_FILES[ballItemId]
   if (!files) return null
-  const rowCount = captureAnimRowCount(success)
-  const row = Math.min(Math.max(0, frameIndex), rowCount - 1)
-  const phase = row % 3
-  // Costura x=0 nao tem metade esquerda (fora do PNG) — usa a costura
-  // x=192 (slot 3), mesma fase (3 % 3 === 0), bola inteira disponivel.
-  const slot = phase === 0 ? 3 : phase
+  const total = captureAnimFrameCount(success)
+  const frame = Math.min(Math.max(0, frameIndex), total - 1)
   return {
     url: success ? files.success : files.fail,
-    sx: slot * CAPTURE_ANIM_CELL_WIDTH - CAPTURE_ANIM_CELL_WIDTH / 2,
-    sy: row * CAPTURE_ANIM_CELL_HEIGHT,
+    sx: frame * CAPTURE_ANIM_CELL_WIDTH,
+    sy: 0,
     sw: CAPTURE_ANIM_CELL_WIDTH,
     sh: CAPTURE_ANIM_CELL_HEIGHT,
   }

@@ -1,6 +1,8 @@
 # 10 — Invariantes e testes
 
-`cd . && npm test` (vitest). 11 arquivos.
+`npm test` (vitest). 42 arquivos — cobre cliente **e** servidor num comando só (o `test.exclude`
+do `vite.config.ts` só tira `.claude/**` e `server/engine/**`, então os `server/src/*.test.ts`
+entram). A tabela abaixo é um recorte dos que valem explicação, não a lista completa.
 
 O critério para um invariante virar teste neste projeto é específico:
 
@@ -20,7 +22,12 @@ Um bug que estoura já tem quem o denuncie. Os daqui, não.
 | `engine/systems/animationSystem.test.ts` | — | POKE atacando virado para o lado errado |
 | `data/hunts.test.ts` | 25 | Espécie órfã, sala sem pool, faixa não batendo com o nome, hunt vazia |
 | `engine/salas.test.ts` | 9 | Sala não avançando na quota certa, transição não congelando o mundo |
-| `data/elementVfx.test.ts` | — | Caminho de arte errado caindo no procedural em silêncio |
+| `data/vfxTiras.test.ts` | — | Caminho de arte errado caindo no procedural em silêncio; arte não-direcional girando |
+| `data/walkBlock.test.ts` | 7 | Hunt sem sala (Pesadelo, BOSS, Lance) ficando sem walk-block; pintura órfã; spawn em célula bloqueada |
+| `engine/avisoDeEntradaNaHunt.test.ts` | 4 | "Entrar" recusando em silêncio — indistinguível de UI quebrada |
+| `engine/cooldownVisivel.test.ts` | — | Contagem na tela dessincronizada do cooldown que o motor aplica |
+| `engine/systems/imobilizacao.test.ts` | — | POKE preso continuando a andar |
+| `stores/gateDoLance.test.ts` | — | Hunt liberada pelo Lance voltando a "Bloqueado" no reload |
 | `lib/erroDeRede.test.ts` | — | "Verifique sua internet" acusando o bloqueador do jogador |
 
 ## Determinismo

@@ -27,6 +27,8 @@ export interface CreateWorldEffectParams {
   worldSize?: number
   elementType?: WorldEffect['elementType']
   abilityId?: string
+  // Direcao atacante -> alvo, so pra arte marcada `direcional` (data/moveVfx.ts).
+  anguloDeAtaque?: number
   ballItemId?: string
   success?: boolean
   statusDirection?: WorldEffect['statusDirection']
@@ -43,7 +45,7 @@ export function createWorldEffect(counters: WorldCounters, params: CreateWorldEf
   const {
     type, x, y, targetX, targetY, radius = 10, color = '#fff', duration = 0.25, delay = 0,
     value, effectiveness, effectivenessLabel, text, unit, isAoe, owner = null, laneSize = 1,
-    worldSize, elementType, abilityId, ballItemId, success, statusDirection,
+    worldSize, elementType, abilityId, anguloDeAtaque, ballItemId, success, statusDirection,
   } = params
 
   const id = `effect-${counters.effect++}`
@@ -58,7 +60,7 @@ export function createWorldEffect(counters: WorldCounters, params: CreateWorldEf
     value,
     effectiveness,
     effectivenessLabel: effectivenessLabel ?? undefined,
-    text, unit, isAoe, worldSize, elementType, abilityId, ballItemId, success, statusDirection,
+    text, unit, isAoe, worldSize, elementType, abilityId, anguloDeAtaque, ballItemId, success, statusDirection,
     laneSize,
     ownerId: owner ? owner.id : null,
     lane,

@@ -1,0 +1,33 @@
+VFX QUE FICA SOBRE O CORPO DO POKE
+==================================
+
+Mesmo formato das tiras de golpe (quadros lado a lado, altura cheia, largura
+do quadro deduzida de naturalWidth/quadros). Consumido por
+src/data/vfxTiras.ts e desenhado em render/sprites.ts#drawVfxSobreCorpo.
+
+cura-hp.png       36x38, 16 quadros — faisca vermelha, toca uma vez a cada
+                  ganho de HP, de QUALQUER fonte (poção, dreno, Wish, Ingrain,
+                  Water Absorb, enfermeira).
+cura-status.png   a MESMA arte, tingida de verde no exportador. Toca quando um
+                  status sai por fonte EXTERNA. Status que acaba sozinho (sono
+                  vencendo, congelamento derretendo no sorteio) nao dispara —
+                  a distincao sai de graca porque so a cura externa passa por
+                  statusSystem#curarStatus.
+confusao.png      48x36, 21 quadros — "???" ciano, constante enquanto durar.
+sono.png          40x40, 16 quadros — "Zzz", constante enquanto durar.
+
+REGERAR
+-------
+  py POKE/PXG_2026/objectbuilder/tira_efeito.py 816 --recortar --out cura-hp.png
+  py POKE/PXG_2026/objectbuilder/tira_efeito.py 816 --recortar --matiz 0.33 \
+     --sat-min 0.55 --out cura-status.png
+  py POKE/PXG_2026/objectbuilder/tira_efeito.py 2638 --recortar --out confusao.png
+  node scripts/gerar-sprite-sono.mjs
+
+O "Zzz" e o unico DESENHADO e nao importado: varri os 5691 efeitos do banco e
+ele tem o "???" da confusao, mas nao tem nenhum "zzz". Tres letras saem mais
+barato que continuar procurando.
+
+VENENO/QUEIMADURA/PARALISIA/CONGELAMENTO nao tem arquivo aqui: esses quatro
+TINGEM o corpo (roxo/laranja/amarelo/ciano) em vez de ganhar simbolo — ver
+COR_DE_STATUS_NO_CORPO em src/data/vfxTiras.ts.

@@ -3,6 +3,7 @@ import { resolveBattleAnim } from '@/data/battleSprites'
 import type { AnimName } from '@/data/battleSpriteAnims'
 import type { AttackAnimKind, PlayerEntity, EnemyEntity, Point, WorldState } from '../types'
 import { getSpecies, isDead } from '../entity'
+import { imobilizadoPorStatus } from './statusSystem'
 
 // Quanto tempo a pose de ataque (Shoot/Charge) fica na tela apos disparar —
 // nao ligado ao numero de frames do sprite, so um flourish fixo. Tambem
@@ -22,7 +23,23 @@ export function directionRowFromFacing(facing: Point): number {
 
 export function desiredAnimName(entity: PlayerEntity | EnemyEntity): AnimName {
   if (isDead(entity)) return 'Faint'
+  // Sono vence ate a pose de ataque: e o unico status com animacao propria em
+  // todas as 226 especies com arte, e "dormindo" e a informacao que muda o que
+  // o jogador entende da cena. Um POKE que adormece no meio da propria pose de
+  // Shoot mostra o sono na hora — o golpe ja enfileirado ainda pousa (o guard
+  // de resolveHit e sobre morte, nao sobre sono), mas ele nao age de novo.
+  //
+  // Nao ha risco de especie sem `Sleep-Anim.png`: ANIM_FALLBACKS ja encadeia
+  // Sleep -> Idle -> Walk (conferido: 0 das 226 especies sem Sleep).
+  if (entity.poke.status?.tipo === 'sleep') return 'Sleep'
   if (entity.attackAnimTimer > 0) return entity.attackAnim as AnimName
+  // Imobilizado por status (hoje congelamento — o sono ja saiu acima, com
+  // animacao propria): o estado continua 'chase'/'wander' pra o combate
+  // seguir funcionando (movementSystem.ts explica por que), entao sem esta
+  // linha um POKE congelado andaria no lugar. Nao ha animacao de congelado no
+  // lote PMD; o que comunica o status e o corpo tingido de ciano
+  // (data/vfxTiras.ts#COR_DE_STATUS_NO_CORPO).
+  if (imobilizadoPorStatus(entity)) return 'Idle'
   if (entity.state === 'chase') return 'Walk'
   // 'wander' cobre duas fases (ver movementSystem.ts#wanderStep/wanderFreely):
   // perseguindo um wanderTarget (anda de verdade) e pausado entre alvos
@@ -44,8 +61,23 @@ export function desiredAnimName(entity: PlayerEntity | EnemyEntity): AnimName {
 export function tickAttackAnimTimers(world: WorldState, dt: number): void {
   const entities: (PlayerEntity | EnemyEntity | null)[] = [world.player, ...world.enemies]
   for (const entity of entities) {
-    if (entity && entity.attackAnimTimer > 0) {
+    if (!entity) continue
+    if (entity.attackAnimTimer > 0) {
       entity.attackAnimTimer = Math.max(0, entity.attackAnimTimer - dt)
+    }
+    // Faiscas de cura (HP e status). Descontadas aqui e nao em `updateAnimations`
+    // pelo mesmo motivo do `attackAnimTimer`: esta funcao roda tambem no modo
+    // silencioso do servidor, e um timer que so desce no cliente ficaria
+    // travado num snapshot vindo de um flush.
+    if (entity.vfxCuraHp) {
+      const resta = entity.vfxCuraHp - dt
+      if (resta > 0) entity.vfxCuraHp = resta
+      else delete entity.vfxCuraHp
+    }
+    if (entity.vfxCuraStatus) {
+      const resta = entity.vfxCuraStatus - dt
+      if (resta > 0) entity.vfxCuraStatus = resta
+      else delete entity.vfxCuraStatus
     }
   }
 }

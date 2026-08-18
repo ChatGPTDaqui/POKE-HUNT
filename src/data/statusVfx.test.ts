@@ -1,7 +1,7 @@
-// Mesma disciplina de elementVfx.test.ts: `drawStatusEffect` cai no
+// Mesma disciplina de vfxTiras.test.ts: `drawStatusEffect` cai no
 // procedural em silencio quando a imagem nao existe, entao um nome de
 // arquivo errado nunca aparece como erro — so como golpe de status voltando
-// a ser o burst antigo, sem ninguem notar. Ver assets/move-vfx/status/CREDITOS.txt.
+// a ser o burst antigo, sem ninguem notar. Ver assets/move-vfx/status/NOTAS.txt.
 import { describe, expect, it } from 'vitest'
 import { statusVfxUrl, direcaoDoGolpeDeStatus, todosOsVfxDeStatus } from './statusVfx'
 import type { ElementType } from './generated/types'

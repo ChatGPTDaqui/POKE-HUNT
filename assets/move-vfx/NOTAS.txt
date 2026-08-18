@@ -1,0 +1,39 @@
+Arte de efeito de golpe.
+
+Duas camadas:
+
+  tiras/           por TIPO ELEMENTAL, 18 tipos — UM PNG por tipo com os
+                   quadros lado a lado, consumido por src/data/vfxTiras.ts
+  <tipo>/          lote ANTIGO (fire, water, electric, normal, grass, bug,
+                   fighting, rock) — PNG solto de 32x32. SEM CONSUMIDOR
+                   desde a migracao pra tira; sobra em disco
+  bullet-punch/    por GOLPE — 8 quadros de 96x64, consumido por
+                   src/data/moveVfx.ts
+  status/          buff/debuff/condicao — ver status/NOTAS.txt
+
+Duas regras que ja custaram retrabalho:
+
+1. ARTE VINDA DE .dat/.spr NAO TEM QUADRO PRONTO. Um efeito guarda
+   `width x height` TILES de 32x32 por quadro; o quadro so existe depois
+   de montar os tiles, e essa geometria vive no .dat, nao na imagem.
+   Bullet Punch e 3x2 tiles x 8 quadros = 48 sprites. Fatiar a folha
+   exportada em 48 celulas de 32 entregou "48 quadros" que eram tiles: o
+   jogo animou um sexto da arte por vez. Exporte ja montado
+   (x0_y0_z0_f*.png) — nao fatie folha.
+
+   Nenhuma heuristica de pixel decide isso. scripts/fatiar-sheet-vfx.mjs
+   mede continuidade nas costuras e ERROU neste caso (razao 5,1x,
+   "celulas independentes", sobre tiles de um quadro de 96x64): arte de
+   efeito tem muita transparencia, a fronteira entre tiles cai no vazio
+   e a amostra que sobra nao representa nada.
+
+2. UM CONJUNTO DE 8 ARQUIVOS NUMERADOS 0..7 costuma ser as 8 DIRECOES de
+   um projetil, nao quadros de animacao. Tocar em sequencia da um
+   projetil girando no lugar. Conjunto de 2 a 5 arquivos e animacao de
+   verdade.
+
+CRITERIO DE ESCOLHA: contraste sobre o FUNDO REAL DA HUNT, conferido no
+tamanho de jogo contra assets/hunt-backgrounds/ — nao em folha de
+contato. Duas escolhas aprovadas em cinza/verde-escuro ficaram invisiveis
+em jogo. Um efeito invisivel e pior que o desenho procedural que ele
+substitui.

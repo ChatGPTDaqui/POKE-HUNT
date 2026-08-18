@@ -362,48 +362,97 @@ registrado), dado real que diz o que é.
 
 ## VFX de combate
 
-100% canvas, sem asset obrigatório. Nenhum spritesheet real por tipo existe para os 17.
+Duas camadas: arte real por tipo elemental, e desenho procedural como rede embaixo dela.
 
-- **Alvo único**: `drawImpactBurst` — glow radial aditivo (`globalCompositeOperation:
-  'lighter'`) com pop-in rápido e fade, mais 7 partículas em ângulos **fixos derivados do
-  índice**, sem RNG: a animação é idêntica em toda a vida do efeito e não consome a sequência
-  de sorteio.
+### Arte real — uma TIRA por tipo
+
+`data/vfxTiras.ts` cobre os **18 tipos**, um PNG cada em `assets/move-vfx/tiras/`, com os
+quadros lado a lado (14 a 40 por tipo). A largura do quadro **não** está escrita no código: sai
+de `naturalWidth / quadros` — um número a menos para errar quando a arte for regerada. É o
+mesmo formato que `captureAnim.ts` já usava para as pokébolas.
+
+Tira e não PNG solto por quadro porque `data/preload.ts` aquece tudo antes de a cena montar:
+430 arquivos viraram 18 requests.
+
+Os quadros são **recortados** da moldura transparente comum a todos eles. Sem isso, arte com
+muito respiro (desenho de 60px num quadro de 192×192) era desenhada na altura do QUADRO e saía
+como uma manchinha no meio do nada — foi o motivo de quatro escolhas terem sido rejeitadas na
+conferência sobre o fundo real da hunt.
+
+`TiraDeVfx.escala` corrige o que o recorte não resolve: um relâmpago longilíneo e um estouro
+redondo com a mesma altura de arquivo não têm o mesmo peso na tela.
+
+### Direção da arte: três classes, não duas
+
+O lote nasceu marcado como "simétrico" em bloco, sem ninguém medir.
+`node scripts/conferir-direcao-vfx.mjs` mediu as 18 uma a uma — centroide, eixo principal por
+segundo momento, alongamento, e estabilidade do eixo entre quadros — e achou três classes:
+
+| classe | quantas | o que o desenho faz |
+|---|---|---|
+| RADIAL | 12 | anel, estouro, emaranhado. Sem lado alto — desenha como está |
+| VERTICAL | 4 | PSYCHIC, FLYING, POISON, FAIRY. Assimétricas, mas com o eixo principal DEITADO: têm "pra cima", não "pra o alvo" |
+| DIRECIONAL | 3 | FIRE, BUG, DARK. Apontam para algum lado e giram para acompanhar o golpe |
+
+A distinção importa porque o teste ingênuo — "é assimétrica? então gira" — **piora** as quatro
+verticais: girar a cúpula do PSYCHIC na direção do inimigo a deita no chão.
+
+Só a classe DIRECIONAL ganha o campo `direcional`. `anguloBaseGraus` é para onde a arte aponta
+DENTRO do arquivo (0° = direita, positivo = para baixo, a convenção do `Math.atan2` do mundo); o
+desenho gira por `anguloDeAtaque - base`, então arte que já nasce apontando para a direita usa 0
+e não vira nada quando o alvo está à direita. `ancoraX` diz em que fração da largura fica o
+ponto de impacto — sem ele um jato comprido atravessa o inimigo com o meio do desenho em cima
+do alvo.
+
+`orientacaoDaTira` é pura e testada isolada; `drawQuadroDeTira` só a aplica. O ângulo de ataque
+chega apenas em `drawImpactBurst` — anel de AOE e faísca de cura não giram.
+
+### Procedural, embaixo
+
+- **Alvo único**: `drawImpactBurst` — glow radial aditivo (`globalCompositeOperation: 'lighter'`)
+  com pop-in rápido e fade, mais 7 partículas em ângulos **fixos derivados do índice**, sem RNG:
+  a animação é idêntica em toda a vida do efeito e não consome a sequência de sorteio.
 - **AOE**: `drawAoeRing` — círculo expandindo de 0 até `ability.radius` (ease-out), com
-  preenchimento fraco por baixo e anel brilhante por cima. `effect.worldSize =
-  ability.radius * 2` — o tamanho da sprite **é** o tamanho da área de efeito.
-- **Forma por tipo**: `IMPACT_SHAPE_BY_TYPE` mapeia os 17 tipos para 12 famílias de forma
-  (chama, gota, folha, fragmento, raio, cristal, estrela, bolha, pedra, pena, espiral, névoa,
-  garra). Vários tipos dividem família de propósito — a cor via `colorForType` já diferencia.
+  preenchimento fraco por baixo e anel brilhante por cima. `effect.worldSize = ability.radius * 2`
+  — o tamanho da sprite **é** o tamanho da área de efeito.
+- **Forma por tipo**: `IMPACT_SHAPE_BY_TYPE` mapeia os tipos para 12 famílias de forma (chama,
+  gota, folha, fragmento, raio, cristal, estrela, bolha, pedra, pena, espiral, névoa, garra).
+  Vários tipos dividem família de propósito — a cor via `colorForType` já diferencia.
 
-**Arte real onde existe:** `data/elementVfx.ts` com PNGs 32×32 do Dungeon Crawl Stone Soup
-(`rltiles/effect`, domínio público; procedência em `assets/move-vfx/CREDITOS.txt`), em 8
-elementos. `drawImpactBurst` e `drawAoeRing` tentam a arte e **caem no procedural** quando o
-tipo não tem arte ou quando o PNG ainda não está decodificado — sem essa segunda checagem, o
-primeiro golpe de uma sessão sairia sem efeito nenhum.
+Os dois desenhos tentam a arte e **caem no procedural** quando o tipo não tem arte ou quando a
+imagem ainda não decodificou — sem essa segunda checagem, o primeiro golpe de uma sessão sairia
+sem efeito nenhum. `SOLID_OPACITY = 0.9` vale para os dois caminhos: antes só o procedural
+aplicava, e a arte real saía opaca, dois VFX do mesmo jogo com peso visual diferente.
 
-`SOLID_OPACITY = 0.9` vale para os dois caminhos. Antes só o procedural aplicava, e a arte real
-saía opaca: dois VFX do mesmo jogo com peso visual diferente.
+### Golpe de status é GIF, não tira
+
+`data/statusVfx.ts`, em `assets/move-vfx/status/{aumenta,diminui}/<tipo>.gif`. GIF porque a arte
+já vem animada: `drawImage` de uma `Image()` apontada para um GIF pega o quadro atual sozinho, e
+este loop já redesenha a cada frame. Por tipo + direção e não por golpe — são 180 golpes de
+status no dataset, e a direção é do EFEITO, não de quem lança (Growl no oponente é "diminui" do
+lado de quem recebe).
 
 ### Duas armadilhas do repositório de arte de origem
 
 1. **Conjunto de 8 arquivos numerados `0..7` são as 8 DIREÇÕES de um projétil, não quadros de
-   animação** (`arrow`, `bolt`, `icicle`, `stone_arrow`…). Tocar um desses em sequência daria
-   um projétil girando no lugar. Nenhum foi usado.
-2. **Julgar arte fora do fundo real não vale.** Numa folha de contato sobre fundo cinza,
-   `bog_flash`/`slime_wave` (verde-escuro) e `shatter_wave_white` (cinza) pareciam aceitáveis;
-   no tamanho real sobre `assets/hunt-backgrounds/forest.png`, **sumiam**. Um efeito invisível
-   é pior que o desenho procedural que ele substitui — o procedural pelo menos brilha.
+   animação.** Tocar um desses em sequência daria um projétil girando no lugar.
+2. **Julgar arte fora do fundo real não vale.** Numa folha de contato sobre fundo cinza, duas
+   escolhas em verde-escuro e cinza pareciam aceitáveis; no tamanho real sobre o background da
+   hunt, **sumiam**. Um efeito invisível é pior que o desenho procedural que ele substitui — o
+   procedural pelo menos brilha.
 
-`VfxDeElemento.escala` existe porque os quadros não têm enquadramento padronizado (nuvens
-preenchem os 32×32; `sting` e `sandblast` desenham um símbolo pequeno com margem
-transparente). Sem correção, alguns tipos saíam do tamanho de uma moeda.
+### O que o teste tranca
 
-`src/data/elementVfx.test.ts` tranca o que falha em silêncio: `drawVfxDeElemento` devolve
-`false` quando a imagem não está pronta e quem chama cai no procedural — comportamento certo,
-mas significa que **um caminho de arquivo errado não produz erro nenhum**, só o efeito antigo
-de volta. O teste confere existência dos quadros e ícones (via `import.meta.glob`, não
-`node:fs`: o tsconfig do app não carrega os tipos de Node), que todo tipo com arte tem `single`
-**e** `aoe`, e que nenhum quadro é reaproveitado entre dois tipos.
+`src/data/vfxTiras.test.ts` cobre o que falha em silêncio: o desenho devolve `false` quando a
+imagem não está pronta e quem chama cai no procedural — comportamento certo, mas significa que
+**um caminho de arquivo errado não produz erro nenhum**, só o efeito antigo de volta. Confere a
+existência de cada tira (via `import.meta.glob`, não `node:fs`: o tsconfig do app não carrega os
+tipos de Node), que todo tipo tem entrada, e que `orientacaoDaTira` não gira o que não é
+direcional.
+
+**Sobra em disco:** `assets/move-vfx/<tipo>/` (PNG solto por quadro) e `assets/move-vfx-gif/`
+(um GIF por tipo) são os dois lotes anteriores de impacto. Os módulos que liam deles foram
+removidos na migração para tira; a arte ficou sem consumidor.
 
 ## Ícones de skill por TIPO
 

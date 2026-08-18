@@ -1,17 +1,17 @@
 // Efeito visual de golpe de STATUS (muda atributo ou aplica condicao),
-// separado do impacto de dano (`elementVfx.ts`) porque golpe de status nao
+// separado do impacto de dano (`vfxTiras.ts`) porque golpe de status nao
 // deveria parecer um soco/queimadura acertando — precedencia: ver
-// `assets/move-vfx/status/CREDITOS.txt` pra origem e criterio de escolha.
+// `assets/move-vfx/status/NOTAS.txt` pra origem e criterio de escolha.
 //
 // Por TIPO + DIRECAO (aumenta/diminui), nao por golpe: mesmo raciocinio do
 // `abilityIconUrl` — sao 180 golpes de status no dataset, arte 1:1 pra cada
 // um nao existe em lugar nenhum.
 //
-// GIF, nao PNG-sequence como `elementVfx.ts`: a arte ja vem animada e o
+// GIF, nao tira de quadros como `vfxTiras.ts`: a arte ja vem animada e o
 // navegador anima uma `<img>`/`Image()` apontada pra um GIF sozinho —
 // `drawImage` num canvas que redesenha a cada frame (este jogo ja faz isso)
 // automaticamente pega o frame atual do GIF, sem precisar fatiar frame a
-// frame manualmente como o lote de PNG do Fogo precisou.
+// frame manualmente como uma tira exige.
 import type { ElementType } from './generated/types'
 import type { StatChange } from './generated/types'
 

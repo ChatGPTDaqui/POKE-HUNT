@@ -20,11 +20,19 @@ import { hpBarFillColor } from '@/data/hpBar'
 import { AURA_COLORS } from '@/data/auraColors'
 import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
 import { impactShapeForType, type ImpactShape } from '@/data/impactShapes'
-import { captureAnimFrameDuration, captureAnimFrameRect } from '@/data/captureAnim'
-import { vfxDoElemento } from '@/data/elementVfx'
-import { elementoVfxGifUrl } from '@/data/elementVfxGif'
+import {
+  captureAnimFrameDuration,
+  captureAnimFrameRect,
+  CAPTURE_ANIM_ANCHOR_X,
+  CAPTURE_ANIM_ANCHOR_Y,
+} from '@/data/captureAnim'
 import { vfxDoGolpe } from '@/data/moveVfx'
 import { statusVfxUrl } from '@/data/statusVfx'
+import {
+  tiraDoElemento, orientacaoDaTira, TIRA_CURA_HP, TIRA_CURA_STATUS, TIRA_CONFUSAO, TIRA_SONO,
+  COR_DE_STATUS_NO_CORPO, FORCA_DA_TINTA_DE_STATUS, type TiraDeVfx,
+} from '@/data/vfxTiras'
+import { VFX_CURA_DURACAO } from '@/engine/entity'
 import type { Species } from '@/data/pokes'
 import type { WorldEntity, WorldEffect, WorldState } from '@/engine/types'
 import type { MapBackground } from '@/data/generated/types'
@@ -83,6 +91,62 @@ export function primeImage(url: string): Promise<void> {
 export function isImageReady(url: string): boolean {
   const img = imageCache.get(url)
   return Boolean(img && img.complete && img.naturalWidth > 0)
+}
+
+/**
+ * Um quadro de uma TIRA (data/vfxTiras.ts) desenhado com a ALTURA pedida,
+ * centrado em (cx, cy). A largura sai da proporcao do quadro — nunca do
+ * quadrado: a arte deste banco tem quadro retangular (o de FOGO e 220x119) e
+ * forcar quadrado o espremeria pra metade da largura.
+ *
+ * `fase` e 0..1 dentro da animacao (ja com as repeticoes aplicadas por quem
+ * chama). Devolve false quando a imagem ainda nao carregou, pra quem chama
+ * poder cair no desenho de reserva em vez de mostrar um buraco.
+ */
+function drawQuadroDeTira(
+  ctx: CanvasRenderingContext2D,
+  tira: TiraDeVfx,
+  fase: number,
+  cx: number,
+  cy: number,
+  altura: number,
+  alpha: number,
+  /**
+   * Direcao do golpe (atacante -> alvo), em radianos. So gira a arte marcada
+   * como `direcional` em data/vfxTiras.ts; nas outras e ignorado de proposito
+   * — anel e cupula nao tem lado, e girar a cupula do PSYCHIC a deitaria no
+   * chao. `undefined` (golpe em si mesmo, area) tambem nao gira.
+   */
+  anguloDeAtaque?: number,
+): boolean {
+  if (!isImageReady(tira.url)) return false
+  const img = getOrLoadImage(tira.url)
+  const sw = img.naturalWidth / tira.quadros
+  const sh = img.naturalHeight
+  // clamp antes do modulo: `fase === 1` voltaria pro quadro 0 no ultimo frame
+  const indice = Math.min(tira.quadros - 1, Math.max(0, Math.floor(fase * tira.quadros)))
+  const largura = altura * (sw / sh)
+
+  ctx.save()
+  ctx.globalAlpha = Math.max(0, Math.min(1, alpha))
+  ctx.imageSmoothingEnabled = false
+
+  // A conta de orientacao mora em data/vfxTiras.ts, como funcao pura: sinal
+  // trocado num canvas nao lanca erro nenhum, so espelha a arte, e e o tipo de
+  // bug que sobrevive a revisao. Aqui fica so a aplicacao.
+  const { girar, espelharY, ancoraX } = orientacaoDaTira(tira, anguloDeAtaque)
+  if (girar === 0 && !espelharY && ancoraX === 0.5) {
+    ctx.drawImage(img, indice * sw, 0, sw, sh, cx - largura / 2, cy - altura / 2, largura, altura)
+    ctx.restore()
+    return true
+  }
+
+  ctx.translate(cx, cy)
+  ctx.rotate(girar)
+  if (espelharY) ctx.scale(1, -1)
+  ctx.drawImage(img, indice * sw, 0, sw, sh, -largura * ancoraX, -altura / 2, largura, altura)
+  ctx.restore()
+  return true
 }
 
 /**
@@ -181,7 +245,66 @@ function drawBattleSprite(ctx: CanvasRenderingContext2D, entity: WorldEntity): b
   if (entity.flashTimer > 0) ctx.filter = 'brightness(2.2)'
   ctx.drawImage(frame.img, frame.sx, frame.sy, frame.sw, frame.sh, bounds.x, bounds.y, bounds.w, bounds.h)
   ctx.restore()
+  drawTintaDeStatus(ctx, entity, frame, bounds)
   return true
+}
+
+// Canvas fora da tela pra tingir a sprite. UM so, module-level: criar um por
+// frame e por entidade custaria uma alocacao de textura a 60fps.
+//
+// POR QUE NAO DA PRA TINGIR DIRETO NO CANVAS PRINCIPAL: o modo de composicao
+// que pinta "so onde ja tem pixel" (`source-atop`) enxerga TODO o canvas, e
+// nesse ponto o fundo da hunt ja foi desenhado — a tinta sairia cobrindo o
+// mapa inteiro. Isolando a sprite num canvas proprio, o "ja tem pixel" passa
+// a significar exatamente o recorte do POKE.
+const canvasDeTinta: HTMLCanvasElement | null =
+  typeof document !== 'undefined' ? document.createElement('canvas') : null
+
+function corDeStatusNoCorpo(entity: WorldEntity): string | null {
+  const tipo = entity.poke.status?.tipo
+  return (tipo && COR_DE_STATUS_NO_CORPO[tipo]) || null
+}
+
+/**
+ * Tinge o corpo inteiro do POKE com a cor do status que ele carrega — veneno
+ * roxo, queimadura laranja, paralisia amarela, congelamento ciano.
+ *
+ * `FORCA_DA_TINTA_DE_STATUS` e o que separa "arroxeado" de "roxo": a sprite
+ * original continua embaixo e so uma fracao da cor entra por cima, entao da
+ * pra continuar reconhecendo a especie.
+ *
+ * Sono e confusao nao entram aqui de proposito — os dois usam simbolo
+ * constante sobre a cabeca (drawSimboloDeStatus), nao cor.
+ */
+function drawTintaDeStatus(
+  ctx: CanvasRenderingContext2D,
+  entity: WorldEntity,
+  frame: FrameSource,
+  bounds: SpriteBounds,
+): void {
+  const cor = corDeStatusNoCorpo(entity)
+  if (!cor || !canvasDeTinta) return
+  // O canvas so cresce: encolher a cada troca de especie faria realocacao a
+  // toa, e mexer em width/height limpa o conteudo (que e reescrito abaixo de
+  // qualquer forma).
+  if (canvasDeTinta.width < frame.sw) canvasDeTinta.width = frame.sw
+  if (canvasDeTinta.height < frame.sh) canvasDeTinta.height = frame.sh
+  const off = canvasDeTinta.getContext('2d')
+  if (!off) return
+
+  off.globalCompositeOperation = 'source-over'
+  off.clearRect(0, 0, canvasDeTinta.width, canvasDeTinta.height)
+  off.imageSmoothingEnabled = false
+  off.drawImage(frame.img, frame.sx, frame.sy, frame.sw, frame.sh, 0, 0, frame.sw, frame.sh)
+  off.globalCompositeOperation = 'source-atop'
+  off.fillStyle = cor
+  off.fillRect(0, 0, frame.sw, frame.sh)
+
+  ctx.save()
+  ctx.globalAlpha = FORCA_DA_TINTA_DE_STATUS
+  ctx.imageSmoothingEnabled = false
+  ctx.drawImage(canvasDeTinta, 0, 0, frame.sw, frame.sh, bounds.x, bounds.y, bounds.w, bounds.h)
+  ctx.restore()
 }
 
 function drawAura(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
@@ -264,7 +387,67 @@ export function drawEntity(ctx: CanvasRenderingContext2D, entity: WorldEntity): 
   // entao o primeiro frame desenhado pode chegar antes disso e piscaria a forma
   // colorida mesmo com a arte ja em cache.
   if (!drewSprite && !hasBattleSprites(getSpecies(entity).id)) drawPlaceholderShape(ctx, entity)
+  drawVfxSobreCorpo(ctx, entity)
 }
+
+// Altura do simbolo constante de sono/confusao, em pixel de mundo. Fixa e nao
+// proporcional a sprite: um Caterpie e um Steelix precisam do MESMO simbolo
+// legivel, e escalar por especie deixaria o do Caterpie ilegivel.
+const ALTURA_SIMBOLO_DE_STATUS = 26
+// Volta completa do simbolo constante. Vem do relogio de parede, e nao do
+// mundo simulado, porque nao ha estado nenhum por tras: e uma animacao de
+// enfeite que roda igual mesmo com o jogo pausado atras de um menu.
+const CICLO_SIMBOLO_MS = 1400
+
+/**
+ * Camada que fica SOBRE o corpo do POKE: faisca de cura (HP e status) e o
+ * simbolo constante de sono/confusao.
+ *
+ * Ordem importa — a faisca de cura vem por ultimo, porque ela e o evento e o
+ * simbolo e o estado de fundo (curar um POKE dormindo tem que mostrar a
+ * faisca por cima do "Zzz", nao atras dele).
+ */
+function drawVfxSobreCorpo(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
+  const topo = entity.y - visualTopOffset(entity)
+  const meioDoCorpo = (topo + entity.y + groundOffset(entity)) / 2
+  const alturaDoCorpo = entity.y + groundOffset(entity) - topo
+
+  // --- estado constante: so um simbolo por vez -----------------------------
+  // Sono e nao-volatil e confusao e volatil, entao os dois podem coexistir.
+  // Sono ganha: um POKE dormindo nao age, e essa e a informacao que muda o
+  // que o jogador entende da cena.
+  const simbolo = entity.poke.status?.tipo === 'sleep'
+    ? TIRA_SONO
+    : entity.statusVolatil?.tipo === 'confusion' ? TIRA_CONFUSAO : null
+  if (simbolo) {
+    const fase = (Date.now() % CICLO_SIMBOLO_MS) / CICLO_SIMBOLO_MS
+    drawQuadroDeTira(
+      ctx, simbolo, fase,
+      entity.x + entity.radius * 0.9,
+      topo - ALTURA_SIMBOLO_DE_STATUS * 0.4,
+      ALTURA_SIMBOLO_DE_STATUS, 1,
+    )
+  }
+
+  // --- evento: faisca de cura ----------------------------------------------
+  // `vfxCuraHp`/`vfxCuraStatus` sao CONTAGENS REGRESSIVAS (engine/types.ts),
+  // entao a fase e o complemento delas. As duas podem tocar juntas — poção
+  // que cura HP e Antidoto usado no mesmo instante — e sobrepor as duas cores
+  // e a leitura certa, nao um conflito.
+  const alturaDaFaisca = Math.max(28, alturaDoCorpo * 0.95)
+  for (const [restante, tira] of [
+    [entity.vfxCuraStatus, TIRA_CURA_STATUS] as const,
+    [entity.vfxCuraHp, TIRA_CURA_HP] as const,
+  ]) {
+    if (!restante) continue
+    const fase = Math.min(1, Math.max(0, 1 - restante / VFX_CURA_DURACAO))
+    drawQuadroDeTira(ctx, tira, fase, entity.x, meioDoCorpo, alturaDaFaisca, VFX_CURA_OPACIDADE)
+  }
+}
+
+// Pedido explicito: a faisca de cura fica "com 90% de transparencia sobre o
+// corpo" — ou seja, quase solida, deixando ver o POKE por baixo.
+const VFX_CURA_OPACIDADE = 0.9
 
 const HP_BAR_WIDTH = 32
 const HP_BAR_HEIGHT = 5
@@ -534,13 +717,21 @@ function drawVfxDeElemento(
   effect: WorldEffect,
   quadros: string[],
   tamanho: number,
+  direcional?: { ancoraX: number; recorteX?: number },
+  repeticoes = 1,
 ): boolean {
   if (!quadros.length) return false
   const progress = effectProgress(effect)
   // A animacao ocupa a vida inteira do efeito: a duracao ja e diferente entre
   // single (0.35s) e AOE (0.55s), entao amarrar o passo ao progresso mantem as
   // duas terminando junto com o proprio efeito, sem constante de fps nova.
-  const indice = Math.min(quadros.length - 1, Math.floor(progress * quadros.length))
+  // Com `repeticoes > 1` a lista toca varias voltas dentro da vida do efeito —
+  // e a vida ja foi esticada na mesma proporcao (combatSystem.ts), entao cada
+  // quadro segura o mesmo tempo de antes. O clamp antes do modulo evita que
+  // `progress === 1` volte pro quadro 0 no ultimo frame desenhado.
+  const passos = quadros.length * repeticoes
+  const passo = Math.min(passos - 1, Math.floor(progress * passos))
+  const indice = passo % quadros.length
   const url = quadros[indice]
   if (!isImageReady(url)) return false
 
@@ -552,9 +743,66 @@ function drawVfxDeElemento(
   // jogo com peso visual diferente.
   ctx.globalAlpha = Math.max(0, Math.min(1, fade)) * SOLID_OPACITY
   ctx.imageSmoothingEnabled = false
-  ctx.drawImage(getOrLoadImage(url), effect.targetX! - tamanho / 2, effect.targetY! - tamanho / 2, tamanho, tamanho)
+  // `tamanho` e a ALTURA; a largura sai da proporcao natural do quadro, igual
+  // ao que `drawGifEffect` ja fazia. Desenhar quadrado so era invisivel porque
+  // toda a arte antiga era 32x32 — o primeiro quadro nao-quadrado (Bullet
+  // Punch, 96x64) sairia espremido a 2/3 da largura.
+  const img = getOrLoadImage(url)
+
+  // `recorteX` corta o quadro pelo lado de TRAS (esquerda no arquivo, ver a
+  // convencao em data/moveVfx.ts) e desenha so a fracao pedida. Serve pra
+  // encurtar rastro comprido demais sem encolher o impacto junto — que e o que
+  // acontece se a correcao for por `escala`.
+  const manter = direcional?.recorteX ?? 1
+  const recorteLargura = img.naturalWidth * manter
+  const recorteInicio = img.naturalWidth - recorteLargura
+  const largura = tamanho * (recorteLargura / img.naturalHeight)
+
+  const angulo = direcional ? effect.anguloDeAtaque : undefined
+  if (angulo == null) {
+    // Burst radial (o lote inteiro por tipo elemental): sem rotacao, centrado
+    // no alvo. Tambem o caminho de arte direcional cujo efeito nao trouxe
+    // angulo — golpe em si mesmo, ou efeito criado por um caminho que ainda
+    // nao grava direcao. Desenhar sem girar e o comportamento antigo, nao um
+    // erro.
+    ctx.drawImage(img, recorteInicio, 0, recorteLargura, img.naturalHeight,
+      effect.targetX! - largura / 2, effect.targetY! - tamanho / 2, largura, tamanho)
+  } else {
+    ctx.translate(effect.targetX!, effect.targetY!)
+    ctx.rotate(angulo)
+    // Girar mais de 90 graus deixa a arte de cabeca pra baixo (inimigo a
+    // esquerda). Espelhar no eixo Y DEPOIS de girar mantem a direcao do golpe
+    // e devolve o "em pe" — o mesmo truque de sprite de projetil lateral.
+    if (Math.abs(angulo) > Math.PI / 2) ctx.scale(1, -1)
+    // O ponto de impacto da arte (nao o centro dela) e que cai sobre o alvo.
+    // `ancoraX` e medido no quadro INTEIRO; com recorte, ele precisa ser
+    // reexpresso dentro do pedaco que sobrou, senao encurtar o rastro moveria
+    // a faisca de lugar.
+    const ancora = Math.min(1, Math.max(0, (direcional!.ancoraX - (1 - manter)) / manter))
+    ctx.drawImage(img, recorteInicio, 0, recorteLargura, img.naturalHeight,
+      -largura * ancora, -tamanho / 2, largura, tamanho)
+  }
   ctx.restore()
   return true
+}
+
+/**
+ * Fase 0..1 dentro da tira. Uma volta ocupa a vida INTEIRA do efeito: a
+ * duracao ja e diferente entre impacto (1,0s) e area (1,2s), entao amarrar a
+ * fase ao progresso deixa as duas terminando junto com o proprio efeito, sem
+ * constante de fps nova. Arte muito curta pede `repeticoes` (data/moveVfx.ts).
+ */
+function faseDaTira(effect: WorldEffect, tira: TiraDeVfx): number {
+  const repeticoes = vfxDoGolpe(effect.abilityId)?.repeticoes ?? 1
+  if (repeticoes <= 1 || tira.quadros <= 0) return effectProgress(effect)
+  return (effectProgress(effect) * repeticoes) % 1
+}
+
+/** Fade do fim da vida do efeito, ja multiplicado pela opacidade global de VFX. */
+function opacidadeDoEfeito(effect: WorldEffect): number {
+  const progress = effectProgress(effect)
+  const fade = progress < HOLD_PORTION ? 1 : 1 - (progress - HOLD_PORTION) / (1 - HOLD_PORTION)
+  return Math.max(0, Math.min(1, fade)) * SOLID_OPACITY
 }
 
 function drawImpactBurst(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
@@ -563,20 +811,15 @@ function drawImpactBurst(ctx: CanvasRenderingContext2D, effect: WorldEffect): vo
   const arteDoGolpe = vfxDoGolpe(effect.abilityId)
   if (arteDoGolpe) {
     const tamanho = (effect.worldSize || IMPACT_BASE_SIZE) * ESCALA_VFX_SINGLE * (arteDoGolpe.escala?.single ?? 1)
-    if (drawVfxDeElemento(ctx, effect, arteDoGolpe.single, tamanho)) return
+    if (drawVfxDeElemento(ctx, effect, arteDoGolpe.single, tamanho, arteDoGolpe.direcional, arteDoGolpe.repeticoes)) return
   }
 
-  const arte = vfxDoElemento(effect.elementType)
-  if (arte) {
-    const tamanho = (effect.worldSize || IMPACT_BASE_SIZE) * ESCALA_VFX_SINGLE * (arte.escala?.single ?? 1)
-    if (drawVfxDeElemento(ctx, effect, arte.single, tamanho)) return
-  }
-  // 8 tipos sem PNG-sequence (ver elementVfxGif.ts) — GIF nativo, mesmo
-  // tamanho-base que os outros 8 ja usam.
-  const gifUrl = elementoVfxGifUrl(effect.elementType)
-  if (gifUrl) {
-    const tamanho = (effect.worldSize || IMPACT_BASE_SIZE) * ESCALA_VFX_SINGLE
-    if (drawGifEffect(ctx, effect, gifUrl, tamanho)) return
+  const tira = tiraDoElemento(effect.elementType)
+  if (tira) {
+    const tamanho = (effect.worldSize || IMPACT_BASE_SIZE) * ESCALA_VFX_SINGLE * (tira.escala ?? 1)
+    // O angulo so entra no impacto ALVO-UNICO. `drawAoeRing` nao passa: area e
+    // um circulo centrado em quem lancou, e nao aponta pra ninguem.
+    if (drawQuadroDeTira(ctx, tira, faseDaTira(effect, tira), effect.targetX!, effect.targetY!, tamanho, opacidadeDoEfeito(effect), effect.anguloDeAtaque)) return
   }
 
   const x = effect.targetX!
@@ -630,18 +873,17 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
   const arteDoGolpe = vfxDoGolpe(effect.abilityId)
   if (arteDoGolpe?.aoe) {
     const tamanho = effect.worldSize! * ESCALA_VFX_AOE * (arteDoGolpe.escala?.aoe ?? 1)
-    if (drawVfxDeElemento(ctx, effect, arteDoGolpe.aoe, tamanho)) return
+    if (drawVfxDeElemento(ctx, effect, arteDoGolpe.aoe, tamanho, undefined, arteDoGolpe.repeticoes)) return
   }
 
-  const arte = vfxDoElemento(effect.elementType)
-  if (arte) {
-    const tamanho = effect.worldSize! * ESCALA_VFX_AOE * (arte.escala?.aoe ?? 1)
-    if (drawVfxDeElemento(ctx, effect, arte.aoe, tamanho)) return
-  }
-  const gifUrl = elementoVfxGifUrl(effect.elementType)
-  if (gifUrl) {
-    const tamanho = effect.worldSize! * ESCALA_VFX_AOE
-    if (drawGifEffect(ctx, effect, gifUrl, tamanho)) return
+  // Mesma tira do impacto alvo-unico, so que desenhada no DIAMETRO real do
+  // splash. E a mesma regra que o lote de GIF ja seguia, e evita ter que
+  // achar e conferir 18 artes de area alem das 18 de impacto — a leitura de
+  // "isto pegou uma area" vem do tamanho, nao de um desenho diferente.
+  const tira = tiraDoElemento(effect.elementType)
+  if (tira) {
+    const tamanho = effect.worldSize! * ESCALA_VFX_AOE * (tira.escala ?? 1)
+    if (drawQuadroDeTira(ctx, tira, faseDaTira(effect, tira), effect.targetX!, effect.targetY!, tamanho, opacidadeDoEfeito(effect))) return
   }
 
   const x = effect.targetX!
@@ -691,14 +933,12 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
   ctx.restore()
 }
 
-// GIF nativo (nao um array de PNGs pisado por `effect.age` como
+// GIF nativo (nao uma tira de quadros pisada por `effect.age` como
 // `drawVfxDeElemento`): o navegador ja anima uma `Image()` apontada pra um
 // `.gif` sozinho, e este loop de desenho ja redesenha tudo a cada frame —
 // `drawImage` so pega o quadro que o GIF esta mostrando naquele instante,
-// de graca. Compartilhado por golpe de STATUS (data/statusVfx.ts, altura
-// fixa) e por golpe de DANO nos 8 tipos sem PNG-sequence
-// (data/elementVfxGif.ts, tamanho = area real do golpe, mesma regra do
-// lote PNG).
+// de graca. Usado so por golpe de STATUS (data/statusVfx.ts, altura fixa):
+// o impacto de DANO migrou pros dois lotes de tira (data/vfxTiras.ts).
 function drawGifEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect, url: string, altura: number): boolean {
   if (!isImageReady(url)) return false
   const img = getOrLoadImage(url)
@@ -735,34 +975,46 @@ function drawAbilityEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect): 
   else drawImpactBurst(ctx, effect)
 }
 
-// 32, nao 40: precisa ser um divisor INTEIRO da largura da fonte (64px),
-// pra escala de reducao ficar em 2:1 exato. Com 40 (fator 1.6, nao inteiro)
-// e `imageSmoothingEnabled=false`, minificacao nao-inteira nao e garantida
-// como point-sampling puro em todo motor/GPU — alguns aplicam algo tipo
-// mipmap mesmo com suavizacao desligada (ela so controla a AMPLIACAO, nao a
-// reducao), e podem descartar metade dos pixels da bola dependendo do
-// alinhamento. Print do usuario ("so esta metade") bate exatamente com
-// esse padrao; a simulacao Node (point-sampling ingenuo) nunca reproduziria
-// isso, porque o navegador real nao necessariamente reduz do mesmo jeito.
-// 32 elimina a variavel: toda reducao 2:1 e trivial e identica em qualquer
-// motor. A altura sai PROPORCIONAL ao frame (sh/sw) pra nao esticar a bola.
-const CAPTURE_ANIM_DRAW_WIDTH = 32
+// 1:1 com a fonte (64x96). A escala PRECISA ser inteira: com fator nao-inteiro
+// e `imageSmoothingEnabled=false`, reducao nao e garantida como point-sampling
+// puro em todo motor/GPU — alguns aplicam algo tipo mipmap mesmo com suavizacao
+// desligada (ela so controla a AMPLIACAO, nao a reducao) e podem descartar
+// metade dos pixels da bola dependendo do alinhamento. Isso ja aconteceu aqui
+// com 40/64 = 1.6x, e o print do usuario ("so esta metade") batia exatamente
+// com o padrao.
+//
+// 0.5 = a metade pedida. E seguro apesar do paragrafo acima porque o problema
+// nunca foi "reduzir": foi reduzir por um fator que nao divide o pixel
+// inteiro. 40/64 = 0,625 faz cada pixel de destino cair sobre 1,6 pixels de
+// origem, e a amostragem escolhe de forma irregular quais sobrevivem — dai a
+// bola pela metade. 0,5 e divisor exato: cada pixel de destino cobre 2 de
+// origem, o descarte e uniforme (um sim, um nao) e o resultado e identico ao
+// que sairia reduzindo o arquivo no exportador.
+//
+// A ancora nao muda junto: ela e FRACAO do quadro (data/captureAnim.ts), nao
+// pixel, entao continua caindo no mesmo ponto da bola depois da reducao.
+const CAPTURE_ANIM_DRAW_SCALE = 0.5
 
 function drawCaptureAnim(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
   if (effect.age < effect.delay) return
-  const frameIndex = Math.floor((effect.age - effect.delay) / captureAnimFrameDuration(effect.ballItemId!))
+  const frameIndex = Math.floor((effect.age - effect.delay) / captureAnimFrameDuration())
   const frame = captureAnimFrameRect(effect.ballItemId!, Boolean(effect.success), frameIndex)
   if (!frame) return
   const img = getOrLoadImage(frame.url)
   if (!img.complete || img.naturalWidth === 0) return
 
-  const drawHeight = CAPTURE_ANIM_DRAW_WIDTH * (frame.sh / frame.sw)
+  const largura = frame.sw * CAPTURE_ANIM_DRAW_SCALE
+  const altura = frame.sh * CAPTURE_ANIM_DRAW_SCALE
+  // A bola em repouso nao fica no centro do quadro (o terco de cima e so o
+  // arremesso e o estouro) — quem cai sobre o POKE e o ponto de ancora medido
+  // em data/captureAnim.ts.
   ctx.save()
   ctx.imageSmoothingEnabled = false
   ctx.drawImage(
     img, frame.sx, frame.sy, frame.sw, frame.sh,
-    effect.targetX! - CAPTURE_ANIM_DRAW_WIDTH / 2, effect.targetY! - drawHeight / 2,
-    CAPTURE_ANIM_DRAW_WIDTH, drawHeight,
+    effect.targetX! - largura * CAPTURE_ANIM_ANCHOR_X,
+    effect.targetY! - altura * CAPTURE_ANIM_ANCHOR_Y,
+    largura, altura,
   )
   ctx.restore()
 }

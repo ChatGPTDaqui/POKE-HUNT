@@ -20,9 +20,8 @@ import { battleSpriteUrl } from './battleSprites'
 import { getMap } from './maps'
 import { getEncounter } from './enemies'
 import { faceIconUrl, spriteUrl } from './sprites'
-import { todosOsQuadrosDeVfx } from './elementVfx'
 import { todosOsQuadrosDeGolpe } from './moveVfx'
-import { todosOsGifsDeImpacto } from './elementVfxGif'
+import { todasAsTirasDeVfx } from './vfxTiras'
 import { todosOsIconesDeHabilidade } from './abilityIcons'
 import { todosOsVfxDeStatus } from './statusVfx'
 import { primeImage } from '@/render/sprites'
@@ -107,11 +106,15 @@ export async function preloadHunt(mapId: string, jogador: EspeciePreload | null)
   }
 
   const fundo = mapDef.bg?.image ? [primeImage(mapDef.bg.image)] : []
-  // Arte de efeito de golpe (8 tipos — ver data/elementVfx.ts) e icone de slot
-  // (17 tipos). Todos de uma vez em vez de derivar quais tipos esta hunt pode
-  // usar: o proprio POKE do jogador muda de golpe ao subir de nivel e ao
-  // evoluir, e "quais tipos vao aparecer" nao e uma pergunta que da pra
-  // responder na entrada da hunt. Sao PNGs de 32x32, ~66 arquivos.
-  const efeitos = [...todosOsQuadrosDeVfx(), ...todosOsQuadrosDeGolpe(), ...todosOsGifsDeImpacto(), ...todosOsIconesDeHabilidade(), ...todosOsVfxDeStatus()].map(primeImage)
+  // Arte de efeito de golpe (18 tipos, 1 tira cada — ver data/vfxTiras.ts),
+  // faisca de cura, simbolos de sono/confusao e icone de slot. Todos de uma
+  // vez em vez de derivar quais tipos esta hunt pode usar: o proprio POKE do
+  // jogador muda de golpe ao subir de nivel e ao evoluir, e "quais tipos vao
+  // aparecer" nao e uma pergunta que da pra responder na entrada da hunt.
+  //
+  // As tiras somam ~1 MB (PNG-8; eram 4,5 MB em RGBA). E o item mais pesado
+  // deste preload, e o teto de PRELOAD_TIMEOUT_MS existe justamente pra rede
+  // ruim nao transformar isso em "o botao Entrar nao funciona".
+  const efeitos = [...todasAsTirasDeVfx(), ...todosOsQuadrosDeGolpe(), ...todosOsIconesDeHabilidade(), ...todosOsVfxDeStatus()].map(primeImage)
   await Promise.all([preloadEspecies(especies), ...fundo, ...efeitos])
 }

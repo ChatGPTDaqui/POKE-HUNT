@@ -1,7 +1,7 @@
-// Fatia um spritesheet de efeito num quadro PNG por celula — o formato que
-// src/data/elementVfx.ts e src/data/moveVfx.ts consomem (lista de PNGs soltos,
-// nao spritesheet: e assim que a arte do Dungeon Crawl ja veio, e o desenho em
-// render/sprites.ts#drawVfxDeElemento espera uma lista de URLs).
+// Fatia um spritesheet de efeito num quadro PNG por celula — o formato de
+// lista de PNGs soltos que src/data/moveVfx.ts consome (e assim que o lote de
+// Bullet Punch veio). NAO serve pro lote por TIPO: aquele migrou pra TIRA
+// (src/data/vfxTiras.ts), um arquivo com os quadros lado a lado.
 //
 //   node scripts/fatiar-sheet-vfx.mjs <sheet.png> <pasta-destino> [--celula=32] [--prefixo=q]
 //
@@ -10,13 +10,27 @@
 // 100% transparente no meio da animacao aparece como piscada de nada) e a
 // continuidade nas costuras entre celulas vizinhas.
 //
-// POR QUE O DIAGNOSTICO DE COSTURA: dump de sprite de cliente Tibia (Object
-// Builder) pode ser (a) N quadros independentes de 32x32 ou (b) quadros MAIORES
-// partidos em tiles de 32x32 lado a lado. Fatiar um sheet do tipo (b) como (a)
-// entrega 48 pedacos de bicho cortado, e o erro so aparece na tela, no meio do
-// combate. A costura mede isso: se os tiles formassem uma imagem maior, a
-// diferenca de cor na fronteira entre vizinhos seria PARECIDA com a diferenca
-// dentro de um tile. Muito maior = tiles independentes.
+// AVISO: PRA ARTE VINDA DE UM BANCO .dat/.spr, NAO USE ESTE SCRIPT.
+//
+// Efeito num banco .dat/.spr nao guarda quadro pronto: guarda `width x height`
+// TILES de 32x32 por quadro. Bullet Punch e 3x2 tiles x 8 quadros = 48
+// sprites; fatiado aqui virou "48 quadros" e o jogo animou um sexto da arte
+// por vez. O metadado que separa tile de quadro esta no .dat, nao na imagem —
+// e nenhuma heuristica de pixel substitui ele. Exporte ja montado:
+//
+//   py POKE/PXG_2026/objectbuilder/export_sprites.py export effect <id> //      --projeto pxg --out <pasta>        # gera x0_y0_z0_f*.png
+//   py POKE/PXG_2026/objectbuilder/achar_efeito.py <pasta-de-pngs>
+//                                          # descobre o id e a geometria real
+//
+// O diagnostico de costura abaixo TENTA distinguir os dois casos comparando a
+// diferenca de cor na fronteira entre celulas com a diferenca dentro de uma
+// celula. Ele ja errou: no sheet do Bullet Punch deu razao 5,1x ("celulas
+// INDEPENDENTES") sobre tiles que eram pedacos de um quadro de 96x64. O filtro
+// `alpha > 32` e o motivo — arte de efeito tem muita transparencia, e a
+// fronteira entre tiles vizinhos quase sempre cai no vazio, entao a amostra
+// que sobra e minuscula e nao representa a costura. O numero continua sendo
+// impresso porque ajuda em folha de arte comum (fundo opaco), mas ele NAO e
+// autoridade sobre nada que tenha vindo de um .dat.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { createRequire } from 'node:module'
@@ -87,9 +101,10 @@ if (f.delta != null && d.delta != null) {
   const razao = f.delta / d.delta
   console.log(
     razao > 2
-      ? `  -> razao ${razao.toFixed(1)}x: celulas INDEPENDENTES, fatiar como quadro solto esta certo.`
-      : `  -> razao ${razao.toFixed(1)}x: os tiles podem formar um quadro MAIOR. Confira antes de usar.`,
+      ? `  -> razao ${razao.toFixed(1)}x: SUGERE celulas independentes. Nao e prova — ver o aviso no topo.`
+      : `  -> razao ${razao.toFixed(1)}x: os tiles provavelmente formam um quadro MAIOR. Nao fatie.`,
   )
+  console.log('  (arte vinda de .dat: a geometria certa esta no .dat, nao neste numero)')
 }
 
 // --- escrita ---
