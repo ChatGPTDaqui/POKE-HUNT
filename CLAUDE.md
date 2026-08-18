@@ -28,6 +28,12 @@ src/features/  # telas
 
 Jira: `oreisviana.atlassian.net`, projeto `PH`.
 
+## Documentação (arquitetura/regras de negócio — sob demanda)
+
+`docs/` — arquitetura e regras de negócio detalhadas, por assunto (índice em
+`docs/README.md`). Não carregado por padrão: ler só quando a tarefa pedir
+histórico ou decisão que este arquivo não cobre.
+
 ## Regras críticas
 
 - **`assets/` (~270MB) fica na raiz do repo**, fora de `public/` — nunca copiar/linkar pra `public/assets`, git duplicaria ~6.300 arquivos. Servido via plugin (`vite.config.ts`) em dev, `serve.js` em produção.

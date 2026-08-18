@@ -1,0 +1,96 @@
+name: Supabase check
+
+# Gate de PR/push. Pega os 2 incidentes que ja aconteceram por falta disso:
+# - migration criada e nunca aplicada (schema remoto diverge do que os
+#   arquivos em supabase/migrations/ esperam)
+# - front rodando contra schema desatualizado (database.types.ts nao
+#   regenerado depois de uma mudanca de coluna/tabela)
+#
+# Roda num runner do GitHub (tem Docker disponivel) — nao e o mesmo ambiente
+# que a maquina local, que evita Docker de proposito (ver docs/11-operacao.md).
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches-ignore: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link no projeto Supabase
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+      - name: Schema remoto diverge do que as migrations do repo esperam?
+        # public E dev — o projeto tem os 2 (dev.config.toml:13), dev e o clone
+        # de teste (ver supabase/migrations/*_dev.sql). graphql_public fica de
+        # fora: e gerado automatico, nao e controlado por migration.
+        run: |
+          supabase db diff --linked --schema public --schema dev > /tmp/schema-diff.sql
+          if [ -s /tmp/schema-diff.sql ]; then
+            echo "::error::Schema remoto diverge das migrations em supabase/migrations/."
+            echo "Ou falta 'supabase db push' de uma migration ja commitada, ou alguem"
+            echo "aplicou mudanca de schema direto (db query) sem criar migration."
+            cat /tmp/schema-diff.sql
+            exit 1
+          fi
+          echo "Schema remoto bate com as migrations do repo."
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Migration nova mexe em dev sem mexer em public (ou vice-versa)?
+        # Convencao do projeto (ver supabase/migrations/2026081*): mudanca de
+        # schema em dev/public anda em par. Nada impede hoje commitar so um
+        # lado — silencioso ate os 2 ambientes divergirem de verdade.
+        # So olha migrations NOVAS neste push/PR (nao mexe no historico, que
+        # e de antes dessa convencao existir).
+        run: |
+          git fetch origin main --depth=50
+          NOVAS=$(git diff --name-only --diff-filter=A origin/main...HEAD -- supabase/migrations/)
+          if [ -z "$NOVAS" ]; then
+            echo "Nenhuma migration nova neste push/PR."
+            exit 0
+          fi
+          TOCA_DEV=""
+          TOCA_PUBLIC=""
+          for f in $NOVAS; do
+            if grep -qE '\bdev\.[a-zA-Z_]' "$f"; then TOCA_DEV="$TOCA_DEV $f"; fi
+            if grep -qE '\bpublic\.[a-zA-Z_]' "$f"; then TOCA_PUBLIC="$TOCA_PUBLIC $f"; fi
+          done
+          if [ -n "$TOCA_DEV" ] && [ -z "$TOCA_PUBLIC" ]; then
+            echo "::error::Migration nova mexe em dev.* mas nenhuma mexe em public.* — falta o par:$TOCA_DEV"
+            exit 1
+          fi
+          if [ -n "$TOCA_PUBLIC" ] && [ -z "$TOCA_DEV" ]; then
+            echo "::error::Migration nova mexe em public.* mas nenhuma mexe em dev.* — falta o par:$TOCA_PUBLIC"
+            exit 1
+          fi
+          echo "Par dev/public ok (ou migration nao mexe em nenhum dos dois, ex: grant/extensao)."
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: database.types.ts esta desatualizado?
+        run: |
+          npm ci
+          supabase gen types typescript --linked > /tmp/database.types.ts
+          if ! diff -q /tmp/database.types.ts src/lib/database.types.ts > /dev/null; then
+            echo "::error::src/lib/database.types.ts esta desatualizado em relacao ao schema remoto."
+            echo "Rode 'npm run db:types' local e commite o resultado junto da migration."
+            diff /tmp/database.types.ts src/lib/database.types.ts || true
+            exit 1
+          fi
+          echo "database.types.ts em sincronia com o schema remoto."
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}

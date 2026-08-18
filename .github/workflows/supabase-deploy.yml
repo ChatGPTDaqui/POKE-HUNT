@@ -1,0 +1,48 @@
+name: Supabase deploy
+
+# Unico caminho de deploy real (db push + edge function). So dispara em push
+# em main, ou seja, so depois que supabase-check.yml ja passou no PR. Acaba
+# com o incidente de 2 devs rodando `edge:publicar`/`db push` manual e um
+# sobrescrevendo o outro — agora e sempre 1 deploy por vez, serializado pelo
+# git (concurrency abaixo garante isso mesmo com 2 pushes quase juntos).
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: supabase-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link no projeto Supabase
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+      - name: Aplicar migrations pendentes (public + dev, par por arquivo)
+        run: supabase db push --linked
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - name: Publicar Edge Function (motor + servidor de autoridade)
+        run: npm run edge:publicar
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
