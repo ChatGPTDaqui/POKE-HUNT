@@ -13,6 +13,18 @@ export interface PatchNoteEntry {
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
   {
+    version: '7.3',
+    date: '2026-08-18',
+    title: 'Voce nasce onde o mapa manda, e a tela para de fingir que nao tem nada quando so esta carregando',
+    highlights: [
+      'O PONTO DE NASCIMENTO DE CADA MAPA AGORA E ESCOLHIDO A MAO. Onze cenarios ganharam um ponto de entrada marcado de proposito — voce entra na hunt e comeca na rua, na trilha ou na clareira que faz sentido pra aquele lugar, e nao mais no meio geometrico da area andavel. Ate agora o jogo calculava a media da regiao onde da pra andar e largava voce ali, o que num mapa em L ou numa cidade de ruas estreitas caia num canto arbitrario.',
+      'BUG REAL CORRIGIDO NA PROPRIA FERRAMENTA QUE LE ESSAS MARCACOES: os onze pontos ja estavam marcados e TODOS estavam sendo ignorados em silencio. A arte de fundo e maior que a area jogavel — o desenho cobre o mapa com sobra e so a faixa central dele aparece na tela —, e a marcacao caia nessa sobra. O jogo agora traz o ponto pra dentro mantendo a direcao marcada, em vez de descartar.',
+      'BUG REAL CORRIGIDO: O PERFIL DIZIA QUE VOCE NAO TINHA CAPTURA NENHUMA enquanto a lista ainda estava chegando. A aba Capturas mostrava \'Nenhuma captura registrada ainda. Ligue o Auto-Catch no painel do Bot\' para quem tem a mochila cheia — e ainda mandava ligar um bot que ja podia estar ligado. Agora aparece \'Carregando suas capturas...\' ate o dado chegar.',
+      'BUG REAL CORRIGIDO E MAIS GRAVE: A TELA DE ITEM DO MERCADO MOSTRAVA PRECO ZERO enquanto carregava. Alem de dizer \'Ninguem vendendo\' e \'Ninguem procurando\' sobre um item com ofertas, o campo de preco nascia em 0 — um numero em que da pra clicar e comprar. A tela agora espera o livro de ofertas chegar antes de desenhar qualquer coisa.',
+      'TODO BOTAO QUE FALA COM O SERVIDOR AGORA MOSTRA QUE ESTA TRABALHANDO. Comprar, vender, trancar item, aceitar pedido de amizade, cancelar anuncio: antes o botao so apagava por um ou dois segundos, sem dizer nada, o que e igualzinho a um botao quebrado. Agora ele gira. O rotulo continua no lugar de proposito, pra lista nao pular embaixo do seu dedo.',
+    ],
+  },
+  {
     version: '7.2',
     date: '2026-08-18',
     title: 'Parede virou parede em TODA hunt, os 4 golpes sao seus pra escolher, e o Lance nao desfaz mais o que liberou',
