@@ -26,6 +26,7 @@
     "conta:teste": "node scripts/conta-de-teste.js",
     "conta:criar": "node scripts/conta-de-teste.js --criar",
     "conta:limpar": "node scripts/conta-de-teste.js --limpar",
+    "conta:poderes": "node scripts/conta-teste-poderes.mjs --aplicar",
     "edge:publicar": "npm run build:edge && npx supabase functions deploy jogo",
     "usum:baixar": "node scripts/fetch-usum-catalog.js",
     "usum:gerar": "node scripts/generate-catalog-usum.js",
