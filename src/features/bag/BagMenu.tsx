@@ -16,13 +16,14 @@ import { controller } from '@/engine/controller'
 import { useGameStateStore, MAX_TEAM_SIZE } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
+import { useDeviceMode } from '@/stores/uiStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { PokeNameTag } from '@/components/shared/PokeNameTag'
 import { linkarItem, linkarPoke, tratouComoLink } from '@/components/shared/linkarNoChat'
 import { ItemTooltip } from '@/components/shared/ItemTooltip'
 import {
-  GameButton, GameCard, GameCheck, GameIconButton, GameInput, GameSelect, SegmentedTabs, StickyHeader,
+  GameButton, GameCard, GameIconButton, GameInput, GameSelect, SegmentedTabs, StickyHeader,
 } from '@/components/game/controls'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
 import { cn } from '@/lib/utils'
@@ -67,6 +68,7 @@ function PokemonsTab() {
   const updatePokeInstance = useGameStateStore((s) => s.updatePokeInstance)
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const acao = useAcaoPendente()
+  const { compacto } = useDeviceMode()
 
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('rarity')
@@ -106,26 +108,38 @@ function PokemonsTab() {
 
   return (
     <div className="flex flex-col gap-[.45em]">
-      <div className="flex flex-wrap items-center gap-[.5em]">
+      {/* Uma linha so. Com o checkbox de shiny em linha propria (ele ocupa a
+          largura inteira por ser um `<label>` com 44px de alvo), o cabecalho de
+          filtros comia 180px dos ~470px uteis do celular. Como CHIP ele cabe ao
+          lado dos outros tres controles e o estado continua obvio. */}
+      <div className="flex items-center gap-[.4em]">
         <GameInput
-          placeholder="Buscar POKE por nome..."
+          placeholder="Buscar POKE..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="min-w-[10em] flex-1"
+          className="min-w-[6em] flex-1"
         />
         <GameSelect value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)}>
           {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
             <option key={key} value={key}>{SORT_LABELS[key]}</option>
           ))}
         </GameSelect>
-        <GameButton onClick={() => setSortDesc((d) => !d)} title={sortDesc ? 'Maior primeiro' : 'Menor primeiro'}>
+        <GameButton
+          onClick={() => setSortDesc((d) => !d)}
+          aria-label={sortDesc ? 'Maior primeiro' : 'Menor primeiro'}
+          title={sortDesc ? 'Maior primeiro' : 'Menor primeiro'}
+        >
           {sortDesc ? <ArrowDown /> : <ArrowUp />}
         </GameButton>
-        <GameCheck checked={shinyOnly} onChange={setShinyOnly}>
-          <span className="inline-flex items-center gap-[.25em]">
-            Somente <Sparkle weight="fill" className="text-shiny" /> Shiny
-          </span>
-        </GameCheck>
+        <GameButton
+          variant={shinyOnly ? 'primary' : 'secondary'}
+          aria-pressed={shinyOnly}
+          aria-label="Somente shiny"
+          title="Somente shiny"
+          onClick={() => setShinyOnly(!shinyOnly)}
+        >
+          <Sparkle weight="fill" className={shinyOnly ? undefined : 'text-shiny'} />
+        </GameButton>
       </div>
 
       {visible.length === 0 ? (
@@ -167,6 +181,12 @@ function PokemonsTab() {
                 <GameButton
                   carregando={acao.isPending(`team:${poke.uid}`)}
                   disabled={acao.pendingKey != null}
+                  // "Mover p/ equipe" por extenso custava 40% da largura do card
+                  // no celular e empurrava nome e IV pra reticencia. O rotulo
+                  // curto mantem a acao legivel; o `title` completo continua no
+                  // desktop, onde ele e alcancavel.
+                  title="Mover para a equipe"
+                  aria-label="Mover para a equipe"
                   onClick={(e) => {
                     e.stopPropagation()
                     void acao.run(`team:${poke.uid}`, () =>
@@ -174,7 +194,7 @@ function PokemonsTab() {
                     )
                   }}
                 >
-                  Mover p/ equipe
+                  {compacto ? 'Equipar' : 'Mover p/ equipe'}
                 </GameButton>
               ) : (
                 <span className="text-[.78em] text-n500">Equipe cheia</span>

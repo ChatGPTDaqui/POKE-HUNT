@@ -15,7 +15,8 @@ import { SPECIES, type Species } from '@/data/pokes'
 import { pokedexNumber } from '@/data/regions'
 import { faceIconUrl } from '@/data/sprites'
 import { useGameStateStore, type PokedexKillCount } from '@/stores/gameStateStore'
-import { useBreakpoints } from '@/stores/uiStore'
+import { useDeviceMode } from '@/stores/uiStore'
+import { Sheet } from '@/components/game/Sheet'
 import { TypeChip } from '@/components/shared/TypeChip'
 import { GameCheck, GameInput, GameSelect, Meter, SectionLabel } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
@@ -45,7 +46,7 @@ type Filtro = 'todos' | 'progresso' | 'completo'
 
 export function BestiarioMenu() {
   const pokedexKills = useGameStateStore((s) => s.pokedexKills)
-  const { colStack } = useBreakpoints()
+  const { compacto } = useDeviceMode()
   const [search, setSearch] = useState('')
   const [filtro, setFiltro] = useState<Filtro>('todos')
   const [shinyOnly, setShinyOnly] = useState(false)
@@ -118,7 +119,7 @@ export function BestiarioMenu() {
         <GameCheck checked={shinyOnly} onChange={setShinyOnly}>✨ Shiny</GameCheck>
       </div>
 
-      <div className={colStack ? 'flex flex-col gap-[.65em]' : 'grid grid-cols-[1.4fr_1fr] gap-[.65em]'}>
+      <div className={compacto ? 'flex flex-col gap-[.65em]' : 'grid grid-cols-[1.4fr_1fr] gap-[.65em]'}>
         <div className="grid content-start gap-[.5em] [grid-template-columns:repeat(auto-fill,minmax(6em,1fr))]">
           {visiveis.map((species) => {
             const p = progressoDe(pokedexKills, species.id)
@@ -150,17 +151,35 @@ export function BestiarioMenu() {
           {visiveis.length === 0 && <p className="text-n500">Nenhum Pokemon corresponde aos filtros.</p>}
         </div>
 
-        <DetalheEspecie species={selecionada} kills={pokedexKills} />
+        {/* No celular o detalhe NAO fica embaixo da grade: com 226 especies em
+            quatro colunas, "embaixo" fica a vinte fileiras de rolagem do toque
+            que o abriu — tocar numa especie parecia nao fazer nada. Vira sheet
+            por cima, que e o mesmo gesto do resto do jogo. */}
+        {!compacto && <DetalheEspecie species={selecionada} kills={pokedexKills} />}
       </div>
+
+      {compacto && selecionada && (
+        <Sheet
+          winKey="bestiario-detalhe"
+          snap="conteudo"
+          zIndex={33}
+          onClose={() => setSelectedId(null)}
+          title={selecionada.name}
+        >
+          <DetalheEspecie species={selecionada} kills={pokedexKills} semNome />
+        </Sheet>
+      )}
     </div>
   )
 }
 
 function DetalheEspecie({
-  species, kills,
+  species, kills, semNome,
 }: {
   species: Species | null
   kills: Record<string, PokedexKillCount>
+  /** No sheet o nome ja e o titulo da moldura — repetir dentro le como bug. */
+  semNome?: boolean
 }) {
   if (!species) {
     return (
@@ -175,7 +194,7 @@ function DetalheEspecie({
 
   return (
     <div className="flex flex-col gap-[.45em] self-start rounded-[.7em] border border-n800 bg-n900 p-[.6em]">
-      <div className="text-[1.05em] font-medium">{species.name}</div>
+      {!semNome && <div className="text-[1.05em] font-medium">{species.name}</div>}
       <div className="flex gap-[.3em]">
         <TypeChip type={species.type} />
         {species.type2 && <TypeChip type={species.type2} />}

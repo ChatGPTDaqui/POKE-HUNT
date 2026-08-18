@@ -16,7 +16,7 @@ import { CurrencyCircleDollar } from '@phosphor-icons/react'
 import { RARITIES, type RarityKey } from '@/data/rarity'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { sincronizarAuto } from '@/data/remote/autoridade'
-import { GameCard, GameSwitch, SectionLabel } from '@/components/game/controls'
+import { GameSwitch, Recolhivel } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 
 // Ordem crescente de raridade, a mesma do resto do jogo — o jogador le de
@@ -48,13 +48,25 @@ export function AutoVendaPanel() {
     })
   }
 
+  // Resumo pra barra fechada. Fechar a secao NAO pode esconder o estado: sem
+  // isto o jogador nao saberia que esta vendendo COMUM automaticamente sem
+  // abrir o bloco, e a primeira captura perdida viraria bug reportado.
+  const resumo = !config.ligado
+    ? 'desligada'
+    : config.raridades.length === 0
+      ? 'ligada, sem raridade marcada'
+      : config.raridades.map((r) => RARITIES[r].label).join(', ')
+
   return (
-    <GameCard className="flex flex-col gap-[.5em] p-[.55em]">
+    <Recolhivel
+      titulo="Auto-venda"
+      resumo={resumo}
+      icone={<CurrencyCircleDollar className="shrink-0 text-[1.15em] text-gold" />}
+      className={config.ligado && config.raridades.length === 0 ? 'border-warn/50' : undefined}
+    >
+    <div className="flex flex-col gap-[.5em]">
       <div className="flex items-center justify-between gap-[.5em]">
-        <SectionLabel className="flex items-center gap-[.3em]">
-          <CurrencyCircleDollar className="text-[1.15em] text-gold" />
-          AUTO-VENDA
-        </SectionLabel>
+        <span className="text-[.8em] text-n400">Vender captura na hora</span>
         <GameSwitch
           label="Ligar auto-venda"
           checked={config.ligado}
@@ -98,6 +110,7 @@ export function AutoVendaPanel() {
           Ligado, mas sem raridade marcada — nada será vendido.
         </p>
       )}
-    </GameCard>
+    </div>
+    </Recolhivel>
   )
 }

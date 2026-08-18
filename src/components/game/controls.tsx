@@ -16,11 +16,12 @@
 // proprio card (aconteceu de verdade no prototipo, com o input de % do
 // auto-pot). Os primitivos do shadcn continuam em uso nas telas FORA do jogo
 // (login/cadastro/home), onde nao ha escala fluida.
-import { CircleNotch } from '@phosphor-icons/react'
-import { useId } from 'react'
+import { CaretDown, CircleNotch } from '@phosphor-icons/react'
+import { useId, useState } from 'react'
 import type {
   ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes,
 } from 'react'
+import { useDeviceMode } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent'
@@ -220,7 +221,18 @@ export function GameSwitch({
   )
 }
 
-/** Abas em pilula (Mochila, Loja, Config, continentes das Hunts...). */
+/**
+ * Abas em pilula (Mochila, Loja, Config, continentes das Hunts...).
+ *
+ * No celular a fileira ROLA de lado em vez de quebrar em varias. A Wiki tem 7
+ * abas: quebradas, elas ocupavam 150px dos ~470px uteis antes de a primeira
+ * linha de conteudo aparecer. Rolagem horizontal e o padrao de barra de abas em
+ * jogo mobile justamente por isso.
+ *
+ * O risco conhecido do padrao e a aba fora da tela passar despercebida — o
+ * degrade na borda direita existe pra dizer que ha mais coisa ali. Com poucas
+ * abas nada rola e nada aparece.
+ */
 export function SegmentedTabs<T extends string>({
   value, options, onChange, className,
 }: {
@@ -229,13 +241,27 @@ export function SegmentedTabs<T extends string>({
   onChange: (value: T) => void
   className?: string
 }) {
+  const { compacto } = useDeviceMode()
+  // O degrade da borda so entra quando a fileira PROVAVELMENTE nao cabe. Ele e
+  // estatico (CSS nao enxerga overflow), entao aplicado sempre ele apagaria a
+  // ultima aba de uma fileira que cabia inteira. Cinco e o ponto em que a
+  // fileira passa de 374px uteis com rotulos de tamanho tipico.
+  const podeRolar = compacto && options.length >= 5
   return (
-    <div className={cn('flex flex-wrap gap-[.3em]', className)}>
+    <div
+      className={cn(
+        'flex gap-[.3em]',
+        compacto ? 'fileira-abas flex-nowrap overflow-x-auto' : 'flex-wrap',
+        podeRolar && 'tiras-de-aba',
+        className,
+      )}
+    >
       {options.map((option) => (
         <GameButton
           key={option.value}
           variant={option.value === value ? 'primary' : 'secondary'}
           aria-pressed={option.value === value}
+          className={compacto ? 'shrink-0' : undefined}
           onClick={() => onChange(option.value)}
         >
           {option.label}
@@ -340,6 +366,49 @@ export function ComingSoon({ icon, title, children }: { icon: ReactNode; title: 
       <span className="text-[2em] text-n300">{icon}</span>
       <div className="font-medium">{title}</div>
       <div className="max-w-[24em] text-[.8em] text-n500">{children}</div>
+    </div>
+  )
+}
+
+/**
+ * Bloco que abre e fecha, com um resumo do estado na propria barra.
+ *
+ * Existe por causa de uma conta de tela: no celular o painel util tem ~470px de
+ * altura, e a configuracao de auto-venda sozinha ocupava 300px permanentes no
+ * topo da Mochila — sobravam quatro POKEs visiveis numa lista que pode ter
+ * cem. Configuracao que se mexe uma vez por semana nao pode empurrar a lista
+ * que se olha todo dia.
+ *
+ * O `resumo` na barra e o que torna o fechamento honesto: fechado, o jogador
+ * continua sabendo se a auto-venda esta ligada e em quais raridades. Um
+ * acordeao que esconde o ESTADO, e nao so os controles, e pior que a secao
+ * sempre aberta.
+ */
+export function Recolhivel({
+  titulo, resumo, icone, inicialmenteAberto = false, children, className,
+}: {
+  titulo: ReactNode
+  resumo?: ReactNode
+  icone?: ReactNode
+  inicialmenteAberto?: boolean
+  children: ReactNode
+  className?: string
+}) {
+  const [aberto, setAberto] = useState(inicialmenteAberto)
+  return (
+    <div className={cn('overflow-hidden rounded-[.7em] border border-n800 bg-n900', className)}>
+      <button
+        type="button"
+        aria-expanded={aberto}
+        onClick={() => setAberto((v) => !v)}
+        className="jogo-botao flex w-full cursor-pointer items-center gap-[.5em] border-0 bg-transparent px-[.6em] py-[.5em] text-left font-[inherit]"
+      >
+        {icone}
+        <span className="font-medium">{titulo}</span>
+        {resumo && <span className="min-w-0 flex-1 truncate text-right text-[.78em] text-n400">{resumo}</span>}
+        <CaretDown className={cn('shrink-0 text-n400 transition-transform duration-150', aberto && 'rotate-180')} />
+      </button>
+      {aberto && <div className="border-t border-n800 px-[.6em] py-[.55em]">{children}</div>}
     </div>
   )
 }

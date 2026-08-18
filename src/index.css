@@ -411,3 +411,25 @@
   position: absolute;
   inset: -11px -8px;
 }
+
+/* Fileira de abas rolavel (SegmentedTabs no compacto, com 5 abas ou mais). A
+   barra de rolagem some — ela ocuparia 8px de altura permanentes sob as abas — e
+   o degrade da borda direita fica no lugar dela, dizendo que ha mais aba fora da
+   tela. Quem decide aplicar e o componente, pela CONTAGEM de abas: `mask` e
+   estatico e o CSS nao enxerga overflow, entao aplicado sempre ele apagaria a
+   ultima aba de uma fileira que ja cabia. */
+.tiras-de-aba {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.6em), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 1.6em), transparent);
+}
+
+/* A barra de rolagem some na fileira de abas, role ou nao. Restrito a ela: a
+   Loja tem colunas que rolam de lado de proposito, e ali a barra e a unica
+   pista de que ha conteudo fora da vista. */
+.fileira-abas {
+  scrollbar-width: none;
+}
+
+.fileira-abas::-webkit-scrollbar {
+  height: 0;
+}
