@@ -5,11 +5,21 @@
 // botao Auto flutuante, que tinha que MEDIR o rodape pra nao ficar por tras
 // dele. Aqui os tres sao filhos do mesmo flex — nao ha o que medir.
 //
-// A navegacao virou barra de abas de 5 slots. O corte nao e arbitrario: o slot
-// e caro (44px de largura minima cada, mais rotulo legivel), entao ficam os
-// quatro destinos que o jogador abre durante o farm — Equipe, Mochila, Hunt,
-// Loja — e "Mais" para o resto. Hunt e o slot alto do meio por ser a unica acao
-// que troca a cena do jogo.
+// A navegacao e uma barra de 8 slots FIXOS, iguais nos tres regimes: Equipe,
+// Mochila, Pokedex, Hunt, Loja, Hospital, Mercado, Mais. Nada entra ou sai por
+// largura de tela — o jogador aprende a posicao uma vez e ela nao se mexe.
+//
+// Hunt tem peso proprio (pilula do acento, icone maior) por ser a acao que
+// troca a CENA do jogo, e nao so a tela por cima dela. Hospital e a outra
+// metade desse par: fora de uma hunt ele e o destino atual, e aparece marcado.
+//
+// **Hunt nao fica em cima do centro exato da barra, e nao da pra ficar.** Sao
+// 7 destinos alem dele — numero impar — entao qualquer divisao deixa 3 de um
+// lado e 4 do outro, e o centro do slot do meio cai meio slot (~21px em 390px)
+// a esquerda do centro da barra. As unicas saidas exatas sao 6 ou 8 destinos
+// alem do Hunt. A alternativa — grupos de larguras diferentes pra compensar —
+// foi medida e rejeitada: em 390px joga os 4 slots da direita pra 38,7px, e em
+// 320px pra 31px, abaixo do minimo de toque.
 //
 // Em 'deitado' os rotulos somem e tudo vira uma fileira so: com 390px de altura
 // cada linha do rodape custa 13% do jogo visivel.
@@ -33,30 +43,33 @@ import { useMedirAltura } from '@/hooks/useMedirAltura'
 import { cn } from '@/lib/utils'
 
 export interface Destino {
-  screen: ScreenName
+  /** Ausente nos slots que NAO abrem tela: Hospital (troca a cena) e Mais. */
+  screen?: ScreenName
   label: string
   Icon: Icon
   /** Imagem que substitui o icone vetorial; o `Icon` continua sendo o fallback. */
   iconUrl?: string
 }
 
-// Os quatro destinos da barra, alem do Hunt central.
-const FIXOS: Destino[] = [
+// Os tres slots a esquerda do Hunt e os dois de tela a direita dele. Hospital
+// e Mais nao entram aqui: nenhum dos dois e uma `ScreenName` (um troca a cena
+// do canvas, o outro abre a grade).
+type DestinoDeTela = Destino & { screen: ScreenName }
+
+const ESQUERDA: DestinoDeTela[] = [
   { screen: 'equipe', label: 'Equipe', Icon: UsersThree, iconUrl: 'assets/ui-icons/equipe.png' },
   { screen: 'mochila', label: 'Mochila', Icon: Backpack },
+  { screen: 'pokedex', label: 'Pokedex', Icon: BookOpen },
+]
+const DIREITA: DestinoDeTela[] = [
   { screen: 'loja', label: 'Loja', Icon: Storefront },
+  { screen: 'mercado', label: 'Mercado', Icon: Scales },
 ]
 
 // O que vive dentro de "Mais". Ordem por frequencia de uso real, nao
-// alfabetica: Pokedex e Mercado abrem varias vezes por sessao, Configuracoes
-// uma vez por mes.
-//
-// Em tela ampla nao ha motivo pra esconder os dois primeiros atras de um toque:
-// a largura sobra. Eles sobem pra barra e SAEM da grade — o mesmo destino nunca
-// aparece nos dois lugares, senao o badge de pendencia conta duas vezes.
-const SECUNDARIOS: Destino[] = [
-  { screen: 'pokedex', label: 'Pokedex', Icon: BookOpen },
-  { screen: 'mercado', label: 'Mercado', Icon: Scales },
+// alfabetica: Correio abre varias vezes por sessao, Configuracoes uma vez por
+// mes.
+const SECUNDARIOS: DestinoDeTela[] = [
   { screen: 'correio', label: 'Correio', Icon: Envelope },
   { screen: 'bestiario', label: 'Bestiário', Icon: BookBookmark },
   { screen: 'tasks', label: 'Tasks', Icon: CheckSquare },
@@ -67,13 +80,21 @@ const SECUNDARIOS: Destino[] = [
   { screen: 'config', label: 'Ajustes', Icon: Gear },
 ]
 
-export function destinosPorRegime(compacto: boolean): { promovidos: Destino[]; naGrade: Destino[] } {
-  const promovidos = compacto ? [] : SECUNDARIOS.slice(0, 2)
-  return { promovidos, naGrade: SECUNDARIOS.filter((d) => !promovidos.includes(d)) }
+/**
+ * O mesmo destino nunca pode estar na barra E na grade do "Mais": os dois
+ * lugares somam badge de pendencia, entao a duplicata faz o jogador ler "2
+ * pendencias" onde ha uma. Esta e a lista unica das telas que a barra ja cobre.
+ */
+export const TELAS_NA_BARRA: ReadonlySet<ScreenName> = new Set<ScreenName>(
+  [...ESQUERDA, ...DIREITA].map((d) => d.screen),
+)
+
+export function destinosDaGrade(): DestinoDeTela[] {
+  return SECUNDARIOS.filter((d) => !TELAS_NA_BARRA.has(d.screen))
 }
 
 export function ActionDock() {
-  const { mode, compacto } = useDeviceMode()
+  const { mode } = useDeviceMode()
   const emHunt = useWorldStore((s) => s.mapDef != null)
   const deitado = mode === 'deitado'
 
@@ -90,13 +111,13 @@ export function ActionDock() {
         <BotaoAuto />
       </div>
 
-      <BarraNavegacao compacto={compacto} deitado={deitado} />
+      <BarraNavegacao deitado={deitado} />
     </div>
   )
 }
 
 // --- barra de navegacao ------------------------------------------------------
-function BarraNavegacao({ compacto, deitado }: { compacto: boolean; deitado: boolean }) {
+function BarraNavegacao({ deitado }: { deitado: boolean }) {
   const currentScreen = useUiStore((s) => s.currentScreen)
   const toggleScreen = useUiStore((s) => s.toggleScreen)
   const moreOpen = useUiStore((s) => s.moreOpen)
@@ -108,13 +129,20 @@ function BarraNavegacao({ compacto, deitado }: { compacto: boolean; deitado: boo
   const navRef = useRef<HTMLElement>(null)
   useMedirAltura(navRef, useUiStore((s) => s.setNavHeight))
 
-  const { promovidos, naGrade } = destinosPorRegime(compacto)
-  const pendenciasEmMais = naGrade.reduce((soma, d) => (
+  const pendenciasEmMais = destinosDaGrade().reduce((soma, d) => (
     soma + (d.screen === 'mercado' ? pendenciasMercado : d.screen === 'correio' ? pendenciasCorreio : 0)
   ), 0)
 
-  const esquerda = [FIXOS[0], FIXOS[1]]
-  const direita = [FIXOS[2], ...promovidos]
+  // Hospital nao abre tela: ele TROCA a cena do canvas. Fora de uma hunt o
+  // jogador ja esta la, entao o slot vira indicador de "voce esta aqui" e o
+  // toque so fecha o que estiver aberto por cima — nao ha viagem a fazer.
+  const emHunt = useWorldStore((s) => s.mapDef != null)
+  const closeScreen = useUiStore((s) => s.closeScreen)
+  function irAoHospital() {
+    closeScreen()
+    setMoreOpen(false)
+    if (emHunt) void controller.returnToHospital({ x: 0, y: 0 })
+  }
 
   return (
     // `data-keep-open`: estes botoes ja alternam a tela sozinhos. Sem a marca, o
@@ -128,7 +156,7 @@ function BarraNavegacao({ compacto, deitado }: { compacto: boolean; deitado: boo
         deitado ? 'px-[.5em] py-[.2em]' : 'px-[.4em] py-[.3em]',
       )}
     >
-      {esquerda.map((d) => (
+      {ESQUERDA.map((d) => (
         <SlotNav
           key={d.screen}
           destino={d}
@@ -144,19 +172,30 @@ function BarraNavegacao({ compacto, deitado }: { compacto: boolean; deitado: boo
         onClick={() => toggleScreen('hunts')}
       />
 
-      {direita.map((d) => (
-        <SlotNav
-          key={d.screen}
-          destino={d}
-          ativo={currentScreen === d.screen}
-          rotulo={!deitado}
-          badge={d.screen === 'mercado' ? pendenciasMercado : d.screen === 'correio' ? pendenciasCorreio : 0}
-          onClick={() => toggleScreen(d.screen)}
-        />
-      ))}
+      <SlotNav
+        destino={DIREITA[0]}
+        ativo={currentScreen === DIREITA[0].screen}
+        rotulo={!deitado}
+        onClick={() => toggleScreen(DIREITA[0].screen)}
+      />
 
       <SlotNav
-        destino={{ screen: 'config', label: 'Mais', Icon: DotsThreeOutline }}
+        destino={{ label: 'Hospital', Icon: FirstAid }}
+        ativo={!emHunt}
+        rotulo={!deitado}
+        onClick={irAoHospital}
+      />
+
+      <SlotNav
+        destino={DIREITA[1]}
+        ativo={currentScreen === DIREITA[1].screen}
+        rotulo={!deitado}
+        badge={pendenciasMercado}
+        onClick={() => toggleScreen(DIREITA[1].screen)}
+      />
+
+      <SlotNav
+        destino={{ label: 'Mais', Icon: DotsThreeOutline }}
         ativo={moreOpen}
         rotulo={!deitado}
         badge={pendenciasEmMais}
@@ -184,8 +223,8 @@ function SlotNav({
       aria-pressed={ativo}
       onClick={onClick}
       className={cn(
-        'alvo-toque relative flex flex-1 cursor-pointer flex-col items-center justify-center gap-[.15em]',
-        'rounded-[.8em] px-[.15em] py-[.25em] font-[inherit] transition-colors',
+        'relative flex min-h-[44px] min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-[.15em]',
+        'rounded-[.8em] px-[.1em] py-[.25em] font-[inherit] transition-colors',
         ativo ? 'bg-n800 text-foreground' : 'text-n400',
       )}
     >
@@ -203,7 +242,18 @@ function SlotNav({
       {/* O rotulo NAO e enfeite no toque: sem hover nao existe `title`, e um
           icone sozinho e adivinhacao. Ele so sai em 'deitado', onde cada
           linha custa 13% da altura do jogo. */}
-      {rotulo && <span className="text-[.62em] leading-none tracking-[.01em]">{label}</span>}
+      {rotulo && (
+        // `min()` e nao `.58em` seco: com 8 slots a largura util e 1/8 da barra,
+        // e em 320px isso da 34px — "Hospital" e "Mercado" truncavam pra
+        // "Hospit…". O rotulo passa a encolher junto com a tela. Medido: em
+        // 320px nenhum dos oito trunca, em 390px o texto volta ao tamanho cheio.
+        <span
+          className="w-full truncate text-center leading-none tracking-[.01em]"
+          style={{ fontSize: 'min(.58em, 2.3vw)' }}
+        >
+          {label}
+        </span>
+      )}
       <NotificationBadge count={badge} titulo={`${badge} pendência(s) em ${label}`} />
     </button>
   )
@@ -218,21 +268,21 @@ function SlotHunt({ ativo, deitado, onClick }: { ativo: boolean; deitado: boolea
       aria-pressed={ativo}
       onClick={onClick}
       className={cn(
-        'alvo-toque relative flex flex-1 cursor-pointer flex-col items-center justify-center gap-[.15em]',
-        'rounded-[.8em] px-[.15em] py-[.25em] font-[inherit] transition-colors',
+        'relative flex min-h-[44px] min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-[.15em]',
+        'rounded-[.8em] px-[.1em] py-[.25em] font-[inherit] transition-colors',
         ativo ? 'text-foreground' : 'text-n300',
       )}
     >
       <span
         className={cn(
           'flex items-center justify-center rounded-full transition-colors',
-          deitado ? 'h-[1.9em] w-[1.9em]' : 'h-[2.15em] w-[2.15em]',
+          deitado ? 'h-[2.05em] w-[2.05em]' : 'h-[2.3em] w-[2.3em]',
           ativo ? 'bg-primary text-primary-foreground' : 'bg-n800 text-n100',
         )}
       >
-        <MapTrifold className="text-[1.15em]" weight="fill" />
+        <MapTrifold className="text-[1.45em]" weight="fill" />
       </span>
-      {!deitado && <span className="text-[.62em] leading-none">Hunt</span>}
+      {!deitado && <span className="leading-none" style={{ fontSize: 'min(.58em, 2.3vw)' }}>Hunt</span>}
     </button>
   )
 }
@@ -247,38 +297,21 @@ function SlotHunt({ ativo, deitado, onClick }: { ativo: boolean; deitado: boolea
 export function SheetMais() {
   const moreOpen = useUiStore((s) => s.moreOpen)
   const toggleScreen = useUiStore((s) => s.toggleScreen)
-  const closeScreen = useUiStore((s) => s.closeScreen)
   const setMoreOpen = useUiStore((s) => s.setMoreOpen)
-  const pendenciasMercado = usePendenciasDoMercado()
   const pendenciasCorreio = usePendenciasDoCorreio()
-  const emHunt = useWorldStore((s) => s.mapDef != null)
-  const { compacto } = useDeviceMode()
-  const { naGrade: destinos } = destinosPorRegime(compacto)
+  const destinos = destinosDaGrade()
 
   if (!moreOpen) return null
 
   return (
     <Sheet winKey="mais" snap="conteudo" zIndex={33} onClose={() => setMoreOpen(false)} title="Mais">
       <div className="grid grid-cols-4 gap-[.5em]">
-        {/* Hospital nao abre tela: TROCA a cena do canvas. So aparece dentro de
-            uma hunt — no Hospital ele nao faria nada. */}
-        {emHunt && (
-          <ItemGrade
-            label="Hospital"
-            Icon={FirstAid}
-            onClick={() => {
-              void controller.returnToHospital({ x: 0, y: 0 })
-              closeScreen()
-              setMoreOpen(false)
-            }}
-          />
-        )}
         {destinos.map(({ screen, label, Icon }) => (
           <ItemGrade
             key={screen}
             label={label}
             Icon={Icon}
-            badge={screen === 'mercado' ? pendenciasMercado : screen === 'correio' ? pendenciasCorreio : 0}
+            badge={screen === 'correio' ? pendenciasCorreio : 0}
             onClick={() => {
               toggleScreen(screen)
               setMoreOpen(false)

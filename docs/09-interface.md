@@ -42,7 +42,7 @@ unico listener compartilhado, e devolve um de tres regimes:
 |---|---|---|
 | `compacto` | largura `<820` e nao deitado | Trilho no topo, doca no rodape, paineis em sheet |
 | `deitado` | altura `<520`, mais larga que alta, com dedo (ou `<1024`) | Igual, sem rotulo na doca, doca em cluster de 38em |
-| `amplo` | o resto | Mesmo trilho e mesma doca, mais largos, mais destinos visiveis, paineis em janela |
+| `amplo` | o resto | Mesmo trilho e mesma doca, mais largos, com taxas e treinador no trilho, paineis em janela |
 
 **E uma arvore so.** O amplo e o compacto com mais espaco — nao existe layout de desktop
 separado. A alternativa (duas arvores) foi recusada porque toda feature nova custaria dobrado, e
@@ -125,16 +125,36 @@ breakpoint. Em 390px elas se cobriam: medido no aparelho, o card do treinador fi
 HP do POKE, e o chat ocupava 12% da tela em cima do campo de batalha.
 
 **O criterio do que entra no trilho:** o dado muda sozinho e o jogador olha para ele sem ter
-pedido. HP, XP, carteira. Local, Pokedex e taxas moram atras de um toque na gaveta de detalhes —
-nao porque importem menos, mas porque nao mudam entre um olhar e outro.
+pedido. HP, XP, carteira. Local, Pokedex, taxas e o perfil do treinador moram atras de um toque na
+gaveta de detalhes — nao porque importem menos, mas porque nao mudam entre um olhar e outro.
 
-**O criterio da doca:** cinco slots, porque o slot e caro (44px de largura minima mais rotulo
-legivel). Ficam os destinos abertos durante o farm (Equipe, Mochila, Hunt, Loja) e "Mais" para o
-resto. Em `amplo`, Pokedex e Mercado sobem para a barra e **saem** da grade do Mais — o mesmo
-destino nunca aparece nos dois lugares, senao o badge de pendencia conta duas vezes.
+Duas coisas SAIRAM do trilho depois de medir o que elas custavam na faixa mais disputada da tela:
+o contador da Pokedex (que ganhou slot proprio na barra e continua na gaveta) e, **so no
+compacto**, o avatar do treinador — sem largura para o nome e o nivel, ele era um icone generico
+gastando ~46px permanentes; na gaveta ele cabe com os dois escritos. Em `amplo` e `deitado` a
+largura sobra e o avatar fica onde estava.
+
+**O criterio da doca:** oito slots FIXOS, iguais nos tres regimes — Equipe, Mochila, Pokedex,
+Hunt, Loja, Hospital, Mercado, Mais. Nada entra ou sai por largura de tela: a posicao se aprende
+uma vez. Hunt tem peso proprio (pilula do acento, glifo maior que os vizinhos) por trocar a CENA
+do jogo; Hospital e a outra metade do par, e fora de uma hunt aparece marcado como destino atual
+em vez de viajar para lugar nenhum.
+
+**Hunt nao fica no centro exato da barra, e nao da para ficar.** Sao 7 destinos alem dele — numero
+impar — entao qualquer divisao deixa 3 de um lado e 4 do outro, e o centro do slot do meio cai meio
+slot a esquerda do centro da barra (medido: 18,4px em 390px). As unicas saidas exatas sao 6 ou 8
+destinos alem do Hunt. A alternativa de grupos com larguras diferentes para compensar foi calculada
+e rejeitada: joga os 4 slots da direita para 38,7px em 390px e 31px em 320px, abaixo do minimo de
+toque.
+
+**O slot da doca nao usa `alvo-toque`.** A classe traz `min-width: 44px`, e com 8 slots isso
+ESTOURA a barra: medido em 320px, os oito somavam 384px numa barra de 304 e "Mais" saia da tela
+inteira — flex nao encolhe abaixo de um minimo em px, e nao ha erro nenhum, so um botao invisivel.
+O piso ali e so de ALTURA (44px); a largura e 1/8 da barra: 44px em 390px, 34px em 320px.
 
 Rotulo em todo slot, exceto deitado: sem hover nao existe `title`, e icone sozinho no toque e
-adivinhacao.
+adivinhacao. O tamanho e `min(.58em, 2.3vw)` e nao `.58em` seco — com 34px de largura util,
+"Hospital" e "Mercado" truncavam para "Hospit…". Conferido: em 320px nenhum dos oito trunca.
 
 ## Janela no desktop, sheet no celular
 

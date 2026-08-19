@@ -4890,3 +4890,31 @@ alvo cresceu sem virar a tela inteira).
 **Nao verificado**: teclado virtual em aparelho real (a metade CSS foi, com o inset forcado: a doca
 sobe exatos 300px), custo do blur em GPU movel, e o modal de derrota (o Entei Lv100 da conta de
 teste nao morre em hunt de Lv1-30).
+
+### Doca de 8 slots fixos (mesma branch, mesmo dia)
+
+Pedido do usuario: a barra de baixo passa a ter sempre Equipe, Mochila, Pokedex, Hunt, Loja,
+Hospital, Mercado e Mais, com Hunt centralizado e de icone maior — e reduzir o que for
+desnecessario na tela.
+
+**O que nao da pra entregar, e por que:** Hunt centralizado no pixel. Sao 7 destinos alem dele,
+numero impar; qualquer divisao da 3 de um lado e 4 do outro e o centro do slot do meio cai meio
+slot a esquerda (medido: 18,4px em 390px). Compensar com grupos de larguras diferentes joga os 4
+slots da direita para 38,7px em 390px e 31px em 320px — abaixo do minimo de toque. As unicas saidas
+exatas seriam 6 ou 8 destinos alem do Hunt.
+
+**O bug que 8 slots destaparam:** `.alvo-toque` traz `min-width: 44px`. Com 8 slots em 320px os
+botoes somavam 384px numa barra de 304 — flex nao encolhe abaixo de um minimo em px, entao "Mais"
+ficava 64px fora da tela, sem erro nenhum e sem barra de rolagem. Na doca o piso passou a ser so de
+altura. O rotulo virou `min(.58em, 2.3vw)` pelo mesmo motivo: com 34px de largura util, "Hospital"
+e "Mercado" truncavam.
+
+**Corte no trilho:** o contador da Pokedex saiu (ganhou slot proprio e continua na gaveta) e, so no
+compacto, o avatar do treinador — sem largura pro nome e pro nivel ele era um icone generico
+gastando ~46px permanentes na faixa que ja tinha empurrado o proprio avatar pra fora em 320px. Na
+gaveta ele aparece COM nome e nivel.
+
+**Achado de passagem:** "Resetar" na gaveta estava cortado em "R" na borda direita — `block`
+(`w-full`) num flex com outro botao, a mesma armadilha ja corrigida na Equipe e na Loja. Terceira
+ocorrencia do mesmo padrao.
+

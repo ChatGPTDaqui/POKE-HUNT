@@ -83,10 +83,15 @@ export function StatusRail() {
         {mode === 'amplo' && <TaxasInline />}
         <Carteira abreviada={mode !== 'amplo'} />
         <BotaoDetalhes aberta={gavetaAberta} onToggle={() => setGavetaAberta((v) => !v)} />
-        <AvatarTreinador />
+        {/* No compacto o avatar era um botao mudo: sem largura pro nome e pro
+            nivel, sobrava um icone generico ocupando ~46px permanentes da faixa
+            mais disputada da tela — a mesma que ja tinha empurrado o avatar
+            pra fora em 320px. Ele desce pra gaveta, onde cabe COM o nome e o
+            nivel escritos. */}
+        {!estreito && <AvatarTreinador />}
       </div>
 
-      {gavetaAberta && <GavetaDetalhes />}
+      {gavetaAberta && <GavetaDetalhes comTreinador={estreito} />}
       <ChipEvolucao />
     </div>
   )
@@ -269,16 +274,14 @@ function useTaxas() {
   return getPerfStats({ perfStats } as Parameters<typeof getPerfStats>[0])
 }
 
+// So o NOME do lugar. O contador da Pokedex saiu daqui: ele muda umas poucas
+// vezes por sessao, tem slot proprio na barra de navegacao e continua na
+// gaveta — permanente no trilho ele era uma linha de texto que ninguem le duas
+// vezes. O nome fica porque em hunt de BOSS nao ha chip de sala, e sem ele o
+// jogador nao tem em lugar nenhum da tela onde esta.
 function ResumoLocal() {
-  const pokedexKills = useGameStateStore((s) => s.pokedexKills)
   const huntName = useWorldStore((s) => s.mapDef?.name ?? 'Hospital')
-  const registradas = Object.keys(pokedexKills).length
-  return (
-    <div className="shrink-0 text-right text-[.72em] text-n400">
-      <div className="truncate text-n300">{huntName}</div>
-      <div>Pokedex <b className="font-medium text-n200">{registradas}/{TOTAL_ESPECIES}</b></div>
-    </div>
-  )
+  return <div className="max-w-[8em] shrink-0 truncate text-right text-[.72em] text-n300">{huntName}</div>
 }
 
 function TaxasInline() {
@@ -298,9 +301,11 @@ function TaxasInline() {
   )
 }
 
-function GavetaDetalhes() {
+function GavetaDetalhes({ comTreinador }: { comTreinador: boolean }) {
   const stats = useTaxas()
   const abrirAnalyzer = useUiStore((s) => s.setAnalyzerOpen)
+  const setPerfilOpen = useUiStore((s) => s.setPerfilOpen)
+  const trainer = useGameStateStore((s) => s.trainer)
   const pokedexKills = useGameStateStore((s) => s.pokedexKills)
   const huntName = useWorldStore((s) => s.mapDef?.name ?? 'Hospital')
   const registradas = Object.keys(pokedexKills).length
@@ -311,6 +316,18 @@ function GavetaDetalhes() {
         <span className="truncate font-medium text-n100">{huntName}</span>
         <span className="shrink-0 text-n400">Pokedex <b className="font-medium text-n200">{registradas}/{TOTAL_ESPECIES}</b></span>
       </div>
+      {comTreinador && (
+        <GameButton
+          variant="secondary"
+          data-keep-open
+          block
+          className="justify-between"
+          onClick={() => setPerfilOpen(true)}
+        >
+          <span className="flex items-center gap-[.4em]"><User weight="fill" /> {trainer.name}</span>
+          <span className="text-n400">Lv {trainer.level}</span>
+        </GameButton>
+      )}
       <div className="grid grid-cols-4 gap-[.3em] text-center text-[.85em]">
         <Taxa rotulo="Gold/h" valor={fmtTaxa(stats.goldPerHour)} cor="var(--color-gold)" />
         <Taxa rotulo="XP/h" valor={fmtTaxa(stats.xpPerHour)} />
@@ -321,15 +338,18 @@ function GavetaDetalhes() {
         <GameButton
           variant="secondary"
           data-keep-open
-          block
-          className="justify-center"
+          className="flex-1 justify-center"
           onClick={() => abrirAnalyzer(true)}
         >
           <ChartLineUp /> Hunt Analyzer
         </GameButton>
         {/* Resetar fica separado do resto: ele descarta a amostra inteira e nao
             pode dividir area de toque com "ver detalhes". */}
-        <GameButton variant="ghost" className="justify-center" onClick={() => controller.resetPerfStats()}>
+        <GameButton
+          variant="ghost"
+          className="shrink-0 justify-center"
+          onClick={() => controller.resetPerfStats()}
+        >
           Resetar
         </GameButton>
       </div>
