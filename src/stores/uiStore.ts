@@ -360,7 +360,15 @@ export interface DeviceInfo {
   coarse: boolean
   /** Atalho: qualquer regime de celular. */
   compacto: boolean
-  /** Painel abre como bottom sheet (compacto/deitado) ou como janela (amplo). */
+  /**
+   * Painel abre como bottom sheet, e nao como janela arrastavel.
+   *
+   * Vale pros dois regimes de celular E pra qualquer aparelho de DEDO, por
+   * largo que seja: um tablet de 834px cai em 'amplo' pelo layout (ha espaco
+   * pro trilho espalhado e pra doca com mais destinos), mas continuar
+   * entregando janela arrastavel com canto de redimensionar de 16px la e
+   * entregar um controle que o dedo nao alcanca.
+   */
   usaSheet: boolean
 }
 
@@ -391,6 +399,6 @@ export function deviceModeDe(width: number, height: number, coarse: boolean): De
     height,
     coarse,
     compacto: mode !== 'amplo',
-    usaSheet: mode !== 'amplo',
+    usaSheet: mode !== 'amplo' || coarse,
   }
 }

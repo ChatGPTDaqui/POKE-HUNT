@@ -92,6 +92,7 @@ function LinkAnexo({ anexo }: { anexo: AnexoChat }) {
 }
 
 export function AbaMundo() {
+  const pontoGrosso = useUiStore((s) => s.coarsePointer)
   const mensagens = useChatStore((s) => s.mensagens)
   const rascunho = useChatStore((s) => s.rascunho)
   const setRascunho = useChatStore((s) => s.setRascunho)
@@ -136,7 +137,9 @@ export function AbaMundo() {
           name="chat-mundo"
           value={rascunho}
           maxLength={240}
-          placeholder="Falar no mundo (Shift+clique num item/POKE pra linkar)"
+          // O "Shift+clique pra linkar" so existe com teclado; no celular era
+          // uma instrucao morta ocupando a unica linha de dica do campo.
+          placeholder={pontoGrosso ? 'Falar no mundo' : 'Falar no mundo (Shift+clique num item/POKE pra linkar)'}
           onChange={(e) => setRascunho(e.target.value)}
           // `jogo-campo`/`jogo-botao`: sao os ganchos do alvo minimo de toque
           // (index.css). Este par nao usa os primitivos do jogo — e um form

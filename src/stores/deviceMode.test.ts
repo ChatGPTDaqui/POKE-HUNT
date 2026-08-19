@@ -41,9 +41,18 @@ describe('deviceModeDe', () => {
     expect(deviceModeDe(834, 1194, true).mode).toBe('amplo')
   })
 
-  it('compacto e deitado abrem sheet; amplo abre janela', () => {
+  it('compacto e deitado abrem sheet; amplo COM MOUSE abre janela', () => {
     expect(deviceModeDe(390, 844, true).usaSheet).toBe(true)
     expect(deviceModeDe(844, 390, true).usaSheet).toBe(true)
     expect(deviceModeDe(1280, 800, false).usaSheet).toBe(false)
+  })
+
+  // Um tablet cabe no layout amplo (ha espaco pro trilho espalhado), mas nao
+  // pode receber janela arrastavel: o canto de redimensionar tem 16px e o dedo
+  // nao o alcanca.
+  it('tablet grande e amplo no layout e sheet no painel', () => {
+    const tablet = deviceModeDe(1024, 1366, true)
+    expect(tablet.mode).toBe('amplo')
+    expect(tablet.usaSheet).toBe(true)
   })
 })
