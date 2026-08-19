@@ -1,0 +1,75 @@
+name: Supabase deploy (dev)
+
+# Espelha supabase-deploy.yml, mas pro branch/schema/function de staging (docs/15,
+# Parte 3). So dispara em push em `dev`, ou seja, so depois que supabase-check.yml
+# ja passou no PR feature->dev. Concurrency group PROPRIO (nao o mesmo de
+# supabase-deploy.yml) -- um deploy de dev e um de main podem rodar em paralelo
+# sem se atrapalhar, so serializa contra si mesmo.
+
+on:
+  push:
+    branches: [dev]
+
+concurrency:
+  group: supabase-deploy-dev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link no projeto Supabase
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+      - name: Aplicar migrations pendentes (mesmo arquivo cobre dev + public)
+        # Mesmo comando do deploy de main -- nao ha "db push so pra dev", o CLI
+        # aplica toda migration pendente do repo inteiro. O gate de par
+        # dev/public (supabase-check.yml) e quem garante que uma migration nova
+        # nunca fica so-de-um-lado antes de chegar aqui.
+        run: supabase db push --linked
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - name: Publicar Edge Function jogo-dev (mesmo bundle de authority/)
+        run: |
+          npm run build:edge
+          npx supabase functions deploy jogo-dev --project-ref "$SUPABASE_PROJECT_REF"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+      - name: Confirmar schema ativo pos-deploy (achado do pente fino, docs/15)
+        # Sem isto, secret errado (JOGO_SCHEMA_DEV ausente/trocado) bota codigo
+        # de staging rodando contra o schema de PRODUCAO silenciosamente --
+        # mesma classe do incidente de 13/08. Usa a publishable key (nao e
+        # segredo, e a mesma que o cliente browser usa) so pra passar o gate de
+        # JWT do gateway -- /saude nao exige autenticacao de jogador nenhuma.
+        run: |
+          PUBLISHABLE_KEY=$(supabase projects api-keys --project-ref "$SUPABASE_PROJECT_REF" --output-format json | jq -r '.keys[] | select(.type == "publishable") | .api_key')
+          RESP=$(curl -sf -H "Authorization: Bearer $PUBLISHABLE_KEY" -H "apikey: $PUBLISHABLE_KEY" \
+            "https://$SUPABASE_PROJECT_REF.supabase.co/functions/v1/jogo-dev/saude")
+          echo "Resposta: $RESP"
+          SCHEMA=$(echo "$RESP" | jq -r '.schema')
+          if [ "$SCHEMA" != "dev" ]; then
+            echo "::error::jogo-dev respondeu com schema '$SCHEMA', esperado 'dev'. Secret JOGO_SCHEMA_DEV ausente ou errado -- staging pode estar apontando pra producao."
+            exit 1
+          fi
+          echo "jogo-dev confirmado rodando com schema dev."
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
