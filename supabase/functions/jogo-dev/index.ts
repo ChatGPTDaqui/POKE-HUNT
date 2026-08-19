@@ -11,10 +11,13 @@ import { criarApp } from '../jogo/servidor.js'
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-// Sem secret setado aqui tambem cai em 'dev' (mesmo fallback do jogo/index.ts)
-// — mas nesta function o secret DEVE estar setado como 'dev' explicito
-// mesmo assim, documentando intencao (ver task de deploy).
-const schema = Deno.env.get('JOGO_SCHEMA') ?? 'dev'
+// Var com nome DIFERENTE de JOGO_SCHEMA (usada por jogo/index.ts) de proposito:
+// secrets do Supabase sao por PROJETO, nao por function — as duas functions
+// leem o mesmo secret store. Se ambas lessem `JOGO_SCHEMA`, setar um valor
+// pra uma mudaria a outra junto (mesma classe do incidente de 13/08, schema
+// trocado). Nome dedicado evita a colisao sem precisar de isolamento nativo
+// que o CLI/dashboard nao oferece.
+const schema = Deno.env.get('JOGO_SCHEMA_DEV') ?? 'dev'
 
 const origensPermitidas = (Deno.env.get('ORIGENS_PERMITIDAS') ?? 'http://localhost:5173')
   .split(',')
