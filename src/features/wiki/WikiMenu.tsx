@@ -4,7 +4,7 @@
 import { useState, type ReactNode } from 'react'
 import {
   Backpack, BookOpen, Books, Drop, FirstAid, Fire, Gear, Lightning, MapTrifold, Moon,
-  Question, Robot, Snowflake, Storefront, UsersThree, type Icon,
+  Question, Robot, Scales, Snowflake, Storefront, UsersThree, type Icon,
 } from '@phosphor-icons/react'
 import { TYPE_CHART, getEffectiveness } from '@/data/generated/typeChart.generated'
 import { colorForType, TYPE_COLORS } from '@/data/typeColors'
@@ -90,15 +90,18 @@ function InicioTab() {
         caçada — seu POKE nunca fica parado esperando ordem.
         <br />
         <br />
-        Voce pode <b>desligar</b> um golpe especifico da rotacao automatica dando duplo clique no icone dele
+        Voce pode <b>desligar</b> um golpe especifico da rotacao automatica: no celular, toque no icone dele e
+        use o botao no fim da ficha; no computador, duplo clique no icone
         na barra de habilidades (a barra fixa no centro inferior da tela, entre os dois lados do HUD) — util
         pra evitar que a IA gaste um golpe fraco quando um mais forte esta quase pronto.
       </WikiCard>
 
       <WikiCard title="3. Navegando pelos menus">
-        O menu inferior da tela tem os atalhos principais. Os icones abaixo sao os MESMOS que aparecem no
-        menu — antes esta lista usava emoji aproximados (⚾ pra Equipe, por exemplo), que nao batiam com
-        nenhum botao da tela.
+        A barra de baixo tem os atalhos principais: <b>Equipe</b>, <b>Mochila</b>, <b>Hunt</b> (o botao do
+        meio) e <b>Loja</b>. Tudo o mais — Pokedex, Mercado, Correio, Bestiario, Tasks, Calculadora, Ranking,
+        Wiki, Tutoriais, Configuracoes e o Hospital, quando voce esta numa hunt — vive atras do botao
+        <b>Mais</b>, no fim da barra. Numa tela larga, Pokedex e Mercado sobem pra barra e saem do Mais. Os
+        icones abaixo sao os MESMOS que aparecem no jogo.
         <ul className="mt-[.5em] flex flex-col gap-[.4em]">
           <LinhaDeMenu Icon={UsersThree} nome="Equipe">
             seus ate 6 POKEs ativos, trocar quem esta em campo, evoluir, ver status completos.
@@ -116,6 +119,9 @@ function InicioTab() {
             registro de toda especie do jogo, mesmo as que voce nunca capturou, com onde encontrar cada
             uma (incluindo fraquezas/resistencias).
           </LinhaDeMenu>
+          <LinhaDeMenu Icon={Scales} nome="Mercado">
+            comprar e vender com outros jogadores: itens por livro de ofertas, POKEs por anuncio.
+          </LinhaDeMenu>
           <LinhaDeMenu Icon={Books} nome="Wiki">
             este guia que voce esta lendo agora.
           </LinhaDeMenu>
@@ -123,8 +129,8 @@ function InicioTab() {
             clique na enfermeira em campo pra curar seu time por completo, de graça.
           </LinhaDeMenu>
           <LinhaDeMenu Icon={Robot} nome="Auto">
-            botao flutuante no canto inferior direito — liga/desliga auto-pot, auto-catch e auto-revive, e
-            configura qual item cada automacao deve usar.
+            o botao de robo na barra de acao, ao lado dos golpes — liga/desliga auto-pot, auto-catch e
+            auto-revive, e configura qual item cada automacao deve usar.
           </LinhaDeMenu>
           <LinhaDeMenu Icon={Gear} nome="Configuracoes">
             reiniciar o jogo e ver o historico de atualizacoes (Patch-notes).
@@ -362,8 +368,8 @@ function MecanicasTab() {
       <WikiCard title="Distancia de visao (camera/FOV)">
         A camera comeca com um campo de visao 160% maior que o padrao original (voce ve mais mapa ao redor do
         seu POKE do que veria em 100%), tanto durante as hunts quanto na cena do Hospital. Isso e só o ponto
-        de partida — o zoom ainda pode ser ajustado livremente com os botoes +/- no canto superior direito ou
-        Ctrl+Scroll do mouse, pra qualquer lado (mais perto ou ainda mais longe).
+        de partida — o zoom ainda pode ser ajustado livremente pelas lupas + e − a esquerda da barra de golpes
+        (so dentro de uma hunt) ou por Ctrl+Scroll do mouse, pra qualquer lado.
       </WikiCard>
 
       <WikiCard title="Habilidades em area (AoE)">
@@ -547,7 +553,7 @@ function StatusTab() {
       <WikiCard title="Barra de status em campo">
         Enquanto seu POKE ativo (ou o inimigo) estiver com algum status ou atributo alterado, um icone aparece numa
         fileira fixa logo acima da barra de golpes — some sozinho quando o status passa ou e curado. E so
-        informativo (nao precisa clicar em nada); passe o mouse pra ver o nome exato.
+        informativo (nao precisa tocar em nada); no computador, passe o mouse pra ver o nome exato.
       </WikiCard>
 
       <WikiCard title="Imunidade de reaplicacao">
