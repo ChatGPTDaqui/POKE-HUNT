@@ -14,14 +14,8 @@ import { ItensTab } from './components/ItensTab'
 import { PokemonsTab } from './components/PokemonsTab'
 import { fmt } from './utils'
 
-type Destino = 'comprar' | 'vender' | 'pokemons'
-
 export function ShopMenu() {
   const [tab, setTab] = useState<'itens' | 'pokemons'>('itens')
-  // Estado proprio do compacto, onde as duas fileiras de aba viram uma. Nao
-  // deriva de `tab`: sao dois eixos diferentes (o que vender x comprar ou
-  // vender), e amarrar um no outro fazia trocar de regime perder o lado.
-  const [destino, setDestino] = useState<Destino>('comprar')
   const gold = useGameStateStore((s) => s.wallet.gold)
   const diamonds = useGameStateStore((s) => s.wallet.diamonds)
   const { compacto } = useDeviceMode()
@@ -29,30 +23,18 @@ export function ShopMenu() {
   return (
     <div className="flex flex-col gap-[.55em]">
       <StickyHeader className="flex-row flex-wrap items-center">
-        {/* Compacto: UMA fileira com os tres destinos reais da Loja. Antes eram
-            duas barras empilhadas (Itens/Pokemons e depois Comprar/Vender), e a
-            segunda so existia porque a primeira nao dizia o que o jogador ia
-            fazer — "Itens" nao e uma acao. */}
-        {compacto ? (
-          <SegmentedTabs
-            value={destino}
-            onChange={setDestino}
-            options={[
-              { value: 'comprar', label: 'Comprar' },
-              { value: 'vender', label: 'Vender' },
-              { value: 'pokemons', label: 'POKEs' },
-            ]}
-          />
-        ) : (
-          <SegmentedTabs
-            value={tab}
-            onChange={setTab}
-            options={[
-              { value: 'itens', label: 'Itens' },
-              { value: 'pokemons', label: 'Pokemons' },
-            ]}
-          />
-        )}
+        {/* Uma fileira so, e os mesmos dois destinos em todo regime. Ela chegou
+            a ter tres opcoes no celular ("Comprar | Vender | POKEs") porque
+            comprar e vender eram ABAS la; agora as duas colunas aparecem
+            juntas e o eixo "que lado" deixou de existir. */}
+        <SegmentedTabs
+          value={tab}
+          onChange={setTab}
+          options={[
+            { value: 'itens', label: 'Itens' },
+            { value: 'pokemons', label: 'Pokemons' },
+          ]}
+        />
         {/* No celular a carteira ja esta no trilho de status, logo acima — aqui
             ela so empurrava as abas. */}
         {!compacto && (
@@ -66,9 +48,7 @@ export function ShopMenu() {
           </span>
         )}
       </StickyHeader>
-      {compacto
-        ? (destino === 'pokemons' ? <PokemonsTab /> : <ItensTab ladoExterno={destino} />)
-        : (tab === 'itens' ? <ItensTab /> : <PokemonsTab />)}
+      {tab === 'itens' ? <ItensTab /> : <PokemonsTab />}
     </div>
   )
 }

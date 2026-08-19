@@ -345,6 +345,35 @@ custa nada em 390px; em **320px** custa: o rotulo "Comprar 1 · 60" precisava de
 73,9. O que fechou a conta foi o campo de quantidade, de `4.2em` pra `3.4em` — ainda cabe "1000",
 que e o maior atalho. O `truncate` cobre o resto (x1000 do item mais caro).
 
+### As duas colunas da Loja
+
+Comprar e vender aparecem LADO A LADO em todo regime (pedido explicito). No celular eram abas —
+"Comprar" ou "Vender", nunca os dois — e a troca custava um toque justamente no momento em que o
+jogador compara: acabou de esvaziar a mochila numa hunt e quer saber se da pra repor as balls.
+
+O que paga a conta e a forma da linha, e ela depende da LARGURA DA COLUNA, nao do dedo:
+
+| Regime | Coluna | Forma |
+|---|---|---|
+| `compacto` (390px) | ~170px | Linha so de identidade; a transacao abre num sheet |
+| `deitado` (844x390) | ~470px | Card inteiro, transacao inline |
+| `amplo` | ~340px+ | Card inteiro, transacao inline |
+
+Em 170px nao cabe campo de quantidade + tres atalhos + confirmar sem derrubar todo alvo abaixo do
+minimo — a conta nao fecha, e nao e questao de apertar mais o padding. O sheet custa um toque a
+mais por compra e **devolve** alvo de toque: inline, `+10` tem 27px de largura; no sheet passa dos
+44px.
+
+Por isso o teste e `mode === 'compacto'` e nao o booleano `compacto` (que inclui `deitado`): ali a
+coluna tem 470px e mandar abrir um sheet seria um toque cobrado por nada.
+
+**A ficha nao mora dentro da linha.** O `ItensTab` e que monta os dois sheets, ao lado do grid e
+nao dentro dele. Motivo concreto: a linha nao sobrevive as proprias acoes dela — trancar um item o
+manda pro fim da ordenacao (e possivelmente pra outra pagina) e vender o ultimo o tira da lista.
+Com o sheet montado pela linha, trancar de dentro do sheet DESMONTAVA o sheet no meio da
+interacao. Reproduzido antes de mudar. A regra que fica: **estado de painel aberto nao pode viver
+num componente cujo tempo de vida depende de ordenacao ou paginacao.**
+
 **O alvo de toque nao entra nessa conta.** Nenhum controle encolheu abaixo de 44px de altura: a
 densidade veio de espaco morto (padding, faixa vazia, bloco de configuracao permanente), nunca do
 botao. A unica excecao deliberada e a LARGURA dos slots da doca, medida e documentada acima.

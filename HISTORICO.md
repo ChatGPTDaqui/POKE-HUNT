@@ -4945,3 +4945,32 @@ cabe "1000") e fechou a conta.
 **Nenhum alvo de toque encolheu.** A densidade saiu de espaco morto; os 44px de altura continuam
 em todo controle.
 
+### Loja em duas colunas no celular (mesma branch)
+
+Pedido: comprar e vender na mesma tela, em duas colunas.
+
+O bloqueio real nao era o layout, era a largura: com duas colunas em 390px cada uma fica com
+~170px, e ali NAO cabe campo de quantidade + `+10 +100 +1000` + botao de confirmar sem derrubar
+todo alvo de toque abaixo do minimo. A saida foi trocar a forma da linha por largura de coluna: em
+`compacto` a linha e so identidade (icone, nome, estoque, preco) e a transacao abre num sheet;
+em `deitado` (coluna de ~470px) e no amplo, o card inteiro continua inline.
+
+O sheet cobra um toque a mais por compra e devolve alvo de toque: inline o `+10` tem **27px** de
+largura, no sheet passa dos 44px.
+
+**O bug que so aparece interagindo:** trancar um item de DENTRO do sheet fechava o sheet. Trancar
+manda o item pro fim da ordenacao — e possivelmente pra outra pagina — entao a linha que montava o
+sheet desmontava e levava o sheet junto. A ficha passou a ser montada pelo `ItensTab`, irma do
+grid. Regra que fica: **estado de painel aberto nao pode viver num componente cujo tempo de vida
+depende de ordenacao ou paginacao.**
+
+Dois acertos menores encontrados no caminho: `ItemIcon` devolvia `null` quando o item nao tem arte
+(as varas), e a linha inteira comecava 31px a esquerda das vizinhas — virou um vazio do mesmo
+tamanho, com `block` porque `<span>` inline ignora altura e largura. E os cabecalhos das duas
+colunas ganharam `min-h` igual: o botao "Tudo" da venda e mais alto que um rotulo de texto e
+empurrava a primeira linha daquela coluna pra baixo da vizinha.
+
+Efeito colateral bom: sumiu o eixo "que lado" da Loja no celular. As abas voltaram a ser as mesmas
+dos dois regimes — "Itens | Pokemons" — e o `ladoExterno`/`ladoLocal` do `ItensTab` deixou de
+existir.
+

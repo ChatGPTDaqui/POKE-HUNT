@@ -1,39 +1,35 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { pedirAcao, pedirAcaoComLocal } from '@/data/remote/autoridade'
 import { SHOP_STOCK, getItem, ITEMS } from '@/data/items'
 import { buyItem, sellItem, sellAllItems } from '@/engine/systems/economySystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useDeviceMode } from '@/stores/uiStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
-import { GameButton, SectionLabel, SegmentedTabs } from '@/components/game/controls'
+import { GameButton, SectionLabel } from '@/components/game/controls'
+import { Sheet } from '@/components/game/Sheet'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
-import { cn } from '@/lib/utils'
 import { fmt, toast } from '../utils'
-import { ItemCompraCard } from './ItemCompraCard'
-import { ItemVendaCard } from './ItemVendaCard'
+import { ItemCompraCard, FichaCompra, type AcoesCompra } from './ItemCompraCard'
+import { ItemVendaCard, FichaVenda, type AcoesVenda } from './ItemVendaCard'
 
-export function ItensTab({ ladoExterno }: { ladoExterno?: 'comprar' | 'vender' } = {}) {
+export function ItensTab() {
   const gold = useGameStateStore((s) => s.wallet.gold)
   const items = useGameStateStore((s) => s.items)
   const lockedItems = useGameStateStore((s) => s.lockedItems)
   const toggleItemLock = useGameStateStore((s) => s.toggleItemLock)
-  const { compacto } = useDeviceMode()
+  // Ver a nota em `ItemCompraCard`: quem decide a forma e a largura da coluna.
+  const estreito = useDeviceMode().mode === 'compacto'
   const acao = useAcaoPendente()
 
   const [buyQty, setBuyQty] = useState<Record<string, number>>({})
   const [sellQty, setSellQty] = useState<Record<string, number>>({})
-  // No celular as duas colunas viram duas ABAS, nao duas secoes empilhadas:
-  // empilhadas, chegar em "vender" exigia rolar por dez cards de compra — e
-  // vender e justamente o que o jogador faz depois de uma hunt cheia.
-  //
-  // Quem manda no lado pode ser o pai (`ladoExterno`): no compacto a Loja funde
-  // as duas fileiras de aba numa so — "Comprar | Vender | POKEs" — e a escolha
-  // passa a viver la em cima. Sem isso eram duas barras de abas empilhadas,
-  // ~100px de uma tela de 470px.
-  const [ladoLocal, setLadoLocal] = useState<'comprar' | 'vender'>('comprar')
-  const lado = ladoExterno ?? ladoLocal
-  const mostrarCompra = !compacto || lado === 'comprar'
-  const mostrarVenda = !compacto || lado === 'vender'
+  // Qual ficha esta aberta. O estado mora AQUI, e nao dentro da linha, porque a
+  // linha nao sobrevive as proprias acoes dela: trancar um item o manda pro fim
+  // da ordenacao (e possivelmente pra outra pagina), e vender o ultimo o tira da
+  // lista. Com o sheet montado pela linha, trancar de dentro dele desmontava o
+  // sheet no meio da interacao — reproduzido antes de mudar.
+  const [compraAberta, setCompraAberta] = useState<string | null>(null)
+  const [vendaAberta, setVendaAberta] = useState<string | null>(null)
 
   // Item TRAVADO vai pro fim (mesma regra da Mochila): ele nao pode ser vendido,
   // entao ficar no topo da lista de VENDA e ruido puro.
@@ -49,6 +45,14 @@ export function ItensTab({ ladoExterno }: { ladoExterno?: 'comprar' | 'vender' }
     [items, lockedItems],
   )
   const paginadoVenda = usePaginacao(ownedItemIds)
+
+  // Vendeu ate zerar: a ficha perde o assunto. Fechar aqui e nao no `onVender`
+  // porque o estoque tambem pode zerar por outro caminho (o "Tudo" do topo, uma
+  // acao vinda do servidor).
+  const semEstoque = vendaAberta != null && !(items[vendaAberta] > 0)
+  useEffect(() => {
+    if (semEstoque) setVendaAberta(null)
+  }, [semEstoque])
 
   async function comprar(itemId: string, qty: number, nome: string) {
     const { ok, local } = await pedirAcaoComLocal(
@@ -71,101 +75,144 @@ export function ItensTab({ ladoExterno }: { ladoExterno?: 'comprar' | 'vender' }
     else toast(local.reason === 'locked' ? 'Item trancado.' : 'Nao foi possivel vender.', 'error')
   }
 
+  function acoesCompra(itemId: string): AcoesCompra | null {
+    const item = getItem(itemId)
+    if (!item || item.kind === 'stone') return null
+    const maxAffordable = Math.max(1, Math.floor(gold / item.buyPrice))
+    const qty = Math.min(buyQty[item.id] ?? 1, maxAffordable)
+    const key = `buy:${item.id}`
+    return {
+      item,
+      owned: items[item.id] || 0,
+      gold,
+      qty,
+      ocupado: acao.pendingKey != null,
+      isPending: acao.isPending(key),
+      onQtyChange: (v) => setBuyQty((m) => ({ ...m, [item.id]: v })),
+      onExecutarAtalho: (n) => void acao.run(`${key}:${n}`, () => comprar(item.id, n, item.name)),
+      onComprar: () => void acao.run(key, () => comprar(item.id, qty, item.name)),
+    }
+  }
+
+  function acoesVenda(itemId: string): AcoesVenda | null {
+    const item = ITEMS[itemId]
+    const owned = items[itemId]
+    if (!item || !(owned > 0)) return null
+    const qty = Math.min(sellQty[itemId] ?? 1, owned)
+    return {
+      itemId,
+      item,
+      owned,
+      locked: Boolean(lockedItems[itemId]),
+      qty,
+      ocupado: acao.pendingKey != null,
+      onQtyChange: (v) => setSellQty((m) => ({ ...m, [itemId]: v })),
+      onToggleLock: () => void acao.run(`lock:${itemId}`, () =>
+        pedirAcao({ tipo: 'alternarTravaItem', itemId }, () => toggleItemLock(itemId)),
+      ),
+      onExecutarAtalho: (n) => void acao.run(`sell:${itemId}:${n}`, () => vender(itemId, n, item.name)),
+      onVender: () => void acao.run(`sell:${itemId}`, () => vender(itemId, qty, item.name)),
+      onVenderTudo: () => void acao.run(`sell-all:${itemId}`, () => vender(itemId, owned, item.name)),
+    }
+  }
+
+  const fichaCompra = compraAberta ? acoesCompra(compraAberta) : null
+  const fichaVenda = vendaAberta ? acoesVenda(vendaAberta) : null
+
   return (
-    // `overflow-x-auto` nas duas colunas (pedido explicito): com os atalhos de
-    // quantidade e o botao "Vender tudo", uma linha da Loja passa da largura da
-    // janela quando ela e redimensionada pra estreita. Sem isso o botao ficava
-    // cortado e inalcancavel; a rolagem horizontal e local a coluna, entao a
-    // janela inteira nunca rola de lado.
-    <div className="flex flex-col gap-[.4em]">
-      {compacto && ladoExterno == null && (
-        <SegmentedTabs
-          value={lado}
-          onChange={setLadoLocal}
-          options={[{ value: 'comprar', label: 'Comprar' }, { value: 'vender', label: 'Vender' }]}
-        />
-      )}
+    <>
+      {/* DUAS COLUNAS EM TODO REGIME (pedido explicito). No celular elas eram
+          abas — "Comprar" ou "Vender", nunca os dois — e a troca custava um
+          toque justamente no momento em que o jogador compara: acabou de
+          esvaziar a mochila e quer saber se da pra repor as balls. O que paga a
+          conta e a linha compacta: em ~170px de coluna nao cabe transacao
+          inline, entao ali a linha e so identidade e os controles abrem num
+          sheet (ver `ItemCompraCard`).
 
-      <div className={compacto ? 'flex flex-col gap-[.4em]' : 'grid grid-cols-2 gap-[.5em]'}>
-      <div className={cn('flex min-w-0 flex-col gap-[.3em] overflow-x-auto', !mostrarCompra && 'hidden')}>
-        {!compacto && <SectionLabel>COMPRAR</SectionLabel>}
-        {SHOP_STOCK.map((stock) => {
-          const item = getItem(stock.itemId)
-          if (!item || item.kind === 'stone') return null
-          const maxAffordable = Math.max(1, Math.floor(gold / item.buyPrice))
-          const qty = Math.min(buyQty[item.id] ?? 1, maxAffordable)
-          const key = `buy:${item.id}`
-          return (
-            <ItemCompraCard
-              key={item.id}
-              item={item}
-              owned={items[item.id] || 0}
-              gold={gold}
-              qty={qty}
-              ocupado={acao.pendingKey != null}
-              isPending={acao.isPending(key)}
-              onQtyChange={(v) => setBuyQty((m) => ({ ...m, [item.id]: v }))}
-              onExecutarAtalho={(n) => void acao.run(`${key}:${n}`, () => comprar(item.id, n, item.name))}
-              onComprar={() => void acao.run(key, () => comprar(item.id, qty, item.name))}
-            />
-          )
-        })}
-      </div>
-
-      <div className={cn('flex min-w-0 flex-col gap-[.3em] overflow-x-auto', !mostrarVenda && 'hidden')}>
-        <div className="flex items-center justify-between">
-          <SectionLabel>VENDER ITENS</SectionLabel>
-          <GameButton
-            variant="ghost"
-            disabled={acao.pendingKey != null}
-            onClick={() =>
-              void acao.run('sell-all-items', async () => {
-                const { ok, local } = await pedirAcaoComLocal(
-                  { tipo: 'venderTodosItens' },
-                  () => sellAllItems(useGameStateStore.getState()),
-                )
-                if (!ok || !local) return
-                if (local.itemCount > 0) toast(`Vendeu ${local.itemCount} itens por ${fmt.format(local.gold)} ouro.`)
-                else toast('Nada para vender (itens trancados sao poupados).', 'info')
-              })
-            }
-          >
-            Vender Tudo
-          </GameButton>
+          `min-w-0` nas duas colunas: sem isso um nome longo estica a coluna e o
+          grid de 1fr 1fr vira duas colunas de larguras diferentes. */}
+      <div className="grid grid-cols-2 items-start gap-[.4em]">
+        <div className="flex min-w-0 flex-col gap-[.3em]">
+          {/* `min-h` igual nas duas colunas: o botao "Tudo" da venda e mais alto
+              que um rotulo de texto, e sem o piso a primeira linha de uma coluna
+              comecava abaixo da outra. */}
+          <div className="flex min-h-[2em] items-center">
+            <SectionLabel>COMPRAR</SectionLabel>
+          </div>
+          {SHOP_STOCK.map((stock) => {
+            const acoes = acoesCompra(stock.itemId)
+            if (!acoes) return null
+            return (
+              <ItemCompraCard
+                key={stock.itemId}
+                {...acoes}
+                onAbrir={() => setCompraAberta(stock.itemId)}
+              />
+            )
+          })}
         </div>
 
-        {ownedItemIds.length === 0 && <p className="text-n500">Nenhum item para vender.</p>}
-
-        {paginadoVenda.pagina.map((itemId) => {
-          const item = ITEMS[itemId]
-          const owned = items[itemId]
-          const locked = Boolean(lockedItems[itemId])
-          const qty = Math.min(sellQty[itemId] ?? 1, owned)
-          return (
-            <ItemVendaCard
-              key={itemId}
-              itemId={itemId}
-              item={item}
-              owned={owned}
-              locked={locked}
-              qty={qty}
-              ocupado={acao.pendingKey != null}
-              onQtyChange={(v) => setSellQty((m) => ({ ...m, [itemId]: v }))}
-              onToggleLock={() =>
-                void acao.run(`lock:${itemId}`, () =>
-                  pedirAcao({ tipo: 'alternarTravaItem', itemId }, () => toggleItemLock(itemId)),
-                )
+        <div className="flex min-w-0 flex-col gap-[.3em]">
+          <div className="flex min-h-[2em] items-center justify-between gap-[.3em]">
+            <SectionLabel className="truncate">VENDER</SectionLabel>
+            <GameButton
+              variant="ghost"
+              disabled={acao.pendingKey != null}
+              title="Vender TODOS os itens da mochila (os trancados sao poupados)"
+              onClick={() =>
+                void acao.run('sell-all-items', async () => {
+                  const { ok, local } = await pedirAcaoComLocal(
+                    { tipo: 'venderTodosItens' },
+                    () => sellAllItems(useGameStateStore.getState()),
+                  )
+                  if (!ok || !local) return
+                  if (local.itemCount > 0) toast(`Vendeu ${local.itemCount} itens por ${fmt.format(local.gold)} ouro.`)
+                  else toast('Nada para vender (itens trancados sao poupados).', 'info')
+                })
               }
-              onExecutarAtalho={(n) => void acao.run(`sell:${itemId}:${n}`, () => vender(itemId, n, item.name))}
-              onVender={() => void acao.run(`sell:${itemId}`, () => vender(itemId, qty, item.name))}
-              onVenderTudo={() => void acao.run(`sell-all:${itemId}`, () => vender(itemId, owned, item.name))}
-            />
-          )
-        })}
+              className="shrink-0 px-[.4em] text-[.8em]"
+            >
+              Tudo
+            </GameButton>
+          </div>
 
-        <Paginacao estado={paginadoVenda} rotulo="itens" />
+          {ownedItemIds.length === 0 && <p className="text-n500">Nenhum item para vender.</p>}
+
+          {paginadoVenda.pagina.map((itemId) => {
+            const acoes = acoesVenda(itemId)
+            if (!acoes) return null
+            return <ItemVendaCard key={itemId} {...acoes} onAbrir={() => setVendaAberta(itemId)} />
+          })}
+
+          <Paginacao estado={paginadoVenda} rotulo="itens" />
+        </div>
       </div>
-      </div>
-    </div>
+
+      {/* As fichas ficam FORA do grid: sao irmas das colunas, nao filhas de uma
+          linha que a propria acao pode desmontar. */}
+      {estreito && fichaCompra && (
+        <Sheet
+          winKey={`compra:${compraAberta}`}
+          snap="conteudo"
+          zIndex={34}
+          title={`Comprar ${fichaCompra.item.name}`}
+          onClose={() => setCompraAberta(null)}
+        >
+          <FichaCompra {...fichaCompra} />
+        </Sheet>
+      )}
+
+      {estreito && fichaVenda && (
+        <Sheet
+          winKey={`venda:${vendaAberta}`}
+          snap="conteudo"
+          zIndex={34}
+          title={`Vender ${fichaVenda.item.name}`}
+          onClose={() => setVendaAberta(null)}
+        >
+          <FichaVenda {...fichaVenda} />
+        </Sheet>
+      )}
+    </>
   )
 }

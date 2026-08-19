@@ -4,7 +4,12 @@ import { GameButton, GameInput } from '@/components/game/controls'
 export function ItemIcon({ itemId, name }: { itemId: string; name: string }) {
   const url = itemIconUrl(itemId)
   const borderColor = itemIconBorderColor(itemId)
-  if (!url) return null
+  // Sem arte, um espaco VAZIO do mesmo tamanho — nao `null`. Nas colunas da
+  // Loja, devolver nada fazia a linha de "Good Rod" comecar 31px a esquerda das
+  // vizinhas e a coluna inteira parecer desalinhada.
+  // `block`: um `<span>` e inline e ignora altura/largura — o `<img>` honra as
+  // duas por ser elemento substituido, entao a versao sem arte precisa dizer.
+  if (!url) return <span className="block h-[2.2em] w-[2.2em] shrink-0" aria-hidden />
   return (
     <img
       src={url}
