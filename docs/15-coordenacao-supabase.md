@@ -108,15 +108,9 @@ sempre no ar, nada rodando na máquina do dev** além do front (`vite`, local, p
 | Branch git | `dev` | `main` |
 | Schema Supabase | `dev` | `public` |
 | Edge Function | `jogo-dev` (nova) | `jogo` (já existe) |
-| Secret de schema | `JOGO_SCHEMA_DEV=dev` | `JOGO_SCHEMA=public` |
+| Secret `JOGO_SCHEMA` | `dev` | `public` |
 
-Mesmo bundle `servidor.js` (`authority/`) nas duas functions, mas **nomes de secret diferentes por
-function** — achado real: `supabase secrets set` é por PROJETO, não por function (confirmado nos
-docs oficiais, um dashboard só em `/functions/secrets`, compartilhado). Se as duas lessem a mesma
-var `JOGO_SCHEMA`, setar um valor pra uma mudaria a outra junto — mesma classe do incidente de
-13/08 (schema trocado). `jogo/index.ts` lê `JOGO_SCHEMA` (default `'dev'` se ausente — fail-safe
-deliberado, nunca promove pra `public` por omissão); `jogo-dev/index.ts` lê `JOGO_SCHEMA_DEV`
-(também default `'dev'`). Os dois secrets coexistem no mesmo project-wide store sem colisão.
+Mesmo código `authority/` nas duas functions — só o secret `JOGO_SCHEMA` muda (`supabase/functions/jogo/index.ts:29`, já suporta via env, default `'dev'` se ausente — fail-safe deliberado, nunca promove pra `public` por omissão).
 
 ### Isto NÃO é trunk-based development
 
@@ -146,8 +140,8 @@ CI (job de tsc+test) roda no PR
     v (passou)
 merge em `dev` (git)
   `supabase db push` (aplica migration nova que toca `dev.*`)
-  deploy `jogo-dev` (JOGO_SCHEMA_DEV=dev) com o codigo de `dev`
-  CI confirma JOGO_SCHEMA_DEV correto pos-deploy (chama endpoint de debug/health
+  deploy `jogo-dev` (JOGO_SCHEMA=dev) com o codigo de `dev`
+  CI confirma JOGO_SCHEMA correto pos-deploy (chama endpoint de debug/health
   que ecoa o schema ativo) -- sem isso, secret errado bota codigo nao testado
   rodando contra dado real de producao, silenciosamente (mesma classe do
   incidente de 13/08, ver _Session do vault)
@@ -191,8 +185,7 @@ crescer.
 
 ### Pendente de implementação
 
-- Criar função `jogo-dev` (Supabase Dashboard ou CLI) + secret `JOGO_SCHEMA_DEV=dev` (nome
-  dedicado, não `JOGO_SCHEMA` — ver seção acima).
+- Criar função `jogo-dev` (Supabase Dashboard ou CLI) + secret `JOGO_SCHEMA=dev`.
 - Workflow novo (CI): merge-de-teste feature→`dev`, build+test gate, só então merge real +
   `db push` + deploy `jogo-dev`.
 - `supabase-check.yml`: diff base do job de `push` vira condicional por trigger (branch `dev` como
