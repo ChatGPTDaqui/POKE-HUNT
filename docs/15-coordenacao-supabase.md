@@ -93,3 +93,87 @@ workflow entrar no ar, pra não haver dois fluxos "oficiais" ao mesmo tempo.
 Supabase branching (preview branches por PR) foi considerado e descartado por ora: resolve
 isolamento total, mas é recurso pago e overhead grande para 2 devs. Fica como próximo passo se o
 time crescer.
+
+## Parte 3 — Branch `dev` (git) + schema `dev` como staging ao vivo
+
+Design aprovado em 2026-08-18. Contexto: `npm run dev` hoje roda o front local contra a Edge
+Function JÁ PUBLICADA em produção — testar mudança de servidor/migration exige publicar antes
+(zero ciclo de teste real). Docker local (`supabase start`) foi descartado — objetivo é **tudo
+sempre no ar, nada rodando na máquina do dev** além do front (`vite`, local, port 5173).
+
+### Simetria git ↔ Supabase
+
+| Camada | Staging | Produção |
+|---|---|---|
+| Branch git | `dev` | `main` |
+| Schema Supabase | `dev` | `public` |
+| Edge Function | `jogo-dev` (nova) | `jogo` (já existe) |
+| Secret `JOGO_SCHEMA` | `dev` | `public` |
+
+Mesmo código `authority/` nas duas functions — só o secret `JOGO_SCHEMA` muda (`supabase/functions/jogo/index.ts:29`, já suporta via env, default `'dev'` se ausente — fail-safe deliberado, nunca promove pra `public` por omissão).
+
+### Fluxo
+
+```
+PR feature -> dev (nao push direto -- ponto de decisao explicito do dev, mesma
+  disciplina que ja existe pra main. Push solto na feature branch nao promove nada)
+    |
+    v
+CI (job de tsc+test) roda no PR
+    |
+    +-- falhou --> para aqui. Branch `dev` intocada.
+    |
+    v (passou)
+merge em `dev` (git)
+  `supabase db push` (aplica migration nova que toca `dev.*`)
+  deploy `jogo-dev` (JOGO_SCHEMA=dev) com o codigo de `dev`
+  CI confirma JOGO_SCHEMA correto pos-deploy (chama endpoint de debug/health
+  que ecoa o schema ativo) -- sem isso, secret errado bota codigo nao testado
+  rodando contra dado real de producao, silenciosamente (mesma classe do
+  incidente de 13/08, ver _Session do vault)
+    |
+    v
+dev testa local: .env.local -> VITE_SERVIDOR_URL aponta pra URL de `jogo-dev`
+  (unico ponto de config do front, ja suportado por src/data/remote/servidor.ts:22 -- zero mudanca de codigo)
+    |
+    v (validado)
+PR `dev` -> `main` (migration par completo: arquivo que toca `dev.*` PRECISA
+  ter o correspondente `public.*` na mesma PR -- gate da Parte 2)
+    |
+    v
+merge em `main` --> supabase-deploy.yml de sempre (Parte 2): db push completo
+  (parte dev ja aplicada = no-op) + deploy `jogo` (public/prod)
+```
+
+### Mudança necessária no gate da Parte 2 (achado no pente fino)
+
+`supabase-check.yml` já dispara em `push: branches-ignore: [main]` — roda em QUALQUER push fora
+de `main`, inclusive na feature branch e em `dev`, sempre diffando contra `origin/main`
+(`git diff origin/main...HEAD`, linha 74-75). Isso quebra o fluxo acima: um commit só `_dev.sql`
+(sem `_public.sql` ainda) falharia esse gate na feature branch, antes mesmo de chegar em `dev` —
+**não é "trava sem mudança", precisa mudar**.
+
+Fix: base do diff varia por trigger.
+- `push` (não-main, ou seja feature branch / `dev`) → diff contra `dev`, não contra `main`. Commit
+  só-`_dev` passa livre (não se espera par ainda).
+- `pull_request: branches: [main]` → diff contra `main`, como já é hoje. Aqui sim exige par
+  completo — é o ponto real de promoção.
+
+O mecanismo em si (compara diff da PR inteira, não commit a commit) continua são — só a branch de
+comparação do job de push precisa ficar condicional ao alvo.
+
+### Risco aceito
+
+`dev`/`jogo-dev` são **compartilhados** entre os 2 devs — sem isolamento por branch (isso é
+Supabase branching pago, já descartado na Parte 2). Duas branches simultâneas mexendo em schema
+competem pelo mesmo merge-target de staging. Aceito pelo tamanho do time; reavaliar se o time
+crescer.
+
+### Pendente de implementação
+
+- Criar função `jogo-dev` (Supabase Dashboard ou CLI) + secret `JOGO_SCHEMA=dev`.
+- Workflow novo (CI): merge-de-teste feature→`dev`, build+test gate, só então merge real +
+  `db push` + deploy `jogo-dev`.
+- `supabase-check.yml`: diff base do job de `push` vira condicional por trigger (branch `dev` como
+  base fora de `main`, ver seção acima) — mudança obrigatória, não opcional.
+- `supabase-deploy.yml` (deploy de `main`) permanece como está — sem alteração.
