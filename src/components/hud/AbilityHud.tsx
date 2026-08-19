@@ -286,20 +286,32 @@ function EnvolucroSlot({
   onAbrirDetalhe: () => void
   children: ReactNode
 }) {
-  if (!coarse) {
-    return <AbilityTooltip ability={ability} poke={poke}>{children}</AbilityTooltip>
-  }
-  return (
+  // O slot e um `button` NOS DOIS regimes: como `div` ele nao existia pro
+  // teclado nem pro leitor de tela, e quem nao usa mouse nao tinha caminho
+  // nenhum ate dano, precisao e recarga.
+  //
+  // Quem abre a ficha muda com o meio, e por isso o `event.detail`: o clique de
+  // MOUSE nao pode abrir nada, senao o duplo clique que liga/desliga o golpe
+  // abriria a ficha duas vezes no caminho. `detail === 0` e o clique vindo do
+  // TECLADO (Enter/Espaco) — esse abre, e e o unico jeito de o teclado chegar
+  // na informacao que o mouse pega no hover.
+  const botao = (
     <button
       type="button"
       data-keep-open
       aria-label={`Detalhes de ${ability.name}`}
-      onClick={onAbrirDetalhe}
+      onClick={(e) => {
+        if (coarse || e.detail === 0) onAbrirDetalhe()
+      }}
       className="cursor-pointer p-0 font-[inherit]"
     >
       {children}
     </button>
   )
+  if (!coarse) {
+    return <AbilityTooltip ability={ability} poke={poke}>{botao}</AbilityTooltip>
+  }
+  return botao
 }
 
 const ROTULO_CATEGORIA: Record<string, string> = {

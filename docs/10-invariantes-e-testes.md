@@ -30,6 +30,9 @@ Um bug que estoura já tem quem o denuncie. Os daqui, não.
 | `engine/systems/imobilizacao.test.ts` | — | POKE preso continuando a andar |
 | `stores/gateDoLance.test.ts` | — | Hunt liberada pelo Lance voltando a "Bloqueado" no reload |
 | `lib/erroDeRede.test.ts` | — | "Verifique sua internet" acusando o bloqueador do jogador |
+| `stores/deviceMode.test.ts` | 7 | Celular deitado (844x390) lido como desktop — HUD sobreposta em 390px de altura |
+| `components/hud/ActionDock.test.ts` | 3 | Destino na barra E na grade do "Mais": badge de pendência contado duas vezes |
+| `features/game/hooks/insetDoTeclado.test.ts` | 4 | HUD pulando a cada rolagem (barra de URL) ou teclado cobrindo o campo de digitação |
 
 ## Determinismo
 

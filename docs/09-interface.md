@@ -147,13 +147,17 @@ caminho do desktop — foi exatamente assim que perfil do POKE, perfil do treina
 e painel Auto continuaram janelas arrastaveis no celular depois de os paineis de menu ja terem
 virado sheet.
 
-**Sheet — tres coisas que nao sao cosmeticas:**
+**Sheet — quatro coisas que nao sao cosmeticas:**
 
 - **Para ACIMA da doca** (`bottom: footerHeight`). A doca e o unico caminho de navegacao no
   celular; um painel que a cobre obriga a fechar antes de trocar de tela.
 - **Altura em % do pai, nunca `vh`.** `vh` ignora os recortes do aparelho e a barra de URL. A
   primeira versao (`vh` mais rodape medido em px) estourava a tela para cima: cobria o trilho e
   escondia a propria alca.
+- **Deitado a conta inverte.** Com 390px de altura, reservar 4.4em pro trilho e parar acima do
+  rodape inteiro deixava 109px de conteudo — um card e meio. La o sheet cobre o trilho (sobra so a
+  folga da alca), para em cima da BARRA DE NAVEGACAO em vez do rodape todo (`uiStore#navHeight`,
+  medida a parte) e o cabecalho perde uma linha. Medido: 109px -> 268px.
 - **Desenhado por portal em `#camada-hud`.** Um `absolute` resolve contra o ancestral posicionado
   mais proximo, e um sheet declarado dentro da doca herdava a largura dela. O portal tambem
   reconquista o no quando ele sai do documento (remount da arvore) — com a referencia velha
@@ -221,6 +225,17 @@ backdrop, então com o Analyzer aberto, clicar em "Mercado" abria o Mercado **po
   assincrono) e monta o B, e o `popstate` atrasado do A fecha o B.
 - **`pointerdown`, nao `mousedown`,** em todo fechar-ao-tocar-fora: no toque o evento de mouse de
   compatibilidade so sai depois do `touchend`, e nao sai quando o gesto vira rolagem.
+- **O teclado virtual empurra a HUD pra cima.** A raiz do jogo e `h-svh overflow-hidden` e tudo
+  dentro dela e absoluto; `svh` NAO encolhe quando o teclado abre — ele e a altura com as barras do
+  navegador retraidas, um valor fixo. Sem tratar, doca, ticker e o campo de digitacao do chat ficam
+  ATRAS do teclado. `useViewportTracking` mede `innerHeight - visualViewport.height`, so chama de
+  teclado acima de 120px (a barra de URL come ~60px, e um pinch tambem encolhe o visualViewport) e a
+  `.hud-safe` sobe por esse tanto (`--teclado`). A metade CSS foi verificada com o inset forcado — a
+  doca sobe exatos 300px; a medicao depende de um teclado de verdade.
+- **O slot de golpe e `button` nos dois regimes**, mas quem abre a ficha muda com o meio: no mouse o
+  clique NAO abre nada (senao o duplo clique que liga/desliga o golpe abriria a ficha duas vezes no
+  caminho) — abre `event.detail === 0`, que e o clique vindo do teclado. Sem isso, quem nao usa mouse
+  nao tinha caminho nenhum ate dano, precisao e recarga.
 
 ## Vidro preto
 
@@ -253,6 +268,25 @@ O que se sabe sem medir: `backdrop-filter` obriga o compositor a reamostrar o qu
 camada, e aqui isso e um canvas que muda todo quadro. Numa GPU movel fraca e um custo real. A
 chave e uma classe CSS, barata e reversivel, entao fica — mas nenhum numero e afirmado ate alguem
 rodar isto num celular de verdade.
+
+## Avisos que pertencem ao campo
+
+`CampoOverlay` e a moldura de tudo que avisa sobre o COMBATE (contagem do revive, troca de sala,
+derrota, intro do Lance). Ele nao pode cobrir a doca — durante os 5s do auto-revive o jogador quer
+justamente abrir a Mochila pra ver se ainda tem Revive.
+
+Duas medidas, e as duas ja estiveram erradas:
+
+- **Embaixo**, o rodape MEDIDO (`footerHeight`) mais uma folga. Foi assim desde que os avisos
+  deixaram de ser `fixed inset-0`.
+- **Em cima**, 4.4em — a mesma reserva do sheet. Era 7.5em, a medida da "fileira de cards do topo"
+  que foi deletada com a HUD nova: sobravam 3.8em de faixa morta no topo do aviso.
+
+Ele e `fixed`, ou seja, **fora da `.hud-safe`** — os recortes do aparelho sao dele pra resolver, e
+por isso `var(--sa-*)` aparece nas duas pontas. Sem isso o aviso encostava na doca por baixo num
+iPhone, que e exatamente o que ele existe pra nao fazer.
+
+Conferido ao vivo numa troca de sala em 390x844: overlay em 70..678, doca comecando em 770.
 
 ## O eixo que faltava nos paineis: altura util
 

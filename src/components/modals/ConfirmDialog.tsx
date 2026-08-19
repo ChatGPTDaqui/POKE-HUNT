@@ -18,7 +18,11 @@ export function ConfirmDialog() {
       role="dialog"
       aria-modal="true"
       className="pointer-events-auto absolute inset-0 z-[60] flex items-center justify-center bg-black/60"
-      onMouseDown={(e) => {
+      // `pointerdown`, nao `mousedown`: no toque o evento de mouse de
+      // compatibilidade so sai depois do `touchend`, e nao sai quando o gesto
+      // vira rolagem — tocar fora do dialogo ora fechava com atraso, ora nao
+      // fechava. Mesma troca ja feita nas janelas e nos sheets.
+      onPointerDown={(e) => {
         if (e.target === e.currentTarget) close()
       }}
     >
