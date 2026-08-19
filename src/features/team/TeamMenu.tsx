@@ -25,7 +25,7 @@ export function TeamMenu() {
   }
 
   return (
-    <div className="flex flex-col gap-[.45em]">
+    <div className="flex flex-col gap-[.3em]">
       {team.map((poke, index) => {
         const species = SPECIES[poke.speciesId]
         // Guard herdado do vanilla: um unico POKE com especie invalida (save
@@ -48,7 +48,7 @@ export function TeamMenu() {
             // numa coluna a direita: "Colocar em campo" e "Retirar da equipe"
             // empilhados custavam 45% da largura do card e empurravam nome, HP
             // e barra pra uma coluna de 8em.
-            className={cn('flex gap-[.55em] p-[.55em]', compacto ? 'flex-col' : 'items-center')}
+            className={cn('flex gap-[.5em] p-[.4em]', compacto ? 'flex-col' : 'items-center')}
           >
             <div className={cn('flex min-w-0 gap-[.55em]', compacto ? 'items-center' : 'flex-1 items-center')}>
             <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={3.2} />

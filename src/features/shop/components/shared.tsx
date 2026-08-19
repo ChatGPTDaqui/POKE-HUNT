@@ -39,7 +39,11 @@ export function QtyInput({
         max={max}
         value={value}
         onChange={(e) => onChange(limita(Number(e.target.value) || 1))}
-        className="w-[4.2em] text-center"
+        // 3.4em e nao 4.2em: com o botao de confirmar na MESMA fileira dos
+        // atalhos, cada pixel do campo sai do rotulo do botao. Cabe "1000"
+        // (quatro digitos) e devolve ~14px pra "Comprar N * X" nao truncar em
+        // 320px — medido.
+        className="w-[3.4em] text-center"
       />
       {/* min-h em px (nao em): padding do GameButton e em `em`, entao com
           text-[.75em] ele encolhia pra ~22px de alvo de toque — abaixo do

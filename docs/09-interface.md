@@ -315,6 +315,40 @@ iPhone, que e exatamente o que ele existe pra nao fazer.
 
 Conferido ao vivo numa troca de sala em 390x844: overlay em 70..678, doca comecando em 770.
 
+## Densidade: quantos itens cabem numa tela
+
+Medido em 390x844, na Mochila, antes de mexer: **5 POKEs visiveis** de uma lista que passa de
+cem. Na Loja, **3,5 itens**. O que comia a tela nao era o tamanho da fonte — era a soma de
+quatro coisas, e cada uma tem um numero:
+
+| Onde | Antes | Depois | Como |
+|---|---|---|---|
+| Altura do sheet 'cheia' | 586px | 705px | Ancorar na barra de navegacao, nao no rodape todo |
+| Card da Loja | 148,5px | 95,6px | Tres faixas viraram duas |
+| Linha da Mochila | 71px | 61px | `p-[.6em]` -> `p-[.4em]`, `gap-[.45em]` -> `gap-[.3em]` |
+| Bloco da auto-venda | 53px | 0 | Virou chip na fileira das abas |
+
+Resultado: Mochila **5 -> 8 linhas**, Loja **3,5 -> 5,5**, Pokedex **9,5 -> 11**.
+
+**Por que o sheet 'cheia' para na BARRA e nao no rodape inteiro.** O rodape do celular tem 179px,
+dos quais 111 sao barra de golpes, zoom, botao Auto e o ticker do chat. Nenhum dos quatro e
+acionavel enquanto se navega uma lista — o jogador esta escolhendo um POKE, nao trocando de golpe
+— e os 111px valem 1,7 linha de card. O que NAO pode ser coberto e a barra de navegacao: ela e o
+unico caminho pra outra tela, e cobri-la transforma "trocar de tela" em dois toques. Sheet curto
+('conteudo', 'meia') continua ancorado no rodape todo: ali a altura nao e o gargalo, e cobrir a
+barra de golpes com a ficha de um item seria perder o que o jogador estava olhando por nada.
+
+**Por que o card da Loja tinha tres faixas.** Identidade / quantidade / confirmar. A faixa do meio
+usava 192px dos 343 disponiveis — 150px de vidro vazio ao lado dos atalhos `+10 +100 +1000` —
+enquanto o botao de confirmar gastava uma faixa inteira de 44px logo abaixo. Juntar os dois nao
+custa nada em 390px; em **320px** custa: o rotulo "Comprar 1 · 60" precisava de 75,8px e sobravam
+73,9. O que fechou a conta foi o campo de quantidade, de `4.2em` pra `3.4em` — ainda cabe "1000",
+que e o maior atalho. O `truncate` cobre o resto (x1000 do item mais caro).
+
+**O alvo de toque nao entra nessa conta.** Nenhum controle encolheu abaixo de 44px de altura: a
+densidade veio de espaco morto (padding, faixa vazia, bloco de configuracao permanente), nunca do
+botao. A unica excecao deliberada e a LARGURA dos slots da doca, medida e documentada acima.
+
 ## O eixo que faltava nos paineis: altura util
 
 Nenhum painel transbordava de LADO no celular — a escala fluida em `em` ja

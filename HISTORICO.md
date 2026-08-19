@@ -4918,3 +4918,30 @@ gaveta ele aparece COM nome e nivel.
 (`w-full`) num flex com outro botao, a mesma armadilha ja corrigida na Equipe e na Loja. Terceira
 ocorrencia do mesmo padrao.
 
+### Densidade dos menus (mesma branch)
+
+Pedido: "dentro dos menus, quero que mais itens sejam vistos em uma tela".
+
+Medido em 390x844 antes: Mochila com **5 linhas**, Loja com **3,5 itens**. Quatro causas, com
+numero cada:
+
+1. **O sheet parava acima do rodape INTEIRO** (179px), quando so a barra de navegacao (68px) e
+   inegociavel. Os outros 111px sao barra de golpes, zoom, Auto e ticker — nada acionavel com uma
+   lista aberta. Sheet de 586px -> 705px.
+2. **O card da Loja tinha tres faixas** e a do meio usava 192px de 343: 150px de vidro vazio ao
+   lado dos atalhos, com o botao de confirmar numa faixa propria logo abaixo. 148,5px -> 95,6px.
+3. **A auto-venda era um bloco permanente no topo da Mochila** (46px + espaco) enquanto a fileira
+   das abas ao lado usava 190px de 374. Virou chip na propria fileira das abas.
+4. **Padding e espaco entre linhas**: `p-[.6em]`/`gap-[.45em]` -> `p-[.4em]`/`gap-[.3em]` nas
+   listas longas. 71px -> 61px por linha da Mochila.
+
+Resultado: Mochila 5 -> 8, Loja 3,5 -> 5,5, Pokedex 9,5 -> 11.
+
+**O que 320px pegou e 390px nao pegaria:** juntar as duas faixas da Loja fazia o rotulo do botao
+(75,8px) nao caber nos 73,9px que sobravam, e ele vazava CORTADO em vez de truncar — faltava
+`min-w-0` no span dentro do botao flex. O campo de quantidade passou de `4.2em` pra `3.4em` (ainda
+cabe "1000") e fechou a conta.
+
+**Nenhum alvo de toque encolheu.** A densidade saiu de espaco morto; os 44px de altura continuam
+em todo controle.
+

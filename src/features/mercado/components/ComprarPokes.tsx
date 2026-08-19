@@ -208,7 +208,7 @@ export function ComprarPokes() {
         const species = SPECIES[a.species_id]
         const cor = RARITIES[a.rarity as RarityKey]?.color
         return (
-          <GameCard key={a.id} className="flex flex-wrap items-center gap-[.45em] p-[.55em]">
+          <GameCard key={a.id} className="flex flex-wrap items-center gap-[.45em] p-[.4em]">
             <img
               src={faceIconUrl(a.species_id, a.is_shiny) ?? undefined}
               alt=""

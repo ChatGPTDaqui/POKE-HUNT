@@ -93,7 +93,14 @@ export function Sheet({
   const navHeight = useUiStore((s) => s.navHeight)
   const deitado = useDeviceMode().mode === 'deitado'
   const reservaTopo = deitado ? RESERVA_TRILHO_DEITADO : RESERVA_TRILHO
-  const alturaRodape = deitado ? navHeight : footerHeight
+  // Um sheet 'cheia' para em cima da BARRA DE NAVEGACAO, e nao do rodape
+  // inteiro. Medido em 390x844: o rodape tem 179px, dos quais 111 sao barra de
+  // golpes, zoom, botao Auto e o ticker do chat — nada disso e acionavel
+  // enquanto se navega uma lista, e os 111px valiam 1,7 linha de card a mais.
+  // Quem e curto ('conteudo', 'meia') continua ancorado no rodape todo: ali a
+  // altura nao e o gargalo, e cobrir a barra de golpes com uma ficha de item
+  // seria perder o que o jogador estava olhando por nada.
+  const alturaRodape = deitado || snap === 'cheia' ? navHeight : footerHeight
   const [arrasto, setArrasto] = useState(0)
   const inicio = useRef<number | null>(null)
   const alvo = useCamadaHud()
@@ -161,7 +168,10 @@ export function Sheet({
         data-window={winKey}
         style={{
           zIndex,
-          bottom: alturaRodape ? `${alturaRodape}px` : '7em',
+          // `+ .5em` porque o rodape da HUD e ancorado em `bottom-[.5em]`:
+          // sem a folga o sheet cobre os 8px do canto arredondado da barra de
+          // navegacao e ela parece cortada.
+          bottom: alturaRodape ? `calc(${alturaRodape}px + .5em)` : '7em',
           // 'cheia' e ancorada nas DUAS pontas (topo reservado, rodape medido);
           // as outras crescem de baixo pra cima com teto. Deitado, 'meia' vira
           // 'cheia' — metade de 390px nao cabe um cabecalho e uma linha.
@@ -197,7 +207,7 @@ export function Sheet({
           onPointerCancel={onPointerUp}
           className={cn(
             'win-drag-handle flex shrink-0 flex-col items-center',
-            deitado ? 'pt-[.3em]' : 'pt-[.5em] pb-[.15em]',
+            deitado ? 'pt-[.3em]' : 'pt-[.35em]',
           )}
         >
           <span className="h-[.28em] w-[2.6em] rounded-full bg-n600" />
@@ -216,7 +226,7 @@ export function Sheet({
           <div
             className={cn(
               'flex shrink-0 items-center justify-between gap-[.5em] px-[.9em]',
-              deitado ? 'pt-0 pb-[.2em]' : 'pt-[.15em] pb-[.5em]',
+              deitado ? 'pt-0 pb-[.2em]' : 'pb-[.25em]',
             )}
           >
             <span className="truncate text-[1.02em] font-medium tracking-[-.01em]">{title}</span>

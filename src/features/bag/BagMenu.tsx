@@ -27,7 +27,7 @@ import {
 } from '@/components/game/controls'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
 import { cn } from '@/lib/utils'
-import { AutoVendaPanel } from './AutoVendaPanel'
+import { AutoVendaPanel, ChipAutoVenda } from './AutoVendaPanel'
 import { useMochila } from './useMochila'
 import { EstadoDaMochila } from './EstadoDaMochila'
 
@@ -107,7 +107,7 @@ function PokemonsTab() {
   const canMove = teamLength < MAX_TEAM_SIZE
 
   return (
-    <div className="flex flex-col gap-[.45em]">
+    <div className="flex flex-col gap-[.3em]">
       {/* Uma linha so. Com o checkbox de shiny em linha propria (ele ocupa a
           largura inteira por ser um `<label>` com 44px de alvo), o cabecalho de
           filtros comia 180px dos ~470px uteis do celular. Como CHIP ele cabe ao
@@ -159,7 +159,7 @@ function PokemonsTab() {
                 if (tratouComoLink(e, () => linkarPoke(poke, species))) return
                 showProfile(poke, species)
               }}
-              className="flex items-center gap-[.5em] p-[.6em]"
+              className="flex items-center gap-[.5em] p-[.4em]"
             >
               <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={2.6} />
               <div className="min-w-0 flex-1">
@@ -253,7 +253,7 @@ function ItensTab() {
   if (ids.length === 0) return <p className="text-n500">Nenhum item.</p>
 
   return (
-    <div className="flex flex-col gap-[.5em]">
+    <div className="flex flex-col gap-[.3em]">
       {paginado.pagina.map((itemId) => {
         const item = ITEMS[itemId]
         const locked = Boolean(lockedItems[itemId])
@@ -278,7 +278,7 @@ function ItensTab() {
             key={itemId}
             title="Shift+clique para linkar no chat"
             onClick={(e) => { tratouComoLink(e, () => linkarItem(item, items[itemId])) }}
-            className={cn('flex items-center gap-[.5em] p-[.6em]', locked && 'border-gold/40')}
+            className={cn('flex items-center gap-[.5em] p-[.4em]', locked && 'border-gold/40')}
           >
             <ItemTooltip item={item}>
               {iconUrl && (
@@ -321,19 +321,33 @@ function ItensTab() {
 
 export function BagMenu() {
   const [tab, setTab] = useState<'pokemons' | 'itens'>('pokemons')
+  const [autoVendaAberta, setAutoVendaAberta] = useState(false)
   return (
-    <div className="flex flex-col gap-[.55em]">
+    <div className="flex flex-col gap-[.4em]">
       <StickyHeader>
-        <SegmentedTabs
-          value={tab}
-          onChange={setTab}
-          options={[
-            { value: 'pokemons', label: 'Pokemons' },
-            { value: 'itens', label: 'Itens' },
-          ]}
-        />
+        {/* Abas e gatilho da auto-venda na MESMA fileira. As duas abas usavam
+            190px dos 374 uteis e o resto era vidro vazio, enquanto a auto-venda
+            gastava uma linha inteira logo abaixo. */}
+        <div className="flex items-center gap-[.4em]">
+          <SegmentedTabs
+            value={tab}
+            onChange={setTab}
+            options={[
+              { value: 'pokemons', label: 'Pokemons' },
+              { value: 'itens', label: 'Itens' },
+            ]}
+          />
+          {tab === 'pokemons' && (
+            <div className="ml-auto min-w-0">
+              <ChipAutoVenda
+                aberto={autoVendaAberta}
+                onToggle={() => setAutoVendaAberta((v) => !v)}
+              />
+            </div>
+          )}
+        </div>
+        {tab === 'pokemons' && autoVendaAberta && <AutoVendaPanel />}
       </StickyHeader>
-      {tab === 'pokemons' && <AutoVendaPanel />}
       {tab === 'pokemons' ? <PokemonsTab /> : <ItensTab />}
     </div>
   )

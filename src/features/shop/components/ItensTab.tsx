@@ -77,7 +77,7 @@ export function ItensTab({ ladoExterno }: { ladoExterno?: 'comprar' | 'vender' }
     // janela quando ela e redimensionada pra estreita. Sem isso o botao ficava
     // cortado e inalcancavel; a rolagem horizontal e local a coluna, entao a
     // janela inteira nunca rola de lado.
-    <div className="flex flex-col gap-[.65em]">
+    <div className="flex flex-col gap-[.4em]">
       {compacto && ladoExterno == null && (
         <SegmentedTabs
           value={lado}
@@ -86,8 +86,8 @@ export function ItensTab({ ladoExterno }: { ladoExterno?: 'comprar' | 'vender' }
         />
       )}
 
-      <div className={compacto ? 'flex flex-col gap-[.65em]' : 'grid grid-cols-2 gap-[.65em]'}>
-      <div className={cn('flex min-w-0 flex-col gap-[.5em] overflow-x-auto', !mostrarCompra && 'hidden')}>
+      <div className={compacto ? 'flex flex-col gap-[.4em]' : 'grid grid-cols-2 gap-[.5em]'}>
+      <div className={cn('flex min-w-0 flex-col gap-[.3em] overflow-x-auto', !mostrarCompra && 'hidden')}>
         {!compacto && <SectionLabel>COMPRAR</SectionLabel>}
         {SHOP_STOCK.map((stock) => {
           const item = getItem(stock.itemId)
@@ -112,7 +112,7 @@ export function ItensTab({ ladoExterno }: { ladoExterno?: 'comprar' | 'vender' }
         })}
       </div>
 
-      <div className={cn('flex min-w-0 flex-col gap-[.5em] overflow-x-auto', !mostrarVenda && 'hidden')}>
+      <div className={cn('flex min-w-0 flex-col gap-[.3em] overflow-x-auto', !mostrarVenda && 'hidden')}>
         <div className="flex items-center justify-between">
           <SectionLabel>VENDER ITENS</SectionLabel>
           <GameButton

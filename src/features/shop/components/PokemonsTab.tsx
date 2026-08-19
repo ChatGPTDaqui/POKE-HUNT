@@ -260,7 +260,7 @@ export function PokemonsTab() {
         const showCheckbox = !poke.locked && (shinyOnly || !poke.isShiny)
 
         return (
-          <GameCard key={poke.uid} className="flex items-center gap-[.45em] p-[.55em]">
+          <GameCard key={poke.uid} className="flex items-center gap-[.45em] p-[.4em]">
             {showCheckbox ? (
               <GameCheck
                 checked={selectedUids.has(poke.uid)}

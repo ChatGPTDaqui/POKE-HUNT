@@ -23,20 +23,20 @@ export function ItemCompraCard({
   const semOuro = custo > gold
 
   return (
-    // Tres faixas fixas: identidade / quantidade / confirmar. A versao anterior
-    // punha total e botao no MESMO flex-wrap dos atalhos, e com os alvos de
-    // toque em 44px isso virava uma pilha de cinco linhas por item — um card
-    // de ~400px de altura no celular, quatro itens por tela inteira.
-    <GameCard className="flex flex-col gap-[.4em] p-[.55em]">
+    // DUAS faixas: identidade / transacao. Eram tres, e a do meio (quantidade)
+    // usava 192px dos 343 disponiveis — 150px de vidro vazio ao lado dos
+    // atalhos enquanto o botao de confirmar gastava uma faixa inteira de 44px
+    // logo abaixo.
+    <GameCard className="flex flex-col gap-[.35em] p-[.45em]">
       <div className="flex items-center gap-[.45em]">
         <ItemTooltip item={item}>
           <span className="cursor-help">
             <ItemIcon itemId={item.id} name={item.name} />
           </span>
         </ItemTooltip>
-        <div className="min-w-[6em] flex-1">
-          <div className="font-medium">{item.name}</div>
-          <div className="text-[.78em] text-n500">tem {fmt.format(owned)}</div>
+        <div className="min-w-[5em] flex-1">
+          <div className="truncate font-medium">{item.name}</div>
+          <div className="truncate text-[.78em] text-n500">tem {fmt.format(owned)}</div>
         </div>
         <span className="shrink-0 text-[.82em] text-gold">{fmt.format(item.buyPrice)}</span>
       </div>
@@ -49,22 +49,23 @@ export function ItemCompraCard({
           ocupado={ocupado}
           onExecutar={onExecutarAtalho}
         />
+        {/* O total vai DENTRO do rotulo: o jogador le o quanto vai pagar no
+            mesmo lugar em que confirma. `flex-1 min-w-0` e nao `block`
+            (`w-full`) — numa fileira com os atalhos, `w-full` empurraria o
+            botao pra fora do card. Com x1000 o rotulo passa de 6 digitos, e o
+            `truncate` corta o texto em vez de esticar a fileira. */}
+        <GameButton
+          variant={semOuro ? 'secondary' : 'primary'}
+          carregando={isPending}
+          disabled={ocupado || semOuro}
+          onClick={onComprar}
+          className="min-w-0 flex-1 justify-center overflow-hidden px-[.4em]"
+        >
+          <span className="min-w-0 truncate">
+            {semOuro ? 'Sem ouro' : `Comprar ${fmt.format(qty)} · ${fmt.format(custo)}`}
+          </span>
+        </GameButton>
       </div>
-
-      {/* O total entrou DENTRO do rotulo. Ele estava numa linha propria porque
-          "com x1000 o numero passa de 6 digitos e o rotulo quebrava" — com o
-          botao ocupando a largura toda isso deixou de acontecer, e o jogador
-          le o quanto vai pagar no mesmo lugar em que confirma. */}
-      <GameButton
-        block
-        variant={semOuro ? 'secondary' : 'primary'}
-        carregando={isPending}
-        disabled={ocupado || semOuro}
-        onClick={onComprar}
-        className="justify-center"
-      >
-        {semOuro ? 'Ouro insuficiente' : `Comprar ${fmt.format(qty)} · ${fmt.format(custo)}`}
-      </GameButton>
     </GameCard>
   )
 }

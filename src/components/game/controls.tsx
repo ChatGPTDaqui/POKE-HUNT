@@ -312,8 +312,8 @@ export function StickyHeader({ children, className }: { children: ReactNode; cla
         // caixa de MARGEM), e com `top-0` sobrava uma faixa de ~12px acima do
         // cabecalho por onde a lista passava rolando. O deslocamento negativo
         // devolve a borda do cabecalho exatamente ao topo da area rolavel.
-        'sticky -top-[.7em] z-[5] -mx-[.7em] -mt-[.7em] flex flex-col gap-[.5em]',
-        'border-b border-n800 bg-background px-[.7em] pt-[.7em] pb-[.5em]',
+        'sticky -top-[.7em] z-[5] -mx-[.7em] -mt-[.7em] flex flex-col gap-[.4em]',
+        'border-b border-n800 bg-background px-[.7em] pt-[.45em] pb-[.35em]',
         className,
       )}
     >
