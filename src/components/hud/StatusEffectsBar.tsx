@@ -21,6 +21,10 @@ import { statusVfxUrl } from '@/data/statusVfx'
 import { STAT_LABEL } from '@/data/statLabels'
 import type { StatDeEstagio } from '@/data/statusEffects'
 import { useWorldStore } from '@/stores/worldStore'
+import { useDeviceMode } from '@/stores/uiStore'
+import { Sheet } from '@/components/game/Sheet'
+import { useState } from 'react'
+import { cn } from '@/lib/utils'
 
 const ESTAGIOS_ORDEM: StatDeEstagio[] = ['atkFis', 'atkEsp', 'def', 'defEsp', 'speed', 'accuracy', 'evasion']
 // `accuracy`/`evasion` nao sao um dos 6 stats reais (STAT_LABEL, indexado por
@@ -49,6 +53,11 @@ export function StatusEffectsBar() {
   const poke = useWorldStore((s) => s.player?.poke ?? null)
   const statusVolatil = useWorldStore((s) => s.player?.statusVolatil ?? null)
   const estagios = useWorldStore((s) => s.player?.estagios ?? null)
+  const { coarse } = useDeviceMode()
+  // O NOME de cada efeito so existia no `title`, ou seja, so no hover: no
+  // celular a faixa era uma fileira de icones sem legenda nenhuma. O toque abre
+  // a lista escrita. Mesmo remendo do slot de golpe, mesma razao.
+  const [aberta, setAberta] = useState(false)
 
   if (!poke) return null
   const species = SPECIES[poke.speciesId]
@@ -86,7 +95,17 @@ export function StatusEffectsBar() {
   if (badges.length === 0) return null
 
   return (
-    <div className="pointer-events-none flex flex-wrap justify-center gap-[.3em]">
+    <>
+    <div
+      className={cn(
+        'flex flex-wrap justify-center gap-[.3em]',
+        coarse ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none',
+      )}
+      onClick={coarse ? () => setAberta(true) : undefined}
+      data-keep-open={coarse ? '' : undefined}
+      role={coarse ? 'button' : undefined}
+      aria-label={coarse ? 'Ver efeitos ativos' : undefined}
+    >
       {badges.map((badge) => (
         <div
           key={badge.key}
@@ -117,5 +136,31 @@ export function StatusEffectsBar() {
         </div>
       ))}
     </div>
+
+    {aberta && (
+      <Sheet
+        winKey="efeitos"
+        snap="conteudo"
+        zIndex={33}
+        onClose={() => setAberta(false)}
+        title="Efeitos ativos"
+      >
+        <ul className="flex flex-col gap-[.35em]">
+          {badges.map((badge) => (
+            <li
+              key={badge.key}
+              className="flex items-center gap-[.5em] rounded-[.5em] border border-n800 px-[.6em] py-[.45em] text-[.85em]"
+            >
+              <span
+                className="h-[.6em] w-[.6em] shrink-0 rounded-full"
+                style={{ background: badge.aumenta ? 'var(--color-ok)' : 'var(--color-bad)' }}
+              />
+              {badge.titulo}
+            </li>
+          ))}
+        </ul>
+      </Sheet>
+    )}
+    </>
   )
 }

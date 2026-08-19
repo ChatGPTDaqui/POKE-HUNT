@@ -24,6 +24,9 @@ import { sincronizarAuto } from '@/data/remote/autoridade'
 import { useWorldStore } from '@/stores/worldStore'
 import { GameButton, GameCheck, GameInput, GameSelect, GameSwitch } from '@/components/game/controls'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useState } from 'react'
+import { Sheet } from '@/components/game/Sheet'
+import { useDeviceMode } from '@/stores/uiStore'
 import { estoqueDoItemDeRegra, itensEmUso, LIMIAR_ESTOQUE_BAIXO } from './estoqueBaixo'
 import { usePrevisaoDeConsumo, formatarTempoRestante, rotuloDoRecurso } from './consumo'
 import { ItemPicker, type OpcaoDeItem } from './ItemPicker'
@@ -34,16 +37,46 @@ const MAX_AUTO_POT_RULES = 3
 const POTION_OPTIONS = Object.values(ITEMS).filter((i) => i.kind === 'potion')
 const BALL_OPTIONS = Object.values(ITEMS).filter((i) => i.kind === 'ball')
 
+// A explicacao de cada automacao vivia so no hover do `?`. No dedo, tocar nele
+// nao fazia nada — e e justamente aqui que o jogador decide se liga o
+// auto-catch e com qual bola. No toque o mesmo texto abre num sheet.
 function InfoIcon({ text }: { text: string }) {
+  const { coarse } = useDeviceMode()
+  const [aberto, setAberto] = useState(false)
+
+  const marca = (
+    <span className="inline-flex h-[1.15em] w-[1.15em] cursor-help items-center justify-center rounded-full border border-n600 text-n500">
+      <Question className="text-[.7em]" />
+    </span>
+  )
+
+  if (coarse) {
+    return (
+      <>
+        <button
+          type="button"
+          data-keep-open
+          aria-label="O que isso faz"
+          onClick={(e) => {
+            e.stopPropagation()
+            setAberto(true)
+          }}
+          className="cursor-pointer border-0 bg-transparent p-0"
+        >
+          {marca}
+        </button>
+        {aberto && (
+          <Sheet winKey="ajuda" snap="conteudo" zIndex={41} onClose={() => setAberto(false)} title="Como funciona">
+            <p className="text-[.9em] text-n300">{text}</p>
+          </Sheet>
+        )}
+      </>
+    )
+  }
+
   return (
     <Tooltip>
-      <TooltipTrigger
-        render={
-          <span className="inline-flex h-[1.15em] w-[1.15em] cursor-help items-center justify-center rounded-full border border-n600 text-n500" />
-        }
-      >
-        <Question className="text-[.7em]" />
-      </TooltipTrigger>
+      <TooltipTrigger render={<span className="contents" />}>{marca}</TooltipTrigger>
       <TooltipContent className="max-w-[18em] bg-popover text-popover-foreground">{text}</TooltipContent>
     </Tooltip>
   )
