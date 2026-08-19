@@ -13,6 +13,12 @@ on:
 jobs:
   build-check:
     runs-on: ubuntu-latest
+    env:
+      # Placeholder -- so pra passar o guard "Supabase nao configurado" em
+      # src/lib/supabase.ts. Testes nao fazem chamada de rede real, so
+      # precisam do client construir sem lancar no import.
+      VITE_SUPABASE_URL: https://placeholder.supabase.co
+      VITE_SUPABASE_ANON_KEY: placeholder-anon-key
     steps:
       - uses: actions/checkout@v4
 
