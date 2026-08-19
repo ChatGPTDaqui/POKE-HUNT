@@ -117,6 +117,14 @@ interface UiState {
   footerHeight: number
   setFooterHeight: (height: number) => void
 
+  // Altura so da BARRA DE NAVEGACAO (os cinco slots), medida a parte do rodape
+  // inteiro. Deitado, um sheet que para acima do rodape todo perde tambem a
+  // faixa dos golpes: sobravam 109px de conteudo numa tela de 390px. Com um
+  // painel aberto o jogador nao esta olhando os golpes — o que ele nao pode
+  // perder e o caminho de navegacao, e so ele.
+  navHeight: number
+  setNavHeight: (height: number) => void
+
   // Largura E ALTURA do viewport em px. Vivem na store (e nao num `useState`
   // por componente) porque varias superficies decidem posicao a partir delas:
   // um listener de resize compartilhado em vez de um por superficie.
@@ -132,12 +140,25 @@ interface UiState {
   // funciona, alvo de 32px e clicavel) e um tablet largo NAO e um desktop.
   coarsePointer: boolean
 
+  // Altura em px que o TECLADO virtual esta ocupando agora (0 quando fechado).
+  //
+  // Existe porque o layout do jogo nao rola: a raiz e `h-svh overflow-hidden` e
+  // tudo dentro dela e absoluto. Quando o teclado abre, o `svh` NAO encolhe —
+  // ele e a altura da janela com as barras do navegador retraidas, um valor
+  // fixo. Resultado: a doca, o ticker e o campo de digitacao do chat ficam
+  // ATRAS do teclado, e o jogador digita sem ver o que escreve.
+  //
+  // Medido como `innerHeight - visualViewport.height`, com um piso de 120px pra
+  // nao confundir com a barra de URL (que mede ~60px) nem com a mudanca de
+  // escala de um pinch — os dois tambem encolhem o visualViewport.
+  tecladoPx: number
+
   winPos: WindowPositions
   setWinPos: (key: WindowKey, pos: { x: number; y: number }) => void
   // Chamado no resize do viewport: uma janela arrastada pro canto direito de
   // uma tela larga fica FORA da tela quando ela encolhe, e sem barra de titulo
   // visivel nao ha como trazer de volta.
-  handleViewportResize: (width: number, height: number, coarse: boolean) => void
+  handleViewportResize: (width: number, height: number, coarse: boolean, teclado: number) => void
 
   hudScale: number
   setHudScale: (scale: number) => void
@@ -208,9 +229,16 @@ export const useUiStore = create<UiState>((set, get) => ({
     if (get().footerHeight !== r) set({ footerHeight: r })
   },
 
+  navHeight: 0,
+  setNavHeight: (height) => {
+    const r = Math.round(height)
+    if (get().navHeight !== r) set({ navHeight: r })
+  },
+
   viewportWidth: typeof window === 'undefined' ? 1280 : window.innerWidth,
   viewportHeight: typeof window === 'undefined' ? 800 : window.innerHeight,
   coarsePointer: pontoGrosso(),
+  tecladoPx: 0,
 
   winPos: {},
   setWinPos: (key, pos) => set((s) => ({ winPos: { ...s.winPos, [key]: pos } })),
@@ -224,12 +252,13 @@ export const useUiStore = create<UiState>((set, get) => ({
   //    A barra de URL muda a altura em ~60px o tempo todo; com o `winPos: {}`
   //    incondicional, uma janela que o jogador arrastou voltava sozinha pro
   //    centro quando ele rolava a lista dentro dela.
-  handleViewportResize: (viewportWidth, viewportHeight, coarsePointer) => {
+  handleViewportResize: (viewportWidth, viewportHeight, coarsePointer, tecladoPx) => {
     const s = get()
     if (
       s.viewportWidth === viewportWidth
       && s.viewportHeight === viewportHeight
       && s.coarsePointer === coarsePointer
+      && s.tecladoPx === tecladoPx
     ) return
     const estrutural = s.viewportWidth !== viewportWidth
       || Math.abs(s.viewportHeight - viewportHeight) > 120
@@ -237,7 +266,11 @@ export const useUiStore = create<UiState>((set, get) => ({
       viewportWidth,
       viewportHeight,
       coarsePointer,
-      ...(estrutural ? { winPos: {} } : null),
+      tecladoPx,
+      // Abrir o teclado NAO e mudanca estrutural: ele encolhe a altura em
+      // ~300px e, sem esta excecao, jogaria toda janela arrastada de volta pro
+      // centro no meio de uma digitacao.
+      ...(estrutural && tecladoPx === s.tecladoPx ? { winPos: {} } : null),
     })
   },
 

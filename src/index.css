@@ -359,7 +359,10 @@
   position: absolute;
   top: var(--sa-top);
   right: var(--sa-right);
-  bottom: var(--sa-bottom);
+  /* `--teclado` sobe a HUD inteira por cima do teclado virtual. Sem isso a doca,
+     o ticker e o campo de digitacao do chat ficam ATRAS dele: a raiz do jogo e
+     `h-svh overflow-hidden`, e `svh` nao encolhe quando o teclado abre. */
+  bottom: calc(var(--sa-bottom) + var(--teclado, 0px));
   left: var(--sa-left);
 }
 

@@ -15,6 +15,10 @@ import { useUiStore } from '@/stores/uiStore'
 // `orientationchange` e ouvido junto porque o iOS dispara `resize` ANTES de a
 // rotacao assentar: sem o segundo evento, um giro para o modo deitado media a
 // tela ainda em pe.
+// Piso pra chamar de "teclado" o que o visualViewport perdeu. Um teclado de
+// celular ocupa 250-350px; a barra de URL, ~60px.
+const MINIMO_TECLADO_PX = 120
+
 export function useViewportTracking(): void {
   useEffect(() => {
     // Mesmo motivo do `pontoGrosso` no uiStore: jsdom nao implementa
@@ -24,10 +28,17 @@ export function useViewportTracking(): void {
       : null
     const onResize = () => {
       const vv = window.visualViewport
+      const altura = Math.round(vv?.height ?? window.innerHeight)
+      // Quanto o teclado virtual esta comendo. So conta acima de 120px: a barra
+      // de URL do celular encolhe o visualViewport em ~60px o tempo todo, e um
+      // pinch tambem — nenhum dos dois e teclado. Abaixo do piso, zero.
+      const roubado = Math.max(0, window.innerHeight - altura)
+      const teclado = roubado > MINIMO_TECLADO_PX ? roubado : 0
       useUiStore.getState().handleViewportResize(
         Math.round(vv?.width ?? window.innerWidth),
-        Math.round(vv?.height ?? window.innerHeight),
+        altura,
         mql?.matches ?? false,
+        teclado,
       )
     }
     onResize()

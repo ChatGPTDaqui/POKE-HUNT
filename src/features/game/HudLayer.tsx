@@ -32,7 +32,7 @@
 // mesmo assim segue tocavel: o backdrop e puramente visual
 // (`pointer-events:none`) e o fechar-ao-tocar-fora e um listener de documento.
 // Um backdrop que capturasse o toque faria trocar de tela exigir dois toques.
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { StatusRail } from '@/components/hud/StatusRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
 import { SalaChip } from '@/components/hud/SalaChip'
@@ -40,6 +40,7 @@ import { ChatLog } from '@/components/toasts/ChatLog'
 import { ChatMobile } from '@/components/toasts/ChatMobile'
 import { AutoWindow } from '@/components/auto/AutoFloatingPanel'
 import { useDeviceMode, useUiStore } from '@/stores/uiStore'
+import { useMedirAltura } from '@/hooks/useMedirAltura'
 import { cn } from '@/lib/utils'
 
 // Acima disto o chat volta a ser janela flutuante no canto: e a largura em que
@@ -57,14 +58,7 @@ export function HudLayer() {
   // navegacao no celular. `ResizeObserver` porque a altura muda com o regime,
   // com o numero de golpes do POKE e com o `hudScale`.
   const footerRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const el = footerRef.current
-    if (!el) return
-    const ro = new ResizeObserver(() => setFooterHeight(el.getBoundingClientRect().height))
-    ro.observe(el)
-    setFooterHeight(el.getBoundingClientRect().height)
-    return () => ro.disconnect()
-  }, [setFooterHeight])
+  useMedirAltura(footerRef, setFooterHeight)
 
   return (
     <>

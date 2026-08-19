@@ -25,7 +25,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from '@phosphor-icons/react'
-import { useUiStore } from '@/stores/uiStore'
+import { useDeviceMode, useUiStore } from '@/stores/uiStore'
 import { GameIconButton } from './controls'
 import { cn } from '@/lib/utils'
 
@@ -45,10 +45,17 @@ import { cn } from '@/lib/utils'
  */
 export type SheetSnap = 'conteudo' | 'meia' | 'cheia'
 
-// Faixa reservada ao trilho de status no topo. Um sheet nunca a cobre: o
-// jogador precisa continuar vendo HP e carteira com um painel aberto — e sem
-// essa reserva o proprio cabecalho do sheet saia pra fora da tela.
+// Faixa reservada ao trilho de status no topo. Um sheet nao a cobre: o jogador
+// precisa continuar vendo HP e carteira com um painel aberto — e sem reserva
+// nenhuma o proprio cabecalho do sheet sai pra fora da tela.
+//
+// DEITADO a conta inverte. Com 390px de altura, reservar 4.4em pro trilho e
+// parar acima do rodape inteiro deixava 109px de conteudo — um card e meio.
+// La o sheet cobre o trilho (sobra so a folga da alca) e para em cima da BARRA
+// DE NAVEGACAO em vez do rodape todo: com um painel aberto o jogador nao esta
+// olhando a barra de golpes, mas nao pode perder o caminho de navegacao.
 const RESERVA_TRILHO = '4.4em'
+const RESERVA_TRILHO_DEITADO = '.6em'
 
 // Arrasto para baixo maior que isto (em px) fecha. Abaixo, volta pro lugar.
 // 96px e ~1/9 de uma tela de celular: alto o suficiente pra nao fechar num
@@ -83,6 +90,10 @@ export function Sheet({
   snap = 'cheia', zIndex = 31, backdrop = true, children, bodyClassName,
 }: SheetProps) {
   const footerHeight = useUiStore((s) => s.footerHeight)
+  const navHeight = useUiStore((s) => s.navHeight)
+  const deitado = useDeviceMode().mode === 'deitado'
+  const reservaTopo = deitado ? RESERVA_TRILHO_DEITADO : RESERVA_TRILHO
+  const alturaRodape = deitado ? navHeight : footerHeight
   const [arrasto, setArrasto] = useState(0)
   const inicio = useRef<number | null>(null)
   const alvo = useCamadaHud()
@@ -144,14 +155,15 @@ export function Sheet({
         data-window={winKey}
         style={{
           zIndex,
-          bottom: footerHeight ? `${footerHeight}px` : '7em',
+          bottom: alturaRodape ? `${alturaRodape}px` : '7em',
           // 'cheia' e ancorada nas DUAS pontas (topo reservado, rodape medido);
-          // as outras crescem de baixo pra cima com teto.
-          ...(snap === 'cheia'
-            ? { top: RESERVA_TRILHO }
+          // as outras crescem de baixo pra cima com teto. Deitado, 'meia' vira
+          // 'cheia' na pratica — metade de 390px nao cabe um cabecalho.
+          ...(snap === 'cheia' || deitado
+            ? { top: reservaTopo }
             : {
               height: snap === 'meia' ? '52%' : undefined,
-              maxHeight: `calc(100% - ${RESERVA_TRILHO} - ${footerHeight}px)`,
+              maxHeight: `calc(100% - ${reservaTopo} - ${alturaRodape}px)`,
             }),
           transform: arrasto ? `translateY(${arrasto}px)` : undefined,
           transition: arrasto ? 'none' : 'transform .18s ease-out',
@@ -165,12 +177,18 @@ export function Sheet({
       >
         {/* Alca. E ela que arrasta, e nao o cabecalho inteiro: com o cabecalho
             todo arrastavel, tocar no titulo pra rolar a lista fechava o sheet. */}
+        {/* Deitado a alca vira uma faixa FINA sobre o cabecalho, em vez de uma
+            linha propria: as duas linhas somavam 72px dos 181px que o sheet
+            tinha de altura. */}
         <div
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
-          className="win-drag-handle flex shrink-0 flex-col items-center pt-[.5em] pb-[.15em]"
+          className={cn(
+            'win-drag-handle flex shrink-0 flex-col items-center',
+            deitado ? 'pt-[.3em]' : 'pt-[.5em] pb-[.15em]',
+          )}
         >
           <span className="h-[.28em] w-[2.6em] rounded-full bg-n600" />
         </div>
@@ -185,7 +203,12 @@ export function Sheet({
             </div>
           </div>
         ) : (
-          <div className="flex shrink-0 items-center justify-between gap-[.5em] px-[.9em] pt-[.15em] pb-[.5em]">
+          <div
+            className={cn(
+              'flex shrink-0 items-center justify-between gap-[.5em] px-[.9em]',
+              deitado ? 'pt-0 pb-[.2em]' : 'pt-[.15em] pb-[.5em]',
+            )}
+          >
             <span className="truncate text-[1.02em] font-medium tracking-[-.01em]">{title}</span>
             <GameIconButton variant="ghost" onClick={onClose} aria-label="Fechar" className="alvo-toque">
               <X />

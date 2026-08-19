@@ -13,7 +13,7 @@
 //
 // Em 'deitado' os rotulos somem e tudo vira uma fileira so: com 390px de altura
 // cada linha do rodape custa 13% do jogo visivel.
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   Backpack, BookOpen, Books, Calculator, CheckSquare, DotsThreeOutline, Envelope,
   FirstAid, Gear, GraduationCap, MagnifyingGlassMinus, MagnifyingGlassPlus, MapTrifold,
@@ -29,6 +29,7 @@ import { NotificationBadge } from '@/components/game/NotificationBadge'
 import { AbilityHud } from '@/components/hud/AbilityHud'
 import { StatusEffectsBar } from '@/components/hud/StatusEffectsBar'
 import { Sheet } from '@/components/game/Sheet'
+import { useMedirAltura } from '@/hooks/useMedirAltura'
 import { cn } from '@/lib/utils'
 
 interface Destino {
@@ -102,6 +103,10 @@ function BarraNavegacao({ compacto, deitado }: { compacto: boolean; deitado: boo
   const setMoreOpen = useUiStore((s) => s.setMoreOpen)
   const pendenciasMercado = usePendenciasDoMercado()
   const pendenciasCorreio = usePendenciasDoCorreio()
+  // Medida propria (ver `uiStore#navHeight`): deitado, o sheet para em cima
+  // desta barra e nao do rodape inteiro.
+  const navRef = useRef<HTMLElement>(null)
+  useMedirAltura(navRef, useUiStore((s) => s.setNavHeight))
 
   const { promovidos, naGrade } = destinosPorRegime(compacto)
   const pendenciasEmMais = naGrade.reduce((soma, d) => (
@@ -116,6 +121,7 @@ function BarraNavegacao({ compacto, deitado }: { compacto: boolean; deitado: boo
     // fechar-ao-tocar-fora do sheet fecharia a tela ANTES do onClick e o gesto
     // viraria "fecha e reabre".
     <nav
+      ref={navRef}
       data-keep-open
       className={cn(
         'vidro flex w-full items-center justify-around gap-[.15em] rounded-[1.15em]',

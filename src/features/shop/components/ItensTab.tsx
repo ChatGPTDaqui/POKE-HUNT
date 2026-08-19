@@ -12,7 +12,7 @@ import { fmt, toast } from '../utils'
 import { ItemCompraCard } from './ItemCompraCard'
 import { ItemVendaCard } from './ItemVendaCard'
 
-export function ItensTab() {
+export function ItensTab({ ladoExterno }: { ladoExterno?: 'comprar' | 'vender' } = {}) {
   const gold = useGameStateStore((s) => s.wallet.gold)
   const items = useGameStateStore((s) => s.items)
   const lockedItems = useGameStateStore((s) => s.lockedItems)
@@ -25,7 +25,13 @@ export function ItensTab() {
   // No celular as duas colunas viram duas ABAS, nao duas secoes empilhadas:
   // empilhadas, chegar em "vender" exigia rolar por dez cards de compra — e
   // vender e justamente o que o jogador faz depois de uma hunt cheia.
-  const [lado, setLado] = useState<'comprar' | 'vender'>('comprar')
+  //
+  // Quem manda no lado pode ser o pai (`ladoExterno`): no compacto a Loja funde
+  // as duas fileiras de aba numa so — "Comprar | Vender | POKEs" — e a escolha
+  // passa a viver la em cima. Sem isso eram duas barras de abas empilhadas,
+  // ~100px de uma tela de 470px.
+  const [ladoLocal, setLadoLocal] = useState<'comprar' | 'vender'>('comprar')
+  const lado = ladoExterno ?? ladoLocal
   const mostrarCompra = !compacto || lado === 'comprar'
   const mostrarVenda = !compacto || lado === 'vender'
 
@@ -72,10 +78,10 @@ export function ItensTab() {
     // cortado e inalcancavel; a rolagem horizontal e local a coluna, entao a
     // janela inteira nunca rola de lado.
     <div className="flex flex-col gap-[.65em]">
-      {compacto && (
+      {compacto && ladoExterno == null && (
         <SegmentedTabs
           value={lado}
-          onChange={setLado}
+          onChange={setLadoLocal}
           options={[{ value: 'comprar', label: 'Comprar' }, { value: 'vender', label: 'Vender' }]}
         />
       )}

@@ -31,6 +31,7 @@ export function JogoCarregado() {
   const hudScale = useUiStore((s) => s.hudScale)
   const vidroFosco = useUiStore((s) => s.vidroFosco)
   const coarse = useUiStore((s) => s.coarsePointer)
+  const tecladoPx = useUiStore((s) => s.tecladoPx)
   const { summary, dismiss } = useOfflineFarmOnBoot()
   useBackgroundCatchUp()
   useSaidaAoEncerrarSessao()
@@ -51,7 +52,11 @@ export function JogoCarregado() {
       // Dedo em vez de mouse: o CSS usa isto pra dar 44px de alvo minimo aos
       // primitivos de controle. Ver "alvo de toque" no index.css.
       data-toque={coarse ? '1' : undefined}
-      style={{ '--hud-scale': hudScale } as React.CSSProperties}
+      // `--teclado`: a camada da HUD sobe por cima do teclado virtual (ver
+      // `.hud-safe` no index.css e a nota em `uiStore#tecladoPx`). Fica na raiz
+      // e nao na `.hud-safe` porque o valor tambem serve pra qualquer coisa
+      // futura que precise saber que o teclado esta aberto.
+      style={{ '--hud-scale': hudScale, '--teclado': `${tecladoPx}px` } as React.CSSProperties}
     >
       <GameCanvas />
 
