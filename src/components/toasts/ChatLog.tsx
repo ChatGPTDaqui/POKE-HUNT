@@ -225,8 +225,8 @@ export function ChatLog() {
       data-window="chat"
       style={{ ...style, height: open ? '21em' : 'auto' }}
       className={cn(
-        'hud-surface pointer-events-auto absolute z-[21] flex max-h-[72vh] max-w-[min(28em,94vw)] min-w-[12em]',
-        'flex-col overflow-hidden rounded-xl border border-n800 shadow-lg',
+        'vidro-flutua pointer-events-auto absolute z-[21] flex max-h-[72vh] max-w-[min(28em,94vw)] min-w-[12em]',
+        'flex-col overflow-hidden rounded-xl',
         open && 'resize',
       )}
     >

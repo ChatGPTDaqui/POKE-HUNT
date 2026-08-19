@@ -222,9 +222,10 @@
   }
 }
 
-/* Superficie translucida da HUD (cards do topo, pilulas, chat). O blur fica SO
-   aqui: o backdrop escuro atras de um menu aberto nao borra o jogo — pedido
-   explicito, e o motivo de nao ser um utilitario generico. */
+/* Superficie translucida ANTERIOR ao vidro preto. Nao ha mais nenhum consumidor
+   dela na HUD (trilho, doca, chips e chat usam `.vidro*`); fica so pra nao
+   quebrar algum ponto fora do jogo que ainda a referencie. Ao encontrar um,
+   migre pra `.vidro-flutua` e apague isto. */
 .hud-surface {
   background: color-mix(in srgb, var(--background) 85%, transparent);
   backdrop-filter: blur(6px);
