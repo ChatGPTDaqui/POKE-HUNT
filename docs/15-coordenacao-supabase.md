@@ -196,5 +196,38 @@ crescer.
 - Workflow novo (CI): merge-de-teste feature→`dev`, build+test gate, só então merge real +
   `db push` + deploy `jogo-dev`.
 - `supabase-check.yml`: diff base do job de `push` vira condicional por trigger (branch `dev` como
-  base fora de `main`, ver seção acima) — mudança obrigatória, não opcional.
+  base fora de `main`, ver seção acima) — mudança obrigatória, não opcional. **Feito**, ver
+  commit `483266f`.
 - `supabase-deploy.yml` (deploy de `main`) permanece como está — sem alteração.
+
+### Branch protection — passo a passo pro dono do repo aplicar
+
+**Bloqueio conhecido**: a conta usada pelo Claude Code (`OtaviorRV`) só tem `push` no repo
+`ChatGPTDaqui/POKE-HUNT`, não `admin` — só quem tem `admin` (o dono) consegue mexer em
+`Settings > Branches`. CI (`supabase-check.yml`) já reforça parte disso (PR pra `main` só de
+`dev`, commit `483266f`), mas só vira trava de verdade combinada com isto abaixo — sem branch
+protection, dá pra ignorar o X vermelho e mergear igual.
+
+Aplicar em **`Settings > Branches > Add branch protection rule`**, uma regra pra `main` e outra
+pra `dev`:
+
+**Regra pra `main`:**
+1. Branch name pattern: `main`
+2. ✅ Require a pull request before merging
+   - Require approvals: 1
+3. ✅ Require status checks to pass before merging
+   - Marcar como obrigatório: `check` (job do `supabase-check.yml`)
+   - ✅ Require branches to be up to date before merging
+4. ✅ Do not allow bypassing the above settings (senão admin consegue pular tudo isso — inclusive
+   sem querer, foi o que causou os 2 merges direto em `main` nesta sessão)
+5. ✅ Restrict who can push to matching branches — deixar vazio/ninguém (força tudo via PR)
+6. ✅ Block force pushes
+7. NÃO marcar "Allow deletions"
+
+**Regra pra `dev`:** repetir os mesmos 7 passos, trocando `main` por `dev` no passo 1. O check
+obrigatório do passo 3 continua sendo `check` (mesmo workflow cobre os dois branches).
+
+**Validação depois de aplicar**: tentar abrir um PR de uma feature branch reto pra `main` (não
+via `dev`) numa branch descartável — tem que ser recusado tanto pelo CI (`::error::PR para main
+so e permitido...`) quanto pelo botão de merge ficar bloqueado até status check passar. Isto é a
+task #10 do plano de execução (teste ponta a ponta).
