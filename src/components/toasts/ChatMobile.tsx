@@ -8,7 +8,7 @@
 // A ultima linha vem do LOG (combate/sistema), nao do chat de jogadores: e o
 // canal que descreve o que esta acontecendo no jogo enquanto o jogador olha.
 // Conversa de outros jogadores nao interrompe — ela espera dentro do sheet.
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { ChatCircleDots } from '@phosphor-icons/react'
 import { useToastStore } from '@/stores/toastStore'
 import { useUiStore, type ChatTab } from '@/stores/uiStore'
@@ -57,10 +57,13 @@ function Ticker({ onOpen }: { onOpen: () => void }) {
       data-keep-open
       onClick={onOpen}
       aria-label="Abrir chat"
+      // Faixa fina de proposito (cada pixel dela e jogo escondido), com a area
+      // de toque crescida por baixo — ver `.alvo-estendido` no index.css.
       className={cn(
-        'vidro pointer-events-auto flex w-full cursor-pointer items-center gap-[.45em] rounded-full',
-        'px-[.7em] py-[.3em] text-left font-[inherit]',
+        'vidro alvo-estendido pointer-events-auto relative flex w-full cursor-pointer items-center gap-[.45em]',
+        'rounded-full px-[.7em] py-[.3em] text-left font-[inherit]',
       )}
+      style={{ '--alvo-folga': '-9px', '--alvo-folga-x': '0px' } as CSSProperties}
     >
       <ChatCircleDots className="shrink-0 text-[.95em] text-n400" />
       <span
@@ -116,7 +119,10 @@ function BotaoAba({ label, ativo, onClick }: { label: string; ativo: boolean; on
       type="button"
       onClick={onClick}
       className={cn(
-        'flex-1 cursor-pointer rounded-[.6em] px-[.4em] py-[.45em] font-[inherit] text-[.75em]',
+        // `jogo-botao` e o gancho do alvo minimo de toque: sao quatro abas lado
+        // a lado com 27px de altura, e errar a vizinha troca o canal que o
+        // jogador esta lendo.
+        'jogo-botao flex-1 cursor-pointer rounded-[.6em] px-[.4em] py-[.45em] font-[inherit] text-[.75em]',
         ativo ? 'bg-n800 text-foreground' : 'text-n500',
       )}
     >

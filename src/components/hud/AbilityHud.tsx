@@ -32,7 +32,7 @@ import { AbilityTooltip, descricaoDoGolpe } from '@/components/shared/AbilityToo
 import { Sheet } from '@/components/game/Sheet'
 import { GameButton } from '@/components/game/controls'
 import { AOE_RADIUS } from '@/data/abilities'
-import { useState, type ReactNode } from 'react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 const CATEGORY_BORDER: Record<string, string> = {
@@ -303,7 +303,11 @@ function EnvolucroSlot({
       onClick={(e) => {
         if (coarse || e.detail === 0) onAbrirDetalhe()
       }}
-      className="cursor-pointer p-0 font-[inherit]"
+      // O tamanho do slot e calibrado com a fileira (8 golpes tem que caber numa
+      // linha), entao ele nao estica no toque — cresce so a area, ver
+      // `.alvo-estendido`.
+      className="alvo-estendido relative cursor-pointer p-0 font-[inherit]"
+      style={{ '--alvo-folga': '-6px', '--alvo-folga-x': '-3px' } as CSSProperties}
     >
       {children}
     </button>

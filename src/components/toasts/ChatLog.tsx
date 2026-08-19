@@ -138,13 +138,18 @@ export function AbaMundo() {
           maxLength={240}
           placeholder="Falar no mundo (Shift+clique num item/POKE pra linkar)"
           onChange={(e) => setRascunho(e.target.value)}
-          className="min-w-0 flex-1 rounded-[.4em] border border-n700 bg-n900 px-[.5em] py-[.3em] font-[inherit] text-[.76em] text-foreground placeholder:text-n600 focus-visible:border-n500 focus-visible:outline-none"
+          // `jogo-campo`/`jogo-botao`: sao os ganchos do alvo minimo de toque
+          // (index.css). Este par nao usa os primitivos do jogo — e um form
+          // proprio — e por isso ficou de fora da varredura: no celular o campo
+          // media 22px de altura, metade do minimo, no unico lugar do jogo em
+          // que se digita.
+          className="jogo-campo min-w-0 flex-1 rounded-[.4em] border border-n700 bg-n900 px-[.5em] py-[.3em] font-[inherit] text-[.76em] text-foreground placeholder:text-n600 focus-visible:border-n500 focus-visible:outline-none"
         />
         <button
           type="submit"
           disabled={carregando || !rascunho.trim()}
           aria-label="Enviar"
-          className="flex h-[1.8em] w-[1.8em] shrink-0 cursor-pointer items-center justify-center rounded-[.4em] border border-n700 text-n300 hover:border-primary disabled:cursor-not-allowed disabled:opacity-40"
+          className="jogo-botao jogo-botao-icone flex h-[1.8em] w-[1.8em] shrink-0 cursor-pointer items-center justify-center rounded-[.4em] border border-n700 text-n300 hover:border-primary disabled:cursor-not-allowed disabled:opacity-40"
         >
           <PaperPlaneRight />
         </button>

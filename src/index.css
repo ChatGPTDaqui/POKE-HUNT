@@ -421,13 +421,18 @@
   min-height: 44px;
 }
 
-/* O switch nao pode crescer — ele e um desenho, nao uma caixa de texto. Em vez
-   disso o ALVO cresce por baixo, com um pseudo-elemento invisivel: mesma
-   aparencia, area de toque de 44px. */
-.hud-root[data-toque] .jogo-switch::after {
+/* Alvo que cresce SEM crescer o desenho: um pseudo-elemento invisivel por
+   baixo. Para controles que nao podem esticar — o switch e um desenho, o slot
+   de golpe tem tamanho calibrado com a fileira, e a seta da gaveta esticada
+   engordaria o trilho inteiro. O elemento precisa ser `relative` (todos ja
+   sao) e o vizinho que vem DEPOIS no DOM ganha a sobreposicao, que e o
+   comportamento desejado: o alvo cresce pro lado de fora, nao por cima do
+   botao ao lado. */
+.hud-root[data-toque] .jogo-switch::after,
+.hud-root[data-toque] .alvo-estendido::after {
   content: '';
   position: absolute;
-  inset: -11px -8px;
+  inset: var(--alvo-folga, -11px) var(--alvo-folga-x, -8px);
 }
 
 /* Fileira de abas rolavel (SegmentedTabs no compacto, com 5 abas ou mais). A

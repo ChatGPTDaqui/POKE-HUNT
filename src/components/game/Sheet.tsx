@@ -158,8 +158,12 @@ export function Sheet({
           bottom: alturaRodape ? `${alturaRodape}px` : '7em',
           // 'cheia' e ancorada nas DUAS pontas (topo reservado, rodape medido);
           // as outras crescem de baixo pra cima com teto. Deitado, 'meia' vira
-          // 'cheia' na pratica — metade de 390px nao cabe um cabecalho.
-          ...(snap === 'cheia' || deitado
+          // 'cheia' — metade de 390px nao cabe um cabecalho e uma linha.
+          //
+          // 'conteudo' NUNCA estica, nem deitado: e o snap dos menus curtos (a
+          // grade do "Mais", a ficha de um golpe), e esticar deixaria meia tela
+          // de vidro vazio, que le como "faltou carregar".
+          ...(snap === 'cheia' || (deitado && snap === 'meia')
             ? { top: reservaTopo }
             : {
               height: snap === 'meia' ? '52%' : undefined,

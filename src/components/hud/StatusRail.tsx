@@ -67,7 +67,10 @@ export function StatusRail() {
     <div className="pointer-events-auto flex flex-col items-stretch gap-[.4em]">
       <div
         className={cn(
-          'vidro flex items-center gap-[.5em] rounded-[1.1em] py-[.35em] pr-[.4em] pl-[.35em]',
+          // `overflow-hidden` e rede de seguranca, nao layout: se algum dado
+          // novo (um nome de treinador longo, uma moeda de 13 digitos) estourar
+          // a conta de novo, ele corta em vez de deixar o avatar sair da tela.
+          'vidro flex items-center gap-[.5em] overflow-hidden rounded-[1.1em] py-[.35em] pr-[.4em] pl-[.35em]',
         )}
       >
         <FacePoke />
@@ -139,10 +142,16 @@ function VitaisPoke() {
   const expPct = Math.max(0, Math.min(100, (progress.into / progress.needed) * 100))
 
   return (
-    // `min-w-[9em]`: o nome do POKE e a barra de HP sao o conteudo mais
-    // importante do trilho e eram os primeiros a encolher, porque todo vizinho
-    // e `shrink-0`. Com o piso, quem cede espaco e a faixa do meio.
-    <div className="flex min-w-[9em] flex-1 flex-col gap-[.18em]">
+    // Piso de largura pro nome do POKE e pra barra de HP: eles sao o conteudo
+    // mais importante do trilho e eram os primeiros a encolher, porque todo
+    // vizinho e `shrink-0`.
+    //
+    // `min(9em, 34vw)` e nao `9em` seco: num aparelho de 320px os 9em (144px)
+    // mais os vizinhos de tamanho fixo somavam 324px numa caixa de 302px, e
+    // quem saia pela borda era o avatar do treinador. O piso passa a ceder
+    // junto com a tela — 34vw e o valor em que o conteudo cabe inteiro em 320px
+    // (medido, nao chutado).
+    <div className="flex min-w-[min(9em,34vw)] flex-1 flex-col gap-[.18em]">
       <div className="flex min-w-0 items-center gap-[.35em] text-[.82em] leading-none">
         <span className={cn('truncate font-medium', poke.isShiny && 'text-shiny')}>
           {poke.isShiny && '✨'}{species.name}
@@ -243,7 +252,9 @@ function BotaoDetalhes({ aberta, onToggle }: { aberta: boolean; onToggle: () => 
       aria-label={aberta ? 'Esconder detalhes' : 'Mostrar detalhes'}
       aria-expanded={aberta}
       onClick={onToggle}
-      className="flex h-[1.9em] w-[1.5em] shrink-0 cursor-pointer items-center justify-center rounded-[.4em] text-n400"
+      // `alvo-estendido`: a seta e estreita de proposito (esticar engordaria o
+      // trilho inteiro), entao quem cresce no toque e so a area.
+      className="alvo-estendido relative flex h-[1.9em] w-[1.5em] shrink-0 cursor-pointer items-center justify-center rounded-[.4em] text-n400"
     >
       <CaretDown className={cn('transition-transform duration-150', aberta && 'rotate-180')} />
     </button>
