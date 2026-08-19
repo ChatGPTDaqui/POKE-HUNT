@@ -206,7 +206,14 @@ backdrop, então com o Analyzer aberto, clicar em "Mercado" abria o Mercado **po
   - `em` dentro de um `<input>` resolve contra o font-size do proprio controle (~11.5px, definido
     pelo navegador). Por isso a caixinha do checkbox esta em px, e quem recebe os 44px e o
     `<label>`.
-  - O switch e um desenho e nao cabe esticar: o alvo cresce por um pseudo-elemento invisivel.
+  - O switch e um desenho e nao cabe esticar: o alvo cresce por um pseudo-elemento invisivel
+    (`.alvo-estendido`, com a folga por `--alvo-folga`). A mesma tecnica vale pra seta da gaveta do
+    trilho (30 -> 52px efetivos), pro ticker do chat (27 -> 43) e pro slot de golpe (33 -> 45):
+    esticar de verdade engordaria o trilho, comeria jogo e quebraria a fileira de 8 golpes numa
+    linha.
+  - A area de toque da ENFERMEIRA e a excecao que nao e CSS: ela e desenhada no canvas, e o
+    retangulo util e 9,8% x 13,8% da cena (~31px num aparelho de 320px). `hospitalClickOnNurse`
+    aceita uma folga em px, aplicada so no dedo.
 - **Detalhe do golpe por toque.** Sem hover, o tooltip da barra de golpes nunca abria — a unica
   fonte de dano, precisao, recarga e descricao era inalcancavel, sem sinal de que existia. No
   toque o slot abre um sheet com o mesmo conteudo, que tambem hospeda o liga/desliga (o

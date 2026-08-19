@@ -4796,3 +4796,97 @@ regra dos jogos e nao encosta em PP.
   (entity.ts) e `cooldownTotalDoGolpe` (combatSystem.ts, ja escalado pela Velocidade efetiva, com
   clima) alimentam o numero e a cortina de recarga. Conferido ao vivo: os slots passaram de
   "1.3s | 1.3s | 1.3s | 1.3s" para "0.4s | 1.3s | 1.3s | 1.3s".
+
+
+---
+
+## HUD mobile-first (branch `feat/hud-mobile`, 2026-08-18)
+
+Pedido: converter a HUD para celular, "minimalismo, eficiencia e praticidade, design black glass".
+Trabalho em branch, sem tocar a `main`.
+
+### O diagnostico, com numero
+
+Medido em 390x844 antes de mexer: os cards do topo somavam ~450px de largura numa tela de 374px
+uteis — o card do treinador **cobria o HP do POKE**. O chat ocupava 264x336px sobre o campo de
+batalha, o menu quebrava em duas fileiras de circulos, e o jogo visivel virava um buraco no meio.
+
+Tres causas, e nenhuma delas era "faltou media query":
+
+1. **Cinco ancoras independentes** nas bordas, cada uma se posicionando sozinha e negociando com as
+   vizinhas por breakpoint.
+2. **Breakpoint so por LARGURA.** Celular deitado (844x390) lia como desktop, com 390px de altura.
+3. **`viewport-fit=cover` no `index.html` desde sempre e zero `env(safe-area-inset-*)` no CSS.**
+
+### O desenho novo
+
+Duas superficies permanentes: **trilho** (topo) e **doca** (rodape). Uma arvore so — o desktop e o
+compacto com mais largura e mais rotulo, decisao explicita do usuario contra manter dois layouts.
+
+Criterio do trilho: *o dado muda sozinho e o jogador olha sem ter pedido* (HP, XP, carteira). Local,
+Pokedex e taxas ficam atras de um toque. Criterio da doca: cinco slots, porque o slot e caro (44px
+mais rotulo legivel).
+
+Painel vira **bottom sheet** que para ACIMA da doca — trocar de tela continua custando um toque.
+
+### O que so se descobre medindo
+
+- **A altura do sheet em `vh` estourava a tela pra cima.** `vh` mais rodape medido em px cobria o
+  trilho e escondia a propria alca do sheet. Virou % do pai.
+- **Deitado, o sheet dava 109px de conteudo** — um card e meio. La ele cobre o trilho e para em cima
+  da barra de navegacao (medida a parte), e o cabecalho perde uma linha: 268px.
+- **320px estourava o trilho**: o piso de 9em dos vitais mais os vizinhos fixos davam 324px numa
+  caixa de 302px, e o avatar saia pela borda da TELA. Virou `min(9em, 34vw)`.
+- **157 de 341 alvos da Loja e 75 de 75 da Mochila tinham menos de 40px.** O tamanho passou a vir
+  por CSS a partir de uma classe estavel em cada primitivo (`jogo-botao`, `jogo-campo`...), e nao
+  por prop: threading `coarse` por ~200 pontos de chamada e uma edicao que o proximo controle novo
+  esqueceria.
+- **`em` dentro de um `<input>` resolve contra o font-size do PROPRIO controle** (~11.5px, definido
+  pelo navegador), nao contra a raiz. Por isso `1.4em` no checkbox virava 16px.
+- **O teclado virtual ficava POR CIMA da doca**: a raiz e `h-svh overflow-hidden`, e `svh` nao
+  encolhe quando o teclado abre. Passou a medir `innerHeight - visualViewport.height` com piso de
+  120px (a barra de URL come ~60px, e um pinch tambem encolhe).
+
+### O erro de metodo desta leva: A/B nao intercalado
+
+Escrevi em codigo e em docs que `backdrop-filter` custa "uma recomposicao por quadro por camada",
+como se fosse medido. Ao medir de verdade, dentro de uma hunt:
+
+| Cenario | Com blur | Sem blur |
+|---|---|---|
+| Sem throttle | 16,76ms | 16,68ms (os dois no teto de 60fps) |
+| CPU 4x, A/B intercalado 4 rodadas | 101,2ms | 101,5ms |
+
+A primeira leitura, **sequencial**, deu +17ms pro blur. Intercalando, some: eram 17ms de deriva do
+proprio jogo ficando mais pesado com mais inimigos em campo. A chave de desligar continua (e uma
+classe CSS, e o custo e real em GPU movel fraca), mas sem numero inventado. **Lembrete: A/B nao
+intercalado mede a deriva, nao o tratamento.**
+
+### Informacao que so existia no hover
+
+Varredura pelos `Tooltip`: no dedo nao existe hover, entao cada um era informacao que o jogador de
+celular nunca via, sem nem sinal de que existia. O tooltip do GOLPE era a unica fonte de dano,
+precisao, recarga e descricao. O `ItemTooltip` era o unico lugar que dizia quanto uma pocao cura. A
+faixa de status so tinha o nome do efeito no `title`. Os tres ganharam sheet no toque.
+
+O slot de golpe virou `button` tambem no desktop (como `div` nao existia pro teclado). Quem abre a
+ficha no mouse e `event.detail === 0` — o clique vindo do teclado; senao o duplo clique que
+liga/desliga o golpe abriria a ficha duas vezes no caminho.
+
+### Texto do jogo descrevendo uma HUD que nao existe
+
+Wiki e tutoriais citavam "botao flutuante no canto inferior direito" (Auto), "botoes +/- no canto
+superior direito" (zoom) e "o circulo grande do meio do menu" (Hunt). Patch-notes NAO foram
+tocados: eles registram o que a tela era naquela leva.
+
+### Verificacao
+
+`tsc -b`, `vitest` (532 testes) e `build` limpos. Conferido ao vivo em 320x568, 390x844, 844x390 e
+1440x900 com a conta de teste: os 13 paineis sem overflow horizontal e sem alvo abaixo de 40px, a
+troca de sala com o aviso de campo na faixa certa (70..678, doca em 770), o botao voltar fechando
+painel em vez de sair do jogo, e o toque na enfermeira curando (43% da largura cura, 40% nao — o
+alvo cresceu sem virar a tela inteira).
+
+**Nao verificado**: teclado virtual em aparelho real (a metade CSS foi, com o inset forcado: a doca
+sobe exatos 300px), custo do blur em GPU movel, e o modal de derrota (o Entei Lv100 da conta de
+teste nao morre em hunt de Lv1-30).
