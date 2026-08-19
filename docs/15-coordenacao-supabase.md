@@ -112,6 +112,20 @@ sempre no ar, nada rodando na máquina do dev** além do front (`vite`, local, p
 
 Mesmo código `authority/` nas duas functions — só o secret `JOGO_SCHEMA` muda (`supabase/functions/jogo/index.ts:29`, já suporta via env, default `'dev'` se ausente — fail-safe deliberado, nunca promove pra `public` por omissão).
 
+### Isto NÃO é trunk-based development
+
+Fica parecido de longe ("staging ao vivo", deploy contínuo) mas é outro modelo — importa deixar
+explícito pra não confundir o time.
+
+Trunk-based de verdade seria: um branch só (`main`), commit direto ou via branch curtíssima
+(<1 dia), feature incompleta atrás de feature flag (não de branch separada), deploy dev/prod
+saindo do MESMO commit, diferenciado só por config de ambiente.
+
+O que este design faz: `dev` e `main` são branches **permanentes**, cada PR vive até revisão,
+promoção `dev`→`main` é evento separado e explícito. Mais devagar que trunk-based — troca-off
+aceito de propósito pra time de 2 pessoas, sem custo de infra de feature flag. Mais próximo de
+GitFlow simplificado (2 branches de longa duração) do que de trunk-based.
+
 ### Fluxo
 
 ```
