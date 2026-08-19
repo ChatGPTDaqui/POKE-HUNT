@@ -15,9 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # Placeholder -- so pra passar o guard "Supabase nao configurado" em
-      # src/lib/supabase.ts. Testes nao fazem chamada de rede real, so
-      # precisam do client construir sem lancar no import.
-      VITE_SUPABASE_URL: https://placeholder.supabase.co
+      # src/lib/supabase.ts. `.invalid` e TLD reservado (RFC 2606): nunca
+      # resolve em lugar nenhum, ao contrario de um subdominio *.supabase.co
+      # fake, que cai na infra real (wildcard DNS) e se comporta diferente
+      # em runner com internet (CI) vs sandbox sem internet (local).
+      VITE_SUPABASE_URL: https://placeholder.invalid
       VITE_SUPABASE_ANON_KEY: placeholder-anon-key
     steps:
       - uses: actions/checkout@v4
