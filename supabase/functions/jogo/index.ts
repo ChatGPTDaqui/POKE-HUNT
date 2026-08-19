@@ -49,10 +49,13 @@ const jwksJson = Deno.env.get('JOGO_JWKS') ?? undefined
 const handler = criarApp({ supabaseUrl, serviceRoleKey, schema, origensPermitidas, jwksJson })
 
 // O gateway das Edge Functions prefixa a rota com o nome da funcao
-// (`/jogo/sessao/flush`). O app conhece as rotas sem esse prefixo, entao ele e
-// removido aqui — de novo, casca de plataforma, nao regra.
+// (`/jogo/sessao/flush`, ou `/jogo-dev/sessao/flush` na function de staging). O
+// app conhece as rotas sem esse prefixo, entao o PRIMEIRO segmento e removido
+// aqui, generico — nao hardcoded pro nome `jogo`, pra servir as duas functions
+// sem duplicar este arquivo (achado real: `/^\/jogo/` batia so o literal
+// "jogo", quebrando `jogo-dev` ao deixar sobrar "-dev/..." no path).
 Deno.serve((req: Request) => {
   const url = new URL(req.url)
-  url.pathname = url.pathname.replace(/^\/jogo/, '') || '/'
+  url.pathname = url.pathname.replace(/^\/[^/]+/, '') || '/'
   return handler(new Request(url.toString(), req))
 })
