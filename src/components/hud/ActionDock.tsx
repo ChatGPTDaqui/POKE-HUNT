@@ -32,7 +32,7 @@ import { Sheet } from '@/components/game/Sheet'
 import { useMedirAltura } from '@/hooks/useMedirAltura'
 import { cn } from '@/lib/utils'
 
-interface Destino {
+export interface Destino {
   screen: ScreenName
   label: string
   Icon: Icon
@@ -67,7 +67,7 @@ const SECUNDARIOS: Destino[] = [
   { screen: 'config', label: 'Ajustes', Icon: Gear },
 ]
 
-function destinosPorRegime(compacto: boolean): { promovidos: Destino[]; naGrade: Destino[] } {
+export function destinosPorRegime(compacto: boolean): { promovidos: Destino[]; naGrade: Destino[] } {
   const promovidos = compacto ? [] : SECUNDARIOS.slice(0, 2)
   return { promovidos, naGrade: SECUNDARIOS.filter((d) => !promovidos.includes(d)) }
 }

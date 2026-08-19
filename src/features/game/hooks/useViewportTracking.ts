@@ -19,6 +19,19 @@ import { useUiStore } from '@/stores/uiStore'
 // celular ocupa 250-350px; a barra de URL, ~60px.
 const MINIMO_TECLADO_PX = 120
 
+/**
+ * Quanto o teclado virtual esta ocupando, em px.
+ *
+ * Pura e exportada porque o piso e a parte que erra em silencio: baixo demais e
+ * a HUD inteira pula a cada rolagem (a barra de URL do celular entra e sai o
+ * tempo todo); alto demais e o teclado cobre o campo de digitacao, que e o bug
+ * que isto existe pra consertar.
+ */
+export function insetDoTeclado(alturaJanela: number, alturaVisual: number): number {
+  const roubado = Math.max(0, alturaJanela - alturaVisual)
+  return roubado > MINIMO_TECLADO_PX ? roubado : 0
+}
+
 export function useViewportTracking(): void {
   useEffect(() => {
     // Mesmo motivo do `pontoGrosso` no uiStore: jsdom nao implementa
@@ -29,11 +42,7 @@ export function useViewportTracking(): void {
     const onResize = () => {
       const vv = window.visualViewport
       const altura = Math.round(vv?.height ?? window.innerHeight)
-      // Quanto o teclado virtual esta comendo. So conta acima de 120px: a barra
-      // de URL do celular encolhe o visualViewport em ~60px o tempo todo, e um
-      // pinch tambem — nenhum dos dois e teclado. Abaixo do piso, zero.
-      const roubado = Math.max(0, window.innerHeight - altura)
-      const teclado = roubado > MINIMO_TECLADO_PX ? roubado : 0
+      const teclado = insetDoTeclado(window.innerHeight, altura)
       useUiStore.getState().handleViewportResize(
         Math.round(vv?.width ?? window.innerWidth),
         altura,
