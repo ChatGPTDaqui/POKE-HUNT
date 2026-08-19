@@ -82,7 +82,11 @@ export function GameWindow({
     function onDown(event: PointerEvent) {
       const alvo = event.target as HTMLElement | null
       if (!alvo) return
-      if (alvo.closest(`[data-window="${winKey}"]`)) return
+      // Dentro de QUALQUER janela, e nao so desta: clicar no painel Auto (que
+      // pode ficar aberto junto, de proposito) ou na janela do chat fechava a
+      // tela de menu por tras. Cada janela cuida do proprio fora-de-clique;
+      // um clique dentro de outra nunca e "fora" desta.
+      if (alvo.closest('[data-window]')) return
       if (alvo.closest('[data-keep-open]')) return
       onClose()
     }

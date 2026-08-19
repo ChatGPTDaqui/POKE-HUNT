@@ -105,7 +105,13 @@ export function Sheet({
     function onDown(event: PointerEvent) {
       const alvo = event.target as HTMLElement | null
       if (!alvo) return
-      if (alvo.closest(`[data-window="${winKey}"]`)) return
+      // Dentro de QUALQUER janela/sheet, e nao so da minha. Um sheet empilhado
+      // por cima (a ficha de um item aberta a partir da Loja) nao esta "fora"
+      // deste: sem esta regra, tocar no texto da ficha fechava o painel de
+      // baixo — e com ele o proprio sheet de cima, que vive na arvore dele.
+      // Reproduzido: Loja aberta, ficha do item aberta, um toque no corpo da
+      // ficha e os dois sumiam.
+      if (alvo.closest('[data-window]')) return
       if (alvo.closest('[data-keep-open]')) return
       onClose()
     }
