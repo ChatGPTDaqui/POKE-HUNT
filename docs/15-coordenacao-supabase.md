@@ -192,13 +192,23 @@ crescer.
 ### Pendente de implementação
 
 - Criar função `jogo-dev` (Supabase Dashboard ou CLI) + secret `JOGO_SCHEMA_DEV=dev` (nome
-  dedicado, não `JOGO_SCHEMA` — ver seção acima).
+  dedicado, não `JOGO_SCHEMA` — ver seção acima). **Feito**, confirmado via `/saude` em
+  2026-08-20 (`{"ok":true,"schema":"dev"}`) — ver nota abaixo sobre deploy via CLI, não MCP.
 - Workflow novo (CI): merge-de-teste feature→`dev`, build+test gate, só então merge real +
   `db push` + deploy `jogo-dev`.
 - `supabase-check.yml`: diff base do job de `push` vira condicional por trigger (branch `dev` como
   base fora de `main`, ver seção acima) — mudança obrigatória, não opcional. **Feito**, ver
   commit `483266f`.
 - `supabase-deploy.yml` (deploy de `main`) permanece como está — sem alteração.
+
+**Achado no deploy manual de `jogo-dev` (2026-08-20)**: o bundle (`servidor.js`, ~900KB
+minificado) tokeniza pesado (~424k tokens) — grande demais pro tool MCP `deploy_edge_function`
+(que exige o conteúdo do arquivo inteiro como string gerada na chamada, não leitura/streaming de
+disco). Deploy real precisa ser via CLI (`npx supabase functions deploy jogo-dev --project-ref
+...`), que lê o arquivo direto do disco sem esse limite. CLI local pode estar logada numa conta
+Supabase errada (accounts distintas coexistem) — `npx supabase projects list` confirma; se o
+projeto não aparecer, `npx supabase login` resolve. O workflow de CI (item acima, "Workflow novo")
+já usa a CLI real dentro do runner, não o MCP — não herda essa limitação.
 
 ### Branch protection — passo a passo pro dono do repo aplicar
 
