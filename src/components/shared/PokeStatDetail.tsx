@@ -6,7 +6,7 @@
 import type { ReactNode } from 'react'
 import { expProgressForInstance } from '@/engine/systems/progressionSystem'
 import { getAbility, BASIC_ATTACK } from '@/data/abilities'
-import { activeAbilitiesPadrao, MAX_ACTIVE_ABILITIES } from '@/data/activeAbilities'
+import { golpesUtilizaveis, MAX_ACTIVE_ABILITIES } from '@/data/activeAbilities'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { controller } from '@/engine/controller'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -383,7 +383,17 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
   // nenhum dos dois arrays, entao cai de volta na prop como sempre.
   const pokeVivo = equipe.find((p) => p.uid === poke.uid) ?? mochila.find((p) => p.uid === poke.uid) ?? poke
 
-  const ativos = pokeVivo.activeAbilities ?? activeAbilitiesPadrao(species, pokeVivo.level)
+  // SANEADO, nao cru: `golpesUtilizaveis` e a mesma porta que o combate usa,
+  // entao a contagem "n/4" e os numeros da coluna Usar passam a descrever
+  // exatamente o que o POKE leva pra luta.
+  //
+  // Lendo cru, uma escolha gravada com golpe que o learnset atual nao tem mais
+  // (regra do Recordador, rename do Ultra Sun) contava pro teto de 4 sem
+  // aparecer em linha nenhuma da tabela — o jogador via "4/4" com 3 numeros,
+  // nao tinha o que desmarcar, e cada clique mandava a chave orfa de volta pra
+  // RPC, que recusava a edicao inteira. Ver
+  // data/activeAbilities.ts#sanearEscolhaDeGolpes.
+  const ativos = golpesUtilizaveis(pokeVivo, species, false)
   // Pedido explicito do usuario (revertendo uma leva anterior, que a tinha
   // removido a pedido DELE tambem): build fixo durante o combate, editavel so
   // fora da hunt. Tecnicamente nao havia risco de corromper nada (o servidor
