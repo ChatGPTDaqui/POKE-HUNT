@@ -18,12 +18,20 @@ import { descricaoDaNatureza } from '@/data/natures'
 import { STAT_LABEL } from '@/data/statLabels'
 import { traitDoPoke, nomeDaTrait, traitEhOculta } from '@/data/traits'
 import { descricaoDaTrait, motivoSemEfeito } from '@/data/traitInfo'
-import { caracteristicaDe } from '@/data/characteristics'
+import { IV_MAX, caracteristicaDe } from '@/data/characteristics'
+import {
+  verbeteDaCaracteristica,
+  verbeteDaNatureza,
+  verbeteDaTrait,
+  verbeteDoStat,
+  verbeteDosTiposDaEspecie,
+} from '@/data/glossario'
 import type { PokeInstance, Species } from '@/data/pokes'
 import { PokeNameTag } from './PokeNameTag'
 import { StatusBadge } from './StatusBadge'
 import { TypeChip } from './TypeChip'
 import { AbilityTooltip } from './AbilityTooltip'
+import { Palavra } from './Explicacao'
 import { Meter } from '@/components/game/controls'
 import type { AbilityCategory } from '@/data/generated/types'
 
@@ -68,10 +76,17 @@ export function ProfileHero({ poke, species }: { poke: PokeInstance; species: Sp
           <PokeNameTag poke={poke} species={species} />
           <span className="text-n400">Lv{poke.level}</span>
         </div>
-        <div className="flex gap-[.3em]">
+        {/* Um gatilho pros DOIS chips, nao um por chip: a fraqueza de verdade
+            sai da combinacao dos dois tipos (o 4x so existe assim), entao duas
+            bolhas separadas dariam duas respostas incompletas. */}
+        <Palavra
+          verbete={verbeteDosTiposDaEspecie(species)}
+          side="bottom"
+          className="inline-flex gap-[.3em] no-underline"
+        >
           <TypeChip type={species.type} />
           {species.type2 && <TypeChip type={species.type2} />}
-        </div>
+        </Palavra>
         <div className="flex items-center gap-[.4em] text-[.75em] text-n400">
           <span>HP {Math.floor(poke.hp)}/{poke.stats.hp}</span>
           {/* So o nao-volatil aqui: a ficha abre pra qualquer POKE da equipe ou
@@ -88,9 +103,6 @@ export function ProfileHero({ poke, species }: { poke: PokeInstance; species: Sp
 const IV_LABELS: Record<string, string> = {
   hp: 'HP', atkFis: 'AF', atkEsp: 'AE', def: 'DF', defEsp: 'DE', speed: 'VL',
 }
-// Um IV so e "perfeito" em 31 — e o teto do dado. Destacar em verde faz a
-// leitura de "vale a pena investir neste POKE" ser instantanea.
-const IV_MAX = 31
 
 /**
  * Os TRES tracos individuais dos jogos, na ficha do POKE.
@@ -108,25 +120,35 @@ function TracosIndividuais({ poke }: { poke: PokeInstance }) {
   const caracteristica = caracteristicaDe(poke.ivs)
 
   return (
+    // DUAS bolhas por linha, e nao uma: o ROTULO explica o CAMPO ("o que e
+    // natureza") e o VALOR explica AQUELE sorteio ("o que Hardy faz"). Pedido
+    // explicito do usuario, e a divisao se sustenta — quem toca o rotulo nao sabe
+    // o que o campo e; quem toca o valor ja sabe e quer o efeito.
     <div className="flex flex-col gap-[.35em] rounded-[.4em] border border-n800 bg-n900 px-[.55em] py-[.45em] text-[.85em]">
       <div className="flex items-baseline justify-between gap-[.5em]">
-        <span className="shrink-0 text-n500">Natureza</span>
-        <b className="min-w-0 truncate text-right font-medium">
+        <Palavra verbete="natureza" className="shrink-0 text-n500">Natureza</Palavra>
+        <Palavra
+          verbete={verbeteDaNatureza(poke.nature)}
+          className="min-w-0 truncate text-right font-medium"
+        >
           {descricaoDaNatureza(poke.nature, (s) => STAT_LABEL[s])}
-        </b>
+        </Palavra>
       </div>
 
       {trait && (
         <div className="flex flex-col gap-[.15em]">
           <div className="flex items-baseline justify-between gap-[.5em]">
-            <span className="shrink-0 text-n500">Habilidade</span>
-            <b className="min-w-0 truncate text-right font-medium">
+            <Palavra verbete="habilidade" className="shrink-0 text-n500">Habilidade</Palavra>
+            <Palavra
+              verbete={verbeteDaTrait(trait, oculta)}
+              className="min-w-0 truncate text-right font-medium"
+            >
               {nomeDaTrait(trait)}
               {/* Habilidade OCULTA e rara (5% no nascimento) e nao aparece em
                   nenhum outro lugar do jogo — sem a marca, o jogador nao teria
                   como saber que tirou uma. */}
-              {oculta && <span className="ml-[.35em] text-[.85em] text-amber-400">oculta</span>}
-            </b>
+              {oculta && <span className="ml-[.35em] text-[.85em] text-amber-400 no-underline">oculta</span>}
+            </Palavra>
           </div>
           <p className="text-[.85em] leading-tight text-n500">{descricaoDaTrait(trait)}</p>
           {/* Habilidade sem efeito AQUI e dita em voz alta, com o motivo. O
@@ -140,8 +162,13 @@ function TracosIndividuais({ poke }: { poke: PokeInstance }) {
 
       {caracteristica && (
         <div className="flex items-baseline justify-between gap-[.5em]">
-          <span className="shrink-0 text-n500">Caracteristica</span>
-          <b className="min-w-0 truncate text-right font-medium">{caracteristica.texto}</b>
+          <Palavra verbete="caracteristica" className="shrink-0 text-n500">Caracteristica</Palavra>
+          <Palavra
+            verbete={verbeteDaCaracteristica(caracteristica)}
+            className="min-w-0 truncate text-right font-medium"
+          >
+            {caracteristica.texto}
+          </Palavra>
         </div>
       )}
     </div>
@@ -161,34 +188,41 @@ export function StatDetail({ poke, weaknessSection }: { poke: PokeInstance; weak
         </div>
       )}
       <div className="grid grid-cols-3 gap-[.4em]">
+        {/* O rotulo aqui e o nome LONGO ("Defesa"), diferente do STAT_LABEL
+            curto que a bolha usa como titulo — de proposito: o card tem largura
+            pra escrever por extenso e a bolha nao. */}
         {([
-          ['Atk Fis', poke.stats.atkFis],
-          ['Atk Esp', poke.stats.atkEsp],
-          ['Defesa', poke.stats.def],
-          ['Def Esp', poke.stats.defEsp],
-          ['Velocidade', poke.stats.speed],
-        ] as const).map(([label, value]) => (
+          ['Atk Fis', 'atkFis', poke.stats.atkFis],
+          ['Atk Esp', 'atkEsp', poke.stats.atkEsp],
+          ['Defesa', 'def', poke.stats.def],
+          ['Def Esp', 'defEsp', poke.stats.defEsp],
+          ['Velocidade', 'speed', poke.stats.speed],
+        ] as const).map(([label, stat, value]) => (
           <div key={label} className="flex justify-between rounded-[.4em] border border-n800 bg-n900 px-[.55em] py-[.4em]">
-            <span className="text-[.85em] text-n500">{label}</span>
+            <Palavra verbete={verbeteDoStat(stat)} className="text-[.85em] text-n500">{label}</Palavra>
             <b className="font-medium">{value}</b>
           </div>
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-[.3em]">
+      <div className="flex flex-wrap items-center gap-[.3em]">
+        {/* A fileira nunca disse em nenhum lugar que aqueles seis numeros SAO os
+            IVs — quem nao conhece o termo via "HP 24 AF 31" e mais nada. */}
+        <Palavra verbete="iv" className="text-[.72em] text-n500">IVs</Palavra>
         {Object.entries(poke.ivs).map(([key, value]) => {
           const perfeito = value >= IV_MAX
           return (
-            <span
-              key={key}
-              className="rounded-[.4em] border px-[.5em] py-[.15em] text-[.72em]"
-              style={{
-                color: perfeito ? '#4ade80' : 'var(--color-n400)',
-                borderColor: perfeito ? '#4ade80' : 'var(--color-n700)',
-              }}
-            >
-              {IV_LABELS[key] || key} {value}
-            </span>
+            <Palavra key={key} verbete={verbeteDoStat(key as keyof typeof poke.ivs)} className="no-underline">
+              <span
+                className="rounded-[.4em] border px-[.5em] py-[.15em] text-[.72em]"
+                style={{
+                  color: perfeito ? '#4ade80' : 'var(--color-n400)',
+                  borderColor: perfeito ? '#4ade80' : 'var(--color-n700)',
+                }}
+              >
+                {IV_LABELS[key] || key} {value}
+              </span>
+            </Palavra>
           )
         })}
       </div>

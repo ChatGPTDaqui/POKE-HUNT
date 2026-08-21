@@ -10,7 +10,7 @@ import {
 } from './moveDescriptions'
 import { ABILITIES_DATA } from './generated/abilities.generated'
 import { TYPED_AOE_MOVES } from './typedAoeMoves'
-import { BASIC_ATTACK } from './abilities'
+import { ABILITIES, BASIC_ATTACK, DANO_SEM_PODER_BASE, isDamagingAbility } from './abilities'
 
 describe('descricoes de golpe', () => {
   it('todo golpe do catalogo tem descricao', () => {
@@ -69,11 +69,50 @@ describe('golpeTemEfeitoReal — aviso de "sem efeito" so em golpe realmente ine
     expect(golpeTemEfeitoReal({ id: 'perish_song' })).toBe(true)
   })
 
+  // BUG REAL, ACHADO EM 2026-08-19 e confirmado na tela (ficha do Dugtrio, golpe
+  // Magnitude): `golpeTemEfeitoReal` nao conhecia `DANO_SEM_PODER_BASE`, entao os
+  // 11 golpes de dano com `power: 0` — Magnitude, Seismic Toss, Dragon Rage,
+  // Counter, Mirror Coat, Psywave, Super Fang, Reversal, Flail, Night Shade,
+  // Present — recebiam AVISO_SEM_DANO ("este golpe nao causa dano") enquanto o
+  // motor os escolhia como golpe de dano e eles batiam normalmente.
+  //
+  // O comentario do proprio arquivo garantia que isso era impossivel ("eles tem
+  // `power > 0` na pratica"). Nao tinham. E o tipo de defeito que nao lanca nada:
+  // a ficha simplesmente mente, e so um jogador reclamando pegaria.
+  it('golpe que o motor seleciona como DANO nunca e anunciado como inerte', () => {
+    const mentindo = Object.values(ABILITIES)
+      .filter((a) => isDamagingAbility(a))
+      .filter((a) => a.power <= 0 && !golpeTemEfeitoReal(a))
+      .map((a) => a.id)
+    expect(mentindo).toEqual([])
+  })
+
+  it('os golpes de dano por regra propria existem no catalogo e sao selecionaveis', () => {
+    for (const id of DANO_SEM_PODER_BASE) {
+      const ability = ABILITIES[id]
+      expect(ability, `${id} nao existe no catalogo`).toBeTruthy()
+      expect(isDamagingAbility(ability), `${id} nao e selecionavel como dano`).toBe(true)
+      expect(golpeTemEfeitoReal(ability), `${id} marcado como inerte`).toBe(true)
+    }
+  })
+
   it('golpes genuinamente inertes (sem status/statChanges/id conhecido) continuam sem efeito', () => {
     expect(golpeTemEfeitoReal({ id: 'splash' })).toBe(false)
     expect(golpeTemEfeitoReal({ id: 'transform' })).toBe(false)
     expect(golpeTemEfeitoReal({ id: 'sleep_talk' })).toBe(false)
     expect(golpeTemEfeitoReal({ id: 'rage_powder' })).toBe(false) // no-op estrutural, documentado
     expect(golpeTemEfeitoReal({ id: 'quick_guard' })).toBe(false) // sem prioridade neste motor
+    // Os quatro OHKO do catalogo sao DOIS casos diferentes, e a tela precisa
+    // distinguir: guillotine/sheer_cold nao tem implementacao nenhuma (inertes de
+    // fato), enquanto horn_drill/fissure TEM (FIXED_DAMAGE_ABILITIES mata o alvo)
+    // e so estao fora da selecao por balanceamento. Dizer "sem efeito
+    // implementado" nesses dois era falso.
+    expect(golpeTemEfeitoReal({ id: 'guillotine' })).toBe(false)
+    expect(golpeTemEfeitoReal({ id: 'sheer_cold' })).toBe(false)
+    expect(golpeTemEfeitoReal({ id: 'horn_drill' })).toBe(true)
+    expect(golpeTemEfeitoReal({ id: 'fissure' })).toBe(true)
+    // ...e continuam nao-selecionaveis, que e o ponto do desligamento.
+    expect(isDamagingAbility(ABILITIES.horn_drill)).toBe(false)
+    expect(isDamagingAbility(ABILITIES.fissure)).toBe(false)
   })
 })

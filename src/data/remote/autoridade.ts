@@ -15,6 +15,8 @@ import {
   ativarPredicoesDeCaptura, ehCapturaPredita, limparCapturasPreditas,
 } from './predicoesDeCaptura'
 import { mochilaCarregada } from '@/stores/mochilaStore'
+import { ABATES_POR_SALA } from '@/data/biomas'
+import type { SalaAtiva } from '@/engine/types'
 
 // Sem servidor nao ha nada pra reconciliar — a mochila local JA e a verdade.
 // Desligar so evita a lista de uids crescer a sessao inteira sem ninguem ler.
@@ -158,20 +160,31 @@ export const INTERVALO_FLUSH_MS = 30000
 
 let timerFlush: ReturnType<typeof setInterval> | null = null
 
-export async function abrirSessaoDeHunt(mapId: string, pokeUid: string): Promise<boolean> {
-  if (!servidorAtivo()) return true
+/**
+ * Abre a sessao e devolve a SALA INICIAL que o servidor decidiu, pra quem
+ * constroi o mundo comecar na mesma sala que ele.
+ *
+ * `null` cobre tres casos que o chamador trata igual (sorteia a propria):
+ * hunt sem sistema de salas, jogo sem servidor, e servidor mais antigo que nao
+ * manda o campo.
+ */
+export async function abrirSessaoDeHunt(
+  mapId: string, pokeUid: string,
+): Promise<{ ok: boolean; sala: SalaAtiva | null }> {
+  if (!servidorAtivo()) return { ok: true, sala: null }
   try {
-    await servidor.abrirSessao(mapId, pokeUid)
+    const resposta = await servidor.abrirSessao(mapId, pokeUid)
     pararFlushPeriodico()
     timerFlush = setInterval(() => { void liquidar() }, INTERVALO_FLUSH_MS)
-    return true
+    observarQuotaDeSala()
+    return { ok: true, sala: resposta.sala ?? null }
   } catch (erro) {
     // Sempre avisa: so ha um chamador (`controller.enterMap`) e ele nasce de um
     // clique em "Entrar". Recusa do servidor (hunt trancada, POKE que nao e da
     // equipe, sessao invalida) TEM que aparecer em toda tentativa — calar a
     // segunda faz o botao parecer quebrado.
     reportarErro(erro, true)
-    return false
+    return { ok: false, sala: null }
   }
 }
 
@@ -292,6 +305,42 @@ export async function liquidar(): Promise<void> {
 export function pararFlushPeriodico(): void {
   if (timerFlush) clearInterval(timerFlush)
   timerFlush = null
+  pararObservadorDeSala?.()
+  pararObservadorDeSala = null
+  salaJaPedida = null
+}
+
+// --- quota de sala fechada: pede o flush na hora ----------------------------
+// Sob autoridade remota o cliente NAO sorteia a proxima sala (ver
+// engine/systems/salaSystem.ts#registrarAbate): ele conta o abate e espera. Sem
+// isto a espera seria o intervalo de flush inteiro — ate 30 segundos com a barra
+// da sala cheia e nada acontecendo, que le como jogo travado.
+//
+// O pedido e por (ciclo, sala) e tem repeticao propria porque o servidor pode
+// ainda NAO ter fechado a quota dele: as duas simulacoes contam abates
+// separadamente e a dele pode estar dois abates atras. Nesse caso a resposta traz
+// a mesma sala, e o proximo tick pede de novo depois do intervalo.
+const REPETIR_PEDIDO_DE_SALA_MS = 5000
+let pararObservadorDeSala: (() => void) | null = null
+let salaJaPedida: string | null = null
+let ultimoPedidoDeSala = 0
+
+function observarQuotaDeSala(): void {
+  pararObservadorDeSala?.()
+  pararObservadorDeSala = useWorldStore.subscribe((estado) => {
+    const sala = estado.sala
+    if (!estado.salaSobAutoridade || !sala) return
+    // Transicao ja em andamento (a sala do servidor chegou e o aviso esta na
+    // tela): nao ha o que pedir.
+    if (estado.salaPendente || estado.salaCountdownRemaining != null) return
+    if (sala.abates < ABATES_POR_SALA) return
+    const chave = `${sala.ciclos}:${sala.indice}`
+    const agora = Date.now()
+    if (chave === salaJaPedida && agora - ultimoPedidoDeSala < REPETIR_PEDIDO_DE_SALA_MS) return
+    salaJaPedida = chave
+    ultimoPedidoDeSala = agora
+    void liquidar()
+  })
 }
 
 // Intervalo minimo entre dois commits FORCADOS (level-up, aba sendo ocultada).

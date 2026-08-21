@@ -21,6 +21,7 @@ import { useBackgroundCatchUp } from '../hooks/useBackgroundCatchUp'
 import { useSaidaAoEncerrarSessao } from '../hooks/useSaidaAoEncerrarSessao'
 import { useSyncOnUnload } from '../hooks/useSyncOnUnload'
 import { useViewportTracking } from '../hooks/useViewportTracking'
+import { useVoltarFechaPainel } from '../hooks/useVoltarFechaPainel'
 import { useCommitOnLevelUp } from '../hooks/useCommitOnLevelUp'
 import { useTutorialInicial } from '../hooks/useTutorialInicial'
 import { useAvisoDeEstoqueNoChat } from '../hooks/useAvisoDeEstoqueNoChat'
@@ -28,11 +29,15 @@ import { useAvisoDeEstoqueNoChat } from '../hooks/useAvisoDeEstoqueNoChat'
 export function JogoCarregado() {
   const hasStarter = useHasStarter()
   const hudScale = useUiStore((s) => s.hudScale)
+  const vidroFosco = useUiStore((s) => s.vidroFosco)
+  const coarse = useUiStore((s) => s.coarsePointer)
+  const tecladoPx = useUiStore((s) => s.tecladoPx)
   const { summary, dismiss } = useOfflineFarmOnBoot()
   useBackgroundCatchUp()
   useSaidaAoEncerrarSessao()
   useSyncOnUnload()
   useViewportTracking()
+  useVoltarFechaPainel()
   useCommitOnLevelUp()
   useTutorialInicial(hasStarter)
   useAvisoDeEstoqueNoChat()
@@ -43,7 +48,15 @@ export function JogoCarregado() {
       // interface deriva; `--hud-scale` e a preferencia do jogador (0.8–1.4),
       // que multiplica esse ajuste em vez de substitui-lo.
       className="hud-root relative h-svh w-svw overflow-hidden bg-background text-foreground"
-      style={{ '--hud-scale': hudScale } as React.CSSProperties}
+      data-blur={vidroFosco ? 'off' : undefined}
+      // Dedo em vez de mouse: o CSS usa isto pra dar 44px de alvo minimo aos
+      // primitivos de controle. Ver "alvo de toque" no index.css.
+      data-toque={coarse ? '1' : undefined}
+      // `--teclado`: a camada da HUD sobe por cima do teclado virtual (ver
+      // `.hud-safe` no index.css e a nota em `uiStore#tecladoPx`). Fica na raiz
+      // e nao na `.hud-safe` porque o valor tambem serve pra qualquer coisa
+      // futura que precise saber que o teclado esta aberto.
+      style={{ '--hud-scale': hudScale, '--teclado': `${tecladoPx}px` } as React.CSSProperties}
     >
       <GameCanvas />
 
@@ -61,7 +74,14 @@ export function JogoCarregado() {
       <div className="pointer-events-none absolute inset-0">
         {hasStarter && (
           <>
-            <HudLayer />
+            {/* `.hud-safe` recorta SO a HUD pelas areas inseguras do aparelho
+                (notch, home indicator). O canvas fica de fora de proposito: ele
+                e irmao desta camada e continua sangrando ate a borda fisica —
+                cortar o cenario pra caber no retangulo seguro deixaria duas
+                tarjas pretas em vez de imagem. */}
+            <div id="camada-hud" className="hud-safe">
+              <HudLayer />
+            </div>
             <ScreenOverlay />
             <ReviveCountdownModal />
             <DefeatModal />

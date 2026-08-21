@@ -4,12 +4,24 @@
 // o golpe de nivel 50 tem categoria `dynamic` — ela depende de qual atributo do
 // POKE e maior no nivel 50. Um tooltip que mostrasse "dynamic" nao diria nada.
 import type { ReactNode } from 'react'
-import { AOE_RADIUS, type Ability } from '@/data/abilities'
+import {
+  AOE_RADIUS,
+  DANO_SEM_PODER_BASE,
+  OHKO_DESLIGADO,
+  isDamagingAbility,
+  type Ability,
+} from '@/data/abilities'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
-import { AVISO_SEM_DANO, MOVE_DESCRIPTIONS, golpeTemEfeitoReal } from '@/data/moveDescriptions'
+import {
+  AVISO_DANO_POR_REGRA_PROPRIA,
+  AVISO_OHKO_DESLIGADO,
+  AVISO_SEM_DANO,
+  MOVE_DESCRIPTIONS,
+  golpeTemEfeitoReal,
+} from '@/data/moveDescriptions'
 import { colorForType } from '@/data/typeColors'
 import type { PokeInstance } from '@/data/pokes'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Explicacao } from './Explicacao'
 
 // 'status' e categoria de verdade desde a base de dados do Ultra Sun (ate a
 // Gen III a categoria era decidida pelo TIPO do golpe e nao existia uma
@@ -44,12 +56,16 @@ export function AbilityTooltip({
   const cor = colorForType(ability.type)
   const descricao = descricaoDoGolpe(ability)
   const semDano = ability.power <= 0 && !golpeTemEfeitoReal(ability)
+  // Golpe de regra propria: `power` 0 no catalogo, dano real vindo de
+  // combatSystem#specialDamageFor. "Dano base 0" sozinho le como golpe fraco.
+  const danoPorRegraPropria = DANO_SEM_PODER_BASE.has(ability.id)
+  const ohkoDesligado = OHKO_DESLIGADO.has(ability.id)
 
   return (
-    <Tooltip>
-      <TooltipTrigger render={<span className="contents" />}>{children}</TooltipTrigger>
-      <TooltipContent className="max-w-[21em] bg-popover text-popover-foreground">
-        <div className="flex flex-col gap-[.3em] text-[.95em]">
+    <Explicacao
+      envolve="bloco"
+      conteudo={
+        <div className="flex flex-col gap-[.3em] text-left">
           <div className="flex flex-wrap items-center gap-[.4em]">
             <b>{ability.name}</b>
             <span className="rounded-[.3em] px-[.35em] text-[.85em] text-white" style={{ background: cor }}>
@@ -61,11 +77,15 @@ export function AbilityTooltip({
           </div>
 
           <div className="flex flex-wrap gap-x-[.55em] text-[.9em] opacity-85">
-            <span>Dano base {ability.power}</span>
+            <span>Dano base {danoPorRegraPropria ? '—' : ability.power}</span>
             {/* Precisao so pra golpe de DANO: golpe de status passa pelo mesmo
                 sorteio no motor, mas mostrar "100%" nele sugere um teste de
-                acerto que na pratica nunca falha. */}
-            {ability.power > 0 && (
+                acerto que na pratica nunca falha.
+                `isDamagingAbility` e nao `power > 0`: os 12 de
+                DANO_SEM_PODER_BASE tem poder 0 e causam dano, e com o teste
+                antigo a precisao deles nunca aparecia — Earthquake mostrava
+                "Precisao 100%" e Magnitude, ao lado, nada. */}
+            {isDamagingAbility(ability) && (
               <span className={(ability.accuracy ?? 100) < 100 ? 'text-warn' : undefined}>
                 Precisao {ability.accuracy ?? 100}%
               </span>
@@ -79,8 +99,14 @@ export function AbilityTooltip({
           {/* So golpe SEM efeito real nenhum implementado aqui (nem dano, nem
               status/estagio/clima/escudo/etc) — ver golpeTemEfeitoReal. */}
           {semDano && <span className="text-[.85em] text-warn">{AVISO_SEM_DANO}</span>}
+          {danoPorRegraPropria && (
+            <span className="text-[.85em] opacity-70">{AVISO_DANO_POR_REGRA_PROPRIA}</span>
+          )}
+          {ohkoDesligado && <span className="text-[.85em] text-warn">{AVISO_OHKO_DESLIGADO}</span>}
         </div>
-      </TooltipContent>
-    </Tooltip>
+      }
+    >
+      {children}
+    </Explicacao>
   )
 }

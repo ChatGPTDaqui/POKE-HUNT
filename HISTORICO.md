@@ -4796,3 +4796,487 @@ regra dos jogos e nao encosta em PP.
   (entity.ts) e `cooldownTotalDoGolpe` (combatSystem.ts, ja escalado pela Velocidade efetiva, com
   clima) alimentam o numero e a cortina de recarga. Conferido ao vivo: os slots passaram de
   "1.3s | 1.3s | 1.3s | 1.3s" para "0.4s | 1.3s | 1.3s | 1.3s".
+
+
+---
+
+## HUD mobile-first (branch `feat/hud-mobile`, 2026-08-18)
+
+Pedido: converter a HUD para celular, "minimalismo, eficiencia e praticidade, design black glass".
+Trabalho em branch, sem tocar a `main`.
+
+### O diagnostico, com numero
+
+Medido em 390x844 antes de mexer: os cards do topo somavam ~450px de largura numa tela de 374px
+uteis — o card do treinador **cobria o HP do POKE**. O chat ocupava 264x336px sobre o campo de
+batalha, o menu quebrava em duas fileiras de circulos, e o jogo visivel virava um buraco no meio.
+
+Tres causas, e nenhuma delas era "faltou media query":
+
+1. **Cinco ancoras independentes** nas bordas, cada uma se posicionando sozinha e negociando com as
+   vizinhas por breakpoint.
+2. **Breakpoint so por LARGURA.** Celular deitado (844x390) lia como desktop, com 390px de altura.
+3. **`viewport-fit=cover` no `index.html` desde sempre e zero `env(safe-area-inset-*)` no CSS.**
+
+### O desenho novo
+
+Duas superficies permanentes: **trilho** (topo) e **doca** (rodape). Uma arvore so — o desktop e o
+compacto com mais largura e mais rotulo, decisao explicita do usuario contra manter dois layouts.
+
+Criterio do trilho: *o dado muda sozinho e o jogador olha sem ter pedido* (HP, XP, carteira). Local,
+Pokedex e taxas ficam atras de um toque. Criterio da doca: cinco slots, porque o slot e caro (44px
+mais rotulo legivel).
+
+Painel vira **bottom sheet** que para ACIMA da doca — trocar de tela continua custando um toque.
+
+### O que so se descobre medindo
+
+- **A altura do sheet em `vh` estourava a tela pra cima.** `vh` mais rodape medido em px cobria o
+  trilho e escondia a propria alca do sheet. Virou % do pai.
+- **Deitado, o sheet dava 109px de conteudo** — um card e meio. La ele cobre o trilho e para em cima
+  da barra de navegacao (medida a parte), e o cabecalho perde uma linha: 268px.
+- **320px estourava o trilho**: o piso de 9em dos vitais mais os vizinhos fixos davam 324px numa
+  caixa de 302px, e o avatar saia pela borda da TELA. Virou `min(9em, 34vw)`.
+- **157 de 341 alvos da Loja e 75 de 75 da Mochila tinham menos de 40px.** O tamanho passou a vir
+  por CSS a partir de uma classe estavel em cada primitivo (`jogo-botao`, `jogo-campo`...), e nao
+  por prop: threading `coarse` por ~200 pontos de chamada e uma edicao que o proximo controle novo
+  esqueceria.
+- **`em` dentro de um `<input>` resolve contra o font-size do PROPRIO controle** (~11.5px, definido
+  pelo navegador), nao contra a raiz. Por isso `1.4em` no checkbox virava 16px.
+- **O teclado virtual ficava POR CIMA da doca**: a raiz e `h-svh overflow-hidden`, e `svh` nao
+  encolhe quando o teclado abre. Passou a medir `innerHeight - visualViewport.height` com piso de
+  120px (a barra de URL come ~60px, e um pinch tambem encolhe).
+
+### O erro de metodo desta leva: A/B nao intercalado
+
+Escrevi em codigo e em docs que `backdrop-filter` custa "uma recomposicao por quadro por camada",
+como se fosse medido. Ao medir de verdade, dentro de uma hunt:
+
+| Cenario | Com blur | Sem blur |
+|---|---|---|
+| Sem throttle | 16,76ms | 16,68ms (os dois no teto de 60fps) |
+| CPU 4x, A/B intercalado 4 rodadas | 101,2ms | 101,5ms |
+
+A primeira leitura, **sequencial**, deu +17ms pro blur. Intercalando, some: eram 17ms de deriva do
+proprio jogo ficando mais pesado com mais inimigos em campo. A chave de desligar continua (e uma
+classe CSS, e o custo e real em GPU movel fraca), mas sem numero inventado. **Lembrete: A/B nao
+intercalado mede a deriva, nao o tratamento.**
+
+### Informacao que so existia no hover
+
+Varredura pelos `Tooltip`: no dedo nao existe hover, entao cada um era informacao que o jogador de
+celular nunca via, sem nem sinal de que existia. O tooltip do GOLPE era a unica fonte de dano,
+precisao, recarga e descricao. O `ItemTooltip` era o unico lugar que dizia quanto uma pocao cura. A
+faixa de status so tinha o nome do efeito no `title`. Os tres ganharam sheet no toque.
+
+O slot de golpe virou `button` tambem no desktop (como `div` nao existia pro teclado). Quem abre a
+ficha no mouse e `event.detail === 0` — o clique vindo do teclado; senao o duplo clique que
+liga/desliga o golpe abriria a ficha duas vezes no caminho.
+
+### Texto do jogo descrevendo uma HUD que nao existe
+
+Wiki e tutoriais citavam "botao flutuante no canto inferior direito" (Auto), "botoes +/- no canto
+superior direito" (zoom) e "o circulo grande do meio do menu" (Hunt). Patch-notes NAO foram
+tocados: eles registram o que a tela era naquela leva.
+
+### Verificacao
+
+`tsc -b`, `vitest` (532 testes) e `build` limpos. Conferido ao vivo em 320x568, 390x844, 844x390 e
+1440x900 com a conta de teste: os 13 paineis sem overflow horizontal e sem alvo abaixo de 40px, a
+troca de sala com o aviso de campo na faixa certa (70..678, doca em 770), o botao voltar fechando
+painel em vez de sair do jogo, e o toque na enfermeira curando (43% da largura cura, 40% nao — o
+alvo cresceu sem virar a tela inteira).
+
+**Nao verificado**: teclado virtual em aparelho real (a metade CSS foi, com o inset forcado: a doca
+sobe exatos 300px), custo do blur em GPU movel, e o modal de derrota (o Entei Lv100 da conta de
+teste nao morre em hunt de Lv1-30).
+
+### Doca de 8 slots fixos (mesma branch, mesmo dia)
+
+Pedido do usuario: a barra de baixo passa a ter sempre Equipe, Mochila, Pokedex, Hunt, Loja,
+Hospital, Mercado e Mais, com Hunt centralizado e de icone maior — e reduzir o que for
+desnecessario na tela.
+
+**O que nao da pra entregar, e por que:** Hunt centralizado no pixel. Sao 7 destinos alem dele,
+numero impar; qualquer divisao da 3 de um lado e 4 do outro e o centro do slot do meio cai meio
+slot a esquerda (medido: 18,4px em 390px). Compensar com grupos de larguras diferentes joga os 4
+slots da direita para 38,7px em 390px e 31px em 320px — abaixo do minimo de toque. As unicas saidas
+exatas seriam 6 ou 8 destinos alem do Hunt.
+
+**O bug que 8 slots destaparam:** `.alvo-toque` traz `min-width: 44px`. Com 8 slots em 320px os
+botoes somavam 384px numa barra de 304 — flex nao encolhe abaixo de um minimo em px, entao "Mais"
+ficava 64px fora da tela, sem erro nenhum e sem barra de rolagem. Na doca o piso passou a ser so de
+altura. O rotulo virou `min(.58em, 2.3vw)` pelo mesmo motivo: com 34px de largura util, "Hospital"
+e "Mercado" truncavam.
+
+**Corte no trilho:** o contador da Pokedex saiu (ganhou slot proprio e continua na gaveta) e, so no
+compacto, o avatar do treinador — sem largura pro nome e pro nivel ele era um icone generico
+gastando ~46px permanentes na faixa que ja tinha empurrado o proprio avatar pra fora em 320px. Na
+gaveta ele aparece COM nome e nivel.
+
+**Achado de passagem:** "Resetar" na gaveta estava cortado em "R" na borda direita — `block`
+(`w-full`) num flex com outro botao, a mesma armadilha ja corrigida na Equipe e na Loja. Terceira
+ocorrencia do mesmo padrao.
+
+### Densidade dos menus (mesma branch)
+
+Pedido: "dentro dos menus, quero que mais itens sejam vistos em uma tela".
+
+Medido em 390x844 antes: Mochila com **5 linhas**, Loja com **3,5 itens**. Quatro causas, com
+numero cada:
+
+1. **O sheet parava acima do rodape INTEIRO** (179px), quando so a barra de navegacao (68px) e
+   inegociavel. Os outros 111px sao barra de golpes, zoom, Auto e ticker — nada acionavel com uma
+   lista aberta. Sheet de 586px -> 705px.
+2. **O card da Loja tinha tres faixas** e a do meio usava 192px de 343: 150px de vidro vazio ao
+   lado dos atalhos, com o botao de confirmar numa faixa propria logo abaixo. 148,5px -> 95,6px.
+3. **A auto-venda era um bloco permanente no topo da Mochila** (46px + espaco) enquanto a fileira
+   das abas ao lado usava 190px de 374. Virou chip na propria fileira das abas.
+4. **Padding e espaco entre linhas**: `p-[.6em]`/`gap-[.45em]` -> `p-[.4em]`/`gap-[.3em]` nas
+   listas longas. 71px -> 61px por linha da Mochila.
+
+Resultado: Mochila 5 -> 8, Loja 3,5 -> 5,5, Pokedex 9,5 -> 11.
+
+**O que 320px pegou e 390px nao pegaria:** juntar as duas faixas da Loja fazia o rotulo do botao
+(75,8px) nao caber nos 73,9px que sobravam, e ele vazava CORTADO em vez de truncar — faltava
+`min-w-0` no span dentro do botao flex. O campo de quantidade passou de `4.2em` pra `3.4em` (ainda
+cabe "1000") e fechou a conta.
+
+**Nenhum alvo de toque encolheu.** A densidade saiu de espaco morto; os 44px de altura continuam
+em todo controle.
+
+### Loja em duas colunas no celular (mesma branch)
+
+Pedido: comprar e vender na mesma tela, em duas colunas.
+
+O bloqueio real nao era o layout, era a largura: com duas colunas em 390px cada uma fica com
+~170px, e ali NAO cabe campo de quantidade + `+10 +100 +1000` + botao de confirmar sem derrubar
+todo alvo de toque abaixo do minimo. A saida foi trocar a forma da linha por largura de coluna: em
+`compacto` a linha e so identidade (icone, nome, estoque, preco) e a transacao abre num sheet;
+em `deitado` (coluna de ~470px) e no amplo, o card inteiro continua inline.
+
+O sheet cobra um toque a mais por compra e devolve alvo de toque: inline o `+10` tem **27px** de
+largura, no sheet passa dos 44px.
+
+**O bug que so aparece interagindo:** trancar um item de DENTRO do sheet fechava o sheet. Trancar
+manda o item pro fim da ordenacao — e possivelmente pra outra pagina — entao a linha que montava o
+sheet desmontava e levava o sheet junto. A ficha passou a ser montada pelo `ItensTab`, irma do
+grid. Regra que fica: **estado de painel aberto nao pode viver num componente cujo tempo de vida
+depende de ordenacao ou paginacao.**
+
+Dois acertos menores encontrados no caminho: `ItemIcon` devolvia `null` quando o item nao tem arte
+(as varas), e a linha inteira comecava 31px a esquerda das vizinhas — virou um vazio do mesmo
+tamanho, com `block` porque `<span>` inline ignora altura e largura. E os cabecalhos das duas
+colunas ganharam `min-h` igual: o botao "Tudo" da venda e mais alto que um rotulo de texto e
+empurrava a primeira linha daquela coluna pra baixo da vizinha.
+
+Efeito colateral bom: sumiu o eixo "que lado" da Loja no celular. As abas voltaram a ser as mesmas
+dos dois regimes — "Itens | Pokemons" — e o `ladoExterno`/`ladoLocal` do `ItensTab` deixou de
+existir.
+
+
+---
+
+## 2026-08-19 — face do HUD viva, mira dos golpes e o sub-bioma que trocava sozinho
+
+Branch `feat/hud-mobile`. Tres frentes, e as tres comecaram com um relato de "esta estranho" que
+so virou diagnostico depois de medir.
+
+### 1. "O face icon do cabecalho nao esta atualizando em tempo real"
+
+**Nao reproduziu, e o numero e que fechou o assunto.** Amostrei o DOM do trilho de status durante
+uma hunt de teste: HP 100% -> 97,5 -> 96,7 -> 95,8 -> 91,0 -> 83,5; EXP 6,25% -> 9,60%; nivel
+`Lv 6` -> `Lv 5 KO` (penalidade de morte); ouro 1.000.512.405 -> 1.000.520.065; anel de EXP do
+treinador 46,26% -> 48,45%; e a face trocando de `entei.png` pra `charmander.png` na troca de POKE
+em campo, com o `aria-label` junto. Tudo reativo, pelo mesmo caminho de store.
+
+O que de fato **nao** mudava era a ARTE: uma imagem por especie, a expressao neutra, igual com o
+POKE a 3% de vida. Entao a leva virou a feature que o relato pedia por baixo.
+
+**7 expressoes por especie**, do mesmo banco da face neutra (`npm run faces:emocao`, 2.566
+arquivos, 10,7 MB). A regra e pura (`data/faceEmotions.ts#escolherFace`) e a ordem e uma escala de
+urgencia: KO (`dizzy`) > subiu de nivel (`joyous`, 2,2s) > HP<30% (`pain`) > status
+(veneno/queimadura `pain`, paralisia/congelado `stunned`, sono `sigh`, confusao `dizzy`) > HP<60%
+(`worried`) > lutando (`determined`) > neutra.
+
+Tres decisoes que valem registro:
+
+- **Level-up ganha de HP critico.** A festa dura 2s e e o unico momento comemorativo do loop.
+- **Status ganha de HP baixo e perde de HP critico.** A 60% de vida com veneno, a noticia e o
+  veneno; a 20%, a noticia e a vida.
+- **Piso de 500ms por face.** Sem ele o retrato tremia: `chase` -> `wander` -> `chase` acontece
+  varias vezes por segundo quando um alvo morre e outro nasce perto.
+
+A cobertura da origem e **parcial** (~40 das 226 especies nao tem parte das expressoes), e e por
+isso que existe mapa gerado: `<img>` pedindo PNG inexistente deixaria um quadrado vazio na unica
+superficie permanente da tela. Quem nao tem cai na neutra em tempo de compilacao, nao por 404.
+
+Sequencia real capturada ao vivo: `determined` -> `dizzy` (KO) -> `worried` (auto-revive a 50%) ->
+`dizzy`.
+
+**Achado de brinde:** `levelUpSplashStore` e codigo morto. `LevelUpSplash` esta montado em
+`JogoCarregado.tsx`, mas ninguem chama `show()` em lugar nenhum do `src/` — o banner "LVL UP!"
+nunca apareceu. Nao mexi; a face `joyous` acha o level-up por conta propria (diff de nivel do
+mesmo uid).
+
+### 2. Mira dos golpes: 7 das 8 artes direcionais erravam metade do circulo
+
+O pedido era "pente fino em TODAS as sprites de habilidades, com a rotacao adequada". Os dois
+conferidores que existiam nao respondiam a pergunta: um mede a arte e nao desenha
+(`conferir-direcao-vfx.mjs`), o outro desenha **sem girar** (`conferir-vfx-visual.mjs`). O terceiro
+(`conferir-mira-vfx.mjs`) replica a geometria real do desenho — rotacao, espelho, ancora, recorte —
+e varia o angulo do alvo em 4 direcoes. Foi ele que mostrou o bug.
+
+**A conta do espelho estava errada pra arte de eixo vertical.** `orientacaoDaTira` devolvia um giro
+so (`angulo - base`) e o canvas espelhava ANTES de girar — ou seja, refletia em volta da horizontal
+DO ARQUIVO. Isso funciona enquanto toda arte direcional tem eixo quase horizontal (era o caso: 0°,
+-19°, 22°, -41°, -46°, 49°) e **inverte o sentido do movimento** quando o eixo e vertical.
+
+Contrafactual medido, com a conta antiga, em 12 angulos:
+
+| arte | base | erro |
+|---|---|---|
+| FIRE, bullet_punch | 0° | correto |
+| flamethrower | -19° | 38° em 6 de 12 angulos |
+| charm | 22° | 44° |
+| DARK | -41° | 82° |
+| scratch | -46° | 92° |
+| mud_shot | 46° | 92° |
+| BUG | 49° | 98° |
+| shadow_punch | 98° | 164° |
+
+Mud Shot mandava lama pra ESQUERDA com o inimigo em cima. Nada disso lanca erro: a arte aparece,
+bonita, apontando pro lado errado.
+
+**Conserto:** dois giros, com o espelho ENTRE eles — `rotate(giroParaOAlvo)` -> `scale(1,-1)` ->
+`rotate(giroDaBase)`. O espelho passa a refletir em volta da linha do golpe, e a mira sobrevive a
+qualquer eixo. A condicao do espelho tambem mudou de "giro resultante > 90°" pra "angulo do golpe >
+90°", que e o que de fato deixa a arte de ponta-cabeca. Backward-compatible exato pra base 0°.
+
+Trancado em `moveVfx.test.ts#mira da arte direcional`: pra cada arte marcada `direcional` nas duas
+camadas, o vetor "frente" depois da cadeia inteira tem que apontar pro alvo, em 12 angulos.
+
+Duas artes novas entraram girando: **shadow_punch** (o punho que desceu do teto a vida toda) e
+**fury_swipes**. E uma licao de cadastro: `anguloBaseGraus` e pra onde a arte APONTA, e o medidor
+devolve o EIXO — uma reta, ambigua em 180°. Shadow Punch mede -82° e aponta pra 98°; cadastrado com
+-82° o golpe chega pelas costas do alvo.
+
+O resto do lote continua sem girar, e agora com numero: 12 das 18 tiras por tipo sao radiais
+(alongamento <= 1.35 ou eixo instavel a +-40° ou mais) — girar um estouro redondo nao muda nada. As
+"verticais" que sobram (FLYING, fire_spin, dragon_dance) sao tornado, espiral e buff: apontam pra
+CIMA, nao pro alvo.
+
+### 3. O sub-bioma trocando sozinho, sem aviso — duas simulacoes sorteando salas diferentes
+
+Reproduzido com log de DOM, uma hunt, 90 segundos:
+
+```
+14:53:13  Sala 2/10 Obra           predicao local, com aviso na tela
+14:53:15  Sala 1/10 Usina 0/30     flush: VOLTOU pra sala anterior
+14:53:20  Sala 2/10 Laboratorio    outro sub-bioma, sem aviso nenhum
+14:53:45  Sala 2/10 Obra           e de volta pro palpite local
+```
+
+**Causa raiz:** as duas simulacoes tem sequencia de sorteio propria (a do cliente e predicao), e as
+duas sorteavam a sala. Elas nunca poderiam concordar. Por cima disso, `definirSala` escrevia
+`draft.sala` DIRETO — e trocar de sala e trocar mapa, colisao, spawn e inimigos em campo, coisas que
+so `aplicarTransicaoDeSala` faz. O HUD anunciava "Laboratorio" e o canvas desenhava e colidia como
+"Usina".
+
+Conserto em tres partes:
+
+1. `world.salaSobAutoridade` — com sessao no servidor, `registrarAbate` conta o abate e **para**.
+   Sem servidor, e na propria simulacao do servidor, o sorteio local continua.
+2. `reconciliarSalaDaAutoridade` — porta unica da sala que vem do flush. Mesma sala: so o contador,
+   e nunca pra tras. Sala diferente: vira `salaPendente` e arma a contagem regressiva, entrando pela
+   transicao normal. Sala anterior por `(ciclo, indice)`: ignorada.
+3. A sala INICIAL passou a ser decidida na abertura da sessao (`appSessao.ts#abrirSessao`, com o
+   `rng` da sessao avancado e gravado) e volta na resposta. Sem isso o cliente entrava com a sala
+   dele e trocava de sub-bioma ~30s depois — observado ao vivo: `Obra` -> `Usina` com aviso, 30
+   segundos apos entrar.
+
+O cliente tambem pede o flush **na hora** em que a quota fecha, em vez de esperar os 30s
+(`observarQuotaDeSala`, repetindo a cada 5s enquanto o servidor nao fechar a dele).
+
+**Por que nao fazer os dois sorteios coincidirem:** exigiria o cliente conhecer a semente da sessao,
+e com ela ele calcula as 10 salas na abertura — o reroll gratis que "sorteio no avanco, e nao plano
+antecipado" (leva 6.1) existe pra impedir.
+
+### 4. Modo Pesadelo nao tinha salas — metade do conteudo de bioma com outra mecanica
+
+Medido: 87 hunts, **36 com salas e 51 sem**. As 51: hunt inicial, 12 BOSS, Lance, treino... e as
+**36 do Modo Pesadelo**. `buildNightmareMirror` clonava mapa e encontros e parava ai, entao o
+espelho nascia fora de `POOL_POR_SALA` e `temSalas()` respondia `false`: sem sub-bioma, sem chip de
+sala, sem aviso de nova area, sem janela de nivel por sala, e com o pool INTEIRO da hunt spawnando
+de uma vez. A hunt normal e o espelho dela diferiam num `nightmare_` de id e em toda a progressao
+dentro da hunt.
+
+O espelho agora recebe `POOL_POR_SALA` e devolve `porSala` com as mesmas chaves de sub-bioma da
+origem (mesmo bioma, mesma arte, mesmo body-block — o que muda e o nivel), com os ids de encontro
+trocados pelos espelhados. Depois: **72 com salas, 15 sem** — e as 15 sao as que nao deveriam ter
+(elenco curado, lendario unico, fixture de teste).
+
+`hunts.test.ts` trava por espelho: mesmas chaves da origem, pool nao-vazio, todo id existente em
+`ENCOUNTERS` e contido no `enemyPool` da propria hunt.
+
+### 5. Explicacao flutuante — e a descoberta de que nenhuma bolha do jogo abria no celular
+
+Pedido: explicacao flutuante sobre trait, golpe, natureza etc — no celular ao tocar a palavra, no PC
+ao passar o mouse. A metade do PC parecia existir (havia cinco `<Tooltip>` no codigo). Nao existia
+metade nenhuma no celular, e nao por esquecimento: `TooltipTrigger` do base-ui passa
+`mouseOnly: true` FIXO ao hook de hover (`node_modules/@base-ui/react/tooltip/trigger/
+TooltipTrigger.js:147`). Nao ha prop pra desligar. Golpe, item, POKE do chat, POKE do mercado e o
+`?` do painel Auto: todos hover-only. Todo `title=` da HUD, idem — `title` e hover.
+
+Duas telas ja haviam contornado a mao, cada uma do seu jeito (ramo por `useDeviceMode().coarse` que
+abre um `Sheet`); as outras tres nao tinham caminho nenhum.
+
+`components/shared/Explicacao.tsx` e o mecanismo unico: `open` controlado por estado proprio, o
+hover do base-ui continua mandando nele, e o toque entra por `onClick`. Quatro decisoes que custaram
+teste ao vivo:
+
+- **Sem ramo por `coarse`.** Notebook com toque e as duas coisas ao mesmo tempo, e
+  `(pointer: coarse)` responde por UM ponteiro. Decide pelo `pointerType` do evento real — gravado
+  no `pointerdown`, lido no `click`.
+- **`onClick`, nao `onPointerDown`.** Com pointerdown, comecar a ROLAR a lista com o dedo em cima da
+  palavra abria a bolha no meio da rolagem.
+- **`stopPropagation` so no toque.** Tocar "Natureza" dentro de um card com `onClick` proprio abria
+  a bolha E o card.
+- **`data-keep-open` na BOLHA.** O popup e portado pra `document.body`, entao pro listener de
+  `pointerdown` do `Sheet` ele e "fora" — um toque no TEXTO da explicacao fechava o painel inteiro
+  por baixo dela. Reproduzido no celular emulado (390x844): ficha do POKE aberta, toque na bolha da
+  Natureza, ficha some. Confirmado consertado no mesmo caminho.
+
+`data/glossario.ts` guarda o texto: verbete estatico pro conceito, FUNCAO pro que depende do POKE na
+tela (`verbeteDaNatureza`, `verbeteDaTrait`, `verbeteDoStatus`, ...). Nenhum numero escrito a mao
+onde existe fonte — `NATURE_BONUS`, `IV_MAX`, `CHANCE_DE_TRAIT_OCULTA`, `RARITIES`, `STATUS_RULES` e
+`TURNO_SEGUNDOS` entram por import, e o efeito de cada status sai inteiro de `regraDoStatus`.
+
+**O teto de tamanho e a feature, e virou teste.** A primeira versao emendava os tres paragrafos do
+conceito por baixo da linha especifica: no celular a bolha da Natureza cobria dois tercos da tela,
+tapando a ficha que ela explicava. `glossario.test.ts` trava 4 paragrafos e 210 caracteres cada, e o
+proprio teste achou dois estouros reais que a leitura nao acharia — `burn` com 5 linhas (dano + dano
+fisico + imunidade + prazo + volatilidade) e `moltres` com 5 (4x, 2x, resiste 4x, resiste 2x,
+imune). Os dois passaram a agrupar. O mesmo teste varre 25 naturezas, todas as habilidades do
+catalogo, as 30 caracteristicas, os 6 status, as 6 raridades, os 18 tipos e todas as especies
+procurando `NaN`/`undefined`/`${` — lixo de interpolacao nao lanca excecao, a bolha so abre mentindo.
+
+**Um `title=` morto encontrado no caminho:** a faixa de efeitos ativos e `pointer-events-none` no
+desktop (pra nao comer clique do canvas), entao o cursor nunca chegava nos icones e o `title` de
+cada um nunca apareceu — o desktop nao tinha NENHUM jeito de saber o que aqueles icones eram. O
+badge recebeu `pointer-events-auto` e a bolha; no dedo o sheet continua sendo o caminho, agora
+listando o efeito e nao so o nome.
+
+Onde as bolhas entraram: ficha do POKE (Natureza, Habilidade, Caracteristica, os 5 atributos, IVs,
+cada chip de IV, os chips de tipo com o lado defensivo combinado), `StatusBadge`, sheet do golpe
+(Dano base, Precisao, PP, Recarga, Alcance, Categoria, tipo), `StatusEffectsBar` e Pokedex. As tres
+bolhas hover-only que restavam (golpe, POKE do chat, POKE do mercado) migraram pro mecanismo novo e
+passaram a abrir no dedo.
+
+Ficou **sem** bolha de proposito: `TypeChip` generico — o mesmo chip serve tipo de GOLPE e tipo de
+ESPECIE, e a resposta certa e diferente nos dois; dar a ofensiva num contexto defensivo seria pior
+que nao dar nada.
+
+**Segunda rodada, no mesmo dia:** unificacao das duas telas que sobraram e divisao rotulo/valor.
+
+`ItemTooltip` e o `InfoIcon` do `AutoPanel` perderam o ramo por `useDeviceMode().coarse` e o `Sheet`
+proprio. Os dois escreviam o MESMO conteudo duas vezes, em dois formatos, e o ramo por media query
+errava no notebook com tela de toque. Agora nao existe mais tooltip com caminho proprio no jogo
+inteiro: `Explicacao` e o unico. O tamanho do texto da bolha tambem saiu de cada conteudo e virou
+uma classe no `TooltipContent` — antes `AbilityTooltip` e `ChatLog` diziam `.95em` e a bolha do
+glossario `.85em`, o que dava duas escalas de texto pro mesmo tipo de superficie.
+
+**O que a unificacao nao mudou, e vale saber:** na Loja em coluna estreita o card inteiro tem
+`onClick` (e assim que se compra no celular) e o `ItemTooltip` envolve so o ICONE. Tocar o icone
+abre a explicacao, nao a compra. Nao e regressao — o ramo por `Sheet` fazia o mesmo, pelo mesmo
+`stopPropagation`; tocar o nome/preco continua comprando.
+
+**Divisao rotulo/valor** (pedido explicito): tocar "Natureza" responde *o que e natureza*; tocar
+"Hardy (neutra)" responde *o que Hardy faz*. Idem Habilidade (`Pressure` traz a descricao real mais
+o aviso de que o motor daqui ignora) e Caracteristica (`Cochila muito` traz "aponta HP como o IV
+mais alto deste POKE (31)"). Os verbetes de individuo pararam de concatenar o conceito, e o titulo
+deles virou o nome do sorteio (`Hardy`, nao `Natureza Hardy`).
+
+Isso criou uma falha silenciosa nova, e ela virou teste: se alguem reemendar o conceito dentro do
+verbete do individuo, as duas bolhas ficam IDENTICAS e o jogador le o conceito de novo a cada toque
+— sem erro, sem log, sem diferenca visivel no codigo. `glossario.test.ts` exige titulo diferente do
+conceito e nenhum paragrafo do conceito dentro do corpo do individuo, nas 25 naturezas, em toda
+habilidade do catalogo e na caracteristica.
+
+### 6. A ficha mentia em 11 golpes que funcionam (achado ao listar o "sem efeito")
+
+Pedido: listar tudo que esta sem efeito no jogo. Medido por script (catalogo + learnset + banco), nao
+de memoria — e a medicao achou um defeito.
+
+**`golpeTemEfeitoReal` (data/moveDescriptions.ts) nao conhecia `DANO_SEM_PODER_BASE`
+(data/abilities.ts)** — os golpes cujo dano vem de uma regra propria (nivel do usuario, HP do alvo, o
+ultimo golpe recebido) e nao do dano base. O comentario do proprio arquivo garantia que isso era
+impossivel: *"Golpes de dano fixo (Seismic Toss, Dragon Rage, ...) nao entram aqui: eles tem
+`power > 0` na pratica"*. Tem `power: 0`. Os 11 alcancaveis por alguma especie:
+
+    Magnitude, Seismic Toss, Dragon Rage, Counter, Mirror Coat, Psywave,
+    Super Fang, Reversal, Flail, Night Shade, Present
+
+Confirmado na tela antes do fix, ficha do Dugtrio da conta de teste:
+
+    Magnitude | GROUND | Fisico | Dano base 0 | PP 30 | Recarga 1.3s | Area (raio 175)
+    "Neste jogo este golpe nao causa dano, e nao tem nenhum efeito extra implementado aqui."
+
+Mentira: `DYNAMIC_POWER_ABILITIES.magnitude` sorteia poder real e `isDamagingAbility` devolve `true`
+— o motor escolhe Magnitude como golpe de dano e ela bate.
+
+Tres consertos, um por sintoma:
+
+1. `golpeTemEfeitoReal` consulta `DANO_SEM_PODER_BASE` (exportado agora).
+2. A linha de **Precisao** na bolha passou a ser gatilhada por `isDamagingAbility`, nao por
+   `power > 0`. Sintoma secundario da mesma raiz: Earthquake mostrava "Precisao 100%" e Magnitude,
+   ao lado, nao mostrava nada.
+3. "Dano base 0" virou "Dano base —" + `AVISO_DANO_POR_REGRA_PROPRIA`. Um zero cru le como golpe
+   fraco num Seismic Toss que tira o nivel inteiro do alvo.
+
+Depois, na tela: `Dano base — | Precisao 100% | ... | O dano deste golpe sai de uma regra propria,
+nao do dano base.`
+
+**Os quatro OHKO do catalogo eram tratados como um caso e sao dois.** `horn_drill`/`fissure` TEM
+implementacao (`FIXED_DAMAGE_ABILITIES` causa `defenderPoke.hp`) e estao fora de
+`isDamagingAbility` por balanceamento; `guillotine`/`sheer_cold` nao tem implementacao nenhuma.
+Dizer "sem efeito implementado" nos dois primeiros era falso, entao eles ganharam
+`AVISO_OHKO_DESLIGADO` ("mata o alvo de uma vez, e por isso esta desligado: o POKE nunca vai
+escolhe-lo"). Novo Set `OHKO_DESLIGADO`, com a nota de manter em sincronia com o motor.
+
+**A justificativa escrita no codigo pra manter os dois desligados estava desatualizada.** Ela dizia
+"ESTE JOGO NAO TEM PRECISAO (nem `Ability` nem o dado gerado tem o campo; todo golpe sempre acerta)".
+`accuracy` e campo OBRIGATORIO de `Ability` e existe rolagem de acerto com estagios de
+precisao/evasao (`combatSystem.ts#chanceDeAcerto`); os dois vem do catalogo com accuracy 30. O que
+falta de verdade e a regra de OHKO dos jogos — a chance ESCALA com a diferenca de nivel e nunca
+acerta alvo de nivel maior. Sem ela, 30% e um dado de "mata agora" que funciona igual contra um BOSS
+40 niveis acima. A decisao continua a mesma; a razao registrada agora e a certa.
+
+**O invariante que fecha a classe inteira** (`moveDescriptions.test.ts`): nenhum golpe que
+`isDamagingAbility` aceita pode ser anunciado como inerte. Conferido pelo CONTRAFACTUAL — removida a
+linha do fix, o teste acusa os 11 pelo nome (`expected [ 'dragon_rage', 'mirror_coat', …(9) ] to
+deeply equal []`).
+
+**O resto do levantamento, para registro:** 67 golpes realmente inertes de 497 (todos alcancaveis,
+nenhum orfao), 31 habilidades sem efeito de 132 — uma delas (`healer`) orfa, sem especie nenhuma —,
+e **6 especies em que TODA habilidade possivel e inerte**: `ho_oh`, `celebi`, `mewtwo`, `staryu`,
+`aipom`, `wobbuffet`. Tres legendarios entre eles: o campo "Habilidade" da ficha do Mewtwo e
+decoracao permanente. Mais 3 varas sem pesca, o farm offline pausado por chave, e a fila
+`market_deliveries` (14 linhas, todas reclamadas, nenhuma RPC insere — `entregas.ts` gasta uma query
+por `/estado` pra assentar fila que ninguem alimenta).
+
+Duas linhas de doc que a medicao derrubou: `element_type` no Postgres **tem** os 18 tipos com FAIRY
+nos dois schemas (a pendencia no CLAUDE.md ja estava resolvida quando foi escrita), e a descricao de
+OHKO em `CLAUDE.md`/`docs/03` misturava os dois casos.
+
+**Achado de lado, MEDIDO e nao desta leva:** `pessimista.test.ts` falha por TIMEOUT em 2 de 3 rodadas
+da suite completa e passa 3 de 3 em isolamento — verde sozinho, vermelho junto. Nao e flake
+estatistico: a mensagem e `Test timed out in 45000ms`. Custo medido em isolamento: **37,6s com esta
+branch e 38,5s no HEAD limpo** (`git stash` + rodar + `stash pop`), contra o cap de 45s. Ou seja, a
+branch esta exonerada por medicao — a regressao ja estava no codigo commitado.
+
+O que sobra de pergunta: o comentario do proprio teste (commit `ff699c1`) diz que ele custava **~12,8s**
+quando o timeout foi de 15s pra 45s. Triplicou desde entao, e ninguem viu porque a resposta anterior
+foi subir o relogio. **Nao subi o relogio de novo de proposito** — foi exatamente assim que o 3x se
+escondeu. O caminho certo e `git bisect` no custo do teste, e isso fica registrado aqui como
+pendencia com o numero na mao, nao como "teste flaky".

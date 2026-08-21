@@ -18,7 +18,7 @@ import { faceIconUrl } from '@/data/sprites'
 import { useGameStateStore, useActivePoke } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useUiStore } from '@/stores/uiStore'
-import { GameWindow } from '@/components/game/GameWindow'
+import { Painel } from '@/components/game/Painel'
 import { SectionLabel } from '@/components/game/controls'
 import { TypeChip } from '@/components/shared/TypeChip'
 import { huntOdds } from './HuntMenu'
@@ -100,11 +100,11 @@ export function HuntAnalyzer() {
   const odds = mapDef ? huntOdds(mapDef) : null
 
   return (
-    <GameWindow
+    <Painel
       winKey="analyzer"
       widthEm={40}
       zIndex={31}
-      backdrop={{ zIndex: 30 }}
+      backdropZIndex={30}
       onClose={fechar}
       title="Hunt Analyzer"
     >
@@ -207,6 +207,6 @@ export function HuntAnalyzer() {
           piso do farm offline). Trocar de hunt recomeça a medição.
         </p>
       </div>
-    </GameWindow>
+    </Painel>
   )
 }

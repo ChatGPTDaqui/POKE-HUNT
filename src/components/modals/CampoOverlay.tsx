@@ -20,10 +20,12 @@ import type { ReactNode } from 'react'
 import { useUiStore } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
 
-// Folga acima da barra de golpes/menu.
+// Folga acima da barra de golpes/doca.
 const FOLGA_INFERIOR_EM = 0.8
-// Abaixo da fileira de cards do topo (POKE ativo, treinador, bloco central).
-const TOPO_EM = 7.5
+// Abaixo do trilho de status. Era 7.5em, medida da "fileira de cards do topo"
+// (POKE ativo + treinador + bloco central) que nao existe mais: o trilho tem
+// ~3.7em com a folga. Os 3.8em a mais eram faixa morta no topo do aviso.
+const TOPO_EM = 4.4
 
 export function CampoOverlay({
   children, className, interativo = false,
@@ -37,7 +39,15 @@ export function CampoOverlay({
   const footerHeight = useUiStore((s) => s.footerHeight)
   // Enquanto a medida nao chega (primeiro paint), um valor conservador que
   // cobre o pior caso comum de rodape.
-  const bottom = footerHeight ? `calc(${footerHeight}px + ${FOLGA_INFERIOR_EM}em)` : '11em'
+  //
+  // `--sa-*` entra na conta porque este overlay e `fixed` — ele nao esta dentro
+  // da `.hud-safe`, entao os recortes do aparelho (home indicator, notch) sao
+  // dele pra resolver. Sem isso o aviso encostava na doca por baixo num iPhone,
+  // que e exatamente o que ele existe pra nao fazer.
+  const bottom = footerHeight
+    ? `calc(${footerHeight}px + ${FOLGA_INFERIOR_EM}em + var(--sa-bottom, 0px))`
+    : `calc(11em + var(--sa-bottom, 0px))`
+  const top = `calc(${TOPO_EM}em + var(--sa-top, 0px))`
 
   return (
     <div
@@ -50,7 +60,7 @@ export function CampoOverlay({
         interativo ? 'pointer-events-auto' : 'pointer-events-none',
         className,
       )}
-      style={{ top: `${TOPO_EM}em`, bottom }}
+      style={{ top, bottom, marginLeft: 'var(--sa-left, 0px)', marginRight: 'var(--sa-right, 0px)' }}
     >
       {children}
     </div>

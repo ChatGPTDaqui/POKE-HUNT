@@ -4,12 +4,14 @@ import { sortedPatchNotes } from '@/data/patchNotes'
 import { controller } from '@/engine/controller'
 import { useConfirmDialogStore } from '@/stores/confirmDialogStore'
 import { useUiStore, HUD_SCALE_MIN, HUD_SCALE_MAX } from '@/stores/uiStore'
-import { GameButton, GameCard, SegmentedTabs } from '@/components/game/controls'
+import { GameButton, GameCard, GameCheck, SegmentedTabs } from '@/components/game/controls'
 
 function GeralTab() {
   const askConfirm = useConfirmDialogStore((s) => s.confirm)
   const hudScale = useUiStore((s) => s.hudScale)
   const setHudScale = useUiStore((s) => s.setHudScale)
+  const vidroFosco = useUiStore((s) => s.vidroFosco)
+  const setVidroFosco = useUiStore((s) => s.setVidroFosco)
 
   return (
     <div className="flex flex-col gap-[.5em]">
@@ -28,7 +30,7 @@ function GeralTab() {
             step={0.05}
             value={hudScale}
             onChange={(e) => setHudScale(Number(e.target.value))}
-            className="h-[1em] flex-1 cursor-pointer accent-primary"
+            className="jogo-range h-[1em] flex-1 cursor-pointer accent-primary"
             aria-label="Escala da interface"
           />
           <span className="w-[3.5em] text-right tabular-nums text-n300">
@@ -36,6 +38,18 @@ function GeralTab() {
           </span>
           <GameButton variant="ghost" onClick={() => setHudScale(1)}>Padrao</GameButton>
         </div>
+      </GameCard>
+
+      <GameCard className="flex flex-col gap-[.4em] p-[.6em]">
+        <div className="font-medium">Reduzir transparência</div>
+        <div className="text-[.8em] text-n500">
+          As superfícies da interface desfocam o jogo por trás, e o desfoque é recalculado enquanto o jogo se
+          move. Em celular mais simples isso pode derrubar a taxa de quadros — se o seu engasgar, desligue aqui:
+          as superfícies ficam quase opacas e o resto continua igual.
+        </div>
+        <GameCheck checked={vidroFosco} onChange={setVidroFosco} className="self-start">
+          Desligar o desfoque
+        </GameCheck>
       </GameCard>
 
       <GameCard className="flex flex-col gap-[.4em] p-[.6em]">

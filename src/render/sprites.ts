@@ -80,6 +80,10 @@ function getOrLoadImage(url: string): HTMLImageElement {
  */
 export function primeImage(url: string): Promise<void> {
   return new Promise((resolve) => {
+    // `typeof Image === 'undefined'` acontece fora de navegador (teste Node,
+    // SSR): sem isso `new Image()` lanca sincrono dentro do executor e vira
+    // promise REJEITADA, quebrando o contrato "nunca rejeita" acima.
+    if (typeof Image === 'undefined') return resolve()
     const img = getOrLoadImage(url)
     if (img.complete) return resolve()
     img.addEventListener('load', () => resolve(), { once: true })
@@ -134,8 +138,8 @@ function drawQuadroDeTira(
   // A conta de orientacao mora em data/vfxTiras.ts, como funcao pura: sinal
   // trocado num canvas nao lanca erro nenhum, so espelha a arte, e e o tipo de
   // bug que sobrevive a revisao. Aqui fica so a aplicacao.
-  const { girar, espelharY, ancoraX, recorteX } = orientacaoDaTira(tira, anguloDeAtaque)
-  if (girar === 0 && !espelharY && ancoraX === 0.5 && recorteX === 1) {
+  const { giroParaOAlvo, giroDaBase, espelharY, ancoraX, recorteX } = orientacaoDaTira(tira, anguloDeAtaque)
+  if (giroParaOAlvo === 0 && giroDaBase === 0 && !espelharY && ancoraX === 0.5 && recorteX === 1) {
     ctx.drawImage(img, indice * sw, 0, sw, sh, cx - largura / 2, cy - altura / 2, largura, altura)
     ctx.restore()
     return true
@@ -147,9 +151,14 @@ function drawQuadroDeTira(
   const inicioFonte = indice * sw + (sw - larguraFonte)
   const larguraDestino = largura * recorteX
 
+  // Ordem exigida por `orientacaoDaTira` (ver a nota "DOIS GIROS" la): o espelho
+  // fica ENTRE os dois giros, pra refletir em volta da linha do golpe e nao em
+  // volta da horizontal do arquivo — a segunda inverte a mira de arte com eixo
+  // vertical.
   ctx.translate(cx, cy)
-  ctx.rotate(girar)
+  ctx.rotate(giroParaOAlvo)
   if (espelharY) ctx.scale(1, -1)
+  ctx.rotate(giroDaBase)
   ctx.drawImage(
     img, inicioFonte, 0, larguraFonte, sh,
     -larguraDestino * ancoraX, -altura / 2, larguraDestino, altura,

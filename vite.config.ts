@@ -87,7 +87,7 @@ export default defineConfig({
     // por sessoes de agente. O vitest as varre por padrao e roda os testes
     // delas contra o codigo desta branch — resultado sem sentido (12 falhas
     // vindas de arquivos que nem estao nesta arvore) que esconde falha real.
-    exclude: ['**/node_modules/**', '**/dist/**', '.claude/**', 'server/engine/**'],
+    exclude: ['**/node_modules/**', '**/dist/**', '.claude/**', 'authority/engine/**'],
   },
   build: {
     // Por padrao o Vite emite os chunks em `dist/assets/`, que colidiria com

@@ -1,5 +1,12 @@
 // Controles da HUD, dimensionados em `em`.
 //
+// Cada primitivo carrega uma classe estavel (`jogo-botao`, `jogo-campo`,
+// `jogo-check`, `jogo-switch`). Ela nao pinta nada: e o gancho por onde o CSS
+// aplica o alvo minimo de toque quando o aparelho tem dedo em vez de mouse
+// (ver `[data-toque]` no index.css). Fazer isso por CSS, e nao por prop, evita
+// passar `coarse` por ~200 pontos de chamada — e um controle novo nasce com o
+// tamanho certo so por usar o primitivo.
+//
 // Por que nao usar os componentes do shadcn aqui: eles sao dimensionados em
 // `rem` (`h-8`, `text-sm`, `px-3`), ou seja, ancorados no font-size da RAIZ do
 // documento. O contrato de layout desta interface e o oposto — tudo escala com
@@ -9,11 +16,12 @@
 // proprio card (aconteceu de verdade no prototipo, com o input de % do
 // auto-pot). Os primitivos do shadcn continuam em uso nas telas FORA do jogo
 // (login/cadastro/home), onde nao ha escala fluida.
-import { CircleNotch } from '@phosphor-icons/react'
-import { useId } from 'react'
+import { CaretDown, CircleNotch } from '@phosphor-icons/react'
+import { useId, useState } from 'react'
 import type {
   ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes,
 } from 'react'
+import { useDeviceMode } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent'
@@ -56,7 +64,7 @@ export function GameButton({
       disabled={disabled || carregando}
       aria-busy={carregando || undefined}
       className={cn(
-        'relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-[.35em] rounded-[.5em] border',
+        'jogo-botao relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-[.35em] rounded-[.5em] border',
         'px-[.55em] py-[.32em] font-[inherit] text-[.85em] leading-[1.35] whitespace-nowrap transition-colors',
         'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
         'disabled:cursor-not-allowed disabled:opacity-45',
@@ -106,7 +114,7 @@ export function GameIconButton({ className, ...props }: GameButtonProps) {
   return (
     <GameButton
       {...props}
-      className={cn('h-[1.9em] w-[1.9em] shrink-0 px-0 py-0 text-[1em]', className)}
+      className={cn('jogo-botao-icone h-[1.9em] w-[1.9em] shrink-0 px-0 py-0 text-[1em]', className)}
     />
   )
 }
@@ -123,7 +131,7 @@ export function GameInput({ className, ...props }: InputHTMLAttributes<HTMLInput
       {...props}
       name={props.name ?? props.id ?? autoId}
       className={cn(
-        'min-w-0 rounded-[.45em] border border-n700 bg-n900 px-[.55em] py-[.32em]',
+        'jogo-campo min-w-0 rounded-[.45em] border border-n700 bg-n900 px-[.55em] py-[.32em]',
         'font-[inherit] text-[.85em] text-foreground placeholder:text-n500',
         'focus-visible:border-n500 focus-visible:outline-none',
         'disabled:cursor-not-allowed disabled:opacity-45',
@@ -140,7 +148,7 @@ export function GameSelect({ className, ...props }: SelectHTMLAttributes<HTMLSel
       {...props}
       name={props.name ?? props.id ?? autoId}
       className={cn(
-        'min-w-0 cursor-pointer rounded-[.45em] border border-n700 bg-n900 px-[.4em] py-[.32em]',
+        'jogo-campo min-w-0 cursor-pointer rounded-[.45em] border border-n700 bg-n900 px-[.4em] py-[.32em]',
         'font-[inherit] text-[.85em] text-foreground',
         'focus-visible:border-n500 focus-visible:outline-none',
         'disabled:cursor-not-allowed disabled:opacity-45',
@@ -164,7 +172,7 @@ export function GameCheck({
   return (
     <label
       className={cn(
-        'inline-flex cursor-pointer items-center gap-[.4em] text-[.85em] text-n300 select-none',
+        'jogo-check-rotulo inline-flex cursor-pointer items-center gap-[.4em] text-[.85em] text-n300 select-none',
         disabled && 'cursor-not-allowed opacity-45',
         className,
       )}
@@ -175,7 +183,7 @@ export function GameCheck({
         checked={checked}
         disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
-        className="h-[1em] w-[1em] shrink-0 cursor-pointer accent-primary"
+        className="jogo-check h-[1em] w-[1em] shrink-0 cursor-pointer accent-primary"
       />
       {children}
     </label>
@@ -198,7 +206,7 @@ export function GameSwitch({
       aria-label={label}
       onClick={() => onChange(!checked)}
       className={cn(
-        'relative h-[1.4em] w-[2.6em] shrink-0 cursor-pointer rounded-full border transition-colors',
+        'jogo-switch relative h-[1.4em] w-[2.6em] shrink-0 cursor-pointer rounded-full border transition-colors',
         'focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none',
         checked ? 'border-primary bg-primary' : 'border-n600 bg-n800',
       )}
@@ -213,7 +221,18 @@ export function GameSwitch({
   )
 }
 
-/** Abas em pilula (Mochila, Loja, Config, continentes das Hunts...). */
+/**
+ * Abas em pilula (Mochila, Loja, Config, continentes das Hunts...).
+ *
+ * No celular a fileira ROLA de lado em vez de quebrar em varias. A Wiki tem 7
+ * abas: quebradas, elas ocupavam 150px dos ~470px uteis antes de a primeira
+ * linha de conteudo aparecer. Rolagem horizontal e o padrao de barra de abas em
+ * jogo mobile justamente por isso.
+ *
+ * O risco conhecido do padrao e a aba fora da tela passar despercebida — o
+ * degrade na borda direita existe pra dizer que ha mais coisa ali. Com poucas
+ * abas nada rola e nada aparece.
+ */
 export function SegmentedTabs<T extends string>({
   value, options, onChange, className,
 }: {
@@ -222,13 +241,27 @@ export function SegmentedTabs<T extends string>({
   onChange: (value: T) => void
   className?: string
 }) {
+  const { compacto } = useDeviceMode()
+  // O degrade da borda so entra quando a fileira PROVAVELMENTE nao cabe. Ele e
+  // estatico (CSS nao enxerga overflow), entao aplicado sempre ele apagaria a
+  // ultima aba de uma fileira que cabia inteira. Cinco e o ponto em que a
+  // fileira passa de 374px uteis com rotulos de tamanho tipico.
+  const podeRolar = compacto && options.length >= 5
   return (
-    <div className={cn('flex flex-wrap gap-[.3em]', className)}>
+    <div
+      className={cn(
+        'flex gap-[.3em]',
+        compacto ? 'fileira-abas flex-nowrap overflow-x-auto' : 'flex-wrap',
+        podeRolar && 'tiras-de-aba',
+        className,
+      )}
+    >
       {options.map((option) => (
         <GameButton
           key={option.value}
           variant={option.value === value ? 'primary' : 'secondary'}
           aria-pressed={option.value === value}
+          className={compacto ? 'shrink-0' : undefined}
           onClick={() => onChange(option.value)}
         >
           {option.label}
@@ -279,8 +312,8 @@ export function StickyHeader({ children, className }: { children: ReactNode; cla
         // caixa de MARGEM), e com `top-0` sobrava uma faixa de ~12px acima do
         // cabecalho por onde a lista passava rolando. O deslocamento negativo
         // devolve a borda do cabecalho exatamente ao topo da area rolavel.
-        'sticky -top-[.7em] z-[5] -mx-[.7em] -mt-[.7em] flex flex-col gap-[.5em]',
-        'border-b border-n800 bg-background px-[.7em] pt-[.7em] pb-[.5em]',
+        'sticky -top-[.7em] z-[5] -mx-[.7em] -mt-[.7em] flex flex-col gap-[.4em]',
+        'border-b border-n800 bg-background px-[.7em] pt-[.45em] pb-[.35em]',
         className,
       )}
     >
@@ -333,6 +366,49 @@ export function ComingSoon({ icon, title, children }: { icon: ReactNode; title: 
       <span className="text-[2em] text-n300">{icon}</span>
       <div className="font-medium">{title}</div>
       <div className="max-w-[24em] text-[.8em] text-n500">{children}</div>
+    </div>
+  )
+}
+
+/**
+ * Bloco que abre e fecha, com um resumo do estado na propria barra.
+ *
+ * Existe por causa de uma conta de tela: no celular o painel util tem ~470px de
+ * altura, e a configuracao de auto-venda sozinha ocupava 300px permanentes no
+ * topo da Mochila — sobravam quatro POKEs visiveis numa lista que pode ter
+ * cem. Configuracao que se mexe uma vez por semana nao pode empurrar a lista
+ * que se olha todo dia.
+ *
+ * O `resumo` na barra e o que torna o fechamento honesto: fechado, o jogador
+ * continua sabendo se a auto-venda esta ligada e em quais raridades. Um
+ * acordeao que esconde o ESTADO, e nao so os controles, e pior que a secao
+ * sempre aberta.
+ */
+export function Recolhivel({
+  titulo, resumo, icone, inicialmenteAberto = false, children, className,
+}: {
+  titulo: ReactNode
+  resumo?: ReactNode
+  icone?: ReactNode
+  inicialmenteAberto?: boolean
+  children: ReactNode
+  className?: string
+}) {
+  const [aberto, setAberto] = useState(inicialmenteAberto)
+  return (
+    <div className={cn('overflow-hidden rounded-[.7em] border border-n800 bg-n900', className)}>
+      <button
+        type="button"
+        aria-expanded={aberto}
+        onClick={() => setAberto((v) => !v)}
+        className="jogo-botao flex w-full cursor-pointer items-center gap-[.5em] border-0 bg-transparent px-[.6em] py-[.5em] text-left font-[inherit]"
+      >
+        {icone}
+        <span className="font-medium">{titulo}</span>
+        {resumo && <span className="min-w-0 flex-1 truncate text-right text-[.78em] text-n400">{resumo}</span>}
+        <CaretDown className={cn('shrink-0 text-n400 transition-transform duration-150', aberto && 'rotate-180')} />
+      </button>
+      {aberto && <div className="border-t border-n800 px-[.6em] py-[.55em]">{children}</div>}
     </div>
   )
 }

@@ -32,7 +32,7 @@ export const TUTORIAIS: Tutorial[] = [
         titulo: 'O que o Bot e',
         corpo:
           'O Bot e o conjunto de automacoes que agem pelo seu POKE durante a cacada: usar pocao, jogar bola e reanimar. ' +
-          'Ele fica no botao com o icone de robo, no canto inferior direito da tela.',
+          'Ele fica no botao com o icone de robo, na barra de acao, ao lado dos golpes.',
       },
       {
         titulo: 'Auto-Pot — comeca LIGADO, a 70% de vida',
@@ -78,7 +78,7 @@ export const TUTORIAIS: Tutorial[] = [
       {
         titulo: 'Escolha uma hunt',
         corpo:
-          'O circulo grande do meio do menu abre a lista de hunts. Cada uma tem uma faixa de nivel e um elenco proprio. ' +
+          'O botao Hunt, no meio da barra de baixo, abre a lista. Cada hunt tem uma faixa de nivel e um elenco proprio. ' +
           'Comece pela Johto Route 46 (Inicial): la so aparecem POKEs de nivel 1 e 2.',
       },
       {

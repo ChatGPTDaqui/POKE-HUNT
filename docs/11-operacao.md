@@ -20,10 +20,21 @@ funciona. Isso é o recurso, não um bug.
 
 **Não existe mais serviço de autoridade local.** `authority/src/node.ts` (o adaptador `node:http`,
 porta 8787) foi deletado em `29a4da4` — `authority/package.json` tem só `build`, e nenhum
-`listen()` sobrou em `authority/src/`. `.env.local` aponta `VITE_SERVIDOR_URL` direto para a Edge
-Function publicada, e é assim que se desenvolve hoje: `npm run dev` no cliente contra a função
-em produção. Consequência a aceitar: **testar mudança no servidor exige `npm run edge:publicar`
-antes** — não há ciclo local.
+`listen()` sobrou em `authority/src/`. Consequência a aceitar: testar mudança no servidor exige
+publicar antes — não há ciclo local, mas desde a função `jogo-dev` (docs/15, Parte 3) não
+precisa mais ser DIRETO em produção.
+
+**Dois alvos possíveis pra `VITE_SERVIDOR_URL` em `.env.local`:**
+
+| Alvo | URL | Quando usar |
+|---|---|---|
+| `jogo` (produção) | `https://uogmhqbyjgafjujbqdty.supabase.co/functions/v1/jogo` | Padrão histórico — testa direto contra dado real |
+| `jogo-dev` (staging) | `https://uogmhqbyjgafjujbqdty.supabase.co/functions/v1/jogo-dev` | Testar mudança de servidor/migration sem tocar produção — schema `dev`, populado só com dado de teste |
+
+Trocar de alvo é só editar essa linha em `.env.local` e reiniciar `npm run dev` — nenhuma outra
+mudança de código. `jogo-dev` só reflete o que já foi mergeado em `dev` (deploy automático via
+`supabase-deploy-dev.yml` a cada push nesse branch, ver docs/15) — não é live-reload do que está
+sendo editado localmente; ainda assim, publicar em `dev` é bem mais barato que publicar em `main`.
 
 ### Dados
 
@@ -75,7 +86,10 @@ arquivo. `~/.supabase/access-token` não existe e `env | grep -i supabase` volta
 dois dão a impressão falsa de "CLI não autenticada". O teste que vale é
 `npx supabase projects list`.
 
-Projeto: `cffbihbmhiuudahsgjsn` ("Poke Idle Hunt", `sa-east-1`, Postgres 17.6).
+Projeto: `uogmhqbyjgafjujbqdty` ("PokeInspiration's Project", `sa-east-1`, Postgres 17.6) — migrado
+de `cffbihbmhiuudahsgjsn` em 2026-08-20 (motivo: matar a service_role key vazada de 13/08, ver
+docs/15). Progresso de jogador NÃO foi copiado — só catálogo (species/moves/items/etc) e a conta
+admin.
 
 `.env` da raiz tem `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`. `.env.local` tem as chaves do
 cliente (anon + `VITE_SERVIDOR_URL`).
@@ -228,13 +242,20 @@ exceção — mesmo pra teste rápido, mesmo achando que vai desfazer depois.
    de sistema), criar **os dois arquivos**, um por schema, timestamps próximos — convenção já em
    uso, ver `supabase/migrations/2026081*_..._public.sql` / `..._dev.sql`.
 3. Aplicar: `npx supabase db push` (precisa estar linkado uma vez por máquina —
-   `npx supabase link --project-ref cffbihbmhiuudahsgjsn`).
+   `npx supabase link --project-ref uogmhqbyjgafjujbqdty`).
 4. Se mudou tabela/coluna/tipo: `npm run db:types` — regenera `src/lib/database.types.ts`.
    Commitar junto da migration, no mesmo commit.
-5. `git add` migration(s) + `database.types.ts` → commit → push.
-6. PR abre → `supabase-check.yml` roda sozinho e reprova se algo ficou pra trás. Seguir a
-   mensagem de erro — ela diz exatamente o que falta (ver seção abaixo).
-7. Merge em `main` → `supabase-deploy.yml` aplica de verdade em produção. **Não rodar `db
+5. `git add` migration(s) + `database.types.ts` → commit → push numa branch de feature.
+6. **PR mira `dev`, nunca `main` direto** (docs/15, Parte 3 — reforçado por CI desde
+   `483266f`: PR pra `main` que não vem de `dev` é reprovado automático). `build-check-dev.yml`
+   roda tsc+testes; `supabase-check.yml` roda o gate de migration/types, comparando contra
+   `dev` (não `main`) nesta etapa.
+7. Merge em `dev` → `supabase-deploy-dev.yml` aplica migration + publica `jogo-dev` +
+   confirma o schema ativo (`/saude`). Testar local: `.env.local` com `VITE_SERVIDOR_URL`
+   apontando pra `jogo-dev` (seção acima) — agora sim existe ciclo antes de produção.
+8. Validado em `jogo-dev` → PR `dev` → `main` (gate de par `dev`/`public` reaplica aqui,
+   comparando contra `main` de verdade — é o ponto real de promoção).
+9. Merge em `main` → `supabase-deploy.yml` aplica em produção. **Não rodar `db
    push`/`edge:publicar` manual fora desse fluxo**, a menos que seja diagnóstico pontual (a seção
    de Diagnóstico de 502 abaixo já é esse caso legítimo).
 

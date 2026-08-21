@@ -16,17 +16,18 @@ import { controller } from '@/engine/controller'
 import { useGameStateStore, MAX_TEAM_SIZE } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
+import { useDeviceMode } from '@/stores/uiStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { PokeNameTag } from '@/components/shared/PokeNameTag'
 import { linkarItem, linkarPoke, tratouComoLink } from '@/components/shared/linkarNoChat'
 import { ItemTooltip } from '@/components/shared/ItemTooltip'
 import {
-  GameButton, GameCard, GameCheck, GameIconButton, GameInput, GameSelect, SegmentedTabs, StickyHeader,
+  GameButton, GameCard, GameIconButton, GameInput, GameSelect, SegmentedTabs, StickyHeader,
 } from '@/components/game/controls'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
 import { cn } from '@/lib/utils'
-import { AutoVendaPanel } from './AutoVendaPanel'
+import { AutoVendaPanel, ChipAutoVenda } from './AutoVendaPanel'
 import { useMochila } from './useMochila'
 import { EstadoDaMochila } from './EstadoDaMochila'
 
@@ -67,6 +68,7 @@ function PokemonsTab() {
   const updatePokeInstance = useGameStateStore((s) => s.updatePokeInstance)
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const acao = useAcaoPendente()
+  const { compacto } = useDeviceMode()
 
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('rarity')
@@ -105,27 +107,43 @@ function PokemonsTab() {
   const canMove = teamLength < MAX_TEAM_SIZE
 
   return (
-    <div className="flex flex-col gap-[.45em]">
-      <div className="flex flex-wrap items-center gap-[.5em]">
+    <div className="flex flex-col gap-[.3em]">
+      {/* Uma linha so. Com o checkbox de shiny em linha propria (ele ocupa a
+          largura inteira por ser um `<label>` com 44px de alvo), o cabecalho de
+          filtros comia 180px dos ~470px uteis do celular. Como CHIP ele cabe ao
+          lado dos outros tres controles e o estado continua obvio. */}
+      <div className="flex items-center gap-[.4em]">
         <GameInput
-          placeholder="Buscar POKE por nome..."
+          placeholder="Buscar POKE..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="min-w-[10em] flex-1"
+          className="min-w-[6em] flex-1"
         />
         <GameSelect value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)}>
           {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
             <option key={key} value={key}>{SORT_LABELS[key]}</option>
           ))}
         </GameSelect>
-        <GameButton onClick={() => setSortDesc((d) => !d)} title={sortDesc ? 'Maior primeiro' : 'Menor primeiro'}>
+        <GameButton
+          onClick={() => setSortDesc((d) => !d)}
+          aria-label={sortDesc ? 'Maior primeiro' : 'Menor primeiro'}
+          title={sortDesc ? 'Maior primeiro' : 'Menor primeiro'}
+        >
           {sortDesc ? <ArrowDown /> : <ArrowUp />}
         </GameButton>
-        <GameCheck checked={shinyOnly} onChange={setShinyOnly}>
-          <span className="inline-flex items-center gap-[.25em]">
-            Somente <Sparkle weight="fill" className="text-shiny" /> Shiny
-          </span>
-        </GameCheck>
+        <GameButton
+          variant={shinyOnly ? 'primary' : 'secondary'}
+          aria-pressed={shinyOnly}
+          aria-label="Somente shiny"
+          title="Somente shiny"
+          onClick={() => setShinyOnly(!shinyOnly)}
+        >
+          <Sparkle weight="fill" className={shinyOnly ? undefined : 'text-shiny'} />
+          {/* Onde ha largura, o rotulo volta: no desktop o `title` do hover
+              cobre o icone sozinho, mas ler "Shiny" e mais rapido que passar o
+              mouse por cima pra descobrir. */}
+          {!compacto && 'Shiny'}
+        </GameButton>
       </div>
 
       {visible.length === 0 ? (
@@ -141,7 +159,7 @@ function PokemonsTab() {
                 if (tratouComoLink(e, () => linkarPoke(poke, species))) return
                 showProfile(poke, species)
               }}
-              className="flex items-center gap-[.5em] p-[.6em]"
+              className="flex items-center gap-[.5em] p-[.4em]"
             >
               <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={2.6} />
               <div className="min-w-0 flex-1">
@@ -167,6 +185,12 @@ function PokemonsTab() {
                 <GameButton
                   carregando={acao.isPending(`team:${poke.uid}`)}
                   disabled={acao.pendingKey != null}
+                  // "Mover p/ equipe" por extenso custava 40% da largura do card
+                  // no celular e empurrava nome e IV pra reticencia. O rotulo
+                  // curto mantem a acao legivel; o `title` completo continua no
+                  // desktop, onde ele e alcancavel.
+                  title="Mover para a equipe"
+                  aria-label="Mover para a equipe"
                   onClick={(e) => {
                     e.stopPropagation()
                     void acao.run(`team:${poke.uid}`, () =>
@@ -174,7 +198,7 @@ function PokemonsTab() {
                     )
                   }}
                 >
-                  Mover p/ equipe
+                  {compacto ? 'Equipar' : 'Mover p/ equipe'}
                 </GameButton>
               ) : (
                 <span className="text-[.78em] text-n500">Equipe cheia</span>
@@ -229,7 +253,7 @@ function ItensTab() {
   if (ids.length === 0) return <p className="text-n500">Nenhum item.</p>
 
   return (
-    <div className="flex flex-col gap-[.5em]">
+    <div className="flex flex-col gap-[.3em]">
       {paginado.pagina.map((itemId) => {
         const item = ITEMS[itemId]
         const locked = Boolean(lockedItems[itemId])
@@ -254,7 +278,7 @@ function ItensTab() {
             key={itemId}
             title="Shift+clique para linkar no chat"
             onClick={(e) => { tratouComoLink(e, () => linkarItem(item, items[itemId])) }}
-            className={cn('flex items-center gap-[.5em] p-[.6em]', locked && 'border-gold/40')}
+            className={cn('flex items-center gap-[.5em] p-[.4em]', locked && 'border-gold/40')}
           >
             <ItemTooltip item={item}>
               {iconUrl && (
@@ -297,19 +321,33 @@ function ItensTab() {
 
 export function BagMenu() {
   const [tab, setTab] = useState<'pokemons' | 'itens'>('pokemons')
+  const [autoVendaAberta, setAutoVendaAberta] = useState(false)
   return (
-    <div className="flex flex-col gap-[.55em]">
+    <div className="flex flex-col gap-[.4em]">
       <StickyHeader>
-        <SegmentedTabs
-          value={tab}
-          onChange={setTab}
-          options={[
-            { value: 'pokemons', label: 'Pokemons' },
-            { value: 'itens', label: 'Itens' },
-          ]}
-        />
+        {/* Abas e gatilho da auto-venda na MESMA fileira. As duas abas usavam
+            190px dos 374 uteis e o resto era vidro vazio, enquanto a auto-venda
+            gastava uma linha inteira logo abaixo. */}
+        <div className="flex items-center gap-[.4em]">
+          <SegmentedTabs
+            value={tab}
+            onChange={setTab}
+            options={[
+              { value: 'pokemons', label: 'Pokemons' },
+              { value: 'itens', label: 'Itens' },
+            ]}
+          />
+          {tab === 'pokemons' && (
+            <div className="ml-auto min-w-0">
+              <ChipAutoVenda
+                aberto={autoVendaAberta}
+                onToggle={() => setAutoVendaAberta((v) => !v)}
+              />
+            </div>
+          )}
+        </div>
+        {tab === 'pokemons' && autoVendaAberta && <AutoVendaPanel />}
       </StickyHeader>
-      {tab === 'pokemons' && <AutoVendaPanel />}
       {tab === 'pokemons' ? <PokemonsTab /> : <ItensTab />}
     </div>
   )

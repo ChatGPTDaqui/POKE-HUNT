@@ -267,19 +267,38 @@ export function tiraDeAreaDoElemento(tipo: string | null | undefined): TiraDeVfx
  * despercebido ate alguem reparar que o fogo sai pelas costas. Testada em
  * `vfxTiras.test.ts`.
  *
- * `girar` ja e a rotacao final (direcao do golpe menos a direcao que a arte
- * tem no arquivo). `espelharY` acompanha: girar mais de 90° deixaria a arte de
- * cabeca pra baixo, e espelhar depois do giro devolve o "em pe" sem mexer na
- * direcao — o padrao de sprite de projetil visto de lado.
+ * DOIS GIROS, E A ORDEM IMPORTA. `giroDaBase` desconta o angulo que a arte tem
+ * DENTRO do arquivo (deixa ela apontando pra +x, a direita); `giroParaOAlvo` e a
+ * direcao do golpe. Quem desenha aplica, nesta ordem de chamada:
+ *
+ *   rotate(giroParaOAlvo) -> [scale(1,-1) se espelharY] -> rotate(giroDaBase)
+ *
+ * POR QUE NAO UM GIRO SO. Ate 2026-08-19 esta funcao devolvia `girar =
+ * angulo - base` e o desenho espelhava ANTES de girar, o que espelha em volta da
+ * horizontal DO ARQUIVO. Isso funciona enquanto toda arte direcional tem o eixo
+ * quase horizontal no arquivo (era o caso: 0°, -19°, 22°, -41°, -46°, 49°) e
+ * QUEBRA A MIRA quando o eixo e vertical: espelhar em volta da horizontal
+ * inverte o proprio sentido do movimento, e o golpe passa a chegar pelo lado
+ * oposto ao do atacante. Foi o que aconteceu com o punho do Shadow Punch, que e
+ * desenhado de cima pra baixo (98°) — ele mirava exatamente ao contrario.
+ *
+ * Espelhando DEPOIS do giro do alvo, o espelho acontece em volta da linha do
+ * golpe: a arte volta a ficar "em pe" sem que o sentido mude, qualquer que seja
+ * o eixo dela no arquivo.
+ *
+ * `espelharY` olha o ANGULO DO GOLPE e nao o giro resultante, pelo mesmo motivo:
+ * o que deixa a arte de ponta-cabeca e mirar pra esquerda, e isso e uma
+ * propriedade do golpe. Com a regra antiga (giro resultante) uma arte de base
+ * 49° ficava de ponta-cabeca na faixa de 90° a 139°, sem nada apontar o erro.
  */
 export function orientacaoDaTira(
   tira: TiraDeVfx,
   anguloDeAtaque: number | undefined,
-): { girar: number; espelharY: boolean; ancoraX: number; recorteX: number } {
+): { giroParaOAlvo: number; giroDaBase: number; espelharY: boolean; ancoraX: number; recorteX: number } {
   if (!tira.direcional || anguloDeAtaque == null) {
-    return { girar: 0, espelharY: false, ancoraX: 0.5, recorteX: 1 }
+    return { giroParaOAlvo: 0, giroDaBase: 0, espelharY: false, ancoraX: 0.5, recorteX: 1 }
   }
-  const girar = anguloDeAtaque - (tira.direcional.anguloBaseGraus * Math.PI) / 180
+  const giroDaBase = -(tira.direcional.anguloBaseGraus * Math.PI) / 180
   const recorteX = Math.min(1, Math.max(0.05, tira.direcional.recorteX ?? 1))
   const ancoraNoQuadro = tira.direcional.ancoraX ?? 0.5
   // A ancora e medida no quadro INTEIRO, mas o desenho recebe so a fatia da
@@ -291,8 +310,9 @@ export function orientacaoDaTira(
     ? ancoraNoQuadro
     : Math.min(1, Math.max(0, (ancoraNoQuadro - inicioDaFatia) / recorteX))
   return {
-    girar,
-    espelharY: Math.abs(girar) > Math.PI / 2,
+    giroParaOAlvo: anguloDeAtaque,
+    giroDaBase,
+    espelharY: Math.abs(anguloDeAtaque) > Math.PI / 2,
     recorteX,
     ancoraX: ancoraNaFatia,
   }

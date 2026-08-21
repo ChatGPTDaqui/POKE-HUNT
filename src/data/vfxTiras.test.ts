@@ -134,21 +134,53 @@ describe('orientacao das tiras direcionais', () => {
   it('arte que aponta pra direita nao gira quando o alvo esta a direita', () => {
     // FIRE nasce apontando pra +x, e 0 rad e exatamente "alvo a direita".
     const o = orientacaoDaTira(TIRA_POR_ELEMENTO.FIRE, 0)
-    expect(o.girar).toBe(0)
+    expect(o.giroParaOAlvo).toBe(0)
+    expect(o.giroDaBase).toBe(-0)
     expect(o.espelharY).toBe(false)
   })
 
   it('alvo a esquerda gira meia volta E espelha, pra arte nao ficar de ponta-cabeca', () => {
     const o = orientacaoDaTira(TIRA_POR_ELEMENTO.FIRE, Math.PI)
-    expect(o.girar).toBeCloseTo(Math.PI, 6)
+    expect(o.giroParaOAlvo).toBeCloseTo(Math.PI, 6)
     expect(o.espelharY).toBe(true)
   })
 
   it('a base da arte e descontada: o talho do DARK sai reto, nao 41° torto', () => {
-    // Ele nasce em -41° no arquivo. Mirando em -41°, o giro tem que ser ZERO —
-    // sem descontar a base, a arte sairia sempre 41° fora da linha do golpe.
+    // Ele nasce em -41° no arquivo. Mirando em -41°, a soma dos dois giros tem
+    // que ser ZERO — sem descontar a base, a arte sairia sempre 41° fora da
+    // linha do golpe.
     const o = orientacaoDaTira(TIRA_POR_ELEMENTO.DARK, (-41 * Math.PI) / 180)
-    expect(o.girar).toBeCloseTo(0, 6)
+    expect(o.giroParaOAlvo + o.giroDaBase).toBeCloseTo(0, 6)
+  })
+
+  it('a MIRA sobrevive ao espelho, mesmo com arte de eixo vertical', () => {
+    // O bug que esta funcao teve ate 2026-08-19, e a razao de existirem dois
+    // giros. Com um giro so e o espelho aplicado antes dele, a reflexao
+    // acontecia em volta da horizontal DO ARQUIVO: arte desenhada de cima pra
+    // baixo (base 98°, o punho do Shadow Punch) chegava pelo lado OPOSTO ao do
+    // atacante sempre que o alvo estava a esquerda.
+    //
+    // O teste mede o que importa: pra onde aponta o vetor "frente" da arte
+    // depois da cadeia inteira. Ele tem que apontar pro alvo, e so.
+    const vertical = { url: 'x', quadros: 1, direcional: { anguloBaseGraus: 98 } } as TiraDeVfx
+    for (const grausDoAlvo of [0, 45, 90, 135, 180, -45, -90, -135]) {
+      const alvo = (grausDoAlvo * Math.PI) / 180
+      const o = orientacaoDaTira(vertical, alvo)
+      // frente da arte, no espaco do arquivo
+      const base = (98 * Math.PI) / 180
+      let fx = Math.cos(base)
+      let fy = Math.sin(base)
+      // rotate(giroDaBase)
+      let x = fx * Math.cos(o.giroDaBase) - fy * Math.sin(o.giroDaBase)
+      let y = fx * Math.sin(o.giroDaBase) + fy * Math.cos(o.giroDaBase)
+      // scale(1, -1)
+      if (o.espelharY) y = -y
+      // rotate(giroParaOAlvo)
+      fx = x * Math.cos(o.giroParaOAlvo) - y * Math.sin(o.giroParaOAlvo)
+      fy = x * Math.sin(o.giroParaOAlvo) + y * Math.cos(o.giroParaOAlvo)
+      // ...e tem que coincidir com a direcao do golpe
+      expect(Math.atan2(fy, fx), `alvo em ${grausDoAlvo}°`).toBeCloseTo(alvo, 6)
+    }
   })
 
   it('sem angulo (golpe em si mesmo, area) nada gira, nada recorta, ancora no centro', () => {
@@ -157,7 +189,7 @@ describe('orientacao das tiras direcionais', () => {
     // area de efeito nao tem cauda pra cortar — recortar o AOE mentiria sobre
     // o raio do golpe, que e o unico dado que aquele desenho carrega.
     const o = orientacaoDaTira(TIRA_POR_ELEMENTO.FIRE, undefined)
-    expect(o).toEqual({ girar: 0, espelharY: false, ancoraX: 0.5, recorteX: 1 })
+    expect(o).toEqual({ giroParaOAlvo: 0, giroDaBase: 0, espelharY: false, ancoraX: 0.5, recorteX: 1 })
   })
 
   it('o recorte reposiciona a ancora, senao o impacto desliza do alvo', () => {

@@ -21,7 +21,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # precisa do historico completo pro git diff contra origin/main mais abaixo
+          fetch-depth: 0 # precisa do historico completo pro git diff contra a base mais abaixo
+
+      - name: PR pra main so pode vir de dev
+        # Reforco do fluxo feature->dev->main (docs/15, Parte 3): so vira gate
+        # de verdade combinado com branch protection marcando este check como
+        # obrigatorio (pendente — precisa de admin no repo, ver docs/15).
+        # Sem isso, um PR de feature branch reto pra main (o mesmo erro que
+        # ja aconteceu 2x nesta sessao) passa sem aviso nenhum.
+        if: github.event_name == 'pull_request' && github.head_ref != 'dev'
+        run: |
+          echo "::error::PR para main so e permitido a partir da branch dev (esta PR vem de '${{ github.head_ref }}'). Merge sua feature branch em dev primeiro, teste em jogo-dev, so depois abra PR dev->main."
+          exit 1
 
       - uses: supabase/setup-cli@v1
         with:
@@ -70,9 +81,20 @@ jobs:
         # lado — silencioso ate os 2 ambientes divergirem de verdade.
         # So olha migrations NOVAS neste push/PR (nao mexe no historico, que
         # e de antes dessa convencao existir).
+        #
+        # Base do diff varia por trigger (achado do pente fino, docs/15 Parte 3):
+        # PR pra main compara contra main (exige par completo, e o ponto real
+        # de promocao pra producao). Push fora de main (feature branch ou dev)
+        # compara contra dev — um commit so-`_dev.sql` precisa passar livre
+        # ali, o par so e cobrado quando vira PR dev->main.
         run: |
-          git fetch origin main --depth=50
-          NOVAS=$(git diff --name-only --diff-filter=A origin/main...HEAD -- supabase/migrations/)
+          git fetch origin main dev --depth=50
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BASE=origin/main
+          else
+            BASE=origin/dev
+          fi
+          NOVAS=$(git diff --name-only --diff-filter=A "$BASE"...HEAD -- supabase/migrations/)
           if [ -z "$NOVAS" ]; then
             echo "Nenhuma migration nova neste push/PR."
             exit 0

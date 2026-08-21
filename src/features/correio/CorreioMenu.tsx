@@ -140,7 +140,7 @@ export function CorreioMenu() {
             return (
               <GameCard
                 key={m.id}
-                className={cn('flex flex-wrap items-center gap-[.5em] p-[.55em]', pendente && 'border-primary/40')}
+                className={cn('flex flex-wrap items-center gap-[.5em] p-[.4em]', pendente && 'border-primary/40')}
                 onClick={() => { if (pendente && !ehPedido && !temAnexo) marcarLida.mutate(m.id) }}
               >
                 <div className="min-w-[10em] flex-1">

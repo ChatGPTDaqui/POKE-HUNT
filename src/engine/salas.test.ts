@@ -13,6 +13,7 @@ import { createPokeInstance } from '@/data/pokes'
 import { buildMapWorld, stepWorld } from './simulation'
 import {
   janelaDaSala, poolAtivo, registrarAbate, temSalas, aplicarTransicaoDeSala, SALA_TRANSITION_COUNTDOWN,
+  reconciliarSalaDaAutoridade, ESPERA_MAXIMA_PELA_AUTORIDADE,
 } from './systems/salaSystem'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { ABATES_POR_SALA, SALAS_POR_HUNT } from '@/data/biomas'
@@ -223,5 +224,280 @@ describe('salas', () => {
     for (const inimigo of world.enemies) {
       expect(inimigo.poke.level, `${inimigo.poke.speciesId} acima da janela da sala 1`).toBeLessThanOrEqual(teto)
     }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Sala sob AUTORIDADE do servidor
+// ---------------------------------------------------------------------------
+// O bug que este bloco tranca foi observado ao vivo (log em
+// salaSystem.ts#registrarAbate): as duas simulacoes sorteiam sub-bioma com
+// sequencias diferentes, entao o cliente aplicava o palpite dele e o flush
+// escrevia o do servidor por cima — sem aviso na tela e sem trocar o mapa
+// desenhado. Nada disso lanca erro: o HUD mostra um nome, o canvas desenha
+// outro sub-bioma, e a colisao continua a da sala anterior.
+describe('sala sob autoridade do servidor', () => {
+  beforeEach(() => {
+    useGameStateStore.getState().resetToDefaults()
+  })
+
+  it('o cliente conta o abate e NAO sorteia a proxima sala', () => {
+    const world = mundo(7)
+    world.salaSobAutoridade = true
+    const daPrimeira = world.sala!.chave
+
+    for (let i = 0; i < ABATES_POR_SALA + 5; i++) registrarAbate(world, world.mapDef!.id)
+
+    expect(world.sala!.chave).toBe(daPrimeira)
+    expect(world.sala!.indice).toBe(0)
+    expect(world.sala!.abates).toBe(ABATES_POR_SALA) // com teto, sem estourar a quota
+    expect(world.salaPendente).toBeNull()
+    expect(world.salaCountdownRemaining).toBeNull()
+  })
+
+  it('sem autoridade remota o sorteio local continua valendo', () => {
+    const world = mundo(7)
+    expect(world.salaSobAutoridade).toBe(false)
+    for (let i = 0; i < ABATES_POR_SALA; i++) registrarAbate(world, world.mapDef!.id)
+    expect(world.salaPendente).not.toBeNull()
+    expect(world.salaCountdownRemaining).toBe(SALA_TRANSITION_COUNTDOWN)
+  })
+
+  it('sala do servidor IGUAL: so o contador anda, sem aviso e sem trocar cena', () => {
+    const world = mundo(11)
+    const atual = world.sala!
+    reconciliarSalaDaAutoridade(world, { ...atual, abates: 7 })
+    expect(world.sala!.abates).toBe(7)
+    expect(world.salaPendente).toBeNull()
+    expect(world.salaCountdownRemaining).toBeNull()
+  })
+
+  it('contador do servidor nunca puxa a barra pra tras', () => {
+    // Entre o inicio da janela e a resposta o jogador continuou matando: o
+    // contador local ja passou do que o servidor viu. Aceitar o menor fazia a
+    // barra do HUD recuar sozinha — foi um dos sintomas do log.
+    const world = mundo(11)
+    world.sala!.abates = 9
+    reconciliarSalaDaAutoridade(world, { ...world.sala!, abates: 4 })
+    expect(world.sala!.abates).toBe(9)
+  })
+
+  it('sala do servidor DIFERENTE entra pela transicao, nao por escrita direta', () => {
+    const world = mundo(11)
+    const antes = world.sala!.chave
+    const outra = Object.keys(POOL_POR_SALA[HUNT]).find((c) => c !== antes)!
+
+    reconciliarSalaDaAutoridade(world, { indice: 1, chave: outra, abates: 0, ciclos: 0 })
+
+    // A sala em campo NAO troca na hora: quem troca mapa/colisao/inimigos e
+    // `aplicarTransicaoDeSala`, no fim da contagem regressiva.
+    expect(world.sala!.chave).toBe(antes)
+    expect(world.salaPendente!.chave).toBe(outra)
+    expect(world.salaCountdownRemaining).toBe(SALA_TRANSITION_COUNTDOWN)
+  })
+
+  it('sala ANTERIOR do servidor e ignorada (nao volta pra sala 1)', () => {
+    const world = mundo(11)
+    const primeira = world.sala!.chave
+    world.sala = { indice: 3, chave: primeira, abates: 5, ciclos: 0 }
+    const outra = Object.keys(POOL_POR_SALA[HUNT]).find((c) => c !== primeira)!
+
+    reconciliarSalaDaAutoridade(world, { indice: 0, chave: outra, abates: 0, ciclos: 0 })
+
+    expect(world.sala!.indice).toBe(3)
+    expect(world.salaPendente).toBeNull()
+    expect(world.salaCountdownRemaining).toBeNull()
+  })
+
+  it('ciclo NOVO conta como avanco, mesmo com indice menor', () => {
+    const world = mundo(11)
+    const primeira = world.sala!.chave
+    world.sala = { indice: 9, chave: primeira, abates: ABATES_POR_SALA, ciclos: 0 }
+    const outra = Object.keys(POOL_POR_SALA[HUNT]).find((c) => c !== primeira)!
+
+    reconciliarSalaDaAutoridade(world, { indice: 0, chave: outra, abates: 0, ciclos: 1 })
+
+    expect(world.salaPendente!.ciclos).toBe(1)
+    expect(world.salaCountdownRemaining).toBe(SALA_TRANSITION_COUNTDOWN)
+  })
+
+  it('a transicao vinda do servidor troca a cena inteira, como a local', () => {
+    const world = mundo(11)
+    const outra = Object.keys(POOL_POR_SALA[HUNT]).find((c) => c !== world.sala!.chave)!
+    world.enemies.push(...world.enemies) // qualquer coisa em campo
+    reconciliarSalaDaAutoridade(world, { indice: 1, chave: outra, abates: 0, ciclos: 0 })
+
+    const gameState = useGameStateStore.getState()
+    stepWorld(world, SALA_TRANSITION_COUNTDOWN + 0.1, gameState, { silent: true })
+
+    expect(world.sala!.chave).toBe(outra)
+    expect(world.salaPendente).toBeNull()
+    // Pool da sala NOVA, nao da anterior: e a prova de que a cena trocou de
+    // verdade, e nao so o rotulo do HUD. Era exatamente aqui que o bug morava —
+    // o nome mudava e o mundo (arte, colisao, spawn) ficava na sala velha.
+    const especiesDaNova = new Set(POOL_POR_SALA[HUNT][outra].map((id) => ENCOUNTERS[id].speciesId))
+    expect(world.enemies.length).toBeGreaterThan(0)
+    for (const inimigo of world.enemies) {
+      expect(especiesDaNova.has(inimigo.poke.speciesId), inimigo.poke.speciesId + ' fora da sala ' + outra).toBe(true)
+    }
+  })
+
+  // Os dois testes abaixo sao um par: `null` do servidor significa coisas
+  // OPOSTAS em hunt com e sem salas, e tratar os dois igual apagava a sala em
+  // jogo. Medido ao vivo em 2026-08-20 nas hunts do Pesadelo (cliente novo,
+  // Edge Function publicada ainda velha): o chip "Sala 1/10" desaparecia e o
+  // sub-bioma voltava atras no primeiro flush. Sem aviso, sem erro no console.
+  it('null do servidor NAO apaga a sala de hunt que tem salas (servidor velho)', () => {
+    const world = mundo(13)
+    const antes = { ...world.sala! }
+    expect(temSalas(world.mapDef!.id)).toBe(true)
+
+    reconciliarSalaDaAutoridade(world, null)
+
+    expect(world.sala).not.toBeNull()
+    expect(world.sala!.chave).toBe(antes.chave)
+    expect(world.sala!.indice).toBe(antes.indice)
+    expect(world.salaPendente).toBeNull()
+    expect(world.salaCountdownRemaining).toBeNull()
+  })
+
+  it('null do servidor APAGA a sala de hunt sem salas (o caso legitimo)', () => {
+    // O contrafactual do teste acima: sem ele, "nunca apagar em null" passaria
+    // igual e deixaria sub-bioma pendurado no HUD fora de hunt de bioma.
+    const world = mundo(13, 'route_46')
+    expect(temSalas(world.mapDef!.id)).toBe(false)
+    world.sala = { indice: 3, chave: 'grass', abates: 5, ciclos: 0 }
+
+    reconciliarSalaDaAutoridade(world, null)
+
+    expect(world.sala).toBeNull()
+    expect(world.salaPendente).toBeNull()
+    expect(world.salaCountdownRemaining).toBeNull()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Quota fechada vale por si — o livelock da janela curta
+// ---------------------------------------------------------------------------
+// `salaPendente`/`salaCountdownRemaining` sao efemeros: nao atravessam a
+// reconstrucao de mundo que o servidor faz a cada janela de flush. Enquanto a
+// transicao dependia do PROXIMO abate, uma janela curta demais pra caber
+// "matar + 3s de contagem" perdia a transicao e recomecava do zero na janela
+// seguinte — a sala travava em `abates: 30` pra sempre. Observado ao vivo em
+// 2026-08-19 com janelas de 5s (o cliente passou a pedir flush na hora que a
+// quota fecha), e invisivel antes porque a janela normal e de 30s.
+describe('quota de sala fechada atravessa a janela', () => {
+  beforeEach(() => {
+    useGameStateStore.getState().resetToDefaults()
+  })
+
+  it('sala que ABRE a janela com a quota cheia troca sem depender de abate novo', () => {
+    const world = mundo(21)
+    const daPrimeira = world.sala!.chave
+    world.sala!.abates = ABATES_POR_SALA
+    // Sem inimigo em campo: nada pode morrer, entao a unica coisa capaz de
+    // armar a transicao e a quota ja fechada.
+    world.enemies = []
+    world.respawnTimer = 999
+
+    const gameState = useGameStateStore.getState()
+    for (let i = 0; i < 60; i++) stepWorld(world, 0.1, gameState, { silent: true })
+
+    expect(world.sala!.indice).toBe(1)
+    expect(world.salaPendente).toBeNull()
+    expect(world.salaCountdownRemaining).toBeNull()
+    // Sub-bioma novo (pode repetir por sorteio, mas o indice tem que ter andado)
+    expect(typeof world.sala!.chave).toBe('string')
+    expect(daPrimeira).toBeTruthy()
+  })
+
+  it('a janela do servidor troca a sala mesmo sem abate nenhum nela', () => {
+    // Cada iteracao imita uma janela de flush: mundo reconstruido do progresso
+    // persistido, simulacao, progresso lido de volta. Com a transicao dependendo
+    // de abate, o indice ficava em 0 pra sempre.
+    //
+    // 5 segundos e o piso REAL da janela: o cliente nao pede flush de sala mais
+    // de uma vez a cada 5s (autoridade.ts#REPETIR_PEDIDO_DE_SALA_MS), e a
+    // contagem regressiva e de 3. Janela mais curta que a contagem nao completa a
+    // troca — ela apenas rearma na janela seguinte, sem travar.
+    let progresso = { indice: 0, chave: '', abates: ABATES_POR_SALA, ciclos: 0 }
+    const primeiro = mundo(33)
+    progresso = { ...progresso, chave: primeiro.sala!.chave }
+
+    const gameState = useGameStateStore.getState()
+    const poke = createPokeInstance(createRng(33), 'charmander', 20)
+    const world = buildMapWorld(HUNT, poke, {
+      rng: createRng(33),
+      counters: { entity: 1, effect: 1, pendingHit: 1 },
+    }, { sala: { ...progresso } })
+    world.enemies = []
+    world.respawnTimer = 999
+    for (let i = 0; i < 50; i++) stepWorld(world, 0.1, gameState, { silent: true })
+
+    expect(world.sala!.indice, 'a sala nao avancou numa janela de 5s sem abate').toBe(1)
+    expect(world.sala!.abates).toBe(0)
+  })
+
+  it('sob autoridade remota a quota cheia NAO arma nada (quem decide e o servidor)', () => {
+    const world = mundo(21)
+    world.salaSobAutoridade = true
+    const daPrimeira = world.sala!.chave
+    world.sala!.abates = ABATES_POR_SALA
+    world.enemies = []
+    world.respawnTimer = 999
+
+    const gameState = useGameStateStore.getState()
+    for (let i = 0; i < 60; i++) stepWorld(world, 0.1, gameState, { silent: true })
+
+    expect(world.sala!.indice).toBe(0)
+    expect(world.sala!.chave).toBe(daPrimeira)
+    expect(world.salaPendente).toBeNull()
+  })
+})
+
+// A rede de seguranca de VERSAO: servidor publicado antes de 2026-08-19 nunca
+// fecha a transicao quando a janela e curta, e o cliente — que parou de sortear —
+// ficaria com a barra cheia e a sala parada pra sempre. Depois da espera, a
+// predicao local volta a valer.
+describe('espera pela autoridade tem teto', () => {
+  beforeEach(() => {
+    useGameStateStore.getState().resetToDefaults()
+  })
+
+  it('cliente volta a sortear se o servidor nao trouxer sala nova', () => {
+    const world = mundo(45)
+    world.salaSobAutoridade = true
+    world.sala!.abates = ABATES_POR_SALA
+    world.enemies = []
+    world.respawnTimer = 999
+    const gameState = useGameStateStore.getState()
+
+    // Antes do teto: nada acontece, o cliente espera.
+    for (let i = 0; i < Math.floor((ESPERA_MAXIMA_PELA_AUTORIDADE - 2) / 0.1); i++) {
+      stepWorld(world, 0.1, gameState, { silent: true })
+    }
+    expect(world.sala!.indice).toBe(0)
+    expect(world.salaPendente).toBeNull()
+
+    // Passado o teto (mais a contagem regressiva), a sala anda.
+    for (let i = 0; i < Math.floor((2 + SALA_TRANSITION_COUNTDOWN + 1) / 0.1); i++) {
+      stepWorld(world, 0.1, gameState, { silent: true })
+    }
+    expect(world.sala!.indice).toBe(1)
+  })
+
+  it('a espera zera quando a sala do servidor chega', () => {
+    const world = mundo(45)
+    world.salaSobAutoridade = true
+    world.sala!.abates = ABATES_POR_SALA
+    world.enemies = []
+    world.respawnTimer = 999
+    const gameState = useGameStateStore.getState()
+    for (let i = 0; i < 100; i++) stepWorld(world, 0.1, gameState, { silent: true })
+    expect(world.salaEsperaDaAutoridade).toBeGreaterThan(0)
+
+    const outra = Object.keys(POOL_POR_SALA[HUNT]).find((c) => c !== world.sala!.chave)!
+    reconciliarSalaDaAutoridade(world, { indice: 1, chave: outra, abates: 0, ciclos: 0 })
+    expect(world.salaEsperaDaAutoridade).toBe(0)
   })
 })

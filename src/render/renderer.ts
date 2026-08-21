@@ -133,14 +133,27 @@ export class Renderer {
     return this._hospitalParaTela(CENA_HOSPITAL.tapete.x, CENA_HOSPITAL.tapete.y)
   }
 
-  /** Este ponto da tela esta sobre a enfermeira (ou sobre o rotulo "Curar")? */
-  hospitalClickOnNurse(x: number, y: number): boolean {
+  /**
+   * Este ponto da tela esta sobre a enfermeira (ou sobre o rotulo "Curar")?
+   *
+   * `folga` cresce o retangulo em pixels de CANVAS, e existe pro dedo: a area
+   * util e 9,8% x 13,8% da cena, o que num celular de 320px da ~31px de largura
+   * — abaixo do minimo de toque, e este e o unico jeito de curar de graca.
+   * Errar por 5px nao devolve nada na tela, o que le como botao quebrado.
+   */
+  hospitalClickOnNurse(x: number, y: number, folga = 0): boolean {
     const { escala, ox, oy } = this._hospitalLayout()
     if (!(escala > 0)) return false
-    const fx = (x - ox) / (CENA_HOSPITAL.largura * escala)
-    const fy = (y - oy) / (CENA_HOSPITAL.altura * escala)
+    const largura = CENA_HOSPITAL.largura * escala
+    const altura = CENA_HOSPITAL.altura * escala
+    const fx = (x - ox) / largura
+    const fy = (y - oy) / altura
+    // A folga vem em px e o retangulo esta em fracao da cena: converter aqui
+    // mantem a area de toque constante na TELA, e nao proporcional ao zoom.
+    const fgx = folga / largura
+    const fgy = folga / altura
     const a = CENA_HOSPITAL.alvo
-    return fx >= a.x1 && fx <= a.x2 && fy >= a.y1 && fy <= a.y2
+    return fx >= a.x1 - fgx && fx <= a.x2 + fgx && fy >= a.y1 - fgy && fy <= a.y2 + fgy
   }
 
   renderHospital(playerEntity: WorldEntity | null, nurseHovered = false): void {

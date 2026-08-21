@@ -4,7 +4,7 @@
 // tela e e disparado por evento, nao por clique de menu — no primeiro boot ele
 // abre sozinho.
 import { useTutorialStore } from '@/stores/tutorialStore'
-import { GameWindow } from '@/components/game/GameWindow'
+import { Painel } from '@/components/game/Painel'
 import { GameButton } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 
@@ -20,13 +20,16 @@ export function TutorialModal() {
   const ultimo = passo === aberto.passos.length - 1
 
   return (
-    <GameWindow
+    <Painel
       winKey="tutorial"
       widthEm={30}
+      // Sheet de altura de conteudo no celular: o tutorial tem tres linhas de
+      // texto e um rodape, e um sheet de meia tela ficaria com metade vazia.
+      snap="conteudo"
       // Acima do painel de menu (31) e do painel Auto (40): o tutorial do Bot
       // fala sobre o painel do Bot, entao os dois podem estar abertos juntos.
       zIndex={56}
-      backdrop={{ zIndex: 55 }}
+      backdropZIndex={55}
       onClose={fechar}
       title={aberto.titulo}
       footer={
@@ -58,6 +61,6 @@ export function TutorialModal() {
         <h3 className="text-[1.15em] font-semibold">{atual.titulo}</h3>
         <p className="text-[.9em] leading-[1.55] text-n200">{atual.corpo}</p>
       </div>
-    </GameWindow>
+    </Painel>
   )
 }

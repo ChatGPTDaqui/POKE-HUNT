@@ -1,0 +1,47 @@
+name: Build check (PR para dev)
+
+# Gate de tsc+testes pra feature branches virando dev -- nao existia CI
+# nenhum de build/teste antes disso, so o gate especifico de Supabase
+# (supabase-check.yml). Espelha o que "npm run build" + "npm test" fariam
+# local, mas roda antes do merge real (docs/15, Parte 3, fluxo PR
+# feature->dev).
+
+on:
+  pull_request:
+    branches: [dev]
+
+jobs:
+  build-check:
+    runs-on: ubuntu-latest
+    env:
+      # Placeholder -- so pra passar o guard "Supabase nao configurado" em
+      # src/lib/supabase.ts. `.invalid` e TLD reservado (RFC 2606): nunca
+      # resolve em lugar nenhum, ao contrario de um subdominio *.supabase.co
+      # fake, que cai na infra real (wildcard DNS) e se comporta diferente
+      # em runner com internet (CI) vs sandbox sem internet (local).
+      VITE_SUPABASE_URL: https://placeholder.invalid
+      VITE_SUPABASE_ANON_KEY: placeholder-anon-key
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+      - run: cd authority && npm ci
+
+      - name: Buildar #engine (authority/ nao resolve sem isto -- ver CLAUDE.md)
+        run: npm run build:engine
+
+      - name: Typecheck raiz (motor, cliente)
+        run: npx tsc -b --force
+
+      - name: Typecheck authority (servico de autoridade)
+        run: cd authority && npx tsc --noEmit
+
+      - name: Testes raiz
+        run: npm test
+
+      - name: Testes authority
+        run: cd authority && npx vitest run

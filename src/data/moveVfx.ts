@@ -96,10 +96,29 @@ export const VFX_POR_GOLPE: Record<string, VfxDeGolpe> = {
   scratch: {
     single: tira('scratch', 12, { direcional: { anguloBaseGraus: -46, ancoraX: 0.67 } }),
   },
-  fury_swipes: { single: tira('fury_swipes', 10) },
+  // 1.56x no eixo 23°, com desvio de 25° entre os quadros — o feixe de talhos
+  // muda de inclinacao durante a propria animacao, e por isso ele ficou fora da
+  // primeira rodada de direcionais. Entra agora porque a decisao nao e sobre a
+  // arte ser estavel, e sobre o que o jogador le: sem girar, os talhos saiam
+  // sempre na mesma diagonal, com o inimigo em qualquer lugar da tela. Ancora
+  // centrada: talho corta EM CIMA do alvo, nao antes dele.
+  fury_swipes: { single: tira('fury_swipes', 10, { direcional: { anguloBaseGraus: 23 } }) },
   stomp: { single: tira('stomp', 9) },
   x_scissor: { single: tira('x_scissor', 7) },
-  shadow_punch: { single: tira('shadow_punch', 16) },
+  // A arte que provou o bug do espelho (ver a nota "DOIS GIROS" em
+  // data/vfxTiras.ts). E um punho descendo: eixo de 2.13x medido em -82°, quadro
+  // de 64x128 — a unica arte VERTICAL do lote com sentido de movimento claro.
+  //
+  // 98° e nao -82° porque o campo diz pra onde a arte APONTA, e o medidor
+  // devolve o eixo (uma reta, ambigua em 180°). O punho esta no alto e o impacto
+  // embaixo, entao ela aponta pra BAIXO: -82 + 180. Com -82 o golpe chegava pelo
+  // lado oposto ao do atacante — conferido em scripts/conferir-mira-vfx.mjs.
+  //
+  // Sem `ancoraX`: a ancora corre na largura do QUADRO, que nesta arte e o eixo
+  // curto (23px de mundo contra 46 de comprimento). Pra ancorar no punho faria
+  // falta um `ancoraY`, que ninguem precisa ainda — com 23px de rastro contra
+  // 39px de alcance, o desenho nao alcanca o atacante de todo jeito.
+  shadow_punch: { single: tira('shadow_punch', 16, { direcional: { anguloBaseGraus: 98 } }) },
   // aqua_jet NAO entra. A arte do banco (efeito 5325) e uma coluna de 36x214,
   // proporcao 0.17: desenhada com os 46px de altura padrao ela vira um FIO de 6px
   // de largura. Alongamento medido de 18.4x, o maior de todo o lote por uma ordem
