@@ -14,7 +14,8 @@
 import { useState } from 'react'
 import { CaretDown, ChartLineUp, Coin, Diamond, User } from '@phosphor-icons/react'
 import { SPECIES, type PokeInstance } from '@/data/pokes'
-import { faceIconUrl, spriteUrl } from '@/data/sprites'
+import { spriteUrl } from '@/data/sprites'
+import { faceEmocaoUrl } from '@/data/faceEmotions'
 import { rarityOf } from '@/data/rarity'
 import { stoneName } from '@/data/stones'
 import {
@@ -27,6 +28,7 @@ import { useWorldStore } from '@/stores/worldStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { useUiStore, useDeviceMode } from '@/stores/uiStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
+import { useFaceDoPoke } from '@/hooks/useFaceDoPoke'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { GameButton } from '@/components/game/controls'
 import { useIntervalo } from '@/hooks/useIntervalo'
@@ -107,13 +109,20 @@ function usePokeAtivo(): PokeInstance | null {
   return worldPoke ?? teamPoke
 }
 
+// A ARTE muda com o estado do POKE — dor, tontura, sono, comemoracao (ver
+// data/faceEmotions.ts). O trilho ja dizia HP/status em barra e selo; a face
+// existe pra dizer a mesma coisa sem exigir leitura, e um retrato fixo era a
+// unica peca do trilho que nao respondia a nada.
 function FacePoke() {
   const poke = usePokeAtivo()
   const showProfile = usePokeProfileStore((s) => s.showProfile)
+  const face = useFaceDoPoke(poke)
   if (!poke) return null
   const species = SPECIES[poke.speciesId]
   if (!species) return null
-  const url = faceIconUrl(poke.speciesId, poke.isShiny) ?? spriteUrl(poke.speciesId, poke.isShiny)
+  // `faceEmocaoUrl` ja cai na face neutra quando a especie nao tem a expressao,
+  // entao o `??` aqui so cobre especie sem retrato NENHUM.
+  const url = faceEmocaoUrl(poke.speciesId, poke.isShiny, face) ?? spriteUrl(poke.speciesId, poke.isShiny)
   const rarity = rarityOf(poke)
   return (
     <button
