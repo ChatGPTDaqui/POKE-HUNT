@@ -355,7 +355,17 @@ function tiposEfetivosParaEfetividade(entity: WorldEntity, species: { type: Elem
 // uma vez por uso, nao importa quantos inimigos o AOE realmente acerte (ver
 // branch isAoeVisual de resolveHit abaixo, que ja dispara exatamente uma
 // vez por uso).
-const SELF_DESTRUCT_ABILITY_KEYS = new Set(['explosion', 'selfdestruct'])
+// A chave era `selfdestruct` e ficou ORFA na migracao pro catalogo do Ultra
+// Sun, que renomeou pra `self_destruct` (PH-73). Enquanto durou, Autodestruicao
+// causava os 200 de poder EM AREA e quem usou nao desmaiava — o custo inteiro
+// do golpe desaparecido, sem erro em lugar nenhum. O mesmo rename ja tinha
+// furado a lista de golpes de area (ver o comentario de AOE_ABILITY_KEYS em
+// data/abilities.ts); esta lista passou batida na mesma limpeza.
+//
+// EXPORTADO pra combatSystem.chavesDoCatalogo.test.ts poder reprovar chave
+// orfa. Lista de id escrita a mao neste arquivo tem que entrar naquele teste —
+// e a unica coisa que impede o proximo rename de repetir isto em silencio.
+export const SELF_DESTRUCT_ABILITY_KEYS = new Set(['explosion', 'self_destruct'])
 const SELF_DESTRUCT_HP_LOSS_PERCENT = 0.5
 
 // Escudos ("Screens"): golpe -> chave de `Escudos` que ele liga em quem usou.
@@ -370,7 +380,7 @@ const SELF_DESTRUCT_HP_LOSS_PERCENT = 0.5
 // pipeline de hit, sem ordem de turno), entao nao ha nada pra quick_guard
 // bloquear. Fica no catalogo/kit como golpe de status comum, mas sem
 // nenhum efeito mecanico — golpe morto de verdade, e nao um esquecimento.
-const ESCUDO_ABILITIES: Record<string, keyof Escudos> = {
+export const ESCUDO_ABILITIES: Record<string, keyof Escudos> = {
   reflect: 'reflect',
   light_screen: 'lightScreen',
   safeguard: 'safeguard',
@@ -547,7 +557,7 @@ function psywaveDamage(rng: Rng, attackerPoke: PokeInstance): number {
   return Math.max(1, Math.round(attackerPoke.level * randRange(rng, 0.5, 1.5)))
 }
 
-const DYNAMIC_POWER_ABILITIES: Record<string, (rng: Rng, attackerPoke: PokeInstance) => number> = {
+export const DYNAMIC_POWER_ABILITIES: Record<string, (rng: Rng, attackerPoke: PokeInstance) => number> = {
   magnitude: (rng) => rollMagnitudePower(rng),
   reversal: (_rng, attackerPoke) => hpRatioPower(attackerPoke),
   flail: (_rng, attackerPoke) => hpRatioPower(attackerPoke),
@@ -569,7 +579,7 @@ function counterDamage(attackerEntity: WorldEntity, category: 'physical' | 'spec
   return null
 }
 
-const FIXED_DAMAGE_ABILITIES: Record<string, (attackerPoke: PokeInstance, defenderPoke: PokeInstance, attackerEntity: WorldEntity, rng: Rng) => number | null> = {
+export const FIXED_DAMAGE_ABILITIES: Record<string, (attackerPoke: PokeInstance, defenderPoke: PokeInstance, attackerEntity: WorldEntity, rng: Rng) => number | null> = {
   // horn_drill/fissure continuam aqui (a regra existe e funciona se o golpe
   // chegar), mas `isDamagingAbility` nao os deixa ser escolhidos enquanto nao
   // houver precisao — ver a nota em data/abilities.ts.
@@ -740,7 +750,7 @@ function somaDeEstagios(entity: WorldEntity): number {
  * 8s por causa disso. Contar usos aqui seria inventar um segundo significado pro
  * mesmo campo.
  */
-const PROTECAO_ABILITY_KEYS = new Set(['protect', 'detect', 'endure'])
+export const PROTECAO_ABILITY_KEYS = new Set(['protect', 'detect', 'endure'])
 
 /**
  * Chance de o golpe de protecao FUNCIONAR agora, dado quantas vezes seguidas ele
@@ -1738,7 +1748,7 @@ function creditarMorteSeNecessario(entity: WorldEntity, defeatedEnemyIds: string
 // reais, ignora Protect). Protect/Detect do ALVO nao bloqueia nenhum
 // destes — mesma excecao dos jogos reais pro Psych Up, generalizada pros
 // golpes de auto-alvo deste catalogo.
-const PROTECT_BYPASS_ABILITY_IDS = new Set([
+export const PROTECT_BYPASS_ABILITY_IDS = new Set([
   'endure', 'protect', 'detect', 'destiny_bond', 'rest', 'belly_drum',
   'acupressure', 'aromatherapy', 'heal_bell', 'haze', 'psych_up',
   'perish_song', 'rage_powder',
