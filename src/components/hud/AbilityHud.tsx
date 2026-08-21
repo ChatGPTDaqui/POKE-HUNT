@@ -29,9 +29,12 @@ import { cooldownTotalDoGolpe } from '@/engine/systems/combatSystem'
 import { useWorldStore } from '@/stores/worldStore'
 import { useDeviceMode } from '@/stores/uiStore'
 import { AbilityTooltip, descricaoDoGolpe } from '@/components/shared/AbilityTooltip'
+import { Palavra } from '@/components/shared/Explicacao'
+import { verbeteDoTipoDoGolpe, type VerbeteId } from '@/data/glossario'
 import { Sheet } from '@/components/game/Sheet'
 import { GameButton } from '@/components/game/controls'
-import { AOE_RADIUS } from '@/data/abilities'
+import { AOE_RADIUS, DANO_SEM_PODER_BASE } from '@/data/abilities'
+import { AVISO_DANO_POR_REGRA_PROPRIA } from '@/data/moveDescriptions'
 import { useState, type CSSProperties, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
@@ -335,26 +338,51 @@ function SheetDoGolpe({
     <Sheet winKey="golpe" snap="conteudo" zIndex={33} onClose={onClose} title={ability.name}>
       <div className="flex flex-col gap-[.7em]">
         <div className="flex flex-wrap items-center gap-[.4em]">
-          <span
-            className="rounded-[.4em] px-[.5em] py-[.1em] text-[.8em] text-white"
-            style={{ background: colorForType(ability.type) }}
+          <Palavra
+            verbete={verbeteDoTipoDoGolpe(ability.type)}
+            className="no-underline"
           >
-            {ability.type}
-          </span>
-          <span className="text-[.85em] text-n400">{ROTULO_CATEGORIA[String(categoria)] ?? String(categoria)}</span>
+            <span
+              className="rounded-[.4em] px-[.5em] py-[.1em] text-[.8em] text-white"
+              style={{ background: colorForType(ability.type) }}
+            >
+              {ability.type}
+            </span>
+          </Palavra>
+          <Palavra verbete="categoriaDoGolpe" className="text-[.85em] text-n400">
+            {ROTULO_CATEGORIA[String(categoria)] ?? String(categoria)}
+          </Palavra>
         </div>
 
+        {/* Cada rotulo desta grade era jargao sem legenda: "PP 5" nao diz que
+            aqui o PP nao e gasto, e "Recarga 8.0s" nao diz que ela sai do PP e
+            da Velocidade. Os cinco explicam a si mesmos agora. */}
         <div className="grid grid-cols-2 gap-[.4em] text-[.85em]">
-          <Ficha rotulo="Dano base" valor={ability.power > 0 ? String(ability.power) : '—'} />
-          <Ficha rotulo="Precisão" valor={`${ability.accuracy ?? 100}%`} />
-          <Ficha rotulo="Recarga" valor={ability.cooldown != null ? `${ability.cooldown.toFixed(1)}s` : '—'} />
           <Ficha
+            verbete="danoBase"
+            rotulo="Dano base"
+            valor={ability.power > 0 ? String(ability.power) : '—'}
+          />
+          <Ficha verbete="precisao" rotulo="Precisão" valor={`${ability.accuracy ?? 100}%`} />
+          <Ficha verbete="pp" rotulo="PP" valor={String(ability.pp)} />
+          <Ficha
+            verbete="recarga"
+            rotulo="Recarga"
+            valor={ability.cooldown != null ? `${ability.cooldown.toFixed(1)}s` : '—'}
+          />
+          <Ficha
+            verbete="area"
             rotulo="Alcance"
             valor={ability.target === 'aoe' ? `Área (raio ${ability.radius ?? AOE_RADIUS})` : 'Alvo único'}
           />
         </div>
 
         <p className="text-[.85em] text-n300">{descricaoDoGolpe(ability)}</p>
+        {/* Mesma correcao do tooltip: o "Dano base —" acima nao diz de onde o
+            dano sai, e nesses golpes ele sai de uma regra propria. */}
+        {DANO_SEM_PODER_BASE.has(ability.id) && (
+          <p className="text-[.85em] text-n400">{AVISO_DANO_POR_REGRA_PROPRIA}</p>
+        )}
 
         {/* Substitui o duplo-clique do desktop. O rotulo diz o ESTADO RESULTANTE
             do toque, nao o atual — "Desligar" num golpe ligado. */}
@@ -374,10 +402,10 @@ function SheetDoGolpe({
   )
 }
 
-function Ficha({ rotulo, valor }: { rotulo: string; valor: string }) {
+function Ficha({ rotulo, valor, verbete }: { rotulo: string; valor: string; verbete: VerbeteId }) {
   return (
     <div className="flex flex-col gap-[.1em] rounded-[.5em] border border-n800 px-[.6em] py-[.4em]">
-      <span className="text-[.8em] text-n500">{rotulo}</span>
+      <Palavra verbete={verbete} className="text-[.8em] text-n500">{rotulo}</Palavra>
       <b className="font-medium tabular-nums">{valor}</b>
     </div>
   )

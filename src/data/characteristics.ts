@@ -25,7 +25,9 @@
 import type { StatBlock, StatKey } from './pokes'
 import { STAT_ORDER } from './statLabels'
 
-const IV_MAX = 31
+// Teto do dado. Exportado porque a ficha do POKE (destaque verde no IV maximo) e
+// o glossario precisam do MESMO numero — eram tres copias do literal 31.
+export const IV_MAX = 31
 
 // As 30 frases oficiais, traduzidas. Indice = IV modulo 5, na ordem em que os
 // jogos as listam para cada atributo.

@@ -15,6 +15,7 @@ import { stoneName } from '@/data/stones'
 import { traitsDaEspecie, nomeDaTrait } from '@/data/traits'
 import { descricaoDaTrait, motivoSemEfeito } from '@/data/traitInfo'
 import { GROWTH_LABEL } from '@/data/statLabels'
+import { verbeteDoStat } from '@/data/glossario'
 // Preview da Pokedex nao e simulacao: usa uma sequencia DERIVADA do id da
 // especie em vez da do mundo. Consumir a sequencia principal pra desenhar um
 // cartao dessincronizaria o replay que o servidor verifica (Fase D) — e de
@@ -31,6 +32,7 @@ import { useUiStore } from '@/stores/uiStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { TypeChip } from '@/components/shared/TypeChip'
+import { Palavra } from '@/components/shared/Explicacao'
 import { TypeWeaknessSection } from '@/components/shared/TypeWeaknessSection'
 import { GameButton, GameInput, SegmentedTabs, StickyHeader } from '@/components/game/controls'
 import { focusHunt } from '@/features/hunt/HuntMenu'
@@ -202,7 +204,9 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
 
       {traits && (
         <div>
-          <div className="mb-[.4em] font-medium">Habilidades possiveis</div>
+          <div className="mb-[.4em] font-medium">
+            <Palavra verbete="habilidade">Habilidades</Palavra> possiveis
+          </div>
           <div className="flex flex-col gap-[.3em] text-[.8em]">
             {[...traits.normais.map((k) => [k, false] as const), ...(traits.oculta ? [[traits.oculta, true] as const] : [])]
               .map(([chave, oculta]) => (
@@ -226,7 +230,7 @@ function SpeciesDetail({ species, onNavegar }: { species: Species; onNavegar?: (
         <div className="grid grid-cols-3 gap-[.4em]">
           {BASE_STAT_ROWS.map(([label, key]) => (
             <div key={key} className="flex justify-between rounded-[.4em] border border-n800 bg-background px-[.5em] py-[.35em] text-[.8em]">
-              <span className="text-n500">{label}</span>
+              <Palavra verbete={verbeteDoStat(key)} className="text-n500">{label}</Palavra>
               <b className="font-medium">{species.base[key]}</b>
             </div>
           ))}

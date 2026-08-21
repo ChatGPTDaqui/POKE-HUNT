@@ -20,7 +20,7 @@ import { useUiStore, useBreakpoints, type ChatTab } from '@/stores/uiStore'
 import { useWindowDrag } from '@/hooks/useWindowDrag'
 import type { AnexoChat } from '@/data/remote/servidor'
 import { RARITIES, type RarityKey } from '@/data/rarity'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Explicacao } from '@/components/shared/Explicacao'
 import { TextoComRealce } from '@/components/shared/TextoComRealce'
 import { cn } from '@/lib/utils'
 
@@ -59,35 +59,29 @@ function LinkAnexo({ anexo }: { anexo: AnexoChat }) {
     ? (RARITIES[(anexo.rarity ?? 'comum') as RarityKey]?.color ?? 'var(--color-n300)')
     : 'var(--color-gold)'
   return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <span
-            className="cursor-help rounded-[.3em] border px-[.3em] whitespace-nowrap"
-            style={{ borderColor: cor, color: cor }}
-          />
-        }
-      >
-        {anexo.kind === 'poke'
-          ? `${anexo.isShiny ? '✨' : ''}${anexo.nome} Lv${anexo.level ?? 1}`
-          : `${anexo.nome}${anexo.quantidade ? ` x${anexo.quantidade}` : ''}`}
-      </TooltipTrigger>
-      <TooltipContent className="bg-popover text-popover-foreground">
-        {anexo.kind === 'poke' ? (
-          <div className="flex flex-col gap-[.15em] text-[.95em]">
+    <Explicacao
+      className="cursor-help rounded-[.3em] border px-[.3em] whitespace-nowrap"
+      estilo={{ borderColor: cor, color: cor }}
+      conteudo={
+        anexo.kind === 'poke' ? (
+          <div className="flex flex-col gap-[.15em]">
             <b>{anexo.isShiny ? '✨ ' : ''}{anexo.nome}</b>
             <span>Nivel {anexo.level ?? 1}</span>
             <span style={{ color: cor }}>{RARITIES[(anexo.rarity ?? 'comum') as RarityKey]?.label ?? anexo.rarity}</span>
             <span>IV medio {anexo.ivPercent ?? 0}%</span>
           </div>
         ) : (
-          <div className="flex flex-col gap-[.15em] text-[.95em]">
+          <div className="flex flex-col gap-[.15em]">
             <b>{anexo.nome}</b>
             <span>Quantidade mostrada: {anexo.quantidade ?? 0}</span>
           </div>
-        )}
-      </TooltipContent>
-    </Tooltip>
+        )
+      }
+    >
+      {anexo.kind === 'poke'
+        ? `${anexo.isShiny ? '✨' : ''}${anexo.nome} Lv${anexo.level ?? 1}`
+        : `${anexo.nome}${anexo.quantidade ? ` x${anexo.quantidade}` : ''}`}
+    </Explicacao>
   )
 }
 

@@ -7,7 +7,7 @@
 import { faceIconUrl } from '@/data/sprites'
 import { rarityOf } from '@/data/rarity'
 import type { PokeInstance, Species } from '@/data/pokes'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Explicacao } from './Explicacao'
 import { PokeTooltipContent } from './PokeTooltipContent'
 import { cn } from '@/lib/utils'
 
@@ -51,13 +51,13 @@ export function PokeSwatch({ species, isShiny = false, poke = null, size = 2.8, 
   if (!poke) return icon
 
   return (
-    <Tooltip>
-      <TooltipTrigger render={<span tabIndex={0} className="inline-block cursor-default" />}>
-        {icon}
-      </TooltipTrigger>
-      <TooltipContent className="max-w-none border bg-popover px-3 py-2 text-xs text-popover-foreground">
-        <PokeTooltipContent poke={poke} species={species} />
-      </TooltipContent>
-    </Tooltip>
+    <Explicacao
+      tabIndex={0}
+      className="inline-block cursor-default"
+      classeDoConteudo="max-w-none border px-3 py-2 text-xs"
+      conteudo={<PokeTooltipContent poke={poke} species={species} />}
+    >
+      {icon}
+    </Explicacao>
   )
 }

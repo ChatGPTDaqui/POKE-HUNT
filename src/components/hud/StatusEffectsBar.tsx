@@ -23,7 +23,9 @@ import type { StatDeEstagio } from '@/data/statusEffects'
 import { useWorldStore } from '@/stores/worldStore'
 import { useDeviceMode } from '@/stores/uiStore'
 import { Sheet } from '@/components/game/Sheet'
-import { useState } from 'react'
+import { Palavra } from '@/components/shared/Explicacao'
+import { GLOSSARIO, verbeteDoStatus, type Verbete } from '@/data/glossario'
+import { useState, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 const ESTAGIOS_ORDEM: StatDeEstagio[] = ['atkFis', 'atkEsp', 'def', 'defEsp', 'speed', 'accuracy', 'evasion']
@@ -47,6 +49,8 @@ interface Badge {
   titulo: string
   contador: string | null
   aumenta: boolean
+  /** O que o efeito FAZ. O `titulo` diz so o nome e a contagem. */
+  verbete: Verbete
 }
 
 export function StatusEffectsBar() {
@@ -75,6 +79,7 @@ export function StatusEffectsBar() {
         : `${nomeDoStatus(status.tipo)} — nao passa sozinho`,
       contador: status.turnosRestantes != null ? String(status.turnosRestantes) : '∞',
       aumenta: false,
+      verbete: verbeteDoStatus(status),
     })
   }
 
@@ -88,6 +93,7 @@ export function StatusEffectsBar() {
         titulo: `${ROTULO_ESTAGIO[stat]} ${valor > 0 ? 'aumentado' : 'diminuido'} (${valor > 0 ? '+' : ''}${valor})`,
         contador: `${valor > 0 ? '+' : ''}${valor}`,
         aumenta: valor > 0,
+        verbete: GLOSSARIO.estagioDeAtributo,
       })
     }
   }
@@ -107,9 +113,8 @@ export function StatusEffectsBar() {
       aria-label={coarse ? 'Ver efeitos ativos' : undefined}
     >
       {badges.map((badge) => (
+        <BadgeDoEfeito key={badge.key} badge={badge} coarse={coarse}>
         <div
-          key={badge.key}
-          title={badge.titulo}
           className="relative flex h-[1.7em] w-[1.7em] items-center justify-center overflow-hidden rounded-[.4em] border"
           style={{
             borderColor: badge.aumenta ? 'var(--color-ok)' : 'var(--color-bad)',
@@ -134,6 +139,7 @@ export function StatusEffectsBar() {
             {badge.contador}
           </span>
         </div>
+        </BadgeDoEfeito>
       ))}
     </div>
 
@@ -152,15 +158,37 @@ export function StatusEffectsBar() {
               className="flex items-center gap-[.5em] rounded-[.5em] border border-n800 px-[.6em] py-[.45em] text-[.85em]"
             >
               <span
-                className="h-[.6em] w-[.6em] shrink-0 rounded-full"
+                className="mt-[.35em] h-[.6em] w-[.6em] shrink-0 rounded-full"
                 style={{ background: badge.aumenta ? 'var(--color-ok)' : 'var(--color-bad)' }}
               />
-              {badge.titulo}
+              {/* O nome e a contagem vinham sozinhos aqui: a lista dizia "Veneno
+                  — 3 turno(s)" e nada sobre o que o veneno faz. */}
+              <span className="flex min-w-0 flex-col gap-[.15em]">
+                <b className="font-medium">{badge.titulo}</b>
+                {badge.verbete.corpo.map((linha) => (
+                  <span key={linha} className="leading-tight text-n400">{linha}</span>
+                ))}
+              </span>
             </li>
           ))}
         </ul>
       </Sheet>
     )}
     </>
+  )
+}
+
+// No DEDO o toque em qualquer icone abre a LISTA inteira (sheet), que e o que
+// cabe num alvo de 1.7em; no mouse, cada icone abre a propria bolha. Antes o
+// desktop nao tinha caminho nenhum: o `title` dos icones nunca aparecia porque o
+// container e `pointer-events-none` — o cursor nao chegava neles.
+function BadgeDoEfeito(
+  { badge, coarse, children }: { badge: Badge; coarse: boolean; children: ReactNode },
+) {
+  if (coarse) return <>{children}</>
+  return (
+    <Palavra verbete={badge.verbete} className="pointer-events-auto no-underline" side="top">
+      {children}
+    </Palavra>
   )
 }
