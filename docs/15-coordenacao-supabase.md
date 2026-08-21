@@ -84,7 +84,8 @@ workflow entrar no ar, pra não haver dois fluxos "oficiais" ao mesmo tempo.
 
 - Secret `SUPABASE_ACCESS_TOKEN` no GitHub Actions — hoje a credencial mora no Windows Credential
   Manager local (ver 11-operacao.md), precisa gerar um token novo dedicado a CI.
-- Secret `SUPABASE_PROJECT_REF` (`cffbihbmhiuudahsgjsn`).
+- Secret `SUPABASE_PROJECT_REF` (`uogmhqbyjgafjujbqdty` — projeto migrado em 2026-08-20, ref antigo
+  `cffbihbmhiuudahsgjsn` obsoleto, ver seção de achados abaixo).
 - Testar o workflow numa branch descartável antes de depender dele — CI mexendo em produção sem
   ensaio é o mesmo tipo de risco que motivou este documento.
 

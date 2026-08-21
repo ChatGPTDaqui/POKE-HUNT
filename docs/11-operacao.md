@@ -28,8 +28,8 @@ precisa mais ser DIRETO em produção.
 
 | Alvo | URL | Quando usar |
 |---|---|---|
-| `jogo` (produção) | `https://cffbihbmhiuudahsgjsn.supabase.co/functions/v1/jogo` | Padrão histórico — testa direto contra dado real |
-| `jogo-dev` (staging) | `https://cffbihbmhiuudahsgjsn.supabase.co/functions/v1/jogo-dev` | Testar mudança de servidor/migration sem tocar produção — schema `dev`, populado só com dado de teste |
+| `jogo` (produção) | `https://uogmhqbyjgafjujbqdty.supabase.co/functions/v1/jogo` | Padrão histórico — testa direto contra dado real |
+| `jogo-dev` (staging) | `https://uogmhqbyjgafjujbqdty.supabase.co/functions/v1/jogo-dev` | Testar mudança de servidor/migration sem tocar produção — schema `dev`, populado só com dado de teste |
 
 Trocar de alvo é só editar essa linha em `.env.local` e reiniciar `npm run dev` — nenhuma outra
 mudança de código. `jogo-dev` só reflete o que já foi mergeado em `dev` (deploy automático via
@@ -86,7 +86,10 @@ arquivo. `~/.supabase/access-token` não existe e `env | grep -i supabase` volta
 dois dão a impressão falsa de "CLI não autenticada". O teste que vale é
 `npx supabase projects list`.
 
-Projeto: `cffbihbmhiuudahsgjsn` ("Poke Idle Hunt", `sa-east-1`, Postgres 17.6).
+Projeto: `uogmhqbyjgafjujbqdty` ("PokeInspiration's Project", `sa-east-1`, Postgres 17.6) — migrado
+de `cffbihbmhiuudahsgjsn` em 2026-08-20 (motivo: matar a service_role key vazada de 13/08, ver
+docs/15). Progresso de jogador NÃO foi copiado — só catálogo (species/moves/items/etc) e a conta
+admin.
 
 `.env` da raiz tem `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`. `.env.local` tem as chaves do
 cliente (anon + `VITE_SERVIDOR_URL`).
@@ -239,7 +242,7 @@ exceção — mesmo pra teste rápido, mesmo achando que vai desfazer depois.
    de sistema), criar **os dois arquivos**, um por schema, timestamps próximos — convenção já em
    uso, ver `supabase/migrations/2026081*_..._public.sql` / `..._dev.sql`.
 3. Aplicar: `npx supabase db push` (precisa estar linkado uma vez por máquina —
-   `npx supabase link --project-ref cffbihbmhiuudahsgjsn`).
+   `npx supabase link --project-ref uogmhqbyjgafjujbqdty`).
 4. Se mudou tabela/coluna/tipo: `npm run db:types` — regenera `src/lib/database.types.ts`.
    Commitar junto da migration, no mesmo commit.
 5. `git add` migration(s) + `database.types.ts` → commit → push numa branch de feature.
