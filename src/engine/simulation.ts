@@ -43,7 +43,10 @@ import { updateAutoHeal, maybeAutoCatch } from './systems/autoSystem'
 import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } from './systems/progressionSystem'
 import { awardKillLoot } from './systems/economySystem'
 import { recordKill } from './systems/farmRates'
-import { contextoDeSpawn, lootAtivo, novaSala, nomeDaSala, registrarAbate, temSalas, aplicarTransicaoDeSala } from './systems/salaSystem'
+import {
+  contextoDeSpawn, lootAtivo, novaSala, nomeDaSala, registrarAbate, temSalas,
+  aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada,
+} from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
 
@@ -578,6 +581,12 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     if (!silent) updateAnimations(world, dt)
     return []
   }
+
+  // Quota fechada numa janela ANTERIOR (a contagem regressiva e efemera e nao
+  // atravessa a reconstrucao de mundo do servidor): arma a transicao agora, sem
+  // esperar um abate novo. Ver o livelock em
+  // salaSystem.ts#garantirTransicaoDeQuotaFechada.
+  garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt)
 
   // Contagem regressiva "Entrando em nova area" entre salas (ver
   // salaSystem.ts#registrarAbate/aplicarTransicaoDeSala): a quota de abates

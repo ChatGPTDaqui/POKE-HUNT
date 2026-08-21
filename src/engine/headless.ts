@@ -23,6 +23,11 @@ export { createPokeInstance, SPECIES, computeStatsAtLevel, totalExpForLevel, ave
 export type { PokeInstance } from '@/data/pokes'
 export { MAPS, getMap } from '@/data/maps'
 export { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
+// A sala INICIAL da sessao e decidida na abertura, pelo servidor (ver
+// authority/src/appSessao.ts#abrirSessao): se ela nascesse no primeiro flush, o
+// cliente entraria com uma sala sorteada por ele e trocaria de sub-bioma
+// (com aviso na tela) 30 segundos depois de entrar na hunt.
+export { novaSala, temSalas } from './systems/salaSystem'
 export {
   BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, SALAS_POR_HUNT, ABATES_POR_SALA,
   BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, huntId,

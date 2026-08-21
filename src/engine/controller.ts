@@ -18,6 +18,7 @@ import { useToastStore } from '@/stores/toastStore'
 import { preloadEspecies, preloadHunt } from '@/data/preload'
 import type { Point } from './types'
 import { pedirAcao, abrirSessaoDeHunt, fecharSessaoDeHunt } from '@/data/remote/autoridade'
+import { servidorAtivo } from '@/data/remote/servidor'
 export const controller = {
   returnToHospital(hospitalSpot: Point): void {
     const gameState = useGameStateStore.getState()
@@ -62,7 +63,8 @@ export const controller = {
       )
       return false
     }
-    if (!(await abrirSessaoDeHunt(mapId, activePoke.uid))) return false
+    const sessao = await abrirSessaoDeHunt(mapId, activePoke.uid)
+    if (!sessao.ok) return false
     // Arte de TODA especie do pool na memoria antes de a cena aparecer — senao o
     // primeiro encontro com cada uma pisca sem sprite enquanto o PNG baixa (ver
     // data/preload.ts). Tem teto de tempo proprio, entao rede ruim atrasa a
@@ -70,7 +72,15 @@ export const controller = {
     // se o servidor recusar, nao ha por que gastar banda.
     await preloadHunt(mapId, { speciesId: activePoke.speciesId, isShiny: activePoke.isShiny })
     gameState.setCurrentMapId(mapId)
-    const world = buildMapWorld(mapId, activePoke, useWorldStore.getState())
+    // A sala inicial e a que o servidor decidiu na abertura. Sem passa-la aqui, a
+    // simulacao local sorteia a propria e o jogador ve o sub-bioma trocar poucos
+    // segundos depois de entrar, quando a do servidor chega no primeiro flush.
+    const world = buildMapWorld(mapId, activePoke, useWorldStore.getState(), sessao.sala ? { sala: sessao.sala } : undefined)
+    // Com sessao aberta no servidor, a sala seguinte tambem e DELE (ver
+    // engine/systems/salaSystem.ts#registrarAbate): a simulacao local para de
+    // sortear sub-bioma e passa a so contar abate, e a troca chega no flush.
+    // Sem servidor (jogo local) o sorteio local continua sendo o unico.
+    world.salaSobAutoridade = servidorAtivo()
     useWorldStore.getState().setWorld(world)
     resetStats(gameState) // painel de taxa de farm reinicia do zero a cada hunt nova
     return true

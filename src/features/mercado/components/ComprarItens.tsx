@@ -156,7 +156,7 @@ export function ComprarItens() {
         <div key={item.id}>
           <GameCard
             onClick={() => setAberto(aberto === item.id ? null : item.id)}
-            className="flex flex-wrap items-center gap-[.5em] p-[.5em]"
+            className="flex flex-wrap items-center gap-[.5em] p-[.4em]"
           >
             <ItemTooltip item={item}>
               <span className="flex cursor-help items-center gap-[.5em]">

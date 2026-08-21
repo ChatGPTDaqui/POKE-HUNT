@@ -3,7 +3,7 @@
 import { LANCE_MAP_ID } from '@/data/nightmareMaps'
 import { controller } from '@/engine/controller'
 import { useWorldStore } from '@/stores/worldStore'
-import { Button } from '@/components/ui/button'
+import { GameButton } from '@/components/game/controls'
 import { CampoOverlay } from './CampoOverlay'
 
 // Contagem regressiva de intro (world.countdownRemaining, ver
@@ -30,12 +30,18 @@ export function LanceVictoryReturn() {
   if (!visible) return null
 
   return (
-    <div className="pointer-events-auto fixed inset-x-0 top-24 z-[55] flex flex-col items-center gap-2">
-      <div className="rounded-lg border border-amber-500 bg-background/95 px-4 py-3 text-center shadow-xl">
-        <div className="mb-2 font-semibold text-amber-300">Voce derrotou o Campeao Lance!</div>
-        <Button size="sm" onClick={() => controller.returnToHospital({ x: 0, y: 0 })}>
+    // `top-24` era 96px fixos — no celular isso cai em cima do trilho de
+    // status. Vai pra mesma reserva que o resto usa, com o recorte do aparelho
+    // na conta (este aviso e `fixed`, fora da `.hud-safe`).
+    <div
+      className="pointer-events-auto fixed inset-x-0 z-[55] flex flex-col items-center gap-2 px-[1em]"
+      style={{ top: 'calc(4.6em + var(--sa-top, 0px))' }}
+    >
+      <div className="rounded-lg border border-amber-500 bg-background/95 px-[1em] py-[.7em] text-center shadow-xl">
+        <div className="mb-[.5em] font-semibold text-amber-300">Voce derrotou o Campeao Lance!</div>
+        <GameButton onClick={() => controller.returnToHospital({ x: 0, y: 0 })}>
           Retornar ao Centro Pokemon
-        </Button>
+        </GameButton>
       </div>
     </div>
   )

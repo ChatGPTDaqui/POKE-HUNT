@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import { Coin, Diamond } from '@phosphor-icons/react'
 import { useGameStateStore } from '@/stores/gameStateStore'
+import { useDeviceMode } from '@/stores/uiStore'
 import { SegmentedTabs, StickyHeader } from '@/components/game/controls'
 import { ItensTab } from './components/ItensTab'
 import { PokemonsTab } from './components/PokemonsTab'
@@ -17,10 +18,15 @@ export function ShopMenu() {
   const [tab, setTab] = useState<'itens' | 'pokemons'>('itens')
   const gold = useGameStateStore((s) => s.wallet.gold)
   const diamonds = useGameStateStore((s) => s.wallet.diamonds)
+  const { compacto } = useDeviceMode()
 
   return (
     <div className="flex flex-col gap-[.55em]">
       <StickyHeader className="flex-row flex-wrap items-center">
+        {/* Uma fileira so, e os mesmos dois destinos em todo regime. Ela chegou
+            a ter tres opcoes no celular ("Comprar | Vender | POKEs") porque
+            comprar e vender eram ABAS la; agora as duas colunas aparecem
+            juntas e o eixo "que lado" deixou de existir. */}
         <SegmentedTabs
           value={tab}
           onChange={setTab}
@@ -29,14 +35,18 @@ export function ShopMenu() {
             { value: 'pokemons', label: 'Pokemons' },
           ]}
         />
-        <span className="flex items-center gap-[.45em] text-[.85em] text-n300">
-          <span className="flex items-center gap-[.25em] text-gold">
-            <Coin weight="fill" /> {fmt.format(gold)}
+        {/* No celular a carteira ja esta no trilho de status, logo acima — aqui
+            ela so empurrava as abas. */}
+        {!compacto && (
+          <span className="flex items-center gap-[.45em] text-[.85em] text-n300">
+            <span className="flex items-center gap-[.25em] text-gold">
+              <Coin weight="fill" /> {fmt.format(gold)}
+            </span>
+            <span className="flex items-center gap-[.25em] text-diamond">
+              <Diamond weight="fill" /> {fmt.format(diamonds)}
+            </span>
           </span>
-          <span className="flex items-center gap-[.25em] text-diamond">
-            <Diamond weight="fill" /> {fmt.format(diamonds)}
-          </span>
-        </span>
+        )}
       </StickyHeader>
       {tab === 'itens' ? <ItensTab /> : <PokemonsTab />}
     </div>

@@ -6,6 +6,7 @@
 // tela nao pode roubar um clique do jogador.
 import { useEffect } from 'react'
 import { useToastStore, type ToastEntry, type ToastType } from '@/stores/toastStore'
+import { useDeviceMode } from '@/stores/uiStore'
 import { TextoComRealce } from '@/components/shared/TextoComRealce'
 
 const TOAST_DURATION_MS = 2500
@@ -22,10 +23,19 @@ const TYPE_COLOR: Record<ToastType, string> = {
 
 export function ToastStack() {
   const toasts = useToastStore((s) => s.toasts)
+  const { compacto } = useDeviceMode()
+
+  // No celular so ERRO vira toast. Todo toast tambem vira linha de chat
+  // (`pushToast` escreve nos dois), e no compacto essa linha ja esta na tela o
+  // tempo todo, no ticker acima da doca — o toast era a MESMA frase, uma
+  // segunda vez, cobrindo o campo de batalha. Erro fica porque significa que
+  // uma acao do jogador falhou: isso precisa interromper, nao esperar ele
+  // olhar pro ticker.
+  const visiveis = compacto ? toasts.filter((t) => t.type === 'error') : toasts
 
   return (
     <div className="pointer-events-none absolute top-[7.5em] left-1/2 z-[70] flex -translate-x-1/2 flex-col items-center gap-[.4em]">
-      {toasts.map((toast) => (
+      {visiveis.map((toast) => (
         <Toast key={toast.id} toast={toast} />
       ))}
     </div>

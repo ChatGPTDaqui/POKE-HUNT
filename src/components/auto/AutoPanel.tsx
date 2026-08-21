@@ -23,7 +23,7 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { sincronizarAuto } from '@/data/remote/autoridade'
 import { useWorldStore } from '@/stores/worldStore'
 import { GameButton, GameCheck, GameInput, GameSelect, GameSwitch } from '@/components/game/controls'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Explicacao } from '@/components/shared/Explicacao'
 import { estoqueDoItemDeRegra, itensEmUso, LIMIAR_ESTOQUE_BAIXO } from './estoqueBaixo'
 import { usePrevisaoDeConsumo, formatarTempoRestante, rotuloDoRecurso } from './consumo'
 import { ItemPicker, type OpcaoDeItem } from './ItemPicker'
@@ -34,18 +34,22 @@ const MAX_AUTO_POT_RULES = 3
 const POTION_OPTIONS = Object.values(ITEMS).filter((i) => i.kind === 'potion')
 const BALL_OPTIONS = Object.values(ITEMS).filter((i) => i.kind === 'ball')
 
+// A explicacao de cada automacao vivia so no hover do `?` — e e justamente aqui
+// que o jogador decide se liga o auto-catch e com qual bola. Este arquivo tinha
+// um ramo proprio por `coarse` abrindo um Sheet; virou `Explicacao`, o mecanismo
+// unico que abre nos dois ponteiros (ver components/shared/Explicacao.tsx).
 function InfoIcon({ text }: { text: string }) {
   return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <span className="inline-flex h-[1.15em] w-[1.15em] cursor-help items-center justify-center rounded-full border border-n600 text-n500" />
-        }
-      >
+    <Explicacao
+      conteudo={text}
+      classeDoConteudo="max-w-[18em]"
+      className="cursor-help"
+      rotulo="O que isso faz"
+    >
+      <span className="inline-flex h-[1.15em] w-[1.15em] items-center justify-center rounded-full border border-n600 text-n500">
         <Question className="text-[.7em]" />
-      </TooltipTrigger>
-      <TooltipContent className="max-w-[18em] bg-popover text-popover-foreground">{text}</TooltipContent>
-    </Tooltip>
+      </span>
+    </Explicacao>
   )
 }
 

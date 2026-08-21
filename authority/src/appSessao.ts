@@ -9,7 +9,7 @@ import {
   aplicarFlush, carregarEstado, comEstadoParaEscrita, gravarEstado,
   FLUSH_OCUPADO, type LinhaSessao,
 } from './progresso.js'
-import { MAPS, randomSeed, createEmptySummary } from '#engine'
+import { MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas } from '#engine'
 
 function json(dado: unknown, status = 200): Response {
   return new Response(JSON.stringify(dado), {
@@ -197,6 +197,19 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
   }
 
   const semente = randomSeed()
+  // A SALA INICIAL SAI DAQUI, e nao do primeiro flush.
+  //
+  // Ela nascia lazy, dentro do `buildMapWorld` da primeira janela — ou seja, ~30
+  // segundos depois de o jogador entrar. Nesse intervalo o cliente exibia a sala
+  // que a predicao dele sorteou, e quando a do servidor chegava o sub-bioma
+  // trocava (hoje com aviso na tela, antes em silencio) logo depois da entrada.
+  // Decidindo aqui, os dois lados comecam com a MESMA sala: o cliente recebe a
+  // dela na resposta e constroi o mundo com ela.
+  //
+  // O `rng` avanca junto e e gravado avancado: a sequencia da sessao continua
+  // sendo uma so, e o sorteio da sala inicial faz parte dela.
+  const rng = createRng(semente)
+  const salaInicial = temSalas(mapId) ? novaSala(rng, mapId, 0, 0) : null
   let criada: LinhaSessao
   try {
     ;[criada] = await inserir<LinhaSessao>(cfg, 'game_sessions', {
@@ -204,20 +217,38 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
       map_id: mapId,
       poke_uid: pokeUid,
       seed: semente,
-      rng_state: semente,
-      rng_draws: 0,
+      rng_state: rng.state,
+      rng_draws: rng.draws,
+      sala_indice: salaInicial?.indice ?? 0,
+      sala_chave: salaInicial?.chave ?? null,
+      sala_abates: 0,
+      ciclos: 0,
     }, { retornar: true })
   } catch {
     const vencedora = await sessaoAberta(cfg, userId)
     if (!vencedora) throw new ErroHttp(409, 'nao foi possivel abrir a sessao — tente de novo')
-    return json({ sessaoId: vencedora.id, mapId: vencedora.map_id, iniciadaEm: vencedora.last_flush_at })
+    // Corrida: outra aba abriu a sessao primeiro. A sala que vale e a DELA, e a
+    // que este request sorteou nunca foi gravada.
+    return json({
+      sessaoId: vencedora.id,
+      mapId: vencedora.map_id,
+      iniciadaEm: vencedora.last_flush_at,
+      sala: vencedora.sala_chave
+        ? {
+            indice: Number(vencedora.sala_indice ?? 0),
+            chave: vencedora.sala_chave,
+            abates: Number(vencedora.sala_abates ?? 0),
+            ciclos: Number(vencedora.ciclos ?? 0),
+          }
+        : null,
+    })
   }
 
   await atualizar(cfg, `players?user_id=eq.${userId}`, {
     current_map_id: mapId,
     perf_stats: { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now() },
   })
-  return json({ sessaoId: criada.id, mapId, iniciadaEm: criada.last_flush_at })
+  return json({ sessaoId: criada.id, mapId, iniciadaEm: criada.last_flush_at, sala: salaInicial })
 }
 
 async function flush(cfg: Config, userId: string, parcial: boolean): Promise<Response> {

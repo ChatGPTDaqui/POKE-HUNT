@@ -311,7 +311,11 @@ for (const map of Object.values(maps)) {
 }
 
 // Espelho do Modo Pesadelo tirado do resultado ACIMA, nao do dado gerado cru.
-const nightmare = buildNightmareMirror(maps, encounters)
+// `POOL_POR_SALA` entra junto: sem ele o espelho nascia sem sistema de salas e o
+// Modo Pesadelo era a unica familia de hunt de bioma rodando como arena unica
+// (ver a nota em nightmareMaps.ts#buildNightmareMirror).
+const nightmare = buildNightmareMirror(maps, encounters, POOL_POR_SALA)
+for (const [id, salas] of Object.entries(nightmare.porSala)) POOL_POR_SALA[id] = salas
 
 // Treinamento entra DEPOIS do espelho do Modo Pesadelo de proposito: e um
 // fixture de teste, nao teria sentido nenhum um "nightmare_treinamento" a

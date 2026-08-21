@@ -14,6 +14,13 @@ export const ABAS: { value: Aba; label: string }[] = [
   { value: 'historico', label: 'Histórico' },
 ]
 
+// "Anúncios Ativos" sozinho quebrava a fileira de abas em duas no celular, e a
+// segunda fileira custa ~50px de uma tela de ~470px uteis. O rotulo curto so
+// existe no compacto — no desktop a palavra inteira cabe e diz melhor o que e.
+export const ABAS_CURTAS: { value: Aba; label: string }[] = ABAS.map((a) => (
+  a.value === 'ativos' ? { ...a, label: 'Ativos' } : a
+))
+
 export function toast(mensagem: string, tipo: 'success' | 'error' | 'info' = 'success', erroDetalhe?: ToastErroDetalhe) {
   useToastStore.getState().pushToast(mensagem, tipo, 'trade', undefined, erroDetalhe)
 }

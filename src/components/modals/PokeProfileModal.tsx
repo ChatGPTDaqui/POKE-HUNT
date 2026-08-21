@@ -6,7 +6,7 @@
 // trocado pelas abas: se ele fosse remontado a cada clique de aba, a animacao
 // do GIF reiniciaria do zero. Ele tambem e a alca de arraste da janela.
 import { useState } from 'react'
-import { GameWindow } from '@/components/game/GameWindow'
+import { Painel } from '@/components/game/Painel'
 import { ProfileHero, StatDetail, MovesetTable } from '@/components/shared/PokeStatDetail'
 import { TypeWeaknessSection } from '@/components/shared/TypeWeaknessSection'
 import { usePokeProfileStore, type PokeProfileTarget } from '@/stores/pokeProfileStore'
@@ -33,12 +33,12 @@ function PokeProfileModalBody(
   const { poke, species } = open
 
   return (
-    <GameWindow
+    <Painel
       winKey="profile"
       widthEm={30}
       defaultTop="8vh"
       zIndex={46}
-      backdrop={{ zIndex: 45 }}
+      backdropZIndex={45}
       onClose={close}
       header={<ProfileHero poke={poke} species={species} />}
       subheader={
@@ -66,6 +66,6 @@ function PokeProfileModalBody(
       ) : (
         <MovesetTable poke={poke} species={species} />
       )}
-    </GameWindow>
+    </Painel>
   )
 }

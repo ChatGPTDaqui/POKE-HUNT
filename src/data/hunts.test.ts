@@ -365,3 +365,67 @@ describe('hunt inicial', () => {
     }
   })
 })
+
+// ---------------------------------------------------------------------------
+// Modo Pesadelo espelha a hunt de origem INTEIRA, salas incluidas
+// ---------------------------------------------------------------------------
+// A falha silenciosa: o espelho copiava mapa e encontros e nao o cadastro de
+// salas, entao `temSalas('nightmare_mata_faixa1')` dava `false` e aquelas 36
+// hunts rodavam como arena unica — sem sub-bioma, sem chip de sala, sem aviso
+// de nova area, sem janela de nivel por sala, e com o pool inteiro spawnando de
+// uma vez. Metade do conteudo de bioma com regra diferente da outra metade, e
+// nada no jogo apontando isso.
+describe('espelho do Modo Pesadelo', () => {
+  const espelhos = Object.keys(MAPS).filter((id) => id.startsWith('nightmare_'))
+
+  it('existe um espelho por hunt espelhavel (senao o teste passa de vazio)', () => {
+    expect(espelhos.length).toBeGreaterThan(30)
+  })
+
+  it.each(espelhos)('%s tem as mesmas salas da hunt de origem', (id) => {
+    const origem = id.slice('nightmare_'.length)
+    const salasDaOrigem = POOL_POR_SALA[origem]
+    const salasDoEspelho = POOL_POR_SALA[id]
+
+    if (!salasDaOrigem) {
+      // Origem fora do sistema de salas (a hunt inicial): o espelho tambem fica
+      // fora. O que nao pode e um dos dois ter salas e o outro nao.
+      expect(salasDoEspelho, `${id} ganhou salas que ${origem} nao tem`).toBeUndefined()
+      return
+    }
+
+    expect(salasDoEspelho, `${id} sem salas, mas ${origem} tem`).toBeDefined()
+    expect(Object.keys(salasDoEspelho!).sort()).toEqual(Object.keys(salasDaOrigem).sort())
+  })
+
+  it.each(espelhos)('%s: toda sala tem pool nao-vazio e de encontro existente', (id) => {
+    const salas = POOL_POR_SALA[id]
+    if (!salas) return
+    for (const [chave, pool] of Object.entries(salas)) {
+      // Sala com pool vazio nao lanca erro: o jogador entra e nada spawna.
+      expect(pool.length, `${id}/${chave} sem encontro`).toBeGreaterThan(0)
+      for (const encId of pool) {
+        expect(ENCOUNTERS[encId], `${id}/${chave} aponta pro encontro inexistente ${encId}`).toBeDefined()
+      }
+      // E o pool da sala tem que estar dentro do pool da hunt, senao o
+      // `poolAtivo` da sala spawna bicho que a hunt diz nao ter.
+      const daHunt = new Set(MAPS[id].enemyPool)
+      for (const encId of pool) expect(daHunt.has(encId), `${encId} fora do enemyPool de ${id}`).toBe(true)
+    }
+  })
+
+  it('o nivel do espelho continua deslocado (o espelho nao virou copia crua)', () => {
+    for (const id of espelhos) {
+      const origem = MAPS[id.slice('nightmare_'.length)]
+      const espelho = MAPS[id]
+      expect(espelho.levelRange[0], id).toBeGreaterThan(origem.levelRange[0])
+      for (const encId of espelho.enemyPool) {
+        const enc = ENCOUNTERS[encId]
+        // Mesmo teste que ja pegou o bug dos `levelWeights` nao deslocados.
+        for (const lw of enc.levelWeights ?? []) {
+          expect(lw.level, `${encId} com levelWeights fora da faixa`).toBeGreaterThanOrEqual(enc.minLevel)
+        }
+      }
+    }
+  })
+})

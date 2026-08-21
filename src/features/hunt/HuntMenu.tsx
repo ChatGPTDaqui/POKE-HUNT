@@ -361,7 +361,7 @@ export function HuntMenu() {
           <div key={map.id} className="overflow-hidden rounded-[.7em] border border-n800 bg-n900">
             <div
               onClick={() => setExpandedMapId(expanded ? null : map.id)}
-              className="flex cursor-pointer items-center gap-[.5em] p-[.55em] hover:bg-n800"
+              className="flex cursor-pointer items-center gap-[.5em] px-[.5em] py-[.4em] hover:bg-n800"
             >
               <span
                 className="h-[2.2em] w-[2.2em] shrink-0 rounded-full"

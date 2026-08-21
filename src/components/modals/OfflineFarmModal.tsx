@@ -8,7 +8,7 @@ import { faceIconUrl, spriteUrl, itemIconUrl } from '@/data/sprites'
 import { pokemonSellValue } from '@/engine/systems/economySystem'
 import type { OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
 import { PokeNameTag } from '@/components/shared/PokeNameTag'
-import { GameWindow } from '@/components/game/GameWindow'
+import { Painel } from '@/components/game/Painel'
 import { GameButton, SectionLabel } from '@/components/game/controls'
 
 const MAX_CAPTURES_SHOWN = 40
@@ -125,12 +125,12 @@ export function OfflineFarmModal({ summary, onClose }: { summary: OfflineSimSumm
   const hasConsumed = totalConsumed > 0
 
   return (
-    <GameWindow
+    <Painel
       winKey="offline"
       widthEm={26}
       defaultTop="9vh"
       zIndex={51}
-      backdrop={{ zIndex: 50 }}
+      backdropZIndex={50}
       onClose={onClose}
       header={
         <div className="border-b border-n800 p-[.7em]">
@@ -228,6 +228,6 @@ export function OfflineFarmModal({ summary, onClose }: { summary: OfflineSimSumm
           </>
         )}
       </div>
-    </GameWindow>
+    </Painel>
   )
 }

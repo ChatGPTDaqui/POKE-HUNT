@@ -1,136 +1,106 @@
-// Onde cada superficie da HUD fica na tela, e como isso muda com a largura do
-// viewport.
+// Onde cada superficie da HUD fica na tela.
 //
-// Foi extraido do GameShell porque sao duas responsabilidades com ciclos de
-// vida diferentes: o GameShell cuida de boot/persistencia/catch-up (efeitos que
-// rodam uma vez), este arquivo cuida so de posicionamento.
+// A HUD tem DUAS superficies permanentes, e so duas: o trilho de status
+// (topo) e a doca de acao (rodape). Tudo o mais e contextual (chip de sala,
+// chip de evolucao) ou aberto por toque (sheets, janelas).
 //
-// Os breakpoints sao aplicados em JS e nao por media query porque varias
-// decisoes nao sao de estilo: em <640 o card de taxas nao encolhe, ele SOME e o
-// mesmo dado reaparece como chip dentro do bloco central (outro ponto da
-// arvore) — coisa que media query nao faz. Ver useBreakpoints no uiStore.
+// Isso substitui o desenho anterior, de cinco ancoras independentes nas bordas
+// (`ActivePokeCard` + `RatesCard` na esquerda, `CenterBlock` no centro,
+// `TrainerCard` + `SideMenuColumn` na direita, `MainMenu` + `AbilityHud` no
+// rodape, `AutoButton` solto e `ChatLog` flutuante). Cada uma se posicionava
+// sozinha e negociava com as vizinhas por breakpoint; em 390px elas
+// literalmente se cobriam — medido no aparelho, o card do treinador ficava
+// por cima do HP do POKE.
+//
+// A mesma arvore serve os tres regimes (ver `useDeviceMode`). Nao ha layout de
+// desktop separado: o amplo e o compacto com mais largura, mais rotulo e mais
+// destino visivel na barra. Um layout so pra manter, e o celular deixa de ser
+// o caso degradado.
 //
 // Camadas (z-index):
 //   0      canvas do jogo
-//   18–22  HUD
-//   30/31  backdrop + painel de menu
+//   18–22  HUD (trilho, doca, chips)
+//   30/31  backdrop + painel (sheet no celular, janela no amplo)
+//   33     sheets que abrem POR CIMA de um painel (Mais, chat)
 //   40     painel Auto (nao passa pelo backdrop, de proposito)
 //   45/46  perfil do POKE
 //   50/51  relatorio offline
 //   60     confirmacao
 //   70     toasts
 //
-// A HUD continua ABAIXO do backdrop na pilha (ela e escurecida junto com o
-// jogo, como o desenho pede) e mesmo assim segue clicavel: o backdrop e
-// puramente visual (`pointer-events:none`) e o fechar-ao-clicar-fora e um
-// listener de documento — ver GameWindow. Um backdrop que capturasse o clique
-// faria trocar de tela exigir dois toques, porque o primeiro acertaria ele em
-// vez do botao do menu (bug reproduzido ao vivo nesta rodada, e ja conhecido do
-// jogo vanilla).
-import { ActivePokeCard } from '@/components/hud/ActivePokeCard'
-import { RatesCard } from '@/components/hud/RatesCard'
-import { CenterBlock } from '@/components/hud/CenterBlock'
-import { TrainerCard, SideMenuColumn } from '@/components/hud/TrainerCard'
-import { ZoomControl } from '@/components/hud/ZoomControl'
-import { AbilityHud } from '@/components/hud/AbilityHud'
-import { StatusEffectsBar } from '@/components/hud/StatusEffectsBar'
+// A HUD continua ABAIXO do backdrop na pilha (ela escurece junto com o jogo) e
+// mesmo assim segue tocavel: o backdrop e puramente visual
+// (`pointer-events:none`) e o fechar-ao-tocar-fora e um listener de documento.
+// Um backdrop que capturasse o toque faria trocar de tela exigir dois toques.
+import { useRef } from 'react'
+import { StatusRail } from '@/components/hud/StatusRail'
+import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
+import { SalaChip } from '@/components/hud/SalaChip'
 import { ChatLog } from '@/components/toasts/ChatLog'
-import { AutoButton, AutoWindow } from '@/components/auto/AutoFloatingPanel'
-import { MainMenu } from '@/features/nav/MainMenu'
-import { useBreakpoints, useUiStore } from '@/stores/uiStore'
-import { useWorldStore } from '@/stores/worldStore'
-import { useEffect, useRef } from 'react'
+import { ChatMobile } from '@/components/toasts/ChatMobile'
+import { AutoWindow } from '@/components/auto/AutoFloatingPanel'
+import { useDeviceMode, useUiStore } from '@/stores/uiStore'
+import { useMedirAltura } from '@/hooks/useMedirAltura'
+import { cn } from '@/lib/utils'
+
+// Acima disto o chat volta a ser janela flutuante no canto: e a largura em que
+// ela cabe ao lado da doca sem encostar nela. Abaixo, ticker de uma linha —
+// inclusive em desktop estreito, onde a janela tambem cobria o jogo.
+const LARGURA_CHAT_FLUTUANTE = 1200
 
 export function HudLayer() {
-  const { narrow, mid, colStack } = useBreakpoints()
-  // O zoom e controle de CAMERA sobre o mapa da hunt. O Hospital e um cenario
-  // fixo desenhado pra caber na tela (ver Renderer#_hospitalLayout), entao la
-  // o controle nao teria efeito nenhum — botao que nao faz nada e pior que
-  // botao ausente. Seletor booleano: so re-renderiza na troca de cena.
-  const emHunt = useWorldStore((s) => s.mapDef !== null)
-  const footerHeight = useUiStore((s) => s.footerHeight)
+  const { mode, width } = useDeviceMode()
   const setFooterHeight = useUiStore((s) => s.setFooterHeight)
+  const chatFlutuante = mode === 'amplo' && width >= LARGURA_CHAT_FLUTUANTE
 
-  // Mede o rodape (barra de golpes + menu) ao vivo. Chat e Auto ancoram acima
-  // dele a partir deste numero — ver a nota em uiStore#footerHeight sobre por
-  // que um offset `em` fixo nao serve (rodape muda de altura com a largura E com
-  // o hudScale). ResizeObserver cobre os dois: reflow do menu (quebra de fileira)
-  // e mudanca de escala disparam o mesmo callback.
+  // Mede o rodape ao vivo. Os sheets ancoram o proprio `bottom` neste numero
+  // pra parar EM CIMA da doca em vez de cobri-la — a doca e o unico caminho de
+  // navegacao no celular. `ResizeObserver` porque a altura muda com o regime,
+  // com o numero de golpes do POKE e com o `hudScale`.
   const footerRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const el = footerRef.current
-    if (!el) return
-    const ro = new ResizeObserver(() => setFooterHeight(el.getBoundingClientRect().height))
-    ro.observe(el)
-    setFooterHeight(el.getBoundingClientRect().height)
-    return () => ro.disconnect()
-  }, [setFooterHeight])
-
-  // Acima do rodape, com uma folga. So no regime empilhado (<780): acima disso o
-  // rodape e uma fileira central estreita e o Auto/chat, nos cantos, nao chegam
-  // perto. Enquanto a medida nao chega (primeiro paint), cai no valor antigo.
-  const acimaDoRodape = footerHeight ? `calc(${footerHeight}px + .8em)` : '10.6em'
-
-  // A pilula de zoom fica sob o card do POKE ativo, entao a altura dela depende
-  // de quanto o topo esquerdo ocupa — que muda quando o bloco central desce
-  // (mid) e quando o card do POKE perde o card de taxas ao lado (narrow).
-  const zoomTop = narrow ? '17em' : mid ? '13.2em' : '11.5em'
+  useMedirAltura(footerRef, setFooterHeight)
 
   return (
     <>
-      {/* topo-esquerdo: POKE ativo + taxas */}
-      <div className="absolute top-[.8em] left-[.8em] z-20 flex items-start gap-[.5em]">
-        <ActivePokeCard />
-        {!narrow && <RatesCard />}
-      </div>
-
-      {/* topo-centro: carteira, local, Pokedex. Abaixo de 1140px ele desce pra
-          baixo dos cards laterais e se estica, em vez de disputar a faixa do
-          meio com eles. */}
-      <div
-        className="absolute z-[19] flex justify-center"
-        style={
-          mid
-            ? { top: '7.7em', left: '.8em', right: '.8em' }
-            : { top: '.8em', left: '50%', transform: 'translateX(-50%)' }
-        }
-      >
-        <CenterBlock />
-      </div>
-
-      {/* topo-direito: treinador + coluna de menus secundarios */}
-      <div className="absolute top-[.8em] right-[.8em] z-20 flex flex-col items-end gap-[.5em]">
-        <TrainerCard />
-        <SideMenuColumn />
-      </div>
-
-      {emHunt && (
-        <div className="absolute left-[.8em] z-[21]" style={{ top: zoomTop }}>
-          <ZoomControl />
+      {/* Topo: trilho + o que for contextual embaixo dele. Uma coluna so, pra
+          o chip de sala e o de evolucao empurrarem em vez de sobrepor. */}
+      <div className="absolute inset-x-[.5em] top-[.5em] z-20 flex flex-col items-center gap-[.4em]">
+        <div className="flex w-full max-w-[64em] flex-col gap-[.4em]">
+          <StatusRail />
+          <SalaChip />
         </div>
-      )}
-
-      {/* rodape-centro: golpes acima do menu. Os dois juntos formam a "faixa
-          segura" do rodape — o canvas desenha nome/HP/texto de combate ate uns
-          90px acima do sprite, e antes disso essa area estava livre pra colidir
-          com a barra de golpes. */}
-      <div ref={footerRef} className="absolute bottom-[.8em] left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-[.5em]">
-        <StatusEffectsBar />
-        <AbilityHud />
-        <MainMenu />
       </div>
 
-      {/* Auto: canto inferior direito, explicitamente posicionado. Antes ele
-          era filho direto da camada sem wrapper e caia no fluxo normal, ou seja,
-          aparecia no canto superior ESQUERDO por cima do HUD. No regime
-          empilhado (<780) o menu do rodape cresce e sobe; o Auto tem que ficar
-          ACIMA dele (medido), senao a fileira de baixo do menu passa por tras. */}
-      <div className="absolute right-[.9em] z-[22]" style={{ bottom: colStack ? acimaDoRodape : '6.8em' }}>
-        <AutoButton />
+      {/* Rodape: ticker do chat (quando nao ha janela flutuante) + doca. Os dois
+          no MESMO container medido — o botao Auto e o chat costumavam se
+          posicionar por conta propria a partir da altura do rodape, e cada
+          mudanca de regime exigia reancorar os dois a mao. */}
+      <div
+        ref={footerRef}
+        className="absolute inset-x-[.5em] bottom-[.5em] z-20 flex flex-col items-center gap-[.35em]"
+      >
+        {/* Deitado a doca NAO se estica: numa faixa de 844px os cinco slots
+            ficariam a 200px um do outro e o polegar teria que atravessar a tela
+            pra trocar de aba. Cluster central, mais perto do dedo e mais perto
+            do desenho compacto. */}
+        <div
+          className={cn(
+            'flex w-full flex-col items-stretch gap-[.35em]',
+            mode === 'deitado' ? 'max-w-[38em]' : 'max-w-[52em]',
+          )}
+        >
+          {!chatFlutuante && <ChatMobile />}
+          <ActionDock />
+        </div>
       </div>
+
+      {/* Camadas que abrem por cima de tudo. O sheet se desenha por portal na
+          camada da HUD (ver Sheet), entao o lugar dele na arvore aqui e so
+          organizacao — a janela do Auto e que precisa mesmo ficar fora da doca,
+          porque ela SIM posiciona contra o ancestral. */}
+      <SheetMais />
       <AutoWindow />
-
-      <ChatLog />
+      {chatFlutuante && <ChatLog />}
     </>
   )
 }

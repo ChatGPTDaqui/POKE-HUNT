@@ -84,10 +84,24 @@ export function GameCanvas() {
     // no canvas nao paga.
     let enfermeiraEmFoco = false
 
+    // Folga da area de toque da enfermeira, em px de CANVAS. Zero no mouse (o
+    // cursor e preciso e o `pointer` ja avisa onde clicar); no dedo, 14px de
+    // cada lado — sem hover nao ha aviso nenhum de onde e a borda, e um toque
+    // que erra por 5px nao devolve nada na tela.
+    const mqlToque = typeof window.matchMedia === 'function'
+      ? window.matchMedia('(pointer: coarse)')
+      : null
+    function folgaDoAlvo(): number {
+      if (!mqlToque?.matches || !canvas) return 0
+      const rect = canvas.getBoundingClientRect()
+      if (rect.width <= 0) return 0
+      return 14 * (canvas.width / rect.width)
+    }
+
     function handleClick(event: MouseEvent) {
       if (useWorldStore.getState().mapDef) return // enfermeira so existe na cena do Hospital
       const { x, y } = canvasPointFromEvent(event)
-      if (renderer.hospitalClickOnNurse(x, y)) controller.healTeam()
+      if (renderer.hospitalClickOnNurse(x, y, folgaDoAlvo())) controller.healTeam()
     }
 
     function handleMouseMove(event: MouseEvent) {

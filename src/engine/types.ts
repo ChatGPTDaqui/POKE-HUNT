@@ -489,6 +489,27 @@ export interface WorldState {
   /** Sala ja sorteada (o "carregamento" adiantado) esperando a contagem
    *  regressiva zerar pra virar `sala` de verdade. */
   salaPendente: SalaAtiva | null
+  /**
+   * Quem decide a proxima sala e o SERVIDOR — ligado pelo cliente quando ha
+   * sessao de hunt aberta (engine/controller.ts#enterMap).
+   *
+   * Com isto ligado, `registrarAbate` conta o abate e NAO sorteia: a sala
+   * seguinte chega no flush, por `reconciliarSalaDaAutoridade`. Desligado (jogo
+   * sem servidor, e a propria simulacao do servidor) o sorteio local vale, que e
+   * o comportamento de sempre.
+   *
+   * Efemero como `salaCountdownRemaining`: nao atravessa reconstrucao de mundo
+   * por janela — quem reconstroi do lado do servidor e a autoridade, e la ele e
+   * false por definicao.
+   */
+  salaSobAutoridade: boolean
+  /**
+   * Segundos acumulados com a quota da sala fechada esperando a sala do
+   * servidor. Estourando ESPERA_MAXIMA_PELA_AUTORIDADE, a predicao local volta a
+   * valer — rede de seguranca pra servidor de versao antiga, ver
+   * salaSystem.ts#garantirTransicaoDeQuotaFechada. Zera em toda troca de sala.
+   */
+  salaEsperaDaAutoridade: number
   // Toda aleatoriedade da simulacao sai daqui. Ver core/rng.ts pro porque e
   // pros limites (isto torna a SEQUENCIA DE SORTEIOS reproduzivel; nao promete
   // replay bit-a-bit de coordenadas entre engines diferentes).

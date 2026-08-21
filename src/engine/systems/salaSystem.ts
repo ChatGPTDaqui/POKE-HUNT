@@ -41,6 +41,13 @@ import type { SalaAtiva, WorldState } from '../types'
  */
 export const SALA_TRANSITION_COUNTDOWN = 3
 
+/**
+ * Quanto o cliente espera a sala do servidor antes de voltar a sortear a
+ * propria. Generoso de proposito: o flush periodico e de 30s e o pedido
+ * disparado pela quota repete a cada 5s, entao 20s cobre varias tentativas.
+ */
+export const ESPERA_MAXIMA_PELA_AUTORIDADE = 20
+
 /** A hunt e percorrida em salas? Hunt inicial, BOSS e Lance nao sao. */
 export function temSalas(mapId: string): boolean {
   return POOL_POR_SALA[mapId] != null
@@ -179,6 +186,30 @@ export function registrarAbate(world: WorldState, mapId: string): AvancoDeSala {
 
   sala.abates += 1
   if (sala.abates < ABATES_POR_SALA) return { avancou: false, fechouCiclo: false }
+  // SOB AUTORIDADE REMOTA O CLIENTE NAO SORTEIA SALA. Ele conta abate (a barra
+  // do HUD precisa andar a cada morte, nao de 30 em 30 segundos) e para aqui: a
+  // sala seguinte chega pelo flush, por `reconciliarSalaDaAutoridade`.
+  //
+  // O BUG QUE ISTO CONSERTA, medido ao vivo em 2026-08-19 numa hunt de teste. As
+  // duas simulacoes tem sequencia de sorteio PROPRIA (a do cliente e predicao,
+  // ver core/rng.ts), entao elas sorteavam sub-biomas DIFERENTES pra mesma sala.
+  // O cliente aplicava o dele com o aviso na tela; 2 segundos depois o flush
+  // trazia o do servidor e `definirSala` o escrevia direto no estado — sem
+  // aviso, sem trocar o mapa desenhado. Log real, uma hunt, 90 segundos:
+  //
+  //   14:53:13  Sala 2/10 Obra           (predicao local, com aviso)
+  //   14:53:15  Sala 1/10 Usina 0/30     (flush: VOLTOU pra sala anterior)
+  //   14:53:20  Sala 2/10 Laboratorio    (outro sub-bioma, sem aviso nenhum)
+  //   14:53:45  Sala 2/10 Obra           (e de volta pro palpite local)
+  //
+  // Nao da pra consertar fazendo os dois sorteios coincidirem: seria preciso o
+  // cliente conhecer a semente da sessao, e ai ele calcula as 10 salas na
+  // abertura — o reroll gratis que a nota do topo deste arquivo existe pra
+  // impedir. Quem cede e a predicao, que e o lado sem autoridade.
+  if (world.salaSobAutoridade) {
+    sala.abates = ABATES_POR_SALA
+    return { avancou: false, fechouCiclo: false }
+  }
   // Cap: sem isto, matar mais de um inimigo no MESMO tick (AOE) ou o jogo
   // continuar rodando por um instante antes do proximo tick congelar
   // deixaria `sala.abates` crescer sem limite enquanto a contagem regressiva
@@ -186,9 +217,23 @@ export function registrarAbate(world: WorldState, mapId: string): AvancoDeSala {
   // (server/src/progresso.ts#sala_abates) com numero que nunca reflete a
   // quota real.
   sala.abates = ABATES_POR_SALA
-  // Transicao ja armada por outro abate neste mesmo tick (AOE matando 2+ de
-  // uma vez): nao reamarra, nao resorteia.
-  if (world.salaCountdownRemaining != null) return { avancou: false, fechouCiclo: false }
+  return armarTransicaoDeSala(world, mapId)
+}
+
+/**
+ * Sorteia a proxima sala e arma a contagem regressiva. Idempotente: com a
+ * transicao ja armada (outro abate no MESMO tick, AOE matando 2+ de uma vez)
+ * nao reamarra e nao resorteia.
+ *
+ * Separada de `registrarAbate` porque a quota fechada, e nao o abate, e o que
+ * dispara a troca — ver `garantirTransicaoDeQuotaFechada`.
+ */
+function armarTransicaoDeSala(world: WorldState, mapId: string): AvancoDeSala {
+  const sala = world.sala
+  if (!sala) return { avancou: false, fechouCiclo: false }
+  if (world.salaCountdownRemaining != null || world.salaPendente) {
+    return { avancou: false, fechouCiclo: false }
+  }
 
   const proximo = sala.indice + 1
   const fechouCiclo = proximo >= SALAS_POR_HUNT
@@ -204,6 +249,131 @@ export function registrarAbate(world: WorldState, mapId: string): AvancoDeSala {
 }
 
 /**
+ * Quota JA fechada na abertura da janela: arma a transicao sem esperar um abate
+ * novo. Chamado por `stepWorld` no primeiro tick.
+ *
+ * O LIVELOCK QUE ISTO CONSERTA (medido ao vivo em 2026-08-19). `salaPendente` e
+ * `salaCountdownRemaining` sao efemeros — nao atravessam a reconstrucao de mundo
+ * de cada janela do servidor. Enquanto a transicao dependia do PROXIMO abate, uma
+ * janela curta demais pra caber "matar + 3s de contagem" perdia a transicao e
+ * recomecava do zero na janela seguinte:
+ *
+ *   janela de 5s: inimigos nascem, o primeiro morre em ~3s, contagem arma,
+ *   janela acaba em 2s -> pendente e contagem descartados -> repete
+ *
+ * A sala travava em `abates: 30` pra sempre — e o cliente, que agora espera a
+ * sala do servidor em vez de sortear a propria, travava com ela. Nao aparecia
+ * antes porque a janela normal e de 30s e sempre cabia; apareceu quando o cliente
+ * passou a pedir flush a cada 5s ao fechar a quota.
+ *
+ * Com a quota fechada valendo por si, a transicao acontece no comeco da janela e
+ * cabe em qualquer duracao. Isso tambem fecha o caso que ja estava documentado
+ * como "autocurativo no proximo abate" — ele nao era, quando nao havia proximo.
+ */
+export function garantirTransicaoDeQuotaFechada(world: WorldState, mapId: string, dt = 0): void {
+  const sala = world.sala
+  if (!sala || sala.abates < ABATES_POR_SALA) {
+    world.salaEsperaDaAutoridade = 0
+    return
+  }
+  if (world.salaSobAutoridade) {
+    // Sob autoridade remota quem sorteia e o servidor, e o cliente espera o
+    // flush. Mas nao pra sempre: se a resposta nao trouxer sala nova nesta
+    // janela de espera, a predicao local volta a valer.
+    //
+    // Isto e rede de seguranca contra VERSAO, nao contra rede. Um servidor sem
+    // `garantirTransicaoDeQuotaFechada` (bundle publicado antes de 2026-08-19)
+    // nunca fecha a transicao quando a janela e curta — e o cliente, que parou de
+    // sortear, ficava com a barra cheia e a sala parada indefinidamente. Com o
+    // fallback, o pior caso e voltar ao comportamento antigo (predicao que a
+    // reconciliacao corrige depois, agora com aviso na tela).
+    world.salaEsperaDaAutoridade += dt
+    if (world.salaEsperaDaAutoridade < ESPERA_MAXIMA_PELA_AUTORIDADE) return
+    world.salaEsperaDaAutoridade = 0
+  }
+  armarTransicaoDeSala(world, mapId)
+}
+
+/**
+ * A sala que o SERVIDOR decidiu, entrando pela mesma porta da transicao local.
+ *
+ * Tres casos, e a diferenca entre eles e o que o jogador ve:
+ *
+ *  - MESMA sala (so o contador de abates andou): escreve o contador e mais
+ *    nada. E o caso comum — um flush a cada 30s, uma troca de sala a cada
+ *    poucos minutos.
+ *  - PRIMEIRA sala da sessao (nao havia sala): entra direto, sem aviso. Nao ha
+ *    "sala anterior" pra anunciar saida de.
+ *  - sala DIFERENTE: vira `salaPendente` e arma a contagem regressiva. Quem
+ *    troca o mapa, zera os inimigos e reposiciona o jogador continua sendo
+ *    `aplicarTransicaoDeSala`, no gate do proximo tick.
+ *
+ * Antes disto o cliente escrevia a sala do servidor direto no estado. O nome no
+ * HUD trocava, e o resto da cena — arte de fundo, grade de colisao, ponto de
+ * nascimento, inimigos em campo — ficava na sala ANTERIOR, porque so
+ * `aplicarTransicaoDeSala` mexe nisso. Uma hunt podia ficar minutos anunciando
+ * "Laboratorio" enquanto desenhava e colidia como "Usina".
+ *
+ * Nunca REGRIDE: sala com (ciclo, indice) anterior ao que esta na tela e
+ * ignorada. Isso acontece de verdade — o flush cobre uma janela que comecou
+ * antes da troca, e o servidor responde com a sala de la. Aceitar aquilo
+ * mandava o jogador de volta pra sala 1 com o aviso de nova area, o que le como
+ * perda de progresso.
+ */
+export function reconciliarSalaDaAutoridade(world: WorldState, sala: SalaAtiva | null): void {
+  // Fora de hunt nao ha sala: escrever uma aqui deixaria o Hospital com um
+  // sub-bioma pendurado no HUD.
+  if (!world.mapDef) return
+  if (!sala) {
+    // `null` DO SERVIDOR TEM DOIS SIGNIFICADOS, e tratar os dois igual apagava
+    // a sala em jogo.
+    //
+    // 1. Hunt sem sistema de salas (inicial, BOSS, Lance): nao ha sala mesmo, e
+    //    limpar e o certo — sem isso o Hospital fica com sub-bioma pendurado.
+    // 2. Servidor MAIS ANTIGO que o cliente, numa hunt que TEM salas. Foi o
+    //    caso medido ao vivo em 2026-08-20 com as 36 hunts do Pesadelo: o
+    //    cliente ja sabia das salas (POOL_POR_SALA passou a cobrir o espelho) e
+    //    a Edge Function publicada ainda nao. `/sessao/abrir` respondeu sem
+    //    `sala`, o cliente exibiu a propria ("Sala 1/10 Vulcao"), e o primeiro
+    //    flush trouxe `sala: null` — que caia aqui e APAGAVA o chip e o
+    //    sub-bioma no meio da hunt.
+    //
+    // `temSalas` desempata pelo unico dado que separa os dois casos: se ESTE
+    // mapa tem salas, um `null` e divergencia de versao, nao autoridade. O
+    // cliente segue com a predicao dele ate o servidor ser publicado.
+    //
+    // Importa porque cliente e Edge Function sobem por pipelines DIFERENTES no
+    // mesmo push (Cloudflare Pages e supabase-deploy.yml), com duracoes
+    // diferentes: a janela em que um esta novo e o outro velho existe sempre.
+    if (temSalas(world.mapDef.id)) return
+    world.sala = null
+    world.salaPendente = null
+    world.salaCountdownRemaining = null
+    return
+  }
+
+  const atual = world.salaPendente ?? world.sala
+  if (!atual) {
+    world.sala = { ...sala }
+    return
+  }
+  if (atual.chave === sala.chave && atual.indice === sala.indice && atual.ciclos === sala.ciclos) {
+    // O contador do servidor manda, mas nunca pra TRAS: entre o inicio da janela
+    // e a resposta o jogador continuou matando, e o contador local ja andou.
+    // Voltar faria a barra do HUD recuar sozinha.
+    const alvo = world.salaPendente ?? world.sala
+    if (alvo) alvo.abates = Math.max(alvo.abates, sala.abates)
+    return
+  }
+  const posicao = (s: SalaAtiva) => s.ciclos * SALAS_POR_HUNT + s.indice
+  if (posicao(sala) < posicao(atual)) return
+
+  world.salaPendente = { ...sala }
+  world.salaCountdownRemaining ??= SALA_TRANSITION_COUNTDOWN
+  world.salaEsperaDaAutoridade = 0
+}
+
+/**
  * Aplica a sala ja sorteada (`world.salaPendente`) quando a contagem
  * regressiva zera: troca mapa/colisao e reposiciona pro spawn point da nova
  * sala. "Area nova do zero" (pedido explicito do usuario) — zera tambem
@@ -215,6 +385,7 @@ export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
   if (!pendente) return
   world.sala = pendente
   world.salaPendente = null
+  world.salaEsperaDaAutoridade = 0
   world.enemies = []
   world.effects = []
   world.pendingHits = []

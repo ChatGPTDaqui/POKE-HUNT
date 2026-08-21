@@ -10,6 +10,10 @@ import { iniciarCapturaDeErroDeToast } from '@/lib/errorToastReporting'
 import './index.css'
 import App from './App.tsx'
 
+function mostrarDevtools(): boolean {
+  return typeof window !== 'undefined' && window.innerWidth >= 820
+}
+
 registrarErrosGlobais()
 iniciarCapturaDeErroDeToast()
 
@@ -20,7 +24,11 @@ createRoot(document.getElementById('root')!).render(
         <TooltipProvider>
           <App />
         </TooltipProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {/* O botao flutuante das devtools mora no canto inferior direito, que
+            desde a HUD mobile e exatamente onde fica o slot "Mais" da doca —
+            em 390px ele cobre o botao e rouba o toque. Some em tela estreita;
+            no desktop, onde ha canto sobrando, continua. */}
+        {mostrarDevtools() && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
     </ErrorBoundary>
   </StrictMode>,

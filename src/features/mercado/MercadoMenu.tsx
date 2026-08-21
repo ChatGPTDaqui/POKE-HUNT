@@ -12,6 +12,7 @@
 import { useState } from 'react'
 import { Tag } from '@phosphor-icons/react'
 import { useGameStateStore } from '@/stores/gameStateStore'
+import { useDeviceMode } from '@/stores/uiStore'
 import { SegmentedTabs, StickyHeader } from '@/components/game/controls'
 import { ComprarItens } from './components/ComprarItens'
 import { ComprarPokes } from './components/ComprarPokes'
@@ -20,23 +21,29 @@ import { VenderPokes } from './components/VenderPokes'
 import { Ativos } from './components/Ativos'
 import { Historico } from './components/Historico'
 import { Moeda } from './components/shared'
-import { ABAS, type Aba } from './utils'
+import { ABAS, ABAS_CURTAS, type Aba } from './utils'
 
 export function MercadoMenu() {
   const [aba, setAba] = useState<Aba>('comprar')
   const [tipo, setTipo] = useState<'itens' | 'pokes'>('itens')
   const gold = useGameStateStore((s) => s.wallet.gold)
   const diamonds = useGameStateStore((s) => s.wallet.diamonds)
+  const { compacto } = useDeviceMode()
 
   return (
     <div className="flex flex-col gap-[.5em]">
       <StickyHeader>
         <div className="flex flex-wrap items-center gap-[.5em]">
-          <SegmentedTabs value={aba} onChange={setAba} options={ABAS} />
-          <span className="flex items-center gap-[.45em] text-[.85em]">
-            <Moeda valor={gold} tipo="gold" />
-            <Moeda valor={diamonds} tipo="diamond" />
-          </span>
+          <SegmentedTabs value={aba} onChange={setAba} options={compacto ? ABAS_CURTAS : ABAS} />
+          {/* A carteira sai no celular: ela ja esta no trilho de status, dois
+              centimetros acima, e repeti-la aqui empurrava as abas pra uma
+              segunda fileira. */}
+          {!compacto && (
+            <span className="flex items-center gap-[.45em] text-[.85em]">
+              <Moeda valor={gold} tipo="gold" />
+              <Moeda valor={diamonds} tipo="diamond" />
+            </span>
+          )}
         </div>
 
         {(aba === 'comprar' || aba === 'vender') && (

@@ -19,7 +19,7 @@
 // estado de combate ao vivo, atualizado a cada tick.
 import { getAbility, type Ability } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
-import { SPECIES } from '@/data/pokes'
+import { SPECIES, type PokeInstance } from '@/data/pokes'
 import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { abilityIconUrl } from '@/data/abilityIcons'
 import { colorForType } from '@/data/typeColors'
@@ -27,8 +27,15 @@ import { controller } from '@/engine/controller'
 import { segundosAtePoderUsar, cooldownProprio } from '@/engine/entity'
 import { cooldownTotalDoGolpe } from '@/engine/systems/combatSystem'
 import { useWorldStore } from '@/stores/worldStore'
-import { useBreakpoints } from '@/stores/uiStore'
-import { AbilityTooltip } from '@/components/shared/AbilityTooltip'
+import { useDeviceMode } from '@/stores/uiStore'
+import { AbilityTooltip, descricaoDoGolpe } from '@/components/shared/AbilityTooltip'
+import { Palavra } from '@/components/shared/Explicacao'
+import { verbeteDoTipoDoGolpe, type VerbeteId } from '@/data/glossario'
+import { Sheet } from '@/components/game/Sheet'
+import { GameButton } from '@/components/game/controls'
+import { AOE_RADIUS, DANO_SEM_PODER_BASE } from '@/data/abilities'
+import { AVISO_DANO_POR_REGRA_PROPRIA } from '@/data/moveDescriptions'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 const CATEGORY_BORDER: Record<string, string> = {
@@ -70,12 +77,18 @@ export function AbilityHud() {
   // Rush, que DOBRAM a Velocidade — sem ele a barra do HUD contaria mais devagar
   // que o combate de verdade.
   const clima = useWorldStore((s) => s.clima?.tipo ?? null)
-  const { narrow, colStack } = useBreakpoints()
+  const { mode, coarse } = useDeviceMode()
+  // No dedo NAO existe hover, e o tooltip do golpe (a unica fonte de dano,
+  // precisao, recarga e descricao) simplesmente nunca abria — informacao
+  // inalcancavel, sem nenhum sinal de que existia. No toque o slot abre um
+  // sheet com o mesmo conteudo, que tambem hospeda o liga/desliga: o
+  // duplo-clique que fazia isso e um gesto que o celular usa pra zoom.
+  const [detalhe, setDetalhe] = useState<Ability | null>(null)
 
   const poke = player?.poke ?? null
   if (!poke) return null
 
-  const regime = narrow ? 'estreito' : colStack ? 'medio' : 'largo'
+  const regime = mode === 'compacto' ? 'estreito' : mode === 'deitado' ? 'medio' : 'largo'
   const lado = TAMANHO_SLOT[regime]
   const fonteRotulo = TAMANHO_ROTULO[regime]
 
@@ -124,10 +137,16 @@ export function AbilityHud() {
         const icone = abilityIconUrl(ability.type)
 
         return (
-          <AbilityTooltip key={ability.id} ability={ability} poke={poke}>
+          <EnvolucroSlot
+            key={ability.id}
+            ability={ability}
+            poke={poke}
+            coarse={coarse}
+            onAbrirDetalhe={() => setDetalhe(ability)}
+          >
           <div
-            onDoubleClick={() => controller.toggleAbility(poke.uid, ability.id)}
-            title={isOff ? 'Desligado — duplo clique religa' : 'Duplo clique desliga da rotação'}
+            onDoubleClick={coarse ? undefined : () => controller.toggleAbility(poke.uid, ability.id)}
+            title={coarse ? undefined : (isOff ? 'Desligado — duplo clique religa' : 'Duplo clique desliga da rotação')}
             className={cn(
               'relative flex cursor-pointer items-center justify-center rounded-[.5em] select-none',
               ready && 'shadow-[0_0_0_2px_rgba(255,255,255,.85)]',
@@ -240,9 +259,154 @@ export function AbilityHud() {
               {ability.power > 0 ? ability.power : '—'}
             </span>
           </div>
-          </AbilityTooltip>
+          </EnvolucroSlot>
         )
       })}
+
+      {detalhe && (
+        <SheetDoGolpe
+          ability={detalhe}
+          poke={poke}
+          desligado={Boolean(disabled[detalhe.id])}
+          onClose={() => setDetalhe(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+/**
+ * Tooltip no mouse, toque no dedo. Sao dois caminhos porque o gesto e outro:
+ * hover nao existe no celular, e um tooltip preso ao toque fica aberto sem
+ * nada que o feche.
+ */
+function EnvolucroSlot({
+  ability, poke, coarse, onAbrirDetalhe, children,
+}: {
+  ability: Ability
+  poke: PokeInstance
+  coarse: boolean
+  onAbrirDetalhe: () => void
+  children: ReactNode
+}) {
+  // O slot e um `button` NOS DOIS regimes: como `div` ele nao existia pro
+  // teclado nem pro leitor de tela, e quem nao usa mouse nao tinha caminho
+  // nenhum ate dano, precisao e recarga.
+  //
+  // Quem abre a ficha muda com o meio, e por isso o `event.detail`: o clique de
+  // MOUSE nao pode abrir nada, senao o duplo clique que liga/desliga o golpe
+  // abriria a ficha duas vezes no caminho. `detail === 0` e o clique vindo do
+  // TECLADO (Enter/Espaco) — esse abre, e e o unico jeito de o teclado chegar
+  // na informacao que o mouse pega no hover.
+  const botao = (
+    <button
+      type="button"
+      data-keep-open
+      aria-label={`Detalhes de ${ability.name}`}
+      onClick={(e) => {
+        if (coarse || e.detail === 0) onAbrirDetalhe()
+      }}
+      // O tamanho do slot e calibrado com a fileira (8 golpes tem que caber numa
+      // linha), entao ele nao estica no toque — cresce so a area, ver
+      // `.alvo-estendido`.
+      className="alvo-estendido relative cursor-pointer p-0 font-[inherit]"
+      style={{ '--alvo-folga': '-6px', '--alvo-folga-x': '-3px' } as CSSProperties}
+    >
+      {children}
+    </button>
+  )
+  if (!coarse) {
+    return <AbilityTooltip ability={ability} poke={poke}>{botao}</AbilityTooltip>
+  }
+  return botao
+}
+
+const ROTULO_CATEGORIA: Record<string, string> = {
+  physical: 'Físico', special: 'Especial', status: 'Status',
+}
+
+function SheetDoGolpe({
+  ability, poke, desligado, onClose,
+}: {
+  ability: Ability
+  poke: PokeInstance
+  desligado: boolean
+  onClose: () => void
+}) {
+  const categoria = resolveAbilityCategory(ability, poke)
+  return (
+    <Sheet winKey="golpe" snap="conteudo" zIndex={33} onClose={onClose} title={ability.name}>
+      <div className="flex flex-col gap-[.7em]">
+        <div className="flex flex-wrap items-center gap-[.4em]">
+          <Palavra
+            verbete={verbeteDoTipoDoGolpe(ability.type)}
+            className="no-underline"
+          >
+            <span
+              className="rounded-[.4em] px-[.5em] py-[.1em] text-[.8em] text-white"
+              style={{ background: colorForType(ability.type) }}
+            >
+              {ability.type}
+            </span>
+          </Palavra>
+          <Palavra verbete="categoriaDoGolpe" className="text-[.85em] text-n400">
+            {ROTULO_CATEGORIA[String(categoria)] ?? String(categoria)}
+          </Palavra>
+        </div>
+
+        {/* Cada rotulo desta grade era jargao sem legenda: "PP 5" nao diz que
+            aqui o PP nao e gasto, e "Recarga 8.0s" nao diz que ela sai do PP e
+            da Velocidade. Os cinco explicam a si mesmos agora. */}
+        <div className="grid grid-cols-2 gap-[.4em] text-[.85em]">
+          <Ficha
+            verbete="danoBase"
+            rotulo="Dano base"
+            valor={ability.power > 0 ? String(ability.power) : '—'}
+          />
+          <Ficha verbete="precisao" rotulo="Precisão" valor={`${ability.accuracy ?? 100}%`} />
+          <Ficha verbete="pp" rotulo="PP" valor={String(ability.pp)} />
+          <Ficha
+            verbete="recarga"
+            rotulo="Recarga"
+            valor={ability.cooldown != null ? `${ability.cooldown.toFixed(1)}s` : '—'}
+          />
+          <Ficha
+            verbete="area"
+            rotulo="Alcance"
+            valor={ability.target === 'aoe' ? `Área (raio ${ability.radius ?? AOE_RADIUS})` : 'Alvo único'}
+          />
+        </div>
+
+        <p className="text-[.85em] text-n300">{descricaoDoGolpe(ability)}</p>
+        {/* Mesma correcao do tooltip: o "Dano base —" acima nao diz de onde o
+            dano sai, e nesses golpes ele sai de uma regra propria. */}
+        {DANO_SEM_PODER_BASE.has(ability.id) && (
+          <p className="text-[.85em] text-n400">{AVISO_DANO_POR_REGRA_PROPRIA}</p>
+        )}
+
+        {/* Substitui o duplo-clique do desktop. O rotulo diz o ESTADO RESULTANTE
+            do toque, nao o atual — "Desligar" num golpe ligado. */}
+        <GameButton
+          variant={desligado ? 'primary' : 'secondary'}
+          block
+          className="justify-center"
+          onClick={() => {
+            controller.toggleAbility(poke.uid, ability.id)
+            onClose()
+          }}
+        >
+          {desligado ? 'Ligar na rotação' : 'Desligar da rotação'}
+        </GameButton>
+      </div>
+    </Sheet>
+  )
+}
+
+function Ficha({ rotulo, valor, verbete }: { rotulo: string; valor: string; verbete: VerbeteId }) {
+  return (
+    <div className="flex flex-col gap-[.1em] rounded-[.5em] border border-n800 px-[.6em] py-[.4em]">
+      <Palavra verbete={verbete} className="text-[.8em] text-n500">{rotulo}</Palavra>
+      <b className="font-medium tabular-nums">{valor}</b>
     </div>
   )
 }

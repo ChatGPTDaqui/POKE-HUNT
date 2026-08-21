@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest'
 
 import { ABILITIES_DATA } from './generated/abilities.generated'
 import { VFX_POR_GOLPE, todasAsTirasDeGolpe, vfxDoGolpe, repeticoesDoGolpe } from './moveVfx'
+import { TIRA_POR_ELEMENTO, orientacaoDaTira, type TiraDeVfx } from './vfxTiras'
 
 // `import.meta.glob` e não `node:fs`: confere contra o que o Vite realmente
 // empacota, não contra o disco cru. É a mesma escolha de `vfxTiras.test.ts`, e
@@ -88,6 +89,61 @@ describe('arte de efeito por golpe', () => {
       if (!v.aoe) continue
       expect(v.aoe.url, id).toBe(v.single.url)
       expect(v.aoe.quadros, id).toBe(v.single.quadros)
+    }
+  })
+})
+
+// Onde o desenho aponta depois da cadeia inteira que `drawQuadroDeTira` aplica:
+//   rotate(giroParaOAlvo) -> [scale(1,-1)] -> rotate(giroDaBase)
+// O vetor de entrada e a "frente" da arte no arquivo (o `anguloBaseGraus`).
+function direcaoFinal(tira: TiraDeVfx, anguloDoAlvo: number): number {
+  const o = orientacaoDaTira(tira, anguloDoAlvo)
+  const base = ((tira.direcional?.anguloBaseGraus ?? 0) * Math.PI) / 180
+  let x = Math.cos(base)
+  let y = Math.sin(base)
+  const g1 = Math.cos(o.giroDaBase), s1 = Math.sin(o.giroDaBase)
+  ;[x, y] = [x * g1 - y * s1, x * s1 + y * g1]
+  if (o.espelharY) y = -y
+  const g2 = Math.cos(o.giroParaOAlvo), s2 = Math.sin(o.giroParaOAlvo)
+  ;[x, y] = [x * g2 - y * s2, x * s2 + y * g2]
+  return Math.atan2(y, x)
+}
+
+// O INVARIANTE das duas camadas de arte direcional, e o que faltava quando o
+// desenho tinha um giro so: toda arte marcada `direcional` tem que apontar pro
+// alvo, com o alvo em QUALQUER lugar em volta.
+//
+// Ele nao e teorico. Com a regra antiga (espelho antes do giro, decidido pelo
+// giro resultante), 7 das 8 artes direcionais cadastradas erravam a mira numa
+// faixa do circulo — Mud Shot mandava lama pra esquerda com o inimigo em cima, e
+// o punho do Shadow Punch chegava pelas costas do alvo. Nada disso lanca erro:
+// a arte aparece, bonita, apontando pro lado errado.
+describe('mira da arte direcional', () => {
+  const DIRECIONAIS: [string, TiraDeVfx][] = [
+    ...Object.entries(TIRA_POR_ELEMENTO)
+      .filter(([, tira]) => tira.direcional)
+      .map(([nome, tira]): [string, TiraDeVfx] => [`tipo:${nome}`, tira]),
+    ...Object.entries(VFX_POR_GOLPE)
+      .filter(([, vfx]) => vfx.single.direcional)
+      .map(([nome, vfx]): [string, TiraDeVfx] => [`golpe:${nome}`, vfx.single]),
+  ]
+
+  it('existe arte direcional nas duas camadas (senao o teste passa de vazio)', () => {
+    expect(DIRECIONAIS.filter(([n]) => n.startsWith('tipo:')).length).toBeGreaterThan(0)
+    expect(DIRECIONAIS.filter(([n]) => n.startsWith('golpe:')).length).toBeGreaterThan(0)
+  })
+
+  it.each(DIRECIONAIS)('%s aponta pro alvo em toda volta', (nome, tira) => {
+    for (const graus of [0, 30, 60, 90, 120, 150, 179, -30, -60, -90, -120, -150]) {
+      const alvo = (graus * Math.PI) / 180
+      expect(direcaoFinal(tira, alvo), `${nome} com alvo em ${graus}°`).toBeCloseTo(alvo, 6)
+    }
+  })
+
+  it('arte sem angulo (area, golpe em si mesmo) nao gira nem espelha', () => {
+    for (const [nome, tira] of DIRECIONAIS) {
+      const o = orientacaoDaTira(tira, undefined)
+      expect([o.giroParaOAlvo, o.giroDaBase, o.espelharY], nome).toEqual([0, 0, false])
     }
   })
 })

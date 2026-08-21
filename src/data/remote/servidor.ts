@@ -358,8 +358,12 @@ export const servidor = {
   // Abrir sessao fecha a anterior e gera semente nova. Repetir depois de um
   // erro de rede geraria uma segunda sessao — sem duplicar ouro (so a mais
   // recente e flushada), mas descartando o intervalo da primeira.
+  // A resposta traz a SALA INICIAL decidida pelo servidor (appSessao.ts#abrirSessao).
+  // Sem ela o cliente construia o mundo com uma sala sorteada por ele, e o
+  // sub-bioma trocava logo depois de entrar, quando a do servidor chegava.
+  // `sala` ausente = servidor mais antigo, ou hunt sem sistema de salas.
   abrirSessao: (mapId: string, pokeUid: string) =>
-    pedir<{ sessaoId: string; mapId: string }>('/sessao/abrir', {
+    pedir<{ sessaoId: string; mapId: string; sala?: SalaAtiva | null }>('/sessao/abrir', {
       method: 'POST',
       body: JSON.stringify({ mapId, pokeUid }),
     }),
