@@ -80,6 +80,10 @@ function getOrLoadImage(url: string): HTMLImageElement {
  */
 export function primeImage(url: string): Promise<void> {
   return new Promise((resolve) => {
+    // `typeof Image === 'undefined'` acontece fora de navegador (teste Node,
+    // SSR): sem isso `new Image()` lanca sincrono dentro do executor e vira
+    // promise REJEITADA, quebrando o contrato "nunca rejeita" acima.
+    if (typeof Image === 'undefined') return resolve()
     const img = getOrLoadImage(url)
     if (img.complete) return resolve()
     img.addEventListener('load', () => resolve(), { once: true })

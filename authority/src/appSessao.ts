@@ -83,7 +83,11 @@ async function aceitaEstadoParcial(req: Request): Promise<boolean> {
 }
 
 async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response> {
-  if (url.pathname === '/saude') return json({ ok: true })
+  // Schema ecoado aqui pra CI confirmar pos-deploy que `jogo-dev` esta mesmo
+  // rodando com JOGO_SCHEMA_DEV=dev (nao com o fallback ou, pior, com o
+  // schema de outra function por engano de secret) -- ver docs/15,
+  // "Mudanca necessaria no gate da Parte 2".
+  if (url.pathname === '/saude') return json({ ok: true, schema: cfg.schema ?? 'public' })
 
   // Toda rota abaixo exige um jogador autenticado.
   const jogador = await autenticar(cfg, req)

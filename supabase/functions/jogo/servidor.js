@@ -50708,7 +50708,10 @@ async function aceitaEstadoParcial(req) {
 	return (await req.json().catch(() => null))?.parcial === true;
 }
 async function rotear(cfg, req, url) {
-	if (url.pathname === "/saude") return json({ ok: true });
+	if (url.pathname === "/saude") return json({
+		ok: true,
+		schema: cfg.schema ?? "public"
+	});
 	const jogador = await autenticar(cfg, req);
 	if (url.pathname === "/sessao/abrir" && req.method === "POST") return abrirSessao(cfg, jogador.id, req);
 	if (url.pathname === "/sessao/flush" && req.method === "POST") return flush(cfg, jogador.id, await aceitaEstadoParcial(req));
