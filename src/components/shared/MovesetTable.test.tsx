@@ -247,3 +247,76 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
     })
   })
 })
+
+// O POKE com a escolha TRAVADA — o bug relatado como "nao consigo trocar meu
+// golpe".
+//
+// A escolha gravada carregava chave que o learnset atual nao tem mais (regra do
+// Recordador na v6.8, rename de 15 chaves na migracao do Ultra Sun). Ela contava
+// pro teto de 4 sem aparecer em linha nenhuma da tabela: a tela dizia "4/4" com
+// 3 botoes numerados, adicionar batia em "Maximo de 4 golpes — desmarque um
+// primeiro", e nao havia o que desmarcar. Pior, cada clique mandava a chave orfa
+// de volta pra RPC `definir_golpes_ativos`, que recusava a edicao INTEIRA.
+//
+// A invariante que fecha os dois lados: a lista que a tela mostra e a lista que
+// ela manda sao a mesma coisa que o combate usa (`golpesUtilizaveis`), entao
+// todo slot ocupado tem um botao clicavel e nenhuma chave invisivel vai pro
+// servidor.
+describe('MovesetTable — escolha gravada com golpe orfao', () => {
+  const orfao = 'golpe_que_saiu_do_catalogo'
+
+  /** Quantos botoes da coluna Usar estao numerados (= slots ocupados visiveis). */
+  function slotsNumerados(): string[] {
+    return screen.getAllByRole('button')
+      .map((b) => b.textContent ?? '')
+      .filter((t) => /^[1-9]$/.test(t))
+      // A tabela lista por nivel de aprendizado, nao pela ordem da fila.
+      .sort()
+  }
+
+  it('a contagem bate com o numero de slots visiveis na tela', () => {
+    const validos = activeAbilitiesPadrao(ESPECIE, NIVEL).slice(0, 2)
+    const poke = pokeDoJogador({ activeAbilities: [orfao, ...validos] })
+    useGameStateStore.setState({ team: [poke] })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+    // 3 chaves gravadas, uma delas orfa: o slot dela e recomposto com golpe que
+    // o POKE conhece de verdade — a escolha nao encolhe, e o que a tela conta
+    // tem botao correspondente.
+    expect(screen.getByText('3/4')).toBeTruthy()
+    expect(slotsNumerados()).toEqual(['1', '2', '3'])
+  })
+
+  it('a edicao nao leva a chave orfa de volta pro servidor', async () => {
+    const validos = activeAbilitiesPadrao(ESPECIE, NIVEL).slice(0, 2)
+    const poke = pokeDoJogador({ activeAbilities: [orfao, ...validos] })
+    useGameStateStore.setState({ team: [poke] })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+    await userEvent.click(botaoUsar(nomeDoGolpe(validos[0]))!)
+
+    expect(setActiveAbilities).toHaveBeenCalledTimes(1)
+    const [, lista] = setActiveAbilities.mock.calls[0]
+    expect(lista).not.toContain(orfao)
+    for (const key of lista as string[]) {
+      expect(poke.unlockedAbilities.includes(key) || key === BASIC_ATTACK.id).toBe(true)
+    }
+  })
+
+  it('com os 4 slots cheios, TODOS tem botao pra desmarcar — nao ha mais beco sem saida', async () => {
+    const validos = activeAbilitiesPadrao(ESPECIE, NIVEL).slice(0, 3)
+    const poke = pokeDoJogador({ activeAbilities: [...validos, orfao] })
+    useGameStateStore.setState({ team: [poke] })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+    // Antes: "4/4" com 3 numeros. Agora o quarto slot e um golpe real, visivel
+    // e clicavel — o jogador tem por onde sair.
+    expect(screen.getByText('4/4')).toBeTruthy()
+    expect(slotsNumerados()).toEqual(['1', '2', '3', '4'])
+
+    await userEvent.click(botaoUsar(nomeDoGolpe(validos[0]))!)
+    const [, lista] = setActiveAbilities.mock.calls[0]
+    expect(lista).toHaveLength(3)
+    expect(lista).not.toContain(orfao)
+  })
+})
