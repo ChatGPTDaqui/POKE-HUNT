@@ -316,3 +316,31 @@ describe('MovesetTable — reordenar a fila', () => {
     expect(screen.getByText(/Ordem de uso/i)).toBeTruthy()
   })
 })
+
+describe('MovesetTable — aviso ao ficar sem golpe', () => {
+  it('tirar o ULTIMO golpe avisa que o POKE deixa de atacar, e ainda assim obedece', async () => {
+    const unico = activeAbilitiesPadrao(ESPECIE, NIVEL)[0]
+    const poke = pokeDoJogador({ activeAbilities: [unico] })
+    useGameStateStore.setState({ team: [poke] })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+    await userEvent.click(botaoUsar(nomeDoGolpe(unico))!)
+
+    // Avisa, mas nao barra: montar a build sem restricao e pedido explicito
+    // registrado em data/activeAbilities.ts.
+    expect(useToastStore.getState().toasts.some((t) => /nao ataca/i.test(t.message))).toBe(true)
+    expect(setActiveAbilities).toHaveBeenCalledWith(poke.uid, [])
+  })
+
+  it('tirar um golpe quando ainda sobra outro nao avisa nada', async () => {
+    const escolhidos = activeAbilitiesPadrao(ESPECIE, NIVEL).slice(0, 2)
+    const poke = pokeDoJogador({ activeAbilities: escolhidos })
+    useGameStateStore.setState({ team: [poke] })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+    await userEvent.click(botaoUsar(nomeDoGolpe(escolhidos[0]))!)
+
+    expect(useToastStore.getState().toasts.some((t) => /nao ataca/i.test(t.message))).toBe(false)
+    expect(setActiveAbilities).toHaveBeenCalledWith(poke.uid, [escolhidos[1]])
+  })
+})

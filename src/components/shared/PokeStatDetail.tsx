@@ -401,6 +401,17 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
       useToastStore.getState().pushToast(`Maximo de ${MAX_ACTIVE_ABILITIES} golpes — desmarque um primeiro.`, 'info', 'world')
       return
     }
+    // TIRAR O ULTIMO e permitido — a liberdade de montar a build sem restricao
+    // e pedido explicito registrado em data/activeAbilities.ts —, mas nao pode
+    // ser silencioso: sem golpe nenhum o POKE nao ataca, ponto
+    // (combatSystem#pickAbility nao tem fallback pro jogador desde
+    // 2026-08-18). O sintoma aparece longe daqui, dentro da hunt, como um POKE
+    // parado em campo sem nada na tela explicando — que le como jogo travado.
+    if (ja && ativos.length === 1) {
+      useToastStore.getState().pushToast(
+        'Sem nenhum golpe escolhido seu POKE nao ataca. Escolha ao menos um.', 'error', 'world',
+      )
+    }
     controller.setActiveAbilities(poke.uid, ja ? ativos.filter((k) => k !== key) : [...ativos, key])
   }
 
