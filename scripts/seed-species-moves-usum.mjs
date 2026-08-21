@@ -35,7 +35,7 @@ if (schema === 'public' && !args.includes('--confirmar-public')) {
   process.exit(1);
 }
 
-// SPECIES vem do bundle do motor ja existente (server/engine/headless.js,
+// SPECIES vem do bundle do motor ja existente (authority/engine/headless.js,
 // gerado por `npm run build:engine`, commitado). ABILITIES/BASIC_ATTACK NAO
 // sao exportados por ele — precisam de um bundle proprio, pequeno, porque
 // `data/abilities.ts` usa o alias `@/` que so o Vite resolve. Construido aqui
@@ -83,7 +83,7 @@ export default defineConfig({
 
 const { bundlePath: SEED_BUNDLE, cleanup: cleanupAbilitiesBundle } = buildAbilitiesBundle();
 
-const { SPECIES } = await import(pathToFileURL(path.join(ROOT, 'server/engine/headless.js')).href);
+const { SPECIES } = await import(pathToFileURL(path.join(ROOT, 'authority/engine/headless.js')).href);
 const { ABILITIES, BASIC_ATTACK } = await import(pathToFileURL(SEED_BUNDLE).href);
 
 const DEX_RE = /Nº\s*(\d+)/;
