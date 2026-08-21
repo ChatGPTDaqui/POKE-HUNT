@@ -127,12 +127,43 @@ const ALL_ABILITIES_SOURCE = { ...ABILITIES_DATA, ...TYPED_AOE_MOVES }
 // Foresight/Miracle Eye NAO entram aqui: o efeito deles (ignorar uma
 // imunidade de tipo + a evasao do alvo) e resolvido em combatSystem.ts via
 // `entity.revelado`, fora do vocabulario de statChanges.
+// CAUSA RAIZ, e por que esta lista tende a crescer (PH-70): o gerador do
+// catalogo (`scripts/generate-catalog-usum.js`) nao emite mudanca de estagio de
+// PRECISAO nem de EVASAO. Todo golpe dessas duas familias chega vazio e precisa
+// entrar aqui a mao — nao e descuido de uma vez, e uma categoria inteira que o
+// gerador nao expressa. Conserta-lo obriga a rodar `usum:baixar` de novo (rede) e
+// rebate o catalogo inteiro; fica como divida registrada na issue.
+//
+// COMO CONFERIR se falta alguem: golpe com `_categoriaPokeapi` `damage-lower` ou
+// `net-good-stats` e `mudancasDeStat: []` no scripts/usum/catalog.json.
 const STAT_CHANGE_OVERRIDES: Partial<Record<string, Pick<Ability, 'statChanges' | 'statChance' | 'statTarget'>>> = {
   sand_attack: { statChanges: [{ stat: 'accuracy', estagios: -1 }], statChance: 100 },
   smokescreen: { statChanges: [{ stat: 'accuracy', estagios: -1 }], statChance: 100 },
   kinesis: { statChanges: [{ stat: 'accuracy', estagios: -1 }], statChance: 100 },
   double_team: { statChanges: [{ stat: 'evasion', estagios: 1 }], statChance: 100, statTarget: 'self' },
   minimize: { statChanges: [{ stat: 'evasion', estagios: 2 }], statChance: 100, statTarget: 'self' },
+  // PH-70: os 7 abaixo tinham a MESMA causa dos 5 acima e ficaram de fora.
+  // Chance de cada um conforme os jogos (Gen VII).
+  mud_slap: { statChanges: [{ stat: 'accuracy', estagios: -1 }], statChance: 100 },
+  mud_bomb: { statChanges: [{ stat: 'accuracy', estagios: -1 }], statChance: 30 },
+  mirror_shot: { statChanges: [{ stat: 'accuracy', estagios: -1 }], statChance: 30 },
+  muddy_water: { statChanges: [{ stat: 'accuracy', estagios: -1 }], statChance: 30 },
+  octazooka: { statChanges: [{ stat: 'accuracy', estagios: -1 }], statChance: 50 },
+  leaf_tornado: { statChanges: [{ stat: 'accuracy', estagios: -1 }], statChance: 50 },
+  // Sweet Scent derruba a EVASAO do alvo em 2 estagios (Gen VI+). Era o unico
+  // dos 7 completamente inerte: poder 0 e nenhum efeito, ou seja slot morto em
+  // 13 especies.
+  sweet_scent: { statChanges: [{ stat: 'evasion', estagios: -2 }], statChance: 100 },
+}
+
+// Patch por cima do catalogo gerado: golpe de dano com STATUS que o gerador
+// descartou (PH-70). `status` guarda um valor so, e o Tri Attack tem tres —
+// QUAL dos tres ele tenta em cada hit e sorteado em
+// combatSystem.ts#STATUS_SORTEADO. O valor abaixo e so o que faz o golpe entrar
+// no pipeline de efeito secundario (Shield Dust, Serene Grace, chance); o
+// sorteio substitui antes de aplicar.
+const STATUS_OVERRIDES: Partial<Record<string, Pick<Ability, 'status' | 'statusChance'>>> = {
+  tri_attack: { status: 'burn', statusChance: 20 },
 }
 
 // Patch por cima do catalogo gerado (Ultra Sun): estes 4 golpes vinham como
@@ -157,6 +188,7 @@ export const ABILITIES: Record<string, Ability> = Object.fromEntries(
       {
         ...ability,
         ...STAT_CHANGE_OVERRIDES[key],
+        ...STATUS_OVERRIDES[key],
         ...HAZARD_OVERRIDES[key],
         target: isAoe ? 'aoe' : 'single',
         radius: isAoe ? AOE_RADIUS : undefined,
