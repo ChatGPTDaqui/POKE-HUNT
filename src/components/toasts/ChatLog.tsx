@@ -24,7 +24,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { TextoComRealce } from '@/components/shared/TextoComRealce'
 import { cn } from '@/lib/utils'
 
-const TABS: { key: ChatTab; label: string }[] = [
+export const TABS: { key: ChatTab; label: string }[] = [
   { key: 'mundo', label: 'Mundo' },
   { key: 'sistema', label: 'Sistema' },
   { key: 'trade', label: 'Comercio' },
@@ -40,8 +40,6 @@ const TYPE_COLOR: Record<ToastType, string> = {
   'capture-fail': 'var(--color-warn)',
   info: 'var(--color-n300)',
 }
-
-const SEM_LINHAS: never[] = []
 
 function horaDe(iso: string): string {
   const d = new Date(iso)
@@ -93,7 +91,8 @@ function LinkAnexo({ anexo }: { anexo: AnexoChat }) {
   )
 }
 
-function AbaMundo() {
+export function AbaMundo() {
+  const pontoGrosso = useUiStore((s) => s.coarsePointer)
   const mensagens = useChatStore((s) => s.mensagens)
   const rascunho = useChatStore((s) => s.rascunho)
   const setRascunho = useChatStore((s) => s.setRascunho)
@@ -138,20 +137,61 @@ function AbaMundo() {
           name="chat-mundo"
           value={rascunho}
           maxLength={240}
-          placeholder="Falar no mundo (Shift+clique num item/POKE pra linkar)"
+          // O "Shift+clique pra linkar" so existe com teclado; no celular era
+          // uma instrucao morta ocupando a unica linha de dica do campo.
+          placeholder={pontoGrosso ? 'Falar no mundo' : 'Falar no mundo (Shift+clique num item/POKE pra linkar)'}
           onChange={(e) => setRascunho(e.target.value)}
-          className="min-w-0 flex-1 rounded-[.4em] border border-n700 bg-n900 px-[.5em] py-[.3em] font-[inherit] text-[.76em] text-foreground placeholder:text-n600 focus-visible:border-n500 focus-visible:outline-none"
+          // `jogo-campo`/`jogo-botao`: sao os ganchos do alvo minimo de toque
+          // (index.css). Este par nao usa os primitivos do jogo — e um form
+          // proprio — e por isso ficou de fora da varredura: no celular o campo
+          // media 22px de altura, metade do minimo, no unico lugar do jogo em
+          // que se digita.
+          className="jogo-campo min-w-0 flex-1 rounded-[.4em] border border-n700 bg-n900 px-[.5em] py-[.3em] font-[inherit] text-[.76em] text-foreground placeholder:text-n600 focus-visible:border-n500 focus-visible:outline-none"
         />
         <button
           type="submit"
           disabled={carregando || !rascunho.trim()}
           aria-label="Enviar"
-          className="flex h-[1.8em] w-[1.8em] shrink-0 cursor-pointer items-center justify-center rounded-[.4em] border border-n700 text-n300 hover:border-primary disabled:cursor-not-allowed disabled:opacity-40"
+          className="jogo-botao jogo-botao-icone flex h-[1.8em] w-[1.8em] shrink-0 cursor-pointer items-center justify-center rounded-[.4em] border border-n700 text-n300 hover:border-primary disabled:cursor-not-allowed disabled:opacity-40"
         >
           <PaperPlaneRight />
         </button>
       </form>
     </>
+  )
+}
+
+/**
+ * Lista de linhas de UMA aba (tudo menos "Mundo", que tem campo de digitacao e
+ * fonte propria). Extraida da janela porque o chat do celular mostra o mesmo
+ * conteudo dentro de um sheet — duas molduras, um corpo so.
+ */
+export function LinhasDaAba({ tab }: { tab: Exclude<ChatTab, 'mundo'> }) {
+  const chatLines = useToastStore((s) => s.chatLines)
+  const lines = chatLines[tab]
+  const linesRef = useRef<HTMLDivElement>(null)
+
+  // Rola pro fim sempre que chegar linha nova.
+  useEffect(() => {
+    const el = linesRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [lines])
+
+  return (
+    <div
+      ref={linesRef}
+      className="flex min-h-0 flex-1 flex-col gap-[.25em] overflow-auto overscroll-contain px-[.55em] pt-[.3em] pb-[.6em] text-[.76em]"
+    >
+      {lines.length === 0 ? (
+        <div className="text-n500">Nada por aqui ainda.</div>
+      ) : (
+        lines.map((line) => (
+          <div key={line.id} style={{ color: TYPE_COLOR[line.type] ?? TYPE_COLOR.info }}>
+            <TextoComRealce texto={line.message} realce={line.realce} />
+          </div>
+        ))
+      )}
+    </div>
   )
 }
 
@@ -161,36 +201,21 @@ export function ChatLog() {
   const open = useUiStore((s) => s.chatOpen)
   const setOpen = useUiStore((s) => s.setChatOpen)
   const footerHeight = useUiStore((s) => s.footerHeight)
-  const chatLines = useToastStore((s) => s.chatLines)
-  const { narrow, colStack, chatNarrow } = useBreakpoints()
+  const { narrow, chatNarrow } = useBreakpoints()
   const { pos, onPointerDown } = useWindowDrag('chat')
-  const linesRef = useRef<HTMLDivElement>(null)
-
-  // Constante compartilhada, e nao `[]` inline: um literal novo a cada render
-  // faria o efeito de auto-scroll abaixo rodar em TODO render (a aba "Mundo"
-  // tem o proprio scroll, esta lista nem existe la).
-  const lines = activeTab === 'mundo' ? SEM_LINHAS : chatLines[activeTab]
-
-  // Rola pro fim sempre que chegar linha nova na aba visivel.
-  useEffect(() => {
-    const el = linesRef.current
-    if (el) el.scrollTop = el.scrollHeight
-  }, [lines])
 
   // O chat ganhou uma aba a mais e um campo de digitacao: nas larguras onde ele
   // ja era estreito, 4 abas em `13em` quebravam em duas fileiras e comiam a
   // area de leitura.
   const width = narrow ? '16.5em' : chatNarrow ? '15em' : '21em'
-  // Abaixo de 780px o menu do rodape se aproxima do chat (canto inferior
-  // esquerdo) e cresce em fileiras. Em vez de um offset `em` chutado (que ja
-  // deixou a barra de golpes por baixo do chat em 390px, mesmo depois de
-  // ajustada a mao duas vezes), o chat sobe pela altura REAL do rodape, medida
-  // no HudLayer. Acima de 780px o rodape e uma fileira central estreita, longe
-  // do chat, entao ele fica colado embaixo. O fallback so vale ate a primeira
-  // medida chegar.
-  const bottom = colStack
-    ? footerHeight ? `calc(${footerHeight}px + .8em)` : (narrow ? '13.5em' : '10.6em')
-    : '.8em'
+  // SEMPRE acima do rodape medido, e nao so em tela estreita. A doca da HUD
+  // nova ocupa ate 52em centralizados: em 1440px isso vai de x=202 a x=1237, e
+  // o chat ancorado no canto inferior esquerdo cobria os slots Equipe e
+  // Mochila — verificado na tela, com o rotulo "Mochila" aparecendo cortado
+  // atras da janela. A regra antiga ("acima de 780px o rodape e uma fileira
+  // central estreita, longe do chat") descrevia o menu de circulos, que nao
+  // existe mais. O fallback so vale ate a primeira medida chegar.
+  const bottom = footerHeight ? `calc(${footerHeight}px + .8em)` : (narrow ? '13.5em' : '10.6em')
   const style: CSSProperties = pos
     ? { left: pos.x, top: pos.y, width }
     : { left: '.8em', bottom, width }
@@ -200,8 +225,8 @@ export function ChatLog() {
       data-window="chat"
       style={{ ...style, height: open ? '21em' : 'auto' }}
       className={cn(
-        'hud-surface pointer-events-auto absolute z-[21] flex max-h-[72vh] max-w-[min(28em,94vw)] min-w-[12em]',
-        'flex-col overflow-hidden rounded-xl border border-n800 shadow-lg',
+        'vidro-flutua pointer-events-auto absolute z-[21] flex max-h-[72vh] max-w-[min(28em,94vw)] min-w-[12em]',
+        'flex-col overflow-hidden rounded-xl',
         open && 'resize',
       )}
     >
@@ -234,24 +259,7 @@ export function ChatLog() {
         </button>
       </div>
 
-      {open && (activeTab === 'mundo' ? (
-        <AbaMundo />
-      ) : (
-        <div
-          ref={linesRef}
-          className="flex min-h-0 flex-1 flex-col gap-[.25em] overflow-auto px-[.55em] pt-[.3em] pb-[.6em] text-[.76em]"
-        >
-          {lines.length === 0 ? (
-            <div className="text-n500">Nada por aqui ainda.</div>
-          ) : (
-            lines.map((line) => (
-              <div key={line.id} style={{ color: TYPE_COLOR[line.type] ?? TYPE_COLOR.info }}>
-                <TextoComRealce texto={line.message} realce={line.realce} />
-              </div>
-            ))
-          )}
-        </div>
-      ))}
+      {open && (activeTab === 'mundo' ? <AbaMundo /> : <LinhasDaAba tab={activeTab} />)}
     </div>
   )
 }

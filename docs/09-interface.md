@@ -33,100 +33,170 @@ Aquele estado é propriedade do servidor (a resposta sobrescreve o objeto inteir
 preferência de vídeo gravada lá seria apagada no primeiro flush. Vive em `localStorage`
 próprio, por aparelho (`uiStore`).
 
-## Breakpoints em JS, não em media query
+## Regimes de dispositivo, em JS
 
-`useBreakpoints()` lê `viewportWidth`, alimentado por **um** listener de resize compartilhado
-por 8 superfícies.
+`useDeviceMode()` (`uiStore`) le largura, **altura** e `(pointer: coarse)`, alimentados por um
+unico listener compartilhado, e devolve um de tres regimes:
 
-São decisões de **estado**, não só de estilo — em `<640` o card de taxas não encolhe, ele
-**some**, e o dado reaparece como chip no bloco central, em outro ponto da árvore.
+| Regime | Quando | Layout |
+|---|---|---|
+| `compacto` | largura `<820` e nao deitado | Trilho no topo, doca no rodape, paineis em sheet |
+| `deitado` | altura `<520`, mais larga que alta, com dedo (ou `<1024`) | Igual, sem rotulo na doca, doca em cluster de 38em |
+| `amplo` | o resto | Mesmo trilho e mesma doca, mais largos, com taxas e treinador no trilho, paineis em janela |
 
-| Largura | O que muda |
-|---|---|
-| `<1180` | Chat estreita de 20em para 13em (não encostar no menu central) |
-| `<1140` | Bloco central desce para baixo dos cards laterais |
-| `<780` | Chat e botão Auto sobem para cima do menu; colunas duplas dos painéis empilham |
-| `<640` | Card de taxas vira chip, treinador só avatar, botões laterais só ícone, rótulos do menu somem |
+**E uma arvore so.** O amplo e o compacto com mais espaco — nao existe layout de desktop
+separado. A alternativa (duas arvores) foi recusada porque toda feature nova custaria dobrado, e
+porque o celular volta a ser o caso degradado no primeiro descuido.
 
-O mesmo listener **limpa as posições de janela arrastadas** (`winPos`): uma janela largada no
-canto direito de uma tela larga fica inalcançável quando ela encolhe, e sem barra de título
-visível não há como trazê-la de volta.
+**A altura entrou na conta em 2026-08-18.** O desenho anterior decidia tudo por largura, e por
+isso um celular deitado (844x390) caia no regime desktop com 390px de altura util: cards do topo
+e rodape sobrepostos, sem nenhum breakpoint acusando.
 
-## A única media query de layout do projeto
+`(pointer: coarse)` e separado da largura de proposito. Uma janela de navegador estreita num
+desktop **nao** e um celular (hover funciona, alvo de 32px e clicavel) e um tablet largo **nao**
+e um desktop. Ele decide alvo de toque e o caminho de informacao que dependia de hover.
+
+O mesmo listener **limpa as posicoes de janela arrastadas** (`winPos`) — mas so numa mudanca
+ESTRUTURAL (largura, ou altura > 120px). A medida vem do `visualViewport`, e a barra de URL do
+celular muda a altura o tempo todo: com o `winPos: {}` incondicional, uma janela arrastada
+voltava sozinha pro centro enquanto o jogador rolava uma lista dentro dela.
+
+`useBreakpoints()` ainda existe e ainda e lido pelo `ChatLog`. E a API anterior, por largura; nao
+use em codigo novo.
+
+## A unica media query de layout do projeto
 
 ```css
 @media (max-width: 640px) {
-  /* multiplicador manual limitado a min(var(--hud-scale), 1) */
-  /* teto do clamp reduzido */
+  /* teto do clamp reduzido; multiplicador manual limitado a min(var(--hud-scale), 1.2) */
 }
 ```
 
-`--hud-scale` até 1.4 numa tela estreita estourava a HUD (card do POKE cobrindo o treinador,
-chat cobrindo o bloco central). O multiplicador manual multiplica um `font-size` que em
-`<=640px` já está no piso do `clamp`.
+E legitima porque `font-size` e estilo puro, nao posicionamento — "regime de layout em JS, nao
+CSS" continua valendo para o resto.
 
-É legítima porque `font-size` é estilo puro, não posicionamento — "breakpoint de layout em JS,
-não CSS" continua valendo para o resto.
+O teto do multiplicador foi 1 ate a HUD mobile e voltou para **1.2**. Ele estava travado porque o
+layout antigo (cinco ancoras negociando a mesma faixa) ja colidia no tamanho normal; trilho e
+doca ocupam a largura inteira e nao disputam espaco com ninguem.
 
-**Tradeoff assumido:** sobrepõe parcialmente a preferência do jogador. A alternativa — honrar
-1.4 com a HUD estourada, ou zerar o slider no mobile — é pior. `HUD_SCALE_MIN` desceu para 0.7
-para que quem jogava confortável no tamanho antigo tenha como voltar.
+## O rodape e MEDIDO, nao estimado
 
-## O rodapé é MEDIDO, não estimado
+`HudLayer` poe um `ResizeObserver` no wrapper do rodape e grava a altura em
+`uiStore.footerHeight` (guarda anti-loop: so faz `set` se o valor arredondado mudou). A altura
+muda com o regime, com o numero de golpes do POKE e com o `hudScale` — nenhuma constante em `em`
+fecha os tres eixos.
 
-Chat e botão Auto ancoravam por offset `em` fixo. Foi ajustado à mão **duas vezes** e ainda
-estava errado: a altura do rodapé (barra de golpes + menu) muda com **dois** eixos — a largura
-(o menu quebra em mais fileiras) **e** o `hudScale`. Nenhuma constante em `em` fecha os dois.
+Quem ancora nesse numero: o **sheet** (para em cima da doca em vez de cobri-la), o chat flutuante
+e o `CampoOverlay` (os avisos de revive, BOSS e contagem do Lance eram `fixed inset-0` e cobriam
+a barra de golpes).
 
-`HudLayer` põe um `ResizeObserver` no wrapper bottom-center e grava a altura em
-`uiStore.footerHeight` (guarda anti-loop: só faz `set` se o valor arredondado mudou). Chat e
-Auto ancoram em `calc(${footerHeight}px + folga)` quando empilhado (`<780`), com o `em` antigo
-só como fallback até a primeira medida.
+O chat flutuante ancora acima do rodape em **qualquer** largura. A regra antiga — "acima de 780px
+o rodape e uma fileira central estreita, longe do chat" — descrevia o menu de circulos, que nao
+existe mais: com a doca de ate 52em centralizada, em 1440px a janela do chat cobria os slots
+Equipe e Mochila.
 
-Acima de 780px o rodapé é uma fileira central estreita longe dos cantos, então o caminho
-medido só vale no regime empilhado.
+### Como medir colisao de HUD
 
-`CampoOverlay` usa o mesmo `footerHeight`: os avisos de revive, BOSS e contagem do Lance eram
-`fixed inset-0` e cobriam a barra de golpes e o menu.
+Regra, para repetir: coletar os `getBoundingClientRect` de toda superficie com `z-index` 18-22 (a
+faixa da HUD), remover as contidas em outra maior (wrappers compartilhados dao falso-positivo) e
+cruzar par a par. **Overlap real e o que sobra.**
 
-### Como medir colisão de HUD
+Para alvo de toque, a mesma ideia com outro criterio: varrer `button, select, input, a` dentro do
+corpo do painel e listar quem tem `height < 40`. Foi assim que se soube que 157 dos 341 alvos da
+Loja e 75 dos 75 da Mochila estavam abaixo do minimo — numero, nao impressao.
 
-Regra, para repetir: coletar os `getBoundingClientRect` de toda superfície com `z-index` 18-22
-(a faixa da HUD), remover as contidas em outra maior (wrappers compartilhados dão
-falso-positivo) e cruzar par a par. **Overlap real é o que sobra.**
-
-Screenshot sozinho engana — o wrapper pode sobrepor sem o conteúdo, centralizado, chegar a
+Screenshot sozinho engana — o wrapper pode sobrepor sem o conteudo, centralizado, chegar a
 colidir.
 
-**Armadilha de ferramenta:** `resize_page` do Chrome DevTools trava em **500px** (mínimo da
-janela do Chrome). Todo teste que parava em ~492-500px não testava celular nenhum. Só
-`emulate` com device metrics override (`390x844x3,mobile,touch`) chega num aparelho de
-verdade. Em 500px o layout quase fecha; abaixo disso quebrava.
+**Armadilha de ferramenta:** `resize_page` do Chrome DevTools trava em **500px** (minimo da
+janela do Chrome). Todo teste que parava em ~492-500px nao testava celular nenhum. So `emulate`
+com device metrics override (`390x844x3,mobile,touch`) chega num aparelho de verdade.
 
-**Não mexido, com motivo:** o overlap wrapper do bloco central × coluna lateral. Reservar
-espaço à direita faria a linha da carteira transbordar no celular — ela precisa da largura
-cheia. Com o conteúdo em `justify-center`, ele não alcança os ícones laterais; o wrapper
-sobrepõe, o conteúdo não. O `z-index` do bloco (19) é menor que o da coluna (20), então nem
-clique é roubado.
+## Duas superficies permanentes: trilho e doca
 
-## Janelas
+`StatusRail` (topo) e `ActionDock` (rodape) sao a HUD inteira. Tudo o mais e contextual (chip de
+sala, chip de evolucao) ou aberto por toque.
 
-`components/game/GameWindow.tsx` é a moldura de todo painel e modal (menu, perfil, relatório
-offline).
+O desenho anterior tinha cinco ancoras independentes nas bordas — `ActivePokeCard` + `RatesCard`
+a esquerda, `CenterBlock` no centro (que em `<1140` DESCIA para cima dos outros dois),
+`TrainerCard` + `SideMenuColumn` a direita, `MainMenu` + `AbilityHud` no rodape, `AutoButton`
+solto e `ChatLog` flutuante. Cada uma se posicionava sozinha e negociava com as vizinhas por
+breakpoint. Em 390px elas se cobriam: medido no aparelho, o card do treinador ficava por cima do
+HP do POKE, e o chat ocupava 12% da tela em cima do campo de batalha.
 
-Arrastar (posição no `uiStore`, `hooks/useWindowDrag.ts` com eventos `pointer*`, funciona no
-toque), redimensionar (`resize: both` do CSS, sem JS), barra de título e rodapé fora da área
-rolável.
+**O criterio do que entra no trilho:** o dado muda sozinho e o jogador olha para ele sem ter
+pedido. HP, XP, carteira. Local, Pokedex, taxas e o perfil do treinador moram atras de um toque na
+gaveta de detalhes — nao porque importem menos, mas porque nao mudam entre um olhar e outro.
 
-**Dois detalhes que não são cosméticos:**
+Duas coisas SAIRAM do trilho depois de medir o que elas custavam na faixa mais disputada da tela:
+o contador da Pokedex (que ganhou slot proprio na barra e continua na gaveta) e, **so no
+compacto**, o avatar do treinador — sem largura para o nome e o nivel, ele era um icone generico
+gastando ~46px permanentes; na gaveta ele cabe com os dois escritos. Em `amplo` e `deitado` a
+largura sobra e o avatar fica onde estava.
 
-- **A largura padrão é escrita uma vez por `ref`, nunca no `style` reativo.** No style, cada
-  quadro de arrasto reescreveria `style.width` — a mesma propriedade que `resize: both`
-  grava — desfazendo o redimensionamento do jogador.
-- **`max-height: min(86vh, 100vh - 12em)`.** O primeiro termo é o teto do design; o segundo
-  impede que o rodapé da janela vire área morta atrás do menu inferior.
+**O criterio da doca:** oito slots FIXOS, iguais nos tres regimes — Equipe, Mochila, Pokedex,
+Hunt, Loja, Hospital, Mercado, Mais. Nada entra ou sai por largura de tela: a posicao se aprende
+uma vez. Hunt tem peso proprio (pilula do acento, glifo maior que os vizinhos) por trocar a CENA
+do jogo; Hospital e a outra metade do par, e fora de uma hunt aparece marcado como destino atual
+em vez de viajar para lugar nenhum.
 
-Larguras por tela: Loja 52em, Bestiário 56em, Calculadora 46em, Correio 40em, padrão 36em.
+**Hunt nao fica no centro exato da barra, e nao da para ficar.** Sao 7 destinos alem dele — numero
+impar — entao qualquer divisao deixa 3 de um lado e 4 do outro, e o centro do slot do meio cai meio
+slot a esquerda do centro da barra (medido: 18,4px em 390px). As unicas saidas exatas sao 6 ou 8
+destinos alem do Hunt. A alternativa de grupos com larguras diferentes para compensar foi calculada
+e rejeitada: joga os 4 slots da direita para 38,7px em 390px e 31px em 320px, abaixo do minimo de
+toque.
+
+**O slot da doca nao usa `alvo-toque`.** A classe traz `min-width: 44px`, e com 8 slots isso
+ESTOURA a barra: medido em 320px, os oito somavam 384px numa barra de 304 e "Mais" saia da tela
+inteira — flex nao encolhe abaixo de um minimo em px, e nao ha erro nenhum, so um botao invisivel.
+O piso ali e so de ALTURA (44px); a largura e 1/8 da barra: 44px em 390px, 34px em 320px.
+
+Rotulo em todo slot, exceto deitado: sem hover nao existe `title`, e icone sozinho no toque e
+adivinhacao. O tamanho e `min(.58em, 2.3vw)` e nao `.58em` seco — com 34px de largura util,
+"Hospital" e "Mercado" truncavam para "Hospit…". Conferido: em 320px nenhum dos oito trunca.
+
+## Janela no desktop, sheet no celular
+
+`components/game/Painel.tsx` escolhe a moldura pelo regime: `GameWindow` (arrastavel,
+redimensionavel) em `amplo`, `Sheet` (bottom sheet) em `compacto`/`deitado`. Quem abre nao sabe
+em qual dos dois esta.
+
+A escolha vive em UM lugar de proposito. Repetida por tela, a proxima janela nasceria so com o
+caminho do desktop — foi exatamente assim que perfil do POKE, perfil do treinador, Hunt Analyzer
+e painel Auto continuaram janelas arrastaveis no celular depois de os paineis de menu ja terem
+virado sheet.
+
+**Sheet — quatro coisas que nao sao cosmeticas:**
+
+- **Para ACIMA da doca** (`bottom: footerHeight`). A doca e o unico caminho de navegacao no
+  celular; um painel que a cobre obriga a fechar antes de trocar de tela.
+- **Altura em % do pai, nunca `vh`.** `vh` ignora os recortes do aparelho e a barra de URL. A
+  primeira versao (`vh` mais rodape medido em px) estourava a tela para cima: cobria o trilho e
+  escondia a propria alca.
+- **Deitado a conta inverte.** Com 390px de altura, reservar 4.4em pro trilho e parar acima do
+  rodape inteiro deixava 109px de conteudo — um card e meio. La o sheet cobre o trilho (sobra so a
+  folga da alca), para em cima da BARRA DE NAVEGACAO em vez do rodape todo (`uiStore#navHeight`,
+  medida a parte) e o cabecalho perde uma linha. Medido: 109px -> 268px.
+- **Desenhado por portal em `#camada-hud`.** Um `absolute` resolve contra o ancestral posicionado
+  mais proximo, e um sheet declarado dentro da doca herdava a largura dela. O portal tambem
+  reconquista o no quando ele sai do documento (remount da arvore) — com a referencia velha
+  guardada em estado, o painel desenhava num no solto: a doca marcava a tela como aberta e nada
+  aparecia.
+
+**GameWindow — dois detalhes que continuam valendo no desktop:**
+
+- **A largura padrao e escrita uma vez por `ref`, nunca no `style` reativo.** No style, cada
+  quadro de arrasto reescreveria `style.width` — a mesma propriedade que `resize: both` grava —
+  desfazendo o redimensionamento do jogador.
+- **`max-height: min(86vh, 100vh - 12em)`.** O primeiro termo e o teto do design; o segundo
+  impede que o rodape da janela vire area morta atras da doca.
+
+Fechar-ao-tocar-fora deixou de ser amarrado ao escurecimento: o painel Auto nunca escureceu o
+jogo e sempre fechou ao clicar fora (`fecharAoTocarFora`).
+
+Larguras de JANELA por tela (ignoradas no sheet, que ocupa a largura da tela): Loja 52em,
+Bestiario 56em, Calculadora 46em, Correio 40em, padrao 36em.
 
 ### O backdrop comia o clique do menu
 
@@ -146,6 +216,212 @@ fecharia (listener) e reabriria (onClick) no mesmo gesto.
 **Analyzer e tela de menu eram mutuamente invisíveis:** usavam o mesmo z-index e o mesmo
 backdrop, então com o Analyzer aberto, clicar em "Mercado" abria o Mercado **por baixo** dele.
 `openScreen` e `setAnalyzerOpen` viraram mutuamente exclusivos.
+
+## O que so existe no dedo
+
+- **Alvo minimo de 44px** nos primitivos de controle, por CSS, a partir de uma classe estavel
+  (`jogo-botao`, `jogo-campo`, `jogo-check`, `jogo-switch`, `jogo-range`) e do atributo
+  `data-toque` na `.hud-root`. Por CSS e nao por prop: passar `coarse` por ~200 pontos de chamada
+  e uma edicao em massa que o proximo controle novo esqueceria.
+  - `em` dentro de um `<input>` resolve contra o font-size do proprio controle (~11.5px, definido
+    pelo navegador). Por isso a caixinha do checkbox esta em px, e quem recebe os 44px e o
+    `<label>`.
+  - O switch e um desenho e nao cabe esticar: o alvo cresce por um pseudo-elemento invisivel
+    (`.alvo-estendido`, com a folga por `--alvo-folga`). A mesma tecnica vale pra seta da gaveta do
+    trilho (30 -> 52px efetivos), pro ticker do chat (27 -> 43) e pro slot de golpe (33 -> 45):
+    esticar de verdade engordaria o trilho, comeria jogo e quebraria a fileira de 8 golpes numa
+    linha.
+  - A area de toque da ENFERMEIRA e a excecao que nao e CSS: ela e desenhada no canvas, e o
+    retangulo util e 9,8% x 13,8% da cena (~31px num aparelho de 320px). `hospitalClickOnNurse`
+    aceita uma folga em px, aplicada so no dedo.
+- **Detalhe do golpe por toque.** Sem hover, o tooltip da barra de golpes nunca abria — a unica
+  fonte de dano, precisao, recarga e descricao era inalcancavel, sem sinal de que existia. No
+  toque o slot abre um sheet com o mesmo conteudo, que tambem hospeda o liga/desliga (o
+  duplo-clique do desktop e um gesto que o celular usa para zoom).
+- **Chat vira ticker de uma linha** mais sheet, abaixo de 1200px de largura. E, no
+  compacto, o ticker e o UNICO canal: so `error` continua virando toast. Todo toast
+  tambem vira linha de chat (`pushToast` escreve nos dois), entao no celular o toast
+  era a MESMA frase, uma segunda vez, por cima do campo de batalha. Erro fica porque
+  significa que uma acao falhou — isso precisa interromper.
+- **Recortes do aparelho.** `index.html` pede `viewport-fit=cover` desde sempre e nenhum ponto do
+  CSS lia `env(safe-area-inset-*)`: no iPhone a doca ficava sob o home indicator e, deitado, o
+  notch cobria o card da esquerda. A camada `.hud-safe` recorta so a HUD — o canvas continua
+  sangrando ate a borda fisica, porque corta-lo deixaria duas tarjas pretas.
+- **Voltar fecha a camada do topo** (`useVoltarFechaPainel`), em vez de sair do jogo. Dono unico:
+  com um `pushState` por sheet, trocar de painel pela doca desmonta o A (cujo `history.back()` e
+  assincrono) e monta o B, e o `popstate` atrasado do A fecha o B.
+- **`pointerdown`, nao `mousedown`,** em todo fechar-ao-tocar-fora: no toque o evento de mouse de
+  compatibilidade so sai depois do `touchend`, e nao sai quando o gesto vira rolagem.
+- **O teclado virtual empurra a HUD pra cima.** A raiz do jogo e `h-svh overflow-hidden` e tudo
+  dentro dela e absoluto; `svh` NAO encolhe quando o teclado abre — ele e a altura com as barras do
+  navegador retraidas, um valor fixo. Sem tratar, doca, ticker e o campo de digitacao do chat ficam
+  ATRAS do teclado. `useViewportTracking` mede `innerHeight - visualViewport.height`, so chama de
+  teclado acima de 120px (a barra de URL come ~60px, e um pinch tambem encolhe o visualViewport) e a
+  `.hud-safe` sobe por esse tanto (`--teclado`). A metade CSS foi verificada com o inset forcado — a
+  doca sobe exatos 300px; a medicao depende de um teclado de verdade.
+- **O slot de golpe e `button` nos dois regimes**, mas quem abre a ficha muda com o meio: no mouse o
+  clique NAO abre nada (senao o duplo clique que liga/desliga o golpe abriria a ficha duas vezes no
+  caminho) — abre `event.detail === 0`, que e o clique vindo do teclado. Sem isso, quem nao usa mouse
+  nao tinha caminho nenhum ate dano, precisao e recarga.
+
+## Vidro preto
+
+Tres niveis de superficie, e nada alem deles: `.vidro` (ancorada na borda: trilho, doca),
+`.vidro-flutua` (card solto sobre o jogo), `.vidro-alto` (sheet e janela). A elevacao e expressa
+por opacidade, raio do blur e fio de luz na borda de cima — sombra espalhada nao le em fundo
+preto.
+
+A tinta nao e cinza puro (`#101218`, levemente fria): vidro sobre um jogo colorido puxa a cor do
+que esta atras, e sem isso as superficies ficavam com um bege sujo em cima do mapa de deserto.
+
+### O custo do blur nao foi medido, e a chave existe assim mesmo
+
+Configuracoes tem "Reduzir transparencia" (`data-blur="off"`), que troca o vidro por superficie
+quase opaca — vidro transparente **sem** blur nao e um efeito, e ruido em cima do jogo.
+
+**Duas tentativas de medir, dentro de uma hunt, com A/B intercalado:**
+
+| Cenario | Com blur | Sem blur | Conclusao |
+|---|---|---|---|
+| Sem throttle | 16,76ms | 16,68ms | Os dois batem no teto de 60fps; a diferenca some sob o vsync |
+| CPU 4x, 4 rodadas | 101,2ms | 101,5ms | O loop do jogo domina (~10fps) e varia de 65ms a 134ms ENTRE rodadas do mesmo lado |
+
+A primeira leitura, **sequencial** (um lado depois do outro, sem intercalar), deu +17ms para o
+blur. Intercalando, o efeito desaparece: aqueles 17ms eram a deriva do proprio jogo ficando mais
+pesado com mais inimigos em campo. **Lembrete do metodo: A/B nao intercalado mede a deriva, nao o
+tratamento.**
+
+O que se sabe sem medir: `backdrop-filter` obriga o compositor a reamostrar o que esta atras da
+camada, e aqui isso e um canvas que muda todo quadro. Numa GPU movel fraca e um custo real. A
+chave e uma classe CSS, barata e reversivel, entao fica — mas nenhum numero e afirmado ate alguem
+rodar isto num celular de verdade.
+
+## Avisos que pertencem ao campo
+
+`CampoOverlay` e a moldura de tudo que avisa sobre o COMBATE (contagem do revive, troca de sala,
+derrota, intro do Lance). Ele nao pode cobrir a doca — durante os 5s do auto-revive o jogador quer
+justamente abrir a Mochila pra ver se ainda tem Revive.
+
+Duas medidas, e as duas ja estiveram erradas:
+
+- **Embaixo**, o rodape MEDIDO (`footerHeight`) mais uma folga. Foi assim desde que os avisos
+  deixaram de ser `fixed inset-0`.
+- **Em cima**, 4.4em — a mesma reserva do sheet. Era 7.5em, a medida da "fileira de cards do topo"
+  que foi deletada com a HUD nova: sobravam 3.8em de faixa morta no topo do aviso.
+
+Ele e `fixed`, ou seja, **fora da `.hud-safe`** — os recortes do aparelho sao dele pra resolver, e
+por isso `var(--sa-*)` aparece nas duas pontas. Sem isso o aviso encostava na doca por baixo num
+iPhone, que e exatamente o que ele existe pra nao fazer.
+
+Conferido ao vivo numa troca de sala em 390x844: overlay em 70..678, doca comecando em 770.
+
+## Densidade: quantos itens cabem numa tela
+
+Medido em 390x844, na Mochila, antes de mexer: **5 POKEs visiveis** de uma lista que passa de
+cem. Na Loja, **3,5 itens**. O que comia a tela nao era o tamanho da fonte — era a soma de
+quatro coisas, e cada uma tem um numero:
+
+| Onde | Antes | Depois | Como |
+|---|---|---|---|
+| Altura do sheet 'cheia' | 586px | 705px | Ancorar na barra de navegacao, nao no rodape todo |
+| Card da Loja | 148,5px | 95,6px | Tres faixas viraram duas |
+| Linha da Mochila | 71px | 61px | `p-[.6em]` -> `p-[.4em]`, `gap-[.45em]` -> `gap-[.3em]` |
+| Bloco da auto-venda | 53px | 0 | Virou chip na fileira das abas |
+
+Resultado: Mochila **5 -> 8 linhas**, Loja **3,5 -> 5,5**, Pokedex **9,5 -> 11**.
+
+**Por que o sheet 'cheia' para na BARRA e nao no rodape inteiro.** O rodape do celular tem 179px,
+dos quais 111 sao barra de golpes, zoom, botao Auto e o ticker do chat. Nenhum dos quatro e
+acionavel enquanto se navega uma lista — o jogador esta escolhendo um POKE, nao trocando de golpe
+— e os 111px valem 1,7 linha de card. O que NAO pode ser coberto e a barra de navegacao: ela e o
+unico caminho pra outra tela, e cobri-la transforma "trocar de tela" em dois toques. Sheet curto
+('conteudo', 'meia') continua ancorado no rodape todo: ali a altura nao e o gargalo, e cobrir a
+barra de golpes com a ficha de um item seria perder o que o jogador estava olhando por nada.
+
+**Por que o card da Loja tinha tres faixas.** Identidade / quantidade / confirmar. A faixa do meio
+usava 192px dos 343 disponiveis — 150px de vidro vazio ao lado dos atalhos `+10 +100 +1000` —
+enquanto o botao de confirmar gastava uma faixa inteira de 44px logo abaixo. Juntar os dois nao
+custa nada em 390px; em **320px** custa: o rotulo "Comprar 1 · 60" precisava de 75,8px e sobravam
+73,9. O que fechou a conta foi o campo de quantidade, de `4.2em` pra `3.4em` — ainda cabe "1000",
+que e o maior atalho. O `truncate` cobre o resto (x1000 do item mais caro).
+
+### As duas colunas da Loja
+
+Comprar e vender aparecem LADO A LADO em todo regime (pedido explicito). No celular eram abas —
+"Comprar" ou "Vender", nunca os dois — e a troca custava um toque justamente no momento em que o
+jogador compara: acabou de esvaziar a mochila numa hunt e quer saber se da pra repor as balls.
+
+O que paga a conta e a forma da linha, e ela depende da LARGURA DA COLUNA, nao do dedo:
+
+| Regime | Coluna | Forma |
+|---|---|---|
+| `compacto` (390px) | ~170px | Linha so de identidade; a transacao abre num sheet |
+| `deitado` (844x390) | ~470px | Card inteiro, transacao inline |
+| `amplo` | ~340px+ | Card inteiro, transacao inline |
+
+Em 170px nao cabe campo de quantidade + tres atalhos + confirmar sem derrubar todo alvo abaixo do
+minimo — a conta nao fecha, e nao e questao de apertar mais o padding. O sheet custa um toque a
+mais por compra e **devolve** alvo de toque: inline, `+10` tem 27px de largura; no sheet passa dos
+44px.
+
+Por isso o teste e `mode === 'compacto'` e nao o booleano `compacto` (que inclui `deitado`): ali a
+coluna tem 470px e mandar abrir um sheet seria um toque cobrado por nada.
+
+**A ficha nao mora dentro da linha.** O `ItensTab` e que monta os dois sheets, ao lado do grid e
+nao dentro dele. Motivo concreto: a linha nao sobrevive as proprias acoes dela — trancar um item o
+manda pro fim da ordenacao (e possivelmente pra outra pagina) e vender o ultimo o tira da lista.
+Com o sheet montado pela linha, trancar de dentro do sheet DESMONTAVA o sheet no meio da
+interacao. Reproduzido antes de mudar. A regra que fica: **estado de painel aberto nao pode viver
+num componente cujo tempo de vida depende de ordenacao ou paginacao.**
+
+**O alvo de toque nao entra nessa conta.** Nenhum controle encolheu abaixo de 44px de altura: a
+densidade veio de espaco morto (padding, faixa vazia, bloco de configuracao permanente), nunca do
+botao. A unica excecao deliberada e a LARGURA dos slots da doca, medida e documentada acima.
+
+## O eixo que faltava nos paineis: altura util
+
+Nenhum painel transbordava de LADO no celular — a escala fluida em `em` ja
+resolvia isso sozinha. O problema era vertical, e so aparece quando se mede a
+distancia entre o topo do corpo do painel e a primeira linha de CONTEUDO.
+
+Com trilho e doca, o corpo do sheet tem ~553px em 390x844. Antes desta leva:
+
+| Painel | Cabecalho + filtros | Itens visiveis |
+|---|---|---|
+| Mochila | ~480px (auto-venda 300 + filtros 180) | 4 POKEs |
+| Loja > Pokemons | ~330px | 4 POKEs |
+| Mercado > Comprar > Pokemon | ~330px | 2 anuncios |
+| Wiki | ~150px so de abas quebradas em 2 fileiras | — |
+| Calculadora | 300px so nos seis atributos | — |
+
+Tres regras sairam disso:
+
+1. **Configuracao que se mexe uma vez nao pode empurrar a lista que se olha
+   todo dia.** Vira `Recolhivel` (controls.tsx). Auto-venda, filtros da Loja,
+   filtros do Mercado.
+2. **Um acordeao que esconde o ESTADO e pior que a secao sempre aberta.** Por
+   isso `Recolhivel` tem `resumo`: fechado, a barra continua dizendo
+   "5/6 raridades · IV 20-100" ou "auto-venda: COMUM, RARO". Sem isso, a
+   primeira captura vendida sem querer vira bug reportado.
+3. **Dado que ja esta no trilho nao se repete no painel.** A carteira saiu do
+   cabecalho da Loja e do Mercado: ela esta dois centimetros acima, e no
+   Mercado empurrava as abas pra uma segunda fileira.
+
+E dois erros de layout que so aparecem no estreito:
+
+- **`block` (w-full) em dois botoes da mesma fileira soma 200%** e o segundo sai
+  da tela. Na Equipe isso criou uma barra de rolagem horizontal no painel; o
+  certo e `flex-1`.
+- **Detalhe embaixo de uma grade longa e detalhe invisivel.** No Bestiario, com
+  226 especies em quatro colunas, o painel de detalhe ficava a vinte fileiras de
+  rolagem do toque que o abriu — tocar numa especie parecia nao fazer nada. Virou
+  sheet.
+
+### Como medir isto de novo
+
+O mesmo script da secao anterior, com outro criterio: para cada painel, abrir e
+comparar `clientHeight` do corpo com o `offsetTop` do primeiro item da lista. Se
+o cabecalho passa de ~1/3 da altura util, ele esta no lugar do conteudo.
 
 ## Bug de clique em botão dentro de painel re-renderizado a 60fps
 
@@ -571,7 +847,7 @@ e o Auto medem e ancoram em cima.
 `h/w-full`, não `spriteUrl` (o ícone "grande", recorte de fan sheet com proporção e padding
 variáveis por espécie, que sobrava faixa vazia com `object-contain`).
 
-Vale no `ActivePokeCard` e no relatório de farm offline. Conferido: as 226 espécies têm os 3
+Vale no trilho de status (`StatusRail#FacePoke`) e no relatório de farm offline. Conferido: as 226 espécies têm os 3
 arquivos de arte no disco — o problema era o recorte, não arquivo faltando.
 
 ## Tutoriais

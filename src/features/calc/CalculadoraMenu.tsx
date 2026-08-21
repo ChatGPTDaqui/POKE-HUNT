@@ -14,7 +14,8 @@ import { useMemo, useState } from 'react'
 import { SPECIES, computeStatsAtLevel, type Species, type StatBlock } from '@/data/pokes'
 import { gen5SpriteUrl } from '@/data/gen5Sprites'
 import { RARITIES, type RarityKey } from '@/data/rarity'
-import { useBreakpoints } from '@/stores/uiStore'
+import { useDeviceMode } from '@/stores/uiStore'
+import { cn } from '@/lib/utils'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { TypeChip } from '@/components/shared/TypeChip'
 import { GameButton, GameCheck, GameInput, GameSelect } from '@/components/game/controls'
@@ -65,7 +66,7 @@ function statsDe(lado: Lado): { species: Species; stats: StatBlock; calculado: S
 }
 
 export function CalculadoraMenu() {
-  const { colStack } = useBreakpoints()
+  const { compacto } = useDeviceMode()
   const [ladoA, setLadoA] = useState<Lado>({ ...LADO_PADRAO, speciesId: ESPECIES[0]?.id ?? '' })
   const [ladoB, setLadoB] = useState<Lado>(LADO_PADRAO)
 
@@ -73,7 +74,7 @@ export function CalculadoraMenu() {
   const b = useMemo(() => statsDe(ladoB), [ladoB])
 
   return (
-    <div className={colStack ? 'flex flex-col gap-[.65em]' : 'grid grid-cols-2 gap-[.65em]'}>
+    <div className={compacto ? 'flex flex-col gap-[.65em]' : 'grid grid-cols-2 gap-[.65em]'}>
       <PainelLado marca="A" lado={ladoA} onChange={setLadoA} resultado={a} comparar={b} />
       <PainelLado marca="B" lado={ladoB} onChange={setLadoB} resultado={b} comparar={a} />
     </div>
@@ -89,6 +90,7 @@ function PainelLado({
   resultado: ReturnType<typeof statsDe>
   comparar: ReturnType<typeof statsDe>
 }) {
+  const { compacto } = useDeviceMode()
   const url = resultado ? gen5SpriteUrl(resultado.species.id, lado.isShiny) : null
   // Especies presentes na equipe agora, na ordem da equipe e sem repetir
   // (dois POKEs da mesma especie dariam duas opcoes identicas).
@@ -198,7 +200,11 @@ function PainelLado({
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-[.4em]">
+          {/* Duas colunas com rotulo AO LADO do campo no celular; tres colunas
+              empilhadas no desktop. Empilhado, cada atributo custava ~90px
+              (rotulo + campo de 44px + padding) e os seis somavam 300px de uma
+              tela de ~470px — sobrava espaco pra nenhum resultado. */}
+          <div className={cn('grid gap-[.4em]', compacto ? 'grid-cols-2' : 'grid-cols-3')}>
             {STATS.map(([label, key]) => {
               const valor = resultado.stats[key]
               const outro = comparar?.stats[key]
@@ -207,10 +213,13 @@ function PainelLado({
               return (
                 <div
                   key={key}
-                  className="rounded-[.5em] border bg-background p-[.5em] text-center"
+                  className={cn(
+                    'rounded-[.5em] border bg-background p-[.4em]',
+                    compacto ? 'flex items-center gap-[.4em]' : 'text-center',
+                  )}
                   style={{ borderColor: editado ? 'var(--color-primary)' : 'var(--color-n800)' }}
                 >
-                  <div className="text-[.72em] text-n500">{label}</div>
+                  <div className={cn('text-[.72em] text-n500', compacto && 'min-w-0 flex-1 truncate')}>{label}</div>
                   {/* Campo editavel, e nao numero fixo: o valor calculado e so
                       o ponto de partida. Digitar sobrescreve so este atributo;
                       apagar o campo devolve o controle ao calculo (por isso a
@@ -228,7 +237,10 @@ function PainelLado({
                       else manual[key] = Math.max(0, Math.floor(Number(bruto) || 0))
                       onChange({ ...lado, manual })
                     }}
-                    className="w-full text-center text-[1.05em] font-medium tabular-nums"
+                    className={cn(
+                      'text-center text-[1.05em] font-medium tabular-nums',
+                      compacto ? 'w-[3.4em] shrink-0' : 'w-full',
+                    )}
                   />
                   {/* Delta so aparece quando os dois lados estao preenchidos —
                       e a unica razao de existir um lado B. */}

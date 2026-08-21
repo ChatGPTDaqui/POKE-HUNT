@@ -380,7 +380,7 @@ export function PokedexMenu() {
   }, [allSpecies, search, escopoAtivo, mapaAtual, regiaoAtual])
 
   return (
-    <div className="flex flex-col gap-[.45em]">
+    <div className="flex flex-col gap-[.3em]">
       <StickyHeader>
         <div className="flex gap-[.5em]">
           <GameInput
@@ -419,7 +419,7 @@ export function PokedexMenu() {
           <div key={species.id} className="overflow-hidden rounded-[.6em] border border-n800 bg-n900">
             <div
               onClick={() => setExpandedSpeciesId(expanded ? null : species.id)}
-              className="flex cursor-pointer items-center gap-[.5em] px-[.55em] py-[.55em] hover:bg-n800"
+              className="flex cursor-pointer items-center gap-[.5em] px-[.5em] py-[.4em] hover:bg-n800"
             >
               <PokeSwatch species={species} size={2.4} />
               <div className="min-w-0 flex-1">

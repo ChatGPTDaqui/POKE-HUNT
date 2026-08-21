@@ -7,7 +7,7 @@ import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
 import { RARITIES, type RarityKey } from '@/data/rarity'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
-import { GameButton, GameCard, GameCheck, GameInput, GameSelect } from '@/components/game/controls'
+import { GameButton, GameCard, GameCheck, GameInput, GameSelect, Recolhivel } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
 import { STALE_MS } from '../utils'
@@ -121,8 +121,26 @@ export function ComprarPokes() {
 
   if (isLoading) return <Carregando />
 
+  // Resumo pra barra fechada: o jogador precisa saber POR QUE a vitrine esta
+  // curta sem reabrir os filtros.
+  const resumo = [
+    busca.trim() && `"${busca.trim()}"`,
+    !verGold && 'sem gold',
+    !verDiamante && 'sem diamante',
+    somenteOferta && 'só oferta',
+    nivelMin > 0 && `Lv ${nivelMin}+`,
+    ivMin > 0 && `IV ${ivMin}%+`,
+    shinyOnly && 'só shiny',
+    raridades.size < Object.keys(RARITIES).length && `${raridades.size}/${Object.keys(RARITIES).length} raridades`,
+  ].filter(Boolean).join(' · ') || 'tudo'
+
   return (
     <div className="flex flex-col gap-[.45em]">
+      {/* Quatro fileiras de filtro (busca, moeda, faixa, raridades) somavam
+          ~330px antes do primeiro anuncio — mais da metade do painel util no
+          celular. Recolhidas, a vitrine comeca no topo. */}
+      <Recolhivel titulo="Filtros" resumo={resumo}>
+      <div className="flex flex-col gap-[.45em]">
       <div className="flex flex-wrap items-center gap-[.5em]">
         <GameInput
           placeholder="Buscar especie..." value={busca}
@@ -181,6 +199,8 @@ export function ComprarPokes() {
           </GameCheck>
         ))}
       </div>
+      </div>
+      </Recolhivel>
 
       {filtrados.length === 0 && <p className="text-n500">Nenhum POKE a venda com esses filtros.</p>}
 
@@ -188,7 +208,7 @@ export function ComprarPokes() {
         const species = SPECIES[a.species_id]
         const cor = RARITIES[a.rarity as RarityKey]?.color
         return (
-          <GameCard key={a.id} className="flex flex-wrap items-center gap-[.45em] p-[.55em]">
+          <GameCard key={a.id} className="flex flex-wrap items-center gap-[.45em] p-[.4em]">
             <img
               src={faceIconUrl(a.species_id, a.is_shiny) ?? undefined}
               alt=""

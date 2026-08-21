@@ -9,9 +9,9 @@
 //    mesmo, e a posicao se mantem sozinha.
 //  - O padrao de "DOM incremental" pra nao quebrar clique: o reconciler do
 //    React ja resolve isso.
-import { useUiStore, useBreakpoints, type ScreenName } from '@/stores/uiStore'
+import { useUiStore, type ScreenName } from '@/stores/uiStore'
 import { useGameStateStore, MAX_TEAM_SIZE } from '@/stores/gameStateStore'
-import { GameWindow } from '@/components/game/GameWindow'
+import { Painel } from '@/components/game/Painel'
 import { TeamMenu } from '@/features/team/TeamMenu'
 import { BagMenu } from '@/features/bag/BagMenu'
 import { ShopMenu } from '@/features/shop/ShopMenu'
@@ -80,7 +80,6 @@ export function ScreenOverlay() {
   const currentScreen = useUiStore((s) => s.currentScreen)
   const closeScreen = useUiStore((s) => s.closeScreen)
   const teamSize = useGameStateStore((s) => s.team.length)
-  const { narrow } = useBreakpoints()
 
   if (!currentScreen) return null
   const Panel = PANELS[currentScreen]
@@ -92,18 +91,18 @@ export function ScreenOverlay() {
     : TITLES[currentScreen]
 
   return (
-    <GameWindow
+    // A largura em `em` so existe do lado da JANELA: num sheet ela nao
+    // significa nada (ele ocupa a tela), e era ela que fazia a Loja (52em)
+    // nascer colada nas duas bordas do celular.
+    <Painel
       winKey="panel"
-      // Em telas estreitas a largura em `em` nao importa (o `max-width` de
-      // 100vw-1.5em corta antes), mas manter o valor grande faria a janela
-      // nascer colada nas duas bordas — 36em uniforme e mais previsivel.
-      widthEm={narrow ? DEFAULT_WIDTH : (WIDTHS[currentScreen] ?? DEFAULT_WIDTH)}
+      widthEm={WIDTHS[currentScreen] ?? DEFAULT_WIDTH}
       zIndex={31}
-      backdrop={{ zIndex: 30 }}
+      backdropZIndex={30}
       onClose={closeScreen}
       title={title}
     >
       <Panel />
-    </GameWindow>
+    </Painel>
   )
 }

@@ -211,19 +211,21 @@
    sem quebrar o encaixe. E font-size (estilo puro), nao layout — por isso media
    query, e nao o mesmo caminho JS dos breakpoints de posicionamento. */
 @media (max-width: 640px) {
-  /* Mesmos +3px (13->16, 9->12, 16->19). CONSEQUENCIA REAL do aumento global: o
-     encaixe de 360px foi calibrado no piso antigo (13px), entao no piso novo o
-     multiplicador manual passou a ser o unico ajuste que sobra — por isso o teto
-     dele aqui caiu de 1.15 pra 1, e o minimo global desceu pra 0.7 (uiStore),
-     dando ao jogador de celular como voltar ao tamanho anterior se quiser. */
+  /* O teto do multiplicador manual voltou de 1 pra 1.2 com a HUD nova. Ele foi
+     travado em 1 porque o layout antigo (cinco ancoras negociando a mesma
+     faixa) ja colidia no tamanho normal — aumentar era garantir sobreposicao.
+     O trilho e a doca nao disputam espaco com ninguem: eles ocupam a largura
+     toda e o que cresce e o texto dentro. 1.2 e o ponto em que a barra de
+     navegacao ainda cabe em cinco slots numa tela de 360px. */
   .hud-root {
-    font-size: calc(clamp(16px, 0.55vw + 12px, 19px) * min(var(--hud-scale, 1), 1));
+    font-size: calc(clamp(16px, 0.55vw + 12px, 19px) * min(var(--hud-scale, 1), 1.2));
   }
 }
 
-/* Superficie translucida da HUD (cards do topo, pilulas, chat). O blur fica SO
-   aqui: o backdrop escuro atras de um menu aberto nao borra o jogo — pedido
-   explicito, e o motivo de nao ser um utilitario generico. */
+/* Superficie translucida ANTERIOR ao vidro preto. Nao ha mais nenhum consumidor
+   dela na HUD (trilho, doca, chips e chat usam `.vidro*`); fica so pra nao
+   quebrar algum ponto fora do jogo que ainda a referencie. Ao encontrar um,
+   migre pra `.vidro-flutua` e apague isto. */
 .hud-surface {
   background: color-mix(in srgb, var(--background) 85%, transparent);
   backdrop-filter: blur(6px);
@@ -264,4 +266,224 @@
    e ela que carrega a informacao; a animacao so chama atencao. */
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse-alerta { animation: none }
+}
+
+/* ============================================================================
+   BLACK GLASS — linguagem de superficie da HUD mobile-first (v8)
+   ============================================================================
+   Substitui progressivamente `.hud-surface`, que era uma coisa so (85% de
+   background + blur 6px) usada em card, pilula e chat sem hierarquia nenhuma.
+   Aqui a elevacao e expressa por TRES coisas juntas — opacidade, raio do blur e
+   fio de luz na borda de cima — porque sombra espalhada nao le em fundo preto.
+
+   Tres niveis, e nada alem deles:
+     .vidro        superficie ancorada na borda da tela (trilho, doca)
+     .vidro-flutua card/pilula solto sobre o jogo
+     .vidro-alto   sheet/janela aberta por cima de tudo
+
+   O tom NAO e cinza puro: `--vidro-tinta` tem um leve azul (#101218). Vidro
+   sobre um jogo colorido puxa a cor do que esta atras; sem a tinta fria as
+   superficies ficavam com um bege sujo em cima do mapa de deserto. */
+.hud-root {
+  --vidro-tinta: #101218;
+  --vidro-fio: rgba(255, 255, 255, .085);
+  --vidro-luz: inset 0 1px 0 rgba(255, 255, 255, .06);
+  --vidro-sombra: 0 .5em 1.5em -.6em rgba(0, 0, 0, .75);
+
+  /* Recortes do aparelho (notch, home indicator, cantos arredondados). O
+     `index.html` pede `viewport-fit=cover` desde sempre, mas NENHUM ponto do
+     CSS lia o `env()` — no iPhone o menu do rodape ficava sob o home indicator
+     e, deitado, o notch cobria o card da esquerda. O fallback `0px` e
+     obrigatorio: sem ele o `env()` sem suporte invalida a declaracao inteira. */
+  --sa-top: env(safe-area-inset-top, 0px);
+  --sa-right: env(safe-area-inset-right, 0px);
+  --sa-bottom: env(safe-area-inset-bottom, 0px);
+  --sa-left: env(safe-area-inset-left, 0px);
+}
+
+.vidro,
+.vidro-flutua,
+.vidro-alto {
+  border: 1px solid var(--vidro-fio);
+  background: color-mix(in srgb, var(--vidro-tinta) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(1.35);
+  box-shadow: var(--vidro-luz);
+}
+
+.vidro-flutua {
+  background: color-mix(in srgb, var(--vidro-tinta) 78%, transparent);
+  box-shadow: var(--vidro-luz), var(--vidro-sombra);
+}
+
+/* Sheet e janela cobrem conteudo que o jogador precisa LER. Mais opaco e mais
+   blur: texto de 12px sobre sprite animado com 78% de opacidade e ilegivel. */
+.vidro-alto {
+  background: color-mix(in srgb, var(--vidro-tinta) 93%, transparent);
+  backdrop-filter: blur(22px) saturate(1.25);
+  box-shadow: var(--vidro-luz), 0 1.2em 3em -.8em rgba(0, 0, 0, .85);
+}
+
+/* Chave de desligar o blur (Configuracoes -> "Reduzir transparencia").
+
+   O CUSTO NAO FOI MEDIDO — e a chave existe apesar disso, nao por causa disso.
+   Duas tentativas nesta maquina, dentro de uma hunt, com o A/B intercalado:
+     - sem throttle, os dois lados batem no teto de 60fps (16,68ms) e a
+       diferenca fica em 0,08ms, ou seja, invisivel sob o vsync;
+     - com CPU 4x, o proprio loop do jogo domina (~10fps) e a media varia de
+       65ms a 134ms ENTRE RODADAS do mesmo lado — mais que qualquer efeito do
+       blur. A primeira leitura, sequencial, sugeriu +17ms; intercalada, some.
+   Ou seja: o navegador de desktop nao mostra o custo, e o throttle de CPU nao
+   isola compositing. Quem tem a resposta e um aparelho real.
+
+   O que se sabe sem medir: `backdrop-filter` obriga o compositor a reamostrar o
+   que esta ATRAS da camada, e aqui isso e um canvas que muda todo quadro. Numa
+   GPU movel fraca isso e um custo real. A chave e barata (uma classe) e
+   reversivel, entao ela fica — mas nenhum numero e afirmado ate alguem rodar
+   isto num celular.
+
+   Com o blur fora, a superficie sobe pra quase opaca: vidro transparente SEM
+   blur nao e um efeito, e ruido em cima do jogo. */
+.hud-root[data-blur='off'] .vidro,
+.hud-root[data-blur='off'] .vidro-flutua,
+.hud-root[data-blur='off'] .vidro-alto,
+.hud-root[data-blur='off'] .hud-surface {
+  backdrop-filter: none;
+  background: color-mix(in srgb, var(--vidro-tinta) 96%, transparent);
+}
+
+/* Camada onde a HUD vive: a tela inteira MENOS os recortes do aparelho. O
+   canvas continua sangrando por baixo do notch (ele e irmao desta camada, nao
+   filho). Filho posicionado por `absolute` resolve contra o padding box do
+   ancestral, ou seja, padding aqui NAO afastaria nada — por isso sao `inset`
+   de verdade. */
+.hud-safe {
+  position: absolute;
+  top: var(--sa-top);
+  right: var(--sa-right);
+  /* `--teclado` sobe a HUD inteira por cima do teclado virtual. Sem isso a doca,
+     o ticker e o campo de digitacao do chat ficam ATRAS dele: a raiz do jogo e
+     `h-svh overflow-hidden`, e `svh` nao encolhe quando o teclado abre. */
+  bottom: calc(var(--sa-bottom) + var(--teclado, 0px));
+  left: var(--sa-left);
+}
+
+/* Alvo minimo de toque. 44px e o piso da Apple HIG e o mais rigoroso dos dois
+   (Android pede 48dp, que da os mesmos ~44-48px em densidade tipica). Em px
+   fixo de proposito: `em` acompanha o `hudScale`, e um jogador que diminui a
+   HUD pra ver mais mapa nao esta pedindo alvos menores que o dedo dele. */
+.alvo-toque {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Sem realce azul de toque do WebKit e sem selecao acidental de texto ao segurar
+   um botao. Restrito a controles: texto de painel continua selecionavel. */
+.hud-root button,
+.hud-root [role='button'] {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* --- alvo de toque nos primitivos ------------------------------------------
+   Aplicado so quando o aparelho tem DEDO (`data-toque`, escrito pelo
+   JogoCarregado a partir de `(pointer: coarse)`). No mouse os mesmos controles
+   continuam compactos: um botao de 44px numa lista densa de desktop e desperdicio
+   de altura, e desktop nao tem o problema que isto resolve.
+
+   Medido em 390px antes disto: 157 dos 341 alvos da Loja e 75 dos 75 da Mochila
+   tinham menos de 40px de altura. */
+.hud-root[data-toque] .jogo-botao,
+.hud-root[data-toque] .jogo-campo {
+  min-height: 44px;
+}
+
+.hud-root[data-toque] .jogo-botao-icone {
+  min-width: 44px;
+}
+
+/* O alvo do checkbox e o ROTULO (um `<label>` repassa o clique pro input), e
+   nao a caixinha. A caixinha so cresce um pouco — e em px: `em` dentro de um
+   `<input>` resolve contra o font-size do proprio controle, que o navegador
+   define sozinho (~11.5px), e por isso `1.4em` virava 16px em vez de 22. */
+.hud-root[data-toque] .jogo-check {
+  width: 22px;
+  height: 22px;
+}
+
+.hud-root[data-toque] .jogo-check-rotulo {
+  min-height: 44px;
+}
+
+/* Deslizador: a trilha continua fina (e so um desenho), o que cresce e a area
+   que recebe o dedo. Sem isto o ajuste de escala da HUD e uma faixa de 16px —
+   o unico controle da tela que o jogador precisa ARRASTAR, e o mais dificil de
+   pegar. */
+.hud-root[data-toque] .jogo-range {
+  min-height: 44px;
+}
+
+/* Alvo que cresce SEM crescer o desenho: um pseudo-elemento invisivel por
+   baixo. Para controles que nao podem esticar — o switch e um desenho, o slot
+   de golpe tem tamanho calibrado com a fileira, e a seta da gaveta esticada
+   engordaria o trilho inteiro. O elemento precisa ser `relative` (todos ja
+   sao) e o vizinho que vem DEPOIS no DOM ganha a sobreposicao, que e o
+   comportamento desejado: o alvo cresce pro lado de fora, nao por cima do
+   botao ao lado. */
+.hud-root[data-toque] .jogo-switch::after,
+.hud-root[data-toque] .alvo-estendido::after {
+  content: '';
+  position: absolute;
+  inset: var(--alvo-folga, -11px) var(--alvo-folga-x, -8px);
+}
+
+/* Fileira de abas rolavel (SegmentedTabs no compacto, com 5 abas ou mais). A
+   barra de rolagem some — ela ocuparia 8px de altura permanentes sob as abas — e
+   o degrade da borda direita fica no lugar dela, dizendo que ha mais aba fora da
+   tela. Quem decide aplicar e o componente, pela CONTAGEM de abas: `mask` e
+   estatico e o CSS nao enxerga overflow, entao aplicado sempre ele apagaria a
+   ultima aba de uma fileira que ja cabia. */
+.tiras-de-aba {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.6em), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 1.6em), transparent);
+}
+
+/* A barra de rolagem some na fileira de abas, role ou nao. Restrito a ela: a
+   Loja tem colunas que rolam de lado de proposito, e ali a barra e a unica
+   pista de que ha conteudo fora da vista. */
+.fileira-abas {
+  scrollbar-width: none;
+}
+
+.fileira-abas::-webkit-scrollbar {
+  height: 0;
+}
+
+/* Entrada de sheet e chegada de linha no ticker.
+   Sao os dois unicos movimentos da HUD nova, e existem pelo mesmo motivo: dizer
+   DE ONDE a coisa veio. Um painel que aparece pronto no meio da tela nao explica
+   que veio de baixo, e uma linha que troca de texto sem transicao nao avisa que
+   e nova. */
+@keyframes sheet-sobe {
+  from { transform: translateY(12%); opacity: .4 }
+  to { transform: none; opacity: 1 }
+}
+
+.sheet-entrada {
+  animation: sheet-sobe .2s cubic-bezier(.22, 1, .36, 1);
+}
+
+@keyframes ticker-chega {
+  from { opacity: 0; transform: translateY(.35em) }
+  to { opacity: 1; transform: none }
+}
+
+.hud-ticker-linha {
+  animation: ticker-chega .22s ease-out;
+}
+
+/* Movimento e exatamente o que a preferencia de movimento reduzido desliga. O
+   conteudo (o sheet, a linha) continua aparecendo — so nao desliza. */
+@media (prefers-reduced-motion: reduce) {
+  .sheet-entrada,
+  .hud-ticker-linha { animation: none }
 }

@@ -29,14 +29,14 @@ export function Ativos() {
   const minhas = data?.minhasOfertas ?? []
 
   return (
-    <div className="flex flex-col gap-[.45em]">
+    <div className="flex flex-col gap-[.3em]">
       {/* Ofertas recebidas ficam no TOPO: sao a unica linha desta aba que exige
           uma decisao do jogador — o resto e so "cancelar se quiser". */}
       {recebidas.length > 0 && (
         <>
           <SectionLabel>LANCES RECEBIDOS ({recebidas.length})</SectionLabel>
           {recebidas.map((o) => (
-            <GameCard key={o.id} className="flex flex-wrap items-center gap-[.5em] border-primary/40 p-[.55em]">
+            <GameCard key={o.id} className="flex flex-wrap items-center gap-[.5em] border-primary/40 p-[.4em]">
               {o.anuncio && (
                 <img
                   src={faceIconUrl(o.anuncio.species_id, o.anuncio.is_shiny) ?? undefined}
@@ -77,7 +77,7 @@ export function Ativos() {
         <>
           <SectionLabel>MEUS LANCES ({minhas.length})</SectionLabel>
           {minhas.map((o) => (
-            <GameCard key={o.id} className="flex flex-wrap items-center gap-[.5em] p-[.55em]">
+            <GameCard key={o.id} className="flex flex-wrap items-center gap-[.5em] p-[.4em]">
               <Gavel className="text-warn" />
               <div className="min-w-[8em] flex-1 text-[.85em] text-n400">
                 Lance enviado · valor retido até o vendedor responder
@@ -94,7 +94,7 @@ export function Ativos() {
       <SectionLabel>MINHAS ORDENS DE ITEM</SectionLabel>
       {ordens.length === 0 && <p className="text-n500">Nenhuma ordem ativa.</p>}
       {ordens.map((o) => (
-        <GameCard key={o.id} className="flex flex-wrap items-center gap-[.5em] p-[.55em]">
+        <GameCard key={o.id} className="flex flex-wrap items-center gap-[.5em] p-[.4em]">
           <IconeItem itemId={o.item_id} />
           <div className="min-w-[8em] flex-1">
             <b className="font-medium">{ITEMS[o.item_id]?.name ?? o.item_id}</b>
@@ -113,7 +113,7 @@ export function Ativos() {
       <SectionLabel>MEUS POKES ANUNCIADOS</SectionLabel>
       {anuncios.length === 0 && <p className="text-n500">Nenhum POKE anunciado.</p>}
       {anuncios.map((a) => (
-        <GameCard key={a.id} className="flex flex-wrap items-center gap-[.5em] p-[.55em]">
+        <GameCard key={a.id} className="flex flex-wrap items-center gap-[.5em] p-[.4em]">
           <img src={faceIconUrl(a.species_id, a.is_shiny) ?? undefined} alt="" className="h-[2.2em] w-[2.2em] rounded-[.4em] object-cover" />
           <div className="min-w-[8em] flex-1">
             <b className="font-medium">{SPECIES[a.species_id]?.name ?? a.species_id} Lv{a.level}</b>

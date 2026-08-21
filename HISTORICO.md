@@ -4796,3 +4796,181 @@ regra dos jogos e nao encosta em PP.
   (entity.ts) e `cooldownTotalDoGolpe` (combatSystem.ts, ja escalado pela Velocidade efetiva, com
   clima) alimentam o numero e a cortina de recarga. Conferido ao vivo: os slots passaram de
   "1.3s | 1.3s | 1.3s | 1.3s" para "0.4s | 1.3s | 1.3s | 1.3s".
+
+
+---
+
+## HUD mobile-first (branch `feat/hud-mobile`, 2026-08-18)
+
+Pedido: converter a HUD para celular, "minimalismo, eficiencia e praticidade, design black glass".
+Trabalho em branch, sem tocar a `main`.
+
+### O diagnostico, com numero
+
+Medido em 390x844 antes de mexer: os cards do topo somavam ~450px de largura numa tela de 374px
+uteis — o card do treinador **cobria o HP do POKE**. O chat ocupava 264x336px sobre o campo de
+batalha, o menu quebrava em duas fileiras de circulos, e o jogo visivel virava um buraco no meio.
+
+Tres causas, e nenhuma delas era "faltou media query":
+
+1. **Cinco ancoras independentes** nas bordas, cada uma se posicionando sozinha e negociando com as
+   vizinhas por breakpoint.
+2. **Breakpoint so por LARGURA.** Celular deitado (844x390) lia como desktop, com 390px de altura.
+3. **`viewport-fit=cover` no `index.html` desde sempre e zero `env(safe-area-inset-*)` no CSS.**
+
+### O desenho novo
+
+Duas superficies permanentes: **trilho** (topo) e **doca** (rodape). Uma arvore so — o desktop e o
+compacto com mais largura e mais rotulo, decisao explicita do usuario contra manter dois layouts.
+
+Criterio do trilho: *o dado muda sozinho e o jogador olha sem ter pedido* (HP, XP, carteira). Local,
+Pokedex e taxas ficam atras de um toque. Criterio da doca: cinco slots, porque o slot e caro (44px
+mais rotulo legivel).
+
+Painel vira **bottom sheet** que para ACIMA da doca — trocar de tela continua custando um toque.
+
+### O que so se descobre medindo
+
+- **A altura do sheet em `vh` estourava a tela pra cima.** `vh` mais rodape medido em px cobria o
+  trilho e escondia a propria alca do sheet. Virou % do pai.
+- **Deitado, o sheet dava 109px de conteudo** — um card e meio. La ele cobre o trilho e para em cima
+  da barra de navegacao (medida a parte), e o cabecalho perde uma linha: 268px.
+- **320px estourava o trilho**: o piso de 9em dos vitais mais os vizinhos fixos davam 324px numa
+  caixa de 302px, e o avatar saia pela borda da TELA. Virou `min(9em, 34vw)`.
+- **157 de 341 alvos da Loja e 75 de 75 da Mochila tinham menos de 40px.** O tamanho passou a vir
+  por CSS a partir de uma classe estavel em cada primitivo (`jogo-botao`, `jogo-campo`...), e nao
+  por prop: threading `coarse` por ~200 pontos de chamada e uma edicao que o proximo controle novo
+  esqueceria.
+- **`em` dentro de um `<input>` resolve contra o font-size do PROPRIO controle** (~11.5px, definido
+  pelo navegador), nao contra a raiz. Por isso `1.4em` no checkbox virava 16px.
+- **O teclado virtual ficava POR CIMA da doca**: a raiz e `h-svh overflow-hidden`, e `svh` nao
+  encolhe quando o teclado abre. Passou a medir `innerHeight - visualViewport.height` com piso de
+  120px (a barra de URL come ~60px, e um pinch tambem encolhe).
+
+### O erro de metodo desta leva: A/B nao intercalado
+
+Escrevi em codigo e em docs que `backdrop-filter` custa "uma recomposicao por quadro por camada",
+como se fosse medido. Ao medir de verdade, dentro de uma hunt:
+
+| Cenario | Com blur | Sem blur |
+|---|---|---|
+| Sem throttle | 16,76ms | 16,68ms (os dois no teto de 60fps) |
+| CPU 4x, A/B intercalado 4 rodadas | 101,2ms | 101,5ms |
+
+A primeira leitura, **sequencial**, deu +17ms pro blur. Intercalando, some: eram 17ms de deriva do
+proprio jogo ficando mais pesado com mais inimigos em campo. A chave de desligar continua (e uma
+classe CSS, e o custo e real em GPU movel fraca), mas sem numero inventado. **Lembrete: A/B nao
+intercalado mede a deriva, nao o tratamento.**
+
+### Informacao que so existia no hover
+
+Varredura pelos `Tooltip`: no dedo nao existe hover, entao cada um era informacao que o jogador de
+celular nunca via, sem nem sinal de que existia. O tooltip do GOLPE era a unica fonte de dano,
+precisao, recarga e descricao. O `ItemTooltip` era o unico lugar que dizia quanto uma pocao cura. A
+faixa de status so tinha o nome do efeito no `title`. Os tres ganharam sheet no toque.
+
+O slot de golpe virou `button` tambem no desktop (como `div` nao existia pro teclado). Quem abre a
+ficha no mouse e `event.detail === 0` — o clique vindo do teclado; senao o duplo clique que
+liga/desliga o golpe abriria a ficha duas vezes no caminho.
+
+### Texto do jogo descrevendo uma HUD que nao existe
+
+Wiki e tutoriais citavam "botao flutuante no canto inferior direito" (Auto), "botoes +/- no canto
+superior direito" (zoom) e "o circulo grande do meio do menu" (Hunt). Patch-notes NAO foram
+tocados: eles registram o que a tela era naquela leva.
+
+### Verificacao
+
+`tsc -b`, `vitest` (532 testes) e `build` limpos. Conferido ao vivo em 320x568, 390x844, 844x390 e
+1440x900 com a conta de teste: os 13 paineis sem overflow horizontal e sem alvo abaixo de 40px, a
+troca de sala com o aviso de campo na faixa certa (70..678, doca em 770), o botao voltar fechando
+painel em vez de sair do jogo, e o toque na enfermeira curando (43% da largura cura, 40% nao — o
+alvo cresceu sem virar a tela inteira).
+
+**Nao verificado**: teclado virtual em aparelho real (a metade CSS foi, com o inset forcado: a doca
+sobe exatos 300px), custo do blur em GPU movel, e o modal de derrota (o Entei Lv100 da conta de
+teste nao morre em hunt de Lv1-30).
+
+### Doca de 8 slots fixos (mesma branch, mesmo dia)
+
+Pedido do usuario: a barra de baixo passa a ter sempre Equipe, Mochila, Pokedex, Hunt, Loja,
+Hospital, Mercado e Mais, com Hunt centralizado e de icone maior — e reduzir o que for
+desnecessario na tela.
+
+**O que nao da pra entregar, e por que:** Hunt centralizado no pixel. Sao 7 destinos alem dele,
+numero impar; qualquer divisao da 3 de um lado e 4 do outro e o centro do slot do meio cai meio
+slot a esquerda (medido: 18,4px em 390px). Compensar com grupos de larguras diferentes joga os 4
+slots da direita para 38,7px em 390px e 31px em 320px — abaixo do minimo de toque. As unicas saidas
+exatas seriam 6 ou 8 destinos alem do Hunt.
+
+**O bug que 8 slots destaparam:** `.alvo-toque` traz `min-width: 44px`. Com 8 slots em 320px os
+botoes somavam 384px numa barra de 304 — flex nao encolhe abaixo de um minimo em px, entao "Mais"
+ficava 64px fora da tela, sem erro nenhum e sem barra de rolagem. Na doca o piso passou a ser so de
+altura. O rotulo virou `min(.58em, 2.3vw)` pelo mesmo motivo: com 34px de largura util, "Hospital"
+e "Mercado" truncavam.
+
+**Corte no trilho:** o contador da Pokedex saiu (ganhou slot proprio e continua na gaveta) e, so no
+compacto, o avatar do treinador — sem largura pro nome e pro nivel ele era um icone generico
+gastando ~46px permanentes na faixa que ja tinha empurrado o proprio avatar pra fora em 320px. Na
+gaveta ele aparece COM nome e nivel.
+
+**Achado de passagem:** "Resetar" na gaveta estava cortado em "R" na borda direita — `block`
+(`w-full`) num flex com outro botao, a mesma armadilha ja corrigida na Equipe e na Loja. Terceira
+ocorrencia do mesmo padrao.
+
+### Densidade dos menus (mesma branch)
+
+Pedido: "dentro dos menus, quero que mais itens sejam vistos em uma tela".
+
+Medido em 390x844 antes: Mochila com **5 linhas**, Loja com **3,5 itens**. Quatro causas, com
+numero cada:
+
+1. **O sheet parava acima do rodape INTEIRO** (179px), quando so a barra de navegacao (68px) e
+   inegociavel. Os outros 111px sao barra de golpes, zoom, Auto e ticker — nada acionavel com uma
+   lista aberta. Sheet de 586px -> 705px.
+2. **O card da Loja tinha tres faixas** e a do meio usava 192px de 343: 150px de vidro vazio ao
+   lado dos atalhos, com o botao de confirmar numa faixa propria logo abaixo. 148,5px -> 95,6px.
+3. **A auto-venda era um bloco permanente no topo da Mochila** (46px + espaco) enquanto a fileira
+   das abas ao lado usava 190px de 374. Virou chip na propria fileira das abas.
+4. **Padding e espaco entre linhas**: `p-[.6em]`/`gap-[.45em]` -> `p-[.4em]`/`gap-[.3em]` nas
+   listas longas. 71px -> 61px por linha da Mochila.
+
+Resultado: Mochila 5 -> 8, Loja 3,5 -> 5,5, Pokedex 9,5 -> 11.
+
+**O que 320px pegou e 390px nao pegaria:** juntar as duas faixas da Loja fazia o rotulo do botao
+(75,8px) nao caber nos 73,9px que sobravam, e ele vazava CORTADO em vez de truncar — faltava
+`min-w-0` no span dentro do botao flex. O campo de quantidade passou de `4.2em` pra `3.4em` (ainda
+cabe "1000") e fechou a conta.
+
+**Nenhum alvo de toque encolheu.** A densidade saiu de espaco morto; os 44px de altura continuam
+em todo controle.
+
+### Loja em duas colunas no celular (mesma branch)
+
+Pedido: comprar e vender na mesma tela, em duas colunas.
+
+O bloqueio real nao era o layout, era a largura: com duas colunas em 390px cada uma fica com
+~170px, e ali NAO cabe campo de quantidade + `+10 +100 +1000` + botao de confirmar sem derrubar
+todo alvo de toque abaixo do minimo. A saida foi trocar a forma da linha por largura de coluna: em
+`compacto` a linha e so identidade (icone, nome, estoque, preco) e a transacao abre num sheet;
+em `deitado` (coluna de ~470px) e no amplo, o card inteiro continua inline.
+
+O sheet cobra um toque a mais por compra e devolve alvo de toque: inline o `+10` tem **27px** de
+largura, no sheet passa dos 44px.
+
+**O bug que so aparece interagindo:** trancar um item de DENTRO do sheet fechava o sheet. Trancar
+manda o item pro fim da ordenacao — e possivelmente pra outra pagina — entao a linha que montava o
+sheet desmontava e levava o sheet junto. A ficha passou a ser montada pelo `ItensTab`, irma do
+grid. Regra que fica: **estado de painel aberto nao pode viver num componente cujo tempo de vida
+depende de ordenacao ou paginacao.**
+
+Dois acertos menores encontrados no caminho: `ItemIcon` devolvia `null` quando o item nao tem arte
+(as varas), e a linha inteira comecava 31px a esquerda das vizinhas — virou um vazio do mesmo
+tamanho, com `block` porque `<span>` inline ignora altura e largura. E os cabecalhos das duas
+colunas ganharam `min-h` igual: o botao "Tudo" da venda e mais alto que um rotulo de texto e
+empurrava a primeira linha daquela coluna pra baixo da vizinha.
+
+Efeito colateral bom: sumiu o eixo "que lado" da Loja no celular. As abas voltaram a ser as mesmas
+dos dois regimes — "Itens | Pokemons" — e o `ladoExterno`/`ladoLocal` do `ItensTab` deixou de
+existir.
+

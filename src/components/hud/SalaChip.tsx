@@ -20,11 +20,11 @@ export function SalaChip() {
   const progresso = Math.min(1, sala.abates / ABATES_POR_SALA)
 
   return (
-    <div className="hud-surface flex items-center gap-[.6em] rounded-full border border-n800 px-[1.1em] py-[.4em] shadow-sm">
+    <div className="vidro flex items-center gap-[.6em] overflow-hidden rounded-full px-[.9em] py-[.35em]">
       <span className="text-[.72em] tabular-nums text-n400">
         Sala <b className="font-medium text-n100">{sala.indice + 1}</b>/{SALAS_POR_HUNT}
       </span>
-      <span className="text-[.78em] font-medium text-n100">{nome}</span>
+      <span className="min-w-0 truncate text-[.78em] font-medium text-n100">{nome}</span>
       {janela && (
         <span className="text-[.7em] tabular-nums text-n500">Lv {janela[0]}-{janela[1]}</span>
       )}
@@ -36,7 +36,7 @@ export function SalaChip() {
           style={{ width: `${progresso * 100}%` }}
         />
       </span>
-      <span className="text-[.7em] tabular-nums text-n500">{restantes} p/ limpar</span>
+      <span className="shrink-0 text-[.7em] tabular-nums text-n500">{restantes} p/ limpar</span>
       {sala.ciclos > 0 && (
         <span className="text-[.7em] tabular-nums text-n500">· ciclo {sala.ciclos + 1}</span>
       )}
