@@ -2,7 +2,7 @@
 // auth.uid(), friendships.user_id = auth.uid()) + as 3 RPCs de escrita ja
 // testadas (#10) + Supabase Realtime no lugar de poll de 15s — pedido de
 // amizade/mensagem nova chega por websocket.
-import { supabase } from '@/lib/supabase'
+import { supabase, SCHEMA_DO_BANCO } from '@/lib/supabase'
 import { ErroServidor } from './servidor'
 import type { AmigoRemoto, AnexoItemCorreio, MensagemCorreio } from './servidor'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -98,7 +98,7 @@ export function assinarCorreioAoVivo(userId: string, aoMudar: () => void): () =>
     .channel(`correio-${userId}`)
     .on(
       'postgres_changes',
-      { event: '*', schema: 'dev', table: 'mail_messages', filter: `para_id=eq.${userId}` },
+      { event: '*', schema: SCHEMA_DO_BANCO, table: 'mail_messages', filter: `para_id=eq.${userId}` },
       () => aoMudar(),
     )
     .subscribe()

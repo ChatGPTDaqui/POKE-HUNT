@@ -27,6 +27,19 @@ if (!url || !anonKey) {
 // type-check de tabela/coluna (regenerar tipos contra dev cobre isso depois).
 const schema = (import.meta.env.VITE_SUPABASE_SCHEMA || 'public') as 'public'
 
+/**
+ * O schema resolvido, EXPORTADO porque o Realtime precisa dele à mão.
+ *
+ * `db: { schema }` abaixo vale pro PostgREST e SÓ pra ele: no Realtime o schema
+ * é parâmetro do filtro de `postgres_changes`, e o client não o preenche
+ * sozinho. As duas assinaturas do jogo (chat mundial, correio) traziam
+ * `schema: 'dev'` escrito à mão — em produção elas assinavam eventos de uma
+ * tabela que o jogo não usa, então chat novo só aparecia recarregando a tela e o
+ * correio dependia do poll. Passou meses sem ninguém notar porque o ambiente de
+ * teste roda justamente no schema `dev`.
+ */
+export const SCHEMA_DO_BANCO = schema
+
 export const supabase = createClient<Database>(url, anonKey, {
   db: { schema },
   auth: {
