@@ -290,6 +290,69 @@ function CelulaOrdem(
   )
 }
 
+/**
+ * A fila dos escolhidos, na ORDEM, com as setas pra reordenar.
+ *
+ * Existe por duas razoes que sao a mesma: a ordem dos slots e a ordem em que o
+ * POKE usa os golpes (`combatSystem#pickAbilityDaFila` percorre
+ * `activeAbilities` do 1o ao ultimo), e nada na tela dizia isso — a coluna Usar
+ * mostra numeros, mas so da pra "acrescentar no fim" e "remover", entao o
+ * numero parecia consequencia da ordem de aprendizado.
+ *
+ * Fica FORA da tabela de propriedade: a tabela lista o learnset inteiro por
+ * nivel, e a fila e um recorte de no maximo 4 linhas numa ordem diferente.
+ * Tentar fazer as setas caberem na celula de 2.6em da coluna Usar dava tres
+ * alvos de toque colados num quadrado de dedo.
+ */
+function FilaDeGolpes(
+  { ativos, podeMover, onMover }:
+  { ativos: string[]; podeMover: boolean; onMover: (de: number, passo: -1 | 1) => void },
+) {
+  return (
+    <div className="flex flex-col gap-[.2em]">
+      <span className="text-[.9em] text-n500">
+        Ordem de uso: o POKE tenta o 1º, depois o 2º, e volta ao começo.
+      </span>
+      <div className="flex flex-wrap gap-[.3em]">
+        {ativos.map((key, i) => {
+          const ability = getAbility(key)
+          return (
+            <span
+              key={`${key}-${i}`}
+              className="flex items-center gap-[.25em] rounded-full border border-n700 bg-n800 pr-[.15em] pl-[.5em]"
+            >
+              <span className="tabular-nums text-n500">{i + 1}º</span>
+              <span className="max-w-[7em] truncate">{ability?.name ?? key}</span>
+              {/* Duas setas por chip em vez de arrastar: arrastar exige
+                  biblioteca de DnD e nao tem equivalente de teclado, e a fila
+                  tem no maximo 4 itens — uma seta resolve em um toque. */}
+              {([-1, 1] as const).map((passo) => {
+                const limite = passo === -1 ? i === 0 : i === ativos.length - 1
+                return (
+                  <button
+                    key={passo}
+                    type="button"
+                    disabled={!podeMover || limite}
+                    aria-label={`${passo === -1 ? 'Subir' : 'Descer'} ${ability?.name ?? key} na fila`}
+                    title={podeMover ? (passo === -1 ? 'Usar mais cedo' : 'Usar mais tarde') : 'Saia da hunt para reordenar'}
+                    onClick={() => onMover(i, passo)}
+                    className={cn(
+                      'h-[1.3em] w-[1.3em] rounded-full border-0 bg-transparent font-[inherit] text-[.9em] leading-none text-n300',
+                      !podeMover || limite ? 'cursor-not-allowed opacity-30' : 'cursor-pointer hover:text-foreground',
+                    )}
+                  >
+                    {passo === -1 ? '‹' : '›'}
+                  </button>
+                )
+              })}
+            </span>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export function MovesetTable({ poke, species }: { poke: PokeInstance; species: Species }) {
   // O learnset COMPLETO da especie, nao so `poke.unlockedAbilities`: a tabela
   // tambem serve como preview de "o que vem por ai".
@@ -341,16 +404,39 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
     controller.setActiveAbilities(poke.uid, ja ? ativos.filter((k) => k !== key) : [...ativos, key])
   }
 
+  /**
+   * Troca de lugar o golpe da posicao `de` com o vizinho na direcao `passo`.
+   *
+   * UMA chamada com a lista final, e nao uma sequencia de tira-e-poe: cada
+   * chamada e um round-trip a RPC que pode falhar por conta propria, e a ordem
+   * intermediaria seria gravada no meio do caminho. Antes disto nao havia como
+   * reordenar: a coluna Usar so acrescenta no fim e remove, entao pra pôr um
+   * golpe em 1o o jogador desmarcava os quatro e remarcava na ordem — oito
+   * cliques e oito chamadas. E a ordem NAO e enfeite: e a rotacao que
+   * `combatSystem#pickAbilityDaFila` percorre.
+   */
+  function mover(de: number, passo: -1 | 1): void {
+    if (!podeEscolher) return
+    const para = de + passo
+    if (para < 0 || para >= ativos.length) return
+    const nova = [...ativos]
+    ;[nova[de], nova[para]] = [nova[para], nova[de]]
+    controller.setActiveAbilities(poke.uid, nova)
+  }
+
   return (
     <div className="overflow-hidden rounded-[.4em] border border-n800 text-[.8em]">
       {meu && (
-        <div className="flex items-center justify-between border-b border-n800 bg-n900 px-[.5em] py-[.35em]">
-          <span className="text-n400">
-            Golpes ativos <span className="text-foreground">{ativos.length}/{MAX_ACTIVE_ABILITIES}</span>
-          </span>
-          <span className="text-n500">
-            {emHunt ? 'Saia da hunt para trocar de golpe.' : 'Clique na coluna Usar para escolher.'}
-          </span>
+        <div className="flex flex-col gap-[.3em] border-b border-n800 bg-n900 px-[.5em] py-[.35em]">
+          <div className="flex items-center justify-between gap-[.5em]">
+            <span className="text-n400">
+              Golpes ativos <span className="text-foreground">{ativos.length}/{MAX_ACTIVE_ABILITIES}</span>
+            </span>
+            <span className="min-w-0 truncate text-n500">
+              {emHunt ? 'Saia da hunt para trocar de golpe.' : 'Clique na coluna Usar para escolher.'}
+            </span>
+          </div>
+          {ativos.length > 0 && <FilaDeGolpes ativos={ativos} podeMover={podeEscolher} onMover={mover} />}
         </div>
       )}
       <div

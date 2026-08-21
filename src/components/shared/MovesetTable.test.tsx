@@ -51,10 +51,14 @@ function pokeDoJogador(extra: Partial<PokeInstance> = {}): PokeInstance {
 // A linha da tabela e um grid de <div>s, nao um <tr> — acha pelo nome do golpe
 // e sobe ate o container que tambem tem o botao "Usar".
 function linhaDoGolpe(nome: string): HTMLElement {
-  const rotulo = screen.getByText(nome)
-  const linha = rotulo.closest('div[class*="grid"]')
-  if (!linha) throw new Error(`linha nao encontrada para ${nome}`)
-  return linha as HTMLElement
+  // `getAllByText` e nao `getByText`: o nome do golpe aparece TAMBEM na fila de
+  // ordem de uso (chips no cabecalho), que nao e um grid — a linha da tabela e
+  // a unica ocorrencia com ancestral `grid`.
+  for (const rotulo of screen.getAllByText(nome)) {
+    const linha = rotulo.closest('div[class*="grid"]')
+    if (linha) return linha as HTMLElement
+  }
+  throw new Error(`linha nao encontrada para ${nome}`)
 }
 
 function botaoUsar(nomeDoGolpe: string): HTMLButtonElement | null {
@@ -245,5 +249,70 @@ describe('MovesetTable — selecao dos 4 golpes', () => {
       await userEvent.click(botao)
       expect(toggleAbility).not.toHaveBeenCalled()
     })
+  })
+})
+
+// A ORDEM dos slots e a rotacao de combate (`pickAbilityDaFila` percorre
+// `activeAbilities` do 1o ao ultimo). Antes desta leva nao havia como
+// reordenar: a coluna Usar so acrescenta no fim e remove, entao pôr um golpe em
+// 1o custava desmarcar os quatro e remarcar na ordem — oito cliques e oito
+// chamadas de rede, cada uma podendo falhar sozinha.
+describe('MovesetTable — reordenar a fila', () => {
+  function setaDe(nome: string, direcao: 'Subir' | 'Descer'): HTMLButtonElement {
+    return screen.getByLabelText(new RegExp(`${direcao} ${nome}`, 'i')) as HTMLButtonElement
+  }
+
+  it('subir um golpe manda a lista na ordem nova, numa chamada so', async () => {
+    const escolhidos = activeAbilitiesPadrao(ESPECIE, NIVEL)
+    const poke = pokeDoJogador({ activeAbilities: escolhidos })
+    useGameStateStore.setState({ team: [poke] })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+    await userEvent.click(setaDe(nomeDoGolpe(escolhidos[1]), 'Subir'))
+
+    expect(setActiveAbilities).toHaveBeenCalledTimes(1)
+    const [, lista] = setActiveAbilities.mock.calls[0]
+    expect(lista).toEqual([escolhidos[1], escolhidos[0], ...escolhidos.slice(2)])
+  })
+
+  it('descer faz o simetrico', async () => {
+    const escolhidos = activeAbilitiesPadrao(ESPECIE, NIVEL)
+    const poke = pokeDoJogador({ activeAbilities: escolhidos })
+    useGameStateStore.setState({ team: [poke] })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+    await userEvent.click(setaDe(nomeDoGolpe(escolhidos[0]), 'Descer'))
+
+    const [, lista] = setActiveAbilities.mock.calls[0]
+    expect(lista).toEqual([escolhidos[1], escolhidos[0], ...escolhidos.slice(2)])
+  })
+
+  it('as pontas da fila nao tem pra onde ir', () => {
+    const escolhidos = activeAbilitiesPadrao(ESPECIE, NIVEL)
+    const poke = pokeDoJogador({ activeAbilities: escolhidos })
+    useGameStateStore.setState({ team: [poke] })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+    expect(setaDe(nomeDoGolpe(escolhidos[0]), 'Subir').disabled).toBe(true)
+    expect(setaDe(nomeDoGolpe(escolhidos.at(-1)!), 'Descer').disabled).toBe(true)
+  })
+
+  it('dentro de hunt reordenar fica bloqueado, como o resto da tela', async () => {
+    const escolhidos = activeAbilitiesPadrao(ESPECIE, NIVEL)
+    const poke = pokeDoJogador({ activeAbilities: escolhidos })
+    useGameStateStore.setState({ team: [poke], currentMapId: 'mata_faixa1' })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+
+    const seta = setaDe(nomeDoGolpe(escolhidos[1]), 'Subir')
+    expect(seta.disabled).toBe(true)
+    await userEvent.click(seta)
+    expect(setActiveAbilities).not.toHaveBeenCalled()
+  })
+
+  it('a tela diz que a ordem e a ordem de uso', () => {
+    const poke = pokeDoJogador()
+    useGameStateStore.setState({ team: [poke] })
+    render(<MovesetTable poke={poke} species={ESPECIE} />)
+    expect(screen.getByText(/Ordem de uso/i)).toBeTruthy()
   })
 })
