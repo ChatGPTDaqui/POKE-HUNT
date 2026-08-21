@@ -966,3 +966,76 @@ describe('Fase 12: Traits passivas', () => {
     expect(multiplicadorDeDefesaPorTrait('marvel_scale', false, true)).toBe(1) // so no fisico
   })
 })
+
+// GOLPE DE MULTIPLOS ACERTOS (PH-68). O `power` desses 16 golpes e POR ACERTO
+// (15 a 40) e o motor batia UMA vez — ~1/3 do dano pretendido. Nao era slot
+// desperdicado: desde 2026-08-18 o POKE do jogador roda a fila dos 4 slots sem
+// fallback pro Ataque Basico (poder 40), entao Fury Attack (15) gastava o turno
+// batendo menos da metade do golpe gratuito. Ver data/abilities.ts#MULTI_HIT_OVERRIDES.
+describe('golpe de multiplos acertos', () => {
+  function cenarioMultiAcerto(golpeId: string, semente = 7) {
+    const rng = createRng(semente)
+    const counters = { entity: 1, effect: 1, pendingHit: 1 }
+    // Atacante FRACO (nivel 5) contra alvo forte (nivel 60) de proposito: o
+    // alvo precisa SOBREVIVER aos 5 acertos, senao a sequencia para no KO e o
+    // teste mediria a morte em vez da contagem de acertos.
+    const jogadorPoke = createPokeInstance(rng, 'charmander', 5)
+    jogadorPoke.unlockedAbilities = [...jogadorPoke.unlockedAbilities, golpeId]
+    jogadorPoke.activeAbilities = [golpeId]
+    jogadorPoke.disabledAbilities = {
+      [typedAoeMoveKey(SPECIES.charmander.type)]: true,
+      [BASIC_ATTACK.id]: true,
+    }
+    const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
+    const player = world.player!
+    player.cooldowns = {}
+    player.globalCooldown = 0
+
+    const enemyPoke = createPokeInstance(rng, 'rattata', 60)
+    const enemySpecies = SPECIES[enemyPoke.speciesId]
+    // Inimigo silenciado: um contra-ataque dele somaria numeros de dano no
+    // mesmo `world.effects` que este teste conta.
+    enemyPoke.disabledAbilities = Object.fromEntries(
+      [...golpesUtilizaveis(enemyPoke, enemySpecies, true), BASIC_ATTACK.id].map((id) => [id, true]),
+    )
+    const enemy = createEnemyEntity(world.counters, {
+      poke: enemyPoke, x: player.x, y: player.y, encounterId: 'route_46_rattata',
+    })
+    enemy.state = 'engaged'
+    enemy.targetId = player.id
+    world.enemies = [enemy]
+    return { world, player, enemy }
+  }
+
+  // Um uso do golpe: `updateCombat(0)` enfileira o hit e `updateCombat(0.6)`
+  // pousa ele (HIT_LAND_DELAY e 0.5s). 0.6 e menor que MIN_ACTION_GAP (2s), ou
+  // seja o POKE nao age de novo e cada numero de dano contado abaixo pertence a
+  // ESTE uso.
+  function umUsoDoGolpe(world: ReturnType<typeof cenarioMultiAcerto>['world']) {
+    updateCombat(world, 0)
+    updateCombat(world, 0.6)
+    return world.effects.filter((e) => e.type === 'damageNumber').map((e) => e.value ?? 0)
+  }
+
+  it('fury_swipes acerta de 2 a 5 vezes, e o HP perdido e a soma dos acertos', () => {
+    const { world, enemy } = cenarioMultiAcerto('fury_swipes')
+    const hpAntes = enemy.poke.hp
+
+    const acertos = umUsoDoGolpe(world)
+
+    expect(acertos.length).toBeGreaterThanOrEqual(2)
+    expect(acertos.length).toBeLessThanOrEqual(5)
+    expect(enemy.poke.hp).toBeGreaterThan(0) // o cenario garante que ele sobrevive
+    expect(hpAntes - enemy.poke.hp).toBe(acertos.reduce((s, n) => s + n, 0))
+  })
+
+  it('double_kick acerta exatamente 2 vezes (contagem fixa, sem sorteio)', () => {
+    const { world } = cenarioMultiAcerto('double_kick')
+    expect(umUsoDoGolpe(world)).toHaveLength(2)
+  })
+
+  it('golpe normal continua com um acerto so', () => {
+    const { world } = cenarioMultiAcerto('scratch')
+    expect(umUsoDoGolpe(world)).toHaveLength(1)
+  })
+})
