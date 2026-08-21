@@ -48329,6 +48329,7 @@ function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0) {
 function reconciliarSalaDaAutoridade(world, sala) {
 	if (!world.mapDef) return;
 	if (!sala) {
+		if (temSalas(world.mapDef.id)) return;
 		world.sala = null;
 		world.salaPendente = null;
 		world.salaCountdownRemaining = null;

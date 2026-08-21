@@ -325,6 +325,27 @@ export function reconciliarSalaDaAutoridade(world: WorldState, sala: SalaAtiva |
   // sub-bioma pendurado no HUD.
   if (!world.mapDef) return
   if (!sala) {
+    // `null` DO SERVIDOR TEM DOIS SIGNIFICADOS, e tratar os dois igual apagava
+    // a sala em jogo.
+    //
+    // 1. Hunt sem sistema de salas (inicial, BOSS, Lance): nao ha sala mesmo, e
+    //    limpar e o certo — sem isso o Hospital fica com sub-bioma pendurado.
+    // 2. Servidor MAIS ANTIGO que o cliente, numa hunt que TEM salas. Foi o
+    //    caso medido ao vivo em 2026-08-20 com as 36 hunts do Pesadelo: o
+    //    cliente ja sabia das salas (POOL_POR_SALA passou a cobrir o espelho) e
+    //    a Edge Function publicada ainda nao. `/sessao/abrir` respondeu sem
+    //    `sala`, o cliente exibiu a propria ("Sala 1/10 Vulcao"), e o primeiro
+    //    flush trouxe `sala: null` — que caia aqui e APAGAVA o chip e o
+    //    sub-bioma no meio da hunt.
+    //
+    // `temSalas` desempata pelo unico dado que separa os dois casos: se ESTE
+    // mapa tem salas, um `null` e divergencia de versao, nao autoridade. O
+    // cliente segue com a predicao dele ate o servidor ser publicado.
+    //
+    // Importa porque cliente e Edge Function sobem por pipelines DIFERENTES no
+    // mesmo push (Cloudflare Pages e supabase-deploy.yml), com duracoes
+    // diferentes: a janela em que um esta novo e o outro velho existe sempre.
+    if (temSalas(world.mapDef.id)) return
     world.sala = null
     world.salaPendente = null
     world.salaCountdownRemaining = null

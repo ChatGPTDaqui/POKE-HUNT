@@ -341,6 +341,39 @@ describe('sala sob autoridade do servidor', () => {
       expect(especiesDaNova.has(inimigo.poke.speciesId), inimigo.poke.speciesId + ' fora da sala ' + outra).toBe(true)
     }
   })
+
+  // Os dois testes abaixo sao um par: `null` do servidor significa coisas
+  // OPOSTAS em hunt com e sem salas, e tratar os dois igual apagava a sala em
+  // jogo. Medido ao vivo em 2026-08-20 nas hunts do Pesadelo (cliente novo,
+  // Edge Function publicada ainda velha): o chip "Sala 1/10" desaparecia e o
+  // sub-bioma voltava atras no primeiro flush. Sem aviso, sem erro no console.
+  it('null do servidor NAO apaga a sala de hunt que tem salas (servidor velho)', () => {
+    const world = mundo(13)
+    const antes = { ...world.sala! }
+    expect(temSalas(world.mapDef!.id)).toBe(true)
+
+    reconciliarSalaDaAutoridade(world, null)
+
+    expect(world.sala).not.toBeNull()
+    expect(world.sala!.chave).toBe(antes.chave)
+    expect(world.sala!.indice).toBe(antes.indice)
+    expect(world.salaPendente).toBeNull()
+    expect(world.salaCountdownRemaining).toBeNull()
+  })
+
+  it('null do servidor APAGA a sala de hunt sem salas (o caso legitimo)', () => {
+    // O contrafactual do teste acima: sem ele, "nunca apagar em null" passaria
+    // igual e deixaria sub-bioma pendurado no HUD fora de hunt de bioma.
+    const world = mundo(13, 'route_46')
+    expect(temSalas(world.mapDef!.id)).toBe(false)
+    world.sala = { indice: 3, chave: 'grass', abates: 5, ciclos: 0 }
+
+    reconciliarSalaDaAutoridade(world, null)
+
+    expect(world.sala).toBeNull()
+    expect(world.salaPendente).toBeNull()
+    expect(world.salaCountdownRemaining).toBeNull()
+  })
 })
 
 // ---------------------------------------------------------------------------
