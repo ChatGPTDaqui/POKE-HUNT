@@ -206,6 +206,18 @@ export interface BaseEntity {
   nightmareDot?: boolean
   /** Ingrain/Aqua Ring (mesmo campo pros dois): fracao do HP MAXIMO curada por turno (1/16). */
   regenPercent?: number
+  /**
+   * PRESO (PH-72): Wrap/Bind/Fire Spin/Clamp/Whirlpool/Sand Tomb/Infestation.
+   * Segundos restantes, no mesmo formato de `silenciadoAte`/`tormentedUntil` (a
+   * duracao nasce em turnos e vira segundos por TURNO_SEGUNDOS). Enquanto > 0:
+   * perde 1/8 do HP MAXIMO por turno, e o POKE do JOGADOR nao pode ser trocado
+   * por outro da equipe.
+   *
+   * Nao existe "preso" do lado do selvagem que faca diferenca no bloqueio de
+   * troca — o selvagem nao tem equipe. O dano por turno, esse sim, vale pros
+   * dois lados, e e por isso que o golpe nao e so desvantagem pro jogador.
+   */
+  presoAte?: number
 
   // Guarda contra reaplicar o HOOK DE ENTRADA EM COMBATE (Intimidate/Download/
   // clima automatico — ver combatSystem.ts#resolveEntryHook) todo frame

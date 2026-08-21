@@ -40,6 +40,9 @@ import {
 const LEECH_SEED_DRAIN_PERCENT = 1 / 8
 const CURSE_DOT_PERCENT = 1 / 4
 const NIGHTMARE_DOT_PERCENT = 1 / 4
+// PRESO (Wrap/Bind/Fire Spin/...): 1/8 do HP maximo por turno, a fracao dos
+// jogos (Gen VI+) pra esta familia.
+const PRESO_DANO_PERCENT = 1 / 8
 
 // Traits que impedem um status especifico de pegar (Fase 12). Cada uma cobre
 // UM status so — nao existe trait "imune a tudo" neste catalogo.
@@ -338,6 +341,10 @@ export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.curseDot = undefined
   entity.nightmareDot = undefined
   entity.regenPercent = undefined
+  // PRESO (PH-72): fim de luta solta o POKE. Sem esta linha o jogador ficaria
+  // com a troca de equipe travada FORA de combate, sem nada na tela explicando —
+  // o pior jeito de um estado volatil vazar.
+  entity.presoAte = undefined
   entity.entradaProcessada = false
   // Fase 12: todo campo volatil novo tem que zerar aqui tambem — fim de
   // batalha e fim de batalha pra qualquer estado que nao sobrevive a troca de
@@ -444,6 +451,12 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
   }
   if (entity.tormentedUntil && entity.tormentedUntil > 0) {
     entity.tormentedUntil = Math.max(0, entity.tormentedUntil - dt)
+  }
+  // PRESO (PH-72): mesmo formato dos timers acima — segundos corridos. O DANO
+  // por turno fica junto do resto do tick volatil (leech_seed e companhia), mais
+  // abaixo, porque ele depende do relogio de TURNO, nao do de frame.
+  if (entity.presoAte && entity.presoAte > 0) {
+    entity.presoAte = Math.max(0, entity.presoAte - dt)
   }
 
   entity.proximoTurnoDeStatus -= dt
@@ -585,6 +598,12 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
   }
   if (entity.curseDot) {
     dano += Math.max(1, Math.round(entity.poke.stats.hp * CURSE_DOT_PERCENT))
+  }
+  // PRESO (PH-72): 1/8 do HP MAXIMO por turno, a fracao padrao desta familia de
+  // golpe nos jogos. Soma no mesmo `dano` agregado (nao substitui) — um POKE
+  // preso E envenenado leva as duas coisas.
+  if (entity.presoAte && entity.presoAte > 0) {
+    dano += Math.max(1, Math.round(entity.poke.stats.hp * PRESO_DANO_PERCENT))
   }
   // Nightmare so causa dano ENQUANTO o alvo estiver dormindo — se ele acordar
   // a flag fica ligada (nao precisa limpar), mas simplesmente para de fazer
