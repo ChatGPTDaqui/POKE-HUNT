@@ -104,7 +104,8 @@ Foresight/Miracle Eye/Odor Sleuth fazem o atacante ignorar a Evasão do defensor
 
 Golpes de **dano fixo** (Seismic Toss/Night Shade = nível do usuário; Dragon Rage = 40 flat;
 Super Fang = metade do HP atual do alvo; Horn Drill/Fissure existem na tabela mas ficam fora
-de `isDamagingAbility`, nunca selecionáveis — sem accuracy dedicada pra equilibrar um OHKO)
+de `isDamagingAbility`, nunca selecionáveis — falta a regra de OHKO por diferença de nível, não
+a accuracy, que existe desde a leva de combate)
 pulam a pipeline inteira, exceto a imunidade de tipo. Golpe normal:
 
 ```

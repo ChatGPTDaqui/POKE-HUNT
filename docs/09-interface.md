@@ -620,6 +620,107 @@ registrado), dado real que diz o que é.
 
 ## Tooltips
 
+### O `<Tooltip>` do base-ui nunca abriu no celular — nem tinha como
+
+`TooltipTrigger` do base-ui passa `mouseOnly: true` FIXO ao seu hook de hover
+(`node_modules/@base-ui/react/tooltip/trigger/TooltipTrigger.js:147`). Não é opção: é o valor
+escrito no pacote. Consequência medida em 2026-08-19: as cinco bolhas que existiam (golpe, item,
+POKE do chat, POKE do mercado, `?` do painel Auto) **abriam só no mouse**. O mesmo vale para
+todo `title=` da HUD — atributo `title` é hover, e dedo não faz hover.
+
+Duas telas já tinham contornado isso à mão, cada uma do seu jeito (`ItemTooltip` e `InfoIcon` do
+`AutoPanel`: ramo por `useDeviceMode().coarse` que abre um `Sheet` em vez da bolha, com o mesmo
+conteúdo escrito duas vezes em dois formatos). As outras três não tinham caminho nenhum.
+**As duas foram migradas** — não há mais ramo por media query nem conteúdo duplicado em tooltip
+nenhum do jogo.
+
+**`components/shared/Explicacao.tsx`** é o mecanismo único: `open` controlado por estado próprio,
+o hover do base-ui continua mandando nele (ele chama `onOpenChange`) e o toque entra por
+`onClick`.
+
+- **Sem ramo por `coarse`.** Notebook com tela de toque é as duas coisas ao mesmo tempo, e
+  `(pointer: coarse)` responde por UM ponteiro. O `pointerType` do evento real responde certo nos
+  dois — gravado no `pointerdown`, lido no `click`.
+- **`onClick`, não `onPointerDown`.** Com pointerdown, começar a ROLAR a lista com o dedo em cima
+  da palavra abria a bolha no meio da rolagem. Click o browser já suprime depois de um arrasto.
+- **`stopPropagation` só no toque.** Tocar a palavra "Natureza" dentro de um card com `onClick`
+  próprio abria a bolha E o card. No mouse a propagação continua: lá o hover já mostrou a bolha, e
+  o clique pertence ao card.
+- **`data-keep-open` na BOLHA, não no gatilho.** O popup é portado para `document.body`, então
+  para o listener de `pointerdown` do `Sheet`/`GameWindow` ele é "fora" — um toque no texto da
+  explicação fechava o painel inteiro por baixo dela. Reproduzido no celular: ficha do POKE
+  aberta, toque na bolha da Natureza, ficha some. O gatilho não precisa da marca (mora dentro do
+  `[data-window]`).
+- **`text-[.85em]`, não `.95em`.** A bolha é portada para fora da `.hud-root`, então o `em` dela
+  resolve contra `html { font-size: 19px }` — dois pontos acima da HUD numa tela estreita. Sem o
+  desconto, o texto da explicação saía maior que o texto explicado.
+
+`Palavra` é o gatilho com afordância: sublinhado pontilhado e `tabIndex={0}`. O sublinhado não é
+enfeite — bolha sem marca é bolha que o jogador nunca descobre, e no dedo mais ainda, porque não
+existe hover para revelar por acidente. O `tabIndex` existe porque um `<span>` com bolha não tem
+papel nenhum na árvore de acessibilidade: sem ele a explicação era inalcançável por teclado.
+
+### O glossário: `data/glossario.ts`
+
+Verbete ESTÁTICO (o conceito) em `GLOSSARIO`; verbete que depende do POKE na tela é FUNÇÃO
+(`verbeteDaNatureza`, `verbeteDaTrait`, `verbeteDoStatus`, `verbeteDoStat`, `verbeteDaRaridade`,
+`verbeteDaCaracteristica`, `verbeteDoTipoDoGolpe`, `verbeteDosTiposDaEspecie`) — ela compõe o
+conceito com os números daquele indivíduo, porque "Natureza sobe um atributo em 10%" não responde
+"a MINHA natureza atrapalha o golpe que eu uso?".
+
+**Nenhum número escrito à mão onde existe fonte.** `NATURE_BONUS`, `IV_MAX`,
+`CHANCE_DE_TRAIT_OCULTA`, `RARITIES`, `STATUS_RULES` e `TURNO_SEGUNDOS` entram por import — mesmo
+motivo da Wiki ler fórmula ao vivo. O efeito de cada status sai inteiro de `regraDoStatus`; só a
+frase que amarra os números é escrita.
+
+**Não é a Wiki, e não duplica ela.** A Wiki responde "como funciona o sistema" em telas de JSX;
+o glossário responde "o que essa palavra quer dizer" em uma a três frases. `glossario.test.ts`
+tranca o teto — **4 parágrafos, 210 caracteres cada** — porque o limite é a feature: a primeira
+versão emendava os três parágrafos do conceito e a bolha da Natureza cobria dois terços de uma
+tela de 390px, tapando a ficha que ela explicava. O mesmo teste varre 25 naturezas, todas as
+habilidades do catálogo, as 30 características, os 6 status, as 6 raridades, os 18 tipos e todas
+as espécies procurando `NaN`/`undefined`/`${` — lixo de interpolação não lança exceção, a bolha só
+abre mentindo.
+
+### Onde as bolhas entraram
+
+| Tela | Palavras explicadas |
+|---|---|
+| Ficha do POKE (`PokeStatDetail`) | Natureza **e o valor dela**, Habilidade **e o nome dela**, Característica **e a frase**, os 5 atributos, IVs, cada chip de IV, os chips de tipo (lado defensivo, combinando os dois tipos) |
+| `StatusBadge` (ficha, equipe, card em campo) | a sigla de 3 letras, que só tinha `title=` |
+| Sheet do golpe (`AbilityHud`) | Dano base, Precisão, PP, Recarga, Alcance, Categoria, tipo do golpe |
+| `StatusEffectsBar` | cada ícone no mouse; no dedo o sheet lista o nome **e o efeito** |
+| Pokedex | "Habilidades possíveis", os 6 rótulos de status base |
+| Loja, Mochila, Mercado (`ItemTooltip`) | o item — agora no dedo também |
+| Painel Auto (`InfoIcon`) | o `?` de cada automação — idem |
+
+#### Duas bolhas por linha: o RÓTULO e o VALOR
+
+Pedido explícito do usuário, e a divisão se sustenta. Tocar **"Natureza"** responde *o que é
+natureza*; tocar **"Hardy (neutra)"** responde *o que Hardy faz*. Igual em Habilidade
+(`Habilidade` → conceito, `Pressure` → "o oponente gasta PP dobrado" + o aviso de que o motor daqui
+ignora) e em Característica (`Característica` → conceito, `Cochila muito` → "aponta HP como o IV
+mais alto deste POKE (31)").
+
+Verbete de indivíduo por isso **não repete** o conceito: `verbeteDaNatureza` devolve uma linha só, e
+o `titulo` dela é `Hardy`, não `Natureza`. `glossario.test.ts` tranca as duas coisas — título
+diferente do conceito, e nenhum parágrafo do conceito dentro do corpo do indivíduo. Sem esse teste,
+reemendar as duas respostas faz as duas bolhas ficarem idênticas e o jogador ler o conceito de novo
+a cada toque, sem erro e sem log.
+
+**`StatusEffectsBar` tinha um `title=` morto.** O container é `pointer-events-none` no desktop
+(para não comer clique do canvas), então o cursor nunca chegava nos ícones e o `title` deles nunca
+apareceu. Agora o badge recebe `pointer-events-auto` e a bolha.
+
+O que ficou **sem** bolha de propósito: `TypeChip` genérico. O mesmo chip serve tipo de golpe e tipo
+de espécie, e a resposta certa é diferente nos dois — dar a ofensiva num contexto defensivo seria
+pior que não dar nada.
+
+**O que a unificação NÃO mudou:** na Loja em coluna estreita o card inteiro tem `onClick` (é assim
+que se compra no celular), e o `ItemTooltip` envolve só o ÍCONE. Tocar o ícone abre a explicação e
+não a compra — mesma troca que o ramo por `Sheet` já fazia, pelo mesmo `stopPropagation`. Tocar o
+nome/preço continua comprando.
+
 - **Item** (`data/itemInfo.ts`): texto **derivado** dos números reais (`healAmount`,
   `captureRate`, `reviveHpPercent`, preços), não de uma segunda lista escrita à mão. A planilha
   só tem descrição por **categoria** ("Restaura HP." nas quatro poções), que não responde a
@@ -629,7 +730,31 @@ registrado), dado real que diz o que é.
   incluindo FAIRY), uma por golpe, conferidas por script contra `ABILITIES_DATA` (zero
   faltando, zero sobrando). Escritas em português a partir dos efeitos reais dos jogos.
 
-  **`AVISO_SEM_DANO` corrigido** (ver
+  **`AVISO_SEM_DANO` mentia em 11 golpes, e o comentário do arquivo garantia que não podia**
+  (corrigido em 2026-08-19). `golpeTemEfeitoReal` não conhecia `DANO_SEM_PODER_BASE`
+  (`data/abilities.ts`) — os 12 golpes cujo dano vem de uma regra própria e não do dano base.
+  O comentário afirmava que eles "têm `power > 0` na prática, então `semDano` nunca chega a
+  perguntar sobre eles". Têm `power: 0`. Resultado, confirmado na tela (ficha do Dugtrio, golpe
+  Magnitude): a ficha estampava *"este golpe não causa dano"* em Magnitude, Seismic Toss, Dragon
+  Rage, Counter, Mirror Coat, Psywave, Super Fang, Reversal, Flail, Night Shade e Present —
+  golpes que o próprio motor escolhe como golpe de dano.
+
+  Três consertos, um por sintoma: `golpeTemEfeitoReal` consulta o Set; a linha de **Precisão**
+  passou a ser gatilhada por `isDamagingAbility` e não por `power > 0` (Earthquake mostrava
+  "Precisão 100%" e Magnitude, ao lado, nada); e "Dano base 0" virou "Dano base —" mais
+  `AVISO_DANO_POR_REGRA_PROPRIA`, porque um zero cru lê como golpe fraco num Seismic Toss que
+  tira o nível inteiro.
+
+  **Os quatro OHKO são dois casos, e a bolha agora distingue.** `horn_drill`/`fissure` têm
+  implementação e estão fora da seleção por balanceamento → `AVISO_OHKO_DESLIGADO` ("mata o alvo
+  de uma vez, e por isso está desligado"). `guillotine`/`sheer_cold` não têm implementação nenhuma
+  → `AVISO_SEM_DANO`, que ali é verdade.
+
+  O invariante que fecha a classe inteira está em `moveDescriptions.test.ts`: **nenhum golpe que
+  `isDamagingAbility` aceita pode ser anunciado como inerte**. Conferido pelo contrafactual —
+  removida a linha do fix, o teste acusa os 11 pelo nome.
+
+  **`AVISO_SEM_DANO` corrigido antes disso** (ver
   [03](03-motor-de-simulacao.md#continua-fora-de-escopo-decisão-explícita)). Avisava em TODO
   golpe de potência 0 — presumindo que nenhum tem efeito real, verdade antes da leva de
   combate, falsa depois. `golpeTemEfeitoReal` agora só deixa o aviso acender nos golpes
@@ -661,6 +786,13 @@ sabe, meia dúzia, e nunca os outros 470; aquecer 844 KB que a sessão não vai 
 por nada. O custo é o primeiro uso de cada golpe cair no procedural por alguns frames — que é o que
 o fallback existe para fazer. As 18 tiras por TIPO continuam no preload (968 KB), porque todo
 combate usa todas.
+
+**Quais golpes giram, medido em 2026-08-19**: `bullet_punch` (0°), `flamethrower` (−19°), `charm`
+(22°), `fury_swipes` (23°), `mud_shot` (46°), `scratch` (−46°) e `shadow_punch` (98°). Os outros 15
+não giram, e a divisão é a mesma do lote por tipo: eixo instável entre quadros (as três presas, ±47°
+a ±59°; `petal_dance`, ±58°) ou radial de verdade (`comet_punch`, `stomp`, `x_scissor`,
+`earthquake`, `whirlpool`, `whirlwind`, `taunt`, `spider_web`, `dig`). `fire_spin` e `dragon_dance`
+são coluna e buff — apontam para cima, não para o alvo; girá-los deita a espiral no chão.
 
 ### Arte real — uma TIRA por tipo
 
@@ -754,14 +886,51 @@ deixaria o efeito entre os dois, parecendo que errou. Arte `direcional` não rec
 o `ancoraX` já resolve o posicionamento, e deslocar de novo empurraria a faísca para fora.
 
 Só a classe DIRECIONAL ganha o campo `direcional`. `anguloBaseGraus` é para onde a arte aponta
-DENTRO do arquivo (0° = direita, positivo = para baixo, a convenção do `Math.atan2` do mundo); o
-desenho gira por `anguloDeAtaque - base`, então arte que já nasce apontando para a direita usa 0
-e não vira nada quando o alvo está à direita. `ancoraX` diz em que fração da largura fica o
-ponto de impacto — sem ele um jato comprido atravessa o inimigo com o meio do desenho em cima
-do alvo.
+DENTRO do arquivo (0° = direita, positivo = para baixo, a convenção do `Math.atan2` do mundo).
+`ancoraX` diz em que fração da largura fica o ponto de impacto — sem ele um jato comprido
+atravessa o inimigo com o meio do desenho em cima do alvo.
 
 `orientacaoDaTira` é pura e testada isolada; `drawQuadroDeTira` só a aplica. O ângulo de ataque
 chega apenas em `drawImpactBurst` — anel de AOE e faísca de cura não giram.
+
+#### Dois giros, e o espelho no meio
+
+A cadeia é `rotate(giroParaOAlvo)` → `scale(1,-1)` (só quando espelha) → `rotate(giroDaBase)`. O
+primeiro giro leva a arte para a direção do golpe; o último desconta o ângulo que ela tem no
+arquivo. O espelho fica **entre** os dois, e essa posição é o conserto de 2026-08-19.
+
+Antes era um giro só (`anguloDeAtaque - base`) com o espelho aplicado **antes** dele — o que
+reflete em volta da horizontal DO ARQUIVO. Isso funciona enquanto toda arte direcional tem eixo
+quase horizontal (era o caso: 0°, −19°, 22°, −41°, −46°, 49°) e **inverte o sentido do movimento**
+quando o eixo é vertical. Contrafactual medido em 12 ângulos, com a conta antiga:
+
+| arte | base | erro na mira |
+|---|---|---|
+| FIRE, bullet_punch | 0° | correto |
+| flamethrower | −19° | 38° em 6 dos 12 ângulos |
+| charm | 22° | 44° |
+| DARK | −41° | 82° |
+| scratch | −46° | 92° |
+| mud_shot | 46° | 92° |
+| BUG | 49° | 98° |
+| shadow_punch | 98° | 164° |
+
+Mud Shot mandava lama para a esquerda com o inimigo em cima. **Só arte de base 0° escapava** — e
+eram justamente as duas que alguém tinha conferido a olho.
+
+A condição do espelho também mudou: era "giro resultante > 90°", passou a ser "**ângulo do golpe**
+> 90°". O que deixa a arte de ponta-cabeça é mirar para a esquerda, e isso é propriedade do golpe,
+não do giro. Com a regra antiga, arte de base 49° saía de ponta-cabeça na faixa de 90° a 139°.
+
+O invariante está trancado em `moveVfx.test.ts#mira da arte direcional`: para toda arte marcada
+`direcional` nas duas camadas, o vetor "frente" depois da cadeia inteira tem que apontar para o
+alvo, em 12 ângulos. E `scripts/conferir-mira-vfx.mjs` desenha as três camadas **com** a rotação
+real, com o alvo em quatro direções — é o único dos três conferidores que responde "o golpe mira
+no alvo?".
+
+Lição de cadastro que veio com isso: `anguloBaseGraus` é para onde a arte **aponta**, e o medidor
+devolve o **eixo** — uma reta, ambígua em 180°. O punho do Shadow Punch mede −82° e aponta para
+98°; cadastrado com −82°, o golpe chega pelas costas do alvo.
 
 ### Procedural, embaixo
 
@@ -849,6 +1018,47 @@ variáveis por espécie, que sobrava faixa vazia com `object-contain`).
 
 Vale no trilho de status (`StatusRail#FacePoke`) e no relatório de farm offline. Conferido: as 226 espécies têm os 3
 arquivos de arte no disco — o problema era o recorte, não arquivo faltando.
+
+### A face muda com o estado do POKE
+
+No trilho, o retrato **não é fixo**: ele é a leitura de relance do estado do POKE em campo.
+`data/faceEmotions.ts#escolherFace` (puro) decide, e `hooks/useFaceDoPoke.ts` observa o mundo.
+
+A prioridade é uma escala de urgência, e é o desenho todo:
+
+| Estado | Face |
+|---|---|
+| desmaiado | `dizzy` |
+| subiu de nível nos últimos 2,2s | `joyous` |
+| HP < 30% | `pain` |
+| status (volátil primeiro) | veneno/queimadura → `pain`, paralisia/congelado → `stunned`, sono → `sigh`, confusão → `dizzy` |
+| HP < 60% | `worried` |
+| perseguindo ou trocando golpe | `determined` |
+| resto | a face neutra de sempre |
+
+Três decisões que valem registro:
+
+**Level-up ganha de HP crítico.** A festa dura ~2s e é o único momento comemorativo do loop;
+a cara de dor volta logo depois.
+
+**Status ganha de HP baixo e perde de HP crítico.** A 60% de vida com veneno, a notícia é o
+veneno; a 20% de vida, a notícia é a vida.
+
+**Piso de 500ms por face** (`PISO_DE_FACE_MS`). Sem ele o retrato tremia: `chase` → `wander` →
+`chase` acontece várias vezes por segundo quando um alvo morre e outro nasce perto, e cada ida e
+volta trocava a imagem.
+
+A arte vem do mesmo banco da face neutra — 7 expressões por espécie em
+`assets/sprites-face{,-shiny}/emo/<face>/<id>.png`, 10,7 MB no total, importadas por
+`npm run faces:emocao`. **A cobertura não é completa:** ~40 das 226 espécies não têm parte das
+expressões na origem, e é por isso que existe o mapa gerado
+`data/generated/faceEmocoes.generated.ts` — sem ele o `<img>` pediria um PNG inexistente e o
+retrato ficaria em branco na única superfície permanente da tela. Quem não tem a expressão cai na
+face neutra, decidido em tempo de compilação e não por 404 (`faceEmotions.test.ts` tranca isso:
+todo arquivo prometido pelo mapa tem que existir no bundle).
+
+O preload é por POKE **em campo**, não por espécie do pool (`useFacesQuentes`): a troca de face
+acontece no meio do combate, e são 7 PNGs de ~4kB — mais barato que um único sprite de batalha.
 
 ## Tutoriais
 

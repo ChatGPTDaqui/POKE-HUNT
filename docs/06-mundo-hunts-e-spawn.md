@@ -200,11 +200,58 @@ campo com espécie fora do pool novo até morrer por conta própria — era assi
   salas um segundo papel além da variedade de sub-bioma: a hunt afunda conforme o jogador
   avança.
 
+### Quem decide a sala: o servidor, e só ele
+
+**A simulação do cliente é predição, e predição não pode sortear sub-bioma.** As duas
+simulações (cliente e servidor) têm sequência de sorteio própria — é o que `core/rng.ts`
+garante e o que a autoridade exige. Enquanto as duas sorteavam, elas sorteavam **salas
+diferentes para o mesmo índice**, e o resultado era visível: o cliente aplicava o palpite dele
+(com overlay), o flush seguinte trazia o do servidor, e `definirSala` escrevia direto no
+estado. Log real, uma hunt de teste, 90 segundos:
+
+```
+14:53:13  Sala 2/10 Obra           predição local, com aviso na tela
+14:53:15  Sala 1/10 Usina 0/30     flush: VOLTOU para a sala anterior
+14:53:20  Sala 2/10 Laboratorio    outro sub-bioma, sem aviso nenhum
+14:53:45  Sala 2/10 Obra           e de volta para o palpite local
+```
+
+Pior que o vai-e-vem: escrever `sala` direto **não troca a cena**. Arte de fundo, grade de
+colisão, ponto de nascimento e inimigos em campo só mudam dentro de
+`aplicarTransicaoDeSala` — então o HUD anunciava "Laboratorio" enquanto o canvas desenhava e
+colidia como "Usina", por minutos.
+
+Como funciona desde 2026-08-19:
+
+- `world.salaSobAutoridade` (ligado por `controller.enterMap` quando há sessão no servidor)
+  faz `registrarAbate` **contar o abate e parar aí** — sem sorteio, sem `salaPendente`. Sem
+  servidor (jogo local) e **na própria simulação do servidor** o flag é `false`, e o sorteio
+  local continua sendo o de sempre.
+- `reconciliarSalaDaAutoridade(world, sala)` é a única porta da sala que vem do flush. Mesma
+  sala → só atualiza o contador (e **nunca para trás**: entre o início da janela e a resposta
+  o jogador continuou matando). Sala diferente → vira `salaPendente` e arma a contagem
+  regressiva, entrando pela mesma transição da regra local. Sala **anterior** → ignorada, por
+  `(ciclo, índice)`; aceitar mandava o jogador de volta para a sala 1 com aviso de área nova.
+- O cliente **pede o flush na hora** em que a quota fecha (`autoridade.ts#observarQuotaDeSala`),
+  em vez de esperar o intervalo de 30s. Se o servidor ainda não fechou a quota dele (as duas
+  contagens de abate são independentes), a resposta traz a mesma sala e o pedido repete a cada
+  5s até ele fechar.
+
+O preço assumido: a troca de sala passa a custar uma ida ao servidor. A contagem regressiva de
+3s existia antes e cobre esse tempo (pior caso medido da Edge Function: 1593ms).
+
+Por que **não** fazer os dois sorteios coincidirem: seria preciso o cliente conhecer a semente
+da sessão, e com ela ele calcula as 10 salas na abertura — o reroll grátis que a decisão
+"sorteio no avanço, não plano antecipado" (acima) existe para impedir.
+
 ### Hunts sem sistema de salas
 
-`temSalas(mapId)` = `POOL_POR_SALA[mapId] != null`. A hunt inicial, as 11 BOSS e a do Campeão
-Lance ficam de fora — elenco curado à mão ou lendário único, sala não faz sentido para
-nenhuma delas.
+`temSalas(mapId)` = `POOL_POR_SALA[mapId] != null`. Ficam de fora **15 das 87**: a hunt inicial
+(e o espelho Pesadelo dela), as 11 BOSS, o Campeão Lance e o treino — elenco curado à mão,
+lendário único ou fixture de teste, sala não faz sentido para nenhuma.
+
+As outras 72 (36 hunts de bioma × faixa + os 36 espelhos do Modo Pesadelo) passam pelas 10
+salas. **O Modo Pesadelo entrou nessa conta em 2026-08-19** — ver a seção dele abaixo.
 
 ## Wall-block pela ARTE de fundo (colisão pintada à mão)
 
@@ -341,6 +388,21 @@ ler dado bruto: espelhar o dado errado congelaria composição antiga.
 `randInt`). O Pesadelo da hunt inicial anunciava Lv 150 e spawnava POKE de nível 1 e 2 — a hunt
 mais difícil do início do jogo era a mais fácil dele. `hunts.test.ts` trava faixa por
 encontro **e** por `levelWeights`.
+
+**Segundo bug real da mesma família, corrigido em 2026-08-19: o espelho não copiava as
+salas.** `buildNightmareMirror` clonava mapa e encontros e parava aí, então as 36 hunts do
+Pesadelo nasciam fora de `POOL_POR_SALA` e `temSalas()` respondia `false` para todas elas.
+Consequência: metade do conteúdo de bioma do jogo rodava como **arena única** — sem sub-bioma,
+sem chip de sala, sem aviso de nova área, sem janela de nível por sala, e com o pool inteiro da
+hunt spawnando de uma vez (em vez do pool do sub-bioma da sala). A hunt normal e o espelho dela
+diferiam num `nightmare_` de id e em toda a mecânica de progressão dentro da hunt.
+
+O espelho agora recebe `POOL_POR_SALA` por parâmetro e devolve `porSala` com as **mesmas
+chaves de sub-bioma** da origem (mesmo bioma, mesma arte, mesmo body-block pintado — o que muda
+é o nível dos encontros), com cada id de encontro trocado pelo par espelhado. Encontro da
+origem sem par no espelho é filtrado: id fantasma no pool faria o spawn pedir um encontro que
+não existe. `hunts.test.ts` trava, por espelho: mesmas chaves de sala que a origem, pool
+não-vazio, todo id existente em `ENCOUNTERS` e contido no `enemyPool` da própria hunt.
 
 Hunts BOSS: 11 (uma por lendário, `data/legendaries.ts#LEGENDARY_SPECIES_IDS`), `maxEnemies:
 1`, `noRespawn: true`, nível fixo 300, sem loot. `noRespawn` também é o que marca "sem rede de
