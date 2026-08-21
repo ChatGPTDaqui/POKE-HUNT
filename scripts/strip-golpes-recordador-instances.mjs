@@ -23,6 +23,7 @@
 // Linha sem mudanca nenhuma nao entra no UPDATE.
 'use strict';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { config } from 'dotenv';
 
@@ -41,9 +42,22 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!SUPABASE_URL || !SERVICE_ROLE) throw new Error('SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY ausentes em .env');
 
-const { SPECIES, ehGolpeAoeDeNivel50 } = await import(
-  pathToFileURL(path.join(ROOT, 'server/engine/headless.js')).href
-);
+// `authority/engine`, e nao `server/engine`: o rename da pasta deixou este
+// caminho apontando pro vazio e o script parou de rodar inteiro
+// (ERR_MODULE_NOT_FOUND antes de qualquer trabalho util). O destino real e
+// definido por vite.engine.config.ts#outDir. Ver PH-51, que cobre os outros
+// tres scripts com o mesmo defeito.
+const BUNDLE_DO_MOTOR = path.join(ROOT, 'authority/engine/headless.js');
+if (!existsSync(BUNDLE_DO_MOTOR)) {
+  // Mensagem em vez do ERR_MODULE_NOT_FOUND cru: o bundle e gitignored (gerado),
+  // entao "nao existe" e o estado NORMAL de um clone novo — e a acao a tomar
+  // nao aparece em lugar nenhum do erro do Node.
+  console.error(`Bundle do motor ausente em ${BUNDLE_DO_MOTOR}.`);
+  console.error('Rode `npm run build:engine` na raiz e tente de novo.');
+  process.exit(1);
+}
+
+const { SPECIES, ehGolpeAoeDeNivel50 } = await import(pathToFileURL(BUNDLE_DO_MOTOR).href);
 
 const golpesValidosPorEspecie = new Map(
   Object.values(SPECIES).map((sp) => [sp.id, new Set(sp.abilities.map((a) => a.key))]),
