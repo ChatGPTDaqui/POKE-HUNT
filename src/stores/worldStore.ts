@@ -24,6 +24,7 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import type { SalaAtiva, WorldState } from '@/engine/types'
+import { reconciliarSalaDaAutoridade } from '@/engine/systems/salaSystem'
 import { createRng, randomSeed, type Rng } from '@/core/rng'
 
 // `seed` opcional: quem constroi um mundo pra valer passa a semente da sessao
@@ -47,6 +48,8 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     sala: null,
     salaCountdownRemaining: null,
     salaPendente: null,
+    salaSobAutoridade: false,
+    salaEsperaDaAutoridade: 0,
     rng: createRng(seed),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
     pessimista: false,
@@ -101,9 +104,12 @@ export const useWorldStore = create<WorldStore>()(
 
     definirSala: (sala) =>
       set((draft) => {
-        // So dentro de uma hunt: fora dela nao ha sala, e escrever uma aqui
-        // deixaria o Hospital com um sub-bioma pendurado no HUD.
-        if (draft.mapDef) draft.sala = sala ? { ...sala } : null
+        // A REGRA mora no motor (salaSystem.ts#reconciliarSalaDaAutoridade), e
+        // nao aqui: trocar de sala e trocar mapa, grade de colisao, ponto de
+        // nascimento e inimigos em campo — cadeia que ja existe pra transicao
+        // local. Este store escrevia `draft.sala` direto, e era exatamente isso
+        // que deixava o HUD numa sala e o desenho em outra.
+        reconciliarSalaDaAutoridade(draft, sala)
       }),
   })),
 )

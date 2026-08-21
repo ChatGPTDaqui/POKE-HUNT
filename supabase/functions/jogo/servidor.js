@@ -28241,9 +28241,24 @@ var LEVEL_OFFSET = 100;
 var BOSS_LEVEL = 300;
 var NIGHTMARE_MIN_LEVEL = 150;
 var shiftLevel = (level) => Math.max(level + LEVEL_OFFSET, NIGHTMARE_MIN_LEVEL);
-function buildNightmareMirror(sourceMaps, sourceEncounters) {
+/**
+* `sourcePorSala` e o cadastro de salas das hunts espelhadas
+* (huntSpawnOverrides.ts#POOL_POR_SALA). Ele entra aqui porque o espelho e quem
+* conhece a convencao do prefixo `nightmare_` — e porque sem ele o Modo Pesadelo
+* era a UNICA familia de hunt de bioma sem sistema de salas.
+*
+* O QUE ISSO CONSERTA. O espelho copiava mapa e encontros e paravam ai: as 36
+* hunts do Pesadelo nasciam fora de `POOL_POR_SALA`, entao `temSalas()` dizia
+* `false` e elas rodavam como hunt de BOSS — um mapa unico, sem sub-bioma, sem
+* chip de sala, sem aviso de nova area, sem janela de nivel por sala e com o
+* pool inteiro da hunt spawnando de uma vez. As irmas normais (as mesmas 36, um
+* `nightmare_` de diferenca no id) rodavam com as 10 salas. Nada disso dava
+* erro: era so uma feature que nao existia em metade do conteudo de bioma.
+*/
+function buildNightmareMirror(sourceMaps, sourceEncounters, sourcePorSala = {}) {
 	const maps = {};
 	const encounters = {};
+	const porSala = {};
 	for (const map of Object.values(sourceMaps)) {
 		const newId = `nightmare_${map.id}`;
 		const enemyPool = [];
@@ -28273,10 +28288,17 @@ function buildNightmareMirror(sourceMaps, sourceEncounters) {
 			maxEnemies: GEOMETRIA.maxEnemies,
 			enemyPool
 		};
+		const salasDaOrigem = sourcePorSala[map.id];
+		if (salasDaOrigem) {
+			const salas = {};
+			for (const [chave, ids] of Object.entries(salasDaOrigem)) salas[chave] = ids.map((id) => `nightmare_${id}`).filter((id) => encounters[id] != null);
+			porSala[newId] = salas;
+		}
 	}
 	return {
 		maps,
-		encounters
+		encounters,
+		porSala
 	};
 }
 function buildBossHunts() {
@@ -28749,7 +28771,8 @@ for (const map of Object.values(maps)) {
 		}
 	}
 }
-var nightmare = buildNightmareMirror(maps, encounters);
+var nightmare = buildNightmareMirror(maps, encounters, POOL_POR_SALA);
+for (const [id, salas] of Object.entries(nightmare.porSala)) POOL_POR_SALA[id] = salas;
 var MAPS = {
 	...maps,
 	...nightmare.maps,
@@ -48198,8 +48221,31 @@ function registrarAbate(world, mapId) {
 		avancou: false,
 		fechouCiclo: false
 	};
+	if (world.salaSobAutoridade) {
+		sala.abates = 30;
+		return {
+			avancou: false,
+			fechouCiclo: false
+		};
+	}
 	sala.abates = 30;
-	if (world.salaCountdownRemaining != null) return {
+	return armarTransicaoDeSala(world, mapId);
+}
+/**
+* Sorteia a proxima sala e arma a contagem regressiva. Idempotente: com a
+* transicao ja armada (outro abate no MESMO tick, AOE matando 2+ de uma vez)
+* nao reamarra e nao resorteia.
+*
+* Separada de `registrarAbate` porque a quota fechada, e nao o abate, e o que
+* dispara a troca — ver `garantirTransicaoDeQuotaFechada`.
+*/
+function armarTransicaoDeSala(world, mapId) {
+	const sala = world.sala;
+	if (!sala) return {
+		avancou: false,
+		fechouCiclo: false
+	};
+	if (world.salaCountdownRemaining != null || world.salaPendente) return {
 		avancou: false,
 		fechouCiclo: false
 	};
@@ -48220,6 +48266,91 @@ function registrarAbate(world, mapId) {
 	};
 }
 /**
+* Quota JA fechada na abertura da janela: arma a transicao sem esperar um abate
+* novo. Chamado por `stepWorld` no primeiro tick.
+*
+* O LIVELOCK QUE ISTO CONSERTA (medido ao vivo em 2026-08-19). `salaPendente` e
+* `salaCountdownRemaining` sao efemeros — nao atravessam a reconstrucao de mundo
+* de cada janela do servidor. Enquanto a transicao dependia do PROXIMO abate, uma
+* janela curta demais pra caber "matar + 3s de contagem" perdia a transicao e
+* recomecava do zero na janela seguinte:
+*
+*   janela de 5s: inimigos nascem, o primeiro morre em ~3s, contagem arma,
+*   janela acaba em 2s -> pendente e contagem descartados -> repete
+*
+* A sala travava em `abates: 30` pra sempre — e o cliente, que agora espera a
+* sala do servidor em vez de sortear a propria, travava com ela. Nao aparecia
+* antes porque a janela normal e de 30s e sempre cabia; apareceu quando o cliente
+* passou a pedir flush a cada 5s ao fechar a quota.
+*
+* Com a quota fechada valendo por si, a transicao acontece no comeco da janela e
+* cabe em qualquer duracao. Isso tambem fecha o caso que ja estava documentado
+* como "autocurativo no proximo abate" — ele nao era, quando nao havia proximo.
+*/
+function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0) {
+	const sala = world.sala;
+	if (!sala || sala.abates < 30) {
+		world.salaEsperaDaAutoridade = 0;
+		return;
+	}
+	if (world.salaSobAutoridade) {
+		world.salaEsperaDaAutoridade += dt;
+		if (world.salaEsperaDaAutoridade < 20) return;
+		world.salaEsperaDaAutoridade = 0;
+	}
+	armarTransicaoDeSala(world, mapId);
+}
+/**
+* A sala que o SERVIDOR decidiu, entrando pela mesma porta da transicao local.
+*
+* Tres casos, e a diferenca entre eles e o que o jogador ve:
+*
+*  - MESMA sala (so o contador de abates andou): escreve o contador e mais
+*    nada. E o caso comum — um flush a cada 30s, uma troca de sala a cada
+*    poucos minutos.
+*  - PRIMEIRA sala da sessao (nao havia sala): entra direto, sem aviso. Nao ha
+*    "sala anterior" pra anunciar saida de.
+*  - sala DIFERENTE: vira `salaPendente` e arma a contagem regressiva. Quem
+*    troca o mapa, zera os inimigos e reposiciona o jogador continua sendo
+*    `aplicarTransicaoDeSala`, no gate do proximo tick.
+*
+* Antes disto o cliente escrevia a sala do servidor direto no estado. O nome no
+* HUD trocava, e o resto da cena — arte de fundo, grade de colisao, ponto de
+* nascimento, inimigos em campo — ficava na sala ANTERIOR, porque so
+* `aplicarTransicaoDeSala` mexe nisso. Uma hunt podia ficar minutos anunciando
+* "Laboratorio" enquanto desenhava e colidia como "Usina".
+*
+* Nunca REGRIDE: sala com (ciclo, indice) anterior ao que esta na tela e
+* ignorada. Isso acontece de verdade — o flush cobre uma janela que comecou
+* antes da troca, e o servidor responde com a sala de la. Aceitar aquilo
+* mandava o jogador de volta pra sala 1 com o aviso de nova area, o que le como
+* perda de progresso.
+*/
+function reconciliarSalaDaAutoridade(world, sala) {
+	if (!world.mapDef) return;
+	if (!sala) {
+		world.sala = null;
+		world.salaPendente = null;
+		world.salaCountdownRemaining = null;
+		return;
+	}
+	const atual = world.salaPendente ?? world.sala;
+	if (!atual) {
+		world.sala = { ...sala };
+		return;
+	}
+	if (atual.chave === sala.chave && atual.indice === sala.indice && atual.ciclos === sala.ciclos) {
+		const alvo = world.salaPendente ?? world.sala;
+		if (alvo) alvo.abates = Math.max(alvo.abates, sala.abates);
+		return;
+	}
+	const posicao = (s) => s.ciclos * 10 + s.indice;
+	if (posicao(sala) < posicao(atual)) return;
+	world.salaPendente = { ...sala };
+	world.salaCountdownRemaining ??= 3;
+	world.salaEsperaDaAutoridade = 0;
+}
+/**
 * Aplica a sala ja sorteada (`world.salaPendente`) quando a contagem
 * regressiva zera: troca mapa/colisao e reposiciona pro spawn point da nova
 * sala. "Area nova do zero" (pedido explicito do usuario) — zera tambem
@@ -48231,6 +48362,7 @@ function aplicarTransicaoDeSala(world, mapId) {
 	if (!pendente) return;
 	world.sala = pendente;
 	world.salaPendente = null;
+	world.salaEsperaDaAutoridade = 0;
 	world.enemies = [];
 	world.effects = [];
 	world.pendingHits = [];
@@ -49020,6 +49152,8 @@ function emptyWorldState(seed = randomSeed()) {
 		sala: null,
 		salaCountdownRemaining: null,
 		salaPendente: null,
+		salaSobAutoridade: false,
+		salaEsperaDaAutoridade: 0,
 		rng: createRng(seed),
 		counters: {
 			entity: 1,
@@ -49047,7 +49181,7 @@ create()(immer((set) => ({
 		return resultado;
 	},
 	definirSala: (sala) => set((draft) => {
-		if (draft.mapDef) draft.sala = sala ? { ...sala } : null;
+		reconciliarSalaDaAutoridade(draft, sala);
 	})
 })));
 //#endregion
@@ -49412,6 +49546,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (!silent) updateAnimations(world, dt);
 		return [];
 	}
+	garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt);
 	if (world.salaCountdownRemaining != null) {
 		world.salaCountdownRemaining -= dt;
 		if (world.salaCountdownRemaining <= 0) {
@@ -50638,6 +50773,8 @@ async function abrirSessao(cfg, userId, req) {
 		await fecharLinhaDeSessao(cfg, anterior.id);
 	}
 	const semente = randomSeed();
+	const rng = createRng(semente);
+	const salaInicial = temSalas(mapId) ? novaSala(rng, mapId, 0, 0) : null;
 	let criada;
 	try {
 		[criada] = await inserir(cfg, "game_sessions", {
@@ -50645,8 +50782,12 @@ async function abrirSessao(cfg, userId, req) {
 			map_id: mapId,
 			poke_uid: pokeUid,
 			seed: semente,
-			rng_state: semente,
-			rng_draws: 0
+			rng_state: rng.state,
+			rng_draws: rng.draws,
+			sala_indice: salaInicial?.indice ?? 0,
+			sala_chave: salaInicial?.chave ?? null,
+			sala_abates: 0,
+			ciclos: 0
 		}, { retornar: true });
 	} catch {
 		const vencedora = await sessaoAberta(cfg, userId);
@@ -50654,7 +50795,13 @@ async function abrirSessao(cfg, userId, req) {
 		return json({
 			sessaoId: vencedora.id,
 			mapId: vencedora.map_id,
-			iniciadaEm: vencedora.last_flush_at
+			iniciadaEm: vencedora.last_flush_at,
+			sala: vencedora.sala_chave ? {
+				indice: Number(vencedora.sala_indice ?? 0),
+				chave: vencedora.sala_chave,
+				abates: Number(vencedora.sala_abates ?? 0),
+				ciclos: Number(vencedora.ciclos ?? 0)
+			} : null
 		});
 	}
 	await atualizar(cfg, `players?user_id=eq.${userId}`, {
@@ -50670,7 +50817,8 @@ async function abrirSessao(cfg, userId, req) {
 	return json({
 		sessaoId: criada.id,
 		mapId,
-		iniciadaEm: criada.last_flush_at
+		iniciadaEm: criada.last_flush_at,
+		sala: salaInicial
 	});
 }
 async function flush(cfg, userId, parcial) {

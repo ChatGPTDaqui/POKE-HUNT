@@ -11,7 +11,7 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 const pedirAcaoMock = vi.fn()
 vi.mock('@/data/remote/autoridade', () => ({
   pedirAcao: (...args: unknown[]) => pedirAcaoMock(...args),
-  abrirSessaoDeHunt: vi.fn(async () => true),
+  abrirSessaoDeHunt: vi.fn(async () => ({ ok: true, sala: null })),
   fecharSessaoDeHunt: vi.fn(async () => {}),
 }))
 
