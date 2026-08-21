@@ -72,12 +72,32 @@ const shiftLevel = (level: number) => Math.max(level + LEVEL_OFFSET, NIGHTMARE_M
 // hunts-irmas criadas em huntSpawnOverrides.ts), senao o Modo Pesadelo
 // congelaria a composicao antiga — POKE de Kanto numa hunt de Johto — e as
 // hunts novas nao teriam espelho nenhum.
+/**
+ * `sourcePorSala` e o cadastro de salas das hunts espelhadas
+ * (huntSpawnOverrides.ts#POOL_POR_SALA). Ele entra aqui porque o espelho e quem
+ * conhece a convencao do prefixo `nightmare_` — e porque sem ele o Modo Pesadelo
+ * era a UNICA familia de hunt de bioma sem sistema de salas.
+ *
+ * O QUE ISSO CONSERTA. O espelho copiava mapa e encontros e paravam ai: as 36
+ * hunts do Pesadelo nasciam fora de `POOL_POR_SALA`, entao `temSalas()` dizia
+ * `false` e elas rodavam como hunt de BOSS — um mapa unico, sem sub-bioma, sem
+ * chip de sala, sem aviso de nova area, sem janela de nivel por sala e com o
+ * pool inteiro da hunt spawnando de uma vez. As irmas normais (as mesmas 36, um
+ * `nightmare_` de diferenca no id) rodavam com as 10 salas. Nada disso dava
+ * erro: era so uma feature que nao existia em metade do conteudo de bioma.
+ */
 export function buildNightmareMirror(
   sourceMaps: Record<string, HuntMapDef>,
   sourceEncounters: Record<string, HuntEncounter>,
-): { maps: Record<string, HuntMapDef>; encounters: Record<string, HuntEncounter> } {
+  sourcePorSala: Record<string, Record<string, string[]>> = {},
+): {
+  maps: Record<string, HuntMapDef>
+  encounters: Record<string, HuntEncounter>
+  porSala: Record<string, Record<string, string[]>>
+} {
   const maps: Record<string, HuntMapDef> = {}
   const encounters: Record<string, HuntEncounter> = {}
+  const porSala: Record<string, Record<string, string[]>> = {}
 
   for (const map of Object.values(sourceMaps)) {
     const newId = `nightmare_${map.id}`
@@ -119,9 +139,24 @@ export function buildNightmareMirror(
       maxEnemies: GEOMETRIA.maxEnemies,
       enemyPool,
     }
+
+    // As salas do espelho sao as MESMAS chaves de sub-bioma da hunt de origem
+    // (mesmo bioma, mesma arte, mesmo body-block pintado — o que muda e o nivel
+    // dos encontros). So os ids de encontro trocam pro par espelhado.
+    const salasDaOrigem = sourcePorSala[map.id]
+    if (salasDaOrigem) {
+      const salas: Record<string, string[]> = {}
+      for (const [chave, ids] of Object.entries(salasDaOrigem)) {
+        // Filtra pelo que o espelho de fato criou: encontro da origem sem par
+        // (a fonte nao tinha a especie) nao pode virar id fantasma no pool, ou
+        // o spawn pediria um encontro que nao existe.
+        salas[chave] = ids.map((id) => `nightmare_${id}`).filter((id) => encounters[id] != null)
+      }
+      porSala[newId] = salas
+    }
   }
 
-  return { maps, encounters }
+  return { maps, encounters, porSala }
 }
 
 function buildBossHunts(): { maps: Record<string, HuntMapDef>; encounters: Record<string, HuntEncounter> } {
