@@ -181,16 +181,45 @@ export function getAbility(id: string): Ability | null {
 // 1 de ~15 na lista, agora seria 1 dos 4 slots.
 //
 // FORA DA LISTA, DE PROPOSITO: `horn_drill` e `fissure`. Os dois causam
-// `defenderPoke.hp` — KO instantaneo. Nos jogos reais o que os equilibra e a
-// precisao de 30% e a regra de nunca acertar alvo de nivel maior, e ESTE JOGO
-// NAO TEM PRECISAO (nem `Ability` nem o dado gerado tem o campo; todo golpe
-// sempre acerta). Liga-los hoje daria um botao de vitoria automatica pra toda
-// especie que os aprende. Voltam quando precisao existir.
-const DANO_SEM_PODER_BASE = new Set([
+// `defenderPoke.hp` — KO instantaneo.
+//
+// A JUSTIFICATIVA ANTERIOR AQUI ESTAVA ERRADA E FOI CORRIGIDA EM 2026-08-19.
+// Ela dizia "ESTE JOGO NAO TEM PRECISAO (nem `Ability` nem o dado gerado tem o
+// campo; todo golpe sempre acerta)". Falso hoje: `accuracy` e campo OBRIGATORIO
+// de `Ability` (ver a interface acima) e existe rolagem de acerto de verdade,
+// com estagios de precisao/evasao, em combatSystem.ts#chanceDeAcerto. Os dois
+// vem do catalogo com accuracy 30.
+//
+// O QUE AINDA FALTA, e por isso eles continuam de fora: nos jogos reais o OHKO
+// nao e "30% de chance de matar" — a chance ESCALA com a diferenca de nivel e
+// NUNCA acerta alvo de nivel maior que o usuario. Sem essa segunda regra, 30%
+// aqui e um dado de "mata o inimigo agora" que funciona igual contra um BOSS 40
+// niveis acima. Voltam quando existir formula de precisao por diferenca de
+// nivel — nao antes.
+//
+// `guillotine` e `sheer_cold` sao caso DIFERENTE e mais simples: nem
+// implementacao tem (nao estao em FIXED_DAMAGE_ABILITIES), entao sao golpe
+// inerte comum, nao decisao de balanceamento.
+//
+// EXPORTADO porque `moveDescriptions.ts#golpeTemEfeitoReal` precisa saber que
+// estes 12 CAUSAM dano. Sem isso a ficha estampava "este golpe nao causa dano"
+// em Magnitude, Seismic Toss, Counter e companhia — golpes que o proprio motor
+// escolhe como golpe de dano. Trancado em moveDescriptions.test.ts.
+export const DANO_SEM_PODER_BASE = new Set([
   'magnitude', 'reversal', 'flail', 'present', 'hidden_power',
   'seismic_toss', 'night_shade', 'dragon_rage', 'super_fang', 'psywave',
   'counter', 'mirror_coat',
 ])
+
+// Os dois OHKO que TEM implementacao e estao desligados por balanceamento (ver o
+// bloco acima). Existem como Set proprio porque a tela precisa distinguir "golpe
+// que nao faz nada aqui" de "golpe que faz e esta desligado" — o aviso generico
+// de golpe inerte era factualmente errado nestes dois.
+//
+// MANTER EM SINCRONIA com combatSystem.ts#FIXED_DAMAGE_ABILITIES: cada id aqui
+// tem entrada la. `guillotine`/`sheer_cold` NAO entram — esses nao tem
+// implementacao nenhuma e sao golpe inerte comum.
+export const OHKO_DESLIGADO = new Set(['horn_drill', 'fissure'])
 
 // quick_guard (bloqueia golpe de PRIORIDADE) fica sem implementacao mecanica
 // de proposito, ao contrario dos outros 5 golpes do elenco Screens (Reflect,

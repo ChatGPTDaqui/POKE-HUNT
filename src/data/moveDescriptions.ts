@@ -1,4 +1,4 @@
-import { CLIMA_DO_GOLPE } from './abilities'
+import { CLIMA_DO_GOLPE, DANO_SEM_PODER_BASE, OHKO_DESLIGADO } from './abilities'
 
 // Descricao de cada golpe, pro tooltip da barra de habilidades e da aba
 // "Golpes" do perfil.
@@ -26,6 +26,20 @@ import { CLIMA_DO_GOLPE } from './abilities'
 // implementada).
 export const AVISO_SEM_DANO =
   'Neste jogo este golpe nao causa dano, e nao tem nenhum efeito extra implementado aqui.'
+
+// Golpe cujo dano NAO sai do dano base — ele tem `power: 0` no catalogo e o
+// numero real vem de uma regra propria (nivel do usuario, HP do alvo, o ultimo
+// golpe recebido...). Sem esta linha a ficha mostrava "Dano base 0" e mais nada,
+// que le como "golpe fraco" num Seismic Toss que tira o nivel inteiro.
+// Guilhotina/Fissura de VERDADE (horn_drill/fissure): a regra existe e mata o
+// alvo, mas o golpe esta fora da selecao por balanceamento. Dizer "nao tem efeito
+// implementado" neles seria falso; dizer nada deixaria o jogador esperando um
+// golpe que nunca sai.
+export const AVISO_OHKO_DESLIGADO =
+  'Este golpe mata o alvo de uma vez, e por isso esta desligado: o POKE nunca vai escolhe-lo.'
+
+export const AVISO_DANO_POR_REGRA_PROPRIA =
+  'O dano deste golpe sai de uma regra propria, nao do dano base.'
 
 // Golpes de poder 0 cujo efeito e HARDCODED por id em combatSystem.ts (o
 // catalogo nao tem coluna pra eles — nada em `Ability` denuncia sozinho que
@@ -63,9 +77,13 @@ export const GOLPES_DE_ESCUDO = new Set([
  * `healPercent`/`drainPercent`, que o motor le sem precisar saber o id) ou
  * HARDCODED por id (`GOLPES_COM_EFEITO_HARDCODED`/`GOLPES_DE_ESCUDO`/
  * `CLIMA_DO_GOLPE`, golpes cujo efeito inteiro vive em combatSystem.ts).
- * Golpes de dano fixo (Seismic Toss, Dragon Rage, ...) nao entram aqui: eles
- * tem `power > 0` na pratica (o motor so usa o poder deles pra outra coisa),
- * entao `semDano` no tooltip nunca chega a perguntar sobre eles.
+ * GOLPE DE DANO FIXO/DINAMICO ENTRA AQUI, por `DANO_SEM_PODER_BASE`. O
+ * comentario anterior afirmava o oposto — "eles tem `power > 0` na pratica,
+ * entao `semDano` nunca chega a perguntar sobre eles" — e isso era falso: os 11
+ * alcancaveis tem `power: 0` no catalogo, cairam no `semDano` e a ficha
+ * estampava "este golpe nao causa dano" em Magnitude, Seismic Toss, Dragon Rage,
+ * Counter, Mirror Coat, Psywave, Super Fang, Reversal, Flail, Night Shade e
+ * Present. Confirmado na tela (ficha do Dugtrio, golpe Magnitude) antes do fix.
  */
 export function golpeTemEfeitoReal(ability: {
   id: string
@@ -75,6 +93,12 @@ export function golpeTemEfeitoReal(ability: {
   healPercent?: number
   drainPercent?: number
 }): boolean {
+  // PRIMEIRO de todos: golpe que causa dano tem efeito, obviamente. E o unico
+  // caminho que nao da pra deduzir do dado do golpe — `power` e 0 nesses.
+  if (DANO_SEM_PODER_BASE.has(ability.id)) return true
+  // Implementacao existe (FIXED_DAMAGE_ABILITIES), so nao e selecionavel — quem
+  // avisa o jogador disso e AVISO_OHKO_DESLIGADO, nao AVISO_SEM_DANO.
+  if (OHKO_DESLIGADO.has(ability.id)) return true
   if (ability.status) return true
   if (ability.statChanges && ability.statChanges.length > 0) return true
   if (ability.hazard) return true
