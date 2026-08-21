@@ -84,7 +84,8 @@ workflow entrar no ar, pra não haver dois fluxos "oficiais" ao mesmo tempo.
 
 - Secret `SUPABASE_ACCESS_TOKEN` no GitHub Actions — hoje a credencial mora no Windows Credential
   Manager local (ver 11-operacao.md), precisa gerar um token novo dedicado a CI.
-- Secret `SUPABASE_PROJECT_REF` (`cffbihbmhiuudahsgjsn`).
+- Secret `SUPABASE_PROJECT_REF` (`uogmhqbyjgafjujbqdty` — projeto migrado em 2026-08-20, ref antigo
+  `cffbihbmhiuudahsgjsn` obsoleto, ver seção de achados abaixo).
 - Testar o workflow numa branch descartável antes de depender dele — CI mexendo em produção sem
   ensaio é o mesmo tipo de risco que motivou este documento.
 
@@ -192,9 +193,52 @@ crescer.
 ### Pendente de implementação
 
 - Criar função `jogo-dev` (Supabase Dashboard ou CLI) + secret `JOGO_SCHEMA_DEV=dev` (nome
-  dedicado, não `JOGO_SCHEMA` — ver seção acima).
+  dedicado, não `JOGO_SCHEMA` — ver seção acima). **Feito**, confirmado via `/saude` em
+  2026-08-20 (`{"ok":true,"schema":"dev"}`) — ver nota abaixo sobre deploy via CLI, não MCP.
 - Workflow novo (CI): merge-de-teste feature→`dev`, build+test gate, só então merge real +
   `db push` + deploy `jogo-dev`.
 - `supabase-check.yml`: diff base do job de `push` vira condicional por trigger (branch `dev` como
-  base fora de `main`, ver seção acima) — mudança obrigatória, não opcional.
+  base fora de `main`, ver seção acima) — mudança obrigatória, não opcional. **Feito**, ver
+  commit `483266f`.
 - `supabase-deploy.yml` (deploy de `main`) permanece como está — sem alteração.
+
+**Achado no deploy manual de `jogo-dev` (2026-08-20)**: o bundle (`servidor.js`, ~900KB
+minificado) tokeniza pesado (~424k tokens) — grande demais pro tool MCP `deploy_edge_function`
+(que exige o conteúdo do arquivo inteiro como string gerada na chamada, não leitura/streaming de
+disco). Deploy real precisa ser via CLI (`npx supabase functions deploy jogo-dev --project-ref
+...`), que lê o arquivo direto do disco sem esse limite. CLI local pode estar logada numa conta
+Supabase errada (accounts distintas coexistem) — `npx supabase projects list` confirma; se o
+projeto não aparecer, `npx supabase login` resolve. O workflow de CI (item acima, "Workflow novo")
+já usa a CLI real dentro do runner, não o MCP — não herda essa limitação.
+
+### Branch protection — passo a passo pro dono do repo aplicar
+
+**Bloqueio conhecido**: a conta usada pelo Claude Code (`OtaviorRV`) só tem `push` no repo
+`ChatGPTDaqui/POKE-HUNT`, não `admin` — só quem tem `admin` (o dono) consegue mexer em
+`Settings > Branches`. CI (`supabase-check.yml`) já reforça parte disso (PR pra `main` só de
+`dev`, commit `483266f`), mas só vira trava de verdade combinada com isto abaixo — sem branch
+protection, dá pra ignorar o X vermelho e mergear igual.
+
+Aplicar em **`Settings > Branches > Add branch protection rule`**, uma regra pra `main` e outra
+pra `dev`:
+
+**Regra pra `main`:**
+1. Branch name pattern: `main`
+2. ✅ Require a pull request before merging
+   - Require approvals: 1
+3. ✅ Require status checks to pass before merging
+   - Marcar como obrigatório: `check` (job do `supabase-check.yml`)
+   - ✅ Require branches to be up to date before merging
+4. ✅ Do not allow bypassing the above settings (senão admin consegue pular tudo isso — inclusive
+   sem querer, foi o que causou os 2 merges direto em `main` nesta sessão)
+5. ✅ Restrict who can push to matching branches — deixar vazio/ninguém (força tudo via PR)
+6. ✅ Block force pushes
+7. NÃO marcar "Allow deletions"
+
+**Regra pra `dev`:** repetir os mesmos 7 passos, trocando `main` por `dev` no passo 1. O check
+obrigatório do passo 3 continua sendo `check` (mesmo workflow cobre os dois branches).
+
+**Validação depois de aplicar**: tentar abrir um PR de uma feature branch reto pra `main` (não
+via `dev`) numa branch descartável — tem que ser recusado tanto pelo CI (`::error::PR para main
+so e permitido...`) quanto pelo botão de merge ficar bloqueado até status check passar. Isto é a
+task #10 do plano de execução (teste ponta a ponta).
