@@ -43,7 +43,7 @@ import { FORMULAS } from '@/data/generated/formulas.generated'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { rollChance, randRange } from '@/core/random'
 import { triggerAttackAnim, ATTACK_ANIM_DURATION } from './animationSystem'
-import { createWorldEffect, effectDone, tickEffect } from '../effect'
+import { createWorldEffect, effectDone, seguirDono, tickEffect } from '../effect'
 import {
   isDead, getGroundOffset, tickCooldowns, isAbilityReady,
   startCooldown, canAct, startGlobalCooldown, takeDamage, heal, getMaxHp, releaseEffectLane, findEntityById,
@@ -1962,6 +1962,9 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
         // do resto do jogo, que mostra a animacao do golpe independente do
         // resultado (ver announceAbility).
         statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : undefined,
+        // O anel e centrado em quem lancou: se ele anda durante os 1,2s de
+        // animacao, a arte anda junto em vez de ficar plantada onde ele estava.
+        seguir: attacker,
       }))
     }
 
@@ -2700,6 +2703,11 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       elementType: ability.type,
       abilityId: ability.id,
       statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : undefined,
+      // A arte pousa em cima de `local` (o alvo, ou quem de fato recebeu o
+      // status) e acompanha ele pelo 1,0-1,1s que dura. `anguloDeAtaque`
+      // continua congelado de proposito: ele registra de onde o golpe veio, e
+      // recalcular faria a arte girar no meio da animacao.
+      seguir: local,
     }))
   }
 
@@ -2857,7 +2865,12 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     if (world.clima.turnosRestantes <= 0) world.clima = null
   }
 
-  for (const effect of world.effects) tickEffect(effect, dt)
+  for (const effect of world.effects) {
+    tickEffect(effect, dt)
+    // Depois do movimento deste frame ja ter rodado, senao a arte andaria um
+    // frame atras do POKE.
+    if (effect.seguirId) seguirDono(effect, findEntityById(player, enemies, effect.seguirId))
+  }
   for (const effect of world.effects) {
     if (effectDone(effect) && effect.ownerId) {
       const owner = findEntityById(player, enemies, effect.ownerId)
