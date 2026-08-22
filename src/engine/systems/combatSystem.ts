@@ -575,12 +575,93 @@ function psywaveDamage(rng: Rng, attackerPoke: PokeInstance): number {
   return Math.max(1, Math.round(attackerPoke.level * randRange(rng, 0.5, 1.5)))
 }
 
-export const DYNAMIC_POWER_ABILITIES: Record<string, (rng: Rng, attackerPoke: PokeInstance) => number> = {
+// Gyro Ball: quanto mais LENTO o usuario em relacao ao alvo, mais forte. Teto
+// de 150 como nos jogos. Usa a Velocidade EFETIVA (estagio, status, clima) —
+// senao Scary Face num alvo rapido nao mudaria nada num golpe que existe
+// justamente pra isso.
+function gyroBallPower(attackerEntity: WorldEntity, defenderEntity: WorldEntity): number {
+  const minha = Math.max(1, velocidadeEfetiva(attackerEntity))
+  const dela = Math.max(1, velocidadeEfetiva(defenderEntity))
+  return Math.min(150, Math.floor(25 * dela / minha) + 1)
+}
+
+// Electro Ball: o inverso do Gyro Ball — quanto mais RAPIDO o usuario em
+// relacao ao alvo, mais forte. Faixas da Gen VI/VII.
+function electroBallPower(attackerEntity: WorldEntity, defenderEntity: WorldEntity): number {
+  const minha = Math.max(1, velocidadeEfetiva(attackerEntity))
+  const dela = Math.max(1, velocidadeEfetiva(defenderEntity))
+  const razao = minha / dela
+  if (razao >= 4) return 150
+  if (razao >= 3) return 120
+  if (razao >= 2) return 80
+  if (razao > 1) return 60
+  return 40
+}
+
+// Wring Out / Crush Grip: poder proporcional ao HP que o ALVO ainda tem.
+function wringOutPower(defenderPoke: PokeInstance): number {
+  const fracao = Math.max(0, defenderPoke.hp) / defenderPoke.stats.hp
+  return Math.max(1, Math.floor(120 * fracao))
+}
+
+// Punishment: +20 de poder por estagio POSITIVO do alvo, base 60, teto 200 —
+// o golpe que pune quem passou a luta se fortalecendo.
+function punishmentPower(defenderEntity: WorldEntity): number {
+  const positivos = Object.values(defenderEntity.estagios)
+    .reduce((soma, n) => soma + Math.max(0, n ?? 0), 0)
+  return Math.min(200, 60 + 20 * positivos)
+}
+
+// PESO, em kg. Vem do catalogo (`pesoHg` da PokeAPI, em hectogramas — Machamp =
+// 1300 = 130,0 kg), dividido por 10 aqui porque as tabelas dos jogos sao todas
+// escritas em kg. Ver scripts/fetch-usum-catalog.js.
+function pesoEmKg(poke: PokeInstance): number {
+  return SPECIES[poke.speciesId].pesoHg / 10
+}
+
+// Low Kick: poder pela faixa de peso do ALVO. Tabela da Gen III em diante,
+// identica no Ultra Sun.
+function lowKickPower(defenderPoke: PokeInstance): number {
+  const kg = pesoEmKg(defenderPoke)
+  if (kg >= 200) return 120
+  if (kg >= 100) return 100
+  if (kg >= 50) return 80
+  if (kg >= 25) return 60
+  if (kg >= 10) return 40
+  return 20
+}
+
+// Heavy Slam: poder pela RAZAO entre o peso de quem usa e o do alvo — quanto
+// mais pesado que o alvo, mais forte. Mesmas faixas dos jogos.
+function heavySlamPower(attackerPoke: PokeInstance, defenderPoke: PokeInstance): number {
+  // Peso do alvo nunca e 0 no catalogo (o menor e Gastly, 0,1 kg), mas o guard
+  // fica: uma divisao por zero aqui viraria Infinity e depois NaN de dano, que
+  // e o tipo de coisa que aparece como "golpe que nao faz nada" em vez de erro.
+  const razao = pesoEmKg(attackerPoke) / Math.max(0.1, pesoEmKg(defenderPoke))
+  if (razao >= 5) return 120
+  if (razao >= 4) return 100
+  if (razao >= 3) return 80
+  if (razao >= 2) return 60
+  return 40
+}
+
+export const DYNAMIC_POWER_ABILITIES: Record<string, (rng: Rng, attackerPoke: PokeInstance, defenderPoke: PokeInstance, attackerEntity: WorldEntity, defenderEntity: WorldEntity) => number> = {
   magnitude: (rng) => rollMagnitudePower(rng),
   reversal: (_rng, attackerPoke) => hpRatioPower(attackerPoke),
   flail: (_rng, attackerPoke) => hpRatioPower(attackerPoke),
   present: (rng) => rollPresentPower(rng),
   hidden_power: (_rng, attackerPoke) => hiddenPowerPower(attackerPoke),
+  // PH-69: os quatro abaixo vinham do catalogo com `power: 0` e ficaram fora
+  // desta tabela, entao `isDamagingAbility` era falso e `pickAbilityDaFila`
+  // pulava eles em TODA rotacao — slot morto, e a descricao prometendo dano.
+  gyro_ball: (_rng, _a, _d, attackerEntity, defenderEntity) => gyroBallPower(attackerEntity, defenderEntity),
+  electro_ball: (_rng, _a, _d, attackerEntity, defenderEntity) => electroBallPower(attackerEntity, defenderEntity),
+  wring_out: (_rng, _a, defenderPoke) => wringOutPower(defenderPoke),
+  punishment: (_rng, _a, _d, _attackerEntity, defenderEntity) => punishmentPower(defenderEntity),
+  // Os dois de PESO. O dado nao existia — `pesoHg` foi adicionado ao catalogo
+  // nesta mesma leva (fetch-usum-catalog.js), direto da PokeAPI.
+  low_kick: (_rng, _a, defenderPoke) => lowKickPower(defenderPoke),
+  heavy_slam: (_rng, attackerPoke, defenderPoke) => heavySlamPower(attackerPoke, defenderPoke),
 }
 
 // Counter/Mirror Coat refletem 2x o ultimo golpe daquela categoria que o
@@ -610,6 +691,16 @@ export const FIXED_DAMAGE_ABILITIES: Record<string, (attackerPoke: PokeInstance,
   psywave: (attackerPoke, _d, _e, rng) => psywaveDamage(rng, attackerPoke),
   counter: (_a, _d, attackerEntity) => counterDamage(attackerEntity, 'physical'),
   mirror_coat: (_a, _d, attackerEntity) => counterDamage(attackerEntity, 'special'),
+  // PH-69, mesma historia do bloco de DYNAMIC_POWER: `power: 0` no catalogo,
+  // fora desta tabela, logo pulados pra sempre pela fila.
+  sonic_boom: () => 20,
+  // Endeavor iguala o HP do alvo ao do usuario. Alvo com HP menor ou igual:
+  // devolve 0, que aqui e "o golpe falha" — e o comportamento real, e nao pode
+  // devolver `null`, que a linha do Counter transforma num hit comum de 40.
+  endeavor: (attackerPoke, defenderPoke) => Math.max(0, defenderPoke.hp - attackerPoke.hp),
+  // Final Gambit: dano igual ao HP que o usuario tem. O CUSTO nao esta aqui, e
+  // sim no bloco de auto-dano de resolveHit.
+  final_gambit: (attackerPoke) => Math.max(1, attackerPoke.hp),
 }
 
 // GOLPE DE MULTIPLOS ACERTOS (PH-68): quantas vezes este uso vai bater.
@@ -643,7 +734,9 @@ function specialDamageFor(rng: Rng, ability: Ability, attackerEntity: WorldEntit
   const defenderPoke = defenderEntity.poke
 
   const dynamic = DYNAMIC_POWER_ABILITIES[ability.id]
-  if (dynamic) return { mode: 'dynamicPower', power: dynamic(rng, attackerPoke) }
+  if (dynamic) {
+    return { mode: 'dynamicPower', power: dynamic(rng, attackerPoke, defenderPoke, attackerEntity, defenderEntity) }
+  }
 
   const fixed = FIXED_DAMAGE_ABILITIES[ability.id]
   if (fixed) {
@@ -2515,6 +2608,23 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       if (!silent) spawnDamageNumber(world, attacker, { amount: quanto, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
       creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted)
     }
+  }
+
+  // FINAL GAMBIT (PH-69): o dano sai em FIXED_DAMAGE_ABILITIES (HP atual do
+  // usuario) e o CUSTO e aqui.
+  //
+  // DESVIO CONSCIENTE DO JOGO ORIGINAL: la o usuario desmaia. Aqui a fila dos 4
+  // slots dispara sozinha em rotacao, entao um auto-KO fiel faria o POKE se
+  // suicidar a cada volta da fila e encerrar a hunt — o mesmo motivo pelo qual
+  // horn_drill/fissure ficaram fora da selecao (ver data/abilities.ts). Cobra
+  // metade do HP atual, reaproveitando SELF_DESTRUCT_HP_LOSS_PERCENT, que existe
+  // exatamente por esta razao: Explosao/Autodestruicao tambem foram suavizadas
+  // de auto-KO pra -50%. Sem custo nenhum seria o bug do PH-73 de novo.
+  if (ability.id === 'final_gambit' && danoCausado > 0 && !isDead(attacker)) {
+    const custo = Math.max(1, Math.round(attacker.poke.hp * SELF_DESTRUCT_HP_LOSS_PERCENT))
+    takeDamage(attacker, custo)
+    if (!silent) spawnDamageNumber(world, attacker, { amount: custo, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
+    creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted)
   }
 
   // --- GOLPES DE SUPORTE SEM DANO (Fase 12) ---------------------------------

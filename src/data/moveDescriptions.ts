@@ -597,7 +597,7 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   belch: 'Um arroto potente — so funciona depois de comer uma fruta.',
   flatter: 'Bajula o alvo: ele fica confuso, mas com o Ataque Especial em alta.',
   quick_guard: 'Protege a equipe de golpes de prioridade por um turno.',
-  final_gambit: 'O usuario desmaia e causa dano igual ao HP que ainda tinha.',
+  final_gambit: 'Causa dano igual ao HP que o usuario ainda tinha, ao custo de metade do proprio HP.',
   low_sweep: 'Uma rasteira nas pernas que reduz a Velocidade do alvo.',
   dual_chop: 'Duas cutiladas seguidas com o corpo.',
   bulk_up: 'Contrai os musculos e eleva o Ataque e a Defesa.',
