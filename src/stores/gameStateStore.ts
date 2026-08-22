@@ -63,6 +63,12 @@ export interface GameStateActions {
   // setActiveTeamIndex pra "subir" o poke recem-colocado em campo pro topo
   // da lista visivel.
   moveTeamIndexToFront: (index: number) => void
+  // Move uma RESERVA de posicao dentro da fila (PH-75, trilho da HUD).
+  // Recusa qualquer movimento que envolva o indice 0: quem esta em campo so
+  // troca por `setActiveTeamIndex`, que precarrega a arte e atualiza o
+  // worldStore — mexer no slot 0 por aqui deixaria o sprite desenhado
+  // diferente do POKE ativo.
+  reordenarReservas: (de: number, para: number) => void
   // Tira do time e poe na mochila; devolve o poke removido (null se uid nao
   // achado) pra quem chamou poder ler o nome/shiny pro toast.
   moveTeamToBag: (uid: string) => PokeInstance | null
@@ -389,6 +395,24 @@ export const useGameStateStore = create<GameStateStore>()(
           const [poke] = team.splice(index, 1)
           team.unshift(poke)
           return { team, activeIndex: 0 }
+        })
+      },
+
+      reordenarReservas: (de, para) => {
+        set((state) => {
+          const n = state.team.length
+          if (de === para) return state
+          // O indice 0 fica de fora dos DOIS lados: como origem (nao se
+          // rebaixa quem esta em campo arrastando) e como destino (nao se
+          // promove arrastando pro topo). Ver o comentario da interface.
+          if (de < 1 || de >= n) return state
+          if (para < 1 || para >= n) return state
+          const team = [...state.team]
+          const [poke] = team.splice(de, 1)
+          team.splice(para, 0, poke)
+          // `activeIndex` nao muda: continua 0, que e o invariante do modelo
+          // (ver `definir_ativo` — o ativo e sempre o slot 0).
+          return { team }
         })
       },
 

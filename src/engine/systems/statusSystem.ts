@@ -338,6 +338,10 @@ export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.curseDot = undefined
   entity.nightmareDot = undefined
   entity.regenPercent = undefined
+  // PRESO (PH-72): fim de luta solta o POKE. Sem esta linha o jogador ficaria
+  // com a troca de equipe travada FORA de combate, sem nada na tela explicando —
+  // o pior jeito de um estado volatil vazar.
+  entity.presoAte = undefined
   entity.entradaProcessada = false
   // Fase 12: todo campo volatil novo tem que zerar aqui tambem — fim de
   // batalha e fim de batalha pra qualquer estado que nao sobrevive a troca de
@@ -444,6 +448,12 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
   }
   if (entity.tormentedUntil && entity.tormentedUntil > 0) {
     entity.tormentedUntil = Math.max(0, entity.tormentedUntil - dt)
+  }
+  // PRESO (PH-72): mesmo formato dos timers acima — segundos corridos. O DANO
+  // por turno fica junto do resto do tick volatil (leech_seed e companhia), mais
+  // abaixo, porque ele depende do relogio de TURNO, nao do de frame.
+  if (entity.presoAte && entity.presoAte > 0) {
+    entity.presoAte = Math.max(0, entity.presoAte - dt)
   }
 
   entity.proximoTurnoDeStatus -= dt

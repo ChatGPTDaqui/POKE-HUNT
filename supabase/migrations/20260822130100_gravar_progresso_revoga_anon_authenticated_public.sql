@@ -1,0 +1,13 @@
+-- PH-67: `revoke execute ... from public` (migration 20260822130000) nao
+-- bastou. Confirmado com has_function_privilege(): `anon` e `authenticated`
+-- continuavam com EXECUTE mesmo depois do revoke de PUBLIC. Causa: este
+-- projeto Supabase tem `alter default privileges ... grant execute on
+-- functions to anon, authenticated, service_role` no schema -- toda funcao
+-- nova recebe grant EXPLICITO e NOMEADO pra essas 3 roles no momento da
+-- criacao, nao um grant herdado de PUBLIC. `revoke ... from public` so
+-- afeta o grant implicito de PUBLIC; nao alcanca um grant que ja foi dado
+-- por nome a `anon`/`authenticated`. Sem este fix, qualquer jogador logado
+-- ainda conseguia chamar gravar_progresso direto via REST com o proprio
+-- JWT, passando o p_user_id de QUALQUER conta -- a vulnerabilidade descrita
+-- na migration anterior continuava aberta apesar do revoke ali.
+revoke execute on function public.gravar_progresso(uuid, jsonb, timestamptz) from anon, authenticated;

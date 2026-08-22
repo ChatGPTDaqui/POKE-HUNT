@@ -36,6 +36,11 @@ interface AuthState {
   signUp: (email: string, password: string, trainerName?: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
   atualizarSenha: (novaSenha: string) => Promise<{ error: string | null }>
+  enviarRecuperacaoDeSenha: (email: string) => Promise<{ error: string | null }>
+  // Fecha a tela de recuperacao explicitamente, DEPOIS que o jogador viu a
+  // confirmacao ("Senha atualizada.") e clicou pra seguir — ver o comentario
+  // em `atualizarSenha` pro motivo de nao fazer isso sozinho.
+  sairDaRecuperacaoDeSenha: () => void
   // Confirma a troca: derruba a(s) outra(s) sessao(oes) e libera o jogo aqui.
   assumirControle: () => Promise<void>
   // Desiste da troca: desfaz o login desta aba, devolve pra tela de entrar —
@@ -161,11 +166,35 @@ export const useAuthStore = create<AuthState>(() => ({
     await supabase.auth.signOut()
   },
 
+  // NAO fecha `emRecuperacaoDeSenha` aqui: App.tsx troca de tela no MESMO
+  // ciclo de commit que o `setState`, entao ResetPasswordPage seria
+  // desmontada antes de conseguir mostrar "Senha atualizada." — o jogador
+  // caia direto na tela de login sem nenhuma confirmacao. `sairDaRecuperacaoDeSenha`
+  // fecha explicitamente, chamada só depois que o jogador VIU a confirmacao.
   atualizarSenha: async (novaSenha) => {
     const { error } = await supabase.auth.updateUser({ password: novaSenha })
-    if (error) return { error: traduzErro(error.message) }
+    return { error: error ? traduzErro(error.message) : null }
+  },
+
+  sairDaRecuperacaoDeSenha: () => {
     useAuthStore.setState({ emRecuperacaoDeSenha: false })
-    return { error: null }
+  },
+
+  // `redirectTo: '/login'` e nao proposito, mesmo pra quem chegou de /registro
+  // ou de dentro do jogo: o link de recovery loga o usuario e ResetPasswordPage
+  // intercepta ANTES do roteamento normal decidir pra onde ir (App.tsx,
+  // `emRecuperacaoDeSenha` fora do <Routes>) — o path so precisa estar na
+  // allow-list de Redirect URLs do projeto Supabase, e /login ja e a rota
+  // publica mais obvia pra isso.
+  //
+  // O Supabase de proposito NAO diz se o email existe (mesma resposta de
+  // sucesso nos dois casos) — enumeracao de conta e o motivo, nao um detalhe
+  // que falta aqui.
+  enviarRecuperacaoDeSenha: async (email) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/login`,
+    })
+    return { error: error ? traduzErro(error.message) : null }
   },
 }))
 

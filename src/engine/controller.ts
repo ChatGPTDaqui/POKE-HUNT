@@ -226,7 +226,13 @@ export const controller = {
         // nao soma HP. Sem esta linha a enfermeira seria a unica fonte de cura
         // sem retorno visual.
         if (draft.player.poke.hp < draft.player.poke.stats.hp) draft.player.vfxCuraHp = VFX_CURA_DURACAO
-        draft.player.poke = { ...draft.player.poke, hp: draft.player.poke.stats.hp }
+        // `status: null` limpa paralisia/veneno/etc residual (PH-45) — mesma
+        // classe do bug de fainted/state logo abaixo: `gameStateStore.healTeamFully()`
+        // ja zerava `status` no store persistido, mas so isso nao chegava aqui no
+        // world draft ativo, que e o que `combatSystem.ts` le de verdade
+        // (`entity.poke.status`). POKE saia do Hospital com HP cheio e ainda
+        // paralisado/envenenado.
+        draft.player.poke = { ...draft.player.poke, hp: draft.player.poke.stats.hp, status: null }
         // Repor o HP nao bastava: `fainted`/`state` continuavam em desmaiado.
         // Bug real reproduzido ao vivo — curar na enfermeira mostrava HP 14/14 e
         // "Desmaiado!" ao mesmo tempo, e o POKE seguia sem lutar ao entrar numa
@@ -245,6 +251,22 @@ export const controller = {
   // Traz a POKE recem-colocada em campo pro topo da lista visivel do time.
   setActiveTeamIndex(index: number): void {
     const gameState = useGameStateStore.getState()
+    // PRESO (PH-72): Wrap/Bind/Fire Spin e companhia travam a troca de POKE
+    // enquanto duram. O guard fica aqui, e nao so no botao, porque a tela de
+    // Equipe nao e o unico caminho possivel pra esta acao.
+    //
+    // LIMITE CONHECIDO, ACEITO: e um bloqueio de CLIENTE. `definirAtivo` e RPC e
+    // o estado volatil de combate vive so no worldStore efemero — o servidor nao
+    // tem como validar sem receber estado de combate a cada troca, o que sai
+    // caro demais pelo que resolve. Cliente modificado troca de POKE preso.
+    const jogador = useWorldStore.getState().player
+    if (jogador && (jogador.presoAte ?? 0) > 0 && !isDead(jogador)) {
+      useToastStore.getState().pushToast(
+        `${SPECIES[jogador.poke.speciesId].name} esta preso e nao pode sair de campo agora.`,
+        'error', 'combat',
+      )
+      return
+    }
     // A escrita no worldStore precisa esperar `pedirAcao`: sob autoridade do
     // servidor o `fallback` NAO roda, entao ler `team[0]` de forma sincrona logo
     // apos o `void pedirAcao` pegava o POKE ativo VELHO (a resposta com o time
@@ -272,6 +294,30 @@ export const controller = {
     })
   },
 
+  // Reordena a fila de RESERVAS (trilho da HUD, PH-75).
+  //
+  // Nao troca quem esta em campo — isso e `setActiveTeamIndex`, e a RPC recusa
+  // qualquer ordem que mude o slot 0. Por isso aqui nao ha nada de preload de
+  // arte nem de worldStore: o POKE desenhado nao muda.
+  reorderTeam(de: number, para: number): void {
+    const gameState = useGameStateStore.getState()
+    if (de === para) return
+    const n = gameState.team.length
+    if (de < 1 || de >= n || para < 1 || para >= n) return
+
+    // A ordem RESULTANTE e calculada aqui, antes do fallback rodar: sob
+    // autoridade do servidor o fallback NAO roda, entao ler a equipe depois do
+    // `pedirAcao` mandaria a ordem velha.
+    const ordem = gameState.team.map((p) => p.uid)
+    const [movido] = ordem.splice(de, 1)
+    ordem.splice(para, 0, movido)
+
+    void pedirAcao(
+      { tipo: 'reordenarEquipe', ordem },
+      () => gameState.reordenarReservas(de, para),
+    )
+  },
+
   removeFromTeam(pokeUid: string): void {
     const gameState = useGameStateStore.getState()
     const idx = gameState.team.findIndex((p) => p.uid === pokeUid)
@@ -281,6 +327,17 @@ export const controller = {
       return
     }
     const wasActive = idx === gameState.activeIndex
+    // PRESO (PH-72): tirar da equipe o POKE preso e a MESMA fuga que trocar de
+    // POKE — quem sai de campo por aqui tambem escapa do golpe. Sem este guard o
+    // bloqueio de `setActiveTeamIndex` acima seria decorativo.
+    const jogadorEmCampo = useWorldStore.getState().player
+    if (wasActive && jogadorEmCampo && (jogadorEmCampo.presoAte ?? 0) > 0 && !isDead(jogadorEmCampo)) {
+      useToastStore.getState().pushToast(
+        `${SPECIES[jogadorEmCampo.poke.speciesId].name} esta preso e nao pode sair de campo agora.`,
+        'error', 'combat',
+      )
+      return
+    }
     const removed = gameState.team[idx]
     // Mesmo motivo de `setActiveTeamIndex`: sob servidor o time reajustado so
     // chega na resposta, entao a troca do POKE em campo tem que ir pro `.then`.
