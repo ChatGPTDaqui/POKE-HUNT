@@ -71,10 +71,21 @@ const WATER_HUNT_IDS = new Set(
 export function getMap(id: string): MapDef | null {
   const map = MAPS[id]
   if (!map) return null
+  // `MOB_RESPAWN_DELAY_MULTIPLIER` e um botao de ECONOMIA: ele acelera o
+  // respawn de POKE SELVAGEM pra calibrar ouro/hora. Hunt de SEQUENCIA (a
+  // arena do Campeao Lance) nao tem respawn selvagem nenhum — ali o
+  // `respawnDelay` e o intervalo coreografado entre um POKE do treinador cair
+  // e o proximo entrar, e escalar isso por um numero de planilha e o tipo de
+  // acoplamento que quebra em silencio: um ajuste de ouro/hora mudaria o ritmo
+  // de uma luta roteirizada sem ninguem ligar as duas coisas.
+  //
+  // Ja tinha quebrado: os 3s escritos na arena viravam 0,75s ao vivo, e o
+  // pedido de "2 segundos entre um POKE e o proximo" saia como 0,5s.
+  const atraso = map.sequence ? map.respawnDelay : map.respawnDelay * RESPAWN_DELAY_MULTIPLIER
   if (WATER_HUNT_IDS.has(id)) {
     return {
       ...map,
-      respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER,
+      respawnDelay: atraso,
       collisionGrid: WATER_COLLISION_GRID,
       playerSpawn: WATER_SPAWN_POINT,
     }
@@ -82,7 +93,7 @@ export function getMap(id: string): MapDef | null {
   const collisionGrid = WALL_BLOCK_ENABLED
     ? (map.bg && map.bg.image && COLLISION_GRIDS[map.bg.image]) || null
     : null
-  return { ...map, respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER, collisionGrid }
+  return { ...map, respawnDelay: atraso, collisionGrid }
 }
 
 /**
@@ -144,6 +155,24 @@ export function spawnPointParaSala(mapId: string, sala: { chave: string } | null
   if (!map) return null
   const arte = backgroundParaSala(map, sala).image
   return (arte ? COLISAO_POR_ARTE[arte]?.spawnPoint : undefined) ?? null
+}
+
+/**
+ * Por onde entra o POKE do lado INIMIGO nesta cena — o circulo VERDE pintado,
+ * irmao do amarelo que `spawnPointParaSala` devolve. So as arenas de duelo
+ * (dojo, dragon) tem; toda outra arte devolve `null` e quem chama cai no
+ * sorteio de sempre.
+ *
+ * Existe separado, e nao como mais um campo de `mapDef`, pelo mesmo motivo do
+ * spawn do jogador: o ponto e propriedade do DESENHO, entao a arena do Lance,
+ * o espelho do Modo Pesadelo e a hunt de Treinamento herdam o mesmo ponto sem
+ * ninguem precisar cadastrar nada em tres lugares.
+ */
+export function spawnInimigoParaSala(mapId: string, sala: { chave: string } | null): { x: number; y: number } | null {
+  const map = getMap(mapId)
+  if (!map) return null
+  const arte = backgroundParaSala(map, sala).image
+  return (arte ? COLISAO_POR_ARTE[arte]?.spawnInimigo : undefined) ?? null
 }
 
 export function isCellBlocked(mapDef: MapDef, x: number, y: number): boolean {

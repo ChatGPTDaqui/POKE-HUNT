@@ -486,6 +486,21 @@ export interface WorldState {
   autoTimers: AutoTimers
   reviveCountdown: number | null
   respawnTimer: number | null
+  /**
+   * Segundos que faltam pro proximo POKE da equipe entrar em campo depois de
+   * um desmaio, nos mapas com `autoSwitchTeamOnFaint` (hoje so a arena do
+   * Campeao Lance). Nulo == ninguem esperando.
+   *
+   * EFEMERO DE PROPOSITO, e o `stepWorld` o REDERIVA em vez de carregar:
+   * "jogador desmaiado + alguem vivo no banco" e uma condicao observavel a
+   * qualquer momento, entao uma janela de flush que corte no meio da espera
+   * so recomeca a contagem na janela seguinte. Carregar o numero exigiria
+   * mais um campo em `ProgressoDaSessao` e no payload do servidor, e um
+   * esquecimento ali travaria a luta pra sempre — o POKE fica desmaiado em
+   * campo e a troca nunca acontece, que e o modo de falha de `sequenceIndex`
+   * que `engine/lance.test.ts` existe pra impedir.
+   */
+  trocaEmCampo: number | null
   sequenceIndex: number
   sequenceCleared: boolean
   countdownRemaining: number | null
