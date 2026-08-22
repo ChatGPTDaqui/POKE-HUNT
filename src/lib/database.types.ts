@@ -1616,6 +1616,14 @@ export type Database = {
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       escolher_starter: { Args: { p_species_id: string }; Returns: Json }
       evoluir_poke: { Args: { p_poke_id: string }; Returns: Json }
+      gravar_progresso: {
+        Args: {
+          p_patch: Json
+          p_updated_at_esperado: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       hunts_iniciais: { Args: never; Returns: string[] }
       id_por_nome_de_treinador: { Args: { nome: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
@@ -3374,6 +3382,14 @@ export type Database = {
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       escolher_starter: { Args: { p_species_id: string }; Returns: Json }
       evoluir_poke: { Args: { p_poke_id: string }; Returns: Json }
+      gravar_progresso: {
+        Args: {
+          p_patch: Json
+          p_updated_at_esperado: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       hunts_iniciais: { Args: never; Returns: string[] }
       id_por_nome_de_treinador: { Args: { nome: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
