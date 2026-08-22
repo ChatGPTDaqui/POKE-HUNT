@@ -9,10 +9,14 @@
 import { useEffect, useRef } from 'react'
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
-import { stepWorld } from './simulation'
+import { stepWorld, LIVE_SIM_STEP_SECONDS } from './simulation'
 import { recordSimulatedSeconds } from './clockDrift'
 
-const STEP = 1 / 60
+// Mesma constante que o resim do servidor usa fora do regime offline
+// (authority/src/progresso.ts) — ver o raciocinio completo em
+// LIVE_SIM_STEP_SECONDS (simulation.ts, PH-37). Uma fonte so evita os dois
+// lados desalinharem nesse numero de novo no futuro.
+const STEP = LIVE_SIM_STEP_SECONDS
 const UPDATE_INTERVAL_MS = 1000 / 60
 const MAX_DELTA = 1.0 // clampa gaps grandes (ex: laptop hibernou) pra nao resolver um combate gigante de uma vez
 

@@ -287,9 +287,26 @@ export function garantirTransicaoDeQuotaFechada(world: WorldState, mapId: string
     // sortear, ficava com a barra cheia e a sala parada indefinidamente. Com o
     // fallback, o pior caso e voltar ao comportamento antigo (predicao que a
     // reconciliacao corrige depois, agora com aviso na tela).
+    //
+    // UMA sala de adiantamento, nunca duas. Enquanto o servidor nao confirmar a
+    // predicao anterior, o cliente espera — e nao sorteia outra por cima. Sem
+    // este teto o fallback virava um trilho paralelo: a cada 20s o cliente
+    // avancava sozinho, e como `reconciliarSalaDaAutoridade` descarta sala em
+    // posicao anterior, a autoridade nunca mais era aceita. Na tela: sub-bioma
+    // trocando do nada de tempo em tempo, com o pool e o loot creditados vindo
+    // de uma sala completamente outra. Com o teto, a divergencia fica limitada
+    // a UMA sala: contra um servidor mudo o cliente adianta uma e espera, e
+    // contra um servidor que responde com sala anterior o par
+    // predicao/correcao pode se repetir — mas quem tem a ultima palavra e
+    // sempre a autoridade, e o HUD volta pro sub-bioma que de fato pagou o
+    // loot em vez de fugir dele pra sempre.
+    if (world.salaPredita) return
     world.salaEsperaDaAutoridade += dt
     if (world.salaEsperaDaAutoridade < ESPERA_MAXIMA_PELA_AUTORIDADE) return
     world.salaEsperaDaAutoridade = 0
+    const armada = armarTransicaoDeSala(world, mapId)
+    if (armada.avancou) world.salaPredita = true
+    return
   }
   armarTransicaoDeSala(world, mapId)
 }
@@ -355,6 +372,7 @@ export function reconciliarSalaDaAutoridade(world: WorldState, sala: SalaAtiva |
   const atual = world.salaPendente ?? world.sala
   if (!atual) {
     world.sala = { ...sala }
+    world.salaPredita = false
     return
   }
   if (atual.chave === sala.chave && atual.indice === sala.indice && atual.ciclos === sala.ciclos) {
@@ -363,14 +381,26 @@ export function reconciliarSalaDaAutoridade(world: WorldState, sala: SalaAtiva |
     // Voltar faria a barra do HUD recuar sozinha.
     const alvo = world.salaPendente ?? world.sala
     if (alvo) alvo.abates = Math.max(alvo.abates, sala.abates)
+    // O servidor chegou na MESMA sala: o palpite virou verdade e o fallback
+    // pode voltar a valer daqui pra frente.
+    world.salaPredita = false
     return
   }
+  // A protecao anti-regressao vale contra flush ATRASADO, nao contra a propria
+  // predicao. Com `salaPredita` ligado, quem esta adiante e o palpite local
+  // (`garantirTransicaoDeQuotaFechada` sorteou sozinho porque a espera
+  // estourou) — e ai voltar pra sala do servidor e a CORRECAO, nao a
+  // regressao. Sem esta condicao, a primeira predicao envenenava a sessao
+  // inteira: toda sala da autoridade caia como "anterior" e era descartada, o
+  // HUD seguia mostrando sub-bioma sorteado localmente e o pool/loot creditados
+  // vinham de outro lugar, sem nada na tela denunciando.
   const posicao = (s: SalaAtiva) => s.ciclos * SALAS_POR_HUNT + s.indice
-  if (posicao(sala) < posicao(atual)) return
+  if (!world.salaPredita && posicao(sala) < posicao(atual)) return
 
   world.salaPendente = { ...sala }
   world.salaCountdownRemaining ??= SALA_TRANSITION_COUNTDOWN
   world.salaEsperaDaAutoridade = 0
+  world.salaPredita = false
 }
 
 /**

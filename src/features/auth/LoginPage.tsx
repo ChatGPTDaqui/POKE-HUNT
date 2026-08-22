@@ -12,6 +12,7 @@ export function LoginPage() {
       descricao="Acesse sua conta para continuar de onde parou."
       rotuloAcao="Entrar"
       onSubmit={signIn}
+      mostrarEsqueciSenha
       aoConcluir={() => navigate('/jogo', { replace: true })}
       rodape={{ texto: 'Ainda nao tem conta?', linkTexto: 'Criar conta', para: '/registro' }}
     />

@@ -206,6 +206,17 @@ export interface BaseEntity {
   nightmareDot?: boolean
   /** Ingrain/Aqua Ring (mesmo campo pros dois): fracao do HP MAXIMO curada por turno (1/16). */
   regenPercent?: number
+  /**
+   * PRESO (PH-72): Wrap/Bind/Fire Spin/Clamp/Whirlpool/Sand Tomb/Infestation.
+   * Segundos restantes, no mesmo formato de `silenciadoAte`/`tormentedUntil` (a
+   * duracao nasce em turnos e vira segundos por TURNO_SEGUNDOS). Enquanto > 0, o
+   * POKE do JOGADOR nao pode ser trocado por outro da equipe.
+   *
+   * SO ISSO: prender nao causa dano por turno. O campo tambem e setado no
+   * selvagem (o efeito do golpe nao olha de que lado o alvo esta), mas ali nao
+   * muda nada — selvagem nao tem equipe pra trocar.
+   */
+  presoAte?: number
 
   // Guarda contra reaplicar o HOOK DE ENTRADA EM COMBATE (Intimidate/Download/
   // clima automatico — ver combatSystem.ts#resolveEntryHook) todo frame
@@ -365,6 +376,21 @@ export interface WorldEffect {
   laneSize: number
   ownerId: string | null // era `owner` (referencia direta), ver nota do topo
   lane: number
+  // Entidade cuja posicao este efeito ACOMPANHA enquanto vive. Diferente de
+  // `ownerId`: aquele e a coluna de TEXTO (numero de dano, nome do golpe) e
+  // reserva uma raia; este so arrasta a arte junto com o POKE e nao reserva
+  // nada. Sem ele a arte do golpe fica congelada onde a entidade estava no
+  // instante do impacto e, como o efeito dura 1,0-1,2s, ela descola de quem
+  // esta andando (ver o laco de tick de efeitos em combatSystem.ts).
+  seguirId?: string
+  // Posicao da entidade seguida no ultimo tick. O laco translada o efeito pelo
+  // DESLOCAMENTO dela (nao reancorando por offset fixo) pra nao precisar saber
+  // o que cada campo de coordenada significa em cada tipo de efeito: `x`/`y` e
+  // `targetX`/`targetY` andam juntos, seja qual for a folga que o call-site
+  // tenha somado. Se a entidade sumir do mundo antes do fim, o efeito
+  // simplesmente para de andar e termina onde estava.
+  seguirUltimoX?: number
+  seguirUltimoY?: number
 }
 
 export interface PendingHit {
@@ -471,6 +497,21 @@ export interface WorldState {
   autoTimers: AutoTimers
   reviveCountdown: number | null
   respawnTimer: number | null
+  /**
+   * Segundos que faltam pro proximo POKE da equipe entrar em campo depois de
+   * um desmaio, nos mapas com `autoSwitchTeamOnFaint` (hoje so a arena do
+   * Campeao Lance). Nulo == ninguem esperando.
+   *
+   * EFEMERO DE PROPOSITO, e o `stepWorld` o REDERIVA em vez de carregar:
+   * "jogador desmaiado + alguem vivo no banco" e uma condicao observavel a
+   * qualquer momento, entao uma janela de flush que corte no meio da espera
+   * so recomeca a contagem na janela seguinte. Carregar o numero exigiria
+   * mais um campo em `ProgressoDaSessao` e no payload do servidor, e um
+   * esquecimento ali travaria a luta pra sempre — o POKE fica desmaiado em
+   * campo e a troca nunca acontece, que e o modo de falha de `sequenceIndex`
+   * que `engine/lance.test.ts` existe pra impedir.
+   */
+  trocaEmCampo: number | null
   sequenceIndex: number
   sequenceCleared: boolean
   countdownRemaining: number | null
@@ -510,6 +551,25 @@ export interface WorldState {
    * salaSystem.ts#garantirTransicaoDeQuotaFechada. Zera em toda troca de sala.
    */
   salaEsperaDaAutoridade: number
+  /**
+   * A sala em vigor saiu do FALLBACK local (a espera acima estourou), e nao da
+   * autoridade — ou seja, e palpite que o servidor ainda nao confirmou.
+   *
+   * Serve pra duas coisas em `salaSystem.ts`, e as duas existem pro mesmo bug:
+   * sem elas a predicao passava a frente do servidor pra sempre.
+   *
+   *  - `reconciliarSalaDaAutoridade` aceita a sala do servidor mesmo em posicao
+   *    ANTERIOR enquanto isto estiver ligado. Sem isso, a protecao
+   *    anti-regressao (escrita pro caso legitimo de flush atrasado) descartava
+   *    todas as salas do servidor dali pra frente.
+   *  - `garantirTransicaoDeQuotaFechada` nao arma uma SEGUNDA transicao local
+   *    enquanto a primeira nao foi confirmada: o fallback vale por uma sala de
+   *    adiantamento, nao por um trilho paralelo.
+   *
+   * Efemero como os vizinhos: no servidor `salaSobAutoridade` e false e nada
+   * aqui e escrito.
+   */
+  salaPredita: boolean
   // Toda aleatoriedade da simulacao sai daqui. Ver core/rng.ts pro porque e
   // pros limites (isto torna a SEQUENCIA DE SORTEIOS reproduzivel; nao promete
   // replay bit-a-bit de coordenadas entre engines diferentes).

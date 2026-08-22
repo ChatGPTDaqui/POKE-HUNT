@@ -15,6 +15,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { resolverSchema, cabecalhosRest } = require('./lib/schema-alvo.cjs');
 
 const ROOT = path.join(__dirname, '..');
 const FRASE = 'APAGAR-TUDO';
@@ -57,6 +58,9 @@ async function main() {
     console.error('');
     console.error(`  Para executar de verdade:  node scripts/wipe-todos-os-saves.js --confirmar=${FRASE}`);
     console.error('');
+    console.error('  O alvo sai de --schema=<nome>, senao de SUPABASE_SCHEMA no .env, senao dev.');
+    console.error('  Apagar o schema public (jogadores reais) exige tambem --confirmar-public.');
+    console.error('');
     process.exit(1);
   }
 
@@ -64,15 +68,16 @@ async function main() {
   // Deixa VISIVEL contra qual projeto vai rodar. Um wipe apontado pro banco
   // errado e o pior resultado possivel deste script.
   console.log(`Banco: ${env.SUPABASE_URL}`);
+  // E contra qual SCHEMA. As RPCs de wipe existem em `public` e em `dev` com o
+  // mesmo nome, entao o projeto certo com o schema errado ainda apaga o save de
+  // producao. `resolverSchema` recusa `public` sem `--confirmar-public`.
+  const schema = resolverSchema({ envSchema: env.SUPABASE_SCHEMA });
+  console.log(`Schema: ${schema}`);
 
   const chamar = async (rpc) => {
     const res = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/${rpc}`, {
       method: 'POST',
-      headers: {
-        apikey: env.SUPABASE_SERVICE_ROLE_KEY,
-        Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-        'content-type': 'application/json',
-      },
+      headers: cabecalhosRest(env.SUPABASE_SERVICE_ROLE_KEY, schema),
       body: '{}',
     });
     const texto = await res.text();
