@@ -4,6 +4,7 @@
 // calculadora, aviso de level-up). Centralizado aqui pra o aviso de level-up
 // e o perfil nunca chamarem o mesmo atributo por nomes diferentes.
 import type { StatBlock } from './pokes'
+import type { StatDeEstagio } from './statusEffects'
 
 export const STAT_LABEL: Record<keyof StatBlock, string> = {
   hp: 'HP',
@@ -47,4 +48,23 @@ export const GROWTH_LABEL: Record<string, string> = {
   MEDIUM_SLOW: 'Media-lenta',
   SLOW: 'Lenta',
   FLUCTUATING: 'Flutuante',
+}
+
+// Rotulo dos ESTAGIOS de atributo. `accuracy`/`evasion` nao sao um dos 6 stats
+// reais (STAT_LABEL, indexado por `keyof StatBlock`) — sao eixo de combate a
+// parte (sand_attack/smokescreen e companhia). Rotulo proprio so pros dois; o
+// resto reusa STAT_LABEL pra nao duplicar os nomes ja centralizados aqui.
+//
+// Morava dentro de StatusEffectsBar.tsx. Subiu pra ca quando a ficha do golpe
+// (AbilityTooltip) passou a mostrar os estagios que cada golpe mexe — dois
+// lugares chamando o mesmo atributo por nomes diferentes e exatamente o que
+// este arquivo existe pra evitar.
+export const ROTULO_ESTAGIO: Record<StatDeEstagio, string> = {
+  atkFis: STAT_LABEL.atkFis,
+  atkEsp: STAT_LABEL.atkEsp,
+  def: STAT_LABEL.def,
+  defEsp: STAT_LABEL.defEsp,
+  speed: STAT_LABEL.speed,
+  accuracy: 'Precisão',
+  evasion: 'Evasão',
 }

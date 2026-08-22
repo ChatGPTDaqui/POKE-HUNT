@@ -77,6 +77,12 @@ export function StatusRail() {
       >
         <FacePoke />
         <VitaisPoke />
+        {/* Sobra de largura vira espaco AQUI, e nao barra de HP mais longa (ver
+            `VitaisPoke`): sem este vao, com as barras tendo teto, o grupo da
+            direita (carteira, detalhes, avatar) descolava da borda do trilho e
+            ficava flutuando no meio dele — os vizinhos sao todos `shrink-0` e
+            nenhum cresce pra ocupar o resto. */}
+        <div className="min-w-0 flex-1" aria-hidden />
         {!estreito && <ResumoLocal />}
         {/* Taxas so no amplo. Deitado a largura parece sobrar e nao sobra: com
             as taxas na faixa do meio, o nome do POKE truncava pra "Ent…" com a
@@ -165,7 +171,16 @@ function VitaisPoke() {
     // quem saia pela borda era o avatar do treinador. O piso passa a ceder
     // junto com a tela — 34vw e o valor em que o conteudo cabe inteiro em 320px
     // (medido, nao chutado).
-    <div className="flex min-w-[min(9em,34vw)] flex-1 flex-col gap-[.18em]">
+    //
+    // O TETO (`max-w`) existe porque o piso resolvia so metade do problema. O
+    // trilho vai ate 64em (features/game/HudLayer.tsx) e esta coluna era a
+    // unica `flex-1` dele, entao num monitor largo as duas barras esticavam por
+    // 600px+ — largura que nao acrescenta informacao nenhuma: o que a barra
+    // precisa dizer de relance e "esta acabando", e isso ela diz em 14em. O
+    // resto da sobra virou o vao antes do grupo da direita (ver o `flex-1`
+    // vazio no trilho). Em tela estreita nada muda: la o teto nunca e
+    // alcancado e quem manda continua sendo o piso.
+    <div className="flex min-w-[min(9em,34vw)] max-w-[14em] flex-1 flex-col gap-[.18em]">
       <div className="flex min-w-0 items-center gap-[.35em] text-[.82em] leading-none">
         <span className={cn('truncate font-medium', poke.isShiny && 'text-shiny')}>
           {poke.isShiny && '✨'}{species.name}
