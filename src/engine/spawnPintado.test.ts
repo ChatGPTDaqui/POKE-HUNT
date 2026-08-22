@@ -19,7 +19,6 @@ import { MAPS, isCellBlocked, mapDefParaSala, spawnPointParaSala } from '@/data/
 import { temSalas } from './systems/salaSystem'
 import { buildMapWorld } from './simulation'
 
-const MUNDO = { width: 1400, height: 900 }
 const CELULA = 40
 
 /**
@@ -45,35 +44,39 @@ describe('o circulo amarelo chega ao mundo', () => {
     expect(ruins, 'spawn pintado caindo em celula bloqueada').toEqual([])
   })
 
-  it('a celula do spawn cabe INTEIRA no mundo', () => {
-    // Os 10 circulos da leva 2026-08-18 foram pintados FORA da janela visivel
-    // (a arte e 2048x2048 e so a faixa central dela vira mundo), e o gerador os
-    // projeta pra dentro. Sem cuidado, a projecao punha o nascimento em y=900 —
-    // a borda EXATA —, e o POKE aparecia colado na beirada com o mapa inteiro
-    // atras dele.
+  it('a celula do spawn cabe INTEIRA no mundo daquela arte', () => {
+    // HISTORICO, porque a forma do teste mudou e o motivo importa. Quando todo
+    // mapa era 1400x900, a grade tinha 23 fileiras de 40px cobrindo 900 — a
+    // fileira 22 ia de 880 a 920 e TRANSBORDAVA. O jogador projetado pra borda
+    // nascia em y=900, colado na beirada com o mapa inteiro atras dele.
     //
-    // A checagem e sobre a CELULA, nao sobre uma margem fixa em volta do ponto.
-    // A grade tem 23 fileiras de 40px cobrindo 900px de mundo: a fileira 22 vai
-    // de 880 a 920 e transborda, entao o centro dela (y=900) e o unico valor
-    // ruim do eixo Y. No X fecha certo (35 colunas x 40 = 1400) e toda coluna
-    // serve. Uma margem fixa reprovaria y=20 (fileira 0, que cabe inteira e e
-    // um spawn perfeitamente bom — o lake.jpg nasce la) e deixaria passar o
-    // caso que importa se a folga fosse menor.
-    //
-    // O clamp da projecao recua uma celula das bordas, mas quem decide o ponto
-    // final e o snap pra celula andavel mais proxima: se a unica area pintada
-    // perto do circulo estiver na primeira fileira, e la que o jogador nasce.
+    // Desde PH-80 o mundo e a caixa da area pintada arredondada pra celula
+    // inteira, entao bounds e sempre multiplo de 40 e fileira que transborda
+    // deixou de existir. O teste continua porque o invariante e o mesmo — a
+    // celula do nascimento tem que caber no mundo —, so que agora medido
+    // contra o bounds DAQUELA arte, e nao contra um 1400x900 que nao existe
+    // mais. Se alguem voltar a emitir bounds que nao fecha na grade, cai aqui.
     const transbordando: string[] = []
     for (const [arte, pintada] of Object.entries(COLISAO_POR_ARTE)) {
       const { x, y } = pintada.spawnPoint
       const col = Math.floor(x / CELULA)
       const row = Math.floor(y / CELULA)
       const cabe = col >= 0 && row >= 0
-        && (col + 1) * CELULA <= MUNDO.width
-        && (row + 1) * CELULA <= MUNDO.height
-      if (!cabe) transbordando.push(`${arte} em (${x},${y}), celula ${col},${row}`)
+        && (col + 1) * CELULA <= pintada.bounds.width
+        && (row + 1) * CELULA <= pintada.bounds.height
+      if (!cabe) transbordando.push(`${arte} em (${x},${y}), celula ${col},${row}, mundo ${pintada.bounds.width}x${pintada.bounds.height}`)
     }
     expect(transbordando).toEqual([])
+  })
+
+  it('o mundo de cada arte fecha exatamente na grade de 40px', () => {
+    // O que faz o teste acima nao poder mais falhar por arredondamento — e o
+    // que precisa continuar verdade pra `isCellBlocked` nao tratar uma sobra
+    // de mundo como "fora do mapa".
+    for (const [arte, pintada] of Object.entries(COLISAO_POR_ARTE)) {
+      expect(pintada.bounds.width % CELULA, `${arte}: largura`).toBe(0)
+      expect(pintada.bounds.height % CELULA, `${arte}: altura`).toBe(0)
+    }
   })
 
   it('hunt sem sala resolve spawn pela arte do bioma, e ele e andavel', () => {

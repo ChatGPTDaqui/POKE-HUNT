@@ -26,6 +26,9 @@ import { COLISAO_POR_ARTE } from './generated/subBiomaCollision.generated'
 import { MAPS, getMap, mapDefParaSala, spawnPointParaSala, spawnInimigoParaSala, isCellBlocked, type MapDef } from './maps'
 import { LANCE_MAP_ID } from './nightmareMaps'
 
+// Mesma celula do gerador e de `isCellBlocked`.
+const CELULA = 40
+
 // Vazia desde 2026-08-22: o Dojo era a ultima arte de sala sem referencia
 // pintada, e a leva daquele dia fechou ela junto com a arena do dragao. A
 // constante FICA — e o gancho pra proxima arte que entrar sem pintura ter que
@@ -221,13 +224,43 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
     })
   })
 
-  it('toda grade tem o tamanho do mapa inteiro (35x23 celulas de 40px)', () => {
-    // `isCellBlocked` trata "fora da grade" como bloqueado quando
-    // colisaoDefineLimite esta ligado. Uma grade menor que os bounds
-    // encolheria o mapa em silencio.
-    for (const [arte, { grid }] of Object.entries(COLISAO_POR_ARTE)) {
-      expect(grid.length, arte).toBe(23)
-      for (const linha of grid) expect(linha.length, arte).toBe(35)
+  it('a grade de cada arte cobre exatamente o bounds dela', () => {
+    // Era "35x23 pra todo mundo" ate PH-80, quando o mundo virou a caixa da
+    // area pintada e cada arte passou a ter o seu tamanho. O invariante que
+    // importa nao mudou: `isCellBlocked` trata "fora da grade" como bloqueado
+    // quando `colisaoDefineLimite` esta ligado, entao uma grade menor que o
+    // bounds encolhe o mapa em silencio, e uma maior libera area que o
+    // renderer nem desenha.
+    for (const [arte, { grid, bounds }] of Object.entries(COLISAO_POR_ARTE)) {
+      expect(grid.length * CELULA, `${arte}: altura`).toBe(bounds.height)
+      for (const linha of grid) expect(linha.length * CELULA, `${arte}: largura`).toBe(bounds.width)
     }
+  })
+
+  it('cada arte tem o seu tamanho de mundo — nao ha mais um tamanho unico', () => {
+    // O ponto da PH-80. Se algum dia isto voltar a ser um valor so, o mundo
+    // parou de seguir a pintura e ninguem vai perceber pela tela.
+    const tamanhos = new Set(Object.values(COLISAO_POR_ARTE).map((c) => `${c.bounds.width}x${c.bounds.height}`))
+    expect(tamanhos.size).toBeGreaterThan(1)
+  })
+
+  it('a colocacao da arte e emitida, nunca deduzida do bounds', () => {
+    // Gerador e renderer chegavam na mesma transformacao por conta propria,
+    // repetindo as mesmas constantes. Agora o gerador manda. Sem este campo o
+    // desenho cai no enquadramento antigo e a grade descola do pixel.
+    for (const [arte, c] of Object.entries(COLISAO_POR_ARTE)) {
+      expect(c.arte, `${arte} sem colocacao`).toBeDefined()
+      expect(c.arte.escala, arte).toBeGreaterThan(0)
+    }
+  })
+
+  it('nenhum marcador precisa ser projetado pra dentro do mundo', () => {
+    // Com o mundo recortado A PARTIR da tinta, um circulo pintado nao tem como
+    // cair fora dele. `amarelo-projetado` era o remendo da era do 1400x900
+    // fixo, quando 6 dos 11 circulos caiam fora da faixa visivel.
+    const projetados = Object.entries(COLISAO_POR_ARTE)
+      .filter(([, c]) => c.spawnOrigem === 'amarelo-projetado')
+      .map(([arte]) => arte)
+    expect(projetados).toEqual([])
   })
 })

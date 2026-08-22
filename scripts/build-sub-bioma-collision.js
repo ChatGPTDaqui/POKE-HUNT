@@ -58,13 +58,17 @@ const fs = require('fs');
 const path = require('path');
 const { decodePng } = require('./lib/png');
 
-const HUNT_BG_TILE_SCALE = 0.8; // deve bater com src/render/sprites.ts
-const HUNT_BG_COVERAGE_MARGIN = 1.15; // idem
-const MAP_BOUNDS = { width: 1400, height: 900 }; // deve bater com GEOMETRIA.bounds (data/biomas.ts)
+// Escala de desenho da arte: 1 pixel de imagem = 0,8 unidades de mundo. Deixou
+// de ser "o minimo pra cobrir 1400x900" e virou constante de verdade — o mundo
+// agora e recortado DE DENTRO da arte (ver `enquadrar`), entao nunca falta
+// imagem pra cobrir e nao ha mais o que esticar.
+const HUNT_BG_TILE_SCALE = 0.8;
 const CELL_SIZE = 40; // deve bater com COLLISION_GRID_CELL_SIZE (generated/collisionGrids.generated.ts)
 const SAMPLE_STRIDE = 5;
-const MAP_CX = MAP_BOUNDS.width / 2;
-const MAP_CY = MAP_BOUNDS.height / 2;
+// Folga em volta da area pintada. Sem ela o POKE encosta na borda do mundo no
+// mesmo pixel em que encosta na parede pintada, e a leitura fica de mapa
+// cortado em vez de mapa que acabou.
+const MARGEM_DE_MUNDO = CELL_SIZE;
 
 // Vermelho saturado (amostrado no arquivo real: ~[227,24,44]).
 function isRed(r, g, b) {
@@ -207,24 +211,83 @@ const MANIFESTO = {
   'dragon.png': { bg: 'dragon.png', modo: 'rosa_anda' },
 };
 
-const cols = Math.ceil(MAP_BOUNDS.width / CELL_SIZE);
-const rows = Math.ceil(MAP_BOUNDS.height / CELL_SIZE);
+/**
+ * O ENQUADRAMENTO: quanto de mundo esta arte vira, e onde a imagem fica dentro
+ * dele.
+ *
+ * ---------------------------------------------------------------------------
+ * POR QUE ISTO DEIXOU DE SER UMA CONSTANTE
+ * ---------------------------------------------------------------------------
+ * Ate 2026-08-22 todo mapa tinha exatamente 1400x900 e a arte era CENTRADA
+ * nesse retangulo, esticada o bastante pra cobri-lo. Ou seja: so a faixa
+ * central da imagem virava mundo, e o que estivesse pintado fora dela era
+ * descartado sem aviso.
+ *
+ * O custo apareceu inteiro em `dragon.png`: a sala do duelo e as duas bolas
+ * caiam fora da faixa, a poda por conectividade jogava fora 245 das 292
+ * celulas, e sobrava um quartinho de 47 celulas num canto. Com o mundo
+ * recortado a partir da PINTURA, as mesmas 728 celulas viram um componente
+ * conectado de 718. A pintura estava certa desde sempre; o recorte e que
+ * estava errado.
+ *
+ * A regra agora: o mundo e a CAIXA que envolve tudo o que e andavel naquela
+ * arte, mais uma celula de folga, alinhada a grade de 40px. Cada arte define o
+ * proprio tamanho — ha mapas maiores e menores, de proposito.
+ *
+ * ---------------------------------------------------------------------------
+ * E POR QUE ELE E EMITIDO, EM VEZ DE RECALCULADO NO RENDERER
+ * ---------------------------------------------------------------------------
+ * Antes, gerador e `render/sprites.ts#drawMapBackground` chegavam na mesma
+ * transformacao por conta propria, concordando porque repetiam as mesmas tres
+ * constantes. Isso ja era fragil (o cabecalho de `data/maps.ts` chama
+ * "a classe de bug mais cara deste sistema" a grade ser de uma imagem e o
+ * pixel na tela de outra) e agora e impossivel: o canto da imagem depende da
+ * caixa da tinta, que so quem le os pixels conhece. Entao o gerador EMITE
+ * `arte: { escala, x, y }` e o renderer so consome.
+ */
+function enquadrar(width, height, rgba, modo) {
+  const escala = HUNT_BG_TILE_SCALE;
+  // Caixa do que e andavel, em pixels de imagem. Marcador conta: ele e pintado
+  // sobre a area andavel e o POKE nasce nele.
+  const andavelNoPixel = (r, g, b, a) => (modo === 'rosa_anda'
+    ? a >= 10 && (isPink(r, g, b) || isMarcador(r, g, b))
+    : a >= 10 && !isRed(r, g, b));
 
-const SHARED_SPAWN_POINTS = [
-  { x: 500, y: 320 }, { x: 900, y: 320 }, { x: 500, y: 580 },
-  { x: 900, y: 580 }, { x: 700, y: 250 }, { x: 700, y: 650 },
-];
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (let y = 0; y < height; y += 2) {
+    for (let x = 0; x < width; x += 2) {
+      const i = (y * width + x) * 4;
+      if (!andavelNoPixel(rgba[i], rgba[i + 1], rgba[i + 2], rgba[i + 3])) continue;
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+  }
+  if (x0 === Infinity) return null;
 
-function transformFor(imgWidth, imgHeight) {
-  const escalaMinima = Math.max(
-    (MAP_BOUNDS.width * HUNT_BG_COVERAGE_MARGIN) / imgWidth,
-    (MAP_BOUNDS.height * HUNT_BG_COVERAGE_MARGIN) / imgHeight,
-  );
-  const escala = Math.max(HUNT_BG_TILE_SCALE, escalaMinima);
+  // Da caixa em pixels pro mundo, com folga, arredondado pra celula inteira: a
+  // grade tem que cobrir o retangulo exato, senao `isCellBlocked` trata a
+  // sobra como fora do mapa.
+  const larguraCrua = (x1 - x0 + 1) * escala + MARGEM_DE_MUNDO * 2;
+  const alturaCrua = (y1 - y0 + 1) * escala + MARGEM_DE_MUNDO * 2;
+  const cols = Math.ceil(larguraCrua / CELL_SIZE);
+  const rows = Math.ceil(alturaCrua / CELL_SIZE);
+  const bounds = { width: cols * CELL_SIZE, height: rows * CELL_SIZE };
+
+  // Pixel de imagem que corresponde a x=0,y=0 do mundo. Sai negativo em
+  // relacao a caixa por causa da folga, e e daqui que vem tanto a conversao
+  // imagem<->mundo do resto do script quanto o canto de desenho da arte.
+  const origemImgX = x0 - MARGEM_DE_MUNDO / escala;
+  const origemImgY = y0 - MARGEM_DE_MUNDO / escala;
+
   return {
     escala,
-    originX: MAP_CX - (imgWidth * escala) / 2,
-    originY: MAP_CY - (imgHeight * escala) / 2,
+    originX: -origemImgX * escala,
+    originY: -origemImgY * escala,
+    bounds,
+    cols,
+    rows,
   };
 }
 
@@ -300,7 +363,9 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
   if (!fs.existsSync(bgPath)) { console.warn(`Pulando ${refFile}: arte real ${bg} nao encontrada`); continue; }
 
   const { width, height, rgba } = decodePng(fs.readFileSync(refPath));
-  const { escala, originX, originY } = transformFor(width, height);
+  const quadro = enquadrar(width, height, rgba, modo);
+  if (!quadro) throw new Error(`${refFile}: nada andavel na referencia — nem tinta rosa, nem area fora do vermelho.`);
+  const { escala, originX, originY, bounds: MAP_BOUNDS, cols, rows } = quadro;
   const paraMundo = (ix, iy) => ({ x: originX + ix * escala, y: originY + iy * escala });
   const dentroDoMapa = (p) => p.x >= 0 && p.x <= MAP_BOUNDS.width && p.y >= 0 && p.y <= MAP_BOUNDS.height;
 
@@ -521,13 +586,14 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
     (spawnInimigo ? `, inimigo (${spawnInimigo.x},${spawnInimigo.y}) [verde]` : ''),
   );
 
-  const presos = SHARED_SPAWN_POINTS.filter((p) => rowStrings[Math.floor(p.y / CELL_SIZE)][Math.floor(p.x / CELL_SIZE)] === '1');
-  if (presos.length > 0) {
-    avisos.push(
-      `${refFile}: ${presos.length}/6 pontos de spawn de inimigo compartilhados (data/biomas.ts#GEOMETRIA.spawnPoints) caem em area bloqueada. ` +
-      'Sao os mesmos 6 pontos de TODA hunt; inimigo que nascer la e reposicionado pro ponto andavel mais proximo em runtime.',
-    );
-  }
+  // AQUI HAVIA um aviso sobre os 6 `GEOMETRIA.spawnPoints` caindo em area
+  // bloqueada. Saiu porque alertava sobre algo que NADA consome: aqueles
+  // pontos so sao lidos em `engine/simulation.ts#spawnSequenceEnemy`, e la ja
+  // sao sobrepostos pela bola verde quando ela existe. Spawn de POKE selvagem
+  // nunca passa por eles — e sorteado num cone a frente do jogador, com
+  // fallback num disco no centro do mapa. Com o mundo deixando de ser 1400x900
+  // pra todo mundo, seis coordenadas absolutas so poderiam mesmo virar ruido.
+  // Ver PH-56, que trata dos sistemas de colisao inalcancaveis.
 
   // `spawnOrigem` vai pro arquivo gerado de proposito: sem ele, um circulo
   // amarelo que a deteccao deixasse de enxergar viraria centroide rosa em
@@ -536,6 +602,8 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
   // tem circulo pintado, e a regressao vira teste vermelho.
   resultados[`assets/hunt-backgrounds/${bg}`] = {
     grid: rowStrings,
+    bounds: MAP_BOUNDS,
+    arte: { escala, x: Math.round(originX * 100) / 100, y: Math.round(originY * 100) / 100 },
     spawnPoint: { x: spawnWorldX, y: spawnWorldY },
     spawnOrigem: origemDoSpawn === 'centroide rosa' ? 'centroide-rosa'
       : origemDoSpawn === 'amarelo projetado' ? 'amarelo-projetado' : 'amarelo',
@@ -572,6 +640,25 @@ const header = `// AUTO-GERADO por \`node scripts/build-sub-bioma-collision.js\`
 // Nao editar a mao — rode o script de novo apos repintar uma referencia.
 export interface ColisaoPintada {
   grid: string[];
+  /**
+   * Tamanho do mundo desta arte, em unidades de mundo. NAO e mais 1400x900 pra
+   * todo mundo: e a caixa que envolve a area pintada mais uma celula de folga,
+   * arredondada pra celula inteira. \`grid\` cobre exatamente este retangulo —
+   * \`isCellBlocked\` trata qualquer coisa fora dele como fora do mapa.
+   */
+  bounds: { width: number; height: number };
+  /**
+   * Onde desenhar a imagem de fundo, em coordenadas de MUNDO: canto superior
+   * esquerdo em (x,y), tamanho \`naturalWidth * escala\` por
+   * \`naturalHeight * escala\`.
+   *
+   * Emitido, e nao recalculado no renderer, porque o canto depende da caixa da
+   * tinta — coisa que so quem le os pixels da referencia conhece. Antes as
+   * duas pontas chegavam na mesma conta por repetir as mesmas constantes; se
+   * elas divergissem, a grade de colisao passaria a ser de uma imagem e o
+   * pixel na tela de outra (ver o cabecalho de data/maps.ts).
+   */
+  arte: { escala: number; x: number; y: number };
   spawnPoint: { x: number; y: number };
   /**
    * De onde saiu o spawnPoint.
