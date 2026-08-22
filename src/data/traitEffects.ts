@@ -98,7 +98,7 @@ const GOLPES_DE_SOCO = new Set([
 
 // GOLPE DE SOM — Soundproof. Mesma razao da lista de socos: o catalogo nao tem
 // a flag "sound".
-const GOLPES_DE_SOM = new Set([
+export const GOLPES_DE_SOM = new Set([
   'growl', 'roar', 'sing', 'supersonic', 'screech', 'snore', 'perish_song',
   'heal_bell', 'uproar', 'hyper_voice', 'metal_sound', 'grass_whistle',
   'howl', 'bug_buzz', 'round', 'echoed_voice', 'disarming_voice',
