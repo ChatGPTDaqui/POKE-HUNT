@@ -392,6 +392,24 @@ const ENCORE_DURATION = TURNO_SEGUNDOS * 3 // Encore: 3 turnos forcando repetir 
 // Torment nos jogos reais dura ate o POKE trocar de campo -- sem troca nesta
 // hunt continua, 3 turnos e a aproximacao (mesma janela de Taunt/Encore).
 const TORMENT_DURATION = TURNO_SEGUNDOS * 3
+
+// PRENDER (PH-72): Wrap, Bind, Fire Spin, Clamp, Whirlpool, Sand Tomb,
+// Infestation. Os 7 chegam do catalogo como `damage-ailment` com `status: null`
+// — o efeito de prender foi descartado na geracao e sobrou so o dano.
+//
+// O QUE "PRESO" SIGNIFICA AQUI, e SO ISTO: o POKE preso nao pode ser trocado por
+// outro da equipe enquanto durar. Nada de dano por turno — os 7 golpes ja tem
+// poder proprio, e dano extra nao foi pedido.
+//
+// EXPORTADO: a tela precisa da lista pra explicar o bloqueio, e o teste pra
+// conferir a lista contra o catalogo.
+export const GOLPES_QUE_PRENDEM = new Set([
+  'wrap', 'bind', 'fire_spin', 'clamp', 'whirlpool', 'sand_tomb', 'infestation',
+])
+// 4 ou 5 turnos, como nos jogos (Gen V+ sem Grip Claw). Um sorteio por
+// aplicacao, do mesmo `rng` que os dois lados compartilham.
+const PRESO_DURACAO_SEGUNDOS = (rng: Rng): number =>
+  TURNO_SEGUNDOS * (nextFloat(rng) < 0.5 ? 4 : 5)
 // Spite: "reduz 4 PP do ultimo golpe" mapeado pro cooldown deste motor (PP e
 // cooldown sao o mesmo conceito aqui, ver TURNO_SEGUNDOS acima) -- 4 PP vira
 // 4 turnos de cooldown extra.
@@ -2273,6 +2291,20 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       if (!alvoEhGrass) target.seeded = { sourceId: attacker.id }
     }
     if (ability.id === 'nightmare') target.nightmareDot = true
+
+    // PRENDER (PH-72): Wrap/Bind/Fire Spin/Clamp/Whirlpool/Sand Tomb/
+    // Infestation. Os 7 vem do catalogo como `damage-ailment` com `status: null`
+    // — o efeito de prender foi descartado na geracao e sobrou o dano.
+    //
+    // Nao reaplica em alvo JA preso: nos jogos o golpe falha nesse caso, e aqui
+    // renovar o timer a cada uso faria o dano por turno virar infinito enquanto
+    // o golpe estivesse na fila. O dano do hit acontece de qualquer forma (o
+    // bloco de dano roda antes deste), entao nenhum turno e perdido — e por isso
+    // que `golpeDeApoioUtil` NAO precisa saber deste golpe, ao contrario do
+    // leech_seed: estes tem poder proprio e a fila os usa como golpe de dano.
+    if (GOLPES_QUE_PRENDEM.has(ability.id) && !(target.presoAte && target.presoAte > 0)) {
+      target.presoAte = PRESO_DURACAO_SEGUNDOS(world.rng)
+    }
   }
 
   // FOCUS ENERGY (self-target): soma +2 num contador PARALELO de estagio de
