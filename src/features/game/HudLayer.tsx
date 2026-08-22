@@ -34,6 +34,7 @@
 // Um backdrop que capturasse o toque faria trocar de tela exigir dois toques.
 import { useRef } from 'react'
 import { StatusRail } from '@/components/hud/StatusRail'
+import { ReservasRail } from '@/components/hud/ReservasRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
 import { SalaChip } from '@/components/hud/SalaChip'
 import { ChatLog } from '@/components/toasts/ChatLog'
@@ -64,10 +65,23 @@ export function HudLayer() {
     <>
       {/* Topo: trilho + o que for contextual embaixo dele. Uma coluna so, pra
           o chip de sala e o de evolucao empurrarem em vez de sobrepor. */}
-      <div className="absolute inset-x-[.5em] top-[.5em] z-20 flex flex-col items-center gap-[.4em]">
+      {/* `items-start`, nao `items-center` (PH-83): o `max-w-[64em]` de baixo
+          impede o trilho de esticar em tela ultralarga, mas centralizado ele
+          empurrava a coluna inteira pra dentro assim que a janela passava de
+          64em — 112px em 1440, 352px em 1920, 672px em 2560. Em monitor grande
+          o cabecalho do POKE aparecia no MEIO da tela em vez do canto. Alinhar
+          a esquerda mantem o teto de largura e devolve o canto. */}
+      <div className="absolute inset-x-[.5em] top-[.5em] z-20 flex flex-col items-start gap-[.4em]">
         <div className="flex w-full max-w-[64em] flex-col gap-[.4em]">
           <StatusRail />
           <SalaChip />
+          {/* Trilho de reservas: mesma coluna do trilho de status, e nao uma
+              ancora propria na borda esquerda. A ancora foi tentada uma vez
+              (`ActivePokeCard`, ver o cabecalho deste arquivo) e cobria o HP em
+              390px. Aqui ele empurra em vez de sobrepor, e continua no canto
+              superior esquerdo porque o proprio componente se alinha a esquerda
+              dentro da linha. */}
+          <ReservasRail />
         </div>
       </div>
 
