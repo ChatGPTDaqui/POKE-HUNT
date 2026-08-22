@@ -333,7 +333,12 @@ export interface MensagemCorreio {
   de_id: string | null
   de_nome: string
   tipo: 'texto' | 'pedido_amizade' | 'sistema'
-  assunto: string
+  /**
+   * NULO em mensagem de conversa (PH-81): conversa nao tem assunto, carta
+   * tinha. Continua preenchido em aviso de sistema e pedido de amizade, que
+   * sao avisos com titulo e nao um fio entre duas pessoas.
+   */
+  assunto: string | null
   corpo: string
   estado: 'pendente' | 'aceito' | 'recusado' | 'lido'
   created_at: string
@@ -341,9 +346,74 @@ export interface MensagemCorreio {
   anexo_itens?: AnexoItemCorreio[]
   /** Carimbo de coleta — presente significa "ja recebido". */
   anexo_coletado_em?: string | null
+  /**
+   * Exclusao e por lado e SOFT (PH-74): cada ponta some com a mensagem da
+   * propria caixa sem tirar da outra. Por isso duas colunas em vez de um
+   * `delete` ou de um unico booleano.
+   */
+  excluido_destinatario_em?: string | null
+  excluido_remetente_em?: string | null
+  para_id?: string
+  /**
+   * Nome de quem RECEBEU. Nao existe coluna pra isso (`de_nome` e desnormalizado
+   * mas `para_nome` nao), entao o client resolve por `treinadores_publico` so na
+   * caixa de enviados, que e a unica tela que precisa mostrar o destinatario.
+   */
+  para_nome?: string
 }
 
 export interface AmigoRemoto { userId: string; nome: string; nivel: number }
+
+/** POKE que o amigo esta usando agora — so o suficiente pro card, sem stats. */
+export interface PokeAtivoDoAmigo {
+  speciesId: string
+  nivel: number
+  shiny: boolean
+}
+
+/**
+ * Amigo com tudo que a lista precisa numa consulta so (RPC
+ * `amigos_detalhados`). Junta o que antes exigiria 4 idas ao banco:
+ * `treinadores_publico`, `game_sessions` (online), `pokemon_instances` (POKE
+ * ativo) e a contagem de DM nao lida.
+ */
+export interface AmigoDetalhado extends AmigoRemoto {
+  online: boolean
+  pokeAtivo: PokeAtivoDoAmigo | null
+  naoLidas: number
+}
+
+export interface BloqueadoRemoto { userId: string; nome: string }
+
+/** Uma linha do fio de conversa privada entre dois amigos. */
+export interface MensagemDM {
+  id: string
+  de_id: string
+  para_id: string
+  corpo: string
+  created_at: string
+  read_at: string | null
+}
+
+/**
+ * Um CONTATO na lista de conversas (PH-81) — um registro por interlocutor, nao
+ * por mensagem. Vem pronto da RPC `conversas`, que resolve num lugar so o que
+ * a tela precisaria juntar de quatro: a ultima mensagem do fio, a contagem de
+ * nao lidas, se ha anexo esperando coleta, e se o contato esta online.
+ */
+export interface ConversaResumo {
+  userId: string
+  nick: string
+  ultimoTrecho: string
+  ultimaEm: string
+  /** Ultima do fio foi minha — a lista prefixa "Voce:" quando verdadeiro. */
+  ultimaMinha: boolean
+  naoLidas: number
+  /** Quantas mensagens deste contato tem anexo ainda nao coletado. */
+  anexosPendentes: number
+  online: boolean
+  bloqueado: boolean
+}
 
 // Ranking/perfil/mercado/chat/correio saíram daqui na migração RPC-everything
 // (ver acoesRpc.ts, mercadoRpc.ts, chatRealtime.ts, correioRealtime.ts,
