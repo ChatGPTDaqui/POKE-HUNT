@@ -1,4 +1,6 @@
-// Tooltip de golpe: tipo, categoria, PP, cooldown, area e descricao.
+// Tooltip de golpe: tipo, categoria, PP, cooldown, area, descricao e os EFEITOS
+// com numero (chance de status, estagio de atributo, dreno, flinch, critico —
+// ver `efeitosDoGolpe`).
 //
 // A categoria e resolvida com o POKE em maos (`resolveAbilityCategory`) porque
 // o golpe de nivel 50 tem categoria `dynamic` — ela depende de qual atributo do
@@ -6,6 +8,7 @@
 import type { ReactNode } from 'react'
 import {
   AOE_RADIUS,
+  CLIMA_DO_GOLPE,
   DANO_SEM_PODER_BASE,
   OHKO_DESLIGADO,
   isDamagingAbility,
@@ -19,6 +22,8 @@ import {
   MOVE_DESCRIPTIONS,
   golpeTemEfeitoReal,
 } from '@/data/moveDescriptions'
+import { ROTULO_ESTAGIO } from '@/data/statLabels'
+import { nomeDoStatus } from '@/data/statusEffects'
 import { colorForType } from '@/data/typeColors'
 import type { PokeInstance } from '@/data/pokes'
 import { Explicacao } from './Explicacao'
@@ -29,6 +34,59 @@ import { Explicacao } from './Explicacao'
 // `golpeTemEfeitoReal` (data/moveDescriptions.ts), que decide se o aviso logo
 // abaixo aparece.
 const ROTULO_CATEGORIA: Record<string, string> = { physical: 'Fisico', special: 'Especial', status: 'Status' }
+
+/**
+ * Os efeitos do golpe COM NÚMERO, lidos do próprio objeto `Ability` — o mesmo
+ * dado que o motor de combate consome.
+ *
+ * POR QUE ISTO EXISTE (PH-71): até aqui a ficha mostrava tipo, categoria, dano
+ * base, precisão, PP, recarga e área — e depois a descrição em prosa, escrita à
+ * mão, como ÚNICA informação sobre o que o golpe faz. Chance de status, estágios
+ * de atributo, percentual de dreno, chance de flinch, estágio de crítico: nada
+ * disso aparecia na tela, mesmo estando no dado. O jogador escolhia os 4 slots
+ * com base num texto que nada verificava, e foi assim que 479 golpes acumularam
+ * divergência sem ninguém notar.
+ *
+ * Ler do dado é o ponto: esta lista NÃO PODE divergir do combate, porque é a
+ * mesma fonte. Texto em prosa continua existindo, mas para o sabor do golpe, não
+ * para os números.
+ */
+export function efeitosDoGolpe(ability: Ability): string[] {
+  const efeitos: string[] = []
+
+  if (ability.status) {
+    const chance = ability.statusChance ?? 100
+    efeitos.push(`${nomeDoStatus(ability.status)}${chance < 100 ? ` (${chance}%)` : ''}`)
+  }
+
+  for (const mudanca of ability.statChanges ?? []) {
+    const chance = ability.statChance ?? 100
+    const sinal = mudanca.estagios > 0 ? '+' : ''
+    const alvo = ability.statTarget === 'self' ? 'em si' : 'no alvo'
+    efeitos.push(
+      `${ROTULO_ESTAGIO[mudanca.stat]} ${sinal}${mudanca.estagios} ${alvo}${chance < 100 ? ` (${chance}%)` : ''}`,
+    )
+  }
+
+  // Dreno e recuo dividem `drainPercent` — o SINAL e que separa os dois (ver
+  // combatSystem.ts). Mostrar "50%" sem dizer de que e o percentual foi
+  // exatamente o mal-entendido que abriu esta issue: dreno e do DANO CAUSADO,
+  // nao do HP do alvo.
+  if (ability.drainPercent) {
+    const p = Math.abs(ability.drainPercent)
+    efeitos.push(ability.drainPercent > 0
+      ? `Cura ${p}% do dano causado`
+      : `Recuo: ${p}% do dano causado`)
+  }
+  if (ability.healPercent) efeitos.push(`Cura ${ability.healPercent}% do HP máximo`)
+  if (ability.flinchChance) efeitos.push(`${ability.flinchChance}% de tirar o turno do alvo`)
+  if (ability.critStages) efeitos.push('Chance de crítico maior')
+  if (ability.hazard) efeitos.push('Armadilha no campo inimigo')
+  const clima = CLIMA_DO_GOLPE[ability.id]
+  if (clima) efeitos.push(`Muda o clima para ${clima}`)
+
+  return efeitos
+}
 
 export function descricaoDoGolpe(ability: Ability): string {
   const pronta = MOVE_DESCRIPTIONS[ability.id]
@@ -55,6 +113,7 @@ export function AbilityTooltip({
   const categoria = poke ? resolveAbilityCategory(ability, poke) : ability.category
   const cor = colorForType(ability.type)
   const descricao = descricaoDoGolpe(ability)
+  const efeitos = efeitosDoGolpe(ability)
   const semDano = ability.power <= 0 && !golpeTemEfeitoReal(ability)
   // Golpe de regra propria: `power` 0 no catalogo, dano real vindo de
   // combatSystem#specialDamageFor. "Dano base 0" sozinho le como golpe fraco.
@@ -96,6 +155,19 @@ export function AbilityTooltip({
           </div>
 
           <span className="opacity-85">{descricao}</span>
+
+          {/* Efeitos COM NUMERO, do proprio dado do golpe — ver efeitosDoGolpe.
+              Ficam depois da prosa de proposito: a prosa diz o que o golpe e, e
+              estas linhas dizem o que ele faz de fato neste jogo. */}
+          {efeitos.length > 0 && (
+            <div className="flex flex-wrap gap-[.3em]">
+              {efeitos.map((efeito) => (
+                <span key={efeito} className="rounded-[.3em] bg-n800 px-[.4em] py-[.05em] text-[.8em]">
+                  {efeito}
+                </span>
+              ))}
+            </div>
+          )}
           {/* So golpe SEM efeito real nenhum implementado aqui (nem dano, nem
               status/estagio/clima/escudo/etc) — ver golpeTemEfeitoReal. */}
           {semDano && <span className="text-[.85em] text-warn">{AVISO_SEM_DANO}</span>}

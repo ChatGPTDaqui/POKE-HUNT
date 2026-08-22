@@ -18,8 +18,10 @@ vi.mock('./servidor', async () => {
 
 import { ErroServidor, servidor } from './servidor'
 import {
-  abrirSessaoDeHunt, liquidar, pararFlushPeriodico, registrarEncerramentoDeSessao, INTERVALO_FLUSH_MS,
+  abrirSessaoDeHunt, liquidar, pararFlushPeriodico, registrarEncerramentoDeSessao,
+  INTERVALO_FLUSH_MS, INTERVALO_FLUSH_MAX_MS,
 } from './autoridade'
+import { LIMIAR_OFFLINE_SEGUNDOS } from '@/engine/simulation'
 import { useToastStore } from '@/stores/toastStore'
 
 const mock = servidor as unknown as {
@@ -125,5 +127,78 @@ describe('liquidar() com 409 (nenhuma sessao aberta)', () => {
     mock.flush.mockClear()
     await vi.advanceTimersByTimeAsync(INTERVALO_FLUSH_MS)
     expect(mock.flush).toHaveBeenCalled()
+  })
+})
+
+// O intervalo de flush e ADAPTATIVO (PH-62). Cada flush e uma invocacao de Edge
+// Function e o plano Free tem 500 mil por mes: a 30s fixos, ~120 por hora por
+// jogador, o que num jogo idle (jogador sempre ligado) da teto de ~5 jogadores
+// simultaneos. Janela sem evento nao precisa desse ritmo — a janela do servidor
+// e por tempo decorrido, entao esperar mais nao perde progresso.
+describe('ritmo adaptativo do flush', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.clearAllMocks()
+    pararFlushPeriodico()
+  })
+  afterEach(() => {
+    pararFlushPeriodico()
+    vi.useRealTimers()
+  })
+
+  const janelaVazia = { estado: {}, resumo: { kills: 0, gold: 0, xp: 0 } }
+  const janelaProdutiva = { estado: {}, resumo: { kills: 3, gold: 120, xp: 40 } }
+
+  it('janela vazia dobra a espera; qualquer evento volta pro piso', async () => {
+    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'route_46' })
+    mock.flush.mockResolvedValue(janelaVazia)
+    await abrirSessaoDeHunt('route_46', 'poke-1')
+
+    // 1o tique no piso.
+    await vi.advanceTimersByTimeAsync(INTERVALO_FLUSH_MS)
+    expect(mock.flush).toHaveBeenCalledTimes(1)
+
+    // Depois de uma janela vazia a espera dobrou: no piso NAO ha tique.
+    await vi.advanceTimersByTimeAsync(INTERVALO_FLUSH_MS)
+    expect(mock.flush).toHaveBeenCalledTimes(1)
+    await vi.advanceTimersByTimeAsync(INTERVALO_FLUSH_MS)
+    expect(mock.flush).toHaveBeenCalledTimes(2)
+
+    // Janela produtiva: o proximo tique volta a acontecer no piso.
+    mock.flush.mockResolvedValue(janelaProdutiva)
+    await vi.advanceTimersByTimeAsync(INTERVALO_FLUSH_MS * 4)
+    const apos = mock.flush.mock.calls.length
+    await vi.advanceTimersByTimeAsync(INTERVALO_FLUSH_MS)
+    expect(mock.flush.mock.calls.length).toBeGreaterThan(apos)
+  })
+
+  it('a espera nunca passa do teto, que fica abaixo do limiar de ausencia', async () => {
+    // Acima de LIMIAR_OFFLINE_SEGUNDOS (120s) o servidor trata a janela como
+    // AUSENCIA — modo pessimista e piso de 50%. Um teto que atravessasse essa
+    // linha faria jogo ao vivo ser creditado como farm offline.
+    expect(INTERVALO_FLUSH_MAX_MS).toBeLessThan(LIMIAR_OFFLINE_SEGUNDOS * 1000)
+
+    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'route_46' })
+    mock.flush.mockResolvedValue(janelaVazia)
+    await abrirSessaoDeHunt('route_46', 'poke-1')
+
+    // Meia hora de janelas vazias: o intervalo satura no teto em vez de crescer
+    // sem limite (o que deixaria a hunt sem creditar nada por muito tempo).
+    await vi.advanceTimersByTimeAsync(30 * 60 * 1000)
+    const chamadasNaMeiaHora = mock.flush.mock.calls.length
+    const minimoNoTeto = Math.floor((30 * 60 * 1000) / INTERVALO_FLUSH_MAX_MS) - 1
+    expect(chamadasNaMeiaHora).toBeGreaterThanOrEqual(minimoNoTeto)
+  })
+
+  it('entrar numa hunt nova volta pro piso, sem herdar a espera esticada', async () => {
+    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'route_46' })
+    mock.flush.mockResolvedValue(janelaVazia)
+    await abrirSessaoDeHunt('route_46', 'poke-1')
+    await vi.advanceTimersByTimeAsync(INTERVALO_FLUSH_MS * 6)
+
+    await abrirSessaoDeHunt('mata_faixa1', 'poke-1')
+    mock.flush.mockClear()
+    await vi.advanceTimersByTimeAsync(INTERVALO_FLUSH_MS)
+    expect(mock.flush).toHaveBeenCalledTimes(1)
   })
 })

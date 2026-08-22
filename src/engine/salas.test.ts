@@ -501,3 +501,90 @@ describe('espera pela autoridade tem teto', () => {
     expect(world.salaEsperaDaAutoridade).toBe(0)
   })
 })
+
+// A predicao do fallback nao pode virar um trilho paralelo. Estes dois casos
+// sao o bug relatado como "o sub-bioma troca do nada": depois de uma predicao
+// local, TODA sala do servidor caia na protecao anti-regressao e era
+// descartada, e o cliente seguia sorteando sozinho a cada teto de espera — com
+// o pool e o loot creditados vindo de outra sala, sem nada na tela denunciando.
+describe('predicao local cede pra autoridade', () => {
+  beforeEach(() => {
+    useGameStateStore.getState().resetToDefaults()
+  })
+
+  /** Leva o mundo ate o fallback local disparar, e devolve a sala predita. */
+  function predizerLocalmente(world: WorldState) {
+    const gameState = useGameStateStore.getState()
+    world.salaSobAutoridade = true
+    world.sala!.abates = ABATES_POR_SALA
+    world.enemies = []
+    world.respawnTimer = 999
+    const ticks = Math.floor((ESPERA_MAXIMA_PELA_AUTORIDADE + SALA_TRANSITION_COUNTDOWN + 1) / 0.1)
+    for (let i = 0; i < ticks; i++) stepWorld(world, 0.1, gameState, { silent: true })
+    return world.sala!
+  }
+
+  it('sala ANTERIOR do servidor e aceita quando a sala em vigor e palpite local', () => {
+    const world = mundo(45)
+    const primeira = { ...world.sala! }
+    const predita = predizerLocalmente(world)
+    expect(predita.indice).toBe(1)
+    expect(world.salaPredita).toBe(true)
+
+    // O servidor nunca saiu da sala 0 — e a sala dele que vale.
+    const doServidor = { indice: 0, chave: primeira.chave, abates: ABATES_POR_SALA, ciclos: 0 }
+    reconciliarSalaDaAutoridade(world, doServidor)
+    expect(world.salaPendente).toEqual(doServidor)
+    expect(world.salaCountdownRemaining).toBe(SALA_TRANSITION_COUNTDOWN)
+    expect(world.salaPredita).toBe(false)
+
+    aplicarTransicaoDeSala(world, world.mapDef!.id)
+    expect(world.sala!.indice).toBe(0)
+    expect(world.sala!.chave).toBe(primeira.chave)
+  })
+
+  it('sem predicao envolvida, sala anterior do servidor continua ignorada', () => {
+    const world = mundo(45)
+    world.salaSobAutoridade = true
+    const outra = Object.keys(POOL_POR_SALA[HUNT]).find((c) => c !== world.sala!.chave)!
+    reconciliarSalaDaAutoridade(world, { indice: 3, chave: outra, abates: 0, ciclos: 0 })
+    aplicarTransicaoDeSala(world, world.mapDef!.id)
+    expect(world.sala!.indice).toBe(3)
+    expect(world.salaPredita).toBe(false)
+
+    // Flush cobrindo uma janela que comecou antes da troca: o caso legitimo que
+    // a protecao anti-regressao existe pra barrar.
+    reconciliarSalaDaAutoridade(world, { indice: 1, chave: outra, abates: 5, ciclos: 0 })
+    expect(world.salaPendente).toBeNull()
+    expect(world.sala!.indice).toBe(3)
+  })
+
+  it('o fallback vale por UMA sala: nao arma a segunda sem confirmacao', () => {
+    const world = mundo(45)
+    const gameState = useGameStateStore.getState()
+    predizerLocalmente(world)
+    expect(world.sala!.indice).toBe(1)
+
+    // Quota da sala predita fecha e a espera estoura de novo — e nada acontece,
+    // porque a predicao anterior segue sem confirmacao do servidor.
+    world.sala!.abates = ABATES_POR_SALA
+    const ticks = Math.floor((ESPERA_MAXIMA_PELA_AUTORIDADE * 2 + SALA_TRANSITION_COUNTDOWN + 1) / 0.1)
+    for (let i = 0; i < ticks; i++) stepWorld(world, 0.1, gameState, { silent: true })
+    expect(world.sala!.indice).toBe(1)
+    expect(world.salaPendente).toBeNull()
+  })
+
+  it('servidor confirmando a MESMA sala destrava o fallback de novo', () => {
+    const world = mundo(45)
+    const gameState = useGameStateStore.getState()
+    const predita = predizerLocalmente(world)
+
+    reconciliarSalaDaAutoridade(world, { ...predita, abates: ABATES_POR_SALA })
+    expect(world.salaPredita).toBe(false)
+
+    const ticks = Math.floor((ESPERA_MAXIMA_PELA_AUTORIDADE + SALA_TRANSITION_COUNTDOWN + 1) / 0.1)
+    for (let i = 0; i < ticks; i++) stepWorld(world, 0.1, gameState, { silent: true })
+    expect(world.sala!.indice).toBe(2)
+    expect(world.salaPredita).toBe(true)
+  })
+})
