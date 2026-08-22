@@ -365,6 +365,21 @@ export interface WorldEffect {
   laneSize: number
   ownerId: string | null // era `owner` (referencia direta), ver nota do topo
   lane: number
+  // Entidade cuja posicao este efeito ACOMPANHA enquanto vive. Diferente de
+  // `ownerId`: aquele e a coluna de TEXTO (numero de dano, nome do golpe) e
+  // reserva uma raia; este so arrasta a arte junto com o POKE e nao reserva
+  // nada. Sem ele a arte do golpe fica congelada onde a entidade estava no
+  // instante do impacto e, como o efeito dura 1,0-1,2s, ela descola de quem
+  // esta andando (ver o laco de tick de efeitos em combatSystem.ts).
+  seguirId?: string
+  // Posicao da entidade seguida no ultimo tick. O laco translada o efeito pelo
+  // DESLOCAMENTO dela (nao reancorando por offset fixo) pra nao precisar saber
+  // o que cada campo de coordenada significa em cada tipo de efeito: `x`/`y` e
+  // `targetX`/`targetY` andam juntos, seja qual for a folga que o call-site
+  // tenha somado. Se a entidade sumir do mundo antes do fim, o efeito
+  // simplesmente para de andar e termina onde estava.
+  seguirUltimoX?: number
+  seguirUltimoY?: number
 }
 
 export interface PendingHit {
