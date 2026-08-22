@@ -106,3 +106,64 @@ describe('controller.evolvePoke — round-trip inteiro guarda reentrancia (PH-13
     expect(aindaKadabra?.speciesId).toBe('kadabra')
   })
 })
+
+// PRESO (PH-72): Wrap/Bind/Fire Spin e companhia travam a troca de POKE
+// enquanto duram. O guard e de CLIENTE, por decisao registrada na issue:
+// `definirAtivo` e RPC e o estado volatil de combate vive so no worldStore
+// efemero, entao o servidor nao tem como validar sem receber estado de combate
+// em toda troca.
+//
+// Os dois caminhos de sair de campo estao cobertos aqui. O segundo e o que
+// tornaria o primeiro decorativo: tirar da equipe o POKE preso e a MESMA fuga
+// que trocar por outro.
+describe('controller — POKE preso nao sai de campo (PH-72)', () => {
+  async function comJogadorPreso(presoAte: number) {
+    const { useWorldStore } = await import('@/stores/worldStore')
+    const { buildMapWorld } = await import('./simulation')
+    const gameState = useGameStateStore.getState()
+    const rng = createRng(21)
+    const emCampo = createPokeInstance(rng, 'charmander', 30)
+    const reserva = createPokeInstance(rng, 'squirtle', 30)
+    gameState.addPokeToTeam(emCampo)
+    gameState.addPokeToTeam(reserva)
+    // `addPokeToTeam`, e nao `addCapturedPoke`: aquela poe na MOCHILA (toda
+    // captura entra por la), e o teste precisa dos dois na EQUIPE.
+    const world = buildMapWorld('route_46', useGameStateStore.getState().team[0], {
+      rng, counters: { entity: 1, effect: 1, pendingHit: 1 },
+    })
+    world.player!.presoAte = presoAte
+    useWorldStore.getState().setWorld(world)
+    return useGameStateStore.getState().team
+  }
+
+  it('trocar de POKE nao chega nem a pedir a acao ao servidor', async () => {
+    pedirAcaoMock.mockResolvedValue(true)
+    const { controller } = await import('./controller')
+    const team = await comJogadorPreso(8)
+    expect(team.length).toBeGreaterThan(1)
+
+    controller.setActiveTeamIndex(1)
+
+    expect(pedirAcaoMock).not.toHaveBeenCalled()
+  })
+
+  it('tirar da equipe o POKE preso tambem e bloqueado (senao o bloqueio acima seria decorativo)', async () => {
+    pedirAcaoMock.mockResolvedValue(true)
+    const { controller } = await import('./controller')
+    const team = await comJogadorPreso(8)
+
+    controller.removeFromTeam(team[0].uid)
+
+    expect(pedirAcaoMock).not.toHaveBeenCalled()
+  })
+
+  it('com o timer zerado, a troca segue normalmente', async () => {
+    pedirAcaoMock.mockResolvedValue(true)
+    const { controller } = await import('./controller')
+    await comJogadorPreso(0)
+
+    controller.setActiveTeamIndex(1)
+
+    expect(pedirAcaoMock).toHaveBeenCalled()
+  })
+})

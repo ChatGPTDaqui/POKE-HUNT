@@ -355,7 +355,17 @@ function tiposEfetivosParaEfetividade(entity: WorldEntity, species: { type: Elem
 // uma vez por uso, nao importa quantos inimigos o AOE realmente acerte (ver
 // branch isAoeVisual de resolveHit abaixo, que ja dispara exatamente uma
 // vez por uso).
-const SELF_DESTRUCT_ABILITY_KEYS = new Set(['explosion', 'selfdestruct'])
+// A chave era `selfdestruct` e ficou ORFA na migracao pro catalogo do Ultra
+// Sun, que renomeou pra `self_destruct` (PH-73). Enquanto durou, Autodestruicao
+// causava os 200 de poder EM AREA e quem usou nao desmaiava — o custo inteiro
+// do golpe desaparecido, sem erro em lugar nenhum. O mesmo rename ja tinha
+// furado a lista de golpes de area (ver o comentario de AOE_ABILITY_KEYS em
+// data/abilities.ts); esta lista passou batida na mesma limpeza.
+//
+// EXPORTADO pra combatSystem.chavesDoCatalogo.test.ts poder reprovar chave
+// orfa. Lista de id escrita a mao neste arquivo tem que entrar naquele teste —
+// e a unica coisa que impede o proximo rename de repetir isto em silencio.
+export const SELF_DESTRUCT_ABILITY_KEYS = new Set(['explosion', 'self_destruct'])
 const SELF_DESTRUCT_HP_LOSS_PERCENT = 0.5
 
 // Escudos ("Screens"): golpe -> chave de `Escudos` que ele liga em quem usou.
@@ -370,7 +380,7 @@ const SELF_DESTRUCT_HP_LOSS_PERCENT = 0.5
 // pipeline de hit, sem ordem de turno), entao nao ha nada pra quick_guard
 // bloquear. Fica no catalogo/kit como golpe de status comum, mas sem
 // nenhum efeito mecanico — golpe morto de verdade, e nao um esquecimento.
-const ESCUDO_ABILITIES: Record<string, keyof Escudos> = {
+export const ESCUDO_ABILITIES: Record<string, keyof Escudos> = {
   reflect: 'reflect',
   light_screen: 'lightScreen',
   safeguard: 'safeguard',
@@ -392,6 +402,24 @@ const ENCORE_DURATION = TURNO_SEGUNDOS * 3 // Encore: 3 turnos forcando repetir 
 // Torment nos jogos reais dura ate o POKE trocar de campo -- sem troca nesta
 // hunt continua, 3 turnos e a aproximacao (mesma janela de Taunt/Encore).
 const TORMENT_DURATION = TURNO_SEGUNDOS * 3
+
+// PRENDER (PH-72): Wrap, Bind, Fire Spin, Clamp, Whirlpool, Sand Tomb,
+// Infestation. Os 7 chegam do catalogo como `damage-ailment` com `status: null`
+// — o efeito de prender foi descartado na geracao e sobrou so o dano.
+//
+// O QUE "PRESO" SIGNIFICA AQUI, e SO ISTO: o POKE preso nao pode ser trocado por
+// outro da equipe enquanto durar. Nada de dano por turno — os 7 golpes ja tem
+// poder proprio, e dano extra nao foi pedido.
+//
+// EXPORTADO: a tela precisa da lista pra explicar o bloqueio, e o teste pra
+// conferir a lista contra o catalogo.
+export const GOLPES_QUE_PRENDEM = new Set([
+  'wrap', 'bind', 'fire_spin', 'clamp', 'whirlpool', 'sand_tomb', 'infestation',
+])
+// 4 ou 5 turnos, como nos jogos (Gen V+ sem Grip Claw). Um sorteio por
+// aplicacao, do mesmo `rng` que os dois lados compartilham.
+const PRESO_DURACAO_SEGUNDOS = (rng: Rng): number =>
+  TURNO_SEGUNDOS * (nextFloat(rng) < 0.5 ? 4 : 5)
 // Spite: "reduz 4 PP do ultimo golpe" mapeado pro cooldown deste motor (PP e
 // cooldown sao o mesmo conceito aqui, ver TURNO_SEGUNDOS acima) -- 4 PP vira
 // 4 turnos de cooldown extra.
@@ -617,7 +645,7 @@ function heavySlamPower(attackerPoke: PokeInstance, defenderPoke: PokeInstance):
   return 40
 }
 
-const DYNAMIC_POWER_ABILITIES: Record<string, (rng: Rng, attackerPoke: PokeInstance, defenderPoke: PokeInstance, attackerEntity: WorldEntity, defenderEntity: WorldEntity) => number> = {
+export const DYNAMIC_POWER_ABILITIES: Record<string, (rng: Rng, attackerPoke: PokeInstance, defenderPoke: PokeInstance, attackerEntity: WorldEntity, defenderEntity: WorldEntity) => number> = {
   magnitude: (rng) => rollMagnitudePower(rng),
   reversal: (_rng, attackerPoke) => hpRatioPower(attackerPoke),
   flail: (_rng, attackerPoke) => hpRatioPower(attackerPoke),
@@ -650,7 +678,7 @@ function counterDamage(attackerEntity: WorldEntity, category: 'physical' | 'spec
   return null
 }
 
-const FIXED_DAMAGE_ABILITIES: Record<string, (attackerPoke: PokeInstance, defenderPoke: PokeInstance, attackerEntity: WorldEntity, rng: Rng) => number | null> = {
+export const FIXED_DAMAGE_ABILITIES: Record<string, (attackerPoke: PokeInstance, defenderPoke: PokeInstance, attackerEntity: WorldEntity, rng: Rng) => number | null> = {
   // horn_drill/fissure continuam aqui (a regra existe e funciona se o golpe
   // chegar), mas `isDamagingAbility` nao os deixa ser escolhidos enquanto nao
   // houver precisao — ver a nota em data/abilities.ts.
@@ -673,6 +701,28 @@ const FIXED_DAMAGE_ABILITIES: Record<string, (attackerPoke: PokeInstance, defend
   // Final Gambit: dano igual ao HP que o usuario tem. O CUSTO nao esta aqui, e
   // sim no bloco de auto-dano de resolveHit.
   final_gambit: (attackerPoke) => Math.max(1, attackerPoke.hp),
+}
+
+// GOLPE DE MULTIPLOS ACERTOS (PH-68): quantas vezes este uso vai bater.
+//
+// Distribuicao da Gen V+ (a mesma do Ultra Sun, que e a base de dados deste
+// jogo): 2 e 3 acertos com 3/8 de chance cada, 4 e 5 com 1/8 cada. Golpe de
+// contagem FIXA (min === max, ex. Double Kick) nao sorteia nada — e isso
+// importa, porque um sorteio a mais aqui dessincronizaria a predicao do cliente
+// da re-simulacao do servidor, que compartilham este mesmo `rng`.
+const CHANCE_ACUMULADA_DE_ACERTOS: [number, number][] = [
+  [2, 3 / 8], [3, 6 / 8], [4, 7 / 8], [5, 1],
+]
+function quantidadeDeAcertos(rng: Rng, ability: Ability): number {
+  const min = ability.minHits ?? 1
+  const max = ability.maxHits ?? 1
+  if (max <= 1) return 1
+  if (min === max) return min
+  const sorteio = nextFloat(rng)
+  for (const [acertos, limite] of CHANCE_ACUMULADA_DE_ACERTOS) {
+    if (acertos >= min && acertos <= max && sorteio < limite) return acertos
+  }
+  return max
 }
 
 type SpecialDamage = { mode: 'dynamicPower'; power: number } | { mode: 'fixed'; amount: number } | null
@@ -766,7 +816,16 @@ function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: W
   // contra um Thick Fat que corta o dano dela pela metade.
   dmg *= multiplicadorDeDanoRecebidoPorTrait(defenderTraitEstimate, ability, effectivenessMultiplier)
   dmg *= multiplicadorDeDanoCausadoPorTrait(attackerTraitEstimate, effectivenessMultiplier)
-  return dmg
+  // GOLPE DE MULTIPLOS ACERTOS (PH-68): a estimativa e por ACERTO, e o `power`
+  // do catalogo desses golpes tambem. Sem multiplicar pela media de acertos, a
+  // IA do selvagem ranquearia Fury Swipes (18 por acerto) como o pior golpe do
+  // kit dele, e o overkill-guard da fila do jogador acharia que nenhum golpe
+  // pronto mata o alvo quando o multi-acerto mataria. Media da distribuicao de
+  // `quantidadeDeAcertos`: 3 acertos pro 2-5, e min pro de contagem fixa.
+  const minHits = ability.minHits ?? 1
+  const maxHits = ability.maxHits ?? 1
+  const acertosMedios = maxHits <= 1 ? 1 : (minHits === maxHits ? minHits : 3)
+  return dmg * acertosMedios
 }
 
 // Ate que estagio a IA se da ao trabalho de buffar/debuffar.
@@ -833,7 +892,7 @@ function somaDeEstagios(entity: WorldEntity): number {
  * 8s por causa disso. Contar usos aqui seria inventar um segundo significado pro
  * mesmo campo.
  */
-const PROTECAO_ABILITY_KEYS = new Set(['protect', 'detect', 'endure'])
+export const PROTECAO_ABILITY_KEYS = new Set(['protect', 'detect', 'endure'])
 
 /**
  * Chance de o golpe de protecao FUNCIONAR agora, dado quantas vezes seguidas ele
@@ -1831,7 +1890,7 @@ function creditarMorteSeNecessario(entity: WorldEntity, defeatedEnemyIds: string
 // reais, ignora Protect). Protect/Detect do ALVO nao bloqueia nenhum
 // destes — mesma excecao dos jogos reais pro Psych Up, generalizada pros
 // golpes de auto-alvo deste catalogo.
-const PROTECT_BYPASS_ABILITY_IDS = new Set([
+export const PROTECT_BYPASS_ABILITY_IDS = new Set([
   'endure', 'protect', 'detect', 'destiny_bond', 'rest', 'belly_drum',
   'acupressure', 'aromatherapy', 'heal_bell', 'haze', 'psych_up',
   'perish_song', 'rage_powder',
@@ -2037,38 +2096,57 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     return
   }
 
-  const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null)
+  // GOLPE DE MULTIPLOS ACERTOS (PH-68): o bloco de DANO roda uma vez por
+  // acerto — cada um com formula, critico e efetividade proprios, como nos
+  // jogos. Todo o resto de `resolveHit` (habilidade que reage a hit, dreno,
+  // status, estagio, flinch) continua rodando UMA vez, com o TOTAL da
+  // sequencia. Golpe normal tem `acertos === 1` e passa por aqui igual a antes.
+  const acertos = quantidadeDeAcertos(world.rng, ability)
+  // `danoFinal` daqui pra baixo e o total da sequencia. Os usos posteriores
+  // dele sao todos `danoFinal > 0` ("este golpe causou dano?"), entao somar e o
+  // que preserva o significado com 1 ou com 5 acertos.
+  let danoFinal = 0
+  let danoCausado = 0
+  let houveCritico = false
+  for (let acerto = 0; acerto < acertos; acerto++) {
+    // Alvo caiu no acerto anterior: a sequencia para. Nos jogos e igual — os
+    // acertos restantes de um Fury Swipes nao saem depois do KO.
+    if (acerto > 0 && isDead(target)) break
+    const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null)
+    if (result.isCrit) houveCritico = true
 
-  // ENDURE / STURDY (Fase 12): sobrevive com 1 HP num golpe que mataria.
-  // Endure e um golpe (flag consumida no proximo hit recebido, mate ele ou
-  // nao); Sturdy e a MESMA mecanica sempre ativa via Trait, mas so em HP
-  // CHEIO — perde o efeito no primeiro hit que ja tirou HP, igual ao
-  // Multiscale acima.
-  let danoFinal = result.amount
-  const enduraGolpe = target.enduraAtiva === true
-  if (enduraGolpe) target.enduraAtiva = false
-  const sturdyTrait = !enduraGolpe
-    && traitDoPoke(target.poke) === 'sturdy'
-    && target.poke.hp === target.poke.stats.hp
-  const aguentou = (enduraGolpe || sturdyTrait) && danoFinal >= target.poke.hp && target.poke.hp > 0
-  if (aguentou) danoFinal = target.poke.hp - 1
+    // ENDURE / STURDY (Fase 12): sobrevive com 1 HP num golpe que mataria.
+    // Endure e um golpe (flag consumida no proximo hit recebido, mate ele ou
+    // nao); Sturdy e a MESMA mecanica sempre ativa via Trait, mas so em HP
+    // CHEIO — perde o efeito no primeiro hit que ja tirou HP, igual ao
+    // Multiscale acima.
+    let danoDoAcerto = result.amount
+    const enduraGolpe = target.enduraAtiva === true
+    if (enduraGolpe) target.enduraAtiva = false
+    const sturdyTrait = !enduraGolpe
+      && traitDoPoke(target.poke) === 'sturdy'
+      && target.poke.hp === target.poke.stats.hp
+    const aguentou = (enduraGolpe || sturdyTrait) && danoDoAcerto >= target.poke.hp && target.poke.hp > 0
+    if (aguentou) danoDoAcerto = target.poke.hp - 1
 
-  // Dano REALMENTE causado, limitado ao HP que o alvo tinha. `result.amount` e
-  // o numero cru da formula e pode passar MUITO do HP do alvo (um POKE Nivel 85
-  // batendo num Nivel 40 causa varias vezes a vida dele). E o que dreno e recuo
-  // precisam usar, como nos jogos: Double-Edge devolve 33% do que TIROU, nao
-  // 33% do que teria tirado num alvo infinito.
-  //
-  // BUG QUE ISTO CORRIGE: sem o teto, um golpe de recuo virava suicidio em
-  // qualquer hunt onde o jogador estivesse acima do nivel. Medido, custava um
-  // quarto das kills/hora no Nivel 85 — o POKE se matava sozinho.
-  const danoCausado = Math.min(danoFinal, target.poke.hp)
-  // Golpe de status causa 0 de dano — nao mostra "0" flutuando sobre o alvo
-  // nem registra "ultimo dano recebido" (Counter/Mirror Coat refletiriam nada).
-  if (danoFinal > 0) {
-    takeDamage(target, danoFinal, resolveAbilityCategory(ability, attacker.poke))
-    if (!silent) spawnDamageNumber(world, target, { ...result, amount: danoFinal })
-    if (aguentou && !silent) anunciarAguentou(world, target)
+    // Dano REALMENTE causado, limitado ao HP que o alvo tinha. `result.amount` e
+    // o numero cru da formula e pode passar MUITO do HP do alvo (um POKE Nivel 85
+    // batendo num Nivel 40 causa varias vezes a vida dele). E o que dreno e recuo
+    // precisam usar, como nos jogos: Double-Edge devolve 33% do que TIROU, nao
+    // 33% do que teria tirado num alvo infinito.
+    //
+    // BUG QUE ISTO CORRIGE: sem o teto, um golpe de recuo virava suicidio em
+    // qualquer hunt onde o jogador estivesse acima do nivel. Medido, custava um
+    // quarto das kills/hora no Nivel 85 — o POKE se matava sozinho.
+    danoCausado += Math.min(danoDoAcerto, target.poke.hp)
+    danoFinal += danoDoAcerto
+    // Golpe de status causa 0 de dano — nao mostra "0" flutuando sobre o alvo
+    // nem registra "ultimo dano recebido" (Counter/Mirror Coat refletiriam nada).
+    if (danoDoAcerto > 0) {
+      takeDamage(target, danoDoAcerto, resolveAbilityCategory(ability, attacker.poke))
+      if (!silent) spawnDamageNumber(world, target, { ...result, amount: danoDoAcerto })
+      if (aguentou && !silent) anunciarAguentou(world, target)
+    }
   }
 
   // HABILIDADES QUE REAGEM A LEVAR UM HIT (Justified, Rattled, Weak Armor,
@@ -2087,7 +2165,9 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     const categoriaBate = !reacao?.soFisico || ehFisico
     // ANGER POINT so dispara em CRITICO recebido — a unica das cinco com
     // gatilho proprio, entao o `if` extra em vez de mais um campo na tabela.
-    const gatilhoDeAngerPoint = traitDoAlvo !== 'anger_point' || result.isCrit
+    // Com golpe de multiplos acertos, QUALQUER acerto critico da sequencia
+    // serve de gatilho — nao so o ultimo.
+    const gatilhoDeAngerPoint = traitDoAlvo !== 'anger_point' || houveCritico
     if (reacao && tipoBate && categoriaBate && gatilhoDeAngerPoint) {
       const mudanca = aplicarEstagioUnico(target, reacao.stat as StatDeEstagio, reacao.estagios)
       if (mudanca && !silent) anunciarEstagios(world, target, [mudanca])
@@ -2369,6 +2449,20 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       if (!alvoEhGrass) target.seeded = { sourceId: attacker.id }
     }
     if (ability.id === 'nightmare') target.nightmareDot = true
+
+    // PRENDER (PH-72): Wrap/Bind/Fire Spin/Clamp/Whirlpool/Sand Tomb/
+    // Infestation. Os 7 vem do catalogo como `damage-ailment` com `status: null`
+    // — o efeito de prender foi descartado na geracao e sobrou o dano.
+    //
+    // Nao reaplica em alvo JA preso: nos jogos o golpe falha nesse caso, e aqui
+    // renovar o timer a cada uso faria o dano por turno virar infinito enquanto
+    // o golpe estivesse na fila. O dano do hit acontece de qualquer forma (o
+    // bloco de dano roda antes deste), entao nenhum turno e perdido — e por isso
+    // que `golpeDeApoioUtil` NAO precisa saber deste golpe, ao contrario do
+    // leech_seed: estes tem poder proprio e a fila os usa como golpe de dano.
+    if (GOLPES_QUE_PRENDEM.has(ability.id) && !(target.presoAte && target.presoAte > 0)) {
+      target.presoAte = PRESO_DURACAO_SEGUNDOS(world.rng)
+    }
   }
 
   // FOCUS ENERGY (self-target): soma +2 num contador PARALELO de estagio de
