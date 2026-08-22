@@ -4,12 +4,11 @@
 // mesma caixa que o resto, com dois botoes em vez de nenhum. Assim so existe um
 // lugar pra olhar quando alguem interage com voce — e o contador de nao lidas
 // cobre as duas coisas de uma vez.
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, Gift, UserPlus, X } from '@phosphor-icons/react'
 import { ErroServidor, detalheDeErro, type MensagemCorreio } from '@/data/remote/servidor'
 import * as correioRpc from '@/data/remote/correioRealtime'
-import { supabase } from '@/lib/supabase'
 import { useToastStore, type ToastErroDetalhe } from '@/stores/toastStore'
 import { getItem } from '@/data/items'
 import { itemIconUrl } from '@/data/sprites'
@@ -40,31 +39,18 @@ export function CorreioMenu() {
     staleTime: STALE_MS,
   })
 
-  // Realtime substitui o poll de 15s: qualquer INSERT/UPDATE nas MINHAS
-  // mensagens (pedido novo, resposta, mensagem de sistema) invalida a query.
+  // A ASSINATURA DE REALTIME NAO MORA MAIS AQUI. Ela subiu pra
+  // `hooks/usePendencias.ts#useCorreioAoVivo`, que roda enquanto o jogo esta
+  // aberto (o `ActionDock` do HUD sempre esta montado) — antes ela existia so
+  // com o Correio ABERTO, e era justamente por isso que o contador de pendencia
+  // dependia de um poll de 60s.
   //
-  // BUG REAL CORRIGIDO: `assinarCorreioAoVivo` usa `supabase.channel('correio-'+userId)`,
-  // nome fixo por usuario — chamar de novo com o mesmo nome ANTES do primeiro canal
-  // ser removido devolve o MESMO canal ja inscrito, e `.on()` nele estoura
-  // ("cannot add postgres_changes callbacks... after subscribe()"). Como a
-  // inscricao so acontece dentro do `.then()` de `getSession()` (gap assincrono),
-  // o StrictMode do React (ou so um remount rapido de verdade) roda o efeito de
-  // novo ANTES desse `.then()` resolver — a limpeza da 1a rodada ainda achava
-  // `parar` nulo (a inscricao nem tinha terminado) e nao desfazia nada; a 2a
-  // rodada inscrevia no mesmo canal ja vivo. `cancelado` fecha essa janela: se
-  // a limpeza ja rodou quando o `.then()` finalmente resolve, a inscricao nem
-  // comeca.
-  useEffect(() => {
-    let cancelado = false
-    let parar: (() => void) | null = null
-    void supabase.auth.getSession().then(({ data: sessao }) => {
-      if (cancelado) return
-      const userId = sessao.session?.user.id
-      if (!userId) return
-      parar = correioRpc.assinarCorreioAoVivo(userId, () => { void qc.invalidateQueries({ queryKey: ['correio'] }) })
-    })
-    return () => { cancelado = true; parar?.() }
-  }, [qc])
+  // Duas assinaturas ao mesmo tempo nao e opcao: `assinarCorreioAoVivo` usa
+  // `supabase.channel('correio-<uid>')`, nome fixo por usuario, e pedir o mesmo
+  // nome antes de remover o canal anterior devolve o canal JA inscrito — `.on()`
+  // nele lanca "cannot add postgres_changes callbacks after subscribe()". Este
+  // componente compartilha a `queryKey` ['correio'] com o contador, entao a
+  // invalidacao que o Realtime dispara la ja atualiza a tela aberta aqui.
 
   const adicionar = useMutation({
     mutationFn: (n: string) => correioRpc.pedirAmizade(n),
