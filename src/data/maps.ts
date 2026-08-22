@@ -71,10 +71,21 @@ const WATER_HUNT_IDS = new Set(
 export function getMap(id: string): MapDef | null {
   const map = MAPS[id]
   if (!map) return null
+  // `MOB_RESPAWN_DELAY_MULTIPLIER` e um botao de ECONOMIA: ele acelera o
+  // respawn de POKE SELVAGEM pra calibrar ouro/hora. Hunt de SEQUENCIA (a
+  // arena do Campeao Lance) nao tem respawn selvagem nenhum — ali o
+  // `respawnDelay` e o intervalo coreografado entre um POKE do treinador cair
+  // e o proximo entrar, e escalar isso por um numero de planilha e o tipo de
+  // acoplamento que quebra em silencio: um ajuste de ouro/hora mudaria o ritmo
+  // de uma luta roteirizada sem ninguem ligar as duas coisas.
+  //
+  // Ja tinha quebrado: os 3s escritos na arena viravam 0,75s ao vivo, e o
+  // pedido de "2 segundos entre um POKE e o proximo" saia como 0,5s.
+  const atraso = map.sequence ? map.respawnDelay : map.respawnDelay * RESPAWN_DELAY_MULTIPLIER
   if (WATER_HUNT_IDS.has(id)) {
     return {
       ...map,
-      respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER,
+      respawnDelay: atraso,
       collisionGrid: WATER_COLLISION_GRID,
       playerSpawn: WATER_SPAWN_POINT,
     }
@@ -82,7 +93,7 @@ export function getMap(id: string): MapDef | null {
   const collisionGrid = WALL_BLOCK_ENABLED
     ? (map.bg && map.bg.image && COLLISION_GRIDS[map.bg.image]) || null
     : null
-  return { ...map, respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER, collisionGrid }
+  return { ...map, respawnDelay: atraso, collisionGrid }
 }
 
 /**
@@ -131,7 +142,31 @@ export function mapDefParaSala(mapId: string, sala: { chave: string } | null): M
   const arte = backgroundParaSala(map, sala).image
   const pintada = arte ? COLISAO_POR_ARTE[arte] : undefined
   if (!pintada) return map
-  return { ...map, collisionGrid: pintada.grid, colisaoDefineLimite: true }
+  // `bounds` vem da ARTE desde PH-80: o mundo e a caixa da area pintada, nao
+  // mais 1400x900 pra todos. O `bounds` que veio do catalogo (planilha, ou
+  // GEOMETRIA pras hunts escritas a mao) so vale enquanto a cena nao tem
+  // pintura — hoje, so o Hospital.
+  //
+  // Tem que andar JUNTO com `collisionGrid`: a grade cobre exatamente este
+  // retangulo, e `isCellBlocked` trata tudo fora dela como fora do mapa. Um
+  // bounds de um tamanho com a grade de outro encolhe ou estica o mapa em
+  // silencio.
+  return { ...map, bounds: pintada.bounds, collisionGrid: pintada.grid, colisaoDefineLimite: true }
+}
+
+/**
+ * Onde desenhar a arte de fundo desta cena, em coordenadas de mundo. `null`
+ * quando a arte nao tem referencia pintada — ai o desenho cai no enquadramento
+ * antigo (centrado nos bounds, esticado pra cobrir).
+ *
+ * Existe porque a colocacao deixou de ser derivavel de `bounds`: ela depende
+ * de onde a tinta esta na imagem. Ver render/sprites.ts#MapBackgroundDef.
+ */
+export function arteParaSala(mapId: string, sala: { chave: string } | null): { escala: number; x: number; y: number } | null {
+  const map = getMap(mapId)
+  if (!map) return null
+  const arte = backgroundParaSala(map, sala).image
+  return (arte ? COLISAO_POR_ARTE[arte]?.arte : undefined) ?? null
 }
 
 /**
@@ -144,6 +179,24 @@ export function spawnPointParaSala(mapId: string, sala: { chave: string } | null
   if (!map) return null
   const arte = backgroundParaSala(map, sala).image
   return (arte ? COLISAO_POR_ARTE[arte]?.spawnPoint : undefined) ?? null
+}
+
+/**
+ * Por onde entra o POKE do lado INIMIGO nesta cena — o circulo VERDE pintado,
+ * irmao do amarelo que `spawnPointParaSala` devolve. So as arenas de duelo
+ * (dojo, dragon) tem; toda outra arte devolve `null` e quem chama cai no
+ * sorteio de sempre.
+ *
+ * Existe separado, e nao como mais um campo de `mapDef`, pelo mesmo motivo do
+ * spawn do jogador: o ponto e propriedade do DESENHO, entao a arena do Lance,
+ * o espelho do Modo Pesadelo e a hunt de Treinamento herdam o mesmo ponto sem
+ * ninguem precisar cadastrar nada em tres lugares.
+ */
+export function spawnInimigoParaSala(mapId: string, sala: { chave: string } | null): { x: number; y: number } | null {
+  const map = getMap(mapId)
+  if (!map) return null
+  const arte = backgroundParaSala(map, sala).image
+  return (arte ? COLISAO_POR_ARTE[arte]?.spawnInimigo : undefined) ?? null
 }
 
 export function isCellBlocked(mapDef: MapDef, x: number, y: number): boolean {

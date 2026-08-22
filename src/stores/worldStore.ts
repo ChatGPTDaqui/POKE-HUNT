@@ -41,6 +41,7 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     pendingWishes: [],
     autoTimers: { treinador: 0 },
     reviveCountdown: null,
+    trocaEmCampo: null,
     respawnTimer: null,
     sequenceIndex: 0,
     sequenceCleared: false,
