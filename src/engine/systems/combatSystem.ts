@@ -397,11 +397,9 @@ const TORMENT_DURATION = TURNO_SEGUNDOS * 3
 // Infestation. Os 7 chegam do catalogo como `damage-ailment` com `status: null`
 // — o efeito de prender foi descartado na geracao e sobrou so o dano.
 //
-// O QUE "PRESO" SIGNIFICA AQUI, por definicao do usuario: o POKE preso nao pode
-// ser trocado por outro da equipe. Mais o dano de 1/8 do HP maximo por turno
-// (statusSystem.ts#PRESO_DANO_PERCENT), que e o que faz o golpe valer nos DOIS
-// sentidos — o bloqueio de troca so morde quando o SELVAGEM prende o jogador,
-// porque selvagem nao tem equipe pra trocar.
+// O QUE "PRESO" SIGNIFICA AQUI, e SO ISTO: o POKE preso nao pode ser trocado por
+// outro da equipe enquanto durar. Nada de dano por turno — os 7 golpes ja tem
+// poder proprio, e dano extra nao foi pedido.
 //
 // EXPORTADO: a tela precisa da lista pra explicar o bloqueio, e o teste pra
 // conferir a lista contra o catalogo.

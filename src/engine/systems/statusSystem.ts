@@ -40,9 +40,6 @@ import {
 const LEECH_SEED_DRAIN_PERCENT = 1 / 8
 const CURSE_DOT_PERCENT = 1 / 4
 const NIGHTMARE_DOT_PERCENT = 1 / 4
-// PRESO (Wrap/Bind/Fire Spin/...): 1/8 do HP maximo por turno, a fracao dos
-// jogos (Gen VI+) pra esta familia.
-const PRESO_DANO_PERCENT = 1 / 8
 
 // Traits que impedem um status especifico de pegar (Fase 12). Cada uma cobre
 // UM status so — nao existe trait "imune a tudo" neste catalogo.
@@ -598,12 +595,6 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
   }
   if (entity.curseDot) {
     dano += Math.max(1, Math.round(entity.poke.stats.hp * CURSE_DOT_PERCENT))
-  }
-  // PRESO (PH-72): 1/8 do HP MAXIMO por turno, a fracao padrao desta familia de
-  // golpe nos jogos. Soma no mesmo `dano` agregado (nao substitui) — um POKE
-  // preso E envenenado leva as duas coisas.
-  if (entity.presoAte && entity.presoAte > 0) {
-    dano += Math.max(1, Math.round(entity.poke.stats.hp * PRESO_DANO_PERCENT))
   }
   // Nightmare so causa dano ENQUANTO o alvo estiver dormindo — se ele acordar
   // a flag fica ligada (nao precisa limpar), mas simplesmente para de fazer

@@ -4,10 +4,8 @@
 // catalogo como `damage-ailment` com `status: null` — a parte de prender foi
 // descartada na geracao e sobrou so o dano.
 //
-// "Preso" aqui, por definicao do usuario: o POKE preso nao pode ser trocado por
-// outro da equipe. Mais 1/8 do HP maximo por turno, que e o que faz o golpe valer
-// nos dois sentidos — o bloqueio de troca so morde quando o SELVAGEM prende o
-// jogador, porque selvagem nao tem equipe pra trocar.
+// "Preso" aqui, e SO isto: o POKE preso nao pode ser trocado por outro da
+// equipe enquanto durar. Sem dano por turno — os 7 golpes ja tem poder proprio.
 import { describe, expect, it } from 'vitest'
 
 import { createRng } from '@/core/rng'
@@ -77,19 +75,6 @@ describe('prender o alvo', () => {
       expect(restante, id).toBeGreaterThan(0)
       expect(restante, id).toBeLessThanOrEqual(TURNO_SEGUNDOS * 5)
     }
-  })
-
-  it('preso perde HP por turno mesmo sem levar golpe nenhum', () => {
-    const mundo = cenario('fire_spin')
-    umUso(mundo)
-    expect(mundo.enemy.presoAte ?? 0).toBeGreaterThan(0)
-
-    // Ninguem mais ataca: o jogador fica sem golpe disponivel e o inimigo esta
-    // calado. Todo HP que sair daqui pra frente e do dano de preso.
-    mundo.player.poke.disabledAbilities = { ...mundo.player.poke.disabledAbilities, fire_spin: true }
-    const hpAntes = mundo.enemy.poke.hp
-    updateCombat(mundo.world, TURNO_SEGUNDOS)
-    expect(mundo.enemy.poke.hp).toBeLessThan(hpAntes)
   })
 
   it('nao reaplica em alvo ja preso (senao o timer nunca acabaria)', () => {
