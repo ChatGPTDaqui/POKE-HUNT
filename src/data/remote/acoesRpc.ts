@@ -12,6 +12,13 @@ import { mochilaCarregada, useMochilaStore } from '@/stores/mochilaStore'
 import { rowToPoke } from './playerMapper'
 import { useGameStateStore, type GameStateData } from '@/stores/gameStateStore'
 import { ErroServidor } from './servidor'
+// Estatico de proposito (PH-49): `gameStatePersistence.ts` ja importa
+// `loadPlayerState`/`savePlayerState` estatico pra montar o `postgresStorage`
+// do zustand na inicializacao do store — `playerRepository` cai no chunk
+// principal de qualquer jeito. O `await import()` que existia aqui era
+// INEFFECTIVE_DYNAMIC_IMPORT (aviso do build): nao criava split nenhum, so
+// sugeria no codigo-fonte um limite de carregamento que nao existe de verdade.
+import { loadPlayerState } from './playerRepository'
 
 type Acao = { tipo: string } & Record<string, unknown>
 type RespostaRpc = { data: unknown; error: { message: string; code?: string } | null }
@@ -157,7 +164,6 @@ function removerPokes(pokeIds: string[]): void {
 /** So pra escolherStarter/reiniciarJogo: os 2 casos em que TUDO muda de fato. */
 async function refetchTudo(): Promise<void> {
   const uid = await userIdAtual()
-  const { loadPlayerState } = await import('./playerRepository')
   const resultado = await loadPlayerState(uid, useGameStateStore.getState() as GameStateData)
   if (resultado) useGameStateStore.setState(resultado.data)
   // `loadPlayerState` le `pokemon_instances` sem paginar, entao a mochila que
