@@ -34,6 +34,7 @@
 // Um backdrop que capturasse o toque faria trocar de tela exigir dois toques.
 import { useRef } from 'react'
 import { StatusRail } from '@/components/hud/StatusRail'
+import { ReservasRail } from '@/components/hud/ReservasRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
 import { SalaChip } from '@/components/hud/SalaChip'
 import { ChatLog } from '@/components/toasts/ChatLog'
@@ -68,6 +69,13 @@ export function HudLayer() {
         <div className="flex w-full max-w-[64em] flex-col gap-[.4em]">
           <StatusRail />
           <SalaChip />
+          {/* Trilho de reservas: mesma coluna do trilho de status, e nao uma
+              ancora propria na borda esquerda. A ancora foi tentada uma vez
+              (`ActivePokeCard`, ver o cabecalho deste arquivo) e cobria o HP em
+              390px. Aqui ele empurra em vez de sobrepor, e continua no canto
+              superior esquerdo porque o proprio componente se alinha a esquerda
+              dentro da linha. */}
+          <ReservasRail />
         </div>
       </div>
 

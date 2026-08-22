@@ -1719,6 +1719,7 @@ export type Database = {
       }
       reiniciar_jogo: { Args: never; Returns: undefined }
       remover_amizade: { Args: { p_amigo_id: string }; Returns: Json }
+      reordenar_equipe: { Args: { p_ordem: string[] }; Returns: Json }
       responder_correio: {
         Args: { p_corpo: string; p_mensagem_id: string }
         Returns: Json
@@ -3558,6 +3559,7 @@ export type Database = {
       }
       reiniciar_jogo: { Args: never; Returns: undefined }
       remover_amizade: { Args: { p_amigo_id: string }; Returns: Json }
+      reordenar_equipe: { Args: { p_ordem: string[] }; Returns: Json }
       responder_correio: {
         Args: { p_corpo: string; p_mensagem_id: string }
         Returns: Json
