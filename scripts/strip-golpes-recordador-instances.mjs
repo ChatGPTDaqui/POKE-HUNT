@@ -120,23 +120,33 @@ for (const row of todas) {
 
 console.error(`-- ${mudancas.length} instancias com golpe de recordador pra remover (${semEspecieConhecida} ignoradas por especie desconhecida)`);
 
+// PH-57: NAO `process.exit(0)` aqui (nem em lugar nenhum deste script) —
+// medido ao vivo, 100% reproduzivel: process.exit(0) logo apos o loop de
+// fetches paginados de buscarTodasInstancias() (undici, varias chamadas
+// sequenciais) crasha com "Assertion failed:
+// !(handle->flags & UV_HANDLE_CLOSING), file ...\deps\uv\src\win\async.c"
+// no Windows — o handle do fetch ainda fecha quando o exit forcado interrompe
+// o processo, e o assert do libuv dispara antes do OS matar o processo, que
+// sai com codigo 127 em vez de 0 mesmo tendo rodado tudo certo. 5/5 rodadas
+// isoladas (so o loop de fetch + exit) reproduziram; 5/5 sem o exit saíram
+// limpo, codigo 0. Deixar o event loop esvaziar sozinho evita o handle ainda
+// em transicao no momento do exit.
 if (!mudancas.length) {
   console.error('-- nada a fazer, sem SQL gerado');
-  process.exit(0);
+} else {
+  console.log('begin;');
+  // UPDATE em lote via VALUES, mesmo padrao de seed-species-moves-usum.mjs —
+  // uma linha SQL por instancia mudada, nao uma query por linha.
+  console.log(`update ${schema}.pokemon_instances as p set`);
+  console.log('  unlocked_abilities = v.unlocked_abilities,');
+  console.log('  active_abilities = v.active_abilities');
+  console.log('from (values');
+  console.log(
+    mudancas
+      .map((m) => `  ('${m.id}'::uuid, ${sqlArrayDeTexto(m.unlockedNovo)}, ${m.activeNovo == null ? 'null::text[]' : sqlArrayDeTexto(m.activeNovo)})`)
+      .join(',\n'),
+  );
+  console.log(') as v(id, unlocked_abilities, active_abilities)');
+  console.log('where p.id = v.id;');
+  console.log('commit;');
 }
-
-console.log('begin;');
-// UPDATE em lote via VALUES, mesmo padrao de seed-species-moves-usum.mjs —
-// uma linha SQL por instancia mudada, nao uma query por linha.
-console.log(`update ${schema}.pokemon_instances as p set`);
-console.log('  unlocked_abilities = v.unlocked_abilities,');
-console.log('  active_abilities = v.active_abilities');
-console.log('from (values');
-console.log(
-  mudancas
-    .map((m) => `  ('${m.id}'::uuid, ${sqlArrayDeTexto(m.unlockedNovo)}, ${m.activeNovo == null ? 'null::text[]' : sqlArrayDeTexto(m.activeNovo)})`)
-    .join(',\n'),
-);
-console.log(') as v(id, unlocked_abilities, active_abilities)');
-console.log('where p.id = v.id;');
-console.log('commit;');
