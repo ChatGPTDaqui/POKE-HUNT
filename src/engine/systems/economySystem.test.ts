@@ -58,7 +58,7 @@ describe('valor de POKE', () => {
 // PH-24: a UI ja exclui POKE shiny da selecao de venda em lote, mas uma
 // request forjada direto pra `venderPokes` (bypassando a UI) bate no servidor
 // sem passar por ela. `sellAllBagPokes` e a MESMA funcao usada pelo servidor
-// (bundle em server/engine/), entao ela e a revalidacao — nao pode confiar so
+// (bundle em authority/engine/), entao ela e a revalidacao — nao pode confiar so
 // no `locked`.
 describe('sellAllBagPokes — defesa em profundidade (PH-24)', () => {
   it('pula POKE shiny mesmo destrancado, mesmo com o uid explicitamente pedido', () => {

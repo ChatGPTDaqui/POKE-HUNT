@@ -22,7 +22,7 @@
 'use strict';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -83,7 +83,12 @@ export default defineConfig({
 
 const { bundlePath: SEED_BUNDLE, cleanup: cleanupAbilitiesBundle } = buildAbilitiesBundle();
 
-const { SPECIES } = await import(pathToFileURL(path.join(ROOT, 'authority/engine/headless.js')).href);
+const ENGINE_BUNDLE = path.join(ROOT, 'authority/engine/headless.js');
+if (!existsSync(ENGINE_BUNDLE)) {
+  console.error(`${ENGINE_BUNDLE} nao existe. Rode: npm run build:engine`);
+  process.exit(1);
+}
+const { SPECIES } = await import(pathToFileURL(ENGINE_BUNDLE).href);
 const { ABILITIES, BASIC_ATTACK } = await import(pathToFileURL(SEED_BUNDLE).href);
 
 const DEX_RE = /Nº\s*(\d+)/;

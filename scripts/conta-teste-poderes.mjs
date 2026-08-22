@@ -42,7 +42,7 @@
 // vindo de uma sessao aberta ANTES dele, sobrescreve tudo que foi dado aqui. O
 // script recusa rodar se houver sessao aberta. Depois de aplicar, recarregue a
 // aba — o cliente em memoria ainda tem o estado antigo.
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -144,7 +144,12 @@ async function main() {
   console.log(`Conta:  ${email}`);
   // `pathToFileURL` e obrigatorio no Windows: o import() dinamico do Node
   // interpreta "C:\..." como um esquema de URL chamado "c:" e recusa.
-  const motor = await import(pathToFileURL(join(RAIZ, 'authority', 'engine', 'headless.js')).href);
+  const bundle = join(RAIZ, 'authority', 'engine', 'headless.js');
+  if (!existsSync(bundle)) {
+    console.error(`${bundle} nao existe. Rode: npm run build:engine`);
+    process.exit(1);
+  }
+  const motor = await import(pathToFileURL(bundle).href);
   const { createPokeInstance, createRng, totalExpForLevel, ITEMS, MAPS, FAIXAS, GRUPOS_DO_LANCE } = motor;
 
   const conta = await acharConta(env, email);

@@ -23,6 +23,7 @@
 // Linha sem mudanca nenhuma nao entra no UPDATE.
 'use strict';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { config } from 'dotenv';
 import { resolverSchema, cabecalhosRest } from './lib/schema-alvo.cjs';
@@ -41,8 +42,13 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!SUPABASE_URL || !SERVICE_ROLE) throw new Error('SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY ausentes em .env');
 
+const ENGINE_BUNDLE = path.join(ROOT, 'authority/engine/headless.js');
+if (!existsSync(ENGINE_BUNDLE)) {
+  console.error(`${ENGINE_BUNDLE} nao existe. Rode: npm run build:engine`);
+  process.exit(1);
+}
 const { SPECIES, ehGolpeAoeDeNivel50 } = await import(
-  pathToFileURL(path.join(ROOT, 'authority/engine/headless.js')).href
+  pathToFileURL(ENGINE_BUNDLE).href
 );
 
 const golpesValidosPorEspecie = new Map(
