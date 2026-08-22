@@ -111,6 +111,19 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
       s.team.unshift(p)
       s.activeIndex = 0
     },
+    // A simulacao nunca reordena reserva — isso e acao de jogador na HUD
+    // (PH-75). Implementada mesmo assim, com as MESMAS guardas do store do
+    // navegador, porque o tipo exige e porque um stub que divergisse da regra
+    // viraria uma diferenca de comportamento entre client e servidor esperando
+    // pra ser descoberta. O indice 0 fica de fora dos dois lados: quem esta em
+    // campo so troca por `definir_ativo`.
+    reordenarReservas: (de, para) => {
+      const n = s.team.length
+      if (de === para) return
+      if (de < 1 || de >= n || para < 1 || para >= n) return
+      const [p] = s.team.splice(de, 1)
+      s.team.splice(para, 0, p)
+    },
     moveTeamToBag: (uid) => {
       const i = s.team.findIndex((p) => p.uid === uid)
       if (i < 0 || s.team.length <= 1) return null

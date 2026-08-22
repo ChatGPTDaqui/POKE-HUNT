@@ -6,8 +6,8 @@ import { createClient } from '@supabase/supabase-js'
 import type { Database } from './database.types'
 import { secureAuthStorage } from './secureAuthStorage'
 
-const url = import.meta.env.VITE_SUPABASE_URL
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+export const url = import.meta.env.VITE_SUPABASE_URL
+export const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 // Falha barulhenta e cedo: sem isso o app so quebraria na primeira query, com
 // um erro de rede generico que nao diz que o problema e configuracao faltando.
@@ -25,7 +25,7 @@ if (!url || !anonKey) {
 // de teste clonado no mesmo projeto Supabase). database.types.ts so cobre
 // `public`; apontar pra `dev` mantem o client funcional mas perde o
 // type-check de tabela/coluna (regenerar tipos contra dev cobre isso depois).
-const schema = (import.meta.env.VITE_SUPABASE_SCHEMA || 'public') as 'public'
+export const schema = (import.meta.env.VITE_SUPABASE_SCHEMA || 'public') as 'public'
 
 export const supabase = createClient<Database>(url, anonKey, {
   db: { schema },

@@ -47,12 +47,15 @@ export interface AuthFormProps {
   confirmarSenha?: boolean
   // Registro pede o nome do treinador; login nao.
   pedirNomeTreinador?: boolean
+  // So o Login mostra o link — recuperar senha de uma conta que ainda nao
+  // existe (Registro) nao faz sentido.
+  mostrarEsqueciSenha?: boolean
   aoConcluir?: () => void
 }
 
 export function AuthForm({
   titulo, descricao, rotuloAcao, onSubmit, rodape,
-  confirmarSenha = false, pedirNomeTreinador = false, aoConcluir,
+  confirmarSenha = false, pedirNomeTreinador = false, mostrarEsqueciSenha = false, aoConcluir,
 }: AuthFormProps) {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
@@ -133,6 +136,11 @@ export function AuthForm({
           />
           {confirmarSenha && (
             <p className="text-xs text-muted-foreground">Pelo menos {MIN_SENHA} caracteres, com letras e numeros.</p>
+          )}
+          {mostrarEsqueciSenha && (
+            <Link to="/esqueci-senha" className="inline-block text-xs text-muted-foreground underline underline-offset-4">
+              Esqueci minha senha
+            </Link>
           )}
         </div>
 
