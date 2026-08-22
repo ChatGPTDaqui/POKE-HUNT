@@ -584,6 +584,28 @@ const FIXED_DAMAGE_ABILITIES: Record<string, (attackerPoke: PokeInstance, defend
   mirror_coat: (_a, _d, attackerEntity) => counterDamage(attackerEntity, 'special'),
 }
 
+// GOLPE DE MULTIPLOS ACERTOS (PH-68): quantas vezes este uso vai bater.
+//
+// Distribuicao da Gen V+ (a mesma do Ultra Sun, que e a base de dados deste
+// jogo): 2 e 3 acertos com 3/8 de chance cada, 4 e 5 com 1/8 cada. Golpe de
+// contagem FIXA (min === max, ex. Double Kick) nao sorteia nada — e isso
+// importa, porque um sorteio a mais aqui dessincronizaria a predicao do cliente
+// da re-simulacao do servidor, que compartilham este mesmo `rng`.
+const CHANCE_ACUMULADA_DE_ACERTOS: [number, number][] = [
+  [2, 3 / 8], [3, 6 / 8], [4, 7 / 8], [5, 1],
+]
+function quantidadeDeAcertos(rng: Rng, ability: Ability): number {
+  const min = ability.minHits ?? 1
+  const max = ability.maxHits ?? 1
+  if (max <= 1) return 1
+  if (min === max) return min
+  const sorteio = nextFloat(rng)
+  for (const [acertos, limite] of CHANCE_ACUMULADA_DE_ACERTOS) {
+    if (acertos >= min && acertos <= max && sorteio < limite) return acertos
+  }
+  return max
+}
+
 type SpecialDamage = { mode: 'dynamicPower'; power: number } | { mode: 'fixed'; amount: number } | null
 
 // Devolve null (usa o `power` fixo do golpe pelo pipeline normal) ou uma das
@@ -673,7 +695,16 @@ function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: W
   // contra um Thick Fat que corta o dano dela pela metade.
   dmg *= multiplicadorDeDanoRecebidoPorTrait(defenderTraitEstimate, ability, effectivenessMultiplier)
   dmg *= multiplicadorDeDanoCausadoPorTrait(attackerTraitEstimate, effectivenessMultiplier)
-  return dmg
+  // GOLPE DE MULTIPLOS ACERTOS (PH-68): a estimativa e por ACERTO, e o `power`
+  // do catalogo desses golpes tambem. Sem multiplicar pela media de acertos, a
+  // IA do selvagem ranquearia Fury Swipes (18 por acerto) como o pior golpe do
+  // kit dele, e o overkill-guard da fila do jogador acharia que nenhum golpe
+  // pronto mata o alvo quando o multi-acerto mataria. Media da distribuicao de
+  // `quantidadeDeAcertos`: 3 acertos pro 2-5, e min pro de contagem fixa.
+  const minHits = ability.minHits ?? 1
+  const maxHits = ability.maxHits ?? 1
+  const acertosMedios = maxHits <= 1 ? 1 : (minHits === maxHits ? minHits : 3)
+  return dmg * acertosMedios
 }
 
 // Ate que estagio a IA se da ao trabalho de buffar/debuffar.
@@ -1941,38 +1972,57 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     return
   }
 
-  const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null)
+  // GOLPE DE MULTIPLOS ACERTOS (PH-68): o bloco de DANO roda uma vez por
+  // acerto — cada um com formula, critico e efetividade proprios, como nos
+  // jogos. Todo o resto de `resolveHit` (habilidade que reage a hit, dreno,
+  // status, estagio, flinch) continua rodando UMA vez, com o TOTAL da
+  // sequencia. Golpe normal tem `acertos === 1` e passa por aqui igual a antes.
+  const acertos = quantidadeDeAcertos(world.rng, ability)
+  // `danoFinal` daqui pra baixo e o total da sequencia. Os usos posteriores
+  // dele sao todos `danoFinal > 0` ("este golpe causou dano?"), entao somar e o
+  // que preserva o significado com 1 ou com 5 acertos.
+  let danoFinal = 0
+  let danoCausado = 0
+  let houveCritico = false
+  for (let acerto = 0; acerto < acertos; acerto++) {
+    // Alvo caiu no acerto anterior: a sequencia para. Nos jogos e igual — os
+    // acertos restantes de um Fury Swipes nao saem depois do KO.
+    if (acerto > 0 && isDead(target)) break
+    const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null)
+    if (result.isCrit) houveCritico = true
 
-  // ENDURE / STURDY (Fase 12): sobrevive com 1 HP num golpe que mataria.
-  // Endure e um golpe (flag consumida no proximo hit recebido, mate ele ou
-  // nao); Sturdy e a MESMA mecanica sempre ativa via Trait, mas so em HP
-  // CHEIO — perde o efeito no primeiro hit que ja tirou HP, igual ao
-  // Multiscale acima.
-  let danoFinal = result.amount
-  const enduraGolpe = target.enduraAtiva === true
-  if (enduraGolpe) target.enduraAtiva = false
-  const sturdyTrait = !enduraGolpe
-    && traitDoPoke(target.poke) === 'sturdy'
-    && target.poke.hp === target.poke.stats.hp
-  const aguentou = (enduraGolpe || sturdyTrait) && danoFinal >= target.poke.hp && target.poke.hp > 0
-  if (aguentou) danoFinal = target.poke.hp - 1
+    // ENDURE / STURDY (Fase 12): sobrevive com 1 HP num golpe que mataria.
+    // Endure e um golpe (flag consumida no proximo hit recebido, mate ele ou
+    // nao); Sturdy e a MESMA mecanica sempre ativa via Trait, mas so em HP
+    // CHEIO — perde o efeito no primeiro hit que ja tirou HP, igual ao
+    // Multiscale acima.
+    let danoDoAcerto = result.amount
+    const enduraGolpe = target.enduraAtiva === true
+    if (enduraGolpe) target.enduraAtiva = false
+    const sturdyTrait = !enduraGolpe
+      && traitDoPoke(target.poke) === 'sturdy'
+      && target.poke.hp === target.poke.stats.hp
+    const aguentou = (enduraGolpe || sturdyTrait) && danoDoAcerto >= target.poke.hp && target.poke.hp > 0
+    if (aguentou) danoDoAcerto = target.poke.hp - 1
 
-  // Dano REALMENTE causado, limitado ao HP que o alvo tinha. `result.amount` e
-  // o numero cru da formula e pode passar MUITO do HP do alvo (um POKE Nivel 85
-  // batendo num Nivel 40 causa varias vezes a vida dele). E o que dreno e recuo
-  // precisam usar, como nos jogos: Double-Edge devolve 33% do que TIROU, nao
-  // 33% do que teria tirado num alvo infinito.
-  //
-  // BUG QUE ISTO CORRIGE: sem o teto, um golpe de recuo virava suicidio em
-  // qualquer hunt onde o jogador estivesse acima do nivel. Medido, custava um
-  // quarto das kills/hora no Nivel 85 — o POKE se matava sozinho.
-  const danoCausado = Math.min(danoFinal, target.poke.hp)
-  // Golpe de status causa 0 de dano — nao mostra "0" flutuando sobre o alvo
-  // nem registra "ultimo dano recebido" (Counter/Mirror Coat refletiriam nada).
-  if (danoFinal > 0) {
-    takeDamage(target, danoFinal, resolveAbilityCategory(ability, attacker.poke))
-    if (!silent) spawnDamageNumber(world, target, { ...result, amount: danoFinal })
-    if (aguentou && !silent) anunciarAguentou(world, target)
+    // Dano REALMENTE causado, limitado ao HP que o alvo tinha. `result.amount` e
+    // o numero cru da formula e pode passar MUITO do HP do alvo (um POKE Nivel 85
+    // batendo num Nivel 40 causa varias vezes a vida dele). E o que dreno e recuo
+    // precisam usar, como nos jogos: Double-Edge devolve 33% do que TIROU, nao
+    // 33% do que teria tirado num alvo infinito.
+    //
+    // BUG QUE ISTO CORRIGE: sem o teto, um golpe de recuo virava suicidio em
+    // qualquer hunt onde o jogador estivesse acima do nivel. Medido, custava um
+    // quarto das kills/hora no Nivel 85 — o POKE se matava sozinho.
+    danoCausado += Math.min(danoDoAcerto, target.poke.hp)
+    danoFinal += danoDoAcerto
+    // Golpe de status causa 0 de dano — nao mostra "0" flutuando sobre o alvo
+    // nem registra "ultimo dano recebido" (Counter/Mirror Coat refletiriam nada).
+    if (danoDoAcerto > 0) {
+      takeDamage(target, danoDoAcerto, resolveAbilityCategory(ability, attacker.poke))
+      if (!silent) spawnDamageNumber(world, target, { ...result, amount: danoDoAcerto })
+      if (aguentou && !silent) anunciarAguentou(world, target)
+    }
   }
 
   // HABILIDADES QUE REAGEM A LEVAR UM HIT (Justified, Rattled, Weak Armor,
@@ -1991,7 +2041,9 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     const categoriaBate = !reacao?.soFisico || ehFisico
     // ANGER POINT so dispara em CRITICO recebido — a unica das cinco com
     // gatilho proprio, entao o `if` extra em vez de mais um campo na tabela.
-    const gatilhoDeAngerPoint = traitDoAlvo !== 'anger_point' || result.isCrit
+    // Com golpe de multiplos acertos, QUALQUER acerto critico da sequencia
+    // serve de gatilho — nao so o ultimo.
+    const gatilhoDeAngerPoint = traitDoAlvo !== 'anger_point' || houveCritico
     if (reacao && tipoBate && categoriaBate && gatilhoDeAngerPoint) {
       const mudanca = aplicarEstagioUnico(target, reacao.stat as StatDeEstagio, reacao.estagios)
       if (mudanca && !silent) anunciarEstagios(world, target, [mudanca])
