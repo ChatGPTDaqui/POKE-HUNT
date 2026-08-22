@@ -41,24 +41,46 @@ export const CENA_HOSPITAL = {
 
   /**
    * Multiplicador do sprite do POKE, em unidades DA IMAGEM (nao da tela).
-   * Com 5, um frame de 32px (Charmander) sai com 160px na arte de 2000px —
-   * praticamente a mesma altura visivel da enfermeira (~150px), que era o
-   * pedido ("coerente em relacao a dama do centro pokemon"). Como todo frame
-   * PMD ja e proporcional ao tamanho do bicho (24px o Swinub, 128px o
-   * Gyarados), um multiplicador unico preserva as diferencas entre especies —
-   * nada aqui reintroduz o `scaleForSpecies` por altura de Pokedex, desligado
-   * de proposito numa leva anterior.
+   *
+   * ERA 5, E ESTAVA CALIBRADO PELA MEDIDA ERRADA (PH-82/PH-85). A conta que
+   * justificava o 5 dizia "um frame de 32px sai com 160px, praticamente a
+   * altura da enfermeira" — mas 32 e a LARGURA do frame. Medido ao vivo, o
+   * frame PMD e 32x64, e quem manda no tamanho aparente e a altura: o POKE
+   * saia com 64x5 = 320 unidades de imagem, o DOBRO do pretendido. Na tela, em
+   * 1440x900, isso era 230px de altura contra ~110-160px da enfermeira.
+   *
+   * 2.5 devolve os ~160 que a conta original queria. De brinde resolve a
+   * serrilha: o upscale do sprite (multiplicador x escala do layout, 0,72 em
+   * 1440x900) cai de 3,6x pra 1,8x — era o esticamento, e nao a arte, que
+   * deixava o POKE granulado.
+   *
+   * Nao da pra resolver isso encolhendo o FUNDO, que foi a primeira ideia: ele
+   * e desenhado em `cover` (`max(largura/2000, altura/2000)`) e em 1440x900 ja
+   * esta no minimo que cobre a tela — abaixo disso sobra faixa vazia nas
+   * laterais. E encolher o fundo encolheria a enfermeira junto, entao a
+   * PROPORCAO entre os dois nem mudaria: ela depende so deste numero.
+   *
+   * Como todo frame PMD ja e proporcional ao tamanho do bicho (24px o Swinub,
+   * 128px o Gyarados), um multiplicador unico preserva as diferencas entre
+   * especies — nada aqui reintroduz o `scaleForSpecies` por altura de Pokedex,
+   * desligado de proposito numa leva anterior.
    */
-  escalaPoke: 5,
+  escalaPoke: 2.5,
 
   /**
    * Teto de altura do sprite, em pixels da imagem. Existe por um motivo
-   * funcional, nao estetico: sem ele, um Gyarados (frame de 128px) sairia com
-   * 640px e cobriria a enfermeira — ou seja, o unico elemento clicavel da cena
-   * ficaria escondido atras do proprio POKE do jogador. Com 400, o maior
-   * sprite possivel para logo abaixo do balcao.
+   * funcional, nao estetico: sem ele um Gyarados (frame de 128px) cobriria a
+   * enfermeira, e o unico elemento clicavel da cena ficaria escondido atras do
+   * proprio POKE do jogador.
+   *
+   * Desceu de 400 pra 200 junto com `escalaPoke` (PH-85): 400 foi dimensionado
+   * na mesma regua errada, e com o multiplicador corrigido ele deixaria de ter
+   * efeito nenhum — 128 x 2,5 = 320 ja passa longe de 400, entao NENHUMA
+   * especie seria limitada e o Gyarados voltaria a cobrir a enfermeira. 200
+   * mantem o teto no mesmo lugar RELATIVO de antes: pouco acima dos ~160 do
+   * POKE tipico, cortando so quem for grande demais.
    */
-  alturaMaximaPoke: 400,
+  alturaMaximaPoke: 200,
 } as const
 
 /** Escala efetiva do sprite (em unidades da imagem) para um frame de `alturaDoFrame`. */

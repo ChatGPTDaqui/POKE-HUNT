@@ -24,6 +24,32 @@ import { CLIMA_DO_GOLPE, DANO_SEM_PODER_BASE, OHKO_DESLIGADO } from './abilities
 // `AVISO_SEM_DANO` so aparece nos golpes que SAO mesmo inertes aqui (ex:
 // Splash, Transform, Sleep Talk — catalogados, sem mecanica nenhuma
 // implementada).
+// REGRA DO TEXTO, decidida na revisao de 2026-08-21 (PH-71), depois de uma
+// auditoria dos 479 golpes contra o dado e contra o motor:
+//
+//   1. Golpe que CAUSA DANO (ou que tem efeito real) nao mostra aviso nenhum na
+//      ficha — nele o texto e a unica informacao que o jogador tem. Ele NAO PODE
+//      prometer mecanica que este motor nao tem. 26 textos foram reescritos por
+//      esta regra: prometiam confusao no fim (Outrage/Thrash/Petal Dance), dano
+//      ao errar (Jump Kick), auto-KO (Explosion/Self-Destruct, que aqui custam
+//      metade do HP), prioridade de turno (Sucker Punch), troca de POKE
+//      (U-turn/Dragon Tail), item do alvo (Knock Off), veneno que escala
+//      (Toxic), dreno "enorme" quando os tres golpes de dreno curam os mesmos
+//      50% do dano causado (Mega Drain/Giga Drain)...
+//
+//   2. Golpe INERTE mantem o texto de sabor do golpe original. Nele a ficha ja
+//      estampa AVISO_SEM_DANO logo abaixo ("nao causa dano e nao tem nenhum
+//      efeito extra implementado aqui"), que contradiz a promessa de forma
+//      explicita. Reescrever os 65 pra "este golpe nao faz nada" apagaria a
+//      informacao de que golpe e aquele, sem ganhar nada — o aviso ja e a
+//      informacao honesta.
+//
+//   3. Numero de efeito nao se escreve aqui. Chance de status, estagio de
+//      atributo, percentual de dreno, chance de flinch e estagio de critico
+//      saem do proprio objeto `Ability`, renderizados por
+//      components/shared/AbilityTooltip.tsx#efeitosDoGolpe. Texto a mao nao
+//      pode competir com o dado que o motor le: foi assim que a divergencia
+//      cresceu sem ninguem notar.
 export const AVISO_SEM_DANO =
   'Neste jogo este golpe nao causa dano, e nao tem nenhum efeito extra implementado aqui.'
 
@@ -114,7 +140,7 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   growl: 'Um rosnado manhoso que reduz o Ataque de quem ouve.',
   ember: 'Cospe uma pequena chama que pode queimar o alvo.',
   smokescreen: 'Solta fuligem que atrapalha a pontaria do alvo.',
-  rage: 'Enquanto usado sem parar, o Ataque sobe a cada golpe recebido.',
+  rage: 'Um ataque movido a pura furia.',
   scary_face: 'Uma careta assustadora que derruba muito a Velocidade do alvo.',
   flamethrower: 'Um jato intenso de fogo que pode queimar.',
   slash: 'Um corte com garras ou lamina, com alta chance de critico.',
@@ -131,7 +157,7 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   rain_dance: 'Faz chover por cinco turnos, fortalecendo golpes de Agua.',
   skull_bash: 'Encolhe a cabeca num turno e ataca com forca no seguinte.',
   hydro_pump: 'Um jato de agua devastador disparado a alta pressao.',
-  leech_seed: 'Planta uma semente que rouba HP do alvo a cada turno.',
+  leech_seed: 'Planta uma semente que rouba HP do alvo a cada turno. Nao pega em alvo do tipo Planta, e a semente se solta no fim da luta.',
   vine_whip: 'Chicoteia o alvo com cipos finos.',
   sleep_powder: 'Um po sonifero que faz o alvo dormir.',
   razor_leaf: 'Lanca folhas cortantes; atinge varios inimigos de uma vez.',
@@ -191,7 +217,7 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   harden: 'Enrijece o corpo e aumenta a Defesa.',
   rollout: 'Rola contra o alvo; fica mais forte a cada acerto seguido.',
   earthquake: 'Um terremoto que atinge tudo por perto.',
-  explosion: 'A explosao mais devastadora que existe — o usuario desmaia.',
+  explosion: 'A explosao mais devastadora que existe, ao custo de metade do HP do usuario.',
   fury_attack: 'Espeta o alvo repetidas vezes com chifre ou bico.',
   pursuit: 'Acerta com forca dobrada quem tenta trocar de POKE.',
   mirror_move: 'Copia e devolve o ultimo golpe usado pelo alvo.',
@@ -202,18 +228,18 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   stun_spore: 'Espalha esporos que paralisam o alvo.',
   acid: 'Cospe acido; pode reduzir a Defesa Especial.',
   moonlight: 'Recupera HP com a luz da lua.',
-  petal_dance: 'Ataca com uma tempestade de petalas por varios turnos e fica confuso.',
+  petal_dance: 'Ataca envolvendo o alvo numa tempestade de petalas.',
   wrap: 'Enrola o alvo e aperta por varios turnos.',
   slam: 'Bate com forca usando a cauda ou uma vinha.',
   barrage: 'Arremessa esferas em serie contra o alvo.',
   hypnosis: 'Sugestao hipnotica que faz o alvo dormir.',
   constrict: 'Ataca com tentaculos e pode reduzir a Velocidade.',
   bind: 'Amarra o alvo com o corpo e o esmaga por varios turnos.',
-  mega_drain: 'Drena boa parte do HP do alvo pra si.',
+  mega_drain: 'Drena o HP do alvo: metade do dano causado vira HP do usuario.',
   body_slam: 'Joga o corpo inteiro contra o alvo; pode paralisar.',
   splash: 'Se debate sem sair do lugar. Nao faz absolutamente nada.',
   cotton_spore: 'Gruda esporos de algodao e derruba muito a Velocidade.',
-  giga_drain: 'Drena uma quantidade enorme de HP pro usuario.',
+  giga_drain: 'Drena com forca total: metade do dano causado vira HP do usuario.',
   string_shot: 'Amarra o alvo com seda e reduz a Velocidade.',
   supersonic: 'Ondas sonoras estranhas que confundem o alvo.',
   psybeam: 'Um feixe mental peculiar que pode confundir.',
@@ -265,7 +291,7 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   tri_attack: 'Tres esferas simultaneas que podem queimar, congelar ou paralisar.',
   lick: 'Uma lambida com a lingua comprida; pode paralisar.',
   dizzy_punch: 'Um soco ritmado que pode deixar o alvo confuso.',
-  thrash: 'Ataca sem controle por varios turnos e depois fica confuso.',
+  thrash: 'Ataca sem controle nenhum, com forca total.',
   conversion: 'Muda o proprio tipo pro tipo de um dos golpes conhecidos.',
   sharpen: 'Deixa o corpo mais anguloso e aumenta o Ataque.',
   zap_cannon: 'Um canhao eletrico que paralisa, mas erra com facilidade.',
@@ -303,7 +329,7 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   vital_throw: 'Um arremesso que sai por ultimo, mas nunca erra.',
   meditate: 'Desperta o poder adormecido e aumenta o Ataque.',
   rolling_kick: 'Um chute giratorio que pode fazer o alvo recuar.',
-  jump_kick: 'Um chute em salto; erra e o usuario se machuca.',
+  jump_kick: 'Um chute dado em pleno salto, com forca alta.',
   mega_kick: 'Um chute com toda a forca dos musculos.',
   ice_punch: 'Um soco gelado que pode congelar.',
   mach_punch: 'Um soco em velocidade extrema; quase sempre sai primeiro.',
@@ -316,7 +342,7 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   psywave: 'Uma onda psiquica de forca imprevisivel.',
   pain_split: 'Soma o HP dos dois e divide igualmente.',
   beat_up: 'Toda a equipe ataca em sequencia.',
-  outrage: 'Enfurece-se por varios turnos e depois fica confuso.',
+  outrage: 'Enfurece-se e ataca com forca total.',
   octazooka: 'Dispara tinta no rosto do alvo; pode baixar a precisao.',
 
   // -------------------------------------------------------------------------
@@ -352,11 +378,11 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   pluck: 'Bicada que consome a fruta que o alvo estiver segurando.',
   charge: 'Acumula eletricidade e reforca o proximo golpe eletrico.',
   discharge: 'Descarrega eletricidade em todos ao redor; pode paralisar.',
-  magnetic_flux: 'Reorganiza polaridades e reforca a defesa dos aliados com Plus/Minus.',
+  magnetic_flux: 'Reorganiza as polaridades e reforca as duas Defesas do usuario.',
   air_slash: 'Corta o ar com uma lamina de vento; pode fazer o alvo recuar.',
   heat_wave: 'Sopra ar escaldante em todos os oponentes; pode queimar.',
   solar_beam: 'Absorve luz num turno e dispara um feixe potente no seguinte.',
-  burn_up: 'Queima tudo que tem: dano enorme, mas o usuario perde o tipo Fogo.',
+  burn_up: 'Queima tudo que tem de uma vez, num golpe de dano enorme.',
   extrasensory: 'Uma forca estranha e invisivel; pode fazer o alvo recuar.',
   thunder_fang: 'Uma mordida eletrificada que pode paralisar ou fazer recuar.',
   calm_mind: 'Concentra-se e eleva o Ataque Especial e a Defesa Especial.',
@@ -385,23 +411,23 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   reflect_type: 'Copia o tipo do alvo.',
   nasty_plot: 'Trama algo maldoso e dobra o proprio Ataque Especial.',
   mud_sport: 'Espalha lama e enfraquece golpes eletricos por cinco turnos.',
-  rock_polish: 'Polir o corpo reduz o atrito e dobra a Velocidade.',
-  smack_down: 'Uma pedrada que derruba alvos voadores para o chao.',
+  rock_polish: 'Polir o corpo reduz o atrito e eleva muito a Velocidade.',
+  smack_down: 'Uma pedrada certeira, arremessada com forca.',
   bulldoze: 'Pisoteia o solo e atinge todos ao redor, baixando a Velocidade.',
-  self_destruct: 'O usuario explode e desmaia, causando dano enorme em area.',
+  self_destruct: 'O usuario se autodestroi e causa dano enorme em area, ao custo de metade do proprio HP.',
   stealth_rock: 'Espalha pedras flutuantes que ferem quem entrar em campo.',
   rock_blast: 'Atira de duas a cinco pedras seguidas.',
   stone_edge: 'Pedras afiadas atacam por baixo, com alta chance de critico.',
   aerial_ace: 'Um voo rasante rapido demais para ser desviado — nunca erra.',
   assurance: 'Dobra de forca se o alvo ja tiver se machucado neste turno.',
-  sucker_punch: 'Ataca antes do alvo, mas so funciona se ele fosse atacar.',
+  sucker_punch: 'Um golpe traicoeiro, dado de surpresa.',
   endeavor: 'Iguala o HP do alvo ao do usuario.',
   petal_blizzard: 'Uma ventania de petalas violentas que atinge todos ao redor.',
   lucky_chant: 'Um encanto que impede criticos contra a equipe.',
-  toxic: 'Envenena gravemente: o dano aumenta a cada turno.',
+  toxic: 'Envenena o alvo com uma toxina forte.',
   moonblast: 'Invoca o poder da lua; pode baixar o Ataque Especial do alvo.',
   grassy_terrain: 'Cobre o campo de grama: cura a cada turno e reforca golpes de Planta.',
-  knock_off: 'Derruba o item do alvo, e bate mais forte se ele tinha um.',
+  knock_off: 'Um golpe baixo, dado com o alvo desprevenido.',
   gastro_acid: 'Um acido que anula a habilidade do alvo.',
   poison_jab: 'Uma estocada com ferrao ou tentaculo; pode envenenar.',
   wring_out: 'Torce o alvo com forca — quanto mais HP ele tiver, maior o dano.',
@@ -418,11 +444,11 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   power_whip: 'Chicoteia violentamente com cipos ou tentaculos.',
   aromatherapy: 'Um aroma suave que cura o status de toda a equipe.',
   fairy_wind: 'Levanta um vento encantado contra o alvo.',
-  acrobatics: 'Um ataque agil que dobra de forca se o usuario nao carregar item.',
+  acrobatics: 'Um ataque agil, dado em pleno ar.',
   rage_powder: 'Espalha um po irritante que atrai todos os ataques.',
-  u_turn: 'Ataca e volta correndo, trocando de POKE.',
+  u_turn: 'Ataca girando o corpo e recua na mesma investida.',
   bounce: 'Salta bem alto e cai sobre o alvo; pode paralisar.',
-  memento: 'O usuario desmaia, mas derruba muito o Ataque e o Ataque Especial do alvo.',
+  memento: 'Derruba muito o Ataque e o Ataque Especial do alvo.',
   grass_whistle: 'Uma melodia agradavel que faz o alvo dormir.',
   flower_shield: 'Uma energia floral que eleva a Defesa de todos os tipos Planta.',
   bug_bite: 'Morde e come a fruta que o alvo estiver segurando.',
@@ -432,7 +458,7 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   quiver_dance: 'Uma danca leve que eleva Ataque Especial, Defesa Especial e Velocidade.',
   venoshock: 'Um liquido toxico que dobra de forca contra alvo envenenado.',
   toxic_spikes: 'Espalha espinhos que envenenam quem entrar em campo.',
-  fell_stinger: 'Se derrubar o alvo, o Ataque do usuario sobe muito.',
+  fell_stinger: 'Uma ferroada afiada e certeira.',
   fury_cutter: 'Fica mais forte a cada vez que acerta em sequencia.',
   x_scissor: 'Corta o alvo cruzando as garras como uma tesoura.',
   cross_poison: 'Um corte venenoso em X; pode envenenar e tem alta chance de critico.',
@@ -455,7 +481,7 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   toxic_thread: 'Fios venenosos que envenenam e reduzem a Velocidade.',
   venom_drench: 'Derruba Ataque, Ataque Especial e Velocidade de alvo envenenado.',
   sonic_boom: 'Uma onda de choque que sempre tira exatamente 20 de HP.',
-  payback: 'Dobra de forca se o usuario atacar depois do alvo.',
+  payback: 'Um golpe de troco, dado com todo o peso do corpo.',
   gyro_ball: 'Um giro violento — quanto mais LENTO o usuario, mais forte.',
   autotomize: 'Descarta partes do corpo, ficando mais leve e muito mais rapido.',
   heavy_slam: 'Esmaga com o proprio peso: quanto mais pesado que o alvo, maior o dano.',
@@ -481,7 +507,7 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   sludge_wave: 'Uma onda de lodo que atinge todos ao redor; pode envenenar.',
   yawn: 'Um bocejo contagioso: o alvo adormece no turno seguinte.',
   slack_off: 'Relaxa e recupera metade do HP maximo.',
-  heal_pulse: 'Uma onda curativa que devolve metade do HP de um aliado.',
+  heal_pulse: 'Uma onda curativa que devolve metade do HP maximo.',
   icy_wind: 'Um vento gelado que atinge os oponentes e reduz a Velocidade.',
   aqua_ring: 'Um veu de agua que cura um pouco a cada turno.',
   dive: 'Mergulha num turno e emerge atacando no seguinte.',
@@ -509,7 +535,7 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   drill_run: 'Gira o corpo como uma broca; alta chance de critico.',
   play_nice: 'Faz amizade com o alvo e o deixa sem vontade de lutar.',
   disarming_voice: 'Um grito encantador que nunca erra os oponentes.',
-  round: 'Uma cancao que fica mais forte se um aliado ja tiver cantado.',
+  round: 'Uma cancao cortante.',
   fake_out: 'So funciona no primeiro turno, mas sai primeiro e faz o alvo recuar.',
   feint_attack: 'Aproxima-se com jeitinho e acerta um golpe que nunca erra.',
   taunt: 'Provoca o alvo, que so consegue usar golpes de ataque.',
@@ -553,14 +579,14 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   head_smash: 'Uma cabecada suicida; o usuario sofre um recuo enorme.',
   dark_pulse: 'Uma onda de pensamentos sinistros; pode fazer o alvo recuar.',
   crush_claw: 'Rasga com garras duras; pode baixar a Defesa do alvo.',
-  stomping_tantrum: 'Um chilique que dobra de forca se o golpe anterior falhou.',
-  retaliate: 'Vinga um aliado derrotado no turno anterior, com o dobro de forca.',
+  stomping_tantrum: 'Um chilique que castiga o chao e o alvo junto.',
+  retaliate: 'Um golpe movido a vinganca.',
   sky_uppercut: 'Um gancho ascendente que acerta ate quem esta no ar.',
   flare_blitz: 'Envolve-se em chamas e arremete; o usuario tambem se queima.',
   extreme_speed: 'Uma investida em velocidade absurda; sai primeiro quase sempre.',
   flame_charge: 'Ataca envolto em chamas e ganha Velocidade.',
   clear_smog: 'Uma fumaca especial que zera as alteracoes de atributo do alvo.',
-  incinerate: 'Uma chama que atinge os oponentes e queima as frutas deles.',
+  incinerate: 'Uma chama que atinge todos os oponentes em area.',
   nuzzle: 'Esfrega as bochechas eletricas no alvo e o paralisa.',
   wild_charge: 'Uma carga eletrica total; o usuario tambem se machuca.',
   magnet_bomb: 'Dispara bombas magneticas que perseguem o alvo e nunca erram.',
@@ -571,13 +597,13 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   belch: 'Um arroto potente — so funciona depois de comer uma fruta.',
   flatter: 'Bajula o alvo: ele fica confuso, mas com o Ataque Especial em alta.',
   quick_guard: 'Protege a equipe de golpes de prioridade por um turno.',
-  final_gambit: 'O usuario desmaia e causa dano igual ao HP que ainda tinha.',
+  final_gambit: 'Causa dano igual ao HP que o usuario ainda tinha, ao custo de metade do proprio HP.',
   low_sweep: 'Uma rasteira nas pernas que reduz a Velocidade do alvo.',
   dual_chop: 'Duas cutiladas seguidas com o corpo.',
   bulk_up: 'Contrai os musculos e eleva o Ataque e a Defesa.',
   dynamic_punch: 'Um soco com toda a forca que deixa o alvo confuso, mas erra muito.',
   strength: 'Empurra o alvo com toda a forca do corpo.',
-  high_jump_kick: 'Uma joelhada em salto alto; erra e o usuario se machuca feio.',
+  high_jump_kick: 'Uma joelhada em salto alto, das mais fortes que existem.',
   blaze_kick: 'Um chute em chamas com alta chance de critico; pode queimar.',
   focus_punch: 'Concentra-se o turno inteiro; apanhar antes cancela o golpe.',
   heart_stamp: 'Distrai o alvo com fofura e acerta um golpe pesado; pode faze-lo recuar.',
@@ -600,6 +626,6 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   snatch: 'Rouba o efeito do golpe de cura ou de status do alvo.',
   howl: 'Um uivo que anima o usuario e eleva o Ataque.',
   embargo: 'Impede o alvo de usar o item que carrega.',
-  dragon_tail: 'Uma rabanada que expulsa o alvo do campo.',
+  dragon_tail: 'Uma rabanada pesada com a cauda.',
   after_you: 'Cede a vez para que o alvo aja logo em seguida.',
 }

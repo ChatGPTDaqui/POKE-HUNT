@@ -53,3 +53,16 @@ export interface HuntEncounter extends EncounterDataEntry {
   // Ausente = uniforme, como sempre foi.
   levelWeights?: { level: number; weight: number }[]
 }
+
+/**
+ * Segundos entre um POKE cair e o substituto entrar em campo, NOS DOIS LADOS
+ * de uma arena de duelo.
+ *
+ * Vive aqui, e nao em cada ponta, porque as duas pontas sao arquivos que nao
+ * podem se importar: `nightmareMaps.ts` usa como `respawnDelay` da arena do
+ * Campeao Lance (o lado dele) e `engine/simulation.ts` usa como espera da
+ * troca por desmaio (o lado do jogador). Duplicar o numero deixaria os dois
+ * lados sairem de sincronia sem nada acusar — o pedido foi explicitamente a
+ * MESMA espera pros dois.
+ */
+export const ESPERA_DE_TROCA_SEGUNDOS = 2
