@@ -146,6 +146,24 @@ export function spawnPointParaSala(mapId: string, sala: { chave: string } | null
   return (arte ? COLISAO_POR_ARTE[arte]?.spawnPoint : undefined) ?? null
 }
 
+/**
+ * Por onde entra o POKE do lado INIMIGO nesta cena — o circulo VERDE pintado,
+ * irmao do amarelo que `spawnPointParaSala` devolve. So as arenas de duelo
+ * (dojo, dragon) tem; toda outra arte devolve `null` e quem chama cai no
+ * sorteio de sempre.
+ *
+ * Existe separado, e nao como mais um campo de `mapDef`, pelo mesmo motivo do
+ * spawn do jogador: o ponto e propriedade do DESENHO, entao a arena do Lance,
+ * o espelho do Modo Pesadelo e a hunt de Treinamento herdam o mesmo ponto sem
+ * ninguem precisar cadastrar nada em tres lugares.
+ */
+export function spawnInimigoParaSala(mapId: string, sala: { chave: string } | null): { x: number; y: number } | null {
+  const map = getMap(mapId)
+  if (!map) return null
+  const arte = backgroundParaSala(map, sala).image
+  return (arte ? COLISAO_POR_ARTE[arte]?.spawnInimigo : undefined) ?? null
+}
+
 export function isCellBlocked(mapDef: MapDef, x: number, y: number): boolean {
   const grid = mapDef.collisionGrid
   if (!grid) return false

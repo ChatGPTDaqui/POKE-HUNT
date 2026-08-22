@@ -94,6 +94,29 @@ function isYellow(r, g, b) {
 function isPink(r, g, b) {
   return r > 180 && b > 150 && g < r - 60 && g < b - 60;
 }
+// Verde do marcador de ENTRADA DO INIMIGO — a convencao nova da leva
+// 2026-08-22 (dojo/dragon), irma do circulo amarelo: amarelo e por onde entra
+// o POKE do jogador, verde e por onde entra todo POKE novo do outro lado.
+//
+// A tinta e chapada e igual nas duas referencias: (48,248,104) em praticamente
+// todo pixel lido. O teste e estrito pelo MESMO motivo de `isYellow`, e aqui a
+// pressao e maior: verde e a cor mais comum da arte deste jogo (grama, folha,
+// arbusto, musgo). Exigir G alto E os dois outros canais bem abaixo derruba a
+// vegetacao inteira — medido nas duas referencias, o verde da arte fica em
+// (104,168,56) e parecidos, que tem R alto demais pra passar.
+function isGreen(r, g, b) {
+  return g >= 200 && r <= g - 120 && b <= g - 100 && b >= 40;
+}
+// Marcador pintado esta SOBRE a area andavel — por definicao, o POKE nasce
+// nele. Sem isto o circulo abre um buraco bloqueado de ~1,2 celula exatamente
+// no ponto de nascimento, e o snap do passo 3 empurra o spawn pra celula
+// vizinha. Passou despercebido enquanto so o amarelo existia (11 artes, 6
+// deles projetados pra fora da janela e portanto nunca dentro de uma celula
+// visivel); com dois marcadores dentro da arena do duelo o buraco vira
+// duplo e no meio do campo.
+function isMarcador(r, g, b) {
+  return isYellow(r, g, b) || isGreen(r, g, b);
+}
 // Maioria simples: a celula de borda do traco vermelho cai pro lado seguro
 // (bloqueada) sozinha.
 const RED_CELL_RATIO = 0.5;
@@ -173,6 +196,15 @@ const MANIFESTO = {
   'town-night.png': { bg: 'town-night.jpg', modo: 'rosa_anda' },
   'town.png': { bg: 'town.jpg', modo: 'rosa_anda' },
   'volcano.png': { bg: 'volcano.jpg', modo: 'rosa_anda' },
+
+  // Leva 2026-08-22: as duas ultimas artes sem grade, e as primeiras com
+  // CIRCULO VERDE alem do amarelo — sao arenas de duelo, nao mapas de
+  // perambular. `dojo.png` e o sub-bioma Dojo (Urbano) e a hunt de
+  // Treinamento; `dragon.png` e a arena do Campeao Lance e o espelho DRAGON do
+  // Modo Pesadelo. Nenhuma das duas e arte de bioma, entao ate aqui elas
+  // escapavam de todo teste que itera `BIOMAS` — ver walkBlock.test.ts.
+  'dojo.png': { bg: 'dojo.png', modo: 'rosa_anda' },
+  'dragon.png': { bg: 'dragon.png', modo: 'rosa_anda' },
 };
 
 const cols = Math.ceil(MAP_BOUNDS.width / CELL_SIZE);
@@ -297,7 +329,7 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
           const idx = (iy * width + ix) * 4;
           const r = rgba[idx], g = rgba[idx + 1], b = rgba[idx + 2], alpha = rgba[idx + 3];
           if (modo === 'rosa_anda') {
-            if (alpha >= 10 && isPink(r, g, b)) matchSamples++;
+            if (alpha >= 10 && (isPink(r, g, b) || isMarcador(r, g, b))) matchSamples++;
           } else if (alpha < 10 || isRed(r, g, b)) {
             matchSamples++;
           }
@@ -381,21 +413,24 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
   //    andavel mais proxima em espiral quadrada — mantem a intencao (o mais
   //    perto possivel do que o usuario marcou) sem travar o build.
   const celulaValida = (c, r) => r >= 0 && r < rows && c >= 0 && c < cols && rowStrings[r][c] === '0';
-  let spawnCol = Math.floor(spawnWorldX / CELL_SIZE);
-  let spawnRow = Math.floor(spawnWorldY / CELL_SIZE);
-  if (!celulaValida(spawnCol, spawnRow)) {
-    let achou = null;
-    for (let radius = 1; radius <= Math.max(cols, rows) && !achou; radius++) {
-      for (let dr = -radius; dr <= radius && !achou; dr++) {
-        for (let dc = -radius; dc <= radius && !achou; dc++) {
+  // Espiral quadrada em volta de (col,row) ate achar celula andavel. Extraida
+  // pra funcao quando o marcador VERDE entrou: ele precisa exatamente do mesmo
+  // resgate que o amarelo, e duas copias divergiriam na primeira mexida.
+  function celulaAndavelMaisProxima(col, row) {
+    if (celulaValida(col, row)) return { c: col, r: row };
+    for (let radius = 1; radius <= Math.max(cols, rows); radius++) {
+      for (let dr = -radius; dr <= radius; dr++) {
+        for (let dc = -radius; dc <= radius; dc++) {
           if (Math.max(Math.abs(dr), Math.abs(dc)) !== radius) continue;
-          if (celulaValida(spawnCol + dc, spawnRow + dr)) achou = { c: spawnCol + dc, r: spawnRow + dr };
+          if (celulaValida(col + dc, row + dr)) return { c: col + dc, r: row + dr };
         }
       }
     }
-    if (!achou) throw new Error(`${refFile}: nenhuma celula andavel perto do ponto de spawn.`);
-    spawnCol = achou.c; spawnRow = achou.r;
+    return null;
   }
+  const casaDoSpawn = celulaAndavelMaisProxima(Math.floor(spawnWorldX / CELL_SIZE), Math.floor(spawnWorldY / CELL_SIZE));
+  if (!casaDoSpawn) throw new Error(`${refFile}: nenhuma celula andavel perto do ponto de spawn.`);
+  const spawnCol = casaDoSpawn.c, spawnRow = casaDoSpawn.r;
   spawnWorldX = spawnCol * CELL_SIZE + CELL_SIZE / 2;
   spawnWorldY = spawnRow * CELL_SIZE + CELL_SIZE / 2;
 
@@ -430,11 +465,60 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
     }
     rowStrings[row] = linhaNova;
   }
+  // 5) Circulo VERDE: por onde entra todo POKE novo do lado inimigo. Resolvido
+  //    DEPOIS da poda de propósito — assim ele nunca cai num bolsao que o
+  //    pathfinder trata como bloqueado, e o inimigo nasce sempre num lugar de
+  //    onde da pra alcancar o jogador. Arte sem circulo verde nao ganha o
+  //    campo, e quem consome trata a ausencia como "usa o spawn de sempre".
+  let spawnInimigo = null;
+  const blobVerde = maiorBlob(width, height, rgba, isGreen);
+  if (blobVerde && blobVerde.pixels >= MIN_PIXELS_DO_MARCADOR) {
+    let { x: vx, y: vy } = paraMundo(blobVerde.x, blobVerde.y);
+    if (!dentroDoMapa({ x: vx, y: vy })) {
+      const antesX = vx, antesY = vy;
+      vx = Math.min(Math.max(vx, CELL_SIZE), MAP_BOUNDS.width - CELL_SIZE);
+      vy = Math.min(Math.max(vy, CELL_SIZE), MAP_BOUNDS.height - CELL_SIZE);
+      avisos.push(
+        `${refFile}: circulo VERDE em img(${blobVerde.x | 0},${blobVerde.y | 0}) cai fora da janela visivel ` +
+        `(daria ${antesX.toFixed(0)},${antesY.toFixed(0)}). Projetado pra ${vx.toFixed(0)},${vy.toFixed(0)}.`,
+      );
+    }
+    const casa = celulaAndavelMaisProxima(Math.floor(vx / CELL_SIZE), Math.floor(vy / CELL_SIZE));
+    if (!casa) throw new Error(`${refFile}: nenhuma celula andavel perto do circulo verde.`);
+    spawnInimigo = { x: casa.c * CELL_SIZE + CELL_SIZE / 2, y: casa.r * CELL_SIZE + CELL_SIZE / 2 };
+    if (spawnInimigo.x === spawnWorldX && spawnInimigo.y === spawnWorldY) {
+      avisos.push(
+        `${refFile}: circulo verde e circulo amarelo caem na MESMA celula (${spawnWorldX},${spawnWorldY}) — ` +
+        'jogador e inimigo nasceriam um em cima do outro. Pinte os dois mais afastados.',
+      );
+    }
+  } else if (blobVerde) {
+    avisos.push(
+      `${refFile}: ha tinta verde mas o maior blob tem so ${blobVerde.pixels}px (< ${MIN_PIXELS_DO_MARCADOR}px) — ` +
+      'tratado como vegetacao da arte, nao como marcador de entrada do inimigo.',
+    );
+  }
+
   const walkableFinal = walkableCount - podadas;
   const pct = ((walkableFinal / (cols * rows)) * 100).toFixed(0);
+
+  // A poda descartar MAIS do que ficou nao e "uns bolsoes soltos": e o spawn
+  // ter caido no pedaco errado da pintura. Foi exatamente o que aconteceu com
+  // dragon.png na leva 2026-08-22 — o circulo amarelo caiu fora da janela
+  // visivel, foi projetado pra borda, e a borda caiu num quartinho de 47
+  // celulas isolado dos 243 do corredor principal. O mapa fica jogavel, entao
+  // nada falha: some 84% da pintura sem uma linha de aviso. Este e o aviso.
+  if (podadas > walkableFinal) {
+    avisos.push(
+      `${refFile}: a poda por conectividade descartou MAIS area do que manteve (${podadas} podadas vs ${walkableFinal} mantidas). ` +
+      `O spawn (${spawnWorldX},${spawnWorldY}) caiu num pedaco isolado da pintura, nao no corredor principal. ` +
+      'Confira o gabarito (`node scripts/conferir-walk-block.mjs`): ou o marcador esta no bolsao errado, ou falta ligar o bolsao ao resto.',
+    );
+  }
   console.log(
     `${bg.padEnd(24)} ${String(walkableFinal).padStart(4)}/${cols * rows} andaveis (${pct.padStart(2)}%), ` +
-    `${String(podadas).padStart(3)} isoladas podadas, spawn (${spawnWorldX},${spawnWorldY}) [${origemDoSpawn}]`,
+    `${String(podadas).padStart(3)} isoladas podadas, spawn (${spawnWorldX},${spawnWorldY}) [${origemDoSpawn}]` +
+    (spawnInimigo ? `, inimigo (${spawnInimigo.x},${spawnInimigo.y}) [verde]` : ''),
   );
 
   const presos = SHARED_SPAWN_POINTS.filter((p) => rowStrings[Math.floor(p.y / CELL_SIZE)][Math.floor(p.x / CELL_SIZE)] === '1');
@@ -455,6 +539,7 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
     spawnPoint: { x: spawnWorldX, y: spawnWorldY },
     spawnOrigem: origemDoSpawn === 'centroide rosa' ? 'centroide-rosa'
       : origemDoSpawn === 'amarelo projetado' ? 'amarelo-projetado' : 'amarelo',
+    ...(spawnInimigo ? { spawnInimigo } : {}),
   };
 }
 
@@ -499,6 +584,15 @@ export interface ColisaoPintada {
    *   'centroide-rosa'     sem circulo — nasce no meio da area andavel.
    */
   spawnOrigem: 'amarelo' | 'amarelo-projetado' | 'centroide-rosa';
+  /**
+   * Por onde entra todo POKE novo do lado INIMIGO — o circulo VERDE pintado,
+   * irmao do amarelo. So as arenas de duelo tem (dojo, dragon); arte sem
+   * circulo verde omite o campo, e quem consome cai no spawn de sempre.
+   *
+   * Resolvido depois da poda de conectividade, entao e sempre uma celula de
+   * onde da pra alcancar o jogador.
+   */
+  spawnInimigo?: { x: number; y: number };
 }
 
 export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = ${JSON.stringify(resultados, null, 2)};

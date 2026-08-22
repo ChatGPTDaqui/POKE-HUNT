@@ -23,14 +23,24 @@ import { describe, expect, it } from 'vitest'
 
 import { BIOMAS } from './biomas'
 import { COLISAO_POR_ARTE } from './generated/subBiomaCollision.generated'
-import { MAPS, getMap, mapDefParaSala, spawnPointParaSala, isCellBlocked } from './maps'
+import { MAPS, getMap, mapDefParaSala, spawnPointParaSala, spawnInimigoParaSala, isCellBlocked, type MapDef } from './maps'
+import { LANCE_MAP_ID } from './nightmareMaps'
 
-// Unica arte de sala sem referencia pintada hoje. Lista explicita pra uma
-// arte nova nao entrar de carona no "ainda faltam algumas" — quando alguem
-// pintar o Dojo, este teste avisa que da pra esvaziar a lista.
-const ARTES_SEM_PINTURA = new Set(['assets/hunt-backgrounds/dojo.png'])
+// Vazia desde 2026-08-22: o Dojo era a ultima arte de sala sem referencia
+// pintada, e a leva daquele dia fechou ela junto com a arena do dragao. A
+// constante FICA — e o gancho pra proxima arte que entrar sem pintura ter que
+// se declarar aqui em vez de sumir dentro de um "ainda faltam algumas".
+const ARTES_SEM_PINTURA = new Set<string>()
 
-/** Toda arte que alguma sala ou alguma hunt pode botar na tela. */
+/**
+ * Toda arte que alguma sala ou alguma hunt pode botar na tela.
+ *
+ * Percorre os MAPAS tambem, e nao so `BIOMAS`, porque arte de hunt sem sala
+ * (arena do Campeao Lance, BOSS, Modo Pesadelo, Treinamento) nao aparece em
+ * bioma nenhum — `dragon.png` e exatamente esse caso e ficaria de fora do
+ * inventario, marcada como pintura orfa mesmo estando em uso. E o mesmo furo
+ * que o cabecalho deste arquivo descreve, so que do lado do inventario.
+ */
 function artesEmUso(): Map<string, string> {
   const usos = new Map<string, string>()
   for (const bioma of BIOMAS) {
@@ -38,6 +48,9 @@ function artesEmUso(): Map<string, string> {
     for (const sub of bioma.subBiomas) {
       if (sub.bg?.image) usos.set(sub.bg.image, `sub-bioma ${sub.chave}`)
     }
+  }
+  for (const [id, map] of Object.entries(MAPS)) {
+    if (map.bg?.image) usos.set(map.bg.image, `hunt ${id}`)
   }
   return usos
 }
@@ -122,6 +135,8 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
       'abyss.jpg', 'ice-cave.jpg', 'fairy-cave.jpg', 'island.jpg', 'lake.jpg',
       'metropolis.jpg', 'slum.jpg', 'wasteland.jpg', 'town-night.jpg',
       'town.jpg', 'volcano.jpg',
+      // Leva 2026-08-22, as duas arenas de duelo.
+      'dojo.png', 'dragon.png',
     ]
 
     const semCirculo: string[] = []
@@ -149,10 +164,61 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
       .map(([arte]) => arte.replace('assets/hunt-backgrounds/', ''))
       .sort()
     expect(inventados).toEqual([
-      'abyss.jpg', 'fairy-cave.jpg', 'ice-cave.jpg', 'island.jpg', 'lake.jpg',
-      'metropolis.jpg', 'slum.jpg', 'town-night.jpg', 'town.jpg',
-      'volcano.jpg', 'wasteland.jpg',
+      'abyss.jpg', 'dojo.png', 'dragon.png', 'fairy-cave.jpg', 'ice-cave.jpg',
+      'island.jpg', 'lake.jpg', 'metropolis.jpg', 'slum.jpg', 'town-night.jpg',
+      'town.jpg', 'volcano.jpg', 'wasteland.jpg',
     ])
+  })
+
+  it('a arena do Campeao Lance tem grade — ela nao passa por nenhum outro teste daqui', () => {
+    // `boss_lance` nao e sub-bioma nem espelho `nightmare_`, entao escapava dos
+    // dois loops acima. Era literalmente a hunt mais longa do jogo rodando com
+    // o mapa inteiro aberto.
+    const arena = mapDefParaSala(LANCE_MAP_ID, null)
+    expect(arena, 'a arena do Lance sumiu de MAPS').not.toBeNull()
+    expect(arena!.collisionGrid).toEqual(COLISAO_POR_ARTE['assets/hunt-backgrounds/dragon.png'].grid)
+    expect(arena!.colisaoDefineLimite).toBe(true)
+  })
+
+  describe('bola verde: por onde entra o POKE do lado inimigo', () => {
+    const ARENAS = ['assets/hunt-backgrounds/dojo.png', 'assets/hunt-backgrounds/dragon.png']
+
+    it('so as duas arenas de duelo tem bola verde', () => {
+      const comVerde = Object.entries(COLISAO_POR_ARTE)
+        .filter(([, c]) => c.spawnInimigo)
+        .map(([arte]) => arte)
+        .sort()
+      // As outras 29 nao podem ganhar o campo por acidente: verde e a cor mais
+      // comum da arte deste jogo, e um teste de cor frouxo poria "entrada do
+      // inimigo" em cima de um arbusto qualquer.
+      expect(comVerde).toEqual(ARENAS)
+    })
+
+    it('a bola verde cai em celula andavel, igual a amarela', () => {
+      for (const arte of ARENAS) {
+        const pintada = COLISAO_POR_ARTE[arte]
+        const mapDef = { collisionGrid: pintada.grid, colisaoDefineLimite: true } as MapDef
+        expect(isCellBlocked(mapDef, pintada.spawnInimigo!.x, pintada.spawnInimigo!.y), `${arte}: inimigo nasce na parede`).toBe(false)
+      }
+    })
+
+    it('verde e amarela nao caem na mesma celula', () => {
+      // Se caissem, jogador e inimigo nasceriam um dentro do outro e o duelo
+      // comecaria com os dois em cima do mesmo pixel.
+      for (const arte of ARENAS) {
+        const { spawnPoint, spawnInimigo } = COLISAO_POR_ARTE[arte]
+        expect(`${spawnInimigo!.x},${spawnInimigo!.y}`, arte).not.toBe(`${spawnPoint.x},${spawnPoint.y}`)
+      }
+    })
+
+    it('a arena do Lance resolve a bola verde pela arte que ela mostra', () => {
+      expect(spawnInimigoParaSala(LANCE_MAP_ID, null))
+        .toEqual(COLISAO_POR_ARTE['assets/hunt-backgrounds/dragon.png'].spawnInimigo)
+    })
+
+    it('hunt sem bola verde devolve null em vez de inventar um ponto', () => {
+      expect(spawnInimigoParaSala('route_46', null)).toBeNull()
+    })
   })
 
   it('toda grade tem o tamanho do mapa inteiro (35x23 celulas de 40px)', () => {
