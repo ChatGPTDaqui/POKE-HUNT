@@ -10,7 +10,7 @@ import type { GameStateData, AutoPotRule, AutoCatchConfig, AutoCatchRule, PerfSt
 import { SPECIES, computeStatsAtLevel, type PokeInstance, type StatBlock } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
 import { NATURES_NEUTRAS, type NatureKey } from '@/data/natures'
-import { activeAbilitiesPadrao, golpesAprendidosAte } from '@/data/activeAbilities'
+import { activeAbilitiesPadrao, golpesAprendidosAte, sanearEscolhaDeGolpes } from '@/data/activeAbilities'
 import type { StatusCondition } from '@/data/statusEffects'
 
 type Json = Database['public']['Tables']['players']['Row']['auto_toggles']
@@ -132,8 +132,23 @@ export function rowToPoke(row: PokemonRow): PokeInstance {
     //
     // O filtro por especie desconhecida acompanha `unlockedAbilities`: sem
     // species nao ha padrao a montar.
-    activeAbilities: row.active_abilities
-      ?? (species ? activeAbilitiesPadrao(species, row.level) : undefined),
+    //
+    // SANEADA na carga, e nao lida crua, pela MESMA regra que o combate usa
+    // (`sanearEscolhaDeGolpes`). Sem isto a escolha gravada podia apontar pra
+    // golpe que o learnset atual nao tem mais — e como a coluna
+    // `unlocked_abilities` e reescrita com o recalculo acima em todo flush, a
+    // RPC `definir_golpes_ativos` passava a recusar QUALQUER edicao daquele
+    // POKE ("esse POKE nao conhece esse golpe"), inclusive remover outro
+    // golpe: a tela mandava de volta a lista crua, com a chave orfa dentro.
+    // Ver a nota inteira em data/activeAbilities.ts#sanearEscolhaDeGolpes.
+    activeAbilities: species
+      ? sanearEscolhaDeGolpes(
+        row.active_abilities ?? activeAbilitiesPadrao(species, row.level),
+        golpesAprendidosAte(species, row.level),
+        species,
+        row.level,
+      )
+      : (row.active_abilities ?? undefined),
     // Status NAO-VOLATIL. Sobrevive a sessao porque nos jogos ele sobrevive a
     // batalha — so item ou Centro Pokemon tiram. A confusao NAO vem daqui: e
     // volatil, mora na entidade de combate e some ao trocar de cena.

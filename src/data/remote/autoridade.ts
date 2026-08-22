@@ -341,9 +341,9 @@ export async function liquidar(): Promise<void> {
     //    o 401 (token local sumido) escapava por este mesmo buraco.
     //
     // MAS nem todo 409 de `/sessao/flush` significa "sessao sumiu" — o CAS de
-    // `gravarEstado` (server/src/progresso.ts) tambem responde 409 quando OUTRA
-    // escrita em `players` (config de auto, comprar, vender) colidiu com o
-    // flush, e essa colisao E transitoria (o server ja retenta algumas vezes
+    // `gravarEstado` (authority/src/progresso.ts) tambem responde 409 quando
+    // OUTRA escrita em `players` (config de auto, comprar, vender) colidiu com
+    // o flush, e essa colisao E transitoria (o server ja retenta algumas vezes
     // sozinho antes de desistir). BUG REAL que isto corrigia: tratar esse 409
     // como "sessao sumiu" parava o timer de flush no meio de uma cacada viva —
     // no pior caso, bem na hora de fechar a sequencia do Campeao Lance, jogando
@@ -352,6 +352,14 @@ export async function liquidar(): Promise<void> {
     // 409 cai no `reportarErro` de baixo e a proxima tentativa (30s ou
     // `commitAgora`) tenta de novo sozinha. 401 nao tem esse ambiguidade —
     // token local sumido so tem um significado.
+    //
+    // PH-67: `pg_advisory_xact_lock` no servidor serializa as escritas que
+    // colidiam aqui, entao esse 409 fica bem mais raro (so sobra se as 3
+    // tentativas do server ainda assim colidirem). Decisao explicita: este
+    // tratamento fica — defesa em profundidade, nao caminho morto. O client
+    // nao tem como saber se um 409 de fato esgotou o retry do servidor ou se
+    // e outra causa qualquer; continuar tratando como transitorio (cai no
+    // `reportarErro`, tenta de novo sozinho) e sempre a leitura mais segura.
     if (
       erro instanceof ErroServidor
       && ((erro.status === 409 && erro.message === 'nenhuma sessao aberta') || erro.status === 401)
