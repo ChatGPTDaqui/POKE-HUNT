@@ -2,7 +2,7 @@
 // sem invariante alem do dono da linha e do check de tamanho ja no banco) +
 // Supabase Realtime no lugar do polling de 6s — mensagem de outro jogador
 // chega via websocket, nao por reconsulta periodica.
-import { supabase } from '@/lib/supabase'
+import { schema, supabase } from '@/lib/supabase'
 import { ErroServidor } from './servidor'
 import type { AnexoChat, MensagemChat } from './servidor'
 
@@ -35,7 +35,7 @@ export function assinarChatAoVivo(aoChegar: (mensagem: MensagemChat) => void): (
     .channel('chat-mundo')
     .on(
       'postgres_changes',
-      { event: 'INSERT', schema: 'dev', table: 'chat_messages' },
+      { event: 'INSERT', schema, table: 'chat_messages' },
       (payload) => aoChegar(payload.new as unknown as MensagemChat),
     )
     .subscribe()
