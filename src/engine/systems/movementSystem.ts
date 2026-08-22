@@ -2,7 +2,7 @@
 import { randRange } from '@/core/random'
 import type { Rng } from '@/core/rng'
 import { mapWalkRadius, isCellBlocked, type MapDef } from '@/data/maps'
-import { COLLISION_GRID_CELL_SIZE } from '@/data/generated/collisionGrids.generated'
+import { COLLISION_GRID_CELL_SIZE } from '@/data/collisionConstants'
 import { findPath } from '@/core/pathfinding'
 import { engageRangeFor } from './combatSystem'
 import { isDead, distanceTo } from '../entity'
