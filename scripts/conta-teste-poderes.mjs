@@ -23,7 +23,7 @@
 // ---------------------------------------------------------------------------
 // POR QUE O ENTEI E MONTADO PELO MOTOR, E NAO POR INSERT NA MAO
 // ---------------------------------------------------------------------------
-// `createPokeInstance` (bundle `server/engine/headless.js`) aplica a formula de
+// `createPokeInstance` (bundle `authority/engine/headless.js`) aplica a formula de
 // atributo, a curva de EXP da especie, o learnset ate o nivel e os 4 golpes
 // ativos padrao. Escrever a linha a mao significaria reimplementar isso tudo, e
 // qualquer erro sairia como um POKE silenciosamente errado — atributo que nao
@@ -46,6 +46,7 @@ import { readFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { resolverSchema, cabecalhosRest } from './lib/schema-alvo.cjs';
 
 const RAIZ = dirname(dirname(fileURLToPath(import.meta.url)));
 const DOMINIO = '@teste.pokehunt.local';
@@ -79,6 +80,8 @@ function lerEnv() {
   return env;
 }
 
+// Cabecalhos da Admin API de auth. NAO leva profile de schema: `auth.users`
+// nao mora nem em `public` nem em `dev`, e o header seria ignorado.
 function cabecalhos(env, extra = {}) {
   return {
     apikey: env.SUPABASE_SERVICE_ROLE_KEY,
@@ -88,10 +91,16 @@ function cabecalhos(env, extra = {}) {
   };
 }
 
+// Fixado uma vez em `main`, antes de qualquer chamada. Modulo-level porque as 5
+// chamadas a `rest` sao todas do mesmo alvo — passar o schema em cada uma so
+// daria mais lugar pra esquecer de passar.
+let SCHEMA = null;
+
 async function rest(env, caminho, init = {}) {
+  if (!SCHEMA) throw new Error('rest() chamado antes de resolver o schema alvo');
   const res = await fetch(`${env.SUPABASE_URL}/rest/v1/${caminho}`, {
     ...init,
-    headers: cabecalhos(env, init.headers),
+    headers: cabecalhosRest(env.SUPABASE_SERVICE_ROLE_KEY, SCHEMA, init.headers),
   });
   if (!res.ok) {
     console.error(`${init.method || 'GET'} ${caminho} falhou: ${res.status} ${await res.text()}`);
@@ -129,9 +138,13 @@ async function main() {
   }
 
   const aplicar = process.argv.includes('--aplicar');
+  SCHEMA = resolverSchema({ envSchema: env.SUPABASE_SCHEMA });
+  console.log(`Banco:  ${env.SUPABASE_URL}`);
+  console.log(`Schema: ${SCHEMA}`);
+  console.log(`Conta:  ${email}`);
   // `pathToFileURL` e obrigatorio no Windows: o import() dinamico do Node
   // interpreta "C:\..." como um esquema de URL chamado "c:" e recusa.
-  const motor = await import(pathToFileURL(join(RAIZ, 'server', 'engine', 'headless.js')).href);
+  const motor = await import(pathToFileURL(join(RAIZ, 'authority', 'engine', 'headless.js')).href);
   const { createPokeInstance, createRng, totalExpForLevel, ITEMS, MAPS, FAIXAS, GRUPOS_DO_LANCE } = motor;
 
   const conta = await acharConta(env, email);

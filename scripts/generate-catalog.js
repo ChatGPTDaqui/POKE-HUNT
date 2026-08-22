@@ -40,6 +40,7 @@ const fs = require('fs');
 const path = require('path');
 const sync = require('./sync-planilha.js');
 const { bloqueiaCatalogoAntigo } = require('./lib/guarda-catalogo-gen2.js');
+const { resolverSchema, cabecalhosRest } = require('./lib/schema-alvo.cjs');
 
 bloqueiaCatalogoAntigo(
   'npm run catalog:gerar',
@@ -75,6 +76,9 @@ function loadEnv() {
 }
 
 const ENV = loadEnv();
+const SCHEMA = resolverSchema({ envSchema: ENV.SUPABASE_SCHEMA });
+console.log(`Banco: ${ENV.SUPABASE_URL}`);
+console.log(`Schema: ${SCHEMA}`);
 
 // PostgREST corta em 1000 linhas por request, em silencio. Ler `species_moves`
 // (1865) sem paginar perderia 865 linhas sem erro nenhum — por isso a leitura
@@ -88,12 +92,10 @@ async function fetchAll(table, order) {
   for (;;) {
     const qs = `${table}?select=*${order ? `&order=${order}` : ''}`;
     const res = await fetch(`${ENV.SUPABASE_URL}/rest/v1/${qs}`, {
-      headers: {
-        apikey: ENV.SUPABASE_SERVICE_ROLE_KEY,
-        Authorization: `Bearer ${ENV.SUPABASE_SERVICE_ROLE_KEY}`,
+      headers: cabecalhosRest(ENV.SUPABASE_SERVICE_ROLE_KEY, SCHEMA, {
         Prefer: 'count=exact',
         Range: `${from}-${from + PAGE - 1}`,
-      },
+      }),
     });
     if (res.status >= 400) throw new Error(`lendo ${table}: ${res.status} ${await res.text()}`);
     const page = await res.json();

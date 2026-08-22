@@ -21,6 +21,63 @@ if (!STORAGE_SECRET && import.meta.env.PROD) {
   )
 }
 
+// --- varredura de chaves orfas no localStorage (PH-50) ---------------------
+//
+// Nada no app varria o localStorage atras de chaves que ele mesmo deixou de
+// usar. Troca de projeto Supabase, rotacao de VITE_AUTH_STORAGE_KEY, ou a
+// migracao do save local pro Postgres deixavam a entrada antiga no browser
+// pra sempre — inclusive `refresh_token` em texto puro (chave de projeto
+// morto nunca mais lida por `secureAuthStorage.getItem`, entao nunca passa
+// pelo decrypt, entao nunca teve o prefixo `enc:` aplicado; ver header do
+// arquivo pro porque criptografar isso importa).
+//
+// Denylist estreita de proposito, NUNCA allowlist: varrer e apagar tudo que
+// nao reconhece derrubaria `novo-poke-idle:tutoriais-vistos`, `:hud-scale`,
+// `:vidro-fosco` e qualquer chave nova que um `localStorage.setItem` futuro
+// venha a criar sem eu saber sobre ela hoje.
+const PADRAO_AUTH_TOKEN = /^sb-[a-z0-9]+-auth-token$/
+
+function refDoProjetoAtual(): string | null {
+  const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
+  if (!url) return null
+  try {
+    // supabase-js grava sob `sb-<ref>-auth-token`, onde <ref> e o primeiro
+    // rotulo do hostname (`https://<ref>.supabase.co`).
+    return new URL(url).hostname.split('.')[0] || null
+  } catch {
+    return null
+  }
+}
+
+// `novo-poke-idle:save` era o save do adaptador de localStorage puro, antes
+// da Fase 4 trocar pro `postgresStorage` (ver gameStateStore.ts). Nenhum
+// caminho de leitura hoje consulta essa chave (`lerSaveLocalLegado` existe
+// mas nao tem chamador — confirmado antes de escrever isto).
+const CHAVE_SAVE_LEGADO = 'novo-poke-idle:save'
+
+/**
+ * Roda uma vez no boot (chamada no fim deste modulo). Devolve as chaves
+ * removidas so pra teste/log — nada no app le o retorno.
+ */
+export function limparStorageOrfao(): string[] {
+  if (typeof window === 'undefined') return []
+  const refAtual = refDoProjetoAtual()
+  const removidas: string[] = []
+  for (const chave of Object.keys(window.localStorage)) {
+    // `refAtual === null` (env faltando/malformada): nao mexe em NENHUMA
+    // `sb-*-auth-token` — sem saber qual e a viva, apagar seria apagar a
+    // sessao atual tambem.
+    const authOrfa = refAtual !== null && PADRAO_AUTH_TOKEN.test(chave) && chave !== `sb-${refAtual}-auth-token`
+    const saveObsoleto = chave === CHAVE_SAVE_LEGADO
+    if (!authOrfa && !saveObsoleto) continue
+    window.localStorage.removeItem(chave)
+    removidas.push(chave)
+  }
+  return removidas
+}
+
+limparStorageOrfao()
+
 function encryptValue(value: string): string {
   // Simetrico com `decryptValue`: nunca lanca. Sem isso, uma falha aqui
   // estourava dentro do `setItem` que o supabase-js chama pra persistir o

@@ -6,6 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { resolverSchema, cabecalhosRest } = require('./lib/schema-alvo.cjs');
 
 const ROOT = path.join(__dirname, '..');
 const env = {};
@@ -16,15 +17,13 @@ for (const line of fs.readFileSync(path.join(ROOT, '.env'), 'utf8').split('\n'))
   env[t.slice(0, i).trim()] = t.slice(i + 1).trim();
 }
 
+const schema = resolverSchema({ envSchema: env.SUPABASE_SCHEMA });
+console.log(`Schema: ${schema}`);
+
 async function rest(pathname, init = {}) {
   const res = await fetch(`${env.SUPABASE_URL}/rest/v1/${pathname}`, {
     ...init,
-    headers: {
-      apikey: env.SUPABASE_SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-      'Content-Type': 'application/json',
-      ...(init.headers || {}),
-    },
+    headers: cabecalhosRest(env.SUPABASE_SERVICE_ROLE_KEY, schema, init.headers),
   });
   const text = await res.text();
   let body = null;

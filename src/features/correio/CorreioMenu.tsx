@@ -84,34 +84,17 @@ export function CorreioMenu() {
     return () => { cancelado = true }
   }, [])
 
-  // Realtime substitui o poll de 15s: qualquer INSERT/UPDATE nas MINHAS
-  // mensagens (mensagem nova, pedido, aviso de sistema) invalida a query.
+  // A ASSINATURA DE REALTIME NAO MORA MAIS AQUI. Ela subiu pra
+  // `hooks/usePendencias.ts#useCorreioAoVivo`, que roda enquanto o jogo esta
+  // aberto (o `ActionDock` do HUD sempre esta montado) — antes ela existia so
+  // com o Correio ABERTO, e era justamente por isso que o contador de pendencia
+  // dependia de um poll de 60s.
   //
-  // BUG REAL CORRIGIDO: `assinarCorreioAoVivo` usa `supabase.channel('correio-'+userId)`,
-  // nome fixo por usuario — chamar de novo com o mesmo nome ANTES do primeiro canal
-  // ser removido devolve o MESMO canal ja inscrito, e `.on()` nele estoura
-  // ("cannot add postgres_changes callbacks... after subscribe()"). Como a
-  // inscricao so acontece dentro do `.then()` de `getSession()` (gap assincrono),
-  // o StrictMode do React (ou so um remount rapido de verdade) roda o efeito de
-  // novo ANTES desse `.then()` resolver — a limpeza da 1a rodada ainda achava
-  // `parar` nulo (a inscricao nem tinha terminado) e nao desfazia nada; a 2a
-  // rodada inscrevia no mesmo canal ja vivo. `cancelado` fecha essa janela.
-  //
-  // O canal do MENU e o do FIO ABERTO sao dois, com nomes diferentes por
-  // construcao (`correio-<id>` aqui, e o de `Conversa.tsx` idem) — o Supabase
-  // permite duas assinaturas do mesmo nome? Nao: por isso `Conversa.tsx` abre o
-  // seu com o mesmo nome so quando montado, e este e removido junto do menu.
-  useEffect(() => {
-    let cancelado = false
-    let parar: (() => void) | null = null
-    void supabase.auth.getSession().then(({ data: sessao }) => {
-      if (cancelado) return
-      const userId = sessao.session?.user.id
-      if (!userId) return
-      parar = correioRpc.assinarCorreioAoVivo(userId, () => { void qc.invalidateQueries({ queryKey: ['correio'] }) })
-    })
-    return () => { cancelado = true; parar?.() }
-  }, [qc])
+  // Desde PH-81 cada assinante leva um sufixo de canal proprio, entao duas
+  // assinaturas ate SERIAM possiveis (o fio aberto tem a dele). O ponto aqui e
+  // outro: nao PRECISA. Este componente compartilha a `queryKey` ['correio']
+  // com o contador, entao a invalidacao que o Realtime dispara la ja atualiza a
+  // tela aberta aqui — um socket a menos por aba.
 
   const adicionar = useMutation({
     mutationFn: (n: string) => correioRpc.pedirAmizade(n),

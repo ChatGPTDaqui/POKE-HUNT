@@ -67,6 +67,24 @@ export const DEATH_ANIM_GRACE_PERIOD = 4.0 // segundos que um inimigo derrotado 
 const formulaEngine = createFormulaEngine(FORMULAS)
 export const OFFLINE_FARM_MAX_HOURS = formulaEngine.evalOrDefault('OFFLINE_FARM_MAX_HOURS', 6)
 export const OFFLINE_SIM_STEP_SECONDS = formulaEngine.evalOrDefault('OFFLINE_SIM_STEP_SECONDS', 0.1)
+// Mesmo passo fixo que useGameLoop.ts usa pro tick ao vivo (1/60s). PH-37: o
+// resim do servidor usava OFFLINE_SIM_STEP_SECONDS (0.1s, 6x mais grosso) pra
+// QUALQUER flush, inclusive o normal (<=LIMIAR_OFFLINE_SEGUNDOS). RNG e
+// sorteado por evento (ataque, status), mas O INSTANTE em que um evento
+// dispara depende de um cooldown cruzar zero — com passo mais grosso esse
+// cruzamento acontece em outro instante simulado, desalinhando a sequencia
+// de sorteios cedo. Client (1/60s) e servidor (0.1s) resimulando o MESMO
+// intervalo com o MESMO rng_state divergiam so por causa do tamanho do
+// passo, mesmo sem nenhuma interacao real do jogador no meio — e o POKE
+// levava level-up no client que o servidor nunca confirmava.
+//
+// Fix paliativo: bate o passo do servidor com o do client fora do regime
+// offline. Nao elimina 100% de divergencia (jogo ao vivo tem tempo real
+// variavel por tick do lado do client, resim do servidor sempre fixo), mas
+// fecha o desalinhamento de 6x que dominava o caso reproduzido. O jeito
+// definitivo de fechar isso de vez e o flush ser refeito (ver PH-62,
+// intervalo adaptativo) — nao antecipado aqui.
+export const LIVE_SIM_STEP_SECONDS = 1 / 60
 export const MIN_CATCHUP_GAP_SECONDS = 5
 export const MIN_OFFLINE_GAP_SECONDS = 60
 // Acima disso o gap caracteriza ausencia real (offline de verdade, nao so um
