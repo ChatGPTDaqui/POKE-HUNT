@@ -22,6 +22,19 @@ vi.mock('./db.js', async (importOriginal) => {
       tabelaPlayers.updated_at = new Date(new Date(tabelaPlayers.updated_at).getTime() + 1).toISOString()
       return [tabelaPlayers]
     }),
+    // PH-67: gravarEstado() troca o PATCH cru pela RPC gravar_progresso — o
+    // CAS simulado aqui e o MESMO da RPC real (migration 20260822120000),
+    // so a origem do sinal de conflito muda de "array vazio" pra
+    // "{ok:false}".
+    chamarRpc: vi.fn(async (_cfg: unknown, nome: string, args: { p_user_id?: string; p_patch?: Record<string, unknown>; p_updated_at_esperado?: string }) => {
+      if (nome !== 'gravar_progresso') throw new Error(`chamarRpc mock: rpc desconhecida "${nome}"`)
+      if (args.p_user_id !== tabelaPlayers.user_id) throw new Error(`chamarRpc mock: p_user_id inesperado "${args.p_user_id}"`)
+      const bateUpdatedAt = args.p_updated_at_esperado === tabelaPlayers.updated_at
+      if (!bateUpdatedAt) return { ok: false, conflito: true }
+      Object.assign(tabelaPlayers, args.p_patch)
+      tabelaPlayers.updated_at = new Date(new Date(tabelaPlayers.updated_at).getTime() + 1).toISOString()
+      return { ok: true, updatedAt: tabelaPlayers.updated_at }
+    }),
     atualizar: vi.fn(async () => {}),
     selecionarTudo: vi.fn(async () => []),
     inserir: vi.fn(async () => []),
