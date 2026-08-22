@@ -17,6 +17,7 @@ import {
 import { mochilaCarregada } from '@/stores/mochilaStore'
 import { ABATES_POR_SALA } from '@/data/biomas'
 import type { SalaAtiva } from '@/engine/types'
+import { supabase, schema, url as supabaseUrl, anonKey } from '@/lib/supabase'
 
 // Sem servidor nao ha nada pra reconciliar — a mochila local JA e a verdade.
 // Desligar so evita a lista de uids crescer a sessao inteira sem ninguem ler.
@@ -492,6 +493,50 @@ export function sincronizarAuto(): void {
       sellConfig: s.autoSellConfig,
     },
   }).catch(reportarErro)
+}
+
+/**
+ * Ultimo `configurar_auto` ao sair da pagina (PH-42).
+ *
+ * `sincronizarAuto()` acima e fire-and-forget via `supabase.rpc()` — se o
+ * jogador desliga um toggle e recarrega logo em seguida, o navegador pode
+ * ABORTAR essa request no meio do unload. O boot da pagina nova chama
+ * `assentarSessaoPendente()` quase de imediato, que fecha a sessao pendente
+ * lendo `players` FRESCO do banco: se a escrita da config nunca chegou, o
+ * servidor resimula com o toggle ANTIGO (ex.: auto-catch ainda ligado) —
+ * exatamente o "toggle desligado captura mesmo assim" reproduzido ao vivo.
+ *
+ * `fetch` com `keepalive` em vez do client do supabase-js (que nao expoe essa
+ * opcao): mesma decisao de `flushAoSair()` em servidor.ts, raw fetch direto no
+ * endpoint RPC do PostgREST pra sobreviver ao unload.
+ */
+export function sincronizarAutoAoSair(): void {
+  if (!servidorAtivo()) return
+  const s = useGameStateStore.getState()
+  const patch = {
+    toggles: s.autoToggles,
+    catchConfig: s.autoCatchConfig,
+    potRules: s.autoPotRules,
+    catchRules: s.autoCatchRules,
+    statusItems: s.autoStatusConfig,
+    sellConfig: s.autoSellConfig,
+  }
+  void supabase.auth.getSession().then(({ data }) => {
+    const token = data.session?.access_token
+    if (!token) return
+    void fetch(`${supabaseUrl}/rest/v1/rpc/configurar_auto`, {
+      method: 'POST',
+      keepalive: true,
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${token}`,
+        'content-type': 'application/json',
+        'Accept-Profile': schema,
+        'Content-Profile': schema,
+      },
+      body: JSON.stringify({ p_patch: patch }),
+    })
+  })
 }
 
 // --- farm offline -----------------------------------------------------------
