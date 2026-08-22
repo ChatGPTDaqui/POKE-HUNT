@@ -25,7 +25,7 @@ if (!url || !anonKey) {
 // de teste clonado no mesmo projeto Supabase). database.types.ts so cobre
 // `public`; apontar pra `dev` mantem o client funcional mas perde o
 // type-check de tabela/coluna (regenerar tipos contra dev cobre isso depois).
-const schema = (import.meta.env.VITE_SUPABASE_SCHEMA || 'public') as 'public'
+export const schema = (import.meta.env.VITE_SUPABASE_SCHEMA || 'public') as 'public'
 
 export const supabase = createClient<Database>(url, anonKey, {
   db: { schema },
