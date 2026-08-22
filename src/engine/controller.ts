@@ -226,7 +226,13 @@ export const controller = {
         // nao soma HP. Sem esta linha a enfermeira seria a unica fonte de cura
         // sem retorno visual.
         if (draft.player.poke.hp < draft.player.poke.stats.hp) draft.player.vfxCuraHp = VFX_CURA_DURACAO
-        draft.player.poke = { ...draft.player.poke, hp: draft.player.poke.stats.hp }
+        // `status: null` limpa paralisia/veneno/etc residual (PH-45) — mesma
+        // classe do bug de fainted/state logo abaixo: `gameStateStore.healTeamFully()`
+        // ja zerava `status` no store persistido, mas so isso nao chegava aqui no
+        // world draft ativo, que e o que `combatSystem.ts` le de verdade
+        // (`entity.poke.status`). POKE saia do Hospital com HP cheio e ainda
+        // paralisado/envenenado.
+        draft.player.poke = { ...draft.player.poke, hp: draft.player.poke.stats.hp, status: null }
         // Repor o HP nao bastava: `fainted`/`state` continuavam em desmaiado.
         // Bug real reproduzido ao vivo — curar na enfermeira mostrava HP 14/14 e
         // "Desmaiado!" ao mesmo tempo, e o POKE seguia sem lutar ao entrar numa
