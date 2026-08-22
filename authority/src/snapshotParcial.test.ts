@@ -76,6 +76,9 @@ vi.mock('./db.js', async (importOriginal) => {
       return [...TIME, ...MOCHILA]
     }),
     atualizarRetornando: vi.fn(async () => [{ user_id: 'jogador-1', updated_at: 'x' }]),
+    // PH-67: gravarEstado() agora chama a RPC gravar_progresso em vez do
+    // PATCH cru — mesmo sucesso incondicional que o mock acima simulava.
+    chamarRpc: vi.fn(async () => ({ ok: true, updatedAt: 'x' })),
     atualizar: vi.fn(async () => {}),
     inserir: vi.fn(async (_cfg: unknown, tabela: string, linhas: unknown) => {
       INSERIDOS.push({ tabela, linhas: Array.isArray(linhas) ? linhas : [linhas] })

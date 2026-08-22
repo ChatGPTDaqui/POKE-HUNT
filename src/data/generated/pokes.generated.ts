@@ -14,6 +14,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 62,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 85,
     "base": {
       "hp": 39,
       "atkFis": 52,
@@ -84,6 +85,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 63,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 90,
     "base": {
       "hp": 44,
       "atkFis": 48,
@@ -162,6 +164,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 64,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 69,
     "base": {
       "hp": 45,
       "atkFis": 49,
@@ -240,6 +243,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 3,
     "baseExp": 261,
     "growthCurve": "SLOW",
+    "pesoHg": 554,
     "base": {
       "hp": 90,
       "atkFis": 85,
@@ -326,6 +330,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 3,
     "baseExp": 261,
     "growthCurve": "SLOW",
+    "pesoHg": 526,
     "base": {
       "hp": 90,
       "atkFis": 90,
@@ -412,6 +417,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 3,
     "baseExp": 261,
     "growthCurve": "SLOW",
+    "pesoHg": 600,
     "base": {
       "hp": 90,
       "atkFis": 100,
@@ -498,6 +504,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 3,
     "baseExp": 261,
     "growthCurve": "SLOW",
+    "pesoHg": 1780,
     "base": {
       "hp": 90,
       "atkFis": 85,
@@ -576,6 +583,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 3,
     "baseExp": 261,
     "growthCurve": "SLOW",
+    "pesoHg": 1980,
     "base": {
       "hp": 115,
       "atkFis": 115,
@@ -658,6 +666,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 3,
     "baseExp": 261,
     "growthCurve": "SLOW",
+    "pesoHg": 1870,
     "base": {
       "hp": 100,
       "atkFis": 75,
@@ -740,6 +749,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 3,
     "baseExp": 306,
     "growthCurve": "SLOW",
+    "pesoHg": 2160,
     "base": {
       "hp": 106,
       "atkFis": 90,
@@ -826,6 +836,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 3,
     "baseExp": 306,
     "growthCurve": "SLOW",
+    "pesoHg": 1990,
     "base": {
       "hp": 106,
       "atkFis": 130,
@@ -912,6 +923,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 270,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 50,
     "base": {
       "hp": 100,
       "atkFis": 100,
@@ -990,6 +1002,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 3,
     "baseExp": 306,
     "growthCurve": "SLOW",
+    "pesoHg": 1220,
     "base": {
       "hp": 106,
       "atkFis": 110,
@@ -1092,6 +1105,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 270,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 40,
     "base": {
       "hp": 100,
       "atkFis": 100,
@@ -1166,6 +1180,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 60,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 200,
     "base": {
       "hp": 40,
       "atkFis": 80,
@@ -1252,6 +1267,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 52,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 20,
     "base": {
       "hp": 40,
       "atkFis": 60,
@@ -1322,6 +1338,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 51,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 35,
     "base": {
       "hp": 30,
       "atkFis": 56,
@@ -1396,6 +1413,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 142,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 130,
     "base": {
       "hp": 60,
       "atkFis": 62,
@@ -1470,6 +1488,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 236,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 1000,
     "base": {
       "hp": 80,
       "atkFis": 82,
@@ -1552,6 +1571,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 64,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 54,
     "base": {
       "hp": 45,
       "atkFis": 50,
@@ -1638,6 +1658,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 138,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 86,
     "base": {
       "hp": 60,
       "atkFis": 65,
@@ -1716,6 +1737,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 60,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 40,
     "base": {
       "hp": 50,
       "atkFis": 75,
@@ -1794,6 +1816,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 137,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 64,
     "base": {
       "hp": 65,
       "atkFis": 90,
@@ -1868,6 +1891,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 221,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 155,
     "base": {
       "hp": 80,
       "atkFis": 105,
@@ -1930,6 +1954,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 90,
     "baseExp": 65,
     "growthCurve": "SLOW",
+    "pesoHg": 25,
     "base": {
       "hp": 60,
       "atkFis": 40,
@@ -2012,6 +2037,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 87,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 350,
     "base": {
       "hp": 65,
       "atkFis": 55,
@@ -2110,6 +2136,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 64,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 64,
     "base": {
       "hp": 45,
       "atkFis": 49,
@@ -2188,6 +2215,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 142,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 158,
     "base": {
       "hp": 60,
       "atkFis": 62,
@@ -2258,6 +2286,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 236,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 1005,
     "base": {
       "hp": 80,
       "atkFis": 82,
@@ -2336,6 +2365,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 50,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 5,
     "base": {
       "hp": 35,
       "atkFis": 35,
@@ -2438,6 +2468,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 119,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 10,
     "base": {
       "hp": 55,
       "atkFis": 45,
@@ -2532,6 +2563,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 207,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 30,
     "base": {
       "hp": 75,
       "atkFis": 55,
@@ -2626,6 +2658,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 235,
     "baseExp": 36,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 18,
     "base": {
       "hp": 30,
       "atkFis": 30,
@@ -2712,6 +2745,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 149,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 85,
     "base": {
       "hp": 75,
       "atkFis": 75,
@@ -2810,6 +2844,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 39,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 29,
     "base": {
       "hp": 45,
       "atkFis": 30,
@@ -2844,6 +2879,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 72,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 99,
     "base": {
       "hp": 50,
       "atkFis": 20,
@@ -2870,6 +2906,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 178,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 320,
     "base": {
       "hp": 60,
       "atkFis": 45,
@@ -2956,6 +2993,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 39,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 32,
     "base": {
       "hp": 40,
       "atkFis": 35,
@@ -2990,6 +3028,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 72,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 100,
     "base": {
       "hp": 45,
       "atkFis": 25,
@@ -3016,6 +3055,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 178,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 295,
     "base": {
       "hp": 65,
       "atkFis": 90,
@@ -3090,6 +3130,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 57,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 54,
     "base": {
       "hp": 35,
       "atkFis": 70,
@@ -3160,6 +3201,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 142,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 295,
     "base": {
       "hp": 60,
       "atkFis": 95,
@@ -3226,6 +3268,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 61,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 300,
     "base": {
       "hp": 60,
       "atkFis": 55,
@@ -3304,6 +3347,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 158,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 125,
     "base": {
       "hp": 70,
       "atkFis": 65,
@@ -3382,6 +3426,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 100,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 560,
     "base": {
       "hp": 70,
       "atkFis": 110,
@@ -3476,6 +3521,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 175,
     "growthCurve": "SLOW",
+    "pesoHg": 550,
     "base": {
       "hp": 65,
       "atkFis": 125,
@@ -3562,6 +3608,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 53,
     "growthCurve": "FAST",
+    "pesoHg": 108,
     "base": {
       "hp": 40,
       "atkFis": 20,
@@ -3640,6 +3687,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 90,
     "baseExp": 137,
     "growthCurve": "FAST",
+    "pesoHg": 356,
     "base": {
       "hp": 55,
       "atkFis": 35,
@@ -3714,6 +3762,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 50,
     "growthCurve": "FAST",
+    "pesoHg": 85,
     "base": {
       "hp": 40,
       "atkFis": 60,
@@ -3808,6 +3857,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 90,
     "baseExp": 140,
     "growthCurve": "FAST",
+    "pesoHg": 335,
     "base": {
       "hp": 70,
       "atkFis": 90,
@@ -3894,6 +3944,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 78,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 380,
     "base": {
       "hp": 65,
       "atkFis": 65,
@@ -3980,6 +4031,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 58,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 72,
     "base": {
       "hp": 50,
       "atkFis": 65,
@@ -4058,6 +4110,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 163,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 1258,
     "base": {
       "hp": 75,
       "atkFis": 90,
@@ -4148,6 +4201,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 25,
     "baseExp": 175,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 1180,
     "base": {
       "hp": 70,
       "atkFis": 130,
@@ -4242,6 +4296,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 175,
     "growthCurve": "SLOW",
+    "pesoHg": 540,
     "base": {
       "hp": 80,
       "atkFis": 125,
@@ -4336,6 +4391,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 142,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 225,
     "base": {
       "hp": 59,
       "atkFis": 63,
@@ -4410,6 +4466,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 239,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 855,
     "base": {
       "hp": 79,
       "atkFis": 83,
@@ -4484,6 +4541,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 64,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 196,
     "base": {
       "hp": 50,
       "atkFis": 52,
@@ -4570,6 +4628,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 175,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 766,
     "base": {
       "hp": 80,
       "atkFis": 82,
@@ -4648,6 +4707,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 60,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 124,
     "base": {
       "hp": 40,
       "atkFis": 50,
@@ -4722,6 +4782,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 135,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 200,
     "base": {
       "hp": 65,
       "atkFis": 65,
@@ -4792,6 +4853,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 67,
     "growthCurve": "SLOW",
+    "pesoHg": 455,
     "base": {
       "hp": 40,
       "atkFis": 40,
@@ -4882,6 +4944,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 60,
     "baseExp": 180,
     "growthCurve": "SLOW",
+    "pesoHg": 550,
     "base": {
       "hp": 80,
       "atkFis": 70,
@@ -4968,6 +5031,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 63,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 360,
     "base": {
       "hp": 90,
       "atkFis": 65,
@@ -5054,6 +5118,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 172,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 785,
     "base": {
       "hp": 95,
       "atkFis": 75,
@@ -5132,6 +5197,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 65,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 900,
     "base": {
       "hp": 65,
       "atkFis": 45,
@@ -5222,6 +5288,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 166,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 1200,
     "base": {
       "hp": 90,
       "atkFis": 70,
@@ -5312,6 +5379,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 61,
     "growthCurve": "SLOW",
+    "pesoHg": 40,
     "base": {
       "hp": 30,
       "atkFis": 65,
@@ -5402,6 +5470,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 225,
     "baseExp": 65,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 65,
     "base": {
       "hp": 30,
       "atkFis": 105,
@@ -5484,6 +5553,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 60,
     "baseExp": 166,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 600,
     "base": {
       "hp": 55,
       "atkFis": 130,
@@ -5558,6 +5628,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 225,
     "baseExp": 59,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 80,
     "base": {
       "hp": 30,
       "atkFis": 40,
@@ -5628,6 +5699,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 154,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 250,
     "base": {
       "hp": 55,
       "atkFis": 65,
@@ -5694,6 +5766,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 225,
     "baseExp": 64,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 150,
     "base": {
       "hp": 45,
       "atkFis": 67,
@@ -5772,6 +5845,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 60,
     "baseExp": 158,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 390,
     "base": {
       "hp": 80,
       "atkFis": 92,
@@ -5838,6 +5912,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 225,
     "baseExp": 68,
     "growthCurve": "SLOW",
+    "pesoHg": 345,
     "base": {
       "hp": 30,
       "atkFis": 45,
@@ -5936,6 +6011,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 40,
     "growthCurve": "SLOW",
+    "pesoHg": 100,
     "base": {
       "hp": 20,
       "atkFis": 10,
@@ -5970,6 +6046,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 189,
     "growthCurve": "SLOW",
+    "pesoHg": 2350,
     "base": {
       "hp": 95,
       "atkFis": 125,
@@ -6044,6 +6121,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 187,
     "growthCurve": "SLOW",
+    "pesoHg": 2200,
     "base": {
       "hp": 130,
       "atkFis": 85,
@@ -6126,6 +6204,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 63,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 95,
     "base": {
       "hp": 50,
       "atkFis": 65,
@@ -6212,6 +6291,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 142,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 250,
     "base": {
       "hp": 65,
       "atkFis": 80,
@@ -6290,6 +6370,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 239,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 888,
     "base": {
       "hp": 85,
       "atkFis": 105,
@@ -6368,6 +6449,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 66,
     "growthCurve": "SLOW",
+    "pesoHg": 120,
     "base": {
       "hp": 75,
       "atkFis": 38,
@@ -6454,6 +6536,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 161,
     "growthCurve": "SLOW",
+    "pesoHg": 225,
     "base": {
       "hp": 125,
       "atkFis": 58,
@@ -6544,6 +6627,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 88,
     "growthCurve": "FAST",
+    "pesoHg": 85,
     "base": {
       "hp": 70,
       "atkFis": 20,
@@ -6630,6 +6714,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 189,
     "growthCurve": "FAST",
+    "pesoHg": 285,
     "base": {
       "hp": 100,
       "atkFis": 50,
@@ -6708,6 +6793,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 225,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 339,
     "base": {
       "hp": 90,
       "atkFis": 75,
@@ -6758,6 +6844,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 42,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 85,
     "base": {
       "hp": 55,
       "atkFis": 45,
@@ -6832,6 +6919,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 90,
     "baseExp": 151,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 750,
     "base": {
       "hp": 95,
       "atkFis": 85,
@@ -6898,6 +6986,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 88,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 39,
     "base": {
       "hp": 65,
       "atkFis": 95,
@@ -7000,6 +7089,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 60,
     "baseExp": 144,
     "growthCurve": "FAST",
+    "pesoHg": 50,
     "base": {
       "hp": 65,
       "atkFis": 55,
@@ -7094,6 +7184,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 60,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 120,
     "base": {
       "hp": 35,
       "atkFis": 65,
@@ -7168,6 +7259,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 168,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 285,
     "base": {
       "hp": 75,
       "atkFis": 105,
@@ -7242,6 +7334,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 25,
     "baseExp": 170,
     "growthCurve": "SLOW",
+    "pesoHg": 2200,
     "base": {
       "hp": 85,
       "atkFis": 40,
@@ -7340,6 +7433,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 243,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 1520,
     "base": {
       "hp": 75,
       "atkFis": 95,
@@ -7414,6 +7508,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 50,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 18,
     "base": {
       "hp": 40,
       "atkFis": 45,
@@ -7492,6 +7587,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 122,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 300,
     "base": {
       "hp": 63,
       "atkFis": 60,
@@ -7566,6 +7662,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 216,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 395,
     "base": {
       "hp": 83,
       "atkFis": 80,
@@ -7640,6 +7737,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 127,
     "baseExp": 145,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 185,
     "base": {
       "hp": 55,
       "atkFis": 81,
@@ -7710,6 +7808,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 90,
     "baseExp": 155,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 380,
     "base": {
       "hp": 65,
       "atkFis": 90,
@@ -7776,6 +7875,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 170,
     "baseExp": 95,
     "growthCurve": "FAST",
+    "pesoHg": 55,
     "base": {
       "hp": 115,
       "atkFis": 45,
@@ -7874,6 +7974,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 58,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 42,
     "base": {
       "hp": 40,
       "atkFis": 45,
@@ -7956,6 +8057,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 90,
     "baseExp": 154,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 320,
     "base": {
       "hp": 65,
       "atkFis": 70,
@@ -8034,6 +8136,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 132,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 150,
     "base": {
       "hp": 52,
       "atkFis": 90,
@@ -8128,6 +8231,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 62,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 392,
     "base": {
       "hp": 35,
       "atkFis": 85,
@@ -8214,6 +8318,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 165,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 852,
     "base": {
       "hp": 60,
       "atkFis": 110,
@@ -8296,6 +8401,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 77,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 655,
     "base": {
       "hp": 90,
       "atkFis": 55,
@@ -8378,6 +8484,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 172,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 800,
     "base": {
       "hp": 105,
       "atkFis": 95,
@@ -8460,6 +8567,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 172,
     "growthCurve": "SLOW",
+    "pesoHg": 884,
     "base": {
       "hp": 75,
       "atkFis": 100,
@@ -8542,6 +8650,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 35,
     "baseExp": 101,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 40,
     "base": {
       "hp": 48,
       "atkFis": 48,
@@ -8568,6 +8677,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 65,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 65,
     "base": {
       "hp": 55,
       "atkFis": 55,
@@ -8658,6 +8768,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 79,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 365,
     "base": {
       "hp": 65,
       "atkFis": 60,
@@ -8740,6 +8851,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 25,
     "baseExp": 189,
     "growthCurve": "SLOW",
+    "pesoHg": 4600,
     "base": {
       "hp": 160,
       "atkFis": 110,
@@ -8830,6 +8942,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 43,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 60,
     "base": {
       "hp": 35,
       "atkFis": 46,
@@ -8908,6 +9021,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 90,
     "baseExp": 145,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 325,
     "base": {
       "hp": 85,
       "atkFis": 76,
@@ -8982,6 +9096,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 52,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 212,
     "base": {
       "hp": 60,
       "atkFis": 30,
@@ -9076,6 +9191,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 90,
     "baseExp": 158,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 408,
     "base": {
       "hp": 100,
       "atkFis": 50,
@@ -9158,6 +9274,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 170,
     "baseExp": 42,
     "growthCurve": "FAST",
+    "pesoHg": 10,
     "base": {
       "hp": 90,
       "atkFis": 30,
@@ -9204,6 +9321,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 72,
     "growthCurve": "FAST",
+    "pesoHg": 115,
     "base": {
       "hp": 55,
       "atkFis": 70,
@@ -9282,6 +9400,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 60,
     "baseExp": 159,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 415,
     "base": {
       "hp": 70,
       "atkFis": 80,
@@ -9372,6 +9491,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 145,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 140,
     "base": {
       "hp": 100,
       "atkFis": 70,
@@ -9482,6 +9602,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 66,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 88,
     "base": {
       "hp": 60,
       "atkFis": 80,
@@ -9564,6 +9685,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 60,
     "baseExp": 175,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 1258,
     "base": {
       "hp": 90,
       "atkFis": 130,
@@ -9626,6 +9748,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 180,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 325,
     "base": {
       "hp": 85,
       "atkFis": 80,
@@ -9712,6 +9835,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 163,
     "growthCurve": "SLOW",
+    "pesoHg": 712,
     "base": {
       "hp": 73,
       "atkFis": 95,
@@ -9794,6 +9918,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 88,
     "growthCurve": "FAST",
+    "pesoHg": 580,
     "base": {
       "hp": 55,
       "atkFis": 20,
@@ -9820,6 +9945,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 172,
     "growthCurve": "SLOW",
+    "pesoHg": 755,
     "base": {
       "hp": 95,
       "atkFis": 80,
@@ -9894,6 +10020,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 137,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 1050,
     "base": {
       "hp": 55,
       "atkFis": 95,
@@ -9972,6 +10099,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 223,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 3000,
     "base": {
       "hp": 80,
       "atkFis": 120,
@@ -10062,6 +10190,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 77,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 2100,
     "base": {
       "hp": 35,
       "atkFis": 45,
@@ -10172,6 +10301,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 71,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 75,
     "base": {
       "hp": 35,
       "atkFis": 40,
@@ -10250,6 +10380,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 173,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 350,
     "base": {
       "hp": 70,
       "atkFis": 60,
@@ -10324,6 +10455,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 71,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 115,
     "base": {
       "hp": 30,
       "atkFis": 80,
@@ -10394,6 +10526,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 173,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 405,
     "base": {
       "hp": 60,
       "atkFis": 115,
@@ -10464,6 +10597,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 180,
     "growthCurve": "SLOW",
+    "pesoHg": 590,
     "base": {
       "hp": 80,
       "atkFis": 105,
@@ -10554,6 +10688,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 65,
     "baseExp": 144,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 380,
     "base": {
       "hp": 70,
       "atkFis": 100,
@@ -10648,6 +10783,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 60,
     "growthCurve": "SLOW",
+    "pesoHg": 720,
     "base": {
       "hp": 50,
       "atkFis": 64,
@@ -10726,6 +10862,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 144,
     "growthCurve": "SLOW",
+    "pesoHg": 1520,
     "base": {
       "hp": 70,
       "atkFis": 84,
@@ -10796,6 +10933,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 270,
     "growthCurve": "SLOW",
+    "pesoHg": 2020,
     "base": {
       "hp": 100,
       "atkFis": 134,
@@ -10870,6 +11008,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 60,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 120,
     "base": {
       "hp": 50,
       "atkFis": 75,
@@ -10960,6 +11099,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 90,
     "baseExp": 158,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 295,
     "base": {
       "hp": 75,
       "atkFis": 100,
@@ -11046,6 +11186,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 53,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 8,
     "base": {
       "hp": 10,
       "atkFis": 55,
@@ -11124,6 +11265,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 50,
     "baseExp": 149,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 333,
     "base": {
       "hp": 35,
       "atkFis": 100,
@@ -11198,6 +11340,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 64,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 65,
     "base": {
       "hp": 50,
       "atkFis": 50,
@@ -11284,6 +11427,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 149,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 450,
     "base": {
       "hp": 60,
       "atkFis": 80,
@@ -11366,6 +11510,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 69,
     "growthCurve": "SLOW",
+    "pesoHg": 1150,
     "base": {
       "hp": 80,
       "atkFis": 85,
@@ -11448,6 +11593,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 60,
     "baseExp": 170,
     "growthCurve": "SLOW",
+    "pesoHg": 1200,
     "base": {
       "hp": 105,
       "atkFis": 130,
@@ -11526,6 +11672,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 60,
     "baseExp": 86,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 648,
     "base": {
       "hp": 65,
       "atkFis": 75,
@@ -11608,6 +11755,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 66,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 335,
     "base": {
       "hp": 90,
       "atkFis": 60,
@@ -11682,6 +11830,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 60,
     "baseExp": 175,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 1200,
     "base": {
       "hp": 90,
       "atkFis": 120,
@@ -11744,6 +11893,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 142,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 190,
     "base": {
       "hp": 58,
       "atkFis": 64,
@@ -11806,6 +11956,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 240,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 905,
     "base": {
       "hp": 78,
       "atkFis": 84,
@@ -11880,6 +12031,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 70,
     "growthCurve": "SLOW",
+    "pesoHg": 190,
     "base": {
       "hp": 55,
       "atkFis": 70,
@@ -11974,6 +12126,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 194,
     "growthCurve": "SLOW",
+    "pesoHg": 1550,
     "base": {
       "hp": 90,
       "atkFis": 110,
@@ -12020,6 +12173,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 82,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 300,
     "base": {
       "hp": 50,
       "atkFis": 85,
@@ -12098,6 +12252,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 60,
     "baseExp": 175,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 950,
     "base": {
       "hp": 65,
       "atkFis": 100,
@@ -12172,6 +12327,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 173,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 445,
     "base": {
       "hp": 65,
       "atkFis": 95,
@@ -12242,6 +12398,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 62,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 79,
     "base": {
       "hp": 39,
       "atkFis": 52,
@@ -12328,6 +12485,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 142,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 190,
     "base": {
       "hp": 58,
       "atkFis": 64,
@@ -12406,6 +12564,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 240,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 795,
     "base": {
       "hp": 78,
       "atkFis": 84,
@@ -12484,6 +12643,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 50,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 350,
     "base": {
       "hp": 40,
       "atkFis": 40,
@@ -12570,6 +12730,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 151,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 550,
     "base": {
       "hp": 60,
       "atkFis": 50,
@@ -12652,6 +12813,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 73,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 214,
     "base": {
       "hp": 45,
       "atkFis": 75,
@@ -12730,6 +12892,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 112,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 60,
     "base": {
       "hp": 35,
       "atkFis": 55,
@@ -12824,6 +12987,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 65,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 60,
     "base": {
       "hp": 25,
       "atkFis": 35,
@@ -12918,6 +13082,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 60,
     "baseExp": 163,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 600,
     "base": {
       "hp": 50,
       "atkFis": 60,
@@ -13008,6 +13173,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 66,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 104,
     "base": {
       "hp": 40,
       "atkFis": 30,
@@ -13098,6 +13264,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 60,
     "baseExp": 172,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 666,
     "base": {
       "hp": 60,
       "atkFis": 50,
@@ -13180,6 +13347,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 172,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 300,
     "base": {
       "hp": 65,
       "atkFis": 83,
@@ -13250,6 +13418,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 41,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 20,
     "base": {
       "hp": 20,
       "atkFis": 40,
@@ -13296,6 +13465,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 235,
     "baseExp": 56,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 78,
     "base": {
       "hp": 55,
       "atkFis": 40,
@@ -13378,6 +13548,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 128,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 133,
     "base": {
       "hp": 70,
       "atkFis": 55,
@@ -13452,6 +13623,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 230,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 615,
     "base": {
       "hp": 90,
       "atkFis": 75,
@@ -13534,6 +13706,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 72,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 235,
     "base": {
       "hp": 45,
       "atkFis": 63,
@@ -13612,6 +13785,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 58,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 69,
     "base": {
       "hp": 35,
       "atkFis": 60,
@@ -13702,6 +13876,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 90,
     "baseExp": 157,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 650,
     "base": {
       "hp": 60,
       "atkFis": 95,
@@ -13788,6 +13963,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 235,
     "baseExp": 55,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 70,
     "base": {
       "hp": 55,
       "atkFis": 47,
@@ -13862,6 +14038,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 128,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 200,
     "base": {
       "hp": 70,
       "atkFis": 62,
@@ -13928,6 +14105,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 227,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 600,
     "base": {
       "hp": 90,
       "atkFis": 92,
@@ -13982,6 +14160,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 235,
     "baseExp": 55,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 90,
     "base": {
       "hp": 46,
       "atkFis": 57,
@@ -14056,6 +14235,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 128,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 195,
     "base": {
       "hp": 61,
       "atkFis": 72,
@@ -14122,6 +14302,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 227,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 620,
     "base": {
       "hp": 81,
       "atkFis": 102,
@@ -14176,6 +14357,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 255,
     "baseExp": 49,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 75,
     "base": {
       "hp": 40,
       "atkFis": 45,
@@ -14258,6 +14440,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 90,
     "baseExp": 159,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 550,
     "base": {
       "hp": 75,
       "atkFis": 80,
@@ -14336,6 +14519,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 65,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 300,
     "base": {
       "hp": 80,
       "atkFis": 80,
@@ -14422,6 +14606,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 175,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 300,
     "base": {
       "hp": 105,
       "atkFis": 105,
@@ -14504,6 +14689,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 68,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 10,
     "base": {
       "hp": 40,
       "atkFis": 65,
@@ -14586,6 +14772,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 60,
     "baseExp": 172,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 95,
     "base": {
       "hp": 65,
       "atkFis": 90,
@@ -14664,6 +14851,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 61,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 280,
     "base": {
       "hp": 40,
       "atkFis": 80,
@@ -14762,6 +14950,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 159,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 320,
     "base": {
       "hp": 65,
       "atkFis": 105,
@@ -14844,6 +15033,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 180,
     "baseExp": 61,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 195,
     "base": {
       "hp": 70,
       "atkFis": 80,
@@ -14934,6 +15124,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 90,
     "baseExp": 142,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 705,
     "base": {
       "hp": 80,
       "atkFis": 100,
@@ -15016,6 +15207,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 227,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 1300,
     "base": {
       "hp": 90,
       "atkFis": 130,
@@ -15114,6 +15306,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 159,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 498,
     "base": {
       "hp": 50,
       "atkFis": 120,
@@ -15200,6 +15393,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 159,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 502,
     "base": {
       "hp": 50,
       "atkFis": 105,
@@ -15294,6 +15488,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 42,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 210,
     "base": {
       "hp": 35,
       "atkFis": 35,
@@ -15332,6 +15527,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 159,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 406,
     "base": {
       "hp": 65,
       "atkFis": 50,
@@ -15410,6 +15606,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 225,
     "baseExp": 50,
     "growthCurve": "SLOW",
+    "pesoHg": 65,
     "base": {
       "hp": 50,
       "atkFis": 50,
@@ -15492,6 +15689,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 158,
     "growthCurve": "SLOW",
+    "pesoHg": 558,
     "base": {
       "hp": 100,
       "atkFis": 100,
@@ -15570,6 +15768,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 116,
     "growthCurve": "FAST",
+    "pesoHg": 160,
     "base": {
       "hp": 45,
       "atkFis": 55,
@@ -15600,6 +15799,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 61,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 60,
     "base": {
       "hp": 45,
       "atkFis": 30,
@@ -15682,6 +15882,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 25,
     "baseExp": 179,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 4000,
     "base": {
       "hp": 75,
       "atkFis": 85,
@@ -15804,6 +16005,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 25,
     "baseExp": 163,
     "growthCurve": "SLOW",
+    "pesoHg": 505,
     "base": {
       "hp": 65,
       "atkFis": 80,
@@ -15890,6 +16092,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 64,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 20,
     "base": {
       "hp": 40,
       "atkFis": 50,
@@ -15976,6 +16179,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 165,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 150,
     "base": {
       "hp": 65,
       "atkFis": 75,
@@ -16058,6 +16262,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 200,
     "baseExp": 62,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 195,
     "base": {
       "hp": 25,
       "atkFis": 20,
@@ -16084,6 +16289,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 100,
     "baseExp": 140,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 565,
     "base": {
       "hp": 40,
       "atkFis": 35,
@@ -16162,6 +16368,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 50,
     "baseExp": 225,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 480,
     "base": {
       "hp": 55,
       "atkFis": 50,
@@ -16244,6 +16451,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 66,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 324,
     "base": {
       "hp": 60,
       "atkFis": 48,
@@ -16334,6 +16542,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 169,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 756,
     "base": {
       "hp": 85,
       "atkFis": 73,
@@ -16416,6 +16625,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 225,
     "baseExp": 118,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 50,
     "base": {
       "hp": 48,
       "atkFis": 72,
@@ -16442,6 +16652,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 142,
     "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 285,
     "base": {
       "hp": 190,
       "atkFis": 33,
@@ -16480,6 +16691,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 62,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 1,
     "base": {
       "hp": 30,
       "atkFis": 35,
@@ -16562,6 +16774,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 90,
     "baseExp": 142,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 1,
     "base": {
       "hp": 45,
       "atkFis": 50,
@@ -16640,6 +16853,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 225,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 405,
     "base": {
       "hp": 60,
       "atkFis": 65,
@@ -16726,6 +16940,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 87,
     "growthCurve": "FAST",
+    "pesoHg": 10,
     "base": {
       "hp": 60,
       "atkFis": 60,
@@ -16804,6 +17019,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 30,
     "baseExp": 81,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 21,
     "base": {
       "hp": 60,
       "atkFis": 85,
@@ -16886,6 +17102,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 60,
     "baseExp": 86,
     "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 280,
     "base": {
       "hp": 55,
       "atkFis": 95,
@@ -16972,6 +17189,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 120,
     "baseExp": 66,
     "growthCurve": "SLOW",
+    "pesoHg": 108,
     "base": {
       "hp": 45,
       "atkFis": 60,
@@ -17058,6 +17276,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 175,
     "growthCurve": "SLOW",
+    "pesoHg": 350,
     "base": {
       "hp": 75,
       "atkFis": 90,
@@ -17136,6 +17355,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 60,
     "growthCurve": "SLOW",
+    "pesoHg": 33,
     "base": {
       "hp": 41,
       "atkFis": 64,
@@ -17214,6 +17434,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 147,
     "growthCurve": "SLOW",
+    "pesoHg": 165,
     "base": {
       "hp": 61,
       "atkFis": 84,
@@ -17284,6 +17505,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 45,
     "baseExp": 270,
     "growthCurve": "SLOW",
+    "pesoHg": 2100,
     "base": {
       "hp": 91,
       "atkFis": 134,
@@ -17362,6 +17584,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 150,
     "baseExp": 44,
     "growthCurve": "FAST",
+    "pesoHg": 30,
     "base": {
       "hp": 50,
       "atkFis": 25,
@@ -17412,6 +17635,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 49,
     "growthCurve": "FAST",
+    "pesoHg": 15,
     "base": {
       "hp": 35,
       "atkFis": 20,
@@ -17494,6 +17718,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 190,
     "baseExp": 60,
     "growthCurve": "FAST",
+    "pesoHg": 78,
     "base": {
       "hp": 60,
       "atkFis": 80,
@@ -17576,6 +17801,7 @@ export const SPECIES_DATA: SpeciesData = {
     "catchRate": 75,
     "baseExp": 158,
     "growthCurve": "FAST",
+    "pesoHg": 487,
     "base": {
       "hp": 90,
       "atkFis": 120,

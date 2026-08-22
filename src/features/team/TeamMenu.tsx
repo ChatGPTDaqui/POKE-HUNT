@@ -5,6 +5,7 @@ import { stoneName } from '@/data/stones'
 import { canEvolve, evolutionStoneRequirement, expProgressForInstance } from '@/engine/systems/progressionSystem'
 import { controller } from '@/engine/controller'
 import { useGameStateStore } from '@/stores/gameStateStore'
+import { useWorldStore } from '@/stores/worldStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { PokeSwatch } from '@/components/shared/PokeSwatch'
@@ -13,9 +14,18 @@ import { GameButton, GameCard, Meter } from '@/components/game/controls'
 import { useDeviceMode } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
 
+// PRESO (PH-72): Wrap/Bind/Fire Spin e companhia travam a troca de POKE
+// enquanto duram. O guard de verdade esta em controller.setActiveTeamIndex; aqui
+// e so pra o botao nao parecer quebrado.
+const MOTIVO_PRESO = 'O POKE em campo esta preso e nao pode sair agora.'
+
 export function TeamMenu() {
   const team = useGameStateStore((s) => s.team)
   const activeIndex = useGameStateStore((s) => s.activeIndex)
+  // Selector estreito de proposito: o worldStore muda 60x por segundo, e um
+  // selector que devolvesse `player` inteiro re-renderizaria a tela de Equipe
+  // em todo frame de combate.
+  const pokeEmCampoPreso = useWorldStore((s) => (s.player?.presoAte ?? 0) > 0)
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const acao = useAcaoPendente()
   const { compacto } = useDeviceMode()
@@ -88,13 +98,32 @@ export function TeamMenu() {
             </div>
 
             <div className={cn('flex shrink-0 gap-[.3em]', compacto ? 'flex-row' : 'flex-col')}>
+              {/* Caminho VISIVEL ate os 4 golpes. Antes a gestao existia so
+                  dentro do perfil, atras de um clique no card e de uma aba que
+                  nada anunciava — o jogador que quisesse trocar de golpe tinha
+                  que descobrir os dois passos. A Equipe e onde ele administra o
+                  POKE, entao e onde o botao pertence. */}
+              <GameButton
+                variant="ghost"
+                className={compacto ? 'flex-1 justify-center' : undefined}
+                title="Escolher os 4 golpes"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  showProfile(poke, species, 'golpes')
+                }}
+              >
+                Golpes
+              </GameButton>
               {!isActive && (
                 <GameButton
                   // `flex-1`, e nao `block`: dois botoes `w-full` na mesma
                   // fileira somam 200% da largura e o segundo sai da tela — foi
                   // o que criou uma barra de rolagem horizontal no painel.
                   className={compacto ? 'flex-1 justify-center' : undefined}
-                  disabled={acao.pendingKey != null}
+                  disabled={acao.pendingKey != null || pokeEmCampoPreso}
+                  // Botao desabilitado sem razao visivel e indistinguivel de
+                  // botao quebrado — o `title` diz o que esta acontecendo.
+                  title={pokeEmCampoPreso ? MOTIVO_PRESO : undefined}
                   onClick={(e) => {
                     e.stopPropagation()
                     void acao.run(`field:${poke.uid}`, () => controller.setActiveTeamIndex(index))
