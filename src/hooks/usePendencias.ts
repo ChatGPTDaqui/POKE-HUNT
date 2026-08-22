@@ -14,7 +14,7 @@ const INTERVALO_CORREIO_MS = 60000
 // lados) e menos urgente: um lance pendente pode esperar dois minutos.
 const INTERVALO_MERCADO_MS = 120000
 
-/** Mensagens nao lidas + anexos ainda nao coletados. */
+/** Mensagens nao lidas + anexos ainda nao coletados + DM de amigo nao lida. */
 export function usePendenciasDoCorreio(): number {
   const { data } = useQuery({
     queryKey: ['correio'],
@@ -23,10 +23,14 @@ export function usePendenciasDoCorreio(): number {
     refetchInterval: INTERVALO_CORREIO_MS,
   })
   if (!data) return 0
-  return data.mensagens.filter((m) => {
+  const naCaixa = data.mensagens.filter((m) => {
     const temAnexoPendente = (m.anexo_itens?.length ?? 0) > 0 && !m.anexo_coletado_em
     return temAnexoPendente || m.estado === 'pendente'
   }).length
+  // DM entra no mesmo contador (PH-74). Sem isto, conversa privada so avisa com
+  // o menu do Correio ja aberto — o Realtime entrega a mensagem e ninguem ve.
+  const dmNaoLidas = data.amigos.reduce((total, a) => total + a.naoLidas, 0)
+  return naCaixa + dmNaoLidas
 }
 
 /** Lances recebidos que ainda esperam aceitar/recusar. */

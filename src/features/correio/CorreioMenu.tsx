@@ -1,44 +1,70 @@
-// Correio: caixa de entrada + amigos + adicionar amigo pelo nick.
+// Correio: caixa de entrada, enviados, avisos do sistema, amigos e conversa
+// privada (PH-74).
 //
 // O pedido de amizade e uma MENSAGEM, nao uma tabela de "pedidos": ela chega na
 // mesma caixa que o resto, com dois botoes em vez de nenhum. Assim so existe um
 // lugar pra olhar quando alguem interage com voce — e o contador de nao lidas
 // cobre as duas coisas de uma vez.
-import { useEffect, useState } from 'react'
+//
+// As abas separam por TIPO, nao por estado de leitura: "avisos" sai da entrada
+// porque mensagem de sistema chega em rajada (venda no mercado, concessao
+// inicial) e afogaria a mensagem de gente de verdade, que e a que pede resposta.
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, Gift, UserPlus, X } from '@phosphor-icons/react'
-import { ErroServidor, detalheDeErro, type MensagemCorreio } from '@/data/remote/servidor'
+import { PencilSimple, UserPlus, X } from '@phosphor-icons/react'
+import {
+  ErroServidor, detalheDeErro,
+  type AmigoDetalhado, type AnexoItemCorreio, type MensagemCorreio,
+} from '@/data/remote/servidor'
 import * as correioRpc from '@/data/remote/correioRealtime'
 import { supabase } from '@/lib/supabase'
 import { useToastStore, type ToastErroDetalhe } from '@/stores/toastStore'
-import { getItem } from '@/data/items'
-import { itemIconUrl } from '@/data/sprites'
+import { useDeviceMode } from '@/stores/uiStore'
 import {
-  GameButton, GameCard, GameInput, SectionLabel,
+  GameButton, GameCard, GameInput, SectionLabel, SegmentedTabs,
 } from '@/components/game/controls'
-import { cn } from '@/lib/utils'
+import { ComporMensagem } from './ComporMensagem'
+import { ConversaDM } from './ConversaDM'
+import { LinhaDeMensagem } from './LinhaDeMensagem'
+import { PainelAmigos } from './PainelAmigos'
 
 const STALE_MS = 15000
+
+type Aba = 'entrada' | 'enviados' | 'sistema' | 'amigos'
 
 function toast(mensagem: string, tipo: 'success' | 'error' = 'success', erroDetalhe?: ToastErroDetalhe) {
   useToastStore.getState().pushToast(mensagem, tipo, 'world', undefined, erroDetalhe)
 }
 
-const ROTULO_TIPO: Record<MensagemCorreio['tipo'], string> = {
-  texto: 'Mensagem',
-  pedido_amizade: 'Pedido de amizade',
-  sistema: 'Aviso',
+function aoFalhar(padrao: string) {
+  return (e: unknown) => toast(e instanceof ErroServidor ? e.message : padrao, 'error', detalheDeErro(e))
 }
 
 export function CorreioMenu() {
   const qc = useQueryClient()
+  const { compacto } = useDeviceMode()
   const [nick, setNick] = useState('')
+  const [aba, setAba] = useState<Aba>('entrada')
+  const [compondo, setCompondo] = useState<{ nickInicial?: string } | null>(null)
+  const [respondendoA, setRespondendoA] = useState<MensagemCorreio | null>(null)
+  const [amigoAberto, setAmigoAberto] = useState<AmigoDetalhado | null>(null)
+  const [meuId, setMeuId] = useState<string | null>(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ['correio'],
     queryFn: () => correioRpc.correio(),
     staleTime: STALE_MS,
   })
+
+  const recarregar = useCallback(() => { void qc.invalidateQueries({ queryKey: ['correio'] }) }, [qc])
+
+  useEffect(() => {
+    let cancelado = false
+    void supabase.auth.getSession().then(({ data: sessao }) => {
+      if (!cancelado) setMeuId(sessao.session?.user.id ?? null)
+    })
+    return () => { cancelado = true }
+  }, [])
 
   // Realtime substitui o poll de 15s: qualquer INSERT/UPDATE nas MINHAS
   // mensagens (pedido novo, resposta, mensagem de sistema) invalida a query.
@@ -68,26 +94,19 @@ export function CorreioMenu() {
 
   const adicionar = useMutation({
     mutationFn: (n: string) => correioRpc.pedirAmizade(n),
-    onSuccess: (r) => {
-      toast(r.mensagem)
-      setNick('')
-      void qc.invalidateQueries({ queryKey: ['correio'] })
-    },
-    onError: (e) => toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel enviar o pedido.', 'error', detalheDeErro(e)),
+    onSuccess: (r) => { toast(r.mensagem); setNick(''); recarregar() },
+    onError: aoFalhar('Nao foi possivel enviar o pedido.'),
   })
 
-  const responder = useMutation({
+  const responderPedido = useMutation({
     mutationFn: ({ id, aceitar }: { id: string; aceitar: boolean }) => correioRpc.responderPedido(id, aceitar),
-    onSuccess: (r) => {
-      toast(r.mensagem)
-      void qc.invalidateQueries({ queryKey: ['correio'] })
-    },
-    onError: (e) => toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel responder.', 'error', detalheDeErro(e)),
+    onSuccess: (r) => { toast(r.mensagem); recarregar() },
+    onError: aoFalhar('Nao foi possivel responder.'),
   })
 
   const marcarLida = useMutation({
     mutationFn: (id: string) => correioRpc.marcarLida(id),
-    onSuccess: () => { void qc.invalidateQueries({ queryKey: ['correio'] }) },
+    onSuccess: recarregar,
   })
 
   // A RPC ja credita o item na mesma transacao (sem fila de entrega — ver
@@ -95,12 +114,184 @@ export function CorreioMenu() {
   // item no client. So falta atualizar a caixa de entrada.
   const coletar = useMutation({
     mutationFn: (id: string) => correioRpc.coletarAnexo(id),
-    onSuccess: (r) => {
-      toast(r.mensagem)
-      void qc.invalidateQueries({ queryKey: ['correio'] })
-    },
-    onError: (e) => toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel coletar.', 'error', detalheDeErro(e)),
+    onSuccess: (r) => { toast(r.mensagem); recarregar() },
+    onError: aoFalhar('Nao foi possivel coletar.'),
   })
+
+  const enviar = useMutation({
+    mutationFn: (d: { nick: string; assunto: string; corpo: string; anexos: AnexoItemCorreio[] }) =>
+      correioRpc.enviarCorreio(d.nick, d.assunto, d.corpo, d.anexos),
+    onSuccess: (r) => { toast(r.mensagem); setCompondo(null); recarregar() },
+    onError: aoFalhar('Nao foi possivel enviar a mensagem.'),
+  })
+
+  const responderMsg = useMutation({
+    mutationFn: (d: { id: string; corpo: string }) => correioRpc.responderCorreio(d.id, d.corpo),
+    onSuccess: (r) => { toast(r.mensagem); setRespondendoA(null); recarregar() },
+    onError: aoFalhar('Nao foi possivel responder.'),
+  })
+
+  const excluir = useMutation({
+    mutationFn: (id: string) => correioRpc.excluirCorreio(id),
+    onSuccess: recarregar,
+    onError: aoFalhar('Nao foi possivel excluir.'),
+  })
+
+  const remover = useMutation({
+    mutationFn: (id: string) => correioRpc.removerAmizade(id),
+    onSuccess: (r) => { toast(r.mensagem); recarregar() },
+    onError: aoFalhar('Nao foi possivel remover.'),
+  })
+
+  const bloquear = useMutation({
+    mutationFn: (id: string) => correioRpc.bloquearJogador(id),
+    onSuccess: (r) => { toast(r.mensagem); recarregar() },
+    onError: aoFalhar('Nao foi possivel bloquear.'),
+  })
+
+  const desbloquear = useMutation({
+    mutationFn: (id: string) => correioRpc.desbloquearJogador(id),
+    onSuccess: (r) => { toast(r.mensagem); recarregar() },
+    onError: aoFalhar('Nao foi possivel desbloquear.'),
+  })
+
+  const entrada = useMemo(
+    () => (data?.mensagens ?? []).filter((m) => m.tipo !== 'sistema'),
+    [data?.mensagens],
+  )
+  const sistema = useMemo(
+    () => (data?.mensagens ?? []).filter((m) => m.tipo === 'sistema'),
+    [data?.mensagens],
+  )
+  const naoLidasEntrada = entrada.filter((m) => m.estado === 'pendente').length
+  const naoLidasSistema = sistema.filter((m) => m.estado === 'pendente').length
+  const dmNaoLidas = (data?.amigos ?? []).reduce((t, a) => t + a.naoLidas, 0)
+
+  // Bloquear ou remover o amigo cuja conversa esta aberta tem que FECHAR a
+  // conversa: a linha some da lista por baixo e o painel continuaria mostrando
+  // um fio que o servidor ja nao deixa mais escrever.
+  useEffect(() => {
+    if (!amigoAberto) return
+    if (!(data?.amigos ?? []).some((a) => a.userId === amigoAberto.userId)) setAmigoAberto(null)
+  }, [data?.amigos, amigoAberto])
+
+  // O objeto do amigo aberto vem sempre da query, nunca do state: senao o painel
+  // congela `naoLidas` e `online` no valor que tinham no clique.
+  const amigoAtual = amigoAberto
+    ? (data?.amigos ?? []).find((a) => a.userId === amigoAberto.userId) ?? null
+    : null
+
+  const ocupado = remover.isPending || bloquear.isPending || desbloquear.isPending
+
+  const abrirComposicao = useCallback((nickInicial?: string) => {
+    setRespondendoA(null)
+    setCompondo({ nickInicial })
+    setAba('entrada')
+  }, [])
+
+  const abas: { value: Aba; label: string }[] = [
+    { value: 'entrada', label: `Entrada${naoLidasEntrada ? ` (${naoLidasEntrada})` : ''}` },
+    { value: 'enviados', label: `Enviados${data?.enviados.length ? ` (${data.enviados.length})` : ''}` },
+    { value: 'sistema', label: `Avisos${naoLidasSistema ? ` (${naoLidasSistema})` : ''}` },
+    { value: 'amigos', label: `Amigos${dmNaoLidas ? ` (${dmNaoLidas})` : ''}` },
+  ]
+
+  const lista = aba === 'enviados' ? (data?.enviados ?? []) : aba === 'sistema' ? sistema : entrada
+  const vazio = aba === 'enviados'
+    ? 'Voce ainda nao enviou nenhuma mensagem.'
+    : aba === 'sistema' ? 'Nenhum aviso.' : 'Sua caixa esta vazia.'
+  const titulo = aba === 'enviados'
+    ? 'ENVIADOS'
+    : aba === 'sistema'
+      ? `AVISOS DO JOGO ${naoLidasSistema ? `(${naoLidasSistema} novo(s))` : ''}`
+      : `CAIXA DE ENTRADA ${naoLidasEntrada ? `(${naoLidasEntrada} nova(s))` : ''}`
+
+  const painelEsquerdo = (
+    <div className="flex flex-col gap-[.55em]">
+      {aba !== 'amigos' && (
+        <div className="flex justify-end">
+          <GameButton variant="primary" onClick={() => abrirComposicao()}>
+            <PencilSimple /> Escrever
+          </GameButton>
+        </div>
+      )}
+
+      {compondo && (
+        <ComporMensagem
+          nickInicial={compondo.nickInicial}
+          enviando={enviar.isPending}
+          onCancelar={() => setCompondo(null)}
+          onEnviar={(d) => enviar.mutate(d)}
+        />
+      )}
+      {respondendoA && (
+        <ComporMensagem
+          respondendoA={{ id: respondendoA.id, deNome: respondendoA.de_nome, assunto: respondendoA.assunto }}
+          enviando={responderMsg.isPending}
+          onCancelar={() => setRespondendoA(null)}
+          onEnviar={(d) => responderMsg.mutate({ id: respondendoA.id, corpo: d.corpo })}
+        />
+      )}
+
+      {isLoading && <p className="text-n400">Carregando...</p>}
+
+      {!isLoading && aba === 'amigos' && (
+        <PainelAmigos
+          amigos={data?.amigos ?? []}
+          bloqueados={data?.bloqueados ?? []}
+          selecionado={amigoAtual?.userId ?? null}
+          ocupado={ocupado}
+          onSelecionar={setAmigoAberto}
+          onEscrever={abrirComposicao}
+          onRemover={(a) => remover.mutate(a.userId)}
+          onBloquear={(a) => bloquear.mutate(a.userId)}
+          onDesbloquear={(b) => desbloquear.mutate(b.userId)}
+        />
+      )}
+
+      {!isLoading && aba !== 'amigos' && (
+        <div>
+          <SectionLabel>{titulo}</SectionLabel>
+          {lista.length === 0 && <p className="text-n400">{vazio}</p>}
+          <div className="mt-[.4em] flex flex-col gap-[.4em]">
+            {lista.map((m) => (
+              <LinhaDeMensagem
+                key={m.id}
+                m={m}
+                enviada={aba === 'enviados'}
+                respondendo={responderPedido.isPending}
+                coletando={coletar.isPending}
+                excluindo={excluir.isPending}
+                onMarcarLida={marcarLida.mutate}
+                onResponderPedido={(id, aceitar) => responderPedido.mutate({ id, aceitar })}
+                onColetar={coletar.mutate}
+                onResponder={(msg) => { setCompondo(null); setRespondendoA(msg) }}
+                onExcluir={excluir.mutate}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+
+  const painelDireito = amigoAtual && meuId ? (
+    <GameCard className="p-[.6em]">
+      <div className="mb-[.35em] flex justify-end">
+        <GameButton variant="ghost" aria-label="Fechar conversa" onClick={() => setAmigoAberto(null)}>
+          <X />
+        </GameButton>
+      </div>
+      <ConversaDM
+        // `key` por amigo: trocar de conversa precisa REMONTAR, nao reusar.
+        // Sem isto o fio do amigo anterior fica na tela ate o novo carregar.
+        key={amigoAtual.userId}
+        amigo={amigoAtual}
+        meuId={meuId}
+        aoMarcarLidas={recarregar}
+      />
+    </GameCard>
+  ) : null
 
   return (
     <div className="flex flex-col gap-[.55em]">
@@ -124,123 +315,17 @@ export function CorreioMenu() {
         </GameButton>
       </GameCard>
 
-      <div>
-        <SectionLabel>CAIXA DE ENTRADA {data?.naoLidas ? `(${data.naoLidas} nova(s))` : ''}</SectionLabel>
-        {isLoading && <p className="text-n400">Carregando...</p>}
-        {!isLoading && (data?.mensagens.length ?? 0) === 0 && (
-          <p className="text-n400">Sua caixa esta vazia.</p>
-        )}
-        <div className="mt-[.4em] flex flex-col gap-[.4em]">
-          {data?.mensagens.map((m) => {
-            const pendente = m.estado === 'pendente'
-            const ehPedido = m.tipo === 'pedido_amizade'
-            const anexos = m.anexo_itens ?? []
-            const temAnexo = anexos.length > 0
-            const coletado = Boolean(m.anexo_coletado_em)
-            return (
-              <GameCard
-                key={m.id}
-                className={cn('flex flex-wrap items-center gap-[.5em] p-[.4em]', pendente && 'border-primary/40')}
-                onClick={() => { if (pendente && !ehPedido && !temAnexo) marcarLida.mutate(m.id) }}
-              >
-                <div className="min-w-[10em] flex-1">
-                  <div className="flex flex-wrap items-center gap-[.4em]">
-                    <b className="font-medium text-foreground">{m.assunto}</b>
-                    <span className="text-[.75em] text-n400">{ROTULO_TIPO[m.tipo]}</span>
-                    {pendente && !ehPedido && <span className="text-[.75em] text-primary">nova</span>}
-                  </div>
-                  <div className="text-[.85em] text-n300">{m.corpo}</div>
-                  {temAnexo && (
-                    <div className="mt-[.25em] flex flex-wrap items-center gap-[.3em]">
-                      {anexos.map((a) => (
-                        <span
-                          key={a.itemId}
-                          className="flex items-center gap-[.25em] rounded-[.35em] border border-n700 bg-n800 px-[.35em] py-[.1em] text-[.78em] text-foreground"
-                        >
-                          <img
-                            src={itemIconUrl(a.itemId) ?? undefined}
-                            alt=""
-                            aria-hidden
-                            className="h-[1.2em] w-[1.2em] object-contain"
-                            style={{ imageRendering: 'pixelated' }}
-                          />
-                          {getItem(a.itemId)?.name ?? a.itemId} x{a.quantity}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="text-[.75em] text-n500">
-                    de {m.de_nome} · {new Date(m.created_at).toLocaleString('pt-BR')}
-                  </div>
-                </div>
+      <SegmentedTabs value={aba} options={abas} onChange={setAba} />
 
-                {temAnexo && (
-                  coletado ? (
-                    <span className="text-[.8em] text-ok">Recebido</span>
-                  ) : (
-                    <GameButton
-                      variant="primary"
-                      carregando={coletar.isPending}
-                      onClick={() => coletar.mutate(m.id)}
-                    >
-                      <Gift /> Coletar
-                    </GameButton>
-                  )
-                )}
-
-                {ehPedido && pendente && (
-                  <div className="flex gap-[.35em]">
-                    <GameButton
-                      variant="primary"
-                      carregando={responder.isPending}
-                      onClick={() => responder.mutate({ id: m.id, aceitar: true })}
-                    >
-                      <Check /> Aceitar
-                    </GameButton>
-                    <GameButton
-                      variant="ghost"
-                      carregando={responder.isPending}
-                      onClick={() => responder.mutate({ id: m.id, aceitar: false })}
-                    >
-                      <X /> Recusar
-                    </GameButton>
-                  </div>
-                )}
-                {ehPedido && !pendente && (
-                  <span className="text-[.8em] text-n400">
-                    {m.estado === 'aceito' ? 'Aceito' : 'Recusado'}
-                  </span>
-                )}
-              </GameCard>
-            )
-          })}
+      {/* Dois paineis so quando ha conversa aberta E espaco. No compacto a
+          conversa OCUPA a tela: dividir 374px uteis em dois deixaria as duas
+          metades inutilizaveis. */}
+      {painelDireito && !compacto ? (
+        <div className="grid grid-cols-[1fr_1fr] items-start gap-[.65em]">
+          {painelEsquerdo}
+          {painelDireito}
         </div>
-      </div>
-
-      <div>
-        <SectionLabel>AMIGOS ({data?.amigos.length ?? 0})</SectionLabel>
-        {(data?.amigos.length ?? 0) === 0 && (
-          <p className="text-n400">Voce ainda nao tem amigos. Mande um pedido pelo nick acima.</p>
-        )}
-        <div className="mt-[.4em] flex flex-col gap-[.3em]">
-          {data?.amigos.map((a) => (
-            <div
-              key={a.userId}
-              className="flex items-center justify-between rounded-[.45em] border border-n800 px-[.6em] py-[.35em] text-[.85em]"
-            >
-              <b className="font-medium">{a.nome}</b>
-              <span className="text-n400">Treinador Nv {a.nivel}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Honestidade sobre o que ainda nao existe: mensagem escrita entre
-          jogadores nao tem rota nenhuma no servidor, e um campo de "escrever"
-          que nao envia seria pior que a ausencia dele. */}
-      <p className="text-[.78em] text-n400">
-        Ainda não dá para escrever mensagens livres — a caixa recebe pedidos de amizade e avisos do jogo.
-      </p>
+      ) : painelDireito ?? painelEsquerdo}
     </div>
   )
 }
