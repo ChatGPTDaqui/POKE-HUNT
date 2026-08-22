@@ -11,24 +11,13 @@
 // porque bloqueio, rate limit e debito de anexo vivem dentro de
 // `enviar_mensagem`. Uma policy de insert abriria rota paralela sem nenhuma
 // dessas checagens — o mesmo furo que PH-23 achou no chat mundial.
-import { supabase } from '@/lib/supabase'
+import { schema, supabase } from '@/lib/supabase'
 import { ErroServidor } from './servidor'
 import type {
   AmigoDetalhado, AnexoItemCorreio, BloqueadoRemoto, ConversaResumo, MensagemCorreio,
 } from './servidor'
 import { useGameStateStore } from '@/stores/gameStateStore'
 
-/**
- * Schema alvo do Realtime.
- *
- * Sai do env, e NAO da string 'dev' fixa que este arquivo usava antes: no
- * Realtime o schema e parametro do filtro de `postgres_changes` e o client nao
- * o preenche sozinho, entao em producao a assinatura antiga escutava eventos de
- * uma tabela que o jogo nem le. Herdado de `dmRealtime.ts`, que ja nascia
- * certo. PH-38/PH-66 seguem abertas pro `chatRealtime.ts`, que ainda tem a
- * string fixa — nao e corrigido aqui, e outra issue.
- */
-const SCHEMA_DO_REALTIME = (import.meta.env.VITE_SUPABASE_SCHEMA as string | undefined) || 'public'
 
 // `treinadores_publico` e view exclusiva do schema `dev`, e as RPCs novas so
 // existem depois do `db push` — o gerador de tipos so conhece o `public` do
@@ -285,7 +274,7 @@ export function assinarCorreioAoVivo(
     .channel(`correio-${userId}-${sufixo}`)
     .on(
       'postgres_changes',
-      { event: '*', schema: SCHEMA_DO_REALTIME, table: 'mail_messages', filter: `para_id=eq.${userId}` },
+      { event: '*', schema, table: 'mail_messages', filter: `para_id=eq.${userId}` },
       (payload) => {
         if (payload.eventType === 'INSERT' && aoChegar) aoChegar(payload.new as unknown as MensagemCorreio)
         aoMudar()
