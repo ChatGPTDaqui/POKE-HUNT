@@ -251,6 +251,22 @@ export const controller = {
   // Traz a POKE recem-colocada em campo pro topo da lista visivel do time.
   setActiveTeamIndex(index: number): void {
     const gameState = useGameStateStore.getState()
+    // PRESO (PH-72): Wrap/Bind/Fire Spin e companhia travam a troca de POKE
+    // enquanto duram. O guard fica aqui, e nao so no botao, porque a tela de
+    // Equipe nao e o unico caminho possivel pra esta acao.
+    //
+    // LIMITE CONHECIDO, ACEITO: e um bloqueio de CLIENTE. `definirAtivo` e RPC e
+    // o estado volatil de combate vive so no worldStore efemero — o servidor nao
+    // tem como validar sem receber estado de combate a cada troca, o que sai
+    // caro demais pelo que resolve. Cliente modificado troca de POKE preso.
+    const jogador = useWorldStore.getState().player
+    if (jogador && (jogador.presoAte ?? 0) > 0 && !isDead(jogador)) {
+      useToastStore.getState().pushToast(
+        `${SPECIES[jogador.poke.speciesId].name} esta preso e nao pode sair de campo agora.`,
+        'error', 'combat',
+      )
+      return
+    }
     // A escrita no worldStore precisa esperar `pedirAcao`: sob autoridade do
     // servidor o `fallback` NAO roda, entao ler `team[0]` de forma sincrona logo
     // apos o `void pedirAcao` pegava o POKE ativo VELHO (a resposta com o time
@@ -311,6 +327,17 @@ export const controller = {
       return
     }
     const wasActive = idx === gameState.activeIndex
+    // PRESO (PH-72): tirar da equipe o POKE preso e a MESMA fuga que trocar de
+    // POKE — quem sai de campo por aqui tambem escapa do golpe. Sem este guard o
+    // bloqueio de `setActiveTeamIndex` acima seria decorativo.
+    const jogadorEmCampo = useWorldStore.getState().player
+    if (wasActive && jogadorEmCampo && (jogadorEmCampo.presoAte ?? 0) > 0 && !isDead(jogadorEmCampo)) {
+      useToastStore.getState().pushToast(
+        `${SPECIES[jogadorEmCampo.poke.speciesId].name} esta preso e nao pode sair de campo agora.`,
+        'error', 'combat',
+      )
+      return
+    }
     const removed = gameState.team[idx]
     // Mesmo motivo de `setActiveTeamIndex`: sob servidor o time reajustado so
     // chega na resposta, entao a troca do POKE em campo tem que ir pro `.then`.
