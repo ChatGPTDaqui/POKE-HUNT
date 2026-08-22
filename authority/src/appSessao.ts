@@ -116,8 +116,8 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
     // aqui. Medido: numa conta de 456 POKEs, 97,8% desta resposta era mochila.
     // Sem o parametro, responde completo — cliente antigo depende disso.
     const parcial = url.searchParams.get('parcial') === '1'
-    return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas }) => {
-      if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt)
+    return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas, linhasNoLoad }) => {
+      if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt, linhasNoLoad)
       return json({ estado, estadoParcial: parcial })
     }, { comBag: !parcial })
   }
