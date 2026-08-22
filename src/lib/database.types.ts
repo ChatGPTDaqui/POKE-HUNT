@@ -106,6 +106,24 @@ export type Database = {
         }
         Relationships: []
       }
+      blocks: {
+        Row: {
+          bloqueado_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          bloqueado_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          bloqueado_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           anexos: Json
@@ -214,6 +232,33 @@ export type Database = {
           key?: string
           sort_order?: number
           variables?: string[]
+        }
+        Relationships: []
+      }
+      friend_messages: {
+        Row: {
+          corpo: string
+          created_at: string
+          de_id: string
+          id: string
+          para_id: string
+          read_at: string | null
+        }
+        Insert: {
+          corpo: string
+          created_at?: string
+          de_id: string
+          id?: string
+          para_id: string
+          read_at?: string | null
+        }
+        Update: {
+          corpo?: string
+          created_at?: string
+          de_id?: string
+          id?: string
+          para_id?: string
+          read_at?: string | null
         }
         Relationships: []
       }
@@ -473,6 +518,8 @@ export type Database = {
           de_id: string | null
           de_nome: string
           estado: string
+          excluido_destinatario_em: string | null
+          excluido_remetente_em: string | null
           id: string
           para_id: string
           read_at: string | null
@@ -487,6 +534,8 @@ export type Database = {
           de_id?: string | null
           de_nome: string
           estado?: string
+          excluido_destinatario_em?: string | null
+          excluido_remetente_em?: string | null
           id?: string
           para_id: string
           read_at?: string | null
@@ -501,6 +550,8 @@ export type Database = {
           de_id?: string | null
           de_nome?: string
           estado?: string
+          excluido_destinatario_em?: string | null
+          excluido_remetente_em?: string | null
           id?: string
           para_id?: string
           read_at?: string | null
@@ -1571,6 +1622,7 @@ export type Database = {
       }
       alternar_trava_item: { Args: { p_item_id: string }; Returns: Json }
       alternar_trava_poke: { Args: { p_poke_id: string }; Returns: Json }
+      amigos_detalhados: { Args: never; Returns: Json }
       anunciar_poke: {
         Args: {
           p_apenas_oferta: boolean
@@ -1580,6 +1632,8 @@ export type Database = {
         }
         Returns: Json
       }
+      bloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
+      bloqueio_entre: { Args: { p_a: string; p_b: string }; Returns: boolean }
       cancelar_anuncio: { Args: { p_anuncio_id: string }; Returns: Json }
       cancelar_oferta: { Args: { p_oferta_id: string }; Returns: Json }
       cancelar_ordem_mercado: { Args: { p_ordem_id: string }; Returns: Json }
@@ -1614,12 +1668,34 @@ export type Database = {
       }
       definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
+      desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
+      enviar_correio: {
+        Args: {
+          p_anexos?: Json
+          p_assunto: string
+          p_corpo: string
+          p_para_nick: string
+        }
+        Returns: Json
+      }
+      enviar_dm: { Args: { p_corpo: string; p_para_id: string }; Returns: Json }
       escolher_starter: { Args: { p_species_id: string }; Returns: Json }
+      esta_online: { Args: { p_user_id: string }; Returns: boolean }
       evoluir_poke: { Args: { p_poke_id: string }; Returns: Json }
+      excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
+      gravar_progresso: {
+        Args: {
+          p_patch: Json
+          p_updated_at_esperado: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       hunts_iniciais: { Args: never; Returns: string[] }
       id_por_nome_de_treinador: { Args: { nome: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       marcar_correio_lido: { Args: { p_mensagem_id: string }; Returns: Json }
+      marcar_dm_lidas: { Args: { p_amigo_id: string }; Returns: Json }
       meu_perfil: { Args: never; Returns: Json }
       nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
       ofertar_no_anuncio: {
@@ -1642,6 +1718,12 @@ export type Database = {
         Returns: undefined
       }
       reiniciar_jogo: { Args: never; Returns: undefined }
+      remover_amizade: { Args: { p_amigo_id: string }; Returns: Json }
+      reordenar_equipe: { Args: { p_ordem: string[] }; Returns: Json }
+      responder_correio: {
+        Args: { p_corpo: string; p_mensagem_id: string }
+        Returns: Json
+      }
       responder_oferta: {
         Args: { p_aceitar: boolean; p_oferta_id: string }
         Returns: Json
@@ -1864,6 +1946,24 @@ export type Database = {
         }
         Relationships: []
       }
+      blocks: {
+        Row: {
+          bloqueado_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          bloqueado_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          bloqueado_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           anexos: Json
@@ -1972,6 +2072,33 @@ export type Database = {
           key?: string
           sort_order?: number
           variables?: string[]
+        }
+        Relationships: []
+      }
+      friend_messages: {
+        Row: {
+          corpo: string
+          created_at: string
+          de_id: string
+          id: string
+          para_id: string
+          read_at: string | null
+        }
+        Insert: {
+          corpo: string
+          created_at?: string
+          de_id: string
+          id?: string
+          para_id: string
+          read_at?: string | null
+        }
+        Update: {
+          corpo?: string
+          created_at?: string
+          de_id?: string
+          id?: string
+          para_id?: string
+          read_at?: string | null
         }
         Relationships: []
       }
@@ -2231,6 +2358,8 @@ export type Database = {
           de_id: string | null
           de_nome: string
           estado: string
+          excluido_destinatario_em: string | null
+          excluido_remetente_em: string | null
           id: string
           para_id: string
           read_at: string | null
@@ -2245,6 +2374,8 @@ export type Database = {
           de_id?: string | null
           de_nome: string
           estado?: string
+          excluido_destinatario_em?: string | null
+          excluido_remetente_em?: string | null
           id?: string
           para_id: string
           read_at?: string | null
@@ -2259,6 +2390,8 @@ export type Database = {
           de_id?: string | null
           de_nome?: string
           estado?: string
+          excluido_destinatario_em?: string | null
+          excluido_remetente_em?: string | null
           id?: string
           para_id?: string
           read_at?: string | null
@@ -3329,6 +3462,7 @@ export type Database = {
       }
       alternar_trava_item: { Args: { p_item_id: string }; Returns: Json }
       alternar_trava_poke: { Args: { p_poke_id: string }; Returns: Json }
+      amigos_detalhados: { Args: never; Returns: Json }
       anunciar_poke: {
         Args: {
           p_apenas_oferta: boolean
@@ -3338,6 +3472,8 @@ export type Database = {
         }
         Returns: Json
       }
+      bloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
+      bloqueio_entre: { Args: { p_a: string; p_b: string }; Returns: boolean }
       cancelar_anuncio: { Args: { p_anuncio_id: string }; Returns: Json }
       cancelar_oferta: { Args: { p_oferta_id: string }; Returns: Json }
       cancelar_ordem_mercado: { Args: { p_ordem_id: string }; Returns: Json }
@@ -3372,12 +3508,34 @@ export type Database = {
       }
       definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
+      desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
+      enviar_correio: {
+        Args: {
+          p_anexos?: Json
+          p_assunto: string
+          p_corpo: string
+          p_para_nick: string
+        }
+        Returns: Json
+      }
+      enviar_dm: { Args: { p_corpo: string; p_para_id: string }; Returns: Json }
       escolher_starter: { Args: { p_species_id: string }; Returns: Json }
+      esta_online: { Args: { p_user_id: string }; Returns: boolean }
       evoluir_poke: { Args: { p_poke_id: string }; Returns: Json }
+      excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
+      gravar_progresso: {
+        Args: {
+          p_patch: Json
+          p_updated_at_esperado: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       hunts_iniciais: { Args: never; Returns: string[] }
       id_por_nome_de_treinador: { Args: { nome: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       marcar_correio_lido: { Args: { p_mensagem_id: string }; Returns: Json }
+      marcar_dm_lidas: { Args: { p_amigo_id: string }; Returns: Json }
       meu_perfil: { Args: never; Returns: Json }
       nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
       ofertar_no_anuncio: {
@@ -3400,6 +3558,12 @@ export type Database = {
         Returns: undefined
       }
       reiniciar_jogo: { Args: never; Returns: undefined }
+      remover_amizade: { Args: { p_amigo_id: string }; Returns: Json }
+      reordenar_equipe: { Args: { p_ordem: string[] }; Returns: Json }
+      responder_correio: {
+        Args: { p_corpo: string; p_mensagem_id: string }
+        Returns: Json
+      }
       responder_oferta: {
         Args: { p_aceitar: boolean; p_oferta_id: string }
         Returns: Json

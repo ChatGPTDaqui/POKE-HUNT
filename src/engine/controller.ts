@@ -272,6 +272,30 @@ export const controller = {
     })
   },
 
+  // Reordena a fila de RESERVAS (trilho da HUD, PH-75).
+  //
+  // Nao troca quem esta em campo — isso e `setActiveTeamIndex`, e a RPC recusa
+  // qualquer ordem que mude o slot 0. Por isso aqui nao ha nada de preload de
+  // arte nem de worldStore: o POKE desenhado nao muda.
+  reorderTeam(de: number, para: number): void {
+    const gameState = useGameStateStore.getState()
+    if (de === para) return
+    const n = gameState.team.length
+    if (de < 1 || de >= n || para < 1 || para >= n) return
+
+    // A ordem RESULTANTE e calculada aqui, antes do fallback rodar: sob
+    // autoridade do servidor o fallback NAO roda, entao ler a equipe depois do
+    // `pedirAcao` mandaria a ordem velha.
+    const ordem = gameState.team.map((p) => p.uid)
+    const [movido] = ordem.splice(de, 1)
+    ordem.splice(para, 0, movido)
+
+    void pedirAcao(
+      { tipo: 'reordenarEquipe', ordem },
+      () => gameState.reordenarReservas(de, para),
+    )
+  },
+
   removeFromTeam(pokeUid: string): void {
     const gameState = useGameStateStore.getState()
     const idx = gameState.team.findIndex((p) => p.uid === pokeUid)

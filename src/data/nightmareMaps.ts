@@ -14,7 +14,7 @@ import { SPECIES } from './pokes'
 import { GEOMETRIA, GRUPOS_DO_LANCE } from './biomas'
 import { LEGENDARY_SPECIES_IDS } from './legendaries'
 import type { ElementType, SpeciesDataEntry } from './generated/types'
-import type { HuntMapDef, HuntEncounter, StatBlock } from './huntTypes'
+import { ESPERA_DE_TROCA_SEGUNDOS, type HuntMapDef, type HuntEncounter, type StatBlock } from './huntTypes'
 import type { RarityKey } from './rarity'
 
 // Same all-18-types real per-type background art as the regular hunts —
@@ -258,7 +258,7 @@ function buildLanceHunt(): { map: HuntMapDef; encounters: Record<string, HuntEnc
     unlocksContinentOnClear: GRUPOS_DO_LANCE,
     startCountdown: 5, // explicit user request — 5..0 countdown before Lance's first POKE spawns (main.js#buildMapWorld/stepWorld)
     keepCorpses: true, // explicit user request — defeated POKEs here stay on the field as "bodies" instead of despawning after DEATH_ANIM_GRACE_PERIOD
-    respawnDelay: 3,
+    respawnDelay: ESPERA_DE_TROCA_SEGUNDOS, // o lado do Lance da espera de troca; o do jogador esta em simulation.ts#trocarPorDesmaio
     spawnPoints: [{ x: 700, y: 450 }],
     enemyPool,
     itemDrops: [],
