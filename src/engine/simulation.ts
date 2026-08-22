@@ -19,7 +19,7 @@
 // Um comparador acusaria jogador honesto. E re-simular pra conferir custa a
 // MESMA CPU que simular; se vai gastar, gaste sendo a autoridade.
 import { SPECIES, createPokeInstance, type PokeInstance } from '@/data/pokes'
-import { mapDefParaSala, spawnPointParaSala, mapWalkRadius, isCellBlocked, nearestOpenPoint, type MapDef } from '@/data/maps'
+import { mapDefParaSala, spawnPointParaSala, spawnInimigoParaSala, mapWalkRadius, isCellBlocked, nearestOpenPoint, type MapDef } from '@/data/maps'
 import { getEncounter } from '@/data/enemies'
 import { getItem } from '@/data/items'
 import { isDamagingAbility } from '@/data/abilities'
@@ -31,6 +31,7 @@ import { randInt, randRange, weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
 import { captureAnimFrameDuration, captureAnimFrameCount } from '@/data/captureAnim'
 import { rarityOf, realceDaRaridade } from '@/data/rarity'
+import { ESPERA_DE_TROCA_SEGUNDOS } from '@/data/huntTypes'
 import { formatStatGains } from '@/data/statLabels'
 
 import { createPlayerEntity, createEnemyEntity, isDead, takeDamage } from './entity'
@@ -173,6 +174,17 @@ function randomSpawnPointFullMap(rng: Rng, mapDef: MapDef): Point {
     attempts < SPAWN_POINT_MAX_ATTEMPTS
     && (Math.hypot(x - mapDef.playerSpawn.x, y - mapDef.playerSpawn.y) < SPAWN_MIN_DISTANCE || isCellBlocked(mapDef, x, y))
   )
+  // O laco acima sai por ESGOTAR as tentativas, entao a ultima pode ser uma
+  // celula bloqueada — ele nunca prometeu ponto valido, so tentou 40 vezes.
+  // Era improvavel enquanto todo mapa tinha 1400x900; com o mundo do tamanho
+  // da area pintada (PH-80) um sub-bioma apertado pode nao ter faixa nenhuma
+  // que satisfaca `SPAWN_MIN_DISTANCE` E seja andavel, e ai o inimigo nascia
+  // dentro da parede — de onde o pathfinder nao tira ele. Melhor perder a
+  // distancia minima do que a validade do ponto.
+  if (isCellBlocked(mapDef, x, y)) {
+    const aberto = nearestOpenPoint(mapDef, x, y)
+    if (aberto) return aberto
+  }
   return { x, y }
 }
 
@@ -202,9 +214,10 @@ function spawnEnemyAt(
   pool: string[],
   janela?: [number, number],
   player?: { x: number; y: number; facing: Point } | null,
+  entrada?: Point | null,
 ): EnemyEntity {
   const { rng, counters } = world
-  const point = randomSpawnPoint(rng, mapDef, player ?? null)
+  const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null)
   // Ponderado pelo TIER de spawn da especie, derivado da chance real de
   // encontro selvagem do Gen1/Gen2 (ver scripts/derive-spawn-tiers.js) — quem e
   // comum nos jogos reais aparece mais que quem e raro, dentro da mesma hunt.
@@ -275,13 +288,80 @@ function sequenceSpawnPoint(rng: Rng, mapDef: MapDef, base: Point): Point {
   return { x, y }
 }
 
-function spawnSequenceEnemy(world: SequenciaDeSorteio, mapDef: MapDef, index: number): EnemyEntity {
+/**
+ * A BOLA VERDE pintada na arte: por onde entra todo POKE novo do lado inimigo.
+ * `null` quando a arte nao tem uma (as 29 hunts normais), e ai o chamador cai
+ * no sorteio de sempre.
+ *
+ * Mapa que poe VARIOS inimigos em campo ao mesmo tempo nao usa: um ponto fixo
+ * empilharia os seis no mesmo pixel. Sobra o formato de duelo — a sequencia do
+ * Lance e os mapas de um inimigo so (BOSS, Treinamento), que e onde a bola faz
+ * sentido.
+ */
+function entradaDoInimigo(mapDef: MapDef, sala: { chave: string } | null): Point | null {
+  if (!mapDef.sequence && mapDef.maxEnemies > 1) return null
+  return spawnInimigoParaSala(mapDef.id, sala)
+}
+
+/**
+ * Poe o proximo POKE vivo da equipe em campo depois da espera. Nao faz nada
+ * fora dos mapas com `autoSwitchTeamOnFaint`, nem quando a equipe inteira caiu
+ * — ai o fluxo normal de derrota assume.
+ */
+function trocarPorDesmaio(world: WorldState, gameState: GameStateStore, dt: number, silent: boolean): void {
+  const player = world.player
+  if (!world.mapDef?.autoSwitchTeamOnFaint || !player || !isDead(player)) {
+    world.trocaEmCampo = null
+    return
+  }
+  const proximo = gameState.team.findIndex((p) => p.hp > 0)
+  if (proximo === -1) {
+    world.trocaEmCampo = null
+    return
+  }
+
+  world.trocaEmCampo = (world.trocaEmCampo ?? ESPERA_DE_TROCA_SEGUNDOS) - dt
+  if (world.trocaEmCampo > 0) return
+  world.trocaEmCampo = null
+
+  gameState.setActiveIndex(proximo)
+  const nextPoke = gameState.team[proximo]
+  player.poke = nextPoke
+  player.cooldowns = {}
+  player.flashTimer = 0
+  player.fainted = false
+  player.state = 'wander'
+  player.targetId = null
+  // Entra pela BOLA AMARELA, nao no buraco onde o anterior caiu — e a mesma
+  // regra que a bola verde da pro outro lado. Arte sem bola pintada nao move
+  // ninguem: o substituto continua aparecendo no lugar do anterior, que e o
+  // comportamento de antes.
+  const entrada = spawnPointParaSala(world.mapDef.id, world.sala)
+  if (entrada) {
+    player.x = entrada.x
+    player.y = entrada.y
+    player.pathWaypoints = null
+    player.pathIndex = 0
+    player.pathTargetX = null
+    player.pathTargetY = null
+  }
+  if (!silent) {
+    useToastStore.getState().pushToast(
+      `${shinyPrefix(nextPoke.isShiny)}${SPECIES[nextPoke.speciesId].name} entrou em campo!`,
+      'success', 'combat',
+    )
+  }
+}
+
+function spawnSequenceEnemy(world: SequenciaDeSorteio, mapDef: MapDef, index: number, entrada: Point | null): EnemyEntity {
   const { rng, counters } = world
   const encounterId = mapDef.sequence![index]
   const encounter = getEncounter(encounterId)
   if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
   const base = mapDef.spawnPoints[0] || mapDef.playerSpawn
-  const point = index === 0 ? base : sequenceSpawnPoint(rng, mapDef, base)
+  // Com bola verde TODO POKE da sequencia entra por ela, o primeiro inclusive
+  // — o pedido foi "todo novo pokemon", nao "do segundo em diante".
+  const point = entrada ?? (index === 0 ? base : sequenceSpawnPoint(rng, mapDef, base))
   const poke = createPokeInstance(rng, encounter.speciesId, encounter.minLevel, { rarity: encounter.rarity, ivs: encounter.ivs })
   return createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId })
 }
@@ -385,12 +465,12 @@ export function buildMapWorld(
   const enemies: EnemyEntity[] = []
   if (!countdownRemaining && !sequenceCleared) {
     if (mapDef.sequence) {
-      const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex)
+      const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala))
       aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
       enemies.push(enemy)
     } else {
       for (let i = 0; i < mapDef.maxEnemies; i++) {
-        const enemy = spawnEnemyAt(base, mapDef, pool, janela, player)
+        const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala))
         aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
         enemies.push(enemy)
       }
@@ -402,6 +482,7 @@ export function buildMapWorld(
     mapDef, player, enemies, effects: [], pendingHits: [], pendingWishes: [],
     autoTimers: { treinador: 0 },
     reviveCountdown: null,
+    trocaEmCampo: null,
     respawnTimer: mapDef.respawnDelay,
     sequenceIndex,
     sequenceCleared,
@@ -584,13 +665,13 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     if (world.countdownRemaining <= 0) {
       world.countdownRemaining = null
       if (world.mapDef.sequence) {
-        const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex)
+        const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex, entradaDoInimigo(world.mapDef, world.sala))
         aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
         world.enemies.push(enemy)
       } else {
         const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
         for (let i = 0; i < world.mapDef.maxEnemies; i++) {
-          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player)
+          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala))
           aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
           world.enemies.push(enemy)
         }
@@ -620,7 +701,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       if (world.mapDef) {
         const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
         for (let i = 0; i < world.mapDef.maxEnemies; i++) {
-          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player)
+          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala))
           aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
           world.enemies.push(enemy)
         }
@@ -683,30 +764,20 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
         'error', 'combat',
       )
     }
-
-    // Regra da Champion Lance (autoSwitchTeamOnFaint): em vez do modal
-    // "voce perdeu" de BOSS normal no primeiro desmaio, o proximo membro
-    // de equipe nao-desmaiado entra em campo automaticamente.
-    if (world.mapDef.autoSwitchTeamOnFaint) {
-      const nextIndex = gameState.team.findIndex((p) => p.hp > 0)
-      if (nextIndex !== -1) {
-        gameState.setActiveIndex(nextIndex)
-        const nextPoke = gameState.team[nextIndex]
-        world.player.poke = nextPoke
-        world.player.cooldowns = {}
-        world.player.flashTimer = 0
-        world.player.fainted = false
-        world.player.state = 'wander'
-        world.player.targetId = null
-        if (!silent) {
-          useToastStore.getState().pushToast(
-            `${shinyPrefix(nextPoke.isShiny)}${SPECIES[nextPoke.speciesId].name} entrou em campo!`,
-            'success', 'combat',
-          )
-        }
-      }
-    }
   }
+
+  // Regra da Champion Lance (autoSwitchTeamOnFaint): em vez do modal "voce
+  // perdeu" de BOSS normal no primeiro desmaio, o proximo membro de equipe
+  // nao-desmaiado entra em campo — depois de TROCA_APOS_DESMAIO segundos, a
+  // mesma espera que o outro lado tem (huntTypes.ts#ESPERA_DE_TROCA_SEGUNDOS).
+  //
+  // A condicao e REDERIVADA todo tick ("desmaiado em campo + alguem vivo no
+  // banco") em vez de disparada uma vez no `playerJustFainted`. E o que faz a
+  // espera sobreviver a reconstrucao do mundo por janela de flush: o mundo
+  // novo nasce com o POKE desmaiado e sem timer nenhum, e sem esta releitura
+  // a troca simplesmente nunca aconteceria — o mesmo modo de falha silencioso
+  // do `sequenceIndex` que engine/lance.test.ts existe pra impedir.
+  trocarPorDesmaio(world, gameState, dt, silent)
 
   const autoEvents = updateAutoHeal(world, gameState, dt)
   if (!silent) {
@@ -741,7 +812,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
       const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
-      const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player)
+      const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala))
       aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
       world.enemies.push(enemy)
       world.respawnTimer = world.mapDef.respawnDelay
@@ -750,7 +821,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
       world.sequenceIndex += 1
-      const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex)
+      const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex, entradaDoInimigo(world.mapDef, world.sala))
       aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
       world.enemies.push(enemy)
       world.respawnTimer = world.mapDef.respawnDelay

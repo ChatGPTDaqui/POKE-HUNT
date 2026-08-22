@@ -18,7 +18,7 @@
 import { SPECIES } from '@/data/pokes'
 import { nomeDoStatus, type StatusAtivo } from '@/data/statusEffects'
 import { statusVfxUrl } from '@/data/statusVfx'
-import { STAT_LABEL } from '@/data/statLabels'
+import { ROTULO_ESTAGIO } from '@/data/statLabels'
 import type { StatDeEstagio } from '@/data/statusEffects'
 import { useWorldStore } from '@/stores/worldStore'
 import { useDeviceMode } from '@/stores/uiStore'
@@ -29,19 +29,6 @@ import { useState, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 const ESTAGIOS_ORDEM: StatDeEstagio[] = ['atkFis', 'atkEsp', 'def', 'defEsp', 'speed', 'accuracy', 'evasion']
-// `accuracy`/`evasion` nao sao um dos 6 stats reais (STAT_LABEL, indexado por
-// `keyof StatBlock`) — sao eixo de combate a parte (sand_attack/smokescreen
-// etc, golpes novos desta mesma leva). Rotulo proprio so pros dois; o resto
-// reusa STAT_LABEL pra nao duplicar os nomes ja centralizados la.
-const ROTULO_ESTAGIO: Record<StatDeEstagio, string> = {
-  atkFis: STAT_LABEL.atkFis,
-  atkEsp: STAT_LABEL.atkEsp,
-  def: STAT_LABEL.def,
-  defEsp: STAT_LABEL.defEsp,
-  speed: STAT_LABEL.speed,
-  accuracy: 'Precisão',
-  evasion: 'Evasão',
-}
 
 interface Badge {
   key: string
