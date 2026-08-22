@@ -190,6 +190,23 @@ export interface EstadoParaEscrita {
    * por essa lista curta.
    */
   bagCarregada: boolean
+  /**
+   * As LINHAS CRUAS que este snapshot leu, guardadas pra `gravarEstado` poder
+   * gravar so o que mudou.
+   *
+   * Sem baseline, todo flush reescrevia o conjunto inteiro: as linhas do time em
+   * `pokemon_instances`, TODOS os itens, TODA a Pokedex e TODAS as regras de
+   * auto-captura — 120 vezes por hora por jogador, mesmo numa janela em que o
+   * jogador nao matou nada. E cada tabela dessas custa dois round-trips (o
+   * select do diff de remocao e o upsert), o que fazia um flush parado custar o
+   * mesmo que um flush cheio de abates.
+   *
+   * Guardado como linha, e nao como `PokeInstance`: `rowToPoke` recalcula campo
+   * derivado na leitura (`unlockedAbilities`, `stats`) e e justamente esse
+   * recalculo que atualiza a coluna quando o catalogo muda. Comparar objeto de
+   * jogo congelaria essa atualizacao; comparar a linha ja mapeada nao.
+   */
+  linhasNoLoad: PlayerSnapshot
 }
 
 /**
@@ -248,16 +265,15 @@ export async function lerSnapshot(
     selecionarTudo<PlayerSnapshot['autoCatchRules'][number]>(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=*`),
   ])
   if (!player[0]) throw new ErroHttp(404, 'jogador sem linha em `players`')
-  const estado = snapshotToGameState(
-    { player: player[0], pokemon, items, pokedex, autoCatchRules },
-    defaultGameStateData(),
-  )
+  const linhasNoLoad: PlayerSnapshot = { player: player[0], pokemon, items, pokedex, autoCatchRules }
+  const estado = snapshotToGameState(linhasNoLoad, defaultGameStateData())
   return {
     estado,
     pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)),
     entregas: [],
     playerUpdatedAt: player[0].updated_at,
     bagCarregada: comBag,
+    linhasNoLoad,
   }
 }
 
@@ -347,12 +363,63 @@ interface LinhaLocalizacao {
 // confundir com qualquer outro 409 do jogo (ouro insuficiente, item travado).
 export const CONFLITO_ESCRITA_JOGADOR = 'outro comando em andamento — tente de novo'
 
+/**
+ * Duas linhas do banco dizem a mesma coisa?
+ *
+ * Compara so as chaves que a linha NOVA traz: o tipo `Insert` omite coluna com
+ * default (`created_at`, `updated_at`), e exigir igualdade nelas faria toda
+ * linha parecer diferente — que e exatamente o comportamento que este diff
+ * existe pra evitar.
+ *
+ * Em caso de duvida o resultado e `false` (grava). Um falso "mudou" custa uma
+ * escrita a mais; um falso "nao mudou" perde progresso.
+ */
+function linhaIgual(nova: Record<string, unknown>, atual: Record<string, unknown> | undefined): boolean {
+  if (!atual) return false
+  for (const [chave, valor] of Object.entries(nova)) {
+    const antes = atual[chave]
+    if (valor === antes) continue
+    // `null` e `undefined` significam a mesma coisa aqui: o PostgREST devolve
+    // `null` na coluna vazia e o mapper as vezes omite a chave.
+    if (valor == null && antes == null) continue
+    if (typeof valor === 'object' || typeof antes === 'object') {
+      // Array (`unlocked_abilities`) e jsonb (`disabled_abilities`, configs de
+      // auto). JSON.stringify e comparacao por FORMA, entao ordem de array e de
+      // chave importa — pro dado deste jogo as duas sao estaveis (o mapper monta
+      // sempre na mesma ordem), e onde nao forem o efeito e gravar a mais.
+      if (JSON.stringify(valor) === JSON.stringify(antes)) continue
+      return false
+    }
+    return false
+  }
+  return true
+}
+
+/** Nada mudou nesta tabela: mesmas chaves, e nenhuma linha diferente. */
+function tabelaIntacta<T extends Record<string, unknown>>(
+  novas: T[],
+  atuais: T[] | undefined,
+  chaveDe: (linha: T) => string,
+): boolean {
+  // `undefined` = nao ha baseline (chamador antigo, ou leitura que nao guardou
+  // as linhas). Sem baseline nao ha como afirmar que nada mudou.
+  if (!atuais) return false
+  if (novas.length !== atuais.length) return false
+  const porChave = new Map(atuais.map((l) => [chaveDe(l), l]))
+  return novas.every((nova) => linhaIgual(nova, porChave.get(chaveDe(nova))))
+}
+
 export async function gravarEstado(
   cfg: Config,
   userId: string,
   estado: GameStateData,
   pokeIdsNoLoad: Set<string>,
   playerUpdatedAtEsperado: string,
+  /**
+   * As linhas que a leitura viu (`EstadoParaEscrita.linhasNoLoad`). Ausente =
+   * sem baseline, e ai o comportamento e o de sempre: reescreve tudo.
+   */
+  linhasNoLoad?: PlayerSnapshot,
 ): Promise<void> {
   // CAS na linha de `players`: sem isso, duas acoes concorrentes do mesmo
   // jogador (duas abas, duplo clique, comprar+evoluir quase juntos) leem o
@@ -369,35 +436,42 @@ export async function gravarEstado(
   if (!gravada.length) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR)
 
   const linhasPoke = gameStateToPokemonRows(userId, estado)
-  // `id` e opcional so no tipo `Insert` (coluna tem default no banco) — aqui
-  // sempre vem preenchido, o proprio POKE que o gerou.
-  const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id): id is string => id != null))
-  // Uma leitura so, cobrindo o que eu conhecia e o que estou tentando gravar.
-  const idsDeInteresse = [...new Set([...pokeIdsNoLoad, ...idsAgora])]
-  const atuais: LinhaLocalizacao[] = []
-  for (const lote of porLotesDeId(idsDeInteresse)) {
-    atuais.push(
-      ...(await selecionarTudo<LinhaLocalizacao>(
-        cfg,
-        `pokemon_instances?id=in.(${lote.join(',')})&select=id,user_id,location`,
-      )),
-    )
-  }
-  const porId = new Map(atuais.map((l) => [l.id, l]))
-  const aindaMeu = (l: LinhaLocalizacao | undefined): boolean =>
-    l != null && l.user_id === userId && (l.location === 'team' || l.location === 'bag')
+  // JANELA SEM NADA PRA GRAVAR: sai antes dos dois round-trips (o select do
+  // diff de remocao e o upsert). Isto e o caso COMUM num jogo idle — POKE
+  // desmaiado, inimigo ainda nascendo, jogador parado no Hospital — e antes
+  // custava exatamente o mesmo que uma janela cheia de abates.
+  const pokeIntacto = tabelaIntacta(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id))
+  if (!pokeIntacto) {
+    // `id` e opcional so no tipo `Insert` (coluna tem default no banco) — aqui
+    // sempre vem preenchido, o proprio POKE que o gerou.
+    const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id): id is string => id != null))
+    // Uma leitura so, cobrindo o que eu conhecia e o que estou tentando gravar.
+    const idsDeInteresse = [...new Set([...pokeIdsNoLoad, ...idsAgora])]
+    const atuais: LinhaLocalizacao[] = []
+    for (const lote of porLotesDeId(idsDeInteresse)) {
+      atuais.push(
+        ...(await selecionarTudo<LinhaLocalizacao>(
+          cfg,
+          `pokemon_instances?id=in.(${lote.join(',')})&select=id,user_id,location`,
+        )),
+      )
+    }
+    const porId = new Map(atuais.map((l) => [l.id, l]))
+    const aindaMeu = (l: LinhaLocalizacao | undefined): boolean =>
+      l != null && l.user_id === userId && (l.location === 'team' || l.location === 'bag')
 
-  const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)))
-  for (const lote of porLotesDeId(remover)) {
-    await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(',')})`)
+    const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)))
+    for (const lote of porLotesDeId(remover)) {
+      await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(',')})`)
+    }
+    // Linha sem par no banco e POKE novo (captura, inicial, compra) — grava.
+    // Linha com par que ja nao e minha fica de fora.
+    const gravarPoke = linhasPoke.filter((l) => {
+      const atual = porId.get(String(l.id))
+      return atual == null || aindaMeu(atual)
+    })
+    if (gravarPoke.length) await inserir(cfg, 'pokemon_instances', gravarPoke, { upsert: 'id' })
   }
-  // Linha sem par no banco e POKE novo (captura, inicial, compra) — grava.
-  // Linha com par que ja nao e minha fica de fora.
-  const gravarPoke = linhasPoke.filter((l) => {
-    const atual = porId.get(String(l.id))
-    return atual == null || aindaMeu(atual)
-  })
-  if (gravarPoke.length) await inserir(cfg, 'pokemon_instances', gravarPoke, { upsert: 'id' })
 
   const linhasItens = gameStateToItemRows(userId, estado)
   // Mesmo diff de remocao que `pokemon_instances` acima. Sem ele, um item
@@ -407,25 +481,29 @@ export async function gravarEstado(
   // reload (evolucao especial de graca), e qualquer pocao/bola zerada
   // ressuscitava. `gameStateToItemRows` ja preserva itens travados com
   // quantidade 0, entao esses continuam na lista e nao sao removidos.
-  const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id))
-  const itensNoBanco = await selecionarTudo<{ item_id: string }>(cfg, `player_items?user_id=eq.${userId}&select=item_id`)
-  const removerItens = itensNoBanco.map((l) => l.item_id).filter((id) => !itemIdsAgora.has(id))
-  for (const lote of porLotesDeId(removerItens)) {
-    await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(',')})`)
+  if (!tabelaIntacta(linhasItens, linhasNoLoad?.items, (l) => String(l.item_id))) {
+    const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id))
+    const itensNoBanco = await selecionarTudo<{ item_id: string }>(cfg, `player_items?user_id=eq.${userId}&select=item_id`)
+    const removerItens = itensNoBanco.map((l) => l.item_id).filter((id) => !itemIdsAgora.has(id))
+    for (const lote of porLotesDeId(removerItens)) {
+      await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(',')})`)
+    }
+    if (linhasItens.length) await inserir(cfg, 'player_items', linhasItens, { upsert: 'user_id,item_id' })
   }
-  if (linhasItens.length) await inserir(cfg, 'player_items', linhasItens, { upsert: 'user_id,item_id' })
 
   // Mesmo diff de remocao das duas tabelas acima. Sem ele, `reiniciarJogo`
   // apagava POKEs e itens mas a Pokedex sobrevivia inteira — a conta "zerada"
   // voltava com todos os abates registrados.
   const linhasDex = gameStateToPokedexRows(userId, estado)
-  const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id))
-  const dexNoBanco = await selecionarTudo<{ species_id: string }>(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)
-  const removerDex = dexNoBanco.map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id))
-  for (const lote of porLotesDeId(removerDex)) {
-    await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
+  if (!tabelaIntacta(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))) {
+    const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id))
+    const dexNoBanco = await selecionarTudo<{ species_id: string }>(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)
+    const removerDex = dexNoBanco.map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id))
+    for (const lote of porLotesDeId(removerDex)) {
+      await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
+    }
+    if (linhasDex.length) await inserir(cfg, 'player_pokedex', linhasDex, { upsert: 'user_id,species_id' })
   }
-  if (linhasDex.length) await inserir(cfg, 'player_pokedex', linhasDex, { upsert: 'user_id,species_id' })
 
   // `player_auto_catch_rules` NUNCA era gravada: `carregarEstado` a lia,
   // `gameStateToAutoCatchRuleRows` existia sem nenhum call site, e o mapper de
@@ -445,16 +523,18 @@ export async function gravarEstado(
   // e o proprio par (especie, bola) — a chave estavel que faltava era
   // exatamente a constraint.
   const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado)
-  const especiesAgora = new Set(linhasAuto.map((l) => l.species_id))
-  const autoNoBanco = await selecionarTudo<{ species_id: string }>(
-    cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`,
-  )
-  const removerAuto = autoNoBanco.map((l) => l.species_id).filter((id) => !especiesAgora.has(id))
-  for (const lote of porLotesDeId(removerAuto)) {
-    await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
-  }
-  if (linhasAuto.length) {
-    await inserir(cfg, 'player_auto_catch_rules', linhasAuto, { upsert: 'user_id,species_id' })
+  if (!tabelaIntacta(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id))) {
+    const especiesAgora = new Set(linhasAuto.map((l) => l.species_id))
+    const autoNoBanco = await selecionarTudo<{ species_id: string }>(
+      cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`,
+    )
+    const removerAuto = autoNoBanco.map((l) => l.species_id).filter((id) => !especiesAgora.has(id))
+    for (const lote of porLotesDeId(removerAuto)) {
+      await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
+    }
+    if (linhasAuto.length) {
+      await inserir(cfg, 'player_auto_catch_rules', linhasAuto, { upsert: 'user_id,species_id' })
+    }
   }
 }
 
@@ -617,6 +697,7 @@ export async function aplicarFlush(
       comEstadoParaEscrita(cfg, userId, async (ctx) => {
         const resultado = await simularSessao(
           cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, ctx.playerUpdatedAt, { agora, segundos, truncado },
+          ctx.linhasNoLoad,
         )
         // `null` = sessao insimulavel; sai SEM gravar, entao as entregas voltam pra
         // fila (o `catch` do embrulho so cobre excecao, e aqui nao ha excecao).
@@ -639,6 +720,8 @@ async function simularSessao(
   pokeIdsNoLoad: Set<string>,
   playerUpdatedAt: string,
   janela: { agora: number; segundos: number; truncado: boolean },
+  // Baseline pro diff de escrita de `gravarEstado` — ver `EstadoParaEscrita.linhasNoLoad`.
+  linhasNoLoad: PlayerSnapshot,
 ): Promise<ResultadoFlush | null> {
   const { agora, segundos, truncado } = janela
   const { store, dados: estado } = criarEstadoDoJogador(dados)
@@ -741,7 +824,7 @@ async function simularSessao(
   // esta resposta, entao um `currentMapId` sobrevivente o deixaria desenhando
   // uma cacada que o servidor ja encerrou.
   estado.currentMapId = resumo.stoppedEarly ? null : sessao.map_id
-  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt)
+  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt, linhasNoLoad)
 
   // Hall da Fama: a unica coisa que libera os grupos do Lance e limpar a
   // sequencia dele (`unlocksContinentOnClear`, ver data/nightmareMaps.ts). O
