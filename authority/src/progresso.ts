@@ -8,7 +8,7 @@ import {
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
 } from '#engine'
 import {
-  ErroHttp, selecionarTudo, selecionar, atualizar, atualizarRetornando, inserir, apagar, type Config,
+  ErroHttp, selecionarTudo, selecionar, atualizar, atualizarRetornando, inserir, apagar, chamarRpc, type Config,
 } from './db.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
 import { aplicarPiso, NENHUM_PISO, type ResultadoPiso } from './farmOffline.js'
@@ -428,12 +428,23 @@ export async function gravarEstado(
   // Mercado, aqui na linha do jogador (PH-5). `updated_at` e mantido pelo
   // trigger `players_set_updated_at`: todo UPDATE bem sucedido (nosso ou de
   // outro request concorrente) sempre avanca a versao.
-  const gravada = await atualizarRetornando(
+  //
+  // PH-67: RPC em vez de PATCH cru. Um PATCH direto no REST nunca disputava o
+  // `pg_advisory_xact_lock` que as RPCs de acao (comprar/vender/etc) passaram
+  // a tomar — duas transacoes HTTP separadas, nenhuma pedindo o mesmo lock,
+  // colisao efemera batendo 409 sem nenhuma das duas estar "errada". A RPC
+  // `gravar_progresso` pega o MESMO lock por usuario antes do CAS, entao
+  // agora as duas familias de escrita realmente se serializam.
+  const resultado = await chamarRpc<{ ok: boolean; conflito?: boolean; updatedAt?: string }>(
     cfg,
-    `players?user_id=eq.${userId}&updated_at=eq.${encodeURIComponent(playerUpdatedAtEsperado)}`,
-    gameStateToPlayerRow(userId, estado),
+    'gravar_progresso',
+    {
+      p_user_id: userId,
+      p_patch: gameStateToPlayerRow(userId, estado),
+      p_updated_at_esperado: playerUpdatedAtEsperado,
+    },
   )
-  if (!gravada.length) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR)
+  if (!resultado.ok) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR)
 
   const linhasPoke = gameStateToPokemonRows(userId, estado)
   // JANELA SEM NADA PRA GRAVAR: sai antes dos dois round-trips (o select do

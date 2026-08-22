@@ -215,6 +215,74 @@ export function ehGolpeAoeDeNivel50(key: string): boolean {
   return key in TYPED_AOE_MOVES
 }
 
+/**
+ * A escolha do jogador SANEADA: sem golpe que este POKE nao conhece, sem
+ * repetido, no maximo 4, e com slot recomposto quando o filtro esvaziou algum.
+ *
+ * REGRA UNICA, TRES CONSUMIDORES. Ela nasceu aqui dentro de
+ * `golpesUtilizaveis` (o caminho do combate) e era exclusiva dele — e essa
+ * exclusividade era um bug:
+ *
+ *  - a TELA (`MovesetTable`) lia `poke.activeAbilities` cru, entao mostrava
+ *    "4/4" com menos de 4 botoes numerados: a chave orfa nao tem linha na
+ *    tabela (saiu do catalogo) ou tem linha com `aprendido=false` (mudou de
+ *    nivel exigido), e nos dois casos ela e invisivel e impossivel de
+ *    desmarcar;
+ *  - a EDICAO mandava essa mesma lista crua pra RPC `definir_golpes_ativos`,
+ *    que valida id por id contra `unlocked_abilities` e ABORTA a chamada
+ *    inteira. Resultado: o POKE ficava com a escolha travada — nem adicionar
+ *    (o teto de 4 ja estava "cheio") nem remover (todo payload levava a chave
+ *    recusada) funcionava. Sem erro que ajudasse: so "esse POKE nao conhece
+ *    esse golpe" pra um golpe que o jogador nao escolheu e nao ve.
+ *
+ * De onde vem chave orfa: a regra do Recordador (so golpe com nivel real na
+ * propria especie, v6.8) e o rename de 15 chaves na migracao do Ultra Sun.
+ * Medido contra producao antes daquela leva: 3.188 de 7.184 POKEs com escolha
+ * gravada perdiam ao menos um golpe.
+ *
+ * `conhecidos` entra por parametro em vez de ser derivado de (especie, nivel)
+ * aqui dentro porque quem chama ja tem a lista montada — e no caso do
+ * `rowToPoke` ela e justamente o recalculo fresco que acabou de substituir a
+ * coluna do banco.
+ */
+export function sanearEscolhaDeGolpes(
+  escolha: readonly string[],
+  conhecidos: readonly string[],
+  species: Species,
+  level: number,
+): string[] {
+  const validos = new Set([...conhecidos, BASIC_ATTACK.id])
+  // Duplicata aqui vira `key` React duplicada em toda UI que mapeia por
+  // `ability.id` (`AbilityHud`), e key duplicada corrompe a reconciliacao: o
+  // node extra fica orfao e sobrevive a troca de POKE seguinte mostrando o
+  // golpe antigo. Ha dado assim em producao, de antes de a validacao existir.
+  const escolhidos = [...new Set(escolha.filter((key) => validos.has(key)))].slice(0, MAX_ACTIVE_ABILITIES)
+
+  // RECOMPOE O SLOT QUE O FILTRO ESVAZIOU.
+  //
+  // O filtro acima existe pra escolha que aponta pra golpe que o POKE nao sabe
+  // mais. Sozinho ele so TIRA, e ai a escolha do jogador encolhe em silencio: o
+  // POKE fica com 2 golpes, ou com nenhum, sem nada na tela dizendo por que.
+  //
+  // Escolha VAZIA de proposito continua vazia: zero golpes e uma opcao valida
+  // (o POKE simplesmente nao ataca, ver combatSystem#pickAbility) e nao pode
+  // ser "consertada" pra 4.
+  //
+  // Repoe EXATAMENTE o que o filtro tirou, nao ate 4. Enquanto isto vivia so
+  // no caminho do combate, completar ate o teto era invisivel; agora a mesma
+  // lista alimenta a tela e o payload da RPC, e encher slot que o jogador
+  // deixou vazio de proposito seria mudar a escolha dele — um POKE com 3
+  // golpes escolhidos e um orfao voltaria com 4.
+  const alvo = Math.min(escolha.length, MAX_ACTIVE_ABILITIES)
+  if (escolha.length > 0 && escolhidos.length < alvo) {
+    for (const key of activeAbilitiesPadrao(species, level)) {
+      if (escolhidos.length >= alvo) break
+      if (!escolhidos.includes(key) && validos.has(key)) escolhidos.push(key)
+    }
+  }
+  return escolhidos
+}
+
 // O conjunto que o combate pode usar. Ponto unico de leitura: a IA
 // (`pickAbility`), o HUD de golpes e a tela de Equipes passam todos por aqui.
 //
@@ -224,43 +292,17 @@ export function ehGolpeAoeDeNivel50(key: string): boolean {
 export function golpesUtilizaveis(poke: PokeInstance, species: Species, selvagem: boolean): string[] {
   if (selvagem) return activeAbilitiesSelvagem(species, poke.level)
 
-  // O Ataque Basico nunca esta em `unlockedAbilities` — ele nao e aprendido em
-  // nivel nenhum, todo POKE simplesmente tem. Sem entrar aqui, o filtro logo
-  // abaixo o descartaria da escolha do jogador e ele nunca chegaria ao combate.
-  const conhecidos = new Set([...poke.unlockedAbilities, BASIC_ATTACK.id])
-  const escolha = poke.activeAbilities ?? activeAbilitiesPadrao(species, poke.level)
-  // `escolha` pode ter golpe repetido (dado salvo antes da validacao existir —
-  // ver `pokemon_instances.active_abilities` em producao). Duplicata aqui vira
-  // `key` React duplicada em toda UI que mapeia por `ability.id`
-  // (`AbilityHud`), e key duplicada corrompe a reconciliacao: o node extra fica
-  // orfao e sobrevive a troca de POKE seguinte mostrando o golpe antigo.
-  const escolhidos = [...new Set(escolha.filter((key) => conhecidos.has(key)))].slice(0, MAX_ACTIVE_ABILITIES)
-
-  // RECOMPOE O SLOT QUE O FILTRO ESVAZIOU.
+  // O Ataque Basico entra em `conhecidos` dentro de `sanearEscolhaDeGolpes`:
+  // ele nao e aprendido em nivel nenhum (nunca esta em `unlockedAbilities`),
+  // todo POKE simplesmente tem.
   //
-  // O filtro acima existe pra escolha que aponta pra golpe que o POKE nao sabe
-  // mais — golpe renomeado pela migracao do Ultra Sun, ou especie trocada por
-  // evolucao. Sozinho ele so TIRA, e ai a escolha do jogador encolhe em
-  // silencio: o POKE fica com 2 golpes, ou com nenhum, e luta de Ataque Basico
-  // sem nada na tela dizendo por que.
-  //
-  // Deixou de ser hipotetico com a correcao do bloco de golpes rememoraveis do
-  // nivel 1 (ver `nivelExigido`). Medido contra o banco de producao ANTES de
-  // publicar: dos 7.184 POKEs salvos com golpes escolhidos, 3.188 perdiam ao
-  // menos um e 714 ficavam com ZERO. A regra nova esta certa, mas aplica-la
-  // tirando golpe de quem ja jogava seria trocar um bug por outro pior.
-  //
-  // Escolha VAZIA de proposito continua vazia: `[]` e a opcao valida de lutar so
-  // com o Ataque Basico, e nao pode ser "consertada" pra 4 golpes.
-  if (escolha.length > 0 && escolhidos.length < Math.min(escolha.length, MAX_ACTIVE_ABILITIES)) {
-    for (const key of activeAbilitiesPadrao(species, poke.level)) {
-      if (escolhidos.length >= MAX_ACTIVE_ABILITIES) break
-      if (!escolhidos.includes(key) && conhecidos.has(key)) escolhidos.push(key)
-    }
-  }
-
   // NAO ha mais anexo depois dos slots. A Explosao Elemental costumava entrar
   // aqui, fora da conta dos 4 — desde 2026-08-18 ela e um golpe comum e so
   // luta se estiver entre os escolhidos (ver o topo do arquivo).
-  return escolhidos
+  return sanearEscolhaDeGolpes(
+    poke.activeAbilities ?? activeAbilitiesPadrao(species, poke.level),
+    poke.unlockedAbilities,
+    species,
+    poke.level,
+  )
 }
