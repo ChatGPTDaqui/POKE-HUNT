@@ -14,7 +14,7 @@ const INTERVALO_CORREIO_MS = 60000
 // lados) e menos urgente: um lance pendente pode esperar dois minutos.
 const INTERVALO_MERCADO_MS = 120000
 
-/** Mensagens nao lidas + anexos ainda nao coletados. */
+/** Mensagem de conversa nao lida + aviso pendente + anexo ainda nao coletado. */
 export function usePendenciasDoCorreio(): number {
   const { data } = useQuery({
     queryKey: ['correio'],
@@ -23,10 +23,18 @@ export function usePendenciasDoCorreio(): number {
     refetchInterval: INTERVALO_CORREIO_MS,
   })
   if (!data) return 0
-  return data.mensagens.filter((m) => {
+  // As conversas (PH-81) trazem `naoLidas` e `anexosPendentes` ja contados pela
+  // RPC, por contato. Somar os dois aqui e o que faz o sino avisar tambem
+  // quando o que chegou foi um ITEM, e nao um texto novo — sem isso, mensagem
+  // ja lida com anexo por coletar sumiria do contador com o item preso dentro.
+  const naConversa = data.conversas.reduce((t, c) => t + c.naoLidas + c.anexosPendentes, 0)
+  // Aviso de sistema e pedido de amizade ficam fora das conversas, mas nao
+  // fora do contador: pro sino do HUD e tudo "tem coisa esperando voce".
+  const emAvisos = data.avisos.filter((m) => {
     const temAnexoPendente = (m.anexo_itens?.length ?? 0) > 0 && !m.anexo_coletado_em
     return temAnexoPendente || m.estado === 'pendente'
   }).length
+  return naConversa + emAvisos
 }
 
 /** Lances recebidos que ainda esperam aceitar/recusar. */
