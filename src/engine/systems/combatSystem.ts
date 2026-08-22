@@ -602,6 +602,57 @@ const FIXED_DAMAGE_ABILITIES: Record<string, (attackerPoke: PokeInstance, defend
   mirror_coat: (_a, _d, attackerEntity) => counterDamage(attackerEntity, 'special'),
 }
 
+// PODER CONDICIONAL (PH-70): golpe que "dobra de forca" contra um alvo em certa
+// condicao. Vinha tudo do catalogo como golpe comum — a condicao esta na
+// descricao da PokeAPI, em texto livre, e o gerador nao tem campo pra ela.
+// Resultado: 11 golpes que prometiam dobrar nunca dobravam.
+//
+// Implementados so os que dependem de estado que ESTE motor tem. Ficaram de
+// fora, de proposito: knock_off e acrobatics (item carregado), payback e
+// stomping_tantrum (ordem de turno / golpe anterior ter falhado — nao existe
+// ordem de turno aqui), retaliate e round (aliado, e a luta e sempre 1 contra
+// N). Ver a mesma logica de DANO_POR_REGRA_NAO_IMPLEMENTADA em data/abilities.ts.
+//
+// Le o MESMO ponto do pipeline nos dois lados (computeDamage e estimateDamage):
+// se so o dano real dobrasse, a IA do selvagem ranquearia o golpe pela metade do
+// que ele faz e quase nunca o escolheria.
+// Golpe que sorteia QUAL status tenta aplicar. `Ability.status` guarda um so, e
+// Tri Attack tem tres — na geracao do catalogo os tres foram descartados
+// (categoria PokeAPI `damage-ailment` com `status: null`) e o golpe virou dano
+// puro. EXPORTADO pro teste poder conferir sem duplicar a lista.
+export const STATUS_SORTEADO: Record<string, StatusCondition[]> = {
+  tri_attack: ['burn', 'freeze', 'paralysis'],
+}
+
+const JANELA_DE_DANO_RECENTE = 3 // segundos, mesma janela do Counter
+export const MULTIPLICADOR_CONDICIONAL: Record<string, (defenderEntity: WorldEntity) => number> = {
+  // Brine: dobra contra alvo com metade do HP ou menos.
+  brine: (d) => (d.poke.hp <= d.poke.stats.hp / 2 ? 2 : 1),
+  // Hex: dobra contra alvo com qualquer status nao-volatil.
+  hex: (d) => (d.poke.status ? 2 : 1),
+  // Venoshock: dobra contra alvo envenenado.
+  venoshock: (d) => (d.poke.status?.tipo === 'poison' ? 2 : 1),
+  // Wake-Up Slap: dobra contra alvo dormindo. (Nos jogos ainda ACORDA o alvo
+  // depois; isso nao esta implementado — dobrar o dano e a metade que muda o
+  // resultado da luta, acordar so devolveria o turno pro inimigo.)
+  wake_up_slap: (d) => (d.poke.status?.tipo === 'sleep' ? 2 : 1),
+  // Assurance: dobra se o alvo JA levou dano recentemente. `lastDamageTaken`
+  // existe pro Counter e serve exatamente pra isso; "neste turno" dos jogos vira
+  // a mesma janela curta que o Counter usa, porque este combate nao e
+  // estritamente por turno.
+  assurance: (d) => {
+    const recente = (categoria: 'physical' | 'special') => {
+      const m = d.lastDamageTaken[categoria]
+      return m.amount > 0 && m.age <= JANELA_DE_DANO_RECENTE
+    }
+    return recente('physical') || recente('special') ? 2 : 1
+  },
+}
+
+function multiplicadorCondicional(ability: Ability, defenderEntity: WorldEntity): number {
+  return MULTIPLICADOR_CONDICIONAL[ability.id]?.(defenderEntity) ?? 1
+}
+
 type SpecialDamage = { mode: 'dynamicPower'; power: number } | { mode: 'fixed'; amount: number } | null
 
 // Devolve null (usa o `power` fixo do golpe pelo pipeline normal) ou uma das
@@ -668,7 +719,12 @@ function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: W
   // O clima nao entra na estimativa (ela nao recebe `world`), o que subestima
   // Sand Force — aceitavel: a estimativa so ordena golpes do MESMO atacante, e
   // o clima e igual pra todos eles.
-  const power = poderBruto * multiplicadorDePoderPorTrait(attackerTraitEstimate, ability, null)
+  // O condicional entra na estimativa tambem: sem ele a IA ranquearia Hex/Brine
+  // pela metade do dano que eles vao causar contra o alvo que esta na frente
+  // dela, e praticamente nunca os escolheria.
+  const power = poderBruto
+    * multiplicadorDePoderPorTrait(attackerTraitEstimate, ability, null)
+    * multiplicadorCondicional(ability, defenderEntity)
   if (power === 0) return 0
 
   let dmg = formulaEngine.eval('DAMAGE_BASE', { level: attackerPoke.level, power, atk, def })
@@ -1057,7 +1113,9 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
     // Multiplica o poder ANTES de DAMAGE_BASE, como nos jogos — a diferenca
     // aparece de verdade porque DAMAGE_BASE tem divisao inteira no meio.
     const poderBruto = special && special.mode === 'dynamicPower' ? special.power : ability.power
-    const power = poderBruto * multiplicadorDePoderPorTrait(attackerTrait, ability, climaAtivo)
+    const power = poderBruto
+      * multiplicadorDePoderPorTrait(attackerTrait, ability, climaAtivo)
+      * multiplicadorCondicional(ability, defenderEntity)
 
     // DAMAGE_BASE tem um +2 fixo na formula (Gen2 legitimo pra golpe de dano
     // real), mas golpe de status puro (power 0, sem dynamicPower/fixed) nao
@@ -2178,11 +2236,33 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     const traits = traitsDoConfronto(attacker, target)
     const secundario = temEfeitoSecundario(ability)
     let abilityEfetiva = ability
+
+    // TRI ATTACK (PH-70): o golpe pode queimar, congelar OU paralisar, e
+    // `Ability.status` guarda UM status — na geracao do catalogo os tres foram
+    // descartados e o golpe virou dano puro, com a descricao prometendo os tres.
+    //
+    // Sorteia qual dos tres tenta pegar neste hit, antes de qualquer outra
+    // coisa: `statusVaiPegar` (imunidade por tipo, status ja ativo) roda depois,
+    // dentro de aplicarEfeitosDoGolpe, exatamente como em qualquer outro golpe —
+    // Tri Attack contra um ICE que tirou congelamento simplesmente falha, como
+    // nos jogos. Mesmo padrao do Effect Spore, que ja sorteia entre tres.
+    //
+    // O sorteio acontece mesmo que a chance de status falhe depois. Isso e
+    // proposital: consumir sempre o mesmo numero de valores do `rng` e o que
+    // mantem a predicao do cliente e a re-simulacao do servidor sincronizadas.
+    const statusSorteados = STATUS_SORTEADO[ability.id]
+    if (statusSorteados) {
+      const escolhido = statusSorteados[Math.floor(nextFloat(world.rng) * statusSorteados.length)]
+      abilityEfetiva = { ...abilityEfetiva, status: escolhido }
+    }
+
+    // Spread de `abilityEfetiva`, NAO de `ability`: senao estes dois ramos
+    // descartariam o status sorteado do Tri Attack logo acima.
     if (secundario && traits.defensor === TRAIT_SHIELD_DUST) {
-      abilityEfetiva = { ...ability, statusChance: 0, statChance: 0, flinchChance: 0 }
+      abilityEfetiva = { ...abilityEfetiva, statusChance: 0, statChance: 0, flinchChance: 0 }
     } else if (secundario && traits.atacante === TRAIT_SERENE_GRACE) {
       abilityEfetiva = {
-        ...ability,
+        ...abilityEfetiva,
         statusChance: Math.min(100, (ability.statusChance ?? 0) * 2),
         statChance: Math.min(100, (ability.statChance ?? 0) * 2),
       }
