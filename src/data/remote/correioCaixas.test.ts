@@ -1,23 +1,25 @@
-// PH-74: as duas caixas e a exclusao por lado.
+// PH-81: o que `correio()` monta pra tela inicial — conversas, avisos e a
+// contagem que alimenta o badge do HUD.
 //
-// O ponto sensivel e o filtro de excluidas acontecer na CONSULTA, nao na tela:
-// `usePendenciasDoCorreio` conta em cima do mesmo retorno, entao mensagem
-// apagada filtrada so no render continuaria alimentando o badge do HUD com uma
-// pendencia que o jogador nao consegue mais abrir.
+// Era o teste das duas caixas (entrada e enviados) de PH-74. As caixas sairam:
+// num aplicativo de mensagem o que voce mandou esta dentro do fio, e o
+// agrupamento por contato mudou de lugar — quem faz e a RPC `conversas`, no
+// banco, nao mais o client juntando `para_id` com `treinadores_publico`.
+//
+// O que continua valendo e o ponto sensivel de sempre: o badge do HUD conta em
+// cima DESTE retorno, entao qualquer coisa filtrada so no render continuaria
+// alimentando o contador com pendencia que o jogador nao consegue abrir.
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 type Resposta = { data: unknown; error: { message: string } | null }
 
 const chamadas: { tabela: string; filtros: Record<string, unknown> }[] = []
 const rpc = vi.fn()
-let respostaEntrada: Resposta = { data: [], error: null }
-let respostaEnviados: Resposta = { data: [], error: null }
-let respostaNomes: Resposta = { data: [], error: null }
+let respostaAvisos: Resposta = { data: [], error: null }
 
 function builder(tabela: string) {
   const filtros: Record<string, unknown> = {}
-  const registro = { tabela, filtros }
-  chamadas.push(registro)
+  chamadas.push({ tabela, filtros })
   const self: Record<string, unknown> = {}
   const encadeia = (chave: string) => (...args: unknown[]) => {
     filtros[chave] = args.length === 1 ? args[0] : args
@@ -26,16 +28,12 @@ function builder(tabela: string) {
   Object.assign(self, {
     select: encadeia('select'),
     eq: (coluna: string, valor: unknown) => { filtros[`eq:${coluna}`] = valor; return self },
+    neq: (coluna: string, valor: unknown) => { filtros[`neq:${coluna}`] = valor; return self },
     is: (coluna: string, valor: unknown) => { filtros[`is:${coluna}`] = valor; return self },
     in: (coluna: string, valor: unknown) => { filtros[`in:${coluna}`] = valor; return self },
     order: encadeia('order'),
     limit: encadeia('limit'),
-    then: (aceitar: (v: Resposta) => unknown) => {
-      const alvo = tabela === 'treinadores_publico'
-        ? respostaNomes
-        : filtros['eq:de_id'] ? respostaEnviados : respostaEntrada
-      return Promise.resolve(alvo).then(aceitar)
-    },
+    then: (aceitar: (v: Resposta) => unknown) => Promise.resolve(respostaAvisos).then(aceitar),
   })
   return self
 }
@@ -49,100 +47,99 @@ vi.mock('@/lib/supabase', () => ({
     removeChannel: vi.fn(),
   },
 }))
-vi.mock('@/stores/gameStateStore', () => ({ useGameStateStore: { setState: vi.fn() } }))
 
 const { correio } = await import('./correioRealtime')
 
+function fio(userId: string, naoLidas: number) {
+  return {
+    userId, nick: `T-${userId}`, ultimoTrecho: 'oi', ultimaEm: '2026-08-22T10:00:00Z',
+    ultimaMinha: false, naoLidas, anexosPendentes: 0, online: false, bloqueado: false,
+  }
+}
+
+/** Ambas as RPCs passam pelo mesmo mock — despacha por nome. */
+function respondeRpcs(conversas: unknown[], detalhes: unknown = { amigos: [], bloqueados: [] }) {
+  rpc.mockImplementation((nome: string) => Promise.resolve(
+    nome === 'conversas' ? { data: conversas, error: null } : { data: detalhes, error: null },
+  ))
+}
+
 describe('correio()', () => {
   beforeEach(() => {
-    chamadas.length = 0
     vi.clearAllMocks()
-    respostaEntrada = { data: [], error: null }
-    respostaEnviados = { data: [], error: null }
-    respostaNomes = { data: [], error: null }
-    rpc.mockResolvedValue({ data: { amigos: [], bloqueados: [] }, error: null })
+    chamadas.length = 0
+    respostaAvisos = { data: [], error: null }
+    respondeRpcs([])
   })
 
-  it('pede a entrada filtrando o que EU apaguei, nao o que o remetente apagou', async () => {
-    await correio()
-    const entrada = chamadas.find((c) => c.filtros['eq:para_id'] === 'eu')
-    expect(entrada?.filtros['is:excluido_destinatario_em']).toBeNull()
-    // O lado do remetente nao pode influenciar a minha caixa.
-    expect(entrada?.filtros).not.toHaveProperty('is:excluido_remetente_em')
-  })
-
-  it('pede os enviados filtrando o lado do remetente e so mensagens de texto', async () => {
-    await correio()
-    const enviados = chamadas.find((c) => c.filtros['eq:de_id'] === 'eu')
-    expect(enviados?.filtros['is:excluido_remetente_em']).toBeNull()
-    // Pedido de amizade e aviso tambem gravam `de_id`, mas ninguem pensa neles
-    // como "mensagem que eu mandei".
-    expect(enviados?.filtros['eq:tipo']).toBe('texto')
-  })
-
-  it('resolve o nome do destinatario numa consulta so, nao uma por linha', async () => {
-    respostaEnviados = {
-      data: [
-        { id: 'a', para_id: 'u1', de_nome: 'Eu', tipo: 'texto', assunto: 'x', corpo: '', estado: 'lido', created_at: 'z' },
-        { id: 'b', para_id: 'u2', de_nome: 'Eu', tipo: 'texto', assunto: 'y', corpo: '', estado: 'lido', created_at: 'z' },
-        { id: 'c', para_id: 'u1', de_nome: 'Eu', tipo: 'texto', assunto: 'w', corpo: '', estado: 'lido', created_at: 'z' },
-      ],
-      error: null,
-    }
-    respostaNomes = {
-      data: [{ user_id: 'u1', trainer_name: 'Misty' }, { user_id: 'u2', trainer_name: 'Brock' }],
-      error: null,
-    }
+  it('agrupa por contato NO BANCO, nao no client', async () => {
+    // O client juntava `para_id` de cada enviada com `treinadores_publico` pra
+    // descobrir o nome do destinatario. Isso saiu: a RPC ja devolve nick,
+    // ultimo trecho e contagem prontos, num registro por contato.
+    respondeRpcs([fio('u1', 0), fio('u2', 0)])
     const r = await correio()
-
-    const consultaDeNomes = chamadas.filter((c) => c.tabela === 'treinadores_publico')
-    expect(consultaDeNomes).toHaveLength(1)
-    // Dois destinatarios distintos em tres mensagens: o `in` leva 2, nao 3.
-    expect(consultaDeNomes[0].filtros['in:user_id']).toEqual(['u1', 'u2'])
-    expect(r.enviados.map((m) => m.para_nome)).toEqual(['Misty', 'Brock', 'Misty'])
-  })
-
-  it('nao consulta nomes quando nao ha nada enviado', async () => {
-    await correio()
+    expect(rpc).toHaveBeenCalledWith('conversas')
     expect(chamadas.some((c) => c.tabela === 'treinadores_publico')).toBe(false)
+    expect(r.conversas.map((c) => c.userId)).toEqual(['u1', 'u2'])
   })
 
-  it('conta como nao lida so o que sobrou depois do filtro de excluidas', async () => {
-    respostaEntrada = {
+  it('a lista de avisos exclui `texto` — conversa nao e aviso', async () => {
+    // Os dois vivem na MESMA tabela. Sem o `neq` a caixa de avisos mostraria
+    // cada mensagem de gente como se fosse notificacao do jogo.
+    await correio()
+    const consulta = chamadas.find((c) => c.tabela === 'mail_messages')
+    expect(consulta?.filtros['neq:tipo']).toBe('texto')
+  })
+
+  it('a lista de avisos ignora o que EU apaguei', async () => {
+    // O filtro tem que estar na CONSULTA: `naoLidas` conta sobre este retorno e
+    // alimenta o badge do HUD.
+    await correio()
+    const consulta = chamadas.find((c) => c.tabela === 'mail_messages')
+    expect(consulta?.filtros['is:excluido_destinatario_em']).toBeNull()
+  })
+
+  it('naoLidas soma as conversas MAIS os avisos pendentes', async () => {
+    // Duas fontes, um numero — o sino do HUD nao distingue "alguem te escreveu"
+    // de "chegou aviso", e somar aqui e o que impede as duas contas divergirem.
+    respondeRpcs([fio('u1', 2), fio('u2', 1)])
+    respostaAvisos = {
       data: [
-        { id: 'a', estado: 'pendente', tipo: 'texto', de_nome: 'Ash', assunto: 'x', corpo: '', created_at: 'z' },
-        { id: 'b', estado: 'lido', tipo: 'texto', de_nome: 'Ash', assunto: 'y', corpo: '', created_at: 'z' },
+        { id: 'a', estado: 'pendente', tipo: 'sistema', de_nome: 'Jogo', assunto: 'x', corpo: '', created_at: 'z' },
+        { id: 'b', estado: 'lido', tipo: 'sistema', de_nome: 'Jogo', assunto: 'y', corpo: '', created_at: 'z' },
       ],
       error: null,
     }
     const r = await correio()
-    expect(r.naoLidas).toBe(1)
+    expect(r.naoLidas).toBe(4)
   })
 
   it('traz amigos e bloqueados da RPC, nao de consulta solta a friendships', async () => {
-    rpc.mockResolvedValue({
-      data: {
-        amigos: [{ userId: 'u1', nome: 'Misty', nivel: 12, online: true, pokeAtivo: null, naoLidas: 2 }],
-        bloqueados: [{ userId: 'u9', nome: 'Gary' }],
-      },
-      error: null,
+    respondeRpcs([], {
+      amigos: [{ userId: 'u1', nome: 'Misty', nivel: 12, online: true, pokeAtivo: null, naoLidas: 2 }],
+      bloqueados: [{ userId: 'u9', nome: 'Gary' }],
     })
     const r = await correio()
     expect(rpc).toHaveBeenCalledWith('amigos_detalhados')
     expect(chamadas.some((c) => c.tabela === 'friendships')).toBe(false)
-    expect(r.amigos[0].naoLidas).toBe(2)
+    expect(r.amigos[0].nome).toBe('Misty')
     expect(r.bloqueados[0].nome).toBe('Gary')
   })
 
   it('tolera RPC devolvendo corpo vazio sem quebrar a tela', async () => {
     rpc.mockResolvedValue({ data: null, error: null })
     const r = await correio()
+    expect(r.conversas).toEqual([])
     expect(r.amigos).toEqual([])
     expect(r.bloqueados).toEqual([])
   })
 
-  it('propaga erro da consulta de enviados em vez de mostrar caixa vazia', async () => {
-    respostaEnviados = { data: null, error: { message: 'permission denied for de_id' } }
-    await expect(correio()).rejects.toThrow('permission denied for de_id')
+  it('propaga erro da RPC de conversas em vez de mostrar lista vazia', async () => {
+    rpc.mockImplementation((nome: string) => Promise.resolve(
+      nome === 'conversas'
+        ? { data: null, error: { message: 'permission denied for conversas' } }
+        : { data: {}, error: null },
+    ))
+    await expect(correio()).rejects.toThrow('permission denied for conversas')
   })
 })

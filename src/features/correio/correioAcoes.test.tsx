@@ -1,6 +1,11 @@
 // @vitest-environment jsdom
 //
-// PH-74: as regras da caixa que so aparecem no botao.
+// PH-74 (reduzido em PH-81): as regras da lista de AVISOS que so aparecem no
+// botao.
+//
+// A caixa de entrada e a de enviados sairam junto com a virada pra conversa —
+// o que sobrou aqui e aviso de sistema e pedido de amizade, que continuam
+// sendo lista.
 //
 // Duas delas nao sao cosmeticas — excluir mensagem com anexo nao coletado
 // DESTRUIRIA o item (ele ja saiu do inventario de quem mandou, e a coleta e o
@@ -33,16 +38,14 @@ const acoes = () => ({
   onMarcarLida: vi.fn(),
   onResponderPedido: vi.fn(),
   onColetar: vi.fn(),
-  onResponder: vi.fn(),
   onExcluir: vi.fn(),
 })
 
-function renderLinha(m: MensagemCorreio, enviada = false) {
+function renderLinha(m: MensagemCorreio) {
   const fns = acoes()
   render(
     <LinhaDeMensagem
       m={m}
-      enviada={enviada}
       respondendo={false}
       coletando={false}
       excluindo={false}
@@ -89,38 +92,6 @@ describe('excluir mensagem', () => {
   })
 })
 
-describe('responder', () => {
-  it('nao aparece em pedido de amizade — ali a resposta sao Aceitar/Recusar', () => {
-    renderLinha(msg({ tipo: 'pedido_amizade', assunto: 'Pedido de amizade' }))
-    expect(screen.queryByRole('button', { name: /Responder a/i })).toBeNull()
-    expect(screen.getByRole('button', { name: /Aceitar/i })).toBeTruthy()
-  })
-
-  it('nao aparece em aviso do sistema, que nao tem remetente', () => {
-    renderLinha(msg({ tipo: 'sistema', de_id: null, de_nome: 'Sistema' }))
-    expect(screen.queryByRole('button', { name: /Responder a/i })).toBeNull()
-  })
-
-  it('nao aparece na caixa de enviados', () => {
-    renderLinha(msg({ para_nome: 'Misty' }), true)
-    expect(screen.queryByRole('button', { name: /Responder a/i })).toBeNull()
-  })
-})
-
-describe('caixa de enviados', () => {
-  it('mostra o DESTINATARIO, nao o remetente', () => {
-    renderLinha(msg({ para_nome: 'Misty' }), true)
-    expect(screen.getByText(/para Misty/)).toBeTruthy()
-    expect(screen.queryByText(/de Ash/)).toBeNull()
-  })
-
-  it('nao oferece Coletar no anexo — quem coleta e o outro lado', () => {
-    renderLinha(msg({ para_nome: 'Misty', anexo_itens: [{ itemId: 'pokeball', quantity: 1 }] }), true)
-    expect(screen.queryByRole('button', { name: /Coletar/i })).toBeNull()
-    expect(screen.getByText('Nao coletado')).toBeTruthy()
-  })
-})
-
 describe('anexar item ao escrever', () => {
   beforeEach(() => {
     useGameStateStore.setState({
@@ -151,12 +122,11 @@ describe('anexar item ao escrever', () => {
     expect(opcoes).not.toContain('pokeball')
   })
 
-  it('envia nick, assunto, corpo e anexos juntos', async () => {
+  it('envia nick, corpo e anexos juntos', async () => {
     const onEnviar = vi.fn()
     render(<ComporMensagem enviando={false} onCancelar={vi.fn()} onEnviar={onEnviar} />)
 
     await userEvent.type(screen.getByPlaceholderText('Nome do treinador'), 'Misty')
-    await userEvent.type(screen.getByPlaceholderText('Sobre o que e'), 'Presente')
     await userEvent.type(screen.getByPlaceholderText('Escreva aqui'), 'toma ai')
     await userEvent.selectOptions(screen.getByLabelText('Item para anexar'), 'superball')
     await userEvent.click(screen.getByRole('button', { name: 'Anexar' }))
@@ -164,36 +134,15 @@ describe('anexar item ao escrever', () => {
 
     expect(onEnviar).toHaveBeenCalledWith({
       nick: 'Misty',
-      assunto: 'Presente',
       corpo: 'toma ai',
       anexos: [{ itemId: 'superball', quantity: 1 }],
     })
   })
 
-  it('nao deixa enviar sem destinatario nem sem assunto', async () => {
+  it('nao deixa enviar sem destinatario', async () => {
     render(<ComporMensagem enviando={false} onCancelar={vi.fn()} onEnviar={vi.fn()} />)
     await userEvent.type(screen.getByPlaceholderText('Escreva aqui'), 'so o corpo')
     expect(screen.getByRole('button', { name: /Enviar/i }).hasAttribute('disabled')).toBe(true)
   })
 
-  it('no modo resposta nao pede nick nem assunto, e nao oferece anexo', async () => {
-    const onEnviar = vi.fn()
-    render(
-      <ComporMensagem
-        respondendoA={{ id: 'm1', deNome: 'Ash', assunto: 'Oi' }}
-        enviando={false}
-        onCancelar={vi.fn()}
-        onEnviar={onEnviar}
-      />,
-    )
-    expect(screen.queryByPlaceholderText('Nome do treinador')).toBeNull()
-    // Anexo fora da resposta de proposito: senao toda resposta rapida vira um
-    // caminho de saida de item.
-    expect(screen.queryByLabelText('Item para anexar')).toBeNull()
-    expect(screen.getByText(/Re: Oi/)).toBeTruthy()
-
-    await userEvent.type(screen.getByPlaceholderText('Escreva aqui'), 'tudo certo')
-    await userEvent.click(screen.getByRole('button', { name: /Enviar/i }))
-    expect(onEnviar).toHaveBeenCalledWith(expect.objectContaining({ corpo: 'tudo certo', anexos: [] }))
-  })
 })

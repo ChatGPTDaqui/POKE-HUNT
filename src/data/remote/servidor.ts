@@ -333,7 +333,12 @@ export interface MensagemCorreio {
   de_id: string | null
   de_nome: string
   tipo: 'texto' | 'pedido_amizade' | 'sistema'
-  assunto: string
+  /**
+   * NULO em mensagem de conversa (PH-81): conversa nao tem assunto, carta
+   * tinha. Continua preenchido em aviso de sistema e pedido de amizade, que
+   * sao avisos com titulo e nao um fio entre duas pessoas.
+   */
+  assunto: string | null
   corpo: string
   estado: 'pendente' | 'aceito' | 'recusado' | 'lido'
   created_at: string
@@ -388,6 +393,26 @@ export interface MensagemDM {
   corpo: string
   created_at: string
   read_at: string | null
+}
+
+/**
+ * Um CONTATO na lista de conversas (PH-81) — um registro por interlocutor, nao
+ * por mensagem. Vem pronto da RPC `conversas`, que resolve num lugar so o que
+ * a tela precisaria juntar de quatro: a ultima mensagem do fio, a contagem de
+ * nao lidas, se ha anexo esperando coleta, e se o contato esta online.
+ */
+export interface ConversaResumo {
+  userId: string
+  nick: string
+  ultimoTrecho: string
+  ultimaEm: string
+  /** Ultima do fio foi minha — a lista prefixa "Voce:" quando verdadeiro. */
+  ultimaMinha: boolean
+  naoLidas: number
+  /** Quantas mensagens deste contato tem anexo ainda nao coletado. */
+  anexosPendentes: number
+  online: boolean
+  bloqueado: boolean
 }
 
 // Ranking/perfil/mercado/chat/correio saíram daqui na migração RPC-everything

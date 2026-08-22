@@ -1,9 +1,15 @@
-// Uma linha da caixa de correio (PH-74).
+// Uma linha da lista de AVISOS do correio (PH-74, reduzido em PH-81).
+//
+// Era a linha de qualquer mensagem da caixa. Desde que conversa virou fio
+// proprio (Conversa.tsx), este componente so ve o que NAO e conversa: aviso de
+// sistema e pedido de amizade. Por isso perdeu o modo `enviada` (aviso nunca
+// sai de mim) e o botao Responder (aviso de sistema nao tem remetente pra
+// responder, e pedido de amizade se responde com Aceitar/Recusar).
 //
 // Componente de topo, NAO uma funcao declarada dentro de CorreioMenu: componente
 // definido no corpo de outro e recriado a cada render, o que remonta a subarvore
 // inteira e joga fora foco e estado interno. Mesmo motivo de PH-31.
-import { ArrowBendUpLeft, Check, Gift, Trash, X } from '@phosphor-icons/react'
+import { Check, Gift, Trash, X } from '@phosphor-icons/react'
 import { GameButton, GameCard } from '@/components/game/controls'
 import { getItem } from '@/data/items'
 import { itemIconUrl } from '@/data/sprites'
@@ -18,21 +24,18 @@ const ROTULO_TIPO: Record<MensagemCorreio['tipo'], string> = {
 
 interface Props {
   m: MensagemCorreio
-  /** `true` na caixa de enviados: muda o rotulo do remetente e tira as acoes de destinatario. */
-  enviada: boolean
   respondendo: boolean
   coletando: boolean
   excluindo: boolean
   onMarcarLida: (id: string) => void
   onResponderPedido: (id: string, aceitar: boolean) => void
   onColetar: (id: string) => void
-  onResponder: (m: MensagemCorreio) => void
   onExcluir: (id: string) => void
 }
 
 export function LinhaDeMensagem({
-  m, enviada, respondendo, coletando, excluindo,
-  onMarcarLida, onResponderPedido, onColetar, onResponder, onExcluir,
+  m, respondendo, coletando, excluindo,
+  onMarcarLida, onResponderPedido, onColetar, onExcluir,
 }: Props) {
   const pendente = m.estado === 'pendente'
   const ehPedido = m.tipo === 'pedido_amizade'
@@ -42,19 +45,19 @@ export function LinhaDeMensagem({
   // O item ja saiu do inventario de quem mandou. Excluir com anexo pendente
   // destruiria o item sem ninguem ficar com ele — a RPC recusa, e o botao
   // desabilitado explica antes do erro.
-  const anexoPreso = temAnexo && !coletado && !enviada
+  const anexoPreso = temAnexo && !coletado
   const pedidoEmAberto = ehPedido && pendente
 
   return (
     <GameCard
-      className={cn('flex flex-wrap items-center gap-[.5em] p-[.4em]', pendente && !enviada && 'border-primary/40')}
-      onClick={() => { if (pendente && !ehPedido && !temAnexo && !enviada) onMarcarLida(m.id) }}
+      className={cn('flex flex-wrap items-center gap-[.5em] p-[.4em]', pendente && 'border-primary/40')}
+      onClick={() => { if (pendente && !ehPedido && !temAnexo) onMarcarLida(m.id) }}
     >
       <div className="min-w-[10em] flex-1">
         <div className="flex flex-wrap items-center gap-[.4em]">
-          <b className="font-medium text-foreground">{m.assunto}</b>
+          <b className="font-medium text-foreground">{m.assunto ?? ROTULO_TIPO[m.tipo]}</b>
           <span className="text-[.75em] text-n400">{ROTULO_TIPO[m.tipo]}</span>
-          {pendente && !ehPedido && !enviada && <span className="text-[.75em] text-primary">nova</span>}
+          {pendente && !ehPedido && <span className="text-[.75em] text-primary">nova</span>}
         </div>
         <div className="whitespace-pre-wrap break-words text-[.85em] text-n300">{m.corpo}</div>
 
@@ -79,13 +82,13 @@ export function LinhaDeMensagem({
         )}
 
         <div className="text-[.75em] text-n500">
-          {enviada ? `para ${m.para_nome ?? 'Treinador'}` : `de ${m.de_nome}`}
+          {`de ${m.de_nome}`}
           {' · '}
           {new Date(m.created_at).toLocaleString('pt-BR')}
         </div>
       </div>
 
-      {temAnexo && !enviada && (
+      {temAnexo && (
         coletado ? (
           <span className="text-[.8em] text-ok">Recebido</span>
         ) : (
@@ -98,11 +101,6 @@ export function LinhaDeMensagem({
           </GameButton>
         )
       )}
-      {/* Na caixa de enviados o anexo e so informacao: quem coleta e o outro. */}
-      {temAnexo && enviada && (
-        <span className="text-[.8em] text-n400">{coletado ? 'Coletado' : 'Nao coletado'}</span>
-      )}
-
       {pedidoEmAberto && (
         <div className="flex gap-[.35em]">
           <GameButton
@@ -128,16 +126,6 @@ export function LinhaDeMensagem({
       )}
 
       <div className="flex gap-[.25em]">
-        {!enviada && m.de_id && !ehPedido && (
-          <GameButton
-            variant="ghost"
-            title="Responder"
-            aria-label={`Responder a ${m.de_nome}`}
-            onClick={(e) => { e.stopPropagation(); onResponder(m) }}
-          >
-            <ArrowBendUpLeft />
-          </GameButton>
-        )}
         <GameButton
           variant="ghost"
           title={
@@ -145,7 +133,7 @@ export function LinhaDeMensagem({
               : pedidoEmAberto ? 'Responda ao pedido antes de excluir'
                 : 'Excluir'
           }
-          aria-label={`Excluir ${m.assunto}`}
+          aria-label={`Excluir ${m.assunto ?? ROTULO_TIPO[m.tipo]}`}
           disabled={anexoPreso || pedidoEmAberto || excluindo}
           onClick={(e) => { e.stopPropagation(); onExcluir(m.id) }}
         >

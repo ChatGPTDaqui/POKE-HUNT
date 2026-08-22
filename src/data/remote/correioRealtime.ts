@@ -1,17 +1,38 @@
-// Correio sob RPC-everything: leitura RLS-direta (mail_messages.para_id =
-// auth.uid(), friendships.user_id = auth.uid()) + as 3 RPCs de escrita ja
-// testadas (#10) + Supabase Realtime no lugar de poll de 15s — pedido de
-// amizade/mensagem nova chega por websocket.
+// O correio como CONVERSA (PH-81), nao mais como caixa de cartas avulsas.
+//
+// Antes daqui havia duas camadas, `correioRealtime.ts` (carta, por `para_id`) e
+// `dmRealtime.ts` (fio, por par, so entre amigos), e a mesma pessoa tinha duas
+// caixas com o mesmo interlocutor. `dmRealtime.ts` foi absorvido por este
+// arquivo junto com `friend_messages`; o que sobrou dele de melhor — a leitura
+// paginada por cursor e o schema do Realtime vindo do env — veio junto.
+//
+// Leitura continua RLS-direta (`mail_messages` tem policy pros dois lados) e
+// escrita continua so por RPC: a tabela NAO tem policy de INSERT de proposito,
+// porque bloqueio, rate limit e debito de anexo vivem dentro de
+// `enviar_mensagem`. Uma policy de insert abriria rota paralela sem nenhuma
+// dessas checagens — o mesmo furo que PH-23 achou no chat mundial.
 import { supabase } from '@/lib/supabase'
 import { ErroServidor } from './servidor'
 import type {
-  AmigoDetalhado, AnexoItemCorreio, BloqueadoRemoto, MensagemCorreio,
+  AmigoDetalhado, AnexoItemCorreio, BloqueadoRemoto, ConversaResumo, MensagemCorreio,
 } from './servidor'
 import { useGameStateStore } from '@/stores/gameStateStore'
 
-// `treinadores_publico` e view exclusiva do schema `dev` (ver migracao #9) —
-// o gerador de tipos so conhece `public`, mesma razao documentada em
-// `mercadoRpc.ts`/`acoesRpc.ts`.
+/**
+ * Schema alvo do Realtime.
+ *
+ * Sai do env, e NAO da string 'dev' fixa que este arquivo usava antes: no
+ * Realtime o schema e parametro do filtro de `postgres_changes` e o client nao
+ * o preenche sozinho, entao em producao a assinatura antiga escutava eventos de
+ * uma tabela que o jogo nem le. Herdado de `dmRealtime.ts`, que ja nascia
+ * certo. PH-38/PH-66 seguem abertas pro `chatRealtime.ts`, que ainda tem a
+ * string fixa — nao e corrigido aqui, e outra issue.
+ */
+const SCHEMA_DO_REALTIME = (import.meta.env.VITE_SUPABASE_SCHEMA as string | undefined) || 'public'
+
+// `treinadores_publico` e view exclusiva do schema `dev`, e as RPCs novas so
+// existem depois do `db push` — o gerador de tipos so conhece o `public` do
+// banco atual. Mesmo escape hatch de `mercadoRpc.ts`/`acoesRpc.ts`.
 const db = supabase as unknown as {
   from: (tabela: string) => any
   rpc: (nome: string, params?: Record<string, unknown>) => Promise<{ data: any; error: { message: string } | null }>
@@ -25,78 +46,121 @@ async function userIdAtual(): Promise<string> {
 }
 
 export interface CaixaDoCorreio {
-  mensagens: MensagemCorreio[]
-  /** Caixa de enviados: so as que EU escrevi e ainda nao apaguei do meu lado. */
-  enviados: MensagemCorreio[]
+  /** Um registro por CONTATO, mais recente primeiro. A tela inicial. */
+  conversas: ConversaResumo[]
+  /**
+   * Aviso de sistema e pedido de amizade. Ficam FORA da conversa de proposito:
+   * aviso de sistema nao tem interlocutor (`de_id` nulo) e pedido de amizade e
+   * uma decisao a tomar, nao uma fala num fio.
+   */
+  avisos: MensagemCorreio[]
   amigos: AmigoDetalhado[]
   bloqueados: BloqueadoRemoto[]
+  /** Soma das nao lidas de todas as conversas, mais os avisos pendentes. */
   naoLidas: number
 }
 
 export async function correio(): Promise<CaixaDoCorreio> {
   const uid = await userIdAtual()
-  const [msgs, enviadas, detalhes] = await Promise.all([
-    // `excluido_destinatario_em is null`: exclusao e soft e por lado (PH-74).
-    // Filtrar aqui e nao na tela mantem `naoLidas` e o badge do HUD honestos —
-    // mensagem apagada nao pode continuar contando como pendencia.
+  const [fios, avisosQ, detalhes] = await Promise.all([
+    db.rpc('conversas'),
+    // Avisos continuam RLS-direto: sao poucos, so chegam (nunca saem) e nao
+    // precisam do agrupamento por par que a RPC de conversas faz.
     supabase.from('mail_messages').select('*').eq('para_id', uid)
+      .neq('tipo', 'texto')
       .is('excluido_destinatario_em', null)
-      .order('created_at', { ascending: false }).limit(100),
-    // Enviados so lista `texto`: pedido de amizade e aviso de sistema tambem
-    // gravam `de_id`, mas ninguem pensa neles como "mensagem que eu mandei".
-    supabase.from('mail_messages').select('*').eq('de_id', uid).eq('tipo', 'texto')
-      .is('excluido_remetente_em', null)
       .order('created_at', { ascending: false }).limit(100),
     db.rpc('amigos_detalhados'),
   ])
-  if (msgs.error) throw new ErroServidor(409, msgs.error.message)
-  if (enviadas.error) throw new ErroServidor(409, enviadas.error.message)
+  if (fios.error) throw new ErroServidor(409, fios.error.message)
+  if (avisosQ.error) throw new ErroServidor(409, avisosQ.error.message)
   if (detalhes.error) throw new ErroServidor(409, detalhes.error.message)
 
-  const mensagens = (msgs.data ?? []) as unknown as MensagemCorreio[]
-  const enviados = (enviadas.data ?? []) as unknown as MensagemCorreio[]
-
-  // `para_nome` nao existe como coluna (so `de_nome` e desnormalizado). Uma
-  // consulta pros destinatarios distintos, nao uma por linha.
-  const destinatarios = [...new Set(enviados.map((m) => m.para_id).filter(Boolean))] as string[]
-  if (destinatarios.length) {
-    const { data: nomes } = await db.from('treinadores_publico')
-      .select('user_id, trainer_name').in('user_id', destinatarios)
-    const porId = new Map<string, string>(
-      (nomes ?? []).map((n: { user_id: string; trainer_name: string }) => [n.user_id, n.trainer_name]),
-    )
-    for (const m of enviados) m.para_nome = porId.get(m.para_id ?? '') ?? 'Treinador'
-  }
-
+  const conversas = (fios.data ?? []) as ConversaResumo[]
+  const avisos = (avisosQ.data ?? []) as unknown as MensagemCorreio[]
   const retorno = (detalhes.data ?? {}) as { amigos?: AmigoDetalhado[]; bloqueados?: BloqueadoRemoto[] }
-  const naoLidas = mensagens.filter((m) => m.estado === 'pendente').length
+
+  const naoLidas = conversas.reduce((t, c) => t + c.naoLidas, 0)
+    + avisos.filter((a) => a.estado === 'pendente').length
+
   return {
-    mensagens,
-    enviados,
+    conversas,
+    avisos,
     amigos: retorno.amigos ?? [],
     bloqueados: retorno.bloqueados ?? [],
     naoLidas,
   }
 }
 
-export async function enviarCorreio(
-  paraNick: string, assunto: string, corpo: string, anexos: AnexoItemCorreio[] = [],
-): Promise<{ mensagem: string }> {
-  const { data, error } = await db.rpc('enviar_correio', {
-    p_para_nick: paraNick, p_assunto: assunto, p_corpo: corpo, p_anexos: anexos,
+/** Quantas mensagens o fio carrega por vez. */
+export const PAGINA_CONVERSA = 30
+
+/**
+ * Um trecho do fio com um contato, do mais antigo pro mais novo.
+ *
+ * `antesDe` pagina pra tras (historico): passa o `created_at` da mensagem mais
+ * antiga que ja esta na tela. Cursor, e nao OFFSET, porque mensagem nova
+ * chegando no meio da rolagem desalinharia todas as paginas seguintes.
+ */
+export async function lerConversa(
+  contatoId: string, antesDe?: string,
+): Promise<{ mensagens: MensagemCorreio[]; temMais: boolean }> {
+  const uid = await userIdAtual()
+
+  let q = db.from('mail_messages')
+    .select('*')
+    .eq('tipo', 'texto')
+    // As duas direcoes do fio. `or` com and-aninhado e a forma que o PostgREST
+    // aceita: (de=eu e para=ele) ou (de=ele e para=eu).
+    .or(`and(de_id.eq.${uid},para_id.eq.${contatoId}),and(de_id.eq.${contatoId},para_id.eq.${uid})`)
+    .order('created_at', { ascending: false })
+    // Pede uma a mais que a pagina so pra saber se ainda ha historico — mais
+    // barato que um count() separado.
+    .limit(PAGINA_CONVERSA + 1)
+  if (antesDe) q = q.lt('created_at', antesDe)
+
+  const { data, error } = await q
+  if (error) throw new ErroServidor(409, error.message)
+
+  // A exclusao e por LADO, e o filtro depende de qual lado eu sou em cada
+  // linha — nao da pra expressar num `.is()` so. Feito aqui, sobre a pagina.
+  const linhas = ((data ?? []) as MensagemCorreio[]).filter((m) => (
+    m.de_id === uid ? !m.excluido_remetente_em : !m.excluido_destinatario_em
+  ))
+  const temMais = linhas.length > PAGINA_CONVERSA
+  const pagina = temMais ? linhas.slice(0, PAGINA_CONVERSA) : linhas
+  // Veio decrescente (pro `limit` pegar as mais RECENTES); a tela le de cima
+  // pra baixo.
+  return { mensagens: pagina.reverse(), temMais }
+}
+
+/**
+ * Manda mensagem num fio. `paraId` quando a conversa ja esta aberta (o caminho
+ * normal), `paraNick` quando o jogador esta comecando uma nova.
+ */
+export async function enviarMensagem(
+  destino: { paraId?: string; paraNick?: string },
+  corpo: string,
+  anexos: AnexoItemCorreio[] = [],
+): Promise<{ id: string; paraId: string; paraNome: string }> {
+  const { data, error } = await db.rpc('enviar_mensagem', {
+    p_corpo: corpo,
+    p_para_id: destino.paraId ?? null,
+    p_para_nick: destino.paraNick ?? null,
+    p_anexos: anexos,
   })
   if (error) throw new ErroServidor(409, error.message)
 
   // A RPC debita o anexo do inventario do REMETENTE na mesma transacao — o
   // estado local precisa refletir isso na hora, senao a Mochila mostra item que
-  // ja saiu. Mesmo refetch cirurgico de `coletarAnexo`, no sentido inverso.
+  // ja saiu. Refetch cirurgico, so dos ids anexados.
   if (anexos.length) {
     const uid = await userIdAtual()
     const ids = [...new Set(anexos.map((a) => a.itemId))]
     const { data: linhas, error: erroRefetch } = await supabase
       .from('player_items').select('item_id, quantity').eq('user_id', uid).in('item_id', ids)
     if (erroRefetch) {
-      console.error('enviarCorreio: refetch de itens falhou, mantendo estado local', erroRefetch)
+      console.error('enviarMensagem: refetch de itens falhou, mantendo estado local', erroRefetch)
     } else {
       const porId = new Map((linhas ?? []).map((r) => [r.item_id, r.quantity]))
       useGameStateStore.setState((s) => ({
@@ -104,16 +168,21 @@ export async function enviarCorreio(
       }))
     }
   }
-  return { mensagem: (data as { mensagem: string }).mensagem }
+  return data as { id: string; paraId: string; paraNome: string }
 }
 
-export async function responderCorreio(mensagemId: string, corpo: string): Promise<{ mensagem: string }> {
-  // Destinatario e assunto saem da mensagem original DENTRO da RPC. Mandar o
-  // nick daqui deixaria um client adulterado escrever pra qualquer um alegando
-  // que e resposta.
-  const { data, error } = await db.rpc('responder_correio', { p_mensagem_id: mensagemId, p_corpo: corpo })
+/** Zera as nao lidas de UM contato. Substituiu `marcar_dm_lidas`. */
+export async function marcarConversaLida(contatoId: string): Promise<{ marcadas: number }> {
+  const { data, error } = await db.rpc('marcar_conversa_lida', { p_contato_id: contatoId })
   if (error) throw new ErroServidor(409, error.message)
-  return { mensagem: (data as { mensagem: string }).mensagem }
+  return { marcadas: (data as { marcadas: number }).marcadas }
+}
+
+/** Apaga o fio inteiro do MEU lado. O outro continua com a copia dele. */
+export async function excluirConversa(contatoId: string): Promise<{ apagadas: number }> {
+  const { data, error } = await db.rpc('excluir_conversa', { p_contato_id: contatoId })
+  if (error) throw new ErroServidor(409, error.message)
+  return { apagadas: (data as { apagadas: number }).apagadas }
 }
 
 export async function excluirCorreio(mensagemId: string): Promise<{ ok: boolean }> {
@@ -154,8 +223,7 @@ export async function responderPedido(mensagemId: string, aceitar: boolean): Pro
 
 export async function marcarLida(mensagemId: string): Promise<{ ok: boolean }> {
   // RPC em vez de UPDATE direto (PH-22): o filtro de "nao marcar lido com
-  // anexo pendente" precisa rodar no banco, nao so na UI (CorreioMenu.tsx so
-  // evita CLICAR nesse caso, mas RLS-direct nao tem como aplicar essa regra).
+  // anexo pendente" precisa rodar no banco, nao so na UI.
   const { error } = await db.rpc('marcar_correio_lido', { p_mensagem_id: mensagemId })
   if (error) throw new ErroServidor(409, error.message)
   return { ok: true }
@@ -166,17 +234,15 @@ export async function coletarAnexo(mensagemId: string): Promise<{ ok: boolean; i
   if (error) throw new ErroServidor(409, error.message)
   const resultado = data as { ok: boolean; itens: AnexoItemCorreio[]; mensagem: string }
 
-  // A RPC ja creditou os itens na mesma transacao (sem fila de entrega, ver
-  // migracao #10) — so falta o client saber. Refetch cirurgico so dos itemIds
-  // que vieram no retorno, em vez de recarregar o estado inteiro.
+  // A RPC ja creditou os itens na mesma transacao — so falta o client saber.
+  // Refetch cirurgico so dos itemIds que vieram no retorno.
   const uid = await userIdAtual()
   const idsUnicos = [...new Set(resultado.itens.map((i) => i.itemId))]
   if (idsUnicos.length > 0) {
     const { data: linhas, error: erroRefetch } = await supabase
       .from('player_items').select('item_id, quantity').eq('user_id', uid).in('item_id', idsUnicos)
-    // A RPC ja creditou de verdade (linha 72) — se so o refetch de exibicao
-    // falhar, zerar aqui mostraria quantidade errada pra um item que o
-    // jogador acabou de receber. Loga e mantem o estado local.
+    // A RPC ja creditou de verdade — se so o refetch de exibicao falhar, zerar
+    // aqui mostraria quantidade errada pra um item recem-recebido.
     if (erroRefetch) {
       console.error('coletarAnexo: refetch de itens falhou, mantendo estado local', erroRefetch)
     } else {
@@ -189,14 +255,41 @@ export async function coletarAnexo(mensagemId: string): Promise<{ ok: boolean; i
   return resultado
 }
 
-/** Assina INSERT+UPDATE nas MINHAS mensagens. Devolve a funcao de cancelar. */
-export function assinarCorreioAoVivo(userId: string, aoMudar: () => void): () => void {
+/**
+ * Assina o que CHEGA pra mim em `mail_messages` — mensagem de conversa, aviso
+ * de sistema e pedido de amizade, todos na mesma tabela.
+ *
+ * O filtro e so `para_id`: o Realtime aceita um filtro por assinatura, e o eco
+ * das MINHAS mensagens ja vem do retorno de `enviarMensagem`, sem depender do
+ * socket. `aoChegar` recebe a linha nova pra quem estiver com um fio aberto
+ * poder anexar sem refetch; `aoMudar` avisa a lista pra recontar.
+ */
+export function assinarCorreioAoVivo(
+  userId: string,
+  aoMudar: () => void,
+  aoChegar?: (m: MensagemCorreio) => void,
+  /**
+   * Sufixo do nome do canal. OBRIGATORIO quando ha mais de um assinante vivo ao
+   * mesmo tempo — e ha: o menu escuta pra recontar os badges e o fio aberto
+   * escuta pra anexar a linha nova.
+   *
+   * `supabase.channel(nome)` com um nome JA INSCRITO devolve o MESMO canal, e o
+   * `.on()` seguinte estoura com "cannot add postgres_changes callbacks after
+   * subscribe()". E o mesmo defeito que o comentario de `CorreioMenu.tsx`
+   * descreve pro caso de remontagem — aqui seriam dois componentes distintos
+   * disputando um nome so.
+   */
+  sufixo = 'menu',
+): () => void {
   const canal = supabase
-    .channel(`correio-${userId}`)
+    .channel(`correio-${userId}-${sufixo}`)
     .on(
       'postgres_changes',
-      { event: '*', schema: 'dev', table: 'mail_messages', filter: `para_id=eq.${userId}` },
-      () => aoMudar(),
+      { event: '*', schema: SCHEMA_DO_REALTIME, table: 'mail_messages', filter: `para_id=eq.${userId}` },
+      (payload) => {
+        if (payload.eventType === 'INSERT' && aoChegar) aoChegar(payload.new as unknown as MensagemCorreio)
+        aoMudar()
+      },
     )
     .subscribe()
   return () => { void supabase.removeChannel(canal) }
