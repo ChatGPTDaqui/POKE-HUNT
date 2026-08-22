@@ -4,7 +4,7 @@ import {
   snapshotToGameState, gameStateToPlayerRow, gameStateToPokemonRows,
   gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
   defaultGameStateData, MAPS, GRUPOS_DO_LANCE,
-  OFFLINE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
+  OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
 } from '#engine'
 import {
@@ -716,13 +716,18 @@ async function simularSessao(
   // pro comeco quando o farm for religado.
   const pausado = offline && FARM_OFFLINE_PAUSADO
 
+  // PH-37: fora do regime offline, o passo precisa bater com o do client ao
+  // vivo (useGameLoop.ts, 1/60s) — senao o resim do servidor e o client
+  // desalinham a sequencia de sorteios de RNG so pelo tamanho do passo, e o
+  // level-up do POKE que o client mostrou nunca e confirmado. Ver
+  // LIVE_SIM_STEP_SECONDS em simulation.ts pro raciocinio completo.
   const resumo = pausado
     ? createEmptySummary()
     : simulateWorldSeconds({
       world,
       gameState: store,
       seconds: segundos,
-      stepSeconds: OFFLINE_SIM_STEP_SECONDS,
+      stepSeconds: offline ? OFFLINE_SIM_STEP_SECONDS : LIVE_SIM_STEP_SECONDS,
       stepFn: (w, dt, opts) => stepWorld(w, dt, store, opts),
     })
 
