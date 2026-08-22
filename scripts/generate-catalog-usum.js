@@ -72,6 +72,8 @@ function abaEspecies(catalogo) {
     'EXP Base': e.baseExp,
     'Taxa de Captura (0-255)': e.catchRate,
     'Curva de Crescimento': e.curva,
+    // Peso em hectogramas, direto da PokeAPI (ver fetch-usum-catalog.js).
+    'Peso (hg)': e.pesoHg,
     'Evolui Para (chave)': e.evolvesTo ? e.evolvesTo.toUpperCase() : '',
     'Evolui no Nível': e.evolvesAtLevel || '',
   }));

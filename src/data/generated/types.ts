@@ -98,6 +98,13 @@ export interface SpeciesDataEntry {
   catchRate: number
   baseExp: number
   growthCurve: GrowthCurve
+  /**
+   * Peso em HECTOGRAMAS, como a PokeAPI entrega (`pokemon.weight`: Machamp =
+   * 1300, ou seja 130,0 kg). Cru, sem converter — as formulas dos jogos que
+   * dependem de peso sao escritas em kg, e quem usa divide por 10 na hora
+   * (combatSystem.ts: Low Kick e Heavy Slam).
+   */
+  pesoHg: number
   base: SpeciesBaseStats
   abilities: AbilityRef[]
   evolvesTo: string | null

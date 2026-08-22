@@ -715,6 +715,10 @@ function syncSpeciesAndMoves(workbook, hunts) {
       catchRate: row['Taxa de Captura (0-255)'],
       baseExp: row['EXP Base'],
       growthCurve: row['Curva de Crescimento'],
+      // Peso em HECTOGRAMAS, como a PokeAPI entrega (Machamp = 1300 = 130,0 kg).
+      // Lido por combatSystem.ts (Low Kick, Heavy Slam), que divide por 10 na
+      // hora de aplicar a formula — as tabelas dos jogos sao em kg.
+      pesoHg: row['Peso (hg)'],
       base: {
         hp: row['HP'],
         atkFis: row['Ataque'],
