@@ -207,10 +207,6 @@ export interface EncounterDataEntry {
 }
 export type EncountersData = Record<string, EncounterDataEntry>
 
-// Written by `scripts/build-collision-grids.js` (separate from the xlsx
-// pipeline — samples assets/hunt-backgrounds/*.png pixels directly).
-export type CollisionGrids = Record<string, string[]>
-
 // Escritos por `scripts/gerar-subbiomas.mjs` (tambem fora do pipeline da
 // planilha — cruza as pools do PokeRogue com o nosso catalogo).
 export type SubBiomaEspecies = Record<string, string[]>
