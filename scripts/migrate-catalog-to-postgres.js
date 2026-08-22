@@ -24,6 +24,7 @@ const fs = require('fs');
 const path = require('path');
 const sync = require('./sync-planilha.js');
 const { bloqueiaCatalogoAntigo } = require('./lib/guarda-catalogo-gen2.js');
+const { resolverSchema, cabecalhosRest } = require('./lib/schema-alvo.cjs');
 
 bloqueiaCatalogoAntigo(
   'npm run catalog:migrar',
@@ -81,16 +82,14 @@ function loadEnv() {
 }
 
 const ENV = loadEnv();
+const SCHEMA = resolverSchema({ envSchema: ENV.SUPABASE_SCHEMA });
+console.log(`Banco: ${ENV.SUPABASE_URL}`);
+console.log(`Schema: ${SCHEMA}`);
 
 async function rest(pathname, init = {}) {
   const res = await fetch(`${ENV.SUPABASE_URL}/rest/v1/${pathname}`, {
     ...init,
-    headers: {
-      apikey: ENV.SUPABASE_SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${ENV.SUPABASE_SERVICE_ROLE_KEY}`,
-      'Content-Type': 'application/json',
-      ...(init.headers || {}),
-    },
+    headers: cabecalhosRest(ENV.SUPABASE_SERVICE_ROLE_KEY, SCHEMA, init.headers),
   });
   const text = await res.text();
   let body = null;
@@ -127,12 +126,10 @@ async function upsert(table, rows, onConflict) {
 // script ja cometeu).
 async function count(table) {
   const res = await fetch(`${ENV.SUPABASE_URL}/rest/v1/${table}?select=*`, {
-    headers: {
-      apikey: ENV.SUPABASE_SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${ENV.SUPABASE_SERVICE_ROLE_KEY}`,
+    headers: cabecalhosRest(ENV.SUPABASE_SERVICE_ROLE_KEY, SCHEMA, {
       Prefer: 'count=exact',
       Range: '0-0',
-    },
+    }),
   });
   const range = res.headers.get('content-range') || '';
   const total = range.split('/')[1];

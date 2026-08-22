@@ -25,24 +25,24 @@
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 import { config } from 'dotenv';
+import { resolverSchema, cabecalhosRest } from './lib/schema-alvo.cjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 config({ path: path.join(ROOT, '.env'), quiet: true });
 
+// A regra de alvo (--schema= > SUPABASE_SCHEMA > dev, e `public` so com
+// --confirmar-public) nasceu aqui e agora vive em lib/schema-alvo.cjs, aplicada
+// a todos os scripts. Duas copias da mesma regra e exatamente como os outros
+// seis passaram a escrever em `public` sem ninguem notar.
 const args = process.argv.slice(2);
-const schemaArg = args.find((a) => a.startsWith('--schema='));
-const schema = schemaArg ? schemaArg.split('=')[1] : 'dev';
-if (schema === 'public' && !args.includes('--confirmar-public')) {
-  console.error('Recusado: schema public exige --confirmar-public explicito (mexe em dado de jogador real).');
-  process.exit(1);
-}
+const schema = resolverSchema({ argv: args, envSchema: process.env.SUPABASE_SCHEMA });
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!SUPABASE_URL || !SERVICE_ROLE) throw new Error('SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY ausentes em .env');
 
 const { SPECIES, ehGolpeAoeDeNivel50 } = await import(
-  pathToFileURL(path.join(ROOT, 'server/engine/headless.js')).href
+  pathToFileURL(path.join(ROOT, 'authority/engine/headless.js')).href
 );
 
 const golpesValidosPorEspecie = new Map(
@@ -66,12 +66,9 @@ async function buscarTodasInstancias() {
     const res = await fetch(
       `${SUPABASE_URL}/rest/v1/pokemon_instances?select=id,species_id,unlocked_abilities,active_abilities`,
       {
-        headers: {
-          apikey: SERVICE_ROLE,
-          Authorization: `Bearer ${SERVICE_ROLE}`,
-          'Accept-Profile': schema,
+        headers: cabecalhosRest(SERVICE_ROLE, schema, {
           Range: `${offset}-${offset + PAGINA - 1}`,
-        },
+        }),
       },
     );
     if (!res.ok) throw new Error(`GET pokemon_instances (offset ${offset}): ${res.status} ${await res.text()}`);
