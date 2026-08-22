@@ -49,6 +49,17 @@ sendo editado localmente; ainda assim, publicar em `dev` é bem mais barato que 
 `catalog:gerar` e `catalog:migrar` precisam de `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` no
 `.env` da raiz.
 
+**Schema alvo (`scripts/lib/schema-alvo.cjs`).** Todo script que fala com `rest/v1` — inclusive
+`catalog:migrar`, `catalog:gerar`, `catalog:verificar` e `db:wipe` — resolve o schema por
+`--schema=<nome>` > `SUPABASE_SCHEMA` do `.env` > `dev` (padrão), e manda `Accept-Profile`/
+`Content-Profile` com esse valor. Sem isso o PostgREST caía sempre em `public`, mesmo com
+`SUPABASE_SCHEMA=dev` configurado — rodar contra `dev` de propósito ainda escrevia em produção
+(PH-52). **`public` só é alcançável com `--confirmar-public` explícito** (argv ou `.env`); sem a
+flag o script recusa e sai com código 1. Rodar `catalog:migrar` de verdade contra produção — por
+exemplo, promovendo catálogo depois do passo 9 do fluxo de schema abaixo — exige
+`SUPABASE_SCHEMA=public` (ou `--schema=public`) **e** `--confirmar-public` juntos; sem os dois a
+migração de catálogo cai em `dev` e produção não recebe a mudança.
+
 ### Motor e deploy
 
 | Comando | O que faz |
