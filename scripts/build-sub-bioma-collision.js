@@ -173,6 +173,17 @@ const MANIFESTO = {
   'town-night.png': { bg: 'town-night.jpg', modo: 'rosa_anda' },
   'town.png': { bg: 'town.jpg', modo: 'rosa_anda' },
   'volcano.png': { bg: 'volcano.jpg', modo: 'rosa_anda' },
+
+  // PH-55: as 2 artes que faltavam (Dojo do bioma Urbano e arena do Campeao
+  // Lance). Pintadas por RETANGULOS calibrados por recorte (scripts/
+  // gerar-referencia-body-block.mjs), nao pincel livre a mao como as 29
+  // acima -- aproximacao deliberada, nao cobre toda area andavel que a arte
+  // sugere (jardins/rio adjacentes em dojo.png, parte do cemiterio em
+  // dragon.png ficaram de fora por seguranca: preferi sub-cobertura a
+  // arriscar pintar rosa em cima de agua/lava). Sem circulo amarelo de spawn
+  // -- cai no centroide da area rosa.
+  'dojo.png': { bg: 'dojo.png', modo: 'rosa_anda' },
+  'dragon.png': { bg: 'dragon.png', modo: 'rosa_anda' },
 };
 
 const cols = Math.ceil(MAP_BOUNDS.width / CELL_SIZE);

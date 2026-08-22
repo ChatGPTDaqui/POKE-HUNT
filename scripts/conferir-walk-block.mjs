@@ -60,6 +60,8 @@ const PARES = {
   'fairy-cave.png': 'fairy-cave.jpg', 'island.png': 'island.jpg', 'lake.png': 'lake.jpg',
   'metropolis.png': 'metropolis.jpg', 'slum.png': 'slum.jpg', 'wasteland.png': 'wasteland.jpg',
   'town-night.png': 'town-night.jpg', 'town.png': 'town.jpg', 'volcano.png': 'volcano.jpg',
+  // PH-55
+  'dojo.png': 'dojo.png', 'dragon.png': 'dragon.png',
 };
 
 function png(width, height, rgba) {
