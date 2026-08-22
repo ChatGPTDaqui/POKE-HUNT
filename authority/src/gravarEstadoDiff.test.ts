@@ -24,6 +24,14 @@ vi.mock('./db.js', async (importOriginal) => {
   const real = await importOriginal<typeof import('./db.js')>()
   return {
     ...real,
+    // PH-67: `players` grava via RPC (`gravar_progresso`, pega
+    // `pg_advisory_xact_lock` antes do CAS), nao mais PATCH cru por
+    // `atualizarRetornando` — o mock precisa simular a MESMA linha de sucesso
+    // que a RPC real devolve, senao o teste cai pro fetch de verdade.
+    chamarRpc: vi.fn(async (_cfg: unknown, _nome: string, argumentos: { p_patch: Record<string, unknown> }) => {
+      Object.assign(tabelaPlayers, argumentos.p_patch)
+      return { ok: true, updatedAt: tabelaPlayers.updated_at }
+    }),
     atualizarRetornando: vi.fn(async (_cfg: unknown, _caminho: string, patch: Record<string, unknown>) => {
       Object.assign(tabelaPlayers, patch)
       return [tabelaPlayers]
@@ -75,8 +83,10 @@ describe('gravarEstado() — diff de escrita', () => {
     await gravarEstado(cfg, USER, estado, new Set(), tabelaPlayers.updated_at, baselineDe(estado))
 
     // `players` SEMPRE e gravada: `last_flush_at`/`updated_at` e o que marca a
-    // janela como creditada, e o CAS depende disso.
-    expect(db.atualizarRetornando).toHaveBeenCalledTimes(1)
+    // janela como creditada, e o CAS depende disso. Via RPC (PH-67), nao
+    // PATCH direto.
+    expect(db.chamarRpc).toHaveBeenCalledTimes(1)
+    expect(db.chamarRpc).toHaveBeenCalledWith(cfg, 'gravar_progresso', expect.anything())
     // As outras quatro tabelas nao sao nem consultadas — o select do diff de
     // remocao tambem cai fora.
     expect(db.inserir).not.toHaveBeenCalled()
