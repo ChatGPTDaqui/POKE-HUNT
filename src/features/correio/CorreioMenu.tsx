@@ -1,20 +1,26 @@
-// Correio: caixa de entrada, enviados, avisos do sistema, amigos e conversa
-// privada (PH-74).
+// Correio como aplicativo de mensagem (PH-81): lista de CONVERSAS, avisos e
+// amigos.
 //
-// O pedido de amizade e uma MENSAGEM, nao uma tabela de "pedidos": ela chega na
-// mesma caixa que o resto, com dois botoes em vez de nenhum. Assim so existe um
-// lugar pra olhar quando alguem interage com voce — e o contador de nao lidas
-// cobre as duas coisas de uma vez.
+// Antes eram quatro abas — Entrada, Enviados, Avisos, Amigos — e a mesma pessoa
+// aparecia em tres delas: o que ela te mandou na Entrada, o que voce respondeu
+// nos Enviados, e o que voces conversaram no fio de Amigos. Nao havia conversa,
+// havia tres listas do mesmo dialogo. Agora ha um fio por contato e o resto
+// desapareceu junto com a separacao.
 //
-// As abas separam por TIPO, nao por estado de leitura: "avisos" sai da entrada
-// porque mensagem de sistema chega em rajada (venda no mercado, concessao
-// inicial) e afogaria a mensagem de gente de verdade, que e a que pede resposta.
+// "Enviados" nao virou aba nenhuma DE PROPOSITO: num aplicativo de mensagem o
+// que voce mandou esta dentro da conversa, do lado direito. Uma caixa separada
+// de enviados so existia porque carta e um objeto que sai de casa.
+//
+// Aviso de sistema e pedido de amizade ficam FORA das conversas: o primeiro nao
+// tem interlocutor (`de_id` nulo) e o segundo e uma decisao a tomar, nao uma
+// fala num fio. Os dois chegam em rajada (venda no mercado, concessao inicial)
+// e afogariam a mensagem de gente de verdade.
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { PencilSimple, UserPlus, X } from '@phosphor-icons/react'
+import { ChatCircleDots, Gift, PencilSimple, Trash, UserPlus, X } from '@phosphor-icons/react'
 import {
   ErroServidor, detalheDeErro,
-  type AmigoDetalhado, type AnexoItemCorreio, type MensagemCorreio,
+  type AnexoItemCorreio, type ConversaResumo,
 } from '@/data/remote/servidor'
 import * as correioRpc from '@/data/remote/correioRealtime'
 import { supabase } from '@/lib/supabase'
@@ -23,14 +29,15 @@ import { useDeviceMode } from '@/stores/uiStore'
 import {
   GameButton, GameCard, GameInput, SectionLabel, SegmentedTabs,
 } from '@/components/game/controls'
+import { cn } from '@/lib/utils'
 import { ComporMensagem } from './ComporMensagem'
-import { ConversaDM } from './ConversaDM'
+import { Conversa, type Contato } from './Conversa'
 import { LinhaDeMensagem } from './LinhaDeMensagem'
 import { PainelAmigos } from './PainelAmigos'
 
 const STALE_MS = 15000
 
-type Aba = 'entrada' | 'enviados' | 'sistema' | 'amigos'
+type Aba = 'conversas' | 'avisos' | 'amigos'
 
 function toast(mensagem: string, tipo: 'success' | 'error' = 'success', erroDetalhe?: ToastErroDetalhe) {
   useToastStore.getState().pushToast(mensagem, tipo, 'world', undefined, erroDetalhe)
@@ -40,14 +47,25 @@ function aoFalhar(padrao: string) {
   return (e: unknown) => toast(e instanceof ErroServidor ? e.message : padrao, 'error', detalheDeErro(e))
 }
 
+/** "14:32" pra hoje, "22/08" pra antes — o mesmo corte que aplicativo de mensagem faz. */
+function quando(iso: string): string {
+  const d = new Date(iso)
+  const hoje = new Date()
+  const mesmoDia = d.getDate() === hoje.getDate()
+    && d.getMonth() === hoje.getMonth()
+    && d.getFullYear() === hoje.getFullYear()
+  return mesmoDia
+    ? d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    : d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+}
+
 export function CorreioMenu() {
   const qc = useQueryClient()
   const { compacto } = useDeviceMode()
   const [nick, setNick] = useState('')
-  const [aba, setAba] = useState<Aba>('entrada')
+  const [aba, setAba] = useState<Aba>('conversas')
   const [compondo, setCompondo] = useState<{ nickInicial?: string } | null>(null)
-  const [respondendoA, setRespondendoA] = useState<MensagemCorreio | null>(null)
-  const [amigoAberto, setAmigoAberto] = useState<AmigoDetalhado | null>(null)
+  const [contatoAberto, setContatoAberto] = useState<Contato | null>(null)
   const [meuId, setMeuId] = useState<string | null>(null)
 
   const { data, isLoading } = useQuery({
@@ -67,7 +85,7 @@ export function CorreioMenu() {
   }, [])
 
   // Realtime substitui o poll de 15s: qualquer INSERT/UPDATE nas MINHAS
-  // mensagens (pedido novo, resposta, mensagem de sistema) invalida a query.
+  // mensagens (mensagem nova, pedido, aviso de sistema) invalida a query.
   //
   // BUG REAL CORRIGIDO: `assinarCorreioAoVivo` usa `supabase.channel('correio-'+userId)`,
   // nome fixo por usuario — chamar de novo com o mesmo nome ANTES do primeiro canal
@@ -77,9 +95,12 @@ export function CorreioMenu() {
   // o StrictMode do React (ou so um remount rapido de verdade) roda o efeito de
   // novo ANTES desse `.then()` resolver — a limpeza da 1a rodada ainda achava
   // `parar` nulo (a inscricao nem tinha terminado) e nao desfazia nada; a 2a
-  // rodada inscrevia no mesmo canal ja vivo. `cancelado` fecha essa janela: se
-  // a limpeza ja rodou quando o `.then()` finalmente resolve, a inscricao nem
-  // comeca.
+  // rodada inscrevia no mesmo canal ja vivo. `cancelado` fecha essa janela.
+  //
+  // O canal do MENU e o do FIO ABERTO sao dois, com nomes diferentes por
+  // construcao (`correio-<id>` aqui, e o de `Conversa.tsx` idem) — o Supabase
+  // permite duas assinaturas do mesmo nome? Nao: por isso `Conversa.tsx` abre o
+  // seu com o mesmo nome so quando montado, e este e removido junto do menu.
   useEffect(() => {
     let cancelado = false
     let parar: (() => void) | null = null
@@ -109,32 +130,36 @@ export function CorreioMenu() {
     onSuccess: recarregar,
   })
 
-  // A RPC ja credita o item na mesma transacao (sem fila de entrega — ver
-  // migracao #10) e `correioRpc.coletarAnexo` ja faz o refetch cirurgico do
-  // item no client. So falta atualizar a caixa de entrada.
   const coletar = useMutation({
     mutationFn: (id: string) => correioRpc.coletarAnexo(id),
     onSuccess: (r) => { toast(r.mensagem); recarregar() },
     onError: aoFalhar('Nao foi possivel coletar.'),
   })
 
-  const enviar = useMutation({
-    mutationFn: (d: { nick: string; assunto: string; corpo: string; anexos: AnexoItemCorreio[] }) =>
-      correioRpc.enviarCorreio(d.nick, d.assunto, d.corpo, d.anexos),
-    onSuccess: (r) => { toast(r.mensagem); setCompondo(null); recarregar() },
+  // Comecar conversa nova: manda a primeira mensagem por NICK e ja abre o fio
+  // com o id que a RPC devolveu — sem isso o jogador escreveria e cairia de
+  // volta numa lista, tendo que procurar o proprio contato que acabou de criar.
+  const comecar = useMutation({
+    mutationFn: (d: { nick: string; corpo: string; anexos: AnexoItemCorreio[] }) =>
+      correioRpc.enviarMensagem({ paraNick: d.nick }, d.corpo, d.anexos),
+    onSuccess: (r) => {
+      setCompondo(null)
+      setContatoAberto({ userId: r.paraId, nick: r.paraNome })
+      recarregar()
+    },
     onError: aoFalhar('Nao foi possivel enviar a mensagem.'),
-  })
-
-  const responderMsg = useMutation({
-    mutationFn: (d: { id: string; corpo: string }) => correioRpc.responderCorreio(d.id, d.corpo),
-    onSuccess: (r) => { toast(r.mensagem); setRespondendoA(null); recarregar() },
-    onError: aoFalhar('Nao foi possivel responder.'),
   })
 
   const excluir = useMutation({
     mutationFn: (id: string) => correioRpc.excluirCorreio(id),
     onSuccess: recarregar,
     onError: aoFalhar('Nao foi possivel excluir.'),
+  })
+
+  const apagarFio = useMutation({
+    mutationFn: (id: string) => correioRpc.excluirConversa(id),
+    onSuccess: () => { setContatoAberto(null); recarregar() },
+    onError: aoFalhar('Nao foi possivel apagar a conversa.'),
   })
 
   const remover = useMutation({
@@ -155,63 +180,87 @@ export function CorreioMenu() {
     onError: aoFalhar('Nao foi possivel desbloquear.'),
   })
 
-  const entrada = useMemo(
-    () => (data?.mensagens ?? []).filter((m) => m.tipo !== 'sistema'),
-    [data?.mensagens],
-  )
-  const sistema = useMemo(
-    () => (data?.mensagens ?? []).filter((m) => m.tipo === 'sistema'),
-    [data?.mensagens],
-  )
-  const naoLidasEntrada = entrada.filter((m) => m.estado === 'pendente').length
-  const naoLidasSistema = sistema.filter((m) => m.estado === 'pendente').length
-  const dmNaoLidas = (data?.amigos ?? []).reduce((t, a) => t + a.naoLidas, 0)
-
-  // Bloquear ou remover o amigo cuja conversa esta aberta tem que FECHAR a
-  // conversa: a linha some da lista por baixo e o painel continuaria mostrando
-  // um fio que o servidor ja nao deixa mais escrever.
-  useEffect(() => {
-    if (!amigoAberto) return
-    if (!(data?.amigos ?? []).some((a) => a.userId === amigoAberto.userId)) setAmigoAberto(null)
-  }, [data?.amigos, amigoAberto])
-
-  // O objeto do amigo aberto vem sempre da query, nunca do state: senao o painel
-  // congela `naoLidas` e `online` no valor que tinham no clique.
-  const amigoAtual = amigoAberto
-    ? (data?.amigos ?? []).find((a) => a.userId === amigoAberto.userId) ?? null
-    : null
+  // Memoizado porque `?? []` cria um array novo a cada render, e `contatoAtual`
+  // depende dele — sem isto o `useMemo` de baixo recalcula sempre e o objeto do
+  // contato troca de identidade, remontando o fio inteiro a cada render.
+  const conversas = useMemo(() => data?.conversas ?? [], [data?.conversas])
+  const avisos = useMemo(() => data?.avisos ?? [], [data?.avisos])
+  const naoLidasConversas = conversas.reduce((t, c) => t + c.naoLidas, 0)
+  const naoLidosAvisos = avisos.filter((m) => m.estado === 'pendente').length
 
   const ocupado = remover.isPending || bloquear.isPending || desbloquear.isPending
 
+  // O contato aberto le da query sempre que existir linha la, pra `online` e
+  // `naoLidas` nao congelarem no valor que tinham no clique. Quando o fio ainda
+  // nao existe (conversa recem-criada), vale o que o clique guardou.
+  const contatoAtual = useMemo<Contato | null>(() => {
+    if (!contatoAberto) return null
+    const daLista = conversas.find((c) => c.userId === contatoAberto.userId)
+    return daLista ? { userId: daLista.userId, nick: daLista.nick, online: daLista.online } : contatoAberto
+  }, [contatoAberto, conversas])
+
   const abrirComposicao = useCallback((nickInicial?: string) => {
-    setRespondendoA(null)
     setCompondo({ nickInicial })
-    setAba('entrada')
+    setAba('conversas')
+  }, [])
+
+  const abrirFio = useCallback((c: Contato) => {
+    setCompondo(null)
+    setContatoAberto(c)
+    setAba('conversas')
   }, [])
 
   const abas: { value: Aba; label: string }[] = [
-    { value: 'entrada', label: `Entrada${naoLidasEntrada ? ` (${naoLidasEntrada})` : ''}` },
-    { value: 'enviados', label: `Enviados${data?.enviados.length ? ` (${data.enviados.length})` : ''}` },
-    { value: 'sistema', label: `Avisos${naoLidasSistema ? ` (${naoLidasSistema})` : ''}` },
-    { value: 'amigos', label: `Amigos${dmNaoLidas ? ` (${dmNaoLidas})` : ''}` },
+    { value: 'conversas', label: `Conversas${naoLidasConversas ? ` (${naoLidasConversas})` : ''}` },
+    { value: 'avisos', label: `Avisos${naoLidosAvisos ? ` (${naoLidosAvisos})` : ''}` },
+    { value: 'amigos', label: 'Amigos' },
   ]
 
-  const lista = aba === 'enviados' ? (data?.enviados ?? []) : aba === 'sistema' ? sistema : entrada
-  const vazio = aba === 'enviados'
-    ? 'Voce ainda nao enviou nenhuma mensagem.'
-    : aba === 'sistema' ? 'Nenhum aviso.' : 'Sua caixa esta vazia.'
-  const titulo = aba === 'enviados'
-    ? 'ENVIADOS'
-    : aba === 'sistema'
-      ? `AVISOS DO JOGO ${naoLidasSistema ? `(${naoLidasSistema} novo(s))` : ''}`
-      : `CAIXA DE ENTRADA ${naoLidasEntrada ? `(${naoLidasEntrada} nova(s))` : ''}`
+  function LinhaDeConversa({ c }: { c: ConversaResumo }) {
+    const aberta = contatoAtual?.userId === c.userId
+    return (
+      <GameCard
+        className={cn(
+          'flex cursor-pointer items-center gap-[.5em] p-[.45em]',
+          aberta && 'border-primary/60',
+          c.naoLidas > 0 && !aberta && 'border-primary/40',
+        )}
+        onClick={() => abrirFio({ userId: c.userId, nick: c.nick, online: c.online })}
+      >
+        <span
+          aria-hidden
+          className={cn('h-[.5em] w-[.5em] shrink-0 rounded-full', c.online ? 'bg-ok' : 'bg-n600')}
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline justify-between gap-[.4em]">
+            <b className="truncate font-medium text-foreground">{c.nick}</b>
+            <span className="shrink-0 text-[.7em] text-n500">{quando(c.ultimaEm)}</span>
+          </div>
+          <div className="flex items-center gap-[.35em]">
+            <span className="min-w-0 flex-1 truncate text-[.8em] text-n400">
+              {c.ultimaMinha && <span className="text-n500">Voce: </span>}
+              {c.ultimoTrecho}
+            </span>
+            {c.anexosPendentes > 0 && (
+              <span className="shrink-0 text-primary" title="Anexo esperando coleta"><Gift /></span>
+            )}
+            {c.naoLidas > 0 && (
+              <span className="shrink-0 rounded-full bg-primary px-[.4em] text-[.7em] text-n900">
+                {c.naoLidas}
+              </span>
+            )}
+          </div>
+        </div>
+      </GameCard>
+    )
+  }
 
   const painelEsquerdo = (
     <div className="flex flex-col gap-[.55em]">
-      {aba !== 'amigos' && (
+      {aba === 'conversas' && (
         <div className="flex justify-end">
           <GameButton variant="primary" onClick={() => abrirComposicao()}>
-            <PencilSimple /> Escrever
+            <PencilSimple /> Nova conversa
           </GameButton>
         </div>
       )}
@@ -219,74 +268,87 @@ export function CorreioMenu() {
       {compondo && (
         <ComporMensagem
           nickInicial={compondo.nickInicial}
-          enviando={enviar.isPending}
+          enviando={comecar.isPending}
           onCancelar={() => setCompondo(null)}
-          onEnviar={(d) => enviar.mutate(d)}
-        />
-      )}
-      {respondendoA && (
-        <ComporMensagem
-          respondendoA={{ id: respondendoA.id, deNome: respondendoA.de_nome, assunto: respondendoA.assunto }}
-          enviando={responderMsg.isPending}
-          onCancelar={() => setRespondendoA(null)}
-          onEnviar={(d) => responderMsg.mutate({ id: respondendoA.id, corpo: d.corpo })}
+          onEnviar={(d) => comecar.mutate(d)}
         />
       )}
 
       {isLoading && <p className="text-n400">Carregando...</p>}
 
-      {!isLoading && aba === 'amigos' && (
-        <PainelAmigos
-          amigos={data?.amigos ?? []}
-          bloqueados={data?.bloqueados ?? []}
-          selecionado={amigoAtual?.userId ?? null}
-          ocupado={ocupado}
-          onSelecionar={setAmigoAberto}
-          onEscrever={abrirComposicao}
-          onRemover={(a) => remover.mutate(a.userId)}
-          onBloquear={(a) => bloquear.mutate(a.userId)}
-          onDesbloquear={(b) => desbloquear.mutate(b.userId)}
-        />
+      {!isLoading && aba === 'conversas' && (
+        <div>
+          <SectionLabel>CONVERSAS {naoLidasConversas ? `(${naoLidasConversas} nova(s))` : ''}</SectionLabel>
+          {conversas.length === 0 && (
+            <p className="text-n400">
+              Nenhuma conversa ainda. Use "Nova conversa" pra falar com alguem pelo nick.
+            </p>
+          )}
+          <div className="mt-[.4em] flex flex-col gap-[.35em]">
+            {conversas.map((c) => <LinhaDeConversa key={c.userId} c={c} />)}
+          </div>
+        </div>
       )}
 
-      {!isLoading && aba !== 'amigos' && (
+      {!isLoading && aba === 'avisos' && (
         <div>
-          <SectionLabel>{titulo}</SectionLabel>
-          {lista.length === 0 && <p className="text-n400">{vazio}</p>}
+          <SectionLabel>AVISOS {naoLidosAvisos ? `(${naoLidosAvisos} novo(s))` : ''}</SectionLabel>
+          {avisos.length === 0 && <p className="text-n400">Nenhum aviso.</p>}
           <div className="mt-[.4em] flex flex-col gap-[.4em]">
-            {lista.map((m) => (
+            {avisos.map((m) => (
               <LinhaDeMensagem
                 key={m.id}
                 m={m}
-                enviada={aba === 'enviados'}
+
                 respondendo={responderPedido.isPending}
                 coletando={coletar.isPending}
                 excluindo={excluir.isPending}
                 onMarcarLida={marcarLida.mutate}
                 onResponderPedido={(id, aceitar) => responderPedido.mutate({ id, aceitar })}
                 onColetar={coletar.mutate}
-                onResponder={(msg) => { setCompondo(null); setRespondendoA(msg) }}
                 onExcluir={excluir.mutate}
               />
             ))}
           </div>
         </div>
       )}
+
+      {!isLoading && aba === 'amigos' && (
+        <PainelAmigos
+          amigos={data?.amigos ?? []}
+          bloqueados={data?.bloqueados ?? []}
+          selecionado={contatoAtual?.userId ?? null}
+          ocupado={ocupado}
+          onSelecionar={(a) => abrirFio({ userId: a.userId, nick: a.nome, online: a.online })}
+          onEscrever={abrirComposicao}
+          onRemover={(a) => remover.mutate(a.userId)}
+          onBloquear={(a) => bloquear.mutate(a.userId)}
+          onDesbloquear={(b) => desbloquear.mutate(b.userId)}
+        />
+      )}
     </div>
   )
 
-  const painelDireito = amigoAtual && meuId ? (
+  const painelDireito = contatoAtual && meuId ? (
     <GameCard className="p-[.6em]">
-      <div className="mb-[.35em] flex justify-end">
-        <GameButton variant="ghost" aria-label="Fechar conversa" onClick={() => setAmigoAberto(null)}>
+      <div className="mb-[.35em] flex justify-end gap-[.3em]">
+        <GameButton
+          variant="ghost"
+          aria-label="Apagar conversa"
+          carregando={apagarFio.isPending}
+          onClick={() => apagarFio.mutate(contatoAtual.userId)}
+        >
+          <Trash />
+        </GameButton>
+        <GameButton variant="ghost" aria-label="Fechar conversa" onClick={() => setContatoAberto(null)}>
           <X />
         </GameButton>
       </div>
-      <ConversaDM
-        // `key` por amigo: trocar de conversa precisa REMONTAR, nao reusar.
-        // Sem isto o fio do amigo anterior fica na tela ate o novo carregar.
-        key={amigoAtual.userId}
-        amigo={amigoAtual}
+      <Conversa
+        // `key` por contato: trocar de conversa precisa REMONTAR, nao reusar.
+        // Sem isto o fio do contato anterior fica na tela ate o novo carregar.
+        key={contatoAtual.userId}
+        contato={contatoAtual}
         meuId={meuId}
         aoMarcarLidas={recarregar}
       />
@@ -312,6 +374,9 @@ export function CorreioMenu() {
           onClick={() => adicionar.mutate(nick.trim())}
         >
           <UserPlus /> Enviar pedido
+        </GameButton>
+        <GameButton variant="secondary" disabled={!nick.trim()} onClick={() => abrirComposicao(nick.trim())}>
+          <ChatCircleDots /> Conversar
         </GameButton>
       </GameCard>
 

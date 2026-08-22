@@ -1,8 +1,10 @@
-// Formulario de escrever/responder mensagem (PH-74).
+// Formulario de COMECAR UMA CONVERSA (PH-81).
 //
-// Um componente pros dois casos: escrever do zero pede o nick, responder ja tem
-// destinatario e assunto travados pela RPC. Separar em dois daria duas telas
-// quase identicas divergindo com o tempo.
+// Era o formulario de escrever/responder carta. Perdeu as duas coisas: o campo
+// ASSUNTO (conversa nao tem) e o modo RESPOSTA (responder agora e so mandar
+// outra mensagem dentro do fio, em Conversa.tsx). Sobrou o unico caso que ainda
+// precisa de formulario proprio: abrir conversa com quem ainda nao tem fio,
+// apontando o destinatario pelo nick — e ja mandando anexo junto, se quiser.
 import { useMemo, useState } from 'react'
 import { PaperPlaneRight, Trash, X } from '@phosphor-icons/react'
 import { GameButton, GameInput, GameSelect, SectionLabel } from '@/components/game/controls'
@@ -12,25 +14,20 @@ import { itemIconUrl } from '@/data/sprites'
 import type { AnexoItemCorreio } from '@/data/remote/servidor'
 import { cn } from '@/lib/utils'
 
-export const MAX_ASSUNTO = 60
 export const MAX_CORPO = 1000
-/** Espelha o limite da RPC `enviar_correio`. */
+/** Espelha o limite da RPC `enviar_mensagem`. */
 export const MAX_ANEXOS = 5
 
 interface Props {
-  /** Preenchido = modo resposta: destinatario e assunto ficam fixos. */
-  respondendoA?: { id: string; deNome: string; assunto: string }
-  /** Nick pre-preenchido (clicou em "Escrever" a partir de um amigo). */
+  /** Nick pre-preenchido (clicou em "Conversar" a partir de um amigo). */
   nickInicial?: string
   enviando: boolean
   onCancelar: () => void
-  onEnviar: (dados: { nick: string; assunto: string; corpo: string; anexos: AnexoItemCorreio[] }) => void
+  onEnviar: (dados: { nick: string; corpo: string; anexos: AnexoItemCorreio[] }) => void
 }
 
-export function ComporMensagem({ respondendoA, nickInicial, enviando, onCancelar, onEnviar }: Props) {
-  const ehResposta = Boolean(respondendoA)
+export function ComporMensagem({ nickInicial, enviando, onCancelar, onEnviar }: Props) {
   const [nick, setNick] = useState(nickInicial ?? '')
-  const [assunto, setAssunto] = useState('')
   const [corpo, setCorpo] = useState('')
   const [anexos, setAnexos] = useState<AnexoItemCorreio[]>([])
   const [itemEscolhido, setItemEscolhido] = useState('')
@@ -51,9 +48,7 @@ export function ComporMensagem({ respondendoA, nickInicial, enviando, onCancelar
   )
 
   const maxQtd = itemEscolhido ? (items[itemEscolhido] ?? 0) : 0
-  const assuntoFinal = ehResposta ? '' : assunto.trim()
-  const podeEnviar = corpo.trim().length > 0
-    && (ehResposta || (nick.trim().length > 0 && assuntoFinal.length > 0))
+  const podeEnviar = corpo.trim().length > 0 && nick.trim().length > 0
 
   function adicionarAnexo() {
     if (!itemEscolhido || qtd < 1) return
@@ -67,40 +62,21 @@ export function ComporMensagem({ respondendoA, nickInicial, enviando, onCancelar
   return (
     <div className="flex flex-col gap-[.5em] rounded-[.7em] border border-primary/40 bg-n900 p-[.7em]">
       <div className="flex items-center justify-between">
-        <SectionLabel>
-          {ehResposta ? `RESPONDER A ${respondendoA?.deNome.toUpperCase()}` : 'NOVA MENSAGEM'}
-        </SectionLabel>
+        <SectionLabel>NOVA CONVERSA</SectionLabel>
         <GameButton variant="ghost" onClick={onCancelar} aria-label="Fechar">
           <X />
         </GameButton>
       </div>
 
-      {ehResposta ? (
-        <div className="text-[.8em] text-n400">
-          Assunto: <span className="text-foreground">Re: {respondendoA?.assunto}</span>
-        </div>
-      ) : (
-        <div className="flex flex-wrap gap-[.4em]">
-          <label className="flex min-w-[9em] flex-1 flex-col gap-[.2em] text-[.78em] text-n300">
-            Para (nick exato)
-            <GameInput
-              value={nick}
-              placeholder="Nome do treinador"
-              maxLength={40}
-              onChange={(e) => setNick(e.target.value)}
-            />
-          </label>
-          <label className="flex min-w-[11em] flex-[2] flex-col gap-[.2em] text-[.78em] text-n300">
-            Assunto
-            <GameInput
-              value={assunto}
-              placeholder="Sobre o que e"
-              maxLength={MAX_ASSUNTO}
-              onChange={(e) => setAssunto(e.target.value)}
-            />
-          </label>
-        </div>
-      )}
+      <label className="flex flex-col gap-[.2em] text-[.78em] text-n300">
+        Para (nick exato)
+        <GameInput
+          value={nick}
+          placeholder="Nome do treinador"
+          maxLength={40}
+          onChange={(e) => setNick(e.target.value)}
+        />
+      </label>
 
       <label className="flex flex-col gap-[.2em] text-[.78em] text-n300">
         Mensagem
@@ -121,10 +97,7 @@ export function ComporMensagem({ respondendoA, nickInicial, enviando, onCancelar
         </span>
       </label>
 
-      {/* Anexo so no envio novo: a RPC `responder_correio` nao aceita anexo, pra
-          nao transformar toda resposta rapida num caminho de saida de item. */}
-      {!ehResposta && (
-        <div className="flex flex-col gap-[.35em]">
+      <div className="flex flex-col gap-[.35em]">
           <SectionLabel>ANEXAR ITENS ({anexos.length}/{MAX_ANEXOS})</SectionLabel>
 
           {anexos.length > 0 && (
@@ -184,13 +157,12 @@ export function ComporMensagem({ respondendoA, nickInicial, enviando, onCancelar
             </div>
           )}
 
-          {disponiveis.length === 0 && anexos.length === 0 && (
-            <p className="text-[.75em] text-n500">
-              Nenhum item disponivel. Itens travados nao podem ser anexados.
-            </p>
-          )}
-        </div>
-      )}
+        {disponiveis.length === 0 && anexos.length === 0 && (
+          <p className="text-[.75em] text-n500">
+            Nenhum item disponivel. Itens travados nao podem ser anexados.
+          </p>
+        )}
+      </div>
 
       <div className="flex justify-end gap-[.35em]">
         <GameButton variant="ghost" onClick={onCancelar}>Cancelar</GameButton>
@@ -198,7 +170,7 @@ export function ComporMensagem({ respondendoA, nickInicial, enviando, onCancelar
           variant="primary"
           carregando={enviando}
           disabled={!podeEnviar}
-          onClick={() => onEnviar({ nick: nick.trim(), assunto: assuntoFinal, corpo: corpo.trim(), anexos })}
+          onClick={() => onEnviar({ nick: nick.trim(), corpo: corpo.trim(), anexos })}
         >
           <PaperPlaneRight /> Enviar
         </GameButton>
