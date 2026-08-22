@@ -4,10 +4,9 @@
 // spreadsheet has no equivalent for those).
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from './generated/formulas.generated'
-import { COLLISION_GRIDS, COLLISION_GRID_CELL_SIZE } from './generated/collisionGrids.generated'
-import { WATER_COLLISION_GRID, WATER_SPAWN_POINT } from './generated/waterCollisionMask.generated'
+import { COLLISION_GRID_CELL_SIZE } from './collisionConstants'
 import { COLISAO_POR_ARTE } from './generated/subBiomaCollision.generated'
-import { FAIXAS, huntId, SUB_BIOMA_POR_CHAVE } from './biomas'
+import { SUB_BIOMA_POR_CHAVE } from './biomas'
 import type { HuntMapDef } from './huntTypes'
 
 // Modo Pesadelo hunts (see nightmareMaps.js) and the hand-picked spawn-pool
@@ -39,35 +38,32 @@ const formulaEngine = createFormulaEngine(FORMULAS)
 // the spreadsheet's raw respawnDelay by default.
 const RESPAWN_DELAY_MULTIPLIER = formulaEngine.evalOrDefault('MOB_RESPAWN_DELAY_MULTIPLIER', 0.25)
 
-// Explicit user request: temporarily pause the wall/obstacle collision
-// system (the per-background grid baked by scripts/build-collision-grids.js
-// — water banks, cave walls, cliffs) so every POKE can walk freely across
-// the whole map with nothing blocking them, while leaving the rest of the
-// system in place to flip back on later (just set this back to true).
-// Doesn't touch the separate circular map-edge clamp (mapWalkRadius below /
-// MovementSystem.js), which is what actually keeps POKEs inside the hunt at
-// all and isn't part of "wall block".
-const WALL_BLOCK_ENABLED = false
-
-// Explicit user request: reactivate wall-block EXCLUSIVELY for the real
-// Water hunts, using a hand-painted mask
-// (scripts/build-water-collision-mask.js) instead of the pixel-heuristic
-// grid above.
+// PH-56: ate 2026-08-21 existiam DOIS sistemas de walk-block por tras deste
+// arquivo alem do de `mapDefParaSala` (grade pintada por ARTE, COLISAO_POR_ARTE
+// — esse continua vivo, ver logo abaixo):
 //
-// Keyed by BIOME, not by `bg.image`: art is shared between themes (see
-// data/biomas.ts#ARTE), so keying by image would leak the water collision
-// onto whatever else happens to reuse water.png. Derived from the biome list
-// rather than a hand-typed id list so a new level band never silently misses
-// the mask.
-const WATER_BIOMAS = ['marinho', 'aguas_interiores']
-const WATER_HUNT_IDS = new Set(
-  WATER_BIOMAS.flatMap((bioma) => FAIXAS.map((faixa) => huntId(bioma, faixa.id))),
-)
-
-// Only the 7 hunt themes with real background art (see
-// scripts/build-collision-grids.js) have a grid — every other hunt gets
-// `collisionGrid: null` and keeps the old fully-open walkable circle
-// (js/systems/MovementSystem.js treats a null grid as "no extra blocking").
+//   1. Uma grade por-heuristica-de-pixel (`COLLISION_GRIDS`, so 7 imagens,
+//      gerada por scripts/build-collision-grids.js), ligada por uma flag
+//      `WALL_BLOCK_ENABLED` que estava `false` havia tempo.
+//   2. Um caso especial pra hunts de Agua (`WATER_COLLISION_GRID`, mascara
+//      pintada a mao por scripts/build-water-collision-mask.js).
+//
+// Os dois foram REMOVIDOS (nao reativados) porque nenhum dos dois nunca
+// chegava a valer: TODO consumidor de gameplay real passa por
+// `mapDefParaSala` (nunca por `getMap` direto — os dois callers restantes,
+// `preload.ts` e `HuntMenu.tsx`, so leem `enemyPool`/`bg`, nunca
+// `collisionGrid`), e `mapDefParaSala` SEMPRE sobrescreve o que `getMap`
+// devolve quando a arte tem pintura em `COLISAO_POR_ARTE` — inclusive as 5
+// artes de Agua (sea/beach/lake/island/swamp), que tem pintura desde a leva
+// de sub-bioma. `COLISAO_POR_ARTE` e estritamente superior (pintado a mao,
+// cobre toda arte que uma sala pode mostrar, nao so 7) e ja cobria 29 das 31
+// artes antes do PH-55 fechar as 2 que faltavam (dojo/dragon) — zero caso de
+// uso sobrou pro fallback antigo. Arquivos gerados e scripts removidos junto
+// (`generated/collisionGrids.generated.ts`, `generated/
+// waterCollisionMask.generated.ts`, `scripts/build-collision-grids.js`,
+// `scripts/build-water-collision-mask.js`) — `COLLISION_GRID_CELL_SIZE`
+// sobrou como constante fixa em `./collisionConstants` (nao e dado gerado,
+// nunca variou).
 export function getMap(id: string): MapDef | null {
   const map = MAPS[id]
   if (!map) return null
@@ -82,18 +78,7 @@ export function getMap(id: string): MapDef | null {
   // Ja tinha quebrado: os 3s escritos na arena viravam 0,75s ao vivo, e o
   // pedido de "2 segundos entre um POKE e o proximo" saia como 0,5s.
   const atraso = map.sequence ? map.respawnDelay : map.respawnDelay * RESPAWN_DELAY_MULTIPLIER
-  if (WATER_HUNT_IDS.has(id)) {
-    return {
-      ...map,
-      respawnDelay: atraso,
-      collisionGrid: WATER_COLLISION_GRID,
-      playerSpawn: WATER_SPAWN_POINT,
-    }
-  }
-  const collisionGrid = WALL_BLOCK_ENABLED
-    ? (map.bg && map.bg.image && COLLISION_GRIDS[map.bg.image]) || null
-    : null
-  return { ...map, respawnDelay: atraso, collisionGrid }
+  return { ...map, respawnDelay: atraso, collisionGrid: null }
 }
 
 /**

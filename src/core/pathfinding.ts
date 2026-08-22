@@ -5,7 +5,7 @@
 // goal cell. Used by MovementSystem.js whenever a straight line to the
 // target is blocked, so a POKE can route around a wall/void/water patch
 // instead of sliding along it (or freezing) forever.
-import { COLLISION_GRID_CELL_SIZE } from '@/data/generated/collisionGrids.generated'
+import { COLLISION_GRID_CELL_SIZE } from '@/data/collisionConstants'
 import { mapWalkRadius } from '@/data/maps'
 
 export interface PathfindingMapDef {
