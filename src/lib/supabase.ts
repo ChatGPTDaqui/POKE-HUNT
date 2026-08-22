@@ -6,8 +6,8 @@ import { createClient } from '@supabase/supabase-js'
 import type { Database } from './database.types'
 import { secureAuthStorage } from './secureAuthStorage'
 
-const url = import.meta.env.VITE_SUPABASE_URL
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+export const url = import.meta.env.VITE_SUPABASE_URL
+export const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 // Falha barulhenta e cedo: sem isso o app so quebraria na primeira query, com
 // um erro de rede generico que nao diz que o problema e configuracao faltando.

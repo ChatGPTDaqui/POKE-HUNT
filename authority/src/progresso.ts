@@ -4,11 +4,11 @@ import {
   snapshotToGameState, gameStateToPlayerRow, gameStateToPokemonRows,
   gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
   defaultGameStateData, MAPS, GRUPOS_DO_LANCE,
-  OFFLINE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
+  OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
 } from '#engine'
 import {
-  ErroHttp, selecionarTudo, selecionar, atualizar, atualizarRetornando, inserir, apagar, type Config,
+  ErroHttp, selecionarTudo, selecionar, atualizar, atualizarRetornando, inserir, apagar, chamarRpc, type Config,
 } from './db.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
 import { aplicarPiso, NENHUM_PISO, type ResultadoPiso } from './farmOffline.js'
@@ -361,12 +361,23 @@ export async function gravarEstado(
   // Mercado, aqui na linha do jogador (PH-5). `updated_at` e mantido pelo
   // trigger `players_set_updated_at`: todo UPDATE bem sucedido (nosso ou de
   // outro request concorrente) sempre avanca a versao.
-  const gravada = await atualizarRetornando(
+  //
+  // PH-67: RPC em vez de PATCH cru. Um PATCH direto no REST nunca disputava o
+  // `pg_advisory_xact_lock` que as RPCs de acao (comprar/vender/etc) passaram
+  // a tomar — duas transacoes HTTP separadas, nenhuma pedindo o mesmo lock,
+  // colisao efemera batendo 409 sem nenhuma das duas estar "errada". A RPC
+  // `gravar_progresso` pega o MESMO lock por usuario antes do CAS, entao
+  // agora as duas familias de escrita realmente se serializam.
+  const resultado = await chamarRpc<{ ok: boolean; conflito?: boolean; updatedAt?: string }>(
     cfg,
-    `players?user_id=eq.${userId}&updated_at=eq.${encodeURIComponent(playerUpdatedAtEsperado)}`,
-    gameStateToPlayerRow(userId, estado),
+    'gravar_progresso',
+    {
+      p_user_id: userId,
+      p_patch: gameStateToPlayerRow(userId, estado),
+      p_updated_at_esperado: playerUpdatedAtEsperado,
+    },
   )
-  if (!gravada.length) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR)
+  if (!resultado.ok) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR)
 
   const linhasPoke = gameStateToPokemonRows(userId, estado)
   // `id` e opcional so no tipo `Insert` (coluna tem default no banco) — aqui
@@ -705,13 +716,18 @@ async function simularSessao(
   // pro comeco quando o farm for religado.
   const pausado = offline && FARM_OFFLINE_PAUSADO
 
+  // PH-37: fora do regime offline, o passo precisa bater com o do client ao
+  // vivo (useGameLoop.ts, 1/60s) — senao o resim do servidor e o client
+  // desalinham a sequencia de sorteios de RNG so pelo tamanho do passo, e o
+  // level-up do POKE que o client mostrou nunca e confirmado. Ver
+  // LIVE_SIM_STEP_SECONDS em simulation.ts pro raciocinio completo.
   const resumo = pausado
     ? createEmptySummary()
     : simulateWorldSeconds({
       world,
       gameState: store,
       seconds: segundos,
-      stepSeconds: OFFLINE_SIM_STEP_SECONDS,
+      stepSeconds: offline ? OFFLINE_SIM_STEP_SECONDS : LIVE_SIM_STEP_SECONDS,
       stepFn: (w, dt, opts) => stepWorld(w, dt, store, opts),
     })
 

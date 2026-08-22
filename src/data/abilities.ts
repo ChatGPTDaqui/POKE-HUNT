@@ -61,6 +61,11 @@ export interface Ability {
   drainPercent?: number
   healPercent?: number
   hazard?: HazardId
+  // Golpe de MULTIPLOS ACERTOS: quantas vezes ele bate num uso. Ausente = uma
+  // vez, como todo golpe normal. `power` desses golpes e POR ACERTO (ver
+  // MULTI_HIT_OVERRIDES abaixo).
+  minHits?: number
+  maxHits?: number
 }
 
 const formulaEngine = createFormulaEngine(FORMULAS)
@@ -149,6 +154,46 @@ const HAZARD_OVERRIDES: Partial<Record<string, Pick<Ability, 'hazard'>>> = {
   sticky_web: { hazard: 'sticky_web' },
 }
 
+// Patch por cima do catalogo gerado (Ultra Sun): GOLPE DE MULTIPLOS ACERTOS.
+// Nem `Ability` nem o catalogo tinham a contagem — `min_hits`/`max_hits` da
+// PokeAPI nunca foram importados, e a categoria PokeAPI desses golpes e so
+// "damage", entao o dado perdido nao aparecia em nenhuma checagem.
+//
+// O QUE ISSO CORRIGIA (PH-68): o `power` do catalogo e POR ACERTO (15 a 40) e o
+// motor batia UMA vez, ou seja ~1/3 do dano pretendido. E nao era slot
+// desperdicado: desde 2026-08-18 o POKE do jogador roda a FILA dos 4 slots e o
+// Ataque Basico (poder 40) so entra se o jogador gastar um slot nele — Fury
+// Attack (15) e Fury Swipes (18) gastavam o turno batendo menos da metade do
+// golpe que todo POKE tem de graca.
+//
+// POR QUE OVERLAY E NAO CONSERTAR O GERADOR: corrigir `generate-catalog-usum.js`
+// obriga a rodar `usum:baixar` de novo (rede) e rebate o catalogo inteiro. A
+// divida fica registrada em PH-70, que tem o mesmo problema com accuracy/evasao.
+//
+// A DISTRIBUICAO nao mora aqui, e sim em combatSystem#quantidadeDeAcertos: 2 e 3
+// acertos com 3/8 de chance cada, 4 e 5 com 1/8 (Gen V+). Golpe de 2 acertos
+// FIXOS (Double Kick, Double Hit, Dual Chop, Twineedle) tem min === max e nao
+// sorteia nada.
+const MULTI_HIT_OVERRIDES: Partial<Record<string, Pick<Ability, 'minHits' | 'maxHits'>>> = {
+  arm_thrust: { minHits: 2, maxHits: 5 },
+  barrage: { minHits: 2, maxHits: 5 },
+  bone_rush: { minHits: 2, maxHits: 5 },
+  bullet_seed: { minHits: 2, maxHits: 5 },
+  comet_punch: { minHits: 2, maxHits: 5 },
+  double_slap: { minHits: 2, maxHits: 5 },
+  fury_attack: { minHits: 2, maxHits: 5 },
+  fury_swipes: { minHits: 2, maxHits: 5 },
+  icicle_spear: { minHits: 2, maxHits: 5 },
+  pin_missile: { minHits: 2, maxHits: 5 },
+  rock_blast: { minHits: 2, maxHits: 5 },
+  spike_cannon: { minHits: 2, maxHits: 5 },
+  // Dois acertos fixos.
+  double_hit: { minHits: 2, maxHits: 2 },
+  double_kick: { minHits: 2, maxHits: 2 },
+  dual_chop: { minHits: 2, maxHits: 2 },
+  twineedle: { minHits: 2, maxHits: 2 },
+}
+
 export const ABILITIES: Record<string, Ability> = Object.fromEntries(
   Object.entries(ALL_ABILITIES_SOURCE).map(([key, ability]) => {
     const isAoe = AOE_ABILITY_KEYS.has(key) || ('target' in ability && ability.target === 'aoe')
@@ -158,6 +203,7 @@ export const ABILITIES: Record<string, Ability> = Object.fromEntries(
         ...ability,
         ...STAT_CHANGE_OVERRIDES[key],
         ...HAZARD_OVERRIDES[key],
+        ...MULTI_HIT_OVERRIDES[key],
         target: isAoe ? 'aoe' : 'single',
         radius: isAoe ? AOE_RADIUS : undefined,
         cooldown: cooldownFromPp(ability.pp),
@@ -209,6 +255,42 @@ export const DANO_SEM_PODER_BASE = new Set([
   'magnitude', 'reversal', 'flail', 'present', 'hidden_power',
   'seismic_toss', 'night_shade', 'dragon_rage', 'super_fang', 'psywave',
   'counter', 'mirror_coat',
+  // PH-69: estes 9 tinham exatamente o mesmo bug que os 12 acima e ficaram de
+  // fora da leva anterior. `power: 0` no catalogo, fora de
+  // DYNAMIC_POWER_ABILITIES/FIXED_DAMAGE_ABILITIES, entao `isDamagingAbility`
+  // era falso e `pickAbilityDaFila` os pulava em TODA rotacao — slot morto pra
+  // sempre, com a descricao prometendo dano. Alcance: 67 pares especie-golpe.
+  'gyro_ball', 'electro_ball', 'wring_out', 'punishment', 'sonic_boom',
+  'endeavor', 'final_gambit',
+  // Os dois de PESO. Ficaram inertes na primeira versao desta issue porque o
+  // catalogo nao tinha peso; agora tem — `pesoHg` foi adicionado direto da
+  // PokeAPI (scripts/fetch-usum-catalog.js), 226 especies cobertas.
+  'low_kick', 'heavy_slam',
+])
+
+// GOLPES DE DANO QUE CONTINUAM INERTES DE PROPOSITO (PH-69), e por que cada um.
+// Todos tem `power: 0` no catalogo e o dano real dependeria de uma mecanica que
+// este motor nao tem. Ficam FORA de DANO_SEM_PODER_BASE — entrar la sem
+// implementacao os transformaria em golpe de dano 0 escolhivel, que e pior que
+// inerte: o aviso de golpe inerte da ficha (moveDescriptions#golpeTemEfeitoReal)
+// sumiria e o jogador gastaria um dos 4 slots sem nada na tela avisando.
+//
+//   fling, natural_gift   dependem do ITEM que o POKE carrega; nao existe POKE
+//                         segurando item neste jogo.
+//   beat_up               um acerto por membro da equipe; a luta aqui e sempre
+//                         1 contra N, sem equipe atacando junto.
+//   spit_up               consome Stockpile, que nao esta implementado.
+//   bide                  acumula dano por dois turnos e devolve; exigiria
+//                         estado de "golpe em carga" atravessando turnos.
+//   trump_card            o poder sai do PP RESTANTE, e este motor troca PP por
+//                         cooldown (ver cooldownFromPp acima) — nao ha contador
+//                         de PP pra ler.
+//
+// Mesmo espirito da nota de `quick_guard` no fim deste arquivo: golpe morto
+// documentado e diferente de golpe esquecido.
+export const DANO_POR_REGRA_NAO_IMPLEMENTADA = new Set([
+  'fling', 'natural_gift', 'beat_up', 'spit_up',
+  'bide', 'trump_card',
 ])
 
 // Os dois OHKO que TEM implementacao e estao desligados por balanceamento (ver o

@@ -16,7 +16,7 @@
 import { drawEntity, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage } from './sprites'
 import { CENA_HOSPITAL, escalaDoPoke } from '@/data/hospital'
 import type { WorldEntity, WorldState } from '@/engine/types'
-import { backgroundParaSala } from '@/data/maps'
+import { arteParaSala, backgroundParaSala } from '@/data/maps'
 import type { MapDef } from '@/data/maps'
 
 // Fundo por sub-bioma: a sala troca de sub-bioma a cada quota de abates (ver
@@ -271,7 +271,11 @@ export class Renderer {
 
     drawMapBackground(
       ctx,
-      { bg: backgroundParaSala(mapDef, world.sala), bounds: mapDef.bounds },
+      {
+        bg: backgroundParaSala(mapDef, world.sala),
+        bounds: mapDef.bounds,
+        arte: arteParaSala(mapDef.id, world.sala) ?? undefined,
+      },
       { x: camera.x, y: camera.y, w: this.width / this.zoom, h: this.height / this.zoom },
     )
 
