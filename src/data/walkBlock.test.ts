@@ -22,13 +22,15 @@
 import { describe, expect, it } from 'vitest'
 
 import { BIOMAS } from './biomas'
+import { BOSS_MAPS_DATA } from './nightmareMaps'
 import { COLISAO_POR_ARTE } from './generated/subBiomaCollision.generated'
 import { MAPS, getMap, mapDefParaSala, spawnPointParaSala, isCellBlocked } from './maps'
 
-// Unica arte de sala sem referencia pintada hoje. Lista explicita pra uma
-// arte nova nao entrar de carona no "ainda faltam algumas" — quando alguem
-// pintar o Dojo, este teste avisa que da pra esvaziar a lista.
-const ARTES_SEM_PINTURA = new Set(['assets/hunt-backgrounds/dojo.png'])
+// PH-55 pintou as 2 ultimas (dojo.png, dragon.png) — lista vazia agora.
+// Fica declarada (nao removida) de proposito: se uma arte nova entrar sem
+// referencia pintada, o jeito de nao quebrar o teste de baixo e adicionar
+// aqui explicitamente, nunca esvaziar a checagem.
+const ARTES_SEM_PINTURA = new Set<string>()
 
 /** Toda arte que alguma sala ou alguma hunt pode botar na tela. */
 function artesEmUso(): Map<string, string> {
@@ -38,6 +40,14 @@ function artesEmUso(): Map<string, string> {
     for (const sub of bioma.subBiomas) {
       if (sub.bg?.image) usos.set(sub.bg.image, `sub-bioma ${sub.chave}`)
     }
+  }
+  // PH-55: BOSS_MAPS_DATA (boss_lance e as hunts BOSS por tipo) fica FORA do
+  // sistema de biomas — mesmo motivo do route_46 logo abaixo, so que sem
+  // special-case: dragon.png (arena do Lance) so aparece aqui, em nenhum
+  // bioma/sub-bioma. Sem este loop, o teste "nenhuma referencia pintada fica
+  // orfa" reprova toda vez que alguem pinta uma arte usada so por hunt BOSS.
+  for (const [id, map] of Object.entries(BOSS_MAPS_DATA)) {
+    if (map.bg.image) usos.set(map.bg.image, `boss ${id}`)
   }
   return usos
 }
@@ -153,6 +163,18 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
       'metropolis.jpg', 'slum.jpg', 'town-night.jpg', 'town.jpg',
       'volcano.jpg', 'wasteland.jpg',
     ])
+  })
+
+  it('PH-55: a arena do Campeao Lance (boss_lance) tem grade, nao area aberta', () => {
+    // Nenhuma asserção cobria isto antes: boss_lance nao e sub-bioma nem
+    // hunt normal (nasce de bosses.maps/lance.map em nightmareMaps.ts, fora
+    // do sistema de biomas), entao nao aparecia no loop `for bioma of
+    // BIOMAS` dos testes acima — a arena podia ficar sem grade pra sempre
+    // sem nenhum teste vermelho.
+    const mapDef = mapDefParaSala('boss_lance', null)
+    expect(mapDef).not.toBeNull()
+    expect(mapDef!.collisionGrid).toEqual(COLISAO_POR_ARTE['assets/hunt-backgrounds/dragon.png'].grid)
+    expect(mapDef!.colisaoDefineLimite).toBe(true)
   })
 
   it('toda grade tem o tamanho do mapa inteiro (35x23 celulas de 40px)', () => {
