@@ -28,6 +28,16 @@ vi.mock('./db.js', async (importOriginal) => {
       Object.assign(tabelaPlayers, patch)
       return [tabelaPlayers]
     }),
+    // A linha do jogador deixou de ser gravada por PATCH cru e passou a ir
+    // pela RPC `gravar_progresso` (PH-67), que pega o mesmo advisory lock das
+    // RPCs de acao. Sem stubar aqui, o teste faz `fetch` DE VERDADE contra
+    // `cfg.supabaseUrl` (que e `{}`) e morre com "falha ao falar com o banco"
+    // antes de chegar no diff que ele existe pra medir.
+    chamarRpc: vi.fn(async (_cfg: unknown, nome: string, args: Record<string, unknown>) => {
+      if (nome !== 'gravar_progresso') return { ok: true }
+      Object.assign(tabelaPlayers, args.p_patch as Record<string, unknown>)
+      return { ok: true, updatedAt: tabelaPlayers.updated_at }
+    }),
     atualizar: vi.fn(async () => {}),
     selecionarTudo: vi.fn(async () => []),
     inserir: vi.fn(async () => []),
@@ -75,8 +85,11 @@ describe('gravarEstado() — diff de escrita', () => {
     await gravarEstado(cfg, USER, estado, new Set(), tabelaPlayers.updated_at, baselineDe(estado))
 
     // `players` SEMPRE e gravada: `last_flush_at`/`updated_at` e o que marca a
-    // janela como creditada, e o CAS depende disso.
-    expect(db.atualizarRetornando).toHaveBeenCalledTimes(1)
+    // janela como creditada, e o CAS depende disso. Desde PH-67 o caminho e a
+    // RPC `gravar_progresso` (mesmo advisory lock das RPCs de acao), nao mais
+    // um PATCH cru — o invariante e o mesmo, o transporte que mudou.
+    expect(db.chamarRpc).toHaveBeenCalledTimes(1)
+    expect(db.chamarRpc).toHaveBeenCalledWith(cfg, 'gravar_progresso', expect.anything())
     // As outras quatro tabelas nao sao nem consultadas — o select do diff de
     // remocao tambem cai fora.
     expect(db.inserir).not.toHaveBeenCalled()
