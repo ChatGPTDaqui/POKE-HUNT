@@ -156,9 +156,63 @@ export async function pedirAcaoComLocal<T>(
 // meio-termo: o jogador ve o ouro andar em passos visiveis, e uma aba fechada
 // no soco perde no maximo 30s de tempo NAO creditado — nao de progresso, porque
 // o relogio de referencia vive no banco e o proximo flush cobre o intervalo.
+//
+// PISO do intervalo adaptativo (ver `proximoIntervaloDeFlush`).
 export const INTERVALO_FLUSH_MS = 30000
 
-let timerFlush: ReturnType<typeof setInterval> | null = null
+/**
+ * TETO do intervalo adaptativo.
+ *
+ * POR QUE ADAPTATIVO: cada flush e uma invocacao de Edge Function, e o plano
+ * Free tem 500.000 por mes. A 30s fixos sao ~120 por hora por jogador, ou seja
+ * ~3.800 horas-jogador no mes — e num jogo idle o jogador fica LIGADO, entao
+ * isso e teto de jogadores simultaneos (~5), nao de acesso. Janela sem nenhum
+ * evento nao precisa desse ritmo: a janela do servidor e por tempo decorrido
+ * (`last_flush_at`), entao esperar mais nao perde progresso, so faz o numero na
+ * tela andar em passos maiores.
+ *
+ * POR QUE 90s E NAO 2 MINUTOS: acima de `LIMIAR_OFFLINE_SEGUNDOS` (120s, em
+ * engine/simulation.ts) o servidor trata a janela como AUSENCIA — liga o modo
+ * pessimista e aplica o piso de 50% do farm offline. Um teto de 120s mais
+ * latencia e drift de timer atravessaria essa linha e faria jogo ao vivo ser
+ * creditado como farm offline, o que e pior que o custo que estamos cortando.
+ * 90s deixa 30s de folga. Subir daqui exige subir o limiar no motor primeiro —
+ * e isso muda a semantica do farm offline, nao e ajuste de rede.
+ */
+export const INTERVALO_FLUSH_MAX_MS = 90000
+
+let timerFlush: ReturnType<typeof setTimeout> | null = null
+// Cresce a cada `pararFlushPeriodico`: um flush que ja estava em voo quando a
+// sessao fechou nao pode reagendar o proximo (`agendarProximoFlush` compara a
+// geracao antes de se reagendar).
+let geracaoDoTimer = 0
+let intervaloAtual = INTERVALO_FLUSH_MS
+
+/**
+ * Janela sem nenhum evento DOBRA o intervalo, ate o teto; qualquer evento volta
+ * pro piso.
+ *
+ * "Evento" e o resumo do servidor, nao a predicao local: quem credita e ele, e
+ * e o ritmo do credito que o jogador percebe. Abate, ouro ou XP na janela ja
+ * conta — nao ha caso de janela produtiva que nao mexa em nenhum dos tres.
+ */
+function ajustarRitmoDeFlush(houveEvento: boolean): void {
+  intervaloAtual = houveEvento
+    ? INTERVALO_FLUSH_MS
+    : Math.min(intervaloAtual * 2, INTERVALO_FLUSH_MAX_MS)
+}
+
+function agendarProximoFlush(): void {
+  const geracao = geracaoDoTimer
+  timerFlush = setTimeout(() => {
+    void liquidar().finally(() => {
+      // `pararFlushPeriodico` durante o request em voo (sessao encerrada pelo
+      // servidor, jogador saindo da hunt) bump'a a geracao — e ai nao ha
+      // proximo.
+      if (geracao === geracaoDoTimer) agendarProximoFlush()
+    })
+  }, intervaloAtual)
+}
 
 /**
  * Abre a sessao e devolve a SALA INICIAL que o servidor decidiu, pra quem
@@ -175,7 +229,11 @@ export async function abrirSessaoDeHunt(
   try {
     const resposta = await servidor.abrirSessao(mapId, pokeUid)
     pararFlushPeriodico()
-    timerFlush = setInterval(() => { void liquidar() }, INTERVALO_FLUSH_MS)
+    // Hunt nova comeca no piso: a primeira janela e quase sempre produtiva, e
+    // herdar o intervalo esticado da hunt anterior faria o jogador entrar e
+    // esperar 90s pelo primeiro credito.
+    intervaloAtual = INTERVALO_FLUSH_MS
+    agendarProximoFlush()
     observarQuotaDeSala()
     return { ok: true, sala: resposta.sala ?? null }
   } catch (erro) {
@@ -252,6 +310,9 @@ export async function liquidar(): Promise<void> {
     // sala exibida seria um palpite — e o pool/loot que o jogador de fato
     // recebeu vieram da sala de la.
     if (r.sala !== undefined) useWorldStore.getState().definirSala(r.sala)
+    // Ritmo do proximo flush: janela produtiva mantem 30s, janela vazia estica
+    // (ver INTERVALO_FLUSH_MAX_MS).
+    ajustarRitmoDeFlush((r.resumo?.kills ?? 0) > 0 || (r.resumo?.gold ?? 0) > 0 || (r.resumo?.xp ?? 0) > 0)
     tratarEncerramento(r.sessaoEncerrada)
     if (r.truncado) {
       useToastStore.getState().pushToast(
@@ -280,9 +341,9 @@ export async function liquidar(): Promise<void> {
     //    o 401 (token local sumido) escapava por este mesmo buraco.
     //
     // MAS nem todo 409 de `/sessao/flush` significa "sessao sumiu" — o CAS de
-    // `gravarEstado` (server/src/progresso.ts) tambem responde 409 quando OUTRA
-    // escrita em `players` (config de auto, comprar, vender) colidiu com o
-    // flush, e essa colisao E transitoria (o server ja retenta algumas vezes
+    // `gravarEstado` (authority/src/progresso.ts) tambem responde 409 quando
+    // OUTRA escrita em `players` (config de auto, comprar, vender) colidiu com
+    // o flush, e essa colisao E transitoria (o server ja retenta algumas vezes
     // sozinho antes de desistir). BUG REAL que isto corrigia: tratar esse 409
     // como "sessao sumiu" parava o timer de flush no meio de uma cacada viva —
     // no pior caso, bem na hora de fechar a sequencia do Campeao Lance, jogando
@@ -291,6 +352,14 @@ export async function liquidar(): Promise<void> {
     // 409 cai no `reportarErro` de baixo e a proxima tentativa (30s ou
     // `commitAgora`) tenta de novo sozinha. 401 nao tem esse ambiguidade —
     // token local sumido so tem um significado.
+    //
+    // PH-67: `pg_advisory_xact_lock` no servidor serializa as escritas que
+    // colidiam aqui, entao esse 409 fica bem mais raro (so sobra se as 3
+    // tentativas do server ainda assim colidirem). Decisao explicita: este
+    // tratamento fica — defesa em profundidade, nao caminho morto. O client
+    // nao tem como saber se um 409 de fato esgotou o retry do servidor ou se
+    // e outra causa qualquer; continuar tratando como transitorio (cai no
+    // `reportarErro`, tenta de novo sozinho) e sempre a leitura mais segura.
     if (
       erro instanceof ErroServidor
       && ((erro.status === 409 && erro.message === 'nenhuma sessao aberta') || erro.status === 401)
@@ -303,8 +372,12 @@ export async function liquidar(): Promise<void> {
 }
 
 export function pararFlushPeriodico(): void {
-  if (timerFlush) clearInterval(timerFlush)
+  // A geracao sobe ANTES de limpar: um `liquidar()` ja em voo cai no `finally`
+  // depois disto e nao reagenda.
+  geracaoDoTimer += 1
+  if (timerFlush) clearTimeout(timerFlush)
   timerFlush = null
+  intervaloAtual = INTERVALO_FLUSH_MS
   pararObservadorDeSala?.()
   pararObservadorDeSala = null
   salaJaPedida = null
@@ -339,6 +412,10 @@ function observarQuotaDeSala(): void {
     if (chave === salaJaPedida && agora - ultimoPedidoDeSala < REPETIR_PEDIDO_DE_SALA_MS) return
     salaJaPedida = chave
     ultimoPedidoDeSala = agora
+    // Quota fechada e o oposto de janela parada: o jogador esta matando no
+    // ritmo. Volta pro piso pra a sala seguinte nao esperar o intervalo
+    // esticado.
+    intervaloAtual = INTERVALO_FLUSH_MS
     void liquidar()
   })
 }
