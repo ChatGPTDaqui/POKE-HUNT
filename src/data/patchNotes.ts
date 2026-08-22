@@ -12,6 +12,27 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Entrada curta de proposito, ao contrario das anteriores: pedido explicito
+  // do usuario ("um resumo bem sucinto sobre todas as melhorias").
+  {
+    version: '7.7',
+    date: '2026-08-22',
+    title: 'Correio e amigos, time no canto da tela, e as arenas ganharam parede',
+    highlights: [
+      'CORREIO COMPLETO: mande carta com ouro ou item anexado, responda, e apague o que ja leu — cada lado apaga a sua copia.',
+      'LISTA DE AMIGOS: convide, aceite, remova e bloqueie. Bloquear corta os dois lados e desfaz a amizade.',
+      'CONVERSA PRIVADA com amigo, em tempo real, com contador de nao lidas no sino.',
+      'SEU TIME NO CANTO SUPERIOR ESQUERDO: foto e nivel das reservas em coluna. Arraste pra mudar a ordem, passe o mouse pro resumo, clique pra abrir o perfil ou botar em campo.',
+      'A FILA DOS 4 GOLPES virou arrastavel, e da pra chegar nos golpes direto pela tela de Equipe.',
+      'POKE SEM GOLPE UTILIZAVEL agora diz isso na tela em vez de ficar parado sem explicacao.',
+      'A ESCOLHA DE GOLPES DESTRAVOU: um golpe orfao na lista impedia qualquer edicao.',
+      'NO CELULAR: a carinha do POKE muda conforme o estado dele, e tocar num termo abre a explicacao (com glossario).',
+      'BUG: A ARTE DO GOLPE FICAVA PRA TRAS. O efeito nascia parado no lugar onde o POKE estava, e ele andava mais de 100 pixels durante o segundo que a animacao dura. Agora ela acompanha.',
+      'DOJO E ARENA DO DRAGAO GANHARAM PAREDE DE VERDADE. Eram as duas ultimas telas do jogo em que dava pra atravessar predio, agua e lava.',
+      'DUELO DO CAMPEAO LANCE COREOGRAFADO: cada lado entra por um ponto fixo da arena, e ha 2 segundos entre um POKE cair e o proximo entrar — dos dois lados. Antes o seu substituto aparecia no mesmo instante, dentro do buraco onde o anterior morreu.',
+      'SEU PROGRESSO PAROU DE CORRER RISCO: duas gravacoes ao mesmo tempo se atropelavam e uma podia sobrescrever a outra.',
+    ],
+  },
   {
     version: '7.6',
     date: '2026-08-18',
