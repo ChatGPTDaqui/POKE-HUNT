@@ -71,10 +71,21 @@ const WATER_HUNT_IDS = new Set(
 export function getMap(id: string): MapDef | null {
   const map = MAPS[id]
   if (!map) return null
+  // `MOB_RESPAWN_DELAY_MULTIPLIER` e um botao de ECONOMIA: ele acelera o
+  // respawn de POKE SELVAGEM pra calibrar ouro/hora. Hunt de SEQUENCIA (a
+  // arena do Campeao Lance) nao tem respawn selvagem nenhum — ali o
+  // `respawnDelay` e o intervalo coreografado entre um POKE do treinador cair
+  // e o proximo entrar, e escalar isso por um numero de planilha e o tipo de
+  // acoplamento que quebra em silencio: um ajuste de ouro/hora mudaria o ritmo
+  // de uma luta roteirizada sem ninguem ligar as duas coisas.
+  //
+  // Ja tinha quebrado: os 3s escritos na arena viravam 0,75s ao vivo, e o
+  // pedido de "2 segundos entre um POKE e o proximo" saia como 0,5s.
+  const atraso = map.sequence ? map.respawnDelay : map.respawnDelay * RESPAWN_DELAY_MULTIPLIER
   if (WATER_HUNT_IDS.has(id)) {
     return {
       ...map,
-      respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER,
+      respawnDelay: atraso,
       collisionGrid: WATER_COLLISION_GRID,
       playerSpawn: WATER_SPAWN_POINT,
     }
@@ -82,7 +93,7 @@ export function getMap(id: string): MapDef | null {
   const collisionGrid = WALL_BLOCK_ENABLED
     ? (map.bg && map.bg.image && COLLISION_GRIDS[map.bg.image]) || null
     : null
-  return { ...map, respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER, collisionGrid }
+  return { ...map, respawnDelay: atraso, collisionGrid }
 }
 
 /**

@@ -19,6 +19,7 @@ import { createRng } from '@/core/rng'
 import type { PokeInstance } from '@/data/pokes'
 import { COLISAO_POR_ARTE } from '@/data/generated/subBiomaCollision.generated'
 import { ESPERA_DE_TROCA_SEGUNDOS } from '@/data/huntTypes'
+import { getMap, MAPS } from '@/data/maps'
 import { LANCE_MAP_ID } from '@/data/nightmareMaps'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { buildMapWorld, stepWorld, type ProgressoDaSessao } from './simulation'
@@ -59,6 +60,23 @@ function passarIntro(world: ReturnType<typeof mundoDoLance>, gameState = useGame
 describe('arena de duelo: por onde cada lado entra', () => {
   beforeEach(() => {
     useGameStateStore.getState().resetToDefaults()
+  })
+
+  it('a espera do lado do Lance chega em 2s DEPOIS de getMap, nao so no arquivo de dados', () => {
+    // O teste que faltava: `getMap` multiplica todo `respawnDelay` por
+    // `MOB_RESPAWN_DELAY_MULTIPLIER` (0,25), um botao de economia pra respawn
+    // SELVAGEM. Os 2s escritos em nightmareMaps chegavam como 0,5s na arena, e
+    // so uma medicao ao vivo pegou — asserir a constante no arquivo de origem
+    // teria passado verde com o jogo errado.
+    const arena = getMap(LANCE_MAP_ID)
+    expect(arena!.respawnDelay).toBe(ESPERA_DE_TROCA_SEGUNDOS)
+  })
+
+  it('hunt normal continua com o multiplicador de economia aplicado', () => {
+    // O contrapeso: a isencao vale SO pra hunt de sequencia. Se ela vazasse
+    // pro resto, ouro/hora mudaria em todo o jogo sem ninguem pedir.
+    const normal = getMap('route_46')
+    expect(normal!.respawnDelay).toBeLessThan(MAPS['route_46'].respawnDelay)
   })
 
   it('a arte da arena tem as duas bolas, e elas nao coincidem', () => {
