@@ -551,6 +551,25 @@ export interface WorldState {
    * salaSystem.ts#garantirTransicaoDeQuotaFechada. Zera em toda troca de sala.
    */
   salaEsperaDaAutoridade: number
+  /**
+   * A sala em vigor saiu do FALLBACK local (a espera acima estourou), e nao da
+   * autoridade — ou seja, e palpite que o servidor ainda nao confirmou.
+   *
+   * Serve pra duas coisas em `salaSystem.ts`, e as duas existem pro mesmo bug:
+   * sem elas a predicao passava a frente do servidor pra sempre.
+   *
+   *  - `reconciliarSalaDaAutoridade` aceita a sala do servidor mesmo em posicao
+   *    ANTERIOR enquanto isto estiver ligado. Sem isso, a protecao
+   *    anti-regressao (escrita pro caso legitimo de flush atrasado) descartava
+   *    todas as salas do servidor dali pra frente.
+   *  - `garantirTransicaoDeQuotaFechada` nao arma uma SEGUNDA transicao local
+   *    enquanto a primeira nao foi confirmada: o fallback vale por uma sala de
+   *    adiantamento, nao por um trilho paralelo.
+   *
+   * Efemero como os vizinhos: no servidor `salaSobAutoridade` e false e nada
+   * aqui e escrito.
+   */
+  salaPredita: boolean
   // Toda aleatoriedade da simulacao sai daqui. Ver core/rng.ts pro porque e
   // pros limites (isto torna a SEQUENCIA DE SORTEIOS reproduzivel; nao promete
   // replay bit-a-bit de coordenadas entre engines diferentes).

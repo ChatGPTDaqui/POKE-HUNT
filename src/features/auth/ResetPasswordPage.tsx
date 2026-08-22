@@ -10,6 +10,7 @@ import { MIN_SENHA, validaSenha } from './AuthForm'
 
 export function ResetPasswordPage() {
   const atualizarSenha = useAuthStore((s) => s.atualizarSenha)
+  const sairDaRecuperacaoDeSenha = useAuthStore((s) => s.sairDaRecuperacaoDeSenha)
   const [senha, setSenha] = useState('')
   const [senha2, setSenha2] = useState('')
   const [erro, setErro] = useState<string | null>(null)
@@ -42,7 +43,13 @@ export function ResetPasswordPage() {
         </div>
 
         {concluido ? (
-          <Button className="w-full" onClick={() => (window.location.href = '/jogo')}>
+          <Button
+            className="w-full"
+            onClick={() => {
+              sairDaRecuperacaoDeSenha()
+              window.location.href = '/jogo'
+            }}
+          >
             Ir pro jogo
           </Button>
         ) : (

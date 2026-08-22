@@ -16,6 +16,7 @@ import { LoginPage } from '@/features/auth/LoginPage'
 import { RegisterPage } from '@/features/auth/RegisterPage'
 import { RequireAuth } from '@/features/auth/RequireAuth'
 import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage'
+import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage'
 import { DeviceTakeoverPage } from '@/features/auth/DeviceTakeoverPage'
 import { GameShell } from '@/features/game/GameShell'
 import { RequireAdmin } from '@/features/admin/RequireAdmin'
@@ -47,6 +48,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registro" element={<RegisterPage />} />
+          <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
           <Route
             path="/jogo"
             element={
