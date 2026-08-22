@@ -88,6 +88,22 @@ export function TeamMenu() {
             </div>
 
             <div className={cn('flex shrink-0 gap-[.3em]', compacto ? 'flex-row' : 'flex-col')}>
+              {/* Caminho VISIVEL ate os 4 golpes. Antes a gestao existia so
+                  dentro do perfil, atras de um clique no card e de uma aba que
+                  nada anunciava — o jogador que quisesse trocar de golpe tinha
+                  que descobrir os dois passos. A Equipe e onde ele administra o
+                  POKE, entao e onde o botao pertence. */}
+              <GameButton
+                variant="ghost"
+                className={compacto ? 'flex-1 justify-center' : undefined}
+                title="Escolher os 4 golpes"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  showProfile(poke, species, 'golpes')
+                }}
+              >
+                Golpes
+              </GameButton>
               {!isActive && (
                 <GameButton
                   // `flex-1`, e nao `block`: dois botoes `w-full` na mesma
