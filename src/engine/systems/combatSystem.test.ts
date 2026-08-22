@@ -19,11 +19,21 @@ import {
   updateCombat, multiplicadorDeAtaquePorTrait, multiplicadorDeDefesaPorTrait, velocidadeEfetiva,
 } from './combatSystem'
 
-function construirCenarioExplosao() {
+function construirCenarioExplosao(golpe = 'explosion') {
   const rng = createRng(1)
   const counters = { entity: 1, effect: 1, pendingHit: 1 }
   const jogadorPoke = createPokeInstance(rng, 'charmander', 50)
-  jogadorPoke.unlockedAbilities = ['explosion']
+  jogadorPoke.unlockedAbilities = [golpe]
+  // `activeAbilities` E o que a fila do jogador usa (golpesUtilizaveis) — sem
+  // esta linha a escolha caia em `activeAbilitiesPadrao`, que deriva do
+  // learnset da especie, e o filtro por `unlockedAbilities` a esvaziava: o POKE
+  // lutava de Ataque Basico e o golpe sob teste nunca saia. Os dois testes
+  // abaixo passavam de qualquer forma porque o jogador esta a 1 de HP e o
+  // contra-ataque do inimigo bastava pra derruba-lo.
+  jogadorPoke.activeAbilities = [golpe]
+  // O AOE de nivel 50 vive fora dos 4 slots e ja esta desbloqueado neste
+  // nivel — desligado pra sobrar so o golpe sob teste.
+  jogadorPoke.disabledAbilities = { [typedAoeMoveKey(SPECIES.charmander.type)]: true }
   const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
   const player = world.player!
   player.poke.hp = 1
@@ -58,6 +68,36 @@ describe('Explosao/Autodestruicao com atacante em HP baixo (PH-10)', () => {
 
     expect(enemy.poke.hp).toBeLessThan(enemyHpAntes)
     expect(player.fainted).toBe(true)
+  })
+
+  // PH-73: a chave da lista de auto-KO era `selfdestruct` e o catalogo do Ultra
+  // Sun renomeou pra `self_destruct`. Enquanto ficou orfa, Autodestruicao
+  // causava os 200 de poder EM AREA e quem usou nao pagava NADA — nuke de
+  // graca. Aqui o teste e de COMPORTAMENTO; chavesDoCatalogo.test.ts cobre a
+  // lista.
+  //
+  // O cenario e o OPOSTO do teste do PH-10 acima: jogador com HP CHEIO e
+  // inimigo calado. Com o jogador a 1 de HP (como la), ele desmaiaria do
+  // contra-ataque de qualquer forma e o teste passaria mesmo com o bug — foi
+  // exatamente o que aconteceu na primeira versao deste teste.
+  it('Autodestruicao cobra o mesmo custo de HP que Explosao', () => {
+    const { world, player, enemy } = construirCenarioExplosao('self_destruct')
+    player.poke.hp = player.poke.stats.hp
+    // Inimigo calado: qualquer dano que ele fizesse se somaria ao custo do
+    // golpe e o teste nao mediria mais so o auto-dano.
+    const enemySpecies = SPECIES[enemy.poke.speciesId]
+    enemy.poke.disabledAbilities = Object.fromEntries(
+      [...golpesUtilizaveis(enemy.poke, enemySpecies, true), BASIC_ATTACK.id].map((id) => [id, true]),
+    )
+
+    updateCombat(world, 0)
+    updateCombat(world, 999)
+
+    // SELF_DESTRUCT_HP_LOSS_PERCENT e 0.5 do HP ATUAL — neste motor o golpe
+    // custa metade da vida, nao a vida inteira (decisao de balanceamento: um
+    // auto-KO de verdade encerraria a hunt do jogador).
+    expect(player.poke.hp).toBeLessThanOrEqual(Math.ceil(player.poke.stats.hp / 2))
+    expect(player.poke.hp).toBeGreaterThan(0)
   })
 })
 
