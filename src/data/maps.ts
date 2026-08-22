@@ -142,7 +142,31 @@ export function mapDefParaSala(mapId: string, sala: { chave: string } | null): M
   const arte = backgroundParaSala(map, sala).image
   const pintada = arte ? COLISAO_POR_ARTE[arte] : undefined
   if (!pintada) return map
-  return { ...map, collisionGrid: pintada.grid, colisaoDefineLimite: true }
+  // `bounds` vem da ARTE desde PH-80: o mundo e a caixa da area pintada, nao
+  // mais 1400x900 pra todos. O `bounds` que veio do catalogo (planilha, ou
+  // GEOMETRIA pras hunts escritas a mao) so vale enquanto a cena nao tem
+  // pintura — hoje, so o Hospital.
+  //
+  // Tem que andar JUNTO com `collisionGrid`: a grade cobre exatamente este
+  // retangulo, e `isCellBlocked` trata tudo fora dela como fora do mapa. Um
+  // bounds de um tamanho com a grade de outro encolhe ou estica o mapa em
+  // silencio.
+  return { ...map, bounds: pintada.bounds, collisionGrid: pintada.grid, colisaoDefineLimite: true }
+}
+
+/**
+ * Onde desenhar a arte de fundo desta cena, em coordenadas de mundo. `null`
+ * quando a arte nao tem referencia pintada — ai o desenho cai no enquadramento
+ * antigo (centrado nos bounds, esticado pra cobrir).
+ *
+ * Existe porque a colocacao deixou de ser derivavel de `bounds`: ela depende
+ * de onde a tinta esta na imagem. Ver render/sprites.ts#MapBackgroundDef.
+ */
+export function arteParaSala(mapId: string, sala: { chave: string } | null): { escala: number; x: number; y: number } | null {
+  const map = getMap(mapId)
+  if (!map) return null
+  const arte = backgroundParaSala(map, sala).image
+  return (arte ? COLISAO_POR_ARTE[arte]?.arte : undefined) ?? null
 }
 
 /**

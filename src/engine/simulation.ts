@@ -156,6 +156,17 @@ function randomSpawnPointFullMap(rng: Rng, mapDef: MapDef): Point {
     attempts < SPAWN_POINT_MAX_ATTEMPTS
     && (Math.hypot(x - mapDef.playerSpawn.x, y - mapDef.playerSpawn.y) < SPAWN_MIN_DISTANCE || isCellBlocked(mapDef, x, y))
   )
+  // O laco acima sai por ESGOTAR as tentativas, entao a ultima pode ser uma
+  // celula bloqueada — ele nunca prometeu ponto valido, so tentou 40 vezes.
+  // Era improvavel enquanto todo mapa tinha 1400x900; com o mundo do tamanho
+  // da area pintada (PH-80) um sub-bioma apertado pode nao ter faixa nenhuma
+  // que satisfaca `SPAWN_MIN_DISTANCE` E seja andavel, e ai o inimigo nascia
+  // dentro da parede — de onde o pathfinder nao tira ele. Melhor perder a
+  // distancia minima do que a validade do ponto.
+  if (isCellBlocked(mapDef, x, y)) {
+    const aberto = nearestOpenPoint(mapDef, x, y)
+    if (aberto) return aberto
+  }
   return { x, y }
 }
 

@@ -1144,6 +1144,24 @@ const HUNT_BG_COVERAGE_MARGIN = 1.15
 export interface MapBackgroundDef {
   bg: MapBackground
   bounds: { width: number; height: number }
+  /**
+   * Onde a imagem fica, em coordenadas de mundo — vem do arquivo gerado, via
+   * `data/maps.ts#arteParaSala`.
+   *
+   * ISTO DEIXOU DE SER CALCULADO AQUI de proposito. Antes este arquivo e
+   * `scripts/build-sub-bioma-collision.js` chegavam na mesma transformacao por
+   * conta propria, concordando so porque repetiam as mesmas constantes; e o
+   * cabecalho de `data/maps.ts` ja alertava que a grade ser de uma imagem e o
+   * pixel na tela ser de outra e a classe de bug mais cara deste sistema.
+   * Desde que o mundo virou o recorte da area pintada (PH-80), a conta depende
+   * da caixa da tinta e nao ha como derivar aqui — o gerador manda, o desenho
+   * obedece.
+   *
+   * Ausente = arte sem referencia pintada. Cai no enquadramento antigo
+   * (centrado nos bounds, esticado pra cobrir), que continua valendo pra
+   * qualquer cena que nao passe pelo walk-block — hoje, o Hospital.
+   */
+  arte?: { escala: number; x: number; y: number }
 }
 
 export interface Viewport {
@@ -1171,16 +1189,23 @@ export function drawMapBackground(ctx: CanvasRenderingContext2D, map: MapBackgro
     // nao so no zoom-out extremo que ja era aceito). A escala agora nunca
     // desenha a imagem menor do que o necessario pra cobrir o mapa, qualquer
     // que seja a resolucao nativa do arquivo.
-    const escalaMinima = Math.max(
-      (map.bounds.width * HUNT_BG_COVERAGE_MARGIN) / img.naturalWidth,
-      (map.bounds.height * HUNT_BG_COVERAGE_MARGIN) / img.naturalHeight,
-    )
-    const escala = Math.max(HUNT_BG_TILE_SCALE, escalaMinima)
-    const iw = img.naturalWidth * escala
-    const ih = img.naturalHeight * escala
-    const mapCx = map.bounds.width / 2
-    const mapCy = map.bounds.height / 2
-    ctx.drawImage(img, mapCx - iw / 2, mapCy - ih / 2, iw, ih)
+    if (map.arte) {
+      ctx.drawImage(
+        img, map.arte.x, map.arte.y,
+        img.naturalWidth * map.arte.escala, img.naturalHeight * map.arte.escala,
+      )
+    } else {
+      const escalaMinima = Math.max(
+        (map.bounds.width * HUNT_BG_COVERAGE_MARGIN) / img.naturalWidth,
+        (map.bounds.height * HUNT_BG_COVERAGE_MARGIN) / img.naturalHeight,
+      )
+      const escala = Math.max(HUNT_BG_TILE_SCALE, escalaMinima)
+      const iw = img.naturalWidth * escala
+      const ih = img.naturalHeight * escala
+      const mapCx = map.bounds.width / 2
+      const mapCy = map.bounds.height / 2
+      ctx.drawImage(img, mapCx - iw / 2, mapCy - ih / 2, iw, ih)
+    }
   } else {
     const tile = 48
     const margin = 300
