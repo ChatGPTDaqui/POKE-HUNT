@@ -9,10 +9,9 @@ import { useState } from 'react'
 import { Painel } from '@/components/game/Painel'
 import { ProfileHero, StatDetail, MovesetTable } from '@/components/shared/PokeStatDetail'
 import { TypeWeaknessSection } from '@/components/shared/TypeWeaknessSection'
-import { usePokeProfileStore, type PokeProfileTarget } from '@/stores/pokeProfileStore'
+import { usePokeProfileStore, type AbaDoPerfil, type PokeProfileTarget } from '@/stores/pokeProfileStore'
 import { cn } from '@/lib/utils'
 
-type ProfileTab = 'status' | 'golpes'
 
 export function PokeProfileModal() {
   const open = usePokeProfileStore((s) => s.open)
@@ -29,7 +28,9 @@ export function PokeProfileModal() {
 function PokeProfileModalBody(
   { open, close }: { open: PokeProfileTarget; close: () => void },
 ) {
-  const [activeTab, setActiveTab] = useState<ProfileTab>('status')
+  // Quem abriu pode ter pedido uma aba (a Equipe tem botao direto pros
+  // golpes); sem pedido, Status, como sempre.
+  const [activeTab, setActiveTab] = useState<AbaDoPerfil>(open.aba ?? 'status')
   const { poke, species } = open
 
   return (

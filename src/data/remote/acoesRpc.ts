@@ -233,6 +233,14 @@ const DESPACHO: Record<string, Despacho> = {
     },
     aoSucesso: async () => { await refetchEquipeInteira() },
   },
+  reordenarEquipe: {
+    // Manda a ordem COMPLETA, nao o par (de, para): a RPC valida que a lista
+    // cobre a equipe inteira sem repetir, e o resultado nao depende de quantas
+    // vezes a chamada rode. Um par obrigaria os dois lados a deduzir o resto da
+    // fila a partir de estados que podem ja ter divergido.
+    chamar: rpc('reordenar_equipe', (a) => ({ p_ordem: a.ordem })),
+    aoSucesso: async () => { await refetchEquipeInteira() },
+  },
   tirarDaEquipe: {
     chamar: rpc('tirar_da_equipe', (a) => ({ p_poke_id: a.pokeUid })),
     aoSucesso: async (a) => { await refetchPoke(a.pokeUid as string) },

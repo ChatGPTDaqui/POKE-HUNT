@@ -105,10 +105,41 @@ export function AbilityHud() {
     .map((id) => getAbility(id))
     .filter((a): a is Ability => a != null)
 
-  if (abilities.length === 0) return null
+  // POKE SEM NENHUM GOLPE PRA USAR: a unica coisa na tela que denuncia isso.
+  //
+  // Desde 2026-08-18 o Ataque Basico ocupa slot e o fallback escondido saiu do
+  // caminho do jogador (`combatSystem#pickAbility` devolve `null` — o
+  // `tentarAtaqueBasico` e exclusivo do selvagem). Ficar sem golpe continua
+  // sendo escolha permitida, mas o POKE simplesmente para de atacar, e antes
+  // disto a barra devolvia `null`: campo vazio, POKE parado, zero explicacao.
+  // Le como jogo travado, e nao como consequencia de dois cliques na tela de
+  // golpes.
+  //
+  // DOIS caminhos chegam no mesmo lugar, e por isso o aviso nao pode olhar so
+  // pra contagem de slots:
+  //
+  //  - slots vazios (desmarcou os 4 em `MovesetTable`);
+  //  - slots cheios e TODOS desligados (duplo clique/sheet aqui na barra grava
+  //    `disabledAbilities`) — esse caso nem aparecia na contagem "4/4" da tela
+  //    de golpes, porque o slot continua ocupado.
+  const semGolpeUtilizavel = abilities.every((ability) => disabled[ability.id])
 
   return (
-    <div className="pointer-events-auto flex flex-wrap justify-center gap-[.45em]">
+    <div className="pointer-events-auto flex flex-col items-center gap-[.35em]">
+      {semGolpeUtilizavel && (
+        <div
+          role="status"
+          className="vidro flex items-center gap-[.4em] rounded-full border border-bad/50 px-[.7em] py-[.25em] text-[.78em] text-bad"
+        >
+          <span aria-hidden>⚠</span>
+          <span>
+            {abilities.length === 0
+              ? 'Sem golpe escolhido — seu POKE nao ataca.'
+              : 'Todos os golpes desligados — seu POKE nao ataca.'}
+          </span>
+        </div>
+      )}
+      <div className="flex flex-wrap justify-center gap-[.45em]">
       {abilities.map((ability) => {
         const isOff = Boolean(disabled[ability.id])
         // TRES numeros, e os tres importam por motivos diferentes:
@@ -262,6 +293,7 @@ export function AbilityHud() {
           </EnvolucroSlot>
         )
       })}
+      </div>
 
       {detalhe && (
         <SheetDoGolpe

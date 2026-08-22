@@ -107,3 +107,41 @@ describe('AbilityHud', () => {
     expect(screen.getByText('—')).toBeTruthy()
   })
 })
+
+// O POKE que nao ataca. Antes desta leva a barra devolvia `null` no caso de
+// escolha vazia: o jogador via o POKE parado em campo, sem golpe nenhum na tela
+// e sem nenhuma mensagem — le como jogo travado, nao como consequencia de dois
+// cliques na tela de golpes. `pickAbility` nao tem fallback pro jogador desde
+// 2026-08-18 (o Ataque Basico so luta se ocupar um slot).
+describe('AbilityHud — aviso de POKE sem golpe', () => {
+  it('escolha vazia: avisa em vez de nao desenhar nada', () => {
+    porEmCampo(pokeEmCampo({ activeAbilities: [] }))
+    render(<AbilityHud />)
+
+    expect(screen.getByRole('status').textContent).toMatch(/nao ataca/i)
+    expect(screen.getByRole('status').textContent).toMatch(/Sem golpe escolhido/i)
+    expect(screen.queryAllByTitle(/duplo clique/i)).toHaveLength(0)
+  })
+
+  it('slots cheios mas TODOS desligados: avisa tambem', () => {
+    // O caso que nem a contagem "4/4" da tela de golpes denuncia — o slot
+    // continua ocupado, so fora da rotacao.
+    const escolhidos = activeAbilitiesPadrao(ESPECIE, NIVEL)
+    const desligados = Object.fromEntries(escolhidos.map((k) => [k, true]))
+    porEmCampo(pokeEmCampo({ activeAbilities: escolhidos, disabledAbilities: desligados }))
+    render(<AbilityHud />)
+
+    expect(screen.getByRole('status').textContent).toMatch(/desligados/i)
+    // A barra continua desenhada: os slots existem, so estao apagados.
+    expect(slots()).toHaveLength(escolhidos.length)
+  })
+
+  it('com pelo menos um golpe utilizavel nao ha aviso nenhum', () => {
+    const escolhidos = activeAbilitiesPadrao(ESPECIE, NIVEL)
+    const desligados = Object.fromEntries(escolhidos.slice(1).map((k) => [k, true]))
+    porEmCampo(pokeEmCampo({ activeAbilities: escolhidos, disabledAbilities: desligados }))
+    render(<AbilityHud />)
+
+    expect(screen.queryByRole('status')).toBeNull()
+  })
+})

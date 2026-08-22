@@ -39,9 +39,12 @@ const raiz = dirname(dirname(fileURLToPath(import.meta.url)));
 const refDir = join(raiz, 'scripts', 'body-block-refs');
 const saidaDir = join(refDir, '_conferencia');
 
-// Tem que bater com build-sub-bioma-collision.js.
-const TILE = 0.8, MARGEM = 1.15, LARGURA = 1400, ALTURA = 900, CELULA = 40;
-const ESCALA_SAIDA = 2; // 1400x900 -> 700x450
+// A transformacao imagem<->mundo NAO e recalculada aqui: desde PH-80 ela vem
+// pronta no arquivo gerado (`bounds` + `arte`), porque depende de onde a tinta
+// esta na imagem. Este script existe justamente pra flagrar desalinhamento —
+// se ele deduzisse a conta por conta propria, concordaria com o proprio erro.
+const CELULA = 40;
+const ESCALA_SAIDA = 2; // mundo -> pixel de saida
 
 const gerado = readFileSync(join(raiz, 'src', 'data', 'generated', 'subBiomaCollision.generated.ts'), 'utf8');
 const COLISAO = JSON.parse(gerado.slice(gerado.indexOf('= {') + 2, gerado.lastIndexOf('}') + 1));
@@ -60,6 +63,7 @@ const PARES = {
   'fairy-cave.png': 'fairy-cave.jpg', 'island.png': 'island.jpg', 'lake.png': 'lake.jpg',
   'metropolis.png': 'metropolis.jpg', 'slum.png': 'slum.jpg', 'wasteland.png': 'wasteland.jpg',
   'town-night.png': 'town-night.jpg', 'town.png': 'town.jpg', 'volcano.png': 'volcano.jpg',
+  'dojo.png': 'dojo.png', 'dragon.png': 'dragon.png',
 };
 
 function png(width, height, rgba) {
@@ -112,9 +116,8 @@ for (const [ref, arte] of Object.entries(PARES)) {
   if (alvos.length && !alvos.some((a) => ref.includes(a))) continue;
 
   const { width, height, rgba } = decodePng(readFileSync(join(refDir, ref)));
-  const escala = Math.max(TILE, Math.max((LARGURA * MARGEM) / width, (ALTURA * MARGEM) / height));
-  const ox = LARGURA / 2 - (width * escala) / 2;
-  const oy = ALTURA / 2 - (height * escala) / 2;
+  const { escala, x: ox, y: oy } = COLISAO[chave].arte;
+  const LARGURA = COLISAO[chave].bounds.width, ALTURA = COLISAO[chave].bounds.height;
 
   const grid = COLISAO[chave].grid;
   const spawn = COLISAO[chave].spawnPoint;
