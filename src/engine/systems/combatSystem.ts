@@ -584,6 +584,39 @@ function punishmentPower(defenderEntity: WorldEntity): number {
   return Math.min(200, 60 + 20 * positivos)
 }
 
+// PESO, em kg. Vem do catalogo (`pesoHg` da PokeAPI, em hectogramas — Machamp =
+// 1300 = 130,0 kg), dividido por 10 aqui porque as tabelas dos jogos sao todas
+// escritas em kg. Ver scripts/fetch-usum-catalog.js.
+function pesoEmKg(poke: PokeInstance): number {
+  return SPECIES[poke.speciesId].pesoHg / 10
+}
+
+// Low Kick: poder pela faixa de peso do ALVO. Tabela da Gen III em diante,
+// identica no Ultra Sun.
+function lowKickPower(defenderPoke: PokeInstance): number {
+  const kg = pesoEmKg(defenderPoke)
+  if (kg >= 200) return 120
+  if (kg >= 100) return 100
+  if (kg >= 50) return 80
+  if (kg >= 25) return 60
+  if (kg >= 10) return 40
+  return 20
+}
+
+// Heavy Slam: poder pela RAZAO entre o peso de quem usa e o do alvo — quanto
+// mais pesado que o alvo, mais forte. Mesmas faixas dos jogos.
+function heavySlamPower(attackerPoke: PokeInstance, defenderPoke: PokeInstance): number {
+  // Peso do alvo nunca e 0 no catalogo (o menor e Gastly, 0,1 kg), mas o guard
+  // fica: uma divisao por zero aqui viraria Infinity e depois NaN de dano, que
+  // e o tipo de coisa que aparece como "golpe que nao faz nada" em vez de erro.
+  const razao = pesoEmKg(attackerPoke) / Math.max(0.1, pesoEmKg(defenderPoke))
+  if (razao >= 5) return 120
+  if (razao >= 4) return 100
+  if (razao >= 3) return 80
+  if (razao >= 2) return 60
+  return 40
+}
+
 const DYNAMIC_POWER_ABILITIES: Record<string, (rng: Rng, attackerPoke: PokeInstance, defenderPoke: PokeInstance, attackerEntity: WorldEntity, defenderEntity: WorldEntity) => number> = {
   magnitude: (rng) => rollMagnitudePower(rng),
   reversal: (_rng, attackerPoke) => hpRatioPower(attackerPoke),
@@ -597,6 +630,10 @@ const DYNAMIC_POWER_ABILITIES: Record<string, (rng: Rng, attackerPoke: PokeInsta
   electro_ball: (_rng, _a, _d, attackerEntity, defenderEntity) => electroBallPower(attackerEntity, defenderEntity),
   wring_out: (_rng, _a, defenderPoke) => wringOutPower(defenderPoke),
   punishment: (_rng, _a, _d, _attackerEntity, defenderEntity) => punishmentPower(defenderEntity),
+  // Os dois de PESO. O dado nao existia — `pesoHg` foi adicionado ao catalogo
+  // nesta mesma leva (fetch-usum-catalog.js), direto da PokeAPI.
+  low_kick: (_rng, _a, defenderPoke) => lowKickPower(defenderPoke),
+  heavy_slam: (_rng, attackerPoke, defenderPoke) => heavySlamPower(attackerPoke, defenderPoke),
 }
 
 // Counter/Mirror Coat refletem 2x o ultimo golpe daquela categoria que o

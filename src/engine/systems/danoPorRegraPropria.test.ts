@@ -26,19 +26,26 @@ import { updateCombat } from './combatSystem'
 
 const IMPLEMENTADOS = [
   'gyro_ball', 'electro_ball', 'wring_out', 'punishment', 'sonic_boom',
-  'endeavor', 'final_gambit',
+  'endeavor', 'final_gambit', 'low_kick', 'heavy_slam',
 ] as const
 
-function cenario(golpeId: string, { nivelJogador = 30, nivelInimigo = 60 } = {}) {
+function cenario(golpeId: string, {
+  nivelJogador = 30, nivelInimigo = 60,
+  especieJogador = 'charmander', especieInimigo = 'rattata',
+  // Stats do alvo forcados quando o teste compara DOIS alvos diferentes: sem
+  // isto a medicao pegaria a diferenca de Defesa/HP entre as duas especies em
+  // vez da regra sob teste.
+  statsDoInimigo = null as null | { hp: number; def: number },
+} = {}) {
   const rng = createRng(11)
   const counters = { entity: 1, effect: 1, pendingHit: 1 }
-  const jogadorPoke = createPokeInstance(rng, 'charmander', nivelJogador)
+  const jogadorPoke = createPokeInstance(rng, especieJogador, nivelJogador)
   jogadorPoke.unlockedAbilities = [...jogadorPoke.unlockedAbilities, golpeId]
   jogadorPoke.activeAbilities = [golpeId]
   // AOE de nivel 50 e Ataque Basico desligados: os dois competem pelo turno e
   // roubariam o unico uso que o teste mede.
   jogadorPoke.disabledAbilities = {
-    [typedAoeMoveKey(SPECIES.charmander.type)]: true,
+    [typedAoeMoveKey(SPECIES[especieJogador].type)]: true,
     [BASIC_ATTACK.id]: true,
   }
   const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
@@ -46,7 +53,11 @@ function cenario(golpeId: string, { nivelJogador = 30, nivelInimigo = 60 } = {})
   player.cooldowns = {}
   player.globalCooldown = 0
 
-  const enemyPoke = createPokeInstance(rng, 'rattata', nivelInimigo)
+  const enemyPoke = createPokeInstance(rng, especieInimigo, nivelInimigo)
+  if (statsDoInimigo) {
+    enemyPoke.stats = { ...enemyPoke.stats, hp: statsDoInimigo.hp, def: statsDoInimigo.def }
+    enemyPoke.hp = statsDoInimigo.hp
+  }
   const enemySpecies = SPECIES[enemyPoke.speciesId]
   // Inimigo calado: contra-ataque dele mexeria no HP dos dois lados e nenhuma
   // das medicoes abaixo sobreviveria a isso.
@@ -70,14 +81,14 @@ function umUso(mundo: ReturnType<typeof cenario>) {
 }
 
 describe('golpes de dano por regra propria que estavam inertes', () => {
-  it('os 7 implementados sao reconhecidos como golpe de dano', () => {
+  it('os 9 implementados sao reconhecidos como golpe de dano', () => {
     for (const id of IMPLEMENTADOS) {
       expect(DANO_SEM_PODER_BASE.has(id), id).toBe(true)
       expect(isDamagingAbility(getAbility(id)), id).toBe(true)
     }
   })
 
-  it('cada um dos 7 tira HP de verdade quando dispara', () => {
+  it('cada um dos 9 tira HP de verdade quando dispara', () => {
     for (const id of IMPLEMENTADOS) {
       const mundo = cenario(id)
       const hpAntes = mundo.enemy.poke.hp
@@ -143,11 +154,79 @@ describe('golpes de dano por regra propria que estavam inertes', () => {
   // pode entrar em DANO_SEM_PODER_BASE. Se entrasse, viraria golpe de dano 0
   // escolhivel e o aviso de golpe inerte da ficha sumiria — pior que o bug
   // original, porque nada na tela explicaria o slot morto.
-  it('os 8 sem regra implementada continuam FORA de DANO_SEM_PODER_BASE', () => {
+  it('os 6 sem regra implementada continuam FORA de DANO_SEM_PODER_BASE', () => {
     for (const id of DANO_POR_REGRA_NAO_IMPLEMENTADA) {
       expect(ABILITIES_DATA[id], id).toBeDefined()
       expect(DANO_SEM_PODER_BASE.has(id), id).toBe(false)
       expect(isDamagingAbility(getAbility(id)), id).toBe(false)
     }
+  })
+})
+
+// GOLPES DE PESO (low_kick, heavy_slam). Ficaram inertes na primeira versao do
+// PH-69 porque o catalogo nao tinha peso nenhum; `pesoHg` foi adicionado direto
+// da PokeAPI (scripts/fetch-usum-catalog.js, 226 especies) e as duas formulas
+// dos jogos passaram a ser calculaveis.
+//
+// Os testes abaixo medem a FORMULA, nao o dano final: dano depende de ataque,
+// defesa, nivel e tipo, e comparar dois POKEs diferentes misturaria tudo isso.
+// Aqui a comparacao e sempre "mesmo atacante, alvos de peso diferente" (ou o
+// inverso), que isola a variavel de peso.
+describe('golpes que dependem do peso da especie', () => {
+  it('toda especie do jogo tem peso, em hectogramas', () => {
+    const semPeso = Object.values(SPECIES).filter((e) => !(e.pesoHg > 0)).map((e) => e.id)
+    expect(semPeso).toEqual([])
+    // Ancoras conferidas contra os jogos: Gastly 0,1 kg e Snorlax 460 kg sao os
+    // extremos do elenco, e Machamp 130 kg cai numa faixa do meio do Low Kick.
+    expect(SPECIES.gastly.pesoHg).toBe(1)
+    expect(SPECIES.machamp.pesoHg).toBe(1300)
+    expect(SPECIES.snorlax.pesoHg).toBe(4600)
+  })
+
+
+  // Os dois alvos sao NORMAL de proposito: Low Kick e FIGHTING, e o POKE mais
+  // leve do elenco (Gastly, 0,1 kg) e GHOST — IMUNE. Com ele o teste mediria a
+  // imunidade de tipo, nao a tabela de peso. Rattata (3,5 kg) cai na primeira
+  // faixa (poder 20) e Snorlax (460 kg) na ultima (poder 120).
+  //
+  // `statsDoInimigo` iguala Defesa e HP dos dois: sem isso a medicao pegaria a
+  // diferenca de stats entre Rattata e Snorlax em vez da tabela.
+  it('low_kick: alvo mais pesado leva mais dano', () => {
+    const mesmosStats = { hp: 99999, def: 100 }
+    const leve = cenario('low_kick', { nivelInimigo: 40, especieInimigo: 'rattata', statsDoInimigo: mesmosStats })
+    const hpAntesLeve = leve.enemy.poke.hp
+    umUso(leve)
+    const danoNoLeve = hpAntesLeve - leve.enemy.poke.hp
+
+    const pesado = cenario('low_kick', { nivelInimigo: 40, especieInimigo: 'snorlax', statsDoInimigo: mesmosStats })
+    const hpAntesPesado = pesado.enemy.poke.hp
+    umUso(pesado)
+    const danoNoPesado = hpAntesPesado - pesado.enemy.poke.hp
+
+    expect(danoNoLeve).toBeGreaterThan(0)
+    expect(danoNoPesado).toBeGreaterThan(danoNoLeve * 2)
+  })
+
+  it('heavy_slam: quanto mais pesado o usuario for que o alvo, mais forte', () => {
+    // Onix (210 kg) usando o golpe. Contra Rattata (3,5 kg) a razao passa de 5
+    // (poder maximo, 120); contra Snorlax (460 kg) fica abaixo de 1 (poder
+    // minimo, 40).
+    const mesmosStats = { hp: 99999, def: 100 }
+    const contraLeve = cenario('heavy_slam', {
+      especieJogador: 'onix', nivelInimigo: 40, especieInimigo: 'rattata', statsDoInimigo: mesmosStats,
+    })
+    const hpAntesLeve = contraLeve.enemy.poke.hp
+    umUso(contraLeve)
+    const danoContraLeve = hpAntesLeve - contraLeve.enemy.poke.hp
+
+    const contraPesado = cenario('heavy_slam', {
+      especieJogador: 'onix', nivelInimigo: 40, especieInimigo: 'snorlax', statsDoInimigo: mesmosStats,
+    })
+    const hpAntesPesado = contraPesado.enemy.poke.hp
+    umUso(contraPesado)
+    const danoContraPesado = hpAntesPesado - contraPesado.enemy.poke.hp
+
+    expect(danoContraPesado).toBeGreaterThan(0)
+    expect(danoContraLeve).toBeGreaterThan(danoContraPesado * 2)
   })
 })
