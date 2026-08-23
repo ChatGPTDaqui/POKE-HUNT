@@ -6,7 +6,7 @@
 // estavel entre renders, entao da pra filtrar o array de verdade — esse
 // workaround nao precisa ser portado.
 import { useMemo, useState } from 'react'
-import { ArrowDown, ArrowUp, LockSimple, LockSimpleOpen, Sparkle } from '@phosphor-icons/react'
+import { ArrowDown, ArrowUp, LockSimple, LockSimpleOpen } from '@phosphor-icons/react'
 import { pedirAcao } from '@/data/remote/autoridade'
 import { SPECIES, averageIvPercent, type PokeInstance } from '@/data/pokes'
 import { ITEMS } from '@/data/items'
@@ -23,7 +23,7 @@ import { PokeNameTag } from '@/components/shared/PokeNameTag'
 import { linkarItem, linkarPoke, tratouComoLink } from '@/components/shared/linkarNoChat'
 import { ItemTooltip } from '@/components/shared/ItemTooltip'
 import {
-  GameButton, GameCard, GameIconButton, GameInput, GameSelect, SegmentedTabs, StickyHeader,
+  GameButton, GameCard, GameCheck, GameIconButton, GameInput, GameSelect, SegmentedTabs, StickyHeader,
 } from '@/components/game/controls'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
 import { cn } from '@/lib/utils'
@@ -131,19 +131,14 @@ function PokemonsTab() {
         >
           {sortDesc ? <ArrowDown /> : <ArrowUp />}
         </GameButton>
-        <GameButton
-          variant={shinyOnly ? 'primary' : 'secondary'}
-          aria-pressed={shinyOnly}
-          aria-label="Somente shiny"
-          title="Somente shiny"
-          onClick={() => setShinyOnly(!shinyOnly)}
-        >
-          <Sparkle weight="fill" className={shinyOnly ? undefined : 'text-shiny'} />
-          {/* Onde ha largura, o rotulo volta: no desktop o `title` do hover
-              cobre o icone sozinho, mas ler "Shiny" e mais rapido que passar o
-              mouse por cima pra descobrir. */}
-          {!compacto && 'Shiny'}
-        </GameButton>
+        {/* Caixa, e nao botao (PH-112). Aqui havia um `GameButton` justamente
+            porque "a caixinha some no meio de uma fileira de filtros e o alvo de
+            toque fica pequeno demais no celular" — decisao revertida por pedido
+            explicito, pra o filtro de Shiny ter UMA forma so no jogo inteiro em
+            vez de quatro. Se o alvo pequeno incomodar em 390px, o caminho e dar
+            padding ao `GameCheck` da fileira, e nao voltar o botao so aqui: isso
+            traria de volta a inconsistencia que o pedido veio resolver. */}
+        <GameCheck checked={shinyOnly} onChange={setShinyOnly} className="shrink-0">Shiny</GameCheck>
       </div>
 
       {visible.length === 0 ? (

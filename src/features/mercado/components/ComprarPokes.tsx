@@ -298,7 +298,7 @@ export function ComprarPokes() {
             onChange={(e) => setIvMin(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
           />
         </label>
-        <GameCheck checked={shinyOnly} onChange={setShinyOnly}>Somente Shiny</GameCheck>
+        <GameCheck checked={shinyOnly} onChange={setShinyOnly}>Shiny</GameCheck>
       </div>
 
       <div className="flex flex-wrap items-center gap-x-[.6em] gap-y-[.3em]">
