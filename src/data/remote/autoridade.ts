@@ -224,7 +224,7 @@ function agendarProximoFlush(): void {
  * manda o campo.
  */
 export async function abrirSessaoDeHunt(
-  mapId: string, pokeUid: string,
+  mapId: string, pokeUid: string, opcoes?: { avisarErro?: boolean },
 ): Promise<{ ok: boolean; sala: SalaAtiva | null }> {
   if (!servidorAtivo()) return { ok: true, sala: null }
   try {
@@ -238,11 +238,18 @@ export async function abrirSessaoDeHunt(
     observarQuotaDeSala()
     return { ok: true, sala: resposta.sala ?? null }
   } catch (erro) {
-    // Sempre avisa: so ha um chamador (`controller.enterMap`) e ele nasce de um
-    // clique em "Entrar". Recusa do servidor (hunt trancada, POKE que nao e da
-    // equipe, sessao invalida) TEM que aparecer em toda tentativa — calar a
-    // segunda faz o botao parecer quebrado.
-    reportarErro(erro, true)
+    // Sempre avisa QUANDO A ENTRADA NASCEU DE UM CLIQUE: recusa do servidor
+    // (hunt trancada, POKE que nao e da equipe, sessao invalida) TEM que
+    // aparecer em toda tentativa — calar a segunda faz o botao "Entrar"
+    // parecer quebrado.
+    //
+    // `avisarErro: false` existe pro segundo chamador, que NAO e um clique: a
+    // reentrada automatica na hunt do boot (PH-93). Ali a recusa nao e um erro
+    // que o jogador possa agir sobre — ele nem pediu pra entrar —, e cair no
+    // Hospital ja e o estado seguro. Um toast de erro no primeiro segundo do
+    // jogo, sobre uma acao que ninguem disparou, so ensina o jogador a ignorar
+    // toast.
+    if (opcoes?.avisarErro ?? true) reportarErro(erro, true)
     return { ok: false, sala: null }
   }
 }
