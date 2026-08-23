@@ -14,7 +14,7 @@
 // a nota original ja mencionava ("dois desenhos no mesmo tick, ex.
 // StrictMode double-invoke, podem corromper a posicao").
 import { drawEntity, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage } from './sprites'
-import { CENA_HOSPITAL, escalaDoPoke } from '@/data/hospital'
+import { CENA_HOSPITAL, ZOOM_DA_CENA, escalaDoPoke } from '@/data/hospital'
 import type { WorldEntity, WorldState } from '@/engine/types'
 import { arteParaSala, backgroundParaSala } from '@/data/maps'
 import type { MapDef } from '@/data/maps'
@@ -98,24 +98,32 @@ export class Renderer {
   }
 
   /**
-   * Como a arte do Centro Pokemon (quadrada) e encaixada nesta tela: `cover`
-   * (preenche, cortando o excedente), nunca `contain`.
+   * Como a arte do Centro Pokemon (quadrada) e encaixada nesta tela.
    *
-   * Cover corta as bordas, e isso e seguro AQUI porque os dois pontos que
-   * importam — a enfermeira e o tapete — ficam colados no eixo central da
-   * imagem: sobrevivem tanto ao corte lateral do retrato (celular) quanto ao
-   * corte de topo/rodape do ultrawide. Contain deixaria tarja preta em toda
-   * tela que nao fosse quadrada.
+   * ERA `cover` puro. Agora e `cover * ZOOM_DA_CENA`, com o zoom abaixo de 1
+   * — ou seja, a cena e desenhada MENOR do que preencheria a tela, e sobra
+   * fundo liso nas bordas. Isso e deliberado e o motivo esta em
+   * `data/hospital.ts#ZOOM_DA_CENA`: e o unico jeito de o sprite de 64px do
+   * POKE parar de ser esticado 3,6x sem mexer na proporcao dele com a cena.
    *
-   * O ZOOM NAO ENTRA NESTA CONTA de proposito. Zoom e controle de CAMERA sobre
-   * um mapa maior que a tela; o Hospital e um cenario fixo. Aplicar zoom aqui
-   * so cortaria mais o cenario, e no maximo (2.5x) o tapete — onde fica o POKE
-   * — sai inteiro da tela. Pior: com a enfermeira virando o botao de curar, um
-   * nivel de zoom que a esconde e um beco sem saida. O ZoomControl fica oculto
-   * fora da hunt (ver HudLayer) pra nao virar um botao que nao faz nada.
+   * O que continua valendo do desenho antigo: os dois pontos que importam —
+   * a enfermeira e o tapete — ficam colados no eixo central da imagem, entao
+   * sobrevivem a qualquer recorte que ainda haja no eixo mais longo.
+   *
+   * O ZOOM DE CAMERA NAO ENTRA NESTA CONTA, e nao se confunde com
+   * `ZOOM_DA_CENA`: aquele e controle do jogador sobre um mapa maior que a
+   * tela, e o Hospital e cenario fixo. Aplicar zoom de camera aqui so
+   * cortaria o cenario, e no maximo (2.5x) o tapete — onde fica o POKE — sai
+   * inteiro da tela. Pior: com a enfermeira virando o botao de curar, um
+   * nivel de zoom que a esconde e um beco sem saida. O ZoomControl fica
+   * oculto fora da hunt (ver HudLayer) pra nao virar um botao inerte.
    */
   private _hospitalLayout(): { escala: number; ox: number; oy: number } {
-    const escala = Math.max(this.width / CENA_HOSPITAL.largura, this.height / CENA_HOSPITAL.altura)
+    // `cover` (o `max`) e o tamanho que PREENCHE a tela; `ZOOM_DA_CENA`
+    // encolhe a partir dele. Ver o comentario da constante: e o unico jeito
+    // de tirar o serrilhado do POKE sem mexer na proporcao dele com a cena.
+    const cobrindo = Math.max(this.width / CENA_HOSPITAL.largura, this.height / CENA_HOSPITAL.altura)
+    const escala = cobrindo * ZOOM_DA_CENA
     return {
       escala,
       ox: (this.width - CENA_HOSPITAL.largura * escala) / 2,
