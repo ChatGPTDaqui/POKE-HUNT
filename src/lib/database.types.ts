@@ -655,10 +655,14 @@ export type Database = {
           buyer_id: string | null
           created_at: string
           currency: string
+          expira_em: string | null
           id: string
+          incremento_minimo: number | null
           is_shiny: boolean
           iv_percent: number
+          lance_minimo: number | null
           level: number
+          modo: string
           poke_uid: string | null
           price: number | null
           rarity: Database["dev"]["Enums"]["rarity_tier"]
@@ -672,10 +676,14 @@ export type Database = {
           buyer_id?: string | null
           created_at?: string
           currency: string
+          expira_em?: string | null
           id?: string
+          incremento_minimo?: number | null
           is_shiny?: boolean
           iv_percent?: number
+          lance_minimo?: number | null
           level: number
+          modo?: string
           poke_uid?: string | null
           price?: number | null
           rarity: Database["dev"]["Enums"]["rarity_tier"]
@@ -689,10 +697,14 @@ export type Database = {
           buyer_id?: string | null
           created_at?: string
           currency?: string
+          expira_em?: string | null
           id?: string
+          incremento_minimo?: number | null
           is_shiny?: boolean
           iv_percent?: number
+          lance_minimo?: number | null
           level?: number
+          modo?: string
           poke_uid?: string | null
           price?: number | null
           rarity?: Database["dev"]["Enums"]["rarity_tier"]
@@ -1403,11 +1415,15 @@ export type Database = {
           buyer_id: string | null
           created_at: string | null
           currency: string | null
+          expira_em: string | null
           id: string | null
+          incremento_minimo: number | null
           is_shiny: boolean | null
           iv_percent: number | null
+          lance_minimo: number | null
           level: number | null
           melhor_oferta: number | null
+          modo: string | null
           ofertas: number | null
           poke_uid: string | null
           price: number | null
@@ -1706,6 +1722,16 @@ export type Database = {
       }
       configurar_auto: { Args: { p_patch: Json }; Returns: Json }
       conversas: { Args: never; Returns: Json }
+      criar_leilao: {
+        Args: {
+          p_currency: string
+          p_horas: number
+          p_incremento_minimo: number
+          p_lance_minimo: number
+          p_poke_id: string
+        }
+        Returns: Json
+      }
       criar_ordem_mercado: {
         Args: {
           p_item_id: string
@@ -1716,6 +1742,10 @@ export type Database = {
         Returns: Json
       }
       curar_equipe: { Args: never; Returns: Json }
+      dar_lance: {
+        Args: { p_anuncio_id: string; p_valor: number }
+        Returns: Json
+      }
       definir_ativo: { Args: { p_poke_id: string }; Returns: Json }
       definir_golpes_ativos: {
         Args: { p_ability_ids: string[]; p_poke_id: string }
@@ -1724,6 +1754,7 @@ export type Database = {
       definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
+      encerrar_leiloes_vencidos: { Args: { p_limite?: number }; Returns: Json }
       enviar_mensagem: {
         Args: {
           p_anexos?: Json
@@ -2551,10 +2582,14 @@ export type Database = {
           buyer_id: string | null
           created_at: string
           currency: string
+          expira_em: string | null
           id: string
+          incremento_minimo: number | null
           is_shiny: boolean
           iv_percent: number
+          lance_minimo: number | null
           level: number
+          modo: string
           poke_uid: string | null
           price: number | null
           rarity: Database["public"]["Enums"]["rarity_tier"]
@@ -2568,10 +2603,14 @@ export type Database = {
           buyer_id?: string | null
           created_at?: string
           currency: string
+          expira_em?: string | null
           id?: string
+          incremento_minimo?: number | null
           is_shiny?: boolean
           iv_percent?: number
+          lance_minimo?: number | null
           level: number
+          modo?: string
           poke_uid?: string | null
           price?: number | null
           rarity: Database["public"]["Enums"]["rarity_tier"]
@@ -2585,10 +2624,14 @@ export type Database = {
           buyer_id?: string | null
           created_at?: string
           currency?: string
+          expira_em?: string | null
           id?: string
+          incremento_minimo?: number | null
           is_shiny?: boolean
           iv_percent?: number
+          lance_minimo?: number | null
           level?: number
+          modo?: string
           poke_uid?: string | null
           price?: number | null
           rarity?: Database["public"]["Enums"]["rarity_tier"]
@@ -3299,11 +3342,15 @@ export type Database = {
           buyer_id: string | null
           created_at: string | null
           currency: string | null
+          expira_em: string | null
           id: string | null
+          incremento_minimo: number | null
           is_shiny: boolean | null
           iv_percent: number | null
+          lance_minimo: number | null
           level: number | null
           melhor_oferta: number | null
+          modo: string | null
           ofertas: number | null
           poke_uid: string | null
           price: number | null
@@ -3602,6 +3649,16 @@ export type Database = {
       }
       configurar_auto: { Args: { p_patch: Json }; Returns: Json }
       conversas: { Args: never; Returns: Json }
+      criar_leilao: {
+        Args: {
+          p_currency: string
+          p_horas: number
+          p_incremento_minimo: number
+          p_lance_minimo: number
+          p_poke_id: string
+        }
+        Returns: Json
+      }
       criar_ordem_mercado: {
         Args: {
           p_item_id: string
@@ -3612,6 +3669,10 @@ export type Database = {
         Returns: Json
       }
       curar_equipe: { Args: never; Returns: Json }
+      dar_lance: {
+        Args: { p_anuncio_id: string; p_valor: number }
+        Returns: Json
+      }
       definir_ativo: { Args: { p_poke_id: string }; Returns: Json }
       definir_golpes_ativos: {
         Args: { p_ability_ids: string[]; p_poke_id: string }
@@ -3620,6 +3681,7 @@ export type Database = {
       definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
       desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
+      encerrar_leiloes_vencidos: { Args: { p_limite?: number }; Returns: Json }
       enviar_mensagem: {
         Args: {
           p_anexos?: Json
