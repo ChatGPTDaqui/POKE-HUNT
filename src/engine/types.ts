@@ -391,6 +391,13 @@ export interface WorldEffect {
   // simplesmente para de andar e termina onde estava.
   seguirUltimoX?: number
   seguirUltimoY?: number
+  // Entidade pra qual o rastro continua APONTANDO enquanto o efeito vive — o
+  // atacante (PH-110). Presente SO em arte direcional: aquela e um risco que
+  // liga atacante e alvo, e com o angulo congelado no instante do hit o
+  // atacante andar descola o rastro do punho dele. Arte nao direcional nunca
+  // recebe este campo, entao o congelamento (decisao registrada no call-site)
+  // continua valendo pra ela.
+  apontarParaId?: string
 }
 
 export interface PendingHit {
