@@ -22,7 +22,9 @@ import { useConfirmDialogStore } from '@/stores/confirmDialogStore'
 function montarLojaComDialogo(onClose: () => void) {
   return render(
     <>
-      <GameWindow winKey="panel" zIndex={31} backdrop={{ zIndex: 30 }} onClose={onClose} title="Loja">
+      {/* `widthEm` e obrigatorio em GameWindowProps; 52 e a largura que a Loja
+          usa de verdade em ScreenOverlay. */}
+      <GameWindow winKey="panel" widthEm={52} zIndex={31} backdrop={{ zIndex: 30 }} onClose={onClose} title="Loja">
         <button type="button">Vender Shiny</button>
       </GameWindow>
       <ConfirmDialog />
