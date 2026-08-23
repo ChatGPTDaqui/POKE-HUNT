@@ -30,9 +30,21 @@ import { useDeviceMode } from '@/stores/uiStore'
 import { PokeTooltipContent } from '@/components/shared/PokeTooltipContent'
 import { cn } from '@/lib/utils'
 
-/** Lado do quadrado da foto, em `em`, por regime. */
-const TAMANHO_AMPLO = 2.6
-const TAMANHO_COMPACTO = 1.9
+/**
+ * Lado do quadrado da foto, em `em`, por regime.
+ *
+ * Metade do que era (2.6 / 1.9) por pedido explicito (PH-111): o substituto fica
+ * no trilho de forma REPRESENTATIVA, e nao pra ser examinado — quem quer olhar o
+ * POKE abre o perfil, que e o que o card ja faz no toque.
+ *
+ * A altura do card NAO acompanha essa reducao: ela e ditada pela coluna de
+ * nome/nivel/HP ao lado, nao pela foto. Isso e o que mantem o alvo de toque
+ * (o card inteiro e o `role="button"`) grande o bastante pra arrastar e abrir o
+ * menu no celular. Encolher a foto sem encolher o alvo e exatamente o que se
+ * queria aqui.
+ */
+const TAMANHO_AMPLO = 1.3
+const TAMANHO_COMPACTO = 0.95
 
 /**
  * Quantos pixels o ponteiro precisa andar pra virar arrasto.
