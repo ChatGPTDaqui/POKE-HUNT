@@ -819,6 +819,7 @@ export type Database = {
           quantity: number
           seller_id: string | null
           species_id: string | null
+          taxa: number
           unit_price: number
         }
         Insert: {
@@ -831,6 +832,7 @@ export type Database = {
           quantity?: number
           seller_id?: string | null
           species_id?: string | null
+          taxa?: number
           unit_price: number
         }
         Update: {
@@ -843,6 +845,7 @@ export type Database = {
           quantity?: number
           seller_id?: string | null
           species_id?: string | null
+          taxa?: number
           unit_price?: number
         }
         Relationships: []
@@ -1780,6 +1783,11 @@ export type Database = {
         Args: { p_aceitar: boolean; p_mensagem_id: string }
         Returns: Json
       }
+      taxa_de_venda: {
+        Args: { p_currency: string; p_valor: number }
+        Returns: number
+      }
+      taxa_do_mercado: { Args: never; Returns: Json }
       tem_outra_sessao_de_auth_ativa: { Args: never; Returns: boolean }
       tirar_da_equipe: { Args: { p_poke_id: string }; Returns: Json }
       usar_item: { Args: { p_item_id: string }; Returns: Json }
@@ -2707,6 +2715,7 @@ export type Database = {
           quantity: number
           seller_id: string | null
           species_id: string | null
+          taxa: number
           unit_price: number
         }
         Insert: {
@@ -2719,6 +2728,7 @@ export type Database = {
           quantity?: number
           seller_id?: string | null
           species_id?: string | null
+          taxa?: number
           unit_price: number
         }
         Update: {
@@ -2731,6 +2741,7 @@ export type Database = {
           quantity?: number
           seller_id?: string | null
           species_id?: string | null
+          taxa?: number
           unit_price?: number
         }
         Relationships: []
@@ -3668,6 +3679,11 @@ export type Database = {
         Args: { p_aceitar: boolean; p_mensagem_id: string }
         Returns: Json
       }
+      taxa_de_venda: {
+        Args: { p_currency: string; p_valor: number }
+        Returns: number
+      }
+      taxa_do_mercado: { Args: never; Returns: Json }
       tem_outra_sessao_de_auth_ativa: { Args: never; Returns: boolean }
       tirar_da_equipe: { Args: { p_poke_id: string }; Returns: Json }
       usar_item: { Args: { p_item_id: string }; Returns: Json }

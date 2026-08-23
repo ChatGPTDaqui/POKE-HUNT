@@ -10,8 +10,10 @@ import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { GameButton, GameCard, GameCheck, GameInput, GameSelect, Recolhivel } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
-import { STALE_MS } from '../utils'
+import { fmt, STALE_MS } from '../utils'
 import { Carregando, Moeda } from './shared'
+import { TempoRestante } from './TempoRestante'
+import { useSegundosRestantes, proximoLanceMinimo } from '../tempoDeLeilao'
 import { HistoricoDePreco } from './HistoricoDePreco'
 
 /**
@@ -71,6 +73,70 @@ function anuncioComoPoke(a: AnuncioMercado) {
   }
 }
 
+/**
+ * A linha de um LEILAO na vitrine (PH-101).
+ *
+ * Separada num componente proprio porque ela e a unica da lista que precisa de
+ * um relogio: `useSegundosRestantes` assina o tique de 1s, e um hook nao pode
+ * ficar dentro do `.map` do cartao (a ordem de hooks mudaria a cada filtro
+ * aplicado, que e exatamente o que o React proibe).
+ */
+function LinhaDeLeilao({
+  anuncio, valor, onValor, onLance, pendente,
+}: {
+  anuncio: AnuncioMercado
+  valor: number | undefined
+  onValor: (v: number) => void
+  onLance: (valor: number) => void
+  pendente: boolean
+}) {
+  const segundos = useSegundosRestantes(anuncio.expira_em)
+  // Ja venceu e o cron ainda nao passou: o servidor recusa lance depois de
+  // `expira_em`, entao a tela desabilita em vez de deixar o jogador tentar e
+  // levar um erro.
+  const encerrado = segundos != null && segundos <= 0
+
+  // O minimo do PROXIMO lance sai da mesma regra que o servidor aplica: sem
+  // lance ainda e o piso do leilao, com lance e o maior + o incremento.
+  const minimo = proximoLanceMinimo(anuncio.melhorOferta, anuncio.lance_minimo, anuncio.incremento_minimo)
+
+  return (
+    <>
+      <span className="flex flex-col text-[.78em] text-n400">
+        <span className="flex items-center gap-[.25em] text-warn">
+          <Gavel weight="fill" /> Leilão · <TempoRestante expiraEm={anuncio.expira_em} />
+        </span>
+        <span>
+          {anuncio.melhorOferta != null
+            ? <>maior: <Moeda valor={anuncio.melhorOferta} tipo={anuncio.currency} /></>
+            : <>sem lance ainda</>}
+          {' · '}mínimo {fmt.format(minimo)}
+        </span>
+      </span>
+      <GameInput
+        type="number"
+        min={minimo}
+        className="w-[6.5em]"
+        // O campo nasce VAZIO com o mínimo no placeholder, e não preenchido com
+        // ele: um valor já digitado num campo de lance convida a clicar sem ler,
+        // e aqui clicar sem ler tira ouro do bolso na hora.
+        placeholder={String(minimo)}
+        disabled={encerrado}
+        value={valor ?? ''}
+        onChange={(e) => onValor(Math.max(0, Math.floor(Number(e.target.value) || 0)))}
+      />
+      <GameButton
+        variant="primary"
+        carregando={pendente}
+        disabled={encerrado || !(valor != null && valor >= minimo)}
+        onClick={() => valor != null && onLance(valor)}
+      >
+        {encerrado ? 'Encerrado' : 'Dar lance'}
+      </GameButton>
+    </>
+  )
+}
+
 export function ComprarPokes() {
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const [busca, setBusca] = useState('')
@@ -86,7 +152,7 @@ export function ComprarPokes() {
   const [nivelMin, setNivelMin] = useState(0)
   const [ivMin, setIvMin] = useState(0)
   const [raridades, setRaridades] = useState<Set<RarityKey>>(() => new Set(Object.keys(RARITIES) as RarityKey[]))
-  const [ordem, setOrdem] = useState<'preco' | 'nivel' | 'iv'>('preco')
+  const [ordem, setOrdem] = useState<'preco' | 'nivel' | 'iv' | 'termina'>('preco')
   // Um anuncio com o historico aberto por vez — ver a nota no botao "Preco".
   const [precoAberto, setPrecoAberto] = useState<string | null>(null)
 
@@ -97,6 +163,7 @@ export function ComprarPokes() {
   })
   const comprar = useAcaoMercado((anuncioId: string) => mercadoRpc.comprarAnuncio(anuncioId))
   const ofertar = useAcaoMercado(mercadoRpc.ofertar)
+  const darLance = useAcaoMercado(mercadoRpc.darLance)
 
   const filtrados = useMemo(() => {
     const termo = busca.trim().toLowerCase()
@@ -116,9 +183,25 @@ export function ComprarPokes() {
       .sort((a, b) => {
         if (ordem === 'nivel') return b.level - a.level
         if (ordem === 'iv') return b.iv_percent - a.iv_percent
+        if (ordem === 'termina') {
+          // Leilao primeiro, por quem acaba antes; o resto (preco fixo e
+          // somente-lance) nao tem prazo e vai pro fim.
+          const ta = a.modo === 'leilao' && a.expira_em ? new Date(a.expira_em).getTime() : Number.MAX_SAFE_INTEGER
+          const tb = b.modo === 'leilao' && b.expira_em ? new Date(b.expira_em).getTime() : Number.MAX_SAFE_INTEGER
+          return ta - tb
+        }
         // Anuncio de lance nao tem preco: vai pro fim da ordenacao por preco em
         // vez de virar 0 e fingir ser o mais barato do Mercado.
-        return (a.price ?? Number.MAX_SAFE_INTEGER) - (b.price ?? Number.MAX_SAFE_INTEGER)
+        const pa = a.price ?? Number.MAX_SAFE_INTEGER
+        const pb = b.price ?? Number.MAX_SAFE_INTEGER
+        if (pa !== pb) return pa - pb
+        // Empate no fim da lista: dois anuncios sem preco. Sem desempate eles
+        // sairiam na ordem que o `sort` resolvesse, e o jogador veria a lista
+        // de leiloes se reembaralhar a cada refetch de 10s. Quem acaba antes
+        // primeiro — e a informacao que importa num leilao.
+        const ea = a.modo === 'leilao' && a.expira_em ? new Date(a.expira_em).getTime() : Number.MAX_SAFE_INTEGER
+        const eb = b.modo === 'leilao' && b.expira_em ? new Date(b.expira_em).getTime() : Number.MAX_SAFE_INTEGER
+        return ea - eb
       })
   }, [data, busca, verGold, verDiamante, somenteOferta, shinyOnly, nivelMin, ivMin, raridades, ordem])
 
@@ -151,6 +234,7 @@ export function ComprarPokes() {
         />
         <GameSelect value={ordem} onChange={(e) => setOrdem(e.target.value as typeof ordem)}>
           <option value="preco">Menor preco</option>
+          <option value="termina">Leilão terminando</option>
           <option value="nivel">Maior nivel</option>
           <option value="iv">Maior IV</option>
         </GameSelect>
@@ -233,7 +317,15 @@ export function ComprarPokes() {
                 {a.apenas_oferta && ` · ${a.ofertas ?? 0} oferta(s)`}
               </div>
             </div>
-            {a.apenas_oferta ? (
+            {a.modo === 'leilao' ? (
+              <LinhaDeLeilao
+                anuncio={a}
+                valor={lance[a.id]}
+                onValor={(v) => setLance((m) => ({ ...m, [a.id]: v }))}
+                onLance={(valor) => darLance.mutate({ anuncioId: a.id, valor })}
+                pendente={darLance.isPending}
+              />
+            ) : a.apenas_oferta ? (
               <>
                 <span className="flex flex-col text-[.78em] text-n400">
                   <span className="flex items-center gap-[.25em] text-warn">

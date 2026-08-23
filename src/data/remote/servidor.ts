@@ -260,6 +260,19 @@ export interface AnuncioMercado {
   is_shiny: boolean
   iv_percent: number
   created_at: string
+  /**
+   * Leilão (PH-101). `'preco_fixo'` é o default no banco, então anúncio antigo
+   * e resposta de servidor mais velho leem como preço fixo — que é o que eram.
+   *
+   * Leilão é sempre `apenas_oferta = true` e `price = null` (a check
+   * `market_listings_preco_coerente` garante), então a tela distingue os dois
+   * modos de lance por ESTE campo, não pela ausência de preço.
+   */
+  modo?: 'preco_fixo' | 'leilao'
+  /** Só em leilão. Quando ele passa, o cron encerra na varredura seguinte. */
+  expira_em?: string | null
+  lance_minimo?: number | null
+  incremento_minimo?: number | null
   vendedor?: string
   ofertas?: number
   melhorOferta?: number | null
@@ -273,6 +286,15 @@ export interface OfertaMercado {
   currency: 'gold' | 'diamond'
   status: 'pendente' | 'aceita' | 'recusada' | 'cancelada'
   created_at: string
+  /**
+   * Modo do anúncio em que o lance foi dado (PH-101), trazido pelo join.
+   *
+   * A tela precisa dele para não oferecer "Cancelar" num lance de leilão — que
+   * o servidor recusa, porque lance de leilão vale até alguém cobrir. Sem o
+   * campo, o botão existiria só para dar erro.
+   */
+  modo?: 'preco_fixo' | 'leilao'
+  expira_em?: string | null
 }
 
 export interface OfertaRecebida extends OfertaMercado {
