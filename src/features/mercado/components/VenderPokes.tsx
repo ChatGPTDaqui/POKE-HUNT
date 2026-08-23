@@ -5,6 +5,8 @@ import { rarityOf } from '@/data/rarity'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { GameButton, GameCard, GameInput, GameSelect, SectionLabel } from '@/components/game/controls'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
+import { useTaxaDoMercado, taxaDeVenda } from '../useTaxaDoMercado'
+import { fmt } from '../utils'
 import { useMochila } from '@/features/bag/useMochila'
 import { EstadoDaMochila } from '@/features/bag/EstadoDaMochila'
 
@@ -31,6 +33,8 @@ export function VenderPokes() {
   const [incremento, setIncremento] = useState(100)
   const anunciar = useAcaoMercado(mercadoRpc.anunciarPoke)
   const leiloar = useAcaoMercado(mercadoRpc.criarLeilao)
+  const { regra } = useTaxaDoMercado()
+  const taxa = taxaDeVenda(preco, moeda, regra)
 
   // POKE travado nao aparece: a trava existe justamente pra ele nao sair da
   // mochila por engano, e anunciar e sair da mochila.
@@ -116,6 +120,18 @@ export function VenderPokes() {
           </GameSelect>
         </label>
         <div className="flex-1 text-[.8em] text-n400">
+          {/* So em preco fixo. Nos outros dois modos nao ha preco pra descontar
+              ainda: em "somente lance" o valor sai do lance aceito (a taxa
+              aparece na hora de aceitar, em Ativos) e em leilao sai do maior
+              lance no fim do prazo. Descontar `preco` neles mostraria um
+              liquido calculado sobre um campo que aquele modo nem usa. */}
+          {modo === 'preco_fixo' && (
+            taxa > 0
+              ? <>Voce recebe <b className="text-gold">{fmt.format(preco - taxa)}</b>
+                <span className="text-n500"> (taxa de {regra.percentual}%: {fmt.format(taxa)})</span>.{' '}</>
+              : <>Voce recebe <b className="text-gold">{fmt.format(preco)}</b>
+                <span className="text-n500"> (sem taxa em {moeda === 'gold' ? 'ouro' : 'diamante'})</span>.{' '}</>
+          )}
           O POKE sai da sua mochila enquanto o anuncio estiver de pe.
         </div>
       </div>
