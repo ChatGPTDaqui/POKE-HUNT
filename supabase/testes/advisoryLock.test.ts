@@ -22,21 +22,18 @@ import { describe, expect, it } from 'vitest'
 const DIR = join(__dirname, '..', 'migrations')
 
 /**
- * RPCs que escrevem em `players` de DOIS jogadores (comprador e vendedor) e
- * por isso nao entram no padrao de uma linha.
+ * As unicas RPCs que podem escrever em `players` sem o lock.
  *
- * Travar as duas pontas exige ordem deterministica por uuid: sem isso, duas
- * compras cruzadas (A comprando de B enquanto B compra de A) travam uma na
- * outra. Nao e "esqueceram" — e trabalho de desenho separado, registrado na
- * PH-67. Tirar um nome desta lista sem adicionar o lock faz o teste falhar,
- * que e o comportamento desejado.
+ * Manutencao/admin: rodam fora do caminho do jogador e nunca concorrem com o
+ * flush de uma sessao. Tirar um nome desta lista sem adicionar o lock faz o
+ * teste falhar, que e o comportamento desejado.
+ *
+ * As 4 do Mercado saíram daqui quando ganharam o lock do caller. Elas mexem no
+ * ouro de dois jogadores, mas so o caller e travado — o incremento na
+ * contraparte (`gold = gold + X`) e atomico e nao precisa. Ver o cabecalho de
+ * `20260823030000_lock_nas_rpcs_de_mercado_public.sql`.
  */
 const SEM_LOCK_POR_ENQUANTO = new Set([
-  'criar_ordem_mercado',
-  'comprar_anuncio',
-  'responder_oferta',
-  'recusar_ofertas_pendentes',
-  // Manutencao/admin, roda fora do caminho do jogador e nunca concorre com flush.
   'wipe_todos_os_saves',
   'wipe_inventario_e_economia',
 ])
@@ -81,6 +78,25 @@ describe('advisory lock nas RPCs que escrevem em players (PH-67)', () => {
       .filter((chave) => !SEM_LOCK_POR_ENQUANTO.has(chave.split('.')[1]))
       .sort()
     expect(semLock, 'RPC nova escrevendo em players sem serializar por usuario').toEqual([])
+  })
+
+  it('o lock vem ANTES de qualquer escrita ou leitura travante', () => {
+    // Ordem importa tanto quanto existir. Um advisory tomado DEPOIS de um
+    // `for update` permite inversao: a transacao A segura a linha e espera o
+    // advisory que a transacao B segura, enquanto B espera a linha. Tomar o
+    // advisory primeiro, sempre, faz as duas entrarem na fila na mesma ordem.
+    const fora: string[] = []
+    for (const [chave, corpo] of escrevemEmPlayers()) {
+      if (SEM_LOCK_POR_ENQUANTO.has(chave.split('.')[1])) continue
+      const schema = chave.split('.')[0]
+      const lock = corpo.search(/pg_advisory_xact_lock/i)
+      const posicoes = [`update ${schema}.`, `insert into ${schema}.`, `delete from ${schema}.`, 'for update']
+        .map((m) => corpo.toLowerCase().indexOf(m))
+        .filter((p) => p !== -1)
+      if (!posicoes.length) continue
+      if (lock === -1 || lock > Math.min(...posicoes)) fora.push(chave)
+    }
+    expect(fora, 'lock tomado depois de ja ter escrito ou travado linha').toEqual([])
   })
 
   it('as duas pontas de cada par dev/public concordam sobre o lock', () => {

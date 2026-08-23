@@ -1563,27 +1563,55 @@ export type Database = {
         }
         Returns: number
       }
-      _calcular_stats: {
-        Args: {
-          p_is_shiny: boolean
-          p_iv_atk_esp: number
-          p_iv_atk_fis: number
-          p_iv_def: number
-          p_iv_def_esp: number
-          p_iv_hp: number
-          p_iv_speed: number
-          p_level: number
-          p_rarity: string
-          p_species: Database["dev"]["Tables"]["species"]["Row"]
-        }
-        Returns: {
-          stat_atk_esp: number
-          stat_atk_fis: number
-          stat_def: number
-          stat_def_esp: number
-          stat_hp: number
-          stat_speed: number
-        }[]
+      _calcular_stats:
+        | {
+            Args: {
+              p_is_shiny: boolean
+              p_iv_atk_esp: number
+              p_iv_atk_fis: number
+              p_iv_def: number
+              p_iv_def_esp: number
+              p_iv_hp: number
+              p_iv_speed: number
+              p_level: number
+              p_rarity: string
+              p_species: Database["dev"]["Tables"]["species"]["Row"]
+            }
+            Returns: {
+              stat_atk_esp: number
+              stat_atk_fis: number
+              stat_def: number
+              stat_def_esp: number
+              stat_hp: number
+              stat_speed: number
+            }[]
+          }
+        | {
+            Args: {
+              p_is_shiny: boolean
+              p_iv_atk_esp: number
+              p_iv_atk_fis: number
+              p_iv_def: number
+              p_iv_def_esp: number
+              p_iv_hp: number
+              p_iv_speed: number
+              p_level: number
+              p_nature: string
+              p_rarity: string
+              p_species: Database["dev"]["Tables"]["species"]["Row"]
+            }
+            Returns: {
+              stat_atk_esp: number
+              stat_atk_fis: number
+              stat_def: number
+              stat_def_esp: number
+              stat_hp: number
+              stat_speed: number
+            }[]
+          }
+      _mult_natureza: {
+        Args: { p_nature: string; p_stat: string }
+        Returns: number
       }
       _valor_venda_poke: {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
@@ -3373,27 +3401,55 @@ export type Database = {
         }
         Returns: number
       }
-      _calcular_stats: {
-        Args: {
-          p_is_shiny: boolean
-          p_iv_atk_esp: number
-          p_iv_atk_fis: number
-          p_iv_def: number
-          p_iv_def_esp: number
-          p_iv_hp: number
-          p_iv_speed: number
-          p_level: number
-          p_rarity: string
-          p_species: Database["public"]["Tables"]["species"]["Row"]
-        }
-        Returns: {
-          stat_atk_esp: number
-          stat_atk_fis: number
-          stat_def: number
-          stat_def_esp: number
-          stat_hp: number
-          stat_speed: number
-        }[]
+      _calcular_stats:
+        | {
+            Args: {
+              p_is_shiny: boolean
+              p_iv_atk_esp: number
+              p_iv_atk_fis: number
+              p_iv_def: number
+              p_iv_def_esp: number
+              p_iv_hp: number
+              p_iv_speed: number
+              p_level: number
+              p_rarity: string
+              p_species: Database["public"]["Tables"]["species"]["Row"]
+            }
+            Returns: {
+              stat_atk_esp: number
+              stat_atk_fis: number
+              stat_def: number
+              stat_def_esp: number
+              stat_hp: number
+              stat_speed: number
+            }[]
+          }
+        | {
+            Args: {
+              p_is_shiny: boolean
+              p_iv_atk_esp: number
+              p_iv_atk_fis: number
+              p_iv_def: number
+              p_iv_def_esp: number
+              p_iv_hp: number
+              p_iv_speed: number
+              p_level: number
+              p_nature: string
+              p_rarity: string
+              p_species: Database["public"]["Tables"]["species"]["Row"]
+            }
+            Returns: {
+              stat_atk_esp: number
+              stat_atk_fis: number
+              stat_def: number
+              stat_def_esp: number
+              stat_hp: number
+              stat_speed: number
+            }[]
+          }
+      _mult_natureza: {
+        Args: { p_nature: string; p_stat: string }
+        Returns: number
       }
       _valor_venda_poke: {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
