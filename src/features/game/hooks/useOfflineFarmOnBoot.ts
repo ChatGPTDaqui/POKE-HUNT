@@ -9,8 +9,8 @@ import {
 } from '@/engine/simulation'
 import { resetDrift } from '@/engine/clockDrift'
 import { simulateWorldSeconds, type OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
-import { assentarSessaoPendente } from '@/data/remote/autoridade'
 import { servidorAtivo } from '@/data/remote/servidor'
+import { assentarUmaVez } from '../bootDaSessao'
 import { farmOfflineSemServidorEhConfiavel, deveSerPessimista } from '../utils'
 
 export function useOfflineFarmOnBoot(): { summary: OfflineSimSummary | null; dismiss: () => void } {
@@ -30,7 +30,12 @@ export function useOfflineFarmOnBoot(): { summary: OfflineSimSummary | null; dis
     // independentes), e o jogador veria um relatorio que nao bate com o ouro
     // que recebeu. Entao aqui so pedimos o resumo e mostramos.
     if (servidorAtivo()) {
-      void assentarSessaoPendente().then((resumo) => {
+      // `assentarUmaVez` e nao `assentarSessaoPendente`: a decisao de reentrar
+      // na hunt (PH-93) precisa do MESMO resumo, e chamar o assentamento duas
+      // vezes faria o segundo receber `fechada: false` — um dos dois
+      // consumidores concluiria que nao havia sessao nenhuma, e qual deles
+      // dependeria de quem ganhasse a corrida. Ver features/game/bootDaSessao.
+      void assentarUmaVez().then((resumo) => {
         // `stoppedEarly` entra no criterio junto com os abates: a sessao que
         // termina com o POKE no chao pode ter rendido ZERO, e era exatamente
         // esse caso que ficava sem relatorio nenhum. O jogador voltava depois de

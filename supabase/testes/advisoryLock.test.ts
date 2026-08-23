@@ -36,6 +36,18 @@ const DIR = join(__dirname, '..', 'migrations')
 const SEM_LOCK_POR_ENQUANTO = new Set([
   'wipe_todos_os_saves',
   'wipe_inventario_e_economia',
+  // PH-101, encerramento de leilao. Roda pelo pg_cron, entao NAO TEM
+  // `auth.uid()` — nao existe "usuario desta transacao" pra travar, e travar o
+  // vendedor de cada leilao do lote fila a varredura atras de sessoes ativas.
+  //
+  // Nao precisa: toda escrita dela em `players` e INCREMENTO
+  // (`gold = gold + X`), e o proprio PH-67 registra que incremento nao precisa
+  // de lock — ele e atomico dentro do UPDATE. O que o advisory lock protege e o
+  // CAS do flush, e quem faz CAS e o dono da sessao, nao esta funcao.
+  //
+  // Se ela algum dia passar a DEBITAR (por exemplo cobrando o vencedor no
+  // encerramento em vez de no lance), esta linha tem que sair.
+  'encerrar_leiloes_vencidos',
 ])
 
 /** Corpo vigente de cada funcao (`<schema>.<nome>` -> corpo), ultima definicao ganha. */

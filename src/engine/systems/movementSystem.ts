@@ -37,10 +37,20 @@ const PATH_TARGET_BIG_JUMP = 150
 // pro A* real, que contorna a parede que o atalho nao via.
 const PATH_STUCK_THRESHOLD_SECONDS = 0.3
 
-// A pegada de colisao de um POKE e exatamente 1 caixa da grade
-// (COLLISION_GRID_CELL_SIZE) por pedido explicito do usuario — checar so o
-// ponto central da entidade contra a grade equivale a isso, ja que cada
-// celula ja E uma caixa.
+// A pegada de colisao de um POKE e uma caixa de `POKE_COLLISION_FOOTPRINT`, e
+// checar so o ponto central contra a grade EQUIVALE a isso — mas nao porque
+// "cada celula ja e uma caixa", que era o raciocinio antigo e valia so enquanto
+// a pegada e o tamanho da celula eram o mesmo numero por coincidencia.
+//
+// Equivale porque a grade nao diz "aqui tem tinta": ela diz "o CENTRO do POKE
+// pode estar aqui". A pegada e aplicada na GERACAO, por erosao
+// (build-sub-bioma-collision.js, passo 1.5), o que mantem este laco — que roda
+// ate 250 mil passos por chamada no resim do servidor — com uma consulta so em
+// vez das nove que uma caixa exigiria em runtime.
+//
+// Mexer na pegada e mexer naquela constante e rodar o gerador de novo; nao ha
+// nada a mudar aqui. Ver a nota longa em data/collisionConstants.ts (PH-94)
+// pro que a medicao mostrou sobre a pegada de 40.
 function canOccupy(mapDef: MapDef, x: number, y: number): boolean {
   return !isCellBlocked(mapDef, x, y)
 }

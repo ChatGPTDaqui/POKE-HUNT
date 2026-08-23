@@ -5,11 +5,13 @@ import { useGameStateStore } from '@/stores/gameStateStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { GameButton, GameCard, GameInput, GameSelect, SectionLabel } from '@/components/game/controls'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
+import { useTaxaDoMercado, taxaDeVenda } from '../useTaxaDoMercado'
 import { fmt } from '../utils'
 
 export function VenderItens() {
   const items = useGameStateStore((s) => s.items)
   const lockedItems = useGameStateStore((s) => s.lockedItems)
+  const { regra } = useTaxaDoMercado()
   const [itemId, setItemId] = useState('')
   const [preco, setPreco] = useState(100)
   const [qtd, setQtd] = useState(1)
@@ -19,6 +21,10 @@ export function VenderItens() {
   const disponiveis = Object.keys(items).filter((id) => items[id] > 0 && ITEMS[id] && !lockedItems[id])
   const escolhido = itemId || disponiveis[0] || ''
   const maximo = items[escolhido] ?? 0
+
+  // Livro de item e sempre em ouro, entao a taxa sempre incide aqui.
+  const bruto = preco * Math.min(qtd, maximo)
+  const taxa = taxaDeVenda(bruto, 'gold', regra)
 
   if (disponiveis.length === 0) {
     return <p className="text-n500">Nenhum item destravado na mochila para anunciar.</p>
@@ -52,8 +58,15 @@ export function VenderItens() {
         </label>
       </div>
       <div className="text-[.8em] text-n400">
-        Voce recebe ate <b className="text-gold">{fmt.format(preco * Math.min(qtd, maximo))}</b> de ouro.
-        Os itens saem da mochila assim que a ordem e criada e voltam se voce cancelar.
+        Voce recebe ate <b className="text-gold">{fmt.format(bruto - taxa)}</b> de ouro.
+        {/* A taxa aparece ANTES de confirmar (PH-98). Descobrir depois de vender
+            e indistinguivel de bug de ouro faltando. */}
+        {taxa > 0 && (
+          <span className="text-n500">
+            {' '}(bruto {fmt.format(bruto)} − taxa de {regra.percentual}%: {fmt.format(taxa)})
+          </span>
+        )}
+        {' '}Os itens saem da mochila assim que a ordem e criada e voltam se voce cancelar.
       </div>
       <GameButton
         variant="primary"

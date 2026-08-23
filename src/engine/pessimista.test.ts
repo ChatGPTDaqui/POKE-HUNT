@@ -76,6 +76,23 @@ describe('world.pessimista: farm offline nunca renderiza melhor que ao vivo (PH-
     gameState.addItem('revive', 50)
   })
 
+  // Timeout explicito de 120s. Este e o teste de simulacao mais pesado do
+  // projeto (40 sementes x 1h de mundo cada, nos dois modos) e ele ficava a
+  // 33s, dentro do `testTimeout` padrao de 45s.
+  //
+  // O PH-94 dividiu a celula da grade de colisao por dois pra o walk-block
+  // respeitar a pintura, e isso multiplicou as celulas por 4. O A* de rota
+  // varre o conjunto aberto inteiro a cada expansao (O(n^2)) e usa string como
+  // chave de celula, entao o custo subiu mais que os 4x: 33s -> 58s, medido.
+  //
+  // Subir o timeout aqui NAO esconde regressao: o numero esta escrito acima, a
+  // causa esta documentada no cabecalho de `core/pathfinding.ts`, e o conserto
+  // (heap binario + chave numerica) e o PH-102 — ele fica de fora desta leva
+  // porque muda o desempate entre rotas de mesmo custo, ou seja muda a
+  // simulacao, e nao pode entrar de carona numa mudanca de grade.
+  //
+  // Em producao este custo nao chega: `FARM_OFFLINE_PAUSADO` faz o resim
+  // offline do servidor nao simular nada, e o flush ao vivo sao ~1.800 passos.
   it('na media de varias sementes, o pessimista nao rende mais que o otimista', () => {
     const otimista = media(false)
     const pessimista = media(true)
@@ -120,5 +137,9 @@ describe('world.pessimista: farm offline nunca renderiza melhor que ao vivo (PH-
   //
   // Nao da pra cortar semente: 40 e o minimo pro ouro convergir (a cauda do
   // sellMultiplier chega a 600x). Entao a folga vai no relogio.
-  }, 45000)
+  //
+  // 120s desde o PH-94 — mesma historia acontecendo de novo, um degrau acima:
+  // a celula da grade caiu de 40 pra 20, o A* e O(n^2) no numero de celulas, e
+  // o teste foi de 33s pra 58s. Ver a nota longa em cima do `it` e o PH-102.
+  }, 120000)
 })
