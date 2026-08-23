@@ -37,7 +37,13 @@ export const controller = {
   // via o combate rodando na tela e nao ganhava nada — sem nenhum aviso, porque
   // a simulacao local continua desenhando normalmente. Um erro que so aparece
   // como "o jogo parou de dar ouro".
-  async enterMap(mapId: string): Promise<boolean> {
+  // `silencioso` desliga os TRES avisos deste caminho (slot vazio, POKE caido,
+  // recusa do servidor). Existe pro unico chamador que nao nasce de um clique:
+  // a reentrada automatica na hunt no boot (PH-93, features/game/bootDaSessao).
+  // Ali o jogador nao pediu nada, cair no Hospital ja e o estado seguro, e um
+  // toast de erro sobre acao que ninguem disparou so ensina a ignorar toast.
+  async enterMap(mapId: string, opcoes?: { silencioso?: boolean }): Promise<boolean> {
+    const avisar = !opcoes?.silencioso
     const gameState = useGameStateStore.getState()
     const activePoke = gameState.team[gameState.activeIndex]
     // Slot ativo vazio. Era um `return false` MUDO, e custou uma sessao inteira
@@ -48,9 +54,11 @@ export const controller = {
     // aba), e o HUD nao denuncia porque ele desenha o POKE do `worldStore`, que
     // ainda tem o antigo em memoria.
     if (!activePoke) {
-      useToastStore.getState().pushToast(
-        'Nenhum POKE selecionado na equipe. Abra Equipe e coloque um em campo.', 'error', 'world',
-      )
+      if (avisar) {
+        useToastStore.getState().pushToast(
+          'Nenhum POKE selecionado na equipe. Abra Equipe e coloque um em campo.', 'error', 'world',
+        )
+      }
       return false
     }
     // POKE caido nao luta, e uma cacada com ele so queima o relogio: a simulacao
@@ -58,12 +66,14 @@ export const controller = {
     // jogo. O servidor tambem recusa (defesa em profundidade), mas aqui a
     // resposta e imediata e diz o que fazer.
     if (activePoke.hp <= 0) {
-      useToastStore.getState().pushToast(
-        'Seu POKE esta desmaiado. Cure na Enfermeira antes de cacar.', 'error', 'world',
-      )
+      if (avisar) {
+        useToastStore.getState().pushToast(
+          'Seu POKE esta desmaiado. Cure na Enfermeira antes de cacar.', 'error', 'world',
+        )
+      }
       return false
     }
-    const sessao = await abrirSessaoDeHunt(mapId, activePoke.uid)
+    const sessao = await abrirSessaoDeHunt(mapId, activePoke.uid, { avisarErro: avisar })
     if (!sessao.ok) return false
     // Arte de TODA especie do pool na memoria antes de a cena aparecer — senao o
     // primeiro encontro com cada uma pisca sem sprite enquanto o PNG baixa (ver

@@ -12,6 +12,8 @@ function GeralTab() {
   const setHudScale = useUiStore((s) => s.setHudScale)
   const vidroFosco = useUiStore((s) => s.vidroFosco)
   const setVidroFosco = useUiStore((s) => s.setVidroFosco)
+  const vidaNoCenario = useUiStore((s) => s.vidaNoCenario)
+  const setVidaNoCenario = useUiStore((s) => s.setVidaNoCenario)
 
   return (
     <div className="flex flex-col gap-[.5em]">
@@ -49,6 +51,18 @@ function GeralTab() {
         </div>
         <GameCheck checked={vidroFosco} onChange={setVidroFosco} className="self-start">
           Desligar o desfoque
+        </GameCheck>
+      </GameCard>
+
+      <GameCard className="flex flex-col gap-[.4em] p-[.6em]">
+        <div className="font-medium">Vida no cenário</div>
+        <div className="text-[.8em] text-n500">
+          Folha caindo na floresta, brilho na água, brasa no vulcão, poeira na caverna, neve na montanha — cada
+          bioma ganha o movimento que combina com ele. É só enfeite: não muda em nada o combate, a captura nem
+          por onde o POKE anda. Se o seu aparelho engasgar, desligue aqui.
+        </div>
+        <GameCheck checked={vidaNoCenario} onChange={setVidaNoCenario} className="self-start">
+          Mostrar movimento no cenário
         </GameCheck>
       </GameCard>
 

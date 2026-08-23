@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
 import { STALE_MS } from '../utils'
 import { Carregando, Moeda } from './shared'
+import { HistoricoDePreco } from './HistoricoDePreco'
 
 /**
  * Filtro rapido de um toque: botao que liga/desliga (pedido explicito).
@@ -86,6 +87,8 @@ export function ComprarPokes() {
   const [ivMin, setIvMin] = useState(0)
   const [raridades, setRaridades] = useState<Set<RarityKey>>(() => new Set(Object.keys(RARITIES) as RarityKey[]))
   const [ordem, setOrdem] = useState<'preco' | 'nivel' | 'iv'>('preco')
+  // Um anuncio com o historico aberto por vez — ver a nota no botao "Preco".
+  const [precoAberto, setPrecoAberto] = useState<string | null>(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ['mercado', 'pokes'],
@@ -273,6 +276,28 @@ export function ComprarPokes() {
               <GameButton variant="ghost" onClick={() => showProfile(anuncioComoPoke(a), species)}>
                 Ver
               </GameButton>
+            )}
+            {/* Historico SOB DEMANDA e UM POR VEZ (PH-97).
+
+                A issue pedia o grafico "no cartao do anuncio", mas montar um por
+                linha seriam DUAS leituras por anuncio numa vitrine que pode ter
+                centenas — o mesmo tipo de custo que o PH-65 existiu pra cortar
+                (dois polls de badge gastando 90 requisicoes por hora por aba).
+
+                Um por vez, e nao um conjunto de abertos: comparar duas especies
+                lado a lado nao e o que se faz aqui (a vitrine e uma lista de
+                anuncios individuais), e o teto de uma leitura ativa e o que
+                garante que abrir 40 cartoes nao vire 80 requests. */}
+            <GameButton
+              variant="ghost"
+              onClick={() => setPrecoAberto((atual) => (atual === a.id ? null : a.id))}
+            >
+              {precoAberto === a.id ? 'Fechar preço' : 'Preço'}
+            </GameButton>
+            {precoAberto === a.id && (
+              <div className="w-full border-t border-n700 pt-[.4em]">
+                <HistoricoDePreco speciesId={a.species_id} currency={a.currency} />
+              </div>
             )}
           </GameCard>
         )

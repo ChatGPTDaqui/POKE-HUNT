@@ -22,12 +22,18 @@
 import { describe, expect, it } from 'vitest'
 
 import { BIOMAS } from './biomas'
+import { COLLISION_GRID_CELL_SIZE } from './collisionConstants'
 import { COLISAO_POR_ARTE } from './generated/subBiomaCollision.generated'
 import { MAPS, getMap, mapDefParaSala, spawnPointParaSala, spawnInimigoParaSala, isCellBlocked, type MapDef } from './maps'
 import { LANCE_MAP_ID } from './nightmareMaps'
 
-// Mesma celula do gerador e de `isCellBlocked`.
-const CELULA = 40
+// A MESMA constante do gerador e de `isCellBlocked` — IMPORTADA, nunca
+// repetida. Este numero estava hardcodado como 40 aqui e em
+// engine/spawnPintado.test.ts, e as duas copias reprovaram no PH-94 quando a
+// celula caiu pra 20: o teste passou a exigir que `grid.length * 40` batesse
+// com um bounds medido em passos de 20. Ou seja, a suite guardava dentro dela a
+// divergencia que ela existe pra impedir.
+const CELULA = COLLISION_GRID_CELL_SIZE
 
 // Vazia desde 2026-08-22: o Dojo era a ultima arte de sala sem referencia
 // pintada, e a leva daquele dia fechou ela junto com a arena do dragao. A
