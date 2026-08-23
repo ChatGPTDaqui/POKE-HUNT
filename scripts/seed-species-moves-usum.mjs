@@ -21,6 +21,7 @@
 // pra destravar o bug relatado.
 'use strict';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { carregarMotor } from './lib/motor.mjs';
 import { execSync } from 'node:child_process';
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
@@ -83,7 +84,7 @@ export default defineConfig({
 
 const { bundlePath: SEED_BUNDLE, cleanup: cleanupAbilitiesBundle } = buildAbilitiesBundle();
 
-const { SPECIES } = await import(pathToFileURL(path.join(ROOT, 'authority/engine/headless.js')).href);
+const { SPECIES } = await carregarMotor();
 const { ABILITIES, BASIC_ATTACK } = await import(pathToFileURL(SEED_BUNDLE).href);
 
 const DEX_RE = /Nº\s*(\d+)/;
