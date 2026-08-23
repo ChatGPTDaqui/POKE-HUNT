@@ -11,8 +11,11 @@ import { GameButton, GameCard, GameCheck, GameInput, GameSelect, Recolhivel } fr
 import { cn } from '@/lib/utils'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
 import { fmt, STALE_MS } from '../utils'
-import { faixaDaPagina } from '../paginacao'
 import { Carregando, Moeda } from './shared'
+import { TempoRestante } from './TempoRestante'
+import { useSegundosRestantes, proximoLanceMinimo } from '../tempoDeLeilao'
+import { HistoricoDePreco } from './HistoricoDePreco'
+import { faixaDaPagina } from '../paginacao'
 
 /**
  * Filtro rapido de um toque: botao que liga/desliga (pedido explicito).
@@ -81,6 +84,70 @@ function anuncioComoPoke(a: AnuncioMercado) {
  */
 const POR_PAGINA = 25
 
+/**
+ * A linha de um LEILAO na vitrine (PH-101).
+ *
+ * Separada num componente proprio porque ela e a unica da lista que precisa de
+ * um relogio: `useSegundosRestantes` assina o tique de 1s, e um hook nao pode
+ * ficar dentro do `.map` do cartao (a ordem de hooks mudaria a cada filtro
+ * aplicado, que e exatamente o que o React proibe).
+ */
+function LinhaDeLeilao({
+  anuncio, valor, onValor, onLance, pendente,
+}: {
+  anuncio: AnuncioMercado
+  valor: number | undefined
+  onValor: (v: number) => void
+  onLance: (valor: number) => void
+  pendente: boolean
+}) {
+  const segundos = useSegundosRestantes(anuncio.expira_em)
+  // Ja venceu e o cron ainda nao passou: o servidor recusa lance depois de
+  // `expira_em`, entao a tela desabilita em vez de deixar o jogador tentar e
+  // levar um erro.
+  const encerrado = segundos != null && segundos <= 0
+
+  // O minimo do PROXIMO lance sai da mesma regra que o servidor aplica: sem
+  // lance ainda e o piso do leilao, com lance e o maior + o incremento.
+  const minimo = proximoLanceMinimo(anuncio.melhorOferta, anuncio.lance_minimo, anuncio.incremento_minimo)
+
+  return (
+    <>
+      <span className="flex flex-col text-[.78em] text-n400">
+        <span className="flex items-center gap-[.25em] text-warn">
+          <Gavel weight="fill" /> Leilão · <TempoRestante expiraEm={anuncio.expira_em} />
+        </span>
+        <span>
+          {anuncio.melhorOferta != null
+            ? <>maior: <Moeda valor={anuncio.melhorOferta} tipo={anuncio.currency} /></>
+            : <>sem lance ainda</>}
+          {' · '}mínimo {fmt.format(minimo)}
+        </span>
+      </span>
+      <GameInput
+        type="number"
+        min={minimo}
+        className="w-[6.5em]"
+        // O campo nasce VAZIO com o mínimo no placeholder, e não preenchido com
+        // ele: um valor já digitado num campo de lance convida a clicar sem ler,
+        // e aqui clicar sem ler tira ouro do bolso na hora.
+        placeholder={String(minimo)}
+        disabled={encerrado}
+        value={valor ?? ''}
+        onChange={(e) => onValor(Math.max(0, Math.floor(Number(e.target.value) || 0)))}
+      />
+      <GameButton
+        variant="primary"
+        carregando={pendente}
+        disabled={encerrado || !(valor != null && valor >= minimo)}
+        onClick={() => valor != null && onLance(valor)}
+      >
+        {encerrado ? 'Encerrado' : 'Dar lance'}
+      </GameButton>
+    </>
+  )
+}
+
 export function ComprarPokes() {
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const [busca, setBusca] = useState('')
@@ -96,7 +163,9 @@ export function ComprarPokes() {
   const [nivelMin, setNivelMin] = useState(0)
   const [ivMin, setIvMin] = useState(0)
   const [raridades, setRaridades] = useState<Set<RarityKey>>(() => new Set(Object.keys(RARITIES) as RarityKey[]))
-  const [ordem, setOrdem] = useState<'preco' | 'recente' | 'nivel' | 'iv'>('preco')
+  const [ordem, setOrdem] = useState<'preco' | 'recente' | 'nivel' | 'iv' | 'termina'>('preco')
+  // Um anuncio com o historico aberto por vez — ver a nota no botao "Preco".
+  const [precoAberto, setPrecoAberto] = useState<string | null>(null)
   const [pagina, setPagina] = useState(0)
 
   // Filtro do SERVIDOR (PH-99). Montado num `useMemo` porque ele e a
@@ -143,6 +212,7 @@ export function ComprarPokes() {
   })
   const comprar = useAcaoMercado((anuncioId: string) => mercadoRpc.comprarAnuncio(anuncioId))
   const ofertar = useAcaoMercado(mercadoRpc.ofertar)
+  const darLance = useAcaoMercado(mercadoRpc.darLance)
 
   // A lista chega da pagina JA filtrada e ordenada pelo servidor (PH-99). O
   // unico descarte que sobra aqui e a especie que o cliente nao conhece —
@@ -153,6 +223,10 @@ export function ComprarPokes() {
   // contador vem do `count` do banco, entao ele conta o anuncio que a tela
   // descartou. Preferi um total honesto ("34 anuncios") com uma linha faltando
   // a um total que muda de acordo com a versao do navegador.
+  //
+  // A ordenacao por prazo de leilao (PH-101) tambem desceu pro servidor: o
+  // `.sort()` que ficava aqui so via a PAGINA, e ordenar 25 de 300 anuncios
+  // daria uma lista que parece ordenada e nao esta.
   const filtrados = useMemo(
     () => (data?.anuncios ?? []).filter((a) => SPECIES[a.species_id]),
     [data],
@@ -191,6 +265,7 @@ export function ComprarPokes() {
         <GameSelect value={ordem} onChange={(e) => setOrdem(e.target.value as typeof ordem)}>
           <option value="preco">Menor preco</option>
           <option value="recente">Mais recente</option>
+          <option value="termina">Leilão terminando</option>
           <option value="nivel">Maior nivel</option>
           <option value="iv">Maior IV</option>
         </GameSelect>
@@ -285,7 +360,15 @@ export function ComprarPokes() {
                 {a.apenas_oferta && ` · ${a.ofertas ?? 0} oferta(s)`}
               </div>
             </div>
-            {a.apenas_oferta ? (
+            {a.modo === 'leilao' ? (
+              <LinhaDeLeilao
+                anuncio={a}
+                valor={lance[a.id]}
+                onValor={(v) => setLance((m) => ({ ...m, [a.id]: v }))}
+                onLance={(valor) => darLance.mutate({ anuncioId: a.id, valor })}
+                pendente={darLance.isPending}
+              />
+            ) : a.apenas_oferta ? (
               <>
                 <span className="flex flex-col text-[.78em] text-n400">
                   <span className="flex items-center gap-[.25em] text-warn">
@@ -328,6 +411,28 @@ export function ComprarPokes() {
               <GameButton variant="ghost" onClick={() => showProfile(anuncioComoPoke(a), species)}>
                 Ver
               </GameButton>
+            )}
+            {/* Historico SOB DEMANDA e UM POR VEZ (PH-97).
+
+                A issue pedia o grafico "no cartao do anuncio", mas montar um por
+                linha seriam DUAS leituras por anuncio numa vitrine que pode ter
+                centenas — o mesmo tipo de custo que o PH-65 existiu pra cortar
+                (dois polls de badge gastando 90 requisicoes por hora por aba).
+
+                Um por vez, e nao um conjunto de abertos: comparar duas especies
+                lado a lado nao e o que se faz aqui (a vitrine e uma lista de
+                anuncios individuais), e o teto de uma leitura ativa e o que
+                garante que abrir 40 cartoes nao vire 80 requests. */}
+            <GameButton
+              variant="ghost"
+              onClick={() => setPrecoAberto((atual) => (atual === a.id ? null : a.id))}
+            >
+              {precoAberto === a.id ? 'Fechar preço' : 'Preço'}
+            </GameButton>
+            {precoAberto === a.id && (
+              <div className="w-full border-t border-n700 pt-[.4em]">
+                <HistoricoDePreco speciesId={a.species_id} currency={a.currency} />
+              </div>
             )}
           </GameCard>
         )

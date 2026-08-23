@@ -1194,6 +1194,191 @@ export interface Viewport {
   h: number
 }
 
+// --- borda que desmancha (PH-95) --------------------------------------------
+//
+// A arte da hunt terminava numa aresta reta: um retangulo colado em cima de uma
+// cor solida, em vez de um pedaco de mundo. Pedido do usuario: "um pincel
+// magico nas bordas, pra nao ficar quadrado o mapa".
+//
+// POR QUE PINTAR A COR POR CIMA, E NAO MASCARAR A IMAGEM
+// ---------------------------------------------------------------------------
+// O caminho obvio seria montar, uma vez por arte, um canvas offscreen com a
+// imagem e apagar as bordas com `destination-out`. Cacheado, custa uma vez so.
+//
+// Nao cabe: as artes tem ~2048x2048, ou seja ~16 MB de canvas cada. Sao 31
+// artes, e trocar de sub-bioma acontece a cada quota de abates — um cache que
+// segure as visitadas passa de meio giga, e um que segure duas remonta a
+// mascara em toda troca de sala, no meio do jogo.
+//
+// Como a area em volta da imagem JA e preenchida com `primary` (a cor de fundo
+// do bioma), o mesmo efeito sai de graca pelo outro lado: em vez de apagar a
+// borda da imagem, pinta-se `primary` por cima dela, opaco na aresta e
+// transparente pra dentro. A imagem dissolve na cor que ja estava atras. Zero
+// canvas extra, zero memoria, e o laco de desenho continua com um `drawImage`.
+//
+// O RUIDO NAO PODE VIR DO MOTOR
+// ---------------------------------------------------------------------------
+// Nada aqui toca `world.rng`. Aquele gerador e autoritativo e compartilhado com
+// o resim do servidor — sortear a posicao de uma mancha decorativa nele
+// dessincronizaria a sequencia e o flush passaria a divergir do que o cliente
+// mostrou (a classe de bug do PH-37). O ruido desta borda sai de um hash da URL
+// da arte: deterministico, igual em toda maquina, e sem relacao nenhuma com a
+// simulacao.
+
+// Largura do esfumado como fracao do menor lado da arte. Fracao, e nao pixels:
+// as artes vao de ~1250px a ~2048px nativos, e um valor fixo seria uma moldura
+// grossa numa e um fio na outra.
+const BORDA_FRACAO = 0.12
+// Manchas por aresta. O esfumado reto sozinho ainda le como retangulo (de
+// cantos macios, mas retangulo); as manchas e que quebram a linha.
+const MANCHAS_POR_ARESTA = 9
+
+/** Hash estavel de string -> semente. Pequeno de proposito: o unico requisito
+ *  e ser o MESMO numero em toda maquina pra a borda nao "respirar" entre
+ *  sessoes nem diferir entre jogadores. */
+function semeteDaArte(chave: string): number {
+  let h = 2166136261
+  for (let i = 0; i < chave.length; i++) {
+    h ^= chave.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return h >>> 0
+}
+
+/** LCG minusculo. Nao precisa de qualidade estatistica — precisa ser barato e
+ *  repetivel. */
+function sorteioLocal(semente: number): () => number {
+  let s = semente || 1
+  return () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0
+    return s / 4294967296
+  }
+}
+
+/**
+ * A geometria da borda de uma arte, montada uma vez e guardada.
+ *
+ * Guardar isto (e nao a imagem mascarada) e o que faz o cache ser barato: sao
+ * ~28 numeros por arte, nao 16 MB de pixels.
+ */
+interface BordaDaArte {
+  /** Manchas em coordenadas NORMALIZADAS (0..1) do retangulo da arte, com raio
+   *  em fracao do menor lado — assim a mesma geometria serve qualquer zoom e
+   *  qualquer enquadramento sem recalcular. */
+  manchas: { u: number; v: number; r: number }[]
+}
+
+const bordasPorArte = new Map<string, BordaDaArte>()
+
+function bordaDaArte(chave: string): BordaDaArte {
+  const cacheada = bordasPorArte.get(chave)
+  if (cacheada) return cacheada
+
+  const rand = sorteioLocal(semeteDaArte(chave))
+  const manchas: BordaDaArte['manchas'] = []
+  for (let aresta = 0; aresta < 4; aresta++) {
+    for (let i = 0; i < MANCHAS_POR_ARESTA; i++) {
+      // Distribuidas ao longo da aresta com jitter, em vez de posicao
+      // totalmente aleatoria: aleatorio puro deixa buraco (um trecho da aresta
+      // sem mancha nenhuma, que volta a parecer reto) e amontoado.
+      const t = (i + 0.5) / MANCHAS_POR_ARESTA + (rand() - 0.5) * (0.8 / MANCHAS_POR_ARESTA)
+      // Mancha centrada SOBRE a aresta (nao dentro nem fora): metade dela come
+      // a imagem, metade cai no fundo, que e o que produz recorte irregular em
+      // vez de dentado pra um lado so.
+      const desvio = (rand() - 0.5) * BORDA_FRACAO * 0.6
+      const r = BORDA_FRACAO * (0.6 + rand() * 1.0)
+      if (aresta === 0) manchas.push({ u: t, v: 0 + desvio, r })
+      else if (aresta === 1) manchas.push({ u: t, v: 1 + desvio, r })
+      else if (aresta === 2) manchas.push({ u: 0 + desvio, v: t, r })
+      else manchas.push({ u: 1 + desvio, v: t, r })
+    }
+  }
+  const borda = { manchas }
+  bordasPorArte.set(chave, borda)
+  return borda
+}
+
+/**
+ * A MESMA cor com alpha 0 — e nunca a palavra-chave `transparent`.
+ *
+ * BUG REAL, VISTO NA TELA na primeira versao desta borda: `transparent` e
+ * `rgba(0,0,0,0)`, ou seja PRETO com alpha zero. Um gradiente de `#3f5a34` ate
+ * `transparent` interpola o RGB rumo ao preto junto com o alpha, entao o meio
+ * do gradiente e preto meio-transparente. As manchas apareciam como discos
+ * ESCUROS flutuando sobre o fundo solido, em vez de invisiveis — que e o que
+ * elas tem que ser fora da imagem, ja que ali a cor pintada e igual a cor que
+ * ja estava atras.
+ *
+ * As cores de bioma sao hex de 6 digitos hoje (`#3f5a34`), mas nao da pra
+ * assumir isso: a normalizacao vai pelo proprio canvas, que aceita qualquer
+ * cor CSS valida e devolve `#rrggbb` ou `rgba(...)`.
+ */
+function comAlphaZero(ctx: CanvasRenderingContext2D, cor: string): string {
+  const anterior = ctx.fillStyle
+  ctx.fillStyle = cor
+  const normalizada = String(ctx.fillStyle)
+  ctx.fillStyle = anterior
+
+  const hex = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(normalizada)
+  if (hex) {
+    return `rgba(${parseInt(hex[1], 16)}, ${parseInt(hex[2], 16)}, ${parseInt(hex[3], 16)}, 0)`
+  }
+  const rgb = /^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/i.exec(normalizada)
+  if (rgb) return `rgba(${rgb[1]}, ${rgb[2]}, ${rgb[3]}, 0)`
+  // Cor que o canvas normalizou pra algo que nao reconhecemos (gradiente,
+  // pattern, `currentColor` herdado). `transparent` de volta e pior que nao
+  // desenhar: melhor a borda dura de antes que uma sombra preta em volta dela.
+  return normalizada
+}
+
+/**
+ * Dissolve as bordas do retangulo (x,y,w,h) na cor `cor`.
+ *
+ * Chamado DEPOIS do `drawImage` da arte e dentro do mesmo `save`/`restore`.
+ */
+function desmancharBorda(
+  ctx: CanvasRenderingContext2D,
+  chave: string,
+  cor: string,
+  x: number, y: number, w: number, h: number,
+): void {
+  const menorLado = Math.min(w, h)
+  const faixa = menorLado * BORDA_FRACAO
+  if (faixa <= 0) return
+
+  const corSumindo = comAlphaZero(ctx, cor)
+
+  // 1) Rampa por aresta.
+  const rampas: [number, number, number, number, number, number, number, number][] = [
+    [x, y, x, y + faixa, x, y, w, faixa],
+    [x, y + h, x, y + h - faixa, x, y + h - faixa, w, faixa],
+    [x, y, x + faixa, y, x, y, faixa, h],
+    [x + w, y, x + w - faixa, y, x + w - faixa, y, faixa, h],
+  ]
+  for (const [gx0, gy0, gx1, gy1, rx, ry, rw, rh] of rampas) {
+    const g = ctx.createLinearGradient(gx0, gy0, gx1, gy1)
+    g.addColorStop(0, cor)
+    g.addColorStop(1, corSumindo)
+    ctx.fillStyle = g
+    ctx.fillRect(rx, ry, rw, rh)
+  }
+
+  // 2) Manchas por cima, pra a aresta deixar de ser uma linha.
+  const { manchas } = bordaDaArte(chave)
+  for (const m of manchas) {
+    const cx = x + m.u * w
+    const cy = y + m.v * h
+    const raio = m.r * menorLado
+    const g = ctx.createRadialGradient(cx, cy, raio * 0.42, cx, cy, raio)
+    g.addColorStop(0, cor)
+    g.addColorStop(1, corSumindo)
+    ctx.fillStyle = g
+    ctx.beginPath()
+    ctx.arc(cx, cy, raio, 0, Math.PI * 2)
+    ctx.fill()
+  }
+}
+
 export function drawMapBackground(ctx: CanvasRenderingContext2D, map: MapBackgroundDef, viewport: Viewport): void {
   const { primary, secondary, image } = map.bg
   const img = image ? getOrLoadImage(image) : null
@@ -1213,10 +1398,10 @@ export function drawMapBackground(ctx: CanvasRenderingContext2D, map: MapBackgro
     // desenha a imagem menor do que o necessario pra cobrir o mapa, qualquer
     // que seja a resolucao nativa do arquivo.
     if (map.arte) {
-      ctx.drawImage(
-        img, map.arte.x, map.arte.y,
-        img.naturalWidth * map.arte.escala, img.naturalHeight * map.arte.escala,
-      )
+      const iw = img.naturalWidth * map.arte.escala
+      const ih = img.naturalHeight * map.arte.escala
+      ctx.drawImage(img, map.arte.x, map.arte.y, iw, ih)
+      desmancharBorda(ctx, image!, primary, map.arte.x, map.arte.y, iw, ih)
     } else {
       const escalaMinima = Math.max(
         (map.bounds.width * HUNT_BG_COVERAGE_MARGIN) / img.naturalWidth,
@@ -1227,6 +1412,11 @@ export function drawMapBackground(ctx: CanvasRenderingContext2D, map: MapBackgro
       const ih = img.naturalHeight * escala
       const mapCx = map.bounds.width / 2
       const mapCy = map.bounds.height / 2
+      // Este ramo desenha a arte MAIOR que o mapa de proposito (ela cobre os
+      // bounds com sobra), entao a aresta dela cai fora da area jogavel e
+      // desmanchar ali nao tem o que resolver — pior, comeria imagem que o
+      // enquadramento pos justamente pra nao faltar cobertura na borda do
+      // mundo. Hoje so o Hospital cai aqui (arte sem referencia pintada).
       ctx.drawImage(img, mapCx - iw / 2, mapCy - ih / 2, iw, ih)
     }
   } else {

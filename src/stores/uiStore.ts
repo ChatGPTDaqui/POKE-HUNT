@@ -40,6 +40,7 @@ function pontoGrosso(): boolean {
 
 const HUD_SCALE_KEY = 'novo-poke-idle:hud-scale'
 const VIDRO_KEY = 'novo-poke-idle:vidro-fosco'
+const VIDA_CENARIO_KEY = 'novo-poke-idle:vida-no-cenario'
 // 0.7 (era 0.8) porque a fonte base da HUD subiu 3px nesta leva: sem descer o
 // minimo, quem jogava confortavel no tamanho antigo perdeu a opcao de voltar.
 export const HUD_SCALE_MIN = 0.7
@@ -76,6 +77,17 @@ function lerVidroFosco(): boolean {
     // Safari privado lanca no acesso ao localStorage; preferencia de video nao
     // vale derrubar o jogo.
     return false
+  }
+}
+
+// `!== '0'` e nao `=== '1'`: esta preferencia nasce LIGADA, entao chave ausente
+// (jogador novo, ou quem ja jogava antes do PH-96) tem que cair no ligado. O
+// unico valor que desliga e o '0' que o proprio ajuste grava.
+function lerVidaNoCenario(): boolean {
+  try {
+    return localStorage.getItem(VIDA_CENARIO_KEY) !== '0'
+  } catch {
+    return true
   }
 }
 
@@ -166,6 +178,17 @@ interface UiState {
   /** Desliga o `backdrop-filter` de toda superficie de vidro. */
   vidroFosco: boolean
   setVidroFosco: (fosco: boolean) => void
+
+  /**
+   * Vida ambiente do cenario (PH-96): folha, brilho, brasa, poeira, neve.
+   *
+   * Nasce LIGADA, ao contrario de `vidroFosco` — que e um ajuste de socorro pra
+   * aparelho fraco e por isso comeca desligado. Esta e a aparencia pretendida
+   * do jogo; o interruptor existe pra quem precisa cortar trabalho de desenho,
+   * nao pra quem precisa ligar o efeito.
+   */
+  vidaNoCenario: boolean
+  setVidaNoCenario: (ligada: boolean) => void
 
   // Filtros da tela de Hunts. Ficam aqui (e nao em useState local do
   // HuntMenu) por um motivo unico e concreto: a Pokedex precisa escrever
@@ -293,6 +316,16 @@ export const useUiStore = create<UiState>((set, get) => ({
       // idem: preferencia perdida e aceitavel, crash nao.
     }
     set({ vidroFosco })
+  },
+
+  vidaNoCenario: lerVidaNoCenario(),
+  setVidaNoCenario: (vidaNoCenario) => {
+    try {
+      localStorage.setItem(VIDA_CENARIO_KEY, vidaNoCenario ? '1' : '0')
+    } catch {
+      // idem.
+    }
+    set({ vidaNoCenario })
   },
 
   huntContinent: 'faixa1',

@@ -7,8 +7,10 @@ import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
 import { GameButton, GameCard, SectionLabel } from '@/components/game/controls'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
+import { useTaxaDoMercado, taxaDeVenda } from '../useTaxaDoMercado'
 import { fmt, STALE_MS } from '../utils'
 import { Carregando, IconeItem, Moeda } from './shared'
+import { TempoRestante } from './TempoRestante'
 
 export function Ativos() {
   const { data, isLoading } = useQuery({
@@ -21,6 +23,7 @@ export function Ativos() {
   const responder = useAcaoMercado(({ id, aceitar }: { id: string; aceitar: boolean }) =>
     mercadoRpc.responderOferta(id, aceitar))
   const cancelarOferta = useAcaoMercado((id: string) => mercadoRpc.cancelarOferta(id))
+  const { regra } = useTaxaDoMercado()
 
   if (isLoading) return <Carregando />
   const ordens: OrdemMercado[] = data?.ordens ?? []
@@ -49,7 +52,15 @@ export function Ativos() {
                   {o.anuncio ? SPECIES[o.anuncio.species_id]?.name ?? o.anuncio.species_id : 'POKE'}
                   {o.anuncio ? ` Lv${o.anuncio.level}` : ''}
                 </b>
-                <div className="text-[.78em] text-n500">lance de {o.comprador}</div>
+                <div className="text-[.78em] text-n500">
+                  lance de {o.comprador}
+                  {/* Aceitar E vender, entao o liquido tem que estar na tela
+                      antes do clique (PH-98) — nao depois, no extrato. */}
+                  {taxaDeVenda(o.valor, o.currency, regra) > 0 && (
+                    <> · voce fica com {fmt.format(o.valor - taxaDeVenda(o.valor, o.currency, regra))}
+                      {' '}(taxa de {regra.percentual}%: {fmt.format(taxaDeVenda(o.valor, o.currency, regra))})</>
+                  )}
+                </div>
               </div>
               <Moeda valor={o.valor} tipo={o.currency} />
               <div className="flex gap-[.35em]">
@@ -80,12 +91,22 @@ export function Ativos() {
             <GameCard key={o.id} className="flex flex-wrap items-center gap-[.5em] p-[.4em]">
               <Gavel className="text-warn" />
               <div className="min-w-[8em] flex-1 text-[.85em] text-n400">
-                Lance enviado · valor retido até o vendedor responder
+                {o.modo === 'leilao'
+                  ? <>Lance em leilão · encerra em <TempoRestante expiraEm={o.expira_em} /> · valor retido enquanto você estiver na frente</>
+                  : <>Lance enviado · valor retido até o vendedor responder</>}
               </div>
               <Moeda valor={o.valor} tipo={o.currency} />
-              <GameButton variant="danger" carregando={cancelarOferta.isPending} onClick={() => cancelarOferta.mutate(o.id)}>
-                <X /> Cancelar
-              </GameButton>
+              {/* Lance de LEILAO nao se retira (PH-101): se desse, o padrao
+                  otimo seria dar um lance altissimo pra afastar todos e retirar
+                  perto do fim. O servidor recusa; a tela nao oferece um botao
+                  que so serve pra dar erro. */}
+              {o.modo === 'leilao' ? (
+                <span className="text-[.78em] text-n500">vale até alguém cobrir</span>
+              ) : (
+                <GameButton variant="danger" carregando={cancelarOferta.isPending} onClick={() => cancelarOferta.mutate(o.id)}>
+                  <X /> Cancelar
+                </GameButton>
+              )}
             </GameCard>
           ))}
         </>
@@ -119,14 +140,28 @@ export function Ativos() {
             <b className="font-medium">{SPECIES[a.species_id]?.name ?? a.species_id} Lv{a.level}</b>
             <div className="text-[.78em] text-n500">
               IV {a.iv_percent}%{a.apenas_oferta && ` · ${a.ofertas ?? 0} lance(s)`}
+              {a.modo === 'leilao' && <> · encerra em <TempoRestante expiraEm={a.expira_em} /></>}
             </div>
           </div>
-          {a.apenas_oferta
-            ? <span className="flex items-center gap-[.25em] text-[.8em] text-warn"><Gavel weight="fill" /> lances</span>
-            : <Moeda valor={a.price ?? 0} tipo={a.currency} />}
-          <GameButton variant="danger" carregando={cancelarAnuncio.isPending} onClick={() => cancelarAnuncio.mutate(a.id)}>
-            <X /> Retirar
-          </GameButton>
+          {a.modo === 'leilao'
+            ? <span className="flex items-center gap-[.25em] text-[.8em] text-warn"><Gavel weight="fill" /> leilão</span>
+            : a.apenas_oferta
+              ? <span className="flex items-center gap-[.25em] text-[.8em] text-warn"><Gavel weight="fill" /> lances</span>
+              : <Moeda valor={a.price ?? 0} tipo={a.currency} />}
+          {/* Leilao com lance nao pode ser retirado (PH-101), e o botao diz isso
+              em vez de existir pra levar um erro: o vendedor que ve um lance
+              alto e cancela esta retratando uma venda ja comprometida. O
+              servidor recusa de qualquer forma — aqui a tela so nao mente sobre
+              o que da pra fazer. */}
+          {a.modo === 'leilao' && (a.ofertas ?? 0) > 0 ? (
+            <span className="text-[.78em] text-n500">
+              travado até encerrar
+            </span>
+          ) : (
+            <GameButton variant="danger" carregando={cancelarAnuncio.isPending} onClick={() => cancelarAnuncio.mutate(a.id)}>
+              <X /> Retirar
+            </GameButton>
+          )}
         </GameCard>
       ))}
     </div>
