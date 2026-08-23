@@ -1,63 +1,68 @@
-// Deriva a MASCARA DE AGUA de cada arte de fundo, pra a camada ambiente
-// (render/ambiente.ts) ondular so onde ha agua (PH-113).
+// Deriva a MASCARA DE AGUA de cada arte de fundo a partir de referencia
+// PINTADA A MAO, pra a camada ambiente (render/ambiente.ts) ondular so onde ha
+// agua (PH-113).
 //
 // ---------------------------------------------------------------------------
-// POR QUE ESTE ARQUIVO EXISTE
+// POR QUE PINTADA, E NAO DERIVADA DA COR DA ARTE
 // ---------------------------------------------------------------------------
-// O PH-96 entregou a camada ambiente por bioma e registrou a limitacao em voz
-// alta no cabecalho de `ambiente.ts`: o preset de agua "nao sabe onde a agua
-// esta, entao ele passa por cima de terra tambem", e por isso ele nasceu o mais
-// discreto de todos. Ondulacao visivel sem mascara faria a AREIA ondular.
+// A primeira versao deste script tentou achar agua pela cor. Nao funciona neste
+// acervo, e a medicao e conclusiva. Calibrando com amostras ROTULADAS em
+// `swamp.jpg`:
 //
-// ---------------------------------------------------------------------------
-// TRES SINAIS, E DOIS DELES JA EXISTIAM
-// ---------------------------------------------------------------------------
-// Cor sozinha erra feio: ceu azul, telhado azul e flor azul passam por agua. Os
-// dois primeiros sinais abaixo derrubam quase todo falso positivo antes de
-// olhar um pixel de cor.
+//   agua centro   h=67  s=0.39 l=0.22 var=0.0069
+//   mata topo     h=62  s=0.35 l=0.16 var=0.0048
+//   salgueiro     h=97  s=0.40 l=0.20 var=0.0071
 //
-// 1. COLISAO PINTADA (`subBiomaCollision.generated.ts`). Na convencao
-//    `rosa_anda`, rosa e a UNICA area andavel — logo a agua esta
-//    necessariamente entre as celulas BLOQUEADAS. Isso elimina a faixa de
-//    areia/chao de graca, e sem ler a arte. As 5 artes de agua (sea, lake,
-//    beach, island, swamp) tem pintura desde a leva de 2026-08-18.
+// Agua e vegetacao ocupam o MESMO ponto em matiz, saturacao, luminancia e
+// textura. Nao ha plano separador — nao e questao de calibrar melhor. Em `beach`
+// o mar separa (h=160, s=0.76) mas a poca (h=73, s=0.64) cai em cima do
+// palmeiral (h=81, s=0.44).
 //
-// 2. FAIXA VERTICAL. Nessas artes a agua esta na metade de baixo e o ceu em
-//    cima. `CORTE_CEU` descarta o topo, que e o falso positivo mais obvio da
-//    prova de cor — e o unico que os outros dois sinais NAO pegam, porque ceu
-//    tambem e bloqueado e tambem e azul e liso.
+// Tres tentativas falharam antes disso ficar claro, e cada uma vale como aviso:
 //
-// 3. COR + VARIANCIA LOCAL. Agua e azul-esverdeada E LISA. Folhagem, telhado e
-//    pedra tem textura, entao a variancia local os derruba mesmo quando a cor
-//    passa.
+//   1. Cor solta nas 31 artes marcou 33% de `ice-cave`, 24% de `town-night` e
+//      22% de `ruins` — gelo e pedra azulada lisa passam por agua.
+//   2. Cruzar com a colisao pintada saiu INVERTIDO: supor "POKE nao anda na
+//      agua, logo agua e bloqueada" e o contrario da verdade — nestas artes o
+//      POKE atravessa a agua e o que bloqueia e rocha e coral.
+//   3. Sem a colisao, cor + variancia marcou a agua E o palmeiral inteiro de
+//      `beach`; amostrar a celula toda em vez de 6px nao mudou nada.
 //
 // ---------------------------------------------------------------------------
-// POR QUE NAO DERIVAR NO NAVEGADOR
+// A CONVENCAO DE COR
 // ---------------------------------------------------------------------------
-// O navegador decodifica JPEG de graca, o que tornaria este script e a
-// dependencia `jpeg-js` desnecessarios. Recusado por dois motivos:
+// Mesma ideia dos `body-block-refs` que ja existem: o arquivo em
+// `scripts/agua-refs/<arte>.png` e A ARTE com tinta em cima.
 //
-//   - Decodificar uma arte de 2048x2048 a cada troca de mapa no celular e
-//     exatamente o tipo de custo que o cabecalho de `ambiente.ts` manda evitar
-//     ("a unica coisa aqui que cresce sem limite natural").
-//   - Mascara em memoria nao aparece no diff. Heuristica que vai errar em algum
-//     mapa precisa ser AUDITAVEL — o `--relatorio` abaixo existe pra isso.
+//   AZUL PURO (R<60, G<60, B>200) = AGUA. Ondula.
+//   Todo o resto = ignorado.
+//
+// Azul PURO e nao "azulado": o azul das artes e dessaturado e tem verde
+// significativo (o mar de `sea` fica em ~(60,150,190)), entao ele nunca cruza
+// esse limiar. Sem exigir pureza, a propria agua desenhada contaria como tinta e
+// a referencia seria inutil.
 //
 // ---------------------------------------------------------------------------
 // USO
 // ---------------------------------------------------------------------------
-//   node scripts/build-agua-mask.js --relatorio   # so imprime, nao escreve
-//   node scripts/build-agua-mask.js --debug       # + PNG de conferencia por arte
-//   node scripts/build-agua-mask.js               # gera o .generated.ts
+//   node scripts/build-agua-mask.js --rascunho   # gera refs de PARTIDA (heuristica)
+//   node scripts/build-agua-mask.js --relatorio  # so imprime, nao escreve
+//   node scripts/build-agua-mask.js --debug      # + PNG de conferencia por arte
+//   node scripts/build-agua-mask.js              # gera o .generated.ts
+//
+// O `--rascunho` existe porque corrigir e mais rapido que pintar do zero: ele
+// escreve em `scripts/agua-refs/` a arte com o palpite da heuristica em azul.
+// O palpite ERRA (marca copa de arvore), e apagar o excesso e o trabalho. Nao
+// commitar rascunho sem revisar — e por isso que ele grava com sufixo.
 //
 // ---------------------------------------------------------------------------
 // O --debug NAO E LUXO
 // ---------------------------------------------------------------------------
 // Porcentagem de celulas marcadas nao diz se a mascara esta certa: "17% de
 // swamp" pode ser a agua ou pode ser a copa das arvores. O overlay escreve a
-// arte com as celulas marcadas tingidas, em `scripts/agua-debug/`, e e a unica
-// forma de conferir isso sem abrir o jogo. Heuristica derivada de imagem sem
-// saida visual e fe, nao verificacao.
+// arte com as celulas marcadas tingidas, em `scripts/agua-debug/`, e foi ele
+// que pegou os tres erros acima. Heuristica derivada de imagem sem saida visual
+// e fe, nao verificacao.
 const fs = require('fs')
 const path = require('path')
 const jpeg = require('jpeg-js')
@@ -65,7 +70,8 @@ const { decodePng } = require('./lib/png')
 const { encodePng } = require('./lib/png-encode')
 
 const RAIZ = path.join(__dirname, '..')
-const DIR_ARTE = path.join(RAIZ, 'assets', 'hunt-backgrounds')
+const DIR_REFS = path.join(RAIZ, 'scripts', 'agua-refs')
+const DIR_DEBUG = path.join(RAIZ, 'scripts', 'agua-debug')
 const SAIDA = path.join(RAIZ, 'src', 'data', 'generated', 'aguaMask.generated.ts')
 const COLISAO = path.join(RAIZ, 'src', 'data', 'generated', 'subBiomaCollision.generated.ts')
 const AMBIENTE = path.join(RAIZ, 'src', 'render', 'ambiente.ts')
@@ -73,55 +79,26 @@ const AMBIENTE = path.join(RAIZ, 'src', 'render', 'ambiente.ts')
 /**
  * Lado da celula da mascara, em unidades de mundo.
  *
- * 20 e a MESMA celula da grade de colisao depois do PH-94 — casar as duas
- * evita a classe de bug em que a agua "existe" numa grade e nao na outra, e
- * deixa o cruzamento do sinal 1 ser indice a indice em vez de reamostragem.
+ * 20 e a MESMA celula da grade de colisao depois do PH-94. Casar as duas evita a
+ * classe de bug em que a agua "existe" numa grade e nao na outra.
  */
 const CELULA = 20
 
-/**
- * Passo da varredura dentro da celula, em pixels da arte.
- *
- * A amostra cobre a CELULA INTEIRA, e nao um quadradinho no centro dela. A
- * primeira versao usava 6x6 px fixos e reprovou no overlay: numa arte de 2048px
- * essa janela cabe DENTRO de uma folha de palmeira, que e lisa — entao a
- * variancia media dava "agua" e a mata inteira de `beach` marcava. Variancia so
- * enxerga a estrutura folha-a-folha na escala da folha, nao na do pixel.
- *
- * O passo evita ler 27x27 px por celula quando 4 em cada direcao ja descreve a
- * textura: 5 vezes menos leitura, mesma decisao.
- */
-const PASSO_AMOSTRA = 3
+/** Passo da varredura dentro da celula, em pixels da referencia. */
+const PASSO = 3
 
-// --- prova de cor ---------------------------------------------------------
-// A FAIXA VEIO DE MEDICAO, e a primeira versao dela estava errada. Amostrando a
-// metade de baixo das cinco artes, o matiz dominante e:
-//
-//   sea     180-210 (69%)  sat 0.51  lum 0.41   azul classico
-//   island  180-210 (59%)  sat 0.64  lum 0.48
-//   beach   180-210 (27%) + 150-180 (27%)
-//   lake     90-120 (41%)  sat 0.41  lum 0.45   VERDE
-//   swamp    60-90  (43%)  sat 0.40  lum 0.23   VERDE-BARRO, zero azul
-//
-// A janela inicial [150,250] pegava sea/island/beach e marcava 0.3% de `swamp`.
-// Agua de pantano nao e azul, e agua de lago aqui e verde — restringir a azul
-// era um erro de premissa, nao de calibragem.
-const MATIZ_MIN = 60 // graus; abaixo disso e areia/terra/laranja
-const MATIZ_MAX = 250 // acima disso e roxo/magenta
-const SAT_MIN = 0.14 // pedra cinza e nevoa ficam abaixo
-const LUM_MIN = 0.10 // preto de caverna
-const LUM_MAX = 0.86 // branco de nuvem e de espuma estourada
 /**
- * Variancia maxima do brilho dentro da amostra, em [0,1].
+ * Fracao da celula que precisa estar pintada pra ela contar como agua.
  *
- * COM A FAIXA DE MATIZ ABERTA ATE O VERDE, e este numero que faz o trabalho de
- * separar agua de VEGETACAO — as duas ocupam o mesmo matiz nestas artes. Agua e
- * lisa; folha tem borda. Sem ele, a copa de `swamp` e a mata de `lake` entram.
- *
- * Por isso ele e mais apertado que na primeira versao (era 0.055): ali o matiz
- * azul ja excluia folha, e a variancia era so reforco.
+ * 0.35 e nao 0.5: a borda da agua e irregular e a tinta a mao nao acompanha
+ * pixel a pixel. Exigir metade comeria uma faixa de uma celula em toda a
+ * margem, que e justamente onde a ondulacao mais aparece.
  */
-const VARIANCIA_MAX = 0.022
+const COBERTURA_MINIMA = 0.35
+
+function ehAzulPuro(r, g, b, a) {
+  return a >= 128 && r < 60 && g < 60 && b > 200
+}
 
 function rgbParaHsl(r, g, b) {
   const rr = r / 255, gg = g / 255, bb = b / 255
@@ -141,8 +118,7 @@ function decodificar(arquivo) {
   const buf = fs.readFileSync(arquivo)
   if (arquivo.toLowerCase().endsWith('.png')) {
     const png = decodePng(buf)
-    // `decodePng` devolve o buffer em `rgba`, nao em `data` — nomes diferentes
-    // pelas duas bibliotecas serem de origens diferentes.
+    // `decodePng` devolve o buffer em `rgba`; `jpeg.decode` em `data`.
     return { width: png.width, height: png.height, data: png.rgba }
   }
   const raw = jpeg.decode(buf, { useTArray: true })
@@ -150,52 +126,12 @@ function decodificar(arquivo) {
 }
 
 /**
- * A celula que comeca em (px,py) e mede `lado` pixels parece agua?
- *
- * `lado` vem da escala da arte, nao de constante: uma celula de 20 unidades de
- * mundo cobre mais pixels numa arte de 2048 do que numa de 1254, e e o tamanho
- * em PIXEIS que decide se a variancia enxerga textura.
- */
-function pareceAgua(img, px, py, lado) {
-  let somaL = 0, somaL2 = 0, n = 0
-  let somaH = 0, somaS = 0
-  for (let dy = 0; dy < lado; dy += PASSO_AMOSTRA) {
-    for (let dx = 0; dx < lado; dx += PASSO_AMOSTRA) {
-      const x = px + dx
-      const y = py + dy
-      if (x < 0 || y < 0 || x >= img.width || y >= img.height) continue
-      const i = (y * img.width + x) * 4
-      // Alpha 0 e borda transparente de PNG — nao e agua nem terra.
-      if (img.data[i + 3] < 128) continue
-      const { h, s, l } = rgbParaHsl(img.data[i], img.data[i + 1], img.data[i + 2])
-      somaH += h; somaS += s; somaL += l; somaL2 += l * l; n++
-    }
-  }
-  if (n === 0) return false
-  const mediaL = somaL / n
-  const variancia = Math.max(0, somaL2 / n - mediaL * mediaL)
-  const mediaH = somaH / n
-  const mediaS = somaS / n
-  return mediaH >= MATIZ_MIN && mediaH <= MATIZ_MAX
-    && mediaS >= SAT_MIN
-    && mediaL >= LUM_MIN && mediaL <= LUM_MAX
-    && variancia <= VARIANCIA_MAX
-}
-
-/**
  * As artes que o ambiente JA classifica como agua, lidas de
  * `render/ambiente.ts#PRESET_POR_ARTE`.
  *
- * ESTA E A PORTA, e ela nao e opcional. A prova de cor sozinha, solta em todas
- * as 31 artes, marcou 33% de `ice-cave`, 24% de `town-night`, 23% de
- * `metropolis` e 22% de `ruins` — gelo e pedra azulada lisa passam por agua.
- * Falso positivo em um terco dos mapas nao e excecao reportavel, e heuristica
- * errada. Com a porta, arte que nao e de agua nao tem como ondular, qualquer
- * que seja a cor dela.
- *
- * LE a lista em vez de duplicar: cadastrar uma arte de agua nova naquele
- * arquivo passa a trazer a mascara junto, e nao existe estado em que as duas
- * listas discordem — porque so ha uma.
+ * LE a lista em vez de duplicar: cadastrar uma arte de agua nova naquele arquivo
+ * passa a pedir a referencia junto, e nao existe estado em que as duas listas
+ * discordem — porque so ha uma.
  */
 function lerArtesDeAgua() {
   const fonte = fs.readFileSync(AMBIENTE, 'utf8')
@@ -204,8 +140,7 @@ function lerArtesDeAgua() {
   const artes = new Set()
   for (const m of bloco.slice(0, fim).matchAll(/'([^']+)':\s*'agua'/g)) artes.add(m[1])
   // Guarda contra o parser silenciosamente vazio: sem isto, mudar o formato
-  // daquele objeto geraria uma mascara VAZIA e o efeito sumiria do jogo sem
-  // ninguem ver erro nenhum.
+  // daquele objeto geraria mascara VAZIA e o efeito sumiria sem erro nenhum.
   if (artes.size === 0) throw new Error('nenhuma arte com preset agua — o parser de PRESET_POR_ARTE quebrou')
   return artes
 }
@@ -214,45 +149,84 @@ function lerArtesDeAgua() {
 function lerColisao() {
   const fonte = fs.readFileSync(COLISAO, 'utf8')
   const inicio = fonte.indexOf('= {', fonte.indexOf('COLISAO_POR_ARTE'))
-  const json = fonte.slice(inicio + 2).replace(/;\s*$/, '')
-  return JSON.parse(json)
+  return JSON.parse(fonte.slice(inicio + 2).replace(/;\s*$/, ''))
+}
+
+function nomeBase(arte) {
+  return path.basename(arte).replace(/\.(jpg|png)$/i, '')
 }
 
 /**
- * Escreve a arte com as celulas marcadas tingidas de MAGENTA, pra conferencia a
- * olho. Magenta porque nao existe nestas artes — qualquer outra cor se
- * confundiria com o proprio cenario em algum mapa.
+ * Grade de agua de uma arte, a partir da referencia pintada.
  *
- * Reduz pela metade: 2048px por arte vezes 5 artes e peso que ninguem precisa
- * pra julgar "a tinta caiu na agua ou na copa".
+ * O mapeamento celula -> pixel usa `pintada.arte` (`x`, `y`, `escala`), que e o
+ * MESMO retangulo que `drawMapBackground` desenha. Emitido pelo script de
+ * colisao justamente pra as duas pontas nao chegarem na mesma conta por
+ * caminhos separados — se divergissem, a mascara seria de uma imagem e o pixel
+ * na tela de outra.
  */
+function gradeDaRef(ref, pintada) {
+  const { escala, x: ax, y: ay } = pintada.arte
+  const larguraMundo = ref.width * escala
+  const alturaMundo = ref.height * escala
+  const cols = Math.ceil(pintada.bounds.width / CELULA)
+  const linhas = Math.ceil(pintada.bounds.height / CELULA)
+  const ladoPx = Math.max(2, Math.round(CELULA / escala))
+
+  const grade = []
+  let marcadas = 0
+  for (let ly = 0; ly < linhas; ly++) {
+    let linha = ''
+    for (let lx = 0; lx < cols; lx++) {
+      const mundoX = lx * CELULA + CELULA / 2
+      const mundoY = ly * CELULA + CELULA / 2
+      const u = (mundoX - ax) / larguraMundo
+      const v = (mundoY - ay) / alturaMundo
+      if (u < 0 || u >= 1 || v < 0 || v >= 1) { linha += '0'; continue }
+
+      const px = Math.floor(u * ref.width) - (ladoPx >> 1)
+      const py = Math.floor(v * ref.height) - (ladoPx >> 1)
+      let pintados = 0, total = 0
+      for (let dy = 0; dy < ladoPx; dy += PASSO) {
+        for (let dx = 0; dx < ladoPx; dx += PASSO) {
+          const x = px + dx, y = py + dy
+          if (x < 0 || y < 0 || x >= ref.width || y >= ref.height) continue
+          const i = (y * ref.width + x) * 4
+          total++
+          if (ehAzulPuro(ref.data[i], ref.data[i + 1], ref.data[i + 2], ref.data[i + 3])) pintados++
+        }
+      }
+      const agua = total > 0 && pintados / total >= COBERTURA_MINIMA
+      linha += agua ? '1' : '0'
+      if (agua) marcadas++
+    }
+    grade.push(linha)
+  }
+  return { grade, marcadas, total: cols * linhas, cols, linhas }
+}
+
+/** Overlay de conferencia: a arte com as celulas marcadas tingidas de magenta. */
 function escreverOverlay(arte, img, grade, pintada) {
-  const DIR = path.join(RAIZ, 'scripts', 'agua-debug')
-  fs.mkdirSync(DIR, { recursive: true })
+  fs.mkdirSync(DIR_DEBUG, { recursive: true })
   const { escala, x: ax, y: ay } = pintada.arte
   const larguraMundo = img.width * escala
   const alturaMundo = img.height * escala
-
-  const w = img.width >> 1
-  const h = img.height >> 1
+  const w = img.width >> 1, h = img.height >> 1
   const saida = new Uint8Array(w * h * 4)
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const src = ((y * 2) * img.width + x * 2) * 4
       const dst = (y * w + x) * 4
-      // Pixel -> mundo -> celula, o caminho inverso do laco principal. Feito
-      // pelo inverso, e nao guardando as celulas: assim o overlay confere a
-      // MESMA conta que gerou a grade, e um erro de mapeamento aparece na
+      // Pixel -> mundo -> celula, o INVERSO do laco que gerou a grade. Feito
+      // pelo inverso de proposito: assim um erro de mapeamento aparece na
       // imagem em vez de se cancelar.
-      const mundoX = ax + ((x * 2) / img.width) * larguraMundo
-      const mundoY = ay + ((y * 2) / img.height) * alturaMundo
-      const lx = Math.floor(mundoX / CELULA)
-      const ly = Math.floor(mundoY / CELULA)
+      const lx = Math.floor((ax + ((x * 2) / img.width) * larguraMundo) / CELULA)
+      const ly = Math.floor((ay + ((y * 2) / img.height) * alturaMundo) / CELULA)
       const marcada = grade[ly] && grade[ly][lx] === '1'
       if (marcada) {
-        saida[dst] = Math.min(255, img.data[src] * 0.35 + 255 * 0.65)
+        saida[dst] = Math.min(255, img.data[src] * 0.35 + 166)
         saida[dst + 1] = img.data[src + 1] * 0.35
-        saida[dst + 2] = Math.min(255, img.data[src + 2] * 0.35 + 255 * 0.65)
+        saida[dst + 2] = Math.min(255, img.data[src + 2] * 0.35 + 166)
       } else {
         saida[dst] = img.data[src]
         saida[dst + 1] = img.data[src + 1]
@@ -261,124 +235,121 @@ function escreverOverlay(arte, img, grade, pintada) {
       saida[dst + 3] = 255
     }
   }
-  const nome = path.basename(arte).replace(/\.(jpg|png)$/i, '') + '.png'
-  fs.writeFileSync(path.join(DIR, nome), encodePng(w, h, saida))
+  fs.writeFileSync(path.join(DIR_DEBUG, `${nomeBase(arte)}.png`), encodePng(w, h, saida))
+}
+
+/**
+ * Escreve uma referencia de PARTIDA: a arte com o palpite da heuristica em azul
+ * puro por cima, pra ser CORRIGIDA a mao.
+ *
+ * O palpite erra — e o mesmo que marcou o palmeiral inteiro de `beach`. Ele
+ * serve porque apagar excesso e mais rapido que pintar do zero, nao porque
+ * acerta. Grava com `-rascunho` no nome pra ninguem confundir com referencia
+ * revisada.
+ */
+function escreverRascunho(arte, img) {
+  fs.mkdirSync(DIR_REFS, { recursive: true })
+  const saida = new Uint8Array(img.width * img.height * 4)
+  const lado = 8
+  for (let by = 0; by < img.height; by += lado) {
+    for (let bx = 0; bx < img.width; bx += lado) {
+      let sl = 0, sl2 = 0, sh = 0, ss = 0, n = 0
+      for (let dy = 0; dy < lado; dy++) {
+        for (let dx = 0; dx < lado; dx++) {
+          const x = bx + dx, y = by + dy
+          if (x >= img.width || y >= img.height) continue
+          const i = (y * img.width + x) * 4
+          const c = rgbParaHsl(img.data[i], img.data[i + 1], img.data[i + 2])
+          sh += c.h; ss += c.s; sl += c.l; sl2 += c.l * c.l; n++
+        }
+      }
+      const ml = sl / n
+      const palpite = n > 0
+        && sh / n >= 150 && sh / n <= 250 && ss / n >= 0.20
+        && Math.max(0, sl2 / n - ml * ml) <= 0.01
+      for (let dy = 0; dy < lado; dy++) {
+        for (let dx = 0; dx < lado; dx++) {
+          const x = bx + dx, y = by + dy
+          if (x >= img.width || y >= img.height) continue
+          const i = (y * img.width + x) * 4
+          if (palpite) {
+            saida[i] = 0; saida[i + 1] = 0; saida[i + 2] = 255
+          } else {
+            saida[i] = img.data[i]; saida[i + 1] = img.data[i + 1]; saida[i + 2] = img.data[i + 2]
+          }
+          saida[i + 3] = 255
+        }
+      }
+    }
+  }
+  const destino = path.join(DIR_REFS, `${nomeBase(arte)}-rascunho.png`)
+  fs.writeFileSync(destino, encodePng(img.width, img.height, saida))
+  return destino
 }
 
 function main() {
   const soRelatorio = process.argv.includes('--relatorio')
   const comDebug = process.argv.includes('--debug')
-  const colisao = lerColisao()
-  const artesDeAgua = lerArtesDeAgua()
-  const saida = {}
-  const relatorio = []
+  const soRascunho = process.argv.includes('--rascunho')
 
-  for (const [arte, pintada] of Object.entries(colisao)) {
-    // A PORTA. Arte que o ambiente nao chama de agua nao entra nem no
-    // relatorio — ver `lerArtesDeAgua`.
-    if (!artesDeAgua.has(arte)) continue
-    const arquivo = path.join(RAIZ, arte)
-    if (!fs.existsSync(arquivo)) {
-      relatorio.push({ arte, erro: 'arquivo nao encontrado' })
+  const colisao = lerColisao()
+  const artesDeAgua = [...lerArtesDeAgua()]
+  const saida = {}
+  const linhas = []
+
+  for (const arte of artesDeAgua) {
+    const pintada = colisao[arte]
+    if (!pintada) { linhas.push([arte, 'SEM colisao pintada — o script de colisao roda primeiro']); continue }
+
+    if (soRascunho) {
+      const img = decodificar(path.join(RAIZ, arte))
+      const destino = escreverRascunho(arte, img)
+      linhas.push([arte, `rascunho: ${path.relative(RAIZ, destino)}`])
       continue
     }
-    const img = decodificar(arquivo)
 
-    // Retangulo da arte em coordenadas de MUNDO, exatamente como o renderer
-    // desenha (`drawMapBackground`): canto em arte.x/arte.y, tamanho natural
-    // vezes a escala. Emitido pelo script de colisao justamente pra as duas
-    // pontas nao chegarem na mesma conta por caminhos separados.
-    const { escala, x: ax, y: ay } = pintada.arte
-    const larguraMundo = img.width * escala
-    const alturaMundo = img.height * escala
-
-    const cols = Math.ceil(pintada.bounds.width / CELULA)
-    const linhas = Math.ceil(pintada.bounds.height / CELULA)
-    const grade = []
-    let marcadas = 0
-
-    for (let ly = 0; ly < linhas; ly++) {
-      let linha = ''
-      for (let lx = 0; lx < cols; lx++) {
-        // Centro da celula em coordenadas de mundo.
-        const mundoX = lx * CELULA + CELULA / 2
-        const mundoY = ly * CELULA + CELULA / 2
-
-        // A grade de colisao NAO entra mais como filtro — ver o cabecalho.
-
-        // Mundo -> pixel da arte. Fora da arte desenhada nao ha o que amostrar.
-        const u = (mundoX - ax) / larguraMundo
-        const v = (mundoY - ay) / alturaMundo
-        if (u < 0 || u >= 1 || v < 0 || v >= 1) { linha += '0'; continue }
-
-        // Cor + variancia, sobre a celula INTEIRA — ver `PASSO_AMOSTRA`.
-        // `u`/`v` sao o CENTRO da celula, entao volta meio lado pra pegar o
-        // canto e varrer a celula toda a partir dele.
-        const ladoPx = Math.max(2, Math.round(CELULA / escala))
-        const ehAgua = pareceAgua(
-          img,
-          Math.floor(u * img.width) - (ladoPx >> 1),
-          Math.floor(v * img.height) - (ladoPx >> 1),
-          ladoPx,
-        )
-        linha += ehAgua ? '1' : '0'
-        if (ehAgua) marcadas++
-      }
-      grade.push(linha)
+    const ref = path.join(DIR_REFS, `${nomeBase(arte)}.png`)
+    if (!fs.existsSync(ref)) {
+      linhas.push([arte, 'sem referencia pintada — nao ondula'])
+      continue
     }
-
-    if (comDebug) escreverOverlay(arte, img, grade, pintada)
-
-    const totalCelulas = cols * linhas
-    const pct = totalCelulas ? (marcadas / totalCelulas) * 100 : 0
-    relatorio.push({
-      arte, marcadas, totalCelulas, pct,
-      cols, linhas,
-    })
-    // Arte sem uma celula de agua nao entra no arquivo: quem consome trata
-    // ausencia como "sem ondulacao", e emitir grade toda zero seria peso morto
-    // no bundle por 26 artes.
+    const { grade, marcadas, total, cols, linhas: nl } = gradeDaRef(decodificar(ref), pintada)
+    linhas.push([arte, `${((marcadas / total) * 100).toFixed(1)}% agua  ${marcadas}/${total}  grade ${cols}x${nl}`])
     if (marcadas > 0) saida[arte] = { grid: grade, celula: CELULA }
+    if (comDebug) escreverOverlay(arte, decodificar(path.join(RAIZ, arte)), grade, pintada)
   }
 
-  relatorio.sort((a, b) => (b.pct ?? 0) - (a.pct ?? 0))
-  console.log('arte'.padEnd(46), 'agua%'.padStart(7), 'celulas'.padStart(9), 'grade'.padStart(10))
-  for (const r of relatorio) {
-    if (r.erro) { console.log(r.arte.padEnd(46), r.erro); continue }
-    console.log(
-      r.arte.padEnd(46),
-      r.pct.toFixed(1).padStart(7),
-      `${r.marcadas}/${r.totalCelulas}`.padStart(9),
-      `${r.cols}x${r.linhas}`.padStart(10),
-    )
-  }
-  console.log(`\n${Object.keys(saida).length} arte(s) com agua marcada, de ${relatorio.length} conferidas.`)
-
-  if (soRelatorio) {
-    console.log('\n--relatorio: nada foi escrito.')
+  for (const [arte, msg] of linhas) console.log(arte.padEnd(46), msg)
+  if (soRascunho) {
+    console.log(`\n${linhas.length} rascunho(s) em scripts/agua-refs/.`)
+    console.log('CORRIJA a mao (o palpite marca copa de arvore), renomeie tirando "-rascunho" e rode sem flag.')
     return
   }
+  console.log(`\n${Object.keys(saida).length} de ${artesDeAgua.length} arte(s) de agua com mascara.`)
+  if (soRelatorio) { console.log('\n--relatorio: nada foi escrito.'); return }
 
   const chaves = Object.keys(saida).sort()
   const corpo = chaves.map((k) => {
-    const linhas = saida[k].grid.map((l) => `      "${l}",`).join('\n')
-    return `  ${JSON.stringify(k)}: {\n    "celula": ${saida[k].celula},\n    "grid": [\n${linhas}\n    ],\n  },`
+    const g = saida[k].grid.map((l) => `      "${l}",`).join('\n')
+    return `  ${JSON.stringify(k)}: {\n    "celula": ${saida[k].celula},\n    "grid": [\n${g}\n    ],\n  },`
   }).join('\n')
 
-  fs.writeFileSync(SAIDA, `// AUTO-GERADO por \`node scripts/build-agua-mask.js\` (PH-113).
+  fs.writeFileSync(SAIDA, `// AUTO-GERADO por \`node scripts/build-agua-mask.js\` (PH-113), a partir das
+// referencias pintadas a mao em scripts/agua-refs/*.png.
 //
 // Onde ha AGUA em cada arte de fundo, pra a camada ambiente ondular so ali.
-// Derivado da arte cruzando tres sinais — colisao pintada, faixa vertical e
-// cor+variancia. Ver o cabecalho do script pro porque de cada um.
+// AZUL PURO na referencia = agua. Ver o cabecalho do script pra por que isto e
+// pintado e nao derivado da cor da arte (resposta curta: agua e vegetacao
+// coincidem em matiz, saturacao, luminancia e textura neste acervo).
 //
 // A chave e o CAMINHO DA ARTE, igual em \`subBiomaCollision.generated.ts\`: o
 // ambiente e propriedade do desenho, entao quem mostra a imagem herda a
-// mascara — sub-bioma com arte propria, sub-bioma sem arte e hunt sem salas.
+// mascara.
 //
-// Arte sem uma celula de agua NAO aparece aqui. Quem consome trata ausencia
-// como "sem ondulacao".
+// Arte sem referencia pintada NAO aparece aqui, e quem consome trata ausencia
+// como "sem ondulacao" — o comportamento de hoje.
 //
-// Nao editar a mao — rode o script de novo.
+// Nao editar a mao — repinte a referencia e rode o script.
 export interface MascaraDeAgua {
   /** Lado da celula em unidades de mundo. Mesma celula da grade de colisao. */
   celula: number;

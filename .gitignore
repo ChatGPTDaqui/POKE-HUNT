@@ -85,3 +85,4 @@ npm-debug.log*
 # diagnostico regeravel, nao versionado.
 scripts/body-block-refs/_conferencia/
 scripts/agua-debug/
+scripts/agua-refs/*-rascunho.png
