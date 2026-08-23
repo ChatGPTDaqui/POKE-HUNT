@@ -6,6 +6,8 @@ import { rarityOf } from '@/data/rarity'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { GameButton, GameCard, GameCheck, GameInput, GameSelect, SectionLabel } from '@/components/game/controls'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
+import { useTaxaDoMercado, taxaDeVenda } from '../useTaxaDoMercado'
+import { fmt } from '../utils'
 import { useMochila } from '@/features/bag/useMochila'
 import { EstadoDaMochila } from '@/features/bag/EstadoDaMochila'
 
@@ -18,6 +20,8 @@ export function VenderPokes() {
   const [moeda, setMoeda] = useState<'gold' | 'diamond'>('gold')
   const [apenasOferta, setApenasOferta] = useState(false)
   const anunciar = useAcaoMercado(mercadoRpc.anunciarPoke)
+  const { regra } = useTaxaDoMercado()
+  const taxa = taxaDeVenda(preco, moeda, regra)
 
   // POKE travado nao aparece: a trava existe justamente pra ele nao sair da
   // mochila por engano, e anunciar e sair da mochila.
@@ -63,6 +67,15 @@ export function VenderPokes() {
           </GameSelect>
         </label>
         <div className="flex-1 text-[.8em] text-n400">
+          {/* Em "somente lance" nao ha preco pra descontar ainda — o valor sai do
+              lance aceito, e a taxa e mostrada na hora de aceitar (Ativos). */}
+          {!apenasOferta && (
+            taxa > 0
+              ? <>Voce recebe <b className="text-gold">{fmt.format(preco - taxa)}</b>
+                <span className="text-n500"> (taxa de {regra.percentual}%: {fmt.format(taxa)})</span>.{' '}</>
+              : <>Voce recebe <b className="text-gold">{fmt.format(preco)}</b>
+                <span className="text-n500"> (sem taxa em {moeda === 'gold' ? 'ouro' : 'diamante'})</span>.{' '}</>
+          )}
           O POKE sai da sua mochila enquanto o anuncio estiver de pe.
         </div>
       </div>

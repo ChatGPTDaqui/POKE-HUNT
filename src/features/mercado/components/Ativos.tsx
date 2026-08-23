@@ -7,6 +7,7 @@ import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
 import { GameButton, GameCard, SectionLabel } from '@/components/game/controls'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
+import { useTaxaDoMercado, taxaDeVenda } from '../useTaxaDoMercado'
 import { fmt, STALE_MS } from '../utils'
 import { Carregando, IconeItem, Moeda } from './shared'
 
@@ -21,6 +22,7 @@ export function Ativos() {
   const responder = useAcaoMercado(({ id, aceitar }: { id: string; aceitar: boolean }) =>
     mercadoRpc.responderOferta(id, aceitar))
   const cancelarOferta = useAcaoMercado((id: string) => mercadoRpc.cancelarOferta(id))
+  const { regra } = useTaxaDoMercado()
 
   if (isLoading) return <Carregando />
   const ordens: OrdemMercado[] = data?.ordens ?? []
@@ -49,7 +51,15 @@ export function Ativos() {
                   {o.anuncio ? SPECIES[o.anuncio.species_id]?.name ?? o.anuncio.species_id : 'POKE'}
                   {o.anuncio ? ` Lv${o.anuncio.level}` : ''}
                 </b>
-                <div className="text-[.78em] text-n500">lance de {o.comprador}</div>
+                <div className="text-[.78em] text-n500">
+                  lance de {o.comprador}
+                  {/* Aceitar E vender, entao o liquido tem que estar na tela
+                      antes do clique (PH-98) — nao depois, no extrato. */}
+                  {taxaDeVenda(o.valor, o.currency, regra) > 0 && (
+                    <> · voce fica com {fmt.format(o.valor - taxaDeVenda(o.valor, o.currency, regra))}
+                      {' '}(taxa de {regra.percentual}%: {fmt.format(taxaDeVenda(o.valor, o.currency, regra))})</>
+                  )}
+                </div>
               </div>
               <Moeda valor={o.valor} tipo={o.currency} />
               <div className="flex gap-[.35em]">

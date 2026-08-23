@@ -1432,6 +1432,32 @@ export type Database = {
           },
         ]
       }
+      mercado_historico_itens: {
+        Row: {
+          currency: string | null
+          dia: string | null
+          item_id: string | null
+          maximo: number | null
+          mediana: number | null
+          minimo: number | null
+          negocios: number | null
+          volume: number | null
+        }
+        Relationships: []
+      }
+      mercado_historico_pokes: {
+        Row: {
+          currency: string | null
+          dia: string | null
+          maximo: number | null
+          mediana: number | null
+          minimo: number | null
+          negocios: number | null
+          species_id: string | null
+          volume: number | null
+        }
+        Relationships: []
+      }
       mercado_ofertas_recebidas: {
         Row: {
           buyer_id: string | null
@@ -1464,6 +1490,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mercado_resumo_historico_itens: {
+        Row: {
+          currency: string | null
+          item_id: string | null
+          mediana_24h: number | null
+          mediana_7d: number | null
+          negocios_30d: number | null
+          volume_24h: number | null
+          volume_30d: number | null
+        }
+        Relationships: []
+      }
+      mercado_resumo_historico_pokes: {
+        Row: {
+          currency: string | null
+          mediana_24h: number | null
+          mediana_7d: number | null
+          negocios_30d: number | null
+          species_id: string | null
+          volume_24h: number | null
+          volume_30d: number | null
+        }
+        Relationships: []
       }
       mercado_resumo_itens: {
         Row: {
@@ -3270,6 +3320,32 @@ export type Database = {
           },
         ]
       }
+      mercado_historico_itens: {
+        Row: {
+          currency: string | null
+          dia: string | null
+          item_id: string | null
+          maximo: number | null
+          mediana: number | null
+          minimo: number | null
+          negocios: number | null
+          volume: number | null
+        }
+        Relationships: []
+      }
+      mercado_historico_pokes: {
+        Row: {
+          currency: string | null
+          dia: string | null
+          maximo: number | null
+          mediana: number | null
+          minimo: number | null
+          negocios: number | null
+          species_id: string | null
+          volume: number | null
+        }
+        Relationships: []
+      }
       mercado_ofertas_recebidas: {
         Row: {
           buyer_id: string | null
@@ -3302,6 +3378,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mercado_resumo_historico_itens: {
+        Row: {
+          currency: string | null
+          item_id: string | null
+          mediana_24h: number | null
+          mediana_7d: number | null
+          negocios_30d: number | null
+          volume_24h: number | null
+          volume_30d: number | null
+        }
+        Relationships: []
+      }
+      mercado_resumo_historico_pokes: {
+        Row: {
+          currency: string | null
+          mediana_24h: number | null
+          mediana_7d: number | null
+          negocios_30d: number | null
+          species_id: string | null
+          volume_24h: number | null
+          volume_30d: number | null
+        }
+        Relationships: []
       }
       mercado_resumo_itens: {
         Row: {

@@ -28,6 +28,11 @@ function estourarSeErro(error: { message: string } | null): void {
   if (error) throw new ErroServidor(409, error.message)
 }
 
+// Formatador local, e nao o `fmt` de `features/mercado/utils`: importar de
+// `features/` dentro de `data/remote/` inverteria a camada — o adaptador de
+// dados nao pode depender de tela. Mesma configuracao, dois donos.
+const numero = new Intl.NumberFormat('pt-BR')
+
 async function userIdAtual(): Promise<string> {
   const { data } = await supabase.auth.getSession()
   const id = data.session?.user.id
@@ -145,6 +150,20 @@ export async function mercadoMeus(): Promise<{
       anuncio: { species_id: r.species_id, level: r.level, is_shiny: r.is_shiny } as AnuncioMercado,
     })),
     minhasOfertas: (minhasOfertas.data ?? []) as OfertaMercado[],
+  }
+}
+
+/**
+ * Regra da taxa de venda (PH-98). Leitura, apesar de ser `rpc`: a funcao e
+ * `immutable` e nao escreve nada — ela existe pra a tela mostrar o liquido antes
+ * de confirmar, usando a MESMA fonte que as RPCs de venda consultam.
+ */
+export async function taxaDoMercado(): Promise<{ percentual: number; moedasIsentas: string[] }> {
+  const { data, error } = await db.rpc('taxa_do_mercado')
+  estourarSeErro(error)
+  return {
+    percentual: Number(data?.percentual ?? 0),
+    moedasIsentas: Array.isArray(data?.moedasIsentas) ? data.moedasIsentas : [],
   }
 }
 
@@ -269,13 +288,21 @@ export async function criarOrdem(corpo: { itemId: string; side: 'compra' | 'vend
   estourarSeErro(error)
   await refetchAposOrdem(corpo.itemId)
   const executado = data?.executado ?? 0
+  // A taxa (PH-98) entra no toast SO na venda, e so quando ela existiu: e o
+  // vendedor que paga, e o `recebidoTotal` que a RPC devolve JA e liquido.
+  // Repetir o desconto aqui descontaria duas vezes na frase.
+  const taxaTotal = Number(data?.taxaTotal ?? 0)
+  const recebido = Number(data?.recebidoTotal ?? 0)
+  const sufixoDeVenda = corpo.side === 'venda' && recebido > 0
+    ? ` Você recebeu ${numero.format(recebido)}${taxaTotal > 0 ? ` (taxa: ${numero.format(taxaTotal)})` : ''}.`
+    : ''
   // Unica das 8 RPCs do mercado sem `mensagem` no retorno (so ok/ordemId/
   // executado/gastoTotal/recebidoTotal) — sem isto o jogador clicava
   // "Comprar"/"Colocar a venda" e nao via nenhum toast confirmando.
   const mensagem = executado >= corpo.quantity
-    ? `Ordem executada: ${executado}x ${corpo.itemId} casou na hora.`
+    ? `Ordem executada: ${executado}x ${corpo.itemId} casou na hora.${sufixoDeVenda}`
     : executado > 0
-      ? `${executado}x casou na hora, o resto (${corpo.quantity - executado}x) ficou no livro esperando.`
+      ? `${executado}x casou na hora, o resto (${corpo.quantity - executado}x) ficou no livro esperando.${sufixoDeVenda}`
       : 'Ordem criada, aguardando alguem do outro lado.'
   return { mensagem, executado }
 }
