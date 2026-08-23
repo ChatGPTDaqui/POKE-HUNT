@@ -16,6 +16,7 @@ import { useMochilaStore } from '@/stores/mochilaStore'
 import {
   configurarPersistencia, limparPersistencia, flushAgora, erroDaUltimaCarga,
 } from '@/data/remote/gameStatePersistence'
+import { retomarHuntSeHavia, reiniciarBootDaSessao } from './bootDaSessao'
 
 export type EstadoProgresso =
   | { fase: 'carregando' }
@@ -33,6 +34,11 @@ export function useProgressoRemoto(): EstadoProgresso {
 
     const minhaGeracao = configurarPersistencia(userId, defaultGameStateData())
 
+    // Solta a promessa de assentamento do jogador anterior. Reaproveitada, ela
+    // mostraria o resumo de farm offline de outra conta e decidiria a
+    // reentrada com o `map_id` dela.
+    reiniciarBootDaSessao()
+
     // A mochila e carregada sob demanda e vive FORA do save (ver mochilaStore).
     // Sem zerar aqui, entrar noutra conta na mesma aba encontraria a mochila
     // "ja carregada" e a tela mostraria os POKEs do jogador ANTERIOR: o modulo
@@ -41,7 +47,7 @@ export function useProgressoRemoto(): EstadoProgresso {
 
     useGameStateStore.persist
       .rehydrate()
-      ?.then(() => {
+      ?.then(async () => {
         if (cancelado) return
         // O `.catch` abaixo NAO cobre falha de leitura: o `persist` do zustand
         // engole o erro do storage e resolve mesmo assim (ver a nota em
@@ -52,7 +58,27 @@ export function useProgressoRemoto(): EstadoProgresso {
         // inicial pra quem ja tem equipe no servidor. Reproduzido com um
         // bloqueador de anuncios barrando o servico.
         const falha = erroDaUltimaCarga()
-        setEstado(falha ? { fase: 'erro', mensagem: falha } : { fase: 'pronto' })
+        if (falha) {
+          setEstado({ fase: 'erro', mensagem: falha })
+          return
+        }
+
+        // Reentrada na hunt ANTES de liberar a montagem do jogo (PH-93). Aqui,
+        // e nao num efeito de `JogoCarregado`, porque o `GameCanvas` monta o
+        // mundo do Hospital no primeiro mount — depois dele, reentrar seria
+        // trocar de cena na cara do jogador em vez de nunca sair dela.
+        //
+        // Falha nao pode travar o boot: a reentrada e uma conveniencia, e o
+        // Hospital e o estado seguro. Quem estava numa hunt e nao consegue
+        // voltar entra no jogo normalmente — nunca fica na tela de
+        // carregamento por causa disto.
+        try {
+          await retomarHuntSeHavia()
+        } catch (erro) {
+          console.warn('[boot] nao foi possivel retomar a hunt anterior', erro)
+        }
+        if (cancelado) return
+        setEstado({ fase: 'pronto' })
       })
       .catch((err: unknown) => {
         if (!cancelado) {
