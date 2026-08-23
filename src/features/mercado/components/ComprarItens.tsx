@@ -11,6 +11,7 @@ import { GameButton, GameCard, GameInput, SectionLabel } from '@/components/game
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
 import { fmt, STALE_MS } from '../utils'
 import { Carregando, IconeItem } from './shared'
+import { HistoricoDePreco } from './HistoricoDePreco'
 
 function LivroDoItem({ itemId }: { itemId: string }) {
   const item = getItem(itemId)
@@ -62,6 +63,12 @@ function LivroDoItem({ itemId }: { itemId: string }) {
           ))}
         </div>
       </div>
+
+      {/* ANTES do formulario de propósito (PH-97): o campo de preco nasce no
+          melhor preco do livro, que diz o que esta a venda AGORA e nao o que a
+          coisa vale. Quem digita um preco antes de ver a mediana de 7 dias
+          ancora no primeiro numero que apareceu na tela. */}
+      <HistoricoDePreco itemId={itemId} />
 
       <GameCard className="flex flex-wrap items-end gap-[.5em] p-[.6em]">
         <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
