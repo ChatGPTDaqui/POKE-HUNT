@@ -14,6 +14,7 @@
 // a nota original ja mencionava ("dois desenhos no mesmo tick, ex.
 // StrictMode double-invoke, podem corromper a posicao").
 import { drawEntity, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage } from './sprites'
+import { desenharAmbiente } from './ambiente'
 import { CENA_HOSPITAL, ZOOM_DA_CENA, escalaDoPoke } from '@/data/hospital'
 import type { WorldEntity, WorldState } from '@/engine/types'
 import { arteParaSala, backgroundParaSala } from '@/data/maps'
@@ -277,15 +278,24 @@ export class Renderer {
     ctx.scale(this.zoom, this.zoom)
     ctx.translate(-camera.x, -camera.y)
 
+    const fundo = backgroundParaSala(mapDef, world.sala)
+    const janela = { x: camera.x, y: camera.y, w: this.width / this.zoom, h: this.height / this.zoom }
+
     drawMapBackground(
       ctx,
       {
-        bg: backgroundParaSala(mapDef, world.sala),
+        bg: fundo,
         bounds: mapDef.bounds,
         arte: arteParaSala(mapDef.id, world.sala) ?? undefined,
       },
-      { x: camera.x, y: camera.y, w: this.width / this.zoom, h: this.height / this.zoom },
+      janela,
     )
+
+    // Vida ambiente ENTRE o fundo e as entidades (PH-96): folha, brasa e poeira
+    // passam sobre o cenario mas por baixo do POKE — na frente dele, a camada
+    // esconderia o que o jogador precisa ver. A janela vai em coordenada de
+    // mundo porque e ela que decide onde a particula nasce e onde ela recicla.
+    desenharAmbiente(ctx, fundo.image, janela)
 
     for (const enemy of world.enemies) {
       drawEntity(ctx, enemy)
