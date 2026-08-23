@@ -35,6 +35,7 @@
 // vive so neste modulo, e o unico estado dela e um array de particulas que
 // morre junto com a troca de arte. O motor nao sabe que ela existe.
 import { useUiStore } from '@/stores/uiStore'
+import { AGUA_POR_ARTE } from '@/data/generated/aguaMask.generated'
 
 export type PresetAmbiente =
   | 'folha' // floresta, selva, mato alto — folha caindo em deriva + feixe de luz
@@ -193,6 +194,65 @@ export interface JanelaDeAmbiente {
   h: number
 }
 
+// ---------------------------------------------------------------------------
+// MASCARA DE AGUA (PH-113)
+// ---------------------------------------------------------------------------
+// O cabecalho acima registra a limitacao que o PH-96 deixou: o preset de agua
+// "nao sabe onde a agua esta, entao ele passa por cima de terra tambem", e por
+// isso ele nasceu o mais discreto de todos.
+//
+// `aguaMask.generated.ts` resolve isso pra as artes que tem referencia PINTADA.
+// Arte sem referencia nao muda em NADA — mesmo brilho discreto de hoje. Ou seja:
+// esta mudanca nao pode piorar mapa nenhum, so melhorar os pintados.
+//
+// Por que pintado e nao derivado da cor da arte: agua e vegetacao coincidem em
+// matiz, saturacao, luminancia E textura neste acervo (medido em PH-113, ver o
+// cabecalho de scripts/build-agua-mask.js). Nao ha plano separador.
+
+interface MascaraViva { celula: number; grid: string[] }
+
+/** A arte que esta na tela tem mascara de agua? */
+function mascaraDaArte(imagem: string): MascaraViva | null {
+  return AGUA_POR_ARTE[imagem] ?? null
+}
+
+/** O ponto de MUNDO (x,y) cai numa celula marcada como agua? */
+function eAgua(mascara: MascaraViva, x: number, y: number): boolean {
+  // Fora da grade e "nao e agua", nao "e agua": a grade cobre o retangulo do
+  // mundo, e o que passa dela e borda de arte, onde ondular nao faz sentido.
+  if (x < 0 || y < 0) return false
+  const linha = mascara.grid[Math.floor(y / mascara.celula)]
+  return !!linha && linha[Math.floor(x / mascara.celula)] === '1'
+}
+
+/**
+ * Receita do preset, reforcada quando ha mascara.
+ *
+ * O preset de agua e discreto porque nao sabia onde a agua estava — pontinho
+ * esparso de alpha baixo, que le como cintilancia de luz em QUALQUER superficie.
+ * Com mascara essa restricao cai: da pra ondular de verdade sem risco de a areia
+ * ondular junto.
+ *
+ * Reforcar sem mascara seria o contrario de uma melhoria: deixaria mais visivel
+ * exatamente o efeito que passa por cima da terra. Por isso o reforco e
+ * CONDICIONAL, e nao um numero novo no lugar do velho.
+ */
+function receitaDe(preset: Exclude<PresetAmbiente, 'nenhum'>, mascara: MascaraViva | null): Receita {
+  const base = RECEITAS[preset]
+  if (preset !== 'agua' || !mascara) return base
+  return {
+    ...base,
+    quantidade: Math.round(base.quantidade * 1.8),
+    raio: [base.raio[0] * 1.35, base.raio[1] * 1.7],
+    alpha: Math.min(1, base.alpha * 1.5),
+    // Mais bamboleio e menos espalhamento: a onda sobe quase reta e ondula de
+    // lado, que e o que le como superficie de agua. Espalhamento alto fazia o
+    // conjunto parecer poeira subindo.
+    espalhamento: base.espalhamento * 0.55,
+    bamboleio: base.bamboleio * 2.6,
+  }
+}
+
 // Estado da camada. Modulo, e nao WorldState: e cosmetico, nao entra no save,
 // nao e resimulado e nao pode viajar pro servidor.
 let arteAtual: string | null = null
@@ -217,7 +277,23 @@ export function presetDaArte(imagem: string | null | undefined): PresetAmbiente 
   return PRESET_POR_ARTE[imagem] ?? 'nenhum'
 }
 
-function nascer(p: Particula, r: Receita, janela: JanelaDeAmbiente, aoEntrar: boolean): void {
+/**
+ * Quantas posicoes sortear procurando agua antes de desistir.
+ *
+ * Desistir importa: numa janela SEM agua nenhuma (o jogador andou pra dentro da
+ * mata do `swamp`) nenhum sorteio acerta, e insistir travaria o quadro. Ao
+ * desistir a particula nasce onde caiu, e o laco de desenho a recicla antes de
+ * desenhar — o efeito rarefaz longe da agua em vez de vazar pra terra.
+ */
+const TENTATIVAS_DE_AGUA = 12
+
+function nascer(
+  p: Particula,
+  r: Receita,
+  janela: JanelaDeAmbiente,
+  aoEntrar: boolean,
+  mascara: MascaraViva | null = null,
+): void {
   const ang = r.angulo + (rand() - 0.5) * 2 * r.espalhamento
   const vel = r.velocidade[0] + rand() * (r.velocidade[1] - r.velocidade[0])
   p.vx = Math.cos(ang) * vel
@@ -226,6 +302,20 @@ function nascer(p: Particula, r: Receita, janela: JanelaDeAmbiente, aoEntrar: bo
   p.alphaMax = r.alpha * (0.5 + rand() * 0.5)
   p.fase = rand() * Math.PI * 2
   p.bamboleio = r.bamboleio * (0.4 + rand() * 0.6)
+
+  // Com mascara, a particula nasce DENTRO da agua e nao na borda da janela — o
+  // ponto inteiro do PH-113. Vale tambem na reciclagem: entrar pela borda faria
+  // a onda atravessar a terra ate achar agua.
+  if (mascara) {
+    for (let i = 0; i < TENTATIVAS_DE_AGUA; i++) {
+      const x = janela.x + rand() * janela.w
+      const y = janela.y + rand() * janela.h
+      if (eAgua(mascara, x, y)) { p.x = x; p.y = y; return }
+    }
+    p.x = janela.x + rand() * janela.w
+    p.y = janela.y + rand() * janela.h
+    return
+  }
 
   if (!aoEntrar) {
     // Primeira populacao: espalhada pela janela inteira, senao a camada entra
@@ -246,8 +336,14 @@ function nascer(p: Particula, r: Receita, janela: JanelaDeAmbiente, aoEntrar: bo
   }
 }
 
-function reconstruir(chave: string, preset: Exclude<PresetAmbiente, 'nenhum'>, janela: JanelaDeAmbiente, compacto: boolean): void {
-  const r = RECEITAS[preset]
+function reconstruir(
+  chave: string,
+  preset: Exclude<PresetAmbiente, 'nenhum'>,
+  janela: JanelaDeAmbiente,
+  compacto: boolean,
+  mascara: MascaraViva | null,
+): void {
+  const r = receitaDe(preset, mascara)
   rand = sorteioLocal(semeteDaArte(chave))
   // Metade no compacto (celular): o laco de desenho roda a 60/s e esta e a
   // unica coisa aqui que cresce sem limite natural.
@@ -255,7 +351,7 @@ function reconstruir(chave: string, preset: Exclude<PresetAmbiente, 'nenhum'>, j
   particulas = []
   for (let i = 0; i < quantidade; i++) {
     const p: Particula = { x: 0, y: 0, vx: 0, vy: 0, raio: 0, alphaMax: 0, fase: 0, bamboleio: 0 }
-    nascer(p, r, janela, false)
+    nascer(p, r, janela, false, mascara)
     particulas.push(p)
   }
   arteAtual = chave
@@ -287,9 +383,10 @@ export function desenharAmbiente(
     return
   }
 
-  const r = RECEITAS[preset]
+  const mascara = mascaraDaArte(imagem)
+  const r = receitaDe(preset, mascara)
   const compacto = ui.viewportWidth > 0 && ui.viewportWidth < 760
-  if (arteAtual !== imagem || particulas.length === 0) reconstruir(imagem, preset, janela, compacto)
+  if (arteAtual !== imagem || particulas.length === 0) reconstruir(imagem, preset, janela, compacto, mascara)
 
   const agora = performance.now()
   // Primeiro quadro apos reconstruir: sem instante anterior, `delta` seria o
@@ -318,8 +415,13 @@ export function desenharAmbiente(
 
     const foraX = p.x < janela.x - FOLGA * 2 || p.x > janela.x + janela.w + FOLGA * 2
     const foraY = p.y < janela.y - FOLGA * 2 || p.y > janela.y + janela.h + FOLGA * 2
-    if (foraX || foraY) {
-      nascer(p, r, janela, true)
+    // Com mascara, SAIR DA AGUA tambem recicla — senao a onda continuaria
+    // subindo depois de passar da margem e apareceria em cima da terra, que e
+    // exatamente o que esta mudanca existe pra impedir. Cobre tambem a
+    // particula que nasceu em terra por `TENTATIVAS_DE_AGUA` ter desistido:
+    // ela e reciclada ANTES de ser desenhada.
+    if (foraX || foraY || (mascara && !eAgua(mascara, p.x, p.y))) {
+      nascer(p, r, janela, true, mascara)
       continue
     }
 
