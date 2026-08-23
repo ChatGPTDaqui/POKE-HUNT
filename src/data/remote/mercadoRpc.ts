@@ -114,13 +114,94 @@ export async function mercadoLivro(itemId: string) {
   }
 }
 
-export async function mercadoPokes(): Promise<{ anuncios: AnuncioMercado[] }> {
-  const { data, error } = await db.from('mercado_anuncios_ativos').select('*').order('created_at', { ascending: false })
+/**
+ * Filtro da vitrine de POKE (PH-99). Tudo aqui vira predicado SQL — nada e
+ * filtrado em memoria depois.
+ */
+export interface FiltroDaVitrine {
+  /** Base zero. */
+  pagina: number
+  porPagina: number
+  /** Casado contra `species_id` — ver a nota em `mercadoPokes`. */
+  termo?: string
+  moedas?: ('gold' | 'diamond')[]
+  raridades?: string[]
+  shinyOnly?: boolean
+  nivelMin?: number
+  ivMin?: number
+  soLance?: boolean
+  ordem?: 'preco' | 'recente' | 'nivel' | 'iv' | 'termina'
+}
+
+/**
+ * Uma pagina da vitrine de POKE, com o TOTAL de verdade.
+ *
+ * ---------------------------------------------------------------------------
+ * POR QUE `count: 'exact'` E NAO `data.length`
+ * ---------------------------------------------------------------------------
+ * `.length` no resultado do PostgREST MENTE acima de 1000 linhas: ele corta e
+ * nao avisa. A vitrine ia simplesmente parar de mostrar anuncio, e nada na tela
+ * nem no console diria isso — pareceria que o Mercado esta vazio de POKE mais
+ * raro. E uma armadilha ja documentada como regra critica do projeto.
+ *
+ * `count: 'exact'` e o caminho do supabase-js pra `Prefer: count=exact` +
+ * leitura do header `Content-Range`, que e exatamente a receita que a regra
+ * manda usar — feita pela biblioteca em vez de a mao.
+ *
+ * ---------------------------------------------------------------------------
+ * A BUSCA CASA CONTRA `species_id`, E ISSO NAO E UM ATALHO
+ * ---------------------------------------------------------------------------
+ * Buscar pelo NOME exigiria juntar `species` na view, e `security_invoker`
+ * faria a leitura depender da RLS do catalogo no schema `dev` — que foi clonado
+ * fora da trilha de migration e nao da pra afirmar sem conferir no banco.
+ *
+ * Medido em vez de suposto: das 226 especies do catalogo, 224 tem o nome
+ * derivavel do id (`Charmander` <-> `charmander`). As duas excecoes sao
+ * `nidoran_f`/`nidoran_m` ("Nidoran♀"/"Nidoran♂"), e as duas casam por
+ * prefixo com "nidoran" de qualquer jeito. Ou seja: casar contra o id E casar
+ * contra o nome, sem tocar em RLS de catalogo.
+ */
+export async function mercadoPokes(filtro?: FiltroDaVitrine): Promise<{ anuncios: AnuncioMercado[]; total: number }> {
+  const f: FiltroDaVitrine = filtro ?? { pagina: 0, porPagina: 25 }
+  let q = db.from('mercado_anuncios_ativos').select('*', { count: 'exact' })
+
+  if (f.termo?.trim()) q = q.ilike('species_id', `%${f.termo.trim().toLowerCase()}%`)
+  // Lista vazia significaria "nenhuma moeda", que nao e um estado que a tela
+  // ofereça — mas se chegar, `in.()` vazio e erro de sintaxe no PostgREST. Só
+  // filtra quando a lista restringe de verdade.
+  if (f.moedas && f.moedas.length > 0 && f.moedas.length < 2) q = q.in('currency', f.moedas)
+  if (f.raridades && f.raridades.length > 0) q = q.in('rarity', f.raridades)
+  if (f.shinyOnly) q = q.eq('is_shiny', true)
+  if (f.nivelMin && f.nivelMin > 0) q = q.gte('level', f.nivelMin)
+  if (f.ivMin && f.ivMin > 0) q = q.gte('iv_percent', f.ivMin)
+  if (f.soLance) q = q.eq('apenas_oferta', true)
+
+  if (f.ordem === 'recente') q = q.order('created_at', { ascending: false })
+  else if (f.ordem === 'nivel') q = q.order('level', { ascending: false })
+  else if (f.ordem === 'iv') q = q.order('iv_percent', { ascending: false })
+  else if (f.ordem === 'termina') {
+    // Leilao primeiro, por quem acaba antes. `nullsFirst: false` manda quem nao
+    // tem prazo (preco fixo e somente-lance) pro fim, em vez de tratar `null`
+    // como "acaba agora".
+    q = q.order('expira_em', { ascending: true, nullsFirst: false })
+  } else {
+    // Preco crescente, com anuncio SEM PRECO no fim — regra de negocio que ja
+    // valia no filtro em memoria: tratar `null` como 0 faria o anuncio de lance
+    // aparecer como o mais barato do Mercado. `nullsFirst: false` e o que
+    // sustenta isso no servidor.
+    q = q.order('price', { ascending: true, nullsFirst: false })
+      // Desempate entre os sem-preco: quem acaba antes primeiro. Sem isto a
+      // lista de leiloes se reembaralharia a cada refetch.
+      .order('expira_em', { ascending: true, nullsFirst: false })
+  }
+
+  const de = f.pagina * f.porPagina
+  const { data, error, count } = await q.range(de, de + f.porPagina - 1)
   estourarSeErro(error)
   const anuncios: AnuncioMercado[] = (data ?? []).map((r: Linha) => ({
     ...r, melhorOferta: r.melhor_oferta ?? null,
   }))
-  return { anuncios }
+  return { anuncios, total: Number(count ?? 0) }
 }
 
 export async function mercadoMeus(): Promise<{

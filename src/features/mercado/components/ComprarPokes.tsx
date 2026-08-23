@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Coin, Diamond, Gavel } from '@phosphor-icons/react'
 import * as mercadoRpc from '@/data/remote/mercadoRpc'
@@ -15,6 +15,7 @@ import { Carregando, Moeda } from './shared'
 import { TempoRestante } from './TempoRestante'
 import { useSegundosRestantes, proximoLanceMinimo } from '../tempoDeLeilao'
 import { HistoricoDePreco } from './HistoricoDePreco'
+import { faixaDaPagina } from '../paginacao'
 
 /**
  * Filtro rapido de um toque: botao que liga/desliga (pedido explicito).
@@ -72,6 +73,16 @@ function anuncioComoPoke(a: AnuncioMercado) {
     unlockedAbilities: [],
   }
 }
+
+/**
+ * Anuncios por pagina.
+ *
+ * 25 e o meio-termo medido no painel: no celular (~470px uteis) cabem 5 ou 6
+ * cartoes na tela, entao 25 e uma rolagem curta; e a consulta pagina traz uma
+ * fracao do que a vitrine inteira trazia. Numero muito menor multiplicaria os
+ * cliques de paginacao e, com eles, as requisicoes.
+ */
+const POR_PAGINA = 25
 
 /**
  * A linha de um LEILAO na vitrine (PH-101).
@@ -152,58 +163,74 @@ export function ComprarPokes() {
   const [nivelMin, setNivelMin] = useState(0)
   const [ivMin, setIvMin] = useState(0)
   const [raridades, setRaridades] = useState<Set<RarityKey>>(() => new Set(Object.keys(RARITIES) as RarityKey[]))
-  const [ordem, setOrdem] = useState<'preco' | 'nivel' | 'iv' | 'termina'>('preco')
+  const [ordem, setOrdem] = useState<'preco' | 'recente' | 'nivel' | 'iv' | 'termina'>('preco')
   // Um anuncio com o historico aberto por vez — ver a nota no botao "Preco".
   const [precoAberto, setPrecoAberto] = useState<string | null>(null)
+  const [pagina, setPagina] = useState(0)
+
+  // Filtro do SERVIDOR (PH-99). Montado num `useMemo` porque ele e a
+  // `queryKey`: sem isso um objeto novo a cada render invalidaria o cache em
+  // todo re-render e a vitrine viraria uma rajada de requests.
+  const filtro = useMemo((): mercadoRpc.FiltroDaVitrine => ({
+    pagina,
+    porPagina: POR_PAGINA,
+    termo: busca.trim() || undefined,
+    // `undefined` quando as duas estao ligadas: nao restringe nada, e mandar as
+    // duas viraria um `in.(gold,diamond)` inutil na URL.
+    moedas: verGold && verDiamante ? undefined : [
+      ...(verGold ? ['gold' as const] : []),
+      ...(verDiamante ? ['diamond' as const] : []),
+    ],
+    raridades: raridades.size === Object.keys(RARITIES).length ? undefined : [...raridades],
+    shinyOnly: shinyOnly || undefined,
+    nivelMin: nivelMin || undefined,
+    ivMin: ivMin || undefined,
+    soLance: somenteOferta || undefined,
+    ordem,
+  }), [pagina, busca, verGold, verDiamante, raridades, shinyOnly, nivelMin, ivMin, somenteOferta, ordem])
+
+  // Mudar QUALQUER filtro volta pra primeira pagina. Sem isto, quem estava na
+  // pagina 5 e digita uma busca que devolve 3 resultados ve uma vitrine VAZIA —
+  // e o vazio nao explica que o problema e a pagina, nao o filtro.
+  //
+  // Efeito, e nao um wrapper em cada um dos oito setters: com oito, o proximo
+  // filtro a entrar seria adicionado sem o wrapper e o bug voltaria calado.
+  useEffect(() => {
+    setPagina(0)
+  }, [busca, verGold, verDiamante, raridades, shinyOnly, nivelMin, ivMin, somenteOferta, ordem])
 
   const { data, isLoading } = useQuery({
-    queryKey: ['mercado', 'pokes'],
-    queryFn: () => mercadoRpc.mercadoPokes(),
+    // O filtro INTEIRO entra na chave. Sem ele, trocar de pagina ou de
+    // ordenacao leria o cache da combinacao anterior e a tela mostraria a
+    // pagina errada com aparencia de certa.
+    queryKey: ['mercado', 'pokes', filtro],
+    queryFn: () => mercadoRpc.mercadoPokes(filtro),
     staleTime: STALE_MS,
+    // Segura a pagina anterior enquanto a nova carrega, em vez de piscar o
+    // estado de carregamento e a lista sumir a cada clique de paginacao.
+    placeholderData: (anterior) => anterior,
   })
   const comprar = useAcaoMercado((anuncioId: string) => mercadoRpc.comprarAnuncio(anuncioId))
   const ofertar = useAcaoMercado(mercadoRpc.ofertar)
   const darLance = useAcaoMercado(mercadoRpc.darLance)
 
-  const filtrados = useMemo(() => {
-    const termo = busca.trim().toLowerCase()
-    return (data?.anuncios ?? [])
-      .filter((a) => {
-        const species = SPECIES[a.species_id]
-        if (!species) return false
-        if (termo && !species.name.toLowerCase().includes(termo)) return false
-        if (a.currency === 'gold' && !verGold) return false
-        if (a.currency === 'diamond' && !verDiamante) return false
-        if (somenteOferta && !a.apenas_oferta) return false
-        if (shinyOnly && !a.is_shiny) return false
-        if (a.level < nivelMin) return false
-        if (a.iv_percent < ivMin) return false
-        return raridades.has(a.rarity as RarityKey)
-      })
-      .sort((a, b) => {
-        if (ordem === 'nivel') return b.level - a.level
-        if (ordem === 'iv') return b.iv_percent - a.iv_percent
-        if (ordem === 'termina') {
-          // Leilao primeiro, por quem acaba antes; o resto (preco fixo e
-          // somente-lance) nao tem prazo e vai pro fim.
-          const ta = a.modo === 'leilao' && a.expira_em ? new Date(a.expira_em).getTime() : Number.MAX_SAFE_INTEGER
-          const tb = b.modo === 'leilao' && b.expira_em ? new Date(b.expira_em).getTime() : Number.MAX_SAFE_INTEGER
-          return ta - tb
-        }
-        // Anuncio de lance nao tem preco: vai pro fim da ordenacao por preco em
-        // vez de virar 0 e fingir ser o mais barato do Mercado.
-        const pa = a.price ?? Number.MAX_SAFE_INTEGER
-        const pb = b.price ?? Number.MAX_SAFE_INTEGER
-        if (pa !== pb) return pa - pb
-        // Empate no fim da lista: dois anuncios sem preco. Sem desempate eles
-        // sairiam na ordem que o `sort` resolvesse, e o jogador veria a lista
-        // de leiloes se reembaralhar a cada refetch de 10s. Quem acaba antes
-        // primeiro — e a informacao que importa num leilao.
-        const ea = a.modo === 'leilao' && a.expira_em ? new Date(a.expira_em).getTime() : Number.MAX_SAFE_INTEGER
-        const eb = b.modo === 'leilao' && b.expira_em ? new Date(b.expira_em).getTime() : Number.MAX_SAFE_INTEGER
-        return ea - eb
-      })
-  }, [data, busca, verGold, verDiamante, somenteOferta, shinyOnly, nivelMin, ivMin, raridades, ordem])
+  // A lista chega da pagina JA filtrada e ordenada pelo servidor (PH-99). O
+  // unico descarte que sobra aqui e a especie que o cliente nao conhece —
+  // anuncio de POKE renomeado num sync posterior, que nao tem como desenhar.
+  //
+  // Filtrar isso no servidor exigiria ele saber qual catalogo ESTE cliente tem,
+  // e as duas pontas divergem por deploy. Ele fica de fora do total tambem: o
+  // contador vem do `count` do banco, entao ele conta o anuncio que a tela
+  // descartou. Preferi um total honesto ("34 anuncios") com uma linha faltando
+  // a um total que muda de acordo com a versao do navegador.
+  //
+  // A ordenacao por prazo de leilao (PH-101) tambem desceu pro servidor: o
+  // `.sort()` que ficava aqui so via a PAGINA, e ordenar 25 de 300 anuncios
+  // daria uma lista que parece ordenada e nao esta.
+  const filtrados = useMemo(
+    () => (data?.anuncios ?? []).filter((a) => SPECIES[a.species_id]),
+    [data],
+  )
 
   if (isLoading) return <Carregando />
 
@@ -220,6 +247,9 @@ export function ComprarPokes() {
     raridades.size < Object.keys(RARITIES).length && `${raridades.size}/${Object.keys(RARITIES).length} raridades`,
   ].filter(Boolean).join(' · ') || 'tudo'
 
+  const total = data?.total ?? 0
+  const { paginas, inicio, fim } = faixaDaPagina(total, pagina, POR_PAGINA)
+
   return (
     <div className="flex flex-col gap-[.45em]">
       {/* Quatro fileiras de filtro (busca, moeda, faixa, raridades) somavam
@@ -234,6 +264,7 @@ export function ComprarPokes() {
         />
         <GameSelect value={ordem} onChange={(e) => setOrdem(e.target.value as typeof ordem)}>
           <option value="preco">Menor preco</option>
+          <option value="recente">Mais recente</option>
           <option value="termina">Leilão terminando</option>
           <option value="nivel">Maior nivel</option>
           <option value="iv">Maior IV</option>
@@ -288,6 +319,18 @@ export function ComprarPokes() {
       </div>
       </div>
       </Recolhivel>
+
+      {/* O TOTAL vem do `count` do banco, e nao de `data.length` (PH-99): acima
+          de 1000 linhas o `.length` do PostgREST corta e nao avisa, e a vitrine
+          pararia de mostrar anuncio parecendo que o Mercado esta vazio. */}
+      {total > 0 && (
+        <div className="flex items-center justify-between text-[.78em] text-n500">
+          <span>
+            {inicio}–{fim} de {fmt.format(total)}
+          </span>
+          {paginas > 1 && <span>página {pagina + 1} de {fmt.format(paginas)}</span>}
+        </div>
+      )}
 
       {filtrados.length === 0 && <p className="text-n500">Nenhum POKE a venda com esses filtros.</p>}
 
@@ -394,6 +437,31 @@ export function ComprarPokes() {
           </GameCard>
         )
       })}
+
+      {/* Paginacao no FIM da lista, e nao no topo: e onde o dedo esta depois de
+          rolar os 25 cartoes. Só aparece quando ha mais de uma pagina — dois
+          botoes desabilitados em cima de uma vitrine de 3 anuncios sao ruido. */}
+      {paginas > 1 && (
+        <div className="flex items-center justify-center gap-[.5em] pt-[.3em]">
+          <GameButton
+            variant="ghost"
+            disabled={pagina === 0}
+            onClick={() => setPagina((p) => Math.max(0, p - 1))}
+          >
+            ← Anterior
+          </GameButton>
+          <span className="text-[.8em] tabular-nums text-n400">
+            {pagina + 1} / {fmt.format(paginas)}
+          </span>
+          <GameButton
+            variant="ghost"
+            disabled={pagina + 1 >= paginas}
+            onClick={() => setPagina((p) => p + 1)}
+          >
+            Próxima →
+          </GameButton>
+        </div>
+      )}
     </div>
   )
 }
