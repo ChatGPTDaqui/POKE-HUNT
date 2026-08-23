@@ -289,6 +289,14 @@ export interface NegocioMercado {
   unit_price: number
   currency: 'gold' | 'diamond'
   created_at: string
+  /**
+   * Taxa cobrada do VENDEDOR nesta negociacao (PH-98), na moeda da linha.
+   *
+   * Opcional porque toda linha anterior ao PH-98 nao tem a coluna preenchida
+   * (default 0) e porque uma resposta de servidor mais antigo simplesmente nao
+   * traz o campo — a tela trata ausente e zero igual, "nao houve taxa".
+   */
+  taxa?: number | null
   comprador?: string | null
   vendedor?: string | null
   souComprador?: boolean
