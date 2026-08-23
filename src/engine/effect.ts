@@ -44,6 +44,12 @@ export interface CreateWorldEffectParams {
   // raia; este so translada as coordenadas e nao reserva nada. Ver
   // types.ts#WorldEffect.seguirId.
   seguir?: BaseEntity | null
+  /**
+   * Entidade pra qual o rastro deve continuar APONTANDO enquanto o efeito vive
+   * (o atacante). So arte DIRECIONAL passa isto — ver
+   * `combatSystem` e types.ts#WorldEffect.apontarParaId.
+   */
+  apontarPara?: BaseEntity | null
 }
 
 export function createWorldEffect(counters: WorldCounters, params: CreateWorldEffectParams): WorldEffect {
@@ -51,7 +57,7 @@ export function createWorldEffect(counters: WorldCounters, params: CreateWorldEf
     type, x, y, targetX, targetY, radius = 10, color = '#fff', duration = 0.25, delay = 0,
     value, effectiveness, effectivenessLabel, text, unit, isAoe, owner = null, laneSize = 1,
     worldSize, elementType, abilityId, anguloDeAtaque, ballItemId, success, statusDirection,
-    seguir = null,
+    seguir = null, apontarPara = null,
   } = params
 
   const id = `effect-${counters.effect++}`
@@ -73,7 +79,35 @@ export function createWorldEffect(counters: WorldCounters, params: CreateWorldEf
     seguirId: seguir ? seguir.id : undefined,
     seguirUltimoX: seguir ? seguir.x : undefined,
     seguirUltimoY: seguir ? seguir.y : undefined,
+    apontarParaId: apontarPara ? apontarPara.id : undefined,
   }
+}
+
+/**
+ * Reaponta o rastro pra entidade que disparou o golpe (PH-110).
+ *
+ * Arte DIRECIONAL e um risco que LIGA atacante e alvo: a faisca de impacto fica
+ * em cima do alvo e o rastro se estende de volta pra quem bateu. Com o angulo
+ * congelado no instante do hit, o atacante andar durante o ~1s de animacao
+ * descola o rastro do punho dele — foi o que o Bullet Punch mostrou, que e o
+ * pior caso do lote (rastro horizontal de 84px recortado pra 37px, exatamente a
+ * distancia de combate).
+ *
+ * Congelar continua valendo pra arte NAO direcional: quem nao e direcional
+ * nunca recebe `apontarParaId`, entao nem chega aqui. O gate e na criacao, e nao
+ * neste laco, pra o resto do jogo ficar byte a byte igual.
+ *
+ * `atacante` nulo (morreu, saiu do mundo) deixa o ultimo angulo valido no lugar:
+ * girar a arte pra um ponto que nao existe mais seria pior que nao girar.
+ */
+export function reapontarParaAtacante(effect: WorldEffect, atacante: BaseEntity | null): void {
+  if (!effect.apontarParaId || !atacante) return
+  const dx = effect.x - atacante.x
+  const dy = effect.y - atacante.y
+  // Mesma guarda do call-site: golpe em si mesmo nao tem direcao, e dx=dy=0
+  // sairia como angulo 0 e apontaria a arte pra direita sem motivo.
+  if (dx === 0 && dy === 0) return
+  effect.anguloDeAtaque = Math.atan2(dy, dx)
 }
 
 /**

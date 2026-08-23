@@ -36,6 +36,7 @@ import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { SPECIES } from '@/data/pokes'
 import type { PokeInstance } from '@/data/pokes'
 import { colorForType } from '@/data/typeColors'
+import { ehDirecional } from '@/data/moveVfx'
 import { direcaoDoGolpeDeStatus } from '@/data/statusVfx'
 
 import { createFormulaEngine } from '@/core/formulaEngine'
@@ -43,7 +44,7 @@ import { FORMULAS } from '@/data/generated/formulas.generated'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { rollChance, randRange } from '@/core/random'
 import { triggerAttackAnim, ATTACK_ANIM_DURATION } from './animationSystem'
-import { createWorldEffect, effectDone, seguirDono, tickEffect } from '../effect'
+import { createWorldEffect, effectDone, reapontarParaAtacante, seguirDono, tickEffect } from '../effect'
 import {
   isDead, getGroundOffset, tickCooldowns, isAbilityReady,
   startCooldown, canAct, startGlobalCooldown, takeDamage, heal, getMaxHp, releaseEffectLane, findEntityById,
@@ -2878,10 +2879,17 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       abilityId: ability.id,
       statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : undefined,
       // A arte pousa em cima de `local` (o alvo, ou quem de fato recebeu o
-      // status) e acompanha ele pelo 1,0-1,1s que dura. `anguloDeAtaque`
-      // continua congelado de proposito: ele registra de onde o golpe veio, e
-      // recalcular faria a arte girar no meio da animacao.
+      // status) e acompanha ele pelo 1,0-1,1s que dura.
       seguir: local,
+      // `anguloDeAtaque` segue congelado pra arte NAO direcional — ele registra
+      // de onde o golpe veio, e girar no meio da animacao nao acrescenta nada
+      // num impacto redondo.
+      //
+      // Arte direcional e outra historia (PH-110): ela e um risco que LIGA
+      // atacante e alvo. Congelar uma ponta e mover a outra descola o rastro do
+      // punho, e o Bullet Punch mostrou isso em jogo. Essas recebem o atacante
+      // e o laco de efeitos reaponta a cada frame.
+      apontarPara: mesmoLugar || !ehDirecional(ability.id) ? undefined : attacker,
     }))
   }
 
@@ -3044,6 +3052,13 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     // Depois do movimento deste frame ja ter rodado, senao a arte andaria um
     // frame atras do POKE.
     if (effect.seguirId) seguirDono(effect, findEntityById(player, enemies, effect.seguirId))
+    // DEPOIS do `seguirDono`, e nao antes: o reapontamento le a posicao ja
+    // transladada do efeito. Invertido, o angulo sairia calculado contra a
+    // posicao do frame anterior — um frame de erro a cada frame, que num golpe
+    // rapido e o bastante pra o rastro tremer.
+    if (effect.apontarParaId) {
+      reapontarParaAtacante(effect, findEntityById(player, enemies, effect.apontarParaId))
+    }
   }
   for (const effect of world.effects) {
     if (effectDone(effect) && effect.ownerId) {
