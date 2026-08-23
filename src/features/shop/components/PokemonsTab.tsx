@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ArrowDown, ArrowUp, LockSimple, Sparkle } from '@phosphor-icons/react'
+import { ArrowDown, ArrowUp, LockSimple } from '@phosphor-icons/react'
 import { pedirAcaoComLocal } from '@/data/remote/autoridade'
 import { SPECIES, averageIvPercent } from '@/data/pokes'
 import { RARITIES, rarityOf, type RarityKey } from '@/data/rarity'
@@ -217,9 +217,7 @@ export function PokemonsTab() {
             setSelectedUids(new Set()) // trocar de modo muda o que e selecionavel
           }}
         >
-          <span className="inline-flex items-center gap-[.25em]">
-            Somente <Sparkle weight="fill" className="text-shiny" /> Shiny
-          </span>
+          Shiny
         </GameCheck>
       </div>
       </div>
