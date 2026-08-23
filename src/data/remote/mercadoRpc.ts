@@ -148,6 +148,96 @@ export async function mercadoMeus(): Promise<{
   }
 }
 
+// --- historico de preco (PH-97) -----------------------------------------------
+
+export interface PontoDeHistorico {
+  dia: string
+  mediana: number
+  minimo: number
+  maximo: number
+  volume: number
+  negocios: number
+}
+
+export interface ResumoDeHistorico {
+  mediana24h: number | null
+  mediana7d: number | null
+  volume24h: number
+  volume30d: number
+  negocios30d: number
+}
+
+export interface HistoricoDePreco {
+  serie: PontoDeHistorico[]
+  resumo: ResumoDeHistorico | null
+}
+
+function pontos(linhas: Linha[]): PontoDeHistorico[] {
+  return linhas.map((r) => ({
+    dia: r.dia,
+    mediana: Number(r.mediana),
+    minimo: Number(r.minimo),
+    maximo: Number(r.maximo),
+    volume: Number(r.volume),
+    negocios: Number(r.negocios),
+  }))
+}
+
+/**
+ * Exportada SO pra teste — a decisão que ela guarda é a que quebra em silêncio:
+ * "não houve negócio nas últimas 24h" tem que sobreviver como `null` até a
+ * tela, nunca virar 0. Zero é um PREÇO, e um preço em que dá pra clicar; o
+ * projeto já pagou esse prejuízo uma vez (ver o guard de `isLoading` em
+ * ComprarItens.tsx, que existe porque o campo nascia em 0).
+ */
+export function mapearResumoDeHistorico(linha: Linha | null): ResumoDeHistorico | null {
+  return resumo(linha)
+}
+
+function resumo(linha: Linha | null): ResumoDeHistorico | null {
+  if (!linha) return null
+  return {
+    // `null` sobrevive como `null` de propósito: "sem negocio nas ultimas 24h"
+    // e uma resposta, e virar 0 faria a tela mostrar um PRECO de zero — numero
+    // em que da pra clicar. Mesmo prejuizo que o guard de `isLoading` em
+    // ComprarItens.tsx ja pagou uma vez.
+    mediana24h: linha.mediana_24h == null ? null : Number(linha.mediana_24h),
+    mediana7d: linha.mediana_7d == null ? null : Number(linha.mediana_7d),
+    volume24h: Number(linha.volume_24h ?? 0),
+    volume30d: Number(linha.volume_30d ?? 0),
+    negocios30d: Number(linha.negocios_30d ?? 0),
+  }
+}
+
+/**
+ * Serie diaria + resumo de um item. Duas leituras em paralelo contra views
+ * agregadas — o cliente nunca recebe linha crua de `market_trades` (30 dias de
+ * um item liquido passam do corte silencioso de 1000 linhas do PostgREST).
+ */
+export async function historicoDoItem(itemId: string, currency = 'gold'): Promise<HistoricoDePreco> {
+  const [serie, res] = await Promise.all([
+    db.from('mercado_historico_itens').select('*')
+      .eq('item_id', itemId).eq('currency', currency).order('dia', { ascending: true }),
+    db.from('mercado_resumo_historico_itens').select('*')
+      .eq('item_id', itemId).eq('currency', currency).maybeSingle(),
+  ])
+  estourarSeErro(serie.error)
+  // O resumo NAO estoura: `maybeSingle` sem linha e o caso normal de item que
+  // nunca foi negociado, e derrubar a tela por causa disso esconderia a serie.
+  return { serie: pontos(serie.data ?? []), resumo: resumo(res.data ?? null) }
+}
+
+export async function historicoDaEspecie(speciesId: string, currency: 'gold' | 'diamond'): Promise<HistoricoDePreco> {
+  const [serie, res] = await Promise.all([
+    db.from('mercado_historico_pokes').select('*')
+      .eq('species_id', speciesId).eq('currency', currency).order('dia', { ascending: true }),
+    db.from('mercado_resumo_historico_pokes').select('*')
+      .eq('species_id', speciesId).eq('currency', currency).maybeSingle(),
+  ])
+  estourarSeErro(serie.error)
+  return { serie: pontos(serie.data ?? []), resumo: resumo(res.data ?? null) }
+}
+
 export async function mercadoHistorico(): Promise<{ negocios: NegocioMercado[] }> {
   const uid = await userIdAtual()
   const { data, error } = await db.from('market_trades').select('*')
