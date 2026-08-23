@@ -129,6 +129,39 @@ create index if not exists market_listings_leiloes_a_vencer_idx
   where status = 'ativo' and modo = 'leilao';
 
 -- ===========================================================================
+-- 1.5 A VITRINE PRECISA SER RECRIADA — `l.*` NUMA VIEW E CONGELADO
+-- ===========================================================================
+-- `mercado_anuncios_ativos` foi criada com `select l.*, ...`, e o Postgres
+-- EXPANDE o `*` no momento da criacao e guarda a lista de colunas resultante.
+-- Coluna adicionada na tabela depois NAO entra na view.
+--
+-- Sem este passo o leilao "funcionaria" e estaria quebrado do jeito mais chato
+-- possivel: as RPCs gravariam `modo`/`expira_em`/`lance_minimo`/
+-- `incremento_minimo` corretamente, a tela leria `undefined` nos quatro, e todo
+-- leilao apareceria na vitrine como "somente lance" — sem cronometro, sem
+-- minimo, sem botao de lance. Nada daria erro.
+--
+-- `drop` + `create` e nao `create or replace`: aquele exige que as colunas
+-- existentes mantenham nome, tipo E ORDEM, e as novas so podem ir no fim.
+-- Reproduzir a ordem exata da expansao original a mao (a tabela ganhou
+-- `apenas_oferta` por `alter table` depois do `create table`, entao ela vem
+-- DEPOIS de `buyer_id`) e o tipo de detalhe que se erra em silencio.
+--
+-- `drop` derruba os grants junto, entao eles sao refeitos abaixo — sem isso a
+-- vitrine fica ilegivel pra `authenticated` e o Mercado abre vazio.
+drop view if exists public.mercado_anuncios_ativos;
+create view public.mercado_anuncios_ativos with (security_invoker = true) as
+select l.*, t.trainer_name as vendedor,
+  (select count(*) from public.market_offers o where o.listing_id = l.id and o.status = 'pendente')::int as ofertas,
+  (select max(valor) from public.market_offers o where o.listing_id = l.id and o.status = 'pendente') as melhor_oferta
+from public.market_listings l
+join public.treinadores_publico t on t.user_id = l.seller_id
+where l.status = 'ativo';
+
+revoke all on public.mercado_anuncios_ativos from public;
+grant select on public.mercado_anuncios_ativos to authenticated;
+
+-- ===========================================================================
 -- 2. criar_leilao
 -- ===========================================================================
 -- RPC PROPRIA, e nao parametros novos em `anunciar_poke`: aquela funcao tem
