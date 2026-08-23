@@ -42,46 +42,76 @@ export const CENA_HOSPITAL = {
   /**
    * Multiplicador do sprite do POKE, em unidades DA IMAGEM (nao da tela).
    *
-   * ERA 5, E ESTAVA CALIBRADO PELA MEDIDA ERRADA (PH-82/PH-85). A conta que
-   * justificava o 5 dizia "um frame de 32px sai com 160px, praticamente a
-   * altura da enfermeira" — mas 32 e a LARGURA do frame. Medido ao vivo, o
-   * frame PMD e 32x64, e quem manda no tamanho aparente e a altura: o POKE
-   * saia com 64x5 = 320 unidades de imagem, o DOBRO do pretendido. Na tela, em
-   * 1440x900, isso era 230px de altura contra ~110-160px da enfermeira.
+   * Este numero controla SO A PROPORCAO entre o POKE e o resto da cena, e
+   * nada mais: POKE e enfermeira sao escalados pelo mesmo fator de layout, e
+   * ele se cancela na razao entre os dois. Com 5, o POKE fica ~2,1x a altura
+   * da enfermeira, que e o enquadramento pedido.
    *
-   * 2.5 devolve os ~160 que a conta original queria. De brinde resolve a
-   * serrilha: o upscale do sprite (multiplicador x escala do layout, 0,72 em
-   * 1440x900) cai de 3,6x pra 1,8x — era o esticamento, e nao a arte, que
-   * deixava o POKE granulado.
+   * JA FOI 2.5 POR UM ERRO DE LEITURA MEU (PH-85). Eu li a queixa de
+   * "desproporcional + resolucao ruim" como "esta grande demais" e encolhi o
+   * POKE. Era o contrario: a proporcao grande e a certa, e o problema era so
+   * o serrilhado. Quem resolve o serrilhado e `ZOOM_DA_CENA` abaixo, nao
+   * este numero.
    *
-   * Nao da pra resolver isso encolhendo o FUNDO, que foi a primeira ideia: ele
-   * e desenhado em `cover` (`max(largura/2000, altura/2000)`) e em 1440x900 ja
-   * esta no minimo que cobre a tela — abaixo disso sobra faixa vazia nas
-   * laterais. E encolher o fundo encolheria a enfermeira junto, entao a
-   * PROPORCAO entre os dois nem mudaria: ela depende so deste numero.
+   * (O comentario original justificava o 5 dizendo "um frame de 32px sai com
+   * 160px". 32 e a LARGURA; o frame e 32x64 e quem manda e a altura. A conta
+   * estava errada, o resultado por acaso era o desejado.)
    *
    * Como todo frame PMD ja e proporcional ao tamanho do bicho (24px o Swinub,
    * 128px o Gyarados), um multiplicador unico preserva as diferencas entre
-   * especies — nada aqui reintroduz o `scaleForSpecies` por altura de Pokedex,
-   * desligado de proposito numa leva anterior.
+   * especies.
    */
-  escalaPoke: 2.5,
+  escalaPoke: 5,
 
   /**
-   * Teto de altura do sprite, em pixels da imagem. Existe por um motivo
-   * funcional, nao estetico: sem ele um Gyarados (frame de 128px) cobriria a
-   * enfermeira, e o unico elemento clicavel da cena ficaria escondido atras do
-   * proprio POKE do jogador.
+   * Teto de altura do sprite, em pixels da imagem. Motivo funcional, nao
+   * estetico: sem ele um Gyarados (frame de 128px) sairia com 640 e cobriria
+   * a enfermeira — o unico elemento clicavel da cena ficaria escondido atras
+   * do proprio POKE do jogador. Com 400, o maior sprite possivel para logo
+   * abaixo do balcao.
    *
-   * Desceu de 400 pra 200 junto com `escalaPoke` (PH-85): 400 foi dimensionado
-   * na mesma regua errada, e com o multiplicador corrigido ele deixaria de ter
-   * efeito nenhum — 128 x 2,5 = 320 ja passa longe de 400, entao NENHUMA
-   * especie seria limitada e o Gyarados voltaria a cobrir a enfermeira. 200
-   * mantem o teto no mesmo lugar RELATIVO de antes: pouco acima dos ~160 do
-   * POKE tipico, cortando so quem for grande demais.
+   * Voltou de 200 pra 400 junto com `escalaPoke` (PH-85): 200 so fazia
+   * sentido no mundo do multiplicador 2.5.
    */
-  alturaMaximaPoke: 200,
+  alturaMaximaPoke: 400,
 } as const
+
+/**
+ * Quanto a cena inteira encolhe em relacao ao tamanho que COBRIRIA a tela.
+ *
+ * ---------------------------------------------------------------------------
+ * POR QUE ISTO E O QUE CONSERTA O SERRILHADO
+ * ---------------------------------------------------------------------------
+ * O sprite do POKE tem 64px de altura na fonte (folha PMD de 320x320, quadro
+ * 32x64) — nao existe versao maior no projeto, entao o serrilhado nao e falta
+ * de arte, e esticamento. E ele ja e desenhado sem suavizacao
+ * (`imageSmoothingEnabled = false`), entao nao ha "borrao" pra desligar: o que
+ * se ve e pixel grande mesmo.
+ *
+ * Com o fundo em `cover` (1440x900 -> escala 0,72), o POKE saia com 230px na
+ * tela: 3,6x de esticamento de um sprite de 64px.
+ *
+ * A saida NAO e encolher o POKE, porque a proporcao dele com a enfermeira e a
+ * desejada — e ela nem mudaria, ja que os dois sao escalados pelo mesmo fator.
+ * A saida e encolher A CENA TODA: o POKE cai de tamanho em PIXEL (menos
+ * esticamento) sem perder um milimetro da proporcao com o resto.
+ *
+ * Com 0,65: escala efetiva 0,47 em 1440x900, POKE em ~150px, esticamento de
+ * 2,3x em vez de 3,6x — 35% menos.
+ *
+ * ---------------------------------------------------------------------------
+ * O CUSTO, QUE E REAL
+ * ---------------------------------------------------------------------------
+ * `cover` existe pra arte preencher a tela. Abaixo dele sobra fundo liso nas
+ * bordas, e a arte NAO ajuda a disfarcar: ela so tem 44-50px de borda escura
+ * (medido), e zero embaixo. Em 1440x900 sobram ~250px de cada lado, pintados
+ * com `HOSPITAL_FALLBACK`.
+ *
+ * E o preco de ver o POKE nitido com esta arte. Baixar mais este numero deixa
+ * o sprite melhor e a moldura maior; subir faz o contrario. 1 volta ao
+ * comportamento antigo.
+ */
+export const ZOOM_DA_CENA = 0.65
 
 /** Escala efetiva do sprite (em unidades da imagem) para um frame de `alturaDoFrame`. */
 export function escalaDoPoke(alturaDoFrame: number): number {
