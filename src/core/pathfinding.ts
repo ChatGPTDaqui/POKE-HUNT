@@ -1,10 +1,24 @@
-// A* route search over a hunt's collision grid (data/generated/collisionGrids.generated.ts).
-// Cells are COLLISION_GRID_CELL_SIZE world units square and an entity's
-// footprint is exactly one cell (see MovementSystem.js#canOccupy), so a route
-// is simply the chain of walkable cell-centers from the start cell to the
-// goal cell. Used by MovementSystem.js whenever a straight line to the
-// target is blocked, so a POKE can route around a wall/void/water patch
-// instead of sliding along it (or freezing) forever.
+// A* route search over a hunt's collision grid
+// (data/generated/subBiomaCollision.generated.ts, via data/maps.ts).
+//
+// Cada celula tem COLLISION_GRID_CELL_SIZE unidades de mundo de lado e a grade
+// diz onde o CENTRO de um POKE pode estar — a pegada dele
+// (POKE_COLLISION_FOOTPRINT) ja foi descontada na geracao, por erosao. Uma rota
+// e entao so a cadeia de centros de celula andavel do inicio ao destino. Usado
+// por movementSystem.ts sempre que a linha reta ate o alvo esta bloqueada, pra
+// o POKE contornar a parede/agua em vez de deslizar nela (ou congelar) pra
+// sempre.
+//
+// PERFORMANCE, SABIDA E NAO CORRIGIDA AQUI: o conjunto aberto e um `Map` e a
+// escolha do menor `f` e uma varredura LINEAR a cada expansao, o que faz a
+// busca ser O(n^2) no numero de celulas; as chaves de celula tambem sao
+// strings (`"col,row"`), uma alocacao por vizinho visitado. Medido no PH-94: a
+// grade 4x mais fina custou +75% no teste de simulacao offline mais pesado
+// (33s -> 58s). Nao chega em producao — `FARM_OFFLINE_PAUSADO` deixa o resim
+// offline do servidor sem simular nada, e o flush ao vivo sao ~1.800 passos —
+// mas o desenho continua errado. Trocar por heap binario + chave numerica muda
+// o desempate entre rotas de mesmo custo, ou seja muda a simulacao, e por isso
+// nao entra de carona numa mudanca de grade.
 import { COLLISION_GRID_CELL_SIZE } from '@/data/collisionConstants'
 import { mapWalkRadius } from '@/data/maps'
 
@@ -25,10 +39,28 @@ const NEIGHBORS: [number, number][] = [
   [1, 1], [1, -1], [-1, 1], [-1, -1],
 ]
 
-// Safety cap: this grid is at most ~800 cells, so a real search never gets
-// close to this — it only matters if start/goal are somehow degenerate
-// (e.g. entirely surrounded), where it stops the search instead of hanging.
-const MAX_EXPANSIONS = 4000
+// Safety cap, DERIVADO da grade em vez de fixo.
+//
+// Era `4000` com o comentario "this grid is at most ~800 cells, so a real
+// search never gets close to this". Isso deixou de ser verdade sem ninguem
+// mexer aqui: desde que o mundo virou o recorte da area pintada (PH-80) as
+// grades passaram a ter tamanhos proprios, e `dragon` ja tinha 2.808 celulas
+// com celula de 40. Com a celula de 20 do PH-94 ela tem 10.605 — ou seja o
+// teto de seguranca ficou ABAIXO do tamanho da grade, e uma busca longa
+// legitima batia nele e devolvia `null`.
+//
+// O sintoma disso nao e travamento: `null` faz o chamador cair no movimento
+// direto (`slideToward`), e o POKE passa a deslizar na parede em vez de
+// contornar — o mesmo comportamento de "sem rota" que o pathfinder existe pra
+// eliminar. Silencioso, e so no mapa grande.
+//
+// A* nunca expande a mesma celula duas vezes (`closed`), entao o numero de
+// expansoes e limitado pelo numero de celulas andaveis. Uma folga de 2x sobre
+// o total de celulas e um teto que uma busca real nao alcanca e que continua
+// cortando o caso degenerado.
+function tetoDeExpansoes(grid: string[]): number {
+  return grid.length * grid[0].length * 2
+}
 
 function cellKey(col: number, row: number): string {
   return `${col},${row}`
@@ -120,9 +152,10 @@ export function findPath(mapDef: PathfindingMapDef, startX: number, startY: numb
   const open = new Map<string, number>([[startKey, heuristic(startCol, startRow, goalCol, goalRow)]])
   const closed = new Set<string>()
 
+  const maxExpansions = tetoDeExpansoes(grid)
   let expansions = 0
   while (open.size > 0) {
-    if (++expansions > MAX_EXPANSIONS) return null
+    if (++expansions > maxExpansions) return null
 
     let currentKey: string | null = null
     let bestF = Infinity

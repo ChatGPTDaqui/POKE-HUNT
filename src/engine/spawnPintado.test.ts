@@ -14,12 +14,15 @@ import { describe, expect, it } from 'vitest'
 
 import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
+import { COLLISION_GRID_CELL_SIZE } from '@/data/collisionConstants'
 import { COLISAO_POR_ARTE } from '@/data/generated/subBiomaCollision.generated'
 import { MAPS, isCellBlocked, mapDefParaSala, spawnPointParaSala } from '@/data/maps'
 import { temSalas } from './systems/salaSystem'
 import { buildMapWorld } from './simulation'
 
-const CELULA = 40
+// Importada, nao repetida: hardcodar 40 aqui fez este teste reprovar no PH-94
+// quando a celula caiu pra 20. Ver a nota em data/walkBlock.test.ts.
+const CELULA = COLLISION_GRID_CELL_SIZE
 
 /**
  * Hunts que resolvem grade e spawn pela arte do BIOMA, sem passar pelo sistema

@@ -63,7 +63,49 @@ const { decodePng } = require('./lib/png');
 // agora e recortado DE DENTRO da arte (ver `enquadrar`), entao nunca falta
 // imagem pra cobrir e nao ha mais o que esticar.
 const HUNT_BG_TILE_SCALE = 0.8;
-const CELL_SIZE = 40; // deve bater com COLLISION_GRID_CELL_SIZE (generated/collisionGrids.generated.ts)
+
+/**
+ * Tamanho da celula, LIDO de `src/data/collisionConstants.ts` em vez de
+ * repetido aqui.
+ *
+ * Era um `40` literal com um comentario pedindo "deve bater com
+ * COLLISION_GRID_CELL_SIZE". Pedido nao e mecanismo: divergir os dois faz a
+ * grade de colisao ser de uma resolucao e o consumidor (pathfinding,
+ * `isCellBlocked`, o passo de `movementSystem`) ler outra — ou seja, o POKE
+ * colide com uma parede que nao esta onde a tela mostra. O cabecalho de
+ * `data/maps.ts` chama isso de "a classe de bug mais cara deste sistema", e
+ * era a unica constante compartilhada que ainda dependia de alguem lembrar.
+ *
+ * `CELL` no ambiente sobrescreve, so pra repetir a medicao de limiar do
+ * PH-94 sem editar arquivo nenhum.
+ */
+function lerConstante(nome) {
+  const arquivo = path.join(__dirname, '..', 'src', 'data', 'collisionConstants.ts');
+  const fonte = fs.readFileSync(arquivo, 'utf8');
+  const m = fonte.match(new RegExp(`export const ${nome}\\s*=\\s*(\\d+)`));
+  if (!m) throw new Error(`nao achei ${nome} em ${arquivo}`);
+  return Number(m[1]);
+}
+const CELL_SIZE = Number(process.env.CELL || lerConstante('COLLISION_GRID_CELL_SIZE'));
+
+/**
+ * Pegada de colisao do POKE, em unidades de mundo.
+ *
+ * "A pegada de colisao de um POKE e exatamente 1 caixa da grade por pedido
+ * explicito do usuario" — `movementSystem.ts#canOccupy`. Enquanto a celula
+ * tinha 40, a pegada e o tamanho da celula eram o MESMO numero, e o pedido
+ * ficava satisfeito por acidente. Separadas, a pegada continua valendo 40 e
+ * passa a ser aplicada por erosao na geracao (ver o passo 1.5).
+ *
+ * `PEGADA` no ambiente sobrescreve, so pra medicao.
+ */
+const POKE_FOOTPRINT = Number(process.env.PEGADA || lerConstante('POKE_COLLISION_FOOTPRINT'));
+
+// Amostras por eixo dentro de uma celula (25 por celula). Independe do tamanho
+// da celula de proposito: e ele que decide a GRANULARIDADE do limiar (1/25 =
+// 4%), nao a resolucao da imagem. Com celula de 20 unidades de mundo (25px de
+// imagem na escala 0,8) o passo entre amostras e de 5px de imagem — longe de
+// sub-pixel, onde a amostragem viraria ruido.
 const SAMPLE_STRIDE = 5;
 // Folga em volta da area pintada. Sem ela o POKE encosta na borda do mundo no
 // mesmo pixel em que encosta na parede pintada, e a leitura fica de mapa
@@ -128,27 +170,46 @@ const RED_CELL_RATIO = 0.5;
 // Quanto de uma celula (40px de mundo = 50px de imagem) precisa estar pintada
 // de rosa pra ela ser andavel.
 //
-// ERA 0.5 e ISSO QUEBRAVA AS ARTES URBANAS. Rua de cidade tem cerca de UMA
-// celula de largura, entao qualquer estreitamento derrubava a celula abaixo
-// da maioria e CORTAVA a malha em pedacos; o passo de poda (que remove o que
-// nao conecta ao spawn) entao apagava tudo do outro lado do corte. Medido nas
-// 29 referencias, em celulas podadas por desconexao:
+// ERA 0.3, E ESSE ERA O BUG DO PH-94 — o jogador via a pintura desrespeitada
+// em todas as hunts porque uma celula 30% pintada passava, e o centro do POKE
+// podia encostar ~28px dentro do que a arte mostra como parede.
 //
-//   ratio | metropolis | town-night | ice-cave
-//   0.5   |    116     |    224     |    35
-//   0.4   |      4     |    229     |    38
-//   0.3   |      1     |      0     |     0
-//   0.2   |      2     |      0     |     0
+// O 0.3 nao era descuido: com celula de 40, rua de cidade tem cerca de UMA
+// celula de largura, e a 0.5 qualquer estreitamento derrubava a celula abaixo
+// da maioria e CORTAVA a malha; a poda por conectividade apagava tudo do outro
+// lado do corte. Medido nas 29 referencias da epoca (celulas podadas):
 //
-// 0.3 e o joelho da curva: resolve a fragmentacao inteira e 0.2 nao conserta
-// mais nada, so afrouxa parede. Custo aceito e conhecido: as 18 referencias
-// da leva anterior tambem ficam um pouco mais permissivas (beach 66%->71%,
-// forest 34%->40% de area andavel) — uma celula 30% pintada agora passa, e o
-// POKE pode encostar ate ~28px dentro do que a arte mostra como parede. Vale
-// menos que ter metade do mapa inalcancavel.
+//   celula 40 | metropolis | town-night | ice-cave
+//   0.5       |    116     |    224     |    35
+//   0.3       |      1     |      0     |     0
+//
+// Ou seja: 0.3 tratava o SINTOMA. A causa era a celula ser grossa demais pra
+// geometria fina das artes urbanas. Com CELL_SIZE de 20 a mesma rua tem duas
+// celulas e o limiar pode ser rigoroso sem fragmentar nada. Medido no PH-94,
+// nas 31 referencias (total de celulas podadas por desconexao, e a area de
+// mundo que isso representa — comparar CONTAGEM entre tamanhos de celula
+// diferentes engana, area nao):
+//
+//   celula | ratio | podadas | area podada | urbanas podadas
+//   40     | 0.3   |    77   |   123.200   | metropolis 4
+//   40     | 0.5   |   430   |   688.000   | town-night 246 (!)
+//   20     | 0.5   |   168   |    67.200   | zero
+//   20     | 0.6   |   159   |    63.600   | zero
+//   20     | 0.7   |   379   |   151.600   | volta a fragmentar
+//   10     | 0.5   |  1294   |   129.400   | zero, mas area pior
+//
+// 0.6 e o joelho: poda METADE da area que o desenho antigo podava, sendo o
+// DOBRO de rigoroso, e 0.7 volta a rachar. As 151 celulas que sobram em
+// abismo.png sao do modo `vermelho_bloqueia`, onde este ratio nao entra — mesma
+// area isolada de sempre, so medida mais fino.
+//
+// Custo: 1 a 4 pontos percentuais de area andavel por arte (a folga de parede
+// sendo devolvida), e a pegada do POKE passando de 40 pra 20 — ver
+// `POKE_COLLISION_FOOTPRINT` em src/data/collisionConstants.ts, que explica por
+// que a de 40 nunca foi honrada de verdade.
 //
 // `PINK_RATIO` no ambiente sobrescreve, so pra repetir essa medicao.
-const PINK_CELL_RATIO = Number(process.env.PINK_RATIO || 0.3);
+const PINK_CELL_RATIO = Number(process.env.PINK_RATIO || 0.6);
 
 const refDir = path.join(__dirname, 'body-block-refs');
 const bgDir = path.join(__dirname, '..', 'assets', 'hunt-backgrounds');
@@ -411,6 +472,55 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
     throw new Error(`${refFile}: nenhuma celula andavel — nada pintado dentro da janela visivel do mapa.`);
   }
 
+  // 1.5) EROSAO PELA PEGADA DO POKE.
+  //
+  // A grade nao responde "aqui tem tinta" — ela responde "o CENTRO do POKE
+  // pode estar aqui". `movementSystem.ts#canOccupy` checa um ponto so, e o
+  // comentario dele explica por que isso equivale a uma pegada de uma caixa:
+  // enquanto a celula tinha o tamanho da pegada (40), as duas coisas eram a
+  // mesma. Com a celula menor elas deixam de ser, e sem erodir o POKE ficaria
+  // METADE mais fino — chegaria mais perto da parede, o oposto do que o PH-94
+  // quer.
+  //
+  // Entao a pegada continua sendo 40 unidades de mundo (decisao explicita do
+  // usuario, preservada), e ela e aplicada AQUI, de graca, em vez de virar 9
+  // consultas por passo no laco quente — que roda ate 250 mil vezes por
+  // chamada no resim do servidor.
+  //
+  // Raio em celulas = metade da pegada / tamanho da celula. Com pegada 40 e
+  // celula 40 o raio e 0 e nada e erodido: e exatamente o comportamento de
+  // hoje, o que faz esta etapa ser retrocompativel por construcao.
+  const raioDaPegada = Math.max(0, Math.round(POKE_FOOTPRINT / 2 / CELL_SIZE - 0.5));
+  let erodidas = 0;
+  if (raioDaPegada > 0) {
+    const original = rowStrings.slice();
+    for (let row = 0; row < rows; row++) {
+      let linhaNova = '';
+      for (let col = 0; col < cols; col++) {
+        if (original[row][col] === '1') { linhaNova += '1'; continue; }
+        let cabe = true;
+        for (let dr = -raioDaPegada; dr <= raioDaPegada && cabe; dr++) {
+          for (let dc = -raioDaPegada; dc <= raioDaPegada; dc++) {
+            const r = row + dr, c = col + dc;
+            // Fora da grade conta como bloqueado — mesma regra do resto do
+            // script, e evita o POKE nascer com meio corpo fora do mundo.
+            if (r < 0 || r >= rows || c < 0 || c >= cols || original[r][c] === '1') { cabe = false; break; }
+          }
+        }
+        if (cabe) linhaNova += '0';
+        else { linhaNova += '1'; erodidas++; }
+      }
+      rowStrings[row] = linhaNova;
+    }
+    walkableCount -= erodidas;
+    if (walkableCount <= 0) {
+      throw new Error(
+        `${refFile}: a erosao pela pegada de ${POKE_FOOTPRINT} zerou a area andavel. ` +
+        'A pintura e mais estreita que o corpo do POKE em toda parte.',
+      );
+    }
+  }
+
   // 2) Ponto de spawn.
   //
   //    O CIRCULO MANDA SEMPRE QUE EXISTIR — inclusive quando cai fora da
@@ -581,7 +691,8 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
     );
   }
   console.log(
-    `${bg.padEnd(24)} ${String(walkableFinal).padStart(4)}/${cols * rows} andaveis (${pct.padStart(2)}%), ` +
+    `${bg.padEnd(24)} ${String(walkableFinal).padStart(5)}/${cols * rows} andaveis (${pct.padStart(2)}%), ` +
+    `${String(erodidas).padStart(5)} erodidas pela pegada, ` +
     `${String(podadas).padStart(3)} isoladas podadas, spawn (${spawnWorldX},${spawnWorldY}) [${origemDoSpawn}]` +
     (spawnInimigo ? `, inimigo (${spawnInimigo.x},${spawnInimigo.y}) [verde]` : ''),
   );
@@ -684,5 +795,13 @@ export interface ColisaoPintada {
 
 export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = ${JSON.stringify(resultados, null, 2)};
 `;
-fs.writeFileSync(outFile, header);
-console.log(`\nEscrito ${outFile} (${Object.keys(resultados).length} artes)`);
+// `MEDIR=1` roda a analise inteira e NAO escreve o arquivo gerado. Existe pra
+// varrer combinacoes de CELL/PINK_RATIO sem sujar a arvore de trabalho — a
+// medicao do PH-94 sao 8 rodadas seguidas, e cada uma reescreveria 70-280 KB
+// de TS que ninguem quer commitar.
+if (process.env.MEDIR === '1') {
+  console.log(`\n[MEDIR] celula=${CELL_SIZE} ratio=${PINK_CELL_RATIO} — arquivo NAO escrito.`);
+} else {
+  fs.writeFileSync(outFile, header);
+  console.log(`\nEscrito ${outFile} (${Object.keys(resultados).length} artes)`);
+}
