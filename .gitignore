@@ -84,3 +84,4 @@ npm-debug.log*
 # Imagens de conferencia do walk-block (scripts/conferir-walk-block.mjs) — 15MB de
 # diagnostico regeravel, nao versionado.
 scripts/body-block-refs/_conferencia/
+scripts/agua-debug/
