@@ -82,7 +82,14 @@ export function attemptCapture(rng: Rng, gameState: GameStateStore, defeatedPoke
 
   if (!captured) return { success: false, reason: 'roll_failed', chance, ballItemId }
 
-  const stats = computeStatsAtLevel(species, CAPTURE_LEVEL, defeatedPoke.ivs, defeatedPoke.rarity, defeatedPoke.isShiny)
+  // `defeatedPoke.nature` NAO pode faltar aqui (PH-92). O POKE capturado herda
+  // a natureza do selvagem pelo spread abaixo, entao omitir o argumento gravava
+  // a linha com natureza na ficha e stats que a ignoram — nada nulo, nada de
+  // erro, so numeros que nao batem com o que a ficha promete. Pegou 74% dos
+  // POKE de producao antes de alguem notar.
+  const stats = computeStatsAtLevel(
+    species, CAPTURE_LEVEL, defeatedPoke.ivs, defeatedPoke.rarity, defeatedPoke.isShiny, defeatedPoke.nature,
+  )
   const newPoke: PokeInstance = {
     ...defeatedPoke,
     // Mesma fonte de uid do createPokeInstance — o uid E a PK no Postgres.
