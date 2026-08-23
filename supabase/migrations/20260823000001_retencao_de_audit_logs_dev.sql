@@ -1,3 +1,20 @@
+-- RE-DATADA DE 20260821220000/01 PARA 20260823000000/01 EM 2026-08-23 (PH-88).
+-- O conteudo e de 21/08 e nao mudou; so o timestamp do arquivo mudou.
+--
+-- Motivo: estas duas nunca chegaram a ser registradas no banco, enquanto as
+-- migrations de 22/08 (timestamp maior) foram aplicadas fora do workflow. Dai
+-- em diante `supabase db push` passou a recusar TODO deploy da dev com
+-- "Found local migration files to be inserted before the last migration on
+-- remote database", e nenhuma migration nova chegava mais ao banco — o merge
+-- ficava verde e so o workflow de deploy, que ninguem olha, ficava vermelho.
+--
+-- Re-datar faz o push normal aplica-las em ordem, sem `--include-all` fixo no
+-- workflow (que trocaria uma falha ruidosa por aplicacao silenciosa fora de
+-- ordem) e sem `migration repair --status reverted` (que marcaria como
+-- revertida migration de fato aplicada). Seguro aqui porque as duas so fazem
+-- `cron.unschedule` condicional + `cron.schedule`: idempotentes, e sem
+-- dependencia de nada criado em 22/08 (`audit_logs` existe desde 15/08).
+--
 -- Espelho do 20260821220000 no schema `dev`.
 --
 -- So a RETENCAO tem espelho. O log-puller nao: ele e um job unico e global (o
