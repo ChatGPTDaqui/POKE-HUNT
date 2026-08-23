@@ -187,6 +187,23 @@ export function repeticoesDoGolpe(abilityId: string | undefined): number {
 }
 
 /**
+ * A arte de impacto deste golpe e DIRECIONAL, ou seja gira pra apontar do
+ * atacante pro alvo?
+ *
+ * Quem pergunta e o motor (PH-110): so arte direcional precisa reapontar o
+ * rastro a cada frame, porque ela e um risco que LIGA as duas entidades. Arte
+ * redonda mantem o angulo congelado no instante do hit, que e a decisao
+ * registrada no call-site do efeito.
+ *
+ * Mora aqui, e nao no motor, porque a resposta e uma propriedade do DADO de
+ * arte — quem adicionar um direcional novo em `VFX_POR_GOLPE` ganha o
+ * reapontamento de graca, sem tocar em `combatSystem`.
+ */
+export function ehDirecional(abilityId: string | undefined): boolean {
+  return !!vfxDoGolpe(abilityId)?.single.direcional
+}
+
+/**
  * Toda URL de tira por golpe.
  *
  * NAO e consumido pelo preload (ver o cabecalho): existe pro teste conferir que
