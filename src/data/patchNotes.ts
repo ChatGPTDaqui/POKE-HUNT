@@ -12,6 +12,22 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Continuacao do mesmo dia da 7.7: aquela entrada foi escrita no meio do
+  // lote de merges e ficou pra tras do que entrou depois (PH-91).
+  {
+    version: '7.8',
+    date: '2026-08-23',
+    title: 'O correio virou conversa de verdade, e o ouro anexado parou de sumir',
+    highlights: [
+      'CORREIO E CHAT AGORA: uma conversa por contato, com todo o historico salvo, do jeito que voce espera de um aplicativo de mensagem. Antes a mesma pessoa tinha tres listas — a carta numa aba, o recado em outra, a resposta numa terceira.',
+      'MENSAGEM NOVA APARECE NA HORA no fio que voce esta lendo, sem recarregar. Abrir a conversa zera as nao lidas so daquele contato.',
+      'BUG SERIO: OURO ANEXADO NUMA MENSAGEM ERA DESTRUIDO. Saia de quem mandou, nunca chegava em quem recebeu, e a mensagem ficava travada com o anexo por coletar pra sempre. Anexo de item nunca foi afetado. O ouro que estava preso voltou pro destinatario.',
+      'VINTE E TRES ARTES DE GOLPE NAO APARECIAM NA TELA — entre elas o Bullet Punch. O desenho existia e estava certo; o jogo so nunca chegava a pedir o arquivo pra desenhar.',
+      'HOSPITAL: o POKE estava serrilhado e fora de proporcao com a sala. Em vez de esticar o POKE, a cena inteira encolheu — mesma proporcao entre ele e a enfermeira, com bem menos esticamento no sprite.',
+      'A JANELA DE CHAT RECOLHIDA agora e so "Chat" e um "+". Antes ela continuava ocupando espaco com as abas e o campo de escrever mesmo fechada.',
+      'CADA SUB-BIOMA TEM O TAMANHO QUE PRECISA. O mundo jogavel deixou de ser um retangulo fixo igual pra todos: agora ele e do tamanho do que foi desenhado naquele mapa, entao ha mapas maiores e menores.',
+    ],
+  },
   // Entrada curta de proposito, ao contrario das anteriores: pedido explicito
   // do usuario ("um resumo bem sucinto sobre todas as melhorias").
   {
