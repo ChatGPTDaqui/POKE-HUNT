@@ -129,7 +129,13 @@ export async function mercadoMeus(): Promise<{
     db.from('market_orders').select('*').eq('user_id', uid).eq('status', 'ativa').order('created_at', { ascending: false }),
     db.from('market_listings').select('*').eq('seller_id', uid).eq('status', 'ativo').order('created_at', { ascending: false }),
     db.from('mercado_ofertas_recebidas').select('*').eq('seller_id', uid),
-    db.from('market_offers').select('*').eq('buyer_id', uid).eq('status', 'pendente').order('created_at', { ascending: false }),
+    // Embed do anuncio (PH-101): a tela precisa do `modo` pra nao oferecer
+    // "Cancelar" num lance de leilao, que o servidor recusa. `market_offers.
+    // listing_id` tem FK pra `market_listings`, entao o PostgREST resolve o
+    // join sozinho — e a policy de leitura publica de anuncio ATIVO cobre
+    // exatamente as linhas que interessam aqui (lance pendente e sempre em
+    // anuncio ativo).
+    db.from('market_offers').select('*, market_listings(modo, expira_em)').eq('buyer_id', uid).eq('status', 'pendente').order('created_at', { ascending: false }),
   ])
   estourarSeErro(ordens.error); estourarSeErro(anuncios.error)
   estourarSeErro(ofertasRecebidas.error); estourarSeErro(minhasOfertas.error)
@@ -144,7 +150,16 @@ export async function mercadoMeus(): Promise<{
       // nome + nivel) — o resto de AnuncioMercado nao veio nesta leitura.
       anuncio: { species_id: r.species_id, level: r.level, is_shiny: r.is_shiny } as AnuncioMercado,
     })),
-    minhasOfertas: (minhasOfertas.data ?? []) as OfertaMercado[],
+    // O embed vem como objeto aninhado; achatado aqui pra a tela nao ter que
+    // saber a forma da resposta do PostgREST.
+    // `r` e `Record<string, any>` (ver a nota do cast no topo), e espalhar um
+    // tipo com index signature nao satisfaz a interface pro `tsc` — dai o cast,
+    // no mesmo espirito do resto deste arquivo.
+    minhasOfertas: (minhasOfertas.data ?? []).map((r: Linha): OfertaMercado => ({
+      ...(r as unknown as OfertaMercado),
+      modo: r.market_listings?.modo ?? 'preco_fixo',
+      expira_em: r.market_listings?.expira_em ?? null,
+    })),
   }
 }
 
@@ -205,6 +220,37 @@ export async function anunciarPoke(corpo: { pokeUid: string; price: number | nul
   estourarSeErro(error)
   await refetchAposAnuncio(corpo.pokeUid)
   return { mensagem: data?.mensagem as string | undefined }
+}
+
+/** Leilão (PH-101). RPC própria e não `anunciar_poke` com argumentos novos:
+ *  acrescentar parâmetros àquela assinatura criaria um overload, e o PostgREST
+ *  passa a responder erro de ambiguidade em vez de chamar qualquer uma. */
+export async function criarLeilao(corpo: {
+  pokeUid: string
+  currency: 'gold' | 'diamond'
+  horas: 6 | 12 | 24
+  lanceMinimo: number
+  incrementoMinimo: number
+}) {
+  const { data, error } = await db.rpc('criar_leilao', {
+    p_poke_id: corpo.pokeUid,
+    p_currency: corpo.currency,
+    p_horas: corpo.horas,
+    p_lance_minimo: corpo.lanceMinimo,
+    p_incremento_minimo: corpo.incrementoMinimo,
+  })
+  estourarSeErro(error)
+  await refetchAposAnuncio(corpo.pokeUid)
+  return { mensagem: data?.mensagem as string | undefined }
+}
+
+export async function darLance(corpo: { anuncioId: string; valor: number }) {
+  const { data, error } = await db.rpc('dar_lance', {
+    p_anuncio_id: corpo.anuncioId, p_valor: corpo.valor,
+  })
+  estourarSeErro(error)
+  await refetchCarteira()
+  return { mensagem: data?.mensagem as string | undefined, esticou: Boolean(data?.esticou) }
 }
 
 export async function ofertar(corpo: { anuncioId: string; valor: number }) {
