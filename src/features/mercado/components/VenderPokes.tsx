@@ -4,6 +4,8 @@ import { SPECIES, averageIvPercent } from '@/data/pokes'
 import { rarityOf } from '@/data/rarity'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { GameButton, GameCard, GameInput, GameSelect, SectionLabel } from '@/components/game/controls'
+import { GradeDeInventario } from '@/components/game/GradeDeInventario'
+import { PokeSwatch } from '@/components/shared/PokeSwatch'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
 import { useTaxaDoMercado, taxaDeVenda } from '../useTaxaDoMercado'
 import { fmt } from '../utils'
@@ -50,16 +52,33 @@ export function VenderPokes() {
   return (
     <GameCard className="flex flex-col gap-[.45em] p-[.55em]">
       <SectionLabel>ANUNCIAR POKE</SectionLabel>
-      <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
+      {/* Grade, e nao dropdown (PH-114): o que se escolhe aqui sai da mochila,
+          e o texto do `<select>` nao mostrava sprite, borda de raridade nem
+          shiny. O dado que estava no rotulo da opcao nao se perdeu — ele passou
+          pro `title`/`aria-label` do slot e pra linha de resumo abaixo, que
+          descreve o SELECIONADO em vez de todos ao mesmo tempo. */}
+      <div className="flex flex-col gap-[.2em] text-[.78em] text-n400">
         POKE
-        <GameSelect value={escolhido?.uid ?? ''} onChange={(e) => setUid(e.target.value)}>
-          {elegiveis.map((p) => (
-            <option key={p.uid} value={p.uid}>
-              {p.isShiny ? '✨ ' : ''}{SPECIES[p.speciesId].name} Lv{p.level} · {rarityOf(p).label} · IV {averageIvPercent(p.ivs).toFixed(0)}%
-            </option>
-          ))}
-        </GameSelect>
-      </label>
+        <GradeDeInventario
+          rotuloDoGrupo="POKE para anunciar"
+          selecionado={escolhido?.uid ?? null}
+          onSelecionar={setUid}
+          slots={elegiveis.map((p) => ({
+            id: p.uid,
+            rotulo: `${p.isShiny ? '✨ ' : ''}${SPECIES[p.speciesId].name} Lv${p.level} · ${rarityOf(p).label} · IV ${averageIvPercent(p.ivs).toFixed(0)}%`,
+            conteudo: (
+              <PokeSwatch species={SPECIES[p.speciesId]} isShiny={p.isShiny} poke={p} size={2.5} />
+            ),
+          }))}
+        />
+        {escolhido && (
+          <span className="text-n300">
+            {escolhido.isShiny ? '✨ ' : ''}
+            {SPECIES[escolhido.speciesId].name} Lv{escolhido.level} · {rarityOf(escolhido).label}
+            {' · '}IV {averageIvPercent(escolhido.ivs).toFixed(0)}%
+          </span>
+        )}
+      </div>
       {/* Os tres modos sao MUTUAMENTE EXCLUSIVOS, entao viraram uma selecao e
           nao dois checkboxes (PH-101). Com dois booleanos haveria quatro
           estados, dois deles sem significado — "leilao e preco fixo ao mesmo

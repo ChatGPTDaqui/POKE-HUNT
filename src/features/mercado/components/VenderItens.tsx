@@ -1,12 +1,36 @@
 import { useState } from 'react'
 import * as mercadoRpc from '@/data/remote/mercadoRpc'
 import { ITEMS } from '@/data/items'
+import { itemIconUrl, itemIconBorderColor } from '@/data/sprites'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
-import { GameButton, GameCard, GameInput, GameSelect, SectionLabel } from '@/components/game/controls'
+import { GameButton, GameCard, GameInput, SectionLabel } from '@/components/game/controls'
+import { GradeDeInventario } from '@/components/game/GradeDeInventario'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
 import { useTaxaDoMercado, taxaDeVenda } from '../useTaxaDoMercado'
 import { fmt } from '../utils'
+
+/**
+ * Icone do item pra dentro do slot da grade.
+ *
+ * Local e nao componente compartilhado: o projeto repete este par
+ * `itemIconUrl`/`itemIconBorderColor` inline em varios lugares (ItemPicker,
+ * BagMenu, Correio) e unificar os cinco e refatoracao propria, nao carona
+ * nesta. O que importa aqui e nao inventar um SEXTO jeito de desenhar.
+ */
+function IconeDeItem({ itemId }: { itemId: string }) {
+  const url = itemIconUrl(itemId)
+  const borda = itemIconBorderColor(itemId)
+  if (!url) return <span className="h-full w-full rounded-[.25em] border border-n700" />
+  return (
+    <img
+      src={url}
+      alt=""
+      className="h-full w-full rounded-[.25em] object-contain"
+      style={borda ? { border: `2px solid ${borda}` } : undefined}
+    />
+  )
+}
 
 export function VenderItens() {
   const items = useGameStateStore((s) => s.items)
@@ -34,14 +58,24 @@ export function VenderItens() {
     <GameCard className="flex flex-col gap-[.45em] p-[.55em]">
       <SectionLabel>ANUNCIAR ITEM</SectionLabel>
       <div className="flex flex-wrap items-end gap-[.5em]">
-        <label className="flex min-w-[10em] flex-1 flex-col gap-[.2em] text-[.78em] text-n400">
+        {/* Grade, e nao dropdown (PH-114). O contador do slot substitui o
+            "(x30)" que estava no texto da opcao — ele fica visivel em TODOS os
+            itens de uma vez, e nao so no que esta selecionado. */}
+        <div className="flex w-full flex-col gap-[.2em] text-[.78em] text-n400">
           Item
-          <GameSelect value={escolhido} onChange={(e) => setItemId(e.target.value)}>
-            {disponiveis.map((id) => (
-              <option key={id} value={id}>{ITEMS[id].name} (x{items[id]})</option>
-            ))}
-          </GameSelect>
-        </label>
+          <GradeDeInventario
+            rotuloDoGrupo="Item para anunciar"
+            selecionado={escolhido || null}
+            onSelecionar={setItemId}
+            slots={disponiveis.map((id) => ({
+              id,
+              rotulo: `${ITEMS[id].name} (x${items[id]})`,
+              contador: items[id],
+              conteudo: <IconeDeItem itemId={id} />,
+            }))}
+          />
+          {escolhido && <span className="text-n300">{ITEMS[escolhido].name}</span>}
+        </div>
         <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
           Preco/un.
           <GameInput
