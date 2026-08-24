@@ -129,12 +129,38 @@ interface Receita {
    * anel em cima de terra seria o pior dos dois mundos.
    */
   ondular?: boolean
+  /**
+   * Folha: elipse que GIRA enquanto cai, em vez de circulo.
+   *
+   * Todo preset desenhava o mesmo circulo cheio, variando so cor e tamanho —
+   * folha de floresta lia como ponto amarelo descendo de lado. Uma folha de
+   * verdade e achatada e tomba no ar, e e o tombo (nao a cor) que faz o cerebro
+   * ler "folha".
+   */
+  girar?: boolean
+  /**
+   * Brasa: pisca rapido e o raio pulsa, em vez de alpha suave e raio fixo.
+   *
+   * Faisca de fogo nao tem brilho constante: ela apaga e reacende. O pulso de
+   * raio junto com o de alpha e o que separa "faisca" de "ponto laranja".
+   */
+  faisca?: boolean
+  /**
+   * Neve: UM sorteio controla tamanho, velocidade e alpha de cada floco.
+   *
+   * Sorteados de forma independente, aparecia floco grande e lento e floco
+   * pequeno e rapido — que e o contrario do que a profundidade faz. Amarrados,
+   * floco grande cai mais rapido e mais opaco (esta perto) e floco pequeno cai
+   * devagar e apagado (esta longe), e a nevasca ganha camadas.
+   */
+  profundidade?: boolean
 }
 
 const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
   folha: {
     quantidade: 34, cor: '#e8f0a8', raio: [3.4, 7.0], velocidade: [16, 34],
     angulo: Math.PI / 2 + 0.35, espalhamento: 0.3, alpha: 0.72, bamboleio: 16, feixes: true,
+    girar: true,
   },
   agua: {
     quantidade: 30, cor: '#eaf8ff', raio: [2.2, 4.4], velocidade: [4, 11],
@@ -143,6 +169,7 @@ const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
   brasa: {
     quantidade: 30, cor: '#ffb057', raio: [2.6, 5.4], velocidade: [18, 40],
     angulo: -Math.PI / 2, espalhamento: 0.4, alpha: 0.8, bamboleio: 11, aditivo: true,
+    faisca: true,
   },
   poeira: {
     quantidade: 26, cor: '#e2dcc8', raio: [2.2, 4.8], velocidade: [3, 9],
@@ -151,6 +178,7 @@ const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
   neve: {
     quantidade: 46, cor: '#ffffff', raio: [2.8, 6.0], velocidade: [22, 46],
     angulo: Math.PI / 2 + 0.22, espalhamento: 0.22, alpha: 0.9, bamboleio: 14,
+    profundidade: true,
   },
   areia: {
     quantidade: 32, cor: '#e8d2a4', raio: [2.4, 5.0], velocidade: [46, 88],
@@ -161,6 +189,22 @@ const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
     angulo: 0.5, espalhamento: 1.6, alpha: 0.34, bamboleio: 6,
   },
 }
+
+// ---------------------------------------------------------------------------
+// AS TRES FORMAS QUE NAO SAO O CIRCULO (PH-115)
+// ---------------------------------------------------------------------------
+// O PH-96 desenhou tudo como circulo cheio, com `risco` (areia) como unica
+// excecao. Cor e tamanho separavam os presets no codigo, mas nao na tela: folha,
+// brasa, neve, poeira e poeira de cidade eram o mesmo ponto em cores diferentes.
+
+/** Razao vertical da folha. Achatada, senao ela gira e ninguem percebe. */
+const FOLHA_ACHATAMENTO = 0.45
+/** Faixa do giro da folha, em radianos por unidade de fase. */
+const FOLHA_GIRO = [0.8, 2.4] as const
+/** Frequencia do pisca da faisca. Alta de proposito — brasa nao tem brilho constante. */
+const FAISCA_PISCA = 2.6
+/** Quanto do raio a faisca perde no fundo do pulso. */
+const FAISCA_PULSO = 0.4
 
 interface Particula {
   x: number
@@ -178,6 +222,11 @@ interface Particula {
   vida: number
   /** Desenha como anel de ondulacao em vez de ponto. */
   anel: boolean
+  /**
+   * Velocidade e sentido do tombo, em radianos por unidade de fase. 0 = nao
+   * gira (todo preset que nao e folha).
+   */
+  giro: number
 }
 
 /** LCG minusculo — nao precisa de qualidade estatistica, precisa NAO ser o
@@ -361,16 +410,24 @@ function nascer(
   mascara: MascaraViva | null = null,
 ): void {
   const ang = r.angulo + (rand() - 0.5) * 2 * r.espalhamento
-  const vel = r.velocidade[0] + rand() * (r.velocidade[1] - r.velocidade[0])
+  // UM sorteio pra tamanho, velocidade e alpha quando a receita pede
+  // profundidade; tres sorteios independentes quando nao pede. Ver
+  // `Receita.profundidade`.
+  const perto = r.profundidade ? rand() : null
+  const vel = r.velocidade[0] + (perto ?? rand()) * (r.velocidade[1] - r.velocidade[0])
   p.vx = Math.cos(ang) * vel
   p.vy = Math.sin(ang) * vel
-  p.raio = r.raio[0] + rand() * (r.raio[1] - r.raio[0])
-  p.alphaMax = r.alpha * (0.5 + rand() * 0.5)
+  p.raio = r.raio[0] + (perto ?? rand()) * (r.raio[1] - r.raio[0])
+  p.alphaMax = r.alpha * (perto != null ? 0.45 + perto * 0.55 : 0.5 + rand() * 0.5)
   p.fase = rand() * Math.PI * 2
   p.bamboleio = r.bamboleio * (0.4 + rand() * 0.6)
   p.idade = 0
   p.anel = !!r.ondular && rand() < ANEL_FRACAO
   p.vida = p.anel ? ANEL_VIDA[0] + rand() * (ANEL_VIDA[1] - ANEL_VIDA[0]) : 0
+  // Sentido sorteado: folha caindo toda pro mesmo lado le como engrenagem.
+  p.giro = r.girar
+    ? (rand() < 0.5 ? -1 : 1) * (FOLHA_GIRO[0] + rand() * (FOLHA_GIRO[1] - FOLHA_GIRO[0]))
+    : 0
 
   // Com mascara, a particula nasce DENTRO da agua e nao na borda da janela — o
   // ponto inteiro do PH-113. Vale tambem na reciclagem: entrar pela borda faria
@@ -431,7 +488,7 @@ function reconstruir(
   for (let i = 0; i < quantidade; i++) {
     const p: Particula = {
       x: 0, y: 0, vx: 0, vy: 0, raio: 0, alphaMax: 0, fase: 0, bamboleio: 0,
-      idade: 0, vida: 0, anel: false,
+      idade: 0, vida: 0, anel: false, giro: 0,
     }
     nascer(p, r, janela, false, mascara)
     particulas.push(p)
@@ -531,8 +588,13 @@ export function desenharAmbiente(
       ctx.stroke()
       continue
     }
-
-    ctx.globalAlpha = p.alphaMax * (0.55 + 0.45 * Math.sin(p.fase * 0.8))
+    // Pisca rapido E o raio pulsa junto (faisca). `Math.abs` do seno em vez do
+    // seno cru: com o seno, metade do ciclo fica no alpha minimo e a brasa passa
+    // mais tempo apagada que acesa.
+    const pulso = r.faisca ? Math.abs(Math.sin(p.fase * FAISCA_PISCA)) : 0
+    ctx.globalAlpha = r.faisca
+      ? p.alphaMax * (0.3 + 0.7 * pulso)
+      : p.alphaMax * (0.55 + 0.45 * Math.sin(p.fase * 0.8))
     if (r.risco) {
       // Areia soprando le melhor como risco na direcao do vento que como ponto.
       ctx.lineWidth = p.raio
@@ -540,9 +602,16 @@ export function desenharAmbiente(
       ctx.moveTo(p.x, p.y)
       ctx.lineTo(p.x - p.vx * 0.05, p.y - p.vy * 0.05)
       ctx.stroke()
+    } else if (p.giro !== 0) {
+      // Folha: elipse achatada girando no proprio eixo. A rotacao sai da fase
+      // (que ja avanca com o tempo), entao nao ha estado novo por particula alem
+      // da velocidade do tombo.
+      ctx.beginPath()
+      ctx.ellipse(p.x, p.y, p.raio, p.raio * FOLHA_ACHATAMENTO, p.fase * p.giro, 0, Math.PI * 2)
+      ctx.fill()
     } else {
       ctx.beginPath()
-      ctx.arc(p.x, p.y, p.raio, 0, Math.PI * 2)
+      ctx.arc(p.x, p.y, p.raio * (r.faisca ? 1 - FAISCA_PULSO * (1 - pulso) : 1), 0, Math.PI * 2)
       ctx.fill()
     }
   }
