@@ -208,7 +208,20 @@ for (const species of Object.values(SPECIES)) {
 // the other 9 species are, so it's out of scope for a fix that's specifically
 // about un-sticking dead-end evolutions.
 export const SPECIAL_EVOLUTION_LEVEL = 80
-export const SPECIAL_EVOLUTION_STONE_COUNT = 20
+/**
+ * PH-136: era 20.
+ *
+ * ESTE NUMERO TEM UM GEMEO NO SERVIDOR. A decisao de deixar a evolucao
+ * acontecer e da RPC `evoluir_poke` (`v_stone_count`); esta constante so
+ * ANTECIPA a resposta pra tela poder dizer "faltam N" antes de chamar. Mudar um
+ * sem o outro deixa as duas metades discordando — ver o cabecalho da migration
+ * `20260824030000_evolucao_especial_40_pedras_public.sql`, e o teste
+ * `evolucaoEspecialCliente...` que compara os dois.
+ *
+ * Custo real: a pedra cai a 5% por abate e e do tipo do INIMIGO abatido, nao do
+ * POKE que vai evoluir — 40 pedras sao ~800 abates do tipo certo.
+ */
+export const SPECIAL_EVOLUTION_STONE_COUNT = 40
 const SPECIAL_EVOLUTIONS: Record<string, string> = {
   kadabra: 'alakazam', machoke: 'machamp', haunter: 'gengar',
   graveler: 'golem', onix: 'steelix', scyther: 'scizor',

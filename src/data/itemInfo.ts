@@ -9,6 +9,7 @@
 // preco) em vez de escrito a mao numa segunda lista: reequilibrar a Hyper
 // Potion na planilha muda a descricao junto, sem ninguem lembrar de vir aqui.
 // A frase da planilha continua aparecendo como primeira linha.
+import { SPECIAL_EVOLUTION_LEVEL, SPECIAL_EVOLUTION_STONE_COUNT } from './pokes'
 import type { AnyItem } from './items'
 
 const fmt = new Intl.NumberFormat('pt-BR')
@@ -50,7 +51,14 @@ export function infoDoItem(item: AnyItem): InfoDeItem {
   }
 
   if (item.kind === 'stone') {
-    efeitos.push(`Evolucao especial: 20 unidades no Nivel 80 evoluem um POKE de tipo ${item.stoneType}.`)
+    // Numero INTERPOLADO, nao escrito a mao (PH-136): estava `20` literal aqui
+    // enquanto a constante dizia outra coisa, e a ficha que o jogador le e
+    // exatamente o lugar onde essa divergencia nao aparece como bug — aparece
+    // como o jogo mentindo.
+    efeitos.push(
+      `Evolucao especial: ${SPECIAL_EVOLUTION_STONE_COUNT} unidades no Nivel ${SPECIAL_EVOLUTION_LEVEL}`
+      + ` evoluem um POKE de tipo ${item.stoneType}.`,
+    )
     efeitos.push('Nao e vendida na Loja: so cai de POKEs derrotados do mesmo tipo.')
   }
 
