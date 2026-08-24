@@ -50,6 +50,13 @@
 //   node scripts/build-agua-mask.js --debug      # + PNG de conferencia por arte
 //   node scripts/build-agua-mask.js              # gera o .generated.ts
 //
+// `beach` e a excecao, e tem script proprio: `scripts/pintar-ref-beach.js`.
+// Naquela arte o MAR separa por cor com margem grande (h 177-186, s 0.69-0.81,
+// contra areia h=42, palmeiral h=40, grama h=97), entao a referencia dela e
+// GERADA e nao pintada — e o cabecalho daquele arquivo explica por que isso nao
+// contradiz o paragrafo acima. As duas pocas da areia entram por geometria, nao
+// por cor, porque a poca (h=73) cai em cima do palmeiral no espaco de cor.
+//
 // O `--rascunho` existe porque corrigir e mais rapido que pintar do zero: ele
 // escreve em `scripts/agua-refs/` a arte com o palpite da heuristica em azul.
 // O palpite ERRA (marca copa de arvore), e apagar o excesso e o trabalho. Nao
