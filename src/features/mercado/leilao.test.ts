@@ -47,7 +47,7 @@ describe('proximoLanceMinimo espelha a regra de dar_lance (PH-101)', () => {
 
 describe('formatarRestante (PH-101)', () => {
   it('tempo esgotado nao mostra numero negativo', () => {
-    // Existe uma janela de ate ~60s em que `expira_em` passou e o cron ainda
+    // Existe uma janela de ate ~5min em que `expira_em` passou e o cron ainda
     // nao varreu. Mostrar "-42s" faria parecer defeito; "encerrando..." e o que
     // esta de fato acontecendo.
     expect(formatarRestante(0)).toBe('encerrando...')
