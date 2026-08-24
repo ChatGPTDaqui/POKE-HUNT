@@ -288,6 +288,13 @@ async function flush(cfg: Config, userId: string, parcial: boolean): Promise<Res
     // Idem pra sala: o cliente sorteia a propria como predicao, e quem decidiu
     // o pool e o loot que de fato foram creditados foi esta aqui.
     sala: resultado.sala,
+    // PH-140: `aplicarFlush` ja resolvia o clima da sala, e esta linha e que
+    // faltava pra ele CHEGAR ao cliente. Sem ela, `/sessao/abrir` mandava o
+    // clima e todo flush seguinte vinha sem o campo — e como campo ausente
+    // significa "sem informacao, mantenha o que tem", a primeira troca de sala
+    // sob autoridade deixava o jogador sem clima nenhum pelo resto da hunt.
+    // Passou pela suite inteira: so aparece chamando a funcao publicada.
+    clima: resultado.clima,
     // `estadoParcial` anda SEMPRE junto de `estado`: e ele que diz ao cliente se
     // `bagPokes` e a mochila inteira ou so as capturas desta janela. Mandar o
     // estado sem a marca e a unica forma de esta otimizacao virar perda de dado
