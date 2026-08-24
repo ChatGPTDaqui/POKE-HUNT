@@ -24,7 +24,7 @@ import { LANCE_MAP_ID } from '@/data/nightmareMaps'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { buildMapWorld, stepWorld, type ProgressoDaSessao } from './simulation'
 
-const ARENA_DO_LANCE = COLISAO_POR_ARTE['assets/hunt-backgrounds/dragon.png']
+const ARENA_DO_LANCE = COLISAO_POR_ARTE['assets/hunt-backgrounds/dragon.jpg']
 
 function poke(uid: string, hp: number): PokeInstance {
   return {

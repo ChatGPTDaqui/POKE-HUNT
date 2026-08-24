@@ -79,14 +79,14 @@ const PRESET_POR_ARTE: Record<string, PresetAmbiente> = {
   'assets/hunt-backgrounds/cave-volcanic.jpg': 'brasa',
 
   'assets/hunt-backgrounds/ruins.jpg': 'poeira',
-  'assets/hunt-backgrounds/temple.png': 'poeira',
+  'assets/hunt-backgrounds/temple.jpg': 'poeira',
   'assets/hunt-backgrounds/fairy-cave.jpg': 'poeira',
   'assets/hunt-backgrounds/abyss.jpg': 'poeira',
-  'assets/hunt-backgrounds/dragon.png': 'poeira',
-  'assets/hunt-backgrounds/dojo.png': 'poeira',
+  'assets/hunt-backgrounds/dragon.jpg': 'poeira',
+  'assets/hunt-backgrounds/dojo.jpg': 'poeira',
 
   'assets/hunt-backgrounds/ice-cave.jpg': 'neve',
-  'assets/hunt-backgrounds/ice-mountain.png': 'neve',
+  'assets/hunt-backgrounds/ice-mountain.jpg': 'neve',
   'assets/hunt-backgrounds/mountain.jpg': 'neve',
 
   'assets/hunt-backgrounds/desert.jpg': 'areia',

@@ -158,7 +158,7 @@ export interface BiomaDef {
 // trainingDummy.ts), preservada de proposito em vez de cair no fundo novo do
 // bioma Urbano.
 const ARTE = {
-  dojo: 'assets/hunt-backgrounds/dojo.png',
+  dojo: 'assets/hunt-backgrounds/dojo.jpg',
 
   // Bioma-padrao (usado pelo bioma inteiro e por todo sub-bioma sem imagem
   // propria) + os sub-biomas com correspondencia EXATA de nome — ver o
@@ -183,12 +183,12 @@ const ARTE = {
   montanha: 'assets/hunt-backgrounds/mountain.jpg',
   cavernaVulcanica: 'assets/hunt-backgrounds/cave-volcanic.jpg',
   cavernaDeGelo: 'assets/hunt-backgrounds/ice-cave.jpg',
-  montanhaDeGelo: 'assets/hunt-backgrounds/ice-mountain.png',
+  montanhaDeGelo: 'assets/hunt-backgrounds/ice-mountain.jpg',
   vulcao: 'assets/hunt-backgrounds/volcano.jpg',
   obra: 'assets/hunt-backgrounds/construction-site.jpg',
   industrial: 'assets/hunt-backgrounds/industrial.jpg',
   ruinas: 'assets/hunt-backgrounds/ruins.jpg',
-  temploMistico: 'assets/hunt-backgrounds/temple.png',
+  temploMistico: 'assets/hunt-backgrounds/temple.jpg',
   grutaFeerica: 'assets/hunt-backgrounds/fairy-cave.jpg',
   florestaQueimada: 'assets/hunt-backgrounds/burnt-forest.jpg',
   abismo: 'assets/hunt-backgrounds/abyss.jpg',

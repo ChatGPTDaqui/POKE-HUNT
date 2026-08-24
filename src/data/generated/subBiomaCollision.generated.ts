@@ -907,7 +907,7 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     },
     "spawnOrigem": "centroide-rosa"
   },
-  "assets/hunt-backgrounds/ice-mountain.png": {
+  "assets/hunt-backgrounds/ice-mountain.jpg": {
     "grid": [
       "1111111111111111111111111111111",
       "1111111111111111001111111111111",
@@ -1637,7 +1637,7 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     },
     "spawnOrigem": "centroide-rosa"
   },
-  "assets/hunt-backgrounds/temple.png": {
+  "assets/hunt-backgrounds/temple.jpg": {
     "grid": [
       "11111111111111111111111111111111111111111111111111111",
       "11111111111111111111111111111111111111111111111111111",
@@ -2705,7 +2705,7 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
     },
     "spawnOrigem": "amarelo"
   },
-  "assets/hunt-backgrounds/dojo.png": {
+  "assets/hunt-backgrounds/dojo.jpg": {
     "grid": [
       "111111111111111111111111111",
       "111100111111000111110000011",
@@ -2745,7 +2745,7 @@ export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = {
       "y": 170
     }
   },
-  "assets/hunt-backgrounds/dragon.png": {
+  "assets/hunt-backgrounds/dragon.jpg": {
     "grid": [
       "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
       "111111111111111100001111111111111111111111111111111111111111111111111111111111111111111111111111111111111",

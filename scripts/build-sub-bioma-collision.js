@@ -235,7 +235,7 @@ const MANIFESTO = {
   'forest.png': { bg: 'forest.jpg', modo: 'rosa_anda' },
   'industrial.png': { bg: 'industrial.jpg', modo: 'rosa_anda' },
   'sea.png': { bg: 'sea.jpg', modo: 'rosa_anda' },
-  'ice-mountain.png': { bg: 'ice-mountain.png', modo: 'rosa_anda' },
+  'ice-mountain.png': { bg: 'ice-mountain.jpg', modo: 'rosa_anda' },
   'mountain.png': { bg: 'mountain.jpg', modo: 'rosa_anda' },
   'construction-site.png': { bg: 'construction-site.jpg', modo: 'rosa_anda' },
   'swamp.png': { bg: 'swamp.jpg', modo: 'rosa_anda' },
@@ -243,7 +243,7 @@ const MANIFESTO = {
   'beach.png': { bg: 'beach.jpg', modo: 'rosa_anda' },
   'ruins.png': { bg: 'ruins.jpg', modo: 'rosa_anda' },
   'jungle.png': { bg: 'jungle.jpg', modo: 'rosa_anda' },
-  'temple.png': { bg: 'temple.png', modo: 'rosa_anda' },
+  'temple.png': { bg: 'temple.jpg', modo: 'rosa_anda' },
   // Pintada junto com as 17 acima mas nunca cadastrada — a sala 'cave' ficou
   // sem grade por esquecimento, nao por decisao. Sem marcador amarelo (a
   // arte e lava: amarelo incidental demais pra confiar num blob).
@@ -268,8 +268,8 @@ const MANIFESTO = {
   // Treinamento; `dragon.png` e a arena do Campeao Lance e o espelho DRAGON do
   // Modo Pesadelo. Nenhuma das duas e arte de bioma, entao ate aqui elas
   // escapavam de todo teste que itera `BIOMAS` — ver walkBlock.test.ts.
-  'dojo.png': { bg: 'dojo.png', modo: 'rosa_anda' },
-  'dragon.png': { bg: 'dragon.png', modo: 'rosa_anda' },
+  'dojo.png': { bg: 'dojo.jpg', modo: 'rosa_anda' },
+  'dragon.png': { bg: 'dragon.jpg', modo: 'rosa_anda' },
 };
 
 /**
