@@ -396,6 +396,27 @@ gerado.
 
 ---
 
+## Unificar as duas bibliotecas de ícone
+
+O projeto tem `@phosphor-icons/react` **e** `lucide-react` em `dependencies`, o que parece
+duplicação óbvia. Contado antes de decidir: Phosphor em **36** arquivos, Lucide em **4** — e os
+quatro são `src/components/ui/checkbox.tsx`, `dialog.tsx`, `select.tsx` e `sonner.tsx`.
+
+**Descartado porque a fronteira não é estética, é de propriedade do arquivo.** Os quatro são
+primitivos **gerados pela CLI do shadcn**, e Lucide é o que ela emite. Trocar por Phosphor
+significa editar à mão arquivo gerado: na próxima vez que alguém rodar a CLI para regerar ou
+adicionar um primitivo, o arquivo volta com Lucide e a "unificação" desfaz em silêncio — ou pior,
+some num conflito que ninguém lê.
+
+A regra que fica: **Phosphor é o conjunto de ícones do app; Lucide não é importado fora de
+`src/components/ui/`.** Uma ocorrência de `lucide-react` em `src/features/` é o sinal de que
+alguém copiou primitivo para dentro de tela.
+
+`next-themes` é a mesma história e o mesmo motivo: um uso só, em `ui/sonner.tsx`, também gerado.
+Não é dependência do app, é dependência do primitivo.
+
+---
+
 ## Fora de escopo por decisão explícita
 
 **Lista corrigida após a leva de combate** (ver [03](03-motor-de-simulacao.md#combate-combatsystemts)):
