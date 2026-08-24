@@ -22,7 +22,7 @@ describe('Treinamento — boneco de treino', () => {
   it('o boneco nunca ataca, mesmo com o jogador parado nele por muito tempo', () => {
     const rng = createRng(1)
     const poke = createPokeInstance(rng, 'charmander', 1) // o caso mais fragil possivel
-    const world = buildMapWorld(TRAINING_MAP_ID, poke, {
+    const world = buildMapWorld(TRAINING_MAP_ID, poke, { seed: 0,
       rng: createRng(1),
       counters: { entity: 1, effect: 1, pendingHit: 1 },
     })
@@ -41,7 +41,7 @@ describe('Treinamento — boneco de treino', () => {
     // POKE forte o bastante pra matar o boneco dentro da janela do teste —
     // o alvo aqui e a RECOMPENSA do abate, nao o combate em si.
     const poke = createPokeInstance(rng, 'charizard', 90)
-    const world = buildMapWorld(TRAINING_MAP_ID, poke, {
+    const world = buildMapWorld(TRAINING_MAP_ID, poke, { seed: 0,
       rng: createRng(2),
       counters: { entity: 1, effect: 1, pendingHit: 1 },
     })

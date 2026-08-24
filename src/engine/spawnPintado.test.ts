@@ -100,7 +100,7 @@ describe('o circulo amarelo chega ao mundo', () => {
     const erros: string[] = []
     for (const id of huntsSemSalaComPintura()) {
       const esperado = spawnPointParaSala(id, null)!
-      const world = buildMapWorld(id, poke, {
+      const world = buildMapWorld(id, poke, { seed: 0,
         rng: createRng(11),
         counters: { entity: 1, effect: 1, pendingHit: 1 },
       })
@@ -131,7 +131,7 @@ describe('o circulo amarelo chega ao mundo', () => {
       const esperado = spawnPointParaSala(mapa, { chave })
       if (!esperado) { erros.push(`${chave}: sem spawn pintado`); continue }
 
-      const world = buildMapWorld(mapa, poke, {
+      const world = buildMapWorld(mapa, poke, { seed: 0,
         rng: createRng(3),
         counters: { entity: 1, effect: 1, pendingHit: 1 },
       }, { sala: { indice: 0, chave, abates: 0, ciclos: 0 } })

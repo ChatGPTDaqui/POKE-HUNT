@@ -74,7 +74,7 @@ function lutar(golpeForcado: string | null): Achados {
   // direcional, e o teste passaria por vacuidade.
   if (golpeForcado) poke.activeAbilities = [golpeForcado]
 
-  const world = buildMapWorld(MAPA, poke, {
+  const world = buildMapWorld(MAPA, poke, { seed: 0,
     rng: createRng(SEMENTE),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
   })

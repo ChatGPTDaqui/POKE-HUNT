@@ -805,7 +805,11 @@ async function simularSessao(
   const world = buildMapWorld(
     sessao.map_id,
     ativo,
-    { rng, counters: { entity: 1, effect: 1, pendingHit: 1 } },
+    // `seed` alem do `rng` (PH-140): o clima de AMBIENTE e derivado dela, e nao
+    // guardado. Passar a semente REAL da sessao e o que faz o servidor simular
+    // sob o mesmo clima que a tela do jogador mostrou — com um valor fixo aqui,
+    // o dano de areia/granizo fecharia diferente dos dois lados.
+    { rng, seed: Number(sessao.seed), counters: { entity: 1, effect: 1, pendingHit: 1 } },
     // Progresso que atravessa a janela. Mesma familia do `rng_state`: o mundo e
     // reconstruido, o progresso nao pode ser.
     {

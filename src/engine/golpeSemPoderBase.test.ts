@@ -22,7 +22,7 @@ function golpesDisparados(speciesId: string, nivel: number, golpes: string[], se
   const rng = createRng(4242)
   const poke = createPokeInstance(rng, speciesId, nivel, { rarity: 'comum', ivs: IV })
   poke.activeAbilities = golpes
-  const world = buildMapWorld('route_46', poke, {
+  const world = buildMapWorld('route_46', poke, { seed: 0,
     rng: createRng(4242),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
   })

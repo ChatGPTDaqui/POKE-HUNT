@@ -35,7 +35,7 @@ function cenario(golpeId: string) {
     [typedAoeMoveKey(SPECIES.charmander.type)]: true,
     [BASIC_ATTACK.id]: true,
   }
-  const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
+  const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
   const player = world.player!
   player.cooldowns = {}
   player.globalCooldown = 0

@@ -62,7 +62,7 @@ function lutar(): Achados {
   const gameState = useGameStateStore.getState()
   const rng = createRng(SEMENTE)
   const poke = createPokeInstance(rng, 'charmander', 12)
-  const world = buildMapWorld(MAPA, poke, {
+  const world = buildMapWorld(MAPA, poke, { seed: 0,
     rng: createRng(SEMENTE),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
   })

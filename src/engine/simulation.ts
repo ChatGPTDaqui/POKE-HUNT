@@ -39,6 +39,7 @@ import { createWorldEffect } from './effect'
 import { updateMovement } from './systems/movementSystem'
 import { updateCombat } from './systems/combatSystem'
 import { aplicarStatus } from './systems/statusSystem'
+import { climaAmbienteDaSala } from './systems/climaAmbiente'
 import { updateAnimations, tickAttackAnimTimers } from './systems/animationSystem'
 import { updateAutoHeal, maybeAutoCatch } from './systems/autoSystem'
 import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } from './systems/progressionSystem'
@@ -119,13 +120,17 @@ export function shinyPrefix(isShiny?: boolean): string {
 // unica sequencia derivada de uma semente so. Sem isso, cada ida ao Hospital
 // reiniciaria o stream com uma semente nova e o servidor (Fase D) teria que
 // rastrear uma semente por cena em vez de uma por sessao.
-export type SequenciaDeSorteio = Pick<WorldState, 'rng' | 'counters'>
+export type SequenciaDeSorteio = Pick<WorldState, 'rng' | 'counters' | 'seed'>
 
 function novoMundo(carry?: SequenciaDeSorteio): WorldState {
   const base = emptyWorldState()
   if (carry) {
     base.rng = { ...carry.rng }
     base.counters = { ...carry.counters }
+    // Sem isto o clima de ambiente re-sortearia a cada janela de simulacao:
+    // `emptyWorldState()` sorteia uma semente nova quando ninguem passa uma, e
+    // o clima e derivado dela (PH-140).
+    base.seed = carry.seed
   }
   return base
 }
@@ -488,6 +493,14 @@ export function buildMapWorld(
     sequenceCleared,
     countdownRemaining,
     sala,
+    // PH-140: o clima de ambiente e reposto em TODA construcao de mundo, e nao
+    // guardado. E o que faz ele sobreviver ao flush do servidor (que reconstroi
+    // o mundo a cada 30-90s) sem coluna nova em `game_sessions`: mesma
+    // `(seed, sala)`, mesmo clima.
+    //
+    // Clima de GOLPE nao volta aqui de proposito — 10 turnos nao atravessam
+    // reconstrucao de mundo, igual estagio de atributo e escudo.
+    clima: climaAmbienteDaSala(base.seed, sala),
   }
 }
 

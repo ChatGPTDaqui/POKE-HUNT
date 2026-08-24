@@ -26,6 +26,7 @@
 import { weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
 import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, LOOT, type SubBiomaDef } from '@/data/biomas'
+import { reporClimaDeAmbiente } from './climaAmbiente'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { getEncounter } from '@/data/enemies'
 import { mapDefParaSala, spawnPointParaSala, isCellBlocked, nearestOpenPoint } from '@/data/maps'
@@ -373,6 +374,9 @@ export function reconciliarSalaDaAutoridade(world: WorldState, sala: SalaAtiva |
   if (!atual) {
     world.sala = { ...sala }
     world.salaPredita = false
+    // PH-140: sala nova, clima novo. Sem isto o mundo seguiria com o clima
+    // derivado de `sala: null` (nenhum) ate a proxima reconstrucao.
+    reporClimaDeAmbiente(world)
     return
   }
   if (atual.chave === sala.chave && atual.indice === sala.indice && atual.ciclos === sala.ciclos) {
@@ -415,6 +419,9 @@ export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
   if (!pendente) return
   world.sala = pendente
   world.salaPendente = null
+  // PH-140: o clima da sala anterior NAO acompanha o jogador — inclusive o de
+  // golpe, que morre junto com a sala mesmo com turnos sobrando.
+  reporClimaDeAmbiente(world)
   world.salaEsperaDaAutoridade = 0
   world.enemies = []
   world.effects = []

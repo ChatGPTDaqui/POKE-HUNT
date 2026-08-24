@@ -45,6 +45,7 @@ import { FORMULAS } from '@/data/generated/formulas.generated'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { rollChance, randRange } from '@/core/random'
 import { triggerAttackAnim } from './animationSystem'
+import { reporClimaDeAmbiente } from './climaAmbiente'
 import { createWorldEffect, effectDone, reapontarParaAtacante, seguirDono, tickEffect } from '../effect'
 import {
   isDead, getGroundOffset, tickCooldowns, isAbilityReady,
@@ -294,6 +295,19 @@ function efetividadeConsiderandoRevelado(
 const CLIMA_MULTIPLICADOR_FAVORECIDO = 1.5
 const CLIMA_MULTIPLICADOR_DESFAVORECIDO = 0.5
 
+// NEVE (Gen 9) e NEVOA (Gen 4) — PH-140.
+//
+// Neve: +50% de Defesa pra tipos ICE, e SO isso. Nao tira HP por turno; o
+// granizo e que faz isso. Sao climas distintos, e nas tabelas de sub-bioma os
+// dois aparecem juntos (`ice-cave`: 50% de neve, 12,5% de granizo).
+const NEVE_DEFESA_GELO = 1.5
+// Nevoa: precisao de todo golpe x0,6 (o efeito principal), Solar Beam pela
+// metade, e as curas de clima (Moonlight/Morning Sun/Synthesis) caem de 1/2
+// para 1/4 do HP maximo. Nenhum golpe cria nevoa — ela so vem do ambiente.
+const NEVOA_PRECISAO = 0.6
+// Solar Beam perde metade do dano em qualquer clima que nao seja sol.
+const SOLAR_BEAM_SOB_CLIMA_RUIM = 0.5
+
 // --- Fase 12: Traits que multiplicam ATAQUE/DEFESA FISICOS -----------------
 //
 // Todas as quatro so mexem no fisico (Gen VII): Huge Power/Pure Power dobram
@@ -417,6 +431,12 @@ export const ESCUDO_ABILITIES: Record<string, keyof Escudos> = {
   wide_guard: 'wideGuard',
 }
 const ESCUDO_DURACAO_TURNOS = 5 // igual aos jogos reais (Gen2-VII, fora de Dobrado item/Light Clay)
+// Clima ligado por GOLPE (Rain Dance/Sunny Day/Hail/Sandstorm). Nos jogos sao 5
+// turnos; aqui sao 10, por decisao do usuario em 2026-08-24 (PH-140) — uma sala
+// dura 30 abates, entao 5 turnos de clima passavam antes de qualquer coisa
+// acontecer. Ao expirar, o clima de AMBIENTE da sala volta; o ceu nao fica
+// limpo (ver systems/climaAmbiente.ts#reporClimaDeAmbiente).
+const CLIMA_DE_GOLPE_TURNOS = 10
 const ESCUDO_DURACAO_SEGUNDOS = ESCUDO_DURACAO_TURNOS * TURNO_SEGUNDOS
 
 // Golpes de disable/lock (imprison/embargo descartados por decisao anterior,
@@ -1317,6 +1337,30 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
     } else if (climaAtivo === 'sol') {
       if (ability.type === 'FIRE') dmg *= CLIMA_MULTIPLICADOR_FAVORECIDO
       else if (ability.type === 'WATER') dmg *= CLIMA_MULTIPLICADOR_DESFAVORECIDO
+    } else if (climaAtivo === 'neve') {
+      // NEVE (Gen 9, PH-140): +50% de DEFESA pra tipos ICE. Defesa, e nao
+      // Defesa Especial — entao so corta golpe FISICO. Aplicado como divisao do
+      // dano em vez de mexer no stat: o pipeline de dano deste motor le
+      // `stats.def` uma vez la em cima, e um buff temporario de stat nao tem
+      // onde morar sem inventar um campo novo.
+      //
+      // E o unico efeito da neve. Ela NAO tira HP por turno — quem faz isso e o
+      // granizo (ver statusSystem#danoDeClimaPorTurno). Confundir os dois e o
+      // erro mais provavel aqui.
+      const ehGelo = defenderSpecies.type === 'ICE' || defenderSpecies.type2 === 'ICE'
+      if (ehGelo && isPhysical) dmg /= NEVE_DEFESA_GELO
+    }
+
+    // SOLAR BEAM sob clima ruim: dano pela metade em QUALQUER clima que nao
+    // seja sol nem ceu limpo — chuva, areia, granizo, neve e nevoa (PH-140).
+    // Generalizado de proposito: a regra dos jogos nunca foi "so na nevoa", e
+    // implementar so o caso novo deixaria o mesmo golpe com fidelidade
+    // diferente dependendo de qual clima estivesse em campo.
+    //
+    // O outro lado da regra (sol dispensa o turno de carga) nao existe aqui:
+    // este motor nao tem golpe de carga nenhum.
+    if (ability.id === 'solar_beam' && climaAtivo != null && climaAtivo !== 'sol') {
+      dmg *= SOLAR_BEAM_SOB_CLIMA_RUIM
     }
 
     // HABILIDADES QUE MEXEM NO DANO JA CALCULADO, depois da efetividade de tipo
@@ -1844,7 +1888,16 @@ function golpeErrou(
     if (traitDef === TRAIT_TANGLED_FEET && defensor.statusVolatil?.tipo === 'confusion') multDefensor *= 2
   }
 
-  const precisaoEfetiva = precisaoBase * multAtacante / multDefensor
+  // NEVOA (PH-140): precisao de TODO golpe x0,6, dos dois lados. Entra por
+  // ultimo, depois de estagios e evasao, porque e efeito de CAMPO — ele nao
+  // disputa com Sand Veil/Snow Cloak, empilha por cima.
+  //
+  // `climaEfetivo` e nao `clima` cru: Cloud Nine/Air Lock apagam o EFEITO do
+  // clima sem apagar o clima, e sob elas a nevoa nao pode cegar ninguem.
+  const climaAtivo = climaEfetivo(clima, { atacante: traitAtk, defensor: traitDef })
+  const multClima = climaAtivo === 'nevoa' ? NEVOA_PRECISAO : 1
+
+  const precisaoEfetiva = precisaoBase * multAtacante * multClima / multDefensor
   if (precisaoEfetiva >= 100) return false
   return nextFloat(rng) * 100 >= precisaoEfetiva
 }
@@ -2442,7 +2495,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // e o efeito nao depende do alvo ter sobrevivido.
   const climaDoGolpe = CLIMA_DO_GOLPE[ability.id]
   if (climaDoGolpe) {
-    world.clima = { tipo: climaDoGolpe, turnosRestantes: 5 }
+    world.clima = { tipo: climaDoGolpe, turnosRestantes: CLIMA_DE_GOLPE_TURNOS, origem: 'golpe' }
   }
 
   // Efeito de status DEPOIS do dano, como nos jogos: um golpe que mata nao
@@ -2994,10 +3047,11 @@ const TRAIT_CLIMA: Partial<Record<TraitId, ClimaTipo>> = {
 
 // Clima ligado por TRAIT (Drizzle/Sand Stream/Snow Warning/Drought) e
 // INDEFINIDO nos jogos reais — dura ate outra Trait ou golpe de clima
-// substituir, sem contagem de turnos (diferente do clima ligado por GOLPE tipo
-// Rain Dance, que dura 5 turnos e nao existe neste motor ainda). `Infinity` e
-// o mesmo sentinela de "sem timer" que `lastDamageTaken.age` ja usa neste
-// motor (ver engine/entity.ts).
+// substituir, sem contagem de turnos. `Infinity` e o mesmo sentinela de "sem
+// timer" que `lastDamageTaken.age` ja usa neste motor (ver engine/entity.ts).
+//
+// PH-140: com clima de ambiente, `Infinity` deixou de significar "pra sempre" —
+// significa "ate a sala trocar", que e o que derruba qualquer clima agora.
 const CLIMA_DE_TRAIT_TURNOS = Infinity
 
 /**
@@ -3015,7 +3069,7 @@ function resolveEntryHook(world: WorldState, self: WorldEntity, opponent: WorldE
   const climaTipo = TRAIT_CLIMA[trait]
   if (climaTipo) {
     if (world.clima?.tipo !== climaTipo) {
-      world.clima = { tipo: climaTipo, turnosRestantes: CLIMA_DE_TRAIT_TURNOS }
+      world.clima = { tipo: climaTipo, turnosRestantes: CLIMA_DE_TRAIT_TURNOS, origem: 'golpe' }
     }
     return
   }
@@ -3115,8 +3169,12 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
   }
 
   if (turnoDeClimaFechou && world.clima) {
+    // Clima de ambiente tem `turnosRestantes: Infinity` — decrementar nao muda
+    // nada e a comparacao nunca dispara, entao ele so sai na troca de sala.
     world.clima.turnosRestantes -= 1
-    if (world.clima.turnosRestantes <= 0) world.clima = null
+    // PH-140: expirou o clima de golpe, o do LUGAR volta. Zerar aqui deixaria o
+    // deserto sem areia pelo resto da sala por causa de um Rain Dance.
+    if (world.clima.turnosRestantes <= 0) reporClimaDeAmbiente(world)
   }
 
   for (const effect of world.effects) {
@@ -3230,7 +3288,11 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     // nao dentro de `limparEstadoVolatil` (que so mexe em campos de
     // WorldEntity). Mesmo ponto porque e aqui que "fim de batalha" e
     // detectado e quem chama ja tem `world` em maos.
-    world.clima = null
+    //
+    // PH-140: "reset" agora e VOLTAR AO AMBIENTE, nao zerar. O clima do lugar
+    // nao acaba porque uma batalha acabou — ele vale a sala inteira, e a sala
+    // dura 30 abates. Só o que veio de golpe/trait e que morre aqui.
+    reporClimaDeAmbiente(world)
   }
 
   return { defeatedEnemyIds, playerJustFainted }

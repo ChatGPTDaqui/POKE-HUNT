@@ -53,6 +53,9 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     salaEsperaDaAutoridade: 0,
     salaPredita: false,
     rng: createRng(seed),
+    // Guardada alem do `rng` porque `rng.state` avanca a cada sorteio e deixa
+    // de identificar a sessao — ver o campo em engine/types.ts (PH-140).
+    seed,
     counters: { entity: 1, effect: 1, pendingHit: 1 },
     pessimista: false,
     clima: null,

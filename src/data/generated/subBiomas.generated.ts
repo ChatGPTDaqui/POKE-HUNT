@@ -8,7 +8,7 @@
 // A CHANCE de aparicao NAO vem daqui: peso de spawn continua sendo o
 // `spawn_tier` real do Gen1/Gen2 (scripts/derive-spawn-tiers.js) e a chance
 // de a sala cair neste sub-bioma vive em data/biomas.ts, escrita a mao.
-import type { SubBiomaEspecies, SubBiomaLinks } from './types';
+import type { SubBiomaClima, SubBiomaEspecies, SubBiomaLinks } from './types';
 
 /** Especies do nosso catalogo que podem aparecer em cada sub-bioma. */
 export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
@@ -506,6 +506,50 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
  * NAO e usado pelo jogo hoje. Fica guardado porque e a fundacao do modo
  * Expedicao, e o parser que extrai isso ja esta escrito.
  */
+/**
+ * Pesos de clima de cada sub-bioma (PH-140), do `weatherPool` do PokeRogue.
+ * Sorteado UMA vez ao entrar na sala; `limpo` e um resultado como outro
+ * qualquer, nao a ausencia de tabela.
+ *
+ * E o unico dado de PROBABILIDADE de clima que existe: os jogos principais
+ * fixam o clima por rota (Rota 119 sempre chove) e nunca sortearam nada.
+ */
+export const SUB_BIOMA_CLIMA: SubBiomaClima = {
+  'abyss': { limpo: 1 },
+  'badlands': { limpo: 8, areia: 2, sol: 5 },
+  'beach': { limpo: 8, chuva: 3, sol: 5 },
+  'cave': { limpo: 1 },
+  'construction-site': { limpo: 1 },
+  'desert': { limpo: 2, areia: 8, sol: 5 },
+  'dojo': { limpo: 1 },
+  'factory': { limpo: 1 },
+  'fairy-cave': { limpo: 1 },
+  'forest': { limpo: 8, chuva: 4 },
+  'grass': { limpo: 8, chuva: 4, sol: 8 },
+  'graveyard': { limpo: 3, nevoa: 1 },
+  'ice-cave': { limpo: 3, neve: 4, granizo: 1 },
+  'jungle': { limpo: 8, chuva: 6, nevoa: 1 },
+  'laboratory': { limpo: 1 },
+  'lake': { limpo: 10, chuva: 4, nevoa: 1 },
+  'meadow': { limpo: 3, sol: 5 },
+  'metropolis': { limpo: 1 },
+  'mountain': { limpo: 1 },
+  'plains': { limpo: 1 },
+  'power-plant': { limpo: 1 },
+  'ruins': { limpo: 1 },
+  'sea': { limpo: 3, chuva: 12 },
+  'seabed': { chuva: 1 },
+  'slum': { limpo: 1 },
+  'snowy-forest': { neve: 7, granizo: 1 },
+  'space': { limpo: 1 },
+  'swamp': { limpo: 3, chuva: 4, nevoa: 1 },
+  'tall-grass': { limpo: 8, chuva: 4, sol: 4 },
+  'temple': { limpo: 1 },
+  'town': { limpo: 1 },
+  'volcano': { sol: 1 },
+  'wasteland': { limpo: 1 },
+};
+
 export const SUB_BIOMA_LINKS: SubBiomaLinks = {
   'abyss': [{ bioma: 'cave', peso: 1 }, { bioma: 'space', peso: 2 }, { bioma: 'wasteland', peso: 2 }],
   'badlands': [{ bioma: 'desert', peso: 1 }, { bioma: 'mountain', peso: 1 }],

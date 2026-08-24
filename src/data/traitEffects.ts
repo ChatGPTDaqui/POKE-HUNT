@@ -20,10 +20,17 @@ import type { ElementType } from './generated/types'
 import { ABILITIES } from './abilities'
 import type { Ability } from './abilities'
 
-// Repetido aqui em vez de importado de engine/types.ts pelo mesmo motivo que
-// CLIMA_DO_GOLPE em abilities.ts: engine/types importa data/abilities, e o
-// import reverso fecharia um ciclo. Casa estruturalmente com ClimaTipo.
-type Clima = 'chuva' | 'sol' | 'granizo' | 'areia'
+// PH-140: isto era uma COPIA do union ('chuva' | 'sol' | 'granizo' | 'areia'),
+// com um comentario afirmando que "casa estruturalmente com ClimaTipo". Parou
+// de casar no minuto em que neve e nevoa entraram, e so houve aviso porque o
+// valor atravessa a fronteira em `multiplicadorDeVelocidadePorTrait`. Copia
+// conferida por acaso nao e copia segura.
+//
+// O ciclo que a copia existia pra evitar nao acontece com `import type`: ele e
+// APAGADO na compilacao e nao vira import nenhum em runtime. `engine/types`
+// importa `data/abilities` de verdade; este arquivo importa `engine/types` so
+// no plano dos tipos.
+import type { ClimaTipo as Clima } from '@/engine/types'
 
 // ---------------------------------------------------------------------------
 // VELOCIDADE

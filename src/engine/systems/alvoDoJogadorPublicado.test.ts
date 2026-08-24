@@ -29,7 +29,7 @@ function cenario() {
   const rng = createRng(77)
   const counters = { entity: 1, effect: 1, pendingHit: 1 }
   const jogadorPoke = createPokeInstance(rng, 'charmander', 40)
-  const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
+  const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
   const player = world.player!
   player.cooldowns = {}
   player.globalCooldown = 0
