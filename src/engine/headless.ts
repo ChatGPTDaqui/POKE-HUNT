@@ -28,6 +28,9 @@ export { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 // cliente entraria com uma sala sorteada por ele e trocaria de sub-bioma
 // (com aviso na tela) 30 segundos depois de entrar na hunt.
 export { novaSala, temSalas } from './systems/salaSystem'
+// PH-140: o servidor resolve o clima de ambiente e manda pro cliente, que nao
+// tem a semente da sessao pra derivar o dele.
+export { climaDaSala } from './systems/climaAmbiente'
 export {
   BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, SALAS_POR_HUNT, ABATES_POR_SALA,
   BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, huntId,
@@ -39,7 +42,7 @@ export {
   MAX_ACTIVE_ABILITIES, activeAbilitiesPadrao, ehGolpeAoeDeNivel50, golpesUtilizaveis,
 } from '@/data/activeAbilities'
 
-export type { WorldState, WorldCounters, SalaAtiva } from './types'
+export type { WorldState, WorldCounters, SalaAtiva, ClimaTipo } from './types'
 
 // Regras de economia e progressao usadas pelas ACOES do jogador (comprar,
 // vender, desbloquear, evoluir). O servidor chama exatamente estas — nao ha uma

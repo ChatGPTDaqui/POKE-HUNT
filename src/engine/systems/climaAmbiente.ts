@@ -78,7 +78,16 @@ export function climaDaSala(seed: number, sala: SalaAtiva | null): ClimaTipo | n
  * fazendo `climaDaSala` devolver outra coisa.
  */
 export function climaAmbienteDaSala(seed: number, sala: SalaAtiva | null): Clima | null {
-  const tipo = climaDaSala(seed, sala)
+  return climaDeAmbiente(climaDaSala(seed, sala))
+}
+
+/**
+ * Embrulha um tipo de clima como clima de AMBIENTE.
+ *
+ * Usado tambem pelo caminho da autoridade, onde o tipo nao e sorteado aqui: ele
+ * chega pronto do servidor, que e quem tem a semente da sessao.
+ */
+export function climaDeAmbiente(tipo: ClimaTipo | null): Clima | null {
   return tipo ? { tipo, turnosRestantes: Infinity, origem: 'ambiente' } : null
 }
 
@@ -92,5 +101,22 @@ export function climaAmbienteDaSala(seed: number, sala: SalaAtiva | null): Clima
  * alguem usou um golpe de clima uma vez.
  */
 export function reporClimaDeAmbiente(world: WorldState): void {
-  world.clima = climaAmbienteDaSala(world.seed, world.sala)
+  world.clima = world.climaAmbiente
+}
+
+/**
+ * Troca o clima do LUGAR e, junto, o efetivo — a menos que um golpe esteja em
+ * campo agora.
+ *
+ * Usado nos dois caminhos: troca de sala no jogo local (com o clima derivado) e
+ * chegada do clima autoritativo no flush.
+ *
+ * O respeito ao clima de golpe importa nos dois: o servidor manda o clima do
+ * LUGAR, e um Rain Dance de 10 turnos em andamento no cliente nao e assunto
+ * dele.
+ */
+export function definirClimaDeAmbiente(world: WorldState, ambiente: Clima | null): void {
+  world.climaAmbiente = ambiente
+  if (world.clima?.origem === 'golpe') return
+  world.clima = ambiente
 }

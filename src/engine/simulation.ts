@@ -39,7 +39,7 @@ import { createWorldEffect } from './effect'
 import { updateMovement } from './systems/movementSystem'
 import { updateCombat } from './systems/combatSystem'
 import { aplicarStatus } from './systems/statusSystem'
-import { climaAmbienteDaSala } from './systems/climaAmbiente'
+import { climaAmbienteDaSala, climaDeAmbiente } from './systems/climaAmbiente'
 import { updateAnimations, tickAttackAnimTimers } from './systems/animationSystem'
 import { updateAutoHeal, maybeAutoCatch } from './systems/autoSystem'
 import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } from './systems/progressionSystem'
@@ -55,7 +55,7 @@ import type { KillResult } from './systems/offlineSimSystem'
 import type { GameStateStore } from '@/stores/gameStateStore'
 import { emptyWorldState } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
-import type { EnemyEntity, EnemyHazards, Point, SalaAtiva, WorldState } from './types'
+import type { ClimaTipo, EnemyEntity, EnemyHazards, Point, SalaAtiva, WorldState } from './types'
 
 export const STARTER_LEVEL = 1
 // Starters sempre saem previsiveis — raridade Comum, IV 75% (23/31) em toda
@@ -422,6 +422,23 @@ export interface ProgressoDaSessao {
   sequenceCleared?: boolean
   /** Sala em que a sessao parou. Ausente = comeca uma sala nova sorteada. */
   sala?: SalaAtiva | null
+  /**
+   * O clima que o SERVIDOR sorteou para esta sala (PH-140).
+   *
+   * `undefined` e `null` querem dizer coisas diferentes, e a distincao e o
+   * ponto deste campo:
+   *
+   * - `undefined` — nao ha autoridade (jogo local, ou o proprio servidor
+   *   montando o mundo dele). O clima e DERIVADO de `(seed, sala)`.
+   * - `null` — a autoridade falou, e o que ela disse foi "ceu limpo".
+   *
+   * Existe porque o cliente NAO conhece a semente da sessao e nunca vai
+   * conhecer: e ela que decide shiny, IV, raridade e crit, e um cliente que a
+   * tivesse preveria o proximo shiny (ver core/rng.ts). Sem este campo, cliente
+   * e servidor derivariam climas diferentes — o jogador veria o ceu limpo
+   * enquanto o servidor cobrava dano de areia.
+   */
+  clima?: ClimaTipo | null
 }
 
 export function buildMapWorld(
@@ -465,6 +482,14 @@ export function buildMapWorld(
   const retomando = sequenceIndex > 0 || sequenceCleared
   const countdownRemaining = retomando ? null : (mapDef.startCountdown || null)
 
+  // PH-140: com autoridade o clima vem PRONTO no progresso; sem ela, e derivado
+  // de `(seed, sala)`. `'clima' in progresso` e nao `progresso.clima != null`
+  // porque ausente e "nao ha autoridade" e `null` e "a autoridade disse ceu
+  // limpo" — ver `ProgressoDaSessao.clima`.
+  const climaDaConstrucao = progresso && 'clima' in progresso
+    ? climaDeAmbiente(progresso.clima ?? null)
+    : climaAmbienteDaSala(base.seed, sala)
+
   const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool)
 
   const enemies: EnemyEntity[] = []
@@ -498,9 +523,13 @@ export function buildMapWorld(
     // o mundo a cada 30-90s) sem coluna nova em `game_sessions`: mesma
     // `(seed, sala)`, mesmo clima.
     //
+    // Com autoridade, o clima vem PRONTO no progresso em vez de ser derivado —
+    // o cliente nao tem a semente da sessao. Ver `ProgressoDaSessao.clima`.
+    //
     // Clima de GOLPE nao volta aqui de proposito — 10 turnos nao atravessam
     // reconstrucao de mundo, igual estagio de atributo e escudo.
-    clima: climaAmbienteDaSala(base.seed, sala),
+    clima: climaDaConstrucao,
+    climaAmbiente: climaDaConstrucao,
   }
 }
 

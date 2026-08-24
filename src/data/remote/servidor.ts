@@ -17,7 +17,7 @@ import { supabase } from '@/lib/supabase'
 import { mensagemDeFalhaDeRede } from '@/lib/erroDeRede'
 import type { OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
 import type { PokeInstance } from '@/data/pokes'
-import type { SalaAtiva } from '@/engine/types'
+import type { ClimaTipo, SalaAtiva } from '@/engine/types'
 
 const BASE = (import.meta.env.VITE_SERVIDOR_URL || '').replace(/\/$/, '')
 
@@ -204,6 +204,18 @@ export interface RespostaFlush extends RespostaComEstado {
    * Ausente (nao nula) quando o servidor e mais velho que este cliente.
    */
   sala?: SalaAtiva | null
+  /**
+   * O clima de AMBIENTE da sala acima (PH-140) — o do lugar, nunca o de golpe.
+   *
+   * Vem do servidor porque o cliente NAO tem a semente da sessao: ela decide
+   * shiny, IV, raridade e crit e por isso nunca sai de la (ver core/rng.ts).
+   * Sem este campo os dois lados derivariam climas diferentes, e o jogador
+   * levaria dano de areia sob um ceu que a tela dele mostra limpo.
+   *
+   * Ausente (nao nula) quando o servidor e mais velho que este cliente: ai o
+   * cliente mantem o clima que ja tem, em vez de assumir ceu limpo.
+   */
+  clima?: ClimaTipo | null
 }
 
 // --- ranking e perfil -------------------------------------------------------
@@ -463,7 +475,7 @@ export const servidor = {
   // sub-bioma trocava logo depois de entrar, quando a do servidor chegava.
   // `sala` ausente = servidor mais antigo, ou hunt sem sistema de salas.
   abrirSessao: (mapId: string, pokeUid: string) =>
-    pedir<{ sessaoId: string; mapId: string; sala?: SalaAtiva | null }>('/sessao/abrir', {
+    pedir<{ sessaoId: string; mapId: string; sala?: SalaAtiva | null; clima?: ClimaTipo | null }>('/sessao/abrir', {
       method: 'POST',
       body: JSON.stringify({ mapId, pokeUid }),
     }),

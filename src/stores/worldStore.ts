@@ -23,7 +23,7 @@
 // re-renderizam quando aquele campo muda de verdade.
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
-import type { SalaAtiva, WorldState } from '@/engine/types'
+import type { ClimaTipo, SalaAtiva, WorldState } from '@/engine/types'
 import { reconciliarSalaDaAutoridade } from '@/engine/systems/salaSystem'
 import { createRng, randomSeed, type Rng } from '@/core/rng'
 
@@ -59,6 +59,7 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     counters: { entity: 1, effect: 1, pendingHit: 1 },
     pessimista: false,
     clima: null,
+    climaAmbiente: null,
   }
 }
 
@@ -82,7 +83,7 @@ export interface WorldStore extends WorldState {
   // Sobrescreve a sala com a AUTORITATIVA do servidor. A simulacao local
   // sorteia a propria (ela e predicao e tem sequencia de sorteio propria), e
   // quem decidiu o pool e o loot creditados foi o servidor.
-  definirSala: (sala: SalaAtiva | null) => void
+  definirSala: (sala: SalaAtiva | null, clima?: ClimaTipo | null) => void
 }
 
 export const useWorldStore = create<WorldStore>()(
@@ -107,14 +108,14 @@ export const useWorldStore = create<WorldStore>()(
       return resultado!
     },
 
-    definirSala: (sala) =>
+    definirSala: (sala, clima) =>
       set((draft) => {
         // A REGRA mora no motor (salaSystem.ts#reconciliarSalaDaAutoridade), e
         // nao aqui: trocar de sala e trocar mapa, grade de colisao, ponto de
         // nascimento e inimigos em campo — cadeia que ja existe pra transicao
         // local. Este store escrevia `draft.sala` direto, e era exatamente isso
         // que deixava o HUD numa sala e o desenho em outra.
-        reconciliarSalaDaAutoridade(draft, sala)
+        reconciliarSalaDaAutoridade(draft, sala, clima)
       }),
   })),
 )

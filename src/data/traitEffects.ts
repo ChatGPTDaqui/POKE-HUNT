@@ -63,23 +63,34 @@ export const TRAIT_IMUNE_A_DANO_DE_CLIMA = new Set([
   'overcoat', 'magic_guard',
 ])
 
-/** Fracao do HP MAXIMO curada por turno no clima certo. */
-export const CURA_POR_CLIMA: Partial<Record<string, { clima: Clima; fracao: number }>> = {
-  rain_dish: { clima: 'chuva', fracao: 1 / 16 },
-  ice_body: { clima: 'granizo', fracao: 1 / 16 },
-  dry_skin: { clima: 'chuva', fracao: 1 / 8 },
+/**
+ * Fracao do HP MAXIMO curada por turno no clima certo.
+ *
+ * LISTA de climas, e nao um so (PH-140): Ice Body cura tanto no GRANIZO quanto
+ * na NEVE, e nos jogos e a mesma habilidade — a Gen 9 trocou o clima de gelo e
+ * levou junto tudo que dependia dele. Um campo unico obrigaria a escolher um
+ * dos dois e deixaria o outro em silencio.
+ */
+export const CURA_POR_CLIMA: Partial<Record<string, { climas: Clima[]; fracao: number }>> = {
+  rain_dish: { climas: ['chuva'], fracao: 1 / 16 },
+  ice_body: { climas: ['granizo', 'neve'], fracao: 1 / 16 },
+  dry_skin: { climas: ['chuva'], fracao: 1 / 8 },
 }
 
 /** Fracao do HP MAXIMO PERDIDA por turno no clima certo. */
-export const DANO_POR_CLIMA: Partial<Record<string, { clima: Clima; fracao: number }>> = {
-  dry_skin: { clima: 'sol', fracao: 1 / 8 },
-  solar_power: { clima: 'sol', fracao: 1 / 8 },
+export const DANO_POR_CLIMA: Partial<Record<string, { climas: Clima[]; fracao: number }>> = {
+  dry_skin: { climas: ['sol'], fracao: 1 / 8 },
+  solar_power: { climas: ['sol'], fracao: 1 / 8 },
 }
 
-/** Evasao 1.25x no clima certo (o que reduz a precisao de quem ataca). */
-export const EVASAO_POR_CLIMA: Partial<Record<string, Clima>> = {
-  sand_veil: 'areia',
-  snow_cloak: 'granizo',
+/**
+ * Evasao 1.25x no clima certo (o que reduz a precisao de quem ataca).
+ *
+ * Snow Cloak vale nos DOIS climas de gelo, pelo mesmo motivo do Ice Body.
+ */
+export const EVASAO_POR_CLIMA: Partial<Record<string, Clima[]>> = {
+  sand_veil: ['areia'],
+  snow_cloak: ['granizo', 'neve'],
 }
 
 /** Cloud Nine / Air Lock: o clima continua no campo, mas nao surte efeito. */

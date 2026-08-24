@@ -6,7 +6,12 @@
 // original — aqui viram id + lookup via findEntityById, unica mudanca de
 // forma permitida no port (risco de referencia obsoleta sob Immer).
 import { deriveRng, nextFloat, type Rng } from '@/core/rng'
-import { getAbility, BASIC_ATTACK, isDamagingAbility, TURNO_SEGUNDOS, CLIMA_DO_GOLPE, type Ability } from '@/data/abilities'
+import {
+  getAbility, BASIC_ATTACK, isDamagingAbility, TURNO_SEGUNDOS, CLIMA_DO_GOLPE,
+  GOLPE_NUNCA_ERRA_NO_CLIMA, PRECISAO_DO_GOLPE_NO_CLIMA, WEATHER_BALL_POR_CLIMA,
+  CURA_SENSIVEL_AO_CLIMA, CURA_NO_SOL, CURA_EM_CLIMA_RUIM, GROWTH_NO_SOL,
+  type Ability,
+} from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import {
   multiplicadorDeVelocidade, multiplicadorDeDanoFisico, multiplicadorDeStat,
@@ -51,7 +56,7 @@ import {
   isDead, getGroundOffset, tickCooldowns, isAbilityReady,
   startCooldown, canAct, startGlobalCooldown, takeDamage, heal, getMaxHp, releaseEffectLane, findEntityById,
 } from '../entity'
-import type { ClimaTipo, EnemyEntity, Escudos, PendingHit, PlayerEntity, WorldEntity, WorldState } from '../types'
+import type { Clima, ClimaTipo, EnemyEntity, Escudos, PendingHit, PlayerEntity, WorldEntity, WorldState } from '../types'
 
 // Quanto tempo depois do golpe disparar a resolucao pousa: arte do golpe,
 // numero de dano, status, tratamento de derrota.
@@ -307,6 +312,58 @@ const NEVE_DEFESA_GELO = 1.5
 const NEVOA_PRECISAO = 0.6
 // Solar Beam perde metade do dano em qualquer clima que nao seja sol.
 const SOLAR_BEAM_SOB_CLIMA_RUIM = 0.5
+
+/**
+ * O golpe como o CLIMA o deixa (PH-140).
+ *
+ * Hoje so a Weather Ball muda de forma. Devolve o proprio objeto quando nada
+ * muda — golpe comum nao paga alocacao nenhuma, e o pipeline de dano roda pra
+ * cada hit de cada inimigo, a 60 Hz.
+ *
+ * NAO muta `ability`: os objetos de `ABILITIES` sao compartilhados por todas as
+ * entidades do mundo. Mutar um aqui deixaria o tipo do golpe "grudado" no
+ * catalogo depois que o clima passasse.
+ */
+/**
+ * Quanto o clima multiplica a cura de Moonlight/Synthesis (PH-140).
+ *
+ * 1 = ceu limpo (o `healPercent` do catalogo ja e esse caso). Sol da 4/3, o que
+ * leva os 50% do catalogo aos 2/3 dos jogos; qualquer outro clima da 0,5, que
+ * leva a 1/4.
+ */
+function multiplicadorDeCuraPorClima(
+  ability: Ability, clima: Clima | null, atacante: WorldEntity, alvo: WorldEntity,
+): number {
+  if (!CURA_SENSIVEL_AO_CLIMA.has(ability.id)) return 1
+  const climaAtivo = climaEfetivo(clima?.tipo ?? null, traitsDoConfronto(atacante, alvo))
+  if (!climaAtivo) return 1
+  return climaAtivo === 'sol' ? CURA_NO_SOL : CURA_EM_CLIMA_RUIM
+}
+
+/**
+ * Growth sob sol forte sobe 2 estagios em vez de 1 (PH-140).
+ *
+ * Devolve o proprio objeto quando nada muda, e nunca muta o do catalogo — ver a
+ * mesma nota em `golpeAjustadoPeloClima`.
+ */
+function golpeDeEstagioAjustadoPeloClima(
+  ability: Ability, clima: Clima | null, atacante: WorldEntity, alvo: WorldEntity,
+): Ability {
+  if (ability.id !== 'growth' || !ability.statChanges) return ability
+  const climaAtivo = climaEfetivo(clima?.tipo ?? null, traitsDoConfronto(atacante, alvo))
+  if (climaAtivo !== 'sol') return ability
+  return {
+    ...ability,
+    statChanges: ability.statChanges.map((m) => ({ ...m, estagios: m.estagios * GROWTH_NO_SOL })),
+  }
+}
+
+function golpeAjustadoPeloClima(ability: Ability, clima: ClimaTipo | null): Ability {
+  if (ability.id !== 'weather_ball' || !clima) return ability
+  const regra = WEATHER_BALL_POR_CLIMA[clima]
+  if (!regra) return ability
+  return { ...ability, type: regra.tipo, power: regra.dobra ? ability.power * 2 : ability.power }
+}
 
 // --- Fase 12: Traits que multiplicam ATAQUE/DEFESA FISICOS -----------------
 //
@@ -1228,7 +1285,7 @@ export interface DamageResult {
 // so sabe sortear dentro dela.
 const DANO_VARIACAO_MINIMA = 0.85
 
-function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity, ability: Ability, pessimista = false, clima: ClimaTipo | null = null): DamageResult {
+function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity, abilityBase: Ability, pessimista = false, clima: ClimaTipo | null = null): DamageResult {
   const attackerPoke = attackerEntity.poke
   const defenderPoke = defenderEntity.poke
   const attackerSpecies = SPECIES[attackerPoke.speciesId]
@@ -1237,6 +1294,15 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
   // da funcao ler o valor ja filtrado — ver traitsDoConfronto.
   const { atacante: attackerTrait, defensor: defenderTrait } = traitsDoConfronto(attackerEntity, defenderEntity)
   const climaAtivo = climaEfetivo(clima, { atacante: attackerTrait, defensor: defenderTrait })
+  // WEATHER BALL (PH-140): o clima troca o TIPO e o PODER do golpe, e as duas
+  // coisas precisam valer antes da primeira leitura de `ability.type` — que
+  // vem na proxima linha, na tabela de efetividade. Por isso a substituicao
+  // acontece AQUI e nao mais pra baixo: STAB, imunidade de tipo, Flash Fire e
+  // efetividade tem todos que enxergar o tipo novo.
+  //
+  // `climaEfetivo` e nao `clima` cru: sob Cloud Nine/Air Lock o clima existe
+  // mas nao surte efeito, e Weather Ball volta a ser NORMAL sem bonus.
+  const ability = golpeAjustadoPeloClima(abilityBase, climaAtivo)
   const [defType1, defType2] = tiposEfetivosParaEfetividade(defenderEntity, defenderSpecies)
   let effectivenessMultiplier = efetividadeConsiderandoRevelado(
     getEffectiveness(ability.type, defType1, defType2),
@@ -1854,7 +1920,13 @@ function nearbyAliveEnemies(world: WorldState): EnemyEntity[] {
  * Hustle (Fase 12): +50% de Ataque Fisico custa -20% de precisao nos golpes
  * FISICOS do proprio portador — aplicado ANTES dos estagios de accuracy/evasao.
  */
-function golpeErrou(
+/**
+ * Exportada pra teste (PH-140): a rolagem de acerto acontece no CAST, dentro de
+ * `executePlayerAction`, e nao na resolucao do hit. Um teste que enfileira o
+ * hit direto — como os de dano fazem — PULA a precisao inteira e mediria sempre
+ * acerto, inclusive quando a regra de clima estivesse desligada.
+ */
+export function golpeErrou(
   rng: Rng, ability: Ability, atacante: WorldEntity, defensor: WorldEntity,
   clima: ClimaTipo | null = null,
 ): boolean {
@@ -1864,9 +1936,29 @@ function golpeErrou(
   // DELA quanto dos golpes CONTRA ela — e uma faca de dois gumes, nao um buff.
   if (traitAtk === TRAIT_NO_GUARD || traitDef === TRAIT_NO_GUARD) return false
 
+  // PH-140: o clima manda na precisao antes de qualquer outra coisa.
+  //
+  // `climaEfetivo` e nao `clima` cru: sob Cloud Nine/Air Lock o clima nao surte
+  // efeito nenhum, entao Thunder volta a errar normalmente na chuva.
+  const climaAtivo = climaEfetivo(clima, { atacante: traitAtk, defensor: traitDef })
+
+  // ACERTO GARANTIDO (Thunder/Hurricane na chuva, Blizzard no granizo e na
+  // neve). Sai ANTES de estagios, evasao e neblina de proposito: nos jogos, o
+  // golpe que pula a checagem de precisao pula tudo que mexe nela — inclusive o
+  // x0,6 da neblina e a Evasao do Snow Cloak.
+  if (climaAtivo && GOLPE_NUNCA_ERRA_NO_CLIMA[ability.id]?.includes(climaAtivo)) return false
+
   const isPhysical = resolveAbilityCategory(ability, atacante.poke) === 'physical'
+  // PRECISAO FIXA por clima (Thunder e Hurricane despencam pra 50% sob sol).
+  // Substitui a precisao do catalogo, e nao multiplica: o numero dos jogos e
+  // absoluto. As traits de precisao continuam valendo por cima, igual valeriam
+  // sobre a precisao normal.
+  const regraDePrecisao = PRECISAO_DO_GOLPE_NO_CLIMA[ability.id]
+  const precisaoDeCatalogo = (climaAtivo && regraDePrecisao?.climas.includes(climaAtivo))
+    ? regraDePrecisao.precisao
+    : (ability.accuracy ?? 100)
   // Compound Eyes (1.3x) e Hustle (-20% no fisico) vivem na mesma funcao pura.
-  let precisaoBase = (ability.accuracy ?? 100) * multiplicadorDePrecisaoPorTrait(traitAtk, isPhysical)
+  let precisaoBase = precisaoDeCatalogo * multiplicadorDePrecisaoPorTrait(traitAtk, isPhysical)
   // WONDER SKIN: golpe SEM DANO contra o portador cai pra 50% fixos — o
   // "exatamente 50%" da descricao e um TETO, entao golpe de 30% de precisao
   // continua com 30%.
@@ -1882,7 +1974,8 @@ function golpeErrou(
   let multDefensor = ignoraEvasao ? 1 : multiplicadorDeAccuracyOuEvasion(defensor.estagios.evasion ?? 0)
   if (!ignoraEvasao) {
     // SAND VEIL / SNOW CLOAK: 1.25x de evasao no clima certo.
-    if (traitDef && EVASAO_POR_CLIMA[traitDef] && EVASAO_POR_CLIMA[traitDef] === clima) multDefensor *= 1.25
+    // `includes` e nao igualdade: Snow Cloak vale no granizo E na neve (PH-140).
+    if (traitDef && clima && EVASAO_POR_CLIMA[traitDef]?.includes(clima)) multDefensor *= 1.25
     // TANGLED FEET: evasao DOBRADA enquanto o portador esta confuso — a
     // habilidade transforma o proprio atrapalho em esquiva.
     if (traitDef === TRAIT_TANGLED_FEET && defensor.statusVolatil?.tipo === 'confusion') multDefensor *= 2
@@ -1890,11 +1983,8 @@ function golpeErrou(
 
   // NEVOA (PH-140): precisao de TODO golpe x0,6, dos dois lados. Entra por
   // ultimo, depois de estagios e evasao, porque e efeito de CAMPO — ele nao
-  // disputa com Sand Veil/Snow Cloak, empilha por cima.
-  //
-  // `climaEfetivo` e nao `clima` cru: Cloud Nine/Air Lock apagam o EFEITO do
-  // clima sem apagar o clima, e sob elas a nevoa nao pode cegar ninguem.
-  const climaAtivo = climaEfetivo(clima, { atacante: traitAtk, defensor: traitDef })
+  // disputa com Sand Veil/Snow Cloak, empilha por cima. Golpe de acerto
+  // garantido ja saiu la em cima e nao chega aqui.
   const multClima = climaAtivo === 'nevoa' ? NEVOA_PRECISAO : 1
 
   const precisaoEfetiva = precisaoBase * multAtacante * multClima / multDefensor
@@ -2569,7 +2659,13 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     // Danca das Espadas, o alvo num Rosnado) — mostrar "+Ataque" flutuando
     // sobre o inimigo quando quem se fortaleceu foi voce leria como o contrario
     // do que aconteceu.
-    const mudancas = aplicarMudancasDeStat(world.rng, attacker, target, abilityEfetiva)
+    // PH-140: Growth sobe DOIS estagios sob sol forte, em vez de um. Ajustado
+    // aqui, no golpe que vai ser aplicado, em vez de dentro de
+    // `aplicarMudancasDeStat` — a funcao nao conhece clima, e dar um parametro
+    // de clima a ela espalharia a dependencia por todos os chamadores.
+    const mudancas = aplicarMudancasDeStat(
+      world.rng, attacker, target, golpeDeEstagioAjustadoPeloClima(abilityEfetiva, world.clima, attacker, target),
+    )
     if (mudancas.length) {
       statusRecebeuEm = ability.statTarget === 'self' ? attacker : target
       if (!silent) anunciarEstagios(world, statusRecebeuEm, mudancas)
@@ -2689,7 +2785,16 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // e o "alvo" so existe aqui porque a fila de hits deste motor sempre tem um.
   // Heal Block (Fase 12) trava isto: nao cura nada enquanto ativo.
   if (ability.healPercent && !curaBloqueada(attacker)) {
-    const quanto = Math.max(1, Math.round(attacker.poke.stats.hp * ability.healPercent / 100))
+    // PH-140: Moonlight e Synthesis dependem do clima — 2/3 do HP maximo no
+    // sol, 1/2 com ceu limpo, 1/4 em qualquer outro. O `healPercent` do
+    // catalogo (50) e o caso de ceu limpo, entao o clima entra como
+    // multiplicador e o dado gerado continua sendo a fonte do numero base.
+    //
+    // Recover, Soft-Boiled e o resto dos 10 golpes de cura NAO entram: nos
+    // jogos so a familia "solar" olha pro tempo.
+    const quanto = Math.max(1, Math.round(
+      attacker.poke.stats.hp * ability.healPercent / 100 * multiplicadorDeCuraPorClima(ability, world.clima, attacker, target)
+    ))
     heal(attacker, quanto)
     if (!silent) spawnDamageNumber(world, attacker, { amount: -quanto, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
   }

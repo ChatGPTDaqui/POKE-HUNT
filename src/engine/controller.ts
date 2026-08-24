@@ -85,7 +85,14 @@ export const controller = {
     // A sala inicial e a que o servidor decidiu na abertura. Sem passa-la aqui, a
     // simulacao local sorteia a propria e o jogador ve o sub-bioma trocar poucos
     // segundos depois de entrar, quando a do servidor chega no primeiro flush.
-    const world = buildMapWorld(mapId, activePoke, useWorldStore.getState(), sessao.sala ? { sala: sessao.sala } : undefined)
+    // PH-140: `clima` entra JUNTO da sala. A presenca da chave e o que diz ao
+    // motor "ha autoridade, nao derive" — o cliente nao tem a semente da sessao
+    // (ver ProgressoDaSessao.clima). Servidor mais antigo nao manda o campo, e
+    // ai o cliente volta a derivar, como no jogo local.
+    const world = buildMapWorld(
+      mapId, activePoke, useWorldStore.getState(),
+      sessao.sala ? { sala: sessao.sala, clima: sessao.clima ?? null } : undefined,
+    )
     // Com sessao aberta no servidor, a sala seguinte tambem e DELE (ver
     // engine/systems/salaSystem.ts#registrarAbate): a simulacao local para de
     // sortear sub-bioma e passa a so contar abate, e a troca chega no flush.

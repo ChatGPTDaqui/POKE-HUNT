@@ -660,6 +660,21 @@ export interface WorldState {
   // nao herda `clima` do `carry`), entao um flush do servidor limpa o clima
   // igual limpa estagio de atributo.
   clima: Clima | null
+  /**
+   * O clima do LUGAR — o que a sala tem quando nenhum golpe esta em campo
+   * (PH-140).
+   *
+   * Separado de `clima` (o efetivo) porque as duas coisas tem donos
+   * diferentes: `clima` muda com Rain Dance e volta ao normal quando ele
+   * expira, e o "normal" e ISTO. Sem guardar, cada ponto que hoje limpa o
+   * clima (fim de batalha, expiracao do golpe) precisaria saber re-sortear —
+   * e sob autoridade ele nao PODE, porque o cliente nao tem a semente.
+   *
+   * Quem preenche:
+   *  - jogo local: derivado de `(seed, sala)` na construcao do mundo;
+   *  - com servidor: vem pronto no flush, junto da sala autoritativa.
+   */
+  climaAmbiente: Clima | null
   // Ver `EnemyHazards` acima. Ausente = nenhuma armadilha plantada ainda.
   // MESMO DESVIO que `clima`: nao atravessa reconstrucao de mundo (fora do
   // `ProgressoDaSessao` que `sala`/`sequenceIndex` usam pra sobreviver ao
