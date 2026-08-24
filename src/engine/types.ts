@@ -18,7 +18,7 @@ import type { MapDef } from '@/data/maps'
 import type { ElementType } from '@/data/generated/types'
 import type { Ability } from '@/data/abilities'
 import type { ResolvedBattleAnim } from '@/data/battleSprites'
-import type { StatusAtivo, EstagiosDeStat } from '@/data/statusEffects'
+import type { StatusAtivo, EstagiosDeStat, EstagiosFonte } from '@/data/statusEffects'
 import type { Rng } from '@/core/rng'
 
 export type EntityState = 'idle' | 'wander' | 'chase' | 'engaged' | 'dead'
@@ -121,6 +121,12 @@ export interface BaseEntity {
   // nos jogos zeram quando o POKE sai de campo, e a entidade e o que e
   // recriado a cada troca de cena. Ausente = estagio 0 (multiplicador 1).
   estagios: EstagiosDeStat
+  // DE ONDE veio cada estagio (PH-121) — golpe, e de quem. Puramente cosmetico:
+  // nenhuma regra de combate le, `multiplicadorDeStat` continua olhando so
+  // `estagios`. Opcional porque a informacao nao existe pra estagio aplicado
+  // antes desta versao, e porque nao ha o que preencher no momento em que a
+  // entidade nasce. Volatil junto com `estagios` (limparEstadoVolatil).
+  estagiosFonte?: EstagiosFonte
   // Foresight/Miracle Eye: remove UMA imunidade de tipo especifica deste alvo
   // (Fantasma vs Normal/Lutador, ou Sombrio vs Psiquico) e ignora o estagio de
   // evasao dele, pelo resto da luta — sem timer, so `limparEstadoVolatil` tira.

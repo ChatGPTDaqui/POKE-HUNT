@@ -19,7 +19,10 @@ import { SPECIES } from '@/data/pokes'
 import { nomeDoStatus, type StatusAtivo } from '@/data/statusEffects'
 import { statusVfxUrl } from '@/data/statusVfx'
 import { ROTULO_ESTAGIO } from '@/data/statLabels'
-import type { StatDeEstagio } from '@/data/statusEffects'
+import { ICONE_DE_ESTAGIO } from '@/data/statIcones'
+import { getAbility } from '@/data/abilities'
+import { nomeDaTrait } from '@/data/traits'
+import type { FonteDeEstagio, StatDeEstagio } from '@/data/statusEffects'
 import { useWorldStore } from '@/stores/worldStore'
 import { useDeviceMode } from '@/stores/uiStore'
 import { Sheet } from '@/components/game/Sheet'
@@ -33,17 +36,36 @@ const ESTAGIOS_ORDEM: StatDeEstagio[] = ['atkFis', 'atkEsp', 'def', 'defEsp', 's
 interface Badge {
   key: string
   url: string | null
+  /**
+   * Icone do ATRIBUTO, quando o selo e de estagio (PH-121). Substitui a `url`:
+   * a arte de `statusVfxUrl` varia com o tipo do POKE e com a direcao, nunca
+   * com o atributo, entao Ataque e Velocidade desenhavam a mesma coisa.
+   */
+  Icone: typeof ICONE_DE_ESTAGIO[StatDeEstagio] | null
   titulo: string
   contador: string | null
   aumenta: boolean
   /** O que o efeito FAZ. O `titulo` diz so o nome e a contagem. */
   verbete: Verbete
+  /** De onde o estagio veio (PH-121). Vazio para status. */
+  fontes: FonteDeEstagio[]
+}
+
+/** "Danca das Espadas (voce)" / "Rosnado (Rattata)" / "Intimidate (Gyarados)". */
+function descreverFonte(fonte: FonteDeEstagio): string {
+  const nome = fonte.tipo === 'golpe'
+    ? getAbility(fonte.id)?.name ?? fonte.id
+    : nomeDaTrait(fonte.id) ?? fonte.id
+  const quem = fonte.proprio ? 'você' : fonte.deQuem
+  const marca = fonte.tipo === 'trait' ? ' · habilidade' : ''
+  return `${nome} (${quem})${marca}`
 }
 
 export function StatusEffectsBar() {
   const poke = useWorldStore((s) => s.player?.poke ?? null)
   const statusVolatil = useWorldStore((s) => s.player?.statusVolatil ?? null)
   const estagios = useWorldStore((s) => s.player?.estagios ?? null)
+  const estagiosFonte = useWorldStore((s) => s.player?.estagiosFonte ?? null)
   const { coarse } = useDeviceMode()
   // O NOME de cada efeito so existia no `title`, ou seja, so no hover: no
   // celular a faixa era uma fileira de icones sem legenda nenhuma. O toque abre
@@ -61,12 +83,14 @@ export function StatusEffectsBar() {
     badges.push({
       key: `status-${status.tipo}`,
       url: statusVfxUrl(species.type, 'diminui'),
+      Icone: null,
       titulo: status.turnosRestantes != null
         ? `${nomeDoStatus(status.tipo)} — ${status.turnosRestantes} turno(s) restante(s)`
         : `${nomeDoStatus(status.tipo)} — nao passa sozinho`,
       contador: status.turnosRestantes != null ? String(status.turnosRestantes) : '∞',
       aumenta: false,
       verbete: verbeteDoStatus(status),
+      fontes: [],
     })
   }
 
@@ -76,11 +100,14 @@ export function StatusEffectsBar() {
       if (valor === 0) continue
       badges.push({
         key: `estagio-${stat}`,
-        url: statusVfxUrl(species.type, valor > 0 ? 'aumenta' : 'diminui'),
+        // Sem `url`: o icone do ATRIBUTO e o que este selo tem pra dizer.
+        url: null,
+        Icone: ICONE_DE_ESTAGIO[stat],
         titulo: `${ROTULO_ESTAGIO[stat]} ${valor > 0 ? 'aumentado' : 'diminuido'} (${valor > 0 ? '+' : ''}${valor})`,
         contador: `${valor > 0 ? '+' : ''}${valor}`,
         aumenta: valor > 0,
         verbete: GLOSSARIO.estagioDeAtributo,
+        fontes: estagiosFonte?.[stat] ?? [],
       })
     }
   }
@@ -108,7 +135,22 @@ export function StatusEffectsBar() {
             background: 'color-mix(in srgb, var(--color-n900) 80%, transparent)',
           }}
         >
-          {badge.url ? (
+          {badge.Icone ? (
+            // `weight="bold"`, e nao `fill` nem `regular`. Conferido no harness:
+            // com `fill` o escudo da Defesa virava um borrao vermelho sem forma
+            // e Def. Esp. ficava um quadrado verde com uma estrela — ou seja, a
+            // silhueta (que e a unica coisa que o icone tem pra dizer) se perdia
+            // justamente nos dois atributos mais parecidos entre si. `regular` e
+            // fino demais em 1.7em com o contador por cima. A cor segue a
+            // direcao, igual a borda.
+            <badge.Icone
+              size="70%"
+              weight="bold"
+              aria-hidden
+              color={badge.aumenta ? 'var(--color-ok)' : 'var(--color-bad)'}
+              style={{ marginBottom: '.25em' }}
+            />
+          ) : badge.url ? (
             <img
               src={badge.url}
               alt=""
@@ -152,6 +194,15 @@ export function StatusEffectsBar() {
                   — 3 turno(s)" e nada sobre o que o veneno faz. */}
               <span className="flex min-w-0 flex-col gap-[.15em]">
                 <b className="font-medium">{badge.titulo}</b>
+                {/* DE ONDE VEIO (PH-121) — antes a lista dizia so o atributo e a
+                    contagem, e "quem fez isso" nao existia em lugar nenhum do
+                    estado. Vem primeiro que a explicacao generica: e a parte que
+                    responde a pergunta do jogador naquele instante. */}
+                {badge.fontes.length > 0 && (
+                  <span className="leading-tight text-n300">
+                    Origem: {badge.fontes.map(descreverFonte).join(' · ')}
+                  </span>
+                )}
                 {badge.verbete.corpo.map((linha) => (
                   <span key={linha} className="leading-tight text-n400">{linha}</span>
                 ))}
@@ -173,8 +224,19 @@ function BadgeDoEfeito(
   { badge, coarse, children }: { badge: Badge; coarse: boolean; children: ReactNode },
 ) {
   if (coarse) return <>{children}</>
+  // No mouse a bolha e o unico lugar que abre, entao ela carrega o MESMO
+  // conteudo da lista do celular: titulo com o atributo e a contagem, origem, e
+  // depois a explicacao generica. Antes ela mostrava so a generica, e "de onde
+  // veio" nao existia em canto nenhum (PH-121).
+  const verbete: Verbete = {
+    ...badge.verbete,
+    titulo: badge.titulo,
+    corpo: badge.fontes.length > 0
+      ? [`Origem: ${badge.fontes.map(descreverFonte).join(' · ')}`, ...badge.verbete.corpo]
+      : badge.verbete.corpo,
+  }
   return (
-    <Palavra verbete={badge.verbete} className="pointer-events-auto no-underline" side="top">
+    <Palavra verbete={verbete} className="pointer-events-auto no-underline" side="top">
       {children}
     </Palavra>
   )
