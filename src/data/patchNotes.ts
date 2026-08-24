@@ -12,6 +12,28 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-135. Primeira entrada que sai JUNTO com o codigo que ela descreve: a
+  // 7.7 e a 7.8 existiam na `dev` desde 22 e 23/08, mas a `main` estava 174
+  // commits atras, entao o jogador pulou da 7.6 pra ca de uma vez.
+  {
+    version: '7.9',
+    date: '2026-08-24',
+    title: 'O combate passou a explicar o que faz, e o POKE dos outros deixou de ser publico',
+    highlights: [
+      'PRIVACIDADE, E ESTA E A MAIS IMPORTANTE: qualquer jogador conseguia ler a ficha inteira do SEU POKE — os seis IVs, a natureza, a caracteristica, o que estava travado e quem foi o treinador original. Nao era so do POKE anunciado no Mercado: era de todos, inclusive os que voce nunca mostrou pra ninguem. Fechado. Agora so voce le os seus, e o que continua publico e o que sempre foi de propria vontade: o POKE anunciado, o ranking e o perfil.',
+      'CRITICO APARECE NA TELA. O golpe critico existia e multiplicava o dano desde sempre, mas nada dizia isso — o mesmo golpe no mesmo inimigo as vezes tirava um numero muito maior e voce nao tinha como saber por que. Agora o numero cresce e vem marcado com CRIT.',
+      'O DANO QUE VOCE LEVA ficou diferente do dano que voce causa: ele sai numa placa vermelha. Numa luta com varios inimigos em volta era impossivel distinguir um do outro.',
+      'GOLPE QUE O INIMIGO RESISTE ficou legivel. O numero saia cinza escuro em cima de cena escura, justamente no caso em que voce mais precisa perceber que seu golpe nao esta funcionando naquele inimigo.',
+      'O SELO DE ATRIBUTO DIZ QUAL ATRIBUTO E DE ONDE VEIO. Antes Ataque caindo e Velocidade caindo desenhavam exatamente o mesmo icone, e nada dizia quem tinha feito aquilo. Agora cada atributo tem simbolo proprio, e o selo mostra o golpe e de quem partiu — "Rosnado (Rattata)" e diferente de voce ter usado Danca das Espadas em si mesmo.',
+      'VOCE PASSA A VER OS EFEITOS DO INIMIGO QUE ESTA ENFRENTANDO, numa fileira propria com o nome dele. Buff e debuff do adversario nao apareciam em lugar nenhum: se ele dobrava o Ataque ou subia a Evasao, o seu dano caia ou seus golpes erravam sem nenhuma causa visivel na tela.',
+      'LEILAO: A CONTAGEM DE LANCES ESTAVA ERRADA pra quem nao era o vendedor. Cada um via so os proprios lances, entao um leilao com dez lances aparecia como "0 ofertas" — e quem tinha sido coberto nem conseguia ver que perdeu a lideranca. Pior: voce montava um lance a partir do minimo e o jogo recusava, porque o piso de verdade era outro.',
+      'A HUNT CARREGA MUITO MAIS RAPIDO em quatro cenarios. O Dojo baixava 15 MB de imagem, a Arena do Dragao 13 MB — agora sao 2,6 e 2,0 MB, com a mesma arte. Em conexao de celular eram uns 24 segundos de espera antes da cena aparecer, e o jogo desistia de esperar antes disso e entrava sem o fundo.',
+      'A AGUA ONDULA DE VERDADE em cinco artes, a folha tomba, a brasa pisca e a neve ganhou profundidade.',
+      'O ESFUMADO DA BORDA DA TELA caiu de 12% para 5,5% — sobrou mais mapa visivel.',
+      'MOCHILA E LOJA GANHARAM GRADE QUADRICULADA, e o item sem arte mostra a sigla dele em vez de um quadrado vazio. A ficha do item na Loja passou a abrir acima da grade, sem tapar o que voce estava olhando.',
+      'A ARTE DO GOLPE POUSA EM 0,3 SEGUNDO, ainda durante a pose de ataque — antes ela chegava depois de o POKE ja ter voltado ao normal.',
+    ],
+  },
   // Continuacao do mesmo dia da 7.7: aquela entrada foi escrita no meio do
   // lote de merges e ficou pra tras do que entrou depois (PH-91).
   {
