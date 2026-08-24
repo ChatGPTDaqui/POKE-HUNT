@@ -145,7 +145,7 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
       'metropolis.jpg', 'slum.jpg', 'wasteland.jpg', 'town-night.jpg',
       'town.jpg', 'volcano.jpg',
       // Leva 2026-08-22, as duas arenas de duelo.
-      'dojo.png', 'dragon.png',
+      'dojo.jpg', 'dragon.jpg',
     ]
 
     const semCirculo: string[] = []
@@ -173,7 +173,7 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
       .map(([arte]) => arte.replace('assets/hunt-backgrounds/', ''))
       .sort()
     expect(inventados).toEqual([
-      'abyss.jpg', 'dojo.png', 'dragon.png', 'fairy-cave.jpg', 'ice-cave.jpg',
+      'abyss.jpg', 'dojo.jpg', 'dragon.jpg', 'fairy-cave.jpg', 'ice-cave.jpg',
       'island.jpg', 'lake.jpg', 'metropolis.jpg', 'slum.jpg', 'town-night.jpg',
       'town.jpg', 'volcano.jpg', 'wasteland.jpg',
     ])
@@ -185,12 +185,12 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
     // o mapa inteiro aberto.
     const arena = mapDefParaSala(LANCE_MAP_ID, null)
     expect(arena, 'a arena do Lance sumiu de MAPS').not.toBeNull()
-    expect(arena!.collisionGrid).toEqual(COLISAO_POR_ARTE['assets/hunt-backgrounds/dragon.png'].grid)
+    expect(arena!.collisionGrid).toEqual(COLISAO_POR_ARTE['assets/hunt-backgrounds/dragon.jpg'].grid)
     expect(arena!.colisaoDefineLimite).toBe(true)
   })
 
   describe('bola verde: por onde entra o POKE do lado inimigo', () => {
-    const ARENAS = ['assets/hunt-backgrounds/dojo.png', 'assets/hunt-backgrounds/dragon.png']
+    const ARENAS = ['assets/hunt-backgrounds/dojo.jpg', 'assets/hunt-backgrounds/dragon.jpg']
 
     it('so as duas arenas de duelo tem bola verde', () => {
       const comVerde = Object.entries(COLISAO_POR_ARTE)
@@ -222,7 +222,7 @@ describe('walk-block segue a arte, nao a chave da sala', () => {
 
     it('a arena do Lance resolve a bola verde pela arte que ela mostra', () => {
       expect(spawnInimigoParaSala(LANCE_MAP_ID, null))
-        .toEqual(COLISAO_POR_ARTE['assets/hunt-backgrounds/dragon.png'].spawnInimigo)
+        .toEqual(COLISAO_POR_ARTE['assets/hunt-backgrounds/dragon.jpg'].spawnInimigo)
     })
 
     it('hunt sem bola verde devolve null em vez de inventar um ponto', () => {

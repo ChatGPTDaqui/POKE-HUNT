@@ -50,20 +50,26 @@ const gerado = readFileSync(join(raiz, 'src', 'data', 'generated', 'subBiomaColl
 const COLISAO = JSON.parse(gerado.slice(gerado.indexOf('= {') + 2, gerado.lastIndexOf('}') + 1));
 
 // ref -> arte, so o suficiente pra achar o par (mesma lista do MANIFESTO).
+//
+// CUIDADO: esta e a SEGUNDA copia do manifesto (a primeira esta em
+// build-sub-bioma-collision.js#MANIFESTO). Renomear uma arte e atualizar so
+// uma das duas nao da erro: `COLISAO[chave]` nao acha, o laco faz `continue`,
+// e o gabarito daquela arte simplesmente nao e gerado. Aconteceu no PH-125,
+// quando 4 artes viraram .jpg.
 const PARES = {
   'abismo.png': 'abyss.jpg', 'meadow.png': 'meadow.jpg', 'desert.png': 'desert.jpg',
   'badlands.png': 'badlands.jpg', 'burnt-forest.png': 'burnt-forest.jpg',
   'tall-grass.png': 'tall-grass.jpg', 'forest.png': 'forest.jpg',
   'industrial.png': 'industrial.jpg', 'sea.png': 'sea.jpg',
-  'ice-mountain.png': 'ice-mountain.png', 'mountain.png': 'mountain.jpg',
+  'ice-mountain.png': 'ice-mountain.jpg', 'mountain.png': 'mountain.jpg',
   'construction-site.png': 'construction-site.jpg', 'swamp.png': 'swamp.jpg',
   'plains.png': 'plains.jpg', 'beach.png': 'beach.jpg', 'ruins.png': 'ruins.jpg',
-  'jungle.png': 'jungle.jpg', 'temple.png': 'temple.png',
+  'jungle.png': 'jungle.jpg', 'temple.png': 'temple.jpg',
   'cave-volcanic.png': 'cave-volcanic.jpg', 'ice-cave.png': 'ice-cave.jpg',
   'fairy-cave.png': 'fairy-cave.jpg', 'island.png': 'island.jpg', 'lake.png': 'lake.jpg',
   'metropolis.png': 'metropolis.jpg', 'slum.png': 'slum.jpg', 'wasteland.png': 'wasteland.jpg',
   'town-night.png': 'town-night.jpg', 'town.png': 'town.jpg', 'volcano.png': 'volcano.jpg',
-  'dojo.png': 'dojo.png', 'dragon.png': 'dragon.png',
+  'dojo.png': 'dojo.jpg', 'dragon.png': 'dragon.jpg',
 };
 
 function png(width, height, rgba) {

@@ -762,38 +762,44 @@ const TYPE_THEME = {
   FAIRY: BG_ROUTE,
 };
 
-// Real per-type background art (user-provided, see assets/hunt-backgrounds/)
-// — only 7 real images exist on disk (the source folder itself only has 7,
-// confirmed by listing it — there's no more art to import). Explicit user
-// request: "Nenhuma hunt devera ficar sem background" — every one of the 17
-// real types must load and use a real image, never the procedural
-// checkerboard placeholder. The 10 types with no dedicated art of their own
-// reuse whichever of the 7 fits its vibe closest (Ice/Ground/Steel/Ghost/Dark
-// -> cave, echoing real Ice Path/Icefall Cave being literal caves; Bug/Normal
-// -> forest; Flying/Poison -> water, coastal cliffs and swamps both read as
-// "wet"; Psychic -> dojo, closest to a mystic shrine/tower vibe) rather than
-// leaving them on the checkerboard. js/data/collisionGrids.generated.js
-// (built by scripts/build-collision-grids.js from these same 7 files) only
-// has real walk-blocking collision data for the 7 base images though — a
-// type reusing one of them inherits that same collision grid too.
+// Arte de fundo por tipo. Pedido explicito do usuario, e a regra nao mudou:
+// "Nenhuma hunt devera ficar sem background" — os 17 tipos reais carregam
+// imagem de verdade, nunca o xadrez procedural.
+//
+// REPONTADO NO PH-125. Antes os 17 tipos caiam em 7 imagens, e 5 delas
+// (cave/water/eletric/forest/fire.png, 65 MB somados) existiam SO por causa
+// desta tabela — nenhuma referencia em `src/`. Este gerador e legado (guardado
+// por PERMITIR_CATALOGO_GEN2, o catalogo vigente vem de `usum:gerar`), entao os
+// 65 MB eram peso morto que ninguem baixava e ninguem apagava.
+//
+// A tabela agora aponta pras artes que o JOGO usa de fato (`src/data/biomas.ts`),
+// escolhidas pela mesma logica de "vibe" da versao anterior: Ice -> ice-cave,
+// Ground -> desert, Steel/Electric -> industrial, Ghost -> abyss, Dark -> slum,
+// Bug -> jungle, Normal -> plains, Flying -> island, Poison -> swamp,
+// Psychic -> temple. Ou seja: se este gerador voltar a rodar, ele aponta pra
+// arquivo que existe.
+//
+// A grade de walk-block de cada arte vem de `subBiomaCollision.generated.ts`,
+// indexada pela ARTE (ver build-sub-bioma-collision.js) — um tipo que reusa uma
+// imagem herda a grade dela, como antes.
 const TYPE_BACKGROUND_IMAGE = {
-  FIRE: 'assets/hunt-backgrounds/fire.png',
-  WATER: 'assets/hunt-backgrounds/water.png',
-  GRASS: 'assets/hunt-backgrounds/forest.png',
-  ROCK: 'assets/hunt-backgrounds/cave.png',
-  FIGHTING: 'assets/hunt-backgrounds/dojo.png',
-  ELECTRIC: 'assets/hunt-backgrounds/eletric.png',
-  DRAGON: 'assets/hunt-backgrounds/dragon.png',
-  BUG: 'assets/hunt-backgrounds/forest.png',
-  NORMAL: 'assets/hunt-backgrounds/forest.png',
-  POISON: 'assets/hunt-backgrounds/water.png',
-  FLYING: 'assets/hunt-backgrounds/water.png',
-  GROUND: 'assets/hunt-backgrounds/cave.png',
-  ICE: 'assets/hunt-backgrounds/cave.png',
-  STEEL: 'assets/hunt-backgrounds/cave.png',
-  PSYCHIC: 'assets/hunt-backgrounds/dojo.png',
-  GHOST: 'assets/hunt-backgrounds/cave.png',
-  DARK: 'assets/hunt-backgrounds/cave.png',
+  FIRE: 'assets/hunt-backgrounds/volcano.jpg',
+  WATER: 'assets/hunt-backgrounds/sea.jpg',
+  GRASS: 'assets/hunt-backgrounds/forest.jpg',
+  ROCK: 'assets/hunt-backgrounds/mountain.jpg',
+  FIGHTING: 'assets/hunt-backgrounds/dojo.jpg',
+  ELECTRIC: 'assets/hunt-backgrounds/industrial.jpg',
+  DRAGON: 'assets/hunt-backgrounds/dragon.jpg',
+  BUG: 'assets/hunt-backgrounds/jungle.jpg',
+  NORMAL: 'assets/hunt-backgrounds/plains.jpg',
+  POISON: 'assets/hunt-backgrounds/swamp.jpg',
+  FLYING: 'assets/hunt-backgrounds/island.jpg',
+  GROUND: 'assets/hunt-backgrounds/desert.jpg',
+  ICE: 'assets/hunt-backgrounds/ice-cave.jpg',
+  STEEL: 'assets/hunt-backgrounds/industrial.jpg',
+  PSYCHIC: 'assets/hunt-backgrounds/temple.jpg',
+  GHOST: 'assets/hunt-backgrounds/abyss.jpg',
+  DARK: 'assets/hunt-backgrounds/slum.jpg',
 };
 
 function pickBgTheme(type) {
