@@ -687,6 +687,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 62,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 85,
 		"base": {
 			"hp": 39,
 			"atkFis": 52,
@@ -757,6 +758,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 63,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 90,
 		"base": {
 			"hp": 44,
 			"atkFis": 48,
@@ -835,6 +837,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 64,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 69,
 		"base": {
 			"hp": 45,
 			"atkFis": 49,
@@ -913,6 +916,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 261,
 		"growthCurve": "SLOW",
+		"pesoHg": 554,
 		"base": {
 			"hp": 90,
 			"atkFis": 85,
@@ -999,6 +1003,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 261,
 		"growthCurve": "SLOW",
+		"pesoHg": 526,
 		"base": {
 			"hp": 90,
 			"atkFis": 90,
@@ -1085,6 +1090,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 261,
 		"growthCurve": "SLOW",
+		"pesoHg": 600,
 		"base": {
 			"hp": 90,
 			"atkFis": 100,
@@ -1171,6 +1177,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 261,
 		"growthCurve": "SLOW",
+		"pesoHg": 1780,
 		"base": {
 			"hp": 90,
 			"atkFis": 85,
@@ -1249,6 +1256,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 261,
 		"growthCurve": "SLOW",
+		"pesoHg": 1980,
 		"base": {
 			"hp": 115,
 			"atkFis": 115,
@@ -1331,6 +1339,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 261,
 		"growthCurve": "SLOW",
+		"pesoHg": 1870,
 		"base": {
 			"hp": 100,
 			"atkFis": 75,
@@ -1413,6 +1422,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 306,
 		"growthCurve": "SLOW",
+		"pesoHg": 2160,
 		"base": {
 			"hp": 106,
 			"atkFis": 90,
@@ -1499,6 +1509,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 306,
 		"growthCurve": "SLOW",
+		"pesoHg": 1990,
 		"base": {
 			"hp": 106,
 			"atkFis": 130,
@@ -1585,6 +1596,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 270,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 50,
 		"base": {
 			"hp": 100,
 			"atkFis": 100,
@@ -1663,6 +1675,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 306,
 		"growthCurve": "SLOW",
+		"pesoHg": 1220,
 		"base": {
 			"hp": 106,
 			"atkFis": 110,
@@ -1765,6 +1778,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 270,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 40,
 		"base": {
 			"hp": 100,
 			"atkFis": 100,
@@ -1839,6 +1853,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 60,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 200,
 		"base": {
 			"hp": 40,
 			"atkFis": 80,
@@ -1925,6 +1940,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 52,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 20,
 		"base": {
 			"hp": 40,
 			"atkFis": 60,
@@ -1995,6 +2011,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 51,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 35,
 		"base": {
 			"hp": 30,
 			"atkFis": 56,
@@ -2069,6 +2086,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 130,
 		"base": {
 			"hp": 60,
 			"atkFis": 62,
@@ -2143,6 +2161,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 236,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 1e3,
 		"base": {
 			"hp": 80,
 			"atkFis": 82,
@@ -2225,6 +2244,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 64,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 54,
 		"base": {
 			"hp": 45,
 			"atkFis": 50,
@@ -2311,6 +2331,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 138,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 86,
 		"base": {
 			"hp": 60,
 			"atkFis": 65,
@@ -2389,6 +2410,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 60,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 40,
 		"base": {
 			"hp": 50,
 			"atkFis": 75,
@@ -2467,6 +2489,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 137,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 64,
 		"base": {
 			"hp": 65,
 			"atkFis": 90,
@@ -2541,6 +2564,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 221,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 155,
 		"base": {
 			"hp": 80,
 			"atkFis": 105,
@@ -2603,6 +2627,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 65,
 		"growthCurve": "SLOW",
+		"pesoHg": 25,
 		"base": {
 			"hp": 60,
 			"atkFis": 40,
@@ -2685,6 +2710,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 87,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 350,
 		"base": {
 			"hp": 65,
 			"atkFis": 55,
@@ -2783,6 +2809,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 64,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 64,
 		"base": {
 			"hp": 45,
 			"atkFis": 49,
@@ -2861,6 +2888,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 158,
 		"base": {
 			"hp": 60,
 			"atkFis": 62,
@@ -2931,6 +2959,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 236,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 1005,
 		"base": {
 			"hp": 80,
 			"atkFis": 82,
@@ -3009,6 +3038,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 50,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 5,
 		"base": {
 			"hp": 35,
 			"atkFis": 35,
@@ -3111,6 +3141,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 119,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 10,
 		"base": {
 			"hp": 55,
 			"atkFis": 45,
@@ -3205,6 +3236,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 207,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 30,
 		"base": {
 			"hp": 75,
 			"atkFis": 55,
@@ -3299,6 +3331,7 @@ var SPECIES_DATA = {
 		"catchRate": 235,
 		"baseExp": 36,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 18,
 		"base": {
 			"hp": 30,
 			"atkFis": 30,
@@ -3385,6 +3418,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 149,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 85,
 		"base": {
 			"hp": 75,
 			"atkFis": 75,
@@ -3483,6 +3517,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 39,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 29,
 		"base": {
 			"hp": 45,
 			"atkFis": 30,
@@ -3517,6 +3552,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 72,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 99,
 		"base": {
 			"hp": 50,
 			"atkFis": 20,
@@ -3541,6 +3577,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 178,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 320,
 		"base": {
 			"hp": 60,
 			"atkFis": 45,
@@ -3627,6 +3664,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 39,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 32,
 		"base": {
 			"hp": 40,
 			"atkFis": 35,
@@ -3661,6 +3699,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 72,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 100,
 		"base": {
 			"hp": 45,
 			"atkFis": 25,
@@ -3685,6 +3724,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 178,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 295,
 		"base": {
 			"hp": 65,
 			"atkFis": 90,
@@ -3759,6 +3799,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 57,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 54,
 		"base": {
 			"hp": 35,
 			"atkFis": 70,
@@ -3829,6 +3870,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 295,
 		"base": {
 			"hp": 60,
 			"atkFis": 95,
@@ -3895,6 +3937,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 61,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 300,
 		"base": {
 			"hp": 60,
 			"atkFis": 55,
@@ -3973,6 +4016,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 158,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 125,
 		"base": {
 			"hp": 70,
 			"atkFis": 65,
@@ -4051,6 +4095,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 100,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 560,
 		"base": {
 			"hp": 70,
 			"atkFis": 110,
@@ -4145,6 +4190,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 175,
 		"growthCurve": "SLOW",
+		"pesoHg": 550,
 		"base": {
 			"hp": 65,
 			"atkFis": 125,
@@ -4231,6 +4277,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 53,
 		"growthCurve": "FAST",
+		"pesoHg": 108,
 		"base": {
 			"hp": 40,
 			"atkFis": 20,
@@ -4309,6 +4356,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 137,
 		"growthCurve": "FAST",
+		"pesoHg": 356,
 		"base": {
 			"hp": 55,
 			"atkFis": 35,
@@ -4383,6 +4431,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 50,
 		"growthCurve": "FAST",
+		"pesoHg": 85,
 		"base": {
 			"hp": 40,
 			"atkFis": 60,
@@ -4477,6 +4526,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 140,
 		"growthCurve": "FAST",
+		"pesoHg": 335,
 		"base": {
 			"hp": 70,
 			"atkFis": 90,
@@ -4563,6 +4613,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 78,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 380,
 		"base": {
 			"hp": 65,
 			"atkFis": 65,
@@ -4649,6 +4700,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 58,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 72,
 		"base": {
 			"hp": 50,
 			"atkFis": 65,
@@ -4727,6 +4779,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 163,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 1258,
 		"base": {
 			"hp": 75,
 			"atkFis": 90,
@@ -4817,6 +4870,7 @@ var SPECIES_DATA = {
 		"catchRate": 25,
 		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 1180,
 		"base": {
 			"hp": 70,
 			"atkFis": 130,
@@ -4911,6 +4965,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 175,
 		"growthCurve": "SLOW",
+		"pesoHg": 540,
 		"base": {
 			"hp": 80,
 			"atkFis": 125,
@@ -5005,6 +5060,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 225,
 		"base": {
 			"hp": 59,
 			"atkFis": 63,
@@ -5079,6 +5135,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 239,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 855,
 		"base": {
 			"hp": 79,
 			"atkFis": 83,
@@ -5153,6 +5210,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 64,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 196,
 		"base": {
 			"hp": 50,
 			"atkFis": 52,
@@ -5239,6 +5297,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 766,
 		"base": {
 			"hp": 80,
 			"atkFis": 82,
@@ -5317,6 +5376,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 60,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 124,
 		"base": {
 			"hp": 40,
 			"atkFis": 50,
@@ -5391,6 +5451,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 135,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 200,
 		"base": {
 			"hp": 65,
 			"atkFis": 65,
@@ -5461,6 +5522,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 67,
 		"growthCurve": "SLOW",
+		"pesoHg": 455,
 		"base": {
 			"hp": 40,
 			"atkFis": 40,
@@ -5551,6 +5613,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 180,
 		"growthCurve": "SLOW",
+		"pesoHg": 550,
 		"base": {
 			"hp": 80,
 			"atkFis": 70,
@@ -5637,6 +5700,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 63,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 360,
 		"base": {
 			"hp": 90,
 			"atkFis": 65,
@@ -5723,6 +5787,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 172,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 785,
 		"base": {
 			"hp": 95,
 			"atkFis": 75,
@@ -5801,6 +5866,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 65,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 900,
 		"base": {
 			"hp": 65,
 			"atkFis": 45,
@@ -5891,6 +5957,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 166,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 1200,
 		"base": {
 			"hp": 90,
 			"atkFis": 70,
@@ -5981,6 +6048,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 61,
 		"growthCurve": "SLOW",
+		"pesoHg": 40,
 		"base": {
 			"hp": 30,
 			"atkFis": 65,
@@ -6071,6 +6139,7 @@ var SPECIES_DATA = {
 		"catchRate": 225,
 		"baseExp": 65,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 65,
 		"base": {
 			"hp": 30,
 			"atkFis": 105,
@@ -6153,6 +6222,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 166,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 600,
 		"base": {
 			"hp": 55,
 			"atkFis": 130,
@@ -6227,6 +6297,7 @@ var SPECIES_DATA = {
 		"catchRate": 225,
 		"baseExp": 59,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 80,
 		"base": {
 			"hp": 30,
 			"atkFis": 40,
@@ -6297,6 +6368,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 154,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 250,
 		"base": {
 			"hp": 55,
 			"atkFis": 65,
@@ -6363,6 +6435,7 @@ var SPECIES_DATA = {
 		"catchRate": 225,
 		"baseExp": 64,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 150,
 		"base": {
 			"hp": 45,
 			"atkFis": 67,
@@ -6441,6 +6514,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 158,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 390,
 		"base": {
 			"hp": 80,
 			"atkFis": 92,
@@ -6507,6 +6581,7 @@ var SPECIES_DATA = {
 		"catchRate": 225,
 		"baseExp": 68,
 		"growthCurve": "SLOW",
+		"pesoHg": 345,
 		"base": {
 			"hp": 30,
 			"atkFis": 45,
@@ -6605,6 +6680,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 40,
 		"growthCurve": "SLOW",
+		"pesoHg": 100,
 		"base": {
 			"hp": 20,
 			"atkFis": 10,
@@ -6639,6 +6715,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 189,
 		"growthCurve": "SLOW",
+		"pesoHg": 2350,
 		"base": {
 			"hp": 95,
 			"atkFis": 125,
@@ -6713,6 +6790,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 187,
 		"growthCurve": "SLOW",
+		"pesoHg": 2200,
 		"base": {
 			"hp": 130,
 			"atkFis": 85,
@@ -6795,6 +6873,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 63,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 95,
 		"base": {
 			"hp": 50,
 			"atkFis": 65,
@@ -6881,6 +6960,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 250,
 		"base": {
 			"hp": 65,
 			"atkFis": 80,
@@ -6959,6 +7039,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 239,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 888,
 		"base": {
 			"hp": 85,
 			"atkFis": 105,
@@ -7037,6 +7118,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 66,
 		"growthCurve": "SLOW",
+		"pesoHg": 120,
 		"base": {
 			"hp": 75,
 			"atkFis": 38,
@@ -7123,6 +7205,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 161,
 		"growthCurve": "SLOW",
+		"pesoHg": 225,
 		"base": {
 			"hp": 125,
 			"atkFis": 58,
@@ -7213,6 +7296,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 88,
 		"growthCurve": "FAST",
+		"pesoHg": 85,
 		"base": {
 			"hp": 70,
 			"atkFis": 20,
@@ -7299,6 +7383,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 189,
 		"growthCurve": "FAST",
+		"pesoHg": 285,
 		"base": {
 			"hp": 100,
 			"atkFis": 50,
@@ -7377,6 +7462,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 225,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 339,
 		"base": {
 			"hp": 90,
 			"atkFis": 75,
@@ -7427,6 +7513,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 42,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 85,
 		"base": {
 			"hp": 55,
 			"atkFis": 45,
@@ -7501,6 +7588,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 151,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 750,
 		"base": {
 			"hp": 95,
 			"atkFis": 85,
@@ -7567,6 +7655,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 88,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 39,
 		"base": {
 			"hp": 65,
 			"atkFis": 95,
@@ -7669,6 +7758,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 144,
 		"growthCurve": "FAST",
+		"pesoHg": 50,
 		"base": {
 			"hp": 65,
 			"atkFis": 55,
@@ -7763,6 +7853,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 60,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 120,
 		"base": {
 			"hp": 35,
 			"atkFis": 65,
@@ -7837,6 +7928,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 168,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 285,
 		"base": {
 			"hp": 75,
 			"atkFis": 105,
@@ -7911,6 +8003,7 @@ var SPECIES_DATA = {
 		"catchRate": 25,
 		"baseExp": 170,
 		"growthCurve": "SLOW",
+		"pesoHg": 2200,
 		"base": {
 			"hp": 85,
 			"atkFis": 40,
@@ -8009,6 +8102,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 243,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 1520,
 		"base": {
 			"hp": 75,
 			"atkFis": 95,
@@ -8083,6 +8177,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 50,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 18,
 		"base": {
 			"hp": 40,
 			"atkFis": 45,
@@ -8161,6 +8256,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 122,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 300,
 		"base": {
 			"hp": 63,
 			"atkFis": 60,
@@ -8235,6 +8331,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 216,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 395,
 		"base": {
 			"hp": 83,
 			"atkFis": 80,
@@ -8309,6 +8406,7 @@ var SPECIES_DATA = {
 		"catchRate": 127,
 		"baseExp": 145,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 185,
 		"base": {
 			"hp": 55,
 			"atkFis": 81,
@@ -8379,6 +8477,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 155,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 380,
 		"base": {
 			"hp": 65,
 			"atkFis": 90,
@@ -8445,6 +8544,7 @@ var SPECIES_DATA = {
 		"catchRate": 170,
 		"baseExp": 95,
 		"growthCurve": "FAST",
+		"pesoHg": 55,
 		"base": {
 			"hp": 115,
 			"atkFis": 45,
@@ -8543,6 +8643,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 58,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 42,
 		"base": {
 			"hp": 40,
 			"atkFis": 45,
@@ -8625,6 +8726,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 154,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 320,
 		"base": {
 			"hp": 65,
 			"atkFis": 70,
@@ -8703,6 +8805,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 132,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 150,
 		"base": {
 			"hp": 52,
 			"atkFis": 90,
@@ -8797,6 +8900,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 62,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 392,
 		"base": {
 			"hp": 35,
 			"atkFis": 85,
@@ -8883,6 +8987,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 165,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 852,
 		"base": {
 			"hp": 60,
 			"atkFis": 110,
@@ -8965,6 +9070,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 77,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 655,
 		"base": {
 			"hp": 90,
 			"atkFis": 55,
@@ -9047,6 +9153,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 172,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 800,
 		"base": {
 			"hp": 105,
 			"atkFis": 95,
@@ -9129,6 +9236,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 172,
 		"growthCurve": "SLOW",
+		"pesoHg": 884,
 		"base": {
 			"hp": 75,
 			"atkFis": 100,
@@ -9211,6 +9319,7 @@ var SPECIES_DATA = {
 		"catchRate": 35,
 		"baseExp": 101,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 40,
 		"base": {
 			"hp": 48,
 			"atkFis": 48,
@@ -9235,6 +9344,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 65,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 65,
 		"base": {
 			"hp": 55,
 			"atkFis": 55,
@@ -9325,6 +9435,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 79,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 365,
 		"base": {
 			"hp": 65,
 			"atkFis": 60,
@@ -9407,6 +9518,7 @@ var SPECIES_DATA = {
 		"catchRate": 25,
 		"baseExp": 189,
 		"growthCurve": "SLOW",
+		"pesoHg": 4600,
 		"base": {
 			"hp": 160,
 			"atkFis": 110,
@@ -9497,6 +9609,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 43,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 60,
 		"base": {
 			"hp": 35,
 			"atkFis": 46,
@@ -9575,6 +9688,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 145,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 325,
 		"base": {
 			"hp": 85,
 			"atkFis": 76,
@@ -9649,6 +9763,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 52,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 212,
 		"base": {
 			"hp": 60,
 			"atkFis": 30,
@@ -9743,6 +9858,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 158,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 408,
 		"base": {
 			"hp": 100,
 			"atkFis": 50,
@@ -9825,6 +9941,7 @@ var SPECIES_DATA = {
 		"catchRate": 170,
 		"baseExp": 42,
 		"growthCurve": "FAST",
+		"pesoHg": 10,
 		"base": {
 			"hp": 90,
 			"atkFis": 30,
@@ -9871,6 +9988,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 72,
 		"growthCurve": "FAST",
+		"pesoHg": 115,
 		"base": {
 			"hp": 55,
 			"atkFis": 70,
@@ -9949,6 +10067,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 415,
 		"base": {
 			"hp": 70,
 			"atkFis": 80,
@@ -10039,6 +10158,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 145,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 140,
 		"base": {
 			"hp": 100,
 			"atkFis": 70,
@@ -10149,6 +10269,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 66,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 88,
 		"base": {
 			"hp": 60,
 			"atkFis": 80,
@@ -10231,6 +10352,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 1258,
 		"base": {
 			"hp": 90,
 			"atkFis": 130,
@@ -10293,6 +10415,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 180,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 325,
 		"base": {
 			"hp": 85,
 			"atkFis": 80,
@@ -10379,6 +10502,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 163,
 		"growthCurve": "SLOW",
+		"pesoHg": 712,
 		"base": {
 			"hp": 73,
 			"atkFis": 95,
@@ -10461,6 +10585,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 88,
 		"growthCurve": "FAST",
+		"pesoHg": 580,
 		"base": {
 			"hp": 55,
 			"atkFis": 20,
@@ -10485,6 +10610,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 172,
 		"growthCurve": "SLOW",
+		"pesoHg": 755,
 		"base": {
 			"hp": 95,
 			"atkFis": 80,
@@ -10559,6 +10685,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 137,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 1050,
 		"base": {
 			"hp": 55,
 			"atkFis": 95,
@@ -10637,6 +10764,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 223,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 3e3,
 		"base": {
 			"hp": 80,
 			"atkFis": 120,
@@ -10727,6 +10855,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 77,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 2100,
 		"base": {
 			"hp": 35,
 			"atkFis": 45,
@@ -10837,6 +10966,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 71,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 75,
 		"base": {
 			"hp": 35,
 			"atkFis": 40,
@@ -10915,6 +11045,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 173,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 350,
 		"base": {
 			"hp": 70,
 			"atkFis": 60,
@@ -10989,6 +11120,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 71,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 115,
 		"base": {
 			"hp": 30,
 			"atkFis": 80,
@@ -11059,6 +11191,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 173,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 405,
 		"base": {
 			"hp": 60,
 			"atkFis": 115,
@@ -11129,6 +11262,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 180,
 		"growthCurve": "SLOW",
+		"pesoHg": 590,
 		"base": {
 			"hp": 80,
 			"atkFis": 105,
@@ -11219,6 +11353,7 @@ var SPECIES_DATA = {
 		"catchRate": 65,
 		"baseExp": 144,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 380,
 		"base": {
 			"hp": 70,
 			"atkFis": 100,
@@ -11313,6 +11448,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 60,
 		"growthCurve": "SLOW",
+		"pesoHg": 720,
 		"base": {
 			"hp": 50,
 			"atkFis": 64,
@@ -11391,6 +11527,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 144,
 		"growthCurve": "SLOW",
+		"pesoHg": 1520,
 		"base": {
 			"hp": 70,
 			"atkFis": 84,
@@ -11461,6 +11598,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 270,
 		"growthCurve": "SLOW",
+		"pesoHg": 2020,
 		"base": {
 			"hp": 100,
 			"atkFis": 134,
@@ -11535,6 +11673,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 60,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 120,
 		"base": {
 			"hp": 50,
 			"atkFis": 75,
@@ -11625,6 +11764,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 158,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 295,
 		"base": {
 			"hp": 75,
 			"atkFis": 100,
@@ -11711,6 +11851,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 53,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 8,
 		"base": {
 			"hp": 10,
 			"atkFis": 55,
@@ -11789,6 +11930,7 @@ var SPECIES_DATA = {
 		"catchRate": 50,
 		"baseExp": 149,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 333,
 		"base": {
 			"hp": 35,
 			"atkFis": 100,
@@ -11863,6 +12005,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 64,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 65,
 		"base": {
 			"hp": 50,
 			"atkFis": 50,
@@ -11949,6 +12092,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 149,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 450,
 		"base": {
 			"hp": 60,
 			"atkFis": 80,
@@ -12031,6 +12175,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 69,
 		"growthCurve": "SLOW",
+		"pesoHg": 1150,
 		"base": {
 			"hp": 80,
 			"atkFis": 85,
@@ -12113,6 +12258,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 170,
 		"growthCurve": "SLOW",
+		"pesoHg": 1200,
 		"base": {
 			"hp": 105,
 			"atkFis": 130,
@@ -12191,6 +12337,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 86,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 648,
 		"base": {
 			"hp": 65,
 			"atkFis": 75,
@@ -12273,6 +12420,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 66,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 335,
 		"base": {
 			"hp": 90,
 			"atkFis": 60,
@@ -12347,6 +12495,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 1200,
 		"base": {
 			"hp": 90,
 			"atkFis": 120,
@@ -12409,6 +12558,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 190,
 		"base": {
 			"hp": 58,
 			"atkFis": 64,
@@ -12471,6 +12621,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 240,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 905,
 		"base": {
 			"hp": 78,
 			"atkFis": 84,
@@ -12545,6 +12696,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 70,
 		"growthCurve": "SLOW",
+		"pesoHg": 190,
 		"base": {
 			"hp": 55,
 			"atkFis": 70,
@@ -12639,6 +12791,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 194,
 		"growthCurve": "SLOW",
+		"pesoHg": 1550,
 		"base": {
 			"hp": 90,
 			"atkFis": 110,
@@ -12685,6 +12838,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 82,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 300,
 		"base": {
 			"hp": 50,
 			"atkFis": 85,
@@ -12763,6 +12917,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 950,
 		"base": {
 			"hp": 65,
 			"atkFis": 100,
@@ -12837,6 +12992,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 173,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 445,
 		"base": {
 			"hp": 65,
 			"atkFis": 95,
@@ -12907,6 +13063,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 62,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 79,
 		"base": {
 			"hp": 39,
 			"atkFis": 52,
@@ -12993,6 +13150,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 190,
 		"base": {
 			"hp": 58,
 			"atkFis": 64,
@@ -13071,6 +13229,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 240,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 795,
 		"base": {
 			"hp": 78,
 			"atkFis": 84,
@@ -13149,6 +13308,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 50,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 350,
 		"base": {
 			"hp": 40,
 			"atkFis": 40,
@@ -13235,6 +13395,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 151,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 550,
 		"base": {
 			"hp": 60,
 			"atkFis": 50,
@@ -13317,6 +13478,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 73,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 214,
 		"base": {
 			"hp": 45,
 			"atkFis": 75,
@@ -13395,6 +13557,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 112,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 60,
 		"base": {
 			"hp": 35,
 			"atkFis": 55,
@@ -13489,6 +13652,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 65,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 60,
 		"base": {
 			"hp": 25,
 			"atkFis": 35,
@@ -13583,6 +13747,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 163,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 600,
 		"base": {
 			"hp": 50,
 			"atkFis": 60,
@@ -13673,6 +13838,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 66,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 104,
 		"base": {
 			"hp": 40,
 			"atkFis": 30,
@@ -13763,6 +13929,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 172,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 666,
 		"base": {
 			"hp": 60,
 			"atkFis": 50,
@@ -13845,6 +14012,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 172,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 300,
 		"base": {
 			"hp": 65,
 			"atkFis": 83,
@@ -13915,6 +14083,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 41,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 20,
 		"base": {
 			"hp": 20,
 			"atkFis": 40,
@@ -13961,6 +14130,7 @@ var SPECIES_DATA = {
 		"catchRate": 235,
 		"baseExp": 56,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 78,
 		"base": {
 			"hp": 55,
 			"atkFis": 40,
@@ -14043,6 +14213,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 128,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 133,
 		"base": {
 			"hp": 70,
 			"atkFis": 55,
@@ -14117,6 +14288,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 230,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 615,
 		"base": {
 			"hp": 90,
 			"atkFis": 75,
@@ -14199,6 +14371,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 72,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 235,
 		"base": {
 			"hp": 45,
 			"atkFis": 63,
@@ -14277,6 +14450,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 58,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 69,
 		"base": {
 			"hp": 35,
 			"atkFis": 60,
@@ -14367,6 +14541,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 157,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 650,
 		"base": {
 			"hp": 60,
 			"atkFis": 95,
@@ -14453,6 +14628,7 @@ var SPECIES_DATA = {
 		"catchRate": 235,
 		"baseExp": 55,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 70,
 		"base": {
 			"hp": 55,
 			"atkFis": 47,
@@ -14527,6 +14703,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 128,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 200,
 		"base": {
 			"hp": 70,
 			"atkFis": 62,
@@ -14593,6 +14770,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 227,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 600,
 		"base": {
 			"hp": 90,
 			"atkFis": 92,
@@ -14647,6 +14825,7 @@ var SPECIES_DATA = {
 		"catchRate": 235,
 		"baseExp": 55,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 90,
 		"base": {
 			"hp": 46,
 			"atkFis": 57,
@@ -14721,6 +14900,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 128,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 195,
 		"base": {
 			"hp": 61,
 			"atkFis": 72,
@@ -14787,6 +14967,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 227,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 620,
 		"base": {
 			"hp": 81,
 			"atkFis": 102,
@@ -14841,6 +15022,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 49,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 75,
 		"base": {
 			"hp": 40,
 			"atkFis": 45,
@@ -14923,6 +15105,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 550,
 		"base": {
 			"hp": 75,
 			"atkFis": 80,
@@ -15001,6 +15184,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 65,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 300,
 		"base": {
 			"hp": 80,
 			"atkFis": 80,
@@ -15087,6 +15271,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 300,
 		"base": {
 			"hp": 105,
 			"atkFis": 105,
@@ -15169,6 +15354,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 68,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 10,
 		"base": {
 			"hp": 40,
 			"atkFis": 65,
@@ -15251,6 +15437,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 172,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 95,
 		"base": {
 			"hp": 65,
 			"atkFis": 90,
@@ -15329,6 +15516,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 61,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 280,
 		"base": {
 			"hp": 40,
 			"atkFis": 80,
@@ -15427,6 +15615,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 320,
 		"base": {
 			"hp": 65,
 			"atkFis": 105,
@@ -15509,6 +15698,7 @@ var SPECIES_DATA = {
 		"catchRate": 180,
 		"baseExp": 61,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 195,
 		"base": {
 			"hp": 70,
 			"atkFis": 80,
@@ -15599,6 +15789,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 705,
 		"base": {
 			"hp": 80,
 			"atkFis": 100,
@@ -15681,6 +15872,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 227,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 1300,
 		"base": {
 			"hp": 90,
 			"atkFis": 130,
@@ -15779,6 +15971,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 498,
 		"base": {
 			"hp": 50,
 			"atkFis": 120,
@@ -15865,6 +16058,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 502,
 		"base": {
 			"hp": 50,
 			"atkFis": 105,
@@ -15959,6 +16153,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 42,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 210,
 		"base": {
 			"hp": 35,
 			"atkFis": 35,
@@ -15997,6 +16192,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 406,
 		"base": {
 			"hp": 65,
 			"atkFis": 50,
@@ -16075,6 +16271,7 @@ var SPECIES_DATA = {
 		"catchRate": 225,
 		"baseExp": 50,
 		"growthCurve": "SLOW",
+		"pesoHg": 65,
 		"base": {
 			"hp": 50,
 			"atkFis": 50,
@@ -16157,6 +16354,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 158,
 		"growthCurve": "SLOW",
+		"pesoHg": 558,
 		"base": {
 			"hp": 100,
 			"atkFis": 100,
@@ -16235,6 +16433,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 116,
 		"growthCurve": "FAST",
+		"pesoHg": 160,
 		"base": {
 			"hp": 45,
 			"atkFis": 55,
@@ -16262,6 +16461,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 61,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 60,
 		"base": {
 			"hp": 45,
 			"atkFis": 30,
@@ -16344,6 +16544,7 @@ var SPECIES_DATA = {
 		"catchRate": 25,
 		"baseExp": 179,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 4e3,
 		"base": {
 			"hp": 75,
 			"atkFis": 85,
@@ -16466,6 +16667,7 @@ var SPECIES_DATA = {
 		"catchRate": 25,
 		"baseExp": 163,
 		"growthCurve": "SLOW",
+		"pesoHg": 505,
 		"base": {
 			"hp": 65,
 			"atkFis": 80,
@@ -16552,6 +16754,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 64,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 20,
 		"base": {
 			"hp": 40,
 			"atkFis": 50,
@@ -16638,6 +16841,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 165,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 150,
 		"base": {
 			"hp": 65,
 			"atkFis": 75,
@@ -16720,6 +16924,7 @@ var SPECIES_DATA = {
 		"catchRate": 200,
 		"baseExp": 62,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 195,
 		"base": {
 			"hp": 25,
 			"atkFis": 20,
@@ -16744,6 +16949,7 @@ var SPECIES_DATA = {
 		"catchRate": 100,
 		"baseExp": 140,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 565,
 		"base": {
 			"hp": 40,
 			"atkFis": 35,
@@ -16822,6 +17028,7 @@ var SPECIES_DATA = {
 		"catchRate": 50,
 		"baseExp": 225,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 480,
 		"base": {
 			"hp": 55,
 			"atkFis": 50,
@@ -16904,6 +17111,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 66,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 324,
 		"base": {
 			"hp": 60,
 			"atkFis": 48,
@@ -16994,6 +17202,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 169,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 756,
 		"base": {
 			"hp": 85,
 			"atkFis": 73,
@@ -17076,6 +17285,7 @@ var SPECIES_DATA = {
 		"catchRate": 225,
 		"baseExp": 118,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 50,
 		"base": {
 			"hp": 48,
 			"atkFis": 72,
@@ -17100,6 +17310,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 285,
 		"base": {
 			"hp": 190,
 			"atkFis": 33,
@@ -17138,6 +17349,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 62,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 1,
 		"base": {
 			"hp": 30,
 			"atkFis": 35,
@@ -17220,6 +17432,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 1,
 		"base": {
 			"hp": 45,
 			"atkFis": 50,
@@ -17298,6 +17511,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 225,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 405,
 		"base": {
 			"hp": 60,
 			"atkFis": 65,
@@ -17384,6 +17598,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 87,
 		"growthCurve": "FAST",
+		"pesoHg": 10,
 		"base": {
 			"hp": 60,
 			"atkFis": 60,
@@ -17462,6 +17677,7 @@ var SPECIES_DATA = {
 		"catchRate": 30,
 		"baseExp": 81,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 21,
 		"base": {
 			"hp": 60,
 			"atkFis": 85,
@@ -17544,6 +17760,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 86,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 280,
 		"base": {
 			"hp": 55,
 			"atkFis": 95,
@@ -17630,6 +17847,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 66,
 		"growthCurve": "SLOW",
+		"pesoHg": 108,
 		"base": {
 			"hp": 45,
 			"atkFis": 60,
@@ -17716,6 +17934,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 175,
 		"growthCurve": "SLOW",
+		"pesoHg": 350,
 		"base": {
 			"hp": 75,
 			"atkFis": 90,
@@ -17794,6 +18013,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 60,
 		"growthCurve": "SLOW",
+		"pesoHg": 33,
 		"base": {
 			"hp": 41,
 			"atkFis": 64,
@@ -17872,6 +18092,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 147,
 		"growthCurve": "SLOW",
+		"pesoHg": 165,
 		"base": {
 			"hp": 61,
 			"atkFis": 84,
@@ -17942,6 +18163,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 270,
 		"growthCurve": "SLOW",
+		"pesoHg": 2100,
 		"base": {
 			"hp": 91,
 			"atkFis": 134,
@@ -18020,6 +18242,7 @@ var SPECIES_DATA = {
 		"catchRate": 150,
 		"baseExp": 44,
 		"growthCurve": "FAST",
+		"pesoHg": 30,
 		"base": {
 			"hp": 50,
 			"atkFis": 25,
@@ -18070,6 +18293,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 49,
 		"growthCurve": "FAST",
+		"pesoHg": 15,
 		"base": {
 			"hp": 35,
 			"atkFis": 20,
@@ -18152,6 +18376,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 60,
 		"growthCurve": "FAST",
+		"pesoHg": 78,
 		"base": {
 			"hp": 60,
 			"atkFis": 80,
@@ -18234,6 +18459,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 158,
 		"growthCurve": "FAST",
+		"pesoHg": 487,
 		"base": {
 			"hp": 90,
 			"atkFis": 120,
@@ -25637,20 +25863,141 @@ var STAT_CHANGE_OVERRIDES = {
 		}],
 		statChance: 100,
 		statTarget: "self"
+	},
+	mud_slap: {
+		statChanges: [{
+			stat: "accuracy",
+			estagios: -1
+		}],
+		statChance: 100
+	},
+	mud_bomb: {
+		statChanges: [{
+			stat: "accuracy",
+			estagios: -1
+		}],
+		statChance: 30
+	},
+	mirror_shot: {
+		statChanges: [{
+			stat: "accuracy",
+			estagios: -1
+		}],
+		statChance: 30
+	},
+	muddy_water: {
+		statChanges: [{
+			stat: "accuracy",
+			estagios: -1
+		}],
+		statChance: 30
+	},
+	octazooka: {
+		statChanges: [{
+			stat: "accuracy",
+			estagios: -1
+		}],
+		statChance: 50
+	},
+	leaf_tornado: {
+		statChanges: [{
+			stat: "accuracy",
+			estagios: -1
+		}],
+		statChance: 50
+	},
+	sweet_scent: {
+		statChanges: [{
+			stat: "evasion",
+			estagios: -2
+		}],
+		statChance: 100
 	}
 };
+var STATUS_OVERRIDES = { tri_attack: {
+	status: "burn",
+	statusChance: 20
+} };
 var HAZARD_OVERRIDES = {
 	spikes: { hazard: "spikes" },
 	toxic_spikes: { hazard: "toxic_spikes" },
 	stealth_rock: { hazard: "stealth_rock" },
 	sticky_web: { hazard: "sticky_web" }
 };
+var MULTI_HIT_OVERRIDES = {
+	arm_thrust: {
+		minHits: 2,
+		maxHits: 5
+	},
+	barrage: {
+		minHits: 2,
+		maxHits: 5
+	},
+	bone_rush: {
+		minHits: 2,
+		maxHits: 5
+	},
+	bullet_seed: {
+		minHits: 2,
+		maxHits: 5
+	},
+	comet_punch: {
+		minHits: 2,
+		maxHits: 5
+	},
+	double_slap: {
+		minHits: 2,
+		maxHits: 5
+	},
+	fury_attack: {
+		minHits: 2,
+		maxHits: 5
+	},
+	fury_swipes: {
+		minHits: 2,
+		maxHits: 5
+	},
+	icicle_spear: {
+		minHits: 2,
+		maxHits: 5
+	},
+	pin_missile: {
+		minHits: 2,
+		maxHits: 5
+	},
+	rock_blast: {
+		minHits: 2,
+		maxHits: 5
+	},
+	spike_cannon: {
+		minHits: 2,
+		maxHits: 5
+	},
+	double_hit: {
+		minHits: 2,
+		maxHits: 2
+	},
+	double_kick: {
+		minHits: 2,
+		maxHits: 2
+	},
+	dual_chop: {
+		minHits: 2,
+		maxHits: 2
+	},
+	twineedle: {
+		minHits: 2,
+		maxHits: 2
+	}
+};
 var ABILITIES = Object.fromEntries(Object.entries(ALL_ABILITIES_SOURCE).map(([key, ability]) => {
 	const isAoe = AOE_ABILITY_KEYS.has(key) || "target" in ability && ability.target === "aoe";
 	return [key, {
 		...ability,
 		...STAT_CHANGE_OVERRIDES[key],
+		...STATUS_OVERRIDES[key],
 		...HAZARD_OVERRIDES[key],
+		...MULTI_HIT_OVERRIDES[key],
 		target: isAoe ? "aoe" : "single",
 		radius: isAoe ? AOE_RADIUS : void 0,
 		cooldown: cooldownFromPp(ability.pp)
@@ -25672,7 +26019,16 @@ var DANO_SEM_PODER_BASE = /* @__PURE__ */ new Set([
 	"super_fang",
 	"psywave",
 	"counter",
-	"mirror_coat"
+	"mirror_coat",
+	"gyro_ball",
+	"electro_ball",
+	"wring_out",
+	"punishment",
+	"sonic_boom",
+	"endeavor",
+	"final_gambit",
+	"low_kick",
+	"heavy_slam"
 ]);
 function isDamagingAbility(ability) {
 	if (!ability) return false;
@@ -25762,16 +26118,49 @@ function encaixarNovosGolpes(atuais, novos) {
 	}
 	return saida;
 }
-function golpesUtilizaveis(poke, species, selvagem) {
-	if (selvagem) return activeAbilitiesSelvagem(species, poke.level);
-	const conhecidos = /* @__PURE__ */ new Set([...poke.unlockedAbilities, BASIC_ATTACK.id]);
-	const escolha = poke.activeAbilities ?? activeAbilitiesPadrao(species, poke.level);
-	const escolhidos = [...new Set(escolha.filter((key) => conhecidos.has(key)))].slice(0, 4);
-	if (escolha.length > 0 && escolhidos.length < Math.min(escolha.length, 4)) for (const key of activeAbilitiesPadrao(species, poke.level)) {
-		if (escolhidos.length >= 4) break;
-		if (!escolhidos.includes(key) && conhecidos.has(key)) escolhidos.push(key);
+/**
+* A escolha do jogador SANEADA: sem golpe que este POKE nao conhece, sem
+* repetido, no maximo 4, e com slot recomposto quando o filtro esvaziou algum.
+*
+* REGRA UNICA, TRES CONSUMIDORES. Ela nasceu aqui dentro de
+* `golpesUtilizaveis` (o caminho do combate) e era exclusiva dele — e essa
+* exclusividade era um bug:
+*
+*  - a TELA (`MovesetTable`) lia `poke.activeAbilities` cru, entao mostrava
+*    "4/4" com menos de 4 botoes numerados: a chave orfa nao tem linha na
+*    tabela (saiu do catalogo) ou tem linha com `aprendido=false` (mudou de
+*    nivel exigido), e nos dois casos ela e invisivel e impossivel de
+*    desmarcar;
+*  - a EDICAO mandava essa mesma lista crua pra RPC `definir_golpes_ativos`,
+*    que valida id por id contra `unlocked_abilities` e ABORTA a chamada
+*    inteira. Resultado: o POKE ficava com a escolha travada — nem adicionar
+*    (o teto de 4 ja estava "cheio") nem remover (todo payload levava a chave
+*    recusada) funcionava. Sem erro que ajudasse: so "esse POKE nao conhece
+*    esse golpe" pra um golpe que o jogador nao escolheu e nao ve.
+*
+* De onde vem chave orfa: a regra do Recordador (so golpe com nivel real na
+* propria especie, v6.8) e o rename de 15 chaves na migracao do Ultra Sun.
+* Medido contra producao antes daquela leva: 3.188 de 7.184 POKEs com escolha
+* gravada perdiam ao menos um golpe.
+*
+* `conhecidos` entra por parametro em vez de ser derivado de (especie, nivel)
+* aqui dentro porque quem chama ja tem a lista montada — e no caso do
+* `rowToPoke` ela e justamente o recalculo fresco que acabou de substituir a
+* coluna do banco.
+*/
+function sanearEscolhaDeGolpes(escolha, conhecidos, species, level) {
+	const validos = /* @__PURE__ */ new Set([...conhecidos, BASIC_ATTACK.id]);
+	const escolhidos = [...new Set(escolha.filter((key) => validos.has(key)))].slice(0, 4);
+	const alvo = Math.min(escolha.length, 4);
+	if (escolha.length > 0 && escolhidos.length < alvo) for (const key of activeAbilitiesPadrao(species, level)) {
+		if (escolhidos.length >= alvo) break;
+		if (!escolhidos.includes(key) && validos.has(key)) escolhidos.push(key);
 	}
 	return escolhidos;
+}
+function golpesUtilizaveis(poke, species, selvagem) {
+	if (selvagem) return activeAbilitiesSelvagem(species, poke.level);
+	return sanearEscolhaDeGolpes(poke.activeAbilities ?? activeAbilitiesPadrao(species, poke.level), poke.unlockedAbilities, species, poke.level);
 }
 //#endregion
 //#region src/data/pokes.ts
@@ -25925,966 +26314,2822 @@ function createPokeInstance(rng, speciesId, level = 1, { ivs: fixedIvs, rarity: 
 	};
 }
 //#endregion
-//#region src/data/generated/waterCollisionMask.generated.ts
-var WATER_COLLISION_GRID = [
-	"11111111110000000000000000000000000",
-	"10111111110000000000000000000000000",
-	"10011111000000000000000000000000000",
-	"00000000000000000000000000000000000",
-	"00000000000000000000000000000000000",
-	"00000000000000000001111111111111111",
-	"00000000000000000011111111111111111",
-	"11111000000111111111111111111111111",
-	"11111111001111111111111111111111111",
-	"11111111001111110000111111111111111",
-	"11111111001111110000000011111111111",
-	"00011111001111110000000001111111111",
-	"00001111001111100000000001111111111",
-	"00000111000111100000000000111111111",
-	"00000000000000000000000000111111111",
-	"11111111111111110000000000111111111",
-	"11111111111111111000000001111111111",
-	"11111111111111111100000001111111111",
-	"11111111111111111111000011111111111",
-	"11111111100111111111111111111111111",
-	"11111111000111111111111111111111110",
-	"11111110000111111111111111111111110",
-	"11111100000111111111111111111111110"
-];
-var WATER_SPAWN_POINT = {
-	x: 664.56,
-	y: 86.56738461538407
-};
-//#endregion
 //#region src/data/generated/subBiomaCollision.generated.ts
 var COLISAO_POR_ARTE = {
 	"assets/hunt-backgrounds/abyss.jpg": {
 		"grid": [
-			"00000000000011111111111100000000111",
-			"00000000000111111111111110000000111",
-			"00000000001111111111111111100000000",
-			"00000000111111111111111111100000000",
-			"00000001111111111111111111100000000",
-			"00000011111111111111111111110000000",
-			"00000011111111111111111111111000000",
-			"00000111111111111111111111111111001",
-			"00000111111111111111111111111100000",
-			"00000011111111111111111111111000000",
-			"00000011111111111111111111111000000",
-			"00000001111111111111111111110000000",
-			"00000000111111111111111111000000000",
-			"00000000111111111111111110000000000",
-			"00000000001111111111111110000000000",
-			"10000000001111111111111110000000000",
-			"00000000001111111111111100000000000",
-			"10000000011111111111100000000000011",
-			"00000000011100011111000000000000001",
-			"00000000000000001111000000000011111",
-			"00000001000000000000000000000111111",
-			"10001111000000000000000000011111111",
-			"11000110000000000111000000011111111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"100000000000000000111111111111111111111111111111111111111111111111111111111111111111",
+			"100000000000000000011111111111111111111111111111111111111111111111111111111111111111",
+			"100000000000000000000000000111111111111111111111111111111111111111111111111111111111",
+			"100000000000000000000000000101111110011111111111011111111111111111111111111111111111",
+			"100000000000000000000000001100001110001111111100000111111001111111111111001111111111",
+			"100000000000000000000000011000000000001111111100000001111000111111111111000111111111",
+			"100000000000000000000000010000000000001111111000000000111000111111111110000111111111",
+			"100000000000000000000000100000000000000111111000000000000001111111111110000111111111",
+			"100000000000000000000001100000000000000001000000000000000001101111111100000111111111",
+			"100000000000000000000010000000000000000000000000000000000000000011111000000111111111",
+			"100000000000000000011000000000000000000000000000000000000000000000000000000111111111",
+			"100000000011000000010100000000000000000000000000000000000000000000000000001111111111",
+			"100000000000000000000000000000000000001111111100000000000000000000000000001111111111",
+			"100001110010000000000000000000000000011111111110000000000000000000000000011111111111",
+			"100100101000000000000000000000000011111111111111111111000000000000000000111111111111",
+			"110000000000000000000000000000111111111111111111111111000000000000000001111111111111",
+			"100000000000000000000000000000111111111111111111111111100000000000000011111110111111",
+			"100000000110000000000000000001111111111111111111111111110000000000000011111110011111",
+			"100000000100000000000000000111111111111111111111111111111100000000000000111110011111",
+			"100000001000000000000000000111111111111111111111111111111111100000000000000000011111",
+			"100000001000000000000000111111111111111111111111111111111111100000000000000000011111",
+			"100000001000000000000001111111111111111111111111111111111111000000000000000000011111",
+			"100000000000000000000001111111111111111111111111111111111111000000000000000000011111",
+			"100000001000000000000111111111111111111111111111111111111111100000000000000000011101",
+			"100000101000000000001111111111111111111111111111111111111111110000000000000000000001",
+			"100000101000000000011111111111111111111111111111111111111111111000000000000000000001",
+			"100000100000000000011111111111111111111111111111111111111111111100000000000000000001",
+			"100000000000000000011111111111111111111111111111111111111111111100000000000000000011",
+			"100000100000000000111111111111111111111111111111111111111111111111111000000110000011",
+			"100001100000000001111111111111111111111111111111111111111111111111111110000111111011",
+			"111111000000000001111111111111111111111111111111111111111111111111111110000111101011",
+			"111111000000000000111111111111111111111111111111111111111111111111101100000000001011",
+			"111100000000000000111111111111111111111111111111111111111111111111000000000000001111",
+			"100000001000000000111111111111111111111111111111111111111111111111000000000000001111",
+			"100000000000000000111111111111111111111111111111111111111111111111000000000000001111",
+			"100000100000000000111111111111111111111111111111111111111111111110000000000000000001",
+			"100000001000000000001111111111111111111111111111111111111111111100000000000000000111",
+			"100001000000000000000111111111111111111111111111111111111111111000000000000000000001",
+			"100001100000000000000111111111111111111111111111111111111111100000000000000000000001",
+			"100001000000000000000001111111111111111111111111111111111110000000000000000000000001",
+			"100000000000000000000001111111111111111111111111111111111100000000000000000000000001",
+			"100000000000000000000000111111111111111111111111111111111000000000000000000000000001",
+			"100000000000000000000000011111111111111111111111111111111000000000000000000000000001",
+			"100000000000000000000000001111111111111111111111111111111000000000000000000000000011",
+			"100001000000000000000000000111111111111111111111111111111100000000000000000000000011",
+			"100011111000000000000000000011111111111111111111111111111100000000000000000000000011",
+			"101111100000000000000000000111111111111111111111111111111000000000000000000000000011",
+			"101111110000000000000000000111111111111111111111111011100000000000000000000000000011",
+			"100111110000000000000000001111111111111111111111110000000000000000000000001000000111",
+			"100011111000000000000000011111110111111111111111100000000000000000000000001110001111",
+			"111011111000000000000000011111100000011111111110000000000000000000000001011111001111",
+			"100001110000000000000000001111100000011111111110000000000000000000000010001110011111",
+			"100011110000000000000000000110000000000111111110000000000000000000100111011111111111",
+			"111111110000000000000000000000000000000011111110000000000000000000111111111111111111",
+			"111100000000000000010000000000000000000011000000000000000000000001111111111111111111",
+			"100000000000000001010100000000000000000000000000000000000000000001111110000010111111",
+			"100001110000000011010111000000000000000000000000000000000000001111111000000100111111",
+			"111111110000000111011110000000000000000000000000000000000000011111010000000010111111",
+			"111111100100001111111100000000000000000000000010000000000000011110000000000000111111",
+			"111111000110000111111000010000000000000001111110000000000000011100000000000001000111",
+			"111111101111000011111000001100000000000001111111011100000010111100000100000000010111",
+			"111111101111111001111001001000000000011101111111111100000010001100000000000000001111",
+			"111110000001001100011001010100000000011101111111111110000010101000000000000000111111",
+			"111110011001011110000001110000000000000101111111111100001101001110000000000000011111",
+			"111111100000011111100011110100000000000001111111111000000000001000000000000000101111",
+			"111110000000011111100000010000000000000001111111111000000010001100000000000011101111",
+			"111111010001111111110011011100000000000000000000000000000000111111000000000011001111",
+			"111111111011111111111010001111000000000000000000000000000000000001000000000111101111",
+			"111111111111111111110000011101010000000000000000000000000000000100000000000111001111",
+			"111111111111111111111001001101110000000000110000110000000000110000000000000110001111",
+			"111111111111111111111100000101111000000000111111110000000000111000000000000100001111",
+			"111111111111111111111111010001111110000010111111110010000000011100000001010000011111",
+			"111111111111111111111111100111111100000110111111111001000000011100010000100000111111",
+			"111111111111111111111111000111111111101100111111111101000000001001111110100000111111",
+			"111111111111111111111110011111111111101101111111111111110000000000000100000001111111",
+			"111111111111111111111111111111111111101111111111111111111000011011000001111111111111",
+			"111111111111111111111111111111111111111111111111111111111000111111110011111111111111",
+			"111111111111111111111111111111111111111111111111111111111000011111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1680,
+			"height": 1680
+		},
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": 20
+		},
 		"spawnPoint": {
-			"x": 260,
-			"y": 60
+			"x": 410,
+			"y": 450
 		},
 		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/meadow.jpg": {
 		"grid": [
-			"00000111100011111111100000000011110",
-			"00000111000011111110000000000000000",
-			"10110010000001111110000001100000000",
-			"11110000000000111111111001110000011",
-			"11100000000000000111111111110000001",
-			"11000000000000000001111111110000001",
-			"11000100111000000000111111111100111",
-			"11000100111000000000000111111100111",
-			"11111100110000000000000000111100111",
-			"11111000100000000000000000000000011",
-			"11111000110000000000000000000000001",
-			"11111000110000000000000000000000001",
-			"11111000111000000000000000000000001",
-			"11100000011100000000000000100000111",
-			"11110000011110000000000000110000111",
-			"11111100001111000000000111110000111",
-			"11111100001111100000001111111000111",
-			"11111110000001110000011111111000111",
-			"11111110000000111001111111111000111",
-			"11111110000000111001111111100000011",
-			"11111100000000011000001111000000000",
-			"11111000000000000000000000000000000",
-			"11111100000000000000000000000000000"
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111000111111111111111111111111111111111111111111111111111111111111111111",
+			"1111100000111111111111111111111111111111111111111111111111111111111111111111",
+			"1111000000011111111111111111111111111111111111111111111111111111111111111111",
+			"1110000000011111111111111111111111111111111111111111111111111111111111111111",
+			"1110000000001111111111111111111111111111111111111111111111111111111111111111",
+			"1100000000000011111111111111111111111111111111111111111111111111111111111111",
+			"1100000000000001111111111111111111111111111111111111111111111111111111111111",
+			"1000000000000001111111111111111111111111111111111111111111111111111111111111",
+			"1000000000000001111111111111111111111111111111111111111100001111111111111111",
+			"1000000000000011111111111111111111111111111111111111111100001111111111111111",
+			"1000000000000011111111111111111111111111111111111111100000001111111111111111",
+			"1100000000000111111111111111111111111111111110000111100000000111111111111111",
+			"1110000000001111111111000011111111111111111100000000000000000111111111111111",
+			"1110000000011111111110000011111111111111111100000000000000000011111111000111",
+			"1110000000001111111100000001111111111111110000000000000000000000000000000011",
+			"1110000000000111111000000001111111111111100000000000000000000000000000000011",
+			"1111000111000011110000000000111111111111100000000000001100000000000000000011",
+			"1111111111100001100000000000011111111111111000000000011110000000000000000111",
+			"1111111111100000000000000000001111111111111111000000111111000000000001111111",
+			"1111111111110000000000000000000111111111111111111001111111100000000011111111",
+			"1111111111110000000000000000000011111111111111111111111111000000000011111111",
+			"1111111110000000000000000000000000000111111111111111111111000000000000011111",
+			"1111111100000000000000000000000000000011111111111111111111100000000000011111",
+			"1111111000000000000001110000000000000000111111111111111111110000000000011111",
+			"1111111000000100000111110000000000000000011111111111111111111100001111111111",
+			"1111111000011110000111110000000000000000000111111111111111111100001111111111",
+			"1111111100011111000111111000000000000000000011111111111111111100001111111111",
+			"1111111100011111000111111100000000000000000000000111111111111110001111111111",
+			"1111111110111110000111110000000000000000000000000001111111111110001111111111",
+			"1111111111111110000111000000000000000000000000000000001111111100001111111111",
+			"1111111111111100000111000000000000000000000000000000000111111100001111111111",
+			"1111111111111100000111000000000000000000000000000000000000000000000011111111",
+			"1111111111111100000111100000000000000000000000000000000000000000000001111111",
+			"1111111111111000000111110000000000000000000000000000000000000000000000111111",
+			"1111111111111000000111110000000000000000000000000000000000000000000000111111",
+			"1111111111111000000111110000000000000000000000000000000000000000000000111111",
+			"1111111111111000000111111000000000000000000000000000000000000000000000111111",
+			"1111111111110000000111111110000000000000000000000000000000000000000001111111",
+			"1111111111100000000111111110000000000000000000000000000010000000000111111111",
+			"1111111111000000000011111111000000000000000000000000000111000000000111111111",
+			"1111111111000000000001111111100000000000000000001000001111000000001111111111",
+			"1111111111101110000001111111100000000000000000001000111111100000001111111111",
+			"1111111111111110000001111111110000000000000000001111111111100000001111111111",
+			"1111111111111111000000111111111000000000000000001111111111100000001111111111",
+			"1111111111111111000000111111111110000000000000011111111111110000001111111111",
+			"1111111111111111000000011111111111000000000000111111111111110000011111111111",
+			"1111111111111111100000001111111111000000000001111111111111111100001111111111",
+			"1111111111111111100000000000111111110000000011111111111111111100001111111111",
+			"1111111111111111100000000000011111111000000111111111111111111100001111111111",
+			"1111111111111111100000000000011111111000111111111111111111111000000111111111",
+			"1111111111111111100000000000001111111000111111111111111111110000000011111111",
+			"1111111111111111000000000000000111111000111111111111111111000000000011111111",
+			"1111111111111110000000000000000111111000111111111111111100000000000000111111",
+			"1111111111111100000000000000000011111000110000011111110000000000000000001111",
+			"1111111111111100000000000000000001111000000000001111000000000000000000001111",
+			"1111111111111000000000000000000000111000000000000110000000000000000000000111",
+			"1111111111111100000000000000000000000000000000000000000000000000000000000111",
+			"1111111111111110000000000000000000000000000000000000000000000000000000000111",
+			"1111111111111111000000000000000000000000000000000000000000000000000000000111",
+			"1111111111111111110000000000000000000000000000000000000000000000000000000111",
+			"1111111111111111111000000000000000000000000000000000000000000000000000001111",
+			"1111111111111111111000000000000000000000000000000000000000000000000000001111",
+			"1111111111111111111100000000000000000000000000000000000000000000000000001111",
+			"1111111111111111111100000000000000000000000000000000000000000000000000001111",
+			"1111111111111111111111111000000000000000000000000000000000000000000000011111",
+			"1111111111111111111111111111111100000000000000000000000000000000000000111111",
+			"1111111111111111111111111111111111111000000000000000000000000000000001111111",
+			"1111111111111111111111111111111111111110000000000000000000000000000111111111",
+			"1111111111111111111111111111111111111111000000000000000000000000001111111111",
+			"1111111111111111111111111111111111111111111000000000000000000000011111111111",
+			"1111111111111111111111111111111111111111111111000000000000000011111111111111",
+			"1111111111111111111111111111111111111111111111111111111000111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1520,
+			"height": 1480
+		},
+		"arte": {
+			"escala": .8,
+			"x": -66.4,
+			"y": -104.8
+		},
 		"spawnPoint": {
-			"x": 740,
-			"y": 540
+			"x": 810,
+			"y": 810
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/desert.jpg": {
 		"grid": [
-			"00000000000000010000111111111111111",
-			"00000000000000000011111111111111111",
-			"00000011000000000011111111111111111",
-			"00010010000000000011111111111111111",
-			"00110000000000000011111111111111111",
-			"01111000000001110011111111111111111",
-			"01111111111111100011111111111111001",
-			"11111111111111100011111111111111000",
-			"11111111111111100011111111111110000",
-			"11111111111011100000001111111110000",
-			"11111111100000000000000011111100000",
-			"10000000000000000000000000000000000",
-			"10000000000000000000000000000000000",
-			"10000111000000000000000000000000001",
-			"10000011000000000000000000000000001",
-			"10000001000000010000100001100000001",
-			"10000000000000100000000011111100011",
-			"10000000000001100000000111111100011",
-			"10000000000011110000001111111110011",
-			"10000000000011111100001111111110011",
-			"11000000000111111111001111111110011",
-			"11000000000111111111000111111000001",
-			"11000000000111111111000111100000000"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111000000000111111111111111111111111111111",
+			"111111111111111111111111111111111111111110000000000011111111111111111111111111111",
+			"111111111111111111111111111111111111111110000000000011111111111111111111111111111",
+			"111111111111111111111111111111111111111111100000000011111111111111111111111111111",
+			"111111111111111101111111111111111111111111111111000001111111111111111111111111111",
+			"111111111110000000000000000111111111111111111111000000111111111111111111111111111",
+			"111111110000000000000000000011111111111100111111000000111111111111111111111111111",
+			"111111100000000000000000000000000000000000000111000000111111111111111111111111111",
+			"111111000000000000000000000000000000000000000011100000111111111111111111111111111",
+			"111111000000000000000000000000000000000000000011000000111111111111111111111111111",
+			"111110000000000000000000000000000000000000000010000000111111111111111111111111111",
+			"111110000000000000000000000000000000000000000000000000111111111111111111111111111",
+			"100000000000000000000000000000000000001110000000000000111111111111111111111111111",
+			"100000000000000000000000000000000000011110000000000000011111111111111111111111111",
+			"100000000000000000000000000000000000111110000001110000001111111111111111111111111",
+			"100000000000000000000000000000000000011100000001110000001111111111111111111111111",
+			"100111000000000000000000000000000000001100001111111000011111111111111111111111111",
+			"100011100000000000001100000000000000000000011111111111111111111111111111111111111",
+			"100011100000000000001100000000000000000000011111111111111111111111111111111111111",
+			"100011000000000000011100000000000000000000011111111111111111111111111111111111111",
+			"100001000000000000111100000000000000000000111111111111111111111111111111111111111",
+			"100000000001111000011100000000000000000000111111111111111111111111111111111111111",
+			"100000000011111000001100000000000000000000111111111111111111111111111111111111111",
+			"100000000011111100000000000000000000000000111111111111111111111111111111111111111",
+			"100000000111111110000000000000000011110000111111111111111111111111111111111111111",
+			"100000000111111110000000000000000111110000111111111111111111111111111111111111111",
+			"110000000011111111100000000001111111110000111111111111111111111111111111111111111",
+			"110000000111111111111111111111111111110000111111111111111111111111111111101111111",
+			"111111111111111111111111111111111111110000111111111111111111111111111110000011111",
+			"111111111111111111111111111111111111110001111111111111111111111111111110000011111",
+			"111111111111111111111111111111111111110000111111111111111111111111111100000011111",
+			"111111111111111111111111111111111111110000111111111111111111111111111000000011111",
+			"111111111111111111111111111111111111110000111111111111111111111111111000000011111",
+			"111111111111111111111111111111111111110000000001111111111111111111110000000111111",
+			"111111111111111111111111111100000111100000000000000111111111111111110000000100011",
+			"111111111111111111111111111000000010000000000000000011111111111111110000000000011",
+			"111111111111111111111000000000000000000000000000000000000111111111100000000000011",
+			"111111111100000000000000000000000000000000000000000000000000111100000000000000111",
+			"111111111000000000000000000000000000000000000000000000000000000000000000000000111",
+			"111111111100000000000000000000000000000000000000000000000000000000000000000011111",
+			"111111111100000000001111100000000000000000000000000000000000000000000000000011111",
+			"111111111100000011111111000000000000000000000000000000000000000000000000001111111",
+			"111111111100000001111111000000000000000000000000000000000000000000000000001111111",
+			"111111111000000000111110000000000000000000000000011100000000000000000000001111111",
+			"111111111000000000011110000000000000001100000011111000000000000000000000001111111",
+			"111111111000000000001110000000000000011111111111110000001111110000000000001111111",
+			"111111111000000000001000000000000000111000000000110000011111111111110000011111111",
+			"111111111000000000000000000000000001110000000000000001111111111111110000011111111",
+			"111111111000000000000000000000000011110000000000000001111111111111110000011111111",
+			"111111111100000000000000000000001111110000000000000011111111111111110000011111111",
+			"111111111100000000000000000000011111110000000000000111111111111111110000011111111",
+			"111111111100000000000000000000011111110000000000000111111111111111111000011111111",
+			"111111111100000000000000000000111111111000000000000111111111111111111000011111111",
+			"111111111100000000000000000000111111111111110000000111111111111111111000011111111",
+			"111111111100000000000000000001111111111111111100000111111111111111111000011111111",
+			"111111111100000000000000000001111111111111111111000111111111111111111000011111111",
+			"111111111100000000000000000001111111111111111111000011111111111111110000001111111",
+			"111111111110000000000000000001111111111111111111000011111111111110000000001111111",
+			"111111111110000000000000000001111111111111111111000011111111111100000000000111111",
+			"111111111110000000000000000001111111111111111111000011111111100000000010000011111",
+			"111111111100000000000000000001111111110000011111000011111100000000011111000001111",
+			"111111111000000000000000000000111111110000001111000011100000000000111111000001111",
+			"111111111000000000000000000000000001100000000000000000000000000001111111110000111",
+			"111111110000000000000000000000000000000000000000000000000000000001110011110000111",
+			"111111110000000000000000000000000000000000000000000000000000000011100001111000111",
+			"111111110000000000000000000000000000000000000000000000000000000011100001111000011",
+			"111111110000000000000000000000000000000000000000000000000000000001000001111000111",
+			"111111110000000000110000000000000000000000000000000000000000000001000011111000111",
+			"111111110000000001110000000000000000000000000000011100000000000000000011100000111",
+			"111111111000000001110000000000000000000000000000111100000000000000000000000000111",
+			"111111111110000011111000000000000000000000000000011100000000000000000000000000111",
+			"111111111111111111111111100000000000000000000000011100000000000000000000000001111",
+			"111111111111111111111111111110000111000000000000000000000000000000000100001111111",
+			"111111111111111111111111111111111111100000000000000000000000000111111111111111111",
+			"111111111111111111111111111111111111110000000000000000000000011111111111111111111",
+			"111111111111111111111111111111111111100000000000000000000011111111111111111111111",
+			"111111111111111111111111111111111111100000000000000000111111111111111111111111111",
+			"111111111111111111111111111111111111100000000000001111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1620,
+			"height": 1600
+		},
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": -60
+		},
 		"spawnPoint": {
-			"x": 620,
-			"y": 540
+			"x": 750,
+			"y": 870
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/badlands.jpg": {
 		"grid": [
-			"00000000000000000000000000000000001",
-			"00000000000000000000000000000000011",
-			"00010000000000000000000000000000011",
-			"00111000000000000000000000000000011",
-			"00000000000000111111000000000000011",
-			"00000000000000111111110000000000111",
-			"00000000000001111111100000000000111",
-			"10000001100000111111000000000001111",
-			"11111111110000111110000000100011111",
-			"11111111110000010000000001111111111",
-			"11111111110000000000000011111111111",
-			"11111111111000000000000111111111111",
-			"11111111110000000000000111111111111",
-			"11111111111000000010000001111111111",
-			"11111111111000000110011000001111111",
-			"11111111110000000110011000000111111",
-			"11111111110000001110011100000111111",
-			"11000111100000001110011100001111111",
-			"10000001000000000000011100111111111",
-			"11000000000000000000000001111111111",
-			"11000000000000000011000111111111111",
-			"10000000000000000111111111111111111",
-			"00000000000000011111111111111111111"
+			"11111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111110001111111111111111111111111111111111111111111111111111111",
+			"11111111111111100001111111111111111111111111111111111111111111111111111111",
+			"11111111111111000000111111111111111111111111111111111111111111111111111111",
+			"11111111111111000000001111111111111111111111111111111111111111111111111111",
+			"11111111111111000000000111111111111111111111111111111111111111111111111111",
+			"11111111111111100000000011111111111111111111111111111111111111111111111111",
+			"11111111111111000000000001111111111111111111111111111111111111111111111111",
+			"11111111111100000000000000011011111111111111111111111111111111111111111111",
+			"11111111111000000000000000000000111111111111111111111111111111111111111111",
+			"11111111110000000000000000000000011111111111111111111111111111111111111111",
+			"11111111100000000000000000000000011111111111111111111111111111111111111111",
+			"11111100000000000000000000000000011111111111111111111111111111111111111111",
+			"11111000000000000000000000000000011111111111111111111111111111110000011111",
+			"11110000000000000000000000000000011111111111111100011111111111100000001111",
+			"11110000000000000000000000000000011111111111100000001111111111100000001111",
+			"11100000000000000000000000000000111111100000000000000111111110000000000111",
+			"11100000000000000000000000000000111111000000000000000111111000000000000011",
+			"11110000000000000000000000000000111110000000000000000011110000000000000001",
+			"11110000000000000000000000000000001000000000000000000000000000000000000001",
+			"11110000000000000000000000000000000000000000000000000000000000000000000001",
+			"11110000000000000000000000000000000000000000000000000000000000000000000011",
+			"11110000000100000000000000000000000000000000000000000000000000000000000111",
+			"11110000000110000000000000000000000000000000000000000000000000000000000111",
+			"11110000001111000000000000000000000000000000000000000000000000000000000011",
+			"11111000011111110000000000000000000000000000000000000000000000000000000011",
+			"11111000011111110000000000000000000000000000000000000000000000000000000011",
+			"11111000011111100000000000000000001111111111100000000000000000000000000111",
+			"11111000001001000000000000000000001111111111110001100000000000000000000111",
+			"11111000000000000000000000000000011111111111111111000000000000000000001111",
+			"11111000000000000000000000000000011111111111111110000000000000000000001111",
+			"11111000000000000000000000000000111111111111111100000000000000000000011111",
+			"11111100000000000000001100000000111111111111111000000000000000000000111111",
+			"11111111000000000000111100000000111111111111111000000000000000000001111111",
+			"11111111111111000011111110000000011111111111110000000000000000000001111111",
+			"11111111111111111111111110000000011111111111100000000000001100000111111111",
+			"11111111111111111111111110000000001111111111000000000000011111111111111111",
+			"11111111111111111111111111000000001111111000000000000000111111111111111111",
+			"11111111111111111111111111000000001111000000000000000001111111111111111111",
+			"11111111111111111111111111100000000000000000000000000011111111111111111111",
+			"11111111111111111111111111100000000000000000000000000111111111111111111111",
+			"11111111111111111111111111100000000000000000000000001111111111111111111111",
+			"11111111111111111111111111100000000000000000000000011111111111111111111111",
+			"11111111111111111111111111100000000000000000000000011111111111111111111111",
+			"11111111111111111111111111100000000000000001100000011111111111111111111111",
+			"11111111111111111111111111100000000000000111100000000011111111111111111111",
+			"11111111111111111111111111110000000000001111100000000000111111111111111111",
+			"11111111111111111111111111110000000000011111000111110000011001111111111111",
+			"11111111111111111111111111110000000000011111000111111000000001111111111111",
+			"11111111111111111111111111100000000000111111100111111000000000111111111111",
+			"11111111111111111111111111100000000000111111100111111000000000111111111111",
+			"11111111111111111111111111000000000000111111100111111100000000011111111111",
+			"11111111111111111111111110000000000001111111000111111100000000011111111111",
+			"11111111111111111111111110000000000001111111000111111100000000111111111111",
+			"11111111111010011111111000000000000000111110000111111100000111111111111111",
+			"11111111100000000001110000000000000000000000001111111100001111111111111111",
+			"11111111000000000000100000000000000000000000001111111110011111111111111111",
+			"11111111110000000000000000000000000000000000001111111000111111111111111111",
+			"11111111111000000000000000000000000000000000000000000001111111111111111111",
+			"11111111111000000000000000000000000000000011000000011111111111111111111111",
+			"11111111111000000000000000000000000000000111111100111111111111111111111111",
+			"11111111100000000000000000000000000000001111111111111111111111111111111111",
+			"11111110000000000000000000000000000000011111111111111111111111111111111111",
+			"11111000000000000000000000000000000001111111111111111111111111111111111111",
+			"11110000000000000000000000000000000111111111111111111111111111111111111111",
+			"11110000000000000000000000000000000111111111111111111111111111111111111111",
+			"11110000000000000000000000000000001111111111111111111111111111111111111111",
+			"11110000000000000000000000000000001111111111111111111111111111111111111111",
+			"11111000000000000000000000000000001111111111111111111111111111111111111111",
+			"11111100000000000000000000000000001111111111111111111111111111111111111111",
+			"11111111000000000000000000000000001111111111111111111111111111111111111111",
+			"11111110000000000000000000000000011111111111111111111111111111111111111111",
+			"11111110000000000000000000000000011111111111111111111111111111111111111111",
+			"11111100000000000110000000000000011111111111111111111111111111111111111111",
+			"11111000000000001111000000000000011111111111111111111111111111111111111111",
+			"11110000000000011111110000000000011111111111111111111111111111111111111111",
+			"11100000000000111111110000000000111111111111111111111111111111111111111111",
+			"11000000000000111111110000000000111111111111111111111111111111111111111111",
+			"11000000000011111111111000000001111111111111111111111111111111111111111111",
+			"10000000000111111111111110000011111111111111111111111111111111111111111111",
+			"10000000001111111111111111111111111111111111111111111111111111111111111111",
+			"10000000011111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1480,
+			"height": 1680
+		},
+		"arte": {
+			"escala": .8,
+			"x": -7.2,
+			"y": 12
+		},
 		"spawnPoint": {
-			"x": 540,
-			"y": 420
+			"x": 650,
+			"y": 790
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/burnt-forest.jpg": {
 		"grid": [
-			"00000000000111111111111110011111111",
-			"11000110000111000100011100011111111",
-			"10000010000111000000000000111111111",
-			"00000000000111000000000000011111111",
-			"00000000011111000011100000011111111",
-			"10000111111111100000100000011111111",
-			"11100111111111100000000000011111111",
-			"11100111111100000010000000011111111",
-			"11100111111000000111000000111111111",
-			"11000111111110001111000000011111111",
-			"11100010111110001111000000001111111",
-			"11100000000000000001100110001111111",
-			"11000000000000000011111111000111111",
-			"11101111111000001111111111100011111",
-			"11111111111111111111111111110000011",
-			"11111111111111111111111111110000001",
-			"11111111111111111111111110000000001",
-			"11111111111111111111111110000000011",
-			"11111111111111111111111110000000011",
-			"11111111111111111111100110000000011",
-			"11111111111111111100000010000000011",
-			"11111111111110000000000000000001111",
-			"11111111111100000001110000110001111"
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111110000001111",
+			"1111111111111111111111111111111111111111111111111111111111111111110000000000011",
+			"1111111111111111111111111111111111111111111111111111111111111110000000000000011",
+			"1111111111111111111111111111111111111111111111111111111111110000000000000000011",
+			"1111111111111111111111111111111111111111111111111111111111100000000000000000111",
+			"1111111111111111111111111111111111111111111111111111111111110000000000000011111",
+			"1111111111111111111111111111111111111111111111111111111111111000000000000111111",
+			"1111110000000011111111111111111111111111111111111111111111111000000000001111111",
+			"1111100000000011111111111111111111111111111111111111111111110000000000001111111",
+			"1111100000000111111111111111111111111111111111111111111111110000111100011111111",
+			"1111110000001111110011111111111111111111111111111111111111100001111111111111111",
+			"1111111100001111100000111111111111111111111111111111111111000001111111111111111",
+			"1111111100001111100000000111111111111111111111111111111111000011111111111111111",
+			"1111111100001111110000000011111111111111111111111111111110000111111111111111111",
+			"1100000000000000000000000001111111111111111111111111111100001111111111111111111",
+			"1000000000000000000000000000111111111111111111111111111100001111111111111111111",
+			"1000000000000000000000000001111111111111111111111111111000011111111111111111111",
+			"1000000000000001100000000011111111111111111111111111111000011111111111111111111",
+			"1110111100000001111100000111111111001111111111111111110000111111111111111111111",
+			"1111111100000001111100000111111110000011100000111111100001111111111111111111111",
+			"1111111100000001111000000011111110000000000000000011000001111111111111111111111",
+			"1111111000000000111000000011111110000000000000000000000011111111111111111111111",
+			"1111000000000000000000000111111110000000000000000000000000111111111111111111111",
+			"1111000000000000000000000111111100000000100000000000000000011111111111111111111",
+			"1111000000000000000000111111111100000001111111000000000000111111111111111111111",
+			"1111000000000000000011111111111110000000011111100000000000111111111111111111111",
+			"1111110000000001111111111111111111100000000111100000000000111111111111111111111",
+			"1111111111000001111111111111111111110000000001000000000000111111111111111111111",
+			"1111111111100001111111111111111111110000000000000000000000111111111111111111111",
+			"1111111111100001111111111111111111110000110000000000000001111111111111111111111",
+			"1111111111100001111111111111111100000000111000000000000001111111111111111111111",
+			"1111111111100001111111111111000000000001111100000000000001111111111111111111111",
+			"1111111111000001111111111111000000000111111110000000000011111111111111111111111",
+			"1111111111000001111111111111000000000111111100000000000011111111111111111111111",
+			"1111111111000001111111111111110000001111111100000000000001111111111111111111111",
+			"1111111111000001111111111111111000001111111100000000000000111111111111111111111",
+			"1111111111000001111111111111111000001111111110000000000000011111111111111111111",
+			"1111111111000000110011111111111000001111111111000000100000011111111111111111111",
+			"1111111111000000000000011110000000000000011111100011110000001111111111111111111",
+			"1111111111000000000000000000000000000000011111111111111000000111111111111111111",
+			"1111111111000000000000000000000000000000011111111111111100000011111111111111111",
+			"1111111111000001111110000000000000000001111111111111111110000011111111111111111",
+			"1111111111101111111111111110000000001111111111111111111111000000111111111111111",
+			"1111111111111111111111111111000011111111111111111111111111100000111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111110000110001111111111",
+			"1111111111111111111111111111111111111111111111111111111111111000000000011111111",
+			"1111111111111111111111111111111111111111111111111111111111111000000000001111111",
+			"1111111111111111111111111111111111111111111111111111111111111000000000001111111",
+			"1111111111111111111111111111111111111111111111111111111100010000000000001111111",
+			"1111111111111111111111111111111111111111111111111111111000000000000000001111111",
+			"1111111111111111111111111111111111111111111111111111110000000000000000011111111",
+			"1111000000000001111111111111111111111111111111111111110000000000000000011111111",
+			"1110000000000000111111111111111111111111111111111111110000000000000000111111111",
+			"1110000000000000111111111111111111111111111111111111110000000000000000111111111",
+			"1111110000000001111111111111111111111111111111110111110000000000000000111111111",
+			"1111110000000001111111111111111111111111111111000011111000000000000000111111111",
+			"1111100000000011111111111111111111111111110000000001111000000000000000111111111",
+			"1111100000000001111111111111111111111111000000000000110000000000000011111111111",
+			"1111100000000000111111111111111000111100000000000000100000000000000111111111111",
+			"1111100000000000000001111111110000010000000001111000000000010000001111111111111",
+			"1111110000000000000000111111100000000000000111111000000011111000001111111111111",
+			"1111110000000000000000111111000000000000001111110000000111111100001111111111111",
+			"1111110000000000000000001111000000000000011111100000000011111110001111111111111",
+			"1111111000000000000000001000000000000000111110000000000000111000000011111111111",
+			"1111111000000000111110000000000000000000111100000000000000000000000001111111111",
+			"1111111100000000000000000000000000000000100000000011000000000000000000111111111",
+			"1111111111000000000000000000000000000000000000001111000010000000000000011111111",
+			"1111111111100000000000000000100000000000000000111111000011100000000000001111111",
+			"1111111111110000010000000001100000000000000011111111100011100000000000001111111",
+			"1111111111111000000000001111110000000000001111111111100011110000001110000011111",
+			"1111111111111000000000011111111000000000111111111111100011111110001111000001111",
+			"1111111111111110000000111111111000000001111111111111100111111110001111100000111",
+			"1111111111111111000001111111111110000001111111111111111111111100001111110000011",
+			"1111111111111111111111111111111111000000011111111111111111111110001111111000011",
+			"1111111111111111111111111111111111100000001111111111111111111110000111100000011",
+			"1111111111111111111111111111111111100000001111111111111111111110000000000000011",
+			"1111111111111111111111111111111111100000000111111111111111111111000000000000011",
+			"1111111111111111111111111111111111110000000111111111111111111111110000000000001",
+			"1111111111111111111111111111111111110000001111111111111111111111111100000000001",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1580,
+			"height": 1640
+		},
+		"arte": {
+			"escala": .8,
+			"x": -29.6,
+			"y": -29.6
+		},
 		"spawnPoint": {
-			"x": 660,
-			"y": 500
+			"x": 750,
+			"y": 850
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/tall-grass.jpg": {
 		"grid": [
-			"11111111111111111111000000000011111",
-			"11111111111111111110000000000001111",
-			"11111111111111111111100000000001111",
-			"11111111111111111111110000000111111",
-			"11111111111111111111110000001111111",
-			"11111111111111111111100000111111111",
-			"11111111111111111111100000111111111",
-			"11111111111111111111000000111111111",
-			"11111111111111111110000000111111111",
-			"11111111111111100000011111111111111",
-			"11000011111110000000111111111111111",
-			"00000000111111000001111111111111111",
-			"00000000111110000011111111111111111",
-			"00000001111110000011111111111111111",
-			"10000001111111000001111111111111111",
-			"10000111111110000000111111111111111",
-			"11100111110000001100000001111111111",
-			"11100111100000011110000000111111111",
-			"11100111100000001111111100000011111",
-			"11100111100000011111111110000011111",
-			"11100111100000011111111100000011111",
-			"11100000000000011111111000000111111",
-			"11100000000000011111110000000111111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111100001111111111111111",
+			"111111111111111111111111111111111111111111111111111000000001111111111111",
+			"111111111111111111111111111111111111111111111111110000000000111111111111",
+			"111111111111111111111111111111111111111111111110010000000000000000011111",
+			"111111111111111111111111111111111111111111111100000000000000000000001111",
+			"111111111111111111111111111111111111111111111100000000000000000000001111",
+			"111111111111111111111111111111111111111111111110000000000000000000001111",
+			"111111111111111111111111111111111111111111111111100000000000000000001111",
+			"111111111111111111111111111111111111111111111111111000000000000000011111",
+			"111111111111111111111111111111111111111111111111111000000000000011111111",
+			"111111111111111111111111111111111111111111111111111000000000000111111111",
+			"111111111111111111111111111111111111111111111111111000000000011111111111",
+			"111111111111111111111111111111111111111111111111111000000011111111111111",
+			"111111111111111111111111111111111111111111111111110000000011111111111111",
+			"111111111111111111111111111111111111111111111111100000000011111111111111",
+			"111111111111111111111111111111111111111111111111100000000011111111111111",
+			"111111111111111111111111111111111111111111111111000000000011111111111111",
+			"111111111111111111111111111111111111111111111110000000000011111111111111",
+			"111111111111111111111111111111111111111111111100000000000011111111111111",
+			"111111111111111111111111111111111111111111111000000110000111111111111111",
+			"111111111111111111111111111111111111111111110000011111111111111111111111",
+			"111111111111111111111111111111111111111000000000111111111111111111111111",
+			"111111111111111111111111111111111110000000000001111111111111111111111111",
+			"111111111111000000111111111111111100000000000001111111111111111111111111",
+			"111111111100000000001111111111111100000000000011111111111111111111111111",
+			"111111110000000000000011111111111100000000001111111111111111111111111111",
+			"111111100000000000000011111111111100000000011111111111111111111111111111",
+			"111111100000000000000011111111111100000000011111111111111111111111111111",
+			"111111100000000000000011111111111100000000011111111111111111111111111111",
+			"111111100000000000001111111111111100000000011111111111111111111111111111",
+			"111111110000000000001111111111111110000000011111111111111111111111111111",
+			"111111111000000000011111111111111110000000001111111111111111111111111111",
+			"111111111100000000111111111111111100000000000111111111111111111111111111",
+			"111111111100000011111111111111111100000010000011111111111111111111111111",
+			"111111111111000011111111111111110000000111000000000011111111111111111111",
+			"111111111111000011111111111000000000011111100000000000011111111111111111",
+			"111111111111000011111111110000000000011111110000000000000111111111111111",
+			"111111111111100011111111110000000000011111111111000000000001111111111111",
+			"111111111111100011111111110000000000011111111111111111000000110011111111",
+			"111111111111100011111111110000000000001111111111111111110000000000111111",
+			"111111111111100011111111110000000000011111111111111111111000000000111111",
+			"111111111111100001111111100000000000011111111111111111110000000000111111",
+			"111111111111100001111111100000000000111111111111111111100000000000111111",
+			"111111111111100001111111100000000000111111111111111111100000000000111111",
+			"111111111111100001111111000000000000111111111111111111000000000001111111",
+			"111111111111110000110000000000000000111111111111111111000000000001111111",
+			"111111111111110000000000000000000000111111111111111110000000000011111111",
+			"111111111111110000000000000000000001111111111111111100000000000111111111",
+			"111111111111111000000000000000000001111111111111111100000000000111111111",
+			"111111111111110000000000000000000001111111111111111000000000000111111111",
+			"111111111111000000000000000000000001111111111111111000000000000111111111",
+			"111111111110000000000000011100000001111111111111111100000001111111111111",
+			"111111111100000000000001111000000111111111111111111110000001111111111111",
+			"111111110000000000000001110000011111111111111111111111110000111111111111",
+			"111111100000000000000000010000111111111111111111111111111000111111111111",
+			"111111000000000000000000000001111111111111111111111111111000011111111111",
+			"111111000000000000000000000011111111111111111111111111111100001111111111",
+			"111110000000001111011110000111111111111111111111111111111100001111111111",
+			"111110000000111111111111111111111111111111111111111111111110000111111111",
+			"111110000011111111111111111111111111111111111111111111111111000111111111",
+			"110000001111111111111111111111111111111111111111111111111111111111111111",
+			"100000001111111111111111111111111111111111111111111111111111111111111111",
+			"100000001111111111111111111111111111111111111111111111111111111111111111",
+			"100000011111111111111111111111111111111111111111111111111111111111111111",
+			"100011111111111111111111111111111111111111111111111111111111111111111111",
+			"100011111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1440,
+			"height": 1440
+		},
+		"arte": {
+			"escala": .8,
+			"x": 16.8,
+			"y": -221.6
+		},
 		"spawnPoint": {
-			"x": 620,
-			"y": 660
+			"x": 730,
+			"y": 810
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/forest.jpg": {
 		"grid": [
-			"10000011111111110000000000001111111",
-			"10000011111110000001111100001111111",
-			"11110011111100000001111111111111111",
-			"11110011111000000011111111111111111",
-			"11110001111100000111111111111111111",
-			"11110001111110000111111111111111111",
-			"11110001111110000011111111111111111",
-			"11110011101110000000000000000000001",
-			"11100000001000000000000000000000001",
-			"11000000000000000001111001111100000",
-			"00000000000000001111111101111110000",
-			"00111111111110011111111100011111000",
-			"10111111111110111100000000111111000",
-			"10111111111100000000000111111111000",
-			"10111111111100000000011111111111100",
-			"10111111111100000000011111111111100",
-			"10111111111110000000011111111111111",
-			"10111111111110011100011111111011111",
-			"10111111111100011100111111100001111",
-			"10111111111100001111111111000000111",
-			"10001111111100000000111000000000111",
-			"11000011111100000000000000011000111",
-			"11001111111110011001111011111111111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111100001111111111111111111111111111",
+			"111111111111111111111111111111111000000000111111000000000111111111111111111111111",
+			"111111111111110001000111111111111000000000000000000000000001111111111111111111111",
+			"111111111111110000000111111111111111111000000000000000000000111111111111111111111",
+			"111111111111111000001111111111111111111000000000000000000000011111111111111111111",
+			"111111111111111000111111111111111111111100011110000000000000011111111111111111111",
+			"111111111111111000111111111111111111111100011110000000000000001111111111111111111",
+			"111111111110011000111111111111111111111000011110000000000000001111111111111111111",
+			"111111111110011000111111111111111111111000000000000000000000001111111111111111111",
+			"111111111110000000111111111111111111111000000000000000000000000111111111111111111",
+			"111111111100000000111111111111111111111000000000000000000000000111111111111111111",
+			"111111110000000000111111111111111111111000000000000000000000001111111111111111111",
+			"111111100000000000111111111111111111111000000011111110000000001111111111111111111",
+			"111111100000000001111111111111111111000000001111111110000000011111111111111111111",
+			"111111111111111001111111111111100000000000001111111111110001111111111111111111111",
+			"111111111111111000111111111111100000000000001111111111111111111111111111111111111",
+			"111111111111111000111111111110000000000000011111111111111111111111111111111111111",
+			"111111111111111000111111111100000000000001111111111111111111111111111111111111111",
+			"111111111111111000111111111110000000000011111111111111111111111111111111111111111",
+			"111111111111110000011111111111000000000011111111111111111111111111111111111111111",
+			"111111111111110000001111111111110000000011111111111111111111111111111111111111111",
+			"111111111111111000001111111111111000000011111111111111111111111111111111111111111",
+			"111111111111111000011111111111111000000011111111111111111111111111111111111111111",
+			"111111111111111000011111111111110000000011111111111111111111111111111111111111111",
+			"111111111111111000011111111111110000000001111111111111111111111111111111111111111",
+			"111111111111111000111111111111111000000000111111111111111111111111100000001111111",
+			"111111111111111000111110000111111110000000000000000000000000000000000000001111111",
+			"111111111111110000000000000110001100000000000000000000000000000000000000001111111",
+			"111111111111000000000000001110000000000000001111111100001111111111000000001111111",
+			"111111111110000000000000000000000000000000001111111110001111111111000000000111111",
+			"111111111000000000000000000000000000000000111111111111001111111111110000000000011",
+			"111110000000000000000000000000000000001111111111111111001111111111111000000000011",
+			"111111000011111111111111000000000000011111111111111111001111111111111100000011111",
+			"111111100011111111111111111111110001111111111111111111000111111111111100000011111",
+			"111111110011111111111111111111110011111111111111111111000000111111111100000011111",
+			"111111110011111111111111111111110011111111111111111110000111111111111100000011111",
+			"111111110011111111111111111111110011111100000000000000011111111111111100000011111",
+			"111111110011111111111111111111110000000000000000000011111111111111111100000011111",
+			"111111110011111111111111111111000000000000000000011111111111111111111111100011111",
+			"111111110011111111111111111110000000000000000000111111111111111111111111100011111",
+			"111111110011111111111111111111000000000000000000111111111111111111111111100111111",
+			"111111110011111111111111111111100000000000000000111111111111111111111111100111111",
+			"111111110011111111111111111111110000000000000000111111111111111111111111100111111",
+			"111111110011111111111111111111110000000000000000111111111111111111111111111111111",
+			"111111110011111111111111111111110000011100000000111111111111111111111111111111111",
+			"111111110011111111111111111111110001111111000001111111111111111111111111111111111",
+			"111111110011111111111111111111110001111111100011111111111111110000011111111111111",
+			"111111110011111111111111111111100001111111100111111111111111100000011111111111111",
+			"111111110011111111111111111111100001111111111111111111111111100000001111111111111",
+			"111111110011111111111111111111000000011111111111111111111111111000000111111111111",
+			"111111110001111111111111111111000000000001111111111111111000000100000111111111111",
+			"111111111000111111111111111111000000000000001111111111110000000000000111111111111",
+			"111111111000011001111111111111000000000000000000000000000000000000000111111111111",
+			"111111111110000001111111111111000000000000000000000000000000011100000111111111111",
+			"111111111110000011111111111111110000111100001000000000111111111100011111111111111",
+			"111111111110011111111111111111110000111110001111111000111111111111111111111111111",
+			"111111111110011111111111111111100001111110011111111100111111111111111111111111111",
+			"111111111110001111111111111111100001111111111111111111111111111111111111111111111",
+			"111111111110000111111111111111110001111111111111111111111111111111111111111111111",
+			"111111111110000111111111111111100000111111111111111111111111111111111111111111111",
+			"111111111110000000000000000111000001111111111111111111111111111111111111111111111",
+			"111111111110000000000000000000001111111111111111111111111111111111111111111111111",
+			"111111111110000000011000000000001111111111111111111111111111111111111111111111111",
+			"111111111110000001111111000000001111111111111111111111111111111111111111111111111",
+			"111100001100001111111111000000001111111111111111111111111111111111111111111111111",
+			"100000000000111111111111100000011111111111111111111111111111111111111111111111111",
+			"100001100011111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1620,
+			"height": 1400
+		},
+		"arte": {
+			"escala": .8,
+			"x": -.8,
+			"y": -133.6
+		},
 		"spawnPoint": {
-			"x": 620,
-			"y": 380
+			"x": 750,
+			"y": 630
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/industrial.jpg": {
 		"grid": [
-			"11111111111111111111111111110000000",
-			"00000001111111111111111111110000000",
-			"00000001111111111111111111100000000",
-			"11100011111111111111111111100000000",
-			"11100011111111111111111111111100001",
-			"10000001111111111111111111111100111",
-			"10000000111111111111111111111100111",
-			"00000000011111111111111111111100111",
-			"00000000011111111111111000000000001",
-			"00000000111111111111100000000000000",
-			"00000000000000000000000000000000000",
-			"00000000000000000000000000000000000",
-			"00000000111111111110000000000000000",
-			"00000001111111111110000000000000001",
-			"00000111111111111110000000000000001",
-			"11001111111111111111110000000000011",
-			"11001111111111111111111111111100011",
-			"11001111111111111111111111111100011",
-			"11001111111111111111111111111100011",
-			"10000011111111111111111111111100001",
-			"10000011111111111111111111111000001",
-			"10000011111111100111111111000000001",
-			"10000001111111100000000000000000001"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111100011111111111111111111111111",
+			"111111111111111111111111111111111111111111111001000001111111111111111111111111",
+			"111111111111111111111111111111111111111111110000000000111111111011111111111111",
+			"111111111111111111111111111111111111111111110000000000111111110001111111111111",
+			"111111111111111111111111111111111111111111111000000000000000000000000001111111",
+			"111111111111111111111111111111111111111111111000000000000000000000000001111111",
+			"111111111111111111111111111111111111111111111000000000000000000000000000111111",
+			"111111111111111111111111111111111111111111111000000000000000000000000000111111",
+			"111111111111111111111111111111111111111111110000000000000000000000000000111111",
+			"111111111111111111111111111111111111111111110000000000000000000000000000011111",
+			"111111111111111111111111111111111111111111110000000000011000000000000000011111",
+			"111111111111111111111111111111111111111111110000000000011100000000000000011111",
+			"111111111111111111111111111111111111111111110000000000011110000000000000011111",
+			"110000000000000011111111111111111111111111110000000000011110000000000000111111",
+			"100000000000000011111111111111111111111111110000000000011100000000000000111111",
+			"110000000000000011111111111111111111111111100000000000011000000000000000111111",
+			"111110000000000111111111111111111111111111000000000000111000000000000000111111",
+			"111111111000011111111111111111111111111111000000000000111000000000000000111111",
+			"111111111000011111111111111111111111111111000000000000111110000000000000111111",
+			"111111110000011111111111111111111111111111100000000000111111111000110001111111",
+			"111111110000011111111111111111111111111111110000111111111111111000111111111111",
+			"111111000000000111111111111111111111111111111111111111111111111000111111111111",
+			"111110000000000011111111111111111111111111111111111111111111111000111111111111",
+			"111110000000000011111111111111111111111111111111111111111111111000111111111111",
+			"111110000000000000011111111111111111111111111111111111111111111000111111111111",
+			"110000000000000000001111111111111111111111111111111111111111111000111111111111",
+			"100000000000000000011111111111111111111111111111111100111111111000111111111111",
+			"100000000000000000011111111111111111111111111111110000011000000000111111111111",
+			"111000000000000000011111111111111111111111111110110000000000000000000011111111",
+			"111000000000000000111111111111111111111111111000000000000000000000000001111111",
+			"110000000000000001111111111111111111111111110000000000000000000000000000111111",
+			"110000000000000000111111111111111111111111110000000000000000000000000000011111",
+			"110000000000000000000000000000000000000000000000000000000000000000000000000111",
+			"110000000000000000000000000000000000000000000000000000000000000000000000000011",
+			"110000000000000000000000000000000000000000000000000000000000000000000000000011",
+			"110000000000000000111111111111111111111110000000000000000000000000000000000111",
+			"110000000000000001111111111111111111111110000000000000000000000000000000011111",
+			"110000000000000001111111111111111111111110000000000000000000000000000111111111",
+			"110000000000000111111111111111111111111110000000000000000000000000000111111111",
+			"111000000000011111111111111111111111111110000000000000000000000000000111111111",
+			"111100000001111111111111111111111111111111000000000000000000000000000111111111",
+			"111111000001111111111111111111111111111111111111000000000000011000000111111111",
+			"111111000001111111111111111111111111111111111111111111111111111100001111111111",
+			"111111000011111111111111111111111111111111111111111111111111111000001111111111",
+			"111111000011111111111111111111111111111111111111111111111111111000001111111111",
+			"111111100011111111111111111111111111111111111111111111111111111000001111111111",
+			"111111100011111111111111111111111111111111111111111111111111111000001111111111",
+			"111111000011111111111111111111111111111111111111111111111111111000001111111111",
+			"111111000001111111111111111111111111111111111111111111111111111000001111111111",
+			"111111000000011111111111111111111111111111111111111111111111111000000111111111",
+			"111110000000001111111111111111111111111111111111111111111111111000000011111111",
+			"111110000000011111111111111111111111111111111111111111111111100000000011111111",
+			"111110000000011111111111111111111111111111111111111111111111100000000011111111",
+			"111100000000011111111111111111111111111111111111111111111111000000000011111111",
+			"111100000000000111111111111111111000011111111111111111000000000000000011111111",
+			"111100000000000011111111111111111000000000000000000000000000000000000011111111",
+			"111100000000000011111111111111111000000000000000000000000000000000000001111111",
+			"111100000000000001111111111111111000000000000000000000000000000000000001111111",
+			"111100000000000000000000000000000000000000000000000000000000000000000001111111",
+			"111100000000000000000000000000000000000000000000000000000000000000000001111111",
+			"111100000000000000000000000000000000000000000000000000000000000000000001111111",
+			"111100000000000000000000111111111000000000000000000000000000000000000001111111",
+			"111110000000000011111111111111111000000000000000000000000000000000000011111111",
+			"111110000000000111111111111111111000000000000000000000000000000000000011111111",
+			"111111000111111111111111111111111000000000000000000000000000000000000111111111",
+			"111111111111111111111111111111111000000000000000000000000000000000001111111111",
+			"111111111111111111111111111111111100000000000001111110000000000000001111111111",
+			"111111111111111111111111111111111110000000000011111111111100000000011111111111",
+			"111111111111111111111111111111111110000000000111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111101111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1560,
+			"height": 1440
+		},
+		"arte": {
+			"escala": .8,
+			"x": -68,
+			"y": -133.6
+		},
 		"spawnPoint": {
-			"x": 780,
-			"y": 540
+			"x": 850,
+			"y": 770
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/sea.jpg": {
 		"grid": [
-			"11111111111111111111111111100000000",
-			"11111111111111111111111111110000011",
-			"11111111111111111111001111111000111",
-			"11111111111110000000001111110001111",
-			"11111111111100000000001011100001111",
-			"11111000111000110000000000000011111",
-			"11111000000000111000000000000111111",
-			"11110000000000111110000000001111111",
-			"11100000000001111111100000001111111",
-			"11100000001111111111110000001111111",
-			"11100000001111111111111000000111111",
-			"11000000000111111111111000000111111",
-			"11100000000011111111111000000111111",
-			"11110000010011111111111000000011111",
-			"11111001110001111111111000000011111",
-			"11111001100001111111111000000011111",
-			"11111000100011111111110000000001111",
-			"11111100100010111111100001000000111",
-			"11111100000010011111000011111000001",
-			"11111100000000000000000111111110000",
-			"11101100000000000000001111111111000",
-			"11000000000000000000111111111111111",
-			"10000000000100000111111111111111111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111110000001111111",
+			"111111111111111111111111111111111111111111111111111111111110000000000111111",
+			"111111111111111111111111111111111111111111111111111111111000000000000011111",
+			"111111111111111111111111111111111111111111111111111111111000000111000001111",
+			"111111111111111111111111111111111111111111111111111111100000001111100000111",
+			"111111111111111111111111111111111111111111111111111111000000001111100000011",
+			"111111111111111111111111111111111111111111111111111110000000011111110000011",
+			"111111111111111111111111111111111111111111111111111110000000011111110000011",
+			"111111111111111111111111111111111111111111111111111100000000000111110000011",
+			"111111111111111111111111111111111111111111111111111100000000000000000000011",
+			"111111111111111111111111111111111111111111111111111100000000000000000000011",
+			"111111111111111111111111111111111111111111111111111100000000000000000000001",
+			"111111111111111111111111111111111111111111111111111100000000000000000000001",
+			"111111111111111111111111111111111111111111111111111110000000000000000000001",
+			"111111111111111111111111111111111111111111111111111110000000000000000000001",
+			"111111111111111111111111111111111111111111111111111100000000000000000000011",
+			"111111111111111111111111111111111111111111111111111100000000000000000000011",
+			"111111111111111111111111111111111111111111111111111110000000000000000000111",
+			"111111111111111111111111111111111111111111111111111111000000000000111011111",
+			"111111111111111111111111111111111111111111111111111111100000000001111111111",
+			"111111111111111111111111111111111111111111111111111111110000000111111111111",
+			"111111111111111111111111111111111111111111111111111111111000000111111111111",
+			"111111111111111111111111111111111111111000111111111111111000001111111111111",
+			"111111111111111111111111111110001111110000111111111111111000001111111111111",
+			"111111111111111111111111110000000001000000111111111111110000011111111111111",
+			"111111111111111111111111000000000000000001111111111111100000011111111111111",
+			"111111111111111111111110000000000000000001111111111110000000111111111111111",
+			"111111111111111111111110000111100000000000000000111100000000111111111111111",
+			"111111111000000111111000001111100000000000000000110000000001111111111111111",
+			"111111111000000011100000001111110000000000000000000000000011111111111111111",
+			"111111111000000000000000000111111100000000000000000000001111111111111111111",
+			"111111110000000000000000001111111111100000000000000000011111111111111111111",
+			"111111100000000000000000001111111111110000000000000000011111111111111111111",
+			"111111100000000000000000011111111111111100000000000000011111111111111111111",
+			"111111000000000000000011111111111111111110000000000000011111111111111111111",
+			"111111000000000000011111111111111111111111000000000000011111111111111111111",
+			"111111000000000000111111111111111111111111100000000000011111111111111111111",
+			"111111000000000000111111111111111111111111110000000000011111111111111111111",
+			"111110000000000000011111111111111111111111111000000000001111111111111111111",
+			"111100000000000000001111111111111111111111111000000000001111111111111111111",
+			"111100000000000000000111111111111111111111111100000000000111111111111111111",
+			"111110000000000000000011111111111111111111111100000000000111111111111111111",
+			"111111100000000000000011111111111111111111111100000000000111111111111111111",
+			"111111100000000000100001111111111111111111111100000000000011111111111111111",
+			"111111110000011111100001111111111111111111111100000000000011111111111111111",
+			"111111111000111111110000111111111111111111111100000000000011111111111111111",
+			"111111111000011111110000111111111111111111111100000000000001111111111111111",
+			"111111111000011111100000111111111111111111111000000000000001111111111111111",
+			"111111111000011111000000111111111111111111111000000000000001111111111111111",
+			"111111111000011111000001111111111111111111110000000000000001111111111111111",
+			"111111111100001111000001111111111111111111100000000000000000111111111111111",
+			"111111111100001111000011111111111111111111000000000000000000011111111111111",
+			"111111111110000111000011110111111111111110000000011100000000001111111111111",
+			"111111111110000011000011100011111111111110000000111111110000000001111111111",
+			"111111111110000000000011100001111111111100000001111111111110000000111111111",
+			"111111111110000000000011000000011111100000000011111111111111000000011111111",
+			"111111111110000000000000000000001100000000000111111111111111110000001111111",
+			"111111111110000000000000000000000000000000011111111111111111111000001111111",
+			"111110111110000000000000000000000000000001111111111111111111111111001111111",
+			"111100011000000000000000000000000000000111111111111111111111111111111111111",
+			"111000000000000000000000000000000000011111111111111111111111111111111111111",
+			"111000000000000000000100000000000011111111111111111111111111111111111111111",
+			"110000000000000000001110000000001111111111111111111111111111111111111111111",
+			"100000000000000000111111000000011111111111111111111111111111111111111111111",
+			"100011111100000011111111110000011111111111111111111111111111111111111111111",
+			"100001111100001111111111111111111111111111111111111111111111111111111111111",
+			"100001111100001111111111111111111111111111111111111111111111111111111111111",
+			"110000011100001111111111111111111111111111111111111111111111111111111111111",
+			"111000000000011111111111111111111111111111111111111111111111111111111111111",
+			"111100000000011111111111111111111111111111111111111111111111111111111111111",
+			"111110000000111111111111111111111111111111111111111111111111111111111111111",
+			"111111110001111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1500,
+			"height": 1480
+		},
+		"arte": {
+			"escala": .8,
+			"x": -141.6,
+			"y": -2.4
+		},
 		"spawnPoint": {
-			"x": 860,
-			"y": 340
+			"x": 830,
+			"y": 710
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
-	"assets/hunt-backgrounds/ice-mountain.png": {
+	"assets/hunt-backgrounds/ice-mountain.jpg": {
 		"grid": [
-			"11110000000000000111111111111111111",
-			"11111000000000000111111111111111111",
-			"11111100000010000111111111111111111",
-			"11111111001111000001111111111111111",
-			"11111111001111100000001000111111111",
-			"11111111001111110000000000111111111",
-			"11111100000111111111000001111111111",
-			"11111000000011111111100111111111111",
-			"11110000000001111111100111111111111",
-			"11110000000000000111100111111111111",
-			"11110000000000000000000111111111111",
-			"11111100011000000000000111111111111",
-			"11111111111100000000000011111111111",
-			"11111111111100011000000000111111111",
-			"11111111111110011100000000111111111",
-			"11111111111110011110000000111111111",
-			"11111111111110011110000000111111111",
-			"11111111100000011111110001111111111",
-			"11111110000000001111100011111111111",
-			"11111110000000000111110011111111111",
-			"11111110011110000111110011111111111",
-			"11111111111111000011110011111111111",
-			"11111111111111000000110011111111111"
+			"1111111111111111111111111111111",
+			"1111111111111111001111111111111",
+			"1111111111111101001111111111111",
+			"1111111111111000000111111111111",
+			"1111111111111000000011111111111",
+			"1100000111111100000001110111111",
+			"1000000001111110010000000011111",
+			"1000000000111110011000000011111",
+			"1000000000000110011100111111111",
+			"1100000000000000011111111111111",
+			"1111000000000000011111111111111",
+			"1111000000111100011111111111111",
+			"1111110001111110001111111111111",
+			"1111110001111110000000111100111",
+			"1111110001111111000000000000011",
+			"1111110001111111111100000000111",
+			"1111000000111111111111000011111",
+			"1110000000011111111111000111111",
+			"1100000000001111111111000111111",
+			"1000000000001110111111000111111",
+			"1000000000000000001111000111111",
+			"1100000000000000000000000111111",
+			"1111100111100000000000000111111",
+			"1111111111110001000000000011111",
+			"1111111111110001100000000001111",
+			"1111111111110001111100000000011",
+			"1111111111110001111100000000011",
+			"1111111111110001111100000000011",
+			"1111111111110001111110000000011",
+			"1111111111111001111111110000011",
+			"1111111000000000111111110011111",
+			"1111110000000000011111110011111",
+			"1111100011100000011111110011111",
+			"1111110111111000001111110011111",
+			"1111111111111100001111110011111",
+			"1111111111111100000111110011111",
+			"1111111111111110000000100011111",
+			"1111111111111111000000000011111",
+			"1111111111111111000000000011111",
+			"1111111111111111100110000001111",
+			"1111111111000011100110000001111",
+			"1111111111000001100110000001111",
+			"1111111111000000000011000001111",
+			"1111111111111100000011100001111",
+			"1111111111111110000011110001111",
+			"1111111111111110000001110011111",
+			"1111111111111111000001110011111",
+			"1111111111111111111111111111111",
+			"1111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 620,
+			"height": 980
+		},
+		"arte": {
+			"escala": .8,
+			"x": -135.2,
+			"y": -58.4
+		},
 		"spawnPoint": {
-			"x": 620,
-			"y": 500
+			"x": 330,
+			"y": 470
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/mountain.jpg": {
 		"grid": [
-			"11111111111100000001111111111111111",
-			"11100011111111100000111111111111111",
-			"10000011111111111100000011111111111",
-			"10011111111111111110000001011111111",
-			"10011111111111111100000000001111111",
-			"10011111111111111100000010001111111",
-			"10011111111111111110000111001111111",
-			"00011111111111111111111111001111111",
-			"00000000111111111111111111001111111",
-			"11100000000000001111111100000111111",
-			"11110000000000000011111100000111111",
-			"11111000001111000000000000001111111",
-			"11111000011111100000000000011111111",
-			"11110000111111110000000000011111111",
-			"11100011111111111111111000011111111",
-			"11100011111111111111111100111111111",
-			"11000111111111111111111000000111111",
-			"10000111111111111111110000000111111",
-			"10000111111111111111110000001111111",
-			"11000111111111111111111000111111111",
-			"11100011111111111111111100011111111",
-			"11110000110111111111111110011111111",
-			"11111000000011111111111110001111111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111110100011111111111111111111111111111111111111111111111111111111111111111111",
+			"111100111100000011111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000001111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000000111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000000111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000000111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000000000000000000001111111111111111111111111111111111111111111111111111",
+			"111110000000000000000000000000000000001111111111111111111111111111111111111111111111",
+			"111111100000001111111111000000000000000111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111100000000011111111111111111111111111111111111111111111",
+			"111111111111111111111111111111110000000011111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111000000000111111111111111111111111111111111111111111",
+			"111111111111111111111111111111110000000000011111111111111111111111111111111111111111",
+			"111111111111111111111111111111100000000000001111111111111111111111111111111111111111",
+			"111111111111111111111111111111100010000000001111111111111111111111111111111111111111",
+			"111111111111111111111111111111100111000000001111111111111111111111111111111111111111",
+			"111111111111110001111111111111111111100000000011111111111111111111111111111111111111",
+			"111111111111000000111111111111111111100001000011111111111111111111111111111111111111",
+			"111111111100000000111111111111111111111111100001110000111111111111111111111111111111",
+			"111111111000000111111111111111111111111111110000000000011111111111111111111111111111",
+			"111111111100011111111111111111111111111111111000000000011111111111111111111111111111",
+			"111111111100011111111111111111111111111111111000000000000110011111111111111111111111",
+			"111111111000011111111111111111111111111111110000000000000000001111111111111111111111",
+			"111111111000011111111111111111111111111111110000000000000000001111111111111111111111",
+			"111111111000011111111111111111111111111111110000000000111000001111111111111111111111",
+			"111111111000011111111111111111111111111111110000000000111100000111111111111111111111",
+			"111111111000011111111111111111111111111111111100000001111100000111111111111111111111",
+			"111111111000111111111111111111111111111111111111111111111110000111111111111111111111",
+			"110000000000111111111111111111111111111111111111111111111110000111111111111111111111",
+			"100000000000011111111111111111111111111111111111111111111110000111111111111111111111",
+			"110000000000001000000111111111111111111111111111111111111110000111111111111111111111",
+			"111110000000000000000001111111111111111111111111111111110110001111111111111111111111",
+			"111111111111000000000000111111110000001111111111111111100000000001111111111111111111",
+			"111111111111110000000000000000000000001111111111111111110000000001111111111111111111",
+			"111111111111111000000000000000000000000011111111111111100000000011111111111111111111",
+			"111111111111111100000000000000000000000000011111111111100000000111111111111111111111",
+			"111111111111111100000000001111111100000000000111111111000000001111111111111111111111",
+			"111111111111111100000000001111111111000000000000000000000000011111111111111111111111",
+			"111111111111111110000000011111111111100000000000000000000000011111111111111111111111",
+			"111111111111111100000000111111111111111000000000000000000000011111111111111111111111",
+			"111111111111111100000011111111111111111000000000000000000000011111111111111111111111",
+			"111111111111111000000111111111111111111000000000000000000000011111111111111111111111",
+			"111111111111110000011111111111111111111111111111111110000000011111111111111111111111",
+			"111111111111110000011111111111111111111111111111111111100000111111111111111111111111",
+			"111111111111110000111111111111111111111111111111111111100001111111111111111111111111",
+			"111111111111100000111111111111111111111111111111111111100001111111111111111111111111",
+			"111111111111100001111111111111111111111111111111111111100001000111111111111111111111",
+			"111111111100000001111111111111111111111111111111111100000000000011111111111111111111",
+			"111111111100000011111111111111111111111111111111111000000000000011111111111111111111",
+			"111111111100000011111111111111111111111111111111111000000000000011111111111111111111",
+			"111111111000000011111111111111111111111111111111111000000000000111111111111111111111",
+			"111111111100000011111111111111111111111111111111111100000000001111111111111111111111",
+			"111111111110000011111111111111111111111111111111111111000001111111111111111111111111",
+			"111111111111000011111111111111111111111111111111111111100001111111111111111111111111",
+			"111111111111100000111111111111111111111111111111111111110000111111111111111111111111",
+			"111111111111110000001111111111111111111111111111111111110000111111111111111111111111",
+			"111111111111111000000111111111111111111111111110011111111000011111111111111111111111",
+			"111111111111111100000001111001111111111111111110001111111000011111111111111111111111",
+			"111111111111111110000000111000111111111111111110000011111000001111111111111111111111",
+			"111111111111111111100000000000011111110011111110000000000000000011111111111111111111",
+			"111111111111111111111100000000000011110001111110000000000000000000011111111111111111",
+			"111111111111111111111111000000000000010000111110000000000000000000000011111111111111",
+			"111111111111111111111110000000000000000000111100000000000000000000000000111111111111",
+			"111111111111111111111100000000000000000000011100000000000000000000000000011111111111",
+			"111111111111111111111110000000000000000000001000000000000000000000000000011111111111",
+			"111111111111111111111111110000000000000000000000000000000000000000000000001111111111",
+			"111111111111111111111111111100000000000000000000000000000000000000000000000011111111",
+			"111111111111111111111111111111100000000000000000000000000000000000000000000000111111",
+			"111111111111111111111111111111110000001100000000000000000000000000000000000000011111",
+			"111111111111111111111111111111110001111111000000001111111111111100000000000000001111",
+			"111111111111111111111111111111111011111111000001111111111111111111100000000000000111",
+			"111111111111111111111111111111111111111110000111111111111111111111111100000000000111",
+			"111111111111111111111111111111111111111100001111111111111111111111111110000000000011",
+			"111111111111111111111111111111111111111100011111111111111111111111111111100000000011",
+			"111111111111111111111111111111111111111100111111111111111111111111111111110000000001",
+			"111111111111111111111111111111111111111100111111111111111111111111111111111000000001",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111100000011",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1680,
+			"height": 1600
+		},
+		"arte": {
+			"escala": .8,
+			"x": 16.8,
+			"y": -71.2
+		},
 		"spawnPoint": {
-			"x": 660,
-			"y": 540
+			"x": 810,
+			"y": 850
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/construction-site.jpg": {
 		"grid": [
-			"11111111100000000000000000011111111",
-			"11111100000000000000000000001111111",
-			"11111000000000000000000000011111111",
-			"11111000110000000001111000111111111",
-			"11110001111111000011111000111111111",
-			"11110000011111111111111000111111111",
-			"11100000001111111111111100111111111",
-			"11110000001111111111111100111111111",
-			"11110000001111111111111100111111111",
-			"11110000011111111111111000111111111",
-			"11110000011111111111111100111111111",
-			"11111001111111111111111100111111111",
-			"11111000111111111111111100111111111",
-			"11110000111111111111111100111111111",
-			"11110000111111111111111100011111111",
-			"11110000111111111111110000011111111",
-			"11110001111111111111100000011111111",
-			"11110001111111111111110000011111111",
-			"11110001111111111111110000011111111",
-			"11110001111111111111110000011111111",
-			"11111001111111111111110000011111111",
-			"11111001111111111111111100011111111",
-			"11111000111111111111111100011111111"
+			"1111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111001111111111",
+			"1111111111111111111111000101111111111111111000111111111",
+			"1111111111111111111100000000000000000000000000001111111",
+			"1111111111111111111000000000000000000000000000001111111",
+			"1111111111111111110000000000000000000000000000001111111",
+			"1111111111111000000000000000000000000000000000000000011",
+			"1111111111100000000000000000000000000000000000000000001",
+			"1111111111100000000000000000000000000000000000000000001",
+			"1111111111000000000000000000000000000000000000000000011",
+			"1111111110000001111000000000000000000001111111000011111",
+			"1111111110000011111100000000000000011111111111000011111",
+			"1111111100000111111110001110000000011111111111000011111",
+			"1111111100000111111111111110000000111111111111000011111",
+			"1111111100001111111111111111011111111111111111000011111",
+			"1111111000000000011111111111111111111111111111000011111",
+			"1111110000000000001111111111111111111111111111000011111",
+			"1111110000000000001111111111111111111111111111000011111",
+			"1111110000000000001111111111111111111111111111100011111",
+			"1111111000000000001111111111111111111111111111100011111",
+			"1111111000000000001111111111111111111111111111100011111",
+			"1111111000000000001111111111111111111111111111000011111",
+			"1111111000000000011111111111111111111111111111000011111",
+			"1111111000000000011111111111111111111111111111000011111",
+			"1111111100000000011111111111111111111111111111000011111",
+			"1111111100000000011111111111111111111111111111000011111",
+			"1111111100000011111111111111111111111111111111000011111",
+			"1111111100000111111111111111111111111111111111100011111",
+			"1111111100000011111111111111111111111111111111100011111",
+			"1111111100000011111111111111111111111111111111100011111",
+			"1111111100000011111111111111111111111111111111100011111",
+			"1111111100000011111111111111111111111111111111100001111",
+			"1111111100000011111111111111111111111111111111000000111",
+			"1111111100000011111111111111111111111111111111000000111",
+			"1111111100000011111111111111111111111111111111000000111",
+			"1111111100000011111111111111111111111111111111000000111",
+			"1111111100000111111111111111111111111111110000000000111",
+			"1111111100000111111111111111111111111111110000000000111",
+			"1111111100000111111111111111111111111111110000000000111",
+			"1111111100000111111111111111111111111111111000000000111",
+			"1111111100000111111111111111111111111111111000000000111",
+			"1111111100001111111111111111111111111111111000000000111",
+			"1111111100001111111111111111111111111111111000000000111",
+			"1111111100001111111111111111111111111111111000000000111",
+			"1111111110000111111111111111111111111111111000000000111",
+			"1111111110000111111111111111111111111111111000000000111",
+			"1111111110000111111111111111111111111111111101100000111",
+			"1111111110000111111111111110001111110000111111110000111",
+			"1111111110000111111111111100001111100000111111110000111",
+			"1111111111000111111111111100001111100000011111110000111",
+			"1111111111000001111111100000000000000000011111110000111",
+			"1111001111000000000000000000000000000000000000010000111",
+			"1100001111000000000000000000000000000000000000000000111",
+			"1100000111000000000000000000000000010000000000000000111",
+			"1000000000000000000000000000000000110000000000000000111",
+			"1000000000000100000000000110000000111000000000000000111",
+			"1111111111111111110001111110000000111100100000000000111",
+			"1111111111111111111111111111000000111111110000000001111",
+			"1111111111111111111111111111000000100111111000011111111",
+			"1111111111111111111111111111000000000011111111111111111",
+			"1111111111111111111111111111000000000000011111111111111",
+			"1111111111111111111111111111100000000000011111111111111",
+			"1111111111111111111111111111100000000000011111111111111",
+			"1111111111111111111111111111100000000011111111111111111",
+			"1111111111111111111111111111110000001111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1100,
+			"height": 1340
+		},
+		"arte": {
+			"escala": .8,
+			"x": -140,
+			"y": -280.8
+		},
 		"spawnPoint": {
-			"x": 380,
-			"y": 300
+			"x": 350,
+			"y": 410
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/swamp.jpg": {
 		"grid": [
-			"11111111111111110001111111111111111",
-			"11111111111111110001111111111111111",
-			"11111111111111110001111111111111111",
-			"11111111111100000001111111111111111",
-			"11111111111000000011111111111111111",
-			"11111111111000000011111111111111111",
-			"11111111111000000111111111111111111",
-			"11111111111100000011111111111111111",
-			"11111111111100000111111111111111111",
-			"11111111111100001111111111111111111",
-			"11111111111100001111111111111111111",
-			"11111111111110001111111111111111111",
-			"11111111111110001111111111111111111",
-			"11110011111110001111111111111111111",
-			"11100001111100000111111111111111111",
-			"11000000000000000011111111111111111",
-			"10000000000000000001111111111111111",
-			"10000000011100000001111111111111111",
-			"10001000011111100001111111111111111",
-			"10001000011111110001111000011111111",
-			"10011000111111111001110000010011111",
-			"10000000111111110001100000000011111",
-			"00000001111111100000000000000011111"
+			"1111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111001111111111111111",
+			"1111111111111111111111111111111111111111111111111110000111111111111111",
+			"1111111111111111111111111111111111111111111111111110000011111111111111",
+			"1111111111111111111111111111111111111111111111111110000011111111111111",
+			"1111111111111111111111111111111111111111111111111100000011111111111111",
+			"1111111111111000111111111111111111111111111111111100000011111111111111",
+			"1111111000000000000000000111111111111111111111111000000011111111111111",
+			"1111100000000000000000000000000111111111111111100000000011111111111111",
+			"1100000000000000000000000000000000011111111110000000000011111111111111",
+			"1000000000011111000000000000000000000000001000000000000011111111111111",
+			"1000000000111111100000000000000000000000000000000000000111111111111111",
+			"1000000001111111111000000000000000000000000000000000000111111111111111",
+			"1000000011111111111000000000000000000000000000000000001111111111111111",
+			"1000000111111111111000000000011111111000000000000000111111111111111111",
+			"1000000111111111111000000000011111111000000000000000111111111111111111",
+			"1100000111111111111000000011111111111100000000000011111111111111111111",
+			"1110000011111111111000111111111111111111000000001111111111111111111111",
+			"1110000011111111110000111111111111111111000011001111111111111111111111",
+			"1110000011111111100001111111111111111111000011111111111111111111111111",
+			"1111000011111111000001111111111111111111000011111111111111111111111111",
+			"1111100000011110000011111111111111111111000011111111111111111111111111",
+			"1111110000000000000111111111111111111111000011111111111111111111111111",
+			"1111110000000000001111111111111111111111000011111111111111111111111111",
+			"1111111000000000001111111111111111111111000011111111111111111111111111",
+			"1111111100000000011111111111111111111110000011111111111111111111111111",
+			"1111111110000000111111111111111110000000000011111111111111111111111111",
+			"1111111111000001111111111111111000000000000111111111111111111111111111",
+			"1111111111000011111111111111110000000000000111111111111111111111111111",
+			"1111111111000011111111111111100000000000000111111111111111111111111111",
+			"1111111111101111111111111111100000000000001111111111111111111111111111",
+			"1111111111111111111111111111110000000000001111111111111111111111111111",
+			"1111111111111111111111111111110000000000001111111111111111111111111111",
+			"1111111111111111111111111111110000000000001111111111111111111111111111",
+			"1111111111111111111111111111111000000000001111111111111111111111111111",
+			"1111111111111111111111111111111100000000001111111111111111111111111111",
+			"1111111111111111111111111111111100000000011111111111111111111111111111",
+			"1111111111111111111111111111111000000000011111111111111111111111111111",
+			"1111111111111111111111111111111000000011111111111111111111111111111111",
+			"1111111111111111111111111111111000000011111111111111111111111111111111",
+			"1111111111111111111111111111111111000011111111111111111111111111111111",
+			"1111111111111111111111111111111111000011111111111111111111111111111111",
+			"1111111111111111111111111111111111000011111111111111111111111111111111",
+			"1111111111111111111111111111111111000011111111111111111111111111111111",
+			"1111111111111111111111111111111111000011111111111111111111111111111111",
+			"1111111111111111111111111111111111000011111111111111111111111111111111",
+			"1111111111111110111111111111111111000011111111111111111111111111111111",
+			"1111111111111100000011111111111111000001111111111111111111111111111111",
+			"1111111111111100000011111111111100000000011111111111111111111111111111",
+			"1111111111111100000001111111111100000000001111111111111111111111111111",
+			"1111111111100000000000000000111100000000000111111111111111111111111111",
+			"1111111111100000000000000000000000000000000011111111111111111111111111",
+			"1111111111000000000000000000000000000000000011111111111111111111111111",
+			"1111111111000000000000000000000000000000000011111111111111111111111111",
+			"1111111110000000000000000111111110000000000011111111111111111111111111",
+			"1111111100000000000000000111111111100000000011111111111111111111111111",
+			"1111111110000011100000000111111111111110000011111111111111111111111111",
+			"1111111111000011100000000111111111111111000011111111111110000111111111",
+			"1111111111000111100000000111111111111111000011111111110000000111111111",
+			"1111111111000111100000001111111111111111000011111111100000000111111111",
+			"1111111110000111100000011111111111111111000011111111000000001111000111",
+			"1111111110000001000000111111111111111111000011111110000000011111000111",
+			"1111111110000000000000111111111111111111000011111110000001111110000111",
+			"1111111100000000000001111111111111111111000010000000000001000000000111",
+			"1111111100000000000001111111111111111100000000000000000000000000000111",
+			"1111111100000000000001111111111111111000000000000000000000000000000011",
+			"1111111100000000000011111111111111111100000000000000000000000000000011",
+			"1111111100000000000011111111111111111100000000000000000000000000000011",
+			"1111111100000000000011111111111111111110000000000000000000000000000011",
+			"1111111100000000000000111111111111111111100000000000000110000000000111",
+			"1111111100000000000000111111111111111111111111100000111111000000000111",
+			"1111111100000000000000000111111111111111111111111111111111000000001111",
+			"1111111110000000000000000001111111111111111111111111111111101000111111",
+			"1111111110000000000000000001111111111111111111111111111111111000111111",
+			"1111111111000000000000000000111111111111111111111111111111111000111111",
+			"1111111111110000000000000000011111111111111111111111111111111000111111",
+			"1111111111111000000000000000000111111111111111111111111111110000111111",
+			"1111111111111100000011111000000111111111111111111111111111110000111111",
+			"1111111111111110110111111100000111111111111111111111111111110000111111",
+			"1111111111111111111111111110111111111111111111111111111111100000000111",
+			"1111111111111111111111111111111111111111111111111111111111000000000011",
+			"1111111111111111111111111111111111111111111111111111111111000000000001",
+			"1111111111111111111111111111111111111111111111111111111110000000000001",
+			"1111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1400,
+			"height": 1680
+		},
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": 20
+		},
 		"spawnPoint": {
-			"x": 540,
-			"y": 460
+			"x": 690,
+			"y": 830
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/plains.jpg": {
 		"grid": [
-			"11111111111111100011111111111110000",
-			"11111111111100001111111111111111001",
-			"11111111111000011111111111111111001",
-			"11111111111000111111111111111100001",
-			"11111111110000111111111111111000000",
-			"11111111100000001111111111111100000",
-			"11111111000000001111111111111110000",
-			"11111110000000000000001111111111001",
-			"11111000000000000000000000011111001",
-			"11000000000000000000000000011111001",
-			"10000111110000000001100000000111001",
-			"11000000001000000000111100000000000",
-			"11000000000000000000011110000000000",
-			"11111111000000000000001110000000000",
-			"11111111000000000000011110000000001",
-			"11111111000000000000111111000000011",
-			"11111000000000000000111111000000111",
-			"11110000000100000000111110000000111",
-			"11110000001100000000011100000000111",
-			"11110000011000000000010000000000011",
-			"11100000010000000000000000000000001",
-			"11100000000000000000000000000000001",
-			"11100000100000000000000000000000001"
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110011111111111111111111111111111111",
+			"111111111111111111111111111111111111100011111111111111111000011111111111",
+			"111111111111111111111111111111111111100011111111111111110000000001111111",
+			"111111111111111111111111111111111111000011111111111111100000000000111111",
+			"111111111111111111111111111111111110000011111111111111100000000000000111",
+			"111111111111111111111111111111111100000111111111111111100000000000000011",
+			"111111111111111111111111111111111000000111111111111111110000000000000011",
+			"111111111111111111111111111111110000001111111111111111111000000000000011",
+			"111111111111111111111111111111110000111111111111111111111100000000000011",
+			"111111111111111111111111111111000001111111111111111111111110000000000011",
+			"111111111111111111111111111110000011111111111111111111111111000000000011",
+			"111111111111111111111111111100001111111111111111111111111111100000000111",
+			"111111111111111111111111100000011111111111111111111111111111100000111111",
+			"111111111111111111111100000000111111111111111111111111111111110000111111",
+			"111111111111111111111000000011111111111111111111111111111111110000111111",
+			"111111111111111111111000001111111111111111111111111111111111110000111111",
+			"111111111111111111111000011111111111111111111111111111111111110000111111",
+			"111111111111111111111000011111111111111111111111111111111100000001111111",
+			"111111111111111111110000111111111111111111111111111111111000000000011111",
+			"111111111111111111100000000111111111111111111111111111111000000000000111",
+			"111111111111111111000000000011111111111111111111111111111000000000000111",
+			"111111111111111100000000000001111111111111111111111111111100000000000111",
+			"111111111111111000000000000001111111111111111111111111111110000000000111",
+			"111111111111110000000000000000111111111111111111111111111111000000001111",
+			"111111111111110000000000000001111111111111111111111111111111110001111111",
+			"111111111111100000000000000000000000000000111111111111111111100001111111",
+			"111111111111000000000000000000000000000000000000001111111111100001111111",
+			"111111111000000000000000000000000000000000000000000111111111100001111111",
+			"111000000000000000000000000000000000000000000000000111111111100001111111",
+			"100000000011111110000000000000001111110000000000000011111111110001111111",
+			"100000111111111111000000000000000011111100000000000011111111100001111111",
+			"100000001111111111100000000000000001111111000000000000001111100001111111",
+			"100000000000000111110000000000000000011111111110000000000110000000111111",
+			"110000000000000001111100000000000000001111111111000000000000000000011111",
+			"110010000000000000000100000000000000000011111111000000000000000000011111",
+			"111111100100000000000100000000000000000001111111000000000000000000001111",
+			"111111111111110000000100000000000000000001111111000000000000000000011111",
+			"111111111111110000000100000000000000000001111111000000000000000000011111",
+			"111111111111111000000100000000000000000011111111100000000000000000011111",
+			"111111111111111000000100000000000000000011111111100000000000000000111111",
+			"111111111111110000000100000000000000000111111111100000000000001111111111",
+			"111111111111100000000100000000000000001111111111110000000000001111111111",
+			"111111111110000000000100000000000000001111111111110000000000001111111111",
+			"111111110000000000000100000000000000001111111111110000000000001111111111",
+			"111111000000000000000110000000000000011111111111000000000000001111111111",
+			"111111000000000000001110000000000000011111111110000000000000001111111111",
+			"111111100000000000111110000000000000001111111100000000000000001111111111",
+			"111111100000000001111110000000000000000111111000000000000000001111111111",
+			"111111000000000011111110000000000000000111100000000000000000001111111111",
+			"111111000000000011110000000000000000000010000000000000000000000011111111",
+			"111110000000000111100000000000000000000000000000000000000000000001111111",
+			"111100000000000111100000000000000000000000000000000000000000000001111111",
+			"111100000000000111000000000000000000000000000000000000000000000000111111",
+			"111100000000000110000000000000000000000000000000000000000000000001111111",
+			"111100000000011100000000000000000000000000000000000000000000000001111111",
+			"111100000111111100000000000000000000000000000000001100000000000011111111",
+			"111110000111111110000000000000000000000000000000001110000000011111111111",
+			"111111000001111100000000000000000000000000000000011111000000011111111111",
+			"111110000011111100000000000000000000000000000000111111000000011111111111",
+			"111110000011111110000000000000000000000000000001111111000000011111111111",
+			"111110000011011110000000000000000000000000000111111110000000001111111111",
+			"111111000010011111111000000000000000000000001111111100000000000111111111",
+			"111111000000011111111111000000000000000000001111111100000000000011111111",
+			"111111000000011111111111100000000000000000011111111110000000000111111111",
+			"111111100000111111111111100000000000000000011111111111111111111111111111",
+			"111111110001111111111111100000000000000000011111111111111111111111111111",
+			"111111111111111111111111100000000000000000011111111111111111111111111111",
+			"111111111111111111111111110000000000000000111111111111111111111111111111",
+			"111111111111111111111111111000000000000011111111111111111111111111111111",
+			"111111111111111111111111111000000000000111111111111111111111111111111111",
+			"111111111111111111111111111100000000001111111111111111111111111111111111",
+			"111111111111111111111111111110000000011111111111111111111111111111111111",
+			"111111111111111111111111111110000000011111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1440,
+			"height": 1520
+		},
+		"arte": {
+			"escala": .8,
+			"x": -162.4,
+			"y": -149.6
+		},
 		"spawnPoint": {
-			"x": 780,
-			"y": 620
+			"x": 730,
+			"y": 830
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/beach.jpg": {
 		"grid": [
-			"11100000011111111111000001111000111",
-			"11100000000011111100000001111000011",
-			"11100000000000000100000001111000001",
-			"11111000000000000000000001111000000",
-			"11111100000000000000000000111000000",
-			"11111110000000000000000000010000100",
-			"11111111000000000011000000110001110",
-			"11111111111111111111110011111001110",
-			"11111111111100111111100011100000100",
-			"11111111111000110111100000000000000",
-			"11010000111000000010000000001110000",
-			"10000000110000000000000000000000000",
-			"10000000000000100000000000000000000",
-			"10000000000000000000100000011000000",
-			"00000000000000000000110000111000000",
-			"00000000100000000001111000111000001",
-			"00000000111000000001111100000000001",
-			"00000000000000000000111100000000011",
-			"00000000000000000000000000000000111",
-			"00010000000000000000000000000000111",
-			"00110000000000000000000000000000111",
-			"00011000000000000000000000000000011",
-			"00011000011111110000001111000000001"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111100001111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000011111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000011111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000001111111111111111111111111111111111111111111111111111111111111111",
+			"111110000000000001111111111111111111111111111111111111111111111111111111111111111",
+			"111110000000000001111111111111111111111111111111111111111111111111111111111111111",
+			"111111000000000000111111111111111111111111111111111111111111111111111111111111111",
+			"111111100000000000011111111111111111111111111111111111111111111111111111111111111",
+			"111111110000000000000111111111111111111111111111111111111111111111111111111111111",
+			"111111111000000000000011111111111111111111111111111111111111111111111111111111111",
+			"111111111100000000000001111111111111111111111111111111111111111111111011111111111",
+			"111111111110000000000001111111111111111111111111111111111111111111110001111111111",
+			"111111111111000000000000111111111111111111111111111111111111111111110001111111111",
+			"111111111111000000000000111111111111111111111111111111111111111111000001111111111",
+			"111111111111100000000000111111111111111111111111000000001111111110000001111111111",
+			"111111111111100000000000011111111111111111111000000000001111111110000001111111111",
+			"111111111111100000000000000000011111111111110000000000000111111110000000111111111",
+			"111111111111110000000000000000001111000111110000000000000111111110000000111111111",
+			"111111111111110000000000000000000000000011110000000000000111111111100000001111111",
+			"111111111111111100000000000000000000000001110000000000000111111111000000000111111",
+			"111111111111111110000000000000000000000000000000000000000111111110000000000011111",
+			"111111111111111111000000000000000000000000000000000000000011111110000000000001111",
+			"111111111111111111100000000000000000000000000000000000000001111110000000000000111",
+			"111111111111111111110000000000000000000000000000000000000000111100000001100000011",
+			"111111111111111111111100000000000000000000000000000000000000111100000011110000011",
+			"111111111111111111111100000000000000000000011111000000000000111100000011111000011",
+			"111111111111111111111110000000000000010000011111000000000001111100000111111000001",
+			"111111111111111111111111111111111111111111111111110000011111111110001111111000001",
+			"111111111111111111111111111111111111111111111111111000011111111110001111111000001",
+			"111111111111111111111111111111111111111111111111111000011111111100000011111000001",
+			"111111111111111111111111111111110011111111111111110000011111111000000001110000001",
+			"111111111111111111111111111111000001111111111111110000011111100000000000100000001",
+			"111111111111111111111111111110000001111001111111110000000000000000110000000000011",
+			"111111111111111111111111111110000000110000111100110000000000000011111100000000011",
+			"111111111111111100000111111110000000110000111100000000000000001111111100000000011",
+			"111111111110011000000011111100000000110000011000000000000000000011110000000000011",
+			"111111111100000000000001111000000000110000001000000000000000000000100000000000111",
+			"111111111100000000000000000000000000110000000000000000000000000000000000000000111",
+			"111111111100000000000000000000000001111000000000000000000000100000000000000000111",
+			"111111111100000000000000000000000001110000000001100000000000111110000000000000111",
+			"111111111100000000000000000000110000000000000001110000000000111111000000000001111",
+			"111111111000000000000000000000100000000000000011110000000000111111000000000011111",
+			"111111000000000000000000000000000000000000000011111000000001111111000000000011111",
+			"111100000000000000000001000000000000000000000111111110000001111111000000000111111",
+			"111000000000000000000001110000000000000000000111111111000001111111000000000111111",
+			"111100000000000000000011111110000000000000000111111111000001111000000000001111111",
+			"111000000000000000000011111110000000000000000111111111100000000000000000001111111",
+			"111000000000000000100001110000000000000000000111111111100000000000000000011111111",
+			"111100000000000000000000000000000000000000000111111111100000000000000000111111111",
+			"111100000000000000000000000000000000000000000011111111000000000000000000111111111",
+			"111000000000000000000000000000000000000000000000000000000000000000000001111111111",
+			"111000000000000000000000000000000000000110000000000000000000000000000001111111111",
+			"111000000000011000000000000000000000000010000000000000000000000000000001111111111",
+			"111000000000111000000000000000000000000011000000000000000000000000000011111111111",
+			"110000000001111000000000000000000000000011000000000000000000000000000011111111111",
+			"100000000000111100000000000000000000000000000000000000000000000000000001111111111",
+			"100000000000011110000000000000000000000000000000000000000110001100000000011111111",
+			"100000000000011110000000011110010000011000000000000000001110001100000000001111111",
+			"100000000000011110000000011111111111111110000000000111111110001100000100000111111",
+			"100000000000111111111100011111111111111111111000111111111110001110000110000011111",
+			"100000000001111111111100011111111111111111111000111111111110001110000111000001111",
+			"111101110111111111111100001111111111111111111000111111111110001110000111110001111",
+			"111111111111111111111100000000011111111111111000111111111110001110000011110000111",
+			"111111111111111111000000000000001111111111111000111111111111111110000001100000111",
+			"111111111111111100000000000000001111111111100000011111111111111110000001100000111",
+			"111111111111111000000000000000011111111111100000001111111111111110000001100000111",
+			"111111111111111000000000000111111111111111100000000011111111111110000001100001111",
+			"111111111111111000000000111111111111111111100000000001111111111110000000000001111",
+			"111111111111111111111111111111111111111111110000000001111111111111000000000001111",
+			"111111111111111111111111111111111111111111111000000011111111111111000000000011111",
+			"111111111111111111111111111111111111111111111111000111111111111111100000000111111",
+			"111111111111111111111111111111111111111111111111111111111111111111110000011111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1620,
+			"height": 1520
+		},
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": -37.6
+		},
 		"spawnPoint": {
-			"x": 700,
-			"y": 540
+			"x": 810,
+			"y": 850
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/ruins.jpg": {
 		"grid": [
-			"00000000000111111111111111111111111",
-			"01000011111111111111111111111111111",
-			"01000011111111111111111111111111111",
-			"11100011111111111111111111111111111",
-			"11100011111111111111111111111111111",
-			"11100111111111111111111111111111111",
-			"11100111111111111011111111111111111",
-			"11100011111111100001111111111111111",
-			"11100011111111000000001111111111111",
-			"11100000111110000000001111000111111",
-			"10000000000000000000000000000111111",
-			"10000000000000000000000000000000000",
-			"11100100001100000000001110000000000",
-			"11111100111110000000011111000111111",
-			"11111000011111100000111111000111111",
-			"11111000111111100000111111000111111",
-			"11111100111111100000111111000111111",
-			"11111100011111100000111111000111111",
-			"11111100001111100000111111000111111",
-			"11111100000001100000011111000111111",
-			"11111100000000000000000000000111111",
-			"11111110000000000000000000001111111",
-			"11111111100000000001100110011111111"
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111000000000000000000001111101111111",
+			"1111111111111111111111111111111011000000000000000000000000000000000000011111",
+			"1111000000000000000000000000000000000000000000000000000000000000000000001111",
+			"1110000000000000000000000000000000000000000001111100000000000000000000000111",
+			"1100000000000000000000000000000000000000000111111111111111111100000000001111",
+			"1100000000000000000000000000000000000000001111111111111111111111000000011111",
+			"1100000000000000000000000000000000111111111111111111111111111111110000111111",
+			"1100000000000000000000000000000000111111111111111111111111111111111111111111",
+			"1000000000000000000000001111111111111111111111111111111111111111111111111111",
+			"1000011000000000000011111111111111111111111111111111111111111111111111111111",
+			"1000011100000001111111111111111111111111111111111111111111111111111111111111",
+			"1000011100000001111111111111111111111111111111111111111111111111111111111111",
+			"1100111100000001111111111111111111111111111111111111111111111111111111111111",
+			"1111111100000011111111111111111111111111111111111111111111111111111111111111",
+			"1111111111000011111111111111111111111111111111111111111111111111111111111111",
+			"1111111111000011111111111111111111111111111111111111111111111111111111111111",
+			"1111111110000111111111111111111111111111111111111111111111111111111111111111",
+			"1111111110000111111111111111111111111111111111111111111111111111111111111111",
+			"1111111110000111111111111111111111111111111111111111111111111111111111111111",
+			"1111111110000111111111111111111111111111111111111111111111111111111111111111",
+			"1111111110000111111111111111111111111111111111111111111111111111111111111111",
+			"1111111110000111111111111111111111111001111111111111111111111111111111111111",
+			"1111111110000011111111111111111111110000111111111111111111111111111111111111",
+			"1111111110000011111111111111111100000000011111111111111111111111111111111111",
+			"1111111110000001111111111111111000000000000011111111111111111111111111111111",
+			"1111111110000001111111111111110000000000000000111111111110111111111111111111",
+			"1111111110000000001111111111100000000000000000011111111000001111111111111111",
+			"1111111110000000000011111111000001000000000000011111111000001111111111111111",
+			"1111110000000000000011100000000011000000001100000000001000001111111111111111",
+			"1111110000000000000000000000000011000000001100000000000000000111111111111111",
+			"1111110000000000000000000000000011000000001100000000000000000000000000000011",
+			"1111111100000010000000000000000011000000000000011111000000000000000000000011",
+			"1111111110000111000000111110000000000000000000011111110000000000000000000011",
+			"1111111110000111000111111111000000000000000000111111110000000001111111111111",
+			"1111111111011111000111111111100000000000000011111111111000000111111111111111",
+			"1111111111111111000111111111111000000000000011111111111000000111111111111111",
+			"1111111111111111000111111111111110000000000111111111111000000111111111111111",
+			"1111111111111000000111111111111110000000001111111111111000000111111111111111",
+			"1111111111110000000111111111111110000000001111111111111000000111111111111111",
+			"1111111111111000000111111111111110000000001111111111111000000111111111111111",
+			"1111111111111110000111111111111110000000001111111111111000000111111111111111",
+			"1111111111111111000111111111111111000000001111111111111000000111111111111111",
+			"1111111111111111000011111111111111000000001111111111111000000111111111111111",
+			"1111111111111111000001111111111111000000001111111111111000000111111111111111",
+			"1111111111111111000000011111111111000000001111111111111000001111111111111111",
+			"1111111111111111000000001111111111000000000111111111111000001111111111111111",
+			"1111111111111111000000000001111111000000000011111111111000001111111111111111",
+			"1111111111111110000000000000001111000000000000111111110000001111111111111111",
+			"1111111111111111000000000000000110000000000000100100000000001111111111111111",
+			"1111111111111111000000000000000000000000000000000000000000001111111111111111",
+			"1111111111111111100000000000000000000000001000000000000000011111111111111111",
+			"1111111111111111111000000000000000000000011100000000000001111111111111111111",
+			"1111111111111111111110000000000111000000011111001111100011111111111111111111",
+			"1111111111111111111100000000000110000000011111111111111111111111111111111111",
+			"1111111111111111111100001100000110000000011111111111111111111111111111111111",
+			"1111110000000000000100001111101110000000011111111111111111111111111111111111",
+			"1111100000000000000000001111111111000000001111111111111111111111111111111111",
+			"1111100000000000000000001111111000000000000011111111111111111111111111111111",
+			"1111110000000000000000001111110000000000000011111111111111111111111111111111",
+			"1111111000000000000000001111110000000000000011111111111111111111111111111111",
+			"1111111000000000000000001111110000000000001111111111111111111111111111111111",
+			"1111111100000000000000001111111111000000001111111111111111111111111111111111",
+			"1111111100000000000000001111111111000000001111111111111111111111111111111111",
+			"1111111100000000000000001111111111000000001111111111111111111111111111111111",
+			"1111111100000000000000011111111111000000001111111111111111111111111111111111",
+			"1111111100000000000000111111111111000000001111111111111111111111111111111111",
+			"1111111111000000000001111111111111000000011111111111111111111111111111111111",
+			"1111111111111111111111111111111111101111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1520,
+			"height": 1580
+		},
+		"arte": {
+			"escala": .8,
+			"x": -61.6,
+			"y": -15.2
+		},
 		"spawnPoint": {
-			"x": 580,
-			"y": 500
+			"x": 650,
+			"y": 870
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/jungle.jpg": {
 		"grid": [
-			"11111111111111111000111111111000011",
-			"11111111111111111000111111111110011",
-			"11111111111111111000111111111110011",
-			"11111111111011100000111111111110000",
-			"11111111110000000000111111111100000",
-			"11111111111000000000111111111100000",
-			"11111111111100000000001111111110000",
-			"11111111111110000000001111111110011",
-			"11111111111111110000000111111110011",
-			"11111111111111111000000111111110011",
-			"11111100011111111000100010001000001",
-			"10000000001111110000100000000000001",
-			"00000000000000000011100000000000001",
-			"00000000000000000111100000011110000",
-			"11100000000010011111110000011110000",
-			"11111100000111111111110000111110001",
-			"11111111000011111111111101111110001",
-			"11111111100001111111111111111110001",
-			"11111111110001111111111111111110001",
-			"11111111111000111111111111111110001",
-			"11111111111000111111111111111110001",
-			"11111111111100011111111111111110001",
-			"11111111111100001111111111110000001"
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111000011111111111111111111111111111111111111111111111",
+			"11111100000001111110000011110000001111111111111111111111111111111111111111111111",
+			"11000000000000011000000000000000000011111111111111111111111111111110001111111111",
+			"10000000000000000000000000000000000000001111111100000111111111111100001111111111",
+			"10000000000000000000010000000000000000000011100000000000111111110000000111111111",
+			"10000000000000000000111111000000011000000000000000000000111111100000000111111111",
+			"10000000000000000011111111111111111111100000000000000001111111100000000111111111",
+			"11111110000000000111111111111111111111100000000011111111111111100000000011111111",
+			"11111111000000000011111111111111111111110000000111111111111111110000000001111111",
+			"11111111110000000001111111111111111111111000000111111111111111110000000001111111",
+			"11111111111110000001111111111111111111111100001111111111111111111000000001111111",
+			"11111111111110000001111111111111111111111100001111111111111111111100000011111111",
+			"11111111111111000011111111111111111111111100001111111111111111111111100011111111",
+			"11111111111111110111111111111111111111111100001111111111111111111111100011111111",
+			"11111111111111111111111111111111111111111100001111111111111111111111100011111111",
+			"11111111111111111111111111111111111111111100001111111111111111111111100011111111",
+			"11111111111111111111111111111111111111111000001111111111111111111111100000000111",
+			"11111111111111111111111111111001111110000000001111111111111111111111100000000011",
+			"11111111111111111111111111110000111000000000001111111111111111111111100000000011",
+			"11111111111111111111111111110000000000000000001111111111111111111111000000000011",
+			"11111111111111111111111111111000000000000000000111111111111111111110000000000011",
+			"11111111111111111111111111111000000000000000000111111111111111111111000000000011",
+			"11111111111111111111111111111100000000000000000000111111111111111111100000000011",
+			"11111111111111111111111111111111000000000000000000011111111111111111100000000011",
+			"11111111111111111111111111111111100000000000000000011111111111111111100011111111",
+			"11111111111111111111111111111111111000000000000000011111111111111111100011111111",
+			"11111111111111111111111111111111111110000000000000001111111111111111100011111111",
+			"11111111111111111111111111111111111111111100000000001111111111111111100001111111",
+			"11111111111111111111111111111111111111111100000000001111111111111111110001111111",
+			"11111111111111111111111111111111111111111100001100001111111111111111110001111111",
+			"11111111111111111111111011111111111111111100001100000111111111111111110001111111",
+			"11111111111111111110000001111111111111111100001110000001110000011101110000111111",
+			"11111111111111111100000001111111111111110000001110000000000000000000000000111111",
+			"11111111100000001100000000011111111111100000001110000000000000000000000000111111",
+			"11111111000000000000000000000011111110000001111110000000000000000000000000011111",
+			"11111111000000000000000000000000001000000011111110000000000000000000000000011111",
+			"11111111000000000000000000000000000000000111111110000000000000111111100000011111",
+			"11111111001100000000000000000000000000011111111111000000000111111111100000001111",
+			"11111111111100000000000000000001100001111111111111000000000011111111100000001111",
+			"11111111111110000000000000000011111111111111111111100000000011111111100000001111",
+			"11111111111111111100000000000111111111111111111111100000000111111111100000011111",
+			"11111111111111111110000000000111111111111111111111110000001111111111100000111111",
+			"11111111111111111111111000000011111111111111111111111100011111111111100000111111",
+			"11111111111111111111111100000011111111111111111111111111111111111111100000111111",
+			"11111111111111111111111110000001111111111111111111111111111111111111110000111111",
+			"11111111111111111111111111000000111111111111111111111111111111111111110000111111",
+			"11111111111111111111111111100000111111111111111111111111111111111111110000111111",
+			"11111111111111111111111111110000011111111111111111111111111111111111100000111111",
+			"11111111111111111111111111111000001111111111111111111111111111111111100000111111",
+			"11111111111111111111111111111000001111111111111111111111111111111111100000111111",
+			"11111111111111111111111111111100000111111111111111111111111111111111100000111111",
+			"11111111111111111111111111111100000111111111111111111111111111111111100000111111",
+			"11111111111111111111111111111110000011111111111111111111111111111111100000011111",
+			"11111111111111111111111111111111000001111111111111111111111111111111100000011111",
+			"11111111111111111111111111111111000000111111111111111111111111111111000000011111",
+			"11111111111111111111111111111110000000011111111111111111111111110000000000011111",
+			"11111111111111111111111111111110000000011111111111111111111111100000000000001111",
+			"11111111111111111111111111111110000000000111111111111111111111000000000000000111",
+			"11111111111111111111111111111100000000000011111111111111111111000000000000000111",
+			"11111111111110111111111111111000000000000000011111111111111111000000000000000111",
+			"11111111111100001111111111110000000000000000001111111111111110000000000000000111",
+			"11111111111100000111111111000000000000000000001111111111111100000000000000001111",
+			"11111111111000000111100000000000000000000000000000000000000000000000000000111111",
+			"11111111100000000010000000000000000000000000000000000000000000000000000001111111",
+			"11111111000000000000000000000000000000000000000000000000000000000000000011111111",
+			"11111111000000000000000000000000000001100001000000000000000000000000000111111111",
+			"11111111000000000000000000111111100111110001000011111111111100001000011111111111",
+			"11111111110000000000000011111111111111111111111111111111111111111111111111111111",
+			"11111111111000000000000111111111111111111111111111111111111111111111111111111111",
+			"11111111111100000000011111111111111111111111111111111111111111111111111111111111",
+			"11111111111110000011111111111111111111111111111111111111111111111111111111111111",
+			"11111111111110001111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1600,
+			"height": 1500
+		},
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": -146.4
+		},
 		"spawnPoint": {
-			"x": 700,
-			"y": 460
+			"x": 830,
+			"y": 710
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
-	"assets/hunt-backgrounds/temple.png": {
+	"assets/hunt-backgrounds/temple.jpg": {
 		"grid": [
-			"11111111111110000000111111111111111",
-			"11111111111111000001111111111111111",
-			"11111111111111000111111111111111111",
-			"11111111111111100111111111111011111",
-			"11111111111111100111111111110011111",
-			"11111111111111100011110000000011111",
-			"11111111111111000011100000000011111",
-			"11111111110000000111100001100001111",
-			"11111111111000001111111111100011111",
-			"11111111111111100111111111100011111",
-			"11111111111111100011111111110000111",
-			"11111111111111110011111111110000111",
-			"11111110011111110011111110000001111",
-			"11111110011111110010011000000011111",
-			"11111110011111100000000001001011111",
-			"11111110011110000000100001100111111",
-			"11111110011000011000111100001111111",
-			"11111100000001111000111110001111111",
-			"11111110000011111000111111111111111",
-			"11111110110000100001111111111111111",
-			"11111111111000000001111111111111111",
-			"11111111111100001001111111111111111",
-			"11111111111100111000000000000001111"
+			"11111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111",
+			"11111000111111111111111111111111111111111111111111111",
+			"11110000011111111111111101111111111111111111111111111",
+			"11110000011111111111111000111111111111111111111111111",
+			"11111000000000000000110000111111111111111111111111111",
+			"11111110000000000000000000000111111111111111111111111",
+			"11111111111111111111000000000111111111111111111111111",
+			"11111111111111111111111000000111111111111111111111111",
+			"11111111111111111111110000011111111111111111111111111",
+			"11111111111111111111110000111111111111111111111111111",
+			"11111111111111111111111001111111111111111111111111111",
+			"11111111111111111111111000111111111111110111111111111",
+			"11111111111111111111111000111111111111100111111111111",
+			"11111111111111111111111000111111000000000111111111111",
+			"11111111111111111111110000111110000000000111111111111",
+			"11111111111111111100000001111110000111000011111111111",
+			"11111111111111111000000011111110011111000011111111111",
+			"11111111111111111111110011111111111111000111111111111",
+			"11111111111111111111111001111111111111000111111111111",
+			"11111111111111111111111100111111111111100001111111111",
+			"11111111111111111111111110111111111111110001111111111",
+			"11111111111110111111111110111111111111100011111111111",
+			"11111111111110011111111100111111111000000011111111111",
+			"11111111111110011111111100111111110000001111111111111",
+			"11111111111110011111111000000000000110011111111111111",
+			"11111111111110011111100000001110000111011111111111111",
+			"11111111111110011110000110001111110010011111111111111",
+			"11111111111110001000011110000111111000011111111111111",
+			"11111111111110000001111111000111111100011111111111111",
+			"11111111111110000011111111000111111111111111111111111",
+			"11111111111110110000111100001111111111111111111111111",
+			"11111111111111111100000000001111111111111111111111111",
+			"11111111111111111111000010001111111111111111111111111",
+			"11111111111111111111001111011111111111111111111111111",
+			"11111111111111111110011111000000011100000011111111111",
+			"11111111111111111111111111000000000000000001111111111",
+			"11111111111111111111111100011111111111110001111111111",
+			"11111111110111111111111100111111111111100001111111111",
+			"11111111000001111111111001111111111111100011111111111",
+			"11111110000000111111111001111111111111001111111111111",
+			"11111110000000111111100001111111111100001111111111111",
+			"11111111000001111111000001111111111110001111111111111",
+			"11111111100000011100000111111111111111001111111111111",
+			"11111111100000000000111111111111111110001111111111111",
+			"11111111100011000011111111111111111110000111111111111",
+			"11111111110111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1060,
+			"height": 1040
+		},
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": 8.8
+		},
 		"spawnPoint": {
-			"x": 700,
-			"y": 580
+			"x": 510,
+			"y": 590
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/cave-volcanic.jpg": {
 		"grid": [
-			"10000001111111111000011111111111111",
-			"10000011111110000001111111111111111",
-			"11110001111100000001111111111111111",
-			"11110001111110000111111111111111111",
-			"11110001111111100111111111111111111",
-			"11110001111111100011111111111111111",
-			"11110011111111110011111111111111111",
-			"11110011111111110000000000000000111",
-			"11110001111111000000000000000000011",
-			"11000000000000000000011110000000001",
-			"10000000000000011111111111111111000",
-			"10011111111100011111111111111111100",
-			"10011111111110000011111111111111100",
-			"10011111111110000000011111111111100",
-			"10011111111100000000001111111111000",
-			"10011111111100000000011111111111000",
-			"10011111111100000000011111111111000",
-			"00011111111100011111111111111111001",
-			"10011111111100011111111111111110001",
-			"10011111111100011111111111111100011",
-			"10001111111100000000000000000000011",
-			"11001111111110000000000000000000111",
-			"11001111111110011111111111111111111"
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111110111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111000000111111111111111111111110001111111111111111111111111",
+			"11111111111100111000000000000111111111111111100000000000111111111111111111111",
+			"11111111111000000000001110000000000000000000000000000000011111111111111111111",
+			"11111111111000000000111111110000000000000000000000000000011111111111111111111",
+			"11111111111100000001111111111111111110000000000000000000000111111111111110111",
+			"11111111111110000111111111111111111111000011100000000000000000000000000000001",
+			"11111111111110000111111111111111111111000011100000000000000000000000000000011",
+			"11111111100010000111111111111111111111000111110000000000000011111111111111111",
+			"11111111100000000111111111111111111111000111110000000000000011111111111111111",
+			"11111111100000000011111111111111111111000000000000000000000001111111111111111",
+			"11111111100000000011111111111111111111000000000000000000000000111111111111111",
+			"11111110000000000011111111111111111111000000000000000000000001111111111111111",
+			"11111110000000000011111111111111111111000000111111100000000001111111111111111",
+			"11111110000000000111111111111111111111000011111111111000000011111111111111111",
+			"11111111100000000111111111111111100000000011111111111111111111111111111111111",
+			"11111111111110000111111111111100000000000011111111111111111111111111111111111",
+			"11111111111110000111111111111100000000000011111111111111111111111111111111111",
+			"11111111111111000011111111111100000000111111111111111111111111111111111111111",
+			"11111111111110000011111111111111110000011111111111111111111111111111111111111",
+			"11111111111110000011111111111111111000011111111111111111111111111111111111111",
+			"11111111111110000011111111111111111000011111111111111111111111111111111111111",
+			"11111111111110000011111111111111111000011111111111111111111111111111111111111",
+			"11111111111110000111111111111111111100001111111111111111111111111111111111111",
+			"11111111111110000111111111111111111100001111111111111111111111111111111111111",
+			"11111111111110000111111111111111111110001111111111111111111111111111111111111",
+			"11111111111110000111111111111111111110001111111111111111111111111111111111111",
+			"11111111111110000111111111111111111100000000000000000000000000000000111111111",
+			"11111111111110000111111111111111111000000000000000000000000000000000001111111",
+			"11111111111110000111111111111111110000000000000000000000000000000000000111111",
+			"11111111110000000000011111111111000000000000000000000000000000000000000011111",
+			"11111111100000000000000000000000000001111111111111111111111111111111000011111",
+			"11111111000000000000000000000000000011111111111111111111111111111111100001111",
+			"11111110000011111110000000000000001111111111111111111111111111111111100001111",
+			"11111110000111111111110000000000001111111111111111111111111111111111110000111",
+			"11111100001111111111111111111100001111111111111111111111111111111111110000111",
+			"11111100001111111111111111111100001111111111111111111111111111111111110000111",
+			"11111100001111111111111111111100001100011111111111111111111111111111110000111",
+			"11111100001111111111111111111100000000000000001111111111111111111111110000111",
+			"11111100001111111111111111111100000000000000000111111111111111111111110000111",
+			"11111100001111111111111111111100000000000000000111111111111111111111110000111",
+			"11111100001111111111111111111100000000000000000111111111111111111111110000111",
+			"11111100001111111111111111111100000000000000000111111111111111111111110000111",
+			"11111100001111111111111111111100000000000000000111111111111111111111110000111",
+			"11111100001111111111111111111100000000000000001111111111111111111111110001111",
+			"11111100001111111111111111111100001111100000011111111111111111111111100001111",
+			"11111100001111111111111111111100001111111111111111111111111111111111100001111",
+			"11111100001111111111111111111100001111111111111111111111111111111111100001111",
+			"11111100001111111111111111111100001111111111111111111111111111111111000011111",
+			"11111100001111111111111111111100001111111111111111111111111111111111000011111",
+			"11111100001111111111111111111100001111111111111111111111111111111110000111111",
+			"11111110000111111111111111111000011111111111111111111111111111111100000111111",
+			"11111110000111111111111111111000011111111111111111111111100000000000001111111",
+			"11111111000011111111111111111000000000000000000000000000000000000000011111111",
+			"11111111000011111111111111111100000000000000000000000000000000000000111111111",
+			"11111111100001111111111111111100000000000000000000000000000000001111111111111",
+			"11111111100001111111111111111110000111100000000000000001111111111111111111111",
+			"11111111100001111111111111111110000111111111111111111111111111111111111111111",
+			"11111111100001111111111111111110000111111111111111111111111111111111111111111",
+			"11111111100001111111111111111100001111111111111111111111111111111111111111111",
+			"11111111100001111111111111111100001111111111111111111111111111111111111111111",
+			"11111111100001111111111111111000011111111111111111111111111111111111111111111",
+			"11111111100000000000000000000000011111111111111111111111111111111111111111111",
+			"11111111100000000000000000000000111111111111111111111111111111111111111111111",
+			"11111111100000000000000000000001111111111111111111111111111111111111111111111",
+			"11111111000000000000000000000111111111111111111111111111111111111111111111111",
+			"11111100000000111111111111111111111111111111111111111111111111111111111111111",
+			"11111100000011111111111111111111111111111111111111111111111111111111111111111",
+			"11111100000111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1540,
+			"height": 1480
+		},
+		"arte": {
+			"escala": .8,
+			"x": -26.4,
+			"y": -64.8
+		},
 		"spawnPoint": {
-			"x": 660,
-			"y": 380
+			"x": 730,
+			"y": 690
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/ice-cave.jpg": {
 		"grid": [
-			"11111111111111111111110000110011111",
-			"11111111111111111111110000000000111",
-			"11111111111111111111110000000000111",
-			"11111111111111111111000111111110011",
-			"11111111111111111110001111111111001",
-			"11111111111111111000111111111111001",
-			"11111111111111110001111111111111001",
-			"11111111110000000011111111111111001",
-			"11111110000000000111111111111111001",
-			"11110000000000000111111111111111001",
-			"11000011000000001111111111111111001",
-			"10000011111000111111111111111111000",
-			"11111001111111111111111111111110000",
-			"11111100111111111111111111111100000",
-			"11111110011111111111111111110000000",
-			"11111111001111111111111111000000001",
-			"11111111001111111111111100000100011",
-			"11111111100111111111100000111110011",
-			"11100011000111111100000011111111111",
-			"11000000001111111000011111111111111",
-			"10011111111111110011111111111111111",
-			"10011111111111100011111111111111111",
-			"10011111111111100111111111111111111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111110011111111111111111111111111111",
+			"111111111111111111111111111111111111111100001111111111111111111111111111",
+			"111111111111111111111111111111111111111110000011111111111111111111111111",
+			"111111111111111111111111111111111111111111000000111111111111111111111111",
+			"111111111111111111111111111111111111111111100000001111110000111111111111",
+			"111111111111111111111111111111111111111111110000000000000000011111111111",
+			"111111111111111111111111111111111111111111110000000000000000001111111111",
+			"111111111111111111111111111111111111111111110000000000001000000111111111",
+			"111111111111111111111111111111111111111111100011011111111100000111111111",
+			"111111111111111111111111111111111111111110000011111111111111100011111111",
+			"111111111111111111111111111111111111111000000111111111111111110001111111",
+			"111111111111111111111111111111111111110000011111111111111111111000111111",
+			"111111111111111111111111111111111111000001111111111111111111111000111111",
+			"111111111111111111111111111111111110000011111111111111111111111000111111",
+			"111111111111111111111111111111111100001111111111111111111111111000111111",
+			"111111111111111111111111111111111000011111111111111111111111111100111111",
+			"111111111111111111111111111111100000111111111111111111111111111100111111",
+			"111111111111111111111111111100000001111111111111111111111111111100111111",
+			"111111111111111111110000000000000001111111111111111111111111111100111111",
+			"111111111111111100000000000000000011111111111111111111111111111100111111",
+			"111111111111110000000000000000000011111111111111111111111111111100111111",
+			"111111111111100000000000000000000111111111111111111111111111111000111111",
+			"111111110011000000000000000000001111111111111111111111111111111000111111",
+			"111111100001111000000000000000011111111111111111111111111111111000111111",
+			"111100000001111110000000000001111111111111111111111111111111111000011111",
+			"100000000001111111111000000111111111111111111111111111111111111000001111",
+			"100000000000111111111111111111111111111111111111111111111111111000001111",
+			"110111111000111111111111111111111111111111111111111111111111110000000111",
+			"111111111100011111111111111111111111111111111111111111111111100000000011",
+			"111111111110001111111111111111111111111111111111111111111111000000000011",
+			"111111111110000111111111111111111111111111111111111111111110000000000111",
+			"111111111111000011111111111111111111111111111111111111111100000000000111",
+			"111111111111100001111111111111111111111111111111111111110000000000001111",
+			"111111111111110000111111111111111111111111111111111111100000000000001111",
+			"111111111111111000011111111111111111111111111111111100000000000000111111",
+			"111111111111111100011111111111111111111111111111100000000110000000111111",
+			"111111111111111110001111111111111111111111111110000000011111000001111111",
+			"111111111111111110001111111111111111111111111000000111111111110001111111",
+			"111111111111111111001111111111111111111111000000011111111111111001111111",
+			"111111111111111110001111111111111111110000000001111111111111111111111111",
+			"111111000011111100001111111111111111000000000111111111111111111111111111",
+			"111000000000000000011111111111111100000001111111111111111111111111111111",
+			"110000000000000000111111111111111000001111111111111111111111111111111111",
+			"110001111111110111111111111111110000111111111111111111111111111111111111",
+			"110011111111111111111111111111100001111111111111111111111111111111111111",
+			"100011111111111111111111111111100011111111111111111111111111111111111111",
+			"100011111111111111111111111111000111111111111111111111111111111111111111",
+			"100011111111111111111111111111000111111111111111111111111111111111111111",
+			"100011111111111111111111111111000111111111111111111111111111111111111111",
+			"100011111111111111111111111111000111111111111111111111111111111111111111",
+			"100011111111111111111111111111100011111111111111111111111111111111111111",
+			"110011111111111111111111111111000011111111111111111111111111111111111111",
+			"110001111111111111111111111100000000111111111111111111111111111111111111",
+			"110001111111111111111111100000000000000011111111111111111111111111111111",
+			"100000111111111111111110000000000000000000000111111111111100000111111111",
+			"100000111111111111111000000000000011100000000000000000000000000001111111",
+			"100000011111111111110000000000000011111110000000000000000000000001111111",
+			"100000000011111100000000000000000011111111111111110000000000000001111111",
+			"100000000000000000000000000010000111111111111111111110000000000000111111",
+			"110000000000000000000000000111111111111111111111111110000000000000011111",
+			"110000000000000000000000111111111111111111111111111111000000000000011111",
+			"110000000000000000000001111111111111111111111111111111110000000000011111",
+			"111110000000000000000111111111111111111111111111111111111100000000011111",
+			"111111000000000000011111111111111111111111111111111111111110000000111111",
+			"111111111110000001111111111111111111111111111111111111111110000000111111",
+			"111111111111111111111111111111111111111111111111111111111111000001111111",
+			"111111111111111111111111111111111111111111111111111111111111110111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 1260,
-			"y": 700
+		"bounds": {
+			"width": 1440,
+			"height": 1380
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": -136.8,
+			"y": -287.2
+		},
+		"spawnPoint": {
+			"x": 1250,
+			"y": 1230
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/fairy-cave.jpg": {
 		"grid": [
-			"11111100000000000001111111110000001",
-			"11100000000000000001111111100000000",
-			"10000000011111110011111111100000001",
-			"10000000111111111111111111111000001",
-			"10000001111111111111111111111000001",
-			"11000001111111111111111111111000001",
-			"11100111111111111111111111111100111",
-			"11100111111111111111111111111100111",
-			"11100111111111100001111111111110011",
-			"11100111111110000000111111111110011",
-			"11100111111100011110001111111110011",
-			"11100111111100111111001111111110011",
-			"11100011111000111111000011111100111",
-			"11100000000000011111000000000000111",
-			"11100000000000000000000100000111111",
-			"11100011111100000000001111111111111",
-			"11100011111111000000011111111111111",
-			"11100011111111110001111111111111111",
-			"11110011111111111001111111111111111",
-			"11110111111111111001111111111111111",
-			"11110111111111111001111111111111111",
-			"11110111111111111001111111111111111",
-			"11100111111111111001111111111111111"
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111100111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111111111111111110000011111111100011111111111111111111111100000111111111",
+			"1111111111111111111000000000000111100000011111111111111111111100000000011111111",
+			"1111111111111100000000000000000000000000001111111111111111110000000000001111111",
+			"1111111111100000000000000000000000000000000111111111111111000000000000000111111",
+			"1111111110000000000000000111111100000000001111111111111111000000000000000111111",
+			"1111111100000000000000111111111111111111111111111111111111110000000000001111111",
+			"1111111000000000000011111111111111111111111111111111111111111100000000001111111",
+			"1111111000000000000011111111111111111111111111111111111111111110000000001111111",
+			"1111111000000000000111111111111111111111111111111111111111111110000000001111111",
+			"1111111100000000000111111111111111111111111111111111111111111110000000001111111",
+			"1111111110000000001111111111111111111111111111111111111111111111000000001111111",
+			"1111111110000000001111111111111111111111111111111111111111111111000000001111111",
+			"1111111111000010011111111111111111111111111111111111111111111111000000111111111",
+			"1111111111000011111111111111111111111111111111111111111111111111100011111111111",
+			"1111111111100011111111111111111111111111111111111111111111111111100011111111111",
+			"1111111111100011111111111111111111111111111111111111111111111111110001111111111",
+			"1111111111100011111111111111111111111111111111111111111111111111110001111111111",
+			"1111111111100011111111111111111111100000111111111111111111111111110001111111111",
+			"1111111111100011111111111111111110000000000111111111111111111111111000111111111",
+			"1111111111100011111111111111111100000000000001111111111111111111111000111111111",
+			"1111111111100011111111111111111000011111100000111111111111111111111000111111111",
+			"1111111111100011111111111111110000111111111000011111111111111111111000111111111",
+			"1111111111100011111111111111100001111111111100001111111111111111111000111111111",
+			"1111111111100011111111111111100001111111111110000111111111111111111000111111111",
+			"1111111111100001111111111111000011111111111110000100111111111111110001111111111",
+			"1111111111100001111111111111000011111111111110000000111111111111110001111111111",
+			"1111111111000000111111111110000001111111111110000000001111110000000011111111111",
+			"1111111111000000000000000000000000111111111100000000000000000000000111111111111",
+			"1111111111000000000000000000000000011111111000000000000000000000001111111111111",
+			"1111111111000000110000000000000000000000000000000011111110011111111111111111111",
+			"1111111111000000111111111111000000000000000000000111111111111111111111111111111",
+			"1111111111000000111111111111110000000000000000000111111111111111111111111111111",
+			"1111111111100000111111111111111100000000000000001111111111111111111111111111111",
+			"1111111111100001111111111111111111000000000000011111111111111111111111111111111",
+			"1111111111100001111111111111111111110000000011111111111111111111111111111111111",
+			"1111111111110001111111111111111111111000000111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100001111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100001111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100001111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111100001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111100001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111000000111111111111111111111100000111111111110111111111111111111111111",
+			"1111111110000000000001111110000000000000000000011111000011111111111111111111111",
+			"1111111110000000000000000000000000000000000000000000000011111111111111111111111",
+			"1111111100000000000000000000000000000000000000000000000000000011001111111111111",
+			"1111111100000000000000000000000000000000000000000000000000000000000000111111111",
+			"1111111110000000000111000000000000000000000000000000000000000000000000011111111",
+			"1111111110000000001111111000000000000000000000000000000011000000000000001111111",
+			"1111111111111101111111111111111000000000000000000000000111110000000000001111111",
+			"1111111111111111111111111111111111000000000001111111111111111000000000011111111",
+			"1111111111111111111111111111111111100000000011111111111111111100000000111111111",
+			"1111111111111111111111111111111111100000000011111111111111111111000111111111111",
+			"1111111111111111111111111111111111100000000011111111111111111111111111111111111",
+			"1111111111111111111111111111111111100000000111111111111111111111111111111111111",
+			"1111111111111111111111111111111111110000000111111111111111111111111111111111111",
+			"1111111111111111111111111111111111110000000111111111111111111111111111111111111",
+			"1111111111111111111111111111111111100000000111111111111111111111111111111111111",
+			"1111111111111111111111111111111111110000001111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 700,
-			"y": 860
+		"bounds": {
+			"width": 1580,
+			"height": 1620
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": -29.6,
+			"y": -39.2
+		},
+		"spawnPoint": {
+			"x": 790,
+			"y": 1510
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/island.jpg": {
 		"grid": [
-			"11111111111111001111011111111111111",
-			"11111111110010001110011111111111011",
-			"11111111111000000000000111111111001",
-			"11111111111000000000000000000011000",
-			"11111111111111110011110000000011100",
-			"11111111111111110011111100000111100",
-			"11111000011111110011111111011111110",
-			"11100000001111110011111110011111110",
-			"11100000000100000001111111011111110",
-			"11110000000000000000000111011111110",
-			"11111000011111011000000000000011110",
-			"11111111111111011100000000000011110",
-			"11111111111111011111111001100111110",
-			"11111111111110011111111001111111110",
-			"11111111111100011111111001111111100",
-			"11111111111110001111111001111111000",
-			"11111111111111000111111001111111000",
-			"11111111111111100000111001111111000",
-			"11111111111111110001111000111110000",
-			"11111111111111110000011100100110000",
-			"11111111111111111000001100000100000",
-			"11111111111111111000000000000000001",
-			"11111111111111111000000000000000011"
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111000000111111111111111111111111111111111111111111",
+			"11111111111111111111111111111110000001111111111111111111111111111111111111111111",
+			"11111111111111111011111111111110000111111111111111111111111111111111111111111111",
+			"11111111111111110001111111111110000111111111111111111111111111111111111111111111",
+			"11111111111111000001111111111100000111111110011111111111111111111111111111111111",
+			"11111111111110000111111110111100001111111100011111111111111111111111111111111111",
+			"11111111111100001111111100011100000111111100011111111111111111111111011111111111",
+			"11111111111000011111111100011100000000000000011111111111111111111110001111111111",
+			"11111111110000111111111100000000000000000000001111111111111111111110000111111111",
+			"11111111100011111111111110000000000000000000000000011111111110011111000111111111",
+			"11111111100111111111111111000000111000100000000000000010001100011111000011111111",
+			"11111111000111111111111111111111111000111111100000000000000000011111000011111111",
+			"11111100001111111111111111111111111000111111111000000000000000111111100001111111",
+			"11111000011111111111111111111111111000111111111111000000000001111111100000111111",
+			"11111000111111111111111111111111111000111111111111111100011111111111110000011111",
+			"11110000111111001111111111111111111000111111111111111110011111111111110000011111",
+			"11100001111111000000111111111111111000111111111111111110011111111111111000001111",
+			"11100001111111000000001111111111111000111111111111111110011111111111111000000011",
+			"11000011100010000000000111111111111100111111111111111100011111111111111000000011",
+			"11000011100000000000000011110111110000001111111111111100011111111111111100000011",
+			"11000001110000000000000001110011000000000111111111111110011111111111111100000011",
+			"11000001110000000000000000000000000000000011001111111110011111111111111100000111",
+			"11000001111000000000000000001100011100000000000111111110011111111111111000000111",
+			"11000001111100000000001111111110011100000000000001100010011111111111111000000111",
+			"11000001111111000111111111111110011111000000000000000000000000111111111000000111",
+			"10000001111111111111111111111110011111100000000000000000000000111111111000000111",
+			"10000001111111111111111111111110011111110000000010000000000000111111111000000111",
+			"10000001111111111111111111111110011111111111111111001111000000111111111000000111",
+			"10000001111111111111111111111110011111111111111111001111110001111111111000000111",
+			"10000001111111111111111111111100011111111111111111001111111111111111111000000111",
+			"10000001111111111111111111111100011111111111111110001111111111111111111000000111",
+			"11000000111111111111111111110000011111111111111110001111111111111111111000000111",
+			"11000000111111111111111111110000011111111111111110001111111111111111100000000111",
+			"11000000111111111111111111110000011111111111111110001111111111111111100000000111",
+			"11100000111111111111111111111000001111111111111110001111111111111111000000000111",
+			"11110000011111111111111111111100001111111111111110001111111111111110000000000111",
+			"11111000011111111111111111111111000001111111111111001111111111111110000000000111",
+			"11111100001111111111111111111111100000010001111111001111111111111110000000000111",
+			"11111100000111111111111111111111110000000001111111001111111111111110000000000111",
+			"11111100000111111111111111111111111000000001111111000111111111111000000000000111",
+			"11111110000111111111111111111111111000000111111111000011111111111000000000001111",
+			"11111110000011111111111111111111111100000111111111000011111111111000000000001111",
+			"11111110000011111111111111111111111100000110111111100001110011111000000000011111",
+			"11111110000011111111111111111111111100000000011111110000110001111000000001111111",
+			"11111110000001111111111111111111111100000000000111100000000001111000000011111111",
+			"11111110000001111111111111111111111110000000000000000000000000000000000111111111",
+			"11111111000000111111111111111111111110000000000000000000000000000000001111111111",
+			"11111111000000011111111111111111111110000000000000000000000000000000011111111111",
+			"11111111000000001111111111111111111110000000000000000000000000000000111111111111",
+			"11111111000000000011111111111111111110000000000000111110000000000001111111111111",
+			"11111111100000000000111111111111111100000000000000111111000000000011111111111111",
+			"11111111110000000000001111111111111100000000000001111111100000000011111111111111",
+			"11111111111111100000000011111111110000000000000000111111110000000111111111111111",
+			"11111111111111111000000000000000000000000000000000111111110000011111111111111111",
+			"11111111111111111100000000000000000000000000000000001111110000111111111111111111",
+			"11111111111111111110000000000000000000000000000000000000000001111111111111111111",
+			"11111111111111111111000000000000000000000000000000000000000011111111111111111111",
+			"11111111111111111111111111100000000000000011111111110000000111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 1100,
-			"y": 860
+		"bounds": {
+			"width": 1600,
+			"height": 1220
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": -60,
+			"y": -280.8
+		},
+		"spawnPoint": {
+			"x": 1170,
+			"y": 1010
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/lake.jpg": {
 		"grid": [
-			"11000000000000001111111111111111111",
-			"11000000000000011111111111111111111",
-			"11100000000011111111111111111111111",
-			"11100011001111111111111111111111111",
-			"11000111001111111111111111111111111",
-			"10001111001111111111111111111111111",
-			"10001110011111111111111111111111111",
-			"00011110011111111111111111111111111",
-			"00011110111111111111111111111111111",
-			"00011100111111111111111111111111111",
-			"00000000111111111111111111111111111",
-			"00000000111111111111111111111111111",
-			"00000000011111111111111111111111111",
-			"00011000011111111111111111111111111",
-			"00000000111111111111111111111111111",
-			"11000011111111111111111111111111111",
-			"11110011111111111111111111111111111",
-			"11110011111111111111111111111111111",
-			"11111001111111111111111111111111111",
-			"11111000111111111111111111111111111",
-			"11111000011111111111111111111111111",
-			"11111100001111111111111111111111111",
-			"11111100000000111111111111111111111"
+			"1111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111100111111111111111111111111111111",
+			"1111111111111111111111111111111111111000111111111111111111111111111111",
+			"1111111111111111111111111111111111111000111111111111111111111111111111",
+			"1111111111111111111111111111111111110000111111111111111111111111111111",
+			"1111111111111111111111111111111110000000001111111111111111111111111111",
+			"1111111111111111111111111111110000000000000000011111111111111111111111",
+			"1111111111111111111111111111100000000000000000000011111111111111111111",
+			"1111111111111111111111111111000000000000000000000001111111111111111111",
+			"1111111111111111111111111100000000000000000000000001111111111111111111",
+			"1111111111111111111111111100000000000000000000000001111111111111111111",
+			"1111111111111111111111111100000000011111111111111111111111111111111111",
+			"1111111111111100011111111000000000011111111111111111111111111111111111",
+			"1111111111111000000000000000000000011111111111111111111111111111111111",
+			"1111111111111000000000000000000000111111111111111111111111111111111111",
+			"1111111111110000000000000000000000111111111111111111111111111111111111",
+			"1111111111110000000000000000000000111111111111111111111111111111111111",
+			"1111111111100000000000000000000000111111111111111111111111111111111111",
+			"1111111110000000000000000000000000111111111111111111111111111111111111",
+			"1111111110000000000000000000000000111111111111111111111111111111111111",
+			"1111111100000000000000000000000000111111111111111111111111111111111111",
+			"1111111110000000000000000000001111111111111111111111111111111111111111",
+			"1111111111000000000000000001111111111111111111111111111111111111111111",
+			"1111111111000001100000000011111111111111111111111111111111111111111111",
+			"1111111111000011111000001111111111111111111111111111111111111111111111",
+			"1111111111000011111100011111111111111111111111111111111111111111111111",
+			"1111111100000011111100011111111111111111111111111111111111111111111111",
+			"1111111000000111111100111111111111111111111111111111111111111111111111",
+			"1111111000000111111100111111111111111111111111111111111111111111111111",
+			"1111110000001111111000111111111111111111111111111111111111111111111111",
+			"1111111000011111111000111111111111111111111111111111111111111111111111",
+			"1111110000011111111001111111111111111111111111111111111111111111111111",
+			"1111100000111111110001111111111111111111111111111111111111111111111111",
+			"1111100000111111110001111111111111111111111111111111111111111111111111",
+			"1111100000111111100011111111111111111111111111111111111111111111111111",
+			"1111000001111111100011111111111111111111111111111111111111111111111111",
+			"1111000000111111100011111111111111111111111111111111111111111111111111",
+			"1111000000111111100111111111111111111111111111111111111111111111111111",
+			"1111000000000011000111111111111111111111111111111111111111111111111111",
+			"1111000000000000000111111111111111111111111111111111111111111111111111",
+			"1111000000000000000111111111111111111111111111111111111111111111111111",
+			"1110000000000000000011111111111111111111111111111111111111111111111111",
+			"1110000000000000000011111111111111111111111111111111111111111111111111",
+			"1110000000111100000011111111111111111111111111111111111111111111111111",
+			"1100000000111110000011111111111111111111111111111111111111111111111111",
+			"1000000000111100000011111111111111111111111111111111111111111111111111",
+			"1000000000011100000011111111111111111111111111111111111111111111111111",
+			"1111110000001100111111111111111111111111111111111111111111111111111111",
+			"1111111000000000111111111111111111111111111111111111111111111111111111",
+			"1111111110000000111111111111111111111111111111111111111111111111111111",
+			"1111111111000000111111111111111111111111111111111111111111111111111111",
+			"1111111111100001111111111111111111111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111111111111111111111111111111111111",
+			"1111111111111000111111111111111111111111111111111111111111111111111111",
+			"1111111111111000111111111111111111111111111111111111111111111111111111",
+			"1111111111111100011111111111111111111111111111111111111111111111111111",
+			"1111111111111100001111111111111111111111111111111111111111111111111111",
+			"1111111111111100001111111111111111111111111111111111111111111110000111",
+			"1111111111111100000111111111111111111111111111111111111111111100000111",
+			"1111111111111110000001111111111111111111111111111111111111111100000001",
+			"1111111111111111000000011111111111111111111111111111111111111000000001",
+			"1111111111111111100000011111111111111111111111111111111111111000000001",
+			"1111111111111111100000000000011111111111111111111111111111111100000001",
+			"1111111111111111000000000000000111111111111111111111111111111100000001",
+			"1111111111111111000000000000000011111111111111111111111111110000000001",
+			"1111111111110000000000000000000001111111111111000000111111100000011111",
+			"1111111111110000000000000000000000111111111110000000001110000000111111",
+			"1111111111100000000000111000000000011111111110000000000110000001111111",
+			"1111111101100000001111111111000000001111111100000000000000000001111111",
+			"1111110000000000111111111111100000000000000000000000000000000011111111",
+			"1111100000000001111111111111110000000000000000000000000000000011111111",
+			"1111100000000001111111111111111000000000000000000000000000000011111111",
+			"1111100000000011111111111111111100000000000000000000000000000111111111",
+			"1111100000000011111111111111111111000000000000000000000000001111111111",
+			"1111110000000111111111111111111111110000000000000011111111111111111111",
+			"1111111000001111111111111111111111111111111111001111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 620,
-			"y": 20
+		"bounds": {
+			"width": 1400,
+			"height": 1540
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": -48.8,
+			"y": -5.6
+		},
+		"spawnPoint": {
+			"x": 770,
+			"y": 130
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/metropolis.jpg": {
 		"grid": [
-			"11111000011111111111111111111000001",
-			"11111010011111111111111111111000001",
-			"11111010001111111111111111111000001",
-			"11111000001111111111111111111000001",
-			"11111000001111111111111111111100011",
-			"11111000011111111111111111111100011",
-			"11111000001111111111111111111110011",
-			"11111000101111111111111111111110011",
-			"00000000011111111111111111111110011",
-			"00000000001111000011111111111000001",
-			"11111000000000011100000000100000000",
-			"11111000000000000000000000000000000",
-			"11111000001111111111111111110000000",
-			"11111000001111111111111111110000000",
-			"11111000001111111111111111110000011",
-			"11111000001111111111111111110000011",
-			"11111000001111111111111111110000011",
-			"11111000101111111111111111110000011",
-			"11111000101111111111111111110000011",
-			"11111000001111111111111111110000011",
-			"11111000001111111111111111111000011",
-			"11111000001111111111111111111100011",
-			"11111010001111111111111111111110011"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111100000000000000011111111111111111111111111111111111111111000001111111111111",
+			"111111110000000000000000001111111111111111111111111111111111111111000000011111111111",
+			"111111110000000000000000001111111111111111111111111111111111111111000000011111111111",
+			"111111111000000000000000001111111111111111111111111111111111111111100000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111000000011111111111",
+			"111111111111111110000000011111111111111111111111111111111111111111000000011111111111",
+			"111111111111111110000000011111111111111111111111111111111111111111000000011111111111",
+			"111111111111111110000000011111111111111111111111111111111111111111000000011111111111",
+			"111111111111111100000000011111111111111111111111111111111111111111000000011111111111",
+			"111111111111111100000000011111111111111111111111111111111111111111000000001111111111",
+			"111111111111111110111100011111111111111111111111111111111111111111000000001111111111",
+			"111111111111111110111100011111111111111111111111111111111111111111000000001111111111",
+			"111111111111111110111100001111111111111111111111111111111111111111000000001111111111",
+			"111111111111111110111100001111111111111111111111111111111111111111000000001111111111",
+			"111111111111111110111100001111111111111111111111111111111111111111000000001111111111",
+			"111111111111111110111100001111111111111111111111111111111111111111000000001111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111100000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111100000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111110000011111111111",
+			"111111111111111100000000001111111111111111111111111111111111111111111000011111111111",
+			"111111111111111100000011101111111111111111111111111111111111111111111100011111111111",
+			"111111111111111100000011101111111111111111111111111111111111111111111100011111111111",
+			"111111111111111100000011001111111111111111111111111111111111111111111100011111111111",
+			"111111111111111110000011001111111111111111111111111111111111111111111100011111111111",
+			"100000000000000000000000001111111111111111111111111111111111111111111100011111111111",
+			"100000000000000000000000001111111111111111111111111111111111111111111000011111111111",
+			"111111111111111100000000001111111111000000111111111111111110011110000000011111111111",
+			"111111111111111110000000000000000000011111000000000000000000000000000000000000000001",
+			"111111111111111110000000000000000000011111100000000000000011111000000000000000000001",
+			"111111111111111110000000000000000000001111100000000000000011110000000000000000000001",
+			"111111111111111110000000000111111111000000000000000000000000001000000000000000000011",
+			"111111111111111110000000001111111111111111111111111111111111111000000000000000011111",
+			"111111111111111110000000001111111111111111111111111111111111111000000000000000011111",
+			"111111111111111110000000001111111111111111111111111111111111111000000000000000011111",
+			"111111111111111110000000001111111111111111111111111111111111111000000000001111111111",
+			"111111111111111110000000001111111111111111111111111111111111111000000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000111111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000111111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000111111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000111111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000011101111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000011101111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000011101111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000011101111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111110000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111100000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111111000011111111111",
+			"111111111111111110111100001111111111111111111111111111111111111111111000011111111111",
+			"111111111111111110111100001111111111111111111111111111111111111111111000011111111111",
+			"111111111111111110111100001111111111111111111111111111111111111111111000011111111111",
+			"111111111111111110111100001111111111111111111111111110000001111111111000011111111111",
+			"111111111111111111011000001111111111111111111111111110000001111111111000011111111111",
+			"111111111111111110000000001111111111111111111111111111000001111110000000011111111111",
+			"100001111111111100000000000000000000000000000000000000000000000110000000001111111111",
+			"100000000000000000000000000000011111000000000000000000000000000000000000000000000001",
+			"100000000000000000000000000000111111100000000000000000000000000000000000000000000001",
+			"100000000000000000000000000000111111100000000000000000000000000000000000000000000001",
+			"100000001111111000000000000000000000000000111000000000000000000000000000000000000001",
+			"100000111111111100000000000000000000000001111111111111111111111100000000000000000001",
+			"100001111111111100000000000000000000000001111111111111111111111110000000000000000001",
+			"111111111111111100000000000001111111111111111111111111111111111110000000011111111111",
+			"111111111111111100000000000001111111111111111111111111111111111110000000011111111111",
+			"111111111111111110000000000011111111111111111111111111111111111110000000111111111111",
+			"111111111111111110000000000011111111111111111111111111111111111110000000111111111111",
+			"111111111111111110000000000011111111111111111111111111111111111100000000111111111111",
+			"111111111111111110000000000011111111111111111111111111111111111100000000111111111111",
+			"111111111111111110000000000011111111111111111111111111111111111110000000111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 1300,
-			"y": 820
+		"bounds": {
+			"width": 1680,
+			"height": 1500
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": -167.2
+		},
+		"spawnPoint": {
+			"x": 1490,
+			"y": 1270
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/slum.jpg": {
 		"grid": [
-			"11111111111111111000111111111111111",
-			"11111111001000000000000000111101111",
-			"00000000000000000000000000000001111",
-			"11110000010111111110001111100001111",
-			"11111110011111111111011111111100111",
-			"11111110011111111111011111111100111",
-			"11111110011111111111001111111100111",
-			"11111110011111111111001111111100111",
-			"11111110011111111100001111111100111",
-			"00001110011111111100011111111100001",
-			"00000000011111111100111111111100000",
-			"11000000011111111100111111111100000",
-			"11110000011111111100111111111000000",
-			"11110000011111111000011111111100000",
-			"11100000011111110000000011111100000",
-			"11100000001111100010000000000000111",
-			"11100000000000000010011100000000111",
-			"00000000000000000000111111001000111",
-			"00000000111111100001111111001100111",
-			"11100000111111110011111111001100111",
-			"11110001111111110001111111001100111",
-			"11100001111111110001111111001100111",
-			"11100001111111110001111111001000111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111100111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111000111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111000111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111000111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111110000111111111111111111111111111111111111111",
+			"111111111111111111111100011111000001111000000000110001111111111111100111111111111111",
+			"111111110000000000000000000000000000000000000000000000000000000000000111111111111111",
+			"111111110000000000000000000000000000000000000000000000000000000000000111111111111111",
+			"111111111000000000000000000001111111110000000000000000111100000000000111111111111111",
+			"111111111111111111111000111111111111111111111000011111111111111111000111111111111111",
+			"111111111111111111111000111111111111111111111100011111111111111111000111111111111111",
+			"111111111111111111111000111111111111111111111100011111111111111111100111111111111111",
+			"111111111111111111111000111111111111111111111100011111111111111111100011111111111111",
+			"111111111111111111111000111111111111111111111100011111111111111111100011111111111111",
+			"111111111111111111111000111111111111111111111110011111111111111111100011111111111111",
+			"111111111111111111111000111111111111111111111110011111111111111111100011111111111111",
+			"111111111111111111111000111111111111111111111110011111111111111111100111111111111111",
+			"111111111111111111111000111111111111111111111110001111111111111111000111111111111111",
+			"111111111111111111111000111111111111111111100100001111111111111111000111111111111111",
+			"111111111111111111111000111111111111111111100000011111111111111111000111111111111111",
+			"111111111111111111111000111111111111111111100000111111111111111111000011111111111111",
+			"111111110000000111111000111111111111111111100000111111111111111111000000001111111111",
+			"111111100000000011111000111111111111111111000001111111111111111111000000000111111111",
+			"111111110000000000001000111111111111111111000001111111111111111111000000000011111111",
+			"111111111110000000001100111111111111111111000001111111111111111111100000000000000111",
+			"111111111111000000011100111111111111111111000001111111111111111111000000000000000001",
+			"111111111111111000011100111111111111111111100001111111111111111111000000000000000001",
+			"111111111111111000011100111111111111111111100001111111111111111111000000000000000011",
+			"111111111111110000011000111111111111111111000001111111111111111111000000000001111111",
+			"111111111111110000001000111111111111111110000000111111111111111111000000000001111111",
+			"111111111111110000001000111111111111111100000000011111111111111111000000000001111111",
+			"111111111111110000000000011111111111111000000000000001111111111111000000010011111111",
+			"111111111111110000000000001111111111110000010000000000000111111111000001111111111111",
+			"111111111111110000000000001111111111110000111100000000000000000000000011111111111111",
+			"111111111111110000000000000001111111000000111100111111000000000000000011111111111111",
+			"111111111111110000000000000000000000000000111000111111111100000000000011111111111111",
+			"111111111111110000000000000000000000000000110000111111111110001111000111111111111111",
+			"110000000000000000000000111111000000000000000001111111111110001111000111111111111111",
+			"100000000000000000000000111111111111100000000011111111111110001111000111111111111111",
+			"110000000000000000000001111111111111110000001111111111111110011111000111111111111111",
+			"111111111111110000000011111111111111111000011111111111111110011111100111111111111111",
+			"111111111111110000000111111111111111110000011111111111111110011111100011111111111111",
+			"111111111111110000000111111111111111110000011111111111111110011111100111111111111111",
+			"111111111111110000000111111111111111110000001111111111111110011111100111111111111111",
+			"111111111111110000000111111111111111111000001111111111111110001111100111111111111111",
+			"111111111111110000000111111111111111111000001111111111111110011111000111111111111111",
+			"111111111111110000000111111111111111111000001111111111111110011111000011111111111111",
+			"111111111111110000000111111111111111111000001111111111111110011110000011111111111111",
+			"111111111111110000000111111111111111111000001111111111111100010000000011111111111111",
+			"111111111111110000000011111111111111111100000000000000000000000000000001111111111111",
+			"111111111111100000000011111111111111111000000000000000000000000000000000111111111111",
+			"111111111111000000000011111111111111110000000000000110000011111111111000111111111111",
+			"111111111111100110000011111111111111000000000001111111111111111111111111111111111111",
+			"111111111111111110000000000000000000000000000111111111111111111111111111111111111111",
+			"111111111111111111000000000000000000000000001111111111111111111111111111111111111111",
+			"111111111111111111000000000000000000000000001111111111111111111111111111111111111111",
+			"111111111111111111000011111111110000000000001111111111111111111111111111111111111111",
+			"111111111111111111000111111111111111100000001111111111111111111111111111111111111111",
+			"111111111111111111000111111111111111110000001111111111111111111111111111111111111111",
+			"111111111111111100000111111111111111110000001111111111111111111111111111111111111111",
+			"111111111111111000000111111111111111110000001111111111111111111111111111111111111111",
+			"111111111111111000000111111111111111111000001111111111111111111111111111111111111111",
+			"111111111111111100000111111111111111111000001111111111111111111111111111111111111111",
+			"111111111111111100000111111111111111111000001111111111111111111111111111111111111111",
+			"111111111111111110001111111111111111111000001111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111000011111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 60,
-			"y": 700
+		"bounds": {
+			"width": 1680,
+			"height": 1360
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": 13.6,
+			"y": -301.6
+		},
+		"spawnPoint": {
+			"x": 90,
+			"y": 790
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/wasteland.jpg": {
 		"grid": [
-			"11100011111000000000111111111111111",
-			"11110001100000000011111111111111111",
-			"11111000000000001111111111111111111",
-			"11110000000000111111111111111111111",
-			"11100000000001111111111111111111111",
-			"11100000001111111111111111111111111",
-			"11110000011111111111111000000011111",
-			"11110011111111111111100000000011111",
-			"11110011111111111111000010000011111",
-			"10000011000011111110000111000001111",
-			"00000000000111111110000011001001111",
-			"00000000001111111110000000001011111",
-			"10000000011111111110000000001111111",
-			"11000000001111111110000000011111111",
-			"11100000001111111100001100011111111",
-			"11100000001111111000001110011111111",
-			"11100000000111111000001111111111111",
-			"11100000000011110000011111111111111",
-			"11100100000000110001111111111111111",
-			"11100100000000000011111111111111111",
-			"11100100000000000011111111111111111",
-			"10001110000000000000000111111111111",
-			"00011110000000000000000000111111111"
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111001000000111111111111111111111111111111111111111111111111111111111111111",
+			"11111111100000000000011111111111111111111111111111111111111111111111111111111111111",
+			"11111111100000000000111111111111111111111111111111111111111100011111111111111111111",
+			"11111111000000000011111111111111111111111111111000001111111000011111111111111111111",
+			"11111110000000001111111111111111111111111111110000000001110000111111111111111111111",
+			"11111100000000111111111111111111111111111111111000000000100001111111111111111111111",
+			"11110000000000111111111111111111111111111111111000000000000011111111111111111111111",
+			"11100000000000011111111111111111111111111110000000000100000111111111111111111111111",
+			"11000000011100001111111111111111111000000000000000000111001111111111111111111111111",
+			"10000000111110001111111111111111100000000000000000001111111111111111111111111111111",
+			"10000011111110000111111111111110000000000000000001111111111111111111111111111111111",
+			"11111111111111000011111111110000000000000001111111111111111111111111111111111111111",
+			"11111111111111100001111111000000000000000011111111111111111111111111111111111111111",
+			"11111111111111110001111110000000000000001111111111111111111111111111111111111111111",
+			"11111111111111110000000000000000000000011111111111111111111111111111111111111111111",
+			"11111111111111111000000000000000000001111111111111111111111111111111111111111111111",
+			"11111111111111111000000000000000000111111111111111111111111111111111111111111111111",
+			"11111111111111000000000000000000001111111111111111111111111111111111111111111111111",
+			"11111111111110000000000000000000111111111111111111111111111111111111111111111111111",
+			"11111111111100000000000000000011111111111111111111111111111111111111111111111111111",
+			"11111111111100000000000000111111111111111111111111111111111111111111111111111111111",
+			"11111111111110000000000001111111111111111111111111111111111111111111111111111111111",
+			"11111111111111100000000001111111111111111111111111111111111111111111111111111111111",
+			"11111111111111100001111111111111111111111111111111111000000000000011111111111111111",
+			"11111111111111100001111111111111111111111111111111000000000000000001111111111111111",
+			"11111111111111100001111111111111111111111111111110000000000000000001111111111111111",
+			"11111111111111100011111111111111111111111111111100000011000000000001111111111111111",
+			"11111111111111100011111111111111111111111111111000001111111000000011111111111111111",
+			"11111111111111100011111111001111111111111111000000001111111000110001111111111111111",
+			"11111111100000000011110000000111111111111111000000011111111000110001111111111111111",
+			"11111111000000000000000000000111111111111111000000001111111000110001111111111111111",
+			"11111110000000000000000000011111111111111111000000000011111000110001111111111111111",
+			"11111110000000000000000000111111111111111111100000000000111000111001111111111111111",
+			"11111110000000000000000000111111111111111111100000000000000000111111111111111111111",
+			"11111111000000000000000001111111111111111111110000000000000001111111111111111111111",
+			"11111111100000000000000111111111111111111111110000000000000001111111111111111111111",
+			"11111111111000000000000111111111111111111111100000000000000001111111111111111111111",
+			"11111111111100000000000000111111111111111111000000011000000001111111111111111111111",
+			"11111111111100000000000000111111111111111110000000111100000011111111111111111111111",
+			"11111111111110000000000000111111111111111100000000111110000011111111111111111111111",
+			"11111111111110000000000000111111111111111100000000111111000011111111111111111111111",
+			"11111111111100000000000000011111111111111000000001111111111111111111111111111111111",
+			"11111111111100000000000000001111111111111000000001111111111111111111111111111111111",
+			"11111111111100000000000000000111111111111000000001111111111111111111111111111111111",
+			"11111111111100000000000000000111111111110000000001111111111111111111111111111111111",
+			"11111111111100000000000000000011111111100000010011111111111111111111111111111111111",
+			"11111111111110001100000000000000011111100000111111111111111111111111111111111111111",
+			"11111111111110001110000000000000000111000000111111111111111111111111111111111111111",
+			"11111111111110001110000000000000000001000001111111111111111111111111111111111111111",
+			"11111111111110001110000100000000000000000011111111111111111111111111111111111111111",
+			"11111111111100001110000110000000000000000011111111111111111111111111111111111111111",
+			"11111111111100011110000100000000000000000111111111111111111111111111111111111111111",
+			"11111111111000011111000000000000000000000000011111111111111111111111111111111111111",
+			"11111111100000111111000000000000000000000000000000000111111111111111111111111111111",
+			"11111111000001111111100000000000000000000000000000000000011111111111111111111111111",
+			"11111110000011111111100000000000000000000000000000000000000111111111111111111111111",
+			"11111100000111111111111100000000000000000000000001111000000000111111111111111111111",
+			"11111110011111111111111110000000000000000000000011111111000000001111111111111111111",
+			"11111111111111111111111111000000000000000000000111111111110000000111111111111111111",
+			"11111111111111111111111111111100000000000000111111111111111110000000000001111111111",
+			"11111111111111111111111111111110000000000000111111111111111111100000000000111111111",
+			"11111111111111111111111111111111000000000000111111111111111111100000000000000111111",
+			"11111111111111111111111111111111110000000000111111111111111111100000000000000001111",
+			"11111111111111111111111111111111111000110000111111111111111111110000000000000000011",
+			"11111111111111111111111111111111111111111000111111111111111111110000000000000000011",
+			"11111111111111111111111111111111111111111000111111111111111111111000000000000000011",
+			"11111111111111111111111111111111111111111000111111111111111111111100000000000000111",
+			"11111111111111111111111111111111111111111000111111111111111111111100000000000000111",
+			"11111111111111111111111111111111111111110001111111111111111111111100000011000000111",
+			"11111111111111111111111111111111111111110001111111111111111111111110000011000001111",
+			"11111111111111111111111111111111111111110000111111111111111111111111100000000111111",
+			"11111111111111111111111111111111111111111001111111111111111111111111110000000111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111000001111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 1060,
-			"y": 620
+		"bounds": {
+			"width": 1660,
+			"height": 1520
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": 7.2,
+			"y": -148
+		},
+		"spawnPoint": {
+			"x": 1410,
+			"y": 1310
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/town-night.jpg": {
 		"grid": [
-			"11111100000000000000000000000000000",
-			"11111111000000000000000000000000000",
-			"10011111000000000000000000000000000",
-			"10011111111000000000000000000000001",
-			"10001111111000000100000000000000011",
-			"00000111110000011110000000000001111",
-			"10100001100010011110000000011111111",
-			"10000000001110011110000001111111111",
-			"10000000011111001110000001111111111",
-			"00000000001111000000000001111111111",
-			"00000000000111111110000001111111111",
-			"00000000001111111111000001111111111",
-			"10000000011111111111000000111111111",
-			"10000000111111111111000000000111111",
-			"11000000111100111111100000001111111",
-			"11000000000000111111110000011111111",
-			"11000000000000111111111110111111111",
-			"11000000000000000001111111111111111",
-			"00000000000000000001111111111111111",
-			"00000000000000000000111111111111111",
-			"00000000000000000000001111111111111",
-			"00000000000000000000000111111111111",
-			"10000000000000000000000111111111111"
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111000001111111111111111111111111111111111111111111111111111111111",
+			"11111111111111110000000111111111111111111111111111111111111111111111111111111111",
+			"11111111111111110000000111111111111111111111111111111111111111111111111111111111",
+			"11111111111111110000000111111111111111111111111111111111111111111111111111111111",
+			"11111111111111110000000111111111111111111111111111111111111111111111111111111111",
+			"11111111111111110000000111111111111111111111111111111111111111111111111111111111",
+			"11111111111111110000000000011111111111111111111111111111111111111111111111111111",
+			"11111111111111110000000000001111111110000111111110000011111111111111111000111111",
+			"11111111111111110000000000000111000000000011111110000001111111111111111000011111",
+			"11111111111111111000000000000000000000000000111110000000001111111111111000011111",
+			"11111111111111111000000000000000000000000000000000000000000011111100010000011111",
+			"11111111111111111110000000000000000000000000000000000000000000110000000000011111",
+			"11111111111111111111000000000000000000000000000000000000000000000000000000011111",
+			"11111111111111111111100000000000000000000000000000000000000000000000000000111111",
+			"11111111111111111111100000000000000000000000000000000000000000000000000000111111",
+			"11111110001111111111111000000000000000000000000000000000000000000000000000111111",
+			"11111110000111111111111111000000000000000000000000000000000000000000000001111111",
+			"11111110000111111111111111100000000000001000000000000000000000000000000001111111",
+			"11111110000011111111111111100000000000011100000000000000000000000000000111111111",
+			"11111100000011111111111111100000000001111100000000000000000000000000001111111111",
+			"11111000000001111111111111100000000011111110000000000000000000000001111111111111",
+			"11111100000000111111111111000000000111111111000000000000000000000111111111111111",
+			"11111110011000000111111110000110000111111111000000000000000000011111111111111111",
+			"11111110011000000001111100011111000111111111000000000000001111111111111111111111",
+			"11111110011000000000010000111111000111111111000000000000111111111111111111111111",
+			"11111110000000000000000001111111000111111111000000000001111111111111111111111111",
+			"11111110000000000000000111111111100011111111000000000001111111111111111111111111",
+			"11111110000000000000000111111111100011111111000000000011111111111111111111111111",
+			"11100000000000000000000011111111100000000000000000000011111111111111111111111111",
+			"10000000000000000000000001111111110000000000000000000011111111111111111111111111",
+			"10000000000000000000000000111111111100000111000000000011111111111111111111111111",
+			"11000000000000000000000001111111111111111111000000000001111111111111111111111111",
+			"11000000000000000000000001111111111111111111100000000001111111111111111111111111",
+			"11000000000000000000000111111111111111111111000000000000111111111111111111111111",
+			"11101100000000000000001111111111111111111111000000000000011111111111111111111111",
+			"11111110000000000000011111111111111111111111100000000000001111111111111111111111",
+			"11111111000000000000111111111111111111111111110000000000000000011111111111111111",
+			"11111111100000000000111111111111111111111111110000000000000000011111111111111111",
+			"11111111100000000000111111111111111111111111111000000000000000111111111111111111",
+			"11111111110000000000111111111100111111111111111100000000000011111111111111111111",
+			"11111111100000000000011111111000011111111111111110001100000011111111111111111111",
+			"11111111100000000000000000000000011111111111111111111110000111111111111111111111",
+			"11111111100000000000000000000000011111111111111111111110011111111111111111111111",
+			"11111111110000011000000000000000001111111111111111111111111111111111111111111111",
+			"11111111110000011000000000000000001111000111111111111111111111111111111111111111",
+			"11111111110000000000000000000000000011000001111111111111111111111111111111111111",
+			"11111111110000000000000000000000000000000001111111111111111111111111111111111111",
+			"11110000000000000000000000000000000000000001111111111111111111111111111111111111",
+			"11110000000000000000000000000000000000000000111111111111111111111111111111111111",
+			"11110000000000000000000000000000000000000000011111111111111111111111111111111111",
+			"11111000000000000000000000000000000000000000001111111111111111111111111111111111",
+			"11111000000000000000000000000000000000000000000011111111111111111111111111111111",
+			"11111100000000000000000000000000000000000000000000111111111111111111111111111111",
+			"11111100000000000000000000000000000000000000000000111111111111111111111111111111",
+			"11111100000000000000000000000000000000000000000000111111111111111111111111111111",
+			"11111110000000000000000000000000000000000000000000011111111111111111111111111111",
+			"11111111100000000000000000000000000000000000000000011111111111111111100111111111",
+			"11111111110000000000000000000000000000000000000000000011111111111111000011111111",
+			"11111111110011111100000000000011100000000000000000000000000001111110000011111111",
+			"11111111110111111100000000011111100001111000000000000000000000000100000011111111",
+			"11111111111111111111111111111111110111111111100000000000000000000000000011111111",
+			"11111111111111111111111111111111111111111111111000000000000000000000000011111111",
+			"11111111111111111111111111111111111111111111111100000000000000000000000011111111",
+			"11111111111111111111111111111111111111111111111111000000000000000000000011111111",
+			"11111111111111111111111111111111111111111111111111111100000000000000000011111111",
+			"11111111111111111111111111111111111111111111111111111111000000000000000011111111",
+			"11111111111111111111111111111111111111111111111111111111100000000000000011111111",
+			"11111111111111111111111111111111111111111111111111111111110000000000000111111111",
+			"11111111111111111111111111111111111111111111111111111111110000000000001111111111",
+			"11111111111111111111111111111111111111111111111111111111110000000000000111111111",
+			"11111111111111111111111111111111111111111111111111111111110000000000000111111111",
+			"11111111111111111111111111111111111111111111111111111111100000000000000111111111",
+			"11111111111111111111111111111111111111111111111111111100000000000000000011111111",
+			"11111111111111111111111111111111111111111111111111111110000000000000000011111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 1020,
-			"y": 660
+		"bounds": {
+			"width": 1600,
+			"height": 1520
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": -18.4,
+			"y": -146.4
+		},
+		"spawnPoint": {
+			"x": 1290,
+			"y": 1430
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/town.jpg": {
 		"grid": [
-			"10000000000001001111000110000110001",
-			"10000000011000001111100100000000001",
-			"00000000111100001111100100111111001",
-			"10000011111111000110000001111111001",
-			"10000011111111100000000011111111001",
-			"00000011111111111001111111111111001",
-			"10000001111111111001111111111111001",
-			"11000011111111111001111111111110000",
-			"00001111111111111001111111111000000",
-			"00111111111111111001111111100000000",
-			"01111111111111111001111111000000000",
-			"11111111111111111001111111111111000",
-			"11111111111111111100111111111111110",
-			"11111111111111111100111111111111110",
-			"11111111111111111100111111111111100",
-			"11111111111111111000111111111111000",
-			"11111111111111111001111111110111001",
-			"11111111111111110011111111100111001",
-			"11111111111111110011111111110111001",
-			"11111111111111110011111111100000011",
-			"11111111000000000010000000000011111",
-			"11111110000000000000000000001111111",
-			"11111111111111100000111111111111111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111",
+			"111111111111110000001111111111111111111111111000001111111111111111111111111111",
+			"111111100000000000001111111111111100111111110000000111111111111111111001111111",
+			"111111100000000000111111111111111100111111110000000001111111111111110001111111",
+			"111111000000000000111111111111111100111111110000000001111111111111110001111111",
+			"111111000000000000111110011111111100111111110000000011111111111111111000111111",
+			"111111000000000000110000000001111100111111111000000111110011111111111000111111",
+			"111111000000000000100000000000111100111111111100001111100000000000000000111111",
+			"111111000000000000000011111000001100111111111110001111000000000000000000111111",
+			"111111000000000000000111111100000000111111111110001110001110000000000000111111",
+			"111111000000000000011111111111000000111111111110001110001111111111110000111111",
+			"111111000000000011111111111111100000011111111110001100011111111111111000111111",
+			"111111000000000011111111111111111000001111111110000000111111111111111000111111",
+			"111111000000000011111111111111111100000000000000000000111111111111111001111111",
+			"111111000000000011111111111111111110000000000000000011111111111111111001111111",
+			"111111000000000011111111111111111111000000000001111111111111111111111001111111",
+			"111111000000000001111111111111111111110001111111111111111111111111111001111111",
+			"111111000000000001111111111111111111111001111111111111111111111111111000111111",
+			"111111100000000001111111111111111111111001111111111111111111111111111000111111",
+			"111111111000000001111111111111111111111001111111111111111111111111111000111111",
+			"111111111000000001111111111111111111111001111111111111111111111111111100011111",
+			"111111111000011011111111111111111111111001111111111111111111111110000000001111",
+			"111110000000111111111111111111111111111001111111111111111111111100000000000111",
+			"111100000001111111111111111111111111111001111111111111111111110000000000000111",
+			"111000000111111111111111111111111111111001111111111111111111000000000000000011",
+			"111000111111111111111111111111111111111000111111111111111110000000000000000011",
+			"110000111111111111111111111111111111111000111111111111111100000000000000000011",
+			"110001111111111111111111111111111111111000111111111111111100000000000000000011",
+			"110001111111111111111111111111111111111000111111111111111111111111111000000011",
+			"100001111111111111111111111111111111111000011111111111111111111111111100000011",
+			"100001111111111111111111111111111111111100011111111111111111111111111111000011",
+			"100001111111111111111111111111111111111110001111111111111111111111111111000111",
+			"110001111111111111111111111111111111111111001111111111111111111111111111000111",
+			"110001111111111111111111111111111111111111001111111111111111111111111111000111",
+			"110000111111111111111111111111111111111111001111111111111111111111111111001111",
+			"111000011111111111111111111111111111111110001111111111111111111111111110001111",
+			"111100001111111111111111111111111111111100001111111111111111111111111100001111",
+			"111110001111111111111111111111111111111000011111111111111111111111111000011111",
+			"111111001111111111111111111111111111110000111111111111111111001111111000111111",
+			"111111001111111111111111111111111111110001111111111111111111000111111001111111",
+			"111111001111111111111111111111111111110011111111111111111111001111111001111111",
+			"111111001111111111111111111111111111110011111111111111111111001111111001111111",
+			"111111001111111111111111111111111111100011111111111111111111000111111001111111",
+			"111111001111111111111111111111111111100011111111111111111111000111000001111111",
+			"111111000111111111111111111111111111100011111111111111111111000000000001111111",
+			"111111000011111111111000111111111111110011111111111111111110000000000111111111",
+			"111111100000111111110000011111111111000011111111111111111000001111111111111111",
+			"111111110000001111110000000000000000000010000000000000000000111111111111111111",
+			"111111110000001111110000000000000000000000000000000000000001111111111111111111",
+			"111111111000001111110000011111111110000000000111111000000111111111111111111111",
+			"111111111000111111111111111111111110000000001111111111111111111111111111111111",
+			"111111111000111111111111111111111110000010001111111111111111111111111111111111",
+			"111111111000111111111111111111111110001111000111111111111111111111111111111111",
+			"111111111000111111111111111111111110011111000111111111111111111111001111111111",
+			"111111111000111111111111111111111100011111100111111111111111111111001111111111",
+			"111111111000111100000011111111111100011111100011111111111111111111000111111111",
+			"111111111000110000000000000000000000011111100011111111111111111111000111111111",
+			"111111111000000000000000000000000000011111110001111111111111111111001111111111",
+			"111111111000000011111111111110000000000010000001111000111111111110001111111111",
+			"111111110000111111111111111111111100000000000000000000000000000000001111111111",
+			"111111110001111111111111111111111111110000000000000000000000000000011111111111",
+			"111111111011111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 700,
-			"y": 860
+		"bounds": {
+			"width": 1560,
+			"height": 1440
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": -31.2,
+			"y": -234.4
+		},
+		"spawnPoint": {
+			"x": 790,
+			"y": 1330
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/volcano.jpg": {
 		"grid": [
-			"11111111111111111111111111111100000",
-			"11111111111111111111111111111110011",
-			"11111111111111111111111111111110011",
-			"11111111111111111111111111111110011",
-			"11111111111111111111111111111110011",
-			"11111111110000000000000010111100011",
-			"11111111110000000000000000011100001",
-			"01111111111001000000000000000000011",
-			"01111111110001000000000000000000111",
-			"01111111100000000000000000000000011",
-			"00000000000000000000000000000000011",
-			"11111100000000000000111111000000001",
-			"11111111100000000111111111111000001",
-			"11111111111100111111111111111100111",
-			"11111111111100111111111111111100111",
-			"11111101111000111111111111111100111",
-			"11111001111000011111000000111100111",
-			"11111100011000111101000000011000111",
-			"00000000000000001000000000000000011",
-			"00010000000000000000000000000000001",
-			"11111111111000000000000000000000011",
-			"11111111111110001100000000000000011",
-			"11111111111111001100000000000000011"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111100111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111000011",
+			"111111111111111111111111111111111111111111111111111111111111111100011111111111000011",
+			"111111111111111111111111111111111111111111111111111111111110000000000111111100000011",
+			"111111111111111111111111111111111111111111111111111111100000000000000011111100000011",
+			"111111111111111111111111111111111111111111111111111110000000000000000001111000000011",
+			"111111111111111111111111111111111111111111111111111100000000000000000000011000000011",
+			"111111111111111111111111111111111111110000000111110000000000000000000000000000000011",
+			"111111111111111111111110000000000000000000000011100000000000000000000000000010000011",
+			"111111111111111111000000000000000000000000000000000000000000000000000000001110000001",
+			"111111111111111110011111111111111110000000000000000000000001000000000000000110000001",
+			"111110000000000000111111111111111110000000000000000000000001111111000000000010000001",
+			"111111111000011111111111111111111111111000100000000000000011111111000000000000000011",
+			"111111111000011111111111111111111111111111111111000000001111111111100000000000000111",
+			"111111111000011111111111111111111111111111111111111111111111111111111000011111111111",
+			"110000000000011111111111111111111111111111111111111111111111111111111000011111111111",
+			"111000000000011111111111111111111111111111111111111111111111111111111000011111111111",
+			"111110000011111111111111111111111111111111111111111111111111111111111000011111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111000011111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111000011111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111000011111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111000111111111111",
+			"111111111111111111111111111100111111111111111111111111111111111111111000111111111111",
+			"111111111111111111111111111100000000011111111100000000111111111111110000111111111111",
+			"111111111111111111111111111100000000000000000000000000110001111111100000111111111111",
+			"111111111111111111111111111100000000000000000000000000000001111111100000001111111111",
+			"111111111111111111111111111110000111000000000000000000000000111111000000001111111111",
+			"111111101111111111111111111110000111000000000000000000000000011100000000011111111111",
+			"111111000111111111111111111110000111000000000000000000000000000000000001111111111111",
+			"111110000111111111111111111100000111000000000000000000000000000000000011111111111111",
+			"110100000111111111111111111100000110000000000000000000000000000000000011111111111111",
+			"100000001111111111111111110000000110000000000000000000000000000000000000111111111111",
+			"100000001111000000000000100000000000000000000000000000000000000000000000011111111111",
+			"100000000000000000000000000000000000000000000000000000000000000000000000011111111111",
+			"100000000000000000000000000000000000000000000000000000000000000000000000011111111111",
+			"100000011111111111110000000000000000000000000111111111111111110000000000001111111111",
+			"100000111111111111111100000000000000000000001111111111111111111110000000001111111111",
+			"100001111111111111111111100000000000000001111111111111111111111111000000001111111111",
+			"111111111111111111111111111111100001111111111111111111111111111111100001111111111111",
+			"111111111111111111111111111111100011111111111111111111111111111111100001111111111111",
+			"111111111111111111111111111111100001111111111111111111111111111111110001111111111111",
+			"111111111111111111111111111111000001111111111111111111111111111111110001111111111111",
+			"111111111111111111111111111111000001111111111111111111111111111111110001111111111111",
+			"111111111111111111111111111111000001111111111111111111111111111111110001111111111111",
+			"111111111111111111001111111111000001111111111111111111111111111111110001111111111111",
+			"111111111111111111000111111111000000111111111111000000000111111111110001111111111111",
+			"110000111111111111100111111111000001111111111111000000000001111111110001111111111111",
+			"110000011111111111100001111111000001111111111110000000000000111111110001111111111111",
+			"100000011111111111100000000111000001111111000100000000000000000000000001111111111111",
+			"100000000000000000000000000000000000001111000000000000000000000000000000011111111111",
+			"100000000000000000000000000000000000000111000000000000000000000000000000001111111111",
+			"110000001111111111100001100000000000000000000000000000000000000000000000001111111111",
+			"111000011111111111110011111000000000000000000000000000000000000000000000011111111111",
+			"111100111111111111111111111110000000000000000000000000000000000000000000011111111111",
+			"111111111111111111111111111111100000000111000000000000000000000000000000011111111111",
+			"111111111111111111111111111111111100000111110000000000000000000000000000111111111111",
+			"111111111111111111111111111111111110000111110000000000000000000000000000011111111111",
+			"111111111111111111111111111111111111000111111000000000000000000000000000011111111111",
+			"111111111111111111111111111111111111111111100000000000000000000000000000011111111111",
+			"111111111111111111111111111111111111111111100000000000000000000000000000001111111111",
+			"111111111111111111111111111111111111111111100000000000000000000000000000001111111111",
+			"111111111111111111111111111111111111111111110000000000000000000000000000001111111111",
+			"111111111111111111111111111111111111111111110000000000000000000000000000011111111111",
+			"111111111111111111111111111111111111111111110000000000000000000000000000011111111111",
+			"111111111111111111111111111111111111111111111000000000000000000000000000111111111111",
+			"111111111111111111111111111111111111111111111000000000000000000000000000111111111111",
+			"111111111111111111111111111111111111111111111100000000000001000000000000111111111111",
+			"111111111111111111111111111111111111111111111110000000000011100000000000111111111111",
+			"111111111111111111111111111111111111111111111111111011000111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 60,
-			"y": 420
+		"bounds": {
+			"width": 1680,
+			"height": 1420
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": -95.2
+		},
+		"spawnPoint": {
+			"x": 110,
+			"y": 690
+		},
+		"spawnOrigem": "amarelo"
+	},
+	"assets/hunt-backgrounds/dojo.jpg": {
+		"grid": [
+			"111111111111111111111111111",
+			"111100111111000111110000011",
+			"111000000000000000000000011",
+			"110000000000000000000000011",
+			"100000000000000000000000001",
+			"100000000000000000000000011",
+			"100000000000000000000000011",
+			"100000000000000000000000011",
+			"100000000000000000000000011",
+			"100000000000000000000000011",
+			"100000000000000000000000011",
+			"100000000000000000000000011",
+			"100000000000000000000000001",
+			"100000000000000000000000001",
+			"100000000000000000000000011",
+			"110000000000000000000000011",
+			"111111111111011000000001111",
+			"111111111111111111111111111"
+		],
+		"bounds": {
+			"width": 540,
+			"height": 360
+		},
+		"arte": {
+			"escala": .8,
+			"x": -1028,
+			"y": -1279.2
+		},
+		"spawnPoint": {
+			"x": 90,
+			"y": 170
+		},
+		"spawnOrigem": "amarelo",
+		"spawnInimigo": {
+			"x": 430,
+			"y": 170
+		}
+	},
+	"assets/hunt-backgrounds/dragon.jpg": {
+		"grid": [
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111100001111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111100000111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000000111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111110011111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111100000000001111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111000000000000111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111000000000000111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111000000000001111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000001111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000000111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000001111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000001111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000001111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000011111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000011111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000011111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111110011111110000111111111111111111111111",
+			"111111111111111000011111111111111100011111111111111111111111111110000000111100000111111111111111111111111",
+			"111111111111111000001111111111111100011111111111111110000000000000000000000000000111100000111111111111111",
+			"111111111111110000001111111111111000011111111110000000000000000000000000000000000000000000000111111111111",
+			"111111111110000000001111111111111000011111111100000000000000000000000000000000011000011111100000011111111",
+			"111111111000000000000000001111111000011111111000000000000000000000000000000001111111111111111110000111111",
+			"111111110000000000000000000000000000011111110000000000001111111111111111111111111111111111111111100011111",
+			"111111110000000000000000000000000000000000000000000000001111111111111111111111111111111111111111111001111",
+			"111111100000000000000000000000000000000000000000000000111111111111111111111111111111111111111111111100111",
+			"111111000000000000000000000000000000000000000000000111111111111111111111111111111111111111111111111110011",
+			"111111000000000000000000000000000000000000000000011111111111111111111111111111111111111111111111111110011",
+			"111111100001111111000000000000000000000000000001111111111111111111111111111111111111111111111111111111011",
+			"111111000111111111111100000000000001111100001111111111111111111111111111111111111111111111111111111111011",
+			"111110001111111111111111111111111111111100001111111111111111111111111111111111111111111111111111111111001",
+			"111100011111111111111111111111111111111100001111111111111111111111111111111111111111111111111111111111001",
+			"111100001111111111111111111111111111111100001111111111111111111111111111111111111111111111111111111111001",
+			"111100001111111111111111111111111111111100001111111111010000111001111111111111111111111111111111111111001",
+			"111100001111111111111111111111111111111100001111111000000000000000000011111111111111111111111111111111011",
+			"111100001111111111111111111111111111111110000111000000000000000000000001111111111111111111111111111111011",
+			"111100001111111111111111111111111111111110000010000000000000000000000001111111111111111111111111111111011",
+			"111100011111111111111111111111111111111110000000000000000111100000000011111111111111111111111111111111011",
+			"111100011111111111111111111111111111111110000000000000001111110000000111111111111111111111111111111111011",
+			"111100011111111111111111111111111111111100000000000000011111111000000111111111111111111111111111111111011",
+			"111100011111111111111111111111111111111100000000000000111111111000000111111111111111111111111111111111011",
+			"111100011111111110000000000111111111111100000000000001111111111000000111111111111111111111111111111111001",
+			"111000011111111000000000000000111111111100000000000011111111110000000111111111111111111111111111111111001",
+			"111000011111110000000000000000001111111100000000000000000111000000000111111111111111111111111111111111111",
+			"111000011111100000000000000000000011111100000000000000000000000000001111111111111111111111111111111111111",
+			"111000011111100000000000000000000011111110000000000000000000000000011111111111111111111111111111111111111",
+			"111000011111000000000000000000000011111110000000000000000000000000111111111111111111111111111111111111111",
+			"111000011111000000000000000000000011111110000000010000000000000001111111111111111111111111111111111111111",
+			"111000011111000000000000000000000011111110000001111100000000000011111111111111111111111111111111111111111",
+			"111000011111000000000000000000000011111110000011111111000000001111111111111111111111111111111111111111111",
+			"111000011111000000000000000000000011111110000011111111111110111111111111111111111111111111111111111111111",
+			"111000011111000000000000000000000011111110000011111111111111111111111111111111111111111111111111111111111",
+			"111000011111000000000000000000000011111100000000111100111111111111111111111111111111111111111111111101111",
+			"111100000000000000000000000000000011111000000000000000001111111111111111111111111111111111111111110000111",
+			"111100000000000000000000000000000011111000000000000000001111111111111111111111111111111111111111110000111",
+			"111100000000000000000000000000000011110000000000000000001111111111111111111111111111111111111111100001111",
+			"111100000000000000000000000000000011110000000000000000001111111111111111111111111111111111111110000001111",
+			"111110000000000000000000000000000011111000000000000000001111110000011111111111111111111111111000000011111",
+			"111111100000000000000000000000000111111100000000000000001110000000000011111111111111111111110000000111111",
+			"111111111000011111111111111111111111111100000000000000001000000000000000000111111111111111000000011111111",
+			"111111111000011111111111111111111111111100000000000000000000000000000000000000000000000000000000111111111",
+			"111111111000011111111111111111111111111110000000000000000000011111110000000000000000000000000001111111111",
+			"111111111000011111111111111111111111111110000000000000000001111111111100000000000000000000000111111111111",
+			"111111111000011111111111111111111111111100000000111111111111111111111110000111000000001111111111111111111",
+			"111111111000111111111111111111111111111100000001111111111111111111111110000111111111111111111111111111111",
+			"111111111000111111111111111111111111111100000011111111111111111111111110001111111111111111111111111111111",
+			"111111111000111111111111111111111111111110000111111111111111111111111100001111111111111111111111111111111",
+			"111111111000111111111111111111111111111110001111111111111111111111111100000011111111111111111111111111111",
+			"111111111000111111111111111111111111111110001111111111111111111111111100000001111111111111111111111111111",
+			"111111111000111111111111111111111111111100001111111111111111111111111000000001111111111111111111111111111",
+			"111111111000111111111111111111111111111100001111111111111111111111110000000011111111111111111111111111111",
+			"111111110000111111110000000000001111111000000111111111111111111111100000000001111111111111111111111111111",
+			"111111110000000000000000000000000000000000001111111111111111111111000000000001111111111111111111111111111",
+			"111111110000000000000000000000000000000000001111111111111111111111000000000011111111111111111111111111111",
+			"111111110000000000000000000000000000000000011111111111111111111110000000000111111111111111111111111111111",
+			"111111110000000000000000000000000000000000111111111111111111111110000000000111111111111111111111111111111",
+			"111111000000000001100000000000000000000001111111111111111111111110000000001111111111111111111111111111111",
+			"111000000000001111111111111100000000000011111111111111111111111111000000001111111111111111111111111111111",
+			"100000000000011111111111111111000000000011111111111111111111111111110000001111111111111111111111111111111",
+			"100000000001111111111111111111100000000111111111111111111111111111111100001111111111111111111111111111111",
+			"100000000011111111111111111111110000001111111111111111111111111111111111001111111111111111111111111111111",
+			"110000000111111111111111111111111011111111111111111111111111111111111111111111111111111111111111111111111",
+			"111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
+		],
+		"bounds": {
+			"width": 2100,
+			"height": 2020
+		},
+		"arte": {
+			"escala": .8,
+			"x": -162.4,
+			"y": -304.8
+		},
+		"spawnPoint": {
+			"x": 330,
+			"y": 1330
+		},
+		"spawnOrigem": "amarelo",
+		"spawnInimigo": {
+			"x": 590,
+			"y": 1330
+		}
 	}
 };
 //#endregion
@@ -26963,7 +29208,7 @@ var LOOT = {
 	]
 };
 var ARTE = {
-	dojo: "assets/hunt-backgrounds/dojo.png",
+	dojo: "assets/hunt-backgrounds/dojo.jpg",
 	planicie: "assets/hunt-backgrounds/plains.jpg",
 	campina: "assets/hunt-backgrounds/meadow.jpg",
 	vilarejo: "assets/hunt-backgrounds/town.jpg",
@@ -26984,12 +29229,12 @@ var ARTE = {
 	montanha: "assets/hunt-backgrounds/mountain.jpg",
 	cavernaVulcanica: "assets/hunt-backgrounds/cave-volcanic.jpg",
 	cavernaDeGelo: "assets/hunt-backgrounds/ice-cave.jpg",
-	montanhaDeGelo: "assets/hunt-backgrounds/ice-mountain.png",
+	montanhaDeGelo: "assets/hunt-backgrounds/ice-mountain.jpg",
 	vulcao: "assets/hunt-backgrounds/volcano.jpg",
 	obra: "assets/hunt-backgrounds/construction-site.jpg",
 	industrial: "assets/hunt-backgrounds/industrial.jpg",
 	ruinas: "assets/hunt-backgrounds/ruins.jpg",
-	temploMistico: "assets/hunt-backgrounds/temple.png",
+	temploMistico: "assets/hunt-backgrounds/temple.jpg",
 	grutaFeerica: "assets/hunt-backgrounds/fairy-cave.jpg",
 	florestaQueimada: "assets/hunt-backgrounds/burnt-forest.jpg",
 	abismo: "assets/hunt-backgrounds/abyss.jpg"
@@ -28219,17 +30464,17 @@ var TYPE_BACKGROUND_IMAGE = {
 	WATER: "assets/hunt-backgrounds/sea.jpg",
 	GRASS: "assets/hunt-backgrounds/forest.jpg",
 	ROCK: "assets/hunt-backgrounds/mountain.jpg",
-	FIGHTING: "assets/hunt-backgrounds/dojo.png",
+	FIGHTING: "assets/hunt-backgrounds/dojo.jpg",
 	ELECTRIC: "assets/hunt-backgrounds/industrial.jpg",
-	DRAGON: "assets/hunt-backgrounds/dragon.png",
+	DRAGON: "assets/hunt-backgrounds/dragon.jpg",
 	BUG: "assets/hunt-backgrounds/jungle.jpg",
 	NORMAL: "assets/hunt-backgrounds/plains.jpg",
 	POISON: "assets/hunt-backgrounds/swamp.jpg",
 	FLYING: "assets/hunt-backgrounds/mountain.jpg",
 	GROUND: "assets/hunt-backgrounds/desert.jpg",
-	ICE: "assets/hunt-backgrounds/ice-mountain.png",
+	ICE: "assets/hunt-backgrounds/ice-mountain.jpg",
 	STEEL: "assets/hunt-backgrounds/construction-site.jpg",
-	PSYCHIC: "assets/hunt-backgrounds/temple.png",
+	PSYCHIC: "assets/hunt-backgrounds/temple.jpg",
 	GHOST: "assets/hunt-backgrounds/abyss.jpg",
 	DARK: "assets/hunt-backgrounds/burnt-forest.jpg",
 	FAIRY: "assets/hunt-backgrounds/fairy-cave.jpg"
@@ -28436,7 +30681,7 @@ function buildLanceHunt() {
 			unlocksContinentOnClear: GRUPOS_DO_LANCE,
 			startCountdown: 5,
 			keepCorpses: true,
-			respawnDelay: 3,
+			respawnDelay: 2,
 			spawnPoints: [{
 				x: 700,
 				y: 450
@@ -28499,7 +30744,7 @@ var TRAINING_MAP = {
 	bg: {
 		primary: "#2c2f3a",
 		secondary: "#3a3f52",
-		image: "assets/hunt-backgrounds/dojo.png"
+		image: "assets/hunt-backgrounds/dojo.jpg"
 	},
 	maxEnemies: 1,
 	respawnDelay: 2,
@@ -28788,21 +31033,14 @@ var ENCOUNTERS = {
 //#endregion
 //#region src/data/maps.ts
 var RESPAWN_DELAY_MULTIPLIER = createFormulaEngine(FORMULAS).evalOrDefault("MOB_RESPAWN_DELAY_MULTIPLIER", .25);
-var WATER_HUNT_IDS = new Set(["marinho", "aguas_interiores"].flatMap((bioma) => FAIXAS$1.map((faixa) => huntId(bioma, faixa.id))));
 function getMap(id) {
 	const map = MAPS[id];
 	if (!map) return null;
-	if (WATER_HUNT_IDS.has(id)) return {
-		...map,
-		respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER,
-		collisionGrid: WATER_COLLISION_GRID,
-		playerSpawn: WATER_SPAWN_POINT
-	};
-	const collisionGrid = null;
+	const atraso = map.sequence ? map.respawnDelay : map.respawnDelay * RESPAWN_DELAY_MULTIPLIER;
 	return {
 		...map,
-		respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER,
-		collisionGrid
+		respawnDelay: atraso,
+		collisionGrid: null
 	};
 }
 /**
@@ -28852,6 +31090,7 @@ function mapDefParaSala(mapId, sala) {
 	if (!pintada) return map;
 	return {
 		...map,
+		bounds: pintada.bounds,
 		collisionGrid: pintada.grid,
 		colisaoDefineLimite: true
 	};
@@ -28867,11 +31106,28 @@ function spawnPointParaSala(mapId, sala) {
 	const arte = backgroundParaSala(map, sala).image;
 	return (arte ? COLISAO_POR_ARTE[arte]?.spawnPoint : void 0) ?? null;
 }
+/**
+* Por onde entra o POKE do lado INIMIGO nesta cena — o circulo VERDE pintado,
+* irmao do amarelo que `spawnPointParaSala` devolve. So as arenas de duelo
+* (dojo, dragon) tem; toda outra arte devolve `null` e quem chama cai no
+* sorteio de sempre.
+*
+* Existe separado, e nao como mais um campo de `mapDef`, pelo mesmo motivo do
+* spawn do jogador: o ponto e propriedade do DESENHO, entao a arena do Lance,
+* o espelho do Modo Pesadelo e a hunt de Treinamento herdam o mesmo ponto sem
+* ninguem precisar cadastrar nada em tres lugares.
+*/
+function spawnInimigoParaSala(mapId, sala) {
+	const map = getMap(mapId);
+	if (!map) return null;
+	const arte = backgroundParaSala(map, sala).image;
+	return (arte ? COLISAO_POR_ARTE[arte]?.spawnInimigo : void 0) ?? null;
+}
 function isCellBlocked(mapDef, x, y) {
 	const grid = mapDef.collisionGrid;
 	if (!grid) return false;
-	const col = Math.floor(x / 40);
-	const row = Math.floor(y / 40);
+	const col = Math.floor(x / 20);
+	const row = Math.floor(y / 20);
 	if (row < 0 || row >= grid.length || col < 0 || col >= grid[0].length) return Boolean(mapDef.colisaoDefineLimite);
 	return grid[row][col] === "1";
 }
@@ -28898,16 +31154,16 @@ function nearestOpenPoint(mapDef, x, y) {
 		y
 	};
 	const cols = grid[0].length, rows = grid.length;
-	const startCol = Math.floor(x / 40);
-	const startRow = Math.floor(y / 40);
+	const startCol = Math.floor(x / 20);
+	const startRow = Math.floor(y / 20);
 	const maxRadius = Math.max(cols, rows);
 	for (let radius = 0; radius <= maxRadius; radius++) for (let dr = -radius; dr <= radius; dr++) for (let dc = -radius; dc <= radius; dc++) {
 		if (Math.max(Math.abs(dr), Math.abs(dc)) !== radius) continue;
 		const c = startCol + dc, r = startRow + dr;
 		if (r < 0 || r >= rows || c < 0 || c >= cols) continue;
 		if (grid[r][c] === "0") return {
-			x: c * 40 + 20,
-			y: r * 40 + 20
+			x: c * 20 + 10,
+			y: r * 20 + 10
 		};
 	}
 	return null;
@@ -29540,6 +31796,7 @@ function formatStatGains(gains) {
 	if (!gains) return "";
 	return STAT_ORDER.filter((key) => (gains[key] ?? 0) > 0).map((key) => `+${gains[key]} ${STAT_LABEL[key]}`).join(", ");
 }
+STAT_LABEL.atkFis, STAT_LABEL.atkEsp, STAT_LABEL.def, STAT_LABEL.defEsp, STAT_LABEL.speed;
 //#endregion
 //#region src/data/spriteFootOffsets.ts
 var FOOT_OFFSET_FRACTION = {
@@ -29979,7 +32236,7 @@ function findEntityById(player, enemies, id) {
 //#endregion
 //#region src/engine/effect.ts
 function createWorldEffect(counters, params) {
-	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, abilityId, anguloDeAtaque, ballItemId, success, statusDirection } = params;
+	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, isCrit, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, abilityId, anguloDeAtaque, ballItemId, success, statusDirection, seguir = null, apontarPara = null } = params;
 	const id = `effect-${counters.effect++}`;
 	const lane = owner ? claimEffectLane(owner, id, laneSize) : 0;
 	return {
@@ -29997,6 +32254,7 @@ function createWorldEffect(counters, params) {
 		value,
 		effectiveness,
 		effectivenessLabel: effectivenessLabel ?? void 0,
+		isCrit,
 		text,
 		unit,
 		isAoe,
@@ -30009,8 +32267,54 @@ function createWorldEffect(counters, params) {
 		statusDirection,
 		laneSize,
 		ownerId: owner ? owner.id : null,
-		lane
+		lane,
+		seguirId: seguir ? seguir.id : void 0,
+		seguirUltimoX: seguir ? seguir.x : void 0,
+		seguirUltimoY: seguir ? seguir.y : void 0,
+		apontarParaId: apontarPara ? apontarPara.id : void 0
 	};
+}
+/**
+* Reaponta o rastro pra entidade que disparou o golpe (PH-110).
+*
+* Arte DIRECIONAL e um risco que LIGA atacante e alvo: a faisca de impacto fica
+* em cima do alvo e o rastro se estende de volta pra quem bateu. Com o angulo
+* congelado no instante do hit, o atacante andar durante o ~1s de animacao
+* descola o rastro do punho dele — foi o que o Bullet Punch mostrou, que e o
+* pior caso do lote (rastro horizontal de 84px recortado pra 37px, exatamente a
+* distancia de combate).
+*
+* Congelar continua valendo pra arte NAO direcional: quem nao e direcional
+* nunca recebe `apontarParaId`, entao nem chega aqui. O gate e na criacao, e nao
+* neste laco, pra o resto do jogo ficar byte a byte igual.
+*
+* `atacante` nulo (morreu, saiu do mundo) deixa o ultimo angulo valido no lugar:
+* girar a arte pra um ponto que nao existe mais seria pior que nao girar.
+*/
+function reapontarParaAtacante(effect, atacante) {
+	if (!effect.apontarParaId || !atacante) return;
+	const dx = effect.x - atacante.x;
+	const dy = effect.y - atacante.y;
+	if (dx === 0 && dy === 0) return;
+	effect.anguloDeAtaque = Math.atan2(dy, dx);
+}
+/**
+* Arrasta o efeito pelo deslocamento da entidade que ele acompanha desde o tick
+* anterior. Chamado do laco de efeitos junto do `tickEffect`; `entidade` nula
+* (POKE morreu, inimigo saiu do mundo) deixa o efeito parado onde estava, que e
+* melhor do que sumir com ele ou joga-lo pra origem do mundo.
+*/
+function seguirDono(effect, entidade) {
+	if (!effect.seguirId || !entidade) return;
+	const dx = entidade.x - (effect.seguirUltimoX ?? entidade.x);
+	const dy = entidade.y - (effect.seguirUltimoY ?? entidade.y);
+	effect.seguirUltimoX = entidade.x;
+	effect.seguirUltimoY = entidade.y;
+	if (dx === 0 && dy === 0) return;
+	effect.x += dx;
+	effect.y += dy;
+	if (effect.targetX !== void 0) effect.targetX += dx;
+	if (effect.targetY !== void 0) effect.targetY += dy;
 }
 function effectDone(effect) {
 	return effect.age >= effect.delay + effect.duration;
@@ -30030,7 +32334,9 @@ var NEIGHBORS = [
 	[-1, 1],
 	[-1, -1]
 ];
-var MAX_EXPANSIONS = 4e3;
+function tetoDeExpansoes(grid) {
+	return grid.length * grid[0].length * 2;
+}
 function cellKey(col, row) {
 	return `${col},${row}`;
 }
@@ -30038,8 +32344,8 @@ function isBlocked(grid, col, row, circle) {
 	if (row < 0 || row >= grid.length || col < 0 || col >= grid[0].length) return true;
 	if (grid[row][col] === "1") return true;
 	if (circle) {
-		const x = col * 40 + 20;
-		const y = row * 40 + 20;
+		const x = col * 20 + 10;
+		const y = row * 20 + 10;
 		if (Math.hypot(x - circle.cx, y - circle.cy) > circle.radius) return true;
 	}
 	return false;
@@ -30058,8 +32364,8 @@ function reconstructPath(cameFrom, goalKey, startKey) {
 	return cellPath.map((k) => {
 		const [col, row] = k.split(",").map(Number);
 		return {
-			x: col * 40 + 20,
-			y: row * 40 + 20
+			x: col * 20 + 10,
+			y: row * 20 + 10
 		};
 	});
 }
@@ -30071,8 +32377,8 @@ function findPath(mapDef, startX, startY, goalX, goalY) {
 		cy: mapDef.bounds.height / 2,
 		radius: mapWalkRadius(mapDef)
 	};
-	const toCol = (x) => Math.floor(x / 40);
-	const toRow = (y) => Math.floor(y / 40);
+	const toCol = (x) => Math.floor(x / 20);
+	const toRow = (y) => Math.floor(y / 20);
 	const startCol = toCol(startX), startRow = toRow(startY);
 	const goalCol = toCol(goalX), goalRow = toRow(goalY);
 	if (startCol === goalCol && startRow === goalRow) return [];
@@ -30083,9 +32389,10 @@ function findPath(mapDef, startX, startY, goalX, goalY) {
 	const gScore = /* @__PURE__ */ new Map([[startKey, 0]]);
 	const open = /* @__PURE__ */ new Map([[startKey, heuristic(startCol, startRow, goalCol, goalRow)]]);
 	const closed = /* @__PURE__ */ new Set();
+	const maxExpansions = tetoDeExpansoes(grid);
 	let expansions = 0;
 	while (open.size > 0) {
-		if (++expansions > MAX_EXPANSIONS) return null;
+		if (++expansions > maxExpansions) return null;
 		let currentKey = null;
 		let bestF = Infinity;
 		for (const [key, f] of open) if (f < bestF) {
@@ -30546,6 +32853,8 @@ function ehGolpeDeSom(abilityId) {
 }
 /** Solar Power: +50% de Ataque Especial sob sol (o custo esta em DANO_POR_CLIMA). */
 var SOLAR_POWER_BONUS = 1.5;
+/** Moxie: +1 de Ataque a cada POKE derrubado. */
+var TRAIT_MOXIE = "moxie";
 /**
 * Habilidades que Trace NAO copia (regra dos jogos — sao as que so fazem
 * sentido no dono original, ou que criariam copia infinita).
@@ -30683,6 +32992,13 @@ function aplicarMudancasDeStat(rng, atacante, alvo, ability) {
 		const depois = Math.max(-6, Math.min(6, antes + delta));
 		if (depois === antes) continue;
 		destino.estagios[mudanca.stat] = depois;
+		registrarFonteDeEstagio(destino, mudanca.stat, {
+			id: ability.id,
+			tipo: "golpe",
+			proprio: destino === atacante,
+			deQuem: SPECIES[atacante.poke.speciesId]?.name ?? atacante.poke.speciesId
+		});
+		esquecerFonteSeZerado(destino, mudanca.stat);
 		aplicadas.push({
 			stat: mudanca.stat,
 			estagios: depois - antes
@@ -30691,7 +33007,12 @@ function aplicarMudancasDeStat(rng, atacante, alvo, ability) {
 	}
 	const reacao = traitDoDestino ? REACAO_A_QUEDA_DE_ESTAGIO[traitDoDestino] : void 0;
 	if (sofreuQuedaDoOponente && reacao) {
-		const subida = aplicarEstagioUnico(destino, reacao.stat, reacao.estagios);
+		const subida = aplicarEstagioUnico(destino, reacao.stat, reacao.estagios, {
+			id: traitDoDestino,
+			tipo: "trait",
+			proprio: true,
+			deQuem: SPECIES[destino.poke.speciesId]?.name ?? destino.poke.speciesId
+		});
 		if (subida) aplicadas.push(subida);
 	}
 	return aplicadas;
@@ -30704,15 +33025,56 @@ function aplicarMudancasDeStat(rng, atacante, alvo, ability) {
 * (StatChange|null, null quando ja no teto/piso) pro chamador decidir se
 * anuncia o toast.
 */
-function aplicarEstagioUnico(alvo, stat, delta) {
+function aplicarEstagioUnico(alvo, stat, delta, fonte) {
 	const antes = alvo.estagios[stat] ?? 0;
 	const depois = Math.max(-6, Math.min(6, antes + delta));
 	if (depois === antes) return null;
 	alvo.estagios[stat] = depois;
+	if (fonte) registrarFonteDeEstagio(alvo, stat, fonte);
+	esquecerFonteSeZerado(alvo, stat);
 	return {
 		stat,
 		estagios: depois - antes
 	};
+}
+/**
+* Procedencia de estagio que veio de uma TRAIT (PH-121).
+*
+* `dono` e quem TEM a trait; `destino` e quem recebe o estagio. Os dois quase
+* sempre coincidem (Speed Boost, Moody, Moxie, Weak Armor, Download), e
+* Intimidate e a excecao que obriga a distinguir: a trait e do atacante e o
+* estagio cai no oponente, entao `proprio` tem que ser `false` ali e o "de quem"
+* tem que apontar pro dono, nao pra quem levou.
+*/
+function fonteDeTrait(dono, trait, destino = dono) {
+	if (!trait) return void 0;
+	return {
+		id: trait,
+		tipo: "trait",
+		proprio: dono === destino,
+		deQuem: SPECIES[dono.poke.speciesId]?.name ?? dono.poke.speciesId
+	};
+}
+/**
+* Anota a procedencia de um estagio (PH-121), deduplicando.
+*
+* DEDUPLICA porque o mesmo golpe do mesmo POKE pode acertar dez vezes na mesma
+* luta, e a lista existe pra responder "quem fez isso", nao "quantas vezes".
+* Sem isto ela cresceria sem teto dentro de uma entidade que vive a luta toda.
+*/
+function registrarFonteDeEstagio(destino, stat, fonte) {
+	const mapa = destino.estagiosFonte ??= {};
+	const lista = mapa[stat] ??= [];
+	if (!lista.some((f) => f.id === fonte.id && f.tipo === fonte.tipo && f.proprio === fonte.proprio && f.deQuem === fonte.deQuem)) lista.push(fonte);
+}
+/**
+* Estagio de volta a 0 nao tem fonte — o selo desapareceu da tela, e manter a
+* lista faria a proxima mudanca daquele atributo aparecer com o historico de uma
+* situacao que ja passou.
+*/
+function esquecerFonteSeZerado(destino, stat) {
+	if ((destino.estagios[stat] ?? 0) !== 0) return;
+	if (destino.estagiosFonte) delete destino.estagiosFonte[stat];
 }
 function aplicarEfeitosDoGolpe(rng, alvo, ability, clima) {
 	const congelado = statusNaoVolatil(alvo);
@@ -30760,6 +33122,7 @@ function curarStatus(entity, tipo) {
 function limparEstadoVolatil(entity) {
 	entity.statusVolatil = null;
 	entity.estagios = {};
+	entity.estagiosFonte = void 0;
 	entity.revelado = void 0;
 	entity.escudos = void 0;
 	entity.imuneAoTipoVolatil = void 0;
@@ -30777,6 +33140,7 @@ function limparEstadoVolatil(entity) {
 	entity.curseDot = void 0;
 	entity.nightmareDot = void 0;
 	entity.regenPercent = void 0;
+	entity.presoAte = void 0;
 	entity.entradaProcessada = false;
 	entity.enduraAtiva = false;
 	entity.protegida = false;
@@ -30827,6 +33191,7 @@ function tickStatus(rng, entity, dt, clima = null) {
 		if (entity.forcedAbilityUntil <= 0) entity.forcedAbilityId = null;
 	}
 	if (entity.tormentedUntil && entity.tormentedUntil > 0) entity.tormentedUntil = Math.max(0, entity.tormentedUntil - dt);
+	if (entity.presoAte && entity.presoAte > 0) entity.presoAte = Math.max(0, entity.presoAte - dt);
 	entity.proximoTurnoDeStatus -= dt;
 	if (entity.proximoTurnoDeStatus > 1e-9) return {
 		dano: 0,
@@ -30874,7 +33239,7 @@ function tickStatus(rng, entity, dt, clima = null) {
 			entity.poke.status = null;
 		}
 	}
-	if (traitDaEntidade === "speed_boost") aplicarEstagioUnico(entity, "speed", 1);
+	if (traitDaEntidade === "speed_boost") aplicarEstagioUnico(entity, "speed", 1, fonteDeTrait(entity, traitDaEntidade));
 	if (traitDaEntidade === "moody") {
 		const opcoes = [
 			"atkFis",
@@ -30888,8 +33253,8 @@ function tickStatus(rng, entity, dt, clima = null) {
 		const sobe = opcoes[Math.floor(nextFloat(rng) * opcoes.length)];
 		const restantes = opcoes.filter((o) => o !== sobe);
 		const desce = restantes[Math.floor(nextFloat(rng) * restantes.length)];
-		aplicarEstagioUnico(entity, sobe, 2);
-		aplicarEstagioUnico(entity, desce, -1);
+		aplicarEstagioUnico(entity, sobe, 2, fonteDeTrait(entity, traitDaEntidade));
+		aplicarEstagioUnico(entity, desce, -1, fonteDeTrait(entity, traitDaEntidade));
 	}
 	const vol = entity.statusVolatil;
 	if (vol && vol.turnosRestantes != null) {
@@ -30978,6 +33343,101 @@ function resolveAbilityCategory(ability, poke) {
 	if (ability.category !== "dynamic") return ability.category;
 	const stats = statsAtTypedAoeLevel(poke);
 	return stats.atkFis >= stats.atkEsp ? "physical" : "special";
+}
+//#endregion
+//#region src/data/moveVfx.ts
+var RAIZ = "assets/move-vfx/golpes";
+var tira = (arquivo, quadros, extra) => ({
+	url: `${RAIZ}/${arquivo}.png`,
+	quadros,
+	...extra
+});
+var VFX_POR_GOLPE = {
+	bullet_punch: {
+		single: tira("bullet_punch", 8, { direcional: {
+			anguloBaseGraus: 0,
+			ancoraX: .8,
+			recorteX: .55
+		} }),
+		repeticoes: 2
+	},
+	comet_punch: { single: tira("comet_punch", 12) },
+	scratch: { single: tira("scratch", 12, { direcional: {
+		anguloBaseGraus: -46,
+		ancoraX: .67
+	} }) },
+	fury_swipes: { single: tira("fury_swipes", 10, { direcional: { anguloBaseGraus: 23 } }) },
+	stomp: { single: tira("stomp", 9) },
+	x_scissor: { single: tira("x_scissor", 7) },
+	shadow_punch: { single: tira("shadow_punch", 16, { direcional: { anguloBaseGraus: 98 } }) },
+	dig: { single: tira("dig", 19) },
+	fire_fang: { single: tira("fire_fang", 12) },
+	thunder_fang: { single: tira("thunder_fang", 12) },
+	ice_fang: { single: tira("ice_fang", 11) },
+	flamethrower: { single: tira("flamethrower", 13, { direcional: {
+		anguloBaseGraus: -19,
+		ancoraX: .56
+	} }) },
+	fire_spin: {
+		single: tira("fire_spin", 5),
+		repeticoes: 2
+	},
+	mud_shot: { single: tira("mud_shot", 15, { direcional: {
+		anguloBaseGraus: 46,
+		ancoraX: .68
+	} }) },
+	earthquake: {
+		single: tira("earthquake", 14),
+		aoe: tira("earthquake", 14)
+	},
+	whirlpool: {
+		single: tira("whirlpool", 16),
+		aoe: tira("whirlpool", 16)
+	},
+	whirlwind: {
+		single: tira("whirlwind", 20),
+		aoe: tira("whirlwind", 20)
+	},
+	petal_dance: {
+		single: tira("petal_dance", 16),
+		aoe: tira("petal_dance", 16)
+	},
+	charm: {
+		single: tira("charm", 13, { direcional: {
+			anguloBaseGraus: 22,
+			ancoraX: .66
+		} }),
+		repeticoes: 2
+	},
+	taunt: {
+		single: tira("taunt", 12),
+		repeticoes: 2
+	},
+	dragon_dance: { single: tira("dragon_dance", 16) },
+	spider_web: {
+		single: tira("spider_web", 4),
+		repeticoes: 3
+	}
+};
+function vfxDoGolpe(abilityId) {
+	if (!abilityId) return null;
+	return VFX_POR_GOLPE[abilityId] ?? null;
+}
+/**
+* A arte de impacto deste golpe e DIRECIONAL, ou seja gira pra apontar do
+* atacante pro alvo?
+*
+* Quem pergunta e o motor (PH-110): so arte direcional precisa reapontar o
+* rastro a cada frame, porque ela e um risco que LIGA as duas entidades. Arte
+* redonda mantem o angulo congelado no instante do hit, que e a decisao
+* registrada no call-site do efeito.
+*
+* Mora aqui, e nao no motor, porque a resposta e uma propriedade do DADO de
+* arte — quem adicionar um direcional novo em `VFX_POR_GOLPE` ganha o
+* reapontamento de graca, sem tocar em `combatSystem`.
+*/
+function ehDirecional(abilityId) {
+	return !!vfxDoGolpe(abilityId)?.single.direcional;
 }
 //#endregion
 //#region src/data/statusVfx.ts
@@ -45837,7 +48297,7 @@ function triggerAttackAnim(entity, isAoe, target) {
 }
 //#endregion
 //#region src/engine/systems/combatSystem.ts
-var HIT_LAND_DELAY = ATTACK_ANIM_DURATION;
+var HIT_LAND_DELAY = .3;
 var IMPACT_EFFECT_DURATION = 1;
 var AOE_EFFECT_DURATION = 1.2;
 var STATUS_VFX_DURATION = 1.1;
@@ -45997,7 +48457,7 @@ function tiposEfetivosParaEfetividade(entity, species) {
 	if (entity.tipoForcado) return [entity.tipoForcado, null];
 	return [species.type, species.type2];
 }
-var SELF_DESTRUCT_ABILITY_KEYS = /* @__PURE__ */ new Set(["explosion", "selfdestruct"]);
+var SELF_DESTRUCT_ABILITY_KEYS = /* @__PURE__ */ new Set(["explosion", "self_destruct"]);
 var SELF_DESTRUCT_HP_LOSS_PERCENT = .5;
 var ESCUDO_ABILITIES = {
 	reflect: "reflect",
@@ -46012,6 +48472,16 @@ var TAUNT_DURATION = TURNO_SEGUNDOS * 3;
 var DISABLE_DURATION = TURNO_SEGUNDOS * 4;
 var ENCORE_DURATION = TURNO_SEGUNDOS * 3;
 var TORMENT_DURATION = TURNO_SEGUNDOS * 3;
+var GOLPES_QUE_PRENDEM = /* @__PURE__ */ new Set([
+	"wrap",
+	"bind",
+	"fire_spin",
+	"clamp",
+	"whirlpool",
+	"sand_tomb",
+	"infestation"
+]);
+var PRESO_DURACAO_SEGUNDOS = (rng) => TURNO_SEGUNDOS * (nextFloat(rng) < .5 ? 4 : 5);
 var SPITE_COOLDOWN_BONUS = TURNO_SEGUNDOS * 4;
 var CURSE_SELF_MAX_HP_LOSS_PERCENT = .5;
 var INGRAIN_AQUA_RING_REGEN_PERCENT = 1 / 16;
@@ -46107,12 +48577,59 @@ function hiddenPowerPower(attackerPoke) {
 function psywaveDamage(rng, attackerPoke) {
 	return Math.max(1, Math.round(attackerPoke.level * randRange(rng, .5, 1.5)));
 }
+function gyroBallPower(attackerEntity, defenderEntity) {
+	const minha = Math.max(1, velocidadeEfetiva(attackerEntity));
+	const dela = Math.max(1, velocidadeEfetiva(defenderEntity));
+	return Math.min(150, Math.floor(25 * dela / minha) + 1);
+}
+function electroBallPower(attackerEntity, defenderEntity) {
+	const razao = Math.max(1, velocidadeEfetiva(attackerEntity)) / Math.max(1, velocidadeEfetiva(defenderEntity));
+	if (razao >= 4) return 150;
+	if (razao >= 3) return 120;
+	if (razao >= 2) return 80;
+	if (razao > 1) return 60;
+	return 40;
+}
+function wringOutPower(defenderPoke) {
+	const fracao = Math.max(0, defenderPoke.hp) / defenderPoke.stats.hp;
+	return Math.max(1, Math.floor(120 * fracao));
+}
+function punishmentPower(defenderEntity) {
+	const positivos = Object.values(defenderEntity.estagios).reduce((soma, n) => soma + Math.max(0, n ?? 0), 0);
+	return Math.min(200, 60 + 20 * positivos);
+}
+function pesoEmKg(poke) {
+	return SPECIES[poke.speciesId].pesoHg / 10;
+}
+function lowKickPower(defenderPoke) {
+	const kg = pesoEmKg(defenderPoke);
+	if (kg >= 200) return 120;
+	if (kg >= 100) return 100;
+	if (kg >= 50) return 80;
+	if (kg >= 25) return 60;
+	if (kg >= 10) return 40;
+	return 20;
+}
+function heavySlamPower(attackerPoke, defenderPoke) {
+	const razao = pesoEmKg(attackerPoke) / Math.max(.1, pesoEmKg(defenderPoke));
+	if (razao >= 5) return 120;
+	if (razao >= 4) return 100;
+	if (razao >= 3) return 80;
+	if (razao >= 2) return 60;
+	return 40;
+}
 var DYNAMIC_POWER_ABILITIES = {
 	magnitude: (rng) => rollMagnitudePower(rng),
 	reversal: (_rng, attackerPoke) => hpRatioPower(attackerPoke),
 	flail: (_rng, attackerPoke) => hpRatioPower(attackerPoke),
 	present: (rng) => rollPresentPower(rng),
-	hidden_power: (_rng, attackerPoke) => hiddenPowerPower(attackerPoke)
+	hidden_power: (_rng, attackerPoke) => hiddenPowerPower(attackerPoke),
+	gyro_ball: (_rng, _a, _d, attackerEntity, defenderEntity) => gyroBallPower(attackerEntity, defenderEntity),
+	electro_ball: (_rng, _a, _d, attackerEntity, defenderEntity) => electroBallPower(attackerEntity, defenderEntity),
+	wring_out: (_rng, _a, defenderPoke) => wringOutPower(defenderPoke),
+	punishment: (_rng, _a, _d, _attackerEntity, defenderEntity) => punishmentPower(defenderEntity),
+	low_kick: (_rng, _a, defenderPoke) => lowKickPower(defenderPoke),
+	heavy_slam: (_rng, attackerPoke, defenderPoke) => heavySlamPower(attackerPoke, defenderPoke)
 };
 var COUNTER_MEMORY_WINDOW = 3;
 function counterDamage(attackerEntity, category) {
@@ -46129,15 +48646,55 @@ var FIXED_DAMAGE_ABILITIES = {
 	fissure: (_a, defenderPoke) => defenderPoke.hp,
 	psywave: (attackerPoke, _d, _e, rng) => psywaveDamage(rng, attackerPoke),
 	counter: (_a, _d, attackerEntity) => counterDamage(attackerEntity, "physical"),
-	mirror_coat: (_a, _d, attackerEntity) => counterDamage(attackerEntity, "special")
+	mirror_coat: (_a, _d, attackerEntity) => counterDamage(attackerEntity, "special"),
+	sonic_boom: () => 20,
+	endeavor: (attackerPoke, defenderPoke) => Math.max(0, defenderPoke.hp - attackerPoke.hp),
+	final_gambit: (attackerPoke) => Math.max(1, attackerPoke.hp)
 };
+var CHANCE_ACUMULADA_DE_ACERTOS = [
+	[2, 3 / 8],
+	[3, 6 / 8],
+	[4, 7 / 8],
+	[5, 1]
+];
+function quantidadeDeAcertos(rng, ability) {
+	const min = ability.minHits ?? 1;
+	const max = ability.maxHits ?? 1;
+	if (max <= 1) return 1;
+	if (min === max) return min;
+	const sorteio = nextFloat(rng);
+	for (const [acertos, limite] of CHANCE_ACUMULADA_DE_ACERTOS) if (acertos >= min && acertos <= max && sorteio < limite) return acertos;
+	return max;
+}
+var STATUS_SORTEADO = { tri_attack: [
+	"burn",
+	"freeze",
+	"paralysis"
+] };
+var JANELA_DE_DANO_RECENTE = 3;
+var MULTIPLICADOR_CONDICIONAL = {
+	brine: (d) => d.poke.hp <= d.poke.stats.hp / 2 ? 2 : 1,
+	hex: (d) => d.poke.status ? 2 : 1,
+	venoshock: (d) => d.poke.status?.tipo === "poison" ? 2 : 1,
+	wake_up_slap: (d) => d.poke.status?.tipo === "sleep" ? 2 : 1,
+	assurance: (d) => {
+		const recente = (categoria) => {
+			const m = d.lastDamageTaken[categoria];
+			return m.amount > 0 && m.age <= JANELA_DE_DANO_RECENTE;
+		};
+		return recente("physical") || recente("special") ? 2 : 1;
+	}
+};
+function multiplicadorCondicional(ability, defenderEntity) {
+	return MULTIPLICADOR_CONDICIONAL[ability.id]?.(defenderEntity) ?? 1;
+}
 function specialDamageFor(rng, ability, attackerEntity, defenderEntity) {
 	const attackerPoke = attackerEntity.poke;
 	const defenderPoke = defenderEntity.poke;
 	const dynamic = DYNAMIC_POWER_ABILITIES[ability.id];
 	if (dynamic) return {
 		mode: "dynamicPower",
-		power: dynamic(rng, attackerPoke)
+		power: dynamic(rng, attackerPoke, defenderPoke, attackerEntity, defenderEntity)
 	};
 	const fixed = FIXED_DAMAGE_ABILITIES[ability.id];
 	if (fixed) {
@@ -46168,7 +48725,7 @@ function estimateDamage(rng, attackerEntity, defenderEntity, ability) {
 	const { atacante: attackerTraitEstimate, defensor: defenderTraitEstimate } = traitsDoConfronto(attackerEntity, defenderEntity);
 	const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp) * multiplicadorDeAtaquePorTrait(attackerTraitEstimate, isPhysical, Boolean(attackerPoke.status));
 	const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp) * multiplicadorDeDefesaPorTrait(defenderTraitEstimate, isPhysical, Boolean(defenderPoke.status));
-	const power = (special && special.mode === "dynamicPower" ? special.power : ability.power) * multiplicadorDePoderPorTrait(attackerTraitEstimate, ability, null);
+	const power = (special && special.mode === "dynamicPower" ? special.power : ability.power) * multiplicadorDePoderPorTrait(attackerTraitEstimate, ability, null) * multiplicadorCondicional(ability, defenderEntity);
 	if (power === 0) return 0;
 	let dmg = formulaEngine$4.eval("DAMAGE_BASE", {
 		level: attackerPoke.level,
@@ -46182,7 +48739,9 @@ function estimateDamage(rng, attackerEntity, defenderEntity, ability) {
 	dmg *= effectivenessMultiplier;
 	dmg *= multiplicadorDeDanoRecebidoPorTrait(defenderTraitEstimate, ability, effectivenessMultiplier);
 	dmg *= multiplicadorDeDanoCausadoPorTrait(attackerTraitEstimate, effectivenessMultiplier);
-	return dmg;
+	const minHits = ability.minHits ?? 1;
+	const maxHits = ability.maxHits ?? 1;
+	return dmg * (maxHits <= 1 ? 1 : minHits === maxHits ? minHits : 3);
 }
 var ESTAGIO_ALVO_DA_IA = 2;
 var FOCUS_ENERGY_TETO_DA_IA = 3;
@@ -46366,7 +48925,7 @@ function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista 
 		const estagiosDoAtacanteValem = defenderTrait !== TRAIT_UNAWARE;
 		const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp) * (estagiosDoAtacanteValem ? multiplicadorDeStat(attackerEntity.estagios, isPhysical ? "atkFis" : "atkEsp") : 1) * multiplicadorDeAtaquePorTrait(attackerTrait, isPhysical, Boolean(attackerPoke.status)) * (attackerTrait === "solar_power" && !isPhysical && climaAtivo === "sol" ? SOLAR_POWER_BONUS : 1);
 		const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp) * (estagiosDoDefensorValem ? multiplicadorDeStat(defenderEntity.estagios, isPhysical ? "def" : "defEsp") : 1) * multiplicadorDeDefesaPorTrait(defenderTrait, isPhysical, Boolean(defenderPoke.status));
-		const power = (special && special.mode === "dynamicPower" ? special.power : ability.power) * multiplicadorDePoderPorTrait(attackerTrait, ability, climaAtivo);
+		const power = (special && special.mode === "dynamicPower" ? special.power : ability.power) * multiplicadorDePoderPorTrait(attackerTrait, ability, climaAtivo) * multiplicadorCondicional(ability, defenderEntity);
 		dmg = power === 0 ? 0 : formulaEngine$4.eval("DAMAGE_BASE", {
 			level: attackerPoke.level,
 			power,
@@ -46429,7 +48988,7 @@ var EFFECTIVENESS_COLORS = {
 	super: "#ff8c1a",
 	effective: "#ffe14d",
 	normal: "#ffffff",
-	weak: "#5a5a5a",
+	weak: "#8b98a8",
 	immune: "#000000"
 };
 function spawnDamageNumber(world, target, result) {
@@ -46444,6 +49003,7 @@ function spawnDamageNumber(world, target, result) {
 		value: result.amount,
 		effectiveness: result.effectiveness !== "normal" ? result.effectiveness : void 0,
 		effectivenessLabel: result.effectivenessLabel,
+		isCrit: result.isCrit || void 0,
 		owner: target,
 		laneSize: result.effectivenessLabel ? 2 : 1
 	}));
@@ -46794,6 +49354,19 @@ var HEAL_BLOCK_SEGUNDOS = 5 * TURNO_SEGUNDOS;
 function curaBloqueada(entity) {
 	return Boolean(entity.curaBloqueadaAte && entity.curaBloqueadaAte > 0);
 }
+/**
+* Procedencia de estagio que o proprio POKE aplicou em si por um golpe de caso
+* especial (PH-121) — Belly Drum e Acupressure escrevem em `estagios` direto,
+* sem passar por `aplicarMudancasDeStat`, entao nao ganhariam fonte sozinhos.
+*/
+function registrarFonteDoProprioGolpe(entity, stat, ability) {
+	registrarFonteDeEstagio(entity, stat, {
+		id: ability.id,
+		tipo: "golpe",
+		proprio: true,
+		deQuem: SPECIES[entity.poke.speciesId]?.name ?? entity.poke.speciesId
+	});
+}
 function trocarEstagios(a, b, stats) {
 	for (const stat of stats) {
 		const av = a.estagios[stat];
@@ -46802,6 +49375,14 @@ function trocarEstagios(a, b, stats) {
 		else a.estagios[stat] = bv;
 		if (av === void 0) delete b.estagios[stat];
 		else b.estagios[stat] = av;
+		const af = a.estagiosFonte?.[stat];
+		const bf = b.estagiosFonte?.[stat];
+		if (bf === void 0) {
+			if (a.estagiosFonte) delete a.estagiosFonte[stat];
+		} else (a.estagiosFonte ??= {})[stat] = bf;
+		if (af === void 0) {
+			if (b.estagiosFonte) delete b.estagiosFonte[stat];
+		} else (b.estagiosFonte ??= {})[stat] = af;
 	}
 }
 function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
@@ -46822,7 +49403,8 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			worldSize: (ability.radius ?? 0) * 2,
 			elementType: ability.type,
 			abilityId: ability.id,
-			statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0
+			statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0,
+			seguir: attacker
 		}));
 		const alguemComDamp = [world.player, ...world.enemies].some((e) => e && !isDead(e) && traitDoPoke(e.poke) === "damp");
 		if (SELF_DESTRUCT_ABILITY_KEYS.has(ability.id) && !isDead(attacker) && !alguemComDamp) {
@@ -46859,21 +49441,30 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		if (!silent) anunciarProtegido(world, target);
 		return;
 	}
-	const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null);
-	let danoFinal = result.amount;
-	const enduraGolpe = target.enduraAtiva === true;
-	if (enduraGolpe) target.enduraAtiva = false;
-	const sturdyTrait = !enduraGolpe && traitDoPoke(target.poke) === "sturdy" && target.poke.hp === target.poke.stats.hp;
-	const aguentou = (enduraGolpe || sturdyTrait) && danoFinal >= target.poke.hp && target.poke.hp > 0;
-	if (aguentou) danoFinal = target.poke.hp - 1;
-	const danoCausado = Math.min(danoFinal, target.poke.hp);
-	if (danoFinal > 0) {
-		takeDamage(target, danoFinal, resolveAbilityCategory(ability, attacker.poke));
-		if (!silent) spawnDamageNumber(world, target, {
-			...result,
-			amount: danoFinal
-		});
-		if (aguentou && !silent) anunciarAguentou(world, target);
+	const acertos = quantidadeDeAcertos(world.rng, ability);
+	let danoFinal = 0;
+	let danoCausado = 0;
+	let houveCritico = false;
+	for (let acerto = 0; acerto < acertos; acerto++) {
+		if (acerto > 0 && isDead(target)) break;
+		const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null);
+		if (result.isCrit) houveCritico = true;
+		let danoDoAcerto = result.amount;
+		const enduraGolpe = target.enduraAtiva === true;
+		if (enduraGolpe) target.enduraAtiva = false;
+		const sturdyTrait = !enduraGolpe && traitDoPoke(target.poke) === "sturdy" && target.poke.hp === target.poke.stats.hp;
+		const aguentou = (enduraGolpe || sturdyTrait) && danoDoAcerto >= target.poke.hp && target.poke.hp > 0;
+		if (aguentou) danoDoAcerto = target.poke.hp - 1;
+		danoCausado += Math.min(danoDoAcerto, target.poke.hp);
+		danoFinal += danoDoAcerto;
+		if (danoDoAcerto > 0) {
+			takeDamage(target, danoDoAcerto, resolveAbilityCategory(ability, attacker.poke));
+			if (!silent) spawnDamageNumber(world, target, {
+				...result,
+				amount: danoDoAcerto
+			});
+			if (aguentou && !silent) anunciarAguentou(world, target);
+		}
 	}
 	if (danoFinal > 0 && !isDead(target)) {
 		const traitDoAlvo = traitsDoConfronto(attacker, target).defensor;
@@ -46881,12 +49472,12 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		const ehFisico = resolveAbilityCategory(ability, attacker.poke) === "physical";
 		const tipoBate = !reacao?.tipos || reacao.tipos.includes(ability.type);
 		const categoriaBate = !reacao?.soFisico || ehFisico;
-		const gatilhoDeAngerPoint = traitDoAlvo !== "anger_point" || result.isCrit;
-		if (reacao && tipoBate && categoriaBate && gatilhoDeAngerPoint) {
-			const mudanca = aplicarEstagioUnico(target, reacao.stat, reacao.estagios);
+		if (reacao && tipoBate && categoriaBate && (traitDoAlvo !== "anger_point" || houveCritico)) {
+			const fonteDaTrait = fonteDeTrait(target, traitDoAlvo);
+			const mudanca = aplicarEstagioUnico(target, reacao.stat, reacao.estagios, fonteDaTrait);
 			if (mudanca && !silent) anunciarEstagios(world, target, [mudanca]);
 			if (traitDoAlvo === "weak_armor") {
-				const queda = aplicarEstagioUnico(target, "def", -1);
+				const queda = aplicarEstagioUnico(target, "def", -1, fonteDaTrait);
 				if (queda && !silent) anunciarEstagios(world, target, [queda]);
 			}
 		}
@@ -46990,14 +49581,22 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		const traits = traitsDoConfronto(attacker, target);
 		const secundario = temEfeitoSecundario(ability);
 		let abilityEfetiva = ability;
+		const statusSorteados = STATUS_SORTEADO[ability.id];
+		if (statusSorteados) {
+			const escolhido = statusSorteados[Math.floor(nextFloat(world.rng) * statusSorteados.length)];
+			abilityEfetiva = {
+				...abilityEfetiva,
+				status: escolhido
+			};
+		}
 		if (secundario && traits.defensor === "shield_dust") abilityEfetiva = {
-			...ability,
+			...abilityEfetiva,
 			statusChance: 0,
 			statChance: 0,
 			flinchChance: 0
 		};
 		else if (secundario && traits.atacante === "serene_grace") abilityEfetiva = {
-			...ability,
+			...abilityEfetiva,
 			statusChance: Math.min(100, (ability.statusChance ?? 0) * 2),
 			statChance: Math.min(100, (ability.statChance ?? 0) * 2)
 		};
@@ -47061,6 +49660,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			if (!(especieAlvo.type === "GRASS" || especieAlvo.type2 === "GRASS")) target.seeded = { sourceId: attacker.id };
 		}
 		if (ability.id === "nightmare") target.nightmareDot = true;
+		if (GOLPES_QUE_PRENDEM.has(ability.id) && !(target.presoAte && target.presoAte > 0)) target.presoAte = PRESO_DURACAO_SEGUNDOS(world.rng);
 	}
 	if (ability.id === "focus_energy") attacker.estagioDeCritico = (attacker.estagioDeCritico ?? 0) + 2;
 	if (ability.id === "laser_focus") attacker.proximoGolpeCriticoGarantido = true;
@@ -47121,7 +49721,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		if (chance > 0 && !(traitDef === "shield_dust" && chanceDoGolpe > 0 && chanceDoStench === 0) && nextFloat(world.rng) * 100 < chance && traitDef !== "inner_focus") {
 			startGlobalCooldown(target, MIN_ACTION_GAP);
 			if (traitDef === "steadfast") {
-				const mudanca = aplicarEstagioUnico(target, "speed", 1);
+				const mudanca = aplicarEstagioUnico(target, "speed", 1, fonteDeTrait(target, traitDef));
 				if (mudanca && !silent) anunciarEstagios(world, target, [mudanca]);
 			}
 		}
@@ -47158,6 +49758,17 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			});
 			creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted);
 		}
+	}
+	if (ability.id === "final_gambit" && danoCausado > 0 && !isDead(attacker)) {
+		const custo = Math.max(1, Math.round(attacker.poke.hp * SELF_DESTRUCT_HP_LOSS_PERCENT));
+		takeDamage(attacker, custo);
+		if (!silent) spawnDamageNumber(world, attacker, {
+			amount: custo,
+			effectiveness: "normal",
+			effectivenessLabel: null,
+			isCrit: false
+		});
+		creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted);
 	}
 	switch (ability.id) {
 		case "endure":
@@ -47211,6 +49822,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			const perda = Math.round(attacker.poke.stats.hp / 2);
 			attacker.poke.hp = Math.max(1, attacker.poke.hp - perda);
 			attacker.estagios.atkFis = 6;
+			registrarFonteDoProprioGolpe(attacker, "atkFis", ability);
 			break;
 		}
 		case "acupressure": {
@@ -47224,6 +49836,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			const stat = stats[Math.floor(nextFloat(world.rng) * stats.length)];
 			const atual = attacker.estagios[stat] ?? 0;
 			attacker.estagios[stat] = Math.min(6, atual + 2);
+			registrarFonteDoProprioGolpe(attacker, stat, ability);
 			break;
 		}
 		case "aromatherapy":
@@ -47273,12 +49886,14 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
 			elementType: ability.type,
 			abilityId: ability.id,
-			statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0
+			statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0,
+			seguir: local,
+			apontarPara: mesmoLugar || !ehDirecional(ability.id) ? void 0 : attacker
 		}));
 	}
 	if (!isDead(target)) return;
 	if (traitDoPoke(attacker.poke) === "moxie" && !isDead(attacker)) {
-		const mudanca = aplicarEstagioUnico(attacker, "atkFis", 1);
+		const mudanca = aplicarEstagioUnico(attacker, "atkFis", 1, fonteDeTrait(attacker, TRAIT_MOXIE));
 		if (mudanca && !silent) anunciarEstagios(world, attacker, [mudanca]);
 	}
 	if (isPlayerAttacker) {
@@ -47318,7 +49933,7 @@ function resolveEntryHook(world, self, opponent, silent) {
 		return;
 	}
 	if (trait === "intimidate") {
-		const mudanca = aplicarEstagioUnico(opponent, "atkFis", -1);
+		const mudanca = aplicarEstagioUnico(opponent, "atkFis", -1, fonteDeTrait(self, "intimidate", opponent));
 		if (mudanca && !silent) anunciarEstagios(world, opponent, [mudanca]);
 		return;
 	}
@@ -47332,7 +49947,7 @@ function resolveEntryHook(world, self, opponent, silent) {
 	}
 	if (trait === "download") {
 		const opponentPoke = opponent.poke;
-		const mudanca = aplicarEstagioUnico(self, opponentPoke.stats.def * multiplicadorDeStat(opponent.estagios, "def") <= opponentPoke.stats.defEsp * multiplicadorDeStat(opponent.estagios, "defEsp") ? "atkFis" : "atkEsp", 1);
+		const mudanca = aplicarEstagioUnico(self, opponentPoke.stats.def * multiplicadorDeStat(opponent.estagios, "def") <= opponentPoke.stats.defEsp * multiplicadorDeStat(opponent.estagios, "defEsp") ? "atkFis" : "atkEsp", 1, fonteDeTrait(self, "download"));
 		if (mudanca && !silent) anunciarEstagios(world, self, [mudanca]);
 	}
 }
@@ -47382,7 +49997,11 @@ function updateCombat(world, dt, opts = {}) {
 		world.clima.turnosRestantes -= 1;
 		if (world.clima.turnosRestantes <= 0) world.clima = null;
 	}
-	for (const effect of world.effects) tickEffect(effect, dt);
+	for (const effect of world.effects) {
+		tickEffect(effect, dt);
+		if (effect.seguirId) seguirDono(effect, findEntityById(player, enemies, effect.seguirId));
+		if (effect.apontarParaId) reapontarParaAtacante(effect, findEntityById(player, enemies, effect.apontarParaId));
+	}
 	for (const effect of world.effects) if (effectDone(effect) && effect.ownerId) {
 		const owner = findEntityById(player, enemies, effect.ownerId);
 		if (owner) releaseEffectLane(owner, effect.id);
@@ -47416,6 +50035,7 @@ function updateCombat(world, dt, opts = {}) {
 	if (player.state !== "engaged" && player.entradaProcessada) player.entradaProcessada = false;
 	for (const enemy of enemies) if (enemy.state !== "engaged" && enemy.entradaProcessada) enemy.entradaProcessada = false;
 	const engagedEnemies = enemies.filter((e) => !isDead(e) && e.state === "engaged" && e.targetId === player.id);
+	player.targetId = engagedEnemies[0]?.id ?? null;
 	if (engagedEnemies.length > 0) {
 		const primaryTarget = engagedEnemies[0];
 		if (!player.entradaProcessada) {
@@ -47488,7 +50108,7 @@ function slideToward(entity, tx, ty, speed, dt, mapDef) {
 }
 function hasLineOfSight(mapDef, x0, y0, x1, y1) {
 	const dist = Math.hypot(x1 - x0, y1 - y0);
-	const steps = Math.max(1, Math.ceil(dist / 20));
+	const steps = Math.max(1, Math.ceil(dist / 10));
 	for (let i = 1; i <= steps; i++) {
 		const t = i / steps;
 		if (isCellBlocked(mapDef, x0 + (x1 - x0) * t, y0 + (y1 - y0) * t)) return false;
@@ -47824,7 +50444,7 @@ function attemptCapture(rng, gameState, defeatedPoke, ballItemId) {
 		chance,
 		ballItemId
 	};
-	const stats = computeStatsAtLevel(species, CAPTURE_LEVEL, defeatedPoke.ivs, defeatedPoke.rarity, defeatedPoke.isShiny);
+	const stats = computeStatsAtLevel(species, CAPTURE_LEVEL, defeatedPoke.ivs, defeatedPoke.rarity, defeatedPoke.isShiny, defeatedPoke.nature);
 	const newPoke = {
 		...defeatedPoke,
 		uid: novoPokeUid(),
@@ -48294,9 +50914,12 @@ function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0) {
 		return;
 	}
 	if (world.salaSobAutoridade) {
+		if (world.salaPredita) return;
 		world.salaEsperaDaAutoridade += dt;
 		if (world.salaEsperaDaAutoridade < 20) return;
 		world.salaEsperaDaAutoridade = 0;
+		if (armarTransicaoDeSala(world, mapId).avancou) world.salaPredita = true;
+		return;
 	}
 	armarTransicaoDeSala(world, mapId);
 }
@@ -48338,18 +50961,21 @@ function reconciliarSalaDaAutoridade(world, sala) {
 	const atual = world.salaPendente ?? world.sala;
 	if (!atual) {
 		world.sala = { ...sala };
+		world.salaPredita = false;
 		return;
 	}
 	if (atual.chave === sala.chave && atual.indice === sala.indice && atual.ciclos === sala.ciclos) {
 		const alvo = world.salaPendente ?? world.sala;
 		if (alvo) alvo.abates = Math.max(alvo.abates, sala.abates);
+		world.salaPredita = false;
 		return;
 	}
 	const posicao = (s) => s.ciclos * 10 + s.indice;
-	if (posicao(sala) < posicao(atual)) return;
+	if (!world.salaPredita && posicao(sala) < posicao(atual)) return;
 	world.salaPendente = { ...sala };
 	world.salaCountdownRemaining ??= 3;
 	world.salaEsperaDaAutoridade = 0;
+	world.salaPredita = false;
 }
 /**
 * Aplica a sala ja sorteada (`world.salaPendente`) quando a contagem
@@ -49146,6 +51772,7 @@ function emptyWorldState(seed = randomSeed()) {
 		pendingWishes: [],
 		autoTimers: { treinador: 0 },
 		reviveCountdown: null,
+		trocaEmCampo: null,
 		respawnTimer: null,
 		sequenceIndex: 0,
 		sequenceCleared: false,
@@ -49155,6 +51782,7 @@ function emptyWorldState(seed = randomSeed()) {
 		salaPendente: null,
 		salaSobAutoridade: false,
 		salaEsperaDaAutoridade: 0,
+		salaPredita: false,
 		rng: createRng(seed),
 		counters: {
 			entity: 1,
@@ -49241,6 +51869,7 @@ var useToastStore = create((set) => ({
 var formulaEngine = createFormulaEngine(FORMULAS);
 formulaEngine.evalOrDefault("OFFLINE_FARM_MAX_HOURS", 6);
 var OFFLINE_SIM_STEP_SECONDS = formulaEngine.evalOrDefault("OFFLINE_SIM_STEP_SECONDS", .1);
+var LIVE_SIM_STEP_SECONDS = 1 / 60;
 function shinyPrefix(isShiny) {
 	return isShiny ? "✨ " : "";
 }
@@ -49271,6 +51900,10 @@ function randomSpawnPointFullMap(rng, mapDef) {
 		y = cy + Math.sin(angle) * dist;
 		attempts++;
 	} while (attempts < SPAWN_POINT_MAX_ATTEMPTS && (Math.hypot(x - mapDef.playerSpawn.x, y - mapDef.playerSpawn.y) < SPAWN_MIN_DISTANCE || isCellBlocked(mapDef, x, y)));
+	if (isCellBlocked(mapDef, x, y)) {
+		const aberto = nearestOpenPoint(mapDef, x, y);
+		if (aberto) return aberto;
+	}
 	return {
 		x,
 		y
@@ -49296,9 +51929,9 @@ function randomSpawnPoint(rng, mapDef, player) {
 	}
 	return randomSpawnPointFullMap(rng, mapDef);
 }
-function spawnEnemyAt(world, mapDef, pool, janela, player) {
+function spawnEnemyAt(world, mapDef, pool, janela, player, entrada) {
 	const { rng, counters } = world;
-	const point = randomSpawnPoint(rng, mapDef, player ?? null);
+	const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null);
 	const encounterId = weightedPick(rng, pool, (id) => getEncounter(id)?.weight ?? 45);
 	const encounter = getEncounter(encounterId);
 	if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
@@ -49332,13 +51965,65 @@ function sequenceSpawnPoint(rng, mapDef, base) {
 		y
 	};
 }
-function spawnSequenceEnemy(world, mapDef, index) {
+/**
+* A BOLA VERDE pintada na arte: por onde entra todo POKE novo do lado inimigo.
+* `null` quando a arte nao tem uma (as 29 hunts normais), e ai o chamador cai
+* no sorteio de sempre.
+*
+* Mapa que poe VARIOS inimigos em campo ao mesmo tempo nao usa: um ponto fixo
+* empilharia os seis no mesmo pixel. Sobra o formato de duelo — a sequencia do
+* Lance e os mapas de um inimigo so (BOSS, Treinamento), que e onde a bola faz
+* sentido.
+*/
+function entradaDoInimigo(mapDef, sala) {
+	if (!mapDef.sequence && mapDef.maxEnemies > 1) return null;
+	return spawnInimigoParaSala(mapDef.id, sala);
+}
+/**
+* Poe o proximo POKE vivo da equipe em campo depois da espera. Nao faz nada
+* fora dos mapas com `autoSwitchTeamOnFaint`, nem quando a equipe inteira caiu
+* — ai o fluxo normal de derrota assume.
+*/
+function trocarPorDesmaio(world, gameState, dt, silent) {
+	const player = world.player;
+	if (!world.mapDef?.autoSwitchTeamOnFaint || !player || !isDead(player)) {
+		world.trocaEmCampo = null;
+		return;
+	}
+	const proximo = gameState.team.findIndex((p) => p.hp > 0);
+	if (proximo === -1) {
+		world.trocaEmCampo = null;
+		return;
+	}
+	world.trocaEmCampo = (world.trocaEmCampo ?? 2) - dt;
+	if (world.trocaEmCampo > 0) return;
+	world.trocaEmCampo = null;
+	gameState.setActiveIndex(proximo);
+	const nextPoke = gameState.team[proximo];
+	player.poke = nextPoke;
+	player.cooldowns = {};
+	player.flashTimer = 0;
+	player.fainted = false;
+	player.state = "wander";
+	player.targetId = null;
+	const entrada = spawnPointParaSala(world.mapDef.id, world.sala);
+	if (entrada) {
+		player.x = entrada.x;
+		player.y = entrada.y;
+		player.pathWaypoints = null;
+		player.pathIndex = 0;
+		player.pathTargetX = null;
+		player.pathTargetY = null;
+	}
+	if (!silent) useToastStore.getState().pushToast(`${shinyPrefix(nextPoke.isShiny)}${SPECIES[nextPoke.speciesId].name} entrou em campo!`, "success", "combat");
+}
+function spawnSequenceEnemy(world, mapDef, index, entrada) {
 	const { rng, counters } = world;
 	const encounterId = mapDef.sequence[index];
 	const encounter = getEncounter(encounterId);
 	if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
 	const base = mapDef.spawnPoints[0] || mapDef.playerSpawn;
-	const point = index === 0 ? base : sequenceSpawnPoint(rng, mapDef, base);
+	const point = entrada ?? (index === 0 ? base : sequenceSpawnPoint(rng, mapDef, base));
 	return createEnemyEntity(counters, {
 		poke: createPokeInstance(rng, encounter.speciesId, encounter.minLevel, {
 			rarity: encounter.rarity,
@@ -49385,11 +52070,11 @@ function buildMapWorld(mapId, activePoke, carry, progresso) {
 	const enemies = [];
 	if (!countdownRemaining && !sequenceCleared) {
 		if (mapDef.sequence) {
-			const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex);
+			const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala));
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
 		} else for (let i = 0; i < mapDef.maxEnemies; i++) {
-			const enemy = spawnEnemyAt(base, mapDef, pool, janela, player);
+			const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala));
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
 		}
@@ -49404,6 +52089,7 @@ function buildMapWorld(mapId, activePoke, carry, progresso) {
 		pendingWishes: [],
 		autoTimers: { treinador: 0 },
 		reviveCountdown: null,
+		trocaEmCampo: null,
 		respawnTimer: mapDef.respawnDelay,
 		sequenceIndex,
 		sequenceCleared,
@@ -49532,13 +52218,13 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (world.countdownRemaining <= 0) {
 			world.countdownRemaining = null;
 			if (world.mapDef.sequence) {
-				const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex);
+				const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex, entradaDoInimigo(world.mapDef, world.sala));
 				aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 				world.enemies.push(enemy);
 			} else {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
 				for (let i = 0; i < world.mapDef.maxEnemies; i++) {
-					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player);
+					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala));
 					aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 					world.enemies.push(enemy);
 				}
@@ -49557,7 +52243,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 			if (world.mapDef) {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
 				for (let i = 0; i < world.mapDef.maxEnemies; i++) {
-					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player);
+					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala));
 					aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 					world.enemies.push(enemy);
 				}
@@ -49590,21 +52276,8 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		world.player.poke = penaltyResult.poke;
 		gameState.updatePokeInstance(penaltyResult.poke.uid, () => penaltyResult.poke);
 		if (!silent) useToastStore.getState().pushToast(`${SPECIES[world.player.poke.speciesId].name} desmaiou!${penaltyResult.leveledDown ? ` Caiu para o nivel ${penaltyResult.level}.` : ""}`, "error", "combat");
-		if (world.mapDef.autoSwitchTeamOnFaint) {
-			const nextIndex = gameState.team.findIndex((p) => p.hp > 0);
-			if (nextIndex !== -1) {
-				gameState.setActiveIndex(nextIndex);
-				const nextPoke = gameState.team[nextIndex];
-				world.player.poke = nextPoke;
-				world.player.cooldowns = {};
-				world.player.flashTimer = 0;
-				world.player.fainted = false;
-				world.player.state = "wander";
-				world.player.targetId = null;
-				if (!silent) useToastStore.getState().pushToast(`${shinyPrefix(nextPoke.isShiny)}${SPECIES[nextPoke.speciesId].name} entrou em campo!`, "success", "combat");
-			}
-		}
 	}
+	trocarPorDesmaio(world, gameState, dt, silent);
 	const autoEvents = updateAutoHeal(world, gameState, dt);
 	if (!silent) for (const ev of autoEvents) {
 		if (ev.type === "auto_pot") {
@@ -49625,7 +52298,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
 		if (world.respawnTimer <= 0) {
 			const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
-			const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player);
+			const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala));
 			aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 			world.enemies.push(enemy);
 			world.respawnTimer = world.mapDef.respawnDelay;
@@ -49634,7 +52307,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
 		if (world.respawnTimer <= 0) {
 			world.sequenceIndex += 1;
-			const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex);
+			const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex, entradaDoInimigo(world.mapDef, world.sala));
 			aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 			world.enemies.push(enemy);
 			world.respawnTimer = world.mapDef.respawnDelay;
@@ -49861,7 +52534,7 @@ function rowToPoke(row) {
 		stats,
 		unlockedAbilities: species ? golpesAprendidosAte(species, row.level) : row.unlocked_abilities,
 		disabledAbilities: row.disabled_abilities ?? {},
-		activeAbilities: row.active_abilities ?? (species ? activeAbilitiesPadrao(species, row.level) : void 0),
+		activeAbilities: species ? sanearEscolhaDeGolpes(row.active_abilities ?? activeAbilitiesPadrao(species, row.level), golpesAprendidosAte(species, row.level), species, row.level) : row.active_abilities ?? void 0,
 		status: row.status ? {
 			tipo: row.status,
 			turnosRestantes: row.status_turns
@@ -50156,6 +52829,13 @@ function criarEstadoDoJogador(dados) {
 				s.team.unshift(p);
 				s.activeIndex = 0;
 			},
+			reordenarReservas: (de, para) => {
+				const n = s.team.length;
+				if (de === para) return;
+				if (de < 1 || de >= n || para < 1 || para >= n) return;
+				const [p] = s.team.splice(de, 1);
+				s.team.splice(para, 0, p);
+			},
 			moveTeamToBag: (uid) => {
 				const i = s.team.findIndex((p) => p.uid === uid);
 				if (i < 0 || s.team.length <= 1) return null;
@@ -50413,18 +53093,20 @@ async function lerSnapshot(cfg, userId, opcoes = {}) {
 		selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=*`)
 	]);
 	if (!player[0]) throw new ErroHttp(404, "jogador sem linha em `players`");
+	const linhasNoLoad = {
+		player: player[0],
+		pokemon,
+		items,
+		pokedex,
+		autoCatchRules
+	};
 	return {
-		estado: snapshotToGameState({
-			player: player[0],
-			pokemon,
-			items,
-			pokedex,
-			autoCatchRules
-		}, defaultGameStateData()),
+		estado: snapshotToGameState(linhasNoLoad, defaultGameStateData()),
 		pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)),
 		entregas: [],
 		playerUpdatedAt: player[0].updated_at,
-		bagCarregada: comBag
+		bagCarregada: comBag,
+		linhasNoLoad
 	};
 }
 async function carregarEstado(cfg, userId, opcoes = {}) {
@@ -50484,37 +53166,108 @@ async function comEstadoParaEscrita(cfg, userId, fn, opcoes = {}) {
 *    pro vendedor um POKE que o comprador ja tinha pago.
 */
 var CONFLITO_ESCRITA_JOGADOR = "outro comando em andamento — tente de novo";
-async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAtEsperado) {
-	if (!(await atualizarRetornando(cfg, `players?user_id=eq.${userId}&updated_at=eq.${encodeURIComponent(playerUpdatedAtEsperado)}`, gameStateToPlayerRow(userId, estado))).length) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR);
+/**
+* Duas linhas do banco dizem a mesma coisa?
+*
+* Compara so as chaves que a linha NOVA traz: o tipo `Insert` omite coluna com
+* default (`created_at`, `updated_at`), e exigir igualdade nelas faria toda
+* linha parecer diferente — que e exatamente o comportamento que este diff
+* existe pra evitar.
+*
+* Em caso de duvida o resultado e `false` (grava). Um falso "mudou" custa uma
+* escrita a mais; um falso "nao mudou" perde progresso.
+*/
+function linhaIgual(nova, atual) {
+	if (!atual) return false;
+	for (const [chave, valor] of Object.entries(nova)) {
+		const antes = atual[chave];
+		if (valor === antes) continue;
+		if (valor == null && antes == null) continue;
+		if (typeof valor === "object" || typeof antes === "object") {
+			if (JSON.stringify(valor) === JSON.stringify(antes)) continue;
+			return false;
+		}
+		return false;
+	}
+	return true;
+}
+/**
+* Só as linhas que mudaram em relacao ao baseline — o que de fato precisa subir.
+*
+* POR QUE ISTO EXISTE (PH-90)
+*
+* O diff antes era so por TABELA: bastava uma linha diferente pra reescrever
+* todas. Como a Pokedex guarda contagem de abates, matar UM mob mudava uma
+* contagem e regravava a dex inteira — 104 linhas pra registrar 1 abate no
+* jogador com a dex maior. Medido em producao: 484.746 escritas em
+* `player_pokedex` contra 13.045 em `players`, a tabela principal. Mesma coisa
+* em `player_items`, onde cada pocao consumida reescrevia o inventario todo.
+*
+* `undefined` = nao ha baseline (chamador antigo, ou leitura que nao guardou as
+* linhas). Sem baseline nao da pra saber o que mudou, entao devolve tudo — o
+* mesmo fallback conservador de antes.
+*
+* Linha nova (sem par no baseline) entra: `linhaIgual(nova, undefined)` e
+* false. Linha REMOVIDA nao aparece aqui — quem cuida disso e o diff de
+* remocao de cada bloco, que compara contra o que o banco tem agora.
+*/
+function linhasQueMudaram(novas, atuais, chaveDe) {
+	if (!atuais) return novas;
+	const porChave = new Map(atuais.map((l) => [chaveDe(l), l]));
+	return novas.filter((nova) => !linhaIgual(nova, porChave.get(chaveDe(nova))));
+}
+/** Nada mudou nesta tabela: mesmas chaves, e nenhuma linha diferente. */
+function tabelaIntacta(novas, atuais, chaveDe) {
+	if (!atuais) return false;
+	if (novas.length !== atuais.length) return false;
+	return linhasQueMudaram(novas, atuais, chaveDe).length === 0;
+}
+async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAtEsperado, linhasNoLoad) {
+	if (!(await chamarRpc(cfg, "gravar_progresso", {
+		p_user_id: userId,
+		p_patch: gameStateToPlayerRow(userId, estado),
+		p_updated_at_esperado: playerUpdatedAtEsperado
+	})).ok) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR);
 	const linhasPoke = gameStateToPokemonRows(userId, estado);
-	const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id) => id != null));
-	const idsDeInteresse = [.../* @__PURE__ */ new Set([...pokeIdsNoLoad, ...idsAgora])];
-	const atuais = [];
-	for (const lote of porLotesDeId(idsDeInteresse)) atuais.push(...await selecionarTudo(cfg, `pokemon_instances?id=in.(${lote.join(",")})&select=id,user_id,location`));
-	const porId = new Map(atuais.map((l) => [l.id, l]));
-	const aindaMeu = (l) => l != null && l.user_id === userId && (l.location === "team" || l.location === "bag");
-	const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)));
-	for (const lote of porLotesDeId(remover)) await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(",")})`);
-	const gravarPoke = linhasPoke.filter((l) => {
-		const atual = porId.get(String(l.id));
-		return atual == null || aindaMeu(atual);
-	});
-	if (gravarPoke.length) await inserir(cfg, "pokemon_instances", gravarPoke, { upsert: "id" });
+	if (!tabelaIntacta(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id))) {
+		const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id) => id != null));
+		const idsDeInteresse = [.../* @__PURE__ */ new Set([...pokeIdsNoLoad, ...idsAgora])];
+		const atuais = [];
+		for (const lote of porLotesDeId(idsDeInteresse)) atuais.push(...await selecionarTudo(cfg, `pokemon_instances?id=in.(${lote.join(",")})&select=id,user_id,location`));
+		const porId = new Map(atuais.map((l) => [l.id, l]));
+		const aindaMeu = (l) => l != null && l.user_id === userId && (l.location === "team" || l.location === "bag");
+		const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)));
+		for (const lote of porLotesDeId(remover)) await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(",")})`);
+		const gravarPoke = linhasQueMudaram(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id)).filter((l) => {
+			const atual = porId.get(String(l.id));
+			return atual == null || aindaMeu(atual);
+		});
+		if (gravarPoke.length) await inserir(cfg, "pokemon_instances", gravarPoke, { upsert: "id" });
+	}
 	const linhasItens = gameStateToItemRows(userId, estado);
-	const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id));
-	const removerItens = (await selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=item_id`)).map((l) => l.item_id).filter((id) => !itemIdsAgora.has(id));
-	for (const lote of porLotesDeId(removerItens)) await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(",")})`);
-	if (linhasItens.length) await inserir(cfg, "player_items", linhasItens, { upsert: "user_id,item_id" });
+	if (!tabelaIntacta(linhasItens, linhasNoLoad?.items, (l) => String(l.item_id))) {
+		const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id));
+		const removerItens = (await selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=item_id`)).map((l) => l.item_id).filter((id) => !itemIdsAgora.has(id));
+		for (const lote of porLotesDeId(removerItens)) await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(",")})`);
+		const itensMudados = linhasQueMudaram(linhasItens, linhasNoLoad?.items, (l) => String(l.item_id));
+		if (itensMudados.length) await inserir(cfg, "player_items", itensMudados, { upsert: "user_id,item_id" });
+	}
 	const linhasDex = gameStateToPokedexRows(userId, estado);
-	const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id));
-	const removerDex = (await selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id));
-	for (const lote of porLotesDeId(removerDex)) await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(",")})`);
-	if (linhasDex.length) await inserir(cfg, "player_pokedex", linhasDex, { upsert: "user_id,species_id" });
+	if (!tabelaIntacta(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))) {
+		const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id));
+		const removerDex = (await selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id));
+		for (const lote of porLotesDeId(removerDex)) await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(",")})`);
+		const dexMudada = linhasQueMudaram(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id));
+		if (dexMudada.length) await inserir(cfg, "player_pokedex", dexMudada, { upsert: "user_id,species_id" });
+	}
 	const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado);
-	const especiesAgora = new Set(linhasAuto.map((l) => l.species_id));
-	const removerAuto = (await selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !especiesAgora.has(id));
-	for (const lote of porLotesDeId(removerAuto)) await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${lote.join(",")})`);
-	if (linhasAuto.length) await inserir(cfg, "player_auto_catch_rules", linhasAuto, { upsert: "user_id,species_id" });
+	if (!tabelaIntacta(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id))) {
+		const especiesAgora = new Set(linhasAuto.map((l) => l.species_id));
+		const removerAuto = (await selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !especiesAgora.has(id));
+		for (const lote of porLotesDeId(removerAuto)) await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${lote.join(",")})`);
+		const autoMudadas = linhasQueMudaram(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id));
+		if (autoMudadas.length) await inserir(cfg, "player_auto_catch_rules", autoMudadas, { upsert: "user_id,species_id" });
+	}
 }
 /**
 * Outro request do mesmo jogador ja esta creditando este intervalo.
@@ -50566,7 +53319,7 @@ async function aplicarFlush(cfg, userId, sessao, opcoes = {}) {
 				agora,
 				segundos,
 				truncado
-			});
+			}, ctx.linhasNoLoad);
 			if (!resultado) await devolverEntregas(cfg, ctx.entregas);
 			return resultado;
 		}, {
@@ -50577,7 +53330,7 @@ async function aplicarFlush(cfg, userId, sessao, opcoes = {}) {
 		await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { flushing_since: null });
 	}
 }
-async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUpdatedAt, janela) {
+async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUpdatedAt, janela, linhasNoLoad) {
 	const { agora, segundos, truncado } = janela;
 	const { store, dados: estado } = criarEstadoDoJogador(dados);
 	const continentesAntes = new Set(estado.unlockedContinents);
@@ -50610,7 +53363,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		world,
 		gameState: store,
 		seconds: segundos,
-		stepSeconds: OFFLINE_SIM_STEP_SECONDS,
+		stepSeconds: offline ? OFFLINE_SIM_STEP_SECONDS : LIVE_SIM_STEP_SECONDS,
 		stepFn: (w, dt, opts) => stepWorld(w, dt, store, opts)
 	});
 	const piso = offline && !pausado ? aplicarPiso(store, estado, resumo, agora) : NENHUM_PISO;
@@ -50621,7 +53374,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		shinys: resumo.shinySeen
 	});
 	estado.currentMapId = resumo.stoppedEarly ? null : sessao.map_id;
-	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt);
+	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt, linhasNoLoad);
 	if (GRUPOS_DO_LANCE.some((g) => !continentesAntes.has(g) && estado.unlockedContinents.includes(g))) await inserir(cfg, "hall_da_fama", {
 		user_id: userId,
 		conquista: CONQUISTA_LANCE
@@ -50718,8 +53471,8 @@ async function rotear(cfg, req, url) {
 	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id, await aceitaEstadoParcial(req));
 	if (url.pathname === "/estado" && req.method === "GET") {
 		const parcial = url.searchParams.get("parcial") === "1";
-		return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas }) => {
-			if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt);
+		return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas, linhasNoLoad }) => {
+			if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt, linhasNoLoad);
 			return json({
 				estado,
 				estadoParcial: parcial
