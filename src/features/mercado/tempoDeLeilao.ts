@@ -16,8 +16,9 @@
 // ---------------------------------------------------------------------------
 // O TEMPO PODE FICAR NEGATIVO, E ISSO NAO E ERRO
 // ---------------------------------------------------------------------------
-// `expira_em` passou mas o cron roda de minuto em minuto, entao existe uma
-// janela de ate ~60s em que o leilao esta vencido e ainda nao foi liquidado. A
+// `expira_em` passou mas o cron roda de 5 em 5 minutos (PH-126, era de minuto
+// em minuto), entao existe uma janela de ate ~5min em que o leilao esta vencido
+// e ainda nao foi liquidado — no ambiente `dev` o cron e de 15 em 15. A
 // tela diz "encerrando..." nessa janela em vez de mostrar tempo negativo ou
 // fingir que ainda da pra dar lance — e o servidor recusa lance depois de
 // `expira_em` de qualquer forma, entao os dois concordam.
