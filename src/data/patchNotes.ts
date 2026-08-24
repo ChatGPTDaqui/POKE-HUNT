@@ -12,6 +12,20 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-138. Curta de proposito: sao duas linhas, e a primeira e um aumento
+  // RETROATIVO de requisito. Quem tinha 25 pedras guardadas parou de poder
+  // evoluir, e a unica coisa que explica isso pro jogador e esta nota — a ficha
+  // da pedra e a Pokedex dizem 40, mas quem nao abrir nenhuma das duas descobre
+  // tentando e falhando.
+  {
+    version: '7.10',
+    date: '2026-08-24',
+    title: 'Evolucao especial passou a pedir 40 pedras',
+    highlights: [
+      'EVOLUCAO ESPECIAL AGORA CUSTA 40 PEDRAS do tipo primario do POKE, o dobro das 20 de antes. O Nivel 80 continua igual, e a pedra continua sendo a do PRIMEIRO tipo (Kadabra pede Pedra PSYCHIC, Onix pede Pedra ROCK). Vale pra quem ja tinha pedra guardada: se voce tinha 25 separadas pra evoluir, agora faltam 15.',
+      'A MENSAGEM DE PEDRA FALTANDO parou de sair com letra sobrando — dizia "faltam 40sx Pedra BUGs". Era um erro de formatacao que estava ali desde que a evolucao especial existe.',
+    ],
+  },
   // PH-135. Primeira entrada que sai JUNTO com o codigo que ela descreve: a
   // 7.7 e a 7.8 existiam na `dev` desde 22 e 23/08, mas a `main` estava 174
   // commits atras, entao o jogador pulou da 7.6 pra ca de uma vez.
@@ -799,6 +813,27 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   },
 ];
 
+/**
+ * Compara versao por SEGMENTO, e nao por `Number()` (PH-138).
+ *
+ * `Number('7.10')` e **7.1**, e `Number('7.9')` e 7.9 — ou seja, o desempate
+ * antigo punha a 7.9 ACIMA da 7.10. Nao era hipotetico: apareceu no instante em
+ * que a primeira versao de minor com dois digitos entrou, e o efeito e a nota
+ * mais nova renderizar embaixo da anterior. Versao e lista de inteiros
+ * separados por ponto, nao decimal.
+ */
+function compararVersao(a: string, b: string): number {
+  const pa = a.split('.').map(Number)
+  const pb = b.split('.').map(Number)
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pb[i] ?? 0) - (pa[i] ?? 0)
+    if (d !== 0) return d
+  }
+  return 0
+}
+
 export function sortedPatchNotes(): PatchNoteEntry[] {
-  return [...PATCH_NOTES].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : Number(b.version) - Number(a.version)));
+  return [...PATCH_NOTES].sort((a, b) => (
+    a.date < b.date ? 1 : a.date > b.date ? -1 : compararVersao(a.version, b.version)
+  ));
 }
