@@ -350,6 +350,20 @@ export interface WorldEffect {
   value?: number
   effectiveness?: string
   effectivenessLabel?: string
+  /**
+   * O hit que gerou este numero foi CRITICO (PH-131). So o desenho usa: a
+   * resolucao ja aconteceu, e `dmg` ja vem multiplicado.
+   *
+   * Vive no efeito, e nao e recalculado na hora de desenhar, pelo mesmo motivo
+   * de `anguloDeAtaque`: o efeito sobrevive ao hit, e nao ha mais nada no
+   * mundo dizendo que AQUELE numero saiu de um critico.
+   *
+   * CANAL SEPARADO da efetividade de propósito: critico e efetividade sao
+   * ortogonais (um hit pode ser os dois), entao dividir a cor entre eles faria
+   * um esconder o outro. `color` continua sendo efetividade; isto vira tamanho
+   * e marca escrita.
+   */
+  isCrit?: boolean
   text?: string
   unit?: string
   isAoe?: boolean
