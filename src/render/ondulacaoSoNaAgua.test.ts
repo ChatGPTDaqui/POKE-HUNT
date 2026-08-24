@@ -49,13 +49,21 @@ const { useUiStore } = await import('@/stores/uiStore')
 
 const JANELA = { x: 0, y: 0, w: COLUNAS * CELULA, h: LINHAS * CELULA }
 
-/** `ctx` de mentira que so anota onde `arc` foi chamado. */
+/**
+ * `ctx` de mentira que anota onde a camada desenhou.
+ *
+ * Anota as DUAS formas: `arc` (ponto) e `ellipse` (o anel de ondulacao, PH-113
+ * segunda parte). Anotar so `arc` faria o recorte deixar de ser verificado
+ * exatamente na forma nova — que e a que abre e portanto a que mais tem chance
+ * de vazar pra terra.
+ */
 function ctxEspiao() {
-  const pontos: Array<{ x: number; y: number }> = []
+  const pontos: Array<{ x: number; y: number; anel: boolean }> = []
   const ctx = {
     save: () => {}, restore: () => {}, beginPath: () => {}, fill: () => {},
     stroke: () => {}, moveTo: () => {}, lineTo: () => {}, fillRect: () => {},
-    arc: (x: number, y: number) => { pontos.push({ x, y }) },
+    arc: (x: number, y: number) => { pontos.push({ x, y, anel: false }) },
+    ellipse: (x: number, y: number) => { pontos.push({ x, y, anel: true }) },
     createLinearGradient: () => ({ addColorStop: () => {} }),
     globalCompositeOperation: '', fillStyle: '', strokeStyle: '',
     globalAlpha: 1, lineWidth: 1,
@@ -68,7 +76,7 @@ function eAguaNaMascara(x: number): boolean {
 }
 
 function rodar(imagem: string, quadros: number) {
-  const todos: Array<{ x: number; y: number }> = []
+  const todos: Array<{ x: number; y: number; anel: boolean }> = []
   for (let i = 0; i < quadros; i++) {
     const { ctx, pontos } = ctxEspiao()
     desenharAmbiente(ctx, imagem, JANELA)
@@ -98,6 +106,31 @@ describe('ondulacao de agua respeita a mascara (PH-113)', () => {
   it('nenhuma particula e desenhada fora da agua', () => {
     const fora = rodar(ARTE, 120).filter((p) => !eAguaNaMascara(p.x))
     expect(fora.length, `${fora.length} particula(s) desenhada(s) em terra`).toBe(0)
+  })
+
+  it('com mascara, parte do que e desenhado e anel de ondulacao', () => {
+    // Sem este caso, trocar o desenho de volta pra so pontinho passaria calado:
+    // os outros casos falam de POSICAO, nenhum deles de forma.
+    const pontos = rodar(ARTE, 60)
+    expect(pontos.some((p) => p.anel), 'nenhum anel desenhado na agua').toBe(true)
+  })
+
+  it('anel nenhum e desenhado fora da agua', () => {
+    // Redundante com o caso geral de propósito: o anel CRESCE depois de nascer,
+    // e e a unica particula da camada capaz de cobrir area maior que ela mesma.
+    // Se alguem tirar o teto de raio ou a folga de nascimento, o proximo dev
+    // quer ver o nome deste caso, nao um caso generico.
+    const fora = rodar(ARTE, 120).filter((p) => p.anel && !eAguaNaMascara(p.x))
+    expect(fora.length, `${fora.length} anel(is) desenhado(s) em terra`).toBe(0)
+  })
+
+  it('arte SEM mascara nao ganha anel nenhum', () => {
+    // O reforco e CONDICIONAL a mascara. Anel em arte sem referencia pintada
+    // seria ondulacao em cima de terra — o problema que o PH-96 registrou e que
+    // esta issue existe pra nao repetir.
+    const pontos = rodar(SEM_MASCARA, 60)
+    expect(pontos.length).toBeGreaterThan(0)
+    expect(pontos.some((p) => p.anel), 'anel apareceu em arte sem mascara').toBe(false)
   })
 
   it('arte SEM mascara continua desenhando pela janela inteira', () => {

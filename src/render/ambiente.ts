@@ -123,6 +123,12 @@ interface Receita {
   risco?: boolean
   /** Feixe de luz difuso atravessando a cena, para as artes de floresta. */
   feixes?: boolean
+  /**
+   * Ondulacao de superficie: parte das particulas viram ANEL achatado que abre
+   * e desmancha, em vez de ponto. So com mascara de agua (ver `receitaDe`) —
+   * anel em cima de terra seria o pior dos dois mundos.
+   */
+  ondular?: boolean
 }
 
 const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
@@ -166,6 +172,12 @@ interface Particula {
   /** Fase do bamboleio e do pulso de alpha. */
   fase: number
   bamboleio: number
+  /** Segundos vividos. So o anel usa — ponto nao envelhece, recicla ao sair. */
+  idade: number
+  /** Duracao do anel em segundos. 0 = nao e anel. */
+  vida: number
+  /** Desenha como anel de ondulacao em vez de ponto. */
+  anel: boolean
 }
 
 /** LCG minusculo — nao precisa de qualidade estatistica, precisa NAO ser o
@@ -226,6 +238,22 @@ function eAgua(mascara: MascaraViva, x: number, y: number): boolean {
 }
 
 /**
+ * Agua com FOLGA de uma celula em volta.
+ *
+ * O anel CRESCE depois de nascer. Nascido na celula da margem, ele abre por
+ * cima da areia — e o recorte do laco de desenho nao pega isso, porque ele
+ * testa o centro da particula, que continua na agua. Nascer no interior e o que
+ * impede, e o teto de raio (`ANEL_RAIO_MAXIMO_EM_CELULAS`) e o que faz uma
+ * celula de folga bastar.
+ */
+function aguaComFolga(mascara: MascaraViva, x: number, y: number): boolean {
+  const c = mascara.celula
+  return eAgua(mascara, x, y)
+    && eAgua(mascara, x - c, y) && eAgua(mascara, x + c, y)
+    && eAgua(mascara, x, y - c) && eAgua(mascara, x, y + c)
+}
+
+/**
  * Receita do preset, reforcada quando ha mascara.
  *
  * O preset de agua e discreto porque nao sabia onde a agua estava — pontinho
@@ -243,13 +271,19 @@ function receitaDe(preset: Exclude<PresetAmbiente, 'nenhum'>, mascara: MascaraVi
   return {
     ...base,
     quantidade: Math.round(base.quantidade * 1.8),
-    raio: [base.raio[0] * 1.35, base.raio[1] * 1.7],
+    // Raio de NASCIMENTO — o anel abre sozinho depois (ANEL_CRESCIMENTO), entao
+    // esticar o raio inicial como antes so engrossaria o ponto de partida.
+    raio: [base.raio[0] * 1.1, base.raio[1] * 1.45],
     alpha: Math.min(1, base.alpha * 1.5),
-    // Mais bamboleio e menos espalhamento: a onda sobe quase reta e ondula de
-    // lado, que e o que le como superficie de agua. Espalhamento alto fazia o
-    // conjunto parecer poeira subindo.
-    espalhamento: base.espalhamento * 0.55,
+    // Agua nao SOBE. O preset antigo mandava tudo pra cima (-PI/2) porque
+    // cintilancia de luz nao tem direcao e subir dava a impressao de brilho
+    // evaporando; com mascara o que se quer e superficie, e superficie CORRE.
+    // Deriva lenta em qualquer direcao (espalhamento = PI) le como correnteza.
+    angulo: 0,
+    espalhamento: Math.PI,
+    velocidade: [3, 8],
     bamboleio: base.bamboleio * 2.6,
+    ondular: true,
   }
 }
 
@@ -277,6 +311,38 @@ export function presetDaArte(imagem: string | null | undefined): PresetAmbiente 
   return PRESET_POR_ARTE[imagem] ?? 'nenhum'
 }
 
+// ---------------------------------------------------------------------------
+// O ANEL DE ONDULACAO
+// ---------------------------------------------------------------------------
+// Fracao das particulas que viram anel; o resto continua ponto. Misturar os
+// dois e de proposito: so anel le como chuva na agua (todo anel do mesmo
+// tamanho, aparecendo e sumindo em ritmo igual), e so ponto e o brilho antigo,
+// que nao lia como movimento nenhum.
+const ANEL_FRACAO = 0.62
+/** Duracao de um anel, em segundos: nasce, abre e desmancha nesse tempo. */
+const ANEL_VIDA: [number, number] = [1.5, 2.8]
+/** Quantas vezes o raio de nascimento o anel chega a ter no fim da vida. */
+const ANEL_CRESCIMENTO = 3.2
+/**
+ * Achatamento vertical do anel.
+ *
+ * A camera e de cima com inclinacao — circulo perfeito le como bolha vista de
+ * cima, e a arte de fundo nao e desenhada nesse angulo. Achatar da ao anel a
+ * mesma perspectiva que a arte ja tem.
+ */
+const ANEL_ACHATAMENTO = 0.42
+/** Espessura do traco do anel, em unidades de mundo. */
+const ANEL_TRACO = 1.4
+/**
+ * Teto do raio do anel, em fracao da celula da mascara.
+ *
+ * O recorte do laco de desenho olha o CENTRO da particula: um anel de raio
+ * maior que a celula abriria por cima da margem mesmo com o centro dentro da
+ * agua, e nenhum teste pega isso. O teto e a segunda metade da defesa — a
+ * primeira e nascer com folga (`aguaComFolga`).
+ */
+const ANEL_RAIO_MAXIMO_EM_CELULAS = 0.8
+
 /**
  * Quantas posicoes sortear procurando agua antes de desistir.
  *
@@ -302,11 +368,24 @@ function nascer(
   p.alphaMax = r.alpha * (0.5 + rand() * 0.5)
   p.fase = rand() * Math.PI * 2
   p.bamboleio = r.bamboleio * (0.4 + rand() * 0.6)
+  p.idade = 0
+  p.anel = !!r.ondular && rand() < ANEL_FRACAO
+  p.vida = p.anel ? ANEL_VIDA[0] + rand() * (ANEL_VIDA[1] - ANEL_VIDA[0]) : 0
 
   // Com mascara, a particula nasce DENTRO da agua e nao na borda da janela — o
   // ponto inteiro do PH-113. Vale tambem na reciclagem: entrar pela borda faria
   // a onda atravessar a terra ate achar agua.
   if (mascara) {
+    // Duas rodadas, e nao uma: primeiro procura INTERIOR (folga de uma celula,
+    // pra o anel poder abrir sem passar da margem); se nao achar, aceita
+    // qualquer agua. A segunda rodada nao e redundante — canal estreito de
+    // `swamp` tem largura de uma celula em varios trechos, e sem ela aquele
+    // trecho de agua nao ganharia particula nenhuma.
+    for (let i = 0; i < TENTATIVAS_DE_AGUA; i++) {
+      const x = janela.x + rand() * janela.w
+      const y = janela.y + rand() * janela.h
+      if (aguaComFolga(mascara, x, y)) { p.x = x; p.y = y; return }
+    }
     for (let i = 0; i < TENTATIVAS_DE_AGUA; i++) {
       const x = janela.x + rand() * janela.w
       const y = janela.y + rand() * janela.h
@@ -350,7 +429,10 @@ function reconstruir(
   const quantidade = Math.max(1, Math.round(r.quantidade * (compacto ? 0.5 : 1)))
   particulas = []
   for (let i = 0; i < quantidade; i++) {
-    const p: Particula = { x: 0, y: 0, vx: 0, vy: 0, raio: 0, alphaMax: 0, fase: 0, bamboleio: 0 }
+    const p: Particula = {
+      x: 0, y: 0, vx: 0, vy: 0, raio: 0, alphaMax: 0, fase: 0, bamboleio: 0,
+      idade: 0, vida: 0, anel: false,
+    }
     nascer(p, r, janela, false, mascara)
     particulas.push(p)
   }
@@ -402,10 +484,16 @@ export function desenharAmbiente(
 
   ctx.fillStyle = r.cor
   ctx.strokeStyle = r.cor
+  // Teto do anel em unidades de mundo. Sem mascara nao ha anel, entao nao ha
+  // teto a calcular.
+  const raioMaximoDoAnel = mascara
+    ? mascara.celula * ANEL_RAIO_MAXIMO_EM_CELULAS
+    : Number.POSITIVE_INFINITY
   for (const p of particulas) {
     p.x += p.vx * delta
     p.y += p.vy * delta
     p.fase += delta * 1.7
+    p.idade += delta
 
     // Bamboleio perpendicular ao deslocamento: folha e neve nao caem em linha
     // reta, e o desvio lateral e o que separa "particula" de "chuva".
@@ -420,8 +508,27 @@ export function desenharAmbiente(
     // exatamente o que esta mudanca existe pra impedir. Cobre tambem a
     // particula que nasceu em terra por `TENTATIVAS_DE_AGUA` ter desistido:
     // ela e reciclada ANTES de ser desenhada.
-    if (foraX || foraY || (mascara && !eAgua(mascara, p.x, p.y))) {
+    // Anel tem VIDA: ele nao sai da tela, ele desmancha onde esta. Sem este
+    // ramo o anel travaria no raio maximo e ficaria plantado ate a deriva
+    // tira-lo da agua, que e o oposto de ondular.
+    const acabou = p.anel && p.idade >= p.vida
+    if (foraX || foraY || acabou || (mascara && !eAgua(mascara, p.x, p.y))) {
       nascer(p, r, janela, true, mascara)
+      continue
+    }
+
+    if (p.anel) {
+      const t = p.idade / p.vida
+      const raio = Math.min(raioMaximoDoAnel, p.raio * (1 + t * ANEL_CRESCIMENTO))
+      // Queda quadratica: linear deixa o anel visivel ate o ultimo quadro e
+      // sumir de uma vez, que pisca. Ao quadrado ele apaga antes do fim da
+      // vida e a troca nao aparece.
+      const restante = 1 - t
+      ctx.globalAlpha = p.alphaMax * restante * restante
+      ctx.lineWidth = ANEL_TRACO
+      ctx.beginPath()
+      ctx.ellipse(p.x, p.y, raio, raio * ANEL_ACHATAMENTO, 0, 0, Math.PI * 2)
+      ctx.stroke()
       continue
     }
 

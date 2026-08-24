@@ -96,6 +96,79 @@ const PASSO = 3
  */
 const COBERTURA_MINIMA = 0.35
 
+/**
+ * Menor poca que ondula, em celulas.
+ *
+ * A referencia pintada a mao (e mais ainda o rascunho da heuristica) deixa
+ * SUJEIRA: celula solta em copa de arvore, respingo de azul num telhado — e uma
+ * celula de 20 unidades ondulando em cima de um pinheiro e MAIS visivel que a
+ * agua certa do lado. O filtro e GEOMETRICO, nao de cor: componente conexo
+ * (4-vizinhos) menor que isto cai.
+ *
+ * 25 saiu de CONTAR os componentes das quatro mascaras, nao de palpite:
+ *
+ *   sea      1 componente:  4746
+ *   island   2 componentes: 1717, 131            (o 131 e a lagoa interna)
+ *   lake     4 componentes: 1463, 22, 12, 8      (os tres ultimos sao mata)
+ *   swamp   11 componentes: 370 ... 42, 25, 19, 9 (canal cortado por ponte)
+ *
+ * Ha sobreposicao: a sujeira de `lake` (22) e MAIOR que dois fragmentos de agua
+ * de verdade de `swamp` (19 e 9). Nao existe corte que limpe um sem comer o
+ * outro, e a escolha foi limpar: 28 celulas de 1073 em `swamp` (2,6% da agua
+ * daquela arte) valem menos que ondulacao em copa de arvore no `lake`. Quem
+ * quiser os dois tem o caminho certo — borracha na referencia, e ai da pra
+ * baixar isto.
+ *
+ * O que ele NAO resolve: falso positivo GRANDE. O palmeiral de `beach` marcado
+ * pelo rascunho e um bloco de centenas de celulas e passa por aqui inteiro.
+ */
+const MIN_CELULAS = 25
+
+/**
+ * Apaga os componentes conexos menores que `MIN_CELULAS`.
+ *
+ * Devolve quantas celulas e quantas ilhas cairam porque o numero tem que
+ * aparecer no relatorio: um filtro que comesse 30% da agua em silencio seria
+ * pior que a sujeira que ele tira.
+ */
+function limparIlhas(grade) {
+  const linhas = grade.length
+  const cols = linhas > 0 ? grade[0].length : 0
+  const celulas = grade.map((l) => l.split(''))
+  const visto = Array.from({ length: linhas }, () => new Uint8Array(cols))
+  let removidas = 0
+  const cortados = []
+
+  for (let y = 0; y < linhas; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (celulas[y][x] !== '1' || visto[y][x]) continue
+      // Pilha explicita, e nao recursao: o componente de agua de `sea` tem
+      // ~4.700 celulas, e recursao nessa profundidade estoura a pilha do node.
+      const pilha = [[x, y]]
+      const componente = []
+      visto[y][x] = 1
+      while (pilha.length > 0) {
+        const [cx, cy] = pilha.pop()
+        componente.push([cx, cy])
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const nx = cx + dx
+          const ny = cy + dy
+          if (nx < 0 || ny < 0 || nx >= cols || ny >= linhas) continue
+          if (visto[ny][nx] || celulas[ny][nx] !== '1') continue
+          visto[ny][nx] = 1
+          pilha.push([nx, ny])
+        }
+      }
+      if (componente.length < MIN_CELULAS) {
+        for (const [cx, cy] of componente) celulas[cy][cx] = '0'
+        removidas += componente.length
+        cortados.push(componente.length)
+      }
+    }
+  }
+  return { grade: celulas.map((l) => l.join('')), removidas, cortados }
+}
+
 function ehAzulPuro(r, g, b, a) {
   return a >= 128 && r < 60 && g < 60 && b > 200
 }
@@ -202,7 +275,18 @@ function gradeDaRef(ref, pintada) {
     }
     grade.push(linha)
   }
-  return { grade, marcadas, total: cols * linhas, cols, linhas }
+  // Contagem DEPOIS do filtro, nao antes: o relatorio precisa dizer o que
+  // sobrou na mascara, e nao o que a tinta marcou.
+  const limpo = limparIlhas(grade)
+  return {
+    grade: limpo.grade,
+    marcadas: marcadas - limpo.removidas,
+    total: cols * linhas,
+    cols,
+    linhas,
+    removidas: limpo.removidas,
+    cortados: limpo.cortados,
+  }
 }
 
 /** Overlay de conferencia: a arte com as celulas marcadas tingidas de magenta. */
@@ -313,8 +397,13 @@ function main() {
       linhas.push([arte, 'sem referencia pintada — nao ondula'])
       continue
     }
-    const { grade, marcadas, total, cols, linhas: nl } = gradeDaRef(decodificar(ref), pintada)
-    linhas.push([arte, `${((marcadas / total) * 100).toFixed(1)}% agua  ${marcadas}/${total}  grade ${cols}x${nl}`])
+    const { grade, marcadas, total, cols, linhas: nl, removidas, cortados } = gradeDaRef(decodificar(ref), pintada)
+    // Os TAMANHOS, e nao so o total: e o que permite ver que o corte pegou
+    // sujeira de 1-20 celulas e nao mordeu um corpo de agua inteiro.
+    const sujeira = cortados.length > 0
+      ? `  (-${removidas} celula(s) em ${cortados.length} ilha(s): ${cortados.sort((a, b) => b - a).join(',')})`
+      : ''
+    linhas.push([arte, `${((marcadas / total) * 100).toFixed(1)}% agua  ${marcadas}/${total}  grade ${cols}x${nl}${sujeira}`])
     if (marcadas > 0) saida[arte] = { grid: grade, celula: CELULA }
     if (comDebug) escreverOverlay(arte, decodificar(path.join(RAIZ, arte)), grade, pintada)
   }
