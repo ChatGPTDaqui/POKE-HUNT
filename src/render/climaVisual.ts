@@ -57,7 +57,7 @@ export interface JanelaDeClima {
 // RECEITAS
 // ---------------------------------------------------------------------------
 
-type Forma = 'risco' | 'floco' | 'pedra' | 'mota' | 'banco'
+type Forma = 'risco' | 'cristal' | 'pedra' | 'mota' | 'banco'
 
 interface ReceitaDeClima {
   /** Particulas em tela cheia no desktop. O compacto usa metade. */
@@ -94,6 +94,15 @@ interface ReceitaDeClima {
   relampago?: boolean
   /** Feixes de luz descendo do topo. */
   raios?: boolean
+  /**
+   * Cor do CONTORNO desenhado por baixo da particula, mais grosso que ela.
+   *
+   * Existe porque a neve some no cenario dela. Floco branco sobre caverna de
+   * gelo (que e branca e azul-clara) e sobre floresta nevada e invisivel — e
+   * sao justamente os dois sub-biomas onde ela mais aparece. O contorno escuro
+   * resolve nos dois fundos de uma vez, sem escurecer o floco em si.
+   */
+  contorno?: string
   /**
    * Rastro atras da particula, em multiplos do raio.
    *
@@ -137,9 +146,9 @@ const RECEITAS: Record<ClimaTipo, ReceitaDeClima> = {
   // proposito — os dois convivem no bioma de gelo e o jogador precisa
   // distinguir de relance qual dos dois esta tirando o HP dele.
   neve: {
-    quantidade: 80, cor: '#ffffff', forma: 'floco',
-    raio: [3.0, 7.6], velocidade: [30, 74], angulo: Math.PI / 2 + 0.16,
-    espalhamento: 0.3, alpha: 0.9, bamboleio: 26,
+    quantidade: 80, cor: '#ffffff', forma: 'cristal',
+    raio: [3.4, 11.0], velocidade: [30, 74], angulo: Math.PI / 2 + 0.16,
+    espalhamento: 0.3, alpha: 0.95, bamboleio: 26, contorno: 'rgba(60,96,130,0.55)',
     filtro: '#dbeeff', filtroAlpha: 0.2, filtroClareia: true, vinheta: 0.1,
   },
   // Horizontal e em RAJADAS. A tempestade de areia e a unica que muda de
@@ -191,6 +200,16 @@ interface ParticulaDeClima {
   bamboleio: number
   /** 0 = mais longe, 1 = mais perto. Amarra tamanho, velocidade e alpha. */
   profundidade: number
+  /**
+   * Rotacao acumulada, em radianos. So o cristal de neve usa.
+   *
+   * Floco de neve real tomba enquanto cai. Sem o giro, o cristal vira um
+   * simbolo carimbado sempre na mesma orientacao — e ai ele lê como icone, nao
+   * como neve.
+   */
+  angulo: number
+  /** Velocidade do giro, em radianos por segundo. Sinal = sentido. */
+  giro: number
 }
 
 let climaAtual: ClimaTipo | null = null
@@ -211,6 +230,24 @@ const QUANTIDADE_NA_FRENTE = 7
 const RELAMPAGO_INTERVALO: [number, number] = [7, 18]
 /** Duracao do clarao. Curtissimo — relampago longo lê como bug de render. */
 const RELAMPAGO_DURACAO = 0.16
+/**
+ * Abaixo desta profundidade o floco de neve e desenhado como PONTO, e nao como
+ * cristal.
+ *
+ * Nao e economia: e o que o olho faz. Floco distante nao tem braco resolvivel —
+ * desenhar o cristal em todos deixa a nevasca com aparencia de adesivo repetido,
+ * e mata a profundidade que as tres camadas constroem. Perto ve-se a estrela,
+ * longe ve-se o ponto.
+ */
+const NEVE_CRISTAL_A_PARTIR_DE = 0.45
+/** Braços do cristal. Seis, como floco de verdade. */
+const NEVE_BRACOS = 6
+/** Onde a farpa sai do braço, em fracao do comprimento. */
+const NEVE_FARPA_EM = 0.58
+/** Comprimento da farpa, em fracao do braço. */
+const NEVE_FARPA_TAMANHO = 0.36
+/** Giro do floco, em radianos por segundo, [min, max]. */
+const NEVE_GIRO: [number, number] = [0.25, 0.95]
 
 /** LCG local. NAO pode ser o `world.rng` — ver o cabecalho. */
 function sorteioLocal(semente: number): () => number {
@@ -247,6 +284,10 @@ function semearParticula(
     fase: r() * Math.PI * 2,
     bamboleio: receita.bamboleio * (0.5 + r()),
     profundidade,
+    angulo: r() * Math.PI * 2,
+    // Sentido sorteado: nevasca em que todo floco gira pro mesmo lado lê como
+    // animacao em loop, nao como neve.
+    giro: (receita.forma === 'cristal' ? entre(r, NEVE_GIRO) : 0) * (r() < 0.5 ? -1 : 1),
   }
 }
 
@@ -279,6 +320,7 @@ function avancar(
     p.x += p.vx * delta * multiplicadorDeVelocidade
     p.y += p.vy * delta * multiplicadorDeVelocidade
     p.fase += delta * 1.4
+    p.angulo += p.giro * delta
     // Desvio perpendicular ao deslocamento — o que impede a queda em linha reta.
     if (p.bamboleio > 0) {
       const desvio = Math.sin(p.fase) * p.bamboleio * delta
@@ -334,7 +376,63 @@ function desenharParticula(ctx: CanvasRenderingContext2D, p: ParticulaDeClima, r
       ctx.fill()
       break
     }
-    case 'floco':
+    case 'cristal': {
+      // Longe, ponto. O cristal so aparece quando ha tamanho pra ele existir —
+      // ver NEVE_CRISTAL_A_PARTIR_DE.
+      if (p.profundidade < NEVE_CRISTAL_A_PARTIR_DE) {
+        // O ponto distante tambem leva contorno: e ele que segura o floco
+        // contra a caverna de gelo, que e clara como ele.
+        if (receita.contorno) {
+          ctx.strokeStyle = receita.contorno
+          ctx.lineWidth = Math.max(0.8, p.raio * 0.3)
+          ctx.beginPath()
+          ctx.arc(p.x, p.y, p.raio * 0.5, 0, Math.PI * 2)
+          ctx.stroke()
+          ctx.strokeStyle = receita.cor
+        }
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.raio * 0.5, 0, Math.PI * 2)
+        ctx.fill()
+        break
+      }
+      // Nucleo pequeno: sem ele o centro do floco fica vazado e a estrela
+      // parece um asterisco solto.
+      ctx.beginPath()
+      ctx.arc(p.x, p.y, p.raio * 0.2, 0, Math.PI * 2)
+      ctx.fill()
+      // O caminho da estrela e montado UMA vez e percorrido DUAS: contorno
+      // grosso por baixo, traco claro por cima. `stroke()` nao limpa o caminho,
+      // entao o segundo passe reusa o mesmo — e nao ha `Path2D` no meio, que
+      // deixaria o desenho invisivel pro espiao dos testes.
+      ctx.beginPath()
+      for (let i = 0; i < NEVE_BRACOS; i++) {
+        const a = p.angulo + (i * Math.PI * 2) / NEVE_BRACOS
+        const cos = Math.cos(a)
+        const sen = Math.sin(a)
+        ctx.moveTo(p.x, p.y)
+        ctx.lineTo(p.x + cos * p.raio, p.y + sen * p.raio)
+        // As farpas saem em V, uma pra cada lado do braco.
+        const bx = p.x + cos * p.raio * NEVE_FARPA_EM
+        const by = p.y + sen * p.raio * NEVE_FARPA_EM
+        const farpa = p.raio * NEVE_FARPA_TAMANHO
+        for (const desvio of [0.9, -0.9]) {
+          ctx.moveTo(bx, by)
+          ctx.lineTo(bx + Math.cos(a + desvio) * farpa, by + Math.sin(a + desvio) * farpa)
+        }
+      }
+      // Traco fino em relacao ao raio: floco com traco grosso vira recorte de
+      // papel. O contorno e mais grosso, e so ele encosta no cenario.
+      const traco = Math.max(0.8, p.raio * 0.16)
+      if (receita.contorno) {
+        ctx.strokeStyle = receita.contorno
+        ctx.lineWidth = traco * 2.4
+        ctx.stroke()
+        ctx.strokeStyle = receita.cor
+      }
+      ctx.lineWidth = traco
+      ctx.stroke()
+      break
+    }
     case 'mota':
     default:
       ctx.beginPath()

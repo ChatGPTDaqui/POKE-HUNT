@@ -151,13 +151,32 @@ describe('cada clima tem forma própria (PH-141)', () => {
     expect(desvioDaVertical).toBeLessThan(0.7) // e também não é chuva de lado
   })
 
-  it('granizo tem QUINA, e neve é redonda', () => {
+  it('granizo tem QUINA, e neve não', () => {
     // O par que mais precisa se distinguir: um machuca, o outro não. Se os dois
     // fossem o mesmo círculo branco, o jogador não teria como saber qual está
     // tirando o HP dele.
     expect(fundo('granizo').some((t) => t.tipo === 'poligono')).toBe(true)
-    expect(fundo('neve').some((t) => t.tipo === 'arc')).toBe(true)
     expect(fundo('neve').some((t) => t.tipo === 'poligono')).toBe(false)
+  })
+
+  it('neve é CRISTAL de seis braços, e não bolinha branca', () => {
+    // Seis braços, cada um com duas farpas em V: 6 + 12 = 18 segmentos por
+    // floco. Bolinha branca é o que a neve era antes, e é indistinguível de
+    // qualquer outra partícula clara do jogo.
+    const linhas = fundo('neve', 1).filter((t) => t.tipo === 'linha')
+    expect(linhas.length).toBeGreaterThan(0)
+    expect(linhas.length % 18).toBe(0)
+  })
+
+  it('floco distante é ponto, e só o de perto vira cristal', () => {
+    // Não é economia, é o que o olho faz: floco longe não tem braço resolvível.
+    // Desenhar o cristal em TODOS deixa a nevasca com cara de adesivo repetido
+    // e mata a profundidade que as três camadas constroem.
+    const quadro = fundo('neve', 1)
+    const cristais = quadro.filter((t) => t.tipo === 'linha').length / 18
+    const pontos = quadro.filter((t) => t.tipo === 'arc').length - cristais
+    expect(cristais).toBeGreaterThan(0)
+    expect(pontos).toBeGreaterThan(0)
   })
 
   it('névoa é volume grande e translúcido, não bolinha cinza', () => {
@@ -186,7 +205,13 @@ describe('cada clima tem forma própria (PH-141)', () => {
 })
 
 describe('profundidade: perto é grande e rápido (PH-141)', () => {
-  it.each(['neve', 'granizo'] as ClimaTipo[])('%s: partícula maior anda mais que a menor', (clima) => {
+  // Só o granizo: nele o raio desenhado É o tamanho da partícula. Na neve o
+  // cristal desenha um núcleo pequeno e o ponto distante um círculo maior, duas
+  // escalas diferentes — o raio deixou de ser proxy de tamanho, e comparar os
+  // dois mediria o formato, não a profundidade. O acoplamento
+  // tamanho/velocidade/alpha é um mecanismo só (`semearParticula`), então
+  // testá-lo num clima cobre todos.
+  it.each(['granizo'] as ClimaTipo[])('%s: partícula maior anda mais que a menor', (clima) => {
     // Um sorteio só manda em tamanho, velocidade e alpha. Sorteados separados,
     // sai floco grande e lento junto de floco pequeno e rápido — o contrário do
     // que a distância faz, e a cena perde as camadas.
