@@ -10,7 +10,6 @@ import { ArrowDown, ArrowUp, LockSimple, LockSimpleOpen } from '@phosphor-icons/
 import { pedirAcao } from '@/data/remote/autoridade'
 import { SPECIES, averageIvPercent, type PokeInstance } from '@/data/pokes'
 import { ITEMS } from '@/data/items'
-import { itemIconUrl, itemIconBorderColor } from '@/data/sprites'
 import { rarityRank } from '@/data/rarity'
 import { controller } from '@/engine/controller'
 import { useGameStateStore, MAX_TEAM_SIZE } from '@/stores/gameStateStore'
@@ -26,6 +25,7 @@ import {
   GameButton, GameCard, GameCheck, GameIconButton, GameInput, GameSelect, SegmentedTabs, StickyHeader,
 } from '@/components/game/controls'
 import { GradeDeInventario } from '@/components/game/GradeDeInventario'
+import { IconeDeItemNaGrade } from '@/components/shared/IconeDeItemNaGrade'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
 import { cn } from '@/lib/utils'
 import { AutoVendaPanel, ChipAutoVenda } from './AutoVendaPanel'
@@ -249,33 +249,6 @@ function PokemonsTab() {
   )
 }
 
-/**
- * Icone de item pra dentro do slot da grade (e da ficha).
- *
- * Stones compartilham UM icone base; a distincao entre os 17 tipos vem da COR
- * DA BORDA (nao existem 17 sprites no pack de origem) — e e por isso que a
- * borda nao e enfeite aqui.
- */
-function IconeDeItemNaGrade({ itemId, tamanho }: { itemId: string; tamanho?: string }) {
-  const url = itemIconUrl(itemId)
-  const borderColor = itemIconBorderColor(itemId)
-  const estilo = tamanho ? { height: tamanho, width: tamanho } : undefined
-  if (!url) {
-    return <span className="h-full w-full rounded-[.25em] border border-n700" style={estilo} aria-hidden />
-  }
-  return (
-    <img
-      src={url}
-      alt=""
-      className={cn('rounded-[.3em] object-contain', tamanho ? 'shrink-0' : 'h-full w-full')}
-      style={{ ...estilo, ...(borderColor ? { border: `2px solid ${borderColor}` } : null) }}
-    />
-  )
-}
-
-// Exportada pra  monta-la sem passar pela aba de
-// POKEs (que carrega a mochila do servidor). O  continua sendo o unico
-// ponto de entrada de verdade.
 // Exportada pra `mochilaEmGrade.test.tsx` monta-la sem passar pela aba de POKEs,
 // que carrega a mochila do servidor na montagem. `BagMenu` continua sendo o
 // unico ponto de entrada de verdade.
@@ -350,7 +323,7 @@ export function ItensTab() {
             contador: items[itemId],
             aro: travado ? 'border-gold/50' : undefined,
             marca: travado ? <LockSimple weight="fill" className="text-gold" /> : undefined,
-            conteudo: <IconeDeItemNaGrade itemId={itemId} />,
+            conteudo: <IconeDeItemNaGrade itemId={itemId} nome={ITEMS[itemId].name} />,
           }
         })}
       />
@@ -364,7 +337,7 @@ export function ItensTab() {
         >
           <ItemTooltip item={itemEmFoco}>
             <span className="cursor-help">
-              <IconeDeItemNaGrade itemId={itemEmFoco.id} tamanho="2.6em" />
+              <IconeDeItemNaGrade itemId={itemEmFoco.id} nome={itemEmFoco.name} tamanho="2.6em" />
             </span>
           </ItemTooltip>
           <ItemTooltip item={itemEmFoco}>

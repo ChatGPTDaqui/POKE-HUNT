@@ -70,6 +70,29 @@ export interface SlotDeInventario {
  */
 const LADO = 3.2
 
+/**
+ * Contador do slot em forma CURTA.
+ *
+ * Visto ao vivo em 390px (PH-123): "99999" ocupa a largura inteira do slot e
+ * passa por cima do sprite. O numero e o dado menos importante do slot e estava
+ * tapando o mais importante. O valor exato continua no `rotulo` — que e o
+ * `aria-label` e o `title` — e na ficha de quem esta selecionado.
+ *
+ * Formatador local em vez do `fmtCurto` da Loja: aquele so abrevia a partir de
+ * 100 mil (foi feito pra rotulo de botao) e importar `features/shop` dentro de
+ * `components/game` inverteria a direcao da dependencia.
+ */
+function contadorCurto(n: number): string {
+  const abs = Math.abs(n)
+  // ARREDONDA PRA BAIXO, sempre. Com `Math.round`, 99.999 unidades apareciam
+  // como "100k" — um numero maior do que o jogador tem, no lugar onde ele
+  // decide quanto vender. Truncar erra pra baixo, que e o lado seguro.
+  if (abs >= 1_000_000) return `${(Math.floor(n / 100_000) / 10).toString().replace(/[.,]0$/, '')}M`
+  if (abs >= 10_000) return `${Math.floor(n / 1000)}k`
+  if (abs >= 1_000) return `${(Math.floor(n / 100) / 10).toString().replace(/[.,]0$/, '')}k`
+  return String(n)
+}
+
 export function GradeDeInventario({
   slots, selecionado, onSelecionar, alturaMaxEm = 13, className, rotuloDoGrupo,
   modo = 'unico', selecionados,
@@ -157,7 +180,7 @@ export function GradeDeInventario({
               // isto o clique em cima do numero nao contava como clique no slot
               // em alguns navegadores.
               <span className="pointer-events-none absolute right-[.1em] bottom-0 rounded-[.25em] bg-n950/85 px-[.2em] text-[.62em] leading-[1.4] tabular-nums text-n200">
-                {slot.contador}
+                {contadorCurto(slot.contador)}
               </span>
             )}
           </button>

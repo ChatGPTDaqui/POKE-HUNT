@@ -1,36 +1,14 @@
 import { useState } from 'react'
 import * as mercadoRpc from '@/data/remote/mercadoRpc'
 import { ITEMS } from '@/data/items'
-import { itemIconUrl, itemIconBorderColor } from '@/data/sprites'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { GameButton, GameCard, GameInput, SectionLabel } from '@/components/game/controls'
 import { GradeDeInventario } from '@/components/game/GradeDeInventario'
+import { IconeDeItemNaGrade } from '@/components/shared/IconeDeItemNaGrade'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
 import { useTaxaDoMercado, taxaDeVenda } from '../useTaxaDoMercado'
 import { fmt } from '../utils'
-
-/**
- * Icone do item pra dentro do slot da grade.
- *
- * Local e nao componente compartilhado: o projeto repete este par
- * `itemIconUrl`/`itemIconBorderColor` inline em varios lugares (ItemPicker,
- * BagMenu, Correio) e unificar os cinco e refatoracao propria, nao carona
- * nesta. O que importa aqui e nao inventar um SEXTO jeito de desenhar.
- */
-function IconeDeItem({ itemId }: { itemId: string }) {
-  const url = itemIconUrl(itemId)
-  const borda = itemIconBorderColor(itemId)
-  if (!url) return <span className="h-full w-full rounded-[.25em] border border-n700" />
-  return (
-    <img
-      src={url}
-      alt=""
-      className="h-full w-full rounded-[.25em] object-contain"
-      style={borda ? { border: `2px solid ${borda}` } : undefined}
-    />
-  )
-}
 
 export function VenderItens() {
   const items = useGameStateStore((s) => s.items)
@@ -71,7 +49,7 @@ export function VenderItens() {
               id,
               rotulo: `${ITEMS[id].name} (x${items[id]})`,
               contador: items[id],
-              conteudo: <IconeDeItem itemId={id} />,
+              conteudo: <IconeDeItemNaGrade itemId={id} nome={ITEMS[id].name} />,
             }))}
           />
           {escolhido && <span className="text-n300">{ITEMS[escolhido].name}</span>}
