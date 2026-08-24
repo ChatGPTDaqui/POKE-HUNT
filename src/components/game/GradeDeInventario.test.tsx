@@ -145,6 +145,40 @@ describe('GradeDeInventario (PH-114)', () => {
     expect(screen.getByRole('radio', { name: 'Poke Ball (trancada)' }).textContent).toContain('TRAVA')
   })
 
+  // PH-123 — visto AO VIVO em 390px: contador de 5-6 digitos ocupava a largura
+  // inteira do slot e passava por cima do sprite.
+  describe('contador curto (PH-123)', () => {
+    function comContador(n: number) {
+      render(
+        <GradeDeInventario
+          rotuloDoGrupo="Itens"
+          slots={[{ id: 'x', rotulo: `Poke Ball (x${n})`, contador: n, conteudo: <img alt="" src="f.png" /> }]}
+          selecionado={null} onSelecionar={vi.fn()}
+        />,
+      )
+      return screen.getByRole('radio', { name: `Poke Ball (x${n})` }).textContent
+    }
+
+    it('abrevia a partir de mil e mantem o numero exato no rotulo', () => {
+      // O rotulo e o `aria-label` E o `title`: e por ele que o numero exato
+      // continua alcancavel, de leitor de tela e de mouse parado em cima.
+      expect(comContador(1500)).toBe('1.5k')
+      cleanup()
+      expect(comContador(30)).toBe('30')
+      cleanup()
+      expect(comContador(999)).toBe('999')
+    })
+
+    it('arredonda pra BAIXO', () => {
+      // 99.999 aparecendo como "100k" seria um numero maior do que o jogador
+      // tem, na tela em que ele decide quanto vender. Truncar erra pro lado
+      // seguro.
+      expect(comContador(99999)).toBe('99k')
+      cleanup()
+      expect(comContador(1999999)).toBe('1.9M')
+    })
+  })
+
   it('grade vazia nao explode', () => {
     // Chamador ja trata "mochila vazia" antes de montar a grade, mas o
     // componente nao pode depender disso pra nao quebrar.
