@@ -579,7 +579,7 @@ describe('golpes novos de tick volatil', () => {
       player.poke.hp = 1
 
       updateCombat(world, 0) // enfileira o hit
-      updateCombat(world, 0.6) // hit pousa (HIT_LAND_DELAY=0.5) -> wish entra na fila
+      updateCombat(world, 0.6) // hit pousa (HIT_LAND_DELAY=0.3) -> wish entra na fila
       expect(world.pendingWishes.length).toBe(1)
       expect(player.poke.hp).toBe(1) // ainda nao curou -- e uma cura ATRASADA
 
@@ -1048,7 +1048,7 @@ describe('golpe de multiplos acertos', () => {
   }
 
   // Um uso do golpe: `updateCombat(0)` enfileira o hit e `updateCombat(0.6)`
-  // pousa ele (HIT_LAND_DELAY e 0.5s). 0.6 e menor que MIN_ACTION_GAP (2s), ou
+  // pousa ele (HIT_LAND_DELAY e 0.3s). 0.6 e menor que MIN_ACTION_GAP (2s), ou
   // seja o POKE nao age de novo e cada numero de dano contado abaixo pertence a
   // ESTE uso.
   function umUsoDoGolpe(world: ReturnType<typeof cenarioMultiAcerto>['world']) {

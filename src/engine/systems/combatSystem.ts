@@ -43,7 +43,7 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { rollChance, randRange } from '@/core/random'
-import { triggerAttackAnim, ATTACK_ANIM_DURATION } from './animationSystem'
+import { triggerAttackAnim } from './animationSystem'
 import { createWorldEffect, effectDone, reapontarParaAtacante, seguirDono, tickEffect } from '../effect'
 import {
   isDead, getGroundOffset, tickCooldowns, isAbilityReady,
@@ -51,10 +51,36 @@ import {
 } from '../entity'
 import type { ClimaTipo, EnemyEntity, Escudos, PendingHit, PlayerEntity, WorldEntity, WorldState } from '../types'
 
-// Dano/efeitos/tratamento-de-derrota acontecem esse tempo depois do golpe
-// disparar, pra aparecerem em sincronia com a pose Shoot/Charge terminando
-// em vez de no instante em que o golpe e usado.
-const HIT_LAND_DELAY = ATTACK_ANIM_DURATION
+// Quanto tempo depois do golpe disparar a resolucao pousa: arte do golpe,
+// numero de dano, status, tratamento de derrota.
+//
+// Era `ATTACK_ANIM_DURATION` (0,5s), amarrado a pose de ataque justamente pra
+// tudo pousar quando ela terminasse. Na tela isso saia em SEQUENCIA: a pose
+// tocava inteira, e so ai a arte do golpe comecava. Pedido do usuario: "quando
+// iniciar a sprite de ataque do pokemon, depois de 0,3 segundos iniciara a
+// sprite do golpe".
+//
+// Entao 0,3 aqui e a pose seguindo com 0,5 (`ATTACK_ANIM_DURATION`) — de
+// proposito. As duas passam a se SOBREPOR nos ultimos 0,2s, que e o que le como
+// golpe conectando, em vez de duas animacoes em fila.
+//
+// POR QUE MOVER A RESOLUCAO INTEIRA, E NAO SO A ARTE
+//
+// O caminho "so a arte em 0,3s, dano continua em 0,5s" foi considerado e
+// recusado: a arte NAO e incondicional. `resolveHit` decide mostra-la ja
+// sabendo o resultado — Protect bloqueou (sai antes da arte), Soundproof
+// cancelou, Magic Bounce trocou o alvo, o status pegou ou nao (`statusRecebeuEm`
+// escolhe em cima de QUEM a arte aparece). Antecipar so a arte exigiria decidir
+// isso 0,2s antes de a informacao existir, e o resultado seria arte de golpe
+// bloqueado, arte no alvo errado no Magic Bounce e arte de status que falhou.
+// Mover o pouso inteiro nao inventa nenhum desses casos.
+//
+// O que muda de fato: o numero de dano aparece 0,2s mais cedo, ainda durante a
+// pose, e a janela em que um atacante morrendo cancela o proprio golpe
+// enfileirado encurta de 0,5s pra 0,3s. Nenhuma regra de combate depende dessa
+// janela — `MIN_ACTION_GAP` (2s) continua sendo o que impede golpe empilhado, e
+// o travamento de movimento continua lendo `attackAnimTimer`, que segue em 0,5s.
+const HIT_LAND_DELAY = 0.3
 
 // Tempo de tela de um efeito de golpe.
 //
