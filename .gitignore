@@ -86,3 +86,9 @@ npm-debug.log*
 scripts/body-block-refs/_conferencia/
 scripts/agua-debug/
 scripts/agua-refs/*-rascunho.png
+
+# Artefato de build do `tsc -b` em authority/ (PH-108). Ele reaparece a cada
+# `npm run build:engine` + `tsc -b` la dentro, e sem esta linha um `git add -A`
+# distraido o commita — 200KB de cache de compilacao que nao serve pra ninguem
+# em outra maquina.
+authority/tsconfig.tsbuildinfo
