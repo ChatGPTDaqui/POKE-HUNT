@@ -1,5 +1,12 @@
-// Grade quadriculada de inventario (PH-114) — escolher UM item/POKE clicando
-// num slot com imagem, em vez de ler nome num `<select>`.
+// Grade quadriculada de inventario (PH-114) — escolher item/POKE clicando num
+// slot com imagem, em vez de ler nome numa lista de texto.
+//
+// Desde o PH-118 ela e a forma de listar inventario no jogo inteiro: Mercado
+// (anunciar), Mochila (POKE e item) e Loja (venda de POKE e de item). O que
+// mudou pra isso: modo de selecao MULTIPLA (a venda em lote da Loja marca vários
+// POKE de uma vez), marca de canto e aro proprio (item trancado, POKE shiny —
+// estado que precisa aparecer SEM selecionar), e slot desabilitado (POKE
+// trancado nao entra em lote de venda).
 //
 // ---------------------------------------------------------------------------
 // POR QUE ELA EXISTE
@@ -21,7 +28,7 @@
 // Tambem nao e arrastavel. Reordenar inventario e outro assunto (o trilho de
 // reservas ja tem o seu), e misturar arrasto com selecao no mesmo toque e como
 // se ganha o bug de "toquei pra escolher e ele reordenou".
-import { type ReactNode } from 'react'
+import { type MouseEvent, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 export interface SlotDeInventario {
@@ -36,6 +43,24 @@ export interface SlotDeInventario {
   rotulo: string
   /** Canto inferior direito — quantidade de item. Ausente nao desenha nada. */
   contador?: number
+  /**
+   * Canto superior esquerdo — icone de estado (cadeado). Ausente nao desenha.
+   *
+   * Existe porque a grade esconde texto: numa LISTA o cadeado tinha uma coluna
+   * propria, e aqui o slot e um quadrado com sprite. Sem a marca, "trancado" so
+   * apareceria depois de selecionar, e o jogador descobriria a trava ao tentar
+   * vender.
+   */
+  marca?: ReactNode
+  /** Classe de borda quando o slot NAO esta selecionado (shiny, trancado). */
+  aro?: string
+  /**
+   * Slot que nao aceita selecao (POKE trancado na venda em lote).
+   *
+   * Desabilitar em vez de ocultar: o POKE continua na mochila, e uma grade que
+   * some com ele faria o jogador procurar o que nao esta perdido.
+   */
+  desabilitado?: boolean
 }
 
 /**
@@ -47,21 +72,46 @@ const LADO = 3.2
 
 export function GradeDeInventario({
   slots, selecionado, onSelecionar, alturaMaxEm = 13, className, rotuloDoGrupo,
+  modo = 'unico', selecionados,
 }: {
   slots: SlotDeInventario[]
+  /** Slot marcado no modo 'unico'. Ignorado no modo 'multiplo'. */
   selecionado: string | null
-  onSelecionar: (id: string) => void
+  /**
+   * Clique num slot. No modo 'multiplo' e um ALTERNAR — quem chama decide o que
+   * a marca significa.
+   *
+   * O evento vem junto porque a Mochila liga Shift+clique em "linkar no chat", e
+   * esse atalho existia na linha que a grade substituiu.
+   */
+  onSelecionar: (id: string, evento: MouseEvent<HTMLButtonElement>) => void
   /** Altura maxima antes de rolar. Inventario grande nao pode estourar o painel. */
   alturaMaxEm?: number
   className?: string
   rotuloDoGrupo: string
+  /**
+   * 'unico' = radio (escolher um). 'multiplo' = caixa de selecao (lote).
+   *
+   * A semantica muda de verdade no DOM, e nao so a aparencia: leitor de tela
+   * anuncia "opcao 3 de 40" num radiogroup e "caixa de selecao, marcada" num
+   * grupo de checkbox. Pintar checkbox com role de radio mentiria sobre poder
+   * marcar varios.
+   */
+  modo?: 'unico' | 'multiplo'
+  /** Slots marcados no modo 'multiplo'. */
+  selecionados?: ReadonlySet<string>
 }) {
+  const multiplo = modo === 'multiplo'
   return (
     <div
-      // `radiogroup` e nao `listbox`: e escolha unica entre opcoes visiveis, que
-      // e exatamente a semantica de radio. O `<select>` que estava aqui antes
-      // era listbox por acidente de elemento, nao por intencao.
-      role="radiogroup"
+      // `radiogroup` e nao `listbox`: escolha unica entre opcoes visiveis e
+      // exatamente a semantica de radio. O `<select>` que estava aqui antes era
+      // listbox por acidente de elemento, nao por intencao.
+      //
+      // No modo multiplo o container e `group`: `radiogroup` com filhos
+      // `checkbox` e ARIA invalido, e o leitor de tela para de anunciar a
+      // contagem.
+      role={multiplo ? 'group' : 'radiogroup'}
       aria-label={rotuloDoGrupo}
       className={cn('overflow-y-auto rounded-[.5em] border border-n800 bg-n900/60 p-[.3em]', className)}
       style={{
@@ -74,23 +124,34 @@ export function GradeDeInventario({
       }}
     >
       {slots.map((slot) => {
-        const ativo = slot.id === selecionado
+        const ativo = multiplo ? Boolean(selecionados?.has(slot.id)) : slot.id === selecionado
         return (
           <button
             key={slot.id}
             type="button"
-            role="radio"
+            role={multiplo ? 'checkbox' : 'radio'}
             aria-checked={ativo}
             aria-label={slot.rotulo}
             title={slot.rotulo}
-            onClick={() => onSelecionar(slot.id)}
+            disabled={slot.desabilitado}
+            onClick={(evento) => onSelecionar(slot.id, evento)}
             className={cn(
-              'relative flex cursor-pointer items-center justify-center rounded-[.4em] border-2 p-[.15em] transition-colors',
-              ativo ? 'border-primary bg-primary/15' : 'border-n800 bg-n950/60 hover:border-n600',
+              'relative flex items-center justify-center rounded-[.4em] border-2 p-[.15em] transition-colors',
+              slot.desabilitado ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
+              ativo
+                ? 'border-primary bg-primary/15'
+                : cn('bg-n950/60', slot.aro ?? 'border-n800', !slot.desabilitado && 'hover:border-n600'),
             )}
             style={{ aspectRatio: '1 / 1' }}
           >
             {slot.conteudo}
+            {slot.marca && (
+              // Mesma razao do `pointer-events-none` do contador: a marca fica
+              // DENTRO do botao, e sem isto o clique em cima dela nao contava.
+              <span className="pointer-events-none absolute top-0 left-[.1em] text-[.7em] leading-none">
+                {slot.marca}
+              </span>
+            )}
             {slot.contador !== undefined && (
               // `pointer-events-none`: o contador fica DENTRO do botao, e sem
               // isto o clique em cima do numero nao contava como clique no slot

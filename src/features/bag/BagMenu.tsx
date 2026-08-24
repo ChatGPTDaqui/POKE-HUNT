@@ -25,6 +25,7 @@ import { ItemTooltip } from '@/components/shared/ItemTooltip'
 import {
   GameButton, GameCard, GameCheck, GameIconButton, GameInput, GameSelect, SegmentedTabs, StickyHeader,
 } from '@/components/game/controls'
+import { GradeDeInventario } from '@/components/game/GradeDeInventario'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
 import { cn } from '@/lib/utils'
 import { AutoVendaPanel, ChipAutoVenda } from './AutoVendaPanel'
@@ -74,6 +75,10 @@ function PokemonsTab() {
   const [sortKey, setSortKey] = useState<SortKey>('rarity')
   const [sortDesc, setSortDesc] = useState(true)
   const [shinyOnly, setShinyOnly] = useState(false)
+  // Qual POKE a ficha embaixo da grade mostra. A grade e um quadrado com sprite:
+  // nome, HP, IV e as acoes que ficavam na linha nao cabem dentro do slot, e o
+  // que os recebe e a ficha.
+  const [foco, setFoco] = useState<string | null>(null)
 
   const visible = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -105,6 +110,10 @@ function PokemonsTab() {
   if (bagPokes.length === 0) return <p className="text-n500">Nenhum POKE na mochila.</p>
 
   const canMove = teamLength < MAX_TEAM_SIZE
+  // Da lista FILTRADA e nao da pagina: trocar de pagina ou de filtro nao pode
+  // apagar a ficha do POKE escolhido, mas mover um POKE pra equipe (que o tira
+  // de `bagPokes`) tem que apagar.
+  const pokeEmFoco = foco != null ? visible.find((p) => p.uid === foco) ?? null : null
 
   return (
     <div className="flex flex-col gap-[.3em]">
@@ -144,52 +153,84 @@ function PokemonsTab() {
       {visible.length === 0 ? (
         <p className="text-n500">Nenhum POKE encontrado.</p>
       ) : (
-        paginado.pagina.map((poke) => {
-          const species = SPECIES[poke.speciesId]
-          return (
+        <>
+          {/* Grade, e nao uma linha por POKE (PH-118). Trancado e shiny
+              aparecem no proprio slot: numa grade o texto sai, e sem a marca o
+              jogador so descobriria a trava ao tentar usar o POKE. */}
+          <GradeDeInventario
+            rotuloDoGrupo="POKEs da mochila"
+            alturaMaxEm={14}
+            selecionado={foco}
+            onSelecionar={(uid, evento) => {
+              const poke = visible.find((p) => p.uid === uid)
+              // Shift+clique continua linkando no chat, como fazia na linha.
+              if (poke && tratouComoLink(evento, () => linkarPoke(poke, SPECIES[poke.speciesId]))) return
+              setFoco(uid)
+            }}
+            slots={paginado.pagina.map((poke) => {
+              const species = SPECIES[poke.speciesId]
+              return {
+                id: poke.uid,
+                rotulo: [
+                  `${species.name} Lv${poke.level}`,
+                  `IV ${averageIvPercent(poke.ivs).toFixed(0)}%`,
+                  poke.isShiny ? 'shiny' : null,
+                  poke.locked ? 'trancado' : null,
+                ].filter(Boolean).join(' · '),
+                aro: poke.locked ? 'border-gold/50' : undefined,
+                marca: poke.locked
+                  ? <LockSimple weight="fill" className="text-gold" />
+                  : poke.isShiny ? <span aria-hidden>✨</span> : undefined,
+                conteudo: <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={2.4} />,
+              }
+            })}
+          />
+
+          {pokeEmFoco && (
             <GameCard
-              key={poke.uid}
               title="Clique para ver o perfil · Shift+clique para linkar no chat"
               onClick={(e) => {
-                if (tratouComoLink(e, () => linkarPoke(poke, species))) return
-                showProfile(poke, species)
+                const species = SPECIES[pokeEmFoco.speciesId]
+                if (tratouComoLink(e, () => linkarPoke(pokeEmFoco, species))) return
+                showProfile(pokeEmFoco, species)
               }}
               className="flex items-center gap-[.5em] p-[.4em]"
             >
-              <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={2.6} />
+              <PokeSwatch
+                species={SPECIES[pokeEmFoco.speciesId]}
+                isShiny={pokeEmFoco.isShiny}
+                poke={pokeEmFoco}
+                size={2.6}
+              />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-[.4em]">
-                  <PokeNameTag poke={poke} species={species} />
-                  <span className="text-n400">Lv{poke.level}</span>
+                  <PokeNameTag poke={pokeEmFoco} species={SPECIES[pokeEmFoco.speciesId]} />
+                  <span className="text-n400">Lv{pokeEmFoco.level}</span>
                 </div>
                 <div className="text-[.75em] text-n500">
-                  HP {Math.floor(poke.hp)}/{poke.stats.hp} · IV {averageIvPercent(poke.ivs).toFixed(0)}%
+                  HP {Math.floor(pokeEmFoco.hp)}/{pokeEmFoco.stats.hp} · IV {averageIvPercent(pokeEmFoco.ivs).toFixed(0)}%
                 </div>
               </div>
               <LockButton
-                locked={Boolean(poke.locked)}
-                carregando={acao.isPending(`lock:${poke.uid}`)}
+                locked={Boolean(pokeEmFoco.locked)}
+                carregando={acao.isPending(`lock:${pokeEmFoco.uid}`)}
                 onToggle={() => {
-                  void acao.run(`lock:${poke.uid}`, () =>
-                    pedirAcao({ tipo: 'alternarTravaPoke', pokeUid: poke.uid }, () =>
-                      updatePokeInstance(poke.uid, (p) => ({ ...p, locked: !p.locked }))),
+                  void acao.run(`lock:${pokeEmFoco.uid}`, () =>
+                    pedirAcao({ tipo: 'alternarTravaPoke', pokeUid: pokeEmFoco.uid }, () =>
+                      updatePokeInstance(pokeEmFoco.uid, (p) => ({ ...p, locked: !p.locked }))),
                   )
                 }}
               />
               {canMove ? (
                 <GameButton
-                  carregando={acao.isPending(`team:${poke.uid}`)}
+                  carregando={acao.isPending(`team:${pokeEmFoco.uid}`)}
                   disabled={acao.pendingKey != null}
-                  // "Mover p/ equipe" por extenso custava 40% da largura do card
-                  // no celular e empurrava nome e IV pra reticencia. O rotulo
-                  // curto mantem a acao legivel; o `title` completo continua no
-                  // desktop, onde ele e alcancavel.
                   title="Mover para a equipe"
                   aria-label="Mover para a equipe"
                   onClick={(e) => {
                     e.stopPropagation()
-                    void acao.run(`team:${poke.uid}`, () =>
-                      pedirAcao({ tipo: 'porNaEquipe', pokeUid: poke.uid }, () => { moveBagToTeam(poke.uid) }),
+                    void acao.run(`team:${pokeEmFoco.uid}`, () =>
+                      pedirAcao({ tipo: 'porNaEquipe', pokeUid: pokeEmFoco.uid }, () => { moveBagToTeam(pokeEmFoco.uid) }),
                     )
                   }}
                 >
@@ -199,8 +240,8 @@ function PokemonsTab() {
                 <span className="text-[.78em] text-n500">Equipe cheia</span>
               )}
             </GameCard>
-          )
-        })
+          )}
+        </>
       )}
 
       <Paginacao estado={paginado} rotulo="POKEs" />
@@ -208,7 +249,37 @@ function PokemonsTab() {
   )
 }
 
-function ItensTab() {
+/**
+ * Icone de item pra dentro do slot da grade (e da ficha).
+ *
+ * Stones compartilham UM icone base; a distincao entre os 17 tipos vem da COR
+ * DA BORDA (nao existem 17 sprites no pack de origem) — e e por isso que a
+ * borda nao e enfeite aqui.
+ */
+function IconeDeItemNaGrade({ itemId, tamanho }: { itemId: string; tamanho?: string }) {
+  const url = itemIconUrl(itemId)
+  const borderColor = itemIconBorderColor(itemId)
+  const estilo = tamanho ? { height: tamanho, width: tamanho } : undefined
+  if (!url) {
+    return <span className="h-full w-full rounded-[.25em] border border-n700" style={estilo} aria-hidden />
+  }
+  return (
+    <img
+      src={url}
+      alt=""
+      className={cn('rounded-[.3em] object-contain', tamanho ? 'shrink-0' : 'h-full w-full')}
+      style={{ ...estilo, ...(borderColor ? { border: `2px solid ${borderColor}` } : null) }}
+    />
+  )
+}
+
+// Exportada pra  monta-la sem passar pela aba de
+// POKEs (que carrega a mochila do servidor). O  continua sendo o unico
+// ponto de entrada de verdade.
+// Exportada pra `mochilaEmGrade.test.tsx` monta-la sem passar pela aba de POKEs,
+// que carrega a mochila do servidor na montagem. `BagMenu` continua sendo o
+// unico ponto de entrada de verdade.
+export function ItensTab() {
   const items = useGameStateStore((s) => s.items)
   const lockedItems = useGameStateStore((s) => s.lockedItems)
   const toggleItemLock = useGameStateStore((s) => s.toggleItemLock)
@@ -222,6 +293,9 @@ function ItensTab() {
     return p != null && p.hp >= p.stats.hp
   })
   const acao = useAcaoPendente()
+  // Ver a nota da aba Pokemons: o slot e um quadrado com sprite, entao nome,
+  // descricao e acoes moram na ficha, e nao dentro dele.
+  const [foco, setFoco] = useState<string | null>(null)
 
   // Memo pra `usePaginacao` nao recortar um array novo a cada render (o objeto
   // `items` muda de identidade em todo flush do servidor).
@@ -247,67 +321,81 @@ function ItensTab() {
 
   if (ids.length === 0) return <p className="text-n500">Nenhum item.</p>
 
+  // Da lista inteira e nao da pagina, pelo mesmo motivo da aba Pokemons. Item
+  // que zerou (usado, vendido) sai de `ids` e a ficha fecha junto.
+  const itemEmFoco = foco != null && ids.includes(foco) ? ITEMS[foco] : null
+  const podeUsar = itemEmFoco != null && hasStarter && (itemEmFoco.kind === 'revive'
+    ? fainted
+    : itemEmFoco.kind === 'potion' ? !fainted && !vidaCheia : false)
+
   return (
     <div className="flex flex-col gap-[.3em]">
-      {paginado.pagina.map((itemId) => {
-        const item = ITEMS[itemId]
-        const locked = Boolean(lockedItems[itemId])
-        // "Usar" so aparece quando de fato faz alguma coisa AGORA: pocao com o
-        // POKE ferido, revive com ele desmaiado. Um botao que sempre existe e
-        // sempre recusa e pior que a ausencia dele.
-        //
-        // `vidaCheia` entrou junto com a recusa no servidor: antes a pocao era
-        // consumida por nada nesse caso, e so tirar o desperdicio deixaria a UI
-        // oferecendo um botao que sempre da erro — que e exatamente o que o
-        // comentario acima diz pra nao fazer.
-        const canUse = hasStarter && (item.kind === 'revive'
-          ? fainted
-          : item.kind === 'potion' ? !fainted && !vidaCheia : false)
-        const iconUrl = itemIconUrl(itemId)
-        // Stones compartilham UM icone base; a distincao entre os 17 tipos vem
-        // da cor da borda (nao existem 17 sprites no pack de origem).
-        const borderColor = itemIconBorderColor(itemId)
+      {/* Grade, e nao uma linha por item (PH-118). O contador do slot e o
+          "x30" que estava no texto da linha, e ele fica visivel em TODOS os
+          itens de uma vez em vez de so no selecionado. */}
+      <GradeDeInventario
+        rotuloDoGrupo="Itens da mochila"
+        alturaMaxEm={14}
+        selecionado={foco}
+        onSelecionar={(id, evento) => {
+          // Shift+clique continua linkando no chat, como fazia na linha.
+          if (tratouComoLink(evento, () => linkarItem(ITEMS[id], items[id]))) return
+          setFoco(id)
+        }}
+        slots={paginado.pagina.map((itemId) => {
+          const travado = Boolean(lockedItems[itemId])
+          return {
+            id: itemId,
+            rotulo: `${ITEMS[itemId].name} (x${items[itemId]})${travado ? ' — trancado' : ''}`,
+            contador: items[itemId],
+            aro: travado ? 'border-gold/50' : undefined,
+            marca: travado ? <LockSimple weight="fill" className="text-gold" /> : undefined,
+            conteudo: <IconeDeItemNaGrade itemId={itemId} />,
+          }
+        })}
+      />
 
-        return (
-          <GameCard
-            key={itemId}
-            title="Shift+clique para linkar no chat"
-            onClick={(e) => { tratouComoLink(e, () => linkarItem(item, items[itemId])) }}
-            className={cn('flex items-center gap-[.5em] p-[.4em]', locked && 'border-gold/40')}
-          >
-            <ItemTooltip item={item}>
-              {iconUrl && (
-                <img
-                  src={iconUrl}
-                  alt={item.name}
-                  className="h-[2.6em] w-[2.6em] shrink-0 rounded-[.5em] object-contain"
-                  style={borderColor ? { border: `3px solid ${borderColor}` } : undefined}
-                />
-              )}
-            </ItemTooltip>
-            <ItemTooltip item={item}>
-              <div className="min-w-0 flex-1 cursor-help">
-                <div className="font-medium">
-                  {item.name} <span className="text-n400">x{items[itemId]}</span>
-                </div>
-                <div className="text-[.75em] text-n500">{item.description}</div>
+      {itemEmFoco && (
+        <GameCard
+          title="Shift+clique para linkar no chat"
+          onClick={(e) => { tratouComoLink(e, () => linkarItem(itemEmFoco, items[itemEmFoco.id])) }
+          }
+          className={cn('flex items-center gap-[.5em] p-[.4em]', lockedItems[itemEmFoco.id] && 'border-gold/40')}
+        >
+          <ItemTooltip item={itemEmFoco}>
+            <span className="cursor-help">
+              <IconeDeItemNaGrade itemId={itemEmFoco.id} tamanho="2.6em" />
+            </span>
+          </ItemTooltip>
+          <ItemTooltip item={itemEmFoco}>
+            <div className="min-w-0 flex-1 cursor-help">
+              <div className="font-medium">
+                {itemEmFoco.name} <span className="text-n400">x{items[itemEmFoco.id]}</span>
               </div>
-            </ItemTooltip>
-            <LockButton
-              locked={locked}
-              carregando={acao.isPending(`lock:${itemId}`)}
-              onToggle={() => {
-                void acao.run(`lock:${itemId}`, () =>
-                  pedirAcao({ tipo: 'alternarTravaItem', itemId }, () => toggleItemLock(itemId)),
-                )
-              }}
-            />
-            {canUse && (
-              <GameButton onClick={() => controller.useItem(itemId)}>Usar</GameButton>
-            )}
-          </GameCard>
-        )
-      })}
+              <div className="text-[.75em] text-n500">{itemEmFoco.description}</div>
+            </div>
+          </ItemTooltip>
+          <LockButton
+            locked={Boolean(lockedItems[itemEmFoco.id])}
+            carregando={acao.isPending(`lock:${itemEmFoco.id}`)}
+            onToggle={() => {
+              void acao.run(`lock:${itemEmFoco.id}`, () =>
+                pedirAcao({ tipo: 'alternarTravaItem', itemId: itemEmFoco.id }, () => toggleItemLock(itemEmFoco.id)),
+              )
+            }}
+          />
+          {/* "Usar" so aparece quando de fato faz alguma coisa AGORA: pocao
+              com o POKE ferido, revive com ele desmaiado. Um botao que sempre
+              existe e sempre recusa e pior que a ausencia dele.
+
+              `vidaCheia` entrou junto com a recusa no servidor: antes a pocao
+              era consumida por nada nesse caso, e so tirar o desperdicio
+              deixaria a UI oferecendo um botao que sempre da erro. */}
+          {podeUsar && (
+            <GameButton onClick={(e) => { e.stopPropagation(); controller.useItem(itemEmFoco.id) }}>Usar</GameButton>
+          )}
+        </GameCard>
+      )}
 
       <Paginacao estado={paginado} rotulo="itens" />
     </div>
