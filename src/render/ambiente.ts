@@ -507,6 +507,11 @@ export function desenharAmbiente(
   ctx: CanvasRenderingContext2D,
   imagem: string | null | undefined,
   janela: JanelaDeAmbiente,
+  // PH-141: a FAMILIA de particula que o clima esta desenhando, ja resolvida
+  // pelo chamador. Recebe a familia e nao o `ClimaTipo` de proposito: este
+  // arquivo NAO pode importar do motor — `ambiente.test.ts` reprova qualquer
+  // import de `@/engine` aqui, e o guard esta certo. Ver o cabecalho.
+  familiaDeClima: 'neve' | 'areia' | null = null,
 ): void {
   const ui = useUiStore.getState()
   if (!ui.vidaNoCenario) {
@@ -518,6 +523,20 @@ export function desenharAmbiente(
 
   const preset = presetDaArte(imagem)
   if (preset === 'nenhum' || !imagem) {
+    if (particulas.length) { particulas = []; arteAtual = null }
+    return
+  }
+
+  // PH-141: CLIMA MANDA MAIS QUE ARTE quando os dois desenhariam a mesma coisa.
+  //
+  // `ice-cave` e `mountain` ja tinham neve DECORATIVA por causa da arte. Com
+  // neve-clima por cima, o jogador via neve dobrada e nao tinha como separar "o
+  // cenario e nevado" de "esta nevando agora" — e um dos dois mexe no combate.
+  // O mesmo vale pra areia no deserto.
+  //
+  // Cala so a familia COINCIDENTE. Chuva numa floresta continua com folha
+  // caindo: sao duas coisas diferentes acontecendo, e as duas sao verdade.
+  if (familiaDeClima === preset) {
     if (particulas.length) { particulas = []; arteAtual = null }
     return
   }
