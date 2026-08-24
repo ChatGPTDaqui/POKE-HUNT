@@ -254,8 +254,24 @@ atacante age de novo antes disso, por mais rápido que seja, qualquer que seja o
 `BASIC_ATTACK_COOLDOWN` (planilha, fallback 2s) é a única exceção — fixo, não escala com PP
 nem Velocidade.
 
-`HIT_LAND_DELAY` = `ATTACK_ANIM_DURATION` (0.5s) — o dano cai quando a animação termina, não
-no instante da decisão.
+`HIT_LAND_DELAY` = **0,3s** — a resolução inteira do golpe (arte, número de dano, status,
+tratamento de derrota) pousa 0,3s depois de o golpe disparar, e não no instante da decisão.
+
+Era `ATTACK_ANIM_DURATION` (0,5s), amarrado à pose Shoot/Charge justamente para tudo pousar
+quando ela terminasse. O PH-117 desamarrou os dois **de propósito**: com as duas iguais, a pose
+tocava inteira e só então a arte do golpe começava — as animações ficavam em sequência, não
+sobrepostas. Com 0,3s contra os 0,5s da pose, elas se sobrepõem nos últimos 0,2s, que é o que lê
+como golpe conectando.
+
+Por que a resolução inteira e não só a arte: `resolveHit` decide mostrar a arte **já sabendo o
+resultado** — Protect sai da função antes dela, Soundproof cancela o golpe, Magic Bounce troca o
+alvo, e golpe de status só mostra arte se algo pegou (`statusRecebeuEm` escolhe em cima de quem).
+Antecipar só a arte exigiria decidir isso 0,2s antes de a informação existir.
+
+O que muda de fato: o número de dano aparece 0,2s mais cedo, ainda durante a pose, e a janela em
+que um atacante morrendo cancela o próprio golpe enfileirado encurta de 0,5s para 0,3s. Nenhuma
+regra depende dessa janela — `MIN_ACTION_GAP` (2s) continua sendo o que impede golpe empilhado, e
+o travamento de movimento continua lendo `attackAnimTimer`, que segue em 0,5s.
 
 ### Continua fora de escopo, decisão explícita
 

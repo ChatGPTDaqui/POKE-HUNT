@@ -443,6 +443,78 @@ silêncio.
   (ponderado pelo peso real), não cor fixa de tema.
 - Lista de hunts ordenada por `levelRange[0]`, desempate por teto e nome.
 
+## Camada ambiente: vida no cenário (`src/render/ambiente.ts`)
+
+Partículas decorativas desenhadas **entre o fundo e as entidades** — folha caindo, ondulação de
+água, brasa subindo, poeira, neve, areia soprando. Entrou no PH-96, ganhou máscara de água no
+PH-113 e forma por preset no PH-115.
+
+### O preset é por ARTE, não por bioma
+
+`PRESET_POR_ARTE` mapeia caminho de imagem → preset (`folha`, `agua`, `brasa`, `poeira`, `neve`,
+`areia`, `cidade`, `nenhum`). Mesma razão do wall-block ser propriedade do desenho: quem decide o
+que aparece na tela é a imagem. Sub-bioma sem arte própria mostra a do bioma e herda o ambiente
+dela; hunt sem sistema de salas (Pesadelo, BOSS, Lance, treino) também, sem cadastrar nada.
+
+A tabela é **explícita** de propósito — um `includes('cave')` classificaria `cave-volcanic` como
+caverna e daria poeira a um mapa de lava. Arte que não esteja lá cai em `nenhum` e fica parada.
+`ambiente.test.ts` itera `COLISAO_POR_ARTE` (a lista canônica de artes jogáveis) e reprova arte
+nova sem preset: sem esse teste, a próxima arte a entrar ficaria parada em silêncio.
+
+### Cada preset tem forma própria, não só cor (PH-115)
+
+Até o PH-115 tudo era o mesmo círculo cheio, variando cor e tamanho — folha de floresta lia como
+ponto amarelo descendo. Hoje: folha é elipse achatada que **tomba** (velocidade e sentido
+sorteados); brasa **pisca** rápido com o raio pulsando; neve tem **profundidade** (um sorteio só
+controla tamanho, velocidade e alpha, então floco grande cai mais rápido e mais opaco); areia é
+risco na direção do vento. Poeira e cidade seguem círculo.
+
+### Água: ondulação recortada por máscara pintada (PH-113)
+
+O preset de água nasceu o mais discreto de todos porque **não sabia onde a água estava** — o
+brilho passava por cima da terra também. A máscara levanta essa restrição:
+
+- `scripts/agua-refs/<arte>.png` é a arte com **azul puro** (R<60, G<60, B>200) marcando água.
+  Azul *puro* e não "azulado": o azul das artes é dessaturado e tem verde significativo (o mar de
+  `sea` fica em ~(60,150,190)), então a própria água desenhada nunca conta como tinta.
+- `node scripts/build-agua-mask.js` gera `src/data/generated/aguaMask.generated.ts` (grade por
+  arte, célula de 20 unidades — a mesma da colisão). `--debug` escreve o overlay de conferência em
+  `scripts/agua-debug/`, e **ele não é luxo**: porcentagem de células marcadas não diz se a máscara
+  está certa, "17% de swamp" pode ser a água ou a copa das árvores.
+- Componente conexo com menos de 25 células cai (sujeira de tinta em copa de árvore). O corte saiu
+  de contar os componentes das cinco máscaras, e há sobreposição real: a sujeira de `lake`
+  (22 células) é maior que dois fragmentos de água de verdade de `swamp` (19 e 9).
+- `beach` é a única gerada por script próprio (`scripts/pintar-ref-beach.js`): naquela arte o mar
+  separa por cor com margem grande (h 177-186, s 0,69-0,81, contra areia h=42 e palmeiral h=40), e
+  as duas poças entram por geometria porque poça (h=73) cai em cima do palmeiral no espaço de cor.
+
+**Não tente derivar a máscara da cor da arte no geral.** Foi medido e fechado no PH-113: água e
+vegetação ocupam o mesmo ponto em matiz, saturação, luminância *e* variância neste acervo. Não há
+plano separador — não é questão de calibrar melhor.
+
+Com máscara, a partícula de água vira **anel** achatado que abre e desmancha. O anel cresce depois
+de nascer, e o recorte do laço de desenho testa só o **centro** da partícula — por isso ele nasce
+com folga de uma célula da margem e tem teto de raio em 0,8 célula. Sem as duas defesas, o traço
+abre por cima da areia e nenhum teste de posição pega.
+
+Arte de água **sem** referência pintada não muda em nada: mesmo brilho discreto, mesmas
+partículas. O reforço é condicional à máscara, e é o que impede a areia de ondular.
+
+### A regra dura: esta camada não encosta na simulação
+
+Nada aqui pode tocar `world.rng` nem escrever no `WorldState`. Aquele gerador é autoritativo e
+compartilhado com o resim do servidor: uma única chamada de sorteio a mais no cliente desloca a
+sequência inteira e o flush passa a divergir do que o jogador viu (a classe de bug do PH-37), sem
+dar erro nenhum — só faz o jogo mentir.
+
+Então a camada tem gerador próprio (LCG local semeado pela URL da arte), vive só naquele módulo, e
+o único estado dela é um array de partículas que morre na troca de arte. `ambiente.test.ts` tranca
+isso estaticamente: nenhum import de `@/engine/*`, nenhuma menção a `world.rng`, nenhum
+`Math.random`.
+
+O ajuste "Vida no cenário" (`uiStore.vidaNoCenario`) desligado zera as partículas em vez de só
+parar de desenhá-las.
+
 ## Terceiras evoluções em 0,2% — ainda vale, com um limite novo
 
 `SHARE_TERCEIRA_EVOLUCAO = 0.002` em `huntSpawnOverrides.ts`. A conta sai do peso dos
