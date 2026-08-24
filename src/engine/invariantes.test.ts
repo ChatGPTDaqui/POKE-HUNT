@@ -113,6 +113,24 @@ describe('invariantes da simulacao', () => {
     const world = buildMapWorld('mata_faixa1', poke, {
       rng: createRng(9090), counters: { entity: 1, effect: 1, pendingHit: 1 },
     })
+    // O CADAVER TEM QUE SOBRAR PRA SER OLHADO (PH-130).
+    //
+    // Este teste passou VAZIO desde que foi escrito: em 6.000 passos e 160
+    // abates ele via `state === 'dead'` ZERO vezes — so o ramo do inimigo vivo
+    // rodava, e a regra que da nome ao arquivo nunca foi conferida. Sabotar o
+    // motor (`enemy.poke.hp = 1` junto do `state = 'dead'`, em
+    // movementSystem.ts) deixava o teste VERDE.
+    //
+    // A causa e a interacao de duas decisoes razoaveis: `silent: true` poe
+    // `deathRemovalTimer = 0` (nao ha animacao a esperar) e o filtro do fim do
+    // passo tira o inimigo de `world.enemies` no MESMO passo em que ele morre.
+    // Quando o laco olhava, nao havia mais cadaver.
+    //
+    // `keepCorpses` e a terceira condicao daquele filtro, e e configuracao de
+    // mapa DE VERDADE (a regra da Champion Lance) — o teste passa a medir um
+    // estado que o jogo produz, nao um artificio. Mantem `silent: true`, que e
+    // o que impede este teste de medir toast e animacao junto.
+    world.mapDef!.keepCorpses = true
     let kills = 0
     // A violacao e COLETADA, e nao afirmada dentro do laco (PH-129). Eram
     // ~30 mil chamadas de `expect` (6.000 passos x inimigos vivos x 1 cada), e
@@ -121,21 +139,55 @@ describe('invariantes da simulacao', () => {
     // por defeito. A cobertura e a MESMA: todo passo continua conferido, e
     // parar no primeiro furo e o que o `expect` no laco ja fazia ao estourar.
     // De brinde, a mensagem passa a dizer em QUE passo e com que HP quebrou.
+    //
+    // POR QUE SO UMA DIRECAO E AFIRMADA
+    // ---------------------------------
+    // A versao anterior tambem exigia o contrario ("nao-morto tem HP > 0"), e
+    // ela passava por acidente: sem cadaver na lista, o laco so via inimigo
+    // vivo. Com o cadaver preservado ela reprova — e reprova em comportamento
+    // CORRETO, por dois motivos que valem escrever:
+    //
+    //   1. `updateMovement` (quem poe `state = 'dead'`) roda ANTES de
+    //      `updateCombat` (quem zera o HP) no mesmo passo. Quem morre neste
+    //      passo ainda carrega o `state` do passo anterior.
+    //   2. O gate de troca de sala (`salaCountdownRemaining`) retorna de
+    //      `stepWorld` ANTES de `updateMovement`. A contagem e armada logo
+    //      depois de um abate, entao durante ela nenhum passo de movimento roda
+    //      e o `state` velho fica de pe por varios passos.
+    //
+    // Nada de combate depende de `state`: o pool de acao e
+    // `world.enemies.filter((e) => !isDead(e))` e `resolveHit` sai cedo em
+    // `isDead(attacker)`/`isDead(target)`; `isDead()` e `hp <= 0` direto.
+    // `state` e campo de movimento e animacao. Cobrar "hp<=0 implica
+    // state=dead" seria exigir do motor garantia que ele nao da — e teste que
+    // fica vermelho em comportamento correto e pior que teste nenhum.
     let furo: string | null = null
+    let mortosVistos = 0
+    let vivosVistos = 0
     for (let i = 0; i < PASSOS && furo === null; i++) {
       for (const _ of stepWorld(world, PASSO, gameState, { silent: true })) kills++
       for (const inimigo of world.enemies) {
         // `state === 'dead'` e o que marca inimigo abatido (EnemyEntity nao tem
-        // `fainted`; o cadaver some pelo `deathRemovalTimer`).
+        // `fainted`).
         const morto = inimigo.state === 'dead'
-        if (morto ? inimigo.poke.hp > 0 : inimigo.poke.hp <= 0) {
-          furo = `passo ${i}: inimigo ${inimigo.poke.speciesId} em state="${inimigo.state}" com hp=${inimigo.poke.hp}`
+        if (morto) mortosVistos++
+        else vivosVistos++
+        if (morto && inimigo.poke.hp > 0) {
+          furo = `passo ${i}: cadaver ${inimigo.poke.speciesId} com hp=${inimigo.poke.hp}`
           break
         }
       }
     }
-    expect(furo, 'inimigo com HP incoerente com o state').toBeNull()
+    expect(furo, 'cadaver mostrando HP acima de zero').toBeNull()
     expect(kills).toBeGreaterThan(0)
+    // GUARDA ANTI-VACUO, e a razao de o PH-130 existir: sem ela o teste volta a
+    // afirmar so "inimigo vivo tem HP > 0" e segue verde com a metade que da
+    // nome a ele nunca executada.
+    expect(
+      mortosVistos,
+      'nenhum inimigo abatido foi observado — a metade principal do teste rodou vazia',
+    ).toBeGreaterThan(0)
+    expect(vivosVistos, 'nenhum inimigo vivo foi observado — o cenario nao esta lutando').toBeGreaterThan(0)
   })
 })
 
