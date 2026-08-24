@@ -495,11 +495,40 @@ export interface SalaAtiva {
 // Tambem ligado automaticamente por Trait no hook de entrada em combate
 // (Drizzle -> chuva, Sand Stream -> areia, Snow Warning -> granizo, Drought ->
 // sol — ver combatSystem.ts#resolveEntryHook).
-export type ClimaTipo = 'chuva' | 'sol' | 'granizo' | 'areia'
+//
+// PH-140: 'neve' e 'nevoa' entraram, e nenhum dos dois e sinonimo de outro.
+//
+// NEVE NAO E GRANIZO. Desde a Gen 9 a Neve substituiu o Granizo e trocou o
+// efeito: da +50% de DEFESA pra tipos ICE e nao causa dano nenhum, enquanto o
+// granizo tira 1/16 do HP maximo por turno e nao mexe em Defesa. Os dois
+// convivem no dado de sub-bioma (`ice-cave` tem 50% de neve e 12,5% de
+// granizo), entao fundir os dois transformaria o bioma de gelo inteiro em dano
+// continuo.
+//
+// NEVOA NAO TEM GOLPE QUE A CRIE, e isso e fidelidade e nao limitacao: nao
+// existe "Fog Dance" em geracao nenhuma. Ela e clima de AMBIENTE puro (Gen 4,
+// Diamond/Pearl/Platinum) — e Defog existe justamente pra limpa-la. Efeito
+// principal: precisao de todo golpe x0,6.
+export type ClimaTipo = 'chuva' | 'sol' | 'granizo' | 'areia' | 'neve' | 'nevoa'
 
 export interface Clima {
   tipo: ClimaTipo
+  /**
+   * So conta pro clima de GOLPE. Clima de ambiente usa `Infinity`: quem o
+   * derruba e a troca de sala, nao o relogio de turno.
+   */
   turnosRestantes: number
+  /**
+   * De onde este clima veio (PH-140). O que depende disso:
+   *
+   * - `'ambiente'` — sorteado ao entrar na sala, pela tabela do sub-bioma.
+   *   Sobrevive ao fim de cada batalha e ao flush do servidor porque e
+   *   DERIVADO de `(seed, sala)`, nao guardado (ver systems/climaAmbiente.ts).
+   * - `'golpe'` — Rain Dance e companhia, ou Trait de entrada. Sobrepoe o
+   *   ambiente por 10 turnos e, ao expirar, o ambiente da sala VOLTA — o ceu
+   *   nao fica limpo so porque o Sunny Day acabou.
+   */
+  origem: 'ambiente' | 'golpe'
 }
 
 // Armadilhas de campo do lado INIMIGO (Spikes/Toxic Spikes/Stealth Rock/
@@ -601,6 +630,17 @@ export interface WorldState {
   // pros limites (isto torna a SEQUENCIA DE SORTEIOS reproduzivel; nao promete
   // replay bit-a-bit de coordenadas entre engines diferentes).
   rng: Rng
+  /**
+   * A semente da SESSAO, guardada alem do `rng` (PH-140).
+   *
+   * `rng.state` nao serve pra isso: ele avanca a cada sorteio, entao nao
+   * identifica a sessao. Quem precisa de um sorteio DERIVADO e estavel — o
+   * clima de ambiente, que tem que dar o mesmo resultado em toda reconstrucao
+   * de mundo — parte daqui, via `deriveRng` (ver systems/climaAmbiente.ts).
+   *
+   * Atravessa a reconstrucao junto com `rng`/`counters` (SequenciaDeSorteio).
+   */
+  seed: number
   counters: WorldCounters
   // Combate no PIOR CASO, usado so pelo farm offline: variacao de dano no
   // minimo e zero critico. Regra do usuario — offline nunca pode render mais
@@ -620,6 +660,21 @@ export interface WorldState {
   // nao herda `clima` do `carry`), entao um flush do servidor limpa o clima
   // igual limpa estagio de atributo.
   clima: Clima | null
+  /**
+   * O clima do LUGAR — o que a sala tem quando nenhum golpe esta em campo
+   * (PH-140).
+   *
+   * Separado de `clima` (o efetivo) porque as duas coisas tem donos
+   * diferentes: `clima` muda com Rain Dance e volta ao normal quando ele
+   * expira, e o "normal" e ISTO. Sem guardar, cada ponto que hoje limpa o
+   * clima (fim de batalha, expiracao do golpe) precisaria saber re-sortear —
+   * e sob autoridade ele nao PODE, porque o cliente nao tem a semente.
+   *
+   * Quem preenche:
+   *  - jogo local: derivado de `(seed, sala)` na construcao do mundo;
+   *  - com servidor: vem pronto no flush, junto da sala autoritativa.
+   */
+  climaAmbiente: Clima | null
   // Ver `EnemyHazards` acima. Ausente = nenhuma armadilha plantada ainda.
   // MESMO DESVIO que `clima`: nao atravessa reconstrucao de mundo (fora do
   // `ProgressoDaSessao` que `sala`/`sequenceIndex` usam pra sobreviver ao

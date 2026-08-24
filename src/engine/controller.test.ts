@@ -128,7 +128,7 @@ describe('controller — POKE preso nao sai de campo (PH-72)', () => {
     gameState.addPokeToTeam(reserva)
     // `addPokeToTeam`, e nao `addCapturedPoke`: aquela poe na MOCHILA (toda
     // captura entra por la), e o teste precisa dos dois na EQUIPE.
-    const world = buildMapWorld('route_46', useGameStateStore.getState().team[0], {
+    const world = buildMapWorld('route_46', useGameStateStore.getState().team[0], { seed: 0,
       rng, counters: { entity: 1, effect: 1, pendingHit: 1 },
     })
     world.player!.presoAte = presoAte

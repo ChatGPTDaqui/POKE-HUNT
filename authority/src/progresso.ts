@@ -6,6 +6,7 @@ import {
   defaultGameStateData, MAPS, GRUPOS_DO_LANCE,
   OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
+  type ClimaTipo,
 } from '#engine'
 import {
   ErroHttp, selecionarTudo, selecionar, atualizar, atualizarRetornando, inserir, apagar, chamarRpc, type Config,
@@ -599,6 +600,13 @@ export interface ResultadoFlush {
   /** Sala em que a hunt parou. Nulo nas hunts sem salas. */
   sala: SalaAtiva | null
   /**
+   * O clima de AMBIENTE da sala acima (PH-140) — o do LUGAR, nunca o de golpe.
+   *
+   * O cliente nao tem como derivar: a semente da sessao nao sai daqui. Sem
+   * este campo ele mostraria um clima e o servidor cobraria o dano de outro.
+   */
+  clima: ClimaTipo | null
+  /**
    * A cacada acabou sozinha e a sessao TEM que ser fechada pelo chamador.
    *
    * Hoje so ha um motivo: o POKE desmaiou e nao ha como reanima-lo (auto-revive
@@ -805,7 +813,11 @@ async function simularSessao(
   const world = buildMapWorld(
     sessao.map_id,
     ativo,
-    { rng, counters: { entity: 1, effect: 1, pendingHit: 1 } },
+    // `seed` alem do `rng` (PH-140): o clima de AMBIENTE e derivado dela, e nao
+    // guardado. Passar a semente REAL da sessao e o que faz o servidor simular
+    // sob o mesmo clima que a tela do jogador mostrou — com um valor fixo aqui,
+    // o dano de areia/granizo fecharia diferente dos dois lados.
+    { rng, seed: Number(sessao.seed), counters: { entity: 1, effect: 1, pendingHit: 1 } },
     // Progresso que atravessa a janela. Mesma familia do `rng_state`: o mundo e
     // reconstruido, o progresso nao pode ser.
     {
@@ -947,6 +959,11 @@ async function simularSessao(
     // sorteia a propria sala; sem isto a sala mostrada seria o palpite dele,
     // que diverge do que de fato decidiu o pool e o loot creditados.
     sala: world.sala,
+    // `climaAmbiente` e nao `clima`: o efetivo pode estar sob um Rain Dance que
+    // a simulacao desta janela lancou, e isso e estado de combate, nao
+    // propriedade da sala. Mandar o efetivo faria o cliente tratar um golpe
+    // passageiro como o tempo do lugar.
+    clima: world.climaAmbiente?.tipo ?? null,
     encerrada: resumo.stoppedEarly ? 'desmaio' : null,
   }
 }

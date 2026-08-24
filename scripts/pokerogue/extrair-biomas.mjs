@@ -100,7 +100,22 @@ function extrair(nome) {
       .map((m) => (m[1] ? { bioma: m[1].toLowerCase().replace(/_/g, '-'), peso: Number(m[2]) } : { bioma: m[3].toLowerCase().replace(/_/g, '-'), peso: 1 }))
     : []
 
-  return { pools, links }
+  // Pesos de clima do bioma (PH-140). O PokeRogue sorteia UM clima ao entrar no
+  // bioma, com estes pesos, e `NONE` e o peso de "ceu limpo" — nao a ausencia
+  // de tabela. Bioma sem `weatherPool` nenhum e um caso diferente (nunca tem
+  // clima) e sai como objeto vazio, entao os dois nao se confundem la na frente.
+  //
+  // E o unico dado de % de clima que existe: os jogos principais fixam o clima
+  // por rota (Rota 119 sempre chove), nao ha probabilidade nenhuma pra copiar.
+  const wm = txt.match(/const weatherPool: WeatherPool = \{([\s\S]*?)\};/)
+  const clima = {}
+  if (wm) {
+    for (const m of wm[1].matchAll(/\[WeatherType\.([A-Z_]+)\]:\s*(\d+)/g)) {
+      clima[m[1]] = Number(m[2])
+    }
+  }
+
+  return { pools, links, clima }
 }
 
 if (process.argv.includes('--baixar') || !fs.existsSync(CACHE)) await baixar()

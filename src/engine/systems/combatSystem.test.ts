@@ -34,7 +34,7 @@ function construirCenarioExplosao(golpe = 'explosion') {
   // O AOE de nivel 50 vive fora dos 4 slots e ja esta desbloqueado neste
   // nivel — desligado pra sobrar so o golpe sob teste.
   jogadorPoke.disabledAbilities = { [typedAoeMoveKey(SPECIES.charmander.type)]: true }
-  const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
+  const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
   const player = world.player!
   player.poke.hp = 1
   player.cooldowns = {}
@@ -139,7 +139,7 @@ describe('AOE elemental e Ataque Basico sao opcionais', () => {
     const rng = createRng(7)
     const counters = { entity: 1, effect: 1, pendingHit: 1 }
     const jogadorPoke = createPokeInstance(rng, 'charmander', nivel)
-    const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
+    const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
     const player = world.player!
     player.cooldowns = {}
     player.globalCooldown = 0
@@ -291,7 +291,7 @@ describe('POKE do jogador usa os golpes na ordem escolhida (fila), nao so o de m
       [typedAoeMoveKey(SPECIES.charmander.type)]: true,
       [BASIC_ATTACK.id]: true,
     }
-    const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
+    const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
     const player = world.player!
     player.cooldowns = {}
     player.globalCooldown = 0
@@ -369,7 +369,7 @@ describe('Ataque Basico na fila do jogador', () => {
     // quando o motor o injetava sozinho, agora escrita como escolha.
     jogadorPoke.activeAbilities = [BASIC_ATTACK.id, 'scratch', 'ember', 'flamethrower']
     jogadorPoke.disabledAbilities = { [typedAoeMoveKey(SPECIES.charmander.type)]: true }
-    const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
+    const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
     const player = world.player!
     player.cooldowns = {}
     player.globalCooldown = 0
@@ -451,7 +451,7 @@ describe('golpes novos de tick volatil', () => {
       [typedAoeMoveKey(SPECIES[especieJogador].type)]: true,
       [BASIC_ATTACK.id]: true,
     }
-    const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
+    const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
     const player = world.player!
     player.cooldowns = {}
     player.globalCooldown = 0
@@ -634,7 +634,7 @@ function cenarioDeSuporte(
   const rng = createRng(1)
   const jogadorPoke = createPokeInstance(rng, especieJogador, nivel)
   if (traits.jogador) jogadorPoke.trait = traits.jogador
-  const world = buildMapWorld('route_46', jogadorPoke, { rng, counters: { entity: 1, effect: 1, pendingHit: 1 } })
+  const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters: { entity: 1, effect: 1, pendingHit: 1 } })
   const player = world.player!
   player.cooldowns = {}
   player.globalCooldown = 999
@@ -1026,7 +1026,7 @@ describe('golpe de multiplos acertos', () => {
       [typedAoeMoveKey(SPECIES.charmander.type)]: true,
       [BASIC_ATTACK.id]: true,
     }
-    const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
+    const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
     const player = world.player!
     player.cooldowns = {}
     player.globalCooldown = 0

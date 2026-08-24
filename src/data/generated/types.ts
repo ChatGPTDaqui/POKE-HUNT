@@ -219,6 +219,18 @@ export type EncountersData = Record<string, EncounterDataEntry>
 export type SubBiomaEspecies = Record<string, string[]>
 export type SubBiomaLinks = Record<string, { bioma: string; peso: number }[]>
 
+/**
+ * Pesos de clima de cada sub-bioma (PH-140), vindos do `weatherPool` do
+ * PokeRogue. `limpo` e o peso de CEU LIMPO — nao a ausencia de tabela: um
+ * sub-bioma com `{ limpo: 1 }` tem tabela e ela diz "nunca chove aqui".
+ *
+ * As chaves sao `ClimaTipo` (engine/types.ts) mais `limpo`. Nao importa o tipo
+ * de la pra nao inverter a dependencia — `data/generated` e folha, e o motor
+ * que le o dado, nunca o contrario. O teste `climaPorSubBioma.test.ts` amarra
+ * as duas pontas.
+ */
+export type SubBiomaClima = Record<string, Partial<Record<string, number>>>
+
 // TRAIT = habilidade PASSIVA da especie (o que os jogos chamam de "Ability").
 // O nome existe porque "Ability" ja e o GOLPE em todo este codigo — ver o
 // cabecalho de src/data/traits.ts, que fixou o vocabulario.

@@ -32,7 +32,7 @@ import { desiredAnimName } from './animationSystem'
 function cenario(status: StatusCondition | null, distanciaDoInimigo: number) {
   const rng = createRng(3)
   const counters = { entity: 1, effect: 1, pendingHit: 1 }
-  const world = buildMapWorld('route_46', createPokeInstance(rng, 'typhlosion', 30), { rng, counters })
+  const world = buildMapWorld('route_46', createPokeInstance(rng, 'typhlosion', 30), { seed: 0, rng, counters })
   const player = world.player!
   if (status) player.poke.status = { tipo: status, turnosRestantes: null }
 

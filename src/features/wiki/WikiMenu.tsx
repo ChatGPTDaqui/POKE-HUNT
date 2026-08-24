@@ -795,11 +795,15 @@ function CombateTab() {
       </WikiCard>
 
       <WikiCard title="Clima">
-        Existem 4 climas — Chuva, Sol, Granizo e Areia — ligados pelos golpes correspondentes (
-        {nomeDoGolpe('rain_dance')}, {nomeDoGolpe('sunny_day')}, {nomeDoGolpe('hail')}, {nomeDoGolpe('sandstorm')})
-        ou automaticamente por Traits de entrada (Drizzle/Sand Stream/Snow Warning/Drought, ver tabela acima —
-        essas duram ate outro clima sobrescrever). Um clima novo sempre substitui o anterior (nao empilha); ligado
-        por golpe, dura {turnos(5)}.
+        Existem 6 climas — Chuva, Sol, Granizo, Areia, Neve e Neblina. Cada sala pode NASCER com um clima
+        proprio, sorteado pelo sub-bioma dela: chove quase sempre no mar, neva na floresta nevada, o vulcao
+        vive sob sol forte. Esse clima vale enquanto voce estiver naquela sala e some quando voce troca.
+        <br /><br />
+        Quatro deles tambem sao ligados por golpe ({nomeDoGolpe('rain_dance')}, {nomeDoGolpe('sunny_day')},{' '}
+        {nomeDoGolpe('hail')}, {nomeDoGolpe('sandstorm')}) ou por Trait de entrada (Drizzle/Sand Stream/
+        Snow Warning/Drought, ver tabela acima). Um clima novo sempre substitui o anterior (nao empilha);
+        ligado por golpe, dura {turnos(10)} — e quando acaba, o clima da SALA volta, em vez de o ceu ficar
+        limpo. <b>Neve e Neblina so vem do ambiente</b>: nao ha golpe que as invoque.
         <ul className="mt-[.5em] list-disc space-y-1 pl-4">
           <li>Chuva: golpes <TypeChip type="WATER" /> +50% de dano, <TypeChip type="FIRE" /> −50%.</li>
           <li>Sol: golpes <TypeChip type="FIRE" /> +50% de dano, <TypeChip type="WATER" /> −50%.</li>
@@ -811,7 +815,20 @@ function CombateTab() {
             Areia: tira 1/16 do HP maximo por turno de todo POKE que NAO for <TypeChip type="ROCK" />,{' '}
             <TypeChip type="GROUND" /> ou <TypeChip type="STEEL" /> (nenhum dos tipos).
           </li>
+          <li>
+            Neve: <b>nao causa dano nenhum</b> — da +50% de Defesa pra POKE do tipo <TypeChip type="ICE" />.
+            Nao confunda com Granizo: sao climas diferentes.
+          </li>
+          <li>Neblina: precisao de TODOS os golpes cai pra 60% do normal, dos dois lados.</li>
         </ul>
+        <div className="mt-[.5em]">
+          Alguns golpes mudam de comportamento conforme o tempo: {nomeDoGolpe('thunder')} e{' '}
+          {nomeDoGolpe('hurricane')} nunca erram na Chuva e caem pra 50% de precisao no Sol;{' '}
+          {nomeDoGolpe('blizzard')} nunca erra no Granizo nem na Neve; {nomeDoGolpe('weather_ball')} muda de
+          tipo e dobra de forca; {nomeDoGolpe('solar_beam')} perde metade do dano fora do Sol;{' '}
+          {nomeDoGolpe('synthesis')} e {nomeDoGolpe('moonlight')} curam 2/3 no Sol e so 1/4 em clima ruim;{' '}
+          {nomeDoGolpe('growth')} sobe 2 estagios em vez de 1 sob Sol.
+        </div>
       </WikiCard>
 
       <WikiCard title="Escudos (telas de campo)">

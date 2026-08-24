@@ -55,7 +55,7 @@ function segundosParaDerrubar(especieInimiga: string, nivelJogador: number, nive
   const gameState = useGameStateStore.getState()
   const rng = createRng(7)
   const poke = createPokeInstance(rng, 'typhlosion', nivelJogador, { rarity: 'comum' })
-  const world = buildMapWorld('route_46', poke, {
+  const world = buildMapWorld('route_46', poke, { seed: 0,
     rng: createRng(7),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
   })
@@ -94,7 +94,7 @@ describe('a chance de protecao cai pela metade a cada uso seguido', () => {
   function pegouEm(abilityId: string, vezes: number, semente: number): number {
     const rng = createRng(semente)
     const poke = createPokeInstance(rng, 'kangaskhan', 50, { rarity: 'comum' })
-    const world = buildMapWorld('route_46', poke, {
+    const world = buildMapWorld('route_46', poke, { seed: 0,
       rng: createRng(semente),
       counters: { entity: 1, effect: 1, pendingHit: 1 },
     })

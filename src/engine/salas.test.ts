@@ -26,7 +26,7 @@ const HUNT = 'mata_faixa1'
 function mundo(semente: number, mapa = HUNT): WorldState {
   const rng = createRng(semente)
   const poke = createPokeInstance(rng, 'charmander', 20)
-  return buildMapWorld(mapa, poke, {
+  return buildMapWorld(mapa, poke, { seed: 0,
     rng: createRng(semente),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
   })
@@ -171,7 +171,7 @@ describe('salas', () => {
     const salva = { indice: 6, chave: 'jungle', abates: 4, ciclos: 2 }
     const world = buildMapWorld(
       HUNT, poke,
-      { rng: createRng(5), counters: { entity: 1, effect: 1, pendingHit: 1 } },
+      { seed: 0, rng: createRng(5), counters: { entity: 1, effect: 1, pendingHit: 1 } },
       { sala: salva },
     )
     expect(world.sala).toEqual(salva)
@@ -217,7 +217,7 @@ describe('salas', () => {
     const poke = createPokeInstance(createRng(9), 'charmander', 20)
     const world = buildMapWorld(
       HUNT, poke,
-      { rng: createRng(9), counters: { entity: 1, effect: 1, pendingHit: 1 } },
+      { seed: 0, rng: createRng(9), counters: { entity: 1, effect: 1, pendingHit: 1 } },
       { sala: { indice: 0, chave: 'tall-grass', abates: 0, ciclos: 0 } },
     )
     const [, teto] = janelaDaSala(world.mapDef!.levelRange, 0)
@@ -426,7 +426,7 @@ describe('quota de sala fechada atravessa a janela', () => {
 
     const gameState = useGameStateStore.getState()
     const poke = createPokeInstance(createRng(33), 'charmander', 20)
-    const world = buildMapWorld(HUNT, poke, {
+    const world = buildMapWorld(HUNT, poke, { seed: 0,
       rng: createRng(33),
       counters: { entity: 1, effect: 1, pendingHit: 1 },
     }, { sala: { ...progresso } })

@@ -22,7 +22,7 @@ function cacar(semente: number, mapa: string, nivel: number) {
   const poke = createPokeInstance(rng, 'charmander', nivel)
   gameState.addPokeToTeam(poke)
   gameState.setActiveIndex(0)
-  const world = buildMapWorld(mapa, poke, {
+  const world = buildMapWorld(mapa, poke, { seed: 0,
     rng: createRng(semente),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
   })
@@ -110,7 +110,7 @@ describe('invariantes da simulacao', () => {
     const poke = createPokeInstance(rng, 'charmander', 40)
     gameState.addPokeToTeam(poke)
     gameState.setActiveIndex(0)
-    const world = buildMapWorld('mata_faixa1', poke, {
+    const world = buildMapWorld('mata_faixa1', poke, { seed: 0,
       rng: createRng(9090), counters: { entity: 1, effect: 1, pendingHit: 1 },
     })
     // O CADAVER TEM QUE SOBRAR PRA SER OLHADO (PH-130).

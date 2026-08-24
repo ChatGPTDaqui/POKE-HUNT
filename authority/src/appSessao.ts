@@ -9,7 +9,7 @@ import {
   aplicarFlush, carregarEstado, comEstadoParaEscrita, gravarEstado,
   FLUSH_OCUPADO, type LinhaSessao,
 } from './progresso.js'
-import { MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas } from '#engine'
+import { MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas, climaDaSala } from '#engine'
 
 function json(dado: unknown, status = 200): Response {
   return new Response(JSON.stringify(dado), {
@@ -248,7 +248,16 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
     current_map_id: mapId,
     perf_stats: { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now() },
   })
-  return json({ sessaoId: criada.id, mapId, iniciadaEm: criada.last_flush_at, sala: salaInicial })
+  // PH-140: o clima da sala inicial vai junto. O cliente NAO consegue derivar
+  // o dele — a semente da sessao nunca sai do servidor (e ela que decide shiny,
+  // IV, raridade e crit; ver core/rng.ts). Sem este campo, os dois lados
+  // sorteariam climas diferentes e o jogador levaria dano de areia sob um ceu
+  // que a tela dele mostra limpo.
+  const climaInicial = climaDaSala(semente, salaInicial)
+  return json({
+    sessaoId: criada.id, mapId, iniciadaEm: criada.last_flush_at,
+    sala: salaInicial, clima: climaInicial,
+  })
 }
 
 async function flush(cfg: Config, userId: string, parcial: boolean): Promise<Response> {

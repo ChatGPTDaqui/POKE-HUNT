@@ -41,7 +41,7 @@ function simular(pessimista: boolean, semente: number) {
   const gameState = useGameStateStore.getState()
   const rng = createRng(semente)
   const poke = createPokeInstance(rng, 'charmander', 30)
-  const world = buildMapWorld('route_46', poke, {
+  const world = buildMapWorld('route_46', poke, { seed: 0,
     rng: createRng(semente),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
   })

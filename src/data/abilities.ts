@@ -30,6 +30,12 @@ import { ABILITIES_DATA } from './generated/abilities.generated'
 import { TYPED_AOE_MOVES } from './typedAoeMoves'
 import { WILD_AGGRO_RADIUS } from './huntTypes'
 import type { AbilityCategory, ElementType, StatusCondition, StatChange } from './generated/types'
+// PH-140: `import type` do proprio `ClimaTipo` em vez de repetir o union aqui.
+// O ciclo que a repeticao evitava (engine/types importa este arquivo) nao
+// existe pra import de tipo — ele e apagado na compilacao e nao vira import em
+// runtime. A copia anterior ja tinha se desatualizado uma vez, em
+// data/traitEffects.ts, quando neve e nevoa entraram.
+import type { ClimaTipo as ClimaDoJogo } from '@/engine/types'
 
 export type AbilityTarget = 'single' | 'aoe'
 
@@ -359,12 +365,76 @@ export function isDamagingAbility(ability: Ability | null | undefined): boolean 
 // estruturalmente com `ClimaTipo` (engine/types.ts) sem importa-lo daqui --
 // engine/types.ts ja importa `Ability` deste arquivo, e o import reverso
 // fecharia um ciclo.
-export const CLIMA_DO_GOLPE: Record<string, 'chuva' | 'sol' | 'granizo' | 'areia'> = {
+//
+// PH-140: NEVOA nao esta aqui, e nao e esquecimento. Nao existe golpe que crie
+// neblina em geracao nenhuma — ela e clima de ambiente puro. NEVE tambem nao:
+// o golpe que a poe (Snowscape, Gen 9) nao existe neste catalogo, entao ela so
+// vem do ambiente tambem.
+export const CLIMA_DO_GOLPE: Record<string, ClimaDoJogo> = {
   rain_dance: 'chuva',
   sunny_day: 'sol',
   hail: 'granizo',
   sandstorm: 'areia',
 }
+
+// ---------------------------------------------------------------------------
+// GOLPES QUE O CLIMA MUDA (PH-140)
+// ---------------------------------------------------------------------------
+// Todos os golpes citados aqui EXISTEM no catalogo gerado — conferido, e o
+// teste `climaDosGolpes.test.ts` tranca isso. Citar chave inexistente e a falha
+// silenciosa classica deste projeto: a regra continua "certa" e nunca casa.
+
+/**
+ * Acerto GARANTIDO no clima certo, ignorando precisao, evasao e neblina.
+ *
+ * E o unico caso em que o x0,6 da neblina nao se aplica: nos jogos, golpe que
+ * pula a checagem de precisao pula TUDO que mexe nela.
+ */
+export const GOLPE_NUNCA_ERRA_NO_CLIMA: Record<string, ClimaDoJogo[]> = {
+  thunder: ['chuva'],
+  hurricane: ['chuva'],
+  // Blizzard nos dois climas de gelo: a Gen 9 trocou granizo por neve e levou
+  // a regra junto.
+  blizzard: ['granizo', 'neve'],
+}
+
+/** Precisao FIXA no clima certo, substituindo a do catalogo. */
+export const PRECISAO_DO_GOLPE_NO_CLIMA: Record<string, { climas: ClimaDoJogo[]; precisao: number }> = {
+  // O outro lado do Thunder: sob sol forte ele despenca pra 50%.
+  thunder: { climas: ['sol'], precisao: 50 },
+  hurricane: { climas: ['sol'], precisao: 50 },
+}
+
+/**
+ * Weather Ball: muda de TIPO e DOBRA de forca conforme o clima.
+ *
+ * A descricao na Wiki ja prometia isso; o motor nunca cumpriu. Na neblina o
+ * golpe fica NORMAL e NAO dobra — e a unica entrada que existe pra dizer
+ * "clima presente, mas sem bonus".
+ */
+export const WEATHER_BALL_POR_CLIMA: Record<ClimaDoJogo, { tipo: ElementType; dobra: boolean }> = {
+  chuva: { tipo: 'WATER', dobra: true },
+  sol: { tipo: 'FIRE', dobra: true },
+  granizo: { tipo: 'ICE', dobra: true },
+  neve: { tipo: 'ICE', dobra: true },
+  areia: { tipo: 'ROCK', dobra: true },
+  nevoa: { tipo: 'NORMAL', dobra: false },
+}
+
+/**
+ * Cura que depende do clima (Moonlight, Synthesis).
+ *
+ * Nos jogos: 2/3 do HP maximo no sol, 1/2 com ceu limpo, 1/4 em qualquer outro
+ * clima. O `healPercent` do catalogo (50) e o caso de ceu limpo, entao a regra
+ * aqui e um MULTIPLICADOR sobre ele — assim o dado gerado continua sendo a
+ * fonte do numero base.
+ */
+export const CURA_SENSIVEL_AO_CLIMA = new Set(['moonlight', 'synthesis'])
+export const CURA_NO_SOL = 4 / 3 // 50% * 4/3 = 66,6% ~ 2/3
+export const CURA_EM_CLIMA_RUIM = 0.5 // 50% * 0.5 = 25% = 1/4
+
+/** Growth sobe 2 estagios sob sol forte, em vez de 1 (multiplicador). */
+export const GROWTH_NO_SOL = 2
 
 // `resolveAbilityCategory` mora em data/abilityCategory.ts — ela precisa de
 // `computeStatsAtLevel` (data/pokes.ts), e pokes.ts importa ESTE arquivo, entao
