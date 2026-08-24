@@ -114,15 +114,27 @@ describe('invariantes da simulacao', () => {
       rng: createRng(9090), counters: { entity: 1, effect: 1, pendingHit: 1 },
     })
     let kills = 0
-    for (let i = 0; i < PASSOS; i++) {
+    // A violacao e COLETADA, e nao afirmada dentro do laco (PH-129). Eram
+    // ~30 mil chamadas de `expect` (6.000 passos x inimigos vivos x 1 cada), e
+    // montar o estado do matcher e o que custava: 503 ms sozinho, mais de 5 s
+    // com a suite inteira disputando CPU — o caso reprovava por carga, nunca
+    // por defeito. A cobertura e a MESMA: todo passo continua conferido, e
+    // parar no primeiro furo e o que o `expect` no laco ja fazia ao estourar.
+    // De brinde, a mensagem passa a dizer em QUE passo e com que HP quebrou.
+    let furo: string | null = null
+    for (let i = 0; i < PASSOS && furo === null; i++) {
       for (const _ of stepWorld(world, PASSO, gameState, { silent: true })) kills++
       for (const inimigo of world.enemies) {
         // `state === 'dead'` e o que marca inimigo abatido (EnemyEntity nao tem
         // `fainted`; o cadaver some pelo `deathRemovalTimer`).
-        if (inimigo.state === 'dead') expect(inimigo.poke.hp).toBeLessThanOrEqual(0)
-        else expect(inimigo.poke.hp).toBeGreaterThan(0)
+        const morto = inimigo.state === 'dead'
+        if (morto ? inimigo.poke.hp > 0 : inimigo.poke.hp <= 0) {
+          furo = `passo ${i}: inimigo ${inimigo.poke.speciesId} em state="${inimigo.state}" com hp=${inimigo.poke.hp}`
+          break
+        }
       }
     }
+    expect(furo, 'inimigo com HP incoerente com o state').toBeNull()
     expect(kills).toBeGreaterThan(0)
   })
 })
