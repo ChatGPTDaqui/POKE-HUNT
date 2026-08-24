@@ -3181,6 +3181,14 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
   }
 
   const engagedEnemies = enemies.filter((e) => !isDead(e) && e.state === 'engaged' && e.targetId === player.id)
+  // PH-132: quem o jogador esta enfrentando AGORA, publicado pra tela poder
+  // mostrar os efeitos do alvo. O motor ja escolhia este inimigo todo tick
+  // (`engagedEnemies[0]` e o `primaryTarget` de executePlayerAction) e jogava a
+  // informacao fora; a alternativa era o HUD recalcular a mesma regra de
+  // proximidade e engajamento por conta propria, que e duas fontes de verdade
+  // pra mesma pergunta. Ninguem no motor le `player.targetId` (so o `targetId`
+  // DOS INIMIGOS e lido, no filtro logo acima), entao isto nao muda combate.
+  player.targetId = engagedEnemies[0]?.id ?? null
 
   if (engagedEnemies.length > 0) {
     const primaryTarget = engagedEnemies[0]
