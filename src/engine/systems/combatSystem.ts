@@ -17,6 +17,7 @@ import type { StatChange, ElementType } from '@/data/generated/types'
 import {
   tickStatus, tentarAgir, aplicarEfeitosDoGolpe, statusVaiPegar, aplicarMudancasDeStat,
   limparEstadoVolatil, aplicarStatus, aplicarEstagioUnico, curarStatus,
+  registrarFonteDeEstagio, fonteDeTrait,
 } from './statusSystem'
 import { traitDoPoke, type TraitId } from '@/data/traits'
 import {
@@ -2064,6 +2065,22 @@ function curaBloqueada(entity: WorldEntity): boolean {
   return Boolean(entity.curaBloqueadaAte && entity.curaBloqueadaAte > 0)
 }
 
+/**
+ * Procedencia de estagio que o proprio POKE aplicou em si por um golpe de caso
+ * especial (PH-121) — Belly Drum e Acupressure escrevem em `estagios` direto,
+ * sem passar por `aplicarMudancasDeStat`, entao nao ganhariam fonte sozinhos.
+ */
+function registrarFonteDoProprioGolpe(
+  entity: WorldEntity, stat: StatDeEstagio, ability: Ability,
+): void {
+  registrarFonteDeEstagio(entity, stat, {
+    id: ability.id,
+    tipo: 'golpe',
+    proprio: true,
+    deQuem: SPECIES[entity.poke.speciesId]?.name ?? entity.poke.speciesId,
+  })
+}
+
 // Troca os estagios de `stats` entre duas entidades (Guard Swap/Power Swap).
 // `delete` em vez de setar 0 — estagio ausente e estagio 0, mas o objeto fica
 // mais limpo e bate com o resto do codebase (aplicarMudancasDeStat nunca
@@ -2076,6 +2093,16 @@ function trocarEstagios(a: WorldEntity, b: WorldEntity, stats: StatDeEstagio[]):
     else a.estagios[stat] = bv
     if (av === undefined) delete b.estagios[stat]
     else b.estagios[stat] = av
+
+    // A PROCEDENCIA TROCA JUNTO (PH-121). Sem isto o selo mentiria depois de um
+    // Guard Swap: o estagio que veio do outro POKE apareceria explicado pelo
+    // golpe que o dono ANTIGO tinha usado.
+    const af = a.estagiosFonte?.[stat]
+    const bf = b.estagiosFonte?.[stat]
+    if (bf === undefined) { if (a.estagiosFonte) delete a.estagiosFonte[stat] }
+    else (a.estagiosFonte ??= {})[stat] = bf
+    if (af === undefined) { if (b.estagiosFonte) delete b.estagiosFonte[stat] }
+    else (b.estagiosFonte ??= {})[stat] = af
   }
 }
 
@@ -2266,12 +2293,15 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     // serve de gatilho — nao so o ultimo.
     const gatilhoDeAngerPoint = traitDoAlvo !== 'anger_point' || houveCritico
     if (reacao && tipoBate && categoriaBate && gatilhoDeAngerPoint) {
-      const mudanca = aplicarEstagioUnico(target, reacao.stat as StatDeEstagio, reacao.estagios)
+      // A fonte e a TRAIT do proprio alvo (PH-121): quem produziu o estagio foi
+      // o Weak Armor/Anger Point dele reagindo, nao o golpe que chegou.
+      const fonteDaTrait = fonteDeTrait(target, traitDoAlvo)
+      const mudanca = aplicarEstagioUnico(target, reacao.stat as StatDeEstagio, reacao.estagios, fonteDaTrait)
       if (mudanca && !silent) anunciarEstagios(world, target, [mudanca])
       // WEAK ARMOR e a unica com DOIS lados: sobe Velocidade (acima) e desce
       // Defesa (aqui). Nao cabe na tabela, que so guarda um par stat/estagio.
       if (traitDoAlvo === 'weak_armor') {
-        const queda = aplicarEstagioUnico(target, 'def', -1)
+        const queda = aplicarEstagioUnico(target, 'def', -1, fonteDaTrait)
         if (queda && !silent) anunciarEstagios(world, target, [queda])
       }
     }
@@ -2695,7 +2725,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       // transforma a punicao em buff, e por isso mora aqui dentro e nao num
       // bloco proprio — ela precisa do flinch ter DE FATO acontecido.
       if (traitDef === TRAIT_STEADFAST) {
-        const mudanca = aplicarEstagioUnico(target, 'speed', 1)
+        const mudanca = aplicarEstagioUnico(target, 'speed', 1, fonteDeTrait(target, traitDef))
         if (mudanca && !silent) anunciarEstagios(world, target, [mudanca])
       }
     }
@@ -2837,6 +2867,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       const perda = Math.round(attacker.poke.stats.hp / 2)
       attacker.poke.hp = Math.max(1, attacker.poke.hp - perda)
       attacker.estagios.atkFis = ESTAGIO_MAXIMO
+      registrarFonteDoProprioGolpe(attacker, 'atkFis', ability)
       break
     }
     case 'acupressure': {
@@ -2844,6 +2875,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       const stat = stats[Math.floor(nextFloat(world.rng) * stats.length)]
       const atual = attacker.estagios[stat] ?? 0
       attacker.estagios[stat] = Math.min(ESTAGIO_MAXIMO, atual + 2)
+      registrarFonteDoProprioGolpe(attacker, stat, ability)
       break
     }
     case 'aromatherapy':
@@ -2936,7 +2968,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // MOXIE: +1 de Ataque a cada POKE derrubado. Aqui, e nao no tratamento de
   // morte logo abaixo, porque so este ponto sabe QUEM matou.
   if (traitDoPoke(attacker.poke) === TRAIT_MOXIE && !isDead(attacker)) {
-    const mudanca = aplicarEstagioUnico(attacker, 'atkFis', 1)
+    const mudanca = aplicarEstagioUnico(attacker, 'atkFis', 1, fonteDeTrait(attacker, TRAIT_MOXIE))
     if (mudanca && !silent) anunciarEstagios(world, attacker, [mudanca])
   }
 
@@ -2989,7 +3021,9 @@ function resolveEntryHook(world: WorldState, self: WorldEntity, opponent: WorldE
   }
 
   if (trait === 'intimidate') {
-    const mudanca = aplicarEstagioUnico(opponent, 'atkFis', -1)
+    // Intimidate: a trait e de `self`, o estagio cai no oponente — e por isso que
+    // `fonteDeTrait` recebe os DOIS (proprio: false, e o nome de quem intimidou).
+    const mudanca = aplicarEstagioUnico(opponent, 'atkFis', -1, fonteDeTrait(self, 'intimidate', opponent))
     if (mudanca && !silent) anunciarEstagios(world, opponent, [mudanca])
     return
   }
@@ -3016,7 +3050,7 @@ function resolveEntryHook(world: WorldState, self: WorldEntity, opponent: WorldE
     const defFis = opponentPoke.stats.def * multiplicadorDeStat(opponent.estagios, 'def')
     const defEsp = opponentPoke.stats.defEsp * multiplicadorDeStat(opponent.estagios, 'defEsp')
     const stat: StatDeEstagio = defFis <= defEsp ? 'atkFis' : 'atkEsp'
-    const mudanca = aplicarEstagioUnico(self, stat, 1)
+    const mudanca = aplicarEstagioUnico(self, stat, 1, fonteDeTrait(self, 'download'))
     if (mudanca && !silent) anunciarEstagios(world, self, [mudanca])
   }
 }
