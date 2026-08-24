@@ -15,6 +15,7 @@
 // StrictMode double-invoke, podem corromper a posicao").
 import { drawEntity, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage } from './sprites'
 import { desenharAmbiente } from './ambiente'
+import { desenharClimaFundo, desenharClimaFrente, familiaDoClima } from './climaVisual'
 import { CENA_HOSPITAL, ZOOM_DA_CENA, escalaDoPoke } from '@/data/hospital'
 import type { WorldEntity, WorldState } from '@/engine/types'
 import { arteParaSala, backgroundParaSala } from '@/data/maps'
@@ -295,7 +296,13 @@ export class Renderer {
     // passam sobre o cenario mas por baixo do POKE — na frente dele, a camada
     // esconderia o que o jogador precisa ver. A janela vai em coordenada de
     // mundo porque e ela que decide onde a particula nasce e onde ela recicla.
-    desenharAmbiente(ctx, fundo.image, janela)
+    // A familia e resolvida AQUI, e nao dentro de `desenharAmbiente`: aquele
+    // arquivo nao pode importar do motor (ver o guard em ambiente.test.ts).
+    desenharAmbiente(ctx, fundo.image, janela, familiaDoClima(world.clima?.tipo ?? null))
+
+    // Clima ATRAS das entidades (PH-141): o grosso da precipitacao. Depois do
+    // ambiente porque a chuva passa por cima da folha que cai, nao por baixo.
+    desenharClimaFundo(ctx, world.clima?.tipo ?? null, janela)
 
     for (const enemy of world.enemies) {
       drawEntity(ctx, enemy)
@@ -314,6 +321,12 @@ export class Renderer {
     for (const effect of world.effects) {
       drawEffect(ctx, effect, world)
     }
+
+    // Clima na FRENTE de tudo (PH-141): a passagem rasante, o filtro de cor, a
+    // vinheta e o relampago. Depois dos efeitos de golpe de proposito — o
+    // filtro do clima cobre a cena inteira, e um golpe que ficasse por cima
+    // dele pareceria recortado de outra imagem.
+    desenharClimaFrente(ctx, world.clima?.tipo ?? null, janela)
 
     ctx.restore()
   }
