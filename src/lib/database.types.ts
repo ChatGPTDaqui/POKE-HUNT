@@ -1389,6 +1389,24 @@ export type Database = {
           },
         ]
       }
+      tempo_jogado_arquivado: {
+        Row: {
+          atualizado_em: string
+          segundos: number
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          segundos?: number
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          segundos?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       type_chart: {
         Row: {
           attacking_type: Database["dev"]["Enums"]["element_type"]
@@ -3315,6 +3333,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tempo_jogado_arquivado: {
+        Row: {
+          atualizado_em: string
+          segundos: number
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          segundos?: number
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          segundos?: number
+          user_id?: string
+        }
+        Relationships: []
       }
       type_chart: {
         Row: {
