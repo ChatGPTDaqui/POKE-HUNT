@@ -71,6 +71,19 @@ async function spritesNovo() {
   return import('./sprites')
 }
 
+// AQUECIMENTO, e nao um import ocioso (PH-129). `sprites.ts` puxa um grafo
+// grande, e a PRIMEIRA importacao dele custava ~550 ms de transformacao. Como o
+// unico jeito de isolar os casos e `vi.resetModules()` + reimportar, esse custo
+// caia dentro do primeiro `it` — que, sozinho, passava em 566 ms e, com a suite
+// inteira disputando CPU, estourava o teto de 5 s por 62 ms. O caso reprovava
+// por carga da maquina, nunca por defeito.
+//
+// `vi.resetModules()` limpa o registro de modulos, mas NAO joga fora a
+// transformacao que o Vite ja fez do arquivo. Pagar a transformacao aqui, fora
+// de qualquer `it`, deixa cada reimportacao custando os mesmos ~18 ms dos outros
+// casos, sem afrouxar isolamento nenhum.
+await import('./sprites')
+
 const { vfxDoGolpe } = await import('@/data/moveVfx')
 const ARTE_BULLET_PUNCH = vfxDoGolpe('bullet_punch')?.single.url
 
