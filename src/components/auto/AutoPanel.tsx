@@ -24,7 +24,7 @@ import { sincronizarAuto } from '@/data/remote/autoridade'
 import { useWorldStore } from '@/stores/worldStore'
 import { GameButton, GameCheck, GameInput, GameSelect, GameSwitch } from '@/components/game/controls'
 import { Explicacao } from '@/components/shared/Explicacao'
-import { estoqueDoItemDeRegra, itensEmUso, LIMIAR_ESTOQUE_BAIXO } from './estoqueBaixo'
+import { estoqueDoItemDeRegra, itensEmUso, LIMIAR_ESTOQUE_BAIXO, FAMILIA_REVIVE } from './estoqueBaixo'
 import { usePrevisaoDeConsumo, formatarTempoRestante, rotuloDoRecurso } from './consumo'
 import { ItemPicker, type OpcaoDeItem } from './ItemPicker'
 import { cn } from '@/lib/utils'
@@ -53,11 +53,27 @@ function InfoIcon({ text }: { text: string }) {
   )
 }
 
-/** Monta as opcoes do ItemPicker com estoque e alerta ja resolvidos. */
-function useOpcoes(base: { id: string; name: string }[], emUso: boolean, extra?: OpcaoDeItem): OpcaoDeItem[] {
+/**
+ * Monta as opcoes do ItemPicker com estoque e alerta ja resolvidos.
+ *
+ * `familia` (PH-144): quando os itens desta lista se SUBSTITUEM (os revives, as
+ * curas de status), o alerta olha o total do grupo em vez do item. Ficar sem
+ * Revive nao e ficar sem suprimento se ha Max Revive na mochila — e o aviso que
+ * grita nesse caso e o que ensina o jogador a ignorar todos os outros.
+ */
+function useOpcoes(
+  base: { id: string; name: string }[],
+  emUso: boolean,
+  extra?: OpcaoDeItem,
+  familia?: string,
+): OpcaoDeItem[] {
   const items = useGameStateStore((s) => s.items)
+  const autoStatusConfig = useGameStateStore((s) => s.autoStatusConfig)
+  const estoqueDaFamilia = familia != null
+    ? estoqueDoItemDeRegra(items, familia, autoStatusConfig)
+    : null
   const lista = base.map((item) => {
-    const quantidade = estoqueDoItemDeRegra(items, item.id)
+    const quantidade = estoqueDoItemDeRegra(items, item.id, autoStatusConfig)
     return {
       id: item.id,
       nome: item.name,
@@ -65,7 +81,13 @@ function useOpcoes(base: { id: string; name: string }[], emUso: boolean, extra?:
       // `emUso` decide se alerta. Um item selecionado numa automacao DESLIGADA
       // nao pisca: o bot nao vai gasta-lo, e um alerta que grita sem motivo e
       // um alerta que o jogador aprende a ignorar.
-      alerta: emUso && quantidade < LIMIAR_ESTOQUE_BAIXO,
+      //
+      // PH-144: item que o jogador DESMARCOU tambem nao pisca, pelo mesmo
+      // motivo — o bot nao vai encostar nele. `=== false` e nao `!== true`:
+      // ausente significa habilitado, mesmo default que o bot usa.
+      alerta: emUso
+        && autoStatusConfig[item.id] !== false
+        && (estoqueDaFamilia ?? quantidade) < LIMIAR_ESTOQUE_BAIXO,
     }
   })
   return extra ? [extra, ...lista] : lista
@@ -116,9 +138,12 @@ function PrevisaoDeRecursos() {
   const autoPotRules = useGameStateStore((s) => s.autoPotRules)
   const autoCatchConfig = useGameStateStore((s) => s.autoCatchConfig)
   const autoCatchRules = useGameStateStore((s) => s.autoCatchRules)
+  // PH-144: `autoStatusConfig` entra na conta — item de cura DESLIGADO pelo
+  // jogador nao pode contar como suprimento em uso.
+  const autoStatusConfig = useGameStateStore((s) => s.autoStatusConfig)
   const emUso = useMemo(
-    () => itensEmUso({ autoToggles, autoPotRules, autoCatchConfig, autoCatchRules }),
-    [autoToggles, autoPotRules, autoCatchConfig, autoCatchRules],
+    () => itensEmUso({ autoToggles, autoPotRules, autoCatchConfig, autoCatchRules, autoStatusConfig }),
+    [autoToggles, autoPotRules, autoCatchConfig, autoCatchRules, autoStatusConfig],
   )
   const previsoes = usePrevisaoDeConsumo(emUso)
   if (previsoes.length === 0) return null
@@ -196,6 +221,8 @@ export function AutoPanel() {
   const opcoesRevive = useOpcoes(
     Object.values(ITEMS).filter((i) => i.kind === 'revive'),
     autoToggles.autoRevive,
+    undefined,
+    FAMILIA_REVIVE,
   )
   const opcoesCuraDeStatus = useOpcoes(
     Object.values(ITEMS).filter((i) => i.kind === 'status_heal'),
