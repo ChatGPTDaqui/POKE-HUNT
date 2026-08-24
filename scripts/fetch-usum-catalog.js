@@ -332,6 +332,12 @@ async function main() {
       base,
       baseExp: p.base_experience,
       catchRate: s.capture_rate,
+      // PESO, em HECTOGRAMAS — a unidade que a PokeAPI usa (`pokemon.weight`:
+      // Machamp = 1300, ou seja 130,0 kg). Guardado cru, sem converter, porque
+      // as formulas dos jogos que dependem de peso (Low Kick, Heavy Slam) sao
+      // escritas em kg e a conversao e uma divisao por 10 na hora de usar —
+      // converter aqui perderia precisao e esconderia a unidade da fonte.
+      pesoHg: p.weight,
       curva,
       evolvesTo: evo.evolvesTo,
       evolvesAtLevel: evo.evolvesAtLevel,

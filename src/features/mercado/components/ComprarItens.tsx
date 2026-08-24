@@ -11,6 +11,7 @@ import { GameButton, GameCard, GameInput, SectionLabel } from '@/components/game
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
 import { fmt, STALE_MS } from '../utils'
 import { Carregando, IconeItem } from './shared'
+import { HistoricoDePreco } from './HistoricoDePreco'
 
 function LivroDoItem({ itemId }: { itemId: string }) {
   const item = getItem(itemId)
@@ -62,6 +63,12 @@ function LivroDoItem({ itemId }: { itemId: string }) {
           ))}
         </div>
       </div>
+
+      {/* ANTES do formulario de propósito (PH-97): o campo de preco nasce no
+          melhor preco do livro, que diz o que esta a venda AGORA e nao o que a
+          coisa vale. Quem digita um preco antes de ver a mediana de 7 dias
+          ancora no primeiro numero que apareceu na tela. */}
+      <HistoricoDePreco itemId={itemId} />
 
       <GameCard className="flex flex-wrap items-end gap-[.5em] p-[.6em]">
         <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
@@ -116,6 +123,7 @@ function LivroDoItem({ itemId }: { itemId: string }) {
 
 export function ComprarItens() {
   const [aberto, setAberto] = useState<string | null>(null)
+  const [busca, setBusca] = useState('')
   const { data, isLoading } = useQuery({
     queryKey: ['mercado', 'itens'],
     queryFn: () => mercadoRpc.mercadoItens(),
@@ -129,14 +137,42 @@ export function ComprarItens() {
   // Nao se perde nada: quem quer ser o PRIMEIRO a anunciar um item usa a aba
   // "Vender", que lista o inventario inteiro. O livro daquele item passa a
   // existir na hora.
+  // BUSCA NO CLIENTE, e isso e o certo AQUI — o oposto do que o PH-99 fez com a
+  // vitrine de POKE.
+  //
+  // A diferenca e o teto: `mercado_resumo_itens` agrupa por `item_id`, entao ela
+  // tem no maximo UMA linha por item que existe no jogo — 19 gerados mais as
+  // pedras de evolucao, uns 30 no total. Essa lista nao cresce com o Mercado, e
+  // por isso nao pode cair na armadilha das 1000 linhas do PostgREST nem
+  // justifica um round-trip por tecla digitada.
+  //
+  // A vitrine de POKE e o contrario: uma linha por ANUNCIO ativo, sem teto
+  // nenhum. La a busca teve que ir pro servidor.
   const linhas = useMemo(() => {
+    const termo = busca.trim().toLowerCase()
     const porId = new Map<string, ResumoItemMercado>((data?.itens ?? []).map((i) => [i.itemId, i]))
     return Object.values(ITEMS)
       .filter((item) => porId.has(item.id))
+      .filter((item) => !termo || item.name.toLowerCase().includes(termo) || item.id.includes(termo))
       .map((item) => ({ item, resumo: porId.get(item.id) ?? null }))
-  }, [data])
+  }, [data, busca])
 
   if (isLoading) return <Carregando />
+
+  // Dois vazios diferentes, e confundi-los mandaria o jogador pro lugar errado:
+  // "ninguem esta anunciando" pede pra ele ir VENDER; "sua busca nao achou nada"
+  // pede pra ele limpar a busca. A distincao e ter termo digitado.
+  if (linhas.length === 0 && busca.trim()) {
+    return (
+      <div className="flex flex-col gap-[.4em]">
+        <GameInput
+          placeholder="Buscar item..." value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+        />
+        <p className="text-n500">Nenhum item a venda com esse nome.</p>
+      </div>
+    )
+  }
 
   if (linhas.length === 0) {
     return (
@@ -152,6 +188,10 @@ export function ComprarItens() {
 
   return (
     <div className="flex flex-col gap-[.4em]">
+      <GameInput
+        placeholder="Buscar item..." value={busca}
+        onChange={(e) => setBusca(e.target.value)}
+      />
       {linhas.map(({ item, resumo }) => (
         <div key={item.id}>
           <GameCard

@@ -17,6 +17,17 @@ export function ConfirmDialog() {
     <div
       role="dialog"
       aria-modal="true"
+      // `data-keep-open` e obrigatorio aqui, nao decoracao: `GameWindow` fecha
+      // a janela em QUALQUER `pointerdown` cujo alvo nao esteja dentro de
+      // `[data-window]` ou `[data-keep-open]`, e este dialogo e montado como
+      // IRMAO da arvore de janelas (em JogoCarregado). Sem o marcador, abrir a
+      // confirmacao condena a janela de tras: clicar em "Vender" fechava a
+      // Loja junto, e clicar em "Cancelar" tambem.
+      //
+      // `data-keep-open` e nao `data-window`: isto nao e uma janela de
+      // trabalho (ver a nota de nao ser arrastavel acima), e o que se quer
+      // dizer e exatamente "clicar aqui nao fecha o que esta atras".
+      data-keep-open
       className="pointer-events-auto absolute inset-0 z-[60] flex items-center justify-center bg-black/60"
       // `pointerdown`, nao `mousedown`: no toque o evento de mouse de
       // compatibilidade so sai depois do `touchend`, e nao sai quando o gesto

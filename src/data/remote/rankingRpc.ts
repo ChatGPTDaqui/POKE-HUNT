@@ -36,9 +36,20 @@ export async function rankingTreinadores(limite = 50): Promise<{ entradas: Entra
   return { entradas }
 }
 
-export async function rankingPokemon(criterio: CriterioPoke, limite = 50): Promise<{ entradas: EntradaPoke[] }> {
+/**
+ * Teto de linhas do ranking de POKE, e nao um `default` qualquer: a view
+ * `ranking_pokemon` MATERIALIZA o top 50 de cada criterio (PH-105 — ela deixou
+ * de ser `select *` da tabela inteira pra parar de vazar POKE de terceiro).
+ * Pedir mais de 50 nao daria erro: encheria o fim da lista com linha que entrou
+ * ali pelo top de OUTRO criterio. Cortar aqui e explicito; a alternativa e uma
+ * lista silenciosamente errada.
+ */
+const TETO_POR_CRITERIO = 50
+
+export async function rankingPokemon(criterio: CriterioPoke, limite = TETO_POR_CRITERIO): Promise<{ entradas: EntradaPoke[] }> {
   const coluna = COLUNA_POR_CRITERIO[criterio]
-  const { data, error } = await db.from('ranking_pokemon').select('*').order(coluna, { ascending: false }).limit(limite)
+  const { data, error } = await db.from('ranking_pokemon').select('*').order(coluna, { ascending: false })
+    .limit(Math.min(limite, TETO_POR_CRITERIO))
   if (error) throw new Error(error.message)
   const entradas: EntradaPoke[] = (data ?? []).map((r: any) => ({
     userId: r.user_id,

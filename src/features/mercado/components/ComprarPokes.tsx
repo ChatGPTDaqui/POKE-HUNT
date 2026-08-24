@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Coin, Diamond, Gavel } from '@phosphor-icons/react'
 import * as mercadoRpc from '@/data/remote/mercadoRpc'
@@ -10,8 +10,12 @@ import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { GameButton, GameCard, GameCheck, GameInput, GameSelect, Recolhivel } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
-import { STALE_MS } from '../utils'
+import { fmt, STALE_MS } from '../utils'
 import { Carregando, Moeda } from './shared'
+import { TempoRestante } from './TempoRestante'
+import { useSegundosRestantes, proximoLanceMinimo } from '../tempoDeLeilao'
+import { HistoricoDePreco } from './HistoricoDePreco'
+import { faixaDaPagina } from '../paginacao'
 
 /**
  * Filtro rapido de um toque: botao que liga/desliga (pedido explicito).
@@ -70,6 +74,80 @@ function anuncioComoPoke(a: AnuncioMercado) {
   }
 }
 
+/**
+ * Anuncios por pagina.
+ *
+ * 25 e o meio-termo medido no painel: no celular (~470px uteis) cabem 5 ou 6
+ * cartoes na tela, entao 25 e uma rolagem curta; e a consulta pagina traz uma
+ * fracao do que a vitrine inteira trazia. Numero muito menor multiplicaria os
+ * cliques de paginacao e, com eles, as requisicoes.
+ */
+const POR_PAGINA = 25
+
+/**
+ * A linha de um LEILAO na vitrine (PH-101).
+ *
+ * Separada num componente proprio porque ela e a unica da lista que precisa de
+ * um relogio: `useSegundosRestantes` assina o tique de 1s, e um hook nao pode
+ * ficar dentro do `.map` do cartao (a ordem de hooks mudaria a cada filtro
+ * aplicado, que e exatamente o que o React proibe).
+ */
+function LinhaDeLeilao({
+  anuncio, valor, onValor, onLance, pendente,
+}: {
+  anuncio: AnuncioMercado
+  valor: number | undefined
+  onValor: (v: number) => void
+  onLance: (valor: number) => void
+  pendente: boolean
+}) {
+  const segundos = useSegundosRestantes(anuncio.expira_em)
+  // Ja venceu e o cron ainda nao passou: o servidor recusa lance depois de
+  // `expira_em`, entao a tela desabilita em vez de deixar o jogador tentar e
+  // levar um erro.
+  const encerrado = segundos != null && segundos <= 0
+
+  // O minimo do PROXIMO lance sai da mesma regra que o servidor aplica: sem
+  // lance ainda e o piso do leilao, com lance e o maior + o incremento.
+  const minimo = proximoLanceMinimo(anuncio.melhorOferta, anuncio.lance_minimo, anuncio.incremento_minimo)
+
+  return (
+    <>
+      <span className="flex flex-col text-[.78em] text-n400">
+        <span className="flex items-center gap-[.25em] text-warn">
+          <Gavel weight="fill" /> Leilão · <TempoRestante expiraEm={anuncio.expira_em} />
+        </span>
+        <span>
+          {anuncio.melhorOferta != null
+            ? <>maior: <Moeda valor={anuncio.melhorOferta} tipo={anuncio.currency} /></>
+            : <>sem lance ainda</>}
+          {' · '}mínimo {fmt.format(minimo)}
+        </span>
+      </span>
+      <GameInput
+        type="number"
+        min={minimo}
+        className="w-[6.5em]"
+        // O campo nasce VAZIO com o mínimo no placeholder, e não preenchido com
+        // ele: um valor já digitado num campo de lance convida a clicar sem ler,
+        // e aqui clicar sem ler tira ouro do bolso na hora.
+        placeholder={String(minimo)}
+        disabled={encerrado}
+        value={valor ?? ''}
+        onChange={(e) => onValor(Math.max(0, Math.floor(Number(e.target.value) || 0)))}
+      />
+      <GameButton
+        variant="primary"
+        carregando={pendente}
+        disabled={encerrado || !(valor != null && valor >= minimo)}
+        onClick={() => valor != null && onLance(valor)}
+      >
+        {encerrado ? 'Encerrado' : 'Dar lance'}
+      </GameButton>
+    </>
+  )
+}
+
 export function ComprarPokes() {
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const [busca, setBusca] = useState('')
@@ -85,39 +163,74 @@ export function ComprarPokes() {
   const [nivelMin, setNivelMin] = useState(0)
   const [ivMin, setIvMin] = useState(0)
   const [raridades, setRaridades] = useState<Set<RarityKey>>(() => new Set(Object.keys(RARITIES) as RarityKey[]))
-  const [ordem, setOrdem] = useState<'preco' | 'nivel' | 'iv'>('preco')
+  const [ordem, setOrdem] = useState<'preco' | 'recente' | 'nivel' | 'iv' | 'termina'>('preco')
+  // Um anuncio com o historico aberto por vez — ver a nota no botao "Preco".
+  const [precoAberto, setPrecoAberto] = useState<string | null>(null)
+  const [pagina, setPagina] = useState(0)
+
+  // Filtro do SERVIDOR (PH-99). Montado num `useMemo` porque ele e a
+  // `queryKey`: sem isso um objeto novo a cada render invalidaria o cache em
+  // todo re-render e a vitrine viraria uma rajada de requests.
+  const filtro = useMemo((): mercadoRpc.FiltroDaVitrine => ({
+    pagina,
+    porPagina: POR_PAGINA,
+    termo: busca.trim() || undefined,
+    // `undefined` quando as duas estao ligadas: nao restringe nada, e mandar as
+    // duas viraria um `in.(gold,diamond)` inutil na URL.
+    moedas: verGold && verDiamante ? undefined : [
+      ...(verGold ? ['gold' as const] : []),
+      ...(verDiamante ? ['diamond' as const] : []),
+    ],
+    raridades: raridades.size === Object.keys(RARITIES).length ? undefined : [...raridades],
+    shinyOnly: shinyOnly || undefined,
+    nivelMin: nivelMin || undefined,
+    ivMin: ivMin || undefined,
+    soLance: somenteOferta || undefined,
+    ordem,
+  }), [pagina, busca, verGold, verDiamante, raridades, shinyOnly, nivelMin, ivMin, somenteOferta, ordem])
+
+  // Mudar QUALQUER filtro volta pra primeira pagina. Sem isto, quem estava na
+  // pagina 5 e digita uma busca que devolve 3 resultados ve uma vitrine VAZIA —
+  // e o vazio nao explica que o problema e a pagina, nao o filtro.
+  //
+  // Efeito, e nao um wrapper em cada um dos oito setters: com oito, o proximo
+  // filtro a entrar seria adicionado sem o wrapper e o bug voltaria calado.
+  useEffect(() => {
+    setPagina(0)
+  }, [busca, verGold, verDiamante, raridades, shinyOnly, nivelMin, ivMin, somenteOferta, ordem])
 
   const { data, isLoading } = useQuery({
-    queryKey: ['mercado', 'pokes'],
-    queryFn: () => mercadoRpc.mercadoPokes(),
+    // O filtro INTEIRO entra na chave. Sem ele, trocar de pagina ou de
+    // ordenacao leria o cache da combinacao anterior e a tela mostraria a
+    // pagina errada com aparencia de certa.
+    queryKey: ['mercado', 'pokes', filtro],
+    queryFn: () => mercadoRpc.mercadoPokes(filtro),
     staleTime: STALE_MS,
+    // Segura a pagina anterior enquanto a nova carrega, em vez de piscar o
+    // estado de carregamento e a lista sumir a cada clique de paginacao.
+    placeholderData: (anterior) => anterior,
   })
   const comprar = useAcaoMercado((anuncioId: string) => mercadoRpc.comprarAnuncio(anuncioId))
   const ofertar = useAcaoMercado(mercadoRpc.ofertar)
+  const darLance = useAcaoMercado(mercadoRpc.darLance)
 
-  const filtrados = useMemo(() => {
-    const termo = busca.trim().toLowerCase()
-    return (data?.anuncios ?? [])
-      .filter((a) => {
-        const species = SPECIES[a.species_id]
-        if (!species) return false
-        if (termo && !species.name.toLowerCase().includes(termo)) return false
-        if (a.currency === 'gold' && !verGold) return false
-        if (a.currency === 'diamond' && !verDiamante) return false
-        if (somenteOferta && !a.apenas_oferta) return false
-        if (shinyOnly && !a.is_shiny) return false
-        if (a.level < nivelMin) return false
-        if (a.iv_percent < ivMin) return false
-        return raridades.has(a.rarity as RarityKey)
-      })
-      .sort((a, b) => {
-        if (ordem === 'nivel') return b.level - a.level
-        if (ordem === 'iv') return b.iv_percent - a.iv_percent
-        // Anuncio de lance nao tem preco: vai pro fim da ordenacao por preco em
-        // vez de virar 0 e fingir ser o mais barato do Mercado.
-        return (a.price ?? Number.MAX_SAFE_INTEGER) - (b.price ?? Number.MAX_SAFE_INTEGER)
-      })
-  }, [data, busca, verGold, verDiamante, somenteOferta, shinyOnly, nivelMin, ivMin, raridades, ordem])
+  // A lista chega da pagina JA filtrada e ordenada pelo servidor (PH-99). O
+  // unico descarte que sobra aqui e a especie que o cliente nao conhece —
+  // anuncio de POKE renomeado num sync posterior, que nao tem como desenhar.
+  //
+  // Filtrar isso no servidor exigiria ele saber qual catalogo ESTE cliente tem,
+  // e as duas pontas divergem por deploy. Ele fica de fora do total tambem: o
+  // contador vem do `count` do banco, entao ele conta o anuncio que a tela
+  // descartou. Preferi um total honesto ("34 anuncios") com uma linha faltando
+  // a um total que muda de acordo com a versao do navegador.
+  //
+  // A ordenacao por prazo de leilao (PH-101) tambem desceu pro servidor: o
+  // `.sort()` que ficava aqui so via a PAGINA, e ordenar 25 de 300 anuncios
+  // daria uma lista que parece ordenada e nao esta.
+  const filtrados = useMemo(
+    () => (data?.anuncios ?? []).filter((a) => SPECIES[a.species_id]),
+    [data],
+  )
 
   if (isLoading) return <Carregando />
 
@@ -134,6 +247,9 @@ export function ComprarPokes() {
     raridades.size < Object.keys(RARITIES).length && `${raridades.size}/${Object.keys(RARITIES).length} raridades`,
   ].filter(Boolean).join(' · ') || 'tudo'
 
+  const total = data?.total ?? 0
+  const { paginas, inicio, fim } = faixaDaPagina(total, pagina, POR_PAGINA)
+
   return (
     <div className="flex flex-col gap-[.45em]">
       {/* Quatro fileiras de filtro (busca, moeda, faixa, raridades) somavam
@@ -148,6 +264,8 @@ export function ComprarPokes() {
         />
         <GameSelect value={ordem} onChange={(e) => setOrdem(e.target.value as typeof ordem)}>
           <option value="preco">Menor preco</option>
+          <option value="recente">Mais recente</option>
+          <option value="termina">Leilão terminando</option>
           <option value="nivel">Maior nivel</option>
           <option value="iv">Maior IV</option>
         </GameSelect>
@@ -180,7 +298,7 @@ export function ComprarPokes() {
             onChange={(e) => setIvMin(Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
           />
         </label>
-        <GameCheck checked={shinyOnly} onChange={setShinyOnly}>Somente Shiny</GameCheck>
+        <GameCheck checked={shinyOnly} onChange={setShinyOnly}>Shiny</GameCheck>
       </div>
 
       <div className="flex flex-wrap items-center gap-x-[.6em] gap-y-[.3em]">
@@ -201,6 +319,18 @@ export function ComprarPokes() {
       </div>
       </div>
       </Recolhivel>
+
+      {/* O TOTAL vem do `count` do banco, e nao de `data.length` (PH-99): acima
+          de 1000 linhas o `.length` do PostgREST corta e nao avisa, e a vitrine
+          pararia de mostrar anuncio parecendo que o Mercado esta vazio. */}
+      {total > 0 && (
+        <div className="flex items-center justify-between text-[.78em] text-n500">
+          <span>
+            {inicio}–{fim} de {fmt.format(total)}
+          </span>
+          {paginas > 1 && <span>página {pagina + 1} de {fmt.format(paginas)}</span>}
+        </div>
+      )}
 
       {filtrados.length === 0 && <p className="text-n500">Nenhum POKE a venda com esses filtros.</p>}
 
@@ -230,7 +360,15 @@ export function ComprarPokes() {
                 {a.apenas_oferta && ` · ${a.ofertas ?? 0} oferta(s)`}
               </div>
             </div>
-            {a.apenas_oferta ? (
+            {a.modo === 'leilao' ? (
+              <LinhaDeLeilao
+                anuncio={a}
+                valor={lance[a.id]}
+                onValor={(v) => setLance((m) => ({ ...m, [a.id]: v }))}
+                onLance={(valor) => darLance.mutate({ anuncioId: a.id, valor })}
+                pendente={darLance.isPending}
+              />
+            ) : a.apenas_oferta ? (
               <>
                 <span className="flex flex-col text-[.78em] text-n400">
                   <span className="flex items-center gap-[.25em] text-warn">
@@ -274,9 +412,56 @@ export function ComprarPokes() {
                 Ver
               </GameButton>
             )}
+            {/* Historico SOB DEMANDA e UM POR VEZ (PH-97).
+
+                A issue pedia o grafico "no cartao do anuncio", mas montar um por
+                linha seriam DUAS leituras por anuncio numa vitrine que pode ter
+                centenas — o mesmo tipo de custo que o PH-65 existiu pra cortar
+                (dois polls de badge gastando 90 requisicoes por hora por aba).
+
+                Um por vez, e nao um conjunto de abertos: comparar duas especies
+                lado a lado nao e o que se faz aqui (a vitrine e uma lista de
+                anuncios individuais), e o teto de uma leitura ativa e o que
+                garante que abrir 40 cartoes nao vire 80 requests. */}
+            <GameButton
+              variant="ghost"
+              onClick={() => setPrecoAberto((atual) => (atual === a.id ? null : a.id))}
+            >
+              {precoAberto === a.id ? 'Fechar preço' : 'Preço'}
+            </GameButton>
+            {precoAberto === a.id && (
+              <div className="w-full border-t border-n700 pt-[.4em]">
+                <HistoricoDePreco speciesId={a.species_id} currency={a.currency} />
+              </div>
+            )}
           </GameCard>
         )
       })}
+
+      {/* Paginacao no FIM da lista, e nao no topo: e onde o dedo esta depois de
+          rolar os 25 cartoes. Só aparece quando ha mais de uma pagina — dois
+          botoes desabilitados em cima de uma vitrine de 3 anuncios sao ruido. */}
+      {paginas > 1 && (
+        <div className="flex items-center justify-center gap-[.5em] pt-[.3em]">
+          <GameButton
+            variant="ghost"
+            disabled={pagina === 0}
+            onClick={() => setPagina((p) => Math.max(0, p - 1))}
+          >
+            ← Anterior
+          </GameButton>
+          <span className="text-[.8em] tabular-nums text-n400">
+            {pagina + 1} / {fmt.format(paginas)}
+          </span>
+          <GameButton
+            variant="ghost"
+            disabled={pagina + 1 >= paginas}
+            onClick={() => setPagina((p) => p + 1)}
+          >
+            Próxima →
+          </GameButton>
+        </div>
+      )}
     </div>
   )
 }

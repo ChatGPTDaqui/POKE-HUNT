@@ -98,6 +98,13 @@ export interface SpeciesDataEntry {
   catchRate: number
   baseExp: number
   growthCurve: GrowthCurve
+  /**
+   * Peso em HECTOGRAMAS, como a PokeAPI entrega (`pokemon.weight`: Machamp =
+   * 1300, ou seja 130,0 kg). Cru, sem converter — as formulas dos jogos que
+   * dependem de peso sao escritas em kg, e quem usa divide por 10 na hora
+   * (combatSystem.ts: Low Kick e Heavy Slam).
+   */
+  pesoHg: number
   base: SpeciesBaseStats
   abilities: AbilityRef[]
   evolvesTo: string | null
@@ -206,10 +213,6 @@ export interface EncounterDataEntry {
   weight: number
 }
 export type EncountersData = Record<string, EncounterDataEntry>
-
-// Written by `scripts/build-collision-grids.js` (separate from the xlsx
-// pipeline — samples assets/hunt-backgrounds/*.png pixels directly).
-export type CollisionGrids = Record<string, string[]>
 
 // Escritos por `scripts/gerar-subbiomas.mjs` (tambem fora do pipeline da
 // planilha — cruza as pools do PokeRogue com o nosso catalogo).

@@ -28,3 +28,36 @@ export function deveSerPessimista(elapsedSeconds: number): boolean {
 export function segundosCatchUpEfetivos(gapSeconds: number): number {
   return Math.min(gapSeconds, OFFLINE_FARM_MAX_HOURS * 3600)
 }
+
+/**
+ * Decide se o boot deve REENTRAR na hunt em que o jogador estava, em vez de
+ * montar o Hospital (PH-93).
+ *
+ * O mapa nunca se perdeu num F5: o servidor grava `game_sessions.map_id` e o
+ * assentamento devolve `estado.currentMapId = resumo.stoppedEarly ? null :
+ * sessao.map_id`. Quem jogava o dado fora era o cliente, que montava
+ * `buildHospitalWorld` incondicionalmente — e num jogo idle isso e o modo de
+ * falha mais caro que existe: o jogador acha que deixou farmando e volta horas
+ * depois pra descobrir que ficou parado no Hospital.
+ *
+ * Exportada separada do boot (que mistura promessa, store e efeito) pelo mesmo
+ * motivo de `farmOfflineSemServidorEhConfiavel` e `deveSerPessimista` acima:
+ * a REGRA tem cobertura direta, sem precisar montar meia arvore de React.
+ *
+ * `stoppedEarly` e checado apesar de o servidor ja zerar o mapa nesse caminho.
+ * Nao e redundancia inutil: sao duas pontas independentes (a coluna vem de um
+ * request, a flag de outro), e reentrar com POKE caido nao da erro nenhum —
+ * so queima relogio creditando 0,1s de jogo por flush, que e exatamente o tipo
+ * de falha que ninguem percebe.
+ */
+export function deveRetomarHunt(params: {
+  mapId: string | null
+  stoppedEarly: boolean
+  /** HP do POKE no slot ativo; `null` quando o slot esta vazio. */
+  hpDoPokeAtivo: number | null
+}): boolean {
+  if (params.mapId == null) return false
+  if (params.stoppedEarly) return false
+  if (params.hpDoPokeAtivo == null) return false
+  return params.hpDoPokeAtivo > 0
+}

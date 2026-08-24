@@ -91,11 +91,15 @@ export function primeImage(url: string): Promise<void> {
   })
 }
 
-/** A imagem desta URL ja esta decodificada e pronta pra desenhar? */
-export function isImageReady(url: string): boolean {
-  const img = imageCache.get(url)
-  return Boolean(img && img.complete && img.naturalWidth > 0)
-}
+// AQUI VIVIA `isImageReady(url)`, e ela saiu com PH-82 em vez de ficar sem uso.
+//
+// Ela consultava o cache sem NUNCA preencher, e os dois lugares que a usavam
+// como porteira (`drawQuadroDeTira` e `drawGifEffect`) por isso nunca
+// disparavam o download da propria arte que estavam esperando. Deixa-la
+// exportada seria deixar a armadilha montada pro proximo desenho que precisar
+// checar "ja carregou?" — a resposta certa e pegar a imagem com
+// `getOrLoadImage` (que inicia o download) e olhar o `complete` dela, que e o
+// que `drawCaptureAnim` sempre fez.
 
 /**
  * Um quadro de uma TIRA (data/vfxTiras.ts) desenhado com a ALTURA pedida,
@@ -123,8 +127,23 @@ function drawQuadroDeTira(
    */
   anguloDeAtaque?: number,
 ): boolean {
-  if (!isImageReady(tira.url)) return false
+  // `getOrLoadImage` ANTES da checagem, e nao depois — e ele quem DISPARA o
+  // download; `isImageReady` so consulta o cache e nunca o preenche.
+  //
+  // BUG REAL (PH-82): com a ordem invertida, a primeira chamada saia no
+  // `return false` sem nunca pedir a imagem, o cache continuava vazio, e a
+  // chamada seguinte fazia a mesma coisa — pra sempre. As 23 artes POR GOLPE
+  // ficam de fora do preload de proposito (ver data/moveVfx.ts), apostando
+  // exatamente neste carregamento no primeiro uso, entao NENHUMA delas jamais
+  // apareceu: todo golpe com arte propria caia no burst procedural do tipo, e
+  // o Bullet Punch saia identico ao Metal Claw.
+  //
+  // Medido num canvas isolado, contando pixels: 1436 (procedural) na primeira
+  // chamada, 1436 de novo 1,5s depois, e 789 (a arte) so depois de um
+  // `primeImage` manual na mesma URL. `drawCaptureAnim`, logo abaixo, sempre
+  // fez na ordem certa.
   const img = getOrLoadImage(tira.url)
+  if (!img.complete || img.naturalWidth === 0) return false
   const sw = img.naturalWidth / tira.quadros
   const sh = img.naturalHeight
   // clamp antes do modulo: `fase === 1` voltaria pro quadro 0 no ultimo frame
@@ -944,8 +963,12 @@ function drawAoeRing(ctx: CanvasRenderingContext2D, effect: WorldEffect): void {
 // de graca. Usado so por golpe de STATUS (data/statusVfx.ts, altura fixa):
 // o impacto de DANO migrou pros dois lotes de tira (data/vfxTiras.ts).
 function drawGifEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect, url: string, altura: number): boolean {
-  if (!isImageReady(url)) return false
+  // Mesma ordem de `drawQuadroDeTira`, pelo mesmo motivo (PH-82): pegar a
+  // imagem e o que inicia o download. Aqui o defeito era menos visivel porque
+  // `data/preload.ts` ja aquece os VFX de status na entrada da hunt — mas
+  // qualquer cena que nao passe por aquele preload cairia no mesmo buraco.
   const img = getOrLoadImage(url)
+  if (!img.complete || img.naturalWidth === 0) return false
 
   const progress = effectProgress(effect)
   const fade = progress < HOLD_PORTION ? 1 : 1 - (progress - HOLD_PORTION) / (1 - HOLD_PORTION)
@@ -1042,6 +1065,39 @@ function effectAnchor(effect: WorldEffect, world: WorldState): { x: number; y: n
   }
 }
 
+/** Marca escrita do critico. Curta pra caber ao lado do numero em 390px. */
+const ROTULO_DE_CRITICO = 'CRIT'
+const COR_DE_CRITICO = '#ffd166'
+/**
+ * Placa atras do numero que o POKE do JOGADOR levou (PH-131).
+ *
+ * A primeira tentativa foi so trocar a cor do CONTORNO para vermelho, e olhando
+ * no harness ela reprovou: num numero de 12px o contorno tem 3px e, sobre
+ * preenchimento laranja de "super efetivo", ficou indistinguivel do contorno
+ * preto. Canal fraco nao e canal. Fundo e area — le de relance e nao disputa
+ * nada com a cor do texto, que continua sendo efetividade.
+ */
+const PLACA_DE_DANO_RECEBIDO = 'rgba(153, 27, 27, 0.85)'
+const BORDA_DA_PLACA = 'rgba(248, 113, 113, 0.9)'
+
+/**
+ * Numero de dano flutuante, com TRES canais independentes — e a
+ * independencia e o ponto (PH-131):
+ *
+ *   cor do numero  -> efetividade de tipo (super/efetivo/normal/resistido/imune)
+ *   tamanho + marca -> critico
+ *   placa de fundo  -> de quem e o dano (recebido pelo jogador ou causado por ele)
+ *
+ * Antes, so o primeiro existia. O critico multiplica o dano
+ * (`combatSystem#CRIT_MULTIPLIER`, com Sniper por cima) e nao aparecia em lugar
+ * nenhum: o mesmo golpe no mesmo alvo tirava numeros muito diferentes e nada na
+ * tela explicava, o que le como sorte ou como bug. E dano recebido era
+ * indistinguivel do causado, porque a cor ja estava gasta com efetividade.
+ *
+ * Sao canais SEPARADOS porque as tres perguntas sao ortogonais: um hit pode ser
+ * critico, super efetivo e recebido ao mesmo tempo. Empilhar duas delas na cor
+ * faria uma esconder a outra.
+ */
 function drawDamageNumber(ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState): void {
   const progress = effectProgress(effect)
   const floatOffset = 30 * progress
@@ -1050,24 +1106,60 @@ function drawDamageNumber(ctx: CanvasRenderingContext2D, effect: WorldEffect, wo
   const x = anchor.x
   const y = anchor.y - floatOffset
   const color = effect.color || '#ffffff'
+  // Dono do efeito de dano E o alvo que levou o hit (ver spawnDamageNumber).
+  const recebidoPeloJogador = Boolean(
+    world.player && effect.ownerId != null && effect.ownerId === world.player.id,
+  )
+  // Contorno preto sempre; branco so na excecao do `immune`, que e preenchido
+  // de preto e desapareceria. Autoria NAO mora aqui (ver PLACA_DE_DANO_RECEBIDO).
   const outline = color === '#000000' ? '#ffffff' : '#000000'
+  const crit = effect.isCrit === true
+  const numero = `-${effect.value}`
 
   ctx.save()
   ctx.globalAlpha = Math.max(0, alpha)
   ctx.textAlign = 'left'
-  ctx.lineWidth = 3
+  ctx.lineWidth = crit ? 4 : 3
   ctx.lineJoin = 'round'
+  // Tamanho e canal pre-atentivo: o numero maior e lido como "esse foi
+  // diferente" antes de qualquer texto.
+  ctx.font = crit ? 'bold 17px monospace' : 'bold 12px monospace'
+
+  if (recebidoPeloJogador) {
+    const m = ctx.measureText(numero)
+    const alturaTexto = crit ? 17 : 12
+    const pad = 3
+    ctx.fillStyle = PLACA_DE_DANO_RECEBIDO
+    roundedRectPath(ctx, x - pad, y - alturaTexto, m.width + pad * 2, alturaTexto + pad, 3)
+    ctx.fill()
+    ctx.strokeStyle = BORDA_DA_PLACA
+    ctx.lineWidth = 1
+    ctx.stroke()
+    ctx.lineWidth = crit ? 4 : 3
+  }
+
   ctx.strokeStyle = outline
-  ctx.font = 'bold 12px monospace'
   ctx.fillStyle = color
-  ctx.strokeText(`-${effect.value}`, x, y)
-  ctx.fillText(`-${effect.value}`, x, y)
+  ctx.strokeText(numero, x, y)
+  ctx.fillText(numero, x, y)
+
+  // A marca escrita e o que TRANSFORMA "numero grande" em "critico". Sem ela o
+  // jogador ve variacao, nao causa. Na mesma linha, logo depois do numero, pra
+  // nao gastar raia (ver spawnDamageNumber).
+  if (crit) {
+    const largura = ctx.measureText(numero).width
+    ctx.font = 'bold 9px monospace'
+    ctx.fillStyle = COR_DE_CRITICO
+    ctx.strokeText(ROTULO_DE_CRITICO, x + largura + 3, y)
+    ctx.fillText(ROTULO_DE_CRITICO, x + largura + 3, y)
+  }
 
   if (effect.effectiveness) {
     const isSuper = effect.effectiveness === 'super'
     ctx.font = isSuper ? 'bold 13px monospace' : '9px monospace'
     ctx.fillStyle = color
-    const labelY = y - (isSuper ? 14 : 12)
+    // O rotulo sobe junto quando o numero cresceu, senao o critico encosta nele.
+    const labelY = y - (isSuper ? 14 : 12) - (crit ? 5 : 0)
     ctx.strokeText(effect.effectivenessLabel || effect.effectiveness, x, labelY)
     ctx.fillText(effect.effectivenessLabel || effect.effectiveness, x, labelY)
   }
@@ -1144,6 +1236,24 @@ const HUNT_BG_COVERAGE_MARGIN = 1.15
 export interface MapBackgroundDef {
   bg: MapBackground
   bounds: { width: number; height: number }
+  /**
+   * Onde a imagem fica, em coordenadas de mundo — vem do arquivo gerado, via
+   * `data/maps.ts#arteParaSala`.
+   *
+   * ISTO DEIXOU DE SER CALCULADO AQUI de proposito. Antes este arquivo e
+   * `scripts/build-sub-bioma-collision.js` chegavam na mesma transformacao por
+   * conta propria, concordando so porque repetiam as mesmas constantes; e o
+   * cabecalho de `data/maps.ts` ja alertava que a grade ser de uma imagem e o
+   * pixel na tela ser de outra e a classe de bug mais cara deste sistema.
+   * Desde que o mundo virou o recorte da area pintada (PH-80), a conta depende
+   * da caixa da tinta e nao ha como derivar aqui — o gerador manda, o desenho
+   * obedece.
+   *
+   * Ausente = arte sem referencia pintada. Cai no enquadramento antigo
+   * (centrado nos bounds, esticado pra cobrir), que continua valendo pra
+   * qualquer cena que nao passe pelo walk-block — hoje, o Hospital.
+   */
+  arte?: { escala: number; x: number; y: number }
 }
 
 export interface Viewport {
@@ -1151,6 +1261,203 @@ export interface Viewport {
   y: number
   w: number
   h: number
+}
+
+// --- borda que desmancha (PH-95) --------------------------------------------
+//
+// A arte da hunt terminava numa aresta reta: um retangulo colado em cima de uma
+// cor solida, em vez de um pedaco de mundo. Pedido do usuario: "um pincel
+// magico nas bordas, pra nao ficar quadrado o mapa".
+//
+// POR QUE PINTAR A COR POR CIMA, E NAO MASCARAR A IMAGEM
+// ---------------------------------------------------------------------------
+// O caminho obvio seria montar, uma vez por arte, um canvas offscreen com a
+// imagem e apagar as bordas com `destination-out`. Cacheado, custa uma vez so.
+//
+// Nao cabe: as artes tem ~2048x2048, ou seja ~16 MB de canvas cada. Sao 31
+// artes, e trocar de sub-bioma acontece a cada quota de abates — um cache que
+// segure as visitadas passa de meio giga, e um que segure duas remonta a
+// mascara em toda troca de sala, no meio do jogo.
+//
+// Como a area em volta da imagem JA e preenchida com `primary` (a cor de fundo
+// do bioma), o mesmo efeito sai de graca pelo outro lado: em vez de apagar a
+// borda da imagem, pinta-se `primary` por cima dela, opaco na aresta e
+// transparente pra dentro. A imagem dissolve na cor que ja estava atras. Zero
+// canvas extra, zero memoria, e o laco de desenho continua com um `drawImage`.
+//
+// O RUIDO NAO PODE VIR DO MOTOR
+// ---------------------------------------------------------------------------
+// Nada aqui toca `world.rng`. Aquele gerador e autoritativo e compartilhado com
+// o resim do servidor — sortear a posicao de uma mancha decorativa nele
+// dessincronizaria a sequencia e o flush passaria a divergir do que o cliente
+// mostrou (a classe de bug do PH-37). O ruido desta borda sai de um hash da URL
+// da arte: deterministico, igual em toda maquina, e sem relacao nenhuma com a
+// simulacao.
+
+// Largura do esfumado como fracao do menor lado da arte. Fracao, e nao pixels:
+// as artes vao de ~1250px a ~2048px nativos, e um valor fixo seria uma moldura
+// grossa numa e um fio na outra.
+//
+// Era 0.12, e 0.12 POR ARESTA quer dizer 24% do menor lado somando os dois
+// lados opostos — quase um quarto do cenario visivel entregue ao esfumado, mais
+// o raio das manchas (abaixo), que passa disso pra dentro. Pedido do usuario:
+// "faca o embacado das laterais ocupar menos parte do mapa".
+const BORDA_FRACAO = 0.055
+// Manchas por aresta. O esfumado reto sozinho ainda le como retangulo (de
+// cantos macios, mas retangulo); as manchas e que quebram a linha.
+//
+// Eram 9, e subiu junto com a queda de BORDA_FRACAO — NAO e enfeite. O raio da
+// mancha e fracao da MESMA constante, entao encolher a faixa encolhe cada
+// mancha na mesma proporcao: com 9 manchas de raio ~0.055 os diametros somados
+// mal cobrem uma vez o comprimento da aresta, e sobra trecho reto entre elas.
+// Reduzir a faixa sem isto devolveria a borda de retangulo que o PH-95 existiu
+// pra tirar, so mais fina.
+const MANCHAS_POR_ARESTA = 18
+
+/** Hash estavel de string -> semente. Pequeno de proposito: o unico requisito
+ *  e ser o MESMO numero em toda maquina pra a borda nao "respirar" entre
+ *  sessoes nem diferir entre jogadores. */
+function semeteDaArte(chave: string): number {
+  let h = 2166136261
+  for (let i = 0; i < chave.length; i++) {
+    h ^= chave.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return h >>> 0
+}
+
+/** LCG minusculo. Nao precisa de qualidade estatistica — precisa ser barato e
+ *  repetivel. */
+function sorteioLocal(semente: number): () => number {
+  let s = semente || 1
+  return () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0
+    return s / 4294967296
+  }
+}
+
+/**
+ * A geometria da borda de uma arte, montada uma vez e guardada.
+ *
+ * Guardar isto (e nao a imagem mascarada) e o que faz o cache ser barato: sao
+ * ~28 numeros por arte, nao 16 MB de pixels.
+ */
+interface BordaDaArte {
+  /** Manchas em coordenadas NORMALIZADAS (0..1) do retangulo da arte, com raio
+   *  em fracao do menor lado — assim a mesma geometria serve qualquer zoom e
+   *  qualquer enquadramento sem recalcular. */
+  manchas: { u: number; v: number; r: number }[]
+}
+
+const bordasPorArte = new Map<string, BordaDaArte>()
+
+function bordaDaArte(chave: string): BordaDaArte {
+  const cacheada = bordasPorArte.get(chave)
+  if (cacheada) return cacheada
+
+  const rand = sorteioLocal(semeteDaArte(chave))
+  const manchas: BordaDaArte['manchas'] = []
+  for (let aresta = 0; aresta < 4; aresta++) {
+    for (let i = 0; i < MANCHAS_POR_ARESTA; i++) {
+      // Distribuidas ao longo da aresta com jitter, em vez de posicao
+      // totalmente aleatoria: aleatorio puro deixa buraco (um trecho da aresta
+      // sem mancha nenhuma, que volta a parecer reto) e amontoado.
+      const t = (i + 0.5) / MANCHAS_POR_ARESTA + (rand() - 0.5) * (0.8 / MANCHAS_POR_ARESTA)
+      // Mancha centrada SOBRE a aresta (nao dentro nem fora): metade dela come
+      // a imagem, metade cai no fundo, que e o que produz recorte irregular em
+      // vez de dentado pra um lado so.
+      const desvio = (rand() - 0.5) * BORDA_FRACAO * 0.6
+      const r = BORDA_FRACAO * (0.6 + rand() * 1.0)
+      if (aresta === 0) manchas.push({ u: t, v: 0 + desvio, r })
+      else if (aresta === 1) manchas.push({ u: t, v: 1 + desvio, r })
+      else if (aresta === 2) manchas.push({ u: 0 + desvio, v: t, r })
+      else manchas.push({ u: 1 + desvio, v: t, r })
+    }
+  }
+  const borda = { manchas }
+  bordasPorArte.set(chave, borda)
+  return borda
+}
+
+/**
+ * A MESMA cor com alpha 0 — e nunca a palavra-chave `transparent`.
+ *
+ * BUG REAL, VISTO NA TELA na primeira versao desta borda: `transparent` e
+ * `rgba(0,0,0,0)`, ou seja PRETO com alpha zero. Um gradiente de `#3f5a34` ate
+ * `transparent` interpola o RGB rumo ao preto junto com o alpha, entao o meio
+ * do gradiente e preto meio-transparente. As manchas apareciam como discos
+ * ESCUROS flutuando sobre o fundo solido, em vez de invisiveis — que e o que
+ * elas tem que ser fora da imagem, ja que ali a cor pintada e igual a cor que
+ * ja estava atras.
+ *
+ * As cores de bioma sao hex de 6 digitos hoje (`#3f5a34`), mas nao da pra
+ * assumir isso: a normalizacao vai pelo proprio canvas, que aceita qualquer
+ * cor CSS valida e devolve `#rrggbb` ou `rgba(...)`.
+ */
+function comAlphaZero(ctx: CanvasRenderingContext2D, cor: string): string {
+  const anterior = ctx.fillStyle
+  ctx.fillStyle = cor
+  const normalizada = String(ctx.fillStyle)
+  ctx.fillStyle = anterior
+
+  const hex = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(normalizada)
+  if (hex) {
+    return `rgba(${parseInt(hex[1], 16)}, ${parseInt(hex[2], 16)}, ${parseInt(hex[3], 16)}, 0)`
+  }
+  const rgb = /^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/i.exec(normalizada)
+  if (rgb) return `rgba(${rgb[1]}, ${rgb[2]}, ${rgb[3]}, 0)`
+  // Cor que o canvas normalizou pra algo que nao reconhecemos (gradiente,
+  // pattern, `currentColor` herdado). `transparent` de volta e pior que nao
+  // desenhar: melhor a borda dura de antes que uma sombra preta em volta dela.
+  return normalizada
+}
+
+/**
+ * Dissolve as bordas do retangulo (x,y,w,h) na cor `cor`.
+ *
+ * Chamado DEPOIS do `drawImage` da arte e dentro do mesmo `save`/`restore`.
+ */
+function desmancharBorda(
+  ctx: CanvasRenderingContext2D,
+  chave: string,
+  cor: string,
+  x: number, y: number, w: number, h: number,
+): void {
+  const menorLado = Math.min(w, h)
+  const faixa = menorLado * BORDA_FRACAO
+  if (faixa <= 0) return
+
+  const corSumindo = comAlphaZero(ctx, cor)
+
+  // 1) Rampa por aresta.
+  const rampas: [number, number, number, number, number, number, number, number][] = [
+    [x, y, x, y + faixa, x, y, w, faixa],
+    [x, y + h, x, y + h - faixa, x, y + h - faixa, w, faixa],
+    [x, y, x + faixa, y, x, y, faixa, h],
+    [x + w, y, x + w - faixa, y, x + w - faixa, y, faixa, h],
+  ]
+  for (const [gx0, gy0, gx1, gy1, rx, ry, rw, rh] of rampas) {
+    const g = ctx.createLinearGradient(gx0, gy0, gx1, gy1)
+    g.addColorStop(0, cor)
+    g.addColorStop(1, corSumindo)
+    ctx.fillStyle = g
+    ctx.fillRect(rx, ry, rw, rh)
+  }
+
+  // 2) Manchas por cima, pra a aresta deixar de ser uma linha.
+  const { manchas } = bordaDaArte(chave)
+  for (const m of manchas) {
+    const cx = x + m.u * w
+    const cy = y + m.v * h
+    const raio = m.r * menorLado
+    const g = ctx.createRadialGradient(cx, cy, raio * 0.42, cx, cy, raio)
+    g.addColorStop(0, cor)
+    g.addColorStop(1, corSumindo)
+    ctx.fillStyle = g
+    ctx.beginPath()
+    ctx.arc(cx, cy, raio, 0, Math.PI * 2)
+    ctx.fill()
+  }
 }
 
 export function drawMapBackground(ctx: CanvasRenderingContext2D, map: MapBackgroundDef, viewport: Viewport): void {
@@ -1171,16 +1478,28 @@ export function drawMapBackground(ctx: CanvasRenderingContext2D, map: MapBackgro
     // nao so no zoom-out extremo que ja era aceito). A escala agora nunca
     // desenha a imagem menor do que o necessario pra cobrir o mapa, qualquer
     // que seja a resolucao nativa do arquivo.
-    const escalaMinima = Math.max(
-      (map.bounds.width * HUNT_BG_COVERAGE_MARGIN) / img.naturalWidth,
-      (map.bounds.height * HUNT_BG_COVERAGE_MARGIN) / img.naturalHeight,
-    )
-    const escala = Math.max(HUNT_BG_TILE_SCALE, escalaMinima)
-    const iw = img.naturalWidth * escala
-    const ih = img.naturalHeight * escala
-    const mapCx = map.bounds.width / 2
-    const mapCy = map.bounds.height / 2
-    ctx.drawImage(img, mapCx - iw / 2, mapCy - ih / 2, iw, ih)
+    if (map.arte) {
+      const iw = img.naturalWidth * map.arte.escala
+      const ih = img.naturalHeight * map.arte.escala
+      ctx.drawImage(img, map.arte.x, map.arte.y, iw, ih)
+      desmancharBorda(ctx, image!, primary, map.arte.x, map.arte.y, iw, ih)
+    } else {
+      const escalaMinima = Math.max(
+        (map.bounds.width * HUNT_BG_COVERAGE_MARGIN) / img.naturalWidth,
+        (map.bounds.height * HUNT_BG_COVERAGE_MARGIN) / img.naturalHeight,
+      )
+      const escala = Math.max(HUNT_BG_TILE_SCALE, escalaMinima)
+      const iw = img.naturalWidth * escala
+      const ih = img.naturalHeight * escala
+      const mapCx = map.bounds.width / 2
+      const mapCy = map.bounds.height / 2
+      // Este ramo desenha a arte MAIOR que o mapa de proposito (ela cobre os
+      // bounds com sobra), entao a aresta dela cai fora da area jogavel e
+      // desmanchar ali nao tem o que resolver — pior, comeria imagem que o
+      // enquadramento pos justamente pra nao faltar cobertura na borda do
+      // mundo. Hoje so o Hospital cai aqui (arte sem referencia pintada).
+      ctx.drawImage(img, mapCx - iw / 2, mapCy - ih / 2, iw, ih)
+    }
   } else {
     const tile = 48
     const margin = 300

@@ -12,6 +12,43 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // Continuacao do mesmo dia da 7.7: aquela entrada foi escrita no meio do
+  // lote de merges e ficou pra tras do que entrou depois (PH-91).
+  {
+    version: '7.8',
+    date: '2026-08-23',
+    title: 'O correio virou conversa de verdade, e o ouro anexado parou de sumir',
+    highlights: [
+      'CORREIO E CHAT AGORA: uma conversa por contato, com todo o historico salvo, do jeito que voce espera de um aplicativo de mensagem. Antes a mesma pessoa tinha tres listas — a carta numa aba, o recado em outra, a resposta numa terceira.',
+      'MENSAGEM NOVA APARECE NA HORA no fio que voce esta lendo, sem recarregar. Abrir a conversa zera as nao lidas so daquele contato.',
+      'BUG SERIO: OURO ANEXADO NUMA MENSAGEM ERA DESTRUIDO. Saia de quem mandou, nunca chegava em quem recebeu, e a mensagem ficava travada com o anexo por coletar pra sempre. Anexo de item nunca foi afetado. O ouro que estava preso voltou pro destinatario.',
+      'VINTE E TRES ARTES DE GOLPE NAO APARECIAM NA TELA — entre elas o Bullet Punch. O desenho existia e estava certo; o jogo so nunca chegava a pedir o arquivo pra desenhar.',
+      'HOSPITAL: o POKE estava serrilhado e fora de proporcao com a sala. Em vez de esticar o POKE, a cena inteira encolheu — mesma proporcao entre ele e a enfermeira, com bem menos esticamento no sprite.',
+      'A JANELA DE CHAT RECOLHIDA agora e so "Chat" e um "+". Antes ela continuava ocupando espaco com as abas e o campo de escrever mesmo fechada.',
+      'CADA SUB-BIOMA TEM O TAMANHO QUE PRECISA. O mundo jogavel deixou de ser um retangulo fixo igual pra todos: agora ele e do tamanho do que foi desenhado naquele mapa, entao ha mapas maiores e menores.',
+    ],
+  },
+  // Entrada curta de proposito, ao contrario das anteriores: pedido explicito
+  // do usuario ("um resumo bem sucinto sobre todas as melhorias").
+  {
+    version: '7.7',
+    date: '2026-08-22',
+    title: 'Correio e amigos, time no canto da tela, e as arenas ganharam parede',
+    highlights: [
+      'CORREIO COMPLETO: mande carta com ouro ou item anexado, responda, e apague o que ja leu — cada lado apaga a sua copia.',
+      'LISTA DE AMIGOS: convide, aceite, remova e bloqueie. Bloquear corta os dois lados e desfaz a amizade.',
+      'CONVERSA PRIVADA com amigo, em tempo real, com contador de nao lidas no sino.',
+      'SEU TIME NO CANTO SUPERIOR ESQUERDO: foto e nivel das reservas em coluna. Arraste pra mudar a ordem, passe o mouse pro resumo, clique pra abrir o perfil ou botar em campo.',
+      'A FILA DOS 4 GOLPES virou arrastavel, e da pra chegar nos golpes direto pela tela de Equipe.',
+      'POKE SEM GOLPE UTILIZAVEL agora diz isso na tela em vez de ficar parado sem explicacao.',
+      'A ESCOLHA DE GOLPES DESTRAVOU: um golpe orfao na lista impedia qualquer edicao.',
+      'NO CELULAR: a carinha do POKE muda conforme o estado dele, e tocar num termo abre a explicacao (com glossario).',
+      'BUG: A ARTE DO GOLPE FICAVA PRA TRAS. O efeito nascia parado no lugar onde o POKE estava, e ele andava mais de 100 pixels durante o segundo que a animacao dura. Agora ela acompanha.',
+      'DOJO E ARENA DO DRAGAO GANHARAM PAREDE DE VERDADE. Eram as duas ultimas telas do jogo em que dava pra atravessar predio, agua e lava.',
+      'DUELO DO CAMPEAO LANCE COREOGRAFADO: cada lado entra por um ponto fixo da arena, e ha 2 segundos entre um POKE cair e o proximo entrar — dos dois lados. Antes o seu substituto aparecia no mesmo instante, dentro do buraco onde o anterior morreu.',
+      'SEU PROGRESSO PAROU DE CORRER RISCO: duas gravacoes ao mesmo tempo se atropelavam e uma podia sobrescrever a outra.',
+    ],
+  },
   {
     version: '7.6',
     date: '2026-08-18',

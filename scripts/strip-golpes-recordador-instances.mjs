@@ -22,28 +22,27 @@
 //    em runtime, so que PERSISTIDO em vez de recalculado a cada leitura.
 // Linha sem mudanca nenhuma nao entra no UPDATE.
 'use strict';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
+import { carregarMotor } from './lib/motor.mjs';
 import path from 'node:path';
 import { config } from 'dotenv';
+import { resolverSchema, cabecalhosRest } from './lib/schema-alvo.cjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 config({ path: path.join(ROOT, '.env'), quiet: true });
 
+// A regra de alvo (--schema= > SUPABASE_SCHEMA > dev, e `public` so com
+// --confirmar-public) nasceu aqui e agora vive em lib/schema-alvo.cjs, aplicada
+// a todos os scripts. Duas copias da mesma regra e exatamente como os outros
+// seis passaram a escrever em `public` sem ninguem notar.
 const args = process.argv.slice(2);
-const schemaArg = args.find((a) => a.startsWith('--schema='));
-const schema = schemaArg ? schemaArg.split('=')[1] : 'dev';
-if (schema === 'public' && !args.includes('--confirmar-public')) {
-  console.error('Recusado: schema public exige --confirmar-public explicito (mexe em dado de jogador real).');
-  process.exit(1);
-}
+const schema = resolverSchema({ argv: args, envSchema: process.env.SUPABASE_SCHEMA });
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!SUPABASE_URL || !SERVICE_ROLE) throw new Error('SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY ausentes em .env');
 
-const { SPECIES, ehGolpeAoeDeNivel50 } = await import(
-  pathToFileURL(path.join(ROOT, 'server/engine/headless.js')).href
-);
+const { SPECIES, ehGolpeAoeDeNivel50 } = await carregarMotor();
 
 const golpesValidosPorEspecie = new Map(
   Object.values(SPECIES).map((sp) => [sp.id, new Set(sp.abilities.map((a) => a.key))]),
@@ -66,12 +65,9 @@ async function buscarTodasInstancias() {
     const res = await fetch(
       `${SUPABASE_URL}/rest/v1/pokemon_instances?select=id,species_id,unlocked_abilities,active_abilities`,
       {
-        headers: {
-          apikey: SERVICE_ROLE,
-          Authorization: `Bearer ${SERVICE_ROLE}`,
-          'Accept-Profile': schema,
+        headers: cabecalhosRest(SERVICE_ROLE, schema, {
           Range: `${offset}-${offset + PAGINA - 1}`,
-        },
+        }),
       },
     );
     if (!res.ok) throw new Error(`GET pokemon_instances (offset ${offset}): ${res.status} ${await res.text()}`);
@@ -109,23 +105,33 @@ for (const row of todas) {
 
 console.error(`-- ${mudancas.length} instancias com golpe de recordador pra remover (${semEspecieConhecida} ignoradas por especie desconhecida)`);
 
+// PH-57: NAO `process.exit(0)` aqui (nem em lugar nenhum deste script) —
+// medido ao vivo, 100% reproduzivel: process.exit(0) logo apos o loop de
+// fetches paginados de buscarTodasInstancias() (undici, varias chamadas
+// sequenciais) crasha com "Assertion failed:
+// !(handle->flags & UV_HANDLE_CLOSING), file ...\deps\uv\src\win\async.c"
+// no Windows — o handle do fetch ainda fecha quando o exit forcado interrompe
+// o processo, e o assert do libuv dispara antes do OS matar o processo, que
+// sai com codigo 127 em vez de 0 mesmo tendo rodado tudo certo. 5/5 rodadas
+// isoladas (so o loop de fetch + exit) reproduziram; 5/5 sem o exit saíram
+// limpo, codigo 0. Deixar o event loop esvaziar sozinho evita o handle ainda
+// em transicao no momento do exit.
 if (!mudancas.length) {
   console.error('-- nada a fazer, sem SQL gerado');
-  process.exit(0);
+} else {
+  console.log('begin;');
+  // UPDATE em lote via VALUES, mesmo padrao de seed-species-moves-usum.mjs —
+  // uma linha SQL por instancia mudada, nao uma query por linha.
+  console.log(`update ${schema}.pokemon_instances as p set`);
+  console.log('  unlocked_abilities = v.unlocked_abilities,');
+  console.log('  active_abilities = v.active_abilities');
+  console.log('from (values');
+  console.log(
+    mudancas
+      .map((m) => `  ('${m.id}'::uuid, ${sqlArrayDeTexto(m.unlockedNovo)}, ${m.activeNovo == null ? 'null::text[]' : sqlArrayDeTexto(m.activeNovo)})`)
+      .join(',\n'),
+  );
+  console.log(') as v(id, unlocked_abilities, active_abilities)');
+  console.log('where p.id = v.id;');
+  console.log('commit;');
 }
-
-console.log('begin;');
-// UPDATE em lote via VALUES, mesmo padrao de seed-species-moves-usum.mjs —
-// uma linha SQL por instancia mudada, nao uma query por linha.
-console.log(`update ${schema}.pokemon_instances as p set`);
-console.log('  unlocked_abilities = v.unlocked_abilities,');
-console.log('  active_abilities = v.active_abilities');
-console.log('from (values');
-console.log(
-  mudancas
-    .map((m) => `  ('${m.id}'::uuid, ${sqlArrayDeTexto(m.unlockedNovo)}, ${m.activeNovo == null ? 'null::text[]' : sqlArrayDeTexto(m.activeNovo)})`)
-    .join(',\n'),
-);
-console.log(') as v(id, unlocked_abilities, active_abilities)');
-console.log('where p.id = v.id;');
-console.log('commit;');

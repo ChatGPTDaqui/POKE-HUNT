@@ -61,7 +61,7 @@ export const TRAINING_MAP: HuntMapDef = {
   continent: 'faixa1', // nasce liberada pra qualquer conta, do primeiro POKE ao ultimo
   bounds: { width: 1000, height: 700 },
   playerSpawn: { x: 500, y: 470 },
-  bg: { primary: '#2c2f3a', secondary: '#3a3f52', image: 'assets/hunt-backgrounds/dojo.png' },
+  bg: { primary: '#2c2f3a', secondary: '#3a3f52', image: 'assets/hunt-backgrounds/dojo.jpg' },
   maxEnemies: 1,
   respawnDelay: 2, // religa rapido — testar nao pode parar pra esperar respawn
   spawnPoints: [{ x: 500, y: 280 }],

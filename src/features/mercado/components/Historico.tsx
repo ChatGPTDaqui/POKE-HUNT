@@ -4,7 +4,7 @@ import * as mercadoRpc from '@/data/remote/mercadoRpc'
 import { type NegocioMercado } from '@/data/remote/servidor'
 import { ITEMS } from '@/data/items'
 import { SPECIES } from '@/data/pokes'
-import { STALE_MS } from '../utils'
+import { fmt, STALE_MS } from '../utils'
 import { Carregando, Moeda } from './shared'
 
 export function Historico() {
@@ -34,6 +34,17 @@ export function Historico() {
             </span>
           </span>
           <Moeda valor={n.unit_price * n.quantity} tipo={n.currency} />
+          {/* A taxa (PH-98) aparece SO pra quem pagou por ela, o vendedor: o
+              comprador desembolsou o valor cheio e ver "− taxa" na linha dele
+              sugeriria um desconto que nao existiu.
+
+              `!n.taxa` cobre ausente e zero de uma vez — linha de antes do
+              PH-98 e venda em diamante (isenta) leem igual, "nao houve taxa". */}
+          {!n.souComprador && !!n.taxa && (
+            <span className="text-[.8em] text-n500" title="Taxa de venda do Mercado">
+              − {fmt.format(n.taxa)}
+            </span>
+          )}
           <span className="text-[.85em] text-n600">
             {new Date(n.created_at).toLocaleDateString('pt-BR')}
           </span>

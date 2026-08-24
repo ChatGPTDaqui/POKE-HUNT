@@ -4,11 +4,11 @@ import {
   snapshotToGameState, gameStateToPlayerRow, gameStateToPokemonRows,
   gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
   defaultGameStateData, MAPS, GRUPOS_DO_LANCE,
-  OFFLINE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
+  OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
 } from '#engine'
 import {
-  ErroHttp, selecionarTudo, selecionar, atualizar, atualizarRetornando, inserir, apagar, type Config,
+  ErroHttp, selecionarTudo, selecionar, atualizar, atualizarRetornando, inserir, apagar, chamarRpc, type Config,
 } from './db.js'
 import { criarEstadoDoJogador } from './estadoDoJogador.js'
 import { aplicarPiso, NENHUM_PISO, type ResultadoPiso } from './farmOffline.js'
@@ -190,6 +190,23 @@ export interface EstadoParaEscrita {
    * por essa lista curta.
    */
   bagCarregada: boolean
+  /**
+   * As LINHAS CRUAS que este snapshot leu, guardadas pra `gravarEstado` poder
+   * gravar so o que mudou.
+   *
+   * Sem baseline, todo flush reescrevia o conjunto inteiro: as linhas do time em
+   * `pokemon_instances`, TODOS os itens, TODA a Pokedex e TODAS as regras de
+   * auto-captura — 120 vezes por hora por jogador, mesmo numa janela em que o
+   * jogador nao matou nada. E cada tabela dessas custa dois round-trips (o
+   * select do diff de remocao e o upsert), o que fazia um flush parado custar o
+   * mesmo que um flush cheio de abates.
+   *
+   * Guardado como linha, e nao como `PokeInstance`: `rowToPoke` recalcula campo
+   * derivado na leitura (`unlockedAbilities`, `stats`) e e justamente esse
+   * recalculo que atualiza a coluna quando o catalogo muda. Comparar objeto de
+   * jogo congelaria essa atualizacao; comparar a linha ja mapeada nao.
+   */
+  linhasNoLoad: PlayerSnapshot
 }
 
 /**
@@ -248,16 +265,15 @@ export async function lerSnapshot(
     selecionarTudo<PlayerSnapshot['autoCatchRules'][number]>(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=*`),
   ])
   if (!player[0]) throw new ErroHttp(404, 'jogador sem linha em `players`')
-  const estado = snapshotToGameState(
-    { player: player[0], pokemon, items, pokedex, autoCatchRules },
-    defaultGameStateData(),
-  )
+  const linhasNoLoad: PlayerSnapshot = { player: player[0], pokemon, items, pokedex, autoCatchRules }
+  const estado = snapshotToGameState(linhasNoLoad, defaultGameStateData())
   return {
     estado,
     pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)),
     entregas: [],
     playerUpdatedAt: player[0].updated_at,
     bagCarregada: comBag,
+    linhasNoLoad,
   }
 }
 
@@ -347,12 +363,93 @@ interface LinhaLocalizacao {
 // confundir com qualquer outro 409 do jogo (ouro insuficiente, item travado).
 export const CONFLITO_ESCRITA_JOGADOR = 'outro comando em andamento — tente de novo'
 
+/**
+ * Duas linhas do banco dizem a mesma coisa?
+ *
+ * Compara so as chaves que a linha NOVA traz: o tipo `Insert` omite coluna com
+ * default (`created_at`, `updated_at`), e exigir igualdade nelas faria toda
+ * linha parecer diferente — que e exatamente o comportamento que este diff
+ * existe pra evitar.
+ *
+ * Em caso de duvida o resultado e `false` (grava). Um falso "mudou" custa uma
+ * escrita a mais; um falso "nao mudou" perde progresso.
+ */
+function linhaIgual(nova: Record<string, unknown>, atual: Record<string, unknown> | undefined): boolean {
+  if (!atual) return false
+  for (const [chave, valor] of Object.entries(nova)) {
+    const antes = atual[chave]
+    if (valor === antes) continue
+    // `null` e `undefined` significam a mesma coisa aqui: o PostgREST devolve
+    // `null` na coluna vazia e o mapper as vezes omite a chave.
+    if (valor == null && antes == null) continue
+    if (typeof valor === 'object' || typeof antes === 'object') {
+      // Array (`unlocked_abilities`) e jsonb (`disabled_abilities`, configs de
+      // auto). JSON.stringify e comparacao por FORMA, entao ordem de array e de
+      // chave importa — pro dado deste jogo as duas sao estaveis (o mapper monta
+      // sempre na mesma ordem), e onde nao forem o efeito e gravar a mais.
+      if (JSON.stringify(valor) === JSON.stringify(antes)) continue
+      return false
+    }
+    return false
+  }
+  return true
+}
+
+/**
+ * Só as linhas que mudaram em relacao ao baseline — o que de fato precisa subir.
+ *
+ * POR QUE ISTO EXISTE (PH-90)
+ *
+ * O diff antes era so por TABELA: bastava uma linha diferente pra reescrever
+ * todas. Como a Pokedex guarda contagem de abates, matar UM mob mudava uma
+ * contagem e regravava a dex inteira — 104 linhas pra registrar 1 abate no
+ * jogador com a dex maior. Medido em producao: 484.746 escritas em
+ * `player_pokedex` contra 13.045 em `players`, a tabela principal. Mesma coisa
+ * em `player_items`, onde cada pocao consumida reescrevia o inventario todo.
+ *
+ * `undefined` = nao ha baseline (chamador antigo, ou leitura que nao guardou as
+ * linhas). Sem baseline nao da pra saber o que mudou, entao devolve tudo — o
+ * mesmo fallback conservador de antes.
+ *
+ * Linha nova (sem par no baseline) entra: `linhaIgual(nova, undefined)` e
+ * false. Linha REMOVIDA nao aparece aqui — quem cuida disso e o diff de
+ * remocao de cada bloco, que compara contra o que o banco tem agora.
+ */
+function linhasQueMudaram<T extends Record<string, unknown>>(
+  novas: T[],
+  atuais: T[] | undefined,
+  chaveDe: (linha: T) => string,
+): T[] {
+  if (!atuais) return novas
+  const porChave = new Map(atuais.map((l) => [chaveDe(l), l]))
+  return novas.filter((nova) => !linhaIgual(nova, porChave.get(chaveDe(nova))))
+}
+
+/** Nada mudou nesta tabela: mesmas chaves, e nenhuma linha diferente. */
+function tabelaIntacta<T extends Record<string, unknown>>(
+  novas: T[],
+  atuais: T[] | undefined,
+  chaveDe: (linha: T) => string,
+): boolean {
+  // `undefined` = nao ha baseline (chamador antigo, ou leitura que nao guardou
+  // as linhas). Sem baseline nao ha como afirmar que nada mudou.
+  if (!atuais) return false
+  // Contagem diferente ja resolve: sobrou ou faltou linha em relacao ao load.
+  if (novas.length !== atuais.length) return false
+  return linhasQueMudaram(novas, atuais, chaveDe).length === 0
+}
+
 export async function gravarEstado(
   cfg: Config,
   userId: string,
   estado: GameStateData,
   pokeIdsNoLoad: Set<string>,
   playerUpdatedAtEsperado: string,
+  /**
+   * As linhas que a leitura viu (`EstadoParaEscrita.linhasNoLoad`). Ausente =
+   * sem baseline, e ai o comportamento e o de sempre: reescreve tudo.
+   */
+  linhasNoLoad?: PlayerSnapshot,
 ): Promise<void> {
   // CAS na linha de `players`: sem isso, duas acoes concorrentes do mesmo
   // jogador (duas abas, duplo clique, comprar+evoluir quase juntos) leem o
@@ -361,43 +458,64 @@ export async function gravarEstado(
   // Mercado, aqui na linha do jogador (PH-5). `updated_at` e mantido pelo
   // trigger `players_set_updated_at`: todo UPDATE bem sucedido (nosso ou de
   // outro request concorrente) sempre avanca a versao.
-  const gravada = await atualizarRetornando(
+  //
+  // PH-67: RPC em vez de PATCH cru. Um PATCH direto no REST nunca disputava o
+  // `pg_advisory_xact_lock` que as RPCs de acao (comprar/vender/etc) passaram
+  // a tomar — duas transacoes HTTP separadas, nenhuma pedindo o mesmo lock,
+  // colisao efemera batendo 409 sem nenhuma das duas estar "errada". A RPC
+  // `gravar_progresso` pega o MESMO lock por usuario antes do CAS, entao
+  // agora as duas familias de escrita realmente se serializam.
+  const resultado = await chamarRpc<{ ok: boolean; conflito?: boolean; updatedAt?: string }>(
     cfg,
-    `players?user_id=eq.${userId}&updated_at=eq.${encodeURIComponent(playerUpdatedAtEsperado)}`,
-    gameStateToPlayerRow(userId, estado),
+    'gravar_progresso',
+    {
+      p_user_id: userId,
+      p_patch: gameStateToPlayerRow(userId, estado),
+      p_updated_at_esperado: playerUpdatedAtEsperado,
+    },
   )
-  if (!gravada.length) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR)
+  if (!resultado.ok) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR)
 
   const linhasPoke = gameStateToPokemonRows(userId, estado)
-  // `id` e opcional so no tipo `Insert` (coluna tem default no banco) — aqui
-  // sempre vem preenchido, o proprio POKE que o gerou.
-  const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id): id is string => id != null))
-  // Uma leitura so, cobrindo o que eu conhecia e o que estou tentando gravar.
-  const idsDeInteresse = [...new Set([...pokeIdsNoLoad, ...idsAgora])]
-  const atuais: LinhaLocalizacao[] = []
-  for (const lote of porLotesDeId(idsDeInteresse)) {
-    atuais.push(
-      ...(await selecionarTudo<LinhaLocalizacao>(
-        cfg,
-        `pokemon_instances?id=in.(${lote.join(',')})&select=id,user_id,location`,
-      )),
-    )
-  }
-  const porId = new Map(atuais.map((l) => [l.id, l]))
-  const aindaMeu = (l: LinhaLocalizacao | undefined): boolean =>
-    l != null && l.user_id === userId && (l.location === 'team' || l.location === 'bag')
+  // JANELA SEM NADA PRA GRAVAR: sai antes dos dois round-trips (o select do
+  // diff de remocao e o upsert). Isto e o caso COMUM num jogo idle — POKE
+  // desmaiado, inimigo ainda nascendo, jogador parado no Hospital — e antes
+  // custava exatamente o mesmo que uma janela cheia de abates.
+  const pokeIntacto = tabelaIntacta(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id))
+  if (!pokeIntacto) {
+    // `id` e opcional so no tipo `Insert` (coluna tem default no banco) — aqui
+    // sempre vem preenchido, o proprio POKE que o gerou.
+    const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id): id is string => id != null))
+    // Uma leitura so, cobrindo o que eu conhecia e o que estou tentando gravar.
+    const idsDeInteresse = [...new Set([...pokeIdsNoLoad, ...idsAgora])]
+    const atuais: LinhaLocalizacao[] = []
+    for (const lote of porLotesDeId(idsDeInteresse)) {
+      atuais.push(
+        ...(await selecionarTudo<LinhaLocalizacao>(
+          cfg,
+          `pokemon_instances?id=in.(${lote.join(',')})&select=id,user_id,location`,
+        )),
+      )
+    }
+    const porId = new Map(atuais.map((l) => [l.id, l]))
+    const aindaMeu = (l: LinhaLocalizacao | undefined): boolean =>
+      l != null && l.user_id === userId && (l.location === 'team' || l.location === 'bag')
 
-  const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)))
-  for (const lote of porLotesDeId(remover)) {
-    await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(',')})`)
+    const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)))
+    for (const lote of porLotesDeId(remover)) {
+      await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(',')})`)
+    }
+    // Duas condicoes, e as duas importam. "Mudou" (PH-90) evita reescrever os
+    // outros POKE da equipe porque um deles ganhou EXP. "Ainda e meu" evita
+    // ressuscitar POKE que ja foi vendido/transferido entre a leitura e agora.
+    // Linha sem par no banco e POKE novo (captura, inicial, compra) — grava.
+    const gravarPoke = linhasQueMudaram(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id))
+      .filter((l) => {
+        const atual = porId.get(String(l.id))
+        return atual == null || aindaMeu(atual)
+      })
+    if (gravarPoke.length) await inserir(cfg, 'pokemon_instances', gravarPoke, { upsert: 'id' })
   }
-  // Linha sem par no banco e POKE novo (captura, inicial, compra) — grava.
-  // Linha com par que ja nao e minha fica de fora.
-  const gravarPoke = linhasPoke.filter((l) => {
-    const atual = porId.get(String(l.id))
-    return atual == null || aindaMeu(atual)
-  })
-  if (gravarPoke.length) await inserir(cfg, 'pokemon_instances', gravarPoke, { upsert: 'id' })
 
   const linhasItens = gameStateToItemRows(userId, estado)
   // Mesmo diff de remocao que `pokemon_instances` acima. Sem ele, um item
@@ -407,25 +525,31 @@ export async function gravarEstado(
   // reload (evolucao especial de graca), e qualquer pocao/bola zerada
   // ressuscitava. `gameStateToItemRows` ja preserva itens travados com
   // quantidade 0, entao esses continuam na lista e nao sao removidos.
-  const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id))
-  const itensNoBanco = await selecionarTudo<{ item_id: string }>(cfg, `player_items?user_id=eq.${userId}&select=item_id`)
-  const removerItens = itensNoBanco.map((l) => l.item_id).filter((id) => !itemIdsAgora.has(id))
-  for (const lote of porLotesDeId(removerItens)) {
-    await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(',')})`)
+  if (!tabelaIntacta(linhasItens, linhasNoLoad?.items, (l) => String(l.item_id))) {
+    const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id))
+    const itensNoBanco = await selecionarTudo<{ item_id: string }>(cfg, `player_items?user_id=eq.${userId}&select=item_id`)
+    const removerItens = itensNoBanco.map((l) => l.item_id).filter((id) => !itemIdsAgora.has(id))
+    for (const lote of porLotesDeId(removerItens)) {
+      await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(',')})`)
+    }
+    const itensMudados = linhasQueMudaram(linhasItens, linhasNoLoad?.items, (l) => String(l.item_id))
+    if (itensMudados.length) await inserir(cfg, 'player_items', itensMudados, { upsert: 'user_id,item_id' })
   }
-  if (linhasItens.length) await inserir(cfg, 'player_items', linhasItens, { upsert: 'user_id,item_id' })
 
   // Mesmo diff de remocao das duas tabelas acima. Sem ele, `reiniciarJogo`
   // apagava POKEs e itens mas a Pokedex sobrevivia inteira — a conta "zerada"
   // voltava com todos os abates registrados.
   const linhasDex = gameStateToPokedexRows(userId, estado)
-  const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id))
-  const dexNoBanco = await selecionarTudo<{ species_id: string }>(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)
-  const removerDex = dexNoBanco.map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id))
-  for (const lote of porLotesDeId(removerDex)) {
-    await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
+  if (!tabelaIntacta(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))) {
+    const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id))
+    const dexNoBanco = await selecionarTudo<{ species_id: string }>(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)
+    const removerDex = dexNoBanco.map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id))
+    for (const lote of porLotesDeId(removerDex)) {
+      await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
+    }
+    const dexMudada = linhasQueMudaram(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))
+    if (dexMudada.length) await inserir(cfg, 'player_pokedex', dexMudada, { upsert: 'user_id,species_id' })
   }
-  if (linhasDex.length) await inserir(cfg, 'player_pokedex', linhasDex, { upsert: 'user_id,species_id' })
 
   // `player_auto_catch_rules` NUNCA era gravada: `carregarEstado` a lia,
   // `gameStateToAutoCatchRuleRows` existia sem nenhum call site, e o mapper de
@@ -445,16 +569,19 @@ export async function gravarEstado(
   // e o proprio par (especie, bola) — a chave estavel que faltava era
   // exatamente a constraint.
   const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado)
-  const especiesAgora = new Set(linhasAuto.map((l) => l.species_id))
-  const autoNoBanco = await selecionarTudo<{ species_id: string }>(
-    cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`,
-  )
-  const removerAuto = autoNoBanco.map((l) => l.species_id).filter((id) => !especiesAgora.has(id))
-  for (const lote of porLotesDeId(removerAuto)) {
-    await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
-  }
-  if (linhasAuto.length) {
-    await inserir(cfg, 'player_auto_catch_rules', linhasAuto, { upsert: 'user_id,species_id' })
+  if (!tabelaIntacta(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id))) {
+    const especiesAgora = new Set(linhasAuto.map((l) => l.species_id))
+    const autoNoBanco = await selecionarTudo<{ species_id: string }>(
+      cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`,
+    )
+    const removerAuto = autoNoBanco.map((l) => l.species_id).filter((id) => !especiesAgora.has(id))
+    for (const lote of porLotesDeId(removerAuto)) {
+      await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
+    }
+    const autoMudadas = linhasQueMudaram(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id))
+    if (autoMudadas.length) {
+      await inserir(cfg, 'player_auto_catch_rules', autoMudadas, { upsert: 'user_id,species_id' })
+    }
   }
 }
 
@@ -617,6 +744,7 @@ export async function aplicarFlush(
       comEstadoParaEscrita(cfg, userId, async (ctx) => {
         const resultado = await simularSessao(
           cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, ctx.playerUpdatedAt, { agora, segundos, truncado },
+          ctx.linhasNoLoad,
         )
         // `null` = sessao insimulavel; sai SEM gravar, entao as entregas voltam pra
         // fila (o `catch` do embrulho so cobre excecao, e aqui nao ha excecao).
@@ -639,6 +767,8 @@ async function simularSessao(
   pokeIdsNoLoad: Set<string>,
   playerUpdatedAt: string,
   janela: { agora: number; segundos: number; truncado: boolean },
+  // Baseline pro diff de escrita de `gravarEstado` — ver `EstadoParaEscrita.linhasNoLoad`.
+  linhasNoLoad: PlayerSnapshot,
 ): Promise<ResultadoFlush | null> {
   const { agora, segundos, truncado } = janela
   const { store, dados: estado } = criarEstadoDoJogador(dados)
@@ -705,13 +835,18 @@ async function simularSessao(
   // pro comeco quando o farm for religado.
   const pausado = offline && FARM_OFFLINE_PAUSADO
 
+  // PH-37: fora do regime offline, o passo precisa bater com o do client ao
+  // vivo (useGameLoop.ts, 1/60s) — senao o resim do servidor e o client
+  // desalinham a sequencia de sorteios de RNG so pelo tamanho do passo, e o
+  // level-up do POKE que o client mostrou nunca e confirmado. Ver
+  // LIVE_SIM_STEP_SECONDS em simulation.ts pro raciocinio completo.
   const resumo = pausado
     ? createEmptySummary()
     : simulateWorldSeconds({
       world,
       gameState: store,
       seconds: segundos,
-      stepSeconds: OFFLINE_SIM_STEP_SECONDS,
+      stepSeconds: offline ? OFFLINE_SIM_STEP_SECONDS : LIVE_SIM_STEP_SECONDS,
       stepFn: (w, dt, opts) => stepWorld(w, dt, store, opts),
     })
 
@@ -741,7 +876,7 @@ async function simularSessao(
   // esta resposta, entao um `currentMapId` sobrevivente o deixaria desenhando
   // uma cacada que o servidor ja encerrou.
   estado.currentMapId = resumo.stoppedEarly ? null : sessao.map_id
-  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt)
+  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt, linhasNoLoad)
 
   // Hall da Fama: a unica coisa que libera os grupos do Lance e limpar a
   // sequencia dele (`unlocksContinentOnClear`, ver data/nightmareMaps.ts). O

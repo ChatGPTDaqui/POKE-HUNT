@@ -14,14 +14,16 @@
 // aprendidos — tudo derivado por regra do motor. Escrever isso a mao produz um
 // POKE que existe no banco mas mente sobre si mesmo (stat que nao bate com o
 // nivel, golpe que ele nao deveria saber). Aqui o POKE sai de
-// `createPokeInstance` do PROPRIO motor (server/engine/headless.js) e a linha,
+// `createPokeInstance` do PROPRIO motor (authority/engine/headless.js) e a linha,
 // de `gameStateToPokemonRows` — o mesmo caminho que uma captura de verdade usa.
 //
 // SO ESCREVE EM CONTA DE TESTE: o email precisa terminar em
 // @teste.pokehunt.local (ver scripts/conta-de-teste.js). Nao ha flag pra burlar.
 import { readFileSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { fileURLToPath } from 'node:url'
+import { carregarMotor } from './lib/motor.mjs'
+import { resolverSchema, cabecalhosRest } from './lib/schema-alvo.cjs'
 
 const RAIZ = dirname(dirname(fileURLToPath(import.meta.url)))
 const DOMINIO_TESTE = '@teste.pokehunt.local'
@@ -54,11 +56,10 @@ function lerEnv() {
 }
 
 const env = lerEnv()
-const cabecalhos = {
-  apikey: env.SUPABASE_SERVICE_ROLE_KEY,
-  Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-  'Content-Type': 'application/json',
-}
+const schema = resolverSchema({ envSchema: env.SUPABASE_SCHEMA })
+const cabecalhos = cabecalhosRest(env.SUPABASE_SERVICE_ROLE_KEY, schema)
+console.log(`Banco: ${env.SUPABASE_URL}`)
+console.log(`Schema: ${schema}`)
 
 async function rest(caminho, init = {}) {
   const r = await fetch(`${env.SUPABASE_URL}/rest/v1${caminho}`, {
@@ -95,12 +96,7 @@ if (local !== 'team' && local !== 'bag') {
 
 // O motor empacotado que o servidor de autoridade usa. Fonte unica de verdade
 // pra stats/exp/golpes — ver o cabecalho deste arquivo.
-const bundle = join(RAIZ, 'server', 'engine', 'headless.js')
-if (!existsSync(bundle)) {
-  console.error(`${bundle} nao existe. Rode: npm run build:engine`)
-  process.exit(1)
-}
-const motor = await import(pathToFileURL(bundle).href)
+const motor = await carregarMotor()
 const { SPECIES, MAX_TEAM_SIZE, createRng, createPokeInstance, gameStateToPokemonRows, activeAbilitiesPadrao } = motor
 
 const especie = SPECIES[especieId]

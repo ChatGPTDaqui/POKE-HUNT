@@ -17,7 +17,7 @@ import {
   podeReceberStatus, sortearDuracao, danoPorTurno, ehVolatil, perdeOTurno,
   chanceDeDescongelar, descongelaCom, chanceDeSeAtacar, poderDoAutoDano, imobiliza,
   SEGUNDOS_DE_IMUNIDADE_APOS_CURA, ESTAGIO_MINIMO, ESTAGIO_MAXIMO,
-  type StatusAtivo, type StatusCondition, type StatDeEstagio,
+  type StatusAtivo, type StatusCondition, type StatDeEstagio, type FonteDeEstagio,
 } from '@/data/statusEffects'
 import type { StatChange } from '@/data/generated/types'
 import type { Ability } from '@/data/abilities'
@@ -219,6 +219,17 @@ export function aplicarMudancasDeStat(
     const depois = Math.max(ESTAGIO_MINIMO, Math.min(ESTAGIO_MAXIMO, antes + delta))
     if (depois === antes) continue // ja no teto ou no piso
     destino.estagios[mudanca.stat] = depois
+    // PH-121: a procedencia e anotada AQUI porque e o unico ponto onde `ability`
+    // e `atacante` existem juntos. Depois do hit, `estagios` e um numero solto.
+    registrarFonteDeEstagio(destino, mudanca.stat, {
+      id: ability.id,
+      tipo: 'golpe',
+      proprio: destino === atacante,
+      deQuem: SPECIES[atacante.poke.speciesId]?.name ?? atacante.poke.speciesId,
+    })
+    // Voltar a 0 pelo caminho normal (Rosnado desfazendo uma Danca das Espadas)
+    // apaga a lista: sem selo na tela, nao ha o que a fonte explique.
+    esquecerFonteSeZerado(destino, mudanca.stat)
     aplicadas.push({ stat: mudanca.stat, estagios: depois - antes })
     if (delta < 0 && vemDoOponente) sofreuQuedaDoOponente = true
   }
@@ -228,7 +239,14 @@ export function aplicarMudancasDeStat(
   // por mais estagios que ele tenha derrubado — e como os jogos contam.
   const reacao = traitDoDestino ? REACAO_A_QUEDA_DE_ESTAGIO[traitDoDestino] : undefined
   if (sofreuQuedaDoOponente && reacao) {
-    const subida = aplicarEstagioUnico(destino, reacao.stat, reacao.estagios)
+    // A fonte aqui e a TRAIT do proprio destino, nao o golpe que o irritou: e o
+    // Defiant dele que produziu o +2, e e isso que o selo tem que explicar.
+    const subida = aplicarEstagioUnico(destino, reacao.stat, reacao.estagios, {
+      id: traitDoDestino!,
+      tipo: 'trait',
+      proprio: true,
+      deQuem: SPECIES[destino.poke.speciesId]?.name ?? destino.poke.speciesId,
+    })
     if (subida) aplicadas.push(subida)
   }
   return aplicadas
@@ -242,12 +260,69 @@ export function aplicarMudancasDeStat(
  * (StatChange|null, null quando ja no teto/piso) pro chamador decidir se
  * anuncia o toast.
  */
-export function aplicarEstagioUnico(alvo: WorldEntity, stat: StatDeEstagio, delta: number): StatChange | null {
+export function aplicarEstagioUnico(
+  alvo: WorldEntity,
+  stat: StatDeEstagio,
+  delta: number,
+  /** PH-121 — de onde veio. Ausente deixa o estagio sem procedencia registrada. */
+  fonte?: FonteDeEstagio,
+): StatChange | null {
   const antes = alvo.estagios[stat] ?? 0
   const depois = Math.max(ESTAGIO_MINIMO, Math.min(ESTAGIO_MAXIMO, antes + delta))
   if (depois === antes) return null
   alvo.estagios[stat] = depois
+  if (fonte) registrarFonteDeEstagio(alvo, stat, fonte)
+  esquecerFonteSeZerado(alvo, stat)
   return { stat, estagios: depois - antes }
+}
+
+/**
+ * Procedencia de estagio que veio de uma TRAIT (PH-121).
+ *
+ * `dono` e quem TEM a trait; `destino` e quem recebe o estagio. Os dois quase
+ * sempre coincidem (Speed Boost, Moody, Moxie, Weak Armor, Download), e
+ * Intimidate e a excecao que obriga a distinguir: a trait e do atacante e o
+ * estagio cai no oponente, entao `proprio` tem que ser `false` ali e o "de quem"
+ * tem que apontar pro dono, nao pra quem levou.
+ */
+export function fonteDeTrait(
+  dono: WorldEntity, trait: TraitId | null | undefined, destino: WorldEntity = dono,
+): FonteDeEstagio | undefined {
+  if (!trait) return undefined
+  return {
+    id: trait,
+    tipo: 'trait',
+    proprio: dono === destino,
+    deQuem: SPECIES[dono.poke.speciesId]?.name ?? dono.poke.speciesId,
+  }
+}
+
+/**
+ * Anota a procedencia de um estagio (PH-121), deduplicando.
+ *
+ * DEDUPLICA porque o mesmo golpe do mesmo POKE pode acertar dez vezes na mesma
+ * luta, e a lista existe pra responder "quem fez isso", nao "quantas vezes".
+ * Sem isto ela cresceria sem teto dentro de uma entidade que vive a luta toda.
+ */
+export function registrarFonteDeEstagio(
+  destino: WorldEntity, stat: StatDeEstagio, fonte: FonteDeEstagio,
+): void {
+  const mapa = (destino.estagiosFonte ??= {})
+  const lista = (mapa[stat] ??= [])
+  const jaTem = lista.some(
+    (f) => f.id === fonte.id && f.tipo === fonte.tipo && f.proprio === fonte.proprio && f.deQuem === fonte.deQuem,
+  )
+  if (!jaTem) lista.push(fonte)
+}
+
+/**
+ * Estagio de volta a 0 nao tem fonte — o selo desapareceu da tela, e manter a
+ * lista faria a proxima mudanca daquele atributo aparecer com o historico de uma
+ * situacao que ja passou.
+ */
+export function esquecerFonteSeZerado(destino: WorldEntity, stat: StatDeEstagio): void {
+  if ((destino.estagios[stat] ?? 0) !== 0) return
+  if (destino.estagiosFonte) delete destino.estagiosFonte[stat]
 }
 
 // Efeito colateral de golpe: le `ability.status`/`statusChance` e tenta aplicar.
@@ -315,6 +390,9 @@ export function curarStatus(entity: WorldEntity, tipo?: StatusCondition): boolea
 export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.statusVolatil = null
   entity.estagios = {}
+  // Anda junto com `estagios` (PH-121): fonte sobrevivendo ao fim da luta faria
+  // o selo da proxima explicar um golpe que aconteceu em outra.
+  entity.estagiosFonte = undefined
   entity.revelado = undefined
   entity.escudos = undefined
   entity.imuneAoTipoVolatil = undefined
@@ -338,6 +416,10 @@ export function limparEstadoVolatil(entity: WorldEntity): void {
   entity.curseDot = undefined
   entity.nightmareDot = undefined
   entity.regenPercent = undefined
+  // PRESO (PH-72): fim de luta solta o POKE. Sem esta linha o jogador ficaria
+  // com a troca de equipe travada FORA de combate, sem nada na tela explicando —
+  // o pior jeito de um estado volatil vazar.
+  entity.presoAte = undefined
   entity.entradaProcessada = false
   // Fase 12: todo campo volatil novo tem que zerar aqui tambem — fim de
   // batalha e fim de batalha pra qualquer estado que nao sobrevive a troca de
@@ -445,6 +527,12 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
   if (entity.tormentedUntil && entity.tormentedUntil > 0) {
     entity.tormentedUntil = Math.max(0, entity.tormentedUntil - dt)
   }
+  // PRESO (PH-72): mesmo formato dos timers acima — segundos corridos. O DANO
+  // por turno fica junto do resto do tick volatil (leech_seed e companhia), mais
+  // abaixo, porque ele depende do relogio de TURNO, nao do de frame.
+  if (entity.presoAte && entity.presoAte > 0) {
+    entity.presoAte = Math.max(0, entity.presoAte - dt)
+  }
 
   entity.proximoTurnoDeStatus -= dt
   // EPSILON, e nao `> 0`: dez frames de 0.2s somam 1.9999999999999998, nao 2.
@@ -541,7 +629,7 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
     }
   }
   if (traitDaEntidade === TRAIT_SPEED_BOOST) {
-    aplicarEstagioUnico(entity, 'speed', 1)
+    aplicarEstagioUnico(entity, 'speed', 1, fonteDeTrait(entity, traitDaEntidade))
   }
   if (traitDaEntidade === TRAIT_MOODY) {
     // Sobe 2 num atributo sorteado e desce 1 em OUTRO. Os dois sorteios saem da
@@ -551,8 +639,8 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
     const sobe = opcoes[Math.floor(nextFloat(rng) * opcoes.length)]
     const restantes = opcoes.filter((o) => o !== sobe)
     const desce = restantes[Math.floor(nextFloat(rng) * restantes.length)]
-    aplicarEstagioUnico(entity, sobe, 2)
-    aplicarEstagioUnico(entity, desce, -1)
+    aplicarEstagioUnico(entity, sobe, 2, fonteDeTrait(entity, traitDaEntidade))
+    aplicarEstagioUnico(entity, desce, -1, fonteDeTrait(entity, traitDaEntidade))
   }
 
   const vol = entity.statusVolatil

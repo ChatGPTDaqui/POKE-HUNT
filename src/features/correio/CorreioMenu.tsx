@@ -1,38 +1,72 @@
-// Correio: caixa de entrada + amigos + adicionar amigo pelo nick.
+// Correio como aplicativo de mensagem (PH-81): lista de CONVERSAS, avisos e
+// amigos.
 //
-// O pedido de amizade e uma MENSAGEM, nao uma tabela de "pedidos": ela chega na
-// mesma caixa que o resto, com dois botoes em vez de nenhum. Assim so existe um
-// lugar pra olhar quando alguem interage com voce — e o contador de nao lidas
-// cobre as duas coisas de uma vez.
-import { useEffect, useState } from 'react'
+// Antes eram quatro abas — Entrada, Enviados, Avisos, Amigos — e a mesma pessoa
+// aparecia em tres delas: o que ela te mandou na Entrada, o que voce respondeu
+// nos Enviados, e o que voces conversaram no fio de Amigos. Nao havia conversa,
+// havia tres listas do mesmo dialogo. Agora ha um fio por contato e o resto
+// desapareceu junto com a separacao.
+//
+// "Enviados" nao virou aba nenhuma DE PROPOSITO: num aplicativo de mensagem o
+// que voce mandou esta dentro da conversa, do lado direito. Uma caixa separada
+// de enviados so existia porque carta e um objeto que sai de casa.
+//
+// Aviso de sistema e pedido de amizade ficam FORA das conversas: o primeiro nao
+// tem interlocutor (`de_id` nulo) e o segundo e uma decisao a tomar, nao uma
+// fala num fio. Os dois chegam em rajada (venda no mercado, concessao inicial)
+// e afogariam a mensagem de gente de verdade.
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, Gift, UserPlus, X } from '@phosphor-icons/react'
-import { ErroServidor, detalheDeErro, type MensagemCorreio } from '@/data/remote/servidor'
+import { ChatCircleDots, Gift, PencilSimple, Trash, UserPlus, X } from '@phosphor-icons/react'
+import {
+  ErroServidor, detalheDeErro,
+  type AnexoItemCorreio, type ConversaResumo,
+} from '@/data/remote/servidor'
 import * as correioRpc from '@/data/remote/correioRealtime'
 import { supabase } from '@/lib/supabase'
 import { useToastStore, type ToastErroDetalhe } from '@/stores/toastStore'
-import { getItem } from '@/data/items'
-import { itemIconUrl } from '@/data/sprites'
+import { useDeviceMode } from '@/stores/uiStore'
 import {
-  GameButton, GameCard, GameInput, SectionLabel,
+  GameButton, GameCard, GameInput, SectionLabel, SegmentedTabs,
 } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
+import { ComporMensagem } from './ComporMensagem'
+import { Conversa, type Contato } from './Conversa'
+import { LinhaDeMensagem } from './LinhaDeMensagem'
+import { PainelAmigos } from './PainelAmigos'
 
 const STALE_MS = 15000
+
+type Aba = 'conversas' | 'avisos' | 'amigos'
 
 function toast(mensagem: string, tipo: 'success' | 'error' = 'success', erroDetalhe?: ToastErroDetalhe) {
   useToastStore.getState().pushToast(mensagem, tipo, 'world', undefined, erroDetalhe)
 }
 
-const ROTULO_TIPO: Record<MensagemCorreio['tipo'], string> = {
-  texto: 'Mensagem',
-  pedido_amizade: 'Pedido de amizade',
-  sistema: 'Aviso',
+function aoFalhar(padrao: string) {
+  return (e: unknown) => toast(e instanceof ErroServidor ? e.message : padrao, 'error', detalheDeErro(e))
+}
+
+/** "14:32" pra hoje, "22/08" pra antes — o mesmo corte que aplicativo de mensagem faz. */
+function quando(iso: string): string {
+  const d = new Date(iso)
+  const hoje = new Date()
+  const mesmoDia = d.getDate() === hoje.getDate()
+    && d.getMonth() === hoje.getMonth()
+    && d.getFullYear() === hoje.getFullYear()
+  return mesmoDia
+    ? d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    : d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 }
 
 export function CorreioMenu() {
   const qc = useQueryClient()
+  const { compacto } = useDeviceMode()
   const [nick, setNick] = useState('')
+  const [aba, setAba] = useState<Aba>('conversas')
+  const [compondo, setCompondo] = useState<{ nickInicial?: string } | null>(null)
+  const [contatoAberto, setContatoAberto] = useState<Contato | null>(null)
+  const [meuId, setMeuId] = useState<string | null>(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ['correio'],
@@ -40,67 +74,269 @@ export function CorreioMenu() {
     staleTime: STALE_MS,
   })
 
-  // Realtime substitui o poll de 15s: qualquer INSERT/UPDATE nas MINHAS
-  // mensagens (pedido novo, resposta, mensagem de sistema) invalida a query.
-  //
-  // BUG REAL CORRIGIDO: `assinarCorreioAoVivo` usa `supabase.channel('correio-'+userId)`,
-  // nome fixo por usuario — chamar de novo com o mesmo nome ANTES do primeiro canal
-  // ser removido devolve o MESMO canal ja inscrito, e `.on()` nele estoura
-  // ("cannot add postgres_changes callbacks... after subscribe()"). Como a
-  // inscricao so acontece dentro do `.then()` de `getSession()` (gap assincrono),
-  // o StrictMode do React (ou so um remount rapido de verdade) roda o efeito de
-  // novo ANTES desse `.then()` resolver — a limpeza da 1a rodada ainda achava
-  // `parar` nulo (a inscricao nem tinha terminado) e nao desfazia nada; a 2a
-  // rodada inscrevia no mesmo canal ja vivo. `cancelado` fecha essa janela: se
-  // a limpeza ja rodou quando o `.then()` finalmente resolve, a inscricao nem
-  // comeca.
+  const recarregar = useCallback(() => { void qc.invalidateQueries({ queryKey: ['correio'] }) }, [qc])
+
   useEffect(() => {
     let cancelado = false
-    let parar: (() => void) | null = null
     void supabase.auth.getSession().then(({ data: sessao }) => {
-      if (cancelado) return
-      const userId = sessao.session?.user.id
-      if (!userId) return
-      parar = correioRpc.assinarCorreioAoVivo(userId, () => { void qc.invalidateQueries({ queryKey: ['correio'] }) })
+      if (!cancelado) setMeuId(sessao.session?.user.id ?? null)
     })
-    return () => { cancelado = true; parar?.() }
-  }, [qc])
+    return () => { cancelado = true }
+  }, [])
+
+  // A ASSINATURA DE REALTIME NAO MORA MAIS AQUI. Ela subiu pra
+  // `hooks/usePendencias.ts#useCorreioAoVivo`, que roda enquanto o jogo esta
+  // aberto (o `ActionDock` do HUD sempre esta montado) — antes ela existia so
+  // com o Correio ABERTO, e era justamente por isso que o contador de pendencia
+  // dependia de um poll de 60s.
+  //
+  // Desde PH-81 cada assinante leva um sufixo de canal proprio, entao duas
+  // assinaturas ate SERIAM possiveis (o fio aberto tem a dele). O ponto aqui e
+  // outro: nao PRECISA. Este componente compartilha a `queryKey` ['correio']
+  // com o contador, entao a invalidacao que o Realtime dispara la ja atualiza a
+  // tela aberta aqui — um socket a menos por aba.
 
   const adicionar = useMutation({
     mutationFn: (n: string) => correioRpc.pedirAmizade(n),
-    onSuccess: (r) => {
-      toast(r.mensagem)
-      setNick('')
-      void qc.invalidateQueries({ queryKey: ['correio'] })
-    },
-    onError: (e) => toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel enviar o pedido.', 'error', detalheDeErro(e)),
+    onSuccess: (r) => { toast(r.mensagem); setNick(''); recarregar() },
+    onError: aoFalhar('Nao foi possivel enviar o pedido.'),
   })
 
-  const responder = useMutation({
+  const responderPedido = useMutation({
     mutationFn: ({ id, aceitar }: { id: string; aceitar: boolean }) => correioRpc.responderPedido(id, aceitar),
-    onSuccess: (r) => {
-      toast(r.mensagem)
-      void qc.invalidateQueries({ queryKey: ['correio'] })
-    },
-    onError: (e) => toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel responder.', 'error', detalheDeErro(e)),
+    onSuccess: (r) => { toast(r.mensagem); recarregar() },
+    onError: aoFalhar('Nao foi possivel responder.'),
   })
 
   const marcarLida = useMutation({
     mutationFn: (id: string) => correioRpc.marcarLida(id),
-    onSuccess: () => { void qc.invalidateQueries({ queryKey: ['correio'] }) },
+    onSuccess: recarregar,
   })
 
-  // A RPC ja credita o item na mesma transacao (sem fila de entrega — ver
-  // migracao #10) e `correioRpc.coletarAnexo` ja faz o refetch cirurgico do
-  // item no client. So falta atualizar a caixa de entrada.
   const coletar = useMutation({
     mutationFn: (id: string) => correioRpc.coletarAnexo(id),
-    onSuccess: (r) => {
-      toast(r.mensagem)
-      void qc.invalidateQueries({ queryKey: ['correio'] })
-    },
-    onError: (e) => toast(e instanceof ErroServidor ? e.message : 'Nao foi possivel coletar.', 'error', detalheDeErro(e)),
+    onSuccess: (r) => { toast(r.mensagem); recarregar() },
+    onError: aoFalhar('Nao foi possivel coletar.'),
   })
+
+  // Comecar conversa nova: manda a primeira mensagem por NICK e ja abre o fio
+  // com o id que a RPC devolveu — sem isso o jogador escreveria e cairia de
+  // volta numa lista, tendo que procurar o proprio contato que acabou de criar.
+  const comecar = useMutation({
+    mutationFn: (d: { nick: string; corpo: string; anexos: AnexoItemCorreio[] }) =>
+      correioRpc.enviarMensagem({ paraNick: d.nick }, d.corpo, d.anexos),
+    onSuccess: (r) => {
+      setCompondo(null)
+      setContatoAberto({ userId: r.paraId, nick: r.paraNome })
+      recarregar()
+    },
+    onError: aoFalhar('Nao foi possivel enviar a mensagem.'),
+  })
+
+  const excluir = useMutation({
+    mutationFn: (id: string) => correioRpc.excluirCorreio(id),
+    onSuccess: recarregar,
+    onError: aoFalhar('Nao foi possivel excluir.'),
+  })
+
+  const apagarFio = useMutation({
+    mutationFn: (id: string) => correioRpc.excluirConversa(id),
+    onSuccess: () => { setContatoAberto(null); recarregar() },
+    onError: aoFalhar('Nao foi possivel apagar a conversa.'),
+  })
+
+  const remover = useMutation({
+    mutationFn: (id: string) => correioRpc.removerAmizade(id),
+    onSuccess: (r) => { toast(r.mensagem); recarregar() },
+    onError: aoFalhar('Nao foi possivel remover.'),
+  })
+
+  const bloquear = useMutation({
+    mutationFn: (id: string) => correioRpc.bloquearJogador(id),
+    onSuccess: (r) => { toast(r.mensagem); recarregar() },
+    onError: aoFalhar('Nao foi possivel bloquear.'),
+  })
+
+  const desbloquear = useMutation({
+    mutationFn: (id: string) => correioRpc.desbloquearJogador(id),
+    onSuccess: (r) => { toast(r.mensagem); recarregar() },
+    onError: aoFalhar('Nao foi possivel desbloquear.'),
+  })
+
+  // Memoizado porque `?? []` cria um array novo a cada render, e `contatoAtual`
+  // depende dele — sem isto o `useMemo` de baixo recalcula sempre e o objeto do
+  // contato troca de identidade, remontando o fio inteiro a cada render.
+  const conversas = useMemo(() => data?.conversas ?? [], [data?.conversas])
+  const avisos = useMemo(() => data?.avisos ?? [], [data?.avisos])
+  const naoLidasConversas = conversas.reduce((t, c) => t + c.naoLidas, 0)
+  const naoLidosAvisos = avisos.filter((m) => m.estado === 'pendente').length
+
+  const ocupado = remover.isPending || bloquear.isPending || desbloquear.isPending
+
+  // O contato aberto le da query sempre que existir linha la, pra `online` e
+  // `naoLidas` nao congelarem no valor que tinham no clique. Quando o fio ainda
+  // nao existe (conversa recem-criada), vale o que o clique guardou.
+  const contatoAtual = useMemo<Contato | null>(() => {
+    if (!contatoAberto) return null
+    const daLista = conversas.find((c) => c.userId === contatoAberto.userId)
+    return daLista ? { userId: daLista.userId, nick: daLista.nick, online: daLista.online } : contatoAberto
+  }, [contatoAberto, conversas])
+
+  const abrirComposicao = useCallback((nickInicial?: string) => {
+    setCompondo({ nickInicial })
+    setAba('conversas')
+  }, [])
+
+  const abrirFio = useCallback((c: Contato) => {
+    setCompondo(null)
+    setContatoAberto(c)
+    setAba('conversas')
+  }, [])
+
+  const abas: { value: Aba; label: string }[] = [
+    { value: 'conversas', label: `Conversas${naoLidasConversas ? ` (${naoLidasConversas})` : ''}` },
+    { value: 'avisos', label: `Avisos${naoLidosAvisos ? ` (${naoLidosAvisos})` : ''}` },
+    { value: 'amigos', label: 'Amigos' },
+  ]
+
+  function LinhaDeConversa({ c }: { c: ConversaResumo }) {
+    const aberta = contatoAtual?.userId === c.userId
+    return (
+      <GameCard
+        className={cn(
+          'flex cursor-pointer items-center gap-[.5em] p-[.45em]',
+          aberta && 'border-primary/60',
+          c.naoLidas > 0 && !aberta && 'border-primary/40',
+        )}
+        onClick={() => abrirFio({ userId: c.userId, nick: c.nick, online: c.online })}
+      >
+        <span
+          aria-hidden
+          className={cn('h-[.5em] w-[.5em] shrink-0 rounded-full', c.online ? 'bg-ok' : 'bg-n600')}
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline justify-between gap-[.4em]">
+            <b className="truncate font-medium text-foreground">{c.nick}</b>
+            <span className="shrink-0 text-[.7em] text-n500">{quando(c.ultimaEm)}</span>
+          </div>
+          <div className="flex items-center gap-[.35em]">
+            <span className="min-w-0 flex-1 truncate text-[.8em] text-n400">
+              {c.ultimaMinha && <span className="text-n500">Voce: </span>}
+              {c.ultimoTrecho}
+            </span>
+            {c.anexosPendentes > 0 && (
+              <span className="shrink-0 text-primary" title="Anexo esperando coleta"><Gift /></span>
+            )}
+            {c.naoLidas > 0 && (
+              <span className="shrink-0 rounded-full bg-primary px-[.4em] text-[.7em] text-n900">
+                {c.naoLidas}
+              </span>
+            )}
+          </div>
+        </div>
+      </GameCard>
+    )
+  }
+
+  const painelEsquerdo = (
+    <div className="flex flex-col gap-[.55em]">
+      {aba === 'conversas' && (
+        <div className="flex justify-end">
+          <GameButton variant="primary" onClick={() => abrirComposicao()}>
+            <PencilSimple /> Nova conversa
+          </GameButton>
+        </div>
+      )}
+
+      {compondo && (
+        <ComporMensagem
+          nickInicial={compondo.nickInicial}
+          enviando={comecar.isPending}
+          onCancelar={() => setCompondo(null)}
+          onEnviar={(d) => comecar.mutate(d)}
+        />
+      )}
+
+      {isLoading && <p className="text-n400">Carregando...</p>}
+
+      {!isLoading && aba === 'conversas' && (
+        <div>
+          <SectionLabel>CONVERSAS {naoLidasConversas ? `(${naoLidasConversas} nova(s))` : ''}</SectionLabel>
+          {conversas.length === 0 && (
+            <p className="text-n400">
+              Nenhuma conversa ainda. Use "Nova conversa" pra falar com alguem pelo nick.
+            </p>
+          )}
+          <div className="mt-[.4em] flex flex-col gap-[.35em]">
+            {conversas.map((c) => <LinhaDeConversa key={c.userId} c={c} />)}
+          </div>
+        </div>
+      )}
+
+      {!isLoading && aba === 'avisos' && (
+        <div>
+          <SectionLabel>AVISOS {naoLidosAvisos ? `(${naoLidosAvisos} novo(s))` : ''}</SectionLabel>
+          {avisos.length === 0 && <p className="text-n400">Nenhum aviso.</p>}
+          <div className="mt-[.4em] flex flex-col gap-[.4em]">
+            {avisos.map((m) => (
+              <LinhaDeMensagem
+                key={m.id}
+                m={m}
+
+                respondendo={responderPedido.isPending}
+                coletando={coletar.isPending}
+                excluindo={excluir.isPending}
+                onMarcarLida={marcarLida.mutate}
+                onResponderPedido={(id, aceitar) => responderPedido.mutate({ id, aceitar })}
+                onColetar={coletar.mutate}
+                onExcluir={excluir.mutate}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!isLoading && aba === 'amigos' && (
+        <PainelAmigos
+          amigos={data?.amigos ?? []}
+          bloqueados={data?.bloqueados ?? []}
+          selecionado={contatoAtual?.userId ?? null}
+          ocupado={ocupado}
+          onSelecionar={(a) => abrirFio({ userId: a.userId, nick: a.nome, online: a.online })}
+          onEscrever={abrirComposicao}
+          onRemover={(a) => remover.mutate(a.userId)}
+          onBloquear={(a) => bloquear.mutate(a.userId)}
+          onDesbloquear={(b) => desbloquear.mutate(b.userId)}
+        />
+      )}
+    </div>
+  )
+
+  const painelDireito = contatoAtual && meuId ? (
+    <GameCard className="p-[.6em]">
+      <div className="mb-[.35em] flex justify-end gap-[.3em]">
+        <GameButton
+          variant="ghost"
+          aria-label="Apagar conversa"
+          carregando={apagarFio.isPending}
+          onClick={() => apagarFio.mutate(contatoAtual.userId)}
+        >
+          <Trash />
+        </GameButton>
+        <GameButton variant="ghost" aria-label="Fechar conversa" onClick={() => setContatoAberto(null)}>
+          <X />
+        </GameButton>
+      </div>
+      <Conversa
+        // `key` por contato: trocar de conversa precisa REMONTAR, nao reusar.
+        // Sem isto o fio do contato anterior fica na tela ate o novo carregar.
+        key={contatoAtual.userId}
+        contato={contatoAtual}
+        meuId={meuId}
+        aoMarcarLidas={recarregar}
+      />
+    </GameCard>
+  ) : null
 
   return (
     <div className="flex flex-col gap-[.55em]">
@@ -122,125 +358,22 @@ export function CorreioMenu() {
         >
           <UserPlus /> Enviar pedido
         </GameButton>
+        <GameButton variant="secondary" disabled={!nick.trim()} onClick={() => abrirComposicao(nick.trim())}>
+          <ChatCircleDots /> Conversar
+        </GameButton>
       </GameCard>
 
-      <div>
-        <SectionLabel>CAIXA DE ENTRADA {data?.naoLidas ? `(${data.naoLidas} nova(s))` : ''}</SectionLabel>
-        {isLoading && <p className="text-n400">Carregando...</p>}
-        {!isLoading && (data?.mensagens.length ?? 0) === 0 && (
-          <p className="text-n400">Sua caixa esta vazia.</p>
-        )}
-        <div className="mt-[.4em] flex flex-col gap-[.4em]">
-          {data?.mensagens.map((m) => {
-            const pendente = m.estado === 'pendente'
-            const ehPedido = m.tipo === 'pedido_amizade'
-            const anexos = m.anexo_itens ?? []
-            const temAnexo = anexos.length > 0
-            const coletado = Boolean(m.anexo_coletado_em)
-            return (
-              <GameCard
-                key={m.id}
-                className={cn('flex flex-wrap items-center gap-[.5em] p-[.4em]', pendente && 'border-primary/40')}
-                onClick={() => { if (pendente && !ehPedido && !temAnexo) marcarLida.mutate(m.id) }}
-              >
-                <div className="min-w-[10em] flex-1">
-                  <div className="flex flex-wrap items-center gap-[.4em]">
-                    <b className="font-medium text-foreground">{m.assunto}</b>
-                    <span className="text-[.75em] text-n400">{ROTULO_TIPO[m.tipo]}</span>
-                    {pendente && !ehPedido && <span className="text-[.75em] text-primary">nova</span>}
-                  </div>
-                  <div className="text-[.85em] text-n300">{m.corpo}</div>
-                  {temAnexo && (
-                    <div className="mt-[.25em] flex flex-wrap items-center gap-[.3em]">
-                      {anexos.map((a) => (
-                        <span
-                          key={a.itemId}
-                          className="flex items-center gap-[.25em] rounded-[.35em] border border-n700 bg-n800 px-[.35em] py-[.1em] text-[.78em] text-foreground"
-                        >
-                          <img
-                            src={itemIconUrl(a.itemId) ?? undefined}
-                            alt=""
-                            aria-hidden
-                            className="h-[1.2em] w-[1.2em] object-contain"
-                            style={{ imageRendering: 'pixelated' }}
-                          />
-                          {getItem(a.itemId)?.name ?? a.itemId} x{a.quantity}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="text-[.75em] text-n500">
-                    de {m.de_nome} · {new Date(m.created_at).toLocaleString('pt-BR')}
-                  </div>
-                </div>
+      <SegmentedTabs value={aba} options={abas} onChange={setAba} />
 
-                {temAnexo && (
-                  coletado ? (
-                    <span className="text-[.8em] text-ok">Recebido</span>
-                  ) : (
-                    <GameButton
-                      variant="primary"
-                      carregando={coletar.isPending}
-                      onClick={() => coletar.mutate(m.id)}
-                    >
-                      <Gift /> Coletar
-                    </GameButton>
-                  )
-                )}
-
-                {ehPedido && pendente && (
-                  <div className="flex gap-[.35em]">
-                    <GameButton
-                      variant="primary"
-                      carregando={responder.isPending}
-                      onClick={() => responder.mutate({ id: m.id, aceitar: true })}
-                    >
-                      <Check /> Aceitar
-                    </GameButton>
-                    <GameButton
-                      variant="ghost"
-                      carregando={responder.isPending}
-                      onClick={() => responder.mutate({ id: m.id, aceitar: false })}
-                    >
-                      <X /> Recusar
-                    </GameButton>
-                  </div>
-                )}
-                {ehPedido && !pendente && (
-                  <span className="text-[.8em] text-n400">
-                    {m.estado === 'aceito' ? 'Aceito' : 'Recusado'}
-                  </span>
-                )}
-              </GameCard>
-            )
-          })}
+      {/* Dois paineis so quando ha conversa aberta E espaco. No compacto a
+          conversa OCUPA a tela: dividir 374px uteis em dois deixaria as duas
+          metades inutilizaveis. */}
+      {painelDireito && !compacto ? (
+        <div className="grid grid-cols-[1fr_1fr] items-start gap-[.65em]">
+          {painelEsquerdo}
+          {painelDireito}
         </div>
-      </div>
-
-      <div>
-        <SectionLabel>AMIGOS ({data?.amigos.length ?? 0})</SectionLabel>
-        {(data?.amigos.length ?? 0) === 0 && (
-          <p className="text-n400">Voce ainda nao tem amigos. Mande um pedido pelo nick acima.</p>
-        )}
-        <div className="mt-[.4em] flex flex-col gap-[.3em]">
-          {data?.amigos.map((a) => (
-            <div
-              key={a.userId}
-              className="flex items-center justify-between rounded-[.45em] border border-n800 px-[.6em] py-[.35em] text-[.85em]"
-            >
-              <b className="font-medium">{a.nome}</b>
-              <span className="text-n400">Treinador Nv {a.nivel}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Honestidade sobre o que ainda nao existe: mensagem escrita entre
-          jogadores nao tem rota nenhuma no servidor, e um campo de "escrever"
-          que nao envia seria pior que a ausencia dele. */}
-      <p className="text-[.78em] text-n400">
-        Ainda não dá para escrever mensagens livres — a caixa recebe pedidos de amizade e avisos do jogo.
-      </p>
+      ) : painelDireito ?? painelEsquerdo}
     </div>
   )
 }
