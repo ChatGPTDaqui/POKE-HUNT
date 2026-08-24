@@ -5,12 +5,16 @@ import { buyItem, sellItem, sellAllItems } from '@/engine/systems/economySystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useDeviceMode } from '@/stores/uiStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
-import { GameButton, SectionLabel } from '@/components/game/controls'
+import { LockSimple } from '@phosphor-icons/react'
+import { GameButton, GameCard, SectionLabel } from '@/components/game/controls'
+import { GradeDeInventario } from '@/components/game/GradeDeInventario'
 import { Sheet } from '@/components/game/Sheet'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
+import { ItemTooltip } from '@/components/shared/ItemTooltip'
 import { fmt, toast } from '../utils'
 import { ItemCompraCard, FichaCompra, type AcoesCompra } from './ItemCompraCard'
-import { ItemVendaCard, FichaVenda, type AcoesVenda } from './ItemVendaCard'
+import { FichaVenda, type AcoesVenda } from './ItemVendaCard'
+import { ItemIcon } from './shared'
 
 export function ItensTab() {
   const gold = useGameStateStore((s) => s.wallet.gold)
@@ -178,11 +182,49 @@ export function ItensTab() {
 
           {ownedItemIds.length === 0 && <p className="text-n500">Nenhum item para vender.</p>}
 
-          {paginadoVenda.pagina.map((itemId) => {
-            const acoes = acoesVenda(itemId)
-            if (!acoes) return null
-            return <ItemVendaCard key={itemId} {...acoes} onAbrir={() => setVendaAberta(itemId)} />
-          })}
+          {/* Grade, e nao uma linha por item (PH-118). Ela e a identidade nos
+              DOIS regimes: no compacto troca uma linha de ~170px por um slot de
+              sprite, e no amplo troca a transacao inline de TODOS os itens pela
+              transacao de um — o escolhido. O caminho de abrir continua sendo
+              o mesmo estado do sheet, que ja se fecha sozinho quando o estoque
+              zera. */}
+          {ownedItemIds.length > 0 && (
+            <GradeDeInventario
+              rotuloDoGrupo="Item para vender"
+              alturaMaxEm={11}
+              selecionado={vendaAberta}
+              onSelecionar={setVendaAberta}
+              slots={paginadoVenda.pagina.map((itemId) => {
+                const item = ITEMS[itemId]
+                const travado = Boolean(lockedItems[itemId])
+                return {
+                  id: itemId,
+                  rotulo: `${item.name} (x${items[itemId]})${travado ? ' — trancado' : ''}`,
+                  contador: items[itemId],
+                  aro: travado ? 'border-gold/50' : undefined,
+                  marca: travado ? <LockSimple weight="fill" className="text-gold" /> : undefined,
+                  conteudo: <ItemIcon itemId={itemId} name={item.name} />,
+                }
+              })}
+            />
+          )}
+
+          {/* No amplo a ficha fica aqui embaixo; no compacto ela e o sheet no
+              fim do arquivo. Mesma ficha nos dois — a diferenca e so onde ela
+              cabe. */}
+          {!estreito && fichaVenda && (
+            <GameCard className="flex flex-col gap-[.4em] p-[.45em]">
+              <div className="flex items-center gap-[.4em]">
+                <ItemTooltip item={fichaVenda.item}>
+                  <span className="cursor-help">
+                    <ItemIcon itemId={fichaVenda.itemId} name={fichaVenda.item.name} />
+                  </span>
+                </ItemTooltip>
+                <span className="min-w-0 flex-1 truncate font-medium">{fichaVenda.item.name}</span>
+              </div>
+              <FichaVenda {...fichaVenda} />
+            </GameCard>
+          )}
 
           <Paginacao estado={paginadoVenda} rotulo="itens" />
         </div>
