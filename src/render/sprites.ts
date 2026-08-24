@@ -1228,10 +1228,22 @@ export interface Viewport {
 // Largura do esfumado como fracao do menor lado da arte. Fracao, e nao pixels:
 // as artes vao de ~1250px a ~2048px nativos, e um valor fixo seria uma moldura
 // grossa numa e um fio na outra.
-const BORDA_FRACAO = 0.12
+//
+// Era 0.12, e 0.12 POR ARESTA quer dizer 24% do menor lado somando os dois
+// lados opostos — quase um quarto do cenario visivel entregue ao esfumado, mais
+// o raio das manchas (abaixo), que passa disso pra dentro. Pedido do usuario:
+// "faca o embacado das laterais ocupar menos parte do mapa".
+const BORDA_FRACAO = 0.055
 // Manchas por aresta. O esfumado reto sozinho ainda le como retangulo (de
 // cantos macios, mas retangulo); as manchas e que quebram a linha.
-const MANCHAS_POR_ARESTA = 9
+//
+// Eram 9, e subiu junto com a queda de BORDA_FRACAO — NAO e enfeite. O raio da
+// mancha e fracao da MESMA constante, entao encolher a faixa encolhe cada
+// mancha na mesma proporcao: com 9 manchas de raio ~0.055 os diametros somados
+// mal cobrem uma vez o comprimento da aresta, e sobra trecho reto entre elas.
+// Reduzir a faixa sem isto devolveria a borda de retangulo que o PH-95 existiu
+// pra tirar, so mais fina.
+const MANCHAS_POR_ARESTA = 18
 
 /** Hash estavel de string -> semente. Pequeno de proposito: o unico requisito
  *  e ser o MESMO numero em toda maquina pra a borda nao "respirar" entre
