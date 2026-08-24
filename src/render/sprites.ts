@@ -1065,6 +1065,39 @@ function effectAnchor(effect: WorldEffect, world: WorldState): { x: number; y: n
   }
 }
 
+/** Marca escrita do critico. Curta pra caber ao lado do numero em 390px. */
+const ROTULO_DE_CRITICO = 'CRIT'
+const COR_DE_CRITICO = '#ffd166'
+/**
+ * Placa atras do numero que o POKE do JOGADOR levou (PH-131).
+ *
+ * A primeira tentativa foi so trocar a cor do CONTORNO para vermelho, e olhando
+ * no harness ela reprovou: num numero de 12px o contorno tem 3px e, sobre
+ * preenchimento laranja de "super efetivo", ficou indistinguivel do contorno
+ * preto. Canal fraco nao e canal. Fundo e area — le de relance e nao disputa
+ * nada com a cor do texto, que continua sendo efetividade.
+ */
+const PLACA_DE_DANO_RECEBIDO = 'rgba(153, 27, 27, 0.85)'
+const BORDA_DA_PLACA = 'rgba(248, 113, 113, 0.9)'
+
+/**
+ * Numero de dano flutuante, com TRES canais independentes — e a
+ * independencia e o ponto (PH-131):
+ *
+ *   cor do numero  -> efetividade de tipo (super/efetivo/normal/resistido/imune)
+ *   tamanho + marca -> critico
+ *   placa de fundo  -> de quem e o dano (recebido pelo jogador ou causado por ele)
+ *
+ * Antes, so o primeiro existia. O critico multiplica o dano
+ * (`combatSystem#CRIT_MULTIPLIER`, com Sniper por cima) e nao aparecia em lugar
+ * nenhum: o mesmo golpe no mesmo alvo tirava numeros muito diferentes e nada na
+ * tela explicava, o que le como sorte ou como bug. E dano recebido era
+ * indistinguivel do causado, porque a cor ja estava gasta com efetividade.
+ *
+ * Sao canais SEPARADOS porque as tres perguntas sao ortogonais: um hit pode ser
+ * critico, super efetivo e recebido ao mesmo tempo. Empilhar duas delas na cor
+ * faria uma esconder a outra.
+ */
 function drawDamageNumber(ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState): void {
   const progress = effectProgress(effect)
   const floatOffset = 30 * progress
@@ -1073,24 +1106,60 @@ function drawDamageNumber(ctx: CanvasRenderingContext2D, effect: WorldEffect, wo
   const x = anchor.x
   const y = anchor.y - floatOffset
   const color = effect.color || '#ffffff'
+  // Dono do efeito de dano E o alvo que levou o hit (ver spawnDamageNumber).
+  const recebidoPeloJogador = Boolean(
+    world.player && effect.ownerId != null && effect.ownerId === world.player.id,
+  )
+  // Contorno preto sempre; branco so na excecao do `immune`, que e preenchido
+  // de preto e desapareceria. Autoria NAO mora aqui (ver PLACA_DE_DANO_RECEBIDO).
   const outline = color === '#000000' ? '#ffffff' : '#000000'
+  const crit = effect.isCrit === true
+  const numero = `-${effect.value}`
 
   ctx.save()
   ctx.globalAlpha = Math.max(0, alpha)
   ctx.textAlign = 'left'
-  ctx.lineWidth = 3
+  ctx.lineWidth = crit ? 4 : 3
   ctx.lineJoin = 'round'
+  // Tamanho e canal pre-atentivo: o numero maior e lido como "esse foi
+  // diferente" antes de qualquer texto.
+  ctx.font = crit ? 'bold 17px monospace' : 'bold 12px monospace'
+
+  if (recebidoPeloJogador) {
+    const m = ctx.measureText(numero)
+    const alturaTexto = crit ? 17 : 12
+    const pad = 3
+    ctx.fillStyle = PLACA_DE_DANO_RECEBIDO
+    roundedRectPath(ctx, x - pad, y - alturaTexto, m.width + pad * 2, alturaTexto + pad, 3)
+    ctx.fill()
+    ctx.strokeStyle = BORDA_DA_PLACA
+    ctx.lineWidth = 1
+    ctx.stroke()
+    ctx.lineWidth = crit ? 4 : 3
+  }
+
   ctx.strokeStyle = outline
-  ctx.font = 'bold 12px monospace'
   ctx.fillStyle = color
-  ctx.strokeText(`-${effect.value}`, x, y)
-  ctx.fillText(`-${effect.value}`, x, y)
+  ctx.strokeText(numero, x, y)
+  ctx.fillText(numero, x, y)
+
+  // A marca escrita e o que TRANSFORMA "numero grande" em "critico". Sem ela o
+  // jogador ve variacao, nao causa. Na mesma linha, logo depois do numero, pra
+  // nao gastar raia (ver spawnDamageNumber).
+  if (crit) {
+    const largura = ctx.measureText(numero).width
+    ctx.font = 'bold 9px monospace'
+    ctx.fillStyle = COR_DE_CRITICO
+    ctx.strokeText(ROTULO_DE_CRITICO, x + largura + 3, y)
+    ctx.fillText(ROTULO_DE_CRITICO, x + largura + 3, y)
+  }
 
   if (effect.effectiveness) {
     const isSuper = effect.effectiveness === 'super'
     ctx.font = isSuper ? 'bold 13px monospace' : '9px monospace'
     ctx.fillStyle = color
-    const labelY = y - (isSuper ? 14 : 12)
+    // O rotulo sobe junto quando o numero cresceu, senao o critico encosta nele.
+    const labelY = y - (isSuper ? 14 : 12) - (crit ? 5 : 0)
     ctx.strokeText(effect.effectivenessLabel || effect.effectiveness, x, labelY)
     ctx.fillText(effect.effectivenessLabel || effect.effectiveness, x, labelY)
   }

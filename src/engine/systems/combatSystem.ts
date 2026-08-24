@@ -1418,12 +1418,19 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
   }
 }
 
-// Cor do numero de dano segue a efetividade de tipo, nao o crit.
+// Cor do numero de dano segue a efetividade de tipo. O CRITICO nao entra aqui
+// de proposito (PH-131): os dois sao ortogonais — um hit pode ser critico E
+// super efetivo — entao o critico usa canal proprio (tamanho + marca escrita,
+// ver render/sprites.ts#drawDamageNumber) em vez de disputar a cor.
 const EFFECTIVENESS_COLORS: Record<Effectiveness, string> = {
   super: '#ff8c1a',
   effective: '#ffe14d',
   normal: '#ffffff',
-  weak: '#5a5a5a',
+  // Era `#5a5a5a`: cinza escuro com contorno preto sobre cena escura de hunt,
+  // ilegivel justamente no caso que o jogador mais precisa ler ("meu golpe nao
+  // esta funcionando neste inimigo"). Continua o mais apagado da escala — a
+  // leitura de "pouco dano" e o ponto —, agora acima do fundo.
+  weak: '#8b98a8',
   immune: '#000000',
 }
 
@@ -1440,6 +1447,11 @@ function spawnDamageNumber(world: WorldState, target: WorldEntity, result: Damag
     value: result.amount,
     effectiveness: result.effectiveness !== 'normal' ? result.effectiveness : undefined,
     effectivenessLabel: result.effectivenessLabel,
+    // `isCrit` NAO soma raia: a marca de critico sai na MESMA linha do numero
+    // (ver drawDamageNumber). Critico + super efetivo ja seriam 3 linhas de
+    // texto flutuando sobre o alvo, e a raia e espaco disputado com o nome do
+    // golpe e o texto de status.
+    isCrit: result.isCrit || undefined,
     owner: target,
     laneSize: result.effectivenessLabel ? 2 : 1,
   }))

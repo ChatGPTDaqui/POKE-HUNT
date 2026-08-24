@@ -21,6 +21,8 @@ export interface CreateWorldEffectParams {
   value?: number
   effectiveness?: string
   effectivenessLabel?: string | null
+  /** Ver types.ts#WorldEffect.isCrit — canal separado da efetividade (PH-131). */
+  isCrit?: boolean
   text?: string
   unit?: string
   isAoe?: boolean
@@ -55,7 +57,7 @@ export interface CreateWorldEffectParams {
 export function createWorldEffect(counters: WorldCounters, params: CreateWorldEffectParams): WorldEffect {
   const {
     type, x, y, targetX, targetY, radius = 10, color = '#fff', duration = 0.25, delay = 0,
-    value, effectiveness, effectivenessLabel, text, unit, isAoe, owner = null, laneSize = 1,
+    value, effectiveness, effectivenessLabel, isCrit, text, unit, isAoe, owner = null, laneSize = 1,
     worldSize, elementType, abilityId, anguloDeAtaque, ballItemId, success, statusDirection,
     seguir = null, apontarPara = null,
   } = params
@@ -72,6 +74,7 @@ export function createWorldEffect(counters: WorldCounters, params: CreateWorldEf
     value,
     effectiveness,
     effectivenessLabel: effectivenessLabel ?? undefined,
+    isCrit,
     text, unit, isAoe, worldSize, elementType, abilityId, anguloDeAtaque, ballItemId, success, statusDirection,
     laneSize,
     ownerId: owner ? owner.id : null,
