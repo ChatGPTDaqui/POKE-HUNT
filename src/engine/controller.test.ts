@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { createRng } from '@/core/rng'
-import { createPokeInstance, SPECIES } from '@/data/pokes'
+import { createPokeInstance, SPECIES, SPECIAL_EVOLUTION_STONE_COUNT } from '@/data/pokes'
 import { stoneItemId } from '@/data/stones'
 import { useGameStateStore } from '@/stores/gameStateStore'
 
@@ -30,13 +30,13 @@ describe('controller.evolvePoke — Stone so sai depois da confirmacao (PH-12)',
     const { controller } = await import('./controller')
     const gameState = useGameStateStore.getState()
     const itemId = stoneItemId(SPECIES.kadabra.type)
-    gameState.addItem(itemId, 20)
+    gameState.addItem(itemId, SPECIAL_EVOLUTION_STONE_COUNT)
     const poke = createPokeInstance(createRng(1), 'kadabra', 80)
     gameState.addCapturedPoke(poke)
 
     await controller.evolvePoke(poke.uid)
 
-    expect(useGameStateStore.getState().items[itemId]).toBe(20)
+    expect(useGameStateStore.getState().items[itemId]).toBe(SPECIAL_EVOLUTION_STONE_COUNT)
     const aindaNaMochila = useGameStateStore.getState().bagPokes.find((p) => p.uid === poke.uid)
     expect(aindaNaMochila?.speciesId).toBe('kadabra')
   })
@@ -50,7 +50,7 @@ describe('controller.evolvePoke — Stone so sai depois da confirmacao (PH-12)',
     const { controller } = await import('./controller')
     const gameState = useGameStateStore.getState()
     const itemId = stoneItemId(SPECIES.kadabra.type)
-    gameState.addItem(itemId, 20)
+    gameState.addItem(itemId, SPECIAL_EVOLUTION_STONE_COUNT)
     const poke = createPokeInstance(createRng(1), 'kadabra', 80)
     gameState.addCapturedPoke(poke)
 
@@ -72,7 +72,7 @@ describe('controller.evolvePoke — round-trip inteiro guarda reentrancia (PH-13
     const { controller } = await import('./controller')
     const gameState = useGameStateStore.getState()
     const itemId = stoneItemId(SPECIES.kadabra.type)
-    gameState.addItem(itemId, 20)
+    gameState.addItem(itemId, SPECIAL_EVOLUTION_STONE_COUNT)
     const poke = createPokeInstance(createRng(1), 'kadabra', 80)
     gameState.addCapturedPoke(poke)
 
@@ -96,7 +96,7 @@ describe('controller.evolvePoke — round-trip inteiro guarda reentrancia (PH-13
     const { controller } = await import('./controller')
     const gameState = useGameStateStore.getState()
     const itemId = stoneItemId(SPECIES.kadabra.type)
-    gameState.addItem(itemId, 20)
+    gameState.addItem(itemId, SPECIAL_EVOLUTION_STONE_COUNT)
     const poke = createPokeInstance(createRng(1), 'kadabra', 80)
     gameState.addCapturedPoke(poke)
 
