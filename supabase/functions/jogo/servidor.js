@@ -1,26 +1,3 @@
-//#region \0rolldown/runtime.js
-var __create = Object.create;
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __commonJSMin = (cb, mod) => () => (mod || (cb((mod = { exports: {} }).exports, mod), cb = null), mod.exports);
-var __copyProps = (to, from, except, desc) => {
-	if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
-		key = keys[i];
-		if (!__hasOwnProp.call(to, key) && key !== except) __defProp(to, key, {
-			get: ((k) => from[k]).bind(null, key),
-			enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
-		});
-	}
-	return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule || !__hasOwnProp.call(mod, "default") ? __defProp(target, "default", {
-	value: mod,
-	enumerable: true
-}) : target, mod));
-//#endregion
 //#region authority/src/db.ts
 var ErroHttp = class extends Error {
 	status;
@@ -54555,74 +54532,6 @@ function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0) {
 	armarTransicaoDeSala(world, mapId);
 }
 /**
-* A sala que o SERVIDOR decidiu, entrando pela mesma porta da transicao local.
-*
-* Tres casos, e a diferenca entre eles e o que o jogador ve:
-*
-*  - MESMA sala (so o contador de abates andou): escreve o contador e mais
-*    nada. E o caso comum — um flush a cada 30s, uma troca de sala a cada
-*    poucos minutos.
-*  - PRIMEIRA sala da sessao (nao havia sala): entra direto, sem aviso. Nao ha
-*    "sala anterior" pra anunciar saida de.
-*  - sala DIFERENTE: vira `salaPendente` e arma a contagem regressiva. Quem
-*    troca o mapa, zera os inimigos e reposiciona o jogador continua sendo
-*    `aplicarTransicaoDeSala`, no gate do proximo tick.
-*
-* Antes disto o cliente escrevia a sala do servidor direto no estado. O nome no
-* HUD trocava, e o resto da cena — arte de fundo, grade de colisao, ponto de
-* nascimento, inimigos em campo — ficava na sala ANTERIOR, porque so
-* `aplicarTransicaoDeSala` mexe nisso. Uma hunt podia ficar minutos anunciando
-* "Laboratorio" enquanto desenhava e colidia como "Usina".
-*
-* Nunca REGRIDE: sala com (ciclo, indice) anterior ao que esta na tela e
-* ignorada. Isso acontece de verdade — o flush cobre uma janela que comecou
-* antes da troca, e o servidor responde com a sala de la. Aceitar aquilo
-* mandava o jogador de volta pra sala 1 com o aviso de nova area, o que le como
-* perda de progresso.
-*/
-/**
-* `climaDaAutoridade` (PH-140): o clima de AMBIENTE que o servidor sorteou pra
-* sala. `undefined` = a resposta nao trouxe o campo (servidor antigo, ou jogo
-* local), e ai o clima que o cliente ja tem fica como esta.
-*
-* Nunca derruba clima de GOLPE: o servidor manda o clima do LUGAR, e um Rain
-* Dance de 10 turnos em andamento no cliente nao e assunto dele.
-*/
-function reconciliarSalaDaAutoridade(world, sala, climaDaAutoridade) {
-	const aplicarClima = () => {
-		if (climaDaAutoridade === void 0) return;
-		definirClimaDeAmbiente(world, climaDeAmbiente(climaDaAutoridade));
-	};
-	if (!world.mapDef) return;
-	if (!sala) {
-		if (temSalas(world.mapDef.id)) return;
-		world.sala = null;
-		world.salaPendente = null;
-		world.salaCountdownRemaining = null;
-		return;
-	}
-	const atual = world.salaPendente ?? world.sala;
-	if (!atual) {
-		world.sala = { ...sala };
-		world.salaPredita = false;
-		aplicarClima();
-		return;
-	}
-	if (atual.chave === sala.chave && atual.indice === sala.indice && atual.ciclos === sala.ciclos) {
-		const alvo = world.salaPendente ?? world.sala;
-		if (alvo) alvo.abates = Math.max(alvo.abates, sala.abates);
-		world.salaPredita = false;
-		aplicarClima();
-		return;
-	}
-	const posicao = (s) => s.ciclos * 10 + s.indice;
-	if (!world.salaPredita && posicao(sala) < posicao(atual)) return;
-	world.salaPendente = { ...sala };
-	world.salaCountdownRemaining ??= 3;
-	world.salaEsperaDaAutoridade = 0;
-	world.salaPredita = false;
-}
-/**
 * Aplica a sala ja sorteada (`world.salaPendente`) quando a contagem
 * regressiva zera: troca mapa/colisao e reposiciona pro spawn point da nova
 * sala. "Area nova do zero" (pedido explicito do usuario) — zera tambem
@@ -54676,739 +54585,7 @@ function recordPokedexKill(gameState, speciesId, isShiny) {
 	gameState.setPokedexKillEntry(speciesId, next);
 }
 //#endregion
-//#region node_modules/zustand/esm/vanilla.mjs
-var createStoreImpl = (createState) => {
-	let state;
-	const listeners = /* @__PURE__ */ new Set();
-	const setState = (partial, replace) => {
-		const nextState = typeof partial === "function" ? partial(state) : partial;
-		if (!Object.is(nextState, state)) {
-			const previousState = state;
-			state = (replace != null ? replace : typeof nextState !== "object" || nextState === null) ? nextState : Object.assign({}, state, nextState);
-			listeners.forEach((listener) => listener(state, previousState));
-		}
-	};
-	const getState = () => state;
-	const getInitialState = () => initialState;
-	const subscribe = (listener) => {
-		listeners.add(listener);
-		return () => listeners.delete(listener);
-	};
-	const api = {
-		setState,
-		getState,
-		getInitialState,
-		subscribe
-	};
-	const initialState = state = createState(setState, getState, api);
-	return api;
-};
-var createStore = ((createState) => createState ? createStoreImpl(createState) : createStoreImpl);
-//#endregion
-//#region node_modules/react/cjs/react.production.js
-/**
-* @license React
-* react.production.js
-*
-* Copyright (c) Meta Platforms, Inc. and affiliates.
-*
-* This source code is licensed under the MIT license found in the
-* LICENSE file in the root directory of this source tree.
-*/
-var require_react_production = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var ReactNoopUpdateQueue = {
-		isMounted: function() {
-			return !1;
-		},
-		enqueueForceUpdate: function() {},
-		enqueueReplaceState: function() {},
-		enqueueSetState: function() {}
-	};
-	var assign = Object.assign;
-	var emptyObject = {};
-	function Component(props, context, updater) {
-		this.props = props;
-		this.context = context;
-		this.refs = emptyObject;
-		this.updater = updater || ReactNoopUpdateQueue;
-	}
-	Component.prototype.isReactComponent = {};
-	Component.prototype.setState = function(partialState, callback) {
-		if ("object" !== typeof partialState && "function" !== typeof partialState && null != partialState) throw Error("takes an object of state variables to update or a function which returns an object of state variables.");
-		this.updater.enqueueSetState(this, partialState, callback, "setState");
-	};
-	Component.prototype.forceUpdate = function(callback) {
-		this.updater.enqueueForceUpdate(this, callback, "forceUpdate");
-	};
-	function ComponentDummy() {}
-	ComponentDummy.prototype = Component.prototype;
-	function PureComponent(props, context, updater) {
-		this.props = props;
-		this.context = context;
-		this.refs = emptyObject;
-		this.updater = updater || ReactNoopUpdateQueue;
-	}
-	var pureComponentPrototype = PureComponent.prototype = new ComponentDummy();
-	pureComponentPrototype.constructor = PureComponent;
-	assign(pureComponentPrototype, Component.prototype);
-	pureComponentPrototype.isPureReactComponent = !0;
-	Array.isArray;
-	var ReactSharedInternals = {
-		H: null,
-		A: null,
-		T: null,
-		S: null
-	};
-	exports.useCallback = function(callback, deps) {
-		return ReactSharedInternals.H.useCallback(callback, deps);
-	};
-	exports.useDebugValue = function() {};
-	exports.useSyncExternalStore = function(subscribe, getSnapshot, getServerSnapshot) {
-		return ReactSharedInternals.H.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-	};
-}));
-//#endregion
-//#region node_modules/zustand/esm/react.mjs
-var import_react = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_react_production();
-})))(), 1);
-var identity = (arg) => arg;
-function useStore(api, selector = identity) {
-	const slice = import_react.useSyncExternalStore(api.subscribe, import_react.useCallback(() => selector(api.getState()), [api, selector]), import_react.useCallback(() => selector(api.getInitialState()), [api, selector]));
-	import_react.useDebugValue(slice);
-	return slice;
-}
-var createImpl = (createState) => {
-	const api = createStore(createState);
-	const useBoundStore = (selector) => useStore(api, selector);
-	Object.assign(useBoundStore, api);
-	return useBoundStore;
-};
-var create = ((createState) => createState ? createImpl(createState) : createImpl);
-//#endregion
-//#region node_modules/immer/dist/immer.mjs
-var NOTHING = Symbol.for("immer-nothing");
-var DRAFTABLE = Symbol.for("immer-draftable");
-var DRAFT_STATE = Symbol.for("immer-state");
-function die(error, ...args) {
-	throw new Error(`[Immer] minified error nr: ${error}. Full error at: https://bit.ly/3cXEKWf`);
-}
-var O = Object;
-var getPrototypeOf = O.getPrototypeOf;
-var CONSTRUCTOR = "constructor";
-var PROTOTYPE = "prototype";
-var CONFIGURABLE = "configurable";
-var ENUMERABLE = "enumerable";
-var WRITABLE = "writable";
-var VALUE = "value";
-var isDraft = (value) => !!value && !!value[DRAFT_STATE];
-function isDraftable(value) {
-	if (!value) return false;
-	return isPlainObject(value) || isArray(value) || !!value[DRAFTABLE] || !!value[CONSTRUCTOR]?.[DRAFTABLE] || isMap(value) || isSet(value);
-}
-var objectCtorString = O[PROTOTYPE][CONSTRUCTOR].toString();
-var cachedCtorStrings = /* @__PURE__ */ new WeakMap();
-function isPlainObject(value) {
-	if (!value || !isObjectish(value)) return false;
-	const proto = getPrototypeOf(value);
-	if (proto === null || proto === O[PROTOTYPE]) return true;
-	const Ctor = O.hasOwnProperty.call(proto, CONSTRUCTOR) && proto[CONSTRUCTOR];
-	if (Ctor === Object) return true;
-	if (!isFunction(Ctor)) return false;
-	let ctorString = cachedCtorStrings.get(Ctor);
-	if (ctorString === void 0) {
-		ctorString = Function.toString.call(Ctor);
-		cachedCtorStrings.set(Ctor, ctorString);
-	}
-	return ctorString === objectCtorString;
-}
-function each(obj, iter, strict = true) {
-	if (getArchtype(obj) === 0) (strict ? Reflect.ownKeys(obj) : O.keys(obj)).forEach((key) => {
-		iter(key, obj[key], obj);
-	});
-	else obj.forEach((entry, index) => iter(index, entry, obj));
-}
-function getArchtype(thing) {
-	const state = thing[DRAFT_STATE];
-	return state ? state.type_ : isArray(thing) ? 1 : isMap(thing) ? 2 : isSet(thing) ? 3 : 0;
-}
-var has = (thing, prop, type = getArchtype(thing)) => type === 2 ? thing.has(prop) : O[PROTOTYPE].hasOwnProperty.call(thing, prop);
-var get = (thing, prop, type = getArchtype(thing)) => type === 2 ? thing.get(prop) : thing[prop];
-var set = (thing, propOrOldValue, value, type = getArchtype(thing)) => {
-	if (type === 2) thing.set(propOrOldValue, value);
-	else if (type === 3) thing.add(value);
-	else thing[propOrOldValue] = value;
-};
-function is(x, y) {
-	if (x === y) return x !== 0 || 1 / x === 1 / y;
-	else return x !== x && y !== y;
-}
-var isArray = Array.isArray;
-var isMap = (target) => target instanceof Map;
-var isSet = (target) => target instanceof Set;
-var isObjectish = (target) => typeof target === "object";
-var isFunction = (target) => typeof target === "function";
-var isBoolean = (target) => typeof target === "boolean";
-function isArrayIndex(value) {
-	const n = +value;
-	return Number.isInteger(n) && String(n) === value;
-}
-var latest = (state) => state.copy_ || state.base_;
-var getFinalValue = (state) => state.modified_ ? state.copy_ : state.base_;
-function shallowCopy(base, strict) {
-	if (isMap(base)) return new Map(base);
-	if (isSet(base)) return new Set(base);
-	if (isArray(base)) return Array[PROTOTYPE].slice.call(base);
-	const isPlain = isPlainObject(base);
-	if (strict === true || strict === "class_only" && !isPlain) {
-		const descriptors = O.getOwnPropertyDescriptors(base);
-		delete descriptors[DRAFT_STATE];
-		let keys = Reflect.ownKeys(descriptors);
-		for (let i = 0; i < keys.length; i++) {
-			const key = keys[i];
-			const desc = descriptors[key];
-			if (desc[WRITABLE] === false) {
-				desc[WRITABLE] = true;
-				desc[CONFIGURABLE] = true;
-			}
-			if (desc.get || desc.set) descriptors[key] = {
-				[CONFIGURABLE]: true,
-				[WRITABLE]: true,
-				[ENUMERABLE]: desc[ENUMERABLE],
-				[VALUE]: base[key]
-			};
-		}
-		return O.create(getPrototypeOf(base), descriptors);
-	} else {
-		const proto = getPrototypeOf(base);
-		if (proto !== null && isPlain) return { ...base };
-		const obj = O.create(proto);
-		return O.assign(obj, base);
-	}
-}
-function freeze(obj, deep = false) {
-	if (isFrozen(obj) || isDraft(obj) || !isDraftable(obj)) return obj;
-	if (getArchtype(obj) > 1) O.defineProperties(obj, {
-		set: dontMutateMethodOverride,
-		add: dontMutateMethodOverride,
-		clear: dontMutateMethodOverride,
-		delete: dontMutateMethodOverride
-	});
-	O.freeze(obj);
-	if (deep) each(obj, (_key, value) => {
-		freeze(value, true);
-	}, false);
-	return obj;
-}
-function dontMutateFrozenCollections() {
-	die(2);
-}
-var dontMutateMethodOverride = { [VALUE]: dontMutateFrozenCollections };
-function isFrozen(obj) {
-	if (obj === null || !isObjectish(obj)) return true;
-	return O.isFrozen(obj);
-}
-var PluginMapSet = "MapSet";
-var PluginPatches = "Patches";
-var PluginArrayMethods = "ArrayMethods";
-var plugins = {};
-function getPlugin(pluginKey) {
-	const plugin = plugins[pluginKey];
-	if (!plugin) die(0, pluginKey);
-	return plugin;
-}
-var isPluginLoaded = (pluginKey) => !!plugins[pluginKey];
-var currentScope;
-var getCurrentScope = () => currentScope;
-var createScope = (parent_, immer_) => ({
-	drafts_: [],
-	parent_,
-	immer_,
-	canAutoFreeze_: true,
-	unfinalizedDrafts_: 0,
-	handledSet_: /* @__PURE__ */ new Set(),
-	processedForPatches_: /* @__PURE__ */ new Set(),
-	mapSetPlugin_: isPluginLoaded(PluginMapSet) ? getPlugin(PluginMapSet) : void 0,
-	arrayMethodsPlugin_: isPluginLoaded(PluginArrayMethods) ? getPlugin(PluginArrayMethods) : void 0
-});
-function usePatchesInScope(scope, patchListener) {
-	if (patchListener) {
-		scope.patchPlugin_ = getPlugin(PluginPatches);
-		scope.patches_ = [];
-		scope.inversePatches_ = [];
-		scope.patchListener_ = patchListener;
-	}
-}
-function revokeScope(scope) {
-	leaveScope(scope);
-	scope.drafts_.forEach(revokeDraft);
-	scope.drafts_ = null;
-}
-function leaveScope(scope) {
-	if (scope === currentScope) currentScope = scope.parent_;
-}
-var enterScope = (immer2) => currentScope = createScope(currentScope, immer2);
-function revokeDraft(draft) {
-	const state = draft[DRAFT_STATE];
-	if (state.type_ === 0 || state.type_ === 1) state.revoke_();
-	else state.revoked_ = true;
-}
-function processResult(result, scope) {
-	scope.unfinalizedDrafts_ = scope.drafts_.length;
-	const baseDraft = scope.drafts_[0];
-	if (result !== void 0 && result !== baseDraft) {
-		if (baseDraft[DRAFT_STATE].modified_) {
-			revokeScope(scope);
-			die(4);
-		}
-		if (isDraftable(result)) result = finalize(scope, result);
-		const { patchPlugin_ } = scope;
-		if (patchPlugin_) patchPlugin_.generateReplacementPatches_(baseDraft[DRAFT_STATE].base_, result, scope);
-	} else result = finalize(scope, baseDraft);
-	maybeFreeze(scope, result, true);
-	revokeScope(scope);
-	if (scope.patches_) scope.patchListener_(scope.patches_, scope.inversePatches_);
-	return result !== NOTHING ? result : void 0;
-}
-function finalize(rootScope, value) {
-	if (isFrozen(value)) return value;
-	const state = value[DRAFT_STATE];
-	if (!state) return handleValue(value, rootScope.handledSet_, rootScope);
-	if (!isSameScope(state, rootScope)) return value;
-	if (!state.modified_) return state.base_;
-	if (!state.finalized_) {
-		const { callbacks_ } = state;
-		if (callbacks_) while (callbacks_.length > 0) callbacks_.pop()(rootScope);
-		generatePatchesAndFinalize(state, rootScope);
-	}
-	return state.copy_;
-}
-function maybeFreeze(scope, value, deep = false) {
-	if (!scope.parent_ && scope.immer_.autoFreeze_ && scope.canAutoFreeze_) freeze(value, deep);
-}
-function markStateFinalized(state) {
-	state.finalized_ = true;
-	state.scope_.unfinalizedDrafts_--;
-}
-var isSameScope = (state, rootScope) => state.scope_ === rootScope;
-var EMPTY_LOCATIONS_RESULT = [];
-function updateDraftInParent(parent, draftValue, finalizedValue, originalKey) {
-	const parentCopy = latest(parent);
-	const parentType = parent.type_;
-	if (originalKey !== void 0) {
-		if (get(parentCopy, originalKey, parentType) === draftValue) {
-			set(parentCopy, originalKey, finalizedValue, parentType);
-			return;
-		}
-	}
-	if (!parent.draftLocations_) {
-		const draftLocations = parent.draftLocations_ = /* @__PURE__ */ new Map();
-		each(parentCopy, (key, value) => {
-			if (isDraft(value)) {
-				const keys = draftLocations.get(value) || [];
-				keys.push(key);
-				draftLocations.set(value, keys);
-			}
-		});
-	}
-	const locations = parent.draftLocations_.get(draftValue) ?? EMPTY_LOCATIONS_RESULT;
-	for (const location of locations) set(parentCopy, location, finalizedValue, parentType);
-}
-function registerChildFinalizationCallback(parent, child, key) {
-	parent.callbacks_.push(function childCleanup(rootScope) {
-		const state = child;
-		if (!state || !isSameScope(state, rootScope)) return;
-		rootScope.mapSetPlugin_?.fixSetContents(state);
-		const finalizedValue = getFinalValue(state);
-		updateDraftInParent(parent, state.draft_ ?? state, finalizedValue, key);
-		generatePatchesAndFinalize(state, rootScope);
-	});
-}
-function generatePatchesAndFinalize(state, rootScope) {
-	if (state.modified_ && !state.finalized_ && (state.type_ === 3 || state.type_ === 1 && state.allIndicesReassigned_ || (state.assigned_?.size ?? 0) > 0)) {
-		const { patchPlugin_ } = rootScope;
-		if (patchPlugin_) {
-			const basePath = patchPlugin_.getPath(state);
-			if (basePath) patchPlugin_.generatePatches_(state, basePath, rootScope);
-		}
-		markStateFinalized(state);
-	}
-}
-function handleCrossReference(target, key, value) {
-	const { scope_ } = target;
-	if (isDraft(value)) {
-		const state = value[DRAFT_STATE];
-		if (isSameScope(state, scope_)) state.callbacks_.push(function crossReferenceCleanup() {
-			prepareCopy(target);
-			updateDraftInParent(target, value, getFinalValue(state), key);
-		});
-	} else if (isDraftable(value)) target.callbacks_.push(function nestedDraftCleanup() {
-		const targetCopy = latest(target);
-		if (target.type_ === 3) {
-			if (targetCopy.has(value)) handleValue(value, scope_.handledSet_, scope_);
-		} else if (get(targetCopy, key, target.type_) === value) {
-			if (scope_.drafts_.length > 1 && (target.assigned_.get(key) ?? false) === true && target.copy_) handleValue(get(target.copy_, key, target.type_), scope_.handledSet_, scope_);
-		}
-	});
-}
-function handleValue(target, handledSet, rootScope) {
-	if (!rootScope.immer_.autoFreeze_ && rootScope.unfinalizedDrafts_ < 1) return target;
-	if (isDraft(target) || handledSet.has(target) || !isDraftable(target) || isFrozen(target)) return target;
-	handledSet.add(target);
-	each(target, (key, value) => {
-		if (isDraft(value)) {
-			const state = value[DRAFT_STATE];
-			if (isSameScope(state, rootScope)) {
-				set(target, key, getFinalValue(state), target.type_);
-				markStateFinalized(state);
-			}
-		} else if (isDraftable(value)) handleValue(value, handledSet, rootScope);
-	});
-	return target;
-}
-function createProxyProxy(base, parent) {
-	const baseIsArray = isArray(base);
-	const state = {
-		type_: baseIsArray ? 1 : 0,
-		scope_: parent ? parent.scope_ : getCurrentScope(),
-		modified_: false,
-		finalized_: false,
-		assigned_: void 0,
-		parent_: parent,
-		base_: base,
-		draft_: null,
-		copy_: null,
-		revoke_: null,
-		isManual_: false,
-		callbacks_: void 0
-	};
-	let target = state;
-	let traps = objectTraps;
-	if (baseIsArray) {
-		target = [state];
-		traps = arrayTraps;
-	}
-	const { revoke, proxy } = Proxy.revocable(target, traps);
-	state.draft_ = proxy;
-	state.revoke_ = revoke;
-	return [proxy, state];
-}
-var objectTraps = {
-	get(state, prop) {
-		if (prop === DRAFT_STATE) return state;
-		let arrayPlugin = state.scope_.arrayMethodsPlugin_;
-		const isArrayWithStringProp = state.type_ === 1 && typeof prop === "string";
-		if (isArrayWithStringProp) {
-			if (arrayPlugin?.isArrayOperationMethod(prop)) return arrayPlugin.createMethodInterceptor(state, prop);
-		}
-		const source = latest(state);
-		if (!has(source, prop, state.type_)) return readPropFromProto(state, source, prop);
-		const value = source[prop];
-		if (state.finalized_ || !isDraftable(value)) return value;
-		if (isArrayWithStringProp && state.operationMethod && arrayPlugin?.isMutatingArrayMethod(state.operationMethod) && isArrayIndex(prop)) return value;
-		if (value === peek(state.base_, prop) || isRelocatedBaseRef(state, prop, value)) {
-			prepareCopy(state);
-			const childKey = state.type_ === 1 ? +prop : prop;
-			const childDraft = createProxy(state.scope_, value, state, childKey);
-			return state.copy_[childKey] = childDraft;
-		}
-		return value;
-	},
-	has(state, prop) {
-		return prop in latest(state);
-	},
-	ownKeys(state) {
-		return Reflect.ownKeys(latest(state));
-	},
-	set(state, prop, value) {
-		const desc = getDescriptorFromProto(latest(state), prop);
-		if (desc?.set) {
-			desc.set.call(state.draft_, value);
-			return true;
-		}
-		if (!state.modified_) {
-			const current2 = peek(latest(state), prop);
-			const currentState = current2?.[DRAFT_STATE];
-			if (currentState && currentState.base_ === value) {
-				state.copy_[prop] = value;
-				state.assigned_.set(prop, false);
-				return true;
-			}
-			if (is(value, current2) && (value !== void 0 || has(state.base_, prop, state.type_))) return true;
-			prepareCopy(state);
-			markChanged(state);
-		}
-		if (state.copy_[prop] === value && (value !== void 0 || has(state.copy_, prop, state.type_)) || Number.isNaN(value) && Number.isNaN(state.copy_[prop])) return true;
-		state.copy_[prop] = value;
-		state.assigned_.set(prop, true);
-		handleCrossReference(state, prop, value);
-		return true;
-	},
-	deleteProperty(state, prop) {
-		prepareCopy(state);
-		if (peek(state.base_, prop) !== void 0 || prop in state.base_) {
-			state.assigned_.set(prop, false);
-			markChanged(state);
-		} else state.assigned_.delete(prop);
-		if (state.copy_) delete state.copy_[prop];
-		return true;
-	},
-	getOwnPropertyDescriptor(state, prop) {
-		const owner = latest(state);
-		const desc = Reflect.getOwnPropertyDescriptor(owner, prop);
-		if (!desc) return desc;
-		return {
-			[WRITABLE]: true,
-			[CONFIGURABLE]: state.type_ !== 1 || prop !== "length",
-			[ENUMERABLE]: desc[ENUMERABLE],
-			[VALUE]: owner[prop]
-		};
-	},
-	defineProperty() {
-		die(11);
-	},
-	getPrototypeOf(state) {
-		return getPrototypeOf(state.base_);
-	},
-	setPrototypeOf() {
-		die(12);
-	}
-};
-var arrayTraps = {};
-for (let key in objectTraps) {
-	let fn = objectTraps[key];
-	arrayTraps[key] = function() {
-		const args = arguments;
-		args[0] = args[0][0];
-		return fn.apply(this, args);
-	};
-}
-arrayTraps.deleteProperty = function(state, prop) {
-	return arrayTraps.set.call(this, state, prop, void 0);
-};
-arrayTraps.set = function(state, prop, value) {
-	return objectTraps.set.call(this, state[0], prop, value, state[0]);
-};
-function peek(draft, prop) {
-	const state = draft[DRAFT_STATE];
-	return (state ? latest(state) : draft)[prop];
-}
-function isRelocatedBaseRef(state, prop, value) {
-	if (state.type_ !== 1 || !state.allIndicesReassigned_ || state.assigned_?.get(prop) || !isDraftable(value) || value[DRAFT_STATE]) return false;
-	return state.baseRefs_.has(value);
-}
-function readPropFromProto(state, source, prop) {
-	const desc = getDescriptorFromProto(source, prop);
-	return desc ? VALUE in desc ? desc[VALUE] : desc.get?.call(state.draft_) : void 0;
-}
-function getDescriptorFromProto(source, prop) {
-	if (!(prop in source)) return void 0;
-	let proto = getPrototypeOf(source);
-	while (proto) {
-		const desc = Object.getOwnPropertyDescriptor(proto, prop);
-		if (desc) return desc;
-		proto = getPrototypeOf(proto);
-	}
-}
-function markChanged(state) {
-	if (!state.modified_) {
-		state.modified_ = true;
-		if (state.parent_) markChanged(state.parent_);
-	}
-}
-function prepareCopy(state) {
-	if (!state.copy_) {
-		state.assigned_ = /* @__PURE__ */ new Map();
-		state.copy_ = shallowCopy(state.base_, state.scope_.immer_.useStrictShallowCopy_);
-	}
-}
-var Immer2 = class {
-	constructor(config) {
-		this.autoFreeze_ = true;
-		this.useStrictShallowCopy_ = false;
-		this.useStrictIteration_ = false;
-		/**
-		* The `produce` function takes a value and a "recipe function" (whose
-		* return value often depends on the base state). The recipe function is
-		* free to mutate its first argument however it wants. All mutations are
-		* only ever applied to a __copy__ of the base state.
-		*
-		* Pass only a function to create a "curried producer" which relieves you
-		* from passing the recipe function every time.
-		*
-		* Only plain objects and arrays are made mutable. All other objects are
-		* considered uncopyable.
-		*
-		* Note: This function is __bound__ to its `Immer` instance.
-		*
-		* @param {any} base - the initial state
-		* @param {Function} recipe - function that receives a proxy of the base state as first argument and which can be freely modified
-		* @param {Function} patchListener - optional function that will be called with all the patches produced here
-		* @returns {any} a new state, or the initial state if nothing was modified
-		*/
-		this.produce = (base, recipe, patchListener) => {
-			if (isFunction(base) && !isFunction(recipe)) {
-				const defaultBase = recipe;
-				recipe = base;
-				const self = this;
-				return function curriedProduce(base2 = defaultBase, ...args) {
-					return self.produce(base2, (draft) => recipe.call(this, draft, ...args));
-				};
-			}
-			if (!isFunction(recipe)) die(6);
-			if (patchListener !== void 0 && !isFunction(patchListener)) die(7);
-			let result;
-			if (isDraftable(base)) {
-				const scope = enterScope(this);
-				const proxy = createProxy(scope, base, void 0);
-				let hasError = true;
-				try {
-					result = recipe(proxy);
-					hasError = false;
-				} finally {
-					if (hasError) revokeScope(scope);
-					else leaveScope(scope);
-				}
-				usePatchesInScope(scope, patchListener);
-				return processResult(result, scope);
-			} else if (!base || !isObjectish(base)) {
-				result = recipe(base);
-				if (result === void 0) result = base;
-				if (result === NOTHING) result = void 0;
-				if (this.autoFreeze_) freeze(result, true);
-				if (patchListener) {
-					const p = [];
-					const ip = [];
-					getPlugin(PluginPatches).generateReplacementPatches_(base, result, {
-						patches_: p,
-						inversePatches_: ip
-					});
-					patchListener(p, ip);
-				}
-				return result;
-			} else die(1, base);
-		};
-		this.produceWithPatches = (base, recipe) => {
-			if (isFunction(base)) return (state, ...args) => this.produceWithPatches(state, (draft) => base(draft, ...args));
-			let patches, inversePatches;
-			return [
-				this.produce(base, recipe, (p, ip) => {
-					patches = p;
-					inversePatches = ip;
-				}),
-				patches,
-				inversePatches
-			];
-		};
-		if (isBoolean(config?.autoFreeze)) this.setAutoFreeze(config.autoFreeze);
-		if (isBoolean(config?.useStrictShallowCopy)) this.setUseStrictShallowCopy(config.useStrictShallowCopy);
-		if (isBoolean(config?.useStrictIteration)) this.setUseStrictIteration(config.useStrictIteration);
-	}
-	createDraft(base) {
-		if (!isDraftable(base)) die(8);
-		if (isDraft(base)) base = current(base);
-		const scope = enterScope(this);
-		const proxy = createProxy(scope, base, void 0);
-		proxy[DRAFT_STATE].isManual_ = true;
-		leaveScope(scope);
-		return proxy;
-	}
-	finishDraft(draft, patchListener) {
-		const state = draft && draft[DRAFT_STATE];
-		if (!state || !state.isManual_) die(9);
-		const { scope_: scope } = state;
-		usePatchesInScope(scope, patchListener);
-		return processResult(void 0, scope);
-	}
-	/**
-	* Pass true to automatically freeze all copies created by Immer.
-	*
-	* By default, auto-freezing is enabled.
-	*/
-	setAutoFreeze(value) {
-		this.autoFreeze_ = value;
-	}
-	/**
-	* Pass true to enable strict shallow copy.
-	*
-	* By default, immer does not copy the object descriptors such as getter, setter and non-enumrable properties.
-	*/
-	setUseStrictShallowCopy(value) {
-		this.useStrictShallowCopy_ = value;
-	}
-	/**
-	* Pass false to use faster iteration that skips non-enumerable properties
-	* but still handles symbols for compatibility.
-	*
-	* By default, strict iteration is enabled (includes all own properties).
-	*/
-	setUseStrictIteration(value) {
-		this.useStrictIteration_ = value;
-	}
-	shouldUseStrictIteration() {
-		return this.useStrictIteration_;
-	}
-	applyPatches(base, patches) {
-		let i;
-		for (i = patches.length - 1; i >= 0; i--) {
-			const patch = patches[i];
-			if (patch.path.length === 0 && patch.op === "replace") {
-				base = patch.value;
-				break;
-			}
-		}
-		if (i > -1) patches = patches.slice(i + 1);
-		const applyPatchesImpl = getPlugin(PluginPatches).applyPatches_;
-		if (isDraft(base)) return applyPatchesImpl(base, patches);
-		return this.produce(base, (draft) => applyPatchesImpl(draft, patches));
-	}
-};
-function createProxy(rootScope, value, parent, key) {
-	const [draft, state] = isMap(value) ? getPlugin(PluginMapSet).proxyMap_(value, parent) : isSet(value) ? getPlugin(PluginMapSet).proxySet_(value, parent) : createProxyProxy(value, parent);
-	(parent?.scope_ ?? getCurrentScope()).drafts_.push(draft);
-	state.callbacks_ = parent?.callbacks_ ?? [];
-	state.key_ = key;
-	if (parent && key !== void 0) registerChildFinalizationCallback(parent, state, key);
-	else state.callbacks_.push(function rootDraftCleanup(rootScope2) {
-		rootScope2.mapSetPlugin_?.fixSetContents(state);
-		const { patchPlugin_ } = rootScope2;
-		if (state.modified_ && patchPlugin_) patchPlugin_.generatePatches_(state, [], rootScope2);
-	});
-	return draft;
-}
-function current(value) {
-	if (!isDraft(value)) die(10, value);
-	return currentImpl(value);
-}
-function currentImpl(value) {
-	if (!isDraftable(value) || isFrozen(value)) return value;
-	const state = value[DRAFT_STATE];
-	let copy;
-	let strict = true;
-	if (state) {
-		if (!state.modified_) return state.base_;
-		state.finalized_ = true;
-		copy = shallowCopy(value, state.scope_.immer_.useStrictShallowCopy_);
-		strict = state.scope_.immer_.shouldUseStrictIteration();
-	} else copy = shallowCopy(value, true);
-	each(copy, (key, childValue) => {
-		set(copy, key, currentImpl(childValue));
-	}, strict);
-	if (state) state.finalized_ = false;
-	return copy;
-}
-var produce = new Immer2().produce;
-//#endregion
-//#region node_modules/zustand/esm/middleware/immer.mjs
-var immerImpl = (initializer) => (set, get, store) => {
-	store.setState = (updater, replace, ...args) => {
-		return set(typeof updater === "function" ? produce(updater) : updater, replace, ...args);
-	};
-	return initializer(store.setState, get, store);
-};
-var immer = immerImpl;
-//#endregion
-//#region src/stores/worldStore.ts
+//#region src/engine/worldState.ts
 function emptyWorldState(seed = randomSeed()) {
 	return {
 		mapDef: null,
@@ -55442,28 +54619,37 @@ function emptyWorldState(seed = randomSeed()) {
 		climaAmbiente: null
 	};
 }
-create()(immer((set) => ({
-	...emptyWorldState(),
-	setWorld: (world) => set((draft) => {
-		Object.assign(draft, world);
-	}),
-	resetWorld: () => set((draft) => {
-		Object.assign(draft, emptyWorldState());
-	}),
-	update: (recipe) => set((draft) => recipe(draft)),
-	sortear: (fn) => {
-		let resultado;
-		set((draft) => {
-			resultado = fn(draft.rng);
-		});
-		return resultado;
-	},
-	definirSala: (sala, clima) => set((draft) => {
-		reconciliarSalaDaAutoridade(draft, sala, clima);
-	})
-})));
 //#endregion
-//#region src/stores/toastStore.ts
+//#region node_modules/zustand/esm/vanilla.mjs
+var createStoreImpl = (createState) => {
+	let state;
+	const listeners = /* @__PURE__ */ new Set();
+	const setState = (partial, replace) => {
+		const nextState = typeof partial === "function" ? partial(state) : partial;
+		if (!Object.is(nextState, state)) {
+			const previousState = state;
+			state = (replace != null ? replace : typeof nextState !== "object" || nextState === null) ? nextState : Object.assign({}, state, nextState);
+			listeners.forEach((listener) => listener(state, previousState));
+		}
+	};
+	const getState = () => state;
+	const getInitialState = () => initialState;
+	const subscribe = (listener) => {
+		listeners.add(listener);
+		return () => listeners.delete(listener);
+	};
+	const api = {
+		setState,
+		getState,
+		getInitialState,
+		subscribe
+	};
+	const initialState = state = createState(setState, getState, api);
+	return api;
+};
+var createStore = ((createState) => createState ? createStoreImpl(createState) : createStoreImpl);
+//#endregion
+//#region src/stores/toastStoreVanilla.ts
 var CHANNEL_TO_TAB = {
 	combat: "log",
 	trade: "trade",
@@ -55474,7 +54660,7 @@ var nextId = 1;
 function makeId() {
 	return `toast-${nextId++}`;
 }
-var useToastStore = create((set) => ({
+var toastStore = createStore()((set) => ({
 	toasts: [],
 	chatLines: {
 		sistema: [],
@@ -55716,7 +54902,7 @@ function trocarPorDesmaio(world, gameState, dt, silent) {
 		player.pathTargetX = null;
 		player.pathTargetY = null;
 	}
-	if (!silent) useToastStore.getState().pushToast(`${shinyPrefix(nextPoke.isShiny)}${SPECIES[nextPoke.speciesId].name} entrou em campo!`, "success", "combat");
+	if (!silent) toastStore.getState().pushToast(`${shinyPrefix(nextPoke.isShiny)}${SPECIES[nextPoke.speciesId].name} entrou em campo!`, "success", "combat");
 }
 function spawnSequenceEnemy(world, mapDef, index, entrada) {
 	const { rng, counters } = world;
@@ -55864,16 +55050,16 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			duration: 1.1,
 			owner: enemy
 		}));
-		useToastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${rarityOf(enemy.poke).label}] derrotado! +${expGain} EXP, +${loot.gold} ouro`, "gold", "combat", realceDaRaridade(enemy.poke));
+		toastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${rarityOf(enemy.poke).label}] derrotado! +${expGain} EXP, +${loot.gold} ouro`, "gold", "combat", realceDaRaridade(enemy.poke));
 		if (grantResult.leveledUp) {
 			const ganhos = formatStatGains(grantResult.statGains);
-			useToastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ""}`, "levelup", "combat");
-			for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) useToastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, "levelup", "combat");
+			toastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ""}`, "levelup", "combat");
+			for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) toastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, "levelup", "combat");
 		}
-		if (trainerResult.leveledUp) useToastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, "levelup", "combat");
+		if (trainerResult.leveledUp) toastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, "levelup", "combat");
 		for (const itemId of loot.droppedItems) {
 			const item = getItem(itemId);
-			if (item) useToastStore.getState().pushToast(`Item encontrado: ${item.name}`, "success", "world");
+			if (item) toastStore.getState().pushToast(`Item encontrado: ${item.name}`, "success", "world");
 		}
 		if (captureResult && "ballItemId" in captureResult && captureResult.ballItemId) {
 			const quadros = captureAnimFrameCount(captureResult.success);
@@ -55890,12 +55076,12 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			}));
 		}
 		if (captureResult) {
-			if (captureResult.success && captureResult.location === "vendido") useToastStore.getState().pushToast(`${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
+			if (captureResult.success && captureResult.location === "vendido") toastStore.getState().pushToast(`${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
 			else if (captureResult.success) {
 				const location = "mochila";
 				const raridade = rarityOf(captureResult.poke).label;
-				useToastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
-			} else if (captureResult.reason === "roll_failed") useToastStore.getState().pushToast("A captura falhou!", "capture-fail", "combat");
+				toastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
+			} else if (captureResult.reason === "roll_failed") toastStore.getState().pushToast("A captura falhou!", "capture-fail", "combat");
 		}
 	}
 	return {
@@ -55954,7 +55140,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 				world.respawnTimer = world.mapDef.respawnDelay;
 				if (!silent) {
 					const nome = nomeDaSala(world.sala);
-					useToastStore.getState().pushToast(fechouCiclo ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.` : `Entrando em nova area: ${nome}.`, "success", "world");
+					toastStore.getState().pushToast(fechouCiclo ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.` : `Entrando em nova area: ${nome}.`, "success", "world");
 				}
 			}
 		}
@@ -55979,16 +55165,16 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		const penaltyResult = applyDeathExpPenalty(world.player.poke);
 		world.player.poke = penaltyResult.poke;
 		gameState.updatePokeInstance(penaltyResult.poke.uid, () => penaltyResult.poke);
-		if (!silent) useToastStore.getState().pushToast(`${SPECIES[world.player.poke.speciesId].name} desmaiou!${penaltyResult.leveledDown ? ` Caiu para o nivel ${penaltyResult.level}.` : ""}`, "error", "combat");
+		if (!silent) toastStore.getState().pushToast(`${SPECIES[world.player.poke.speciesId].name} desmaiou!${penaltyResult.leveledDown ? ` Caiu para o nivel ${penaltyResult.level}.` : ""}`, "error", "combat");
 	}
 	trocarPorDesmaio(world, gameState, dt, silent);
 	const autoEvents = updateAutoHeal(world, gameState, dt);
 	if (!silent) for (const ev of autoEvents) {
 		if (ev.type === "auto_pot") {
 			const item = getItem(ev.itemId);
-			if (item) useToastStore.getState().pushToast(`Auto-pot usou ${item.name}.`, "success", "combat");
+			if (item) toastStore.getState().pushToast(`Auto-pot usou ${item.name}.`, "success", "combat");
 		}
-		if (ev.type === "auto_revive") useToastStore.getState().pushToast("Auto-revive reanimou seu POKE!", "success", "combat");
+		if (ev.type === "auto_revive") toastStore.getState().pushToast("Auto-revive reanimou seu POKE!", "success", "combat");
 	}
 	const aliveCount = world.enemies.filter((e) => !isDead(e)).length;
 	if (world.mapDef.sequence && world.mapDef.unlocksContinentOnClear?.length && !world.sequenceCleared && aliveCount === 0 && world.sequenceIndex === world.mapDef.sequence.length - 1) {
@@ -55996,7 +55182,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		const grupos = world.mapDef.unlocksContinentOnClear;
 		const algumEstavaTrancado = grupos.some((g) => !gameState.isContinentUnlocked(g));
 		for (const grupo of grupos) gameState.unlockContinent(grupo);
-		if (!silent && algumEstavaTrancado) useToastStore.getState().pushToast("Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.", "success", "world");
+		if (!silent && algumEstavaTrancado) toastStore.getState().pushToast("Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.", "success", "world");
 	}
 	if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;

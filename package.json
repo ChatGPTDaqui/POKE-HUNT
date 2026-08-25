@@ -15,6 +15,7 @@
     "build:engine": "vite build --config vite.engine.config.ts && tsc -p tsconfig.app.json --declaration --emitDeclarationOnly --noEmit false --rootDir src --outDir authority/engine/types",
     "build:edge": "vite build --config vite.edge.config.ts",
     "edge:verificar": "node scripts/verify-edge-bundle.js",
+    "edge:quem-puxa": "node scripts/quem-puxa-no-edge.mjs",
     "catalog:gerar": "node scripts/generate-catalog.js",
     "catalog:migrar": "node scripts/migrate-catalog-to-postgres.js",
     "catalog:verificar": "node scripts/verify-catalog-diff.js",
