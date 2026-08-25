@@ -7,6 +7,7 @@ import { SPECIES } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
 import { RARITIES, type RarityKey } from '@/data/rarity'
 import { useUiStore } from '@/stores/uiStore'
+import { useAuthStore } from '@/stores/authStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
 import { GameButton, GameCard, GameCheck, GameInput, GameSelect, Recolhivel } from '@/components/game/controls'
 import { cn } from '@/lib/utils'
@@ -151,6 +152,7 @@ function LinhaDeLeilao({
 
 export function ComprarPokes() {
   const abrirPerfilPublico = useUiStore((s) => s.abrirPerfilPublico)
+  const meuId = useAuthStore((s) => s.user?.id ?? null)
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const [busca, setBusca] = useState('')
   // Tres filtros independentes (pedido explicito). Moeda comeca com as duas
@@ -362,14 +364,24 @@ export function ComprarPokes() {
                 {/* PH-119: o nome do vendedor era texto morto. Vira o caminho
                     pro perfil dele, e de lá pra conversa — negociar preço era
                     o pedido, e antes exigia achar o sujeito no Painel de
-                    Amigos, que só lista quem já é amigo. */}
-                <button
-                  type="button"
-                  className="underline decoration-dotted underline-offset-2 transition-colors hover:text-n200"
-                  onClick={() => abrirPerfilPublico({ userId: a.seller_id, nome: a.vendedor ?? '?' })}
-                >
-                  {a.vendedor}
-                </button>
+                    Amigos, que só lista quem já é amigo.
+
+                    O PRÓPRIO anúncio fica sem link: a vitrine NÃO esconde o que
+                    você mesmo anunciou, e o caminho terminaria num botão
+                    "Conversar" que o servidor recusa com "Voce nao pode mandar
+                    mensagem pra si mesmo" — erro depois do clique, para uma
+                    situação que dava pra não oferecer. */}
+                {a.seller_id === meuId ? (
+                  <span className="text-n400">{a.vendedor} (você)</span>
+                ) : (
+                  <button
+                    type="button"
+                    className="underline decoration-dotted underline-offset-2 transition-colors hover:text-n200"
+                    onClick={() => abrirPerfilPublico({ userId: a.seller_id, nome: a.vendedor ?? '?' })}
+                  >
+                    {a.vendedor}
+                  </button>
+                )}
                 {a.apenas_oferta && ` · ${a.ofertas ?? 0} oferta(s)`}
               </div>
             </div>

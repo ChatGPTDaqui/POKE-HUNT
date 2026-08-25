@@ -29,6 +29,7 @@ import { Painel } from '@/components/game/Painel'
 import { Carregando, GameButton } from '@/components/game/controls'
 import { perfilPublico } from '@/data/remote/rankingRpc'
 import { useUiStore } from '@/stores/uiStore'
+import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
 
 function formatarDuracao(segundos: number): string {
@@ -49,6 +50,7 @@ export function PerfilPublico() {
   const alvo = useUiStore((s) => s.perfilPublicoAlvo)
   const fechar = useUiStore((s) => s.fecharPerfilPublico)
   const abrirCorreioCom = useUiStore((s) => s.abrirCorreioCom)
+  const meuId = useAuthStore((s) => s.user?.id ?? null)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['perfil-publico', alvo?.userId],
@@ -130,15 +132,28 @@ export function PerfilPublico() {
             </div>
           )}
 
-          <GameButton
-            className="mt-[.2em] w-full"
-            onClick={() => abrirCorreioCom({ userId: data.userId, nick: data.nome })}
-          >
-            <ChatCircle className="text-[1.1em]" /> Conversar
-          </GameButton>
-          <p className="px-[.2em] text-[.7em] leading-snug text-n500">
-            Abre o Correio já na conversa com {data.nome}. Não precisa ser amigo.
-          </p>
+          {/* Conversar consigo mesmo é recusado pelo servidor ("Voce nao pode
+              mandar mensagem pra si mesmo"). O anúncio próprio já não vira link
+              em `ComprarPokes`, mas a checagem fica aqui também: esta tela é
+              alcançável por qualquer caminho que passe um `userId`, e oferecer
+              um botão que só produz erro é pior que não oferecer. */}
+          {data.userId === meuId ? (
+            <p className="mt-[.2em] rounded-[.45em] border border-n800 px-[.55em] py-[.5em] text-center text-[.8em] text-n400">
+              Este é o seu perfil, do jeito que os outros jogadores veem.
+            </p>
+          ) : (
+            <>
+              <GameButton
+                className="mt-[.2em] w-full"
+                onClick={() => abrirCorreioCom({ userId: data.userId, nick: data.nome })}
+              >
+                <ChatCircle className="text-[1.1em]" /> Conversar
+              </GameButton>
+              <p className="px-[.2em] text-[.7em] leading-snug text-n500">
+                Abre o Correio já na conversa com {data.nome}. Não precisa ser amigo.
+              </p>
+            </>
+          )}
         </div>
       )}
     </Painel>

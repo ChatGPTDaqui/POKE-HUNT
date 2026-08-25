@@ -149,8 +149,38 @@ describe('a tela de perfil público não alcança dado privado (PH-119)', () => 
   it('NÃO tem ação que só faz sentido em si mesmo', () => {
     // "Sair da conta" e "reiniciar o jogo" moram no perfil próprio. Um deles
     // aparecer aqui seria o pior tipo de bug de UI: destrutivo e plausível.
-    for (const proibido of ['signOut', 'useAuthStore', 'reiniciar']) {
+    //
+    // `useAuthStore` NÃO entra nesta lista: ele é usado para saber quem é o
+    // jogador e esconder o "Conversar" no próprio perfil — leitura de
+    // identidade, não de save. O que não pode é `useGameStateStore`, que é o
+    // caso do teste acima.
+    for (const proibido of ['signOut', 'reiniciar']) {
       expect(fonte, `PerfilPublico menciona "${proibido}"`).not.toContain(proibido)
     }
+  })
+
+  it('não oferece "Conversar" no próprio perfil', () => {
+    // O servidor recusa mensagem para si mesmo ("Voce nao pode mandar mensagem
+    // pra si mesmo"), e a vitrine do Mercado NÃO esconde o que você mesmo
+    // anunciou — então o caminho existe de verdade. Oferecer um botão que só
+    // produz erro é pior que não oferecer.
+    expect(fonte).toContain('data.userId === meuId')
+  })
+})
+
+describe('o anúncio do próprio jogador não vira link (PH-119)', () => {
+  const FONTE = import.meta.glob('/src/features/mercado/components/ComprarPokes.tsx', {
+    query: '?raw', import: 'default', eager: true,
+  }) as Record<string, string>
+
+  const fonte = Object.values(FONTE)[0]
+
+  it('compara o vendedor com o jogador antes de linkar', () => {
+    // `mercadoPokes` lê `mercado_anuncios_ativos` sem excluir `seller_id = eu`,
+    // então o próprio anúncio aparece na vitrine. Sem esta checagem o nome
+    // viraria link para o próprio perfil, e de lá para um "Conversar" que o
+    // servidor recusa — erro depois do clique, numa situação que dava para não
+    // oferecer.
+    expect(fonte).toContain('a.seller_id === meuId')
   })
 })
