@@ -3960,16 +3960,6 @@ export const ABILITIES_DATA: AbilitiesData = {
     "target": "aoe",
     "accuracy": 100
   },
-  "hidden_power": {
-    "id": "hidden_power",
-    "name": "Hidden Power",
-    "type": "NORMAL",
-    "category": "special",
-    "power": 60,
-    "pp": 15,
-    "target": "single",
-    "accuracy": 100
-  },
   "trump_card": {
     "id": "trump_card",
     "name": "Trump Card",
@@ -5636,6 +5626,16 @@ export const ABILITIES_DATA: AbilitiesData = {
     "pp": 5,
     "target": "single",
     "healPercent": 50,
+    "accuracy": 100
+  },
+  "hidden_power": {
+    "id": "hidden_power",
+    "name": "Hidden Power",
+    "type": "NORMAL",
+    "category": "special",
+    "power": 60,
+    "pp": 15,
+    "target": "single",
     "accuracy": 100
   },
   "shadow_ball": {

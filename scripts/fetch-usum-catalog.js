@@ -376,6 +376,41 @@ function arestasReaisDoRecorte(cadeiaPorUrl, speciesApi, dexPorNome) {
   return [...porPar.values()].sort((a, b) => a.de.localeCompare(b.de) || a.para.localeCompare(b.para));
 }
 
+/**
+ * Especies que TEM pre-evolucao nos jogos, sem recorte de dex nenhum (PH-150).
+ *
+ * Diferente de `arestasReaisDoRecorte`, que so olha par cujos DOIS lados cabem
+ * em `DEX_MAX`. Aqui interessa a pergunta oposta: "esta especie e uma forma
+ * evoluida?", e a resposta certa nao depende de o pai dela caber no recorte.
+ *
+ * Existe porque `removerGolpesDeRecordador` respondia isso pelo ELENCO. O
+ * Sudowoodo evolui de Bonsly, que e o #438 e nao entra: sem pai no elenco ele
+ * passava por estagio-base, e o bloco de nivel 1 dele — que na verdade e a
+ * lista do Recordador de uma forma evoluida — era mantido inteiro, com
+ * `wood_hammer` (120 de poder) num POKE selvagem de nivel 1.
+ *
+ * Sao cinco especies na faixa atual (sudowoodo, mantine, marill, snorlax,
+ * wobbuffet), e a conta muda a cada faixa de dex nova — dai a resposta vir da
+ * cadeia, e nao de uma lista escrita a mao.
+ */
+function especiesComPaiReal(cadeiaPorUrl, speciesApi) {
+  const comPai = new Set();
+  const anda = (no) => {
+    for (const filho of no.evolves_to) {
+      comPai.add(chaveDeEspecie(filho.species.name));
+      anda(filho);
+    }
+  };
+  const vistas = new Set();
+  for (const s of speciesApi) {
+    const url = s.evolution_chain && s.evolution_chain.url;
+    if (!url || vistas.has(url) || !cadeiaPorUrl[url]) continue;
+    vistas.add(url);
+    anda(cadeiaPorUrl[url].chain);
+  }
+  return comPai;
+}
+
 // Preenche `stoneType` nas opcoes especiais de quem tem ramo. Roda DEPOIS do
 // catalogo inteiro montado porque precisa do tipo primario do DESTINO, e o
 // destino pode ter sido processado depois da origem.
@@ -536,7 +571,9 @@ async function main() {
     if (!m) continue;
     poderPorGolpe[candidatos[i].replace(/-/g, '_')] = api.valoresDeGolpeNoUsum(m, ordem).power || 0;
   }
-  const golpesRemovidos = api.removerGolpesDeRecordador(especies, poderPorGolpe);
+  const golpesRemovidos = api.removerGolpesDeRecordador(
+    especies, poderPorGolpe, especiesComPaiReal(cadeiaPorUrl, speciesApi),
+  );
   console.log(`  golpes de recordador removidos: ${golpesRemovidos} linhas`);
   for (const especie of especies) {
     for (const g of especie.golpes) golpesUsados.add(g.chave.replace(/_/g, '-'));
@@ -694,6 +731,12 @@ async function main() {
     // cabecalho de `arestasReaisDoRecorte`. E contra isto que
     // `src/data/todasAsEvolucoes.test.ts` compara o catalogo.
     arestasReais: arestasReaisDoRecorte(cadeiaPorUrl, speciesApi, dexPorNome),
+    // Quem e FORMA EVOLUIDA nos jogos, sem recorte de dex (PH-150) — inclui
+    // quem tem o pai fora do elenco, que e justamente o caso que o gerador
+    // errava. Emitido pelo mesmo motivo de `arestasReais`: a fonte disto e
+    // `scripts/.cache/pokeapi/`, que e gitignored, entao um teste que lesse de
+    // la mediria o VAZIO no CI.
+    formasEvoluidas: [...especiesComPaiReal(cadeiaPorUrl, speciesApi)].sort(),
   };
   fs.writeFileSync(ARQUIVO_CATALOGO, JSON.stringify(catalogo, null, 1) + '\n');
   // So no recorte padrao: este arquivo e a EVIDENCIA de uma decisao tomada pro

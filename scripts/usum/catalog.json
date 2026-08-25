@@ -10370,10 +10370,6 @@
      "nivel": 1
     },
     {
-     "chave": "revenge",
-     "nivel": 1
-    },
-    {
      "chave": "agility",
      "nivel": 6
     },
@@ -10981,18 +10977,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "defense_curl",
-     "nivel": 1
-    },
-    {
-     "chave": "growl",
-     "nivel": 1
-    },
-    {
-     "chave": "pound",
-     "nivel": 1
-    },
     {
      "chave": "tail_whip",
      "nivel": 5
@@ -11856,42 +11840,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "barrier",
-     "nivel": 1
-    },
-    {
-     "chave": "confusion",
-     "nivel": 1
-    },
-    {
-     "chave": "guard_swap",
-     "nivel": 1
-    },
-    {
-     "chave": "magical_leaf",
-     "nivel": 1
-    },
-    {
-     "chave": "misty_terrain",
-     "nivel": 1
-    },
-    {
-     "chave": "pound",
-     "nivel": 1
-    },
-    {
-     "chave": "power_swap",
-     "nivel": 1
-    },
-    {
-     "chave": "quick_guard",
-     "nivel": 1
-    },
-    {
-     "chave": "wide_guard",
-     "nivel": 1
-    },
     {
      "chave": "copycat",
      "nivel": 4
@@ -13071,18 +13019,6 @@
    ],
    "golpes": [
     {
-     "chave": "helping_hand",
-     "nivel": 1
-    },
-    {
-     "chave": "tackle",
-     "nivel": 1
-    },
-    {
-     "chave": "tail_whip",
-     "nivel": 1
-    },
-    {
      "chave": "thunder_shock",
      "nivel": 1
     },
@@ -13167,18 +13103,6 @@
    "golpes": [
     {
      "chave": "ember",
-     "nivel": 1
-    },
-    {
-     "chave": "helping_hand",
-     "nivel": 1
-    },
-    {
-     "chave": "tackle",
-     "nivel": 1
-    },
-    {
-     "chave": "tail_whip",
      "nivel": 1
     },
     {
@@ -13848,10 +13772,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "tackle",
-     "nivel": 1
-    },
     {
      "chave": "defense_curl",
      "nivel": 4
@@ -17621,27 +17541,7 @@
    ],
    "golpes": [
     {
-     "chave": "leaf_blade",
-     "nivel": 1
-    },
-    {
      "chave": "magical_leaf",
-     "nivel": 1
-    },
-    {
-     "chave": "mega_drain",
-     "nivel": 1
-    },
-    {
-     "chave": "stun_spore",
-     "nivel": 1
-    },
-    {
-     "chave": "sunny_day",
-     "nivel": 1
-    },
-    {
-     "chave": "sweet_scent",
      "nivel": 1
     },
     {
@@ -17705,14 +17605,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "tackle",
-     "nivel": 1
-    },
-    {
-     "chave": "water_gun",
-     "nivel": 1
-    },
     {
      "chave": "tail_whip",
      "nivel": 2
@@ -17904,15 +17796,7 @@
    ],
    "golpes": [
     {
-     "chave": "copycat",
-     "nivel": 1
-    },
-    {
      "chave": "slam",
-     "nivel": 1
-    },
-    {
-     "chave": "wood_hammer",
      "nivel": 1
     },
     {
@@ -19021,18 +18905,6 @@
      "nivel": 1
     },
     {
-     "chave": "helping_hand",
-     "nivel": 1
-    },
-    {
-     "chave": "tackle",
-     "nivel": 1
-    },
-    {
-     "chave": "tail_whip",
-     "nivel": 1
-    },
-    {
      "chave": "sand_attack",
      "nivel": 5
     },
@@ -19112,19 +18984,7 @@
    ],
    "golpes": [
     {
-     "chave": "helping_hand",
-     "nivel": 1
-    },
-    {
      "chave": "pursuit",
-     "nivel": 1
-    },
-    {
-     "chave": "tackle",
-     "nivel": 1
-    },
-    {
-     "chave": "tail_whip",
      "nivel": 1
     },
     {
@@ -19309,26 +19169,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "curse",
-     "nivel": 1
-    },
-    {
-     "chave": "hidden_power",
-     "nivel": 1
-    },
-    {
-     "chave": "power_gem",
-     "nivel": 1
-    },
-    {
-     "chave": "tackle",
-     "nivel": 1
-    },
-    {
-     "chave": "yawn",
-     "nivel": 1
-    },
     {
      "chave": "growl",
      "nivel": 5
@@ -21901,30 +21741,6 @@
    ],
    "golpes": [
     {
-     "chave": "bubble",
-     "nivel": 1
-    },
-    {
-     "chave": "bullet_seed",
-     "nivel": 1
-    },
-    {
-     "chave": "psybeam",
-     "nivel": 1
-    },
-    {
-     "chave": "roost",
-     "nivel": 1
-    },
-    {
-     "chave": "signal_beam",
-     "nivel": 1
-    },
-    {
-     "chave": "tackle",
-     "nivel": 1
-    },
-    {
      "chave": "supersonic",
      "nivel": 3
     },
@@ -22873,10 +22689,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "revenge",
-     "nivel": 1
-    },
     {
      "chave": "rolling_kick",
      "nivel": 1
@@ -29967,26 +29779,6 @@
    "_categoriaPokeapi": "field-effect"
   },
   {
-   "chave": "misty_terrain",
-   "nome": "Misty Terrain",
-   "tipo": "FAIRY",
-   "categoria": "status",
-   "alvo": "single",
-   "poder": 0,
-   "precisao": 100,
-   "pp": 10,
-   "status": null,
-   "chanceDeStatus": 0,
-   "alvoDoEfeito": "target",
-   "mudancasDeStat": [],
-   "chanceDeStat": 0,
-   "chanceDeFlinch": 0,
-   "estagiosDeCritico": 0,
-   "drenoPercentual": 0,
-   "curaPercentual": 0,
-   "_categoriaPokeapi": "whole-field-effect"
-  },
-  {
    "chave": "moonblast",
    "nome": "Moonblast",
    "tipo": "FAIRY",
@@ -36073,5 +35865,167 @@
    "para": "golbat",
    "porNivel": 22
   }
+ ],
+ "formasEvoluidas": [
+  "alakazam",
+  "ambipom",
+  "ampharos",
+  "annihilape",
+  "arbok",
+  "arcanine",
+  "ariados",
+  "azumarill",
+  "bayleef",
+  "beedrill",
+  "bellossom",
+  "blastoise",
+  "blissey",
+  "butterfree",
+  "chansey",
+  "charizard",
+  "charmeleon",
+  "clefable",
+  "clefairy",
+  "clodsire",
+  "cloyster",
+  "crobat",
+  "croconaw",
+  "cursola",
+  "dewgong",
+  "dodrio",
+  "donphan",
+  "dragonair",
+  "dragonite",
+  "dudunsparce",
+  "dugtrio",
+  "electabuzz",
+  "electivire",
+  "electrode",
+  "espeon",
+  "exeggutor",
+  "farigiraf",
+  "fearow",
+  "feraligatr",
+  "flaaffy",
+  "flareon",
+  "forretress",
+  "furret",
+  "gengar",
+  "glaceon",
+  "gliscor",
+  "gloom",
+  "golbat",
+  "golduck",
+  "golem",
+  "granbull",
+  "graveler",
+  "gyarados",
+  "haunter",
+  "hitmonchan",
+  "hitmonlee",
+  "hitmontop",
+  "honchkrow",
+  "houndoom",
+  "hypno",
+  "ivysaur",
+  "jigglypuff",
+  "jolteon",
+  "jumpluff",
+  "jynx",
+  "kabutops",
+  "kadabra",
+  "kakuna",
+  "kingdra",
+  "kingler",
+  "kleavor",
+  "lanturn",
+  "leafeon",
+  "ledian",
+  "lickilicky",
+  "machamp",
+  "machoke",
+  "magcargo",
+  "magmar",
+  "magmortar",
+  "magneton",
+  "magnezone",
+  "mamoswine",
+  "mantine",
+  "marill",
+  "marowak",
+  "meganium",
+  "metapod",
+  "mismagius",
+  "mr__mime",
+  "mr_rime",
+  "muk",
+  "nidoking",
+  "nidoqueen",
+  "nidorina",
+  "nidorino",
+  "ninetales",
+  "noctowl",
+  "octillery",
+  "omastar",
+  "overqwil",
+  "parasect",
+  "perrserker",
+  "persian",
+  "pidgeot",
+  "pidgeotto",
+  "pikachu",
+  "piloswine",
+  "politoed",
+  "poliwhirl",
+  "poliwrath",
+  "porygon2",
+  "porygon_z",
+  "primeape",
+  "pupitar",
+  "quagsire",
+  "quilava",
+  "raichu",
+  "rapidash",
+  "raticate",
+  "rhydon",
+  "rhyperior",
+  "sandslash",
+  "scizor",
+  "seadra",
+  "seaking",
+  "sirfetchd",
+  "skiploom",
+  "slowbro",
+  "slowking",
+  "sneasler",
+  "snorlax",
+  "starmie",
+  "steelix",
+  "sudowoodo",
+  "sunflora",
+  "sylveon",
+  "tangrowth",
+  "tentacruel",
+  "togekiss",
+  "togetic",
+  "typhlosion",
+  "tyranitar",
+  "umbreon",
+  "ursaluna",
+  "ursaring",
+  "vaporeon",
+  "venomoth",
+  "venusaur",
+  "victreebel",
+  "vileplume",
+  "wartortle",
+  "weavile",
+  "weepinbell",
+  "weezing",
+  "wigglytuff",
+  "wobbuffet",
+  "wyrdeer",
+  "xatu",
+  "yanmega"
  ]
 }
