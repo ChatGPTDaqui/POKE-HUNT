@@ -34,6 +34,16 @@ export interface KillResult {
   captured: boolean
   capturedPoke: PokeInstance | null
   droppedItems: string[]
+  /**
+   * PH-169/PH-171: os 3 campos abaixo so vem preenchidos na entrada SINTETICA
+   * que `stepWorld` empurra no bloco `playerJustFainted` (nao e um abate de
+   * verdade, os campos acima ficam zerados/false/null nela) — carregam o que
+   * `applyDeathExpPenalty` de fato debitou, pro resumo do flush poder dizer
+   * pro client quanto de queda de XP e LEGITIMA nesta janela.
+   */
+  playerFainted?: boolean
+  expLostToPenalty?: number
+  leveledDown?: boolean
 }
 
 // Tetos de trabalho por chamada, pra um gap muito longo nao travar (nem
@@ -104,6 +114,14 @@ export interface OfflineSimSummary {
   stoppedEarly: boolean // desmaiou sem jeito de auto-reanimar (sem toggle, ou sem `revive` sobrando)
   truncated: boolean // acabou o orcamento de tempo real antes de cobrir o gap inteiro
   stepSeconds: number // o passo realmente usado (pode ser mais grosso que o pedido — ver DEFAULT_MAX_STEPS)
+  /**
+   * PH-168: quantas vezes o POKE do jogador desmaiou nesta janela, e quanto de
+   * XP a penalidade de morte (`applyDeathExpPenalty`) debitou no total — o
+   * orcamento de queda LEGITIMA que `aplicarEstadoDoServidor` (autoridade.ts)
+   * usa pra distinguir penalidade real de descompasso de janela do flush.
+   */
+  mortesDoJogador: number
+  expPerdidaPorMorte: number
 }
 
 export function createEmptySummary(): OfflineSimSummary {
@@ -131,6 +149,8 @@ export function createEmptySummary(): OfflineSimSummary {
     stoppedEarly: false,
     truncated: false,
     stepSeconds: 0,
+    mortesDoJogador: 0,
+    expPerdidaPorMorte: 0,
   }
 }
 
@@ -178,6 +198,14 @@ export function simulateWorldSeconds({
 
     const kills = stepFn(world, dt, { silent: true }) || []
     for (const result of kills) {
+      // PH-168: entrada sintetica de desmaio (ver KillResult) nao e abate —
+      // conta a parte, ANTES do `summary.kills += 1` de baixo, senao um
+      // desmaio sem abate no mesmo tick inflaria a contagem de abates.
+      if (result.playerFainted) {
+        summary.mortesDoJogador += 1
+        summary.expPerdidaPorMorte += result.expLostToPenalty ?? 0
+        continue
+      }
       summary.kills += 1
       summary.gold += result.gold
       summary.xp += result.xp

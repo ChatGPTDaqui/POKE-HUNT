@@ -859,9 +859,27 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   if (playerJustFainted && world.player) {
     // Roda mesmo quando silent — mesma regra de todo outro pipeline de
     // recompensa/penalidade aqui, so o toast e ao-vivo-so.
+    const expAntesDaPenalidade = world.player.poke.exp
     const penaltyResult = applyDeathExpPenalty(world.player.poke)
     world.player.poke = penaltyResult.poke
     gameState.updatePokeInstance(penaltyResult.poke.uid, () => penaltyResult.poke)
+    // PH-169: entrada SINTETICA (nao e abate) — so pro resumo do flush
+    // (offlineSimSystem.ts) saber quanto de queda de XP nesta janela e
+    // LEGITIMA. Campos de abate ficam zerados/false/null de proposito.
+    kills.push({
+      gold: 0,
+      ouroDeAutoVenda: 0,
+      xp: 0,
+      leveledUp: false,
+      trainerLeveledUp: false,
+      isShiny: false,
+      captured: false,
+      capturedPoke: null,
+      droppedItems: [],
+      playerFainted: true,
+      expLostToPenalty: Math.max(0, expAntesDaPenalidade - penaltyResult.poke.exp),
+      leveledDown: penaltyResult.leveledDown,
+    })
     if (!silent) {
       toastStore.getState().pushToast(
         `${SPECIES[world.player.poke.speciesId].name} desmaiou!${penaltyResult.leveledDown ? ` Caiu para o nivel ${penaltyResult.level}.` : ''}`,
