@@ -55,23 +55,65 @@ jobs:
         #
         # 'migration list --linked' faz a pergunta certa sem precisar
         # reconstruir nada: compara os arquivos locais contra o que o
-        # Supabase tem registrado como aplicado. Pega os dois lados do
-        # mesmo incidente — migration commitada e nunca aplicada, E
-        # (o caso mais perigoso) migration aplicada direto sem nunca virar
-        # arquivo commitado.
+        # Supabase tem registrado como aplicado.
+        #
+        # ---------------------------------------------------------------
+        # PH-76: ORFA PENDENTE DE MERGE NAO E O MESMO QUE DDL NA MAO
+        # ---------------------------------------------------------------
+        # O passo 3 de docs/11-operacao.md manda aplicar `db push` DA BRANCH
+        # DE FEATURE, antes do PR. Enquanto essa PR nao mergear, o arquivo
+        # existe so nela — e pra todas as outras branches aquela migration
+        # aparece como orfa. Reprovar ai fazia seguir o fluxo documentado
+        # travar o CI de todo mundo: 26 PRs reprovadas de uma vez em 22/08,
+        # nenhuma delas mexendo em schema.
+        #
+        # A distincao e barata e objetiva: orfa legitima tem arquivo em
+        # ALGUMA branch do repositorio; DDL aplicada na mao (o incidente que
+        # o gate existe pra pegar, PH-32) nao tem em nenhuma.
+        #
+        # E nao aborta o job: a falha vai pro passo final, pros passos de par
+        # dev/public e de types RODAREM mesmo havendo orfa pendente. Antes
+        # eles ficavam inacessiveis atras deste, justo quando ha mudanca de
+        # schema em voo — que e quando mais importam.
         run: |
-          LISTA=$(supabase migration list --linked --output-format json)
-          echo "$LISTA" | jq -c '.migrations[]'
-          ORFAS=$(echo "$LISTA" | jq -r '.migrations[] | select(.local == "") | .remote')
-          if [ -n "$ORFAS" ]; then
-            echo "::error::Migration(s) aplicada(s) no banco remoto sem arquivo local correspondente: $ORFAS"
-            echo "Ou alguem aplicou mudanca direto (db query/dashboard) sem criar migration,"
-            echo "ou esta branch esta atrasada em relacao a uma migration ja mesclada em main."
-            echo "Resolver: 'git pull' pra ver se e so atraso; se nao for, criar o .sql que falta"
-            echo "e registrar com 'supabase migration repair --status applied <versao>'."
+          # 'migration list --linked' flanca a conexao ocasionalmente (visto
+          # 2x em 25/08: falha em ~30s sem imprimir nada, run seguinte no
+          # MESMO commit passa normal em minutos) -- retry pra nao reprovar
+          # PR por instabilidade de rede, nao por orfa de verdade.
+          LISTA=""
+          for tentativa in 1 2 3; do
+            if LISTA=$(supabase migration list --linked --output-format json); then
+              break
+            fi
+            echo "::warning::Tentativa ${tentativa}/3 de 'migration list --linked' falhou (provavel flake de conexao). Retentando..."
+            sleep 5
+          done
+          if [ -z "$LISTA" ]; then
+            echo "::error::'supabase migration list --linked' falhou 3x seguidas -- isto e falha de conexao/CLI, nao o gate de migration orfa. Ver logs do step."
             exit 1
           fi
-          echo "Toda migration aplicada no remoto tem arquivo local correspondente."
+          echo "$LISTA" | jq -c '.migrations[]'
+          ORFAS=$(echo "$LISTA" | jq -r '.migrations[] | select(.local == "") | .remote')
+          if [ -z "$ORFAS" ]; then
+            echo "Toda migration aplicada no remoto tem arquivo local correspondente."
+            exit 0
+          fi
+          # --tags pra alcancar tambem o que so existe em tag; --force porque
+          # refs podem ter sido reescritas por rebase em branch de feature.
+          git fetch --all --tags --force --quiet
+          ARQUIVOS_EM_QUALQUER_BRANCH=$(git log --all --diff-filter=A --name-only --pretty=format: -- supabase/migrations/ | sort -u)
+          FALHOU=0
+          for versao in $ORFAS; do
+            if echo "$ARQUIVOS_EM_QUALQUER_BRANCH" | grep -q "^supabase/migrations/${versao}_"; then
+              echo "::warning::Migration ${versao} esta aplicada no remoto e pendente de merge (o arquivo existe em outra branch). Nao e bloqueio: e a janela normal do passo 3 do fluxo de schema."
+            else
+              echo "::error::Migration ${versao} esta aplicada no banco remoto e NAO tem arquivo em nenhuma branch — isto e DDL aplicada na mao (db query, dashboard ou apply_migration sem commitar)."
+              echo "  Resolver: reconstruir o .sql com o MESMO timestamp e registrar com 'supabase migration repair --status applied ${versao}'."
+              echo "  NAO rode 'migration repair --status reverted' — o CLI as vezes sugere isso, e marcaria como revertida uma migration que esta de fato aplicada. O deploy seguinte tentaria recriar objeto que ja existe e quebraria."
+              FALHOU=1
+            fi
+          done
+          echo "ORFA_APLICADA_NA_MAO=$FALHOU" >> "$GITHUB_ENV"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
@@ -132,3 +174,15 @@ jobs:
           echo "database.types.ts em sincronia com o schema remoto."
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Resultado do gate
+        # Roda SEMPRE (inclusive se um passo anterior falhou) pra transformar a
+        # orfa aplicada na mao em reprovacao — o passo que a detecta nao aborta
+        # de proposito, pros passos de par dev/public e de types rodarem.
+        if: always()
+        run: |
+          if [ "${ORFA_APLICADA_NA_MAO:-0}" = "1" ]; then
+            echo "::error::Reprovado: ha migration aplicada no banco remoto sem arquivo em nenhuma branch. Veja o passo 'Existe migration aplicada no remoto que nao existe local?'."
+            exit 1
+          fi
+          echo "Gate ok."
