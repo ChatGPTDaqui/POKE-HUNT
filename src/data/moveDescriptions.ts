@@ -387,6 +387,18 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   thunder_fang: 'Uma mordida eletrificada que pode paralisar ou fazer recuar.',
   calm_mind: 'Concentra-se e eleva o Ataque Especial e a Defesa Especial.',
   eruption: 'Uma erupcao devastadora — quanto mais HP o usuario tem, mais forte.',
+
+  // As 8 chaves que entraram com as 19 especies de PH-145. `flower_shield`
+  // saiu na mesma leva: era o unico golpe que so a Sunflora aprendia, e ela
+  // perdeu o bloco de nivel 1 ao ganhar uma pre-evolucao no catalogo.
+  egg_bomb: 'Arremessa um ovo enorme com forca no alvo.',
+  circle_throw: 'Um arremesso circular que joga o alvo pra longe.',
+  icicle_crash: 'Despeja grandes pedacos de gelo; pode fazer o alvo hesitar.',
+  spotlight: 'Ilumina o alvo e obriga todo mundo a mirar nele neste turno.',
+  triple_kick: 'Ate tres chutes seguidos, cada um mais forte que o anterior.',
+  morning_sun: 'Recupera HP; quanto melhor o tempo, mais cura.',
+  gravity: 'Aumenta a gravidade por cinco turnos — ninguem consegue flutuar.',
+  meteor_mash: 'Um soco em velocidade de meteoro; pode elevar o Ataque.',
   lava_plume: 'Cospe lava em todos ao redor; pode queimar.',
   bubble_beam: 'Um jato de bolhas que pode reduzir a Velocidade.',
   ice_fang: 'Uma mordida congelante que pode congelar ou fazer recuar.',
@@ -450,7 +462,6 @@ export const MOVE_DESCRIPTIONS: Record<string, string> = {
   bounce: 'Salta bem alto e cai sobre o alvo; pode paralisar.',
   memento: 'Derruba muito o Ataque e o Ataque Especial do alvo.',
   grass_whistle: 'Uma melodia agradavel que faz o alvo dormir.',
-  flower_shield: 'Uma energia floral que eleva a Defesa de todos os tipos Planta.',
   bug_bite: 'Morde e come a fruta que o alvo estiver segurando.',
   silver_wind: 'Um vento de poeira prateada; pode elevar todos os atributos.',
   bug_buzz: 'Uma onda sonora que pode baixar a Defesa Especial do alvo.',

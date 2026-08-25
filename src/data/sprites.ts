@@ -31,6 +31,10 @@ export const SPECIES_WITH_ART: Set<string> = new Set([
 
   // Kanto/legendary species added with the "Novo Continente" hunts:
   'kingdra', 'politoed', 'golem', 'porygon2', 'scizor',
+
+  // PH-145: as evolucoes por pedra/troca/amizade que so passaram a existir
+  // quando o catalogo ganhou essas arestas.
+  'vileplume', 'bellossom', 'exeggutor', 'poliwrath', 'slowking', 'cloyster', 'starmie', 'wigglytuff', 'vaporeon', 'jolteon', 'flareon', 'espeon', 'umbreon', 'raichu', 'crobat', 'hitmontop', 'clefairy', 'togetic', 'clefable',
 ]);
 
 export function spriteUrl(speciesId: string, isShiny = false): string | null {

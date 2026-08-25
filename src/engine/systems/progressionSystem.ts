@@ -105,7 +105,17 @@ export function evolutionStoneRequirement(species: Species, opcao?: OpcaoDeEvolu
   // exatamente o que todo chamador antigo ja media.
   const especial = opcao ? opcao.isSpecial : species.isSpecialEvolution === true
   if (!especial) return null
-  return { itemId: stoneItemId(species.type), count: SPECIAL_EVOLUTION_STONE_COUNT, type: species.type }
+  // PH-145: o TIPO da pedra vem da opcao quando ela diz qual e — so acontece em
+  // especie com ramo, e ai e o tipo do DESTINO. E o que separa os cinco
+  // caminhos do Eevee: Flareon custa FOGO, Vaporeon AGUA, Jolteon ELETRICO,
+  // Espeon PSIQUICO, Umbreon SOMBRIO.
+  //
+  // Sem `stoneType` continua sendo o tipo primario da ORIGEM. Nao e descuido:
+  // e o comportamento que as nove evolucoes de troca sempre tiveram, e trocar
+  // pra "tipo do destino" em todo mundo faria `onix -> steelix` deixar de
+  // cobrar ROCHA e passar a cobrar ACO no meio do caminho de quem ja juntava.
+  const tipo = opcao?.stoneType ?? species.type
+  return { itemId: stoneItemId(tipo), count: SPECIAL_EVOLUTION_STONE_COUNT, type: tipo }
 }
 
 export type EvolveResult =

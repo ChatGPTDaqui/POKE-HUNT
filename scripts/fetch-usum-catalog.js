@@ -37,6 +37,12 @@ const api = require('./lib/pokeapi.js');
 const OUT_DIR = path.join(__dirname, 'usum');
 const DEX_MAX = 251; // Kanto + Johto: o elenco deste jogo nao muda nesta leva.
 
+// Nivel exigido por toda evolucao que na origem depende de pedra, troca ou
+// amizade — mecanicas que este jogo nao tem. Espelha
+// `src/data/pokes.ts#SPECIAL_EVOLUTION_LEVEL`; as duas pontas precisam ser o
+// mesmo numero, e `src/data/custoDaEvolucaoEspecial.test.ts` guarda isso.
+const NIVEL_DE_EVOLUCAO_ESPECIAL = 80;
+
 // ---------------------------------------------------------------------------
 // Chaves de especie
 // ---------------------------------------------------------------------------
@@ -214,17 +220,38 @@ const STAT_POKEAPI = {
 // ---------------------------------------------------------------------------
 // Evolucao
 // ---------------------------------------------------------------------------
-// O modelo do jogo suporta UM alvo de evolucao por especie, por NIVEL
-// (`evolvesTo` + `evolvesAtLevel`). Evolucao por troca/pedra/amizade nao tem
-// gatilho aqui: essas especies saem com `evolvesTo` vazio e sao tratadas pelo
-// patch hand-authored `src/data/pokes.ts#SPECIAL_EVOLUTIONS` (Nivel 80 + 20
-// Pedras do tipo primario — criterio ja existente, mantido por decisao
-// explicita do usuario).
+// Toda aresta de evolucao real da especie, dentro do recorte 1-DEX_MAX, com o
+// GATE que cada uma exige. Ate PH-145 este extrator devolvia UMA aresta e so
+// aceitava gatilho de NIVEL: evolucao por pedra, troca ou amizade saia com
+// `evolvesTo` vazio, e o jogo simplesmente nao evoluia aquela especie. Era o
+// que deixava Growlithe sem virar Arcanine com Arcanine ja no elenco, e o que
+// mantinha Raichu, as cinco Eeveelutions e outras 13 especies FORA do catalogo
+// — o elenco e o fecho transitivo das cadeias (sync-planilha.js), entao a
+// aresta que nao existe nao traz o destino junto.
 //
-// Especie com MAIS DE UMA evolucao por nivel (so Tyrogue, no elenco 1-251)
-// escolhe deterministicamente a de menor numero de Pokedex e registra o
-// descarte em `evolucoesDescartadas` — some do jogo em silencio seria pior.
-function extrairEvolucao(chain, nomeApi, dexPorNome) {
+// AS DUAS REGRAS DE GATE
+//
+//   1. Gatilho `level-up` com `min_level`  -> nivel real, opcao comum.
+//   2. Qualquer outro gatilho (pedra, troca, amizade, item segurado)
+//      -> NIVEL_DE_EVOLUCAO_ESPECIAL + cobranca de pedras.
+//
+// A regra 2 e uma decisao de produto, nao uma traducao: pedra, troca e amizade
+// nao existem como mecanica neste jogo. Em vez de inventar tres sistemas novos,
+// as tres caem no gate que o jogo JA tem — nivel 80 + 40 pedras do tipo, o
+// mesmo criterio que as nove evolucoes de troca ja usavam antes desta mudanca.
+//
+// `stoneType`: DE QUE TIPO E A PEDRA
+//
+// Emitido so quando a especie tem MAIS DE UM destino. Ai a pedra e do tipo
+// primario do DESTINO, que e o que torna a escolha do Eevee legivel — Flareon
+// custa pedra de FOGO, Vaporeon de AGUA, Jolteon de ELETRICO, Espeon de
+// PSIQUICO, Umbreon de SOMBRIO.
+//
+// Com destino UNICO sai `null`, e quem consome cobra a pedra do tipo primario
+// da especie de ORIGEM (o comportamento que ja existia). Isso e deliberado:
+// mudar a regra pra todo mundo trocaria a pedra de `onix -> steelix` de ROCHA
+// pra ACO e encareceria, no meio do caminho, quem ja estava juntando.
+function extrairEvolucoes(chain, nomeApi, dexPorNome) {
   const encontrado = (function busca(no) {
     if (no.species.name === nomeApi) return no;
     for (const filho of no.evolves_to) {
@@ -233,32 +260,93 @@ function extrairEvolucao(chain, nomeApi, dexPorNome) {
     }
     return null;
   })(chain.chain);
-  if (!encontrado) return { evolvesTo: null, evolvesAtLevel: null, descartadas: [] };
+  if (!encontrado) return { evolucoes: [], descartadas: [] };
 
-  const porNivel = [];
-  const outras = [];
+  const opcoes = [];
+  const descartadas = [];
   for (const filho of encontrado.evolves_to) {
     // As cadeias da PokeAPI nao tem recorte de geracao: o galho de Meowth
     // inclui Perrserker (Gen8, forma de Galar) e o de Wooper inclui Clodsire
     // (Gen9). Nenhum dos dois existe no Ultra Sun — e nenhum existe neste
-    // jogo, cujo elenco e o dex 1-251. Cortar aqui evita que um alvo
-    // inexistente vire `evolvesTo` de alguem.
-    if ((dexPorNome[filho.species.name] || 9999) > DEX_MAX) continue;
+    // jogo, cujo elenco e o dex 1-DEX_MAX. Cortar aqui evita que um alvo
+    // inexistente vire destino de alguem.
+    if ((dexPorNome[filho.species.name] || 9999) > DEX_MAX) {
+      descartadas.push(filho.species.name);
+      continue;
+    }
     const gatilhoDeNivel = filho.evolution_details.find(
       (d) => d.trigger.name === 'level-up' && d.min_level != null
     );
-    if (gatilhoDeNivel) porNivel.push({ nome: filho.species.name, nivel: gatilhoDeNivel.min_level });
-    else outras.push(filho.species.name);
+    opcoes.push({
+      to: chaveDeEspecie(filho.species.name),
+      dex: dexPorNome[filho.species.name] || 9999,
+      atLevel: gatilhoDeNivel ? gatilhoDeNivel.min_level : NIVEL_DE_EVOLUCAO_ESPECIAL,
+      isSpecial: !gatilhoDeNivel,
+    });
   }
-  if (!porNivel.length) return { evolvesTo: null, evolvesAtLevel: null, descartadas: [] };
+  // Ordem por numero de Pokedex: determinismo entre rodadas do script, e e ela
+  // que decide qual destino vira o `evolvesTo` de compatibilidade la embaixo.
+  opcoes.sort((a, b) => a.dex - b.dex);
+  return { evolucoes: opcoes.map(({ dex: _dex, ...o }) => o), descartadas };
+}
 
-  porNivel.sort((a, b) => (dexPorNome[a.nome] || 9999) - (dexPorNome[b.nome] || 9999));
-  const escolhida = porNivel[0];
-  return {
-    evolvesTo: chaveDeEspecie(escolhida.nome),
-    evolvesAtLevel: escolhida.nivel,
-    descartadas: porNivel.slice(1).map((e) => e.nome).concat(outras),
+// Toda aresta de evolucao REAL do recorte, com o gatilho cru da PokeAPI e sem
+// passar por decisao nenhuma deste jogo.
+//
+// Existe pro teste `src/data/todasAsEvolucoes.test.ts` ter contra o que medir. A
+// primeira versao daquele teste lia `scripts/.cache/pokeapi/evolution_chain_*`
+// direto — e o `.cache/` e gitignored, entao no CI ele teria medido o vazio.
+// Emitir a lista pro catalogo (que E versionado) resolve sem duplicar decisao:
+// aqui so sai "a origem, o destino, e o nivel se houver gatilho de nivel". Como
+// o gate vira nivel 80 + pedras e escolha DESTE jogo, e nao esta neste campo, o
+// teste continua comparando o jogo com a fonte em vez de consigo mesmo.
+function arestasReaisDoRecorte(cadeiaPorUrl, speciesApi, dexPorNome) {
+  const porPar = new Map();
+  const anda = (no) => {
+    for (const filho of no.evolves_to) {
+      const de = no.species.name;
+      const para = filho.species.name;
+      if ((dexPorNome[de] || 9999) <= DEX_MAX && (dexPorNome[para] || 9999) <= DEX_MAX) {
+        const chave = `${chaveDeEspecie(de)}|${chaveDeEspecie(para)}`;
+        if (!porPar.has(chave)) {
+          const nivel = filho.evolution_details.find(
+            (d) => d.trigger.name === 'level-up' && d.min_level != null
+          );
+          porPar.set(chave, {
+            de: chaveDeEspecie(de),
+            para: chaveDeEspecie(para),
+            // null = nao ha gatilho de nivel nenhum: pedra, troca ou amizade.
+            porNivel: nivel ? nivel.min_level : null,
+          });
+        }
+      }
+      anda(filho);
+    }
   };
+  const vistas = new Set();
+  for (const s of speciesApi) {
+    const url = s.evolution_chain && s.evolution_chain.url;
+    if (!url || vistas.has(url)) continue;
+    vistas.add(url);
+    anda(cadeiaPorUrl[url].chain);
+  }
+  return [...porPar.values()].sort((a, b) => a.de.localeCompare(b.de) || a.para.localeCompare(b.para));
+}
+
+// Preenche `stoneType` nas opcoes especiais de quem tem ramo. Roda DEPOIS do
+// catalogo inteiro montado porque precisa do tipo primario do DESTINO, e o
+// destino pode ter sido processado depois da origem.
+function preencherTipoDePedra(especies) {
+  const tipo1PorChave = {};
+  for (const e of especies) tipo1PorChave[e.chave] = e.tipo1;
+  for (const e of especies) {
+    if (!e.evolucoes || e.evolucoes.length < 2) continue;
+    for (const opcao of e.evolucoes) {
+      if (!opcao.isSpecial) continue;
+      const tipo = tipo1PorChave[opcao.to];
+      if (tipo) opcao.stoneType = tipo;
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -318,7 +406,7 @@ async function main() {
       if (alvo) base[alvo] = st.base_stat;
     }
 
-    const evo = extrairEvolucao(cadeiaPorUrl[s.evolution_chain.url], s.name, dexPorNome);
+    const evo = extrairEvolucoes(cadeiaPorUrl[s.evolution_chain.url], s.name, dexPorNome);
     if (evo.descartadas.length) evolucoesDescartadas[chave] = evo.descartadas;
 
     const golpes = api.golpesDeNivelNoUsum(p);
@@ -339,8 +427,13 @@ async function main() {
       // converter aqui perderia precisao e esconderia a unidade da fonte.
       pesoHg: p.weight,
       curva,
-      evolvesTo: evo.evolvesTo,
-      evolvesAtLevel: evo.evolvesAtLevel,
+      // TODAS as arestas de evolucao, cada uma com seu gate (PH-145). Os dois
+      // campos abaixo apontam pro PRIMEIRO destino e existem so por
+      // compatibilidade: eles sao o que a coluna 'Evolui Para (chave)' da
+      // planilha sempre carregou, e o que todo leitor antigo continua lendo.
+      evolucoes: evo.evolucoes,
+      evolvesTo: evo.evolucoes.length ? evo.evolucoes[0].to : null,
+      evolvesAtLevel: evo.evolucoes.length ? evo.evolucoes[0].atLevel : null,
       // HABILIDADE (o que os jogos chamam de "Ability" — a passiva da especie,
       // nao o golpe). `slot` 1 e 2 sao as normais, sorteadas no encontro
       // selvagem; `is_hidden` e a Habilidade Oculta, que no Ultra Sun so sai
@@ -370,14 +463,37 @@ async function main() {
       })),
     });
   }
+  preencherTipoDePedra(especies);
   console.log(`  especies: ${especies.length}`);
+  const comRamo = especies.filter((e) => e.evolucoes.length > 1);
+  const especiais = especies.reduce((n, e) => n + e.evolucoes.filter((o) => o.isSpecial).length, 0);
+  console.log(`  evolucoes: ${especies.reduce((n, e) => n + e.evolucoes.length, 0)} arestas, ` +
+    `${especiais} por pedra/troca/amizade, ${comRamo.length} especies com mais de um destino`);
 
   // So golpe com nivel real, aprendido pela propria especie — sem bloco de
   // Recordador (ver cabecalho de `removerGolpesDeRecordador`). `golpesUsados`
   // e reconstruido a partir do resultado JA FILTRADO, senao a lista de golpes
   // buscados na PokeAPI abaixo traria entrada de golpe que nenhuma especie
   // aprende mais.
-  const golpesRemovidos = api.removerGolpesDeRecordador(especies);
+  //
+  // O PODER de cada candidato e resolvido ANTES do filtro porque o escape
+  // dentro da funcao precisa dele: golpe forte devolvido pro nivel 1 daria
+  // Hydro Pump a um Cloyster selvagem Lv5. Sao os mesmos `/move/` que a secao
+  // de golpes busca logo abaixo, e o cache em disco faz a segunda leitura sair
+  // de graca — a alternativa (reposicionar depois, com o catalogo pronto)
+  // deixaria a regra em dois lugares.
+  // `golpesUsados` so e montado DEPOIS do filtro (e de proposito: ele nao pode
+  // listar golpe que ninguem aprende mais), entao a lista de candidatos sai
+  // direto das especies — a uniao ANTES do corte.
+  const candidatos = [...new Set(especies.flatMap((e) => e.golpes.map((g) => g.chave.replace(/_/g, '-'))))].sort();
+  const candidatosApi = await api.emParalelo(candidatos, 12, (n) => api.getJson(`${api.BASE}/move/${n}`));
+  const poderPorGolpe = {};
+  for (let i = 0; i < candidatos.length; i++) {
+    const m = candidatosApi[i];
+    if (!m) continue;
+    poderPorGolpe[candidatos[i].replace(/-/g, '_')] = api.valoresDeGolpeNoUsum(m, ordem).power || 0;
+  }
+  const golpesRemovidos = api.removerGolpesDeRecordador(especies, poderPorGolpe);
   console.log(`  golpes de recordador removidos: ${golpesRemovidos} linhas`);
   for (const especie of especies) {
     for (const g of especie.golpes) golpesUsados.add(g.chave.replace(/_/g, '-'));
@@ -519,6 +635,10 @@ async function main() {
     golpes,
     habilidades,
     evolucoesDescartadas,
+    // A FONTE crua das arestas, sem passar por decisao deste jogo — ver o
+    // cabecalho de `arestasReaisDoRecorte`. E contra isto que
+    // `src/data/todasAsEvolucoes.test.ts` compara o catalogo.
+    arestasReais: arestasReaisDoRecorte(cadeiaPorUrl, speciesApi, dexPorNome),
   };
   fs.writeFileSync(path.join(OUT_DIR, 'catalog.json'), JSON.stringify(catalogo, null, 1) + '\n');
   fs.writeFileSync(

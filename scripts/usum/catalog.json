@@ -403,6 +403,13 @@
    "catchRate": 45,
    "pesoHg": 69,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "ivysaur",
+     "atLevel": 16,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "ivysaur",
    "evolvesAtLevel": 16,
    "habilidades": [
@@ -493,6 +500,13 @@
    "catchRate": 45,
    "pesoHg": 130,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "venusaur",
+     "atLevel": 32,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "venusaur",
    "evolvesAtLevel": 32,
    "habilidades": [
@@ -579,6 +593,7 @@
    "catchRate": 45,
    "pesoHg": 1000,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -673,6 +688,13 @@
    "catchRate": 45,
    "pesoHg": 85,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "charmeleon",
+     "atLevel": 16,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "charmeleon",
    "evolvesAtLevel": 16,
    "habilidades": [
@@ -755,6 +777,13 @@
    "catchRate": 45,
    "pesoHg": 190,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "charizard",
+     "atLevel": 36,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "charizard",
    "evolvesAtLevel": 36,
    "habilidades": [
@@ -829,6 +858,7 @@
    "catchRate": 45,
    "pesoHg": 905,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -915,6 +945,13 @@
    "catchRate": 45,
    "pesoHg": 90,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "wartortle",
+     "atLevel": 16,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "wartortle",
    "evolvesAtLevel": 16,
    "habilidades": [
@@ -1005,6 +1042,13 @@
    "catchRate": 45,
    "pesoHg": 225,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "blastoise",
+     "atLevel": 36,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "blastoise",
    "evolvesAtLevel": 36,
    "habilidades": [
@@ -1091,6 +1135,7 @@
    "catchRate": 45,
    "pesoHg": 855,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -1177,6 +1222,13 @@
    "catchRate": 255,
    "pesoHg": 29,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "metapod",
+     "atLevel": 7,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "metapod",
    "evolvesAtLevel": 7,
    "habilidades": [
@@ -1223,6 +1275,13 @@
    "catchRate": 120,
    "pesoHg": 99,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "butterfree",
+     "atLevel": 10,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "butterfree",
    "evolvesAtLevel": 10,
    "habilidades": [
@@ -1256,6 +1315,7 @@
    "catchRate": 45,
    "pesoHg": 320,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -1354,6 +1414,13 @@
    "catchRate": 255,
    "pesoHg": 32,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "kakuna",
+     "atLevel": 7,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "kakuna",
    "evolvesAtLevel": 7,
    "habilidades": [
@@ -1400,6 +1467,13 @@
    "catchRate": 120,
    "pesoHg": 100,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "beedrill",
+     "atLevel": 10,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "beedrill",
    "evolvesAtLevel": 10,
    "habilidades": [
@@ -1433,6 +1507,7 @@
    "catchRate": 45,
    "pesoHg": 295,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -1519,6 +1594,13 @@
    "catchRate": 255,
    "pesoHg": 18,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "pidgeotto",
+     "atLevel": 18,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "pidgeotto",
    "evolvesAtLevel": 18,
    "habilidades": [
@@ -1613,6 +1695,13 @@
    "catchRate": 120,
    "pesoHg": 300,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "pidgeot",
+     "atLevel": 36,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "pidgeot",
    "evolvesAtLevel": 36,
    "habilidades": [
@@ -1703,6 +1792,7 @@
    "catchRate": 45,
    "pesoHg": 395,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -1793,6 +1883,13 @@
    "catchRate": 255,
    "pesoHg": 35,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "raticate",
+     "atLevel": 20,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "raticate",
    "evolvesAtLevel": 20,
    "habilidades": [
@@ -1883,6 +1980,7 @@
    "catchRate": 127,
    "pesoHg": 185,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -1969,6 +2067,13 @@
    "catchRate": 255,
    "pesoHg": 20,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "fearow",
+     "atLevel": 20,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "fearow",
    "evolvesAtLevel": 20,
    "habilidades": [
@@ -2051,6 +2156,7 @@
    "catchRate": 90,
    "pesoHg": 380,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -2129,6 +2235,13 @@
    "catchRate": 255,
    "pesoHg": 69,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "arbok",
+     "atLevel": 22,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "arbok",
    "evolvesAtLevel": 22,
    "habilidades": [
@@ -2235,6 +2348,7 @@
    "catchRate": 90,
    "pesoHg": 650,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -2337,8 +2451,15 @@
    "catchRate": 190,
    "pesoHg": 60,
    "curva": "MEDIUM_FAST",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "raichu",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "raichu",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "static",
@@ -2351,14 +2472,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "tail_whip",
-     "nivel": 1
-    },
-    {
-     "chave": "thunder_shock",
-     "nivel": 1
-    },
     {
      "chave": "growl",
      "nivel": 5
@@ -2443,6 +2556,7 @@
    "catchRate": 75,
    "pesoHg": 300,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -2493,6 +2607,13 @@
    "catchRate": 255,
    "pesoHg": 120,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "sandslash",
+     "atLevel": 22,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "sandslash",
    "evolvesAtLevel": 22,
    "habilidades": [
@@ -2595,6 +2716,7 @@
    "catchRate": 90,
    "pesoHg": 295,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -2693,6 +2815,13 @@
    "catchRate": 235,
    "pesoHg": 70,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "nidorina",
+     "atLevel": 16,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "nidorina",
    "evolvesAtLevel": 16,
    "habilidades": [
@@ -2783,8 +2912,15 @@
    "catchRate": 120,
    "pesoHg": 200,
    "curva": "MEDIUM_SLOW",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "nidoqueen",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "nidoqueen",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "poison_point",
@@ -2865,6 +3001,7 @@
    "catchRate": 45,
    "pesoHg": 600,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -2883,22 +3020,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "double_kick",
-     "nivel": 1
-    },
-    {
-     "chave": "poison_sting",
-     "nivel": 1
-    },
-    {
-     "chave": "scratch",
-     "nivel": 1
-    },
-    {
-     "chave": "tail_whip",
-     "nivel": 1
-    },
     {
      "chave": "chip_away",
      "nivel": 23
@@ -2935,6 +3056,13 @@
    "catchRate": 235,
    "pesoHg": 90,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "nidorino",
+     "atLevel": 16,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "nidorino",
    "evolvesAtLevel": 16,
    "habilidades": [
@@ -3025,8 +3153,15 @@
    "catchRate": 120,
    "pesoHg": 195,
    "curva": "MEDIUM_SLOW",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "nidoking",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "nidoking",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "poison_point",
@@ -3107,6 +3242,7 @@
    "catchRate": 45,
    "pesoHg": 620,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -3125,22 +3261,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "double_kick",
-     "nivel": 1
-    },
-    {
-     "chave": "focus_energy",
-     "nivel": 1
-    },
-    {
-     "chave": "peck",
-     "nivel": 1
-    },
-    {
-     "chave": "poison_sting",
-     "nivel": 1
-    },
     {
      "chave": "chip_away",
      "nivel": 23
@@ -3177,8 +3297,15 @@
    "catchRate": 150,
    "pesoHg": 75,
    "curva": "FAST",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "clefable",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "clefable",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "cute_charm",
@@ -3195,26 +3322,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "disarming_voice",
-     "nivel": 1
-    },
-    {
-     "chave": "encore",
-     "nivel": 1
-    },
-    {
-     "chave": "growl",
-     "nivel": 1
-    },
-    {
-     "chave": "pound",
-     "nivel": 1
-    },
-    {
-     "chave": "spotlight",
-     "nivel": 1
-    },
     {
      "chave": "sing",
      "nivel": 7
@@ -3307,6 +3414,7 @@
    "catchRate": 25,
    "pesoHg": 400,
    "curva": "FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -3369,8 +3477,15 @@
    "catchRate": 190,
    "pesoHg": 99,
    "curva": "MEDIUM_FAST",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "ninetales",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "ninetales",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "flash_fire",
@@ -3483,6 +3598,7 @@
    "catchRate": 75,
    "pesoHg": 199,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -3541,8 +3657,15 @@
    "catchRate": 170,
    "pesoHg": 55,
    "curva": "FAST",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "wigglytuff",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "wigglytuff",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "cute_charm",
@@ -3559,10 +3682,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "sing",
-     "nivel": 1
-    },
     {
      "chave": "defense_curl",
      "nivel": 3
@@ -3655,6 +3774,7 @@
    "catchRate": 50,
    "pesoHg": 120,
    "curva": "FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -3682,10 +3802,6 @@
      "nivel": 1
     },
     {
-     "chave": "double_edge",
-     "nivel": 1
-    },
-    {
      "chave": "double_slap",
      "nivel": 1
     },
@@ -3696,6 +3812,10 @@
     {
      "chave": "sing",
      "nivel": 1
+    },
+    {
+     "chave": "double_edge",
+     "nivel": 80
     }
    ]
   },
@@ -3717,6 +3837,13 @@
    "catchRate": 255,
    "pesoHg": 75,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "golbat",
+     "atLevel": 22,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "golbat",
    "evolvesAtLevel": 22,
    "habilidades": [
@@ -3811,8 +3938,15 @@
    "catchRate": 90,
    "pesoHg": 550,
    "curva": "MEDIUM_FAST",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "crobat",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "crobat",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "inner_focus",
@@ -3901,6 +4035,13 @@
    "catchRate": 255,
    "pesoHg": 54,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "gloom",
+     "atLevel": 21,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "gloom",
    "evolvesAtLevel": 21,
    "habilidades": [
@@ -3999,8 +4140,22 @@
    "catchRate": 120,
    "pesoHg": 86,
    "curva": "MEDIUM_SLOW",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "vileplume",
+     "atLevel": 80,
+     "isSpecial": true,
+     "stoneType": "GRASS"
+    },
+    {
+     "to": "bellossom",
+     "atLevel": 80,
+     "isSpecial": true,
+     "stoneType": "GRASS"
+    }
+   ],
+   "evolvesTo": "vileplume",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "chlorophyll",
@@ -4089,6 +4244,7 @@
    "catchRate": 45,
    "pesoHg": 186,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -4151,6 +4307,13 @@
    "catchRate": 190,
    "pesoHg": 54,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "parasect",
+     "atLevel": 24,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "parasect",
    "evolvesAtLevel": 24,
    "habilidades": [
@@ -4237,6 +4400,7 @@
    "catchRate": 75,
    "pesoHg": 295,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -4319,6 +4483,13 @@
    "catchRate": 190,
    "pesoHg": 300,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "venomoth",
+     "atLevel": 31,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "venomoth",
    "evolvesAtLevel": 31,
    "habilidades": [
@@ -4413,6 +4584,7 @@
    "catchRate": 75,
    "pesoHg": 125,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -4507,6 +4679,13 @@
    "catchRate": 255,
    "pesoHg": 8,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "dugtrio",
+     "atLevel": 26,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "dugtrio",
    "evolvesAtLevel": 26,
    "habilidades": [
@@ -4601,6 +4780,7 @@
    "catchRate": 50,
    "pesoHg": 333,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -4691,6 +4871,13 @@
    "catchRate": 255,
    "pesoHg": 42,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "persian",
+     "atLevel": 28,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "persian",
    "evolvesAtLevel": 28,
    "habilidades": [
@@ -4789,6 +4976,7 @@
    "catchRate": 90,
    "pesoHg": 320,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -4883,6 +5071,13 @@
    "catchRate": 190,
    "pesoHg": 196,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "golduck",
+     "atLevel": 33,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "golduck",
    "evolvesAtLevel": 33,
    "habilidades": [
@@ -4985,6 +5180,7 @@
    "catchRate": 75,
    "pesoHg": 766,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -5079,6 +5275,13 @@
    "catchRate": 190,
    "pesoHg": 280,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "primeape",
+     "atLevel": 28,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "primeape",
    "evolvesAtLevel": 28,
    "habilidades": [
@@ -5193,6 +5396,7 @@
    "catchRate": 75,
    "pesoHg": 320,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -5291,8 +5495,15 @@
    "catchRate": 190,
    "pesoHg": 190,
    "curva": "SLOW",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "arcanine",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "arcanine",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "intimidate",
@@ -5401,6 +5612,7 @@
    "catchRate": 75,
    "pesoHg": 1550,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -5463,6 +5675,13 @@
    "catchRate": 255,
    "pesoHg": 124,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "poliwhirl",
+     "atLevel": 25,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "poliwhirl",
    "evolvesAtLevel": 25,
    "habilidades": [
@@ -5553,8 +5772,22 @@
    "catchRate": 120,
    "pesoHg": 200,
    "curva": "MEDIUM_SLOW",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "poliwrath",
+     "atLevel": 80,
+     "isSpecial": true,
+     "stoneType": "WATER"
+    },
+    {
+     "to": "politoed",
+     "atLevel": 80,
+     "isSpecial": true,
+     "stoneType": "WATER"
+    }
+   ],
+   "evolvesTo": "poliwrath",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "water_absorb",
@@ -5639,6 +5872,7 @@
    "catchRate": 45,
    "pesoHg": 540,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -5658,22 +5892,6 @@
    ],
    "golpes": [
     {
-     "chave": "bubble_beam",
-     "nivel": 1
-    },
-    {
-     "chave": "double_slap",
-     "nivel": 1
-    },
-    {
-     "chave": "hypnosis",
-     "nivel": 1
-    },
-    {
-     "chave": "submission",
-     "nivel": 1
-    },
-    {
      "chave": "dynamic_punch",
      "nivel": 32
     },
@@ -5684,6 +5902,10 @@
     {
      "chave": "circle_throw",
      "nivel": 53
+    },
+    {
+     "chave": "submission",
+     "nivel": 80
     }
    ]
   },
@@ -5705,6 +5927,13 @@
    "catchRate": 200,
    "pesoHg": 195,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "kadabra",
+     "atLevel": 16,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "kadabra",
    "evolvesAtLevel": 16,
    "habilidades": [
@@ -5747,8 +5976,15 @@
    "catchRate": 100,
    "pesoHg": 565,
    "curva": "MEDIUM_SLOW",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "alakazam",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "alakazam",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "synchronize",
@@ -5841,6 +6077,7 @@
    "catchRate": 50,
    "pesoHg": 480,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -5859,14 +6096,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "kinesis",
-     "nivel": 1
-    },
-    {
-     "chave": "teleport",
-     "nivel": 1
-    },
     {
      "chave": "confusion",
      "nivel": 16
@@ -5918,6 +6147,10 @@
     {
      "chave": "trick",
      "nivel": 46
+    },
+    {
+     "chave": "kinesis",
+     "nivel": 80
     }
    ]
   },
@@ -5939,6 +6172,13 @@
    "catchRate": 180,
    "pesoHg": 195,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "machoke",
+     "atLevel": 28,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "machoke",
    "evolvesAtLevel": 28,
    "habilidades": [
@@ -6045,8 +6285,15 @@
    "catchRate": 90,
    "pesoHg": 705,
    "curva": "MEDIUM_SLOW",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "machamp",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "machamp",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "guts",
@@ -6143,6 +6390,7 @@
    "catchRate": 45,
    "pesoHg": 1300,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -6161,22 +6409,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "leer",
-     "nivel": 1
-    },
-    {
-     "chave": "low_kick",
-     "nivel": 1
-    },
-    {
-     "chave": "strength",
-     "nivel": 1
-    },
-    {
-     "chave": "wide_guard",
-     "nivel": 1
-    },
     {
      "chave": "focus_energy",
      "nivel": 3
@@ -6236,6 +6468,10 @@
     {
      "chave": "dynamic_punch",
      "nivel": 57
+    },
+    {
+     "chave": "strength",
+     "nivel": 80
     }
    ]
   },
@@ -6257,6 +6493,13 @@
    "catchRate": 255,
    "pesoHg": 40,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "weepinbell",
+     "atLevel": 21,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "weepinbell",
    "evolvesAtLevel": 21,
    "habilidades": [
@@ -6347,8 +6590,15 @@
    "catchRate": 120,
    "pesoHg": 64,
    "curva": "MEDIUM_SLOW",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "victreebel",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "victreebel",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "chlorophyll",
@@ -6433,6 +6683,7 @@
    "catchRate": 45,
    "pesoHg": 155,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -6447,10 +6698,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "leaf_tornado",
-     "nivel": 1
-    },
     {
      "chave": "razor_leaf",
      "nivel": 1
@@ -6486,6 +6733,10 @@
     {
      "chave": "leaf_blade",
      "nivel": 44
+    },
+    {
+     "chave": "leaf_tornado",
+     "nivel": 80
     }
    ]
   },
@@ -6507,6 +6758,13 @@
    "catchRate": 190,
    "pesoHg": 455,
    "curva": "SLOW",
+   "evolucoes": [
+    {
+     "to": "tentacruel",
+     "atLevel": 30,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "tentacruel",
    "evolvesAtLevel": 30,
    "habilidades": [
@@ -6613,6 +6871,7 @@
    "catchRate": 60,
    "pesoHg": 550,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -6715,6 +6974,13 @@
    "catchRate": 255,
    "pesoHg": 200,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "graveler",
+     "atLevel": 25,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "graveler",
    "evolvesAtLevel": 25,
    "habilidades": [
@@ -6817,8 +7083,15 @@
    "catchRate": 120,
    "pesoHg": 1050,
    "curva": "MEDIUM_SLOW",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "golem",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "golem",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "rock_head",
@@ -6911,6 +7184,7 @@
    "catchRate": 45,
    "pesoHg": 3000,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -6929,14 +7203,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "defense_curl",
-     "nivel": 1
-    },
-    {
-     "chave": "tackle",
-     "nivel": 1
-    },
     {
      "chave": "mud_sport",
      "nivel": 4
@@ -7017,6 +7283,13 @@
    "catchRate": 190,
    "pesoHg": 300,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "rapidash",
+     "atLevel": 40,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "rapidash",
    "evolvesAtLevel": 40,
    "habilidades": [
@@ -7111,6 +7384,7 @@
    "catchRate": 60,
    "pesoHg": 950,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -7201,6 +7475,19 @@
    "catchRate": 190,
    "pesoHg": 360,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "slowbro",
+     "atLevel": 37,
+     "isSpecial": false
+    },
+    {
+     "to": "slowking",
+     "atLevel": 80,
+     "isSpecial": true,
+     "stoneType": "WATER"
+    }
+   ],
    "evolvesTo": "slowbro",
    "evolvesAtLevel": 37,
    "habilidades": [
@@ -7303,6 +7590,7 @@
    "catchRate": 75,
    "pesoHg": 785,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -7397,6 +7685,13 @@
    "catchRate": 190,
    "pesoHg": 60,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "magneton",
+     "atLevel": 30,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "magneton",
    "evolvesAtLevel": 30,
    "habilidades": [
@@ -7507,6 +7802,7 @@
    "catchRate": 60,
    "pesoHg": 600,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -7613,6 +7909,7 @@
    "catchRate": 45,
    "pesoHg": 150,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -7723,6 +8020,13 @@
    "catchRate": 190,
    "pesoHg": 392,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "dodrio",
+     "atLevel": 31,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "dodrio",
    "evolvesAtLevel": 31,
    "habilidades": [
@@ -7825,6 +8129,7 @@
    "catchRate": 45,
    "pesoHg": 852,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -7923,6 +8228,13 @@
    "catchRate": 190,
    "pesoHg": 900,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "dewgong",
+     "atLevel": 34,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "dewgong",
    "evolvesAtLevel": 34,
    "habilidades": [
@@ -8029,6 +8341,7 @@
    "catchRate": 75,
    "pesoHg": 1200,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -8135,6 +8448,13 @@
    "catchRate": 190,
    "pesoHg": 300,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "muk",
+     "atLevel": 38,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "muk",
    "evolvesAtLevel": 38,
    "habilidades": [
@@ -8237,6 +8557,7 @@
    "catchRate": 75,
    "pesoHg": 300,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -8335,8 +8656,15 @@
    "catchRate": 190,
    "pesoHg": 40,
    "curva": "SLOW",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "cloyster",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "cloyster",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "shell_armor",
@@ -8441,6 +8769,7 @@
    "catchRate": 60,
    "pesoHg": 1325,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -8461,10 +8790,6 @@
    "golpes": [
     {
      "chave": "aurora_beam",
-     "nivel": 1
-    },
-    {
-     "chave": "hydro_pump",
      "nivel": 1
     },
     {
@@ -8498,6 +8823,10 @@
     {
      "chave": "icicle_crash",
      "nivel": 50
+    },
+    {
+     "chave": "hydro_pump",
+     "nivel": 80
     }
    ]
   },
@@ -8519,6 +8848,13 @@
    "catchRate": 190,
    "pesoHg": 1,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "haunter",
+     "atLevel": 25,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "haunter",
    "evolvesAtLevel": 25,
    "habilidades": [
@@ -8608,8 +8944,15 @@
    "catchRate": 90,
    "pesoHg": 1,
    "curva": "MEDIUM_SLOW",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "gengar",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "gengar",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "levitate",
@@ -8693,6 +9036,7 @@
    "catchRate": 45,
    "pesoHg": 405,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -8702,18 +9046,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "hypnosis",
-     "nivel": 1
-    },
-    {
-     "chave": "lick",
-     "nivel": 1
-    },
-    {
-     "chave": "shadow_punch",
-     "nivel": 1
-    },
     {
      "chave": "spite",
      "nivel": 5
@@ -8765,6 +9097,10 @@
     {
      "chave": "nightmare",
      "nivel": 61
+    },
+    {
+     "chave": "shadow_punch",
+     "nivel": 80
     }
    ]
   },
@@ -8786,8 +9122,15 @@
    "catchRate": 45,
    "pesoHg": 2100,
    "curva": "MEDIUM_FAST",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "steelix",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "steelix",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "rock_head",
@@ -8912,6 +9255,13 @@
    "catchRate": 190,
    "pesoHg": 324,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "hypno",
+     "atLevel": 26,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "hypno",
    "evolvesAtLevel": 26,
    "habilidades": [
@@ -9018,6 +9368,7 @@
    "catchRate": 75,
    "pesoHg": 756,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -9116,6 +9467,13 @@
    "catchRate": 225,
    "pesoHg": 65,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "kingler",
+     "atLevel": 28,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "kingler",
    "evolvesAtLevel": 28,
    "habilidades": [
@@ -9214,6 +9572,7 @@
    "catchRate": 60,
    "pesoHg": 600,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -9304,6 +9663,13 @@
    "catchRate": 190,
    "pesoHg": 104,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "electrode",
+     "atLevel": 30,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "electrode",
    "evolvesAtLevel": 30,
    "habilidades": [
@@ -9410,6 +9776,7 @@
    "catchRate": 60,
    "pesoHg": 666,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -9508,8 +9875,15 @@
    "catchRate": 90,
    "pesoHg": 25,
    "curva": "SLOW",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "exeggutor",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "exeggutor",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "chlorophyll",
@@ -9602,6 +9976,7 @@
    "catchRate": 45,
    "pesoHg": 1200,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -9617,26 +9992,6 @@
    ],
    "golpes": [
     {
-     "chave": "barrage",
-     "nivel": 1
-    },
-    {
-     "chave": "confusion",
-     "nivel": 1
-    },
-    {
-     "chave": "hypnosis",
-     "nivel": 1
-    },
-    {
-     "chave": "seed_bomb",
-     "nivel": 1
-    },
-    {
-     "chave": "stomp",
-     "nivel": 1
-    },
-    {
      "chave": "psyshock",
      "nivel": 17
     },
@@ -9651,6 +10006,10 @@
     {
      "chave": "leaf_storm",
      "nivel": 47
+    },
+    {
+     "chave": "stomp",
+     "nivel": 80
     }
    ]
   },
@@ -9672,6 +10031,13 @@
    "catchRate": 190,
    "pesoHg": 65,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "marowak",
+     "atLevel": 28,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "marowak",
    "evolvesAtLevel": 28,
    "habilidades": [
@@ -9774,6 +10140,7 @@
    "catchRate": 75,
    "pesoHg": 450,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -9872,6 +10239,7 @@
    "catchRate": 45,
    "pesoHg": 498,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -9974,6 +10342,7 @@
    "catchRate": 45,
    "pesoHg": 502,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -10084,6 +10453,7 @@
    "catchRate": 45,
    "pesoHg": 655,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -10182,6 +10552,13 @@
    "catchRate": 190,
    "pesoHg": 10,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "weezing",
+     "atLevel": 35,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "weezing",
    "evolvesAtLevel": 35,
    "habilidades": [
@@ -10280,6 +10657,7 @@
    "catchRate": 60,
    "pesoHg": 95,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -10374,6 +10752,13 @@
    "catchRate": 120,
    "pesoHg": 1150,
    "curva": "SLOW",
+   "evolucoes": [
+    {
+     "to": "rhydon",
+     "atLevel": 42,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "rhydon",
    "evolvesAtLevel": 42,
    "habilidades": [
@@ -10472,6 +10857,7 @@
    "catchRate": 60,
    "pesoHg": 1200,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -10566,8 +10952,15 @@
    "catchRate": 30,
    "pesoHg": 346,
    "curva": "FAST",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "blissey",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "blissey",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "natural_cure",
@@ -10672,6 +11065,7 @@
    "catchRate": 45,
    "pesoHg": 350,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -10786,6 +11180,7 @@
    "catchRate": 45,
    "pesoHg": 800,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -10884,6 +11279,13 @@
    "catchRate": 225,
    "pesoHg": 80,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "seadra",
+     "atLevel": 32,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "seadra",
    "evolvesAtLevel": 32,
    "habilidades": [
@@ -10970,8 +11372,15 @@
    "catchRate": 75,
    "pesoHg": 250,
    "curva": "MEDIUM_FAST",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "kingdra",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "kingdra",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "poison_point",
@@ -11052,6 +11461,13 @@
    "catchRate": 225,
    "pesoHg": 150,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "seaking",
+     "atLevel": 33,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "seaking",
    "evolvesAtLevel": 33,
    "habilidades": [
@@ -11146,6 +11562,7 @@
    "catchRate": 60,
    "pesoHg": 390,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -11228,8 +11645,15 @@
    "catchRate": 225,
    "pesoHg": 345,
    "curva": "SLOW",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "starmie",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "starmie",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "illuminate",
@@ -11342,6 +11766,7 @@
    "catchRate": 60,
    "pesoHg": 800,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -11360,10 +11785,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "hydro_pump",
-     "nivel": 1
-    },
     {
      "chave": "rapid_spin",
      "nivel": 1
@@ -11387,6 +11808,10 @@
     {
      "chave": "confuse_ray",
      "nivel": 40
+    },
+    {
+     "chave": "hydro_pump",
+     "nivel": 80
     }
    ]
   },
@@ -11408,6 +11833,7 @@
    "catchRate": 45,
    "pesoHg": 545,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -11546,8 +11972,15 @@
    "catchRate": 45,
    "pesoHg": 560,
    "curva": "MEDIUM_FAST",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "scizor",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "scizor",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "swarm",
@@ -11656,6 +12089,7 @@
    "catchRate": 45,
    "pesoHg": 406,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -11750,6 +12184,7 @@
    "catchRate": 45,
    "pesoHg": 300,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -11832,6 +12267,7 @@
    "catchRate": 45,
    "pesoHg": 445,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -11914,6 +12350,7 @@
    "catchRate": 45,
    "pesoHg": 550,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -12016,6 +12453,7 @@
    "catchRate": 45,
    "pesoHg": 884,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -12114,6 +12552,13 @@
    "catchRate": 255,
    "pesoHg": 100,
    "curva": "SLOW",
+   "evolucoes": [
+    {
+     "to": "gyarados",
+     "atLevel": 20,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "gyarados",
    "evolvesAtLevel": 20,
    "habilidades": [
@@ -12160,6 +12605,7 @@
    "catchRate": 45,
    "pesoHg": 2350,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -12246,6 +12692,7 @@
    "catchRate": 45,
    "pesoHg": 2200,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -12344,6 +12791,7 @@
    "catchRate": 35,
    "pesoHg": 40,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -12382,8 +12830,40 @@
    "catchRate": 45,
    "pesoHg": 65,
    "curva": "MEDIUM_FAST",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "vaporeon",
+     "atLevel": 80,
+     "isSpecial": true,
+     "stoneType": "WATER"
+    },
+    {
+     "to": "jolteon",
+     "atLevel": 80,
+     "isSpecial": true,
+     "stoneType": "ELECTRIC"
+    },
+    {
+     "to": "flareon",
+     "atLevel": 80,
+     "isSpecial": true,
+     "stoneType": "FIRE"
+    },
+    {
+     "to": "espeon",
+     "atLevel": 80,
+     "isSpecial": true,
+     "stoneType": "PSYCHIC"
+    },
+    {
+     "to": "umbreon",
+     "atLevel": 80,
+     "isSpecial": true,
+     "stoneType": "DARK"
+    }
+   ],
+   "evolvesTo": "vaporeon",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "run_away",
@@ -12488,6 +12968,7 @@
    "catchRate": 45,
    "pesoHg": 290,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -12502,22 +12983,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "helping_hand",
-     "nivel": 1
-    },
-    {
-     "chave": "tackle",
-     "nivel": 1
-    },
-    {
-     "chave": "tail_whip",
-     "nivel": 1
-    },
-    {
-     "chave": "water_gun",
-     "nivel": 1
-    },
     {
      "chave": "sand_attack",
      "nivel": 5
@@ -12561,6 +13026,10 @@
     {
      "chave": "hydro_pump",
      "nivel": 45
+    },
+    {
+     "chave": "water_gun",
+     "nivel": 80
     }
    ]
   },
@@ -12582,6 +13051,7 @@
    "catchRate": 45,
    "pesoHg": 245,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -12676,6 +13146,7 @@
    "catchRate": 45,
    "pesoHg": 250,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -12770,8 +13241,15 @@
    "catchRate": 45,
    "pesoHg": 365,
    "curva": "MEDIUM_FAST",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "porygon2",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "porygon2",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "trace",
@@ -12868,6 +13346,13 @@
    "catchRate": 45,
    "pesoHg": 75,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "omastar",
+     "atLevel": 40,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "omastar",
    "evolvesAtLevel": 40,
    "habilidades": [
@@ -12962,6 +13447,7 @@
    "catchRate": 45,
    "pesoHg": 350,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -13052,6 +13538,13 @@
    "catchRate": 45,
    "pesoHg": 115,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "kabutops",
+     "atLevel": 40,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "kabutops",
    "evolvesAtLevel": 40,
    "habilidades": [
@@ -13138,6 +13631,7 @@
    "catchRate": 45,
    "pesoHg": 405,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -13224,6 +13718,7 @@
    "catchRate": 45,
    "pesoHg": 590,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -13330,6 +13825,7 @@
    "catchRate": 25,
    "pesoHg": 4600,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -13436,6 +13932,7 @@
    "catchRate": 3,
    "pesoHg": 554,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -13534,6 +14031,7 @@
    "catchRate": 3,
    "pesoHg": 526,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -13632,6 +14130,7 @@
    "catchRate": 3,
    "pesoHg": 600,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -13730,6 +14229,13 @@
    "catchRate": 45,
    "pesoHg": 33,
    "curva": "SLOW",
+   "evolucoes": [
+    {
+     "to": "dragonair",
+     "atLevel": 30,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "dragonair",
    "evolvesAtLevel": 30,
    "habilidades": [
@@ -13820,6 +14326,13 @@
    "catchRate": 45,
    "pesoHg": 165,
    "curva": "SLOW",
+   "evolucoes": [
+    {
+     "to": "dragonite",
+     "atLevel": 55,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "dragonite",
    "evolvesAtLevel": 55,
    "habilidades": [
@@ -13902,6 +14415,7 @@
    "catchRate": 45,
    "pesoHg": 2100,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -13992,6 +14506,7 @@
    "catchRate": 3,
    "pesoHg": 1220,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -14106,6 +14621,7 @@
    "catchRate": 45,
    "pesoHg": 40,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -14187,6 +14703,13 @@
    "catchRate": 45,
    "pesoHg": 64,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "bayleef",
+     "atLevel": 16,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "bayleef",
    "evolvesAtLevel": 16,
    "habilidades": [
@@ -14277,6 +14800,13 @@
    "catchRate": 45,
    "pesoHg": 158,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "meganium",
+     "atLevel": 32,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "meganium",
    "evolvesAtLevel": 32,
    "habilidades": [
@@ -14359,6 +14889,7 @@
    "catchRate": 45,
    "pesoHg": 1005,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -14449,6 +14980,13 @@
    "catchRate": 45,
    "pesoHg": 79,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "quilava",
+     "atLevel": 14,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "quilava",
    "evolvesAtLevel": 14,
    "habilidades": [
@@ -14547,6 +15085,13 @@
    "catchRate": 45,
    "pesoHg": 190,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "typhlosion",
+     "atLevel": 36,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "typhlosion",
    "evolvesAtLevel": 36,
    "habilidades": [
@@ -14637,6 +15182,7 @@
    "catchRate": 45,
    "pesoHg": 795,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -14727,6 +15273,13 @@
    "catchRate": 45,
    "pesoHg": 95,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "croconaw",
+     "atLevel": 18,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "croconaw",
    "evolvesAtLevel": 18,
    "habilidades": [
@@ -14825,6 +15378,13 @@
    "catchRate": 45,
    "pesoHg": 250,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "feraligatr",
+     "atLevel": 30,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "feraligatr",
    "evolvesAtLevel": 30,
    "habilidades": [
@@ -14915,6 +15475,7 @@
    "catchRate": 45,
    "pesoHg": 888,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -15005,6 +15566,13 @@
    "catchRate": 255,
    "pesoHg": 60,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "furret",
+     "atLevel": 15,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "furret",
    "evolvesAtLevel": 15,
    "habilidades": [
@@ -15099,6 +15667,7 @@
    "catchRate": 90,
    "pesoHg": 325,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -15189,6 +15758,13 @@
    "catchRate": 255,
    "pesoHg": 212,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "noctowl",
+     "atLevel": 20,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "noctowl",
    "evolvesAtLevel": 20,
    "habilidades": [
@@ -15299,6 +15875,7 @@
    "catchRate": 90,
    "pesoHg": 408,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -15397,6 +15974,13 @@
    "catchRate": 255,
    "pesoHg": 108,
    "curva": "FAST",
+   "evolucoes": [
+    {
+     "to": "ledian",
+     "atLevel": 18,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "ledian",
    "evolvesAtLevel": 18,
    "habilidades": [
@@ -15491,6 +16075,7 @@
    "catchRate": 90,
    "pesoHg": 356,
    "curva": "FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -15581,6 +16166,13 @@
    "catchRate": 255,
    "pesoHg": 85,
    "curva": "FAST",
+   "evolucoes": [
+    {
+     "to": "ariados",
+     "atLevel": 22,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "ariados",
    "evolvesAtLevel": 22,
    "habilidades": [
@@ -15691,6 +16283,7 @@
    "catchRate": 90,
    "pesoHg": 335,
    "curva": "FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -15793,6 +16386,7 @@
    "catchRate": 90,
    "pesoHg": 750,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -15807,18 +16401,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "absorb",
-     "nivel": 1
-    },
-    {
-     "chave": "cross_poison",
-     "nivel": 1
-    },
-    {
-     "chave": "screech",
-     "nivel": 1
-    },
     {
      "chave": "supersonic",
      "nivel": 5
@@ -15874,6 +16456,10 @@
     {
      "chave": "quick_guard",
      "nivel": 51
+    },
+    {
+     "chave": "cross_poison",
+     "nivel": 80
     }
    ]
   },
@@ -15895,6 +16481,13 @@
    "catchRate": 190,
    "pesoHg": 120,
    "curva": "SLOW",
+   "evolucoes": [
+    {
+     "to": "lanturn",
+     "atLevel": 27,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "lanturn",
    "evolvesAtLevel": 27,
    "habilidades": [
@@ -15997,6 +16590,7 @@
    "catchRate": 75,
    "pesoHg": 225,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -16103,8 +16697,15 @@
    "catchRate": 190,
    "pesoHg": 20,
    "curva": "MEDIUM_FAST",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "pikachu",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "pikachu",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "static",
@@ -16161,8 +16762,15 @@
    "catchRate": 150,
    "pesoHg": 30,
    "curva": "FAST",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "clefairy",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "clefairy",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "cute_charm",
@@ -16227,8 +16835,15 @@
    "catchRate": 170,
    "pesoHg": 10,
    "curva": "FAST",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "jigglypuff",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "jigglypuff",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "cute_charm",
@@ -16289,8 +16904,15 @@
    "catchRate": 190,
    "pesoHg": 15,
    "curva": "FAST",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "togetic",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "togetic",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "hustle",
@@ -16387,6 +17009,7 @@
    "catchRate": 75,
    "pesoHg": 32,
    "curva": "FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -16405,18 +17028,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "charm",
-     "nivel": 1
-    },
-    {
-     "chave": "growl",
-     "nivel": 1
-    },
-    {
-     "chave": "magical_leaf",
-     "nivel": 1
-    },
     {
      "chave": "metronome",
      "nivel": 5
@@ -16493,6 +17104,13 @@
    "catchRate": 190,
    "pesoHg": 20,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "xatu",
+     "atLevel": 25,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "xatu",
    "evolvesAtLevel": 25,
    "habilidades": [
@@ -16595,6 +17213,7 @@
    "catchRate": 75,
    "pesoHg": 150,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -16693,6 +17312,13 @@
    "catchRate": 235,
    "pesoHg": 78,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "flaaffy",
+     "atLevel": 15,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "flaaffy",
    "evolvesAtLevel": 15,
    "habilidades": [
@@ -16787,6 +17413,13 @@
    "catchRate": 120,
    "pesoHg": 133,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "ampharos",
+     "atLevel": 30,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "ampharos",
    "evolvesAtLevel": 30,
    "habilidades": [
@@ -16873,6 +17506,7 @@
    "catchRate": 45,
    "pesoHg": 615,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -16967,6 +17601,7 @@
    "catchRate": 45,
    "pesoHg": 58,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -17041,6 +17676,13 @@
    "catchRate": 190,
    "pesoHg": 85,
    "curva": "FAST",
+   "evolucoes": [
+    {
+     "to": "azumarill",
+     "atLevel": 18,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "azumarill",
    "evolvesAtLevel": 18,
    "habilidades": [
@@ -17143,6 +17785,7 @@
    "catchRate": 75,
    "pesoHg": 285,
    "curva": "FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -17237,6 +17880,7 @@
    "catchRate": 65,
    "pesoHg": 380,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -17347,6 +17991,7 @@
    "catchRate": 45,
    "pesoHg": 339,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -17413,6 +18058,13 @@
    "catchRate": 255,
    "pesoHg": 5,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "skiploom",
+     "atLevel": 18,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "skiploom",
    "evolvesAtLevel": 18,
    "habilidades": [
@@ -17531,6 +18183,13 @@
    "catchRate": 120,
    "pesoHg": 10,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [
+    {
+     "to": "jumpluff",
+     "atLevel": 27,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "jumpluff",
    "evolvesAtLevel": 27,
    "habilidades": [
@@ -17641,6 +18300,7 @@
    "catchRate": 45,
    "pesoHg": 30,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -17751,6 +18411,7 @@
    "catchRate": 45,
    "pesoHg": 115,
    "curva": "FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -17845,8 +18506,15 @@
    "catchRate": 235,
    "pesoHg": 18,
    "curva": "MEDIUM_SLOW",
-   "evolvesTo": null,
-   "evolvesAtLevel": null,
+   "evolucoes": [
+    {
+     "to": "sunflora",
+     "atLevel": 80,
+     "isSpecial": true
+    }
+   ],
+   "evolvesTo": "sunflora",
+   "evolvesAtLevel": 80,
    "habilidades": [
     {
      "chave": "chlorophyll",
@@ -17947,6 +18615,7 @@
    "catchRate": 120,
    "pesoHg": 85,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -17965,22 +18634,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "absorb",
-     "nivel": 1
-    },
-    {
-     "chave": "flower_shield",
-     "nivel": 1
-    },
-    {
-     "chave": "growth",
-     "nivel": 1
-    },
-    {
-     "chave": "pound",
-     "nivel": 1
-    },
     {
      "chave": "ingrain",
      "nivel": 4
@@ -18061,6 +18714,7 @@
    "catchRate": 75,
    "pesoHg": 380,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -18163,6 +18817,13 @@
    "catchRate": 255,
    "pesoHg": 85,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "quagsire",
+     "atLevel": 20,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "quagsire",
    "evolvesAtLevel": 20,
    "habilidades": [
@@ -18253,6 +18914,7 @@
    "catchRate": 90,
    "pesoHg": 750,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -18335,6 +18997,7 @@
    "catchRate": 45,
    "pesoHg": 265,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -18429,6 +19092,7 @@
    "catchRate": 45,
    "pesoHg": 270,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -18523,6 +19187,7 @@
    "catchRate": 30,
    "pesoHg": 21,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -18621,6 +19286,7 @@
    "catchRate": 70,
    "pesoHg": 795,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -18731,6 +19397,7 @@
    "catchRate": 45,
    "pesoHg": 10,
    "curva": "FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -18816,6 +19483,7 @@
    "catchRate": 225,
    "pesoHg": 50,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -18849,6 +19517,7 @@
    "catchRate": 45,
    "pesoHg": 285,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -18899,6 +19568,7 @@
    "catchRate": 60,
    "pesoHg": 415,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -19005,6 +19675,13 @@
    "catchRate": 190,
    "pesoHg": 72,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "forretress",
+     "atLevel": 31,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "forretress",
    "evolvesAtLevel": 31,
    "habilidades": [
@@ -19095,6 +19772,7 @@
    "catchRate": 75,
    "pesoHg": 1258,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -19197,6 +19875,7 @@
    "catchRate": 190,
    "pesoHg": 140,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -19323,6 +20002,7 @@
    "catchRate": 60,
    "pesoHg": 648,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -19421,6 +20101,7 @@
    "catchRate": 25,
    "pesoHg": 4000,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -19439,34 +20120,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "bind",
-     "nivel": 1
-    },
-    {
-     "chave": "fire_fang",
-     "nivel": 1
-    },
-    {
-     "chave": "harden",
-     "nivel": 1
-    },
-    {
-     "chave": "ice_fang",
-     "nivel": 1
-    },
-    {
-     "chave": "mud_sport",
-     "nivel": 1
-    },
-    {
-     "chave": "tackle",
-     "nivel": 1
-    },
-    {
-     "chave": "thunder_fang",
-     "nivel": 1
-    },
     {
      "chave": "curse",
      "nivel": 4
@@ -19559,6 +20212,13 @@
    "catchRate": 190,
    "pesoHg": 78,
    "curva": "FAST",
+   "evolucoes": [
+    {
+     "to": "granbull",
+     "atLevel": 23,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "granbull",
    "evolvesAtLevel": 23,
    "habilidades": [
@@ -19657,6 +20317,7 @@
    "catchRate": 75,
    "pesoHg": 487,
    "curva": "FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -19731,6 +20392,7 @@
    "catchRate": 45,
    "pesoHg": 39,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -19849,6 +20511,7 @@
    "catchRate": 25,
    "pesoHg": 1180,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -19867,18 +20530,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "bullet_punch",
-     "nivel": 1
-    },
-    {
-     "chave": "leer",
-     "nivel": 1
-    },
-    {
-     "chave": "quick_attack",
-     "nivel": 1
-    },
     {
      "chave": "focus_energy",
      "nivel": 5
@@ -19959,6 +20610,7 @@
    "catchRate": 190,
    "pesoHg": 205,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -20073,6 +20725,7 @@
    "catchRate": 45,
    "pesoHg": 540,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -20183,6 +20836,7 @@
    "catchRate": 60,
    "pesoHg": 280,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -20285,6 +20939,13 @@
    "catchRate": 120,
    "pesoHg": 88,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "ursaring",
+     "atLevel": 30,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "ursaring",
    "evolvesAtLevel": 30,
    "habilidades": [
@@ -20383,6 +21044,7 @@
    "catchRate": 60,
    "pesoHg": 1258,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -20461,6 +21123,13 @@
    "catchRate": 190,
    "pesoHg": 350,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "magcargo",
+     "atLevel": 38,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "magcargo",
    "evolvesAtLevel": 38,
    "habilidades": [
@@ -20563,6 +21232,7 @@
    "catchRate": 75,
    "pesoHg": 550,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -20661,6 +21331,13 @@
    "catchRate": 225,
    "pesoHg": 65,
    "curva": "SLOW",
+   "evolucoes": [
+    {
+     "to": "piloswine",
+     "atLevel": 33,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "piloswine",
    "evolvesAtLevel": 33,
    "habilidades": [
@@ -20759,6 +21436,7 @@
    "catchRate": 75,
    "pesoHg": 558,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -20853,6 +21531,7 @@
    "catchRate": 60,
    "pesoHg": 50,
    "curva": "FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -20963,6 +21642,13 @@
    "catchRate": 190,
    "pesoHg": 120,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "octillery",
+     "atLevel": 25,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "octillery",
    "evolvesAtLevel": 25,
    "habilidades": [
@@ -21053,6 +21739,7 @@
    "catchRate": 75,
    "pesoHg": 285,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -21143,6 +21830,7 @@
    "catchRate": 45,
    "pesoHg": 160,
    "curva": "FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -21189,6 +21877,7 @@
    "catchRate": 25,
    "pesoHg": 2200,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -21303,6 +21992,7 @@
    "catchRate": 25,
    "pesoHg": 505,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -21405,6 +22095,13 @@
    "catchRate": 120,
    "pesoHg": 108,
    "curva": "SLOW",
+   "evolucoes": [
+    {
+     "to": "houndoom",
+     "atLevel": 24,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "houndoom",
    "evolvesAtLevel": 24,
    "habilidades": [
@@ -21507,6 +22204,7 @@
    "catchRate": 45,
    "pesoHg": 350,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -21601,6 +22299,7 @@
    "catchRate": 45,
    "pesoHg": 1520,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -21619,14 +22318,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "bubble",
-     "nivel": 1
-    },
-    {
-     "chave": "yawn",
-     "nivel": 1
-    },
     {
      "chave": "smokescreen",
      "nivel": 5
@@ -21691,6 +22382,13 @@
    "catchRate": 120,
    "pesoHg": 335,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "donphan",
+     "atLevel": 25,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "donphan",
    "evolvesAtLevel": 25,
    "habilidades": [
@@ -21777,6 +22475,7 @@
    "catchRate": 60,
    "pesoHg": 1200,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -21851,6 +22550,7 @@
    "catchRate": 45,
    "pesoHg": 325,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -21869,22 +22569,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "conversion",
-     "nivel": 1
-    },
-    {
-     "chave": "conversion_2",
-     "nivel": 1
-    },
-    {
-     "chave": "defense_curl",
-     "nivel": 1
-    },
-    {
-     "chave": "tackle",
-     "nivel": 1
-    },
     {
      "chave": "psybeam",
      "nivel": 7
@@ -21953,6 +22637,7 @@
    "catchRate": 45,
    "pesoHg": 712,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -22051,6 +22736,7 @@
    "catchRate": 45,
    "pesoHg": 580,
    "curva": "FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -22093,6 +22779,23 @@
    "catchRate": 75,
    "pesoHg": 210,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "hitmonlee",
+     "atLevel": 20,
+     "isSpecial": false
+    },
+    {
+     "to": "hitmonchan",
+     "atLevel": 20,
+     "isSpecial": false
+    },
+    {
+     "to": "hitmontop",
+     "atLevel": 20,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "hitmonlee",
    "evolvesAtLevel": 20,
    "habilidades": [
@@ -22147,6 +22850,7 @@
    "catchRate": 45,
    "pesoHg": 480,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -22249,6 +22953,13 @@
    "catchRate": 45,
    "pesoHg": 60,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "jynx",
+     "atLevel": 30,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "jynx",
    "evolvesAtLevel": 30,
    "habilidades": [
@@ -22347,6 +23058,13 @@
    "catchRate": 45,
    "pesoHg": 235,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "electabuzz",
+     "atLevel": 30,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "electabuzz",
    "evolvesAtLevel": 30,
    "habilidades": [
@@ -22437,6 +23155,13 @@
    "catchRate": 45,
    "pesoHg": 214,
    "curva": "MEDIUM_FAST",
+   "evolucoes": [
+    {
+     "to": "magmar",
+     "atLevel": 30,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "magmar",
    "evolvesAtLevel": 30,
    "habilidades": [
@@ -22527,6 +23252,7 @@
    "catchRate": 45,
    "pesoHg": 755,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -22617,6 +23343,7 @@
    "catchRate": 30,
    "pesoHg": 468,
    "curva": "FAST",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -22635,18 +23362,6 @@
     }
    ],
    "golpes": [
-    {
-     "chave": "defense_curl",
-     "nivel": 1
-    },
-    {
-     "chave": "growl",
-     "nivel": 1
-    },
-    {
-     "chave": "pound",
-     "nivel": 1
-    },
     {
      "chave": "tail_whip",
      "nivel": 5
@@ -22723,6 +23438,7 @@
    "catchRate": 3,
    "pesoHg": 1780,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -22813,6 +23529,7 @@
    "catchRate": 3,
    "pesoHg": 1980,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -22907,6 +23624,7 @@
    "catchRate": 3,
    "pesoHg": 1870,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -23001,6 +23719,13 @@
    "catchRate": 45,
    "pesoHg": 720,
    "curva": "SLOW",
+   "evolucoes": [
+    {
+     "to": "pupitar",
+     "atLevel": 30,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "pupitar",
    "evolvesAtLevel": 30,
    "habilidades": [
@@ -23091,6 +23816,13 @@
    "catchRate": 45,
    "pesoHg": 1520,
    "curva": "SLOW",
+   "evolucoes": [
+    {
+     "to": "tyranitar",
+     "atLevel": 55,
+     "isSpecial": false
+    }
+   ],
    "evolvesTo": "tyranitar",
    "evolvesAtLevel": 55,
    "habilidades": [
@@ -23168,6 +23900,7 @@
    "catchRate": 45,
    "pesoHg": 2020,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -23254,6 +23987,7 @@
    "catchRate": 3,
    "pesoHg": 2160,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -23352,6 +24086,7 @@
    "catchRate": 3,
    "pesoHg": 1990,
    "curva": "SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -23450,6 +24185,7 @@
    "catchRate": 45,
    "pesoHg": 50,
    "curva": "MEDIUM_SLOW",
+   "evolucoes": [],
    "evolvesTo": null,
    "evolvesAtLevel": null,
    "habilidades": [
@@ -26763,31 +27499,6 @@
    "drenoPercentual": 0,
    "curaPercentual": 0,
    "_categoriaPokeapi": "damage"
-  },
-  {
-   "chave": "flower_shield",
-   "nome": "Flower Shield",
-   "tipo": "FAIRY",
-   "categoria": "status",
-   "alvo": "single",
-   "poder": 0,
-   "precisao": 100,
-   "pp": 10,
-   "status": null,
-   "chanceDeStatus": 0,
-   "alvoDoEfeito": "target",
-   "mudancasDeStat": [
-    {
-     "stat": "def",
-     "estagios": 1
-    }
-   ],
-   "chanceDeStat": 100,
-   "chanceDeFlinch": 0,
-   "estagiosDeCritico": 0,
-   "drenoPercentual": 0,
-   "curaPercentual": 0,
-   "_categoriaPokeapi": "unique"
   },
   {
    "chave": "focus_energy",
@@ -34659,12 +35370,704 @@
   }
  ],
  "evolucoesDescartadas": {
-  "slowpoke": [
-   "slowking"
+  "meowth": [
+   "perrserker"
   ],
-  "tyrogue": [
-   "hitmonchan",
-   "hitmontop"
+  "primeape": [
+   "annihilape"
+  ],
+  "magneton": [
+   "magnezone"
+  ],
+  "farfetch_d": [
+   "sirfetchd"
+  ],
+  "lickitung": [
+   "lickilicky"
+  ],
+  "rhydon": [
+   "rhyperior"
+  ],
+  "tangela": [
+   "tangrowth"
+  ],
+  "mr__mime": [
+   "mr-rime"
+  ],
+  "scyther": [
+   "kleavor"
+  ],
+  "electabuzz": [
+   "electivire"
+  ],
+  "magmar": [
+   "magmortar"
+  ],
+  "eevee": [
+   "leafeon",
+   "glaceon",
+   "sylveon"
+  ],
+  "togetic": [
+   "togekiss"
+  ],
+  "aipom": [
+   "ambipom"
+  ],
+  "yanma": [
+   "yanmega"
+  ],
+  "wooper": [
+   "clodsire"
+  ],
+  "murkrow": [
+   "honchkrow"
+  ],
+  "misdreavus": [
+   "mismagius"
+  ],
+  "girafarig": [
+   "farigiraf"
+  ],
+  "dunsparce": [
+   "dudunsparce"
+  ],
+  "gligar": [
+   "gliscor"
+  ],
+  "qwilfish": [
+   "overqwil"
+  ],
+  "sneasel": [
+   "weavile",
+   "sneasler"
+  ],
+  "ursaring": [
+   "ursaluna"
+  ],
+  "piloswine": [
+   "mamoswine"
+  ],
+  "corsola": [
+   "cursola"
+  ],
+  "porygon2": [
+   "porygon-z"
+  ],
+  "stantler": [
+   "wyrdeer"
   ]
- }
+ },
+ "arestasReais": [
+  {
+   "de": "abra",
+   "para": "kadabra",
+   "porNivel": 16
+  },
+  {
+   "de": "bayleef",
+   "para": "meganium",
+   "porNivel": 32
+  },
+  {
+   "de": "bellsprout",
+   "para": "weepinbell",
+   "porNivel": 21
+  },
+  {
+   "de": "bulbasaur",
+   "para": "ivysaur",
+   "porNivel": 16
+  },
+  {
+   "de": "caterpie",
+   "para": "metapod",
+   "porNivel": 7
+  },
+  {
+   "de": "chansey",
+   "para": "blissey",
+   "porNivel": null
+  },
+  {
+   "de": "charmander",
+   "para": "charmeleon",
+   "porNivel": 16
+  },
+  {
+   "de": "charmeleon",
+   "para": "charizard",
+   "porNivel": 36
+  },
+  {
+   "de": "chikorita",
+   "para": "bayleef",
+   "porNivel": 16
+  },
+  {
+   "de": "chinchou",
+   "para": "lanturn",
+   "porNivel": 27
+  },
+  {
+   "de": "clefairy",
+   "para": "clefable",
+   "porNivel": null
+  },
+  {
+   "de": "cleffa",
+   "para": "clefairy",
+   "porNivel": null
+  },
+  {
+   "de": "croconaw",
+   "para": "feraligatr",
+   "porNivel": 30
+  },
+  {
+   "de": "cubone",
+   "para": "marowak",
+   "porNivel": 28
+  },
+  {
+   "de": "cyndaquil",
+   "para": "quilava",
+   "porNivel": 14
+  },
+  {
+   "de": "diglett",
+   "para": "dugtrio",
+   "porNivel": 26
+  },
+  {
+   "de": "doduo",
+   "para": "dodrio",
+   "porNivel": 31
+  },
+  {
+   "de": "dragonair",
+   "para": "dragonite",
+   "porNivel": 55
+  },
+  {
+   "de": "dratini",
+   "para": "dragonair",
+   "porNivel": 30
+  },
+  {
+   "de": "drowzee",
+   "para": "hypno",
+   "porNivel": 26
+  },
+  {
+   "de": "eevee",
+   "para": "espeon",
+   "porNivel": null
+  },
+  {
+   "de": "eevee",
+   "para": "flareon",
+   "porNivel": null
+  },
+  {
+   "de": "eevee",
+   "para": "jolteon",
+   "porNivel": null
+  },
+  {
+   "de": "eevee",
+   "para": "umbreon",
+   "porNivel": null
+  },
+  {
+   "de": "eevee",
+   "para": "vaporeon",
+   "porNivel": null
+  },
+  {
+   "de": "ekans",
+   "para": "arbok",
+   "porNivel": 22
+  },
+  {
+   "de": "elekid",
+   "para": "electabuzz",
+   "porNivel": 30
+  },
+  {
+   "de": "exeggcute",
+   "para": "exeggutor",
+   "porNivel": null
+  },
+  {
+   "de": "flaaffy",
+   "para": "ampharos",
+   "porNivel": 30
+  },
+  {
+   "de": "gastly",
+   "para": "haunter",
+   "porNivel": 25
+  },
+  {
+   "de": "geodude",
+   "para": "graveler",
+   "porNivel": 25
+  },
+  {
+   "de": "gloom",
+   "para": "bellossom",
+   "porNivel": null
+  },
+  {
+   "de": "gloom",
+   "para": "vileplume",
+   "porNivel": null
+  },
+  {
+   "de": "golbat",
+   "para": "crobat",
+   "porNivel": null
+  },
+  {
+   "de": "goldeen",
+   "para": "seaking",
+   "porNivel": 33
+  },
+  {
+   "de": "graveler",
+   "para": "golem",
+   "porNivel": null
+  },
+  {
+   "de": "grimer",
+   "para": "muk",
+   "porNivel": 38
+  },
+  {
+   "de": "growlithe",
+   "para": "arcanine",
+   "porNivel": null
+  },
+  {
+   "de": "haunter",
+   "para": "gengar",
+   "porNivel": null
+  },
+  {
+   "de": "hoothoot",
+   "para": "noctowl",
+   "porNivel": 20
+  },
+  {
+   "de": "hoppip",
+   "para": "skiploom",
+   "porNivel": 18
+  },
+  {
+   "de": "horsea",
+   "para": "seadra",
+   "porNivel": 32
+  },
+  {
+   "de": "houndour",
+   "para": "houndoom",
+   "porNivel": 24
+  },
+  {
+   "de": "igglybuff",
+   "para": "jigglypuff",
+   "porNivel": null
+  },
+  {
+   "de": "ivysaur",
+   "para": "venusaur",
+   "porNivel": 32
+  },
+  {
+   "de": "jigglypuff",
+   "para": "wigglytuff",
+   "porNivel": null
+  },
+  {
+   "de": "kabuto",
+   "para": "kabutops",
+   "porNivel": 40
+  },
+  {
+   "de": "kadabra",
+   "para": "alakazam",
+   "porNivel": null
+  },
+  {
+   "de": "kakuna",
+   "para": "beedrill",
+   "porNivel": 10
+  },
+  {
+   "de": "koffing",
+   "para": "weezing",
+   "porNivel": 35
+  },
+  {
+   "de": "krabby",
+   "para": "kingler",
+   "porNivel": 28
+  },
+  {
+   "de": "larvitar",
+   "para": "pupitar",
+   "porNivel": 30
+  },
+  {
+   "de": "ledyba",
+   "para": "ledian",
+   "porNivel": 18
+  },
+  {
+   "de": "machoke",
+   "para": "machamp",
+   "porNivel": null
+  },
+  {
+   "de": "machop",
+   "para": "machoke",
+   "porNivel": 28
+  },
+  {
+   "de": "magby",
+   "para": "magmar",
+   "porNivel": 30
+  },
+  {
+   "de": "magikarp",
+   "para": "gyarados",
+   "porNivel": 20
+  },
+  {
+   "de": "magnemite",
+   "para": "magneton",
+   "porNivel": 30
+  },
+  {
+   "de": "mankey",
+   "para": "primeape",
+   "porNivel": 28
+  },
+  {
+   "de": "mareep",
+   "para": "flaaffy",
+   "porNivel": 15
+  },
+  {
+   "de": "marill",
+   "para": "azumarill",
+   "porNivel": 18
+  },
+  {
+   "de": "meowth",
+   "para": "persian",
+   "porNivel": 28
+  },
+  {
+   "de": "metapod",
+   "para": "butterfree",
+   "porNivel": 10
+  },
+  {
+   "de": "natu",
+   "para": "xatu",
+   "porNivel": 25
+  },
+  {
+   "de": "nidoran_f",
+   "para": "nidorina",
+   "porNivel": 16
+  },
+  {
+   "de": "nidoran_m",
+   "para": "nidorino",
+   "porNivel": 16
+  },
+  {
+   "de": "nidorina",
+   "para": "nidoqueen",
+   "porNivel": null
+  },
+  {
+   "de": "nidorino",
+   "para": "nidoking",
+   "porNivel": null
+  },
+  {
+   "de": "oddish",
+   "para": "gloom",
+   "porNivel": 21
+  },
+  {
+   "de": "omanyte",
+   "para": "omastar",
+   "porNivel": 40
+  },
+  {
+   "de": "onix",
+   "para": "steelix",
+   "porNivel": null
+  },
+  {
+   "de": "paras",
+   "para": "parasect",
+   "porNivel": 24
+  },
+  {
+   "de": "phanpy",
+   "para": "donphan",
+   "porNivel": 25
+  },
+  {
+   "de": "pichu",
+   "para": "pikachu",
+   "porNivel": null
+  },
+  {
+   "de": "pidgeotto",
+   "para": "pidgeot",
+   "porNivel": 36
+  },
+  {
+   "de": "pidgey",
+   "para": "pidgeotto",
+   "porNivel": 18
+  },
+  {
+   "de": "pikachu",
+   "para": "raichu",
+   "porNivel": null
+  },
+  {
+   "de": "pineco",
+   "para": "forretress",
+   "porNivel": 31
+  },
+  {
+   "de": "poliwag",
+   "para": "poliwhirl",
+   "porNivel": 25
+  },
+  {
+   "de": "poliwhirl",
+   "para": "politoed",
+   "porNivel": null
+  },
+  {
+   "de": "poliwhirl",
+   "para": "poliwrath",
+   "porNivel": null
+  },
+  {
+   "de": "ponyta",
+   "para": "rapidash",
+   "porNivel": 40
+  },
+  {
+   "de": "porygon",
+   "para": "porygon2",
+   "porNivel": null
+  },
+  {
+   "de": "psyduck",
+   "para": "golduck",
+   "porNivel": 33
+  },
+  {
+   "de": "pupitar",
+   "para": "tyranitar",
+   "porNivel": 55
+  },
+  {
+   "de": "quilava",
+   "para": "typhlosion",
+   "porNivel": 36
+  },
+  {
+   "de": "rattata",
+   "para": "raticate",
+   "porNivel": 20
+  },
+  {
+   "de": "remoraid",
+   "para": "octillery",
+   "porNivel": 25
+  },
+  {
+   "de": "rhyhorn",
+   "para": "rhydon",
+   "porNivel": 42
+  },
+  {
+   "de": "sandshrew",
+   "para": "sandslash",
+   "porNivel": 22
+  },
+  {
+   "de": "scyther",
+   "para": "scizor",
+   "porNivel": null
+  },
+  {
+   "de": "seadra",
+   "para": "kingdra",
+   "porNivel": null
+  },
+  {
+   "de": "seel",
+   "para": "dewgong",
+   "porNivel": 34
+  },
+  {
+   "de": "sentret",
+   "para": "furret",
+   "porNivel": 15
+  },
+  {
+   "de": "shellder",
+   "para": "cloyster",
+   "porNivel": null
+  },
+  {
+   "de": "skiploom",
+   "para": "jumpluff",
+   "porNivel": 27
+  },
+  {
+   "de": "slowpoke",
+   "para": "slowbro",
+   "porNivel": 37
+  },
+  {
+   "de": "slowpoke",
+   "para": "slowking",
+   "porNivel": null
+  },
+  {
+   "de": "slugma",
+   "para": "magcargo",
+   "porNivel": 38
+  },
+  {
+   "de": "smoochum",
+   "para": "jynx",
+   "porNivel": 30
+  },
+  {
+   "de": "snubbull",
+   "para": "granbull",
+   "porNivel": 23
+  },
+  {
+   "de": "spearow",
+   "para": "fearow",
+   "porNivel": 20
+  },
+  {
+   "de": "spinarak",
+   "para": "ariados",
+   "porNivel": 22
+  },
+  {
+   "de": "squirtle",
+   "para": "wartortle",
+   "porNivel": 16
+  },
+  {
+   "de": "staryu",
+   "para": "starmie",
+   "porNivel": null
+  },
+  {
+   "de": "sunkern",
+   "para": "sunflora",
+   "porNivel": null
+  },
+  {
+   "de": "swinub",
+   "para": "piloswine",
+   "porNivel": 33
+  },
+  {
+   "de": "teddiursa",
+   "para": "ursaring",
+   "porNivel": 30
+  },
+  {
+   "de": "tentacool",
+   "para": "tentacruel",
+   "porNivel": 30
+  },
+  {
+   "de": "togepi",
+   "para": "togetic",
+   "porNivel": null
+  },
+  {
+   "de": "totodile",
+   "para": "croconaw",
+   "porNivel": 18
+  },
+  {
+   "de": "tyrogue",
+   "para": "hitmonchan",
+   "porNivel": 20
+  },
+  {
+   "de": "tyrogue",
+   "para": "hitmonlee",
+   "porNivel": 20
+  },
+  {
+   "de": "tyrogue",
+   "para": "hitmontop",
+   "porNivel": 20
+  },
+  {
+   "de": "venonat",
+   "para": "venomoth",
+   "porNivel": 31
+  },
+  {
+   "de": "voltorb",
+   "para": "electrode",
+   "porNivel": 30
+  },
+  {
+   "de": "vulpix",
+   "para": "ninetales",
+   "porNivel": null
+  },
+  {
+   "de": "wartortle",
+   "para": "blastoise",
+   "porNivel": 36
+  },
+  {
+   "de": "weedle",
+   "para": "kakuna",
+   "porNivel": 7
+  },
+  {
+   "de": "weepinbell",
+   "para": "victreebel",
+   "porNivel": null
+  },
+  {
+   "de": "wooper",
+   "para": "quagsire",
+   "porNivel": 20
+  },
+  {
+   "de": "zubat",
+   "para": "golbat",
+   "porNivel": 22
+  }
+ ]
 }

@@ -17,7 +17,7 @@ import type { Rng } from '@/core/rng'
 import { typedAoeMoveKey, TYPED_AOE_LEVEL } from './typedAoeMoves'
 import { activeAbilitiesPadrao, golpesAprendidosAte } from './activeAbilities'
 import type { StatusAtivo } from './statusEffects'
-import type { GrowthCurve, SpeciesBaseStats, SpeciesDataEntry } from './generated/types'
+import type { ElementType, GrowthCurve, SpeciesBaseStats, SpeciesDataEntry } from './generated/types'
 
 export type StatKey = keyof SpeciesBaseStats
 export type StatBlock = SpeciesBaseStats
@@ -50,8 +50,16 @@ export interface OpcaoDeEvolucao {
   to: string
   /** Nivel minimo. */
   atLevel: number
-  /** Cobra pedras do tipo primario (ver `evolutionStoneRequirement`). */
+  /** Cobra pedras (ver `evolutionStoneRequirement`). */
   isSpecial: boolean
+  /**
+   * De que TIPO e a pedra. Ausente = tipo primario da especie de ORIGEM, que e
+   * o comportamento historico. Presente so em especie com ramo, e ai e o tipo
+   * primario do DESTINO — Flareon custa FOGO, Jolteon ELETRICO, Umbreon
+   * SOMBRIO, e a escolha do Eevee vira uma decisao legivel em vez de cinco
+   * botoes com o mesmo preco.
+   */
+  stoneType?: ElementType
 }
 
 export interface PokeInstance {
@@ -214,25 +222,24 @@ for (const species of Object.values(SPECIES)) {
   species.abilities = [...species.abilities, { key: typedAoeMoveKey(species.type), levelReq: TYPED_AOE_LEVEL }]
 }
 
-// Hand-authored patch, same "layer on top of the synced data" pattern as
-// nightmareMaps.js/legendaries.js: species whose real Gen1/2 evolution
-// required a trade (with or without a held item) come out of the sync with
-// evolvesTo=null — scripts/sync-planilha.js's "Evolui no Nivel" column has no
-// trade/hold-item trigger at all, so today these are permanently stuck at
-// their un-evolved stage. Per explicit user request, that dead end is
-// replaced with a Level 80 + Stones-of-the-primary-type gate instead (see
-// data/stones.js, systems/ProgressionSystem.js#evolvePokeInstance).
+// O NIVEL de toda evolucao que na origem depende de pedra, troca ou amizade.
 //
-// All 9 real Gen1/2 trade/hold-item evolution chains are covered — the
-// missing evolved-form species (Golem/Onix/Scizor/Kingdra/Politoed/Porygon2)
-// were added to scripts/sync-planilha.js#KANTO_BANDS and synced in
-// ("Setima leva" in CLAUDE.md) specifically so this list wouldn't have to
-// skip any of them. Slowpoke->Slowking is the one real Gen2 case NOT here:
-// Slowpoke already has a genuine, working LEVEL evolution to Slowbro (real
-// planilha data, level 37) — this single-`evolvesTo`-field data model can't
-// represent a second branching option, and Slowpoke isn't "stuck" the way
-// the other 9 species are, so it's out of scope for a fix that's specifically
-// about un-sticking dead-end evolutions.
+// Ate PH-145 este arquivo tambem carregava a LISTA dessas evolucoes, costurada
+// a mao: o catalogo so sabia gatilho de nivel, entao as nove cadeias de troca
+// eram remendadas aqui em cima do dado sincronizado. A lista saiu — quem monta
+// as arestas agora e `scripts/fetch-usum-catalog.js#extrairEvolucoes`, e elas
+// chegam prontas em `SpeciesDataEntry.evolutionOptions`.
+//
+// Isso importa por um motivo pratico: enquanto a lista morava aqui, ela cobria
+// so troca. Evolucao por PEDRA e por AMIZADE nunca entrou, e o efeito nao era
+// so a especie parada — o elenco e o fecho transitivo das cadeias, entao a
+// aresta ausente tambem mantinha Raichu, as cinco Eeveelutions e outras treze
+// especies FORA do jogo.
+//
+// O numero continua aqui porque e decisao de produto, nao dado da fonte: pedra,
+// troca e amizade nao existem como mecanica neste jogo, e as tres caem neste
+// gate. `scripts/fetch-usum-catalog.js#NIVEL_DE_EVOLUCAO_ESPECIAL` e o gemeo
+// dele do lado do gerador.
 export const SPECIAL_EVOLUTION_LEVEL = 80
 /**
  * PH-136: era 20.
@@ -248,63 +255,39 @@ export const SPECIAL_EVOLUTION_LEVEL = 80
  * POKE que vai evoluir — 40 pedras sao ~800 abates do tipo certo.
  */
 export const SPECIAL_EVOLUTION_STONE_COUNT = 40
-/**
- * Especies com MAIS DE UM destino de evolucao (PH-139).
- *
- * O dado da planilha tem uma coluna so ("Evolui Para (chave)"), entao ramo e
- * camada hand-authored, igual `SPECIAL_EVOLUTIONS` logo abaixo.
- *
- * O QUE ESTA AQUI, E O QUE NAO ESTA
- * ----------------------------------
- * So Tyrogue por enquanto — e nao por escolha de escopo, mas porque e o UNICO
- * ramo real cujos dois destinos ja existem no elenco, com arte.
- *
- * Poliwhirl (Politoed/Poliwrath) e Slowpoke (Slowbro/Slowking) sao os casos que
- * originaram esta issue, e continuam fora: poliwrath e slowking NAO estao no
- * elenco gerado. Cadastrar ramo apontando pra especie inexistente produziria
- * uma opcao que a tela nao sabe desenhar. Entram quando as especies entrarem —
- * ver PH-145, que levantou as 18 evolucoes de Gen1/Gen2 ausentes do elenco.
- *
- * Tyrogue vira Hitmonlee OU Hitmonchan no nivel 20. Nos jogos quem decide e a
- * comparacao entre Ataque e Defesa; aqui quem decide e o JOGADOR, que e o
- * pedido desta issue.
- */
-const EVOLUCOES_RAMIFICADAS: Record<string, OpcaoDeEvolucao[]> = {
-  tyrogue: [
-    { to: 'hitmonlee', atLevel: 20, isSpecial: false },
-    { to: 'hitmonchan', atLevel: 20, isSpecial: false },
-  ],
-}
-
-const SPECIAL_EVOLUTIONS: Record<string, string> = {
-  kadabra: 'alakazam', machoke: 'machamp', haunter: 'gengar',
-  graveler: 'golem', onix: 'steelix', scyther: 'scizor',
-  seadra: 'kingdra', poliwhirl: 'politoed', porygon: 'porygon2',
-}
-for (const [fromId, toId] of Object.entries(SPECIAL_EVOLUTIONS)) {
-  const from = SPECIES[fromId]
-  if (from && SPECIES[toId] && !from.evolvesTo) {
-    from.evolvesTo = toId
-    from.evolvesAtLevel = SPECIAL_EVOLUTION_LEVEL
-    from.isSpecialEvolution = true
+// Os destinos de evolucao, vindos do catalogo (PH-145).
+//
+// Ate aqui viviam neste arquivo duas tabelas escritas a mao: `SPECIAL_EVOLUTIONS`
+// (as nove cadeias de troca) e `EVOLUCOES_RAMIFICADAS` (so Tyrogue). As duas
+// existiam pelo mesmo motivo — a fonte tinha uma coluna de destino e um gatilho
+// de nivel, e nada mais cabia la. Agora cabe: `evolutionOptions` chega do
+// gerador com TODAS as arestas e o gate de cada uma.
+//
+// Opcao apontando pra especie fora do elenco e descartada aqui, em silencio e
+// de proposito: um destino que `SPECIES` nao tem viraria um botao que a tela de
+// evolucao nao sabe desenhar. O gerador ja filtra pelo mesmo criterio, entao na
+// pratica isto nunca corta nada — e a rede de seguranca de quem recortar o
+// elenco por outro criterio um dia.
+for (const species of Object.values(SPECIES)) {
+  const opcoes = (species.evolutionOptions ?? []).filter((o) => SPECIES[o.to])
+  if (!opcoes.length) {
+    // Sem destino valido a especie nao evolui, e os campos de compatibilidade
+    // precisam dizer isso. Deixar `evolvesTo` apontando pra uma especie que o
+    // elenco nao tem daria "especie de destino desconhecida" so na hora de
+    // evoluir.
+    delete species.evolutionOptions
+    species.evolvesTo = null
+    species.evolvesAtLevel = null
+    continue
   }
-}
-
-// Ramos, DEPOIS das especiais: uma especie pode ter um destino vindo da planilha
-// e outro costurado aqui. Opcao que aponta pra especie fora do elenco e
-// descartada em silencio de proposito — o alvo pode nao ter entrado no catalogo
-// gerado, e opcao sem especie quebraria a tela na hora de desenhar.
-for (const [fromId, opcoes] of Object.entries(EVOLUCOES_RAMIFICADAS)) {
-  const from = SPECIES[fromId]
-  if (!from) continue
-  const validas = opcoes.filter((o) => SPECIES[o.to])
-  if (validas.length === 0) continue
-  from.evolutionOptions = validas
-  // `evolvesTo` segue apontando pro primeiro: e o que o codigo que ainda nao
-  // conhece ramo continua lendo (Pokedex, estagio de evolucao, servidor antigo).
-  from.evolvesTo = validas[0].to
-  from.evolvesAtLevel = validas[0].atLevel
-  from.isSpecialEvolution = validas[0].isSpecial
+  species.evolutionOptions = opcoes
+  // `evolvesTo`/`evolvesAtLevel` seguem apontando pro PRIMEIRO destino: e o que
+  // todo leitor que ainda nao conhece ramo le (Pokedex, estagio de evolucao,
+  // save antigo). `isSpecialEvolution` acompanha, senao `evolvesTo` sozinho
+  // diria que Growlithe vira Arcanine no nivel 80 e de graca.
+  species.evolvesTo = opcoes[0].to
+  species.evolvesAtLevel = opcoes[0].atLevel
+  species.isSpecialEvolution = opcoes[0].isSpecial
 }
 
 /**

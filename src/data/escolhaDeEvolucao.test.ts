@@ -25,13 +25,17 @@ const MIGRATIONS = import.meta.glob('/supabase/migrations/*.sql', {
 const rng = createRng(11)
 
 describe('o ramo do Tyrogue existe no catálogo (PH-139)', () => {
-  it('Tyrogue tem DOIS destinos, e os dois estão no elenco', () => {
+  it('Tyrogue tem TRÊS destinos, e os três estão no elenco', () => {
     // Guarda anti-teste-vácuo: sem o ramo cadastrado, todo caso abaixo passaria
     // medindo uma espécie de destino único.
+    //
+    // Eram dois até PH-145. Hitmontop é o terceiro ramo real do Tyrogue e
+    // estava fora só porque a espécie não existia no elenco.
     const opcoes = opcoesDeEvolucao(SPECIES.tyrogue)
-    expect(opcoes.map((o) => o.to).sort()).toEqual(['hitmonchan', 'hitmonlee'])
+    expect(opcoes.map((o) => o.to).sort()).toEqual(['hitmonchan', 'hitmonlee', 'hitmontop'])
     expect(SPECIES.hitmonlee).toBeTruthy()
     expect(SPECIES.hitmonchan).toBeTruthy()
+    expect(SPECIES.hitmontop).toBeTruthy()
   })
 
   it('espécie de ramo único continua com um destino só', () => {
@@ -75,9 +79,9 @@ describe('escolher o destino (PH-139)', () => {
     expect(canEvolve(novato, SPECIES.tyrogue)).toBe(false)
   })
 
-  it('no nível, as duas aparecem', () => {
+  it('no nível, as três aparecem', () => {
     const pronto = tyrogue(20)
-    expect(opcoesDisponiveis(pronto, SPECIES.tyrogue)).toHaveLength(2)
+    expect(opcoesDisponiveis(pronto, SPECIES.tyrogue)).toHaveLength(3)
     expect(canEvolve(pronto, SPECIES.tyrogue)).toBe(true)
   })
 
@@ -113,14 +117,21 @@ describe('escolher o destino (PH-139)', () => {
 describe('o servidor valida o alvo (PH-139)', () => {
   // A migration é o único lugar onde essa regra pode existir de verdade: o
   // cliente checa para não chamar em vão, mas quem impede o abuso é a RPC.
+  // Filtra por CONTEÚDO e não por nome de arquivo (PH-145). O filtro era
+  // `nome.includes('escolha_de_evolucao')`, e por isso a migration seguinte —
+  // que cadastrou Hitmontop como terceiro destino do Tyrogue — ficou invisível
+  // aqui: o teste continuou comparando o cliente com um retrato do banco de uma
+  // migration atrás, que é exatamente o tipo de divergência que ele existe para
+  // pegar.
   const sql = Object.entries(MIGRATIONS)
-    .filter(([nome]) => nome.includes('escolha_de_evolucao'))
+    .filter(([, conteudo]) => conteudo.includes('species_evolution_options'))
+    .sort(([a], [b]) => a.localeCompare(b))
     .map(([, conteudo]) => conteudo)
 
-  it('as duas migrations do par existem', () => {
-    // Guarda anti-teste-vácuo, e também o par `_public`/`_dev` que o gate de CI
-    // cobra.
-    expect(sql).toHaveLength(2)
+  it('toda migration que toca a tabela vem em par `_public`/`_dev`', () => {
+    // Guarda anti-teste-vácuo, e também o par que o gate de CI cobra.
+    expect(sql.length).toBeGreaterThanOrEqual(2)
+    expect(sql.length % 2).toBe(0)
   })
 
   it.each(['public', 'dev'])('em %s, alvo fora da lista é recusado', (schema) => {
@@ -143,10 +154,15 @@ describe('o servidor valida o alvo (PH-139)', () => {
   it('o ramo do Tyrogue cadastrado no banco casa com o do cliente', () => {
     // Dois lugares com o mesmo dado, e nada além deste teste os liga. Divergir
     // não dá erro: dá uma opção que a tela mostra e o servidor recusa.
+    // Procura em TODAS as migrations somadas, e não em cada uma: o ramo é
+    // cadastrado uma vez e depois só recebe destinos novos (Hitmontop entrou em
+    // PH-145, na migration seguinte). Exigir a lista inteira em cada arquivo
+    // faria a migration antiga reprovar por não conhecer o futuro.
     const doCliente = opcoesDeEvolucao(SPECIES.tyrogue).map((o) => o.to).sort()
-    for (const arquivo of sql) {
+    for (const schema of ['public', 'dev']) {
+      const doSchema = sql.filter((s) => s.includes(`${schema}.species_evolution_options`)).join('\n')
       for (const alvo of doCliente) {
-        expect(arquivo).toContain(`'tyrogue', '${alvo}'`)
+        expect(doSchema, `${schema} não cadastra tyrogue -> ${alvo}`).toContain(`'tyrogue', '${alvo}'`)
       }
     }
   })

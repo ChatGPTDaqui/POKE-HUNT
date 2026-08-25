@@ -107,8 +107,41 @@ export interface SpeciesDataEntry {
   pesoHg: number
   base: SpeciesBaseStats
   abilities: AbilityRef[]
+  /**
+   * PRIMEIRO destino de evolucao, e o nivel dele. Compatibilidade: e o que
+   * `evolutionOptions` ja diz no indice 0, e o que todo leitor que nao conhece
+   * ramo continua lendo (Pokedex, estagio de evolucao, save antigo).
+   *
+   * CUIDADO ao ler isto sozinho: desde PH-145 ele tambem aponta pra evolucao
+   * que cobra pedras, e o nivel nao e o preco todo. Quem precisa do gate
+   * inteiro le `evolutionOptions` (ou `pokes.ts#opcoesDeEvolucao`).
+   */
   evolvesTo: string | null
   evolvesAtLevel: number | null
+  /**
+   * TODAS as arestas de evolucao da especie, cada uma com seu gate (PH-145).
+   *
+   * Ausente = a especie nao evolui. Presente com um item so = destino unico —
+   * a lista existe mesmo assim porque e ela que carrega `isSpecial`, que os
+   * dois campos acima nao conseguem representar.
+   */
+  evolutionOptions?: OpcaoDeEvolucaoGerada[]
+}
+export interface OpcaoDeEvolucaoGerada {
+  to: string
+  atLevel: number
+  isSpecial: boolean
+  /**
+   * De que TIPO e a pedra que esta opcao cobra. So sai em especie com mais de
+   * um destino, e ai vale o tipo primario do DESTINO — e o que torna a escolha
+   * do Eevee legivel (Flareon custa pedra de FOGO, Vaporeon de AGUA).
+   *
+   * Ausente = cobra o tipo primario da especie de ORIGEM, que e como a
+   * evolucao especial sempre funcionou. Manter esse default e o que impede a
+   * pedra de `onix -> steelix` de virar ACO e encarecer quem ja estava
+   * juntando ROCHA.
+   */
+  stoneType?: ElementType
 }
 export type SpeciesData = Record<string, SpeciesDataEntry>
 
