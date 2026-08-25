@@ -129,9 +129,14 @@ limitação inventada pelo documento.
 | Testar se o token vale | `curl -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" https://api.cloudflare.com/client/v4/user/tokens/verify` |
 | Variáveis de build do Pages | `GET accounts/<conta>/pages/projects/poke-hunt` → `deployment_configs.{production,preview}.env_vars` |
 
-A conta é `afcba46ce039e450a9136dc96e8032b1` — ela aparece na URL que o check "Cloudflare Pages"
-linka em cada PR. **`GET accounts` sem id devolve lista vazia**, então não tente descobrir a conta
-por ali: o token tem escopo de projeto, não de conta.
+O `<conta>` sai da URL que o check "Cloudflare Pages" linka em qualquer PR — é o id logo depois de
+`/accounts/`. **`GET accounts` sem id devolve lista vazia**, então não tente descobrir a conta por
+ali: o token tem escopo de projeto, não de conta.
+
+O id não fica escrito aqui de propósito. Este repositório é **público** (`gh repo view --json
+visibility`), e o id não é credencial mas é atalho de alvo — a troca de conta Supabase de 20/08
+aconteceu por uma `service_role` vazada, então o custo desse tipo de descuido aqui não é hipotético.
+Quem precisa do id acha em dois cliques pela linha acima.
 
 **Leitura está confirmada** (foi assim que o diagnóstico de PH-134 saiu). **Escrita não foi
 testada** — configurar variável de preview é ação de baixa reversibilidade num ambiente
