@@ -55022,9 +55022,24 @@ function stepWorld(world, dt, gameState, opts = {}) {
 	for (const enemy of world.enemies) if (isDead(enemy) && enemy.deathRemovalTimer != null && enemy.deathRemovalTimer > 0) enemy.deathRemovalTimer -= dt;
 	world.enemies = world.enemies.filter((e) => !isDead(e) || (e.deathRemovalTimer ?? 0) > 0 || world.mapDef.keepCorpses);
 	if (playerJustFainted && world.player) {
+		const expAntesDaPenalidade = world.player.poke.exp;
 		const penaltyResult = applyDeathExpPenalty(world.player.poke);
 		world.player.poke = penaltyResult.poke;
 		gameState.updatePokeInstance(penaltyResult.poke.uid, () => penaltyResult.poke);
+		kills.push({
+			gold: 0,
+			ouroDeAutoVenda: 0,
+			xp: 0,
+			leveledUp: false,
+			trainerLeveledUp: false,
+			isShiny: false,
+			captured: false,
+			capturedPoke: null,
+			droppedItems: [],
+			playerFainted: true,
+			expLostToPenalty: Math.max(0, expAntesDaPenalidade - penaltyResult.poke.exp),
+			leveledDown: penaltyResult.leveledDown
+		});
 		if (!silent) toastStore.getState().pushToast(`${SPECIES[world.player.poke.speciesId].name} desmaiou!${penaltyResult.leveledDown ? ` Caiu para o nivel ${penaltyResult.level}.` : ""}`, "error", "combat");
 	}
 	trocarPorDesmaio(world, gameState, dt, silent);
@@ -55099,7 +55114,9 @@ function createEmptySummary() {
 		trainerLevelAfter: 0,
 		stoppedEarly: false,
 		truncated: false,
-		stepSeconds: 0
+		stepSeconds: 0,
+		mortesDoJogador: 0,
+		expPerdidaPorMorte: 0
 	};
 }
 function simulateWorldSeconds({ world, gameState, seconds, stepSeconds, stepFn, maxSteps = DEFAULT_MAX_STEPS, maxWallClockMs = DEFAULT_MAX_WALL_CLOCK_MS }) {
@@ -55120,6 +55137,11 @@ function simulateWorldSeconds({ world, gameState, seconds, stepSeconds, stepFn, 
 		remaining -= dt;
 		const kills = stepFn(world, dt, { silent: true }) || [];
 		for (const result of kills) {
+			if (result.playerFainted) {
+				summary.mortesDoJogador += 1;
+				summary.expPerdidaPorMorte += result.expLostToPenalty ?? 0;
+				continue;
+			}
 			summary.kills += 1;
 			summary.gold += result.gold;
 			summary.xp += result.xp;
