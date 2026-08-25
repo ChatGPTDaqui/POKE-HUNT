@@ -3196,27 +3196,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "leaf_blade",
-				"levelReq": 1
-			},
-			{
 				"key": "magical_leaf",
-				"levelReq": 1
-			},
-			{
-				"key": "mega_drain",
-				"levelReq": 1
-			},
-			{
-				"key": "stun_spore",
-				"levelReq": 1
-			},
-			{
-				"key": "sunny_day",
-				"levelReq": 1
-			},
-			{
-				"key": "sweet_scent",
 				"levelReq": 1
 			},
 			{
@@ -7874,14 +7854,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
 				"key": "tail_whip",
 				"levelReq": 2
 			},
@@ -8242,26 +8214,6 @@ var SPECIES_DATA = {
 			"speed": 30
 		},
 		"abilities": [
-			{
-				"key": "curse",
-				"levelReq": 1
-			},
-			{
-				"key": "hidden_power",
-				"levelReq": 1
-			},
-			{
-				"key": "power_gem",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "yawn",
-				"levelReq": 1
-			},
 			{
 				"key": "growl",
 				"levelReq": 5
@@ -8690,30 +8642,6 @@ var SPECIES_DATA = {
 			"speed": 70
 		},
 		"abilities": [
-			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "bullet_seed",
-				"levelReq": 1
-			},
-			{
-				"key": "psybeam",
-				"levelReq": 1
-			},
-			{
-				"key": "roost",
-				"levelReq": 1
-			},
-			{
-				"key": "signal_beam",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
 			{
 				"key": "supersonic",
 				"levelReq": 3
@@ -10302,10 +10230,6 @@ var SPECIES_DATA = {
 			"speed": 30
 		},
 		"abilities": [
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
 			{
 				"key": "defense_curl",
 				"levelReq": 4
@@ -12154,15 +12078,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "copycat",
-				"levelReq": 1
-			},
-			{
 				"key": "slam",
-				"levelReq": 1
-			},
-			{
-				"key": "wood_hammer",
 				"levelReq": 1
 			},
 			{
@@ -13918,18 +13834,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "helping_hand",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
 				"key": "sand_attack",
 				"levelReq": 5
 			},
@@ -15082,18 +14986,6 @@ var SPECIES_DATA = {
 			"speed": 130
 		},
 		"abilities": [
-			{
-				"key": "helping_hand",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
 			{
 				"key": "thunder_shock",
 				"levelReq": 1
@@ -17264,10 +17156,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "revenge",
-				"levelReq": 1
-			},
-			{
 				"key": "agility",
 				"levelReq": 6
 			},
@@ -17410,10 +17298,6 @@ var SPECIES_DATA = {
 			"speed": 70
 		},
 		"abilities": [
-			{
-				"key": "revenge",
-				"levelReq": 1
-			},
 			{
 				"key": "rolling_kick",
 				"levelReq": 1
@@ -18672,18 +18556,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "helping_hand",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
 				"key": "sand_attack",
 				"levelReq": 5
 			},
@@ -19145,19 +19017,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "helping_hand",
-				"levelReq": 1
-			},
-			{
 				"key": "pursuit",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
 				"levelReq": 1
 			},
 			{
@@ -25861,16 +25721,6 @@ var ABILITIES_DATA = {
 		"target": "aoe",
 		"accuracy": 100
 	},
-	"hidden_power": {
-		"id": "hidden_power",
-		"name": "Hidden Power",
-		"type": "NORMAL",
-		"category": "special",
-		"power": 60,
-		"pp": 15,
-		"target": "single",
-		"accuracy": 100
-	},
 	"trump_card": {
 		"id": "trump_card",
 		"name": "Trump Card",
@@ -27485,6 +27335,16 @@ var ABILITIES_DATA = {
 		"pp": 5,
 		"target": "single",
 		"healPercent": 50,
+		"accuracy": 100
+	},
+	"hidden_power": {
+		"id": "hidden_power",
+		"name": "Hidden Power",
+		"type": "NORMAL",
+		"category": "special",
+		"power": 60,
+		"pp": 15,
+		"target": "single",
 		"accuracy": 100
 	},
 	"shadow_ball": {

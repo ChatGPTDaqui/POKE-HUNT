@@ -248,12 +248,34 @@ function golpesDeNivelNoUsum(pokemon) {
 // poder >= 100 no nivel 1".
 const PODER_QUE_NAO_VOLTA_PRO_NIVEL_1 = 100;
 
-function removerGolpesDeRecordador(especies, poderPorGolpe = {}) {
+function removerGolpesDeRecordador(especies, poderPorGolpe = {}, comPaiReal = new Set()) {
   const paiDe = new Map();
   for (const e of especies) {
     if (!e.evolvesTo || !e.evolvesAtLevel) continue;
     const atual = paiDe.get(e.evolvesTo);
     if (!atual || e.evolvesAtLevel < atual.nivel) paiDe.set(e.evolvesTo, { id: e.chave, nivel: e.evolvesAtLevel });
+  }
+
+  // PH-150 — "e estagio-base?" nao pode ser respondido pelo ELENCO.
+  //
+  // O laco acima so enxerga pai que esta no recorte de dex. O Sudowoodo evolui
+  // de Bonsly (#438, fora do recorte): sem pai ali, ele passava por estagio-base
+  // e o bloco de nivel 1 dele — que e a lista do Recordador de uma forma
+  // evoluida — ficava inteiro, entregando `wood_hammer` (120 de poder) num POKE
+  // selvagem de nivel 1.
+  //
+  // `nivel: 1` porque, NESTE jogo, essas especies existem desde o nivel 1: sem o
+  // pai no elenco elas nascem na hunt, e nao ha "nivel em que a especie passa a
+  // existir" diferente de 1. O campo so e lido em dois lugares — golpe marcado
+  // como de evolucao, e o escape de moveset curto — e na faixa atual nenhuma das
+  // cinco especies afetadas cai em nenhum dos dois. Se uma faixa futura cair, o
+  // teste "nenhuma especie EVOLUIDA entrega golpe de poder >= 100 no nivel 1"
+  // (src/data/activeAbilities.test.ts) passa a valer pra elas e reprova.
+  //
+  // `id: null` e literal: nao existe especie de origem no elenco pra apontar.
+  for (const e of especies) {
+    if (paiDe.has(e.chave) || !comPaiReal.has(e.chave)) continue;
+    paiDe.set(e.chave, { id: null, nivel: 1 });
   }
 
   let removidos = 0;
