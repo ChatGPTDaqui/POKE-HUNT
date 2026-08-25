@@ -173,4 +173,69 @@ describe('o servidor conhece as mesmas arestas que o cliente (PH-145)', () => {
     expect(arquivo).toContain('coalesce(v_opcao.stone_type, v_species.type1)')
     expect(arquivo).toContain("'stone_' || lower(v_stone_type::text)")
   })
+
+})
+
+// PH-153, e este teste existe porque o buraco custou o deploy da `dev`.
+//
+// O Postgres infere `text` para a coluna de um `values` literal e NÃO faz cast
+// implícito de text para enum num `insert ... select`. A migration mergeou, o
+// deploy morreu com
+//
+//   ERROR: column "stone_type" is of type element_type but expression is
+//          of type text (SQLSTATE 42804)
+//
+// e — o que fez doer — **travou a fila**: o deploy tenta as migrations
+// pendentes antes de republicar, então os cinco pushes seguintes morreram no
+// mesmo ponto, sem nenhuma PR ficar vermelha.
+//
+// Nenhuma validação de DADO pega isso. Eu tinha conferido que as 204 espécies
+// existiam, que nenhum nível era ≤ 0 e que não havia auto-evolução — e nada
+// disso executa o `insert`.
+//
+// A guarda vale para TODAS as migrations, não só o par de PH-145: o que
+// derrubou o deploy não foi aquele arquivo, foi a forma. Um `insert ... select`
+// novo, em qualquer migration futura, repete o incidente idêntico.
+//
+// O alvo é a linha de TUPLA de um `values` (`^\s*\(`), e não qualquer literal
+// do arquivo. É essa restrição que deixa a varredura ampla ficar verde: em
+// `where type1 = 'FIRE'` ou `default 'NORMAL'` o Postgres resolve o literal
+// sozinho e o cast não é exigido — marcá-los seria ruído que faria alguém
+// desligar o teste.
+describe('nenhum literal de tipo elemental entra num `values` sem CAST (PH-153)', () => {
+  const TIPOS = 'NORMAL|FIRE|WATER|ELECTRIC|GRASS|ICE|FIGHTING|POISON|GROUND'
+    + '|FLYING|PSYCHIC|BUG|ROCK|GHOST|DRAGON|DARK|STEEL|FAIRY'
+  const semCast: string[] = []
+  let comCast = 0
+
+  for (const [caminho, arquivo] of Object.entries(MIGRATIONS)) {
+    const nome = caminho.split('/').pop()!
+    arquivo.split('\n').forEach((linha, i) => {
+      // Comentário cita os tipos para explicar a regra; não é dado.
+      if (linha.trim().startsWith('--')) return
+      // Só a linha de tupla de um `values`. Ver o comentário do describe.
+      if (!/^\s*\(/.test(linha)) return
+      comCast += linha.match(new RegExp(`'(${TIPOS})'::`, 'g'))?.length ?? 0
+      const achados = linha.match(new RegExp(`'(${TIPOS})'(?!::)`, 'g'))
+      if (achados) semCast.push(`${nome}:${i + 1} ${linha.trim().slice(0, 60)} → ${achados.join(' ')}`)
+    })
+  }
+
+  it('a varredura enxergou as migrations e enxergou tuplas de tipo elemental', () => {
+    // Guarda anti-vácuo, em dois níveis. O glob poderia deixar de casar, e o
+    // filtro de tupla poderia deixar de casar mesmo com os arquivos lidos —
+    // nos dois casos `semCast` fica vazio e o teste passa sem olhar nada, que é
+    // o modo de falha mais caro possível justamente aqui.
+    expect(Object.keys(MIGRATIONS).length).toBeGreaterThan(50)
+    expect(comCast).toBeGreaterThan(0)
+  })
+
+  it('toda tupla com tipo elemental traz `::public.element_type`', () => {
+    expect(
+      semCast,
+      'literal de tipo elemental sem `::public.element_type` numa tupla de `values`. O Postgres '
+      + 'não converte text para enum sozinho num insert, e o erro só aparece no DEPLOY — onde ele '
+      + 'trava a fila de todos os pushes seguintes, com todas as PRs verdes.',
+    ).toEqual([])
+  })
 })
