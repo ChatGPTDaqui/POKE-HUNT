@@ -21,6 +21,8 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { lerAnimData, resolverAnim } from './lib/animdata.mjs'
+
 const RAIZ = dirname(dirname(fileURLToPath(import.meta.url)))
 
 const ACERVO = (() => {
@@ -41,33 +43,6 @@ const gen3 = catalogo.especies
   .sort((a, b) => a.dex - b.dex)
 
 const dex4 = (n) => String(n).padStart(4, '0')
-
-// Mesmo parse mínimo de `importar-especies-novas.mjs`. Duplicado porque aquele
-// é um script executável, não um módulo — e o que precisa ficar igual aqui é só
-// a resolução de `<CopyOf>`, que é a diferença entre medir a arte e medir os
-// nomes de arquivo.
-function lerAnimData(caminho) {
-  const xml = readFileSync(caminho, 'utf8')
-  const porNome = {}
-  for (const bloco of xml.match(/<Anim>[\s\S]*?<\/Anim>/g) || []) {
-    const nome = (bloco.match(/<Name>(.*?)<\/Name>/) || [])[1]
-    if (!nome) continue
-    porNome[nome] = {
-      copyOf: (bloco.match(/<CopyOf>(.*?)<\/CopyOf>/) || [])[1] || null,
-      frameWidth: Number((bloco.match(/<FrameWidth>(\d+)<\/FrameWidth>/) || [])[1]) || null,
-    }
-  }
-  return porNome
-}
-
-function resolveAnim(nome, porNome, spriteDir, vistos = new Set()) {
-  if (vistos.has(nome)) return null
-  vistos.add(nome)
-  const no = porNome[nome]
-  if (existsSync(join(spriteDir, `${nome}-Anim.png`)) && no && no.frameWidth) return nome
-  if (no && no.copyOf) return resolveAnim(no.copyOf, porNome, spriteDir, vistos)
-  return null
-}
 
 // `assets/gen5ani/` usa o NOME em minusculo, com hifen — outra convencao que a
 // dos ids do jogo (`mr__mime`). Normalizar os dois lados evita uma tabela de
@@ -117,7 +92,7 @@ for (const especie of gen3) {
     // importador a resolve. A primeira versao deste script os listou como
     // buraco e o "buraco" era do medidor.
     const porNome = lerAnimData(join(spriteDir, 'AnimData.xml'))
-    const faltando = ANIMS.filter((a) => !resolveAnim(a, porNome, spriteDir))
+    const faltando = ANIMS.filter((a) => !resolverAnim(a, porNome, spriteDir))
     if (faltando.includes('Idle') || faltando.includes('Walk')) {
       buracos.animsParciais.push(`${chave} (nem por CopyOf: ${faltando.join(',')})`)
     }

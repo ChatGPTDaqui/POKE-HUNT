@@ -29,6 +29,8 @@ import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync } from
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { lerAnimData, resolverAnim } from './lib/animdata.mjs'
+
 const RAIZ = dirname(dirname(fileURLToPath(import.meta.url)))
 
 const ACERVO = (() => {
@@ -73,39 +75,6 @@ function especiesDoCatalogo() {
     throw new Error(`catalogo com ${ids.length} ids e ${dex.length} numeros de Pokedex — leitura desalinhada`)
   }
   return ids.map((id, i) => ({ id, dex4: String(dex[i]).padStart(4, '0') }))
-}
-
-// ---------------------------------------------------------------------------
-// AnimData.xml
-//
-// Parse minimo, so o que as tabelas do jogo consomem. `<CopyOf>` importa: a
-// maioria das especies nao tem `Faint-Anim.png` proprio e o no aponta pro
-// quadro de outra animacao (normalmente Hurt) — seguir a cadeia e o que evita
-// registrar uma animacao cujo PNG nao existe em disco.
-function lerAnimData(caminho) {
-  const xml = readFileSync(caminho, 'utf8')
-  const porNome = {}
-  for (const bloco of xml.match(/<Anim>[\s\S]*?<\/Anim>/g) || []) {
-    const nome = (bloco.match(/<Name>(.*?)<\/Name>/) || [])[1]
-    if (!nome) continue
-    porNome[nome] = {
-      copyOf: (bloco.match(/<CopyOf>(.*?)<\/CopyOf>/) || [])[1] || null,
-      frameWidth: Number((bloco.match(/<FrameWidth>(\d+)<\/FrameWidth>/) || [])[1]) || null,
-      frameHeight: Number((bloco.match(/<FrameHeight>(\d+)<\/FrameHeight>/) || [])[1]) || null,
-      durations: [...bloco.matchAll(/<Duration>(\d+)<\/Duration>/g)].map((m) => Number(m[1])),
-    }
-  }
-  return porNome
-}
-
-function resolverAnim(nome, porNome, spriteDir, vistos = new Set()) {
-  if (vistos.has(nome)) return null
-  vistos.add(nome)
-  const arquivo = join(spriteDir, `${nome}-Anim.png`)
-  const no = porNome[nome]
-  if (existsSync(arquivo) && no && no.frameWidth) return { nome, arquivo, no }
-  if (no && no.copyOf) return resolverAnim(no.copyOf, porNome, spriteDir, vistos)
-  return null
 }
 
 // ---------------------------------------------------------------------------
@@ -221,7 +190,7 @@ for (const { id, dex4 } of alvos) {
     // um <img> que nao carrega no meio do combate.
     const shiny = join(shinySpriteDir, `${r.nome}-Anim.png`)
     copiar(existsSync(shiny) ? shiny : r.arquivo, join(BATTLE_DIR, id, `${anim}-Shiny-Anim.png`))
-    doId[anim] = { frameWidth: r.no.frameWidth, frameHeight: r.no.frameHeight, durations: r.no.durations }
+    doId[anim] = { frameWidth: r.no.frameWidth, frameHeight: r.no.frameHeight, durations: r.no.duracoes }
     if (anim === 'Idle' || (anim === 'Walk' && !quadroIdle)) {
       quadroIdle = destino; idleW = r.no.frameWidth; idleH = r.no.frameHeight
     }
