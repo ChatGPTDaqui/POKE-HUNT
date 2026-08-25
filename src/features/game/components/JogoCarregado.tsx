@@ -13,6 +13,7 @@ import { ScreenOverlay } from '@/features/screens/ScreenOverlay'
 import { HuntAnalyzer } from '@/features/hunt/HuntAnalyzer'
 import { StartScreen } from '@/features/start/StartScreen'
 import { PerfilTreinador } from '@/features/perfil/PerfilTreinador'
+import { PerfilPublico } from '@/features/perfil/PerfilPublico'
 import { TutorialModal } from '@/features/tutorial/TutorialModal'
 import { useUiStore } from '@/stores/uiStore'
 import { useHasStarter } from '@/stores/gameStateStore'
@@ -105,6 +106,7 @@ export function JogoCarregado() {
       <HuntAnalyzer />
       <PokeProfileModal />
       <PerfilTreinador />
+      <PerfilPublico />
       <TutorialModal />
       <ConfirmDialog />
       <LevelUpSplash />
