@@ -1,24 +1,26 @@
-// A ARTE DO GOLPE COMECA DURANTE A POSE DE ATAQUE, NAO DEPOIS DELA (PH-117).
+// A ARTE DO GOLPE ESPERA A POSE DE ATAQUE TERMINAR (PH-175).
 //
 // O QUE ESTE TESTE TRANCA
 //
-// `HIT_LAND_DELAY` era literalmente `ATTACK_ANIM_DURATION`, e o comentario dizia
-// que era pra tudo pousar "em sincronia com a pose terminando". Na tela isso
-// saia em SEQUENCIA — pose inteira, e SO ENTAO a arte do golpe. O pedido foi
-// 0,3s: a arte comeca ainda durante a pose de 0,5s.
+// Substitui `arteDoGolpeComecaNaPose.test.ts` (PH-117): aquele pedido tornava
+// `HIT_LAND_DELAY` (0,3s) menor que `ATTACK_ANIM_DURATION` (0,5s) de proposito,
+// pra pose e arte se SOBREPOREM nos ultimos 0,2s — leitura pretendida era "o
+// golpe conectando". Pedido explicito revertendo aquilo: a sobreposicao lia
+// como incoerente, nao como golpe conectando. `HIT_LAND_DELAY` volta a ser
+// `ATTACK_ANIM_DURATION` — sequencial, pose inteira primeiro.
 //
 // A afirmacao aqui e sobre as DUAS pontas, e nenhuma das duas sozinha basta:
 //
-//   1. a arte NAO nasce no instante do disparo (senao seria "0s", nao "0,3s");
-//   2. quando ela nasce, a pose de ataque AINDA ESTA TOCANDO.
+//   1. a arte NAO nasce antes do tempo de tela da pose (`ATTACK_ANIM_DURATION`)
+//      ter decorrido;
+//   2. ela nasce logo depois disso, nao muito mais tarde (senao o caso passaria
+//      so por `HIT_LAND_DELAY` ter virado grande demais, nao por estar CERTO).
 //
-// (2) e o que impede alguem de reamarrar as duas constantes de novo: com
-// `HIT_LAND_DELAY = ATTACK_ANIM_DURATION`, no quadro em que a arte aparece o
-// `attackAnimTimer` ja chegou a zero, e o caso reprova.
-//
-// Por que medir `attackAnimTimer` em vez de comparar as duas constantes: a
-// constante e detalhe interno, e comparar numero com numero passaria mesmo que a
-// arte parasse de ser criada. O que interessa e o que o jogador ve.
+// Mede pelo TEMPO SIMULADO decorrido, nao por `player.attackAnimTimer`: este
+// teste chama `updateCombat` isolado (sem o `stepWorld`/`updateAnimations`
+// completo que decrementa aquele timer de verdade), entao ele ficaria travado
+// no valor inicial e nao provaria nada. O que interessa e o que o jogador ve
+// na tela, e isso e o tempo decorrido ate a arte aparecer.
 import { describe, expect, it } from 'vitest'
 
 import { createRng } from '@/core/rng'
@@ -29,8 +31,9 @@ import { typedAoeMoveKey } from '@/data/typedAoeMoves'
 import { createEnemyEntity } from '../entity'
 import { buildMapWorld } from '../simulation'
 import { updateCombat } from './combatSystem'
+import { ATTACK_ANIM_DURATION } from './animationSystem'
 
-/** Passo de quadro da medicao. Menor que os 0,3s de propósito. */
+/** Passo de quadro da medicao. */
 const QUADRO = 0.05
 
 /** Golpe de dano de alvo unico do Charmander. */
@@ -39,11 +42,11 @@ const GOLPE_UNICO = 'ember'
 /**
  * Teto da janela em que a arte tem que aparecer.
  *
- * 0,36 e nao 0,35: somar 0.05 sete vezes da 0.35000000000000003, e o pouso cai
- * no setimo quadro justamente por causa desse residuo. Comparar com 0,35 exato
- * reprovaria por aritmetica de ponto flutuante, nao por comportamento.
+ * ATTACK_ANIM_DURATION e 0,5s; somar 0,05 dez vezes acumula residuo de ponto
+ * flutuante, entao o teto fica um quadro acima (0,56) pra nao reprovar por
+ * aritmetica, so por comportamento.
  */
-const TETO = 0.36
+const TETO = 0.56
 
 /**
  * Cenario de um golpe, um atacante, um alvo calado.
@@ -102,7 +105,7 @@ function artesDeGolpe(world: ReturnType<typeof cenario>['world']): number {
 describe.each([
   { nome: 'alvo unico', aoe: false },
   { nome: 'area', aoe: true },
-])('arte do golpe de $nome comeca durante a pose (PH-117)', ({ aoe }) => {
+])('arte do golpe de $nome espera a pose terminar (PH-175)', ({ aoe }) => {
   it('nao nasce no instante do disparo', () => {
     const { world, player } = cenario({ aoe })
     updateCombat(world, 0)
@@ -111,30 +114,29 @@ describe.each([
     expect(artesDeGolpe(world), 'arte apareceu junto com o disparo').toBe(0)
   })
 
-  it('nao nasce antes de 0,25s', () => {
+  it('nao nasce antes do tempo de tela da pose decorrer', () => {
     const { world } = cenario({ aoe })
     updateCombat(world, 0)
-    for (let t = 0; t < 5; t++) updateCombat(world, QUADRO)
-    expect(artesDeGolpe(world), 'arte apareceu antes dos 0,3s').toBe(0)
+    // Para ANTES de ATTACK_ANIM_DURATION (0,5s) — o ultimo quadro medido aqui
+    // ainda esta dentro da janela da pose.
+    for (let t = 0; t * QUADRO < ATTACK_ANIM_DURATION - QUADRO; t++) {
+      updateCombat(world, QUADRO)
+      expect(artesDeGolpe(world), `arte apareceu antes da pose acabar (t=${(t + 1) * QUADRO})`).toBe(0)
+    }
   })
 
-  it('nasce ate 0,35s, com a pose AINDA tocando', () => {
-    const { world, player } = cenario({ aoe })
+  it('nasce logo depois que a pose termina, ate 0,56s', () => {
+    const { world } = cenario({ aoe })
     updateCombat(world, 0)
     let quandoApareceu = -1
-    let poseNoInstante = -1
-    for (let t = 1; t <= 7 && quandoApareceu < 0; t++) {
+    for (let t = 1; t <= 12 && quandoApareceu < 0; t++) {
       updateCombat(world, QUADRO)
-      if (artesDeGolpe(world) > 0) {
-        quandoApareceu = t * QUADRO
-        poseNoInstante = player.attackAnimTimer
-      }
+      if (artesDeGolpe(world) > 0) quandoApareceu = t * QUADRO
     }
-    expect(quandoApareceu, 'nenhuma arte de golpe em 0,35s').toBeGreaterThan(0)
+    expect(quandoApareceu, 'nenhuma arte de golpe ate 0,56s').toBeGreaterThan(0)
+    // O CASO QUE IMPORTA: reintroduzir HIT_LAND_DELAY menor que
+    // ATTACK_ANIM_DURATION faria a arte nascer bem antes de 0,5s.
+    expect(quandoApareceu, 'arte apareceu antes do tempo de tela da pose').toBeGreaterThanOrEqual(ATTACK_ANIM_DURATION)
     expect(quandoApareceu).toBeLessThanOrEqual(TETO)
-    // O CASO QUE IMPORTA: reamarrar HIT_LAND_DELAY a ATTACK_ANIM_DURATION zera
-    // este numero, porque a arte passaria a nascer no quadro em que a pose
-    // acaba — as duas animacoes voltariam a ficar em fila.
-    expect(poseNoInstante, 'a pose ja tinha terminado quando a arte apareceu').toBeGreaterThan(0)
   })
 })
