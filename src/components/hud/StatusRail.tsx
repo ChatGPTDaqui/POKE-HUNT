@@ -18,8 +18,9 @@ import { spriteUrl } from '@/data/sprites'
 import { faceEmocaoUrl } from '@/data/faceEmotions'
 import { rarityOf } from '@/data/rarity'
 import { stoneName } from '@/data/stones'
+import { EscolhaDeEvolucao } from '@/components/modals/EscolhaDeEvolucao'
 import {
-  canEvolve, evolutionStoneRequirement, expProgressForInstance, trainerExpProgress,
+  canEvolve, evolutionStoneRequirement, expProgressForInstance, trainerExpProgress, opcoesDisponiveis,
 } from '@/engine/systems/progressionSystem'
 import { controller } from '@/engine/controller'
 import { getPerfStats } from '@/engine/systems/farmRates'
@@ -397,20 +398,41 @@ function Taxa({ rotulo, valor, cor }: { rotulo: string; valor: string; cor?: str
 function ChipEvolucao() {
   const poke = usePokeAtivo()
   const acao = useAcaoPendente()
+  // PH-139: aberto quando a especie tem mais de um destino. Hook antes de
+  // qualquer `return` — a ordem dos hooks nao pode depender de condicao.
+  const [escolhendo, setEscolhendo] = useState(false)
   if (!poke) return null
   const species = SPECIES[poke.speciesId]
   if (!species || !canEvolve(poke, species)) return null
-  const stoneReq = evolutionStoneRequirement(species)
+  const opcoes = opcoesDisponiveis(poke, species)
+  const stoneReq = evolutionStoneRequirement(species, opcoes[0])
   const pending = acao.isPending(`evo:${poke.uid}`)
+  const evoluir = (alvo?: string) => {
+    setEscolhendo(false)
+    void acao.run(`evo:${poke.uid}`, () => controller.evolvePoke(poke.uid, alvo))
+  }
   return (
+    <>
+    {escolhendo && (
+      <EscolhaDeEvolucao
+        poke={poke}
+        opcoes={opcoes}
+        requisito={(o) => evolutionStoneRequirement(species, o)}
+        onEscolher={evoluir}
+        onCancelar={() => setEscolhendo(false)}
+      />
+    )}
     <button
       type="button"
       data-keep-open
       disabled={pending}
-      onClick={() => void acao.run(`evo:${poke.uid}`, () => controller.evolvePoke(poke.uid))}
+      onClick={() => (opcoes.length > 1 ? setEscolhendo(true) : evoluir())}
       className="vidro-flutua alvo-toque flex cursor-pointer items-center justify-center gap-[.4em] self-start rounded-full border-gold px-[.9em] py-[.35em] text-[.8em] font-medium text-gold disabled:opacity-50"
     >
-      ✨ {stoneReq ? `Evoluir (${stoneReq.count}x ${stoneName(stoneReq.type)})` : 'Evoluir'}
+      ✨ {opcoes.length > 1
+        ? 'Evoluir…'
+        : stoneReq ? `Evoluir (${stoneReq.count}x ${stoneName(stoneReq.type)})` : 'Evoluir'}
     </button>
+    </>
   )
 }

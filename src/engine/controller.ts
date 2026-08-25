@@ -418,12 +418,12 @@ export const controller = {
     }
   },
 
-  async evolvePoke(pokeUid: string): Promise<void> {
+  async evolvePoke(pokeUid: string, alvo?: string): Promise<void> {
     const gameState = useGameStateStore.getState()
     const poke = [...gameState.team, ...gameState.bagPokes].find((p) => p.uid === pokeUid)
     if (!poke) return
     const previousName = SPECIES[poke.speciesId].name
-    const result = evolvePokeInstance(poke, gameState)
+    const result = evolvePokeInstance(poke, gameState, alvo)
     if (!result) return
     if ('blocked' in result) {
       const { itemId, count } = result.required
@@ -447,7 +447,7 @@ export const controller = {
     // pra guarda de reentrancia de quem chama (useAcaoPendente.run so libera
     // depois que a Promise retornada resolve) — sem isso a janela de duplo
     // clique durava um microtask (PH-13).
-    const ok = await pedirAcao({ tipo: 'evoluirPoke', pokeUid }, () => {
+    const ok = await pedirAcao({ tipo: 'evoluirPoke', pokeUid, alvo }, () => {
       if (result.stoneReq) gameState.removeItem(result.stoneReq.itemId, result.stoneReq.count)
       gameState.updatePokeInstance(pokeUid, () => result.updatedPoke)
     })

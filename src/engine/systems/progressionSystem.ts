@@ -7,7 +7,7 @@
 // dispararia re-render nem seria persistida corretamente — cada funcao
 // abaixo devolve um POKE NOVO (`{...pokeInstance, ...}`), e o chamador
 // escreve de volta via `gameState.updatePokeInstance(uid, () => novoPoke)`.
-import { SPECIES, computeStatsAtLevel, totalExpForLevel, pokeExpForLevel, SPECIAL_EVOLUTION_STONE_COUNT, type PokeInstance, type StatBlock } from '@/data/pokes'
+import { SPECIES, computeStatsAtLevel, totalExpForLevel, pokeExpForLevel, SPECIAL_EVOLUTION_STONE_COUNT, opcoesDeEvolucao, type OpcaoDeEvolucao, type PokeInstance, type StatBlock } from '@/data/pokes'
 import { getAbility, type Ability } from '@/data/abilities'
 import { activeAbilitiesPadrao, encaixarNovosGolpes, golpesAprendidosAte, nivelDeAprendizado } from '@/data/activeAbilities'
 import { stoneItemId } from '@/data/stones'
@@ -79,7 +79,18 @@ export function expProgressForInstance(pokeInstance: PokeInstance, species: Spec
 }
 
 export function canEvolve(pokeInstance: PokeInstance, species: Species): boolean {
-  return species.evolvesTo != null && species.evolvesAtLevel != null && pokeInstance.level >= species.evolvesAtLevel
+  return opcoesDisponiveis(pokeInstance, species).length > 0
+}
+
+/**
+ * Os destinos que ESTE POKE alcanca agora — nivel ja batido (PH-139).
+ *
+ * Filtra por NIVEL, e nao por pedras: quem nao tem as pedras precisa VER a
+ * opcao pra saber que ela existe e o que falta. Esconder o caminho caro
+ * deixaria o jogador achando que so ha um.
+ */
+export function opcoesDisponiveis(pokeInstance: PokeInstance, species: Species): OpcaoDeEvolucao[] {
+  return opcoesDeEvolucao(species).filter((o) => pokeInstance.level >= o.atLevel && SPECIES[o.to])
 }
 
 export interface StoneRequirement {
@@ -88,8 +99,12 @@ export interface StoneRequirement {
   type: Species['type']
 }
 
-export function evolutionStoneRequirement(species: Species): StoneRequirement | null {
-  if (!species.isSpecialEvolution) return null
+export function evolutionStoneRequirement(species: Species, opcao?: OpcaoDeEvolucao): StoneRequirement | null {
+  // PH-139: o gate e da OPCAO, nao da especie — Slowpoke viraria Slowbro de
+  // graca e Slowking so com pedras. Sem `opcao`, cai no primeiro destino, que e
+  // exatamente o que todo chamador antigo ja media.
+  const especial = opcao ? opcao.isSpecial : species.isSpecialEvolution === true
+  if (!especial) return null
   return { itemId: stoneItemId(species.type), count: SPECIAL_EVOLUTION_STONE_COUNT, type: species.type }
 }
 
@@ -104,20 +119,32 @@ export type EvolveResult =
 // Stones (server: na hora, ja e a acao confirmada; client otimista: so
 // depois que `pedirAcao` confirmar — mutar aqui direto era o bug real da
 // PH-12, Stones sumiam de uma evolucao que o servidor recusou).
-export function evolvePokeInstance(pokeInstance: PokeInstance, gameState: GameStateStore): EvolveResult {
+export function evolvePokeInstance(
+  pokeInstance: PokeInstance,
+  gameState: GameStateStore,
+  // PH-139: qual destino, quando ha mais de um. Ausente = o primeiro, que e o
+  // comportamento de sempre pra especie de ramo unico.
+  alvo?: string,
+): EvolveResult {
   const species = SPECIES[pokeInstance.speciesId]
-  if (!canEvolve(pokeInstance, species)) return null
+  const disponiveis = opcoesDisponiveis(pokeInstance, species)
+  if (disponiveis.length === 0) return null
+  // Alvo fora dos disponiveis e RECUSADO, e nao ignorado: cair no primeiro
+  // evoluiria pra outra coisa que o jogador nao pediu. O servidor faz a mesma
+  // checagem — esta aqui so evita a tela chamar em vao.
+  const opcao = alvo ? disponiveis.find((o) => o.to === alvo) : disponiveis[0]
+  if (!opcao) return null
 
-  const stoneReq = evolutionStoneRequirement(species)
+  const stoneReq = evolutionStoneRequirement(species, opcao)
   if (stoneReq && !gameState.hasItem(stoneReq.itemId, stoneReq.count)) {
     return { blocked: 'stones', required: stoneReq }
   }
 
-  const newSpecies = SPECIES[species.evolvesTo as string]
+  const newSpecies = SPECIES[opcao.to]
   const hpRatio = pokeInstance.hp / pokeInstance.stats.hp
   // Piso pra applyDeathExpPenalty abaixo — um POKE evoluido nunca pode
   // de-evoluir, mesmo depois de um level-down por penalidade de morte.
-  const minLevel = Math.max(pokeInstance.minLevel || 1, species.evolvesAtLevel as number)
+  const minLevel = Math.max(pokeInstance.minLevel || 1, opcao.atLevel)
   const stats = computeStatsAtLevel(newSpecies, pokeInstance.level, pokeInstance.ivs, pokeInstance.rarity, pokeInstance.isShiny, pokeInstance.nature)
   const hp = Math.max(1, Math.round(stats.hp * hpRatio))
 
