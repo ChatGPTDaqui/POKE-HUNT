@@ -1353,6 +1353,45 @@ export type Database = {
           },
         ]
       }
+      species_evolution_options: {
+        Row: {
+          evolves_at_level: number
+          evolves_to: string
+          is_special_evolution: boolean
+          ordem: number
+          species_id: string
+        }
+        Insert: {
+          evolves_at_level: number
+          evolves_to: string
+          is_special_evolution?: boolean
+          ordem?: number
+          species_id: string
+        }
+        Update: {
+          evolves_at_level?: number
+          evolves_to?: string
+          is_special_evolution?: boolean
+          ordem?: number
+          species_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "species_evolution_options_evolves_to_fkey"
+            columns: ["evolves_to"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "species_evolution_options_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       species_moves: {
         Row: {
           level_req: number
@@ -1784,7 +1823,9 @@ export type Database = {
       }
       escolher_starter: { Args: { p_species_id: string }; Returns: Json }
       esta_online: { Args: { p_user_id: string }; Returns: boolean }
-      evoluir_poke: { Args: { p_poke_id: string }; Returns: Json }
+      evoluir_poke:
+        | { Args: { p_poke_id: string }; Returns: Json }
+        | { Args: { p_alvo?: string; p_poke_id: string }; Returns: Json }
       excluir_conversa: { Args: { p_contato_id: string }; Returns: Json }
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
       gravar_progresso: {
@@ -3298,6 +3339,45 @@ export type Database = {
           },
         ]
       }
+      species_evolution_options: {
+        Row: {
+          evolves_at_level: number
+          evolves_to: string
+          is_special_evolution: boolean
+          ordem: number
+          species_id: string
+        }
+        Insert: {
+          evolves_at_level: number
+          evolves_to: string
+          is_special_evolution?: boolean
+          ordem?: number
+          species_id: string
+        }
+        Update: {
+          evolves_at_level?: number
+          evolves_to?: string
+          is_special_evolution?: boolean
+          ordem?: number
+          species_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "species_evolution_options_evolves_to_fkey"
+            columns: ["evolves_to"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "species_evolution_options_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       species_moves: {
         Row: {
           level_req: number
@@ -3729,7 +3809,9 @@ export type Database = {
       }
       escolher_starter: { Args: { p_species_id: string }; Returns: Json }
       esta_online: { Args: { p_user_id: string }; Returns: boolean }
-      evoluir_poke: { Args: { p_poke_id: string }; Returns: Json }
+      evoluir_poke:
+        | { Args: { p_poke_id: string }; Returns: Json }
+        | { Args: { p_alvo?: string; p_poke_id: string }; Returns: Json }
       excluir_conversa: { Args: { p_contato_id: string }; Returns: Json }
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
       gravar_progresso: {
