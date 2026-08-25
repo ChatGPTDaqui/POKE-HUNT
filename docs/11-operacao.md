@@ -36,6 +36,41 @@ mudança de código. `jogo-dev` só reflete o que já foi mergeado em `dev` (dep
 `supabase-deploy-dev.yml` a cada push nesse branch, ver docs/15) — não é live-reload do que está
 sendo editado localmente; ainda assim, publicar em `dev` é bem mais barato que publicar em `main`.
 
+### Staging tem DOIS lados, e "smoke em jogo-dev" cobre só um (PH-134)
+
+Vale a distinção porque ela já custou tempo: **"smoke em `jogo-dev`" testa o SERVIDOR.** É a Edge
+Function respondendo, a migration aplicada, a RPC recusando o que deve recusar. Não diz nada sobre
+o cliente.
+
+**O cliente de staging é `https://dev.poke-hunt-euj.pages.dev`**, publicado pelo Cloudflare Pages a
+cada push na `dev`. Ele passou meses **sem iniciar** — o build compilava, o deploy ficava verde, o
+HTTP respondia 200, e o app morria no browser porque o ambiente de *preview* do Pages não tinha
+variável nenhuma. Ninguém notou porque nada olha a tela depois do deploy.
+
+Consertado em 2026-08-25. As cinco variáveis do preview:
+
+| variável | preview (staging) | produção |
+|---|---|---|
+| `VITE_SUPABASE_URL` | mesmo projeto | mesmo projeto |
+| `VITE_SUPABASE_ANON_KEY` | mesma | mesma |
+| `VITE_SERVIDOR_URL` | **`…/jogo-dev`** | `…/jogo` |
+| `VITE_SUPABASE_SCHEMA` | **`dev`** | não declarada (cai no padrão `public`) |
+| `VITE_AUTH_STORAGE_KEY` | **valor próprio** | valor próprio, diferente |
+
+As duas últimas linhas não são detalhe. `VITE_SUPABASE_SCHEMA` é o segundo caminho de escrita:
+apontar só o `VITE_SERVIDOR_URL` pra `jogo-dev` e deixar o schema em `public` manda metade do
+tráfego pra produção. E `VITE_AUTH_STORAGE_KEY` repetido entre os dois faria staging e produção
+**dividirem a sessão no mesmo navegador** — entrar num logaria no outro.
+
+**Armadilha ao inspecionar pela API:** *todo* deploy deste projeto aparece com
+`environment: "preview"`, inclusive os da branch `dev`. Não conclua que mexer no preview não
+alcança o jogador sem antes conferir por onde produção é servida.
+
+**Enquanto não houver check automático** (item pendente da PH-134, bloqueado porque mexe em
+`.github/workflows/` e o token de push não tem escopo `workflow`), o passo é manual e entra no
+pré-voo da promoção: abrir `https://dev.poke-hunt-euj.pages.dev`, confirmar que a tela sobe e que o
+console está limpo. Deploy verde não é evidência de app que inicia.
+
 ### Dados
 
 | Comando | O que faz |
@@ -312,6 +347,10 @@ exceção — mesmo pra teste rápido, mesmo achando que vai desfazer depois.
    apontando pra `jogo-dev` (seção acima) — agora sim existe ciclo antes de produção.
 8. Validado em `jogo-dev` → PR `dev` → `main` (gate de par `dev`/`public` reaplica aqui,
    comparando contra `main` de verdade — é o ponto real de promoção).
+
+   **"Validado em `jogo-dev`" é o SERVIDOR.** O cliente de staging tem que ser aberto à parte:
+   `https://dev.poke-hunt-euj.pages.dev`, tela subindo e console limpo. Ver a seção "Staging tem
+   DOIS lados" acima — esse front-end passou meses sem iniciar, com o deploy verde o tempo todo.
 9. Merge em `main` → `supabase-deploy.yml` aplica em produção. **Não rodar `db
    push`/`edge:publicar` manual fora desse fluxo**, a menos que seja diagnóstico pontual (a seção
    de Diagnóstico de 502 abaixo já é esse caso legítimo).
