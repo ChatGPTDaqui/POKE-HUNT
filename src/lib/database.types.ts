@@ -1851,6 +1851,7 @@ export type Database = {
         Returns: Json
       }
       pedir_amizade: { Args: { p_nick: string }; Returns: Json }
+      perfil_publico: { Args: { p_user_id: string }; Returns: Json }
       por_na_equipe: { Args: { p_poke_id: string }; Returns: Json }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
@@ -3840,6 +3841,7 @@ export type Database = {
         Returns: Json
       }
       pedir_amizade: { Args: { p_nick: string }; Returns: Json }
+      perfil_publico: { Args: { p_user_id: string }; Returns: Json }
       por_na_equipe: { Args: { p_poke_id: string }; Returns: Json }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
