@@ -60,7 +60,12 @@ function corpo(schema) {
 
   const linhasRamo = comRamo
     .flatMap((e) => e.evolucoes.map((o, i) =>
-      `  (${sql(e.chave)}, ${sql(o.to)}, ${o.atLevel}, ${o.isSpecial}, ${i}, ${sql(o.stoneType ?? null)})`))
+      // Cast em CADA literal, e nao so na coluna do `select` la embaixo. Os dois
+      // juntos sao redundantes de proposito: este ponto ja derrubou o deploy da
+      // `dev` uma vez (PH-153), e castar no literal nao depende de o Postgres
+      // inferir o tipo da coluna do `values` — inclusive quando o primeiro valor
+      // e `null`, que e o caso do `slowpoke`.
+      `  (${sql(e.chave)}, ${sql(o.to)}, ${o.atLevel}, ${o.isSpecial}, ${i}, ${sql(o.stoneType ?? null)}::public.element_type)`))
     .join(',\n')
 
   return `${irma}--
@@ -145,7 +150,21 @@ where s.id = v.species_id
 -- antigo, ou save que evolui sozinho. E a ordem de Pokedex do destino.
 insert into ${schema}.species_evolution_options
   (species_id, evolves_to, evolves_at_level, is_special_evolution, ordem, stone_type)
-select v.species_id, v.evolves_to, v.evolves_at_level, v.is_special_evolution, v.ordem, v.stone_type
+-- \`stone_type\` com CAST EXPLICITO, e isto NAO e estilo: sem ele o deploy
+-- morre com
+--
+--   ERROR: column "stone_type" is of type element_type but expression is of
+--          type text (SQLSTATE 42804)
+--
+-- O Postgres infere \`text\` para a coluna de um \`values\` literal e NAO faz cast
+-- implicito de text para enum num \`insert ... select\`. Os outros tipos passam
+-- (inteiro e booleano tem cast implicito); enum nao.
+--
+-- Custou o deploy da \`dev\` de 25/08: a migration mergeou, o deploy falhou aqui,
+-- e todo push seguinte falhou junto — o deploy tenta a migration pendente
+-- primeiro, entao um erro nela trava a fila inteira.
+select v.species_id, v.evolves_to, v.evolves_at_level, v.is_special_evolution, v.ordem,
+       v.stone_type::public.element_type
 from (values
 ${linhasRamo}
 ) as v(species_id, evolves_to, evolves_at_level, is_special_evolution, ordem, stone_type)

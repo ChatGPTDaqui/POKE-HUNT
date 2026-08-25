@@ -12,6 +12,28 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-152. A maior mudanca de CONTEUDO desde que o elenco existe: 19 especies
+  // novas e 36 caminhos de evolucao que estavam mortos.
+  //
+  // O que fica de FORA, e por que: o A* com heap (PH-102), o React fora do
+  // bundle do servidor (PH-148), o parser unificado (PH-147) e a guarda de
+  // geometria de sprite (PH-149). Todos internos — nenhum muda o que o jogador
+  // ve. Mesma regua que a 7.10 usou pra deixar o teste de cobertura de face de
+  // fora.
+  {
+    version: '7.11',
+    date: '2026-08-25',
+    title: 'Dezenove POKE novos, e as evolucoes que nunca aconteciam',
+    highlights: [
+      'EVOLUCAO POR PEDRA, TROCA E AMIZADE PASSOU A EXISTIR. Se voce tem um Growlithe guardado esperando virar Arcanine, ele nunca ia virar — o caminho simplesmente nao existia no jogo, e nada na tela dizia isso. Eram 36 evolucoes nessa situacao. Agora todas funcionam, no mesmo criterio das outras especiais: Nivel 80 e 40 pedras.',
+      'DEZENOVE POKE NOVOS entraram no elenco, que foi de 226 pra 245. Eles nao existiam porque eram destino das evolucoes que nao aconteciam — sem o caminho, ninguem nunca chegava neles. Entram Raichu, Vaporeon, Jolteon, Flareon, Espeon, Umbreon, Exeggutor, Poliwrath, Slowking, Vileplume, Bellossom, Crobat, Togetic, Starmie, Cloyster, Clefairy, Clefable, Wigglytuff e Hitmontop. Todos aparecem no mato e todos podem ser capturados.',
+      'O EEVEE ESCOLHE PRA QUE EVOLUIR, E A PEDRA DIZ QUAL. Sao cinco caminhos e cada um cobra a pedra do tipo de destino: Flareon pede 40 Pedras de FOGO, Vaporeon de AGUA, Jolteon de ELETRICO, Espeon de PSIQUICO e Umbreon de SOMBRIO. Voce ve os cinco na ficha e escolhe qual perseguir.',
+      'TYROGUE AGORA TEM TRES CAMINHOS — Hitmonlee, Hitmonchan e Hitmontop —, todos no Nivel 20 e sem pedra nenhuma. Antes eram dois.',
+      'GLOOM, POLIWHIRL E SLOWPOKE tambem passaram a ter mais de um destino. Slowpoke e o caso curioso: Slowbro continua no Nivel 37 de graca, e Slowking cobra as 40 pedras — dois caminhos com precos diferentes.',
+      'A CARA DO POKE MUDA EM MAIS OITO ESPECIES. O retrato no trilho de status reage a dor, tontura, sono e comemoracao; oito POKE tinham cara fixa por falta de desenho e agora usam uma expressao equivalente do mesmo acervo.',
+      'ALGUMAS ESPECIES CAPTURADAS DE AGORA EM DIANTE VEM COM MENOS GOLPES INICIAIS. Steelix, Machamp, Nidoqueen e outras 18 tinham uma lista de golpes de Nivel 1 que so existia porque o jogo nao sabia que elas eram formas evoluidas. Quem ja tem um deles NAO perde nada — os golpes ficam. Muda so pra quem capturar dali pra frente.',
+    ],
+  },
   // PH-138. Curta de proposito: sao duas linhas, e a primeira e um aumento
   // RETROATIVO de requisito. Quem tinha 25 pedras guardadas parou de poder
   // evoluir, e a unica coisa que explica isso pro jogador e esta nota — a ficha

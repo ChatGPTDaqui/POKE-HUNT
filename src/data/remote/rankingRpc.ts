@@ -5,7 +5,7 @@
 // propria linha, sem view/RPC publica nao da pra contar as dos outros.
 import { supabase } from '@/lib/supabase'
 import { rowToPoke } from './playerMapper'
-import type { CriterioPoke, EntradaHall, EntradaPoke, EntradaTreinador, PerfilRemoto } from './servidor'
+import type { CriterioPoke, EntradaHall, EntradaPoke, EntradaTreinador, PerfilPublico, PerfilRemoto } from './servidor'
 
 // `treinadores_publico`/`ranking_pokemon`/`meu_perfil` vivem so no schema
 // `dev` — mesma razao (gerador de tipos so conhece `public`) documentada em
@@ -83,5 +83,35 @@ export async function perfil(): Promise<PerfilRemoto> {
   return {
     rank: r.rank, totalJogadores: r.totalJogadores, segundosJogados: Number(r.segundosJogados),
     contaCriadaEm: r.contaCriadaEm, noHallDaFama: r.noHallDaFama,
+  }
+}
+
+/**
+ * O perfil de OUTRO jogador (PH-119).
+ *
+ * `null` quando o treinador não existe mais — a RPC devolve `{ existe: false }`
+ * em vez de estourar, porque chegar aqui a partir de um anúncio de conta apagada
+ * é um caso real, e um toast vermelho seria a resposta errada para "esse
+ * treinador não existe mais".
+ */
+export async function perfilPublico(userId: string): Promise<PerfilPublico | null> {
+  const { data, error } = await db.rpc('perfil_publico', { p_user_id: userId })
+  if (error) throw new Error(error.message)
+  const r = data as ({ existe: false } | (PerfilPublico & { existe: true })) | null
+  if (!r || !r.existe) return null
+  return {
+    userId: r.userId,
+    nome: r.nome,
+    nivel: Number(r.nivel),
+    exp: Number(r.exp),
+    rank: Number(r.rank),
+    totalJogadores: Number(r.totalJogadores),
+    // `numeric` do Postgres chega como string no PostgREST quando passa do
+    // alcance do `number` — o mesmo `Number()` que `perfil()` já faz acima.
+    segundosJogados: Number(r.segundosJogados),
+    contaCriadaEm: r.contaCriadaEm,
+    noHallDaFama: r.noHallDaFama,
+    capturas: Number(r.capturas),
+    anunciosAtivos: Number(r.anunciosAtivos),
   }
 }
