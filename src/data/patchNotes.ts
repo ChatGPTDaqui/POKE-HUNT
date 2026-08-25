@@ -12,6 +12,33 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-159. Continuacao direta da 7.11: a mesma classe de mudanca, em mais 14
+  // especies — e desta vez ela alcanca as Eeveelutions, que quase todo jogador
+  // tem. Por isso ganha entrada propria em vez de virar rodape da anterior.
+  //
+  // A segunda linha CORRIGE o que a 7.11 prometeu errado (PH-158), e e por isso
+  // que as duas entram juntas: elas ficam lado a lado no arquivo, e publicar a
+  // nova sem consertar a antiga deixaria o painel se contradizendo na cara do
+  // jogador.
+  //
+  // O que fica de FORA, e por que: o guarda de bundle da Edge (PH-133), o React
+  // fora do servidor (PH-148), o parser unificado (PH-147), a guarda de
+  // geometria de sprite (PH-149) e os dois `db:types` (PH-154). Todos internos.
+  // Mesma regua da 7.11 e da 7.10.
+  {
+    version: '7.12',
+    date: '2026-08-25',
+    title: 'Mais quatorze POKE com menos golpes de Nivel 1, e as Eeveelutions entre eles',
+    highlights: [
+      'QUATORZE ESPECIES PERDERAM GOLPES DE NIVEL 1, E QUATRO DELAS SAO EEVEELUTIONS. Jolteon, Flareon, Espeon e Umbreon vinham com Tackle, Tail Whip e Helping Hand no Nivel 1 sem nunca terem aprendido nenhum dos tres. Entram na mesma lista Mr. Mime, Mantine, Bellossom, Slowking, Chansey, Sudowoodo, Marill, Snorlax, Hitmonchan e Hitmontop. Sao 47 golpes ao todo.',
+      'O POKE QUE VOCE JA TEM MUDA TAMBEM — e a nota anterior disse o contrario. A lista de golpes de cada POKE e recalculada pela especie e pelo nivel toda vez que o jogo abre, entao golpe que sai da especie sai do seu junto. Nenhum slot fica vazio: o lugar e preenchido por outro golpe que ele conhece. A 7.11 prometia que nada mudava pra quem ja tinha, e a promessa estava errada.',
+      'AQUELE BLOCO NUNCA FOI O KIT INICIAL DELAS. Era a lista do Recordador de Golpes do jogo original, que este jogo nao tem desde a 6.8, e ela entrava por engano em especie que o jogo nao reconhecia como forma evoluida — ou porque a pre-evolucao esta fora do elenco (Sudowoodo vem de Bonsly, que nao existe aqui), ou porque a especie e o SEGUNDO destino de uma evolucao com ramo, como as quatro Eeveelutions.',
+      'O CASO MAIS VISIVEL ERA UM SUDOWOODO SELVAGEM DE NIVEL 1 BATENDO COM WOOD HAMMER. Sao 120 de poder, quase tres vezes o golpe de qualquer POKE da mesma faixa de nivel.',
+      'QUATRO DELAS AGORA COMECAM SEM GOLPE NENHUM NO NIVEL 1: Marill aprende o primeiro no Nivel 2, Mantine no 3, Snorlax no 4 e Slowking no 5. Abaixo disso o POKE luta so com o Ataque Basico.',
+      'AS BARRAS DE HP E XP DO TOPO PARARAM DE MUDAR DE TAMANHO, E AGORA MOSTRAM A PORCENTAGEM. Elas encolhiam e esticavam conforme o resto do cabecalho — um selo de status aparecendo ja bastava pra empurrar. O numero nunca arredonda pra 0% num POKE vivo, nem pra 100% num que ja levou dano.',
+      'O NIVEL NA FICHA DO POKE ATUALIZA SOZINHO. Com o perfil aberto, subir de nivel deixava o Lv antigo na tela ate voce fechar e reabrir a janela.',
+    ],
+  },
   // PH-152. A maior mudanca de CONTEUDO desde que o elenco existe: 19 especies
   // novas e 36 caminhos de evolucao que estavam mortos.
   //
@@ -31,7 +58,16 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'TYROGUE AGORA TEM TRES CAMINHOS — Hitmonlee, Hitmonchan e Hitmontop —, todos no Nivel 20 e sem pedra nenhuma. Antes eram dois.',
       'GLOOM, POLIWHIRL E SLOWPOKE tambem passaram a ter mais de um destino. Slowpoke e o caso curioso: Slowbro continua no Nivel 37 de graca, e Slowking cobra as 40 pedras — dois caminhos com precos diferentes.',
       'A CARA DO POKE MUDA EM MAIS OITO ESPECIES. O retrato no trilho de status reage a dor, tontura, sono e comemoracao; oito POKE tinham cara fixa por falta de desenho e agora usam uma expressao equivalente do mesmo acervo.',
-      'ALGUMAS ESPECIES CAPTURADAS DE AGORA EM DIANTE VEM COM MENOS GOLPES INICIAIS. Steelix, Machamp, Nidoqueen e outras 18 tinham uma lista de golpes de Nivel 1 que so existia porque o jogo nao sabia que elas eram formas evoluidas. Quem ja tem um deles NAO perde nada — os golpes ficam. Muda so pra quem capturar dali pra frente.',
+      // PH-158 — esta linha prometia que nada mudava pra quem ja tinha o POKE,
+      // e a promessa era FALSA. `playerMapper.ts` deriva `unlockedAbilities` de
+      // (especie, nivel) em toda carga e ignora a coluna gravada, entao golpe
+      // que sai do learnset sai do POKE salvo junto. Medido: `jolteon@80` nao
+      // conhece mais tackle, tail_whip nem helping_hand.
+      //
+      // A frase existia pra tranquilizar, e foi o pior lugar possivel pra
+      // errar: quem leu "nao perde nada" e viu a build trocada nao conclui que
+      // a nota estava errada — conclui que o jogo bugou o POKE dele.
+      'VINTE E UMA ESPECIES VEM COM MENOS GOLPES DE NIVEL 1. Steelix, Machamp, Nidoqueen e outras 18 tinham uma lista de golpes de Nivel 1 que so existia porque o jogo nao sabia que elas eram formas evoluidas. O POKE que voce JA TEM muda tambem: a lista de golpes de cada um e recalculada pela especie e pelo nivel toda vez que o jogo abre. Nenhum slot fica vazio — o lugar e preenchido por outro golpe que ele conhece.',
     ],
   },
   // PH-138. Curta de proposito: sao duas linhas, e a primeira e um aumento
