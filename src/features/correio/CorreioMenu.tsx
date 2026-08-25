@@ -25,7 +25,7 @@ import {
 import * as correioRpc from '@/data/remote/correioRealtime'
 import { supabase } from '@/lib/supabase'
 import { useToastStore, type ToastErroDetalhe } from '@/stores/toastStore'
-import { useDeviceMode } from '@/stores/uiStore'
+import { useDeviceMode, useUiStore } from '@/stores/uiStore'
 import {
   GameButton, GameCard, GameInput, SectionLabel, SegmentedTabs,
 } from '@/components/game/controls'
@@ -67,6 +67,19 @@ export function CorreioMenu() {
   const [compondo, setCompondo] = useState<{ nickInicial?: string } | null>(null)
   const [contatoAberto, setContatoAberto] = useState<Contato | null>(null)
   const [meuId, setMeuId] = useState<string | null>(null)
+
+  // PH-119: quem abriu o Correio pedindo uma conversa específica (o botão
+  // "Conversar" do perfil público). Consumido UMA vez e limpo — sem isso,
+  // fechar o fio e voltar ao Correio reabriria o mesmo contato para sempre, e o
+  // jogador não conseguiria mais ver a lista.
+  const contatoInicial = useUiStore((s) => s.correioContatoInicial)
+  const consumirContatoInicial = useUiStore((s) => s.consumirCorreioContatoInicial)
+  useEffect(() => {
+    if (!contatoInicial) return
+    setAba('conversas')
+    setContatoAberto({ userId: contatoInicial.userId, nick: contatoInicial.nick })
+    consumirContatoInicial()
+  }, [contatoInicial, consumirContatoInicial])
 
   const { data, isLoading } = useQuery({
     queryKey: ['correio'],
