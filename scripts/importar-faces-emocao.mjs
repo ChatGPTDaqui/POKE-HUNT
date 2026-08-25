@@ -33,6 +33,40 @@ const EMOCOES = {
   determined: 'Determined',
 }
 
+// SUBSTITUTAS: qual outra expressao da origem serve quando a canonica nao
+// existe, em ordem de preferencia (PH-137).
+//
+// O acervo tem 16 expressoes por especie e este script usava 7. Medido: 8
+// especies tinham ZERO das 7 e alguma das outras 9 — a cara delas nunca mudava,
+// nem uma vez —, e outras 15 tinham buraco parcial com alternativa disponivel.
+// Nao e falta de arte: e o mapeamento sendo estreito demais.
+//
+// O CRITERIO e o que o trilho de status precisa comunicar DE RELANCE, e nao
+// sinonimo de dicionario. A face responde "o quanto incomoda", nao "qual e o
+// status" — quem diz qual e o status e o selo colorido do lado. Entao a
+// substituta certa e a que le com a mesma URGENCIA, mesmo com outro nome:
+//
+//   pain       dor        Crying > Teary-Eyed > Sad
+//   worried    apreensao  Sad > Teary-Eyed > Crying
+//   dizzy      tontura    Surprised > Crying        (olho arregalado, sem foco)
+//   stunned    travado    Surprised > Shouting      (pego de surpresa e parado)
+//   sigh       apatia     Sad > Teary-Eyed          (sono/desanimo, olho baixo)
+//   joyous     festa      Happy > Inspired
+//   determined foco       Inspired > Angry > Shouting
+//
+// `Angry` NAO substitui `pain`, e a tentacao existia: raiva le como "vai
+// revidar", que e o oposto de "esta apanhando". Pelo mesmo motivo `Shouting` so
+// entra em `determined` e `stunned`, nunca em `sigh`.
+const SUBSTITUTAS = {
+  pain: ['Crying', 'Teary-Eyed', 'Sad'],
+  worried: ['Sad', 'Teary-Eyed', 'Crying'],
+  dizzy: ['Surprised', 'Crying'],
+  stunned: ['Surprised', 'Shouting'],
+  sigh: ['Sad', 'Teary-Eyed'],
+  joyous: ['Happy', 'Inspired'],
+  determined: ['Inspired', 'Angry', 'Shouting'],
+}
+
 const REPO = 'PMDCollab/SpriteCollab'
 const RAW = `https://raw.githubusercontent.com/${REPO}/master/portrait`
 const CONCORRENCIA = 12
@@ -126,19 +160,49 @@ const tarefas = []
 const temNormal = {}
 const temShiny = {}
 
+// De onde cada face substituida veio, na rodada ANTERIOR. Serve para uma coisa
+// so, e ela e sutil: `existsSync(destino)` pula o download de um arquivo que ja
+// esta em disco, e o arquivo em disco NAO diz de qual expressao ele saiu. Se a
+// canonica passar a existir na origem, sem isto o substituto ficaria la para
+// sempre, e o mapa gerado diria que a canonica esta em disco — mentira que so
+// aparece olhando o retrato.
+const substitutasAnteriores = (() => {
+  if (!existsSync(ARQUIVO_GERADO)) return {}
+  const texto = readFileSync(ARQUIVO_GERADO, 'utf8')
+  const bloco = texto.match(/FACE_EMOCOES_SUBSTITUTAS[^=]*= (\{[\s\S]*?\n\})/)
+  if (!bloco) return {}
+  const mapa = {}
+  for (const linha of bloco[1].split('\n')) {
+    const m = linha.match(/'([^']+)': '([^']+)'/)
+    if (m) mapa[m[1]] = m[2]
+  }
+  return mapa
+})()
+
+const substitutas = {}
+
 for (const { id, dex4 } of especies) {
   temNormal[id] = []
   temShiny[id] = []
-  for (const [slug, arquivo] of Object.entries(EMOCOES)) {
+  for (const [slug, canonica] of Object.entries(EMOCOES)) {
     const alvos = [
-      { chave: `${dex4}/${arquivo}.png`, destino: join(DESTINO_NORMAL, slug, `${id}.png`), lista: temNormal[id] },
-      { chave: `${dex4}/0000/0001/${arquivo}.png`, destino: join(DESTINO_SHINY, slug, `${id}.png`), lista: temShiny[id] },
+      { prefixo: `${dex4}/`, destino: join(DESTINO_NORMAL, slug, `${id}.png`), lista: temNormal[id], paleta: 'normal' },
+      { prefixo: `${dex4}/0000/0001/`, destino: join(DESTINO_SHINY, slug, `${id}.png`), lista: temShiny[id], paleta: 'shiny' },
     ]
-    for (const { chave, destino, lista } of alvos) {
-      if (!arvore.has(chave)) continue
+    for (const { prefixo, destino, lista, paleta } of alvos) {
+      // Canonica SEMPRE ganha. As substitutas so entram no buraco.
+      const escolhida = [canonica, ...(SUBSTITUTAS[slug] ?? [])]
+        .find((nome) => arvore.has(`${prefixo}${nome}.png`))
+      if (!escolhida) continue
       lista.push(slug)
-      if (!FORCAR && existsSync(destino)) continue
-      tarefas.push(() => baixar(`${RAW}/${chave}`, destino))
+
+      const registro = `${paleta}:${slug}:${id}`
+      if (escolhida !== canonica) substitutas[registro] = escolhida
+      // Trocou de origem desde a ultima rodada (a canonica apareceu, ou a
+      // preferencia mudou): rebaixa mesmo com o arquivo em disco.
+      const mudou = (substitutasAnteriores[registro] ?? canonica) !== escolhida
+      if (!FORCAR && !mudou && existsSync(destino)) continue
+      tarefas.push(() => baixar(`${RAW}/${prefixo}${escolhida}.png`, destino))
     }
   }
 }
@@ -166,6 +230,37 @@ export type FaceEmocao = ${Object.keys(EMOCOES).map((s) => `'${s}'`).join(' | ')
 export const FACE_EMOCOES: Record<string, FaceEmocao[]> = ${comoTabela(temNormal)}
 
 export const FACE_EMOCOES_SHINY: Record<string, FaceEmocao[]> = ${comoTabela(temShiny)}
+
+/**
+ * Faces que NAO vieram da expressao de mesmo nome na origem (PH-137).
+ *
+ * \`'normal:dizzy:onix': 'Surprised'\` = o arquivo \`emo/dizzy/onix.png\` e o
+ * \`Surprised.png\` do acervo. A especie nao tem \`Dizzy\` desenhado, e sem esta
+ * substituicao a cara dela nunca mudaria.
+ *
+ * DUAS RAZOES pra este mapa existir em vez de a substituicao ser invisivel:
+ *
+ *   1. a proxima auditoria de arte precisa saber que \`Dizzy\` do Onix continua
+ *      sem existir na origem — o arquivo em disco nao conta essa historia;
+ *   2. o proprio script le isto pra decidir se rebaixa: se a canonica aparecer
+ *      no acervo um dia, \`existsSync\` pularia o download e o substituto ficaria
+ *      la pra sempre.
+ */
+export const FACE_EMOCOES_SUBSTITUTAS: Record<string, string> = ${
+  Object.keys(substitutas).length
+    ? `{\n${Object.entries(substitutas).sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => `  '${k}': '${v}',`).join('\n')}\n}`
+    : '{}'
+}
 `
 writeFileSync(ARQUIVO_GERADO, corpo)
 console.log(`mapa gravado em ${ARQUIVO_GERADO}`)
+const porEmocao = {}
+for (const chave of Object.keys(substitutas)) {
+  const slug = chave.split(':')[1]
+  porEmocao[slug] = (porEmocao[slug] ?? 0) + 1
+}
+if (Object.keys(substitutas).length) {
+  console.log(`${Object.keys(substitutas).length} face(s) vieram de expressao SUBSTITUTA: ` +
+    Object.entries(porEmocao).map(([k, v]) => `${k}=${v}`).join(' '))
+}
