@@ -9,6 +9,10 @@ import { IconeDeItemNaGrade } from '@/components/shared/IconeDeItemNaGrade'
 import { useAcaoMercado } from '../hooks/useAcaoMercado'
 import { useTaxaDoMercado, taxaDeVenda } from '../useTaxaDoMercado'
 import { fmt } from '../utils'
+import { FiltroDeItens } from './FiltroDaVenda'
+import {
+  filtrarItens, categoriasPresentes, FILTRO_DE_ITEM_VAZIO, type FiltroDeItem,
+} from '../filtrosDaVenda'
 
 export function VenderItens() {
   const items = useGameStateStore((s) => s.items)
@@ -17,11 +21,14 @@ export function VenderItens() {
   const [itemId, setItemId] = useState('')
   const [preco, setPreco] = useState(100)
   const [qtd, setQtd] = useState(1)
+  const [filtro, setFiltro] = useState<FiltroDeItem>(FILTRO_DE_ITEM_VAZIO)
   const criar = useAcaoMercado(mercadoRpc.criarOrdem)
   const acao = useAcaoPendente()
 
   const disponiveis = Object.keys(items).filter((id) => items[id] > 0 && ITEMS[id] && !lockedItems[id])
-  const escolhido = itemId || disponiveis[0] || ''
+  const visiveis = filtrarItens(disponiveis, filtro)
+  // O selecionado sai dos VISÍVEIS, pelo mesmo motivo da tela de POKE.
+  const escolhido = visiveis.includes(itemId) ? itemId : visiveis[0] || ''
   const maximo = items[escolhido] ?? 0
 
   // Livro de item e sempre em ouro, entao a taxa sempre incide aqui.
@@ -41,17 +48,28 @@ export function VenderItens() {
             itens de uma vez, e nao so no que esta selecionado. */}
         <div className="flex w-full flex-col gap-[.2em] text-[.78em] text-n400">
           Item
+          <FiltroDeItens
+            filtro={filtro}
+            onFiltro={setFiltro}
+            categorias={categoriasPresentes(disponiveis)}
+            total={disponiveis.length}
+            mostrando={visiveis.length}
+          />
+          {visiveis.length === 0 ? (
+            <p className="py-[.4em] text-n500">Nenhum item casa com o filtro.</p>
+          ) : (
           <GradeDeInventario
             rotuloDoGrupo="Item para anunciar"
             selecionado={escolhido || null}
             onSelecionar={setItemId}
-            slots={disponiveis.map((id) => ({
+            slots={visiveis.map((id) => ({
               id,
               rotulo: `${ITEMS[id].name} (x${items[id]})`,
               contador: items[id],
               conteudo: <IconeDeItemNaGrade itemId={id} nome={ITEMS[id].name} />,
             }))}
           />
+          )}
           {escolhido && <span className="text-n300">{ITEMS[escolhido].name}</span>}
         </div>
         <label className="flex flex-col gap-[.2em] text-[.78em] text-n400">
