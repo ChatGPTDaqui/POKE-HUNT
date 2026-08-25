@@ -20,6 +20,8 @@
 // Foi esse mesmo erro que fez a primeira medicao de arte da geracao III listar
 // tres especies como buraco quando o buraco era do medidor.
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
+
+import { lerAnimData, resolverAnim } from './lib/animdata.mjs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -49,32 +51,6 @@ const SPRITE = join(ACERVO, 'sprite')
 const JA_USADAS = new Set(['Idle', 'Walk', 'Shoot', 'Charge', 'Sleep', 'Faint'])
 
 // ---------------------------------------------------------------------------
-function lerAnimData(caminho) {
-  const xml = readFileSync(caminho, 'utf8')
-  const porNome = {}
-  for (const bloco of xml.match(/<Anim>[\s\S]*?<\/Anim>/g) || []) {
-    const nome = (bloco.match(/<Name>(.*?)<\/Name>/) || [])[1]
-    if (!nome) continue
-    porNome[nome] = {
-      copyOf: (bloco.match(/<CopyOf>(.*?)<\/CopyOf>/) || [])[1] || null,
-      frameWidth: Number((bloco.match(/<FrameWidth>(\d+)/) || [])[1]) || null,
-      frameHeight: Number((bloco.match(/<FrameHeight>(\d+)/) || [])[1]) || null,
-      duracoes: [...bloco.matchAll(/<Duration>(\d+)/g)].map((m) => Number(m[1])),
-    }
-  }
-  return porNome
-}
-
-function resolver(nome, porNome, dir, vistos = new Set()) {
-  if (vistos.has(nome)) return null
-  vistos.add(nome)
-  const no = porNome[nome]
-  if (existsSync(join(dir, `${nome}-Anim.png`)) && no && no.frameWidth) return { nome, no }
-  if (no && no.copyOf) return resolver(no.copyOf, porNome, dir, vistos)
-  return null
-}
-
-// ---------------------------------------------------------------------------
 const texto = readFileSync(join(RAIZ, 'src', 'data', 'generated', 'pokes.generated.ts'), 'utf8')
 const ids = [...texto.matchAll(/"id": "([a-z0-9_]+)"/g)].map((m) => m[1])
 const dexes = [...texto.matchAll(/"description": "Pokedex N.(\d+)/g)].map((m) => Number(m[1]))
@@ -93,7 +69,7 @@ for (const { dex4 } of elenco) {
   for (const nome of Object.keys(porNome)) nomesConhecidos.add(nome)
 
   for (const nome of Object.keys(porNome)) {
-    const r = resolver(nome, porNome, dir)
+    const r = resolverAnim(nome, porNome, dir)
     if (!r) continue
     const atual = dados.get(nome) ?? { especies: 0, bytes: 0, quadros: 0, ticks: 0 }
     atual.especies += 1
