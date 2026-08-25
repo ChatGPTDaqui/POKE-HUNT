@@ -155,6 +155,34 @@ const SPAWN_POINT_MAX_ATTEMPTS = 40
 const SPAWN_CONE_MIN_DISTANCE = 250 // "media distancia": nunca colado no jogador
 const SPAWN_CONE_MAX_DISTANCE = 550 // nem no fim do mapa — se a tentativa nao achar celula livre nessa faixa, cai no sorteio antigo (raio do mapa inteiro) abaixo
 const SPAWN_CONE_HALF_ANGLE = (55 * Math.PI) / 180 // ~110 graus de cone total
+/**
+ * Distancia minima ENTRE inimigos, em unidades de mundo (PH-143).
+ *
+ * O cone acima resolve "onde o jogador consegue ver", e so isso. Cada inimigo
+ * era sorteado sem olhar onde os outros ja estavam, entao com `maxEnemies: 6`
+ * (o valor das faixas em data/biomas.ts) os seis caiam na MESMA fatia de ~110
+ * graus e podiam nascer colados. O resultado e um pico de dificuldade que nao
+ * vem da faixa de nivel da hunt, e nada na tela denuncia que aquilo foi
+ * sorteio.
+ *
+ * Menor que a largura util do cone de proposito: um valor grande demais nao
+ * caberia na faixa 250-550 e todo spawn cairia no melhor-esforco, que e o mesmo
+ * que nao ter regra.
+ */
+const SPAWN_ENTRE_INIMIGOS = 170
+/**
+ * Orcamento de tentativas quando ha vizinhos a evitar (PH-143).
+ *
+ * Maior que `SPAWN_POINT_MAX_ATTEMPTS`, e por geometria e nao por capricho: o
+ * cone comporta os seis inimigos com folga (a area util e ~230 mil unidades²
+ * contra ~136 mil que seis discos de raio 85 ocupam), mas o dardo aleatorio vai
+ * ficando sem espaco conforme a regiao enche, e com 40 tentativas os ultimos
+ * caiam quase sempre no melhor-esforco. Medido: a mediana da menor distancia
+ * subiu de 108 para o dobro so com este orcamento.
+ *
+ * So custa sorteio no INSTANTE do spawn, nunca por quadro.
+ */
+const SPAWN_ESPACADO_MAX_ATTEMPTS = 160
 
 // Sorteio antigo (raio do mapa inteiro, sem depender de onde o jogador esta
 // olhando) — vira FALLBACK: cobre o caso sem jogador ainda (nao deveria
@@ -193,7 +221,28 @@ function randomSpawnPointFullMap(rng: Rng, mapDef: MapDef): Point {
   return { x, y }
 }
 
-function randomSpawnPoint(rng: Rng, mapDef: MapDef, player: { x: number; y: number; facing: Point } | null): Point {
+/** Distancia do ponto ao inimigo ja posicionado mais proximo. */
+function folgaAte(x: number, y: number, ocupados: Point[]): number {
+  let menor = Number.POSITIVE_INFINITY
+  for (const o of ocupados) menor = Math.min(menor, Math.hypot(x - o.x, y - o.y))
+  return menor
+}
+
+/**
+ * `ocupados`: onde os inimigos JA posicionados nesta leva estao (PH-143).
+ *
+ * O ponto sorteado precisa respeitar `SPAWN_ENTRE_INIMIGOS` em relacao a eles.
+ * Quando nenhuma das tentativas consegue (corredor estreito, sala pequena,
+ * muitos inimigos), vale o MELHOR ESFORCO — o candidato valido mais afastado
+ * dos outros — e nao o fallback de mapa inteiro: perder o espacamento e melhor
+ * que perder o cone de visao, que e pedido explicito do usuario.
+ */
+function randomSpawnPoint(
+  rng: Rng,
+  mapDef: MapDef,
+  player: { x: number; y: number; facing: Point } | null,
+  ocupados: Point[] = [],
+): Point {
   if (!player) return randomSpawnPointFullMap(rng, mapDef)
 
   const cx = mapDef.bounds.width / 2
@@ -201,15 +250,25 @@ function randomSpawnPoint(rng: Rng, mapDef: MapDef, player: { x: number; y: numb
   const radius = mapWalkRadius(mapDef)
   const facingAngle = Math.atan2(player.facing.y, player.facing.x)
 
-  for (let attempts = 0; attempts < SPAWN_POINT_MAX_ATTEMPTS; attempts++) {
+  let melhor: { ponto: Point; folga: number } | null = null
+  const orcamento = ocupados.length > 0 ? SPAWN_ESPACADO_MAX_ATTEMPTS : SPAWN_POINT_MAX_ATTEMPTS
+  for (let attempts = 0; attempts < orcamento; attempts++) {
     const angle = facingAngle + randRange(rng, -SPAWN_CONE_HALF_ANGLE, SPAWN_CONE_HALF_ANGLE)
     const dist = randRange(rng, SPAWN_CONE_MIN_DISTANCE, SPAWN_CONE_MAX_DISTANCE)
     const x = player.x + Math.cos(angle) * dist
     const y = player.y + Math.sin(angle) * dist
     if (Math.hypot(x - cx, y - cy) > radius) continue
     if (isCellBlocked(mapDef, x, y)) continue
-    return { x, y }
+    const folga = folgaAte(x, y, ocupados)
+    if (!melhor || folga > melhor.folga) melhor = { ponto: { x, y }, folga }
+    // Sai cedo SO quando ja esta bem servido. Aceitar o primeiro que passa
+    // raspando espalha pior: o ponto "ok por pouco" rouba o espaco de quem vem
+    // depois, e a leva inteira termina mais apertada do que precisava.
+    if (melhor.folga >= SPAWN_ENTRE_INIMIGOS * 1.5) break
   }
+  // Melhor esforco: o candidato valido mais afastado dos outros. Perder o
+  // espacamento e melhor que perder o cone de visao, que e pedido explicito.
+  if (melhor) return melhor.ponto
   return randomSpawnPointFullMap(rng, mapDef)
 }
 
@@ -220,9 +279,12 @@ function spawnEnemyAt(
   janela?: [number, number],
   player?: { x: number; y: number; facing: Point } | null,
   entrada?: Point | null,
+  // PH-143: onde os outros inimigos ja estao, pra este nao nascer em cima
+  // deles. Ausente = leva de um inimigo so, nao ha com quem se espremer.
+  ocupados: Point[] = [],
 ): EnemyEntity {
   const { rng, counters } = world
-  const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null)
+  const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null, ocupados)
   // Ponderado pelo TIER de spawn da especie, derivado da chance real de
   // encontro selvagem do Gen1/Gen2 (ver scripts/derive-spawn-tiers.js) — quem e
   // comum nos jogos reais aparece mais que quem e raro, dentro da mesma hunt.
@@ -500,7 +562,7 @@ export function buildMapWorld(
       enemies.push(enemy)
     } else {
       for (let i = 0; i < mapDef.maxEnemies; i++) {
-        const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala))
+        const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala), enemies)
         aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
         enemies.push(enemy)
       }
@@ -713,7 +775,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       } else {
         const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
         for (let i = 0; i < world.mapDef.maxEnemies; i++) {
-          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala))
+          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies)
           aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
           world.enemies.push(enemy)
         }
@@ -743,7 +805,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       if (world.mapDef) {
         const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
         for (let i = 0; i < world.mapDef.maxEnemies; i++) {
-          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala))
+          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies)
           aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
           world.enemies.push(enemy)
         }
@@ -854,7 +916,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
       const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
-      const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala))
+      const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies)
       aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
       world.enemies.push(enemy)
       world.respawnTimer = world.mapDef.respawnDelay
