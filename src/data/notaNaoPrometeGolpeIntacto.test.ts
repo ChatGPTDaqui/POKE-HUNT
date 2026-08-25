@@ -56,12 +56,22 @@ describe('nota nao promete golpe intacto em POKE salvo (PH-158)', () => {
     expect(conhecidos).not.toContain('helping_hand')
   })
 
-  it('a nota mais recente e a 7.12, no topo do painel', () => {
+  it('a correcao (7.12) aparece acima da nota que errou (7.11)', () => {
     // O painel (`SettingsScreen`) renderiza `sortedPatchNotes()` na ordem que
     // ela devolve — checar aqui e o equivalente testavel de "abri a aba e a
-    // entrada nova estava em cima".
-    const topo = sortedPatchNotes()[0]!
-    expect(topo.version).toBe('7.12')
-    expect(topo.highlights.length).toBeGreaterThan(4)
+    // correcao estava acima do texto que ela desmente".
+    //
+    // Este teste ja pediu `sortedPatchNotes()[0].version === '7.12'`. Custava
+    // uma edicao a cada nota nova (a 7.13 o quebrou) e nao cobria nada: a
+    // propriedade "mais nova primeiro" tem teste proprio e generico em
+    // `ordemDosPatchNotes.test.ts`, com o caso 7.10-vs-7.9 fixado. O que E
+    // desta issue e o par 7.11/7.12, e esse par nunca muda.
+    const versoes = sortedPatchNotes().map((n) => n.version)
+    const i712 = versoes.indexOf('7.12')
+    const i711 = versoes.indexOf('7.11')
+    expect(i712, 'a entrada 7.12 sumiu do arquivo').toBeGreaterThanOrEqual(0)
+    expect(i711, 'a entrada 7.11 sumiu do arquivo').toBeGreaterThanOrEqual(0)
+    expect(i712, 'a 7.12 corrige a 7.11 e tem que aparecer ACIMA dela').toBeLessThan(i711)
+    expect(sortedPatchNotes()[0]!.highlights.length).toBeGreaterThan(4)
   })
 })

@@ -12,6 +12,38 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-166. ENTRADA RETROATIVA — e a unica do arquivo que descreve codigo que JA
+  // ESTAVA NO AR quando ela foi escrita. Os cinco itens abaixo subiram na
+  // promocao #141 (25/08) e o jogador vinha usando todos sem aviso nenhum.
+  //
+  // Como o buraco aconteceu: a 7.10 saiu na PR #108 e o clima entrou nas #110,
+  // #111 e #112 — mesmo dia, logo depois. A 7.11 e a 7.12 vieram no dia seguinte
+  // tratando de OUTRO assunto (evolucao, golpes de Nivel 1) e ninguem voltou pra
+  // cobrir a janela. Nao houve decisao de excluir: os comentarios de exclusao da
+  // 7.11 e da 7.12 listam so item interno, e nenhum deles cita clima, Mercado ou
+  // spawn. A licao pro proximo: a nota tem que ser conferida contra o INTERVALO
+  // desde a anterior, nao contra a issue que a motivou.
+  //
+  // O que fica de FORA, e por que: o gate de migration do CI (PH-76), o peso
+  // versionado de scripts/ (PH-163) e o inventario de explicacao flutuante
+  // (PH-165). Os tres estao pendentes de promocao e nenhum muda o que o jogador
+  // ve. Mesma regua da 7.12.
+  {
+    version: '7.13',
+    date: '2026-08-25',
+    title: 'O ceu deixou de ser sempre limpo — e mais quatro coisas que ja estavam no ar sem aviso',
+    highlights: [
+      'AGORA CADA SALA TEM CLIMA PROPRIO. Ate agora o clima so existia se um POKE gastasse o turno lancando Rain Dance e companhia — numa hunt normal o ceu estava sempre limpo. O clima e sorteado ao entrar na sala e vale enquanto ela durar, com a tabela de chance vindo do sub-bioma.',
+      'DOIS CLIMAS NOVOS: Neve e Neblina. Com eles sao seis ao todo, junto de Chuva, Sol forte, Granizo e Tempestade de areia.',
+      'UM SUBSISTEMA INTEIRO SAIU DA GAVETA. Chlorophyll, Swift Swim, Sand Rush, Rain Dish e Ice Body ja existiam no jogo e quase nunca disparavam, porque dependiam de um clima que nunca acontecia. Agora valem.',
+      'E VOCE PASSA A VER O CLIMA. Cada um dos seis tem efeito desenhado na tela, e um chip no HUD diz qual esta valendo e o que ele faz. Antes disto um POKE podia perder 1/16 do HP por turno numa sala de deserto sem NADA na tela explicando por que.',
+      'AS TELAS DE VENDA DO MERCADO GANHARAM BUSCA, FILTRO E ORDENACAO. Anunciar exigia cacar o item ou o POKE percorrendo a lista inteira na mao, e mochila e reserva so crescem com o tempo de jogo. POKE tem busca por nome, tipo, raridade e shiny, e ordenacao por nivel, IV, raridade e nome; item tem busca por nome e categoria. A busca ignora acento e maiuscula.',
+      'POKE NAO NASCE MAIS EM BANDO. Cada inimigo era sorteado sem olhar onde os outros ja estavam, entao os seis podiam cair colados na mesma fatia da tela. Nao era so feio: era um pico de dificuldade que nao vinha da faixa de nivel da hunt, e nada denunciava que aquilo tinha sido sorteio. Medida em 60 sementes, a menor distancia entre dois inimigos subiu de 3 para 81.',
+      'O BOT PASSA A USAR MAX REVIVE. Ele so procurava Revive: quem tinha apenas Max Revive ficava com a automacao morta — o POKE desmaiava, nada levantava ele, e nada na tela explicava. O seletor sempre ofereceu os dois.',
+      'E O AVISO DE SUPRIMENTO PAROU DE GRITAR A TOA. Ele contava item que voce tinha DESLIGADO na lista do bot, e ignorava substituto em estoque — cinquenta Max Revive nao calavam o aviso por Revive. Agora a conta e por familia de item.',
+      'A EDICAO DOS 4 GOLPES DESTRAVOU NO HOSPITAL. Voltando pro Hospital, escolher golpe ficava indisponivel e so voltava com F5.',
+    ],
+  },
   // PH-159. Continuacao direta da 7.11: a mesma classe de mudanca, em mais 14
   // especies — e desta vez ela alcanca as Eeveelutions, que quase todo jogador
   // tem. Por isso ganha entrada propria em vez de virar rodape da anterior.
