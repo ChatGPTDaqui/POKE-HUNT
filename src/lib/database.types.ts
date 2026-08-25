@@ -1353,6 +1353,48 @@ export type Database = {
           },
         ]
       }
+      species_evolution_options: {
+        Row: {
+          evolves_at_level: number
+          evolves_to: string
+          is_special_evolution: boolean
+          ordem: number
+          species_id: string
+          stone_type: Database["dev"]["Enums"]["element_type"] | null
+        }
+        Insert: {
+          evolves_at_level: number
+          evolves_to: string
+          is_special_evolution?: boolean
+          ordem?: number
+          species_id: string
+          stone_type?: Database["dev"]["Enums"]["element_type"] | null
+        }
+        Update: {
+          evolves_at_level?: number
+          evolves_to?: string
+          is_special_evolution?: boolean
+          ordem?: number
+          species_id?: string
+          stone_type?: Database["dev"]["Enums"]["element_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "species_evolution_options_evolves_to_fkey"
+            columns: ["evolves_to"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "species_evolution_options_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       species_moves: {
         Row: {
           level_req: number
@@ -1388,6 +1430,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tempo_jogado_arquivado: {
+        Row: {
+          atualizado_em: string
+          segundos: number
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          segundos?: number
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          segundos?: number
+          user_id?: string
+        }
+        Relationships: []
       }
       type_chart: {
         Row: {
@@ -1766,7 +1826,9 @@ export type Database = {
       }
       escolher_starter: { Args: { p_species_id: string }; Returns: Json }
       esta_online: { Args: { p_user_id: string }; Returns: boolean }
-      evoluir_poke: { Args: { p_poke_id: string }; Returns: Json }
+      evoluir_poke:
+        | { Args: { p_poke_id: string }; Returns: Json }
+        | { Args: { p_alvo?: string; p_poke_id: string }; Returns: Json }
       excluir_conversa: { Args: { p_contato_id: string }; Returns: Json }
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
       gravar_progresso: {
@@ -1789,6 +1851,7 @@ export type Database = {
         Returns: Json
       }
       pedir_amizade: { Args: { p_nick: string }; Returns: Json }
+      perfil_publico: { Args: { p_user_id: string }; Returns: Json }
       por_na_equipe: { Args: { p_poke_id: string }; Returns: Json }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
@@ -3280,6 +3343,48 @@ export type Database = {
           },
         ]
       }
+      species_evolution_options: {
+        Row: {
+          evolves_at_level: number
+          evolves_to: string
+          is_special_evolution: boolean
+          ordem: number
+          species_id: string
+          stone_type: Database["public"]["Enums"]["element_type"] | null
+        }
+        Insert: {
+          evolves_at_level: number
+          evolves_to: string
+          is_special_evolution?: boolean
+          ordem?: number
+          species_id: string
+          stone_type?: Database["public"]["Enums"]["element_type"] | null
+        }
+        Update: {
+          evolves_at_level?: number
+          evolves_to?: string
+          is_special_evolution?: boolean
+          ordem?: number
+          species_id?: string
+          stone_type?: Database["public"]["Enums"]["element_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "species_evolution_options_evolves_to_fkey"
+            columns: ["evolves_to"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "species_evolution_options_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       species_moves: {
         Row: {
           level_req: number
@@ -3315,6 +3420,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tempo_jogado_arquivado: {
+        Row: {
+          atualizado_em: string
+          segundos: number
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          segundos?: number
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          segundos?: number
+          user_id?: string
+        }
+        Relationships: []
       }
       type_chart: {
         Row: {
@@ -3693,7 +3816,9 @@ export type Database = {
       }
       escolher_starter: { Args: { p_species_id: string }; Returns: Json }
       esta_online: { Args: { p_user_id: string }; Returns: boolean }
-      evoluir_poke: { Args: { p_poke_id: string }; Returns: Json }
+      evoluir_poke:
+        | { Args: { p_poke_id: string }; Returns: Json }
+        | { Args: { p_alvo?: string; p_poke_id: string }; Returns: Json }
       excluir_conversa: { Args: { p_contato_id: string }; Returns: Json }
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
       gravar_progresso: {
@@ -3716,6 +3841,7 @@ export type Database = {
         Returns: Json
       }
       pedir_amizade: { Args: { p_nick: string }; Returns: Json }
+      perfil_publico: { Args: { p_user_id: string }; Returns: Json }
       por_na_equipe: { Args: { p_poke_id: string }; Returns: Json }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }

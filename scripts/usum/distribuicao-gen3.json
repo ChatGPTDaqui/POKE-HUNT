@@ -1,0 +1,3898 @@
+{
+ "_origem": "Gerado por scripts/relatorio-gen3.mjs (PH-146). Relatorio de PREPARACAO — nenhum arquivo do jogo le isto.",
+ "_regra": "Zona e faixa calculadas pela mesma formula do jogo; a copia e verificada por src/data/regraDeZonaEspelhada.test.ts.",
+ "especies": [
+  {
+   "dex": 252,
+   "chave": "treecko",
+   "nome": "Treecko",
+   "tipo": "GRASS",
+   "bst": 310,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    15
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "forest"
+   ],
+   "biomas": [
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": true
+  },
+  {
+   "dex": 253,
+   "chave": "grovyle",
+   "nome": "Grovyle",
+   "tipo": "GRASS",
+   "bst": 405,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    16,
+    35
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "forest"
+   ],
+   "biomas": [
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 254,
+   "chave": "sceptile",
+   "nome": "Sceptile",
+   "tipo": "GRASS",
+   "bst": 530,
+   "estagio": 3,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    36,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "forest"
+   ],
+   "biomas": [
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 255,
+   "chave": "torchic",
+   "nome": "Torchic",
+   "tipo": "FIRE",
+   "bst": 310,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    15
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "mountain"
+   ],
+   "biomas": [
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": true
+  },
+  {
+   "dex": 256,
+   "chave": "combusken",
+   "nome": "Combusken",
+   "tipo": "FIRE/FIGHTING",
+   "bst": 405,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    16,
+    35
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "mountain"
+   ],
+   "biomas": [
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 257,
+   "chave": "blaziken",
+   "nome": "Blaziken",
+   "tipo": "FIRE/FIGHTING",
+   "bst": 530,
+   "estagio": 3,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    36,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "mountain"
+   ],
+   "biomas": [
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 258,
+   "chave": "mudkip",
+   "nome": "Mudkip",
+   "tipo": "WATER",
+   "bst": 310,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    15
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "swamp"
+   ],
+   "biomas": [
+    "aguas_interiores"
+   ],
+   "lendario": false,
+   "inicial": true
+  },
+  {
+   "dex": 259,
+   "chave": "marshtomp",
+   "nome": "Marshtomp",
+   "tipo": "WATER/GROUND",
+   "bst": 405,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    16,
+    35
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "swamp"
+   ],
+   "biomas": [
+    "aguas_interiores"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 260,
+   "chave": "swampert",
+   "nome": "Swampert",
+   "tipo": "WATER/GROUND",
+   "bst": 535,
+   "estagio": 3,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    36,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "swamp"
+   ],
+   "biomas": [
+    "aguas_interiores"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 261,
+   "chave": "poochyena",
+   "nome": "Poochyena",
+   "tipo": "DARK",
+   "bst": 220,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    17
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "plains",
+    "town",
+    "volcano"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "igneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 262,
+   "chave": "mightyena",
+   "nome": "Mightyena",
+   "tipo": "DARK",
+   "bst": 420,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II",
+    "III"
+   ],
+   "nivel": [
+    18,
+    90
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "plains",
+    "town",
+    "volcano"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "igneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 263,
+   "chave": "zigzagoon",
+   "nome": "Zigzagoon",
+   "tipo": "NORMAL",
+   "bst": 240,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    19
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "metropolis",
+    "plains",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "urbano"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 264,
+   "chave": "linoone",
+   "nome": "Linoone",
+   "tipo": "NORMAL",
+   "bst": 420,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II",
+    "III"
+   ],
+   "nivel": [
+    20,
+    90
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "metropolis",
+    "plains",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "urbano"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 265,
+   "chave": "wurmple",
+   "nome": "Wurmple",
+   "tipo": "BUG",
+   "bst": 195,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    6
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "forest",
+    "grass",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 266,
+   "chave": "silcoon",
+   "nome": "Silcoon",
+   "tipo": "BUG",
+   "bst": 205,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    7,
+    9
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "forest",
+    "grass",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 267,
+   "chave": "beautifly",
+   "nome": "Beautifly",
+   "tipo": "BUG/FLYING",
+   "bst": 395,
+   "estagio": 3,
+   "zonaMinima": 2,
+   "faixas": [
+    "I",
+    "II",
+    "III"
+   ],
+   "nivel": [
+    10,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "forest",
+    "grass",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 268,
+   "chave": "cascoon",
+   "nome": "Cascoon",
+   "tipo": "BUG",
+   "bst": 205,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    9
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "forest",
+    "grass",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 269,
+   "chave": "dustox",
+   "nome": "Dustox",
+   "tipo": "BUG/POISON",
+   "bst": 385,
+   "estagio": 3,
+   "zonaMinima": 2,
+   "faixas": [
+    "I",
+    "II",
+    "III"
+   ],
+   "nivel": [
+    10,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "forest",
+    "grass",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 270,
+   "chave": "lotad",
+   "nome": "Lotad",
+   "tipo": "WATER/GRASS",
+   "bst": 220,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    13
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "lake",
+    "swamp",
+    "town"
+   ],
+   "biomas": [
+    "aguas_interiores",
+    "campo_aberto"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 271,
+   "chave": "lombre",
+   "nome": "Lombre",
+   "tipo": "WATER/GRASS",
+   "bst": 340,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    14,
+    30
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "lake",
+    "swamp",
+    "town"
+   ],
+   "biomas": [
+    "aguas_interiores",
+    "campo_aberto"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 272,
+   "chave": "ludicolo",
+   "nome": "Ludicolo",
+   "tipo": "WATER/GRASS",
+   "bst": 480,
+   "estagio": 3,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    31,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "lake",
+    "swamp",
+    "town"
+   ],
+   "biomas": [
+    "aguas_interiores",
+    "campo_aberto"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 273,
+   "chave": "seedot",
+   "nome": "Seedot",
+   "tipo": "GRASS",
+   "bst": 220,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    13
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "forest",
+    "grass",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 274,
+   "chave": "nuzleaf",
+   "nome": "Nuzleaf",
+   "tipo": "GRASS/DARK",
+   "bst": 340,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    14,
+    30
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "forest",
+    "grass",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 275,
+   "chave": "shiftry",
+   "nome": "Shiftry",
+   "tipo": "GRASS/DARK",
+   "bst": 480,
+   "estagio": 3,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    31,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "forest",
+    "grass",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 276,
+   "chave": "taillow",
+   "nome": "Taillow",
+   "tipo": "NORMAL/FLYING",
+   "bst": 270,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    21
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "mountain",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 277,
+   "chave": "swellow",
+   "nome": "Swellow",
+   "tipo": "NORMAL/FLYING",
+   "bst": 455,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    22,
+    90
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "mountain",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 278,
+   "chave": "wingull",
+   "nome": "Wingull",
+   "tipo": "WATER/FLYING",
+   "bst": 270,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    24
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "sea"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 279,
+   "chave": "pelipper",
+   "nome": "Pelipper",
+   "tipo": "WATER/FLYING",
+   "bst": 440,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    25,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "sea"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 280,
+   "chave": "ralts",
+   "nome": "Ralts",
+   "tipo": "PSYCHIC/FAIRY",
+   "bst": 198,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    19
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "fairy-cave",
+    "meadow",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "sagrado"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 281,
+   "chave": "kirlia",
+   "nome": "Kirlia",
+   "tipo": "PSYCHIC/FAIRY",
+   "bst": 278,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    20,
+    29
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "fairy-cave",
+    "meadow",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "sagrado"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 282,
+   "chave": "gardevoir",
+   "nome": "Gardevoir",
+   "tipo": "PSYCHIC/FAIRY",
+   "bst": 518,
+   "estagio": 3,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    30,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "fairy-cave",
+    "meadow",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "sagrado"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 283,
+   "chave": "surskit",
+   "nome": "Surskit",
+   "tipo": "BUG/WATER",
+   "bst": 269,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    21
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "lake",
+    "town"
+   ],
+   "biomas": [
+    "aguas_interiores",
+    "campo_aberto"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 284,
+   "chave": "masquerain",
+   "nome": "Masquerain",
+   "tipo": "BUG/FLYING",
+   "bst": 454,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    22,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "lake",
+    "town"
+   ],
+   "biomas": [
+    "aguas_interiores",
+    "campo_aberto"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 285,
+   "chave": "shroomish",
+   "nome": "Shroomish",
+   "tipo": "GRASS",
+   "bst": 295,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    22
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "forest",
+    "grass",
+    "jungle",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 286,
+   "chave": "breloom",
+   "nome": "Breloom",
+   "tipo": "GRASS/FIGHTING",
+   "bst": 460,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    23,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "forest",
+    "grass",
+    "jungle",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 287,
+   "chave": "slakoth",
+   "nome": "Slakoth",
+   "tipo": "NORMAL",
+   "bst": 280,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    17
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "jungle"
+   ],
+   "biomas": [
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 288,
+   "chave": "vigoroth",
+   "nome": "Vigoroth",
+   "tipo": "NORMAL",
+   "bst": 440,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II"
+   ],
+   "nivel": [
+    18,
+    35
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "jungle"
+   ],
+   "biomas": [
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 289,
+   "chave": "slaking",
+   "nome": "Slaking",
+   "tipo": "NORMAL",
+   "bst": 670,
+   "estagio": 3,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    36,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "jungle"
+   ],
+   "biomas": [
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 290,
+   "chave": "nincada",
+   "nome": "Nincada",
+   "tipo": "BUG/GROUND",
+   "bst": 266,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    19
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "tall-grass",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 291,
+   "chave": "ninjask",
+   "nome": "Ninjask",
+   "tipo": "BUG/FLYING",
+   "bst": 456,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    20,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "tall-grass",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 292,
+   "chave": "shedinja",
+   "nome": "Shedinja",
+   "tipo": "BUG/GHOST",
+   "bst": 236,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "tall-grass",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 293,
+   "chave": "whismur",
+   "nome": "Whismur",
+   "tipo": "NORMAL",
+   "bst": 240,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    19
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "abyss",
+    "cave",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "sombrio",
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 294,
+   "chave": "loudred",
+   "nome": "Loudred",
+   "tipo": "NORMAL",
+   "bst": 360,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    20,
+    39
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "abyss",
+    "cave",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "sombrio",
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 295,
+   "chave": "exploud",
+   "nome": "Exploud",
+   "tipo": "NORMAL",
+   "bst": 490,
+   "estagio": 3,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    40,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "abyss",
+    "cave",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "sombrio",
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 296,
+   "chave": "makuhita",
+   "nome": "Makuhita",
+   "tipo": "FIGHTING",
+   "bst": 237,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    23
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "cave",
+    "construction-site",
+    "dojo"
+   ],
+   "biomas": [
+    "industrial",
+    "subterraneo",
+    "urbano"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 297,
+   "chave": "hariyama",
+   "nome": "Hariyama",
+   "tipo": "FIGHTING",
+   "bst": 474,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    24,
+    90
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "cave",
+    "construction-site",
+    "dojo"
+   ],
+   "biomas": [
+    "industrial",
+    "subterraneo",
+    "urbano"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 298,
+   "chave": "azurill",
+   "nome": "Azurill",
+   "tipo": "NORMAL/FAIRY",
+   "bst": 190,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    30
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "fairy-cave",
+    "lake"
+   ],
+   "biomas": [
+    "aguas_interiores",
+    "sagrado"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 299,
+   "chave": "nosepass",
+   "nome": "Nosepass",
+   "tipo": "ROCK",
+   "bst": 375,
+   "estagio": 1,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "cave",
+    "construction-site"
+   ],
+   "biomas": [
+    "industrial",
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 300,
+   "chave": "skitty",
+   "nome": "Skitty",
+   "tipo": "NORMAL",
+   "bst": 260,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    30
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "meadow",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 301,
+   "chave": "delcatty",
+   "nome": "Delcatty",
+   "tipo": "NORMAL",
+   "bst": 400,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    31,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "meadow",
+    "town"
+   ],
+   "biomas": [
+    "campo_aberto"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 302,
+   "chave": "sableye",
+   "nome": "Sableye",
+   "tipo": "DARK/GHOST",
+   "bst": 380,
+   "estagio": 1,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "abyss"
+   ],
+   "biomas": [
+    "sombrio"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 303,
+   "chave": "mawile",
+   "nome": "Mawile",
+   "tipo": "STEEL/FAIRY",
+   "bst": 380,
+   "estagio": 1,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "abyss",
+    "fairy-cave"
+   ],
+   "biomas": [
+    "sagrado",
+    "sombrio"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 304,
+   "chave": "aron",
+   "nome": "Aron",
+   "tipo": "STEEL/ROCK",
+   "bst": 330,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    31
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "mountain"
+   ],
+   "biomas": [
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 305,
+   "chave": "lairon",
+   "nome": "Lairon",
+   "tipo": "STEEL/ROCK",
+   "bst": 430,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II"
+   ],
+   "nivel": [
+    32,
+    41
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "mountain"
+   ],
+   "biomas": [
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 306,
+   "chave": "aggron",
+   "nome": "Aggron",
+   "tipo": "STEEL/ROCK",
+   "bst": 530,
+   "estagio": 3,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    42,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "mountain"
+   ],
+   "biomas": [
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 307,
+   "chave": "meditite",
+   "nome": "Meditite",
+   "tipo": "FIGHTING/PSYCHIC",
+   "bst": 280,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    36
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "dojo",
+    "volcano"
+   ],
+   "biomas": [
+    "igneo",
+    "urbano"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 308,
+   "chave": "medicham",
+   "nome": "Medicham",
+   "tipo": "FIGHTING/PSYCHIC",
+   "bst": 410,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    37,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "dojo",
+    "volcano"
+   ],
+   "biomas": [
+    "igneo",
+    "urbano"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 309,
+   "chave": "electrike",
+   "nome": "Electrike",
+   "tipo": "ELECTRIC",
+   "bst": 295,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    25
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "power-plant"
+   ],
+   "biomas": [
+    "industrial"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 310,
+   "chave": "manectric",
+   "nome": "Manectric",
+   "tipo": "ELECTRIC",
+   "bst": 475,
+   "estagio": 2,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    26,
+    90
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "power-plant"
+   ],
+   "biomas": [
+    "industrial"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 311,
+   "chave": "plusle",
+   "nome": "Plusle",
+   "tipo": "ELECTRIC",
+   "bst": 405,
+   "estagio": 1,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "power-plant"
+   ],
+   "biomas": [
+    "industrial"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 312,
+   "chave": "minun",
+   "nome": "Minun",
+   "tipo": "ELECTRIC",
+   "bst": 405,
+   "estagio": 1,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "power-plant"
+   ],
+   "biomas": [
+    "industrial"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 313,
+   "chave": "volbeat",
+   "nome": "Volbeat",
+   "tipo": "BUG",
+   "bst": 430,
+   "estagio": 1,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "meadow"
+   ],
+   "biomas": [
+    "campo_aberto"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 314,
+   "chave": "illumise",
+   "nome": "Illumise",
+   "tipo": "BUG",
+   "bst": 430,
+   "estagio": 1,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "meadow"
+   ],
+   "biomas": [
+    "campo_aberto"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 315,
+   "chave": "roselia",
+   "nome": "Roselia",
+   "tipo": "GRASS/POISON",
+   "bst": 400,
+   "estagio": 1,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "forest",
+    "meadow"
+   ],
+   "biomas": [
+    "campo_aberto",
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 316,
+   "chave": "gulpin",
+   "nome": "Gulpin",
+   "tipo": "POISON",
+   "bst": 302,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    25
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "swamp"
+   ],
+   "biomas": [
+    "aguas_interiores"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 317,
+   "chave": "swalot",
+   "nome": "Swalot",
+   "tipo": "POISON",
+   "bst": 467,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    26,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "swamp"
+   ],
+   "biomas": [
+    "aguas_interiores"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 318,
+   "chave": "carvanha",
+   "nome": "Carvanha",
+   "tipo": "WATER/DARK",
+   "bst": 305,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    29
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "sea"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 319,
+   "chave": "sharpedo",
+   "nome": "Sharpedo",
+   "tipo": "WATER/DARK",
+   "bst": 460,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    30,
+    90
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "sea"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 320,
+   "chave": "wailmer",
+   "nome": "Wailmer",
+   "tipo": "WATER",
+   "bst": 400,
+   "estagio": 1,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    39
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "sea",
+    "seabed"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 321,
+   "chave": "wailord",
+   "nome": "Wailord",
+   "tipo": "WATER",
+   "bst": 500,
+   "estagio": 2,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    40,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "sea",
+    "seabed"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 322,
+   "chave": "numel",
+   "nome": "Numel",
+   "tipo": "FIRE/GROUND",
+   "bst": 305,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    32
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "badlands",
+    "desert",
+    "volcano"
+   ],
+   "biomas": [
+    "aridos",
+    "igneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 323,
+   "chave": "camerupt",
+   "nome": "Camerupt",
+   "tipo": "FIRE/GROUND",
+   "bst": 460,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    33,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "badlands",
+    "desert",
+    "volcano"
+   ],
+   "biomas": [
+    "aridos",
+    "igneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 324,
+   "chave": "torkoal",
+   "nome": "Torkoal",
+   "tipo": "FIRE",
+   "bst": 470,
+   "estagio": 1,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "volcano"
+   ],
+   "biomas": [
+    "igneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 325,
+   "chave": "spoink",
+   "nome": "Spoink",
+   "tipo": "PSYCHIC",
+   "bst": 330,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    31
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "mountain",
+    "ruins",
+    "volcano"
+   ],
+   "biomas": [
+    "igneo",
+    "sagrado",
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 326,
+   "chave": "grumpig",
+   "nome": "Grumpig",
+   "tipo": "PSYCHIC",
+   "bst": 470,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    32,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "mountain",
+    "ruins",
+    "volcano"
+   ],
+   "biomas": [
+    "igneo",
+    "sagrado",
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 327,
+   "chave": "spinda",
+   "nome": "Spinda",
+   "tipo": "NORMAL",
+   "bst": 360,
+   "estagio": 1,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "meadow"
+   ],
+   "biomas": [
+    "campo_aberto"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 328,
+   "chave": "trapinch",
+   "nome": "Trapinch",
+   "tipo": "GROUND",
+   "bst": 290,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    34
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "desert",
+    "wasteland"
+   ],
+   "biomas": [
+    "aridos"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 329,
+   "chave": "vibrava",
+   "nome": "Vibrava",
+   "tipo": "GROUND/DRAGON",
+   "bst": 340,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "II"
+   ],
+   "nivel": [
+    35,
+    44
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "desert",
+    "wasteland"
+   ],
+   "biomas": [
+    "aridos"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 330,
+   "chave": "flygon",
+   "nome": "Flygon",
+   "tipo": "GROUND/DRAGON",
+   "bst": 520,
+   "estagio": 3,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    45,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "desert",
+    "wasteland"
+   ],
+   "biomas": [
+    "aridos"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 331,
+   "chave": "cacnea",
+   "nome": "Cacnea",
+   "tipo": "GRASS",
+   "bst": 335,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    31
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "desert"
+   ],
+   "biomas": [
+    "aridos"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 332,
+   "chave": "cacturne",
+   "nome": "Cacturne",
+   "tipo": "GRASS/DARK",
+   "bst": 475,
+   "estagio": 2,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    32,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "desert"
+   ],
+   "biomas": [
+    "aridos"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 333,
+   "chave": "swablu",
+   "nome": "Swablu",
+   "tipo": "NORMAL/FLYING",
+   "bst": 310,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    34
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "mountain",
+    "volcano",
+    "wasteland"
+   ],
+   "biomas": [
+    "aridos",
+    "igneo",
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 334,
+   "chave": "altaria",
+   "nome": "Altaria",
+   "tipo": "DRAGON/FLYING",
+   "bst": 490,
+   "estagio": 2,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    35,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "mountain",
+    "volcano",
+    "wasteland"
+   ],
+   "biomas": [
+    "aridos",
+    "igneo",
+    "subterraneo"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 335,
+   "chave": "zangoose",
+   "nome": "Zangoose",
+   "tipo": "NORMAL",
+   "bst": 458,
+   "estagio": 1,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "tall-grass"
+   ],
+   "biomas": [
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 336,
+   "chave": "seviper",
+   "nome": "Seviper",
+   "tipo": "POISON",
+   "bst": 458,
+   "estagio": 1,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "jungle",
+    "tall-grass"
+   ],
+   "biomas": [
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 337,
+   "chave": "lunatone",
+   "nome": "Lunatone",
+   "tipo": "ROCK/PSYCHIC",
+   "bst": 460,
+   "estagio": 1,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "space"
+   ],
+   "biomas": [
+    "sombrio"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 338,
+   "chave": "solrock",
+   "nome": "Solrock",
+   "tipo": "ROCK/PSYCHIC",
+   "bst": 460,
+   "estagio": 1,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "space"
+   ],
+   "biomas": [
+    "sombrio"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 339,
+   "chave": "barboach",
+   "nome": "Barboach",
+   "tipo": "WATER/GROUND",
+   "bst": 288,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    29
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "swamp"
+   ],
+   "biomas": [
+    "aguas_interiores"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 340,
+   "chave": "whiscash",
+   "nome": "Whiscash",
+   "tipo": "WATER/GROUND",
+   "bst": 468,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    30,
+    90
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "swamp"
+   ],
+   "biomas": [
+    "aguas_interiores"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 341,
+   "chave": "corphish",
+   "nome": "Corphish",
+   "tipo": "WATER",
+   "bst": 308,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    29
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "beach"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 342,
+   "chave": "crawdaunt",
+   "nome": "Crawdaunt",
+   "tipo": "WATER/DARK",
+   "bst": 468,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    30,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "beach"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 343,
+   "chave": "baltoy",
+   "nome": "Baltoy",
+   "tipo": "GROUND/PSYCHIC",
+   "bst": 300,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    35
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "ruins",
+    "space",
+    "temple"
+   ],
+   "biomas": [
+    "sagrado",
+    "sombrio"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 344,
+   "chave": "claydol",
+   "nome": "Claydol",
+   "tipo": "GROUND/PSYCHIC",
+   "bst": 500,
+   "estagio": 2,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    36,
+    90
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "ruins",
+    "space",
+    "temple"
+   ],
+   "biomas": [
+    "sagrado",
+    "sombrio"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 345,
+   "chave": "lileep",
+   "nome": "Lileep",
+   "tipo": "ROCK/GRASS",
+   "bst": 355,
+   "estagio": 1,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    39
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "desert"
+   ],
+   "biomas": [
+    "aridos"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 346,
+   "chave": "cradily",
+   "nome": "Cradily",
+   "tipo": "ROCK/GRASS",
+   "bst": 495,
+   "estagio": 2,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    40,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "desert"
+   ],
+   "biomas": [
+    "aridos"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 347,
+   "chave": "anorith",
+   "nome": "Anorith",
+   "tipo": "ROCK/BUG",
+   "bst": 355,
+   "estagio": 1,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    39
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "desert"
+   ],
+   "biomas": [
+    "aridos"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 348,
+   "chave": "armaldo",
+   "nome": "Armaldo",
+   "tipo": "ROCK/BUG",
+   "bst": 495,
+   "estagio": 2,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    40,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "desert"
+   ],
+   "biomas": [
+    "aridos"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 349,
+   "chave": "feebas",
+   "nome": "Feebas",
+   "tipo": "WATER",
+   "bst": 200,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    60
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "seabed"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 350,
+   "chave": "milotic",
+   "nome": "Milotic",
+   "tipo": "WATER",
+   "bst": 540,
+   "estagio": 2,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    61,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "seabed"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 351,
+   "chave": "castform",
+   "nome": "Castform",
+   "tipo": "NORMAL",
+   "bst": 420,
+   "estagio": 1,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "metropolis"
+   ],
+   "biomas": [
+    "urbano"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 352,
+   "chave": "kecleon",
+   "nome": "Kecleon",
+   "tipo": "NORMAL",
+   "bst": 440,
+   "estagio": 1,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "tall-grass"
+   ],
+   "biomas": [
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 353,
+   "chave": "shuppet",
+   "nome": "Shuppet",
+   "tipo": "GHOST",
+   "bst": 295,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    36
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "graveyard",
+    "slum"
+   ],
+   "biomas": [
+    "sombrio",
+    "urbano"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 354,
+   "chave": "banette",
+   "nome": "Banette",
+   "tipo": "GHOST",
+   "bst": 455,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    37,
+    90
+   ],
+   "tier": "comum",
+   "peso": 20,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "graveyard",
+    "slum"
+   ],
+   "biomas": [
+    "sombrio",
+    "urbano"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 355,
+   "chave": "duskull",
+   "nome": "Duskull",
+   "tipo": "GHOST",
+   "bst": 295,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    36
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "graveyard",
+    "temple"
+   ],
+   "biomas": [
+    "sagrado",
+    "sombrio"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 356,
+   "chave": "dusclops",
+   "nome": "Dusclops",
+   "tipo": "GHOST",
+   "bst": 455,
+   "estagio": 2,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    37,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "graveyard",
+    "temple"
+   ],
+   "biomas": [
+    "sagrado",
+    "sombrio"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 357,
+   "chave": "tropius",
+   "nome": "Tropius",
+   "tipo": "GRASS/FLYING",
+   "bst": 460,
+   "estagio": 1,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "forest",
+    "jungle",
+    "tall-grass"
+   ],
+   "biomas": [
+    "mata"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 358,
+   "chave": "chimecho",
+   "nome": "Chimecho",
+   "tipo": "PSYCHIC",
+   "bst": 455,
+   "estagio": 1,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "temple"
+   ],
+   "biomas": [
+    "sagrado"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 359,
+   "chave": "absol",
+   "nome": "Absol",
+   "tipo": "DARK",
+   "bst": 465,
+   "estagio": 1,
+   "zonaMinima": 3,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "abyss"
+   ],
+   "biomas": [
+    "sombrio"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 360,
+   "chave": "wynaut",
+   "nome": "Wynaut",
+   "tipo": "PSYCHIC",
+   "bst": 260,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    14
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "ruins"
+   ],
+   "biomas": [
+    "sagrado"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 361,
+   "chave": "snorunt",
+   "nome": "Snorunt",
+   "tipo": "ICE",
+   "bst": 300,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    41
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "ice-cave",
+    "snowy-forest"
+   ],
+   "biomas": [
+    "gelido"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 362,
+   "chave": "glalie",
+   "nome": "Glalie",
+   "tipo": "ICE",
+   "bst": 480,
+   "estagio": 2,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    42,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "ice-cave",
+    "snowy-forest"
+   ],
+   "biomas": [
+    "gelido"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 363,
+   "chave": "spheal",
+   "nome": "Spheal",
+   "tipo": "ICE/WATER",
+   "bst": 290,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    1,
+    31
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "ice-cave"
+   ],
+   "biomas": [
+    "gelido"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 364,
+   "chave": "sealeo",
+   "nome": "Sealeo",
+   "tipo": "ICE/WATER",
+   "bst": 410,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "II"
+   ],
+   "nivel": [
+    32,
+    43
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "ice-cave"
+   ],
+   "biomas": [
+    "gelido"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 365,
+   "chave": "walrein",
+   "nome": "Walrein",
+   "tipo": "ICE/WATER",
+   "bst": 530,
+   "estagio": 3,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    44,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "ice-cave"
+   ],
+   "biomas": [
+    "gelido"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 366,
+   "chave": "clamperl",
+   "nome": "Clamperl",
+   "tipo": "WATER",
+   "bst": 345,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    30
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "seabed"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 367,
+   "chave": "huntail",
+   "nome": "Huntail",
+   "tipo": "WATER",
+   "bst": 485,
+   "estagio": 2,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    31,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "seabed"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 368,
+   "chave": "gorebyss",
+   "nome": "Gorebyss",
+   "tipo": "WATER",
+   "bst": 485,
+   "estagio": 2,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "seabed"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 369,
+   "chave": "relicanth",
+   "nome": "Relicanth",
+   "tipo": "WATER/ROCK",
+   "bst": 485,
+   "estagio": 1,
+   "zonaMinima": 5,
+   "faixas": [
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "seabed"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 370,
+   "chave": "luvdisc",
+   "nome": "Luvdisc",
+   "tipo": "WATER",
+   "bst": 330,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I",
+    "II",
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "seabed"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 371,
+   "chave": "bagon",
+   "nome": "Bagon",
+   "tipo": "DRAGON",
+   "bst": 300,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    29
+   ],
+   "tier": "muito_comum",
+   "peso": 30,
+   "origemDoTier": "emerald",
+   "subBiomas": [
+    "wasteland"
+   ],
+   "biomas": [
+    "aridos"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 372,
+   "chave": "shelgon",
+   "nome": "Shelgon",
+   "tipo": "DRAGON",
+   "bst": 420,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    30,
+    49
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "wasteland"
+   ],
+   "biomas": [
+    "aridos"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 373,
+   "chave": "salamence",
+   "nome": "Salamence",
+   "tipo": "DRAGON/FLYING",
+   "bst": 600,
+   "estagio": 3,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    50,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "wasteland"
+   ],
+   "biomas": [
+    "aridos"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 374,
+   "chave": "beldum",
+   "nome": "Beldum",
+   "tipo": "STEEL/PSYCHIC",
+   "bst": 300,
+   "estagio": 1,
+   "zonaMinima": 0,
+   "faixas": [
+    "I"
+   ],
+   "nivel": [
+    1,
+    19
+   ],
+   "tier": "incomum",
+   "peso": 10,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "factory",
+    "space"
+   ],
+   "biomas": [
+    "industrial",
+    "sombrio"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 375,
+   "chave": "metang",
+   "nome": "Metang",
+   "tipo": "STEEL/PSYCHIC",
+   "bst": 420,
+   "estagio": 2,
+   "zonaMinima": 1,
+   "faixas": [
+    "I",
+    "II"
+   ],
+   "nivel": [
+    20,
+    44
+   ],
+   "tier": "raro",
+   "peso": 5,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "factory",
+    "space"
+   ],
+   "biomas": [
+    "industrial",
+    "sombrio"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 376,
+   "chave": "metagross",
+   "nome": "Metagross",
+   "tipo": "STEEL/PSYCHIC",
+   "bst": 600,
+   "estagio": 3,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    45,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "factory",
+    "space"
+   ],
+   "biomas": [
+    "industrial",
+    "sombrio"
+   ],
+   "lendario": false,
+   "inicial": false
+  },
+  {
+   "dex": 377,
+   "chave": "regirock",
+   "nome": "Regirock",
+   "tipo": "ROCK",
+   "bst": 580,
+   "estagio": 1,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "desert"
+   ],
+   "biomas": [
+    "aridos"
+   ],
+   "lendario": true,
+   "inicial": false
+  },
+  {
+   "dex": 378,
+   "chave": "regice",
+   "nome": "Regice",
+   "tipo": "ICE",
+   "bst": 580,
+   "estagio": 1,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "ice-cave"
+   ],
+   "biomas": [
+    "gelido"
+   ],
+   "lendario": true,
+   "inicial": false
+  },
+  {
+   "dex": 379,
+   "chave": "registeel",
+   "nome": "Registeel",
+   "tipo": "STEEL",
+   "bst": 580,
+   "estagio": 1,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "ruins"
+   ],
+   "biomas": [
+    "sagrado"
+   ],
+   "lendario": true,
+   "inicial": false
+  },
+  {
+   "dex": 380,
+   "chave": "latias",
+   "nome": "Latias",
+   "tipo": "DRAGON/PSYCHIC",
+   "bst": 600,
+   "estagio": 1,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "plains"
+   ],
+   "biomas": [
+    "campo_aberto"
+   ],
+   "lendario": true,
+   "inicial": false
+  },
+  {
+   "dex": 381,
+   "chave": "latios",
+   "nome": "Latios",
+   "tipo": "DRAGON/PSYCHIC",
+   "bst": 600,
+   "estagio": 1,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "plains"
+   ],
+   "biomas": [
+    "campo_aberto"
+   ],
+   "lendario": true,
+   "inicial": false
+  },
+  {
+   "dex": 382,
+   "chave": "kyogre",
+   "nome": "Kyogre",
+   "tipo": "WATER",
+   "bst": 670,
+   "estagio": 1,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "seabed"
+   ],
+   "biomas": [
+    "marinho"
+   ],
+   "lendario": true,
+   "inicial": false
+  },
+  {
+   "dex": 383,
+   "chave": "groudon",
+   "nome": "Groudon",
+   "tipo": "GROUND",
+   "bst": 670,
+   "estagio": 1,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "badlands"
+   ],
+   "biomas": [
+    "aridos"
+   ],
+   "lendario": true,
+   "inicial": false
+  },
+  {
+   "dex": 384,
+   "chave": "rayquaza",
+   "nome": "Rayquaza",
+   "tipo": "DRAGON/FLYING",
+   "bst": 680,
+   "estagio": 1,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [
+    "space"
+   ],
+   "biomas": [
+    "sombrio"
+   ],
+   "lendario": true,
+   "inicial": false
+  },
+  {
+   "dex": 385,
+   "chave": "jirachi",
+   "nome": "Jirachi",
+   "tipo": "STEEL/PSYCHIC",
+   "bst": 600,
+   "estagio": 1,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [],
+   "biomas": [],
+   "lendario": true,
+   "inicial": false
+  },
+  {
+   "dex": 386,
+   "chave": "deoxys",
+   "nome": "Deoxys",
+   "tipo": "PSYCHIC",
+   "bst": 600,
+   "estagio": 1,
+   "zonaMinima": 7,
+   "faixas": [
+    "III"
+   ],
+   "nivel": [
+    1,
+    90
+   ],
+   "tier": "muito_raro",
+   "peso": 1,
+   "origemDoTier": "regra",
+   "subBiomas": [],
+   "biomas": [],
+   "lendario": true,
+   "inicial": false
+  }
+ ]
+}

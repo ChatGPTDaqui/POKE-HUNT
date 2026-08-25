@@ -42,7 +42,7 @@ function rodar(semente: number): WorldState {
   const gameState = useGameStateStore.getState()
   const rng = createRng(semente)
   const poke = createPokeInstance(rng, 'charmander', 5)
-  const world = buildMapWorld(MAPA, poke, { rng: createRng(semente), counters: { entity: 1, effect: 1, pendingHit: 1 } })
+  const world = buildMapWorld(MAPA, poke, { seed: 0, rng: createRng(semente), counters: { entity: 1, effect: 1, pendingHit: 1 } })
   for (let i = 0; i < PASSOS; i++) stepWorld(world, PASSO, gameState, { silent: true })
   return world
 }
@@ -148,7 +148,7 @@ describe('determinismo da simulacao', () => {
       for (let j = 0; j < JANELAS; j++) {
         const rng = retomar ? restoreRng(estado.state, estado.draws) : createRng(SEMENTE)
         const poke = createPokeInstance(createRng(1), 'charmander', 30)
-        const world = buildMapWorld(MAPA_VARIADO, poke, {
+        const world = buildMapWorld(MAPA_VARIADO, poke, { seed: 0,
           rng, counters: { entity: 1, effect: 1, pendingHit: 1 },
         })
         for (let i = 0; i < 100; i++) stepWorld(world, PASSO, gameState, { silent: true })

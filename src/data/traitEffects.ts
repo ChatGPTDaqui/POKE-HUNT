@@ -20,10 +20,17 @@ import type { ElementType } from './generated/types'
 import { ABILITIES } from './abilities'
 import type { Ability } from './abilities'
 
-// Repetido aqui em vez de importado de engine/types.ts pelo mesmo motivo que
-// CLIMA_DO_GOLPE em abilities.ts: engine/types importa data/abilities, e o
-// import reverso fecharia um ciclo. Casa estruturalmente com ClimaTipo.
-type Clima = 'chuva' | 'sol' | 'granizo' | 'areia'
+// PH-140: isto era uma COPIA do union ('chuva' | 'sol' | 'granizo' | 'areia'),
+// com um comentario afirmando que "casa estruturalmente com ClimaTipo". Parou
+// de casar no minuto em que neve e nevoa entraram, e so houve aviso porque o
+// valor atravessa a fronteira em `multiplicadorDeVelocidadePorTrait`. Copia
+// conferida por acaso nao e copia segura.
+//
+// O ciclo que a copia existia pra evitar nao acontece com `import type`: ele e
+// APAGADO na compilacao e nao vira import nenhum em runtime. `engine/types`
+// importa `data/abilities` de verdade; este arquivo importa `engine/types` so
+// no plano dos tipos.
+import type { ClimaTipo as Clima } from '@/engine/types'
 
 // ---------------------------------------------------------------------------
 // VELOCIDADE
@@ -56,23 +63,34 @@ export const TRAIT_IMUNE_A_DANO_DE_CLIMA = new Set([
   'overcoat', 'magic_guard',
 ])
 
-/** Fracao do HP MAXIMO curada por turno no clima certo. */
-export const CURA_POR_CLIMA: Partial<Record<string, { clima: Clima; fracao: number }>> = {
-  rain_dish: { clima: 'chuva', fracao: 1 / 16 },
-  ice_body: { clima: 'granizo', fracao: 1 / 16 },
-  dry_skin: { clima: 'chuva', fracao: 1 / 8 },
+/**
+ * Fracao do HP MAXIMO curada por turno no clima certo.
+ *
+ * LISTA de climas, e nao um so (PH-140): Ice Body cura tanto no GRANIZO quanto
+ * na NEVE, e nos jogos e a mesma habilidade — a Gen 9 trocou o clima de gelo e
+ * levou junto tudo que dependia dele. Um campo unico obrigaria a escolher um
+ * dos dois e deixaria o outro em silencio.
+ */
+export const CURA_POR_CLIMA: Partial<Record<string, { climas: Clima[]; fracao: number }>> = {
+  rain_dish: { climas: ['chuva'], fracao: 1 / 16 },
+  ice_body: { climas: ['granizo', 'neve'], fracao: 1 / 16 },
+  dry_skin: { climas: ['chuva'], fracao: 1 / 8 },
 }
 
 /** Fracao do HP MAXIMO PERDIDA por turno no clima certo. */
-export const DANO_POR_CLIMA: Partial<Record<string, { clima: Clima; fracao: number }>> = {
-  dry_skin: { clima: 'sol', fracao: 1 / 8 },
-  solar_power: { clima: 'sol', fracao: 1 / 8 },
+export const DANO_POR_CLIMA: Partial<Record<string, { climas: Clima[]; fracao: number }>> = {
+  dry_skin: { climas: ['sol'], fracao: 1 / 8 },
+  solar_power: { climas: ['sol'], fracao: 1 / 8 },
 }
 
-/** Evasao 1.25x no clima certo (o que reduz a precisao de quem ataca). */
-export const EVASAO_POR_CLIMA: Partial<Record<string, Clima>> = {
-  sand_veil: 'areia',
-  snow_cloak: 'granizo',
+/**
+ * Evasao 1.25x no clima certo (o que reduz a precisao de quem ataca).
+ *
+ * Snow Cloak vale nos DOIS climas de gelo, pelo mesmo motivo do Ice Body.
+ */
+export const EVASAO_POR_CLIMA: Partial<Record<string, Clima[]>> = {
+  sand_veil: ['areia'],
+  snow_cloak: ['granizo', 'neve'],
 }
 
 /** Cloud Nine / Air Lock: o clima continua no campo, mas nao surte efeito. */

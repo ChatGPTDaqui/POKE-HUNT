@@ -44,7 +44,7 @@ function poke(uid: string, hp: number): PokeInstance {
 
 function mundoDoLance(progresso?: ProgressoDaSessao) {
   const gameState = useGameStateStore.getState()
-  return buildMapWorld(LANCE_MAP_ID, gameState.team[gameState.activeIndex], {
+  return buildMapWorld(LANCE_MAP_ID, gameState.team[gameState.activeIndex], { seed: 0,
     rng: createRng(7),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
   }, progresso)

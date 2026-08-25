@@ -12,6 +12,78 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-159. Continuacao direta da 7.11: a mesma classe de mudanca, em mais 14
+  // especies — e desta vez ela alcanca as Eeveelutions, que quase todo jogador
+  // tem. Por isso ganha entrada propria em vez de virar rodape da anterior.
+  //
+  // A segunda linha CORRIGE o que a 7.11 prometeu errado (PH-158), e e por isso
+  // que as duas entram juntas: elas ficam lado a lado no arquivo, e publicar a
+  // nova sem consertar a antiga deixaria o painel se contradizendo na cara do
+  // jogador.
+  //
+  // O que fica de FORA, e por que: o guarda de bundle da Edge (PH-133), o React
+  // fora do servidor (PH-148), o parser unificado (PH-147), a guarda de
+  // geometria de sprite (PH-149) e os dois `db:types` (PH-154). Todos internos.
+  // Mesma regua da 7.11 e da 7.10.
+  {
+    version: '7.12',
+    date: '2026-08-25',
+    title: 'Mais quatorze POKE com menos golpes de Nivel 1, e as Eeveelutions entre eles',
+    highlights: [
+      'QUATORZE ESPECIES PERDERAM GOLPES DE NIVEL 1, E QUATRO DELAS SAO EEVEELUTIONS. Jolteon, Flareon, Espeon e Umbreon vinham com Tackle, Tail Whip e Helping Hand no Nivel 1 sem nunca terem aprendido nenhum dos tres. Entram na mesma lista Mr. Mime, Mantine, Bellossom, Slowking, Chansey, Sudowoodo, Marill, Snorlax, Hitmonchan e Hitmontop. Sao 47 golpes ao todo.',
+      'O POKE QUE VOCE JA TEM MUDA TAMBEM — e a nota anterior disse o contrario. A lista de golpes de cada POKE e recalculada pela especie e pelo nivel toda vez que o jogo abre, entao golpe que sai da especie sai do seu junto. Nenhum slot fica vazio: o lugar e preenchido por outro golpe que ele conhece. A 7.11 prometia que nada mudava pra quem ja tinha, e a promessa estava errada.',
+      'AQUELE BLOCO NUNCA FOI O KIT INICIAL DELAS. Era a lista do Recordador de Golpes do jogo original, que este jogo nao tem desde a 6.8, e ela entrava por engano em especie que o jogo nao reconhecia como forma evoluida — ou porque a pre-evolucao esta fora do elenco (Sudowoodo vem de Bonsly, que nao existe aqui), ou porque a especie e o SEGUNDO destino de uma evolucao com ramo, como as quatro Eeveelutions.',
+      'O CASO MAIS VISIVEL ERA UM SUDOWOODO SELVAGEM DE NIVEL 1 BATENDO COM WOOD HAMMER. Sao 120 de poder, quase tres vezes o golpe de qualquer POKE da mesma faixa de nivel.',
+      'QUATRO DELAS AGORA COMECAM SEM GOLPE NENHUM NO NIVEL 1: Marill aprende o primeiro no Nivel 2, Mantine no 3, Snorlax no 4 e Slowking no 5. Abaixo disso o POKE luta so com o Ataque Basico.',
+      'AS BARRAS DE HP E XP DO TOPO PARARAM DE MUDAR DE TAMANHO, E AGORA MOSTRAM A PORCENTAGEM. Elas encolhiam e esticavam conforme o resto do cabecalho — um selo de status aparecendo ja bastava pra empurrar. O numero nunca arredonda pra 0% num POKE vivo, nem pra 100% num que ja levou dano.',
+      'O NIVEL NA FICHA DO POKE ATUALIZA SOZINHO. Com o perfil aberto, subir de nivel deixava o Lv antigo na tela ate voce fechar e reabrir a janela.',
+    ],
+  },
+  // PH-152. A maior mudanca de CONTEUDO desde que o elenco existe: 19 especies
+  // novas e 36 caminhos de evolucao que estavam mortos.
+  //
+  // O que fica de FORA, e por que: o A* com heap (PH-102), o React fora do
+  // bundle do servidor (PH-148), o parser unificado (PH-147) e a guarda de
+  // geometria de sprite (PH-149). Todos internos — nenhum muda o que o jogador
+  // ve. Mesma regua que a 7.10 usou pra deixar o teste de cobertura de face de
+  // fora.
+  {
+    version: '7.11',
+    date: '2026-08-25',
+    title: 'Dezenove POKE novos, e as evolucoes que nunca aconteciam',
+    highlights: [
+      'EVOLUCAO POR PEDRA, TROCA E AMIZADE PASSOU A EXISTIR. Se voce tem um Growlithe guardado esperando virar Arcanine, ele nunca ia virar — o caminho simplesmente nao existia no jogo, e nada na tela dizia isso. Eram 36 evolucoes nessa situacao. Agora todas funcionam, no mesmo criterio das outras especiais: Nivel 80 e 40 pedras.',
+      'DEZENOVE POKE NOVOS entraram no elenco, que foi de 226 pra 245. Eles nao existiam porque eram destino das evolucoes que nao aconteciam — sem o caminho, ninguem nunca chegava neles. Entram Raichu, Vaporeon, Jolteon, Flareon, Espeon, Umbreon, Exeggutor, Poliwrath, Slowking, Vileplume, Bellossom, Crobat, Togetic, Starmie, Cloyster, Clefairy, Clefable, Wigglytuff e Hitmontop. Todos aparecem no mato e todos podem ser capturados.',
+      'O EEVEE ESCOLHE PRA QUE EVOLUIR, E A PEDRA DIZ QUAL. Sao cinco caminhos e cada um cobra a pedra do tipo de destino: Flareon pede 40 Pedras de FOGO, Vaporeon de AGUA, Jolteon de ELETRICO, Espeon de PSIQUICO e Umbreon de SOMBRIO. Voce ve os cinco na ficha e escolhe qual perseguir.',
+      'TYROGUE AGORA TEM TRES CAMINHOS — Hitmonlee, Hitmonchan e Hitmontop —, todos no Nivel 20 e sem pedra nenhuma. Antes eram dois.',
+      'GLOOM, POLIWHIRL E SLOWPOKE tambem passaram a ter mais de um destino. Slowpoke e o caso curioso: Slowbro continua no Nivel 37 de graca, e Slowking cobra as 40 pedras — dois caminhos com precos diferentes.',
+      'A CARA DO POKE MUDA EM MAIS OITO ESPECIES. O retrato no trilho de status reage a dor, tontura, sono e comemoracao; oito POKE tinham cara fixa por falta de desenho e agora usam uma expressao equivalente do mesmo acervo.',
+      // PH-158 — esta linha prometia que nada mudava pra quem ja tinha o POKE,
+      // e a promessa era FALSA. `playerMapper.ts` deriva `unlockedAbilities` de
+      // (especie, nivel) em toda carga e ignora a coluna gravada, entao golpe
+      // que sai do learnset sai do POKE salvo junto. Medido: `jolteon@80` nao
+      // conhece mais tackle, tail_whip nem helping_hand.
+      //
+      // A frase existia pra tranquilizar, e foi o pior lugar possivel pra
+      // errar: quem leu "nao perde nada" e viu a build trocada nao conclui que
+      // a nota estava errada — conclui que o jogo bugou o POKE dele.
+      'VINTE E UMA ESPECIES VEM COM MENOS GOLPES DE NIVEL 1. Steelix, Machamp, Nidoqueen e outras 18 tinham uma lista de golpes de Nivel 1 que so existia porque o jogo nao sabia que elas eram formas evoluidas. O POKE que voce JA TEM muda tambem: a lista de golpes de cada um e recalculada pela especie e pelo nivel toda vez que o jogo abre. Nenhum slot fica vazio — o lugar e preenchido por outro golpe que ele conhece.',
+    ],
+  },
+  // PH-138. Curta de proposito: sao duas linhas, e a primeira e um aumento
+  // RETROATIVO de requisito. Quem tinha 25 pedras guardadas parou de poder
+  // evoluir, e a unica coisa que explica isso pro jogador e esta nota — a ficha
+  // da pedra e a Pokedex dizem 40, mas quem nao abrir nenhuma das duas descobre
+  // tentando e falhando.
+  {
+    version: '7.10',
+    date: '2026-08-24',
+    title: 'Evolucao especial passou a pedir 40 pedras',
+    highlights: [
+      'EVOLUCAO ESPECIAL AGORA CUSTA 40 PEDRAS do tipo primario do POKE, o dobro das 20 de antes. O Nivel 80 continua igual, e a pedra continua sendo a do PRIMEIRO tipo (Kadabra pede Pedra PSYCHIC, Onix pede Pedra ROCK). Vale pra quem ja tinha pedra guardada: se voce tinha 25 separadas pra evoluir, agora faltam 15.',
+      'A MENSAGEM DE PEDRA FALTANDO parou de sair com letra sobrando — dizia "faltam 40sx Pedra BUGs". Era um erro de formatacao que estava ali desde que a evolucao especial existe.',
+    ],
+  },
   // PH-135. Primeira entrada que sai JUNTO com o codigo que ela descreve: a
   // 7.7 e a 7.8 existiam na `dev` desde 22 e 23/08, mas a `main` estava 174
   // commits atras, entao o jogador pulou da 7.6 pra ca de uma vez.
@@ -799,6 +871,27 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   },
 ];
 
+/**
+ * Compara versao por SEGMENTO, e nao por `Number()` (PH-138).
+ *
+ * `Number('7.10')` e **7.1**, e `Number('7.9')` e 7.9 — ou seja, o desempate
+ * antigo punha a 7.9 ACIMA da 7.10. Nao era hipotetico: apareceu no instante em
+ * que a primeira versao de minor com dois digitos entrou, e o efeito e a nota
+ * mais nova renderizar embaixo da anterior. Versao e lista de inteiros
+ * separados por ponto, nao decimal.
+ */
+function compararVersao(a: string, b: string): number {
+  const pa = a.split('.').map(Number)
+  const pb = b.split('.').map(Number)
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pb[i] ?? 0) - (pa[i] ?? 0)
+    if (d !== 0) return d
+  }
+  return 0
+}
+
 export function sortedPatchNotes(): PatchNoteEntry[] {
-  return [...PATCH_NOTES].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : Number(b.version) - Number(a.version)));
+  return [...PATCH_NOTES].sort((a, b) => (
+    a.date < b.date ? 1 : a.date > b.date ? -1 : compararVersao(a.version, b.version)
+  ));
 }

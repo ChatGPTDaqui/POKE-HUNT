@@ -600,12 +600,13 @@ export function tickStatus(rng: Rng, entity: WorldEntity, dt: number, clima: Cli
     // (Solar Power e Dry Skin no sol). A cura entra direto no HP, como
     // Poison Heal acima — `dano` e o agregado que o chamador vai APLICAR, e
     // somar uma cura negativa ali confundiria os dois sinais.
+    // `includes` e nao igualdade: Ice Body cura no granizo E na neve (PH-140).
     const cura = traitDaEntidade ? CURA_POR_CLIMA[traitDaEntidade] : undefined
-    if (cura && cura.clima === clima) {
+    if (cura && clima && cura.climas.includes(clima)) {
       heal(entity, Math.max(1, Math.round(entity.poke.stats.hp * cura.fracao)))
     }
     const custo = traitDaEntidade ? DANO_POR_CLIMA[traitDaEntidade] : undefined
-    if (custo && custo.clima === clima) {
+    if (custo && clima && custo.climas.includes(clima)) {
       dano += Math.max(1, Math.round(entity.poke.stats.hp * custo.fracao))
     }
   }

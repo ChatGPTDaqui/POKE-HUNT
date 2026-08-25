@@ -1,26 +1,3 @@
-//#region \0rolldown/runtime.js
-var __create = Object.create;
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __commonJSMin = (cb, mod) => () => (mod || (cb((mod = { exports: {} }).exports, mod), cb = null), mod.exports);
-var __copyProps = (to, from, except, desc) => {
-	if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
-		key = keys[i];
-		if (!__hasOwnProp.call(to, key) && key !== except) __defProp(to, key, {
-			get: ((k) => from[k]).bind(null, key),
-			enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
-		});
-	}
-	return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule || !__hasOwnProp.call(mod, "default") ? __defProp(target, "default", {
-	value: mod,
-	enumerable: true
-}) : target, mod));
-//#endregion
 //#region authority/src/db.ts
 var ErroHttp = class extends Error {
 	status;
@@ -747,7 +724,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "charmeleon",
-		"evolvesAtLevel": 16
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "charmeleon",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
 	},
 	"squirtle": {
 		"id": "squirtle",
@@ -826,7 +808,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "wartortle",
-		"evolvesAtLevel": 16
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "wartortle",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
 	},
 	"bulbasaur": {
 		"id": "bulbasaur",
@@ -905,7 +892,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "ivysaur",
-		"evolvesAtLevel": 16
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "ivysaur",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
 	},
 	"articuno": {
 		"id": "articuno",
@@ -1929,7 +1921,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "graveler",
-		"evolvesAtLevel": 25
+		"evolvesAtLevel": 25,
+		"evolutionOptions": [{
+			"to": "graveler",
+			"atLevel": 25,
+			"isSpecial": false
+		}]
 	},
 	"spearow": {
 		"id": "spearow",
@@ -2000,7 +1997,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "fearow",
-		"evolvesAtLevel": 20
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [{
+			"to": "fearow",
+			"atLevel": 20,
+			"isSpecial": false
+		}]
 	},
 	"rattata": {
 		"id": "rattata",
@@ -2075,7 +2077,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "raticate",
-		"evolvesAtLevel": 20
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [{
+			"to": "raticate",
+			"atLevel": 20,
+			"isSpecial": false
+		}]
 	},
 	"ivysaur": {
 		"id": "ivysaur",
@@ -2150,7 +2157,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "venusaur",
-		"evolvesAtLevel": 32
+		"evolvesAtLevel": 32,
+		"evolutionOptions": [{
+			"to": "venusaur",
+			"atLevel": 32,
+			"isSpecial": false
+		}]
 	},
 	"venusaur": {
 		"id": "venusaur",
@@ -2320,7 +2332,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "gloom",
-		"evolvesAtLevel": 21
+		"evolvesAtLevel": 21,
+		"evolutionOptions": [{
+			"to": "gloom",
+			"atLevel": 21,
+			"isSpecial": false
+		}]
 	},
 	"gloom": {
 		"id": "gloom",
@@ -2396,6 +2413,68 @@ var SPECIES_DATA = {
 			{
 				"key": "petal_dance",
 				"levelReq": 59
+			}
+		],
+		"evolvesTo": "vileplume",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "vileplume",
+			"atLevel": 80,
+			"isSpecial": true,
+			"stoneType": "GRASS"
+		}, {
+			"to": "bellossom",
+			"atLevel": 80,
+			"isSpecial": true,
+			"stoneType": "GRASS"
+		}]
+	},
+	"vileplume": {
+		"id": "vileplume",
+		"name": "Vileplume",
+		"description": "Pokedex Nº45 - tipo GRASS/POISON.",
+		"type": "GRASS",
+		"type2": "POISON",
+		"catchRate": 45,
+		"baseExp": 221,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 186,
+		"base": {
+			"hp": 75,
+			"atkFis": 80,
+			"atkEsp": 110,
+			"def": 85,
+			"defEsp": 90,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "aromatherapy",
+				"levelReq": 1
+			},
+			{
+				"key": "mega_drain",
+				"levelReq": 1
+			},
+			{
+				"key": "poison_powder",
+				"levelReq": 1
+			},
+			{
+				"key": "stun_spore",
+				"levelReq": 1
+			},
+			{
+				"key": "petal_blizzard",
+				"levelReq": 49
+			},
+			{
+				"key": "petal_dance",
+				"levelReq": 59
+			},
+			{
+				"key": "solar_beam",
+				"levelReq": 69
 			}
 		],
 		"evolvesTo": null,
@@ -2478,7 +2557,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "weepinbell",
-		"evolvesAtLevel": 21
+		"evolvesAtLevel": 21,
+		"evolutionOptions": [{
+			"to": "weepinbell",
+			"atLevel": 21,
+			"isSpecial": false
+		}]
 	},
 	"weepinbell": {
 		"id": "weepinbell",
@@ -2552,8 +2636,13 @@ var SPECIES_DATA = {
 				"levelReq": 58
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "victreebel",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "victreebel",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"victreebel": {
 		"id": "victreebel",
@@ -2574,10 +2663,6 @@ var SPECIES_DATA = {
 			"speed": 70
 		},
 		"abilities": [
-			{
-				"key": "leaf_tornado",
-				"levelReq": 1
-			},
 			{
 				"key": "razor_leaf",
 				"levelReq": 1
@@ -2613,6 +2698,10 @@ var SPECIES_DATA = {
 			{
 				"key": "leaf_blade",
 				"levelReq": 44
+			},
+			{
+				"key": "leaf_tornado",
+				"levelReq": 80
 			}
 		],
 		"evolvesTo": null,
@@ -2696,6 +2785,54 @@ var SPECIES_DATA = {
 			{
 				"key": "bestow",
 				"levelReq": 50
+			}
+		],
+		"evolvesTo": "exeggutor",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "exeggutor",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"exeggutor": {
+		"id": "exeggutor",
+		"name": "Exeggutor",
+		"description": "Pokedex Nº103 - tipo GRASS/PSYCHIC.",
+		"type": "GRASS",
+		"type2": "PSYCHIC",
+		"catchRate": 45,
+		"baseExp": 186,
+		"growthCurve": "SLOW",
+		"pesoHg": 1200,
+		"base": {
+			"hp": 95,
+			"atkFis": 95,
+			"atkEsp": 125,
+			"def": 85,
+			"defEsp": 75,
+			"speed": 55
+		},
+		"abilities": [
+			{
+				"key": "psyshock",
+				"levelReq": 17
+			},
+			{
+				"key": "egg_bomb",
+				"levelReq": 27
+			},
+			{
+				"key": "wood_hammer",
+				"levelReq": 37
+			},
+			{
+				"key": "leaf_storm",
+				"levelReq": 47
+			},
+			{
+				"key": "stomp",
+				"levelReq": 80
 			}
 		],
 		"evolvesTo": null,
@@ -2877,7 +3014,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "bayleef",
-		"evolvesAtLevel": 16
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "bayleef",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
 	},
 	"bayleef": {
 		"id": "bayleef",
@@ -2948,7 +3090,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "meganium",
-		"evolvesAtLevel": 32
+		"evolvesAtLevel": 32,
+		"evolutionOptions": [{
+			"to": "meganium",
+			"atLevel": 32,
+			"isSpecial": false
+		}]
 	},
 	"meganium": {
 		"id": "meganium",
@@ -3024,6 +3171,49 @@ var SPECIES_DATA = {
 			{
 				"key": "petal_blizzard",
 				"levelReq": 70
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"bellossom": {
+		"id": "bellossom",
+		"name": "Bellossom",
+		"description": "Pokedex Nº182 - tipo GRASS.",
+		"type": "GRASS",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 221,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 58,
+		"base": {
+			"hp": 75,
+			"atkFis": 80,
+			"atkEsp": 90,
+			"def": 95,
+			"defEsp": 100,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "magical_leaf",
+				"levelReq": 1
+			},
+			{
+				"key": "quiver_dance",
+				"levelReq": 39
+			},
+			{
+				"key": "petal_blizzard",
+				"levelReq": 49
+			},
+			{
+				"key": "petal_dance",
+				"levelReq": 59
+			},
+			{
+				"key": "leaf_storm",
+				"levelReq": 69
 			}
 		],
 		"evolvesTo": null,
@@ -3130,7 +3320,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "skiploom",
-		"evolvesAtLevel": 18
+		"evolvesAtLevel": 18,
+		"evolutionOptions": [{
+			"to": "skiploom",
+			"atLevel": 18,
+			"isSpecial": false
+		}]
 	},
 	"skiploom": {
 		"id": "skiploom",
@@ -3225,7 +3420,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "jumpluff",
-		"evolvesAtLevel": 27
+		"evolvesAtLevel": 27,
+		"evolutionOptions": [{
+			"to": "jumpluff",
+			"atLevel": 27,
+			"isSpecial": false
+		}]
 	},
 	"jumpluff": {
 		"id": "jumpluff",
@@ -3406,8 +3606,13 @@ var SPECIES_DATA = {
 				"levelReq": 43
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "sunflora",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "sunflora",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"sunflora": {
 		"id": "sunflora",
@@ -3428,22 +3633,6 @@ var SPECIES_DATA = {
 			"speed": 30
 		},
 		"abilities": [
-			{
-				"key": "absorb",
-				"levelReq": 1
-			},
-			{
-				"key": "flower_shield",
-				"levelReq": 1
-			},
-			{
-				"key": "growth",
-				"levelReq": 1
-			},
-			{
-				"key": "pound",
-				"levelReq": 1
-			},
 			{
 				"key": "ingrain",
 				"levelReq": 4
@@ -3541,7 +3730,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "metapod",
-		"evolvesAtLevel": 7
+		"evolvesAtLevel": 7,
+		"evolutionOptions": [{
+			"to": "metapod",
+			"atLevel": 7,
+			"isSpecial": false
+		}]
 	},
 	"metapod": {
 		"id": "metapod",
@@ -3566,7 +3760,12 @@ var SPECIES_DATA = {
 			"levelReq": 7
 		}],
 		"evolvesTo": "butterfree",
-		"evolvesAtLevel": 10
+		"evolvesAtLevel": 10,
+		"evolutionOptions": [{
+			"to": "butterfree",
+			"atLevel": 10,
+			"isSpecial": false
+		}]
 	},
 	"butterfree": {
 		"id": "butterfree",
@@ -3688,7 +3887,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "kakuna",
-		"evolvesAtLevel": 7
+		"evolvesAtLevel": 7,
+		"evolutionOptions": [{
+			"to": "kakuna",
+			"atLevel": 7,
+			"isSpecial": false
+		}]
 	},
 	"kakuna": {
 		"id": "kakuna",
@@ -3713,7 +3917,12 @@ var SPECIES_DATA = {
 			"levelReq": 7
 		}],
 		"evolvesTo": "beedrill",
-		"evolvesAtLevel": 10
+		"evolvesAtLevel": 10,
+		"evolutionOptions": [{
+			"to": "beedrill",
+			"atLevel": 10,
+			"isSpecial": false
+		}]
 	},
 	"beedrill": {
 		"id": "beedrill",
@@ -3859,7 +4068,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "parasect",
-		"evolvesAtLevel": 24
+		"evolvesAtLevel": 24,
+		"evolutionOptions": [{
+			"to": "parasect",
+			"atLevel": 24,
+			"isSpecial": false
+		}]
 	},
 	"parasect": {
 		"id": "parasect",
@@ -4005,7 +4219,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "venomoth",
-		"evolvesAtLevel": 31
+		"evolvesAtLevel": 31,
+		"evolutionOptions": [{
+			"to": "venomoth",
+			"atLevel": 31,
+			"isSpecial": false
+		}]
 	},
 	"venomoth": {
 		"id": "venomoth",
@@ -4178,8 +4397,13 @@ var SPECIES_DATA = {
 				"levelReq": 61
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "scizor",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "scizor",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"pinsir": {
 		"id": "pinsir",
@@ -4345,7 +4569,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "ledian",
-		"evolvesAtLevel": 18
+		"evolvesAtLevel": 18,
+		"evolutionOptions": [{
+			"to": "ledian",
+			"atLevel": 18,
+			"isSpecial": false
+		}]
 	},
 	"ledian": {
 		"id": "ledian",
@@ -4515,7 +4744,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "ariados",
-		"evolvesAtLevel": 22
+		"evolvesAtLevel": 22,
+		"evolutionOptions": [{
+			"to": "ariados",
+			"atLevel": 22,
+			"isSpecial": false
+		}]
 	},
 	"ariados": {
 		"id": "ariados",
@@ -4768,7 +5002,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "forretress",
-		"evolvesAtLevel": 31
+		"evolvesAtLevel": 31,
+		"evolutionOptions": [{
+			"to": "forretress",
+			"atLevel": 31,
+			"isSpecial": false
+		}]
 	},
 	"forretress": {
 		"id": "forretress",
@@ -4880,18 +5119,6 @@ var SPECIES_DATA = {
 			"speed": 65
 		},
 		"abilities": [
-			{
-				"key": "bullet_punch",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "quick_attack",
-				"levelReq": 1
-			},
 			{
 				"key": "focus_energy",
 				"levelReq": 5
@@ -5124,7 +5351,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "blastoise",
-		"evolvesAtLevel": 36
+		"evolvesAtLevel": 36,
+		"evolutionOptions": [{
+			"to": "blastoise",
+			"atLevel": 36,
+			"isSpecial": false
+		}]
 	},
 	"blastoise": {
 		"id": "blastoise",
@@ -5286,7 +5518,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "golduck",
-		"evolvesAtLevel": 33
+		"evolvesAtLevel": 33,
+		"evolutionOptions": [{
+			"to": "golduck",
+			"atLevel": 33,
+			"isSpecial": false
+		}]
 	},
 	"golduck": {
 		"id": "golduck",
@@ -5440,7 +5677,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "poliwhirl",
-		"evolvesAtLevel": 25
+		"evolvesAtLevel": 25,
+		"evolutionOptions": [{
+			"to": "poliwhirl",
+			"atLevel": 25,
+			"isSpecial": false
+		}]
 	},
 	"poliwhirl": {
 		"id": "poliwhirl",
@@ -5508,6 +5750,56 @@ var SPECIES_DATA = {
 			{
 				"key": "mud_bomb",
 				"levelReq": 53
+			}
+		],
+		"evolvesTo": "poliwrath",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "poliwrath",
+			"atLevel": 80,
+			"isSpecial": true,
+			"stoneType": "WATER"
+		}, {
+			"to": "politoed",
+			"atLevel": 80,
+			"isSpecial": true,
+			"stoneType": "WATER"
+		}]
+	},
+	"poliwrath": {
+		"id": "poliwrath",
+		"name": "Poliwrath",
+		"description": "Pokedex Nº62 - tipo WATER/FIGHTING.",
+		"type": "WATER",
+		"type2": "FIGHTING",
+		"catchRate": 45,
+		"baseExp": 230,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 540,
+		"base": {
+			"hp": 90,
+			"atkFis": 95,
+			"atkEsp": 70,
+			"def": 95,
+			"defEsp": 90,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "dynamic_punch",
+				"levelReq": 32
+			},
+			{
+				"key": "mind_reader",
+				"levelReq": 43
+			},
+			{
+				"key": "circle_throw",
+				"levelReq": 53
+			},
+			{
+				"key": "submission",
+				"levelReq": 80
 			}
 		],
 		"evolvesTo": null,
@@ -5602,7 +5894,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "tentacruel",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "tentacruel",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"tentacruel": {
 		"id": "tentacruel",
@@ -5776,7 +6073,17 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "slowbro",
-		"evolvesAtLevel": 37
+		"evolvesAtLevel": 37,
+		"evolutionOptions": [{
+			"to": "slowbro",
+			"atLevel": 37,
+			"isSpecial": false
+		}, {
+			"to": "slowking",
+			"atLevel": 80,
+			"isSpecial": true,
+			"stoneType": "WATER"
+		}]
 	},
 	"slowbro": {
 		"id": "slowbro",
@@ -5946,7 +6253,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "dewgong",
-		"evolvesAtLevel": 34
+		"evolvesAtLevel": 34,
+		"evolutionOptions": [{
+			"to": "dewgong",
+			"atLevel": 34,
+			"isSpecial": false
+		}]
 	},
 	"dewgong": {
 		"id": "dewgong",
@@ -6127,6 +6439,74 @@ var SPECIES_DATA = {
 				"levelReq": 61
 			}
 		],
+		"evolvesTo": "cloyster",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "cloyster",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"cloyster": {
+		"id": "cloyster",
+		"name": "Cloyster",
+		"description": "Pokedex Nº91 - tipo WATER/ICE.",
+		"type": "WATER",
+		"type2": "ICE",
+		"catchRate": 60,
+		"baseExp": 184,
+		"growthCurve": "SLOW",
+		"pesoHg": 1325,
+		"base": {
+			"hp": 50,
+			"atkFis": 95,
+			"atkEsp": 85,
+			"def": 180,
+			"defEsp": 45,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "aurora_beam",
+				"levelReq": 1
+			},
+			{
+				"key": "protect",
+				"levelReq": 1
+			},
+			{
+				"key": "shell_smash",
+				"levelReq": 1
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 1
+			},
+			{
+				"key": "toxic_spikes",
+				"levelReq": 1
+			},
+			{
+				"key": "withdraw",
+				"levelReq": 1
+			},
+			{
+				"key": "spike_cannon",
+				"levelReq": 13
+			},
+			{
+				"key": "spikes",
+				"levelReq": 28
+			},
+			{
+				"key": "icicle_crash",
+				"levelReq": 50
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 80
+			}
+		],
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
@@ -6211,7 +6591,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "kingler",
-		"evolvesAtLevel": 28
+		"evolvesAtLevel": 28,
+		"evolutionOptions": [{
+			"to": "kingler",
+			"atLevel": 28,
+			"isSpecial": false
+		}]
 	},
 	"kingler": {
 		"id": "kingler",
@@ -6357,7 +6742,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "seadra",
-		"evolvesAtLevel": 32
+		"evolvesAtLevel": 32,
+		"evolutionOptions": [{
+			"to": "seadra",
+			"atLevel": 32,
+			"isSpecial": false
+		}]
 	},
 	"seadra": {
 		"id": "seadra",
@@ -6423,8 +6813,13 @@ var SPECIES_DATA = {
 				"levelReq": 60
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "kingdra",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "kingdra",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"goldeen": {
 		"id": "goldeen",
@@ -6503,7 +6898,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "seaking",
-		"evolvesAtLevel": 33
+		"evolvesAtLevel": 33,
+		"evolutionOptions": [{
+			"to": "seaking",
+			"atLevel": 33,
+			"isSpecial": false
+		}]
 	},
 	"seaking": {
 		"id": "seaking",
@@ -6668,6 +7068,62 @@ var SPECIES_DATA = {
 				"levelReq": 53
 			}
 		],
+		"evolvesTo": "starmie",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "starmie",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"starmie": {
+		"id": "starmie",
+		"name": "Starmie",
+		"description": "Pokedex Nº121 - tipo WATER/PSYCHIC.",
+		"type": "WATER",
+		"type2": "PSYCHIC",
+		"catchRate": 60,
+		"baseExp": 182,
+		"growthCurve": "SLOW",
+		"pesoHg": 800,
+		"base": {
+			"hp": 60,
+			"atkFis": 75,
+			"atkEsp": 100,
+			"def": 85,
+			"defEsp": 85,
+			"speed": 115
+		},
+		"abilities": [
+			{
+				"key": "rapid_spin",
+				"levelReq": 1
+			},
+			{
+				"key": "recover",
+				"levelReq": 1
+			},
+			{
+				"key": "spotlight",
+				"levelReq": 1
+			},
+			{
+				"key": "swift",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 40
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 80
+			}
+		],
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
@@ -6704,7 +7160,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "gyarados",
-		"evolvesAtLevel": 20
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [{
+			"to": "gyarados",
+			"atLevel": 20,
+			"isSpecial": false
+		}]
 	},
 	"gyarados": {
 		"id": "gyarados",
@@ -6864,6 +7325,77 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"vaporeon": {
+		"id": "vaporeon",
+		"name": "Vaporeon",
+		"description": "Pokedex Nº134 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 184,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 290,
+		"base": {
+			"hp": 130,
+			"atkFis": 65,
+			"atkEsp": 110,
+			"def": 60,
+			"defEsp": 95,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "sand_attack",
+				"levelReq": 5
+			},
+			{
+				"key": "baby_doll_eyes",
+				"levelReq": 9
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 17
+			},
+			{
+				"key": "aurora_beam",
+				"levelReq": 20
+			},
+			{
+				"key": "aqua_ring",
+				"levelReq": 25
+			},
+			{
+				"key": "acid_armor",
+				"levelReq": 29
+			},
+			{
+				"key": "haze",
+				"levelReq": 33
+			},
+			{
+				"key": "muddy_water",
+				"levelReq": 37
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 41
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 45
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 80
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"totodile": {
 		"id": "totodile",
 		"name": "Totodile",
@@ -6949,7 +7481,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "croconaw",
-		"evolvesAtLevel": 18
+		"evolvesAtLevel": 18,
+		"evolutionOptions": [{
+			"to": "croconaw",
+			"atLevel": 18,
+			"isSpecial": false
+		}]
 	},
 	"croconaw": {
 		"id": "croconaw",
@@ -7028,7 +7565,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "feraligatr",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "feraligatr",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"feraligatr": {
 		"id": "feraligatr",
@@ -7194,7 +7736,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "lanturn",
-		"evolvesAtLevel": 27
+		"evolvesAtLevel": 27,
+		"evolutionOptions": [{
+			"to": "lanturn",
+			"atLevel": 27,
+			"isSpecial": false
+		}]
 	},
 	"lanturn": {
 		"id": "lanturn",
@@ -7307,14 +7854,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
-			{
 				"key": "tail_whip",
 				"levelReq": 2
 			},
@@ -7372,7 +7911,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "azumarill",
-		"evolvesAtLevel": 18
+		"evolvesAtLevel": 18,
+		"evolutionOptions": [{
+			"to": "azumarill",
+			"atLevel": 18,
+			"isSpecial": false
+		}]
 	},
 	"azumarill": {
 		"id": "azumarill",
@@ -7577,7 +8121,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "quagsire",
-		"evolvesAtLevel": 20
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [{
+			"to": "quagsire",
+			"atLevel": 20,
+			"isSpecial": false
+		}]
 	},
 	"quagsire": {
 		"id": "quagsire",
@@ -7641,6 +8190,81 @@ var SPECIES_DATA = {
 			{
 				"key": "muddy_water",
 				"levelReq": 53
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"slowking": {
+		"id": "slowking",
+		"name": "Slowking",
+		"description": "Pokedex Nº199 - tipo WATER/PSYCHIC.",
+		"type": "WATER",
+		"type2": "PSYCHIC",
+		"catchRate": 70,
+		"baseExp": 172,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 795,
+		"base": {
+			"hp": 95,
+			"atkFis": 75,
+			"atkEsp": 100,
+			"def": 80,
+			"defEsp": 110,
+			"speed": 30
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 5
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 9
+			},
+			{
+				"key": "confusion",
+				"levelReq": 14
+			},
+			{
+				"key": "disable",
+				"levelReq": 19
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 23
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 28
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 32
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 36
+			},
+			{
+				"key": "swagger",
+				"levelReq": 41
+			},
+			{
+				"key": "psychic",
+				"levelReq": 45
+			},
+			{
+				"key": "trump_card",
+				"levelReq": 49
+			},
+			{
+				"key": "psych_up",
+				"levelReq": 54
+			},
+			{
+				"key": "heal_pulse",
+				"levelReq": 58
 			}
 		],
 		"evolvesTo": null,
@@ -7917,7 +8541,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "octillery",
-		"evolvesAtLevel": 25
+		"evolvesAtLevel": 25,
+		"evolutionOptions": [{
+			"to": "octillery",
+			"atLevel": 25,
+			"isSpecial": false
+		}]
 	},
 	"octillery": {
 		"id": "octillery",
@@ -8014,30 +8643,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "bullet_seed",
-				"levelReq": 1
-			},
-			{
-				"key": "psybeam",
-				"levelReq": 1
-			},
-			{
-				"key": "roost",
-				"levelReq": 1
-			},
-			{
-				"key": "signal_beam",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
 				"key": "supersonic",
 				"levelReq": 3
 			},
@@ -8112,14 +8717,6 @@ var SPECIES_DATA = {
 			"speed": 85
 		},
 		"abilities": [
-			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "yawn",
-				"levelReq": 1
-			},
 			{
 				"key": "smokescreen",
 				"levelReq": 5
@@ -8245,7 +8842,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "pidgeotto",
-		"evolvesAtLevel": 18
+		"evolvesAtLevel": 18,
+		"evolutionOptions": [{
+			"to": "pidgeotto",
+			"atLevel": 18,
+			"isSpecial": false
+		}]
 	},
 	"pidgeotto": {
 		"id": "pidgeotto",
@@ -8320,7 +8922,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "pidgeot",
-		"evolvesAtLevel": 36
+		"evolvesAtLevel": 36,
+		"evolutionOptions": [{
+			"to": "pidgeot",
+			"atLevel": 36,
+			"isSpecial": false
+		}]
 	},
 	"pidgeot": {
 		"id": "pidgeot",
@@ -8555,10 +9162,6 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "sing",
-				"levelReq": 1
-			},
-			{
 				"key": "defense_curl",
 				"levelReq": 3
 			},
@@ -8629,6 +9232,58 @@ var SPECIES_DATA = {
 			{
 				"key": "double_edge",
 				"levelReq": 45
+			}
+		],
+		"evolvesTo": "wigglytuff",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "wigglytuff",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"wigglytuff": {
+		"id": "wigglytuff",
+		"name": "Wigglytuff",
+		"description": "Pokedex Nº40 - tipo NORMAL/FAIRY.",
+		"type": "NORMAL",
+		"type2": "FAIRY",
+		"catchRate": 50,
+		"baseExp": 196,
+		"growthCurve": "FAST",
+		"pesoHg": 120,
+		"base": {
+			"hp": 140,
+			"atkFis": 70,
+			"atkEsp": 85,
+			"def": 45,
+			"defEsp": 50,
+			"speed": 45
+		},
+		"abilities": [
+			{
+				"key": "defense_curl",
+				"levelReq": 1
+			},
+			{
+				"key": "disable",
+				"levelReq": 1
+			},
+			{
+				"key": "double_slap",
+				"levelReq": 1
+			},
+			{
+				"key": "play_rough",
+				"levelReq": 1
+			},
+			{
+				"key": "sing",
+				"levelReq": 1
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 80
 			}
 		],
 		"evolvesTo": null,
@@ -8715,7 +9370,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "persian",
-		"evolvesAtLevel": 28
+		"evolvesAtLevel": 28,
+		"evolutionOptions": [{
+			"to": "persian",
+			"atLevel": 28,
+			"isSpecial": false
+		}]
 	},
 	"persian": {
 		"id": "persian",
@@ -8976,7 +9636,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "dodrio",
-		"evolvesAtLevel": 31
+		"evolvesAtLevel": 31,
+		"evolutionOptions": [{
+			"to": "dodrio",
+			"atLevel": 31,
+			"isSpecial": false
+		}]
 	},
 	"dodrio": {
 		"id": "dodrio",
@@ -9423,8 +10088,40 @@ var SPECIES_DATA = {
 				"levelReq": 45
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "vaporeon",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [
+			{
+				"to": "vaporeon",
+				"atLevel": 80,
+				"isSpecial": true,
+				"stoneType": "WATER"
+			},
+			{
+				"to": "jolteon",
+				"atLevel": 80,
+				"isSpecial": true,
+				"stoneType": "ELECTRIC"
+			},
+			{
+				"to": "flareon",
+				"atLevel": 80,
+				"isSpecial": true,
+				"stoneType": "FIRE"
+			},
+			{
+				"to": "espeon",
+				"atLevel": 80,
+				"isSpecial": true,
+				"stoneType": "PSYCHIC"
+			},
+			{
+				"to": "umbreon",
+				"atLevel": 80,
+				"isSpecial": true,
+				"stoneType": "DARK"
+			}
+		]
 	},
 	"porygon": {
 		"id": "porygon",
@@ -9506,8 +10203,13 @@ var SPECIES_DATA = {
 				"levelReq": 62
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "porygon2",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "porygon2",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"snorlax": {
 		"id": "snorlax",
@@ -9528,10 +10230,6 @@ var SPECIES_DATA = {
 			"speed": 30
 		},
 		"abilities": [
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
 			{
 				"key": "defense_curl",
 				"levelReq": 4
@@ -9677,7 +10375,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "furret",
-		"evolvesAtLevel": 15
+		"evolvesAtLevel": 15,
+		"evolutionOptions": [{
+			"to": "furret",
+			"atLevel": 15,
+			"isSpecial": false
+		}]
 	},
 	"furret": {
 		"id": "furret",
@@ -9847,7 +10550,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "noctowl",
-		"evolvesAtLevel": 20
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [{
+			"to": "noctowl",
+			"atLevel": 20,
+			"isSpecial": false
+		}]
 	},
 	"noctowl": {
 		"id": "noctowl",
@@ -9976,8 +10684,13 @@ var SPECIES_DATA = {
 				"levelReq": 11
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "jigglypuff",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "jigglypuff",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"aipom": {
 		"id": "aipom",
@@ -10341,7 +11054,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "ursaring",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "ursaring",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"ursaring": {
 		"id": "ursaring",
@@ -10425,22 +11143,6 @@ var SPECIES_DATA = {
 			"speed": 60
 		},
 		"abilities": [
-			{
-				"key": "conversion",
-				"levelReq": 1
-			},
-			{
-				"key": "conversion_2",
-				"levelReq": 1
-			},
-			{
-				"key": "defense_curl",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
 			{
 				"key": "psybeam",
 				"levelReq": 7
@@ -10752,8 +11454,13 @@ var SPECIES_DATA = {
 				"levelReq": 54
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "golem",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "golem",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"golem": {
 		"id": "golem",
@@ -10774,14 +11481,6 @@ var SPECIES_DATA = {
 			"speed": 45
 		},
 		"abilities": [
-			{
-				"key": "defense_curl",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
 			{
 				"key": "mud_sport",
 				"levelReq": 4
@@ -10954,8 +11653,13 @@ var SPECIES_DATA = {
 				"levelReq": 52
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "steelix",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "steelix",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"omanyte": {
 		"id": "omanyte",
@@ -11034,7 +11738,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "omastar",
-		"evolvesAtLevel": 40
+		"evolvesAtLevel": 40,
+		"evolutionOptions": [{
+			"to": "omastar",
+			"atLevel": 40,
+			"isSpecial": false
+		}]
 	},
 	"omastar": {
 		"id": "omastar",
@@ -11180,7 +11889,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "kabutops",
-		"evolvesAtLevel": 40
+		"evolvesAtLevel": 40,
+		"evolutionOptions": [{
+			"to": "kabutops",
+			"atLevel": 40,
+			"isSpecial": false
+		}]
 	},
 	"kabutops": {
 		"id": "kabutops",
@@ -11364,15 +12078,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "copycat",
-				"levelReq": 1
-			},
-			{
 				"key": "slam",
-				"levelReq": 1
-			},
-			{
-				"key": "wood_hammer",
 				"levelReq": 1
 			},
 			{
@@ -11516,7 +12222,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "pupitar",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "pupitar",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"pupitar": {
 		"id": "pupitar",
@@ -11587,7 +12298,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "tyranitar",
-		"evolvesAtLevel": 55
+		"evolvesAtLevel": 55,
+		"evolutionOptions": [{
+			"to": "tyranitar",
+			"atLevel": 55,
+			"isSpecial": false
+		}]
 	},
 	"tyranitar": {
 		"id": "tyranitar",
@@ -11753,7 +12469,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "sandslash",
-		"evolvesAtLevel": 22
+		"evolvesAtLevel": 22,
+		"evolutionOptions": [{
+			"to": "sandslash",
+			"atLevel": 22,
+			"isSpecial": false
+		}]
 	},
 	"sandslash": {
 		"id": "sandslash",
@@ -11919,7 +12640,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "dugtrio",
-		"evolvesAtLevel": 26
+		"evolvesAtLevel": 26,
+		"evolutionOptions": [{
+			"to": "dugtrio",
+			"atLevel": 26,
+			"isSpecial": false
+		}]
 	},
 	"dugtrio": {
 		"id": "dugtrio",
@@ -12081,7 +12807,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "marowak",
-		"evolvesAtLevel": 28
+		"evolvesAtLevel": 28,
+		"evolutionOptions": [{
+			"to": "marowak",
+			"atLevel": 28,
+			"isSpecial": false
+		}]
 	},
 	"marowak": {
 		"id": "marowak",
@@ -12247,7 +12978,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "rhydon",
-		"evolvesAtLevel": 42
+		"evolvesAtLevel": 42,
+		"evolutionOptions": [{
+			"to": "rhydon",
+			"atLevel": 42,
+			"isSpecial": false
+		}]
 	},
 	"rhydon": {
 		"id": "rhydon",
@@ -12484,7 +13220,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "donphan",
-		"evolvesAtLevel": 25
+		"evolvesAtLevel": 25,
+		"evolutionOptions": [{
+			"to": "donphan",
+			"atLevel": 25,
+			"isSpecial": false
+		}]
 	},
 	"donphan": {
 		"id": "donphan",
@@ -12610,7 +13351,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "charizard",
-		"evolvesAtLevel": 36
+		"evolvesAtLevel": 36,
+		"evolutionOptions": [{
+			"to": "charizard",
+			"atLevel": 36,
+			"isSpecial": false
+		}]
 	},
 	"charizard": {
 		"id": "charizard",
@@ -12779,8 +13525,13 @@ var SPECIES_DATA = {
 				"levelReq": 45
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "arcanine",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "arcanine",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"arcanine": {
 		"id": "arcanine",
@@ -12906,7 +13657,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "rapidash",
-		"evolvesAtLevel": 40
+		"evolvesAtLevel": 40,
+		"evolutionOptions": [{
+			"to": "rapidash",
+			"atLevel": 40,
+			"isSpecial": false
+		}]
 	},
 	"rapidash": {
 		"id": "rapidash",
@@ -13054,6 +13810,77 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"flareon": {
+		"id": "flareon",
+		"name": "Flareon",
+		"description": "Pokedex Nº136 - tipo FIRE.",
+		"type": "FIRE",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 184,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 250,
+		"base": {
+			"hp": 65,
+			"atkFis": 130,
+			"atkEsp": 95,
+			"def": 60,
+			"defEsp": 110,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "ember",
+				"levelReq": 1
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 5
+			},
+			{
+				"key": "baby_doll_eyes",
+				"levelReq": 9
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "bite",
+				"levelReq": 17
+			},
+			{
+				"key": "fire_fang",
+				"levelReq": 20
+			},
+			{
+				"key": "fire_spin",
+				"levelReq": 25
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 29
+			},
+			{
+				"key": "smog",
+				"levelReq": 33
+			},
+			{
+				"key": "lava_plume",
+				"levelReq": 37
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 41
+			},
+			{
+				"key": "flare_blitz",
+				"levelReq": 45
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"cyndaquil": {
 		"id": "cyndaquil",
 		"name": "Cyndaquil",
@@ -13139,7 +13966,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "quilava",
-		"evolvesAtLevel": 14
+		"evolvesAtLevel": 14,
+		"evolutionOptions": [{
+			"to": "quilava",
+			"atLevel": 14,
+			"isSpecial": false
+		}]
 	},
 	"quilava": {
 		"id": "quilava",
@@ -13218,7 +14050,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "typhlosion",
-		"evolvesAtLevel": 36
+		"evolvesAtLevel": 36,
+		"evolutionOptions": [{
+			"to": "typhlosion",
+			"atLevel": 36,
+			"isSpecial": false
+		}]
 	},
 	"typhlosion": {
 		"id": "typhlosion",
@@ -13384,7 +14221,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "magcargo",
-		"evolvesAtLevel": 38
+		"evolvesAtLevel": 38,
+		"evolutionOptions": [{
+			"to": "magcargo",
+			"atLevel": 38,
+			"isSpecial": false
+		}]
 	},
 	"magcargo": {
 		"id": "magcargo",
@@ -13546,7 +14388,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "magmar",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "magmar",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"pikachu": {
 		"id": "pikachu",
@@ -13567,14 +14414,6 @@ var SPECIES_DATA = {
 			"speed": 90
 		},
 		"abilities": [
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_shock",
-				"levelReq": 1
-			},
 			{
 				"key": "growl",
 				"levelReq": 5
@@ -13638,6 +14477,50 @@ var SPECIES_DATA = {
 			{
 				"key": "thunder",
 				"levelReq": 58
+			}
+		],
+		"evolvesTo": "raichu",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "raichu",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"raichu": {
+		"id": "raichu",
+		"name": "Raichu",
+		"description": "Pokedex Nº26 - tipo ELECTRIC.",
+		"type": "ELECTRIC",
+		"type2": null,
+		"catchRate": 75,
+		"baseExp": 218,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 300,
+		"base": {
+			"hp": 60,
+			"atkFis": 90,
+			"atkEsp": 90,
+			"def": 55,
+			"defEsp": 80,
+			"speed": 110
+		},
+		"abilities": [
+			{
+				"key": "quick_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_shock",
+				"levelReq": 1
+			},
+			{
+				"key": "thunderbolt",
+				"levelReq": 1
 			}
 		],
 		"evolvesTo": null,
@@ -13736,7 +14619,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "magneton",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "magneton",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"magneton": {
 		"id": "magneton",
@@ -13918,7 +14806,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "electrode",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "electrode",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"electrode": {
 		"id": "electrode",
@@ -14074,6 +14967,77 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"jolteon": {
+		"id": "jolteon",
+		"name": "Jolteon",
+		"description": "Pokedex Nº135 - tipo ELECTRIC.",
+		"type": "ELECTRIC",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 184,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 245,
+		"base": {
+			"hp": 65,
+			"atkFis": 65,
+			"atkEsp": 110,
+			"def": 60,
+			"defEsp": 95,
+			"speed": 130
+		},
+		"abilities": [
+			{
+				"key": "thunder_shock",
+				"levelReq": 1
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 5
+			},
+			{
+				"key": "baby_doll_eyes",
+				"levelReq": 9
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "double_kick",
+				"levelReq": 17
+			},
+			{
+				"key": "thunder_fang",
+				"levelReq": 20
+			},
+			{
+				"key": "pin_missile",
+				"levelReq": 25
+			},
+			{
+				"key": "agility",
+				"levelReq": 29
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 33
+			},
+			{
+				"key": "discharge",
+				"levelReq": 37
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 41
+			},
+			{
+				"key": "thunder",
+				"levelReq": 45
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"pichu": {
 		"id": "pichu",
 		"name": "Pichu",
@@ -14118,8 +15082,13 @@ var SPECIES_DATA = {
 				"levelReq": 18
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "pikachu",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "pikachu",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"mareep": {
 		"id": "mareep",
@@ -14202,7 +15171,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "flaaffy",
-		"evolvesAtLevel": 15
+		"evolvesAtLevel": 15,
+		"evolutionOptions": [{
+			"to": "flaaffy",
+			"atLevel": 15,
+			"isSpecial": false
+		}]
 	},
 	"flaaffy": {
 		"id": "flaaffy",
@@ -14277,7 +15251,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "ampharos",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "ampharos",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"ampharos": {
 		"id": "ampharos",
@@ -14439,7 +15418,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "electabuzz",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "electabuzz",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"ekans": {
 		"id": "ekans",
@@ -14530,7 +15514,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "arbok",
-		"evolvesAtLevel": 22
+		"evolvesAtLevel": 22,
+		"evolutionOptions": [{
+			"to": "arbok",
+			"atLevel": 22,
+			"isSpecial": false
+		}]
 	},
 	"arbok": {
 		"id": "arbok",
@@ -14692,7 +15681,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "nidorina",
-		"evolvesAtLevel": 16
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "nidorina",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
 	},
 	"nidorina": {
 		"id": "nidorina",
@@ -14758,8 +15752,13 @@ var SPECIES_DATA = {
 				"levelReq": 58
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "nidoqueen",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "nidoqueen",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"nidoqueen": {
 		"id": "nidoqueen",
@@ -14780,22 +15779,6 @@ var SPECIES_DATA = {
 			"speed": 76
 		},
 		"abilities": [
-			{
-				"key": "double_kick",
-				"levelReq": 1
-			},
-			{
-				"key": "poison_sting",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
 			{
 				"key": "chip_away",
 				"levelReq": 23
@@ -14889,7 +15872,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "nidorino",
-		"evolvesAtLevel": 16
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "nidorino",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
 	},
 	"nidorino": {
 		"id": "nidorino",
@@ -14955,8 +15943,13 @@ var SPECIES_DATA = {
 				"levelReq": 58
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "nidoking",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "nidoking",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"nidoking": {
 		"id": "nidoking",
@@ -14977,22 +15970,6 @@ var SPECIES_DATA = {
 			"speed": 85
 		},
 		"abilities": [
-			{
-				"key": "double_kick",
-				"levelReq": 1
-			},
-			{
-				"key": "focus_energy",
-				"levelReq": 1
-			},
-			{
-				"key": "peck",
-				"levelReq": 1
-			},
-			{
-				"key": "poison_sting",
-				"levelReq": 1
-			},
 			{
 				"key": "chip_away",
 				"levelReq": 23
@@ -15094,7 +16071,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "golbat",
-		"evolvesAtLevel": 22
+		"evolvesAtLevel": 22,
+		"evolutionOptions": [{
+			"to": "golbat",
+			"atLevel": 22,
+			"isSpecial": false
+		}]
 	},
 	"golbat": {
 		"id": "golbat",
@@ -15172,8 +16154,13 @@ var SPECIES_DATA = {
 				"levelReq": 51
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "crobat",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "crobat",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"grimer": {
 		"id": "grimer",
@@ -15260,7 +16247,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "muk",
-		"evolvesAtLevel": 38
+		"evolvesAtLevel": 38,
+		"evolutionOptions": [{
+			"to": "muk",
+			"atLevel": 38,
+			"isSpecial": false
+		}]
 	},
 	"muk": {
 		"id": "muk",
@@ -15426,7 +16418,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "weezing",
-		"evolvesAtLevel": 35
+		"evolvesAtLevel": 35,
+		"evolutionOptions": [{
+			"to": "weezing",
+			"atLevel": 35,
+			"isSpecial": false
+		}]
 	},
 	"weezing": {
 		"id": "weezing",
@@ -15502,6 +16499,89 @@ var SPECIES_DATA = {
 			{
 				"key": "memento",
 				"levelReq": 57
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"crobat": {
+		"id": "crobat",
+		"name": "Crobat",
+		"description": "Pokedex Nº169 - tipo POISON/FLYING.",
+		"type": "POISON",
+		"type2": "FLYING",
+		"catchRate": 90,
+		"baseExp": 241,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 750,
+		"base": {
+			"hp": 85,
+			"atkFis": 90,
+			"atkEsp": 70,
+			"def": 80,
+			"defEsp": 80,
+			"speed": 130
+		},
+		"abilities": [
+			{
+				"key": "supersonic",
+				"levelReq": 5
+			},
+			{
+				"key": "astonish",
+				"levelReq": 7
+			},
+			{
+				"key": "bite",
+				"levelReq": 11
+			},
+			{
+				"key": "wing_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 17
+			},
+			{
+				"key": "air_cutter",
+				"levelReq": 19
+			},
+			{
+				"key": "swift",
+				"levelReq": 24
+			},
+			{
+				"key": "poison_fang",
+				"levelReq": 27
+			},
+			{
+				"key": "mean_look",
+				"levelReq": 32
+			},
+			{
+				"key": "leech_life",
+				"levelReq": 35
+			},
+			{
+				"key": "haze",
+				"levelReq": 40
+			},
+			{
+				"key": "venoshock",
+				"levelReq": 43
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 48
+			},
+			{
+				"key": "quick_guard",
+				"levelReq": 51
+			},
+			{
+				"key": "cross_poison",
+				"levelReq": 80
 			}
 		],
 		"evolvesTo": null,
@@ -15604,7 +16684,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "primeape",
-		"evolvesAtLevel": 28
+		"evolvesAtLevel": 28,
+		"evolutionOptions": [{
+			"to": "primeape",
+			"atLevel": 28,
+			"isSpecial": false
+		}]
 	},
 	"primeape": {
 		"id": "primeape",
@@ -15778,7 +16863,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "machoke",
-		"evolvesAtLevel": 28
+		"evolvesAtLevel": 28,
+		"evolutionOptions": [{
+			"to": "machoke",
+			"atLevel": 28,
+			"isSpecial": false
+		}]
 	},
 	"machoke": {
 		"id": "machoke",
@@ -15860,8 +16950,13 @@ var SPECIES_DATA = {
 				"levelReq": 57
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "machamp",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "machamp",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"machamp": {
 		"id": "machamp",
@@ -15882,22 +16977,6 @@ var SPECIES_DATA = {
 			"speed": 55
 		},
 		"abilities": [
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "low_kick",
-				"levelReq": 1
-			},
-			{
-				"key": "strength",
-				"levelReq": 1
-			},
-			{
-				"key": "wide_guard",
-				"levelReq": 1
-			},
 			{
 				"key": "focus_energy",
 				"levelReq": 3
@@ -15957,6 +17036,10 @@ var SPECIES_DATA = {
 			{
 				"key": "dynamic_punch",
 				"levelReq": 57
+			},
+			{
+				"key": "strength",
+				"levelReq": 80
 			}
 		],
 		"evolvesTo": null,
@@ -16073,10 +17156,6 @@ var SPECIES_DATA = {
 				"levelReq": 1
 			},
 			{
-				"key": "revenge",
-				"levelReq": 1
-			},
-			{
 				"key": "agility",
 				"levelReq": 6
 			},
@@ -16181,7 +17260,107 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "hitmonlee",
-		"evolvesAtLevel": 20
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [
+			{
+				"to": "hitmonlee",
+				"atLevel": 20,
+				"isSpecial": false
+			},
+			{
+				"to": "hitmonchan",
+				"atLevel": 20,
+				"isSpecial": false
+			},
+			{
+				"to": "hitmontop",
+				"atLevel": 20,
+				"isSpecial": false
+			}
+		]
+	},
+	"hitmontop": {
+		"id": "hitmontop",
+		"name": "Hitmontop",
+		"description": "Pokedex Nº237 - tipo FIGHTING.",
+		"type": "FIGHTING",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 159,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 480,
+		"base": {
+			"hp": 50,
+			"atkFis": 95,
+			"atkEsp": 35,
+			"def": 95,
+			"defEsp": 110,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "rolling_kick",
+				"levelReq": 1
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 6
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 10
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 15
+			},
+			{
+				"key": "rapid_spin",
+				"levelReq": 19
+			},
+			{
+				"key": "feint",
+				"levelReq": 24
+			},
+			{
+				"key": "counter",
+				"levelReq": 28
+			},
+			{
+				"key": "triple_kick",
+				"levelReq": 33
+			},
+			{
+				"key": "agility",
+				"levelReq": 37
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 42
+			},
+			{
+				"key": "quick_guard",
+				"levelReq": 46
+			},
+			{
+				"key": "wide_guard",
+				"levelReq": 46
+			},
+			{
+				"key": "detect",
+				"levelReq": 50
+			},
+			{
+				"key": "close_combat",
+				"levelReq": 55
+			},
+			{
+				"key": "endeavor",
+				"levelReq": 60
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
 	},
 	"jynx": {
 		"id": "jynx",
@@ -16343,7 +17522,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "piloswine",
-		"evolvesAtLevel": 33
+		"evolvesAtLevel": 33,
+		"evolutionOptions": [{
+			"to": "piloswine",
+			"atLevel": 33,
+			"isSpecial": false
+		}]
 	},
 	"piloswine": {
 		"id": "piloswine",
@@ -16533,7 +17717,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "jynx",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "jynx",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"steelix": {
 		"id": "steelix",
@@ -16554,34 +17743,6 @@ var SPECIES_DATA = {
 			"speed": 30
 		},
 		"abilities": [
-			{
-				"key": "bind",
-				"levelReq": 1
-			},
-			{
-				"key": "fire_fang",
-				"levelReq": 1
-			},
-			{
-				"key": "harden",
-				"levelReq": 1
-			},
-			{
-				"key": "ice_fang",
-				"levelReq": 1
-			},
-			{
-				"key": "mud_sport",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_fang",
-				"levelReq": 1
-			},
 			{
 				"key": "curse",
 				"levelReq": 4
@@ -16830,53 +17991,58 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "xatu",
-		"evolvesAtLevel": 25
+		"evolvesAtLevel": 25,
+		"evolutionOptions": [{
+			"to": "xatu",
+			"atLevel": 25,
+			"isSpecial": false
+		}]
 	},
-	"xatu": {
-		"id": "xatu",
-		"name": "Xatu",
-		"description": "Pokedex Nº178 - tipo PSYCHIC/FLYING.",
-		"type": "PSYCHIC",
+	"togetic": {
+		"id": "togetic",
+		"name": "Togetic",
+		"description": "Pokedex Nº176 - tipo FAIRY/FLYING.",
+		"type": "FAIRY",
 		"type2": "FLYING",
 		"catchRate": 75,
-		"baseExp": 165,
-		"growthCurve": "MEDIUM_FAST",
-		"pesoHg": 150,
+		"baseExp": 142,
+		"growthCurve": "FAST",
+		"pesoHg": 32,
 		"base": {
-			"hp": 65,
-			"atkFis": 75,
-			"atkEsp": 95,
-			"def": 70,
-			"defEsp": 70,
-			"speed": 95
+			"hp": 55,
+			"atkFis": 40,
+			"atkEsp": 80,
+			"def": 85,
+			"defEsp": 105,
+			"speed": 40
 		},
 		"abilities": [
 			{
-				"key": "night_shade",
-				"levelReq": 6
+				"key": "metronome",
+				"levelReq": 5
 			},
 			{
-				"key": "teleport",
+				"key": "sweet_kiss",
 				"levelReq": 9
 			},
 			{
-				"key": "lucky_chant",
-				"levelReq": 12
+				"key": "yawn",
+				"levelReq": 13
 			},
 			{
-				"key": "stored_power",
+				"key": "fairy_wind",
+				"levelReq": 14
+			},
+			{
+				"key": "encore",
 				"levelReq": 17
 			},
 			{
-				"key": "ominous_wind",
-				"levelReq": 20
+				"key": "follow_me",
+				"levelReq": 21
 			},
 			{
-				"key": "confuse_ray",
-				"levelReq": 23
-			},
-			{
-				"key": "air_slash",
+				"key": "bestow",
 				"levelReq": 25
 			},
 			{
@@ -16884,32 +18050,28 @@ var SPECIES_DATA = {
 				"levelReq": 29
 			},
 			{
-				"key": "psychic",
-				"levelReq": 35
+				"key": "ancient_power",
+				"levelReq": 33
 			},
 			{
-				"key": "miracle_eye",
-				"levelReq": 39
+				"key": "safeguard",
+				"levelReq": 37
 			},
 			{
-				"key": "psycho_shift",
-				"levelReq": 43
+				"key": "baton_pass",
+				"levelReq": 41
 			},
 			{
-				"key": "future_sight",
+				"key": "double_edge",
+				"levelReq": 45
+			},
+			{
+				"key": "last_resort",
 				"levelReq": 49
 			},
 			{
-				"key": "guard_swap",
+				"key": "after_you",
 				"levelReq": 53
-			},
-			{
-				"key": "power_swap",
-				"levelReq": 53
-			},
-			{
-				"key": "me_first",
-				"levelReq": 57
 			}
 		],
 		"evolvesTo": null,
@@ -16938,7 +18100,12 @@ var SPECIES_DATA = {
 			"levelReq": 1
 		}],
 		"evolvesTo": "kadabra",
-		"evolvesAtLevel": 16
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "kadabra",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
 	},
 	"kadabra": {
 		"id": "kadabra",
@@ -17016,8 +18183,13 @@ var SPECIES_DATA = {
 				"levelReq": 46
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "alakazam",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "alakazam",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"alakazam": {
 		"id": "alakazam",
@@ -17038,14 +18210,6 @@ var SPECIES_DATA = {
 			"speed": 120
 		},
 		"abilities": [
-			{
-				"key": "kinesis",
-				"levelReq": 1
-			},
-			{
-				"key": "teleport",
-				"levelReq": 1
-			},
 			{
 				"key": "confusion",
 				"levelReq": 16
@@ -17097,6 +18261,10 @@ var SPECIES_DATA = {
 			{
 				"key": "trick",
 				"levelReq": 46
+			},
+			{
+				"key": "kinesis",
+				"levelReq": 80
 			}
 		],
 		"evolvesTo": null,
@@ -17191,7 +18359,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "hypno",
-		"evolvesAtLevel": 26
+		"evolvesAtLevel": 26,
+		"evolutionOptions": [{
+			"to": "hypno",
+			"atLevel": 26,
+			"isSpecial": false
+		}]
 	},
 	"hypno": {
 		"id": "hypno",
@@ -17271,6 +18444,160 @@ var SPECIES_DATA = {
 			{
 				"key": "future_sight",
 				"levelReq": 61
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"xatu": {
+		"id": "xatu",
+		"name": "Xatu",
+		"description": "Pokedex Nº178 - tipo PSYCHIC/FLYING.",
+		"type": "PSYCHIC",
+		"type2": "FLYING",
+		"catchRate": 75,
+		"baseExp": 165,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 150,
+		"base": {
+			"hp": 65,
+			"atkFis": 75,
+			"atkEsp": 95,
+			"def": 70,
+			"defEsp": 70,
+			"speed": 95
+		},
+		"abilities": [
+			{
+				"key": "night_shade",
+				"levelReq": 6
+			},
+			{
+				"key": "teleport",
+				"levelReq": 9
+			},
+			{
+				"key": "lucky_chant",
+				"levelReq": 12
+			},
+			{
+				"key": "stored_power",
+				"levelReq": 17
+			},
+			{
+				"key": "ominous_wind",
+				"levelReq": 20
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 23
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 25
+			},
+			{
+				"key": "wish",
+				"levelReq": 29
+			},
+			{
+				"key": "psychic",
+				"levelReq": 35
+			},
+			{
+				"key": "miracle_eye",
+				"levelReq": 39
+			},
+			{
+				"key": "psycho_shift",
+				"levelReq": 43
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 49
+			},
+			{
+				"key": "guard_swap",
+				"levelReq": 53
+			},
+			{
+				"key": "power_swap",
+				"levelReq": 53
+			},
+			{
+				"key": "me_first",
+				"levelReq": 57
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"espeon": {
+		"id": "espeon",
+		"name": "Espeon",
+		"description": "Pokedex Nº196 - tipo PSYCHIC.",
+		"type": "PSYCHIC",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 184,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 265,
+		"base": {
+			"hp": 65,
+			"atkFis": 65,
+			"atkEsp": 130,
+			"def": 60,
+			"defEsp": 95,
+			"speed": 110
+		},
+		"abilities": [
+			{
+				"key": "confusion",
+				"levelReq": 1
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 5
+			},
+			{
+				"key": "baby_doll_eyes",
+				"levelReq": 9
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "swift",
+				"levelReq": 17
+			},
+			{
+				"key": "psybeam",
+				"levelReq": 20
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 25
+			},
+			{
+				"key": "psych_up",
+				"levelReq": 29
+			},
+			{
+				"key": "morning_sun",
+				"levelReq": 33
+			},
+			{
+				"key": "psychic",
+				"levelReq": 37
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 41
+			},
+			{
+				"key": "power_swap",
+				"levelReq": 45
 			}
 		],
 		"evolvesTo": null,
@@ -17421,7 +18748,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "haunter",
-		"evolvesAtLevel": 25
+		"evolvesAtLevel": 25,
+		"evolutionOptions": [{
+			"to": "haunter",
+			"atLevel": 25,
+			"isSpecial": false
+		}]
 	},
 	"haunter": {
 		"id": "haunter",
@@ -17499,8 +18831,13 @@ var SPECIES_DATA = {
 				"levelReq": 61
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "gengar",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "gengar",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"gengar": {
 		"id": "gengar",
@@ -17521,18 +18858,6 @@ var SPECIES_DATA = {
 			"speed": 110
 		},
 		"abilities": [
-			{
-				"key": "hypnosis",
-				"levelReq": 1
-			},
-			{
-				"key": "lick",
-				"levelReq": 1
-			},
-			{
-				"key": "shadow_punch",
-				"levelReq": 1
-			},
 			{
 				"key": "spite",
 				"levelReq": 5
@@ -17584,6 +18909,10 @@ var SPECIES_DATA = {
 			{
 				"key": "nightmare",
 				"levelReq": 61
+			},
+			{
+				"key": "shadow_punch",
+				"levelReq": 80
 			}
 		],
 		"evolvesTo": null,
@@ -17663,6 +18992,77 @@ var SPECIES_DATA = {
 			{
 				"key": "power_gem",
 				"levelReq": 55
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"umbreon": {
+		"id": "umbreon",
+		"name": "Umbreon",
+		"description": "Pokedex Nº197 - tipo DARK.",
+		"type": "DARK",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 184,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 270,
+		"base": {
+			"hp": 95,
+			"atkFis": 65,
+			"atkEsp": 60,
+			"def": 110,
+			"defEsp": 130,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "pursuit",
+				"levelReq": 1
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 5
+			},
+			{
+				"key": "baby_doll_eyes",
+				"levelReq": 9
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 17
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 20
+			},
+			{
+				"key": "assurance",
+				"levelReq": 25
+			},
+			{
+				"key": "screech",
+				"levelReq": 29
+			},
+			{
+				"key": "moonlight",
+				"levelReq": 33
+			},
+			{
+				"key": "mean_look",
+				"levelReq": 37
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 41
+			},
+			{
+				"key": "guard_swap",
+				"levelReq": 45
 			}
 		],
 		"evolvesTo": null,
@@ -17923,7 +19323,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "houndoom",
-		"evolvesAtLevel": 24
+		"evolvesAtLevel": 24,
+		"evolutionOptions": [{
+			"to": "houndoom",
+			"atLevel": 24,
+			"isSpecial": false
+		}]
 	},
 	"houndoom": {
 		"id": "houndoom",
@@ -18081,7 +19486,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "dragonair",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "dragonair",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"dragonair": {
 		"id": "dragonair",
@@ -18152,7 +19562,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "dragonite",
-		"evolvesAtLevel": 55
+		"evolvesAtLevel": 55,
+		"evolutionOptions": [{
+			"to": "dragonite",
+			"atLevel": 55,
+			"isSpecial": false
+		}]
 	},
 	"dragonite": {
 		"id": "dragonite",
@@ -18233,6 +19648,153 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"clefairy": {
+		"id": "clefairy",
+		"name": "Clefairy",
+		"description": "Pokedex Nº35 - tipo FAIRY.",
+		"type": "FAIRY",
+		"type2": null,
+		"catchRate": 150,
+		"baseExp": 113,
+		"growthCurve": "FAST",
+		"pesoHg": 75,
+		"base": {
+			"hp": 70,
+			"atkFis": 45,
+			"atkEsp": 60,
+			"def": 48,
+			"defEsp": 65,
+			"speed": 35
+		},
+		"abilities": [
+			{
+				"key": "sing",
+				"levelReq": 7
+			},
+			{
+				"key": "double_slap",
+				"levelReq": 10
+			},
+			{
+				"key": "defense_curl",
+				"levelReq": 13
+			},
+			{
+				"key": "follow_me",
+				"levelReq": 16
+			},
+			{
+				"key": "bestow",
+				"levelReq": 19
+			},
+			{
+				"key": "wake_up_slap",
+				"levelReq": 22
+			},
+			{
+				"key": "minimize",
+				"levelReq": 25
+			},
+			{
+				"key": "stored_power",
+				"levelReq": 28
+			},
+			{
+				"key": "metronome",
+				"levelReq": 31
+			},
+			{
+				"key": "cosmic_power",
+				"levelReq": 34
+			},
+			{
+				"key": "lucky_chant",
+				"levelReq": 37
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 40
+			},
+			{
+				"key": "moonlight",
+				"levelReq": 43
+			},
+			{
+				"key": "moonblast",
+				"levelReq": 46
+			},
+			{
+				"key": "gravity",
+				"levelReq": 49
+			},
+			{
+				"key": "meteor_mash",
+				"levelReq": 50
+			},
+			{
+				"key": "healing_wish",
+				"levelReq": 55
+			},
+			{
+				"key": "after_you",
+				"levelReq": 58
+			}
+		],
+		"evolvesTo": "clefable",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "clefable",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"clefable": {
+		"id": "clefable",
+		"name": "Clefable",
+		"description": "Pokedex Nº36 - tipo FAIRY.",
+		"type": "FAIRY",
+		"type2": null,
+		"catchRate": 25,
+		"baseExp": 217,
+		"growthCurve": "FAST",
+		"pesoHg": 400,
+		"base": {
+			"hp": 95,
+			"atkFis": 70,
+			"atkEsp": 95,
+			"def": 73,
+			"defEsp": 90,
+			"speed": 60
+		},
+		"abilities": [
+			{
+				"key": "disarming_voice",
+				"levelReq": 1
+			},
+			{
+				"key": "double_slap",
+				"levelReq": 1
+			},
+			{
+				"key": "metronome",
+				"levelReq": 1
+			},
+			{
+				"key": "minimize",
+				"levelReq": 1
+			},
+			{
+				"key": "sing",
+				"levelReq": 1
+			},
+			{
+				"key": "spotlight",
+				"levelReq": 1
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"cleffa": {
 		"id": "cleffa",
 		"name": "Cleffa",
@@ -18281,8 +19843,13 @@ var SPECIES_DATA = {
 				"levelReq": 16
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "clefairy",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "clefairy",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"togepi": {
 		"id": "togepi",
@@ -18364,8 +19931,13 @@ var SPECIES_DATA = {
 				"levelReq": 53
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "togetic",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "togetic",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"snubbull": {
 		"id": "snubbull",
@@ -18448,7 +20020,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "granbull",
-		"evolvesAtLevel": 23
+		"evolvesAtLevel": 23,
+		"evolutionOptions": [{
+			"to": "granbull",
+			"atLevel": 23,
+			"isSpecial": false
+		}]
 	},
 	"granbull": {
 		"id": "granbull",
@@ -19360,6 +20937,10 @@ var TRAITS_DATA = {
 			"normais": ["static"],
 			"oculta": "lightning_rod"
 		},
+		"raichu": {
+			"normais": ["static"],
+			"oculta": "lightning_rod"
+		},
 		"sandshrew": {
 			"normais": ["sand_veil"],
 			"oculta": "sand_rush"
@@ -19392,9 +20973,21 @@ var TRAITS_DATA = {
 			"normais": ["poison_point", "rivalry"],
 			"oculta": "sheer_force"
 		},
+		"clefairy": {
+			"normais": ["cute_charm", "magic_guard"],
+			"oculta": "friend_guard"
+		},
+		"clefable": {
+			"normais": ["cute_charm", "magic_guard"],
+			"oculta": "unaware"
+		},
 		"jigglypuff": {
 			"normais": ["cute_charm", "competitive"],
 			"oculta": "friend_guard"
+		},
+		"wigglytuff": {
+			"normais": ["cute_charm", "competitive"],
+			"oculta": "frisk"
 		},
 		"zubat": {
 			"normais": ["inner_focus"],
@@ -19411,6 +21004,10 @@ var TRAITS_DATA = {
 		"gloom": {
 			"normais": ["chlorophyll"],
 			"oculta": "stench"
+		},
+		"vileplume": {
+			"normais": ["chlorophyll"],
+			"oculta": "effect_spore"
 		},
 		"paras": {
 			"normais": ["effect_spore", "dry_skin"],
@@ -19473,6 +21070,10 @@ var TRAITS_DATA = {
 			"oculta": "swift_swim"
 		},
 		"poliwhirl": {
+			"normais": ["water_absorb", "damp"],
+			"oculta": "swift_swim"
+		},
+		"poliwrath": {
 			"normais": ["water_absorb", "damp"],
 			"oculta": "swift_swim"
 		},
@@ -19588,6 +21189,10 @@ var TRAITS_DATA = {
 			"normais": ["shell_armor", "skill_link"],
 			"oculta": "overcoat"
 		},
+		"cloyster": {
+			"normais": ["shell_armor", "skill_link"],
+			"oculta": "overcoat"
+		},
 		"gastly": {
 			"normais": ["levitate"],
 			"oculta": null
@@ -19629,6 +21234,10 @@ var TRAITS_DATA = {
 			"oculta": "aftermath"
 		},
 		"exeggcute": {
+			"normais": ["chlorophyll"],
+			"oculta": "harvest"
+		},
+		"exeggutor": {
 			"normais": ["chlorophyll"],
 			"oculta": "harvest"
 		},
@@ -19696,6 +21305,10 @@ var TRAITS_DATA = {
 			"normais": ["illuminate", "natural_cure"],
 			"oculta": "analytic"
 		},
+		"starmie": {
+			"normais": ["illuminate", "natural_cure"],
+			"oculta": "analytic"
+		},
 		"scyther": {
 			"normais": ["swarm", "technician"],
 			"oculta": "steadfast"
@@ -19739,6 +21352,18 @@ var TRAITS_DATA = {
 		"eevee": {
 			"normais": ["run_away", "adaptability"],
 			"oculta": "anticipation"
+		},
+		"vaporeon": {
+			"normais": ["water_absorb"],
+			"oculta": "hydration"
+		},
+		"jolteon": {
+			"normais": ["volt_absorb"],
+			"oculta": "quick_feet"
+		},
+		"flareon": {
+			"normais": ["flash_fire"],
+			"oculta": "guts"
 		},
 		"porygon": {
 			"normais": ["trace", "download"],
@@ -19868,6 +21493,10 @@ var TRAITS_DATA = {
 			"normais": ["swarm", "insomnia"],
 			"oculta": "sniper"
 		},
+		"crobat": {
+			"normais": ["inner_focus"],
+			"oculta": "infiltrator"
+		},
 		"chinchou": {
 			"normais": ["volt_absorb", "illuminate"],
 			"oculta": "water_absorb"
@@ -19892,6 +21521,10 @@ var TRAITS_DATA = {
 			"normais": ["hustle", "serene_grace"],
 			"oculta": "super_luck"
 		},
+		"togetic": {
+			"normais": ["hustle", "serene_grace"],
+			"oculta": "super_luck"
+		},
 		"natu": {
 			"normais": ["synchronize", "early_bird"],
 			"oculta": "magic_bounce"
@@ -19911,6 +21544,10 @@ var TRAITS_DATA = {
 		"ampharos": {
 			"normais": ["static"],
 			"oculta": "plus"
+		},
+		"bellossom": {
+			"normais": ["chlorophyll"],
+			"oculta": "healer"
 		},
 		"marill": {
 			"normais": ["thick_fat", "huge_power"],
@@ -19964,9 +21601,21 @@ var TRAITS_DATA = {
 			"normais": ["damp", "water_absorb"],
 			"oculta": "unaware"
 		},
+		"espeon": {
+			"normais": ["synchronize"],
+			"oculta": "magic_bounce"
+		},
+		"umbreon": {
+			"normais": ["synchronize"],
+			"oculta": "inner_focus"
+		},
 		"murkrow": {
 			"normais": ["insomnia", "super_luck"],
 			"oculta": "prankster"
+		},
+		"slowking": {
+			"normais": ["oblivious", "own_tempo"],
+			"oculta": "regenerator"
 		},
 		"misdreavus": {
 			"normais": ["levitate"],
@@ -20111,6 +21760,10 @@ var TRAITS_DATA = {
 		"tyrogue": {
 			"normais": ["guts", "steadfast"],
 			"oculta": "vital_spirit"
+		},
+		"hitmontop": {
+			"normais": ["intimidate", "technician"],
+			"oculta": "steadfast"
 		},
 		"smoochum": {
 			"normais": ["oblivious", "forewarn"],
@@ -22158,6 +23811,16 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
+	"aromatherapy": {
+		"id": "aromatherapy",
+		"name": "Aromatherapy",
+		"type": "GRASS",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single",
+		"accuracy": 100
+	},
 	"wrap": {
 		"id": "wrap",
 		"name": "Wrap",
@@ -22220,16 +23883,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"leaf_tornado": {
-		"id": "leaf_tornado",
-		"name": "Leaf Tornado",
-		"type": "GRASS",
-		"category": "special",
-		"power": 65,
-		"pp": 10,
-		"target": "single",
-		"accuracy": 90
-	},
 	"spit_up": {
 		"id": "spit_up",
 		"name": "Spit Up",
@@ -22281,6 +23934,16 @@ var ABILITIES_DATA = {
 		"critStages": 1,
 		"accuracy": 100
 	},
+	"leaf_tornado": {
+		"id": "leaf_tornado",
+		"name": "Leaf Tornado",
+		"type": "GRASS",
+		"category": "special",
+		"power": 65,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 90
+	},
 	"barrage": {
 		"id": "barrage",
 		"name": "Barrage",
@@ -22331,6 +23994,37 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 15,
 		"target": "single",
+		"accuracy": 100
+	},
+	"psyshock": {
+		"id": "psyshock",
+		"name": "Psyshock",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 80,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"egg_bomb": {
+		"id": "egg_bomb",
+		"name": "Egg Bomb",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 100,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 75
+	},
+	"wood_hammer": {
+		"id": "wood_hammer",
+		"name": "Wood Hammer",
+		"type": "GRASS",
+		"category": "physical",
+		"power": 120,
+		"pp": 15,
+		"target": "single",
+		"drainPercent": -33,
 		"accuracy": 100
 	},
 	"constrict": {
@@ -22408,14 +24102,30 @@ var ABILITIES_DATA = {
 		"statusChance": 30,
 		"accuracy": 100
 	},
-	"aromatherapy": {
-		"id": "aromatherapy",
-		"name": "Aromatherapy",
-		"type": "GRASS",
+	"quiver_dance": {
+		"id": "quiver_dance",
+		"name": "Quiver Dance",
+		"type": "BUG",
 		"category": "status",
 		"power": 0,
-		"pp": 5,
+		"pp": 20,
 		"target": "single",
+		"statChanges": [
+			{
+				"stat": "atkEsp",
+				"estagios": 1
+			},
+			{
+				"stat": "defEsp",
+				"estagios": 1
+			},
+			{
+				"stat": "speed",
+				"estagios": 1
+			}
+		],
+		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"splash": {
@@ -22524,21 +24234,6 @@ var ABILITIES_DATA = {
 		"status": "sleep",
 		"statusChance": 100,
 		"accuracy": 55
-	},
-	"flower_shield": {
-		"id": "flower_shield",
-		"name": "Flower Shield",
-		"type": "FAIRY",
-		"category": "status",
-		"power": 0,
-		"pp": 10,
-		"target": "single",
-		"statChanges": [{
-			"stat": "def",
-			"estagios": 1
-		}],
-		"statChance": 100,
-		"accuracy": 100
 	},
 	"string_shot": {
 		"id": "string_shot",
@@ -22666,32 +24361,6 @@ var ABILITIES_DATA = {
 			"estagios": -2
 		}],
 		"statChance": 100,
-		"accuracy": 100
-	},
-	"quiver_dance": {
-		"id": "quiver_dance",
-		"name": "Quiver Dance",
-		"type": "BUG",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"statChanges": [
-			{
-				"stat": "atkEsp",
-				"estagios": 1
-			},
-			{
-				"stat": "defEsp",
-				"estagios": 1
-			},
-			{
-				"stat": "speed",
-				"estagios": 1
-			}
-		],
-		"statChance": 100,
-		"statTarget": "self",
 		"accuracy": 100
 	},
 	"poison_sting": {
@@ -23275,16 +24944,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"bullet_punch": {
-		"id": "bullet_punch",
-		"name": "Bullet Punch",
-		"type": "STEEL",
-		"category": "physical",
-		"power": 40,
-		"pp": 30,
-		"target": "single",
-		"accuracy": 100
-	},
 	"metal_claw": {
 		"id": "metal_claw",
 		"name": "Metal Claw",
@@ -23473,6 +25132,28 @@ var ABILITIES_DATA = {
 		"pp": 10,
 		"target": "single",
 		"accuracy": 85
+	},
+	"dynamic_punch": {
+		"id": "dynamic_punch",
+		"name": "Dynamic Punch",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 100,
+		"pp": 5,
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 100,
+		"accuracy": 50
+	},
+	"circle_throw": {
+		"id": "circle_throw",
+		"name": "Circle Throw",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 60,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 90
 	},
 	"acid_spray": {
 		"id": "acid_spray",
@@ -23718,6 +25399,27 @@ var ABILITIES_DATA = {
 		"statTarget": "self",
 		"accuracy": 100
 	},
+	"spike_cannon": {
+		"id": "spike_cannon",
+		"name": "Spike Cannon",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 20,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
+	"icicle_crash": {
+		"id": "icicle_crash",
+		"name": "Icicle Crash",
+		"type": "ICE",
+		"category": "physical",
+		"power": 85,
+		"pp": 10,
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 90
+	},
 	"crabhammer": {
 		"id": "crabhammer",
 		"name": "Crabhammer",
@@ -23861,6 +25563,16 @@ var ABILITIES_DATA = {
 		"statTarget": "self",
 		"accuracy": 100
 	},
+	"spotlight": {
+		"id": "spotlight",
+		"name": "Spotlight",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
 	"hyper_beam": {
 		"id": "hyper_beam",
 		"name": "Hyper Beam",
@@ -23882,6 +25594,77 @@ var ABILITIES_DATA = {
 		"status": "sleep",
 		"statusChance": 100,
 		"accuracy": 55
+	},
+	"sand_attack": {
+		"id": "sand_attack",
+		"name": "Sand Attack",
+		"type": "GROUND",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
+	"baby_doll_eyes": {
+		"id": "baby_doll_eyes",
+		"name": "Baby-Doll Eyes",
+		"type": "FAIRY",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
+	},
+	"acid_armor": {
+		"id": "acid_armor",
+		"name": "Acid Armor",
+		"type": "POISON",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 2
+		}],
+		"statChance": 100,
+		"statTarget": "self",
+		"accuracy": 100
+	},
+	"haze": {
+		"id": "haze",
+		"name": "Haze",
+		"type": "ICE",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single",
+		"accuracy": 100
+	},
+	"muddy_water": {
+		"id": "muddy_water",
+		"name": "Muddy Water",
+		"type": "WATER",
+		"category": "special",
+		"power": 90,
+		"pp": 10,
+		"target": "aoe",
+		"accuracy": 85
+	},
+	"last_resort": {
+		"id": "last_resort",
+		"name": "Last Resort",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 140,
+		"pp": 5,
+		"target": "single",
+		"accuracy": 100
 	},
 	"electro_ball": {
 		"id": "electro_ball",
@@ -23938,25 +25721,15 @@ var ABILITIES_DATA = {
 		"target": "aoe",
 		"accuracy": 100
 	},
-	"haze": {
-		"id": "haze",
-		"name": "Haze",
-		"type": "ICE",
-		"category": "status",
+	"trump_card": {
+		"id": "trump_card",
+		"name": "Trump Card",
+		"type": "NORMAL",
+		"category": "special",
 		"power": 0,
-		"pp": 30,
+		"pp": 5,
 		"target": "single",
 		"accuracy": 100
-	},
-	"muddy_water": {
-		"id": "muddy_water",
-		"name": "Muddy Water",
-		"type": "WATER",
-		"category": "special",
-		"power": 90,
-		"pp": 10,
-		"target": "aoe",
-		"accuracy": 85
 	},
 	"destiny_bond": {
 		"id": "destiny_bond",
@@ -23975,16 +25748,6 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single",
-		"accuracy": 100
-	},
-	"spike_cannon": {
-		"id": "spike_cannon",
-		"name": "Spike Cannon",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 20,
-		"pp": 15,
 		"target": "single",
 		"accuracy": 100
 	},
@@ -24030,16 +25793,6 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single",
-		"accuracy": 100
-	},
-	"sand_attack": {
-		"id": "sand_attack",
-		"name": "Sand Attack",
-		"type": "GROUND",
-		"category": "status",
-		"power": 0,
-		"pp": 15,
 		"target": "single",
 		"accuracy": 100
 	},
@@ -24269,21 +26022,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"baby_doll_eyes": {
-		"id": "baby_doll_eyes",
-		"name": "Baby-Doll Eyes",
-		"type": "FAIRY",
-		"category": "status",
-		"power": 0,
-		"pp": 30,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": -1
-		}],
-		"statChance": 100,
-		"accuracy": 100
-	},
 	"charm": {
 		"id": "charm",
 		"name": "Charm",
@@ -24297,26 +26035,6 @@ var ABILITIES_DATA = {
 			"estagios": -2
 		}],
 		"statChance": 100,
-		"accuracy": 100
-	},
-	"last_resort": {
-		"id": "last_resort",
-		"name": "Last Resort",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 140,
-		"pp": 5,
-		"target": "single",
-		"accuracy": 100
-	},
-	"trump_card": {
-		"id": "trump_card",
-		"name": "Trump Card",
-		"type": "NORMAL",
-		"category": "special",
-		"power": 0,
-		"pp": 5,
-		"target": "single",
 		"accuracy": 100
 	},
 	"conversion": {
@@ -24761,17 +26479,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"wood_hammer": {
-		"id": "wood_hammer",
-		"name": "Wood Hammer",
-		"type": "GRASS",
-		"category": "physical",
-		"power": 120,
-		"pp": 15,
-		"target": "single",
-		"drainPercent": -33,
-		"accuracy": 100
-	},
 	"low_kick": {
 		"id": "low_kick",
 		"name": "Low Kick",
@@ -25114,6 +26821,16 @@ var ABILITIES_DATA = {
 		"statusChance": 10,
 		"accuracy": 100
 	},
+	"double_kick": {
+		"id": "double_kick",
+		"name": "Double Kick",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 30,
+		"pp": 30,
+		"target": "single",
+		"accuracy": 100
+	},
 	"cotton_guard": {
 		"id": "cotton_guard",
 		"name": "Cotton Guard",
@@ -25151,16 +26868,6 @@ var ABILITIES_DATA = {
 		"status": "poison",
 		"statusChance": 30,
 		"accuracy": 80
-	},
-	"double_kick": {
-		"id": "double_kick",
-		"name": "Double Kick",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 30,
-		"pp": 30,
-		"target": "single",
-		"accuracy": 100
 	},
 	"flatter": {
 		"id": "flatter",
@@ -25233,22 +26940,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"status": "poison",
 		"statusChance": 30,
-		"accuracy": 100
-	},
-	"acid_armor": {
-		"id": "acid_armor",
-		"name": "Acid Armor",
-		"type": "POISON",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"statChanges": [{
-			"stat": "def",
-			"estagios": 2
-		}],
-		"statChance": 100,
-		"statTarget": "self",
 		"accuracy": 100
 	},
 	"venom_drench": {
@@ -25352,18 +27043,6 @@ var ABILITIES_DATA = {
 		"statTarget": "self",
 		"accuracy": 100
 	},
-	"dynamic_punch": {
-		"id": "dynamic_punch",
-		"name": "Dynamic Punch",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 100,
-		"pp": 5,
-		"target": "single",
-		"status": "confusion",
-		"statusChance": 100,
-		"accuracy": 50
-	},
 	"strength": {
 		"id": "strength",
 		"name": "Strength",
@@ -25434,6 +27113,16 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 75
 	},
+	"bullet_punch": {
+		"id": "bullet_punch",
+		"name": "Bullet Punch",
+		"type": "STEEL",
+		"category": "physical",
+		"power": 40,
+		"pp": 30,
+		"target": "single",
+		"accuracy": 100
+	},
 	"ice_punch": {
 		"id": "ice_punch",
 		"name": "Ice Punch",
@@ -25455,6 +27144,16 @@ var ABILITIES_DATA = {
 		"pp": 20,
 		"target": "single",
 		"accuracy": 100
+	},
+	"triple_kick": {
+		"id": "triple_kick",
+		"name": "Triple Kick",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 10,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 90
 	},
 	"lovely_kiss": {
 		"id": "lovely_kiss",
@@ -25577,6 +27276,16 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
+	"after_you": {
+		"id": "after_you",
+		"name": "After You",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
 	"kinesis": {
 		"id": "kinesis",
 		"name": "Kinesis",
@@ -25617,14 +27326,15 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"psyshock": {
-		"id": "psyshock",
-		"name": "Psyshock",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 80,
-		"pp": 10,
+	"morning_sun": {
+		"id": "morning_sun",
+		"name": "Morning Sun",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
 		"target": "single",
+		"healPercent": 50,
 		"accuracy": 100
 	},
 	"hidden_power": {
@@ -25794,15 +27504,30 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 90
 	},
-	"after_you": {
-		"id": "after_you",
-		"name": "After You",
-		"type": "NORMAL",
+	"gravity": {
+		"id": "gravity",
+		"name": "Gravity",
+		"type": "PSYCHIC",
 		"category": "status",
 		"power": 0,
-		"pp": 15,
+		"pp": 5,
 		"target": "single",
 		"accuracy": 100
+	},
+	"meteor_mash": {
+		"id": "meteor_mash",
+		"name": "Meteor Mash",
+		"type": "STEEL",
+		"category": "physical",
+		"power": 90,
+		"pp": 10,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}],
+		"statChance": 20,
+		"accuracy": 90
 	}
 };
 var TURNO_SEGUNDOS = createFormulaEngine(FORMULAS).eval("TURNO_SEGUNDOS");
@@ -26040,6 +27765,72 @@ var CLIMA_DO_GOLPE = {
 	hail: "granizo",
 	sandstorm: "areia"
 };
+/**
+* Acerto GARANTIDO no clima certo, ignorando precisao, evasao e neblina.
+*
+* E o unico caso em que o x0,6 da neblina nao se aplica: nos jogos, golpe que
+* pula a checagem de precisao pula TUDO que mexe nela.
+*/
+var GOLPE_NUNCA_ERRA_NO_CLIMA = {
+	thunder: ["chuva"],
+	hurricane: ["chuva"],
+	blizzard: ["granizo", "neve"]
+};
+/** Precisao FIXA no clima certo, substituindo a do catalogo. */
+var PRECISAO_DO_GOLPE_NO_CLIMA = {
+	thunder: {
+		climas: ["sol"],
+		precisao: 50
+	},
+	hurricane: {
+		climas: ["sol"],
+		precisao: 50
+	}
+};
+/**
+* Weather Ball: muda de TIPO e DOBRA de forca conforme o clima.
+*
+* A descricao na Wiki ja prometia isso; o motor nunca cumpriu. Na neblina o
+* golpe fica NORMAL e NAO dobra — e a unica entrada que existe pra dizer
+* "clima presente, mas sem bonus".
+*/
+var WEATHER_BALL_POR_CLIMA = {
+	chuva: {
+		tipo: "WATER",
+		dobra: true
+	},
+	sol: {
+		tipo: "FIRE",
+		dobra: true
+	},
+	granizo: {
+		tipo: "ICE",
+		dobra: true
+	},
+	neve: {
+		tipo: "ICE",
+		dobra: true
+	},
+	areia: {
+		tipo: "ROCK",
+		dobra: true
+	},
+	nevoa: {
+		tipo: "NORMAL",
+		dobra: false
+	}
+};
+/**
+* Cura que depende do clima (Moonlight, Synthesis).
+*
+* Nos jogos: 2/3 do HP maximo no sol, 1/2 com ceu limpo, 1/4 em qualquer outro
+* clima. O `healPercent` do catalogo (50) e o caso de ceu limpo, entao a regra
+* aqui e um MULTIPLICADOR sobre ele — assim o dado gerado continua sendo a
+* fonte do numero base.
+*/
+var CURA_SENSIVEL_AO_CLIMA = /* @__PURE__ */ new Set(["moonlight", "synthesis"]);
+var CURA_NO_SOL = 4 / 3;
+var CURA_EM_CLIMA_RUIM = .5;
 var STAB_MULTIPLIER$1 = createFormulaEngine(FORMULAS).eval("STAB_MULTIPLIER");
 /**
 * O nivel em que o POKE passa a poder usar cada golpe.
@@ -26223,23 +28014,34 @@ for (const species of Object.values(SPECIES)) species.abilities = [...species.ab
 	key: typedAoeMoveKey(species.type),
 	levelReq: 50
 }];
-for (const [fromId, toId] of Object.entries({
-	kadabra: "alakazam",
-	machoke: "machamp",
-	haunter: "gengar",
-	graveler: "golem",
-	onix: "steelix",
-	scyther: "scizor",
-	seadra: "kingdra",
-	poliwhirl: "politoed",
-	porygon: "porygon2"
-})) {
-	const from = SPECIES[fromId];
-	if (from && SPECIES[toId] && !from.evolvesTo) {
-		from.evolvesTo = toId;
-		from.evolvesAtLevel = 80;
-		from.isSpecialEvolution = true;
+for (const species of Object.values(SPECIES)) {
+	const opcoes = (species.evolutionOptions ?? []).filter((o) => SPECIES[o.to]);
+	if (!opcoes.length) {
+		delete species.evolutionOptions;
+		species.evolvesTo = null;
+		species.evolvesAtLevel = null;
+		continue;
 	}
+	species.evolutionOptions = opcoes;
+	species.evolvesTo = opcoes[0].to;
+	species.evolvesAtLevel = opcoes[0].atLevel;
+	species.isSpecialEvolution = opcoes[0].isSpecial;
+}
+/**
+* Os destinos de evolucao de uma especie, sempre como lista.
+*
+* Especie sem ramo devolve o destino unico; sem evolucao nenhuma devolve vazio.
+* Todo leitor novo usa isto — ler `evolvesTo` direto continua funcionando, mas
+* enxerga so o primeiro caminho.
+*/
+function opcoesDeEvolucao(species) {
+	if (species.evolutionOptions?.length) return species.evolutionOptions;
+	if (species.evolvesTo && species.evolvesAtLevel != null) return [{
+		to: species.evolvesTo,
+		atLevel: species.evolvesAtLevel,
+		isSpecial: species.isSpecialEvolution === true
+	}];
+	return [];
 }
 var SHINY_STAT_MULTIPLIER = 1.5;
 function computeStatsAtLevel(species, level, ivs, rarityKey, isShiny, nature) {
@@ -29727,6 +31529,8 @@ var SUB_BIOMA_ESPECIES = {
 		"gastly",
 		"haunter",
 		"gengar",
+		"crobat",
+		"umbreon",
 		"misdreavus",
 		"dunsparce",
 		"houndour",
@@ -29752,9 +31556,11 @@ var SUB_BIOMA_ESPECIES = {
 	],
 	"beach": [
 		"shellder",
+		"cloyster",
 		"krabby",
 		"kingler",
-		"staryu"
+		"staryu",
+		"starmie"
 	],
 	"cave": [
 		"zubat",
@@ -29765,6 +31571,7 @@ var SUB_BIOMA_ESPECIES = {
 		"graveler",
 		"golem",
 		"onix",
+		"crobat",
 		"steelix",
 		"teddiursa",
 		"ursaring"
@@ -29803,7 +31610,8 @@ var SUB_BIOMA_ESPECIES = {
 		"primeape",
 		"hitmonlee",
 		"hitmonchan",
-		"tyrogue"
+		"tyrogue",
+		"hitmontop"
 	],
 	"factory": [
 		"machop",
@@ -29819,7 +31627,14 @@ var SUB_BIOMA_ESPECIES = {
 		"magby"
 	],
 	"fairy-cave": [
+		"clefairy",
+		"clefable",
 		"jigglypuff",
+		"wigglytuff",
+		"cleffa",
+		"igglybuff",
+		"togepi",
+		"togetic",
 		"marill",
 		"azumarill"
 	],
@@ -29838,6 +31653,7 @@ var SUB_BIOMA_ESPECIES = {
 		"weepinbell",
 		"victreebel",
 		"exeggcute",
+		"exeggutor",
 		"scyther",
 		"hoothoot",
 		"noctowl",
@@ -29878,6 +31694,7 @@ var SUB_BIOMA_ESPECIES = {
 		"dewgong",
 		"jynx",
 		"lapras",
+		"slowking",
 		"sneasel",
 		"swinub",
 		"piloswine",
@@ -29886,6 +31703,7 @@ var SUB_BIOMA_ESPECIES = {
 	],
 	"jungle": [
 		"exeggcute",
+		"exeggutor",
 		"tangela",
 		"kangaskhan",
 		"scyther",
@@ -29915,18 +31733,22 @@ var SUB_BIOMA_ESPECIES = {
 		"seaking",
 		"magikarp",
 		"gyarados",
+		"vaporeon",
 		"marill",
 		"azumarill",
 		"wooper",
-		"quagsire"
+		"quagsire",
+		"slowking"
 	],
 	"meadow": [
 		"jigglypuff",
+		"wigglytuff",
 		"ponyta",
 		"rapidash",
 		"tauros",
 		"ledyba",
 		"ledian",
+		"igglybuff",
 		"mareep",
 		"flaaffy",
 		"ampharos",
@@ -29938,7 +31760,9 @@ var SUB_BIOMA_ESPECIES = {
 		"rattata",
 		"raticate",
 		"pikachu",
+		"raichu",
 		"ditto",
+		"pichu",
 		"houndour",
 		"houndoom",
 		"smeargle"
@@ -29974,6 +31798,7 @@ var SUB_BIOMA_ESPECIES = {
 		"spearow",
 		"fearow",
 		"pikachu",
+		"raichu",
 		"zubat",
 		"golbat",
 		"meowth",
@@ -29991,15 +31816,20 @@ var SUB_BIOMA_ESPECIES = {
 		"snorlax",
 		"sentret",
 		"furret",
+		"crobat",
+		"pichu",
 		"dunsparce"
 	],
 	"power-plant": [
 		"pikachu",
+		"raichu",
 		"magnemite",
 		"magneton",
 		"voltorb",
 		"electrode",
 		"electabuzz",
+		"jolteon",
+		"pichu",
 		"mareep",
 		"flaaffy",
 		"ampharos",
@@ -30013,34 +31843,38 @@ var SUB_BIOMA_ESPECIES = {
 		"hypno",
 		"natu",
 		"xatu",
+		"espeon",
 		"unown",
 		"wobbuffet"
 	],
 	"sea": [
 		"poliwag",
 		"poliwhirl",
+		"poliwrath",
 		"tentacool",
 		"tentacruel",
 		"slowpoke",
 		"slowbro",
 		"shellder",
+		"cloyster",
 		"horsea",
 		"seadra",
 		"goldeen",
 		"seaking",
 		"staryu",
+		"starmie",
 		"magikarp",
 		"gyarados",
 		"lapras",
 		"chinchou",
 		"lanturn",
-		"politoed",
 		"kingdra"
 	],
 	"seabed": [
 		"tentacool",
 		"tentacruel",
 		"shellder",
+		"cloyster",
 		"omanyte",
 		"omastar",
 		"kabuto",
@@ -30078,7 +31912,13 @@ var SUB_BIOMA_ESPECIES = {
 		"delibird",
 		"stantler"
 	],
-	"space": ["staryu", "cleffa"],
+	"space": [
+		"clefairy",
+		"clefable",
+		"staryu",
+		"starmie",
+		"cleffa"
+	],
 	"swamp": [
 		"ekans",
 		"arbok",
@@ -30086,6 +31926,7 @@ var SUB_BIOMA_ESPECIES = {
 		"golduck",
 		"poliwag",
 		"poliwhirl",
+		"poliwrath",
 		"totodile",
 		"croconaw",
 		"feraligatr",
@@ -30102,6 +31943,7 @@ var SUB_BIOMA_ESPECIES = {
 		"nidoking",
 		"oddish",
 		"gloom",
+		"vileplume",
 		"paras",
 		"parasect",
 		"venonat",
@@ -30113,6 +31955,7 @@ var SUB_BIOMA_ESPECIES = {
 		"meganium",
 		"spinarak",
 		"ariados",
+		"bellossom",
 		"girafarig",
 		"scizor"
 	],
@@ -30141,12 +31984,21 @@ var SUB_BIOMA_ESPECIES = {
 		"fearow",
 		"ekans",
 		"arbok",
+		"pikachu",
+		"raichu",
 		"nidoran_f",
 		"nidorina",
+		"nidoqueen",
 		"nidoran_m",
 		"nidorino",
+		"nidoking",
+		"clefairy",
+		"clefable",
+		"jigglypuff",
+		"wigglytuff",
 		"oddish",
 		"gloom",
+		"vileplume",
 		"paras",
 		"parasect",
 		"venonat",
@@ -30158,6 +32010,7 @@ var SUB_BIOMA_ESPECIES = {
 		"alakazam",
 		"bellsprout",
 		"weepinbell",
+		"victreebel",
 		"ditto",
 		"sentret",
 		"furret",
@@ -30171,6 +32024,7 @@ var SUB_BIOMA_ESPECIES = {
 		"cleffa",
 		"igglybuff",
 		"togepi",
+		"togetic",
 		"hoppip",
 		"skiploom",
 		"jumpluff",
@@ -30185,6 +32039,7 @@ var SUB_BIOMA_ESPECIES = {
 		"ponyta",
 		"rapidash",
 		"magmar",
+		"flareon",
 		"cyndaquil",
 		"quilava",
 		"typhlosion",
@@ -30201,6 +32056,107 @@ var SUB_BIOMA_ESPECIES = {
 		"pupitar",
 		"tyranitar"
 	]
+};
+/**
+* Grafo de vizinhanca do PokeRogue: peso `n` = 1/n de chance de o vizinho
+* APARECER como opcao (depois ele sorteia uniforme entre as que apareceram).
+*
+* NAO e usado pelo jogo hoje. Fica guardado porque e a fundacao do modo
+* Expedicao, e o parser que extrai isso ja esta escrito.
+*/
+/**
+* Pesos de clima de cada sub-bioma (PH-140), do `weatherPool` do PokeRogue.
+* Sorteado UMA vez ao entrar na sala; `limpo` e um resultado como outro
+* qualquer, nao a ausencia de tabela.
+*
+* E o unico dado de PROBABILIDADE de clima que existe: os jogos principais
+* fixam o clima por rota (Rota 119 sempre chove) e nunca sortearam nada.
+*/
+var SUB_BIOMA_CLIMA = {
+	"abyss": { limpo: 1 },
+	"badlands": {
+		limpo: 8,
+		areia: 2,
+		sol: 5
+	},
+	"beach": {
+		limpo: 8,
+		chuva: 3,
+		sol: 5
+	},
+	"cave": { limpo: 1 },
+	"construction-site": { limpo: 1 },
+	"desert": {
+		limpo: 2,
+		areia: 8,
+		sol: 5
+	},
+	"dojo": { limpo: 1 },
+	"factory": { limpo: 1 },
+	"fairy-cave": { limpo: 1 },
+	"forest": {
+		limpo: 8,
+		chuva: 4
+	},
+	"grass": {
+		limpo: 8,
+		chuva: 4,
+		sol: 8
+	},
+	"graveyard": {
+		limpo: 3,
+		nevoa: 1
+	},
+	"ice-cave": {
+		limpo: 3,
+		neve: 4,
+		granizo: 1
+	},
+	"jungle": {
+		limpo: 8,
+		chuva: 6,
+		nevoa: 1
+	},
+	"laboratory": { limpo: 1 },
+	"lake": {
+		limpo: 10,
+		chuva: 4,
+		nevoa: 1
+	},
+	"meadow": {
+		limpo: 3,
+		sol: 5
+	},
+	"metropolis": { limpo: 1 },
+	"mountain": { limpo: 1 },
+	"plains": { limpo: 1 },
+	"power-plant": { limpo: 1 },
+	"ruins": { limpo: 1 },
+	"sea": {
+		limpo: 3,
+		chuva: 12
+	},
+	"seabed": { chuva: 1 },
+	"slum": { limpo: 1 },
+	"snowy-forest": {
+		neve: 7,
+		granizo: 1
+	},
+	"space": { limpo: 1 },
+	"swamp": {
+		limpo: 3,
+		chuva: 4,
+		nevoa: 1
+	},
+	"tall-grass": {
+		limpo: 8,
+		chuva: 4,
+		sol: 4
+	},
+	"temple": { limpo: 1 },
+	"town": { limpo: 1 },
+	"volcano": { sol: 1 },
+	"wasteland": { limpo: 1 }
 };
 //#endregion
 //#region src/data/generated/spawnTiers.generated.ts
@@ -30761,7 +32717,7 @@ var TRAINING_MAP = {
 //#endregion
 //#region src/data/evolutionStage.ts
 var PRE_EVOLUCAO$1 = {};
-for (const especie of Object.values(SPECIES)) if (especie.evolvesTo && SPECIES[especie.evolvesTo]) PRE_EVOLUCAO$1[especie.evolvesTo] = especie.id;
+for (const especie of Object.values(SPECIES)) for (const opcao of opcoesDeEvolucao(especie)) if (SPECIES[opcao.to]) PRE_EVOLUCAO$1[opcao.to] = especie.id;
 var PROFUNDIDADE_MAXIMA = 10;
 var CACHE = {};
 /** 1 = forma base, 2 = primeira evolucao, 3+ = segunda evolucao em diante. */
@@ -30857,8 +32813,21 @@ var STARTER_LEVEL_WEIGHTS = [{
 var DEFAULT_WEIGHT = 10;
 var PRE_EVOLUCAO = {};
 for (const especie of Object.values(SPECIES)) if (especie.evolvesTo && SPECIES[especie.evolvesTo]) PRE_EVOLUCAO[especie.evolvesTo] = especie.id;
-function primeiroNivelDaZona(zona) {
-	return (FAIXAS$1.find((f) => zona <= f.zonaMaxima) ?? FAIXAS$1[FAIXAS$1.length - 1]).niveis[0];
+/**
+* Em que FAIXA uma zona minima cai — o indice, nao a faixa, porque quem chama
+* precisa poder pedir "a seguinte".
+*
+* Zona acima de toda `zonaMaxima` devolve o indice da ultima faixa: e o topo do
+* jogo, nao ha mais pra onde empurrar.
+*/
+function indiceDeFaixa(zona) {
+	const i = FAIXAS$1.findIndex((f) => zona <= f.zonaMaxima);
+	return i === -1 ? FAIXAS$1.length - 1 : i;
+}
+/** A faixa que contem este nivel. Nivel acima da ultima cai na ultima. */
+function indiceDeFaixaPorNivel(nivel) {
+	const i = FAIXAS$1.findIndex((f) => nivel <= f.niveis[1]);
+	return i === -1 ? FAIXAS$1.length - 1 : i;
 }
 /**
 * A partir de que nivel `speciesId` deixa de ser o estagio correto da linha.
@@ -30872,11 +32841,17 @@ function primeiroNivelDaZona(zona) {
 * forma evoluida aparece a partir da primeira faixa que a zona minima dela
 * alcanca.
 */
-function nivelDeTroca(speciesId) {
+function nivelDeTroca(speciesId, desde) {
 	const especie = SPECIES[speciesId];
 	const alvo = especie?.evolvesTo;
 	if (!alvo || !SPECIES[alvo]) return null;
-	if (especie.isSpecialEvolution) return primeiroNivelDaZona(Math.max(zonaMinimaDaEspecie(alvo), zonaMinimaDaEspecie(speciesId) + 1));
+	if (especie.isSpecialEvolution) {
+		const daOrigem = Math.max(indiceDeFaixaPorNivel(desde), indiceDeFaixa(zonaMinimaDaEspecie(speciesId)));
+		const doAlvo = indiceDeFaixa(zonaMinimaDaEspecie(alvo));
+		const indice = Math.max(doAlvo, daOrigem + 1);
+		if (indice >= FAIXAS$1.length) return null;
+		return FAIXAS$1[indice].niveis[0];
+	}
 	return especie.evolvesAtLevel ?? null;
 }
 /** Raizes das linhas evolutivas presentes em `especies`, sem duplicar. */
@@ -30904,7 +32879,7 @@ function trechosDaLinha(raiz, faixa, elenco) {
 	let atual = raiz;
 	let desde = 1;
 	for (let i = 0; i < 10 && atual; i++) {
-		const troca = nivelDeTroca(atual);
+		const troca = nivelDeTroca(atual, desde);
 		const ate = troca == null ? Number.POSITIVE_INFINITY : troca - 1;
 		const min = Math.max(lo, desde);
 		const max = Math.min(hi, ate);
@@ -32025,7 +34000,26 @@ var FOOT_OFFSET_FRACTION = {
 	politoed: .078,
 	golem: .125,
 	porygon2: .125,
-	scizor: .125
+	scizor: .125,
+	vileplume: .125,
+	bellossom: .219,
+	exeggutor: .089,
+	poliwrath: .104,
+	slowking: .104,
+	cloyster: .125,
+	starmie: .125,
+	wigglytuff: .104,
+	vaporeon: .125,
+	jolteon: .175,
+	flareon: .15,
+	espeon: .125,
+	umbreon: .146,
+	raichu: .089,
+	crobat: -.071,
+	hitmontop: .089,
+	clefairy: .125,
+	togetic: .104,
+	clefable: .104
 };
 var DEFAULT_FRACTION = .15;
 function footOffsetFraction(speciesId) {
@@ -32337,8 +34331,87 @@ var NEIGHBORS = [
 function tetoDeExpansoes(grid) {
 	return grid.length * grid[0].length * 2;
 }
-function cellKey(col, row) {
-	return `${col},${row}`;
+var HeapDeCelulas = class {
+	celula = [];
+	f = [];
+	ordem = [];
+	tamanho = 0;
+	get vazio() {
+		return this.tamanho === 0;
+	}
+	limpar() {
+		this.tamanho = 0;
+	}
+	/** `ordem` e o desempate: menor primeiro, igual a ordem de iteracao do Map. */
+	inserir(celula, f, ordem) {
+		let i = this.tamanho++;
+		this.celula[i] = celula;
+		this.f[i] = f;
+		this.ordem[i] = ordem;
+		while (i > 0) {
+			const pai = i - 1 >> 1;
+			if (!this.menor(i, pai)) break;
+			this.trocar(i, pai);
+			i = pai;
+		}
+	}
+	/** Remove e devolve a celula de menor (f, ordem). `-1` quando vazio. */
+	remover() {
+		if (this.tamanho === 0) return -1;
+		const topo = this.celula[0];
+		this.tamanho -= 1;
+		if (this.tamanho > 0) {
+			this.celula[0] = this.celula[this.tamanho];
+			this.f[0] = this.f[this.tamanho];
+			this.ordem[0] = this.ordem[this.tamanho];
+			let i = 0;
+			for (;;) {
+				const esq = i * 2 + 1;
+				const dir = esq + 1;
+				let menor = i;
+				if (esq < this.tamanho && this.menor(esq, menor)) menor = esq;
+				if (dir < this.tamanho && this.menor(dir, menor)) menor = dir;
+				if (menor === i) break;
+				this.trocar(i, menor);
+				i = menor;
+			}
+		}
+		return topo;
+	}
+	menor(a, b) {
+		if (this.f[a] !== this.f[b]) return this.f[a] < this.f[b];
+		return this.ordem[a] < this.ordem[b];
+	}
+	trocar(a, b) {
+		let t = this.celula[a];
+		this.celula[a] = this.celula[b];
+		this.celula[b] = t;
+		t = this.f[a];
+		this.f[a] = this.f[b];
+		this.f[b] = t;
+		t = this.ordem[a];
+		this.ordem[a] = this.ordem[b];
+		this.ordem[b] = t;
+	}
+};
+var heap = new HeapDeCelulas();
+var gScore = /* @__PURE__ */ new Float64Array(0);
+var cameFrom = /* @__PURE__ */ new Int32Array(0);
+var ordemDeEntrada = /* @__PURE__ */ new Int32Array(0);
+var visitadoEm = /* @__PURE__ */ new Int32Array(0);
+var fechadoEm = /* @__PURE__ */ new Int32Array(0);
+var buscaAtual = 0;
+function prepararEstado(celulas) {
+	if (gScore.length < celulas) {
+		gScore = new Float64Array(celulas);
+		cameFrom = new Int32Array(celulas);
+		ordemDeEntrada = new Int32Array(celulas);
+		visitadoEm = new Int32Array(celulas);
+		fechadoEm = new Int32Array(celulas);
+		buscaAtual = 0;
+	}
+	buscaAtual += 1;
+	heap.limpar();
 }
 function isBlocked(grid, col, row, circle) {
 	if (row < 0 || row >= grid.length || col < 0 || col >= grid[0].length) return true;
@@ -32353,21 +34426,19 @@ function isBlocked(grid, col, row, circle) {
 function heuristic(col, row, goalCol, goalRow) {
 	return Math.hypot(goalCol - col, goalRow - row);
 }
-function reconstructPath(cameFrom, goalKey, startKey) {
-	const cellPath = [];
-	let key = goalKey;
-	while (key && key !== startKey) {
-		cellPath.push(key);
-		key = cameFrom.get(key);
+function reconstruirRota(destino, inicio, colunas) {
+	const celulas = [];
+	let celula = destino;
+	while (celula !== inicio && celula >= 0) {
+		celulas.push(celula);
+		celula = cameFrom[celula];
 	}
-	cellPath.reverse();
-	return cellPath.map((k) => {
-		const [col, row] = k.split(",").map(Number);
-		return {
-			x: col * 20 + 10,
-			y: row * 20 + 10
-		};
-	});
+	celulas.reverse();
+	const meio = 10;
+	return celulas.map((c) => ({
+		x: c % colunas * 20 + meio,
+		y: Math.floor(c / colunas) * 20 + meio
+	}));
 }
 function findPath(mapDef, startX, startY, goalX, goalY) {
 	const grid = mapDef.collisionGrid;
@@ -32383,41 +34454,51 @@ function findPath(mapDef, startX, startY, goalX, goalY) {
 	const goalCol = toCol(goalX), goalRow = toRow(goalY);
 	if (startCol === goalCol && startRow === goalRow) return [];
 	if (isBlocked(grid, goalCol, goalRow, circle)) return null;
-	const startKey = cellKey(startCol, startRow);
-	const goalKey = cellKey(goalCol, goalRow);
-	const cameFrom = /* @__PURE__ */ new Map();
-	const gScore = /* @__PURE__ */ new Map([[startKey, 0]]);
-	const open = /* @__PURE__ */ new Map([[startKey, heuristic(startCol, startRow, goalCol, goalRow)]]);
-	const closed = /* @__PURE__ */ new Set();
+	const colunas = grid[0].length;
+	const inicio = startRow * colunas + startCol;
+	const destino = goalRow * colunas + goalCol;
+	prepararEstado(grid.length * colunas);
+	const selo = buscaAtual;
+	gScore[inicio] = 0;
+	visitadoEm[inicio] = selo;
+	cameFrom[inicio] = -1;
+	let proximaOrdem = 0;
+	ordemDeEntrada[inicio] = proximaOrdem++;
+	heap.inserir(inicio, heuristic(startCol, startRow, goalCol, goalRow), ordemDeEntrada[inicio]);
 	const maxExpansions = tetoDeExpansoes(grid);
 	let expansions = 0;
-	while (open.size > 0) {
+	while (!heap.vazio) {
+		const atual = heap.remover();
+		if (fechadoEm[atual] === selo) continue;
 		if (++expansions > maxExpansions) return null;
-		let currentKey = null;
-		let bestF = Infinity;
-		for (const [key, f] of open) if (f < bestF) {
-			bestF = f;
-			currentKey = key;
+		if (atual === destino) {
+			const rota = reconstruirRota(destino, inicio, colunas);
+			if (rota.length > 0) rota[rota.length - 1] = {
+				x: goalX,
+				y: goalY
+			};
+			return rota;
 		}
-		if (!currentKey) break;
-		open.delete(currentKey);
-		if (currentKey === goalKey) return reconstructPath(cameFrom, goalKey, startKey).map((wp, i, arr) => i === arr.length - 1 ? {
-			x: goalX,
-			y: goalY
-		} : wp);
-		closed.add(currentKey);
-		const [curCol, curRow] = currentKey.split(",").map(Number);
+		fechadoEm[atual] = selo;
+		const curCol = atual % colunas;
+		const curRow = (atual - curCol) / colunas;
+		const gAtual = gScore[atual];
 		for (const [dc, dr] of NEIGHBORS) {
 			const nCol = curCol + dc, nRow = curRow + dr;
-			const nKey = cellKey(nCol, nRow);
-			if (closed.has(nKey) || isBlocked(grid, nCol, nRow, circle)) continue;
+			if (isBlocked(grid, nCol, nRow, circle)) continue;
+			const vizinho = nRow * colunas + nCol;
+			if (fechadoEm[vizinho] === selo) continue;
 			if (dc !== 0 && dr !== 0 && (isBlocked(grid, curCol + dc, curRow, circle) || isBlocked(grid, curCol, curRow + dr, circle))) continue;
-			const stepCost = dc !== 0 && dr !== 0 ? Math.SQRT2 : 1;
-			const tentativeG = (gScore.get(currentKey) ?? Infinity) + stepCost;
-			if (tentativeG < (gScore.get(nKey) ?? Infinity)) {
-				cameFrom.set(nKey, currentKey);
-				gScore.set(nKey, tentativeG);
-				open.set(nKey, tentativeG + heuristic(nCol, nRow, goalCol, goalRow));
+			const tentativeG = gAtual + (dc !== 0 && dr !== 0 ? Math.SQRT2 : 1);
+			const novo = visitadoEm[vizinho] !== selo;
+			if (novo || tentativeG < gScore[vizinho]) {
+				if (novo) {
+					visitadoEm[vizinho] = selo;
+					ordemDeEntrada[vizinho] = proximaOrdem++;
+				}
+				cameFrom[vizinho] = atual;
+				gScore[vizinho] = tentativeG;
+				heap.inserir(vizinho, tentativeG + heuristic(nCol, nRow, goalCol, goalRow), ordemDeEntrada[vizinho]);
 			}
 		}
 	}
@@ -32636,36 +34717,47 @@ var TRAIT_IMUNE_A_DANO_DE_CLIMA = /* @__PURE__ */ new Set([
 	"overcoat",
 	"magic_guard"
 ]);
-/** Fracao do HP MAXIMO curada por turno no clima certo. */
+/**
+* Fracao do HP MAXIMO curada por turno no clima certo.
+*
+* LISTA de climas, e nao um so (PH-140): Ice Body cura tanto no GRANIZO quanto
+* na NEVE, e nos jogos e a mesma habilidade — a Gen 9 trocou o clima de gelo e
+* levou junto tudo que dependia dele. Um campo unico obrigaria a escolher um
+* dos dois e deixaria o outro em silencio.
+*/
 var CURA_POR_CLIMA = {
 	rain_dish: {
-		clima: "chuva",
+		climas: ["chuva"],
 		fracao: 1 / 16
 	},
 	ice_body: {
-		clima: "granizo",
+		climas: ["granizo", "neve"],
 		fracao: 1 / 16
 	},
 	dry_skin: {
-		clima: "chuva",
+		climas: ["chuva"],
 		fracao: 1 / 8
 	}
 };
 /** Fracao do HP MAXIMO PERDIDA por turno no clima certo. */
 var DANO_POR_CLIMA = {
 	dry_skin: {
-		clima: "sol",
+		climas: ["sol"],
 		fracao: 1 / 8
 	},
 	solar_power: {
-		clima: "sol",
+		climas: ["sol"],
 		fracao: 1 / 8
 	}
 };
-/** Evasao 1.25x no clima certo (o que reduz a precisao de quem ataca). */
+/**
+* Evasao 1.25x no clima certo (o que reduz a precisao de quem ataca).
+*
+* Snow Cloak vale nos DOIS climas de gelo, pelo mesmo motivo do Ice Body.
+*/
 var EVASAO_POR_CLIMA = {
-	sand_veil: "areia",
-	snow_cloak: "granizo"
+	sand_veil: ["areia"],
+	snow_cloak: ["granizo", "neve"]
 };
 /** Cloud Nine / Air Lock: o clima continua no campo, mas nao surte efeito. */
 var TRAIT_ANULA_CLIMA = /* @__PURE__ */ new Set(["cloud_nine", "air_lock"]);
@@ -33227,9 +35319,9 @@ function tickStatus(rng, entity, dt, clima = null) {
 		const especie = SPECIES[entity.poke.speciesId];
 		if (!Boolean(traitDaEntidade && TRAIT_IMUNE_A_DANO_DE_CLIMA.has(traitDaEntidade))) dano += danoDeClimaPorTurno(clima, entity.poke.stats.hp, especie.type, especie.type2);
 		const cura = traitDaEntidade ? CURA_POR_CLIMA[traitDaEntidade] : void 0;
-		if (cura && cura.clima === clima) heal(entity, Math.max(1, Math.round(entity.poke.stats.hp * cura.fracao)));
+		if (cura && clima && cura.climas.includes(clima)) heal(entity, Math.max(1, Math.round(entity.poke.stats.hp * cura.fracao)));
 		const custo = traitDaEntidade ? DANO_POR_CLIMA[traitDaEntidade] : void 0;
-		if (custo && custo.clima === clima) dano += Math.max(1, Math.round(entity.poke.stats.hp * custo.fracao));
+		if (custo && clima && custo.climas.includes(clima)) dano += Math.max(1, Math.round(entity.poke.stats.hp * custo.fracao));
 	}
 	if (traitDaEntidade && entity.poke.status) {
 		const curaPorHydration = traitDaEntidade === "hydration" && clima === "chuva";
@@ -48188,6 +50280,1208 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameHeight": 40,
 			"durations": [30, 35]
 		}
+	},
+	"vileplume": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				30,
+				3,
+				3,
+				8,
+				3,
+				3,
+				30,
+				3,
+				3,
+				8,
+				3,
+				3
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [35, 30]
+		}
+	},
+	"bellossom": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				30,
+				8,
+				4,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"exeggutor": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				40,
+				12,
+				8,
+				12
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				8,
+				12
+			]
+		},
+		"Shoot": {
+			"frameWidth": 64,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"poliwrath": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				40,
+				2,
+				4,
+				2
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				1,
+				1,
+				2,
+				2,
+				2,
+				1,
+				1,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"slowking": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				20,
+				8,
+				12,
+				12,
+				8,
+				20,
+				8,
+				12,
+				12,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				10,
+				12,
+				10,
+				12
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"cloyster": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				12,
+				12,
+				12,
+				14,
+				12,
+				12
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				8,
+				10,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				22,
+				15,
+				10,
+				22,
+				15,
+				10
+			]
+		}
+	},
+	"starmie": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				60,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"wigglytuff": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				40,
+				4,
+				6,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [35, 35]
+		}
+	},
+	"vaporeon": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [60, 16]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"jolteon": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [60, 16]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"flareon": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				12,
+				16,
+				12,
+				16
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				6,
+				2,
+				2,
+				3,
+				3,
+				3,
+				3
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"espeon": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				8,
+				12
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				6,
+				4,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				4
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"umbreon": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				60,
+				10,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				2,
+				6,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"raichu": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				40,
+				2,
+				4,
+				4,
+				4,
+				2
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				1,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"crobat": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				12,
+				12,
+				12,
+				12,
+				12,
+				12,
+				12,
+				12
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				8,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"hitmontop": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				30,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"clefairy": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				30,
+				3,
+				4,
+				5,
+				4,
+				3
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				4,
+				8,
+				4,
+				8,
+				4,
+				8,
+				4
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"togetic": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				30,
+				4,
+				3,
+				3,
+				3,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"clefable": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				30,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				6,
+				6,
+				6,
+				8,
+				6,
+				6,
+				6
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
 	}
 };
 //#endregion
@@ -48294,6 +51588,90 @@ function triggerAttackAnim(entity, isAoe, target) {
 	entity.attackAnim = isAoe ? "Charge" : "Shoot";
 	entity.attackAnimTimer = ATTACK_ANIM_DURATION;
 	if (target) faceToward(entity, target);
+}
+//#endregion
+//#region src/engine/systems/climaAmbiente.ts
+/**
+* Identidade da sala DENTRO da sessao. `indice` sozinho nao serve: ele volta a
+* 0 a cada ciclo de 10 salas, e o jogador que desse a volta cairia sempre no
+* mesmo clima da primeira sala.
+*/
+function posicaoDaSala(sala) {
+	return sala.ciclos * 10 + sala.indice;
+}
+/**
+* O clima desta sala, ou `null` para ceu limpo.
+*
+* `null` sai de dois casos que valem a pena distinguir na leitura, mesmo dando
+* no mesmo resultado: o sub-bioma nao tem tabela nenhuma (nunca tem clima), ou
+* tem tabela e o sorteio caiu em `limpo` (que e um resultado como outro
+* qualquer — 53% em `badlands`, por exemplo).
+*/
+function climaDaSala(seed, sala) {
+	if (!sala) return null;
+	const pesos = SUB_BIOMA_CLIMA[sala.chave];
+	if (!pesos) return null;
+	const entradas = Object.entries(pesos).filter(([, peso]) => (peso ?? 0) > 0);
+	const total = entradas.reduce((soma, [, peso]) => soma + (peso ?? 0), 0);
+	if (total <= 0) return null;
+	let sorteio = nextFloat(deriveRng(seed, `clima:${sala.chave}:${posicaoDaSala(sala)}`)) * total;
+	for (const [nome, peso] of entradas) {
+		sorteio -= peso ?? 0;
+		if (sorteio < 0) return nome === "limpo" ? null : nome;
+	}
+	const ultimo = entradas[entradas.length - 1][0];
+	return ultimo === "limpo" ? null : ultimo;
+}
+/**
+* O `Clima` de ambiente pronto pra `world.clima`, ou `null`.
+*
+* `Infinity` em `turnosRestantes` porque o relogio de turno nao derruba clima
+* de ambiente — quem derruba e a troca de sala, e ela troca a SALA inteira,
+* fazendo `climaDaSala` devolver outra coisa.
+*/
+function climaAmbienteDaSala(seed, sala) {
+	return climaDeAmbiente(climaDaSala(seed, sala));
+}
+/**
+* Embrulha um tipo de clima como clima de AMBIENTE.
+*
+* Usado tambem pelo caminho da autoridade, onde o tipo nao e sorteado aqui: ele
+* chega pronto do servidor, que e quem tem a semente da sessao.
+*/
+function climaDeAmbiente(tipo) {
+	return tipo ? {
+		tipo,
+		turnosRestantes: Infinity,
+		origem: "ambiente"
+	} : null;
+}
+/**
+* Volta `world.clima` pro clima da sala atual.
+*
+* Chamado em TODO ponto que antes zerava o clima — fim de batalha, expiracao do
+* golpe, troca de sala. A diferenca importa: com clima de ambiente, "acabou o
+* Sunny Day" nao significa ceu limpo, significa que o clima do lugar voltou a
+* aparecer. Zerar deixaria o deserto sem areia pelo resto da sala so porque
+* alguem usou um golpe de clima uma vez.
+*/
+function reporClimaDeAmbiente(world) {
+	world.clima = world.climaAmbiente;
+}
+/**
+* Troca o clima do LUGAR e, junto, o efetivo — a menos que um golpe esteja em
+* campo agora.
+*
+* Usado nos dois caminhos: troca de sala no jogo local (com o clima derivado) e
+* chegada do clima autoritativo no flush.
+*
+* O respeito ao clima de golpe importa nos dois: o servidor manda o clima do
+* LUGAR, e um Rain Dance de 10 turnos em andamento no cliente nao e assunto
+* dele.
+*/
+function definirClimaDeAmbiente(world, ambiente) {
+	world.climaAmbiente = ambiente;
+	if (world.clima?.origem === "golpe") return;
+	world.clima = ambiente;
 }
 //#endregion
 //#region src/engine/systems/combatSystem.ts
@@ -48408,6 +51786,60 @@ function efetividadeConsiderandoRevelado(multiplicadorCru, ability, defenderEnti
 }
 var CLIMA_MULTIPLICADOR_FAVORECIDO = 1.5;
 var CLIMA_MULTIPLICADOR_DESFAVORECIDO = .5;
+var NEVE_DEFESA_GELO = 1.5;
+var NEVOA_PRECISAO = .6;
+var SOLAR_BEAM_SOB_CLIMA_RUIM = .5;
+/**
+* O golpe como o CLIMA o deixa (PH-140).
+*
+* Hoje so a Weather Ball muda de forma. Devolve o proprio objeto quando nada
+* muda — golpe comum nao paga alocacao nenhuma, e o pipeline de dano roda pra
+* cada hit de cada inimigo, a 60 Hz.
+*
+* NAO muta `ability`: os objetos de `ABILITIES` sao compartilhados por todas as
+* entidades do mundo. Mutar um aqui deixaria o tipo do golpe "grudado" no
+* catalogo depois que o clima passasse.
+*/
+/**
+* Quanto o clima multiplica a cura de Moonlight/Synthesis (PH-140).
+*
+* 1 = ceu limpo (o `healPercent` do catalogo ja e esse caso). Sol da 4/3, o que
+* leva os 50% do catalogo aos 2/3 dos jogos; qualquer outro clima da 0,5, que
+* leva a 1/4.
+*/
+function multiplicadorDeCuraPorClima(ability, clima, atacante, alvo) {
+	if (!CURA_SENSIVEL_AO_CLIMA.has(ability.id)) return 1;
+	const climaAtivo = climaEfetivo(clima?.tipo ?? null, traitsDoConfronto(atacante, alvo));
+	if (!climaAtivo) return 1;
+	return climaAtivo === "sol" ? CURA_NO_SOL : CURA_EM_CLIMA_RUIM;
+}
+/**
+* Growth sob sol forte sobe 2 estagios em vez de 1 (PH-140).
+*
+* Devolve o proprio objeto quando nada muda, e nunca muta o do catalogo — ver a
+* mesma nota em `golpeAjustadoPeloClima`.
+*/
+function golpeDeEstagioAjustadoPeloClima(ability, clima, atacante, alvo) {
+	if (ability.id !== "growth" || !ability.statChanges) return ability;
+	if (climaEfetivo(clima?.tipo ?? null, traitsDoConfronto(atacante, alvo)) !== "sol") return ability;
+	return {
+		...ability,
+		statChanges: ability.statChanges.map((m) => ({
+			...m,
+			estagios: m.estagios * 2
+		}))
+	};
+}
+function golpeAjustadoPeloClima(ability, clima) {
+	if (ability.id !== "weather_ball" || !clima) return ability;
+	const regra = WEATHER_BALL_POR_CLIMA[clima];
+	if (!regra) return ability;
+	return {
+		...ability,
+		type: regra.tipo,
+		power: regra.dobra ? ability.power * 2 : ability.power
+	};
+}
 function multiplicadorDeAtaquePorTrait(trait, isPhysical, temStatus) {
 	if (!isPhysical) return 1;
 	if (trait === "huge_power" || trait === "pure_power") return 2;
@@ -48467,7 +51899,9 @@ var ESCUDO_ABILITIES = {
 	lucky_chant: "luckyChant",
 	wide_guard: "wideGuard"
 };
-var ESCUDO_DURACAO_SEGUNDOS = 5 * TURNO_SEGUNDOS;
+var ESCUDO_DURACAO_TURNOS = 5;
+var CLIMA_DE_GOLPE_TURNOS = 10;
+var ESCUDO_DURACAO_SEGUNDOS = ESCUDO_DURACAO_TURNOS * TURNO_SEGUNDOS;
 var TAUNT_DURATION = TURNO_SEGUNDOS * 3;
 var DISABLE_DURATION = TURNO_SEGUNDOS * 4;
 var ENCORE_DURATION = TURNO_SEGUNDOS * 3;
@@ -48899,7 +52333,7 @@ function danoEsperado(rng, atacante, defensor, ability) {
 	return estimateDamage(rng, atacante, defensor, ability) * ((ability.accuracy ?? 100) / 100);
 }
 var DANO_VARIACAO_MINIMA = .85;
-function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista = false, clima = null) {
+function computeDamage(rng, attackerEntity, defenderEntity, abilityBase, pessimista = false, clima = null) {
 	const attackerPoke = attackerEntity.poke;
 	const defenderPoke = defenderEntity.poke;
 	const attackerSpecies = SPECIES[attackerPoke.speciesId];
@@ -48909,6 +52343,7 @@ function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista 
 		atacante: attackerTrait,
 		defensor: defenderTrait
 	});
+	const ability = golpeAjustadoPeloClima(abilityBase, climaAtivo);
 	const [defType1, defType2] = tiposEfetivosParaEfetividade(defenderEntity, defenderSpecies);
 	let effectivenessMultiplier = efetividadeConsiderandoRevelado(getEffectiveness(ability.type, defType1, defType2), ability, defenderEntity, defenderSpecies);
 	if (resolverImunidadeDeTipo(rng, ability.type, defenderEntity, true, defenderTrait).imune) effectivenessMultiplier = 0;
@@ -48943,7 +52378,10 @@ function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista 
 		} else if (climaAtivo === "sol") {
 			if (ability.type === "FIRE") dmg *= CLIMA_MULTIPLICADOR_FAVORECIDO;
 			else if (ability.type === "WATER") dmg *= CLIMA_MULTIPLICADOR_DESFAVORECIDO;
+		} else if (climaAtivo === "neve") {
+			if ((defenderSpecies.type === "ICE" || defenderSpecies.type2 === "ICE") && isPhysical) dmg /= NEVE_DEFESA_GELO;
 		}
+		if (ability.id === "solar_beam" && climaAtivo != null && climaAtivo !== "sol") dmg *= SOLAR_BEAM_SOB_CLIMA_RUIM;
 		dmg *= multiplicadorDeDanoRecebidoPorTrait(defenderTrait, ability, effectivenessMultiplier);
 		dmg *= multiplicadorDeDanoCausadoPorTrait(attackerTrait, effectivenessMultiplier);
 		if (defenderTrait === "multiscale" && defenderPoke.hp === defenderPoke.stats.hp) dmg *= MULTISCALE_MULTIPLIER;
@@ -49171,20 +52609,33 @@ function nearbyAliveEnemies(world) {
 * Hustle (Fase 12): +50% de Ataque Fisico custa -20% de precisao nos golpes
 * FISICOS do proprio portador — aplicado ANTES dos estagios de accuracy/evasao.
 */
+/**
+* Exportada pra teste (PH-140): a rolagem de acerto acontece no CAST, dentro de
+* `executePlayerAction`, e nao na resolucao do hit. Um teste que enfileira o
+* hit direto — como os de dano fazem — PULA a precisao inteira e mediria sempre
+* acerto, inclusive quando a regra de clima estivesse desligada.
+*/
 function golpeErrou(rng, ability, atacante, defensor, clima = null) {
 	const { atacante: traitAtk, defensor: traitDef } = traitsDoConfronto(atacante, defensor);
 	if (traitAtk === "no_guard" || traitDef === "no_guard") return false;
+	const climaAtivo = climaEfetivo(clima, {
+		atacante: traitAtk,
+		defensor: traitDef
+	});
+	if (climaAtivo && GOLPE_NUNCA_ERRA_NO_CLIMA[ability.id]?.includes(climaAtivo)) return false;
 	const isPhysical = resolveAbilityCategory(ability, atacante.poke) === "physical";
-	let precisaoBase = (ability.accuracy ?? 100) * multiplicadorDePrecisaoPorTrait(traitAtk, isPhysical);
+	const regraDePrecisao = PRECISAO_DO_GOLPE_NO_CLIMA[ability.id];
+	let precisaoBase = (climaAtivo && regraDePrecisao?.climas.includes(climaAtivo) ? regraDePrecisao.precisao : ability.accuracy ?? 100) * multiplicadorDePrecisaoPorTrait(traitAtk, isPhysical);
 	if (traitDef === "wonder_skin" && ability.power <= 0) precisaoBase = Math.min(precisaoBase, 50);
 	const multAtacante = multiplicadorDeAccuracyOuEvasion(atacante.estagios.accuracy ?? 0);
 	const ignoraEvasao = defensor.revelado || traitAtk != null && TRAIT_IGNORA_EVASAO.has(traitAtk);
 	let multDefensor = ignoraEvasao ? 1 : multiplicadorDeAccuracyOuEvasion(defensor.estagios.evasion ?? 0);
 	if (!ignoraEvasao) {
-		if (traitDef && EVASAO_POR_CLIMA[traitDef] && EVASAO_POR_CLIMA[traitDef] === clima) multDefensor *= 1.25;
+		if (traitDef && clima && EVASAO_POR_CLIMA[traitDef]?.includes(clima)) multDefensor *= 1.25;
 		if (traitDef === "tangled_feet" && defensor.statusVolatil?.tipo === "confusion") multDefensor *= 2;
 	}
-	const precisaoEfetiva = precisaoBase * multAtacante / multDefensor;
+	const multClima = climaAtivo === "nevoa" ? NEVOA_PRECISAO : 1;
+	const precisaoEfetiva = precisaoBase * multAtacante * multClima / multDefensor;
 	if (precisaoEfetiva >= 100) return false;
 	return nextFloat(rng) * 100 >= precisaoEfetiva;
 }
@@ -49574,7 +53025,8 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	const climaDoGolpe = CLIMA_DO_GOLPE[ability.id];
 	if (climaDoGolpe) world.clima = {
 		tipo: climaDoGolpe,
-		turnosRestantes: 5
+		turnosRestantes: CLIMA_DE_GOLPE_TURNOS,
+		origem: "golpe"
 	};
 	let statusRecebeuEm = null;
 	if (!isDead(target)) {
@@ -49606,7 +53058,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			if (!silent) anunciarStatus(world, target, aplicado.tipo, "entrou");
 			if ((aplicado.tipo === "poison" || aplicado.tipo === "paralysis" || aplicado.tipo === "burn") && traitDoPoke(target.poke) === "synchronize") aplicarStatus(world.rng, attacker, aplicado.tipo, 100);
 		}
-		const mudancas = aplicarMudancasDeStat(world.rng, attacker, target, abilityEfetiva);
+		const mudancas = aplicarMudancasDeStat(world.rng, attacker, target, golpeDeEstagioAjustadoPeloClima(abilityEfetiva, world.clima, attacker, target));
 		if (mudancas.length) {
 			statusRecebeuEm = ability.statTarget === "self" ? attacker : target;
 			if (!silent) anunciarEstagios(world, statusRecebeuEm, mudancas);
@@ -49665,7 +53117,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	if (ability.id === "focus_energy") attacker.estagioDeCritico = (attacker.estagioDeCritico ?? 0) + 2;
 	if (ability.id === "laser_focus") attacker.proximoGolpeCriticoGarantido = true;
 	if (ability.healPercent && !curaBloqueada(attacker)) {
-		const quanto = Math.max(1, Math.round(attacker.poke.stats.hp * ability.healPercent / 100));
+		const quanto = Math.max(1, Math.round(attacker.poke.stats.hp * ability.healPercent / 100 * multiplicadorDeCuraPorClima(ability, world.clima, attacker, target)));
 		heal(attacker, quanto);
 		if (!silent) spawnDamageNumber(world, attacker, {
 			amount: -quanto,
@@ -49928,7 +53380,8 @@ function resolveEntryHook(world, self, opponent, silent) {
 	if (climaTipo) {
 		if (world.clima?.tipo !== climaTipo) world.clima = {
 			tipo: climaTipo,
-			turnosRestantes: CLIMA_DE_TRAIT_TURNOS
+			turnosRestantes: CLIMA_DE_TRAIT_TURNOS,
+			origem: "golpe"
 		};
 		return;
 	}
@@ -49995,7 +53448,7 @@ function updateCombat(world, dt, opts = {}) {
 	}
 	if (turnoDeClimaFechou && world.clima) {
 		world.clima.turnosRestantes -= 1;
-		if (world.clima.turnosRestantes <= 0) world.clima = null;
+		if (world.clima.turnosRestantes <= 0) reporClimaDeAmbiente(world);
 	}
 	for (const effect of world.effects) {
 		tickEffect(effect, dt);
@@ -50053,7 +53506,7 @@ function updateCombat(world, dt, opts = {}) {
 		}
 	} else {
 		limparEstadoVolatil(player);
-		world.clima = null;
+		reporClimaDeAmbiente(world);
 	}
 	return {
 		defeatedEnemyIds,
@@ -50498,6 +53951,21 @@ function resolveRulePotionId(gameState, rule) {
 function melhorCuraDeStatus(gameState, status) {
 	return Object.values(ITEMS).filter((item) => "kind" in item && item.kind === "status_heal" && Array.isArray(item.healsStatus) && item.healsStatus.includes(status) && gameState.hasItem(item.id, 1) && gameState.autoStatusConfig[item.id] !== false).sort((a, b) => a.buyPrice - b.buyPrice)[0] ?? null;
 }
+/**
+* O revive mais BARATO que o jogador tem em estoque (PH-144).
+*
+* Antes era `getItem('revive')` literal: quem tinha cinquenta Max Revive e
+* nenhum Revive comum ficava com a automacao morta — o POKE desmaiava e o bot
+* nao levantava ele, sem nada na tela explicando. E o seletor da tela ja
+* oferecia os dois.
+*
+* Ordena por preco de compra e pega o primeiro, mesma economia de
+* `melhorCuraDeStatus`: gastar o Max Revive (que revive com HP cheio) quando um
+* Revive comum resolveria e desperdicio.
+*/
+function melhorRevive(gameState) {
+	return Object.values(ITEMS).filter((item) => "kind" in item && item.kind === "revive" && item.reviveHpPercent != null && gameState.hasItem(item.id, 1)).sort((a, b) => a.buyPrice - b.buyPrice)[0] ?? null;
+}
 function updateAutoHeal(world, gameState, dt) {
 	const player = world.player;
 	const events = [];
@@ -50509,9 +53977,9 @@ function updateAutoHeal(world, gameState, dt) {
 	else world.reviveCountdown = null;
 	if (isBossHunt || timers.treinador > 0) return events;
 	if (gameState.autoToggles.autoRevive && player.fainted && (world.reviveCountdown ?? 0) <= 0) {
-		const revive = getItem("revive");
-		if (revive && "reviveHpPercent" in revive && revive.reviveHpPercent != null && gameState.hasItem("revive", 1)) {
-			gameState.removeItem("revive", 1);
+		const revive = melhorRevive(gameState);
+		if (revive) {
+			gameState.removeItem(revive.id, 1);
 			player.poke.hp = Math.round(player.poke.stats.hp * revive.reviveHpPercent);
 			player.fainted = false;
 			player.state = "wander";
@@ -50519,7 +53987,7 @@ function updateAutoHeal(world, gameState, dt) {
 			world.reviveCountdown = null;
 			events.push({
 				type: "auto_revive",
-				itemId: "revive"
+				itemId: revive.id
 			});
 			return events;
 		}
@@ -50924,60 +54392,6 @@ function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0) {
 	armarTransicaoDeSala(world, mapId);
 }
 /**
-* A sala que o SERVIDOR decidiu, entrando pela mesma porta da transicao local.
-*
-* Tres casos, e a diferenca entre eles e o que o jogador ve:
-*
-*  - MESMA sala (so o contador de abates andou): escreve o contador e mais
-*    nada. E o caso comum — um flush a cada 30s, uma troca de sala a cada
-*    poucos minutos.
-*  - PRIMEIRA sala da sessao (nao havia sala): entra direto, sem aviso. Nao ha
-*    "sala anterior" pra anunciar saida de.
-*  - sala DIFERENTE: vira `salaPendente` e arma a contagem regressiva. Quem
-*    troca o mapa, zera os inimigos e reposiciona o jogador continua sendo
-*    `aplicarTransicaoDeSala`, no gate do proximo tick.
-*
-* Antes disto o cliente escrevia a sala do servidor direto no estado. O nome no
-* HUD trocava, e o resto da cena — arte de fundo, grade de colisao, ponto de
-* nascimento, inimigos em campo — ficava na sala ANTERIOR, porque so
-* `aplicarTransicaoDeSala` mexe nisso. Uma hunt podia ficar minutos anunciando
-* "Laboratorio" enquanto desenhava e colidia como "Usina".
-*
-* Nunca REGRIDE: sala com (ciclo, indice) anterior ao que esta na tela e
-* ignorada. Isso acontece de verdade — o flush cobre uma janela que comecou
-* antes da troca, e o servidor responde com a sala de la. Aceitar aquilo
-* mandava o jogador de volta pra sala 1 com o aviso de nova area, o que le como
-* perda de progresso.
-*/
-function reconciliarSalaDaAutoridade(world, sala) {
-	if (!world.mapDef) return;
-	if (!sala) {
-		if (temSalas(world.mapDef.id)) return;
-		world.sala = null;
-		world.salaPendente = null;
-		world.salaCountdownRemaining = null;
-		return;
-	}
-	const atual = world.salaPendente ?? world.sala;
-	if (!atual) {
-		world.sala = { ...sala };
-		world.salaPredita = false;
-		return;
-	}
-	if (atual.chave === sala.chave && atual.indice === sala.indice && atual.ciclos === sala.ciclos) {
-		const alvo = world.salaPendente ?? world.sala;
-		if (alvo) alvo.abates = Math.max(alvo.abates, sala.abates);
-		world.salaPredita = false;
-		return;
-	}
-	const posicao = (s) => s.ciclos * 10 + s.indice;
-	if (!world.salaPredita && posicao(sala) < posicao(atual)) return;
-	world.salaPendente = { ...sala };
-	world.salaCountdownRemaining ??= 3;
-	world.salaEsperaDaAutoridade = 0;
-	world.salaPredita = false;
-}
-/**
 * Aplica a sala ja sorteada (`world.salaPendente`) quando a contagem
 * regressiva zera: troca mapa/colisao e reposiciona pro spawn point da nova
 * sala. "Area nova do zero" (pedido explicito do usuario) — zera tambem
@@ -50989,6 +54403,8 @@ function aplicarTransicaoDeSala(world, mapId) {
 	if (!pendente) return;
 	world.sala = pendente;
 	world.salaPendente = null;
+	world.clima = null;
+	definirClimaDeAmbiente(world, world.salaSobAutoridade ? null : climaAmbienteDaSala(world.seed, world.sala));
 	world.salaEsperaDaAutoridade = 0;
 	world.enemies = [];
 	world.effects = [];
@@ -51029,6 +54445,41 @@ function recordPokedexKill(gameState, speciesId, isShiny) {
 	gameState.setPokedexKillEntry(speciesId, next);
 }
 //#endregion
+//#region src/engine/worldState.ts
+function emptyWorldState(seed = randomSeed()) {
+	return {
+		mapDef: null,
+		player: null,
+		enemies: [],
+		effects: [],
+		pendingHits: [],
+		pendingWishes: [],
+		autoTimers: { treinador: 0 },
+		reviveCountdown: null,
+		trocaEmCampo: null,
+		respawnTimer: null,
+		sequenceIndex: 0,
+		sequenceCleared: false,
+		countdownRemaining: null,
+		sala: null,
+		salaCountdownRemaining: null,
+		salaPendente: null,
+		salaSobAutoridade: false,
+		salaEsperaDaAutoridade: 0,
+		salaPredita: false,
+		rng: createRng(seed),
+		seed,
+		counters: {
+			entity: 1,
+			effect: 1,
+			pendingHit: 1
+		},
+		pessimista: false,
+		clima: null,
+		climaAmbiente: null
+	};
+}
+//#endregion
 //#region node_modules/zustand/esm/vanilla.mjs
 var createStoreImpl = (createState) => {
 	let state;
@@ -51058,763 +54509,7 @@ var createStoreImpl = (createState) => {
 };
 var createStore = ((createState) => createState ? createStoreImpl(createState) : createStoreImpl);
 //#endregion
-//#region node_modules/react/cjs/react.production.js
-/**
-* @license React
-* react.production.js
-*
-* Copyright (c) Meta Platforms, Inc. and affiliates.
-*
-* This source code is licensed under the MIT license found in the
-* LICENSE file in the root directory of this source tree.
-*/
-var require_react_production = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var ReactNoopUpdateQueue = {
-		isMounted: function() {
-			return !1;
-		},
-		enqueueForceUpdate: function() {},
-		enqueueReplaceState: function() {},
-		enqueueSetState: function() {}
-	};
-	var assign = Object.assign;
-	var emptyObject = {};
-	function Component(props, context, updater) {
-		this.props = props;
-		this.context = context;
-		this.refs = emptyObject;
-		this.updater = updater || ReactNoopUpdateQueue;
-	}
-	Component.prototype.isReactComponent = {};
-	Component.prototype.setState = function(partialState, callback) {
-		if ("object" !== typeof partialState && "function" !== typeof partialState && null != partialState) throw Error("takes an object of state variables to update or a function which returns an object of state variables.");
-		this.updater.enqueueSetState(this, partialState, callback, "setState");
-	};
-	Component.prototype.forceUpdate = function(callback) {
-		this.updater.enqueueForceUpdate(this, callback, "forceUpdate");
-	};
-	function ComponentDummy() {}
-	ComponentDummy.prototype = Component.prototype;
-	function PureComponent(props, context, updater) {
-		this.props = props;
-		this.context = context;
-		this.refs = emptyObject;
-		this.updater = updater || ReactNoopUpdateQueue;
-	}
-	var pureComponentPrototype = PureComponent.prototype = new ComponentDummy();
-	pureComponentPrototype.constructor = PureComponent;
-	assign(pureComponentPrototype, Component.prototype);
-	pureComponentPrototype.isPureReactComponent = !0;
-	Array.isArray;
-	var ReactSharedInternals = {
-		H: null,
-		A: null,
-		T: null,
-		S: null
-	};
-	exports.useCallback = function(callback, deps) {
-		return ReactSharedInternals.H.useCallback(callback, deps);
-	};
-	exports.useDebugValue = function() {};
-	exports.useSyncExternalStore = function(subscribe, getSnapshot, getServerSnapshot) {
-		return ReactSharedInternals.H.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-	};
-}));
-//#endregion
-//#region node_modules/zustand/esm/react.mjs
-var import_react = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_react_production();
-})))(), 1);
-var identity = (arg) => arg;
-function useStore(api, selector = identity) {
-	const slice = import_react.useSyncExternalStore(api.subscribe, import_react.useCallback(() => selector(api.getState()), [api, selector]), import_react.useCallback(() => selector(api.getInitialState()), [api, selector]));
-	import_react.useDebugValue(slice);
-	return slice;
-}
-var createImpl = (createState) => {
-	const api = createStore(createState);
-	const useBoundStore = (selector) => useStore(api, selector);
-	Object.assign(useBoundStore, api);
-	return useBoundStore;
-};
-var create = ((createState) => createState ? createImpl(createState) : createImpl);
-//#endregion
-//#region node_modules/immer/dist/immer.mjs
-var NOTHING = Symbol.for("immer-nothing");
-var DRAFTABLE = Symbol.for("immer-draftable");
-var DRAFT_STATE = Symbol.for("immer-state");
-function die(error, ...args) {
-	throw new Error(`[Immer] minified error nr: ${error}. Full error at: https://bit.ly/3cXEKWf`);
-}
-var O = Object;
-var getPrototypeOf = O.getPrototypeOf;
-var CONSTRUCTOR = "constructor";
-var PROTOTYPE = "prototype";
-var CONFIGURABLE = "configurable";
-var ENUMERABLE = "enumerable";
-var WRITABLE = "writable";
-var VALUE = "value";
-var isDraft = (value) => !!value && !!value[DRAFT_STATE];
-function isDraftable(value) {
-	if (!value) return false;
-	return isPlainObject(value) || isArray(value) || !!value[DRAFTABLE] || !!value[CONSTRUCTOR]?.[DRAFTABLE] || isMap(value) || isSet(value);
-}
-var objectCtorString = O[PROTOTYPE][CONSTRUCTOR].toString();
-var cachedCtorStrings = /* @__PURE__ */ new WeakMap();
-function isPlainObject(value) {
-	if (!value || !isObjectish(value)) return false;
-	const proto = getPrototypeOf(value);
-	if (proto === null || proto === O[PROTOTYPE]) return true;
-	const Ctor = O.hasOwnProperty.call(proto, CONSTRUCTOR) && proto[CONSTRUCTOR];
-	if (Ctor === Object) return true;
-	if (!isFunction(Ctor)) return false;
-	let ctorString = cachedCtorStrings.get(Ctor);
-	if (ctorString === void 0) {
-		ctorString = Function.toString.call(Ctor);
-		cachedCtorStrings.set(Ctor, ctorString);
-	}
-	return ctorString === objectCtorString;
-}
-function each(obj, iter, strict = true) {
-	if (getArchtype(obj) === 0) (strict ? Reflect.ownKeys(obj) : O.keys(obj)).forEach((key) => {
-		iter(key, obj[key], obj);
-	});
-	else obj.forEach((entry, index) => iter(index, entry, obj));
-}
-function getArchtype(thing) {
-	const state = thing[DRAFT_STATE];
-	return state ? state.type_ : isArray(thing) ? 1 : isMap(thing) ? 2 : isSet(thing) ? 3 : 0;
-}
-var has = (thing, prop, type = getArchtype(thing)) => type === 2 ? thing.has(prop) : O[PROTOTYPE].hasOwnProperty.call(thing, prop);
-var get = (thing, prop, type = getArchtype(thing)) => type === 2 ? thing.get(prop) : thing[prop];
-var set = (thing, propOrOldValue, value, type = getArchtype(thing)) => {
-	if (type === 2) thing.set(propOrOldValue, value);
-	else if (type === 3) thing.add(value);
-	else thing[propOrOldValue] = value;
-};
-function is(x, y) {
-	if (x === y) return x !== 0 || 1 / x === 1 / y;
-	else return x !== x && y !== y;
-}
-var isArray = Array.isArray;
-var isMap = (target) => target instanceof Map;
-var isSet = (target) => target instanceof Set;
-var isObjectish = (target) => typeof target === "object";
-var isFunction = (target) => typeof target === "function";
-var isBoolean = (target) => typeof target === "boolean";
-function isArrayIndex(value) {
-	const n = +value;
-	return Number.isInteger(n) && String(n) === value;
-}
-var latest = (state) => state.copy_ || state.base_;
-var getFinalValue = (state) => state.modified_ ? state.copy_ : state.base_;
-function shallowCopy(base, strict) {
-	if (isMap(base)) return new Map(base);
-	if (isSet(base)) return new Set(base);
-	if (isArray(base)) return Array[PROTOTYPE].slice.call(base);
-	const isPlain = isPlainObject(base);
-	if (strict === true || strict === "class_only" && !isPlain) {
-		const descriptors = O.getOwnPropertyDescriptors(base);
-		delete descriptors[DRAFT_STATE];
-		let keys = Reflect.ownKeys(descriptors);
-		for (let i = 0; i < keys.length; i++) {
-			const key = keys[i];
-			const desc = descriptors[key];
-			if (desc[WRITABLE] === false) {
-				desc[WRITABLE] = true;
-				desc[CONFIGURABLE] = true;
-			}
-			if (desc.get || desc.set) descriptors[key] = {
-				[CONFIGURABLE]: true,
-				[WRITABLE]: true,
-				[ENUMERABLE]: desc[ENUMERABLE],
-				[VALUE]: base[key]
-			};
-		}
-		return O.create(getPrototypeOf(base), descriptors);
-	} else {
-		const proto = getPrototypeOf(base);
-		if (proto !== null && isPlain) return { ...base };
-		const obj = O.create(proto);
-		return O.assign(obj, base);
-	}
-}
-function freeze(obj, deep = false) {
-	if (isFrozen(obj) || isDraft(obj) || !isDraftable(obj)) return obj;
-	if (getArchtype(obj) > 1) O.defineProperties(obj, {
-		set: dontMutateMethodOverride,
-		add: dontMutateMethodOverride,
-		clear: dontMutateMethodOverride,
-		delete: dontMutateMethodOverride
-	});
-	O.freeze(obj);
-	if (deep) each(obj, (_key, value) => {
-		freeze(value, true);
-	}, false);
-	return obj;
-}
-function dontMutateFrozenCollections() {
-	die(2);
-}
-var dontMutateMethodOverride = { [VALUE]: dontMutateFrozenCollections };
-function isFrozen(obj) {
-	if (obj === null || !isObjectish(obj)) return true;
-	return O.isFrozen(obj);
-}
-var PluginMapSet = "MapSet";
-var PluginPatches = "Patches";
-var PluginArrayMethods = "ArrayMethods";
-var plugins = {};
-function getPlugin(pluginKey) {
-	const plugin = plugins[pluginKey];
-	if (!plugin) die(0, pluginKey);
-	return plugin;
-}
-var isPluginLoaded = (pluginKey) => !!plugins[pluginKey];
-var currentScope;
-var getCurrentScope = () => currentScope;
-var createScope = (parent_, immer_) => ({
-	drafts_: [],
-	parent_,
-	immer_,
-	canAutoFreeze_: true,
-	unfinalizedDrafts_: 0,
-	handledSet_: /* @__PURE__ */ new Set(),
-	processedForPatches_: /* @__PURE__ */ new Set(),
-	mapSetPlugin_: isPluginLoaded(PluginMapSet) ? getPlugin(PluginMapSet) : void 0,
-	arrayMethodsPlugin_: isPluginLoaded(PluginArrayMethods) ? getPlugin(PluginArrayMethods) : void 0
-});
-function usePatchesInScope(scope, patchListener) {
-	if (patchListener) {
-		scope.patchPlugin_ = getPlugin(PluginPatches);
-		scope.patches_ = [];
-		scope.inversePatches_ = [];
-		scope.patchListener_ = patchListener;
-	}
-}
-function revokeScope(scope) {
-	leaveScope(scope);
-	scope.drafts_.forEach(revokeDraft);
-	scope.drafts_ = null;
-}
-function leaveScope(scope) {
-	if (scope === currentScope) currentScope = scope.parent_;
-}
-var enterScope = (immer2) => currentScope = createScope(currentScope, immer2);
-function revokeDraft(draft) {
-	const state = draft[DRAFT_STATE];
-	if (state.type_ === 0 || state.type_ === 1) state.revoke_();
-	else state.revoked_ = true;
-}
-function processResult(result, scope) {
-	scope.unfinalizedDrafts_ = scope.drafts_.length;
-	const baseDraft = scope.drafts_[0];
-	if (result !== void 0 && result !== baseDraft) {
-		if (baseDraft[DRAFT_STATE].modified_) {
-			revokeScope(scope);
-			die(4);
-		}
-		if (isDraftable(result)) result = finalize(scope, result);
-		const { patchPlugin_ } = scope;
-		if (patchPlugin_) patchPlugin_.generateReplacementPatches_(baseDraft[DRAFT_STATE].base_, result, scope);
-	} else result = finalize(scope, baseDraft);
-	maybeFreeze(scope, result, true);
-	revokeScope(scope);
-	if (scope.patches_) scope.patchListener_(scope.patches_, scope.inversePatches_);
-	return result !== NOTHING ? result : void 0;
-}
-function finalize(rootScope, value) {
-	if (isFrozen(value)) return value;
-	const state = value[DRAFT_STATE];
-	if (!state) return handleValue(value, rootScope.handledSet_, rootScope);
-	if (!isSameScope(state, rootScope)) return value;
-	if (!state.modified_) return state.base_;
-	if (!state.finalized_) {
-		const { callbacks_ } = state;
-		if (callbacks_) while (callbacks_.length > 0) callbacks_.pop()(rootScope);
-		generatePatchesAndFinalize(state, rootScope);
-	}
-	return state.copy_;
-}
-function maybeFreeze(scope, value, deep = false) {
-	if (!scope.parent_ && scope.immer_.autoFreeze_ && scope.canAutoFreeze_) freeze(value, deep);
-}
-function markStateFinalized(state) {
-	state.finalized_ = true;
-	state.scope_.unfinalizedDrafts_--;
-}
-var isSameScope = (state, rootScope) => state.scope_ === rootScope;
-var EMPTY_LOCATIONS_RESULT = [];
-function updateDraftInParent(parent, draftValue, finalizedValue, originalKey) {
-	const parentCopy = latest(parent);
-	const parentType = parent.type_;
-	if (originalKey !== void 0) {
-		if (get(parentCopy, originalKey, parentType) === draftValue) {
-			set(parentCopy, originalKey, finalizedValue, parentType);
-			return;
-		}
-	}
-	if (!parent.draftLocations_) {
-		const draftLocations = parent.draftLocations_ = /* @__PURE__ */ new Map();
-		each(parentCopy, (key, value) => {
-			if (isDraft(value)) {
-				const keys = draftLocations.get(value) || [];
-				keys.push(key);
-				draftLocations.set(value, keys);
-			}
-		});
-	}
-	const locations = parent.draftLocations_.get(draftValue) ?? EMPTY_LOCATIONS_RESULT;
-	for (const location of locations) set(parentCopy, location, finalizedValue, parentType);
-}
-function registerChildFinalizationCallback(parent, child, key) {
-	parent.callbacks_.push(function childCleanup(rootScope) {
-		const state = child;
-		if (!state || !isSameScope(state, rootScope)) return;
-		rootScope.mapSetPlugin_?.fixSetContents(state);
-		const finalizedValue = getFinalValue(state);
-		updateDraftInParent(parent, state.draft_ ?? state, finalizedValue, key);
-		generatePatchesAndFinalize(state, rootScope);
-	});
-}
-function generatePatchesAndFinalize(state, rootScope) {
-	if (state.modified_ && !state.finalized_ && (state.type_ === 3 || state.type_ === 1 && state.allIndicesReassigned_ || (state.assigned_?.size ?? 0) > 0)) {
-		const { patchPlugin_ } = rootScope;
-		if (patchPlugin_) {
-			const basePath = patchPlugin_.getPath(state);
-			if (basePath) patchPlugin_.generatePatches_(state, basePath, rootScope);
-		}
-		markStateFinalized(state);
-	}
-}
-function handleCrossReference(target, key, value) {
-	const { scope_ } = target;
-	if (isDraft(value)) {
-		const state = value[DRAFT_STATE];
-		if (isSameScope(state, scope_)) state.callbacks_.push(function crossReferenceCleanup() {
-			prepareCopy(target);
-			updateDraftInParent(target, value, getFinalValue(state), key);
-		});
-	} else if (isDraftable(value)) target.callbacks_.push(function nestedDraftCleanup() {
-		const targetCopy = latest(target);
-		if (target.type_ === 3) {
-			if (targetCopy.has(value)) handleValue(value, scope_.handledSet_, scope_);
-		} else if (get(targetCopy, key, target.type_) === value) {
-			if (scope_.drafts_.length > 1 && (target.assigned_.get(key) ?? false) === true && target.copy_) handleValue(get(target.copy_, key, target.type_), scope_.handledSet_, scope_);
-		}
-	});
-}
-function handleValue(target, handledSet, rootScope) {
-	if (!rootScope.immer_.autoFreeze_ && rootScope.unfinalizedDrafts_ < 1) return target;
-	if (isDraft(target) || handledSet.has(target) || !isDraftable(target) || isFrozen(target)) return target;
-	handledSet.add(target);
-	each(target, (key, value) => {
-		if (isDraft(value)) {
-			const state = value[DRAFT_STATE];
-			if (isSameScope(state, rootScope)) {
-				set(target, key, getFinalValue(state), target.type_);
-				markStateFinalized(state);
-			}
-		} else if (isDraftable(value)) handleValue(value, handledSet, rootScope);
-	});
-	return target;
-}
-function createProxyProxy(base, parent) {
-	const baseIsArray = isArray(base);
-	const state = {
-		type_: baseIsArray ? 1 : 0,
-		scope_: parent ? parent.scope_ : getCurrentScope(),
-		modified_: false,
-		finalized_: false,
-		assigned_: void 0,
-		parent_: parent,
-		base_: base,
-		draft_: null,
-		copy_: null,
-		revoke_: null,
-		isManual_: false,
-		callbacks_: void 0
-	};
-	let target = state;
-	let traps = objectTraps;
-	if (baseIsArray) {
-		target = [state];
-		traps = arrayTraps;
-	}
-	const { revoke, proxy } = Proxy.revocable(target, traps);
-	state.draft_ = proxy;
-	state.revoke_ = revoke;
-	return [proxy, state];
-}
-var objectTraps = {
-	get(state, prop) {
-		if (prop === DRAFT_STATE) return state;
-		let arrayPlugin = state.scope_.arrayMethodsPlugin_;
-		const isArrayWithStringProp = state.type_ === 1 && typeof prop === "string";
-		if (isArrayWithStringProp) {
-			if (arrayPlugin?.isArrayOperationMethod(prop)) return arrayPlugin.createMethodInterceptor(state, prop);
-		}
-		const source = latest(state);
-		if (!has(source, prop, state.type_)) return readPropFromProto(state, source, prop);
-		const value = source[prop];
-		if (state.finalized_ || !isDraftable(value)) return value;
-		if (isArrayWithStringProp && state.operationMethod && arrayPlugin?.isMutatingArrayMethod(state.operationMethod) && isArrayIndex(prop)) return value;
-		if (value === peek(state.base_, prop) || isRelocatedBaseRef(state, prop, value)) {
-			prepareCopy(state);
-			const childKey = state.type_ === 1 ? +prop : prop;
-			const childDraft = createProxy(state.scope_, value, state, childKey);
-			return state.copy_[childKey] = childDraft;
-		}
-		return value;
-	},
-	has(state, prop) {
-		return prop in latest(state);
-	},
-	ownKeys(state) {
-		return Reflect.ownKeys(latest(state));
-	},
-	set(state, prop, value) {
-		const desc = getDescriptorFromProto(latest(state), prop);
-		if (desc?.set) {
-			desc.set.call(state.draft_, value);
-			return true;
-		}
-		if (!state.modified_) {
-			const current2 = peek(latest(state), prop);
-			const currentState = current2?.[DRAFT_STATE];
-			if (currentState && currentState.base_ === value) {
-				state.copy_[prop] = value;
-				state.assigned_.set(prop, false);
-				return true;
-			}
-			if (is(value, current2) && (value !== void 0 || has(state.base_, prop, state.type_))) return true;
-			prepareCopy(state);
-			markChanged(state);
-		}
-		if (state.copy_[prop] === value && (value !== void 0 || has(state.copy_, prop, state.type_)) || Number.isNaN(value) && Number.isNaN(state.copy_[prop])) return true;
-		state.copy_[prop] = value;
-		state.assigned_.set(prop, true);
-		handleCrossReference(state, prop, value);
-		return true;
-	},
-	deleteProperty(state, prop) {
-		prepareCopy(state);
-		if (peek(state.base_, prop) !== void 0 || prop in state.base_) {
-			state.assigned_.set(prop, false);
-			markChanged(state);
-		} else state.assigned_.delete(prop);
-		if (state.copy_) delete state.copy_[prop];
-		return true;
-	},
-	getOwnPropertyDescriptor(state, prop) {
-		const owner = latest(state);
-		const desc = Reflect.getOwnPropertyDescriptor(owner, prop);
-		if (!desc) return desc;
-		return {
-			[WRITABLE]: true,
-			[CONFIGURABLE]: state.type_ !== 1 || prop !== "length",
-			[ENUMERABLE]: desc[ENUMERABLE],
-			[VALUE]: owner[prop]
-		};
-	},
-	defineProperty() {
-		die(11);
-	},
-	getPrototypeOf(state) {
-		return getPrototypeOf(state.base_);
-	},
-	setPrototypeOf() {
-		die(12);
-	}
-};
-var arrayTraps = {};
-for (let key in objectTraps) {
-	let fn = objectTraps[key];
-	arrayTraps[key] = function() {
-		const args = arguments;
-		args[0] = args[0][0];
-		return fn.apply(this, args);
-	};
-}
-arrayTraps.deleteProperty = function(state, prop) {
-	return arrayTraps.set.call(this, state, prop, void 0);
-};
-arrayTraps.set = function(state, prop, value) {
-	return objectTraps.set.call(this, state[0], prop, value, state[0]);
-};
-function peek(draft, prop) {
-	const state = draft[DRAFT_STATE];
-	return (state ? latest(state) : draft)[prop];
-}
-function isRelocatedBaseRef(state, prop, value) {
-	if (state.type_ !== 1 || !state.allIndicesReassigned_ || state.assigned_?.get(prop) || !isDraftable(value) || value[DRAFT_STATE]) return false;
-	return state.baseRefs_.has(value);
-}
-function readPropFromProto(state, source, prop) {
-	const desc = getDescriptorFromProto(source, prop);
-	return desc ? VALUE in desc ? desc[VALUE] : desc.get?.call(state.draft_) : void 0;
-}
-function getDescriptorFromProto(source, prop) {
-	if (!(prop in source)) return void 0;
-	let proto = getPrototypeOf(source);
-	while (proto) {
-		const desc = Object.getOwnPropertyDescriptor(proto, prop);
-		if (desc) return desc;
-		proto = getPrototypeOf(proto);
-	}
-}
-function markChanged(state) {
-	if (!state.modified_) {
-		state.modified_ = true;
-		if (state.parent_) markChanged(state.parent_);
-	}
-}
-function prepareCopy(state) {
-	if (!state.copy_) {
-		state.assigned_ = /* @__PURE__ */ new Map();
-		state.copy_ = shallowCopy(state.base_, state.scope_.immer_.useStrictShallowCopy_);
-	}
-}
-var Immer2 = class {
-	constructor(config) {
-		this.autoFreeze_ = true;
-		this.useStrictShallowCopy_ = false;
-		this.useStrictIteration_ = false;
-		/**
-		* The `produce` function takes a value and a "recipe function" (whose
-		* return value often depends on the base state). The recipe function is
-		* free to mutate its first argument however it wants. All mutations are
-		* only ever applied to a __copy__ of the base state.
-		*
-		* Pass only a function to create a "curried producer" which relieves you
-		* from passing the recipe function every time.
-		*
-		* Only plain objects and arrays are made mutable. All other objects are
-		* considered uncopyable.
-		*
-		* Note: This function is __bound__ to its `Immer` instance.
-		*
-		* @param {any} base - the initial state
-		* @param {Function} recipe - function that receives a proxy of the base state as first argument and which can be freely modified
-		* @param {Function} patchListener - optional function that will be called with all the patches produced here
-		* @returns {any} a new state, or the initial state if nothing was modified
-		*/
-		this.produce = (base, recipe, patchListener) => {
-			if (isFunction(base) && !isFunction(recipe)) {
-				const defaultBase = recipe;
-				recipe = base;
-				const self = this;
-				return function curriedProduce(base2 = defaultBase, ...args) {
-					return self.produce(base2, (draft) => recipe.call(this, draft, ...args));
-				};
-			}
-			if (!isFunction(recipe)) die(6);
-			if (patchListener !== void 0 && !isFunction(patchListener)) die(7);
-			let result;
-			if (isDraftable(base)) {
-				const scope = enterScope(this);
-				const proxy = createProxy(scope, base, void 0);
-				let hasError = true;
-				try {
-					result = recipe(proxy);
-					hasError = false;
-				} finally {
-					if (hasError) revokeScope(scope);
-					else leaveScope(scope);
-				}
-				usePatchesInScope(scope, patchListener);
-				return processResult(result, scope);
-			} else if (!base || !isObjectish(base)) {
-				result = recipe(base);
-				if (result === void 0) result = base;
-				if (result === NOTHING) result = void 0;
-				if (this.autoFreeze_) freeze(result, true);
-				if (patchListener) {
-					const p = [];
-					const ip = [];
-					getPlugin(PluginPatches).generateReplacementPatches_(base, result, {
-						patches_: p,
-						inversePatches_: ip
-					});
-					patchListener(p, ip);
-				}
-				return result;
-			} else die(1, base);
-		};
-		this.produceWithPatches = (base, recipe) => {
-			if (isFunction(base)) return (state, ...args) => this.produceWithPatches(state, (draft) => base(draft, ...args));
-			let patches, inversePatches;
-			return [
-				this.produce(base, recipe, (p, ip) => {
-					patches = p;
-					inversePatches = ip;
-				}),
-				patches,
-				inversePatches
-			];
-		};
-		if (isBoolean(config?.autoFreeze)) this.setAutoFreeze(config.autoFreeze);
-		if (isBoolean(config?.useStrictShallowCopy)) this.setUseStrictShallowCopy(config.useStrictShallowCopy);
-		if (isBoolean(config?.useStrictIteration)) this.setUseStrictIteration(config.useStrictIteration);
-	}
-	createDraft(base) {
-		if (!isDraftable(base)) die(8);
-		if (isDraft(base)) base = current(base);
-		const scope = enterScope(this);
-		const proxy = createProxy(scope, base, void 0);
-		proxy[DRAFT_STATE].isManual_ = true;
-		leaveScope(scope);
-		return proxy;
-	}
-	finishDraft(draft, patchListener) {
-		const state = draft && draft[DRAFT_STATE];
-		if (!state || !state.isManual_) die(9);
-		const { scope_: scope } = state;
-		usePatchesInScope(scope, patchListener);
-		return processResult(void 0, scope);
-	}
-	/**
-	* Pass true to automatically freeze all copies created by Immer.
-	*
-	* By default, auto-freezing is enabled.
-	*/
-	setAutoFreeze(value) {
-		this.autoFreeze_ = value;
-	}
-	/**
-	* Pass true to enable strict shallow copy.
-	*
-	* By default, immer does not copy the object descriptors such as getter, setter and non-enumrable properties.
-	*/
-	setUseStrictShallowCopy(value) {
-		this.useStrictShallowCopy_ = value;
-	}
-	/**
-	* Pass false to use faster iteration that skips non-enumerable properties
-	* but still handles symbols for compatibility.
-	*
-	* By default, strict iteration is enabled (includes all own properties).
-	*/
-	setUseStrictIteration(value) {
-		this.useStrictIteration_ = value;
-	}
-	shouldUseStrictIteration() {
-		return this.useStrictIteration_;
-	}
-	applyPatches(base, patches) {
-		let i;
-		for (i = patches.length - 1; i >= 0; i--) {
-			const patch = patches[i];
-			if (patch.path.length === 0 && patch.op === "replace") {
-				base = patch.value;
-				break;
-			}
-		}
-		if (i > -1) patches = patches.slice(i + 1);
-		const applyPatchesImpl = getPlugin(PluginPatches).applyPatches_;
-		if (isDraft(base)) return applyPatchesImpl(base, patches);
-		return this.produce(base, (draft) => applyPatchesImpl(draft, patches));
-	}
-};
-function createProxy(rootScope, value, parent, key) {
-	const [draft, state] = isMap(value) ? getPlugin(PluginMapSet).proxyMap_(value, parent) : isSet(value) ? getPlugin(PluginMapSet).proxySet_(value, parent) : createProxyProxy(value, parent);
-	(parent?.scope_ ?? getCurrentScope()).drafts_.push(draft);
-	state.callbacks_ = parent?.callbacks_ ?? [];
-	state.key_ = key;
-	if (parent && key !== void 0) registerChildFinalizationCallback(parent, state, key);
-	else state.callbacks_.push(function rootDraftCleanup(rootScope2) {
-		rootScope2.mapSetPlugin_?.fixSetContents(state);
-		const { patchPlugin_ } = rootScope2;
-		if (state.modified_ && patchPlugin_) patchPlugin_.generatePatches_(state, [], rootScope2);
-	});
-	return draft;
-}
-function current(value) {
-	if (!isDraft(value)) die(10, value);
-	return currentImpl(value);
-}
-function currentImpl(value) {
-	if (!isDraftable(value) || isFrozen(value)) return value;
-	const state = value[DRAFT_STATE];
-	let copy;
-	let strict = true;
-	if (state) {
-		if (!state.modified_) return state.base_;
-		state.finalized_ = true;
-		copy = shallowCopy(value, state.scope_.immer_.useStrictShallowCopy_);
-		strict = state.scope_.immer_.shouldUseStrictIteration();
-	} else copy = shallowCopy(value, true);
-	each(copy, (key, childValue) => {
-		set(copy, key, currentImpl(childValue));
-	}, strict);
-	if (state) state.finalized_ = false;
-	return copy;
-}
-var produce = new Immer2().produce;
-//#endregion
-//#region node_modules/zustand/esm/middleware/immer.mjs
-var immerImpl = (initializer) => (set, get, store) => {
-	store.setState = (updater, replace, ...args) => {
-		return set(typeof updater === "function" ? produce(updater) : updater, replace, ...args);
-	};
-	return initializer(store.setState, get, store);
-};
-var immer = immerImpl;
-//#endregion
-//#region src/stores/worldStore.ts
-function emptyWorldState(seed = randomSeed()) {
-	return {
-		mapDef: null,
-		player: null,
-		enemies: [],
-		effects: [],
-		pendingHits: [],
-		pendingWishes: [],
-		autoTimers: { treinador: 0 },
-		reviveCountdown: null,
-		trocaEmCampo: null,
-		respawnTimer: null,
-		sequenceIndex: 0,
-		sequenceCleared: false,
-		countdownRemaining: null,
-		sala: null,
-		salaCountdownRemaining: null,
-		salaPendente: null,
-		salaSobAutoridade: false,
-		salaEsperaDaAutoridade: 0,
-		salaPredita: false,
-		rng: createRng(seed),
-		counters: {
-			entity: 1,
-			effect: 1,
-			pendingHit: 1
-		},
-		pessimista: false,
-		clima: null
-	};
-}
-create()(immer((set) => ({
-	...emptyWorldState(),
-	setWorld: (world) => set((draft) => {
-		Object.assign(draft, world);
-	}),
-	resetWorld: () => set((draft) => {
-		Object.assign(draft, emptyWorldState());
-	}),
-	update: (recipe) => set((draft) => recipe(draft)),
-	sortear: (fn) => {
-		let resultado;
-		set((draft) => {
-			resultado = fn(draft.rng);
-		});
-		return resultado;
-	},
-	definirSala: (sala) => set((draft) => {
-		reconciliarSalaDaAutoridade(draft, sala);
-	})
-})));
-//#endregion
-//#region src/stores/toastStore.ts
+//#region src/stores/toastStoreVanilla.ts
 var CHANNEL_TO_TAB = {
 	combat: "log",
 	trade: "trade",
@@ -51825,7 +54520,7 @@ var nextId = 1;
 function makeId() {
 	return `toast-${nextId++}`;
 }
-var useToastStore = create((set) => ({
+var toastStore = createStore()((set) => ({
 	toasts: [],
 	chatLines: {
 		sistema: [],
@@ -51878,6 +54573,7 @@ function novoMundo(carry) {
 	if (carry) {
 		base.rng = { ...carry.rng };
 		base.counters = { ...carry.counters };
+		base.seed = carry.seed;
 	}
 	return base;
 }
@@ -51887,6 +54583,34 @@ var SPAWN_POINT_MAX_ATTEMPTS = 40;
 var SPAWN_CONE_MIN_DISTANCE = 250;
 var SPAWN_CONE_MAX_DISTANCE = 550;
 var SPAWN_CONE_HALF_ANGLE = 55 * Math.PI / 180;
+/**
+* Distancia minima ENTRE inimigos, em unidades de mundo (PH-143).
+*
+* O cone acima resolve "onde o jogador consegue ver", e so isso. Cada inimigo
+* era sorteado sem olhar onde os outros ja estavam, entao com `maxEnemies: 6`
+* (o valor das faixas em data/biomas.ts) os seis caiam na MESMA fatia de ~110
+* graus e podiam nascer colados. O resultado e um pico de dificuldade que nao
+* vem da faixa de nivel da hunt, e nada na tela denuncia que aquilo foi
+* sorteio.
+*
+* Menor que a largura util do cone de proposito: um valor grande demais nao
+* caberia na faixa 250-550 e todo spawn cairia no melhor-esforco, que e o mesmo
+* que nao ter regra.
+*/
+var SPAWN_ENTRE_INIMIGOS = 170;
+/**
+* Orcamento de tentativas quando ha vizinhos a evitar (PH-143).
+*
+* Maior que `SPAWN_POINT_MAX_ATTEMPTS`, e por geometria e nao por capricho: o
+* cone comporta os seis inimigos com folga (a area util e ~230 mil unidades²
+* contra ~136 mil que seis discos de raio 85 ocupam), mas o dardo aleatorio vai
+* ficando sem espaco conforme a regiao enche, e com 40 tentativas os ultimos
+* caiam quase sempre no melhor-esforco. Medido: a mediana da menor distancia
+* subiu de 108 para o dobro so com este orcamento.
+*
+* So custa sorteio no INSTANTE do spawn, nunca por quadro.
+*/
+var SPAWN_ESPACADO_MAX_ATTEMPTS = 160;
 function randomSpawnPointFullMap(rng, mapDef) {
 	const cx = mapDef.bounds.width / 2;
 	const cy = mapDef.bounds.height / 2;
@@ -51909,29 +54633,52 @@ function randomSpawnPointFullMap(rng, mapDef) {
 		y
 	};
 }
-function randomSpawnPoint(rng, mapDef, player) {
+/** Distancia do ponto ao inimigo ja posicionado mais proximo. */
+function folgaAte(x, y, ocupados) {
+	let menor = Number.POSITIVE_INFINITY;
+	for (const o of ocupados) menor = Math.min(menor, Math.hypot(x - o.x, y - o.y));
+	return menor;
+}
+/**
+* `ocupados`: onde os inimigos JA posicionados nesta leva estao (PH-143).
+*
+* O ponto sorteado precisa respeitar `SPAWN_ENTRE_INIMIGOS` em relacao a eles.
+* Quando nenhuma das tentativas consegue (corredor estreito, sala pequena,
+* muitos inimigos), vale o MELHOR ESFORCO — o candidato valido mais afastado
+* dos outros — e nao o fallback de mapa inteiro: perder o espacamento e melhor
+* que perder o cone de visao, que e pedido explicito do usuario.
+*/
+function randomSpawnPoint(rng, mapDef, player, ocupados = []) {
 	if (!player) return randomSpawnPointFullMap(rng, mapDef);
 	const cx = mapDef.bounds.width / 2;
 	const cy = mapDef.bounds.height / 2;
 	const radius = mapWalkRadius(mapDef);
 	const facingAngle = Math.atan2(player.facing.y, player.facing.x);
-	for (let attempts = 0; attempts < SPAWN_POINT_MAX_ATTEMPTS; attempts++) {
+	let melhor = null;
+	const orcamento = ocupados.length > 0 ? SPAWN_ESPACADO_MAX_ATTEMPTS : SPAWN_POINT_MAX_ATTEMPTS;
+	for (let attempts = 0; attempts < orcamento; attempts++) {
 		const angle = facingAngle + randRange(rng, -SPAWN_CONE_HALF_ANGLE, SPAWN_CONE_HALF_ANGLE);
 		const dist = randRange(rng, SPAWN_CONE_MIN_DISTANCE, SPAWN_CONE_MAX_DISTANCE);
 		const x = player.x + Math.cos(angle) * dist;
 		const y = player.y + Math.sin(angle) * dist;
 		if (Math.hypot(x - cx, y - cy) > radius) continue;
 		if (isCellBlocked(mapDef, x, y)) continue;
-		return {
-			x,
-			y
+		const folga = folgaAte(x, y, ocupados);
+		if (!melhor || folga > melhor.folga) melhor = {
+			ponto: {
+				x,
+				y
+			},
+			folga
 		};
+		if (melhor.folga >= SPAWN_ENTRE_INIMIGOS * 1.5) break;
 	}
+	if (melhor) return melhor.ponto;
 	return randomSpawnPointFullMap(rng, mapDef);
 }
-function spawnEnemyAt(world, mapDef, pool, janela, player, entrada) {
+function spawnEnemyAt(world, mapDef, pool, janela, player, entrada, ocupados = []) {
 	const { rng, counters } = world;
-	const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null);
+	const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null, ocupados);
 	const encounterId = weightedPick(rng, pool, (id) => getEncounter(id)?.weight ?? 45);
 	const encounter = getEncounter(encounterId);
 	if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
@@ -52015,7 +54762,7 @@ function trocarPorDesmaio(world, gameState, dt, silent) {
 		player.pathTargetX = null;
 		player.pathTargetY = null;
 	}
-	if (!silent) useToastStore.getState().pushToast(`${shinyPrefix(nextPoke.isShiny)}${SPECIES[nextPoke.speciesId].name} entrou em campo!`, "success", "combat");
+	if (!silent) toastStore.getState().pushToast(`${shinyPrefix(nextPoke.isShiny)}${SPECIES[nextPoke.speciesId].name} entrou em campo!`, "success", "combat");
 }
 function spawnSequenceEnemy(world, mapDef, index, entrada) {
 	const { rng, counters } = world;
@@ -52066,6 +54813,7 @@ function buildMapWorld(mapId, activePoke, carry, progresso) {
 	const sequenceIndex = progresso?.sequenceIndex ?? 0;
 	const sequenceCleared = progresso?.sequenceCleared ?? false;
 	const countdownRemaining = sequenceIndex > 0 || sequenceCleared ? null : mapDef.startCountdown || null;
+	const climaDaConstrucao = progresso && "clima" in progresso ? climaDeAmbiente(progresso.clima ?? null) : climaAmbienteDaSala(base.seed, sala);
 	const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool);
 	const enemies = [];
 	if (!countdownRemaining && !sequenceCleared) {
@@ -52074,7 +54822,7 @@ function buildMapWorld(mapId, activePoke, carry, progresso) {
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
 		} else for (let i = 0; i < mapDef.maxEnemies; i++) {
-			const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala));
+			const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala), enemies);
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
 		}
@@ -52094,7 +54842,9 @@ function buildMapWorld(mapId, activePoke, carry, progresso) {
 		sequenceIndex,
 		sequenceCleared,
 		countdownRemaining,
-		sala
+		sala,
+		clima: climaDaConstrucao,
+		climaAmbiente: climaDaConstrucao
 	};
 }
 function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
@@ -52160,16 +54910,16 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			duration: 1.1,
 			owner: enemy
 		}));
-		useToastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${rarityOf(enemy.poke).label}] derrotado! +${expGain} EXP, +${loot.gold} ouro`, "gold", "combat", realceDaRaridade(enemy.poke));
+		toastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${rarityOf(enemy.poke).label}] derrotado! +${expGain} EXP, +${loot.gold} ouro`, "gold", "combat", realceDaRaridade(enemy.poke));
 		if (grantResult.leveledUp) {
 			const ganhos = formatStatGains(grantResult.statGains);
-			useToastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ""}`, "levelup", "combat");
-			for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) useToastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, "levelup", "combat");
+			toastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ""}`, "levelup", "combat");
+			for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) toastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, "levelup", "combat");
 		}
-		if (trainerResult.leveledUp) useToastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, "levelup", "combat");
+		if (trainerResult.leveledUp) toastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, "levelup", "combat");
 		for (const itemId of loot.droppedItems) {
 			const item = getItem(itemId);
-			if (item) useToastStore.getState().pushToast(`Item encontrado: ${item.name}`, "success", "world");
+			if (item) toastStore.getState().pushToast(`Item encontrado: ${item.name}`, "success", "world");
 		}
 		if (captureResult && "ballItemId" in captureResult && captureResult.ballItemId) {
 			const quadros = captureAnimFrameCount(captureResult.success);
@@ -52186,12 +54936,12 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			}));
 		}
 		if (captureResult) {
-			if (captureResult.success && captureResult.location === "vendido") useToastStore.getState().pushToast(`${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
+			if (captureResult.success && captureResult.location === "vendido") toastStore.getState().pushToast(`${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
 			else if (captureResult.success) {
 				const location = "mochila";
 				const raridade = rarityOf(captureResult.poke).label;
-				useToastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
-			} else if (captureResult.reason === "roll_failed") useToastStore.getState().pushToast("A captura falhou!", "capture-fail", "combat");
+				toastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
+			} else if (captureResult.reason === "roll_failed") toastStore.getState().pushToast("A captura falhou!", "capture-fail", "combat");
 		}
 	}
 	return {
@@ -52224,7 +54974,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 			} else {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
 				for (let i = 0; i < world.mapDef.maxEnemies; i++) {
-					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala));
+					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
 					aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 					world.enemies.push(enemy);
 				}
@@ -52243,14 +54993,14 @@ function stepWorld(world, dt, gameState, opts = {}) {
 			if (world.mapDef) {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
 				for (let i = 0; i < world.mapDef.maxEnemies; i++) {
-					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala));
+					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
 					aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 					world.enemies.push(enemy);
 				}
 				world.respawnTimer = world.mapDef.respawnDelay;
 				if (!silent) {
 					const nome = nomeDaSala(world.sala);
-					useToastStore.getState().pushToast(fechouCiclo ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.` : `Entrando em nova area: ${nome}.`, "success", "world");
+					toastStore.getState().pushToast(fechouCiclo ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.` : `Entrando em nova area: ${nome}.`, "success", "world");
 				}
 			}
 		}
@@ -52275,16 +55025,16 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		const penaltyResult = applyDeathExpPenalty(world.player.poke);
 		world.player.poke = penaltyResult.poke;
 		gameState.updatePokeInstance(penaltyResult.poke.uid, () => penaltyResult.poke);
-		if (!silent) useToastStore.getState().pushToast(`${SPECIES[world.player.poke.speciesId].name} desmaiou!${penaltyResult.leveledDown ? ` Caiu para o nivel ${penaltyResult.level}.` : ""}`, "error", "combat");
+		if (!silent) toastStore.getState().pushToast(`${SPECIES[world.player.poke.speciesId].name} desmaiou!${penaltyResult.leveledDown ? ` Caiu para o nivel ${penaltyResult.level}.` : ""}`, "error", "combat");
 	}
 	trocarPorDesmaio(world, gameState, dt, silent);
 	const autoEvents = updateAutoHeal(world, gameState, dt);
 	if (!silent) for (const ev of autoEvents) {
 		if (ev.type === "auto_pot") {
 			const item = getItem(ev.itemId);
-			if (item) useToastStore.getState().pushToast(`Auto-pot usou ${item.name}.`, "success", "combat");
+			if (item) toastStore.getState().pushToast(`Auto-pot usou ${item.name}.`, "success", "combat");
 		}
-		if (ev.type === "auto_revive") useToastStore.getState().pushToast("Auto-revive reanimou seu POKE!", "success", "combat");
+		if (ev.type === "auto_revive") toastStore.getState().pushToast("Auto-revive reanimou seu POKE!", "success", "combat");
 	}
 	const aliveCount = world.enemies.filter((e) => !isDead(e)).length;
 	if (world.mapDef.sequence && world.mapDef.unlocksContinentOnClear?.length && !world.sequenceCleared && aliveCount === 0 && world.sequenceIndex === world.mapDef.sequence.length - 1) {
@@ -52292,13 +55042,13 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		const grupos = world.mapDef.unlocksContinentOnClear;
 		const algumEstavaTrancado = grupos.some((g) => !gameState.isContinentUnlocked(g));
 		for (const grupo of grupos) gameState.unlockContinent(grupo);
-		if (!silent && algumEstavaTrancado) useToastStore.getState().pushToast("Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.", "success", "world");
+		if (!silent && algumEstavaTrancado) toastStore.getState().pushToast("Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.", "success", "world");
 	}
 	if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
 		if (world.respawnTimer <= 0) {
 			const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
-			const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala));
+			const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
 			aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 			world.enemies.push(enemy);
 			world.respawnTimer = world.mapDef.respawnDelay;
@@ -53341,6 +56091,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 	const rng = restoreRng(Number(sessao.rng_state), Number(sessao.rng_draws));
 	const world = buildMapWorld(sessao.map_id, ativo, {
 		rng,
+		seed: Number(sessao.seed),
 		counters: {
 			entity: 1,
 			effect: 1,
@@ -53398,6 +56149,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		estado,
 		piso,
 		sala: world.sala,
+		clima: world.climaAmbiente?.tipo ?? null,
 		encerrada: resumo.stoppedEarly ? "desmaio" : null
 	};
 }
@@ -53571,11 +56323,13 @@ async function abrirSessao(cfg, userId, req) {
 			since: Date.now()
 		}
 	});
+	const climaInicial = climaDaSala(semente, salaInicial);
 	return json({
 		sessaoId: criada.id,
 		mapId,
 		iniciadaEm: criada.last_flush_at,
-		sala: salaInicial
+		sala: salaInicial,
+		clima: climaInicial
 	});
 }
 async function flush(cfg, userId, parcial) {
@@ -53606,6 +56360,7 @@ async function flush(cfg, userId, parcial) {
 		piso: resultado.piso,
 		sessaoEncerrada: resultado.encerrada,
 		sala: resultado.sala,
+		clima: resultado.clima,
 		estadoParcial: parcial,
 		estado: resultado.estado
 	});

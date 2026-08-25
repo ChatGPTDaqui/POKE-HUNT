@@ -41,7 +41,7 @@ function simular(pessimista: boolean, semente: number) {
   const gameState = useGameStateStore.getState()
   const rng = createRng(semente)
   const poke = createPokeInstance(rng, 'charmander', 30)
-  const world = buildMapWorld('route_46', poke, {
+  const world = buildMapWorld('route_46', poke, { seed: 0,
     rng: createRng(semente),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
   })
@@ -77,19 +77,24 @@ describe('world.pessimista: farm offline nunca renderiza melhor que ao vivo (PH-
   })
 
   // Timeout explicito de 120s. Este e o teste de simulacao mais pesado do
-  // projeto (40 sementes x 1h de mundo cada, nos dois modos) e ele ficava a
-  // 33s, dentro do `testTimeout` padrao de 45s.
+  // projeto (40 sementes x 1h de mundo cada, nos dois modos).
   //
-  // O PH-94 dividiu a celula da grade de colisao por dois pra o walk-block
-  // respeitar a pintura, e isso multiplicou as celulas por 4. O A* de rota
-  // varre o conjunto aberto inteiro a cada expansao (O(n^2)) e usa string como
-  // chave de celula, entao o custo subiu mais que os 4x: 33s -> 58s, medido.
+  // A HISTORIA DO NUMERO, que e o que faz o timeout nao esconder regressao:
   //
-  // Subir o timeout aqui NAO esconde regressao: o numero esta escrito acima, a
-  // causa esta documentada no cabecalho de `core/pathfinding.ts`, e o conserto
-  // (heap binario + chave numerica) e o PH-102 — ele fica de fora desta leva
-  // porque muda o desempate entre rotas de mesmo custo, ou seja muda a
-  // simulacao, e nao pode entrar de carona numa mudanca de grade.
+  //   33s  antes do PH-94
+  //   58s  depois do PH-94 (celula da grade dividida por dois pro walk-block
+  //        respeitar a pintura, 4x mais celulas; o A* era O(n^2) com chave de
+  //        string, entao o custo subiu mais que os 4x)
+  //   30s  depois do PH-102 (heap binario + chave numerica)
+  //
+  // Ou seja: voltou pra baixo do `testTimeout` padrao de 45s, e ficou ABAIXO
+  // do numero de antes da grade fina. O timeout explicito continua aqui de
+  // proposito — a folga e o que separa "regressao" de "a maquina do CI estava
+  // ocupada", e apertar ele agora so trocaria um problema por flake.
+  //
+  // Medido isolado na maior grade real (`dragon`, 10.605 celulas), 2.000
+  // buscas: 1.028ms -> 277ms, 3,7x. E a rota devolvida e IDENTICA — ver
+  // `core/pathfindingEquivalente.test.ts`.
   //
   // Em producao este custo nao chega: `FARM_OFFLINE_PAUSADO` faz o resim
   // offline do servidor nao simular nada, e o flush ao vivo sao ~1.800 passos.

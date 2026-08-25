@@ -242,7 +242,13 @@ function golpesDeNivelNoUsum(pokemon) {
  * Muta `especies` in-place (mesmo padrao de `golpesDeNivelNoUsum`, que ja
  * dedupe linha exata antes disto rodar).
  */
-function removerGolpesDeRecordador(especies) {
+// Poder a partir do qual um golpe restaurado NAO volta pro nivel 1 — ver o
+// escape dentro da funcao. Espelha o piso do teste
+// src/data/activeAbilities.test.ts#"nenhuma especie EVOLUIDA entrega golpe de
+// poder >= 100 no nivel 1".
+const PODER_QUE_NAO_VOLTA_PRO_NIVEL_1 = 100;
+
+function removerGolpesDeRecordador(especies, poderPorGolpe = {}, comPaiReal = new Set()) {
   const paiDe = new Map();
   for (const e of especies) {
     if (!e.evolvesTo || !e.evolvesAtLevel) continue;
@@ -250,8 +256,32 @@ function removerGolpesDeRecordador(especies) {
     if (!atual || e.evolvesAtLevel < atual.nivel) paiDe.set(e.evolvesTo, { id: e.chave, nivel: e.evolvesAtLevel });
   }
 
+  // PH-150 — "e estagio-base?" nao pode ser respondido pelo ELENCO.
+  //
+  // O laco acima so enxerga pai que esta no recorte de dex. O Sudowoodo evolui
+  // de Bonsly (#438, fora do recorte): sem pai ali, ele passava por estagio-base
+  // e o bloco de nivel 1 dele — que e a lista do Recordador de uma forma
+  // evoluida — ficava inteiro, entregando `wood_hammer` (120 de poder) num POKE
+  // selvagem de nivel 1.
+  //
+  // `nivel: 1` porque, NESTE jogo, essas especies existem desde o nivel 1: sem o
+  // pai no elenco elas nascem na hunt, e nao ha "nivel em que a especie passa a
+  // existir" diferente de 1. O campo so e lido em dois lugares — golpe marcado
+  // como de evolucao, e o escape de moveset curto — e na faixa atual nenhuma das
+  // cinco especies afetadas cai em nenhum dos dois. Se uma faixa futura cair, o
+  // teste "nenhuma especie EVOLUIDA entrega golpe de poder >= 100 no nivel 1"
+  // (src/data/activeAbilities.test.ts) passa a valer pra elas e reprova.
+  //
+  // `id: null` e literal: nao existe especie de origem no elenco pra apontar.
+  for (const e of especies) {
+    if (paiDe.has(e.chave) || !comPaiReal.has(e.chave)) continue;
+    paiDe.set(e.chave, { id: null, nivel: 1 });
+  }
+
   let removidos = 0;
+  const restaurados = [];
   for (const especie of especies) {
+    const descartados = [];
     const porGolpe = new Map();
     for (const g of especie.golpes) {
       const info = porGolpe.get(g.chave);
@@ -274,11 +304,60 @@ function removerGolpesDeRecordador(especies) {
       // (marca preservada por golpesDeNivelNoUsum) fica, exigindo o nivel em
       // que a especie evoluiu pra existir; o resto e bloco de Recordador puro.
       if (info.evolucao) { golpesNovos.push({ chave: golpe, nivel: pai.nivel }); continue; }
+      descartados.push(golpe);
       removidos += info.niveis.length;
+    }
+
+    // ESCAPE: especie cujo bloco de nivel 1 era o moveset INTEIRO.
+    //
+    // A regra acima pressupoe que a especie evoluida tem golpe de nivel proprio
+    // e que o bloco de nivel 1 e so o Recordador repetindo o que ela ja
+    // aprende. Isso vale pra evolucao por nivel e NAO vale pra evolucao por
+    // pedra: no jogo original Raichu, Wigglytuff, Clefable, Arcanine e Starmie
+    // nao aprendem quase nada subindo de nivel — o kit todo mora no bloco de
+    // nivel 1. Aplicar a regra ali deixava Raichu, Wigglytuff e Clefable com
+    // ZERO golpes e Arcanine com um so, a partir do nivel 34.
+    //
+    // Ate PH-145 isso nao aparecia porque essas especies nao tinham pai:
+    // evolucao por pedra nem existia no catalogo, entao elas passavam por
+    // `base stage` e ficavam com o bloco. Nao e regressao daquela mudanca — e
+    // um buraco da regra que so ficou alcancavel agora.
+    //
+    // O criterio e o TAMANHO do que sobrou, em toda a vida da especie: menos de
+    // MAX_ACTIVE_ABILITIES golpes e o bloco volta inteiro.
+    //
+    // Quatro e o numero de slots ativos do jogo
+    // (`src/data/activeAbilities.ts#MAX_ACTIVE_ABILITIES`): abaixo disso o POKE
+    // entra em combate com slot preenchido por Ataque Basico, que e o sintoma
+    // que este escape existe pra evitar. Charizard tem treze e nao entra;
+    // Raichu, Wigglytuff e Clefable tinham ZERO, Arcanine e Starmie um.
+    //
+    // Nao usar "quantos golpes ate o nivel em que a especie surge": Charizard
+    // so aprende acima do nivel 1 a partir do 36, o mesmo nivel em que ele
+    // evolui, e o criterio dispararia pra 88 especies — devolvendo justamente o
+    // Recordador que a v6.8 tirou.
+    const SLOTS_ATIVOS = 4;
+    if (descartados.length && golpesNovos.length < SLOTS_ATIVOS) {
+      for (const golpe of descartados) {
+        // Golpe FORTE nao volta pro nivel 1 — vai pro nivel em que a especie
+        // surge. O bloco do Cloyster tem Hydro Pump (110 de poder); devolver
+        // aquilo no nivel 1 daria a um Cloyster selvagem Lv5 o golpe mais forte
+        // do jogo, e e exatamente o que o teste
+        // "nenhuma especie EVOLUIDA entrega golpe de poder >= 100 no nivel 1"
+        // guarda. O resto do bloco fica no 1: e o kit que faz a especie ter o
+        // que jogar.
+        const forte = (poderPorGolpe[golpe] ?? 0) >= PODER_QUE_NAO_VOLTA_PRO_NIVEL_1;
+        golpesNovos.push({ chave: golpe, nivel: forte ? pai.nivel : 1 });
+        removidos -= porGolpe.get(golpe).niveis.length;
+      }
+      restaurados.push(especie.chave);
     }
 
     golpesNovos.sort((a, b) => a.nivel - b.nivel || a.chave.localeCompare(b.chave));
     especie.golpes = golpesNovos;
+  }
+  if (restaurados.length) {
+    console.log(`  bloco de nivel 1 devolvido a ${restaurados.length} especie(s) que ficariam sem golpe: ${restaurados.join(', ')}`);
   }
   return removidos;
 }

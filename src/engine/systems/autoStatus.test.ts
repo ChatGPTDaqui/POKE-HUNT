@@ -15,7 +15,7 @@ import type { StatusCondition } from '@/data/statusEffects'
 function cenario(status: StatusCondition, itens: Record<string, number>) {
   const rng = createRng(3)
   const poke = createPokeInstance(rng, 'charmander', 30)
-  const world = buildMapWorld('route_46', poke, { rng, counters: { entity: 1, effect: 1, pendingHit: 1 } })
+  const world = buildMapWorld('route_46', poke, { seed: 0, rng, counters: { entity: 1, effect: 1, pendingHit: 1 } })
   const player = world.player!
   player.poke.status = { tipo: status, turnosRestantes: 5 }
 
@@ -107,7 +107,7 @@ describe('auto-status', () => {
   it('a confusao (volatil) tambem e curada', () => {
     const rng = createRng(3)
     const poke = createPokeInstance(rng, 'charmander', 30)
-    const world = buildMapWorld('route_46', poke, { rng, counters: { entity: 1, effect: 1, pendingHit: 1 } })
+    const world = buildMapWorld('route_46', poke, { seed: 0, rng, counters: { entity: 1, effect: 1, pendingHit: 1 } })
     const player = world.player!
     player.statusVolatil = { tipo: 'confusion', turnosRestantes: 3 }
     useGameStateStore.setState({

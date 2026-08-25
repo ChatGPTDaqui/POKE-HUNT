@@ -37,6 +37,7 @@ import { StatusRail } from '@/components/hud/StatusRail'
 import { ReservasRail } from '@/components/hud/ReservasRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
 import { SalaChip } from '@/components/hud/SalaChip'
+import { ClimaChip } from '@/components/hud/ClimaChip'
 import { ChatLog } from '@/components/toasts/ChatLog'
 import { ChatMobile } from '@/components/toasts/ChatMobile'
 import { AutoWindow } from '@/components/auto/AutoFloatingPanel'
@@ -74,7 +75,14 @@ export function HudLayer() {
       <div className="absolute inset-x-[.5em] top-[.5em] z-20 flex flex-col items-start gap-[.4em]">
         <div className="flex w-full max-w-[64em] flex-col gap-[.4em]">
           <StatusRail />
-          <SalaChip />
+          {/* Sala e clima na MESMA linha: os dois descrevem o lugar onde o
+              jogador esta, e o clima e propriedade da sala (PH-140/PH-141).
+              `flex-wrap` porque em 390px os dois nao cabem lado a lado — ali o
+              clima desce pra linha de baixo em vez de espremer a sala. */}
+          <div className="flex w-full flex-wrap items-center gap-[.4em]">
+            <SalaChip />
+            <ClimaChip />
+          </div>
           {/* Trilho de reservas: mesma coluna do trilho de status, e nao uma
               ancora propria na borda esquerda. A ancora foi tentada uma vez
               (`ActivePokeCard`, ver o cabecalho deste arquivo) e cobria o HP em

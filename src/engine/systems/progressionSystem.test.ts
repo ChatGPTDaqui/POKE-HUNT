@@ -10,7 +10,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { createRng } from '@/core/rng'
-import { createPokeInstance, SPECIES } from '@/data/pokes'
+import { createPokeInstance, SPECIES, SPECIAL_EVOLUTION_STONE_COUNT } from '@/data/pokes'
 import { stoneItemId } from '@/data/stones'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { evolvePokeInstance, expProgressForInstance, grantExp } from './progressionSystem'
@@ -61,7 +61,11 @@ describe('evolvePokeInstance — nao muta gameState, so calcula (PH-12)', () => 
   it('devolve stoneReq mas nao remove o item da store, mesmo com estoque suficiente', () => {
     const gameState = useGameStateStore.getState()
     const itemId = stoneItemId(SPECIES.kadabra.type)
-    gameState.addItem(itemId, 20)
+    // Estoque EXATAMENTE no requisito: o caso de borda que separa "pode" de
+    // "nao pode". Vem da constante, e nao de um literal, pra o teste seguir a
+    // regra quando o custo mudar (PH-136 dobrou de 20 pra 40) — o literal que
+    // guarda o valor pretendido esta no bloco de custo mais abaixo.
+    gameState.addItem(itemId, SPECIAL_EVOLUTION_STONE_COUNT)
     const poke = createPokeInstance(createRng(1), 'kadabra', 80)
 
     const result = evolvePokeInstance(poke, gameState)
@@ -69,11 +73,11 @@ describe('evolvePokeInstance — nao muta gameState, so calcula (PH-12)', () => 
     expect(result).not.toBeNull()
     expect(result && 'blocked' in result).toBe(false)
     if (result && !('blocked' in result)) {
-      expect(result.stoneReq).toEqual({ itemId, count: 20, type: SPECIES.kadabra.type })
+      expect(result.stoneReq).toEqual({ itemId, count: SPECIAL_EVOLUTION_STONE_COUNT, type: SPECIES.kadabra.type })
       expect(result.updatedPoke.speciesId).toBe('alakazam')
     }
-    // A propria chamada nao mutou nada -- 20 Stones seguem la.
-    expect(useGameStateStore.getState().items[itemId]).toBe(20)
+    // A propria chamada nao mutou nada -- as Stones seguem la.
+    expect(useGameStateStore.getState().items[itemId]).toBe(SPECIAL_EVOLUTION_STONE_COUNT)
   })
 
   it('sem Stones suficientes: bloqueia sem tocar em nada', () => {

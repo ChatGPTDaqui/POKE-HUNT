@@ -68,7 +68,10 @@
         "bioma": "wasteland",
         "peso": 2
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "badlands": {
     "pools": {
@@ -134,7 +137,12 @@
         "bioma": "mountain",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 8,
+      "SANDSTORM": 2,
+      "SUNNY": 5
+    }
   },
   "beach": {
     "pools": {
@@ -197,7 +205,12 @@
         "bioma": "island",
         "peso": 2
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 8,
+      "RAIN": 3,
+      "SUNNY": 5
+    }
   },
   "cave": {
     "pools": {
@@ -271,7 +284,10 @@
         "bioma": "laboratory",
         "peso": 2
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "construction-site": {
     "pools": {
@@ -331,7 +347,10 @@
         "bioma": "dojo",
         "peso": 2
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "desert": {
     "pools": {
@@ -409,7 +428,12 @@
         "bioma": "construction-site",
         "peso": 2
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 2,
+      "SANDSTORM": 8,
+      "SUNNY": 5
+    }
   },
   "dojo": {
     "pools": {
@@ -487,7 +511,10 @@
         "bioma": "temple",
         "peso": 2
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "end": {
     "pools": {
@@ -526,7 +553,10 @@
       "BOSS_SUPER_RARE": [],
       "BOSS_ULTRA_RARE": []
     },
-    "links": []
+    "links": [],
+    "clima": {
+      "NONE": 1
+    }
   },
   "factory": {
     "pools": {
@@ -578,7 +608,10 @@
         "bioma": "laboratory",
         "peso": 2
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "fairy-cave": {
     "pools": {
@@ -645,7 +678,10 @@
         "bioma": "space",
         "peso": 2
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "forest": {
     "pools": {
@@ -755,7 +791,11 @@
         "bioma": "meadow",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 8,
+      "RAIN": 4
+    }
   },
   "grass": {
     "pools": {
@@ -813,7 +853,12 @@
         "bioma": "tall-grass",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 8,
+      "RAIN": 4,
+      "SUNNY": 8
+    }
   },
   "graveyard": {
     "pools": {
@@ -877,7 +922,11 @@
         "bioma": "abyss",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 3,
+      "FOG": 1
+    }
   },
   "ice-cave": {
     "pools": {
@@ -944,7 +993,12 @@
         "bioma": "snowy-forest",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 3,
+      "SNOW": 4,
+      "HAIL": 1
+    }
   },
   "island": {
     "pools": {
@@ -994,7 +1048,12 @@
         "bioma": "sea",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 7,
+      "RAIN": 3,
+      "SUNNY": 5
+    }
   },
   "jungle": {
     "pools": {
@@ -1093,7 +1152,12 @@
         "bioma": "temple",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 8,
+      "RAIN": 6,
+      "FOG": 1
+    }
   },
   "laboratory": {
     "pools": {
@@ -1144,7 +1208,10 @@
         "bioma": "construction-site",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "lake": {
     "pools": {
@@ -1220,7 +1287,12 @@
         "bioma": "construction-site",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 10,
+      "RAIN": 4,
+      "FOG": 1
+    }
   },
   "meadow": {
     "pools": {
@@ -1308,7 +1380,11 @@
         "bioma": "fairy-cave",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 3,
+      "SUNNY": 5
+    }
   },
   "metropolis": {
     "pools": {
@@ -1361,7 +1437,10 @@
         "bioma": "slum",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "mountain": {
     "pools": {
@@ -1459,7 +1538,10 @@
         "bioma": "space",
         "peso": 3
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "plains": {
     "pools": {
@@ -1548,7 +1630,10 @@
         "bioma": "lake",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "power-plant": {
     "pools": {
@@ -1619,7 +1704,10 @@
         "bioma": "factory",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "ruins": {
     "pools": {
@@ -1686,7 +1774,10 @@
         "bioma": "forest",
         "peso": 2
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "sea": {
     "pools": {
@@ -1756,7 +1847,11 @@
         "bioma": "ice-cave",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 3,
+      "RAIN": 12
+    }
   },
   "seabed": {
     "pools": {
@@ -1847,7 +1942,10 @@
         "bioma": "volcano",
         "peso": 3
       }
-    ]
+    ],
+    "clima": {
+      "RAIN": 1
+    }
   },
   "slum": {
     "pools": {
@@ -1913,7 +2011,10 @@
         "bioma": "swamp",
         "peso": 2
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "snowy-forest": {
     "pools": {
@@ -1994,7 +2095,11 @@
         "bioma": "lake",
         "peso": 2
       }
-    ]
+    ],
+    "clima": {
+      "SNOW": 7,
+      "HAIL": 1
+    }
   },
   "space": {
     "pools": {
@@ -2051,7 +2156,10 @@
         "bioma": "ruins",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "swamp": {
     "pools": {
@@ -2125,7 +2233,12 @@
         "bioma": "tall-grass",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 3,
+      "RAIN": 4,
+      "FOG": 1
+    }
   },
   "tall-grass": {
     "pools": {
@@ -2202,7 +2315,12 @@
         "bioma": "cave",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 8,
+      "RAIN": 4,
+      "SUNNY": 4
+    }
   },
   "temple": {
     "pools": {
@@ -2259,7 +2377,10 @@
         "bioma": "ruins",
         "peso": 2
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "town": {
     "pools": {
@@ -2351,7 +2472,10 @@
         "bioma": "plains",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   },
   "volcano": {
     "pools": {
@@ -2444,7 +2568,10 @@
         "bioma": "ice-cave",
         "peso": 3
       }
-    ]
+    ],
+    "clima": {
+      "SUNNY": 1
+    }
   },
   "wasteland": {
     "pools": {
@@ -2511,6 +2638,9 @@
         "bioma": "badlands",
         "peso": 1
       }
-    ]
+    ],
+    "clima": {
+      "NONE": 1
+    }
   }
 }

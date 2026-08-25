@@ -16,8 +16,7 @@
 // nivel 5 nao diz nada sobre uma de nivel 90.
 import { useEffect, useState } from 'react'
 import { useGameStateStore } from '@/stores/gameStateStore'
-import { BEST_POTION_OPTION } from '@/engine/systems/autoSystem'
-import { estoqueDoItemDeRegra } from './estoqueBaixo'
+import { estoqueDoItemDeRegra, rotuloDaFamilia } from './estoqueBaixo'
 
 /** So avisa quando faltar menos que isto (pedido explicito). */
 export const LIMIAR_PREVISAO_HORAS = 2
@@ -61,6 +60,9 @@ export interface PrevisaoDeItem {
  */
 export function usePrevisaoDeConsumo(itemIds: string[]): PrevisaoDeItem[] {
   const items = useGameStateStore((s) => s.items)
+  // PH-144: a familia de cura de status depende de quais itens o jogador
+  // deixou habilitados, entao a conta de estoque precisa do config.
+  const autoStatusConfig = useGameStateStore((s) => s.autoStatusConfig)
   const since = useGameStateStore((s) => s.perfStats.since)
   const [, tick] = useState(0)
 
@@ -82,8 +84,9 @@ export function usePrevisaoDeConsumo(itemIds: string[]): PrevisaoDeItem[] {
   const agora = Date.now()
   const saida: PrevisaoDeItem[] = []
   for (const itemId of new Set(itemIds)) {
-    // "Escolher melhor" nao e um item: o estoque relevante e a soma das pocoes.
-    const quantidade = estoqueDoItemDeRegra(items, itemId)
+    // Id de FAMILIA nao e um item: o estoque relevante e a soma do grupo
+    // ("Escolher melhor" soma as pocoes, a familia de revive soma os revives).
+    const quantidade = estoqueDoItemDeRegra(items, itemId, autoStatusConfig)
     const marco = marcoDe(itemId, quantidade, agora)
     const segundos = (agora - marco.desde) / 1000
     if (segundos < AMOSTRA_MINIMA_SEGUNDOS) continue
@@ -103,7 +106,7 @@ export function formatarTempoRestante(horas: number): string {
   return `~${horas.toFixed(1)} h`
 }
 
-/** Rotulo do item pra previsao — `BEST_POTION_OPTION` nao tem nome proprio. */
+/** Rotulo do recurso pra previsao — id de FAMILIA nao tem nome de item. */
 export function rotuloDoRecurso(itemId: string, nomeDoItem: (id: string) => string): string {
-  return itemId === BEST_POTION_OPTION ? 'Poções (total)' : nomeDoItem(itemId)
+  return rotuloDaFamilia(itemId) ?? nomeDoItem(itemId)
 }

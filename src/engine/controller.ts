@@ -81,17 +81,41 @@ export const controller = {
     // entrada mas nunca a impede. Depois da sessao ja estar aceita de proposito:
     // se o servidor recusar, nao ha por que gastar banda.
     await preloadHunt(mapId, { speciesId: activePoke.speciesId, isShiny: activePoke.isShiny })
-    gameState.setCurrentMapId(mapId)
     // A sala inicial e a que o servidor decidiu na abertura. Sem passa-la aqui, a
     // simulacao local sorteia a propria e o jogador ve o sub-bioma trocar poucos
     // segundos depois de entrar, quando a do servidor chega no primeiro flush.
-    const world = buildMapWorld(mapId, activePoke, useWorldStore.getState(), sessao.sala ? { sala: sessao.sala } : undefined)
+    // PH-140: `clima` entra JUNTO da sala. A presenca da chave e o que diz ao
+    // motor "ha autoridade, nao derive" — o cliente nao tem a semente da sessao
+    // (ver ProgressoDaSessao.clima). Servidor mais antigo nao manda o campo, e
+    // ai o cliente volta a derivar, como no jogo local.
+    const world = buildMapWorld(
+      mapId, activePoke, useWorldStore.getState(),
+      sessao.sala ? { sala: sessao.sala, clima: sessao.clima ?? null } : undefined,
+    )
     // Com sessao aberta no servidor, a sala seguinte tambem e DELE (ver
     // engine/systems/salaSystem.ts#registrarAbate): a simulacao local para de
     // sortear sub-bioma e passa a so contar abate, e a troca chega no flush.
     // Sem servidor (jogo local) o sorteio local continua sendo o unico.
     world.salaSobAutoridade = servidorAtivo()
     useWorldStore.getState().setWorld(world)
+    // A FLAG POR ULTIMO, e nao antes de montar a cena (PH-156).
+    //
+    // `currentMapId` e o que o resto do jogo le como "estou numa cacada" — e a
+    // trava que esconde a edicao dos 4 golpes no perfil, entre outras coisas.
+    // Ela ficava gravada aqui em cima, logo depois do `preloadHunt`, e o
+    // problema e o intervalo: entre a gravacao e o `setWorld` acontecem a
+    // montagem do mundo e a leitura do `worldStore`. Qualquer excecao ali
+    // deixava a flag ligada com o Hospital na tela — e nada reconciliava isso,
+    // entao a trava sobrevivia ate o jogador recarregar a pagina (o boot zera,
+    // e e por isso que o sintoma era "so destrava com F5").
+    //
+    // Gravando depois, o estado inconsistente nao chega a existir: ou a cena
+    // subiu e a flag acompanha, ou nenhuma das duas coisas aconteceu.
+    //
+    // A ordem e segura porque `buildMapWorld` NAO le `currentMapId`, e o
+    // observador de `useSaidaAoEncerrarSessao` so acorda com mudanca no
+    // `gameStateStore` — quando esta linha roda, o `mapDef` ja esta no lugar.
+    gameState.setCurrentMapId(mapId)
     resetStats(gameState) // painel de taxa de farm reinicia do zero a cada hunt nova
     return true
   },
@@ -411,12 +435,12 @@ export const controller = {
     }
   },
 
-  async evolvePoke(pokeUid: string): Promise<void> {
+  async evolvePoke(pokeUid: string, alvo?: string): Promise<void> {
     const gameState = useGameStateStore.getState()
     const poke = [...gameState.team, ...gameState.bagPokes].find((p) => p.uid === pokeUid)
     if (!poke) return
     const previousName = SPECIES[poke.speciesId].name
-    const result = evolvePokeInstance(poke, gameState)
+    const result = evolvePokeInstance(poke, gameState, alvo)
     if (!result) return
     if ('blocked' in result) {
       const { itemId, count } = result.required
@@ -440,7 +464,7 @@ export const controller = {
     // pra guarda de reentrancia de quem chama (useAcaoPendente.run so libera
     // depois que a Promise retornada resolve) — sem isso a janela de duplo
     // clique durava um microtask (PH-13).
-    const ok = await pedirAcao({ tipo: 'evoluirPoke', pokeUid }, () => {
+    const ok = await pedirAcao({ tipo: 'evoluirPoke', pokeUid, alvo }, () => {
       if (result.stoneReq) gameState.removeItem(result.stoneReq.itemId, result.stoneReq.count)
       gameState.updatePokeInstance(pokeUid, () => result.updatedPoke)
     })

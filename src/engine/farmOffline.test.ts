@@ -24,7 +24,7 @@ function simular(mapa: string, nivel: number) {
   const gameState = useGameStateStore.getState()
   const rng = createRng(SEMENTE)
   const poke = createPokeInstance(rng, 'charmander', nivel)
-  const world = buildMapWorld(mapa, poke, {
+  const world = buildMapWorld(mapa, poke, { seed: 0,
     rng: createRng(SEMENTE),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
   })

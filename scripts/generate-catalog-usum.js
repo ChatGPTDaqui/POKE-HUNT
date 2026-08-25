@@ -76,6 +76,12 @@ function abaEspecies(catalogo) {
     'Peso (hg)': e.pesoHg,
     'Evolui Para (chave)': e.evolvesTo ? e.evolvesTo.toUpperCase() : '',
     'Evolui no Nível': e.evolvesAtLevel || '',
+    // Coluna que a planilha NUNCA teve (PH-145). As duas colunas acima so
+    // cabem um destino, e so o gatilho de nivel — e era isso que deixava
+    // evolucao por pedra/troca/amizade fora do jogo e, junto com ela, as 19
+    // especies que so apareciam como destino dessas arestas. Elas continuam
+    // sendo emitidas porque sao o que todo leitor antigo le.
+    'Evolucoes': e.evolucoes || [],
   }));
 }
 

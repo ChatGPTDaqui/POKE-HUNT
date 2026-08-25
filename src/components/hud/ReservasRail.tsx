@@ -22,6 +22,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowFatUp, IdentificationCard } from '@phosphor-icons/react'
 import { SPECIES, type PokeInstance } from '@/data/pokes'
 import { faceIconUrl } from '@/data/sprites'
+import { escolherFace, faceEmocaoUrl } from '@/data/faceEmotions'
 import { rarityOf } from '@/data/rarity'
 import { controller } from '@/engine/controller'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -157,10 +158,29 @@ export function ReservasRail() {
           const indiceNaEquipe = i + 1
           const especie = SPECIES[poke.speciesId]
           if (!especie) return null
-          const url = faceIconUrl(especie.id, poke.isShiny)
           const arrastando = arrasto?.indice === indiceNaEquipe && arrasto.passou
           const hpPct = Math.max(0, Math.min(100, (poke.hp / poke.stats.hp) * 100))
           const desmaiado = poke.hp <= 0
+          // A RESERVA DESMAIADA MOSTRA A CARA DE KO (PH-137).
+          //
+          // Antes o trilho de reservas usava so `faceIconUrl` — a face neutra,
+          // sempre. Uma reserva desmaiada aparecia sorrindo, e ela e exatamente
+          // o POKE sobre o qual o jogador precisa decidir (curar ou nao trocar
+          // pra ele).
+          //
+          // SO desmaiado, de proposito: seis caras de dor empilhadas no trilho
+          // viram poluicao, e HP baixo/status ja aparecem na barra e no selo
+          // ao lado. KO e o unico estado que muda o que se pode FAZER com o
+          // POKE. Passar o estado completo aqui e uma linha, se a decisao mudar.
+          //
+          // A cara vem de `escolherFace`, e nao de um `'dizzy'` escrito aqui:
+          // "KO tem essa cara" e decisao de faceEmotions.ts e precisa de um dono
+          // so — senao mudar a face de KO lá deixa o trilho de reservas atras.
+          const faceDeKo = escolherFace({
+            hpFrac: 0, fainted: true, status: null, statusVolatil: null, emCombate: false, festejando: false,
+          })
+          const url = (desmaiado ? faceEmocaoUrl(especie.id, poke.isShiny, faceDeKo) : null)
+            ?? faceIconUrl(especie.id, poke.isShiny)
 
           return (
             <div key={poke.uid} className="relative">

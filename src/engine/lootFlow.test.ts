@@ -31,7 +31,7 @@ describe('fluxo de loot', () => {
     const gameState = useGameStateStore.getState()
     const rng = createRng(SEMENTE)
     const poke = createPokeInstance(rng, 'charmander', 40)
-    const world = buildMapWorld(MAPA, poke, { rng: createRng(SEMENTE), counters: { entity: 1, effect: 1, pendingHit: 1 } })
+    const world = buildMapWorld(MAPA, poke, { seed: 0, rng: createRng(SEMENTE), counters: { entity: 1, effect: 1, pendingHit: 1 } })
 
     let comCaptura = 0
     let semOuro = 0

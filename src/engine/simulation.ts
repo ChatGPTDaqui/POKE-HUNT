@@ -39,6 +39,7 @@ import { createWorldEffect } from './effect'
 import { updateMovement } from './systems/movementSystem'
 import { updateCombat } from './systems/combatSystem'
 import { aplicarStatus } from './systems/statusSystem'
+import { climaAmbienteDaSala, climaDeAmbiente } from './systems/climaAmbiente'
 import { updateAnimations, tickAttackAnimTimers } from './systems/animationSystem'
 import { updateAutoHeal, maybeAutoCatch } from './systems/autoSystem'
 import { grantExp, expRewardForEnemy, grantTrainerExp, applyDeathExpPenalty } from './systems/progressionSystem'
@@ -52,9 +53,9 @@ import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
 
 import type { GameStateStore } from '@/stores/gameStateStore'
-import { emptyWorldState } from '@/stores/worldStore'
-import { useToastStore } from '@/stores/toastStore'
-import type { EnemyEntity, EnemyHazards, Point, SalaAtiva, WorldState } from './types'
+import { emptyWorldState } from './worldState'
+import { toastStore } from '@/stores/toastStoreVanilla'
+import type { ClimaTipo, EnemyEntity, EnemyHazards, Point, SalaAtiva, WorldState } from './types'
 
 export const STARTER_LEVEL = 1
 // Starters sempre saem previsiveis — raridade Comum, IV 75% (23/31) em toda
@@ -119,13 +120,17 @@ export function shinyPrefix(isShiny?: boolean): string {
 // unica sequencia derivada de uma semente so. Sem isso, cada ida ao Hospital
 // reiniciaria o stream com uma semente nova e o servidor (Fase D) teria que
 // rastrear uma semente por cena em vez de uma por sessao.
-export type SequenciaDeSorteio = Pick<WorldState, 'rng' | 'counters'>
+export type SequenciaDeSorteio = Pick<WorldState, 'rng' | 'counters' | 'seed'>
 
 function novoMundo(carry?: SequenciaDeSorteio): WorldState {
   const base = emptyWorldState()
   if (carry) {
     base.rng = { ...carry.rng }
     base.counters = { ...carry.counters }
+    // Sem isto o clima de ambiente re-sortearia a cada janela de simulacao:
+    // `emptyWorldState()` sorteia uma semente nova quando ninguem passa uma, e
+    // o clima e derivado dela (PH-140).
+    base.seed = carry.seed
   }
   return base
 }
@@ -150,6 +155,34 @@ const SPAWN_POINT_MAX_ATTEMPTS = 40
 const SPAWN_CONE_MIN_DISTANCE = 250 // "media distancia": nunca colado no jogador
 const SPAWN_CONE_MAX_DISTANCE = 550 // nem no fim do mapa — se a tentativa nao achar celula livre nessa faixa, cai no sorteio antigo (raio do mapa inteiro) abaixo
 const SPAWN_CONE_HALF_ANGLE = (55 * Math.PI) / 180 // ~110 graus de cone total
+/**
+ * Distancia minima ENTRE inimigos, em unidades de mundo (PH-143).
+ *
+ * O cone acima resolve "onde o jogador consegue ver", e so isso. Cada inimigo
+ * era sorteado sem olhar onde os outros ja estavam, entao com `maxEnemies: 6`
+ * (o valor das faixas em data/biomas.ts) os seis caiam na MESMA fatia de ~110
+ * graus e podiam nascer colados. O resultado e um pico de dificuldade que nao
+ * vem da faixa de nivel da hunt, e nada na tela denuncia que aquilo foi
+ * sorteio.
+ *
+ * Menor que a largura util do cone de proposito: um valor grande demais nao
+ * caberia na faixa 250-550 e todo spawn cairia no melhor-esforco, que e o mesmo
+ * que nao ter regra.
+ */
+const SPAWN_ENTRE_INIMIGOS = 170
+/**
+ * Orcamento de tentativas quando ha vizinhos a evitar (PH-143).
+ *
+ * Maior que `SPAWN_POINT_MAX_ATTEMPTS`, e por geometria e nao por capricho: o
+ * cone comporta os seis inimigos com folga (a area util e ~230 mil unidades²
+ * contra ~136 mil que seis discos de raio 85 ocupam), mas o dardo aleatorio vai
+ * ficando sem espaco conforme a regiao enche, e com 40 tentativas os ultimos
+ * caiam quase sempre no melhor-esforco. Medido: a mediana da menor distancia
+ * subiu de 108 para o dobro so com este orcamento.
+ *
+ * So custa sorteio no INSTANTE do spawn, nunca por quadro.
+ */
+const SPAWN_ESPACADO_MAX_ATTEMPTS = 160
 
 // Sorteio antigo (raio do mapa inteiro, sem depender de onde o jogador esta
 // olhando) — vira FALLBACK: cobre o caso sem jogador ainda (nao deveria
@@ -188,7 +221,28 @@ function randomSpawnPointFullMap(rng: Rng, mapDef: MapDef): Point {
   return { x, y }
 }
 
-function randomSpawnPoint(rng: Rng, mapDef: MapDef, player: { x: number; y: number; facing: Point } | null): Point {
+/** Distancia do ponto ao inimigo ja posicionado mais proximo. */
+function folgaAte(x: number, y: number, ocupados: Point[]): number {
+  let menor = Number.POSITIVE_INFINITY
+  for (const o of ocupados) menor = Math.min(menor, Math.hypot(x - o.x, y - o.y))
+  return menor
+}
+
+/**
+ * `ocupados`: onde os inimigos JA posicionados nesta leva estao (PH-143).
+ *
+ * O ponto sorteado precisa respeitar `SPAWN_ENTRE_INIMIGOS` em relacao a eles.
+ * Quando nenhuma das tentativas consegue (corredor estreito, sala pequena,
+ * muitos inimigos), vale o MELHOR ESFORCO — o candidato valido mais afastado
+ * dos outros — e nao o fallback de mapa inteiro: perder o espacamento e melhor
+ * que perder o cone de visao, que e pedido explicito do usuario.
+ */
+function randomSpawnPoint(
+  rng: Rng,
+  mapDef: MapDef,
+  player: { x: number; y: number; facing: Point } | null,
+  ocupados: Point[] = [],
+): Point {
   if (!player) return randomSpawnPointFullMap(rng, mapDef)
 
   const cx = mapDef.bounds.width / 2
@@ -196,15 +250,25 @@ function randomSpawnPoint(rng: Rng, mapDef: MapDef, player: { x: number; y: numb
   const radius = mapWalkRadius(mapDef)
   const facingAngle = Math.atan2(player.facing.y, player.facing.x)
 
-  for (let attempts = 0; attempts < SPAWN_POINT_MAX_ATTEMPTS; attempts++) {
+  let melhor: { ponto: Point; folga: number } | null = null
+  const orcamento = ocupados.length > 0 ? SPAWN_ESPACADO_MAX_ATTEMPTS : SPAWN_POINT_MAX_ATTEMPTS
+  for (let attempts = 0; attempts < orcamento; attempts++) {
     const angle = facingAngle + randRange(rng, -SPAWN_CONE_HALF_ANGLE, SPAWN_CONE_HALF_ANGLE)
     const dist = randRange(rng, SPAWN_CONE_MIN_DISTANCE, SPAWN_CONE_MAX_DISTANCE)
     const x = player.x + Math.cos(angle) * dist
     const y = player.y + Math.sin(angle) * dist
     if (Math.hypot(x - cx, y - cy) > radius) continue
     if (isCellBlocked(mapDef, x, y)) continue
-    return { x, y }
+    const folga = folgaAte(x, y, ocupados)
+    if (!melhor || folga > melhor.folga) melhor = { ponto: { x, y }, folga }
+    // Sai cedo SO quando ja esta bem servido. Aceitar o primeiro que passa
+    // raspando espalha pior: o ponto "ok por pouco" rouba o espaco de quem vem
+    // depois, e a leva inteira termina mais apertada do que precisava.
+    if (melhor.folga >= SPAWN_ENTRE_INIMIGOS * 1.5) break
   }
+  // Melhor esforco: o candidato valido mais afastado dos outros. Perder o
+  // espacamento e melhor que perder o cone de visao, que e pedido explicito.
+  if (melhor) return melhor.ponto
   return randomSpawnPointFullMap(rng, mapDef)
 }
 
@@ -215,9 +279,12 @@ function spawnEnemyAt(
   janela?: [number, number],
   player?: { x: number; y: number; facing: Point } | null,
   entrada?: Point | null,
+  // PH-143: onde os outros inimigos ja estao, pra este nao nascer em cima
+  // deles. Ausente = leva de um inimigo so, nao ha com quem se espremer.
+  ocupados: Point[] = [],
 ): EnemyEntity {
   const { rng, counters } = world
-  const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null)
+  const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null, ocupados)
   // Ponderado pelo TIER de spawn da especie, derivado da chance real de
   // encontro selvagem do Gen1/Gen2 (ver scripts/derive-spawn-tiers.js) — quem e
   // comum nos jogos reais aparece mais que quem e raro, dentro da mesma hunt.
@@ -346,7 +413,7 @@ function trocarPorDesmaio(world: WorldState, gameState: GameStateStore, dt: numb
     player.pathTargetY = null
   }
   if (!silent) {
-    useToastStore.getState().pushToast(
+    toastStore.getState().pushToast(
       `${shinyPrefix(nextPoke.isShiny)}${SPECIES[nextPoke.speciesId].name} entrou em campo!`,
       'success', 'combat',
     )
@@ -417,6 +484,23 @@ export interface ProgressoDaSessao {
   sequenceCleared?: boolean
   /** Sala em que a sessao parou. Ausente = comeca uma sala nova sorteada. */
   sala?: SalaAtiva | null
+  /**
+   * O clima que o SERVIDOR sorteou para esta sala (PH-140).
+   *
+   * `undefined` e `null` querem dizer coisas diferentes, e a distincao e o
+   * ponto deste campo:
+   *
+   * - `undefined` — nao ha autoridade (jogo local, ou o proprio servidor
+   *   montando o mundo dele). O clima e DERIVADO de `(seed, sala)`.
+   * - `null` — a autoridade falou, e o que ela disse foi "ceu limpo".
+   *
+   * Existe porque o cliente NAO conhece a semente da sessao e nunca vai
+   * conhecer: e ela que decide shiny, IV, raridade e crit, e um cliente que a
+   * tivesse preveria o proximo shiny (ver core/rng.ts). Sem este campo, cliente
+   * e servidor derivariam climas diferentes — o jogador veria o ceu limpo
+   * enquanto o servidor cobrava dano de areia.
+   */
+  clima?: ClimaTipo | null
 }
 
 export function buildMapWorld(
@@ -460,6 +544,14 @@ export function buildMapWorld(
   const retomando = sequenceIndex > 0 || sequenceCleared
   const countdownRemaining = retomando ? null : (mapDef.startCountdown || null)
 
+  // PH-140: com autoridade o clima vem PRONTO no progresso; sem ela, e derivado
+  // de `(seed, sala)`. `'clima' in progresso` e nao `progresso.clima != null`
+  // porque ausente e "nao ha autoridade" e `null` e "a autoridade disse ceu
+  // limpo" — ver `ProgressoDaSessao.clima`.
+  const climaDaConstrucao = progresso && 'clima' in progresso
+    ? climaDeAmbiente(progresso.clima ?? null)
+    : climaAmbienteDaSala(base.seed, sala)
+
   const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool)
 
   const enemies: EnemyEntity[] = []
@@ -470,7 +562,7 @@ export function buildMapWorld(
       enemies.push(enemy)
     } else {
       for (let i = 0; i < mapDef.maxEnemies; i++) {
-        const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala))
+        const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala), enemies)
         aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
         enemies.push(enemy)
       }
@@ -488,6 +580,18 @@ export function buildMapWorld(
     sequenceCleared,
     countdownRemaining,
     sala,
+    // PH-140: o clima de ambiente e reposto em TODA construcao de mundo, e nao
+    // guardado. E o que faz ele sobreviver ao flush do servidor (que reconstroi
+    // o mundo a cada 30-90s) sem coluna nova em `game_sessions`: mesma
+    // `(seed, sala)`, mesmo clima.
+    //
+    // Com autoridade, o clima vem PRONTO no progresso em vez de ser derivado —
+    // o cliente nao tem a semente da sessao. Ver `ProgressoDaSessao.clima`.
+    //
+    // Clima de GOLPE nao volta aqui de proposito — 10 turnos nao atravessam
+    // reconstrucao de mundo, igual estagio de atributo e escudo.
+    clima: climaDaConstrucao,
+    climaAmbiente: climaDaConstrucao,
   }
 }
 
@@ -558,7 +662,7 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
       value: loot.gold, unit: '🪙', color: '#fff59d', duration: 1.1, owner: enemy,
     }))
 
-    useToastStore.getState().pushToast(
+    toastStore.getState().pushToast(
       `${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${rarityOf(enemy.poke).label}] derrotado! +${expGain} EXP, +${loot.gold} ouro`,
       'gold', 'combat', realceDaRaridade(enemy.poke),
     )
@@ -568,21 +672,21 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
       // sem ele o level-up so dizia "subiu de nivel" e o jogador precisava
       // abrir o perfil pra descobrir se aquilo valeu alguma coisa.
       const ganhos = formatStatGains(grantResult.statGains)
-      useToastStore.getState().pushToast(
+      toastStore.getState().pushToast(
         `${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ''}`,
         'levelup', 'combat',
       )
       for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) {
-        useToastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, 'levelup', 'combat')
+        toastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, 'levelup', 'combat')
       }
     }
     if (trainerResult.leveledUp) {
-      useToastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, 'levelup', 'combat')
+      toastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, 'levelup', 'combat')
     }
 
     for (const itemId of loot.droppedItems) {
       const item = getItem(itemId)
-      if (item) useToastStore.getState().pushToast(`Item encontrado: ${item.name}`, 'success', 'world')
+      if (item) toastStore.getState().pushToast(`Item encontrado: ${item.name}`, 'success', 'world')
     }
 
     // Animacao de arremesso de Pokebola — so pra uma tentativa de verdade.
@@ -601,7 +705,7 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
         // Toast proprio: dizer "capturado! Foi para a mochila" e depois nao ter
         // nada na mochila e a forma mais rapida de o jogador achar que perdeu
         // POKE. A raridade fica porque e ela que explica o valor.
-        useToastStore.getState().pushToast(
+        toastStore.getState().pushToast(
           `${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`,
           'capture-success', 'world',
           realceDaRaridade(captureResult.poke),
@@ -613,7 +717,7 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
         // atributo e valor de venda em ate 600x, entao e o dado que decide se
         // aquela captura importou — e o chat era o unico lugar que nao dizia.
         const raridade = rarityOf(captureResult.poke).label
-        useToastStore.getState().pushToast(
+        toastStore.getState().pushToast(
           `${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`,
           'capture-success', 'world',
           // A raridade que vale e a da INSTANCIA capturada, nao a do inimigo em
@@ -621,7 +725,7 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
           realceDaRaridade(captureResult.poke),
         )
       } else if (captureResult.reason === 'roll_failed') {
-        useToastStore.getState().pushToast('A captura falhou!', 'capture-fail', 'combat')
+        toastStore.getState().pushToast('A captura falhou!', 'capture-fail', 'combat')
       }
     }
   }
@@ -671,7 +775,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       } else {
         const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
         for (let i = 0; i < world.mapDef.maxEnemies; i++) {
-          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala))
+          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies)
           aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
           world.enemies.push(enemy)
         }
@@ -701,14 +805,14 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       if (world.mapDef) {
         const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
         for (let i = 0; i < world.mapDef.maxEnemies; i++) {
-          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala))
+          const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies)
           aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
           world.enemies.push(enemy)
         }
         world.respawnTimer = world.mapDef.respawnDelay
         if (!silent) {
           const nome = nomeDaSala(world.sala)
-          useToastStore.getState().pushToast(
+          toastStore.getState().pushToast(
             fechouCiclo
               ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.`
               : `Entrando em nova area: ${nome}.`,
@@ -759,7 +863,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     world.player.poke = penaltyResult.poke
     gameState.updatePokeInstance(penaltyResult.poke.uid, () => penaltyResult.poke)
     if (!silent) {
-      useToastStore.getState().pushToast(
+      toastStore.getState().pushToast(
         `${SPECIES[world.player.poke.speciesId].name} desmaiou!${penaltyResult.leveledDown ? ` Caiu para o nivel ${penaltyResult.level}.` : ''}`,
         'error', 'combat',
       )
@@ -784,9 +888,9 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     for (const ev of autoEvents) {
       if (ev.type === 'auto_pot') {
         const item = getItem(ev.itemId)
-        if (item) useToastStore.getState().pushToast(`Auto-pot usou ${item.name}.`, 'success', 'combat')
+        if (item) toastStore.getState().pushToast(`Auto-pot usou ${item.name}.`, 'success', 'combat')
       }
-      if (ev.type === 'auto_revive') useToastStore.getState().pushToast('Auto-revive reanimou seu POKE!', 'success', 'combat')
+      if (ev.type === 'auto_revive') toastStore.getState().pushToast('Auto-revive reanimou seu POKE!', 'success', 'combat')
     }
   }
 
@@ -804,7 +908,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     const algumEstavaTrancado = grupos.some((g) => !gameState.isContinentUnlocked(g))
     for (const grupo of grupos) gameState.unlockContinent(grupo)
     if (!silent && algumEstavaTrancado) {
-      useToastStore.getState().pushToast('Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.', 'success', 'world')
+      toastStore.getState().pushToast('Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.', 'success', 'world')
     }
   }
 
@@ -812,7 +916,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
       const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
-      const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala))
+      const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies)
       aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
       world.enemies.push(enemy)
       world.respawnTimer = world.mapDef.respawnDelay

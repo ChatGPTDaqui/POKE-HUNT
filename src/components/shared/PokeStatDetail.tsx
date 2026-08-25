@@ -370,18 +370,15 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
   const emHunt = useGameStateStore((s) => s.currentMapId) != null
   const meu = [...equipe, ...mochila].some((p) => p.uid === poke.uid)
 
-  // `poke` e a prop que o chamador passou — pro perfil aberto de um POKE
-  // seu, isso e um SNAPSHOT tirado no clique que abriu o modal
-  // (usePokeProfileStore#showProfile grava o objeto, nao um uid), que nunca
-  // mais atualiza sozinho. Bug real achado ao vivo: marcar/desmarcar um
-  // golpe aqui dentro chamava a acao certa (RPC ida, estado global mudava),
-  // mas o proprio checkbox clicado continuava mostrando o valor antigo ate
-  // fechar e reabrir o modal — mesmo o slot-de-4 preexistente ja tinha esse
-  // problema, so nunca tinha um teste ao vivo que clicasse e conferisse a
-  // tela sem reabrir. Resolvido lendo do POKE AO VIVO (equipe/mochila) por
-  // uid quando ele e seu; POKE de preview (Pokedex/ranking) nao esta em
-  // nenhum dos dois arrays, entao cai de volta na prop como sempre.
-  const pokeVivo = equipe.find((p) => p.uid === poke.uid) ?? mochila.find((p) => p.uid === poke.uid) ?? poke
+  // `poke` JA CHEGA VIVO — nao resolva o snapshot de novo aqui.
+  //
+  // Quem resolve e o `usePokeVivo` do `PokeProfileModal`, uma vez, pro modal
+  // inteiro. Ate PH-155 esta tabela tinha a propria resolucao, so pra ela: isso
+  // consertava o sintoma achado ao vivo (marcar/desmarcar um golpe chamava a
+  // acao certa mas o proprio checkbox continuava no valor antigo) e deixava o
+  // resto do modal congelado — o `Lv` do cabecalho nao mudava quando o POKE
+  // upava com o perfil aberto. Contornar por componente e o que fez o mesmo bug
+  // sobreviver a propria correcao.
 
   // SANEADO, nao cru: `golpesUtilizaveis` e a mesma porta que o combate usa,
   // entao a contagem "n/4" e os numeros da coluna Usar passam a descrever
@@ -393,7 +390,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
   // nao tinha o que desmarcar, e cada clique mandava a chave orfa de volta pra
   // RPC, que recusava a edicao inteira. Ver
   // data/activeAbilities.ts#sanearEscolhaDeGolpes.
-  const ativos = golpesUtilizaveis(pokeVivo, species, false)
+  const ativos = golpesUtilizaveis(poke, species, false)
   // Pedido explicito do usuario (revertendo uma leva anterior, que a tinha
   // removido a pedido DELE tambem): build fixo durante o combate, editavel so
   // fora da hunt. Tecnicamente nao havia risco de corromper nada (o servidor
@@ -402,7 +399,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
   // decide de verdade (`definir_golpes_ativos`/`alternar_habilidade`, ambas
   // recusando com sessao viva — migration 20260815190000). A tela so espelha.
   const podeEscolher = meu && !emHunt
-  const desabilitados = pokeVivo.disabledAbilities ?? {}
+  const desabilitados = poke.disabledAbilities ?? {}
 
   function alternar(key: string): void {
     if (!podeEscolher) return
@@ -475,13 +472,13 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
         {meu && (
           <div className={`${MOVE_GRID} border-b border-n800 bg-n900 px-[.5em] py-[.3em] text-foreground`}>
             <span className="text-n400">—</span>
-            <AbilityTooltip ability={BASIC_ATTACK} poke={pokeVivo}>
+            <AbilityTooltip ability={BASIC_ATTACK} poke={poke}>
               <span className="cursor-help truncate underline decoration-dotted underline-offset-2">
                 {BASIC_ATTACK.name}
               </span>
             </AbilityTooltip>
             <span><TypeChip type={BASIC_ATTACK.type} /></span>
-            <span className="text-n400">{ROTULO_CATEGORIA[resolveAbilityCategory(BASIC_ATTACK, pokeVivo)]}</span>
+            <span className="text-n400">{ROTULO_CATEGORIA[resolveAbilityCategory(BASIC_ATTACK, poke)]}</span>
             <span>{BASIC_ATTACK.power > 0 ? BASIC_ATTACK.power : '—'}</span>
             <span className="text-n400">{textoDePrecisao(BASIC_ATTACK)}</span>
             <span className="text-n400">—</span>
@@ -500,7 +497,7 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
           </div>
         )}
         {rows.map(({ entry, ability }, index) => {
-          const learned = entry.levelReq <= pokeVivo.level
+          const learned = entry.levelReq <= poke.level
           const idxNaFila = ativos.indexOf(entry.key)
           return (
             <div
@@ -513,14 +510,14 @@ export function MovesetTable({ poke, species }: { poke: PokeInstance; species: S
               }`}
             >
               <span className="text-n400">{entry.levelReq}</span>
-              <AbilityTooltip ability={ability} poke={pokeVivo}>
+              <AbilityTooltip ability={ability} poke={poke}>
                 <span className="cursor-help truncate underline decoration-dotted underline-offset-2">
                   {ability.name}
                 </span>
               </AbilityTooltip>
               <span><TypeChip type={ability.type} /></span>
               <span className="text-n400">
-                {ROTULO_CATEGORIA[resolveAbilityCategory(ability, pokeVivo)]}
+                {ROTULO_CATEGORIA[resolveAbilityCategory(ability, poke)]}
               </span>
               <span>{ability.power > 0 ? ability.power : '—'}</span>
               {/* Abaixo de 100% em amarelo: o numero cru some no meio da linha,

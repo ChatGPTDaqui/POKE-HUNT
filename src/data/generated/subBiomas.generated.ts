@@ -2,13 +2,13 @@
 // scripts/pokerogue/biomas.json (pools do PokeRogue) cruzado com o nosso
 // catalogo. Nao editar a mao — a proxima geracao sobrescreve.
 //
-// 33 sub-biomas, 209 especies alocadas
-// (179 com casa direta no PokeRogue, 30 herdadas da linha evolutiva).
+// 33 sub-biomas, 228 especies alocadas
+// (198 com casa direta no PokeRogue, 30 herdadas da linha evolutiva).
 //
 // A CHANCE de aparicao NAO vem daqui: peso de spawn continua sendo o
 // `spawn_tier` real do Gen1/Gen2 (scripts/derive-spawn-tiers.js) e a chance
 // de a sala cair neste sub-bioma vive em data/biomas.ts, escrita a mao.
-import type { SubBiomaEspecies, SubBiomaLinks } from './types';
+import type { SubBiomaClima, SubBiomaEspecies, SubBiomaLinks } from './types';
 
 /** Especies do nosso catalogo que podem aparecer em cada sub-bioma. */
 export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
@@ -20,6 +20,8 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'gastly',
     'haunter',
     'gengar',
+    'crobat',
+    'umbreon',
     'misdreavus',
     'dunsparce',
     'houndour',
@@ -45,9 +47,11 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
   ],
   'beach': [
     'shellder',
+    'cloyster',
     'krabby',
     'kingler',
     'staryu',
+    'starmie',
   ],
   'cave': [
     'zubat',
@@ -58,6 +62,7 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'graveler',
     'golem',
     'onix',
+    'crobat',
     'steelix',
     'teddiursa',
     'ursaring',
@@ -97,6 +102,7 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'hitmonlee',
     'hitmonchan',
     'tyrogue',
+    'hitmontop',
   ],
   'factory': [
     'machop',
@@ -112,7 +118,14 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'magby',
   ],
   'fairy-cave': [
+    'clefairy',
+    'clefable',
     'jigglypuff',
+    'wigglytuff',
+    'cleffa',
+    'igglybuff',
+    'togepi',
+    'togetic',
     'marill',
     'azumarill',
   ],
@@ -131,6 +144,7 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'weepinbell',
     'victreebel',
     'exeggcute',
+    'exeggutor',
     'scyther',
     'hoothoot',
     'noctowl',
@@ -171,6 +185,7 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'dewgong',
     'jynx',
     'lapras',
+    'slowking',
     'sneasel',
     'swinub',
     'piloswine',
@@ -179,6 +194,7 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
   ],
   'jungle': [
     'exeggcute',
+    'exeggutor',
     'tangela',
     'kangaskhan',
     'scyther',
@@ -208,18 +224,22 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'seaking',
     'magikarp',
     'gyarados',
+    'vaporeon',
     'marill',
     'azumarill',
     'wooper',
     'quagsire',
+    'slowking',
   ],
   'meadow': [
     'jigglypuff',
+    'wigglytuff',
     'ponyta',
     'rapidash',
     'tauros',
     'ledyba',
     'ledian',
+    'igglybuff',
     'mareep',
     'flaaffy',
     'ampharos',
@@ -231,7 +251,9 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'rattata',
     'raticate',
     'pikachu',
+    'raichu',
     'ditto',
+    'pichu',
     'houndour',
     'houndoom',
     'smeargle',
@@ -267,6 +289,7 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'spearow',
     'fearow',
     'pikachu',
+    'raichu',
     'zubat',
     'golbat',
     'meowth',
@@ -284,15 +307,20 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'snorlax',
     'sentret',
     'furret',
+    'crobat',
+    'pichu',
     'dunsparce',
   ],
   'power-plant': [
     'pikachu',
+    'raichu',
     'magnemite',
     'magneton',
     'voltorb',
     'electrode',
     'electabuzz',
+    'jolteon',
+    'pichu',
     'mareep',
     'flaaffy',
     'ampharos',
@@ -306,34 +334,38 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'hypno',
     'natu',
     'xatu',
+    'espeon',
     'unown',
     'wobbuffet',
   ],
   'sea': [
     'poliwag',
     'poliwhirl',
+    'poliwrath',
     'tentacool',
     'tentacruel',
     'slowpoke',
     'slowbro',
     'shellder',
+    'cloyster',
     'horsea',
     'seadra',
     'goldeen',
     'seaking',
     'staryu',
+    'starmie',
     'magikarp',
     'gyarados',
     'lapras',
     'chinchou',
     'lanturn',
-    'politoed',
     'kingdra',
   ],
   'seabed': [
     'tentacool',
     'tentacruel',
     'shellder',
+    'cloyster',
     'omanyte',
     'omastar',
     'kabuto',
@@ -372,7 +404,10 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'stantler',
   ],
   'space': [
+    'clefairy',
+    'clefable',
     'staryu',
+    'starmie',
     'cleffa',
   ],
   'swamp': [
@@ -382,6 +417,7 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'golduck',
     'poliwag',
     'poliwhirl',
+    'poliwrath',
     'totodile',
     'croconaw',
     'feraligatr',
@@ -398,6 +434,7 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'nidoking',
     'oddish',
     'gloom',
+    'vileplume',
     'paras',
     'parasect',
     'venonat',
@@ -409,6 +446,7 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'meganium',
     'spinarak',
     'ariados',
+    'bellossom',
     'girafarig',
     'scizor',
   ],
@@ -437,12 +475,21 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'fearow',
     'ekans',
     'arbok',
+    'pikachu',
+    'raichu',
     'nidoran_f',
     'nidorina',
+    'nidoqueen',
     'nidoran_m',
     'nidorino',
+    'nidoking',
+    'clefairy',
+    'clefable',
+    'jigglypuff',
+    'wigglytuff',
     'oddish',
     'gloom',
+    'vileplume',
     'paras',
     'parasect',
     'venonat',
@@ -454,6 +501,7 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'alakazam',
     'bellsprout',
     'weepinbell',
+    'victreebel',
     'ditto',
     'sentret',
     'furret',
@@ -467,6 +515,7 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'cleffa',
     'igglybuff',
     'togepi',
+    'togetic',
     'hoppip',
     'skiploom',
     'jumpluff',
@@ -481,6 +530,7 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
     'ponyta',
     'rapidash',
     'magmar',
+    'flareon',
     'cyndaquil',
     'quilava',
     'typhlosion',
@@ -506,6 +556,50 @@ export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {
  * NAO e usado pelo jogo hoje. Fica guardado porque e a fundacao do modo
  * Expedicao, e o parser que extrai isso ja esta escrito.
  */
+/**
+ * Pesos de clima de cada sub-bioma (PH-140), do `weatherPool` do PokeRogue.
+ * Sorteado UMA vez ao entrar na sala; `limpo` e um resultado como outro
+ * qualquer, nao a ausencia de tabela.
+ *
+ * E o unico dado de PROBABILIDADE de clima que existe: os jogos principais
+ * fixam o clima por rota (Rota 119 sempre chove) e nunca sortearam nada.
+ */
+export const SUB_BIOMA_CLIMA: SubBiomaClima = {
+  'abyss': { limpo: 1 },
+  'badlands': { limpo: 8, areia: 2, sol: 5 },
+  'beach': { limpo: 8, chuva: 3, sol: 5 },
+  'cave': { limpo: 1 },
+  'construction-site': { limpo: 1 },
+  'desert': { limpo: 2, areia: 8, sol: 5 },
+  'dojo': { limpo: 1 },
+  'factory': { limpo: 1 },
+  'fairy-cave': { limpo: 1 },
+  'forest': { limpo: 8, chuva: 4 },
+  'grass': { limpo: 8, chuva: 4, sol: 8 },
+  'graveyard': { limpo: 3, nevoa: 1 },
+  'ice-cave': { limpo: 3, neve: 4, granizo: 1 },
+  'jungle': { limpo: 8, chuva: 6, nevoa: 1 },
+  'laboratory': { limpo: 1 },
+  'lake': { limpo: 10, chuva: 4, nevoa: 1 },
+  'meadow': { limpo: 3, sol: 5 },
+  'metropolis': { limpo: 1 },
+  'mountain': { limpo: 1 },
+  'plains': { limpo: 1 },
+  'power-plant': { limpo: 1 },
+  'ruins': { limpo: 1 },
+  'sea': { limpo: 3, chuva: 12 },
+  'seabed': { chuva: 1 },
+  'slum': { limpo: 1 },
+  'snowy-forest': { neve: 7, granizo: 1 },
+  'space': { limpo: 1 },
+  'swamp': { limpo: 3, chuva: 4, nevoa: 1 },
+  'tall-grass': { limpo: 8, chuva: 4, sol: 4 },
+  'temple': { limpo: 1 },
+  'town': { limpo: 1 },
+  'volcano': { sol: 1 },
+  'wasteland': { limpo: 1 },
+};
+
 export const SUB_BIOMA_LINKS: SubBiomaLinks = {
   'abyss': [{ bioma: 'cave', peso: 1 }, { bioma: 'space', peso: 2 }, { bioma: 'wasteland', peso: 2 }],
   'badlands': [{ bioma: 'desert', peso: 1 }, { bioma: 'mountain', peso: 1 }],
@@ -551,6 +645,7 @@ export const SUB_BIOMA_LINKS: SubBiomaLinks = {
 export const SUB_BIOMA_CHEFES: SubBiomaEspecies = {
   'abyss': [
     'gengar',
+    'crobat',
     'houndoom',
   ],
   'badlands': [
@@ -561,10 +656,13 @@ export const SUB_BIOMA_CHEFES: SubBiomaEspecies = {
     'donphan',
   ],
   'beach': [
+    'cloyster',
     'kingler',
+    'starmie',
   ],
   'cave': [
     'parasect',
+    'crobat',
     'ursaring',
   ],
   'construction-site': [
@@ -576,7 +674,9 @@ export const SUB_BIOMA_CHEFES: SubBiomaEspecies = {
   ],
   'dojo': [],
   'factory': [],
-  'fairy-cave': [],
+  'fairy-cave': [
+    'wigglytuff',
+  ],
   'forest': [
     'venomoth',
     'victreebel',
@@ -599,6 +699,7 @@ export const SUB_BIOMA_CHEFES: SubBiomaEspecies = {
     'jynx',
   ],
   'jungle': [
+    'exeggutor',
     'scizor',
   ],
   'laboratory': [
@@ -628,6 +729,7 @@ export const SUB_BIOMA_CHEFES: SubBiomaEspecies = {
     'furret',
   ],
   'power-plant': [
+    'raichu',
     'ampharos',
   ],
   'ruins': [
@@ -650,17 +752,22 @@ export const SUB_BIOMA_CHEFES: SubBiomaEspecies = {
     'weezing',
   ],
   'snowy-forest': [],
-  'space': [],
+  'space': [
+    'clefable',
+  ],
   'swamp': [
     'arbok',
+    'poliwrath',
     'feraligatr',
     'quagsire',
   ],
   'tall-grass': [
     'nidoqueen',
     'nidoking',
+    'vileplume',
     'meganium',
     'ariados',
+    'bellossom',
   ],
   'temple': [],
   'town': [],

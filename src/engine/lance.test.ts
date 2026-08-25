@@ -69,7 +69,7 @@ describe('Campeao Lance — sequencia', () => {
     gs.addPokeToTeam(pokeAbsurdo())
     gs.setActiveIndex(0)
     const gameState = useGameStateStore.getState()
-    const world = buildMapWorld(LANCE_MAP_ID, gameState.team[0], {
+    const world = buildMapWorld(LANCE_MAP_ID, gameState.team[0], { seed: 0,
       rng: createRng(1),
       counters: { entity: 1, effect: 1, pendingHit: 1 },
     })
@@ -96,7 +96,7 @@ describe('Campeao Lance — sequencia', () => {
     const gameState = useGameStateStore.getState()
 
     let progresso: ProgressoDaSessao | undefined
-    let world = buildMapWorld(LANCE_MAP_ID, gameState.team[0], {
+    let world = buildMapWorld(LANCE_MAP_ID, gameState.team[0], { seed: 0,
       rng: createRng(1),
       counters: { entity: 1, effect: 1, pendingHit: 1 },
     }, progresso)
@@ -114,7 +114,7 @@ describe('Campeao Lance — sequencia', () => {
         }
       }
       progresso = { sequenceIndex: world.sequenceIndex, sequenceCleared: world.sequenceCleared, sala: world.sala }
-      world = buildMapWorld(LANCE_MAP_ID, gameState.team[0], { rng: world.rng, counters: world.counters }, progresso)
+      world = buildMapWorld(LANCE_MAP_ID, gameState.team[0], { seed: 0, rng: world.rng, counters: world.counters }, progresso)
     }
 
     expect(especiesVistas).toEqual(ORDEM_REAL_DO_LANCE)
@@ -150,7 +150,7 @@ describe('Campeao Lance — sequencia', () => {
     // na abertura, no bug).
     let pokeEmCampo = gameState.team[0].uid
     let progresso: ProgressoDaSessao | undefined
-    let world = buildMapWorld(LANCE_MAP_ID, gameState.team[0], {
+    let world = buildMapWorld(LANCE_MAP_ID, gameState.team[0], { seed: 0,
       rng: createRng(1),
       counters: { entity: 1, effect: 1, pendingHit: 1 },
     }, progresso)
@@ -162,7 +162,7 @@ describe('Campeao Lance — sequencia', () => {
       pokeEmCampo = world.player!.poke.uid
       progresso = { sequenceIndex: world.sequenceIndex, sequenceCleared: world.sequenceCleared, sala: world.sala }
       const ativo = gameState.team.find((p) => p.uid === pokeEmCampo)!
-      world = buildMapWorld(LANCE_MAP_ID, ativo, { rng: world.rng, counters: world.counters }, progresso)
+      world = buildMapWorld(LANCE_MAP_ID, ativo, { seed: 0, rng: world.rng, counters: world.counters }, progresso)
     }
 
     expect(pokeEmCampo).toBe('assume-depois')
@@ -176,7 +176,7 @@ describe('Campeao Lance — sequencia', () => {
     gs.addPokeToTeam(pokeFragil('r3'))
     gs.setActiveIndex(0)
     const gameState = useGameStateStore.getState()
-    const world = buildMapWorld(LANCE_MAP_ID, gameState.team[0], {
+    const world = buildMapWorld(LANCE_MAP_ID, gameState.team[0], { seed: 0,
       rng: createRng(1),
       counters: { entity: 1, effect: 1, pendingHit: 1 },
     })

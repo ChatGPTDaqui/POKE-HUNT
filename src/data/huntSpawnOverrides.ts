@@ -76,9 +76,22 @@ for (const especie of Object.values(SPECIES)) {
   if (especie.evolvesTo && SPECIES[especie.evolvesTo]) PRE_EVOLUCAO[especie.evolvesTo] = especie.id
 }
 
-function primeiroNivelDaZona(zona: number): number {
-  const faixa = FAIXAS.find((f) => zona <= f.zonaMaxima) ?? FAIXAS[FAIXAS.length - 1]
-  return faixa.niveis[0]
+/**
+ * Em que FAIXA uma zona minima cai — o indice, nao a faixa, porque quem chama
+ * precisa poder pedir "a seguinte".
+ *
+ * Zona acima de toda `zonaMaxima` devolve o indice da ultima faixa: e o topo do
+ * jogo, nao ha mais pra onde empurrar.
+ */
+function indiceDeFaixa(zona: number): number {
+  const i = FAIXAS.findIndex((f) => zona <= f.zonaMaxima)
+  return i === -1 ? FAIXAS.length - 1 : i
+}
+
+/** A faixa que contem este nivel. Nivel acima da ultima cai na ultima. */
+function indiceDeFaixaPorNivel(nivel: number): number {
+  const i = FAIXAS.findIndex((f) => nivel <= f.niveis[1])
+  return i === -1 ? FAIXAS.length - 1 : i
 }
 
 /**
@@ -93,19 +106,39 @@ function primeiroNivelDaZona(zona: number): number {
  * forma evoluida aparece a partir da primeira faixa que a zona minima dela
  * alcanca.
  */
-function nivelDeTroca(speciesId: string): number | null {
+function nivelDeTroca(speciesId: string, desde: number): number | null {
   const especie = SPECIES[speciesId]
   const alvo = especie?.evolvesTo
   if (!alvo || !SPECIES[alvo]) return null
   if (especie.isSpecialEvolution) {
-    // `zonaMinima(origem) + 1` e o que impede a origem de ser ESPREMIDA pra
-    // fora do jogo. Bug real, pego pelo teste "toda especie selvagem tem pelo
-    // menos uma hunt": Scyther tem zona minima 5 (so a partir de Lv31) e
-    // Scizor tambem 5, entao o gatilho caia em Lv31 e a faixa de Scyther
-    // ficava [1,30] — vazia justamente onde ele podia aparecer. A forma
-    // evoluida tem que ficar pelo menos uma faixa acima da origem.
-    const zona = Math.max(zonaMinimaDaEspecie(alvo), zonaMinimaDaEspecie(speciesId) + 1)
-    return primeiroNivelDaZona(zona)
+    // A forma evoluida tem que comecar pelo menos uma FAIXA acima da origem,
+    // senao a origem e espremida pra fora do jogo. Bug real, pego pelo teste
+    // "toda especie selvagem tem pelo menos uma hunt": Scyther tem zona minima
+    // 5 e Scizor tambem 5, entao o gatilho caia no mesmo Lv31 em que Scyther
+    // comeca e a sub-faixa dele virava [31,30] — vazia.
+    //
+    // O empurrao e em FAIXA, e nao em zona (PH-145). "Zona + 1" resolvia
+    // Scyther porque as zonas 5 e 6 caem em faixas diferentes, mas nao resolve
+    // quando as duas zonas moram na MESMA faixa: Pichu tem zona 0 e Pikachu
+    // zona 1, as duas na primeira faixa, entao `max(1, 0+1) = 1` devolvia Lv1 e
+    // Pichu ficava com [1,0]. Igglybuff, Cleffa e Togepi sumiam pelo mesmo
+    // motivo. Antes desta issue nao aparecia porque evolucao por amizade nao
+    // existia no catalogo e os quatro passavam por "nao evolui".
+    //
+    // `desde` e o que faz a conta ENCADEAR numa linha de tres estagios onde os
+    // dois gatilhos sao especiais. Pichu -> Pikachu -> Raichu: sem ele, Pichu
+    // empurra Pikachu pra Lv31 e Pikachu tambem troca em Lv31, entao o estagio
+    // do meio fica com [31,30] e some. A faixa da ORIGEM e a maior entre "onde
+    // este estagio comeca" e "onde a especie e forte o bastante pra aparecer" —
+    // a segunda metade e o caso do Scyther, que nao aparece antes da faixa II
+    // mesmo comecando a linha no Lv1.
+    const daOrigem = Math.max(indiceDeFaixaPorNivel(desde), indiceDeFaixa(zonaMinimaDaEspecie(speciesId)))
+    const doAlvo = indiceDeFaixa(zonaMinimaDaEspecie(alvo))
+    const indice = Math.max(doAlvo, daOrigem + 1)
+    // Alvo forte demais pra qualquer faixa restante: a origem fica com a linha
+    // inteira, e a forma evoluida so aparece por evolucao do POKE do jogador.
+    if (indice >= FAIXAS.length) return null
+    return FAIXAS[indice].niveis[0]
   }
   return especie.evolvesAtLevel ?? null
 }
@@ -142,7 +175,7 @@ function trechosDaLinha(raiz: string, faixa: FaixaDef, elenco: Set<string>): Tre
   let atual: string | null = raiz
   let desde = 1
   for (let i = 0; i < 10 && atual; i++) {
-    const troca = nivelDeTroca(atual)
+    const troca = nivelDeTroca(atual, desde)
     const ate = troca == null ? Number.POSITIVE_INFINITY : troca - 1
     const min = Math.max(lo, desde)
     const max = Math.min(hi, ate)

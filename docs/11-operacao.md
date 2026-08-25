@@ -36,6 +36,41 @@ mudança de código. `jogo-dev` só reflete o que já foi mergeado em `dev` (dep
 `supabase-deploy-dev.yml` a cada push nesse branch, ver docs/15) — não é live-reload do que está
 sendo editado localmente; ainda assim, publicar em `dev` é bem mais barato que publicar em `main`.
 
+### Staging tem DOIS lados, e "smoke em jogo-dev" cobre só um (PH-134)
+
+Vale a distinção porque ela já custou tempo: **"smoke em `jogo-dev`" testa o SERVIDOR.** É a Edge
+Function respondendo, a migration aplicada, a RPC recusando o que deve recusar. Não diz nada sobre
+o cliente.
+
+**O cliente de staging é `https://dev.poke-hunt-euj.pages.dev`**, publicado pelo Cloudflare Pages a
+cada push na `dev`. Ele passou meses **sem iniciar** — o build compilava, o deploy ficava verde, o
+HTTP respondia 200, e o app morria no browser porque o ambiente de *preview* do Pages não tinha
+variável nenhuma. Ninguém notou porque nada olha a tela depois do deploy.
+
+Consertado em 2026-08-25. As cinco variáveis do preview:
+
+| variável | preview (staging) | produção |
+|---|---|---|
+| `VITE_SUPABASE_URL` | mesmo projeto | mesmo projeto |
+| `VITE_SUPABASE_ANON_KEY` | mesma | mesma |
+| `VITE_SERVIDOR_URL` | **`…/jogo-dev`** | `…/jogo` |
+| `VITE_SUPABASE_SCHEMA` | **`dev`** | não declarada (cai no padrão `public`) |
+| `VITE_AUTH_STORAGE_KEY` | **valor próprio** | valor próprio, diferente |
+
+As duas últimas linhas não são detalhe. `VITE_SUPABASE_SCHEMA` é o segundo caminho de escrita:
+apontar só o `VITE_SERVIDOR_URL` pra `jogo-dev` e deixar o schema em `public` manda metade do
+tráfego pra produção. E `VITE_AUTH_STORAGE_KEY` repetido entre os dois faria staging e produção
+**dividirem a sessão no mesmo navegador** — entrar num logaria no outro.
+
+**Armadilha ao inspecionar pela API:** *todo* deploy deste projeto aparece com
+`environment: "preview"`, inclusive os da branch `dev`. Não conclua que mexer no preview não
+alcança o jogador sem antes conferir por onde produção é servida.
+
+**Enquanto não houver check automático** (item pendente da PH-134, bloqueado porque mexe em
+`.github/workflows/` e o token de push não tem escopo `workflow`), o passo é manual e entra no
+pré-voo da promoção: abrir `https://dev.poke-hunt-euj.pages.dev`, confirmar que a tela sobe e que o
+console está limpo. Deploy verde não é evidência de app que inicia.
+
 ### Dados
 
 | Comando | O que faz |
@@ -91,7 +126,10 @@ de `cffbihbmhiuudahsgjsn` em 2026-08-20 (motivo: matar a service_role key vazada
 docs/15). Progresso de jogador NÃO foi copiado — só catálogo (species/moves/items/etc) e a conta
 admin.
 
-`.env` da raiz tem `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`. `.env.local` tem as chaves do
+`.env` da raiz tem `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_SCHEMA`,
+`CLOUDFLARE_API_TOKEN`, `POKE_HUNT_CI` e `CONTA_TESTE_SENHA` — o inventario completo, porque
+a versao anterior citava so os dois primeiros e isso ja induziu a achar que o resto nao
+existia (PH-151). `.env.local` tem as chaves do
 cliente (anon + `VITE_SERVIDOR_URL`).
 
 ### `db query` NÃO substitui migration
@@ -113,11 +151,65 @@ revogar policy, trocar secret e deploy que muda comportamento são confirmados a
 autonomia é para não precisar pedir *credencial*, não para decidir sozinho o que é
 irreversível.
 
+### Cloudflare: o token EXISTE (PH-151)
+
+Esta seção afirmava o contrário — *"exige um token que não está aqui"* — e a afirmação era falsa.
+Custou caro: **PH-134 foi escrita registrando isso como bloqueio**, e ficou parada por uma
+limitação inventada pelo documento.
+
+`CLOUDFLARE_API_TOKEN` está no **`.env` da raiz**. Ativo, com validade até **2026-10-01**.
+
+| Precisa de | Comando |
+|---|---|
+| Testar se o token vale | `curl -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" https://api.cloudflare.com/client/v4/user/tokens/verify` |
+| Variáveis de build do Pages | `GET accounts/<conta>/pages/projects/poke-hunt` → `deployment_configs.{production,preview}.env_vars` |
+
+O `<conta>` sai da URL que o check "Cloudflare Pages" linka em qualquer PR — é o id logo depois de
+`/accounts/`. **`GET accounts` sem id devolve lista vazia**, então não tente descobrir a conta por
+ali: o token tem escopo de projeto, não de conta.
+
+O id não fica escrito aqui de propósito. Este repositório é **público** (`gh repo view --json
+visibility`), e o id não é credencial mas é atalho de alvo — a troca de conta Supabase de 20/08
+aconteceu por uma `service_role` vazada, então o custo desse tipo de descuido aqui não é hipotético.
+Quem precisa do id acha em dois cliques pela linha acima.
+
+**Leitura está confirmada** (foi assim que o diagnóstico de PH-134 saiu). **Escrita não foi
+testada** — configurar variável de preview é ação de baixa reversibilidade num ambiente
+compartilhado, e a própria PH-134 registra que errar ali é "pior que staging quebrado".
+
+O deploy do cliente continua acontecendo por `git push`; o token é para inspecionar e configurar.
+
+### O CLI local e o CI dividem o mesmo token (PH-106)
+
+`POKE_HUNT_CI`, no `.env`, é **o mesmo token** que os workflows usam. E `supabase link` cria o
+role temporário `cli_login_postgres` pela Management API **rotacionando a senha a cada login**.
+
+Consequência prática: **rodar `npm run db:types`, `db push` ou `edge:publicar` na sua máquina
+enquanto um deploy do CI está em voo derruba o deploy**, com
+
+```
+FATAL: password authentication failed for user "cli_login_postgres" (SQLSTATE 28P01)
+```
+
+Quem morre é sorteio — pode ser o seu comando, pode ser o deploy. Deploy morto significa migration
+não aplicada e Edge Function não republicada, **com a PR já verde e mesclada**; foi assim que
+PH-92 deixou a função com código velho e a captura gravando errado até alguém ir jogar.
+
+**Antes de rodar o CLI, confira se há workflow em execução:**
+
+```
+gh run list --limit 5
+```
+
+O mesmo vale entre os próprios workflows — ver PH-106 para o `concurrency.group` que serializa os
+dois lados.
+
 ### O que não existe nesta máquina
 
-**Token da Cloudflare.** O deploy do cliente acontece por `git push`, então não é bloqueio para
-o fluxo normal. Consultar ou alterar o projeto no painel (domínio, variável de build, log de
-deploy) exige um token que não está aqui.
+Nada mapeado no momento. Esta seção existia para o token da Cloudflare, que **está** aqui — ver
+acima. Se algo entrar nela de novo, escreva **como confirmar a ausência**, e não só a afirmação:
+a versão anterior desta seção não trazia teste nenhum, e por isso ninguém percebeu que ela tinha
+deixado de ser verdade.
 
 ## Domínio de produção
 
@@ -255,6 +347,10 @@ exceção — mesmo pra teste rápido, mesmo achando que vai desfazer depois.
    apontando pra `jogo-dev` (seção acima) — agora sim existe ciclo antes de produção.
 8. Validado em `jogo-dev` → PR `dev` → `main` (gate de par `dev`/`public` reaplica aqui,
    comparando contra `main` de verdade — é o ponto real de promoção).
+
+   **"Validado em `jogo-dev`" é o SERVIDOR.** O cliente de staging tem que ser aberto à parte:
+   `https://dev.poke-hunt-euj.pages.dev`, tela subindo e console limpo. Ver a seção "Staging tem
+   DOIS lados" acima — esse front-end passou meses sem iniciar, com o deploy verde o tempo todo.
 9. Merge em `main` → `supabase-deploy.yml` aplica em produção. **Não rodar `db
    push`/`edge:publicar` manual fora desse fluxo**, a menos que seja diagnóstico pontual (a seção
    de Diagnóstico de 502 abaixo já é esse caso legítimo).

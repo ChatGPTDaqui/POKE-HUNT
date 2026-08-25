@@ -24,7 +24,7 @@ import { segundosAtePoderUsar, startCooldown, startGlobalCooldown, tickCooldowns
 
 function jogador() {
   const rng = createRng(7)
-  const world = buildMapWorld('route_46', createPokeInstance(rng, 'typhlosion', 40), {
+  const world = buildMapWorld('route_46', createPokeInstance(rng, 'typhlosion', 40), { seed: 0,
     rng, counters: { entity: 1, effect: 1, pendingHit: 1 },
   })
   return world.player!
