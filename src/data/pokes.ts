@@ -26,6 +26,32 @@ export interface Species extends SpeciesDataEntry {
   shape: string
   color: string
   isSpecialEvolution?: boolean
+  /**
+   * TODOS os destinos de evolucao desta especie (PH-139).
+   *
+   * `evolvesTo` continua existindo e aponta pro PRIMEIRO — e o que todo o
+   * codigo antigo le, e trocar aquele campo por uma lista significaria mexer em
+   * cada leitor de uma vez. Aqui a lista e a fonte; la e a conveniencia.
+   *
+   * Ausente = a especie tem no maximo um destino, e `evolvesTo` basta.
+   */
+  evolutionOptions?: OpcaoDeEvolucao[]
+}
+
+/**
+ * Um destino de evolucao, com o gate que ele exige.
+ *
+ * Gate POR OPCAO, e nao por especie: Slowpoke vira Slowbro no nivel 37 e
+ * Slowking so com pedras — sao caminhos com precos diferentes, e um gate por
+ * especie nao conseguiria representar isso.
+ */
+export interface OpcaoDeEvolucao {
+  /** Especie de destino. */
+  to: string
+  /** Nivel minimo. */
+  atLevel: number
+  /** Cobra pedras do tipo primario (ver `evolutionStoneRequirement`). */
+  isSpecial: boolean
 }
 
 export interface PokeInstance {
@@ -222,6 +248,34 @@ export const SPECIAL_EVOLUTION_LEVEL = 80
  * POKE que vai evoluir — 40 pedras sao ~800 abates do tipo certo.
  */
 export const SPECIAL_EVOLUTION_STONE_COUNT = 40
+/**
+ * Especies com MAIS DE UM destino de evolucao (PH-139).
+ *
+ * O dado da planilha tem uma coluna so ("Evolui Para (chave)"), entao ramo e
+ * camada hand-authored, igual `SPECIAL_EVOLUTIONS` logo abaixo.
+ *
+ * O QUE ESTA AQUI, E O QUE NAO ESTA
+ * ----------------------------------
+ * So Tyrogue por enquanto — e nao por escolha de escopo, mas porque e o UNICO
+ * ramo real cujos dois destinos ja existem no elenco, com arte.
+ *
+ * Poliwhirl (Politoed/Poliwrath) e Slowpoke (Slowbro/Slowking) sao os casos que
+ * originaram esta issue, e continuam fora: poliwrath e slowking NAO estao no
+ * elenco gerado. Cadastrar ramo apontando pra especie inexistente produziria
+ * uma opcao que a tela nao sabe desenhar. Entram quando as especies entrarem —
+ * ver PH-145, que levantou as 18 evolucoes de Gen1/Gen2 ausentes do elenco.
+ *
+ * Tyrogue vira Hitmonlee OU Hitmonchan no nivel 20. Nos jogos quem decide e a
+ * comparacao entre Ataque e Defesa; aqui quem decide e o JOGADOR, que e o
+ * pedido desta issue.
+ */
+const EVOLUCOES_RAMIFICADAS: Record<string, OpcaoDeEvolucao[]> = {
+  tyrogue: [
+    { to: 'hitmonlee', atLevel: 20, isSpecial: false },
+    { to: 'hitmonchan', atLevel: 20, isSpecial: false },
+  ],
+}
+
 const SPECIAL_EVOLUTIONS: Record<string, string> = {
   kadabra: 'alakazam', machoke: 'machamp', haunter: 'gengar',
   graveler: 'golem', onix: 'steelix', scyther: 'scizor',
@@ -234,6 +288,42 @@ for (const [fromId, toId] of Object.entries(SPECIAL_EVOLUTIONS)) {
     from.evolvesAtLevel = SPECIAL_EVOLUTION_LEVEL
     from.isSpecialEvolution = true
   }
+}
+
+// Ramos, DEPOIS das especiais: uma especie pode ter um destino vindo da planilha
+// e outro costurado aqui. Opcao que aponta pra especie fora do elenco e
+// descartada em silencio de proposito — o alvo pode nao ter entrado no catalogo
+// gerado, e opcao sem especie quebraria a tela na hora de desenhar.
+for (const [fromId, opcoes] of Object.entries(EVOLUCOES_RAMIFICADAS)) {
+  const from = SPECIES[fromId]
+  if (!from) continue
+  const validas = opcoes.filter((o) => SPECIES[o.to])
+  if (validas.length === 0) continue
+  from.evolutionOptions = validas
+  // `evolvesTo` segue apontando pro primeiro: e o que o codigo que ainda nao
+  // conhece ramo continua lendo (Pokedex, estagio de evolucao, servidor antigo).
+  from.evolvesTo = validas[0].to
+  from.evolvesAtLevel = validas[0].atLevel
+  from.isSpecialEvolution = validas[0].isSpecial
+}
+
+/**
+ * Os destinos de evolucao de uma especie, sempre como lista.
+ *
+ * Especie sem ramo devolve o destino unico; sem evolucao nenhuma devolve vazio.
+ * Todo leitor novo usa isto — ler `evolvesTo` direto continua funcionando, mas
+ * enxerga so o primeiro caminho.
+ */
+export function opcoesDeEvolucao(species: Species): OpcaoDeEvolucao[] {
+  if (species.evolutionOptions?.length) return species.evolutionOptions
+  if (species.evolvesTo && species.evolvesAtLevel != null) {
+    return [{
+      to: species.evolvesTo,
+      atLevel: species.evolvesAtLevel,
+      isSpecial: species.isSpecialEvolution === true,
+    }]
+  }
+  return []
 }
 
 // Real Gen2 stat formulas: floor((2*base+iv)*level/100)+5 (and the HP variant).

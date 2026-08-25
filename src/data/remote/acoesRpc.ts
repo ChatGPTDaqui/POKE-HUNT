@@ -223,7 +223,10 @@ const DESPACHO: Record<string, Despacho> = {
     aoSucesso: async () => { await Promise.all([refetchGold(), refetchEquipeInteira()]) },
   },
   evoluirPoke: {
-    chamar: rpc('evoluir_poke', (a) => ({ p_poke_id: a.pokeUid })),
+    // PH-139: `p_alvo` diz QUAL destino, quando a especie tem mais de um. A
+    // RPC valida contra a lista da especie — mandar a escolha do cliente sem
+    // lista branca no servidor deixaria evoluir Tyrogue em Mewtwo.
+    chamar: rpc('evoluir_poke', (a) => ({ p_poke_id: a.pokeUid, p_alvo: a.alvo ?? null })),
     aoSucesso: async (a) => { await Promise.all([refetchPoke(a.pokeUid as string), refetchTodosItens()]) },
   },
   definirAtivo: {

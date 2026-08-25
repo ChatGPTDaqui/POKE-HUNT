@@ -8,15 +8,18 @@
 // costuradas no `SPECIES` em tempo de load. Contando pelo dado cru, Alakazam,
 // Machamp, Gengar, Steelix, Scizor, Kingdra, Golem, Politoed e Porygon2
 // apareceriam como forma BASE, que e o oposto do que sao.
-import { SPECIES } from './pokes'
+import { SPECIES, opcoesDeEvolucao } from './pokes'
 
 // Quem evolui em quem, na direcao inversa (alvo -> origem). Uma especie pode
 // ser alvo de uma unica outra em todo o dado real do Gen1/Gen2, entao um mapa
 // simples basta.
 const PRE_EVOLUCAO: Record<string, string> = {}
 for (const especie of Object.values(SPECIES)) {
-  if (especie.evolvesTo && SPECIES[especie.evolvesTo]) {
-    PRE_EVOLUCAO[especie.evolvesTo] = especie.id
+  // PH-139: TODOS os destinos, e nao so `evolvesTo`. Com ramo, ler o campo
+  // unico faria o segundo destino (Hitmonchan) contar como forma BASE — o
+  // mesmo erro que o cabecalho acima registra para as evolucoes por troca.
+  for (const opcao of opcoesDeEvolucao(especie)) {
+    if (SPECIES[opcao.to]) PRE_EVOLUCAO[opcao.to] = especie.id
   }
 }
 
