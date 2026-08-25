@@ -98,7 +98,11 @@ function makeId(): string {
   return `toast-${nextId++}`
 }
 
-interface ToastState {
+// Exportada porque `toastStore.ts` a referencia no tipo inferido de
+// `useToastStore`. Sem o `export`, `tsc` reclama com TS4023 ("has or is using
+// name 'ToastState' (...) but cannot be named") — e o erro NAO aparece num
+// `tsc -b` incremental que ja tinha cache: so no CI, que builda limpo.
+export interface ToastState {
   toasts: ToastEntry[]
   chatLines: Record<LogTab, ChatLine[]>
   pushToast: (message: string, type: ToastType, channel: ToastChannel, realce?: ToastRealce, erroDetalhe?: ToastErroDetalhe) => void
