@@ -10,6 +10,7 @@ import { Painel } from '@/components/game/Painel'
 import { ProfileHero, StatDetail, MovesetTable } from '@/components/shared/PokeStatDetail'
 import { TypeWeaknessSection } from '@/components/shared/TypeWeaknessSection'
 import { usePokeProfileStore, type AbaDoPerfil, type PokeProfileTarget } from '@/stores/pokeProfileStore'
+import { usePokeVivo } from '@/hooks/usePokeVivo'
 import { cn } from '@/lib/utils'
 
 
@@ -31,7 +32,19 @@ function PokeProfileModalBody(
   // Quem abriu pode ter pedido uma aba (a Equipe tem botao direto pros
   // golpes); sem pedido, Status, como sempre.
   const [activeTab, setActiveTab] = useState<AbaDoPerfil>(open.aba ?? 'status')
-  const { poke, species } = open
+  const { species } = open
+  // PH-155 — resolvido UMA VEZ, aqui, e nao dentro de cada filho.
+  //
+  // `open.poke` e o snapshot que `showProfile` gravou no clique e que nunca
+  // mais muda. A correcao anterior tratou isso so dentro da `MovesetTable`, e o
+  // resultado foi um modal meio vivo: a tabela de golpes acompanhava o POKE e o
+  // cabecalho nao, entao subir de nivel com o perfil aberto deixava o `Lv` no
+  // numero antigo ate fechar e reabrir.
+  //
+  // Resolvendo no pai, os tres filhos (`ProfileHero`, `StatDetail`,
+  // `MovesetTable`) recebem a MESMA instancia viva e nao ha como um deles
+  // ficar pra tras de novo.
+  const poke = usePokeVivo(open.poke)
 
   return (
     <Painel
