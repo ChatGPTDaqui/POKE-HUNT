@@ -76,7 +76,22 @@ jobs:
         # eles ficavam inacessiveis atras deste, justo quando ha mudanca de
         # schema em voo — que e quando mais importam.
         run: |
-          LISTA=$(supabase migration list --linked --output-format json)
+          # 'migration list --linked' flanca a conexao ocasionalmente (visto
+          # 2x em 25/08: falha em ~30s sem imprimir nada, run seguinte no
+          # MESMO commit passa normal em minutos) -- retry pra nao reprovar
+          # PR por instabilidade de rede, nao por orfa de verdade.
+          LISTA=""
+          for tentativa in 1 2 3; do
+            if LISTA=$(supabase migration list --linked --output-format json); then
+              break
+            fi
+            echo "::warning::Tentativa ${tentativa}/3 de 'migration list --linked' falhou (provavel flake de conexao). Retentando..."
+            sleep 5
+          done
+          if [ -z "$LISTA" ]; then
+            echo "::error::'supabase migration list --linked' falhou 3x seguidas -- isto e falha de conexao/CLI, nao o gate de migration orfa. Ver logs do step."
+            exit 1
+          fi
           echo "$LISTA" | jq -c '.migrations[]'
           ORFAS=$(echo "$LISTA" | jq -r '.migrations[] | select(.local == "") | .remote')
           if [ -z "$ORFAS" ]; then
