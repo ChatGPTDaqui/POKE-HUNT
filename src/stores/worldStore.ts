@@ -25,43 +25,13 @@ import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import type { ClimaTipo, SalaAtiva, WorldState } from '@/engine/types'
 import { reconciliarSalaDaAutoridade } from '@/engine/systems/salaSystem'
-import { createRng, randomSeed, type Rng } from '@/core/rng'
+import type { Rng } from '@/core/rng'
 
-// `seed` opcional: quem constroi um mundo pra valer passa a semente da sessao
-// (na Fase D ela vem do servidor); sem argumento, sorteia uma. Nao ha fallback
-// pra `Math.random()` em lugar nenhum da simulacao — a sequencia inteira sai
-// deste estado.
-export function emptyWorldState(seed: number = randomSeed()): WorldState {
-  return {
-    mapDef: null,
-    player: null,
-    enemies: [],
-    effects: [],
-    pendingHits: [],
-    pendingWishes: [],
-    autoTimers: { treinador: 0 },
-    reviveCountdown: null,
-    trocaEmCampo: null,
-    respawnTimer: null,
-    sequenceIndex: 0,
-    sequenceCleared: false,
-    countdownRemaining: null,
-    sala: null,
-    salaCountdownRemaining: null,
-    salaPendente: null,
-    salaSobAutoridade: false,
-    salaEsperaDaAutoridade: 0,
-    salaPredita: false,
-    rng: createRng(seed),
-    // Guardada alem do `rng` porque `rng.state` avanca a cada sorteio e deixa
-    // de identificar a sessao — ver o campo em engine/types.ts (PH-140).
-    seed,
-    counters: { entity: 1, effect: 1, pendingHit: 1 },
-    pessimista: false,
-    clima: null,
-    climaAmbiente: null,
-  }
-}
+// `emptyWorldState` mora em `engine/worldState.ts` desde PH-148 — ela e a forma
+// do estado do MOTOR, e este arquivo puxa React por causa do `create`. Reexportada
+// aqui pra os call sites do cliente continuarem apontando pro mesmo lugar.
+import { emptyWorldState } from '@/engine/worldState'
+export { emptyWorldState }
 
 export interface WorldStore extends WorldState {
   // Troca o mundo inteiro (equivalente a `currentWorld = buildXWorld()` no

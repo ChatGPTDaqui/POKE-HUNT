@@ -161,27 +161,44 @@ function VitaisPoke() {
   const hpPct = Math.max(0, Math.min(100, (poke.hp / poke.stats.hp) * 100))
   const progress = expProgressForInstance(poke, species)
   const expPct = Math.max(0, Math.min(100, (progress.into / progress.needed) * 100))
+  const hpBaixo = hpPct < 30
+
+  // O NUMERO nao arredonda igual a barra (PH-157). `Math.round` mentiria nas
+  // duas pontas que mais importam: com 4 de 900 de HP ele escreve `0%` num POKE
+  // que esta VIVO, e com 897 de 900 escreve `100%` num POKE que ja levou dano.
+  // Nos dois casos o jogador le o oposto do que precisa decidir.
+  //
+  // `floor` resolve a ponta de cima (897/900 vira 99%) e o piso de 1 resolve a
+  // de baixo — `0%` fica reservado pro POKE caido de verdade, que e a unica
+  // situacao em que ele e a informacao certa.
+  const hpNumero = poke.hp > 0 ? Math.max(1, Math.floor(hpPct)) : 0
 
   return (
-    // Piso de largura pro nome do POKE e pra barra de HP: eles sao o conteudo
-    // mais importante do trilho e eram os primeiros a encolher, porque todo
-    // vizinho e `shrink-0`.
+    // LARGURA FIXA (PH-157), e nao mais uma coluna elastica entre piso e teto.
     //
-    // `min(9em, 34vw)` e nao `9em` seco: num aparelho de 320px os 9em (144px)
-    // mais os vizinhos de tamanho fixo somavam 324px numa caixa de 302px, e
-    // quem saia pela borda era o avatar do treinador. O piso passa a ceder
-    // junto com a tela — 34vw e o valor em que o conteudo cabe inteiro em 320px
-    // (medido, nao chutado).
+    // Antes daqui saiam `min-w-[min(9em,34vw)] max-w-[14em] flex-1`, e esta era
+    // a UNICA `flex-1` do trilho: entre os dois limites a barra respirava toda
+    // vez que um vizinho `shrink-0` aparecia ou sumia — selo de status, selo
+    // `KO`, nome de especie mais longo ao trocar de POKE. Barra que muda de
+    // tamanho sozinha e ruim de ler de relance, que e a unica coisa que ela
+    // precisa fazer.
     //
-    // O TETO (`max-w`) existe porque o piso resolvia so metade do problema. O
-    // trilho vai ate 64em (features/game/HudLayer.tsx) e esta coluna era a
-    // unica `flex-1` dele, entao num monitor largo as duas barras esticavam por
-    // 600px+ — largura que nao acrescenta informacao nenhuma: o que a barra
-    // precisa dizer de relance e "esta acabando", e isso ela diz em 14em. O
-    // resto da sobra virou o vao antes do grupo da direita (ver o `flex-1`
-    // vazio no trilho). Em tela estreita nada muda: la o teto nunca e
-    // alcancado e quem manda continua sendo o piso.
-    <div className="flex min-w-[min(9em,34vw)] max-w-[14em] flex-1 flex-col gap-[.18em]">
+    // `min(14em, 34vw)` e FIXO PARA UMA DADA TELA, nao fixo em pixel absoluto —
+    // e a distincao importa. Os dois numeros sao herdados de PH-54 e foram
+    // MEDIDOS:
+    //
+    //  - `34vw` e o valor em que o conteudo do trilho cabe inteiro num aparelho
+    //    de 320px. Com `14em` secos, os 224px mais os vizinhos de tamanho fixo
+    //    estouram a caixa e quem sai pela borda e o avatar do treinador. Em
+    //    320px este `min` da 108,8px — exatamente o piso que valia antes.
+    //  - `14em` e onde a barra ja diz "esta acabando" sem ajuda; acima disso a
+    //    largura extra nao acrescenta informacao. O trilho vai ate 64em
+    //    (features/game/HudLayer.tsx), entao sem teto ela esticaria por 600px+.
+    //
+    // A sobra continua virando o vao antes do grupo da direita (o `flex-1`
+    // vazio no trilho) — por isso tirar o `flex-1` daqui nao descola a carteira
+    // da borda.
+    <div className="flex w-[min(14em,34vw)] shrink-0 flex-col gap-[.18em]">
       <div className="flex min-w-0 items-center gap-[.35em] text-[.82em] leading-none">
         <span className={cn('truncate font-medium', poke.isShiny && 'text-shiny')}>
           {poke.isShiny && '✨'}{species.name}
@@ -191,12 +208,27 @@ function VitaisPoke() {
         <StatusBadge status={poke.status} />
         <StatusBadge status={statusVolatil} />
       </div>
-      {/* Duas barras coladas, sem numero: o numero de HP exato so importa quando
-          o jogador ja esta olhando o POKE, e ai ele esta no perfil. O que a
-          barra precisa dizer de relance e "esta acabando". */}
-      <div className="flex flex-col gap-[.12em]">
-        <Barra pct={hpPct} altura=".34em" cor={hpPct < 30 ? 'var(--color-hp-low)' : 'var(--color-hp)'} />
-        <Barra pct={expPct} altura=".18em" cor="var(--color-exp)" />
+      {/* As duas porcentagens (PH-157), a pedido do usuario. A versao anterior
+          nao trazia numero nenhum, com o argumento de que o valor exato so
+          importa com o jogador ja olhando o perfil — decisao revertida aqui de
+          proposito, pra ninguem "corrigir" de volta depois.
+
+          O rotulo tem largura RESERVADA (`w-[2.4em]`) e `tabular-nums`. Sem os
+          dois ele viraria a proxima fonte de tremida: `7%` e `100%` tem
+          larguras diferentes, e a barra ao lado e quem pagaria a diferenca a
+          cada tick de dano — reintroduzindo, pelo rotulo novo, exatamente o
+          defeito que esta issue veio tirar. */}
+      <div className="flex items-center gap-[.3em]">
+        <div className="flex min-w-0 flex-1 flex-col gap-[.12em]">
+          <Barra pct={hpPct} altura=".34em" cor={hpBaixo ? 'var(--color-hp-low)' : 'var(--color-hp)'} />
+          <Barra pct={expPct} altura=".18em" cor="var(--color-exp)" />
+        </div>
+        <div className="w-[2.4em] shrink-0 text-right text-[.6em] leading-[1.5] tabular-nums text-n400">
+          <div className={cn(hpBaixo && 'text-bad')}>{hpNumero}%</div>
+          {/* EXP nao usa o piso de 1: `0%` logo depois de subir de nivel e o
+              dado certo, e nao um POKE morto. */}
+          <div>{Math.floor(expPct)}%</div>
+        </div>
       </div>
     </div>
   )

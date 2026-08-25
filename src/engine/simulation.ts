@@ -53,8 +53,8 @@ import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
 
 import type { GameStateStore } from '@/stores/gameStateStore'
-import { emptyWorldState } from '@/stores/worldStore'
-import { useToastStore } from '@/stores/toastStore'
+import { emptyWorldState } from './worldState'
+import { toastStore } from '@/stores/toastStoreVanilla'
 import type { ClimaTipo, EnemyEntity, EnemyHazards, Point, SalaAtiva, WorldState } from './types'
 
 export const STARTER_LEVEL = 1
@@ -413,7 +413,7 @@ function trocarPorDesmaio(world: WorldState, gameState: GameStateStore, dt: numb
     player.pathTargetY = null
   }
   if (!silent) {
-    useToastStore.getState().pushToast(
+    toastStore.getState().pushToast(
       `${shinyPrefix(nextPoke.isShiny)}${SPECIES[nextPoke.speciesId].name} entrou em campo!`,
       'success', 'combat',
     )
@@ -662,7 +662,7 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
       value: loot.gold, unit: '🪙', color: '#fff59d', duration: 1.1, owner: enemy,
     }))
 
-    useToastStore.getState().pushToast(
+    toastStore.getState().pushToast(
       `${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${rarityOf(enemy.poke).label}] derrotado! +${expGain} EXP, +${loot.gold} ouro`,
       'gold', 'combat', realceDaRaridade(enemy.poke),
     )
@@ -672,21 +672,21 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
       // sem ele o level-up so dizia "subiu de nivel" e o jogador precisava
       // abrir o perfil pra descobrir se aquilo valeu alguma coisa.
       const ganhos = formatStatGains(grantResult.statGains)
-      useToastStore.getState().pushToast(
+      toastStore.getState().pushToast(
         `${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ''}`,
         'levelup', 'combat',
       )
       for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) {
-        useToastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, 'levelup', 'combat')
+        toastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, 'levelup', 'combat')
       }
     }
     if (trainerResult.leveledUp) {
-      useToastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, 'levelup', 'combat')
+      toastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, 'levelup', 'combat')
     }
 
     for (const itemId of loot.droppedItems) {
       const item = getItem(itemId)
-      if (item) useToastStore.getState().pushToast(`Item encontrado: ${item.name}`, 'success', 'world')
+      if (item) toastStore.getState().pushToast(`Item encontrado: ${item.name}`, 'success', 'world')
     }
 
     // Animacao de arremesso de Pokebola — so pra uma tentativa de verdade.
@@ -705,7 +705,7 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
         // Toast proprio: dizer "capturado! Foi para a mochila" e depois nao ter
         // nada na mochila e a forma mais rapida de o jogador achar que perdeu
         // POKE. A raridade fica porque e ela que explica o valor.
-        useToastStore.getState().pushToast(
+        toastStore.getState().pushToast(
           `${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`,
           'capture-success', 'world',
           realceDaRaridade(captureResult.poke),
@@ -717,7 +717,7 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
         // atributo e valor de venda em ate 600x, entao e o dado que decide se
         // aquela captura importou — e o chat era o unico lugar que nao dizia.
         const raridade = rarityOf(captureResult.poke).label
-        useToastStore.getState().pushToast(
+        toastStore.getState().pushToast(
           `${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`,
           'capture-success', 'world',
           // A raridade que vale e a da INSTANCIA capturada, nao a do inimigo em
@@ -725,7 +725,7 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
           realceDaRaridade(captureResult.poke),
         )
       } else if (captureResult.reason === 'roll_failed') {
-        useToastStore.getState().pushToast('A captura falhou!', 'capture-fail', 'combat')
+        toastStore.getState().pushToast('A captura falhou!', 'capture-fail', 'combat')
       }
     }
   }
@@ -812,7 +812,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
         world.respawnTimer = world.mapDef.respawnDelay
         if (!silent) {
           const nome = nomeDaSala(world.sala)
-          useToastStore.getState().pushToast(
+          toastStore.getState().pushToast(
             fechouCiclo
               ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.`
               : `Entrando em nova area: ${nome}.`,
@@ -863,7 +863,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     world.player.poke = penaltyResult.poke
     gameState.updatePokeInstance(penaltyResult.poke.uid, () => penaltyResult.poke)
     if (!silent) {
-      useToastStore.getState().pushToast(
+      toastStore.getState().pushToast(
         `${SPECIES[world.player.poke.speciesId].name} desmaiou!${penaltyResult.leveledDown ? ` Caiu para o nivel ${penaltyResult.level}.` : ''}`,
         'error', 'combat',
       )
@@ -888,9 +888,9 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     for (const ev of autoEvents) {
       if (ev.type === 'auto_pot') {
         const item = getItem(ev.itemId)
-        if (item) useToastStore.getState().pushToast(`Auto-pot usou ${item.name}.`, 'success', 'combat')
+        if (item) toastStore.getState().pushToast(`Auto-pot usou ${item.name}.`, 'success', 'combat')
       }
-      if (ev.type === 'auto_revive') useToastStore.getState().pushToast('Auto-revive reanimou seu POKE!', 'success', 'combat')
+      if (ev.type === 'auto_revive') toastStore.getState().pushToast('Auto-revive reanimou seu POKE!', 'success', 'combat')
     }
   }
 
@@ -908,7 +908,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     const algumEstavaTrancado = grupos.some((g) => !gameState.isContinentUnlocked(g))
     for (const grupo of grupos) gameState.unlockContinent(grupo)
     if (!silent && algumEstavaTrancado) {
-      useToastStore.getState().pushToast('Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.', 'success', 'world')
+      toastStore.getState().pushToast('Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.', 'success', 'world')
     }
   }
 
