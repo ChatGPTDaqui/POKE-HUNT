@@ -1360,6 +1360,7 @@ export type Database = {
           is_special_evolution: boolean
           ordem: number
           species_id: string
+          stone_type: Database["dev"]["Enums"]["element_type"] | null
         }
         Insert: {
           evolves_at_level: number
@@ -1367,6 +1368,7 @@ export type Database = {
           is_special_evolution?: boolean
           ordem?: number
           species_id: string
+          stone_type?: Database["dev"]["Enums"]["element_type"] | null
         }
         Update: {
           evolves_at_level?: number
@@ -1374,6 +1376,7 @@ export type Database = {
           is_special_evolution?: boolean
           ordem?: number
           species_id?: string
+          stone_type?: Database["dev"]["Enums"]["element_type"] | null
         }
         Relationships: [
           {
@@ -3346,6 +3349,7 @@ export type Database = {
           is_special_evolution: boolean
           ordem: number
           species_id: string
+          stone_type: Database["public"]["Enums"]["element_type"] | null
         }
         Insert: {
           evolves_at_level: number
@@ -3353,6 +3357,7 @@ export type Database = {
           is_special_evolution?: boolean
           ordem?: number
           species_id: string
+          stone_type?: Database["public"]["Enums"]["element_type"] | null
         }
         Update: {
           evolves_at_level?: number
@@ -3360,6 +3365,7 @@ export type Database = {
           is_special_evolution?: boolean
           ordem?: number
           species_id?: string
+          stone_type?: Database["public"]["Enums"]["element_type"] | null
         }
         Relationships: [
           {
