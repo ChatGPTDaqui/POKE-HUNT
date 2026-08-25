@@ -54943,8 +54943,9 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			const item = getItem(itemId);
 			if (item) toastStore.getState().pushToast(`Item encontrado: ${item.name}`, "success", "world");
 		}
+		let atrasoDoToastMs = 0;
 		if (captureResult && "ballItemId" in captureResult && captureResult.ballItemId) {
-			const quadros = captureAnimFrameCount(captureResult.success);
+			const duracao = captureAnimFrameCount(captureResult.success) * captureAnimFrameDuration() + .3;
 			world.effects.push(createWorldEffect(world.counters, {
 				type: "captureAnim",
 				x: enemy.x,
@@ -54954,16 +54955,21 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 				ballItemId: captureResult.ballItemId,
 				success: captureResult.success,
 				delay: 4,
-				duration: quadros * captureAnimFrameDuration() + .3
+				duration: duracao
 			}));
+			atrasoDoToastMs = (4 + duracao) * 1e3;
 		}
 		if (captureResult) {
-			if (captureResult.success && captureResult.location === "vendido") toastStore.getState().pushToast(`${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
-			else if (captureResult.success) {
-				const location = "mochila";
-				const raridade = rarityOf(captureResult.poke).label;
-				toastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
-			} else if (captureResult.reason === "roll_failed") toastStore.getState().pushToast("A captura falhou!", "capture-fail", "combat");
+			const dispararToastDeCaptura = () => {
+				if (captureResult.success && captureResult.location === "vendido") toastStore.getState().pushToast(`${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
+				else if (captureResult.success) {
+					const location = "mochila";
+					const raridade = rarityOf(captureResult.poke).label;
+					toastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
+				} else if (captureResult.reason === "roll_failed") toastStore.getState().pushToast("A captura falhou!", "capture-fail", "combat");
+			};
+			if (atrasoDoToastMs > 0) setTimeout(dispararToastDeCaptura, atrasoDoToastMs);
+			else dispararToastDeCaptura();
 		}
 	}
 	return {
