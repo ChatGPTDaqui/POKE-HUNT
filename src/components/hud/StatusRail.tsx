@@ -177,11 +177,28 @@ function VitaisPoke() {
     // LARGURA FIXA (PH-157), e nao mais uma coluna elastica entre piso e teto.
     //
     // Antes daqui saiam `min-w-[min(9em,34vw)] max-w-[14em] flex-1`, e esta era
-    // a UNICA `flex-1` do trilho: entre os dois limites a barra respirava toda
-    // vez que um vizinho `shrink-0` aparecia ou sumia — selo de status, selo
-    // `KO`, nome de especie mais longo ao trocar de POKE. Barra que muda de
+    // a UNICA `flex-1` do trilho com conteudo: entre o piso e o teto, toda
+    // largura que um IRMAO ganhava ou perdia saia daqui. Barra que muda de
     // tamanho sozinha e ruim de ler de relance, que e a unica coisa que ela
     // precisa fazer.
+    //
+    // Quem mexia, e a resposta NAO e o que parece: os irmaos sao `FacePoke`, o
+    // vao vazio, a `Carteira`, o `BotaoDetalhes` e — no modo amplo —
+    // `ResumoLocal` e `TaxasInline`. A que muda sozinha DURANTE o jogo e a
+    // Carteira, porque ela imprime o ouro e o numero troca de largura com o
+    // valor.
+    //
+    // Selo de status, selo `KO` e nome da especie NAO entram nessa conta, por
+    // mais que pareca: os tres vivem DENTRO desta coluna, na linha do nome, e
+    // disputam com o nome (que trunca) — nunca com a barra. Escrito aqui porque
+    // a primeira versao deste comentario culpava justamente os tres, e mandava
+    // o leitor procurar `StatusBadge` entre os irmaos, onde ele nao esta
+    // (PH-160).
+    //
+    // Medido a 600px de viewport, forcando a largura da Carteira de 60 a 220px:
+    // a coluna ia de 221,2px a 144px no layout antigo — 77,2px de amplitude — e
+    // fica em 204px fixos com esta versao. A 1280px eram 66,6px de amplitude.
+    // O numero esta aqui pra impedir que alguem "otimize" isto de volta.
     //
     // `min(14em, 34vw)` e FIXO PARA UMA DADA TELA, nao fixo em pixel absoluto —
     // e a distincao importa. Os dois numeros sao herdados de PH-54 e foram
