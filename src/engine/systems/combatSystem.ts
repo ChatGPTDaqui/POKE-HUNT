@@ -49,7 +49,7 @@ import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { rollChance, randRange } from '@/core/random'
-import { triggerAttackAnim } from './animationSystem'
+import { ATTACK_ANIM_DURATION, triggerAttackAnim } from './animationSystem'
 import { reporClimaDeAmbiente } from './climaAmbiente'
 import { createWorldEffect, effectDone, reapontarParaAtacante, seguirDono, tickEffect } from '../effect'
 import {
@@ -61,33 +61,17 @@ import type { Clima, ClimaTipo, EnemyEntity, Escudos, PendingHit, PlayerEntity, 
 // Quanto tempo depois do golpe disparar a resolucao pousa: arte do golpe,
 // numero de dano, status, tratamento de derrota.
 //
-// Era `ATTACK_ANIM_DURATION` (0,5s), amarrado a pose de ataque justamente pra
-// tudo pousar quando ela terminasse. Na tela isso saia em SEQUENCIA: a pose
-// tocava inteira, e so ai a arte do golpe comecava. Pedido do usuario: "quando
-// iniciar a sprite de ataque do pokemon, depois de 0,3 segundos iniciara a
-// sprite do golpe".
+// PH-175: de volta a `ATTACK_ANIM_DURATION` (0,5s) — sequencial, a pose
+// termina, so ENTAO a arte do golpe/resolucao acontece. Chegou a ser 0,3s de
+// proposito (pose e arte sobrepostas nos ultimos 0,2s, pra parecer o golpe
+// conectando), mas pedido explicito revertendo aquilo: a sobreposicao lia como
+// incoerente, nao como golpe conectando.
 //
-// Entao 0,3 aqui e a pose seguindo com 0,5 (`ATTACK_ANIM_DURATION`) — de
-// proposito. As duas passam a se SOBREPOR nos ultimos 0,2s, que e o que le como
-// golpe conectando, em vez de duas animacoes em fila.
-//
-// POR QUE MOVER A RESOLUCAO INTEIRA, E NAO SO A ARTE
-//
-// O caminho "so a arte em 0,3s, dano continua em 0,5s" foi considerado e
-// recusado: a arte NAO e incondicional. `resolveHit` decide mostra-la ja
-// sabendo o resultado — Protect bloqueou (sai antes da arte), Soundproof
-// cancelou, Magic Bounce trocou o alvo, o status pegou ou nao (`statusRecebeuEm`
-// escolhe em cima de QUEM a arte aparece). Antecipar so a arte exigiria decidir
-// isso 0,2s antes de a informacao existir, e o resultado seria arte de golpe
-// bloqueado, arte no alvo errado no Magic Bounce e arte de status que falhou.
-// Mover o pouso inteiro nao inventa nenhum desses casos.
-//
-// O que muda de fato: o numero de dano aparece 0,2s mais cedo, ainda durante a
-// pose, e a janela em que um atacante morrendo cancela o proprio golpe
-// enfileirado encurta de 0,5s pra 0,3s. Nenhuma regra de combate depende dessa
-// janela — `MIN_ACTION_GAP` (2s) continua sendo o que impede golpe empilhado, e
-// o travamento de movimento continua lendo `attackAnimTimer`, que segue em 0,5s.
-const HIT_LAND_DELAY = 0.3
+// Nada mais depende do valor mudar aqui: `MIN_ACTION_GAP` (2s) continua sendo
+// o que impede golpe empilhado, e o travamento de movimento ja lia
+// `attackAnimTimer` (tambem `ATTACK_ANIM_DURATION`) — os dois relogios voltam
+// a bater.
+const HIT_LAND_DELAY = ATTACK_ANIM_DURATION
 
 // Tempo de tela de um efeito de golpe.
 //
@@ -580,6 +564,24 @@ export function engageRangeFor(attacker: WorldEntity, defender: WorldEntity): nu
  */
 export function cooldownTotalDoGolpe(entity: WorldEntity, ability: Ability, clima: ClimaTipo | null = null): number {
   return scaledCooldown(ability, velocidadeEfetiva(entity, clima))
+}
+
+/**
+ * PH-176: arma o cooldown do golpe. Chamado em 3 pontos, nunca no disparo
+ * incondicional (era assim ate esta leva, em paralelo com a animacao
+ * inteira):
+ *
+ *  1. Golpe ERROU (`executePlayerAction`/`executeEnemyAction`) — nao ha
+ *     "pouso" pra esperar, o erro ja e instantaneo.
+ *  2. AOE sem NENHUM alvo no raio (`executePlayerAction`) — mesmo caso, e um
+ *     erro na pratica.
+ *  3. `resolveHit`, guardado por `isAbilityReady` — golpe em area gera varios
+ *     `pendingHits` (um por alvo) pro MESMO uso; so a PRIMEIRA resolucao
+ *     encontra a habilidade "pronta" e arma, as seguintes ja veem em cooldown
+ *     e pulam. Cobre o caso comum (1 alvo) e a area sem repetir a chamada.
+ */
+function armarCooldown(entity: WorldEntity, ability: Ability, world: WorldState): void {
+  startCooldown(entity, ability.id, scaledCooldown(ability, velocidadeEfetiva(entity, world.clima?.tipo ?? null)))
 }
 
 function scaledCooldown(ability: Ability, speed: number): number {
@@ -2035,7 +2037,8 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   if (ability.id !== BASIC_ATTACK.id) player.lastUsedAbilityId = ability.id
 
   registrarUsoParaProtecao(player, ability)
-  startCooldown(player, ability.id, scaledCooldown(ability, velocidadeEfetiva(player, world.clima?.tipo ?? null)))
+  // PH-176: cooldown NAO arma aqui mais — so no erro/AOE-sem-alvo abaixo, ou
+  // em `resolveHit` quando o golpe de fato acerta (ver `armarCooldown`).
   startGlobalCooldown(player, MIN_ACTION_GAP)
   triggerAttackAnim(player, ability.target === 'aoe', primaryTarget)
   announceAbility(world, player, ability)
@@ -2047,6 +2050,7 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   const miraGarantida = player.miraGarantidaAlvoId != null && player.miraGarantidaAlvoId === primaryTarget?.id
   if (miraGarantida) player.miraGarantidaAlvoId = null
   if (!miraGarantida && golpeErrou(world.rng, ability, player, primaryTarget, world.clima?.tipo ?? null)) {
+    armarCooldown(player, ability, world) // erro nao tem pouso pra esperar
     if (!silent) anunciarErro(world, player)
     return
   }
@@ -2054,6 +2058,11 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   const targets = ability.target === 'aoe'
     ? allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (ability.radius ?? 0))
     : [engagedEnemies[0]].filter(Boolean)
+
+  if (targets.length === 0) {
+    armarCooldown(player, ability, world) // AOE sem ninguem no raio -- e um erro na pratica
+    return
+  }
 
   // Dano real primeiro, visual/recoil de AOE depois (PH-10): os dois pousam
   // no MESMO tick (mesmo timer), mas `landed` processa na ordem de insercao
@@ -2088,7 +2097,9 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   if (ability.id !== BASIC_ATTACK.id) enemy.lastUsedAbilityId = ability.id
 
   registrarUsoParaProtecao(enemy, ability)
-  startCooldown(enemy, ability.id, scaledCooldown(ability, velocidadeEfetiva(enemy, world.clima?.tipo ?? null)))
+  // PH-176: cooldown NAO arma aqui mais — so no erro abaixo, ou em
+  // `resolveHit` quando o golpe de fato acerta (ver `armarCooldown`). Inimigo
+  // sempre mira o jogador unico, entao nao existe caso "AOE sem alvo".
   startGlobalCooldown(enemy, MIN_ACTION_GAP)
   triggerAttackAnim(enemy, ability.target === 'aoe', player)
   announceAbility(world, enemy, ability)
@@ -2096,6 +2107,7 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   const miraGarantida = enemy.miraGarantidaAlvoId != null && enemy.miraGarantidaAlvoId === player.id
   if (miraGarantida) enemy.miraGarantidaAlvoId = null
   if (!miraGarantida && golpeErrou(world.rng, ability, enemy, player, world.clima?.tipo ?? null)) {
+    armarCooldown(enemy, ability, world) // erro nao tem pouso pra esperar
     if (!silent) anunciarErro(world, enemy)
     return
   }
@@ -2263,6 +2275,12 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // nao pode mais concretizar nada que enfileirou antes de morrer — cancela
   // a acao inteira, dano incluso.
   if (isDead(attacker)) return
+
+  // PH-176: golpe que acertou arma o cooldown AQUI, na resolucao, nao no
+  // disparo. AOE gera varios `pendingHits` (um por alvo) pro MESMO uso —
+  // `isAbilityReady` guarda pra so a PRIMEIRA resolucao armar; as seguintes ja
+  // veem a habilidade em cooldown e pulam, sem precisar de estado novo.
+  if (isAbilityReady(attacker, ability.id)) armarCooldown(attacker, ability, world)
 
   if (hit.isAoeVisual) {
     // O unico anel deste cast AOE, centrado no atacante — ver

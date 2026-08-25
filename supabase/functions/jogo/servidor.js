@@ -51675,7 +51675,7 @@ function definirClimaDeAmbiente(world, ambiente) {
 }
 //#endregion
 //#region src/engine/systems/combatSystem.ts
-var HIT_LAND_DELAY = .3;
+var HIT_LAND_DELAY = ATTACK_ANIM_DURATION;
 var IMPACT_EFFECT_DURATION = 1;
 var AOE_EFFECT_DURATION = 1.2;
 var STATUS_VFX_DURATION = 1.1;
@@ -51926,6 +51926,23 @@ var MIN_ACTION_GAP = TURNO_SEGUNDOS;
 var MELEE_RANGE_PADDING = 10;
 function engageRangeFor(attacker, defender) {
 	return attacker.radius + defender.radius + MELEE_RANGE_PADDING;
+}
+/**
+* PH-176: arma o cooldown do golpe. Chamado em 3 pontos, nunca no disparo
+* incondicional (era assim ate esta leva, em paralelo com a animacao
+* inteira):
+*
+*  1. Golpe ERROU (`executePlayerAction`/`executeEnemyAction`) — nao ha
+*     "pouso" pra esperar, o erro ja e instantaneo.
+*  2. AOE sem NENHUM alvo no raio (`executePlayerAction`) — mesmo caso, e um
+*     erro na pratica.
+*  3. `resolveHit`, guardado por `isAbilityReady` — golpe em area gera varios
+*     `pendingHits` (um por alvo) pro MESMO uso; so a PRIMEIRA resolucao
+*     encontra a habilidade "pronta" e arma, as seguintes ja veem em cooldown
+*     e pulam. Cobre o caso comum (1 alvo) e a area sem repetir a chamada.
+*/
+function armarCooldown(entity, ability, world) {
+	startCooldown(entity, ability.id, scaledCooldown(ability, velocidadeEfetiva(entity, world.clima?.tipo ?? null)));
 }
 function scaledCooldown(ability, speed) {
 	if (ability.id === BASIC_ATTACK.id) return BASE_ATTACK_INTERVAL;
@@ -52677,17 +52694,21 @@ function executePlayerAction(world, player, engagedEnemies, silent) {
 	if (!ability) return;
 	if (ability.id !== BASIC_ATTACK.id) player.lastUsedAbilityId = ability.id;
 	registrarUsoParaProtecao(player, ability);
-	startCooldown(player, ability.id, scaledCooldown(ability, velocidadeEfetiva(player, world.clima?.tipo ?? null)));
 	startGlobalCooldown(player, MIN_ACTION_GAP);
 	triggerAttackAnim(player, ability.target === "aoe", primaryTarget);
 	announceAbility(world, player, ability);
 	const miraGarantida = player.miraGarantidaAlvoId != null && player.miraGarantidaAlvoId === primaryTarget?.id;
 	if (miraGarantida) player.miraGarantidaAlvoId = null;
 	if (!miraGarantida && golpeErrou(world.rng, ability, player, primaryTarget, world.clima?.tipo ?? null)) {
+		armarCooldown(player, ability, world);
 		if (!silent) anunciarErro(world, player);
 		return;
 	}
 	const targets = ability.target === "aoe" ? allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (ability.radius ?? 0)) : [engagedEnemies[0]].filter(Boolean);
+	if (targets.length === 0) {
+		armarCooldown(player, ability, world);
+		return;
+	}
 	for (const target of targets) queueHit(world, player, target, ability);
 	if (ability.target === "aoe") queueAoeVisual(world, player, ability);
 }
@@ -52699,13 +52720,13 @@ function executeEnemyAction(world, enemy, player, silent) {
 	if (!ability) return;
 	if (ability.id !== BASIC_ATTACK.id) enemy.lastUsedAbilityId = ability.id;
 	registrarUsoParaProtecao(enemy, ability);
-	startCooldown(enemy, ability.id, scaledCooldown(ability, velocidadeEfetiva(enemy, world.clima?.tipo ?? null)));
 	startGlobalCooldown(enemy, MIN_ACTION_GAP);
 	triggerAttackAnim(enemy, ability.target === "aoe", player);
 	announceAbility(world, enemy, ability);
 	const miraGarantida = enemy.miraGarantidaAlvoId != null && enemy.miraGarantidaAlvoId === player.id;
 	if (miraGarantida) enemy.miraGarantidaAlvoId = null;
 	if (!miraGarantida && golpeErrou(world.rng, ability, enemy, player, world.clima?.tipo ?? null)) {
+		armarCooldown(enemy, ability, world);
 		if (!silent) anunciarErro(world, enemy);
 		return;
 	}
@@ -52841,6 +52862,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	if (!attacker) return;
 	const { ability } = hit;
 	if (isDead(attacker)) return;
+	if (isAbilityReady(attacker, ability.id)) armarCooldown(attacker, ability, world);
 	if (hit.isAoeVisual) {
 		if (!silent) world.effects.push(createWorldEffect(world.counters, {
 			type: "abilityEffect",
@@ -54921,8 +54943,9 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			const item = getItem(itemId);
 			if (item) toastStore.getState().pushToast(`Item encontrado: ${item.name}`, "success", "world");
 		}
+		let atrasoDoToastMs = 0;
 		if (captureResult && "ballItemId" in captureResult && captureResult.ballItemId) {
-			const quadros = captureAnimFrameCount(captureResult.success);
+			const duracao = captureAnimFrameCount(captureResult.success) * captureAnimFrameDuration() + .3;
 			world.effects.push(createWorldEffect(world.counters, {
 				type: "captureAnim",
 				x: enemy.x,
@@ -54932,16 +54955,21 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 				ballItemId: captureResult.ballItemId,
 				success: captureResult.success,
 				delay: 4,
-				duration: quadros * captureAnimFrameDuration() + .3
+				duration: duracao
 			}));
+			atrasoDoToastMs = (4 + duracao) * 1e3;
 		}
 		if (captureResult) {
-			if (captureResult.success && captureResult.location === "vendido") toastStore.getState().pushToast(`${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
-			else if (captureResult.success) {
-				const location = "mochila";
-				const raridade = rarityOf(captureResult.poke).label;
-				toastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
-			} else if (captureResult.reason === "roll_failed") toastStore.getState().pushToast("A captura falhou!", "capture-fail", "combat");
+			const dispararToastDeCaptura = () => {
+				if (captureResult.success && captureResult.location === "vendido") toastStore.getState().pushToast(`${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
+				else if (captureResult.success) {
+					const location = "mochila";
+					const raridade = rarityOf(captureResult.poke).label;
+					toastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
+				} else if (captureResult.reason === "roll_failed") toastStore.getState().pushToast("A captura falhou!", "capture-fail", "combat");
+			};
+			if (atrasoDoToastMs > 0) setTimeout(dispararToastDeCaptura, atrasoDoToastMs);
+			else dispararToastDeCaptura();
 		}
 	}
 	return {
