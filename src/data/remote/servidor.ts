@@ -241,6 +241,32 @@ export interface PerfilRemoto {
   noHallDaFama: string | null
 }
 
+/**
+ * O perfil de OUTRO jogador (PH-119).
+ *
+ * Tipo separado de `PerfilRemoto` de propósito, e não `PerfilRemoto & { nome }`:
+ * o que pode ser visto de terceiro é uma decisão de privacidade, e ela precisa
+ * de um lugar onde a lista inteira apareça de uma vez. Herdar faria um campo
+ * novo em `PerfilRemoto` — que serve à tela de configuração do próprio jogador —
+ * vazar para cá sem ninguém decidir.
+ *
+ * Nunca carrega carteira, mochila, e-mail nem o time. Ver a migration
+ * `20260825030000_perfil_publico_public.sql`, que lista o porquê de cada campo.
+ */
+export interface PerfilPublico {
+  userId: string
+  nome: string
+  nivel: number
+  exp: number
+  rank: number
+  totalJogadores: number
+  segundosJogados: number
+  contaCriadaEm: string | null
+  noHallDaFama: string | null
+  capturas: number
+  anunciosAtivos: number
+}
+
 // --- mercado, chat e correio ------------------------------------------------
 // Os tipos espelham server/src/mercado.ts e server/src/social.ts.
 
