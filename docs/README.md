@@ -53,6 +53,7 @@ esses pontos. Tornar o repositório público exige, antes, decidir o que sai daq
 | [14-habilidades.md](14-habilidades.md) | Habilidade, Natureza e Característica: o que vale, o que não vale e por quê |
 | [15-coordenacao-supabase.md](15-coordenacao-supabase.md) | Como o time evita pisar um no outro no Supabase e no `CLAUDE.md` |
 | [17-geracao-iii-preparada.md](17-geracao-iii-preparada.md) | As 135 espécies de Hoenn prontas na base, e o que ligá-las exige — em ordem |
+| [18-animacoes-do-pmd-disponiveis.md](18-animacoes-do-pmd-disponiveis.md) | Que animações o acervo PMD tem além das 6 usadas, para quantas espécies, e quanto custam |
 
 ## Como isto se relaciona com os outros arquivos do repositório
 
