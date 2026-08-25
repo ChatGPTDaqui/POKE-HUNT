@@ -17,7 +17,7 @@
 //
 // Mora em `scripts/` porque ler PNG exige `node:fs`, e `src/` nao tem os types
 // de node — mesmo motivo de `scripts/lib/animdata.test.mjs`.
-import { existsSync, readFileSync } from 'node:fs'
+import { closeSync, existsSync, openSync, readFileSync, readSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -34,11 +34,24 @@ const RAIZ = dirname(dirname(fileURLToPath(import.meta.url)))
  *
  * Layout: 8 de assinatura, 4 de tamanho do bloco, 4 do literal "IHDR", 4 de
  * largura e 4 de altura, big-endian.
+ *
+ * Le os 24 bytes pelo descritor, e nao com `readFileSync`. Sao 1.266 folhas, e
+ * algumas passam de 1 MB: trazer a imagem inteira pra memoria pra olhar o
+ * cabecalho e desperdicio que a assinatura da funcao nem denuncia — quem lesse
+ * `dimensoesDePng(readFileSync(caminho))` ia supor que o custo era o do
+ * cabecalho.
  */
-function dimensoesDePng(buffer) {
-  if (buffer.length < 24) throw new Error('arquivo curto demais pra ser PNG')
-  if (buffer.readUInt32BE(12) !== 0x49484452) throw new Error('primeiro bloco nao e IHDR')
-  return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) }
+function dimensoesDePng(caminho) {
+  const fd = openSync(caminho, 'r')
+  try {
+    const buffer = Buffer.alloc(24)
+    const lidos = readSync(fd, buffer, 0, 24, 0)
+    if (lidos < 24) throw new Error(`arquivo curto demais pra ser PNG: ${caminho}`)
+    if (buffer.readUInt32BE(12) !== 0x49484452) throw new Error(`primeiro bloco nao e IHDR: ${caminho}`)
+    return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) }
+  } finally {
+    closeSync(fd)
+  }
 }
 
 /** `BATTLE_SPRITE_ANIMS` e um literal JSON puro no fim do arquivo. */
@@ -80,7 +93,7 @@ describe('a geometria dos battle-sprites (PH-149)', () => {
     for (const { id, nome, meta } of entradas) {
       const caminho = join(RAIZ, 'assets', 'battle-sprites', id, `${nome}-Anim.png`)
       if (!existsSync(caminho)) continue // ja reportado no caso acima
-      const { width, height } = dimensoesDePng(readFileSync(caminho))
+      const { width, height } = dimensoesDePng(caminho)
 
       if (height % meta.frameHeight !== 0) {
         problemas.push(`${id}/${nome}: altura ${height} nao e multiplo de frameHeight ${meta.frameHeight}`)
@@ -91,15 +104,25 @@ describe('a geometria dos battle-sprites (PH-149)', () => {
         continue
       }
       const quadros = width / meta.frameWidth
+      // So a FALTA e erro, e a assimetria e deliberada: quadro sobrando na folha
+      // e comum (a origem exporta a linha inteira mesmo quando a animacao usa
+      // menos), enquanto duracao sem quadro faz o renderer recortar fora da
+      // imagem. Se um dia sobra virar sintoma de `frameWidth` menor do que
+      // deveria, o caso pra abrir e outro — este aqui nao promete pegar.
       if (quadros < meta.durations.length) {
         problemas.push(`${id}/${nome}: ${meta.durations.length} duracoes declaradas mas a folha so tem ${quadros} quadro(s)`)
       }
     }
+    // Truncado porque 1.266 animacoes quebradas seriam ilegiveis — mas o TOTAL
+    // vai junto: 21 problemas e uma regressao pontual, 900 e geometria trocada
+    // no importador, e sao diagnosticos diferentes.
+    const amostra = problemas.slice(0, 20)
     expect(
-      problemas.slice(0, 20),
-      'a geometria declarada nao bate com o PNG. O renderer recorta pelos numeros de '
-      + 'battleSpriteAnims.ts, entao o sintoma e sprite cortado ou com pedaco do quadro vizinho — '
-      + 'visivel na tela e dificil de rastrear ate aqui.',
+      amostra,
+      `${problemas.length} problema(s) de geometria, mostrando ate 20. A geometria declarada nao `
+      + 'bate com o PNG. O renderer recorta pelos numeros de battleSpriteAnims.ts, entao o sintoma '
+      + 'e sprite cortado ou com pedaco do quadro vizinho — visivel na tela e dificil de rastrear '
+      + 'ate aqui.',
     ).toEqual([])
   })
 })
