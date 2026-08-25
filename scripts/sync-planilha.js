@@ -629,11 +629,20 @@ function syncSpeciesAndMoves(workbook, hunts) {
   // Pull in the full evolution chain of every species above too (e.g.
   // Charmander -> Charmeleon -> Charizard) so "Evoluir" can turn into a real
   // species swap instead of just a label.
+  //
+  // Segue TODOS os destinos, nao so o primeiro (PH-145): Eevee tem cinco, e
+  // ate esta mudanca as outras quatro Eeveelutions nunca entravam no elenco —
+  // nao por decisao, mas porque o unico caminho de entrada era a coluna
+  // 'Evolui Para (chave)', que cabe um id so.
   const evolutionQueue = [...allSpeciesKeys];
   while (evolutionQueue.length > 0) {
     const key = evolutionQueue.shift();
-    const nextKey = especiesByKey[key] && especiesByKey[key]['Evolui Para (chave)'];
-    if (nextKey && !allSpeciesKeys.has(nextKey)) {
+    const row = especiesByKey[key];
+    if (!row) continue;
+    const destinos = (row['Evolucoes'] || []).map((o) => o.to.toUpperCase());
+    if (!destinos.length && row['Evolui Para (chave)']) destinos.push(row['Evolui Para (chave)']);
+    for (const nextKey of destinos) {
+      if (allSpeciesKeys.has(nextKey)) continue;
       allSpeciesKeys.add(nextKey);
       evolutionQueue.push(nextKey);
     }
@@ -706,6 +715,19 @@ function syncSpeciesAndMoves(workbook, hunts) {
 
     const type2 = row['Tipo 2'] || null;
     const evolvesToSheetKey = row['Evolui Para (chave)'] || null;
+    // Destino cujo alvo ficou de fora do elenco e descartado aqui, e nao por
+    // quem le: opcao apontando pra especie que `SPECIES` nao tem viraria um
+    // botao que a tela de evolucao nao sabe desenhar. Hoje nao acontece — o
+    // fecho transitivo la em cima traz todo destino junto — mas basta alguem
+    // recortar o elenco por outro criterio pra voltar a acontecer.
+    const evolutionOptions = (row['Evolucoes'] || [])
+      .filter((o) => allSpeciesKeys.has(o.to.toUpperCase()))
+      .map((o) => ({
+        to: o.to.toLowerCase(),
+        atLevel: o.atLevel,
+        isSpecial: o.isSpecial === true,
+        ...(o.stoneType ? { stoneType: o.stoneType } : {}),
+      }));
     speciesData[ourKey] = {
       id: ourKey,
       name: row['Nome'],
@@ -730,6 +752,11 @@ function syncSpeciesAndMoves(workbook, hunts) {
       abilities,
       evolvesTo: evolvesToSheetKey ? evolvesToSheetKey.toLowerCase() : null,
       evolvesAtLevel: evolvesToSheetKey ? row['Evolui no Nível'] : null,
+      // TODOS os destinos, com o gate de cada um (PH-145). Emitido so quando a
+      // especie evolui — 251 listas vazias no bundle nao diriam nada. Os dois
+      // campos acima seguem apontando pro primeiro: sao a leitura de quem ainda
+      // nao conhece ramo (Pokedex, estagio de evolucao, save antigo).
+      ...(evolutionOptions.length ? { evolutionOptions } : {}),
     };
   }
 

@@ -31,9 +31,17 @@ const MAPA = 'route_46'
 const PASSO = 1 / 60
 const PASSOS = 60 * 90
 
-// Scizor tem `bullet_punch` no learnset; um charmander nao tem golpe direcional
-// nenhum, que e exatamente por isso que o teste do PH-103 passou com o bug em pe.
-const ESPECIE = 'scizor'
+// Hitmonchan tem `bullet_punch` no learnset; um charmander nao tem golpe
+// direcional nenhum, que e exatamente por isso que o teste do PH-103 passou com
+// o bug em pe.
+//
+// Era `scizor` ate PH-145. Scizor so aprendia Bullet Punch no bloco de nivel 1,
+// e aquele bloco e o Recordador do jogo original — some quando a especie tem
+// pre-evolucao no catalogo, que passou a ser o caso quando `scyther -> scizor`
+// virou aresta de verdade. O teste NAO estava errado antes: a fonte e que nao
+// sabia que Scizor era forma evoluida. O `expect` de vacuidade logo abaixo e o
+// que transformou isso num erro visivel em vez de um teste medindo o vazio.
+const ESPECIE = 'hitmonchan'
 const NIVEL = 60
 const GOLPE = 'bullet_punch'
 
