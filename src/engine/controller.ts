@@ -81,7 +81,6 @@ export const controller = {
     // entrada mas nunca a impede. Depois da sessao ja estar aceita de proposito:
     // se o servidor recusar, nao ha por que gastar banda.
     await preloadHunt(mapId, { speciesId: activePoke.speciesId, isShiny: activePoke.isShiny })
-    gameState.setCurrentMapId(mapId)
     // A sala inicial e a que o servidor decidiu na abertura. Sem passa-la aqui, a
     // simulacao local sorteia a propria e o jogador ve o sub-bioma trocar poucos
     // segundos depois de entrar, quando a do servidor chega no primeiro flush.
@@ -99,6 +98,24 @@ export const controller = {
     // Sem servidor (jogo local) o sorteio local continua sendo o unico.
     world.salaSobAutoridade = servidorAtivo()
     useWorldStore.getState().setWorld(world)
+    // A FLAG POR ULTIMO, e nao antes de montar a cena (PH-156).
+    //
+    // `currentMapId` e o que o resto do jogo le como "estou numa cacada" — e a
+    // trava que esconde a edicao dos 4 golpes no perfil, entre outras coisas.
+    // Ela ficava gravada aqui em cima, logo depois do `preloadHunt`, e o
+    // problema e o intervalo: entre a gravacao e o `setWorld` acontecem a
+    // montagem do mundo e a leitura do `worldStore`. Qualquer excecao ali
+    // deixava a flag ligada com o Hospital na tela — e nada reconciliava isso,
+    // entao a trava sobrevivia ate o jogador recarregar a pagina (o boot zera,
+    // e e por isso que o sintoma era "so destrava com F5").
+    //
+    // Gravando depois, o estado inconsistente nao chega a existir: ou a cena
+    // subiu e a flag acompanha, ou nenhuma das duas coisas aconteceu.
+    //
+    // A ordem e segura porque `buildMapWorld` NAO le `currentMapId`, e o
+    // observador de `useSaidaAoEncerrarSessao` so acorda com mudanca no
+    // `gameStateStore` — quando esta linha roda, o `mapDef` ja esta no lugar.
+    gameState.setCurrentMapId(mapId)
     resetStats(gameState) // painel de taxa de farm reinicia do zero a cada hunt nova
     return true
   },
