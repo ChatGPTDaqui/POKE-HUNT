@@ -10,6 +10,8 @@ import { useAcaoMercado } from '../hooks/useAcaoMercado'
 import { useTaxaDoMercado, taxaDeVenda } from '../useTaxaDoMercado'
 import { fmt } from '../utils'
 import { useMochila } from '@/features/bag/useMochila'
+import { FiltroDePokes } from './FiltroDaVenda'
+import { filtrarPokes, FILTRO_DE_POKE_VAZIO, type FiltroDePoke } from '../filtrosDaVenda'
 import { EstadoDaMochila } from '@/features/bag/EstadoDaMochila'
 
 /** Os tres jeitos de anunciar um POKE. Excludentes por construcao — ver a nota
@@ -33,6 +35,7 @@ export function VenderPokes() {
   // guerra de +1 que ninguem quer disputar, e o vendedor que nao pensou no
   // numero cai justamente nesse caso.
   const [incremento, setIncremento] = useState(100)
+  const [filtro, setFiltro] = useState<FiltroDePoke>(FILTRO_DE_POKE_VAZIO)
   const anunciar = useAcaoMercado(mercadoRpc.anunciarPoke)
   const leiloar = useAcaoMercado(mercadoRpc.criarLeilao)
   const { regra } = useTaxaDoMercado()
@@ -41,7 +44,10 @@ export function VenderPokes() {
   // POKE travado nao aparece: a trava existe justamente pra ele nao sair da
   // mochila por engano, e anunciar e sair da mochila.
   const elegiveis = bagPokes.filter((p) => !p.locked && SPECIES[p.speciesId])
-  const escolhido = elegiveis.find((p) => p.uid === uid) ?? elegiveis[0]
+  const visiveis = filtrarPokes(elegiveis, filtro)
+  // O selecionado sai dos VISÍVEIS: manter escolhido um POKE que o filtro
+  // escondeu deixaria a tela anunciando um e mostrando outro.
+  const escolhido = visiveis.find((p) => p.uid === uid) ?? visiveis[0]
 
   if (!carregada) return <EstadoDaMochila />
 
@@ -59,11 +65,22 @@ export function VenderPokes() {
           descreve o SELECIONADO em vez de todos ao mesmo tempo. */}
       <div className="flex flex-col gap-[.2em] text-[.78em] text-n400">
         POKE
+        <FiltroDePokes
+          filtro={filtro}
+          onFiltro={setFiltro}
+          total={elegiveis.length}
+          mostrando={visiveis.length}
+        />
+        {visiveis.length === 0 ? (
+          // "Nada casa com o filtro" e "não tenho nada" são coisas diferentes, e
+          // a lista vazia sozinha não distingue as duas.
+          <p className="py-[.4em] text-n500">Nenhum POKE casa com o filtro.</p>
+        ) : (
         <GradeDeInventario
           rotuloDoGrupo="POKE para anunciar"
           selecionado={escolhido?.uid ?? null}
           onSelecionar={setUid}
-          slots={elegiveis.map((p) => ({
+          slots={visiveis.map((p) => ({
             id: p.uid,
             rotulo: `${p.isShiny ? '✨ ' : ''}${SPECIES[p.speciesId].name} Lv${p.level} · ${rarityOf(p).label} · IV ${averageIvPercent(p.ivs).toFixed(0)}%`,
             conteudo: (
@@ -71,6 +88,7 @@ export function VenderPokes() {
             ),
           }))}
         />
+        )}
         {escolhido && (
           <span className="text-n300">
             {escolhido.isShiny ? '✨ ' : ''}
