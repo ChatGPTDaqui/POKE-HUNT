@@ -87,6 +87,14 @@ scripts/body-block-refs/_conferencia/
 scripts/agua-debug/
 scripts/agua-refs/*-rascunho.png
 
+# Notas de operacao de maquina, geradas durante faxina de repositorio: a copia
+# local do ruleset da dev (pra conferir protecao sem abrir o GitHub) e a lista
+# de branch apagada com o hash pra restaurar. Nao sao do produto, e ficavam na
+# raiz sem rastreamento E sem ignore — um `git add -A` distraido commitava as
+# tres. Mesmo defeito que a PH-108 corrigiu pro tsbuildinfo. (PH-163)
+dev-ruleset.json
+branches-apagadas-*.txt
+
 # Artefato de build do `tsc -b` em authority/ (PH-108). Ele reaparece a cada
 # `npm run build:engine` + `tsc -b` la dentro, e sem esta linha um `git add -A`
 # distraido o commita — 200KB de cache de compilacao que nao serve pra ninguem
