@@ -1,0 +1,847 @@
+{
+  "_origem": "Gerado por scripts/derive-spawn-tiers-gen3.mjs a partir de pret/pokeemerald/src/data/wild_encounters.json. Nao editar a mao.",
+  "_escala": "Mesma escala de scripts/spawn-tiers.json (30/20/10/5/1) — sem isso as duas geracoes apareceriam em frequencias incomparaveis.",
+  "_recorte": "dex 252-386",
+  "tiers": [
+    {
+      "chave": "muito_comum",
+      "peso": 30,
+      "minChance": 25
+    },
+    {
+      "chave": "comum",
+      "peso": 20,
+      "minChance": 15
+    },
+    {
+      "chave": "incomum",
+      "peso": 10,
+      "minChance": 7.5
+    },
+    {
+      "chave": "raro",
+      "peso": 5,
+      "minChance": 3
+    },
+    {
+      "chave": "muito_raro",
+      "peso": 1,
+      "minChance": null
+    }
+  ],
+  "especies": {
+    "treecko": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 0)"
+    },
+    "grovyle": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "sceptile": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 2)"
+    },
+    "torchic": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 0)"
+    },
+    "combusken": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "blaziken": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 2)"
+    },
+    "mudkip": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 0)"
+    },
+    "marshtomp": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "swampert": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 2)"
+    },
+    "poochyena": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 31.2,
+      "locais": 11,
+      "nota": "Gen3: 31.2% medio em 11 local(is) (land)"
+    },
+    "mightyena": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 23.3,
+      "locais": 3,
+      "nota": "Gen3: 23.3% medio em 3 local(is) (land)"
+    },
+    "zigzagoon": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 21,
+      "locais": 5,
+      "nota": "Gen3: 21% medio em 5 local(is) (land)"
+    },
+    "linoone": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 20,
+      "locais": 2,
+      "nota": "Gen3: 20% medio em 2 local(is) (land)"
+    },
+    "wurmple": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 30,
+      "locais": 4,
+      "nota": "Gen3: 30% medio em 4 local(is) (land)"
+    },
+    "silcoon": {
+      "tier": "incomum",
+      "origem": "emerald",
+      "chanceMedia": 10,
+      "locais": 1,
+      "nota": "Gen3: 10% medio em 1 local(is) (land)"
+    },
+    "beautifly": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 2)"
+    },
+    "cascoon": {
+      "tier": "incomum",
+      "origem": "emerald",
+      "chanceMedia": 10,
+      "locais": 1,
+      "nota": "Gen3: 10% medio em 1 local(is) (land)"
+    },
+    "dustox": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 2)"
+    },
+    "lotad": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 25,
+      "locais": 2,
+      "nota": "Gen3: 25% medio em 2 local(is) (land)"
+    },
+    "lombre": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 20,
+      "locais": 1,
+      "nota": "Gen3: 20% medio em 1 local(is) (land)"
+    },
+    "ludicolo": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 2)"
+    },
+    "seedot": {
+      "tier": "muito_raro",
+      "origem": "emerald",
+      "chanceMedia": 1,
+      "locais": 3,
+      "nota": "Gen3: 1% medio em 3 local(is) (land)"
+    },
+    "nuzleaf": {
+      "tier": "muito_raro",
+      "origem": "emerald",
+      "chanceMedia": 1,
+      "locais": 1,
+      "nota": "Gen3: 1% medio em 1 local(is) (land)"
+    },
+    "shiftry": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 2)"
+    },
+    "taillow": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 18.8,
+      "locais": 4,
+      "nota": "Gen3: 18.8% medio em 4 local(is) (land)"
+    },
+    "swellow": {
+      "tier": "incomum",
+      "origem": "emerald",
+      "chanceMedia": 10,
+      "locais": 1,
+      "nota": "Gen3: 10% medio em 1 local(is) (land)"
+    },
+    "wingull": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 31.8,
+      "locais": 39,
+      "nota": "Gen3: 31.8% medio em 39 local(is) (land/water)"
+    },
+    "pelipper": {
+      "tier": "raro",
+      "origem": "emerald",
+      "chanceMedia": 5,
+      "locais": 31,
+      "nota": "Gen3: 5% medio em 31 local(is) (water)"
+    },
+    "ralts": {
+      "tier": "raro",
+      "origem": "emerald",
+      "chanceMedia": 4,
+      "locais": 1,
+      "nota": "Gen3: 4% medio em 1 local(is) (land)"
+    },
+    "kirlia": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "gardevoir": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 2)"
+    },
+    "surskit": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 0)"
+    },
+    "masquerain": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "shroomish": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 15,
+      "locais": 1,
+      "nota": "Gen3: 15% medio em 1 local(is) (land)"
+    },
+    "breloom": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "slakoth": {
+      "tier": "raro",
+      "origem": "emerald",
+      "chanceMedia": 5,
+      "locais": 1,
+      "nota": "Gen3: 5% medio em 1 local(is) (land)"
+    },
+    "vigoroth": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "slaking": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 2)"
+    },
+    "nincada": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 20,
+      "locais": 1,
+      "nota": "Gen3: 20% medio em 1 local(is) (land)"
+    },
+    "ninjask": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "shedinja": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "whismur": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 39.8,
+      "locais": 4,
+      "nota": "Gen3: 39.8% medio em 4 local(is) (land)"
+    },
+    "loudred": {
+      "tier": "incomum",
+      "origem": "emerald",
+      "chanceMedia": 13,
+      "locais": 2,
+      "nota": "Gen3: 13% medio em 2 local(is) (land)"
+    },
+    "exploud": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 2)"
+    },
+    "makuhita": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 30,
+      "locais": 4,
+      "nota": "Gen3: 30% medio em 4 local(is) (land)"
+    },
+    "hariyama": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 30,
+      "locais": 2,
+      "nota": "Gen3: 30% medio em 2 local(is) (land)"
+    },
+    "azurill": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 0)"
+    },
+    "nosepass": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 30,
+      "locais": 1,
+      "nota": "Gen3: 30% medio em 1 local(is) (rock_smash)"
+    },
+    "skitty": {
+      "tier": "muito_raro",
+      "origem": "emerald",
+      "chanceMedia": 2,
+      "locais": 1,
+      "nota": "Gen3: 2% medio em 1 local(is) (land)"
+    },
+    "delcatty": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "sableye": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 27.5,
+      "locais": 10,
+      "nota": "Gen3: 27.5% medio em 10 local(is) (land)"
+    },
+    "mawile": {
+      "tier": "raro",
+      "origem": "emerald",
+      "chanceMedia": 5,
+      "locais": 2,
+      "nota": "Gen3: 5% medio em 2 local(is) (land)"
+    },
+    "aron": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 23.8,
+      "locais": 4,
+      "nota": "Gen3: 23.8% medio em 4 local(is) (land)"
+    },
+    "lairon": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 20,
+      "locais": 3,
+      "nota": "Gen3: 20% medio em 3 local(is) (land)"
+    },
+    "aggron": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 2)"
+    },
+    "meditite": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 0)"
+    },
+    "medicham": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "electrike": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 30,
+      "locais": 2,
+      "nota": "Gen3: 30% medio em 2 local(is) (land)"
+    },
+    "manectric": {
+      "tier": "incomum",
+      "origem": "emerald",
+      "chanceMedia": 10,
+      "locais": 1,
+      "nota": "Gen3: 10% medio em 1 local(is) (land)"
+    },
+    "plusle": {
+      "tier": "muito_raro",
+      "origem": "emerald",
+      "chanceMedia": 2,
+      "locais": 1,
+      "nota": "Gen3: 2% medio em 1 local(is) (land)"
+    },
+    "minun": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 15,
+      "locais": 1,
+      "nota": "Gen3: 15% medio em 1 local(is) (land)"
+    },
+    "volbeat": {
+      "tier": "muito_raro",
+      "origem": "emerald",
+      "chanceMedia": 1,
+      "locais": 1,
+      "nota": "Gen3: 1% medio em 1 local(is) (land)"
+    },
+    "illumise": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 18,
+      "locais": 1,
+      "nota": "Gen3: 18% medio em 1 local(is) (land)"
+    },
+    "roselia": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 0, nao evolui)"
+    },
+    "gulpin": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 15,
+      "locais": 1,
+      "nota": "Gen3: 15% medio em 1 local(is) (land)"
+    },
+    "swalot": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "carvanha": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 100,
+      "locais": 2,
+      "nota": "Gen3: 100% medio em 2 local(is) (fishing)"
+    },
+    "sharpedo": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 40,
+      "locais": 15,
+      "nota": "Gen3: 40% medio em 15 local(is) (fishing)"
+    },
+    "wailmer": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 97.9,
+      "locais": 33,
+      "nota": "Gen3: 97.9% medio em 33 local(is) (fishing)"
+    },
+    "wailord": {
+      "tier": "muito_raro",
+      "origem": "emerald",
+      "chanceMedia": 1,
+      "locais": 1,
+      "nota": "Gen3: 1% medio em 1 local(is) (water)"
+    },
+    "numel": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 53.3,
+      "locais": 3,
+      "nota": "Gen3: 53.3% medio em 3 local(is) (land)"
+    },
+    "camerupt": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "torkoal": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 28.7,
+      "locais": 9,
+      "nota": "Gen3: 28.7% medio em 9 local(is) (land)"
+    },
+    "spoink": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 20,
+      "locais": 1,
+      "nota": "Gen3: 20% medio em 1 local(is) (land)"
+    },
+    "grumpig": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "spinda": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 70,
+      "locais": 1,
+      "nota": "Gen3: 70% medio em 1 local(is) (land)"
+    },
+    "trapinch": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 47,
+      "locais": 5,
+      "nota": "Gen3: 47% medio em 5 local(is) (land)"
+    },
+    "vibrava": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "flygon": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 2)"
+    },
+    "cacnea": {
+      "tier": "raro",
+      "origem": "emerald",
+      "chanceMedia": 6,
+      "locais": 1,
+      "nota": "Gen3: 6% medio em 1 local(is) (land)"
+    },
+    "cacturne": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "swablu": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 35,
+      "locais": 2,
+      "nota": "Gen3: 35% medio em 2 local(is) (land)"
+    },
+    "altaria": {
+      "tier": "raro",
+      "origem": "emerald",
+      "chanceMedia": 6,
+      "locais": 1,
+      "nota": "Gen3: 6% medio em 1 local(is) (land)"
+    },
+    "zangoose": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 0, nao evolui)"
+    },
+    "seviper": {
+      "tier": "incomum",
+      "origem": "emerald",
+      "chanceMedia": 9,
+      "locais": 1,
+      "nota": "Gen3: 9% medio em 1 local(is) (land)"
+    },
+    "lunatone": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 0, nao evolui)"
+    },
+    "solrock": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 21.1,
+      "locais": 9,
+      "nota": "Gen3: 21.1% medio em 9 local(is) (land/water)"
+    },
+    "barboach": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 110,
+      "locais": 8,
+      "nota": "Gen3: 110% medio em 8 local(is) (fishing)"
+    },
+    "whiscash": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 20,
+      "locais": 4,
+      "nota": "Gen3: 20% medio em 4 local(is) (fishing)"
+    },
+    "corphish": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 120,
+      "locais": 3,
+      "nota": "Gen3: 120% medio em 3 local(is) (fishing)"
+    },
+    "crawdaunt": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "baltoy": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 24,
+      "locais": 1,
+      "nota": "Gen3: 24% medio em 1 local(is) (land)"
+    },
+    "claydol": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 23,
+      "locais": 3,
+      "nota": "Gen3: 23% medio em 3 local(is) (land)"
+    },
+    "lileep": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 0)"
+    },
+    "cradily": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "anorith": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 0)"
+    },
+    "armaldo": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "feebas": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 0)"
+    },
+    "milotic": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "castform": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 0, nao evolui)"
+    },
+    "kecleon": {
+      "tier": "muito_raro",
+      "origem": "emerald",
+      "chanceMedia": 1,
+      "locais": 5,
+      "nota": "Gen3: 1% medio em 5 local(is) (land)"
+    },
+    "shuppet": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 77.5,
+      "locais": 10,
+      "nota": "Gen3: 77.5% medio em 10 local(is) (land)"
+    },
+    "banette": {
+      "tier": "comum",
+      "origem": "emerald",
+      "chanceMedia": 15,
+      "locais": 3,
+      "nota": "Gen3: 15% medio em 3 local(is) (land)"
+    },
+    "duskull": {
+      "tier": "incomum",
+      "origem": "emerald",
+      "chanceMedia": 10.8,
+      "locais": 4,
+      "nota": "Gen3: 10.8% medio em 4 local(is) (land)"
+    },
+    "dusclops": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "tropius": {
+      "tier": "incomum",
+      "origem": "emerald",
+      "chanceMedia": 9,
+      "locais": 1,
+      "nota": "Gen3: 9% medio em 1 local(is) (land)"
+    },
+    "chimecho": {
+      "tier": "muito_raro",
+      "origem": "emerald",
+      "chanceMedia": 2,
+      "locais": 1,
+      "nota": "Gen3: 2% medio em 1 local(is) (land)"
+    },
+    "absol": {
+      "tier": "incomum",
+      "origem": "emerald",
+      "chanceMedia": 8,
+      "locais": 1,
+      "nota": "Gen3: 8% medio em 1 local(is) (land)"
+    },
+    "wynaut": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 100,
+      "locais": 1,
+      "nota": "Gen3: 100% medio em 1 local(is) (land)"
+    },
+    "snorunt": {
+      "tier": "incomum",
+      "origem": "emerald",
+      "chanceMedia": 10,
+      "locais": 1,
+      "nota": "Gen3: 10% medio em 1 local(is) (land)"
+    },
+    "glalie": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "spheal": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 37.9,
+      "locais": 7,
+      "nota": "Gen3: 37.9% medio em 7 local(is) (land/water)"
+    },
+    "sealeo": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "walrein": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 2)"
+    },
+    "clamperl": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 65,
+      "locais": 2,
+      "nota": "Gen3: 65% medio em 2 local(is) (water)"
+    },
+    "huntail": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "gorebyss": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "relicanth": {
+      "tier": "raro",
+      "origem": "emerald",
+      "chanceMedia": 5,
+      "locais": 2,
+      "nota": "Gen3: 5% medio em 2 local(is) (water)"
+    },
+    "luvdisc": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 60,
+      "locais": 2,
+      "nota": "Gen3: 60% medio em 2 local(is) (fishing)"
+    },
+    "bagon": {
+      "tier": "muito_comum",
+      "origem": "emerald",
+      "chanceMedia": 25,
+      "locais": 1,
+      "nota": "Gen3: 25% medio em 1 local(is) (land)"
+    },
+    "shelgon": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "salamence": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 2)"
+    },
+    "beldum": {
+      "tier": "incomum",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 0)"
+    },
+    "metang": {
+      "tier": "raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 1)"
+    },
+    "metagross": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "sem encontro selvagem em Emerald; regra por estagio evolutivo (profundidade 2)"
+    },
+    "regirock": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "regice": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "registeel": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "latias": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "latios": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "kyogre": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "groudon": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "rayquaza": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "jirachi": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    },
+    "deoxys": {
+      "tier": "muito_raro",
+      "origem": "regra",
+      "nota": "lendario — so aparece em hunt BOSS"
+    }
+  }
+}

@@ -35,7 +35,50 @@ const path = require('path');
 const api = require('./lib/pokeapi.js');
 
 const OUT_DIR = path.join(__dirname, 'usum');
-const DEX_MAX = 251; // Kanto + Johto: o elenco deste jogo nao muda nesta leva.
+
+// ---------------------------------------------------------------------------
+// O RECORTE DA POKEDEX, E A TRAVA QUE O PROTEGE
+// ---------------------------------------------------------------------------
+// `DEX_MAX` decide o elenco INTEIRO do jogo — nao so quais especies existem,
+// mas quais hunts sao montadas, o que entra no Modo Pesadelo e o que o
+// Bestiario lista. Ate PH-146 era uma constante; virou parametro pra Hoenn
+// (252-386) poder ser preparada sem entrar no jogo.
+//
+// A TRAVA: mudar o recorte SEM dizer onde gravar e erro, nao aviso. Sem ela,
+// um `npm run usum:baixar -- --dex-max=386` distraido sobrescreveria
+// `catalog.json`, e o proximo `usum:gerar` poria 135 especies de Hoenn em
+// producao — com arte faltando, sem peso de spawn e sem ninguem pedir. O
+// estrago aparece longe da causa, que e o que faz esse tipo de acidente
+// custar caro.
+//
+// `src/data/recorteDaPokedex.test.ts` guarda o padrao.
+const DEX_MAX_PADRAO = 251; // Kanto + Johto: o elenco que o jogo tem hoje.
+
+function argumento(nome) {
+  const a = process.argv.find((x) => x.startsWith(`--${nome}=`));
+  return a ? a.slice(nome.length + 3) : null;
+}
+
+const SAIDA = argumento('saida');
+const DEX_MAX = (() => {
+  const bruto = argumento('dex-max');
+  if (bruto == null) return DEX_MAX_PADRAO;
+  const n = Number(bruto);
+  if (!Number.isInteger(n) || n < 1 || n > 1025) throw new Error(`--dex-max invalido: ${bruto}`);
+  if (n !== DEX_MAX_PADRAO && !SAIDA) {
+    throw new Error(
+      `--dex-max=${n} muda o elenco do jogo inteiro (o padrao e ${DEX_MAX_PADRAO}).\n` +
+      'Passe tambem --saida=<arquivo> pra gravar num catalogo separado — sobrescrever\n' +
+      'scripts/usum/catalog.json com outro recorte poe as especies novas em producao\n' +
+      'no proximo `npm run usum:gerar`.'
+    );
+  }
+  return n;
+})();
+
+const ARQUIVO_CATALOGO = SAIDA
+  ? path.resolve(__dirname, '..', SAIDA)
+  : path.join(OUT_DIR, 'catalog.json');
 
 // Nivel exigido por toda evolucao que na origem depende de pedra, troca ou
 // amizade — mecanicas que este jogo nao tem. Espelha
@@ -553,11 +596,20 @@ async function main() {
     fs.readFileSync(path.join(__dirname, 'spawn-tiers.json'), 'utf8')
   ).especies));
   const semTier = especies.filter((e) => !chavesConhecidas.has(e.chave));
-  if (semTier.length) {
+  if (semTier.length && DEX_MAX === DEX_MAX_PADRAO) {
     throw new Error(
       `chaves de especie divergiram de spawn-tiers.json: ${semTier.map((e) => e.chave).join(', ')}. ` +
       'Chave de especie e identidade (save/arte/tabelas do jogo) — corrija EXCECOES_DE_CHAVE, nunca a lista de tiers.'
     );
+  }
+  if (semTier.length) {
+    // Recorte de PREPARACAO (PH-146): `spawn-tiers.json` cobre 1-251, entao uma
+    // faixa maior sempre vai ter espécie sem tier. Nao e divergencia de chave —
+    // e dado que ainda nao foi derivado. Vira aviso, e o numero e listado pra
+    // nao passar despercebido: sem tier, toda essa faixa cairia no fallback
+    // "incomum" em silencio no dia em que a geracao for ligada.
+    console.log(`  AVISO: ${semTier.length} especie(s) fora de spawn-tiers.json (recorte 1-${DEX_MAX}, ` +
+      `o arquivo cobre 1-${DEX_MAX_PADRAO}). Rode \`node scripts/derive-spawn-tiers.js --gen3\` antes de ligar.`);
   }
 
   // Regressao conhecida da resolucao por versao: se qualquer um destes sair
@@ -622,13 +674,16 @@ async function main() {
   }
 
   // --- Escrita ------------------------------------------------------------
-  fs.mkdirSync(OUT_DIR, { recursive: true });
+  fs.mkdirSync(path.dirname(ARQUIVO_CATALOGO), { recursive: true });
   const catalogo = {
     _fonte: 'PokeAPI v2 (https://pokeapi.co), version group "ultra-sun-ultra-moon"',
     _regra:
       'Valores resolvidos PARA O ULTRA SUN, nao os atuais: move.past_values (exclusivo) e ' +
       'pokemon.past_types (inclusivo). Ver scripts/lib/pokeapi.js.',
     _gerador: 'npm run usum:baixar (scripts/fetch-usum-catalog.js)',
+    // Qual recorte da Pokedex este arquivo cobre. `padrao: false` marca um
+    // catalogo de PREPARACAO, que o jogo nao le — ver a trava de `--dex-max`.
+    _recorte: { dexMax: DEX_MAX, padrao: DEX_MAX === DEX_MAX_PADRAO },
     tipos: TIPOS,
     tabelaDeTipos,
     especies,
@@ -640,8 +695,11 @@ async function main() {
     // `src/data/todasAsEvolucoes.test.ts` compara o catalogo.
     arestasReais: arestasReaisDoRecorte(cadeiaPorUrl, speciesApi, dexPorNome),
   };
-  fs.writeFileSync(path.join(OUT_DIR, 'catalog.json'), JSON.stringify(catalogo, null, 1) + '\n');
-  fs.writeFileSync(
+  fs.writeFileSync(ARQUIVO_CATALOGO, JSON.stringify(catalogo, null, 1) + '\n');
+  // So no recorte padrao: este arquivo e a EVIDENCIA de uma decisao tomada pro
+  // elenco do jogo (por que o encontro do Ultra Sun nao vira taxa de spawn).
+  // Reescreve-lo com outro recorte falsearia o registro.
+  if (DEX_MAX === DEX_MAX_PADRAO) fs.writeFileSync(
     path.join(OUT_DIR, 'encontros-usum.json'),
     JSON.stringify(
       {
@@ -658,7 +716,8 @@ async function main() {
   );
 
   const stats = api.estatisticasDeCache();
-  console.log(`\nEscrito scripts/usum/catalog.json (${especies.length} especies, ${golpes.length} golpes).`);
+  console.log(`\nEscrito ${path.relative(path.join(__dirname, '..'), ARQUIVO_CATALOGO).replace(/\\/g, '/')} ` +
+    `(${especies.length} especies, ${golpes.length} golpes, dex 1-${DEX_MAX}).`);
   console.log(`Encontros USUM medidos: ${Object.keys(encontros).length}/${DEX_MAX} especies.`);
   console.log(`Requests: ${stats.rede} de rede, ${stats.cache} de cache.`);
   if (Object.keys(evolucoesDescartadas).length) {
