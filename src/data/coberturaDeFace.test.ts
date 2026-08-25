@@ -27,22 +27,31 @@ const ARQUIVOS_NORMAIS = Object.keys(import.meta.glob('/assets/sprites-face/emo/
 const ARQUIVOS_SHINY = Object.keys(import.meta.glob('/assets/sprites-face-shiny/emo/*/*.png'))
 
 /**
- * COBERTURA MINIMA POR EMOCAO, medida em 2026-08-24.
+ * COBERTURA MINIMA POR EMOCAO. Medida em 2026-08-24, subida no mesmo dia.
  *
  * Nao e meta, e piso: o numero de hoje. Subir e livre; descer exige mexer aqui
  * e explicar por que, que e exatamente a conversa que este teste existe pra
- * forcar. As 226 especies tem face neutra; a diferenca e o que falta garimpar.
+ * forcar. As 245 especies tem face neutra; a diferenca e o que falta garimpar.
  *
  * `pain` e `dizzy` sao as que mais doem faltar — dano e confusao/KO.
+ *
+ * HISTORICO DOS NUMEROS, porque eles contam o que aconteceu:
+ *
+ *   192/185/184/184/184/184/182  (normal) — a primeira medicao, com 226
+ *       especies e o mapeamento de 7 expressoes 1:1 com a origem.
+ *   208/204/208/208/213/211/200  — depois de PH-145 (+19 especies) e da tabela
+ *       de SUBSTITUTAS em `importar-faces-emocao.mjs`: o acervo tem 16
+ *       expressoes e o script usava 7, entao parte do "nao existe arte" era o
+ *       mapeamento ser estreito, nao a arte faltar.
  */
 const PISO: Record<FaceEmocao, { normal: number; shiny: number }> = {
-  pain: { normal: 192, shiny: 189 },
-  worried: { normal: 185, shiny: 181 },
-  dizzy: { normal: 184, shiny: 180 },
-  stunned: { normal: 184, shiny: 181 },
-  joyous: { normal: 184, shiny: 180 },
-  determined: { normal: 184, shiny: 181 },
-  sigh: { normal: 182, shiny: 179 },
+  pain: { normal: 208, shiny: 205 },
+  worried: { normal: 204, shiny: 200 },
+  dizzy: { normal: 208, shiny: 204 },
+  stunned: { normal: 208, shiny: 204 },
+  joyous: { normal: 213, shiny: 207 },
+  determined: { normal: 211, shiny: 206 },
+  sigh: { normal: 200, shiny: 197 },
 }
 
 const EMOCOES = Object.keys(PISO) as FaceEmocao[]
