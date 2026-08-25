@@ -566,6 +566,24 @@ export function cooldownTotalDoGolpe(entity: WorldEntity, ability: Ability, clim
   return scaledCooldown(ability, velocidadeEfetiva(entity, clima))
 }
 
+/**
+ * PH-176: arma o cooldown do golpe. Chamado em 3 pontos, nunca no disparo
+ * incondicional (era assim ate esta leva, em paralelo com a animacao
+ * inteira):
+ *
+ *  1. Golpe ERROU (`executePlayerAction`/`executeEnemyAction`) — nao ha
+ *     "pouso" pra esperar, o erro ja e instantaneo.
+ *  2. AOE sem NENHUM alvo no raio (`executePlayerAction`) — mesmo caso, e um
+ *     erro na pratica.
+ *  3. `resolveHit`, guardado por `isAbilityReady` — golpe em area gera varios
+ *     `pendingHits` (um por alvo) pro MESMO uso; so a PRIMEIRA resolucao
+ *     encontra a habilidade "pronta" e arma, as seguintes ja veem em cooldown
+ *     e pulam. Cobre o caso comum (1 alvo) e a area sem repetir a chamada.
+ */
+function armarCooldown(entity: WorldEntity, ability: Ability, world: WorldState): void {
+  startCooldown(entity, ability.id, scaledCooldown(ability, velocidadeEfetiva(entity, world.clima?.tipo ?? null)))
+}
+
 function scaledCooldown(ability: Ability, speed: number): number {
   if (ability.id === BASIC_ATTACK.id) return BASE_ATTACK_INTERVAL
   return (ability.cooldown ?? 0) * (SPEED_REFERENCE / Math.max(1, speed))
@@ -2019,7 +2037,8 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   if (ability.id !== BASIC_ATTACK.id) player.lastUsedAbilityId = ability.id
 
   registrarUsoParaProtecao(player, ability)
-  startCooldown(player, ability.id, scaledCooldown(ability, velocidadeEfetiva(player, world.clima?.tipo ?? null)))
+  // PH-176: cooldown NAO arma aqui mais — so no erro/AOE-sem-alvo abaixo, ou
+  // em `resolveHit` quando o golpe de fato acerta (ver `armarCooldown`).
   startGlobalCooldown(player, MIN_ACTION_GAP)
   triggerAttackAnim(player, ability.target === 'aoe', primaryTarget)
   announceAbility(world, player, ability)
@@ -2031,6 +2050,7 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   const miraGarantida = player.miraGarantidaAlvoId != null && player.miraGarantidaAlvoId === primaryTarget?.id
   if (miraGarantida) player.miraGarantidaAlvoId = null
   if (!miraGarantida && golpeErrou(world.rng, ability, player, primaryTarget, world.clima?.tipo ?? null)) {
+    armarCooldown(player, ability, world) // erro nao tem pouso pra esperar
     if (!silent) anunciarErro(world, player)
     return
   }
@@ -2038,6 +2058,11 @@ function executePlayerAction(world: WorldState, player: PlayerEntity, engagedEne
   const targets = ability.target === 'aoe'
     ? allEnemies.filter((e) => Math.hypot(e.x - player.x, e.y - player.y) <= (ability.radius ?? 0))
     : [engagedEnemies[0]].filter(Boolean)
+
+  if (targets.length === 0) {
+    armarCooldown(player, ability, world) // AOE sem ninguem no raio -- e um erro na pratica
+    return
+  }
 
   // Dano real primeiro, visual/recoil de AOE depois (PH-10): os dois pousam
   // no MESMO tick (mesmo timer), mas `landed` processa na ordem de insercao
@@ -2072,7 +2097,9 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   if (ability.id !== BASIC_ATTACK.id) enemy.lastUsedAbilityId = ability.id
 
   registrarUsoParaProtecao(enemy, ability)
-  startCooldown(enemy, ability.id, scaledCooldown(ability, velocidadeEfetiva(enemy, world.clima?.tipo ?? null)))
+  // PH-176: cooldown NAO arma aqui mais — so no erro abaixo, ou em
+  // `resolveHit` quando o golpe de fato acerta (ver `armarCooldown`). Inimigo
+  // sempre mira o jogador unico, entao nao existe caso "AOE sem alvo".
   startGlobalCooldown(enemy, MIN_ACTION_GAP)
   triggerAttackAnim(enemy, ability.target === 'aoe', player)
   announceAbility(world, enemy, ability)
@@ -2080,6 +2107,7 @@ function executeEnemyAction(world: WorldState, enemy: EnemyEntity, player: Playe
   const miraGarantida = enemy.miraGarantidaAlvoId != null && enemy.miraGarantidaAlvoId === player.id
   if (miraGarantida) enemy.miraGarantidaAlvoId = null
   if (!miraGarantida && golpeErrou(world.rng, ability, enemy, player, world.clima?.tipo ?? null)) {
+    armarCooldown(enemy, ability, world) // erro nao tem pouso pra esperar
     if (!silent) anunciarErro(world, enemy)
     return
   }
@@ -2247,6 +2275,12 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // nao pode mais concretizar nada que enfileirou antes de morrer — cancela
   // a acao inteira, dano incluso.
   if (isDead(attacker)) return
+
+  // PH-176: golpe que acertou arma o cooldown AQUI, na resolucao, nao no
+  // disparo. AOE gera varios `pendingHits` (um por alvo) pro MESMO uso —
+  // `isAbilityReady` guarda pra so a PRIMEIRA resolucao armar; as seguintes ja
+  // veem a habilidade em cooldown e pulam, sem precisar de estado novo.
+  if (isAbilityReady(attacker, ability.id)) armarCooldown(attacker, ability, world)
 
   if (hit.isAoeVisual) {
     // O unico anel deste cast AOE, centrado no atacante — ver
