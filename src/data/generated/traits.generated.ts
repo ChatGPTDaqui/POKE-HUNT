@@ -693,6 +693,12 @@ export const TRAITS_DATA: TraitsData = {
       ],
       "oculta": "lightning_rod"
     },
+    "raichu": {
+      "normais": [
+        "static"
+      ],
+      "oculta": "lightning_rod"
+    },
     "sandshrew": {
       "normais": [
         "sand_veil"
@@ -747,12 +753,33 @@ export const TRAITS_DATA: TraitsData = {
       ],
       "oculta": "sheer_force"
     },
+    "clefairy": {
+      "normais": [
+        "cute_charm",
+        "magic_guard"
+      ],
+      "oculta": "friend_guard"
+    },
+    "clefable": {
+      "normais": [
+        "cute_charm",
+        "magic_guard"
+      ],
+      "oculta": "unaware"
+    },
     "jigglypuff": {
       "normais": [
         "cute_charm",
         "competitive"
       ],
       "oculta": "friend_guard"
+    },
+    "wigglytuff": {
+      "normais": [
+        "cute_charm",
+        "competitive"
+      ],
+      "oculta": "frisk"
     },
     "zubat": {
       "normais": [
@@ -777,6 +804,12 @@ export const TRAITS_DATA: TraitsData = {
         "chlorophyll"
       ],
       "oculta": "stench"
+    },
+    "vileplume": {
+      "normais": [
+        "chlorophyll"
+      ],
+      "oculta": "effect_spore"
     },
     "paras": {
       "normais": [
@@ -884,6 +917,13 @@ export const TRAITS_DATA: TraitsData = {
       "oculta": "swift_swim"
     },
     "poliwhirl": {
+      "normais": [
+        "water_absorb",
+        "damp"
+      ],
+      "oculta": "swift_swim"
+    },
+    "poliwrath": {
       "normais": [
         "water_absorb",
         "damp"
@@ -1083,6 +1123,13 @@ export const TRAITS_DATA: TraitsData = {
       ],
       "oculta": "overcoat"
     },
+    "cloyster": {
+      "normais": [
+        "shell_armor",
+        "skill_link"
+      ],
+      "oculta": "overcoat"
+    },
     "gastly": {
       "normais": [
         "levitate"
@@ -1151,6 +1198,12 @@ export const TRAITS_DATA: TraitsData = {
       "oculta": "aftermath"
     },
     "exeggcute": {
+      "normais": [
+        "chlorophyll"
+      ],
+      "oculta": "harvest"
+    },
+    "exeggutor": {
       "normais": [
         "chlorophyll"
       ],
@@ -1268,6 +1321,13 @@ export const TRAITS_DATA: TraitsData = {
       ],
       "oculta": "analytic"
     },
+    "starmie": {
+      "normais": [
+        "illuminate",
+        "natural_cure"
+      ],
+      "oculta": "analytic"
+    },
     "scyther": {
       "normais": [
         "swarm",
@@ -1339,6 +1399,24 @@ export const TRAITS_DATA: TraitsData = {
         "adaptability"
       ],
       "oculta": "anticipation"
+    },
+    "vaporeon": {
+      "normais": [
+        "water_absorb"
+      ],
+      "oculta": "hydration"
+    },
+    "jolteon": {
+      "normais": [
+        "volt_absorb"
+      ],
+      "oculta": "quick_feet"
+    },
+    "flareon": {
+      "normais": [
+        "flash_fire"
+      ],
+      "oculta": "guts"
     },
     "porygon": {
       "normais": [
@@ -1547,6 +1625,12 @@ export const TRAITS_DATA: TraitsData = {
       ],
       "oculta": "sniper"
     },
+    "crobat": {
+      "normais": [
+        "inner_focus"
+      ],
+      "oculta": "infiltrator"
+    },
     "chinchou": {
       "normais": [
         "volt_absorb",
@@ -1588,6 +1672,13 @@ export const TRAITS_DATA: TraitsData = {
       ],
       "oculta": "super_luck"
     },
+    "togetic": {
+      "normais": [
+        "hustle",
+        "serene_grace"
+      ],
+      "oculta": "super_luck"
+    },
     "natu": {
       "normais": [
         "synchronize",
@@ -1619,6 +1710,12 @@ export const TRAITS_DATA: TraitsData = {
         "static"
       ],
       "oculta": "plus"
+    },
+    "bellossom": {
+      "normais": [
+        "chlorophyll"
+      ],
+      "oculta": "healer"
     },
     "marill": {
       "normais": [
@@ -1711,12 +1808,31 @@ export const TRAITS_DATA: TraitsData = {
       ],
       "oculta": "unaware"
     },
+    "espeon": {
+      "normais": [
+        "synchronize"
+      ],
+      "oculta": "magic_bounce"
+    },
+    "umbreon": {
+      "normais": [
+        "synchronize"
+      ],
+      "oculta": "inner_focus"
+    },
     "murkrow": {
       "normais": [
         "insomnia",
         "super_luck"
       ],
       "oculta": "prankster"
+    },
+    "slowking": {
+      "normais": [
+        "oblivious",
+        "own_tempo"
+      ],
+      "oculta": "regenerator"
     },
     "misdreavus": {
       "normais": [
@@ -1962,6 +2078,13 @@ export const TRAITS_DATA: TraitsData = {
         "steadfast"
       ],
       "oculta": "vital_spirit"
+    },
+    "hitmontop": {
+      "normais": [
+        "intimidate",
+        "technician"
+      ],
+      "oculta": "steadfast"
     },
     "smoochum": {
       "normais": [

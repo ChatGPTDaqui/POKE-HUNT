@@ -1993,6 +1993,16 @@ export const ABILITIES_DATA: AbilitiesData = {
     "target": "single",
     "accuracy": 100
   },
+  "aromatherapy": {
+    "id": "aromatherapy",
+    "name": "Aromatherapy",
+    "type": "GRASS",
+    "category": "status",
+    "power": 0,
+    "pp": 5,
+    "target": "single",
+    "accuracy": 100
+  },
   "wrap": {
     "id": "wrap",
     "name": "Wrap",
@@ -2055,16 +2065,6 @@ export const ABILITIES_DATA: AbilitiesData = {
     "target": "single",
     "accuracy": 100
   },
-  "leaf_tornado": {
-    "id": "leaf_tornado",
-    "name": "Leaf Tornado",
-    "type": "GRASS",
-    "category": "special",
-    "power": 65,
-    "pp": 10,
-    "target": "single",
-    "accuracy": 90
-  },
   "spit_up": {
     "id": "spit_up",
     "name": "Spit Up",
@@ -2119,6 +2119,16 @@ export const ABILITIES_DATA: AbilitiesData = {
     "critStages": 1,
     "accuracy": 100
   },
+  "leaf_tornado": {
+    "id": "leaf_tornado",
+    "name": "Leaf Tornado",
+    "type": "GRASS",
+    "category": "special",
+    "power": 65,
+    "pp": 10,
+    "target": "single",
+    "accuracy": 90
+  },
   "barrage": {
     "id": "barrage",
     "name": "Barrage",
@@ -2169,6 +2179,37 @@ export const ABILITIES_DATA: AbilitiesData = {
     "power": 0,
     "pp": 15,
     "target": "single",
+    "accuracy": 100
+  },
+  "psyshock": {
+    "id": "psyshock",
+    "name": "Psyshock",
+    "type": "PSYCHIC",
+    "category": "special",
+    "power": 80,
+    "pp": 10,
+    "target": "single",
+    "accuracy": 100
+  },
+  "egg_bomb": {
+    "id": "egg_bomb",
+    "name": "Egg Bomb",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 100,
+    "pp": 10,
+    "target": "single",
+    "accuracy": 75
+  },
+  "wood_hammer": {
+    "id": "wood_hammer",
+    "name": "Wood Hammer",
+    "type": "GRASS",
+    "category": "physical",
+    "power": 120,
+    "pp": 15,
+    "target": "single",
+    "drainPercent": -33,
     "accuracy": 100
   },
   "constrict": {
@@ -2251,14 +2292,30 @@ export const ABILITIES_DATA: AbilitiesData = {
     "statusChance": 30,
     "accuracy": 100
   },
-  "aromatherapy": {
-    "id": "aromatherapy",
-    "name": "Aromatherapy",
-    "type": "GRASS",
+  "quiver_dance": {
+    "id": "quiver_dance",
+    "name": "Quiver Dance",
+    "type": "BUG",
     "category": "status",
     "power": 0,
-    "pp": 5,
+    "pp": 20,
     "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkEsp",
+        "estagios": 1
+      },
+      {
+        "stat": "defEsp",
+        "estagios": 1
+      },
+      {
+        "stat": "speed",
+        "estagios": 1
+      }
+    ],
+    "statChance": 100,
+    "statTarget": "self",
     "accuracy": 100
   },
   "splash": {
@@ -2372,23 +2429,6 @@ export const ABILITIES_DATA: AbilitiesData = {
     "status": "sleep",
     "statusChance": 100,
     "accuracy": 55
-  },
-  "flower_shield": {
-    "id": "flower_shield",
-    "name": "Flower Shield",
-    "type": "FAIRY",
-    "category": "status",
-    "power": 0,
-    "pp": 10,
-    "target": "single",
-    "statChanges": [
-      {
-        "stat": "def",
-        "estagios": 1
-      }
-    ],
-    "statChance": 100,
-    "accuracy": 100
   },
   "string_shot": {
     "id": "string_shot",
@@ -2524,32 +2564,6 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
-    "accuracy": 100
-  },
-  "quiver_dance": {
-    "id": "quiver_dance",
-    "name": "Quiver Dance",
-    "type": "BUG",
-    "category": "status",
-    "power": 0,
-    "pp": 20,
-    "target": "single",
-    "statChanges": [
-      {
-        "stat": "atkEsp",
-        "estagios": 1
-      },
-      {
-        "stat": "defEsp",
-        "estagios": 1
-      },
-      {
-        "stat": "speed",
-        "estagios": 1
-      }
-    ],
-    "statChance": 100,
-    "statTarget": "self",
     "accuracy": 100
   },
   "poison_sting": {
@@ -3144,16 +3158,6 @@ export const ABILITIES_DATA: AbilitiesData = {
     "target": "single",
     "accuracy": 100
   },
-  "bullet_punch": {
-    "id": "bullet_punch",
-    "name": "Bullet Punch",
-    "type": "STEEL",
-    "category": "physical",
-    "power": 40,
-    "pp": 30,
-    "target": "single",
-    "accuracy": 100
-  },
   "metal_claw": {
     "id": "metal_claw",
     "name": "Metal Claw",
@@ -3349,6 +3353,28 @@ export const ABILITIES_DATA: AbilitiesData = {
     "pp": 10,
     "target": "single",
     "accuracy": 85
+  },
+  "dynamic_punch": {
+    "id": "dynamic_punch",
+    "name": "Dynamic Punch",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 100,
+    "pp": 5,
+    "target": "single",
+    "status": "confusion",
+    "statusChance": 100,
+    "accuracy": 50
+  },
+  "circle_throw": {
+    "id": "circle_throw",
+    "name": "Circle Throw",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 60,
+    "pp": 10,
+    "target": "single",
+    "accuracy": 90
   },
   "acid_spray": {
     "id": "acid_spray",
@@ -3600,6 +3626,27 @@ export const ABILITIES_DATA: AbilitiesData = {
     "statTarget": "self",
     "accuracy": 100
   },
+  "spike_cannon": {
+    "id": "spike_cannon",
+    "name": "Spike Cannon",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 20,
+    "pp": 15,
+    "target": "single",
+    "accuracy": 100
+  },
+  "icicle_crash": {
+    "id": "icicle_crash",
+    "name": "Icicle Crash",
+    "type": "ICE",
+    "category": "physical",
+    "power": 85,
+    "pp": 10,
+    "target": "single",
+    "flinchChance": 30,
+    "accuracy": 90
+  },
   "crabhammer": {
     "id": "crabhammer",
     "name": "Crabhammer",
@@ -3749,6 +3796,16 @@ export const ABILITIES_DATA: AbilitiesData = {
     "statTarget": "self",
     "accuracy": 100
   },
+  "spotlight": {
+    "id": "spotlight",
+    "name": "Spotlight",
+    "type": "NORMAL",
+    "category": "status",
+    "power": 0,
+    "pp": 15,
+    "target": "single",
+    "accuracy": 100
+  },
   "hyper_beam": {
     "id": "hyper_beam",
     "name": "Hyper Beam",
@@ -3770,6 +3827,81 @@ export const ABILITIES_DATA: AbilitiesData = {
     "status": "sleep",
     "statusChance": 100,
     "accuracy": 55
+  },
+  "sand_attack": {
+    "id": "sand_attack",
+    "name": "Sand Attack",
+    "type": "GROUND",
+    "category": "status",
+    "power": 0,
+    "pp": 15,
+    "target": "single",
+    "accuracy": 100
+  },
+  "baby_doll_eyes": {
+    "id": "baby_doll_eyes",
+    "name": "Baby-Doll Eyes",
+    "type": "FAIRY",
+    "category": "status",
+    "power": 0,
+    "pp": 30,
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": -1
+      }
+    ],
+    "statChance": 100,
+    "accuracy": 100
+  },
+  "acid_armor": {
+    "id": "acid_armor",
+    "name": "Acid Armor",
+    "type": "POISON",
+    "category": "status",
+    "power": 0,
+    "pp": 20,
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "def",
+        "estagios": 2
+      }
+    ],
+    "statChance": 100,
+    "statTarget": "self",
+    "accuracy": 100
+  },
+  "haze": {
+    "id": "haze",
+    "name": "Haze",
+    "type": "ICE",
+    "category": "status",
+    "power": 0,
+    "pp": 30,
+    "target": "single",
+    "accuracy": 100
+  },
+  "muddy_water": {
+    "id": "muddy_water",
+    "name": "Muddy Water",
+    "type": "WATER",
+    "category": "special",
+    "power": 90,
+    "pp": 10,
+    "target": "aoe",
+    "accuracy": 85
+  },
+  "last_resort": {
+    "id": "last_resort",
+    "name": "Last Resort",
+    "type": "NORMAL",
+    "category": "physical",
+    "power": 140,
+    "pp": 5,
+    "target": "single",
+    "accuracy": 100
   },
   "electro_ball": {
     "id": "electro_ball",
@@ -3828,25 +3960,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "target": "aoe",
     "accuracy": 100
   },
-  "haze": {
-    "id": "haze",
-    "name": "Haze",
-    "type": "ICE",
-    "category": "status",
+  "trump_card": {
+    "id": "trump_card",
+    "name": "Trump Card",
+    "type": "NORMAL",
+    "category": "special",
     "power": 0,
-    "pp": 30,
+    "pp": 5,
     "target": "single",
     "accuracy": 100
-  },
-  "muddy_water": {
-    "id": "muddy_water",
-    "name": "Muddy Water",
-    "type": "WATER",
-    "category": "special",
-    "power": 90,
-    "pp": 10,
-    "target": "aoe",
-    "accuracy": 85
   },
   "destiny_bond": {
     "id": "destiny_bond",
@@ -3865,16 +3987,6 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 20,
-    "target": "single",
-    "accuracy": 100
-  },
-  "spike_cannon": {
-    "id": "spike_cannon",
-    "name": "Spike Cannon",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 20,
-    "pp": 15,
     "target": "single",
     "accuracy": 100
   },
@@ -3922,16 +4034,6 @@ export const ABILITIES_DATA: AbilitiesData = {
     "category": "status",
     "power": 0,
     "pp": 10,
-    "target": "single",
-    "accuracy": 100
-  },
-  "sand_attack": {
-    "id": "sand_attack",
-    "name": "Sand Attack",
-    "type": "GROUND",
-    "category": "status",
-    "power": 0,
-    "pp": 15,
     "target": "single",
     "accuracy": 100
   },
@@ -4168,23 +4270,6 @@ export const ABILITIES_DATA: AbilitiesData = {
     "target": "single",
     "accuracy": 100
   },
-  "baby_doll_eyes": {
-    "id": "baby_doll_eyes",
-    "name": "Baby-Doll Eyes",
-    "type": "FAIRY",
-    "category": "status",
-    "power": 0,
-    "pp": 30,
-    "target": "single",
-    "statChanges": [
-      {
-        "stat": "atkFis",
-        "estagios": -1
-      }
-    ],
-    "statChance": 100,
-    "accuracy": 100
-  },
   "charm": {
     "id": "charm",
     "name": "Charm",
@@ -4200,26 +4285,6 @@ export const ABILITIES_DATA: AbilitiesData = {
       }
     ],
     "statChance": 100,
-    "accuracy": 100
-  },
-  "last_resort": {
-    "id": "last_resort",
-    "name": "Last Resort",
-    "type": "NORMAL",
-    "category": "physical",
-    "power": 140,
-    "pp": 5,
-    "target": "single",
-    "accuracy": 100
-  },
-  "trump_card": {
-    "id": "trump_card",
-    "name": "Trump Card",
-    "type": "NORMAL",
-    "category": "special",
-    "power": 0,
-    "pp": 5,
-    "target": "single",
     "accuracy": 100
   },
   "conversion": {
@@ -4679,17 +4744,6 @@ export const ABILITIES_DATA: AbilitiesData = {
     "target": "single",
     "accuracy": 100
   },
-  "wood_hammer": {
-    "id": "wood_hammer",
-    "name": "Wood Hammer",
-    "type": "GRASS",
-    "category": "physical",
-    "power": 120,
-    "pp": 15,
-    "target": "single",
-    "drainPercent": -33,
-    "accuracy": 100
-  },
   "low_kick": {
     "id": "low_kick",
     "name": "Low Kick",
@@ -5045,6 +5099,16 @@ export const ABILITIES_DATA: AbilitiesData = {
     "statusChance": 10,
     "accuracy": 100
   },
+  "double_kick": {
+    "id": "double_kick",
+    "name": "Double Kick",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 30,
+    "pp": 30,
+    "target": "single",
+    "accuracy": 100
+  },
   "cotton_guard": {
     "id": "cotton_guard",
     "name": "Cotton Guard",
@@ -5084,16 +5148,6 @@ export const ABILITIES_DATA: AbilitiesData = {
     "status": "poison",
     "statusChance": 30,
     "accuracy": 80
-  },
-  "double_kick": {
-    "id": "double_kick",
-    "name": "Double Kick",
-    "type": "FIGHTING",
-    "category": "physical",
-    "power": 30,
-    "pp": 30,
-    "target": "single",
-    "accuracy": 100
   },
   "flatter": {
     "id": "flatter",
@@ -5168,24 +5222,6 @@ export const ABILITIES_DATA: AbilitiesData = {
     "target": "single",
     "status": "poison",
     "statusChance": 30,
-    "accuracy": 100
-  },
-  "acid_armor": {
-    "id": "acid_armor",
-    "name": "Acid Armor",
-    "type": "POISON",
-    "category": "status",
-    "power": 0,
-    "pp": 20,
-    "target": "single",
-    "statChanges": [
-      {
-        "stat": "def",
-        "estagios": 2
-      }
-    ],
-    "statChance": 100,
-    "statTarget": "self",
     "accuracy": 100
   },
   "venom_drench": {
@@ -5294,18 +5330,6 @@ export const ABILITIES_DATA: AbilitiesData = {
     "statTarget": "self",
     "accuracy": 100
   },
-  "dynamic_punch": {
-    "id": "dynamic_punch",
-    "name": "Dynamic Punch",
-    "type": "FIGHTING",
-    "category": "physical",
-    "power": 100,
-    "pp": 5,
-    "target": "single",
-    "status": "confusion",
-    "statusChance": 100,
-    "accuracy": 50
-  },
   "strength": {
     "id": "strength",
     "name": "Strength",
@@ -5378,6 +5402,16 @@ export const ABILITIES_DATA: AbilitiesData = {
     "target": "single",
     "accuracy": 75
   },
+  "bullet_punch": {
+    "id": "bullet_punch",
+    "name": "Bullet Punch",
+    "type": "STEEL",
+    "category": "physical",
+    "power": 40,
+    "pp": 30,
+    "target": "single",
+    "accuracy": 100
+  },
   "ice_punch": {
     "id": "ice_punch",
     "name": "Ice Punch",
@@ -5399,6 +5433,16 @@ export const ABILITIES_DATA: AbilitiesData = {
     "pp": 20,
     "target": "single",
     "accuracy": 100
+  },
+  "triple_kick": {
+    "id": "triple_kick",
+    "name": "Triple Kick",
+    "type": "FIGHTING",
+    "category": "physical",
+    "power": 10,
+    "pp": 10,
+    "target": "single",
+    "accuracy": 90
   },
   "lovely_kiss": {
     "id": "lovely_kiss",
@@ -5523,6 +5567,16 @@ export const ABILITIES_DATA: AbilitiesData = {
     "target": "single",
     "accuracy": 100
   },
+  "after_you": {
+    "id": "after_you",
+    "name": "After You",
+    "type": "NORMAL",
+    "category": "status",
+    "power": 0,
+    "pp": 15,
+    "target": "single",
+    "accuracy": 100
+  },
   "kinesis": {
     "id": "kinesis",
     "name": "Kinesis",
@@ -5563,14 +5617,15 @@ export const ABILITIES_DATA: AbilitiesData = {
     "target": "single",
     "accuracy": 100
   },
-  "psyshock": {
-    "id": "psyshock",
-    "name": "Psyshock",
-    "type": "PSYCHIC",
-    "category": "special",
-    "power": 80,
-    "pp": 10,
+  "morning_sun": {
+    "id": "morning_sun",
+    "name": "Morning Sun",
+    "type": "NORMAL",
+    "category": "status",
+    "power": 0,
+    "pp": 5,
     "target": "single",
+    "healPercent": 50,
     "accuracy": 100
   },
   "hidden_power": {
@@ -5746,14 +5801,31 @@ export const ABILITIES_DATA: AbilitiesData = {
     "target": "single",
     "accuracy": 90
   },
-  "after_you": {
-    "id": "after_you",
-    "name": "After You",
-    "type": "NORMAL",
+  "gravity": {
+    "id": "gravity",
+    "name": "Gravity",
+    "type": "PSYCHIC",
     "category": "status",
     "power": 0,
-    "pp": 15,
+    "pp": 5,
     "target": "single",
     "accuracy": 100
+  },
+  "meteor_mash": {
+    "id": "meteor_mash",
+    "name": "Meteor Mash",
+    "type": "STEEL",
+    "category": "physical",
+    "power": 90,
+    "pp": 10,
+    "target": "single",
+    "statChanges": [
+      {
+        "stat": "atkFis",
+        "estagios": 1
+      }
+    ],
+    "statChance": 20,
+    "accuracy": 90
   }
 };

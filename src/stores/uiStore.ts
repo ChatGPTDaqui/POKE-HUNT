@@ -40,6 +40,7 @@ function pontoGrosso(): boolean {
 
 const HUD_SCALE_KEY = 'novo-poke-idle:hud-scale'
 const VIDRO_KEY = 'novo-poke-idle:vidro-fosco'
+const VIDA_CENARIO_KEY = 'novo-poke-idle:vida-no-cenario'
 // 0.7 (era 0.8) porque a fonte base da HUD subiu 3px nesta leva: sem descer o
 // minimo, quem jogava confortavel no tamanho antigo perdeu a opcao de voltar.
 export const HUD_SCALE_MIN = 0.7
@@ -79,6 +80,17 @@ function lerVidroFosco(): boolean {
   }
 }
 
+// `!== '0'` e nao `=== '1'`: esta preferencia nasce LIGADA, entao chave ausente
+// (jogador novo, ou quem ja jogava antes do PH-96) tem que cair no ligado. O
+// unico valor que desliga e o '0' que o proprio ajuste grava.
+function lerVidaNoCenario(): boolean {
+  try {
+    return localStorage.getItem(VIDA_CENARIO_KEY) !== '0'
+  } catch {
+    return true
+  }
+}
+
 interface UiState {
   currentScreen: ScreenName | null
   openScreen: (screen: ScreenName) => void
@@ -96,6 +108,29 @@ interface UiState {
   // pode ficar aberto por cima de qualquer tela.
   perfilOpen: boolean
   setPerfilOpen: (open: boolean) => void
+
+  // Perfil de OUTRO jogador (PH-119). Estado separado de `perfilOpen`, e nao um
+  // `perfilAlvo` que `null` significa "eu": as duas telas mostram coisas
+  // diferentes e a do proprio jogador tem acoes (sair da conta, reiniciar) que
+  // nao existem na de terceiro. Confundir as duas num booleano so seria a
+  // primeira porta pra uma acao dessas aparecer no perfil de outro.
+  //
+  // Guarda o par (id, nome) e nao so o id: o nome ja veio no anuncio, e mostrar
+  // o titulo antes de a RPC responder evita a janela abrir vazia.
+  perfilPublicoAlvo: { userId: string; nome: string } | null
+  abrirPerfilPublico: (alvo: { userId: string; nome: string }) => void
+  fecharPerfilPublico: () => void
+
+  // Conversa que o Correio deve abrir ASSIM QUE montar (PH-119).
+  //
+  // O Correio guarda o contato aberto em estado local, entao quem esta fora
+  // dele nao tem como dizer "abra ja falando com fulano" — que e exatamente o
+  // caminho que a issue pede (do anuncio pro perfil, do perfil pra conversa).
+  // Consumido UMA vez e limpo pelo proprio Correio: sem isso, fechar o fio e
+  // reabrir o Correio reabriria o mesmo contato pra sempre.
+  correioContatoInicial: { userId: string; nick: string } | null
+  abrirCorreioCom: (contato: { userId: string; nick: string }) => void
+  consumirCorreioContatoInicial: () => void
 
   // Hunt Analyzer: aberto pelo card/chip de taxas do HUD. Mesma razao do perfil
   // pra nao ser uma `ScreenName` — nao vive no menu e abre por cima de qualquer
@@ -167,6 +202,17 @@ interface UiState {
   vidroFosco: boolean
   setVidroFosco: (fosco: boolean) => void
 
+  /**
+   * Vida ambiente do cenario (PH-96): folha, brilho, brasa, poeira, neve.
+   *
+   * Nasce LIGADA, ao contrario de `vidroFosco` — que e um ajuste de socorro pra
+   * aparelho fraco e por isso comeca desligado. Esta e a aparencia pretendida
+   * do jogo; o interruptor existe pra quem precisa cortar trabalho de desenho,
+   * nao pra quem precisa ligar o efeito.
+   */
+  vidaNoCenario: boolean
+  setVidaNoCenario: (ligada: boolean) => void
+
   // Filtros da tela de Hunts. Ficam aqui (e nao em useState local do
   // HuntMenu) por um motivo unico e concreto: a Pokedex precisa escrever
   // neles ANTES de abrir a tela de Hunts (o "onde encontrar" -> pula pra
@@ -208,6 +254,27 @@ export const useUiStore = create<UiState>((set, get) => ({
   // Abrir zera a posicao arrastada, mesma regra de `openScreen`.
   setPerfilOpen: (perfilOpen) =>
     set((s) => ({ perfilOpen, winPos: perfilOpen ? { ...s.winPos, perfil: undefined } : s.winPos })),
+
+  perfilPublicoAlvo: null,
+  // Fecha o perfil PROPRIO ao abrir o de terceiro: os dois usam a mesma chave de
+  // janela (`perfil`) pra posicao arrastada, entao deixar os dois abertos poria
+  // um exatamente em cima do outro.
+  abrirPerfilPublico: (alvo) =>
+    set((s) => ({ perfilPublicoAlvo: alvo, perfilOpen: false, winPos: { ...s.winPos, perfil: undefined } })),
+  fecharPerfilPublico: () => set({ perfilPublicoAlvo: null }),
+
+  correioContatoInicial: null,
+  abrirCorreioCom: (contato) =>
+    set((s) => ({
+      correioContatoInicial: contato,
+      currentScreen: 'correio',
+      // Some com o perfil de terceiro: ele foi o caminho ate aqui, e deixa-lo
+      // aberto atras do Correio empilharia duas janelas sobre a mesma conversa.
+      perfilPublicoAlvo: null,
+      moreOpen: false,
+      winPos: { ...s.winPos, panel: undefined },
+    })),
+  consumirCorreioContatoInicial: () => set({ correioContatoInicial: null }),
 
   analyzerOpen: false,
   setAnalyzerOpen: (analyzerOpen) =>
@@ -293,6 +360,16 @@ export const useUiStore = create<UiState>((set, get) => ({
       // idem: preferencia perdida e aceitavel, crash nao.
     }
     set({ vidroFosco })
+  },
+
+  vidaNoCenario: lerVidaNoCenario(),
+  setVidaNoCenario: (vidaNoCenario) => {
+    try {
+      localStorage.setItem(VIDA_CENARIO_KEY, vidaNoCenario ? '1' : '0')
+    } catch {
+      // idem.
+    }
+    set({ vidaNoCenario })
   },
 
   huntContinent: 'faixa1',

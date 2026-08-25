@@ -9,7 +9,7 @@ import {
   aplicarFlush, carregarEstado, comEstadoParaEscrita, gravarEstado,
   FLUSH_OCUPADO, type LinhaSessao,
 } from './progresso.js'
-import { MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas } from '#engine'
+import { MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas, climaDaSala } from '#engine'
 
 function json(dado: unknown, status = 200): Response {
   return new Response(JSON.stringify(dado), {
@@ -248,7 +248,16 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
     current_map_id: mapId,
     perf_stats: { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now() },
   })
-  return json({ sessaoId: criada.id, mapId, iniciadaEm: criada.last_flush_at, sala: salaInicial })
+  // PH-140: o clima da sala inicial vai junto. O cliente NAO consegue derivar
+  // o dele — a semente da sessao nunca sai do servidor (e ela que decide shiny,
+  // IV, raridade e crit; ver core/rng.ts). Sem este campo, os dois lados
+  // sorteariam climas diferentes e o jogador levaria dano de areia sob um ceu
+  // que a tela dele mostra limpo.
+  const climaInicial = climaDaSala(semente, salaInicial)
+  return json({
+    sessaoId: criada.id, mapId, iniciadaEm: criada.last_flush_at,
+    sala: salaInicial, clima: climaInicial,
+  })
 }
 
 async function flush(cfg: Config, userId: string, parcial: boolean): Promise<Response> {
@@ -279,6 +288,13 @@ async function flush(cfg: Config, userId: string, parcial: boolean): Promise<Res
     // Idem pra sala: o cliente sorteia a propria como predicao, e quem decidiu
     // o pool e o loot que de fato foram creditados foi esta aqui.
     sala: resultado.sala,
+    // PH-140: `aplicarFlush` ja resolvia o clima da sala, e esta linha e que
+    // faltava pra ele CHEGAR ao cliente. Sem ela, `/sessao/abrir` mandava o
+    // clima e todo flush seguinte vinha sem o campo — e como campo ausente
+    // significa "sem informacao, mantenha o que tem", a primeira troca de sala
+    // sob autoridade deixava o jogador sem clima nenhum pelo resto da hunt.
+    // Passou pela suite inteira: so aparece chamando a funcao publicada.
+    clima: resultado.clima,
     // `estadoParcial` anda SEMPRE junto de `estado`: e ele que diz ao cliente se
     // `bagPokes` e a mochila inteira ou so as capturas desta janela. Mandar o
     // estado sem a marca e a unica forma de esta otimizacao virar perda de dado

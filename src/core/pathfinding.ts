@@ -1,10 +1,52 @@
-// A* route search over a hunt's collision grid (data/generated/collisionGrids.generated.ts).
-// Cells are COLLISION_GRID_CELL_SIZE world units square and an entity's
-// footprint is exactly one cell (see MovementSystem.js#canOccupy), so a route
-// is simply the chain of walkable cell-centers from the start cell to the
-// goal cell. Used by MovementSystem.js whenever a straight line to the
-// target is blocked, so a POKE can route around a wall/void/water patch
-// instead of sliding along it (or freezing) forever.
+// A* route search over a hunt's collision grid
+// (data/generated/subBiomaCollision.generated.ts, via data/maps.ts).
+//
+// Cada celula tem COLLISION_GRID_CELL_SIZE unidades de mundo de lado e a grade
+// diz onde o CENTRO de um POKE pode estar — a pegada dele
+// (POKE_COLLISION_FOOTPRINT) ja foi descontada na geracao, por erosao. Uma rota
+// e entao so a cadeia de centros de celula andavel do inicio ao destino. Usado
+// por movementSystem.ts sempre que a linha reta ate o alvo esta bloqueada, pra
+// o POKE contornar a parede/agua em vez de deslizar nela (ou congelar) pra
+// sempre.
+//
+// ---------------------------------------------------------------------------
+// PERFORMANCE (PH-102), E POR QUE A ROTA NAO MUDOU
+// ---------------------------------------------------------------------------
+// Ate PH-102 o conjunto aberto era um `Map` e a escolha do menor `f` uma
+// varredura LINEAR a cada expansao — busca O(n^2) no numero de celulas — e a
+// chave de celula era uma string (`"col,row"`), uma alocacao por vizinho
+// visitado mais um `split(',').map(Number)` duas vezes por expansao. Medido no
+// PH-94: a grade 4x mais fina custou +75% no teste de simulacao offline mais
+// pesado (33s -> 58s), passando do `testTimeout` de 45s.
+//
+// Agora: HEAP BINARIO e chave NUMERICA (`row * cols + col`). Nenhuma string e
+// alocada por celula visitada.
+//
+// A PARTE QUE IMPORTA MAIS QUE A VELOCIDADE: a rota devolvida e IDENTICA a de
+// antes, celula por celula. A issue previa que nao seria — "trocar por heap
+// muda o desempate entre rotas de mesmo custo, ou seja muda a simulacao" —, e
+// isso era verdade para um heap comum. Rota diferente = movimento diferente =
+// sequencia de sorteio diferente = simulacao diferente, e num jogo cujo
+// servidor RE-SIMULA o que o cliente fez, isso e divergencia de autoridade.
+//
+// O que salva e uma observacao sobre o codigo antigo: a varredura usava `f <
+// bestF` (estrito), entao em empate ela ficava com o PRIMEIRO da ordem de
+// iteracao do `Map` — a ordem da PRIMEIRA insercao daquela chave, que o `Map`
+// preserva mesmo quando o valor e atualizado depois. Reproduzir isso e so
+// guardar a ordem de primeira insercao por celula (`ordemDeEntrada`) e usa-la
+// como segundo criterio do heap. `pathfindingEquivalente.test.ts` compara as
+// duas implementacoes celula a celula em 2.000 buscas sobre grades aleatorias,
+// e carrega a versao antiga inteira pra isso — ela e o oraculo, nao
+// duplicacao a ser removida.
+//
+// MEDIDO. Maior grade real (`dragon`, 10.605 celulas), 2.000 buscas:
+//
+//   1.028ms -> 277ms   (0,514ms -> 0,138ms por busca), 3,7x
+//
+// E no teste de simulacao mais pesado do projeto (`engine/pessimista.test.ts`,
+// 40 sementes x 1h de mundo nos dois modos): 58s -> 30s, abaixo dos 33s que
+// ele levava ANTES da grade fina do PH-94.
+// ---------------------------------------------------------------------------
 import { COLLISION_GRID_CELL_SIZE } from '@/data/collisionConstants'
 import { mapWalkRadius } from '@/data/maps'
 
@@ -25,13 +67,134 @@ const NEIGHBORS: [number, number][] = [
   [1, 1], [1, -1], [-1, 1], [-1, -1],
 ]
 
-// Safety cap: this grid is at most ~800 cells, so a real search never gets
-// close to this — it only matters if start/goal are somehow degenerate
-// (e.g. entirely surrounded), where it stops the search instead of hanging.
-const MAX_EXPANSIONS = 4000
+// Safety cap, DERIVADO da grade em vez de fixo.
+//
+// Era `4000` com o comentario "this grid is at most ~800 cells, so a real
+// search never gets close to this". Isso deixou de ser verdade sem ninguem
+// mexer aqui: desde que o mundo virou o recorte da area pintada (PH-80) as
+// grades passaram a ter tamanhos proprios, e `dragon` ja tinha 2.808 celulas
+// com celula de 40. Com a celula de 20 do PH-94 ela tem 10.605 — ou seja o
+// teto de seguranca ficou ABAIXO do tamanho da grade, e uma busca longa
+// legitima batia nele e devolvia `null`.
+//
+// O sintoma disso nao e travamento: `null` faz o chamador cair no movimento
+// direto (`slideToward`), e o POKE passa a deslizar na parede em vez de
+// contornar — o mesmo comportamento de "sem rota" que o pathfinder existe pra
+// eliminar. Silencioso, e so no mapa grande.
+//
+// A* nunca expande a mesma celula duas vezes (`closed`), entao o numero de
+// expansoes e limitado pelo numero de celulas andaveis. Uma folga de 2x sobre
+// o total de celulas e um teto que uma busca real nao alcanca e que continua
+// cortando o caso degenerado.
+function tetoDeExpansoes(grid: string[]): number {
+  return grid.length * grid[0].length * 2
+}
 
-function cellKey(col: number, row: number): string {
-  return `${col},${row}`
+// ---------------------------------------------------------------------------
+// Heap binario de minimos, ordenado por (f, ordem de primeira entrada)
+// ---------------------------------------------------------------------------
+// Tres arrays paralelos em vez de um array de objetos: a busca roda dezenas de
+// milhares de vezes por simulacao offline, e um objeto por no seria lixo pro
+// coletor a cada expansao.
+//
+// DELECAO PREGUICOSA: quando uma celula ja no aberto ganha um `g` melhor, uma
+// entrada NOVA e empilhada e a antiga fica. Quem tira do heap descarta o que ja
+// esta fechado. E o padrao normal de A* com heap, e aqui ele nao muda nada: a
+// entrada obsoleta tem `f` MAIOR, entao ela so sairia depois da boa, que ja
+// fechou a celula.
+class HeapDeCelulas {
+  private celula: number[] = []
+  private f: number[] = []
+  private ordem: number[] = []
+  private tamanho = 0
+
+  get vazio(): boolean { return this.tamanho === 0 }
+
+  limpar(): void { this.tamanho = 0 }
+
+  /** `ordem` e o desempate: menor primeiro, igual a ordem de iteracao do Map. */
+  inserir(celula: number, f: number, ordem: number): void {
+    let i = this.tamanho++
+    this.celula[i] = celula
+    this.f[i] = f
+    this.ordem[i] = ordem
+    while (i > 0) {
+      const pai = (i - 1) >> 1
+      if (!this.menor(i, pai)) break
+      this.trocar(i, pai)
+      i = pai
+    }
+  }
+
+  /** Remove e devolve a celula de menor (f, ordem). `-1` quando vazio. */
+  remover(): number {
+    if (this.tamanho === 0) return -1
+    const topo = this.celula[0]
+    this.tamanho -= 1
+    if (this.tamanho > 0) {
+      this.celula[0] = this.celula[this.tamanho]
+      this.f[0] = this.f[this.tamanho]
+      this.ordem[0] = this.ordem[this.tamanho]
+      let i = 0
+      for (;;) {
+        const esq = i * 2 + 1
+        const dir = esq + 1
+        let menor = i
+        if (esq < this.tamanho && this.menor(esq, menor)) menor = esq
+        if (dir < this.tamanho && this.menor(dir, menor)) menor = dir
+        if (menor === i) break
+        this.trocar(i, menor)
+        i = menor
+      }
+    }
+    return topo
+  }
+
+  private menor(a: number, b: number): boolean {
+    if (this.f[a] !== this.f[b]) return this.f[a] < this.f[b]
+    return this.ordem[a] < this.ordem[b]
+  }
+
+  private trocar(a: number, b: number): void {
+    let t = this.celula[a]; this.celula[a] = this.celula[b]; this.celula[b] = t
+    t = this.f[a]; this.f[a] = this.f[b]; this.f[b] = t
+    t = this.ordem[a]; this.ordem[a] = this.ordem[b]; this.ordem[b] = t
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Estado reutilizado entre chamadas
+// ---------------------------------------------------------------------------
+// A busca NAO e reentrante (o sim e de uma thread so, e `findPath` nao chama
+// nada que possa chamar `findPath`), entao alocar um `Map` novo por chamada era
+// so pressao de GC. Os arrays crescem ate o tamanho da maior grade ja vista e
+// param de crescer.
+//
+// `visitadoEm` e o que dispensa limpar tudo entre chamadas: cada busca tem um
+// selo proprio (`buscaAtual`), e uma celula so conta como visitada se o selo
+// dela for o desta busca. Limpar 10.605 posicoes por chamada custaria mais que
+// a busca em si nos casos curtos, que sao a maioria.
+const heap = new HeapDeCelulas()
+let gScore: Float64Array = new Float64Array(0)
+let cameFrom: Int32Array = new Int32Array(0)
+let ordemDeEntrada: Int32Array = new Int32Array(0)
+let visitadoEm: Int32Array = new Int32Array(0)
+let fechadoEm: Int32Array = new Int32Array(0)
+let buscaAtual = 0
+
+function prepararEstado(celulas: number): void {
+  if (gScore.length < celulas) {
+    gScore = new Float64Array(celulas)
+    cameFrom = new Int32Array(celulas)
+    ordemDeEntrada = new Int32Array(celulas)
+    visitadoEm = new Int32Array(celulas)
+    fechadoEm = new Int32Array(celulas)
+    // Arrays novos vem zerados, e 0 e um selo valido. Pular pro 1 evita que a
+    // primeira busca depois de um crescimento veja tudo como ja visitado.
+    buscaAtual = 0
+  }
+  buscaAtual += 1
+  heap.limpar()
 }
 
 interface Circle {
@@ -75,18 +238,19 @@ function heuristic(col: number, row: number, goalCol: number, goalRow: number): 
   return Math.hypot(goalCol - col, goalRow - row)
 }
 
-function reconstructPath(cameFrom: Map<string, string>, goalKey: string, startKey: string): Waypoint[] {
-  const cellPath: string[] = []
-  let key: string | undefined = goalKey
-  while (key && key !== startKey) {
-    cellPath.push(key)
-    key = cameFrom.get(key)
+function reconstruirRota(destino: number, inicio: number, colunas: number): Waypoint[] {
+  const celulas: number[] = []
+  let celula = destino
+  while (celula !== inicio && celula >= 0) {
+    celulas.push(celula)
+    celula = cameFrom[celula]
   }
-  cellPath.reverse()
-  return cellPath.map((k) => {
-    const [col, row] = k.split(',').map(Number)
-    return { x: col * COLLISION_GRID_CELL_SIZE + COLLISION_GRID_CELL_SIZE / 2, y: row * COLLISION_GRID_CELL_SIZE + COLLISION_GRID_CELL_SIZE / 2 }
-  })
+  celulas.reverse()
+  const meio = COLLISION_GRID_CELL_SIZE / 2
+  return celulas.map((c) => ({
+    x: (c % colunas) * COLLISION_GRID_CELL_SIZE + meio,
+    y: Math.floor(c / colunas) * COLLISION_GRID_CELL_SIZE + meio,
+  }))
 }
 
 // Returns:
@@ -112,36 +276,50 @@ export function findPath(mapDef: PathfindingMapDef, startX: number, startY: numb
   if (startCol === goalCol && startRow === goalRow) return []
   if (isBlocked(grid, goalCol, goalRow, circle)) return null
 
-  const startKey = cellKey(startCol, startRow)
-  const goalKey = cellKey(goalCol, goalRow)
+  const colunas = grid[0].length
+  const inicio = startRow * colunas + startCol
+  const destino = goalRow * colunas + goalCol
 
-  const cameFrom = new Map<string, string>()
-  const gScore = new Map<string, number>([[startKey, 0]])
-  const open = new Map<string, number>([[startKey, heuristic(startCol, startRow, goalCol, goalRow)]])
-  const closed = new Set<string>()
+  prepararEstado(grid.length * colunas)
+  const selo = buscaAtual
 
+  gScore[inicio] = 0
+  visitadoEm[inicio] = selo
+  cameFrom[inicio] = -1
+  // A ordem de entrada e o desempate, e ela e a da PRIMEIRA vez que a celula
+  // entrou no aberto — nunca reatribuida quando o `g` melhora. E isso que
+  // reproduz a ordem de iteracao do `Map` da versao anterior.
+  let proximaOrdem = 0
+  ordemDeEntrada[inicio] = proximaOrdem++
+  heap.inserir(inicio, heuristic(startCol, startRow, goalCol, goalRow), ordemDeEntrada[inicio])
+
+  const maxExpansions = tetoDeExpansoes(grid)
   let expansions = 0
-  while (open.size > 0) {
-    if (++expansions > MAX_EXPANSIONS) return null
+  while (!heap.vazio) {
+    const atual = heap.remover()
+    // Entrada obsoleta da delecao preguicosa: a celula ja foi expandida por uma
+    // entrada de `f` menor. Nao conta como expansao — o teto mede celulas
+    // expandidas, que e o que a versao anterior contava.
+    if (fechadoEm[atual] === selo) continue
+    if (++expansions > maxExpansions) return null
 
-    let currentKey: string | null = null
-    let bestF = Infinity
-    for (const [key, f] of open) {
-      if (f < bestF) { bestF = f; currentKey = key }
+    if (atual === destino) {
+      const rota = reconstruirRota(destino, inicio, colunas)
+      // O ultimo ponto vira o alvo exato em vez do centro da celula, pra
+      // chegada precisa.
+      if (rota.length > 0) rota[rota.length - 1] = { x: goalX, y: goalY }
+      return rota
     }
-    if (!currentKey) break
-    open.delete(currentKey)
-    if (currentKey === goalKey) {
-      const path = reconstructPath(cameFrom, goalKey, startKey)
-      return path.map((wp, i, arr) => (i === arr.length - 1 ? { x: goalX, y: goalY } : wp))
-    }
-    closed.add(currentKey)
+    fechadoEm[atual] = selo
 
-    const [curCol, curRow] = currentKey.split(',').map(Number)
+    const curCol = atual % colunas
+    const curRow = (atual - curCol) / colunas
+    const gAtual = gScore[atual]
     for (const [dc, dr] of NEIGHBORS) {
       const nCol = curCol + dc, nRow = curRow + dr
-      const nKey = cellKey(nCol, nRow)
-      if (closed.has(nKey) || isBlocked(grid, nCol, nRow, circle)) continue
+      if (isBlocked(grid, nCol, nRow, circle)) continue
+      const vizinho = nRow * colunas + nCol
+      if (fechadoEm[vizinho] === selo) continue
       // Never cut a diagonal corner between two blocked orthogonal cells —
       // keeps every straight-line step between consecutive waypoints
       // genuinely walkable, so the follower in MovementSystem.js never needs
@@ -149,11 +327,16 @@ export function findPath(mapDef: PathfindingMapDef, startX: number, startY: numb
       if (dc !== 0 && dr !== 0 && (isBlocked(grid, curCol + dc, curRow, circle) || isBlocked(grid, curCol, curRow + dr, circle))) continue
 
       const stepCost = (dc !== 0 && dr !== 0) ? Math.SQRT2 : 1
-      const tentativeG = (gScore.get(currentKey) ?? Infinity) + stepCost
-      if (tentativeG < (gScore.get(nKey) ?? Infinity)) {
-        cameFrom.set(nKey, currentKey)
-        gScore.set(nKey, tentativeG)
-        open.set(nKey, tentativeG + heuristic(nCol, nRow, goalCol, goalRow))
+      const tentativeG = gAtual + stepCost
+      const novo = visitadoEm[vizinho] !== selo
+      if (novo || tentativeG < gScore[vizinho]) {
+        if (novo) {
+          visitadoEm[vizinho] = selo
+          ordemDeEntrada[vizinho] = proximaOrdem++
+        }
+        cameFrom[vizinho] = atual
+        gScore[vizinho] = tentativeG
+        heap.inserir(vizinho, tentativeG + heuristic(nCol, nRow, goalCol, goalRow), ordemDeEntrada[vizinho])
       }
     }
   }

@@ -16,7 +16,7 @@ import {
 } from './predicoesDeCaptura'
 import { mochilaCarregada } from '@/stores/mochilaStore'
 import { ABATES_POR_SALA } from '@/data/biomas'
-import type { SalaAtiva } from '@/engine/types'
+import type { ClimaTipo, SalaAtiva } from '@/engine/types'
 import { supabase, schema, url as supabaseUrl, anonKey } from '@/lib/supabase'
 
 // Sem servidor nao ha nada pra reconciliar — a mochila local JA e a verdade.
@@ -224,8 +224,10 @@ function agendarProximoFlush(): void {
  * manda o campo.
  */
 export async function abrirSessaoDeHunt(
-  mapId: string, pokeUid: string,
-): Promise<{ ok: boolean; sala: SalaAtiva | null }> {
+  mapId: string, pokeUid: string, opcoes?: { avisarErro?: boolean },
+): Promise<{ ok: boolean; sala: SalaAtiva | null; clima?: ClimaTipo | null }> {
+  // Sem servidor nao ha autoridade: `clima` sai AUSENTE (e nao `null`) pra o
+  // motor derivar o dele — ver ProgressoDaSessao.clima (PH-140).
   if (!servidorAtivo()) return { ok: true, sala: null }
   try {
     const resposta = await servidor.abrirSessao(mapId, pokeUid)
@@ -236,13 +238,20 @@ export async function abrirSessaoDeHunt(
     intervaloAtual = INTERVALO_FLUSH_MS
     agendarProximoFlush()
     observarQuotaDeSala()
-    return { ok: true, sala: resposta.sala ?? null }
+    return { ok: true, sala: resposta.sala ?? null, clima: resposta.clima ?? null }
   } catch (erro) {
-    // Sempre avisa: so ha um chamador (`controller.enterMap`) e ele nasce de um
-    // clique em "Entrar". Recusa do servidor (hunt trancada, POKE que nao e da
-    // equipe, sessao invalida) TEM que aparecer em toda tentativa — calar a
-    // segunda faz o botao parecer quebrado.
-    reportarErro(erro, true)
+    // Sempre avisa QUANDO A ENTRADA NASCEU DE UM CLIQUE: recusa do servidor
+    // (hunt trancada, POKE que nao e da equipe, sessao invalida) TEM que
+    // aparecer em toda tentativa — calar a segunda faz o botao "Entrar"
+    // parecer quebrado.
+    //
+    // `avisarErro: false` existe pro segundo chamador, que NAO e um clique: a
+    // reentrada automatica na hunt do boot (PH-93). Ali a recusa nao e um erro
+    // que o jogador possa agir sobre — ele nem pediu pra entrar —, e cair no
+    // Hospital ja e o estado seguro. Um toast de erro no primeiro segundo do
+    // jogo, sobre uma acao que ninguem disparou, so ensina o jogador a ignorar
+    // toast.
+    if (opcoes?.avisarErro ?? true) reportarErro(erro, true)
     return { ok: false, sala: null }
   }
 }
@@ -310,7 +319,9 @@ export async function liquidar(): Promise<void> {
     // predicao e tem sequencia de sorteio propria), entao sem esta linha a
     // sala exibida seria um palpite — e o pool/loot que o jogador de fato
     // recebeu vieram da sala de la.
-    if (r.sala !== undefined) useWorldStore.getState().definirSala(r.sala)
+    // PH-140: o clima do LUGAR vem junto, pela mesma razao — o cliente nao tem
+    // a semente pra derivar o dele.
+    if (r.sala !== undefined) useWorldStore.getState().definirSala(r.sala, r.clima)
     // Ritmo do proximo flush: janela produtiva mantem 30s, janela vazia estica
     // (ver INTERVALO_FLUSH_MAX_MS).
     ajustarRitmoDeFlush((r.resumo?.kills ?? 0) > 0 || (r.resumo?.gold ?? 0) > 0 || (r.resumo?.xp ?? 0) > 0)

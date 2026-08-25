@@ -223,7 +223,10 @@ const DESPACHO: Record<string, Despacho> = {
     aoSucesso: async () => { await Promise.all([refetchGold(), refetchEquipeInteira()]) },
   },
   evoluirPoke: {
-    chamar: rpc('evoluir_poke', (a) => ({ p_poke_id: a.pokeUid })),
+    // PH-139: `p_alvo` diz QUAL destino, quando a especie tem mais de um. A
+    // RPC valida contra a lista da especie — mandar a escolha do cliente sem
+    // lista branca no servidor deixaria evoluir Tyrogue em Mewtwo.
+    chamar: rpc('evoluir_poke', (a) => ({ p_poke_id: a.pokeUid, p_alvo: a.alvo ?? null })),
     aoSucesso: async (a) => { await Promise.all([refetchPoke(a.pokeUid as string), refetchTodosItens()]) },
   },
   definirAtivo: {
@@ -237,6 +240,14 @@ const DESPACHO: Record<string, Despacho> = {
       if (!poke) return Promise.resolve({ data: null, error: { message: 'indice fora da equipe' } })
       return rpcDinamica('definir_ativo', { p_poke_id: poke.uid })
     },
+    aoSucesso: async () => { await refetchEquipeInteira() },
+  },
+  reordenarEquipe: {
+    // Manda a ordem COMPLETA, nao o par (de, para): a RPC valida que a lista
+    // cobre a equipe inteira sem repetir, e o resultado nao depende de quantas
+    // vezes a chamada rode. Um par obrigaria os dois lados a deduzir o resto da
+    // fila a partir de estados que podem ja ter divergido.
+    chamar: rpc('reordenar_equipe', (a) => ({ p_ordem: a.ordem })),
     aoSucesso: async () => { await refetchEquipeInteira() },
   },
   tirarDaEquipe: {

@@ -41,7 +41,7 @@ function simular(pessimista: boolean, semente: number) {
   const gameState = useGameStateStore.getState()
   const rng = createRng(semente)
   const poke = createPokeInstance(rng, 'charmander', 30)
-  const world = buildMapWorld('route_46', poke, {
+  const world = buildMapWorld('route_46', poke, { seed: 0,
     rng: createRng(semente),
     counters: { entity: 1, effect: 1, pendingHit: 1 },
   })
@@ -76,6 +76,28 @@ describe('world.pessimista: farm offline nunca renderiza melhor que ao vivo (PH-
     gameState.addItem('revive', 50)
   })
 
+  // Timeout explicito de 120s. Este e o teste de simulacao mais pesado do
+  // projeto (40 sementes x 1h de mundo cada, nos dois modos).
+  //
+  // A HISTORIA DO NUMERO, que e o que faz o timeout nao esconder regressao:
+  //
+  //   33s  antes do PH-94
+  //   58s  depois do PH-94 (celula da grade dividida por dois pro walk-block
+  //        respeitar a pintura, 4x mais celulas; o A* era O(n^2) com chave de
+  //        string, entao o custo subiu mais que os 4x)
+  //   30s  depois do PH-102 (heap binario + chave numerica)
+  //
+  // Ou seja: voltou pra baixo do `testTimeout` padrao de 45s, e ficou ABAIXO
+  // do numero de antes da grade fina. O timeout explicito continua aqui de
+  // proposito — a folga e o que separa "regressao" de "a maquina do CI estava
+  // ocupada", e apertar ele agora so trocaria um problema por flake.
+  //
+  // Medido isolado na maior grade real (`dragon`, 10.605 celulas), 2.000
+  // buscas: 1.028ms -> 277ms, 3,7x. E a rota devolvida e IDENTICA — ver
+  // `core/pathfindingEquivalente.test.ts`.
+  //
+  // Em producao este custo nao chega: `FARM_OFFLINE_PAUSADO` faz o resim
+  // offline do servidor nao simular nada, e o flush ao vivo sao ~1.800 passos.
   it('na media de varias sementes, o pessimista nao rende mais que o otimista', () => {
     const otimista = media(false)
     const pessimista = media(true)
@@ -120,5 +142,9 @@ describe('world.pessimista: farm offline nunca renderiza melhor que ao vivo (PH-
   //
   // Nao da pra cortar semente: 40 e o minimo pro ouro convergir (a cauda do
   // sellMultiplier chega a 600x). Entao a folga vai no relogio.
-  }, 45000)
+  //
+  // 120s desde o PH-94 — mesma historia acontecendo de novo, um degrau acima:
+  // a celula da grade caiu de 40 pra 20, o A* e O(n^2) no numero de celulas, e
+  // o teste foi de 33s pra 58s. Ver a nota longa em cima do `it` e o PH-102.
+  }, 120000)
 })

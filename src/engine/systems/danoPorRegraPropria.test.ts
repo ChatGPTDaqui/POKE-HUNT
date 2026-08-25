@@ -48,7 +48,7 @@ function cenario(golpeId: string, {
     [typedAoeMoveKey(SPECIES[especieJogador].type)]: true,
     [BASIC_ATTACK.id]: true,
   }
-  const world = buildMapWorld('route_46', jogadorPoke, { rng, counters })
+  const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
   const player = world.player!
   player.cooldowns = {}
   player.globalCooldown = 0
@@ -74,7 +74,8 @@ function cenario(golpeId: string, {
 }
 
 // Um uso: `updateCombat(0)` enfileira, `updateCombat(0.6)` pousa (HIT_LAND_DELAY
-// e 0.5s e MIN_ACTION_GAP e 2s, ou seja o POKE nao age de novo no meio).
+// e 0.3s desde o PH-117, e MIN_ACTION_GAP e 2s — ou seja 0.6 pousa o golpe e
+// ainda nao deixa o POKE agir de novo no meio da medicao).
 function umUso(mundo: ReturnType<typeof cenario>) {
   updateCombat(mundo.world, 0)
   updateCombat(mundo.world, 0.6)

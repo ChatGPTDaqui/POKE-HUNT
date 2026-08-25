@@ -64,6 +64,29 @@ function melhorCuraDeStatus(gameState: GameStateStore, status: StatusCondition):
   return candidatos[0] ?? null
 }
 
+/**
+ * O revive mais BARATO que o jogador tem em estoque (PH-144).
+ *
+ * Antes era `getItem('revive')` literal: quem tinha cinquenta Max Revive e
+ * nenhum Revive comum ficava com a automacao morta — o POKE desmaiava e o bot
+ * nao levantava ele, sem nada na tela explicando. E o seletor da tela ja
+ * oferecia os dois.
+ *
+ * Ordena por preco de compra e pega o primeiro, mesma economia de
+ * `melhorCuraDeStatus`: gastar o Max Revive (que revive com HP cheio) quando um
+ * Revive comum resolveria e desperdicio.
+ */
+function melhorRevive(gameState: GameStateStore): GeneratedItem | null {
+  const candidatos = Object.values(ITEMS)
+    .filter((item): item is GeneratedItem => (
+      'kind' in item && item.kind === 'revive'
+      && (item as GeneratedItem).reviveHpPercent != null
+      && gameState.hasItem(item.id, 1)
+    ))
+    .sort((a, b) => a.buyPrice - b.buyPrice)
+  return candidatos[0] ?? null
+}
+
 // Cuida de autoPot e autoRevive. Chamado uma vez por tick fixo.
 // `world.autoTimers` throttla uso repetido de item.
 // Hunts BOSS (world.mapDef.noRespawn) desligam os dois toggles
@@ -103,15 +126,15 @@ export function updateAutoHeal(world: WorldState, gameState: GameStateStore, dt:
   if (isBossHunt || timers.treinador > 0) return events
 
   if (gameState.autoToggles.autoRevive && player.fainted && (world.reviveCountdown ?? 0) <= 0) {
-    const revive = getItem('revive')
-    if (revive && 'reviveHpPercent' in revive && revive.reviveHpPercent != null && gameState.hasItem('revive', 1)) {
-      gameState.removeItem('revive', 1)
-      player.poke.hp = Math.round(player.poke.stats.hp * revive.reviveHpPercent)
+    const revive = melhorRevive(gameState)
+    if (revive) {
+      gameState.removeItem(revive.id, 1)
+      player.poke.hp = Math.round(player.poke.stats.hp * revive.reviveHpPercent!)
       player.fainted = false
       player.state = 'wander'
       timers.treinador = COOLDOWN_DO_TREINADOR
       world.reviveCountdown = null
-      events.push({ type: 'auto_revive', itemId: 'revive' })
+      events.push({ type: 'auto_revive', itemId: revive.id })
       return events
     }
   }

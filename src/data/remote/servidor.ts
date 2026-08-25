@@ -17,7 +17,7 @@ import { supabase } from '@/lib/supabase'
 import { mensagemDeFalhaDeRede } from '@/lib/erroDeRede'
 import type { OfflineSimSummary } from '@/engine/systems/offlineSimSystem'
 import type { PokeInstance } from '@/data/pokes'
-import type { SalaAtiva } from '@/engine/types'
+import type { ClimaTipo, SalaAtiva } from '@/engine/types'
 
 const BASE = (import.meta.env.VITE_SERVIDOR_URL || '').replace(/\/$/, '')
 
@@ -204,6 +204,18 @@ export interface RespostaFlush extends RespostaComEstado {
    * Ausente (nao nula) quando o servidor e mais velho que este cliente.
    */
   sala?: SalaAtiva | null
+  /**
+   * O clima de AMBIENTE da sala acima (PH-140) — o do lugar, nunca o de golpe.
+   *
+   * Vem do servidor porque o cliente NAO tem a semente da sessao: ela decide
+   * shiny, IV, raridade e crit e por isso nunca sai de la (ver core/rng.ts).
+   * Sem este campo os dois lados derivariam climas diferentes, e o jogador
+   * levaria dano de areia sob um ceu que a tela dele mostra limpo.
+   *
+   * Ausente (nao nula) quando o servidor e mais velho que este cliente: ai o
+   * cliente mantem o clima que ja tem, em vez de assumir ceu limpo.
+   */
+  clima?: ClimaTipo | null
 }
 
 // --- ranking e perfil -------------------------------------------------------
@@ -227,6 +239,32 @@ export interface PerfilRemoto {
   segundosJogados: number
   contaCriadaEm: string | null
   noHallDaFama: string | null
+}
+
+/**
+ * O perfil de OUTRO jogador (PH-119).
+ *
+ * Tipo separado de `PerfilRemoto` de propósito, e não `PerfilRemoto & { nome }`:
+ * o que pode ser visto de terceiro é uma decisão de privacidade, e ela precisa
+ * de um lugar onde a lista inteira apareça de uma vez. Herdar faria um campo
+ * novo em `PerfilRemoto` — que serve à tela de configuração do próprio jogador —
+ * vazar para cá sem ninguém decidir.
+ *
+ * Nunca carrega carteira, mochila, e-mail nem o time. Ver a migration
+ * `20260825030000_perfil_publico_public.sql`, que lista o porquê de cada campo.
+ */
+export interface PerfilPublico {
+  userId: string
+  nome: string
+  nivel: number
+  exp: number
+  rank: number
+  totalJogadores: number
+  segundosJogados: number
+  contaCriadaEm: string | null
+  noHallDaFama: string | null
+  capturas: number
+  anunciosAtivos: number
 }
 
 // --- mercado, chat e correio ------------------------------------------------
@@ -260,6 +298,19 @@ export interface AnuncioMercado {
   is_shiny: boolean
   iv_percent: number
   created_at: string
+  /**
+   * Leilão (PH-101). `'preco_fixo'` é o default no banco, então anúncio antigo
+   * e resposta de servidor mais velho leem como preço fixo — que é o que eram.
+   *
+   * Leilão é sempre `apenas_oferta = true` e `price = null` (a check
+   * `market_listings_preco_coerente` garante), então a tela distingue os dois
+   * modos de lance por ESTE campo, não pela ausência de preço.
+   */
+  modo?: 'preco_fixo' | 'leilao'
+  /** Só em leilão. Quando ele passa, o cron encerra na varredura seguinte. */
+  expira_em?: string | null
+  lance_minimo?: number | null
+  incremento_minimo?: number | null
   vendedor?: string
   ofertas?: number
   melhorOferta?: number | null
@@ -273,6 +324,15 @@ export interface OfertaMercado {
   currency: 'gold' | 'diamond'
   status: 'pendente' | 'aceita' | 'recusada' | 'cancelada'
   created_at: string
+  /**
+   * Modo do anúncio em que o lance foi dado (PH-101), trazido pelo join.
+   *
+   * A tela precisa dele para não oferecer "Cancelar" num lance de leilão — que
+   * o servidor recusa, porque lance de leilão vale até alguém cobrir. Sem o
+   * campo, o botão existiria só para dar erro.
+   */
+  modo?: 'preco_fixo' | 'leilao'
+  expira_em?: string | null
 }
 
 export interface OfertaRecebida extends OfertaMercado {
@@ -289,6 +349,14 @@ export interface NegocioMercado {
   unit_price: number
   currency: 'gold' | 'diamond'
   created_at: string
+  /**
+   * Taxa cobrada do VENDEDOR nesta negociacao (PH-98), na moeda da linha.
+   *
+   * Opcional porque toda linha anterior ao PH-98 nao tem a coluna preenchida
+   * (default 0) e porque uma resposta de servidor mais antigo simplesmente nao
+   * traz o campo — a tela trata ausente e zero igual, "nao houve taxa".
+   */
+  taxa?: number | null
   comprador?: string | null
   vendedor?: string | null
   souComprador?: boolean
@@ -333,7 +401,12 @@ export interface MensagemCorreio {
   de_id: string | null
   de_nome: string
   tipo: 'texto' | 'pedido_amizade' | 'sistema'
-  assunto: string
+  /**
+   * NULO em mensagem de conversa (PH-81): conversa nao tem assunto, carta
+   * tinha. Continua preenchido em aviso de sistema e pedido de amizade, que
+   * sao avisos com titulo e nao um fio entre duas pessoas.
+   */
+  assunto: string | null
   corpo: string
   estado: 'pendente' | 'aceito' | 'recusado' | 'lido'
   created_at: string
@@ -341,9 +414,74 @@ export interface MensagemCorreio {
   anexo_itens?: AnexoItemCorreio[]
   /** Carimbo de coleta — presente significa "ja recebido". */
   anexo_coletado_em?: string | null
+  /**
+   * Exclusao e por lado e SOFT (PH-74): cada ponta some com a mensagem da
+   * propria caixa sem tirar da outra. Por isso duas colunas em vez de um
+   * `delete` ou de um unico booleano.
+   */
+  excluido_destinatario_em?: string | null
+  excluido_remetente_em?: string | null
+  para_id?: string
+  /**
+   * Nome de quem RECEBEU. Nao existe coluna pra isso (`de_nome` e desnormalizado
+   * mas `para_nome` nao), entao o client resolve por `treinadores_publico` so na
+   * caixa de enviados, que e a unica tela que precisa mostrar o destinatario.
+   */
+  para_nome?: string
 }
 
 export interface AmigoRemoto { userId: string; nome: string; nivel: number }
+
+/** POKE que o amigo esta usando agora — so o suficiente pro card, sem stats. */
+export interface PokeAtivoDoAmigo {
+  speciesId: string
+  nivel: number
+  shiny: boolean
+}
+
+/**
+ * Amigo com tudo que a lista precisa numa consulta so (RPC
+ * `amigos_detalhados`). Junta o que antes exigiria 4 idas ao banco:
+ * `treinadores_publico`, `game_sessions` (online), `pokemon_instances` (POKE
+ * ativo) e a contagem de DM nao lida.
+ */
+export interface AmigoDetalhado extends AmigoRemoto {
+  online: boolean
+  pokeAtivo: PokeAtivoDoAmigo | null
+  naoLidas: number
+}
+
+export interface BloqueadoRemoto { userId: string; nome: string }
+
+/** Uma linha do fio de conversa privada entre dois amigos. */
+export interface MensagemDM {
+  id: string
+  de_id: string
+  para_id: string
+  corpo: string
+  created_at: string
+  read_at: string | null
+}
+
+/**
+ * Um CONTATO na lista de conversas (PH-81) — um registro por interlocutor, nao
+ * por mensagem. Vem pronto da RPC `conversas`, que resolve num lugar so o que
+ * a tela precisaria juntar de quatro: a ultima mensagem do fio, a contagem de
+ * nao lidas, se ha anexo esperando coleta, e se o contato esta online.
+ */
+export interface ConversaResumo {
+  userId: string
+  nick: string
+  ultimoTrecho: string
+  ultimaEm: string
+  /** Ultima do fio foi minha — a lista prefixa "Voce:" quando verdadeiro. */
+  ultimaMinha: boolean
+  naoLidas: number
+  /** Quantas mensagens deste contato tem anexo ainda nao coletado. */
+  anexosPendentes: number
+  online: boolean
+  bloqueado: boolean
+}
 
 // Ranking/perfil/mercado/chat/correio saíram daqui na migração RPC-everything
 // (ver acoesRpc.ts, mercadoRpc.ts, chatRealtime.ts, correioRealtime.ts,
@@ -363,7 +501,7 @@ export const servidor = {
   // sub-bioma trocava logo depois de entrar, quando a do servidor chegava.
   // `sala` ausente = servidor mais antigo, ou hunt sem sistema de salas.
   abrirSessao: (mapId: string, pokeUid: string) =>
-    pedir<{ sessaoId: string; mapId: string; sala?: SalaAtiva | null }>('/sessao/abrir', {
+    pedir<{ sessaoId: string; mapId: string; sala?: SalaAtiva | null; clima?: ClimaTipo | null }>('/sessao/abrir', {
       method: 'POST',
       body: JSON.stringify({ mapId, pokeUid }),
     }),

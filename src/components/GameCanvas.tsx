@@ -27,9 +27,12 @@ import { preloadHospital } from '@/data/preload'
 // o localStorage a 60Hz. Fecha a lacuna documentada na Fase 4: entre um kill
 // e outro (o outro ponto de sync automatico), dano/cura em andamento sem
 // morte ainda nao tinha nenhum ponto de sync — isso cobre esse intervalo.
-// TODO Fase 6: chamar isso tambem no autosave/beforeunload e no
-// catch-up de visibilitychange (equivalente ao lastLiveTickAt do main.js
-// original), que ainda nao foram portados.
+// O TODO que ficava aqui ("chamar isso tambem no autosave/beforeunload e no
+// catch-up de visibilitychange, que ainda nao foram portados") saiu: os dois
+// existem — `features/game/hooks/useSyncOnUnload.ts` (`beforeunload` +
+// `pagehide`) e `features/game/hooks/useBackgroundCatchUp.ts`
+// (`visibilitychange`). Este intervalo cobre o meio: a aba em foco, entre um
+// kill e outro.
 const SYNC_INTERVAL_MS = 5000
 
 export function GameCanvas() {

@@ -58,13 +58,59 @@ const fs = require('fs');
 const path = require('path');
 const { decodePng } = require('./lib/png');
 
-const HUNT_BG_TILE_SCALE = 0.8; // deve bater com src/render/sprites.ts
-const HUNT_BG_COVERAGE_MARGIN = 1.15; // idem
-const MAP_BOUNDS = { width: 1400, height: 900 }; // deve bater com GEOMETRIA.bounds (data/biomas.ts)
-const CELL_SIZE = 40; // deve bater com COLLISION_GRID_CELL_SIZE (generated/collisionGrids.generated.ts)
+// Escala de desenho da arte: 1 pixel de imagem = 0,8 unidades de mundo. Deixou
+// de ser "o minimo pra cobrir 1400x900" e virou constante de verdade — o mundo
+// agora e recortado DE DENTRO da arte (ver `enquadrar`), entao nunca falta
+// imagem pra cobrir e nao ha mais o que esticar.
+const HUNT_BG_TILE_SCALE = 0.8;
+
+/**
+ * Tamanho da celula, LIDO de `src/data/collisionConstants.ts` em vez de
+ * repetido aqui.
+ *
+ * Era um `40` literal com um comentario pedindo "deve bater com
+ * COLLISION_GRID_CELL_SIZE". Pedido nao e mecanismo: divergir os dois faz a
+ * grade de colisao ser de uma resolucao e o consumidor (pathfinding,
+ * `isCellBlocked`, o passo de `movementSystem`) ler outra — ou seja, o POKE
+ * colide com uma parede que nao esta onde a tela mostra. O cabecalho de
+ * `data/maps.ts` chama isso de "a classe de bug mais cara deste sistema", e
+ * era a unica constante compartilhada que ainda dependia de alguem lembrar.
+ *
+ * `CELL` no ambiente sobrescreve, so pra repetir a medicao de limiar do
+ * PH-94 sem editar arquivo nenhum.
+ */
+function lerConstante(nome) {
+  const arquivo = path.join(__dirname, '..', 'src', 'data', 'collisionConstants.ts');
+  const fonte = fs.readFileSync(arquivo, 'utf8');
+  const m = fonte.match(new RegExp(`export const ${nome}\\s*=\\s*(\\d+)`));
+  if (!m) throw new Error(`nao achei ${nome} em ${arquivo}`);
+  return Number(m[1]);
+}
+const CELL_SIZE = Number(process.env.CELL || lerConstante('COLLISION_GRID_CELL_SIZE'));
+
+/**
+ * Pegada de colisao do POKE, em unidades de mundo.
+ *
+ * "A pegada de colisao de um POKE e exatamente 1 caixa da grade por pedido
+ * explicito do usuario" — `movementSystem.ts#canOccupy`. Enquanto a celula
+ * tinha 40, a pegada e o tamanho da celula eram o MESMO numero, e o pedido
+ * ficava satisfeito por acidente. Separadas, a pegada continua valendo 40 e
+ * passa a ser aplicada por erosao na geracao (ver o passo 1.5).
+ *
+ * `PEGADA` no ambiente sobrescreve, so pra medicao.
+ */
+const POKE_FOOTPRINT = Number(process.env.PEGADA || lerConstante('POKE_COLLISION_FOOTPRINT'));
+
+// Amostras por eixo dentro de uma celula (25 por celula). Independe do tamanho
+// da celula de proposito: e ele que decide a GRANULARIDADE do limiar (1/25 =
+// 4%), nao a resolucao da imagem. Com celula de 20 unidades de mundo (25px de
+// imagem na escala 0,8) o passo entre amostras e de 5px de imagem — longe de
+// sub-pixel, onde a amostragem viraria ruido.
 const SAMPLE_STRIDE = 5;
-const MAP_CX = MAP_BOUNDS.width / 2;
-const MAP_CY = MAP_BOUNDS.height / 2;
+// Folga em volta da area pintada. Sem ela o POKE encosta na borda do mundo no
+// mesmo pixel em que encosta na parede pintada, e a leitura fica de mapa
+// cortado em vez de mapa que acabou.
+const MARGEM_DE_MUNDO = CELL_SIZE;
 
 // Vermelho saturado (amostrado no arquivo real: ~[227,24,44]).
 function isRed(r, g, b) {
@@ -94,6 +140,29 @@ function isYellow(r, g, b) {
 function isPink(r, g, b) {
   return r > 180 && b > 150 && g < r - 60 && g < b - 60;
 }
+// Verde do marcador de ENTRADA DO INIMIGO — a convencao nova da leva
+// 2026-08-22 (dojo/dragon), irma do circulo amarelo: amarelo e por onde entra
+// o POKE do jogador, verde e por onde entra todo POKE novo do outro lado.
+//
+// A tinta e chapada e igual nas duas referencias: (48,248,104) em praticamente
+// todo pixel lido. O teste e estrito pelo MESMO motivo de `isYellow`, e aqui a
+// pressao e maior: verde e a cor mais comum da arte deste jogo (grama, folha,
+// arbusto, musgo). Exigir G alto E os dois outros canais bem abaixo derruba a
+// vegetacao inteira — medido nas duas referencias, o verde da arte fica em
+// (104,168,56) e parecidos, que tem R alto demais pra passar.
+function isGreen(r, g, b) {
+  return g >= 200 && r <= g - 120 && b <= g - 100 && b >= 40;
+}
+// Marcador pintado esta SOBRE a area andavel — por definicao, o POKE nasce
+// nele. Sem isto o circulo abre um buraco bloqueado de ~1,2 celula exatamente
+// no ponto de nascimento, e o snap do passo 3 empurra o spawn pra celula
+// vizinha. Passou despercebido enquanto so o amarelo existia (11 artes, 6
+// deles projetados pra fora da janela e portanto nunca dentro de uma celula
+// visivel); com dois marcadores dentro da arena do duelo o buraco vira
+// duplo e no meio do campo.
+function isMarcador(r, g, b) {
+  return isYellow(r, g, b) || isGreen(r, g, b);
+}
 // Maioria simples: a celula de borda do traco vermelho cai pro lado seguro
 // (bloqueada) sozinha.
 const RED_CELL_RATIO = 0.5;
@@ -101,27 +170,46 @@ const RED_CELL_RATIO = 0.5;
 // Quanto de uma celula (40px de mundo = 50px de imagem) precisa estar pintada
 // de rosa pra ela ser andavel.
 //
-// ERA 0.5 e ISSO QUEBRAVA AS ARTES URBANAS. Rua de cidade tem cerca de UMA
-// celula de largura, entao qualquer estreitamento derrubava a celula abaixo
-// da maioria e CORTAVA a malha em pedacos; o passo de poda (que remove o que
-// nao conecta ao spawn) entao apagava tudo do outro lado do corte. Medido nas
-// 29 referencias, em celulas podadas por desconexao:
+// ERA 0.3, E ESSE ERA O BUG DO PH-94 — o jogador via a pintura desrespeitada
+// em todas as hunts porque uma celula 30% pintada passava, e o centro do POKE
+// podia encostar ~28px dentro do que a arte mostra como parede.
 //
-//   ratio | metropolis | town-night | ice-cave
-//   0.5   |    116     |    224     |    35
-//   0.4   |      4     |    229     |    38
-//   0.3   |      1     |      0     |     0
-//   0.2   |      2     |      0     |     0
+// O 0.3 nao era descuido: com celula de 40, rua de cidade tem cerca de UMA
+// celula de largura, e a 0.5 qualquer estreitamento derrubava a celula abaixo
+// da maioria e CORTAVA a malha; a poda por conectividade apagava tudo do outro
+// lado do corte. Medido nas 29 referencias da epoca (celulas podadas):
 //
-// 0.3 e o joelho da curva: resolve a fragmentacao inteira e 0.2 nao conserta
-// mais nada, so afrouxa parede. Custo aceito e conhecido: as 18 referencias
-// da leva anterior tambem ficam um pouco mais permissivas (beach 66%->71%,
-// forest 34%->40% de area andavel) — uma celula 30% pintada agora passa, e o
-// POKE pode encostar ate ~28px dentro do que a arte mostra como parede. Vale
-// menos que ter metade do mapa inalcancavel.
+//   celula 40 | metropolis | town-night | ice-cave
+//   0.5       |    116     |    224     |    35
+//   0.3       |      1     |      0     |     0
+//
+// Ou seja: 0.3 tratava o SINTOMA. A causa era a celula ser grossa demais pra
+// geometria fina das artes urbanas. Com CELL_SIZE de 20 a mesma rua tem duas
+// celulas e o limiar pode ser rigoroso sem fragmentar nada. Medido no PH-94,
+// nas 31 referencias (total de celulas podadas por desconexao, e a area de
+// mundo que isso representa — comparar CONTAGEM entre tamanhos de celula
+// diferentes engana, area nao):
+//
+//   celula | ratio | podadas | area podada | urbanas podadas
+//   40     | 0.3   |    77   |   123.200   | metropolis 4
+//   40     | 0.5   |   430   |   688.000   | town-night 246 (!)
+//   20     | 0.5   |   168   |    67.200   | zero
+//   20     | 0.6   |   159   |    63.600   | zero
+//   20     | 0.7   |   379   |   151.600   | volta a fragmentar
+//   10     | 0.5   |  1294   |   129.400   | zero, mas area pior
+//
+// 0.6 e o joelho: poda METADE da area que o desenho antigo podava, sendo o
+// DOBRO de rigoroso, e 0.7 volta a rachar. As 151 celulas que sobram em
+// abismo.png sao do modo `vermelho_bloqueia`, onde este ratio nao entra — mesma
+// area isolada de sempre, so medida mais fino.
+//
+// Custo: 1 a 4 pontos percentuais de area andavel por arte (a folga de parede
+// sendo devolvida), e a pegada do POKE passando de 40 pra 20 — ver
+// `POKE_COLLISION_FOOTPRINT` em src/data/collisionConstants.ts, que explica por
+// que a de 40 nunca foi honrada de verdade.
 //
 // `PINK_RATIO` no ambiente sobrescreve, so pra repetir essa medicao.
-const PINK_CELL_RATIO = Number(process.env.PINK_RATIO || 0.3);
+const PINK_CELL_RATIO = Number(process.env.PINK_RATIO || 0.6);
 
 const refDir = path.join(__dirname, 'body-block-refs');
 const bgDir = path.join(__dirname, '..', 'assets', 'hunt-backgrounds');
@@ -147,7 +235,7 @@ const MANIFESTO = {
   'forest.png': { bg: 'forest.jpg', modo: 'rosa_anda' },
   'industrial.png': { bg: 'industrial.jpg', modo: 'rosa_anda' },
   'sea.png': { bg: 'sea.jpg', modo: 'rosa_anda' },
-  'ice-mountain.png': { bg: 'ice-mountain.png', modo: 'rosa_anda' },
+  'ice-mountain.png': { bg: 'ice-mountain.jpg', modo: 'rosa_anda' },
   'mountain.png': { bg: 'mountain.jpg', modo: 'rosa_anda' },
   'construction-site.png': { bg: 'construction-site.jpg', modo: 'rosa_anda' },
   'swamp.png': { bg: 'swamp.jpg', modo: 'rosa_anda' },
@@ -155,7 +243,7 @@ const MANIFESTO = {
   'beach.png': { bg: 'beach.jpg', modo: 'rosa_anda' },
   'ruins.png': { bg: 'ruins.jpg', modo: 'rosa_anda' },
   'jungle.png': { bg: 'jungle.jpg', modo: 'rosa_anda' },
-  'temple.png': { bg: 'temple.png', modo: 'rosa_anda' },
+  'temple.png': { bg: 'temple.jpg', modo: 'rosa_anda' },
   // Pintada junto com as 17 acima mas nunca cadastrada — a sala 'cave' ficou
   // sem grade por esquecimento, nao por decisao. Sem marcador amarelo (a
   // arte e lava: amarelo incidental demais pra confiar num blob).
@@ -174,36 +262,93 @@ const MANIFESTO = {
   'town.png': { bg: 'town.jpg', modo: 'rosa_anda' },
   'volcano.png': { bg: 'volcano.jpg', modo: 'rosa_anda' },
 
-  // PH-55: as 2 artes que faltavam (Dojo do bioma Urbano e arena do Campeao
-  // Lance). Pintadas por RETANGULOS calibrados por recorte (scripts/
-  // gerar-referencia-body-block.mjs), nao pincel livre a mao como as 29
-  // acima -- aproximacao deliberada, nao cobre toda area andavel que a arte
-  // sugere (jardins/rio adjacentes em dojo.png, parte do cemiterio em
-  // dragon.png ficaram de fora por seguranca: preferi sub-cobertura a
-  // arriscar pintar rosa em cima de agua/lava). Sem circulo amarelo de spawn
-  // -- cai no centroide da area rosa.
-  'dojo.png': { bg: 'dojo.png', modo: 'rosa_anda' },
-  'dragon.png': { bg: 'dragon.png', modo: 'rosa_anda' },
+  // Leva 2026-08-22: as duas ultimas artes sem grade, e as primeiras com
+  // CIRCULO VERDE alem do amarelo — sao arenas de duelo, nao mapas de
+  // perambular. `dojo.png` e o sub-bioma Dojo (Urbano) e a hunt de
+  // Treinamento; `dragon.png` e a arena do Campeao Lance e o espelho DRAGON do
+  // Modo Pesadelo. Nenhuma das duas e arte de bioma, entao ate aqui elas
+  // escapavam de todo teste que itera `BIOMAS` — ver walkBlock.test.ts.
+  'dojo.png': { bg: 'dojo.jpg', modo: 'rosa_anda' },
+  'dragon.png': { bg: 'dragon.jpg', modo: 'rosa_anda' },
 };
 
-const cols = Math.ceil(MAP_BOUNDS.width / CELL_SIZE);
-const rows = Math.ceil(MAP_BOUNDS.height / CELL_SIZE);
+/**
+ * O ENQUADRAMENTO: quanto de mundo esta arte vira, e onde a imagem fica dentro
+ * dele.
+ *
+ * ---------------------------------------------------------------------------
+ * POR QUE ISTO DEIXOU DE SER UMA CONSTANTE
+ * ---------------------------------------------------------------------------
+ * Ate 2026-08-22 todo mapa tinha exatamente 1400x900 e a arte era CENTRADA
+ * nesse retangulo, esticada o bastante pra cobri-lo. Ou seja: so a faixa
+ * central da imagem virava mundo, e o que estivesse pintado fora dela era
+ * descartado sem aviso.
+ *
+ * O custo apareceu inteiro em `dragon.png`: a sala do duelo e as duas bolas
+ * caiam fora da faixa, a poda por conectividade jogava fora 245 das 292
+ * celulas, e sobrava um quartinho de 47 celulas num canto. Com o mundo
+ * recortado a partir da PINTURA, as mesmas 728 celulas viram um componente
+ * conectado de 718. A pintura estava certa desde sempre; o recorte e que
+ * estava errado.
+ *
+ * A regra agora: o mundo e a CAIXA que envolve tudo o que e andavel naquela
+ * arte, mais uma celula de folga, alinhada a grade de 40px. Cada arte define o
+ * proprio tamanho — ha mapas maiores e menores, de proposito.
+ *
+ * ---------------------------------------------------------------------------
+ * E POR QUE ELE E EMITIDO, EM VEZ DE RECALCULADO NO RENDERER
+ * ---------------------------------------------------------------------------
+ * Antes, gerador e `render/sprites.ts#drawMapBackground` chegavam na mesma
+ * transformacao por conta propria, concordando porque repetiam as mesmas tres
+ * constantes. Isso ja era fragil (o cabecalho de `data/maps.ts` chama
+ * "a classe de bug mais cara deste sistema" a grade ser de uma imagem e o
+ * pixel na tela de outra) e agora e impossivel: o canto da imagem depende da
+ * caixa da tinta, que so quem le os pixels conhece. Entao o gerador EMITE
+ * `arte: { escala, x, y }` e o renderer so consome.
+ */
+function enquadrar(width, height, rgba, modo) {
+  const escala = HUNT_BG_TILE_SCALE;
+  // Caixa do que e andavel, em pixels de imagem. Marcador conta: ele e pintado
+  // sobre a area andavel e o POKE nasce nele.
+  const andavelNoPixel = (r, g, b, a) => (modo === 'rosa_anda'
+    ? a >= 10 && (isPink(r, g, b) || isMarcador(r, g, b))
+    : a >= 10 && !isRed(r, g, b));
 
-const SHARED_SPAWN_POINTS = [
-  { x: 500, y: 320 }, { x: 900, y: 320 }, { x: 500, y: 580 },
-  { x: 900, y: 580 }, { x: 700, y: 250 }, { x: 700, y: 650 },
-];
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (let y = 0; y < height; y += 2) {
+    for (let x = 0; x < width; x += 2) {
+      const i = (y * width + x) * 4;
+      if (!andavelNoPixel(rgba[i], rgba[i + 1], rgba[i + 2], rgba[i + 3])) continue;
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+  }
+  if (x0 === Infinity) return null;
 
-function transformFor(imgWidth, imgHeight) {
-  const escalaMinima = Math.max(
-    (MAP_BOUNDS.width * HUNT_BG_COVERAGE_MARGIN) / imgWidth,
-    (MAP_BOUNDS.height * HUNT_BG_COVERAGE_MARGIN) / imgHeight,
-  );
-  const escala = Math.max(HUNT_BG_TILE_SCALE, escalaMinima);
+  // Da caixa em pixels pro mundo, com folga, arredondado pra celula inteira: a
+  // grade tem que cobrir o retangulo exato, senao `isCellBlocked` trata a
+  // sobra como fora do mapa.
+  const larguraCrua = (x1 - x0 + 1) * escala + MARGEM_DE_MUNDO * 2;
+  const alturaCrua = (y1 - y0 + 1) * escala + MARGEM_DE_MUNDO * 2;
+  const cols = Math.ceil(larguraCrua / CELL_SIZE);
+  const rows = Math.ceil(alturaCrua / CELL_SIZE);
+  const bounds = { width: cols * CELL_SIZE, height: rows * CELL_SIZE };
+
+  // Pixel de imagem que corresponde a x=0,y=0 do mundo. Sai negativo em
+  // relacao a caixa por causa da folga, e e daqui que vem tanto a conversao
+  // imagem<->mundo do resto do script quanto o canto de desenho da arte.
+  const origemImgX = x0 - MARGEM_DE_MUNDO / escala;
+  const origemImgY = y0 - MARGEM_DE_MUNDO / escala;
+
   return {
     escala,
-    originX: MAP_CX - (imgWidth * escala) / 2,
-    originY: MAP_CY - (imgHeight * escala) / 2,
+    originX: -origemImgX * escala,
+    originY: -origemImgY * escala,
+    bounds,
+    cols,
+    rows,
   };
 }
 
@@ -279,7 +424,9 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
   if (!fs.existsSync(bgPath)) { console.warn(`Pulando ${refFile}: arte real ${bg} nao encontrada`); continue; }
 
   const { width, height, rgba } = decodePng(fs.readFileSync(refPath));
-  const { escala, originX, originY } = transformFor(width, height);
+  const quadro = enquadrar(width, height, rgba, modo);
+  if (!quadro) throw new Error(`${refFile}: nada andavel na referencia — nem tinta rosa, nem area fora do vermelho.`);
+  const { escala, originX, originY, bounds: MAP_BOUNDS, cols, rows } = quadro;
   const paraMundo = (ix, iy) => ({ x: originX + ix * escala, y: originY + iy * escala });
   const dentroDoMapa = (p) => p.x >= 0 && p.x <= MAP_BOUNDS.width && p.y >= 0 && p.y <= MAP_BOUNDS.height;
 
@@ -308,7 +455,7 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
           const idx = (iy * width + ix) * 4;
           const r = rgba[idx], g = rgba[idx + 1], b = rgba[idx + 2], alpha = rgba[idx + 3];
           if (modo === 'rosa_anda') {
-            if (alpha >= 10 && isPink(r, g, b)) matchSamples++;
+            if (alpha >= 10 && (isPink(r, g, b) || isMarcador(r, g, b))) matchSamples++;
           } else if (alpha < 10 || isRed(r, g, b)) {
             matchSamples++;
           }
@@ -323,6 +470,55 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
   }
   if (walkableCount === 0) {
     throw new Error(`${refFile}: nenhuma celula andavel — nada pintado dentro da janela visivel do mapa.`);
+  }
+
+  // 1.5) EROSAO PELA PEGADA DO POKE.
+  //
+  // A grade nao responde "aqui tem tinta" — ela responde "o CENTRO do POKE
+  // pode estar aqui". `movementSystem.ts#canOccupy` checa um ponto so, e o
+  // comentario dele explica por que isso equivale a uma pegada de uma caixa:
+  // enquanto a celula tinha o tamanho da pegada (40), as duas coisas eram a
+  // mesma. Com a celula menor elas deixam de ser, e sem erodir o POKE ficaria
+  // METADE mais fino — chegaria mais perto da parede, o oposto do que o PH-94
+  // quer.
+  //
+  // Entao a pegada continua sendo 40 unidades de mundo (decisao explicita do
+  // usuario, preservada), e ela e aplicada AQUI, de graca, em vez de virar 9
+  // consultas por passo no laco quente — que roda ate 250 mil vezes por
+  // chamada no resim do servidor.
+  //
+  // Raio em celulas = metade da pegada / tamanho da celula. Com pegada 40 e
+  // celula 40 o raio e 0 e nada e erodido: e exatamente o comportamento de
+  // hoje, o que faz esta etapa ser retrocompativel por construcao.
+  const raioDaPegada = Math.max(0, Math.round(POKE_FOOTPRINT / 2 / CELL_SIZE - 0.5));
+  let erodidas = 0;
+  if (raioDaPegada > 0) {
+    const original = rowStrings.slice();
+    for (let row = 0; row < rows; row++) {
+      let linhaNova = '';
+      for (let col = 0; col < cols; col++) {
+        if (original[row][col] === '1') { linhaNova += '1'; continue; }
+        let cabe = true;
+        for (let dr = -raioDaPegada; dr <= raioDaPegada && cabe; dr++) {
+          for (let dc = -raioDaPegada; dc <= raioDaPegada; dc++) {
+            const r = row + dr, c = col + dc;
+            // Fora da grade conta como bloqueado — mesma regra do resto do
+            // script, e evita o POKE nascer com meio corpo fora do mundo.
+            if (r < 0 || r >= rows || c < 0 || c >= cols || original[r][c] === '1') { cabe = false; break; }
+          }
+        }
+        if (cabe) linhaNova += '0';
+        else { linhaNova += '1'; erodidas++; }
+      }
+      rowStrings[row] = linhaNova;
+    }
+    walkableCount -= erodidas;
+    if (walkableCount <= 0) {
+      throw new Error(
+        `${refFile}: a erosao pela pegada de ${POKE_FOOTPRINT} zerou a area andavel. ` +
+        'A pintura e mais estreita que o corpo do POKE em toda parte.',
+      );
+    }
   }
 
   // 2) Ponto de spawn.
@@ -392,21 +588,24 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
   //    andavel mais proxima em espiral quadrada — mantem a intencao (o mais
   //    perto possivel do que o usuario marcou) sem travar o build.
   const celulaValida = (c, r) => r >= 0 && r < rows && c >= 0 && c < cols && rowStrings[r][c] === '0';
-  let spawnCol = Math.floor(spawnWorldX / CELL_SIZE);
-  let spawnRow = Math.floor(spawnWorldY / CELL_SIZE);
-  if (!celulaValida(spawnCol, spawnRow)) {
-    let achou = null;
-    for (let radius = 1; radius <= Math.max(cols, rows) && !achou; radius++) {
-      for (let dr = -radius; dr <= radius && !achou; dr++) {
-        for (let dc = -radius; dc <= radius && !achou; dc++) {
+  // Espiral quadrada em volta de (col,row) ate achar celula andavel. Extraida
+  // pra funcao quando o marcador VERDE entrou: ele precisa exatamente do mesmo
+  // resgate que o amarelo, e duas copias divergiriam na primeira mexida.
+  function celulaAndavelMaisProxima(col, row) {
+    if (celulaValida(col, row)) return { c: col, r: row };
+    for (let radius = 1; radius <= Math.max(cols, rows); radius++) {
+      for (let dr = -radius; dr <= radius; dr++) {
+        for (let dc = -radius; dc <= radius; dc++) {
           if (Math.max(Math.abs(dr), Math.abs(dc)) !== radius) continue;
-          if (celulaValida(spawnCol + dc, spawnRow + dr)) achou = { c: spawnCol + dc, r: spawnRow + dr };
+          if (celulaValida(col + dc, row + dr)) return { c: col + dc, r: row + dr };
         }
       }
     }
-    if (!achou) throw new Error(`${refFile}: nenhuma celula andavel perto do ponto de spawn.`);
-    spawnCol = achou.c; spawnRow = achou.r;
+    return null;
   }
+  const casaDoSpawn = celulaAndavelMaisProxima(Math.floor(spawnWorldX / CELL_SIZE), Math.floor(spawnWorldY / CELL_SIZE));
+  if (!casaDoSpawn) throw new Error(`${refFile}: nenhuma celula andavel perto do ponto de spawn.`);
+  const spawnCol = casaDoSpawn.c, spawnRow = casaDoSpawn.r;
   spawnWorldX = spawnCol * CELL_SIZE + CELL_SIZE / 2;
   spawnWorldY = spawnRow * CELL_SIZE + CELL_SIZE / 2;
 
@@ -441,20 +640,71 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
     }
     rowStrings[row] = linhaNova;
   }
-  const walkableFinal = walkableCount - podadas;
-  const pct = ((walkableFinal / (cols * rows)) * 100).toFixed(0);
-  console.log(
-    `${bg.padEnd(24)} ${String(walkableFinal).padStart(4)}/${cols * rows} andaveis (${pct.padStart(2)}%), ` +
-    `${String(podadas).padStart(3)} isoladas podadas, spawn (${spawnWorldX},${spawnWorldY}) [${origemDoSpawn}]`,
-  );
-
-  const presos = SHARED_SPAWN_POINTS.filter((p) => rowStrings[Math.floor(p.y / CELL_SIZE)][Math.floor(p.x / CELL_SIZE)] === '1');
-  if (presos.length > 0) {
+  // 5) Circulo VERDE: por onde entra todo POKE novo do lado inimigo. Resolvido
+  //    DEPOIS da poda de propósito — assim ele nunca cai num bolsao que o
+  //    pathfinder trata como bloqueado, e o inimigo nasce sempre num lugar de
+  //    onde da pra alcancar o jogador. Arte sem circulo verde nao ganha o
+  //    campo, e quem consome trata a ausencia como "usa o spawn de sempre".
+  let spawnInimigo = null;
+  const blobVerde = maiorBlob(width, height, rgba, isGreen);
+  if (blobVerde && blobVerde.pixels >= MIN_PIXELS_DO_MARCADOR) {
+    let { x: vx, y: vy } = paraMundo(blobVerde.x, blobVerde.y);
+    if (!dentroDoMapa({ x: vx, y: vy })) {
+      const antesX = vx, antesY = vy;
+      vx = Math.min(Math.max(vx, CELL_SIZE), MAP_BOUNDS.width - CELL_SIZE);
+      vy = Math.min(Math.max(vy, CELL_SIZE), MAP_BOUNDS.height - CELL_SIZE);
+      avisos.push(
+        `${refFile}: circulo VERDE em img(${blobVerde.x | 0},${blobVerde.y | 0}) cai fora da janela visivel ` +
+        `(daria ${antesX.toFixed(0)},${antesY.toFixed(0)}). Projetado pra ${vx.toFixed(0)},${vy.toFixed(0)}.`,
+      );
+    }
+    const casa = celulaAndavelMaisProxima(Math.floor(vx / CELL_SIZE), Math.floor(vy / CELL_SIZE));
+    if (!casa) throw new Error(`${refFile}: nenhuma celula andavel perto do circulo verde.`);
+    spawnInimigo = { x: casa.c * CELL_SIZE + CELL_SIZE / 2, y: casa.r * CELL_SIZE + CELL_SIZE / 2 };
+    if (spawnInimigo.x === spawnWorldX && spawnInimigo.y === spawnWorldY) {
+      avisos.push(
+        `${refFile}: circulo verde e circulo amarelo caem na MESMA celula (${spawnWorldX},${spawnWorldY}) — ` +
+        'jogador e inimigo nasceriam um em cima do outro. Pinte os dois mais afastados.',
+      );
+    }
+  } else if (blobVerde) {
     avisos.push(
-      `${refFile}: ${presos.length}/6 pontos de spawn de inimigo compartilhados (data/biomas.ts#GEOMETRIA.spawnPoints) caem em area bloqueada. ` +
-      'Sao os mesmos 6 pontos de TODA hunt; inimigo que nascer la e reposicionado pro ponto andavel mais proximo em runtime.',
+      `${refFile}: ha tinta verde mas o maior blob tem so ${blobVerde.pixels}px (< ${MIN_PIXELS_DO_MARCADOR}px) — ` +
+      'tratado como vegetacao da arte, nao como marcador de entrada do inimigo.',
     );
   }
+
+  const walkableFinal = walkableCount - podadas;
+  const pct = ((walkableFinal / (cols * rows)) * 100).toFixed(0);
+
+  // A poda descartar MAIS do que ficou nao e "uns bolsoes soltos": e o spawn
+  // ter caido no pedaco errado da pintura. Foi exatamente o que aconteceu com
+  // dragon.png na leva 2026-08-22 — o circulo amarelo caiu fora da janela
+  // visivel, foi projetado pra borda, e a borda caiu num quartinho de 47
+  // celulas isolado dos 243 do corredor principal. O mapa fica jogavel, entao
+  // nada falha: some 84% da pintura sem uma linha de aviso. Este e o aviso.
+  if (podadas > walkableFinal) {
+    avisos.push(
+      `${refFile}: a poda por conectividade descartou MAIS area do que manteve (${podadas} podadas vs ${walkableFinal} mantidas). ` +
+      `O spawn (${spawnWorldX},${spawnWorldY}) caiu num pedaco isolado da pintura, nao no corredor principal. ` +
+      'Confira o gabarito (`node scripts/conferir-walk-block.mjs`): ou o marcador esta no bolsao errado, ou falta ligar o bolsao ao resto.',
+    );
+  }
+  console.log(
+    `${bg.padEnd(24)} ${String(walkableFinal).padStart(5)}/${cols * rows} andaveis (${pct.padStart(2)}%), ` +
+    `${String(erodidas).padStart(5)} erodidas pela pegada, ` +
+    `${String(podadas).padStart(3)} isoladas podadas, spawn (${spawnWorldX},${spawnWorldY}) [${origemDoSpawn}]` +
+    (spawnInimigo ? `, inimigo (${spawnInimigo.x},${spawnInimigo.y}) [verde]` : ''),
+  );
+
+  // AQUI HAVIA um aviso sobre os 6 `GEOMETRIA.spawnPoints` caindo em area
+  // bloqueada. Saiu porque alertava sobre algo que NADA consome: aqueles
+  // pontos so sao lidos em `engine/simulation.ts#spawnSequenceEnemy`, e la ja
+  // sao sobrepostos pela bola verde quando ela existe. Spawn de POKE selvagem
+  // nunca passa por eles — e sorteado num cone a frente do jogador, com
+  // fallback num disco no centro do mapa. Com o mundo deixando de ser 1400x900
+  // pra todo mundo, seis coordenadas absolutas so poderiam mesmo virar ruido.
+  // Ver PH-56, que trata dos sistemas de colisao inalcancaveis.
 
   // `spawnOrigem` vai pro arquivo gerado de proposito: sem ele, um circulo
   // amarelo que a deteccao deixasse de enxergar viraria centroide rosa em
@@ -463,9 +713,12 @@ for (const [refFile, { bg, modo }] of Object.entries(MANIFESTO)) {
   // tem circulo pintado, e a regressao vira teste vermelho.
   resultados[`assets/hunt-backgrounds/${bg}`] = {
     grid: rowStrings,
+    bounds: MAP_BOUNDS,
+    arte: { escala, x: Math.round(originX * 100) / 100, y: Math.round(originY * 100) / 100 },
     spawnPoint: { x: spawnWorldX, y: spawnWorldY },
     spawnOrigem: origemDoSpawn === 'centroide rosa' ? 'centroide-rosa'
       : origemDoSpawn === 'amarelo projetado' ? 'amarelo-projetado' : 'amarelo',
+    ...(spawnInimigo ? { spawnInimigo } : {}),
   };
 }
 
@@ -498,6 +751,25 @@ const header = `// AUTO-GERADO por \`node scripts/build-sub-bioma-collision.js\`
 // Nao editar a mao — rode o script de novo apos repintar uma referencia.
 export interface ColisaoPintada {
   grid: string[];
+  /**
+   * Tamanho do mundo desta arte, em unidades de mundo. NAO e mais 1400x900 pra
+   * todo mundo: e a caixa que envolve a area pintada mais uma celula de folga,
+   * arredondada pra celula inteira. \`grid\` cobre exatamente este retangulo —
+   * \`isCellBlocked\` trata qualquer coisa fora dele como fora do mapa.
+   */
+  bounds: { width: number; height: number };
+  /**
+   * Onde desenhar a imagem de fundo, em coordenadas de MUNDO: canto superior
+   * esquerdo em (x,y), tamanho \`naturalWidth * escala\` por
+   * \`naturalHeight * escala\`.
+   *
+   * Emitido, e nao recalculado no renderer, porque o canto depende da caixa da
+   * tinta — coisa que so quem le os pixels da referencia conhece. Antes as
+   * duas pontas chegavam na mesma conta por repetir as mesmas constantes; se
+   * elas divergissem, a grade de colisao passaria a ser de uma imagem e o
+   * pixel na tela de outra (ver o cabecalho de data/maps.ts).
+   */
+  arte: { escala: number; x: number; y: number };
   spawnPoint: { x: number; y: number };
   /**
    * De onde saiu o spawnPoint.
@@ -510,9 +782,26 @@ export interface ColisaoPintada {
    *   'centroide-rosa'     sem circulo — nasce no meio da area andavel.
    */
   spawnOrigem: 'amarelo' | 'amarelo-projetado' | 'centroide-rosa';
+  /**
+   * Por onde entra todo POKE novo do lado INIMIGO — o circulo VERDE pintado,
+   * irmao do amarelo. So as arenas de duelo tem (dojo, dragon); arte sem
+   * circulo verde omite o campo, e quem consome cai no spawn de sempre.
+   *
+   * Resolvido depois da poda de conectividade, entao e sempre uma celula de
+   * onde da pra alcancar o jogador.
+   */
+  spawnInimigo?: { x: number; y: number };
 }
 
 export const COLISAO_POR_ARTE: Record<string, ColisaoPintada> = ${JSON.stringify(resultados, null, 2)};
 `;
-fs.writeFileSync(outFile, header);
-console.log(`\nEscrito ${outFile} (${Object.keys(resultados).length} artes)`);
+// `MEDIR=1` roda a analise inteira e NAO escreve o arquivo gerado. Existe pra
+// varrer combinacoes de CELL/PINK_RATIO sem sujar a arvore de trabalho — a
+// medicao do PH-94 sao 8 rodadas seguidas, e cada uma reescreveria 70-280 KB
+// de TS que ninguem quer commitar.
+if (process.env.MEDIR === '1') {
+  console.log(`\n[MEDIR] celula=${CELL_SIZE} ratio=${PINK_CELL_RATIO} — arquivo NAO escrito.`);
+} else {
+  fs.writeFileSync(outFile, header);
+  console.log(`\nEscrito ${outFile} (${Object.keys(resultados).length} artes)`);
+}

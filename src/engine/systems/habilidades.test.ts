@@ -33,7 +33,7 @@ function cenario(
   const rng = createRng(11)
   const poke = createPokeInstance(rng, especieJogador, nivel, { rarity: 'comum', ivs: IV, nature: 'hardy' })
   poke.trait = traits.jogador
-  const world = buildMapWorld('route_46', poke, { rng, counters: { entity: 1, effect: 1, pendingHit: 1 } })
+  const world = buildMapWorld('route_46', poke, { seed: 0, rng, counters: { entity: 1, effect: 1, pendingHit: 1 } })
   world.pessimista = true
   const player = world.player!
   player.cooldowns = {}

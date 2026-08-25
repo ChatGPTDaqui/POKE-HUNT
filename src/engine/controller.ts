@@ -37,7 +37,13 @@ export const controller = {
   // via o combate rodando na tela e nao ganhava nada — sem nenhum aviso, porque
   // a simulacao local continua desenhando normalmente. Um erro que so aparece
   // como "o jogo parou de dar ouro".
-  async enterMap(mapId: string): Promise<boolean> {
+  // `silencioso` desliga os TRES avisos deste caminho (slot vazio, POKE caido,
+  // recusa do servidor). Existe pro unico chamador que nao nasce de um clique:
+  // a reentrada automatica na hunt no boot (PH-93, features/game/bootDaSessao).
+  // Ali o jogador nao pediu nada, cair no Hospital ja e o estado seguro, e um
+  // toast de erro sobre acao que ninguem disparou so ensina a ignorar toast.
+  async enterMap(mapId: string, opcoes?: { silencioso?: boolean }): Promise<boolean> {
+    const avisar = !opcoes?.silencioso
     const gameState = useGameStateStore.getState()
     const activePoke = gameState.team[gameState.activeIndex]
     // Slot ativo vazio. Era um `return false` MUDO, e custou uma sessao inteira
@@ -48,9 +54,11 @@ export const controller = {
     // aba), e o HUD nao denuncia porque ele desenha o POKE do `worldStore`, que
     // ainda tem o antigo em memoria.
     if (!activePoke) {
-      useToastStore.getState().pushToast(
-        'Nenhum POKE selecionado na equipe. Abra Equipe e coloque um em campo.', 'error', 'world',
-      )
+      if (avisar) {
+        useToastStore.getState().pushToast(
+          'Nenhum POKE selecionado na equipe. Abra Equipe e coloque um em campo.', 'error', 'world',
+        )
+      }
       return false
     }
     // POKE caido nao luta, e uma cacada com ele so queima o relogio: a simulacao
@@ -58,12 +66,14 @@ export const controller = {
     // jogo. O servidor tambem recusa (defesa em profundidade), mas aqui a
     // resposta e imediata e diz o que fazer.
     if (activePoke.hp <= 0) {
-      useToastStore.getState().pushToast(
-        'Seu POKE esta desmaiado. Cure na Enfermeira antes de cacar.', 'error', 'world',
-      )
+      if (avisar) {
+        useToastStore.getState().pushToast(
+          'Seu POKE esta desmaiado. Cure na Enfermeira antes de cacar.', 'error', 'world',
+        )
+      }
       return false
     }
-    const sessao = await abrirSessaoDeHunt(mapId, activePoke.uid)
+    const sessao = await abrirSessaoDeHunt(mapId, activePoke.uid, { avisarErro: avisar })
     if (!sessao.ok) return false
     // Arte de TODA especie do pool na memoria antes de a cena aparecer — senao o
     // primeiro encontro com cada uma pisca sem sprite enquanto o PNG baixa (ver
@@ -71,17 +81,41 @@ export const controller = {
     // entrada mas nunca a impede. Depois da sessao ja estar aceita de proposito:
     // se o servidor recusar, nao ha por que gastar banda.
     await preloadHunt(mapId, { speciesId: activePoke.speciesId, isShiny: activePoke.isShiny })
-    gameState.setCurrentMapId(mapId)
     // A sala inicial e a que o servidor decidiu na abertura. Sem passa-la aqui, a
     // simulacao local sorteia a propria e o jogador ve o sub-bioma trocar poucos
     // segundos depois de entrar, quando a do servidor chega no primeiro flush.
-    const world = buildMapWorld(mapId, activePoke, useWorldStore.getState(), sessao.sala ? { sala: sessao.sala } : undefined)
+    // PH-140: `clima` entra JUNTO da sala. A presenca da chave e o que diz ao
+    // motor "ha autoridade, nao derive" — o cliente nao tem a semente da sessao
+    // (ver ProgressoDaSessao.clima). Servidor mais antigo nao manda o campo, e
+    // ai o cliente volta a derivar, como no jogo local.
+    const world = buildMapWorld(
+      mapId, activePoke, useWorldStore.getState(),
+      sessao.sala ? { sala: sessao.sala, clima: sessao.clima ?? null } : undefined,
+    )
     // Com sessao aberta no servidor, a sala seguinte tambem e DELE (ver
     // engine/systems/salaSystem.ts#registrarAbate): a simulacao local para de
     // sortear sub-bioma e passa a so contar abate, e a troca chega no flush.
     // Sem servidor (jogo local) o sorteio local continua sendo o unico.
     world.salaSobAutoridade = servidorAtivo()
     useWorldStore.getState().setWorld(world)
+    // A FLAG POR ULTIMO, e nao antes de montar a cena (PH-156).
+    //
+    // `currentMapId` e o que o resto do jogo le como "estou numa cacada" — e a
+    // trava que esconde a edicao dos 4 golpes no perfil, entre outras coisas.
+    // Ela ficava gravada aqui em cima, logo depois do `preloadHunt`, e o
+    // problema e o intervalo: entre a gravacao e o `setWorld` acontecem a
+    // montagem do mundo e a leitura do `worldStore`. Qualquer excecao ali
+    // deixava a flag ligada com o Hospital na tela — e nada reconciliava isso,
+    // entao a trava sobrevivia ate o jogador recarregar a pagina (o boot zera,
+    // e e por isso que o sintoma era "so destrava com F5").
+    //
+    // Gravando depois, o estado inconsistente nao chega a existir: ou a cena
+    // subiu e a flag acompanha, ou nenhuma das duas coisas aconteceu.
+    //
+    // A ordem e segura porque `buildMapWorld` NAO le `currentMapId`, e o
+    // observador de `useSaidaAoEncerrarSessao` so acorda com mudanca no
+    // `gameStateStore` — quando esta linha roda, o `mapDef` ja esta no lugar.
+    gameState.setCurrentMapId(mapId)
     resetStats(gameState) // painel de taxa de farm reinicia do zero a cada hunt nova
     return true
   },
@@ -294,6 +328,30 @@ export const controller = {
     })
   },
 
+  // Reordena a fila de RESERVAS (trilho da HUD, PH-75).
+  //
+  // Nao troca quem esta em campo — isso e `setActiveTeamIndex`, e a RPC recusa
+  // qualquer ordem que mude o slot 0. Por isso aqui nao ha nada de preload de
+  // arte nem de worldStore: o POKE desenhado nao muda.
+  reorderTeam(de: number, para: number): void {
+    const gameState = useGameStateStore.getState()
+    if (de === para) return
+    const n = gameState.team.length
+    if (de < 1 || de >= n || para < 1 || para >= n) return
+
+    // A ordem RESULTANTE e calculada aqui, antes do fallback rodar: sob
+    // autoridade do servidor o fallback NAO roda, entao ler a equipe depois do
+    // `pedirAcao` mandaria a ordem velha.
+    const ordem = gameState.team.map((p) => p.uid)
+    const [movido] = ordem.splice(de, 1)
+    ordem.splice(para, 0, movido)
+
+    void pedirAcao(
+      { tipo: 'reordenarEquipe', ordem },
+      () => gameState.reordenarReservas(de, para),
+    )
+  },
+
   removeFromTeam(pokeUid: string): void {
     const gameState = useGameStateStore.getState()
     const idx = gameState.team.findIndex((p) => p.uid === pokeUid)
@@ -377,12 +435,12 @@ export const controller = {
     }
   },
 
-  async evolvePoke(pokeUid: string): Promise<void> {
+  async evolvePoke(pokeUid: string, alvo?: string): Promise<void> {
     const gameState = useGameStateStore.getState()
     const poke = [...gameState.team, ...gameState.bagPokes].find((p) => p.uid === pokeUid)
     if (!poke) return
     const previousName = SPECIES[poke.speciesId].name
-    const result = evolvePokeInstance(poke, gameState)
+    const result = evolvePokeInstance(poke, gameState, alvo)
     if (!result) return
     if ('blocked' in result) {
       const { itemId, count } = result.required
@@ -406,7 +464,7 @@ export const controller = {
     // pra guarda de reentrancia de quem chama (useAcaoPendente.run so libera
     // depois que a Promise retornada resolve) — sem isso a janela de duplo
     // clique durava um microtask (PH-13).
-    const ok = await pedirAcao({ tipo: 'evoluirPoke', pokeUid }, () => {
+    const ok = await pedirAcao({ tipo: 'evoluirPoke', pokeUid, alvo }, () => {
       if (result.stoneReq) gameState.removeItem(result.stoneReq.itemId, result.stoneReq.count)
       gameState.updatePokeInstance(pokeUid, () => result.updatedPoke)
     })

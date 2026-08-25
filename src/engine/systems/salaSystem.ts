@@ -26,11 +26,12 @@
 import { weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
 import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, LOOT, type SubBiomaDef } from '@/data/biomas'
+import { climaAmbienteDaSala, climaDeAmbiente, definirClimaDeAmbiente } from './climaAmbiente'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { getEncounter } from '@/data/enemies'
 import { mapDefParaSala, spawnPointParaSala, isCellBlocked, nearestOpenPoint } from '@/data/maps'
 import type { MapItemDrop } from '@/data/generated/types'
-import type { SalaAtiva, WorldState } from '../types'
+import type { ClimaTipo, SalaAtiva, WorldState } from '../types'
 
 /**
  * Duracao do aviso "Entrando em nova area" entre salas — congela
@@ -337,7 +338,25 @@ export function garantirTransicaoDeQuotaFechada(world: WorldState, mapId: string
  * mandava o jogador de volta pra sala 1 com o aviso de nova area, o que le como
  * perda de progresso.
  */
-export function reconciliarSalaDaAutoridade(world: WorldState, sala: SalaAtiva | null): void {
+/**
+ * `climaDaAutoridade` (PH-140): o clima de AMBIENTE que o servidor sorteou pra
+ * sala. `undefined` = a resposta nao trouxe o campo (servidor antigo, ou jogo
+ * local), e ai o clima que o cliente ja tem fica como esta.
+ *
+ * Nunca derruba clima de GOLPE: o servidor manda o clima do LUGAR, e um Rain
+ * Dance de 10 turnos em andamento no cliente nao e assunto dele.
+ */
+export function reconciliarSalaDaAutoridade(
+  world: WorldState, sala: SalaAtiva | null, climaDaAutoridade?: ClimaTipo | null,
+): void {
+  // `undefined` = a resposta nao trouxe o campo (servidor mais antigo que o
+  // cliente, o mesmo descasamento de pipeline que o bloco de `sala: null`
+  // abaixo documenta). Nesse caso o clima que o cliente ja tem fica como esta —
+  // melhor um clima defasado que um ceu limpo mentiroso.
+  const aplicarClima = () => {
+    if (climaDaAutoridade === undefined) return
+    definirClimaDeAmbiente(world, climaDeAmbiente(climaDaAutoridade))
+  }
   // Fora de hunt nao ha sala: escrever uma aqui deixaria o Hospital com um
   // sub-bioma pendurado no HUD.
   if (!world.mapDef) return
@@ -373,6 +392,7 @@ export function reconciliarSalaDaAutoridade(world: WorldState, sala: SalaAtiva |
   if (!atual) {
     world.sala = { ...sala }
     world.salaPredita = false
+    aplicarClima()
     return
   }
   if (atual.chave === sala.chave && atual.indice === sala.indice && atual.ciclos === sala.ciclos) {
@@ -384,6 +404,9 @@ export function reconciliarSalaDaAutoridade(world: WorldState, sala: SalaAtiva |
     // O servidor chegou na MESMA sala: o palpite virou verdade e o fallback
     // pode voltar a valer daqui pra frente.
     world.salaPredita = false
+    // PH-140: mesma sala, mas o clima local pode ser palpite (o cliente entrou
+    // na hunt antes de a sessao responder). A autoridade corrige.
+    aplicarClima()
     return
   }
   // A protecao anti-regressao vale contra flush ATRASADO, nao contra a propria
@@ -415,6 +438,18 @@ export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
   if (!pendente) return
   world.sala = pendente
   world.salaPendente = null
+  // PH-140: o clima da sala anterior NAO acompanha o jogador — inclusive o de
+  // golpe, que morre junto com a sala mesmo com turnos sobrando. Por isso o
+  // `clima` e zerado ANTES de `definirClimaDeAmbiente`, que respeitaria um
+  // golpe em campo.
+  world.clima = null
+  // Sob autoridade o cliente NAO deriva: ele nao tem a semente da sessao, e um
+  // palpite aqui seria clima errado por ate um flush inteiro. Fica sem clima
+  // ate o servidor dizer qual e — silencio honesto em vez de mentira curta.
+  definirClimaDeAmbiente(
+    world,
+    world.salaSobAutoridade ? null : climaAmbienteDaSala(world.seed, world.sala),
+  )
   world.salaEsperaDaAutoridade = 0
   world.enemies = []
   world.effects = []

@@ -47,6 +47,28 @@ const FOOT_OFFSET_FRACTION: Record<string, number> = {
   // were introduced — same auto-measurement idea, just computed by script
   // (scripts/import-kanto-sprites.js) instead of eyeballed given the volume.
   kingdra: -0.028, politoed: 0.078, golem: 0.125, porygon2: 0.125, scizor: 0.125,
+  // As evolucoes que entraram no elenco com PH-145 — mesma medicao
+  // automatica das levas anteriores.
+  vileplume: 0.125,
+  bellossom: 0.219,
+  exeggutor: 0.089,
+  poliwrath: 0.104,
+  slowking: 0.104,
+  cloyster: 0.125,
+  starmie: 0.125,
+  wigglytuff: 0.104,
+  vaporeon: 0.125,
+  jolteon: 0.175,
+  flareon: 0.15,
+  espeon: 0.125,
+  umbreon: 0.146,
+  raichu: 0.089,
+  crobat: -0.071,
+  hitmontop: 0.089,
+  clefairy: 0.125,
+  togetic: 0.104,
+  clefable: 0.104,
+
 };
 
 const DEFAULT_FRACTION = 0.15; // rough roster average, used only if a species is somehow missing above

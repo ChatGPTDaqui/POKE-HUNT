@@ -6,7 +6,12 @@
 // original — aqui viram id + lookup via findEntityById, unica mudanca de
 // forma permitida no port (risco de referencia obsoleta sob Immer).
 import { deriveRng, nextFloat, type Rng } from '@/core/rng'
-import { getAbility, BASIC_ATTACK, isDamagingAbility, TURNO_SEGUNDOS, CLIMA_DO_GOLPE, type Ability } from '@/data/abilities'
+import {
+  getAbility, BASIC_ATTACK, isDamagingAbility, TURNO_SEGUNDOS, CLIMA_DO_GOLPE,
+  GOLPE_NUNCA_ERRA_NO_CLIMA, PRECISAO_DO_GOLPE_NO_CLIMA, WEATHER_BALL_POR_CLIMA,
+  CURA_SENSIVEL_AO_CLIMA, CURA_NO_SOL, CURA_EM_CLIMA_RUIM, GROWTH_NO_SOL,
+  type Ability,
+} from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import {
   multiplicadorDeVelocidade, multiplicadorDeDanoFisico, multiplicadorDeStat,
@@ -17,6 +22,7 @@ import type { StatChange, ElementType } from '@/data/generated/types'
 import {
   tickStatus, tentarAgir, aplicarEfeitosDoGolpe, statusVaiPegar, aplicarMudancasDeStat,
   limparEstadoVolatil, aplicarStatus, aplicarEstagioUnico, curarStatus,
+  registrarFonteDeEstagio, fonteDeTrait,
 } from './statusSystem'
 import { traitDoPoke, type TraitId } from '@/data/traits'
 import {
@@ -36,24 +42,52 @@ import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { SPECIES } from '@/data/pokes'
 import type { PokeInstance } from '@/data/pokes'
 import { colorForType } from '@/data/typeColors'
+import { ehDirecional } from '@/data/moveVfx'
 import { direcaoDoGolpeDeStatus } from '@/data/statusVfx'
 
 import { createFormulaEngine } from '@/core/formulaEngine'
 import { FORMULAS } from '@/data/generated/formulas.generated'
 import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { rollChance, randRange } from '@/core/random'
-import { triggerAttackAnim, ATTACK_ANIM_DURATION } from './animationSystem'
-import { createWorldEffect, effectDone, tickEffect } from '../effect'
+import { triggerAttackAnim } from './animationSystem'
+import { reporClimaDeAmbiente } from './climaAmbiente'
+import { createWorldEffect, effectDone, reapontarParaAtacante, seguirDono, tickEffect } from '../effect'
 import {
   isDead, getGroundOffset, tickCooldowns, isAbilityReady,
   startCooldown, canAct, startGlobalCooldown, takeDamage, heal, getMaxHp, releaseEffectLane, findEntityById,
 } from '../entity'
-import type { ClimaTipo, EnemyEntity, Escudos, PendingHit, PlayerEntity, WorldEntity, WorldState } from '../types'
+import type { Clima, ClimaTipo, EnemyEntity, Escudos, PendingHit, PlayerEntity, WorldEntity, WorldState } from '../types'
 
-// Dano/efeitos/tratamento-de-derrota acontecem esse tempo depois do golpe
-// disparar, pra aparecerem em sincronia com a pose Shoot/Charge terminando
-// em vez de no instante em que o golpe e usado.
-const HIT_LAND_DELAY = ATTACK_ANIM_DURATION
+// Quanto tempo depois do golpe disparar a resolucao pousa: arte do golpe,
+// numero de dano, status, tratamento de derrota.
+//
+// Era `ATTACK_ANIM_DURATION` (0,5s), amarrado a pose de ataque justamente pra
+// tudo pousar quando ela terminasse. Na tela isso saia em SEQUENCIA: a pose
+// tocava inteira, e so ai a arte do golpe comecava. Pedido do usuario: "quando
+// iniciar a sprite de ataque do pokemon, depois de 0,3 segundos iniciara a
+// sprite do golpe".
+//
+// Entao 0,3 aqui e a pose seguindo com 0,5 (`ATTACK_ANIM_DURATION`) — de
+// proposito. As duas passam a se SOBREPOR nos ultimos 0,2s, que e o que le como
+// golpe conectando, em vez de duas animacoes em fila.
+//
+// POR QUE MOVER A RESOLUCAO INTEIRA, E NAO SO A ARTE
+//
+// O caminho "so a arte em 0,3s, dano continua em 0,5s" foi considerado e
+// recusado: a arte NAO e incondicional. `resolveHit` decide mostra-la ja
+// sabendo o resultado — Protect bloqueou (sai antes da arte), Soundproof
+// cancelou, Magic Bounce trocou o alvo, o status pegou ou nao (`statusRecebeuEm`
+// escolhe em cima de QUEM a arte aparece). Antecipar so a arte exigiria decidir
+// isso 0,2s antes de a informacao existir, e o resultado seria arte de golpe
+// bloqueado, arte no alvo errado no Magic Bounce e arte de status que falhou.
+// Mover o pouso inteiro nao inventa nenhum desses casos.
+//
+// O que muda de fato: o numero de dano aparece 0,2s mais cedo, ainda durante a
+// pose, e a janela em que um atacante morrendo cancela o proprio golpe
+// enfileirado encurta de 0,5s pra 0,3s. Nenhuma regra de combate depende dessa
+// janela — `MIN_ACTION_GAP` (2s) continua sendo o que impede golpe empilhado, e
+// o travamento de movimento continua lendo `attackAnimTimer`, que segue em 0,5s.
+const HIT_LAND_DELAY = 0.3
 
 // Tempo de tela de um efeito de golpe.
 //
@@ -266,6 +300,71 @@ function efetividadeConsiderandoRevelado(
 const CLIMA_MULTIPLICADOR_FAVORECIDO = 1.5
 const CLIMA_MULTIPLICADOR_DESFAVORECIDO = 0.5
 
+// NEVE (Gen 9) e NEVOA (Gen 4) — PH-140.
+//
+// Neve: +50% de Defesa pra tipos ICE, e SO isso. Nao tira HP por turno; o
+// granizo e que faz isso. Sao climas distintos, e nas tabelas de sub-bioma os
+// dois aparecem juntos (`ice-cave`: 50% de neve, 12,5% de granizo).
+const NEVE_DEFESA_GELO = 1.5
+// Nevoa: precisao de todo golpe x0,6 (o efeito principal), Solar Beam pela
+// metade, e as curas de clima (Moonlight/Morning Sun/Synthesis) caem de 1/2
+// para 1/4 do HP maximo. Nenhum golpe cria nevoa — ela so vem do ambiente.
+const NEVOA_PRECISAO = 0.6
+// Solar Beam perde metade do dano em qualquer clima que nao seja sol.
+const SOLAR_BEAM_SOB_CLIMA_RUIM = 0.5
+
+/**
+ * O golpe como o CLIMA o deixa (PH-140).
+ *
+ * Hoje so a Weather Ball muda de forma. Devolve o proprio objeto quando nada
+ * muda — golpe comum nao paga alocacao nenhuma, e o pipeline de dano roda pra
+ * cada hit de cada inimigo, a 60 Hz.
+ *
+ * NAO muta `ability`: os objetos de `ABILITIES` sao compartilhados por todas as
+ * entidades do mundo. Mutar um aqui deixaria o tipo do golpe "grudado" no
+ * catalogo depois que o clima passasse.
+ */
+/**
+ * Quanto o clima multiplica a cura de Moonlight/Synthesis (PH-140).
+ *
+ * 1 = ceu limpo (o `healPercent` do catalogo ja e esse caso). Sol da 4/3, o que
+ * leva os 50% do catalogo aos 2/3 dos jogos; qualquer outro clima da 0,5, que
+ * leva a 1/4.
+ */
+function multiplicadorDeCuraPorClima(
+  ability: Ability, clima: Clima | null, atacante: WorldEntity, alvo: WorldEntity,
+): number {
+  if (!CURA_SENSIVEL_AO_CLIMA.has(ability.id)) return 1
+  const climaAtivo = climaEfetivo(clima?.tipo ?? null, traitsDoConfronto(atacante, alvo))
+  if (!climaAtivo) return 1
+  return climaAtivo === 'sol' ? CURA_NO_SOL : CURA_EM_CLIMA_RUIM
+}
+
+/**
+ * Growth sob sol forte sobe 2 estagios em vez de 1 (PH-140).
+ *
+ * Devolve o proprio objeto quando nada muda, e nunca muta o do catalogo — ver a
+ * mesma nota em `golpeAjustadoPeloClima`.
+ */
+function golpeDeEstagioAjustadoPeloClima(
+  ability: Ability, clima: Clima | null, atacante: WorldEntity, alvo: WorldEntity,
+): Ability {
+  if (ability.id !== 'growth' || !ability.statChanges) return ability
+  const climaAtivo = climaEfetivo(clima?.tipo ?? null, traitsDoConfronto(atacante, alvo))
+  if (climaAtivo !== 'sol') return ability
+  return {
+    ...ability,
+    statChanges: ability.statChanges.map((m) => ({ ...m, estagios: m.estagios * GROWTH_NO_SOL })),
+  }
+}
+
+function golpeAjustadoPeloClima(ability: Ability, clima: ClimaTipo | null): Ability {
+  if (ability.id !== 'weather_ball' || !clima) return ability
+  const regra = WEATHER_BALL_POR_CLIMA[clima]
+  if (!regra) return ability
+  return { ...ability, type: regra.tipo, power: regra.dobra ? ability.power * 2 : ability.power }
+}
+
 // --- Fase 12: Traits que multiplicam ATAQUE/DEFESA FISICOS -----------------
 //
 // Todas as quatro so mexem no fisico (Gen VII): Huge Power/Pure Power dobram
@@ -389,6 +488,12 @@ export const ESCUDO_ABILITIES: Record<string, keyof Escudos> = {
   wide_guard: 'wideGuard',
 }
 const ESCUDO_DURACAO_TURNOS = 5 // igual aos jogos reais (Gen2-VII, fora de Dobrado item/Light Clay)
+// Clima ligado por GOLPE (Rain Dance/Sunny Day/Hail/Sandstorm). Nos jogos sao 5
+// turnos; aqui sao 10, por decisao do usuario em 2026-08-24 (PH-140) — uma sala
+// dura 30 abates, entao 5 turnos de clima passavam antes de qualquer coisa
+// acontecer. Ao expirar, o clima de AMBIENTE da sala volta; o ceu nao fica
+// limpo (ver systems/climaAmbiente.ts#reporClimaDeAmbiente).
+const CLIMA_DE_GOLPE_TURNOS = 10
 const ESCUDO_DURACAO_SEGUNDOS = ESCUDO_DURACAO_TURNOS * TURNO_SEGUNDOS
 
 // Golpes de disable/lock (imprison/embargo descartados por decisao anterior,
@@ -1182,7 +1287,7 @@ export interface DamageResult {
 // so sabe sortear dentro dela.
 const DANO_VARIACAO_MINIMA = 0.85
 
-function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity, ability: Ability, pessimista = false, clima: ClimaTipo | null = null): DamageResult {
+function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity, abilityBase: Ability, pessimista = false, clima: ClimaTipo | null = null): DamageResult {
   const attackerPoke = attackerEntity.poke
   const defenderPoke = defenderEntity.poke
   const attackerSpecies = SPECIES[attackerPoke.speciesId]
@@ -1191,6 +1296,15 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
   // da funcao ler o valor ja filtrado — ver traitsDoConfronto.
   const { atacante: attackerTrait, defensor: defenderTrait } = traitsDoConfronto(attackerEntity, defenderEntity)
   const climaAtivo = climaEfetivo(clima, { atacante: attackerTrait, defensor: defenderTrait })
+  // WEATHER BALL (PH-140): o clima troca o TIPO e o PODER do golpe, e as duas
+  // coisas precisam valer antes da primeira leitura de `ability.type` — que
+  // vem na proxima linha, na tabela de efetividade. Por isso a substituicao
+  // acontece AQUI e nao mais pra baixo: STAB, imunidade de tipo, Flash Fire e
+  // efetividade tem todos que enxergar o tipo novo.
+  //
+  // `climaEfetivo` e nao `clima` cru: sob Cloud Nine/Air Lock o clima existe
+  // mas nao surte efeito, e Weather Ball volta a ser NORMAL sem bonus.
+  const ability = golpeAjustadoPeloClima(abilityBase, climaAtivo)
   const [defType1, defType2] = tiposEfetivosParaEfetividade(defenderEntity, defenderSpecies)
   let effectivenessMultiplier = efetividadeConsiderandoRevelado(
     getEffectiveness(ability.type, defType1, defType2),
@@ -1291,6 +1405,30 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
     } else if (climaAtivo === 'sol') {
       if (ability.type === 'FIRE') dmg *= CLIMA_MULTIPLICADOR_FAVORECIDO
       else if (ability.type === 'WATER') dmg *= CLIMA_MULTIPLICADOR_DESFAVORECIDO
+    } else if (climaAtivo === 'neve') {
+      // NEVE (Gen 9, PH-140): +50% de DEFESA pra tipos ICE. Defesa, e nao
+      // Defesa Especial — entao so corta golpe FISICO. Aplicado como divisao do
+      // dano em vez de mexer no stat: o pipeline de dano deste motor le
+      // `stats.def` uma vez la em cima, e um buff temporario de stat nao tem
+      // onde morar sem inventar um campo novo.
+      //
+      // E o unico efeito da neve. Ela NAO tira HP por turno — quem faz isso e o
+      // granizo (ver statusSystem#danoDeClimaPorTurno). Confundir os dois e o
+      // erro mais provavel aqui.
+      const ehGelo = defenderSpecies.type === 'ICE' || defenderSpecies.type2 === 'ICE'
+      if (ehGelo && isPhysical) dmg /= NEVE_DEFESA_GELO
+    }
+
+    // SOLAR BEAM sob clima ruim: dano pela metade em QUALQUER clima que nao
+    // seja sol nem ceu limpo — chuva, areia, granizo, neve e nevoa (PH-140).
+    // Generalizado de proposito: a regra dos jogos nunca foi "so na nevoa", e
+    // implementar so o caso novo deixaria o mesmo golpe com fidelidade
+    // diferente dependendo de qual clima estivesse em campo.
+    //
+    // O outro lado da regra (sol dispensa o turno de carga) nao existe aqui:
+    // este motor nao tem golpe de carga nenhum.
+    if (ability.id === 'solar_beam' && climaAtivo != null && climaAtivo !== 'sol') {
+      dmg *= SOLAR_BEAM_SOB_CLIMA_RUIM
     }
 
     // HABILIDADES QUE MEXEM NO DANO JA CALCULADO, depois da efetividade de tipo
@@ -1393,12 +1531,19 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
   }
 }
 
-// Cor do numero de dano segue a efetividade de tipo, nao o crit.
+// Cor do numero de dano segue a efetividade de tipo. O CRITICO nao entra aqui
+// de proposito (PH-131): os dois sao ortogonais — um hit pode ser critico E
+// super efetivo — entao o critico usa canal proprio (tamanho + marca escrita,
+// ver render/sprites.ts#drawDamageNumber) em vez de disputar a cor.
 const EFFECTIVENESS_COLORS: Record<Effectiveness, string> = {
   super: '#ff8c1a',
   effective: '#ffe14d',
   normal: '#ffffff',
-  weak: '#5a5a5a',
+  // Era `#5a5a5a`: cinza escuro com contorno preto sobre cena escura de hunt,
+  // ilegivel justamente no caso que o jogador mais precisa ler ("meu golpe nao
+  // esta funcionando neste inimigo"). Continua o mais apagado da escala — a
+  // leitura de "pouco dano" e o ponto —, agora acima do fundo.
+  weak: '#8b98a8',
   immune: '#000000',
 }
 
@@ -1415,6 +1560,11 @@ function spawnDamageNumber(world: WorldState, target: WorldEntity, result: Damag
     value: result.amount,
     effectiveness: result.effectiveness !== 'normal' ? result.effectiveness : undefined,
     effectivenessLabel: result.effectivenessLabel,
+    // `isCrit` NAO soma raia: a marca de critico sai na MESMA linha do numero
+    // (ver drawDamageNumber). Critico + super efetivo ja seriam 3 linhas de
+    // texto flutuando sobre o alvo, e a raia e espaco disputado com o nome do
+    // golpe e o texto de status.
+    isCrit: result.isCrit || undefined,
     owner: target,
     laneSize: result.effectivenessLabel ? 2 : 1,
   }))
@@ -1772,7 +1922,13 @@ function nearbyAliveEnemies(world: WorldState): EnemyEntity[] {
  * Hustle (Fase 12): +50% de Ataque Fisico custa -20% de precisao nos golpes
  * FISICOS do proprio portador — aplicado ANTES dos estagios de accuracy/evasao.
  */
-function golpeErrou(
+/**
+ * Exportada pra teste (PH-140): a rolagem de acerto acontece no CAST, dentro de
+ * `executePlayerAction`, e nao na resolucao do hit. Um teste que enfileira o
+ * hit direto — como os de dano fazem — PULA a precisao inteira e mediria sempre
+ * acerto, inclusive quando a regra de clima estivesse desligada.
+ */
+export function golpeErrou(
   rng: Rng, ability: Ability, atacante: WorldEntity, defensor: WorldEntity,
   clima: ClimaTipo | null = null,
 ): boolean {
@@ -1782,9 +1938,29 @@ function golpeErrou(
   // DELA quanto dos golpes CONTRA ela — e uma faca de dois gumes, nao um buff.
   if (traitAtk === TRAIT_NO_GUARD || traitDef === TRAIT_NO_GUARD) return false
 
+  // PH-140: o clima manda na precisao antes de qualquer outra coisa.
+  //
+  // `climaEfetivo` e nao `clima` cru: sob Cloud Nine/Air Lock o clima nao surte
+  // efeito nenhum, entao Thunder volta a errar normalmente na chuva.
+  const climaAtivo = climaEfetivo(clima, { atacante: traitAtk, defensor: traitDef })
+
+  // ACERTO GARANTIDO (Thunder/Hurricane na chuva, Blizzard no granizo e na
+  // neve). Sai ANTES de estagios, evasao e neblina de proposito: nos jogos, o
+  // golpe que pula a checagem de precisao pula tudo que mexe nela — inclusive o
+  // x0,6 da neblina e a Evasao do Snow Cloak.
+  if (climaAtivo && GOLPE_NUNCA_ERRA_NO_CLIMA[ability.id]?.includes(climaAtivo)) return false
+
   const isPhysical = resolveAbilityCategory(ability, atacante.poke) === 'physical'
+  // PRECISAO FIXA por clima (Thunder e Hurricane despencam pra 50% sob sol).
+  // Substitui a precisao do catalogo, e nao multiplica: o numero dos jogos e
+  // absoluto. As traits de precisao continuam valendo por cima, igual valeriam
+  // sobre a precisao normal.
+  const regraDePrecisao = PRECISAO_DO_GOLPE_NO_CLIMA[ability.id]
+  const precisaoDeCatalogo = (climaAtivo && regraDePrecisao?.climas.includes(climaAtivo))
+    ? regraDePrecisao.precisao
+    : (ability.accuracy ?? 100)
   // Compound Eyes (1.3x) e Hustle (-20% no fisico) vivem na mesma funcao pura.
-  let precisaoBase = (ability.accuracy ?? 100) * multiplicadorDePrecisaoPorTrait(traitAtk, isPhysical)
+  let precisaoBase = precisaoDeCatalogo * multiplicadorDePrecisaoPorTrait(traitAtk, isPhysical)
   // WONDER SKIN: golpe SEM DANO contra o portador cai pra 50% fixos — o
   // "exatamente 50%" da descricao e um TETO, entao golpe de 30% de precisao
   // continua com 30%.
@@ -1800,13 +1976,20 @@ function golpeErrou(
   let multDefensor = ignoraEvasao ? 1 : multiplicadorDeAccuracyOuEvasion(defensor.estagios.evasion ?? 0)
   if (!ignoraEvasao) {
     // SAND VEIL / SNOW CLOAK: 1.25x de evasao no clima certo.
-    if (traitDef && EVASAO_POR_CLIMA[traitDef] && EVASAO_POR_CLIMA[traitDef] === clima) multDefensor *= 1.25
+    // `includes` e nao igualdade: Snow Cloak vale no granizo E na neve (PH-140).
+    if (traitDef && clima && EVASAO_POR_CLIMA[traitDef]?.includes(clima)) multDefensor *= 1.25
     // TANGLED FEET: evasao DOBRADA enquanto o portador esta confuso — a
     // habilidade transforma o proprio atrapalho em esquiva.
     if (traitDef === TRAIT_TANGLED_FEET && defensor.statusVolatil?.tipo === 'confusion') multDefensor *= 2
   }
 
-  const precisaoEfetiva = precisaoBase * multAtacante / multDefensor
+  // NEVOA (PH-140): precisao de TODO golpe x0,6, dos dois lados. Entra por
+  // ultimo, depois de estagios e evasao, porque e efeito de CAMPO — ele nao
+  // disputa com Sand Veil/Snow Cloak, empilha por cima. Golpe de acerto
+  // garantido ja saiu la em cima e nao chega aqui.
+  const multClima = climaAtivo === 'nevoa' ? NEVOA_PRECISAO : 1
+
+  const precisaoEfetiva = precisaoBase * multAtacante * multClima / multDefensor
   if (precisaoEfetiva >= 100) return false
   return nextFloat(rng) * 100 >= precisaoEfetiva
 }
@@ -2027,6 +2210,22 @@ function curaBloqueada(entity: WorldEntity): boolean {
   return Boolean(entity.curaBloqueadaAte && entity.curaBloqueadaAte > 0)
 }
 
+/**
+ * Procedencia de estagio que o proprio POKE aplicou em si por um golpe de caso
+ * especial (PH-121) — Belly Drum e Acupressure escrevem em `estagios` direto,
+ * sem passar por `aplicarMudancasDeStat`, entao nao ganhariam fonte sozinhos.
+ */
+function registrarFonteDoProprioGolpe(
+  entity: WorldEntity, stat: StatDeEstagio, ability: Ability,
+): void {
+  registrarFonteDeEstagio(entity, stat, {
+    id: ability.id,
+    tipo: 'golpe',
+    proprio: true,
+    deQuem: SPECIES[entity.poke.speciesId]?.name ?? entity.poke.speciesId,
+  })
+}
+
 // Troca os estagios de `stats` entre duas entidades (Guard Swap/Power Swap).
 // `delete` em vez de setar 0 — estagio ausente e estagio 0, mas o objeto fica
 // mais limpo e bate com o resto do codebase (aplicarMudancasDeStat nunca
@@ -2039,6 +2238,16 @@ function trocarEstagios(a: WorldEntity, b: WorldEntity, stats: StatDeEstagio[]):
     else a.estagios[stat] = bv
     if (av === undefined) delete b.estagios[stat]
     else b.estagios[stat] = av
+
+    // A PROCEDENCIA TROCA JUNTO (PH-121). Sem isto o selo mentiria depois de um
+    // Guard Swap: o estagio que veio do outro POKE apareceria explicado pelo
+    // golpe que o dono ANTIGO tinha usado.
+    const af = a.estagiosFonte?.[stat]
+    const bf = b.estagiosFonte?.[stat]
+    if (bf === undefined) { if (a.estagiosFonte) delete a.estagiosFonte[stat] }
+    else (a.estagiosFonte ??= {})[stat] = bf
+    if (af === undefined) { if (b.estagiosFonte) delete b.estagiosFonte[stat] }
+    else (b.estagiosFonte ??= {})[stat] = af
   }
 }
 
@@ -2081,6 +2290,9 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
         // do resto do jogo, que mostra a animacao do golpe independente do
         // resultado (ver announceAbility).
         statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : undefined,
+        // O anel e centrado em quem lancou: se ele anda durante os 1,2s de
+        // animacao, a arte anda junto em vez de ficar plantada onde ele estava.
+        seguir: attacker,
       }))
     }
 
@@ -2226,12 +2438,15 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     // serve de gatilho — nao so o ultimo.
     const gatilhoDeAngerPoint = traitDoAlvo !== 'anger_point' || houveCritico
     if (reacao && tipoBate && categoriaBate && gatilhoDeAngerPoint) {
-      const mudanca = aplicarEstagioUnico(target, reacao.stat as StatDeEstagio, reacao.estagios)
+      // A fonte e a TRAIT do proprio alvo (PH-121): quem produziu o estagio foi
+      // o Weak Armor/Anger Point dele reagindo, nao o golpe que chegou.
+      const fonteDaTrait = fonteDeTrait(target, traitDoAlvo)
+      const mudanca = aplicarEstagioUnico(target, reacao.stat as StatDeEstagio, reacao.estagios, fonteDaTrait)
       if (mudanca && !silent) anunciarEstagios(world, target, [mudanca])
       // WEAK ARMOR e a unica com DOIS lados: sobe Velocidade (acima) e desce
       // Defesa (aqui). Nao cabe na tabela, que so guarda um par stat/estagio.
       if (traitDoAlvo === 'weak_armor') {
-        const queda = aplicarEstagioUnico(target, 'def', -1)
+        const queda = aplicarEstagioUnico(target, 'def', -1, fonteDaTrait)
         if (queda && !silent) anunciarEstagios(world, target, [queda])
       }
     }
@@ -2372,7 +2587,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // e o efeito nao depende do alvo ter sobrevivido.
   const climaDoGolpe = CLIMA_DO_GOLPE[ability.id]
   if (climaDoGolpe) {
-    world.clima = { tipo: climaDoGolpe, turnosRestantes: 5 }
+    world.clima = { tipo: climaDoGolpe, turnosRestantes: CLIMA_DE_GOLPE_TURNOS, origem: 'golpe' }
   }
 
   // Efeito de status DEPOIS do dano, como nos jogos: um golpe que mata nao
@@ -2446,7 +2661,13 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     // Danca das Espadas, o alvo num Rosnado) — mostrar "+Ataque" flutuando
     // sobre o inimigo quando quem se fortaleceu foi voce leria como o contrario
     // do que aconteceu.
-    const mudancas = aplicarMudancasDeStat(world.rng, attacker, target, abilityEfetiva)
+    // PH-140: Growth sobe DOIS estagios sob sol forte, em vez de um. Ajustado
+    // aqui, no golpe que vai ser aplicado, em vez de dentro de
+    // `aplicarMudancasDeStat` — a funcao nao conhece clima, e dar um parametro
+    // de clima a ela espalharia a dependencia por todos os chamadores.
+    const mudancas = aplicarMudancasDeStat(
+      world.rng, attacker, target, golpeDeEstagioAjustadoPeloClima(abilityEfetiva, world.clima, attacker, target),
+    )
     if (mudancas.length) {
       statusRecebeuEm = ability.statTarget === 'self' ? attacker : target
       if (!silent) anunciarEstagios(world, statusRecebeuEm, mudancas)
@@ -2566,7 +2787,16 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // e o "alvo" so existe aqui porque a fila de hits deste motor sempre tem um.
   // Heal Block (Fase 12) trava isto: nao cura nada enquanto ativo.
   if (ability.healPercent && !curaBloqueada(attacker)) {
-    const quanto = Math.max(1, Math.round(attacker.poke.stats.hp * ability.healPercent / 100))
+    // PH-140: Moonlight e Synthesis dependem do clima — 2/3 do HP maximo no
+    // sol, 1/2 com ceu limpo, 1/4 em qualquer outro. O `healPercent` do
+    // catalogo (50) e o caso de ceu limpo, entao o clima entra como
+    // multiplicador e o dado gerado continua sendo a fonte do numero base.
+    //
+    // Recover, Soft-Boiled e o resto dos 10 golpes de cura NAO entram: nos
+    // jogos so a familia "solar" olha pro tempo.
+    const quanto = Math.max(1, Math.round(
+      attacker.poke.stats.hp * ability.healPercent / 100 * multiplicadorDeCuraPorClima(ability, world.clima, attacker, target)
+    ))
     heal(attacker, quanto)
     if (!silent) spawnDamageNumber(world, attacker, { amount: -quanto, effectiveness: 'normal', effectivenessLabel: null, isCrit: false })
   }
@@ -2655,7 +2885,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       // transforma a punicao em buff, e por isso mora aqui dentro e nao num
       // bloco proprio — ela precisa do flinch ter DE FATO acontecido.
       if (traitDef === TRAIT_STEADFAST) {
-        const mudanca = aplicarEstagioUnico(target, 'speed', 1)
+        const mudanca = aplicarEstagioUnico(target, 'speed', 1, fonteDeTrait(target, traitDef))
         if (mudanca && !silent) anunciarEstagios(world, target, [mudanca])
       }
     }
@@ -2797,6 +3027,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       const perda = Math.round(attacker.poke.stats.hp / 2)
       attacker.poke.hp = Math.max(1, attacker.poke.hp - perda)
       attacker.estagios.atkFis = ESTAGIO_MAXIMO
+      registrarFonteDoProprioGolpe(attacker, 'atkFis', ability)
       break
     }
     case 'acupressure': {
@@ -2804,6 +3035,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       const stat = stats[Math.floor(nextFloat(world.rng) * stats.length)]
       const atual = attacker.estagios[stat] ?? 0
       attacker.estagios[stat] = Math.min(ESTAGIO_MAXIMO, atual + 2)
+      registrarFonteDoProprioGolpe(attacker, stat, ability)
       break
     }
     case 'aromatherapy':
@@ -2876,6 +3108,18 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
       elementType: ability.type,
       abilityId: ability.id,
       statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : undefined,
+      // A arte pousa em cima de `local` (o alvo, ou quem de fato recebeu o
+      // status) e acompanha ele pelo 1,0-1,1s que dura.
+      seguir: local,
+      // `anguloDeAtaque` segue congelado pra arte NAO direcional — ele registra
+      // de onde o golpe veio, e girar no meio da animacao nao acrescenta nada
+      // num impacto redondo.
+      //
+      // Arte direcional e outra historia (PH-110): ela e um risco que LIGA
+      // atacante e alvo. Congelar uma ponta e mover a outra descola o rastro do
+      // punho, e o Bullet Punch mostrou isso em jogo. Essas recebem o atacante
+      // e o laco de efeitos reaponta a cada frame.
+      apontarPara: mesmoLugar || !ehDirecional(ability.id) ? undefined : attacker,
     }))
   }
 
@@ -2884,7 +3128,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
   // MOXIE: +1 de Ataque a cada POKE derrubado. Aqui, e nao no tratamento de
   // morte logo abaixo, porque so este ponto sabe QUEM matou.
   if (traitDoPoke(attacker.poke) === TRAIT_MOXIE && !isDead(attacker)) {
-    const mudanca = aplicarEstagioUnico(attacker, 'atkFis', 1)
+    const mudanca = aplicarEstagioUnico(attacker, 'atkFis', 1, fonteDeTrait(attacker, TRAIT_MOXIE))
     if (mudanca && !silent) anunciarEstagios(world, attacker, [mudanca])
   }
 
@@ -2910,10 +3154,11 @@ const TRAIT_CLIMA: Partial<Record<TraitId, ClimaTipo>> = {
 
 // Clima ligado por TRAIT (Drizzle/Sand Stream/Snow Warning/Drought) e
 // INDEFINIDO nos jogos reais — dura ate outra Trait ou golpe de clima
-// substituir, sem contagem de turnos (diferente do clima ligado por GOLPE tipo
-// Rain Dance, que dura 5 turnos e nao existe neste motor ainda). `Infinity` e
-// o mesmo sentinela de "sem timer" que `lastDamageTaken.age` ja usa neste
-// motor (ver engine/entity.ts).
+// substituir, sem contagem de turnos. `Infinity` e o mesmo sentinela de "sem
+// timer" que `lastDamageTaken.age` ja usa neste motor (ver engine/entity.ts).
+//
+// PH-140: com clima de ambiente, `Infinity` deixou de significar "pra sempre" —
+// significa "ate a sala trocar", que e o que derruba qualquer clima agora.
 const CLIMA_DE_TRAIT_TURNOS = Infinity
 
 /**
@@ -2931,13 +3176,15 @@ function resolveEntryHook(world: WorldState, self: WorldEntity, opponent: WorldE
   const climaTipo = TRAIT_CLIMA[trait]
   if (climaTipo) {
     if (world.clima?.tipo !== climaTipo) {
-      world.clima = { tipo: climaTipo, turnosRestantes: CLIMA_DE_TRAIT_TURNOS }
+      world.clima = { tipo: climaTipo, turnosRestantes: CLIMA_DE_TRAIT_TURNOS, origem: 'golpe' }
     }
     return
   }
 
   if (trait === 'intimidate') {
-    const mudanca = aplicarEstagioUnico(opponent, 'atkFis', -1)
+    // Intimidate: a trait e de `self`, o estagio cai no oponente — e por isso que
+    // `fonteDeTrait` recebe os DOIS (proprio: false, e o nome de quem intimidou).
+    const mudanca = aplicarEstagioUnico(opponent, 'atkFis', -1, fonteDeTrait(self, 'intimidate', opponent))
     if (mudanca && !silent) anunciarEstagios(world, opponent, [mudanca])
     return
   }
@@ -2964,7 +3211,7 @@ function resolveEntryHook(world: WorldState, self: WorldEntity, opponent: WorldE
     const defFis = opponentPoke.stats.def * multiplicadorDeStat(opponent.estagios, 'def')
     const defEsp = opponentPoke.stats.defEsp * multiplicadorDeStat(opponent.estagios, 'defEsp')
     const stat: StatDeEstagio = defFis <= defEsp ? 'atkFis' : 'atkEsp'
-    const mudanca = aplicarEstagioUnico(self, stat, 1)
+    const mudanca = aplicarEstagioUnico(self, stat, 1, fonteDeTrait(self, 'download'))
     if (mudanca && !silent) anunciarEstagios(world, self, [mudanca])
   }
 }
@@ -3029,11 +3276,27 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
   }
 
   if (turnoDeClimaFechou && world.clima) {
+    // Clima de ambiente tem `turnosRestantes: Infinity` — decrementar nao muda
+    // nada e a comparacao nunca dispara, entao ele so sai na troca de sala.
     world.clima.turnosRestantes -= 1
-    if (world.clima.turnosRestantes <= 0) world.clima = null
+    // PH-140: expirou o clima de golpe, o do LUGAR volta. Zerar aqui deixaria o
+    // deserto sem areia pelo resto da sala por causa de um Rain Dance.
+    if (world.clima.turnosRestantes <= 0) reporClimaDeAmbiente(world)
   }
 
-  for (const effect of world.effects) tickEffect(effect, dt)
+  for (const effect of world.effects) {
+    tickEffect(effect, dt)
+    // Depois do movimento deste frame ja ter rodado, senao a arte andaria um
+    // frame atras do POKE.
+    if (effect.seguirId) seguirDono(effect, findEntityById(player, enemies, effect.seguirId))
+    // DEPOIS do `seguirDono`, e nao antes: o reapontamento le a posicao ja
+    // transladada do efeito. Invertido, o angulo sairia calculado contra a
+    // posicao do frame anterior — um frame de erro a cada frame, que num golpe
+    // rapido e o bastante pra o rastro tremer.
+    if (effect.apontarParaId) {
+      reapontarParaAtacante(effect, findEntityById(player, enemies, effect.apontarParaId))
+    }
+  }
   for (const effect of world.effects) {
     if (effectDone(effect) && effect.ownerId) {
       const owner = findEntityById(player, enemies, effect.ownerId)
@@ -3083,6 +3346,14 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
   }
 
   const engagedEnemies = enemies.filter((e) => !isDead(e) && e.state === 'engaged' && e.targetId === player.id)
+  // PH-132: quem o jogador esta enfrentando AGORA, publicado pra tela poder
+  // mostrar os efeitos do alvo. O motor ja escolhia este inimigo todo tick
+  // (`engagedEnemies[0]` e o `primaryTarget` de executePlayerAction) e jogava a
+  // informacao fora; a alternativa era o HUD recalcular a mesma regra de
+  // proximidade e engajamento por conta propria, que e duas fontes de verdade
+  // pra mesma pergunta. Ninguem no motor le `player.targetId` (so o `targetId`
+  // DOS INIMIGOS e lido, no filtro logo acima), entao isto nao muda combate.
+  player.targetId = engagedEnemies[0]?.id ?? null
 
   if (engagedEnemies.length > 0) {
     const primaryTarget = engagedEnemies[0]
@@ -3124,7 +3395,11 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
     // nao dentro de `limparEstadoVolatil` (que so mexe em campos de
     // WorldEntity). Mesmo ponto porque e aqui que "fim de batalha" e
     // detectado e quem chama ja tem `world` em maos.
-    world.clima = null
+    //
+    // PH-140: "reset" agora e VOLTAR AO AMBIENTE, nao zerar. O clima do lugar
+    // nao acaba porque uma batalha acabou — ele vale a sala inteira, e a sala
+    // dura 30 abates. Só o que veio de golpe/trait e que morre aqui.
+    reporClimaDeAmbiente(world)
   }
 
   return { defeatedEnemyIds, playerJustFainted }

@@ -106,6 +106,24 @@ export type Database = {
         }
         Relationships: []
       }
+      blocks: {
+        Row: {
+          bloqueado_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          bloqueado_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          bloqueado_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           anexos: Json
@@ -467,12 +485,14 @@ export type Database = {
         Row: {
           anexo_coletado_em: string | null
           anexo_itens: Json
-          assunto: string
+          assunto: string | null
           corpo: string
           created_at: string
           de_id: string | null
           de_nome: string
           estado: string
+          excluido_destinatario_em: string | null
+          excluido_remetente_em: string | null
           id: string
           para_id: string
           read_at: string | null
@@ -481,12 +501,14 @@ export type Database = {
         Insert: {
           anexo_coletado_em?: string | null
           anexo_itens?: Json
-          assunto: string
+          assunto?: string | null
           corpo?: string
           created_at?: string
           de_id?: string | null
           de_nome: string
           estado?: string
+          excluido_destinatario_em?: string | null
+          excluido_remetente_em?: string | null
           id?: string
           para_id: string
           read_at?: string | null
@@ -495,12 +517,14 @@ export type Database = {
         Update: {
           anexo_coletado_em?: string | null
           anexo_itens?: Json
-          assunto?: string
+          assunto?: string | null
           corpo?: string
           created_at?: string
           de_id?: string | null
           de_nome?: string
           estado?: string
+          excluido_destinatario_em?: string | null
+          excluido_remetente_em?: string | null
           id?: string
           para_id?: string
           read_at?: string | null
@@ -631,10 +655,14 @@ export type Database = {
           buyer_id: string | null
           created_at: string
           currency: string
+          expira_em: string | null
           id: string
+          incremento_minimo: number | null
           is_shiny: boolean
           iv_percent: number
+          lance_minimo: number | null
           level: number
+          modo: string
           poke_uid: string | null
           price: number | null
           rarity: Database["dev"]["Enums"]["rarity_tier"]
@@ -648,10 +676,14 @@ export type Database = {
           buyer_id?: string | null
           created_at?: string
           currency: string
+          expira_em?: string | null
           id?: string
+          incremento_minimo?: number | null
           is_shiny?: boolean
           iv_percent?: number
+          lance_minimo?: number | null
           level: number
+          modo?: string
           poke_uid?: string | null
           price?: number | null
           rarity: Database["dev"]["Enums"]["rarity_tier"]
@@ -665,10 +697,14 @@ export type Database = {
           buyer_id?: string | null
           created_at?: string
           currency?: string
+          expira_em?: string | null
           id?: string
+          incremento_minimo?: number | null
           is_shiny?: boolean
           iv_percent?: number
+          lance_minimo?: number | null
           level?: number
+          modo?: string
           poke_uid?: string | null
           price?: number | null
           rarity?: Database["dev"]["Enums"]["rarity_tier"]
@@ -795,6 +831,7 @@ export type Database = {
           quantity: number
           seller_id: string | null
           species_id: string | null
+          taxa: number
           unit_price: number
         }
         Insert: {
@@ -807,6 +844,7 @@ export type Database = {
           quantity?: number
           seller_id?: string | null
           species_id?: string | null
+          taxa?: number
           unit_price: number
         }
         Update: {
@@ -819,6 +857,7 @@ export type Database = {
           quantity?: number
           seller_id?: string | null
           species_id?: string | null
+          taxa?: number
           unit_price?: number
         }
         Relationships: []
@@ -1314,6 +1353,48 @@ export type Database = {
           },
         ]
       }
+      species_evolution_options: {
+        Row: {
+          evolves_at_level: number
+          evolves_to: string
+          is_special_evolution: boolean
+          ordem: number
+          species_id: string
+          stone_type: Database["dev"]["Enums"]["element_type"] | null
+        }
+        Insert: {
+          evolves_at_level: number
+          evolves_to: string
+          is_special_evolution?: boolean
+          ordem?: number
+          species_id: string
+          stone_type?: Database["dev"]["Enums"]["element_type"] | null
+        }
+        Update: {
+          evolves_at_level?: number
+          evolves_to?: string
+          is_special_evolution?: boolean
+          ordem?: number
+          species_id?: string
+          stone_type?: Database["dev"]["Enums"]["element_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "species_evolution_options_evolves_to_fkey"
+            columns: ["evolves_to"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "species_evolution_options_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       species_moves: {
         Row: {
           level_req: number
@@ -1350,6 +1431,24 @@ export type Database = {
           },
         ]
       }
+      tempo_jogado_arquivado: {
+        Row: {
+          atualizado_em: string
+          segundos: number
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          segundos?: number
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          segundos?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       type_chart: {
         Row: {
           attacking_type: Database["dev"]["Enums"]["element_type"]
@@ -1376,11 +1475,15 @@ export type Database = {
           buyer_id: string | null
           created_at: string | null
           currency: string | null
+          expira_em: string | null
           id: string | null
+          incremento_minimo: number | null
           is_shiny: boolean | null
           iv_percent: number | null
+          lance_minimo: number | null
           level: number | null
           melhor_oferta: number | null
+          modo: string | null
           ofertas: number | null
           poke_uid: string | null
           price: number | null
@@ -1407,6 +1510,32 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mercado_historico_itens: {
+        Row: {
+          currency: string | null
+          dia: string | null
+          item_id: string | null
+          maximo: number | null
+          mediana: number | null
+          minimo: number | null
+          negocios: number | null
+          volume: number | null
+        }
+        Relationships: []
+      }
+      mercado_historico_pokes: {
+        Row: {
+          currency: string | null
+          dia: string | null
+          maximo: number | null
+          mediana: number | null
+          minimo: number | null
+          negocios: number | null
+          species_id: string | null
+          volume: number | null
+        }
+        Relationships: []
       }
       mercado_ofertas_recebidas: {
         Row: {
@@ -1440,6 +1569,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mercado_resumo_historico_itens: {
+        Row: {
+          currency: string | null
+          item_id: string | null
+          mediana_24h: number | null
+          mediana_7d: number | null
+          negocios_30d: number | null
+          volume_24h: number | null
+          volume_30d: number | null
+        }
+        Relationships: []
+      }
+      mercado_resumo_historico_pokes: {
+        Row: {
+          currency: string | null
+          mediana_24h: number | null
+          mediana_7d: number | null
+          negocios_30d: number | null
+          species_id: string | null
+          volume_24h: number | null
+          volume_30d: number | null
+        }
+        Relationships: []
       }
       mercado_resumo_itens: {
         Row: {
@@ -1539,27 +1692,55 @@ export type Database = {
         }
         Returns: number
       }
-      _calcular_stats: {
-        Args: {
-          p_is_shiny: boolean
-          p_iv_atk_esp: number
-          p_iv_atk_fis: number
-          p_iv_def: number
-          p_iv_def_esp: number
-          p_iv_hp: number
-          p_iv_speed: number
-          p_level: number
-          p_rarity: string
-          p_species: Database["dev"]["Tables"]["species"]["Row"]
-        }
-        Returns: {
-          stat_atk_esp: number
-          stat_atk_fis: number
-          stat_def: number
-          stat_def_esp: number
-          stat_hp: number
-          stat_speed: number
-        }[]
+      _calcular_stats:
+        | {
+            Args: {
+              p_is_shiny: boolean
+              p_iv_atk_esp: number
+              p_iv_atk_fis: number
+              p_iv_def: number
+              p_iv_def_esp: number
+              p_iv_hp: number
+              p_iv_speed: number
+              p_level: number
+              p_rarity: string
+              p_species: Database["dev"]["Tables"]["species"]["Row"]
+            }
+            Returns: {
+              stat_atk_esp: number
+              stat_atk_fis: number
+              stat_def: number
+              stat_def_esp: number
+              stat_hp: number
+              stat_speed: number
+            }[]
+          }
+        | {
+            Args: {
+              p_is_shiny: boolean
+              p_iv_atk_esp: number
+              p_iv_atk_fis: number
+              p_iv_def: number
+              p_iv_def_esp: number
+              p_iv_hp: number
+              p_iv_speed: number
+              p_level: number
+              p_nature: string
+              p_rarity: string
+              p_species: Database["dev"]["Tables"]["species"]["Row"]
+            }
+            Returns: {
+              stat_atk_esp: number
+              stat_atk_fis: number
+              stat_def: number
+              stat_def_esp: number
+              stat_hp: number
+              stat_speed: number
+            }[]
+          }
+      _mult_natureza: {
+        Args: { p_nature: string; p_stat: string }
+        Returns: number
       }
       _valor_venda_poke: {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
@@ -1571,6 +1752,7 @@ export type Database = {
       }
       alternar_trava_item: { Args: { p_item_id: string }; Returns: Json }
       alternar_trava_poke: { Args: { p_poke_id: string }; Returns: Json }
+      amigos_detalhados: { Args: never; Returns: Json }
       anunciar_poke: {
         Args: {
           p_apenas_oferta: boolean
@@ -1580,6 +1762,8 @@ export type Database = {
         }
         Returns: Json
       }
+      bloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
+      bloqueio_entre: { Args: { p_a: string; p_b: string }; Returns: boolean }
       cancelar_anuncio: { Args: { p_anuncio_id: string }; Returns: Json }
       cancelar_oferta: { Args: { p_oferta_id: string }; Returns: Json }
       cancelar_ordem_mercado: { Args: { p_ordem_id: string }; Returns: Json }
@@ -1597,6 +1781,17 @@ export type Database = {
         }[]
       }
       configurar_auto: { Args: { p_patch: Json }; Returns: Json }
+      conversas: { Args: never; Returns: Json }
+      criar_leilao: {
+        Args: {
+          p_currency: string
+          p_horas: number
+          p_incremento_minimo: number
+          p_lance_minimo: number
+          p_poke_id: string
+        }
+        Returns: Json
+      }
       criar_ordem_mercado: {
         Args: {
           p_item_id: string
@@ -1607,6 +1802,10 @@ export type Database = {
         Returns: Json
       }
       curar_equipe: { Args: never; Returns: Json }
+      dar_lance: {
+        Args: { p_anuncio_id: string; p_valor: number }
+        Returns: Json
+      }
       definir_ativo: { Args: { p_poke_id: string }; Returns: Json }
       definir_golpes_ativos: {
         Args: { p_ability_ids: string[]; p_poke_id: string }
@@ -1614,8 +1813,24 @@ export type Database = {
       }
       definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
+      desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
+      encerrar_leiloes_vencidos: { Args: { p_limite?: number }; Returns: Json }
+      enviar_mensagem: {
+        Args: {
+          p_anexos?: Json
+          p_corpo: string
+          p_para_id?: string
+          p_para_nick?: string
+        }
+        Returns: Json
+      }
       escolher_starter: { Args: { p_species_id: string }; Returns: Json }
-      evoluir_poke: { Args: { p_poke_id: string }; Returns: Json }
+      esta_online: { Args: { p_user_id: string }; Returns: boolean }
+      evoluir_poke:
+        | { Args: { p_poke_id: string }; Returns: Json }
+        | { Args: { p_alvo?: string; p_poke_id: string }; Returns: Json }
+      excluir_conversa: { Args: { p_contato_id: string }; Returns: Json }
+      excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
       gravar_progresso: {
         Args: {
           p_patch: Json
@@ -1627,6 +1842,7 @@ export type Database = {
       hunts_iniciais: { Args: never; Returns: string[] }
       id_por_nome_de_treinador: { Args: { nome: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
+      marcar_conversa_lida: { Args: { p_contato_id: string }; Returns: Json }
       marcar_correio_lido: { Args: { p_mensagem_id: string }; Returns: Json }
       meu_perfil: { Args: never; Returns: Json }
       nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
@@ -1635,6 +1851,7 @@ export type Database = {
         Returns: Json
       }
       pedir_amizade: { Args: { p_nick: string }; Returns: Json }
+      perfil_publico: { Args: { p_user_id: string }; Returns: Json }
       por_na_equipe: { Args: { p_poke_id: string }; Returns: Json }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
@@ -1650,6 +1867,8 @@ export type Database = {
         Returns: undefined
       }
       reiniciar_jogo: { Args: never; Returns: undefined }
+      remover_amizade: { Args: { p_amigo_id: string }; Returns: Json }
+      reordenar_equipe: { Args: { p_ordem: string[] }; Returns: Json }
       responder_oferta: {
         Args: { p_aceitar: boolean; p_oferta_id: string }
         Returns: Json
@@ -1658,6 +1877,11 @@ export type Database = {
         Args: { p_aceitar: boolean; p_mensagem_id: string }
         Returns: Json
       }
+      taxa_de_venda: {
+        Args: { p_currency: string; p_valor: number }
+        Returns: number
+      }
+      taxa_do_mercado: { Args: never; Returns: Json }
       tem_outra_sessao_de_auth_ativa: { Args: never; Returns: boolean }
       tirar_da_equipe: { Args: { p_poke_id: string }; Returns: Json }
       usar_item: { Args: { p_item_id: string }; Returns: Json }
@@ -1869,6 +2093,24 @@ export type Database = {
           id?: string
           processando_desde?: string | null
           ultimo_processado?: string
+        }
+        Relationships: []
+      }
+      blocks: {
+        Row: {
+          bloqueado_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          bloqueado_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          bloqueado_id?: string
+          created_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -2233,12 +2475,14 @@ export type Database = {
         Row: {
           anexo_coletado_em: string | null
           anexo_itens: Json
-          assunto: string
+          assunto: string | null
           corpo: string
           created_at: string
           de_id: string | null
           de_nome: string
           estado: string
+          excluido_destinatario_em: string | null
+          excluido_remetente_em: string | null
           id: string
           para_id: string
           read_at: string | null
@@ -2247,12 +2491,14 @@ export type Database = {
         Insert: {
           anexo_coletado_em?: string | null
           anexo_itens?: Json
-          assunto: string
+          assunto?: string | null
           corpo?: string
           created_at?: string
           de_id?: string | null
           de_nome: string
           estado?: string
+          excluido_destinatario_em?: string | null
+          excluido_remetente_em?: string | null
           id?: string
           para_id: string
           read_at?: string | null
@@ -2261,12 +2507,14 @@ export type Database = {
         Update: {
           anexo_coletado_em?: string | null
           anexo_itens?: Json
-          assunto?: string
+          assunto?: string | null
           corpo?: string
           created_at?: string
           de_id?: string | null
           de_nome?: string
           estado?: string
+          excluido_destinatario_em?: string | null
+          excluido_remetente_em?: string | null
           id?: string
           para_id?: string
           read_at?: string | null
@@ -2397,10 +2645,14 @@ export type Database = {
           buyer_id: string | null
           created_at: string
           currency: string
+          expira_em: string | null
           id: string
+          incremento_minimo: number | null
           is_shiny: boolean
           iv_percent: number
+          lance_minimo: number | null
           level: number
+          modo: string
           poke_uid: string | null
           price: number | null
           rarity: Database["public"]["Enums"]["rarity_tier"]
@@ -2414,10 +2666,14 @@ export type Database = {
           buyer_id?: string | null
           created_at?: string
           currency: string
+          expira_em?: string | null
           id?: string
+          incremento_minimo?: number | null
           is_shiny?: boolean
           iv_percent?: number
+          lance_minimo?: number | null
           level: number
+          modo?: string
           poke_uid?: string | null
           price?: number | null
           rarity: Database["public"]["Enums"]["rarity_tier"]
@@ -2431,10 +2687,14 @@ export type Database = {
           buyer_id?: string | null
           created_at?: string
           currency?: string
+          expira_em?: string | null
           id?: string
+          incremento_minimo?: number | null
           is_shiny?: boolean
           iv_percent?: number
+          lance_minimo?: number | null
           level?: number
+          modo?: string
           poke_uid?: string | null
           price?: number | null
           rarity?: Database["public"]["Enums"]["rarity_tier"]
@@ -2561,6 +2821,7 @@ export type Database = {
           quantity: number
           seller_id: string | null
           species_id: string | null
+          taxa: number
           unit_price: number
         }
         Insert: {
@@ -2573,6 +2834,7 @@ export type Database = {
           quantity?: number
           seller_id?: string | null
           species_id?: string | null
+          taxa?: number
           unit_price: number
         }
         Update: {
@@ -2585,6 +2847,7 @@ export type Database = {
           quantity?: number
           seller_id?: string | null
           species_id?: string | null
+          taxa?: number
           unit_price?: number
         }
         Relationships: []
@@ -3080,6 +3343,48 @@ export type Database = {
           },
         ]
       }
+      species_evolution_options: {
+        Row: {
+          evolves_at_level: number
+          evolves_to: string
+          is_special_evolution: boolean
+          ordem: number
+          species_id: string
+          stone_type: Database["public"]["Enums"]["element_type"] | null
+        }
+        Insert: {
+          evolves_at_level: number
+          evolves_to: string
+          is_special_evolution?: boolean
+          ordem?: number
+          species_id: string
+          stone_type?: Database["public"]["Enums"]["element_type"] | null
+        }
+        Update: {
+          evolves_at_level?: number
+          evolves_to?: string
+          is_special_evolution?: boolean
+          ordem?: number
+          species_id?: string
+          stone_type?: Database["public"]["Enums"]["element_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "species_evolution_options_evolves_to_fkey"
+            columns: ["evolves_to"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "species_evolution_options_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       species_moves: {
         Row: {
           level_req: number
@@ -3116,6 +3421,24 @@ export type Database = {
           },
         ]
       }
+      tempo_jogado_arquivado: {
+        Row: {
+          atualizado_em: string
+          segundos: number
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          segundos?: number
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          segundos?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       type_chart: {
         Row: {
           attacking_type: Database["public"]["Enums"]["element_type"]
@@ -3142,11 +3465,15 @@ export type Database = {
           buyer_id: string | null
           created_at: string | null
           currency: string | null
+          expira_em: string | null
           id: string | null
+          incremento_minimo: number | null
           is_shiny: boolean | null
           iv_percent: number | null
+          lance_minimo: number | null
           level: number | null
           melhor_oferta: number | null
+          modo: string | null
           ofertas: number | null
           poke_uid: string | null
           price: number | null
@@ -3173,6 +3500,32 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mercado_historico_itens: {
+        Row: {
+          currency: string | null
+          dia: string | null
+          item_id: string | null
+          maximo: number | null
+          mediana: number | null
+          minimo: number | null
+          negocios: number | null
+          volume: number | null
+        }
+        Relationships: []
+      }
+      mercado_historico_pokes: {
+        Row: {
+          currency: string | null
+          dia: string | null
+          maximo: number | null
+          mediana: number | null
+          minimo: number | null
+          negocios: number | null
+          species_id: string | null
+          volume: number | null
+        }
+        Relationships: []
       }
       mercado_ofertas_recebidas: {
         Row: {
@@ -3206,6 +3559,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mercado_resumo_historico_itens: {
+        Row: {
+          currency: string | null
+          item_id: string | null
+          mediana_24h: number | null
+          mediana_7d: number | null
+          negocios_30d: number | null
+          volume_24h: number | null
+          volume_30d: number | null
+        }
+        Relationships: []
+      }
+      mercado_resumo_historico_pokes: {
+        Row: {
+          currency: string | null
+          mediana_24h: number | null
+          mediana_7d: number | null
+          negocios_30d: number | null
+          species_id: string | null
+          volume_24h: number | null
+          volume_30d: number | null
+        }
+        Relationships: []
       }
       mercado_resumo_itens: {
         Row: {
@@ -3305,27 +3682,55 @@ export type Database = {
         }
         Returns: number
       }
-      _calcular_stats: {
-        Args: {
-          p_is_shiny: boolean
-          p_iv_atk_esp: number
-          p_iv_atk_fis: number
-          p_iv_def: number
-          p_iv_def_esp: number
-          p_iv_hp: number
-          p_iv_speed: number
-          p_level: number
-          p_rarity: string
-          p_species: Database["public"]["Tables"]["species"]["Row"]
-        }
-        Returns: {
-          stat_atk_esp: number
-          stat_atk_fis: number
-          stat_def: number
-          stat_def_esp: number
-          stat_hp: number
-          stat_speed: number
-        }[]
+      _calcular_stats:
+        | {
+            Args: {
+              p_is_shiny: boolean
+              p_iv_atk_esp: number
+              p_iv_atk_fis: number
+              p_iv_def: number
+              p_iv_def_esp: number
+              p_iv_hp: number
+              p_iv_speed: number
+              p_level: number
+              p_rarity: string
+              p_species: Database["public"]["Tables"]["species"]["Row"]
+            }
+            Returns: {
+              stat_atk_esp: number
+              stat_atk_fis: number
+              stat_def: number
+              stat_def_esp: number
+              stat_hp: number
+              stat_speed: number
+            }[]
+          }
+        | {
+            Args: {
+              p_is_shiny: boolean
+              p_iv_atk_esp: number
+              p_iv_atk_fis: number
+              p_iv_def: number
+              p_iv_def_esp: number
+              p_iv_hp: number
+              p_iv_speed: number
+              p_level: number
+              p_nature: string
+              p_rarity: string
+              p_species: Database["public"]["Tables"]["species"]["Row"]
+            }
+            Returns: {
+              stat_atk_esp: number
+              stat_atk_fis: number
+              stat_def: number
+              stat_def_esp: number
+              stat_hp: number
+              stat_speed: number
+            }[]
+          }
+      _mult_natureza: {
+        Args: { p_nature: string; p_stat: string }
+        Returns: number
       }
       _valor_venda_poke: {
         Args: { p_base_exp: number; p_level: number; p_rarity: string }
@@ -3337,6 +3742,7 @@ export type Database = {
       }
       alternar_trava_item: { Args: { p_item_id: string }; Returns: Json }
       alternar_trava_poke: { Args: { p_poke_id: string }; Returns: Json }
+      amigos_detalhados: { Args: never; Returns: Json }
       anunciar_poke: {
         Args: {
           p_apenas_oferta: boolean
@@ -3346,6 +3752,8 @@ export type Database = {
         }
         Returns: Json
       }
+      bloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
+      bloqueio_entre: { Args: { p_a: string; p_b: string }; Returns: boolean }
       cancelar_anuncio: { Args: { p_anuncio_id: string }; Returns: Json }
       cancelar_oferta: { Args: { p_oferta_id: string }; Returns: Json }
       cancelar_ordem_mercado: { Args: { p_ordem_id: string }; Returns: Json }
@@ -3363,6 +3771,17 @@ export type Database = {
         }[]
       }
       configurar_auto: { Args: { p_patch: Json }; Returns: Json }
+      conversas: { Args: never; Returns: Json }
+      criar_leilao: {
+        Args: {
+          p_currency: string
+          p_horas: number
+          p_incremento_minimo: number
+          p_lance_minimo: number
+          p_poke_id: string
+        }
+        Returns: Json
+      }
       criar_ordem_mercado: {
         Args: {
           p_item_id: string
@@ -3373,6 +3792,10 @@ export type Database = {
         Returns: Json
       }
       curar_equipe: { Args: never; Returns: Json }
+      dar_lance: {
+        Args: { p_anuncio_id: string; p_valor: number }
+        Returns: Json
+      }
       definir_ativo: { Args: { p_poke_id: string }; Returns: Json }
       definir_golpes_ativos: {
         Args: { p_ability_ids: string[]; p_poke_id: string }
@@ -3380,8 +3803,24 @@ export type Database = {
       }
       definir_nome_do_treinador: { Args: { p_nome: string }; Returns: Json }
       desbloquear_hunt: { Args: { p_map_id: string }; Returns: Json }
+      desbloquear_jogador: { Args: { p_alvo_id: string }; Returns: Json }
+      encerrar_leiloes_vencidos: { Args: { p_limite?: number }; Returns: Json }
+      enviar_mensagem: {
+        Args: {
+          p_anexos?: Json
+          p_corpo: string
+          p_para_id?: string
+          p_para_nick?: string
+        }
+        Returns: Json
+      }
       escolher_starter: { Args: { p_species_id: string }; Returns: Json }
-      evoluir_poke: { Args: { p_poke_id: string }; Returns: Json }
+      esta_online: { Args: { p_user_id: string }; Returns: boolean }
+      evoluir_poke:
+        | { Args: { p_poke_id: string }; Returns: Json }
+        | { Args: { p_alvo?: string; p_poke_id: string }; Returns: Json }
+      excluir_conversa: { Args: { p_contato_id: string }; Returns: Json }
+      excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
       gravar_progresso: {
         Args: {
           p_patch: Json
@@ -3393,6 +3832,7 @@ export type Database = {
       hunts_iniciais: { Args: never; Returns: string[] }
       id_por_nome_de_treinador: { Args: { nome: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
+      marcar_conversa_lida: { Args: { p_contato_id: string }; Returns: Json }
       marcar_correio_lido: { Args: { p_mensagem_id: string }; Returns: Json }
       meu_perfil: { Args: never; Returns: Json }
       nome_de_treinador_disponivel: { Args: { nome: string }; Returns: boolean }
@@ -3401,6 +3841,7 @@ export type Database = {
         Returns: Json
       }
       pedir_amizade: { Args: { p_nick: string }; Returns: Json }
+      perfil_publico: { Args: { p_user_id: string }; Returns: Json }
       por_na_equipe: { Args: { p_poke_id: string }; Returns: Json }
       recusar_ofertas_pendentes: {
         Args: { p_anuncio_id: string; p_exceto?: string; p_motivo: string }
@@ -3416,6 +3857,8 @@ export type Database = {
         Returns: undefined
       }
       reiniciar_jogo: { Args: never; Returns: undefined }
+      remover_amizade: { Args: { p_amigo_id: string }; Returns: Json }
+      reordenar_equipe: { Args: { p_ordem: string[] }; Returns: Json }
       responder_oferta: {
         Args: { p_aceitar: boolean; p_oferta_id: string }
         Returns: Json
@@ -3424,6 +3867,11 @@ export type Database = {
         Args: { p_aceitar: boolean; p_mensagem_id: string }
         Returns: Json
       }
+      taxa_de_venda: {
+        Args: { p_currency: string; p_valor: number }
+        Returns: number
+      }
+      taxa_do_mercado: { Args: never; Returns: Json }
       tem_outra_sessao_de_auth_ativa: { Args: never; Returns: boolean }
       tirar_da_equipe: { Args: { p_poke_id: string }; Returns: Json }
       usar_item: { Args: { p_item_id: string }; Returns: Json }

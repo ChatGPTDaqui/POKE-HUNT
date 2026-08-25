@@ -175,6 +175,44 @@ export type StatDeEstagio = 'atkFis' | 'atkEsp' | 'def' | 'defEsp' | 'speed' | '
 export type EstagiosDeStat = Partial<Record<StatDeEstagio, number>>
 
 /**
+ * De onde saiu um estagio de atributo (PH-121).
+ *
+ * `estagios` guarda QUANTOS degraus, e so isso — o selo do HUD podia dizer
+ * "Ataque −2" e nada mais. "De quem" e a metade util da informacao: baixar o
+ * proprio Ataque (Hammer Arm) e levar Rosnado de um Rattata sao situacoes
+ * diferentes, e a tela mostrava as duas igual.
+ *
+ * COSMETICO. Nenhuma regra de combate le isto — `multiplicadorDeStat` continua
+ * lendo so `estagios`. Mora na entidade porque e ali que a informacao existe no
+ * instante em que o estagio e aplicado; recalcular depois e impossivel.
+ */
+export interface FonteDeEstagio {
+  /** Id do golpe, ou da trait quando veio de hook de entrada (Intimidate). */
+  id: string
+  /** Se e golpe ou trait — decide como a tela resolve o nome de `id`. */
+  tipo: 'golpe' | 'trait'
+  /**
+   * `true` = o proprio POKE fez isso em si mesmo (Danca das Espadas, Hammer
+   * Arm). `false` = veio do oponente.
+   */
+  proprio: boolean
+  /**
+   * Nome da ESPECIE de quem causou. E o unico "quem" que existe numa hunt:
+   * nao ha treinador adversario, so POKE selvagem.
+   */
+  deQuem: string
+}
+
+/**
+ * Fontes por atributo. LISTA, e nao a ultima fonte: quando dois golpes mexem no
+ * mesmo atributo, sobrescrever apagaria metade da resposta — "Ataque +1" pode
+ * ser Danca das Espadas (+2) mais um Rosnado (−1), e as duas linhas importam.
+ * `registrarFonteDeEstagio` deduplica, entao a lista fica do tamanho do numero
+ * de golpes distintos em jogo.
+ */
+export type EstagiosFonte = Partial<Record<StatDeEstagio, FonteDeEstagio[]>>
+
+/**
  * Multiplicador de um estagio, formula exata dos jogos: (2+n)/2 subindo e
  * 2/(2-n) descendo.
  *

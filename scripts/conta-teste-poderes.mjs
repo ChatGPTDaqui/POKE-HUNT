@@ -45,8 +45,9 @@
 import { readFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { dirname, join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { resolverSchema, cabecalhosRest } from './lib/schema-alvo.cjs';
+import { carregarMotor } from './lib/motor.mjs';
 
 const RAIZ = dirname(dirname(fileURLToPath(import.meta.url)));
 const DOMINIO = '@teste.pokehunt.local';
@@ -142,9 +143,7 @@ async function main() {
   console.log(`Banco:  ${env.SUPABASE_URL}`);
   console.log(`Schema: ${SCHEMA}`);
   console.log(`Conta:  ${email}`);
-  // `pathToFileURL` e obrigatorio no Windows: o import() dinamico do Node
-  // interpreta "C:\..." como um esquema de URL chamado "c:" e recusa.
-  const motor = await import(pathToFileURL(join(RAIZ, 'authority', 'engine', 'headless.js')).href);
+  const motor = await carregarMotor();
   const { createPokeInstance, createRng, totalExpForLevel, ITEMS, MAPS, FAIXAS, GRUPOS_DO_LANCE } = motor;
 
   const conta = await acharConta(env, email);

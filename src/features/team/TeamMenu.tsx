@@ -2,8 +2,10 @@
 // dele param a propagacao.
 import { SPECIES } from '@/data/pokes'
 import { stoneName } from '@/data/stones'
-import { canEvolve, evolutionStoneRequirement, expProgressForInstance } from '@/engine/systems/progressionSystem'
+import { canEvolve, evolutionStoneRequirement, expProgressForInstance, opcoesDisponiveis } from '@/engine/systems/progressionSystem'
+import { EscolhaDeEvolucao } from '@/components/modals/EscolhaDeEvolucao'
 import { controller } from '@/engine/controller'
+import { useState } from 'react'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { usePokeProfileStore } from '@/stores/pokeProfileStore'
@@ -29,13 +31,30 @@ export function TeamMenu() {
   const showProfile = usePokeProfileStore((s) => s.showProfile)
   const acao = useAcaoPendente()
   const { compacto } = useDeviceMode()
+  // PH-139: uid do POKE cuja escolha de evolucao esta aberta, ou null.
+  const [escolhendo, setEscolhendo] = useState<string | null>(null)
 
   if (team.length === 0) {
     return <p className="text-n500">Voce ainda nao tem nenhum POKE.</p>
   }
 
+  const pokeEscolhendo = team.find((p) => p.uid === escolhendo)
+  const especieEscolhendo = pokeEscolhendo ? SPECIES[pokeEscolhendo.speciesId] : null
+
   return (
     <div className="flex flex-col gap-[.3em]">
+      {pokeEscolhendo && especieEscolhendo && (
+        <EscolhaDeEvolucao
+          poke={pokeEscolhendo}
+          opcoes={opcoesDisponiveis(pokeEscolhendo, especieEscolhendo)}
+          requisito={(o) => evolutionStoneRequirement(especieEscolhendo, o)}
+          onEscolher={(alvo) => {
+            setEscolhendo(null)
+            void acao.run(`evo:${pokeEscolhendo.uid}`, () => controller.evolvePoke(pokeEscolhendo.uid, alvo))
+          }}
+          onCancelar={() => setEscolhendo(null)}
+        />
+      )}
       {team.map((poke, index) => {
         const species = SPECIES[poke.speciesId]
         // Guard herdado do vanilla: um unico POKE com especie invalida (save
@@ -46,7 +65,8 @@ export function TeamMenu() {
         }
         const isActive = index === activeIndex
         const progress = expProgressForInstance(poke, species)
-        const stoneReq = evolutionStoneRequirement(species)
+        const opcoesDeEvo = opcoesDisponiveis(poke, species)
+        const stoneReq = evolutionStoneRequirement(species, opcoesDeEvo[0])
         const hpPct = (poke.hp / poke.stats.hp) * 100
         const canRemove = team.length > 1
 
@@ -78,10 +98,14 @@ export function TeamMenu() {
                     disabled={acao.isPending(`evo:${poke.uid}`)}
                     onClick={(e) => {
                       e.stopPropagation()
+                      // PH-139: com mais de um destino, quem decide e o jogador.
+                      if (opcoesDeEvo.length > 1) { setEscolhendo(poke.uid); return }
                       void acao.run(`evo:${poke.uid}`, () => controller.evolvePoke(poke.uid))
                     }}
                   >
-                    {stoneReq ? `Evoluir (${stoneReq.count}x ${stoneName(stoneReq.type)})` : 'Evoluir'}
+                    {opcoesDeEvo.length > 1
+                      ? 'Evoluir…'
+                      : stoneReq ? `Evoluir (${stoneReq.count}x ${stoneName(stoneReq.type)})` : 'Evoluir'}
                   </GameButton>
                 )}
               </div>

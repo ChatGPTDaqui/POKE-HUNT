@@ -29,7 +29,7 @@ const SEGUNDOS = 90
 function mundoInicial(): WorldState {
   const rng = createRng(SEMENTE)
   const poke = createPokeInstance(rng, 'charmander', 1)
-  return buildMapWorld(MAPA, poke, { rng: createRng(SEMENTE), counters: { entity: 1, effect: 1, pendingHit: 1 } })
+  return buildMapWorld(MAPA, poke, { seed: 0, rng: createRng(SEMENTE), counters: { entity: 1, effect: 1, pendingHit: 1 } })
 }
 
 // Client de verdade: `useGameLoop.ts` fatia qualquer gap em sub-passos FIXOS

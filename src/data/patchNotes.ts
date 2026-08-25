@@ -12,6 +12,137 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-159. Continuacao direta da 7.11: a mesma classe de mudanca, em mais 14
+  // especies — e desta vez ela alcanca as Eeveelutions, que quase todo jogador
+  // tem. Por isso ganha entrada propria em vez de virar rodape da anterior.
+  //
+  // A segunda linha CORRIGE o que a 7.11 prometeu errado (PH-158), e e por isso
+  // que as duas entram juntas: elas ficam lado a lado no arquivo, e publicar a
+  // nova sem consertar a antiga deixaria o painel se contradizendo na cara do
+  // jogador.
+  //
+  // O que fica de FORA, e por que: o guarda de bundle da Edge (PH-133), o React
+  // fora do servidor (PH-148), o parser unificado (PH-147), a guarda de
+  // geometria de sprite (PH-149) e os dois `db:types` (PH-154). Todos internos.
+  // Mesma regua da 7.11 e da 7.10.
+  {
+    version: '7.12',
+    date: '2026-08-25',
+    title: 'Mais quatorze POKE com menos golpes de Nivel 1, e as Eeveelutions entre eles',
+    highlights: [
+      'QUATORZE ESPECIES PERDERAM GOLPES DE NIVEL 1, E QUATRO DELAS SAO EEVEELUTIONS. Jolteon, Flareon, Espeon e Umbreon vinham com Tackle, Tail Whip e Helping Hand no Nivel 1 sem nunca terem aprendido nenhum dos tres. Entram na mesma lista Mr. Mime, Mantine, Bellossom, Slowking, Chansey, Sudowoodo, Marill, Snorlax, Hitmonchan e Hitmontop. Sao 47 golpes ao todo.',
+      'O POKE QUE VOCE JA TEM MUDA TAMBEM — e a nota anterior disse o contrario. A lista de golpes de cada POKE e recalculada pela especie e pelo nivel toda vez que o jogo abre, entao golpe que sai da especie sai do seu junto. Nenhum slot fica vazio: o lugar e preenchido por outro golpe que ele conhece. A 7.11 prometia que nada mudava pra quem ja tinha, e a promessa estava errada.',
+      'AQUELE BLOCO NUNCA FOI O KIT INICIAL DELAS. Era a lista do Recordador de Golpes do jogo original, que este jogo nao tem desde a 6.8, e ela entrava por engano em especie que o jogo nao reconhecia como forma evoluida — ou porque a pre-evolucao esta fora do elenco (Sudowoodo vem de Bonsly, que nao existe aqui), ou porque a especie e o SEGUNDO destino de uma evolucao com ramo, como as quatro Eeveelutions.',
+      'O CASO MAIS VISIVEL ERA UM SUDOWOODO SELVAGEM DE NIVEL 1 BATENDO COM WOOD HAMMER. Sao 120 de poder, quase tres vezes o golpe de qualquer POKE da mesma faixa de nivel.',
+      'QUATRO DELAS AGORA COMECAM SEM GOLPE NENHUM NO NIVEL 1: Marill aprende o primeiro no Nivel 2, Mantine no 3, Snorlax no 4 e Slowking no 5. Abaixo disso o POKE luta so com o Ataque Basico.',
+      'AS BARRAS DE HP E XP DO TOPO PARARAM DE MUDAR DE TAMANHO, E AGORA MOSTRAM A PORCENTAGEM. Elas encolhiam e esticavam conforme o resto do cabecalho — um selo de status aparecendo ja bastava pra empurrar. O numero nunca arredonda pra 0% num POKE vivo, nem pra 100% num que ja levou dano.',
+      'O NIVEL NA FICHA DO POKE ATUALIZA SOZINHO. Com o perfil aberto, subir de nivel deixava o Lv antigo na tela ate voce fechar e reabrir a janela.',
+    ],
+  },
+  // PH-152. A maior mudanca de CONTEUDO desde que o elenco existe: 19 especies
+  // novas e 36 caminhos de evolucao que estavam mortos.
+  //
+  // O que fica de FORA, e por que: o A* com heap (PH-102), o React fora do
+  // bundle do servidor (PH-148), o parser unificado (PH-147) e a guarda de
+  // geometria de sprite (PH-149). Todos internos — nenhum muda o que o jogador
+  // ve. Mesma regua que a 7.10 usou pra deixar o teste de cobertura de face de
+  // fora.
+  {
+    version: '7.11',
+    date: '2026-08-25',
+    title: 'Dezenove POKE novos, e as evolucoes que nunca aconteciam',
+    highlights: [
+      'EVOLUCAO POR PEDRA, TROCA E AMIZADE PASSOU A EXISTIR. Se voce tem um Growlithe guardado esperando virar Arcanine, ele nunca ia virar — o caminho simplesmente nao existia no jogo, e nada na tela dizia isso. Eram 36 evolucoes nessa situacao. Agora todas funcionam, no mesmo criterio das outras especiais: Nivel 80 e 40 pedras.',
+      'DEZENOVE POKE NOVOS entraram no elenco, que foi de 226 pra 245. Eles nao existiam porque eram destino das evolucoes que nao aconteciam — sem o caminho, ninguem nunca chegava neles. Entram Raichu, Vaporeon, Jolteon, Flareon, Espeon, Umbreon, Exeggutor, Poliwrath, Slowking, Vileplume, Bellossom, Crobat, Togetic, Starmie, Cloyster, Clefairy, Clefable, Wigglytuff e Hitmontop. Todos aparecem no mato e todos podem ser capturados.',
+      'O EEVEE ESCOLHE PRA QUE EVOLUIR, E A PEDRA DIZ QUAL. Sao cinco caminhos e cada um cobra a pedra do tipo de destino: Flareon pede 40 Pedras de FOGO, Vaporeon de AGUA, Jolteon de ELETRICO, Espeon de PSIQUICO e Umbreon de SOMBRIO. Voce ve os cinco na ficha e escolhe qual perseguir.',
+      'TYROGUE AGORA TEM TRES CAMINHOS — Hitmonlee, Hitmonchan e Hitmontop —, todos no Nivel 20 e sem pedra nenhuma. Antes eram dois.',
+      'GLOOM, POLIWHIRL E SLOWPOKE tambem passaram a ter mais de um destino. Slowpoke e o caso curioso: Slowbro continua no Nivel 37 de graca, e Slowking cobra as 40 pedras — dois caminhos com precos diferentes.',
+      'A CARA DO POKE MUDA EM MAIS OITO ESPECIES. O retrato no trilho de status reage a dor, tontura, sono e comemoracao; oito POKE tinham cara fixa por falta de desenho e agora usam uma expressao equivalente do mesmo acervo.',
+      // PH-158 — esta linha prometia que nada mudava pra quem ja tinha o POKE,
+      // e a promessa era FALSA. `playerMapper.ts` deriva `unlockedAbilities` de
+      // (especie, nivel) em toda carga e ignora a coluna gravada, entao golpe
+      // que sai do learnset sai do POKE salvo junto. Medido: `jolteon@80` nao
+      // conhece mais tackle, tail_whip nem helping_hand.
+      //
+      // A frase existia pra tranquilizar, e foi o pior lugar possivel pra
+      // errar: quem leu "nao perde nada" e viu a build trocada nao conclui que
+      // a nota estava errada — conclui que o jogo bugou o POKE dele.
+      'VINTE E UMA ESPECIES VEM COM MENOS GOLPES DE NIVEL 1. Steelix, Machamp, Nidoqueen e outras 18 tinham uma lista de golpes de Nivel 1 que so existia porque o jogo nao sabia que elas eram formas evoluidas. O POKE que voce JA TEM muda tambem: a lista de golpes de cada um e recalculada pela especie e pelo nivel toda vez que o jogo abre. Nenhum slot fica vazio — o lugar e preenchido por outro golpe que ele conhece.',
+    ],
+  },
+  // PH-138. Curta de proposito: sao duas linhas, e a primeira e um aumento
+  // RETROATIVO de requisito. Quem tinha 25 pedras guardadas parou de poder
+  // evoluir, e a unica coisa que explica isso pro jogador e esta nota — a ficha
+  // da pedra e a Pokedex dizem 40, mas quem nao abrir nenhuma das duas descobre
+  // tentando e falhando.
+  {
+    version: '7.10',
+    date: '2026-08-24',
+    title: 'Evolucao especial passou a pedir 40 pedras',
+    highlights: [
+      'EVOLUCAO ESPECIAL AGORA CUSTA 40 PEDRAS do tipo primario do POKE, o dobro das 20 de antes. O Nivel 80 continua igual, e a pedra continua sendo a do PRIMEIRO tipo (Kadabra pede Pedra PSYCHIC, Onix pede Pedra ROCK). Vale pra quem ja tinha pedra guardada: se voce tinha 25 separadas pra evoluir, agora faltam 15.',
+      'A MENSAGEM DE PEDRA FALTANDO parou de sair com letra sobrando — dizia "faltam 40sx Pedra BUGs". Era um erro de formatacao que estava ali desde que a evolucao especial existe.',
+    ],
+  },
+  // PH-135. Primeira entrada que sai JUNTO com o codigo que ela descreve: a
+  // 7.7 e a 7.8 existiam na `dev` desde 22 e 23/08, mas a `main` estava 174
+  // commits atras, entao o jogador pulou da 7.6 pra ca de uma vez.
+  {
+    version: '7.9',
+    date: '2026-08-24',
+    title: 'O combate passou a explicar o que faz, e o POKE dos outros deixou de ser publico',
+    highlights: [
+      'PRIVACIDADE, E ESTA E A MAIS IMPORTANTE: qualquer jogador conseguia ler a ficha inteira do SEU POKE — os seis IVs, a natureza, a caracteristica, o que estava travado e quem foi o treinador original. Nao era so do POKE anunciado no Mercado: era de todos, inclusive os que voce nunca mostrou pra ninguem. Fechado. Agora so voce le os seus, e o que continua publico e o que sempre foi de propria vontade: o POKE anunciado, o ranking e o perfil.',
+      'CRITICO APARECE NA TELA. O golpe critico existia e multiplicava o dano desde sempre, mas nada dizia isso — o mesmo golpe no mesmo inimigo as vezes tirava um numero muito maior e voce nao tinha como saber por que. Agora o numero cresce e vem marcado com CRIT.',
+      'O DANO QUE VOCE LEVA ficou diferente do dano que voce causa: ele sai numa placa vermelha. Numa luta com varios inimigos em volta era impossivel distinguir um do outro.',
+      'GOLPE QUE O INIMIGO RESISTE ficou legivel. O numero saia cinza escuro em cima de cena escura, justamente no caso em que voce mais precisa perceber que seu golpe nao esta funcionando naquele inimigo.',
+      'O SELO DE ATRIBUTO DIZ QUAL ATRIBUTO E DE ONDE VEIO. Antes Ataque caindo e Velocidade caindo desenhavam exatamente o mesmo icone, e nada dizia quem tinha feito aquilo. Agora cada atributo tem simbolo proprio, e o selo mostra o golpe e de quem partiu — "Rosnado (Rattata)" e diferente de voce ter usado Danca das Espadas em si mesmo.',
+      'VOCE PASSA A VER OS EFEITOS DO INIMIGO QUE ESTA ENFRENTANDO, numa fileira propria com o nome dele. Buff e debuff do adversario nao apareciam em lugar nenhum: se ele dobrava o Ataque ou subia a Evasao, o seu dano caia ou seus golpes erravam sem nenhuma causa visivel na tela.',
+      'LEILAO: A CONTAGEM DE LANCES ESTAVA ERRADA pra quem nao era o vendedor. Cada um via so os proprios lances, entao um leilao com dez lances aparecia como "0 ofertas" — e quem tinha sido coberto nem conseguia ver que perdeu a lideranca. Pior: voce montava um lance a partir do minimo e o jogo recusava, porque o piso de verdade era outro.',
+      'A HUNT CARREGA MUITO MAIS RAPIDO em quatro cenarios. O Dojo baixava 15 MB de imagem, a Arena do Dragao 13 MB — agora sao 2,6 e 2,0 MB, com a mesma arte. Em conexao de celular eram uns 24 segundos de espera antes da cena aparecer, e o jogo desistia de esperar antes disso e entrava sem o fundo.',
+      'A AGUA ONDULA DE VERDADE em cinco artes, a folha tomba, a brasa pisca e a neve ganhou profundidade.',
+      'O ESFUMADO DA BORDA DA TELA caiu de 12% para 5,5% — sobrou mais mapa visivel.',
+      'MOCHILA E LOJA GANHARAM GRADE QUADRICULADA, e o item sem arte mostra a sigla dele em vez de um quadrado vazio. A ficha do item na Loja passou a abrir acima da grade, sem tapar o que voce estava olhando.',
+      'A ARTE DO GOLPE POUSA EM 0,3 SEGUNDO, ainda durante a pose de ataque — antes ela chegava depois de o POKE ja ter voltado ao normal.',
+    ],
+  },
+  // Continuacao do mesmo dia da 7.7: aquela entrada foi escrita no meio do
+  // lote de merges e ficou pra tras do que entrou depois (PH-91).
+  {
+    version: '7.8',
+    date: '2026-08-23',
+    title: 'O correio virou conversa de verdade, e o ouro anexado parou de sumir',
+    highlights: [
+      'CORREIO E CHAT AGORA: uma conversa por contato, com todo o historico salvo, do jeito que voce espera de um aplicativo de mensagem. Antes a mesma pessoa tinha tres listas — a carta numa aba, o recado em outra, a resposta numa terceira.',
+      'MENSAGEM NOVA APARECE NA HORA no fio que voce esta lendo, sem recarregar. Abrir a conversa zera as nao lidas so daquele contato.',
+      'BUG SERIO: OURO ANEXADO NUMA MENSAGEM ERA DESTRUIDO. Saia de quem mandou, nunca chegava em quem recebeu, e a mensagem ficava travada com o anexo por coletar pra sempre. Anexo de item nunca foi afetado. O ouro que estava preso voltou pro destinatario.',
+      'VINTE E TRES ARTES DE GOLPE NAO APARECIAM NA TELA — entre elas o Bullet Punch. O desenho existia e estava certo; o jogo so nunca chegava a pedir o arquivo pra desenhar.',
+      'HOSPITAL: o POKE estava serrilhado e fora de proporcao com a sala. Em vez de esticar o POKE, a cena inteira encolheu — mesma proporcao entre ele e a enfermeira, com bem menos esticamento no sprite.',
+      'A JANELA DE CHAT RECOLHIDA agora e so "Chat" e um "+". Antes ela continuava ocupando espaco com as abas e o campo de escrever mesmo fechada.',
+      'CADA SUB-BIOMA TEM O TAMANHO QUE PRECISA. O mundo jogavel deixou de ser um retangulo fixo igual pra todos: agora ele e do tamanho do que foi desenhado naquele mapa, entao ha mapas maiores e menores.',
+    ],
+  },
+  // Entrada curta de proposito, ao contrario das anteriores: pedido explicito
+  // do usuario ("um resumo bem sucinto sobre todas as melhorias").
+  {
+    version: '7.7',
+    date: '2026-08-22',
+    title: 'Correio e amigos, time no canto da tela, e as arenas ganharam parede',
+    highlights: [
+      'CORREIO COMPLETO: mande carta com ouro ou item anexado, responda, e apague o que ja leu — cada lado apaga a sua copia.',
+      'LISTA DE AMIGOS: convide, aceite, remova e bloqueie. Bloquear corta os dois lados e desfaz a amizade.',
+      'CONVERSA PRIVADA com amigo, em tempo real, com contador de nao lidas no sino.',
+      'SEU TIME NO CANTO SUPERIOR ESQUERDO: foto e nivel das reservas em coluna. Arraste pra mudar a ordem, passe o mouse pro resumo, clique pra abrir o perfil ou botar em campo.',
+      'A FILA DOS 4 GOLPES virou arrastavel, e da pra chegar nos golpes direto pela tela de Equipe.',
+      'POKE SEM GOLPE UTILIZAVEL agora diz isso na tela em vez de ficar parado sem explicacao.',
+      'A ESCOLHA DE GOLPES DESTRAVOU: um golpe orfao na lista impedia qualquer edicao.',
+      'NO CELULAR: a carinha do POKE muda conforme o estado dele, e tocar num termo abre a explicacao (com glossario).',
+      'BUG: A ARTE DO GOLPE FICAVA PRA TRAS. O efeito nascia parado no lugar onde o POKE estava, e ele andava mais de 100 pixels durante o segundo que a animacao dura. Agora ela acompanha.',
+      'DOJO E ARENA DO DRAGAO GANHARAM PAREDE DE VERDADE. Eram as duas ultimas telas do jogo em que dava pra atravessar predio, agua e lava.',
+      'DUELO DO CAMPEAO LANCE COREOGRAFADO: cada lado entra por um ponto fixo da arena, e ha 2 segundos entre um POKE cair e o proximo entrar — dos dois lados. Antes o seu substituto aparecia no mesmo instante, dentro do buraco onde o anterior morreu.',
+      'SEU PROGRESSO PAROU DE CORRER RISCO: duas gravacoes ao mesmo tempo se atropelavam e uma podia sobrescrever a outra.',
+    ],
+  },
   {
     version: '7.6',
     date: '2026-08-18',
@@ -740,6 +871,27 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   },
 ];
 
+/**
+ * Compara versao por SEGMENTO, e nao por `Number()` (PH-138).
+ *
+ * `Number('7.10')` e **7.1**, e `Number('7.9')` e 7.9 — ou seja, o desempate
+ * antigo punha a 7.9 ACIMA da 7.10. Nao era hipotetico: apareceu no instante em
+ * que a primeira versao de minor com dois digitos entrou, e o efeito e a nota
+ * mais nova renderizar embaixo da anterior. Versao e lista de inteiros
+ * separados por ponto, nao decimal.
+ */
+function compararVersao(a: string, b: string): number {
+  const pa = a.split('.').map(Number)
+  const pb = b.split('.').map(Number)
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (pb[i] ?? 0) - (pa[i] ?? 0)
+    if (d !== 0) return d
+  }
+  return 0
+}
+
 export function sortedPatchNotes(): PatchNoteEntry[] {
-  return [...PATCH_NOTES].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : Number(b.version) - Number(a.version)));
+  return [...PATCH_NOTES].sort((a, b) => (
+    a.date < b.date ? 1 : a.date > b.date ? -1 : compararVersao(a.version, b.version)
+  ));
 }

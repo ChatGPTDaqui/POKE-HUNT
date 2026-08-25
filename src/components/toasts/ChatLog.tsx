@@ -210,25 +210,37 @@ export function ChatLog() {
   // central estreita, longe do chat") descrevia o menu de circulos, que nao
   // existe mais. O fallback so vale ate a primeira medida chegar.
   const bottom = footerHeight ? `calc(${footerHeight}px + .8em)` : (narrow ? '13.5em' : '10.6em')
+  // Recolhida a janela NAO leva a largura guardada (PH-84): ela encolhe pro
+  // conteudo, que passa a ser so o rotulo "Chat" e o botao de expandir. Sem
+  // isto "recolher" so tirava altura — a barra continuava atravessando a tela
+  // com as quatro abas, e a janela nao saia da frente de nada. A largura fica
+  // guardada em `width` e volta inteira ao expandir.
   const style: CSSProperties = pos
-    ? { left: pos.x, top: pos.y, width }
-    : { left: '.8em', bottom, width }
+    ? { left: pos.x, top: pos.y, ...(open ? { width } : {}) }
+    : { left: '.8em', bottom, ...(open ? { width } : {}) }
 
   return (
     <div
       data-window="chat"
       style={{ ...style, height: open ? '21em' : 'auto' }}
       className={cn(
-        'vidro-flutua pointer-events-auto absolute z-[21] flex max-h-[72vh] max-w-[min(28em,94vw)] min-w-[12em]',
+        'vidro-flutua pointer-events-auto absolute z-[21] flex max-h-[72vh] max-w-[min(28em,94vw)]',
         'flex-col overflow-hidden rounded-xl',
-        open && 'resize',
+        // O piso de largura e pra JANELA ABERTA nao virar uma coluna estreita
+        // demais pra ler mensagem. Recolhida ela nao tem mensagem nenhuma, e o
+        // piso so deixava um retangulo vazio de 12em ao lado da palavra "Chat".
+        open ? 'min-w-[12em] resize' : 'min-w-0',
       )}
     >
       <div
         onPointerDown={onPointerDown}
         className="win-drag-handle flex shrink-0 flex-wrap items-center gap-[.25em] px-[.45em] py-[.35em]"
       >
-        {TABS.map((tab) => (
+        {/* Recolhida, so o rotulo. As abas continuam MONTADAS no estado (o
+            `activeTab` nao e tocado aqui), entao expandir volta na mesma aba em
+            vez de resetar pra Mundo. A barra segue sendo o punho de arrastar
+            nos dois casos — o `onPointerDown` esta neste div, nao nas abas. */}
+        {open ? TABS.map((tab) => (
           <button
             key={tab.key}
             type="button"
@@ -240,7 +252,9 @@ export function ChatLog() {
           >
             {tab.label}
           </button>
-        ))}
+        )) : (
+          <span className="px-[.55em] py-[.28em] text-[.74em] text-n300">Chat</span>
+        )}
         <span className="flex-1" />
         <button
           type="button"

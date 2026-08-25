@@ -5,7 +5,7 @@
 // propria linha, sem view/RPC publica nao da pra contar as dos outros.
 import { supabase } from '@/lib/supabase'
 import { rowToPoke } from './playerMapper'
-import type { CriterioPoke, EntradaHall, EntradaPoke, EntradaTreinador, PerfilRemoto } from './servidor'
+import type { CriterioPoke, EntradaHall, EntradaPoke, EntradaTreinador, PerfilPublico, PerfilRemoto } from './servidor'
 
 // `treinadores_publico`/`ranking_pokemon`/`meu_perfil` vivem so no schema
 // `dev` — mesma razao (gerador de tipos so conhece `public`) documentada em
@@ -36,9 +36,20 @@ export async function rankingTreinadores(limite = 50): Promise<{ entradas: Entra
   return { entradas }
 }
 
-export async function rankingPokemon(criterio: CriterioPoke, limite = 50): Promise<{ entradas: EntradaPoke[] }> {
+/**
+ * Teto de linhas do ranking de POKE, e nao um `default` qualquer: a view
+ * `ranking_pokemon` MATERIALIZA o top 50 de cada criterio (PH-105 — ela deixou
+ * de ser `select *` da tabela inteira pra parar de vazar POKE de terceiro).
+ * Pedir mais de 50 nao daria erro: encheria o fim da lista com linha que entrou
+ * ali pelo top de OUTRO criterio. Cortar aqui e explicito; a alternativa e uma
+ * lista silenciosamente errada.
+ */
+const TETO_POR_CRITERIO = 50
+
+export async function rankingPokemon(criterio: CriterioPoke, limite = TETO_POR_CRITERIO): Promise<{ entradas: EntradaPoke[] }> {
   const coluna = COLUNA_POR_CRITERIO[criterio]
-  const { data, error } = await db.from('ranking_pokemon').select('*').order(coluna, { ascending: false }).limit(limite)
+  const { data, error } = await db.from('ranking_pokemon').select('*').order(coluna, { ascending: false })
+    .limit(Math.min(limite, TETO_POR_CRITERIO))
   if (error) throw new Error(error.message)
   const entradas: EntradaPoke[] = (data ?? []).map((r: any) => ({
     userId: r.user_id,
@@ -72,5 +83,35 @@ export async function perfil(): Promise<PerfilRemoto> {
   return {
     rank: r.rank, totalJogadores: r.totalJogadores, segundosJogados: Number(r.segundosJogados),
     contaCriadaEm: r.contaCriadaEm, noHallDaFama: r.noHallDaFama,
+  }
+}
+
+/**
+ * O perfil de OUTRO jogador (PH-119).
+ *
+ * `null` quando o treinador não existe mais — a RPC devolve `{ existe: false }`
+ * em vez de estourar, porque chegar aqui a partir de um anúncio de conta apagada
+ * é um caso real, e um toast vermelho seria a resposta errada para "esse
+ * treinador não existe mais".
+ */
+export async function perfilPublico(userId: string): Promise<PerfilPublico | null> {
+  const { data, error } = await db.rpc('perfil_publico', { p_user_id: userId })
+  if (error) throw new Error(error.message)
+  const r = data as ({ existe: false } | (PerfilPublico & { existe: true })) | null
+  if (!r || !r.existe) return null
+  return {
+    userId: r.userId,
+    nome: r.nome,
+    nivel: Number(r.nivel),
+    exp: Number(r.exp),
+    rank: Number(r.rank),
+    totalJogadores: Number(r.totalJogadores),
+    // `numeric` do Postgres chega como string no PostgREST quando passa do
+    // alcance do `number` — o mesmo `Number()` que `perfil()` já faz acima.
+    segundosJogados: Number(r.segundosJogados),
+    contaCriadaEm: r.contaCriadaEm,
+    noHallDaFama: r.noHallDaFama,
+    capturas: Number(r.capturas),
+    anunciosAtivos: Number(r.anunciosAtivos),
   }
 }

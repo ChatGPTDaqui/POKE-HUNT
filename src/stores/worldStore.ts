@@ -23,40 +23,15 @@
 // re-renderizam quando aquele campo muda de verdade.
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
-import type { SalaAtiva, WorldState } from '@/engine/types'
+import type { ClimaTipo, SalaAtiva, WorldState } from '@/engine/types'
 import { reconciliarSalaDaAutoridade } from '@/engine/systems/salaSystem'
-import { createRng, randomSeed, type Rng } from '@/core/rng'
+import type { Rng } from '@/core/rng'
 
-// `seed` opcional: quem constroi um mundo pra valer passa a semente da sessao
-// (na Fase D ela vem do servidor); sem argumento, sorteia uma. Nao ha fallback
-// pra `Math.random()` em lugar nenhum da simulacao — a sequencia inteira sai
-// deste estado.
-export function emptyWorldState(seed: number = randomSeed()): WorldState {
-  return {
-    mapDef: null,
-    player: null,
-    enemies: [],
-    effects: [],
-    pendingHits: [],
-    pendingWishes: [],
-    autoTimers: { treinador: 0 },
-    reviveCountdown: null,
-    respawnTimer: null,
-    sequenceIndex: 0,
-    sequenceCleared: false,
-    countdownRemaining: null,
-    sala: null,
-    salaCountdownRemaining: null,
-    salaPendente: null,
-    salaSobAutoridade: false,
-    salaEsperaDaAutoridade: 0,
-    salaPredita: false,
-    rng: createRng(seed),
-    counters: { entity: 1, effect: 1, pendingHit: 1 },
-    pessimista: false,
-    clima: null,
-  }
-}
+// `emptyWorldState` mora em `engine/worldState.ts` desde PH-148 — ela e a forma
+// do estado do MOTOR, e este arquivo puxa React por causa do `create`. Reexportada
+// aqui pra os call sites do cliente continuarem apontando pro mesmo lugar.
+import { emptyWorldState } from '@/engine/worldState'
+export { emptyWorldState }
 
 export interface WorldStore extends WorldState {
   // Troca o mundo inteiro (equivalente a `currentWorld = buildXWorld()` no
@@ -78,7 +53,7 @@ export interface WorldStore extends WorldState {
   // Sobrescreve a sala com a AUTORITATIVA do servidor. A simulacao local
   // sorteia a propria (ela e predicao e tem sequencia de sorteio propria), e
   // quem decidiu o pool e o loot creditados foi o servidor.
-  definirSala: (sala: SalaAtiva | null) => void
+  definirSala: (sala: SalaAtiva | null, clima?: ClimaTipo | null) => void
 }
 
 export const useWorldStore = create<WorldStore>()(
@@ -103,14 +78,14 @@ export const useWorldStore = create<WorldStore>()(
       return resultado!
     },
 
-    definirSala: (sala) =>
+    definirSala: (sala, clima) =>
       set((draft) => {
         // A REGRA mora no motor (salaSystem.ts#reconciliarSalaDaAutoridade), e
         // nao aqui: trocar de sala e trocar mapa, grade de colisao, ponto de
         // nascimento e inimigos em campo — cadeia que ja existe pra transicao
         // local. Este store escrevia `draft.sala` direto, e era exatamente isso
         // que deixava o HUD numa sala e o desenho em outra.
-        reconciliarSalaDaAutoridade(draft, sala)
+        reconciliarSalaDaAutoridade(draft, sala, clima)
       }),
   })),
 )

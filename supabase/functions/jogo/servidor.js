@@ -1,26 +1,3 @@
-//#region \0rolldown/runtime.js
-var __create = Object.create;
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __commonJSMin = (cb, mod) => () => (mod || (cb((mod = { exports: {} }).exports, mod), cb = null), mod.exports);
-var __copyProps = (to, from, except, desc) => {
-	if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
-		key = keys[i];
-		if (!__hasOwnProp.call(to, key) && key !== except) __defProp(to, key, {
-			get: ((k) => from[k]).bind(null, key),
-			enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
-		});
-	}
-	return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule || !__hasOwnProp.call(mod, "default") ? __defProp(target, "default", {
-	value: mod,
-	enumerable: true
-}) : target, mod));
-//#endregion
 //#region authority/src/db.ts
 var ErroHttp = class extends Error {
 	status;
@@ -687,6 +664,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 62,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 85,
 		"base": {
 			"hp": 39,
 			"atkFis": 52,
@@ -746,7 +724,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "charmeleon",
-		"evolvesAtLevel": 16
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "charmeleon",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
 	},
 	"squirtle": {
 		"id": "squirtle",
@@ -757,6 +740,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 63,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 90,
 		"base": {
 			"hp": 44,
 			"atkFis": 48,
@@ -824,7 +808,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "wartortle",
-		"evolvesAtLevel": 16
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "wartortle",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
 	},
 	"bulbasaur": {
 		"id": "bulbasaur",
@@ -835,6 +824,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 64,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 69,
 		"base": {
 			"hp": 45,
 			"atkFis": 49,
@@ -902,7 +892,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "ivysaur",
-		"evolvesAtLevel": 16
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "ivysaur",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
 	},
 	"articuno": {
 		"id": "articuno",
@@ -913,6 +908,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 261,
 		"growthCurve": "SLOW",
+		"pesoHg": 554,
 		"base": {
 			"hp": 90,
 			"atkFis": 85,
@@ -999,6 +995,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 261,
 		"growthCurve": "SLOW",
+		"pesoHg": 526,
 		"base": {
 			"hp": 90,
 			"atkFis": 90,
@@ -1085,6 +1082,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 261,
 		"growthCurve": "SLOW",
+		"pesoHg": 600,
 		"base": {
 			"hp": 90,
 			"atkFis": 100,
@@ -1171,6 +1169,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 261,
 		"growthCurve": "SLOW",
+		"pesoHg": 1780,
 		"base": {
 			"hp": 90,
 			"atkFis": 85,
@@ -1249,6 +1248,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 261,
 		"growthCurve": "SLOW",
+		"pesoHg": 1980,
 		"base": {
 			"hp": 115,
 			"atkFis": 115,
@@ -1331,6 +1331,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 261,
 		"growthCurve": "SLOW",
+		"pesoHg": 1870,
 		"base": {
 			"hp": 100,
 			"atkFis": 75,
@@ -1413,6 +1414,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 306,
 		"growthCurve": "SLOW",
+		"pesoHg": 2160,
 		"base": {
 			"hp": 106,
 			"atkFis": 90,
@@ -1499,6 +1501,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 306,
 		"growthCurve": "SLOW",
+		"pesoHg": 1990,
 		"base": {
 			"hp": 106,
 			"atkFis": 130,
@@ -1585,6 +1588,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 270,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 50,
 		"base": {
 			"hp": 100,
 			"atkFis": 100,
@@ -1663,6 +1667,7 @@ var SPECIES_DATA = {
 		"catchRate": 3,
 		"baseExp": 306,
 		"growthCurve": "SLOW",
+		"pesoHg": 1220,
 		"base": {
 			"hp": 106,
 			"atkFis": 110,
@@ -1765,6 +1770,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 270,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 40,
 		"base": {
 			"hp": 100,
 			"atkFis": 100,
@@ -1839,6 +1845,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 60,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 200,
 		"base": {
 			"hp": 40,
 			"atkFis": 80,
@@ -1914,7 +1921,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "graveler",
-		"evolvesAtLevel": 25
+		"evolvesAtLevel": 25,
+		"evolutionOptions": [{
+			"to": "graveler",
+			"atLevel": 25,
+			"isSpecial": false
+		}]
 	},
 	"spearow": {
 		"id": "spearow",
@@ -1925,6 +1937,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 52,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 20,
 		"base": {
 			"hp": 40,
 			"atkFis": 60,
@@ -1984,7 +1997,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "fearow",
-		"evolvesAtLevel": 20
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [{
+			"to": "fearow",
+			"atLevel": 20,
+			"isSpecial": false
+		}]
 	},
 	"rattata": {
 		"id": "rattata",
@@ -1995,6 +2013,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 51,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 35,
 		"base": {
 			"hp": 30,
 			"atkFis": 56,
@@ -2058,7 +2077,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "raticate",
-		"evolvesAtLevel": 20
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [{
+			"to": "raticate",
+			"atLevel": 20,
+			"isSpecial": false
+		}]
 	},
 	"ivysaur": {
 		"id": "ivysaur",
@@ -2069,6 +2093,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 130,
 		"base": {
 			"hp": 60,
 			"atkFis": 62,
@@ -2132,7 +2157,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "venusaur",
-		"evolvesAtLevel": 32
+		"evolvesAtLevel": 32,
+		"evolutionOptions": [{
+			"to": "venusaur",
+			"atLevel": 32,
+			"isSpecial": false
+		}]
 	},
 	"venusaur": {
 		"id": "venusaur",
@@ -2143,6 +2173,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 236,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 1e3,
 		"base": {
 			"hp": 80,
 			"atkFis": 82,
@@ -2225,6 +2256,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 64,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 54,
 		"base": {
 			"hp": 45,
 			"atkFis": 50,
@@ -2300,7 +2332,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "gloom",
-		"evolvesAtLevel": 21
+		"evolvesAtLevel": 21,
+		"evolutionOptions": [{
+			"to": "gloom",
+			"atLevel": 21,
+			"isSpecial": false
+		}]
 	},
 	"gloom": {
 		"id": "gloom",
@@ -2311,6 +2348,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 138,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 86,
 		"base": {
 			"hp": 60,
 			"atkFis": 65,
@@ -2377,6 +2415,68 @@ var SPECIES_DATA = {
 				"levelReq": 59
 			}
 		],
+		"evolvesTo": "vileplume",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "vileplume",
+			"atLevel": 80,
+			"isSpecial": true,
+			"stoneType": "GRASS"
+		}, {
+			"to": "bellossom",
+			"atLevel": 80,
+			"isSpecial": true,
+			"stoneType": "GRASS"
+		}]
+	},
+	"vileplume": {
+		"id": "vileplume",
+		"name": "Vileplume",
+		"description": "Pokedex Nº45 - tipo GRASS/POISON.",
+		"type": "GRASS",
+		"type2": "POISON",
+		"catchRate": 45,
+		"baseExp": 221,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 186,
+		"base": {
+			"hp": 75,
+			"atkFis": 80,
+			"atkEsp": 110,
+			"def": 85,
+			"defEsp": 90,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "aromatherapy",
+				"levelReq": 1
+			},
+			{
+				"key": "mega_drain",
+				"levelReq": 1
+			},
+			{
+				"key": "poison_powder",
+				"levelReq": 1
+			},
+			{
+				"key": "stun_spore",
+				"levelReq": 1
+			},
+			{
+				"key": "petal_blizzard",
+				"levelReq": 49
+			},
+			{
+				"key": "petal_dance",
+				"levelReq": 59
+			},
+			{
+				"key": "solar_beam",
+				"levelReq": 69
+			}
+		],
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
@@ -2389,6 +2489,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 60,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 40,
 		"base": {
 			"hp": 50,
 			"atkFis": 75,
@@ -2456,7 +2557,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "weepinbell",
-		"evolvesAtLevel": 21
+		"evolvesAtLevel": 21,
+		"evolutionOptions": [{
+			"to": "weepinbell",
+			"atLevel": 21,
+			"isSpecial": false
+		}]
 	},
 	"weepinbell": {
 		"id": "weepinbell",
@@ -2467,6 +2573,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 137,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 64,
 		"base": {
 			"hp": 65,
 			"atkFis": 90,
@@ -2529,8 +2636,13 @@ var SPECIES_DATA = {
 				"levelReq": 58
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "victreebel",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "victreebel",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"victreebel": {
 		"id": "victreebel",
@@ -2541,6 +2653,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 221,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 155,
 		"base": {
 			"hp": 80,
 			"atkFis": 105,
@@ -2550,10 +2663,6 @@ var SPECIES_DATA = {
 			"speed": 70
 		},
 		"abilities": [
-			{
-				"key": "leaf_tornado",
-				"levelReq": 1
-			},
 			{
 				"key": "razor_leaf",
 				"levelReq": 1
@@ -2589,6 +2698,10 @@ var SPECIES_DATA = {
 			{
 				"key": "leaf_blade",
 				"levelReq": 44
+			},
+			{
+				"key": "leaf_tornado",
+				"levelReq": 80
 			}
 		],
 		"evolvesTo": null,
@@ -2603,6 +2716,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 65,
 		"growthCurve": "SLOW",
+		"pesoHg": 25,
 		"base": {
 			"hp": 60,
 			"atkFis": 40,
@@ -2673,6 +2787,54 @@ var SPECIES_DATA = {
 				"levelReq": 50
 			}
 		],
+		"evolvesTo": "exeggutor",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "exeggutor",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"exeggutor": {
+		"id": "exeggutor",
+		"name": "Exeggutor",
+		"description": "Pokedex Nº103 - tipo GRASS/PSYCHIC.",
+		"type": "GRASS",
+		"type2": "PSYCHIC",
+		"catchRate": 45,
+		"baseExp": 186,
+		"growthCurve": "SLOW",
+		"pesoHg": 1200,
+		"base": {
+			"hp": 95,
+			"atkFis": 95,
+			"atkEsp": 125,
+			"def": 85,
+			"defEsp": 75,
+			"speed": 55
+		},
+		"abilities": [
+			{
+				"key": "psyshock",
+				"levelReq": 17
+			},
+			{
+				"key": "egg_bomb",
+				"levelReq": 27
+			},
+			{
+				"key": "wood_hammer",
+				"levelReq": 37
+			},
+			{
+				"key": "leaf_storm",
+				"levelReq": 47
+			},
+			{
+				"key": "stomp",
+				"levelReq": 80
+			}
+		],
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
@@ -2685,6 +2847,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 87,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 350,
 		"base": {
 			"hp": 65,
 			"atkFis": 55,
@@ -2783,6 +2946,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 64,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 64,
 		"base": {
 			"hp": 45,
 			"atkFis": 49,
@@ -2850,7 +3014,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "bayleef",
-		"evolvesAtLevel": 16
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "bayleef",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
 	},
 	"bayleef": {
 		"id": "bayleef",
@@ -2861,6 +3030,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 158,
 		"base": {
 			"hp": 60,
 			"atkFis": 62,
@@ -2920,7 +3090,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "meganium",
-		"evolvesAtLevel": 32
+		"evolvesAtLevel": 32,
+		"evolutionOptions": [{
+			"to": "meganium",
+			"atLevel": 32,
+			"isSpecial": false
+		}]
 	},
 	"meganium": {
 		"id": "meganium",
@@ -2931,6 +3106,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 236,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 1005,
 		"base": {
 			"hp": 80,
 			"atkFis": 82,
@@ -3000,6 +3176,49 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"bellossom": {
+		"id": "bellossom",
+		"name": "Bellossom",
+		"description": "Pokedex Nº182 - tipo GRASS.",
+		"type": "GRASS",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 221,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 58,
+		"base": {
+			"hp": 75,
+			"atkFis": 80,
+			"atkEsp": 90,
+			"def": 95,
+			"defEsp": 100,
+			"speed": 50
+		},
+		"abilities": [
+			{
+				"key": "magical_leaf",
+				"levelReq": 1
+			},
+			{
+				"key": "quiver_dance",
+				"levelReq": 39
+			},
+			{
+				"key": "petal_blizzard",
+				"levelReq": 49
+			},
+			{
+				"key": "petal_dance",
+				"levelReq": 59
+			},
+			{
+				"key": "leaf_storm",
+				"levelReq": 69
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"hoppip": {
 		"id": "hoppip",
 		"name": "Hoppip",
@@ -3009,6 +3228,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 50,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 5,
 		"base": {
 			"hp": 35,
 			"atkFis": 35,
@@ -3100,7 +3320,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "skiploom",
-		"evolvesAtLevel": 18
+		"evolvesAtLevel": 18,
+		"evolutionOptions": [{
+			"to": "skiploom",
+			"atLevel": 18,
+			"isSpecial": false
+		}]
 	},
 	"skiploom": {
 		"id": "skiploom",
@@ -3111,6 +3336,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 119,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 10,
 		"base": {
 			"hp": 55,
 			"atkFis": 45,
@@ -3194,7 +3420,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "jumpluff",
-		"evolvesAtLevel": 27
+		"evolvesAtLevel": 27,
+		"evolutionOptions": [{
+			"to": "jumpluff",
+			"atLevel": 27,
+			"isSpecial": false
+		}]
 	},
 	"jumpluff": {
 		"id": "jumpluff",
@@ -3205,6 +3436,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 207,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 30,
 		"base": {
 			"hp": 75,
 			"atkFis": 55,
@@ -3299,6 +3531,7 @@ var SPECIES_DATA = {
 		"catchRate": 235,
 		"baseExp": 36,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 18,
 		"base": {
 			"hp": 30,
 			"atkFis": 30,
@@ -3373,8 +3606,13 @@ var SPECIES_DATA = {
 				"levelReq": 43
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "sunflora",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "sunflora",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"sunflora": {
 		"id": "sunflora",
@@ -3385,6 +3623,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 149,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 85,
 		"base": {
 			"hp": 75,
 			"atkFis": 75,
@@ -3394,22 +3633,6 @@ var SPECIES_DATA = {
 			"speed": 30
 		},
 		"abilities": [
-			{
-				"key": "absorb",
-				"levelReq": 1
-			},
-			{
-				"key": "flower_shield",
-				"levelReq": 1
-			},
-			{
-				"key": "growth",
-				"levelReq": 1
-			},
-			{
-				"key": "pound",
-				"levelReq": 1
-			},
 			{
 				"key": "ingrain",
 				"levelReq": 4
@@ -3483,6 +3706,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 39,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 29,
 		"base": {
 			"hp": 45,
 			"atkFis": 30,
@@ -3506,7 +3730,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "metapod",
-		"evolvesAtLevel": 7
+		"evolvesAtLevel": 7,
+		"evolutionOptions": [{
+			"to": "metapod",
+			"atLevel": 7,
+			"isSpecial": false
+		}]
 	},
 	"metapod": {
 		"id": "metapod",
@@ -3517,6 +3746,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 72,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 99,
 		"base": {
 			"hp": 50,
 			"atkFis": 20,
@@ -3530,7 +3760,12 @@ var SPECIES_DATA = {
 			"levelReq": 7
 		}],
 		"evolvesTo": "butterfree",
-		"evolvesAtLevel": 10
+		"evolvesAtLevel": 10,
+		"evolutionOptions": [{
+			"to": "butterfree",
+			"atLevel": 10,
+			"isSpecial": false
+		}]
 	},
 	"butterfree": {
 		"id": "butterfree",
@@ -3541,6 +3776,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 178,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 320,
 		"base": {
 			"hp": 60,
 			"atkFis": 45,
@@ -3627,6 +3863,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 39,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 32,
 		"base": {
 			"hp": 40,
 			"atkFis": 35,
@@ -3650,7 +3887,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "kakuna",
-		"evolvesAtLevel": 7
+		"evolvesAtLevel": 7,
+		"evolutionOptions": [{
+			"to": "kakuna",
+			"atLevel": 7,
+			"isSpecial": false
+		}]
 	},
 	"kakuna": {
 		"id": "kakuna",
@@ -3661,6 +3903,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 72,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 100,
 		"base": {
 			"hp": 45,
 			"atkFis": 25,
@@ -3674,7 +3917,12 @@ var SPECIES_DATA = {
 			"levelReq": 7
 		}],
 		"evolvesTo": "beedrill",
-		"evolvesAtLevel": 10
+		"evolvesAtLevel": 10,
+		"evolutionOptions": [{
+			"to": "beedrill",
+			"atLevel": 10,
+			"isSpecial": false
+		}]
 	},
 	"beedrill": {
 		"id": "beedrill",
@@ -3685,6 +3933,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 178,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 295,
 		"base": {
 			"hp": 65,
 			"atkFis": 90,
@@ -3759,6 +4008,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 57,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 54,
 		"base": {
 			"hp": 35,
 			"atkFis": 70,
@@ -3818,7 +4068,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "parasect",
-		"evolvesAtLevel": 24
+		"evolvesAtLevel": 24,
+		"evolutionOptions": [{
+			"to": "parasect",
+			"atLevel": 24,
+			"isSpecial": false
+		}]
 	},
 	"parasect": {
 		"id": "parasect",
@@ -3829,6 +4084,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 295,
 		"base": {
 			"hp": 60,
 			"atkFis": 95,
@@ -3895,6 +4151,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 61,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 300,
 		"base": {
 			"hp": 60,
 			"atkFis": 55,
@@ -3962,7 +4219,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "venomoth",
-		"evolvesAtLevel": 31
+		"evolvesAtLevel": 31,
+		"evolutionOptions": [{
+			"to": "venomoth",
+			"atLevel": 31,
+			"isSpecial": false
+		}]
 	},
 	"venomoth": {
 		"id": "venomoth",
@@ -3973,6 +4235,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 158,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 125,
 		"base": {
 			"hp": 70,
 			"atkFis": 65,
@@ -4051,6 +4314,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 100,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 560,
 		"base": {
 			"hp": 70,
 			"atkFis": 110,
@@ -4133,8 +4397,13 @@ var SPECIES_DATA = {
 				"levelReq": 61
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "scizor",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "scizor",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"pinsir": {
 		"id": "pinsir",
@@ -4145,6 +4414,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 175,
 		"growthCurve": "SLOW",
+		"pesoHg": 550,
 		"base": {
 			"hp": 65,
 			"atkFis": 125,
@@ -4231,6 +4501,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 53,
 		"growthCurve": "FAST",
+		"pesoHg": 108,
 		"base": {
 			"hp": 40,
 			"atkFis": 20,
@@ -4298,7 +4569,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "ledian",
-		"evolvesAtLevel": 18
+		"evolvesAtLevel": 18,
+		"evolutionOptions": [{
+			"to": "ledian",
+			"atLevel": 18,
+			"isSpecial": false
+		}]
 	},
 	"ledian": {
 		"id": "ledian",
@@ -4309,6 +4585,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 137,
 		"growthCurve": "FAST",
+		"pesoHg": 356,
 		"base": {
 			"hp": 55,
 			"atkFis": 35,
@@ -4383,6 +4660,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 50,
 		"growthCurve": "FAST",
+		"pesoHg": 85,
 		"base": {
 			"hp": 40,
 			"atkFis": 60,
@@ -4466,7 +4744,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "ariados",
-		"evolvesAtLevel": 22
+		"evolvesAtLevel": 22,
+		"evolutionOptions": [{
+			"to": "ariados",
+			"atLevel": 22,
+			"isSpecial": false
+		}]
 	},
 	"ariados": {
 		"id": "ariados",
@@ -4477,6 +4760,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 140,
 		"growthCurve": "FAST",
+		"pesoHg": 335,
 		"base": {
 			"hp": 70,
 			"atkFis": 90,
@@ -4563,6 +4847,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 78,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 380,
 		"base": {
 			"hp": 65,
 			"atkFis": 65,
@@ -4649,6 +4934,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 58,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 72,
 		"base": {
 			"hp": 50,
 			"atkFis": 65,
@@ -4716,7 +5002,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "forretress",
-		"evolvesAtLevel": 31
+		"evolvesAtLevel": 31,
+		"evolutionOptions": [{
+			"to": "forretress",
+			"atLevel": 31,
+			"isSpecial": false
+		}]
 	},
 	"forretress": {
 		"id": "forretress",
@@ -4727,6 +5018,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 163,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 1258,
 		"base": {
 			"hp": 75,
 			"atkFis": 90,
@@ -4817,6 +5109,7 @@ var SPECIES_DATA = {
 		"catchRate": 25,
 		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 1180,
 		"base": {
 			"hp": 70,
 			"atkFis": 130,
@@ -4826,18 +5119,6 @@ var SPECIES_DATA = {
 			"speed": 65
 		},
 		"abilities": [
-			{
-				"key": "bullet_punch",
-				"levelReq": 1
-			},
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "quick_attack",
-				"levelReq": 1
-			},
 			{
 				"key": "focus_energy",
 				"levelReq": 5
@@ -4911,6 +5192,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 175,
 		"growthCurve": "SLOW",
+		"pesoHg": 540,
 		"base": {
 			"hp": 80,
 			"atkFis": 125,
@@ -5005,6 +5287,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 225,
 		"base": {
 			"hp": 59,
 			"atkFis": 63,
@@ -5068,7 +5351,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "blastoise",
-		"evolvesAtLevel": 36
+		"evolvesAtLevel": 36,
+		"evolutionOptions": [{
+			"to": "blastoise",
+			"atLevel": 36,
+			"isSpecial": false
+		}]
 	},
 	"blastoise": {
 		"id": "blastoise",
@@ -5079,6 +5367,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 239,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 855,
 		"base": {
 			"hp": 79,
 			"atkFis": 83,
@@ -5153,6 +5442,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 64,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 196,
 		"base": {
 			"hp": 50,
 			"atkFis": 52,
@@ -5228,7 +5518,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "golduck",
-		"evolvesAtLevel": 33
+		"evolvesAtLevel": 33,
+		"evolutionOptions": [{
+			"to": "golduck",
+			"atLevel": 33,
+			"isSpecial": false
+		}]
 	},
 	"golduck": {
 		"id": "golduck",
@@ -5239,6 +5534,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 766,
 		"base": {
 			"hp": 80,
 			"atkFis": 82,
@@ -5317,6 +5613,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 60,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 124,
 		"base": {
 			"hp": 40,
 			"atkFis": 50,
@@ -5380,7 +5677,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "poliwhirl",
-		"evolvesAtLevel": 25
+		"evolvesAtLevel": 25,
+		"evolutionOptions": [{
+			"to": "poliwhirl",
+			"atLevel": 25,
+			"isSpecial": false
+		}]
 	},
 	"poliwhirl": {
 		"id": "poliwhirl",
@@ -5391,6 +5693,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 135,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 200,
 		"base": {
 			"hp": 65,
 			"atkFis": 65,
@@ -5449,6 +5752,56 @@ var SPECIES_DATA = {
 				"levelReq": 53
 			}
 		],
+		"evolvesTo": "poliwrath",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "poliwrath",
+			"atLevel": 80,
+			"isSpecial": true,
+			"stoneType": "WATER"
+		}, {
+			"to": "politoed",
+			"atLevel": 80,
+			"isSpecial": true,
+			"stoneType": "WATER"
+		}]
+	},
+	"poliwrath": {
+		"id": "poliwrath",
+		"name": "Poliwrath",
+		"description": "Pokedex Nº62 - tipo WATER/FIGHTING.",
+		"type": "WATER",
+		"type2": "FIGHTING",
+		"catchRate": 45,
+		"baseExp": 230,
+		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 540,
+		"base": {
+			"hp": 90,
+			"atkFis": 95,
+			"atkEsp": 70,
+			"def": 95,
+			"defEsp": 90,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "dynamic_punch",
+				"levelReq": 32
+			},
+			{
+				"key": "mind_reader",
+				"levelReq": 43
+			},
+			{
+				"key": "circle_throw",
+				"levelReq": 53
+			},
+			{
+				"key": "submission",
+				"levelReq": 80
+			}
+		],
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
@@ -5461,6 +5814,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 67,
 		"growthCurve": "SLOW",
+		"pesoHg": 455,
 		"base": {
 			"hp": 40,
 			"atkFis": 40,
@@ -5540,7 +5894,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "tentacruel",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "tentacruel",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"tentacruel": {
 		"id": "tentacruel",
@@ -5551,6 +5910,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 180,
 		"growthCurve": "SLOW",
+		"pesoHg": 550,
 		"base": {
 			"hp": 80,
 			"atkFis": 70,
@@ -5637,6 +5997,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 63,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 360,
 		"base": {
 			"hp": 90,
 			"atkFis": 65,
@@ -5712,7 +6073,17 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "slowbro",
-		"evolvesAtLevel": 37
+		"evolvesAtLevel": 37,
+		"evolutionOptions": [{
+			"to": "slowbro",
+			"atLevel": 37,
+			"isSpecial": false
+		}, {
+			"to": "slowking",
+			"atLevel": 80,
+			"isSpecial": true,
+			"stoneType": "WATER"
+		}]
 	},
 	"slowbro": {
 		"id": "slowbro",
@@ -5723,6 +6094,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 172,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 785,
 		"base": {
 			"hp": 95,
 			"atkFis": 75,
@@ -5801,6 +6173,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 65,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 900,
 		"base": {
 			"hp": 65,
 			"atkFis": 45,
@@ -5880,7 +6253,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "dewgong",
-		"evolvesAtLevel": 34
+		"evolvesAtLevel": 34,
+		"evolutionOptions": [{
+			"to": "dewgong",
+			"atLevel": 34,
+			"isSpecial": false
+		}]
 	},
 	"dewgong": {
 		"id": "dewgong",
@@ -5891,6 +6269,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 166,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 1200,
 		"base": {
 			"hp": 90,
 			"atkFis": 70,
@@ -5981,6 +6360,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 61,
 		"growthCurve": "SLOW",
+		"pesoHg": 40,
 		"base": {
 			"hp": 30,
 			"atkFis": 65,
@@ -6059,6 +6439,74 @@ var SPECIES_DATA = {
 				"levelReq": 61
 			}
 		],
+		"evolvesTo": "cloyster",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "cloyster",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"cloyster": {
+		"id": "cloyster",
+		"name": "Cloyster",
+		"description": "Pokedex Nº91 - tipo WATER/ICE.",
+		"type": "WATER",
+		"type2": "ICE",
+		"catchRate": 60,
+		"baseExp": 184,
+		"growthCurve": "SLOW",
+		"pesoHg": 1325,
+		"base": {
+			"hp": 50,
+			"atkFis": 95,
+			"atkEsp": 85,
+			"def": 180,
+			"defEsp": 45,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "aurora_beam",
+				"levelReq": 1
+			},
+			{
+				"key": "protect",
+				"levelReq": 1
+			},
+			{
+				"key": "shell_smash",
+				"levelReq": 1
+			},
+			{
+				"key": "supersonic",
+				"levelReq": 1
+			},
+			{
+				"key": "toxic_spikes",
+				"levelReq": 1
+			},
+			{
+				"key": "withdraw",
+				"levelReq": 1
+			},
+			{
+				"key": "spike_cannon",
+				"levelReq": 13
+			},
+			{
+				"key": "spikes",
+				"levelReq": 28
+			},
+			{
+				"key": "icicle_crash",
+				"levelReq": 50
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 80
+			}
+		],
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
@@ -6071,6 +6519,7 @@ var SPECIES_DATA = {
 		"catchRate": 225,
 		"baseExp": 65,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 65,
 		"base": {
 			"hp": 30,
 			"atkFis": 105,
@@ -6142,7 +6591,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "kingler",
-		"evolvesAtLevel": 28
+		"evolvesAtLevel": 28,
+		"evolutionOptions": [{
+			"to": "kingler",
+			"atLevel": 28,
+			"isSpecial": false
+		}]
 	},
 	"kingler": {
 		"id": "kingler",
@@ -6153,6 +6607,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 166,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 600,
 		"base": {
 			"hp": 55,
 			"atkFis": 130,
@@ -6227,6 +6682,7 @@ var SPECIES_DATA = {
 		"catchRate": 225,
 		"baseExp": 59,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 80,
 		"base": {
 			"hp": 30,
 			"atkFis": 40,
@@ -6286,7 +6742,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "seadra",
-		"evolvesAtLevel": 32
+		"evolvesAtLevel": 32,
+		"evolutionOptions": [{
+			"to": "seadra",
+			"atLevel": 32,
+			"isSpecial": false
+		}]
 	},
 	"seadra": {
 		"id": "seadra",
@@ -6297,6 +6758,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 154,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 250,
 		"base": {
 			"hp": 55,
 			"atkFis": 65,
@@ -6351,8 +6813,13 @@ var SPECIES_DATA = {
 				"levelReq": 60
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "kingdra",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "kingdra",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"goldeen": {
 		"id": "goldeen",
@@ -6363,6 +6830,7 @@ var SPECIES_DATA = {
 		"catchRate": 225,
 		"baseExp": 64,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 150,
 		"base": {
 			"hp": 45,
 			"atkFis": 67,
@@ -6430,7 +6898,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "seaking",
-		"evolvesAtLevel": 33
+		"evolvesAtLevel": 33,
+		"evolutionOptions": [{
+			"to": "seaking",
+			"atLevel": 33,
+			"isSpecial": false
+		}]
 	},
 	"seaking": {
 		"id": "seaking",
@@ -6441,6 +6914,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 158,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 390,
 		"base": {
 			"hp": 80,
 			"atkFis": 92,
@@ -6507,6 +6981,7 @@ var SPECIES_DATA = {
 		"catchRate": 225,
 		"baseExp": 68,
 		"growthCurve": "SLOW",
+		"pesoHg": 345,
 		"base": {
 			"hp": 30,
 			"atkFis": 45,
@@ -6593,6 +7068,62 @@ var SPECIES_DATA = {
 				"levelReq": 53
 			}
 		],
+		"evolvesTo": "starmie",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "starmie",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"starmie": {
+		"id": "starmie",
+		"name": "Starmie",
+		"description": "Pokedex Nº121 - tipo WATER/PSYCHIC.",
+		"type": "WATER",
+		"type2": "PSYCHIC",
+		"catchRate": 60,
+		"baseExp": 182,
+		"growthCurve": "SLOW",
+		"pesoHg": 800,
+		"base": {
+			"hp": 60,
+			"atkFis": 75,
+			"atkEsp": 100,
+			"def": 85,
+			"defEsp": 85,
+			"speed": 115
+		},
+		"abilities": [
+			{
+				"key": "rapid_spin",
+				"levelReq": 1
+			},
+			{
+				"key": "recover",
+				"levelReq": 1
+			},
+			{
+				"key": "spotlight",
+				"levelReq": 1
+			},
+			{
+				"key": "swift",
+				"levelReq": 1
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 1
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 40
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 80
+			}
+		],
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
@@ -6605,6 +7136,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 40,
 		"growthCurve": "SLOW",
+		"pesoHg": 100,
 		"base": {
 			"hp": 20,
 			"atkFis": 10,
@@ -6628,7 +7160,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "gyarados",
-		"evolvesAtLevel": 20
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [{
+			"to": "gyarados",
+			"atLevel": 20,
+			"isSpecial": false
+		}]
 	},
 	"gyarados": {
 		"id": "gyarados",
@@ -6639,6 +7176,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 189,
 		"growthCurve": "SLOW",
+		"pesoHg": 2350,
 		"base": {
 			"hp": 95,
 			"atkFis": 125,
@@ -6713,6 +7251,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 187,
 		"growthCurve": "SLOW",
+		"pesoHg": 2200,
 		"base": {
 			"hp": 130,
 			"atkFis": 85,
@@ -6786,6 +7325,77 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"vaporeon": {
+		"id": "vaporeon",
+		"name": "Vaporeon",
+		"description": "Pokedex Nº134 - tipo WATER.",
+		"type": "WATER",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 184,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 290,
+		"base": {
+			"hp": 130,
+			"atkFis": 65,
+			"atkEsp": 110,
+			"def": 60,
+			"defEsp": 95,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "sand_attack",
+				"levelReq": 5
+			},
+			{
+				"key": "baby_doll_eyes",
+				"levelReq": 9
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 17
+			},
+			{
+				"key": "aurora_beam",
+				"levelReq": 20
+			},
+			{
+				"key": "aqua_ring",
+				"levelReq": 25
+			},
+			{
+				"key": "acid_armor",
+				"levelReq": 29
+			},
+			{
+				"key": "haze",
+				"levelReq": 33
+			},
+			{
+				"key": "muddy_water",
+				"levelReq": 37
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 41
+			},
+			{
+				"key": "hydro_pump",
+				"levelReq": 45
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 80
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"totodile": {
 		"id": "totodile",
 		"name": "Totodile",
@@ -6795,6 +7405,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 63,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 95,
 		"base": {
 			"hp": 50,
 			"atkFis": 65,
@@ -6870,7 +7481,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "croconaw",
-		"evolvesAtLevel": 18
+		"evolvesAtLevel": 18,
+		"evolutionOptions": [{
+			"to": "croconaw",
+			"atLevel": 18,
+			"isSpecial": false
+		}]
 	},
 	"croconaw": {
 		"id": "croconaw",
@@ -6881,6 +7497,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 250,
 		"base": {
 			"hp": 65,
 			"atkFis": 80,
@@ -6948,7 +7565,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "feraligatr",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "feraligatr",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"feraligatr": {
 		"id": "feraligatr",
@@ -6959,6 +7581,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 239,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 888,
 		"base": {
 			"hp": 85,
 			"atkFis": 105,
@@ -7037,6 +7660,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 66,
 		"growthCurve": "SLOW",
+		"pesoHg": 120,
 		"base": {
 			"hp": 75,
 			"atkFis": 38,
@@ -7112,7 +7736,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "lanturn",
-		"evolvesAtLevel": 27
+		"evolvesAtLevel": 27,
+		"evolutionOptions": [{
+			"to": "lanturn",
+			"atLevel": 27,
+			"isSpecial": false
+		}]
 	},
 	"lanturn": {
 		"id": "lanturn",
@@ -7123,6 +7752,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 161,
 		"growthCurve": "SLOW",
+		"pesoHg": 225,
 		"base": {
 			"hp": 125,
 			"atkFis": 58,
@@ -7213,6 +7843,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 88,
 		"growthCurve": "FAST",
+		"pesoHg": 85,
 		"base": {
 			"hp": 70,
 			"atkFis": 20,
@@ -7222,14 +7853,6 @@ var SPECIES_DATA = {
 			"speed": 40
 		},
 		"abilities": [
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "water_gun",
-				"levelReq": 1
-			},
 			{
 				"key": "tail_whip",
 				"levelReq": 2
@@ -7288,7 +7911,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "azumarill",
-		"evolvesAtLevel": 18
+		"evolvesAtLevel": 18,
+		"evolutionOptions": [{
+			"to": "azumarill",
+			"atLevel": 18,
+			"isSpecial": false
+		}]
 	},
 	"azumarill": {
 		"id": "azumarill",
@@ -7299,6 +7927,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 189,
 		"growthCurve": "FAST",
+		"pesoHg": 285,
 		"base": {
 			"hp": 100,
 			"atkFis": 50,
@@ -7377,6 +8006,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 225,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 339,
 		"base": {
 			"hp": 90,
 			"atkFis": 75,
@@ -7427,6 +8057,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 42,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 85,
 		"base": {
 			"hp": 55,
 			"atkFis": 45,
@@ -7490,7 +8121,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "quagsire",
-		"evolvesAtLevel": 20
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [{
+			"to": "quagsire",
+			"atLevel": 20,
+			"isSpecial": false
+		}]
 	},
 	"quagsire": {
 		"id": "quagsire",
@@ -7501,6 +8137,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 151,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 750,
 		"base": {
 			"hp": 95,
 			"atkFis": 85,
@@ -7558,6 +8195,81 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"slowking": {
+		"id": "slowking",
+		"name": "Slowking",
+		"description": "Pokedex Nº199 - tipo WATER/PSYCHIC.",
+		"type": "WATER",
+		"type2": "PSYCHIC",
+		"catchRate": 70,
+		"baseExp": 172,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 795,
+		"base": {
+			"hp": 95,
+			"atkFis": 75,
+			"atkEsp": 100,
+			"def": 80,
+			"defEsp": 110,
+			"speed": 30
+		},
+		"abilities": [
+			{
+				"key": "growl",
+				"levelReq": 5
+			},
+			{
+				"key": "water_gun",
+				"levelReq": 9
+			},
+			{
+				"key": "confusion",
+				"levelReq": 14
+			},
+			{
+				"key": "disable",
+				"levelReq": 19
+			},
+			{
+				"key": "headbutt",
+				"levelReq": 23
+			},
+			{
+				"key": "water_pulse",
+				"levelReq": 28
+			},
+			{
+				"key": "zen_headbutt",
+				"levelReq": 32
+			},
+			{
+				"key": "nasty_plot",
+				"levelReq": 36
+			},
+			{
+				"key": "swagger",
+				"levelReq": 41
+			},
+			{
+				"key": "psychic",
+				"levelReq": 45
+			},
+			{
+				"key": "trump_card",
+				"levelReq": 49
+			},
+			{
+				"key": "psych_up",
+				"levelReq": 54
+			},
+			{
+				"key": "heal_pulse",
+				"levelReq": 58
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"qwilfish": {
 		"id": "qwilfish",
 		"name": "Qwilfish",
@@ -7567,6 +8279,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 88,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 39,
 		"base": {
 			"hp": 65,
 			"atkFis": 95,
@@ -7669,6 +8382,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 144,
 		"growthCurve": "FAST",
+		"pesoHg": 50,
 		"base": {
 			"hp": 65,
 			"atkFis": 55,
@@ -7763,6 +8477,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 60,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 120,
 		"base": {
 			"hp": 35,
 			"atkFis": 65,
@@ -7826,7 +8541,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "octillery",
-		"evolvesAtLevel": 25
+		"evolvesAtLevel": 25,
+		"evolutionOptions": [{
+			"to": "octillery",
+			"atLevel": 25,
+			"isSpecial": false
+		}]
 	},
 	"octillery": {
 		"id": "octillery",
@@ -7837,6 +8557,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 168,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 285,
 		"base": {
 			"hp": 75,
 			"atkFis": 105,
@@ -7911,6 +8632,7 @@ var SPECIES_DATA = {
 		"catchRate": 25,
 		"baseExp": 170,
 		"growthCurve": "SLOW",
+		"pesoHg": 2200,
 		"base": {
 			"hp": 85,
 			"atkFis": 40,
@@ -7920,30 +8642,6 @@ var SPECIES_DATA = {
 			"speed": 70
 		},
 		"abilities": [
-			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "bullet_seed",
-				"levelReq": 1
-			},
-			{
-				"key": "psybeam",
-				"levelReq": 1
-			},
-			{
-				"key": "roost",
-				"levelReq": 1
-			},
-			{
-				"key": "signal_beam",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
 			{
 				"key": "supersonic",
 				"levelReq": 3
@@ -8009,6 +8707,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 243,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 1520,
 		"base": {
 			"hp": 75,
 			"atkFis": 95,
@@ -8018,14 +8717,6 @@ var SPECIES_DATA = {
 			"speed": 85
 		},
 		"abilities": [
-			{
-				"key": "bubble",
-				"levelReq": 1
-			},
-			{
-				"key": "yawn",
-				"levelReq": 1
-			},
 			{
 				"key": "smokescreen",
 				"levelReq": 5
@@ -8083,6 +8774,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 50,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 18,
 		"base": {
 			"hp": 40,
 			"atkFis": 45,
@@ -8150,7 +8842,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "pidgeotto",
-		"evolvesAtLevel": 18
+		"evolvesAtLevel": 18,
+		"evolutionOptions": [{
+			"to": "pidgeotto",
+			"atLevel": 18,
+			"isSpecial": false
+		}]
 	},
 	"pidgeotto": {
 		"id": "pidgeotto",
@@ -8161,6 +8858,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 122,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 300,
 		"base": {
 			"hp": 63,
 			"atkFis": 60,
@@ -8224,7 +8922,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "pidgeot",
-		"evolvesAtLevel": 36
+		"evolvesAtLevel": 36,
+		"evolutionOptions": [{
+			"to": "pidgeot",
+			"atLevel": 36,
+			"isSpecial": false
+		}]
 	},
 	"pidgeot": {
 		"id": "pidgeot",
@@ -8235,6 +8938,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 216,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 395,
 		"base": {
 			"hp": 83,
 			"atkFis": 80,
@@ -8309,6 +9013,7 @@ var SPECIES_DATA = {
 		"catchRate": 127,
 		"baseExp": 145,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 185,
 		"base": {
 			"hp": 55,
 			"atkFis": 81,
@@ -8379,6 +9084,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 155,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 380,
 		"base": {
 			"hp": 65,
 			"atkFis": 90,
@@ -8445,6 +9151,7 @@ var SPECIES_DATA = {
 		"catchRate": 170,
 		"baseExp": 95,
 		"growthCurve": "FAST",
+		"pesoHg": 55,
 		"base": {
 			"hp": 115,
 			"atkFis": 45,
@@ -8454,10 +9161,6 @@ var SPECIES_DATA = {
 			"speed": 20
 		},
 		"abilities": [
-			{
-				"key": "sing",
-				"levelReq": 1
-			},
 			{
 				"key": "defense_curl",
 				"levelReq": 3
@@ -8531,6 +9234,58 @@ var SPECIES_DATA = {
 				"levelReq": 45
 			}
 		],
+		"evolvesTo": "wigglytuff",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "wigglytuff",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"wigglytuff": {
+		"id": "wigglytuff",
+		"name": "Wigglytuff",
+		"description": "Pokedex Nº40 - tipo NORMAL/FAIRY.",
+		"type": "NORMAL",
+		"type2": "FAIRY",
+		"catchRate": 50,
+		"baseExp": 196,
+		"growthCurve": "FAST",
+		"pesoHg": 120,
+		"base": {
+			"hp": 140,
+			"atkFis": 70,
+			"atkEsp": 85,
+			"def": 45,
+			"defEsp": 50,
+			"speed": 45
+		},
+		"abilities": [
+			{
+				"key": "defense_curl",
+				"levelReq": 1
+			},
+			{
+				"key": "disable",
+				"levelReq": 1
+			},
+			{
+				"key": "double_slap",
+				"levelReq": 1
+			},
+			{
+				"key": "play_rough",
+				"levelReq": 1
+			},
+			{
+				"key": "sing",
+				"levelReq": 1
+			},
+			{
+				"key": "double_edge",
+				"levelReq": 80
+			}
+		],
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
@@ -8543,6 +9298,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 58,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 42,
 		"base": {
 			"hp": 40,
 			"atkFis": 45,
@@ -8614,7 +9370,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "persian",
-		"evolvesAtLevel": 28
+		"evolvesAtLevel": 28,
+		"evolutionOptions": [{
+			"to": "persian",
+			"atLevel": 28,
+			"isSpecial": false
+		}]
 	},
 	"persian": {
 		"id": "persian",
@@ -8625,6 +9386,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 154,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 320,
 		"base": {
 			"hp": 65,
 			"atkFis": 70,
@@ -8703,6 +9465,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 132,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 150,
 		"base": {
 			"hp": 52,
 			"atkFis": 90,
@@ -8797,6 +9560,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 62,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 392,
 		"base": {
 			"hp": 35,
 			"atkFis": 85,
@@ -8872,7 +9636,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "dodrio",
-		"evolvesAtLevel": 31
+		"evolvesAtLevel": 31,
+		"evolutionOptions": [{
+			"to": "dodrio",
+			"atLevel": 31,
+			"isSpecial": false
+		}]
 	},
 	"dodrio": {
 		"id": "dodrio",
@@ -8883,6 +9652,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 165,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 852,
 		"base": {
 			"hp": 60,
 			"atkFis": 110,
@@ -8965,6 +9735,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 77,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 655,
 		"base": {
 			"hp": 90,
 			"atkFis": 55,
@@ -9047,6 +9818,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 172,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 800,
 		"base": {
 			"hp": 105,
 			"atkFis": 95,
@@ -9129,6 +9901,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 172,
 		"growthCurve": "SLOW",
+		"pesoHg": 884,
 		"base": {
 			"hp": 75,
 			"atkFis": 100,
@@ -9211,6 +9984,7 @@ var SPECIES_DATA = {
 		"catchRate": 35,
 		"baseExp": 101,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 40,
 		"base": {
 			"hp": 48,
 			"atkFis": 48,
@@ -9235,6 +10009,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 65,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 65,
 		"base": {
 			"hp": 55,
 			"atkFis": 55,
@@ -9313,8 +10088,40 @@ var SPECIES_DATA = {
 				"levelReq": 45
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "vaporeon",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [
+			{
+				"to": "vaporeon",
+				"atLevel": 80,
+				"isSpecial": true,
+				"stoneType": "WATER"
+			},
+			{
+				"to": "jolteon",
+				"atLevel": 80,
+				"isSpecial": true,
+				"stoneType": "ELECTRIC"
+			},
+			{
+				"to": "flareon",
+				"atLevel": 80,
+				"isSpecial": true,
+				"stoneType": "FIRE"
+			},
+			{
+				"to": "espeon",
+				"atLevel": 80,
+				"isSpecial": true,
+				"stoneType": "PSYCHIC"
+			},
+			{
+				"to": "umbreon",
+				"atLevel": 80,
+				"isSpecial": true,
+				"stoneType": "DARK"
+			}
+		]
 	},
 	"porygon": {
 		"id": "porygon",
@@ -9325,6 +10132,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 79,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 365,
 		"base": {
 			"hp": 65,
 			"atkFis": 60,
@@ -9395,8 +10203,13 @@ var SPECIES_DATA = {
 				"levelReq": 62
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "porygon2",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "porygon2",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"snorlax": {
 		"id": "snorlax",
@@ -9407,6 +10220,7 @@ var SPECIES_DATA = {
 		"catchRate": 25,
 		"baseExp": 189,
 		"growthCurve": "SLOW",
+		"pesoHg": 4600,
 		"base": {
 			"hp": 160,
 			"atkFis": 110,
@@ -9416,10 +10230,6 @@ var SPECIES_DATA = {
 			"speed": 30
 		},
 		"abilities": [
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
 			{
 				"key": "defense_curl",
 				"levelReq": 4
@@ -9497,6 +10307,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 43,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 60,
 		"base": {
 			"hp": 35,
 			"atkFis": 46,
@@ -9564,7 +10375,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "furret",
-		"evolvesAtLevel": 15
+		"evolvesAtLevel": 15,
+		"evolutionOptions": [{
+			"to": "furret",
+			"atLevel": 15,
+			"isSpecial": false
+		}]
 	},
 	"furret": {
 		"id": "furret",
@@ -9575,6 +10391,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 145,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 325,
 		"base": {
 			"hp": 85,
 			"atkFis": 76,
@@ -9649,6 +10466,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 52,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 212,
 		"base": {
 			"hp": 60,
 			"atkFis": 30,
@@ -9732,7 +10550,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "noctowl",
-		"evolvesAtLevel": 20
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [{
+			"to": "noctowl",
+			"atLevel": 20,
+			"isSpecial": false
+		}]
 	},
 	"noctowl": {
 		"id": "noctowl",
@@ -9743,6 +10566,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 158,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 408,
 		"base": {
 			"hp": 100,
 			"atkFis": 50,
@@ -9825,6 +10649,7 @@ var SPECIES_DATA = {
 		"catchRate": 170,
 		"baseExp": 42,
 		"growthCurve": "FAST",
+		"pesoHg": 10,
 		"base": {
 			"hp": 90,
 			"atkFis": 30,
@@ -9859,8 +10684,13 @@ var SPECIES_DATA = {
 				"levelReq": 11
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "jigglypuff",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "jigglypuff",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"aipom": {
 		"id": "aipom",
@@ -9871,6 +10701,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 72,
 		"growthCurve": "FAST",
+		"pesoHg": 115,
 		"base": {
 			"hp": 55,
 			"atkFis": 70,
@@ -9949,6 +10780,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 415,
 		"base": {
 			"hp": 70,
 			"atkFis": 80,
@@ -10039,6 +10871,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 145,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 140,
 		"base": {
 			"hp": 100,
 			"atkFis": 70,
@@ -10149,6 +10982,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 66,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 88,
 		"base": {
 			"hp": 60,
 			"atkFis": 80,
@@ -10220,7 +11054,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "ursaring",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "ursaring",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"ursaring": {
 		"id": "ursaring",
@@ -10231,6 +11070,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 1258,
 		"base": {
 			"hp": 90,
 			"atkFis": 130,
@@ -10293,6 +11133,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 180,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 325,
 		"base": {
 			"hp": 85,
 			"atkFis": 80,
@@ -10302,22 +11143,6 @@ var SPECIES_DATA = {
 			"speed": 60
 		},
 		"abilities": [
-			{
-				"key": "conversion",
-				"levelReq": 1
-			},
-			{
-				"key": "conversion_2",
-				"levelReq": 1
-			},
-			{
-				"key": "defense_curl",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
 			{
 				"key": "psybeam",
 				"levelReq": 7
@@ -10379,6 +11204,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 163,
 		"growthCurve": "SLOW",
+		"pesoHg": 712,
 		"base": {
 			"hp": 73,
 			"atkFis": 95,
@@ -10461,6 +11287,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 88,
 		"growthCurve": "FAST",
+		"pesoHg": 580,
 		"base": {
 			"hp": 55,
 			"atkFis": 20,
@@ -10485,6 +11312,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 172,
 		"growthCurve": "SLOW",
+		"pesoHg": 755,
 		"base": {
 			"hp": 95,
 			"atkFis": 80,
@@ -10559,6 +11387,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 137,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 1050,
 		"base": {
 			"hp": 55,
 			"atkFis": 95,
@@ -10625,8 +11454,13 @@ var SPECIES_DATA = {
 				"levelReq": 54
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "golem",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "golem",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"golem": {
 		"id": "golem",
@@ -10637,6 +11471,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 223,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 3e3,
 		"base": {
 			"hp": 80,
 			"atkFis": 120,
@@ -10646,14 +11481,6 @@ var SPECIES_DATA = {
 			"speed": 45
 		},
 		"abilities": [
-			{
-				"key": "defense_curl",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
 			{
 				"key": "mud_sport",
 				"levelReq": 4
@@ -10727,6 +11554,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 77,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 2100,
 		"base": {
 			"hp": 35,
 			"atkFis": 45,
@@ -10825,8 +11653,13 @@ var SPECIES_DATA = {
 				"levelReq": 52
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "steelix",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "steelix",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"omanyte": {
 		"id": "omanyte",
@@ -10837,6 +11670,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 71,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 75,
 		"base": {
 			"hp": 35,
 			"atkFis": 40,
@@ -10904,7 +11738,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "omastar",
-		"evolvesAtLevel": 40
+		"evolvesAtLevel": 40,
+		"evolutionOptions": [{
+			"to": "omastar",
+			"atLevel": 40,
+			"isSpecial": false
+		}]
 	},
 	"omastar": {
 		"id": "omastar",
@@ -10915,6 +11754,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 173,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 350,
 		"base": {
 			"hp": 70,
 			"atkFis": 60,
@@ -10989,6 +11829,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 71,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 115,
 		"base": {
 			"hp": 30,
 			"atkFis": 80,
@@ -11048,7 +11889,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "kabutops",
-		"evolvesAtLevel": 40
+		"evolvesAtLevel": 40,
+		"evolutionOptions": [{
+			"to": "kabutops",
+			"atLevel": 40,
+			"isSpecial": false
+		}]
 	},
 	"kabutops": {
 		"id": "kabutops",
@@ -11059,6 +11905,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 173,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 405,
 		"base": {
 			"hp": 60,
 			"atkFis": 115,
@@ -11129,6 +11976,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 180,
 		"growthCurve": "SLOW",
+		"pesoHg": 590,
 		"base": {
 			"hp": 80,
 			"atkFis": 105,
@@ -11219,6 +12067,7 @@ var SPECIES_DATA = {
 		"catchRate": 65,
 		"baseExp": 144,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 380,
 		"base": {
 			"hp": 70,
 			"atkFis": 100,
@@ -11229,15 +12078,7 @@ var SPECIES_DATA = {
 		},
 		"abilities": [
 			{
-				"key": "copycat",
-				"levelReq": 1
-			},
-			{
 				"key": "slam",
-				"levelReq": 1
-			},
-			{
-				"key": "wood_hammer",
 				"levelReq": 1
 			},
 			{
@@ -11313,6 +12154,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 60,
 		"growthCurve": "SLOW",
+		"pesoHg": 720,
 		"base": {
 			"hp": 50,
 			"atkFis": 64,
@@ -11380,7 +12222,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "pupitar",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "pupitar",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"pupitar": {
 		"id": "pupitar",
@@ -11391,6 +12238,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 144,
 		"growthCurve": "SLOW",
+		"pesoHg": 1520,
 		"base": {
 			"hp": 70,
 			"atkFis": 84,
@@ -11450,7 +12298,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "tyranitar",
-		"evolvesAtLevel": 55
+		"evolvesAtLevel": 55,
+		"evolutionOptions": [{
+			"to": "tyranitar",
+			"atLevel": 55,
+			"isSpecial": false
+		}]
 	},
 	"tyranitar": {
 		"id": "tyranitar",
@@ -11461,6 +12314,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 270,
 		"growthCurve": "SLOW",
+		"pesoHg": 2020,
 		"base": {
 			"hp": 100,
 			"atkFis": 134,
@@ -11535,6 +12389,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 60,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 120,
 		"base": {
 			"hp": 50,
 			"atkFis": 75,
@@ -11614,7 +12469,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "sandslash",
-		"evolvesAtLevel": 22
+		"evolvesAtLevel": 22,
+		"evolutionOptions": [{
+			"to": "sandslash",
+			"atLevel": 22,
+			"isSpecial": false
+		}]
 	},
 	"sandslash": {
 		"id": "sandslash",
@@ -11625,6 +12485,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 158,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 295,
 		"base": {
 			"hp": 75,
 			"atkFis": 100,
@@ -11711,6 +12572,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 53,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 8,
 		"base": {
 			"hp": 10,
 			"atkFis": 55,
@@ -11778,7 +12640,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "dugtrio",
-		"evolvesAtLevel": 26
+		"evolvesAtLevel": 26,
+		"evolutionOptions": [{
+			"to": "dugtrio",
+			"atLevel": 26,
+			"isSpecial": false
+		}]
 	},
 	"dugtrio": {
 		"id": "dugtrio",
@@ -11789,6 +12656,7 @@ var SPECIES_DATA = {
 		"catchRate": 50,
 		"baseExp": 149,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 333,
 		"base": {
 			"hp": 35,
 			"atkFis": 100,
@@ -11863,6 +12731,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 64,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 65,
 		"base": {
 			"hp": 50,
 			"atkFis": 50,
@@ -11938,7 +12807,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "marowak",
-		"evolvesAtLevel": 28
+		"evolvesAtLevel": 28,
+		"evolutionOptions": [{
+			"to": "marowak",
+			"atLevel": 28,
+			"isSpecial": false
+		}]
 	},
 	"marowak": {
 		"id": "marowak",
@@ -11949,6 +12823,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 149,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 450,
 		"base": {
 			"hp": 60,
 			"atkFis": 80,
@@ -12031,6 +12906,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 69,
 		"growthCurve": "SLOW",
+		"pesoHg": 1150,
 		"base": {
 			"hp": 80,
 			"atkFis": 85,
@@ -12102,7 +12978,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "rhydon",
-		"evolvesAtLevel": 42
+		"evolvesAtLevel": 42,
+		"evolutionOptions": [{
+			"to": "rhydon",
+			"atLevel": 42,
+			"isSpecial": false
+		}]
 	},
 	"rhydon": {
 		"id": "rhydon",
@@ -12113,6 +12994,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 170,
 		"growthCurve": "SLOW",
+		"pesoHg": 1200,
 		"base": {
 			"hp": 105,
 			"atkFis": 130,
@@ -12191,6 +13073,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 86,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 648,
 		"base": {
 			"hp": 65,
 			"atkFis": 75,
@@ -12273,6 +13156,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 66,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 335,
 		"base": {
 			"hp": 90,
 			"atkFis": 60,
@@ -12336,7 +13220,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "donphan",
-		"evolvesAtLevel": 25
+		"evolvesAtLevel": 25,
+		"evolutionOptions": [{
+			"to": "donphan",
+			"atLevel": 25,
+			"isSpecial": false
+		}]
 	},
 	"donphan": {
 		"id": "donphan",
@@ -12347,6 +13236,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 1200,
 		"base": {
 			"hp": 90,
 			"atkFis": 120,
@@ -12409,6 +13299,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 190,
 		"base": {
 			"hp": 58,
 			"atkFis": 64,
@@ -12460,7 +13351,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "charizard",
-		"evolvesAtLevel": 36
+		"evolvesAtLevel": 36,
+		"evolutionOptions": [{
+			"to": "charizard",
+			"atLevel": 36,
+			"isSpecial": false
+		}]
 	},
 	"charizard": {
 		"id": "charizard",
@@ -12471,6 +13367,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 240,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 905,
 		"base": {
 			"hp": 78,
 			"atkFis": 84,
@@ -12545,6 +13442,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 70,
 		"growthCurve": "SLOW",
+		"pesoHg": 190,
 		"base": {
 			"hp": 55,
 			"atkFis": 70,
@@ -12627,8 +13525,13 @@ var SPECIES_DATA = {
 				"levelReq": 45
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "arcanine",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "arcanine",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"arcanine": {
 		"id": "arcanine",
@@ -12639,6 +13542,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 194,
 		"growthCurve": "SLOW",
+		"pesoHg": 1550,
 		"base": {
 			"hp": 90,
 			"atkFis": 110,
@@ -12685,6 +13589,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 82,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 300,
 		"base": {
 			"hp": 50,
 			"atkFis": 85,
@@ -12752,7 +13657,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "rapidash",
-		"evolvesAtLevel": 40
+		"evolvesAtLevel": 40,
+		"evolutionOptions": [{
+			"to": "rapidash",
+			"atLevel": 40,
+			"isSpecial": false
+		}]
 	},
 	"rapidash": {
 		"id": "rapidash",
@@ -12763,6 +13673,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 950,
 		"base": {
 			"hp": 65,
 			"atkFis": 100,
@@ -12837,6 +13748,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 173,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 445,
 		"base": {
 			"hp": 65,
 			"atkFis": 95,
@@ -12898,6 +13810,77 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"flareon": {
+		"id": "flareon",
+		"name": "Flareon",
+		"description": "Pokedex Nº136 - tipo FIRE.",
+		"type": "FIRE",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 184,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 250,
+		"base": {
+			"hp": 65,
+			"atkFis": 130,
+			"atkEsp": 95,
+			"def": 60,
+			"defEsp": 110,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "ember",
+				"levelReq": 1
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 5
+			},
+			{
+				"key": "baby_doll_eyes",
+				"levelReq": 9
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "bite",
+				"levelReq": 17
+			},
+			{
+				"key": "fire_fang",
+				"levelReq": 20
+			},
+			{
+				"key": "fire_spin",
+				"levelReq": 25
+			},
+			{
+				"key": "scary_face",
+				"levelReq": 29
+			},
+			{
+				"key": "smog",
+				"levelReq": 33
+			},
+			{
+				"key": "lava_plume",
+				"levelReq": 37
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 41
+			},
+			{
+				"key": "flare_blitz",
+				"levelReq": 45
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"cyndaquil": {
 		"id": "cyndaquil",
 		"name": "Cyndaquil",
@@ -12907,6 +13890,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 62,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 79,
 		"base": {
 			"hp": 39,
 			"atkFis": 52,
@@ -12982,7 +13966,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "quilava",
-		"evolvesAtLevel": 14
+		"evolvesAtLevel": 14,
+		"evolutionOptions": [{
+			"to": "quilava",
+			"atLevel": 14,
+			"isSpecial": false
+		}]
 	},
 	"quilava": {
 		"id": "quilava",
@@ -12993,6 +13982,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 190,
 		"base": {
 			"hp": 58,
 			"atkFis": 64,
@@ -13060,7 +14050,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "typhlosion",
-		"evolvesAtLevel": 36
+		"evolvesAtLevel": 36,
+		"evolutionOptions": [{
+			"to": "typhlosion",
+			"atLevel": 36,
+			"isSpecial": false
+		}]
 	},
 	"typhlosion": {
 		"id": "typhlosion",
@@ -13071,6 +14066,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 240,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 795,
 		"base": {
 			"hp": 78,
 			"atkFis": 84,
@@ -13149,6 +14145,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 50,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 350,
 		"base": {
 			"hp": 40,
 			"atkFis": 40,
@@ -13224,7 +14221,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "magcargo",
-		"evolvesAtLevel": 38
+		"evolvesAtLevel": 38,
+		"evolutionOptions": [{
+			"to": "magcargo",
+			"atLevel": 38,
+			"isSpecial": false
+		}]
 	},
 	"magcargo": {
 		"id": "magcargo",
@@ -13235,6 +14237,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 151,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 550,
 		"base": {
 			"hp": 60,
 			"atkFis": 50,
@@ -13317,6 +14320,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 73,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 214,
 		"base": {
 			"hp": 45,
 			"atkFis": 75,
@@ -13384,7 +14388,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "magmar",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "magmar",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"pikachu": {
 		"id": "pikachu",
@@ -13395,6 +14404,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 112,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 60,
 		"base": {
 			"hp": 35,
 			"atkFis": 55,
@@ -13404,14 +14414,6 @@ var SPECIES_DATA = {
 			"speed": 90
 		},
 		"abilities": [
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_shock",
-				"levelReq": 1
-			},
 			{
 				"key": "growl",
 				"levelReq": 5
@@ -13477,6 +14479,50 @@ var SPECIES_DATA = {
 				"levelReq": 58
 			}
 		],
+		"evolvesTo": "raichu",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "raichu",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"raichu": {
+		"id": "raichu",
+		"name": "Raichu",
+		"description": "Pokedex Nº26 - tipo ELECTRIC.",
+		"type": "ELECTRIC",
+		"type2": null,
+		"catchRate": 75,
+		"baseExp": 218,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 300,
+		"base": {
+			"hp": 60,
+			"atkFis": 90,
+			"atkEsp": 90,
+			"def": 55,
+			"defEsp": 80,
+			"speed": 110
+		},
+		"abilities": [
+			{
+				"key": "quick_attack",
+				"levelReq": 1
+			},
+			{
+				"key": "tail_whip",
+				"levelReq": 1
+			},
+			{
+				"key": "thunder_shock",
+				"levelReq": 1
+			},
+			{
+				"key": "thunderbolt",
+				"levelReq": 1
+			}
+		],
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
@@ -13489,6 +14535,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 65,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 60,
 		"base": {
 			"hp": 25,
 			"atkFis": 35,
@@ -13572,7 +14619,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "magneton",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "magneton",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"magneton": {
 		"id": "magneton",
@@ -13583,6 +14635,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 163,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 600,
 		"base": {
 			"hp": 50,
 			"atkFis": 60,
@@ -13673,6 +14726,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 66,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 104,
 		"base": {
 			"hp": 40,
 			"atkFis": 30,
@@ -13752,7 +14806,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "electrode",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "electrode",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"electrode": {
 		"id": "electrode",
@@ -13763,6 +14822,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 172,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 666,
 		"base": {
 			"hp": 60,
 			"atkFis": 50,
@@ -13845,6 +14905,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 172,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 300,
 		"base": {
 			"hp": 65,
 			"atkFis": 83,
@@ -13906,6 +14967,77 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"jolteon": {
+		"id": "jolteon",
+		"name": "Jolteon",
+		"description": "Pokedex Nº135 - tipo ELECTRIC.",
+		"type": "ELECTRIC",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 184,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 245,
+		"base": {
+			"hp": 65,
+			"atkFis": 65,
+			"atkEsp": 110,
+			"def": 60,
+			"defEsp": 95,
+			"speed": 130
+		},
+		"abilities": [
+			{
+				"key": "thunder_shock",
+				"levelReq": 1
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 5
+			},
+			{
+				"key": "baby_doll_eyes",
+				"levelReq": 9
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "double_kick",
+				"levelReq": 17
+			},
+			{
+				"key": "thunder_fang",
+				"levelReq": 20
+			},
+			{
+				"key": "pin_missile",
+				"levelReq": 25
+			},
+			{
+				"key": "agility",
+				"levelReq": 29
+			},
+			{
+				"key": "thunder_wave",
+				"levelReq": 33
+			},
+			{
+				"key": "discharge",
+				"levelReq": 37
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 41
+			},
+			{
+				"key": "thunder",
+				"levelReq": 45
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"pichu": {
 		"id": "pichu",
 		"name": "Pichu",
@@ -13915,6 +15047,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 41,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 20,
 		"base": {
 			"hp": 20,
 			"atkFis": 40,
@@ -13949,8 +15082,13 @@ var SPECIES_DATA = {
 				"levelReq": 18
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "pikachu",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "pikachu",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"mareep": {
 		"id": "mareep",
@@ -13961,6 +15099,7 @@ var SPECIES_DATA = {
 		"catchRate": 235,
 		"baseExp": 56,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 78,
 		"base": {
 			"hp": 55,
 			"atkFis": 40,
@@ -14032,7 +15171,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "flaaffy",
-		"evolvesAtLevel": 15
+		"evolvesAtLevel": 15,
+		"evolutionOptions": [{
+			"to": "flaaffy",
+			"atLevel": 15,
+			"isSpecial": false
+		}]
 	},
 	"flaaffy": {
 		"id": "flaaffy",
@@ -14043,6 +15187,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 128,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 133,
 		"base": {
 			"hp": 70,
 			"atkFis": 55,
@@ -14106,7 +15251,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "ampharos",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "ampharos",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"ampharos": {
 		"id": "ampharos",
@@ -14117,6 +15267,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 230,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 615,
 		"base": {
 			"hp": 90,
 			"atkFis": 75,
@@ -14199,6 +15350,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 72,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 235,
 		"base": {
 			"hp": 45,
 			"atkFis": 63,
@@ -14266,7 +15418,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "electabuzz",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "electabuzz",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"ekans": {
 		"id": "ekans",
@@ -14277,6 +15434,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 58,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 69,
 		"base": {
 			"hp": 35,
 			"atkFis": 60,
@@ -14356,7 +15514,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "arbok",
-		"evolvesAtLevel": 22
+		"evolvesAtLevel": 22,
+		"evolutionOptions": [{
+			"to": "arbok",
+			"atLevel": 22,
+			"isSpecial": false
+		}]
 	},
 	"arbok": {
 		"id": "arbok",
@@ -14367,6 +15530,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 157,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 650,
 		"base": {
 			"hp": 60,
 			"atkFis": 95,
@@ -14453,6 +15617,7 @@ var SPECIES_DATA = {
 		"catchRate": 235,
 		"baseExp": 55,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 70,
 		"base": {
 			"hp": 55,
 			"atkFis": 47,
@@ -14516,7 +15681,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "nidorina",
-		"evolvesAtLevel": 16
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "nidorina",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
 	},
 	"nidorina": {
 		"id": "nidorina",
@@ -14527,6 +15697,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 128,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 200,
 		"base": {
 			"hp": 70,
 			"atkFis": 62,
@@ -14581,8 +15752,13 @@ var SPECIES_DATA = {
 				"levelReq": 58
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "nidoqueen",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "nidoqueen",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"nidoqueen": {
 		"id": "nidoqueen",
@@ -14593,6 +15769,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 227,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 600,
 		"base": {
 			"hp": 90,
 			"atkFis": 92,
@@ -14602,22 +15779,6 @@ var SPECIES_DATA = {
 			"speed": 76
 		},
 		"abilities": [
-			{
-				"key": "double_kick",
-				"levelReq": 1
-			},
-			{
-				"key": "poison_sting",
-				"levelReq": 1
-			},
-			{
-				"key": "scratch",
-				"levelReq": 1
-			},
-			{
-				"key": "tail_whip",
-				"levelReq": 1
-			},
 			{
 				"key": "chip_away",
 				"levelReq": 23
@@ -14647,6 +15808,7 @@ var SPECIES_DATA = {
 		"catchRate": 235,
 		"baseExp": 55,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 90,
 		"base": {
 			"hp": 46,
 			"atkFis": 57,
@@ -14710,7 +15872,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "nidorino",
-		"evolvesAtLevel": 16
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "nidorino",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
 	},
 	"nidorino": {
 		"id": "nidorino",
@@ -14721,6 +15888,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 128,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 195,
 		"base": {
 			"hp": 61,
 			"atkFis": 72,
@@ -14775,8 +15943,13 @@ var SPECIES_DATA = {
 				"levelReq": 58
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "nidoking",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "nidoking",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"nidoking": {
 		"id": "nidoking",
@@ -14787,6 +15960,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 227,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 620,
 		"base": {
 			"hp": 81,
 			"atkFis": 102,
@@ -14796,22 +15970,6 @@ var SPECIES_DATA = {
 			"speed": 85
 		},
 		"abilities": [
-			{
-				"key": "double_kick",
-				"levelReq": 1
-			},
-			{
-				"key": "focus_energy",
-				"levelReq": 1
-			},
-			{
-				"key": "peck",
-				"levelReq": 1
-			},
-			{
-				"key": "poison_sting",
-				"levelReq": 1
-			},
 			{
 				"key": "chip_away",
 				"levelReq": 23
@@ -14841,6 +15999,7 @@ var SPECIES_DATA = {
 		"catchRate": 255,
 		"baseExp": 49,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 75,
 		"base": {
 			"hp": 40,
 			"atkFis": 45,
@@ -14912,7 +16071,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "golbat",
-		"evolvesAtLevel": 22
+		"evolvesAtLevel": 22,
+		"evolutionOptions": [{
+			"to": "golbat",
+			"atLevel": 22,
+			"isSpecial": false
+		}]
 	},
 	"golbat": {
 		"id": "golbat",
@@ -14923,6 +16087,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 550,
 		"base": {
 			"hp": 75,
 			"atkFis": 80,
@@ -14989,8 +16154,13 @@ var SPECIES_DATA = {
 				"levelReq": 51
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "crobat",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "crobat",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"grimer": {
 		"id": "grimer",
@@ -15001,6 +16171,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 65,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 300,
 		"base": {
 			"hp": 80,
 			"atkFis": 80,
@@ -15076,7 +16247,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "muk",
-		"evolvesAtLevel": 38
+		"evolvesAtLevel": 38,
+		"evolutionOptions": [{
+			"to": "muk",
+			"atLevel": 38,
+			"isSpecial": false
+		}]
 	},
 	"muk": {
 		"id": "muk",
@@ -15087,6 +16263,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 175,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 300,
 		"base": {
 			"hp": 105,
 			"atkFis": 105,
@@ -15169,6 +16346,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 68,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 10,
 		"base": {
 			"hp": 40,
 			"atkFis": 65,
@@ -15240,7 +16418,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "weezing",
-		"evolvesAtLevel": 35
+		"evolvesAtLevel": 35,
+		"evolutionOptions": [{
+			"to": "weezing",
+			"atLevel": 35,
+			"isSpecial": false
+		}]
 	},
 	"weezing": {
 		"id": "weezing",
@@ -15251,6 +16434,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 172,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 95,
 		"base": {
 			"hp": 65,
 			"atkFis": 90,
@@ -15320,6 +16504,89 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"crobat": {
+		"id": "crobat",
+		"name": "Crobat",
+		"description": "Pokedex Nº169 - tipo POISON/FLYING.",
+		"type": "POISON",
+		"type2": "FLYING",
+		"catchRate": 90,
+		"baseExp": 241,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 750,
+		"base": {
+			"hp": 85,
+			"atkFis": 90,
+			"atkEsp": 70,
+			"def": 80,
+			"defEsp": 80,
+			"speed": 130
+		},
+		"abilities": [
+			{
+				"key": "supersonic",
+				"levelReq": 5
+			},
+			{
+				"key": "astonish",
+				"levelReq": 7
+			},
+			{
+				"key": "bite",
+				"levelReq": 11
+			},
+			{
+				"key": "wing_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 17
+			},
+			{
+				"key": "air_cutter",
+				"levelReq": 19
+			},
+			{
+				"key": "swift",
+				"levelReq": 24
+			},
+			{
+				"key": "poison_fang",
+				"levelReq": 27
+			},
+			{
+				"key": "mean_look",
+				"levelReq": 32
+			},
+			{
+				"key": "leech_life",
+				"levelReq": 35
+			},
+			{
+				"key": "haze",
+				"levelReq": 40
+			},
+			{
+				"key": "venoshock",
+				"levelReq": 43
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 48
+			},
+			{
+				"key": "quick_guard",
+				"levelReq": 51
+			},
+			{
+				"key": "cross_poison",
+				"levelReq": 80
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"mankey": {
 		"id": "mankey",
 		"name": "Mankey",
@@ -15329,6 +16596,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 61,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 280,
 		"base": {
 			"hp": 40,
 			"atkFis": 80,
@@ -15416,7 +16684,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "primeape",
-		"evolvesAtLevel": 28
+		"evolvesAtLevel": 28,
+		"evolutionOptions": [{
+			"to": "primeape",
+			"atLevel": 28,
+			"isSpecial": false
+		}]
 	},
 	"primeape": {
 		"id": "primeape",
@@ -15427,6 +16700,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 320,
 		"base": {
 			"hp": 65,
 			"atkFis": 105,
@@ -15509,6 +16783,7 @@ var SPECIES_DATA = {
 		"catchRate": 180,
 		"baseExp": 61,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 195,
 		"base": {
 			"hp": 70,
 			"atkFis": 80,
@@ -15588,7 +16863,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "machoke",
-		"evolvesAtLevel": 28
+		"evolvesAtLevel": 28,
+		"evolutionOptions": [{
+			"to": "machoke",
+			"atLevel": 28,
+			"isSpecial": false
+		}]
 	},
 	"machoke": {
 		"id": "machoke",
@@ -15599,6 +16879,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 705,
 		"base": {
 			"hp": 80,
 			"atkFis": 100,
@@ -15669,8 +16950,13 @@ var SPECIES_DATA = {
 				"levelReq": 57
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "machamp",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "machamp",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"machamp": {
 		"id": "machamp",
@@ -15681,6 +16967,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 227,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 1300,
 		"base": {
 			"hp": 90,
 			"atkFis": 130,
@@ -15690,22 +16977,6 @@ var SPECIES_DATA = {
 			"speed": 55
 		},
 		"abilities": [
-			{
-				"key": "leer",
-				"levelReq": 1
-			},
-			{
-				"key": "low_kick",
-				"levelReq": 1
-			},
-			{
-				"key": "strength",
-				"levelReq": 1
-			},
-			{
-				"key": "wide_guard",
-				"levelReq": 1
-			},
 			{
 				"key": "focus_energy",
 				"levelReq": 3
@@ -15765,6 +17036,10 @@ var SPECIES_DATA = {
 			{
 				"key": "dynamic_punch",
 				"levelReq": 57
+			},
+			{
+				"key": "strength",
+				"levelReq": 80
 			}
 		],
 		"evolvesTo": null,
@@ -15779,6 +17054,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 498,
 		"base": {
 			"hp": 50,
 			"atkFis": 120,
@@ -15865,6 +17141,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 502,
 		"base": {
 			"hp": 50,
 			"atkFis": 105,
@@ -15876,10 +17153,6 @@ var SPECIES_DATA = {
 		"abilities": [
 			{
 				"key": "comet_punch",
-				"levelReq": 1
-			},
-			{
-				"key": "revenge",
 				"levelReq": 1
 			},
 			{
@@ -15959,6 +17232,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 42,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 210,
 		"base": {
 			"hp": 35,
 			"atkFis": 35,
@@ -15986,7 +17260,107 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "hitmonlee",
-		"evolvesAtLevel": 20
+		"evolvesAtLevel": 20,
+		"evolutionOptions": [
+			{
+				"to": "hitmonlee",
+				"atLevel": 20,
+				"isSpecial": false
+			},
+			{
+				"to": "hitmonchan",
+				"atLevel": 20,
+				"isSpecial": false
+			},
+			{
+				"to": "hitmontop",
+				"atLevel": 20,
+				"isSpecial": false
+			}
+		]
+	},
+	"hitmontop": {
+		"id": "hitmontop",
+		"name": "Hitmontop",
+		"description": "Pokedex Nº237 - tipo FIGHTING.",
+		"type": "FIGHTING",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 159,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 480,
+		"base": {
+			"hp": 50,
+			"atkFis": 95,
+			"atkEsp": 35,
+			"def": 95,
+			"defEsp": 110,
+			"speed": 70
+		},
+		"abilities": [
+			{
+				"key": "rolling_kick",
+				"levelReq": 1
+			},
+			{
+				"key": "focus_energy",
+				"levelReq": 6
+			},
+			{
+				"key": "pursuit",
+				"levelReq": 10
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 15
+			},
+			{
+				"key": "rapid_spin",
+				"levelReq": 19
+			},
+			{
+				"key": "feint",
+				"levelReq": 24
+			},
+			{
+				"key": "counter",
+				"levelReq": 28
+			},
+			{
+				"key": "triple_kick",
+				"levelReq": 33
+			},
+			{
+				"key": "agility",
+				"levelReq": 37
+			},
+			{
+				"key": "gyro_ball",
+				"levelReq": 42
+			},
+			{
+				"key": "quick_guard",
+				"levelReq": 46
+			},
+			{
+				"key": "wide_guard",
+				"levelReq": 46
+			},
+			{
+				"key": "detect",
+				"levelReq": 50
+			},
+			{
+				"key": "close_combat",
+				"levelReq": 55
+			},
+			{
+				"key": "endeavor",
+				"levelReq": 60
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
 	},
 	"jynx": {
 		"id": "jynx",
@@ -15997,6 +17371,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 159,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 406,
 		"base": {
 			"hp": 65,
 			"atkFis": 50,
@@ -16075,6 +17450,7 @@ var SPECIES_DATA = {
 		"catchRate": 225,
 		"baseExp": 50,
 		"growthCurve": "SLOW",
+		"pesoHg": 65,
 		"base": {
 			"hp": 50,
 			"atkFis": 50,
@@ -16146,7 +17522,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "piloswine",
-		"evolvesAtLevel": 33
+		"evolvesAtLevel": 33,
+		"evolutionOptions": [{
+			"to": "piloswine",
+			"atLevel": 33,
+			"isSpecial": false
+		}]
 	},
 	"piloswine": {
 		"id": "piloswine",
@@ -16157,6 +17538,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 158,
 		"growthCurve": "SLOW",
+		"pesoHg": 558,
 		"base": {
 			"hp": 100,
 			"atkFis": 100,
@@ -16235,6 +17617,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 116,
 		"growthCurve": "FAST",
+		"pesoHg": 160,
 		"base": {
 			"hp": 45,
 			"atkFis": 55,
@@ -16262,6 +17645,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 61,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 60,
 		"base": {
 			"hp": 45,
 			"atkFis": 30,
@@ -16333,7 +17717,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "jynx",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "jynx",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"steelix": {
 		"id": "steelix",
@@ -16344,6 +17733,7 @@ var SPECIES_DATA = {
 		"catchRate": 25,
 		"baseExp": 179,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 4e3,
 		"base": {
 			"hp": 75,
 			"atkFis": 85,
@@ -16353,34 +17743,6 @@ var SPECIES_DATA = {
 			"speed": 30
 		},
 		"abilities": [
-			{
-				"key": "bind",
-				"levelReq": 1
-			},
-			{
-				"key": "fire_fang",
-				"levelReq": 1
-			},
-			{
-				"key": "harden",
-				"levelReq": 1
-			},
-			{
-				"key": "ice_fang",
-				"levelReq": 1
-			},
-			{
-				"key": "mud_sport",
-				"levelReq": 1
-			},
-			{
-				"key": "tackle",
-				"levelReq": 1
-			},
-			{
-				"key": "thunder_fang",
-				"levelReq": 1
-			},
 			{
 				"key": "curse",
 				"levelReq": 4
@@ -16466,6 +17828,7 @@ var SPECIES_DATA = {
 		"catchRate": 25,
 		"baseExp": 163,
 		"growthCurve": "SLOW",
+		"pesoHg": 505,
 		"base": {
 			"hp": 65,
 			"atkFis": 80,
@@ -16552,6 +17915,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 64,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 20,
 		"base": {
 			"hp": 40,
 			"atkFis": 50,
@@ -16627,52 +17991,58 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "xatu",
-		"evolvesAtLevel": 25
+		"evolvesAtLevel": 25,
+		"evolutionOptions": [{
+			"to": "xatu",
+			"atLevel": 25,
+			"isSpecial": false
+		}]
 	},
-	"xatu": {
-		"id": "xatu",
-		"name": "Xatu",
-		"description": "Pokedex Nº178 - tipo PSYCHIC/FLYING.",
-		"type": "PSYCHIC",
+	"togetic": {
+		"id": "togetic",
+		"name": "Togetic",
+		"description": "Pokedex Nº176 - tipo FAIRY/FLYING.",
+		"type": "FAIRY",
 		"type2": "FLYING",
 		"catchRate": 75,
-		"baseExp": 165,
-		"growthCurve": "MEDIUM_FAST",
+		"baseExp": 142,
+		"growthCurve": "FAST",
+		"pesoHg": 32,
 		"base": {
-			"hp": 65,
-			"atkFis": 75,
-			"atkEsp": 95,
-			"def": 70,
-			"defEsp": 70,
-			"speed": 95
+			"hp": 55,
+			"atkFis": 40,
+			"atkEsp": 80,
+			"def": 85,
+			"defEsp": 105,
+			"speed": 40
 		},
 		"abilities": [
 			{
-				"key": "night_shade",
-				"levelReq": 6
+				"key": "metronome",
+				"levelReq": 5
 			},
 			{
-				"key": "teleport",
+				"key": "sweet_kiss",
 				"levelReq": 9
 			},
 			{
-				"key": "lucky_chant",
-				"levelReq": 12
+				"key": "yawn",
+				"levelReq": 13
 			},
 			{
-				"key": "stored_power",
+				"key": "fairy_wind",
+				"levelReq": 14
+			},
+			{
+				"key": "encore",
 				"levelReq": 17
 			},
 			{
-				"key": "ominous_wind",
-				"levelReq": 20
+				"key": "follow_me",
+				"levelReq": 21
 			},
 			{
-				"key": "confuse_ray",
-				"levelReq": 23
-			},
-			{
-				"key": "air_slash",
+				"key": "bestow",
 				"levelReq": 25
 			},
 			{
@@ -16680,32 +18050,28 @@ var SPECIES_DATA = {
 				"levelReq": 29
 			},
 			{
-				"key": "psychic",
-				"levelReq": 35
+				"key": "ancient_power",
+				"levelReq": 33
 			},
 			{
-				"key": "miracle_eye",
-				"levelReq": 39
+				"key": "safeguard",
+				"levelReq": 37
 			},
 			{
-				"key": "psycho_shift",
-				"levelReq": 43
+				"key": "baton_pass",
+				"levelReq": 41
 			},
 			{
-				"key": "future_sight",
+				"key": "double_edge",
+				"levelReq": 45
+			},
+			{
+				"key": "last_resort",
 				"levelReq": 49
 			},
 			{
-				"key": "guard_swap",
+				"key": "after_you",
 				"levelReq": 53
-			},
-			{
-				"key": "power_swap",
-				"levelReq": 53
-			},
-			{
-				"key": "me_first",
-				"levelReq": 57
 			}
 		],
 		"evolvesTo": null,
@@ -16720,6 +18086,7 @@ var SPECIES_DATA = {
 		"catchRate": 200,
 		"baseExp": 62,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 195,
 		"base": {
 			"hp": 25,
 			"atkFis": 20,
@@ -16733,7 +18100,12 @@ var SPECIES_DATA = {
 			"levelReq": 1
 		}],
 		"evolvesTo": "kadabra",
-		"evolvesAtLevel": 16
+		"evolvesAtLevel": 16,
+		"evolutionOptions": [{
+			"to": "kadabra",
+			"atLevel": 16,
+			"isSpecial": false
+		}]
 	},
 	"kadabra": {
 		"id": "kadabra",
@@ -16744,6 +18116,7 @@ var SPECIES_DATA = {
 		"catchRate": 100,
 		"baseExp": 140,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 565,
 		"base": {
 			"hp": 40,
 			"atkFis": 35,
@@ -16810,8 +18183,13 @@ var SPECIES_DATA = {
 				"levelReq": 46
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "alakazam",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "alakazam",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"alakazam": {
 		"id": "alakazam",
@@ -16822,6 +18200,7 @@ var SPECIES_DATA = {
 		"catchRate": 50,
 		"baseExp": 225,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 480,
 		"base": {
 			"hp": 55,
 			"atkFis": 50,
@@ -16831,14 +18210,6 @@ var SPECIES_DATA = {
 			"speed": 120
 		},
 		"abilities": [
-			{
-				"key": "kinesis",
-				"levelReq": 1
-			},
-			{
-				"key": "teleport",
-				"levelReq": 1
-			},
 			{
 				"key": "confusion",
 				"levelReq": 16
@@ -16890,6 +18261,10 @@ var SPECIES_DATA = {
 			{
 				"key": "trick",
 				"levelReq": 46
+			},
+			{
+				"key": "kinesis",
+				"levelReq": 80
 			}
 		],
 		"evolvesTo": null,
@@ -16904,6 +18279,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 66,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 324,
 		"base": {
 			"hp": 60,
 			"atkFis": 48,
@@ -16983,7 +18359,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "hypno",
-		"evolvesAtLevel": 26
+		"evolvesAtLevel": 26,
+		"evolutionOptions": [{
+			"to": "hypno",
+			"atLevel": 26,
+			"isSpecial": false
+		}]
 	},
 	"hypno": {
 		"id": "hypno",
@@ -16994,6 +18375,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 169,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 756,
 		"base": {
 			"hp": 85,
 			"atkFis": 73,
@@ -17067,6 +18449,160 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"xatu": {
+		"id": "xatu",
+		"name": "Xatu",
+		"description": "Pokedex Nº178 - tipo PSYCHIC/FLYING.",
+		"type": "PSYCHIC",
+		"type2": "FLYING",
+		"catchRate": 75,
+		"baseExp": 165,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 150,
+		"base": {
+			"hp": 65,
+			"atkFis": 75,
+			"atkEsp": 95,
+			"def": 70,
+			"defEsp": 70,
+			"speed": 95
+		},
+		"abilities": [
+			{
+				"key": "night_shade",
+				"levelReq": 6
+			},
+			{
+				"key": "teleport",
+				"levelReq": 9
+			},
+			{
+				"key": "lucky_chant",
+				"levelReq": 12
+			},
+			{
+				"key": "stored_power",
+				"levelReq": 17
+			},
+			{
+				"key": "ominous_wind",
+				"levelReq": 20
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 23
+			},
+			{
+				"key": "air_slash",
+				"levelReq": 25
+			},
+			{
+				"key": "wish",
+				"levelReq": 29
+			},
+			{
+				"key": "psychic",
+				"levelReq": 35
+			},
+			{
+				"key": "miracle_eye",
+				"levelReq": 39
+			},
+			{
+				"key": "psycho_shift",
+				"levelReq": 43
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 49
+			},
+			{
+				"key": "guard_swap",
+				"levelReq": 53
+			},
+			{
+				"key": "power_swap",
+				"levelReq": 53
+			},
+			{
+				"key": "me_first",
+				"levelReq": 57
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
+	"espeon": {
+		"id": "espeon",
+		"name": "Espeon",
+		"description": "Pokedex Nº196 - tipo PSYCHIC.",
+		"type": "PSYCHIC",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 184,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 265,
+		"base": {
+			"hp": 65,
+			"atkFis": 65,
+			"atkEsp": 130,
+			"def": 60,
+			"defEsp": 95,
+			"speed": 110
+		},
+		"abilities": [
+			{
+				"key": "confusion",
+				"levelReq": 1
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 5
+			},
+			{
+				"key": "baby_doll_eyes",
+				"levelReq": 9
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "swift",
+				"levelReq": 17
+			},
+			{
+				"key": "psybeam",
+				"levelReq": 20
+			},
+			{
+				"key": "future_sight",
+				"levelReq": 25
+			},
+			{
+				"key": "psych_up",
+				"levelReq": 29
+			},
+			{
+				"key": "morning_sun",
+				"levelReq": 33
+			},
+			{
+				"key": "psychic",
+				"levelReq": 37
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 41
+			},
+			{
+				"key": "power_swap",
+				"levelReq": 45
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"unown": {
 		"id": "unown",
 		"name": "Unown",
@@ -17076,6 +18612,7 @@ var SPECIES_DATA = {
 		"catchRate": 225,
 		"baseExp": 118,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 50,
 		"base": {
 			"hp": 48,
 			"atkFis": 72,
@@ -17100,6 +18637,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 285,
 		"base": {
 			"hp": 190,
 			"atkFis": 33,
@@ -17138,6 +18676,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 62,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 1,
 		"base": {
 			"hp": 30,
 			"atkFis": 35,
@@ -17209,7 +18748,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "haunter",
-		"evolvesAtLevel": 25
+		"evolvesAtLevel": 25,
+		"evolutionOptions": [{
+			"to": "haunter",
+			"atLevel": 25,
+			"isSpecial": false
+		}]
 	},
 	"haunter": {
 		"id": "haunter",
@@ -17220,6 +18764,7 @@ var SPECIES_DATA = {
 		"catchRate": 90,
 		"baseExp": 142,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 1,
 		"base": {
 			"hp": 45,
 			"atkFis": 50,
@@ -17286,8 +18831,13 @@ var SPECIES_DATA = {
 				"levelReq": 61
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "gengar",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "gengar",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"gengar": {
 		"id": "gengar",
@@ -17298,6 +18848,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 225,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 405,
 		"base": {
 			"hp": 60,
 			"atkFis": 65,
@@ -17307,18 +18858,6 @@ var SPECIES_DATA = {
 			"speed": 110
 		},
 		"abilities": [
-			{
-				"key": "hypnosis",
-				"levelReq": 1
-			},
-			{
-				"key": "lick",
-				"levelReq": 1
-			},
-			{
-				"key": "shadow_punch",
-				"levelReq": 1
-			},
 			{
 				"key": "spite",
 				"levelReq": 5
@@ -17370,6 +18909,10 @@ var SPECIES_DATA = {
 			{
 				"key": "nightmare",
 				"levelReq": 61
+			},
+			{
+				"key": "shadow_punch",
+				"levelReq": 80
 			}
 		],
 		"evolvesTo": null,
@@ -17384,6 +18927,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 87,
 		"growthCurve": "FAST",
+		"pesoHg": 10,
 		"base": {
 			"hp": 60,
 			"atkFis": 60,
@@ -17453,6 +18997,77 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"umbreon": {
+		"id": "umbreon",
+		"name": "Umbreon",
+		"description": "Pokedex Nº197 - tipo DARK.",
+		"type": "DARK",
+		"type2": null,
+		"catchRate": 45,
+		"baseExp": 184,
+		"growthCurve": "MEDIUM_FAST",
+		"pesoHg": 270,
+		"base": {
+			"hp": 95,
+			"atkFis": 65,
+			"atkEsp": 60,
+			"def": 110,
+			"defEsp": 130,
+			"speed": 65
+		},
+		"abilities": [
+			{
+				"key": "pursuit",
+				"levelReq": 1
+			},
+			{
+				"key": "sand_attack",
+				"levelReq": 5
+			},
+			{
+				"key": "baby_doll_eyes",
+				"levelReq": 9
+			},
+			{
+				"key": "quick_attack",
+				"levelReq": 13
+			},
+			{
+				"key": "confuse_ray",
+				"levelReq": 17
+			},
+			{
+				"key": "feint_attack",
+				"levelReq": 20
+			},
+			{
+				"key": "assurance",
+				"levelReq": 25
+			},
+			{
+				"key": "screech",
+				"levelReq": 29
+			},
+			{
+				"key": "moonlight",
+				"levelReq": 33
+			},
+			{
+				"key": "mean_look",
+				"levelReq": 37
+			},
+			{
+				"key": "last_resort",
+				"levelReq": 41
+			},
+			{
+				"key": "guard_swap",
+				"levelReq": 45
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"murkrow": {
 		"id": "murkrow",
 		"name": "Murkrow",
@@ -17462,6 +19077,7 @@ var SPECIES_DATA = {
 		"catchRate": 30,
 		"baseExp": 81,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 21,
 		"base": {
 			"hp": 60,
 			"atkFis": 85,
@@ -17544,6 +19160,7 @@ var SPECIES_DATA = {
 		"catchRate": 60,
 		"baseExp": 86,
 		"growthCurve": "MEDIUM_SLOW",
+		"pesoHg": 280,
 		"base": {
 			"hp": 55,
 			"atkFis": 95,
@@ -17630,6 +19247,7 @@ var SPECIES_DATA = {
 		"catchRate": 120,
 		"baseExp": 66,
 		"growthCurve": "SLOW",
+		"pesoHg": 108,
 		"base": {
 			"hp": 45,
 			"atkFis": 60,
@@ -17705,7 +19323,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "houndoom",
-		"evolvesAtLevel": 24
+		"evolvesAtLevel": 24,
+		"evolutionOptions": [{
+			"to": "houndoom",
+			"atLevel": 24,
+			"isSpecial": false
+		}]
 	},
 	"houndoom": {
 		"id": "houndoom",
@@ -17716,6 +19339,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 175,
 		"growthCurve": "SLOW",
+		"pesoHg": 350,
 		"base": {
 			"hp": 75,
 			"atkFis": 90,
@@ -17794,6 +19418,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 60,
 		"growthCurve": "SLOW",
+		"pesoHg": 33,
 		"base": {
 			"hp": 41,
 			"atkFis": 64,
@@ -17861,7 +19486,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "dragonair",
-		"evolvesAtLevel": 30
+		"evolvesAtLevel": 30,
+		"evolutionOptions": [{
+			"to": "dragonair",
+			"atLevel": 30,
+			"isSpecial": false
+		}]
 	},
 	"dragonair": {
 		"id": "dragonair",
@@ -17872,6 +19502,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 147,
 		"growthCurve": "SLOW",
+		"pesoHg": 165,
 		"base": {
 			"hp": 61,
 			"atkFis": 84,
@@ -17931,7 +19562,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "dragonite",
-		"evolvesAtLevel": 55
+		"evolvesAtLevel": 55,
+		"evolutionOptions": [{
+			"to": "dragonite",
+			"atLevel": 55,
+			"isSpecial": false
+		}]
 	},
 	"dragonite": {
 		"id": "dragonite",
@@ -17942,6 +19578,7 @@ var SPECIES_DATA = {
 		"catchRate": 45,
 		"baseExp": 270,
 		"growthCurve": "SLOW",
+		"pesoHg": 2100,
 		"base": {
 			"hp": 91,
 			"atkFis": 134,
@@ -18011,6 +19648,153 @@ var SPECIES_DATA = {
 		"evolvesTo": null,
 		"evolvesAtLevel": null
 	},
+	"clefairy": {
+		"id": "clefairy",
+		"name": "Clefairy",
+		"description": "Pokedex Nº35 - tipo FAIRY.",
+		"type": "FAIRY",
+		"type2": null,
+		"catchRate": 150,
+		"baseExp": 113,
+		"growthCurve": "FAST",
+		"pesoHg": 75,
+		"base": {
+			"hp": 70,
+			"atkFis": 45,
+			"atkEsp": 60,
+			"def": 48,
+			"defEsp": 65,
+			"speed": 35
+		},
+		"abilities": [
+			{
+				"key": "sing",
+				"levelReq": 7
+			},
+			{
+				"key": "double_slap",
+				"levelReq": 10
+			},
+			{
+				"key": "defense_curl",
+				"levelReq": 13
+			},
+			{
+				"key": "follow_me",
+				"levelReq": 16
+			},
+			{
+				"key": "bestow",
+				"levelReq": 19
+			},
+			{
+				"key": "wake_up_slap",
+				"levelReq": 22
+			},
+			{
+				"key": "minimize",
+				"levelReq": 25
+			},
+			{
+				"key": "stored_power",
+				"levelReq": 28
+			},
+			{
+				"key": "metronome",
+				"levelReq": 31
+			},
+			{
+				"key": "cosmic_power",
+				"levelReq": 34
+			},
+			{
+				"key": "lucky_chant",
+				"levelReq": 37
+			},
+			{
+				"key": "body_slam",
+				"levelReq": 40
+			},
+			{
+				"key": "moonlight",
+				"levelReq": 43
+			},
+			{
+				"key": "moonblast",
+				"levelReq": 46
+			},
+			{
+				"key": "gravity",
+				"levelReq": 49
+			},
+			{
+				"key": "meteor_mash",
+				"levelReq": 50
+			},
+			{
+				"key": "healing_wish",
+				"levelReq": 55
+			},
+			{
+				"key": "after_you",
+				"levelReq": 58
+			}
+		],
+		"evolvesTo": "clefable",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "clefable",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
+	},
+	"clefable": {
+		"id": "clefable",
+		"name": "Clefable",
+		"description": "Pokedex Nº36 - tipo FAIRY.",
+		"type": "FAIRY",
+		"type2": null,
+		"catchRate": 25,
+		"baseExp": 217,
+		"growthCurve": "FAST",
+		"pesoHg": 400,
+		"base": {
+			"hp": 95,
+			"atkFis": 70,
+			"atkEsp": 95,
+			"def": 73,
+			"defEsp": 90,
+			"speed": 60
+		},
+		"abilities": [
+			{
+				"key": "disarming_voice",
+				"levelReq": 1
+			},
+			{
+				"key": "double_slap",
+				"levelReq": 1
+			},
+			{
+				"key": "metronome",
+				"levelReq": 1
+			},
+			{
+				"key": "minimize",
+				"levelReq": 1
+			},
+			{
+				"key": "sing",
+				"levelReq": 1
+			},
+			{
+				"key": "spotlight",
+				"levelReq": 1
+			}
+		],
+		"evolvesTo": null,
+		"evolvesAtLevel": null
+	},
 	"cleffa": {
 		"id": "cleffa",
 		"name": "Cleffa",
@@ -18020,6 +19804,7 @@ var SPECIES_DATA = {
 		"catchRate": 150,
 		"baseExp": 44,
 		"growthCurve": "FAST",
+		"pesoHg": 30,
 		"base": {
 			"hp": 50,
 			"atkFis": 25,
@@ -18058,8 +19843,13 @@ var SPECIES_DATA = {
 				"levelReq": 16
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "clefairy",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "clefairy",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"togepi": {
 		"id": "togepi",
@@ -18070,6 +19860,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 49,
 		"growthCurve": "FAST",
+		"pesoHg": 15,
 		"base": {
 			"hp": 35,
 			"atkFis": 20,
@@ -18140,8 +19931,13 @@ var SPECIES_DATA = {
 				"levelReq": 53
 			}
 		],
-		"evolvesTo": null,
-		"evolvesAtLevel": null
+		"evolvesTo": "togetic",
+		"evolvesAtLevel": 80,
+		"evolutionOptions": [{
+			"to": "togetic",
+			"atLevel": 80,
+			"isSpecial": true
+		}]
 	},
 	"snubbull": {
 		"id": "snubbull",
@@ -18152,6 +19948,7 @@ var SPECIES_DATA = {
 		"catchRate": 190,
 		"baseExp": 60,
 		"growthCurve": "FAST",
+		"pesoHg": 78,
 		"base": {
 			"hp": 60,
 			"atkFis": 80,
@@ -18223,7 +20020,12 @@ var SPECIES_DATA = {
 			}
 		],
 		"evolvesTo": "granbull",
-		"evolvesAtLevel": 23
+		"evolvesAtLevel": 23,
+		"evolutionOptions": [{
+			"to": "granbull",
+			"atLevel": 23,
+			"isSpecial": false
+		}]
 	},
 	"granbull": {
 		"id": "granbull",
@@ -18234,6 +20036,7 @@ var SPECIES_DATA = {
 		"catchRate": 75,
 		"baseExp": 158,
 		"growthCurve": "FAST",
+		"pesoHg": 487,
 		"base": {
 			"hp": 90,
 			"atkFis": 120,
@@ -19134,6 +20937,10 @@ var TRAITS_DATA = {
 			"normais": ["static"],
 			"oculta": "lightning_rod"
 		},
+		"raichu": {
+			"normais": ["static"],
+			"oculta": "lightning_rod"
+		},
 		"sandshrew": {
 			"normais": ["sand_veil"],
 			"oculta": "sand_rush"
@@ -19166,9 +20973,21 @@ var TRAITS_DATA = {
 			"normais": ["poison_point", "rivalry"],
 			"oculta": "sheer_force"
 		},
+		"clefairy": {
+			"normais": ["cute_charm", "magic_guard"],
+			"oculta": "friend_guard"
+		},
+		"clefable": {
+			"normais": ["cute_charm", "magic_guard"],
+			"oculta": "unaware"
+		},
 		"jigglypuff": {
 			"normais": ["cute_charm", "competitive"],
 			"oculta": "friend_guard"
+		},
+		"wigglytuff": {
+			"normais": ["cute_charm", "competitive"],
+			"oculta": "frisk"
 		},
 		"zubat": {
 			"normais": ["inner_focus"],
@@ -19185,6 +21004,10 @@ var TRAITS_DATA = {
 		"gloom": {
 			"normais": ["chlorophyll"],
 			"oculta": "stench"
+		},
+		"vileplume": {
+			"normais": ["chlorophyll"],
+			"oculta": "effect_spore"
 		},
 		"paras": {
 			"normais": ["effect_spore", "dry_skin"],
@@ -19247,6 +21070,10 @@ var TRAITS_DATA = {
 			"oculta": "swift_swim"
 		},
 		"poliwhirl": {
+			"normais": ["water_absorb", "damp"],
+			"oculta": "swift_swim"
+		},
+		"poliwrath": {
 			"normais": ["water_absorb", "damp"],
 			"oculta": "swift_swim"
 		},
@@ -19362,6 +21189,10 @@ var TRAITS_DATA = {
 			"normais": ["shell_armor", "skill_link"],
 			"oculta": "overcoat"
 		},
+		"cloyster": {
+			"normais": ["shell_armor", "skill_link"],
+			"oculta": "overcoat"
+		},
 		"gastly": {
 			"normais": ["levitate"],
 			"oculta": null
@@ -19403,6 +21234,10 @@ var TRAITS_DATA = {
 			"oculta": "aftermath"
 		},
 		"exeggcute": {
+			"normais": ["chlorophyll"],
+			"oculta": "harvest"
+		},
+		"exeggutor": {
 			"normais": ["chlorophyll"],
 			"oculta": "harvest"
 		},
@@ -19470,6 +21305,10 @@ var TRAITS_DATA = {
 			"normais": ["illuminate", "natural_cure"],
 			"oculta": "analytic"
 		},
+		"starmie": {
+			"normais": ["illuminate", "natural_cure"],
+			"oculta": "analytic"
+		},
 		"scyther": {
 			"normais": ["swarm", "technician"],
 			"oculta": "steadfast"
@@ -19513,6 +21352,18 @@ var TRAITS_DATA = {
 		"eevee": {
 			"normais": ["run_away", "adaptability"],
 			"oculta": "anticipation"
+		},
+		"vaporeon": {
+			"normais": ["water_absorb"],
+			"oculta": "hydration"
+		},
+		"jolteon": {
+			"normais": ["volt_absorb"],
+			"oculta": "quick_feet"
+		},
+		"flareon": {
+			"normais": ["flash_fire"],
+			"oculta": "guts"
 		},
 		"porygon": {
 			"normais": ["trace", "download"],
@@ -19642,6 +21493,10 @@ var TRAITS_DATA = {
 			"normais": ["swarm", "insomnia"],
 			"oculta": "sniper"
 		},
+		"crobat": {
+			"normais": ["inner_focus"],
+			"oculta": "infiltrator"
+		},
 		"chinchou": {
 			"normais": ["volt_absorb", "illuminate"],
 			"oculta": "water_absorb"
@@ -19666,6 +21521,10 @@ var TRAITS_DATA = {
 			"normais": ["hustle", "serene_grace"],
 			"oculta": "super_luck"
 		},
+		"togetic": {
+			"normais": ["hustle", "serene_grace"],
+			"oculta": "super_luck"
+		},
 		"natu": {
 			"normais": ["synchronize", "early_bird"],
 			"oculta": "magic_bounce"
@@ -19685,6 +21544,10 @@ var TRAITS_DATA = {
 		"ampharos": {
 			"normais": ["static"],
 			"oculta": "plus"
+		},
+		"bellossom": {
+			"normais": ["chlorophyll"],
+			"oculta": "healer"
 		},
 		"marill": {
 			"normais": ["thick_fat", "huge_power"],
@@ -19738,9 +21601,21 @@ var TRAITS_DATA = {
 			"normais": ["damp", "water_absorb"],
 			"oculta": "unaware"
 		},
+		"espeon": {
+			"normais": ["synchronize"],
+			"oculta": "magic_bounce"
+		},
+		"umbreon": {
+			"normais": ["synchronize"],
+			"oculta": "inner_focus"
+		},
 		"murkrow": {
 			"normais": ["insomnia", "super_luck"],
 			"oculta": "prankster"
+		},
+		"slowking": {
+			"normais": ["oblivious", "own_tempo"],
+			"oculta": "regenerator"
 		},
 		"misdreavus": {
 			"normais": ["levitate"],
@@ -19885,6 +21760,10 @@ var TRAITS_DATA = {
 		"tyrogue": {
 			"normais": ["guts", "steadfast"],
 			"oculta": "vital_spirit"
+		},
+		"hitmontop": {
+			"normais": ["intimidate", "technician"],
+			"oculta": "steadfast"
 		},
 		"smoochum": {
 			"normais": ["oblivious", "forewarn"],
@@ -21932,6 +23811,16 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
+	"aromatherapy": {
+		"id": "aromatherapy",
+		"name": "Aromatherapy",
+		"type": "GRASS",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
+		"target": "single",
+		"accuracy": 100
+	},
 	"wrap": {
 		"id": "wrap",
 		"name": "Wrap",
@@ -21994,16 +23883,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"leaf_tornado": {
-		"id": "leaf_tornado",
-		"name": "Leaf Tornado",
-		"type": "GRASS",
-		"category": "special",
-		"power": 65,
-		"pp": 10,
-		"target": "single",
-		"accuracy": 90
-	},
 	"spit_up": {
 		"id": "spit_up",
 		"name": "Spit Up",
@@ -22055,6 +23934,16 @@ var ABILITIES_DATA = {
 		"critStages": 1,
 		"accuracy": 100
 	},
+	"leaf_tornado": {
+		"id": "leaf_tornado",
+		"name": "Leaf Tornado",
+		"type": "GRASS",
+		"category": "special",
+		"power": 65,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 90
+	},
 	"barrage": {
 		"id": "barrage",
 		"name": "Barrage",
@@ -22105,6 +23994,37 @@ var ABILITIES_DATA = {
 		"power": 0,
 		"pp": 15,
 		"target": "single",
+		"accuracy": 100
+	},
+	"psyshock": {
+		"id": "psyshock",
+		"name": "Psyshock",
+		"type": "PSYCHIC",
+		"category": "special",
+		"power": 80,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 100
+	},
+	"egg_bomb": {
+		"id": "egg_bomb",
+		"name": "Egg Bomb",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 100,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 75
+	},
+	"wood_hammer": {
+		"id": "wood_hammer",
+		"name": "Wood Hammer",
+		"type": "GRASS",
+		"category": "physical",
+		"power": 120,
+		"pp": 15,
+		"target": "single",
+		"drainPercent": -33,
 		"accuracy": 100
 	},
 	"constrict": {
@@ -22182,14 +24102,30 @@ var ABILITIES_DATA = {
 		"statusChance": 30,
 		"accuracy": 100
 	},
-	"aromatherapy": {
-		"id": "aromatherapy",
-		"name": "Aromatherapy",
-		"type": "GRASS",
+	"quiver_dance": {
+		"id": "quiver_dance",
+		"name": "Quiver Dance",
+		"type": "BUG",
 		"category": "status",
 		"power": 0,
-		"pp": 5,
+		"pp": 20,
 		"target": "single",
+		"statChanges": [
+			{
+				"stat": "atkEsp",
+				"estagios": 1
+			},
+			{
+				"stat": "defEsp",
+				"estagios": 1
+			},
+			{
+				"stat": "speed",
+				"estagios": 1
+			}
+		],
+		"statChance": 100,
+		"statTarget": "self",
 		"accuracy": 100
 	},
 	"splash": {
@@ -22298,21 +24234,6 @@ var ABILITIES_DATA = {
 		"status": "sleep",
 		"statusChance": 100,
 		"accuracy": 55
-	},
-	"flower_shield": {
-		"id": "flower_shield",
-		"name": "Flower Shield",
-		"type": "FAIRY",
-		"category": "status",
-		"power": 0,
-		"pp": 10,
-		"target": "single",
-		"statChanges": [{
-			"stat": "def",
-			"estagios": 1
-		}],
-		"statChance": 100,
-		"accuracy": 100
 	},
 	"string_shot": {
 		"id": "string_shot",
@@ -22440,32 +24361,6 @@ var ABILITIES_DATA = {
 			"estagios": -2
 		}],
 		"statChance": 100,
-		"accuracy": 100
-	},
-	"quiver_dance": {
-		"id": "quiver_dance",
-		"name": "Quiver Dance",
-		"type": "BUG",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"statChanges": [
-			{
-				"stat": "atkEsp",
-				"estagios": 1
-			},
-			{
-				"stat": "defEsp",
-				"estagios": 1
-			},
-			{
-				"stat": "speed",
-				"estagios": 1
-			}
-		],
-		"statChance": 100,
-		"statTarget": "self",
 		"accuracy": 100
 	},
 	"poison_sting": {
@@ -23049,16 +24944,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"bullet_punch": {
-		"id": "bullet_punch",
-		"name": "Bullet Punch",
-		"type": "STEEL",
-		"category": "physical",
-		"power": 40,
-		"pp": 30,
-		"target": "single",
-		"accuracy": 100
-	},
 	"metal_claw": {
 		"id": "metal_claw",
 		"name": "Metal Claw",
@@ -23247,6 +25132,28 @@ var ABILITIES_DATA = {
 		"pp": 10,
 		"target": "single",
 		"accuracy": 85
+	},
+	"dynamic_punch": {
+		"id": "dynamic_punch",
+		"name": "Dynamic Punch",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 100,
+		"pp": 5,
+		"target": "single",
+		"status": "confusion",
+		"statusChance": 100,
+		"accuracy": 50
+	},
+	"circle_throw": {
+		"id": "circle_throw",
+		"name": "Circle Throw",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 60,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 90
 	},
 	"acid_spray": {
 		"id": "acid_spray",
@@ -23492,6 +25399,27 @@ var ABILITIES_DATA = {
 		"statTarget": "self",
 		"accuracy": 100
 	},
+	"spike_cannon": {
+		"id": "spike_cannon",
+		"name": "Spike Cannon",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 20,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
+	"icicle_crash": {
+		"id": "icicle_crash",
+		"name": "Icicle Crash",
+		"type": "ICE",
+		"category": "physical",
+		"power": 85,
+		"pp": 10,
+		"target": "single",
+		"flinchChance": 30,
+		"accuracy": 90
+	},
 	"crabhammer": {
 		"id": "crabhammer",
 		"name": "Crabhammer",
@@ -23635,6 +25563,16 @@ var ABILITIES_DATA = {
 		"statTarget": "self",
 		"accuracy": 100
 	},
+	"spotlight": {
+		"id": "spotlight",
+		"name": "Spotlight",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
 	"hyper_beam": {
 		"id": "hyper_beam",
 		"name": "Hyper Beam",
@@ -23656,6 +25594,77 @@ var ABILITIES_DATA = {
 		"status": "sleep",
 		"statusChance": 100,
 		"accuracy": 55
+	},
+	"sand_attack": {
+		"id": "sand_attack",
+		"name": "Sand Attack",
+		"type": "GROUND",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
+	"baby_doll_eyes": {
+		"id": "baby_doll_eyes",
+		"name": "Baby-Doll Eyes",
+		"type": "FAIRY",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": -1
+		}],
+		"statChance": 100,
+		"accuracy": 100
+	},
+	"acid_armor": {
+		"id": "acid_armor",
+		"name": "Acid Armor",
+		"type": "POISON",
+		"category": "status",
+		"power": 0,
+		"pp": 20,
+		"target": "single",
+		"statChanges": [{
+			"stat": "def",
+			"estagios": 2
+		}],
+		"statChance": 100,
+		"statTarget": "self",
+		"accuracy": 100
+	},
+	"haze": {
+		"id": "haze",
+		"name": "Haze",
+		"type": "ICE",
+		"category": "status",
+		"power": 0,
+		"pp": 30,
+		"target": "single",
+		"accuracy": 100
+	},
+	"muddy_water": {
+		"id": "muddy_water",
+		"name": "Muddy Water",
+		"type": "WATER",
+		"category": "special",
+		"power": 90,
+		"pp": 10,
+		"target": "aoe",
+		"accuracy": 85
+	},
+	"last_resort": {
+		"id": "last_resort",
+		"name": "Last Resort",
+		"type": "NORMAL",
+		"category": "physical",
+		"power": 140,
+		"pp": 5,
+		"target": "single",
+		"accuracy": 100
 	},
 	"electro_ball": {
 		"id": "electro_ball",
@@ -23712,25 +25721,15 @@ var ABILITIES_DATA = {
 		"target": "aoe",
 		"accuracy": 100
 	},
-	"haze": {
-		"id": "haze",
-		"name": "Haze",
-		"type": "ICE",
-		"category": "status",
+	"trump_card": {
+		"id": "trump_card",
+		"name": "Trump Card",
+		"type": "NORMAL",
+		"category": "special",
 		"power": 0,
-		"pp": 30,
+		"pp": 5,
 		"target": "single",
 		"accuracy": 100
-	},
-	"muddy_water": {
-		"id": "muddy_water",
-		"name": "Muddy Water",
-		"type": "WATER",
-		"category": "special",
-		"power": 90,
-		"pp": 10,
-		"target": "aoe",
-		"accuracy": 85
 	},
 	"destiny_bond": {
 		"id": "destiny_bond",
@@ -23749,16 +25748,6 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 20,
-		"target": "single",
-		"accuracy": 100
-	},
-	"spike_cannon": {
-		"id": "spike_cannon",
-		"name": "Spike Cannon",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 20,
-		"pp": 15,
 		"target": "single",
 		"accuracy": 100
 	},
@@ -23804,16 +25793,6 @@ var ABILITIES_DATA = {
 		"category": "status",
 		"power": 0,
 		"pp": 10,
-		"target": "single",
-		"accuracy": 100
-	},
-	"sand_attack": {
-		"id": "sand_attack",
-		"name": "Sand Attack",
-		"type": "GROUND",
-		"category": "status",
-		"power": 0,
-		"pp": 15,
 		"target": "single",
 		"accuracy": 100
 	},
@@ -24043,21 +26022,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"baby_doll_eyes": {
-		"id": "baby_doll_eyes",
-		"name": "Baby-Doll Eyes",
-		"type": "FAIRY",
-		"category": "status",
-		"power": 0,
-		"pp": 30,
-		"target": "single",
-		"statChanges": [{
-			"stat": "atkFis",
-			"estagios": -1
-		}],
-		"statChance": 100,
-		"accuracy": 100
-	},
 	"charm": {
 		"id": "charm",
 		"name": "Charm",
@@ -24071,26 +26035,6 @@ var ABILITIES_DATA = {
 			"estagios": -2
 		}],
 		"statChance": 100,
-		"accuracy": 100
-	},
-	"last_resort": {
-		"id": "last_resort",
-		"name": "Last Resort",
-		"type": "NORMAL",
-		"category": "physical",
-		"power": 140,
-		"pp": 5,
-		"target": "single",
-		"accuracy": 100
-	},
-	"trump_card": {
-		"id": "trump_card",
-		"name": "Trump Card",
-		"type": "NORMAL",
-		"category": "special",
-		"power": 0,
-		"pp": 5,
-		"target": "single",
 		"accuracy": 100
 	},
 	"conversion": {
@@ -24535,17 +26479,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"wood_hammer": {
-		"id": "wood_hammer",
-		"name": "Wood Hammer",
-		"type": "GRASS",
-		"category": "physical",
-		"power": 120,
-		"pp": 15,
-		"target": "single",
-		"drainPercent": -33,
-		"accuracy": 100
-	},
 	"low_kick": {
 		"id": "low_kick",
 		"name": "Low Kick",
@@ -24888,6 +26821,16 @@ var ABILITIES_DATA = {
 		"statusChance": 10,
 		"accuracy": 100
 	},
+	"double_kick": {
+		"id": "double_kick",
+		"name": "Double Kick",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 30,
+		"pp": 30,
+		"target": "single",
+		"accuracy": 100
+	},
 	"cotton_guard": {
 		"id": "cotton_guard",
 		"name": "Cotton Guard",
@@ -24925,16 +26868,6 @@ var ABILITIES_DATA = {
 		"status": "poison",
 		"statusChance": 30,
 		"accuracy": 80
-	},
-	"double_kick": {
-		"id": "double_kick",
-		"name": "Double Kick",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 30,
-		"pp": 30,
-		"target": "single",
-		"accuracy": 100
 	},
 	"flatter": {
 		"id": "flatter",
@@ -25007,22 +26940,6 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"status": "poison",
 		"statusChance": 30,
-		"accuracy": 100
-	},
-	"acid_armor": {
-		"id": "acid_armor",
-		"name": "Acid Armor",
-		"type": "POISON",
-		"category": "status",
-		"power": 0,
-		"pp": 20,
-		"target": "single",
-		"statChanges": [{
-			"stat": "def",
-			"estagios": 2
-		}],
-		"statChance": 100,
-		"statTarget": "self",
 		"accuracy": 100
 	},
 	"venom_drench": {
@@ -25126,18 +27043,6 @@ var ABILITIES_DATA = {
 		"statTarget": "self",
 		"accuracy": 100
 	},
-	"dynamic_punch": {
-		"id": "dynamic_punch",
-		"name": "Dynamic Punch",
-		"type": "FIGHTING",
-		"category": "physical",
-		"power": 100,
-		"pp": 5,
-		"target": "single",
-		"status": "confusion",
-		"statusChance": 100,
-		"accuracy": 50
-	},
 	"strength": {
 		"id": "strength",
 		"name": "Strength",
@@ -25208,6 +27113,16 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 75
 	},
+	"bullet_punch": {
+		"id": "bullet_punch",
+		"name": "Bullet Punch",
+		"type": "STEEL",
+		"category": "physical",
+		"power": 40,
+		"pp": 30,
+		"target": "single",
+		"accuracy": 100
+	},
 	"ice_punch": {
 		"id": "ice_punch",
 		"name": "Ice Punch",
@@ -25229,6 +27144,16 @@ var ABILITIES_DATA = {
 		"pp": 20,
 		"target": "single",
 		"accuracy": 100
+	},
+	"triple_kick": {
+		"id": "triple_kick",
+		"name": "Triple Kick",
+		"type": "FIGHTING",
+		"category": "physical",
+		"power": 10,
+		"pp": 10,
+		"target": "single",
+		"accuracy": 90
 	},
 	"lovely_kiss": {
 		"id": "lovely_kiss",
@@ -25351,6 +27276,16 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
+	"after_you": {
+		"id": "after_you",
+		"name": "After You",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 15,
+		"target": "single",
+		"accuracy": 100
+	},
 	"kinesis": {
 		"id": "kinesis",
 		"name": "Kinesis",
@@ -25391,14 +27326,15 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 100
 	},
-	"psyshock": {
-		"id": "psyshock",
-		"name": "Psyshock",
-		"type": "PSYCHIC",
-		"category": "special",
-		"power": 80,
-		"pp": 10,
+	"morning_sun": {
+		"id": "morning_sun",
+		"name": "Morning Sun",
+		"type": "NORMAL",
+		"category": "status",
+		"power": 0,
+		"pp": 5,
 		"target": "single",
+		"healPercent": 50,
 		"accuracy": 100
 	},
 	"hidden_power": {
@@ -25568,15 +27504,30 @@ var ABILITIES_DATA = {
 		"target": "single",
 		"accuracy": 90
 	},
-	"after_you": {
-		"id": "after_you",
-		"name": "After You",
-		"type": "NORMAL",
+	"gravity": {
+		"id": "gravity",
+		"name": "Gravity",
+		"type": "PSYCHIC",
 		"category": "status",
 		"power": 0,
-		"pp": 15,
+		"pp": 5,
 		"target": "single",
 		"accuracy": 100
+	},
+	"meteor_mash": {
+		"id": "meteor_mash",
+		"name": "Meteor Mash",
+		"type": "STEEL",
+		"category": "physical",
+		"power": 90,
+		"pp": 10,
+		"target": "single",
+		"statChanges": [{
+			"stat": "atkFis",
+			"estagios": 1
+		}],
+		"statChance": 20,
+		"accuracy": 90
 	}
 };
 var TURNO_SEGUNDOS = createFormulaEngine(FORMULAS).eval("TURNO_SEGUNDOS");
@@ -25637,20 +27588,141 @@ var STAT_CHANGE_OVERRIDES = {
 		}],
 		statChance: 100,
 		statTarget: "self"
+	},
+	mud_slap: {
+		statChanges: [{
+			stat: "accuracy",
+			estagios: -1
+		}],
+		statChance: 100
+	},
+	mud_bomb: {
+		statChanges: [{
+			stat: "accuracy",
+			estagios: -1
+		}],
+		statChance: 30
+	},
+	mirror_shot: {
+		statChanges: [{
+			stat: "accuracy",
+			estagios: -1
+		}],
+		statChance: 30
+	},
+	muddy_water: {
+		statChanges: [{
+			stat: "accuracy",
+			estagios: -1
+		}],
+		statChance: 30
+	},
+	octazooka: {
+		statChanges: [{
+			stat: "accuracy",
+			estagios: -1
+		}],
+		statChance: 50
+	},
+	leaf_tornado: {
+		statChanges: [{
+			stat: "accuracy",
+			estagios: -1
+		}],
+		statChance: 50
+	},
+	sweet_scent: {
+		statChanges: [{
+			stat: "evasion",
+			estagios: -2
+		}],
+		statChance: 100
 	}
 };
+var STATUS_OVERRIDES = { tri_attack: {
+	status: "burn",
+	statusChance: 20
+} };
 var HAZARD_OVERRIDES = {
 	spikes: { hazard: "spikes" },
 	toxic_spikes: { hazard: "toxic_spikes" },
 	stealth_rock: { hazard: "stealth_rock" },
 	sticky_web: { hazard: "sticky_web" }
 };
+var MULTI_HIT_OVERRIDES = {
+	arm_thrust: {
+		minHits: 2,
+		maxHits: 5
+	},
+	barrage: {
+		minHits: 2,
+		maxHits: 5
+	},
+	bone_rush: {
+		minHits: 2,
+		maxHits: 5
+	},
+	bullet_seed: {
+		minHits: 2,
+		maxHits: 5
+	},
+	comet_punch: {
+		minHits: 2,
+		maxHits: 5
+	},
+	double_slap: {
+		minHits: 2,
+		maxHits: 5
+	},
+	fury_attack: {
+		minHits: 2,
+		maxHits: 5
+	},
+	fury_swipes: {
+		minHits: 2,
+		maxHits: 5
+	},
+	icicle_spear: {
+		minHits: 2,
+		maxHits: 5
+	},
+	pin_missile: {
+		minHits: 2,
+		maxHits: 5
+	},
+	rock_blast: {
+		minHits: 2,
+		maxHits: 5
+	},
+	spike_cannon: {
+		minHits: 2,
+		maxHits: 5
+	},
+	double_hit: {
+		minHits: 2,
+		maxHits: 2
+	},
+	double_kick: {
+		minHits: 2,
+		maxHits: 2
+	},
+	dual_chop: {
+		minHits: 2,
+		maxHits: 2
+	},
+	twineedle: {
+		minHits: 2,
+		maxHits: 2
+	}
+};
 var ABILITIES = Object.fromEntries(Object.entries(ALL_ABILITIES_SOURCE).map(([key, ability]) => {
 	const isAoe = AOE_ABILITY_KEYS.has(key) || "target" in ability && ability.target === "aoe";
 	return [key, {
 		...ability,
 		...STAT_CHANGE_OVERRIDES[key],
+		...STATUS_OVERRIDES[key],
 		...HAZARD_OVERRIDES[key],
+		...MULTI_HIT_OVERRIDES[key],
 		target: isAoe ? "aoe" : "single",
 		radius: isAoe ? AOE_RADIUS : void 0,
 		cooldown: cooldownFromPp(ability.pp)
@@ -25672,7 +27744,16 @@ var DANO_SEM_PODER_BASE = /* @__PURE__ */ new Set([
 	"super_fang",
 	"psywave",
 	"counter",
-	"mirror_coat"
+	"mirror_coat",
+	"gyro_ball",
+	"electro_ball",
+	"wring_out",
+	"punishment",
+	"sonic_boom",
+	"endeavor",
+	"final_gambit",
+	"low_kick",
+	"heavy_slam"
 ]);
 function isDamagingAbility(ability) {
 	if (!ability) return false;
@@ -25684,6 +27765,72 @@ var CLIMA_DO_GOLPE = {
 	hail: "granizo",
 	sandstorm: "areia"
 };
+/**
+* Acerto GARANTIDO no clima certo, ignorando precisao, evasao e neblina.
+*
+* E o unico caso em que o x0,6 da neblina nao se aplica: nos jogos, golpe que
+* pula a checagem de precisao pula TUDO que mexe nela.
+*/
+var GOLPE_NUNCA_ERRA_NO_CLIMA = {
+	thunder: ["chuva"],
+	hurricane: ["chuva"],
+	blizzard: ["granizo", "neve"]
+};
+/** Precisao FIXA no clima certo, substituindo a do catalogo. */
+var PRECISAO_DO_GOLPE_NO_CLIMA = {
+	thunder: {
+		climas: ["sol"],
+		precisao: 50
+	},
+	hurricane: {
+		climas: ["sol"],
+		precisao: 50
+	}
+};
+/**
+* Weather Ball: muda de TIPO e DOBRA de forca conforme o clima.
+*
+* A descricao na Wiki ja prometia isso; o motor nunca cumpriu. Na neblina o
+* golpe fica NORMAL e NAO dobra — e a unica entrada que existe pra dizer
+* "clima presente, mas sem bonus".
+*/
+var WEATHER_BALL_POR_CLIMA = {
+	chuva: {
+		tipo: "WATER",
+		dobra: true
+	},
+	sol: {
+		tipo: "FIRE",
+		dobra: true
+	},
+	granizo: {
+		tipo: "ICE",
+		dobra: true
+	},
+	neve: {
+		tipo: "ICE",
+		dobra: true
+	},
+	areia: {
+		tipo: "ROCK",
+		dobra: true
+	},
+	nevoa: {
+		tipo: "NORMAL",
+		dobra: false
+	}
+};
+/**
+* Cura que depende do clima (Moonlight, Synthesis).
+*
+* Nos jogos: 2/3 do HP maximo no sol, 1/2 com ceu limpo, 1/4 em qualquer outro
+* clima. O `healPercent` do catalogo (50) e o caso de ceu limpo, entao a regra
+* aqui e um MULTIPLICADOR sobre ele — assim o dado gerado continua sendo a
+* fonte do numero base.
+*/
+var CURA_SENSIVEL_AO_CLIMA = /* @__PURE__ */ new Set(["moonlight", "synthesis"]);
+var CURA_NO_SOL = 4 / 3;
+var CURA_EM_CLIMA_RUIM = .5;
 var STAB_MULTIPLIER$1 = createFormulaEngine(FORMULAS).eval("STAB_MULTIPLIER");
 /**
 * O nivel em que o POKE passa a poder usar cada golpe.
@@ -25762,16 +27909,49 @@ function encaixarNovosGolpes(atuais, novos) {
 	}
 	return saida;
 }
-function golpesUtilizaveis(poke, species, selvagem) {
-	if (selvagem) return activeAbilitiesSelvagem(species, poke.level);
-	const conhecidos = /* @__PURE__ */ new Set([...poke.unlockedAbilities, BASIC_ATTACK.id]);
-	const escolha = poke.activeAbilities ?? activeAbilitiesPadrao(species, poke.level);
-	const escolhidos = [...new Set(escolha.filter((key) => conhecidos.has(key)))].slice(0, 4);
-	if (escolha.length > 0 && escolhidos.length < Math.min(escolha.length, 4)) for (const key of activeAbilitiesPadrao(species, poke.level)) {
-		if (escolhidos.length >= 4) break;
-		if (!escolhidos.includes(key) && conhecidos.has(key)) escolhidos.push(key);
+/**
+* A escolha do jogador SANEADA: sem golpe que este POKE nao conhece, sem
+* repetido, no maximo 4, e com slot recomposto quando o filtro esvaziou algum.
+*
+* REGRA UNICA, TRES CONSUMIDORES. Ela nasceu aqui dentro de
+* `golpesUtilizaveis` (o caminho do combate) e era exclusiva dele — e essa
+* exclusividade era um bug:
+*
+*  - a TELA (`MovesetTable`) lia `poke.activeAbilities` cru, entao mostrava
+*    "4/4" com menos de 4 botoes numerados: a chave orfa nao tem linha na
+*    tabela (saiu do catalogo) ou tem linha com `aprendido=false` (mudou de
+*    nivel exigido), e nos dois casos ela e invisivel e impossivel de
+*    desmarcar;
+*  - a EDICAO mandava essa mesma lista crua pra RPC `definir_golpes_ativos`,
+*    que valida id por id contra `unlocked_abilities` e ABORTA a chamada
+*    inteira. Resultado: o POKE ficava com a escolha travada — nem adicionar
+*    (o teto de 4 ja estava "cheio") nem remover (todo payload levava a chave
+*    recusada) funcionava. Sem erro que ajudasse: so "esse POKE nao conhece
+*    esse golpe" pra um golpe que o jogador nao escolheu e nao ve.
+*
+* De onde vem chave orfa: a regra do Recordador (so golpe com nivel real na
+* propria especie, v6.8) e o rename de 15 chaves na migracao do Ultra Sun.
+* Medido contra producao antes daquela leva: 3.188 de 7.184 POKEs com escolha
+* gravada perdiam ao menos um golpe.
+*
+* `conhecidos` entra por parametro em vez de ser derivado de (especie, nivel)
+* aqui dentro porque quem chama ja tem a lista montada — e no caso do
+* `rowToPoke` ela e justamente o recalculo fresco que acabou de substituir a
+* coluna do banco.
+*/
+function sanearEscolhaDeGolpes(escolha, conhecidos, species, level) {
+	const validos = /* @__PURE__ */ new Set([...conhecidos, BASIC_ATTACK.id]);
+	const escolhidos = [...new Set(escolha.filter((key) => validos.has(key)))].slice(0, 4);
+	const alvo = Math.min(escolha.length, 4);
+	if (escolha.length > 0 && escolhidos.length < alvo) for (const key of activeAbilitiesPadrao(species, level)) {
+		if (escolhidos.length >= alvo) break;
+		if (!escolhidos.includes(key) && validos.has(key)) escolhidos.push(key);
 	}
 	return escolhidos;
+}
+function golpesUtilizaveis(poke, species, selvagem) {
+	if (selvagem) return activeAbilitiesSelvagem(species, poke.level);
+	return sanearEscolhaDeGolpes(poke.activeAbilities ?? activeAbilitiesPadrao(species, poke.level), poke.unlockedAbilities, species, poke.level);
 }
 //#endregion
 //#region src/data/pokes.ts
@@ -25834,23 +28014,34 @@ for (const species of Object.values(SPECIES)) species.abilities = [...species.ab
 	key: typedAoeMoveKey(species.type),
 	levelReq: 50
 }];
-for (const [fromId, toId] of Object.entries({
-	kadabra: "alakazam",
-	machoke: "machamp",
-	haunter: "gengar",
-	graveler: "golem",
-	onix: "steelix",
-	scyther: "scizor",
-	seadra: "kingdra",
-	poliwhirl: "politoed",
-	porygon: "porygon2"
-})) {
-	const from = SPECIES[fromId];
-	if (from && SPECIES[toId] && !from.evolvesTo) {
-		from.evolvesTo = toId;
-		from.evolvesAtLevel = 80;
-		from.isSpecialEvolution = true;
+for (const species of Object.values(SPECIES)) {
+	const opcoes = (species.evolutionOptions ?? []).filter((o) => SPECIES[o.to]);
+	if (!opcoes.length) {
+		delete species.evolutionOptions;
+		species.evolvesTo = null;
+		species.evolvesAtLevel = null;
+		continue;
 	}
+	species.evolutionOptions = opcoes;
+	species.evolvesTo = opcoes[0].to;
+	species.evolvesAtLevel = opcoes[0].atLevel;
+	species.isSpecialEvolution = opcoes[0].isSpecial;
+}
+/**
+* Os destinos de evolucao de uma especie, sempre como lista.
+*
+* Especie sem ramo devolve o destino unico; sem evolucao nenhuma devolve vazio.
+* Todo leitor novo usa isto — ler `evolvesTo` direto continua funcionando, mas
+* enxerga so o primeiro caminho.
+*/
+function opcoesDeEvolucao(species) {
+	if (species.evolutionOptions?.length) return species.evolutionOptions;
+	if (species.evolvesTo && species.evolvesAtLevel != null) return [{
+		to: species.evolvesTo,
+		atLevel: species.evolvesAtLevel,
+		isSpecial: species.isSpecialEvolution === true
+	}];
+	return [];
 }
 var SHINY_STAT_MULTIPLIER = 1.5;
 function computeStatsAtLevel(species, level, ivs, rarityKey, isShiny, nature) {
@@ -25925,966 +28116,2822 @@ function createPokeInstance(rng, speciesId, level = 1, { ivs: fixedIvs, rarity: 
 	};
 }
 //#endregion
-//#region src/data/generated/waterCollisionMask.generated.ts
-var WATER_COLLISION_GRID = [
-	"11111111110000000000000000000000000",
-	"10111111110000000000000000000000000",
-	"10011111000000000000000000000000000",
-	"00000000000000000000000000000000000",
-	"00000000000000000000000000000000000",
-	"00000000000000000001111111111111111",
-	"00000000000000000011111111111111111",
-	"11111000000111111111111111111111111",
-	"11111111001111111111111111111111111",
-	"11111111001111110000111111111111111",
-	"11111111001111110000000011111111111",
-	"00011111001111110000000001111111111",
-	"00001111001111100000000001111111111",
-	"00000111000111100000000000111111111",
-	"00000000000000000000000000111111111",
-	"11111111111111110000000000111111111",
-	"11111111111111111000000001111111111",
-	"11111111111111111100000001111111111",
-	"11111111111111111111000011111111111",
-	"11111111100111111111111111111111111",
-	"11111111000111111111111111111111110",
-	"11111110000111111111111111111111110",
-	"11111100000111111111111111111111110"
-];
-var WATER_SPAWN_POINT = {
-	x: 664.56,
-	y: 86.56738461538407
-};
-//#endregion
 //#region src/data/generated/subBiomaCollision.generated.ts
 var COLISAO_POR_ARTE = {
 	"assets/hunt-backgrounds/abyss.jpg": {
 		"grid": [
-			"00000000000011111111111100000000111",
-			"00000000000111111111111110000000111",
-			"00000000001111111111111111100000000",
-			"00000000111111111111111111100000000",
-			"00000001111111111111111111100000000",
-			"00000011111111111111111111110000000",
-			"00000011111111111111111111111000000",
-			"00000111111111111111111111111111001",
-			"00000111111111111111111111111100000",
-			"00000011111111111111111111111000000",
-			"00000011111111111111111111111000000",
-			"00000001111111111111111111110000000",
-			"00000000111111111111111111000000000",
-			"00000000111111111111111110000000000",
-			"00000000001111111111111110000000000",
-			"10000000001111111111111110000000000",
-			"00000000001111111111111100000000000",
-			"10000000011111111111100000000000011",
-			"00000000011100011111000000000000001",
-			"00000000000000001111000000000011111",
-			"00000001000000000000000000000111111",
-			"10001111000000000000000000011111111",
-			"11000110000000000111000000011111111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"100000000000000000111111111111111111111111111111111111111111111111111111111111111111",
+			"100000000000000000011111111111111111111111111111111111111111111111111111111111111111",
+			"100000000000000000000000000111111111111111111111111111111111111111111111111111111111",
+			"100000000000000000000000000101111110011111111111011111111111111111111111111111111111",
+			"100000000000000000000000001100001110001111111100000111111001111111111111001111111111",
+			"100000000000000000000000011000000000001111111100000001111000111111111111000111111111",
+			"100000000000000000000000010000000000001111111000000000111000111111111110000111111111",
+			"100000000000000000000000100000000000000111111000000000000001111111111110000111111111",
+			"100000000000000000000001100000000000000001000000000000000001101111111100000111111111",
+			"100000000000000000000010000000000000000000000000000000000000000011111000000111111111",
+			"100000000000000000011000000000000000000000000000000000000000000000000000000111111111",
+			"100000000011000000010100000000000000000000000000000000000000000000000000001111111111",
+			"100000000000000000000000000000000000001111111100000000000000000000000000001111111111",
+			"100001110010000000000000000000000000011111111110000000000000000000000000011111111111",
+			"100100101000000000000000000000000011111111111111111111000000000000000000111111111111",
+			"110000000000000000000000000000111111111111111111111111000000000000000001111111111111",
+			"100000000000000000000000000000111111111111111111111111100000000000000011111110111111",
+			"100000000110000000000000000001111111111111111111111111110000000000000011111110011111",
+			"100000000100000000000000000111111111111111111111111111111100000000000000111110011111",
+			"100000001000000000000000000111111111111111111111111111111111100000000000000000011111",
+			"100000001000000000000000111111111111111111111111111111111111100000000000000000011111",
+			"100000001000000000000001111111111111111111111111111111111111000000000000000000011111",
+			"100000000000000000000001111111111111111111111111111111111111000000000000000000011111",
+			"100000001000000000000111111111111111111111111111111111111111100000000000000000011101",
+			"100000101000000000001111111111111111111111111111111111111111110000000000000000000001",
+			"100000101000000000011111111111111111111111111111111111111111111000000000000000000001",
+			"100000100000000000011111111111111111111111111111111111111111111100000000000000000001",
+			"100000000000000000011111111111111111111111111111111111111111111100000000000000000011",
+			"100000100000000000111111111111111111111111111111111111111111111111111000000110000011",
+			"100001100000000001111111111111111111111111111111111111111111111111111110000111111011",
+			"111111000000000001111111111111111111111111111111111111111111111111111110000111101011",
+			"111111000000000000111111111111111111111111111111111111111111111111101100000000001011",
+			"111100000000000000111111111111111111111111111111111111111111111111000000000000001111",
+			"100000001000000000111111111111111111111111111111111111111111111111000000000000001111",
+			"100000000000000000111111111111111111111111111111111111111111111111000000000000001111",
+			"100000100000000000111111111111111111111111111111111111111111111110000000000000000001",
+			"100000001000000000001111111111111111111111111111111111111111111100000000000000000111",
+			"100001000000000000000111111111111111111111111111111111111111111000000000000000000001",
+			"100001100000000000000111111111111111111111111111111111111111100000000000000000000001",
+			"100001000000000000000001111111111111111111111111111111111110000000000000000000000001",
+			"100000000000000000000001111111111111111111111111111111111100000000000000000000000001",
+			"100000000000000000000000111111111111111111111111111111111000000000000000000000000001",
+			"100000000000000000000000011111111111111111111111111111111000000000000000000000000001",
+			"100000000000000000000000001111111111111111111111111111111000000000000000000000000011",
+			"100001000000000000000000000111111111111111111111111111111100000000000000000000000011",
+			"100011111000000000000000000011111111111111111111111111111100000000000000000000000011",
+			"101111100000000000000000000111111111111111111111111111111000000000000000000000000011",
+			"101111110000000000000000000111111111111111111111111011100000000000000000000000000011",
+			"100111110000000000000000001111111111111111111111110000000000000000000000001000000111",
+			"100011111000000000000000011111110111111111111111100000000000000000000000001110001111",
+			"111011111000000000000000011111100000011111111110000000000000000000000001011111001111",
+			"100001110000000000000000001111100000011111111110000000000000000000000010001110011111",
+			"100011110000000000000000000110000000000111111110000000000000000000100111011111111111",
+			"111111110000000000000000000000000000000011111110000000000000000000111111111111111111",
+			"111100000000000000010000000000000000000011000000000000000000000001111111111111111111",
+			"100000000000000001010100000000000000000000000000000000000000000001111110000010111111",
+			"100001110000000011010111000000000000000000000000000000000000001111111000000100111111",
+			"111111110000000111011110000000000000000000000000000000000000011111010000000010111111",
+			"111111100100001111111100000000000000000000000010000000000000011110000000000000111111",
+			"111111000110000111111000010000000000000001111110000000000000011100000000000001000111",
+			"111111101111000011111000001100000000000001111111011100000010111100000100000000010111",
+			"111111101111111001111001001000000000011101111111111100000010001100000000000000001111",
+			"111110000001001100011001010100000000011101111111111110000010101000000000000000111111",
+			"111110011001011110000001110000000000000101111111111100001101001110000000000000011111",
+			"111111100000011111100011110100000000000001111111111000000000001000000000000000101111",
+			"111110000000011111100000010000000000000001111111111000000010001100000000000011101111",
+			"111111010001111111110011011100000000000000000000000000000000111111000000000011001111",
+			"111111111011111111111010001111000000000000000000000000000000000001000000000111101111",
+			"111111111111111111110000011101010000000000000000000000000000000100000000000111001111",
+			"111111111111111111111001001101110000000000110000110000000000110000000000000110001111",
+			"111111111111111111111100000101111000000000111111110000000000111000000000000100001111",
+			"111111111111111111111111010001111110000010111111110010000000011100000001010000011111",
+			"111111111111111111111111100111111100000110111111111001000000011100010000100000111111",
+			"111111111111111111111111000111111111101100111111111101000000001001111110100000111111",
+			"111111111111111111111110011111111111101101111111111111110000000000000100000001111111",
+			"111111111111111111111111111111111111101111111111111111111000011011000001111111111111",
+			"111111111111111111111111111111111111111111111111111111111000111111110011111111111111",
+			"111111111111111111111111111111111111111111111111111111111000011111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1680,
+			"height": 1680
+		},
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": 20
+		},
 		"spawnPoint": {
-			"x": 260,
-			"y": 60
+			"x": 410,
+			"y": 450
 		},
 		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/meadow.jpg": {
 		"grid": [
-			"00000111100011111111100000000011110",
-			"00000111000011111110000000000000000",
-			"10110010000001111110000001100000000",
-			"11110000000000111111111001110000011",
-			"11100000000000000111111111110000001",
-			"11000000000000000001111111110000001",
-			"11000100111000000000111111111100111",
-			"11000100111000000000000111111100111",
-			"11111100110000000000000000111100111",
-			"11111000100000000000000000000000011",
-			"11111000110000000000000000000000001",
-			"11111000110000000000000000000000001",
-			"11111000111000000000000000000000001",
-			"11100000011100000000000000100000111",
-			"11110000011110000000000000110000111",
-			"11111100001111000000000111110000111",
-			"11111100001111100000001111111000111",
-			"11111110000001110000011111111000111",
-			"11111110000000111001111111111000111",
-			"11111110000000111001111111100000011",
-			"11111100000000011000001111000000000",
-			"11111000000000000000000000000000000",
-			"11111100000000000000000000000000000"
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111000111111111111111111111111111111111111111111111111111111111111111111",
+			"1111100000111111111111111111111111111111111111111111111111111111111111111111",
+			"1111000000011111111111111111111111111111111111111111111111111111111111111111",
+			"1110000000011111111111111111111111111111111111111111111111111111111111111111",
+			"1110000000001111111111111111111111111111111111111111111111111111111111111111",
+			"1100000000000011111111111111111111111111111111111111111111111111111111111111",
+			"1100000000000001111111111111111111111111111111111111111111111111111111111111",
+			"1000000000000001111111111111111111111111111111111111111111111111111111111111",
+			"1000000000000001111111111111111111111111111111111111111100001111111111111111",
+			"1000000000000011111111111111111111111111111111111111111100001111111111111111",
+			"1000000000000011111111111111111111111111111111111111100000001111111111111111",
+			"1100000000000111111111111111111111111111111110000111100000000111111111111111",
+			"1110000000001111111111000011111111111111111100000000000000000111111111111111",
+			"1110000000011111111110000011111111111111111100000000000000000011111111000111",
+			"1110000000001111111100000001111111111111110000000000000000000000000000000011",
+			"1110000000000111111000000001111111111111100000000000000000000000000000000011",
+			"1111000111000011110000000000111111111111100000000000001100000000000000000011",
+			"1111111111100001100000000000011111111111111000000000011110000000000000000111",
+			"1111111111100000000000000000001111111111111111000000111111000000000001111111",
+			"1111111111110000000000000000000111111111111111111001111111100000000011111111",
+			"1111111111110000000000000000000011111111111111111111111111000000000011111111",
+			"1111111110000000000000000000000000000111111111111111111111000000000000011111",
+			"1111111100000000000000000000000000000011111111111111111111100000000000011111",
+			"1111111000000000000001110000000000000000111111111111111111110000000000011111",
+			"1111111000000100000111110000000000000000011111111111111111111100001111111111",
+			"1111111000011110000111110000000000000000000111111111111111111100001111111111",
+			"1111111100011111000111111000000000000000000011111111111111111100001111111111",
+			"1111111100011111000111111100000000000000000000000111111111111110001111111111",
+			"1111111110111110000111110000000000000000000000000001111111111110001111111111",
+			"1111111111111110000111000000000000000000000000000000001111111100001111111111",
+			"1111111111111100000111000000000000000000000000000000000111111100001111111111",
+			"1111111111111100000111000000000000000000000000000000000000000000000011111111",
+			"1111111111111100000111100000000000000000000000000000000000000000000001111111",
+			"1111111111111000000111110000000000000000000000000000000000000000000000111111",
+			"1111111111111000000111110000000000000000000000000000000000000000000000111111",
+			"1111111111111000000111110000000000000000000000000000000000000000000000111111",
+			"1111111111111000000111111000000000000000000000000000000000000000000000111111",
+			"1111111111110000000111111110000000000000000000000000000000000000000001111111",
+			"1111111111100000000111111110000000000000000000000000000010000000000111111111",
+			"1111111111000000000011111111000000000000000000000000000111000000000111111111",
+			"1111111111000000000001111111100000000000000000001000001111000000001111111111",
+			"1111111111101110000001111111100000000000000000001000111111100000001111111111",
+			"1111111111111110000001111111110000000000000000001111111111100000001111111111",
+			"1111111111111111000000111111111000000000000000001111111111100000001111111111",
+			"1111111111111111000000111111111110000000000000011111111111110000001111111111",
+			"1111111111111111000000011111111111000000000000111111111111110000011111111111",
+			"1111111111111111100000001111111111000000000001111111111111111100001111111111",
+			"1111111111111111100000000000111111110000000011111111111111111100001111111111",
+			"1111111111111111100000000000011111111000000111111111111111111100001111111111",
+			"1111111111111111100000000000011111111000111111111111111111111000000111111111",
+			"1111111111111111100000000000001111111000111111111111111111110000000011111111",
+			"1111111111111111000000000000000111111000111111111111111111000000000011111111",
+			"1111111111111110000000000000000111111000111111111111111100000000000000111111",
+			"1111111111111100000000000000000011111000110000011111110000000000000000001111",
+			"1111111111111100000000000000000001111000000000001111000000000000000000001111",
+			"1111111111111000000000000000000000111000000000000110000000000000000000000111",
+			"1111111111111100000000000000000000000000000000000000000000000000000000000111",
+			"1111111111111110000000000000000000000000000000000000000000000000000000000111",
+			"1111111111111111000000000000000000000000000000000000000000000000000000000111",
+			"1111111111111111110000000000000000000000000000000000000000000000000000000111",
+			"1111111111111111111000000000000000000000000000000000000000000000000000001111",
+			"1111111111111111111000000000000000000000000000000000000000000000000000001111",
+			"1111111111111111111100000000000000000000000000000000000000000000000000001111",
+			"1111111111111111111100000000000000000000000000000000000000000000000000001111",
+			"1111111111111111111111111000000000000000000000000000000000000000000000011111",
+			"1111111111111111111111111111111100000000000000000000000000000000000000111111",
+			"1111111111111111111111111111111111111000000000000000000000000000000001111111",
+			"1111111111111111111111111111111111111110000000000000000000000000000111111111",
+			"1111111111111111111111111111111111111111000000000000000000000000001111111111",
+			"1111111111111111111111111111111111111111111000000000000000000000011111111111",
+			"1111111111111111111111111111111111111111111111000000000000000011111111111111",
+			"1111111111111111111111111111111111111111111111111111111000111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1520,
+			"height": 1480
+		},
+		"arte": {
+			"escala": .8,
+			"x": -66.4,
+			"y": -104.8
+		},
 		"spawnPoint": {
-			"x": 740,
-			"y": 540
+			"x": 810,
+			"y": 810
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/desert.jpg": {
 		"grid": [
-			"00000000000000010000111111111111111",
-			"00000000000000000011111111111111111",
-			"00000011000000000011111111111111111",
-			"00010010000000000011111111111111111",
-			"00110000000000000011111111111111111",
-			"01111000000001110011111111111111111",
-			"01111111111111100011111111111111001",
-			"11111111111111100011111111111111000",
-			"11111111111111100011111111111110000",
-			"11111111111011100000001111111110000",
-			"11111111100000000000000011111100000",
-			"10000000000000000000000000000000000",
-			"10000000000000000000000000000000000",
-			"10000111000000000000000000000000001",
-			"10000011000000000000000000000000001",
-			"10000001000000010000100001100000001",
-			"10000000000000100000000011111100011",
-			"10000000000001100000000111111100011",
-			"10000000000011110000001111111110011",
-			"10000000000011111100001111111110011",
-			"11000000000111111111001111111110011",
-			"11000000000111111111000111111000001",
-			"11000000000111111111000111100000000"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111000000000111111111111111111111111111111",
+			"111111111111111111111111111111111111111110000000000011111111111111111111111111111",
+			"111111111111111111111111111111111111111110000000000011111111111111111111111111111",
+			"111111111111111111111111111111111111111111100000000011111111111111111111111111111",
+			"111111111111111101111111111111111111111111111111000001111111111111111111111111111",
+			"111111111110000000000000000111111111111111111111000000111111111111111111111111111",
+			"111111110000000000000000000011111111111100111111000000111111111111111111111111111",
+			"111111100000000000000000000000000000000000000111000000111111111111111111111111111",
+			"111111000000000000000000000000000000000000000011100000111111111111111111111111111",
+			"111111000000000000000000000000000000000000000011000000111111111111111111111111111",
+			"111110000000000000000000000000000000000000000010000000111111111111111111111111111",
+			"111110000000000000000000000000000000000000000000000000111111111111111111111111111",
+			"100000000000000000000000000000000000001110000000000000111111111111111111111111111",
+			"100000000000000000000000000000000000011110000000000000011111111111111111111111111",
+			"100000000000000000000000000000000000111110000001110000001111111111111111111111111",
+			"100000000000000000000000000000000000011100000001110000001111111111111111111111111",
+			"100111000000000000000000000000000000001100001111111000011111111111111111111111111",
+			"100011100000000000001100000000000000000000011111111111111111111111111111111111111",
+			"100011100000000000001100000000000000000000011111111111111111111111111111111111111",
+			"100011000000000000011100000000000000000000011111111111111111111111111111111111111",
+			"100001000000000000111100000000000000000000111111111111111111111111111111111111111",
+			"100000000001111000011100000000000000000000111111111111111111111111111111111111111",
+			"100000000011111000001100000000000000000000111111111111111111111111111111111111111",
+			"100000000011111100000000000000000000000000111111111111111111111111111111111111111",
+			"100000000111111110000000000000000011110000111111111111111111111111111111111111111",
+			"100000000111111110000000000000000111110000111111111111111111111111111111111111111",
+			"110000000011111111100000000001111111110000111111111111111111111111111111111111111",
+			"110000000111111111111111111111111111110000111111111111111111111111111111101111111",
+			"111111111111111111111111111111111111110000111111111111111111111111111110000011111",
+			"111111111111111111111111111111111111110001111111111111111111111111111110000011111",
+			"111111111111111111111111111111111111110000111111111111111111111111111100000011111",
+			"111111111111111111111111111111111111110000111111111111111111111111111000000011111",
+			"111111111111111111111111111111111111110000111111111111111111111111111000000011111",
+			"111111111111111111111111111111111111110000000001111111111111111111110000000111111",
+			"111111111111111111111111111100000111100000000000000111111111111111110000000100011",
+			"111111111111111111111111111000000010000000000000000011111111111111110000000000011",
+			"111111111111111111111000000000000000000000000000000000000111111111100000000000011",
+			"111111111100000000000000000000000000000000000000000000000000111100000000000000111",
+			"111111111000000000000000000000000000000000000000000000000000000000000000000000111",
+			"111111111100000000000000000000000000000000000000000000000000000000000000000011111",
+			"111111111100000000001111100000000000000000000000000000000000000000000000000011111",
+			"111111111100000011111111000000000000000000000000000000000000000000000000001111111",
+			"111111111100000001111111000000000000000000000000000000000000000000000000001111111",
+			"111111111000000000111110000000000000000000000000011100000000000000000000001111111",
+			"111111111000000000011110000000000000001100000011111000000000000000000000001111111",
+			"111111111000000000001110000000000000011111111111110000001111110000000000001111111",
+			"111111111000000000001000000000000000111000000000110000011111111111110000011111111",
+			"111111111000000000000000000000000001110000000000000001111111111111110000011111111",
+			"111111111000000000000000000000000011110000000000000001111111111111110000011111111",
+			"111111111100000000000000000000001111110000000000000011111111111111110000011111111",
+			"111111111100000000000000000000011111110000000000000111111111111111110000011111111",
+			"111111111100000000000000000000011111110000000000000111111111111111111000011111111",
+			"111111111100000000000000000000111111111000000000000111111111111111111000011111111",
+			"111111111100000000000000000000111111111111110000000111111111111111111000011111111",
+			"111111111100000000000000000001111111111111111100000111111111111111111000011111111",
+			"111111111100000000000000000001111111111111111111000111111111111111111000011111111",
+			"111111111100000000000000000001111111111111111111000011111111111111110000001111111",
+			"111111111110000000000000000001111111111111111111000011111111111110000000001111111",
+			"111111111110000000000000000001111111111111111111000011111111111100000000000111111",
+			"111111111110000000000000000001111111111111111111000011111111100000000010000011111",
+			"111111111100000000000000000001111111110000011111000011111100000000011111000001111",
+			"111111111000000000000000000000111111110000001111000011100000000000111111000001111",
+			"111111111000000000000000000000000001100000000000000000000000000001111111110000111",
+			"111111110000000000000000000000000000000000000000000000000000000001110011110000111",
+			"111111110000000000000000000000000000000000000000000000000000000011100001111000111",
+			"111111110000000000000000000000000000000000000000000000000000000011100001111000011",
+			"111111110000000000000000000000000000000000000000000000000000000001000001111000111",
+			"111111110000000000110000000000000000000000000000000000000000000001000011111000111",
+			"111111110000000001110000000000000000000000000000011100000000000000000011100000111",
+			"111111111000000001110000000000000000000000000000111100000000000000000000000000111",
+			"111111111110000011111000000000000000000000000000011100000000000000000000000000111",
+			"111111111111111111111111100000000000000000000000011100000000000000000000000001111",
+			"111111111111111111111111111110000111000000000000000000000000000000000100001111111",
+			"111111111111111111111111111111111111100000000000000000000000000111111111111111111",
+			"111111111111111111111111111111111111110000000000000000000000011111111111111111111",
+			"111111111111111111111111111111111111100000000000000000000011111111111111111111111",
+			"111111111111111111111111111111111111100000000000000000111111111111111111111111111",
+			"111111111111111111111111111111111111100000000000001111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1620,
+			"height": 1600
+		},
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": -60
+		},
 		"spawnPoint": {
-			"x": 620,
-			"y": 540
+			"x": 750,
+			"y": 870
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/badlands.jpg": {
 		"grid": [
-			"00000000000000000000000000000000001",
-			"00000000000000000000000000000000011",
-			"00010000000000000000000000000000011",
-			"00111000000000000000000000000000011",
-			"00000000000000111111000000000000011",
-			"00000000000000111111110000000000111",
-			"00000000000001111111100000000000111",
-			"10000001100000111111000000000001111",
-			"11111111110000111110000000100011111",
-			"11111111110000010000000001111111111",
-			"11111111110000000000000011111111111",
-			"11111111111000000000000111111111111",
-			"11111111110000000000000111111111111",
-			"11111111111000000010000001111111111",
-			"11111111111000000110011000001111111",
-			"11111111110000000110011000000111111",
-			"11111111110000001110011100000111111",
-			"11000111100000001110011100001111111",
-			"10000001000000000000011100111111111",
-			"11000000000000000000000001111111111",
-			"11000000000000000011000111111111111",
-			"10000000000000000111111111111111111",
-			"00000000000000011111111111111111111"
+			"11111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111110001111111111111111111111111111111111111111111111111111111",
+			"11111111111111100001111111111111111111111111111111111111111111111111111111",
+			"11111111111111000000111111111111111111111111111111111111111111111111111111",
+			"11111111111111000000001111111111111111111111111111111111111111111111111111",
+			"11111111111111000000000111111111111111111111111111111111111111111111111111",
+			"11111111111111100000000011111111111111111111111111111111111111111111111111",
+			"11111111111111000000000001111111111111111111111111111111111111111111111111",
+			"11111111111100000000000000011011111111111111111111111111111111111111111111",
+			"11111111111000000000000000000000111111111111111111111111111111111111111111",
+			"11111111110000000000000000000000011111111111111111111111111111111111111111",
+			"11111111100000000000000000000000011111111111111111111111111111111111111111",
+			"11111100000000000000000000000000011111111111111111111111111111111111111111",
+			"11111000000000000000000000000000011111111111111111111111111111110000011111",
+			"11110000000000000000000000000000011111111111111100011111111111100000001111",
+			"11110000000000000000000000000000011111111111100000001111111111100000001111",
+			"11100000000000000000000000000000111111100000000000000111111110000000000111",
+			"11100000000000000000000000000000111111000000000000000111111000000000000011",
+			"11110000000000000000000000000000111110000000000000000011110000000000000001",
+			"11110000000000000000000000000000001000000000000000000000000000000000000001",
+			"11110000000000000000000000000000000000000000000000000000000000000000000001",
+			"11110000000000000000000000000000000000000000000000000000000000000000000011",
+			"11110000000100000000000000000000000000000000000000000000000000000000000111",
+			"11110000000110000000000000000000000000000000000000000000000000000000000111",
+			"11110000001111000000000000000000000000000000000000000000000000000000000011",
+			"11111000011111110000000000000000000000000000000000000000000000000000000011",
+			"11111000011111110000000000000000000000000000000000000000000000000000000011",
+			"11111000011111100000000000000000001111111111100000000000000000000000000111",
+			"11111000001001000000000000000000001111111111110001100000000000000000000111",
+			"11111000000000000000000000000000011111111111111111000000000000000000001111",
+			"11111000000000000000000000000000011111111111111110000000000000000000001111",
+			"11111000000000000000000000000000111111111111111100000000000000000000011111",
+			"11111100000000000000001100000000111111111111111000000000000000000000111111",
+			"11111111000000000000111100000000111111111111111000000000000000000001111111",
+			"11111111111111000011111110000000011111111111110000000000000000000001111111",
+			"11111111111111111111111110000000011111111111100000000000001100000111111111",
+			"11111111111111111111111110000000001111111111000000000000011111111111111111",
+			"11111111111111111111111111000000001111111000000000000000111111111111111111",
+			"11111111111111111111111111000000001111000000000000000001111111111111111111",
+			"11111111111111111111111111100000000000000000000000000011111111111111111111",
+			"11111111111111111111111111100000000000000000000000000111111111111111111111",
+			"11111111111111111111111111100000000000000000000000001111111111111111111111",
+			"11111111111111111111111111100000000000000000000000011111111111111111111111",
+			"11111111111111111111111111100000000000000000000000011111111111111111111111",
+			"11111111111111111111111111100000000000000001100000011111111111111111111111",
+			"11111111111111111111111111100000000000000111100000000011111111111111111111",
+			"11111111111111111111111111110000000000001111100000000000111111111111111111",
+			"11111111111111111111111111110000000000011111000111110000011001111111111111",
+			"11111111111111111111111111110000000000011111000111111000000001111111111111",
+			"11111111111111111111111111100000000000111111100111111000000000111111111111",
+			"11111111111111111111111111100000000000111111100111111000000000111111111111",
+			"11111111111111111111111111000000000000111111100111111100000000011111111111",
+			"11111111111111111111111110000000000001111111000111111100000000011111111111",
+			"11111111111111111111111110000000000001111111000111111100000000111111111111",
+			"11111111111010011111111000000000000000111110000111111100000111111111111111",
+			"11111111100000000001110000000000000000000000001111111100001111111111111111",
+			"11111111000000000000100000000000000000000000001111111110011111111111111111",
+			"11111111110000000000000000000000000000000000001111111000111111111111111111",
+			"11111111111000000000000000000000000000000000000000000001111111111111111111",
+			"11111111111000000000000000000000000000000011000000011111111111111111111111",
+			"11111111111000000000000000000000000000000111111100111111111111111111111111",
+			"11111111100000000000000000000000000000001111111111111111111111111111111111",
+			"11111110000000000000000000000000000000011111111111111111111111111111111111",
+			"11111000000000000000000000000000000001111111111111111111111111111111111111",
+			"11110000000000000000000000000000000111111111111111111111111111111111111111",
+			"11110000000000000000000000000000000111111111111111111111111111111111111111",
+			"11110000000000000000000000000000001111111111111111111111111111111111111111",
+			"11110000000000000000000000000000001111111111111111111111111111111111111111",
+			"11111000000000000000000000000000001111111111111111111111111111111111111111",
+			"11111100000000000000000000000000001111111111111111111111111111111111111111",
+			"11111111000000000000000000000000001111111111111111111111111111111111111111",
+			"11111110000000000000000000000000011111111111111111111111111111111111111111",
+			"11111110000000000000000000000000011111111111111111111111111111111111111111",
+			"11111100000000000110000000000000011111111111111111111111111111111111111111",
+			"11111000000000001111000000000000011111111111111111111111111111111111111111",
+			"11110000000000011111110000000000011111111111111111111111111111111111111111",
+			"11100000000000111111110000000000111111111111111111111111111111111111111111",
+			"11000000000000111111110000000000111111111111111111111111111111111111111111",
+			"11000000000011111111111000000001111111111111111111111111111111111111111111",
+			"10000000000111111111111110000011111111111111111111111111111111111111111111",
+			"10000000001111111111111111111111111111111111111111111111111111111111111111",
+			"10000000011111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1480,
+			"height": 1680
+		},
+		"arte": {
+			"escala": .8,
+			"x": -7.2,
+			"y": 12
+		},
 		"spawnPoint": {
-			"x": 540,
-			"y": 420
+			"x": 650,
+			"y": 790
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/burnt-forest.jpg": {
 		"grid": [
-			"00000000000111111111111110011111111",
-			"11000110000111000100011100011111111",
-			"10000010000111000000000000111111111",
-			"00000000000111000000000000011111111",
-			"00000000011111000011100000011111111",
-			"10000111111111100000100000011111111",
-			"11100111111111100000000000011111111",
-			"11100111111100000010000000011111111",
-			"11100111111000000111000000111111111",
-			"11000111111110001111000000011111111",
-			"11100010111110001111000000001111111",
-			"11100000000000000001100110001111111",
-			"11000000000000000011111111000111111",
-			"11101111111000001111111111100011111",
-			"11111111111111111111111111110000011",
-			"11111111111111111111111111110000001",
-			"11111111111111111111111110000000001",
-			"11111111111111111111111110000000011",
-			"11111111111111111111111110000000011",
-			"11111111111111111111100110000000011",
-			"11111111111111111100000010000000011",
-			"11111111111110000000000000000001111",
-			"11111111111100000001110000110001111"
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111110000001111",
+			"1111111111111111111111111111111111111111111111111111111111111111110000000000011",
+			"1111111111111111111111111111111111111111111111111111111111111110000000000000011",
+			"1111111111111111111111111111111111111111111111111111111111110000000000000000011",
+			"1111111111111111111111111111111111111111111111111111111111100000000000000000111",
+			"1111111111111111111111111111111111111111111111111111111111110000000000000011111",
+			"1111111111111111111111111111111111111111111111111111111111111000000000000111111",
+			"1111110000000011111111111111111111111111111111111111111111111000000000001111111",
+			"1111100000000011111111111111111111111111111111111111111111110000000000001111111",
+			"1111100000000111111111111111111111111111111111111111111111110000111100011111111",
+			"1111110000001111110011111111111111111111111111111111111111100001111111111111111",
+			"1111111100001111100000111111111111111111111111111111111111000001111111111111111",
+			"1111111100001111100000000111111111111111111111111111111111000011111111111111111",
+			"1111111100001111110000000011111111111111111111111111111110000111111111111111111",
+			"1100000000000000000000000001111111111111111111111111111100001111111111111111111",
+			"1000000000000000000000000000111111111111111111111111111100001111111111111111111",
+			"1000000000000000000000000001111111111111111111111111111000011111111111111111111",
+			"1000000000000001100000000011111111111111111111111111111000011111111111111111111",
+			"1110111100000001111100000111111111001111111111111111110000111111111111111111111",
+			"1111111100000001111100000111111110000011100000111111100001111111111111111111111",
+			"1111111100000001111000000011111110000000000000000011000001111111111111111111111",
+			"1111111000000000111000000011111110000000000000000000000011111111111111111111111",
+			"1111000000000000000000000111111110000000000000000000000000111111111111111111111",
+			"1111000000000000000000000111111100000000100000000000000000011111111111111111111",
+			"1111000000000000000000111111111100000001111111000000000000111111111111111111111",
+			"1111000000000000000011111111111110000000011111100000000000111111111111111111111",
+			"1111110000000001111111111111111111100000000111100000000000111111111111111111111",
+			"1111111111000001111111111111111111110000000001000000000000111111111111111111111",
+			"1111111111100001111111111111111111110000000000000000000000111111111111111111111",
+			"1111111111100001111111111111111111110000110000000000000001111111111111111111111",
+			"1111111111100001111111111111111100000000111000000000000001111111111111111111111",
+			"1111111111100001111111111111000000000001111100000000000001111111111111111111111",
+			"1111111111000001111111111111000000000111111110000000000011111111111111111111111",
+			"1111111111000001111111111111000000000111111100000000000011111111111111111111111",
+			"1111111111000001111111111111110000001111111100000000000001111111111111111111111",
+			"1111111111000001111111111111111000001111111100000000000000111111111111111111111",
+			"1111111111000001111111111111111000001111111110000000000000011111111111111111111",
+			"1111111111000000110011111111111000001111111111000000100000011111111111111111111",
+			"1111111111000000000000011110000000000000011111100011110000001111111111111111111",
+			"1111111111000000000000000000000000000000011111111111111000000111111111111111111",
+			"1111111111000000000000000000000000000000011111111111111100000011111111111111111",
+			"1111111111000001111110000000000000000001111111111111111110000011111111111111111",
+			"1111111111101111111111111110000000001111111111111111111111000000111111111111111",
+			"1111111111111111111111111111000011111111111111111111111111100000111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111110000110001111111111",
+			"1111111111111111111111111111111111111111111111111111111111111000000000011111111",
+			"1111111111111111111111111111111111111111111111111111111111111000000000001111111",
+			"1111111111111111111111111111111111111111111111111111111111111000000000001111111",
+			"1111111111111111111111111111111111111111111111111111111100010000000000001111111",
+			"1111111111111111111111111111111111111111111111111111111000000000000000001111111",
+			"1111111111111111111111111111111111111111111111111111110000000000000000011111111",
+			"1111000000000001111111111111111111111111111111111111110000000000000000011111111",
+			"1110000000000000111111111111111111111111111111111111110000000000000000111111111",
+			"1110000000000000111111111111111111111111111111111111110000000000000000111111111",
+			"1111110000000001111111111111111111111111111111110111110000000000000000111111111",
+			"1111110000000001111111111111111111111111111111000011111000000000000000111111111",
+			"1111100000000011111111111111111111111111110000000001111000000000000000111111111",
+			"1111100000000001111111111111111111111111000000000000110000000000000011111111111",
+			"1111100000000000111111111111111000111100000000000000100000000000000111111111111",
+			"1111100000000000000001111111110000010000000001111000000000010000001111111111111",
+			"1111110000000000000000111111100000000000000111111000000011111000001111111111111",
+			"1111110000000000000000111111000000000000001111110000000111111100001111111111111",
+			"1111110000000000000000001111000000000000011111100000000011111110001111111111111",
+			"1111111000000000000000001000000000000000111110000000000000111000000011111111111",
+			"1111111000000000111110000000000000000000111100000000000000000000000001111111111",
+			"1111111100000000000000000000000000000000100000000011000000000000000000111111111",
+			"1111111111000000000000000000000000000000000000001111000010000000000000011111111",
+			"1111111111100000000000000000100000000000000000111111000011100000000000001111111",
+			"1111111111110000010000000001100000000000000011111111100011100000000000001111111",
+			"1111111111111000000000001111110000000000001111111111100011110000001110000011111",
+			"1111111111111000000000011111111000000000111111111111100011111110001111000001111",
+			"1111111111111110000000111111111000000001111111111111100111111110001111100000111",
+			"1111111111111111000001111111111110000001111111111111111111111100001111110000011",
+			"1111111111111111111111111111111111000000011111111111111111111110001111111000011",
+			"1111111111111111111111111111111111100000001111111111111111111110000111100000011",
+			"1111111111111111111111111111111111100000001111111111111111111110000000000000011",
+			"1111111111111111111111111111111111100000000111111111111111111111000000000000011",
+			"1111111111111111111111111111111111110000000111111111111111111111110000000000001",
+			"1111111111111111111111111111111111110000001111111111111111111111111100000000001",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1580,
+			"height": 1640
+		},
+		"arte": {
+			"escala": .8,
+			"x": -29.6,
+			"y": -29.6
+		},
 		"spawnPoint": {
-			"x": 660,
-			"y": 500
+			"x": 750,
+			"y": 850
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/tall-grass.jpg": {
 		"grid": [
-			"11111111111111111111000000000011111",
-			"11111111111111111110000000000001111",
-			"11111111111111111111100000000001111",
-			"11111111111111111111110000000111111",
-			"11111111111111111111110000001111111",
-			"11111111111111111111100000111111111",
-			"11111111111111111111100000111111111",
-			"11111111111111111111000000111111111",
-			"11111111111111111110000000111111111",
-			"11111111111111100000011111111111111",
-			"11000011111110000000111111111111111",
-			"00000000111111000001111111111111111",
-			"00000000111110000011111111111111111",
-			"00000001111110000011111111111111111",
-			"10000001111111000001111111111111111",
-			"10000111111110000000111111111111111",
-			"11100111110000001100000001111111111",
-			"11100111100000011110000000111111111",
-			"11100111100000001111111100000011111",
-			"11100111100000011111111110000011111",
-			"11100111100000011111111100000011111",
-			"11100000000000011111111000000111111",
-			"11100000000000011111110000000111111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111100001111111111111111",
+			"111111111111111111111111111111111111111111111111111000000001111111111111",
+			"111111111111111111111111111111111111111111111111110000000000111111111111",
+			"111111111111111111111111111111111111111111111110010000000000000000011111",
+			"111111111111111111111111111111111111111111111100000000000000000000001111",
+			"111111111111111111111111111111111111111111111100000000000000000000001111",
+			"111111111111111111111111111111111111111111111110000000000000000000001111",
+			"111111111111111111111111111111111111111111111111100000000000000000001111",
+			"111111111111111111111111111111111111111111111111111000000000000000011111",
+			"111111111111111111111111111111111111111111111111111000000000000011111111",
+			"111111111111111111111111111111111111111111111111111000000000000111111111",
+			"111111111111111111111111111111111111111111111111111000000000011111111111",
+			"111111111111111111111111111111111111111111111111111000000011111111111111",
+			"111111111111111111111111111111111111111111111111110000000011111111111111",
+			"111111111111111111111111111111111111111111111111100000000011111111111111",
+			"111111111111111111111111111111111111111111111111100000000011111111111111",
+			"111111111111111111111111111111111111111111111111000000000011111111111111",
+			"111111111111111111111111111111111111111111111110000000000011111111111111",
+			"111111111111111111111111111111111111111111111100000000000011111111111111",
+			"111111111111111111111111111111111111111111111000000110000111111111111111",
+			"111111111111111111111111111111111111111111110000011111111111111111111111",
+			"111111111111111111111111111111111111111000000000111111111111111111111111",
+			"111111111111111111111111111111111110000000000001111111111111111111111111",
+			"111111111111000000111111111111111100000000000001111111111111111111111111",
+			"111111111100000000001111111111111100000000000011111111111111111111111111",
+			"111111110000000000000011111111111100000000001111111111111111111111111111",
+			"111111100000000000000011111111111100000000011111111111111111111111111111",
+			"111111100000000000000011111111111100000000011111111111111111111111111111",
+			"111111100000000000000011111111111100000000011111111111111111111111111111",
+			"111111100000000000001111111111111100000000011111111111111111111111111111",
+			"111111110000000000001111111111111110000000011111111111111111111111111111",
+			"111111111000000000011111111111111110000000001111111111111111111111111111",
+			"111111111100000000111111111111111100000000000111111111111111111111111111",
+			"111111111100000011111111111111111100000010000011111111111111111111111111",
+			"111111111111000011111111111111110000000111000000000011111111111111111111",
+			"111111111111000011111111111000000000011111100000000000011111111111111111",
+			"111111111111000011111111110000000000011111110000000000000111111111111111",
+			"111111111111100011111111110000000000011111111111000000000001111111111111",
+			"111111111111100011111111110000000000011111111111111111000000110011111111",
+			"111111111111100011111111110000000000001111111111111111110000000000111111",
+			"111111111111100011111111110000000000011111111111111111111000000000111111",
+			"111111111111100001111111100000000000011111111111111111110000000000111111",
+			"111111111111100001111111100000000000111111111111111111100000000000111111",
+			"111111111111100001111111100000000000111111111111111111100000000000111111",
+			"111111111111100001111111000000000000111111111111111111000000000001111111",
+			"111111111111110000110000000000000000111111111111111111000000000001111111",
+			"111111111111110000000000000000000000111111111111111110000000000011111111",
+			"111111111111110000000000000000000001111111111111111100000000000111111111",
+			"111111111111111000000000000000000001111111111111111100000000000111111111",
+			"111111111111110000000000000000000001111111111111111000000000000111111111",
+			"111111111111000000000000000000000001111111111111111000000000000111111111",
+			"111111111110000000000000011100000001111111111111111100000001111111111111",
+			"111111111100000000000001111000000111111111111111111110000001111111111111",
+			"111111110000000000000001110000011111111111111111111111110000111111111111",
+			"111111100000000000000000010000111111111111111111111111111000111111111111",
+			"111111000000000000000000000001111111111111111111111111111000011111111111",
+			"111111000000000000000000000011111111111111111111111111111100001111111111",
+			"111110000000001111011110000111111111111111111111111111111100001111111111",
+			"111110000000111111111111111111111111111111111111111111111110000111111111",
+			"111110000011111111111111111111111111111111111111111111111111000111111111",
+			"110000001111111111111111111111111111111111111111111111111111111111111111",
+			"100000001111111111111111111111111111111111111111111111111111111111111111",
+			"100000001111111111111111111111111111111111111111111111111111111111111111",
+			"100000011111111111111111111111111111111111111111111111111111111111111111",
+			"100011111111111111111111111111111111111111111111111111111111111111111111",
+			"100011111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1440,
+			"height": 1440
+		},
+		"arte": {
+			"escala": .8,
+			"x": 16.8,
+			"y": -221.6
+		},
 		"spawnPoint": {
-			"x": 620,
-			"y": 660
+			"x": 730,
+			"y": 810
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/forest.jpg": {
 		"grid": [
-			"10000011111111110000000000001111111",
-			"10000011111110000001111100001111111",
-			"11110011111100000001111111111111111",
-			"11110011111000000011111111111111111",
-			"11110001111100000111111111111111111",
-			"11110001111110000111111111111111111",
-			"11110001111110000011111111111111111",
-			"11110011101110000000000000000000001",
-			"11100000001000000000000000000000001",
-			"11000000000000000001111001111100000",
-			"00000000000000001111111101111110000",
-			"00111111111110011111111100011111000",
-			"10111111111110111100000000111111000",
-			"10111111111100000000000111111111000",
-			"10111111111100000000011111111111100",
-			"10111111111100000000011111111111100",
-			"10111111111110000000011111111111111",
-			"10111111111110011100011111111011111",
-			"10111111111100011100111111100001111",
-			"10111111111100001111111111000000111",
-			"10001111111100000000111000000000111",
-			"11000011111100000000000000011000111",
-			"11001111111110011001111011111111111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111100001111111111111111111111111111",
+			"111111111111111111111111111111111000000000111111000000000111111111111111111111111",
+			"111111111111110001000111111111111000000000000000000000000001111111111111111111111",
+			"111111111111110000000111111111111111111000000000000000000000111111111111111111111",
+			"111111111111111000001111111111111111111000000000000000000000011111111111111111111",
+			"111111111111111000111111111111111111111100011110000000000000011111111111111111111",
+			"111111111111111000111111111111111111111100011110000000000000001111111111111111111",
+			"111111111110011000111111111111111111111000011110000000000000001111111111111111111",
+			"111111111110011000111111111111111111111000000000000000000000001111111111111111111",
+			"111111111110000000111111111111111111111000000000000000000000000111111111111111111",
+			"111111111100000000111111111111111111111000000000000000000000000111111111111111111",
+			"111111110000000000111111111111111111111000000000000000000000001111111111111111111",
+			"111111100000000000111111111111111111111000000011111110000000001111111111111111111",
+			"111111100000000001111111111111111111000000001111111110000000011111111111111111111",
+			"111111111111111001111111111111100000000000001111111111110001111111111111111111111",
+			"111111111111111000111111111111100000000000001111111111111111111111111111111111111",
+			"111111111111111000111111111110000000000000011111111111111111111111111111111111111",
+			"111111111111111000111111111100000000000001111111111111111111111111111111111111111",
+			"111111111111111000111111111110000000000011111111111111111111111111111111111111111",
+			"111111111111110000011111111111000000000011111111111111111111111111111111111111111",
+			"111111111111110000001111111111110000000011111111111111111111111111111111111111111",
+			"111111111111111000001111111111111000000011111111111111111111111111111111111111111",
+			"111111111111111000011111111111111000000011111111111111111111111111111111111111111",
+			"111111111111111000011111111111110000000011111111111111111111111111111111111111111",
+			"111111111111111000011111111111110000000001111111111111111111111111111111111111111",
+			"111111111111111000111111111111111000000000111111111111111111111111100000001111111",
+			"111111111111111000111110000111111110000000000000000000000000000000000000001111111",
+			"111111111111110000000000000110001100000000000000000000000000000000000000001111111",
+			"111111111111000000000000001110000000000000001111111100001111111111000000001111111",
+			"111111111110000000000000000000000000000000001111111110001111111111000000000111111",
+			"111111111000000000000000000000000000000000111111111111001111111111110000000000011",
+			"111110000000000000000000000000000000001111111111111111001111111111111000000000011",
+			"111111000011111111111111000000000000011111111111111111001111111111111100000011111",
+			"111111100011111111111111111111110001111111111111111111000111111111111100000011111",
+			"111111110011111111111111111111110011111111111111111111000000111111111100000011111",
+			"111111110011111111111111111111110011111111111111111110000111111111111100000011111",
+			"111111110011111111111111111111110011111100000000000000011111111111111100000011111",
+			"111111110011111111111111111111110000000000000000000011111111111111111100000011111",
+			"111111110011111111111111111111000000000000000000011111111111111111111111100011111",
+			"111111110011111111111111111110000000000000000000111111111111111111111111100011111",
+			"111111110011111111111111111111000000000000000000111111111111111111111111100111111",
+			"111111110011111111111111111111100000000000000000111111111111111111111111100111111",
+			"111111110011111111111111111111110000000000000000111111111111111111111111100111111",
+			"111111110011111111111111111111110000000000000000111111111111111111111111111111111",
+			"111111110011111111111111111111110000011100000000111111111111111111111111111111111",
+			"111111110011111111111111111111110001111111000001111111111111111111111111111111111",
+			"111111110011111111111111111111110001111111100011111111111111110000011111111111111",
+			"111111110011111111111111111111100001111111100111111111111111100000011111111111111",
+			"111111110011111111111111111111100001111111111111111111111111100000001111111111111",
+			"111111110011111111111111111111000000011111111111111111111111111000000111111111111",
+			"111111110001111111111111111111000000000001111111111111111000000100000111111111111",
+			"111111111000111111111111111111000000000000001111111111110000000000000111111111111",
+			"111111111000011001111111111111000000000000000000000000000000000000000111111111111",
+			"111111111110000001111111111111000000000000000000000000000000011100000111111111111",
+			"111111111110000011111111111111110000111100001000000000111111111100011111111111111",
+			"111111111110011111111111111111110000111110001111111000111111111111111111111111111",
+			"111111111110011111111111111111100001111110011111111100111111111111111111111111111",
+			"111111111110001111111111111111100001111111111111111111111111111111111111111111111",
+			"111111111110000111111111111111110001111111111111111111111111111111111111111111111",
+			"111111111110000111111111111111100000111111111111111111111111111111111111111111111",
+			"111111111110000000000000000111000001111111111111111111111111111111111111111111111",
+			"111111111110000000000000000000001111111111111111111111111111111111111111111111111",
+			"111111111110000000011000000000001111111111111111111111111111111111111111111111111",
+			"111111111110000001111111000000001111111111111111111111111111111111111111111111111",
+			"111100001100001111111111000000001111111111111111111111111111111111111111111111111",
+			"100000000000111111111111100000011111111111111111111111111111111111111111111111111",
+			"100001100011111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1620,
+			"height": 1400
+		},
+		"arte": {
+			"escala": .8,
+			"x": -.8,
+			"y": -133.6
+		},
 		"spawnPoint": {
-			"x": 620,
-			"y": 380
+			"x": 750,
+			"y": 630
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/industrial.jpg": {
 		"grid": [
-			"11111111111111111111111111110000000",
-			"00000001111111111111111111110000000",
-			"00000001111111111111111111100000000",
-			"11100011111111111111111111100000000",
-			"11100011111111111111111111111100001",
-			"10000001111111111111111111111100111",
-			"10000000111111111111111111111100111",
-			"00000000011111111111111111111100111",
-			"00000000011111111111111000000000001",
-			"00000000111111111111100000000000000",
-			"00000000000000000000000000000000000",
-			"00000000000000000000000000000000000",
-			"00000000111111111110000000000000000",
-			"00000001111111111110000000000000001",
-			"00000111111111111110000000000000001",
-			"11001111111111111111110000000000011",
-			"11001111111111111111111111111100011",
-			"11001111111111111111111111111100011",
-			"11001111111111111111111111111100011",
-			"10000011111111111111111111111100001",
-			"10000011111111111111111111111000001",
-			"10000011111111100111111111000000001",
-			"10000001111111100000000000000000001"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111100011111111111111111111111111",
+			"111111111111111111111111111111111111111111111001000001111111111111111111111111",
+			"111111111111111111111111111111111111111111110000000000111111111011111111111111",
+			"111111111111111111111111111111111111111111110000000000111111110001111111111111",
+			"111111111111111111111111111111111111111111111000000000000000000000000001111111",
+			"111111111111111111111111111111111111111111111000000000000000000000000001111111",
+			"111111111111111111111111111111111111111111111000000000000000000000000000111111",
+			"111111111111111111111111111111111111111111111000000000000000000000000000111111",
+			"111111111111111111111111111111111111111111110000000000000000000000000000111111",
+			"111111111111111111111111111111111111111111110000000000000000000000000000011111",
+			"111111111111111111111111111111111111111111110000000000011000000000000000011111",
+			"111111111111111111111111111111111111111111110000000000011100000000000000011111",
+			"111111111111111111111111111111111111111111110000000000011110000000000000011111",
+			"110000000000000011111111111111111111111111110000000000011110000000000000111111",
+			"100000000000000011111111111111111111111111110000000000011100000000000000111111",
+			"110000000000000011111111111111111111111111100000000000011000000000000000111111",
+			"111110000000000111111111111111111111111111000000000000111000000000000000111111",
+			"111111111000011111111111111111111111111111000000000000111000000000000000111111",
+			"111111111000011111111111111111111111111111000000000000111110000000000000111111",
+			"111111110000011111111111111111111111111111100000000000111111111000110001111111",
+			"111111110000011111111111111111111111111111110000111111111111111000111111111111",
+			"111111000000000111111111111111111111111111111111111111111111111000111111111111",
+			"111110000000000011111111111111111111111111111111111111111111111000111111111111",
+			"111110000000000011111111111111111111111111111111111111111111111000111111111111",
+			"111110000000000000011111111111111111111111111111111111111111111000111111111111",
+			"110000000000000000001111111111111111111111111111111111111111111000111111111111",
+			"100000000000000000011111111111111111111111111111111100111111111000111111111111",
+			"100000000000000000011111111111111111111111111111110000011000000000111111111111",
+			"111000000000000000011111111111111111111111111110110000000000000000000011111111",
+			"111000000000000000111111111111111111111111111000000000000000000000000001111111",
+			"110000000000000001111111111111111111111111110000000000000000000000000000111111",
+			"110000000000000000111111111111111111111111110000000000000000000000000000011111",
+			"110000000000000000000000000000000000000000000000000000000000000000000000000111",
+			"110000000000000000000000000000000000000000000000000000000000000000000000000011",
+			"110000000000000000000000000000000000000000000000000000000000000000000000000011",
+			"110000000000000000111111111111111111111110000000000000000000000000000000000111",
+			"110000000000000001111111111111111111111110000000000000000000000000000000011111",
+			"110000000000000001111111111111111111111110000000000000000000000000000111111111",
+			"110000000000000111111111111111111111111110000000000000000000000000000111111111",
+			"111000000000011111111111111111111111111110000000000000000000000000000111111111",
+			"111100000001111111111111111111111111111111000000000000000000000000000111111111",
+			"111111000001111111111111111111111111111111111111000000000000011000000111111111",
+			"111111000001111111111111111111111111111111111111111111111111111100001111111111",
+			"111111000011111111111111111111111111111111111111111111111111111000001111111111",
+			"111111000011111111111111111111111111111111111111111111111111111000001111111111",
+			"111111100011111111111111111111111111111111111111111111111111111000001111111111",
+			"111111100011111111111111111111111111111111111111111111111111111000001111111111",
+			"111111000011111111111111111111111111111111111111111111111111111000001111111111",
+			"111111000001111111111111111111111111111111111111111111111111111000001111111111",
+			"111111000000011111111111111111111111111111111111111111111111111000000111111111",
+			"111110000000001111111111111111111111111111111111111111111111111000000011111111",
+			"111110000000011111111111111111111111111111111111111111111111100000000011111111",
+			"111110000000011111111111111111111111111111111111111111111111100000000011111111",
+			"111100000000011111111111111111111111111111111111111111111111000000000011111111",
+			"111100000000000111111111111111111000011111111111111111000000000000000011111111",
+			"111100000000000011111111111111111000000000000000000000000000000000000011111111",
+			"111100000000000011111111111111111000000000000000000000000000000000000001111111",
+			"111100000000000001111111111111111000000000000000000000000000000000000001111111",
+			"111100000000000000000000000000000000000000000000000000000000000000000001111111",
+			"111100000000000000000000000000000000000000000000000000000000000000000001111111",
+			"111100000000000000000000000000000000000000000000000000000000000000000001111111",
+			"111100000000000000000000111111111000000000000000000000000000000000000001111111",
+			"111110000000000011111111111111111000000000000000000000000000000000000011111111",
+			"111110000000000111111111111111111000000000000000000000000000000000000011111111",
+			"111111000111111111111111111111111000000000000000000000000000000000000111111111",
+			"111111111111111111111111111111111000000000000000000000000000000000001111111111",
+			"111111111111111111111111111111111100000000000001111110000000000000001111111111",
+			"111111111111111111111111111111111110000000000011111111111100000000011111111111",
+			"111111111111111111111111111111111110000000000111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111101111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1560,
+			"height": 1440
+		},
+		"arte": {
+			"escala": .8,
+			"x": -68,
+			"y": -133.6
+		},
 		"spawnPoint": {
-			"x": 780,
-			"y": 540
+			"x": 850,
+			"y": 770
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/sea.jpg": {
 		"grid": [
-			"11111111111111111111111111100000000",
-			"11111111111111111111111111110000011",
-			"11111111111111111111001111111000111",
-			"11111111111110000000001111110001111",
-			"11111111111100000000001011100001111",
-			"11111000111000110000000000000011111",
-			"11111000000000111000000000000111111",
-			"11110000000000111110000000001111111",
-			"11100000000001111111100000001111111",
-			"11100000001111111111110000001111111",
-			"11100000001111111111111000000111111",
-			"11000000000111111111111000000111111",
-			"11100000000011111111111000000111111",
-			"11110000010011111111111000000011111",
-			"11111001110001111111111000000011111",
-			"11111001100001111111111000000011111",
-			"11111000100011111111110000000001111",
-			"11111100100010111111100001000000111",
-			"11111100000010011111000011111000001",
-			"11111100000000000000000111111110000",
-			"11101100000000000000001111111111000",
-			"11000000000000000000111111111111111",
-			"10000000000100000111111111111111111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111110000001111111",
+			"111111111111111111111111111111111111111111111111111111111110000000000111111",
+			"111111111111111111111111111111111111111111111111111111111000000000000011111",
+			"111111111111111111111111111111111111111111111111111111111000000111000001111",
+			"111111111111111111111111111111111111111111111111111111100000001111100000111",
+			"111111111111111111111111111111111111111111111111111111000000001111100000011",
+			"111111111111111111111111111111111111111111111111111110000000011111110000011",
+			"111111111111111111111111111111111111111111111111111110000000011111110000011",
+			"111111111111111111111111111111111111111111111111111100000000000111110000011",
+			"111111111111111111111111111111111111111111111111111100000000000000000000011",
+			"111111111111111111111111111111111111111111111111111100000000000000000000011",
+			"111111111111111111111111111111111111111111111111111100000000000000000000001",
+			"111111111111111111111111111111111111111111111111111100000000000000000000001",
+			"111111111111111111111111111111111111111111111111111110000000000000000000001",
+			"111111111111111111111111111111111111111111111111111110000000000000000000001",
+			"111111111111111111111111111111111111111111111111111100000000000000000000011",
+			"111111111111111111111111111111111111111111111111111100000000000000000000011",
+			"111111111111111111111111111111111111111111111111111110000000000000000000111",
+			"111111111111111111111111111111111111111111111111111111000000000000111011111",
+			"111111111111111111111111111111111111111111111111111111100000000001111111111",
+			"111111111111111111111111111111111111111111111111111111110000000111111111111",
+			"111111111111111111111111111111111111111111111111111111111000000111111111111",
+			"111111111111111111111111111111111111111000111111111111111000001111111111111",
+			"111111111111111111111111111110001111110000111111111111111000001111111111111",
+			"111111111111111111111111110000000001000000111111111111110000011111111111111",
+			"111111111111111111111111000000000000000001111111111111100000011111111111111",
+			"111111111111111111111110000000000000000001111111111110000000111111111111111",
+			"111111111111111111111110000111100000000000000000111100000000111111111111111",
+			"111111111000000111111000001111100000000000000000110000000001111111111111111",
+			"111111111000000011100000001111110000000000000000000000000011111111111111111",
+			"111111111000000000000000000111111100000000000000000000001111111111111111111",
+			"111111110000000000000000001111111111100000000000000000011111111111111111111",
+			"111111100000000000000000001111111111110000000000000000011111111111111111111",
+			"111111100000000000000000011111111111111100000000000000011111111111111111111",
+			"111111000000000000000011111111111111111110000000000000011111111111111111111",
+			"111111000000000000011111111111111111111111000000000000011111111111111111111",
+			"111111000000000000111111111111111111111111100000000000011111111111111111111",
+			"111111000000000000111111111111111111111111110000000000011111111111111111111",
+			"111110000000000000011111111111111111111111111000000000001111111111111111111",
+			"111100000000000000001111111111111111111111111000000000001111111111111111111",
+			"111100000000000000000111111111111111111111111100000000000111111111111111111",
+			"111110000000000000000011111111111111111111111100000000000111111111111111111",
+			"111111100000000000000011111111111111111111111100000000000111111111111111111",
+			"111111100000000000100001111111111111111111111100000000000011111111111111111",
+			"111111110000011111100001111111111111111111111100000000000011111111111111111",
+			"111111111000111111110000111111111111111111111100000000000011111111111111111",
+			"111111111000011111110000111111111111111111111100000000000001111111111111111",
+			"111111111000011111100000111111111111111111111000000000000001111111111111111",
+			"111111111000011111000000111111111111111111111000000000000001111111111111111",
+			"111111111000011111000001111111111111111111110000000000000001111111111111111",
+			"111111111100001111000001111111111111111111100000000000000000111111111111111",
+			"111111111100001111000011111111111111111111000000000000000000011111111111111",
+			"111111111110000111000011110111111111111110000000011100000000001111111111111",
+			"111111111110000011000011100011111111111110000000111111110000000001111111111",
+			"111111111110000000000011100001111111111100000001111111111110000000111111111",
+			"111111111110000000000011000000011111100000000011111111111111000000011111111",
+			"111111111110000000000000000000001100000000000111111111111111110000001111111",
+			"111111111110000000000000000000000000000000011111111111111111111000001111111",
+			"111110111110000000000000000000000000000001111111111111111111111111001111111",
+			"111100011000000000000000000000000000000111111111111111111111111111111111111",
+			"111000000000000000000000000000000000011111111111111111111111111111111111111",
+			"111000000000000000000100000000000011111111111111111111111111111111111111111",
+			"110000000000000000001110000000001111111111111111111111111111111111111111111",
+			"100000000000000000111111000000011111111111111111111111111111111111111111111",
+			"100011111100000011111111110000011111111111111111111111111111111111111111111",
+			"100001111100001111111111111111111111111111111111111111111111111111111111111",
+			"100001111100001111111111111111111111111111111111111111111111111111111111111",
+			"110000011100001111111111111111111111111111111111111111111111111111111111111",
+			"111000000000011111111111111111111111111111111111111111111111111111111111111",
+			"111100000000011111111111111111111111111111111111111111111111111111111111111",
+			"111110000000111111111111111111111111111111111111111111111111111111111111111",
+			"111111110001111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1500,
+			"height": 1480
+		},
+		"arte": {
+			"escala": .8,
+			"x": -141.6,
+			"y": -2.4
+		},
 		"spawnPoint": {
-			"x": 860,
-			"y": 340
+			"x": 830,
+			"y": 710
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
-	"assets/hunt-backgrounds/ice-mountain.png": {
+	"assets/hunt-backgrounds/ice-mountain.jpg": {
 		"grid": [
-			"11110000000000000111111111111111111",
-			"11111000000000000111111111111111111",
-			"11111100000010000111111111111111111",
-			"11111111001111000001111111111111111",
-			"11111111001111100000001000111111111",
-			"11111111001111110000000000111111111",
-			"11111100000111111111000001111111111",
-			"11111000000011111111100111111111111",
-			"11110000000001111111100111111111111",
-			"11110000000000000111100111111111111",
-			"11110000000000000000000111111111111",
-			"11111100011000000000000111111111111",
-			"11111111111100000000000011111111111",
-			"11111111111100011000000000111111111",
-			"11111111111110011100000000111111111",
-			"11111111111110011110000000111111111",
-			"11111111111110011110000000111111111",
-			"11111111100000011111110001111111111",
-			"11111110000000001111100011111111111",
-			"11111110000000000111110011111111111",
-			"11111110011110000111110011111111111",
-			"11111111111111000011110011111111111",
-			"11111111111111000000110011111111111"
+			"1111111111111111111111111111111",
+			"1111111111111111001111111111111",
+			"1111111111111101001111111111111",
+			"1111111111111000000111111111111",
+			"1111111111111000000011111111111",
+			"1100000111111100000001110111111",
+			"1000000001111110010000000011111",
+			"1000000000111110011000000011111",
+			"1000000000000110011100111111111",
+			"1100000000000000011111111111111",
+			"1111000000000000011111111111111",
+			"1111000000111100011111111111111",
+			"1111110001111110001111111111111",
+			"1111110001111110000000111100111",
+			"1111110001111111000000000000011",
+			"1111110001111111111100000000111",
+			"1111000000111111111111000011111",
+			"1110000000011111111111000111111",
+			"1100000000001111111111000111111",
+			"1000000000001110111111000111111",
+			"1000000000000000001111000111111",
+			"1100000000000000000000000111111",
+			"1111100111100000000000000111111",
+			"1111111111110001000000000011111",
+			"1111111111110001100000000001111",
+			"1111111111110001111100000000011",
+			"1111111111110001111100000000011",
+			"1111111111110001111100000000011",
+			"1111111111110001111110000000011",
+			"1111111111111001111111110000011",
+			"1111111000000000111111110011111",
+			"1111110000000000011111110011111",
+			"1111100011100000011111110011111",
+			"1111110111111000001111110011111",
+			"1111111111111100001111110011111",
+			"1111111111111100000111110011111",
+			"1111111111111110000000100011111",
+			"1111111111111111000000000011111",
+			"1111111111111111000000000011111",
+			"1111111111111111100110000001111",
+			"1111111111000011100110000001111",
+			"1111111111000001100110000001111",
+			"1111111111000000000011000001111",
+			"1111111111111100000011100001111",
+			"1111111111111110000011110001111",
+			"1111111111111110000001110011111",
+			"1111111111111111000001110011111",
+			"1111111111111111111111111111111",
+			"1111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 620,
+			"height": 980
+		},
+		"arte": {
+			"escala": .8,
+			"x": -135.2,
+			"y": -58.4
+		},
 		"spawnPoint": {
-			"x": 620,
-			"y": 500
+			"x": 330,
+			"y": 470
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/mountain.jpg": {
 		"grid": [
-			"11111111111100000001111111111111111",
-			"11100011111111100000111111111111111",
-			"10000011111111111100000011111111111",
-			"10011111111111111110000001011111111",
-			"10011111111111111100000000001111111",
-			"10011111111111111100000010001111111",
-			"10011111111111111110000111001111111",
-			"00011111111111111111111111001111111",
-			"00000000111111111111111111001111111",
-			"11100000000000001111111100000111111",
-			"11110000000000000011111100000111111",
-			"11111000001111000000000000001111111",
-			"11111000011111100000000000011111111",
-			"11110000111111110000000000011111111",
-			"11100011111111111111111000011111111",
-			"11100011111111111111111100111111111",
-			"11000111111111111111111000000111111",
-			"10000111111111111111110000000111111",
-			"10000111111111111111110000001111111",
-			"11000111111111111111111000111111111",
-			"11100011111111111111111100011111111",
-			"11110000110111111111111110011111111",
-			"11111000000011111111111110001111111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111110100011111111111111111111111111111111111111111111111111111111111111111111",
+			"111100111100000011111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000001111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000000111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000000111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000000111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000000000000000000001111111111111111111111111111111111111111111111111111",
+			"111110000000000000000000000000000000001111111111111111111111111111111111111111111111",
+			"111111100000001111111111000000000000000111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111100000000011111111111111111111111111111111111111111111",
+			"111111111111111111111111111111110000000011111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111000000000111111111111111111111111111111111111111111",
+			"111111111111111111111111111111110000000000011111111111111111111111111111111111111111",
+			"111111111111111111111111111111100000000000001111111111111111111111111111111111111111",
+			"111111111111111111111111111111100010000000001111111111111111111111111111111111111111",
+			"111111111111111111111111111111100111000000001111111111111111111111111111111111111111",
+			"111111111111110001111111111111111111100000000011111111111111111111111111111111111111",
+			"111111111111000000111111111111111111100001000011111111111111111111111111111111111111",
+			"111111111100000000111111111111111111111111100001110000111111111111111111111111111111",
+			"111111111000000111111111111111111111111111110000000000011111111111111111111111111111",
+			"111111111100011111111111111111111111111111111000000000011111111111111111111111111111",
+			"111111111100011111111111111111111111111111111000000000000110011111111111111111111111",
+			"111111111000011111111111111111111111111111110000000000000000001111111111111111111111",
+			"111111111000011111111111111111111111111111110000000000000000001111111111111111111111",
+			"111111111000011111111111111111111111111111110000000000111000001111111111111111111111",
+			"111111111000011111111111111111111111111111110000000000111100000111111111111111111111",
+			"111111111000011111111111111111111111111111111100000001111100000111111111111111111111",
+			"111111111000111111111111111111111111111111111111111111111110000111111111111111111111",
+			"110000000000111111111111111111111111111111111111111111111110000111111111111111111111",
+			"100000000000011111111111111111111111111111111111111111111110000111111111111111111111",
+			"110000000000001000000111111111111111111111111111111111111110000111111111111111111111",
+			"111110000000000000000001111111111111111111111111111111110110001111111111111111111111",
+			"111111111111000000000000111111110000001111111111111111100000000001111111111111111111",
+			"111111111111110000000000000000000000001111111111111111110000000001111111111111111111",
+			"111111111111111000000000000000000000000011111111111111100000000011111111111111111111",
+			"111111111111111100000000000000000000000000011111111111100000000111111111111111111111",
+			"111111111111111100000000001111111100000000000111111111000000001111111111111111111111",
+			"111111111111111100000000001111111111000000000000000000000000011111111111111111111111",
+			"111111111111111110000000011111111111100000000000000000000000011111111111111111111111",
+			"111111111111111100000000111111111111111000000000000000000000011111111111111111111111",
+			"111111111111111100000011111111111111111000000000000000000000011111111111111111111111",
+			"111111111111111000000111111111111111111000000000000000000000011111111111111111111111",
+			"111111111111110000011111111111111111111111111111111110000000011111111111111111111111",
+			"111111111111110000011111111111111111111111111111111111100000111111111111111111111111",
+			"111111111111110000111111111111111111111111111111111111100001111111111111111111111111",
+			"111111111111100000111111111111111111111111111111111111100001111111111111111111111111",
+			"111111111111100001111111111111111111111111111111111111100001000111111111111111111111",
+			"111111111100000001111111111111111111111111111111111100000000000011111111111111111111",
+			"111111111100000011111111111111111111111111111111111000000000000011111111111111111111",
+			"111111111100000011111111111111111111111111111111111000000000000011111111111111111111",
+			"111111111000000011111111111111111111111111111111111000000000000111111111111111111111",
+			"111111111100000011111111111111111111111111111111111100000000001111111111111111111111",
+			"111111111110000011111111111111111111111111111111111111000001111111111111111111111111",
+			"111111111111000011111111111111111111111111111111111111100001111111111111111111111111",
+			"111111111111100000111111111111111111111111111111111111110000111111111111111111111111",
+			"111111111111110000001111111111111111111111111111111111110000111111111111111111111111",
+			"111111111111111000000111111111111111111111111110011111111000011111111111111111111111",
+			"111111111111111100000001111001111111111111111110001111111000011111111111111111111111",
+			"111111111111111110000000111000111111111111111110000011111000001111111111111111111111",
+			"111111111111111111100000000000011111110011111110000000000000000011111111111111111111",
+			"111111111111111111111100000000000011110001111110000000000000000000011111111111111111",
+			"111111111111111111111111000000000000010000111110000000000000000000000011111111111111",
+			"111111111111111111111110000000000000000000111100000000000000000000000000111111111111",
+			"111111111111111111111100000000000000000000011100000000000000000000000000011111111111",
+			"111111111111111111111110000000000000000000001000000000000000000000000000011111111111",
+			"111111111111111111111111110000000000000000000000000000000000000000000000001111111111",
+			"111111111111111111111111111100000000000000000000000000000000000000000000000011111111",
+			"111111111111111111111111111111100000000000000000000000000000000000000000000000111111",
+			"111111111111111111111111111111110000001100000000000000000000000000000000000000011111",
+			"111111111111111111111111111111110001111111000000001111111111111100000000000000001111",
+			"111111111111111111111111111111111011111111000001111111111111111111100000000000000111",
+			"111111111111111111111111111111111111111110000111111111111111111111111100000000000111",
+			"111111111111111111111111111111111111111100001111111111111111111111111110000000000011",
+			"111111111111111111111111111111111111111100011111111111111111111111111111100000000011",
+			"111111111111111111111111111111111111111100111111111111111111111111111111110000000001",
+			"111111111111111111111111111111111111111100111111111111111111111111111111111000000001",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111100000011",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1680,
+			"height": 1600
+		},
+		"arte": {
+			"escala": .8,
+			"x": 16.8,
+			"y": -71.2
+		},
 		"spawnPoint": {
-			"x": 660,
-			"y": 540
+			"x": 810,
+			"y": 850
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/construction-site.jpg": {
 		"grid": [
-			"11111111100000000000000000011111111",
-			"11111100000000000000000000001111111",
-			"11111000000000000000000000011111111",
-			"11111000110000000001111000111111111",
-			"11110001111111000011111000111111111",
-			"11110000011111111111111000111111111",
-			"11100000001111111111111100111111111",
-			"11110000001111111111111100111111111",
-			"11110000001111111111111100111111111",
-			"11110000011111111111111000111111111",
-			"11110000011111111111111100111111111",
-			"11111001111111111111111100111111111",
-			"11111000111111111111111100111111111",
-			"11110000111111111111111100111111111",
-			"11110000111111111111111100011111111",
-			"11110000111111111111110000011111111",
-			"11110001111111111111100000011111111",
-			"11110001111111111111110000011111111",
-			"11110001111111111111110000011111111",
-			"11110001111111111111110000011111111",
-			"11111001111111111111110000011111111",
-			"11111001111111111111111100011111111",
-			"11111000111111111111111100011111111"
+			"1111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111001111111111",
+			"1111111111111111111111000101111111111111111000111111111",
+			"1111111111111111111100000000000000000000000000001111111",
+			"1111111111111111111000000000000000000000000000001111111",
+			"1111111111111111110000000000000000000000000000001111111",
+			"1111111111111000000000000000000000000000000000000000011",
+			"1111111111100000000000000000000000000000000000000000001",
+			"1111111111100000000000000000000000000000000000000000001",
+			"1111111111000000000000000000000000000000000000000000011",
+			"1111111110000001111000000000000000000001111111000011111",
+			"1111111110000011111100000000000000011111111111000011111",
+			"1111111100000111111110001110000000011111111111000011111",
+			"1111111100000111111111111110000000111111111111000011111",
+			"1111111100001111111111111111011111111111111111000011111",
+			"1111111000000000011111111111111111111111111111000011111",
+			"1111110000000000001111111111111111111111111111000011111",
+			"1111110000000000001111111111111111111111111111000011111",
+			"1111110000000000001111111111111111111111111111100011111",
+			"1111111000000000001111111111111111111111111111100011111",
+			"1111111000000000001111111111111111111111111111100011111",
+			"1111111000000000001111111111111111111111111111000011111",
+			"1111111000000000011111111111111111111111111111000011111",
+			"1111111000000000011111111111111111111111111111000011111",
+			"1111111100000000011111111111111111111111111111000011111",
+			"1111111100000000011111111111111111111111111111000011111",
+			"1111111100000011111111111111111111111111111111000011111",
+			"1111111100000111111111111111111111111111111111100011111",
+			"1111111100000011111111111111111111111111111111100011111",
+			"1111111100000011111111111111111111111111111111100011111",
+			"1111111100000011111111111111111111111111111111100011111",
+			"1111111100000011111111111111111111111111111111100001111",
+			"1111111100000011111111111111111111111111111111000000111",
+			"1111111100000011111111111111111111111111111111000000111",
+			"1111111100000011111111111111111111111111111111000000111",
+			"1111111100000011111111111111111111111111111111000000111",
+			"1111111100000111111111111111111111111111110000000000111",
+			"1111111100000111111111111111111111111111110000000000111",
+			"1111111100000111111111111111111111111111110000000000111",
+			"1111111100000111111111111111111111111111111000000000111",
+			"1111111100000111111111111111111111111111111000000000111",
+			"1111111100001111111111111111111111111111111000000000111",
+			"1111111100001111111111111111111111111111111000000000111",
+			"1111111100001111111111111111111111111111111000000000111",
+			"1111111110000111111111111111111111111111111000000000111",
+			"1111111110000111111111111111111111111111111000000000111",
+			"1111111110000111111111111111111111111111111101100000111",
+			"1111111110000111111111111110001111110000111111110000111",
+			"1111111110000111111111111100001111100000111111110000111",
+			"1111111111000111111111111100001111100000011111110000111",
+			"1111111111000001111111100000000000000000011111110000111",
+			"1111001111000000000000000000000000000000000000010000111",
+			"1100001111000000000000000000000000000000000000000000111",
+			"1100000111000000000000000000000000010000000000000000111",
+			"1000000000000000000000000000000000110000000000000000111",
+			"1000000000000100000000000110000000111000000000000000111",
+			"1111111111111111110001111110000000111100100000000000111",
+			"1111111111111111111111111111000000111111110000000001111",
+			"1111111111111111111111111111000000100111111000011111111",
+			"1111111111111111111111111111000000000011111111111111111",
+			"1111111111111111111111111111000000000000011111111111111",
+			"1111111111111111111111111111100000000000011111111111111",
+			"1111111111111111111111111111100000000000011111111111111",
+			"1111111111111111111111111111100000000011111111111111111",
+			"1111111111111111111111111111110000001111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1100,
+			"height": 1340
+		},
+		"arte": {
+			"escala": .8,
+			"x": -140,
+			"y": -280.8
+		},
 		"spawnPoint": {
-			"x": 380,
-			"y": 300
+			"x": 350,
+			"y": 410
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/swamp.jpg": {
 		"grid": [
-			"11111111111111110001111111111111111",
-			"11111111111111110001111111111111111",
-			"11111111111111110001111111111111111",
-			"11111111111100000001111111111111111",
-			"11111111111000000011111111111111111",
-			"11111111111000000011111111111111111",
-			"11111111111000000111111111111111111",
-			"11111111111100000011111111111111111",
-			"11111111111100000111111111111111111",
-			"11111111111100001111111111111111111",
-			"11111111111100001111111111111111111",
-			"11111111111110001111111111111111111",
-			"11111111111110001111111111111111111",
-			"11110011111110001111111111111111111",
-			"11100001111100000111111111111111111",
-			"11000000000000000011111111111111111",
-			"10000000000000000001111111111111111",
-			"10000000011100000001111111111111111",
-			"10001000011111100001111111111111111",
-			"10001000011111110001111000011111111",
-			"10011000111111111001110000010011111",
-			"10000000111111110001100000000011111",
-			"00000001111111100000000000000011111"
+			"1111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111001111111111111111",
+			"1111111111111111111111111111111111111111111111111110000111111111111111",
+			"1111111111111111111111111111111111111111111111111110000011111111111111",
+			"1111111111111111111111111111111111111111111111111110000011111111111111",
+			"1111111111111111111111111111111111111111111111111100000011111111111111",
+			"1111111111111000111111111111111111111111111111111100000011111111111111",
+			"1111111000000000000000000111111111111111111111111000000011111111111111",
+			"1111100000000000000000000000000111111111111111100000000011111111111111",
+			"1100000000000000000000000000000000011111111110000000000011111111111111",
+			"1000000000011111000000000000000000000000001000000000000011111111111111",
+			"1000000000111111100000000000000000000000000000000000000111111111111111",
+			"1000000001111111111000000000000000000000000000000000000111111111111111",
+			"1000000011111111111000000000000000000000000000000000001111111111111111",
+			"1000000111111111111000000000011111111000000000000000111111111111111111",
+			"1000000111111111111000000000011111111000000000000000111111111111111111",
+			"1100000111111111111000000011111111111100000000000011111111111111111111",
+			"1110000011111111111000111111111111111111000000001111111111111111111111",
+			"1110000011111111110000111111111111111111000011001111111111111111111111",
+			"1110000011111111100001111111111111111111000011111111111111111111111111",
+			"1111000011111111000001111111111111111111000011111111111111111111111111",
+			"1111100000011110000011111111111111111111000011111111111111111111111111",
+			"1111110000000000000111111111111111111111000011111111111111111111111111",
+			"1111110000000000001111111111111111111111000011111111111111111111111111",
+			"1111111000000000001111111111111111111111000011111111111111111111111111",
+			"1111111100000000011111111111111111111110000011111111111111111111111111",
+			"1111111110000000111111111111111110000000000011111111111111111111111111",
+			"1111111111000001111111111111111000000000000111111111111111111111111111",
+			"1111111111000011111111111111110000000000000111111111111111111111111111",
+			"1111111111000011111111111111100000000000000111111111111111111111111111",
+			"1111111111101111111111111111100000000000001111111111111111111111111111",
+			"1111111111111111111111111111110000000000001111111111111111111111111111",
+			"1111111111111111111111111111110000000000001111111111111111111111111111",
+			"1111111111111111111111111111110000000000001111111111111111111111111111",
+			"1111111111111111111111111111111000000000001111111111111111111111111111",
+			"1111111111111111111111111111111100000000001111111111111111111111111111",
+			"1111111111111111111111111111111100000000011111111111111111111111111111",
+			"1111111111111111111111111111111000000000011111111111111111111111111111",
+			"1111111111111111111111111111111000000011111111111111111111111111111111",
+			"1111111111111111111111111111111000000011111111111111111111111111111111",
+			"1111111111111111111111111111111111000011111111111111111111111111111111",
+			"1111111111111111111111111111111111000011111111111111111111111111111111",
+			"1111111111111111111111111111111111000011111111111111111111111111111111",
+			"1111111111111111111111111111111111000011111111111111111111111111111111",
+			"1111111111111111111111111111111111000011111111111111111111111111111111",
+			"1111111111111111111111111111111111000011111111111111111111111111111111",
+			"1111111111111110111111111111111111000011111111111111111111111111111111",
+			"1111111111111100000011111111111111000001111111111111111111111111111111",
+			"1111111111111100000011111111111100000000011111111111111111111111111111",
+			"1111111111111100000001111111111100000000001111111111111111111111111111",
+			"1111111111100000000000000000111100000000000111111111111111111111111111",
+			"1111111111100000000000000000000000000000000011111111111111111111111111",
+			"1111111111000000000000000000000000000000000011111111111111111111111111",
+			"1111111111000000000000000000000000000000000011111111111111111111111111",
+			"1111111110000000000000000111111110000000000011111111111111111111111111",
+			"1111111100000000000000000111111111100000000011111111111111111111111111",
+			"1111111110000011100000000111111111111110000011111111111111111111111111",
+			"1111111111000011100000000111111111111111000011111111111110000111111111",
+			"1111111111000111100000000111111111111111000011111111110000000111111111",
+			"1111111111000111100000001111111111111111000011111111100000000111111111",
+			"1111111110000111100000011111111111111111000011111111000000001111000111",
+			"1111111110000001000000111111111111111111000011111110000000011111000111",
+			"1111111110000000000000111111111111111111000011111110000001111110000111",
+			"1111111100000000000001111111111111111111000010000000000001000000000111",
+			"1111111100000000000001111111111111111100000000000000000000000000000111",
+			"1111111100000000000001111111111111111000000000000000000000000000000011",
+			"1111111100000000000011111111111111111100000000000000000000000000000011",
+			"1111111100000000000011111111111111111100000000000000000000000000000011",
+			"1111111100000000000011111111111111111110000000000000000000000000000011",
+			"1111111100000000000000111111111111111111100000000000000110000000000111",
+			"1111111100000000000000111111111111111111111111100000111111000000000111",
+			"1111111100000000000000000111111111111111111111111111111111000000001111",
+			"1111111110000000000000000001111111111111111111111111111111101000111111",
+			"1111111110000000000000000001111111111111111111111111111111111000111111",
+			"1111111111000000000000000000111111111111111111111111111111111000111111",
+			"1111111111110000000000000000011111111111111111111111111111111000111111",
+			"1111111111111000000000000000000111111111111111111111111111110000111111",
+			"1111111111111100000011111000000111111111111111111111111111110000111111",
+			"1111111111111110110111111100000111111111111111111111111111110000111111",
+			"1111111111111111111111111110111111111111111111111111111111100000000111",
+			"1111111111111111111111111111111111111111111111111111111111000000000011",
+			"1111111111111111111111111111111111111111111111111111111111000000000001",
+			"1111111111111111111111111111111111111111111111111111111110000000000001",
+			"1111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1400,
+			"height": 1680
+		},
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": 20
+		},
 		"spawnPoint": {
-			"x": 540,
-			"y": 460
+			"x": 690,
+			"y": 830
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/plains.jpg": {
 		"grid": [
-			"11111111111111100011111111111110000",
-			"11111111111100001111111111111111001",
-			"11111111111000011111111111111111001",
-			"11111111111000111111111111111100001",
-			"11111111110000111111111111111000000",
-			"11111111100000001111111111111100000",
-			"11111111000000001111111111111110000",
-			"11111110000000000000001111111111001",
-			"11111000000000000000000000011111001",
-			"11000000000000000000000000011111001",
-			"10000111110000000001100000000111001",
-			"11000000001000000000111100000000000",
-			"11000000000000000000011110000000000",
-			"11111111000000000000001110000000000",
-			"11111111000000000000011110000000001",
-			"11111111000000000000111111000000011",
-			"11111000000000000000111111000000111",
-			"11110000000100000000111110000000111",
-			"11110000001100000000011100000000111",
-			"11110000011000000000010000000000011",
-			"11100000010000000000000000000000001",
-			"11100000000000000000000000000000001",
-			"11100000100000000000000000000000001"
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110011111111111111111111111111111111",
+			"111111111111111111111111111111111111100011111111111111111000011111111111",
+			"111111111111111111111111111111111111100011111111111111110000000001111111",
+			"111111111111111111111111111111111111000011111111111111100000000000111111",
+			"111111111111111111111111111111111110000011111111111111100000000000000111",
+			"111111111111111111111111111111111100000111111111111111100000000000000011",
+			"111111111111111111111111111111111000000111111111111111110000000000000011",
+			"111111111111111111111111111111110000001111111111111111111000000000000011",
+			"111111111111111111111111111111110000111111111111111111111100000000000011",
+			"111111111111111111111111111111000001111111111111111111111110000000000011",
+			"111111111111111111111111111110000011111111111111111111111111000000000011",
+			"111111111111111111111111111100001111111111111111111111111111100000000111",
+			"111111111111111111111111100000011111111111111111111111111111100000111111",
+			"111111111111111111111100000000111111111111111111111111111111110000111111",
+			"111111111111111111111000000011111111111111111111111111111111110000111111",
+			"111111111111111111111000001111111111111111111111111111111111110000111111",
+			"111111111111111111111000011111111111111111111111111111111111110000111111",
+			"111111111111111111111000011111111111111111111111111111111100000001111111",
+			"111111111111111111110000111111111111111111111111111111111000000000011111",
+			"111111111111111111100000000111111111111111111111111111111000000000000111",
+			"111111111111111111000000000011111111111111111111111111111000000000000111",
+			"111111111111111100000000000001111111111111111111111111111100000000000111",
+			"111111111111111000000000000001111111111111111111111111111110000000000111",
+			"111111111111110000000000000000111111111111111111111111111111000000001111",
+			"111111111111110000000000000001111111111111111111111111111111110001111111",
+			"111111111111100000000000000000000000000000111111111111111111100001111111",
+			"111111111111000000000000000000000000000000000000001111111111100001111111",
+			"111111111000000000000000000000000000000000000000000111111111100001111111",
+			"111000000000000000000000000000000000000000000000000111111111100001111111",
+			"100000000011111110000000000000001111110000000000000011111111110001111111",
+			"100000111111111111000000000000000011111100000000000011111111100001111111",
+			"100000001111111111100000000000000001111111000000000000001111100001111111",
+			"100000000000000111110000000000000000011111111110000000000110000000111111",
+			"110000000000000001111100000000000000001111111111000000000000000000011111",
+			"110010000000000000000100000000000000000011111111000000000000000000011111",
+			"111111100100000000000100000000000000000001111111000000000000000000001111",
+			"111111111111110000000100000000000000000001111111000000000000000000011111",
+			"111111111111110000000100000000000000000001111111000000000000000000011111",
+			"111111111111111000000100000000000000000011111111100000000000000000011111",
+			"111111111111111000000100000000000000000011111111100000000000000000111111",
+			"111111111111110000000100000000000000000111111111100000000000001111111111",
+			"111111111111100000000100000000000000001111111111110000000000001111111111",
+			"111111111110000000000100000000000000001111111111110000000000001111111111",
+			"111111110000000000000100000000000000001111111111110000000000001111111111",
+			"111111000000000000000110000000000000011111111111000000000000001111111111",
+			"111111000000000000001110000000000000011111111110000000000000001111111111",
+			"111111100000000000111110000000000000001111111100000000000000001111111111",
+			"111111100000000001111110000000000000000111111000000000000000001111111111",
+			"111111000000000011111110000000000000000111100000000000000000001111111111",
+			"111111000000000011110000000000000000000010000000000000000000000011111111",
+			"111110000000000111100000000000000000000000000000000000000000000001111111",
+			"111100000000000111100000000000000000000000000000000000000000000001111111",
+			"111100000000000111000000000000000000000000000000000000000000000000111111",
+			"111100000000000110000000000000000000000000000000000000000000000001111111",
+			"111100000000011100000000000000000000000000000000000000000000000001111111",
+			"111100000111111100000000000000000000000000000000001100000000000011111111",
+			"111110000111111110000000000000000000000000000000001110000000011111111111",
+			"111111000001111100000000000000000000000000000000011111000000011111111111",
+			"111110000011111100000000000000000000000000000000111111000000011111111111",
+			"111110000011111110000000000000000000000000000001111111000000011111111111",
+			"111110000011011110000000000000000000000000000111111110000000001111111111",
+			"111111000010011111111000000000000000000000001111111100000000000111111111",
+			"111111000000011111111111000000000000000000001111111100000000000011111111",
+			"111111000000011111111111100000000000000000011111111110000000000111111111",
+			"111111100000111111111111100000000000000000011111111111111111111111111111",
+			"111111110001111111111111100000000000000000011111111111111111111111111111",
+			"111111111111111111111111100000000000000000011111111111111111111111111111",
+			"111111111111111111111111110000000000000000111111111111111111111111111111",
+			"111111111111111111111111111000000000000011111111111111111111111111111111",
+			"111111111111111111111111111000000000000111111111111111111111111111111111",
+			"111111111111111111111111111100000000001111111111111111111111111111111111",
+			"111111111111111111111111111110000000011111111111111111111111111111111111",
+			"111111111111111111111111111110000000011111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1440,
+			"height": 1520
+		},
+		"arte": {
+			"escala": .8,
+			"x": -162.4,
+			"y": -149.6
+		},
 		"spawnPoint": {
-			"x": 780,
-			"y": 620
+			"x": 730,
+			"y": 830
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/beach.jpg": {
 		"grid": [
-			"11100000011111111111000001111000111",
-			"11100000000011111100000001111000011",
-			"11100000000000000100000001111000001",
-			"11111000000000000000000001111000000",
-			"11111100000000000000000000111000000",
-			"11111110000000000000000000010000100",
-			"11111111000000000011000000110001110",
-			"11111111111111111111110011111001110",
-			"11111111111100111111100011100000100",
-			"11111111111000110111100000000000000",
-			"11010000111000000010000000001110000",
-			"10000000110000000000000000000000000",
-			"10000000000000100000000000000000000",
-			"10000000000000000000100000011000000",
-			"00000000000000000000110000111000000",
-			"00000000100000000001111000111000001",
-			"00000000111000000001111100000000001",
-			"00000000000000000000111100000000011",
-			"00000000000000000000000000000000111",
-			"00010000000000000000000000000000111",
-			"00110000000000000000000000000000111",
-			"00011000000000000000000000000000011",
-			"00011000011111110000001111000000001"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111100001111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000011111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000111111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000011111111111111111111111111111111111111111111111111111111111111111",
+			"111100000000000001111111111111111111111111111111111111111111111111111111111111111",
+			"111110000000000001111111111111111111111111111111111111111111111111111111111111111",
+			"111110000000000001111111111111111111111111111111111111111111111111111111111111111",
+			"111111000000000000111111111111111111111111111111111111111111111111111111111111111",
+			"111111100000000000011111111111111111111111111111111111111111111111111111111111111",
+			"111111110000000000000111111111111111111111111111111111111111111111111111111111111",
+			"111111111000000000000011111111111111111111111111111111111111111111111111111111111",
+			"111111111100000000000001111111111111111111111111111111111111111111111011111111111",
+			"111111111110000000000001111111111111111111111111111111111111111111110001111111111",
+			"111111111111000000000000111111111111111111111111111111111111111111110001111111111",
+			"111111111111000000000000111111111111111111111111111111111111111111000001111111111",
+			"111111111111100000000000111111111111111111111111000000001111111110000001111111111",
+			"111111111111100000000000011111111111111111111000000000001111111110000001111111111",
+			"111111111111100000000000000000011111111111110000000000000111111110000000111111111",
+			"111111111111110000000000000000001111000111110000000000000111111110000000111111111",
+			"111111111111110000000000000000000000000011110000000000000111111111100000001111111",
+			"111111111111111100000000000000000000000001110000000000000111111111000000000111111",
+			"111111111111111110000000000000000000000000000000000000000111111110000000000011111",
+			"111111111111111111000000000000000000000000000000000000000011111110000000000001111",
+			"111111111111111111100000000000000000000000000000000000000001111110000000000000111",
+			"111111111111111111110000000000000000000000000000000000000000111100000001100000011",
+			"111111111111111111111100000000000000000000000000000000000000111100000011110000011",
+			"111111111111111111111100000000000000000000011111000000000000111100000011111000011",
+			"111111111111111111111110000000000000010000011111000000000001111100000111111000001",
+			"111111111111111111111111111111111111111111111111110000011111111110001111111000001",
+			"111111111111111111111111111111111111111111111111111000011111111110001111111000001",
+			"111111111111111111111111111111111111111111111111111000011111111100000011111000001",
+			"111111111111111111111111111111110011111111111111110000011111111000000001110000001",
+			"111111111111111111111111111111000001111111111111110000011111100000000000100000001",
+			"111111111111111111111111111110000001111001111111110000000000000000110000000000011",
+			"111111111111111111111111111110000000110000111100110000000000000011111100000000011",
+			"111111111111111100000111111110000000110000111100000000000000001111111100000000011",
+			"111111111110011000000011111100000000110000011000000000000000000011110000000000011",
+			"111111111100000000000001111000000000110000001000000000000000000000100000000000111",
+			"111111111100000000000000000000000000110000000000000000000000000000000000000000111",
+			"111111111100000000000000000000000001111000000000000000000000100000000000000000111",
+			"111111111100000000000000000000000001110000000001100000000000111110000000000000111",
+			"111111111100000000000000000000110000000000000001110000000000111111000000000001111",
+			"111111111000000000000000000000100000000000000011110000000000111111000000000011111",
+			"111111000000000000000000000000000000000000000011111000000001111111000000000011111",
+			"111100000000000000000001000000000000000000000111111110000001111111000000000111111",
+			"111000000000000000000001110000000000000000000111111111000001111111000000000111111",
+			"111100000000000000000011111110000000000000000111111111000001111000000000001111111",
+			"111000000000000000000011111110000000000000000111111111100000000000000000001111111",
+			"111000000000000000100001110000000000000000000111111111100000000000000000011111111",
+			"111100000000000000000000000000000000000000000111111111100000000000000000111111111",
+			"111100000000000000000000000000000000000000000011111111000000000000000000111111111",
+			"111000000000000000000000000000000000000000000000000000000000000000000001111111111",
+			"111000000000000000000000000000000000000110000000000000000000000000000001111111111",
+			"111000000000011000000000000000000000000010000000000000000000000000000001111111111",
+			"111000000000111000000000000000000000000011000000000000000000000000000011111111111",
+			"110000000001111000000000000000000000000011000000000000000000000000000011111111111",
+			"100000000000111100000000000000000000000000000000000000000000000000000001111111111",
+			"100000000000011110000000000000000000000000000000000000000110001100000000011111111",
+			"100000000000011110000000011110010000011000000000000000001110001100000000001111111",
+			"100000000000011110000000011111111111111110000000000111111110001100000100000111111",
+			"100000000000111111111100011111111111111111111000111111111110001110000110000011111",
+			"100000000001111111111100011111111111111111111000111111111110001110000111000001111",
+			"111101110111111111111100001111111111111111111000111111111110001110000111110001111",
+			"111111111111111111111100000000011111111111111000111111111110001110000011110000111",
+			"111111111111111111000000000000001111111111111000111111111111111110000001100000111",
+			"111111111111111100000000000000001111111111100000011111111111111110000001100000111",
+			"111111111111111000000000000000011111111111100000001111111111111110000001100000111",
+			"111111111111111000000000000111111111111111100000000011111111111110000001100001111",
+			"111111111111111000000000111111111111111111100000000001111111111110000000000001111",
+			"111111111111111111111111111111111111111111110000000001111111111111000000000001111",
+			"111111111111111111111111111111111111111111111000000011111111111111000000000011111",
+			"111111111111111111111111111111111111111111111111000111111111111111100000000111111",
+			"111111111111111111111111111111111111111111111111111111111111111111110000011111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1620,
+			"height": 1520
+		},
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": -37.6
+		},
 		"spawnPoint": {
-			"x": 700,
-			"y": 540
+			"x": 810,
+			"y": 850
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/ruins.jpg": {
 		"grid": [
-			"00000000000111111111111111111111111",
-			"01000011111111111111111111111111111",
-			"01000011111111111111111111111111111",
-			"11100011111111111111111111111111111",
-			"11100011111111111111111111111111111",
-			"11100111111111111111111111111111111",
-			"11100111111111111011111111111111111",
-			"11100011111111100001111111111111111",
-			"11100011111111000000001111111111111",
-			"11100000111110000000001111000111111",
-			"10000000000000000000000000000111111",
-			"10000000000000000000000000000000000",
-			"11100100001100000000001110000000000",
-			"11111100111110000000011111000111111",
-			"11111000011111100000111111000111111",
-			"11111000111111100000111111000111111",
-			"11111100111111100000111111000111111",
-			"11111100011111100000111111000111111",
-			"11111100001111100000111111000111111",
-			"11111100000001100000011111000111111",
-			"11111100000000000000000000000111111",
-			"11111110000000000000000000001111111",
-			"11111111100000000001100110011111111"
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111000000000000000000001111101111111",
+			"1111111111111111111111111111111011000000000000000000000000000000000000011111",
+			"1111000000000000000000000000000000000000000000000000000000000000000000001111",
+			"1110000000000000000000000000000000000000000001111100000000000000000000000111",
+			"1100000000000000000000000000000000000000000111111111111111111100000000001111",
+			"1100000000000000000000000000000000000000001111111111111111111111000000011111",
+			"1100000000000000000000000000000000111111111111111111111111111111110000111111",
+			"1100000000000000000000000000000000111111111111111111111111111111111111111111",
+			"1000000000000000000000001111111111111111111111111111111111111111111111111111",
+			"1000011000000000000011111111111111111111111111111111111111111111111111111111",
+			"1000011100000001111111111111111111111111111111111111111111111111111111111111",
+			"1000011100000001111111111111111111111111111111111111111111111111111111111111",
+			"1100111100000001111111111111111111111111111111111111111111111111111111111111",
+			"1111111100000011111111111111111111111111111111111111111111111111111111111111",
+			"1111111111000011111111111111111111111111111111111111111111111111111111111111",
+			"1111111111000011111111111111111111111111111111111111111111111111111111111111",
+			"1111111110000111111111111111111111111111111111111111111111111111111111111111",
+			"1111111110000111111111111111111111111111111111111111111111111111111111111111",
+			"1111111110000111111111111111111111111111111111111111111111111111111111111111",
+			"1111111110000111111111111111111111111111111111111111111111111111111111111111",
+			"1111111110000111111111111111111111111111111111111111111111111111111111111111",
+			"1111111110000111111111111111111111111001111111111111111111111111111111111111",
+			"1111111110000011111111111111111111110000111111111111111111111111111111111111",
+			"1111111110000011111111111111111100000000011111111111111111111111111111111111",
+			"1111111110000001111111111111111000000000000011111111111111111111111111111111",
+			"1111111110000001111111111111110000000000000000111111111110111111111111111111",
+			"1111111110000000001111111111100000000000000000011111111000001111111111111111",
+			"1111111110000000000011111111000001000000000000011111111000001111111111111111",
+			"1111110000000000000011100000000011000000001100000000001000001111111111111111",
+			"1111110000000000000000000000000011000000001100000000000000000111111111111111",
+			"1111110000000000000000000000000011000000001100000000000000000000000000000011",
+			"1111111100000010000000000000000011000000000000011111000000000000000000000011",
+			"1111111110000111000000111110000000000000000000011111110000000000000000000011",
+			"1111111110000111000111111111000000000000000000111111110000000001111111111111",
+			"1111111111011111000111111111100000000000000011111111111000000111111111111111",
+			"1111111111111111000111111111111000000000000011111111111000000111111111111111",
+			"1111111111111111000111111111111110000000000111111111111000000111111111111111",
+			"1111111111111000000111111111111110000000001111111111111000000111111111111111",
+			"1111111111110000000111111111111110000000001111111111111000000111111111111111",
+			"1111111111111000000111111111111110000000001111111111111000000111111111111111",
+			"1111111111111110000111111111111110000000001111111111111000000111111111111111",
+			"1111111111111111000111111111111111000000001111111111111000000111111111111111",
+			"1111111111111111000011111111111111000000001111111111111000000111111111111111",
+			"1111111111111111000001111111111111000000001111111111111000000111111111111111",
+			"1111111111111111000000011111111111000000001111111111111000001111111111111111",
+			"1111111111111111000000001111111111000000000111111111111000001111111111111111",
+			"1111111111111111000000000001111111000000000011111111111000001111111111111111",
+			"1111111111111110000000000000001111000000000000111111110000001111111111111111",
+			"1111111111111111000000000000000110000000000000100100000000001111111111111111",
+			"1111111111111111000000000000000000000000000000000000000000001111111111111111",
+			"1111111111111111100000000000000000000000001000000000000000011111111111111111",
+			"1111111111111111111000000000000000000000011100000000000001111111111111111111",
+			"1111111111111111111110000000000111000000011111001111100011111111111111111111",
+			"1111111111111111111100000000000110000000011111111111111111111111111111111111",
+			"1111111111111111111100001100000110000000011111111111111111111111111111111111",
+			"1111110000000000000100001111101110000000011111111111111111111111111111111111",
+			"1111100000000000000000001111111111000000001111111111111111111111111111111111",
+			"1111100000000000000000001111111000000000000011111111111111111111111111111111",
+			"1111110000000000000000001111110000000000000011111111111111111111111111111111",
+			"1111111000000000000000001111110000000000000011111111111111111111111111111111",
+			"1111111000000000000000001111110000000000001111111111111111111111111111111111",
+			"1111111100000000000000001111111111000000001111111111111111111111111111111111",
+			"1111111100000000000000001111111111000000001111111111111111111111111111111111",
+			"1111111100000000000000001111111111000000001111111111111111111111111111111111",
+			"1111111100000000000000011111111111000000001111111111111111111111111111111111",
+			"1111111100000000000000111111111111000000001111111111111111111111111111111111",
+			"1111111111000000000001111111111111000000011111111111111111111111111111111111",
+			"1111111111111111111111111111111111101111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1520,
+			"height": 1580
+		},
+		"arte": {
+			"escala": .8,
+			"x": -61.6,
+			"y": -15.2
+		},
 		"spawnPoint": {
-			"x": 580,
-			"y": 500
+			"x": 650,
+			"y": 870
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/jungle.jpg": {
 		"grid": [
-			"11111111111111111000111111111000011",
-			"11111111111111111000111111111110011",
-			"11111111111111111000111111111110011",
-			"11111111111011100000111111111110000",
-			"11111111110000000000111111111100000",
-			"11111111111000000000111111111100000",
-			"11111111111100000000001111111110000",
-			"11111111111110000000001111111110011",
-			"11111111111111110000000111111110011",
-			"11111111111111111000000111111110011",
-			"11111100011111111000100010001000001",
-			"10000000001111110000100000000000001",
-			"00000000000000000011100000000000001",
-			"00000000000000000111100000011110000",
-			"11100000000010011111110000011110000",
-			"11111100000111111111110000111110001",
-			"11111111000011111111111101111110001",
-			"11111111100001111111111111111110001",
-			"11111111110001111111111111111110001",
-			"11111111111000111111111111111110001",
-			"11111111111000111111111111111110001",
-			"11111111111100011111111111111110001",
-			"11111111111100001111111111110000001"
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111000011111111111111111111111111111111111111111111111",
+			"11111100000001111110000011110000001111111111111111111111111111111111111111111111",
+			"11000000000000011000000000000000000011111111111111111111111111111110001111111111",
+			"10000000000000000000000000000000000000001111111100000111111111111100001111111111",
+			"10000000000000000000010000000000000000000011100000000000111111110000000111111111",
+			"10000000000000000000111111000000011000000000000000000000111111100000000111111111",
+			"10000000000000000011111111111111111111100000000000000001111111100000000111111111",
+			"11111110000000000111111111111111111111100000000011111111111111100000000011111111",
+			"11111111000000000011111111111111111111110000000111111111111111110000000001111111",
+			"11111111110000000001111111111111111111111000000111111111111111110000000001111111",
+			"11111111111110000001111111111111111111111100001111111111111111111000000001111111",
+			"11111111111110000001111111111111111111111100001111111111111111111100000011111111",
+			"11111111111111000011111111111111111111111100001111111111111111111111100011111111",
+			"11111111111111110111111111111111111111111100001111111111111111111111100011111111",
+			"11111111111111111111111111111111111111111100001111111111111111111111100011111111",
+			"11111111111111111111111111111111111111111100001111111111111111111111100011111111",
+			"11111111111111111111111111111111111111111000001111111111111111111111100000000111",
+			"11111111111111111111111111111001111110000000001111111111111111111111100000000011",
+			"11111111111111111111111111110000111000000000001111111111111111111111100000000011",
+			"11111111111111111111111111110000000000000000001111111111111111111111000000000011",
+			"11111111111111111111111111111000000000000000000111111111111111111110000000000011",
+			"11111111111111111111111111111000000000000000000111111111111111111111000000000011",
+			"11111111111111111111111111111100000000000000000000111111111111111111100000000011",
+			"11111111111111111111111111111111000000000000000000011111111111111111100000000011",
+			"11111111111111111111111111111111100000000000000000011111111111111111100011111111",
+			"11111111111111111111111111111111111000000000000000011111111111111111100011111111",
+			"11111111111111111111111111111111111110000000000000001111111111111111100011111111",
+			"11111111111111111111111111111111111111111100000000001111111111111111100001111111",
+			"11111111111111111111111111111111111111111100000000001111111111111111110001111111",
+			"11111111111111111111111111111111111111111100001100001111111111111111110001111111",
+			"11111111111111111111111011111111111111111100001100000111111111111111110001111111",
+			"11111111111111111110000001111111111111111100001110000001110000011101110000111111",
+			"11111111111111111100000001111111111111110000001110000000000000000000000000111111",
+			"11111111100000001100000000011111111111100000001110000000000000000000000000111111",
+			"11111111000000000000000000000011111110000001111110000000000000000000000000011111",
+			"11111111000000000000000000000000001000000011111110000000000000000000000000011111",
+			"11111111000000000000000000000000000000000111111110000000000000111111100000011111",
+			"11111111001100000000000000000000000000011111111111000000000111111111100000001111",
+			"11111111111100000000000000000001100001111111111111000000000011111111100000001111",
+			"11111111111110000000000000000011111111111111111111100000000011111111100000001111",
+			"11111111111111111100000000000111111111111111111111100000000111111111100000011111",
+			"11111111111111111110000000000111111111111111111111110000001111111111100000111111",
+			"11111111111111111111111000000011111111111111111111111100011111111111100000111111",
+			"11111111111111111111111100000011111111111111111111111111111111111111100000111111",
+			"11111111111111111111111110000001111111111111111111111111111111111111110000111111",
+			"11111111111111111111111111000000111111111111111111111111111111111111110000111111",
+			"11111111111111111111111111100000111111111111111111111111111111111111110000111111",
+			"11111111111111111111111111110000011111111111111111111111111111111111100000111111",
+			"11111111111111111111111111111000001111111111111111111111111111111111100000111111",
+			"11111111111111111111111111111000001111111111111111111111111111111111100000111111",
+			"11111111111111111111111111111100000111111111111111111111111111111111100000111111",
+			"11111111111111111111111111111100000111111111111111111111111111111111100000111111",
+			"11111111111111111111111111111110000011111111111111111111111111111111100000011111",
+			"11111111111111111111111111111111000001111111111111111111111111111111100000011111",
+			"11111111111111111111111111111111000000111111111111111111111111111111000000011111",
+			"11111111111111111111111111111110000000011111111111111111111111110000000000011111",
+			"11111111111111111111111111111110000000011111111111111111111111100000000000001111",
+			"11111111111111111111111111111110000000000111111111111111111111000000000000000111",
+			"11111111111111111111111111111100000000000011111111111111111111000000000000000111",
+			"11111111111110111111111111111000000000000000011111111111111111000000000000000111",
+			"11111111111100001111111111110000000000000000001111111111111110000000000000000111",
+			"11111111111100000111111111000000000000000000001111111111111100000000000000001111",
+			"11111111111000000111100000000000000000000000000000000000000000000000000000111111",
+			"11111111100000000010000000000000000000000000000000000000000000000000000001111111",
+			"11111111000000000000000000000000000000000000000000000000000000000000000011111111",
+			"11111111000000000000000000000000000001100001000000000000000000000000000111111111",
+			"11111111000000000000000000111111100111110001000011111111111100001000011111111111",
+			"11111111110000000000000011111111111111111111111111111111111111111111111111111111",
+			"11111111111000000000000111111111111111111111111111111111111111111111111111111111",
+			"11111111111100000000011111111111111111111111111111111111111111111111111111111111",
+			"11111111111110000011111111111111111111111111111111111111111111111111111111111111",
+			"11111111111110001111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1600,
+			"height": 1500
+		},
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": -146.4
+		},
 		"spawnPoint": {
-			"x": 700,
-			"y": 460
+			"x": 830,
+			"y": 710
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
-	"assets/hunt-backgrounds/temple.png": {
+	"assets/hunt-backgrounds/temple.jpg": {
 		"grid": [
-			"11111111111110000000111111111111111",
-			"11111111111111000001111111111111111",
-			"11111111111111000111111111111111111",
-			"11111111111111100111111111111011111",
-			"11111111111111100111111111110011111",
-			"11111111111111100011110000000011111",
-			"11111111111111000011100000000011111",
-			"11111111110000000111100001100001111",
-			"11111111111000001111111111100011111",
-			"11111111111111100111111111100011111",
-			"11111111111111100011111111110000111",
-			"11111111111111110011111111110000111",
-			"11111110011111110011111110000001111",
-			"11111110011111110010011000000011111",
-			"11111110011111100000000001001011111",
-			"11111110011110000000100001100111111",
-			"11111110011000011000111100001111111",
-			"11111100000001111000111110001111111",
-			"11111110000011111000111111111111111",
-			"11111110110000100001111111111111111",
-			"11111111111000000001111111111111111",
-			"11111111111100001001111111111111111",
-			"11111111111100111000000000000001111"
+			"11111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111",
+			"11111000111111111111111111111111111111111111111111111",
+			"11110000011111111111111101111111111111111111111111111",
+			"11110000011111111111111000111111111111111111111111111",
+			"11111000000000000000110000111111111111111111111111111",
+			"11111110000000000000000000000111111111111111111111111",
+			"11111111111111111111000000000111111111111111111111111",
+			"11111111111111111111111000000111111111111111111111111",
+			"11111111111111111111110000011111111111111111111111111",
+			"11111111111111111111110000111111111111111111111111111",
+			"11111111111111111111111001111111111111111111111111111",
+			"11111111111111111111111000111111111111110111111111111",
+			"11111111111111111111111000111111111111100111111111111",
+			"11111111111111111111111000111111000000000111111111111",
+			"11111111111111111111110000111110000000000111111111111",
+			"11111111111111111100000001111110000111000011111111111",
+			"11111111111111111000000011111110011111000011111111111",
+			"11111111111111111111110011111111111111000111111111111",
+			"11111111111111111111111001111111111111000111111111111",
+			"11111111111111111111111100111111111111100001111111111",
+			"11111111111111111111111110111111111111110001111111111",
+			"11111111111110111111111110111111111111100011111111111",
+			"11111111111110011111111100111111111000000011111111111",
+			"11111111111110011111111100111111110000001111111111111",
+			"11111111111110011111111000000000000110011111111111111",
+			"11111111111110011111100000001110000111011111111111111",
+			"11111111111110011110000110001111110010011111111111111",
+			"11111111111110001000011110000111111000011111111111111",
+			"11111111111110000001111111000111111100011111111111111",
+			"11111111111110000011111111000111111111111111111111111",
+			"11111111111110110000111100001111111111111111111111111",
+			"11111111111111111100000000001111111111111111111111111",
+			"11111111111111111111000010001111111111111111111111111",
+			"11111111111111111111001111011111111111111111111111111",
+			"11111111111111111110011111000000011100000011111111111",
+			"11111111111111111111111111000000000000000001111111111",
+			"11111111111111111111111100011111111111110001111111111",
+			"11111111110111111111111100111111111111100001111111111",
+			"11111111000001111111111001111111111111100011111111111",
+			"11111110000000111111111001111111111111001111111111111",
+			"11111110000000111111100001111111111100001111111111111",
+			"11111111000001111111000001111111111110001111111111111",
+			"11111111100000011100000111111111111111001111111111111",
+			"11111111100000000000111111111111111110001111111111111",
+			"11111111100011000011111111111111111110000111111111111",
+			"11111111110111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1060,
+			"height": 1040
+		},
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": 8.8
+		},
 		"spawnPoint": {
-			"x": 700,
-			"y": 580
+			"x": 510,
+			"y": 590
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/cave-volcanic.jpg": {
 		"grid": [
-			"10000001111111111000011111111111111",
-			"10000011111110000001111111111111111",
-			"11110001111100000001111111111111111",
-			"11110001111110000111111111111111111",
-			"11110001111111100111111111111111111",
-			"11110001111111100011111111111111111",
-			"11110011111111110011111111111111111",
-			"11110011111111110000000000000000111",
-			"11110001111111000000000000000000011",
-			"11000000000000000000011110000000001",
-			"10000000000000011111111111111111000",
-			"10011111111100011111111111111111100",
-			"10011111111110000011111111111111100",
-			"10011111111110000000011111111111100",
-			"10011111111100000000001111111111000",
-			"10011111111100000000011111111111000",
-			"10011111111100000000011111111111000",
-			"00011111111100011111111111111111001",
-			"10011111111100011111111111111110001",
-			"10011111111100011111111111111100011",
-			"10001111111100000000000000000000011",
-			"11001111111110000000000000000000111",
-			"11001111111110011111111111111111111"
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111110111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111000000111111111111111111111110001111111111111111111111111",
+			"11111111111100111000000000000111111111111111100000000000111111111111111111111",
+			"11111111111000000000001110000000000000000000000000000000011111111111111111111",
+			"11111111111000000000111111110000000000000000000000000000011111111111111111111",
+			"11111111111100000001111111111111111110000000000000000000000111111111111110111",
+			"11111111111110000111111111111111111111000011100000000000000000000000000000001",
+			"11111111111110000111111111111111111111000011100000000000000000000000000000011",
+			"11111111100010000111111111111111111111000111110000000000000011111111111111111",
+			"11111111100000000111111111111111111111000111110000000000000011111111111111111",
+			"11111111100000000011111111111111111111000000000000000000000001111111111111111",
+			"11111111100000000011111111111111111111000000000000000000000000111111111111111",
+			"11111110000000000011111111111111111111000000000000000000000001111111111111111",
+			"11111110000000000011111111111111111111000000111111100000000001111111111111111",
+			"11111110000000000111111111111111111111000011111111111000000011111111111111111",
+			"11111111100000000111111111111111100000000011111111111111111111111111111111111",
+			"11111111111110000111111111111100000000000011111111111111111111111111111111111",
+			"11111111111110000111111111111100000000000011111111111111111111111111111111111",
+			"11111111111111000011111111111100000000111111111111111111111111111111111111111",
+			"11111111111110000011111111111111110000011111111111111111111111111111111111111",
+			"11111111111110000011111111111111111000011111111111111111111111111111111111111",
+			"11111111111110000011111111111111111000011111111111111111111111111111111111111",
+			"11111111111110000011111111111111111000011111111111111111111111111111111111111",
+			"11111111111110000111111111111111111100001111111111111111111111111111111111111",
+			"11111111111110000111111111111111111100001111111111111111111111111111111111111",
+			"11111111111110000111111111111111111110001111111111111111111111111111111111111",
+			"11111111111110000111111111111111111110001111111111111111111111111111111111111",
+			"11111111111110000111111111111111111100000000000000000000000000000000111111111",
+			"11111111111110000111111111111111111000000000000000000000000000000000001111111",
+			"11111111111110000111111111111111110000000000000000000000000000000000000111111",
+			"11111111110000000000011111111111000000000000000000000000000000000000000011111",
+			"11111111100000000000000000000000000001111111111111111111111111111111000011111",
+			"11111111000000000000000000000000000011111111111111111111111111111111100001111",
+			"11111110000011111110000000000000001111111111111111111111111111111111100001111",
+			"11111110000111111111110000000000001111111111111111111111111111111111110000111",
+			"11111100001111111111111111111100001111111111111111111111111111111111110000111",
+			"11111100001111111111111111111100001111111111111111111111111111111111110000111",
+			"11111100001111111111111111111100001100011111111111111111111111111111110000111",
+			"11111100001111111111111111111100000000000000001111111111111111111111110000111",
+			"11111100001111111111111111111100000000000000000111111111111111111111110000111",
+			"11111100001111111111111111111100000000000000000111111111111111111111110000111",
+			"11111100001111111111111111111100000000000000000111111111111111111111110000111",
+			"11111100001111111111111111111100000000000000000111111111111111111111110000111",
+			"11111100001111111111111111111100000000000000000111111111111111111111110000111",
+			"11111100001111111111111111111100000000000000001111111111111111111111110001111",
+			"11111100001111111111111111111100001111100000011111111111111111111111100001111",
+			"11111100001111111111111111111100001111111111111111111111111111111111100001111",
+			"11111100001111111111111111111100001111111111111111111111111111111111100001111",
+			"11111100001111111111111111111100001111111111111111111111111111111111000011111",
+			"11111100001111111111111111111100001111111111111111111111111111111111000011111",
+			"11111100001111111111111111111100001111111111111111111111111111111110000111111",
+			"11111110000111111111111111111000011111111111111111111111111111111100000111111",
+			"11111110000111111111111111111000011111111111111111111111100000000000001111111",
+			"11111111000011111111111111111000000000000000000000000000000000000000011111111",
+			"11111111000011111111111111111100000000000000000000000000000000000000111111111",
+			"11111111100001111111111111111100000000000000000000000000000000001111111111111",
+			"11111111100001111111111111111110000111100000000000000001111111111111111111111",
+			"11111111100001111111111111111110000111111111111111111111111111111111111111111",
+			"11111111100001111111111111111110000111111111111111111111111111111111111111111",
+			"11111111100001111111111111111100001111111111111111111111111111111111111111111",
+			"11111111100001111111111111111100001111111111111111111111111111111111111111111",
+			"11111111100001111111111111111000011111111111111111111111111111111111111111111",
+			"11111111100000000000000000000000011111111111111111111111111111111111111111111",
+			"11111111100000000000000000000000111111111111111111111111111111111111111111111",
+			"11111111100000000000000000000001111111111111111111111111111111111111111111111",
+			"11111111000000000000000000000111111111111111111111111111111111111111111111111",
+			"11111100000000111111111111111111111111111111111111111111111111111111111111111",
+			"11111100000011111111111111111111111111111111111111111111111111111111111111111",
+			"11111100000111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
+		"bounds": {
+			"width": 1540,
+			"height": 1480
+		},
+		"arte": {
+			"escala": .8,
+			"x": -26.4,
+			"y": -64.8
+		},
 		"spawnPoint": {
-			"x": 660,
-			"y": 380
+			"x": 730,
+			"y": 690
 		},
 		"spawnOrigem": "centroide-rosa"
 	},
 	"assets/hunt-backgrounds/ice-cave.jpg": {
 		"grid": [
-			"11111111111111111111110000110011111",
-			"11111111111111111111110000000000111",
-			"11111111111111111111110000000000111",
-			"11111111111111111111000111111110011",
-			"11111111111111111110001111111111001",
-			"11111111111111111000111111111111001",
-			"11111111111111110001111111111111001",
-			"11111111110000000011111111111111001",
-			"11111110000000000111111111111111001",
-			"11110000000000000111111111111111001",
-			"11000011000000001111111111111111001",
-			"10000011111000111111111111111111000",
-			"11111001111111111111111111111110000",
-			"11111100111111111111111111111100000",
-			"11111110011111111111111111110000000",
-			"11111111001111111111111111000000001",
-			"11111111001111111111111100000100011",
-			"11111111100111111111100000111110011",
-			"11100011000111111100000011111111111",
-			"11000000001111111000011111111111111",
-			"10011111111111110011111111111111111",
-			"10011111111111100011111111111111111",
-			"10011111111111100111111111111111111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111110011111111111111111111111111111",
+			"111111111111111111111111111111111111111100001111111111111111111111111111",
+			"111111111111111111111111111111111111111110000011111111111111111111111111",
+			"111111111111111111111111111111111111111111000000111111111111111111111111",
+			"111111111111111111111111111111111111111111100000001111110000111111111111",
+			"111111111111111111111111111111111111111111110000000000000000011111111111",
+			"111111111111111111111111111111111111111111110000000000000000001111111111",
+			"111111111111111111111111111111111111111111110000000000001000000111111111",
+			"111111111111111111111111111111111111111111100011011111111100000111111111",
+			"111111111111111111111111111111111111111110000011111111111111100011111111",
+			"111111111111111111111111111111111111111000000111111111111111110001111111",
+			"111111111111111111111111111111111111110000011111111111111111111000111111",
+			"111111111111111111111111111111111111000001111111111111111111111000111111",
+			"111111111111111111111111111111111110000011111111111111111111111000111111",
+			"111111111111111111111111111111111100001111111111111111111111111000111111",
+			"111111111111111111111111111111111000011111111111111111111111111100111111",
+			"111111111111111111111111111111100000111111111111111111111111111100111111",
+			"111111111111111111111111111100000001111111111111111111111111111100111111",
+			"111111111111111111110000000000000001111111111111111111111111111100111111",
+			"111111111111111100000000000000000011111111111111111111111111111100111111",
+			"111111111111110000000000000000000011111111111111111111111111111100111111",
+			"111111111111100000000000000000000111111111111111111111111111111000111111",
+			"111111110011000000000000000000001111111111111111111111111111111000111111",
+			"111111100001111000000000000000011111111111111111111111111111111000111111",
+			"111100000001111110000000000001111111111111111111111111111111111000011111",
+			"100000000001111111111000000111111111111111111111111111111111111000001111",
+			"100000000000111111111111111111111111111111111111111111111111111000001111",
+			"110111111000111111111111111111111111111111111111111111111111110000000111",
+			"111111111100011111111111111111111111111111111111111111111111100000000011",
+			"111111111110001111111111111111111111111111111111111111111111000000000011",
+			"111111111110000111111111111111111111111111111111111111111110000000000111",
+			"111111111111000011111111111111111111111111111111111111111100000000000111",
+			"111111111111100001111111111111111111111111111111111111110000000000001111",
+			"111111111111110000111111111111111111111111111111111111100000000000001111",
+			"111111111111111000011111111111111111111111111111111100000000000000111111",
+			"111111111111111100011111111111111111111111111111100000000110000000111111",
+			"111111111111111110001111111111111111111111111110000000011111000001111111",
+			"111111111111111110001111111111111111111111111000000111111111110001111111",
+			"111111111111111111001111111111111111111111000000011111111111111001111111",
+			"111111111111111110001111111111111111110000000001111111111111111111111111",
+			"111111000011111100001111111111111111000000000111111111111111111111111111",
+			"111000000000000000011111111111111100000001111111111111111111111111111111",
+			"110000000000000000111111111111111000001111111111111111111111111111111111",
+			"110001111111110111111111111111110000111111111111111111111111111111111111",
+			"110011111111111111111111111111100001111111111111111111111111111111111111",
+			"100011111111111111111111111111100011111111111111111111111111111111111111",
+			"100011111111111111111111111111000111111111111111111111111111111111111111",
+			"100011111111111111111111111111000111111111111111111111111111111111111111",
+			"100011111111111111111111111111000111111111111111111111111111111111111111",
+			"100011111111111111111111111111000111111111111111111111111111111111111111",
+			"100011111111111111111111111111100011111111111111111111111111111111111111",
+			"110011111111111111111111111111000011111111111111111111111111111111111111",
+			"110001111111111111111111111100000000111111111111111111111111111111111111",
+			"110001111111111111111111100000000000000011111111111111111111111111111111",
+			"100000111111111111111110000000000000000000000111111111111100000111111111",
+			"100000111111111111111000000000000011100000000000000000000000000001111111",
+			"100000011111111111110000000000000011111110000000000000000000000001111111",
+			"100000000011111100000000000000000011111111111111110000000000000001111111",
+			"100000000000000000000000000010000111111111111111111110000000000000111111",
+			"110000000000000000000000000111111111111111111111111110000000000000011111",
+			"110000000000000000000000111111111111111111111111111111000000000000011111",
+			"110000000000000000000001111111111111111111111111111111110000000000011111",
+			"111110000000000000000111111111111111111111111111111111111100000000011111",
+			"111111000000000000011111111111111111111111111111111111111110000000111111",
+			"111111111110000001111111111111111111111111111111111111111110000000111111",
+			"111111111111111111111111111111111111111111111111111111111111000001111111",
+			"111111111111111111111111111111111111111111111111111111111111110111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 1260,
-			"y": 700
+		"bounds": {
+			"width": 1440,
+			"height": 1380
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": -136.8,
+			"y": -287.2
+		},
+		"spawnPoint": {
+			"x": 1250,
+			"y": 1230
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/fairy-cave.jpg": {
 		"grid": [
-			"11111100000000000001111111110000001",
-			"11100000000000000001111111100000000",
-			"10000000011111110011111111100000001",
-			"10000000111111111111111111111000001",
-			"10000001111111111111111111111000001",
-			"11000001111111111111111111111000001",
-			"11100111111111111111111111111100111",
-			"11100111111111111111111111111100111",
-			"11100111111111100001111111111110011",
-			"11100111111110000000111111111110011",
-			"11100111111100011110001111111110011",
-			"11100111111100111111001111111110011",
-			"11100011111000111111000011111100111",
-			"11100000000000011111000000000000111",
-			"11100000000000000000000100000111111",
-			"11100011111100000000001111111111111",
-			"11100011111111000000011111111111111",
-			"11100011111111110001111111111111111",
-			"11110011111111111001111111111111111",
-			"11110111111111111001111111111111111",
-			"11110111111111111001111111111111111",
-			"11110111111111111001111111111111111",
-			"11100111111111111001111111111111111"
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111100111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111111111111111110000011111111100011111111111111111111111100000111111111",
+			"1111111111111111111000000000000111100000011111111111111111111100000000011111111",
+			"1111111111111100000000000000000000000000001111111111111111110000000000001111111",
+			"1111111111100000000000000000000000000000000111111111111111000000000000000111111",
+			"1111111110000000000000000111111100000000001111111111111111000000000000000111111",
+			"1111111100000000000000111111111111111111111111111111111111110000000000001111111",
+			"1111111000000000000011111111111111111111111111111111111111111100000000001111111",
+			"1111111000000000000011111111111111111111111111111111111111111110000000001111111",
+			"1111111000000000000111111111111111111111111111111111111111111110000000001111111",
+			"1111111100000000000111111111111111111111111111111111111111111110000000001111111",
+			"1111111110000000001111111111111111111111111111111111111111111111000000001111111",
+			"1111111110000000001111111111111111111111111111111111111111111111000000001111111",
+			"1111111111000010011111111111111111111111111111111111111111111111000000111111111",
+			"1111111111000011111111111111111111111111111111111111111111111111100011111111111",
+			"1111111111100011111111111111111111111111111111111111111111111111100011111111111",
+			"1111111111100011111111111111111111111111111111111111111111111111110001111111111",
+			"1111111111100011111111111111111111111111111111111111111111111111110001111111111",
+			"1111111111100011111111111111111111100000111111111111111111111111110001111111111",
+			"1111111111100011111111111111111110000000000111111111111111111111111000111111111",
+			"1111111111100011111111111111111100000000000001111111111111111111111000111111111",
+			"1111111111100011111111111111111000011111100000111111111111111111111000111111111",
+			"1111111111100011111111111111110000111111111000011111111111111111111000111111111",
+			"1111111111100011111111111111100001111111111100001111111111111111111000111111111",
+			"1111111111100011111111111111100001111111111110000111111111111111111000111111111",
+			"1111111111100001111111111111000011111111111110000100111111111111110001111111111",
+			"1111111111100001111111111111000011111111111110000000111111111111110001111111111",
+			"1111111111000000111111111110000001111111111110000000001111110000000011111111111",
+			"1111111111000000000000000000000000111111111100000000000000000000000111111111111",
+			"1111111111000000000000000000000000011111111000000000000000000000001111111111111",
+			"1111111111000000110000000000000000000000000000000011111110011111111111111111111",
+			"1111111111000000111111111111000000000000000000000111111111111111111111111111111",
+			"1111111111000000111111111111110000000000000000000111111111111111111111111111111",
+			"1111111111100000111111111111111100000000000000001111111111111111111111111111111",
+			"1111111111100001111111111111111111000000000000011111111111111111111111111111111",
+			"1111111111100001111111111111111111110000000011111111111111111111111111111111111",
+			"1111111111110001111111111111111111111000000111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100001111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100001111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100001111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111100001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111100001111111111111111111111100011111111111111111111111111111111111111",
+			"1111111111000000111111111111111111111100000111111111110111111111111111111111111",
+			"1111111110000000000001111110000000000000000000011111000011111111111111111111111",
+			"1111111110000000000000000000000000000000000000000000000011111111111111111111111",
+			"1111111100000000000000000000000000000000000000000000000000000011001111111111111",
+			"1111111100000000000000000000000000000000000000000000000000000000000000111111111",
+			"1111111110000000000111000000000000000000000000000000000000000000000000011111111",
+			"1111111110000000001111111000000000000000000000000000000011000000000000001111111",
+			"1111111111111101111111111111111000000000000000000000000111110000000000001111111",
+			"1111111111111111111111111111111111000000000001111111111111111000000000011111111",
+			"1111111111111111111111111111111111100000000011111111111111111100000000111111111",
+			"1111111111111111111111111111111111100000000011111111111111111111000111111111111",
+			"1111111111111111111111111111111111100000000011111111111111111111111111111111111",
+			"1111111111111111111111111111111111100000000111111111111111111111111111111111111",
+			"1111111111111111111111111111111111110000000111111111111111111111111111111111111",
+			"1111111111111111111111111111111111110000000111111111111111111111111111111111111",
+			"1111111111111111111111111111111111100000000111111111111111111111111111111111111",
+			"1111111111111111111111111111111111110000001111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 700,
-			"y": 860
+		"bounds": {
+			"width": 1580,
+			"height": 1620
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": -29.6,
+			"y": -39.2
+		},
+		"spawnPoint": {
+			"x": 790,
+			"y": 1510
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/island.jpg": {
 		"grid": [
-			"11111111111111001111011111111111111",
-			"11111111110010001110011111111111011",
-			"11111111111000000000000111111111001",
-			"11111111111000000000000000000011000",
-			"11111111111111110011110000000011100",
-			"11111111111111110011111100000111100",
-			"11111000011111110011111111011111110",
-			"11100000001111110011111110011111110",
-			"11100000000100000001111111011111110",
-			"11110000000000000000000111011111110",
-			"11111000011111011000000000000011110",
-			"11111111111111011100000000000011110",
-			"11111111111111011111111001100111110",
-			"11111111111110011111111001111111110",
-			"11111111111100011111111001111111100",
-			"11111111111110001111111001111111000",
-			"11111111111111000111111001111111000",
-			"11111111111111100000111001111111000",
-			"11111111111111110001111000111110000",
-			"11111111111111110000011100100110000",
-			"11111111111111111000001100000100000",
-			"11111111111111111000000000000000001",
-			"11111111111111111000000000000000011"
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111000000111111111111111111111111111111111111111111",
+			"11111111111111111111111111111110000001111111111111111111111111111111111111111111",
+			"11111111111111111011111111111110000111111111111111111111111111111111111111111111",
+			"11111111111111110001111111111110000111111111111111111111111111111111111111111111",
+			"11111111111111000001111111111100000111111110011111111111111111111111111111111111",
+			"11111111111110000111111110111100001111111100011111111111111111111111111111111111",
+			"11111111111100001111111100011100000111111100011111111111111111111111011111111111",
+			"11111111111000011111111100011100000000000000011111111111111111111110001111111111",
+			"11111111110000111111111100000000000000000000001111111111111111111110000111111111",
+			"11111111100011111111111110000000000000000000000000011111111110011111000111111111",
+			"11111111100111111111111111000000111000100000000000000010001100011111000011111111",
+			"11111111000111111111111111111111111000111111100000000000000000011111000011111111",
+			"11111100001111111111111111111111111000111111111000000000000000111111100001111111",
+			"11111000011111111111111111111111111000111111111111000000000001111111100000111111",
+			"11111000111111111111111111111111111000111111111111111100011111111111110000011111",
+			"11110000111111001111111111111111111000111111111111111110011111111111110000011111",
+			"11100001111111000000111111111111111000111111111111111110011111111111111000001111",
+			"11100001111111000000001111111111111000111111111111111110011111111111111000000011",
+			"11000011100010000000000111111111111100111111111111111100011111111111111000000011",
+			"11000011100000000000000011110111110000001111111111111100011111111111111100000011",
+			"11000001110000000000000001110011000000000111111111111110011111111111111100000011",
+			"11000001110000000000000000000000000000000011001111111110011111111111111100000111",
+			"11000001111000000000000000001100011100000000000111111110011111111111111000000111",
+			"11000001111100000000001111111110011100000000000001100010011111111111111000000111",
+			"11000001111111000111111111111110011111000000000000000000000000111111111000000111",
+			"10000001111111111111111111111110011111100000000000000000000000111111111000000111",
+			"10000001111111111111111111111110011111110000000010000000000000111111111000000111",
+			"10000001111111111111111111111110011111111111111111001111000000111111111000000111",
+			"10000001111111111111111111111110011111111111111111001111110001111111111000000111",
+			"10000001111111111111111111111100011111111111111111001111111111111111111000000111",
+			"10000001111111111111111111111100011111111111111110001111111111111111111000000111",
+			"11000000111111111111111111110000011111111111111110001111111111111111111000000111",
+			"11000000111111111111111111110000011111111111111110001111111111111111100000000111",
+			"11000000111111111111111111110000011111111111111110001111111111111111100000000111",
+			"11100000111111111111111111111000001111111111111110001111111111111111000000000111",
+			"11110000011111111111111111111100001111111111111110001111111111111110000000000111",
+			"11111000011111111111111111111111000001111111111111001111111111111110000000000111",
+			"11111100001111111111111111111111100000010001111111001111111111111110000000000111",
+			"11111100000111111111111111111111110000000001111111001111111111111110000000000111",
+			"11111100000111111111111111111111111000000001111111000111111111111000000000000111",
+			"11111110000111111111111111111111111000000111111111000011111111111000000000001111",
+			"11111110000011111111111111111111111100000111111111000011111111111000000000001111",
+			"11111110000011111111111111111111111100000110111111100001110011111000000000011111",
+			"11111110000011111111111111111111111100000000011111110000110001111000000001111111",
+			"11111110000001111111111111111111111100000000000111100000000001111000000011111111",
+			"11111110000001111111111111111111111110000000000000000000000000000000000111111111",
+			"11111111000000111111111111111111111110000000000000000000000000000000001111111111",
+			"11111111000000011111111111111111111110000000000000000000000000000000011111111111",
+			"11111111000000001111111111111111111110000000000000000000000000000000111111111111",
+			"11111111000000000011111111111111111110000000000000111110000000000001111111111111",
+			"11111111100000000000111111111111111100000000000000111111000000000011111111111111",
+			"11111111110000000000001111111111111100000000000001111111100000000011111111111111",
+			"11111111111111100000000011111111110000000000000000111111110000000111111111111111",
+			"11111111111111111000000000000000000000000000000000111111110000011111111111111111",
+			"11111111111111111100000000000000000000000000000000001111110000111111111111111111",
+			"11111111111111111110000000000000000000000000000000000000000001111111111111111111",
+			"11111111111111111111000000000000000000000000000000000000000011111111111111111111",
+			"11111111111111111111111111100000000000000011111111110000000111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 1100,
-			"y": 860
+		"bounds": {
+			"width": 1600,
+			"height": 1220
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": -60,
+			"y": -280.8
+		},
+		"spawnPoint": {
+			"x": 1170,
+			"y": 1010
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/lake.jpg": {
 		"grid": [
-			"11000000000000001111111111111111111",
-			"11000000000000011111111111111111111",
-			"11100000000011111111111111111111111",
-			"11100011001111111111111111111111111",
-			"11000111001111111111111111111111111",
-			"10001111001111111111111111111111111",
-			"10001110011111111111111111111111111",
-			"00011110011111111111111111111111111",
-			"00011110111111111111111111111111111",
-			"00011100111111111111111111111111111",
-			"00000000111111111111111111111111111",
-			"00000000111111111111111111111111111",
-			"00000000011111111111111111111111111",
-			"00011000011111111111111111111111111",
-			"00000000111111111111111111111111111",
-			"11000011111111111111111111111111111",
-			"11110011111111111111111111111111111",
-			"11110011111111111111111111111111111",
-			"11111001111111111111111111111111111",
-			"11111000111111111111111111111111111",
-			"11111000011111111111111111111111111",
-			"11111100001111111111111111111111111",
-			"11111100000000111111111111111111111"
+			"1111111111111111111111111111111111111111111111111111111111111111111111",
+			"1111111111111111111111111111111111111100111111111111111111111111111111",
+			"1111111111111111111111111111111111111000111111111111111111111111111111",
+			"1111111111111111111111111111111111111000111111111111111111111111111111",
+			"1111111111111111111111111111111111110000111111111111111111111111111111",
+			"1111111111111111111111111111111110000000001111111111111111111111111111",
+			"1111111111111111111111111111110000000000000000011111111111111111111111",
+			"1111111111111111111111111111100000000000000000000011111111111111111111",
+			"1111111111111111111111111111000000000000000000000001111111111111111111",
+			"1111111111111111111111111100000000000000000000000001111111111111111111",
+			"1111111111111111111111111100000000000000000000000001111111111111111111",
+			"1111111111111111111111111100000000011111111111111111111111111111111111",
+			"1111111111111100011111111000000000011111111111111111111111111111111111",
+			"1111111111111000000000000000000000011111111111111111111111111111111111",
+			"1111111111111000000000000000000000111111111111111111111111111111111111",
+			"1111111111110000000000000000000000111111111111111111111111111111111111",
+			"1111111111110000000000000000000000111111111111111111111111111111111111",
+			"1111111111100000000000000000000000111111111111111111111111111111111111",
+			"1111111110000000000000000000000000111111111111111111111111111111111111",
+			"1111111110000000000000000000000000111111111111111111111111111111111111",
+			"1111111100000000000000000000000000111111111111111111111111111111111111",
+			"1111111110000000000000000000001111111111111111111111111111111111111111",
+			"1111111111000000000000000001111111111111111111111111111111111111111111",
+			"1111111111000001100000000011111111111111111111111111111111111111111111",
+			"1111111111000011111000001111111111111111111111111111111111111111111111",
+			"1111111111000011111100011111111111111111111111111111111111111111111111",
+			"1111111100000011111100011111111111111111111111111111111111111111111111",
+			"1111111000000111111100111111111111111111111111111111111111111111111111",
+			"1111111000000111111100111111111111111111111111111111111111111111111111",
+			"1111110000001111111000111111111111111111111111111111111111111111111111",
+			"1111111000011111111000111111111111111111111111111111111111111111111111",
+			"1111110000011111111001111111111111111111111111111111111111111111111111",
+			"1111100000111111110001111111111111111111111111111111111111111111111111",
+			"1111100000111111110001111111111111111111111111111111111111111111111111",
+			"1111100000111111100011111111111111111111111111111111111111111111111111",
+			"1111000001111111100011111111111111111111111111111111111111111111111111",
+			"1111000000111111100011111111111111111111111111111111111111111111111111",
+			"1111000000111111100111111111111111111111111111111111111111111111111111",
+			"1111000000000011000111111111111111111111111111111111111111111111111111",
+			"1111000000000000000111111111111111111111111111111111111111111111111111",
+			"1111000000000000000111111111111111111111111111111111111111111111111111",
+			"1110000000000000000011111111111111111111111111111111111111111111111111",
+			"1110000000000000000011111111111111111111111111111111111111111111111111",
+			"1110000000111100000011111111111111111111111111111111111111111111111111",
+			"1100000000111110000011111111111111111111111111111111111111111111111111",
+			"1000000000111100000011111111111111111111111111111111111111111111111111",
+			"1000000000011100000011111111111111111111111111111111111111111111111111",
+			"1111110000001100111111111111111111111111111111111111111111111111111111",
+			"1111111000000000111111111111111111111111111111111111111111111111111111",
+			"1111111110000000111111111111111111111111111111111111111111111111111111",
+			"1111111111000000111111111111111111111111111111111111111111111111111111",
+			"1111111111100001111111111111111111111111111111111111111111111111111111",
+			"1111111111110001111111111111111111111111111111111111111111111111111111",
+			"1111111111111000111111111111111111111111111111111111111111111111111111",
+			"1111111111111000111111111111111111111111111111111111111111111111111111",
+			"1111111111111100011111111111111111111111111111111111111111111111111111",
+			"1111111111111100001111111111111111111111111111111111111111111111111111",
+			"1111111111111100001111111111111111111111111111111111111111111110000111",
+			"1111111111111100000111111111111111111111111111111111111111111100000111",
+			"1111111111111110000001111111111111111111111111111111111111111100000001",
+			"1111111111111111000000011111111111111111111111111111111111111000000001",
+			"1111111111111111100000011111111111111111111111111111111111111000000001",
+			"1111111111111111100000000000011111111111111111111111111111111100000001",
+			"1111111111111111000000000000000111111111111111111111111111111100000001",
+			"1111111111111111000000000000000011111111111111111111111111110000000001",
+			"1111111111110000000000000000000001111111111111000000111111100000011111",
+			"1111111111110000000000000000000000111111111110000000001110000000111111",
+			"1111111111100000000000111000000000011111111110000000000110000001111111",
+			"1111111101100000001111111111000000001111111100000000000000000001111111",
+			"1111110000000000111111111111100000000000000000000000000000000011111111",
+			"1111100000000001111111111111110000000000000000000000000000000011111111",
+			"1111100000000001111111111111111000000000000000000000000000000011111111",
+			"1111100000000011111111111111111100000000000000000000000000000111111111",
+			"1111100000000011111111111111111111000000000000000000000000001111111111",
+			"1111110000000111111111111111111111110000000000000011111111111111111111",
+			"1111111000001111111111111111111111111111111111001111111111111111111111",
+			"1111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 620,
-			"y": 20
+		"bounds": {
+			"width": 1400,
+			"height": 1540
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": -48.8,
+			"y": -5.6
+		},
+		"spawnPoint": {
+			"x": 770,
+			"y": 130
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/metropolis.jpg": {
 		"grid": [
-			"11111000011111111111111111111000001",
-			"11111010011111111111111111111000001",
-			"11111010001111111111111111111000001",
-			"11111000001111111111111111111000001",
-			"11111000001111111111111111111100011",
-			"11111000011111111111111111111100011",
-			"11111000001111111111111111111110011",
-			"11111000101111111111111111111110011",
-			"00000000011111111111111111111110011",
-			"00000000001111000011111111111000001",
-			"11111000000000011100000000100000000",
-			"11111000000000000000000000000000000",
-			"11111000001111111111111111110000000",
-			"11111000001111111111111111110000000",
-			"11111000001111111111111111110000011",
-			"11111000001111111111111111110000011",
-			"11111000001111111111111111110000011",
-			"11111000101111111111111111110000011",
-			"11111000101111111111111111110000011",
-			"11111000001111111111111111110000011",
-			"11111000001111111111111111111000011",
-			"11111000001111111111111111111100011",
-			"11111010001111111111111111111110011"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111100000000000000011111111111111111111111111111111111111111000001111111111111",
+			"111111110000000000000000001111111111111111111111111111111111111111000000011111111111",
+			"111111110000000000000000001111111111111111111111111111111111111111000000011111111111",
+			"111111111000000000000000001111111111111111111111111111111111111111100000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111000000011111111111",
+			"111111111111111110000000011111111111111111111111111111111111111111000000011111111111",
+			"111111111111111110000000011111111111111111111111111111111111111111000000011111111111",
+			"111111111111111110000000011111111111111111111111111111111111111111000000011111111111",
+			"111111111111111100000000011111111111111111111111111111111111111111000000011111111111",
+			"111111111111111100000000011111111111111111111111111111111111111111000000001111111111",
+			"111111111111111110111100011111111111111111111111111111111111111111000000001111111111",
+			"111111111111111110111100011111111111111111111111111111111111111111000000001111111111",
+			"111111111111111110111100001111111111111111111111111111111111111111000000001111111111",
+			"111111111111111110111100001111111111111111111111111111111111111111000000001111111111",
+			"111111111111111110111100001111111111111111111111111111111111111111000000001111111111",
+			"111111111111111110111100001111111111111111111111111111111111111111000000001111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111100000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111100000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111110000011111111111",
+			"111111111111111100000000001111111111111111111111111111111111111111111000011111111111",
+			"111111111111111100000011101111111111111111111111111111111111111111111100011111111111",
+			"111111111111111100000011101111111111111111111111111111111111111111111100011111111111",
+			"111111111111111100000011001111111111111111111111111111111111111111111100011111111111",
+			"111111111111111110000011001111111111111111111111111111111111111111111100011111111111",
+			"100000000000000000000000001111111111111111111111111111111111111111111100011111111111",
+			"100000000000000000000000001111111111111111111111111111111111111111111000011111111111",
+			"111111111111111100000000001111111111000000111111111111111110011110000000011111111111",
+			"111111111111111110000000000000000000011111000000000000000000000000000000000000000001",
+			"111111111111111110000000000000000000011111100000000000000011111000000000000000000001",
+			"111111111111111110000000000000000000001111100000000000000011110000000000000000000001",
+			"111111111111111110000000000111111111000000000000000000000000001000000000000000000011",
+			"111111111111111110000000001111111111111111111111111111111111111000000000000000011111",
+			"111111111111111110000000001111111111111111111111111111111111111000000000000000011111",
+			"111111111111111110000000001111111111111111111111111111111111111000000000000000011111",
+			"111111111111111110000000001111111111111111111111111111111111111000000000001111111111",
+			"111111111111111110000000001111111111111111111111111111111111111000000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000111111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000111111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000111111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000111111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000011101111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000011101111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000011101111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000011101111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111100000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111110000000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111100000011111111111",
+			"111111111111111110000000001111111111111111111111111111111111111111111000011111111111",
+			"111111111111111110111100001111111111111111111111111111111111111111111000011111111111",
+			"111111111111111110111100001111111111111111111111111111111111111111111000011111111111",
+			"111111111111111110111100001111111111111111111111111111111111111111111000011111111111",
+			"111111111111111110111100001111111111111111111111111110000001111111111000011111111111",
+			"111111111111111111011000001111111111111111111111111110000001111111111000011111111111",
+			"111111111111111110000000001111111111111111111111111111000001111110000000011111111111",
+			"100001111111111100000000000000000000000000000000000000000000000110000000001111111111",
+			"100000000000000000000000000000011111000000000000000000000000000000000000000000000001",
+			"100000000000000000000000000000111111100000000000000000000000000000000000000000000001",
+			"100000000000000000000000000000111111100000000000000000000000000000000000000000000001",
+			"100000001111111000000000000000000000000000111000000000000000000000000000000000000001",
+			"100000111111111100000000000000000000000001111111111111111111111100000000000000000001",
+			"100001111111111100000000000000000000000001111111111111111111111110000000000000000001",
+			"111111111111111100000000000001111111111111111111111111111111111110000000011111111111",
+			"111111111111111100000000000001111111111111111111111111111111111110000000011111111111",
+			"111111111111111110000000000011111111111111111111111111111111111110000000111111111111",
+			"111111111111111110000000000011111111111111111111111111111111111110000000111111111111",
+			"111111111111111110000000000011111111111111111111111111111111111100000000111111111111",
+			"111111111111111110000000000011111111111111111111111111111111111100000000111111111111",
+			"111111111111111110000000000011111111111111111111111111111111111110000000111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 1300,
-			"y": 820
+		"bounds": {
+			"width": 1680,
+			"height": 1500
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": -167.2
+		},
+		"spawnPoint": {
+			"x": 1490,
+			"y": 1270
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/slum.jpg": {
 		"grid": [
-			"11111111111111111000111111111111111",
-			"11111111001000000000000000111101111",
-			"00000000000000000000000000000001111",
-			"11110000010111111110001111100001111",
-			"11111110011111111111011111111100111",
-			"11111110011111111111011111111100111",
-			"11111110011111111111001111111100111",
-			"11111110011111111111001111111100111",
-			"11111110011111111100001111111100111",
-			"00001110011111111100011111111100001",
-			"00000000011111111100111111111100000",
-			"11000000011111111100111111111100000",
-			"11110000011111111100111111111000000",
-			"11110000011111111000011111111100000",
-			"11100000011111110000000011111100000",
-			"11100000001111100010000000000000111",
-			"11100000000000000010011100000000111",
-			"00000000000000000000111111001000111",
-			"00000000111111100001111111001100111",
-			"11100000111111110011111111001100111",
-			"11110001111111110001111111001100111",
-			"11100001111111110001111111001100111",
-			"11100001111111110001111111001000111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111100111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111000111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111000111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111000111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111110000111111111111111111111111111111111111111",
+			"111111111111111111111100011111000001111000000000110001111111111111100111111111111111",
+			"111111110000000000000000000000000000000000000000000000000000000000000111111111111111",
+			"111111110000000000000000000000000000000000000000000000000000000000000111111111111111",
+			"111111111000000000000000000001111111110000000000000000111100000000000111111111111111",
+			"111111111111111111111000111111111111111111111000011111111111111111000111111111111111",
+			"111111111111111111111000111111111111111111111100011111111111111111000111111111111111",
+			"111111111111111111111000111111111111111111111100011111111111111111100111111111111111",
+			"111111111111111111111000111111111111111111111100011111111111111111100011111111111111",
+			"111111111111111111111000111111111111111111111100011111111111111111100011111111111111",
+			"111111111111111111111000111111111111111111111110011111111111111111100011111111111111",
+			"111111111111111111111000111111111111111111111110011111111111111111100011111111111111",
+			"111111111111111111111000111111111111111111111110011111111111111111100111111111111111",
+			"111111111111111111111000111111111111111111111110001111111111111111000111111111111111",
+			"111111111111111111111000111111111111111111100100001111111111111111000111111111111111",
+			"111111111111111111111000111111111111111111100000011111111111111111000111111111111111",
+			"111111111111111111111000111111111111111111100000111111111111111111000011111111111111",
+			"111111110000000111111000111111111111111111100000111111111111111111000000001111111111",
+			"111111100000000011111000111111111111111111000001111111111111111111000000000111111111",
+			"111111110000000000001000111111111111111111000001111111111111111111000000000011111111",
+			"111111111110000000001100111111111111111111000001111111111111111111100000000000000111",
+			"111111111111000000011100111111111111111111000001111111111111111111000000000000000001",
+			"111111111111111000011100111111111111111111100001111111111111111111000000000000000001",
+			"111111111111111000011100111111111111111111100001111111111111111111000000000000000011",
+			"111111111111110000011000111111111111111111000001111111111111111111000000000001111111",
+			"111111111111110000001000111111111111111110000000111111111111111111000000000001111111",
+			"111111111111110000001000111111111111111100000000011111111111111111000000000001111111",
+			"111111111111110000000000011111111111111000000000000001111111111111000000010011111111",
+			"111111111111110000000000001111111111110000010000000000000111111111000001111111111111",
+			"111111111111110000000000001111111111110000111100000000000000000000000011111111111111",
+			"111111111111110000000000000001111111000000111100111111000000000000000011111111111111",
+			"111111111111110000000000000000000000000000111000111111111100000000000011111111111111",
+			"111111111111110000000000000000000000000000110000111111111110001111000111111111111111",
+			"110000000000000000000000111111000000000000000001111111111110001111000111111111111111",
+			"100000000000000000000000111111111111100000000011111111111110001111000111111111111111",
+			"110000000000000000000001111111111111110000001111111111111110011111000111111111111111",
+			"111111111111110000000011111111111111111000011111111111111110011111100111111111111111",
+			"111111111111110000000111111111111111110000011111111111111110011111100011111111111111",
+			"111111111111110000000111111111111111110000011111111111111110011111100111111111111111",
+			"111111111111110000000111111111111111110000001111111111111110011111100111111111111111",
+			"111111111111110000000111111111111111111000001111111111111110001111100111111111111111",
+			"111111111111110000000111111111111111111000001111111111111110011111000111111111111111",
+			"111111111111110000000111111111111111111000001111111111111110011111000011111111111111",
+			"111111111111110000000111111111111111111000001111111111111110011110000011111111111111",
+			"111111111111110000000111111111111111111000001111111111111100010000000011111111111111",
+			"111111111111110000000011111111111111111100000000000000000000000000000001111111111111",
+			"111111111111100000000011111111111111111000000000000000000000000000000000111111111111",
+			"111111111111000000000011111111111111110000000000000110000011111111111000111111111111",
+			"111111111111100110000011111111111111000000000001111111111111111111111111111111111111",
+			"111111111111111110000000000000000000000000000111111111111111111111111111111111111111",
+			"111111111111111111000000000000000000000000001111111111111111111111111111111111111111",
+			"111111111111111111000000000000000000000000001111111111111111111111111111111111111111",
+			"111111111111111111000011111111110000000000001111111111111111111111111111111111111111",
+			"111111111111111111000111111111111111100000001111111111111111111111111111111111111111",
+			"111111111111111111000111111111111111110000001111111111111111111111111111111111111111",
+			"111111111111111100000111111111111111110000001111111111111111111111111111111111111111",
+			"111111111111111000000111111111111111110000001111111111111111111111111111111111111111",
+			"111111111111111000000111111111111111111000001111111111111111111111111111111111111111",
+			"111111111111111100000111111111111111111000001111111111111111111111111111111111111111",
+			"111111111111111100000111111111111111111000001111111111111111111111111111111111111111",
+			"111111111111111110001111111111111111111000001111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111000011111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 60,
-			"y": 700
+		"bounds": {
+			"width": 1680,
+			"height": 1360
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": 13.6,
+			"y": -301.6
+		},
+		"spawnPoint": {
+			"x": 90,
+			"y": 790
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/wasteland.jpg": {
 		"grid": [
-			"11100011111000000000111111111111111",
-			"11110001100000000011111111111111111",
-			"11111000000000001111111111111111111",
-			"11110000000000111111111111111111111",
-			"11100000000001111111111111111111111",
-			"11100000001111111111111111111111111",
-			"11110000011111111111111000000011111",
-			"11110011111111111111100000000011111",
-			"11110011111111111111000010000011111",
-			"10000011000011111110000111000001111",
-			"00000000000111111110000011001001111",
-			"00000000001111111110000000001011111",
-			"10000000011111111110000000001111111",
-			"11000000001111111110000000011111111",
-			"11100000001111111100001100011111111",
-			"11100000001111111000001110011111111",
-			"11100000000111111000001111111111111",
-			"11100000000011110000011111111111111",
-			"11100100000000110001111111111111111",
-			"11100100000000000011111111111111111",
-			"11100100000000000011111111111111111",
-			"10001110000000000000000111111111111",
-			"00011110000000000000000000111111111"
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111001000000111111111111111111111111111111111111111111111111111111111111111",
+			"11111111100000000000011111111111111111111111111111111111111111111111111111111111111",
+			"11111111100000000000111111111111111111111111111111111111111100011111111111111111111",
+			"11111111000000000011111111111111111111111111111000001111111000011111111111111111111",
+			"11111110000000001111111111111111111111111111110000000001110000111111111111111111111",
+			"11111100000000111111111111111111111111111111111000000000100001111111111111111111111",
+			"11110000000000111111111111111111111111111111111000000000000011111111111111111111111",
+			"11100000000000011111111111111111111111111110000000000100000111111111111111111111111",
+			"11000000011100001111111111111111111000000000000000000111001111111111111111111111111",
+			"10000000111110001111111111111111100000000000000000001111111111111111111111111111111",
+			"10000011111110000111111111111110000000000000000001111111111111111111111111111111111",
+			"11111111111111000011111111110000000000000001111111111111111111111111111111111111111",
+			"11111111111111100001111111000000000000000011111111111111111111111111111111111111111",
+			"11111111111111110001111110000000000000001111111111111111111111111111111111111111111",
+			"11111111111111110000000000000000000000011111111111111111111111111111111111111111111",
+			"11111111111111111000000000000000000001111111111111111111111111111111111111111111111",
+			"11111111111111111000000000000000000111111111111111111111111111111111111111111111111",
+			"11111111111111000000000000000000001111111111111111111111111111111111111111111111111",
+			"11111111111110000000000000000000111111111111111111111111111111111111111111111111111",
+			"11111111111100000000000000000011111111111111111111111111111111111111111111111111111",
+			"11111111111100000000000000111111111111111111111111111111111111111111111111111111111",
+			"11111111111110000000000001111111111111111111111111111111111111111111111111111111111",
+			"11111111111111100000000001111111111111111111111111111111111111111111111111111111111",
+			"11111111111111100001111111111111111111111111111111111000000000000011111111111111111",
+			"11111111111111100001111111111111111111111111111111000000000000000001111111111111111",
+			"11111111111111100001111111111111111111111111111110000000000000000001111111111111111",
+			"11111111111111100011111111111111111111111111111100000011000000000001111111111111111",
+			"11111111111111100011111111111111111111111111111000001111111000000011111111111111111",
+			"11111111111111100011111111001111111111111111000000001111111000110001111111111111111",
+			"11111111100000000011110000000111111111111111000000011111111000110001111111111111111",
+			"11111111000000000000000000000111111111111111000000001111111000110001111111111111111",
+			"11111110000000000000000000011111111111111111000000000011111000110001111111111111111",
+			"11111110000000000000000000111111111111111111100000000000111000111001111111111111111",
+			"11111110000000000000000000111111111111111111100000000000000000111111111111111111111",
+			"11111111000000000000000001111111111111111111110000000000000001111111111111111111111",
+			"11111111100000000000000111111111111111111111110000000000000001111111111111111111111",
+			"11111111111000000000000111111111111111111111100000000000000001111111111111111111111",
+			"11111111111100000000000000111111111111111111000000011000000001111111111111111111111",
+			"11111111111100000000000000111111111111111110000000111100000011111111111111111111111",
+			"11111111111110000000000000111111111111111100000000111110000011111111111111111111111",
+			"11111111111110000000000000111111111111111100000000111111000011111111111111111111111",
+			"11111111111100000000000000011111111111111000000001111111111111111111111111111111111",
+			"11111111111100000000000000001111111111111000000001111111111111111111111111111111111",
+			"11111111111100000000000000000111111111111000000001111111111111111111111111111111111",
+			"11111111111100000000000000000111111111110000000001111111111111111111111111111111111",
+			"11111111111100000000000000000011111111100000010011111111111111111111111111111111111",
+			"11111111111110001100000000000000011111100000111111111111111111111111111111111111111",
+			"11111111111110001110000000000000000111000000111111111111111111111111111111111111111",
+			"11111111111110001110000000000000000001000001111111111111111111111111111111111111111",
+			"11111111111110001110000100000000000000000011111111111111111111111111111111111111111",
+			"11111111111100001110000110000000000000000011111111111111111111111111111111111111111",
+			"11111111111100011110000100000000000000000111111111111111111111111111111111111111111",
+			"11111111111000011111000000000000000000000000011111111111111111111111111111111111111",
+			"11111111100000111111000000000000000000000000000000000111111111111111111111111111111",
+			"11111111000001111111100000000000000000000000000000000000011111111111111111111111111",
+			"11111110000011111111100000000000000000000000000000000000000111111111111111111111111",
+			"11111100000111111111111100000000000000000000000001111000000000111111111111111111111",
+			"11111110011111111111111110000000000000000000000011111111000000001111111111111111111",
+			"11111111111111111111111111000000000000000000000111111111110000000111111111111111111",
+			"11111111111111111111111111111100000000000000111111111111111110000000000001111111111",
+			"11111111111111111111111111111110000000000000111111111111111111100000000000111111111",
+			"11111111111111111111111111111111000000000000111111111111111111100000000000000111111",
+			"11111111111111111111111111111111110000000000111111111111111111100000000000000001111",
+			"11111111111111111111111111111111111000110000111111111111111111110000000000000000011",
+			"11111111111111111111111111111111111111111000111111111111111111110000000000000000011",
+			"11111111111111111111111111111111111111111000111111111111111111111000000000000000011",
+			"11111111111111111111111111111111111111111000111111111111111111111100000000000000111",
+			"11111111111111111111111111111111111111111000111111111111111111111100000000000000111",
+			"11111111111111111111111111111111111111110001111111111111111111111100000011000000111",
+			"11111111111111111111111111111111111111110001111111111111111111111110000011000001111",
+			"11111111111111111111111111111111111111110000111111111111111111111111100000000111111",
+			"11111111111111111111111111111111111111111001111111111111111111111111110000000111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111000001111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 1060,
-			"y": 620
+		"bounds": {
+			"width": 1660,
+			"height": 1520
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": 7.2,
+			"y": -148
+		},
+		"spawnPoint": {
+			"x": 1410,
+			"y": 1310
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/town-night.jpg": {
 		"grid": [
-			"11111100000000000000000000000000000",
-			"11111111000000000000000000000000000",
-			"10011111000000000000000000000000000",
-			"10011111111000000000000000000000001",
-			"10001111111000000100000000000000011",
-			"00000111110000011110000000000001111",
-			"10100001100010011110000000011111111",
-			"10000000001110011110000001111111111",
-			"10000000011111001110000001111111111",
-			"00000000001111000000000001111111111",
-			"00000000000111111110000001111111111",
-			"00000000001111111111000001111111111",
-			"10000000011111111111000000111111111",
-			"10000000111111111111000000000111111",
-			"11000000111100111111100000001111111",
-			"11000000000000111111110000011111111",
-			"11000000000000111111111110111111111",
-			"11000000000000000001111111111111111",
-			"00000000000000000001111111111111111",
-			"00000000000000000000111111111111111",
-			"00000000000000000000001111111111111",
-			"00000000000000000000000111111111111",
-			"10000000000000000000000111111111111"
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"11111111111111111000001111111111111111111111111111111111111111111111111111111111",
+			"11111111111111110000000111111111111111111111111111111111111111111111111111111111",
+			"11111111111111110000000111111111111111111111111111111111111111111111111111111111",
+			"11111111111111110000000111111111111111111111111111111111111111111111111111111111",
+			"11111111111111110000000111111111111111111111111111111111111111111111111111111111",
+			"11111111111111110000000111111111111111111111111111111111111111111111111111111111",
+			"11111111111111110000000000011111111111111111111111111111111111111111111111111111",
+			"11111111111111110000000000001111111110000111111110000011111111111111111000111111",
+			"11111111111111110000000000000111000000000011111110000001111111111111111000011111",
+			"11111111111111111000000000000000000000000000111110000000001111111111111000011111",
+			"11111111111111111000000000000000000000000000000000000000000011111100010000011111",
+			"11111111111111111110000000000000000000000000000000000000000000110000000000011111",
+			"11111111111111111111000000000000000000000000000000000000000000000000000000011111",
+			"11111111111111111111100000000000000000000000000000000000000000000000000000111111",
+			"11111111111111111111100000000000000000000000000000000000000000000000000000111111",
+			"11111110001111111111111000000000000000000000000000000000000000000000000000111111",
+			"11111110000111111111111111000000000000000000000000000000000000000000000001111111",
+			"11111110000111111111111111100000000000001000000000000000000000000000000001111111",
+			"11111110000011111111111111100000000000011100000000000000000000000000000111111111",
+			"11111100000011111111111111100000000001111100000000000000000000000000001111111111",
+			"11111000000001111111111111100000000011111110000000000000000000000001111111111111",
+			"11111100000000111111111111000000000111111111000000000000000000000111111111111111",
+			"11111110011000000111111110000110000111111111000000000000000000011111111111111111",
+			"11111110011000000001111100011111000111111111000000000000001111111111111111111111",
+			"11111110011000000000010000111111000111111111000000000000111111111111111111111111",
+			"11111110000000000000000001111111000111111111000000000001111111111111111111111111",
+			"11111110000000000000000111111111100011111111000000000001111111111111111111111111",
+			"11111110000000000000000111111111100011111111000000000011111111111111111111111111",
+			"11100000000000000000000011111111100000000000000000000011111111111111111111111111",
+			"10000000000000000000000001111111110000000000000000000011111111111111111111111111",
+			"10000000000000000000000000111111111100000111000000000011111111111111111111111111",
+			"11000000000000000000000001111111111111111111000000000001111111111111111111111111",
+			"11000000000000000000000001111111111111111111100000000001111111111111111111111111",
+			"11000000000000000000000111111111111111111111000000000000111111111111111111111111",
+			"11101100000000000000001111111111111111111111000000000000011111111111111111111111",
+			"11111110000000000000011111111111111111111111100000000000001111111111111111111111",
+			"11111111000000000000111111111111111111111111110000000000000000011111111111111111",
+			"11111111100000000000111111111111111111111111110000000000000000011111111111111111",
+			"11111111100000000000111111111111111111111111111000000000000000111111111111111111",
+			"11111111110000000000111111111100111111111111111100000000000011111111111111111111",
+			"11111111100000000000011111111000011111111111111110001100000011111111111111111111",
+			"11111111100000000000000000000000011111111111111111111110000111111111111111111111",
+			"11111111100000000000000000000000011111111111111111111110011111111111111111111111",
+			"11111111110000011000000000000000001111111111111111111111111111111111111111111111",
+			"11111111110000011000000000000000001111000111111111111111111111111111111111111111",
+			"11111111110000000000000000000000000011000001111111111111111111111111111111111111",
+			"11111111110000000000000000000000000000000001111111111111111111111111111111111111",
+			"11110000000000000000000000000000000000000001111111111111111111111111111111111111",
+			"11110000000000000000000000000000000000000000111111111111111111111111111111111111",
+			"11110000000000000000000000000000000000000000011111111111111111111111111111111111",
+			"11111000000000000000000000000000000000000000001111111111111111111111111111111111",
+			"11111000000000000000000000000000000000000000000011111111111111111111111111111111",
+			"11111100000000000000000000000000000000000000000000111111111111111111111111111111",
+			"11111100000000000000000000000000000000000000000000111111111111111111111111111111",
+			"11111100000000000000000000000000000000000000000000111111111111111111111111111111",
+			"11111110000000000000000000000000000000000000000000011111111111111111111111111111",
+			"11111111100000000000000000000000000000000000000000011111111111111111100111111111",
+			"11111111110000000000000000000000000000000000000000000011111111111111000011111111",
+			"11111111110011111100000000000011100000000000000000000000000001111110000011111111",
+			"11111111110111111100000000011111100001111000000000000000000000000100000011111111",
+			"11111111111111111111111111111111110111111111100000000000000000000000000011111111",
+			"11111111111111111111111111111111111111111111111000000000000000000000000011111111",
+			"11111111111111111111111111111111111111111111111100000000000000000000000011111111",
+			"11111111111111111111111111111111111111111111111111000000000000000000000011111111",
+			"11111111111111111111111111111111111111111111111111111100000000000000000011111111",
+			"11111111111111111111111111111111111111111111111111111111000000000000000011111111",
+			"11111111111111111111111111111111111111111111111111111111100000000000000011111111",
+			"11111111111111111111111111111111111111111111111111111111110000000000000111111111",
+			"11111111111111111111111111111111111111111111111111111111110000000000001111111111",
+			"11111111111111111111111111111111111111111111111111111111110000000000000111111111",
+			"11111111111111111111111111111111111111111111111111111111110000000000000111111111",
+			"11111111111111111111111111111111111111111111111111111111100000000000000111111111",
+			"11111111111111111111111111111111111111111111111111111100000000000000000011111111",
+			"11111111111111111111111111111111111111111111111111111110000000000000000011111111",
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 1020,
-			"y": 660
+		"bounds": {
+			"width": 1600,
+			"height": 1520
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": -18.4,
+			"y": -146.4
+		},
+		"spawnPoint": {
+			"x": 1290,
+			"y": 1430
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/town.jpg": {
 		"grid": [
-			"10000000000001001111000110000110001",
-			"10000000011000001111100100000000001",
-			"00000000111100001111100100111111001",
-			"10000011111111000110000001111111001",
-			"10000011111111100000000011111111001",
-			"00000011111111111001111111111111001",
-			"10000001111111111001111111111111001",
-			"11000011111111111001111111111110000",
-			"00001111111111111001111111111000000",
-			"00111111111111111001111111100000000",
-			"01111111111111111001111111000000000",
-			"11111111111111111001111111111111000",
-			"11111111111111111100111111111111110",
-			"11111111111111111100111111111111110",
-			"11111111111111111100111111111111100",
-			"11111111111111111000111111111111000",
-			"11111111111111111001111111110111001",
-			"11111111111111110011111111100111001",
-			"11111111111111110011111111110111001",
-			"11111111111111110011111111100000011",
-			"11111111000000000010000000000011111",
-			"11111110000000000000000000001111111",
-			"11111111111111100000111111111111111"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111",
+			"111111111111110000001111111111111111111111111000001111111111111111111111111111",
+			"111111100000000000001111111111111100111111110000000111111111111111111001111111",
+			"111111100000000000111111111111111100111111110000000001111111111111110001111111",
+			"111111000000000000111111111111111100111111110000000001111111111111110001111111",
+			"111111000000000000111110011111111100111111110000000011111111111111111000111111",
+			"111111000000000000110000000001111100111111111000000111110011111111111000111111",
+			"111111000000000000100000000000111100111111111100001111100000000000000000111111",
+			"111111000000000000000011111000001100111111111110001111000000000000000000111111",
+			"111111000000000000000111111100000000111111111110001110001110000000000000111111",
+			"111111000000000000011111111111000000111111111110001110001111111111110000111111",
+			"111111000000000011111111111111100000011111111110001100011111111111111000111111",
+			"111111000000000011111111111111111000001111111110000000111111111111111000111111",
+			"111111000000000011111111111111111100000000000000000000111111111111111001111111",
+			"111111000000000011111111111111111110000000000000000011111111111111111001111111",
+			"111111000000000011111111111111111111000000000001111111111111111111111001111111",
+			"111111000000000001111111111111111111110001111111111111111111111111111001111111",
+			"111111000000000001111111111111111111111001111111111111111111111111111000111111",
+			"111111100000000001111111111111111111111001111111111111111111111111111000111111",
+			"111111111000000001111111111111111111111001111111111111111111111111111000111111",
+			"111111111000000001111111111111111111111001111111111111111111111111111100011111",
+			"111111111000011011111111111111111111111001111111111111111111111110000000001111",
+			"111110000000111111111111111111111111111001111111111111111111111100000000000111",
+			"111100000001111111111111111111111111111001111111111111111111110000000000000111",
+			"111000000111111111111111111111111111111001111111111111111111000000000000000011",
+			"111000111111111111111111111111111111111000111111111111111110000000000000000011",
+			"110000111111111111111111111111111111111000111111111111111100000000000000000011",
+			"110001111111111111111111111111111111111000111111111111111100000000000000000011",
+			"110001111111111111111111111111111111111000111111111111111111111111111000000011",
+			"100001111111111111111111111111111111111000011111111111111111111111111100000011",
+			"100001111111111111111111111111111111111100011111111111111111111111111111000011",
+			"100001111111111111111111111111111111111110001111111111111111111111111111000111",
+			"110001111111111111111111111111111111111111001111111111111111111111111111000111",
+			"110001111111111111111111111111111111111111001111111111111111111111111111000111",
+			"110000111111111111111111111111111111111111001111111111111111111111111111001111",
+			"111000011111111111111111111111111111111110001111111111111111111111111110001111",
+			"111100001111111111111111111111111111111100001111111111111111111111111100001111",
+			"111110001111111111111111111111111111111000011111111111111111111111111000011111",
+			"111111001111111111111111111111111111110000111111111111111111001111111000111111",
+			"111111001111111111111111111111111111110001111111111111111111000111111001111111",
+			"111111001111111111111111111111111111110011111111111111111111001111111001111111",
+			"111111001111111111111111111111111111110011111111111111111111001111111001111111",
+			"111111001111111111111111111111111111100011111111111111111111000111111001111111",
+			"111111001111111111111111111111111111100011111111111111111111000111000001111111",
+			"111111000111111111111111111111111111100011111111111111111111000000000001111111",
+			"111111000011111111111000111111111111110011111111111111111110000000000111111111",
+			"111111100000111111110000011111111111000011111111111111111000001111111111111111",
+			"111111110000001111110000000000000000000010000000000000000000111111111111111111",
+			"111111110000001111110000000000000000000000000000000000000001111111111111111111",
+			"111111111000001111110000011111111110000000000111111000000111111111111111111111",
+			"111111111000111111111111111111111110000000001111111111111111111111111111111111",
+			"111111111000111111111111111111111110000010001111111111111111111111111111111111",
+			"111111111000111111111111111111111110001111000111111111111111111111111111111111",
+			"111111111000111111111111111111111110011111000111111111111111111111001111111111",
+			"111111111000111111111111111111111100011111100111111111111111111111001111111111",
+			"111111111000111100000011111111111100011111100011111111111111111111000111111111",
+			"111111111000110000000000000000000000011111100011111111111111111111000111111111",
+			"111111111000000000000000000000000000011111110001111111111111111111001111111111",
+			"111111111000000011111111111110000000000010000001111000111111111110001111111111",
+			"111111110000111111111111111111111100000000000000000000000000000000001111111111",
+			"111111110001111111111111111111111111110000000000000000000000000000011111111111",
+			"111111111011111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111110001111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 700,
-			"y": 860
+		"bounds": {
+			"width": 1560,
+			"height": 1440
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": -31.2,
+			"y": -234.4
+		},
+		"spawnPoint": {
+			"x": 790,
+			"y": 1330
+		},
+		"spawnOrigem": "amarelo"
 	},
 	"assets/hunt-backgrounds/volcano.jpg": {
 		"grid": [
-			"11111111111111111111111111111100000",
-			"11111111111111111111111111111110011",
-			"11111111111111111111111111111110011",
-			"11111111111111111111111111111110011",
-			"11111111111111111111111111111110011",
-			"11111111110000000000000010111100011",
-			"11111111110000000000000000011100001",
-			"01111111111001000000000000000000011",
-			"01111111110001000000000000000000111",
-			"01111111100000000000000000000000011",
-			"00000000000000000000000000000000011",
-			"11111100000000000000111111000000001",
-			"11111111100000000111111111111000001",
-			"11111111111100111111111111111100111",
-			"11111111111100111111111111111100111",
-			"11111101111000111111111111111100111",
-			"11111001111000011111000000111100111",
-			"11111100011000111101000000011000111",
-			"00000000000000001000000000000000011",
-			"00010000000000000000000000000000001",
-			"11111111111000000000000000000000011",
-			"11111111111110001100000000000000011",
-			"11111111111111001100000000000000011"
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111100111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111000011",
+			"111111111111111111111111111111111111111111111111111111111111111100011111111111000011",
+			"111111111111111111111111111111111111111111111111111111111110000000000111111100000011",
+			"111111111111111111111111111111111111111111111111111111100000000000000011111100000011",
+			"111111111111111111111111111111111111111111111111111110000000000000000001111000000011",
+			"111111111111111111111111111111111111111111111111111100000000000000000000011000000011",
+			"111111111111111111111111111111111111110000000111110000000000000000000000000000000011",
+			"111111111111111111111110000000000000000000000011100000000000000000000000000010000011",
+			"111111111111111111000000000000000000000000000000000000000000000000000000001110000001",
+			"111111111111111110011111111111111110000000000000000000000001000000000000000110000001",
+			"111110000000000000111111111111111110000000000000000000000001111111000000000010000001",
+			"111111111000011111111111111111111111111000100000000000000011111111000000000000000011",
+			"111111111000011111111111111111111111111111111111000000001111111111100000000000000111",
+			"111111111000011111111111111111111111111111111111111111111111111111111000011111111111",
+			"110000000000011111111111111111111111111111111111111111111111111111111000011111111111",
+			"111000000000011111111111111111111111111111111111111111111111111111111000011111111111",
+			"111110000011111111111111111111111111111111111111111111111111111111111000011111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111000011111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111000011111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111000011111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111000111111111111",
+			"111111111111111111111111111100111111111111111111111111111111111111111000111111111111",
+			"111111111111111111111111111100000000011111111100000000111111111111110000111111111111",
+			"111111111111111111111111111100000000000000000000000000110001111111100000111111111111",
+			"111111111111111111111111111100000000000000000000000000000001111111100000001111111111",
+			"111111111111111111111111111110000111000000000000000000000000111111000000001111111111",
+			"111111101111111111111111111110000111000000000000000000000000011100000000011111111111",
+			"111111000111111111111111111110000111000000000000000000000000000000000001111111111111",
+			"111110000111111111111111111100000111000000000000000000000000000000000011111111111111",
+			"110100000111111111111111111100000110000000000000000000000000000000000011111111111111",
+			"100000001111111111111111110000000110000000000000000000000000000000000000111111111111",
+			"100000001111000000000000100000000000000000000000000000000000000000000000011111111111",
+			"100000000000000000000000000000000000000000000000000000000000000000000000011111111111",
+			"100000000000000000000000000000000000000000000000000000000000000000000000011111111111",
+			"100000011111111111110000000000000000000000000111111111111111110000000000001111111111",
+			"100000111111111111111100000000000000000000001111111111111111111110000000001111111111",
+			"100001111111111111111111100000000000000001111111111111111111111111000000001111111111",
+			"111111111111111111111111111111100001111111111111111111111111111111100001111111111111",
+			"111111111111111111111111111111100011111111111111111111111111111111100001111111111111",
+			"111111111111111111111111111111100001111111111111111111111111111111110001111111111111",
+			"111111111111111111111111111111000001111111111111111111111111111111110001111111111111",
+			"111111111111111111111111111111000001111111111111111111111111111111110001111111111111",
+			"111111111111111111111111111111000001111111111111111111111111111111110001111111111111",
+			"111111111111111111001111111111000001111111111111111111111111111111110001111111111111",
+			"111111111111111111000111111111000000111111111111000000000111111111110001111111111111",
+			"110000111111111111100111111111000001111111111111000000000001111111110001111111111111",
+			"110000011111111111100001111111000001111111111110000000000000111111110001111111111111",
+			"100000011111111111100000000111000001111111000100000000000000000000000001111111111111",
+			"100000000000000000000000000000000000001111000000000000000000000000000000011111111111",
+			"100000000000000000000000000000000000000111000000000000000000000000000000001111111111",
+			"110000001111111111100001100000000000000000000000000000000000000000000000001111111111",
+			"111000011111111111110011111000000000000000000000000000000000000000000000011111111111",
+			"111100111111111111111111111110000000000000000000000000000000000000000000011111111111",
+			"111111111111111111111111111111100000000111000000000000000000000000000000011111111111",
+			"111111111111111111111111111111111100000111110000000000000000000000000000111111111111",
+			"111111111111111111111111111111111110000111110000000000000000000000000000011111111111",
+			"111111111111111111111111111111111111000111111000000000000000000000000000011111111111",
+			"111111111111111111111111111111111111111111100000000000000000000000000000011111111111",
+			"111111111111111111111111111111111111111111100000000000000000000000000000001111111111",
+			"111111111111111111111111111111111111111111100000000000000000000000000000001111111111",
+			"111111111111111111111111111111111111111111110000000000000000000000000000001111111111",
+			"111111111111111111111111111111111111111111110000000000000000000000000000011111111111",
+			"111111111111111111111111111111111111111111110000000000000000000000000000011111111111",
+			"111111111111111111111111111111111111111111111000000000000000000000000000111111111111",
+			"111111111111111111111111111111111111111111111000000000000000000000000000111111111111",
+			"111111111111111111111111111111111111111111111100000000000001000000000000111111111111",
+			"111111111111111111111111111111111111111111111110000000000011100000000000111111111111",
+			"111111111111111111111111111111111111111111111111111011000111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 		],
-		"spawnPoint": {
-			"x": 60,
-			"y": 420
+		"bounds": {
+			"width": 1680,
+			"height": 1420
 		},
-		"spawnOrigem": "amarelo-projetado"
+		"arte": {
+			"escala": .8,
+			"x": 20,
+			"y": -95.2
+		},
+		"spawnPoint": {
+			"x": 110,
+			"y": 690
+		},
+		"spawnOrigem": "amarelo"
+	},
+	"assets/hunt-backgrounds/dojo.jpg": {
+		"grid": [
+			"111111111111111111111111111",
+			"111100111111000111110000011",
+			"111000000000000000000000011",
+			"110000000000000000000000011",
+			"100000000000000000000000001",
+			"100000000000000000000000011",
+			"100000000000000000000000011",
+			"100000000000000000000000011",
+			"100000000000000000000000011",
+			"100000000000000000000000011",
+			"100000000000000000000000011",
+			"100000000000000000000000011",
+			"100000000000000000000000001",
+			"100000000000000000000000001",
+			"100000000000000000000000011",
+			"110000000000000000000000011",
+			"111111111111011000000001111",
+			"111111111111111111111111111"
+		],
+		"bounds": {
+			"width": 540,
+			"height": 360
+		},
+		"arte": {
+			"escala": .8,
+			"x": -1028,
+			"y": -1279.2
+		},
+		"spawnPoint": {
+			"x": 90,
+			"y": 170
+		},
+		"spawnOrigem": "amarelo",
+		"spawnInimigo": {
+			"x": 430,
+			"y": 170
+		}
+	},
+	"assets/hunt-backgrounds/dragon.jpg": {
+		"grid": [
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111100001111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111100000111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000000111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111111110011111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111100000000001111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111000000000000111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111000000000000111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111000000000001111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000001111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000000111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000001111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000001111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000001111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000011111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000011111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000011111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111111111111110000111111111111111111111111",
+			"111111111111111000011111111111111111111111111111111111111111111111110011111110000111111111111111111111111",
+			"111111111111111000011111111111111100011111111111111111111111111110000000111100000111111111111111111111111",
+			"111111111111111000001111111111111100011111111111111110000000000000000000000000000111100000111111111111111",
+			"111111111111110000001111111111111000011111111110000000000000000000000000000000000000000000000111111111111",
+			"111111111110000000001111111111111000011111111100000000000000000000000000000000011000011111100000011111111",
+			"111111111000000000000000001111111000011111111000000000000000000000000000000001111111111111111110000111111",
+			"111111110000000000000000000000000000011111110000000000001111111111111111111111111111111111111111100011111",
+			"111111110000000000000000000000000000000000000000000000001111111111111111111111111111111111111111111001111",
+			"111111100000000000000000000000000000000000000000000000111111111111111111111111111111111111111111111100111",
+			"111111000000000000000000000000000000000000000000000111111111111111111111111111111111111111111111111110011",
+			"111111000000000000000000000000000000000000000000011111111111111111111111111111111111111111111111111110011",
+			"111111100001111111000000000000000000000000000001111111111111111111111111111111111111111111111111111111011",
+			"111111000111111111111100000000000001111100001111111111111111111111111111111111111111111111111111111111011",
+			"111110001111111111111111111111111111111100001111111111111111111111111111111111111111111111111111111111001",
+			"111100011111111111111111111111111111111100001111111111111111111111111111111111111111111111111111111111001",
+			"111100001111111111111111111111111111111100001111111111111111111111111111111111111111111111111111111111001",
+			"111100001111111111111111111111111111111100001111111111010000111001111111111111111111111111111111111111001",
+			"111100001111111111111111111111111111111100001111111000000000000000000011111111111111111111111111111111011",
+			"111100001111111111111111111111111111111110000111000000000000000000000001111111111111111111111111111111011",
+			"111100001111111111111111111111111111111110000010000000000000000000000001111111111111111111111111111111011",
+			"111100011111111111111111111111111111111110000000000000000111100000000011111111111111111111111111111111011",
+			"111100011111111111111111111111111111111110000000000000001111110000000111111111111111111111111111111111011",
+			"111100011111111111111111111111111111111100000000000000011111111000000111111111111111111111111111111111011",
+			"111100011111111111111111111111111111111100000000000000111111111000000111111111111111111111111111111111011",
+			"111100011111111110000000000111111111111100000000000001111111111000000111111111111111111111111111111111001",
+			"111000011111111000000000000000111111111100000000000011111111110000000111111111111111111111111111111111001",
+			"111000011111110000000000000000001111111100000000000000000111000000000111111111111111111111111111111111111",
+			"111000011111100000000000000000000011111100000000000000000000000000001111111111111111111111111111111111111",
+			"111000011111100000000000000000000011111110000000000000000000000000011111111111111111111111111111111111111",
+			"111000011111000000000000000000000011111110000000000000000000000000111111111111111111111111111111111111111",
+			"111000011111000000000000000000000011111110000000010000000000000001111111111111111111111111111111111111111",
+			"111000011111000000000000000000000011111110000001111100000000000011111111111111111111111111111111111111111",
+			"111000011111000000000000000000000011111110000011111111000000001111111111111111111111111111111111111111111",
+			"111000011111000000000000000000000011111110000011111111111110111111111111111111111111111111111111111111111",
+			"111000011111000000000000000000000011111110000011111111111111111111111111111111111111111111111111111111111",
+			"111000011111000000000000000000000011111100000000111100111111111111111111111111111111111111111111111101111",
+			"111100000000000000000000000000000011111000000000000000001111111111111111111111111111111111111111110000111",
+			"111100000000000000000000000000000011111000000000000000001111111111111111111111111111111111111111110000111",
+			"111100000000000000000000000000000011110000000000000000001111111111111111111111111111111111111111100001111",
+			"111100000000000000000000000000000011110000000000000000001111111111111111111111111111111111111110000001111",
+			"111110000000000000000000000000000011111000000000000000001111110000011111111111111111111111111000000011111",
+			"111111100000000000000000000000000111111100000000000000001110000000000011111111111111111111110000000111111",
+			"111111111000011111111111111111111111111100000000000000001000000000000000000111111111111111000000011111111",
+			"111111111000011111111111111111111111111100000000000000000000000000000000000000000000000000000000111111111",
+			"111111111000011111111111111111111111111110000000000000000000011111110000000000000000000000000001111111111",
+			"111111111000011111111111111111111111111110000000000000000001111111111100000000000000000000000111111111111",
+			"111111111000011111111111111111111111111100000000111111111111111111111110000111000000001111111111111111111",
+			"111111111000111111111111111111111111111100000001111111111111111111111110000111111111111111111111111111111",
+			"111111111000111111111111111111111111111100000011111111111111111111111110001111111111111111111111111111111",
+			"111111111000111111111111111111111111111110000111111111111111111111111100001111111111111111111111111111111",
+			"111111111000111111111111111111111111111110001111111111111111111111111100000011111111111111111111111111111",
+			"111111111000111111111111111111111111111110001111111111111111111111111100000001111111111111111111111111111",
+			"111111111000111111111111111111111111111100001111111111111111111111111000000001111111111111111111111111111",
+			"111111111000111111111111111111111111111100001111111111111111111111110000000011111111111111111111111111111",
+			"111111110000111111110000000000001111111000000111111111111111111111100000000001111111111111111111111111111",
+			"111111110000000000000000000000000000000000001111111111111111111111000000000001111111111111111111111111111",
+			"111111110000000000000000000000000000000000001111111111111111111111000000000011111111111111111111111111111",
+			"111111110000000000000000000000000000000000011111111111111111111110000000000111111111111111111111111111111",
+			"111111110000000000000000000000000000000000111111111111111111111110000000000111111111111111111111111111111",
+			"111111000000000001100000000000000000000001111111111111111111111110000000001111111111111111111111111111111",
+			"111000000000001111111111111100000000000011111111111111111111111111000000001111111111111111111111111111111",
+			"100000000000011111111111111111000000000011111111111111111111111111110000001111111111111111111111111111111",
+			"100000000001111111111111111111100000000111111111111111111111111111111100001111111111111111111111111111111",
+			"100000000011111111111111111111110000001111111111111111111111111111111111001111111111111111111111111111111",
+			"110000000111111111111111111111111011111111111111111111111111111111111111111111111111111111111111111111111",
+			"111000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+			"111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
+		],
+		"bounds": {
+			"width": 2100,
+			"height": 2020
+		},
+		"arte": {
+			"escala": .8,
+			"x": -162.4,
+			"y": -304.8
+		},
+		"spawnPoint": {
+			"x": 330,
+			"y": 1330
+		},
+		"spawnOrigem": "amarelo",
+		"spawnInimigo": {
+			"x": 590,
+			"y": 1330
+		}
 	}
 };
 //#endregion
@@ -26963,7 +31010,7 @@ var LOOT = {
 	]
 };
 var ARTE = {
-	dojo: "assets/hunt-backgrounds/dojo.png",
+	dojo: "assets/hunt-backgrounds/dojo.jpg",
 	planicie: "assets/hunt-backgrounds/plains.jpg",
 	campina: "assets/hunt-backgrounds/meadow.jpg",
 	vilarejo: "assets/hunt-backgrounds/town.jpg",
@@ -26984,12 +31031,12 @@ var ARTE = {
 	montanha: "assets/hunt-backgrounds/mountain.jpg",
 	cavernaVulcanica: "assets/hunt-backgrounds/cave-volcanic.jpg",
 	cavernaDeGelo: "assets/hunt-backgrounds/ice-cave.jpg",
-	montanhaDeGelo: "assets/hunt-backgrounds/ice-mountain.png",
+	montanhaDeGelo: "assets/hunt-backgrounds/ice-mountain.jpg",
 	vulcao: "assets/hunt-backgrounds/volcano.jpg",
 	obra: "assets/hunt-backgrounds/construction-site.jpg",
 	industrial: "assets/hunt-backgrounds/industrial.jpg",
 	ruinas: "assets/hunt-backgrounds/ruins.jpg",
-	temploMistico: "assets/hunt-backgrounds/temple.png",
+	temploMistico: "assets/hunt-backgrounds/temple.jpg",
 	grutaFeerica: "assets/hunt-backgrounds/fairy-cave.jpg",
 	florestaQueimada: "assets/hunt-backgrounds/burnt-forest.jpg",
 	abismo: "assets/hunt-backgrounds/abyss.jpg"
@@ -27482,6 +31529,8 @@ var SUB_BIOMA_ESPECIES = {
 		"gastly",
 		"haunter",
 		"gengar",
+		"crobat",
+		"umbreon",
 		"misdreavus",
 		"dunsparce",
 		"houndour",
@@ -27507,9 +31556,11 @@ var SUB_BIOMA_ESPECIES = {
 	],
 	"beach": [
 		"shellder",
+		"cloyster",
 		"krabby",
 		"kingler",
-		"staryu"
+		"staryu",
+		"starmie"
 	],
 	"cave": [
 		"zubat",
@@ -27520,6 +31571,7 @@ var SUB_BIOMA_ESPECIES = {
 		"graveler",
 		"golem",
 		"onix",
+		"crobat",
 		"steelix",
 		"teddiursa",
 		"ursaring"
@@ -27558,7 +31610,8 @@ var SUB_BIOMA_ESPECIES = {
 		"primeape",
 		"hitmonlee",
 		"hitmonchan",
-		"tyrogue"
+		"tyrogue",
+		"hitmontop"
 	],
 	"factory": [
 		"machop",
@@ -27574,7 +31627,14 @@ var SUB_BIOMA_ESPECIES = {
 		"magby"
 	],
 	"fairy-cave": [
+		"clefairy",
+		"clefable",
 		"jigglypuff",
+		"wigglytuff",
+		"cleffa",
+		"igglybuff",
+		"togepi",
+		"togetic",
 		"marill",
 		"azumarill"
 	],
@@ -27593,6 +31653,7 @@ var SUB_BIOMA_ESPECIES = {
 		"weepinbell",
 		"victreebel",
 		"exeggcute",
+		"exeggutor",
 		"scyther",
 		"hoothoot",
 		"noctowl",
@@ -27633,6 +31694,7 @@ var SUB_BIOMA_ESPECIES = {
 		"dewgong",
 		"jynx",
 		"lapras",
+		"slowking",
 		"sneasel",
 		"swinub",
 		"piloswine",
@@ -27641,6 +31703,7 @@ var SUB_BIOMA_ESPECIES = {
 	],
 	"jungle": [
 		"exeggcute",
+		"exeggutor",
 		"tangela",
 		"kangaskhan",
 		"scyther",
@@ -27670,18 +31733,22 @@ var SUB_BIOMA_ESPECIES = {
 		"seaking",
 		"magikarp",
 		"gyarados",
+		"vaporeon",
 		"marill",
 		"azumarill",
 		"wooper",
-		"quagsire"
+		"quagsire",
+		"slowking"
 	],
 	"meadow": [
 		"jigglypuff",
+		"wigglytuff",
 		"ponyta",
 		"rapidash",
 		"tauros",
 		"ledyba",
 		"ledian",
+		"igglybuff",
 		"mareep",
 		"flaaffy",
 		"ampharos",
@@ -27693,7 +31760,9 @@ var SUB_BIOMA_ESPECIES = {
 		"rattata",
 		"raticate",
 		"pikachu",
+		"raichu",
 		"ditto",
+		"pichu",
 		"houndour",
 		"houndoom",
 		"smeargle"
@@ -27729,6 +31798,7 @@ var SUB_BIOMA_ESPECIES = {
 		"spearow",
 		"fearow",
 		"pikachu",
+		"raichu",
 		"zubat",
 		"golbat",
 		"meowth",
@@ -27746,15 +31816,20 @@ var SUB_BIOMA_ESPECIES = {
 		"snorlax",
 		"sentret",
 		"furret",
+		"crobat",
+		"pichu",
 		"dunsparce"
 	],
 	"power-plant": [
 		"pikachu",
+		"raichu",
 		"magnemite",
 		"magneton",
 		"voltorb",
 		"electrode",
 		"electabuzz",
+		"jolteon",
+		"pichu",
 		"mareep",
 		"flaaffy",
 		"ampharos",
@@ -27768,34 +31843,38 @@ var SUB_BIOMA_ESPECIES = {
 		"hypno",
 		"natu",
 		"xatu",
+		"espeon",
 		"unown",
 		"wobbuffet"
 	],
 	"sea": [
 		"poliwag",
 		"poliwhirl",
+		"poliwrath",
 		"tentacool",
 		"tentacruel",
 		"slowpoke",
 		"slowbro",
 		"shellder",
+		"cloyster",
 		"horsea",
 		"seadra",
 		"goldeen",
 		"seaking",
 		"staryu",
+		"starmie",
 		"magikarp",
 		"gyarados",
 		"lapras",
 		"chinchou",
 		"lanturn",
-		"politoed",
 		"kingdra"
 	],
 	"seabed": [
 		"tentacool",
 		"tentacruel",
 		"shellder",
+		"cloyster",
 		"omanyte",
 		"omastar",
 		"kabuto",
@@ -27833,7 +31912,13 @@ var SUB_BIOMA_ESPECIES = {
 		"delibird",
 		"stantler"
 	],
-	"space": ["staryu", "cleffa"],
+	"space": [
+		"clefairy",
+		"clefable",
+		"staryu",
+		"starmie",
+		"cleffa"
+	],
 	"swamp": [
 		"ekans",
 		"arbok",
@@ -27841,6 +31926,7 @@ var SUB_BIOMA_ESPECIES = {
 		"golduck",
 		"poliwag",
 		"poliwhirl",
+		"poliwrath",
 		"totodile",
 		"croconaw",
 		"feraligatr",
@@ -27857,6 +31943,7 @@ var SUB_BIOMA_ESPECIES = {
 		"nidoking",
 		"oddish",
 		"gloom",
+		"vileplume",
 		"paras",
 		"parasect",
 		"venonat",
@@ -27868,6 +31955,7 @@ var SUB_BIOMA_ESPECIES = {
 		"meganium",
 		"spinarak",
 		"ariados",
+		"bellossom",
 		"girafarig",
 		"scizor"
 	],
@@ -27896,12 +31984,21 @@ var SUB_BIOMA_ESPECIES = {
 		"fearow",
 		"ekans",
 		"arbok",
+		"pikachu",
+		"raichu",
 		"nidoran_f",
 		"nidorina",
+		"nidoqueen",
 		"nidoran_m",
 		"nidorino",
+		"nidoking",
+		"clefairy",
+		"clefable",
+		"jigglypuff",
+		"wigglytuff",
 		"oddish",
 		"gloom",
+		"vileplume",
 		"paras",
 		"parasect",
 		"venonat",
@@ -27913,6 +32010,7 @@ var SUB_BIOMA_ESPECIES = {
 		"alakazam",
 		"bellsprout",
 		"weepinbell",
+		"victreebel",
 		"ditto",
 		"sentret",
 		"furret",
@@ -27926,6 +32024,7 @@ var SUB_BIOMA_ESPECIES = {
 		"cleffa",
 		"igglybuff",
 		"togepi",
+		"togetic",
 		"hoppip",
 		"skiploom",
 		"jumpluff",
@@ -27940,6 +32039,7 @@ var SUB_BIOMA_ESPECIES = {
 		"ponyta",
 		"rapidash",
 		"magmar",
+		"flareon",
 		"cyndaquil",
 		"quilava",
 		"typhlosion",
@@ -27956,6 +32056,107 @@ var SUB_BIOMA_ESPECIES = {
 		"pupitar",
 		"tyranitar"
 	]
+};
+/**
+* Grafo de vizinhanca do PokeRogue: peso `n` = 1/n de chance de o vizinho
+* APARECER como opcao (depois ele sorteia uniforme entre as que apareceram).
+*
+* NAO e usado pelo jogo hoje. Fica guardado porque e a fundacao do modo
+* Expedicao, e o parser que extrai isso ja esta escrito.
+*/
+/**
+* Pesos de clima de cada sub-bioma (PH-140), do `weatherPool` do PokeRogue.
+* Sorteado UMA vez ao entrar na sala; `limpo` e um resultado como outro
+* qualquer, nao a ausencia de tabela.
+*
+* E o unico dado de PROBABILIDADE de clima que existe: os jogos principais
+* fixam o clima por rota (Rota 119 sempre chove) e nunca sortearam nada.
+*/
+var SUB_BIOMA_CLIMA = {
+	"abyss": { limpo: 1 },
+	"badlands": {
+		limpo: 8,
+		areia: 2,
+		sol: 5
+	},
+	"beach": {
+		limpo: 8,
+		chuva: 3,
+		sol: 5
+	},
+	"cave": { limpo: 1 },
+	"construction-site": { limpo: 1 },
+	"desert": {
+		limpo: 2,
+		areia: 8,
+		sol: 5
+	},
+	"dojo": { limpo: 1 },
+	"factory": { limpo: 1 },
+	"fairy-cave": { limpo: 1 },
+	"forest": {
+		limpo: 8,
+		chuva: 4
+	},
+	"grass": {
+		limpo: 8,
+		chuva: 4,
+		sol: 8
+	},
+	"graveyard": {
+		limpo: 3,
+		nevoa: 1
+	},
+	"ice-cave": {
+		limpo: 3,
+		neve: 4,
+		granizo: 1
+	},
+	"jungle": {
+		limpo: 8,
+		chuva: 6,
+		nevoa: 1
+	},
+	"laboratory": { limpo: 1 },
+	"lake": {
+		limpo: 10,
+		chuva: 4,
+		nevoa: 1
+	},
+	"meadow": {
+		limpo: 3,
+		sol: 5
+	},
+	"metropolis": { limpo: 1 },
+	"mountain": { limpo: 1 },
+	"plains": { limpo: 1 },
+	"power-plant": { limpo: 1 },
+	"ruins": { limpo: 1 },
+	"sea": {
+		limpo: 3,
+		chuva: 12
+	},
+	"seabed": { chuva: 1 },
+	"slum": { limpo: 1 },
+	"snowy-forest": {
+		neve: 7,
+		granizo: 1
+	},
+	"space": { limpo: 1 },
+	"swamp": {
+		limpo: 3,
+		chuva: 4,
+		nevoa: 1
+	},
+	"tall-grass": {
+		limpo: 8,
+		chuva: 4,
+		sol: 4
+	},
+	"temple": { limpo: 1 },
+	"town": { limpo: 1 },
+	"volcano": { sol: 1 },
+	"wasteland": { limpo: 1 }
 };
 //#endregion
 //#region src/data/generated/spawnTiers.generated.ts
@@ -28219,17 +32420,17 @@ var TYPE_BACKGROUND_IMAGE = {
 	WATER: "assets/hunt-backgrounds/sea.jpg",
 	GRASS: "assets/hunt-backgrounds/forest.jpg",
 	ROCK: "assets/hunt-backgrounds/mountain.jpg",
-	FIGHTING: "assets/hunt-backgrounds/dojo.png",
+	FIGHTING: "assets/hunt-backgrounds/dojo.jpg",
 	ELECTRIC: "assets/hunt-backgrounds/industrial.jpg",
-	DRAGON: "assets/hunt-backgrounds/dragon.png",
+	DRAGON: "assets/hunt-backgrounds/dragon.jpg",
 	BUG: "assets/hunt-backgrounds/jungle.jpg",
 	NORMAL: "assets/hunt-backgrounds/plains.jpg",
 	POISON: "assets/hunt-backgrounds/swamp.jpg",
 	FLYING: "assets/hunt-backgrounds/mountain.jpg",
 	GROUND: "assets/hunt-backgrounds/desert.jpg",
-	ICE: "assets/hunt-backgrounds/ice-mountain.png",
+	ICE: "assets/hunt-backgrounds/ice-mountain.jpg",
 	STEEL: "assets/hunt-backgrounds/construction-site.jpg",
-	PSYCHIC: "assets/hunt-backgrounds/temple.png",
+	PSYCHIC: "assets/hunt-backgrounds/temple.jpg",
 	GHOST: "assets/hunt-backgrounds/abyss.jpg",
 	DARK: "assets/hunt-backgrounds/burnt-forest.jpg",
 	FAIRY: "assets/hunt-backgrounds/fairy-cave.jpg"
@@ -28436,7 +32637,7 @@ function buildLanceHunt() {
 			unlocksContinentOnClear: GRUPOS_DO_LANCE,
 			startCountdown: 5,
 			keepCorpses: true,
-			respawnDelay: 3,
+			respawnDelay: 2,
 			spawnPoints: [{
 				x: 700,
 				y: 450
@@ -28499,7 +32700,7 @@ var TRAINING_MAP = {
 	bg: {
 		primary: "#2c2f3a",
 		secondary: "#3a3f52",
-		image: "assets/hunt-backgrounds/dojo.png"
+		image: "assets/hunt-backgrounds/dojo.jpg"
 	},
 	maxEnemies: 1,
 	respawnDelay: 2,
@@ -28516,7 +32717,7 @@ var TRAINING_MAP = {
 //#endregion
 //#region src/data/evolutionStage.ts
 var PRE_EVOLUCAO$1 = {};
-for (const especie of Object.values(SPECIES)) if (especie.evolvesTo && SPECIES[especie.evolvesTo]) PRE_EVOLUCAO$1[especie.evolvesTo] = especie.id;
+for (const especie of Object.values(SPECIES)) for (const opcao of opcoesDeEvolucao(especie)) if (SPECIES[opcao.to]) PRE_EVOLUCAO$1[opcao.to] = especie.id;
 var PROFUNDIDADE_MAXIMA = 10;
 var CACHE = {};
 /** 1 = forma base, 2 = primeira evolucao, 3+ = segunda evolucao em diante. */
@@ -28612,8 +32813,21 @@ var STARTER_LEVEL_WEIGHTS = [{
 var DEFAULT_WEIGHT = 10;
 var PRE_EVOLUCAO = {};
 for (const especie of Object.values(SPECIES)) if (especie.evolvesTo && SPECIES[especie.evolvesTo]) PRE_EVOLUCAO[especie.evolvesTo] = especie.id;
-function primeiroNivelDaZona(zona) {
-	return (FAIXAS$1.find((f) => zona <= f.zonaMaxima) ?? FAIXAS$1[FAIXAS$1.length - 1]).niveis[0];
+/**
+* Em que FAIXA uma zona minima cai — o indice, nao a faixa, porque quem chama
+* precisa poder pedir "a seguinte".
+*
+* Zona acima de toda `zonaMaxima` devolve o indice da ultima faixa: e o topo do
+* jogo, nao ha mais pra onde empurrar.
+*/
+function indiceDeFaixa(zona) {
+	const i = FAIXAS$1.findIndex((f) => zona <= f.zonaMaxima);
+	return i === -1 ? FAIXAS$1.length - 1 : i;
+}
+/** A faixa que contem este nivel. Nivel acima da ultima cai na ultima. */
+function indiceDeFaixaPorNivel(nivel) {
+	const i = FAIXAS$1.findIndex((f) => nivel <= f.niveis[1]);
+	return i === -1 ? FAIXAS$1.length - 1 : i;
 }
 /**
 * A partir de que nivel `speciesId` deixa de ser o estagio correto da linha.
@@ -28627,11 +32841,17 @@ function primeiroNivelDaZona(zona) {
 * forma evoluida aparece a partir da primeira faixa que a zona minima dela
 * alcanca.
 */
-function nivelDeTroca(speciesId) {
+function nivelDeTroca(speciesId, desde) {
 	const especie = SPECIES[speciesId];
 	const alvo = especie?.evolvesTo;
 	if (!alvo || !SPECIES[alvo]) return null;
-	if (especie.isSpecialEvolution) return primeiroNivelDaZona(Math.max(zonaMinimaDaEspecie(alvo), zonaMinimaDaEspecie(speciesId) + 1));
+	if (especie.isSpecialEvolution) {
+		const daOrigem = Math.max(indiceDeFaixaPorNivel(desde), indiceDeFaixa(zonaMinimaDaEspecie(speciesId)));
+		const doAlvo = indiceDeFaixa(zonaMinimaDaEspecie(alvo));
+		const indice = Math.max(doAlvo, daOrigem + 1);
+		if (indice >= FAIXAS$1.length) return null;
+		return FAIXAS$1[indice].niveis[0];
+	}
 	return especie.evolvesAtLevel ?? null;
 }
 /** Raizes das linhas evolutivas presentes em `especies`, sem duplicar. */
@@ -28659,7 +32879,7 @@ function trechosDaLinha(raiz, faixa, elenco) {
 	let atual = raiz;
 	let desde = 1;
 	for (let i = 0; i < 10 && atual; i++) {
-		const troca = nivelDeTroca(atual);
+		const troca = nivelDeTroca(atual, desde);
 		const ate = troca == null ? Number.POSITIVE_INFINITY : troca - 1;
 		const min = Math.max(lo, desde);
 		const max = Math.min(hi, ate);
@@ -28788,21 +33008,14 @@ var ENCOUNTERS = {
 //#endregion
 //#region src/data/maps.ts
 var RESPAWN_DELAY_MULTIPLIER = createFormulaEngine(FORMULAS).evalOrDefault("MOB_RESPAWN_DELAY_MULTIPLIER", .25);
-var WATER_HUNT_IDS = new Set(["marinho", "aguas_interiores"].flatMap((bioma) => FAIXAS$1.map((faixa) => huntId(bioma, faixa.id))));
 function getMap(id) {
 	const map = MAPS[id];
 	if (!map) return null;
-	if (WATER_HUNT_IDS.has(id)) return {
-		...map,
-		respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER,
-		collisionGrid: WATER_COLLISION_GRID,
-		playerSpawn: WATER_SPAWN_POINT
-	};
-	const collisionGrid = null;
+	const atraso = map.sequence ? map.respawnDelay : map.respawnDelay * RESPAWN_DELAY_MULTIPLIER;
 	return {
 		...map,
-		respawnDelay: map.respawnDelay * RESPAWN_DELAY_MULTIPLIER,
-		collisionGrid
+		respawnDelay: atraso,
+		collisionGrid: null
 	};
 }
 /**
@@ -28852,6 +33065,7 @@ function mapDefParaSala(mapId, sala) {
 	if (!pintada) return map;
 	return {
 		...map,
+		bounds: pintada.bounds,
 		collisionGrid: pintada.grid,
 		colisaoDefineLimite: true
 	};
@@ -28867,11 +33081,28 @@ function spawnPointParaSala(mapId, sala) {
 	const arte = backgroundParaSala(map, sala).image;
 	return (arte ? COLISAO_POR_ARTE[arte]?.spawnPoint : void 0) ?? null;
 }
+/**
+* Por onde entra o POKE do lado INIMIGO nesta cena — o circulo VERDE pintado,
+* irmao do amarelo que `spawnPointParaSala` devolve. So as arenas de duelo
+* (dojo, dragon) tem; toda outra arte devolve `null` e quem chama cai no
+* sorteio de sempre.
+*
+* Existe separado, e nao como mais um campo de `mapDef`, pelo mesmo motivo do
+* spawn do jogador: o ponto e propriedade do DESENHO, entao a arena do Lance,
+* o espelho do Modo Pesadelo e a hunt de Treinamento herdam o mesmo ponto sem
+* ninguem precisar cadastrar nada em tres lugares.
+*/
+function spawnInimigoParaSala(mapId, sala) {
+	const map = getMap(mapId);
+	if (!map) return null;
+	const arte = backgroundParaSala(map, sala).image;
+	return (arte ? COLISAO_POR_ARTE[arte]?.spawnInimigo : void 0) ?? null;
+}
 function isCellBlocked(mapDef, x, y) {
 	const grid = mapDef.collisionGrid;
 	if (!grid) return false;
-	const col = Math.floor(x / 40);
-	const row = Math.floor(y / 40);
+	const col = Math.floor(x / 20);
+	const row = Math.floor(y / 20);
 	if (row < 0 || row >= grid.length || col < 0 || col >= grid[0].length) return Boolean(mapDef.colisaoDefineLimite);
 	return grid[row][col] === "1";
 }
@@ -28898,16 +33129,16 @@ function nearestOpenPoint(mapDef, x, y) {
 		y
 	};
 	const cols = grid[0].length, rows = grid.length;
-	const startCol = Math.floor(x / 40);
-	const startRow = Math.floor(y / 40);
+	const startCol = Math.floor(x / 20);
+	const startRow = Math.floor(y / 20);
 	const maxRadius = Math.max(cols, rows);
 	for (let radius = 0; radius <= maxRadius; radius++) for (let dr = -radius; dr <= radius; dr++) for (let dc = -radius; dc <= radius; dc++) {
 		if (Math.max(Math.abs(dr), Math.abs(dc)) !== radius) continue;
 		const c = startCol + dc, r = startRow + dr;
 		if (r < 0 || r >= rows || c < 0 || c >= cols) continue;
 		if (grid[r][c] === "0") return {
-			x: c * 40 + 20,
-			y: r * 40 + 20
+			x: c * 20 + 10,
+			y: r * 20 + 10
 		};
 	}
 	return null;
@@ -29540,6 +33771,7 @@ function formatStatGains(gains) {
 	if (!gains) return "";
 	return STAT_ORDER.filter((key) => (gains[key] ?? 0) > 0).map((key) => `+${gains[key]} ${STAT_LABEL[key]}`).join(", ");
 }
+STAT_LABEL.atkFis, STAT_LABEL.atkEsp, STAT_LABEL.def, STAT_LABEL.defEsp, STAT_LABEL.speed;
 //#endregion
 //#region src/data/spriteFootOffsets.ts
 var FOOT_OFFSET_FRACTION = {
@@ -29768,7 +34000,26 @@ var FOOT_OFFSET_FRACTION = {
 	politoed: .078,
 	golem: .125,
 	porygon2: .125,
-	scizor: .125
+	scizor: .125,
+	vileplume: .125,
+	bellossom: .219,
+	exeggutor: .089,
+	poliwrath: .104,
+	slowking: .104,
+	cloyster: .125,
+	starmie: .125,
+	wigglytuff: .104,
+	vaporeon: .125,
+	jolteon: .175,
+	flareon: .15,
+	espeon: .125,
+	umbreon: .146,
+	raichu: .089,
+	crobat: -.071,
+	hitmontop: .089,
+	clefairy: .125,
+	togetic: .104,
+	clefable: .104
 };
 var DEFAULT_FRACTION = .15;
 function footOffsetFraction(speciesId) {
@@ -29979,7 +34230,7 @@ function findEntityById(player, enemies, id) {
 //#endregion
 //#region src/engine/effect.ts
 function createWorldEffect(counters, params) {
-	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, abilityId, anguloDeAtaque, ballItemId, success, statusDirection } = params;
+	const { type, x, y, targetX, targetY, radius = 10, color = "#fff", duration = .25, delay = 0, value, effectiveness, effectivenessLabel, isCrit, text, unit, isAoe, owner = null, laneSize = 1, worldSize, elementType, abilityId, anguloDeAtaque, ballItemId, success, statusDirection, seguir = null, apontarPara = null } = params;
 	const id = `effect-${counters.effect++}`;
 	const lane = owner ? claimEffectLane(owner, id, laneSize) : 0;
 	return {
@@ -29997,6 +34248,7 @@ function createWorldEffect(counters, params) {
 		value,
 		effectiveness,
 		effectivenessLabel: effectivenessLabel ?? void 0,
+		isCrit,
 		text,
 		unit,
 		isAoe,
@@ -30009,8 +34261,54 @@ function createWorldEffect(counters, params) {
 		statusDirection,
 		laneSize,
 		ownerId: owner ? owner.id : null,
-		lane
+		lane,
+		seguirId: seguir ? seguir.id : void 0,
+		seguirUltimoX: seguir ? seguir.x : void 0,
+		seguirUltimoY: seguir ? seguir.y : void 0,
+		apontarParaId: apontarPara ? apontarPara.id : void 0
 	};
+}
+/**
+* Reaponta o rastro pra entidade que disparou o golpe (PH-110).
+*
+* Arte DIRECIONAL e um risco que LIGA atacante e alvo: a faisca de impacto fica
+* em cima do alvo e o rastro se estende de volta pra quem bateu. Com o angulo
+* congelado no instante do hit, o atacante andar durante o ~1s de animacao
+* descola o rastro do punho dele — foi o que o Bullet Punch mostrou, que e o
+* pior caso do lote (rastro horizontal de 84px recortado pra 37px, exatamente a
+* distancia de combate).
+*
+* Congelar continua valendo pra arte NAO direcional: quem nao e direcional
+* nunca recebe `apontarParaId`, entao nem chega aqui. O gate e na criacao, e nao
+* neste laco, pra o resto do jogo ficar byte a byte igual.
+*
+* `atacante` nulo (morreu, saiu do mundo) deixa o ultimo angulo valido no lugar:
+* girar a arte pra um ponto que nao existe mais seria pior que nao girar.
+*/
+function reapontarParaAtacante(effect, atacante) {
+	if (!effect.apontarParaId || !atacante) return;
+	const dx = effect.x - atacante.x;
+	const dy = effect.y - atacante.y;
+	if (dx === 0 && dy === 0) return;
+	effect.anguloDeAtaque = Math.atan2(dy, dx);
+}
+/**
+* Arrasta o efeito pelo deslocamento da entidade que ele acompanha desde o tick
+* anterior. Chamado do laco de efeitos junto do `tickEffect`; `entidade` nula
+* (POKE morreu, inimigo saiu do mundo) deixa o efeito parado onde estava, que e
+* melhor do que sumir com ele ou joga-lo pra origem do mundo.
+*/
+function seguirDono(effect, entidade) {
+	if (!effect.seguirId || !entidade) return;
+	const dx = entidade.x - (effect.seguirUltimoX ?? entidade.x);
+	const dy = entidade.y - (effect.seguirUltimoY ?? entidade.y);
+	effect.seguirUltimoX = entidade.x;
+	effect.seguirUltimoY = entidade.y;
+	if (dx === 0 && dy === 0) return;
+	effect.x += dx;
+	effect.y += dy;
+	if (effect.targetX !== void 0) effect.targetX += dx;
+	if (effect.targetY !== void 0) effect.targetY += dy;
 }
 function effectDone(effect) {
 	return effect.age >= effect.delay + effect.duration;
@@ -30030,16 +34328,97 @@ var NEIGHBORS = [
 	[-1, 1],
 	[-1, -1]
 ];
-var MAX_EXPANSIONS = 4e3;
-function cellKey(col, row) {
-	return `${col},${row}`;
+function tetoDeExpansoes(grid) {
+	return grid.length * grid[0].length * 2;
+}
+var HeapDeCelulas = class {
+	celula = [];
+	f = [];
+	ordem = [];
+	tamanho = 0;
+	get vazio() {
+		return this.tamanho === 0;
+	}
+	limpar() {
+		this.tamanho = 0;
+	}
+	/** `ordem` e o desempate: menor primeiro, igual a ordem de iteracao do Map. */
+	inserir(celula, f, ordem) {
+		let i = this.tamanho++;
+		this.celula[i] = celula;
+		this.f[i] = f;
+		this.ordem[i] = ordem;
+		while (i > 0) {
+			const pai = i - 1 >> 1;
+			if (!this.menor(i, pai)) break;
+			this.trocar(i, pai);
+			i = pai;
+		}
+	}
+	/** Remove e devolve a celula de menor (f, ordem). `-1` quando vazio. */
+	remover() {
+		if (this.tamanho === 0) return -1;
+		const topo = this.celula[0];
+		this.tamanho -= 1;
+		if (this.tamanho > 0) {
+			this.celula[0] = this.celula[this.tamanho];
+			this.f[0] = this.f[this.tamanho];
+			this.ordem[0] = this.ordem[this.tamanho];
+			let i = 0;
+			for (;;) {
+				const esq = i * 2 + 1;
+				const dir = esq + 1;
+				let menor = i;
+				if (esq < this.tamanho && this.menor(esq, menor)) menor = esq;
+				if (dir < this.tamanho && this.menor(dir, menor)) menor = dir;
+				if (menor === i) break;
+				this.trocar(i, menor);
+				i = menor;
+			}
+		}
+		return topo;
+	}
+	menor(a, b) {
+		if (this.f[a] !== this.f[b]) return this.f[a] < this.f[b];
+		return this.ordem[a] < this.ordem[b];
+	}
+	trocar(a, b) {
+		let t = this.celula[a];
+		this.celula[a] = this.celula[b];
+		this.celula[b] = t;
+		t = this.f[a];
+		this.f[a] = this.f[b];
+		this.f[b] = t;
+		t = this.ordem[a];
+		this.ordem[a] = this.ordem[b];
+		this.ordem[b] = t;
+	}
+};
+var heap = new HeapDeCelulas();
+var gScore = /* @__PURE__ */ new Float64Array(0);
+var cameFrom = /* @__PURE__ */ new Int32Array(0);
+var ordemDeEntrada = /* @__PURE__ */ new Int32Array(0);
+var visitadoEm = /* @__PURE__ */ new Int32Array(0);
+var fechadoEm = /* @__PURE__ */ new Int32Array(0);
+var buscaAtual = 0;
+function prepararEstado(celulas) {
+	if (gScore.length < celulas) {
+		gScore = new Float64Array(celulas);
+		cameFrom = new Int32Array(celulas);
+		ordemDeEntrada = new Int32Array(celulas);
+		visitadoEm = new Int32Array(celulas);
+		fechadoEm = new Int32Array(celulas);
+		buscaAtual = 0;
+	}
+	buscaAtual += 1;
+	heap.limpar();
 }
 function isBlocked(grid, col, row, circle) {
 	if (row < 0 || row >= grid.length || col < 0 || col >= grid[0].length) return true;
 	if (grid[row][col] === "1") return true;
 	if (circle) {
-		const x = col * 40 + 20;
-		const y = row * 40 + 20;
+		const x = col * 20 + 10;
+		const y = row * 20 + 10;
 		if (Math.hypot(x - circle.cx, y - circle.cy) > circle.radius) return true;
 	}
 	return false;
@@ -30047,21 +34426,19 @@ function isBlocked(grid, col, row, circle) {
 function heuristic(col, row, goalCol, goalRow) {
 	return Math.hypot(goalCol - col, goalRow - row);
 }
-function reconstructPath(cameFrom, goalKey, startKey) {
-	const cellPath = [];
-	let key = goalKey;
-	while (key && key !== startKey) {
-		cellPath.push(key);
-		key = cameFrom.get(key);
+function reconstruirRota(destino, inicio, colunas) {
+	const celulas = [];
+	let celula = destino;
+	while (celula !== inicio && celula >= 0) {
+		celulas.push(celula);
+		celula = cameFrom[celula];
 	}
-	cellPath.reverse();
-	return cellPath.map((k) => {
-		const [col, row] = k.split(",").map(Number);
-		return {
-			x: col * 40 + 20,
-			y: row * 40 + 20
-		};
-	});
+	celulas.reverse();
+	const meio = 10;
+	return celulas.map((c) => ({
+		x: c % colunas * 20 + meio,
+		y: Math.floor(c / colunas) * 20 + meio
+	}));
 }
 function findPath(mapDef, startX, startY, goalX, goalY) {
 	const grid = mapDef.collisionGrid;
@@ -30071,46 +34448,57 @@ function findPath(mapDef, startX, startY, goalX, goalY) {
 		cy: mapDef.bounds.height / 2,
 		radius: mapWalkRadius(mapDef)
 	};
-	const toCol = (x) => Math.floor(x / 40);
-	const toRow = (y) => Math.floor(y / 40);
+	const toCol = (x) => Math.floor(x / 20);
+	const toRow = (y) => Math.floor(y / 20);
 	const startCol = toCol(startX), startRow = toRow(startY);
 	const goalCol = toCol(goalX), goalRow = toRow(goalY);
 	if (startCol === goalCol && startRow === goalRow) return [];
 	if (isBlocked(grid, goalCol, goalRow, circle)) return null;
-	const startKey = cellKey(startCol, startRow);
-	const goalKey = cellKey(goalCol, goalRow);
-	const cameFrom = /* @__PURE__ */ new Map();
-	const gScore = /* @__PURE__ */ new Map([[startKey, 0]]);
-	const open = /* @__PURE__ */ new Map([[startKey, heuristic(startCol, startRow, goalCol, goalRow)]]);
-	const closed = /* @__PURE__ */ new Set();
+	const colunas = grid[0].length;
+	const inicio = startRow * colunas + startCol;
+	const destino = goalRow * colunas + goalCol;
+	prepararEstado(grid.length * colunas);
+	const selo = buscaAtual;
+	gScore[inicio] = 0;
+	visitadoEm[inicio] = selo;
+	cameFrom[inicio] = -1;
+	let proximaOrdem = 0;
+	ordemDeEntrada[inicio] = proximaOrdem++;
+	heap.inserir(inicio, heuristic(startCol, startRow, goalCol, goalRow), ordemDeEntrada[inicio]);
+	const maxExpansions = tetoDeExpansoes(grid);
 	let expansions = 0;
-	while (open.size > 0) {
-		if (++expansions > MAX_EXPANSIONS) return null;
-		let currentKey = null;
-		let bestF = Infinity;
-		for (const [key, f] of open) if (f < bestF) {
-			bestF = f;
-			currentKey = key;
+	while (!heap.vazio) {
+		const atual = heap.remover();
+		if (fechadoEm[atual] === selo) continue;
+		if (++expansions > maxExpansions) return null;
+		if (atual === destino) {
+			const rota = reconstruirRota(destino, inicio, colunas);
+			if (rota.length > 0) rota[rota.length - 1] = {
+				x: goalX,
+				y: goalY
+			};
+			return rota;
 		}
-		if (!currentKey) break;
-		open.delete(currentKey);
-		if (currentKey === goalKey) return reconstructPath(cameFrom, goalKey, startKey).map((wp, i, arr) => i === arr.length - 1 ? {
-			x: goalX,
-			y: goalY
-		} : wp);
-		closed.add(currentKey);
-		const [curCol, curRow] = currentKey.split(",").map(Number);
+		fechadoEm[atual] = selo;
+		const curCol = atual % colunas;
+		const curRow = (atual - curCol) / colunas;
+		const gAtual = gScore[atual];
 		for (const [dc, dr] of NEIGHBORS) {
 			const nCol = curCol + dc, nRow = curRow + dr;
-			const nKey = cellKey(nCol, nRow);
-			if (closed.has(nKey) || isBlocked(grid, nCol, nRow, circle)) continue;
+			if (isBlocked(grid, nCol, nRow, circle)) continue;
+			const vizinho = nRow * colunas + nCol;
+			if (fechadoEm[vizinho] === selo) continue;
 			if (dc !== 0 && dr !== 0 && (isBlocked(grid, curCol + dc, curRow, circle) || isBlocked(grid, curCol, curRow + dr, circle))) continue;
-			const stepCost = dc !== 0 && dr !== 0 ? Math.SQRT2 : 1;
-			const tentativeG = (gScore.get(currentKey) ?? Infinity) + stepCost;
-			if (tentativeG < (gScore.get(nKey) ?? Infinity)) {
-				cameFrom.set(nKey, currentKey);
-				gScore.set(nKey, tentativeG);
-				open.set(nKey, tentativeG + heuristic(nCol, nRow, goalCol, goalRow));
+			const tentativeG = gAtual + (dc !== 0 && dr !== 0 ? Math.SQRT2 : 1);
+			const novo = visitadoEm[vizinho] !== selo;
+			if (novo || tentativeG < gScore[vizinho]) {
+				if (novo) {
+					visitadoEm[vizinho] = selo;
+					ordemDeEntrada[vizinho] = proximaOrdem++;
+				}
+				cameFrom[vizinho] = atual;
+				gScore[vizinho] = tentativeG;
+				heap.inserir(vizinho, tentativeG + heuristic(nCol, nRow, goalCol, goalRow), ordemDeEntrada[vizinho]);
 			}
 		}
 	}
@@ -30329,36 +34717,47 @@ var TRAIT_IMUNE_A_DANO_DE_CLIMA = /* @__PURE__ */ new Set([
 	"overcoat",
 	"magic_guard"
 ]);
-/** Fracao do HP MAXIMO curada por turno no clima certo. */
+/**
+* Fracao do HP MAXIMO curada por turno no clima certo.
+*
+* LISTA de climas, e nao um so (PH-140): Ice Body cura tanto no GRANIZO quanto
+* na NEVE, e nos jogos e a mesma habilidade — a Gen 9 trocou o clima de gelo e
+* levou junto tudo que dependia dele. Um campo unico obrigaria a escolher um
+* dos dois e deixaria o outro em silencio.
+*/
 var CURA_POR_CLIMA = {
 	rain_dish: {
-		clima: "chuva",
+		climas: ["chuva"],
 		fracao: 1 / 16
 	},
 	ice_body: {
-		clima: "granizo",
+		climas: ["granizo", "neve"],
 		fracao: 1 / 16
 	},
 	dry_skin: {
-		clima: "chuva",
+		climas: ["chuva"],
 		fracao: 1 / 8
 	}
 };
 /** Fracao do HP MAXIMO PERDIDA por turno no clima certo. */
 var DANO_POR_CLIMA = {
 	dry_skin: {
-		clima: "sol",
+		climas: ["sol"],
 		fracao: 1 / 8
 	},
 	solar_power: {
-		clima: "sol",
+		climas: ["sol"],
 		fracao: 1 / 8
 	}
 };
-/** Evasao 1.25x no clima certo (o que reduz a precisao de quem ataca). */
+/**
+* Evasao 1.25x no clima certo (o que reduz a precisao de quem ataca).
+*
+* Snow Cloak vale nos DOIS climas de gelo, pelo mesmo motivo do Ice Body.
+*/
 var EVASAO_POR_CLIMA = {
-	sand_veil: "areia",
-	snow_cloak: "granizo"
+	sand_veil: ["areia"],
+	snow_cloak: ["granizo", "neve"]
 };
 /** Cloud Nine / Air Lock: o clima continua no campo, mas nao surte efeito. */
 var TRAIT_ANULA_CLIMA = /* @__PURE__ */ new Set(["cloud_nine", "air_lock"]);
@@ -30546,6 +34945,8 @@ function ehGolpeDeSom(abilityId) {
 }
 /** Solar Power: +50% de Ataque Especial sob sol (o custo esta em DANO_POR_CLIMA). */
 var SOLAR_POWER_BONUS = 1.5;
+/** Moxie: +1 de Ataque a cada POKE derrubado. */
+var TRAIT_MOXIE = "moxie";
 /**
 * Habilidades que Trace NAO copia (regra dos jogos — sao as que so fazem
 * sentido no dono original, ou que criariam copia infinita).
@@ -30683,6 +35084,13 @@ function aplicarMudancasDeStat(rng, atacante, alvo, ability) {
 		const depois = Math.max(-6, Math.min(6, antes + delta));
 		if (depois === antes) continue;
 		destino.estagios[mudanca.stat] = depois;
+		registrarFonteDeEstagio(destino, mudanca.stat, {
+			id: ability.id,
+			tipo: "golpe",
+			proprio: destino === atacante,
+			deQuem: SPECIES[atacante.poke.speciesId]?.name ?? atacante.poke.speciesId
+		});
+		esquecerFonteSeZerado(destino, mudanca.stat);
 		aplicadas.push({
 			stat: mudanca.stat,
 			estagios: depois - antes
@@ -30691,7 +35099,12 @@ function aplicarMudancasDeStat(rng, atacante, alvo, ability) {
 	}
 	const reacao = traitDoDestino ? REACAO_A_QUEDA_DE_ESTAGIO[traitDoDestino] : void 0;
 	if (sofreuQuedaDoOponente && reacao) {
-		const subida = aplicarEstagioUnico(destino, reacao.stat, reacao.estagios);
+		const subida = aplicarEstagioUnico(destino, reacao.stat, reacao.estagios, {
+			id: traitDoDestino,
+			tipo: "trait",
+			proprio: true,
+			deQuem: SPECIES[destino.poke.speciesId]?.name ?? destino.poke.speciesId
+		});
 		if (subida) aplicadas.push(subida);
 	}
 	return aplicadas;
@@ -30704,15 +35117,56 @@ function aplicarMudancasDeStat(rng, atacante, alvo, ability) {
 * (StatChange|null, null quando ja no teto/piso) pro chamador decidir se
 * anuncia o toast.
 */
-function aplicarEstagioUnico(alvo, stat, delta) {
+function aplicarEstagioUnico(alvo, stat, delta, fonte) {
 	const antes = alvo.estagios[stat] ?? 0;
 	const depois = Math.max(-6, Math.min(6, antes + delta));
 	if (depois === antes) return null;
 	alvo.estagios[stat] = depois;
+	if (fonte) registrarFonteDeEstagio(alvo, stat, fonte);
+	esquecerFonteSeZerado(alvo, stat);
 	return {
 		stat,
 		estagios: depois - antes
 	};
+}
+/**
+* Procedencia de estagio que veio de uma TRAIT (PH-121).
+*
+* `dono` e quem TEM a trait; `destino` e quem recebe o estagio. Os dois quase
+* sempre coincidem (Speed Boost, Moody, Moxie, Weak Armor, Download), e
+* Intimidate e a excecao que obriga a distinguir: a trait e do atacante e o
+* estagio cai no oponente, entao `proprio` tem que ser `false` ali e o "de quem"
+* tem que apontar pro dono, nao pra quem levou.
+*/
+function fonteDeTrait(dono, trait, destino = dono) {
+	if (!trait) return void 0;
+	return {
+		id: trait,
+		tipo: "trait",
+		proprio: dono === destino,
+		deQuem: SPECIES[dono.poke.speciesId]?.name ?? dono.poke.speciesId
+	};
+}
+/**
+* Anota a procedencia de um estagio (PH-121), deduplicando.
+*
+* DEDUPLICA porque o mesmo golpe do mesmo POKE pode acertar dez vezes na mesma
+* luta, e a lista existe pra responder "quem fez isso", nao "quantas vezes".
+* Sem isto ela cresceria sem teto dentro de uma entidade que vive a luta toda.
+*/
+function registrarFonteDeEstagio(destino, stat, fonte) {
+	const mapa = destino.estagiosFonte ??= {};
+	const lista = mapa[stat] ??= [];
+	if (!lista.some((f) => f.id === fonte.id && f.tipo === fonte.tipo && f.proprio === fonte.proprio && f.deQuem === fonte.deQuem)) lista.push(fonte);
+}
+/**
+* Estagio de volta a 0 nao tem fonte — o selo desapareceu da tela, e manter a
+* lista faria a proxima mudanca daquele atributo aparecer com o historico de uma
+* situacao que ja passou.
+*/
+function esquecerFonteSeZerado(destino, stat) {
+	if ((destino.estagios[stat] ?? 0) !== 0) return;
+	if (destino.estagiosFonte) delete destino.estagiosFonte[stat];
 }
 function aplicarEfeitosDoGolpe(rng, alvo, ability, clima) {
 	const congelado = statusNaoVolatil(alvo);
@@ -30760,6 +35214,7 @@ function curarStatus(entity, tipo) {
 function limparEstadoVolatil(entity) {
 	entity.statusVolatil = null;
 	entity.estagios = {};
+	entity.estagiosFonte = void 0;
 	entity.revelado = void 0;
 	entity.escudos = void 0;
 	entity.imuneAoTipoVolatil = void 0;
@@ -30777,6 +35232,7 @@ function limparEstadoVolatil(entity) {
 	entity.curseDot = void 0;
 	entity.nightmareDot = void 0;
 	entity.regenPercent = void 0;
+	entity.presoAte = void 0;
 	entity.entradaProcessada = false;
 	entity.enduraAtiva = false;
 	entity.protegida = false;
@@ -30827,6 +35283,7 @@ function tickStatus(rng, entity, dt, clima = null) {
 		if (entity.forcedAbilityUntil <= 0) entity.forcedAbilityId = null;
 	}
 	if (entity.tormentedUntil && entity.tormentedUntil > 0) entity.tormentedUntil = Math.max(0, entity.tormentedUntil - dt);
+	if (entity.presoAte && entity.presoAte > 0) entity.presoAte = Math.max(0, entity.presoAte - dt);
 	entity.proximoTurnoDeStatus -= dt;
 	if (entity.proximoTurnoDeStatus > 1e-9) return {
 		dano: 0,
@@ -30862,9 +35319,9 @@ function tickStatus(rng, entity, dt, clima = null) {
 		const especie = SPECIES[entity.poke.speciesId];
 		if (!Boolean(traitDaEntidade && TRAIT_IMUNE_A_DANO_DE_CLIMA.has(traitDaEntidade))) dano += danoDeClimaPorTurno(clima, entity.poke.stats.hp, especie.type, especie.type2);
 		const cura = traitDaEntidade ? CURA_POR_CLIMA[traitDaEntidade] : void 0;
-		if (cura && cura.clima === clima) heal(entity, Math.max(1, Math.round(entity.poke.stats.hp * cura.fracao)));
+		if (cura && clima && cura.climas.includes(clima)) heal(entity, Math.max(1, Math.round(entity.poke.stats.hp * cura.fracao)));
 		const custo = traitDaEntidade ? DANO_POR_CLIMA[traitDaEntidade] : void 0;
-		if (custo && custo.clima === clima) dano += Math.max(1, Math.round(entity.poke.stats.hp * custo.fracao));
+		if (custo && clima && custo.climas.includes(clima)) dano += Math.max(1, Math.round(entity.poke.stats.hp * custo.fracao));
 	}
 	if (traitDaEntidade && entity.poke.status) {
 		const curaPorHydration = traitDaEntidade === "hydration" && clima === "chuva";
@@ -30874,7 +35331,7 @@ function tickStatus(rng, entity, dt, clima = null) {
 			entity.poke.status = null;
 		}
 	}
-	if (traitDaEntidade === "speed_boost") aplicarEstagioUnico(entity, "speed", 1);
+	if (traitDaEntidade === "speed_boost") aplicarEstagioUnico(entity, "speed", 1, fonteDeTrait(entity, traitDaEntidade));
 	if (traitDaEntidade === "moody") {
 		const opcoes = [
 			"atkFis",
@@ -30888,8 +35345,8 @@ function tickStatus(rng, entity, dt, clima = null) {
 		const sobe = opcoes[Math.floor(nextFloat(rng) * opcoes.length)];
 		const restantes = opcoes.filter((o) => o !== sobe);
 		const desce = restantes[Math.floor(nextFloat(rng) * restantes.length)];
-		aplicarEstagioUnico(entity, sobe, 2);
-		aplicarEstagioUnico(entity, desce, -1);
+		aplicarEstagioUnico(entity, sobe, 2, fonteDeTrait(entity, traitDaEntidade));
+		aplicarEstagioUnico(entity, desce, -1, fonteDeTrait(entity, traitDaEntidade));
 	}
 	const vol = entity.statusVolatil;
 	if (vol && vol.turnosRestantes != null) {
@@ -30978,6 +35435,101 @@ function resolveAbilityCategory(ability, poke) {
 	if (ability.category !== "dynamic") return ability.category;
 	const stats = statsAtTypedAoeLevel(poke);
 	return stats.atkFis >= stats.atkEsp ? "physical" : "special";
+}
+//#endregion
+//#region src/data/moveVfx.ts
+var RAIZ = "assets/move-vfx/golpes";
+var tira = (arquivo, quadros, extra) => ({
+	url: `${RAIZ}/${arquivo}.png`,
+	quadros,
+	...extra
+});
+var VFX_POR_GOLPE = {
+	bullet_punch: {
+		single: tira("bullet_punch", 8, { direcional: {
+			anguloBaseGraus: 0,
+			ancoraX: .8,
+			recorteX: .55
+		} }),
+		repeticoes: 2
+	},
+	comet_punch: { single: tira("comet_punch", 12) },
+	scratch: { single: tira("scratch", 12, { direcional: {
+		anguloBaseGraus: -46,
+		ancoraX: .67
+	} }) },
+	fury_swipes: { single: tira("fury_swipes", 10, { direcional: { anguloBaseGraus: 23 } }) },
+	stomp: { single: tira("stomp", 9) },
+	x_scissor: { single: tira("x_scissor", 7) },
+	shadow_punch: { single: tira("shadow_punch", 16, { direcional: { anguloBaseGraus: 98 } }) },
+	dig: { single: tira("dig", 19) },
+	fire_fang: { single: tira("fire_fang", 12) },
+	thunder_fang: { single: tira("thunder_fang", 12) },
+	ice_fang: { single: tira("ice_fang", 11) },
+	flamethrower: { single: tira("flamethrower", 13, { direcional: {
+		anguloBaseGraus: -19,
+		ancoraX: .56
+	} }) },
+	fire_spin: {
+		single: tira("fire_spin", 5),
+		repeticoes: 2
+	},
+	mud_shot: { single: tira("mud_shot", 15, { direcional: {
+		anguloBaseGraus: 46,
+		ancoraX: .68
+	} }) },
+	earthquake: {
+		single: tira("earthquake", 14),
+		aoe: tira("earthquake", 14)
+	},
+	whirlpool: {
+		single: tira("whirlpool", 16),
+		aoe: tira("whirlpool", 16)
+	},
+	whirlwind: {
+		single: tira("whirlwind", 20),
+		aoe: tira("whirlwind", 20)
+	},
+	petal_dance: {
+		single: tira("petal_dance", 16),
+		aoe: tira("petal_dance", 16)
+	},
+	charm: {
+		single: tira("charm", 13, { direcional: {
+			anguloBaseGraus: 22,
+			ancoraX: .66
+		} }),
+		repeticoes: 2
+	},
+	taunt: {
+		single: tira("taunt", 12),
+		repeticoes: 2
+	},
+	dragon_dance: { single: tira("dragon_dance", 16) },
+	spider_web: {
+		single: tira("spider_web", 4),
+		repeticoes: 3
+	}
+};
+function vfxDoGolpe(abilityId) {
+	if (!abilityId) return null;
+	return VFX_POR_GOLPE[abilityId] ?? null;
+}
+/**
+* A arte de impacto deste golpe e DIRECIONAL, ou seja gira pra apontar do
+* atacante pro alvo?
+*
+* Quem pergunta e o motor (PH-110): so arte direcional precisa reapontar o
+* rastro a cada frame, porque ela e um risco que LIGA as duas entidades. Arte
+* redonda mantem o angulo congelado no instante do hit, que e a decisao
+* registrada no call-site do efeito.
+*
+* Mora aqui, e nao no motor, porque a resposta e uma propriedade do DADO de
+* arte — quem adicionar um direcional novo em `VFX_POR_GOLPE` ganha o
+* reapontamento de graca, sem tocar em `combatSystem`.
+*/
+function ehDirecional(abilityId) {
+	return !!vfxDoGolpe(abilityId)?.single.direcional;
 }
 //#endregion
 //#region src/data/statusVfx.ts
@@ -45728,6 +50280,1208 @@ var BATTLE_SPRITE_ANIMS = {
 			"frameHeight": 40,
 			"durations": [30, 35]
 		}
+	},
+	"vileplume": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				30,
+				3,
+				3,
+				8,
+				3,
+				3,
+				30,
+				3,
+				3,
+				8,
+				3,
+				3
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [35, 30]
+		}
+	},
+	"bellossom": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				30,
+				8,
+				4,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"exeggutor": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				40,
+				12,
+				8,
+				12
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				8,
+				12
+			]
+		},
+		"Shoot": {
+			"frameWidth": 64,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"poliwrath": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				40,
+				2,
+				4,
+				2
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 72,
+			"durations": [
+				1,
+				1,
+				2,
+				2,
+				2,
+				1,
+				1,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"slowking": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				20,
+				8,
+				12,
+				12,
+				8,
+				20,
+				8,
+				12,
+				12,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				10,
+				12,
+				10,
+				12
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"cloyster": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				12,
+				12,
+				12,
+				14,
+				12,
+				12
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				8,
+				10,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				4,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				22,
+				15,
+				10,
+				22,
+				15,
+				10
+			]
+		}
+	},
+	"starmie": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				60,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"wigglytuff": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				40,
+				4,
+				6,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [35, 35]
+		}
+	},
+	"vaporeon": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [60, 16]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 56,
+			"frameHeight": 72,
+			"durations": [
+				2,
+				2,
+				6,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 56,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		}
+	},
+	"jolteon": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [60, 16]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				6,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"flareon": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				12,
+				16,
+				12,
+				16
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 40,
+			"durations": [
+				4,
+				6,
+				2,
+				2,
+				3,
+				3,
+				3,
+				3
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"espeon": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				8,
+				12
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 48,
+			"durations": [
+				4,
+				4,
+				6,
+				4,
+				2,
+				1,
+				1,
+				1,
+				1,
+				1,
+				1,
+				4
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"umbreon": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				60,
+				10,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				10
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				8,
+				8,
+				8
+			]
+		},
+		"Shoot": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				6,
+				2,
+				6,
+				4,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"raichu": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				40,
+				2,
+				4,
+				4,
+				4,
+				2
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				1,
+				2,
+				6,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 40,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"crobat": {
+		"Idle": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				12,
+				12,
+				12,
+				12,
+				12,
+				12,
+				12,
+				12
+			]
+		},
+		"Walk": {
+			"frameWidth": 40,
+			"frameHeight": 56,
+			"durations": [
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Shoot": {
+			"frameWidth": 48,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				8,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 56,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"hitmontop": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 56,
+			"durations": [
+				30,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Shoot": {
+			"frameWidth": 40,
+			"frameHeight": 64,
+			"durations": [
+				2,
+				4,
+				1,
+				1,
+				1,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
+	},
+	"clefairy": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				30,
+				3,
+				4,
+				5,
+				4,
+				3
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				4,
+				8,
+				4,
+				8,
+				4,
+				8,
+				4
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 24,
+			"durations": [30, 35]
+		}
+	},
+	"togetic": {
+		"Idle": {
+			"frameWidth": 24,
+			"frameHeight": 48,
+			"durations": [
+				30,
+				4,
+				3,
+				3,
+				3,
+				4
+			]
+		},
+		"Walk": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				10,
+				8,
+				10
+			]
+		},
+		"Charge": {
+			"frameWidth": 24,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 24,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		},
+		"Faint": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				8,
+				12,
+				4,
+				10
+			]
+		}
+	},
+	"clefable": {
+		"Idle": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				30,
+				6,
+				6,
+				6,
+				6,
+				6
+			]
+		},
+		"Walk": {
+			"frameWidth": 32,
+			"frameHeight": 48,
+			"durations": [
+				8,
+				6,
+				6,
+				6,
+				8,
+				6,
+				6,
+				6
+			]
+		},
+		"Charge": {
+			"frameWidth": 32,
+			"frameHeight": 40,
+			"durations": [
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2,
+				2
+			]
+		},
+		"Sleep": {
+			"frameWidth": 32,
+			"frameHeight": 32,
+			"durations": [30, 35]
+		}
 	}
 };
 //#endregion
@@ -45836,8 +51590,92 @@ function triggerAttackAnim(entity, isAoe, target) {
 	if (target) faceToward(entity, target);
 }
 //#endregion
+//#region src/engine/systems/climaAmbiente.ts
+/**
+* Identidade da sala DENTRO da sessao. `indice` sozinho nao serve: ele volta a
+* 0 a cada ciclo de 10 salas, e o jogador que desse a volta cairia sempre no
+* mesmo clima da primeira sala.
+*/
+function posicaoDaSala(sala) {
+	return sala.ciclos * 10 + sala.indice;
+}
+/**
+* O clima desta sala, ou `null` para ceu limpo.
+*
+* `null` sai de dois casos que valem a pena distinguir na leitura, mesmo dando
+* no mesmo resultado: o sub-bioma nao tem tabela nenhuma (nunca tem clima), ou
+* tem tabela e o sorteio caiu em `limpo` (que e um resultado como outro
+* qualquer — 53% em `badlands`, por exemplo).
+*/
+function climaDaSala(seed, sala) {
+	if (!sala) return null;
+	const pesos = SUB_BIOMA_CLIMA[sala.chave];
+	if (!pesos) return null;
+	const entradas = Object.entries(pesos).filter(([, peso]) => (peso ?? 0) > 0);
+	const total = entradas.reduce((soma, [, peso]) => soma + (peso ?? 0), 0);
+	if (total <= 0) return null;
+	let sorteio = nextFloat(deriveRng(seed, `clima:${sala.chave}:${posicaoDaSala(sala)}`)) * total;
+	for (const [nome, peso] of entradas) {
+		sorteio -= peso ?? 0;
+		if (sorteio < 0) return nome === "limpo" ? null : nome;
+	}
+	const ultimo = entradas[entradas.length - 1][0];
+	return ultimo === "limpo" ? null : ultimo;
+}
+/**
+* O `Clima` de ambiente pronto pra `world.clima`, ou `null`.
+*
+* `Infinity` em `turnosRestantes` porque o relogio de turno nao derruba clima
+* de ambiente — quem derruba e a troca de sala, e ela troca a SALA inteira,
+* fazendo `climaDaSala` devolver outra coisa.
+*/
+function climaAmbienteDaSala(seed, sala) {
+	return climaDeAmbiente(climaDaSala(seed, sala));
+}
+/**
+* Embrulha um tipo de clima como clima de AMBIENTE.
+*
+* Usado tambem pelo caminho da autoridade, onde o tipo nao e sorteado aqui: ele
+* chega pronto do servidor, que e quem tem a semente da sessao.
+*/
+function climaDeAmbiente(tipo) {
+	return tipo ? {
+		tipo,
+		turnosRestantes: Infinity,
+		origem: "ambiente"
+	} : null;
+}
+/**
+* Volta `world.clima` pro clima da sala atual.
+*
+* Chamado em TODO ponto que antes zerava o clima — fim de batalha, expiracao do
+* golpe, troca de sala. A diferenca importa: com clima de ambiente, "acabou o
+* Sunny Day" nao significa ceu limpo, significa que o clima do lugar voltou a
+* aparecer. Zerar deixaria o deserto sem areia pelo resto da sala so porque
+* alguem usou um golpe de clima uma vez.
+*/
+function reporClimaDeAmbiente(world) {
+	world.clima = world.climaAmbiente;
+}
+/**
+* Troca o clima do LUGAR e, junto, o efetivo — a menos que um golpe esteja em
+* campo agora.
+*
+* Usado nos dois caminhos: troca de sala no jogo local (com o clima derivado) e
+* chegada do clima autoritativo no flush.
+*
+* O respeito ao clima de golpe importa nos dois: o servidor manda o clima do
+* LUGAR, e um Rain Dance de 10 turnos em andamento no cliente nao e assunto
+* dele.
+*/
+function definirClimaDeAmbiente(world, ambiente) {
+	world.climaAmbiente = ambiente;
+	if (world.clima?.origem === "golpe") return;
+	world.clima = ambiente;
+}
+//#endregion
 //#region src/engine/systems/combatSystem.ts
-var HIT_LAND_DELAY = ATTACK_ANIM_DURATION;
+var HIT_LAND_DELAY = .3;
 var IMPACT_EFFECT_DURATION = 1;
 var AOE_EFFECT_DURATION = 1.2;
 var STATUS_VFX_DURATION = 1.1;
@@ -45948,6 +51786,60 @@ function efetividadeConsiderandoRevelado(multiplicadorCru, ability, defenderEnti
 }
 var CLIMA_MULTIPLICADOR_FAVORECIDO = 1.5;
 var CLIMA_MULTIPLICADOR_DESFAVORECIDO = .5;
+var NEVE_DEFESA_GELO = 1.5;
+var NEVOA_PRECISAO = .6;
+var SOLAR_BEAM_SOB_CLIMA_RUIM = .5;
+/**
+* O golpe como o CLIMA o deixa (PH-140).
+*
+* Hoje so a Weather Ball muda de forma. Devolve o proprio objeto quando nada
+* muda — golpe comum nao paga alocacao nenhuma, e o pipeline de dano roda pra
+* cada hit de cada inimigo, a 60 Hz.
+*
+* NAO muta `ability`: os objetos de `ABILITIES` sao compartilhados por todas as
+* entidades do mundo. Mutar um aqui deixaria o tipo do golpe "grudado" no
+* catalogo depois que o clima passasse.
+*/
+/**
+* Quanto o clima multiplica a cura de Moonlight/Synthesis (PH-140).
+*
+* 1 = ceu limpo (o `healPercent` do catalogo ja e esse caso). Sol da 4/3, o que
+* leva os 50% do catalogo aos 2/3 dos jogos; qualquer outro clima da 0,5, que
+* leva a 1/4.
+*/
+function multiplicadorDeCuraPorClima(ability, clima, atacante, alvo) {
+	if (!CURA_SENSIVEL_AO_CLIMA.has(ability.id)) return 1;
+	const climaAtivo = climaEfetivo(clima?.tipo ?? null, traitsDoConfronto(atacante, alvo));
+	if (!climaAtivo) return 1;
+	return climaAtivo === "sol" ? CURA_NO_SOL : CURA_EM_CLIMA_RUIM;
+}
+/**
+* Growth sob sol forte sobe 2 estagios em vez de 1 (PH-140).
+*
+* Devolve o proprio objeto quando nada muda, e nunca muta o do catalogo — ver a
+* mesma nota em `golpeAjustadoPeloClima`.
+*/
+function golpeDeEstagioAjustadoPeloClima(ability, clima, atacante, alvo) {
+	if (ability.id !== "growth" || !ability.statChanges) return ability;
+	if (climaEfetivo(clima?.tipo ?? null, traitsDoConfronto(atacante, alvo)) !== "sol") return ability;
+	return {
+		...ability,
+		statChanges: ability.statChanges.map((m) => ({
+			...m,
+			estagios: m.estagios * 2
+		}))
+	};
+}
+function golpeAjustadoPeloClima(ability, clima) {
+	if (ability.id !== "weather_ball" || !clima) return ability;
+	const regra = WEATHER_BALL_POR_CLIMA[clima];
+	if (!regra) return ability;
+	return {
+		...ability,
+		type: regra.tipo,
+		power: regra.dobra ? ability.power * 2 : ability.power
+	};
+}
 function multiplicadorDeAtaquePorTrait(trait, isPhysical, temStatus) {
 	if (!isPhysical) return 1;
 	if (trait === "huge_power" || trait === "pure_power") return 2;
@@ -45997,7 +51889,7 @@ function tiposEfetivosParaEfetividade(entity, species) {
 	if (entity.tipoForcado) return [entity.tipoForcado, null];
 	return [species.type, species.type2];
 }
-var SELF_DESTRUCT_ABILITY_KEYS = /* @__PURE__ */ new Set(["explosion", "selfdestruct"]);
+var SELF_DESTRUCT_ABILITY_KEYS = /* @__PURE__ */ new Set(["explosion", "self_destruct"]);
 var SELF_DESTRUCT_HP_LOSS_PERCENT = .5;
 var ESCUDO_ABILITIES = {
 	reflect: "reflect",
@@ -46007,11 +51899,23 @@ var ESCUDO_ABILITIES = {
 	lucky_chant: "luckyChant",
 	wide_guard: "wideGuard"
 };
-var ESCUDO_DURACAO_SEGUNDOS = 5 * TURNO_SEGUNDOS;
+var ESCUDO_DURACAO_TURNOS = 5;
+var CLIMA_DE_GOLPE_TURNOS = 10;
+var ESCUDO_DURACAO_SEGUNDOS = ESCUDO_DURACAO_TURNOS * TURNO_SEGUNDOS;
 var TAUNT_DURATION = TURNO_SEGUNDOS * 3;
 var DISABLE_DURATION = TURNO_SEGUNDOS * 4;
 var ENCORE_DURATION = TURNO_SEGUNDOS * 3;
 var TORMENT_DURATION = TURNO_SEGUNDOS * 3;
+var GOLPES_QUE_PRENDEM = /* @__PURE__ */ new Set([
+	"wrap",
+	"bind",
+	"fire_spin",
+	"clamp",
+	"whirlpool",
+	"sand_tomb",
+	"infestation"
+]);
+var PRESO_DURACAO_SEGUNDOS = (rng) => TURNO_SEGUNDOS * (nextFloat(rng) < .5 ? 4 : 5);
 var SPITE_COOLDOWN_BONUS = TURNO_SEGUNDOS * 4;
 var CURSE_SELF_MAX_HP_LOSS_PERCENT = .5;
 var INGRAIN_AQUA_RING_REGEN_PERCENT = 1 / 16;
@@ -46107,12 +52011,59 @@ function hiddenPowerPower(attackerPoke) {
 function psywaveDamage(rng, attackerPoke) {
 	return Math.max(1, Math.round(attackerPoke.level * randRange(rng, .5, 1.5)));
 }
+function gyroBallPower(attackerEntity, defenderEntity) {
+	const minha = Math.max(1, velocidadeEfetiva(attackerEntity));
+	const dela = Math.max(1, velocidadeEfetiva(defenderEntity));
+	return Math.min(150, Math.floor(25 * dela / minha) + 1);
+}
+function electroBallPower(attackerEntity, defenderEntity) {
+	const razao = Math.max(1, velocidadeEfetiva(attackerEntity)) / Math.max(1, velocidadeEfetiva(defenderEntity));
+	if (razao >= 4) return 150;
+	if (razao >= 3) return 120;
+	if (razao >= 2) return 80;
+	if (razao > 1) return 60;
+	return 40;
+}
+function wringOutPower(defenderPoke) {
+	const fracao = Math.max(0, defenderPoke.hp) / defenderPoke.stats.hp;
+	return Math.max(1, Math.floor(120 * fracao));
+}
+function punishmentPower(defenderEntity) {
+	const positivos = Object.values(defenderEntity.estagios).reduce((soma, n) => soma + Math.max(0, n ?? 0), 0);
+	return Math.min(200, 60 + 20 * positivos);
+}
+function pesoEmKg(poke) {
+	return SPECIES[poke.speciesId].pesoHg / 10;
+}
+function lowKickPower(defenderPoke) {
+	const kg = pesoEmKg(defenderPoke);
+	if (kg >= 200) return 120;
+	if (kg >= 100) return 100;
+	if (kg >= 50) return 80;
+	if (kg >= 25) return 60;
+	if (kg >= 10) return 40;
+	return 20;
+}
+function heavySlamPower(attackerPoke, defenderPoke) {
+	const razao = pesoEmKg(attackerPoke) / Math.max(.1, pesoEmKg(defenderPoke));
+	if (razao >= 5) return 120;
+	if (razao >= 4) return 100;
+	if (razao >= 3) return 80;
+	if (razao >= 2) return 60;
+	return 40;
+}
 var DYNAMIC_POWER_ABILITIES = {
 	magnitude: (rng) => rollMagnitudePower(rng),
 	reversal: (_rng, attackerPoke) => hpRatioPower(attackerPoke),
 	flail: (_rng, attackerPoke) => hpRatioPower(attackerPoke),
 	present: (rng) => rollPresentPower(rng),
-	hidden_power: (_rng, attackerPoke) => hiddenPowerPower(attackerPoke)
+	hidden_power: (_rng, attackerPoke) => hiddenPowerPower(attackerPoke),
+	gyro_ball: (_rng, _a, _d, attackerEntity, defenderEntity) => gyroBallPower(attackerEntity, defenderEntity),
+	electro_ball: (_rng, _a, _d, attackerEntity, defenderEntity) => electroBallPower(attackerEntity, defenderEntity),
+	wring_out: (_rng, _a, defenderPoke) => wringOutPower(defenderPoke),
+	punishment: (_rng, _a, _d, _attackerEntity, defenderEntity) => punishmentPower(defenderEntity),
+	low_kick: (_rng, _a, defenderPoke) => lowKickPower(defenderPoke),
+	heavy_slam: (_rng, attackerPoke, defenderPoke) => heavySlamPower(attackerPoke, defenderPoke)
 };
 var COUNTER_MEMORY_WINDOW = 3;
 function counterDamage(attackerEntity, category) {
@@ -46129,15 +52080,55 @@ var FIXED_DAMAGE_ABILITIES = {
 	fissure: (_a, defenderPoke) => defenderPoke.hp,
 	psywave: (attackerPoke, _d, _e, rng) => psywaveDamage(rng, attackerPoke),
 	counter: (_a, _d, attackerEntity) => counterDamage(attackerEntity, "physical"),
-	mirror_coat: (_a, _d, attackerEntity) => counterDamage(attackerEntity, "special")
+	mirror_coat: (_a, _d, attackerEntity) => counterDamage(attackerEntity, "special"),
+	sonic_boom: () => 20,
+	endeavor: (attackerPoke, defenderPoke) => Math.max(0, defenderPoke.hp - attackerPoke.hp),
+	final_gambit: (attackerPoke) => Math.max(1, attackerPoke.hp)
 };
+var STATUS_SORTEADO = { tri_attack: [
+	"burn",
+	"freeze",
+	"paralysis"
+] };
+var JANELA_DE_DANO_RECENTE = 3;
+var MULTIPLICADOR_CONDICIONAL = {
+	brine: (d) => d.poke.hp <= d.poke.stats.hp / 2 ? 2 : 1,
+	hex: (d) => d.poke.status ? 2 : 1,
+	venoshock: (d) => d.poke.status?.tipo === "poison" ? 2 : 1,
+	wake_up_slap: (d) => d.poke.status?.tipo === "sleep" ? 2 : 1,
+	assurance: (d) => {
+		const recente = (categoria) => {
+			const m = d.lastDamageTaken[categoria];
+			return m.amount > 0 && m.age <= JANELA_DE_DANO_RECENTE;
+		};
+		return recente("physical") || recente("special") ? 2 : 1;
+	}
+};
+function multiplicadorCondicional(ability, defenderEntity) {
+	return MULTIPLICADOR_CONDICIONAL[ability.id]?.(defenderEntity) ?? 1;
+}
+var CHANCE_ACUMULADA_DE_ACERTOS = [
+	[2, 3 / 8],
+	[3, 6 / 8],
+	[4, 7 / 8],
+	[5, 1]
+];
+function quantidadeDeAcertos(rng, ability) {
+	const min = ability.minHits ?? 1;
+	const max = ability.maxHits ?? 1;
+	if (max <= 1) return 1;
+	if (min === max) return min;
+	const sorteio = nextFloat(rng);
+	for (const [acertos, limite] of CHANCE_ACUMULADA_DE_ACERTOS) if (acertos >= min && acertos <= max && sorteio < limite) return acertos;
+	return max;
+}
 function specialDamageFor(rng, ability, attackerEntity, defenderEntity) {
 	const attackerPoke = attackerEntity.poke;
 	const defenderPoke = defenderEntity.poke;
 	const dynamic = DYNAMIC_POWER_ABILITIES[ability.id];
 	if (dynamic) return {
 		mode: "dynamicPower",
-		power: dynamic(rng, attackerPoke)
+		power: dynamic(rng, attackerPoke, defenderPoke, attackerEntity, defenderEntity)
 	};
 	const fixed = FIXED_DAMAGE_ABILITIES[ability.id];
 	if (fixed) {
@@ -46168,7 +52159,7 @@ function estimateDamage(rng, attackerEntity, defenderEntity, ability) {
 	const { atacante: attackerTraitEstimate, defensor: defenderTraitEstimate } = traitsDoConfronto(attackerEntity, defenderEntity);
 	const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp) * multiplicadorDeAtaquePorTrait(attackerTraitEstimate, isPhysical, Boolean(attackerPoke.status));
 	const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp) * multiplicadorDeDefesaPorTrait(defenderTraitEstimate, isPhysical, Boolean(defenderPoke.status));
-	const power = (special && special.mode === "dynamicPower" ? special.power : ability.power) * multiplicadorDePoderPorTrait(attackerTraitEstimate, ability, null);
+	const power = (special && special.mode === "dynamicPower" ? special.power : ability.power) * multiplicadorDePoderPorTrait(attackerTraitEstimate, ability, null) * multiplicadorCondicional(ability, defenderEntity);
 	if (power === 0) return 0;
 	let dmg = formulaEngine$4.eval("DAMAGE_BASE", {
 		level: attackerPoke.level,
@@ -46182,7 +52173,9 @@ function estimateDamage(rng, attackerEntity, defenderEntity, ability) {
 	dmg *= effectivenessMultiplier;
 	dmg *= multiplicadorDeDanoRecebidoPorTrait(defenderTraitEstimate, ability, effectivenessMultiplier);
 	dmg *= multiplicadorDeDanoCausadoPorTrait(attackerTraitEstimate, effectivenessMultiplier);
-	return dmg;
+	const minHits = ability.minHits ?? 1;
+	const maxHits = ability.maxHits ?? 1;
+	return dmg * (maxHits <= 1 ? 1 : minHits === maxHits ? minHits : 3);
 }
 var ESTAGIO_ALVO_DA_IA = 2;
 var FOCUS_ENERGY_TETO_DA_IA = 3;
@@ -46340,7 +52333,7 @@ function danoEsperado(rng, atacante, defensor, ability) {
 	return estimateDamage(rng, atacante, defensor, ability) * ((ability.accuracy ?? 100) / 100);
 }
 var DANO_VARIACAO_MINIMA = .85;
-function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista = false, clima = null) {
+function computeDamage(rng, attackerEntity, defenderEntity, abilityBase, pessimista = false, clima = null) {
 	const attackerPoke = attackerEntity.poke;
 	const defenderPoke = defenderEntity.poke;
 	const attackerSpecies = SPECIES[attackerPoke.speciesId];
@@ -46350,6 +52343,7 @@ function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista 
 		atacante: attackerTrait,
 		defensor: defenderTrait
 	});
+	const ability = golpeAjustadoPeloClima(abilityBase, climaAtivo);
 	const [defType1, defType2] = tiposEfetivosParaEfetividade(defenderEntity, defenderSpecies);
 	let effectivenessMultiplier = efetividadeConsiderandoRevelado(getEffectiveness(ability.type, defType1, defType2), ability, defenderEntity, defenderSpecies);
 	if (resolverImunidadeDeTipo(rng, ability.type, defenderEntity, true, defenderTrait).imune) effectivenessMultiplier = 0;
@@ -46366,7 +52360,7 @@ function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista 
 		const estagiosDoAtacanteValem = defenderTrait !== TRAIT_UNAWARE;
 		const atk = (isPhysical ? attackerPoke.stats.atkFis : attackerPoke.stats.atkEsp) * (estagiosDoAtacanteValem ? multiplicadorDeStat(attackerEntity.estagios, isPhysical ? "atkFis" : "atkEsp") : 1) * multiplicadorDeAtaquePorTrait(attackerTrait, isPhysical, Boolean(attackerPoke.status)) * (attackerTrait === "solar_power" && !isPhysical && climaAtivo === "sol" ? SOLAR_POWER_BONUS : 1);
 		const def = (isPhysical ? defenderPoke.stats.def : defenderPoke.stats.defEsp) * (estagiosDoDefensorValem ? multiplicadorDeStat(defenderEntity.estagios, isPhysical ? "def" : "defEsp") : 1) * multiplicadorDeDefesaPorTrait(defenderTrait, isPhysical, Boolean(defenderPoke.status));
-		const power = (special && special.mode === "dynamicPower" ? special.power : ability.power) * multiplicadorDePoderPorTrait(attackerTrait, ability, climaAtivo);
+		const power = (special && special.mode === "dynamicPower" ? special.power : ability.power) * multiplicadorDePoderPorTrait(attackerTrait, ability, climaAtivo) * multiplicadorCondicional(ability, defenderEntity);
 		dmg = power === 0 ? 0 : formulaEngine$4.eval("DAMAGE_BASE", {
 			level: attackerPoke.level,
 			power,
@@ -46384,7 +52378,10 @@ function computeDamage(rng, attackerEntity, defenderEntity, ability, pessimista 
 		} else if (climaAtivo === "sol") {
 			if (ability.type === "FIRE") dmg *= CLIMA_MULTIPLICADOR_FAVORECIDO;
 			else if (ability.type === "WATER") dmg *= CLIMA_MULTIPLICADOR_DESFAVORECIDO;
+		} else if (climaAtivo === "neve") {
+			if ((defenderSpecies.type === "ICE" || defenderSpecies.type2 === "ICE") && isPhysical) dmg /= NEVE_DEFESA_GELO;
 		}
+		if (ability.id === "solar_beam" && climaAtivo != null && climaAtivo !== "sol") dmg *= SOLAR_BEAM_SOB_CLIMA_RUIM;
 		dmg *= multiplicadorDeDanoRecebidoPorTrait(defenderTrait, ability, effectivenessMultiplier);
 		dmg *= multiplicadorDeDanoCausadoPorTrait(attackerTrait, effectivenessMultiplier);
 		if (defenderTrait === "multiscale" && defenderPoke.hp === defenderPoke.stats.hp) dmg *= MULTISCALE_MULTIPLIER;
@@ -46429,7 +52426,7 @@ var EFFECTIVENESS_COLORS = {
 	super: "#ff8c1a",
 	effective: "#ffe14d",
 	normal: "#ffffff",
-	weak: "#5a5a5a",
+	weak: "#8b98a8",
 	immune: "#000000"
 };
 function spawnDamageNumber(world, target, result) {
@@ -46444,6 +52441,7 @@ function spawnDamageNumber(world, target, result) {
 		value: result.amount,
 		effectiveness: result.effectiveness !== "normal" ? result.effectiveness : void 0,
 		effectivenessLabel: result.effectivenessLabel,
+		isCrit: result.isCrit || void 0,
 		owner: target,
 		laneSize: result.effectivenessLabel ? 2 : 1
 	}));
@@ -46611,20 +52609,33 @@ function nearbyAliveEnemies(world) {
 * Hustle (Fase 12): +50% de Ataque Fisico custa -20% de precisao nos golpes
 * FISICOS do proprio portador — aplicado ANTES dos estagios de accuracy/evasao.
 */
+/**
+* Exportada pra teste (PH-140): a rolagem de acerto acontece no CAST, dentro de
+* `executePlayerAction`, e nao na resolucao do hit. Um teste que enfileira o
+* hit direto — como os de dano fazem — PULA a precisao inteira e mediria sempre
+* acerto, inclusive quando a regra de clima estivesse desligada.
+*/
 function golpeErrou(rng, ability, atacante, defensor, clima = null) {
 	const { atacante: traitAtk, defensor: traitDef } = traitsDoConfronto(atacante, defensor);
 	if (traitAtk === "no_guard" || traitDef === "no_guard") return false;
+	const climaAtivo = climaEfetivo(clima, {
+		atacante: traitAtk,
+		defensor: traitDef
+	});
+	if (climaAtivo && GOLPE_NUNCA_ERRA_NO_CLIMA[ability.id]?.includes(climaAtivo)) return false;
 	const isPhysical = resolveAbilityCategory(ability, atacante.poke) === "physical";
-	let precisaoBase = (ability.accuracy ?? 100) * multiplicadorDePrecisaoPorTrait(traitAtk, isPhysical);
+	const regraDePrecisao = PRECISAO_DO_GOLPE_NO_CLIMA[ability.id];
+	let precisaoBase = (climaAtivo && regraDePrecisao?.climas.includes(climaAtivo) ? regraDePrecisao.precisao : ability.accuracy ?? 100) * multiplicadorDePrecisaoPorTrait(traitAtk, isPhysical);
 	if (traitDef === "wonder_skin" && ability.power <= 0) precisaoBase = Math.min(precisaoBase, 50);
 	const multAtacante = multiplicadorDeAccuracyOuEvasion(atacante.estagios.accuracy ?? 0);
 	const ignoraEvasao = defensor.revelado || traitAtk != null && TRAIT_IGNORA_EVASAO.has(traitAtk);
 	let multDefensor = ignoraEvasao ? 1 : multiplicadorDeAccuracyOuEvasion(defensor.estagios.evasion ?? 0);
 	if (!ignoraEvasao) {
-		if (traitDef && EVASAO_POR_CLIMA[traitDef] && EVASAO_POR_CLIMA[traitDef] === clima) multDefensor *= 1.25;
+		if (traitDef && clima && EVASAO_POR_CLIMA[traitDef]?.includes(clima)) multDefensor *= 1.25;
 		if (traitDef === "tangled_feet" && defensor.statusVolatil?.tipo === "confusion") multDefensor *= 2;
 	}
-	const precisaoEfetiva = precisaoBase * multAtacante / multDefensor;
+	const multClima = climaAtivo === "nevoa" ? NEVOA_PRECISAO : 1;
+	const precisaoEfetiva = precisaoBase * multAtacante * multClima / multDefensor;
 	if (precisaoEfetiva >= 100) return false;
 	return nextFloat(rng) * 100 >= precisaoEfetiva;
 }
@@ -46794,6 +52805,19 @@ var HEAL_BLOCK_SEGUNDOS = 5 * TURNO_SEGUNDOS;
 function curaBloqueada(entity) {
 	return Boolean(entity.curaBloqueadaAte && entity.curaBloqueadaAte > 0);
 }
+/**
+* Procedencia de estagio que o proprio POKE aplicou em si por um golpe de caso
+* especial (PH-121) — Belly Drum e Acupressure escrevem em `estagios` direto,
+* sem passar por `aplicarMudancasDeStat`, entao nao ganhariam fonte sozinhos.
+*/
+function registrarFonteDoProprioGolpe(entity, stat, ability) {
+	registrarFonteDeEstagio(entity, stat, {
+		id: ability.id,
+		tipo: "golpe",
+		proprio: true,
+		deQuem: SPECIES[entity.poke.speciesId]?.name ?? entity.poke.speciesId
+	});
+}
 function trocarEstagios(a, b, stats) {
 	for (const stat of stats) {
 		const av = a.estagios[stat];
@@ -46802,6 +52826,14 @@ function trocarEstagios(a, b, stats) {
 		else a.estagios[stat] = bv;
 		if (av === void 0) delete b.estagios[stat];
 		else b.estagios[stat] = av;
+		const af = a.estagiosFonte?.[stat];
+		const bf = b.estagiosFonte?.[stat];
+		if (bf === void 0) {
+			if (a.estagiosFonte) delete a.estagiosFonte[stat];
+		} else (a.estagiosFonte ??= {})[stat] = bf;
+		if (af === void 0) {
+			if (b.estagiosFonte) delete b.estagiosFonte[stat];
+		} else (b.estagiosFonte ??= {})[stat] = af;
 	}
 }
 function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
@@ -46822,7 +52854,8 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			worldSize: (ability.radius ?? 0) * 2,
 			elementType: ability.type,
 			abilityId: ability.id,
-			statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0
+			statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0,
+			seguir: attacker
 		}));
 		const alguemComDamp = [world.player, ...world.enemies].some((e) => e && !isDead(e) && traitDoPoke(e.poke) === "damp");
 		if (SELF_DESTRUCT_ABILITY_KEYS.has(ability.id) && !isDead(attacker) && !alguemComDamp) {
@@ -46859,21 +52892,30 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		if (!silent) anunciarProtegido(world, target);
 		return;
 	}
-	const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null);
-	let danoFinal = result.amount;
-	const enduraGolpe = target.enduraAtiva === true;
-	if (enduraGolpe) target.enduraAtiva = false;
-	const sturdyTrait = !enduraGolpe && traitDoPoke(target.poke) === "sturdy" && target.poke.hp === target.poke.stats.hp;
-	const aguentou = (enduraGolpe || sturdyTrait) && danoFinal >= target.poke.hp && target.poke.hp > 0;
-	if (aguentou) danoFinal = target.poke.hp - 1;
-	const danoCausado = Math.min(danoFinal, target.poke.hp);
-	if (danoFinal > 0) {
-		takeDamage(target, danoFinal, resolveAbilityCategory(ability, attacker.poke));
-		if (!silent) spawnDamageNumber(world, target, {
-			...result,
-			amount: danoFinal
-		});
-		if (aguentou && !silent) anunciarAguentou(world, target);
+	const acertos = quantidadeDeAcertos(world.rng, ability);
+	let danoFinal = 0;
+	let danoCausado = 0;
+	let houveCritico = false;
+	for (let acerto = 0; acerto < acertos; acerto++) {
+		if (acerto > 0 && isDead(target)) break;
+		const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null);
+		if (result.isCrit) houveCritico = true;
+		let danoDoAcerto = result.amount;
+		const enduraGolpe = target.enduraAtiva === true;
+		if (enduraGolpe) target.enduraAtiva = false;
+		const sturdyTrait = !enduraGolpe && traitDoPoke(target.poke) === "sturdy" && target.poke.hp === target.poke.stats.hp;
+		const aguentou = (enduraGolpe || sturdyTrait) && danoDoAcerto >= target.poke.hp && target.poke.hp > 0;
+		if (aguentou) danoDoAcerto = target.poke.hp - 1;
+		danoCausado += Math.min(danoDoAcerto, target.poke.hp);
+		danoFinal += danoDoAcerto;
+		if (danoDoAcerto > 0) {
+			takeDamage(target, danoDoAcerto, resolveAbilityCategory(ability, attacker.poke));
+			if (!silent) spawnDamageNumber(world, target, {
+				...result,
+				amount: danoDoAcerto
+			});
+			if (aguentou && !silent) anunciarAguentou(world, target);
+		}
 	}
 	if (danoFinal > 0 && !isDead(target)) {
 		const traitDoAlvo = traitsDoConfronto(attacker, target).defensor;
@@ -46881,12 +52923,12 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		const ehFisico = resolveAbilityCategory(ability, attacker.poke) === "physical";
 		const tipoBate = !reacao?.tipos || reacao.tipos.includes(ability.type);
 		const categoriaBate = !reacao?.soFisico || ehFisico;
-		const gatilhoDeAngerPoint = traitDoAlvo !== "anger_point" || result.isCrit;
-		if (reacao && tipoBate && categoriaBate && gatilhoDeAngerPoint) {
-			const mudanca = aplicarEstagioUnico(target, reacao.stat, reacao.estagios);
+		if (reacao && tipoBate && categoriaBate && (traitDoAlvo !== "anger_point" || houveCritico)) {
+			const fonteDaTrait = fonteDeTrait(target, traitDoAlvo);
+			const mudanca = aplicarEstagioUnico(target, reacao.stat, reacao.estagios, fonteDaTrait);
 			if (mudanca && !silent) anunciarEstagios(world, target, [mudanca]);
 			if (traitDoAlvo === "weak_armor") {
-				const queda = aplicarEstagioUnico(target, "def", -1);
+				const queda = aplicarEstagioUnico(target, "def", -1, fonteDaTrait);
 				if (queda && !silent) anunciarEstagios(world, target, [queda]);
 			}
 		}
@@ -46983,21 +53025,30 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	const climaDoGolpe = CLIMA_DO_GOLPE[ability.id];
 	if (climaDoGolpe) world.clima = {
 		tipo: climaDoGolpe,
-		turnosRestantes: 5
+		turnosRestantes: CLIMA_DE_GOLPE_TURNOS,
+		origem: "golpe"
 	};
 	let statusRecebeuEm = null;
 	if (!isDead(target)) {
 		const traits = traitsDoConfronto(attacker, target);
 		const secundario = temEfeitoSecundario(ability);
 		let abilityEfetiva = ability;
+		const statusSorteados = STATUS_SORTEADO[ability.id];
+		if (statusSorteados) {
+			const escolhido = statusSorteados[Math.floor(nextFloat(world.rng) * statusSorteados.length)];
+			abilityEfetiva = {
+				...abilityEfetiva,
+				status: escolhido
+			};
+		}
 		if (secundario && traits.defensor === "shield_dust") abilityEfetiva = {
-			...ability,
+			...abilityEfetiva,
 			statusChance: 0,
 			statChance: 0,
 			flinchChance: 0
 		};
 		else if (secundario && traits.atacante === "serene_grace") abilityEfetiva = {
-			...ability,
+			...abilityEfetiva,
 			statusChance: Math.min(100, (ability.statusChance ?? 0) * 2),
 			statChance: Math.min(100, (ability.statChance ?? 0) * 2)
 		};
@@ -47007,7 +53058,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			if (!silent) anunciarStatus(world, target, aplicado.tipo, "entrou");
 			if ((aplicado.tipo === "poison" || aplicado.tipo === "paralysis" || aplicado.tipo === "burn") && traitDoPoke(target.poke) === "synchronize") aplicarStatus(world.rng, attacker, aplicado.tipo, 100);
 		}
-		const mudancas = aplicarMudancasDeStat(world.rng, attacker, target, abilityEfetiva);
+		const mudancas = aplicarMudancasDeStat(world.rng, attacker, target, golpeDeEstagioAjustadoPeloClima(abilityEfetiva, world.clima, attacker, target));
 		if (mudancas.length) {
 			statusRecebeuEm = ability.statTarget === "self" ? attacker : target;
 			if (!silent) anunciarEstagios(world, statusRecebeuEm, mudancas);
@@ -47061,11 +53112,12 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			if (!(especieAlvo.type === "GRASS" || especieAlvo.type2 === "GRASS")) target.seeded = { sourceId: attacker.id };
 		}
 		if (ability.id === "nightmare") target.nightmareDot = true;
+		if (GOLPES_QUE_PRENDEM.has(ability.id) && !(target.presoAte && target.presoAte > 0)) target.presoAte = PRESO_DURACAO_SEGUNDOS(world.rng);
 	}
 	if (ability.id === "focus_energy") attacker.estagioDeCritico = (attacker.estagioDeCritico ?? 0) + 2;
 	if (ability.id === "laser_focus") attacker.proximoGolpeCriticoGarantido = true;
 	if (ability.healPercent && !curaBloqueada(attacker)) {
-		const quanto = Math.max(1, Math.round(attacker.poke.stats.hp * ability.healPercent / 100));
+		const quanto = Math.max(1, Math.round(attacker.poke.stats.hp * ability.healPercent / 100 * multiplicadorDeCuraPorClima(ability, world.clima, attacker, target)));
 		heal(attacker, quanto);
 		if (!silent) spawnDamageNumber(world, attacker, {
 			amount: -quanto,
@@ -47121,7 +53173,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 		if (chance > 0 && !(traitDef === "shield_dust" && chanceDoGolpe > 0 && chanceDoStench === 0) && nextFloat(world.rng) * 100 < chance && traitDef !== "inner_focus") {
 			startGlobalCooldown(target, MIN_ACTION_GAP);
 			if (traitDef === "steadfast") {
-				const mudanca = aplicarEstagioUnico(target, "speed", 1);
+				const mudanca = aplicarEstagioUnico(target, "speed", 1, fonteDeTrait(target, traitDef));
 				if (mudanca && !silent) anunciarEstagios(world, target, [mudanca]);
 			}
 		}
@@ -47158,6 +53210,17 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			});
 			creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted);
 		}
+	}
+	if (ability.id === "final_gambit" && danoCausado > 0 && !isDead(attacker)) {
+		const custo = Math.max(1, Math.round(attacker.poke.hp * SELF_DESTRUCT_HP_LOSS_PERCENT));
+		takeDamage(attacker, custo);
+		if (!silent) spawnDamageNumber(world, attacker, {
+			amount: custo,
+			effectiveness: "normal",
+			effectivenessLabel: null,
+			isCrit: false
+		});
+		creditarMorteSeNecessario(attacker, defeatedEnemyIds, onPlayerFainted);
 	}
 	switch (ability.id) {
 		case "endure":
@@ -47211,6 +53274,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			const perda = Math.round(attacker.poke.stats.hp / 2);
 			attacker.poke.hp = Math.max(1, attacker.poke.hp - perda);
 			attacker.estagios.atkFis = 6;
+			registrarFonteDoProprioGolpe(attacker, "atkFis", ability);
 			break;
 		}
 		case "acupressure": {
@@ -47224,6 +53288,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			const stat = stats[Math.floor(nextFloat(world.rng) * stats.length)];
 			const atual = attacker.estagios[stat] ?? 0;
 			attacker.estagios[stat] = Math.min(6, atual + 2);
+			registrarFonteDoProprioGolpe(attacker, stat, ability);
 			break;
 		}
 		case "aromatherapy":
@@ -47273,12 +53338,14 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 			duration: !isDamagingAbility(ability) ? STATUS_VFX_DURATION : IMPACT_EFFECT_DURATION,
 			elementType: ability.type,
 			abilityId: ability.id,
-			statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0
+			statusDirection: !isDamagingAbility(ability) ? direcaoDoGolpeDeStatus(ability.statChanges) : void 0,
+			seguir: local,
+			apontarPara: mesmoLugar || !ehDirecional(ability.id) ? void 0 : attacker
 		}));
 	}
 	if (!isDead(target)) return;
 	if (traitDoPoke(attacker.poke) === "moxie" && !isDead(attacker)) {
-		const mudanca = aplicarEstagioUnico(attacker, "atkFis", 1);
+		const mudanca = aplicarEstagioUnico(attacker, "atkFis", 1, fonteDeTrait(attacker, TRAIT_MOXIE));
 		if (mudanca && !silent) anunciarEstagios(world, attacker, [mudanca]);
 	}
 	if (isPlayerAttacker) {
@@ -47313,12 +53380,13 @@ function resolveEntryHook(world, self, opponent, silent) {
 	if (climaTipo) {
 		if (world.clima?.tipo !== climaTipo) world.clima = {
 			tipo: climaTipo,
-			turnosRestantes: CLIMA_DE_TRAIT_TURNOS
+			turnosRestantes: CLIMA_DE_TRAIT_TURNOS,
+			origem: "golpe"
 		};
 		return;
 	}
 	if (trait === "intimidate") {
-		const mudanca = aplicarEstagioUnico(opponent, "atkFis", -1);
+		const mudanca = aplicarEstagioUnico(opponent, "atkFis", -1, fonteDeTrait(self, "intimidate", opponent));
 		if (mudanca && !silent) anunciarEstagios(world, opponent, [mudanca]);
 		return;
 	}
@@ -47332,7 +53400,7 @@ function resolveEntryHook(world, self, opponent, silent) {
 	}
 	if (trait === "download") {
 		const opponentPoke = opponent.poke;
-		const mudanca = aplicarEstagioUnico(self, opponentPoke.stats.def * multiplicadorDeStat(opponent.estagios, "def") <= opponentPoke.stats.defEsp * multiplicadorDeStat(opponent.estagios, "defEsp") ? "atkFis" : "atkEsp", 1);
+		const mudanca = aplicarEstagioUnico(self, opponentPoke.stats.def * multiplicadorDeStat(opponent.estagios, "def") <= opponentPoke.stats.defEsp * multiplicadorDeStat(opponent.estagios, "defEsp") ? "atkFis" : "atkEsp", 1, fonteDeTrait(self, "download"));
 		if (mudanca && !silent) anunciarEstagios(world, self, [mudanca]);
 	}
 }
@@ -47380,9 +53448,13 @@ function updateCombat(world, dt, opts = {}) {
 	}
 	if (turnoDeClimaFechou && world.clima) {
 		world.clima.turnosRestantes -= 1;
-		if (world.clima.turnosRestantes <= 0) world.clima = null;
+		if (world.clima.turnosRestantes <= 0) reporClimaDeAmbiente(world);
 	}
-	for (const effect of world.effects) tickEffect(effect, dt);
+	for (const effect of world.effects) {
+		tickEffect(effect, dt);
+		if (effect.seguirId) seguirDono(effect, findEntityById(player, enemies, effect.seguirId));
+		if (effect.apontarParaId) reapontarParaAtacante(effect, findEntityById(player, enemies, effect.apontarParaId));
+	}
 	for (const effect of world.effects) if (effectDone(effect) && effect.ownerId) {
 		const owner = findEntityById(player, enemies, effect.ownerId);
 		if (owner) releaseEffectLane(owner, effect.id);
@@ -47416,6 +53488,7 @@ function updateCombat(world, dt, opts = {}) {
 	if (player.state !== "engaged" && player.entradaProcessada) player.entradaProcessada = false;
 	for (const enemy of enemies) if (enemy.state !== "engaged" && enemy.entradaProcessada) enemy.entradaProcessada = false;
 	const engagedEnemies = enemies.filter((e) => !isDead(e) && e.state === "engaged" && e.targetId === player.id);
+	player.targetId = engagedEnemies[0]?.id ?? null;
 	if (engagedEnemies.length > 0) {
 		const primaryTarget = engagedEnemies[0];
 		if (!player.entradaProcessada) {
@@ -47433,7 +53506,7 @@ function updateCombat(world, dt, opts = {}) {
 		}
 	} else {
 		limparEstadoVolatil(player);
-		world.clima = null;
+		reporClimaDeAmbiente(world);
 	}
 	return {
 		defeatedEnemyIds,
@@ -47488,7 +53561,7 @@ function slideToward(entity, tx, ty, speed, dt, mapDef) {
 }
 function hasLineOfSight(mapDef, x0, y0, x1, y1) {
 	const dist = Math.hypot(x1 - x0, y1 - y0);
-	const steps = Math.max(1, Math.ceil(dist / 20));
+	const steps = Math.max(1, Math.ceil(dist / 10));
 	for (let i = 1; i <= steps; i++) {
 		const t = i / steps;
 		if (isCellBlocked(mapDef, x0 + (x1 - x0) * t, y0 + (y1 - y0) * t)) return false;
@@ -47824,7 +53897,7 @@ function attemptCapture(rng, gameState, defeatedPoke, ballItemId) {
 		chance,
 		ballItemId
 	};
-	const stats = computeStatsAtLevel(species, CAPTURE_LEVEL, defeatedPoke.ivs, defeatedPoke.rarity, defeatedPoke.isShiny);
+	const stats = computeStatsAtLevel(species, CAPTURE_LEVEL, defeatedPoke.ivs, defeatedPoke.rarity, defeatedPoke.isShiny, defeatedPoke.nature);
 	const newPoke = {
 		...defeatedPoke,
 		uid: novoPokeUid(),
@@ -47878,6 +53951,21 @@ function resolveRulePotionId(gameState, rule) {
 function melhorCuraDeStatus(gameState, status) {
 	return Object.values(ITEMS).filter((item) => "kind" in item && item.kind === "status_heal" && Array.isArray(item.healsStatus) && item.healsStatus.includes(status) && gameState.hasItem(item.id, 1) && gameState.autoStatusConfig[item.id] !== false).sort((a, b) => a.buyPrice - b.buyPrice)[0] ?? null;
 }
+/**
+* O revive mais BARATO que o jogador tem em estoque (PH-144).
+*
+* Antes era `getItem('revive')` literal: quem tinha cinquenta Max Revive e
+* nenhum Revive comum ficava com a automacao morta — o POKE desmaiava e o bot
+* nao levantava ele, sem nada na tela explicando. E o seletor da tela ja
+* oferecia os dois.
+*
+* Ordena por preco de compra e pega o primeiro, mesma economia de
+* `melhorCuraDeStatus`: gastar o Max Revive (que revive com HP cheio) quando um
+* Revive comum resolveria e desperdicio.
+*/
+function melhorRevive(gameState) {
+	return Object.values(ITEMS).filter((item) => "kind" in item && item.kind === "revive" && item.reviveHpPercent != null && gameState.hasItem(item.id, 1)).sort((a, b) => a.buyPrice - b.buyPrice)[0] ?? null;
+}
 function updateAutoHeal(world, gameState, dt) {
 	const player = world.player;
 	const events = [];
@@ -47889,9 +53977,9 @@ function updateAutoHeal(world, gameState, dt) {
 	else world.reviveCountdown = null;
 	if (isBossHunt || timers.treinador > 0) return events;
 	if (gameState.autoToggles.autoRevive && player.fainted && (world.reviveCountdown ?? 0) <= 0) {
-		const revive = getItem("revive");
-		if (revive && "reviveHpPercent" in revive && revive.reviveHpPercent != null && gameState.hasItem("revive", 1)) {
-			gameState.removeItem("revive", 1);
+		const revive = melhorRevive(gameState);
+		if (revive) {
+			gameState.removeItem(revive.id, 1);
 			player.poke.hp = Math.round(player.poke.stats.hp * revive.reviveHpPercent);
 			player.fainted = false;
 			player.state = "wander";
@@ -47899,7 +53987,7 @@ function updateAutoHeal(world, gameState, dt) {
 			world.reviveCountdown = null;
 			events.push({
 				type: "auto_revive",
-				itemId: "revive"
+				itemId: revive.id
 			});
 			return events;
 		}
@@ -48294,62 +54382,14 @@ function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0) {
 		return;
 	}
 	if (world.salaSobAutoridade) {
+		if (world.salaPredita) return;
 		world.salaEsperaDaAutoridade += dt;
 		if (world.salaEsperaDaAutoridade < 20) return;
 		world.salaEsperaDaAutoridade = 0;
+		if (armarTransicaoDeSala(world, mapId).avancou) world.salaPredita = true;
+		return;
 	}
 	armarTransicaoDeSala(world, mapId);
-}
-/**
-* A sala que o SERVIDOR decidiu, entrando pela mesma porta da transicao local.
-*
-* Tres casos, e a diferenca entre eles e o que o jogador ve:
-*
-*  - MESMA sala (so o contador de abates andou): escreve o contador e mais
-*    nada. E o caso comum — um flush a cada 30s, uma troca de sala a cada
-*    poucos minutos.
-*  - PRIMEIRA sala da sessao (nao havia sala): entra direto, sem aviso. Nao ha
-*    "sala anterior" pra anunciar saida de.
-*  - sala DIFERENTE: vira `salaPendente` e arma a contagem regressiva. Quem
-*    troca o mapa, zera os inimigos e reposiciona o jogador continua sendo
-*    `aplicarTransicaoDeSala`, no gate do proximo tick.
-*
-* Antes disto o cliente escrevia a sala do servidor direto no estado. O nome no
-* HUD trocava, e o resto da cena — arte de fundo, grade de colisao, ponto de
-* nascimento, inimigos em campo — ficava na sala ANTERIOR, porque so
-* `aplicarTransicaoDeSala` mexe nisso. Uma hunt podia ficar minutos anunciando
-* "Laboratorio" enquanto desenhava e colidia como "Usina".
-*
-* Nunca REGRIDE: sala com (ciclo, indice) anterior ao que esta na tela e
-* ignorada. Isso acontece de verdade — o flush cobre uma janela que comecou
-* antes da troca, e o servidor responde com a sala de la. Aceitar aquilo
-* mandava o jogador de volta pra sala 1 com o aviso de nova area, o que le como
-* perda de progresso.
-*/
-function reconciliarSalaDaAutoridade(world, sala) {
-	if (!world.mapDef) return;
-	if (!sala) {
-		if (temSalas(world.mapDef.id)) return;
-		world.sala = null;
-		world.salaPendente = null;
-		world.salaCountdownRemaining = null;
-		return;
-	}
-	const atual = world.salaPendente ?? world.sala;
-	if (!atual) {
-		world.sala = { ...sala };
-		return;
-	}
-	if (atual.chave === sala.chave && atual.indice === sala.indice && atual.ciclos === sala.ciclos) {
-		const alvo = world.salaPendente ?? world.sala;
-		if (alvo) alvo.abates = Math.max(alvo.abates, sala.abates);
-		return;
-	}
-	const posicao = (s) => s.ciclos * 10 + s.indice;
-	if (posicao(sala) < posicao(atual)) return;
-	world.salaPendente = { ...sala };
-	world.salaCountdownRemaining ??= 3;
-	world.salaEsperaDaAutoridade = 0;
 }
 /**
 * Aplica a sala ja sorteada (`world.salaPendente`) quando a contagem
@@ -48363,6 +54403,8 @@ function aplicarTransicaoDeSala(world, mapId) {
 	if (!pendente) return;
 	world.sala = pendente;
 	world.salaPendente = null;
+	world.clima = null;
+	definirClimaDeAmbiente(world, world.salaSobAutoridade ? null : climaAmbienteDaSala(world.seed, world.sala));
 	world.salaEsperaDaAutoridade = 0;
 	world.enemies = [];
 	world.effects = [];
@@ -48403,6 +54445,41 @@ function recordPokedexKill(gameState, speciesId, isShiny) {
 	gameState.setPokedexKillEntry(speciesId, next);
 }
 //#endregion
+//#region src/engine/worldState.ts
+function emptyWorldState(seed = randomSeed()) {
+	return {
+		mapDef: null,
+		player: null,
+		enemies: [],
+		effects: [],
+		pendingHits: [],
+		pendingWishes: [],
+		autoTimers: { treinador: 0 },
+		reviveCountdown: null,
+		trocaEmCampo: null,
+		respawnTimer: null,
+		sequenceIndex: 0,
+		sequenceCleared: false,
+		countdownRemaining: null,
+		sala: null,
+		salaCountdownRemaining: null,
+		salaPendente: null,
+		salaSobAutoridade: false,
+		salaEsperaDaAutoridade: 0,
+		salaPredita: false,
+		rng: createRng(seed),
+		seed,
+		counters: {
+			entity: 1,
+			effect: 1,
+			pendingHit: 1
+		},
+		pessimista: false,
+		clima: null,
+		climaAmbiente: null
+	};
+}
+//#endregion
 //#region node_modules/zustand/esm/vanilla.mjs
 var createStoreImpl = (createState) => {
 	let state;
@@ -48432,761 +54509,7 @@ var createStoreImpl = (createState) => {
 };
 var createStore = ((createState) => createState ? createStoreImpl(createState) : createStoreImpl);
 //#endregion
-//#region node_modules/react/cjs/react.production.js
-/**
-* @license React
-* react.production.js
-*
-* Copyright (c) Meta Platforms, Inc. and affiliates.
-*
-* This source code is licensed under the MIT license found in the
-* LICENSE file in the root directory of this source tree.
-*/
-var require_react_production = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var ReactNoopUpdateQueue = {
-		isMounted: function() {
-			return !1;
-		},
-		enqueueForceUpdate: function() {},
-		enqueueReplaceState: function() {},
-		enqueueSetState: function() {}
-	};
-	var assign = Object.assign;
-	var emptyObject = {};
-	function Component(props, context, updater) {
-		this.props = props;
-		this.context = context;
-		this.refs = emptyObject;
-		this.updater = updater || ReactNoopUpdateQueue;
-	}
-	Component.prototype.isReactComponent = {};
-	Component.prototype.setState = function(partialState, callback) {
-		if ("object" !== typeof partialState && "function" !== typeof partialState && null != partialState) throw Error("takes an object of state variables to update or a function which returns an object of state variables.");
-		this.updater.enqueueSetState(this, partialState, callback, "setState");
-	};
-	Component.prototype.forceUpdate = function(callback) {
-		this.updater.enqueueForceUpdate(this, callback, "forceUpdate");
-	};
-	function ComponentDummy() {}
-	ComponentDummy.prototype = Component.prototype;
-	function PureComponent(props, context, updater) {
-		this.props = props;
-		this.context = context;
-		this.refs = emptyObject;
-		this.updater = updater || ReactNoopUpdateQueue;
-	}
-	var pureComponentPrototype = PureComponent.prototype = new ComponentDummy();
-	pureComponentPrototype.constructor = PureComponent;
-	assign(pureComponentPrototype, Component.prototype);
-	pureComponentPrototype.isPureReactComponent = !0;
-	Array.isArray;
-	var ReactSharedInternals = {
-		H: null,
-		A: null,
-		T: null,
-		S: null
-	};
-	exports.useCallback = function(callback, deps) {
-		return ReactSharedInternals.H.useCallback(callback, deps);
-	};
-	exports.useDebugValue = function() {};
-	exports.useSyncExternalStore = function(subscribe, getSnapshot, getServerSnapshot) {
-		return ReactSharedInternals.H.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-	};
-}));
-//#endregion
-//#region node_modules/zustand/esm/react.mjs
-var import_react = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_react_production();
-})))(), 1);
-var identity = (arg) => arg;
-function useStore(api, selector = identity) {
-	const slice = import_react.useSyncExternalStore(api.subscribe, import_react.useCallback(() => selector(api.getState()), [api, selector]), import_react.useCallback(() => selector(api.getInitialState()), [api, selector]));
-	import_react.useDebugValue(slice);
-	return slice;
-}
-var createImpl = (createState) => {
-	const api = createStore(createState);
-	const useBoundStore = (selector) => useStore(api, selector);
-	Object.assign(useBoundStore, api);
-	return useBoundStore;
-};
-var create = ((createState) => createState ? createImpl(createState) : createImpl);
-//#endregion
-//#region node_modules/immer/dist/immer.mjs
-var NOTHING = Symbol.for("immer-nothing");
-var DRAFTABLE = Symbol.for("immer-draftable");
-var DRAFT_STATE = Symbol.for("immer-state");
-function die(error, ...args) {
-	throw new Error(`[Immer] minified error nr: ${error}. Full error at: https://bit.ly/3cXEKWf`);
-}
-var O = Object;
-var getPrototypeOf = O.getPrototypeOf;
-var CONSTRUCTOR = "constructor";
-var PROTOTYPE = "prototype";
-var CONFIGURABLE = "configurable";
-var ENUMERABLE = "enumerable";
-var WRITABLE = "writable";
-var VALUE = "value";
-var isDraft = (value) => !!value && !!value[DRAFT_STATE];
-function isDraftable(value) {
-	if (!value) return false;
-	return isPlainObject(value) || isArray(value) || !!value[DRAFTABLE] || !!value[CONSTRUCTOR]?.[DRAFTABLE] || isMap(value) || isSet(value);
-}
-var objectCtorString = O[PROTOTYPE][CONSTRUCTOR].toString();
-var cachedCtorStrings = /* @__PURE__ */ new WeakMap();
-function isPlainObject(value) {
-	if (!value || !isObjectish(value)) return false;
-	const proto = getPrototypeOf(value);
-	if (proto === null || proto === O[PROTOTYPE]) return true;
-	const Ctor = O.hasOwnProperty.call(proto, CONSTRUCTOR) && proto[CONSTRUCTOR];
-	if (Ctor === Object) return true;
-	if (!isFunction(Ctor)) return false;
-	let ctorString = cachedCtorStrings.get(Ctor);
-	if (ctorString === void 0) {
-		ctorString = Function.toString.call(Ctor);
-		cachedCtorStrings.set(Ctor, ctorString);
-	}
-	return ctorString === objectCtorString;
-}
-function each(obj, iter, strict = true) {
-	if (getArchtype(obj) === 0) (strict ? Reflect.ownKeys(obj) : O.keys(obj)).forEach((key) => {
-		iter(key, obj[key], obj);
-	});
-	else obj.forEach((entry, index) => iter(index, entry, obj));
-}
-function getArchtype(thing) {
-	const state = thing[DRAFT_STATE];
-	return state ? state.type_ : isArray(thing) ? 1 : isMap(thing) ? 2 : isSet(thing) ? 3 : 0;
-}
-var has = (thing, prop, type = getArchtype(thing)) => type === 2 ? thing.has(prop) : O[PROTOTYPE].hasOwnProperty.call(thing, prop);
-var get = (thing, prop, type = getArchtype(thing)) => type === 2 ? thing.get(prop) : thing[prop];
-var set = (thing, propOrOldValue, value, type = getArchtype(thing)) => {
-	if (type === 2) thing.set(propOrOldValue, value);
-	else if (type === 3) thing.add(value);
-	else thing[propOrOldValue] = value;
-};
-function is(x, y) {
-	if (x === y) return x !== 0 || 1 / x === 1 / y;
-	else return x !== x && y !== y;
-}
-var isArray = Array.isArray;
-var isMap = (target) => target instanceof Map;
-var isSet = (target) => target instanceof Set;
-var isObjectish = (target) => typeof target === "object";
-var isFunction = (target) => typeof target === "function";
-var isBoolean = (target) => typeof target === "boolean";
-function isArrayIndex(value) {
-	const n = +value;
-	return Number.isInteger(n) && String(n) === value;
-}
-var latest = (state) => state.copy_ || state.base_;
-var getFinalValue = (state) => state.modified_ ? state.copy_ : state.base_;
-function shallowCopy(base, strict) {
-	if (isMap(base)) return new Map(base);
-	if (isSet(base)) return new Set(base);
-	if (isArray(base)) return Array[PROTOTYPE].slice.call(base);
-	const isPlain = isPlainObject(base);
-	if (strict === true || strict === "class_only" && !isPlain) {
-		const descriptors = O.getOwnPropertyDescriptors(base);
-		delete descriptors[DRAFT_STATE];
-		let keys = Reflect.ownKeys(descriptors);
-		for (let i = 0; i < keys.length; i++) {
-			const key = keys[i];
-			const desc = descriptors[key];
-			if (desc[WRITABLE] === false) {
-				desc[WRITABLE] = true;
-				desc[CONFIGURABLE] = true;
-			}
-			if (desc.get || desc.set) descriptors[key] = {
-				[CONFIGURABLE]: true,
-				[WRITABLE]: true,
-				[ENUMERABLE]: desc[ENUMERABLE],
-				[VALUE]: base[key]
-			};
-		}
-		return O.create(getPrototypeOf(base), descriptors);
-	} else {
-		const proto = getPrototypeOf(base);
-		if (proto !== null && isPlain) return { ...base };
-		const obj = O.create(proto);
-		return O.assign(obj, base);
-	}
-}
-function freeze(obj, deep = false) {
-	if (isFrozen(obj) || isDraft(obj) || !isDraftable(obj)) return obj;
-	if (getArchtype(obj) > 1) O.defineProperties(obj, {
-		set: dontMutateMethodOverride,
-		add: dontMutateMethodOverride,
-		clear: dontMutateMethodOverride,
-		delete: dontMutateMethodOverride
-	});
-	O.freeze(obj);
-	if (deep) each(obj, (_key, value) => {
-		freeze(value, true);
-	}, false);
-	return obj;
-}
-function dontMutateFrozenCollections() {
-	die(2);
-}
-var dontMutateMethodOverride = { [VALUE]: dontMutateFrozenCollections };
-function isFrozen(obj) {
-	if (obj === null || !isObjectish(obj)) return true;
-	return O.isFrozen(obj);
-}
-var PluginMapSet = "MapSet";
-var PluginPatches = "Patches";
-var PluginArrayMethods = "ArrayMethods";
-var plugins = {};
-function getPlugin(pluginKey) {
-	const plugin = plugins[pluginKey];
-	if (!plugin) die(0, pluginKey);
-	return plugin;
-}
-var isPluginLoaded = (pluginKey) => !!plugins[pluginKey];
-var currentScope;
-var getCurrentScope = () => currentScope;
-var createScope = (parent_, immer_) => ({
-	drafts_: [],
-	parent_,
-	immer_,
-	canAutoFreeze_: true,
-	unfinalizedDrafts_: 0,
-	handledSet_: /* @__PURE__ */ new Set(),
-	processedForPatches_: /* @__PURE__ */ new Set(),
-	mapSetPlugin_: isPluginLoaded(PluginMapSet) ? getPlugin(PluginMapSet) : void 0,
-	arrayMethodsPlugin_: isPluginLoaded(PluginArrayMethods) ? getPlugin(PluginArrayMethods) : void 0
-});
-function usePatchesInScope(scope, patchListener) {
-	if (patchListener) {
-		scope.patchPlugin_ = getPlugin(PluginPatches);
-		scope.patches_ = [];
-		scope.inversePatches_ = [];
-		scope.patchListener_ = patchListener;
-	}
-}
-function revokeScope(scope) {
-	leaveScope(scope);
-	scope.drafts_.forEach(revokeDraft);
-	scope.drafts_ = null;
-}
-function leaveScope(scope) {
-	if (scope === currentScope) currentScope = scope.parent_;
-}
-var enterScope = (immer2) => currentScope = createScope(currentScope, immer2);
-function revokeDraft(draft) {
-	const state = draft[DRAFT_STATE];
-	if (state.type_ === 0 || state.type_ === 1) state.revoke_();
-	else state.revoked_ = true;
-}
-function processResult(result, scope) {
-	scope.unfinalizedDrafts_ = scope.drafts_.length;
-	const baseDraft = scope.drafts_[0];
-	if (result !== void 0 && result !== baseDraft) {
-		if (baseDraft[DRAFT_STATE].modified_) {
-			revokeScope(scope);
-			die(4);
-		}
-		if (isDraftable(result)) result = finalize(scope, result);
-		const { patchPlugin_ } = scope;
-		if (patchPlugin_) patchPlugin_.generateReplacementPatches_(baseDraft[DRAFT_STATE].base_, result, scope);
-	} else result = finalize(scope, baseDraft);
-	maybeFreeze(scope, result, true);
-	revokeScope(scope);
-	if (scope.patches_) scope.patchListener_(scope.patches_, scope.inversePatches_);
-	return result !== NOTHING ? result : void 0;
-}
-function finalize(rootScope, value) {
-	if (isFrozen(value)) return value;
-	const state = value[DRAFT_STATE];
-	if (!state) return handleValue(value, rootScope.handledSet_, rootScope);
-	if (!isSameScope(state, rootScope)) return value;
-	if (!state.modified_) return state.base_;
-	if (!state.finalized_) {
-		const { callbacks_ } = state;
-		if (callbacks_) while (callbacks_.length > 0) callbacks_.pop()(rootScope);
-		generatePatchesAndFinalize(state, rootScope);
-	}
-	return state.copy_;
-}
-function maybeFreeze(scope, value, deep = false) {
-	if (!scope.parent_ && scope.immer_.autoFreeze_ && scope.canAutoFreeze_) freeze(value, deep);
-}
-function markStateFinalized(state) {
-	state.finalized_ = true;
-	state.scope_.unfinalizedDrafts_--;
-}
-var isSameScope = (state, rootScope) => state.scope_ === rootScope;
-var EMPTY_LOCATIONS_RESULT = [];
-function updateDraftInParent(parent, draftValue, finalizedValue, originalKey) {
-	const parentCopy = latest(parent);
-	const parentType = parent.type_;
-	if (originalKey !== void 0) {
-		if (get(parentCopy, originalKey, parentType) === draftValue) {
-			set(parentCopy, originalKey, finalizedValue, parentType);
-			return;
-		}
-	}
-	if (!parent.draftLocations_) {
-		const draftLocations = parent.draftLocations_ = /* @__PURE__ */ new Map();
-		each(parentCopy, (key, value) => {
-			if (isDraft(value)) {
-				const keys = draftLocations.get(value) || [];
-				keys.push(key);
-				draftLocations.set(value, keys);
-			}
-		});
-	}
-	const locations = parent.draftLocations_.get(draftValue) ?? EMPTY_LOCATIONS_RESULT;
-	for (const location of locations) set(parentCopy, location, finalizedValue, parentType);
-}
-function registerChildFinalizationCallback(parent, child, key) {
-	parent.callbacks_.push(function childCleanup(rootScope) {
-		const state = child;
-		if (!state || !isSameScope(state, rootScope)) return;
-		rootScope.mapSetPlugin_?.fixSetContents(state);
-		const finalizedValue = getFinalValue(state);
-		updateDraftInParent(parent, state.draft_ ?? state, finalizedValue, key);
-		generatePatchesAndFinalize(state, rootScope);
-	});
-}
-function generatePatchesAndFinalize(state, rootScope) {
-	if (state.modified_ && !state.finalized_ && (state.type_ === 3 || state.type_ === 1 && state.allIndicesReassigned_ || (state.assigned_?.size ?? 0) > 0)) {
-		const { patchPlugin_ } = rootScope;
-		if (patchPlugin_) {
-			const basePath = patchPlugin_.getPath(state);
-			if (basePath) patchPlugin_.generatePatches_(state, basePath, rootScope);
-		}
-		markStateFinalized(state);
-	}
-}
-function handleCrossReference(target, key, value) {
-	const { scope_ } = target;
-	if (isDraft(value)) {
-		const state = value[DRAFT_STATE];
-		if (isSameScope(state, scope_)) state.callbacks_.push(function crossReferenceCleanup() {
-			prepareCopy(target);
-			updateDraftInParent(target, value, getFinalValue(state), key);
-		});
-	} else if (isDraftable(value)) target.callbacks_.push(function nestedDraftCleanup() {
-		const targetCopy = latest(target);
-		if (target.type_ === 3) {
-			if (targetCopy.has(value)) handleValue(value, scope_.handledSet_, scope_);
-		} else if (get(targetCopy, key, target.type_) === value) {
-			if (scope_.drafts_.length > 1 && (target.assigned_.get(key) ?? false) === true && target.copy_) handleValue(get(target.copy_, key, target.type_), scope_.handledSet_, scope_);
-		}
-	});
-}
-function handleValue(target, handledSet, rootScope) {
-	if (!rootScope.immer_.autoFreeze_ && rootScope.unfinalizedDrafts_ < 1) return target;
-	if (isDraft(target) || handledSet.has(target) || !isDraftable(target) || isFrozen(target)) return target;
-	handledSet.add(target);
-	each(target, (key, value) => {
-		if (isDraft(value)) {
-			const state = value[DRAFT_STATE];
-			if (isSameScope(state, rootScope)) {
-				set(target, key, getFinalValue(state), target.type_);
-				markStateFinalized(state);
-			}
-		} else if (isDraftable(value)) handleValue(value, handledSet, rootScope);
-	});
-	return target;
-}
-function createProxyProxy(base, parent) {
-	const baseIsArray = isArray(base);
-	const state = {
-		type_: baseIsArray ? 1 : 0,
-		scope_: parent ? parent.scope_ : getCurrentScope(),
-		modified_: false,
-		finalized_: false,
-		assigned_: void 0,
-		parent_: parent,
-		base_: base,
-		draft_: null,
-		copy_: null,
-		revoke_: null,
-		isManual_: false,
-		callbacks_: void 0
-	};
-	let target = state;
-	let traps = objectTraps;
-	if (baseIsArray) {
-		target = [state];
-		traps = arrayTraps;
-	}
-	const { revoke, proxy } = Proxy.revocable(target, traps);
-	state.draft_ = proxy;
-	state.revoke_ = revoke;
-	return [proxy, state];
-}
-var objectTraps = {
-	get(state, prop) {
-		if (prop === DRAFT_STATE) return state;
-		let arrayPlugin = state.scope_.arrayMethodsPlugin_;
-		const isArrayWithStringProp = state.type_ === 1 && typeof prop === "string";
-		if (isArrayWithStringProp) {
-			if (arrayPlugin?.isArrayOperationMethod(prop)) return arrayPlugin.createMethodInterceptor(state, prop);
-		}
-		const source = latest(state);
-		if (!has(source, prop, state.type_)) return readPropFromProto(state, source, prop);
-		const value = source[prop];
-		if (state.finalized_ || !isDraftable(value)) return value;
-		if (isArrayWithStringProp && state.operationMethod && arrayPlugin?.isMutatingArrayMethod(state.operationMethod) && isArrayIndex(prop)) return value;
-		if (value === peek(state.base_, prop) || isRelocatedBaseRef(state, prop, value)) {
-			prepareCopy(state);
-			const childKey = state.type_ === 1 ? +prop : prop;
-			const childDraft = createProxy(state.scope_, value, state, childKey);
-			return state.copy_[childKey] = childDraft;
-		}
-		return value;
-	},
-	has(state, prop) {
-		return prop in latest(state);
-	},
-	ownKeys(state) {
-		return Reflect.ownKeys(latest(state));
-	},
-	set(state, prop, value) {
-		const desc = getDescriptorFromProto(latest(state), prop);
-		if (desc?.set) {
-			desc.set.call(state.draft_, value);
-			return true;
-		}
-		if (!state.modified_) {
-			const current2 = peek(latest(state), prop);
-			const currentState = current2?.[DRAFT_STATE];
-			if (currentState && currentState.base_ === value) {
-				state.copy_[prop] = value;
-				state.assigned_.set(prop, false);
-				return true;
-			}
-			if (is(value, current2) && (value !== void 0 || has(state.base_, prop, state.type_))) return true;
-			prepareCopy(state);
-			markChanged(state);
-		}
-		if (state.copy_[prop] === value && (value !== void 0 || has(state.copy_, prop, state.type_)) || Number.isNaN(value) && Number.isNaN(state.copy_[prop])) return true;
-		state.copy_[prop] = value;
-		state.assigned_.set(prop, true);
-		handleCrossReference(state, prop, value);
-		return true;
-	},
-	deleteProperty(state, prop) {
-		prepareCopy(state);
-		if (peek(state.base_, prop) !== void 0 || prop in state.base_) {
-			state.assigned_.set(prop, false);
-			markChanged(state);
-		} else state.assigned_.delete(prop);
-		if (state.copy_) delete state.copy_[prop];
-		return true;
-	},
-	getOwnPropertyDescriptor(state, prop) {
-		const owner = latest(state);
-		const desc = Reflect.getOwnPropertyDescriptor(owner, prop);
-		if (!desc) return desc;
-		return {
-			[WRITABLE]: true,
-			[CONFIGURABLE]: state.type_ !== 1 || prop !== "length",
-			[ENUMERABLE]: desc[ENUMERABLE],
-			[VALUE]: owner[prop]
-		};
-	},
-	defineProperty() {
-		die(11);
-	},
-	getPrototypeOf(state) {
-		return getPrototypeOf(state.base_);
-	},
-	setPrototypeOf() {
-		die(12);
-	}
-};
-var arrayTraps = {};
-for (let key in objectTraps) {
-	let fn = objectTraps[key];
-	arrayTraps[key] = function() {
-		const args = arguments;
-		args[0] = args[0][0];
-		return fn.apply(this, args);
-	};
-}
-arrayTraps.deleteProperty = function(state, prop) {
-	return arrayTraps.set.call(this, state, prop, void 0);
-};
-arrayTraps.set = function(state, prop, value) {
-	return objectTraps.set.call(this, state[0], prop, value, state[0]);
-};
-function peek(draft, prop) {
-	const state = draft[DRAFT_STATE];
-	return (state ? latest(state) : draft)[prop];
-}
-function isRelocatedBaseRef(state, prop, value) {
-	if (state.type_ !== 1 || !state.allIndicesReassigned_ || state.assigned_?.get(prop) || !isDraftable(value) || value[DRAFT_STATE]) return false;
-	return state.baseRefs_.has(value);
-}
-function readPropFromProto(state, source, prop) {
-	const desc = getDescriptorFromProto(source, prop);
-	return desc ? VALUE in desc ? desc[VALUE] : desc.get?.call(state.draft_) : void 0;
-}
-function getDescriptorFromProto(source, prop) {
-	if (!(prop in source)) return void 0;
-	let proto = getPrototypeOf(source);
-	while (proto) {
-		const desc = Object.getOwnPropertyDescriptor(proto, prop);
-		if (desc) return desc;
-		proto = getPrototypeOf(proto);
-	}
-}
-function markChanged(state) {
-	if (!state.modified_) {
-		state.modified_ = true;
-		if (state.parent_) markChanged(state.parent_);
-	}
-}
-function prepareCopy(state) {
-	if (!state.copy_) {
-		state.assigned_ = /* @__PURE__ */ new Map();
-		state.copy_ = shallowCopy(state.base_, state.scope_.immer_.useStrictShallowCopy_);
-	}
-}
-var Immer2 = class {
-	constructor(config) {
-		this.autoFreeze_ = true;
-		this.useStrictShallowCopy_ = false;
-		this.useStrictIteration_ = false;
-		/**
-		* The `produce` function takes a value and a "recipe function" (whose
-		* return value often depends on the base state). The recipe function is
-		* free to mutate its first argument however it wants. All mutations are
-		* only ever applied to a __copy__ of the base state.
-		*
-		* Pass only a function to create a "curried producer" which relieves you
-		* from passing the recipe function every time.
-		*
-		* Only plain objects and arrays are made mutable. All other objects are
-		* considered uncopyable.
-		*
-		* Note: This function is __bound__ to its `Immer` instance.
-		*
-		* @param {any} base - the initial state
-		* @param {Function} recipe - function that receives a proxy of the base state as first argument and which can be freely modified
-		* @param {Function} patchListener - optional function that will be called with all the patches produced here
-		* @returns {any} a new state, or the initial state if nothing was modified
-		*/
-		this.produce = (base, recipe, patchListener) => {
-			if (isFunction(base) && !isFunction(recipe)) {
-				const defaultBase = recipe;
-				recipe = base;
-				const self = this;
-				return function curriedProduce(base2 = defaultBase, ...args) {
-					return self.produce(base2, (draft) => recipe.call(this, draft, ...args));
-				};
-			}
-			if (!isFunction(recipe)) die(6);
-			if (patchListener !== void 0 && !isFunction(patchListener)) die(7);
-			let result;
-			if (isDraftable(base)) {
-				const scope = enterScope(this);
-				const proxy = createProxy(scope, base, void 0);
-				let hasError = true;
-				try {
-					result = recipe(proxy);
-					hasError = false;
-				} finally {
-					if (hasError) revokeScope(scope);
-					else leaveScope(scope);
-				}
-				usePatchesInScope(scope, patchListener);
-				return processResult(result, scope);
-			} else if (!base || !isObjectish(base)) {
-				result = recipe(base);
-				if (result === void 0) result = base;
-				if (result === NOTHING) result = void 0;
-				if (this.autoFreeze_) freeze(result, true);
-				if (patchListener) {
-					const p = [];
-					const ip = [];
-					getPlugin(PluginPatches).generateReplacementPatches_(base, result, {
-						patches_: p,
-						inversePatches_: ip
-					});
-					patchListener(p, ip);
-				}
-				return result;
-			} else die(1, base);
-		};
-		this.produceWithPatches = (base, recipe) => {
-			if (isFunction(base)) return (state, ...args) => this.produceWithPatches(state, (draft) => base(draft, ...args));
-			let patches, inversePatches;
-			return [
-				this.produce(base, recipe, (p, ip) => {
-					patches = p;
-					inversePatches = ip;
-				}),
-				patches,
-				inversePatches
-			];
-		};
-		if (isBoolean(config?.autoFreeze)) this.setAutoFreeze(config.autoFreeze);
-		if (isBoolean(config?.useStrictShallowCopy)) this.setUseStrictShallowCopy(config.useStrictShallowCopy);
-		if (isBoolean(config?.useStrictIteration)) this.setUseStrictIteration(config.useStrictIteration);
-	}
-	createDraft(base) {
-		if (!isDraftable(base)) die(8);
-		if (isDraft(base)) base = current(base);
-		const scope = enterScope(this);
-		const proxy = createProxy(scope, base, void 0);
-		proxy[DRAFT_STATE].isManual_ = true;
-		leaveScope(scope);
-		return proxy;
-	}
-	finishDraft(draft, patchListener) {
-		const state = draft && draft[DRAFT_STATE];
-		if (!state || !state.isManual_) die(9);
-		const { scope_: scope } = state;
-		usePatchesInScope(scope, patchListener);
-		return processResult(void 0, scope);
-	}
-	/**
-	* Pass true to automatically freeze all copies created by Immer.
-	*
-	* By default, auto-freezing is enabled.
-	*/
-	setAutoFreeze(value) {
-		this.autoFreeze_ = value;
-	}
-	/**
-	* Pass true to enable strict shallow copy.
-	*
-	* By default, immer does not copy the object descriptors such as getter, setter and non-enumrable properties.
-	*/
-	setUseStrictShallowCopy(value) {
-		this.useStrictShallowCopy_ = value;
-	}
-	/**
-	* Pass false to use faster iteration that skips non-enumerable properties
-	* but still handles symbols for compatibility.
-	*
-	* By default, strict iteration is enabled (includes all own properties).
-	*/
-	setUseStrictIteration(value) {
-		this.useStrictIteration_ = value;
-	}
-	shouldUseStrictIteration() {
-		return this.useStrictIteration_;
-	}
-	applyPatches(base, patches) {
-		let i;
-		for (i = patches.length - 1; i >= 0; i--) {
-			const patch = patches[i];
-			if (patch.path.length === 0 && patch.op === "replace") {
-				base = patch.value;
-				break;
-			}
-		}
-		if (i > -1) patches = patches.slice(i + 1);
-		const applyPatchesImpl = getPlugin(PluginPatches).applyPatches_;
-		if (isDraft(base)) return applyPatchesImpl(base, patches);
-		return this.produce(base, (draft) => applyPatchesImpl(draft, patches));
-	}
-};
-function createProxy(rootScope, value, parent, key) {
-	const [draft, state] = isMap(value) ? getPlugin(PluginMapSet).proxyMap_(value, parent) : isSet(value) ? getPlugin(PluginMapSet).proxySet_(value, parent) : createProxyProxy(value, parent);
-	(parent?.scope_ ?? getCurrentScope()).drafts_.push(draft);
-	state.callbacks_ = parent?.callbacks_ ?? [];
-	state.key_ = key;
-	if (parent && key !== void 0) registerChildFinalizationCallback(parent, state, key);
-	else state.callbacks_.push(function rootDraftCleanup(rootScope2) {
-		rootScope2.mapSetPlugin_?.fixSetContents(state);
-		const { patchPlugin_ } = rootScope2;
-		if (state.modified_ && patchPlugin_) patchPlugin_.generatePatches_(state, [], rootScope2);
-	});
-	return draft;
-}
-function current(value) {
-	if (!isDraft(value)) die(10, value);
-	return currentImpl(value);
-}
-function currentImpl(value) {
-	if (!isDraftable(value) || isFrozen(value)) return value;
-	const state = value[DRAFT_STATE];
-	let copy;
-	let strict = true;
-	if (state) {
-		if (!state.modified_) return state.base_;
-		state.finalized_ = true;
-		copy = shallowCopy(value, state.scope_.immer_.useStrictShallowCopy_);
-		strict = state.scope_.immer_.shouldUseStrictIteration();
-	} else copy = shallowCopy(value, true);
-	each(copy, (key, childValue) => {
-		set(copy, key, currentImpl(childValue));
-	}, strict);
-	if (state) state.finalized_ = false;
-	return copy;
-}
-var produce = new Immer2().produce;
-//#endregion
-//#region node_modules/zustand/esm/middleware/immer.mjs
-var immerImpl = (initializer) => (set, get, store) => {
-	store.setState = (updater, replace, ...args) => {
-		return set(typeof updater === "function" ? produce(updater) : updater, replace, ...args);
-	};
-	return initializer(store.setState, get, store);
-};
-var immer = immerImpl;
-//#endregion
-//#region src/stores/worldStore.ts
-function emptyWorldState(seed = randomSeed()) {
-	return {
-		mapDef: null,
-		player: null,
-		enemies: [],
-		effects: [],
-		pendingHits: [],
-		pendingWishes: [],
-		autoTimers: { treinador: 0 },
-		reviveCountdown: null,
-		respawnTimer: null,
-		sequenceIndex: 0,
-		sequenceCleared: false,
-		countdownRemaining: null,
-		sala: null,
-		salaCountdownRemaining: null,
-		salaPendente: null,
-		salaSobAutoridade: false,
-		salaEsperaDaAutoridade: 0,
-		rng: createRng(seed),
-		counters: {
-			entity: 1,
-			effect: 1,
-			pendingHit: 1
-		},
-		pessimista: false,
-		clima: null
-	};
-}
-create()(immer((set) => ({
-	...emptyWorldState(),
-	setWorld: (world) => set((draft) => {
-		Object.assign(draft, world);
-	}),
-	resetWorld: () => set((draft) => {
-		Object.assign(draft, emptyWorldState());
-	}),
-	update: (recipe) => set((draft) => recipe(draft)),
-	sortear: (fn) => {
-		let resultado;
-		set((draft) => {
-			resultado = fn(draft.rng);
-		});
-		return resultado;
-	},
-	definirSala: (sala) => set((draft) => {
-		reconciliarSalaDaAutoridade(draft, sala);
-	})
-})));
-//#endregion
-//#region src/stores/toastStore.ts
+//#region src/stores/toastStoreVanilla.ts
 var CHANNEL_TO_TAB = {
 	combat: "log",
 	trade: "trade",
@@ -49197,7 +54520,7 @@ var nextId = 1;
 function makeId() {
 	return `toast-${nextId++}`;
 }
-var useToastStore = create((set) => ({
+var toastStore = createStore()((set) => ({
 	toasts: [],
 	chatLines: {
 		sistema: [],
@@ -49241,6 +54564,7 @@ var useToastStore = create((set) => ({
 var formulaEngine = createFormulaEngine(FORMULAS);
 formulaEngine.evalOrDefault("OFFLINE_FARM_MAX_HOURS", 6);
 var OFFLINE_SIM_STEP_SECONDS = formulaEngine.evalOrDefault("OFFLINE_SIM_STEP_SECONDS", .1);
+var LIVE_SIM_STEP_SECONDS = 1 / 60;
 function shinyPrefix(isShiny) {
 	return isShiny ? "✨ " : "";
 }
@@ -49249,6 +54573,7 @@ function novoMundo(carry) {
 	if (carry) {
 		base.rng = { ...carry.rng };
 		base.counters = { ...carry.counters };
+		base.seed = carry.seed;
 	}
 	return base;
 }
@@ -49258,6 +54583,34 @@ var SPAWN_POINT_MAX_ATTEMPTS = 40;
 var SPAWN_CONE_MIN_DISTANCE = 250;
 var SPAWN_CONE_MAX_DISTANCE = 550;
 var SPAWN_CONE_HALF_ANGLE = 55 * Math.PI / 180;
+/**
+* Distancia minima ENTRE inimigos, em unidades de mundo (PH-143).
+*
+* O cone acima resolve "onde o jogador consegue ver", e so isso. Cada inimigo
+* era sorteado sem olhar onde os outros ja estavam, entao com `maxEnemies: 6`
+* (o valor das faixas em data/biomas.ts) os seis caiam na MESMA fatia de ~110
+* graus e podiam nascer colados. O resultado e um pico de dificuldade que nao
+* vem da faixa de nivel da hunt, e nada na tela denuncia que aquilo foi
+* sorteio.
+*
+* Menor que a largura util do cone de proposito: um valor grande demais nao
+* caberia na faixa 250-550 e todo spawn cairia no melhor-esforco, que e o mesmo
+* que nao ter regra.
+*/
+var SPAWN_ENTRE_INIMIGOS = 170;
+/**
+* Orcamento de tentativas quando ha vizinhos a evitar (PH-143).
+*
+* Maior que `SPAWN_POINT_MAX_ATTEMPTS`, e por geometria e nao por capricho: o
+* cone comporta os seis inimigos com folga (a area util e ~230 mil unidades²
+* contra ~136 mil que seis discos de raio 85 ocupam), mas o dardo aleatorio vai
+* ficando sem espaco conforme a regiao enche, e com 40 tentativas os ultimos
+* caiam quase sempre no melhor-esforco. Medido: a mediana da menor distancia
+* subiu de 108 para o dobro so com este orcamento.
+*
+* So custa sorteio no INSTANTE do spawn, nunca por quadro.
+*/
+var SPAWN_ESPACADO_MAX_ATTEMPTS = 160;
 function randomSpawnPointFullMap(rng, mapDef) {
 	const cx = mapDef.bounds.width / 2;
 	const cy = mapDef.bounds.height / 2;
@@ -49271,34 +54624,61 @@ function randomSpawnPointFullMap(rng, mapDef) {
 		y = cy + Math.sin(angle) * dist;
 		attempts++;
 	} while (attempts < SPAWN_POINT_MAX_ATTEMPTS && (Math.hypot(x - mapDef.playerSpawn.x, y - mapDef.playerSpawn.y) < SPAWN_MIN_DISTANCE || isCellBlocked(mapDef, x, y)));
+	if (isCellBlocked(mapDef, x, y)) {
+		const aberto = nearestOpenPoint(mapDef, x, y);
+		if (aberto) return aberto;
+	}
 	return {
 		x,
 		y
 	};
 }
-function randomSpawnPoint(rng, mapDef, player) {
+/** Distancia do ponto ao inimigo ja posicionado mais proximo. */
+function folgaAte(x, y, ocupados) {
+	let menor = Number.POSITIVE_INFINITY;
+	for (const o of ocupados) menor = Math.min(menor, Math.hypot(x - o.x, y - o.y));
+	return menor;
+}
+/**
+* `ocupados`: onde os inimigos JA posicionados nesta leva estao (PH-143).
+*
+* O ponto sorteado precisa respeitar `SPAWN_ENTRE_INIMIGOS` em relacao a eles.
+* Quando nenhuma das tentativas consegue (corredor estreito, sala pequena,
+* muitos inimigos), vale o MELHOR ESFORCO — o candidato valido mais afastado
+* dos outros — e nao o fallback de mapa inteiro: perder o espacamento e melhor
+* que perder o cone de visao, que e pedido explicito do usuario.
+*/
+function randomSpawnPoint(rng, mapDef, player, ocupados = []) {
 	if (!player) return randomSpawnPointFullMap(rng, mapDef);
 	const cx = mapDef.bounds.width / 2;
 	const cy = mapDef.bounds.height / 2;
 	const radius = mapWalkRadius(mapDef);
 	const facingAngle = Math.atan2(player.facing.y, player.facing.x);
-	for (let attempts = 0; attempts < SPAWN_POINT_MAX_ATTEMPTS; attempts++) {
+	let melhor = null;
+	const orcamento = ocupados.length > 0 ? SPAWN_ESPACADO_MAX_ATTEMPTS : SPAWN_POINT_MAX_ATTEMPTS;
+	for (let attempts = 0; attempts < orcamento; attempts++) {
 		const angle = facingAngle + randRange(rng, -SPAWN_CONE_HALF_ANGLE, SPAWN_CONE_HALF_ANGLE);
 		const dist = randRange(rng, SPAWN_CONE_MIN_DISTANCE, SPAWN_CONE_MAX_DISTANCE);
 		const x = player.x + Math.cos(angle) * dist;
 		const y = player.y + Math.sin(angle) * dist;
 		if (Math.hypot(x - cx, y - cy) > radius) continue;
 		if (isCellBlocked(mapDef, x, y)) continue;
-		return {
-			x,
-			y
+		const folga = folgaAte(x, y, ocupados);
+		if (!melhor || folga > melhor.folga) melhor = {
+			ponto: {
+				x,
+				y
+			},
+			folga
 		};
+		if (melhor.folga >= SPAWN_ENTRE_INIMIGOS * 1.5) break;
 	}
+	if (melhor) return melhor.ponto;
 	return randomSpawnPointFullMap(rng, mapDef);
 }
-function spawnEnemyAt(world, mapDef, pool, janela, player) {
+function spawnEnemyAt(world, mapDef, pool, janela, player, entrada, ocupados = []) {
 	const { rng, counters } = world;
-	const point = randomSpawnPoint(rng, mapDef, player ?? null);
+	const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null, ocupados);
 	const encounterId = weightedPick(rng, pool, (id) => getEncounter(id)?.weight ?? 45);
 	const encounter = getEncounter(encounterId);
 	if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
@@ -49332,13 +54712,65 @@ function sequenceSpawnPoint(rng, mapDef, base) {
 		y
 	};
 }
-function spawnSequenceEnemy(world, mapDef, index) {
+/**
+* A BOLA VERDE pintada na arte: por onde entra todo POKE novo do lado inimigo.
+* `null` quando a arte nao tem uma (as 29 hunts normais), e ai o chamador cai
+* no sorteio de sempre.
+*
+* Mapa que poe VARIOS inimigos em campo ao mesmo tempo nao usa: um ponto fixo
+* empilharia os seis no mesmo pixel. Sobra o formato de duelo — a sequencia do
+* Lance e os mapas de um inimigo so (BOSS, Treinamento), que e onde a bola faz
+* sentido.
+*/
+function entradaDoInimigo(mapDef, sala) {
+	if (!mapDef.sequence && mapDef.maxEnemies > 1) return null;
+	return spawnInimigoParaSala(mapDef.id, sala);
+}
+/**
+* Poe o proximo POKE vivo da equipe em campo depois da espera. Nao faz nada
+* fora dos mapas com `autoSwitchTeamOnFaint`, nem quando a equipe inteira caiu
+* — ai o fluxo normal de derrota assume.
+*/
+function trocarPorDesmaio(world, gameState, dt, silent) {
+	const player = world.player;
+	if (!world.mapDef?.autoSwitchTeamOnFaint || !player || !isDead(player)) {
+		world.trocaEmCampo = null;
+		return;
+	}
+	const proximo = gameState.team.findIndex((p) => p.hp > 0);
+	if (proximo === -1) {
+		world.trocaEmCampo = null;
+		return;
+	}
+	world.trocaEmCampo = (world.trocaEmCampo ?? 2) - dt;
+	if (world.trocaEmCampo > 0) return;
+	world.trocaEmCampo = null;
+	gameState.setActiveIndex(proximo);
+	const nextPoke = gameState.team[proximo];
+	player.poke = nextPoke;
+	player.cooldowns = {};
+	player.flashTimer = 0;
+	player.fainted = false;
+	player.state = "wander";
+	player.targetId = null;
+	const entrada = spawnPointParaSala(world.mapDef.id, world.sala);
+	if (entrada) {
+		player.x = entrada.x;
+		player.y = entrada.y;
+		player.pathWaypoints = null;
+		player.pathIndex = 0;
+		player.pathTargetX = null;
+		player.pathTargetY = null;
+	}
+	if (!silent) toastStore.getState().pushToast(`${shinyPrefix(nextPoke.isShiny)}${SPECIES[nextPoke.speciesId].name} entrou em campo!`, "success", "combat");
+}
+function spawnSequenceEnemy(world, mapDef, index, entrada) {
 	const { rng, counters } = world;
 	const encounterId = mapDef.sequence[index];
 	const encounter = getEncounter(encounterId);
 	if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
 	const base = mapDef.spawnPoints[0] || mapDef.playerSpawn;
-	const point = index === 0 ? base : sequenceSpawnPoint(rng, mapDef, base);
+	const point = entrada ?? (index === 0 ? base : sequenceSpawnPoint(rng, mapDef, base));
 	return createEnemyEntity(counters, {
 		poke: createPokeInstance(rng, encounter.speciesId, encounter.minLevel, {
 			rarity: encounter.rarity,
@@ -49381,15 +54813,16 @@ function buildMapWorld(mapId, activePoke, carry, progresso) {
 	const sequenceIndex = progresso?.sequenceIndex ?? 0;
 	const sequenceCleared = progresso?.sequenceCleared ?? false;
 	const countdownRemaining = sequenceIndex > 0 || sequenceCleared ? null : mapDef.startCountdown || null;
+	const climaDaConstrucao = progresso && "clima" in progresso ? climaDeAmbiente(progresso.clima ?? null) : climaAmbienteDaSala(base.seed, sala);
 	const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool);
 	const enemies = [];
 	if (!countdownRemaining && !sequenceCleared) {
 		if (mapDef.sequence) {
-			const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex);
+			const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala));
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
 		} else for (let i = 0; i < mapDef.maxEnemies; i++) {
-			const enemy = spawnEnemyAt(base, mapDef, pool, janela, player);
+			const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala), enemies);
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
 		}
@@ -49404,11 +54837,14 @@ function buildMapWorld(mapId, activePoke, carry, progresso) {
 		pendingWishes: [],
 		autoTimers: { treinador: 0 },
 		reviveCountdown: null,
+		trocaEmCampo: null,
 		respawnTimer: mapDef.respawnDelay,
 		sequenceIndex,
 		sequenceCleared,
 		countdownRemaining,
-		sala
+		sala,
+		clima: climaDaConstrucao,
+		climaAmbiente: climaDaConstrucao
 	};
 }
 function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
@@ -49474,16 +54910,16 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			duration: 1.1,
 			owner: enemy
 		}));
-		useToastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${rarityOf(enemy.poke).label}] derrotado! +${expGain} EXP, +${loot.gold} ouro`, "gold", "combat", realceDaRaridade(enemy.poke));
+		toastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${rarityOf(enemy.poke).label}] derrotado! +${expGain} EXP, +${loot.gold} ouro`, "gold", "combat", realceDaRaridade(enemy.poke));
 		if (grantResult.leveledUp) {
 			const ganhos = formatStatGains(grantResult.statGains);
-			useToastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ""}`, "levelup", "combat");
-			for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) useToastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, "levelup", "combat");
+			toastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ""}`, "levelup", "combat");
+			for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) toastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, "levelup", "combat");
 		}
-		if (trainerResult.leveledUp) useToastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, "levelup", "combat");
+		if (trainerResult.leveledUp) toastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, "levelup", "combat");
 		for (const itemId of loot.droppedItems) {
 			const item = getItem(itemId);
-			if (item) useToastStore.getState().pushToast(`Item encontrado: ${item.name}`, "success", "world");
+			if (item) toastStore.getState().pushToast(`Item encontrado: ${item.name}`, "success", "world");
 		}
 		if (captureResult && "ballItemId" in captureResult && captureResult.ballItemId) {
 			const quadros = captureAnimFrameCount(captureResult.success);
@@ -49500,12 +54936,12 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			}));
 		}
 		if (captureResult) {
-			if (captureResult.success && captureResult.location === "vendido") useToastStore.getState().pushToast(`${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
+			if (captureResult.success && captureResult.location === "vendido") toastStore.getState().pushToast(`${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
 			else if (captureResult.success) {
 				const location = "mochila";
 				const raridade = rarityOf(captureResult.poke).label;
-				useToastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
-			} else if (captureResult.reason === "roll_failed") useToastStore.getState().pushToast("A captura falhou!", "capture-fail", "combat");
+				toastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
+			} else if (captureResult.reason === "roll_failed") toastStore.getState().pushToast("A captura falhou!", "capture-fail", "combat");
 		}
 	}
 	return {
@@ -49532,13 +54968,13 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (world.countdownRemaining <= 0) {
 			world.countdownRemaining = null;
 			if (world.mapDef.sequence) {
-				const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex);
+				const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex, entradaDoInimigo(world.mapDef, world.sala));
 				aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 				world.enemies.push(enemy);
 			} else {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
 				for (let i = 0; i < world.mapDef.maxEnemies; i++) {
-					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player);
+					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
 					aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 					world.enemies.push(enemy);
 				}
@@ -49557,14 +54993,14 @@ function stepWorld(world, dt, gameState, opts = {}) {
 			if (world.mapDef) {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
 				for (let i = 0; i < world.mapDef.maxEnemies; i++) {
-					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player);
+					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
 					aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 					world.enemies.push(enemy);
 				}
 				world.respawnTimer = world.mapDef.respawnDelay;
 				if (!silent) {
 					const nome = nomeDaSala(world.sala);
-					useToastStore.getState().pushToast(fechouCiclo ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.` : `Entrando em nova area: ${nome}.`, "success", "world");
+					toastStore.getState().pushToast(fechouCiclo ? `Ciclo ${world.sala?.ciclos ?? 0} concluido! Voltando para a primeira sala: ${nome}.` : `Entrando em nova area: ${nome}.`, "success", "world");
 				}
 			}
 		}
@@ -49589,29 +55025,16 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		const penaltyResult = applyDeathExpPenalty(world.player.poke);
 		world.player.poke = penaltyResult.poke;
 		gameState.updatePokeInstance(penaltyResult.poke.uid, () => penaltyResult.poke);
-		if (!silent) useToastStore.getState().pushToast(`${SPECIES[world.player.poke.speciesId].name} desmaiou!${penaltyResult.leveledDown ? ` Caiu para o nivel ${penaltyResult.level}.` : ""}`, "error", "combat");
-		if (world.mapDef.autoSwitchTeamOnFaint) {
-			const nextIndex = gameState.team.findIndex((p) => p.hp > 0);
-			if (nextIndex !== -1) {
-				gameState.setActiveIndex(nextIndex);
-				const nextPoke = gameState.team[nextIndex];
-				world.player.poke = nextPoke;
-				world.player.cooldowns = {};
-				world.player.flashTimer = 0;
-				world.player.fainted = false;
-				world.player.state = "wander";
-				world.player.targetId = null;
-				if (!silent) useToastStore.getState().pushToast(`${shinyPrefix(nextPoke.isShiny)}${SPECIES[nextPoke.speciesId].name} entrou em campo!`, "success", "combat");
-			}
-		}
+		if (!silent) toastStore.getState().pushToast(`${SPECIES[world.player.poke.speciesId].name} desmaiou!${penaltyResult.leveledDown ? ` Caiu para o nivel ${penaltyResult.level}.` : ""}`, "error", "combat");
 	}
+	trocarPorDesmaio(world, gameState, dt, silent);
 	const autoEvents = updateAutoHeal(world, gameState, dt);
 	if (!silent) for (const ev of autoEvents) {
 		if (ev.type === "auto_pot") {
 			const item = getItem(ev.itemId);
-			if (item) useToastStore.getState().pushToast(`Auto-pot usou ${item.name}.`, "success", "combat");
+			if (item) toastStore.getState().pushToast(`Auto-pot usou ${item.name}.`, "success", "combat");
 		}
-		if (ev.type === "auto_revive") useToastStore.getState().pushToast("Auto-revive reanimou seu POKE!", "success", "combat");
+		if (ev.type === "auto_revive") toastStore.getState().pushToast("Auto-revive reanimou seu POKE!", "success", "combat");
 	}
 	const aliveCount = world.enemies.filter((e) => !isDead(e)).length;
 	if (world.mapDef.sequence && world.mapDef.unlocksContinentOnClear?.length && !world.sequenceCleared && aliveCount === 0 && world.sequenceIndex === world.mapDef.sequence.length - 1) {
@@ -49619,13 +55042,13 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		const grupos = world.mapDef.unlocksContinentOnClear;
 		const algumEstavaTrancado = grupos.some((g) => !gameState.isContinentUnlocked(g));
 		for (const grupo of grupos) gameState.unlockContinent(grupo);
-		if (!silent && algumEstavaTrancado) useToastStore.getState().pushToast("Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.", "success", "world");
+		if (!silent && algumEstavaTrancado) toastStore.getState().pushToast("Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.", "success", "world");
 	}
 	if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
 		if (world.respawnTimer <= 0) {
 			const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
-			const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player);
+			const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
 			aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 			world.enemies.push(enemy);
 			world.respawnTimer = world.mapDef.respawnDelay;
@@ -49634,7 +55057,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
 		if (world.respawnTimer <= 0) {
 			world.sequenceIndex += 1;
-			const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex);
+			const enemy = spawnSequenceEnemy(world, world.mapDef, world.sequenceIndex, entradaDoInimigo(world.mapDef, world.sala));
 			aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 			world.enemies.push(enemy);
 			world.respawnTimer = world.mapDef.respawnDelay;
@@ -49861,7 +55284,7 @@ function rowToPoke(row) {
 		stats,
 		unlockedAbilities: species ? golpesAprendidosAte(species, row.level) : row.unlocked_abilities,
 		disabledAbilities: row.disabled_abilities ?? {},
-		activeAbilities: row.active_abilities ?? (species ? activeAbilitiesPadrao(species, row.level) : void 0),
+		activeAbilities: species ? sanearEscolhaDeGolpes(row.active_abilities ?? activeAbilitiesPadrao(species, row.level), golpesAprendidosAte(species, row.level), species, row.level) : row.active_abilities ?? void 0,
 		status: row.status ? {
 			tipo: row.status,
 			turnosRestantes: row.status_turns
@@ -50156,6 +55579,13 @@ function criarEstadoDoJogador(dados) {
 				s.team.unshift(p);
 				s.activeIndex = 0;
 			},
+			reordenarReservas: (de, para) => {
+				const n = s.team.length;
+				if (de === para) return;
+				if (de < 1 || de >= n || para < 1 || para >= n) return;
+				const [p] = s.team.splice(de, 1);
+				s.team.splice(para, 0, p);
+			},
 			moveTeamToBag: (uid) => {
 				const i = s.team.findIndex((p) => p.uid === uid);
 				if (i < 0 || s.team.length <= 1) return null;
@@ -50413,18 +55843,20 @@ async function lerSnapshot(cfg, userId, opcoes = {}) {
 		selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=*`)
 	]);
 	if (!player[0]) throw new ErroHttp(404, "jogador sem linha em `players`");
+	const linhasNoLoad = {
+		player: player[0],
+		pokemon,
+		items,
+		pokedex,
+		autoCatchRules
+	};
 	return {
-		estado: snapshotToGameState({
-			player: player[0],
-			pokemon,
-			items,
-			pokedex,
-			autoCatchRules
-		}, defaultGameStateData()),
+		estado: snapshotToGameState(linhasNoLoad, defaultGameStateData()),
 		pokeIdsNoLoad: new Set(pokemon.map((p) => p.id)),
 		entregas: [],
 		playerUpdatedAt: player[0].updated_at,
-		bagCarregada: comBag
+		bagCarregada: comBag,
+		linhasNoLoad
 	};
 }
 async function carregarEstado(cfg, userId, opcoes = {}) {
@@ -50484,37 +55916,108 @@ async function comEstadoParaEscrita(cfg, userId, fn, opcoes = {}) {
 *    pro vendedor um POKE que o comprador ja tinha pago.
 */
 var CONFLITO_ESCRITA_JOGADOR = "outro comando em andamento — tente de novo";
-async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAtEsperado) {
-	if (!(await atualizarRetornando(cfg, `players?user_id=eq.${userId}&updated_at=eq.${encodeURIComponent(playerUpdatedAtEsperado)}`, gameStateToPlayerRow(userId, estado))).length) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR);
+/**
+* Duas linhas do banco dizem a mesma coisa?
+*
+* Compara so as chaves que a linha NOVA traz: o tipo `Insert` omite coluna com
+* default (`created_at`, `updated_at`), e exigir igualdade nelas faria toda
+* linha parecer diferente — que e exatamente o comportamento que este diff
+* existe pra evitar.
+*
+* Em caso de duvida o resultado e `false` (grava). Um falso "mudou" custa uma
+* escrita a mais; um falso "nao mudou" perde progresso.
+*/
+function linhaIgual(nova, atual) {
+	if (!atual) return false;
+	for (const [chave, valor] of Object.entries(nova)) {
+		const antes = atual[chave];
+		if (valor === antes) continue;
+		if (valor == null && antes == null) continue;
+		if (typeof valor === "object" || typeof antes === "object") {
+			if (JSON.stringify(valor) === JSON.stringify(antes)) continue;
+			return false;
+		}
+		return false;
+	}
+	return true;
+}
+/**
+* Só as linhas que mudaram em relacao ao baseline — o que de fato precisa subir.
+*
+* POR QUE ISTO EXISTE (PH-90)
+*
+* O diff antes era so por TABELA: bastava uma linha diferente pra reescrever
+* todas. Como a Pokedex guarda contagem de abates, matar UM mob mudava uma
+* contagem e regravava a dex inteira — 104 linhas pra registrar 1 abate no
+* jogador com a dex maior. Medido em producao: 484.746 escritas em
+* `player_pokedex` contra 13.045 em `players`, a tabela principal. Mesma coisa
+* em `player_items`, onde cada pocao consumida reescrevia o inventario todo.
+*
+* `undefined` = nao ha baseline (chamador antigo, ou leitura que nao guardou as
+* linhas). Sem baseline nao da pra saber o que mudou, entao devolve tudo — o
+* mesmo fallback conservador de antes.
+*
+* Linha nova (sem par no baseline) entra: `linhaIgual(nova, undefined)` e
+* false. Linha REMOVIDA nao aparece aqui — quem cuida disso e o diff de
+* remocao de cada bloco, que compara contra o que o banco tem agora.
+*/
+function linhasQueMudaram(novas, atuais, chaveDe) {
+	if (!atuais) return novas;
+	const porChave = new Map(atuais.map((l) => [chaveDe(l), l]));
+	return novas.filter((nova) => !linhaIgual(nova, porChave.get(chaveDe(nova))));
+}
+/** Nada mudou nesta tabela: mesmas chaves, e nenhuma linha diferente. */
+function tabelaIntacta(novas, atuais, chaveDe) {
+	if (!atuais) return false;
+	if (novas.length !== atuais.length) return false;
+	return linhasQueMudaram(novas, atuais, chaveDe).length === 0;
+}
+async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAtEsperado, linhasNoLoad) {
+	if (!(await chamarRpc(cfg, "gravar_progresso", {
+		p_user_id: userId,
+		p_patch: gameStateToPlayerRow(userId, estado),
+		p_updated_at_esperado: playerUpdatedAtEsperado
+	})).ok) throw new ErroHttp(409, CONFLITO_ESCRITA_JOGADOR);
 	const linhasPoke = gameStateToPokemonRows(userId, estado);
-	const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id) => id != null));
-	const idsDeInteresse = [.../* @__PURE__ */ new Set([...pokeIdsNoLoad, ...idsAgora])];
-	const atuais = [];
-	for (const lote of porLotesDeId(idsDeInteresse)) atuais.push(...await selecionarTudo(cfg, `pokemon_instances?id=in.(${lote.join(",")})&select=id,user_id,location`));
-	const porId = new Map(atuais.map((l) => [l.id, l]));
-	const aindaMeu = (l) => l != null && l.user_id === userId && (l.location === "team" || l.location === "bag");
-	const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)));
-	for (const lote of porLotesDeId(remover)) await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(",")})`);
-	const gravarPoke = linhasPoke.filter((l) => {
-		const atual = porId.get(String(l.id));
-		return atual == null || aindaMeu(atual);
-	});
-	if (gravarPoke.length) await inserir(cfg, "pokemon_instances", gravarPoke, { upsert: "id" });
+	if (!tabelaIntacta(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id))) {
+		const idsAgora = new Set(linhasPoke.map((l) => l.id).filter((id) => id != null));
+		const idsDeInteresse = [.../* @__PURE__ */ new Set([...pokeIdsNoLoad, ...idsAgora])];
+		const atuais = [];
+		for (const lote of porLotesDeId(idsDeInteresse)) atuais.push(...await selecionarTudo(cfg, `pokemon_instances?id=in.(${lote.join(",")})&select=id,user_id,location`));
+		const porId = new Map(atuais.map((l) => [l.id, l]));
+		const aindaMeu = (l) => l != null && l.user_id === userId && (l.location === "team" || l.location === "bag");
+		const remover = [...pokeIdsNoLoad].filter((id) => !idsAgora.has(id) && aindaMeu(porId.get(id)));
+		for (const lote of porLotesDeId(remover)) await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(",")})`);
+		const gravarPoke = linhasQueMudaram(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id)).filter((l) => {
+			const atual = porId.get(String(l.id));
+			return atual == null || aindaMeu(atual);
+		});
+		if (gravarPoke.length) await inserir(cfg, "pokemon_instances", gravarPoke, { upsert: "id" });
+	}
 	const linhasItens = gameStateToItemRows(userId, estado);
-	const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id));
-	const removerItens = (await selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=item_id`)).map((l) => l.item_id).filter((id) => !itemIdsAgora.has(id));
-	for (const lote of porLotesDeId(removerItens)) await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(",")})`);
-	if (linhasItens.length) await inserir(cfg, "player_items", linhasItens, { upsert: "user_id,item_id" });
+	if (!tabelaIntacta(linhasItens, linhasNoLoad?.items, (l) => String(l.item_id))) {
+		const itemIdsAgora = new Set(linhasItens.map((l) => l.item_id));
+		const removerItens = (await selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=item_id`)).map((l) => l.item_id).filter((id) => !itemIdsAgora.has(id));
+		for (const lote of porLotesDeId(removerItens)) await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(",")})`);
+		const itensMudados = linhasQueMudaram(linhasItens, linhasNoLoad?.items, (l) => String(l.item_id));
+		if (itensMudados.length) await inserir(cfg, "player_items", itensMudados, { upsert: "user_id,item_id" });
+	}
 	const linhasDex = gameStateToPokedexRows(userId, estado);
-	const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id));
-	const removerDex = (await selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id));
-	for (const lote of porLotesDeId(removerDex)) await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(",")})`);
-	if (linhasDex.length) await inserir(cfg, "player_pokedex", linhasDex, { upsert: "user_id,species_id" });
+	if (!tabelaIntacta(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))) {
+		const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id));
+		const removerDex = (await selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id));
+		for (const lote of porLotesDeId(removerDex)) await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(",")})`);
+		const dexMudada = linhasQueMudaram(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id));
+		if (dexMudada.length) await inserir(cfg, "player_pokedex", dexMudada, { upsert: "user_id,species_id" });
+	}
 	const linhasAuto = gameStateToAutoCatchRuleRows(userId, estado);
-	const especiesAgora = new Set(linhasAuto.map((l) => l.species_id));
-	const removerAuto = (await selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !especiesAgora.has(id));
-	for (const lote of porLotesDeId(removerAuto)) await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${lote.join(",")})`);
-	if (linhasAuto.length) await inserir(cfg, "player_auto_catch_rules", linhasAuto, { upsert: "user_id,species_id" });
+	if (!tabelaIntacta(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id))) {
+		const especiesAgora = new Set(linhasAuto.map((l) => l.species_id));
+		const removerAuto = (await selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !especiesAgora.has(id));
+		for (const lote of porLotesDeId(removerAuto)) await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${lote.join(",")})`);
+		const autoMudadas = linhasQueMudaram(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id));
+		if (autoMudadas.length) await inserir(cfg, "player_auto_catch_rules", autoMudadas, { upsert: "user_id,species_id" });
+	}
 }
 /**
 * Outro request do mesmo jogador ja esta creditando este intervalo.
@@ -50566,7 +56069,7 @@ async function aplicarFlush(cfg, userId, sessao, opcoes = {}) {
 				agora,
 				segundos,
 				truncado
-			});
+			}, ctx.linhasNoLoad);
 			if (!resultado) await devolverEntregas(cfg, ctx.entregas);
 			return resultado;
 		}, {
@@ -50577,7 +56080,7 @@ async function aplicarFlush(cfg, userId, sessao, opcoes = {}) {
 		await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { flushing_since: null });
 	}
 }
-async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUpdatedAt, janela) {
+async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUpdatedAt, janela, linhasNoLoad) {
 	const { agora, segundos, truncado } = janela;
 	const { store, dados: estado } = criarEstadoDoJogador(dados);
 	const continentesAntes = new Set(estado.unlockedContinents);
@@ -50588,6 +56091,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 	const rng = restoreRng(Number(sessao.rng_state), Number(sessao.rng_draws));
 	const world = buildMapWorld(sessao.map_id, ativo, {
 		rng,
+		seed: Number(sessao.seed),
 		counters: {
 			entity: 1,
 			effect: 1,
@@ -50610,7 +56114,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		world,
 		gameState: store,
 		seconds: segundos,
-		stepSeconds: OFFLINE_SIM_STEP_SECONDS,
+		stepSeconds: offline ? OFFLINE_SIM_STEP_SECONDS : LIVE_SIM_STEP_SECONDS,
 		stepFn: (w, dt, opts) => stepWorld(w, dt, store, opts)
 	});
 	const piso = offline && !pausado ? aplicarPiso(store, estado, resumo, agora) : NENHUM_PISO;
@@ -50621,7 +56125,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		shinys: resumo.shinySeen
 	});
 	estado.currentMapId = resumo.stoppedEarly ? null : sessao.map_id;
-	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt);
+	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt, linhasNoLoad);
 	if (GRUPOS_DO_LANCE.some((g) => !continentesAntes.has(g) && estado.unlockedContinents.includes(g))) await inserir(cfg, "hall_da_fama", {
 		user_id: userId,
 		conquista: CONQUISTA_LANCE
@@ -50645,6 +56149,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		estado,
 		piso,
 		sala: world.sala,
+		clima: world.climaAmbiente?.tipo ?? null,
 		encerrada: resumo.stoppedEarly ? "desmaio" : null
 	};
 }
@@ -50718,8 +56223,8 @@ async function rotear(cfg, req, url) {
 	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id, await aceitaEstadoParcial(req));
 	if (url.pathname === "/estado" && req.method === "GET") {
 		const parcial = url.searchParams.get("parcial") === "1";
-		return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas }) => {
-			if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt);
+		return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas, linhasNoLoad }) => {
+			if (entregas.length) await gravarEstado(cfg, jogador.id, estado, pokeIdsNoLoad, playerUpdatedAt, linhasNoLoad);
 			return json({
 				estado,
 				estadoParcial: parcial
@@ -50818,11 +56323,13 @@ async function abrirSessao(cfg, userId, req) {
 			since: Date.now()
 		}
 	});
+	const climaInicial = climaDaSala(semente, salaInicial);
 	return json({
 		sessaoId: criada.id,
 		mapId,
 		iniciadaEm: criada.last_flush_at,
-		sala: salaInicial
+		sala: salaInicial,
+		clima: climaInicial
 	});
 }
 async function flush(cfg, userId, parcial) {
@@ -50853,6 +56360,7 @@ async function flush(cfg, userId, parcial) {
 		piso: resultado.piso,
 		sessaoEncerrada: resultado.encerrada,
 		sala: resultado.sala,
+		clima: resultado.clima,
 		estadoParcial: parcial,
 		estado: resultado.estado
 	});

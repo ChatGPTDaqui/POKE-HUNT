@@ -19,11 +19,17 @@ import { SPECIES } from '@/data/pokes'
 import { nomeDoStatus, type StatusAtivo } from '@/data/statusEffects'
 import { statusVfxUrl } from '@/data/statusVfx'
 import { ROTULO_ESTAGIO } from '@/data/statLabels'
-import type { StatDeEstagio } from '@/data/statusEffects'
+import { ICONE_DE_ESTAGIO } from '@/data/statIcones'
+import { getAbility } from '@/data/abilities'
+import { nomeDaTrait } from '@/data/traits'
+import type { FonteDeEstagio, StatDeEstagio } from '@/data/statusEffects'
+import type { WorldEntity } from '@/engine/types'
 import { useWorldStore } from '@/stores/worldStore'
 import { useDeviceMode } from '@/stores/uiStore'
 import { Sheet } from '@/components/game/Sheet'
 import { Palavra } from '@/components/shared/Explicacao'
+import { SectionLabel } from '@/components/game/controls'
+import { Crosshair } from '@phosphor-icons/react'
 import { GLOSSARIO, verbeteDoStatus, type Verbete } from '@/data/glossario'
 import { useState, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
@@ -33,65 +39,111 @@ const ESTAGIOS_ORDEM: StatDeEstagio[] = ['atkFis', 'atkEsp', 'def', 'defEsp', 's
 interface Badge {
   key: string
   url: string | null
+  /**
+   * Icone do ATRIBUTO, quando o selo e de estagio (PH-121). Substitui a `url`:
+   * a arte de `statusVfxUrl` varia com o tipo do POKE e com a direcao, nunca
+   * com o atributo, entao Ataque e Velocidade desenhavam a mesma coisa.
+   */
+  Icone: typeof ICONE_DE_ESTAGIO[StatDeEstagio] | null
   titulo: string
   contador: string | null
   aumenta: boolean
   /** O que o efeito FAZ. O `titulo` diz so o nome e a contagem. */
   verbete: Verbete
+  /** De onde o estagio veio (PH-121). Vazio para status. */
+  fontes: FonteDeEstagio[]
 }
 
-export function StatusEffectsBar() {
-  const poke = useWorldStore((s) => s.player?.poke ?? null)
-  const statusVolatil = useWorldStore((s) => s.player?.statusVolatil ?? null)
-  const estagios = useWorldStore((s) => s.player?.estagios ?? null)
-  const { coarse } = useDeviceMode()
-  // O NOME de cada efeito so existia no `title`, ou seja, so no hover: no
-  // celular a faixa era uma fileira de icones sem legenda nenhuma. O toque abre
-  // a lista escrita. Mesmo remendo do slot de golpe, mesma razao.
-  const [aberta, setAberta] = useState(false)
+/** "Danca das Espadas (voce)" / "Rosnado (Rattata)" / "Intimidate (Gyarados)". */
+function descreverFonte(fonte: FonteDeEstagio): string {
+  const nome = fonte.tipo === 'golpe'
+    ? getAbility(fonte.id)?.name ?? fonte.id
+    : nomeDaTrait(fonte.id) ?? fonte.id
+  const quem = fonte.proprio ? 'você' : fonte.deQuem
+  const marca = fonte.tipo === 'trait' ? ' · habilidade' : ''
+  return `${nome} (${quem})${marca}`
+}
 
-  if (!poke) return null
-  const species = SPECIES[poke.speciesId]
-  if (!species) return null
+/**
+ * Monta os selos de UMA entidade. Extraida do corpo do componente (PH-132)
+ * porque agora o jogador e o ALVO passam pela mesma regra — dois caminhos
+ * separados divergiriam na primeira mudanca, e a issue pedia explicitamente que
+ * o inimigo nao ganhasse um segundo dialeto visual.
+ *
+ * `prefixo` entra na `key` do React: o mesmo atributo pode estar alterado nos
+ * dois lados, e sem ele as chaves colidiriam.
+ */
+function selosDaEntidade(entidade: WorldEntity | null, prefixo: string): Badge[] {
+  if (!entidade) return []
+  const species = SPECIES[entidade.poke.speciesId]
+  if (!species) return []
 
   const badges: Badge[] = []
 
-  for (const status of [poke.status, statusVolatil] as (StatusAtivo | null)[]) {
+  for (const status of [entidade.poke.status, entidade.statusVolatil] as (StatusAtivo | null)[]) {
     if (!status) continue
     badges.push({
-      key: `status-${status.tipo}`,
+      key: `${prefixo}-status-${status.tipo}`,
       url: statusVfxUrl(species.type, 'diminui'),
+      Icone: null,
       titulo: status.turnosRestantes != null
         ? `${nomeDoStatus(status.tipo)} — ${status.turnosRestantes} turno(s) restante(s)`
         : `${nomeDoStatus(status.tipo)} — nao passa sozinho`,
       contador: status.turnosRestantes != null ? String(status.turnosRestantes) : '∞',
       aumenta: false,
       verbete: verbeteDoStatus(status),
+      fontes: [],
     })
   }
 
-  if (estagios) {
-    for (const stat of ESTAGIOS_ORDEM) {
-      const valor = estagios[stat] ?? 0
-      if (valor === 0) continue
-      badges.push({
-        key: `estagio-${stat}`,
-        url: statusVfxUrl(species.type, valor > 0 ? 'aumenta' : 'diminui'),
-        titulo: `${ROTULO_ESTAGIO[stat]} ${valor > 0 ? 'aumentado' : 'diminuido'} (${valor > 0 ? '+' : ''}${valor})`,
-        contador: `${valor > 0 ? '+' : ''}${valor}`,
-        aumenta: valor > 0,
-        verbete: GLOSSARIO.estagioDeAtributo,
-      })
-    }
+  for (const stat of ESTAGIOS_ORDEM) {
+    const valor = entidade.estagios?.[stat] ?? 0
+    if (valor === 0) continue
+    badges.push({
+      key: `${prefixo}-estagio-${stat}`,
+      // Sem `url`: o icone do ATRIBUTO e o que este selo tem pra dizer.
+      url: null,
+      Icone: ICONE_DE_ESTAGIO[stat],
+      titulo: `${ROTULO_ESTAGIO[stat]} ${valor > 0 ? 'aumentado' : 'diminuido'} (${valor > 0 ? '+' : ''}${valor})`,
+      contador: `${valor > 0 ? '+' : ''}${valor}`,
+      aumenta: valor > 0,
+      verbete: GLOSSARIO.estagioDeAtributo,
+      fontes: entidade.estagiosFonte?.[stat] ?? [],
+    })
   }
 
-  if (badges.length === 0) return null
+  return badges
+}
+
+export function StatusEffectsBar() {
+  const jogador = useWorldStore((s) => s.player ?? null)
+  // O ALVO ATUAL (PH-132). `player.targetId` e publicado pelo motor
+  // (combatSystem#updateCombat) exatamente pra isto — antes o buff do inimigo
+  // nao aparecia em lugar nenhum, e a assimetria era o pior caso: Rosnado NO
+  // jogador acendia selo, Danca das Espadas NO inimigo nao acendia nada, o que
+  // ensina que "selo = tudo que esta ativo".
+  const alvo = useWorldStore((s) => (
+    s.player?.targetId ? s.enemies.find((e) => e.id === s.player!.targetId) ?? null : null
+  ))
+  const { coarse } = useDeviceMode()
+  // O NOME de cada efeito so existia no `title`, ou seja, so no hover: no
+  // celular a faixa era uma fileira de icones sem legenda nenhuma. O toque abre
+  // a lista escrita. Mesmo remendo do slot de golpe, mesma razao.
+  const [aberta, setAberta] = useState(false)
+
+  if (!jogador) return null
+
+  const badges = selosDaEntidade(jogador, 'eu')
+  const badgesDoAlvo = selosDaEntidade(alvo, 'alvo')
+  const nomeDoAlvo = alvo ? SPECIES[alvo.poke.speciesId]?.name ?? alvo.poke.speciesId : null
+
+  if (badges.length === 0 && badgesDoAlvo.length === 0) return null
 
   return (
     <>
     <div
       className={cn(
-        'flex flex-wrap justify-center gap-[.3em]',
+        'flex flex-col items-center gap-[.2em]',
         coarse ? 'pointer-events-auto cursor-pointer' : 'pointer-events-none',
       )}
       onClick={coarse ? () => setAberta(true) : undefined}
@@ -99,35 +151,21 @@ export function StatusEffectsBar() {
       role={coarse ? 'button' : undefined}
       aria-label={coarse ? 'Ver efeitos ativos' : undefined}
     >
-      {badges.map((badge) => (
-        <BadgeDoEfeito key={badge.key} badge={badge} coarse={coarse}>
-        <div
-          className="relative flex h-[1.7em] w-[1.7em] items-center justify-center overflow-hidden rounded-[.4em] border"
-          style={{
-            borderColor: badge.aumenta ? 'var(--color-ok)' : 'var(--color-bad)',
-            background: 'color-mix(in srgb, var(--color-n900) 80%, transparent)',
-          }}
-        >
-          {badge.url ? (
-            <img
-              src={badge.url}
-              alt=""
-              aria-hidden
-              draggable={false}
-              className="h-full w-full object-cover"
-              style={{ imageRendering: 'pixelated' }}
-            />
-          ) : (
-            <span className="text-[.55em] font-bold text-n300">?</span>
-          )}
-          <span
-            className="absolute inset-x-0 bottom-0 bg-black/70 text-center text-[.5em] font-bold tabular-nums text-white"
-          >
-            {badge.contador}
+      {badges.length > 0 && <FileiraDeSelos badges={badges} coarse={coarse} />}
+      {/* O ALVO em fileira PROPRIA, com rotulo (PH-132). Misturar os dois numa
+          fila so seria pior que nao mostrar: o jogador leria o buff do inimigo
+          como se fosse dele. O rotulo e o que separa — icone igual dos dois
+          lados e proposital (mesmo vocabulario), entao a unica coisa que
+          responde "de quem" e a linha. */}
+      {badgesDoAlvo.length > 0 && (
+        <div className="flex items-center gap-[.3em]">
+          <span className="flex items-center gap-[.2em] text-[.55em] uppercase tracking-wide text-n400">
+            <Crosshair size="1.4em" weight="bold" aria-hidden />
+            {nomeDoAlvo}
           </span>
+          <FileiraDeSelos badges={badgesDoAlvo} coarse={coarse} />
         </div>
-        </BadgeDoEfeito>
-      ))}
+      )}
     </div>
 
     {aberta && (
@@ -138,27 +176,13 @@ export function StatusEffectsBar() {
         onClose={() => setAberta(false)}
         title="Efeitos ativos"
       >
-        <ul className="flex flex-col gap-[.35em]">
-          {badges.map((badge) => (
-            <li
-              key={badge.key}
-              className="flex items-center gap-[.5em] rounded-[.5em] border border-n800 px-[.6em] py-[.45em] text-[.85em]"
-            >
-              <span
-                className="mt-[.35em] h-[.6em] w-[.6em] shrink-0 rounded-full"
-                style={{ background: badge.aumenta ? 'var(--color-ok)' : 'var(--color-bad)' }}
-              />
-              {/* O nome e a contagem vinham sozinhos aqui: a lista dizia "Veneno
-                  — 3 turno(s)" e nada sobre o que o veneno faz. */}
-              <span className="flex min-w-0 flex-col gap-[.15em]">
-                <b className="font-medium">{badge.titulo}</b>
-                {badge.verbete.corpo.map((linha) => (
-                  <span key={linha} className="leading-tight text-n400">{linha}</span>
-                ))}
-              </span>
-            </li>
-          ))}
-        </ul>
+        {/* DOIS GRUPOS COM TITULO (PH-132). No dedo esta lista e o unico lugar
+            que abre, entao ela precisa dizer de quem e cada efeito — uma lista
+            corrida faria o jogador ler o buff do inimigo como se fosse dele. */}
+        <ListaDeEfeitos titulo="No seu POKE" badges={badges} />
+        {badgesDoAlvo.length > 0 && (
+          <ListaDeEfeitos titulo={`No alvo · ${nomeDoAlvo}`} badges={badgesDoAlvo} />
+        )}
       </Sheet>
     )}
     </>
@@ -169,12 +193,113 @@ export function StatusEffectsBar() {
 // cabe num alvo de 1.7em; no mouse, cada icone abre a propria bolha. Antes o
 // desktop nao tinha caminho nenhum: o `title` dos icones nunca aparecia porque o
 // container e `pointer-events-none` — o cursor nao chegava neles.
+/** Um grupo da lista escrita, com titulo dizendo de QUEM sao os efeitos. */
+function ListaDeEfeitos({ titulo, badges }: { titulo: string; badges: Badge[] }) {
+  if (badges.length === 0) return null
+  return (
+    <>
+      <SectionLabel>{titulo}</SectionLabel>
+      <ul className="mb-[.6em] flex flex-col gap-[.35em]">
+        {badges.map((badge) => (
+          <li
+            key={badge.key}
+            className="flex items-center gap-[.5em] rounded-[.5em] border border-n800 px-[.6em] py-[.45em] text-[.85em]"
+          >
+            <span
+              className="mt-[.35em] h-[.6em] w-[.6em] shrink-0 rounded-full"
+              style={{ background: badge.aumenta ? 'var(--color-ok)' : 'var(--color-bad)' }}
+            />
+            {/* O nome e a contagem vinham sozinhos aqui: a lista dizia "Veneno
+                — 3 turno(s)" e nada sobre o que o veneno faz. */}
+            <span className="flex min-w-0 flex-col gap-[.15em]">
+              <b className="font-medium">{badge.titulo}</b>
+              {/* DE ONDE VEIO (PH-121) — antes a lista dizia so o atributo e a
+                  contagem, e "quem fez isso" nao existia em lugar nenhum do
+                  estado. Vem primeiro que a explicacao generica: e a parte que
+                  responde a pergunta do jogador naquele instante. */}
+              {badge.fontes.length > 0 && (
+                <span className="leading-tight text-n300">
+                  Origem: {badge.fontes.map(descreverFonte).join(' · ')}
+                </span>
+              )}
+              {badge.verbete.corpo.map((linha) => (
+                <span key={linha} className="leading-tight text-n400">{linha}</span>
+              ))}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </>
+  )
+}
+
+/** Uma fileira de selos. Extraida pra o jogador e o alvo desenharem igual. */
+function FileiraDeSelos({ badges, coarse }: { badges: Badge[]; coarse: boolean }) {
+  return (
+    <div className="flex flex-wrap justify-center gap-[.3em]">
+      {badges.map((badge) => (
+        <BadgeDoEfeito key={badge.key} badge={badge} coarse={coarse}>
+          <div
+            className="relative flex h-[1.7em] w-[1.7em] items-center justify-center overflow-hidden rounded-[.4em] border"
+            style={{
+              borderColor: badge.aumenta ? 'var(--color-ok)' : 'var(--color-bad)',
+              background: 'color-mix(in srgb, var(--color-n900) 80%, transparent)',
+            }}
+          >
+            {badge.Icone ? (
+              // `weight="bold"`, e nao `fill` nem `regular`. Conferido no
+              // harness: com `fill` o escudo da Defesa virava um borrao vermelho
+              // sem forma e Def. Esp. ficava um quadrado verde com uma estrela —
+              // a silhueta (a unica coisa que o icone tem pra dizer) se perdia
+              // justamente nos dois atributos mais parecidos entre si.
+              // `regular` e fino demais em 1.7em com o contador por cima. A cor
+              // segue a direcao, igual a borda.
+              <badge.Icone
+                size="70%"
+                weight="bold"
+                aria-hidden
+                color={badge.aumenta ? 'var(--color-ok)' : 'var(--color-bad)'}
+                style={{ marginBottom: '.25em' }}
+              />
+            ) : badge.url ? (
+              <img
+                src={badge.url}
+                alt=""
+                aria-hidden
+                draggable={false}
+                className="h-full w-full object-cover"
+                style={{ imageRendering: 'pixelated' }}
+              />
+            ) : (
+              <span className="text-[.55em] font-bold text-n300">?</span>
+            )}
+            <span className="absolute inset-x-0 bottom-0 bg-black/70 text-center text-[.5em] font-bold tabular-nums text-white">
+              {badge.contador}
+            </span>
+          </div>
+        </BadgeDoEfeito>
+      ))}
+    </div>
+  )
+}
+
 function BadgeDoEfeito(
   { badge, coarse, children }: { badge: Badge; coarse: boolean; children: ReactNode },
 ) {
   if (coarse) return <>{children}</>
+  // No mouse a bolha e o unico lugar que abre, entao ela carrega o MESMO
+  // conteudo da lista do celular: titulo com o atributo e a contagem, origem, e
+  // depois a explicacao generica. Antes ela mostrava so a generica, e "de onde
+  // veio" nao existia em canto nenhum (PH-121).
+  const verbete: Verbete = {
+    ...badge.verbete,
+    titulo: badge.titulo,
+    corpo: badge.fontes.length > 0
+      ? [`Origem: ${badge.fontes.map(descreverFonte).join(' · ')}`, ...badge.verbete.corpo]
+      : badge.verbete.corpo,
+  }
   return (
-    <Palavra verbete={badge.verbete} className="pointer-events-auto no-underline" side="top">
+    <Palavra verbete={verbete} className="pointer-events-auto no-underline" side="top">
       {children}
     </Palavra>
   )

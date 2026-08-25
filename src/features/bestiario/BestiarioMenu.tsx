@@ -116,7 +116,7 @@ export function BestiarioMenu() {
           <option value="progresso">Em progresso</option>
           <option value="completo">Completo</option>
         </GameSelect>
-        <GameCheck checked={shinyOnly} onChange={setShinyOnly}>✨ Shiny</GameCheck>
+        <GameCheck checked={shinyOnly} onChange={setShinyOnly}>Shiny</GameCheck>
       </div>
 
       <div className={compacto ? 'flex flex-col gap-[.65em]' : 'grid grid-cols-[1.4fr_1fr] gap-[.65em]'}>

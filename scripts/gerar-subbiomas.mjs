@@ -179,6 +179,34 @@ const links = Object.fromEntries(
 
 const lista = (arr) => (arr.length === 0 ? '[]' : `[\n    ${arr.map((s) => `'${s}'`).join(',\n    ')},\n  ]`)
 
+// WeatherType do PokeRogue -> `ClimaTipo` do nosso motor, mais `limpo` pro
+// NONE deles (PH-140). SNOW e HAIL sao climas DIFERENTES e nao viram os dois
+// 'granizo': desde a Gen 9 neve da +50% de Defesa pra ICE e nao causa dano
+// nenhum, enquanto granizo tira 1/16 por turno. Fundir os dois faria
+// `snowy-forest` (87,5% de neve) virar 87,5% de dano continuo.
+const CLIMA_DO_POKEROGUE = {
+  NONE: 'limpo',
+  RAIN: 'chuva',
+  SUNNY: 'sol',
+  SANDSTORM: 'areia',
+  HAIL: 'granizo',
+  SNOW: 'neve',
+  FOG: 'nevoa',
+}
+
+function climaDoSubBioma(chave) {
+  const cru = PR[chave].clima || {}
+  const pesos = []
+  for (const [tipoPr, peso] of Object.entries(cru)) {
+    const nosso = CLIMA_DO_POKEROGUE[tipoPr]
+    // Estourar, e nao ignorar: um WeatherType novo no PokeRogue (ou renomeado)
+    // sumiria da tabela em silencio e o sub-bioma perderia clima sem aviso.
+    if (!nosso) throw new Error(`WeatherType desconhecido em ${chave}: ${tipoPr}`)
+    pesos.push(`${nosso}: ${peso}`)
+  }
+  return `{ ${pesos.join(', ')} }`
+}
+
 const linhas = [
   '// AUTO-GERADO por `node scripts/gerar-subbiomas.mjs` a partir de',
   '// scripts/pokerogue/biomas.json (pools do PokeRogue) cruzado com o nosso',
@@ -190,7 +218,7 @@ const linhas = [
   '// A CHANCE de aparicao NAO vem daqui: peso de spawn continua sendo o',
   '// `spawn_tier` real do Gen1/Gen2 (scripts/derive-spawn-tiers.js) e a chance',
   '// de a sala cair neste sub-bioma vive em data/biomas.ts, escrita a mao.',
-  "import type { SubBiomaEspecies, SubBiomaLinks } from './types';",
+  "import type { SubBiomaClima, SubBiomaEspecies, SubBiomaLinks } from './types';",
   '',
   '/** Especies do nosso catalogo que podem aparecer em cada sub-bioma. */',
   'export const SUB_BIOMA_ESPECIES: SubBiomaEspecies = {',
@@ -204,6 +232,18 @@ const linhas = [
   ' * NAO e usado pelo jogo hoje. Fica guardado porque e a fundacao do modo',
   ' * Expedicao, e o parser que extrai isso ja esta escrito.',
   ' */',
+  '/**',
+  ' * Pesos de clima de cada sub-bioma (PH-140), do `weatherPool` do PokeRogue.',
+  ' * Sorteado UMA vez ao entrar na sala; `limpo` e um resultado como outro',
+  ' * qualquer, nao a ausencia de tabela.',
+  ' *',
+  ' * E o unico dado de PROBABILIDADE de clima que existe: os jogos principais',
+  ' * fixam o clima por rota (Rota 119 sempre chove) e nunca sortearam nada.',
+  ' */',
+  'export const SUB_BIOMA_CLIMA: SubBiomaClima = {',
+  ...chaves.map((c) => `  '${c}': ${climaDoSubBioma(c)},`),
+  '};',
+  '',
   'export const SUB_BIOMA_LINKS: SubBiomaLinks = {',
   ...chaves.map((c) => `  '${c}': [${links[c].map((l) => `{ bioma: '${l.bioma}', peso: ${l.peso} }`).join(', ')}],`),
   '};',

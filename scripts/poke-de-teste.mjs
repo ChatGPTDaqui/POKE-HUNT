@@ -21,7 +21,8 @@
 // @teste.pokehunt.local (ver scripts/conta-de-teste.js). Nao ha flag pra burlar.
 import { readFileSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { fileURLToPath } from 'node:url'
+import { carregarMotor } from './lib/motor.mjs'
 import { resolverSchema, cabecalhosRest } from './lib/schema-alvo.cjs'
 
 const RAIZ = dirname(dirname(fileURLToPath(import.meta.url)))
@@ -95,12 +96,7 @@ if (local !== 'team' && local !== 'bag') {
 
 // O motor empacotado que o servidor de autoridade usa. Fonte unica de verdade
 // pra stats/exp/golpes — ver o cabecalho deste arquivo.
-const bundle = join(RAIZ, 'authority', 'engine', 'headless.js')
-if (!existsSync(bundle)) {
-  console.error(`${bundle} nao existe. Rode: npm run build:engine`)
-  process.exit(1)
-}
-const motor = await import(pathToFileURL(bundle).href)
+const motor = await carregarMotor()
 const { SPECIES, MAX_TEAM_SIZE, createRng, createPokeInstance, gameStateToPokemonRows, activeAbilitiesPadrao } = motor
 
 const especie = SPECIES[especieId]

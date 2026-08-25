@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ArrowDown, ArrowUp, LockSimple, Sparkle } from '@phosphor-icons/react'
+import { ArrowDown, ArrowUp, LockSimple } from '@phosphor-icons/react'
 import { pedirAcaoComLocal } from '@/data/remote/autoridade'
 import { SPECIES, averageIvPercent } from '@/data/pokes'
 import { RARITIES, rarityOf, type RarityKey } from '@/data/rarity'
@@ -14,6 +14,7 @@ import { linkarPoke, tratouComoLink } from '@/components/shared/linkarNoChat'
 import {
   GameButton, GameCard, GameCheck, GameInput, Recolhivel, SectionLabel,
 } from '@/components/game/controls'
+import { GradeDeInventario } from '@/components/game/GradeDeInventario'
 import { Paginacao, usePaginacao } from '@/components/game/Paginacao'
 import type { ConfirmRequest } from '@/stores/confirmDialogStore'
 import { fmt, toast } from '../utils'
@@ -66,6 +67,14 @@ export function PokemonsTab() {
     () => new Set(Object.keys(RARITIES) as RarityKey[]),
   )
   const [selectedUids, setSelectedUids] = useState<Set<string>>(() => new Set())
+  // Qual POKE a ficha embaixo da grade esta mostrando.
+  //
+  // SEPARADO da selecao em lote de proposito. Um clique na grade faz as duas
+  // coisas (marca pro lote, se aquele POKE pode entrar no lote; e sempre abre a
+  // ficha), e sao mesmo duas: POKE trancado e shiny fora do filtro "somente
+  // shiny" NAO entram em lote — mas a venda individual deles existe, e com um
+  // estado so ela ficaria inalcancavel na grade.
+  const [foco, setFoco] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -147,6 +156,10 @@ export function PokemonsTab() {
     void acao.run('sell-all-pokes', () => venderLote(uids, { shiny, locked }))
   }
 
+  // Da lista FILTRADA e nao da pagina: trocar de pagina nao pode fazer a ficha
+  // sumir, e um POKE vendido (que sai de `filtered`) tem que fazer ela sumir.
+  const pokeEmFoco = foco != null ? filtered.find(({ poke }) => poke.uid === foco) ?? null : null
+
   // Le do estado dos filtros, e nao da contagem do resultado: o jogador quer
   // saber POR QUE a lista esta curta, e "5 de 6 raridades" responde isso.
   const resumoDosFiltros = [
@@ -217,9 +230,7 @@ export function PokemonsTab() {
             setSelectedUids(new Set()) // trocar de modo muda o que e selecionavel
           }}
         >
-          <span className="inline-flex items-center gap-[.25em]">
-            Somente <Sparkle weight="fill" className="text-shiny" /> Shiny
-          </span>
+          Shiny
         </GameCheck>
       </div>
       </div>
@@ -254,54 +265,90 @@ export function PokemonsTab() {
         <p className="text-n500">Nenhum POKE corresponde aos filtros.</p>
       )}
 
-      {paginado.pagina.map(({ poke, ivPct }) => {
-        const species = SPECIES[poke.speciesId]
-        const value = pokemonSellValue(poke.level, species.baseExp, poke.rarity)
-        const showCheckbox = !poke.locked && (shinyOnly || !poke.isShiny)
+      {/* Grade, e nao uma linha por POKE (PH-118). O clique MARCA pro lote e
+          abre a ficha; quem nao pode entrar no lote (trancado, ou shiny sem o
+          filtro de shiny) so abre a ficha, que e onde a venda individual dele
+          continua existindo. */}
+      {paginado.pagina.length > 0 && (
+        <GradeDeInventario
+          rotuloDoGrupo="POKEs para vender"
+          modo="multiplo"
+          selecionado={null}
+          selecionados={selectedUids}
+          alturaMaxEm={14}
+          onSelecionar={(uid) => {
+            setFoco(uid)
+            if (!selectableUidSet.has(uid)) return
+            setSelectedUids((prev) => {
+              const next = new Set(prev)
+              if (next.has(uid)) next.delete(uid)
+              else next.add(uid)
+              return next
+            })
+          }}
+          slots={paginado.pagina.map(({ poke, ivPct }) => {
+            const species = SPECIES[poke.speciesId]
+            const emLote = selectableUidSet.has(poke.uid)
+            return {
+              id: poke.uid,
+              rotulo: [
+                `${species.name} Lv${poke.level}`,
+                `IV ${ivPct.toFixed(0)}%`,
+                poke.isShiny ? 'shiny' : null,
+                poke.locked ? 'trancado' : null,
+                !emLote && !poke.locked ? 'fora do lote' : null,
+              ].filter(Boolean).join(' · '),
+              aro: poke.locked ? 'border-gold/50' : undefined,
+              marca: poke.locked
+                ? <LockSimple weight="fill" className="text-gold" />
+                : poke.isShiny ? <span aria-hidden>✨</span> : undefined,
+              conteudo: <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={2.4} />,
+            }
+          })}
+        />
+      )}
 
-        return (
-          <GameCard key={poke.uid} className="flex items-center gap-[.45em] p-[.4em]">
-            {showCheckbox ? (
-              <GameCheck
-                checked={selectedUids.has(poke.uid)}
-                onChange={(on) =>
-                  setSelectedUids((prev) => {
-                    const next = new Set(prev)
-                    if (on) next.add(poke.uid)
-                    else next.delete(poke.uid)
-                    return next
-                  })
-                }
-              />
-            ) : (
-              // Espacador: mantem o alinhamento das colunas quando a linha nao
-              // pode ser selecionada (shiny/trancado).
-              <span className="w-[1em] shrink-0" />
-            )}
-            <span
-              title="Clique para o perfil · Shift+clique para linkar no chat"
-              onClick={(e) => { if (tratouComoLink(e, () => linkarPoke(poke, species))) return; showProfile(poke, species) }}
-              className="cursor-pointer"
-            >
-              <PokeSwatch species={species} isShiny={poke.isShiny} poke={poke} size={2.4} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-[.4em]">
-                <PokeNameTag poke={poke} species={species} />
-                <span className="text-n400">Lv{poke.level}</span>
-                <span className="text-[.78em] text-n500">IV {ivPct.toFixed(0)}%</span>
-              </div>
+      {/* A ficha do POKE em foco: identidade, valor e a venda individual. Era
+          isso que a linha carregava do lado direito. */}
+      {pokeEmFoco && (
+        <GameCard className="flex items-center gap-[.45em] p-[.4em]">
+          <span
+            title="Clique para o perfil · Shift+clique para linkar no chat"
+            onClick={(e) => {
+              const species = SPECIES[pokeEmFoco.poke.speciesId]
+              if (tratouComoLink(e, () => linkarPoke(pokeEmFoco.poke, species))) return
+              showProfile(pokeEmFoco.poke, species)
+            }}
+            className="cursor-pointer"
+          >
+            <PokeSwatch
+              species={SPECIES[pokeEmFoco.poke.speciesId]}
+              isShiny={pokeEmFoco.poke.isShiny}
+              poke={pokeEmFoco.poke}
+              size={2.4}
+            />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-[.4em]">
+              <PokeNameTag poke={pokeEmFoco.poke} species={SPECIES[pokeEmFoco.poke.speciesId]} />
+              <span className="text-n400">Lv{pokeEmFoco.poke.level}</span>
+              <span className="text-[.78em] text-n500">IV {pokeEmFoco.ivPct.toFixed(0)}%</span>
             </div>
-            <GameButton
-              disabled={poke.locked || acao.pendingKey != null}
-              title={poke.locked ? 'Trancado — destranque na Mochila' : undefined}
-              onClick={() => venderUmPoke(poke, species, { askConfirm, acao, venderLote, fmt })}
-            >
-              {poke.locked ? <><LockSimple weight="fill" /> Trancado</> : `Vender (${fmt.format(value)})`}
-            </GameButton>
-          </GameCard>
-        )
-      })}
+            <div className="text-[.75em] text-n500">
+              {selectedUids.has(pokeEmFoco.poke.uid) ? 'Marcado para o lote' : 'Fora do lote'}
+            </div>
+          </div>
+          <GameButton
+            disabled={pokeEmFoco.poke.locked || acao.pendingKey != null}
+            title={pokeEmFoco.poke.locked ? 'Trancado — destranque na Mochila' : undefined}
+            onClick={() => venderUmPoke(pokeEmFoco.poke, SPECIES[pokeEmFoco.poke.speciesId], { askConfirm, acao, venderLote, fmt })}
+          >
+            {pokeEmFoco.poke.locked
+              ? <><LockSimple weight="fill" /> Trancado</>
+              : `Vender (${fmt.format(pokemonSellValue(pokeEmFoco.poke.level, SPECIES[pokeEmFoco.poke.speciesId].baseExp, pokeEmFoco.poke.rarity))})`}
+          </GameButton>
+        </GameCard>
+      )}
 
       <Paginacao estado={paginado} rotulo="POKEs" />
     </div>

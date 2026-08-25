@@ -74,7 +74,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "charmeleon",
-    "evolvesAtLevel": 16
+    "evolvesAtLevel": 16,
+    "evolutionOptions": [
+      {
+        "to": "charmeleon",
+        "atLevel": 16,
+        "isSpecial": false
+      }
+    ]
   },
   "squirtle": {
     "id": "squirtle",
@@ -153,7 +160,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "wartortle",
-    "evolvesAtLevel": 16
+    "evolvesAtLevel": 16,
+    "evolutionOptions": [
+      {
+        "to": "wartortle",
+        "atLevel": 16,
+        "isSpecial": false
+      }
+    ]
   },
   "bulbasaur": {
     "id": "bulbasaur",
@@ -232,7 +246,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "ivysaur",
-    "evolvesAtLevel": 16
+    "evolvesAtLevel": 16,
+    "evolutionOptions": [
+      {
+        "to": "ivysaur",
+        "atLevel": 16,
+        "isSpecial": false
+      }
+    ]
   },
   "articuno": {
     "id": "articuno",
@@ -1256,7 +1277,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "graveler",
-    "evolvesAtLevel": 25
+    "evolvesAtLevel": 25,
+    "evolutionOptions": [
+      {
+        "to": "graveler",
+        "atLevel": 25,
+        "isSpecial": false
+      }
+    ]
   },
   "spearow": {
     "id": "spearow",
@@ -1327,7 +1355,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "fearow",
-    "evolvesAtLevel": 20
+    "evolvesAtLevel": 20,
+    "evolutionOptions": [
+      {
+        "to": "fearow",
+        "atLevel": 20,
+        "isSpecial": false
+      }
+    ]
   },
   "rattata": {
     "id": "rattata",
@@ -1402,7 +1437,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "raticate",
-    "evolvesAtLevel": 20
+    "evolvesAtLevel": 20,
+    "evolutionOptions": [
+      {
+        "to": "raticate",
+        "atLevel": 20,
+        "isSpecial": false
+      }
+    ]
   },
   "ivysaur": {
     "id": "ivysaur",
@@ -1477,7 +1519,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "venusaur",
-    "evolvesAtLevel": 32
+    "evolvesAtLevel": 32,
+    "evolutionOptions": [
+      {
+        "to": "venusaur",
+        "atLevel": 32,
+        "isSpecial": false
+      }
+    ]
   },
   "venusaur": {
     "id": "venusaur",
@@ -1647,7 +1696,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "gloom",
-    "evolvesAtLevel": 21
+    "evolvesAtLevel": 21,
+    "evolutionOptions": [
+      {
+        "to": "gloom",
+        "atLevel": 21,
+        "isSpecial": false
+      }
+    ]
   },
   "gloom": {
     "id": "gloom",
@@ -1723,6 +1779,71 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "petal_dance",
         "levelReq": 59
+      }
+    ],
+    "evolvesTo": "vileplume",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "vileplume",
+        "atLevel": 80,
+        "isSpecial": true,
+        "stoneType": "GRASS"
+      },
+      {
+        "to": "bellossom",
+        "atLevel": 80,
+        "isSpecial": true,
+        "stoneType": "GRASS"
+      }
+    ]
+  },
+  "vileplume": {
+    "id": "vileplume",
+    "name": "Vileplume",
+    "description": "Pokedex Nº45 - tipo GRASS/POISON.",
+    "type": "GRASS",
+    "type2": "POISON",
+    "catchRate": 45,
+    "baseExp": 221,
+    "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 186,
+    "base": {
+      "hp": 75,
+      "atkFis": 80,
+      "atkEsp": 110,
+      "def": 85,
+      "defEsp": 90,
+      "speed": 50
+    },
+    "abilities": [
+      {
+        "key": "aromatherapy",
+        "levelReq": 1
+      },
+      {
+        "key": "mega_drain",
+        "levelReq": 1
+      },
+      {
+        "key": "poison_powder",
+        "levelReq": 1
+      },
+      {
+        "key": "stun_spore",
+        "levelReq": 1
+      },
+      {
+        "key": "petal_blizzard",
+        "levelReq": 49
+      },
+      {
+        "key": "petal_dance",
+        "levelReq": 59
+      },
+      {
+        "key": "solar_beam",
+        "levelReq": 69
       }
     ],
     "evolvesTo": null,
@@ -1805,7 +1926,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "weepinbell",
-    "evolvesAtLevel": 21
+    "evolvesAtLevel": 21,
+    "evolutionOptions": [
+      {
+        "to": "weepinbell",
+        "atLevel": 21,
+        "isSpecial": false
+      }
+    ]
   },
   "weepinbell": {
     "id": "weepinbell",
@@ -1879,8 +2007,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 58
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "victreebel",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "victreebel",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "victreebel": {
     "id": "victreebel",
@@ -1901,10 +2036,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 70
     },
     "abilities": [
-      {
-        "key": "leaf_tornado",
-        "levelReq": 1
-      },
       {
         "key": "razor_leaf",
         "levelReq": 1
@@ -1940,6 +2071,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "leaf_blade",
         "levelReq": 44
+      },
+      {
+        "key": "leaf_tornado",
+        "levelReq": 80
       }
     ],
     "evolvesTo": null,
@@ -2023,6 +2158,56 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "bestow",
         "levelReq": 50
+      }
+    ],
+    "evolvesTo": "exeggutor",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "exeggutor",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
+  },
+  "exeggutor": {
+    "id": "exeggutor",
+    "name": "Exeggutor",
+    "description": "Pokedex Nº103 - tipo GRASS/PSYCHIC.",
+    "type": "GRASS",
+    "type2": "PSYCHIC",
+    "catchRate": 45,
+    "baseExp": 186,
+    "growthCurve": "SLOW",
+    "pesoHg": 1200,
+    "base": {
+      "hp": 95,
+      "atkFis": 95,
+      "atkEsp": 125,
+      "def": 85,
+      "defEsp": 75,
+      "speed": 55
+    },
+    "abilities": [
+      {
+        "key": "psyshock",
+        "levelReq": 17
+      },
+      {
+        "key": "egg_bomb",
+        "levelReq": 27
+      },
+      {
+        "key": "wood_hammer",
+        "levelReq": 37
+      },
+      {
+        "key": "leaf_storm",
+        "levelReq": 47
+      },
+      {
+        "key": "stomp",
+        "levelReq": 80
       }
     ],
     "evolvesTo": null,
@@ -2204,7 +2389,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "bayleef",
-    "evolvesAtLevel": 16
+    "evolvesAtLevel": 16,
+    "evolutionOptions": [
+      {
+        "to": "bayleef",
+        "atLevel": 16,
+        "isSpecial": false
+      }
+    ]
   },
   "bayleef": {
     "id": "bayleef",
@@ -2275,7 +2467,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "meganium",
-    "evolvesAtLevel": 32
+    "evolvesAtLevel": 32,
+    "evolutionOptions": [
+      {
+        "to": "meganium",
+        "atLevel": 32,
+        "isSpecial": false
+      }
+    ]
   },
   "meganium": {
     "id": "meganium",
@@ -2351,6 +2550,49 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "petal_blizzard",
         "levelReq": 70
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "bellossom": {
+    "id": "bellossom",
+    "name": "Bellossom",
+    "description": "Pokedex Nº182 - tipo GRASS.",
+    "type": "GRASS",
+    "type2": null,
+    "catchRate": 45,
+    "baseExp": 221,
+    "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 58,
+    "base": {
+      "hp": 75,
+      "atkFis": 80,
+      "atkEsp": 90,
+      "def": 95,
+      "defEsp": 100,
+      "speed": 50
+    },
+    "abilities": [
+      {
+        "key": "magical_leaf",
+        "levelReq": 1
+      },
+      {
+        "key": "quiver_dance",
+        "levelReq": 39
+      },
+      {
+        "key": "petal_blizzard",
+        "levelReq": 49
+      },
+      {
+        "key": "petal_dance",
+        "levelReq": 59
+      },
+      {
+        "key": "leaf_storm",
+        "levelReq": 69
       }
     ],
     "evolvesTo": null,
@@ -2457,7 +2699,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "skiploom",
-    "evolvesAtLevel": 18
+    "evolvesAtLevel": 18,
+    "evolutionOptions": [
+      {
+        "to": "skiploom",
+        "atLevel": 18,
+        "isSpecial": false
+      }
+    ]
   },
   "skiploom": {
     "id": "skiploom",
@@ -2552,7 +2801,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "jumpluff",
-    "evolvesAtLevel": 27
+    "evolvesAtLevel": 27,
+    "evolutionOptions": [
+      {
+        "to": "jumpluff",
+        "atLevel": 27,
+        "isSpecial": false
+      }
+    ]
   },
   "jumpluff": {
     "id": "jumpluff",
@@ -2733,8 +2989,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 43
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "sunflora",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "sunflora",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "sunflora": {
     "id": "sunflora",
@@ -2755,22 +3018,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 30
     },
     "abilities": [
-      {
-        "key": "absorb",
-        "levelReq": 1
-      },
-      {
-        "key": "flower_shield",
-        "levelReq": 1
-      },
-      {
-        "key": "growth",
-        "levelReq": 1
-      },
-      {
-        "key": "pound",
-        "levelReq": 1
-      },
       {
         "key": "ingrain",
         "levelReq": 4
@@ -2868,7 +3115,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "metapod",
-    "evolvesAtLevel": 7
+    "evolvesAtLevel": 7,
+    "evolutionOptions": [
+      {
+        "to": "metapod",
+        "atLevel": 7,
+        "isSpecial": false
+      }
+    ]
   },
   "metapod": {
     "id": "metapod",
@@ -2895,7 +3149,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "butterfree",
-    "evolvesAtLevel": 10
+    "evolvesAtLevel": 10,
+    "evolutionOptions": [
+      {
+        "to": "butterfree",
+        "atLevel": 10,
+        "isSpecial": false
+      }
+    ]
   },
   "butterfree": {
     "id": "butterfree",
@@ -3017,7 +3278,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "kakuna",
-    "evolvesAtLevel": 7
+    "evolvesAtLevel": 7,
+    "evolutionOptions": [
+      {
+        "to": "kakuna",
+        "atLevel": 7,
+        "isSpecial": false
+      }
+    ]
   },
   "kakuna": {
     "id": "kakuna",
@@ -3044,7 +3312,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "beedrill",
-    "evolvesAtLevel": 10
+    "evolvesAtLevel": 10,
+    "evolutionOptions": [
+      {
+        "to": "beedrill",
+        "atLevel": 10,
+        "isSpecial": false
+      }
+    ]
   },
   "beedrill": {
     "id": "beedrill",
@@ -3190,7 +3465,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "parasect",
-    "evolvesAtLevel": 24
+    "evolvesAtLevel": 24,
+    "evolutionOptions": [
+      {
+        "to": "parasect",
+        "atLevel": 24,
+        "isSpecial": false
+      }
+    ]
   },
   "parasect": {
     "id": "parasect",
@@ -3336,7 +3618,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "venomoth",
-    "evolvesAtLevel": 31
+    "evolvesAtLevel": 31,
+    "evolutionOptions": [
+      {
+        "to": "venomoth",
+        "atLevel": 31,
+        "isSpecial": false
+      }
+    ]
   },
   "venomoth": {
     "id": "venomoth",
@@ -3509,8 +3798,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 61
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "scizor",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "scizor",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "pinsir": {
     "id": "pinsir",
@@ -3676,7 +3972,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "ledian",
-    "evolvesAtLevel": 18
+    "evolvesAtLevel": 18,
+    "evolutionOptions": [
+      {
+        "to": "ledian",
+        "atLevel": 18,
+        "isSpecial": false
+      }
+    ]
   },
   "ledian": {
     "id": "ledian",
@@ -3846,7 +4149,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "ariados",
-    "evolvesAtLevel": 22
+    "evolvesAtLevel": 22,
+    "evolutionOptions": [
+      {
+        "to": "ariados",
+        "atLevel": 22,
+        "isSpecial": false
+      }
+    ]
   },
   "ariados": {
     "id": "ariados",
@@ -4099,7 +4409,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "forretress",
-    "evolvesAtLevel": 31
+    "evolvesAtLevel": 31,
+    "evolutionOptions": [
+      {
+        "to": "forretress",
+        "atLevel": 31,
+        "isSpecial": false
+      }
+    ]
   },
   "forretress": {
     "id": "forretress",
@@ -4211,18 +4528,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 65
     },
     "abilities": [
-      {
-        "key": "bullet_punch",
-        "levelReq": 1
-      },
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "quick_attack",
-        "levelReq": 1
-      },
       {
         "key": "focus_energy",
         "levelReq": 5
@@ -4455,7 +4760,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "blastoise",
-    "evolvesAtLevel": 36
+    "evolvesAtLevel": 36,
+    "evolutionOptions": [
+      {
+        "to": "blastoise",
+        "atLevel": 36,
+        "isSpecial": false
+      }
+    ]
   },
   "blastoise": {
     "id": "blastoise",
@@ -4617,7 +4929,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "golduck",
-    "evolvesAtLevel": 33
+    "evolvesAtLevel": 33,
+    "evolutionOptions": [
+      {
+        "to": "golduck",
+        "atLevel": 33,
+        "isSpecial": false
+      }
+    ]
   },
   "golduck": {
     "id": "golduck",
@@ -4771,7 +5090,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "poliwhirl",
-    "evolvesAtLevel": 25
+    "evolvesAtLevel": 25,
+    "evolutionOptions": [
+      {
+        "to": "poliwhirl",
+        "atLevel": 25,
+        "isSpecial": false
+      }
+    ]
   },
   "poliwhirl": {
     "id": "poliwhirl",
@@ -4839,6 +5165,59 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "mud_bomb",
         "levelReq": 53
+      }
+    ],
+    "evolvesTo": "poliwrath",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "poliwrath",
+        "atLevel": 80,
+        "isSpecial": true,
+        "stoneType": "WATER"
+      },
+      {
+        "to": "politoed",
+        "atLevel": 80,
+        "isSpecial": true,
+        "stoneType": "WATER"
+      }
+    ]
+  },
+  "poliwrath": {
+    "id": "poliwrath",
+    "name": "Poliwrath",
+    "description": "Pokedex Nº62 - tipo WATER/FIGHTING.",
+    "type": "WATER",
+    "type2": "FIGHTING",
+    "catchRate": 45,
+    "baseExp": 230,
+    "growthCurve": "MEDIUM_SLOW",
+    "pesoHg": 540,
+    "base": {
+      "hp": 90,
+      "atkFis": 95,
+      "atkEsp": 70,
+      "def": 95,
+      "defEsp": 90,
+      "speed": 70
+    },
+    "abilities": [
+      {
+        "key": "dynamic_punch",
+        "levelReq": 32
+      },
+      {
+        "key": "mind_reader",
+        "levelReq": 43
+      },
+      {
+        "key": "circle_throw",
+        "levelReq": 53
+      },
+      {
+        "key": "submission",
+        "levelReq": 80
       }
     ],
     "evolvesTo": null,
@@ -4933,7 +5312,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "tentacruel",
-    "evolvesAtLevel": 30
+    "evolvesAtLevel": 30,
+    "evolutionOptions": [
+      {
+        "to": "tentacruel",
+        "atLevel": 30,
+        "isSpecial": false
+      }
+    ]
   },
   "tentacruel": {
     "id": "tentacruel",
@@ -5107,7 +5493,20 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "slowbro",
-    "evolvesAtLevel": 37
+    "evolvesAtLevel": 37,
+    "evolutionOptions": [
+      {
+        "to": "slowbro",
+        "atLevel": 37,
+        "isSpecial": false
+      },
+      {
+        "to": "slowking",
+        "atLevel": 80,
+        "isSpecial": true,
+        "stoneType": "WATER"
+      }
+    ]
   },
   "slowbro": {
     "id": "slowbro",
@@ -5277,7 +5676,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "dewgong",
-    "evolvesAtLevel": 34
+    "evolvesAtLevel": 34,
+    "evolutionOptions": [
+      {
+        "to": "dewgong",
+        "atLevel": 34,
+        "isSpecial": false
+      }
+    ]
   },
   "dewgong": {
     "id": "dewgong",
@@ -5458,6 +5864,76 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 61
       }
     ],
+    "evolvesTo": "cloyster",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "cloyster",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
+  },
+  "cloyster": {
+    "id": "cloyster",
+    "name": "Cloyster",
+    "description": "Pokedex Nº91 - tipo WATER/ICE.",
+    "type": "WATER",
+    "type2": "ICE",
+    "catchRate": 60,
+    "baseExp": 184,
+    "growthCurve": "SLOW",
+    "pesoHg": 1325,
+    "base": {
+      "hp": 50,
+      "atkFis": 95,
+      "atkEsp": 85,
+      "def": 180,
+      "defEsp": 45,
+      "speed": 70
+    },
+    "abilities": [
+      {
+        "key": "aurora_beam",
+        "levelReq": 1
+      },
+      {
+        "key": "protect",
+        "levelReq": 1
+      },
+      {
+        "key": "shell_smash",
+        "levelReq": 1
+      },
+      {
+        "key": "supersonic",
+        "levelReq": 1
+      },
+      {
+        "key": "toxic_spikes",
+        "levelReq": 1
+      },
+      {
+        "key": "withdraw",
+        "levelReq": 1
+      },
+      {
+        "key": "spike_cannon",
+        "levelReq": 13
+      },
+      {
+        "key": "spikes",
+        "levelReq": 28
+      },
+      {
+        "key": "icicle_crash",
+        "levelReq": 50
+      },
+      {
+        "key": "hydro_pump",
+        "levelReq": 80
+      }
+    ],
     "evolvesTo": null,
     "evolvesAtLevel": null
   },
@@ -5542,7 +6018,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "kingler",
-    "evolvesAtLevel": 28
+    "evolvesAtLevel": 28,
+    "evolutionOptions": [
+      {
+        "to": "kingler",
+        "atLevel": 28,
+        "isSpecial": false
+      }
+    ]
   },
   "kingler": {
     "id": "kingler",
@@ -5688,7 +6171,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "seadra",
-    "evolvesAtLevel": 32
+    "evolvesAtLevel": 32,
+    "evolutionOptions": [
+      {
+        "to": "seadra",
+        "atLevel": 32,
+        "isSpecial": false
+      }
+    ]
   },
   "seadra": {
     "id": "seadra",
@@ -5754,8 +6244,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 60
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "kingdra",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "kingdra",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "goldeen": {
     "id": "goldeen",
@@ -5834,7 +6331,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "seaking",
-    "evolvesAtLevel": 33
+    "evolvesAtLevel": 33,
+    "evolutionOptions": [
+      {
+        "to": "seaking",
+        "atLevel": 33,
+        "isSpecial": false
+      }
+    ]
   },
   "seaking": {
     "id": "seaking",
@@ -5999,6 +6503,64 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 53
       }
     ],
+    "evolvesTo": "starmie",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "starmie",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
+  },
+  "starmie": {
+    "id": "starmie",
+    "name": "Starmie",
+    "description": "Pokedex Nº121 - tipo WATER/PSYCHIC.",
+    "type": "WATER",
+    "type2": "PSYCHIC",
+    "catchRate": 60,
+    "baseExp": 182,
+    "growthCurve": "SLOW",
+    "pesoHg": 800,
+    "base": {
+      "hp": 60,
+      "atkFis": 75,
+      "atkEsp": 100,
+      "def": 85,
+      "defEsp": 85,
+      "speed": 115
+    },
+    "abilities": [
+      {
+        "key": "rapid_spin",
+        "levelReq": 1
+      },
+      {
+        "key": "recover",
+        "levelReq": 1
+      },
+      {
+        "key": "spotlight",
+        "levelReq": 1
+      },
+      {
+        "key": "swift",
+        "levelReq": 1
+      },
+      {
+        "key": "water_gun",
+        "levelReq": 1
+      },
+      {
+        "key": "confuse_ray",
+        "levelReq": 40
+      },
+      {
+        "key": "hydro_pump",
+        "levelReq": 80
+      }
+    ],
     "evolvesTo": null,
     "evolvesAtLevel": null
   },
@@ -6035,7 +6597,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "gyarados",
-    "evolvesAtLevel": 20
+    "evolvesAtLevel": 20,
+    "evolutionOptions": [
+      {
+        "to": "gyarados",
+        "atLevel": 20,
+        "isSpecial": false
+      }
+    ]
   },
   "gyarados": {
     "id": "gyarados",
@@ -6195,6 +6764,77 @@ export const SPECIES_DATA: SpeciesData = {
     "evolvesTo": null,
     "evolvesAtLevel": null
   },
+  "vaporeon": {
+    "id": "vaporeon",
+    "name": "Vaporeon",
+    "description": "Pokedex Nº134 - tipo WATER.",
+    "type": "WATER",
+    "type2": null,
+    "catchRate": 45,
+    "baseExp": 184,
+    "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 290,
+    "base": {
+      "hp": 130,
+      "atkFis": 65,
+      "atkEsp": 110,
+      "def": 60,
+      "defEsp": 95,
+      "speed": 65
+    },
+    "abilities": [
+      {
+        "key": "sand_attack",
+        "levelReq": 5
+      },
+      {
+        "key": "baby_doll_eyes",
+        "levelReq": 9
+      },
+      {
+        "key": "quick_attack",
+        "levelReq": 13
+      },
+      {
+        "key": "water_pulse",
+        "levelReq": 17
+      },
+      {
+        "key": "aurora_beam",
+        "levelReq": 20
+      },
+      {
+        "key": "aqua_ring",
+        "levelReq": 25
+      },
+      {
+        "key": "acid_armor",
+        "levelReq": 29
+      },
+      {
+        "key": "haze",
+        "levelReq": 33
+      },
+      {
+        "key": "muddy_water",
+        "levelReq": 37
+      },
+      {
+        "key": "last_resort",
+        "levelReq": 41
+      },
+      {
+        "key": "hydro_pump",
+        "levelReq": 45
+      },
+      {
+        "key": "water_gun",
+        "levelReq": 80
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
   "totodile": {
     "id": "totodile",
     "name": "Totodile",
@@ -6280,7 +6920,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "croconaw",
-    "evolvesAtLevel": 18
+    "evolvesAtLevel": 18,
+    "evolutionOptions": [
+      {
+        "to": "croconaw",
+        "atLevel": 18,
+        "isSpecial": false
+      }
+    ]
   },
   "croconaw": {
     "id": "croconaw",
@@ -6359,7 +7006,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "feraligatr",
-    "evolvesAtLevel": 30
+    "evolvesAtLevel": 30,
+    "evolutionOptions": [
+      {
+        "to": "feraligatr",
+        "atLevel": 30,
+        "isSpecial": false
+      }
+    ]
   },
   "feraligatr": {
     "id": "feraligatr",
@@ -6525,7 +7179,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "lanturn",
-    "evolvesAtLevel": 27
+    "evolvesAtLevel": 27,
+    "evolutionOptions": [
+      {
+        "to": "lanturn",
+        "atLevel": 27,
+        "isSpecial": false
+      }
+    ]
   },
   "lanturn": {
     "id": "lanturn",
@@ -6638,14 +7299,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "water_gun",
-        "levelReq": 1
-      },
-      {
         "key": "tail_whip",
         "levelReq": 2
       },
@@ -6703,7 +7356,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "azumarill",
-    "evolvesAtLevel": 18
+    "evolvesAtLevel": 18,
+    "evolutionOptions": [
+      {
+        "to": "azumarill",
+        "atLevel": 18,
+        "isSpecial": false
+      }
+    ]
   },
   "azumarill": {
     "id": "azumarill",
@@ -6908,7 +7568,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "quagsire",
-    "evolvesAtLevel": 20
+    "evolvesAtLevel": 20,
+    "evolutionOptions": [
+      {
+        "to": "quagsire",
+        "atLevel": 20,
+        "isSpecial": false
+      }
+    ]
   },
   "quagsire": {
     "id": "quagsire",
@@ -6972,6 +7639,81 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "muddy_water",
         "levelReq": 53
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "slowking": {
+    "id": "slowking",
+    "name": "Slowking",
+    "description": "Pokedex Nº199 - tipo WATER/PSYCHIC.",
+    "type": "WATER",
+    "type2": "PSYCHIC",
+    "catchRate": 70,
+    "baseExp": 172,
+    "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 795,
+    "base": {
+      "hp": 95,
+      "atkFis": 75,
+      "atkEsp": 100,
+      "def": 80,
+      "defEsp": 110,
+      "speed": 30
+    },
+    "abilities": [
+      {
+        "key": "growl",
+        "levelReq": 5
+      },
+      {
+        "key": "water_gun",
+        "levelReq": 9
+      },
+      {
+        "key": "confusion",
+        "levelReq": 14
+      },
+      {
+        "key": "disable",
+        "levelReq": 19
+      },
+      {
+        "key": "headbutt",
+        "levelReq": 23
+      },
+      {
+        "key": "water_pulse",
+        "levelReq": 28
+      },
+      {
+        "key": "zen_headbutt",
+        "levelReq": 32
+      },
+      {
+        "key": "nasty_plot",
+        "levelReq": 36
+      },
+      {
+        "key": "swagger",
+        "levelReq": 41
+      },
+      {
+        "key": "psychic",
+        "levelReq": 45
+      },
+      {
+        "key": "trump_card",
+        "levelReq": 49
+      },
+      {
+        "key": "psych_up",
+        "levelReq": 54
+      },
+      {
+        "key": "heal_pulse",
+        "levelReq": 58
       }
     ],
     "evolvesTo": null,
@@ -7248,7 +7990,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "octillery",
-    "evolvesAtLevel": 25
+    "evolvesAtLevel": 25,
+    "evolutionOptions": [
+      {
+        "to": "octillery",
+        "atLevel": 25,
+        "isSpecial": false
+      }
+    ]
   },
   "octillery": {
     "id": "octillery",
@@ -7345,30 +8094,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "bubble",
-        "levelReq": 1
-      },
-      {
-        "key": "bullet_seed",
-        "levelReq": 1
-      },
-      {
-        "key": "psybeam",
-        "levelReq": 1
-      },
-      {
-        "key": "roost",
-        "levelReq": 1
-      },
-      {
-        "key": "signal_beam",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
         "key": "supersonic",
         "levelReq": 3
       },
@@ -7443,14 +8168,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 85
     },
     "abilities": [
-      {
-        "key": "bubble",
-        "levelReq": 1
-      },
-      {
-        "key": "yawn",
-        "levelReq": 1
-      },
       {
         "key": "smokescreen",
         "levelReq": 5
@@ -7576,7 +8293,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "pidgeotto",
-    "evolvesAtLevel": 18
+    "evolvesAtLevel": 18,
+    "evolutionOptions": [
+      {
+        "to": "pidgeotto",
+        "atLevel": 18,
+        "isSpecial": false
+      }
+    ]
   },
   "pidgeotto": {
     "id": "pidgeotto",
@@ -7651,7 +8375,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "pidgeot",
-    "evolvesAtLevel": 36
+    "evolvesAtLevel": 36,
+    "evolutionOptions": [
+      {
+        "to": "pidgeot",
+        "atLevel": 36,
+        "isSpecial": false
+      }
+    ]
   },
   "pidgeot": {
     "id": "pidgeot",
@@ -7886,10 +8617,6 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "sing",
-        "levelReq": 1
-      },
-      {
         "key": "defense_curl",
         "levelReq": 3
       },
@@ -7960,6 +8687,60 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "double_edge",
         "levelReq": 45
+      }
+    ],
+    "evolvesTo": "wigglytuff",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "wigglytuff",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
+  },
+  "wigglytuff": {
+    "id": "wigglytuff",
+    "name": "Wigglytuff",
+    "description": "Pokedex Nº40 - tipo NORMAL/FAIRY.",
+    "type": "NORMAL",
+    "type2": "FAIRY",
+    "catchRate": 50,
+    "baseExp": 196,
+    "growthCurve": "FAST",
+    "pesoHg": 120,
+    "base": {
+      "hp": 140,
+      "atkFis": 70,
+      "atkEsp": 85,
+      "def": 45,
+      "defEsp": 50,
+      "speed": 45
+    },
+    "abilities": [
+      {
+        "key": "defense_curl",
+        "levelReq": 1
+      },
+      {
+        "key": "disable",
+        "levelReq": 1
+      },
+      {
+        "key": "double_slap",
+        "levelReq": 1
+      },
+      {
+        "key": "play_rough",
+        "levelReq": 1
+      },
+      {
+        "key": "sing",
+        "levelReq": 1
+      },
+      {
+        "key": "double_edge",
+        "levelReq": 80
       }
     ],
     "evolvesTo": null,
@@ -8046,7 +8827,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "persian",
-    "evolvesAtLevel": 28
+    "evolvesAtLevel": 28,
+    "evolutionOptions": [
+      {
+        "to": "persian",
+        "atLevel": 28,
+        "isSpecial": false
+      }
+    ]
   },
   "persian": {
     "id": "persian",
@@ -8307,7 +9095,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "dodrio",
-    "evolvesAtLevel": 31
+    "evolvesAtLevel": 31,
+    "evolutionOptions": [
+      {
+        "to": "dodrio",
+        "atLevel": 31,
+        "isSpecial": false
+      }
+    ]
   },
   "dodrio": {
     "id": "dodrio",
@@ -8756,8 +9551,40 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 45
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "vaporeon",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "vaporeon",
+        "atLevel": 80,
+        "isSpecial": true,
+        "stoneType": "WATER"
+      },
+      {
+        "to": "jolteon",
+        "atLevel": 80,
+        "isSpecial": true,
+        "stoneType": "ELECTRIC"
+      },
+      {
+        "to": "flareon",
+        "atLevel": 80,
+        "isSpecial": true,
+        "stoneType": "FIRE"
+      },
+      {
+        "to": "espeon",
+        "atLevel": 80,
+        "isSpecial": true,
+        "stoneType": "PSYCHIC"
+      },
+      {
+        "to": "umbreon",
+        "atLevel": 80,
+        "isSpecial": true,
+        "stoneType": "DARK"
+      }
+    ]
   },
   "porygon": {
     "id": "porygon",
@@ -8839,8 +9666,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 62
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "porygon2",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "porygon2",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "snorlax": {
     "id": "snorlax",
@@ -8861,10 +9695,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 30
     },
     "abilities": [
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
       {
         "key": "defense_curl",
         "levelReq": 4
@@ -9010,7 +9840,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "furret",
-    "evolvesAtLevel": 15
+    "evolvesAtLevel": 15,
+    "evolutionOptions": [
+      {
+        "to": "furret",
+        "atLevel": 15,
+        "isSpecial": false
+      }
+    ]
   },
   "furret": {
     "id": "furret",
@@ -9180,7 +10017,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "noctowl",
-    "evolvesAtLevel": 20
+    "evolvesAtLevel": 20,
+    "evolutionOptions": [
+      {
+        "to": "noctowl",
+        "atLevel": 20,
+        "isSpecial": false
+      }
+    ]
   },
   "noctowl": {
     "id": "noctowl",
@@ -9309,8 +10153,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 11
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "jigglypuff",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "jigglypuff",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "aipom": {
     "id": "aipom",
@@ -9674,7 +10525,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "ursaring",
-    "evolvesAtLevel": 30
+    "evolvesAtLevel": 30,
+    "evolutionOptions": [
+      {
+        "to": "ursaring",
+        "atLevel": 30,
+        "isSpecial": false
+      }
+    ]
   },
   "ursaring": {
     "id": "ursaring",
@@ -9758,22 +10616,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 60
     },
     "abilities": [
-      {
-        "key": "conversion",
-        "levelReq": 1
-      },
-      {
-        "key": "conversion_2",
-        "levelReq": 1
-      },
-      {
-        "key": "defense_curl",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
       {
         "key": "psybeam",
         "levelReq": 7
@@ -10087,8 +10929,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 54
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "golem",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "golem",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "golem": {
     "id": "golem",
@@ -10109,14 +10958,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 45
     },
     "abilities": [
-      {
-        "key": "defense_curl",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
       {
         "key": "mud_sport",
         "levelReq": 4
@@ -10289,8 +11130,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 52
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "steelix",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "steelix",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "omanyte": {
     "id": "omanyte",
@@ -10369,7 +11217,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "omastar",
-    "evolvesAtLevel": 40
+    "evolvesAtLevel": 40,
+    "evolutionOptions": [
+      {
+        "to": "omastar",
+        "atLevel": 40,
+        "isSpecial": false
+      }
+    ]
   },
   "omastar": {
     "id": "omastar",
@@ -10515,7 +11370,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "kabutops",
-    "evolvesAtLevel": 40
+    "evolvesAtLevel": 40,
+    "evolutionOptions": [
+      {
+        "to": "kabutops",
+        "atLevel": 40,
+        "isSpecial": false
+      }
+    ]
   },
   "kabutops": {
     "id": "kabutops",
@@ -10699,15 +11561,7 @@ export const SPECIES_DATA: SpeciesData = {
     },
     "abilities": [
       {
-        "key": "copycat",
-        "levelReq": 1
-      },
-      {
         "key": "slam",
-        "levelReq": 1
-      },
-      {
-        "key": "wood_hammer",
         "levelReq": 1
       },
       {
@@ -10851,7 +11705,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "pupitar",
-    "evolvesAtLevel": 30
+    "evolvesAtLevel": 30,
+    "evolutionOptions": [
+      {
+        "to": "pupitar",
+        "atLevel": 30,
+        "isSpecial": false
+      }
+    ]
   },
   "pupitar": {
     "id": "pupitar",
@@ -10922,7 +11783,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "tyranitar",
-    "evolvesAtLevel": 55
+    "evolvesAtLevel": 55,
+    "evolutionOptions": [
+      {
+        "to": "tyranitar",
+        "atLevel": 55,
+        "isSpecial": false
+      }
+    ]
   },
   "tyranitar": {
     "id": "tyranitar",
@@ -11088,7 +11956,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "sandslash",
-    "evolvesAtLevel": 22
+    "evolvesAtLevel": 22,
+    "evolutionOptions": [
+      {
+        "to": "sandslash",
+        "atLevel": 22,
+        "isSpecial": false
+      }
+    ]
   },
   "sandslash": {
     "id": "sandslash",
@@ -11254,7 +12129,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "dugtrio",
-    "evolvesAtLevel": 26
+    "evolvesAtLevel": 26,
+    "evolutionOptions": [
+      {
+        "to": "dugtrio",
+        "atLevel": 26,
+        "isSpecial": false
+      }
+    ]
   },
   "dugtrio": {
     "id": "dugtrio",
@@ -11416,7 +12298,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "marowak",
-    "evolvesAtLevel": 28
+    "evolvesAtLevel": 28,
+    "evolutionOptions": [
+      {
+        "to": "marowak",
+        "atLevel": 28,
+        "isSpecial": false
+      }
+    ]
   },
   "marowak": {
     "id": "marowak",
@@ -11582,7 +12471,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "rhydon",
-    "evolvesAtLevel": 42
+    "evolvesAtLevel": 42,
+    "evolutionOptions": [
+      {
+        "to": "rhydon",
+        "atLevel": 42,
+        "isSpecial": false
+      }
+    ]
   },
   "rhydon": {
     "id": "rhydon",
@@ -11819,7 +12715,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "donphan",
-    "evolvesAtLevel": 25
+    "evolvesAtLevel": 25,
+    "evolutionOptions": [
+      {
+        "to": "donphan",
+        "atLevel": 25,
+        "isSpecial": false
+      }
+    ]
   },
   "donphan": {
     "id": "donphan",
@@ -11945,7 +12848,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "charizard",
-    "evolvesAtLevel": 36
+    "evolvesAtLevel": 36,
+    "evolutionOptions": [
+      {
+        "to": "charizard",
+        "atLevel": 36,
+        "isSpecial": false
+      }
+    ]
   },
   "charizard": {
     "id": "charizard",
@@ -12114,8 +13024,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 45
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "arcanine",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "arcanine",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "arcanine": {
     "id": "arcanine",
@@ -12241,7 +13158,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "rapidash",
-    "evolvesAtLevel": 40
+    "evolvesAtLevel": 40,
+    "evolutionOptions": [
+      {
+        "to": "rapidash",
+        "atLevel": 40,
+        "isSpecial": false
+      }
+    ]
   },
   "rapidash": {
     "id": "rapidash",
@@ -12389,6 +13313,77 @@ export const SPECIES_DATA: SpeciesData = {
     "evolvesTo": null,
     "evolvesAtLevel": null
   },
+  "flareon": {
+    "id": "flareon",
+    "name": "Flareon",
+    "description": "Pokedex Nº136 - tipo FIRE.",
+    "type": "FIRE",
+    "type2": null,
+    "catchRate": 45,
+    "baseExp": 184,
+    "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 250,
+    "base": {
+      "hp": 65,
+      "atkFis": 130,
+      "atkEsp": 95,
+      "def": 60,
+      "defEsp": 110,
+      "speed": 65
+    },
+    "abilities": [
+      {
+        "key": "ember",
+        "levelReq": 1
+      },
+      {
+        "key": "sand_attack",
+        "levelReq": 5
+      },
+      {
+        "key": "baby_doll_eyes",
+        "levelReq": 9
+      },
+      {
+        "key": "quick_attack",
+        "levelReq": 13
+      },
+      {
+        "key": "bite",
+        "levelReq": 17
+      },
+      {
+        "key": "fire_fang",
+        "levelReq": 20
+      },
+      {
+        "key": "fire_spin",
+        "levelReq": 25
+      },
+      {
+        "key": "scary_face",
+        "levelReq": 29
+      },
+      {
+        "key": "smog",
+        "levelReq": 33
+      },
+      {
+        "key": "lava_plume",
+        "levelReq": 37
+      },
+      {
+        "key": "last_resort",
+        "levelReq": 41
+      },
+      {
+        "key": "flare_blitz",
+        "levelReq": 45
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
   "cyndaquil": {
     "id": "cyndaquil",
     "name": "Cyndaquil",
@@ -12474,7 +13469,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "quilava",
-    "evolvesAtLevel": 14
+    "evolvesAtLevel": 14,
+    "evolutionOptions": [
+      {
+        "to": "quilava",
+        "atLevel": 14,
+        "isSpecial": false
+      }
+    ]
   },
   "quilava": {
     "id": "quilava",
@@ -12553,7 +13555,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "typhlosion",
-    "evolvesAtLevel": 36
+    "evolvesAtLevel": 36,
+    "evolutionOptions": [
+      {
+        "to": "typhlosion",
+        "atLevel": 36,
+        "isSpecial": false
+      }
+    ]
   },
   "typhlosion": {
     "id": "typhlosion",
@@ -12719,7 +13728,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "magcargo",
-    "evolvesAtLevel": 38
+    "evolvesAtLevel": 38,
+    "evolutionOptions": [
+      {
+        "to": "magcargo",
+        "atLevel": 38,
+        "isSpecial": false
+      }
+    ]
   },
   "magcargo": {
     "id": "magcargo",
@@ -12881,7 +13897,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "magmar",
-    "evolvesAtLevel": 30
+    "evolvesAtLevel": 30,
+    "evolutionOptions": [
+      {
+        "to": "magmar",
+        "atLevel": 30,
+        "isSpecial": false
+      }
+    ]
   },
   "pikachu": {
     "id": "pikachu",
@@ -12902,14 +13925,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 90
     },
     "abilities": [
-      {
-        "key": "tail_whip",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_shock",
-        "levelReq": 1
-      },
       {
         "key": "growl",
         "levelReq": 5
@@ -12973,6 +13988,52 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "thunder",
         "levelReq": 58
+      }
+    ],
+    "evolvesTo": "raichu",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "raichu",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
+  },
+  "raichu": {
+    "id": "raichu",
+    "name": "Raichu",
+    "description": "Pokedex Nº26 - tipo ELECTRIC.",
+    "type": "ELECTRIC",
+    "type2": null,
+    "catchRate": 75,
+    "baseExp": 218,
+    "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 300,
+    "base": {
+      "hp": 60,
+      "atkFis": 90,
+      "atkEsp": 90,
+      "def": 55,
+      "defEsp": 80,
+      "speed": 110
+    },
+    "abilities": [
+      {
+        "key": "quick_attack",
+        "levelReq": 1
+      },
+      {
+        "key": "tail_whip",
+        "levelReq": 1
+      },
+      {
+        "key": "thunder_shock",
+        "levelReq": 1
+      },
+      {
+        "key": "thunderbolt",
+        "levelReq": 1
       }
     ],
     "evolvesTo": null,
@@ -13071,7 +14132,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "magneton",
-    "evolvesAtLevel": 30
+    "evolvesAtLevel": 30,
+    "evolutionOptions": [
+      {
+        "to": "magneton",
+        "atLevel": 30,
+        "isSpecial": false
+      }
+    ]
   },
   "magneton": {
     "id": "magneton",
@@ -13253,7 +14321,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "electrode",
-    "evolvesAtLevel": 30
+    "evolvesAtLevel": 30,
+    "evolutionOptions": [
+      {
+        "to": "electrode",
+        "atLevel": 30,
+        "isSpecial": false
+      }
+    ]
   },
   "electrode": {
     "id": "electrode",
@@ -13409,6 +14484,77 @@ export const SPECIES_DATA: SpeciesData = {
     "evolvesTo": null,
     "evolvesAtLevel": null
   },
+  "jolteon": {
+    "id": "jolteon",
+    "name": "Jolteon",
+    "description": "Pokedex Nº135 - tipo ELECTRIC.",
+    "type": "ELECTRIC",
+    "type2": null,
+    "catchRate": 45,
+    "baseExp": 184,
+    "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 245,
+    "base": {
+      "hp": 65,
+      "atkFis": 65,
+      "atkEsp": 110,
+      "def": 60,
+      "defEsp": 95,
+      "speed": 130
+    },
+    "abilities": [
+      {
+        "key": "thunder_shock",
+        "levelReq": 1
+      },
+      {
+        "key": "sand_attack",
+        "levelReq": 5
+      },
+      {
+        "key": "baby_doll_eyes",
+        "levelReq": 9
+      },
+      {
+        "key": "quick_attack",
+        "levelReq": 13
+      },
+      {
+        "key": "double_kick",
+        "levelReq": 17
+      },
+      {
+        "key": "thunder_fang",
+        "levelReq": 20
+      },
+      {
+        "key": "pin_missile",
+        "levelReq": 25
+      },
+      {
+        "key": "agility",
+        "levelReq": 29
+      },
+      {
+        "key": "thunder_wave",
+        "levelReq": 33
+      },
+      {
+        "key": "discharge",
+        "levelReq": 37
+      },
+      {
+        "key": "last_resort",
+        "levelReq": 41
+      },
+      {
+        "key": "thunder",
+        "levelReq": 45
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
   "pichu": {
     "id": "pichu",
     "name": "Pichu",
@@ -13453,8 +14599,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 18
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "pikachu",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "pikachu",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "mareep": {
     "id": "mareep",
@@ -13537,7 +14690,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "flaaffy",
-    "evolvesAtLevel": 15
+    "evolvesAtLevel": 15,
+    "evolutionOptions": [
+      {
+        "to": "flaaffy",
+        "atLevel": 15,
+        "isSpecial": false
+      }
+    ]
   },
   "flaaffy": {
     "id": "flaaffy",
@@ -13612,7 +14772,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "ampharos",
-    "evolvesAtLevel": 30
+    "evolvesAtLevel": 30,
+    "evolutionOptions": [
+      {
+        "to": "ampharos",
+        "atLevel": 30,
+        "isSpecial": false
+      }
+    ]
   },
   "ampharos": {
     "id": "ampharos",
@@ -13774,7 +14941,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "electabuzz",
-    "evolvesAtLevel": 30
+    "evolvesAtLevel": 30,
+    "evolutionOptions": [
+      {
+        "to": "electabuzz",
+        "atLevel": 30,
+        "isSpecial": false
+      }
+    ]
   },
   "ekans": {
     "id": "ekans",
@@ -13865,7 +15039,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "arbok",
-    "evolvesAtLevel": 22
+    "evolvesAtLevel": 22,
+    "evolutionOptions": [
+      {
+        "to": "arbok",
+        "atLevel": 22,
+        "isSpecial": false
+      }
+    ]
   },
   "arbok": {
     "id": "arbok",
@@ -14027,7 +15208,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "nidorina",
-    "evolvesAtLevel": 16
+    "evolvesAtLevel": 16,
+    "evolutionOptions": [
+      {
+        "to": "nidorina",
+        "atLevel": 16,
+        "isSpecial": false
+      }
+    ]
   },
   "nidorina": {
     "id": "nidorina",
@@ -14093,8 +15281,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 58
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "nidoqueen",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "nidoqueen",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "nidoqueen": {
     "id": "nidoqueen",
@@ -14115,22 +15310,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 76
     },
     "abilities": [
-      {
-        "key": "double_kick",
-        "levelReq": 1
-      },
-      {
-        "key": "poison_sting",
-        "levelReq": 1
-      },
-      {
-        "key": "scratch",
-        "levelReq": 1
-      },
-      {
-        "key": "tail_whip",
-        "levelReq": 1
-      },
       {
         "key": "chip_away",
         "levelReq": 23
@@ -14224,7 +15403,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "nidorino",
-    "evolvesAtLevel": 16
+    "evolvesAtLevel": 16,
+    "evolutionOptions": [
+      {
+        "to": "nidorino",
+        "atLevel": 16,
+        "isSpecial": false
+      }
+    ]
   },
   "nidorino": {
     "id": "nidorino",
@@ -14290,8 +15476,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 58
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "nidoking",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "nidoking",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "nidoking": {
     "id": "nidoking",
@@ -14312,22 +15505,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 85
     },
     "abilities": [
-      {
-        "key": "double_kick",
-        "levelReq": 1
-      },
-      {
-        "key": "focus_energy",
-        "levelReq": 1
-      },
-      {
-        "key": "peck",
-        "levelReq": 1
-      },
-      {
-        "key": "poison_sting",
-        "levelReq": 1
-      },
       {
         "key": "chip_away",
         "levelReq": 23
@@ -14429,7 +15606,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "golbat",
-    "evolvesAtLevel": 22
+    "evolvesAtLevel": 22,
+    "evolutionOptions": [
+      {
+        "to": "golbat",
+        "atLevel": 22,
+        "isSpecial": false
+      }
+    ]
   },
   "golbat": {
     "id": "golbat",
@@ -14507,8 +15691,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 51
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "crobat",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "crobat",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "grimer": {
     "id": "grimer",
@@ -14595,7 +15786,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "muk",
-    "evolvesAtLevel": 38
+    "evolvesAtLevel": 38,
+    "evolutionOptions": [
+      {
+        "to": "muk",
+        "atLevel": 38,
+        "isSpecial": false
+      }
+    ]
   },
   "muk": {
     "id": "muk",
@@ -14761,7 +15959,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "weezing",
-    "evolvesAtLevel": 35
+    "evolvesAtLevel": 35,
+    "evolutionOptions": [
+      {
+        "to": "weezing",
+        "atLevel": 35,
+        "isSpecial": false
+      }
+    ]
   },
   "weezing": {
     "id": "weezing",
@@ -14837,6 +16042,89 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "memento",
         "levelReq": 57
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "crobat": {
+    "id": "crobat",
+    "name": "Crobat",
+    "description": "Pokedex Nº169 - tipo POISON/FLYING.",
+    "type": "POISON",
+    "type2": "FLYING",
+    "catchRate": 90,
+    "baseExp": 241,
+    "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 750,
+    "base": {
+      "hp": 85,
+      "atkFis": 90,
+      "atkEsp": 70,
+      "def": 80,
+      "defEsp": 80,
+      "speed": 130
+    },
+    "abilities": [
+      {
+        "key": "supersonic",
+        "levelReq": 5
+      },
+      {
+        "key": "astonish",
+        "levelReq": 7
+      },
+      {
+        "key": "bite",
+        "levelReq": 11
+      },
+      {
+        "key": "wing_attack",
+        "levelReq": 13
+      },
+      {
+        "key": "confuse_ray",
+        "levelReq": 17
+      },
+      {
+        "key": "air_cutter",
+        "levelReq": 19
+      },
+      {
+        "key": "swift",
+        "levelReq": 24
+      },
+      {
+        "key": "poison_fang",
+        "levelReq": 27
+      },
+      {
+        "key": "mean_look",
+        "levelReq": 32
+      },
+      {
+        "key": "leech_life",
+        "levelReq": 35
+      },
+      {
+        "key": "haze",
+        "levelReq": 40
+      },
+      {
+        "key": "venoshock",
+        "levelReq": 43
+      },
+      {
+        "key": "air_slash",
+        "levelReq": 48
+      },
+      {
+        "key": "quick_guard",
+        "levelReq": 51
+      },
+      {
+        "key": "cross_poison",
+        "levelReq": 80
       }
     ],
     "evolvesTo": null,
@@ -14939,7 +16227,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "primeape",
-    "evolvesAtLevel": 28
+    "evolvesAtLevel": 28,
+    "evolutionOptions": [
+      {
+        "to": "primeape",
+        "atLevel": 28,
+        "isSpecial": false
+      }
+    ]
   },
   "primeape": {
     "id": "primeape",
@@ -15113,7 +16408,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "machoke",
-    "evolvesAtLevel": 28
+    "evolvesAtLevel": 28,
+    "evolutionOptions": [
+      {
+        "to": "machoke",
+        "atLevel": 28,
+        "isSpecial": false
+      }
+    ]
   },
   "machoke": {
     "id": "machoke",
@@ -15195,8 +16497,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 57
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "machamp",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "machamp",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "machamp": {
     "id": "machamp",
@@ -15217,22 +16526,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 55
     },
     "abilities": [
-      {
-        "key": "leer",
-        "levelReq": 1
-      },
-      {
-        "key": "low_kick",
-        "levelReq": 1
-      },
-      {
-        "key": "strength",
-        "levelReq": 1
-      },
-      {
-        "key": "wide_guard",
-        "levelReq": 1
-      },
       {
         "key": "focus_energy",
         "levelReq": 3
@@ -15292,6 +16585,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "dynamic_punch",
         "levelReq": 57
+      },
+      {
+        "key": "strength",
+        "levelReq": 80
       }
     ],
     "evolvesTo": null,
@@ -15408,10 +16705,6 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 1
       },
       {
-        "key": "revenge",
-        "levelReq": 1
-      },
-      {
         "key": "agility",
         "levelReq": 6
       },
@@ -15516,7 +16809,107 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "hitmonlee",
-    "evolvesAtLevel": 20
+    "evolvesAtLevel": 20,
+    "evolutionOptions": [
+      {
+        "to": "hitmonlee",
+        "atLevel": 20,
+        "isSpecial": false
+      },
+      {
+        "to": "hitmonchan",
+        "atLevel": 20,
+        "isSpecial": false
+      },
+      {
+        "to": "hitmontop",
+        "atLevel": 20,
+        "isSpecial": false
+      }
+    ]
+  },
+  "hitmontop": {
+    "id": "hitmontop",
+    "name": "Hitmontop",
+    "description": "Pokedex Nº237 - tipo FIGHTING.",
+    "type": "FIGHTING",
+    "type2": null,
+    "catchRate": 45,
+    "baseExp": 159,
+    "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 480,
+    "base": {
+      "hp": 50,
+      "atkFis": 95,
+      "atkEsp": 35,
+      "def": 95,
+      "defEsp": 110,
+      "speed": 70
+    },
+    "abilities": [
+      {
+        "key": "rolling_kick",
+        "levelReq": 1
+      },
+      {
+        "key": "focus_energy",
+        "levelReq": 6
+      },
+      {
+        "key": "pursuit",
+        "levelReq": 10
+      },
+      {
+        "key": "quick_attack",
+        "levelReq": 15
+      },
+      {
+        "key": "rapid_spin",
+        "levelReq": 19
+      },
+      {
+        "key": "feint",
+        "levelReq": 24
+      },
+      {
+        "key": "counter",
+        "levelReq": 28
+      },
+      {
+        "key": "triple_kick",
+        "levelReq": 33
+      },
+      {
+        "key": "agility",
+        "levelReq": 37
+      },
+      {
+        "key": "gyro_ball",
+        "levelReq": 42
+      },
+      {
+        "key": "quick_guard",
+        "levelReq": 46
+      },
+      {
+        "key": "wide_guard",
+        "levelReq": 46
+      },
+      {
+        "key": "detect",
+        "levelReq": 50
+      },
+      {
+        "key": "close_combat",
+        "levelReq": 55
+      },
+      {
+        "key": "endeavor",
+        "levelReq": 60
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
   },
   "jynx": {
     "id": "jynx",
@@ -15678,7 +17071,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "piloswine",
-    "evolvesAtLevel": 33
+    "evolvesAtLevel": 33,
+    "evolutionOptions": [
+      {
+        "to": "piloswine",
+        "atLevel": 33,
+        "isSpecial": false
+      }
+    ]
   },
   "piloswine": {
     "id": "piloswine",
@@ -15871,7 +17271,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "jynx",
-    "evolvesAtLevel": 30
+    "evolvesAtLevel": 30,
+    "evolutionOptions": [
+      {
+        "to": "jynx",
+        "atLevel": 30,
+        "isSpecial": false
+      }
+    ]
   },
   "steelix": {
     "id": "steelix",
@@ -15892,34 +17299,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 30
     },
     "abilities": [
-      {
-        "key": "bind",
-        "levelReq": 1
-      },
-      {
-        "key": "fire_fang",
-        "levelReq": 1
-      },
-      {
-        "key": "harden",
-        "levelReq": 1
-      },
-      {
-        "key": "ice_fang",
-        "levelReq": 1
-      },
-      {
-        "key": "mud_sport",
-        "levelReq": 1
-      },
-      {
-        "key": "tackle",
-        "levelReq": 1
-      },
-      {
-        "key": "thunder_fang",
-        "levelReq": 1
-      },
       {
         "key": "curse",
         "levelReq": 4
@@ -16168,53 +17547,60 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "xatu",
-    "evolvesAtLevel": 25
+    "evolvesAtLevel": 25,
+    "evolutionOptions": [
+      {
+        "to": "xatu",
+        "atLevel": 25,
+        "isSpecial": false
+      }
+    ]
   },
-  "xatu": {
-    "id": "xatu",
-    "name": "Xatu",
-    "description": "Pokedex Nº178 - tipo PSYCHIC/FLYING.",
-    "type": "PSYCHIC",
+  "togetic": {
+    "id": "togetic",
+    "name": "Togetic",
+    "description": "Pokedex Nº176 - tipo FAIRY/FLYING.",
+    "type": "FAIRY",
     "type2": "FLYING",
     "catchRate": 75,
-    "baseExp": 165,
-    "growthCurve": "MEDIUM_FAST",
-    "pesoHg": 150,
+    "baseExp": 142,
+    "growthCurve": "FAST",
+    "pesoHg": 32,
     "base": {
-      "hp": 65,
-      "atkFis": 75,
-      "atkEsp": 95,
-      "def": 70,
-      "defEsp": 70,
-      "speed": 95
+      "hp": 55,
+      "atkFis": 40,
+      "atkEsp": 80,
+      "def": 85,
+      "defEsp": 105,
+      "speed": 40
     },
     "abilities": [
       {
-        "key": "night_shade",
-        "levelReq": 6
+        "key": "metronome",
+        "levelReq": 5
       },
       {
-        "key": "teleport",
+        "key": "sweet_kiss",
         "levelReq": 9
       },
       {
-        "key": "lucky_chant",
-        "levelReq": 12
+        "key": "yawn",
+        "levelReq": 13
       },
       {
-        "key": "stored_power",
+        "key": "fairy_wind",
+        "levelReq": 14
+      },
+      {
+        "key": "encore",
         "levelReq": 17
       },
       {
-        "key": "ominous_wind",
-        "levelReq": 20
+        "key": "follow_me",
+        "levelReq": 21
       },
       {
-        "key": "confuse_ray",
-        "levelReq": 23
-      },
-      {
-        "key": "air_slash",
+        "key": "bestow",
         "levelReq": 25
       },
       {
@@ -16222,32 +17608,28 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 29
       },
       {
-        "key": "psychic",
-        "levelReq": 35
+        "key": "ancient_power",
+        "levelReq": 33
       },
       {
-        "key": "miracle_eye",
-        "levelReq": 39
+        "key": "safeguard",
+        "levelReq": 37
       },
       {
-        "key": "psycho_shift",
-        "levelReq": 43
+        "key": "baton_pass",
+        "levelReq": 41
       },
       {
-        "key": "future_sight",
+        "key": "double_edge",
+        "levelReq": 45
+      },
+      {
+        "key": "last_resort",
         "levelReq": 49
       },
       {
-        "key": "guard_swap",
+        "key": "after_you",
         "levelReq": 53
-      },
-      {
-        "key": "power_swap",
-        "levelReq": 53
-      },
-      {
-        "key": "me_first",
-        "levelReq": 57
       }
     ],
     "evolvesTo": null,
@@ -16278,7 +17660,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "kadabra",
-    "evolvesAtLevel": 16
+    "evolvesAtLevel": 16,
+    "evolutionOptions": [
+      {
+        "to": "kadabra",
+        "atLevel": 16,
+        "isSpecial": false
+      }
+    ]
   },
   "kadabra": {
     "id": "kadabra",
@@ -16356,8 +17745,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 46
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "alakazam",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "alakazam",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "alakazam": {
     "id": "alakazam",
@@ -16378,14 +17774,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 120
     },
     "abilities": [
-      {
-        "key": "kinesis",
-        "levelReq": 1
-      },
-      {
-        "key": "teleport",
-        "levelReq": 1
-      },
       {
         "key": "confusion",
         "levelReq": 16
@@ -16437,6 +17825,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "trick",
         "levelReq": 46
+      },
+      {
+        "key": "kinesis",
+        "levelReq": 80
       }
     ],
     "evolvesTo": null,
@@ -16531,7 +17923,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "hypno",
-    "evolvesAtLevel": 26
+    "evolvesAtLevel": 26,
+    "evolutionOptions": [
+      {
+        "to": "hypno",
+        "atLevel": 26,
+        "isSpecial": false
+      }
+    ]
   },
   "hypno": {
     "id": "hypno",
@@ -16611,6 +18010,160 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "future_sight",
         "levelReq": 61
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "xatu": {
+    "id": "xatu",
+    "name": "Xatu",
+    "description": "Pokedex Nº178 - tipo PSYCHIC/FLYING.",
+    "type": "PSYCHIC",
+    "type2": "FLYING",
+    "catchRate": 75,
+    "baseExp": 165,
+    "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 150,
+    "base": {
+      "hp": 65,
+      "atkFis": 75,
+      "atkEsp": 95,
+      "def": 70,
+      "defEsp": 70,
+      "speed": 95
+    },
+    "abilities": [
+      {
+        "key": "night_shade",
+        "levelReq": 6
+      },
+      {
+        "key": "teleport",
+        "levelReq": 9
+      },
+      {
+        "key": "lucky_chant",
+        "levelReq": 12
+      },
+      {
+        "key": "stored_power",
+        "levelReq": 17
+      },
+      {
+        "key": "ominous_wind",
+        "levelReq": 20
+      },
+      {
+        "key": "confuse_ray",
+        "levelReq": 23
+      },
+      {
+        "key": "air_slash",
+        "levelReq": 25
+      },
+      {
+        "key": "wish",
+        "levelReq": 29
+      },
+      {
+        "key": "psychic",
+        "levelReq": 35
+      },
+      {
+        "key": "miracle_eye",
+        "levelReq": 39
+      },
+      {
+        "key": "psycho_shift",
+        "levelReq": 43
+      },
+      {
+        "key": "future_sight",
+        "levelReq": 49
+      },
+      {
+        "key": "guard_swap",
+        "levelReq": 53
+      },
+      {
+        "key": "power_swap",
+        "levelReq": 53
+      },
+      {
+        "key": "me_first",
+        "levelReq": 57
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "espeon": {
+    "id": "espeon",
+    "name": "Espeon",
+    "description": "Pokedex Nº196 - tipo PSYCHIC.",
+    "type": "PSYCHIC",
+    "type2": null,
+    "catchRate": 45,
+    "baseExp": 184,
+    "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 265,
+    "base": {
+      "hp": 65,
+      "atkFis": 65,
+      "atkEsp": 130,
+      "def": 60,
+      "defEsp": 95,
+      "speed": 110
+    },
+    "abilities": [
+      {
+        "key": "confusion",
+        "levelReq": 1
+      },
+      {
+        "key": "sand_attack",
+        "levelReq": 5
+      },
+      {
+        "key": "baby_doll_eyes",
+        "levelReq": 9
+      },
+      {
+        "key": "quick_attack",
+        "levelReq": 13
+      },
+      {
+        "key": "swift",
+        "levelReq": 17
+      },
+      {
+        "key": "psybeam",
+        "levelReq": 20
+      },
+      {
+        "key": "future_sight",
+        "levelReq": 25
+      },
+      {
+        "key": "psych_up",
+        "levelReq": 29
+      },
+      {
+        "key": "morning_sun",
+        "levelReq": 33
+      },
+      {
+        "key": "psychic",
+        "levelReq": 37
+      },
+      {
+        "key": "last_resort",
+        "levelReq": 41
+      },
+      {
+        "key": "power_swap",
+        "levelReq": 45
       }
     ],
     "evolvesTo": null,
@@ -16763,7 +18316,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "haunter",
-    "evolvesAtLevel": 25
+    "evolvesAtLevel": 25,
+    "evolutionOptions": [
+      {
+        "to": "haunter",
+        "atLevel": 25,
+        "isSpecial": false
+      }
+    ]
   },
   "haunter": {
     "id": "haunter",
@@ -16841,8 +18401,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 61
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "gengar",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "gengar",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "gengar": {
     "id": "gengar",
@@ -16863,18 +18430,6 @@ export const SPECIES_DATA: SpeciesData = {
       "speed": 110
     },
     "abilities": [
-      {
-        "key": "hypnosis",
-        "levelReq": 1
-      },
-      {
-        "key": "lick",
-        "levelReq": 1
-      },
-      {
-        "key": "shadow_punch",
-        "levelReq": 1
-      },
       {
         "key": "spite",
         "levelReq": 5
@@ -16926,6 +18481,10 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "nightmare",
         "levelReq": 61
+      },
+      {
+        "key": "shadow_punch",
+        "levelReq": 80
       }
     ],
     "evolvesTo": null,
@@ -17005,6 +18564,77 @@ export const SPECIES_DATA: SpeciesData = {
       {
         "key": "power_gem",
         "levelReq": 55
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
+  "umbreon": {
+    "id": "umbreon",
+    "name": "Umbreon",
+    "description": "Pokedex Nº197 - tipo DARK.",
+    "type": "DARK",
+    "type2": null,
+    "catchRate": 45,
+    "baseExp": 184,
+    "growthCurve": "MEDIUM_FAST",
+    "pesoHg": 270,
+    "base": {
+      "hp": 95,
+      "atkFis": 65,
+      "atkEsp": 60,
+      "def": 110,
+      "defEsp": 130,
+      "speed": 65
+    },
+    "abilities": [
+      {
+        "key": "pursuit",
+        "levelReq": 1
+      },
+      {
+        "key": "sand_attack",
+        "levelReq": 5
+      },
+      {
+        "key": "baby_doll_eyes",
+        "levelReq": 9
+      },
+      {
+        "key": "quick_attack",
+        "levelReq": 13
+      },
+      {
+        "key": "confuse_ray",
+        "levelReq": 17
+      },
+      {
+        "key": "feint_attack",
+        "levelReq": 20
+      },
+      {
+        "key": "assurance",
+        "levelReq": 25
+      },
+      {
+        "key": "screech",
+        "levelReq": 29
+      },
+      {
+        "key": "moonlight",
+        "levelReq": 33
+      },
+      {
+        "key": "mean_look",
+        "levelReq": 37
+      },
+      {
+        "key": "last_resort",
+        "levelReq": 41
+      },
+      {
+        "key": "guard_swap",
+        "levelReq": 45
       }
     ],
     "evolvesTo": null,
@@ -17265,7 +18895,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "houndoom",
-    "evolvesAtLevel": 24
+    "evolvesAtLevel": 24,
+    "evolutionOptions": [
+      {
+        "to": "houndoom",
+        "atLevel": 24,
+        "isSpecial": false
+      }
+    ]
   },
   "houndoom": {
     "id": "houndoom",
@@ -17423,7 +19060,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "dragonair",
-    "evolvesAtLevel": 30
+    "evolvesAtLevel": 30,
+    "evolutionOptions": [
+      {
+        "to": "dragonair",
+        "atLevel": 30,
+        "isSpecial": false
+      }
+    ]
   },
   "dragonair": {
     "id": "dragonair",
@@ -17494,7 +19138,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "dragonite",
-    "evolvesAtLevel": 55
+    "evolvesAtLevel": 55,
+    "evolutionOptions": [
+      {
+        "to": "dragonite",
+        "atLevel": 55,
+        "isSpecial": false
+      }
+    ]
   },
   "dragonite": {
     "id": "dragonite",
@@ -17575,6 +19226,155 @@ export const SPECIES_DATA: SpeciesData = {
     "evolvesTo": null,
     "evolvesAtLevel": null
   },
+  "clefairy": {
+    "id": "clefairy",
+    "name": "Clefairy",
+    "description": "Pokedex Nº35 - tipo FAIRY.",
+    "type": "FAIRY",
+    "type2": null,
+    "catchRate": 150,
+    "baseExp": 113,
+    "growthCurve": "FAST",
+    "pesoHg": 75,
+    "base": {
+      "hp": 70,
+      "atkFis": 45,
+      "atkEsp": 60,
+      "def": 48,
+      "defEsp": 65,
+      "speed": 35
+    },
+    "abilities": [
+      {
+        "key": "sing",
+        "levelReq": 7
+      },
+      {
+        "key": "double_slap",
+        "levelReq": 10
+      },
+      {
+        "key": "defense_curl",
+        "levelReq": 13
+      },
+      {
+        "key": "follow_me",
+        "levelReq": 16
+      },
+      {
+        "key": "bestow",
+        "levelReq": 19
+      },
+      {
+        "key": "wake_up_slap",
+        "levelReq": 22
+      },
+      {
+        "key": "minimize",
+        "levelReq": 25
+      },
+      {
+        "key": "stored_power",
+        "levelReq": 28
+      },
+      {
+        "key": "metronome",
+        "levelReq": 31
+      },
+      {
+        "key": "cosmic_power",
+        "levelReq": 34
+      },
+      {
+        "key": "lucky_chant",
+        "levelReq": 37
+      },
+      {
+        "key": "body_slam",
+        "levelReq": 40
+      },
+      {
+        "key": "moonlight",
+        "levelReq": 43
+      },
+      {
+        "key": "moonblast",
+        "levelReq": 46
+      },
+      {
+        "key": "gravity",
+        "levelReq": 49
+      },
+      {
+        "key": "meteor_mash",
+        "levelReq": 50
+      },
+      {
+        "key": "healing_wish",
+        "levelReq": 55
+      },
+      {
+        "key": "after_you",
+        "levelReq": 58
+      }
+    ],
+    "evolvesTo": "clefable",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "clefable",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
+  },
+  "clefable": {
+    "id": "clefable",
+    "name": "Clefable",
+    "description": "Pokedex Nº36 - tipo FAIRY.",
+    "type": "FAIRY",
+    "type2": null,
+    "catchRate": 25,
+    "baseExp": 217,
+    "growthCurve": "FAST",
+    "pesoHg": 400,
+    "base": {
+      "hp": 95,
+      "atkFis": 70,
+      "atkEsp": 95,
+      "def": 73,
+      "defEsp": 90,
+      "speed": 60
+    },
+    "abilities": [
+      {
+        "key": "disarming_voice",
+        "levelReq": 1
+      },
+      {
+        "key": "double_slap",
+        "levelReq": 1
+      },
+      {
+        "key": "metronome",
+        "levelReq": 1
+      },
+      {
+        "key": "minimize",
+        "levelReq": 1
+      },
+      {
+        "key": "sing",
+        "levelReq": 1
+      },
+      {
+        "key": "spotlight",
+        "levelReq": 1
+      }
+    ],
+    "evolvesTo": null,
+    "evolvesAtLevel": null
+  },
   "cleffa": {
     "id": "cleffa",
     "name": "Cleffa",
@@ -17623,8 +19423,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 16
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "clefairy",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "clefairy",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "togepi": {
     "id": "togepi",
@@ -17706,8 +19513,15 @@ export const SPECIES_DATA: SpeciesData = {
         "levelReq": 53
       }
     ],
-    "evolvesTo": null,
-    "evolvesAtLevel": null
+    "evolvesTo": "togetic",
+    "evolvesAtLevel": 80,
+    "evolutionOptions": [
+      {
+        "to": "togetic",
+        "atLevel": 80,
+        "isSpecial": true
+      }
+    ]
   },
   "snubbull": {
     "id": "snubbull",
@@ -17790,7 +19604,14 @@ export const SPECIES_DATA: SpeciesData = {
       }
     ],
     "evolvesTo": "granbull",
-    "evolvesAtLevel": 23
+    "evolvesAtLevel": 23,
+    "evolutionOptions": [
+      {
+        "to": "granbull",
+        "atLevel": 23,
+        "isSpecial": false
+      }
+    ]
   },
   "granbull": {
     "id": "granbull",

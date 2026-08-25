@@ -6,6 +6,7 @@ import {
   defaultGameStateData, MAPS, GRUPOS_DO_LANCE,
   OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
+  type ClimaTipo,
 } from '#engine'
 import {
   ErroHttp, selecionarTudo, selecionar, atualizar, atualizarRetornando, inserir, apagar, chamarRpc, type Config,
@@ -395,6 +396,36 @@ function linhaIgual(nova: Record<string, unknown>, atual: Record<string, unknown
   return true
 }
 
+/**
+ * Só as linhas que mudaram em relacao ao baseline — o que de fato precisa subir.
+ *
+ * POR QUE ISTO EXISTE (PH-90)
+ *
+ * O diff antes era so por TABELA: bastava uma linha diferente pra reescrever
+ * todas. Como a Pokedex guarda contagem de abates, matar UM mob mudava uma
+ * contagem e regravava a dex inteira — 104 linhas pra registrar 1 abate no
+ * jogador com a dex maior. Medido em producao: 484.746 escritas em
+ * `player_pokedex` contra 13.045 em `players`, a tabela principal. Mesma coisa
+ * em `player_items`, onde cada pocao consumida reescrevia o inventario todo.
+ *
+ * `undefined` = nao ha baseline (chamador antigo, ou leitura que nao guardou as
+ * linhas). Sem baseline nao da pra saber o que mudou, entao devolve tudo — o
+ * mesmo fallback conservador de antes.
+ *
+ * Linha nova (sem par no baseline) entra: `linhaIgual(nova, undefined)` e
+ * false. Linha REMOVIDA nao aparece aqui — quem cuida disso e o diff de
+ * remocao de cada bloco, que compara contra o que o banco tem agora.
+ */
+function linhasQueMudaram<T extends Record<string, unknown>>(
+  novas: T[],
+  atuais: T[] | undefined,
+  chaveDe: (linha: T) => string,
+): T[] {
+  if (!atuais) return novas
+  const porChave = new Map(atuais.map((l) => [chaveDe(l), l]))
+  return novas.filter((nova) => !linhaIgual(nova, porChave.get(chaveDe(nova))))
+}
+
 /** Nada mudou nesta tabela: mesmas chaves, e nenhuma linha diferente. */
 function tabelaIntacta<T extends Record<string, unknown>>(
   novas: T[],
@@ -404,9 +435,9 @@ function tabelaIntacta<T extends Record<string, unknown>>(
   // `undefined` = nao ha baseline (chamador antigo, ou leitura que nao guardou
   // as linhas). Sem baseline nao ha como afirmar que nada mudou.
   if (!atuais) return false
+  // Contagem diferente ja resolve: sobrou ou faltou linha em relacao ao load.
   if (novas.length !== atuais.length) return false
-  const porChave = new Map(atuais.map((l) => [chaveDe(l), l]))
-  return novas.every((nova) => linhaIgual(nova, porChave.get(chaveDe(nova))))
+  return linhasQueMudaram(novas, atuais, chaveDe).length === 0
 }
 
 export async function gravarEstado(
@@ -475,12 +506,15 @@ export async function gravarEstado(
     for (const lote of porLotesDeId(remover)) {
       await apagar(cfg, `pokemon_instances?user_id=eq.${userId}&id=in.(${lote.join(',')})`)
     }
+    // Duas condicoes, e as duas importam. "Mudou" (PH-90) evita reescrever os
+    // outros POKE da equipe porque um deles ganhou EXP. "Ainda e meu" evita
+    // ressuscitar POKE que ja foi vendido/transferido entre a leitura e agora.
     // Linha sem par no banco e POKE novo (captura, inicial, compra) — grava.
-    // Linha com par que ja nao e minha fica de fora.
-    const gravarPoke = linhasPoke.filter((l) => {
-      const atual = porId.get(String(l.id))
-      return atual == null || aindaMeu(atual)
-    })
+    const gravarPoke = linhasQueMudaram(linhasPoke, linhasNoLoad?.pokemon, (l) => String(l.id))
+      .filter((l) => {
+        const atual = porId.get(String(l.id))
+        return atual == null || aindaMeu(atual)
+      })
     if (gravarPoke.length) await inserir(cfg, 'pokemon_instances', gravarPoke, { upsert: 'id' })
   }
 
@@ -499,7 +533,8 @@ export async function gravarEstado(
     for (const lote of porLotesDeId(removerItens)) {
       await apagar(cfg, `player_items?user_id=eq.${userId}&item_id=in.(${lote.join(',')})`)
     }
-    if (linhasItens.length) await inserir(cfg, 'player_items', linhasItens, { upsert: 'user_id,item_id' })
+    const itensMudados = linhasQueMudaram(linhasItens, linhasNoLoad?.items, (l) => String(l.item_id))
+    if (itensMudados.length) await inserir(cfg, 'player_items', itensMudados, { upsert: 'user_id,item_id' })
   }
 
   // Mesmo diff de remocao das duas tabelas acima. Sem ele, `reiniciarJogo`
@@ -513,7 +548,8 @@ export async function gravarEstado(
     for (const lote of porLotesDeId(removerDex)) {
       await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
     }
-    if (linhasDex.length) await inserir(cfg, 'player_pokedex', linhasDex, { upsert: 'user_id,species_id' })
+    const dexMudada = linhasQueMudaram(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))
+    if (dexMudada.length) await inserir(cfg, 'player_pokedex', dexMudada, { upsert: 'user_id,species_id' })
   }
 
   // `player_auto_catch_rules` NUNCA era gravada: `carregarEstado` a lia,
@@ -543,8 +579,9 @@ export async function gravarEstado(
     for (const lote of porLotesDeId(removerAuto)) {
       await apagar(cfg, `player_auto_catch_rules?user_id=eq.${userId}&species_id=in.(${lote.join(',')})`)
     }
-    if (linhasAuto.length) {
-      await inserir(cfg, 'player_auto_catch_rules', linhasAuto, { upsert: 'user_id,species_id' })
+    const autoMudadas = linhasQueMudaram(linhasAuto, linhasNoLoad?.autoCatchRules, (l) => String(l.species_id))
+    if (autoMudadas.length) {
+      await inserir(cfg, 'player_auto_catch_rules', autoMudadas, { upsert: 'user_id,species_id' })
     }
   }
 }
@@ -562,6 +599,13 @@ export interface ResultadoFlush {
   piso: ResultadoPiso
   /** Sala em que a hunt parou. Nulo nas hunts sem salas. */
   sala: SalaAtiva | null
+  /**
+   * O clima de AMBIENTE da sala acima (PH-140) — o do LUGAR, nunca o de golpe.
+   *
+   * O cliente nao tem como derivar: a semente da sessao nao sai daqui. Sem
+   * este campo ele mostraria um clima e o servidor cobraria o dano de outro.
+   */
+  clima: ClimaTipo | null
   /**
    * A cacada acabou sozinha e a sessao TEM que ser fechada pelo chamador.
    *
@@ -769,7 +813,11 @@ async function simularSessao(
   const world = buildMapWorld(
     sessao.map_id,
     ativo,
-    { rng, counters: { entity: 1, effect: 1, pendingHit: 1 } },
+    // `seed` alem do `rng` (PH-140): o clima de AMBIENTE e derivado dela, e nao
+    // guardado. Passar a semente REAL da sessao e o que faz o servidor simular
+    // sob o mesmo clima que a tela do jogador mostrou — com um valor fixo aqui,
+    // o dano de areia/granizo fecharia diferente dos dois lados.
+    { rng, seed: Number(sessao.seed), counters: { entity: 1, effect: 1, pendingHit: 1 } },
     // Progresso que atravessa a janela. Mesma familia do `rng_state`: o mundo e
     // reconstruido, o progresso nao pode ser.
     {
@@ -911,6 +959,11 @@ async function simularSessao(
     // sorteia a propria sala; sem isto a sala mostrada seria o palpite dele,
     // que diverge do que de fato decidiu o pool e o loot creditados.
     sala: world.sala,
+    // `climaAmbiente` e nao `clima`: o efetivo pode estar sob um Rain Dance que
+    // a simulacao desta janela lancou, e isso e estado de combate, nao
+    // propriedade da sala. Mandar o efetivo faria o cliente tratar um golpe
+    // passageiro como o tempo do lugar.
+    clima: world.climaAmbiente?.tipo ?? null,
     encerrada: resumo.stoppedEarly ? 'desmaio' : null,
   }
 }
