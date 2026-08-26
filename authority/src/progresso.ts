@@ -192,6 +192,22 @@ export interface EstadoParaEscrita {
    */
   bagCarregada: boolean
   /**
+   * Se a Pokedex veio junto (PH-186). Mesma ideia de `bagCarregada`, e pelo
+   * mesmo motivo: ela e a maior leitura recorrente do jogo depois da mochila.
+   *
+   * `false` significa que `estado.pokedexKills` NAO e a Pokedex do jogador: sao
+   * so os abates DESTA janela. Duas consequencias obrigatorias em `gravarEstado`:
+   *
+   *  - o diff de REMOCAO fica desligado (ele apagaria toda especie ausente do
+   *    estado, ou seja, a colecao inteira);
+   *  - a gravacao SOMA sobre o valor do banco em vez de sobrescrever (senao um
+   *    POKE com 400 abates viraria 3).
+   *
+   * E quem mandar esse estado pro cliente tem que avisar que e parcial — igual
+   * a mochila.
+   */
+  dexCarregada: boolean
+  /**
    * As LINHAS CRUAS que este snapshot leu, guardadas pra `gravarEstado` poder
    * gravar so o que mudou.
    *
@@ -237,6 +253,23 @@ export interface EstadoParaEscrita {
  */
 export interface OpcoesDeLeitura {
   comBag?: boolean
+  /**
+   * `comDex: false` tira a Pokedex do snapshot (PH-186).
+   *
+   * Mesma familia do `comBag`, e a segunda maior leitura recorrente do jogo:
+   * `player_pokedex` era relida INTEIRA a cada flush — 21.126 leituras contra
+   * 12.713 flushes em 24h, medido no log de producao em 26/08, e sozinha
+   * respondia por praticamente todo o egress de PostgREST do projeto.
+   *
+   * Vale porque a simulacao NAO precisa dos totais: `recordPokedexKill` so
+   * acumula, e quem le contagem (`pokedexKillCount`) e tela, nao motor. O que a
+   * gravacao precisa saber — o total anterior das especies que MUDARAM — e lido
+   * na hora de gravar, e sao 2 a 5 especies por janela em vez de centenas.
+   *
+   * Quem PRECISA da Pokedex inteira: `/estado` (o cliente monta a tela com ela)
+   * e qualquer caminho que va decidir algo olhando contagem de abate.
+   */
+  comDex?: boolean
 }
 
 // Exportada (sem side-effect, ao contrario de `carregarEstadoParaEscrita`, que
@@ -253,6 +286,9 @@ export async function lerSnapshot(
   // tambem nao entra em `GameStateData` — `snapshotToGameState` so mapeia team
   // e bag —, entao ler market seria pagar por dado que o mapper joga fora.
   const filtroDeLocal = comBag ? '' : '&location=eq.team'
+  // `comDex: false` devolve `[]` sem ir ao banco — a Pokedex inteira nao e lida
+  // (PH-186). `gravarEstado` cobre o buraco lendo so as especies que mudaram.
+  const comDex = opcoes.comDex !== false
   const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
     selecionar<PlayerSnapshot['player']>(cfg, `players?user_id=eq.${userId}&select=*`),
     // `order=id` fixa a ordem entre as paginas de `selecionarTudo` (Range em
@@ -262,7 +298,9 @@ export async function lerSnapshot(
     // com "ON CONFLICT DO UPDATE cannot affect row a second time" (502).
     selecionarTudo<PlayerSnapshot['pokemon'][number]>(cfg, `pokemon_instances?user_id=eq.${userId}${filtroDeLocal}&select=*&order=id`),
     selecionarTudo<PlayerSnapshot['items'][number]>(cfg, `player_items?user_id=eq.${userId}&select=*`),
-    selecionarTudo<PlayerSnapshot['pokedex'][number]>(cfg, `player_pokedex?user_id=eq.${userId}&select=*`),
+    comDex
+      ? selecionarTudo<PlayerSnapshot['pokedex'][number]>(cfg, `player_pokedex?user_id=eq.${userId}&select=*`)
+      : Promise.resolve([] as PlayerSnapshot['pokedex']),
     selecionarTudo<PlayerSnapshot['autoCatchRules'][number]>(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=*`),
   ])
   if (!player[0]) throw new ErroHttp(404, 'jogador sem linha em `players`')
@@ -274,6 +312,7 @@ export async function lerSnapshot(
     entregas: [],
     playerUpdatedAt: player[0].updated_at,
     bagCarregada: comBag,
+    dexCarregada: comDex,
     linhasNoLoad,
   }
 }
@@ -327,7 +366,7 @@ export async function comEstadoParaEscrita<T>(
   opcoes: { esperarFlush?: boolean } & OpcoesDeLeitura = {},
 ): Promise<T> {
   if (opcoes.esperarFlush !== false) await aguardarFlushEmAndamento(cfg, userId)
-  const ctx = await carregarEstadoParaEscrita(cfg, userId, { comBag: opcoes.comBag })
+  const ctx = await carregarEstadoParaEscrita(cfg, userId, { comBag: opcoes.comBag, comDex: opcoes.comDex })
   try {
     return await fn(ctx)
   } catch (erro) {
@@ -451,6 +490,12 @@ export async function gravarEstado(
    * sem baseline, e ai o comportamento e o de sempre: reescreve tudo.
    */
   linhasNoLoad?: PlayerSnapshot,
+  /**
+   * `EstadoParaEscrita.dexCarregada` (PH-186). Ausente = `true`, o comportamento
+   * de sempre — chamador que nao sabe da Pokedex parcial nunca cai no caminho
+   * novo por acidente.
+   */
+  dexCarregada = true,
 ): Promise<void> {
   // CAS na linha de `players`: sem isso, duas acoes concorrentes do mesmo
   // jogador (duas abas, duplo clique, comprar+evoluir quase juntos) leem o
@@ -541,7 +586,49 @@ export async function gravarEstado(
   // apagava POKEs e itens mas a Pokedex sobrevivia inteira — a conta "zerada"
   // voltava com todos os abates registrados.
   const linhasDex = gameStateToPokedexRows(userId, estado)
-  if (!tabelaIntacta(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))) {
+  if (!dexCarregada) {
+    // POKEDEX PARCIAL (PH-186) — `estado.pokedexKills` tem SO os abates desta
+    // janela, porque `lerSnapshot` nao leu a tabela. Dois desvios obrigatorios,
+    // e os dois falham em silencio se forem esquecidos:
+    //
+    //  1. NADA de diff de remocao. `removerDex` apaga toda especie que o estado
+    //     nao tem — com estado parcial isso e a colecao inteira do jogador. Nao
+    //     da 502, nao loga: some. Mesma razao pela qual `pokeIdsNoLoad` escopa o
+    //     diff dos POKE quando a mochila nao veio.
+    //  2. SOMAR sobre o banco, nao sobrescrever. Escrita absoluta com o valor da
+    //     janela transformaria 400 abates em 3.
+    //
+    // A leitura aqui e proporcional ao que MUDOU (2 a 5 especies numa janela
+    // tipica), nao ao tamanho da colecao — e uma janela sem abate nenhum nao le
+    // nada, porque `linhasDex` vem vazia. E esse o ganho inteiro da issue.
+    if (linhasDex.length > 0) {
+      const base = new Map<string, { normal: number; shiny: number }>()
+      for (const lote of porLotesDeId(linhasDex.map((l) => String(l.species_id)))) {
+        const atuais = await selecionarTudo<{ species_id: string; normal_kills: number; shiny_kills: number }>(
+          cfg,
+          `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(',')})&select=species_id,normal_kills,shiny_kills`,
+        )
+        for (const l of atuais) base.set(l.species_id, { normal: Number(l.normal_kills), shiny: Number(l.shiny_kills) })
+      }
+      const somadas = linhasDex.map((l) => {
+        const anterior = base.get(String(l.species_id)) ?? { normal: 0, shiny: 0 }
+        return {
+          ...l,
+          normal_kills: anterior.normal + Number(l.normal_kills),
+          shiny_kills: anterior.shiny + Number(l.shiny_kills),
+        }
+      })
+      await inserir(cfg, 'player_pokedex', somadas, { upsert: 'user_id,species_id' })
+      // O estado devolvido ao cliente passa a levar o TOTAL, nao o incremento.
+      // E o que torna a resposta idempotente: a camada de retry do cliente ja
+      // reaplicou payload e duplicou captura uma vez neste projeto (ver o filtro
+      // de `idsNovos` em `aplicarEstadoDoServidor`). Total absoluto reaplicado
+      // duas vezes da o mesmo numero; incremento dobraria.
+      for (const l of somadas) {
+        estado.pokedexKills[String(l.species_id)] = { normal: l.normal_kills, shiny: l.shiny_kills }
+      }
+    }
+  } else if (!tabelaIntacta(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))) {
     const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id))
     const dexNoBanco = await selecionarTudo<{ species_id: string }>(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)
     const removerDex = dexNoBanco.map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id))
@@ -752,13 +839,17 @@ export async function aplicarFlush(
       comEstadoParaEscrita(cfg, userId, async (ctx) => {
         const resultado = await simularSessao(
           cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, ctx.playerUpdatedAt, { agora, segundos, truncado },
-          ctx.linhasNoLoad,
+          ctx.linhasNoLoad, ctx.dexCarregada,
         )
         // `null` = sessao insimulavel; sai SEM gravar, entao as entregas voltam pra
         // fila (o `catch` do embrulho so cobre excecao, e aqui nao ha excecao).
         if (!resultado) await devolverEntregas(cfg, ctx.entregas)
         return resultado
-      }, { esperarFlush: false, comBag: opcoes.comBag === true }))
+        // `comDex` acompanha `comBag`: quem declarou que sabe receber estado
+        // parcial (o corpo `{parcial:true}` do flush) tambem sabe MESCLAR a
+        // Pokedex por especie. Cliente antigo, que nao declara, continua no
+        // caminho completo — ver PH-186.
+      }, { esperarFlush: false, comBag: opcoes.comBag === true, comDex: opcoes.comBag === true }))
   } finally {
     // No `finally` porque uma marca que sobrevive a um erro (inclusive o 409
     // do proprio CAS de gravarEstado, se AINDA colidir depois da espera) faria
@@ -777,6 +868,9 @@ async function simularSessao(
   janela: { agora: number; segundos: number; truncado: boolean },
   // Baseline pro diff de escrita de `gravarEstado` — ver `EstadoParaEscrita.linhasNoLoad`.
   linhasNoLoad: PlayerSnapshot,
+  // `EstadoParaEscrita.dexCarregada` (PH-186). Default `true` pra um chamador
+  // novo que esqueca o argumento cair no caminho seguro, nao no parcial.
+  dexCarregada = true,
 ): Promise<ResultadoFlush | null> {
   const { agora, segundos, truncado } = janela
   const { store, dados: estado } = criarEstadoDoJogador(dados)
@@ -888,7 +982,7 @@ async function simularSessao(
   // esta resposta, entao um `currentMapId` sobrevivente o deixaria desenhando
   // uma cacada que o servidor ja encerrou.
   estado.currentMapId = resumo.stoppedEarly ? null : sessao.map_id
-  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt, linhasNoLoad)
+  await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt, linhasNoLoad, dexCarregada)
 
   // Hall da Fama: a unica coisa que libera os grupos do Lance e limpar a
   // sequencia dele (`unlocksContinentOnClear`, ver data/nightmareMaps.ts). O
