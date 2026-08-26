@@ -239,6 +239,34 @@ export interface OpcoesDeLeitura {
   comBag?: boolean
 }
 
+// COLUNAS DO SNAPSHOT — pedidas uma a uma, e nao com `select=*` (PH-185).
+//
+// `select=*` custava caro no lugar mais quente do jogo: `player_pokedex` e
+// relida INTEIRA a cada flush, e sozinha respondia por praticamente todo o
+// egress de PostgREST do projeto — 21.126 leituras contra 12.713 flushes em
+// 24h, medido no log de producao em 26/08. Cortar coluna que ninguem le tira
+// 30% da pokedex (30.710 -> 21.510 bytes numa conta de 192 especies) e 31% dos
+// itens, sem mudar comportamento nenhum.
+//
+// O QUE DECIDE ESTAS LISTAS, e por que elas nao podem encolher mais:
+//
+//  - `user_id` FICA, mesmo sendo constante e ja estar no filtro. `linhaIgual`
+//    compara as chaves que a linha NOVA traz, e `gameStateTo*Rows` monta
+//    `user_id` em todas. Sem ele no baseline toda linha pareceria diferente, e
+//    o flush voltaria a gravar a tabela inteira — o oposto do que a PH-90
+//    corrigiu.
+//  - `player_items.locked` FICA: `snapshotToGameState` le essa coluna pra
+//    montar `lockedItems`. Sem ela item trancado voltaria a ser vendavel, e em
+//    silencio.
+//  - `updated_at`/`created_at` SAEM: nenhum gerador de linha os produz, entao
+//    `linhaIgual` nunca os consulta. Sao eles o grosso do que se corta aqui.
+//
+// `colunasCobremAsLinhasGeradas.test.ts` tranca isto: mexer no que
+// `gameStateTo*Rows` monta sem acompanhar aqui deixa o teste vermelho.
+export const COLUNAS_ITENS = 'user_id,item_id,quantity,locked'
+export const COLUNAS_POKEDEX = 'user_id,species_id,normal_kills,shiny_kills'
+export const COLUNAS_AUTO_CATCH = 'user_id,species_id,ball_item_id'
+
 // Exportada (sem side-effect, ao contrario de `carregarEstadoParaEscrita`, que
 // tambem reivindica entregas) pra permitir recarregar estado fresco no meio
 // de uma escrita ja em andamento — usado pelo retry de `criarOrdem` (PH-8)
@@ -261,9 +289,9 @@ export async function lerSnapshot(
     // (uma em cada pagina), gerando duplicata no array e um upsert que quebra
     // com "ON CONFLICT DO UPDATE cannot affect row a second time" (502).
     selecionarTudo<PlayerSnapshot['pokemon'][number]>(cfg, `pokemon_instances?user_id=eq.${userId}${filtroDeLocal}&select=*&order=id`),
-    selecionarTudo<PlayerSnapshot['items'][number]>(cfg, `player_items?user_id=eq.${userId}&select=*`),
-    selecionarTudo<PlayerSnapshot['pokedex'][number]>(cfg, `player_pokedex?user_id=eq.${userId}&select=*`),
-    selecionarTudo<PlayerSnapshot['autoCatchRules'][number]>(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=*`),
+    selecionarTudo<PlayerSnapshot['items'][number]>(cfg, `player_items?user_id=eq.${userId}&select=${COLUNAS_ITENS}`),
+    selecionarTudo<PlayerSnapshot['pokedex'][number]>(cfg, `player_pokedex?user_id=eq.${userId}&select=${COLUNAS_POKEDEX}`),
+    selecionarTudo<PlayerSnapshot['autoCatchRules'][number]>(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=${COLUNAS_AUTO_CATCH}`),
   ])
   if (!player[0]) throw new ErroHttp(404, 'jogador sem linha em `players`')
   const linhasNoLoad: PlayerSnapshot = { player: player[0], pokemon, items, pokedex, autoCatchRules }
