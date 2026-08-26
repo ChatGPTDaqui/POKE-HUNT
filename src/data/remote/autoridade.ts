@@ -416,14 +416,20 @@ export async function liquidar(): Promise<void> {
     // PH-140: o clima do LUGAR vem junto, pela mesma razao — o cliente nao tem
     // a semente pra derivar o dele.
     if (r.sala !== undefined) {
-      // DIAGNOSTICO TEMPORARIO — remover apos confirmar/descartar a hipotese
-      // (relatado: sala as vezes avanca ao vivo sem o jogador ver os 30
-      // abates acontecerem, esporadico). Suspeita: o servidor resimula a
+      // DIAGNOSTICO — relatado: sala as vezes avanca ao vivo sem o jogador ver
+      // os 30 abates acontecerem, esporadico. Suspeita: o servidor resimula a
       // janela do flush pelo tempo REAL (`segundosCreditados`), que pode
       // cobrir mais tempo do que o client renderizou (aba em segundo plano
       // throttlando o loop) — mesma familia do bug de XP ja corrigido
       // (PH-171). So loga quando o cliente NAO tinha visto a quota fechar
       // localmente ainda (abates < 30) e mesmo assim a sala mudou.
+      //
+      // PH-196: era `pushToast(..., 'error')`, o que punha texto interno
+      // ("[diag-sala] avancou sem quota local fechada", contagem de abates,
+      // duracao da janela) na tela do jogador em producao, como erro. Vai pro
+      // console: a hipotese ainda nao foi confirmada nem descartada, entao o
+      // dado continua sendo coletado — so deixa de ser mensagem de jogo. Some
+      // de vez quando a hipotese fechar.
       const antesDoFlush = useWorldStore.getState()
       const posicaoAntes = antesDoFlush.salaPendente ?? antesDoFlush.sala
       useWorldStore.getState().definirSala(r.sala, r.clima)
@@ -433,11 +439,10 @@ export async function liquidar(): Promise<void> {
         posicaoAntes && posicaoDepois && posicaoAntes.abates < ABATES_POR_SALA
         && (posicaoDepois.ciclos !== posicaoAntes.ciclos || posicaoDepois.indice !== posicaoAntes.indice)
       ) {
-        useToastStore.getState().pushToast(
+        console.warn(
           `[diag-sala] avancou sem quota local fechada: sala ${posicaoAntes.ciclos}/${posicaoAntes.indice}`
           + ` (abates locais ${posicaoAntes.abates}/${ABATES_POR_SALA}) -> ${posicaoDepois.ciclos}/${posicaoDepois.indice}.`
           + ` Janela do flush: ${r.segundosCreditados}s.`,
-          'error', 'world',
         )
       }
     }
