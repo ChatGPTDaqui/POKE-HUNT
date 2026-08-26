@@ -387,7 +387,32 @@ export async function liquidar(): Promise<void> {
     // recebeu vieram da sala de la.
     // PH-140: o clima do LUGAR vem junto, pela mesma razao — o cliente nao tem
     // a semente pra derivar o dele.
-    if (r.sala !== undefined) useWorldStore.getState().definirSala(r.sala, r.clima)
+    if (r.sala !== undefined) {
+      // DIAGNOSTICO TEMPORARIO — remover apos confirmar/descartar a hipotese
+      // (relatado: sala as vezes avanca ao vivo sem o jogador ver os 30
+      // abates acontecerem, esporadico). Suspeita: o servidor resimula a
+      // janela do flush pelo tempo REAL (`segundosCreditados`), que pode
+      // cobrir mais tempo do que o client renderizou (aba em segundo plano
+      // throttlando o loop) — mesma familia do bug de XP ja corrigido
+      // (PH-171). So loga quando o cliente NAO tinha visto a quota fechar
+      // localmente ainda (abates < 30) e mesmo assim a sala mudou.
+      const antesDoFlush = useWorldStore.getState()
+      const posicaoAntes = antesDoFlush.salaPendente ?? antesDoFlush.sala
+      useWorldStore.getState().definirSala(r.sala, r.clima)
+      const depoisDoFlush = useWorldStore.getState()
+      const posicaoDepois = depoisDoFlush.salaPendente ?? depoisDoFlush.sala
+      if (
+        posicaoAntes && posicaoDepois && posicaoAntes.abates < ABATES_POR_SALA
+        && (posicaoDepois.ciclos !== posicaoAntes.ciclos || posicaoDepois.indice !== posicaoAntes.indice)
+      ) {
+        useToastStore.getState().pushToast(
+          `[diag-sala] avancou sem quota local fechada: sala ${posicaoAntes.ciclos}/${posicaoAntes.indice}`
+          + ` (abates locais ${posicaoAntes.abates}/${ABATES_POR_SALA}) -> ${posicaoDepois.ciclos}/${posicaoDepois.indice}.`
+          + ` Janela do flush: ${r.segundosCreditados}s.`,
+          'error', 'world',
+        )
+      }
+    }
     // Ritmo do proximo flush: janela produtiva mantem 30s, janela vazia estica
     // (ver INTERVALO_FLUSH_MAX_MS).
     ajustarRitmoDeFlush((r.resumo?.kills ?? 0) > 0 || (r.resumo?.gold ?? 0) > 0 || (r.resumo?.xp ?? 0) > 0)
