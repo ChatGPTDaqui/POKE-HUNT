@@ -78,13 +78,23 @@ export function HudLayer() {
           qualquer largura. O teto de `max-w-[64em]` da linha de baixo e o que
           impede o trilho de esticar; ele nao depende deste recuo. */}
       <div className="absolute inset-x-0 top-0 z-20 flex flex-col items-start gap-[.4em]">
-        <div className="flex w-full max-w-[64em] flex-col gap-[.4em]">
+        {/* PH-197: coluna com `gap-0`. O trilho de reservas cola no cabecalho
+            do POKE ativo em vez de flutuar abaixo dele. O espacamento que
+            sobrava nao era so estetico: a linha de sala/clima abaixo renderiza
+            VAZIA quando a hunt nao tem sala (altura 0) e mesmo assim cobrava os
+            dois `gap` em volta — 18px de vao morto entre o cabecalho e as
+            reservas, sem nada no meio. Com `gap-0` a linha vazia sai de cena de
+            verdade, e a margem propria dela (abaixo) so vale quando ela tem
+            conteudo. */}
+        <div className="flex w-full max-w-[64em] flex-col gap-0">
           <StatusRail />
           {/* Sala e clima na MESMA linha: os dois descrevem o lugar onde o
               jogador esta, e o clima e propriedade da sala (PH-140/PH-141).
               `flex-wrap` porque em 390px os dois nao cabem lado a lado — ali o
-              clima desce pra linha de baixo em vez de espremer a sala. */}
-          <div className="flex w-full flex-wrap items-center gap-[.4em]">
+              clima desce pra linha de baixo em vez de espremer a sala.
+              `:not(:empty)` (PH-197): a coluna nao espaca mais nada, entao o
+              respiro dos chips passa a ser deles — e so quando existem. */}
+          <div className="flex w-full flex-wrap items-center gap-[.4em] [&:not(:empty)]:my-[.4em]">
             <SalaChip />
             <ClimaChip />
           </div>
