@@ -16,6 +16,7 @@ import {
 } from './predicoesDeCaptura'
 import { mochilaCarregada } from '@/stores/mochilaStore'
 import { ABATES_POR_SALA } from '@/data/biomas'
+import { solicitarAvancoDeSala } from '@/engine/systems/salaSystem'
 import type { ClimaTipo, SalaAtiva } from '@/engine/types'
 import { supabase, schema, url as supabaseUrl, anonKey } from '@/lib/supabase'
 
@@ -94,14 +95,38 @@ function reconciliarExpAntesDeAplicar(doServidor: GameStateData, resumo: Respost
  * local e preservada, menos as predicoes locais, que sao substituidas pelas
  * linhas reais que vieram junto.
  *
- * Todo o RESTO do estado (ouro, XP, itens, time, pokedex) continua sendo
- * substituido, parcial ou nao: nada disso e grande, e a regra "a verdade vem do
- * servidor" nao muda.
+ * A POKEDEX entrou na mesma familia da mochila em PH-186: num flush parcial,
+ * `estado.pokedexKills` traz SO as especies abatidas naquela janela — e por
+ * TOTAL ABSOLUTO, nao incremento. Por isso ela e MESCLADA por especie, e nao
+ * substituida: substituir deixaria a tela mostrando 3 abates numa especie com
+ * 400. Ver `mesclarPokedex`.
+ *
+ * Todo o RESTO do estado (ouro, XP, itens, time) continua sendo substituido,
+ * parcial ou nao: nada disso e grande, e a regra "a verdade vem do servidor"
+ * nao muda.
  *
  * `resumo` (so vem de `/sessao/flush` e `/sessao/fechar`) alimenta
  * `reconciliarExpAntesDeAplicar` — ver o comentario dela pro porque disto
  * existir.
  */
+/**
+ * Pokedex local + o que o flush parcial trouxe, por especie (PH-186).
+ *
+ * O servidor manda TOTAL ABSOLUTO das especies que ele acabou de gravar, nao o
+ * incremento da janela. E o que torna esta mescla idempotente: a camada de
+ * retry ja reaplicou a mesma resposta neste projeto (e por isso o filtro de
+ * `idsNovos` logo abaixo existe). Somando delta, reaplicar dobraria a contagem;
+ * sobrescrevendo por especie, reaplicar da o mesmo numero.
+ *
+ * Especie ausente da resposta fica como esta: o servidor so manda o que mudou,
+ * e janela sem abate nenhum manda `{}`.
+ */
+function mesclarPokedex(local: GameStateData, doServidor: GameStateData): GameStateData['pokedexKills'] {
+  const doFlush = doServidor.pokedexKills
+  if (!doFlush || Object.keys(doFlush).length === 0) return local.pokedexKills
+  return { ...local.pokedexKills, ...doFlush }
+}
+
 export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo?: RespostaFlush['resumo']): void {
   if (!estado || typeof estado !== 'object') return
   const doServidor = estado as GameStateData
@@ -118,13 +143,16 @@ export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo
   // abrir a tela dispara a leitura paginada e recebe a verdade, capturas novas
   // incluidas.
   if (!mochilaCarregada()) {
-    useGameStateStore.setState({ ...doServidor, bagPokes: [] })
+    useGameStateStore.setState((local) => ({
+      ...doServidor, bagPokes: [], pokedexKills: mesclarPokedex(local, doServidor),
+    }))
     limparCapturasPreditas()
     return
   }
   const idsNovos = new Set(novos.map((p) => p.uid))
   useGameStateStore.setState((local) => ({
     ...doServidor,
+    pokedexKills: mesclarPokedex(local, doServidor),
     bagPokes: [
       // Fora: o que era predicao (a linha real dela esta em `novos`) e qualquer
       // uid que o servidor esteja mandando agora — sem o segundo filtro, um
@@ -388,14 +416,20 @@ export async function liquidar(): Promise<void> {
     // PH-140: o clima do LUGAR vem junto, pela mesma razao — o cliente nao tem
     // a semente pra derivar o dele.
     if (r.sala !== undefined) {
-      // DIAGNOSTICO TEMPORARIO — remover apos confirmar/descartar a hipotese
-      // (relatado: sala as vezes avanca ao vivo sem o jogador ver os 30
-      // abates acontecerem, esporadico). Suspeita: o servidor resimula a
+      // DIAGNOSTICO — relatado: sala as vezes avanca ao vivo sem o jogador ver
+      // os 30 abates acontecerem, esporadico. Suspeita: o servidor resimula a
       // janela do flush pelo tempo REAL (`segundosCreditados`), que pode
       // cobrir mais tempo do que o client renderizou (aba em segundo plano
       // throttlando o loop) — mesma familia do bug de XP ja corrigido
       // (PH-171). So loga quando o cliente NAO tinha visto a quota fechar
       // localmente ainda (abates < 30) e mesmo assim a sala mudou.
+      //
+      // PH-196: era `pushToast(..., 'error')`, o que punha texto interno
+      // ("[diag-sala] avancou sem quota local fechada", contagem de abates,
+      // duracao da janela) na tela do jogador em producao, como erro. Vai pro
+      // console: a hipotese ainda nao foi confirmada nem descartada, entao o
+      // dado continua sendo coletado — so deixa de ser mensagem de jogo. Some
+      // de vez quando a hipotese fechar.
       const antesDoFlush = useWorldStore.getState()
       const posicaoAntes = antesDoFlush.salaPendente ?? antesDoFlush.sala
       useWorldStore.getState().definirSala(r.sala, r.clima)
@@ -405,11 +439,10 @@ export async function liquidar(): Promise<void> {
         posicaoAntes && posicaoDepois && posicaoAntes.abates < ABATES_POR_SALA
         && (posicaoDepois.ciclos !== posicaoAntes.ciclos || posicaoDepois.indice !== posicaoAntes.indice)
       ) {
-        useToastStore.getState().pushToast(
+        console.warn(
           `[diag-sala] avancou sem quota local fechada: sala ${posicaoAntes.ciclos}/${posicaoAntes.indice}`
           + ` (abates locais ${posicaoAntes.abates}/${ABATES_POR_SALA}) -> ${posicaoDepois.ciclos}/${posicaoDepois.indice}.`
           + ` Janela do flush: ${r.segundosCreditados}s.`,
-          'error', 'world',
         )
       }
     }
@@ -510,6 +543,12 @@ function observarQuotaDeSala(): void {
     // tela): nao ha o que pedir.
     if (estado.salaPendente || estado.salaCountdownRemaining != null) return
     if (sala.abates < ABATES_POR_SALA) return
+    // PH-177/179: toggle ligado, a quota fechada FICA fechada ate o jogador
+    // clicar "Proximo Nivel" (avancarSalaManualmente). Sem este corte, o
+    // observador martelaria `/sessao/flush` a cada 5s pra sempre — o motivo
+    // original da repeticao (servidor pode estar 1-2 abates atras) e
+    // transitorio; com avanco manual, "sala travada" passa a durar minutos.
+    if (useGameStateStore.getState().autoToggles.avancoManualDeSala) return
     const chave = `${sala.ciclos}:${sala.indice}`
     const agora = Date.now()
     if (chave === salaJaPedida && agora - ultimoPedidoDeSala < REPETIR_PEDIDO_DE_SALA_MS) return
@@ -521,6 +560,43 @@ function observarQuotaDeSala(): void {
     intervaloAtual = INTERVALO_FLUSH_MS
     void liquidar()
   })
+}
+
+/**
+ * PH-179. Clique do jogador no botao "Proximo Nivel" (PH-180), sala travada
+ * em 30/30 com o toggle de avanco manual ligado.
+ *
+ * Mesmo padrao de `abrirSessaoDeHunt`/`liquidar`: com sessao autoritativa,
+ * chama o endpoint (PH-178) e aplica o estado que ele devolve — o cliente
+ * nunca decide sozinho qual e a sala nova. Sem servidor (modo local), chama
+ * a mesma funcao do motor direto no world local.
+ */
+export async function avancarSalaManualmente(): Promise<void> {
+  if (!servidorAtivo()) {
+    useWorldStore.getState().update((draft) => {
+      if (draft.mapDef) solicitarAvancoDeSala(draft, draft.mapDef.id)
+    })
+    return
+  }
+  try {
+    const r = await servidor.avancarSalaManual()
+    aplicarEstadoDoServidor(r.estado, r.estadoParcial === true, r.resumo)
+    if (r.sala !== undefined) useWorldStore.getState().definirSala(r.sala, r.clima)
+    tratarEncerramento(r.sessaoEncerrada)
+    if (r.truncado) {
+      useToastStore.getState().pushToast(
+        'Voce ficou fora tempo demais — parte do periodo nao foi creditada.', 'error', 'world',
+      )
+    }
+    // `false`: a sala ja nao estava mais travada quando o servidor processou
+    // (corrida rara — outro flush avancou primeiro). Nao e erro, so nao ha
+    // sala nova pra mostrar; o toast evita um clique "mudo" sem explicacao.
+    if (!r.avancoAplicado) {
+      useToastStore.getState().pushToast('A sala ja tinha avancado.', 'info', 'world')
+    }
+  } catch (erro) {
+    reportarErro(erro)
+  }
 }
 
 // Intervalo minimo entre dois commits FORCADOS (level-up, aba sendo ocultada).

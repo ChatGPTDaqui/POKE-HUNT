@@ -336,4 +336,24 @@ export class Renderer {
     const py = player ? player.y : mapDef.bounds.height / 2
     return { x: px - this.width / 2 / this.zoom, y: py - (this.height * PLAYER_ANCHOR_Y) / this.zoom }
   }
+
+  /**
+   * Coordenada de MUNDO -> px de tela, pela mesma camera que `renderMap` usa
+   * (PH-191).
+   *
+   * Existe porque a camada de VFX desenha em coordenada de TELA (ela precisa
+   * falar com a HUD) e alguns efeitos NASCEM no mundo — o voo de ouro comeca no
+   * POKE derrotado e termina na carteira. Sem isto o call site refaria a conta
+   * da camera a mao, e uma copia que se desatualize planta o efeito num lugar
+   * que nao e o do corpo.
+   *
+   * Devolve `null` fora da hunt: no Hospital nao ha `mapDef`, e `renderHospital`
+   * usa outro sistema de coordenada (a escala da arte, ver `_hospitalLayout`).
+   * Devolver um ponto qualquer ali seria pior que nao devolver nada.
+   */
+  mundoParaTela(mapDef: MapDef | null, player: WorldEntity | null, p: ScreenPoint): ScreenPoint | null {
+    if (!mapDef) return null
+    const camera = this._computeCamera(mapDef, player)
+    return { x: (p.x - camera.x) * this.zoom, y: (p.y - camera.y) * this.zoom }
+  }
 }

@@ -101,6 +101,9 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
   if (url.pathname === '/sessao/fechar' && req.method === 'POST') {
     return fechar(cfg, jogador.id, await aceitaEstadoParcial(req))
   }
+  if (url.pathname === '/sessao/avancar-sala' && req.method === 'POST') {
+    return avancarSala(cfg, jogador.id, await aceitaEstadoParcial(req))
+  }
   if (url.pathname === '/estado' && req.method === 'GET') {
     // Le E LIQUIDA as entregas pendentes do Mercado (uso interno, ver
     // entregas.ts — nenhuma RPC client-facing escreve mais na fila, mas o
@@ -299,6 +302,41 @@ async function flush(cfg: Config, userId: string, parcial: boolean): Promise<Res
     // `bagPokes` e a mochila inteira ou so as capturas desta janela. Mandar o
     // estado sem a marca e a unica forma de esta otimizacao virar perda de dado
     // na tela do jogador.
+    estadoParcial: parcial,
+    estado: resultado.estado,
+  })
+}
+
+/**
+ * PH-178: avanco manual de sala. Mesmo formato de resposta de `flush` —
+ * roda a MESMA infra de claim/CAS/retry (`aplicarFlush`), so com a flag que
+ * destrava a sala parada em 30/30 depois de simular o intervalo normal. Nao
+ * existe caminho de escrita paralelo: se corresse por fora do claim atomico
+ * de `aplicarFlush`, reabriria a classe de bug de corrida que aquele claim
+ * foi criado pra fechar (ver comentario dele, "BUG DE DUPLICACAO").
+ */
+async function avancarSala(cfg: Config, userId: string, parcial: boolean): Promise<Response> {
+  const sessao = await sessaoAberta(cfg, userId)
+  if (!sessao) throw new ErroHttp(409, 'nenhuma sessao aberta')
+  const resultado = await aplicarFlush(cfg, userId, sessao, { comBag: !parcial, forcarAvancoDeSala: true })
+  if (resultado === FLUSH_OCUPADO) throw new ErroHttp(409, 'flush em andamento, tente novamente')
+  if (!resultado) {
+    await sairDaHunt(cfg, userId, sessao.id)
+    throw new ErroHttp(409, 'nenhuma sessao aberta')
+  }
+  if (resultado.encerrada) await sairDaHunt(cfg, userId, sessao.id)
+  return json({
+    segundosCreditados: resultado.segundosCreditados,
+    truncado: resultado.truncado,
+    resumo: resultado.resumo,
+    piso: resultado.piso,
+    sessaoEncerrada: resultado.encerrada,
+    sala: resultado.sala,
+    clima: resultado.clima,
+    // `false` quando a sala nao estava mais travada em 30/30 ao fim da
+    // simulacao (corrida rara: outro flush avancou primeiro) — nao e erro,
+    // o cliente so nao tem uma sala nova pra aplicar.
+    avancoAplicado: resultado.avancoDeSalaAplicado,
     estadoParcial: parcial,
     estado: resultado.estado,
   })
