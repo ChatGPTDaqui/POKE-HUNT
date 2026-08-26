@@ -54320,7 +54320,7 @@ function nomeDaSala(sala) {
 * catch-up de aba oculta e no farm offline — nao ha um segundo caminho de
 * abate que pudesse esquecer de contar.
 */
-function registrarAbate(world, mapId) {
+function registrarAbate(world, mapId, opts = {}) {
 	const sala = world.sala;
 	if (!sala) return {
 		avancou: false,
@@ -54339,6 +54339,10 @@ function registrarAbate(world, mapId) {
 		};
 	}
 	sala.abates = 30;
+	if (opts.manualAdvance) return {
+		avancou: false,
+		fechouCiclo: false
+	};
 	return armarTransicaoDeSala(world, mapId);
 }
 /**
@@ -54349,6 +54353,20 @@ function registrarAbate(world, mapId) {
 * Separada de `registrarAbate` porque a quota fechada, e nao o abate, e o que
 * dispara a troca — ver `garantirTransicaoDeQuotaFechada`.
 */
+/**
+* Avanco manual (PH-178/179): forca a transicao mesmo com o toggle ligado —
+* o proprio clique do jogador E o avanco que o toggle estava segurando.
+* So entrega "quota fechada" ao chamador; `armarTransicaoDeSala` ja e
+* idempotente (chamar de novo com transicao ja armada nao resorteia).
+*/
+function solicitarAvancoDeSala(world, mapId) {
+	const sala = world.sala;
+	if (!sala || sala.abates < 30) return {
+		avancou: false,
+		fechouCiclo: false
+	};
+	return armarTransicaoDeSala(world, mapId);
+}
 function armarTransicaoDeSala(world, mapId) {
 	const sala = world.sala;
 	if (!sala) return {
@@ -54397,7 +54415,7 @@ function armarTransicaoDeSala(world, mapId) {
 * cabe em qualquer duracao. Isso tambem fecha o caso que ja estava documentado
 * como "autocurativo no proximo abate" — ele nao era, quando nao havia proximo.
 */
-function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0) {
+function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0, manualAdvance = false) {
 	const sala = world.sala;
 	if (!sala || sala.abates < 30) {
 		world.salaEsperaDaAutoridade = 0;
@@ -54411,6 +54429,7 @@ function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0) {
 		if (armarTransicaoDeSala(world, mapId).avancou) world.salaPredita = true;
 		return;
 	}
+	if (manualAdvance) return;
 	armarTransicaoDeSala(world, mapId);
 }
 /**
@@ -54582,6 +54601,79 @@ var toastStore = createStore()((set) => ({
 	dismissToast: (id) => {
 		set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) }));
 	}
+}));
+//#endregion
+//#region src/stores/celebracaoStoreVanilla.ts
+/** Os ganhos SOMAM: sao deltas de atributo, entao somar e a operacao certa. */
+function somarGanhos(a, b) {
+	if (!a) return b;
+	if (!b) return a;
+	const fora = {};
+	for (const k of Object.keys(b)) fora[k] = (a[k] ?? 0) + (b[k] ?? 0);
+	return fora;
+}
+function podeJuntar(a, b) {
+	if (!a) return false;
+	if (a.tipo === "nivel" && b.tipo === "nivel") return a.especieId === b.especieId;
+	if (a.tipo === "treinador" && b.tipo === "treinador") return true;
+	return false;
+}
+function juntar(a, b) {
+	if (a.tipo === "nivel" && b.tipo === "nivel") {
+		const x = a;
+		const y = b;
+		return {
+			...y,
+			nivelInicial: Math.min(x.nivelInicial, y.nivelInicial),
+			nivel: Math.max(x.nivel, y.nivel),
+			ganhos: somarGanhos(x.ganhos, y.ganhos),
+			golpesNovos: [.../* @__PURE__ */ new Set([...x.golpesNovos, ...y.golpesNovos])]
+		};
+	}
+	const x = a;
+	const y = b;
+	return {
+		...y,
+		nivelInicial: Math.min(x.nivelInicial, y.nivelInicial),
+		nivel: Math.max(x.nivel, y.nivel)
+	};
+}
+/**
+* Fila com UMA celebracao visivel por vez e level-up COALESCIDO.
+*
+* Sem coalescencia, dois abates seguidos que dao nivel enfileiram dois cartoes
+* e travam a tela por 2x a duracao — e o segundo diz quase a mesma coisa que o
+* primeiro.
+*
+* A juncao entra na celebracao QUE JA ESTA NA TELA (indice 0), e nao so na fila
+* de tras: mesclar so o que espera deixaria o cartao dizendo "Nv 33" enquanto o
+* POKE ja esta em 35, e informacao desatualizada na tela e pior que cartao
+* repetido.
+*/
+var proximoId = 1;
+var celebracaoStore = createStore()((set) => ({
+	fila: [],
+	celebrar: (c) => set((estado) => {
+		const fila = estado.fila;
+		if (podeJuntar(fila[0]?.celebracao, c)) return { fila: [{
+			id: fila[0].id,
+			celebracao: juntar(fila[0].celebracao, c)
+		}, ...fila.slice(1)] };
+		const ultima = fila.length > 1 ? fila[fila.length - 1] : void 0;
+		if (ultima && podeJuntar(ultima.celebracao, c)) {
+			const junta = {
+				id: ultima.id,
+				celebracao: juntar(ultima.celebracao, c)
+			};
+			return { fila: [...fila.slice(0, -1), junta] };
+		}
+		return { fila: [...fila, {
+			id: proximoId++,
+			celebracao: c
+		}] };
+	}),
+	encerrarAtual: () => set((estado) => ({ fila: estado.fila.slice(1) })),
+	limpar: () => set({ fila: [] })
 }));
 var formulaEngine = createFormulaEngine(FORMULAS);
 formulaEngine.evalOrDefault("OFFLINE_FARM_MAX_HOURS", 6);
@@ -54893,6 +54985,8 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 		};
 	}
 	const expGain = expRewardForEnemy(enemy.poke, poke.level);
+	const nivelAntesDoAbate = poke.level;
+	const nivelDoTreinadorAntes = gameState.trainer.level;
 	const grantResult = grantExp(poke, expGain);
 	player.poke = grantResult.poke;
 	gameState.updatePokeInstance(grantResult.poke.uid, () => grantResult.poke);
@@ -54937,8 +55031,26 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			const ganhos = formatStatGains(grantResult.statGains);
 			toastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ""}`, "levelup", "combat");
 			for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) toastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, "levelup", "combat");
+			celebracaoStore.getState().celebrar({
+				tipo: "nivel",
+				especieId: grantResult.poke.speciesId,
+				nome: SPECIES[grantResult.poke.speciesId].name,
+				nivelInicial: nivelAntesDoAbate,
+				nivel: grantResult.level,
+				ganhos: grantResult.statGains,
+				golpesNovos: grantResult.newAbilities.filter(isDamagingAbility).map((a) => a.name),
+				isShiny: Boolean(grantResult.poke.isShiny)
+			});
 		}
-		if (trainerResult.leveledUp) toastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, "levelup", "combat");
+		if (trainerResult.leveledUp) {
+			toastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, "levelup", "combat");
+			celebracaoStore.getState().celebrar({
+				tipo: "treinador",
+				nome: gameState.trainer.name,
+				nivelInicial: nivelDoTreinadorAntes,
+				nivel: trainerResult.level
+			});
+		}
 		for (const itemId of loot.droppedItems) {
 			const item = getItem(itemId);
 			if (item) toastStore.getState().pushToast(`Item encontrado: ${item.name}`, "success", "world");
@@ -54967,6 +55079,11 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 					const raridade = rarityOf(captureResult.poke).label;
 					toastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
 				} else if (captureResult.reason === "roll_failed") toastStore.getState().pushToast("A captura falhou!", "capture-fail", "combat");
+				if (captureResult.success && enemy.poke.isShiny) celebracaoStore.getState().celebrar({
+					tipo: "shiny",
+					especieId: enemy.poke.speciesId,
+					nome: enemySpecies.name
+				});
 			};
 			if (atrasoDoToastMs > 0) setTimeout(dispararToastDeCaptura, atrasoDoToastMs);
 			else dispararToastDeCaptura();
@@ -54986,6 +55103,7 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 }
 function stepWorld(world, dt, gameState, opts = {}) {
 	const silent = opts.silent ?? false;
+	const manualAdvance = (gameState.autoToggles.avancoManualDeSala ?? false) && !(opts.offline ?? false);
 	if (!world.player) return [];
 	if (!world.mapDef) {
 		if (!silent) updateAnimations(world, dt);
@@ -55011,7 +55129,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (!silent) updateAnimations(world, dt);
 		return [];
 	}
-	garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt);
+	garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt, manualAdvance);
 	if (world.salaCountdownRemaining != null) {
 		world.salaCountdownRemaining -= dt;
 		if (world.salaCountdownRemaining <= 0) {
@@ -55045,7 +55163,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (!enemy) continue;
 		kills.push(handleEnemyDefeated(world, enemy, gameState, { silent }));
 		enemy.deathRemovalTimer = silent ? 0 : 4;
-		registrarAbate(world, world.mapDef.id);
+		registrarAbate(world, world.mapDef.id, { manualAdvance });
 	}
 	for (const enemy of world.enemies) if (isDead(enemy) && enemy.deathRemovalTimer != null && enemy.deathRemovalTimer > 0) enemy.deathRemovalTimer -= dt;
 	world.enemies = world.enemies.filter((e) => !isDead(e) || (e.deathRemovalTimer ?? 0) > 0 || world.mapDef.keepCorpses);
@@ -55265,7 +55383,8 @@ function defaultGameStateData() {
 			autoPot: true,
 			autoCatch: false,
 			autoRevive: false,
-			autoStatus: true
+			autoStatus: true,
+			avancoManualDeSala: false
 		},
 		autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
 		autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
@@ -56119,7 +56238,7 @@ async function aplicarFlush(cfg, userId, sessao, opcoes = {}) {
 				agora,
 				segundos,
 				truncado
-			}, ctx.linhasNoLoad);
+			}, ctx.linhasNoLoad, opcoes.forcarAvancoDeSala === true);
 			if (!resultado) await devolverEntregas(cfg, ctx.entregas);
 			return resultado;
 		}, {
@@ -56130,7 +56249,7 @@ async function aplicarFlush(cfg, userId, sessao, opcoes = {}) {
 		await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { flushing_since: null });
 	}
 }
-async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUpdatedAt, janela, linhasNoLoad) {
+async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUpdatedAt, janela, linhasNoLoad, forcarAvancoDeSala) {
 	const { agora, segundos, truncado } = janela;
 	const { store, dados: estado } = criarEstadoDoJogador(dados);
 	const continentesAntes = new Set(estado.unlockedContinents);
@@ -56165,8 +56284,21 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		gameState: store,
 		seconds: segundos,
 		stepSeconds: offline ? OFFLINE_SIM_STEP_SECONDS : LIVE_SIM_STEP_SECONDS,
-		stepFn: (w, dt, opts) => stepWorld(w, dt, store, opts)
+		stepFn: (w, dt, opts) => stepWorld(w, dt, store, {
+			...opts,
+			offline
+		})
 	});
+	let avancoDeSalaAplicado = false;
+	if (forcarAvancoDeSala && world.sala && world.sala.abates >= 30) {
+		if (world.salaCountdownRemaining == null && !world.salaPendente) solicitarAvancoDeSala(world, sessao.map_id);
+		let restante = 3 + LIVE_SIM_STEP_SECONDS;
+		while (world.salaCountdownRemaining != null && restante > 0) {
+			stepWorld(world, LIVE_SIM_STEP_SECONDS, store, { silent: true });
+			restante -= LIVE_SIM_STEP_SECONDS;
+		}
+		avancoDeSalaAplicado = true;
+	}
 	const piso = offline && !pausado ? aplicarPiso(store, estado, resumo, agora) : NENHUM_PISO;
 	if (!offline) recordBatch(store, {
 		gold: resumo.gold,
@@ -56200,7 +56332,8 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		piso,
 		sala: world.sala,
 		clima: world.climaAmbiente?.tipo ?? null,
-		encerrada: resumo.stoppedEarly ? "desmaio" : null
+		encerrada: resumo.stoppedEarly ? "desmaio" : null,
+		avancoDeSalaAplicado
 	};
 }
 //#endregion
@@ -56271,6 +56404,7 @@ async function rotear(cfg, req, url) {
 	if (url.pathname === "/sessao/abrir" && req.method === "POST") return abrirSessao(cfg, jogador.id, req);
 	if (url.pathname === "/sessao/flush" && req.method === "POST") return flush(cfg, jogador.id, await aceitaEstadoParcial(req));
 	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id, await aceitaEstadoParcial(req));
+	if (url.pathname === "/sessao/avancar-sala" && req.method === "POST") return avancarSala(cfg, jogador.id, await aceitaEstadoParcial(req));
 	if (url.pathname === "/estado" && req.method === "GET") {
 		const parcial = url.searchParams.get("parcial") === "1";
 		return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas, linhasNoLoad }) => {
@@ -56411,6 +56545,40 @@ async function flush(cfg, userId, parcial) {
 		sessaoEncerrada: resultado.encerrada,
 		sala: resultado.sala,
 		clima: resultado.clima,
+		estadoParcial: parcial,
+		estado: resultado.estado
+	});
+}
+/**
+* PH-178: avanco manual de sala. Mesmo formato de resposta de `flush` —
+* roda a MESMA infra de claim/CAS/retry (`aplicarFlush`), so com a flag que
+* destrava a sala parada em 30/30 depois de simular o intervalo normal. Nao
+* existe caminho de escrita paralelo: se corresse por fora do claim atomico
+* de `aplicarFlush`, reabriria a classe de bug de corrida que aquele claim
+* foi criado pra fechar (ver comentario dele, "BUG DE DUPLICACAO").
+*/
+async function avancarSala(cfg, userId, parcial) {
+	const sessao = await sessaoAberta(cfg, userId);
+	if (!sessao) throw new ErroHttp(409, "nenhuma sessao aberta");
+	const resultado = await aplicarFlush(cfg, userId, sessao, {
+		comBag: !parcial,
+		forcarAvancoDeSala: true
+	});
+	if (resultado === "ocupado") throw new ErroHttp(409, "flush em andamento, tente novamente");
+	if (!resultado) {
+		await sairDaHunt(cfg, userId, sessao.id);
+		throw new ErroHttp(409, "nenhuma sessao aberta");
+	}
+	if (resultado.encerrada) await sairDaHunt(cfg, userId, sessao.id);
+	return json({
+		segundosCreditados: resultado.segundosCreditados,
+		truncado: resultado.truncado,
+		resumo: resultado.resumo,
+		piso: resultado.piso,
+		sessaoEncerrada: resultado.encerrada,
+		sala: resultado.sala,
+		clima: resultado.clima,
+		avancoAplicado: resultado.avancoDeSalaAplicado,
 		estadoParcial: parcial,
 		estado: resultado.estado
 	});

@@ -35,7 +35,7 @@ function cenario(itens: Record<string, number>) {
 
   useGameStateStore.setState({
     items: { ...itens },
-    autoToggles: { autoPot: false, autoCatch: false, autoRevive: true, autoStatus: false },
+    autoToggles: { autoPot: false, autoCatch: false, autoRevive: true, autoStatus: false, avancoManualDeSala: false },
   })
   return { world, player, gameState: useGameStateStore.getState() }
 }
