@@ -3,7 +3,7 @@ import { ToastStack } from '@/components/toasts/ToastStack'
 import { CamadaVfx } from '@/components/CamadaVfx'
 import { PokeProfileModal } from '@/components/modals/PokeProfileModal'
 import { ConfirmDialog } from '@/components/modals/ConfirmDialog'
-import { LevelUpSplash } from '@/components/modals/LevelUpSplash'
+import { CamadaDeCelebracao } from '@/components/modals/CamadaDeCelebracao'
 import { DefeatModal } from '@/components/modals/DefeatModal'
 import { LanceCountdownModal, LanceVictoryReturn } from '@/components/modals/LanceModals'
 import { ReviveCountdownModal } from '@/components/modals/ReviveCountdownModal'
@@ -119,7 +119,7 @@ export function JogoCarregado() {
       <PerfilPublico />
       <TutorialModal />
       <ConfirmDialog />
-      <LevelUpSplash />
+      <CamadaDeCelebracao />
       {summary && <OfflineFarmModal summary={summary} onClose={dismiss} />}
     </div>
   )

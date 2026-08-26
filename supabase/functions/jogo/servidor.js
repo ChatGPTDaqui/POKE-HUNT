@@ -54602,6 +54602,79 @@ var toastStore = createStore()((set) => ({
 		set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) }));
 	}
 }));
+//#endregion
+//#region src/stores/celebracaoStoreVanilla.ts
+/** Os ganhos SOMAM: sao deltas de atributo, entao somar e a operacao certa. */
+function somarGanhos(a, b) {
+	if (!a) return b;
+	if (!b) return a;
+	const fora = {};
+	for (const k of Object.keys(b)) fora[k] = (a[k] ?? 0) + (b[k] ?? 0);
+	return fora;
+}
+function podeJuntar(a, b) {
+	if (!a) return false;
+	if (a.tipo === "nivel" && b.tipo === "nivel") return a.especieId === b.especieId;
+	if (a.tipo === "treinador" && b.tipo === "treinador") return true;
+	return false;
+}
+function juntar(a, b) {
+	if (a.tipo === "nivel" && b.tipo === "nivel") {
+		const x = a;
+		const y = b;
+		return {
+			...y,
+			nivelInicial: Math.min(x.nivelInicial, y.nivelInicial),
+			nivel: Math.max(x.nivel, y.nivel),
+			ganhos: somarGanhos(x.ganhos, y.ganhos),
+			golpesNovos: [.../* @__PURE__ */ new Set([...x.golpesNovos, ...y.golpesNovos])]
+		};
+	}
+	const x = a;
+	const y = b;
+	return {
+		...y,
+		nivelInicial: Math.min(x.nivelInicial, y.nivelInicial),
+		nivel: Math.max(x.nivel, y.nivel)
+	};
+}
+/**
+* Fila com UMA celebracao visivel por vez e level-up COALESCIDO.
+*
+* Sem coalescencia, dois abates seguidos que dao nivel enfileiram dois cartoes
+* e travam a tela por 2x a duracao — e o segundo diz quase a mesma coisa que o
+* primeiro.
+*
+* A juncao entra na celebracao QUE JA ESTA NA TELA (indice 0), e nao so na fila
+* de tras: mesclar so o que espera deixaria o cartao dizendo "Nv 33" enquanto o
+* POKE ja esta em 35, e informacao desatualizada na tela e pior que cartao
+* repetido.
+*/
+var proximoId = 1;
+var celebracaoStore = createStore()((set) => ({
+	fila: [],
+	celebrar: (c) => set((estado) => {
+		const fila = estado.fila;
+		if (podeJuntar(fila[0]?.celebracao, c)) return { fila: [{
+			id: fila[0].id,
+			celebracao: juntar(fila[0].celebracao, c)
+		}, ...fila.slice(1)] };
+		const ultima = fila.length > 1 ? fila[fila.length - 1] : void 0;
+		if (ultima && podeJuntar(ultima.celebracao, c)) {
+			const junta = {
+				id: ultima.id,
+				celebracao: juntar(ultima.celebracao, c)
+			};
+			return { fila: [...fila.slice(0, -1), junta] };
+		}
+		return { fila: [...fila, {
+			id: proximoId++,
+			celebracao: c
+		}] };
+	}),
+	encerrarAtual: () => set((estado) => ({ fila: estado.fila.slice(1) })),
+	limpar: () => set({ fila: [] })
+}));
 var formulaEngine = createFormulaEngine(FORMULAS);
 formulaEngine.evalOrDefault("OFFLINE_FARM_MAX_HOURS", 6);
 var OFFLINE_SIM_STEP_SECONDS = formulaEngine.evalOrDefault("OFFLINE_SIM_STEP_SECONDS", .1);
@@ -54912,6 +54985,8 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 		};
 	}
 	const expGain = expRewardForEnemy(enemy.poke, poke.level);
+	const nivelAntesDoAbate = poke.level;
+	const nivelDoTreinadorAntes = gameState.trainer.level;
 	const grantResult = grantExp(poke, expGain);
 	player.poke = grantResult.poke;
 	gameState.updatePokeInstance(grantResult.poke.uid, () => grantResult.poke);
@@ -54956,8 +55031,26 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			const ganhos = formatStatGains(grantResult.statGains);
 			toastStore.getState().pushToast(`${shinyPrefix(grantResult.poke.isShiny)}${SPECIES[grantResult.poke.speciesId].name} subiu para o nivel ${grantResult.level}!${ganhos ? ` ${ganhos}` : ""}`, "levelup", "combat");
 			for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) toastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, "levelup", "combat");
+			celebracaoStore.getState().celebrar({
+				tipo: "nivel",
+				especieId: grantResult.poke.speciesId,
+				nome: SPECIES[grantResult.poke.speciesId].name,
+				nivelInicial: nivelAntesDoAbate,
+				nivel: grantResult.level,
+				ganhos: grantResult.statGains,
+				golpesNovos: grantResult.newAbilities.filter(isDamagingAbility).map((a) => a.name),
+				isShiny: Boolean(grantResult.poke.isShiny)
+			});
 		}
-		if (trainerResult.leveledUp) toastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, "levelup", "combat");
+		if (trainerResult.leveledUp) {
+			toastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, "levelup", "combat");
+			celebracaoStore.getState().celebrar({
+				tipo: "treinador",
+				nome: gameState.trainer.name,
+				nivelInicial: nivelDoTreinadorAntes,
+				nivel: trainerResult.level
+			});
+		}
 		for (const itemId of loot.droppedItems) {
 			const item = getItem(itemId);
 			if (item) toastStore.getState().pushToast(`Item encontrado: ${item.name}`, "success", "world");
@@ -54986,6 +55079,11 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 					const raridade = rarityOf(captureResult.poke).label;
 					toastStore.getState().pushToast(`${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`, "capture-success", "world", realceDaRaridade(captureResult.poke));
 				} else if (captureResult.reason === "roll_failed") toastStore.getState().pushToast("A captura falhou!", "capture-fail", "combat");
+				if (captureResult.success && enemy.poke.isShiny) celebracaoStore.getState().celebrar({
+					tipo: "shiny",
+					especieId: enemy.poke.speciesId,
+					nome: enemySpecies.name
+				});
 			};
 			if (atrasoDoToastMs > 0) setTimeout(dispararToastDeCaptura, atrasoDoToastMs);
 			else dispararToastDeCaptura();
