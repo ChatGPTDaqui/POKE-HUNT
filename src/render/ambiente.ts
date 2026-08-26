@@ -36,6 +36,7 @@
 // morre junto com a troca de arte. O motor nao sabe que ela existe.
 import { useUiStore } from '@/stores/uiStore'
 import { AGUA_POR_ARTE } from '@/data/generated/aguaMask.generated'
+import { LAVA_POR_ARTE } from '@/data/generated/lavaMask.generated'
 
 export type PresetAmbiente =
   | 'folha' // floresta, selva, mato alto — folha caindo em deriva + feixe de luz
@@ -155,6 +156,12 @@ interface Receita {
    */
   profundidade?: boolean
   /**
+   * Brilho pulsante rente a BASE da janela (PH-195) — poucos focos de luz
+   * quente por baixo da brasa que sobe, tipo vulcao/lava respirando. So
+   * `brasa` pede: nenhum outro preset tem "fonte" no chao pra brilhar.
+   */
+  brilhoDoChao?: boolean
+  /**
    * Folha: ganha rajada de vento periodica (PH-188) — bamboleio e velocidade
    * de queda sobem durante a rajada e voltam ao normal depois. So faz sentido
    * pra preset que representa vegetacao; agua/poeira/brasa/etc nao pedem vento.
@@ -189,7 +196,7 @@ const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
   brasa: {
     quantidade: 30, cor: '#ffb057', raio: [2.6, 5.4], velocidade: [18, 40],
     angulo: -Math.PI / 2, espalhamento: 0.4, alpha: 0.8, bamboleio: 11, aditivo: true,
-    faisca: true,
+    faisca: true, brilhoDoChao: true,
   },
   poeira: {
     quantidade: 26, cor: '#e2dcc8', raio: [2.2, 4.8], velocidade: [3, 9],
@@ -308,50 +315,60 @@ export interface JanelaDeAmbiente {
 }
 
 // ---------------------------------------------------------------------------
-// MASCARA DE AGUA (PH-113)
+// MASCARA DE REGIAO (agua PH-113, lava PH-195)
 // ---------------------------------------------------------------------------
-// O cabecalho acima registra a limitacao que o PH-96 deixou: o preset de agua
-// "nao sabe onde a agua esta, entao ele passa por cima de terra tambem", e por
-// isso ele nasceu o mais discreto de todos.
+// O cabecalho do arquivo registra a limitacao que o PH-96 deixou: a camada
+// "nao sabe onde a agua/lava esta, entao passa por cima de terra tambem", e
+// por isso os presets nasceram discretos, sem se prender a lugar nenhum.
 //
-// `aguaMask.generated.ts` resolve isso pra as artes que tem referencia PINTADA.
-// Arte sem referencia nao muda em NADA — mesmo brilho discreto de hoje. Ou seja:
-// esta mudanca nao pode piorar mapa nenhum, so melhorar os pintados.
+// `aguaMask.generated.ts` (PH-113) e `lavaMask.generated.ts` (PH-195) resolvem
+// isso pra as artes que tem referencia — pintada a mao pra agua (agua e
+// vegetacao coincidem em matiz/saturacao/luminancia/textura neste acervo, sem
+// plano separador por cor), derivada por COR pra lava em `volcano` (o nucleo
+// dela separa por uma margem grande do resto, ver o cabecalho de
+// `scripts/pintar-ref-lava.js` — `cave-volcanic` NAO entrou, mesma classe de
+// falha da agua: cristal grande demais no mesmo ponto de cor).
 //
-// Por que pintado e nao derivado da cor da arte: agua e vegetacao coincidem em
-// matiz, saturacao, luminancia E textura neste acervo (medido em PH-113, ver o
-// cabecalho de scripts/build-agua-mask.js). Nao ha plano separador.
+// Arte sem referencia (de qualquer um dos dois) nao muda em NADA — mesmo
+// comportamento discreto/livre de antes. As duas mascaras tem o MESMO
+// formato de grade (celula 20, '1' = regiao) e as mesmas funcoes de consulta
+// abaixo servem pra qualquer uma — a particula que usa a mascara (agua ondula
+// na dela, brasa nasce/vive na dela) nao precisa de logica separada pra achar
+// "estou dentro?".
 
 interface MascaraViva { celula: number; grid: string[] }
 
-/** A arte que esta na tela tem mascara de agua? */
-function mascaraDaArte(imagem: string): MascaraViva | null {
-  return AGUA_POR_ARTE[imagem] ?? null
+/** A arte que esta na tela tem mascara pro preset dela (agua ou lava)? */
+function mascaraDaArte(preset: Exclude<PresetAmbiente, 'nenhum'>, imagem: string): MascaraViva | null {
+  if (preset === 'agua') return AGUA_POR_ARTE[imagem] ?? null
+  if (preset === 'brasa') return LAVA_POR_ARTE[imagem] ?? null
+  return null
 }
 
-/** O ponto de MUNDO (x,y) cai numa celula marcada como agua? */
-function eAgua(mascara: MascaraViva, x: number, y: number): boolean {
-  // Fora da grade e "nao e agua", nao "e agua": a grade cobre o retangulo do
-  // mundo, e o que passa dela e borda de arte, onde ondular nao faz sentido.
+/** O ponto de MUNDO (x,y) cai numa celula marcada na mascara? */
+function dentroDaMascara(mascara: MascaraViva, x: number, y: number): boolean {
+  // Fora da grade conta como fora da regiao: a grade cobre o retangulo do
+  // mundo, e o que passa dela e borda de arte, onde o efeito nao faz sentido.
   if (x < 0 || y < 0) return false
   const linha = mascara.grid[Math.floor(y / mascara.celula)]
   return !!linha && linha[Math.floor(x / mascara.celula)] === '1'
 }
 
 /**
- * Agua com FOLGA de uma celula em volta.
+ * Dentro da regiao com FOLGA de uma celula em volta.
  *
- * O anel CRESCE depois de nascer. Nascido na celula da margem, ele abre por
- * cima da areia — e o recorte do laco de desenho nao pega isso, porque ele
- * testa o centro da particula, que continua na agua. Nascer no interior e o que
- * impede, e o teto de raio (`ANEL_RAIO_MAXIMO_EM_CELULAS`) e o que faz uma
- * celula de folga bastar.
+ * O anel de agua CRESCE depois de nascer — nascido na celula da margem, ele
+ * abriria por cima da areia, e o recorte do laco de desenho nao pega isso
+ * porque testa o centro da particula, que continua dentro. Nascer no
+ * interior e o que impede. A brasa nao cresce, mas usa a MESMA folga: nascer
+ * colado na margem faria metade da faisca aparecer fora da lava desde o
+ * primeiro quadro.
  */
-function aguaComFolga(mascara: MascaraViva, x: number, y: number): boolean {
+function dentroComFolga(mascara: MascaraViva, x: number, y: number): boolean {
   const c = mascara.celula
-  return eAgua(mascara, x, y)
-    && eAgua(mascara, x - c, y) && eAgua(mascara, x + c, y)
-    && eAgua(mascara, x, y - c) && eAgua(mascara, x, y + c)
+  return dentroDaMascara(mascara, x, y)
+    && dentroDaMascara(mascara, x - c, y) && dentroDaMascara(mascara, x + c, y)
+    && dentroDaMascara(mascara, x, y - c) && dentroDaMascara(mascara, x, y + c)
 }
 
 /**
@@ -395,6 +412,21 @@ let particulas: Particula[] = []
 let rand: () => number = sorteioLocal(1)
 let ultimoInstante = 0
 let faseGlobal = 0
+
+/** Um foco de brilho, ancorado numa celula real da mascara de lava. Ver `desenharBrilhoDoChao`. */
+interface FocoDeBrilho {
+  x: number
+  y: number
+  raio: number
+  /** Frequencia/fase da onda RAPIDA do pulso — a que da o "respirar" visivel. */
+  freqA: number
+  faseA: number
+  /** Frequencia/fase da onda LENTA — quebra a periodicidade da rapida, senao
+   *  cada foco pisca igual e sincronizado, lendo como luz de LED piscando. */
+  freqB: number
+  faseB: number
+}
+let focosDeBrilho: FocoDeBrilho[] = []
 
 // Teto de tempo por quadro. Aba em segundo plano volta com um `delta` de
 // minutos, e integrar isso de uma vez teleportaria toda particula pra fora da
@@ -445,14 +477,15 @@ const ANEL_TRACO = 1.4
 const ANEL_RAIO_MAXIMO_EM_CELULAS = 0.8
 
 /**
- * Quantas posicoes sortear procurando agua antes de desistir.
+ * Quantas posicoes sortear procurando a regiao da mascara antes de desistir.
  *
- * Desistir importa: numa janela SEM agua nenhuma (o jogador andou pra dentro da
- * mata do `swamp`) nenhum sorteio acerta, e insistir travaria o quadro. Ao
- * desistir a particula nasce onde caiu, e o laco de desenho a recicla antes de
- * desenhar — o efeito rarefaz longe da agua em vez de vazar pra terra.
+ * Desistir importa: numa janela SEM agua/lava nenhuma (o jogador andou pra
+ * dentro da mata do `swamp`, ou a camera esta longe do rio de `volcano`)
+ * nenhum sorteio acerta, e insistir travaria o quadro. Ao desistir a
+ * particula nasce onde caiu, e o laco de desenho a recicla antes de
+ * desenhar — o efeito rarefaz longe da regiao em vez de vazar pra fora dela.
  */
-const TENTATIVAS_DE_AGUA = 12
+const TENTATIVAS_NA_MASCARA = 12
 
 function nascer(
   p: Particula,
@@ -481,24 +514,27 @@ function nascer(
     ? (rand() < 0.5 ? -1 : 1) * (FOLHA_GIRO[0] + rand() * (FOLHA_GIRO[1] - FOLHA_GIRO[0]))
     : 0
 
-  // Com mascara, a particula nasce DENTRO da agua e nao na borda da janela — o
-  // ponto inteiro do PH-113. Vale tambem na reciclagem: entrar pela borda faria
-  // a onda atravessar a terra ate achar agua.
+  // Com mascara, a particula nasce DENTRO da regiao e nao na borda da janela
+  // — o ponto inteiro do PH-113 (agua) e do PH-195 (lava). Vale tambem na
+  // reciclagem: entrar pela borda faria a particula atravessar terra/rocha
+  // ate achar a regiao — ou, pra brasa, subir por cima de um mapa inteiro
+  // antes de aparecer.
   if (mascara) {
-    // Duas rodadas, e nao uma: primeiro procura INTERIOR (folga de uma celula,
-    // pra o anel poder abrir sem passar da margem); se nao achar, aceita
-    // qualquer agua. A segunda rodada nao e redundante — canal estreito de
-    // `swamp` tem largura de uma celula em varios trechos, e sem ela aquele
-    // trecho de agua nao ganharia particula nenhuma.
-    for (let i = 0; i < TENTATIVAS_DE_AGUA; i++) {
+    // Duas rodadas, e nao uma: primeiro procura INTERIOR (folga de uma
+    // celula, pra o anel de agua poder abrir sem passar da margem, e pra a
+    // brasa nao nascer colada na beira); se nao achar, aceita qualquer
+    // celula da regiao. A segunda rodada nao e redundante — canal estreito
+    // de `swamp` tem largura de uma celula em varios trechos, e sem ela
+    // aquele trecho nao ganharia particula nenhuma.
+    for (let i = 0; i < TENTATIVAS_NA_MASCARA; i++) {
       const x = janela.x + rand() * janela.w
       const y = janela.y + rand() * janela.h
-      if (aguaComFolga(mascara, x, y)) { p.x = x; p.y = y; return }
+      if (dentroComFolga(mascara, x, y)) { p.x = x; p.y = y; return }
     }
-    for (let i = 0; i < TENTATIVAS_DE_AGUA; i++) {
+    for (let i = 0; i < TENTATIVAS_NA_MASCARA; i++) {
       const x = janela.x + rand() * janela.w
       const y = janela.y + rand() * janela.h
-      if (eAgua(mascara, x, y)) { p.x = x; p.y = y; return }
+      if (dentroDaMascara(mascara, x, y)) { p.x = x; p.y = y; return }
     }
     p.x = janela.x + rand() * janela.w
     p.y = janela.y + rand() * janela.h
@@ -549,6 +585,32 @@ function reconstruir(
     particulas.push(p)
   }
   arteAtual = chave
+  // Focos de brilho (PH-195): um por CELULA REAL da mascara de lava, nao
+  // posicao livre — sem mascara, sem foco nenhum (ver o cabecalho da secao
+  // de brilho pra por que nao ha fallback "na base da tela"). Reamostrados
+  // junto com a arte, mesmo gerador seedado por `chave`.
+  focosDeBrilho = []
+  if (r.brilhoDoChao && mascara) {
+    const celulasDeLava: Array<[number, number]> = []
+    for (let ly = 0; ly < mascara.grid.length; ly++) {
+      const linha = mascara.grid[ly]
+      for (let lx = 0; lx < linha.length; lx++) {
+        if (linha[lx] === '1') celulasDeLava.push([lx, ly])
+      }
+    }
+    for (let i = 0; i < N_FOCOS_DE_BRILHO && celulasDeLava.length > 0; i++) {
+      const [cx, cy] = celulasDeLava[Math.floor(rand() * celulasDeLava.length)]
+      focosDeBrilho.push({
+        x: cx * mascara.celula + mascara.celula / 2,
+        y: cy * mascara.celula + mascara.celula / 2,
+        raio: mascara.celula * (FOCO_RAIO_EM_CELULAS[0] + rand() * (FOCO_RAIO_EM_CELULAS[1] - FOCO_RAIO_EM_CELULAS[0])),
+        freqA: FOCO_FREQ_RAPIDA[0] + rand() * (FOCO_FREQ_RAPIDA[1] - FOCO_FREQ_RAPIDA[0]),
+        faseA: rand() * Math.PI * 2,
+        freqB: FOCO_FREQ_LENTA[0] + rand() * (FOCO_FREQ_LENTA[1] - FOCO_FREQ_LENTA[0]),
+        faseB: rand() * Math.PI * 2,
+      })
+    }
+  }
 }
 
 /**
@@ -596,7 +658,7 @@ export function desenharAmbiente(
     return
   }
 
-  const mascara = mascaraDaArte(imagem)
+  const mascara = mascaraDaArte(preset, imagem)
   const r = receitaDe(preset, mascara)
   const compacto = ui.viewportWidth > 0 && ui.viewportWidth < 760
   if (arteAtual !== imagem || particulas.length === 0) reconstruir(imagem, preset, janela, compacto, mascara)
@@ -612,6 +674,7 @@ export function desenharAmbiente(
   if (r.aditivo) ctx.globalCompositeOperation = 'lighter'
 
   if (r.feixes) desenharFeixes(ctx, janela)
+  if (r.brilhoDoChao) desenharBrilhoDoChao(ctx)
 
   ctx.fillStyle = r.cor
   ctx.strokeStyle = r.cor
@@ -640,16 +703,18 @@ export function desenharAmbiente(
 
     const foraX = p.x < janela.x - FOLGA * 2 || p.x > janela.x + janela.w + FOLGA * 2
     const foraY = p.y < janela.y - FOLGA * 2 || p.y > janela.y + janela.h + FOLGA * 2
-    // Com mascara, SAIR DA AGUA tambem recicla — senao a onda continuaria
-    // subindo depois de passar da margem e apareceria em cima da terra, que e
-    // exatamente o que esta mudanca existe pra impedir. Cobre tambem a
-    // particula que nasceu em terra por `TENTATIVAS_DE_AGUA` ter desistido:
-    // ela e reciclada ANTES de ser desenhada.
+    // Com mascara, SAIR DA REGIAO tambem recicla — senao a onda de agua
+    // continuaria subindo depois de passar da margem e apareceria em cima da
+    // terra (o que essa mudanca existe pra impedir), e a brasa continuaria
+    // subindo por cima de rocha depois de deixar a lava pra tras — o "fim"
+    // que da a ela comeco/meio/fim em vez de viver a janela inteira. Cobre
+    // tambem a particula que nasceu fora por `TENTATIVAS_NA_MASCARA` ter
+    // desistido: ela e reciclada ANTES de ser desenhada.
     // Anel tem VIDA: ele nao sai da tela, ele desmancha onde esta. Sem este
     // ramo o anel travaria no raio maximo e ficaria plantado ate a deriva
     // tira-lo da agua, que e o oposto de ondular.
     const acabou = p.anel && p.idade >= p.vida
-    if (foraX || foraY || acabou || (mascara && !eAgua(mascara, p.x, p.y))) {
+    if (foraX || foraY || acabou || (mascara && !dentroDaMascara(mascara, p.x, p.y))) {
       nascer(p, r, janela, true, mascara)
       continue
     }
@@ -723,10 +788,68 @@ function desenharFeixes(ctx: CanvasRenderingContext2D, janela: JanelaDeAmbiente)
   ctx.restore()
 }
 
+// ---------------------------------------------------------------------------
+// BRILHO DE LAVA (PH-195)
+// ---------------------------------------------------------------------------
+// A brasa (PH-96/PH-115) so sobe — nada acontecia perto da FONTE. A primeira
+// versao deste efeito colava os focos na base da janela, uma aproximacao
+// (nao havia mascara ainda). Com `lavaMask.generated.ts`, os focos nascem em
+// CELULAS REAIS da lava — sem mascara (arte sem referencia), nao ha foco
+// nenhum: melhor nao mostrar brilho do que mostrar um na base da tela quando
+// a lava de verdade pode estar em qualquer lugar da imagem, como e o caso
+// aqui (o rio de `volcano` cruza a cena de cima a baixo, nao fica so embaixo).
+const N_FOCOS_DE_BRILHO = 4
+/** Raio de cada foco, em CELULAS da mascara (a lava real tem largura variavel,
+ *  celula da mascara e a unica medida de escala que a camada tem dela). */
+const FOCO_RAIO_EM_CELULAS: [number, number] = [2.2, 3.8]
+/** Achatamento vertical do foco — mesma razao da perspectiva do anel de agua. */
+const FOCO_ACHATAMENTO = 0.32
+/** Frequencia da onda rapida do pulso, em radianos/segundo. */
+const FOCO_FREQ_RAPIDA: [number, number] = [0.7, 1.3]
+/** Frequencia da onda lenta — pequena o bastante pra so desafinar a rapida,
+ *  nao pra criar uma rajada (isso e o vento da folha, nao a respiracao da lava). */
+const FOCO_FREQ_LENTA: [number, number] = [0.12, 0.22]
+/** Alpha maximo no pico do pulso. */
+const FOCO_ALPHA_PICO = 0.55
+
+/**
+ * Focos de brilho pulsante colados na base da janela — vulcao/lava
+ * respirando por baixo da brasa que sobe.
+ *
+ * Cada foco soma DUAS senoides (uma rapida, uma lenta) em vez de uma so: uma
+ * unica senoide pulsa mecanico e todos os focos ficam em fase entre si (cada
+ * um comeca com fase propria, mas o PERIODO seria igual) — leria como luz de
+ * LED, nao como lava. A soma de duas frequencias por foco quebra a
+ * periodicidade aparente sem virar rajada esporadica (isso e o vento da
+ * folha, PH-188 — aqui o efeito e uma respiracao continua).
+ */
+function desenharBrilhoDoChao(ctx: CanvasRenderingContext2D): void {
+  if (!focosDeBrilho.length) return
+  ctx.save()
+  ctx.globalCompositeOperation = 'lighter'
+  for (const foco of focosDeBrilho) {
+    const onda = 0.5 * Math.sin(faseGlobal * foco.freqA + foco.faseA)
+      + 0.5 * Math.sin(faseGlobal * foco.freqB + foco.faseB)
+    const pulso = (onda + 1) / 2 // 0..1
+    const alpha = FOCO_ALPHA_PICO * (0.35 + 0.65 * pulso)
+    const raio = foco.raio * (0.82 + 0.18 * pulso)
+    const g = ctx.createRadialGradient(foco.x, foco.y, 0, foco.x, foco.y, raio)
+    g.addColorStop(0, `rgba(255, 150, 60, ${alpha})`)
+    g.addColorStop(0.55, `rgba(255, 90, 20, ${alpha * 0.45})`)
+    g.addColorStop(1, 'rgba(255, 60, 10, 0)')
+    ctx.fillStyle = g
+    ctx.beginPath()
+    ctx.ellipse(foco.x, foco.y, raio, raio * FOCO_ACHATAMENTO, 0, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  ctx.restore()
+}
+
 /** Solta o estado. Chamado ao sair da hunt, pra a proxima entrada nao herdar
  *  particulas posicionadas na janela de outro mapa. */
 export function reiniciarAmbiente(): void {
   particulas = []
   arteAtual = null
   ultimoInstante = 0
+  focosDeBrilho = []
 }
