@@ -86,6 +86,7 @@ npm-debug.log*
 scripts/body-block-refs/_conferencia/
 scripts/agua-debug/
 scripts/agua-refs/*-rascunho.png
+scripts/lava-debug/
 
 # Notas de operacao de maquina, geradas durante faxina de repositorio: a copia
 # local do ruleset da dev (pra conferir protecao sem abrir o GitHub) e a lista
