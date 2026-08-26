@@ -414,6 +414,13 @@ export function AutoPanel() {
           ))}
         </div>
       </BlocoAuto>
+
+      <BlocoAuto
+        titulo="Avanço manual de sala"
+        dica="Ao fechar a quota (30/30), a sala espera você clicar em 'Próximo Nível' na hunt em vez de trocar sozinha."
+        ligado={autoToggles.avancoManualDeSala}
+        aoLigar={(v) => setAutoToggle('avancoManualDeSala', v)}
+      />
     </div>
   )
 }
