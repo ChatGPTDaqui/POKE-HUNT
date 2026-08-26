@@ -1,12 +1,19 @@
 -- PH-198 — "Especialidades": progressao de dano/defesa por tipo elemental.
 -- Gemeo public de `20260826200001_especialidades_dev.sql`.
 --
--- `tipo` e TEXT + check, NAO o enum `element_type`: aquele enum (criado em
--- 20260806201818) tem só 17 valores e nunca ganhou 'FAIRY' (ver
--- 20260814120100, que teve que contornar a mesma lacuna pra `items.stone_type`
--- indo direto de TEXT). Usar o enum aqui herdaria o mesmo bug pra Especialidade
--- Fada. A lacuna do enum em si fica fora desta migration — achado reportado
--- separado, nao e desta issue.
+-- `tipo` e TEXT + check, NAO o enum `element_type`. CORRECAO: a primeira versao
+-- deste comentario dizia que o enum tinha so 17 valores e nunca ganhou 'FAIRY'
+-- — errado, checar so `20260806201818` (a criacao original) sem olhar as
+-- migrations seguintes. `20260814120000` ja adicionou 'FAIRY' aos dois
+-- schemas nesse mesmo dia (`items.stone_type` usa o enum, nao TEXT, e
+-- `stone_fairy` prova que o valor existe). O enum esta completo desde 14/08 —
+-- confirmado contra `database.types.ts` regenerado nesta sessao.
+--
+-- TEXT + check aqui e so decoupling deliberado: Especialidade e conceito de
+-- progressao do jogador, nao um tipo de especie — nao precisa herdar o enum
+-- de `species`/`items` pra continuar correto, e evita puxar o tipo gerado do
+-- Supabase (`Database["..."]["Enums"]["element_type"]`) numa tabela que nao
+-- tem nada a ver com POKE ou item. Nao e workaround de bug nenhum.
 begin;
 
 create table public.player_especialidades (
