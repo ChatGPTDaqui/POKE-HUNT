@@ -13,6 +13,8 @@
 //    mais — ver "Decisao de implementacao: estado do motor" no plano.
 import { useEffect, useRef } from 'react'
 import { Renderer } from '@/render/renderer'
+import { desenharVfx, registrarPintor } from '@/render/camadaVfx'
+import { converterRecompensasNovas, pintorDeRecompensa } from '@/render/vooDeRecompensa'
 import { useGameLoop } from '@/engine/useGameLoop'
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -48,6 +50,10 @@ export function GameCanvas() {
     // Publica o renderer pro ZoomControl (que vive fora do canvas e precisa
     // chamar zoomStep/ler o % atual) — ver stores/rendererStore.ts.
     useRendererStore.getState().setRenderer(renderer)
+
+    // Pintor do voo de recompensa (PH-191). Registrado uma vez, pro ciclo de
+    // vida do canvas — ele mesmo nao desenha nada quando nao ha voo vivo.
+    const soltarPintorDeRecompensa = registrarPintor(pintorDeRecompensa)
 
     // Bug real encontrado ao vivo (jogo abria o Hospital SEM o POKE em campo
     // sempre que a pagina era recarregada com um save existente): o
@@ -135,10 +141,38 @@ export function GameCanvas() {
     canvas.addEventListener('mouseleave', handleMouseLeave)
     canvas.addEventListener('wheel', handleWheel, { passive: false })
 
+    // Instante do quadro anterior, pra o `dt` da camada de VFX. O laco de
+    // DESENHO nao tinha dt nenhum ate aqui — ele so lia estado e pintava, e quem
+    // avanca o tempo e o passo de simulacao (`useGameLoop`, 60/s fixo). A camada
+    // de VFX precisa do dt REAL do desenho porque os efeitos dela nao vivem no
+    // `WorldState`: eles nascem e morrem entre dois quadros.
+    let ultimoQuadro = performance.now()
+    // Teto do dt: com a aba em segundo plano o rAF para, e o primeiro quadro na
+    // volta traria um dt de vários segundos — todo efeito ativo pularia direto
+    // pro fim (ou passaria dele) num unico passo. 1/15s corta isso sem
+    // atrapalhar quadro lento de verdade.
+    const DT_MAXIMO = 1 / 15
+
     let rafId = requestAnimationFrame(function draw() {
+      const agora = performance.now()
+      const dt = Math.min(DT_MAXIMO, (agora - ultimoQuadro) / 1000)
+      ultimoQuadro = agora
+
       const world = useWorldStore.getState()
       if (world.mapDef) renderer.renderMap(world.mapDef, world)
       else renderer.renderHospital(world.player, enfermeiraEmFoco)
+
+      // Recompensa de abate -> voo ate a carteira (PH-191). Le os `rewardText`
+      // que o motor ja empurra no `WorldState` e converte os NOVOS em voo; o
+      // motor nao sabe que isso existe. Fora da hunt `mundoParaTela` devolve
+      // `null` e nada e lancado.
+      converterRecompensasNovas(world.effects, (p) =>
+        renderer.mundoParaTela(world.mapDef, world.player, p))
+      // DEPOIS do jogo, sempre: a camada de VFX fica acima da HUD e precisa ser
+      // o ultimo desenho do quadro. Ela e no-op quando nao ha canvas registrado
+      // (Hospital antes do mount, teste sem DOM), entao o call site nao precisa
+      // saber se ela existe. Ver `render/camadaVfx.ts`.
+      desenharVfx(dt)
       rafId = requestAnimationFrame(draw)
     })
 
@@ -153,6 +187,7 @@ export function GameCanvas() {
       canvas.removeEventListener('mouseleave', handleMouseLeave)
       canvas.removeEventListener('wheel', handleWheel)
       cancelAnimationFrame(rafId)
+      soltarPintorDeRecompensa()
       clearInterval(syncInterval)
       useRendererStore.getState().setRenderer(null)
     }

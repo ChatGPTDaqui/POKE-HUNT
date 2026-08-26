@@ -11,7 +11,7 @@
 // pra ele sem ter pedido. HP, XP, carteira. Todo o resto (local, Pokedex,
 // taxas) mora atras de um toque, na gaveta de detalhes — nao porque importe
 // menos, mas porque ele NAO muda entre um olhar e outro.
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { CaretDown, ChartLineUp, Coin, Diamond, User } from '@phosphor-icons/react'
 import { SPECIES, type PokeInstance } from '@/data/pokes'
 import { spriteUrl } from '@/data/sprites'
@@ -33,6 +33,7 @@ import { useFaceDoPoke } from '@/hooks/useFaceDoPoke'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { GameButton } from '@/components/game/controls'
 import { useIntervalo } from '@/hooks/useIntervalo'
+import { useAncoraDeVfx, ANCORA } from '@/hooks/useAncoraDeVfx'
 import { cn } from '@/lib/utils'
 
 const TOTAL_ESPECIES = Object.keys(SPECIES).length
@@ -267,8 +268,15 @@ function Carteira({ abreviada }: { abreviada: boolean }) {
   const gold = useGameStateStore((s) => s.wallet.gold)
   const diamonds = useGameStateStore((s) => s.wallet.diamonds)
   const fmt = abreviada ? fmtCurto : fmtCheio.format.bind(fmtCheio)
+  // Ancora da camada de VFX (PH-190): e aqui que o voo de ouro do abate termina
+  // (PH-191). Um ref publicado, e nao um `querySelector` por texto ou por
+  // classe: seletor por conteudo quebra na primeira mudanca de copy e quebra em
+  // SILENCIO — o efeito passaria a mirar no canto (0,0) sem erro nenhum.
+  const carteiraRef = useRef<HTMLDivElement>(null)
+  useAncoraDeVfx(ANCORA.carteira, carteiraRef)
   return (
     <div
+      ref={carteiraRef}
       className={cn(
         'shrink-0 text-[.72em] leading-[1.15] tabular-nums',
         abreviada ? 'flex flex-col items-end' : 'flex items-center gap-[.6em]',
