@@ -56007,11 +56007,12 @@ var COLUNAS_AUTO_CATCH = "user_id,species_id,ball_item_id";
 async function lerSnapshot(cfg, userId, opcoes = {}) {
 	const comBag = opcoes.comBag !== false;
 	const filtroDeLocal = comBag ? "" : "&location=eq.team";
+	const comDex = opcoes.comDex !== false;
 	const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
 		selecionar(cfg, `players?user_id=eq.${userId}&select=*`),
 		selecionarTudo(cfg, `pokemon_instances?user_id=eq.${userId}${filtroDeLocal}&select=*&order=id`),
 		selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=${COLUNAS_ITENS}`),
-		selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=${COLUNAS_POKEDEX}`),
+		comDex ? selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=${COLUNAS_POKEDEX}`) : Promise.resolve([]),
 		selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=${COLUNAS_AUTO_CATCH}`)
 	]);
 	if (!player[0]) throw new ErroHttp(404, "jogador sem linha em `players`");
@@ -56028,6 +56029,7 @@ async function lerSnapshot(cfg, userId, opcoes = {}) {
 		entregas: [],
 		playerUpdatedAt: player[0].updated_at,
 		bagCarregada: comBag,
+		dexCarregada: comDex,
 		linhasNoLoad
 	};
 }
@@ -56062,7 +56064,10 @@ async function carregarEstadoParaEscrita(cfg, userId, opcoes = {}) {
 */
 async function comEstadoParaEscrita(cfg, userId, fn, opcoes = {}) {
 	if (opcoes.esperarFlush !== false) await aguardarFlushEmAndamento(cfg, userId);
-	const ctx = await carregarEstadoParaEscrita(cfg, userId, { comBag: opcoes.comBag });
+	const ctx = await carregarEstadoParaEscrita(cfg, userId, {
+		comBag: opcoes.comBag,
+		comDex: opcoes.comDex
+	});
 	try {
 		return await fn(ctx);
 	} catch (erro) {
@@ -56144,7 +56149,7 @@ function tabelaIntacta(novas, atuais, chaveDe) {
 	if (novas.length !== atuais.length) return false;
 	return linhasQueMudaram(novas, atuais, chaveDe).length === 0;
 }
-async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAtEsperado, linhasNoLoad) {
+async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAtEsperado, linhasNoLoad, dexCarregada = true) {
 	if (!(await chamarRpc(cfg, "gravar_progresso", {
 		p_user_id: userId,
 		p_patch: gameStateToPlayerRow(userId, estado),
@@ -56175,7 +56180,34 @@ async function gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAtE
 		if (itensMudados.length) await inserir(cfg, "player_items", itensMudados, { upsert: "user_id,item_id" });
 	}
 	const linhasDex = gameStateToPokedexRows(userId, estado);
-	if (!tabelaIntacta(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))) {
+	if (!dexCarregada) {
+		if (linhasDex.length > 0) {
+			const base = /* @__PURE__ */ new Map();
+			for (const lote of porLotesDeId(linhasDex.map((l) => String(l.species_id)))) {
+				const atuais = await selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(",")})&select=species_id,normal_kills,shiny_kills`);
+				for (const l of atuais) base.set(l.species_id, {
+					normal: Number(l.normal_kills),
+					shiny: Number(l.shiny_kills)
+				});
+			}
+			const somadas = linhasDex.map((l) => {
+				const anterior = base.get(String(l.species_id)) ?? {
+					normal: 0,
+					shiny: 0
+				};
+				return {
+					...l,
+					normal_kills: anterior.normal + Number(l.normal_kills),
+					shiny_kills: anterior.shiny + Number(l.shiny_kills)
+				};
+			});
+			await inserir(cfg, "player_pokedex", somadas, { upsert: "user_id,species_id" });
+			for (const l of somadas) estado.pokedexKills[String(l.species_id)] = {
+				normal: l.normal_kills,
+				shiny: l.shiny_kills
+			};
+		}
+	} else if (!tabelaIntacta(linhasDex, linhasNoLoad?.pokedex, (l) => String(l.species_id))) {
 		const dexIdsAgora = new Set(linhasDex.map((l) => l.species_id));
 		const removerDex = (await selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=species_id`)).map((l) => l.species_id).filter((id) => !dexIdsAgora.has(id));
 		for (const lote of porLotesDeId(removerDex)) await apagar(cfg, `player_pokedex?user_id=eq.${userId}&species_id=in.(${lote.join(",")})`);
@@ -56241,18 +56273,19 @@ async function aplicarFlush(cfg, userId, sessao, opcoes = {}) {
 				agora,
 				segundos,
 				truncado
-			}, ctx.linhasNoLoad, opcoes.forcarAvancoDeSala === true);
+			}, ctx.linhasNoLoad, opcoes.forcarAvancoDeSala === true, ctx.dexCarregada);
 			if (!resultado) await devolverEntregas(cfg, ctx.entregas);
 			return resultado;
 		}, {
 			esperarFlush: false,
-			comBag: opcoes.comBag === true
+			comBag: opcoes.comBag === true,
+			comDex: opcoes.comBag === true
 		}));
 	} finally {
 		await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { flushing_since: null });
 	}
 }
-async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUpdatedAt, janela, linhasNoLoad, forcarAvancoDeSala) {
+async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUpdatedAt, janela, linhasNoLoad, forcarAvancoDeSala, dexCarregada = true) {
 	const { agora, segundos, truncado } = janela;
 	const { store, dados: estado } = criarEstadoDoJogador(dados);
 	const continentesAntes = new Set(estado.unlockedContinents);
@@ -56310,7 +56343,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		shinys: resumo.shinySeen
 	});
 	estado.currentMapId = resumo.stoppedEarly ? null : sessao.map_id;
-	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt, linhasNoLoad);
+	await gravarEstado(cfg, userId, estado, pokeIdsNoLoad, playerUpdatedAt, linhasNoLoad, dexCarregada);
 	if (GRUPOS_DO_LANCE.some((g) => !continentesAntes.has(g) && estado.unlockedContinents.includes(g))) await inserir(cfg, "hall_da_fama", {
 		user_id: userId,
 		conquista: CONQUISTA_LANCE

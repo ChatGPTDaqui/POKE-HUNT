@@ -154,13 +154,33 @@ interface Receita {
    * devagar e apagado (esta longe), e a nevasca ganha camadas.
    */
   profundidade?: boolean
+  /**
+   * Folha: ganha rajada de vento periodica (PH-188) — bamboleio e velocidade
+   * de queda sobem durante a rajada e voltam ao normal depois. So faz sentido
+   * pra preset que representa vegetacao; agua/poeira/brasa/etc nao pedem vento.
+   */
+  vento?: boolean
+  /**
+   * Fracao do ALTO da janela onde a particula pode NASCER (PH-188). `0.4` =
+   * so no topo 40%. Undefined = janela inteira (todo preset sem isto).
+   *
+   * So a folha usa: sem isto ela nascia espalhada por qualquer altura da
+   * tela, inclusive rente ao chao — lendo como confete solto, nao como algo
+   * caindo da copa. Nao ha marcacao de ONDE a arvore esta em cada arte (a
+   * mesma limitacao que a agua tinha antes da mascara do PH-113), entao isto
+   * e aproximacao: assume que copa fica na faixa de cima da cena, sem saber
+   * a posicao real de nenhuma arvore. A RECICLAGEM (`nascer` com
+   * `aoEntrar`) ja entra por uma linha logo acima da janela — nao precisa
+   * dessa faixa, so a primeira populacao precisa.
+   */
+  faixaOrigemY?: number
 }
 
 const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
   folha: {
-    quantidade: 34, cor: '#e8f0a8', raio: [3.4, 7.0], velocidade: [16, 34],
+    quantidade: 34, cor: '#e8f0a8', raio: [1.7, 3.4], velocidade: [16, 34],
     angulo: Math.PI / 2 + 0.35, espalhamento: 0.3, alpha: 0.72, bamboleio: 16, feixes: true,
-    girar: true,
+    girar: true, vento: true, faixaOrigemY: 0.4,
   },
   agua: {
     quantidade: 30, cor: '#eaf8ff', raio: [2.2, 4.4], velocidade: [4, 11],
@@ -205,6 +225,38 @@ const FOLHA_GIRO = [0.8, 2.4] as const
 const FAISCA_PISCA = 2.6
 /** Quanto do raio a faisca perde no fundo do pulso. */
 const FAISCA_PULSO = 0.4
+
+// ---------------------------------------------------------------------------
+// RAJADA DE VENTO NA FOLHAGEM (PH-188)
+// ---------------------------------------------------------------------------
+// Vento de verdade nao sopra constante: vem em rajada e some. Um multiplicador
+// senoidal simples (`sin(fase * f)`) leria como respiracao regular, nao vento —
+// metade do tempo em alta, metade em baixa. Somar tres senos de frequencia
+// incomensuravel e elevar o resultado ao cubo estreita os picos: a maior parte
+// do tempo o vento fica perto de zero, com rajadas esporadicas que sobem e
+// caem rapido — o padrao que le como natural, nao mecanico.
+const VENTO_FREQ: readonly [number, number, number] = [0.11, 0.23, 0.05]
+const VENTO_FASE: readonly [number, number, number] = [0, 2.1, 4.7]
+const VENTO_PESO: readonly [number, number, number] = [0.5, 0.3, 0.2]
+
+/**
+ * Intensidade do vento em [0, 1], funcao pura de `faseGlobal` (segundos).
+ *
+ * Exportada pra ser testada direto, sem depender de mockar relogio e RNG do
+ * sorteio local so pra reproduzir a fase de rajada.
+ */
+export function intensidadeDoVento(fase: number): number {
+  const onda = VENTO_FREQ.reduce(
+    (soma, freq, i) => soma + Math.sin(fase * freq + VENTO_FASE[i]) * VENTO_PESO[i],
+    0,
+  )
+  return ((onda + 1) / 2) ** 3
+}
+
+/** Quanto o bamboleio (deriva lateral) aumenta no pico da rajada. */
+const VENTO_BAMBOLEIO_PICO = 2.4
+/** Quanto a queda acelera no pico da rajada — vento tambem empurra pra baixo. */
+const VENTO_QUEDA_PICO = 0.5
 
 interface Particula {
   x: number
@@ -455,9 +507,12 @@ function nascer(
 
   if (!aoEntrar) {
     // Primeira populacao: espalhada pela janela inteira, senao a camada entra
-    // como uma cortina vindo de uma borda so.
+    // como uma cortina vindo de uma borda so. Com `faixaOrigemY` (so folha),
+    // a altura fica restrita ao topo — cai da copa desde o primeiro quadro,
+    // em vez de aparecer ja espalhada ate o chao.
+    const alturaY = r.faixaOrigemY ? janela.h * r.faixaOrigemY : janela.h
     p.x = janela.x - FOLGA + rand() * (janela.w + FOLGA * 2)
-    p.y = janela.y - FOLGA + rand() * (janela.h + FOLGA * 2)
+    p.y = janela.y - FOLGA + rand() * (alturaY + FOLGA * 2)
     return
   }
   // Reciclagem: entra pela borda OPOSTA a direcao de deslocamento, na
@@ -565,15 +620,21 @@ export function desenharAmbiente(
   const raioMaximoDoAnel = mascara
     ? mascara.celula * ANEL_RAIO_MAXIMO_EM_CELULAS
     : Number.POSITIVE_INFINITY
+  // So folha pede `r.vento` — pra qualquer outro preset `rajada` fica 0 e os
+  // multiplicadores abaixo caem em 1, sem mudar nada do comportamento antigo.
+  const rajada = r.vento ? intensidadeDoVento(faseGlobal) : 0
+  const ventoQueda = 1 + rajada * VENTO_QUEDA_PICO
+  const ventoBamboleio = 1 + rajada * VENTO_BAMBOLEIO_PICO
   for (const p of particulas) {
-    p.x += p.vx * delta
-    p.y += p.vy * delta
+    p.x += p.vx * ventoQueda * delta
+    p.y += p.vy * ventoQueda * delta
     p.fase += delta * 1.7
     p.idade += delta
 
     // Bamboleio perpendicular ao deslocamento: folha e neve nao caem em linha
-    // reta, e o desvio lateral e o que separa "particula" de "chuva".
-    const desvio = Math.sin(p.fase) * p.bamboleio * delta
+    // reta, e o desvio lateral e o que separa "particula" de "chuva". Na
+    // rajada (so folha) ele amplia — e a rajada que le como "vento na copa".
+    const desvio = Math.sin(p.fase) * p.bamboleio * ventoBamboleio * delta
     p.x += -p.vy * desvio * 0.02
     p.y += p.vx * desvio * 0.02
 
