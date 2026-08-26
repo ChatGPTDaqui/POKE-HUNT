@@ -153,9 +153,21 @@ export function ReservasRail() {
     // JogoCarregado.tsx) e cada filho reativa so a propria area. Um wrapper
     // clicavel de largura total bloquearia o toque no canvas na faixa toda.
     <div ref={trilhoRef} className="pointer-events-none flex">
-      <div className="pointer-events-auto flex flex-col gap-[.25em]">
+      {/* PH-197: sem `gap` entre os cards. Eles eram seis mini-janelas soltas
+          empilhadas; agora leem como um bloco unico. O que fecha a emenda sao
+          tres coisas juntas — gap zero aqui, `-mt-px` no card a partir do
+          segundo (senao as bordas vizinhas somam e viram uma linha de 2px), e
+          arredondamento so nas pontas do bloco (ver `cantoDoBloco`). */}
+      <div className="pointer-events-auto flex flex-col">
         {reservas.map((poke, i) => {
           const indiceNaEquipe = i + 1
+          // Canto arredondado so onde o BLOCO termina, nao em cada card. Com
+          // uma reserva unica as duas condicoes valem e ela volta a ser um card
+          // redondo sozinho, como antes.
+          const cantoDoBloco = cn(
+            i === 0 && 'rounded-t-[.5em]',
+            i === reservas.length - 1 && 'rounded-b-[.5em]',
+          )
           const especie = SPECIES[poke.speciesId]
           if (!especie) return null
           const arrastando = arrasto?.indice === indiceNaEquipe && arrasto.passou
@@ -183,7 +195,7 @@ export function ReservasRail() {
             ?? faceIconUrl(especie.id, poke.isShiny)
 
           return (
-            <div key={poke.uid} className="relative">
+            <div key={poke.uid} className={cn('relative', i > 0 && '-mt-px')}>
               <div
                 role="button"
                 tabIndex={0}
@@ -196,7 +208,8 @@ export function ReservasRail() {
                   transform: arrastando ? `translateY(${arrasto.deslocamento}px)` : undefined,
                 }}
                 className={cn(
-                  'flex select-none items-center gap-[.3em] rounded-[.5em] border bg-n900/85 p-[.2em] pr-[.4em]',
+                  'flex select-none items-center gap-[.3em] border bg-n900/85 p-[.2em] pr-[.4em]',
+                  cantoDoBloco,
                   'backdrop-blur-[2px] transition-colors',
                   arrastando ? 'z-10 border-primary opacity-90 shadow-lg' : 'border-n800 hover:border-n600',
                   menuAberto === poke.uid && 'border-primary',
