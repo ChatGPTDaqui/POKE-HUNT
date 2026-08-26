@@ -154,6 +154,12 @@ interface Receita {
    * devagar e apagado (esta longe), e a nevasca ganha camadas.
    */
   profundidade?: boolean
+  /**
+   * Brilho pulsante rente a BASE da janela (PH-195) — poucos focos de luz
+   * quente por baixo da brasa que sobe, tipo vulcao/lava respirando. So
+   * `brasa` pede: nenhum outro preset tem "fonte" no chao pra brilhar.
+   */
+  brilhoDoChao?: boolean
 }
 
 const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
@@ -169,7 +175,7 @@ const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
   brasa: {
     quantidade: 30, cor: '#ffb057', raio: [2.6, 5.4], velocidade: [18, 40],
     angulo: -Math.PI / 2, espalhamento: 0.4, alpha: 0.8, bamboleio: 11, aditivo: true,
-    faisca: true,
+    faisca: true, brilhoDoChao: true,
   },
   poeira: {
     quantidade: 26, cor: '#e2dcc8', raio: [2.2, 4.8], velocidade: [3, 9],
@@ -344,6 +350,20 @@ let rand: () => number = sorteioLocal(1)
 let ultimoInstante = 0
 let faseGlobal = 0
 
+/** Um foco de brilho na base da janela. Ver `desenharBrilhoDoChao`. */
+interface FocoDeBrilho {
+  x: number
+  raio: number
+  /** Frequencia/fase da onda RAPIDA do pulso — a que da o "respirar" visivel. */
+  freqA: number
+  faseA: number
+  /** Frequencia/fase da onda LENTA — quebra a periodicidade da rapida, senao
+   *  cada foco pisca igual e sincronizado, lendo como luz de LED piscando. */
+  freqB: number
+  faseB: number
+}
+let focosDeBrilho: FocoDeBrilho[] = []
+
 // Teto de tempo por quadro. Aba em segundo plano volta com um `delta` de
 // minutos, e integrar isso de uma vez teleportaria toda particula pra fora da
 // janela — a camada sumiria por alguns segundos ate reciclar. Meio segundo e
@@ -494,6 +514,19 @@ function reconstruir(
     particulas.push(p)
   }
   arteAtual = chave
+  // Focos de brilho na base (PH-195): reamostrados junto com a arte, mesmo
+  // gerador seedado por `chave` — trocar de sala reposiciona os focos igual a
+  // como reposiciona as particulas.
+  focosDeBrilho = r.brilhoDoChao
+    ? Array.from({ length: N_FOCOS_DE_BRILHO }, () => ({
+        x: janela.x + rand() * janela.w,
+        raio: janela.w * (FOCO_RAIO_FRACAO[0] + rand() * (FOCO_RAIO_FRACAO[1] - FOCO_RAIO_FRACAO[0])),
+        freqA: FOCO_FREQ_RAPIDA[0] + rand() * (FOCO_FREQ_RAPIDA[1] - FOCO_FREQ_RAPIDA[0]),
+        faseA: rand() * Math.PI * 2,
+        freqB: FOCO_FREQ_LENTA[0] + rand() * (FOCO_FREQ_LENTA[1] - FOCO_FREQ_LENTA[0]),
+        faseB: rand() * Math.PI * 2,
+      }))
+    : []
 }
 
 /**
@@ -557,6 +590,7 @@ export function desenharAmbiente(
   if (r.aditivo) ctx.globalCompositeOperation = 'lighter'
 
   if (r.feixes) desenharFeixes(ctx, janela)
+  if (r.brilhoDoChao) desenharBrilhoDoChao(ctx, janela)
 
   ctx.fillStyle = r.cor
   ctx.strokeStyle = r.cor
@@ -662,10 +696,67 @@ function desenharFeixes(ctx: CanvasRenderingContext2D, janela: JanelaDeAmbiente)
   ctx.restore()
 }
 
+// ---------------------------------------------------------------------------
+// BRILHO DE LAVA RENTE AO CHAO (PH-195)
+// ---------------------------------------------------------------------------
+// A brasa (PH-96/PH-115) so sobe — nada acontecia perto da FONTE, onde a
+// lava estaria. Mesma tecnica dos feixes de luz da floresta: gradiente
+// desenhado direto na camada ambiente, sem particula nova e sem mascara
+// pintada (a mesma limitacao de "nao sabe onde fica a lava de verdade" que
+// a agua tinha antes do PH-113 — aqui os focos so assumem que a base da tela
+// e onde ela estaria).
+const N_FOCOS_DE_BRILHO = 4
+/** Raio de cada foco, em fracao da LARGURA da janela. */
+const FOCO_RAIO_FRACAO: [number, number] = [0.1, 0.18]
+/** Achatamento vertical do foco — mesma razao da perspectiva do anel de agua. */
+const FOCO_ACHATAMENTO = 0.32
+/** Frequencia da onda rapida do pulso, em radianos/segundo. */
+const FOCO_FREQ_RAPIDA: [number, number] = [0.7, 1.3]
+/** Frequencia da onda lenta — pequena o bastante pra so desafinar a rapida,
+ *  nao pra criar uma rajada (isso e o vento da folha, nao a respiracao da lava). */
+const FOCO_FREQ_LENTA: [number, number] = [0.12, 0.22]
+/** Alpha maximo no pico do pulso. */
+const FOCO_ALPHA_PICO = 0.55
+
+/**
+ * Focos de brilho pulsante colados na base da janela — vulcao/lava
+ * respirando por baixo da brasa que sobe.
+ *
+ * Cada foco soma DUAS senoides (uma rapida, uma lenta) em vez de uma so: uma
+ * unica senoide pulsa mecanico e todos os focos ficam em fase entre si (cada
+ * um comeca com fase propria, mas o PERIODO seria igual) — leria como luz de
+ * LED, nao como lava. A soma de duas frequencias por foco quebra a
+ * periodicidade aparente sem virar rajada esporadica (isso e o vento da
+ * folha, PH-188 — aqui o efeito e uma respiracao continua).
+ */
+function desenharBrilhoDoChao(ctx: CanvasRenderingContext2D, janela: JanelaDeAmbiente): void {
+  if (!focosDeBrilho.length) return
+  ctx.save()
+  ctx.globalCompositeOperation = 'lighter'
+  const baseY = janela.y + janela.h
+  for (const foco of focosDeBrilho) {
+    const onda = 0.5 * Math.sin(faseGlobal * foco.freqA + foco.faseA)
+      + 0.5 * Math.sin(faseGlobal * foco.freqB + foco.faseB)
+    const pulso = (onda + 1) / 2 // 0..1
+    const alpha = FOCO_ALPHA_PICO * (0.35 + 0.65 * pulso)
+    const raio = foco.raio * (0.82 + 0.18 * pulso)
+    const g = ctx.createRadialGradient(foco.x, baseY, 0, foco.x, baseY, raio)
+    g.addColorStop(0, `rgba(255, 150, 60, ${alpha})`)
+    g.addColorStop(0.55, `rgba(255, 90, 20, ${alpha * 0.45})`)
+    g.addColorStop(1, 'rgba(255, 60, 10, 0)')
+    ctx.fillStyle = g
+    ctx.beginPath()
+    ctx.ellipse(foco.x, baseY, raio, raio * FOCO_ACHATAMENTO, 0, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  ctx.restore()
+}
+
 /** Solta o estado. Chamado ao sair da hunt, pra a proxima entrada nao herdar
  *  particulas posicionadas na janela de outro mapa. */
 export function reiniciarAmbiente(): void {
   particulas = []
   arteAtual = null
   ultimoInstante = 0
+  focosDeBrilho = []
 }
