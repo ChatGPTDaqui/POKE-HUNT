@@ -4,12 +4,17 @@
 // Some no Hospital e nas hunts sem salas (a inicial, as 11 BOSS e a do Campeao
 // Lance) — nelas nao ha sala, e um chip vazio pendurado no HUD leria como bug.
 import { useWorldStore } from '@/stores/worldStore'
+import { useGameStateStore } from '@/stores/gameStateStore'
 import { SALAS_POR_HUNT, ABATES_POR_SALA } from '@/data/biomas'
 import { janelaDaSala, nomeDaSala } from '@/engine/systems/salaSystem'
+import { avancarSalaManualmente } from '@/data/remote/autoridade'
+import { GameButton } from '@/components/game/controls'
 
 export function SalaChip() {
   const sala = useWorldStore((s) => s.sala)
   const faixa = useWorldStore((s) => s.mapDef?.levelRange)
+  const countdown = useWorldStore((s) => s.salaCountdownRemaining)
+  const avancoManualLigado = useGameStateStore((s) => s.autoToggles.avancoManualDeSala)
   if (!sala) return null
 
   const nome = nomeDaSala(sala)
@@ -18,6 +23,10 @@ export function SalaChip() {
   const janela = faixa ? janelaDaSala(faixa, sala.indice) : null
   const restantes = Math.max(0, ABATES_POR_SALA - sala.abates)
   const progresso = Math.min(1, sala.abates / ABATES_POR_SALA)
+  // PH-180: so aparece com a quota FECHADA, o toggle ligado (senao a sala ja
+  // trocou sozinha) e sem transicao em andamento (o clique nao tem o que
+  // fazer enquanto o overlay de "Entrando em nova area" ja esta na tela).
+  const podeAvancarManual = avancoManualLigado && sala.abates >= ABATES_POR_SALA && countdown == null
 
   return (
     <div className="vidro flex items-center gap-[.6em] overflow-hidden rounded-full px-[.9em] py-[.35em]">
@@ -39,6 +48,15 @@ export function SalaChip() {
       <span className="shrink-0 text-[.7em] tabular-nums text-n500">{restantes} p/ limpar</span>
       {sala.ciclos > 0 && (
         <span className="text-[.7em] tabular-nums text-n500">· ciclo {sala.ciclos + 1}</span>
+      )}
+      {podeAvancarManual && (
+        <GameButton
+          variant="ghost"
+          className="shrink-0 px-[.5em] py-[.15em] text-[.68em]"
+          onClick={() => void avancarSalaManualmente()}
+        >
+          Próximo Nível
+        </GameButton>
       )}
     </div>
   )

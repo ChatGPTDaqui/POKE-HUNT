@@ -5,6 +5,7 @@ import {
   gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
   defaultGameStateData, MAPS, GRUPOS_DO_LANCE,
   OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
+  solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, ABATES_POR_SALA,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
   type ClimaTipo,
 } from '#engine'
@@ -736,6 +737,15 @@ export interface ResultadoFlush {
    * curando no Hospital.
    */
   encerrada: 'desmaio' | null
+  /**
+   * PH-178: so relevante quando o chamador pediu `forcarAvancoDeSala`. `true`
+   * significa que a sala travada em 30/30 foi trocada nesta chamada; `false`
+   * quer dizer que, ao fim desta janela, a sala AINDA nao estava travada —
+   * nao e erro (a quota pode fechar bem no meio do intervalo simulado, ou o
+   * jogador clicou antes de qualquer abate contar), so nao havia o que
+   * avancar. Sempre `false` quando `forcarAvancoDeSala` nao foi pedido.
+   */
+  avancoDeSalaAplicado: boolean
 }
 
 /**
@@ -793,7 +803,10 @@ export async function aplicarFlush(
   // com a Mochila vazia na tela ate recarregar. Quem declara `parcial: true` no
   // corpo do flush recebe o estado enxuto; quem nao declara paga a leitura
   // inteira, como antes. Nada no banco muda entre os dois modos.
-  opcoes: OpcoesDeLeitura = {},
+  // `forcarAvancoDeSala` (PH-178): so quem chama /sessao/avancar-sala liga
+  // isto. Sem ele, um flush normal nunca destrava uma sala parada em 30/30 —
+  // e exatamente o que o toggle de avanco manual promete.
+  opcoes: OpcoesDeLeitura & { forcarAvancoDeSala?: boolean } = {},
 ): Promise<ResultadoFlushOuOcupado> {
   const agora = Date.now()
   const desde = new Date(sessao.last_flush_at).getTime()
@@ -867,7 +880,7 @@ export async function aplicarFlush(
       comEstadoParaEscrita(cfg, userId, async (ctx) => {
         const resultado = await simularSessao(
           cfg, userId, sessao, ctx.estado, ctx.pokeIdsNoLoad, ctx.playerUpdatedAt, { agora, segundos, truncado },
-          ctx.linhasNoLoad, ctx.dexCarregada,
+          ctx.linhasNoLoad, opcoes.forcarAvancoDeSala === true, ctx.dexCarregada,
         )
         // `null` = sessao insimulavel; sai SEM gravar, entao as entregas voltam pra
         // fila (o `catch` do embrulho so cobre excecao, e aqui nao ha excecao).
@@ -896,8 +909,11 @@ async function simularSessao(
   janela: { agora: number; segundos: number; truncado: boolean },
   // Baseline pro diff de escrita de `gravarEstado` — ver `EstadoParaEscrita.linhasNoLoad`.
   linhasNoLoad: PlayerSnapshot,
+  forcarAvancoDeSala: boolean,
   // `EstadoParaEscrita.dexCarregada` (PH-186). Default `true` pra um chamador
   // novo que esqueca o argumento cair no caminho seguro, nao no parcial.
+  // Vem DEPOIS de `forcarAvancoDeSala` porque parametro com default nao pode
+  // preceder obrigatorio.
   dexCarregada = true,
 ): Promise<ResultadoFlush | null> {
   const { agora, segundos, truncado } = janela
@@ -981,8 +997,36 @@ async function simularSessao(
       gameState: store,
       seconds: segundos,
       stepSeconds: offline ? OFFLINE_SIM_STEP_SECONDS : LIVE_SIM_STEP_SECONDS,
-      stepFn: (w, dt, opts) => stepWorld(w, dt, store, opts),
+      stepFn: (w, dt, opts) => stepWorld(w, dt, store, { ...opts, offline }),
     })
+
+  // PH-178: avanco manual de sala. So depois da simulacao normal do
+  // intervalo — a quota pode ter fechado no MEIO desta janela, e e essa sala
+  // (nao uma anterior) que precisa estar travada em 30/30.
+  //
+  // NUNCA lancar erro daqui pra baixo quando a sala nao estiver travada: o
+  // claim atomico ja moveu `last_flush_at` la em cima, a simulacao acima ja
+  // rodou (RNG consumido, XP/ouro ja calculados) — abortar por excecao
+  // jogaria essa janela inteira fora sem gravar nada, o mesmo intervalo
+  // "gasto e nao creditado" que o comentario de `aplicarFlush` ja avisa pra
+  // nunca deixar acontecer. Reporta no retorno em vez de lancar.
+  let avancoDeSalaAplicado = false
+  if (forcarAvancoDeSala && world.sala && world.sala.abates >= ABATES_POR_SALA) {
+    if (world.salaCountdownRemaining == null && !world.salaPendente) {
+      solicitarAvancoDeSala(world, sessao.map_id)
+    }
+    // Fecha a transicao NA HORA (o countdown de 3s que rodaria sozinho no
+    // proximo tick ao vivo) — o jogador clicou o botao pra trocar agora, nao
+    // pra esperar mais um flush. Nada morre nesses passos: movimento e
+    // combate ficam congelados enquanto a contagem corre (mesma regra do
+    // tick ao vivo), entao nao ha o que somar ao `resumo` ja calculado.
+    let restante = SALA_TRANSITION_COUNTDOWN + LIVE_SIM_STEP_SECONDS
+    while (world.salaCountdownRemaining != null && restante > 0) {
+      stepWorld(world, LIVE_SIM_STEP_SECONDS, store, { silent: true })
+      restante -= LIVE_SIM_STEP_SECONDS
+    }
+    avancoDeSalaAplicado = true
+  }
 
   // O piso so existe pra impedir que o pior caso degenere pra zero — nao tem o
   // que fazer num flush de jogo ao vivo.
@@ -1087,5 +1131,6 @@ async function simularSessao(
     // passageiro como o tempo do lugar.
     clima: world.climaAmbiente?.tipo ?? null,
     encerrada: resumo.stoppedEarly ? 'desmaio' : null,
+    avancoDeSalaAplicado,
   }
 }

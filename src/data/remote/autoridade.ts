@@ -16,6 +16,7 @@ import {
 } from './predicoesDeCaptura'
 import { mochilaCarregada } from '@/stores/mochilaStore'
 import { ABATES_POR_SALA } from '@/data/biomas'
+import { solicitarAvancoDeSala } from '@/engine/systems/salaSystem'
 import type { ClimaTipo, SalaAtiva } from '@/engine/types'
 import { supabase, schema, url as supabaseUrl, anonKey } from '@/lib/supabase'
 
@@ -537,6 +538,12 @@ function observarQuotaDeSala(): void {
     // tela): nao ha o que pedir.
     if (estado.salaPendente || estado.salaCountdownRemaining != null) return
     if (sala.abates < ABATES_POR_SALA) return
+    // PH-177/179: toggle ligado, a quota fechada FICA fechada ate o jogador
+    // clicar "Proximo Nivel" (avancarSalaManualmente). Sem este corte, o
+    // observador martelaria `/sessao/flush` a cada 5s pra sempre — o motivo
+    // original da repeticao (servidor pode estar 1-2 abates atras) e
+    // transitorio; com avanco manual, "sala travada" passa a durar minutos.
+    if (useGameStateStore.getState().autoToggles.avancoManualDeSala) return
     const chave = `${sala.ciclos}:${sala.indice}`
     const agora = Date.now()
     if (chave === salaJaPedida && agora - ultimoPedidoDeSala < REPETIR_PEDIDO_DE_SALA_MS) return
@@ -548,6 +555,43 @@ function observarQuotaDeSala(): void {
     intervaloAtual = INTERVALO_FLUSH_MS
     void liquidar()
   })
+}
+
+/**
+ * PH-179. Clique do jogador no botao "Proximo Nivel" (PH-180), sala travada
+ * em 30/30 com o toggle de avanco manual ligado.
+ *
+ * Mesmo padrao de `abrirSessaoDeHunt`/`liquidar`: com sessao autoritativa,
+ * chama o endpoint (PH-178) e aplica o estado que ele devolve — o cliente
+ * nunca decide sozinho qual e a sala nova. Sem servidor (modo local), chama
+ * a mesma funcao do motor direto no world local.
+ */
+export async function avancarSalaManualmente(): Promise<void> {
+  if (!servidorAtivo()) {
+    useWorldStore.getState().update((draft) => {
+      if (draft.mapDef) solicitarAvancoDeSala(draft, draft.mapDef.id)
+    })
+    return
+  }
+  try {
+    const r = await servidor.avancarSalaManual()
+    aplicarEstadoDoServidor(r.estado, r.estadoParcial === true, r.resumo)
+    if (r.sala !== undefined) useWorldStore.getState().definirSala(r.sala, r.clima)
+    tratarEncerramento(r.sessaoEncerrada)
+    if (r.truncado) {
+      useToastStore.getState().pushToast(
+        'Voce ficou fora tempo demais — parte do periodo nao foi creditada.', 'error', 'world',
+      )
+    }
+    // `false`: a sala ja nao estava mais travada quando o servidor processou
+    // (corrida rara — outro flush avancou primeiro). Nao e erro, so nao ha
+    // sala nova pra mostrar; o toast evita um clique "mudo" sem explicacao.
+    if (!r.avancoAplicado) {
+      useToastStore.getState().pushToast('A sala ja tinha avancado.', 'info', 'world')
+    }
+  } catch (erro) {
+    reportarErro(erro)
+  }
 }
 
 // Intervalo minimo entre dois commits FORCADOS (level-up, aba sendo ocultada).
