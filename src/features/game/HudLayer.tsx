@@ -72,7 +72,12 @@ export function HudLayer() {
           64em — 112px em 1440, 352px em 1920, 672px em 2560. Em monitor grande
           o cabecalho do POKE aparecia no MEIO da tela em vez do canto. Alinhar
           a esquerda mantem o teto de largura e devolve o canto. */}
-      <div className="absolute inset-x-[.5em] top-[.5em] z-20 flex flex-col items-start gap-[.4em]">
+      {/* PH-197: `inset-x-0 top-0`, nao `inset-x-[.5em] top-[.5em]`. A folga de
+          meio `em` deixava a coluna sempre descolada do canto — alinhar a
+          esquerda (PH-83) acertou a DIRECAO, mas o recuo fixo continuava ali em
+          qualquer largura. O teto de `max-w-[64em]` da linha de baixo e o que
+          impede o trilho de esticar; ele nao depende deste recuo. */}
+      <div className="absolute inset-x-0 top-0 z-20 flex flex-col items-start gap-[.4em]">
         <div className="flex w-full max-w-[64em] flex-col gap-[.4em]">
           <StatusRail />
           {/* Sala e clima na MESMA linha: os dois descrevem o lugar onde o
