@@ -125,3 +125,70 @@ describe('aplicarEstadoDoServidor(estado) — completo, o caminho de /estado', (
     expect(useGameStateStore.getState().bagPokes.map((p) => p.uid)).toEqual(['do-banco'])
   })
 })
+
+// A POKEDEX entrou na mesma familia da mochila (PH-186): o flush parcial manda
+// so as especies abatidas na janela. A forma de errar tambem nao lanca excecao —
+// ou a contagem despenca na tela (substituir em vez de mesclar), ou ela infla
+// sozinha (o servidor mandar incremento e a camada de retry reaplicar).
+describe('pokedex no estado parcial (PH-186)', () => {
+  /** Resposta de flush parcial que tocou `charmander`, com TOTAL absoluto. */
+  function comPokedex(kills: GameStateData['pokedexKills']): GameStateData {
+    return { ...respostaParcial([]), pokedexKills: kills }
+  }
+
+  beforeEach(() => {
+    useGameStateStore.setState({ pokedexKills: { pikachu: { normal: 400, shiny: 7 } } })
+  })
+
+  it('especie que o flush NAO tocou mantem a contagem local', () => {
+    aplicarEstadoDoServidor(comPokedex({ charmander: { normal: 2, shiny: 0 } }), true)
+
+    expect(
+      useGameStateStore.getState().pokedexKills.pikachu,
+      'substituiu em vez de mesclar — a tela perderia os 400 abates de pikachu',
+    ).toEqual({ normal: 400, shiny: 7 })
+  })
+
+  it('especie tocada recebe o total que o servidor gravou', () => {
+    aplicarEstadoDoServidor(comPokedex({ pikachu: { normal: 403, shiny: 8 } }), true)
+
+    expect(useGameStateStore.getState().pokedexKills.pikachu).toEqual({ normal: 403, shiny: 8 })
+  })
+
+  it('a MESMA resposta aplicada duas vezes nao infla a contagem', () => {
+    // O caso que a camada de retry produz de verdade — ela ja duplicou captura
+    // neste projeto. Total absoluto e idempotente; incremento nao seria.
+    const resposta = comPokedex({ pikachu: { normal: 403, shiny: 8 } })
+
+    aplicarEstadoDoServidor(resposta, true)
+    aplicarEstadoDoServidor(resposta, true)
+
+    expect(
+      useGameStateStore.getState().pokedexKills.pikachu,
+      'a contagem dobrou ao reaplicar — o servidor esta mandando incremento, nao total',
+    ).toEqual({ normal: 403, shiny: 8 })
+  })
+
+  it('janela sem abate nenhum deixa a pokedex intacta', () => {
+    aplicarEstadoDoServidor(comPokedex({}), true)
+
+    expect(useGameStateStore.getState().pokedexKills).toEqual({ pikachu: { normal: 400, shiny: 7 } })
+  })
+
+  it('com a mochila NAO carregada, a pokedex mescla do mesmo jeito', () => {
+    // Este ramo de `aplicarEstadoDoServidor` e outro `setState` — ja passou
+    // despercebido uma vez ao escrever esta issue.
+    useMochilaStore.setState({ carregada: false, carregando: false, erro: null })
+
+    aplicarEstadoDoServidor(comPokedex({ charmander: { normal: 2, shiny: 0 } }), true)
+
+    expect(useGameStateStore.getState().pokedexKills.pikachu).toEqual({ normal: 400, shiny: 7 })
+    expect(useGameStateStore.getState().pokedexKills.charmander).toEqual({ normal: 2, shiny: 0 })
+  })
+
+  it('sync COMPLETO continua substituindo — a verdade vem do servidor', () => {
+    aplicarEstadoDoServidor({ ...defaultGameStateData(), pokedexKills: { eevee: { normal: 1, shiny: 0 } } })
+
+    expect(useGameStateStore.getState().pokedexKills).toEqual({ eevee: { normal: 1, shiny: 0 } })
+  })
+})
