@@ -42,6 +42,7 @@ import { resolveAbilityCategory } from '@/data/abilityCategory'
 import { SPECIES } from '@/data/pokes'
 import type { PokeInstance } from '@/data/pokes'
 import { colorForType } from '@/data/typeColors'
+import { bonusDeAtaque, reducaoDeDefesa } from '@/data/especialidades'
 import { ehDirecional } from '@/data/moveVfx'
 import { direcaoDoGolpeDeStatus } from '@/data/statusVfx'
 
@@ -1287,7 +1288,7 @@ export interface DamageResult {
 // so sabe sortear dentro dela.
 const DANO_VARIACAO_MINIMA = 0.85
 
-function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity, abilityBase: Ability, pessimista = false, clima: ClimaTipo | null = null): DamageResult {
+function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity, abilityBase: Ability, pessimista = false, clima: ClimaTipo | null = null, especialidadeNiveis: WorldState['especialidadeNiveis'] = null): DamageResult {
   const attackerPoke = attackerEntity.poke
   const defenderPoke = defenderEntity.poke
   const attackerSpecies = SPECIES[attackerPoke.speciesId]
@@ -1439,6 +1440,13 @@ function computeDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: Wo
     //   atacante: Tinted Lens (dobro no pouco efetivo).
     dmg *= multiplicadorDeDanoRecebidoPorTrait(defenderTrait, ability, effectivenessMultiplier)
     dmg *= multiplicadorDeDanoCausadoPorTrait(attackerTrait, effectivenessMultiplier)
+
+    // Especialidades (PH-198): bonus/reducao +1%/nivel (ate 5%) por tipo de
+    // golpe, so no lado do JOGADOR — nunca no inimigo. Mesmo grupo de
+    // multiplicador "estado do confronto" das linhas acima, so que o "estado"
+    // aqui e progresso de longo prazo do jogador, nao a Trait do POKE em campo.
+    if (attackerEntity.kind === 'player') dmg *= bonusDeAtaque(especialidadeNiveis, ability.type)
+    if (defenderEntity.kind === 'player') dmg *= reducaoDeDefesa(especialidadeNiveis, ability.type)
 
     // Multiscale: HP do defensor CHEIO (nao so alto) corta o dano recebido
     // pela metade. Depois da efetividade de tipo, igual ao pipeline real —
@@ -2397,7 +2405,7 @@ function resolveHit(world: WorldState, hit: PendingHit, defeatedEnemyIds: string
     // Alvo caiu no acerto anterior: a sequencia para. Nos jogos e igual — os
     // acertos restantes de um Fury Swipes nao saem depois do KO.
     if (acerto > 0 && isDead(target)) break
-    const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null)
+    const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null, world.especialidadeNiveis)
     if (result.isCrit) houveCritico = true
 
     // ENDURE / STURDY (Fase 12): sobrevive com 1 HP num golpe que mataria.

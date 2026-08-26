@@ -45,5 +45,6 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     pessimista: false,
     clima: null,
     climaAmbiente: null,
+    especialidadeNiveis: null,
   }
 }

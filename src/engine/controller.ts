@@ -92,6 +92,7 @@ export const controller = {
     const world = buildMapWorld(
       mapId, activePoke, useWorldStore.getState(),
       sessao.sala ? { sala: sessao.sala, clima: sessao.clima ?? null } : undefined,
+      gameState.especialidades,
     )
     // Com sessao aberta no servidor, a sala seguinte tambem e DELE (ver
     // engine/systems/salaSystem.ts#registrarAbate): a simulacao local para de

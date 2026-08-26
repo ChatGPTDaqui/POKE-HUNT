@@ -966,6 +966,45 @@ export type Database = {
           },
         ]
       }
+      player_especialidades: {
+        Row: {
+          dano_nivel: number
+          defesa_nivel: number
+          tipo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          dano_nivel?: number
+          defesa_nivel?: number
+          tipo: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          dano_nivel?: number
+          defesa_nivel?: number
+          tipo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_especialidades_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_especialidades_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       player_items: {
         Row: {
           item_id: string
@@ -1875,6 +1914,10 @@ export type Database = {
       }
       responder_pedido_amizade: {
         Args: { p_aceitar: boolean; p_mensagem_id: string }
+        Returns: Json
+      }
+      subir_nivel_especialidade: {
+        Args: { p_tipo: string; p_trilha: string }
         Returns: Json
       }
       taxa_de_venda: {
@@ -2956,6 +2999,45 @@ export type Database = {
           },
         ]
       }
+      player_especialidades: {
+        Row: {
+          dano_nivel: number
+          defesa_nivel: number
+          tipo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          dano_nivel?: number
+          defesa_nivel?: number
+          tipo: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          dano_nivel?: number
+          defesa_nivel?: number
+          tipo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_especialidades_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_especialidades_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       player_items: {
         Row: {
           item_id: string
@@ -3865,6 +3947,10 @@ export type Database = {
       }
       responder_pedido_amizade: {
         Args: { p_aceitar: boolean; p_mensagem_id: string }
+        Returns: Json
+      }
+      subir_nivel_especialidade: {
+        Args: { p_tipo: string; p_trilha: string }
         Returns: Json
       }
       taxa_de_venda: {

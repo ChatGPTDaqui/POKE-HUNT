@@ -33,6 +33,7 @@ import { captureAnimFrameDuration, captureAnimFrameCount } from '@/data/captureA
 import { rarityOf, realceDaRaridade } from '@/data/rarity'
 import { ESPERA_DE_TROCA_SEGUNDOS } from '@/data/huntTypes'
 import { formatStatGains } from '@/data/statLabels'
+import type { EspecialidadeNiveis } from '@/data/especialidades'
 
 import { createPlayerEntity, createEnemyEntity, isDead, takeDamage } from './entity'
 import { createWorldEffect } from './effect'
@@ -509,6 +510,7 @@ export function buildMapWorld(
   activePoke: PokeInstance,
   carry?: SequenciaDeSorteio,
   progresso?: ProgressoDaSessao,
+  especialidadeNiveis?: EspecialidadeNiveis | null,
 ): WorldState {
   const base = novoMundo(carry)
 
@@ -593,6 +595,7 @@ export function buildMapWorld(
     // reconstrucao de mundo, igual estagio de atributo e escudo.
     clima: climaDaConstrucao,
     climaAmbiente: climaDaConstrucao,
+    especialidadeNiveis: especialidadeNiveis ?? null,
   }
 }
 
