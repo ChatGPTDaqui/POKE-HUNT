@@ -54320,7 +54320,7 @@ function nomeDaSala(sala) {
 * catch-up de aba oculta e no farm offline — nao ha um segundo caminho de
 * abate que pudesse esquecer de contar.
 */
-function registrarAbate(world, mapId) {
+function registrarAbate(world, mapId, opts = {}) {
 	const sala = world.sala;
 	if (!sala) return {
 		avancou: false,
@@ -54339,6 +54339,10 @@ function registrarAbate(world, mapId) {
 		};
 	}
 	sala.abates = 30;
+	if (opts.manualAdvance) return {
+		avancou: false,
+		fechouCiclo: false
+	};
 	return armarTransicaoDeSala(world, mapId);
 }
 /**
@@ -54349,6 +54353,20 @@ function registrarAbate(world, mapId) {
 * Separada de `registrarAbate` porque a quota fechada, e nao o abate, e o que
 * dispara a troca — ver `garantirTransicaoDeQuotaFechada`.
 */
+/**
+* Avanco manual (PH-178/179): forca a transicao mesmo com o toggle ligado —
+* o proprio clique do jogador E o avanco que o toggle estava segurando.
+* So entrega "quota fechada" ao chamador; `armarTransicaoDeSala` ja e
+* idempotente (chamar de novo com transicao ja armada nao resorteia).
+*/
+function solicitarAvancoDeSala(world, mapId) {
+	const sala = world.sala;
+	if (!sala || sala.abates < 30) return {
+		avancou: false,
+		fechouCiclo: false
+	};
+	return armarTransicaoDeSala(world, mapId);
+}
 function armarTransicaoDeSala(world, mapId) {
 	const sala = world.sala;
 	if (!sala) return {
@@ -54397,7 +54415,7 @@ function armarTransicaoDeSala(world, mapId) {
 * cabe em qualquer duracao. Isso tambem fecha o caso que ja estava documentado
 * como "autocurativo no proximo abate" — ele nao era, quando nao havia proximo.
 */
-function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0) {
+function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0, manualAdvance = false) {
 	const sala = world.sala;
 	if (!sala || sala.abates < 30) {
 		world.salaEsperaDaAutoridade = 0;
@@ -54411,6 +54429,7 @@ function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0) {
 		if (armarTransicaoDeSala(world, mapId).avancou) world.salaPredita = true;
 		return;
 	}
+	if (manualAdvance) return;
 	armarTransicaoDeSala(world, mapId);
 }
 /**
@@ -54986,6 +55005,7 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 }
 function stepWorld(world, dt, gameState, opts = {}) {
 	const silent = opts.silent ?? false;
+	const manualAdvance = (gameState.autoToggles.avancoManualDeSala ?? false) && !(opts.offline ?? false);
 	if (!world.player) return [];
 	if (!world.mapDef) {
 		if (!silent) updateAnimations(world, dt);
@@ -55011,7 +55031,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (!silent) updateAnimations(world, dt);
 		return [];
 	}
-	garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt);
+	garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt, manualAdvance);
 	if (world.salaCountdownRemaining != null) {
 		world.salaCountdownRemaining -= dt;
 		if (world.salaCountdownRemaining <= 0) {
@@ -55045,7 +55065,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (!enemy) continue;
 		kills.push(handleEnemyDefeated(world, enemy, gameState, { silent }));
 		enemy.deathRemovalTimer = silent ? 0 : 4;
-		registrarAbate(world, world.mapDef.id);
+		registrarAbate(world, world.mapDef.id, { manualAdvance });
 	}
 	for (const enemy of world.enemies) if (isDead(enemy) && enemy.deathRemovalTimer != null && enemy.deathRemovalTimer > 0) enemy.deathRemovalTimer -= dt;
 	world.enemies = world.enemies.filter((e) => !isDead(e) || (e.deathRemovalTimer ?? 0) > 0 || world.mapDef.keepCorpses);
@@ -55265,7 +55285,8 @@ function defaultGameStateData() {
 			autoPot: true,
 			autoCatch: false,
 			autoRevive: false,
-			autoStatus: true
+			autoStatus: true,
+			avancoManualDeSala: false
 		},
 		autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
 		autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
@@ -56119,7 +56140,7 @@ async function aplicarFlush(cfg, userId, sessao, opcoes = {}) {
 				agora,
 				segundos,
 				truncado
-			}, ctx.linhasNoLoad);
+			}, ctx.linhasNoLoad, opcoes.forcarAvancoDeSala === true);
 			if (!resultado) await devolverEntregas(cfg, ctx.entregas);
 			return resultado;
 		}, {
@@ -56130,7 +56151,7 @@ async function aplicarFlush(cfg, userId, sessao, opcoes = {}) {
 		await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, { flushing_since: null });
 	}
 }
-async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUpdatedAt, janela, linhasNoLoad) {
+async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUpdatedAt, janela, linhasNoLoad, forcarAvancoDeSala) {
 	const { agora, segundos, truncado } = janela;
 	const { store, dados: estado } = criarEstadoDoJogador(dados);
 	const continentesAntes = new Set(estado.unlockedContinents);
@@ -56165,8 +56186,21 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		gameState: store,
 		seconds: segundos,
 		stepSeconds: offline ? OFFLINE_SIM_STEP_SECONDS : LIVE_SIM_STEP_SECONDS,
-		stepFn: (w, dt, opts) => stepWorld(w, dt, store, opts)
+		stepFn: (w, dt, opts) => stepWorld(w, dt, store, {
+			...opts,
+			offline
+		})
 	});
+	let avancoDeSalaAplicado = false;
+	if (forcarAvancoDeSala && world.sala && world.sala.abates >= 30) {
+		if (world.salaCountdownRemaining == null && !world.salaPendente) solicitarAvancoDeSala(world, sessao.map_id);
+		let restante = 3 + LIVE_SIM_STEP_SECONDS;
+		while (world.salaCountdownRemaining != null && restante > 0) {
+			stepWorld(world, LIVE_SIM_STEP_SECONDS, store, { silent: true });
+			restante -= LIVE_SIM_STEP_SECONDS;
+		}
+		avancoDeSalaAplicado = true;
+	}
 	const piso = offline && !pausado ? aplicarPiso(store, estado, resumo, agora) : NENHUM_PISO;
 	if (!offline) recordBatch(store, {
 		gold: resumo.gold,
@@ -56200,7 +56234,8 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		piso,
 		sala: world.sala,
 		clima: world.climaAmbiente?.tipo ?? null,
-		encerrada: resumo.stoppedEarly ? "desmaio" : null
+		encerrada: resumo.stoppedEarly ? "desmaio" : null,
+		avancoDeSalaAplicado
 	};
 }
 //#endregion
@@ -56271,6 +56306,7 @@ async function rotear(cfg, req, url) {
 	if (url.pathname === "/sessao/abrir" && req.method === "POST") return abrirSessao(cfg, jogador.id, req);
 	if (url.pathname === "/sessao/flush" && req.method === "POST") return flush(cfg, jogador.id, await aceitaEstadoParcial(req));
 	if (url.pathname === "/sessao/fechar" && req.method === "POST") return fechar(cfg, jogador.id, await aceitaEstadoParcial(req));
+	if (url.pathname === "/sessao/avancar-sala" && req.method === "POST") return avancarSala(cfg, jogador.id, await aceitaEstadoParcial(req));
 	if (url.pathname === "/estado" && req.method === "GET") {
 		const parcial = url.searchParams.get("parcial") === "1";
 		return comEstadoParaEscrita(cfg, jogador.id, async ({ estado, pokeIdsNoLoad, playerUpdatedAt, entregas, linhasNoLoad }) => {
@@ -56411,6 +56447,40 @@ async function flush(cfg, userId, parcial) {
 		sessaoEncerrada: resultado.encerrada,
 		sala: resultado.sala,
 		clima: resultado.clima,
+		estadoParcial: parcial,
+		estado: resultado.estado
+	});
+}
+/**
+* PH-178: avanco manual de sala. Mesmo formato de resposta de `flush` —
+* roda a MESMA infra de claim/CAS/retry (`aplicarFlush`), so com a flag que
+* destrava a sala parada em 30/30 depois de simular o intervalo normal. Nao
+* existe caminho de escrita paralelo: se corresse por fora do claim atomico
+* de `aplicarFlush`, reabriria a classe de bug de corrida que aquele claim
+* foi criado pra fechar (ver comentario dele, "BUG DE DUPLICACAO").
+*/
+async function avancarSala(cfg, userId, parcial) {
+	const sessao = await sessaoAberta(cfg, userId);
+	if (!sessao) throw new ErroHttp(409, "nenhuma sessao aberta");
+	const resultado = await aplicarFlush(cfg, userId, sessao, {
+		comBag: !parcial,
+		forcarAvancoDeSala: true
+	});
+	if (resultado === "ocupado") throw new ErroHttp(409, "flush em andamento, tente novamente");
+	if (!resultado) {
+		await sairDaHunt(cfg, userId, sessao.id);
+		throw new ErroHttp(409, "nenhuma sessao aberta");
+	}
+	if (resultado.encerrada) await sairDaHunt(cfg, userId, sessao.id);
+	return json({
+		segundosCreditados: resultado.segundosCreditados,
+		truncado: resultado.truncado,
+		resumo: resultado.resumo,
+		piso: resultado.piso,
+		sessaoEncerrada: resultado.encerrada,
+		sala: resultado.sala,
+		clima: resultado.clima,
+		avancoAplicado: resultado.avancoDeSalaAplicado,
 		estadoParcial: parcial,
 		estado: resultado.estado
 	});

@@ -116,7 +116,7 @@ export interface GameStateData {
   wallet: { gold: number; diamonds: number }
   unlockedMaps: string[]
   currentMapId: string | null
-  autoToggles: { autoPot: boolean; autoCatch: boolean; autoRevive: boolean; autoStatus: boolean }
+  autoToggles: { autoPot: boolean; autoCatch: boolean; autoRevive: boolean; autoStatus: boolean; avancoManualDeSala: boolean }
   autoPotRules: AutoPotRule[]
   autoCatchConfig: AutoCatchConfig
   autoCatchRules: AutoCatchRule[]
@@ -159,7 +159,7 @@ export function defaultGameStateData(): GameStateData {
     // save antigo (que nao tem a chave) cai neste default via o merge em
     // gameStateStore — ou seja, quem ja jogava ganha a cura sem precisar
     // descobrir o interruptor.
-    autoToggles: { autoPot: true, autoCatch: false, autoRevive: false, autoStatus: true },
+    autoToggles: { autoPot: true, autoCatch: false, autoRevive: false, autoStatus: true, avancoManualDeSala: false },
     autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
     autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
     autoCatchRules: [],
