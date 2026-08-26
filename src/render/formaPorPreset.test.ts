@@ -55,6 +55,7 @@ function ctxEspiao() {
     save: () => {}, restore: () => {}, beginPath: () => {}, fill: () => {},
     stroke: () => {}, moveTo: () => {}, lineTo: () => {}, fillRect: () => {},
     createLinearGradient: () => ({ addColorStop: () => {} }),
+    createRadialGradient: () => ({ addColorStop: () => {} }),
     rotate: () => {},
     globalCompositeOperation: '', fillStyle: '', strokeStyle: '',
     globalAlpha: 1, lineWidth: 1,
