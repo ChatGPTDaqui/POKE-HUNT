@@ -1,5 +1,6 @@
 import { GameCanvas } from '@/components/GameCanvas'
 import { ToastStack } from '@/components/toasts/ToastStack'
+import { CamadaVfx } from '@/components/CamadaVfx'
 import { PokeProfileModal } from '@/components/modals/PokeProfileModal'
 import { ConfirmDialog } from '@/components/modals/ConfirmDialog'
 import { LevelUpSplash } from '@/components/modals/LevelUpSplash'
@@ -83,6 +84,15 @@ export function JogoCarregado() {
             <div id="camada-hud" className="hud-safe">
               <HudLayer />
             </div>
+            {/* Camada de VFX (PH-190). DEPOIS da HUD na arvore e em `z-25`, pra
+                efeito que precisa chegar num elemento do trilho ou da doca nao
+                sumir atras dele. Fica ABAIXO de painel/sheet/modal de proposito
+                — ver a nota de pilha em `render/camadaVfx.ts`.
+
+                Sem `.hud-safe`: as coordenadas dela tem que casar 1:1 com o
+                canvas do jogo, e aquele container recorta pelas areas inseguras
+                do aparelho. Recortar aqui deslocaria todo efeito no notch. */}
+            <CamadaVfx />
             <ScreenOverlay />
             <ReviveCountdownModal />
             <DefeatModal />

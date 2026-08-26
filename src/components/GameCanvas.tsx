@@ -13,6 +13,7 @@
 //    mais — ver "Decisao de implementacao: estado do motor" no plano.
 import { useEffect, useRef } from 'react'
 import { Renderer } from '@/render/renderer'
+import { desenharVfx } from '@/render/camadaVfx'
 import { useGameLoop } from '@/engine/useGameLoop'
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -135,10 +136,31 @@ export function GameCanvas() {
     canvas.addEventListener('mouseleave', handleMouseLeave)
     canvas.addEventListener('wheel', handleWheel, { passive: false })
 
+    // Instante do quadro anterior, pra o `dt` da camada de VFX. O laco de
+    // DESENHO nao tinha dt nenhum ate aqui — ele so lia estado e pintava, e quem
+    // avanca o tempo e o passo de simulacao (`useGameLoop`, 60/s fixo). A camada
+    // de VFX precisa do dt REAL do desenho porque os efeitos dela nao vivem no
+    // `WorldState`: eles nascem e morrem entre dois quadros.
+    let ultimoQuadro = performance.now()
+    // Teto do dt: com a aba em segundo plano o rAF para, e o primeiro quadro na
+    // volta traria um dt de vários segundos — todo efeito ativo pularia direto
+    // pro fim (ou passaria dele) num unico passo. 1/15s corta isso sem
+    // atrapalhar quadro lento de verdade.
+    const DT_MAXIMO = 1 / 15
+
     let rafId = requestAnimationFrame(function draw() {
+      const agora = performance.now()
+      const dt = Math.min(DT_MAXIMO, (agora - ultimoQuadro) / 1000)
+      ultimoQuadro = agora
+
       const world = useWorldStore.getState()
       if (world.mapDef) renderer.renderMap(world.mapDef, world)
       else renderer.renderHospital(world.player, enfermeiraEmFoco)
+      // DEPOIS do jogo, sempre: a camada de VFX fica acima da HUD e precisa ser
+      // o ultimo desenho do quadro. Ela e no-op quando nao ha canvas registrado
+      // (Hospital antes do mount, teste sem DOM), entao o call site nao precisa
+      // saber se ela existe. Ver `render/camadaVfx.ts`.
+      desenharVfx(dt)
       rafId = requestAnimationFrame(draw)
     })
 

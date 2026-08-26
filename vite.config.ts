@@ -88,6 +88,12 @@ export default defineConfig({
     // delas contra o codigo desta branch — resultado sem sentido (12 falhas
     // vindas de arquivos que nem estao nesta arvore) que esconde falha real.
     exclude: ['**/node_modules/**', '**/dist/**', '.claude/**', 'authority/engine/**'],
+    // Stubs das APIs de browser que o jsdom nao tem e que a HUD usa. Global de
+    // proposito, e o motivo esta no proprio arquivo: um componente que passa a
+    // usar `ResizeObserver` quebra os testes de QUEM O MONTA, que podem ser
+    // arquivos sem nenhuma relacao com a mudanca (PH-190 quebrou PH-157 assim).
+    // Custo em teste 'node': uma checagem de `in`.
+    setupFiles: ['./src/testes/apiDoBrowserQueOJsdomNaoTem.ts'],
   },
   build: {
     // Por padrao o Vite emite os chunks em `dist/assets/`, que colidiria com
