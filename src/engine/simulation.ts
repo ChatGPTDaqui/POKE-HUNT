@@ -768,8 +768,14 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
 // de catch-up (silent:true, chamados em loop apertado por
 // simulateWorldSeconds) — este e o UNICO lugar onde movimento/combate/
 // auto-heal/respawn avancam. Devolve a lista de resumos por-kill.
-export function stepWorld(world: WorldState, dt: number, gameState: GameStateStore, opts: { silent?: boolean } = {}): KillResult[] {
+export function stepWorld(world: WorldState, dt: number, gameState: GameStateStore, opts: { silent?: boolean; offline?: boolean } = {}): KillResult[] {
   const silent = opts.silent ?? false
+  // Janela longa (farm offline de verdade) ignora o toggle — mesmo eixo que
+  // ja liga `world.pessimista` no servidor (ver LIMIAR_OFFLINE_SEGUNDOS em
+  // authority/progresso.ts). Calculado uma vez e repassado pros dois pontos
+  // que decidem avanco de sala (`garantirTransicaoDeQuotaFechada` e
+  // `registrarAbate`), senao um dos dois fica desatualizado com o toggle.
+  const manualAdvance = (gameState.autoToggles.avancoManualDeSala ?? false) && !(opts.offline ?? false)
   if (!world.player) return []
 
   if (!world.mapDef) {
@@ -805,7 +811,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // atravessa a reconstrucao de mundo do servidor): arma a transicao agora, sem
   // esperar um abate novo. Ver o livelock em
   // salaSystem.ts#garantirTransicaoDeQuotaFechada.
-  garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt)
+  garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt, manualAdvance)
 
   // Contagem regressiva "Entrando em nova area" entre salas (ver
   // salaSystem.ts#registrarAbate/aplicarTransicaoDeSala): a quota de abates
@@ -862,7 +868,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       // oculta e o farm offline contam pela mesma regra sem nenhum deles
       // precisar lembrar. So arma a contagem regressiva (world.salaCountdownRemaining) —
       // a troca de fato acontece la em cima, no gate do proximo tick.
-      registrarAbate(world, world.mapDef.id)
+      registrarAbate(world, world.mapDef.id, { manualAdvance })
     }
   }
   for (const enemy of world.enemies) {
