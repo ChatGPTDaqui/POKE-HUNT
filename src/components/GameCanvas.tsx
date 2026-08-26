@@ -13,7 +13,8 @@
 //    mais — ver "Decisao de implementacao: estado do motor" no plano.
 import { useEffect, useRef } from 'react'
 import { Renderer } from '@/render/renderer'
-import { desenharVfx } from '@/render/camadaVfx'
+import { desenharVfx, registrarPintor } from '@/render/camadaVfx'
+import { converterRecompensasNovas, pintorDeRecompensa } from '@/render/vooDeRecompensa'
 import { useGameLoop } from '@/engine/useGameLoop'
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -49,6 +50,10 @@ export function GameCanvas() {
     // Publica o renderer pro ZoomControl (que vive fora do canvas e precisa
     // chamar zoomStep/ler o % atual) — ver stores/rendererStore.ts.
     useRendererStore.getState().setRenderer(renderer)
+
+    // Pintor do voo de recompensa (PH-191). Registrado uma vez, pro ciclo de
+    // vida do canvas — ele mesmo nao desenha nada quando nao ha voo vivo.
+    const soltarPintorDeRecompensa = registrarPintor(pintorDeRecompensa)
 
     // Bug real encontrado ao vivo (jogo abria o Hospital SEM o POKE em campo
     // sempre que a pagina era recarregada com um save existente): o
@@ -156,6 +161,13 @@ export function GameCanvas() {
       const world = useWorldStore.getState()
       if (world.mapDef) renderer.renderMap(world.mapDef, world)
       else renderer.renderHospital(world.player, enfermeiraEmFoco)
+
+      // Recompensa de abate -> voo ate a carteira (PH-191). Le os `rewardText`
+      // que o motor ja empurra no `WorldState` e converte os NOVOS em voo; o
+      // motor nao sabe que isso existe. Fora da hunt `mundoParaTela` devolve
+      // `null` e nada e lancado.
+      converterRecompensasNovas(world.effects, (p) =>
+        renderer.mundoParaTela(world.mapDef, world.player, p))
       // DEPOIS do jogo, sempre: a camada de VFX fica acima da HUD e precisa ser
       // o ultimo desenho do quadro. Ela e no-op quando nao ha canvas registrado
       // (Hospital antes do mount, teste sem DOM), entao o call site nao precisa
@@ -175,6 +187,7 @@ export function GameCanvas() {
       canvas.removeEventListener('mouseleave', handleMouseLeave)
       canvas.removeEventListener('wheel', handleWheel)
       cancelAnimationFrame(rafId)
+      soltarPintorDeRecompensa()
       clearInterval(syncInterval)
       useRendererStore.getState().setRenderer(null)
     }

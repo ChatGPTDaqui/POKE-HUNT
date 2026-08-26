@@ -121,6 +121,31 @@ export function centroDaAncora(nome: string): { x: number; y: number } | null {
   }
 }
 
+/**
+ * A ancora inteira, em px do CANVAS desta camada.
+ *
+ * Existe alem de `centroDaAncora` porque quem escreve PERTO de um elemento da
+ * HUD precisa da borda dele, nao do meio: o texto de chegada do voo de ouro
+ * (PH-191) ancorado no centro + um offset fixo caia em cima do contador de
+ * diamantes. E offset fixo nao serve — `hudScale` vai de 0,8 a 1,4, entao a
+ * altura da carteira muda com a preferencia do jogador e um numero em px
+ * acertaria so numa escala.
+ */
+export function caixaDaAncora(nome: string): { x: number; y: number; w: number; h: number } | null {
+  const caixa = ancoras.get(nome)
+  if (!caixa || !canvas) return null
+  const meu = canvas.getBoundingClientRect()
+  if (meu.width <= 0 || meu.height <= 0) return null
+  const escalaX = canvas.width / meu.width
+  const escalaY = canvas.height / meu.height
+  return {
+    x: (caixa.left - meu.left) * escalaX,
+    y: (caixa.top - meu.top) * escalaY,
+    w: caixa.width * escalaX,
+    h: caixa.height * escalaY,
+  }
+}
+
 /** Há algo pra desenhar? Deixa o call site pular o trabalho de um quadro vazio. */
 export function camadaVazia(): boolean {
   return pintores.size === 0
