@@ -24,6 +24,67 @@ import { supabase, schema, url as supabaseUrl, anonKey } from '@/lib/supabase'
 ativarPredicoesDeCaptura(servidorAtivo())
 
 /**
+ * PH-171: trava a queda de XP que `doServidor` traria por cima do que o
+ * client ja mostrou, quando essa queda nao e coberta pelo que
+ * `resumo.expPerdidaPorMorte` diz ter sido debitado de verdade na janela.
+ *
+ * Raiz do bug (barra "voltando" sem o jogador ter perdido nada): o servidor
+ * resimula a janela do flush pelo RELOGIO DELE, nao pelo tempo que o client ja
+ * renderizou ao vivo — latencia de rede faz esse recorte fechar um pouco antes
+ * do ponto que o jogador ja viu na tela, e sem esta trava esse valor menor
+ * substituia o que ja estava mostrado (PH-37 e um bug DIFERENTE, ja corrigido:
+ * era passo de resimulacao errado, nao descompasso de janela).
+ *
+ * Muta `doServidor` in-place ANTES do `setState` — o fix fica inteiro na
+ * camada de dados, a UI nao precisa saber que isto existe.
+ */
+function reconciliarExpAntesDeAplicar(doServidor: GameStateData, resumo: RespostaFlush['resumo'] | undefined): void {
+  const local = useGameStateStore.getState()
+
+  // Treinador: nao existe NENHUM mecanismo de queda legitima de exp de
+  // treinador no motor inteiro (so `grantTrainerExp`, que so soma) — uma
+  // resposta menor so pode ser descompasso de janela. Piso incondicional,
+  // funciona mesmo sem `resumo` (ex: recarregarEstado(), que so busca
+  // `/estado` sem rodar resim nenhuma).
+  if (doServidor.trainer && local.trainer.exp > doServidor.trainer.exp) {
+    doServidor.trainer = {
+      ...doServidor.trainer,
+      exp: local.trainer.exp,
+      level: Math.max(local.trainer.level, doServidor.trainer.level),
+    }
+  }
+
+  // POKE ativo: so compara se o MESMO uid segue em campo — troca de POKE por
+  // desmaio ja e visivel por outro caminho (toast + animacao), nao e "a barra
+  // voltou do nada". Sem `resumo` (nenhuma janela de resim rodou) nao ha como
+  // saber quanto seria legitimo — fica sem mexer, confia no servidor como
+  // sempre foi.
+  if (!resumo) return
+  const uidAtivo = useWorldStore.getState().player?.poke.uid
+  if (!uidAtivo || !Array.isArray(doServidor.team)) return
+  const pokeLocal = local.team.find((p) => p.uid === uidAtivo)
+  const indiceNoServidor = doServidor.team.findIndex((p) => p.uid === uidAtivo)
+  if (!pokeLocal || indiceNoServidor === -1) return
+
+  const pokeServidor = doServidor.team[indiceNoServidor]
+  const queda = pokeLocal.exp - pokeServidor.exp
+  if (queda <= 0) return // subiu ou empatou, servidor passa como veio
+
+  const orcamento = resumo.expPerdidaPorMorte
+  if (queda <= orcamento) return // legitima (penalidade de morte real), mostra normal
+
+  // Excedente e espurio — trava no que a penalidade de verdade justifica,
+  // nunca deixa passar disso. Nivel segue a mesma decisao (nao regride abaixo
+  // do que ja foi mostrado) — pode sobrar % de barra levemente inconsistente
+  // com o nivel por ~1 flush, corrige sozinho no ciclo seguinte (YAGNI).
+  doServidor.team[indiceNoServidor] = {
+    ...pokeServidor,
+    exp: pokeLocal.exp - orcamento,
+    level: Math.max(pokeLocal.level, pokeServidor.level),
+  }
+}
+
+/**
  * Substitui o estado local pelo que o servidor considera verdade.
  *
  * `parcial` = a resposta veio de `/sessao/flush` ou `/sessao/fechar` com o
@@ -36,10 +97,15 @@ ativarPredicoesDeCaptura(servidorAtivo())
  * Todo o RESTO do estado (ouro, XP, itens, time, pokedex) continua sendo
  * substituido, parcial ou nao: nada disso e grande, e a regra "a verdade vem do
  * servidor" nao muda.
+ *
+ * `resumo` (so vem de `/sessao/flush` e `/sessao/fechar`) alimenta
+ * `reconciliarExpAntesDeAplicar` — ver o comentario dela pro porque disto
+ * existir.
  */
-export function aplicarEstadoDoServidor(estado: unknown, parcial = false): void {
+export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo?: RespostaFlush['resumo']): void {
   if (!estado || typeof estado !== 'object') return
   const doServidor = estado as GameStateData
+  reconciliarExpAntesDeAplicar(doServidor, resumo)
   if (!parcial) {
     limparCapturasPreditas()
     useGameStateStore.setState(doServidor)
@@ -314,7 +380,7 @@ export async function liquidar(): Promise<void> {
   if (!servidorAtivo()) return
   try {
     const r = await servidor.flush()
-    aplicarEstadoDoServidor(r.estado, r.estadoParcial === true)
+    aplicarEstadoDoServidor(r.estado, r.estadoParcial === true, r.resumo)
     // A sala do servidor manda. A simulacao local sorteia a propria (ela e
     // predicao e tem sequencia de sorteio propria), entao sem esta linha a
     // sala exibida seria um palpite — e o pool/loot que o jogador de fato
@@ -474,7 +540,7 @@ export async function fecharSessaoDeHunt(): Promise<void> {
   pararFlushPeriodico()
   try {
     const r = await servidor.fecharSessao()
-    if (r.estado) aplicarEstadoDoServidor(r.estado, r.estadoParcial === true)
+    if (r.estado) aplicarEstadoDoServidor(r.estado, r.estadoParcial === true, r.resumo)
   } catch (erro) {
     reportarErro(erro)
   }
@@ -572,7 +638,7 @@ export async function assentarSessaoPendente(): Promise<RespostaFlush['resumo'] 
   try {
     const r = await servidor.fecharSessao()
     if (!r.fechada) return null
-    if (r.estado) aplicarEstadoDoServidor(r.estado, r.estadoParcial === true)
+    if (r.estado) aplicarEstadoDoServidor(r.estado, r.estadoParcial === true, r.resumo)
     return r.resumo ?? null
   } catch (erro) {
     reportarErro(erro)

@@ -391,6 +391,10 @@ describe('Ataque Basico na fila do jogador', () => {
   it('executa na 1a posicao da fila mesmo com golpe de verdade pronto', () => {
     const { world, player } = cenarioFilaComBasico()
     updateCombat(world, 1, { silent: true })
+    // PH-176: cooldown so arma quando o hit pousa (HIT_LAND_DELAY), nao mais
+    // no disparo — sem resetar globalCooldown, este 2o tick so deixa o hit ja
+    // enfileirado pousar, nao dispara acao nova.
+    updateCombat(world, 1, { silent: true })
     expect(player.cooldowns[BASIC_ATTACK.id]).toBeGreaterThan(0)
     expect(player.lastUsedAbilityId).toBeUndefined()
 
@@ -415,6 +419,10 @@ describe('Ataque Basico na fila do jogador', () => {
     for (let i = 0; i < 5; i++) {
       player.cooldowns = {}
       player.globalCooldown = 0
+      updateCombat(world, 1, { silent: true })
+      // PH-176: deixa o hit pousar (HIT_LAND_DELAY) antes de ler o cooldown
+      // como sinal de "foi escolhido" — sem resetar globalCooldown, nao
+      // dispara acao nova.
       updateCombat(world, 1, { silent: true })
       usouBasico.push((player.cooldowns[BASIC_ATTACK.id] ?? 0) > 0)
     }

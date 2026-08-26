@@ -690,43 +690,59 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
     }
 
     // Animacao de arremesso de Pokebola — so pra uma tentativa de verdade.
+    //
+    // PH-174: `atrasoDoToastMs` guarda quanto tempo real a bola ainda vai
+    // levar pra terminar de jogar na tela (`delay` do efeito + `duration`) —
+    // o toast de resultado (abaixo) so dispara depois disso. Antes ele saia
+    // na hora, narrando "capturado!"/"a captura falhou!" ANTES da animacao
+    // visualmente resolver — ordem incoerente com o que o jogador via.
+    let atrasoDoToastMs = 0
     if (captureResult && 'ballItemId' in captureResult && captureResult.ballItemId) {
       const quadros = captureAnimFrameCount(captureResult.success)
+      const duracao = quadros * captureAnimFrameDuration() + 0.3
       world.effects.push(createWorldEffect(world.counters, {
         type: 'captureAnim', x: enemy.x, y: enemy.y, targetX: enemy.x, targetY: enemy.y,
         ballItemId: captureResult.ballItemId, success: captureResult.success,
         delay: DEATH_ANIM_GRACE_PERIOD,
-        duration: quadros * captureAnimFrameDuration() + 0.3,
+        duration: duracao,
       }))
+      atrasoDoToastMs = (DEATH_ANIM_GRACE_PERIOD + duracao) * 1000
     }
 
     if (captureResult) {
-      if (captureResult.success && captureResult.location === 'vendido') {
-        // Toast proprio: dizer "capturado! Foi para a mochila" e depois nao ter
-        // nada na mochila e a forma mais rapida de o jogador achar que perdeu
-        // POKE. A raridade fica porque e ela que explica o valor.
-        toastStore.getState().pushToast(
-          `${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`,
-          'capture-success', 'world',
-          realceDaRaridade(captureResult.poke),
-        )
-      } else if (captureResult.success) {
-        // So sobra `location: 'bag'` aqui — o outro caso saiu no `if` acima.
-        const location = 'mochila'
-        // Raridade concatenada no relatorio (pedido explicito): ela multiplica
-        // atributo e valor de venda em ate 600x, entao e o dado que decide se
-        // aquela captura importou — e o chat era o unico lugar que nao dizia.
-        const raridade = rarityOf(captureResult.poke).label
-        toastStore.getState().pushToast(
-          `${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`,
-          'capture-success', 'world',
-          // A raridade que vale e a da INSTANCIA capturada, nao a do inimigo em
-          // campo: `attemptCapture` sorteia o POKE que entra na mochila.
-          realceDaRaridade(captureResult.poke),
-        )
-      } else if (captureResult.reason === 'roll_failed') {
-        toastStore.getState().pushToast('A captura falhou!', 'capture-fail', 'combat')
+      const dispararToastDeCaptura = () => {
+        if (captureResult.success && captureResult.location === 'vendido') {
+          // Toast proprio: dizer "capturado! Foi para a mochila" e depois nao ter
+          // nada na mochila e a forma mais rapida de o jogador achar que perdeu
+          // POKE. A raridade fica porque e ela que explica o valor.
+          toastStore.getState().pushToast(
+            `${enemySpecies.name} [${rarityOf(captureResult.poke).label}] capturado e vendido pelo bot: +${captureResult.vendidoPor} ouro.`,
+            'capture-success', 'world',
+            realceDaRaridade(captureResult.poke),
+          )
+        } else if (captureResult.success) {
+          // So sobra `location: 'bag'` aqui — o outro caso saiu no `if` acima.
+          const location = 'mochila'
+          // Raridade concatenada no relatorio (pedido explicito): ela multiplica
+          // atributo e valor de venda em ate 600x, entao e o dado que decide se
+          // aquela captura importou — e o chat era o unico lugar que nao dizia.
+          const raridade = rarityOf(captureResult.poke).label
+          toastStore.getState().pushToast(
+            `${shinyPrefix(enemy.poke.isShiny)}${enemySpecies.name} [${raridade}] capturado! Foi para a ${location}.`,
+            'capture-success', 'world',
+            // A raridade que vale e a da INSTANCIA capturada, nao a do inimigo em
+            // campo: `attemptCapture` sorteia o POKE que entra na mochila.
+            realceDaRaridade(captureResult.poke),
+          )
+        } else if (captureResult.reason === 'roll_failed') {
+          toastStore.getState().pushToast('A captura falhou!', 'capture-fail', 'combat')
+        }
       }
+      // So atrasa quando houve animacao de verdade pra esperar (tentativa
+      // real, `atrasoDoToastMs > 0`) — sem tentativa (sem bola) nao ha nada
+      // na tela pra sincronizar, o toast sai na hora como sempre saiu.
+      if (atrasoDoToastMs > 0) setTimeout(dispararToastDeCaptura, atrasoDoToastMs)
+      else dispararToastDeCaptura()
     }
   }
 
@@ -859,9 +875,27 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   if (playerJustFainted && world.player) {
     // Roda mesmo quando silent — mesma regra de todo outro pipeline de
     // recompensa/penalidade aqui, so o toast e ao-vivo-so.
+    const expAntesDaPenalidade = world.player.poke.exp
     const penaltyResult = applyDeathExpPenalty(world.player.poke)
     world.player.poke = penaltyResult.poke
     gameState.updatePokeInstance(penaltyResult.poke.uid, () => penaltyResult.poke)
+    // PH-169: entrada SINTETICA (nao e abate) — so pro resumo do flush
+    // (offlineSimSystem.ts) saber quanto de queda de XP nesta janela e
+    // LEGITIMA. Campos de abate ficam zerados/false/null de proposito.
+    kills.push({
+      gold: 0,
+      ouroDeAutoVenda: 0,
+      xp: 0,
+      leveledUp: false,
+      trainerLeveledUp: false,
+      isShiny: false,
+      captured: false,
+      capturedPoke: null,
+      droppedItems: [],
+      playerFainted: true,
+      expLostToPenalty: Math.max(0, expAntesDaPenalidade - penaltyResult.poke.exp),
+      leveledDown: penaltyResult.leveledDown,
+    })
     if (!silent) {
       toastStore.getState().pushToast(
         `${SPECIES[world.player.poke.speciesId].name} desmaiou!${penaltyResult.leveledDown ? ` Caiu para o nivel ${penaltyResult.level}.` : ''}`,
