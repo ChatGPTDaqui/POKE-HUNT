@@ -95,14 +95,38 @@ function reconciliarExpAntesDeAplicar(doServidor: GameStateData, resumo: Respost
  * local e preservada, menos as predicoes locais, que sao substituidas pelas
  * linhas reais que vieram junto.
  *
- * Todo o RESTO do estado (ouro, XP, itens, time, pokedex) continua sendo
- * substituido, parcial ou nao: nada disso e grande, e a regra "a verdade vem do
- * servidor" nao muda.
+ * A POKEDEX entrou na mesma familia da mochila em PH-186: num flush parcial,
+ * `estado.pokedexKills` traz SO as especies abatidas naquela janela — e por
+ * TOTAL ABSOLUTO, nao incremento. Por isso ela e MESCLADA por especie, e nao
+ * substituida: substituir deixaria a tela mostrando 3 abates numa especie com
+ * 400. Ver `mesclarPokedex`.
+ *
+ * Todo o RESTO do estado (ouro, XP, itens, time) continua sendo substituido,
+ * parcial ou nao: nada disso e grande, e a regra "a verdade vem do servidor"
+ * nao muda.
  *
  * `resumo` (so vem de `/sessao/flush` e `/sessao/fechar`) alimenta
  * `reconciliarExpAntesDeAplicar` — ver o comentario dela pro porque disto
  * existir.
  */
+/**
+ * Pokedex local + o que o flush parcial trouxe, por especie (PH-186).
+ *
+ * O servidor manda TOTAL ABSOLUTO das especies que ele acabou de gravar, nao o
+ * incremento da janela. E o que torna esta mescla idempotente: a camada de
+ * retry ja reaplicou a mesma resposta neste projeto (e por isso o filtro de
+ * `idsNovos` logo abaixo existe). Somando delta, reaplicar dobraria a contagem;
+ * sobrescrevendo por especie, reaplicar da o mesmo numero.
+ *
+ * Especie ausente da resposta fica como esta: o servidor so manda o que mudou,
+ * e janela sem abate nenhum manda `{}`.
+ */
+function mesclarPokedex(local: GameStateData, doServidor: GameStateData): GameStateData['pokedexKills'] {
+  const doFlush = doServidor.pokedexKills
+  if (!doFlush || Object.keys(doFlush).length === 0) return local.pokedexKills
+  return { ...local.pokedexKills, ...doFlush }
+}
+
 export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo?: RespostaFlush['resumo']): void {
   if (!estado || typeof estado !== 'object') return
   const doServidor = estado as GameStateData
@@ -119,13 +143,16 @@ export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo
   // abrir a tela dispara a leitura paginada e recebe a verdade, capturas novas
   // incluidas.
   if (!mochilaCarregada()) {
-    useGameStateStore.setState({ ...doServidor, bagPokes: [] })
+    useGameStateStore.setState((local) => ({
+      ...doServidor, bagPokes: [], pokedexKills: mesclarPokedex(local, doServidor),
+    }))
     limparCapturasPreditas()
     return
   }
   const idsNovos = new Set(novos.map((p) => p.uid))
   useGameStateStore.setState((local) => ({
     ...doServidor,
+    pokedexKills: mesclarPokedex(local, doServidor),
     bagPokes: [
       // Fora: o que era predicao (a linha real dela esta em `novos`) e qualquer
       // uid que o servidor esteja mandando agora — sem o segundo filtro, um
