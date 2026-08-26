@@ -218,6 +218,19 @@ export interface RespostaFlush extends RespostaComEstado {
   clima?: ClimaTipo | null
 }
 
+/**
+ * PH-178. Mesmo formato de `RespostaFlush` (o servidor simula o intervalo
+ * normal antes de tentar o avanco) mais o resultado do proprio avanco.
+ */
+export interface RespostaAvancoDeSala extends RespostaFlush {
+  /**
+   * `false` quando a sala ja nao estava mais travada em 30/30 ao fim da
+   * janela simulada (corrida rara: outro flush avancou primeiro) — nao e
+   * erro, so nao havia sala nova pra aplicar.
+   */
+  avancoAplicado: boolean
+}
+
 // --- ranking e perfil -------------------------------------------------------
 // Leitura pura, sempre retentavel. Os tipos espelham server/src/ranking.ts.
 
@@ -515,6 +528,15 @@ export const servidor = {
     & Partial<RespostaComEstado>
   >('/sessao/fechar', {
     method: 'POST', retentavel: true, timeoutMs: TIMEOUT_FLUSH_MS, body: CORPO_PARCIAL,
+  }),
+
+  // PH-178. Sem `retentavel`: um retry automatico depois de a primeira
+  // chamada ja ter avancado a sala pediria um SEGUNDO avanco — a sala
+  // seguinte nao estaria mais travada, e `avancoAplicado: false` voltaria
+  // sem erro nenhum, mas o clique do jogador teria pulado uma sala a mais
+  // do que ele pediu.
+  avancarSalaManual: () => pedir<RespostaAvancoDeSala>('/sessao/avancar-sala', {
+    method: 'POST', timeoutMs: TIMEOUT_FLUSH_MS, body: CORPO_PARCIAL,
   }),
 }
 

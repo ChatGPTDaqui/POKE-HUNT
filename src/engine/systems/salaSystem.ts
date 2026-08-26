@@ -181,7 +181,7 @@ export interface AvancoDeSala {
  * catch-up de aba oculta e no farm offline — nao ha um segundo caminho de
  * abate que pudesse esquecer de contar.
  */
-export function registrarAbate(world: WorldState, mapId: string): AvancoDeSala {
+export function registrarAbate(world: WorldState, mapId: string, opts: { manualAdvance?: boolean } = {}): AvancoDeSala {
   const sala = world.sala
   if (!sala) return { avancou: false, fechouCiclo: false }
 
@@ -218,6 +218,11 @@ export function registrarAbate(world: WorldState, mapId: string): AvancoDeSala {
   // (server/src/progresso.ts#sala_abates) com numero que nunca reflete a
   // quota real.
   sala.abates = ABATES_POR_SALA
+  // Toggle ligado + janela curta (jogador ativo): fecha a quota mas nao
+  // sorteia nem arma a transicao — fica em 30/30 ate o avanco manual
+  // (`avancarSalaManualmente`, endpoint PH-178). Cap acima ja preservado:
+  // nao poluir `sala_abates` mesmo parado.
+  if (opts.manualAdvance) return { avancou: false, fechouCiclo: false }
   return armarTransicaoDeSala(world, mapId)
 }
 
@@ -229,6 +234,18 @@ export function registrarAbate(world: WorldState, mapId: string): AvancoDeSala {
  * Separada de `registrarAbate` porque a quota fechada, e nao o abate, e o que
  * dispara a troca — ver `garantirTransicaoDeQuotaFechada`.
  */
+/**
+ * Avanco manual (PH-178/179): forca a transicao mesmo com o toggle ligado —
+ * o proprio clique do jogador E o avanco que o toggle estava segurando.
+ * So entrega "quota fechada" ao chamador; `armarTransicaoDeSala` ja e
+ * idempotente (chamar de novo com transicao ja armada nao resorteia).
+ */
+export function solicitarAvancoDeSala(world: WorldState, mapId: string): AvancoDeSala {
+  const sala = world.sala
+  if (!sala || sala.abates < ABATES_POR_SALA) return { avancou: false, fechouCiclo: false }
+  return armarTransicaoDeSala(world, mapId)
+}
+
 function armarTransicaoDeSala(world: WorldState, mapId: string): AvancoDeSala {
   const sala = world.sala
   if (!sala) return { avancou: false, fechouCiclo: false }
@@ -271,7 +288,7 @@ function armarTransicaoDeSala(world: WorldState, mapId: string): AvancoDeSala {
  * cabe em qualquer duracao. Isso tambem fecha o caso que ja estava documentado
  * como "autocurativo no proximo abate" — ele nao era, quando nao havia proximo.
  */
-export function garantirTransicaoDeQuotaFechada(world: WorldState, mapId: string, dt = 0): void {
+export function garantirTransicaoDeQuotaFechada(world: WorldState, mapId: string, dt = 0, manualAdvance = false): void {
   const sala = world.sala
   if (!sala || sala.abates < ABATES_POR_SALA) {
     world.salaEsperaDaAutoridade = 0
@@ -309,6 +326,10 @@ export function garantirTransicaoDeQuotaFechada(world: WorldState, mapId: string
     if (armada.avancou) world.salaPredita = true
     return
   }
+  // Mesma regra do avanco manual em `registrarAbate`: quota fechada numa
+  // janela anterior nao pode reavancar sozinha so porque o world foi
+  // reconstruido — senao o toggle vale so no abate 30 e falha no proximo flush.
+  if (manualAdvance) return
   armarTransicaoDeSala(world, mapId)
 }
 
