@@ -162,16 +162,28 @@ jobs:
           node-version: 20
 
       - name: database.types.ts esta desatualizado?
+        # PostgrestVersion reflete a versao do servidor detectada NA HORA da
+        # chamada, nao e schema — e a Management API do Supabase ja
+        # demonstrou responder valores diferentes em chamadas quase
+        # simultaneas pro MESMO projeto (26/08: 14.17 e 14.15, segundos de
+        # diferenca, secrets confirmados corretos nos dois casos). Comparar
+        # essa linha byte a byte reprova o gate por flakiness de infra, nao
+        # por schema desatualizado de verdade. Normalizada em COPIAS
+        # temporarias antes do diff — o arquivo real commitado nunca e
+        # tocado, e qualquer outra diferenca (coluna, tabela, RPC) continua
+        # reprovando normal.
         run: |
           npm ci
           supabase gen types typescript --linked > /tmp/database.types.ts
-          if ! diff -q /tmp/database.types.ts src/lib/database.types.ts > /dev/null; then
+          sed -E 's/PostgrestVersion: "[^"]*"/PostgrestVersion: "NORMALIZADO"/' /tmp/database.types.ts > /tmp/gerado.norm.ts
+          sed -E 's/PostgrestVersion: "[^"]*"/PostgrestVersion: "NORMALIZADO"/' src/lib/database.types.ts > /tmp/commitado.norm.ts
+          if ! diff -q /tmp/gerado.norm.ts /tmp/commitado.norm.ts > /dev/null; then
             echo "::error::src/lib/database.types.ts esta desatualizado em relacao ao schema remoto."
             echo "Rode 'npm run db:types' local e commite o resultado junto da migration."
-            diff /tmp/database.types.ts src/lib/database.types.ts || true
+            diff /tmp/gerado.norm.ts /tmp/commitado.norm.ts || true
             exit 1
           fi
-          echo "database.types.ts em sincronia com o schema remoto."
+          echo "database.types.ts em sincronia com o schema remoto (PostgrestVersion ignorada de proposito - ver comentario do step)."
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 

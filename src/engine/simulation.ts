@@ -55,6 +55,7 @@ import type { KillResult } from './systems/offlineSimSystem'
 import type { GameStateStore } from '@/stores/gameStateStore'
 import { emptyWorldState } from './worldState'
 import { toastStore } from '@/stores/toastStoreVanilla'
+import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
 import type { ClimaTipo, EnemyEntity, EnemyHazards, Point, SalaAtiva, WorldState } from './types'
 
 export const STARTER_LEVEL = 1
@@ -627,6 +628,13 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
   }
 
   const expGain = expRewardForEnemy(enemy.poke, poke.level)
+  // Os niveis ANTES da concessao, guardados aqui porque `grantExp`/
+  // `grantTrainerExp` devolvem so o nivel final e a cascata some (PH-192). Sao
+  // dois numeros na pilha; a alternativa seria o cartao de celebracao mentir
+  // sobre quantos niveis subiram de uma vez.
+  const nivelAntesDoAbate = poke.level
+  const nivelDoTreinadorAntes = gameState.trainer.level
+
   const grantResult = grantExp(poke, expGain)
   player.poke = grantResult.poke
   gameState.updatePokeInstance(grantResult.poke.uid, () => grantResult.poke)
@@ -679,9 +687,35 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
       for (const ability of grantResult.newAbilities.filter(isDamagingAbility)) {
         toastStore.getState().pushToast(`Nova habilidade desbloqueada: ${ability.name}!`, 'levelup', 'combat')
       }
+      // `nivelAntesDoAbate` e nao `grantResult.level - 1` (PH-192): `grantExp`
+      // tem um `while` e um unico abate pode subir varios niveis de uma vez.
+      // Sem o nivel de partida o cartao diria "Nv 36" numa cascata que veio do
+      // 33, escondendo dois tercos do que aconteceu — e o teste de marco
+      // (`cruzouMultiplo`) perderia o 35 no meio do caminho.
+      celebracaoStore.getState().celebrar({
+        tipo: 'nivel',
+        especieId: grantResult.poke.speciesId,
+        nome: SPECIES[grantResult.poke.speciesId].name,
+        nivelInicial: nivelAntesDoAbate,
+        nivel: grantResult.level,
+        ganhos: grantResult.statGains,
+        // So golpe de DANO, igual ao toast logo acima: o jogador nao precisa de
+        // um cartao pra dizer que aprendeu um golpe de status que a IA nem vai
+        // priorizar.
+        golpesNovos: grantResult.newAbilities.filter(isDamagingAbility).map((a) => a.name),
+        isShiny: Boolean(grantResult.poke.isShiny),
+      })
     }
     if (trainerResult.leveledUp) {
       toastStore.getState().pushToast(`${gameState.trainer.name} subiu para o nivel ${trainerResult.level}!`, 'levelup', 'combat')
+      // Um dos DOIS pontos que disparavam o splash no vanilla (js/main.js:288) e
+      // que se perderam na migracao pra React — ver PH-192.
+      celebracaoStore.getState().celebrar({
+        tipo: 'treinador',
+        nome: gameState.trainer.name,
+        nivelInicial: nivelDoTreinadorAntes,
+        nivel: trainerResult.level,
+      })
     }
 
     for (const itemId of loot.droppedItems) {
@@ -737,6 +771,21 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
         } else if (captureResult.reason === 'roll_failed') {
           toastStore.getState().pushToast('A captura falhou!', 'capture-fail', 'combat')
         }
+
+        // SHINY CAPTURADO ganha cartao proprio (PH-192).
+        //
+        // Na CAPTURA e nao no encontro: shiny que aparece e escapa nao e marco,
+        // e um cartao ali celebraria algo que o jogador nao levou. Dentro do
+        // `dispararToastDeCaptura` de proposito — ele ja espera a animacao da
+        // bola terminar (PH-174), e comemorar antes de a bola fechar seria a
+        // mesma incoerencia que aquela issue consertou.
+        if (captureResult.success && enemy.poke.isShiny) {
+          celebracaoStore.getState().celebrar({
+            tipo: 'shiny',
+            especieId: enemy.poke.speciesId,
+            nome: enemySpecies.name,
+          })
+        }
       }
       // So atrasa quando houve animacao de verdade pra esperar (tentativa
       // real, `atrasoDoToastMs > 0`) — sem tentativa (sem bola) nao ha nada
@@ -768,8 +817,14 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
 // de catch-up (silent:true, chamados em loop apertado por
 // simulateWorldSeconds) — este e o UNICO lugar onde movimento/combate/
 // auto-heal/respawn avancam. Devolve a lista de resumos por-kill.
-export function stepWorld(world: WorldState, dt: number, gameState: GameStateStore, opts: { silent?: boolean } = {}): KillResult[] {
+export function stepWorld(world: WorldState, dt: number, gameState: GameStateStore, opts: { silent?: boolean; offline?: boolean } = {}): KillResult[] {
   const silent = opts.silent ?? false
+  // Janela longa (farm offline de verdade) ignora o toggle — mesmo eixo que
+  // ja liga `world.pessimista` no servidor (ver LIMIAR_OFFLINE_SEGUNDOS em
+  // authority/progresso.ts). Calculado uma vez e repassado pros dois pontos
+  // que decidem avanco de sala (`garantirTransicaoDeQuotaFechada` e
+  // `registrarAbate`), senao um dos dois fica desatualizado com o toggle.
+  const manualAdvance = (gameState.autoToggles.avancoManualDeSala ?? false) && !(opts.offline ?? false)
   if (!world.player) return []
 
   if (!world.mapDef) {
@@ -805,7 +860,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // atravessa a reconstrucao de mundo do servidor): arma a transicao agora, sem
   // esperar um abate novo. Ver o livelock em
   // salaSystem.ts#garantirTransicaoDeQuotaFechada.
-  garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt)
+  garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt, manualAdvance)
 
   // Contagem regressiva "Entrando em nova area" entre salas (ver
   // salaSystem.ts#registrarAbate/aplicarTransicaoDeSala): a quota de abates
@@ -862,7 +917,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       // oculta e o farm offline contam pela mesma regra sem nenhum deles
       // precisar lembrar. So arma a contagem regressiva (world.salaCountdownRemaining) —
       // a troca de fato acontece la em cima, no gate do proximo tick.
-      registrarAbate(world, world.mapDef.id)
+      registrarAbate(world, world.mapDef.id, { manualAdvance })
     }
   }
   for (const enemy of world.enemies) {

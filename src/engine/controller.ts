@@ -15,6 +15,7 @@ import {
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useWorldStore } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
+import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
 import { preloadEspecies, preloadHunt } from '@/data/preload'
 import type { Point } from './types'
 import { pedirAcao, abrirSessaoDeHunt, fecharSessaoDeHunt } from '@/data/remote/autoridade'
@@ -486,6 +487,17 @@ export const controller = {
       `${shinyPrefix(poke.isShiny)}${previousName} evoluiu para ${result.species.name}!`,
       'levelup', 'world',
     )
+    // O OUTRO ponto que disparava o splash no vanilla (js/main.js:658) e que se
+    // perdeu na migracao pra React — ver PH-192. `poke.speciesId` e a especie
+    // ANTES da troca: `result.updatedPoke` ja e a nova, e o cartao mostra o par.
+    celebracaoStore.getState().celebrar({
+      tipo: 'evolucao',
+      deId: poke.speciesId,
+      paraId: result.updatedPoke.speciesId,
+      deNome: previousName,
+      paraNome: result.species.name,
+      isShiny: Boolean(poke.isShiny),
+    })
   },
 
   toast(message: string, type: Parameters<ReturnType<typeof useToastStore.getState>['pushToast']>[1], channel: Parameters<ReturnType<typeof useToastStore.getState>['pushToast']>[2]): void {

@@ -21,7 +21,7 @@ function cenario(status: StatusCondition, itens: Record<string, number>) {
 
   useGameStateStore.setState({
     items: { ...itens },
-    autoToggles: { autoPot: false, autoCatch: false, autoRevive: false, autoStatus: true },
+    autoToggles: { autoPot: false, autoCatch: false, autoRevive: false, autoStatus: true, avancoManualDeSala: false },
   })
   return { world, player, gameState: useGameStateStore.getState() }
 }
@@ -67,7 +67,7 @@ describe('auto-status', () => {
   it('respeita o interruptor proprio, e nao mais o do Auto-pocao', () => {
     const { world, player } = cenario('burn', { burn_heal: 5 })
     useGameStateStore.setState({
-      autoToggles: { autoPot: true, autoCatch: false, autoRevive: false, autoStatus: false },
+      autoToggles: { autoPot: true, autoCatch: false, autoRevive: false, autoStatus: false, avancoManualDeSala: false },
     })
 
     expect(updateAutoHeal(world, useGameStateStore.getState(), 0.1)).toEqual([])
@@ -76,7 +76,7 @@ describe('auto-status', () => {
     // ...e com o Auto-pocao DESLIGADO e o Auto-status ligado, cura — que era
     // exatamente o caso impossivel antes.
     useGameStateStore.setState({
-      autoToggles: { autoPot: false, autoCatch: false, autoRevive: false, autoStatus: true },
+      autoToggles: { autoPot: false, autoCatch: false, autoRevive: false, autoStatus: true, avancoManualDeSala: false },
     })
     world.autoTimers.treinador = 0
     expect(updateAutoHeal(world, useGameStateStore.getState(), 0.1))
@@ -112,7 +112,7 @@ describe('auto-status', () => {
     player.statusVolatil = { tipo: 'confusion', turnosRestantes: 3 }
     useGameStateStore.setState({
       items: { full_heal: 2 },
-      autoToggles: { autoPot: false, autoCatch: false, autoRevive: false, autoStatus: true },
+      autoToggles: { autoPot: false, autoCatch: false, autoRevive: false, autoStatus: true, avancoManualDeSala: false },
     })
 
     expect(updateAutoHeal(world, useGameStateStore.getState(), 0.1))

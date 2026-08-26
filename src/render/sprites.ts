@@ -1189,32 +1189,23 @@ function drawAbilityName(ctx: CanvasRenderingContext2D, effect: WorldEffect, wor
   ctx.restore()
 }
 
-function drawRewardText(ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState): void {
-  const progress = effectProgress(effect)
-  const floatOffset = 34 * progress
-  const alpha = progress < 0.7 ? 1 : 1 - (progress - 0.7) / 0.3
-  const anchor = effectAnchor(effect, world)
-  const x = anchor.x
-  const y = anchor.y - floatOffset
-  const label = `+${effect.value}${effect.unit ? ' ' + effect.unit : ''}`
-
-  ctx.save()
-  ctx.globalAlpha = Math.max(0, alpha)
-  ctx.textAlign = 'left'
-  ctx.lineWidth = 3
-  ctx.lineJoin = 'round'
-  ctx.strokeStyle = '#000000'
-  ctx.font = 'bold 11px monospace'
-  ctx.fillStyle = effect.color
-  ctx.strokeText(label, x, y)
-  ctx.fillText(label, x, y)
-  ctx.restore()
-}
+// `drawRewardText` foi REMOVIDA aqui (PH-191). O ouro e o XP do abate deixaram
+// de ser texto no campo e passaram a VOAR ate a carteira do trilho — ver
+// `render/vooDeRecompensa.ts`.
+//
+// Nao e informacao perdida, e informacao movida: a moeda chega no numero que
+// ela muda, e o valor exato aparece no pulso da carteira (alem da linha que o
+// ticker do chat ja escrevia). O que se ganha e espaco — medido na PH-189, a
+// faixa de texto sobre o combate tem 169 px de MUNDO de largura em 390px, e os
+// dois `rewardText` por abate disputavam ela com o numero de dano, que nao tem
+// outro lugar nenhum pra ir.
+//
+// O efeito `rewardText` CONTINUA existindo no `WorldState`: o motor nao foi
+// alterado. Quem o consome agora e a camada de VFX, no cliente.
 
 export function drawEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState): void {
   if (effect.type === 'damageNumber') return drawDamageNumber(ctx, effect, world)
   if (effect.type === 'abilityName') return drawAbilityName(ctx, effect, world)
-  if (effect.type === 'rewardText') return drawRewardText(ctx, effect, world)
   if (effect.type === 'abilityEffect') return drawAbilityEffect(ctx, effect)
   if (effect.type === 'captureAnim') return drawCaptureAnim(ctx, effect)
 }
