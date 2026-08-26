@@ -55882,6 +55882,9 @@ async function aguardarFlushEmAndamento(cfg, userId) {
 		await dormir(INTERVALO_DE_SONDAGEM_MS);
 	}
 }
+var COLUNAS_ITENS = "user_id,item_id,quantity,locked";
+var COLUNAS_POKEDEX = "user_id,species_id,normal_kills,shiny_kills";
+var COLUNAS_AUTO_CATCH = "user_id,species_id,ball_item_id";
 async function lerSnapshot(cfg, userId, opcoes = {}) {
 	const comBag = opcoes.comBag !== false;
 	const filtroDeLocal = comBag ? "" : "&location=eq.team";
@@ -55889,9 +55892,9 @@ async function lerSnapshot(cfg, userId, opcoes = {}) {
 	const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
 		selecionar(cfg, `players?user_id=eq.${userId}&select=*`),
 		selecionarTudo(cfg, `pokemon_instances?user_id=eq.${userId}${filtroDeLocal}&select=*&order=id`),
-		selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=*`),
-		comDex ? selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=*`) : Promise.resolve([]),
-		selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=*`)
+		selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=${COLUNAS_ITENS}`),
+		comDex ? selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=${COLUNAS_POKEDEX}`) : Promise.resolve([]),
+		selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=${COLUNAS_AUTO_CATCH}`)
 	]);
 	if (!player[0]) throw new ErroHttp(404, "jogador sem linha em `players`");
 	const linhasNoLoad = {
