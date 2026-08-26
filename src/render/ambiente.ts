@@ -160,13 +160,27 @@ interface Receita {
    * pra preset que representa vegetacao; agua/poeira/brasa/etc nao pedem vento.
    */
   vento?: boolean
+  /**
+   * Fracao do ALTO da janela onde a particula pode NASCER (PH-188). `0.4` =
+   * so no topo 40%. Undefined = janela inteira (todo preset sem isto).
+   *
+   * So a folha usa: sem isto ela nascia espalhada por qualquer altura da
+   * tela, inclusive rente ao chao — lendo como confete solto, nao como algo
+   * caindo da copa. Nao ha marcacao de ONDE a arvore esta em cada arte (a
+   * mesma limitacao que a agua tinha antes da mascara do PH-113), entao isto
+   * e aproximacao: assume que copa fica na faixa de cima da cena, sem saber
+   * a posicao real de nenhuma arvore. A RECICLAGEM (`nascer` com
+   * `aoEntrar`) ja entra por uma linha logo acima da janela — nao precisa
+   * dessa faixa, so a primeira populacao precisa.
+   */
+  faixaOrigemY?: number
 }
 
 const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
   folha: {
-    quantidade: 34, cor: '#e8f0a8', raio: [3.4, 7.0], velocidade: [16, 34],
+    quantidade: 34, cor: '#e8f0a8', raio: [1.7, 3.4], velocidade: [16, 34],
     angulo: Math.PI / 2 + 0.35, espalhamento: 0.3, alpha: 0.72, bamboleio: 16, feixes: true,
-    girar: true, vento: true,
+    girar: true, vento: true, faixaOrigemY: 0.4,
   },
   agua: {
     quantidade: 30, cor: '#eaf8ff', raio: [2.2, 4.4], velocidade: [4, 11],
@@ -493,9 +507,12 @@ function nascer(
 
   if (!aoEntrar) {
     // Primeira populacao: espalhada pela janela inteira, senao a camada entra
-    // como uma cortina vindo de uma borda so.
+    // como uma cortina vindo de uma borda so. Com `faixaOrigemY` (so folha),
+    // a altura fica restrita ao topo — cai da copa desde o primeiro quadro,
+    // em vez de aparecer ja espalhada ate o chao.
+    const alturaY = r.faixaOrigemY ? janela.h * r.faixaOrigemY : janela.h
     p.x = janela.x - FOLGA + rand() * (janela.w + FOLGA * 2)
-    p.y = janela.y - FOLGA + rand() * (janela.h + FOLGA * 2)
+    p.y = janela.y - FOLGA + rand() * (alturaY + FOLGA * 2)
     return
   }
   // Reciclagem: entra pela borda OPOSTA a direcao de deslocamento, na
