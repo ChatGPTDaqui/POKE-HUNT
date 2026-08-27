@@ -1134,6 +1134,16 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     }
   }
 
+  // PH-217: `world.bossPendente.hpAtual` so nasce setado no spawn — o dano que
+  // o boss leva durante a janela vive na entidade. Espelha aqui, todo tick, pra
+  // o flush (authority/progresso.ts#aplicarFlush) persistir o HP real. Sem
+  // isto, a proxima reconstrucao de mundo (~30s) recria o boss com HP cheio, e
+  // uma luta longa nunca fecha. Sem RNG: so copia um numero.
+  if (world.bossPendente) {
+    const bossVivo = world.enemies.find((e) => e.isBoss && e.poke.uid === world.bossPendente!.uid)
+    if (bossVivo) world.bossPendente.hpAtual = bossVivo.poke.hp
+  }
+
   return kills
 }
 

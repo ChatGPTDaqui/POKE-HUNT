@@ -106,6 +106,25 @@ describe('boss bloqueia o avanco de sala (PH-202)', () => {
     expect(world.bossPendente).toBeNull()
   })
 
+  it('bossPendente.hpAtual acompanha o dano da entidade a cada tick (PH-217)', () => {
+    // Sem isto, `hpAtual` fica congelado no HP de spawn: o flush persiste o
+    // valor cheio e a proxima janela recria o boss curado. Uma luta longa
+    // (varias janelas) nunca fecharia.
+    const world = mundo(54)
+    world.sala = { indice: 0, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.enemies = []
+    world.respawnTimer = 999
+    stepWorld(world, 0.1, useGameStateStore.getState(), { silent: true })
+
+    const boss = world.enemies.find((e) => e.isBoss)!
+    expect(world.bossPendente!.hpAtual).toBe(boss.poke.hp)
+
+    // Dano fora do combate — o proximo tick tem que espelhar.
+    boss.poke.hp = Math.max(1, Math.floor(boss.poke.hp / 3))
+    stepWorld(world, 0.1, useGameStateStore.getState(), { silent: true })
+    expect(world.bossPendente!.hpAtual).toBe(boss.poke.hp)
+  })
+
   it('a reconstrucao do mundo recria o boss FIEL (zero RNG extra) em vez de sortear outro', () => {
     const world = mundo(53)
     world.sala = { indice: 0, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 }
