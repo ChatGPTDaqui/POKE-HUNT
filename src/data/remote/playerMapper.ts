@@ -7,12 +7,13 @@
 // testadas sozinhas.
 import type { Database } from '@/lib/database.types'
 import type { GameStateData, AutoPotRule, AutoCatchConfig, AutoCatchRule, PerfStats, TrainerInfo, PokedexKillCount } from '@/stores/gameStateStore'
+import type { ElementType } from '@/data/generated/types'
+import { especialidadeNiveisDefault, type EspecialidadeNiveis } from '@/data/especialidades'
 import { SPECIES, computeStatsAtLevel, type PokeInstance, type StatBlock } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
 import { NATURES_NEUTRAS, type NatureKey } from '@/data/natures'
 import { activeAbilitiesPadrao, golpesAprendidosAte, sanearEscolhaDeGolpes } from '@/data/activeAbilities'
 import type { StatusCondition } from '@/data/statusEffects'
-import type { ElementType } from '@/data/generated/types'
 import { chaveDaMissao, missaoDaChave } from '@/data/missoes'
 
 type Json = Database['public']['Tables']['players']['Row']['auto_toggles']
@@ -36,6 +37,7 @@ export type ItemRow = Tables['player_items']['Row']
 export type PokedexRow = Tables['player_pokedex']['Row']
 export type AutoCatchRuleRow = Tables['player_auto_catch_rules']['Row']
 export type MissaoReivindicadaRow = Tables['player_missoes_reivindicadas']['Row']
+export type EspecialidadeRow = Tables['player_especialidades']['Row']
 
 export interface PlayerSnapshot {
   player: PlayerRow
@@ -44,6 +46,7 @@ export interface PlayerSnapshot {
   pokedex: PokedexRow[]
   autoCatchRules: AutoCatchRuleRow[]
   missoesReivindicadas: MissaoReivindicadaRow[]
+  especialidades: EspecialidadeRow[]
 }
 
 // --- DB -> jogo -------------------------------------------------------------
@@ -192,6 +195,14 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     pokedexKills[row.species_id] = { normal: row.normal_kills, shiny: row.shiny_kills }
   }
 
+  // Parte de `especialidadeNiveisDefault()` (todo tipo em 0/0) e so
+  // SOBRESCREVE os tipos com linha no banco — o jogador tipicamente tem
+  // progresso em poucos dos 18, e a tabela so guarda o que ele de fato subiu.
+  const especialidades: EspecialidadeNiveis = especialidadeNiveisDefault()
+  for (const row of snap.especialidades) {
+    especialidades[row.tipo as ElementType] = { dano: row.dano_nivel, defesa: row.defesa_nivel }
+  }
+
   const autoCatchRules: AutoCatchRule[] = snap.autoCatchRules.map((r) => ({
     speciesId: r.species_id,
     ballItemId: r.ball_item_id,
@@ -238,6 +249,7 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     trainer: { name: p.trainer_name, level: p.trainer_level, exp: p.trainer_exp } satisfies TrainerInfo,
     pokedexKills,
     missoesReivindicadas,
+    especialidades,
   }
 }
 
@@ -360,6 +372,21 @@ export function gameStateToMissaoRows(userId: string, s: GameStateData): Tables[
       const { tipo, speciesId } = missaoDaChave(chave)
       return { user_id: userId, tipo, species_id: speciesId }
     })
+}
+
+// So os tipos com progresso de verdade (dano OU defesa > 0) — o default tem
+// os 18 tipos presentes em 0/0, e upsertar as 18 linhas em TODO save (mesmo
+// pra quem nunca abriu a tela) seria escrita sem proposito, o mesmo raciocinio
+// de `gameStateToItemRows` filtrar quantidade.
+export function gameStateToEspecialidadeRows(userId: string, s: GameStateData): Tables['player_especialidades']['Insert'][] {
+  return (Object.entries(s.especialidades) as [ElementType, { dano: number; defesa: number }][])
+    .filter(([, v]) => v.dano > 0 || v.defesa > 0)
+    .map(([tipo, v]) => ({
+      user_id: userId,
+      tipo,
+      dano_nivel: v.dano,
+      defesa_nivel: v.defesa,
+    }))
 }
 
 export function gameStateToAutoCatchRuleRows(userId: string, s: GameStateData): Tables['player_auto_catch_rules']['Insert'][] {

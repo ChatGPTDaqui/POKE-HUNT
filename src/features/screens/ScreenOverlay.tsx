@@ -26,6 +26,7 @@ import { CalculadoraMenu } from '@/features/calc/CalculadoraMenu'
 import { MercadoMenu } from '@/features/mercado/MercadoMenu'
 import { RankingMenu } from '@/features/ranking/RankingMenu'
 import { TutoriaisMenu } from '@/features/tutorial/TutoriaisMenu'
+import { EspecialidadesMenu } from '@/features/especialidades/EspecialidadesMenu'
 
 const PANELS: Record<ScreenName, () => React.ReactElement | null> = {
   equipe: TeamMenu,
@@ -42,6 +43,7 @@ const PANELS: Record<ScreenName, () => React.ReactElement | null> = {
   mercado: MercadoMenu,
   ranking: RankingMenu,
   tutoriais: TutoriaisMenu,
+  especialidades: EspecialidadesMenu,
 }
 
 const TITLES: Record<ScreenName, string> = {
@@ -59,6 +61,7 @@ const TITLES: Record<ScreenName, string> = {
   mercado: 'Mercado',
   ranking: 'Ranking',
   tutoriais: 'Repetir Tutoriais',
+  especialidades: 'Especialidades',
 }
 
 // Largura padrao por tela, em `em`. Nao e capricho: a aba Itens da Loja tem
@@ -74,6 +77,8 @@ const WIDTHS: Partial<Record<ScreenName, number>> = {
   // Linha de ranking: posicao + icone + nome + treinador + nivel + valor. Em
   // 36em o nome do POKE e o do treinador brigam pelo mesmo espaco truncado.
   ranking: 44,
+  // Grade de 18 tipos + painel de detalhe lado a lado, mesmo raciocinio do Bestiario.
+  especialidades: 56,
 }
 
 export function ScreenOverlay() {

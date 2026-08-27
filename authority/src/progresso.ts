@@ -396,7 +396,7 @@ export async function lerSnapshot(
   // `comDex: false` devolve `[]` sem ir ao banco — a Pokedex inteira nao e lida
   // (PH-186). `gravarEstado` cobre o buraco lendo so as especies que mudaram.
   const comDex = opcoes.comDex !== false
-  const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
+  const [player, pokemon, items, pokedex, autoCatchRules, especialidades] = await Promise.all([
     selecionar<PlayerSnapshot['player']>(cfg, `players?user_id=eq.${userId}&select=*`),
     // `order=id` fixa a ordem entre as paginas de `selecionarTudo` (Range em
     // lotes de 1000). Sem isso o PostgREST nao garante posicao estavel entre
@@ -409,6 +409,12 @@ export async function lerSnapshot(
       ? selecionarTudo<PlayerSnapshot['pokedex'][number]>(cfg, `player_pokedex?user_id=eq.${userId}&select=${COLUNAS_POKEDEX}`)
       : Promise.resolve([] as PlayerSnapshot['pokedex']),
     selecionarTudo<PlayerSnapshot['autoCatchRules'][number]>(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=${COLUNAS_AUTO_CATCH}`),
+    // PH-198: bonus de dano/defesa por tipo precisa estar aqui — e o motor
+    // (`buildMapWorld`/`computeDamage`) que aplica ele de verdade, e o motor
+    // so roda no cliente como PREDICAO. Sem ler isto o flush recalcularia o
+    // combate inteiro SEM o bonus que a tela do jogador mostrou, e a
+    // simulacao autoritativa desfaria em silencio um upgrade que ele comprou.
+    selecionarTudo<PlayerSnapshot['especialidades'][number]>(cfg, `player_especialidades?user_id=eq.${userId}&select=user_id,tipo,dano_nivel,defesa_nivel`),
   ])
   if (!player[0]) throw new ErroHttp(404, 'jogador sem linha em `players`')
   // `missoesReivindicadas` fica vazio de proposito, ao contrario de
@@ -416,7 +422,9 @@ export async function lerSnapshot(
   // gold via `reivindicar_missao` (RPC de menu, fora da resimulacao) — a
   // resimulacao de sessao nunca le nem escreve este campo, so precisa dele
   // presente pro tipo `GameStateData` fechar.
-  const linhasNoLoad: PlayerSnapshot = { player: player[0], pokemon, items, pokedex, autoCatchRules, missoesReivindicadas: [] }
+  const linhasNoLoad: PlayerSnapshot = {
+    player: player[0], pokemon, items, pokedex, autoCatchRules, especialidades, missoesReivindicadas: [],
+  }
   const estado = snapshotToGameState(linhasNoLoad, defaultGameStateData())
   return {
     estado,
@@ -1069,6 +1077,7 @@ async function simularSessao(
       // saia de sincronia com o do cliente a partir da 2a janela.
       bossPendente: bossDaLinha(sessao),
     },
+    estado.especialidades,
   )
   // Pior caso SO quando o intervalo caracteriza ausencia — ver
   // LIMIAR_OFFLINE_SEGUNDOS. Jogo ao vivo resolve o combate normalmente.

@@ -25,7 +25,7 @@ describe('destinos da barra e da grade', () => {
     const telas = destinosDaGrade().map((d) => d.screen)
     expect(new Set(telas).size).toBe(telas.length)
     expect(telas).toEqual(
-      ['correio', 'bestiario', 'tasks', 'calc', 'ranking', 'wiki', 'tutoriais', 'config'],
+      ['correio', 'bestiario', 'especialidades', 'tasks', 'calc', 'ranking', 'wiki', 'tutoriais', 'config'],
     )
   })
 })

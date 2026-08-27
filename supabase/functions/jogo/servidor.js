@@ -35448,6 +35448,34 @@ function resolveAbilityCategory(ability, poke) {
 	return stats.atkFis >= stats.atkEsp ? "physical" : "special";
 }
 //#endregion
+//#region src/data/especialidades.ts
+var ESPECIALIDADE_TYPES = Object.keys(TYPE_COLORS);
+function especialidadeNiveisDefault() {
+	return Object.fromEntries(ESPECIALIDADE_TYPES.map((tipo) => [tipo, {
+		dano: 0,
+		defesa: 0
+	}]));
+}
+var ESPECIALIDADE_BONUS_POR_NIVEL = .01;
+function nivelDe(niveis, tipo, trilha) {
+	return niveis?.[tipo]?.[trilha] ?? 0;
+}
+/**
+* Multiplicador de DANO CAUSADO (1.00 a 1.05) pro tipo do golpe, trilha
+* "dano". So faz sentido aplicar no lado do ATACANTE.
+*/
+function bonusDeAtaque(niveis, tipoDoGolpe) {
+	return 1 + nivelDe(niveis, tipoDoGolpe, "dano") * ESPECIALIDADE_BONUS_POR_NIVEL;
+}
+/**
+* Multiplicador de DANO RECEBIDO (1.00 a 0.95) pro tipo do golpe, trilha
+* "defesa". So faz sentido aplicar no lado do DEFENSOR — reduz, nunca
+* amplifica.
+*/
+function reducaoDeDefesa(niveis, tipoDoGolpe) {
+	return 1 - nivelDe(niveis, tipoDoGolpe, "defesa") * ESPECIALIDADE_BONUS_POR_NIVEL;
+}
+//#endregion
 //#region src/data/moveVfx.ts
 var RAIZ = "assets/move-vfx/golpes";
 var tira = (arquivo, quadros, extra) => ({
@@ -52361,7 +52389,7 @@ function danoEsperado(rng, atacante, defensor, ability) {
 	return estimateDamage(rng, atacante, defensor, ability) * ((ability.accuracy ?? 100) / 100);
 }
 var DANO_VARIACAO_MINIMA = .85;
-function computeDamage(rng, attackerEntity, defenderEntity, abilityBase, pessimista = false, clima = null) {
+function computeDamage(rng, attackerEntity, defenderEntity, abilityBase, pessimista = false, clima = null, especialidadeNiveis = null) {
 	const attackerPoke = attackerEntity.poke;
 	const defenderPoke = defenderEntity.poke;
 	const attackerSpecies = SPECIES[attackerPoke.speciesId];
@@ -52412,6 +52440,8 @@ function computeDamage(rng, attackerEntity, defenderEntity, abilityBase, pessimi
 		if (ability.id === "solar_beam" && climaAtivo != null && climaAtivo !== "sol") dmg *= SOLAR_BEAM_SOB_CLIMA_RUIM;
 		dmg *= multiplicadorDeDanoRecebidoPorTrait(defenderTrait, ability, effectivenessMultiplier);
 		dmg *= multiplicadorDeDanoCausadoPorTrait(attackerTrait, effectivenessMultiplier);
+		if (attackerEntity.kind === "player") dmg *= bonusDeAtaque(especialidadeNiveis, ability.type);
+		if (defenderEntity.kind === "player") dmg *= reducaoDeDefesa(especialidadeNiveis, ability.type);
 		if (defenderTrait === "multiscale" && defenderPoke.hp === defenderPoke.stats.hp) dmg *= MULTISCALE_MULTIPLIER;
 		const escudosValem = attackerTrait !== TRAIT_INFILTRATOR;
 		if (escudosValem && isPhysical && (defenderEntity.escudos?.reflect ?? 0) > 0) dmg *= .5;
@@ -52931,7 +52961,7 @@ function resolveHit(world, hit, defeatedEnemyIds, onPlayerFainted, silent) {
 	let houveCritico = false;
 	for (let acerto = 0; acerto < acertos; acerto++) {
 		if (acerto > 0 && isDead(target)) break;
-		const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null);
+		const result = computeDamage(world.rng, attacker, target, ability, world.pessimista, world.clima?.tipo ?? null, world.especialidadeNiveis);
 		if (result.isCrit) houveCritico = true;
 		let danoDoAcerto = result.amount;
 		const enduraGolpe = target.enduraAtiva === true;
@@ -54560,7 +54590,8 @@ function emptyWorldState(seed = randomSeed()) {
 		},
 		pessimista: false,
 		clima: null,
-		climaAmbiente: null
+		climaAmbiente: null,
+		especialidadeNiveis: null
 	};
 }
 //#endregion
@@ -55039,7 +55070,7 @@ function aplicarHazardsAoInimigo(rng, hazards, enemy) {
 	}
 	if (hazards.stickyWeb) enemy.estagios.speed = (enemy.estagios.speed ?? 0) - 1;
 }
-function buildMapWorld(mapId, activePoke, carry, progresso) {
+function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis) {
 	const base = novoMundo(carry);
 	const sala = temSalas(mapId) ? progresso?.sala ?? novaSala(base.rng, mapId, 0, 0) : null;
 	const mapDef = mapDefParaSala(mapId, sala);
@@ -55097,7 +55128,8 @@ function buildMapWorld(mapId, activePoke, carry, progresso) {
 		sala,
 		bossPendente,
 		clima: climaDaConstrucao,
-		climaAmbiente: climaDaConstrucao
+		climaAmbiente: climaDaConstrucao,
+		especialidadeNiveis: especialidadeNiveis ?? null
 	};
 }
 function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
@@ -55552,7 +55584,8 @@ function defaultGameStateData() {
 		},
 		pokedexKills: {},
 		unlockedContinents: [...FAIXAS_INICIAIS],
-		missoesReivindicadas: {}
+		missoesReivindicadas: {},
+		especialidades: especialidadeNiveisDefault()
 	};
 }
 //#endregion
@@ -55635,6 +55668,11 @@ function snapshotToGameState(snap, defaults) {
 		normal: row.normal_kills,
 		shiny: row.shiny_kills
 	};
+	const especialidades = especialidadeNiveisDefault();
+	for (const row of snap.especialidades) especialidades[row.tipo] = {
+		dano: row.dano_nivel,
+		defesa: row.defesa_nivel
+	};
 	const autoCatchRules = snap.autoCatchRules.map((r) => ({
 		speciesId: r.species_id,
 		ballItemId: r.ball_item_id
@@ -55673,7 +55711,8 @@ function snapshotToGameState(snap, defaults) {
 			exp: p.trainer_exp
 		},
 		pokedexKills,
-		missoesReivindicadas
+		missoesReivindicadas,
+		especialidades
 	};
 }
 function gameStateToPlayerRow(userId, s) {
@@ -55846,6 +55885,9 @@ function criarEstadoDoJogador(dados) {
 			get missoesReivindicadas() {
 				return s.missoesReivindicadas;
 			},
+			get especialidades() {
+				return s.especialidades;
+			},
 			setActiveIndex: (index) => {
 				s.activeIndex = index;
 			},
@@ -55972,6 +56014,9 @@ function criarEstadoDoJogador(dados) {
 			},
 			setMissaoReivindicada: (chave) => {
 				s.missoesReivindicadas[chave] = true;
+			},
+			setEspecialidadeNivel: (tipo, trilha, nivel) => {
+				s.especialidades[tipo][trilha] = nivel;
 			},
 			setAutoToggle: (key, value) => {
 				s.autoToggles[key] = value;
@@ -56228,12 +56273,13 @@ async function lerSnapshot(cfg, userId, opcoes = {}) {
 	const comBag = opcoes.comBag !== false;
 	const filtroDeLocal = comBag ? "" : "&location=eq.team";
 	const comDex = opcoes.comDex !== false;
-	const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
+	const [player, pokemon, items, pokedex, autoCatchRules, especialidades] = await Promise.all([
 		selecionar(cfg, `players?user_id=eq.${userId}&select=*`),
 		selecionarTudo(cfg, `pokemon_instances?user_id=eq.${userId}${filtroDeLocal}&select=*&order=id`),
 		selecionarTudo(cfg, `player_items?user_id=eq.${userId}&select=${COLUNAS_ITENS}`),
 		comDex ? selecionarTudo(cfg, `player_pokedex?user_id=eq.${userId}&select=${COLUNAS_POKEDEX}`) : Promise.resolve([]),
-		selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=${COLUNAS_AUTO_CATCH}`)
+		selecionarTudo(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=${COLUNAS_AUTO_CATCH}`),
+		selecionarTudo(cfg, `player_especialidades?user_id=eq.${userId}&select=user_id,tipo,dano_nivel,defesa_nivel`)
 	]);
 	if (!player[0]) throw new ErroHttp(404, "jogador sem linha em `players`");
 	const linhasNoLoad = {
@@ -56242,6 +56288,7 @@ async function lerSnapshot(cfg, userId, opcoes = {}) {
 		items,
 		pokedex,
 		autoCatchRules,
+		especialidades,
 		missoesReivindicadas: []
 	};
 	return {
@@ -56533,7 +56580,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 			ciclos: Number(sessao.ciclos ?? 0)
 		} : null,
 		bossPendente: bossDaLinha(sessao)
-	});
+	}, estado.especialidades);
 	const offline = segundos > 120;
 	world.pessimista = offline;
 	const pausado = offline && true;

@@ -14,6 +14,8 @@ import { create } from 'zustand'
 import { persist, type PersistStorage } from 'zustand/middleware'
 import type { PokeInstance } from '@/data/pokes'
 import { FAIXAS_INICIAIS, GRUPOS_DO_LANCE, GRUPOS_LEGADOS } from '@/data/biomas'
+import type { EspecialidadeTrilha } from '@/data/especialidades'
+import type { ElementType } from '@/data/generated/types'
 import { useToastStore } from '@/stores/toastStore'
 // Sem ciclo em runtime: os modulos de `data/remote` so importam TIPOS deste
 // arquivo (`import type`, apagado na compilacao).
@@ -92,6 +94,7 @@ export interface GameStateActions {
   incrementPerfStats: (delta: { gold: number; xp: number; mobs: number; shinys: number }) => void
   setPokedexKillEntry: (speciesId: string, entry: PokedexKillCount) => void
   setMissaoReivindicada: (chave: string) => void
+  setEspecialidadeNivel: (tipo: ElementType, trilha: EspecialidadeTrilha, nivel: number) => void
 
   // Acoes do painel Auto + AbilityHUD (Fase 6). No vanilla essas telas
   // mutavam o objeto direto (`gameState.autoToggles.autoPot = !...`,
@@ -509,6 +512,15 @@ export const useGameStateStore = create<GameStateStore>()(
 
       setMissaoReivindicada: (chave) => {
         set((state) => ({ missoesReivindicadas: { ...state.missoesReivindicadas, [chave]: true } }))
+      },
+
+      setEspecialidadeNivel: (tipo, trilha, nivel) => {
+        set((state) => ({
+          especialidades: {
+            ...state.especialidades,
+            [tipo]: { ...state.especialidades[tipo], [trilha]: nivel },
+          },
+        }))
       },
 
       setAutoToggle: (key, value) => {

@@ -18,6 +18,7 @@ import type { RarityKey } from '@/data/rarity'
 import type { NatureKey } from '@/data/natures'
 import type { MapDef } from '@/data/maps'
 import type { ElementType } from '@/data/generated/types'
+import type { EspecialidadeNiveis } from '@/data/especialidades'
 import type { Ability } from '@/data/abilities'
 import type { ResolvedBattleAnim } from '@/data/battleSprites'
 import type { StatusAtivo, EstagiosDeStat, EstagiosFonte } from '@/data/statusEffects'
@@ -701,6 +702,19 @@ export interface WorldState {
   // nao herda `clima` do `carry`), entao um flush do servidor limpa o clima
   // igual limpa estagio de atributo.
   clima: Clima | null
+  /**
+   * Progresso de "Especialidades" (PH-198) — bonus de dano/defesa por tipo
+   * elemental do JOGADOR (nunca do inimigo, ver combatSystem.ts#computeDamage,
+   * que so aplica quando `entity.kind === 'player'`). `null` = sem bonus
+   * nenhum (equivalente a todo tipo no nivel 0).
+   *
+   * Preenchido em `buildMapWorld`/`buildHospitalWorld` a partir de
+   * `gameState.especialidades` no momento da construcao do mundo — nao e
+   * relido a cada tick. Igual a `pessimista`, um upgrade comprado no meio de
+   * uma janela de combate so vale na PROXIMA reconstrucao de mundo (proximo
+   * flush/entrada de mapa), nunca no meio dela.
+   */
+  especialidadeNiveis: EspecialidadeNiveis | null
   /**
    * O clima do LUGAR — o que a sala tem quando nenhum golpe esta em campo
    * (PH-140).

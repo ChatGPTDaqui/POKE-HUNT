@@ -9,6 +9,7 @@
 // inteiros numa acao tao pequena quanto travar um item.
 import { supabase } from '@/lib/supabase'
 import { chaveDaMissao } from '@/data/missoes'
+import { stoneItemId } from '@/data/stones'
 import type { ElementType } from '@/data/generated/types'
 import { mochilaCarregada, useMochilaStore } from '@/stores/mochilaStore'
 import { rowToPoke } from './playerMapper'
@@ -105,6 +106,26 @@ async function refetchItem(itemId: string): Promise<void> {
 function marcarMissaoReivindicada(tipo: ElementType, speciesId: string): void {
   useGameStateStore.setState((s) => ({
     missoesReivindicadas: { ...s.missoesReivindicadas, [chaveDaMissao(tipo, speciesId)]: true },
+  }))
+}
+
+async function refetchEspecialidade(tipo: string): Promise<void> {
+  const uid = await userIdAtual()
+  const { data, error } = await supabase
+    .from('player_especialidades')
+    .select('dano_nivel, defesa_nivel')
+    .eq('user_id', uid)
+    .eq('tipo', tipo)
+    .maybeSingle()
+  if (error) {
+    console.error(`refetchEspecialidade(${tipo}) falhou, mantendo estado local`, error)
+    return
+  }
+  useGameStateStore.setState((s) => ({
+    especialidades: {
+      ...s.especialidades,
+      [tipo]: { dano: data?.dano_nivel ?? 0, defesa: data?.defesa_nivel ?? 0 },
+    },
   }))
 }
 
@@ -212,6 +233,20 @@ const DESPACHO: Record<string, Despacho> = {
   venderItem: {
     chamar: rpc('vender_item', (a) => ({ p_item_id: a.itemId, p_qtd: a.qtd })),
     aoSucesso: async (a) => { await Promise.all([refetchGold(), refetchItem(a.itemId as string)]) },
+  },
+  subirNivelEspecialidade: {
+    // `especialidadeTipo`, e nao `tipo`: `acao.tipo` JA e o discriminador do
+    // despacho ('subirNivelEspecialidade') — usar o mesmo nome pro tipo
+    // elemental sobrescreveria o dispatch key silenciosamente.
+    chamar: rpc('subir_nivel_especialidade', (a) => ({ p_tipo: a.especialidadeTipo, p_trilha: a.trilha })),
+    aoSucesso: async (a) => {
+      const especialidadeTipo = a.especialidadeTipo as ElementType
+      await Promise.all([
+        refetchGold(),
+        refetchItem(stoneItemId(especialidadeTipo)),
+        refetchEspecialidade(especialidadeTipo),
+      ])
+    },
   },
   venderTodosItens: {
     chamar: rpc('vender_todos_itens', () => ({})),

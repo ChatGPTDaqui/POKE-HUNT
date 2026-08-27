@@ -10,6 +10,7 @@ import type { PokeInstance } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
 import { MAPS } from '@/data/maps'
 import { FAIXAS_INICIAIS } from '@/data/biomas'
+import { especialidadeNiveisDefault, type EspecialidadeNiveis } from '@/data/especialidades'
 
 // Limite de POKEs em campo — no vanilla so aparecia como comentario em
 // GameState.js ("poke instances, max 6") e como `team.length < 6` inline no
@@ -144,6 +145,7 @@ export interface GameStateData {
   // presente e `true` = reivindicada. A mesma especie pode estar em DUAS
   // cadeias (dual-type), e reivindicar numa nao reivindica a outra.
   missoesReivindicadas: Record<string, boolean>
+  especialidades: EspecialidadeNiveis
 }
 
 // Exportado porque o adaptador de persistencia precisa dos mesmos defaults
@@ -174,5 +176,6 @@ export function defaultGameStateData(): GameStateData {
     pokedexKills: {},
     unlockedContinents: [...FAIXAS_INICIAIS],
     missoesReivindicadas: {},
+    especialidades: especialidadeNiveisDefault(),
   }
 }

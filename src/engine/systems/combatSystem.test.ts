@@ -12,6 +12,7 @@ import { createPokeInstance, SPECIES } from '@/data/pokes'
 import { BASIC_ATTACK, getAbility, TURNO_SEGUNDOS, type Ability } from '@/data/abilities'
 import { golpesUtilizaveis } from '@/data/activeAbilities'
 import { typedAoeMoveKey } from '@/data/typedAoeMoves'
+import { especialidadeNiveisDefault } from '@/data/especialidades'
 import { createEnemyEntity } from '../entity'
 import { criarInimigoDeTeste } from '../testes/inimigoDeTeste'
 import { buildMapWorld } from '../simulation'
@@ -1085,5 +1086,111 @@ describe('golpe de multiplos acertos', () => {
   it('golpe normal continua com um acerto so', () => {
     const { world } = cenarioMultiAcerto('scratch')
     expect(umUsoDoGolpe(world)).toHaveLength(1)
+  })
+})
+
+// PH-198: os testes de `data/especialidades.test.ts` cobrem a MATEMATICA do
+// multiplicador isolada; estes cobrem a FIACAO — que `computeDamage` recebe
+// `world.especialidadeNiveis` de verdade e aplica no dano que sai do combate,
+// nao so numa funcao pura desacompanhada do resto do pipeline.
+describe('Especialidades (PH-198) aplicam no dano real do combate', () => {
+  it('bonus de ataque FIRE nivel 5 aumenta em ~5% o dano causado pelo jogador', () => {
+    function cenarioOfensivo(especialidadeNiveis: ReturnType<typeof especialidadeNiveisDefault> | null) {
+      const rng = createRng(7)
+      const counters = { entity: 1, effect: 1, pendingHit: 1 }
+      const jogadorPoke = createPokeInstance(rng, 'charmander', 50)
+      // Ember e o unico golpe ativo: dano previsivel, sempre FIRE (STAB).
+      jogadorPoke.activeAbilities = ['ember']
+      const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters }, undefined, especialidadeNiveis)
+      const player = world.player!
+      player.cooldowns = {}
+      player.globalCooldown = 0
+
+      const enemyPoke = createPokeInstance(rng, 'rattata', 50)
+      const enemyHpAntes = enemyPoke.hp
+      const enemy = createEnemyEntity(world.counters, {
+        poke: enemyPoke, x: player.x, y: player.y, encounterId: 'route_46_rattata',
+      })
+      enemy.state = 'engaged'
+      enemy.targetId = player.id
+      // Trava o contra-ataque: so o dano CAUSADO pelo jogador entra na medicao.
+      enemy.globalCooldown = 999
+      world.enemies = [enemy]
+      return { world, enemy, enemyHpAntes }
+    }
+
+    const niveisMax = especialidadeNiveisDefault()
+    niveisMax.FIRE = { dano: 5, defesa: 0 }
+
+    const semBonus = cenarioOfensivo(null)
+    updateCombat(semBonus.world, 0)
+    updateCombat(semBonus.world, 999)
+
+    const comBonus = cenarioOfensivo(niveisMax)
+    updateCombat(comBonus.world, 0)
+    updateCombat(comBonus.world, 999)
+
+    const danoSemBonus = semBonus.enemyHpAntes - semBonus.enemy.poke.hp
+    const danoComBonus = comBonus.enemyHpAntes - comBonus.enemy.poke.hp
+
+    // Mesma seed, mesma sequencia de chamadas dos dois lados -> os sorteios de
+    // critico/variacao de dano saem identicos, entao a diferenca so pode vir
+    // do multiplicador de Especialidade.
+    expect(danoSemBonus).toBeGreaterThan(0)
+    expect(danoComBonus).toBeGreaterThan(danoSemBonus)
+    expect(danoComBonus / danoSemBonus).toBeCloseTo(1.05, 2)
+  })
+
+  it('reducao de defesa NORMAL nivel 5 diminui em ~5% o dano recebido pelo jogador', () => {
+    function cenarioDefensivo(especialidadeNiveis: ReturnType<typeof especialidadeNiveisDefault> | null) {
+      const rng = createRng(9)
+      const counters = { entity: 1, effect: 1, pendingHit: 1 }
+      const jogadorPoke = createPokeInstance(rng, 'charmander', 50)
+      const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters }, undefined, especialidadeNiveis)
+      const player = world.player!
+      // Jogador nunca ataca: so o dano RECEBIDO entra na medicao.
+      player.globalCooldown = 999
+      const playerHpAntes = player.poke.hp
+
+      const enemyPoke = createPokeInstance(rng, 'rattata', 50)
+      const enemySpecies = SPECIES.rattata
+      // Toda a lista selvagem desligada -> cai no Ataque Basico, que herda o
+      // tipo da especie (NORMAL pro Rattata, STAB) — mesmo golpe previsivel
+      // dos dois lados.
+      enemyPoke.disabledAbilities = Object.fromEntries(
+        golpesUtilizaveis(enemyPoke, enemySpecies, true).map((id) => [id, true]),
+      )
+      const enemy = createEnemyEntity(world.counters, {
+        poke: enemyPoke, x: player.x, y: player.y, encounterId: 'route_46_rattata',
+      })
+      enemy.state = 'engaged'
+      enemy.targetId = player.id
+      enemy.cooldowns = {}
+      enemy.globalCooldown = 0
+      world.enemies = [enemy]
+      return { world, player, playerHpAntes }
+    }
+
+    const niveisMax = especialidadeNiveisDefault()
+    niveisMax.NORMAL = { dano: 0, defesa: 5 }
+
+    const semReducao = cenarioDefensivo(null)
+    updateCombat(semReducao.world, 0)
+    updateCombat(semReducao.world, 999)
+
+    const comReducao = cenarioDefensivo(niveisMax)
+    updateCombat(comReducao.world, 0)
+    updateCombat(comReducao.world, 999)
+
+    const danoSemReducao = semReducao.playerHpAntes - semReducao.player.poke.hp
+    const danoComReducao = comReducao.playerHpAntes - comReducao.player.poke.hp
+
+    expect(danoSemReducao).toBeGreaterThan(0)
+    expect(danoComReducao).toBeLessThan(danoSemReducao)
+    // Precisao menor que o teste ofensivo (1 casa, nao 2): o dano bruto aqui e
+    // pequeno o bastante (Rattata nivel 50 batendo com Ataque Basico) pra o
+    // arredondamento pra HP inteiro pesar no percentual — 5% de um numero
+    // pequeno e menos de 1 HP.
+    expect(danoComReducao / danoSemReducao).toBeCloseTo(0.95, 1)
   })
 })

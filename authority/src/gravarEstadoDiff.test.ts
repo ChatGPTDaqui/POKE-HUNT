@@ -67,6 +67,10 @@ function baselineDe(estado: GameStateData): PlayerSnapshot {
     // combate/simulacao) — vazio aqui de proposito, mesmo raciocinio de
     // `especialidades` nesse mesmo teste (PH-198).
     missoesReivindicadas: [],
+    // Especialidades nunca entra no diff do flush (so muda por RPC de menu,
+    // fora de combate/simulacao) — vazio aqui de proposito, ver nota de
+    // `gravarEstado` sobre o que este teste cobre.
+    especialidades: [],
   }
 }
 
