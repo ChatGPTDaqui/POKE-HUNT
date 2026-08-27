@@ -604,6 +604,19 @@ export async function avancarSalaManualmente(): Promise<void> {
 // dispararia uma chamada de rede por segundo.
 const INTERVALO_MINIMO_COMMIT_MS = 5000
 let ultimoCommit = 0
+// Trailing edge do debounce acima — achado revisando o proprio bug que este
+// arquivo documenta ("dou F5 e perco niveis"): o guard so tinha leading edge
+// (`return` puro dentro da janela), sem agendar nada pro fim dela. Um SEGUNDO
+// level-up a menos de 5s do primeiro (comum: POKE de nivel baixo, ou um abate
+// que cruza varios niveis de uma vez via `grantExp`) era descartado em
+// silencio — nada ficava agendado pra cobrir aquele ganho, e o jogador so
+// reconciliava no proximo gatilho normal (timer de 30s, /acao, mercado,
+// visibilitychange). Um F5 antes disso lia o ultimo estado persistido, sem
+// aquele nivel — exatamente o bug relatado, so que na FRESTA que o fix
+// original nao fechava. Sem parametro de proposito: o commit agendado le o
+// estado NA HORA que dispara, entao ja cobre qualquer level-up que tenha
+// acontecido no meio da espera, nao so o que a disparou.
+let commitAgendado: ReturnType<typeof setTimeout> | null = null
 
 /**
  * Grava o progresso AGORA, sem esperar o ciclo normal.
@@ -625,7 +638,19 @@ let ultimoCommit = 0
  */
 export async function commitAgora(): Promise<void> {
   const agora = Date.now()
-  if (agora - ultimoCommit < INTERVALO_MINIMO_COMMIT_MS) return
+  const restante = INTERVALO_MINIMO_COMMIT_MS - (agora - ultimoCommit)
+  if (restante > 0) {
+    // Ja tem um commit agendado pro fim desta janela — nao duplica o timer,
+    // ele ja vai cobrir este level-up (e qualquer outro que aconteca antes
+    // de disparar) igual.
+    if (commitAgendado == null) {
+      commitAgendado = setTimeout(() => {
+        commitAgendado = null
+        void commitAgora()
+      }, restante)
+    }
+    return
+  }
   ultimoCommit = agora
   if (servidorAtivo()) {
     // So faz sentido com uma sessao de hunt aberta; fora dela o `liquidar`
