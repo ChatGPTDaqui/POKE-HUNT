@@ -55364,6 +55364,10 @@ function stepWorld(world, dt, gameState, opts = {}) {
 			world.respawnTimer = world.mapDef.respawnDelay;
 		}
 	}
+	if (world.bossPendente) {
+		const bossVivo = world.enemies.find((e) => e.isBoss && e.poke.uid === world.bossPendente.uid);
+		if (bossVivo) world.bossPendente.hpAtual = bossVivo.poke.hp;
+	}
 	return kills;
 }
 //#endregion
@@ -56117,6 +56121,60 @@ function porLotesDeId(ids) {
 }
 var CONQUISTA_LANCE = "boss_lance";
 var MAX_SEGUNDOS_POR_FLUSH = 21600;
+/**
+* PH-217: reconstroi o `BossPendente` da linha da sessao pra passar ao
+* `buildMapWorld`, ou `null` quando nao ha boss pendente (`boss_uid` nulo).
+*
+* Espelho exato de `colunasDoBoss` — o que uma grava a outra le. Os `Number()`
+* cobrem o PostgREST devolver `numeric`/`int8` como string, igual ao resto de
+* `LinhaSessao`.
+*/
+function bossDaLinha(s) {
+	if (s.boss_uid == null) return null;
+	return {
+		uid: s.boss_uid,
+		speciesId: s.boss_species_id ?? "",
+		encounterId: s.boss_encounter_id ?? "",
+		level: Number(s.boss_level ?? 0),
+		ivs: {
+			hp: Number(s.boss_iv_hp ?? 0),
+			atkFis: Number(s.boss_iv_atk_fis ?? 0),
+			atkEsp: Number(s.boss_iv_atk_esp ?? 0),
+			def: Number(s.boss_iv_def ?? 0),
+			defEsp: Number(s.boss_iv_def_esp ?? 0),
+			speed: Number(s.boss_iv_speed ?? 0)
+		},
+		rarity: s.boss_rarity ?? "comum",
+		isShiny: Boolean(s.boss_is_shiny),
+		nature: s.boss_nature ?? void 0,
+		trait: s.boss_trait ?? void 0,
+		hpAtual: Number(s.boss_hp_atual ?? 0)
+	};
+}
+/**
+* PH-217: as 15 colunas `boss_*` do `game_sessions` pra gravar no flush — todas
+* do `bossPendente` vivo, ou todas `null` quando o boss ja foi resolvido
+* (morto/capturado) e a sala liberou o avanco.
+*/
+function colunasDoBoss(bp) {
+	return {
+		boss_uid: bp?.uid ?? null,
+		boss_species_id: bp?.speciesId ?? null,
+		boss_encounter_id: bp?.encounterId ?? null,
+		boss_level: bp?.level ?? null,
+		boss_iv_hp: bp?.ivs.hp ?? null,
+		boss_iv_atk_fis: bp?.ivs.atkFis ?? null,
+		boss_iv_atk_esp: bp?.ivs.atkEsp ?? null,
+		boss_iv_def: bp?.ivs.def ?? null,
+		boss_iv_def_esp: bp?.ivs.defEsp ?? null,
+		boss_iv_speed: bp?.ivs.speed ?? null,
+		boss_rarity: bp?.rarity ?? null,
+		boss_is_shiny: bp?.isShiny ?? null,
+		boss_nature: bp?.nature ?? null,
+		boss_trait: bp?.trait ?? null,
+		boss_hp_atual: bp?.hpAtual ?? null
+	};
+}
 var MARCA_DE_FLUSH_EXPIRA_MS = 3e4;
 var ESPERA_MAXIMA_POR_FLUSH_MS = 2500;
 var INTERVALO_DE_SONDAGEM_MS = 120;
@@ -56450,7 +56508,8 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 			chave: sessao.sala_chave,
 			abates: Number(sessao.sala_abates ?? 0),
 			ciclos: Number(sessao.ciclos ?? 0)
-		} : null
+		} : null,
+		bossPendente: bossDaLinha(sessao)
 	});
 	const offline = segundos > 120;
 	world.pessimista = offline;
@@ -56498,7 +56557,8 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		sala_indice: world.sala?.indice ?? 0,
 		sala_chave: world.sala?.chave ?? null,
 		sala_abates: world.sala?.abates ?? 0,
-		ciclos: world.sala?.ciclos ?? 0
+		ciclos: world.sala?.ciclos ?? 0,
+		...colunasDoBoss(world.bossPendente)
 	});
 	return {
 		segundosCreditados: segundos,
