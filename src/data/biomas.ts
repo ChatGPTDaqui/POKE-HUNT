@@ -421,6 +421,30 @@ export const BIOMA_POR_CHAVE: Record<string, BiomaDef> = Object.fromEntries(
   BIOMAS.map((b) => [b.chave, b])
 )
 
+/**
+ * PH-223: ordem canonica dos 12 biomas pro gate sequencial (PH-226/227) —
+ * vencer o boss ultimate do bioma N libera o bioma N+1. So existia como
+ * tabela no vault (`_Architecture.md`, brainstorm 16/08, referencia: sequencia
+ * de ginasios Kanto+Johto) — `BIOMAS` acima esta em ordem ARBITRARIA de
+ * insercao (campo_aberto, mata, marinho, ...), que NAO bate com esta ordem.
+ * Nao usar `BIOMAS.map(b => b.chave)` no lugar disto — e exatamente o furo que
+ * esta constante fecha.
+ */
+export const ORDEM_DOS_BIOMAS: readonly string[] = [
+  'campo_aberto',
+  'subterraneo',
+  'marinho',
+  'industrial',
+  'mata',
+  'aguas_interiores',
+  'urbano',
+  'gelido',
+  'aridos',
+  'sagrado',
+  'sombrio',
+  'igneo',
+]
+
 export const FAIXA_POR_ID: Record<string, FaixaDef> = Object.fromEntries(
   FAIXAS.map((f) => [f.id, f])
 )
