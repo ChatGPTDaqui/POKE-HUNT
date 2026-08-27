@@ -17,7 +17,7 @@ import type { ChatTab } from '@/stores/toastStore'
 export type ScreenName =
   | 'equipe' | 'mochila' | 'loja' | 'hunts' | 'pokedex'
   | 'wiki' | 'config' | 'correio' | 'bestiario' | 'tasks' | 'calc' | 'mercado'
-  | 'ranking' | 'tutoriais'
+  | 'ranking' | 'tutoriais' | 'especialidades'
 
 // Reexportado do toastStore em vez de redeclarado: as duas listas ja
 // divergiram uma vez (a aba "Mundo" mudou de dono e esta copia continuaria

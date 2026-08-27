@@ -267,8 +267,30 @@ export function ReservasRail() {
                   )}
                 </span>
 
-                <span className="flex flex-col leading-tight">
-                  <span className="text-[.68em] text-n300">Nv {poke.level}</span>
+                <span className="flex min-w-0 flex-col leading-tight">
+                  {/* ESPECIE E SELO DE KO (PH-193, item 5).
+                      O trilho dizia so `Nv 28`: pra saber QUAL POKE era, o
+                      jogador dependia da miniatura, que o PH-111 reduziu pela
+                      metade de proposito — o nome era o que faltava pra foto
+                      poder ser pequena.
+                      Nome e nivel dividem a MESMA linha porque a altura do card
+                      e ditada por esta coluna (ver o comentario de
+                      `TAMANHO_AMPLO`); uma linha nova multiplicaria por seis a
+                      altura do trilho inteiro.
+                      O `KO` e selo com fundo, nao so cor de texto: o PH-137
+                      registra que KO e o unico estado que muda o que se PODE
+                      FAZER com o POKE, e ele dependia so do `grayscale` — que
+                      some pra quem nao distingue saturacao e desaparece de vez
+                      contra uma foto ja acinzentada. */}
+                  <span className="flex min-w-0 items-center gap-[.25em] text-[.68em] text-n300">
+                    <span className="min-w-0 max-w-[5.5em] truncate font-medium">{especie.name}</span>
+                    <span className="shrink-0 text-n400">Nv {poke.level}</span>
+                    {desmaiado && (
+                      <span className="shrink-0 rounded-[.25em] bg-bad px-[.25em] text-[.85em] font-bold text-white">
+                        KO
+                      </span>
+                    )}
+                  </span>
                   {/* Barra de HP fina: e o dado que decide se vale trocar, e
                       ler "45/120" em 0.6em no celular nao funciona. */}
                   <span className="mt-[.15em] block h-[.22em] w-[2.6em] overflow-hidden rounded-full bg-n800">

@@ -59,6 +59,24 @@ function shortLabel(name: string): string {
     .slice(0, 3)
 }
 
+/**
+ * Sigla do golpe pro desempate de slots do MESMO tipo (PH-193, item 6).
+ *
+ * Nao reusa `shortLabel`: aquele quebra so em espaco, e nome com hifen —
+ * "Lanca-Chamas" — vira uma letra so. Com dois golpes Fire de nome hifenizado o
+ * "desempate" empatava. Aqui o hifen tambem separa palavra, e nome de palavra
+ * unica cai pras tres primeiras letras em vez de uma inicial solitaria.
+ *
+ * Nao garante unicidade absoluta (dois golpes "Lab..." do mesmo tipo ainda
+ * colidiriam). Nao vale complicar por isso: o criterio e ser distinguivel, e o
+ * tooltip/ficha continuam sendo a resposta exata.
+ */
+function siglaDoGolpe(name: string): string {
+  const palavras = name.split(/[\s-]+/).filter(Boolean)
+  if (palavras.length >= 2) return palavras.map((p) => p[0]).join('').toUpperCase().slice(0, 3)
+  return (palavras[0] ?? name).slice(0, 3).toUpperCase()
+}
+
 // Tamanho do slot por regime de largura. Duas coisas acontecem aqui:
 //
 // 1. O padrao caiu de 3.4em pra 2.6em (pedido explicito: icones menores).
@@ -141,6 +159,16 @@ export function AbilityHud() {
       )}
       <div className="flex flex-wrap justify-center gap-[.45em]">
       {abilities.map((ability) => {
+        // DESEMPATE SO QUANDO HA EMPATE (PH-193, item 6). O cabecalho deste
+        // arquivo assume o tradeoff de trocar o rotulo pelo icone do tipo; o
+        // que ele nao previu e que o pior caso — Charmeleon com tres golpes
+        // Fire — e comum, e ali a barra vira tres quadrados laranja iguais,
+        // separados so pelo dano da faixa de baixo.
+        //
+        // A sigla so aparece nos slots cujo tipo se repete NESTA barra. Com
+        // quatro tipos diferentes nada muda, que e o caso comum e onde gastar
+        // pixel com texto seria regressao.
+        const tipoRepetido = abilities.filter((a) => a.type === ability.type).length > 1
         const isOff = Boolean(disabled[ability.id])
         // TRES numeros, e os tres importam por motivos diferentes:
         //
@@ -269,6 +297,18 @@ export function AbilityHud() {
                 style={{ fontSize: fonteRotulo }}
               >
                 {(cdProprio > 0 ? cdProprio : cd).toFixed(1)}s
+              </span>
+            )}
+            {tipoRepetido && !isOff && (
+              // Mesma faixa de topo do `OFF`, e por isso ela so aparece com o
+              // golpe ligado: os dois nunca disputam o mesmo lugar, e entre
+              // "este golpe esta desligado" e "este e o Lanca-Chamas, nao a
+              // Labareda", o estado ganha.
+              <span
+                className="pointer-events-none absolute inset-x-0 top-0 z-[2] rounded-t-[.32em] bg-black/70 text-center font-bold tracking-[.06em] text-[#e5e5e5]"
+                style={{ fontSize: `calc(${fonteRotulo} * .78)` }}
+              >
+                {siglaDoGolpe(ability.name)}
               </span>
             )}
             {isOff && (

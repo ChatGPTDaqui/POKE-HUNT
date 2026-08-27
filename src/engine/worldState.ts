@@ -32,6 +32,7 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     sequenceCleared: false,
     countdownRemaining: null,
     sala: null,
+    bossPendente: null,
     salaCountdownRemaining: null,
     salaPendente: null,
     salaSobAutoridade: false,
@@ -45,5 +46,6 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     pessimista: false,
     clima: null,
     climaAmbiente: null,
+    especialidadeNiveis: null,
   }
 }

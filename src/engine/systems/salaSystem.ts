@@ -25,7 +25,7 @@
 // recomeca no ciclo 1, sala 1.
 import { weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
-import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, LOOT, type SubBiomaDef } from '@/data/biomas'
+import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, BIOMA_PILOTO_BOSS, LOOT, type SubBiomaDef } from '@/data/biomas'
 import { climaAmbienteDaSala, climaDeAmbiente, definirClimaDeAmbiente } from './climaAmbiente'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { getEncounter } from '@/data/enemies'
@@ -156,6 +156,23 @@ export function lootAtivo(sala: SalaAtiva | null, fallback: MapItemDrop[]): MapI
   return perfil ? LOOT[perfil] : fallback
 }
 
+export type TipoDeBoss = 'mini' | 'ultimate'
+
+/**
+ * PH-202: so o bioma piloto (BIOMA_PILOTO_BOSS) tem boss por enquanto. Salas
+ * 1-9 (indice 0-8) pedem mini-boss ao fechar a quota; a ultima sala (indice
+ * SALAS_POR_HUNT-1) pede o ultimate da faixa. Pura — nao sorteia nada, so
+ * decide QUAL boss a sala pede, se pedir algum. A entidade em si (RNG,
+ * criacao) fica em simulation.ts, que ja importa este modulo — colocar aqui
+ * criaria import circular.
+ */
+export function bossDaSala(sala: SalaAtiva | null): TipoDeBoss | null {
+  if (!sala) return null
+  const bioma = SUB_BIOMA_POR_CHAVE[sala.chave]?.bioma.chave
+  if (bioma !== BIOMA_PILOTO_BOSS) return null
+  return sala.indice >= SALAS_POR_HUNT - 1 ? 'ultimate' : 'mini'
+}
+
 export function nomeDaSala(sala: SalaAtiva | null): string | null {
   if (!sala) return null
   return SUB_BIOMA_POR_CHAVE[sala.chave]?.sub.nome ?? sala.chave
@@ -218,6 +235,15 @@ export function registrarAbate(world: WorldState, mapId: string, opts: { manualA
   // (server/src/progresso.ts#sala_abates) com numero que nunca reflete a
   // quota real.
   sala.abates = ABATES_POR_SALA
+  // PH-202/203: sala do bioma piloto nunca arma transicao por conta propria
+  // (nem no 30o abate normal, nem no proprio abate do boss) — quem arma e
+  // `resolverBossDaSala`, e so depois que o boss cair. Sem este corte, o 30o
+  // abate (quase sempre um inimigo comum, o boss ainda nem nasceu) armava a
+  // contagem regressiva NA HORA e `aplicarTransicaoDeSala` 3s depois zerava
+  // `world.enemies` — apagando o boss que `garantirTransicaoDeQuotaFechada`
+  // ainda ia criar no tick seguinte — e a sala avancava sem o jogador nunca
+  // ter visto o boss resolver nada.
+  if (bossDaSala(sala)) return { avancou: false, fechouCiclo: false }
   // Toggle ligado + janela curta (jogador ativo): fecha a quota mas nao
   // sorteia nem arma a transicao — fica em 30/30 ate o avanco manual
   // (`avancarSalaManualmente`, endpoint PH-178). Cap acima ja preservado:
@@ -267,6 +293,19 @@ function armarTransicaoDeSala(world: WorldState, mapId: string): AvancoDeSala {
 }
 
 /**
+ * PH-202/203: chamado por `handleEnemyDefeated` (simulation.ts) quando o
+ * abate era o do boss da sala — o UNICO gatilho que pode armar a transicao
+ * de uma sala do bioma piloto (`registrarAbate` se recusa, ver acima). Sob
+ * autoridade remota o cliente nao arma nada, so limpa o boss local: quem
+ * decide quando a sala avanca e o flush do servidor, igual toda outra sala.
+ */
+export function resolverBossDaSala(world: WorldState, mapId: string): void {
+  world.bossPendente = null
+  if (world.salaSobAutoridade) return
+  armarTransicaoDeSala(world, mapId)
+}
+
+/**
  * Quota JA fechada na abertura da janela: arma a transicao sem esperar um abate
  * novo. Chamado por `stepWorld` no primeiro tick.
  *
@@ -288,12 +327,31 @@ function armarTransicaoDeSala(world: WorldState, mapId: string): AvancoDeSala {
  * cabe em qualquer duracao. Isso tambem fecha o caso que ja estava documentado
  * como "autocurativo no proximo abate" — ele nao era, quando nao havia proximo.
  */
-export function garantirTransicaoDeQuotaFechada(world: WorldState, mapId: string, dt = 0, manualAdvance = false): void {
+export function garantirTransicaoDeQuotaFechada(
+  world: WorldState,
+  mapId: string,
+  dt = 0,
+  manualAdvance = false,
+  // PH-202/203: injetado de fora (simulation.ts) pra evitar import circular
+  // — a criacao do boss usa `world.rng`/createPokeInstance/createEnemyEntity,
+  // que ja importam este arquivo. Devolve true quando a sala pede boss
+  // (acabou de spawnar um novo, ou ja tinha um vivo) — nesse caso o avanco
+  // fica bloqueado INCONDICIONAL, antes de qualquer outra logica desta
+  // funcao, inclusive o toggle de avanco manual e a espera de autoridade.
+  garantirBossDaSala?: () => boolean,
+): void {
   const sala = world.sala
   if (!sala || sala.abates < ABATES_POR_SALA) {
     world.salaEsperaDaAutoridade = 0
     return
   }
+  // PH-202/203: transicao ja armada (o proprio abate do boss chamou
+  // `resolverBossDaSala` neste MESMO tick, antes deste gate rodar de novo no
+  // proximo) — nao reavaliar o boss. Sem este corte, `bossPendente` ja limpo
+  // + sala ainda sem avancar fazia o gate ler "precisa de boss" de novo e
+  // sortear um SEGUNDO boss por cima da transicao que ja estava a caminho.
+  if (world.salaPendente || world.salaCountdownRemaining != null) return
+  if (garantirBossDaSala?.()) return
   if (world.salaSobAutoridade) {
     // Sob autoridade remota quem sorteia e o servidor, e o cliente espera o
     // flush. Mas nao pra sempre: se a resposta nao trouxer sala nova nesta
