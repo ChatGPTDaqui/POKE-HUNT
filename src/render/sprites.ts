@@ -19,6 +19,7 @@ import { footOffsetFraction } from '@/data/spriteFootOffsets'
 import { hpBarFillColor } from '@/data/hpBar'
 import { AURA_COLORS } from '@/data/auraColors'
 import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
+import { colorForType } from '@/data/typeColors'
 import { impactShapeForType, type ImpactShape } from '@/data/impactShapes'
 import {
   captureAnimFrameDuration,
@@ -41,6 +42,23 @@ const IV_MAX = 31
 
 function getSpecies(entity: WorldEntity): Species {
   return SPECIES[entity.poke.speciesId]
+}
+
+// PH-228: `isBoss` so existe em EnemyEntity (WorldEntity tambem cobre o
+// player) — `in` narrowing pra nao quebrar o union. Sistema separado do
+// LEGENDARY_SPECIES_IDS que drawHpBar ja usava (Modo Pesadelo, boss por
+// especie fixa) — os dois se somam, nao se substituem.
+function ehBoss(entity: WorldEntity): boolean {
+  return 'isBoss' in entity && entity.isBoss === true
+}
+
+// Mesmo fator nos 3 lugares que multiplicam scaleForSpecies (spriteBounds,
+// visualTopOffset, sombra) — sprite maior precisa da sombra/HP-bar/name-tag
+// acompanhando, senao a barra fica flutuando longe da cabeca do boss.
+const BOSS_SPRITE_SCALE = 1.4
+
+function effectiveScale(entity: WorldEntity): number {
+  return scaleForSpecies(getSpecies(entity).id) * (ehBoss(entity) ? BOSS_SPRITE_SCALE : 1)
 }
 
 function maxHp(entity: WorldEntity): number {
@@ -238,7 +256,7 @@ interface SpriteBounds {
 function spriteBounds(entity: WorldEntity): SpriteBounds | null {
   if (!entity.battleAnim) return null
   const anim = entity.battleAnim
-  const scale = scaleForSpecies(getSpecies(entity).id)
+  const scale = effectiveScale(entity)
   const footFraction = footOffsetFraction(getSpecies(entity).id)
   const destW = anim.frameWidth * scale
   const destH = anim.frameHeight * scale
@@ -385,7 +403,7 @@ function drawAura(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
 
 function visualTopOffset(entity: WorldEntity): number {
   if (!entity.battleAnim) return entity.radius
-  const scale = scaleForSpecies(getSpecies(entity).id)
+  const scale = effectiveScale(entity)
   const footFraction = footOffsetFraction(getSpecies(entity).id)
   return entity.battleAnim.frameHeight * (scale * (0.5 + footFraction) - footFraction)
 }
@@ -393,7 +411,7 @@ function visualTopOffset(entity: WorldEntity): number {
 function drawShadow(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
   const groundY = entity.y + groundOffset(entity)
   const baseWidth = entity.battleAnim
-    ? entity.battleAnim.frameWidth * scaleForSpecies(getSpecies(entity).id)
+    ? entity.battleAnim.frameWidth * effectiveScale(entity)
     : entity.radius * 2
   const rx = baseWidth * 0.32
   ctx.save()
@@ -404,8 +422,42 @@ function drawShadow(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
   ctx.restore()
 }
 
+// PH-228: aura de "isso e boss", separada de `drawAura` (que sinaliza IV
+// maximizado — semantica diferente, um boss com IV normal nao devia ganhar
+// halo de raridade que ele nao tem). Pulso pelo relogio de parede, mesmo
+// padrao de CICLO_SIMBOLO_MS abaixo — enfeite que roda igual com o jogo
+// pausado atras de um menu.
+const AURA_DE_BOSS_CICLO_MS = 1600
+const AURA_DE_BOSS_RAIO_MIN = 0.85
+const AURA_DE_BOSS_RAIO_MAX = 1.05
+
+function drawBossAura(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
+  if (!ehBoss(entity)) return
+  const cor = colorForType(getSpecies(entity).type)
+  const bounds = spriteBounds(entity)
+  const raioBase = bounds ? Math.max(bounds.w, bounds.h) * 0.55 : entity.radius * 1.8
+  const fase = (performance.now() % AURA_DE_BOSS_CICLO_MS) / AURA_DE_BOSS_CICLO_MS
+  // Onda triangular (sobe e desce) em vez de senoidal — barato e a diferenca
+  // nao e perceptivel num halo desse tamanho.
+  const pulso = fase < 0.5 ? fase * 2 : 2 - fase * 2
+  const raio = raioBase * (AURA_DE_BOSS_RAIO_MIN + (AURA_DE_BOSS_RAIO_MAX - AURA_DE_BOSS_RAIO_MIN) * pulso)
+  const centroY = entity.y - visualTopOffset(entity) * 0.5
+
+  ctx.save()
+  const grad = ctx.createRadialGradient(entity.x, centroY, 0, entity.x, centroY, raio)
+  grad.addColorStop(0, `${cor}66`)
+  grad.addColorStop(0.7, `${cor}33`)
+  grad.addColorStop(1, `${cor}00`)
+  ctx.fillStyle = grad
+  ctx.beginPath()
+  ctx.arc(entity.x, centroY, raio, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.restore()
+}
+
 export function drawEntity(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
   drawShadow(ctx, entity)
+  drawBossAura(ctx, entity)
   drawAura(ctx, entity)
   const drewSprite = Boolean(entity.battleAnim) && drawBattleSprite(ctx, entity)
   // O placeholder geometrico (triangulo/circulo colorido) e pra especie que NAO
@@ -504,7 +556,10 @@ const BOSS_HP_BAR_WIDTH_MULTIPLIER = 5
 const BOSS_HP_BAR_HEIGHT_MULTIPLIER = 2
 
 export function drawHpBar(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
-  const isBoss = LEGENDARY_SPECIES_IDS.includes(getSpecies(entity).id)
+  // PH-228: mesma barra grande que o Modo Pesadelo ja usa pros bosses por
+  // especie fixa (LEGENDARY_SPECIES_IDS) — o boss por sala/andar (isBoss)
+  // entra no mesmo tratamento visual, os dois sistemas nao se excluem.
+  const isBoss = ehBoss(entity) || LEGENDARY_SPECIES_IDS.includes(getSpecies(entity).id)
   const width = HP_BAR_WIDTH * (isBoss ? BOSS_HP_BAR_WIDTH_MULTIPLIER : 1)
   const height = HP_BAR_HEIGHT * (isBoss ? BOSS_HP_BAR_HEIGHT_MULTIPLIER : 1)
   const x = entity.x - width / 2
@@ -529,9 +584,14 @@ export function drawHpBar(ctx: CanvasRenderingContext2D, entity: WorldEntity): v
 
 const SHINY_NAME_COLOR = '#b366ff'
 
+// PH-228: cor propria pra distinguir do amarelo de shiny e do branco normal —
+// vermelho/dourado le como "aviso/destaque", nao como raridade de captura.
+const BOSS_TAG_COLOR = '#ff4d4d'
+
 export function drawNameLevelTag(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
   const halfHeight = visualTopOffset(entity)
   const isShiny = entity.poke.isShiny
+  const isBoss = ehBoss(entity)
   const name = isShiny ? `✨ ${getSpecies(entity).name}` : getSpecies(entity).name
   ctx.save()
   ctx.font = '9px monospace'
@@ -546,6 +606,12 @@ export function drawNameLevelTag(ctx: CanvasRenderingContext2D, entity: WorldEnt
   ctx.strokeText(name, entity.x, entity.y - halfHeight - 26)
   ctx.fillStyle = isShiny ? SHINY_NAME_COLOR : '#f1f1f6'
   ctx.fillText(name, entity.x, entity.y - halfHeight - 26)
+  if (isBoss) {
+    ctx.font = 'bold 9px monospace'
+    ctx.strokeText('★ BOSS ★', entity.x, entity.y - halfHeight - 37)
+    ctx.fillStyle = BOSS_TAG_COLOR
+    ctx.fillText('★ BOSS ★', entity.x, entity.y - halfHeight - 37)
+  }
   ctx.restore()
 }
 
