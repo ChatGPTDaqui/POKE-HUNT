@@ -922,10 +922,20 @@ export async function aplicarFlush(
   // `gravarEstado` (playerUpdatedAt) so detecta a colisao — nao evita que ELE
   // seja quem perde e joga a simulacao fora. `aguardarFlushEmAndamento` (em
   // `comEstadoParaEscrita`) e quem usa esta marca pra esperar em vez de correr.
-  const [reivindicada] = await atualizarRetornando<LinhaSessao>(
+  //
+  // `&select=id` (PH-219): o `return=representation` de `atualizarRetornando`
+  // continua OBRIGATORIO aqui — e a resposta VAZIA que denuncia a corrida
+  // perdida, e com `return=minimal` isso seria indistinguivel de sucesso. Mas a
+  // linha em si nunca e lida: o unico uso de `reivindicada` e o teste de
+  // verdade logo abaixo. Sem `select`, o PostgREST devolvia as 20+ colunas da
+  // sessao (`rng_state`, `sala_*`, `sequence_*`, `boss_*`) a cada flush — 439 B
+  // no fio contra 47 B, medido gzipado em producao em 27/08, ~11% do egress do
+  // caminho de flush inteiro. Se um dia algum campo da linha reivindicada for
+  // preciso, o que cresce e o `select`, junto do tipo.
+  const [reivindicada] = await atualizarRetornando<Pick<LinhaSessao, 'id'>>(
     cfg,
     `game_sessions?id=eq.${sessao.id}&closed_at=is.null`
-    + `&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}`,
+    + `&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}&select=id`,
     { last_flush_at: new Date(agora).toISOString(), flushing_since: new Date(agora).toISOString() },
   )
   if (!reivindicada) return FLUSH_OCUPADO
