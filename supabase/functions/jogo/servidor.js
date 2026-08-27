@@ -31519,6 +31519,29 @@ var GEOMETRIA = {
 	]
 };
 Object.fromEntries(BIOMAS.map((b) => [b.chave, b]));
+/**
+* PH-223: ordem canonica dos 12 biomas pro gate sequencial (PH-226/227) —
+* vencer o boss ultimate do bioma N libera o bioma N+1. So existia como
+* tabela no vault (`_Architecture.md`, brainstorm 16/08, referencia: sequencia
+* de ginasios Kanto+Johto) — `BIOMAS` acima esta em ordem ARBITRARIA de
+* insercao (campo_aberto, mata, marinho, ...), que NAO bate com esta ordem.
+* Nao usar `BIOMAS.map(b => b.chave)` no lugar disto — e exatamente o furo que
+* esta constante fecha.
+*/
+var ORDEM_DOS_BIOMAS = [
+	"campo_aberto",
+	"subterraneo",
+	"marinho",
+	"industrial",
+	"mata",
+	"aguas_interiores",
+	"urbano",
+	"gelido",
+	"aridos",
+	"sagrado",
+	"sombrio",
+	"igneo"
+];
 function biomaProgressDefault() {
 	return {
 		faixa1: 0,
@@ -54352,16 +54375,19 @@ function lootAtivo(sala, fallback) {
 	return perfil ? LOOT[perfil] : fallback;
 }
 /**
-* PH-202: so o bioma piloto (BIOMA_PILOTO_BOSS) tem boss por enquanto. Salas
-* 1-9 (indice 0-8) pedem mini-boss ao fechar a quota; a ultima sala (indice
-* SALAS_POR_HUNT-1) pede o ultimate da faixa. Pura — nao sorteia nada, so
-* decide QUAL boss a sala pede, se pedir algum. A entidade em si (RNG,
-* criacao) fica em simulation.ts, que ja importa este modulo — colocar aqui
-* criaria import circular.
+* PH-202/225: todo bioma em ORDEM_DOS_BIOMAS tem boss (pivo 27/08 sobre o
+* "fora de escopo" original de 16/08, que limitava a so o bioma piloto —
+* o gate sequencial de PH-207/226 nao tinha efeito nenhum com so 1 bioma,
+* o ultimo da ordem, tendo boss). Salas 1-9 (indice 0-8) pedem mini-boss ao
+* fechar a quota; a ultima sala (indice SALAS_POR_HUNT-1) pede o ultimate da
+* faixa. Pura — nao sorteia nada, so decide QUAL boss a sala pede, se pedir
+* algum. A entidade em si (RNG, criacao) fica em simulation.ts, que ja
+* importa este modulo — colocar aqui criaria import circular.
 */
 function bossDaSala(sala) {
 	if (!sala) return null;
-	if (SUB_BIOMA_POR_CHAVE[sala.chave]?.bioma.chave !== "igneo") return null;
+	const bioma = SUB_BIOMA_POR_CHAVE[sala.chave]?.bioma.chave;
+	if (!bioma || !ORDEM_DOS_BIOMAS.includes(bioma)) return null;
 	return sala.indice >= 9 ? "ultimate" : "mini";
 }
 function nomeDaSala(sala) {
@@ -55098,7 +55124,7 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis)
 	const enemies = [];
 	let bossPendente = null;
 	if (!countdownRemaining && !sequenceCleared) {
-		const tipoDeBoss = bossDaSala(sala);
+		const tipoDeBoss = sala && sala.abates >= 30 ? bossDaSala(sala) : null;
 		if (tipoDeBoss) {
 			const { enemy, pendente } = criarEntidadeDoBoss(base, mapDef, {
 				pool,

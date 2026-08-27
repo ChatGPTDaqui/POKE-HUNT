@@ -25,7 +25,7 @@
 // recomeca no ciclo 1, sala 1.
 import { weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
-import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, BIOMA_PILOTO_BOSS, LOOT, type SubBiomaDef } from '@/data/biomas'
+import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS, LOOT, type SubBiomaDef } from '@/data/biomas'
 import { climaAmbienteDaSala, climaDeAmbiente, definirClimaDeAmbiente } from './climaAmbiente'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { getEncounter } from '@/data/enemies'
@@ -159,17 +159,19 @@ export function lootAtivo(sala: SalaAtiva | null, fallback: MapItemDrop[]): MapI
 export type TipoDeBoss = 'mini' | 'ultimate'
 
 /**
- * PH-202: so o bioma piloto (BIOMA_PILOTO_BOSS) tem boss por enquanto. Salas
- * 1-9 (indice 0-8) pedem mini-boss ao fechar a quota; a ultima sala (indice
- * SALAS_POR_HUNT-1) pede o ultimate da faixa. Pura — nao sorteia nada, so
- * decide QUAL boss a sala pede, se pedir algum. A entidade em si (RNG,
- * criacao) fica em simulation.ts, que ja importa este modulo — colocar aqui
- * criaria import circular.
+ * PH-202/225: todo bioma em ORDEM_DOS_BIOMAS tem boss (pivo 27/08 sobre o
+ * "fora de escopo" original de 16/08, que limitava a so o bioma piloto —
+ * o gate sequencial de PH-207/226 nao tinha efeito nenhum com so 1 bioma,
+ * o ultimo da ordem, tendo boss). Salas 1-9 (indice 0-8) pedem mini-boss ao
+ * fechar a quota; a ultima sala (indice SALAS_POR_HUNT-1) pede o ultimate da
+ * faixa. Pura — nao sorteia nada, so decide QUAL boss a sala pede, se pedir
+ * algum. A entidade em si (RNG, criacao) fica em simulation.ts, que ja
+ * importa este modulo — colocar aqui criaria import circular.
  */
 export function bossDaSala(sala: SalaAtiva | null): TipoDeBoss | null {
   if (!sala) return null
   const bioma = SUB_BIOMA_POR_CHAVE[sala.chave]?.bioma.chave
-  if (bioma !== BIOMA_PILOTO_BOSS) return null
+  if (!bioma || !ORDEM_DOS_BIOMAS.includes(bioma)) return null
   return sala.indice >= SALAS_POR_HUNT - 1 ? 'ultimate' : 'mini'
 }
 
