@@ -187,6 +187,11 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     // `reordenarReservas`: o tipo exige, e um stub que divergisse da regra do
     // navegador seria uma diferenca esperando pra ser descoberta.
     setEspecialidadeNivel: (tipo, trilha, nivel) => { s.especialidades[tipo][trilha] = nivel },
+    // PH-226: ESTA a simulacao chama de verdade — vencer o boss ultimate
+    // avanca o indice dentro de handleEnemyDefeated (simulation.ts). Precisa
+    // do mesmo comportamento nos dois lados (resim do servidor E predicao
+    // do cliente rodam o mesmo handleEnemyDefeated).
+    setBiomaProgress: (faixa, indice) => { s.biomaProgress[faixa as keyof typeof s.biomaProgress] = indice },
 
     // ----- acoes de UI: existem pro tipo fechar, nao sao usadas na simulacao -----
     setAutoToggle: (key, value) => { s.autoToggles[key] = value },

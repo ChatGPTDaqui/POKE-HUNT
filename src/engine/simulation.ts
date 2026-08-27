@@ -34,7 +34,7 @@ import { rarityOf, realceDaRaridade } from '@/data/rarity'
 import { ESPERA_DE_TROCA_SEGUNDOS } from '@/data/huntTypes'
 import { formatStatGains } from '@/data/statLabels'
 import type { EspecialidadeNiveis } from '@/data/especialidades'
-import { ABATES_POR_SALA } from '@/data/biomas'
+import { ABATES_POR_SALA, SALAS_POR_HUNT, ORDEM_DOS_BIOMAS, SUB_BIOMA_POR_CHAVE, type BiomaProgress } from '@/data/biomas'
 
 import { createPlayerEntity, createEnemyEntity, isDead, takeDamage } from './entity'
 import { createWorldEffect } from './effect'
@@ -356,6 +356,29 @@ function garantirBossDaSala(
   world.enemies.push(enemy)
   world.bossPendente = pendente
   return true
+}
+
+/**
+ * PH-226: vencer (matar OU capturar) o boss ULTIMATE avanca o indice de
+ * `biomaProgress` da faixa atual — SO se o bioma resolvido for exatamente o
+ * proximo esperado na ordem canonica (`ORDEM_DOS_BIOMAS`). Fora de ordem
+ * (nao deveria acontecer com o enforcement de PH-227, mas e defesa em
+ * profundidade — o motor nao confia cegamente no proprio estado do mundo)
+ * nao mexe no indice: silencioso de proposito, mesma familia de decisao de
+ * `resolverBossDaSala` nao logar/travar em cima de estado inconsistente.
+ *
+ * Chamado de dentro de `handleEnemyDefeated`, entao roda IGUAL nos dois
+ * lados que rodam esse motor — resim do servidor e predicao do cliente.
+ */
+function avancarBiomaProgressSeForOProximo(world: WorldState, gameState: GameStateStore): void {
+  const bioma = SUB_BIOMA_POR_CHAVE[world.sala?.chave ?? '']?.bioma.chave
+  if (!bioma) return
+  const indice = ORDEM_DOS_BIOMAS.indexOf(bioma)
+  if (indice === -1) return
+  const faixa = (world.mapDef?.continent ?? 'faixa1') as keyof BiomaProgress
+  const atual = gameState.biomaProgress[faixa] ?? 0
+  if (atual !== indice) return
+  gameState.setBiomaProgress(faixa, indice + 1)
 }
 
 function spawnEnemyAt(
@@ -918,7 +941,10 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
   // desarmar o bloqueio. `registrarAbate` (chamado logo depois, mesmo tick,
   // pro proprio abate deste boss) se recusa a arma-la de novo por conta
   // propria — ver salaSystem.ts#registrarAbate.
-  if (enemy.isBoss) resolverBossDaSala(world, world.mapDef!.id)
+  if (enemy.isBoss) {
+    if (world.sala?.indice === SALAS_POR_HUNT - 1) avancarBiomaProgressSeForOProximo(world, gameState)
+    resolverBossDaSala(world, world.mapDef!.id)
+  }
 
   return {
     gold: loot.gold + ouroDeAutoVenda,

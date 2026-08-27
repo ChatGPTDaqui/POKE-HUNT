@@ -231,3 +231,78 @@ describe('boss bloqueia o avanco de sala (PH-202)', () => {
     expect(reconstruido.bossPendente).toEqual(bossSalvo)
   })
 })
+
+// PH-226: vencer (matar OU capturar) o boss ULTIMATE avanca o indice de
+// biomaProgress da faixa — SO se o bioma resolvido for exatamente o proximo
+// esperado na ordem canonica. `mata` (HUNT deste arquivo) e o indice 4 de
+// ORDEM_DOS_BIOMAS (campo_aberto, subterraneo, marinho, industrial, mata,
+// ...).
+describe('avanco de biomaProgress ao vencer o boss ultimate (PH-226)', () => {
+  const INDICE_DE_MATA = 4
+
+  beforeEach(() => {
+    useGameStateStore.getState().resetToDefaults()
+  })
+
+  it('bioma esperado (indice bate com biomaProgress atual): avanca +1', () => {
+    useGameStateStore.getState().setBiomaProgress('faixa1', INDICE_DE_MATA)
+    const world = mundo(70)
+    world.sala = { indice: SALAS_POR_HUNT - 1, chave: 'jungle', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.enemies = []
+    world.respawnTimer = 999
+    const gameState = useGameStateStore.getState()
+
+    stepWorld(world, 0.1, gameState, { silent: true })
+    const boss = world.enemies.find((e) => e.isBoss)!
+    handleEnemyDefeated(world, boss, gameState, { silent: true })
+
+    expect(useGameStateStore.getState().biomaProgress.faixa1).toBe(INDICE_DE_MATA + 1)
+  })
+
+  it('bioma fora de ordem (biomaProgress nao bate): NAO avanca — defesa em profundidade', () => {
+    useGameStateStore.getState().setBiomaProgress('faixa1', 0) // esperava campo_aberto, nao mata
+    const world = mundo(71)
+    world.sala = { indice: SALAS_POR_HUNT - 1, chave: 'jungle', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.enemies = []
+    world.respawnTimer = 999
+    const gameState = useGameStateStore.getState()
+
+    stepWorld(world, 0.1, gameState, { silent: true })
+    const boss = world.enemies.find((e) => e.isBoss)!
+    handleEnemyDefeated(world, boss, gameState, { silent: true })
+
+    expect(useGameStateStore.getState().biomaProgress.faixa1).toBe(0)
+  })
+
+  it('vencer o MINI-boss (nao ultimate) nao mexe em biomaProgress', () => {
+    useGameStateStore.getState().setBiomaProgress('faixa1', INDICE_DE_MATA)
+    const world = mundo(72)
+    world.sala = { indice: 0, chave: 'jungle', abates: ABATES_POR_SALA, ciclos: 0 } // sala 1, nao 10
+    world.enemies = []
+    world.respawnTimer = 999
+    const gameState = useGameStateStore.getState()
+
+    stepWorld(world, 0.1, gameState, { silent: true })
+    const boss = world.enemies.find((e) => e.isBoss)!
+    handleEnemyDefeated(world, boss, gameState, { silent: true })
+
+    expect(useGameStateStore.getState().biomaProgress.faixa1).toBe(INDICE_DE_MATA)
+  })
+
+  it('faixa errada (biomaProgress.faixa2 nao e tocado por uma hunt de faixa1)', () => {
+    useGameStateStore.getState().setBiomaProgress('faixa1', INDICE_DE_MATA)
+    useGameStateStore.getState().setBiomaProgress('faixa2', 99)
+    const world = mundo(73)
+    world.sala = { indice: SALAS_POR_HUNT - 1, chave: 'jungle', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.enemies = []
+    world.respawnTimer = 999
+    const gameState = useGameStateStore.getState()
+
+    stepWorld(world, 0.1, gameState, { silent: true })
+    const boss = world.enemies.find((e) => e.isBoss)!
+    handleEnemyDefeated(world, boss, gameState, { silent: true })
+
+    expect(useGameStateStore.getState().biomaProgress.faixa1).toBe(INDICE_DE_MATA + 1)
+    expect(useGameStateStore.getState().biomaProgress.faixa2).toBe(99)
+  })
+})
