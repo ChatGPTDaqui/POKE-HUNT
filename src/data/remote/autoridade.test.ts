@@ -19,7 +19,7 @@ vi.mock('./servidor', async () => {
 import { ErroServidor, servidor } from './servidor'
 import {
   abrirSessaoDeHunt, liquidar, pararFlushPeriodico, registrarEncerramentoDeSessao,
-  INTERVALO_FLUSH_MS, INTERVALO_FLUSH_MAX_MS,
+  INTERVALO_FLUSH_MS, INTERVALO_FLUSH_MAX_MS, commitAgora,
 } from './autoridade'
 import { LIMIAR_OFFLINE_SEGUNDOS } from '@/engine/simulation'
 import { useToastStore } from '@/stores/toastStore'
@@ -200,5 +200,75 @@ describe('ritmo adaptativo do flush', () => {
     mock.flush.mockClear()
     await vi.advanceTimersByTimeAsync(INTERVALO_FLUSH_MS)
     expect(mock.flush).toHaveBeenCalledTimes(1)
+  })
+})
+
+// Bug relatado: "dou F5 e perco niveis". `commitAgora` ja existia pra isso
+// (comentario no proprio arquivo), mas o debounce de 5s so tinha leading
+// edge: um SEGUNDO level-up dentro da janela era descartado em silencio, sem
+// nada agendado pra cobrir aquele ganho — exatamente a fresta que o F5 cai
+// dentro. `vi.setSystemTime` com uma data bem no futuro em cada teste evita
+// que o `ultimoCommit` (singleton do modulo) sobreviva de um teste pro outro.
+describe('commitAgora — trailing edge do debounce (bug "F5 perde nivel")', () => {
+  const janela = { estado: {}, resumo: { kills: 0, gold: 0, xp: 0 } }
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.clearAllMocks()
+    pararFlushPeriodico()
+  })
+  afterEach(() => {
+    pararFlushPeriodico()
+    vi.useRealTimers()
+  })
+
+  it('segundo commit dentro da janela agenda um trailing em vez de descartar', async () => {
+    vi.setSystemTime(new Date('2030-01-01T00:00:00Z'))
+    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'route_46' })
+    mock.flush.mockResolvedValue(janela)
+    await abrirSessaoDeHunt('route_46', 'poke-1')
+    mock.flush.mockClear()
+
+    await commitAgora() // primeiro: passa direto
+    expect(mock.flush).toHaveBeenCalledTimes(1)
+
+    await commitAgora() // segundo, <5s depois: suprimido — mas AGENDADO
+    expect(mock.flush).toHaveBeenCalledTimes(1)
+
+    await vi.advanceTimersByTimeAsync(5000)
+    expect(mock.flush).toHaveBeenCalledTimes(2) // o trailing disparou
+  })
+
+  it('varios commits suprimidos na mesma janela agendam so UM trailing', async () => {
+    vi.setSystemTime(new Date('2030-01-02T00:00:00Z'))
+    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'route_46' })
+    mock.flush.mockResolvedValue(janela)
+    await abrirSessaoDeHunt('route_46', 'poke-1')
+    mock.flush.mockClear()
+
+    await commitAgora()
+    expect(mock.flush).toHaveBeenCalledTimes(1)
+
+    await commitAgora()
+    await commitAgora()
+    await commitAgora()
+    expect(mock.flush).toHaveBeenCalledTimes(1)
+
+    await vi.advanceTimersByTimeAsync(5000)
+    expect(mock.flush).toHaveBeenCalledTimes(2) // 1 trailing, nao 4
+  })
+
+  it('sem chamada suprimida, nao ha trailing (nao inventa flush sozinho)', async () => {
+    vi.setSystemTime(new Date('2030-01-03T00:00:00Z'))
+    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'route_46' })
+    mock.flush.mockResolvedValue(janela)
+    await abrirSessaoDeHunt('route_46', 'poke-1')
+    mock.flush.mockClear()
+
+    await commitAgora()
+    expect(mock.flush).toHaveBeenCalledTimes(1)
+
+    await vi.advanceTimersByTimeAsync(5000)
+    expect(mock.flush).toHaveBeenCalledTimes(1) // nada extra
   })
 })
