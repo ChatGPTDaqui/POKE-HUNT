@@ -461,6 +461,29 @@ export function huntId(bioma: string, faixa: FaixaId): string {
   return `${bioma}_${faixa}`
 }
 
+/**
+ * Inverso de `huntId` — o bioma embutido no mapId de uma hunt de bioma, ou
+ * `null` se o mapId nao segue esse padrao (BOSS/Nightmare/hunt inicial nao
+ * tem bioma). PH-227/229: mesma logica usada pelo gate server-side
+ * (abrirSessao) E pelo menu (HuntMenu) — nao duplicar, os dois precisam
+ * concordar sobre "que bioma e esse mapId" sempre.
+ */
+export function biomaDoMapId(mapId: string, faixa: string): string | null {
+  return mapId.endsWith(`_${faixa}`) ? mapId.slice(0, -(faixa.length + 1)) : null
+}
+
+/**
+ * Indice do bioma embutido no mapId dentro de `ORDEM_DOS_BIOMAS`, ou `-1` se
+ * o mapId nao tem bioma (hunt inicial/BOSS/Nightmare) ou o bioma nao esta na
+ * ordem (nao deveria acontecer com os 12 habilitados, PH-225 — defesa em
+ * profundidade). Usado pelo gate server-side (PH-227) E pelo sort/selo do
+ * menu (PH-229).
+ */
+export function indiceDoBiomaNoMapId(mapId: string, faixa: string): number {
+  const bioma = biomaDoMapId(mapId, faixa)
+  return bioma ? ORDEM_DOS_BIOMAS.indexOf(bioma) : -1
+}
+
 export const SUB_BIOMA_POR_CHAVE: Record<string, { sub: SubBiomaDef; bioma: BiomaDef }> =
   Object.fromEntries(
     BIOMAS.flatMap((bioma) => bioma.subBiomas.map((sub) => [sub.chave, { sub, bioma }]))

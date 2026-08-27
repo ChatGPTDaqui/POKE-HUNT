@@ -11,7 +11,7 @@ import {
 } from './progresso.js'
 import {
   MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas, climaDaSala,
-  ORDEM_DOS_BIOMAS, BIOMA_POR_CHAVE, type BiomaProgress,
+  ORDEM_DOS_BIOMAS, BIOMA_POR_CHAVE, indiceDoBiomaNoMapId, type BiomaProgress,
 } from '#engine'
 
 function json(dado: unknown, status = 200): Response {
@@ -169,19 +169,16 @@ async function sairDaHunt(cfg: Config, userId: string, sessaoId: string): Promis
 /**
  * PH-227: mensagem de bloqueio (ou `null` se liberado) do gate sequencial de
  * bioma — vencer o boss ultimate do bioma N libera o N+1 (PH-207/226).
- * `mapId` e `huntId(bioma, faixa) = "${bioma}_${faixa}"` (biomas.ts) — a
- * faixa (`grupo`) ja veio de `MAPS[mapId].continent`, entao so sobra tirar o
- * sufixo pra achar o bioma, mesmo com bioma tendo underscore no proprio
- * nome (`aguas_interiores`, `campo_aberto`).
  *
  * Pura de proposito: testavel isolada, sem precisar mockar `db.js`/HTTP
- * inteiro so pra exercitar uma regra de negocio.
+ * inteiro so pra exercitar uma regra de negocio. `biomaDoMapId` (PH-229)
+ * e a MESMA funcao que HuntMenu usa pro selo/ordem/mensagem do menu — os
+ * dois lados tem que concordar sobre "que bioma e esse mapId".
  */
 export function bloqueioDeBiomaPendente(
   mapId: string, grupo: string, biomaProgress: BiomaProgress,
 ): string | null {
-  const biomaChave = mapId.endsWith(`_${grupo}`) ? mapId.slice(0, -(grupo.length + 1)) : null
-  const indiceEsperado = biomaChave ? ORDEM_DOS_BIOMAS.indexOf(biomaChave) : -1
+  const indiceEsperado = indiceDoBiomaNoMapId(mapId, grupo)
   // Bioma sem boss habilitado (indice -1, nao acontece hoje com os 12 todos
   // habilitados — PH-225) ou o PRIMEIRO da ordem (indice 0) libera
   // automatico, sem checar nada — nao ha "boss anterior" pra vencer.

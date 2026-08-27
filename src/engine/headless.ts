@@ -34,7 +34,8 @@ export type { AvancoDeSala } from './systems/salaSystem'
 export { climaDaSala } from './systems/climaAmbiente'
 export {
   BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, SALAS_POR_HUNT, ABATES_POR_SALA,
-  BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, huntId, ORDEM_DOS_BIOMAS, biomaProgressDefault,
+  BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, huntId, biomaDoMapId, indiceDoBiomaNoMapId,
+  ORDEM_DOS_BIOMAS, biomaProgressDefault,
 } from '@/data/biomas'
 export type { BiomaDef, SubBiomaDef, FaixaDef, FaixaId, BiomaProgress } from '@/data/biomas'
 export { getEncounter } from '@/data/enemies'
