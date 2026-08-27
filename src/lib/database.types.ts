@@ -255,6 +255,21 @@ export type Database = {
       }
       game_sessions: {
         Row: {
+          boss_encounter_id: string | null
+          boss_hp_atual: number | null
+          boss_is_shiny: boolean | null
+          boss_iv_atk_esp: number | null
+          boss_iv_atk_fis: number | null
+          boss_iv_def: number | null
+          boss_iv_def_esp: number | null
+          boss_iv_hp: number | null
+          boss_iv_speed: number | null
+          boss_level: number | null
+          boss_nature: string | null
+          boss_rarity: string | null
+          boss_species_id: string | null
+          boss_trait: string | null
+          boss_uid: string | null
           ciclos: number
           closed_at: string | null
           flushing_since: string | null
@@ -275,6 +290,21 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          boss_encounter_id?: string | null
+          boss_hp_atual?: number | null
+          boss_is_shiny?: boolean | null
+          boss_iv_atk_esp?: number | null
+          boss_iv_atk_fis?: number | null
+          boss_iv_def?: number | null
+          boss_iv_def_esp?: number | null
+          boss_iv_hp?: number | null
+          boss_iv_speed?: number | null
+          boss_level?: number | null
+          boss_nature?: string | null
+          boss_rarity?: string | null
+          boss_species_id?: string | null
+          boss_trait?: string | null
+          boss_uid?: string | null
           ciclos?: number
           closed_at?: string | null
           flushing_since?: string | null
@@ -295,6 +325,21 @@ export type Database = {
           user_id: string
         }
         Update: {
+          boss_encounter_id?: string | null
+          boss_hp_atual?: number | null
+          boss_is_shiny?: boolean | null
+          boss_iv_atk_esp?: number | null
+          boss_iv_atk_fis?: number | null
+          boss_iv_def?: number | null
+          boss_iv_def_esp?: number | null
+          boss_iv_hp?: number | null
+          boss_iv_speed?: number | null
+          boss_level?: number | null
+          boss_nature?: string | null
+          boss_rarity?: string | null
+          boss_species_id?: string | null
+          boss_trait?: string | null
+          boss_uid?: string | null
           ciclos?: number
           closed_at?: string | null
           flushing_since?: string | null
@@ -1148,6 +1193,7 @@ export type Database = {
           auto_sell_config: Json
           auto_status_config: Json
           auto_toggles: Json
+          bioma_progress: Json
           created_at: string
           current_map_id: string | null
           diamonds: number
@@ -1168,6 +1214,7 @@ export type Database = {
           auto_sell_config?: Json
           auto_status_config?: Json
           auto_toggles?: Json
+          bioma_progress?: Json
           created_at?: string
           current_map_id?: string | null
           diamonds?: number
@@ -1188,6 +1235,7 @@ export type Database = {
           auto_sell_config?: Json
           auto_status_config?: Json
           auto_toggles?: Json
+          bioma_progress?: Json
           created_at?: string
           current_map_id?: string | null
           diamonds?: number
@@ -2335,6 +2383,21 @@ export type Database = {
       }
       game_sessions: {
         Row: {
+          boss_encounter_id: string | null
+          boss_hp_atual: number | null
+          boss_is_shiny: boolean | null
+          boss_iv_atk_esp: number | null
+          boss_iv_atk_fis: number | null
+          boss_iv_def: number | null
+          boss_iv_def_esp: number | null
+          boss_iv_hp: number | null
+          boss_iv_speed: number | null
+          boss_level: number | null
+          boss_nature: string | null
+          boss_rarity: string | null
+          boss_species_id: string | null
+          boss_trait: string | null
+          boss_uid: string | null
           ciclos: number
           closed_at: string | null
           flushing_since: string | null
@@ -2355,6 +2418,21 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          boss_encounter_id?: string | null
+          boss_hp_atual?: number | null
+          boss_is_shiny?: boolean | null
+          boss_iv_atk_esp?: number | null
+          boss_iv_atk_fis?: number | null
+          boss_iv_def?: number | null
+          boss_iv_def_esp?: number | null
+          boss_iv_hp?: number | null
+          boss_iv_speed?: number | null
+          boss_level?: number | null
+          boss_nature?: string | null
+          boss_rarity?: string | null
+          boss_species_id?: string | null
+          boss_trait?: string | null
+          boss_uid?: string | null
           ciclos?: number
           closed_at?: string | null
           flushing_since?: string | null
@@ -2375,6 +2453,21 @@ export type Database = {
           user_id: string
         }
         Update: {
+          boss_encounter_id?: string | null
+          boss_hp_atual?: number | null
+          boss_is_shiny?: boolean | null
+          boss_iv_atk_esp?: number | null
+          boss_iv_atk_fis?: number | null
+          boss_iv_def?: number | null
+          boss_iv_def_esp?: number | null
+          boss_iv_hp?: number | null
+          boss_iv_speed?: number | null
+          boss_level?: number | null
+          boss_nature?: string | null
+          boss_rarity?: string | null
+          boss_species_id?: string | null
+          boss_trait?: string | null
+          boss_uid?: string | null
           ciclos?: number
           closed_at?: string | null
           flushing_since?: string | null
@@ -3228,6 +3321,7 @@ export type Database = {
           auto_sell_config: Json
           auto_status_config: Json
           auto_toggles: Json
+          bioma_progress: Json
           created_at: string
           current_map_id: string | null
           diamonds: number
@@ -3248,6 +3342,7 @@ export type Database = {
           auto_sell_config?: Json
           auto_status_config?: Json
           auto_toggles?: Json
+          bioma_progress?: Json
           created_at?: string
           current_map_id?: string | null
           diamonds?: number
@@ -3268,6 +3363,7 @@ export type Database = {
           auto_sell_config?: Json
           auto_status_config?: Json
           auto_toggles?: Json
+          bioma_progress?: Json
           created_at?: string
           current_map_id?: string | null
           diamonds?: number
