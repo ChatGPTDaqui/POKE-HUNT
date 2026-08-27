@@ -9,7 +9,10 @@ import {
   aplicarFlush, carregarEstado, comEstadoParaEscrita, gravarEstado,
   FLUSH_OCUPADO, type LinhaSessao,
 } from './progresso.js'
-import { MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas, climaDaSala } from '#engine'
+import {
+  MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas, climaDaSala,
+  ORDEM_DOS_BIOMAS, BIOMA_POR_CHAVE, type BiomaProgress,
+} from '#engine'
 
 function json(dado: unknown, status = 200): Response {
   return new Response(JSON.stringify(dado), {
@@ -163,6 +166,33 @@ async function sairDaHunt(cfg: Config, userId: string, sessaoId: string): Promis
   await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null })
 }
 
+/**
+ * PH-227: mensagem de bloqueio (ou `null` se liberado) do gate sequencial de
+ * bioma — vencer o boss ultimate do bioma N libera o N+1 (PH-207/226).
+ * `mapId` e `huntId(bioma, faixa) = "${bioma}_${faixa}"` (biomas.ts) — a
+ * faixa (`grupo`) ja veio de `MAPS[mapId].continent`, entao so sobra tirar o
+ * sufixo pra achar o bioma, mesmo com bioma tendo underscore no proprio
+ * nome (`aguas_interiores`, `campo_aberto`).
+ *
+ * Pura de proposito: testavel isolada, sem precisar mockar `db.js`/HTTP
+ * inteiro so pra exercitar uma regra de negocio.
+ */
+export function bloqueioDeBiomaPendente(
+  mapId: string, grupo: string, biomaProgress: BiomaProgress,
+): string | null {
+  const biomaChave = mapId.endsWith(`_${grupo}`) ? mapId.slice(0, -(grupo.length + 1)) : null
+  const indiceEsperado = biomaChave ? ORDEM_DOS_BIOMAS.indexOf(biomaChave) : -1
+  // Bioma sem boss habilitado (indice -1, nao acontece hoje com os 12 todos
+  // habilitados — PH-225) ou o PRIMEIRO da ordem (indice 0) libera
+  // automatico, sem checar nada — nao ha "boss anterior" pra vencer.
+  if (indiceEsperado <= 0) return null
+  const progresso = (biomaProgress?.[grupo as keyof BiomaProgress] ?? 0) as number
+  if (progresso >= indiceEsperado) return null
+  const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1]
+  const anteriorNome = BIOMA_POR_CHAVE[anteriorChave]?.nome ?? anteriorChave
+  return `Vença o boss de ${anteriorNome} para liberar esta área.`
+}
+
 async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<Response> {
   const corpo = (await req.json().catch(() => null)) as { mapId?: string; pokeUid?: string } | null
   const mapId = corpo?.mapId
@@ -192,6 +222,12 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
   if (!estado.unlockedContinents.includes(grupo)) {
     throw new ErroHttp(403, 'Derrote o Campeao Lance para acessar esta area.')
   }
+  // PH-227: gate sequencial de bioma (PH-207/226) — sem isto, qualquer
+  // jogador chama esta rota direto (curl/devtools) com o mapId de um bioma
+  // ainda bloqueado e entra mesmo assim. Regra do projeto: limite de
+  // negocio so no cliente vira bypass.
+  const bloqueio = bloqueioDeBiomaPendente(mapId, grupo, estado.biomaProgress)
+  if (bloqueio) throw new ErroHttp(403, bloqueio)
 
   const anterior = await sessaoAberta(cfg, userId)
   if (anterior) {

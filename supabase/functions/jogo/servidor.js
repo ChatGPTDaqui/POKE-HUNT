@@ -31518,7 +31518,7 @@ var GEOMETRIA = {
 		}
 	]
 };
-Object.fromEntries(BIOMAS.map((b) => [b.chave, b]));
+var BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.map((b) => [b.chave, b]));
 /**
 * PH-223: ordem canonica dos 12 biomas pro gate sequencial (PH-226/227) —
 * vencer o boss ultimate do bioma N libera o bioma N+1. So existia como
@@ -56822,6 +56822,25 @@ async function sairDaHunt(cfg, userId, sessaoId) {
 	await fecharLinhaDeSessao(cfg, sessaoId);
 	await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null });
 }
+/**
+* PH-227: mensagem de bloqueio (ou `null` se liberado) do gate sequencial de
+* bioma — vencer o boss ultimate do bioma N libera o N+1 (PH-207/226).
+* `mapId` e `huntId(bioma, faixa) = "${bioma}_${faixa}"` (biomas.ts) — a
+* faixa (`grupo`) ja veio de `MAPS[mapId].continent`, entao so sobra tirar o
+* sufixo pra achar o bioma, mesmo com bioma tendo underscore no proprio
+* nome (`aguas_interiores`, `campo_aberto`).
+*
+* Pura de proposito: testavel isolada, sem precisar mockar `db.js`/HTTP
+* inteiro so pra exercitar uma regra de negocio.
+*/
+function bloqueioDeBiomaPendente(mapId, grupo, biomaProgress) {
+	const biomaChave = mapId.endsWith(`_${grupo}`) ? mapId.slice(0, -(grupo.length + 1)) : null;
+	const indiceEsperado = biomaChave ? ORDEM_DOS_BIOMAS.indexOf(biomaChave) : -1;
+	if (indiceEsperado <= 0) return null;
+	if ((biomaProgress?.[grupo] ?? 0) >= indiceEsperado) return null;
+	const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1];
+	return `Vença o boss de ${BIOMA_POR_CHAVE[anteriorChave]?.nome ?? anteriorChave} para liberar esta área.`;
+}
 async function abrirSessao(cfg, userId, req) {
 	const corpo = await req.json().catch(() => null);
 	const mapId = corpo?.mapId;
@@ -56835,6 +56854,8 @@ async function abrirSessao(cfg, userId, req) {
 	if (MAPS[mapId].unlockCost != null && !estado.unlockedMaps.includes(mapId)) throw new ErroHttp(403, "hunt nao desbloqueada");
 	const grupo = MAPS[mapId].continent;
 	if (!estado.unlockedContinents.includes(grupo)) throw new ErroHttp(403, "Derrote o Campeao Lance para acessar esta area.");
+	const bloqueio = bloqueioDeBiomaPendente(mapId, grupo, estado.biomaProgress);
+	if (bloqueio) throw new ErroHttp(403, bloqueio);
 	const anterior = await sessaoAberta(cfg, userId);
 	if (anterior) {
 		await aplicarFlush(cfg, userId, anterior);
