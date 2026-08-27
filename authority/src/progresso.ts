@@ -7,7 +7,7 @@ import {
   OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
   solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, ABATES_POR_SALA,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
-  type ClimaTipo,
+  type ClimaTipo, type BossPendente,
 } from '#engine'
 import {
   ErroHttp, selecionarTudo, selecionar, atualizar, atualizarRetornando, inserir, apagar, chamarRpc, type Config,
@@ -113,6 +113,84 @@ export interface LinhaSessao {
   sala_chave: string | null
   sala_abates: number | string
   ciclos: number | string
+  // Boss pendente da sala atual (PH-201/202/204). `boss_uid` nulo == sem boss
+  // ativo (sala nao pede, ou ja foi resolvido). Mesma familia do `sala_*`: o
+  // mundo e reconstruido a cada janela de flush, mas o boss NAO pode ser
+  // re-sorteado — `createPokeInstance` rola shiny/trait/nature mesmo com IV e
+  // raridade fixos, entao um boss recriado sem estes campos teria aparencia e
+  // stats diferentes a cada ~30s, e o RNG do servidor divergiria do cliente
+  // (que sorteou o boss uma vez so). Ver `bossDaLinha`/`colunasDoBoss`.
+  boss_uid: string | null
+  boss_species_id: string | null
+  boss_encounter_id: string | null
+  boss_level: number | string | null
+  boss_iv_hp: number | string | null
+  boss_iv_atk_fis: number | string | null
+  boss_iv_atk_esp: number | string | null
+  boss_iv_def: number | string | null
+  boss_iv_def_esp: number | string | null
+  boss_iv_speed: number | string | null
+  boss_rarity: string | null
+  boss_is_shiny: boolean | null
+  boss_nature: string | null
+  boss_trait: string | null
+  boss_hp_atual: number | string | null
+}
+
+/**
+ * PH-217: reconstroi o `BossPendente` da linha da sessao pra passar ao
+ * `buildMapWorld`, ou `null` quando nao ha boss pendente (`boss_uid` nulo).
+ *
+ * Espelho exato de `colunasDoBoss` — o que uma grava a outra le. Os `Number()`
+ * cobrem o PostgREST devolver `numeric`/`int8` como string, igual ao resto de
+ * `LinhaSessao`.
+ */
+export function bossDaLinha(s: LinhaSessao): BossPendente | null {
+  if (s.boss_uid == null) return null
+  return {
+    uid: s.boss_uid,
+    speciesId: s.boss_species_id ?? '',
+    encounterId: s.boss_encounter_id ?? '',
+    level: Number(s.boss_level ?? 0),
+    ivs: {
+      hp: Number(s.boss_iv_hp ?? 0),
+      atkFis: Number(s.boss_iv_atk_fis ?? 0),
+      atkEsp: Number(s.boss_iv_atk_esp ?? 0),
+      def: Number(s.boss_iv_def ?? 0),
+      defEsp: Number(s.boss_iv_def_esp ?? 0),
+      speed: Number(s.boss_iv_speed ?? 0),
+    },
+    rarity: (s.boss_rarity ?? 'comum') as BossPendente['rarity'],
+    isShiny: Boolean(s.boss_is_shiny),
+    nature: (s.boss_nature ?? undefined) as BossPendente['nature'],
+    trait: s.boss_trait ?? undefined,
+    hpAtual: Number(s.boss_hp_atual ?? 0),
+  }
+}
+
+/**
+ * PH-217: as 15 colunas `boss_*` do `game_sessions` pra gravar no flush — todas
+ * do `bossPendente` vivo, ou todas `null` quando o boss ja foi resolvido
+ * (morto/capturado) e a sala liberou o avanco.
+ */
+export function colunasDoBoss(bp: BossPendente | null): Record<string, unknown> {
+  return {
+    boss_uid: bp?.uid ?? null,
+    boss_species_id: bp?.speciesId ?? null,
+    boss_encounter_id: bp?.encounterId ?? null,
+    boss_level: bp?.level ?? null,
+    boss_iv_hp: bp?.ivs.hp ?? null,
+    boss_iv_atk_fis: bp?.ivs.atkFis ?? null,
+    boss_iv_atk_esp: bp?.ivs.atkEsp ?? null,
+    boss_iv_def: bp?.ivs.def ?? null,
+    boss_iv_def_esp: bp?.ivs.defEsp ?? null,
+    boss_iv_speed: bp?.ivs.speed ?? null,
+    boss_rarity: bp?.rarity ?? null,
+    boss_is_shiny: bp?.isShiny ?? null,
+    boss_nature: bp?.nature ?? null,
+    boss_trait: bp?.trait ?? null,
+    boss_hp_atual: bp?.hpAtual ?? null,
+  }
 }
 
 // Marca de flush mais velha que isto e tratada como lixo: a invocacao morreu no
@@ -844,10 +922,20 @@ export async function aplicarFlush(
   // `gravarEstado` (playerUpdatedAt) so detecta a colisao — nao evita que ELE
   // seja quem perde e joga a simulacao fora. `aguardarFlushEmAndamento` (em
   // `comEstadoParaEscrita`) e quem usa esta marca pra esperar em vez de correr.
-  const [reivindicada] = await atualizarRetornando<LinhaSessao>(
+  //
+  // `&select=id` (PH-219): o `return=representation` de `atualizarRetornando`
+  // continua OBRIGATORIO aqui — e a resposta VAZIA que denuncia a corrida
+  // perdida, e com `return=minimal` isso seria indistinguivel de sucesso. Mas a
+  // linha em si nunca e lida: o unico uso de `reivindicada` e o teste de
+  // verdade logo abaixo. Sem `select`, o PostgREST devolvia as 20+ colunas da
+  // sessao (`rng_state`, `sala_*`, `sequence_*`, `boss_*`) a cada flush — 439 B
+  // no fio contra 47 B, medido gzipado em producao em 27/08, ~11% do egress do
+  // caminho de flush inteiro. Se um dia algum campo da linha reivindicada for
+  // preciso, o que cresce e o `select`, junto do tipo.
+  const [reivindicada] = await atualizarRetornando<Pick<LinhaSessao, 'id'>>(
     cfg,
     `game_sessions?id=eq.${sessao.id}&closed_at=is.null`
-    + `&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}`,
+    + `&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}&select=id`,
     { last_flush_at: new Date(agora).toISOString(), flushing_since: new Date(agora).toISOString() },
   )
   if (!reivindicada) return FLUSH_OCUPADO
@@ -970,6 +1058,11 @@ async function simularSessao(
             ciclos: Number(sessao.ciclos ?? 0),
           }
         : null,
+      // PH-217: boss vivo da sala, recriado FIEL (zero RNG) em vez de sorteado
+      // de novo. Sem isto, `buildMapWorld` recebia `undefined` e `bossDaSala`
+      // ainda pedia boss -> sorteava um novo a cada janela, e o RNG do servidor
+      // saia de sincronia com o do cliente a partir da 2a janela.
+      bossPendente: bossDaLinha(sessao),
     },
   )
   // Pior caso SO quando o intervalo caracteriza ausencia — ver
@@ -1114,6 +1207,9 @@ async function simularSessao(
     sala_chave: world.sala?.chave ?? null,
     sala_abates: world.sala?.abates ?? 0,
     ciclos: world.sala?.ciclos ?? 0,
+    // PH-217: boss vivo persistido pra proxima janela recriar sem re-sortear;
+    // tudo `null` quando o boss foi resolvido nesta janela e a sala liberou.
+    ...colunasDoBoss(world.bossPendente),
   })
 
   return {
