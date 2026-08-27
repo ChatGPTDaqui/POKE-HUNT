@@ -16,6 +16,7 @@
 // sobrevive alem do proprio hit) — mesma linguagem visual de "tint by type"
 // que aura/icone de habilidade/moldura de raridade ja usam neste jogo.
 import { SPECIES } from '@/data/pokes'
+import { faceIconUrl } from '@/data/sprites'
 import { nomeDoStatus, type StatusAtivo } from '@/data/statusEffects'
 import { statusVfxUrl } from '@/data/statusVfx'
 import { ROTULO_ESTAGIO } from '@/data/statLabels'
@@ -136,6 +137,10 @@ export function StatusEffectsBar() {
   const badges = selosDaEntidade(jogador, 'eu')
   const badgesDoAlvo = selosDaEntidade(alvo, 'alvo')
   const nomeDoAlvo = alvo ? SPECIES[alvo.poke.speciesId]?.name ?? alvo.poke.speciesId : null
+  // A cara do alvo ao lado do nome (PH-193, item 2) — ver o comentario do
+  // rotulo. `faceIconUrl` e o mesmo icone que o trilho de reservas usa, entao o
+  // jogador ja conhece esse vocabulario.
+  const faceDoAlvo = alvo ? faceIconUrl(alvo.poke.speciesId, alvo.poke.isShiny) : null
 
   if (badges.length === 0 && badgesDoAlvo.length === 0) return null
 
@@ -159,8 +164,38 @@ export function StatusEffectsBar() {
           responde "de quem" e a linha. */}
       {badgesDoAlvo.length > 0 && (
         <div className="flex items-center gap-[.3em]">
-          <span className="flex items-center gap-[.2em] text-[.55em] uppercase tracking-wide text-n400">
+          {/* O ROTULO PRECISA SOBREVIVER AO FUNDO PIOR, NAO AO MAIS BONITO
+              (PH-193, lição do PH-141).
+
+              Ele saía em `text-n400` (#9b9ea8) direto sobre o cenário da hunt,
+              sem superfície nenhuma atrás. Sobre a grama clara de Route 46 o
+              nome da espécie ficava praticamente apagado — e ele é o UNICO
+              elemento que responde "de quem são estes selos". Perdê-lo devolve
+              exatamente o defeito que o PH-132 veio tirar: o jogador lê o buff
+              do inimigo como se fosse dele.
+
+              A correção é a superfície, não a cor: `vidro` é a mesma linguagem
+              do trilho e da doca, e não depende do que está atrás. A cor sobe
+              junto pra `n100` porque agora há contraste garantido pra gastar.
+
+              A CARA DO ALVO vem junto pelo item 2 da issue: os selos moram no
+              rodapé, a ~500px do POKE a que se referem, e relacionar "esse +2 é
+              do Sentret" dependia de memória. O ícone é o vínculo mais barato
+              que existe hoje — a marcação de alvo NO CAMPO, que seria o vínculo
+              ideal, é PH-189 e ainda não existe. Quando ela chegar, a cor dela
+              entra aqui e os dois passam a se apontar. */}
+          <span className="vidro flex shrink-0 items-center gap-[.25em] rounded-full py-[.15em] pr-[.45em] pl-[.3em] text-[.55em] uppercase tracking-wide text-n100">
             <Crosshair size="1.4em" weight="bold" aria-hidden />
+            {faceDoAlvo && (
+              <img
+                src={faceDoAlvo}
+                alt=""
+                aria-hidden
+                draggable={false}
+                className="h-[1.6em] w-[1.6em] shrink-0 rounded-full object-contain"
+                style={{ imageRendering: 'pixelated' }}
+              />
+            )}
             {nomeDoAlvo}
           </span>
           <FileiraDeSelos badges={badgesDoAlvo} coarse={coarse} />
