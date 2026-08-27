@@ -56402,7 +56402,7 @@ async function aplicarFlush(cfg, userId, sessao, opcoes = {}) {
 	const bruto = (agora - new Date(sessao.last_flush_at).getTime()) / 1e3;
 	const segundos = Math.max(0, Math.min(bruto, MAX_SEGUNDOS_POR_FLUSH));
 	const truncado = bruto > MAX_SEGUNDOS_POR_FLUSH;
-	const [reivindicada] = await atualizarRetornando(cfg, `game_sessions?id=eq.${sessao.id}&closed_at=is.null&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}`, {
+	const [reivindicada] = await atualizarRetornando(cfg, `game_sessions?id=eq.${sessao.id}&closed_at=is.null&last_flush_at=eq.${encodeURIComponent(sessao.last_flush_at)}&select=id`, {
 		last_flush_at: new Date(agora).toISOString(),
 		flushing_since: new Date(agora).toISOString()
 	});
