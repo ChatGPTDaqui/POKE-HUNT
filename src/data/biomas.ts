@@ -445,6 +445,22 @@ export const ORDEM_DOS_BIOMAS: readonly string[] = [
   'igneo',
 ]
 
+/**
+ * PH-224: `players.bioma_progress` (migration PH-200) — indice de quantos
+ * biomas da FAIXA o jogador ja venceu (posicao em `ORDEM_DOS_BIOMAS`), nao
+ * lista de biomas liberados. Uma faixa por chave porque o gate e independente
+ * entre as 3 (a Faixa II reinicia do zero, mesma decisao do brainstorm 16/08).
+ */
+export interface BiomaProgress {
+  faixa1: number
+  faixa2: number
+  faixa3: number
+}
+
+export function biomaProgressDefault(): BiomaProgress {
+  return { faixa1: 0, faixa2: 0, faixa3: 0 }
+}
+
 export const FAIXA_POR_ID: Record<string, FaixaDef> = Object.fromEntries(
   FAIXAS.map((f) => [f.id, f])
 )

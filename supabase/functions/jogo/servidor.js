@@ -31519,6 +31519,13 @@ var GEOMETRIA = {
 	]
 };
 Object.fromEntries(BIOMAS.map((b) => [b.chave, b]));
+function biomaProgressDefault() {
+	return {
+		faixa1: 0,
+		faixa2: 0,
+		faixa3: 0
+	};
+}
 Object.fromEntries(FAIXAS$1.map((f) => [f.id, f]));
 /** Id da hunt de um bioma numa faixa. Estavel: e o que vai pro banco. */
 function huntId(bioma, faixa) {
@@ -55585,7 +55592,8 @@ function defaultGameStateData() {
 		pokedexKills: {},
 		unlockedContinents: [...FAIXAS_INICIAIS],
 		missoesReivindicadas: {},
-		especialidades: especialidadeNiveisDefault()
+		especialidades: especialidadeNiveisDefault(),
+		biomaProgress: biomaProgressDefault()
 	};
 }
 //#endregion
@@ -55712,7 +55720,11 @@ function snapshotToGameState(snap, defaults) {
 		},
 		pokedexKills,
 		missoesReivindicadas,
-		especialidades
+		especialidades,
+		biomaProgress: {
+			...defaults.biomaProgress,
+			...fromJson(p.bioma_progress, defaults.biomaProgress)
+		}
 	};
 }
 function gameStateToPlayerRow(userId, s) {
@@ -55732,7 +55744,8 @@ function gameStateToPlayerRow(userId, s) {
 		auto_catch_config: toJson(s.autoCatchConfig),
 		auto_sell_config: toJson(s.autoSellConfig),
 		auto_status_config: toJson(s.autoStatusConfig),
-		perf_stats: toJson(s.perfStats)
+		perf_stats: toJson(s.perfStats),
+		bioma_progress: toJson(s.biomaProgress)
 	};
 }
 /**
@@ -55887,6 +55900,9 @@ function criarEstadoDoJogador(dados) {
 			},
 			get especialidades() {
 				return s.especialidades;
+			},
+			get biomaProgress() {
+				return s.biomaProgress;
 			},
 			setActiveIndex: (index) => {
 				s.activeIndex = index;
