@@ -250,6 +250,11 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     pokedexKills,
     missoesReivindicadas,
     especialidades,
+    // PH-224: MERGE com o default pelo mesmo motivo de autoToggles/autoSellConfig
+    // — linha gravada antes desta coluna existir (todo jogador ate 27/08) volta
+    // sem a chave, e faixa ausente tem que virar 0, nao undefined (quebraria a
+    // comparacao de indice do gate, PH-227).
+    biomaProgress: { ...defaults.biomaProgress, ...fromJson(p.bioma_progress, defaults.biomaProgress) },
   }
 }
 
@@ -273,6 +278,7 @@ export function gameStateToPlayerRow(userId: string, s: GameStateData): Tables['
     auto_sell_config: toJson(s.autoSellConfig),
     auto_status_config: toJson(s.autoStatusConfig),
     perf_stats: toJson(s.perfStats),
+    bioma_progress: toJson(s.biomaProgress),
   }
 }
 

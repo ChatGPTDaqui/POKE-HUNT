@@ -9,7 +9,7 @@
 import type { PokeInstance } from '@/data/pokes'
 import type { RarityKey } from '@/data/rarity'
 import { MAPS } from '@/data/maps'
-import { FAIXAS_INICIAIS } from '@/data/biomas'
+import { FAIXAS_INICIAIS, biomaProgressDefault, type BiomaProgress } from '@/data/biomas'
 import { especialidadeNiveisDefault, type EspecialidadeNiveis } from '@/data/especialidades'
 
 // Limite de POKEs em campo — no vanilla so aparecia como comentario em
@@ -146,6 +146,7 @@ export interface GameStateData {
   // cadeias (dual-type), e reivindicar numa nao reivindica a outra.
   missoesReivindicadas: Record<string, boolean>
   especialidades: EspecialidadeNiveis
+  biomaProgress: BiomaProgress
 }
 
 // Exportado porque o adaptador de persistencia precisa dos mesmos defaults
@@ -177,5 +178,6 @@ export function defaultGameStateData(): GameStateData {
     unlockedContinents: [...FAIXAS_INICIAIS],
     missoesReivindicadas: {},
     especialidades: especialidadeNiveisDefault(),
+    biomaProgress: biomaProgressDefault(),
   }
 }
