@@ -95,6 +95,10 @@ export interface GameStateActions {
   setPokedexKillEntry: (speciesId: string, entry: PokedexKillCount) => void
   setMissaoReivindicada: (chave: string) => void
   setEspecialidadeNivel: (tipo: ElementType, trilha: EspecialidadeTrilha, nivel: number) => void
+  // PH-226: diferente de missao/especialidade (so menu), esta E chamada pela
+  // simulacao — vencer o boss ultimate avanca o indice dentro de
+  // handleEnemyDefeated (simulation.ts), nao so por acao de tela.
+  setBiomaProgress: (faixa: string, indice: number) => void
 
   // Acoes do painel Auto + AbilityHUD (Fase 6). No vanilla essas telas
   // mutavam o objeto direto (`gameState.autoToggles.autoPot = !...`,
@@ -521,6 +525,10 @@ export const useGameStateStore = create<GameStateStore>()(
             [tipo]: { ...state.especialidades[tipo], [trilha]: nivel },
           },
         }))
+      },
+
+      setBiomaProgress: (faixa, indice) => {
+        set((state) => ({ biomaProgress: { ...state.biomaProgress, [faixa]: indice } }))
       },
 
       setAutoToggle: (key, value) => {

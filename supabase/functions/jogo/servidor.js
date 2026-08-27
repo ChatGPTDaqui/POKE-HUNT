@@ -54982,6 +54982,27 @@ function garantirBossDaSala(world, mapDef, bossSalvo, player, entrada) {
 	world.bossPendente = pendente;
 	return true;
 }
+/**
+* PH-226: vencer (matar OU capturar) o boss ULTIMATE avanca o indice de
+* `biomaProgress` da faixa atual — SO se o bioma resolvido for exatamente o
+* proximo esperado na ordem canonica (`ORDEM_DOS_BIOMAS`). Fora de ordem
+* (nao deveria acontecer com o enforcement de PH-227, mas e defesa em
+* profundidade — o motor nao confia cegamente no proprio estado do mundo)
+* nao mexe no indice: silencioso de proposito, mesma familia de decisao de
+* `resolverBossDaSala` nao logar/travar em cima de estado inconsistente.
+*
+* Chamado de dentro de `handleEnemyDefeated`, entao roda IGUAL nos dois
+* lados que rodam esse motor — resim do servidor e predicao do cliente.
+*/
+function avancarBiomaProgressSeForOProximo(world, gameState) {
+	const bioma = SUB_BIOMA_POR_CHAVE[world.sala?.chave ?? ""]?.bioma.chave;
+	if (!bioma) return;
+	const indice = ORDEM_DOS_BIOMAS.indexOf(bioma);
+	if (indice === -1) return;
+	const faixa = world.mapDef?.continent ?? "faixa1";
+	if ((gameState.biomaProgress[faixa] ?? 0) !== indice) return;
+	gameState.setBiomaProgress(faixa, indice + 1);
+}
 function spawnEnemyAt(world, mapDef, pool, janela, player, entrada, ocupados = []) {
 	const { rng, counters } = world;
 	const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null, ocupados);
@@ -55293,7 +55314,10 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			else dispararToastDeCaptura();
 		}
 	}
-	if (enemy.isBoss) resolverBossDaSala(world, world.mapDef.id);
+	if (enemy.isBoss) {
+		if (world.sala?.indice === 9) avancarBiomaProgressSeForOProximo(world, gameState);
+		resolverBossDaSala(world, world.mapDef.id);
+	}
 	return {
 		gold: loot.gold + ouroDeAutoVenda,
 		ouroDeAutoVenda,
@@ -56059,6 +56083,9 @@ function criarEstadoDoJogador(dados) {
 			},
 			setEspecialidadeNivel: (tipo, trilha, nivel) => {
 				s.especialidades[tipo][trilha] = nivel;
+			},
+			setBiomaProgress: (faixa, indice) => {
+				s.biomaProgress[faixa] = indice;
 			},
 			setAutoToggle: (key, value) => {
 				s.autoToggles[key] = value;
