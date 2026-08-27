@@ -64,6 +64,7 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     get trainer() { return s.trainer },
     get pokedexKills() { return s.pokedexKills },
     get unlockedContinents() { return s.unlockedContinents },
+    get missoesReivindicadas() { return s.missoesReivindicadas },
     get especialidades() { return s.especialidades },
 
     // ----- acoes que a simulacao realmente usa -----
@@ -172,6 +173,11 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
       s.perfStats.shinys += delta.shinys
     },
     setPokedexKillEntry: (speciesId, entry) => { s.pokedexKills[speciesId] = entry },
+    // A simulacao nunca chama isto (missao so e reivindicada por acao de menu,
+    // fora de combate) — mesmo raciocinio de `setEspecialidadeNivel`/
+    // `reordenarReservas`: o tipo exige, e um stub que divergisse da regra do
+    // navegador seria uma diferenca esperando pra ser descoberta.
+    setMissaoReivindicada: (chave) => { s.missoesReivindicadas[chave] = true },
     // A simulacao nunca chama isto (Especialidade so sobe por acao de menu,
     // fora de combate) — implementada mesmo assim pelo mesmo motivo de
     // `reordenarReservas`: o tipo exige, e um stub que divergisse da regra do

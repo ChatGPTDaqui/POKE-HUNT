@@ -55584,8 +55584,21 @@ function defaultGameStateData() {
 		},
 		pokedexKills: {},
 		unlockedContinents: [...FAIXAS_INICIAIS],
+		missoesReivindicadas: {},
 		especialidades: especialidadeNiveisDefault()
 	};
+}
+//#endregion
+//#region src/data/regions.ts
+var DEX_RE = /Nº\s*(\d+)/;
+Object.fromEntries(Object.entries(SPECIES_DATA).map(([id, species]) => {
+	const match = species.description.match(DEX_RE);
+	if (!match) throw new Error(`Especie "${id}" sem numero de Pokedex na descricao ("${species.description}") — sem ele nao da pra dizer se ela e de Kanto ou de Johto.`);
+	return [id, Number(match[1])];
+}));
+Object.keys(TYPE_COLORS);
+function chaveDaMissao(tipo, speciesId) {
+	return `${tipo}:${speciesId}`;
 }
 //#endregion
 //#region src/data/remote/playerMapper.ts
@@ -55664,6 +55677,8 @@ function snapshotToGameState(snap, defaults) {
 		speciesId: r.species_id,
 		ballItemId: r.ball_item_id
 	}));
+	const missoesReivindicadas = {};
+	for (const row of snap.missoesReivindicadas) missoesReivindicadas[chaveDaMissao(row.tipo, row.species_id)] = true;
 	return {
 		team,
 		bagPokes,
@@ -55696,6 +55711,7 @@ function snapshotToGameState(snap, defaults) {
 			exp: p.trainer_exp
 		},
 		pokedexKills,
+		missoesReivindicadas,
 		especialidades
 	};
 }
@@ -55866,6 +55882,9 @@ function criarEstadoDoJogador(dados) {
 			get unlockedContinents() {
 				return s.unlockedContinents;
 			},
+			get missoesReivindicadas() {
+				return s.missoesReivindicadas;
+			},
 			get especialidades() {
 				return s.especialidades;
 			},
@@ -55992,6 +56011,9 @@ function criarEstadoDoJogador(dados) {
 			},
 			setPokedexKillEntry: (speciesId, entry) => {
 				s.pokedexKills[speciesId] = entry;
+			},
+			setMissaoReivindicada: (chave) => {
+				s.missoesReivindicadas[chave] = true;
 			},
 			setEspecialidadeNivel: (tipo, trilha, nivel) => {
 				s.especialidades[tipo][trilha] = nivel;
@@ -56266,7 +56288,8 @@ async function lerSnapshot(cfg, userId, opcoes = {}) {
 		items,
 		pokedex,
 		autoCatchRules,
-		especialidades
+		especialidades,
+		missoesReivindicadas: []
 	};
 	return {
 		estado: snapshotToGameState(linhasNoLoad, defaultGameStateData()),

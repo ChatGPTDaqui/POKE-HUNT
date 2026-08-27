@@ -141,6 +141,10 @@ export interface GameStateData {
   trainer: TrainerInfo
   pokedexKills: Record<string, PokedexKillCount>
   unlockedContinents: string[]
+  // Chave `${tipo}:${speciesId}` (ver data/missoes.ts#chaveDaMissao) —
+  // presente e `true` = reivindicada. A mesma especie pode estar em DUAS
+  // cadeias (dual-type), e reivindicar numa nao reivindica a outra.
+  missoesReivindicadas: Record<string, boolean>
   especialidades: EspecialidadeNiveis
 }
 
@@ -171,6 +175,7 @@ export function defaultGameStateData(): GameStateData {
     trainer: { name: 'Treinador', level: 1, exp: 0 },
     pokedexKills: {},
     unlockedContinents: [...FAIXAS_INICIAIS],
+    missoesReivindicadas: {},
     especialidades: especialidadeNiveisDefault(),
   }
 }

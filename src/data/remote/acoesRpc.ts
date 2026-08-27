@@ -8,6 +8,7 @@
 // o usuario pra nao pagar o preco de reconsultar equipe+mochila+pokedex
 // inteiros numa acao tao pequena quanto travar um item.
 import { supabase } from '@/lib/supabase'
+import { chaveDaMissao } from '@/data/missoes'
 import { stoneItemId } from '@/data/stones'
 import type { ElementType } from '@/data/generated/types'
 import { mochilaCarregada, useMochilaStore } from '@/stores/mochilaStore'
@@ -97,6 +98,15 @@ async function refetchItem(itemId: string): Promise<void> {
     else delete lockedItems[itemId]
     return { items: { ...s.items, [itemId]: data?.quantity ?? 0 }, lockedItems }
   })
+}
+
+// Sem refetch de proposito: sucesso da RPC ja diz "reivindicada", sem
+// ambiguidade nenhuma pra resolver com uma leitura a mais — mesmo raciocinio
+// de `removerPokes` (mutacao local direta) pra `venderPokes`.
+function marcarMissaoReivindicada(tipo: ElementType, speciesId: string): void {
+  useGameStateStore.setState((s) => ({
+    missoesReivindicadas: { ...s.missoesReivindicadas, [chaveDaMissao(tipo, speciesId)]: true },
+  }))
 }
 
 async function refetchEspecialidade(tipo: string): Promise<void> {
@@ -241,6 +251,15 @@ const DESPACHO: Record<string, Despacho> = {
   venderTodosItens: {
     chamar: rpc('vender_todos_itens', () => ({})),
     aoSucesso: async () => { await Promise.all([refetchGold(), refetchTodosItens()]) },
+  },
+  reivindicarMissao: {
+    // `missaoTipo`, e nao `tipo`: `acao.tipo` JA e o discriminador do despacho
+    // ('reivindicarMissao') — mesmo cuidado de `subirNivelEspecialidade`.
+    chamar: rpc('reivindicar_missao', (a) => ({ p_tipo: a.missaoTipo, p_species_id: a.speciesId })),
+    aoSucesso: async (a) => {
+      marcarMissaoReivindicada(a.missaoTipo as ElementType, a.speciesId as string)
+      await refetchGold()
+    },
   },
   usarItem: {
     chamar: rpc('usar_item', (a) => ({ p_item_id: a.itemId })),

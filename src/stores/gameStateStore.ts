@@ -93,6 +93,7 @@ export interface GameStateActions {
   resetPerfStats: () => void
   incrementPerfStats: (delta: { gold: number; xp: number; mobs: number; shinys: number }) => void
   setPokedexKillEntry: (speciesId: string, entry: PokedexKillCount) => void
+  setMissaoReivindicada: (chave: string) => void
   setEspecialidadeNivel: (tipo: ElementType, trilha: EspecialidadeTrilha, nivel: number) => void
 
   // Acoes do painel Auto + AbilityHUD (Fase 6). No vanilla essas telas
@@ -507,6 +508,10 @@ export const useGameStateStore = create<GameStateStore>()(
 
       setPokedexKillEntry: (speciesId, entry) => {
         set((state) => ({ pokedexKills: { ...state.pokedexKills, [speciesId]: entry } }))
+      },
+
+      setMissaoReivindicada: (chave) => {
+        set((state) => ({ missoesReivindicadas: { ...state.missoesReivindicadas, [chave]: true } }))
       },
 
       setEspecialidadeNivel: (tipo, trilha, nivel) => {
