@@ -216,8 +216,24 @@ function VitaisPoke() {
     // A sobra continua virando o vao antes do grupo da direita (o `flex-1`
     // vazio no trilho) — por isso tirar o `flex-1` daqui nao descola a carteira
     // da borda.
-    <div className="flex w-[min(14em,34vw)] shrink-0 flex-col gap-[.18em]">
-      <div className="flex min-w-0 items-center gap-[.35em] text-[.82em] leading-none">
+    // PH-193 (item 4): a largura fixa desceu do BLOCO pra BARRA.
+    //
+    // O conserto do PH-157 esta certo e continua inteiro — a barra segue com
+    // `min(14em,34vw)` fixo, pelos mesmos motivos medidos acima. O efeito
+    // colateral que ninguem viu na epoca foi outro: como a largura fixa estava
+    // no bloco INTEIRO, a linha do nome herdava o mesmo teto e truncava junto.
+    // Em 390px saia `Charmele…` com ~200px de vao vazio sobrando na mesma
+    // linha, entre o `42%` e a carteira — o nome cortava por causa de um limite
+    // que existia pra proteger a BARRA, nao ele.
+    //
+    // Agora o bloco cresce com o nome ate um teto proprio e a sobra vira o
+    // mesmo `flex-1` vazio de antes; a barra nao muda de tamanho em nenhum dos
+    // dois casos, que e a unica coisa que o PH-157 pediu.
+    <div className="flex shrink-0 flex-col gap-[.18em]">
+      {/* Teto proprio da linha do nome: sem ele, uma especie de nome longo
+          empurraria a carteira pra fora em tela estreita. Medido — ver o
+          comentario do bloco das porcentagens. */}
+      <div className="flex min-w-0 max-w-[min(22em,52vw)] items-center gap-[.35em] text-[.82em] leading-none">
         <span className={cn('truncate font-medium', poke.isShiny && 'text-shiny')}>
           {poke.isShiny && '✨'}{species.name}
         </span>
@@ -237,15 +253,33 @@ function VitaisPoke() {
           cada tick de dano — reintroduzindo, pelo rotulo novo, exatamente o
           defeito que esta issue veio tirar. */}
       <div className="flex items-center gap-[.3em]">
-        <div className="flex min-w-0 flex-1 flex-col gap-[.12em]">
+        {/* A largura fixa mora AQUI agora (PH-193): na barra, que e o que o
+            PH-157 protegeu. Antes ela era `flex-1` dentro de um bloco fixo, o
+            que dava no mesmo enquanto o vizinho da direita nao mudava — mas
+            fazia qualquer coluna nova de rotulo sair do tamanho da barra. */}
+        <div className="flex w-[min(14em,34vw)] shrink-0 flex-col gap-[.12em]">
           <Barra pct={hpPct} altura=".34em" cor={hpBaixo ? 'var(--color-hp-low)' : 'var(--color-hp)'} />
           <Barra pct={expPct} altura=".18em" cor="var(--color-exp)" />
         </div>
-        <div className="w-[2.4em] shrink-0 text-right text-[.6em] leading-[1.5] tabular-nums text-n400">
-          <div className={cn(hpBaixo && 'text-bad')}>{hpNumero}%</div>
+        {/* ROTULO EM CADA PORCENTAGEM (PH-193, item 3). Eram dois numeros
+            empilhados em `.6em`, sem nada dizendo qual era HP e qual era XP —
+            `42%` em cima de `0%` nao se explica sozinho, e a ordem so e obvia
+            pra quem ja sabe.
+            `justify-between` mantem o numero encostado a direita e o rotulo a
+            esquerda; a largura continua RESERVADA e `tabular-nums`, entao `7%`
+            e `100%` seguem ocupando o mesmo espaco e a tremida que o PH-157
+            tirou nao volta pela porta do rotulo. */}
+        <div className="w-[3.9em] shrink-0 text-[.6em] leading-[1.5] tabular-nums text-n400">
+          <div className={cn('flex justify-between gap-[.3em]', hpBaixo && 'text-bad')}>
+            <span className="font-medium">HP</span>
+            <span>{hpNumero}%</span>
+          </div>
           {/* EXP nao usa o piso de 1: `0%` logo depois de subir de nivel e o
               dado certo, e nao um POKE morto. */}
-          <div>{Math.floor(expPct)}%</div>
+          <div className="flex justify-between gap-[.3em]">
+            <span className="font-medium">XP</span>
+            <span>{Math.floor(expPct)}%</span>
+          </div>
         </div>
       </div>
     </div>
