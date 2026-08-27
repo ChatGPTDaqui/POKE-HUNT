@@ -439,7 +439,7 @@ export function HuntMenu() {
                   void acao.run(key, () => acionarHunt(map, unlocked, continentGated, bloqueioDeBioma))
                 }}
               >
-                {pending ? 'Entrando...' : unlocked ? 'Entrar' : continentGated ? 'Bloqueado' : 'Desbloquear'}
+                {pending ? 'Entrando...' : unlocked ? 'Entrar' : continentGated || bloqueioDeBioma ? 'Bloqueado' : 'Desbloquear'}
               </GameButton>
             </div>
 
