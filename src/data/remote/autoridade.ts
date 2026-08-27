@@ -71,7 +71,11 @@ function reconciliarExpAntesDeAplicar(doServidor: GameStateData, resumo: Respost
   const queda = pokeLocal.exp - pokeServidor.exp
   if (queda <= 0) return // subiu ou empatou, servidor passa como veio
 
-  const orcamento = resumo.expPerdidaPorMorte
+  // `?? 0`: Edge mais antiga (ou `/estado` sem resim) pode mandar `resumo` sem
+  // `expPerdidaPorMorte`. Sem o coalesce, `pokeLocal.exp - undefined` grava
+  // `NaN` na exp do POKE ativo e a barra/nivel quebram ate o proximo flush
+  // limpo (PH-221). Ausente = sem orcamento de morte = toda queda e espuria.
+  const orcamento = resumo.expPerdidaPorMorte ?? 0
   if (queda <= orcamento) return // legitima (penalidade de morte real), mostra normal
 
   // Excedente e espurio — trava no que a penalidade de verdade justifica,
@@ -83,6 +87,67 @@ function reconciliarExpAntesDeAplicar(doServidor: GameStateData, resumo: Respost
     exp: pokeLocal.exp - orcamento,
     level: Math.max(pokeLocal.level, pokeServidor.level),
   }
+}
+
+/**
+ * PH-221: reflete no `worldStore.player.poke` — o que o HUD (`StatusRail`) le
+ * durante a hunt — a mudanca de PROGRESSAO que o servidor acabou de aplicar no
+ * `gameStateStore`.
+ *
+ * Sob autoridade, `aplicarEstadoDoServidor` so mexe no `gameStateStore`, e o
+ * unico sync (`syncActivePokeToGameState`, GameCanvas, 5s) so vai
+ * `world -> gameState` — nada volta. Efeito: evolucao, golpe novo, recalculo
+ * de stat e correcao de nivel do POKE ativo so apareciam no HUD depois do F5
+ * (que reconstroi o world a partir do `gameStateStore`) ou ao sair da hunt.
+ *
+ * Regras, na mesma filosofia de `reconciliarExpAntesDeAplicar`:
+ *  - especie / stats / minLevel / traco / `unlockedAbilities`: SEGUEM o
+ *    servidor sempre (evolucao e golpe novo tem que aparecer). `hp` continua
+ *    sendo a vida ao vivo do combate — so e reclampado pro novo teto.
+ *  - nivel / exp: NUNCA regridem abaixo do que o jogador ja viu no world. Sobe
+ *    quando o servidor traz mais; segura o local quando viria menos
+ *    (descompasso de janela, pessimista de aba oculta). Valor nao-finito do
+ *    servidor e ignorado.
+ *
+ * `activeAbilities` / `disabledAbilities` NAO entram aqui de proposito: sao
+ * escolha do jogador e ja tem caminho proprio de patch no world
+ * (`controller.ts#definirGolpesAtivos` / `#alternarHabilidade`).
+ */
+function reconciliarPokeAtivoNoWorld(doServidor: GameStateData): void {
+  if (!Array.isArray(doServidor.team)) return
+  const noWorld = useWorldStore.getState().player?.poke
+  if (!noWorld) return
+  const doServ = doServidor.team.find((p) => p.uid === noWorld.uid)
+  if (!doServ) return
+
+  const level = Math.max(noWorld.level, Number.isFinite(doServ.level) ? doServ.level : noWorld.level)
+  const exp = Math.max(noWorld.exp, Number.isFinite(doServ.exp) ? doServ.exp : noWorld.exp)
+
+  const jaAtual =
+    doServ.speciesId === noWorld.speciesId
+    && level === noWorld.level
+    && exp === noWorld.exp
+    && (doServ.unlockedAbilities?.length ?? 0) === (noWorld.unlockedAbilities?.length ?? 0)
+    && (doServ.minLevel ?? null) === (noWorld.minLevel ?? null)
+  if (jaAtual) return
+
+  const stats = doServ.stats ?? noWorld.stats
+  useWorldStore.getState().update((draft) => {
+    if (!draft.player || draft.player.poke.uid !== noWorld.uid) return
+    draft.player.poke = {
+      ...draft.player.poke,
+      speciesId: doServ.speciesId,
+      level,
+      exp,
+      stats,
+      hp: Math.min(draft.player.poke.hp, stats.hp),
+      minLevel: doServ.minLevel ?? draft.player.poke.minLevel,
+      isShiny: doServ.isShiny,
+      nature: doServ.nature ?? draft.player.poke.nature,
+      trait: doServ.trait ?? draft.player.poke.trait,
+      unlockedAbilities: doServ.unlockedAbilities ?? draft.player.poke.unlockedAbilities,
+    }
+  })
 }
 
 /**
@@ -131,6 +196,10 @@ export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo
   if (!estado || typeof estado !== 'object') return
   const doServidor = estado as GameStateData
   reconciliarExpAntesDeAplicar(doServidor, resumo)
+  // Roda ANTES do setState de proposito: so le `doServidor.team` + worldStore e
+  // escreve no worldStore — nao depende do gameStateStore ja ter sido gravado,
+  // e ver os valores ja travados por `reconciliarExpAntesDeAplicar` acima.
+  reconciliarPokeAtivoNoWorld(doServidor)
   if (!parcial) {
     limparCapturasPreditas()
     useGameStateStore.setState(doServidor)
