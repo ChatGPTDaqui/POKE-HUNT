@@ -32,6 +32,7 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     sequenceCleared: false,
     countdownRemaining: null,
     sala: null,
+    bossPendente: null,
     salaCountdownRemaining: null,
     salaPendente: null,
     salaSobAutoridade: false,

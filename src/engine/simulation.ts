@@ -18,7 +18,7 @@
 // ultimo bit — posicao diverge, instante de engajamento diverge, kill diverge.
 // Um comparador acusaria jogador honesto. E re-simular pra conferir custa a
 // MESMA CPU que simular; se vai gastar, gaste sendo a autoridade.
-import { SPECIES, createPokeInstance, type PokeInstance } from '@/data/pokes'
+import { SPECIES, createPokeInstance, rollIvsDoBoss, type PokeInstance } from '@/data/pokes'
 import { mapDefParaSala, spawnPointParaSala, spawnInimigoParaSala, mapWalkRadius, isCellBlocked, nearestOpenPoint, type MapDef } from '@/data/maps'
 import { getEncounter } from '@/data/enemies'
 import { getItem } from '@/data/items'
@@ -47,7 +47,7 @@ import { awardKillLoot } from './systems/economySystem'
 import { recordKill } from './systems/farmRates'
 import {
   contextoDeSpawn, lootAtivo, novaSala, nomeDaSala, registrarAbate, temSalas,
-  aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada,
+  aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, bossDaSala, resolverBossDaSala, type TipoDeBoss,
 } from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
@@ -56,7 +56,7 @@ import type { GameStateStore } from '@/stores/gameStateStore'
 import { emptyWorldState } from './worldState'
 import { toastStore } from '@/stores/toastStoreVanilla'
 import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
-import type { ClimaTipo, EnemyEntity, EnemyHazards, Point, SalaAtiva, WorldState } from './types'
+import type { ClimaTipo, EnemyEntity, EnemyHazards, Point, SalaAtiva, WorldState, BossPendente } from './types'
 
 export const STARTER_LEVEL = 1
 // Starters sempre saem previsiveis — raridade Comum, IV 75% (23/31) em toda
@@ -271,6 +271,89 @@ function randomSpawnPoint(
   // espacamento e melhor que perder o cone de visao, que e pedido explicito.
   if (melhor) return melhor.ponto
   return randomSpawnPointFullMap(rng, mapDef)
+}
+
+/**
+ * PH-202/204/205: cria a entidade do boss da sala atual — nova (sorteando
+ * especie/nivel/IV do pool da sala) ou RECRIADA fielmente a partir de um
+ * `BossPendente` ja persistido. Recriar nunca sorteia de novo: `ivs`,
+ * `rarity`, `nature`, `isShiny`, `trait` e `uid` chegam todos fixos em
+ * `createPokeInstance`, entao a reconstrucao consome ZERO `rng` — sortear de
+ * novo trocaria a aparencia/stats do boss a cada flush (~30s).
+ */
+function criarEntidadeDoBoss(
+  world: SequenciaDeSorteio,
+  mapDef: MapDef,
+  ctx: { pool: string[]; janela?: [number, number] },
+  tipo: TipoDeBoss,
+  bossSalvo: BossPendente | null | undefined,
+  player: { x: number; y: number; facing: Point } | null,
+  entrada: Point | null,
+): { enemy: EnemyEntity; pendente: BossPendente } {
+  const { rng, counters } = world
+  const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null, [])
+
+  if (bossSalvo) {
+    const poke = createPokeInstance(rng, bossSalvo.speciesId, bossSalvo.level, {
+      ivs: bossSalvo.ivs, rarity: bossSalvo.rarity, nature: bossSalvo.nature,
+      isShiny: bossSalvo.isShiny, trait: bossSalvo.trait, uid: bossSalvo.uid,
+    })
+    poke.hp = bossSalvo.hpAtual
+    const enemy = createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId: bossSalvo.encounterId })
+    enemy.isBoss = true
+    return { enemy, pendente: bossSalvo }
+  }
+
+  // Novo: mesmo sorteio de espécie que o spawn comum usa (peso real do
+  // encontro), so o NIVEL e o IV seguem a regra propria do boss.
+  const encounterId = weightedPick(rng, ctx.pool, (id) => getEncounter(id)?.weight ?? 45)
+  const encounter = getEncounter(encounterId)
+  if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
+  const level = tipo === 'ultimate' ? mapDef.levelRange[1] : (ctx.janela?.[1] ?? encounter.maxLevel)
+  const ivs = rollIvsDoBoss(rng)
+  const poke = createPokeInstance(rng, encounter.speciesId, level, { ivs })
+  const enemy = createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId })
+  enemy.isBoss = true
+  const pendente: BossPendente = {
+    uid: poke.uid, speciesId: poke.speciesId, encounterId, level, ivs,
+    rarity: poke.rarity, isShiny: poke.isShiny, nature: poke.nature, trait: poke.trait,
+    hpAtual: poke.hp,
+  }
+  return { enemy, pendente }
+}
+
+/**
+ * PH-202/203: garante o boss da sala atual quando ela pedir um — sorteia
+ * (primeira vez) ou recria fiel (janela reconstruida com o boss ainda vivo),
+ * e mantem `world.bossPendente`/`world.enemies` coerentes. Devolve true
+ * quando a sala pede boss (bloqueia o avanco em
+ * `garantirTransicaoDeQuotaFechada`, ver salaSystem.ts), false quando nao.
+ *
+ * Chamado tanto do `stepWorld` (quota acabou de fechar em tempo real) quanto
+ * indiretamente de `buildMapWorld` (reconstrucao com boss ja persistido) —
+ * os dois caminhos convergem aqui pra nao duplicar a logica de recriacao.
+ */
+function garantirBossDaSala(
+  world: WorldState,
+  mapDef: MapDef,
+  bossSalvo: BossPendente | null | undefined,
+  player: { x: number; y: number; facing: Point } | null,
+  entrada: Point | null,
+): boolean {
+  const tipo = bossDaSala(world.sala)
+  if (!tipo) {
+    world.bossPendente = null
+    return false
+  }
+  // Ja resolvido nesta mesma instancia de mundo (chamada de novo no mesmo
+  // tick, ou boss ja spawnado e ainda vivo) — idempotente, nao recria.
+  if (world.bossPendente) return true
+
+  const ctx = contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool)
+  const { enemy, pendente } = criarEntidadeDoBoss(world, mapDef, ctx, tipo, bossSalvo, player, entrada)
+  world.enemies.push(enemy)
+  world.bossPendente = pendente
+  return true
 }
 
 function spawnEnemyAt(
@@ -502,6 +585,14 @@ export interface ProgressoDaSessao {
    * enquanto o servidor cobrava dano de areia.
    */
   clima?: ClimaTipo | null
+  /**
+   * PH-201/202: boss (mini ou ultimate) ainda vivo na sala em que a sessao
+   * parou. Presente == a sala esta em "modo boss": `buildMapWorld` recria a
+   * entidade FIELMENTE em vez do spawn normal — sortear de novo desalinharia
+   * o RNG e trocaria a aparencia do boss a cada flush. Ausente/null == sala
+   * sem boss pendente, spawn normal de sempre.
+   */
+  bossPendente?: BossPendente | null
 }
 
 export function buildMapWorld(
@@ -556,8 +647,21 @@ export function buildMapWorld(
   const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool)
 
   const enemies: EnemyEntity[] = []
+  let bossPendente: BossPendente | null = null
   if (!countdownRemaining && !sequenceCleared) {
-    if (mapDef.sequence) {
+    const tipoDeBoss = bossDaSala(sala)
+    if (tipoDeBoss) {
+      // PH-202/203: sala em modo boss (quota ja fechou, spawn normal fica
+      // suspenso ate resolver). Recria FIEL quando `progresso.bossPendente`
+      // ja existe (zero RNG extra — outra janela ja tinha sorteado esse
+      // boss), sorteia na primeira vez que a sala pede boss senao.
+      const { enemy, pendente } = criarEntidadeDoBoss(
+        base, mapDef, { pool, janela }, tipoDeBoss, progresso?.bossPendente, player, entradaDoInimigo(mapDef, sala),
+      )
+      aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
+      enemies.push(enemy)
+      bossPendente = pendente
+    } else if (mapDef.sequence) {
       const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala))
       aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
       enemies.push(enemy)
@@ -581,6 +685,7 @@ export function buildMapWorld(
     sequenceCleared,
     countdownRemaining,
     sala,
+    bossPendente,
     // PH-140: o clima de ambiente e reposto em TODA construcao de mundo, e nao
     // guardado. E o que faz ele sobreviver ao flush do servidor (que reconstroi
     // o mundo a cada 30-90s) sem coluna nova em `game_sessions`: mesma
@@ -795,6 +900,13 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
     }
   }
 
+  // PH-202/203: resolvido (morto OU capturado) arma a transicao NA HORA —
+  // incondicional a `silent` porque o catch-up headless tambem precisa
+  // desarmar o bloqueio. `registrarAbate` (chamado logo depois, mesmo tick,
+  // pro proprio abate deste boss) se recusa a arma-la de novo por conta
+  // propria — ver salaSystem.ts#registrarAbate.
+  if (enemy.isBoss) resolverBossDaSala(world, world.mapDef!.id)
+
   return {
     gold: loot.gold + ouroDeAutoVenda,
     ouroDeAutoVenda,
@@ -860,7 +972,8 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // atravessa a reconstrucao de mundo do servidor): arma a transicao agora, sem
   // esperar um abate novo. Ver o livelock em
   // salaSystem.ts#garantirTransicaoDeQuotaFechada.
-  garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt, manualAdvance)
+  garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt, manualAdvance, () =>
+    garantirBossDaSala(world, world.mapDef!, undefined, world.player, null))
 
   // Contagem regressiva "Entrando em nova area" entre salas (ver
   // salaSystem.ts#registrarAbate/aplicarTransicaoDeSala): a quota de abates
