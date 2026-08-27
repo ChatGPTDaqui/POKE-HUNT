@@ -1051,6 +1051,49 @@ export type Database = {
           },
         ]
       }
+      player_missoes_reivindicadas: {
+        Row: {
+          claimed_at: string
+          species_id: string
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          species_id: string
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string
+          species_id?: string
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_missoes_reivindicadas_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_missoes_reivindicadas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_missoes_reivindicadas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       player_pokedex: {
         Row: {
           normal_kills: number
@@ -1906,6 +1949,10 @@ export type Database = {
         Returns: undefined
       }
       reiniciar_jogo: { Args: never; Returns: undefined }
+      reivindicar_missao: {
+        Args: { p_species_id: string; p_tipo: string }
+        Returns: Json
+      }
       remover_amizade: { Args: { p_amigo_id: string }; Returns: Json }
       reordenar_equipe: { Args: { p_ordem: string[] }; Returns: Json }
       responder_oferta: {
@@ -3084,6 +3131,49 @@ export type Database = {
           },
         ]
       }
+      player_missoes_reivindicadas: {
+        Row: {
+          claimed_at: string
+          species_id: string
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          species_id: string
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string
+          species_id?: string
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_missoes_reivindicadas_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "species"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_missoes_reivindicadas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "player_missoes_reivindicadas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       player_pokedex: {
         Row: {
           normal_kills: number
@@ -3939,6 +4029,10 @@ export type Database = {
         Returns: undefined
       }
       reiniciar_jogo: { Args: never; Returns: undefined }
+      reivindicar_missao: {
+        Args: { p_species_id: string; p_tipo: string }
+        Returns: Json
+      }
       remover_amizade: { Args: { p_amigo_id: string }; Returns: Json }
       reordenar_equipe: { Args: { p_ordem: string[] }; Returns: Json }
       responder_oferta: {
