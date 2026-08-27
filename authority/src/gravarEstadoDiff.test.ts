@@ -63,6 +63,10 @@ function baselineDe(estado: GameStateData): PlayerSnapshot {
     items: gameStateToItemRows(USER, estado) as unknown as PlayerSnapshot['items'],
     pokedex: gameStateToPokedexRows(USER, estado) as unknown as PlayerSnapshot['pokedex'],
     autoCatchRules: gameStateToAutoCatchRuleRows(USER, estado) as unknown as PlayerSnapshot['autoCatchRules'],
+    // Missao nunca entra no diff do flush (so muda por RPC de menu, fora de
+    // combate/simulacao) — vazio aqui de proposito, mesmo raciocinio de
+    // `especialidades` nesse mesmo teste (PH-198).
+    missoesReivindicadas: [],
   }
 }
 

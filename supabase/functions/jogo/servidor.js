@@ -55407,8 +55407,21 @@ function defaultGameStateData() {
 			exp: 0
 		},
 		pokedexKills: {},
-		unlockedContinents: [...FAIXAS_INICIAIS]
+		unlockedContinents: [...FAIXAS_INICIAIS],
+		missoesReivindicadas: {}
 	};
+}
+//#endregion
+//#region src/data/regions.ts
+var DEX_RE = /Nº\s*(\d+)/;
+Object.fromEntries(Object.entries(SPECIES_DATA).map(([id, species]) => {
+	const match = species.description.match(DEX_RE);
+	if (!match) throw new Error(`Especie "${id}" sem numero de Pokedex na descricao ("${species.description}") — sem ele nao da pra dizer se ela e de Kanto ou de Johto.`);
+	return [id, Number(match[1])];
+}));
+Object.keys(TYPE_COLORS);
+function chaveDaMissao(tipo, speciesId) {
+	return `${tipo}:${speciesId}`;
 }
 //#endregion
 //#region src/data/remote/playerMapper.ts
@@ -55482,6 +55495,8 @@ function snapshotToGameState(snap, defaults) {
 		speciesId: r.species_id,
 		ballItemId: r.ball_item_id
 	}));
+	const missoesReivindicadas = {};
+	for (const row of snap.missoesReivindicadas) missoesReivindicadas[chaveDaMissao(row.tipo, row.species_id)] = true;
 	return {
 		team,
 		bagPokes,
@@ -55513,7 +55528,8 @@ function snapshotToGameState(snap, defaults) {
 			level: p.trainer_level,
 			exp: p.trainer_exp
 		},
-		pokedexKills
+		pokedexKills,
+		missoesReivindicadas
 	};
 }
 function gameStateToPlayerRow(userId, s) {
@@ -55683,6 +55699,9 @@ function criarEstadoDoJogador(dados) {
 			get unlockedContinents() {
 				return s.unlockedContinents;
 			},
+			get missoesReivindicadas() {
+				return s.missoesReivindicadas;
+			},
 			setActiveIndex: (index) => {
 				s.activeIndex = index;
 			},
@@ -55806,6 +55825,9 @@ function criarEstadoDoJogador(dados) {
 			},
 			setPokedexKillEntry: (speciesId, entry) => {
 				s.pokedexKills[speciesId] = entry;
+			},
+			setMissaoReivindicada: (chave) => {
+				s.missoesReivindicadas[chave] = true;
 			},
 			setAutoToggle: (key, value) => {
 				s.autoToggles[key] = value;
@@ -56021,7 +56043,8 @@ async function lerSnapshot(cfg, userId, opcoes = {}) {
 		pokemon,
 		items,
 		pokedex,
-		autoCatchRules
+		autoCatchRules,
+		missoesReivindicadas: []
 	};
 	return {
 		estado: snapshotToGameState(linhasNoLoad, defaultGameStateData()),

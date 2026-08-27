@@ -11,6 +11,7 @@ import {
   gameStateToItemRows,
   gameStateToPokedexRows,
   gameStateToAutoCatchRuleRows,
+  gameStateToMissaoRows,
   type PlayerSnapshot,
 } from './playerMapper'
 
@@ -33,15 +34,16 @@ export async function loadPlayerState(userId: string, defaults: GameStateData): 
   // tudo numa request so, mas devolveria o progresso inteiro embutido na linha
   // de `players`, o que complica o mapeamento sem ganho real: sao 5 requests
   // pequenas, disparadas juntas, uma unica vez no login.
-  const [player, pokemon, items, pokedex, autoCatchRules] = await Promise.all([
+  const [player, pokemon, items, pokedex, autoCatchRules, missoesReivindicadas] = await Promise.all([
     supabase.from('players').select('*').eq('user_id', userId).maybeSingle(),
     supabase.from('pokemon_instances').select('*').eq('user_id', userId),
     supabase.from('player_items').select('*').eq('user_id', userId),
     supabase.from('player_pokedex').select('*').eq('user_id', userId),
     supabase.from('player_auto_catch_rules').select('*').eq('user_id', userId),
+    supabase.from('player_missoes_reivindicadas').select('*').eq('user_id', userId),
   ])
 
-  const erro = player.error ?? pokemon.error ?? items.error ?? pokedex.error ?? autoCatchRules.error
+  const erro = player.error ?? pokemon.error ?? items.error ?? pokedex.error ?? autoCatchRules.error ?? missoesReivindicadas.error
   if (erro) throw new Error(`Falha ao carregar progresso: ${erro.message}`)
 
   // Sem linha em `players` = a trigger `handle_new_user` ainda nao rodou (ou
@@ -56,6 +58,7 @@ export async function loadPlayerState(userId: string, defaults: GameStateData): 
     items: items.data ?? [],
     pokedex: pokedex.data ?? [],
     autoCatchRules: autoCatchRules.data ?? [],
+    missoesReivindicadas: missoesReivindicadas.data ?? [],
   }
 
   // Ancora o diff de exclusao do proximo save (ver `definirIdsConhecidos`).
@@ -105,6 +108,7 @@ export async function savePlayerState(userId: string, state: GameStateData): Pro
   const itemRows = gameStateToItemRows(userId, state)
   const pokedexRows = gameStateToPokedexRows(userId, state)
   const ruleRows = gameStateToAutoCatchRuleRows(userId, state)
+  const missaoRows = gameStateToMissaoRows(userId, state)
 
   const idsNoBanco = idsNoBancoPorUsuario.get(userId) ?? new Set<string>()
   const vivos = new Set(pokemonRows.map((r) => r.id as string))
@@ -157,6 +161,12 @@ export async function savePlayerState(userId: string, state: GameStateData): Pro
   if (pokedexRows.length > 0) {
     const { error } = await supabase.from('player_pokedex').upsert(pokedexRows, { onConflict: 'user_id,species_id' })
     if (error) throw new Error(`Falha ao salvar pokedex: ${error.message}`)
+  }
+
+  if (missaoRows.length > 0) {
+    const { error } = await supabase.from('player_missoes_reivindicadas')
+      .upsert(missaoRows, { onConflict: 'user_id,tipo,species_id', ignoreDuplicates: true })
+    if (error) throw new Error(`Falha ao salvar missoes: ${error.message}`)
   }
 
   // Regras de auto-catch sao poucas (uma por especie escolhida a mao) e tem id

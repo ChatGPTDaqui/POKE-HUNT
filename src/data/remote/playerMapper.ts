@@ -12,6 +12,8 @@ import type { RarityKey } from '@/data/rarity'
 import { NATURES_NEUTRAS, type NatureKey } from '@/data/natures'
 import { activeAbilitiesPadrao, golpesAprendidosAte, sanearEscolhaDeGolpes } from '@/data/activeAbilities'
 import type { StatusCondition } from '@/data/statusEffects'
+import type { ElementType } from '@/data/generated/types'
+import { chaveDaMissao, missaoDaChave } from '@/data/missoes'
 
 type Json = Database['public']['Tables']['players']['Row']['auto_toggles']
 type Tables = Database['public']['Tables']
@@ -33,6 +35,7 @@ export type PokemonRow = Tables['pokemon_instances']['Row']
 export type ItemRow = Tables['player_items']['Row']
 export type PokedexRow = Tables['player_pokedex']['Row']
 export type AutoCatchRuleRow = Tables['player_auto_catch_rules']['Row']
+export type MissaoReivindicadaRow = Tables['player_missoes_reivindicadas']['Row']
 
 export interface PlayerSnapshot {
   player: PlayerRow
@@ -40,6 +43,7 @@ export interface PlayerSnapshot {
   items: ItemRow[]
   pokedex: PokedexRow[]
   autoCatchRules: AutoCatchRuleRow[]
+  missoesReivindicadas: MissaoReivindicadaRow[]
 }
 
 // --- DB -> jogo -------------------------------------------------------------
@@ -193,6 +197,11 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     ballItemId: r.ball_item_id,
   }))
 
+  const missoesReivindicadas: Record<string, boolean> = {}
+  for (const row of snap.missoesReivindicadas) {
+    missoesReivindicadas[chaveDaMissao(row.tipo as ElementType, row.species_id)] = true
+  }
+
   return {
     team,
     bagPokes,
@@ -228,6 +237,7 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     perfStats: fromJson<PerfStats>(p.perf_stats, defaults.perfStats),
     trainer: { name: p.trainer_name, level: p.trainer_level, exp: p.trainer_exp } satisfies TrainerInfo,
     pokedexKills,
+    missoesReivindicadas,
   }
 }
 
@@ -339,6 +349,17 @@ export function gameStateToPokedexRows(userId: string, s: GameStateData): Tables
     normal_kills: k.normal,
     shiny_kills: k.shiny,
   }))
+}
+
+// So insere, nunca "desreivindica" — a chave so entra em `missoesReivindicadas`
+// via `setMissaoReivindicada` (gameStateStore.ts), que nunca remove chave.
+export function gameStateToMissaoRows(userId: string, s: GameStateData): Tables['player_missoes_reivindicadas']['Insert'][] {
+  return Object.keys(s.missoesReivindicadas)
+    .filter((chave) => s.missoesReivindicadas[chave])
+    .map((chave) => {
+      const { tipo, speciesId } = missaoDaChave(chave)
+      return { user_id: userId, tipo, species_id: speciesId }
+    })
 }
 
 export function gameStateToAutoCatchRuleRows(userId: string, s: GameStateData): Tables['player_auto_catch_rules']['Insert'][] {

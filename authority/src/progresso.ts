@@ -333,7 +333,12 @@ export async function lerSnapshot(
     selecionarTudo<PlayerSnapshot['autoCatchRules'][number]>(cfg, `player_auto_catch_rules?user_id=eq.${userId}&select=${COLUNAS_AUTO_CATCH}`),
   ])
   if (!player[0]) throw new ErroHttp(404, 'jogador sem linha em `players`')
-  const linhasNoLoad: PlayerSnapshot = { player: player[0], pokemon, items, pokedex, autoCatchRules }
+  // `missoesReivindicadas` fica vazio de proposito, ao contrario de
+  // `especialidades` (PH-198): missao nunca muda calculo de combate, so paga
+  // gold via `reivindicar_missao` (RPC de menu, fora da resimulacao) — a
+  // resimulacao de sessao nunca le nem escreve este campo, so precisa dele
+  // presente pro tipo `GameStateData` fechar.
+  const linhasNoLoad: PlayerSnapshot = { player: player[0], pokemon, items, pokedex, autoCatchRules, missoesReivindicadas: [] }
   const estado = snapshotToGameState(linhasNoLoad, defaultGameStateData())
   return {
     estado,
