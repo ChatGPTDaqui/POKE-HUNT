@@ -109,6 +109,13 @@ export function TasksMenu() {
 }
 
 function CadeiaDoTipo({ tipo, semTitulo }: { tipo: ElementType | null; semTitulo?: boolean }) {
+  // Hook, e nao `.getState()`: este componente precisa ser reativo por conta
+  // PROPRIA. Antes so re-renderizava porque o TasksMenu pai ja assina
+  // `missoesReivindicadas` pro resumo — coincidencia de layout, nao contrato.
+  // Um `React.memo` futuro em qualquer camada intermediaria congelaria
+  // "bloqueada" na hora errada sem nenhum aviso.
+  const reivindicadas = useGameStateStore((s) => s.missoesReivindicadas)
+
   if (!tipo) {
     return (
       <div className="self-start rounded-[.7em] border border-dashed border-n700 p-[.7em] text-[.85em] text-n500">
@@ -126,7 +133,12 @@ function CadeiaDoTipo({ tipo, semTitulo }: { tipo: ElementType | null; semTitulo
         </div>
       )}
       {cadeia.map((missao, i) => (
-        <MissaoCard key={missao.speciesId} tipo={tipo} missao={missao} bloqueada={i > 0 && !useGameStateStore.getState().missoesReivindicadas[chaveDaMissao(tipo, cadeia[i - 1].speciesId)]} />
+        <MissaoCard
+          key={missao.speciesId}
+          tipo={tipo}
+          missao={missao}
+          bloqueada={i > 0 && !reivindicadas[chaveDaMissao(tipo, cadeia[i - 1].speciesId)]}
+        />
       ))}
     </div>
   )
