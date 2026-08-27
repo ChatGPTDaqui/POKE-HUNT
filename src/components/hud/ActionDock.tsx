@@ -27,7 +27,7 @@ import { useRef, useState } from 'react'
 import {
   Backpack, BookOpen, Books, Calculator, CheckSquare, DotsThreeOutline, Envelope,
   FirstAid, Gear, GraduationCap, MagnifyingGlassMinus, MagnifyingGlassPlus, MapTrifold,
-  Robot, Scales, Storefront, Trophy, UsersThree, Warning, BookBookmark, type Icon,
+  Robot, Scales, Sparkle, Storefront, Trophy, UsersThree, Warning, BookBookmark, type Icon,
 } from '@phosphor-icons/react'
 import { controller } from '@/engine/controller'
 import { useWorldStore } from '@/stores/worldStore'
@@ -72,6 +72,7 @@ const DIREITA: DestinoDeTela[] = [
 const SECUNDARIOS: DestinoDeTela[] = [
   { screen: 'correio', label: 'Correio', Icon: Envelope },
   { screen: 'bestiario', label: 'Bestiário', Icon: BookBookmark },
+  { screen: 'especialidades', label: 'Especialidades', Icon: Sparkle },
   { screen: 'tasks', label: 'Tasks', Icon: CheckSquare },
   { screen: 'calc', label: 'Calculadora', Icon: Calculator },
   { screen: 'ranking', label: 'Ranking', Icon: Trophy },
