@@ -64,6 +64,7 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     get trainer() { return s.trainer },
     get pokedexKills() { return s.pokedexKills },
     get unlockedContinents() { return s.unlockedContinents },
+    get especialidades() { return s.especialidades },
 
     // ----- acoes que a simulacao realmente usa -----
     setActiveIndex: (index) => { s.activeIndex = index },
@@ -171,6 +172,11 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
       s.perfStats.shinys += delta.shinys
     },
     setPokedexKillEntry: (speciesId, entry) => { s.pokedexKills[speciesId] = entry },
+    // A simulacao nunca chama isto (Especialidade so sobe por acao de menu,
+    // fora de combate) — implementada mesmo assim pelo mesmo motivo de
+    // `reordenarReservas`: o tipo exige, e um stub que divergisse da regra do
+    // navegador seria uma diferenca esperando pra ser descoberta.
+    setEspecialidadeNivel: (tipo, trilha, nivel) => { s.especialidades[tipo][trilha] = nivel },
 
     // ----- acoes de UI: existem pro tipo fechar, nao sao usadas na simulacao -----
     setAutoToggle: (key, value) => { s.autoToggles[key] = value },
