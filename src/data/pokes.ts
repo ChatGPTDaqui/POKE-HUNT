@@ -396,6 +396,22 @@ function rollIvs(rng: Rng, speciesId?: string): StatBlock {
   return ivs
 }
 
+// PH-202/204: IV do boss (mini/ultimate) e sorteado num piso mais alto que o
+// selvagem normal, nao 0-31 — design explicito, e ataca de quebra o problema
+// de IV nunca sair alto. Consome `world.rng` igual a qualquer sorteio de
+// combate, entao reconferivel pelo servidor do mesmo jeito.
+export const BOSS_IV_MIN = 20
+export function rollIvsDoBoss(rng: Rng): StatBlock {
+  return {
+    hp: randInt(rng, BOSS_IV_MIN, IV_MAX),
+    atkFis: randInt(rng, BOSS_IV_MIN, IV_MAX),
+    atkEsp: randInt(rng, BOSS_IV_MIN, IV_MAX),
+    def: randInt(rng, BOSS_IV_MIN, IV_MAX),
+    defEsp: randInt(rng, BOSS_IV_MIN, IV_MAX),
+    speed: randInt(rng, BOSS_IV_MIN, IV_MAX),
+  }
+}
+
 // Overall IV quality as a 0-100% average across all 6 stats — used for the
 // shop's IV filter/sort.
 export function averageIvPercent(ivs: StatBlock): number {
@@ -420,28 +436,36 @@ export interface CreatePokeInstanceOptions {
   ivs?: StatBlock
   rarity?: RarityKey
   nature?: NatureKey
+  /**
+   * PH-202/204: fixar tambem shiny/trait/uid, alem de ivs/rarity/nature
+   * acima — pra RECRIAR um boss persistido sem consumir `rng` de novo (os
+   * dois nao tinham parametro pra pular o sorteio antes desta leva).
+   */
+  isShiny?: boolean
+  trait?: string
+  uid?: string
 }
 
 // `rng` e o primeiro parametro (e obrigatorio) de proposito: os tres sorteios
 // aqui — IV, raridade e shiny — sao exatamente os que o servidor precisa poder
 // reconferir na Fase D. Um default pra `Math.random()` deixaria um caminho
 // silencioso de volta pro nao-verificavel.
-export function createPokeInstance(rng: Rng, speciesId: string, level = 1, { ivs: fixedIvs, rarity: fixedRarity, nature: fixedNature }: CreatePokeInstanceOptions = {}): PokeInstance {
+export function createPokeInstance(rng: Rng, speciesId: string, level = 1, { ivs: fixedIvs, rarity: fixedRarity, nature: fixedNature, isShiny: fixedIsShiny, trait: fixedTrait, uid: fixedUid }: CreatePokeInstanceOptions = {}): PokeInstance {
   const species = SPECIES[speciesId]
   if (!species) throw new Error(`Especie desconhecida: ${speciesId}`)
   const ivs = fixedIvs || rollIvs(rng, speciesId)
   const rarity = fixedRarity || rollRarity(rng)
   const shinyChance = (species.catchRate / MAX_CATCH_RATE) * SHINY_CHANCE_AT_MAX_CATCH_RATE
-  const isShiny = rollChance(rng, shinyChance)
+  const isShiny = fixedIsShiny ?? rollChance(rng, shinyChance)
   // Os TRES tracos individuais dos jogos, sorteados aqui e so aqui:
   // NATUREZA (uniforme entre as 25, como nos jogos), HABILIDADE (entre os slots
   // normais da especie, com chance pequena de oculta) e CARACTERISTICA — esta
   // ultima nao e sorteada nem gravada: sai dos IVs (data/characteristics.ts).
   const nature = fixedNature ?? NATURE_LIST[randInt(rng, 0, NATURE_LIST.length - 1)].key
-  const trait = sortearTrait(rng, speciesId) ?? undefined
+  const trait = fixedTrait ?? sortearTrait(rng, speciesId) ?? undefined
   const stats = computeStatsAtLevel(species, level, ivs, rarity, isShiny, nature)
   return {
-    uid: novoPokeUid(),
+    uid: fixedUid ?? novoPokeUid(),
     speciesId,
     level,
     isShiny,

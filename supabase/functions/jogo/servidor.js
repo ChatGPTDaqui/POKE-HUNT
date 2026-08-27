@@ -28087,20 +28087,31 @@ function rollIvs(rng, speciesId) {
 	}
 	return ivs;
 }
+function rollIvsDoBoss(rng) {
+	return {
+		hp: randInt(rng, 20, IV_MAX),
+		atkFis: randInt(rng, 20, IV_MAX),
+		atkEsp: randInt(rng, 20, IV_MAX),
+		def: randInt(rng, 20, IV_MAX),
+		defEsp: randInt(rng, 20, IV_MAX),
+		speed: randInt(rng, 20, IV_MAX)
+	};
+}
 function novoPokeUid() {
 	return crypto.randomUUID();
 }
-function createPokeInstance(rng, speciesId, level = 1, { ivs: fixedIvs, rarity: fixedRarity, nature: fixedNature } = {}) {
+function createPokeInstance(rng, speciesId, level = 1, { ivs: fixedIvs, rarity: fixedRarity, nature: fixedNature, isShiny: fixedIsShiny, trait: fixedTrait, uid: fixedUid } = {}) {
 	const species = SPECIES[speciesId];
 	if (!species) throw new Error(`Especie desconhecida: ${speciesId}`);
 	const ivs = fixedIvs || rollIvs(rng, speciesId);
 	const rarity = fixedRarity || rollRarity(rng);
-	const isShiny = rollChance(rng, species.catchRate / MAX_CATCH_RATE * SHINY_CHANCE_AT_MAX_CATCH_RATE);
+	const shinyChance = species.catchRate / MAX_CATCH_RATE * SHINY_CHANCE_AT_MAX_CATCH_RATE;
+	const isShiny = fixedIsShiny ?? rollChance(rng, shinyChance);
 	const nature = fixedNature ?? NATURE_LIST[randInt(rng, 0, NATURE_LIST.length - 1)].key;
-	const trait = sortearTrait(rng, speciesId) ?? void 0;
+	const trait = fixedTrait ?? sortearTrait(rng, speciesId) ?? void 0;
 	const stats = computeStatsAtLevel(species, level, ivs, rarity, isShiny, nature);
 	return {
-		uid: novoPokeUid(),
+		uid: fixedUid ?? novoPokeUid(),
 		speciesId,
 		level,
 		isShiny,
@@ -54303,6 +54314,19 @@ function lootAtivo(sala, fallback) {
 	const perfil = SUB_BIOMA_POR_CHAVE[sala.chave]?.sub.loot;
 	return perfil ? LOOT[perfil] : fallback;
 }
+/**
+* PH-202: so o bioma piloto (BIOMA_PILOTO_BOSS) tem boss por enquanto. Salas
+* 1-9 (indice 0-8) pedem mini-boss ao fechar a quota; a ultima sala (indice
+* SALAS_POR_HUNT-1) pede o ultimate da faixa. Pura — nao sorteia nada, so
+* decide QUAL boss a sala pede, se pedir algum. A entidade em si (RNG,
+* criacao) fica em simulation.ts, que ja importa este modulo — colocar aqui
+* criaria import circular.
+*/
+function bossDaSala(sala) {
+	if (!sala) return null;
+	if (SUB_BIOMA_POR_CHAVE[sala.chave]?.bioma.chave !== "igneo") return null;
+	return sala.indice >= 9 ? "ultimate" : "mini";
+}
 function nomeDaSala(sala) {
 	if (!sala) return null;
 	return SUB_BIOMA_POR_CHAVE[sala.chave]?.sub.nome ?? sala.chave;
@@ -54339,6 +54363,10 @@ function registrarAbate(world, mapId, opts = {}) {
 		};
 	}
 	sala.abates = 30;
+	if (bossDaSala(sala)) return {
+		avancou: false,
+		fechouCiclo: false
+	};
 	if (opts.manualAdvance) return {
 		avancou: false,
 		fechouCiclo: false
@@ -54394,6 +54422,18 @@ function armarTransicaoDeSala(world, mapId) {
 	};
 }
 /**
+* PH-202/203: chamado por `handleEnemyDefeated` (simulation.ts) quando o
+* abate era o do boss da sala — o UNICO gatilho que pode armar a transicao
+* de uma sala do bioma piloto (`registrarAbate` se recusa, ver acima). Sob
+* autoridade remota o cliente nao arma nada, so limpa o boss local: quem
+* decide quando a sala avanca e o flush do servidor, igual toda outra sala.
+*/
+function resolverBossDaSala(world, mapId) {
+	world.bossPendente = null;
+	if (world.salaSobAutoridade) return;
+	armarTransicaoDeSala(world, mapId);
+}
+/**
 * Quota JA fechada na abertura da janela: arma a transicao sem esperar um abate
 * novo. Chamado por `stepWorld` no primeiro tick.
 *
@@ -54415,12 +54455,14 @@ function armarTransicaoDeSala(world, mapId) {
 * cabe em qualquer duracao. Isso tambem fecha o caso que ja estava documentado
 * como "autocurativo no proximo abate" — ele nao era, quando nao havia proximo.
 */
-function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0, manualAdvance = false) {
+function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0, manualAdvance = false, garantirBossDaSala) {
 	const sala = world.sala;
 	if (!sala || sala.abates < 30) {
 		world.salaEsperaDaAutoridade = 0;
 		return;
 	}
+	if (world.salaPendente || world.salaCountdownRemaining != null) return;
+	if (garantirBossDaSala?.()) return;
 	if (world.salaSobAutoridade) {
 		if (world.salaPredita) return;
 		world.salaEsperaDaAutoridade += dt;
@@ -54503,6 +54545,7 @@ function emptyWorldState(seed = randomSeed()) {
 		sequenceCleared: false,
 		countdownRemaining: null,
 		sala: null,
+		bossPendente: null,
 		salaCountdownRemaining: null,
 		salaPendente: null,
 		salaSobAutoridade: false,
@@ -54790,6 +54833,91 @@ function randomSpawnPoint(rng, mapDef, player, ocupados = []) {
 	if (melhor) return melhor.ponto;
 	return randomSpawnPointFullMap(rng, mapDef);
 }
+/**
+* PH-202/204/205: cria a entidade do boss da sala atual — nova (sorteando
+* especie/nivel/IV do pool da sala) ou RECRIADA fielmente a partir de um
+* `BossPendente` ja persistido. Recriar nunca sorteia de novo: `ivs`,
+* `rarity`, `nature`, `isShiny`, `trait` e `uid` chegam todos fixos em
+* `createPokeInstance`, entao a reconstrucao consome ZERO `rng` — sortear de
+* novo trocaria a aparencia/stats do boss a cada flush (~30s).
+*/
+function criarEntidadeDoBoss(world, mapDef, ctx, tipo, bossSalvo, player, entrada) {
+	const { rng, counters } = world;
+	const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null, []);
+	if (bossSalvo) {
+		const poke = createPokeInstance(rng, bossSalvo.speciesId, bossSalvo.level, {
+			ivs: bossSalvo.ivs,
+			rarity: bossSalvo.rarity,
+			nature: bossSalvo.nature,
+			isShiny: bossSalvo.isShiny,
+			trait: bossSalvo.trait,
+			uid: bossSalvo.uid
+		});
+		poke.hp = bossSalvo.hpAtual;
+		const enemy = createEnemyEntity(counters, {
+			poke,
+			x: point.x,
+			y: point.y,
+			encounterId: bossSalvo.encounterId
+		});
+		enemy.isBoss = true;
+		return {
+			enemy,
+			pendente: bossSalvo
+		};
+	}
+	const encounterId = weightedPick(rng, ctx.pool, (id) => getEncounter(id)?.weight ?? 45);
+	const encounter = getEncounter(encounterId);
+	if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
+	const level = tipo === "ultimate" ? mapDef.levelRange[1] : ctx.janela?.[1] ?? encounter.maxLevel;
+	const ivs = rollIvsDoBoss(rng);
+	const poke = createPokeInstance(rng, encounter.speciesId, level, { ivs });
+	const enemy = createEnemyEntity(counters, {
+		poke,
+		x: point.x,
+		y: point.y,
+		encounterId
+	});
+	enemy.isBoss = true;
+	return {
+		enemy,
+		pendente: {
+			uid: poke.uid,
+			speciesId: poke.speciesId,
+			encounterId,
+			level,
+			ivs,
+			rarity: poke.rarity,
+			isShiny: poke.isShiny,
+			nature: poke.nature,
+			trait: poke.trait,
+			hpAtual: poke.hp
+		}
+	};
+}
+/**
+* PH-202/203: garante o boss da sala atual quando ela pedir um — sorteia
+* (primeira vez) ou recria fiel (janela reconstruida com o boss ainda vivo),
+* e mantem `world.bossPendente`/`world.enemies` coerentes. Devolve true
+* quando a sala pede boss (bloqueia o avanco em
+* `garantirTransicaoDeQuotaFechada`, ver salaSystem.ts), false quando nao.
+*
+* Chamado tanto do `stepWorld` (quota acabou de fechar em tempo real) quanto
+* indiretamente de `buildMapWorld` (reconstrucao com boss ja persistido) —
+* os dois caminhos convergem aqui pra nao duplicar a logica de recriacao.
+*/
+function garantirBossDaSala(world, mapDef, bossSalvo, player, entrada) {
+	const tipo = bossDaSala(world.sala);
+	if (!tipo) {
+		world.bossPendente = null;
+		return false;
+	}
+	if (world.bossPendente) return true;
+	const { enemy, pendente } = criarEntidadeDoBoss(world, mapDef, contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool), tipo, bossSalvo, player, entrada);
+	world.enemies.push(enemy);
+	world.bossPendente = pendente;
+	return true;
+}
 function spawnEnemyAt(world, mapDef, pool, janela, player, entrada, ocupados = []) {
 	const { rng, counters } = world;
 	const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null, ocupados);
@@ -54930,8 +55058,18 @@ function buildMapWorld(mapId, activePoke, carry, progresso) {
 	const climaDaConstrucao = progresso && "clima" in progresso ? climaDeAmbiente(progresso.clima ?? null) : climaAmbienteDaSala(base.seed, sala);
 	const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool);
 	const enemies = [];
+	let bossPendente = null;
 	if (!countdownRemaining && !sequenceCleared) {
-		if (mapDef.sequence) {
+		const tipoDeBoss = bossDaSala(sala);
+		if (tipoDeBoss) {
+			const { enemy, pendente } = criarEntidadeDoBoss(base, mapDef, {
+				pool,
+				janela
+			}, tipoDeBoss, progresso?.bossPendente, player, entradaDoInimigo(mapDef, sala));
+			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
+			enemies.push(enemy);
+			bossPendente = pendente;
+		} else if (mapDef.sequence) {
 			const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala));
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
@@ -54957,6 +55095,7 @@ function buildMapWorld(mapId, activePoke, carry, progresso) {
 		sequenceCleared,
 		countdownRemaining,
 		sala,
+		bossPendente,
 		clima: climaDaConstrucao,
 		climaAmbiente: climaDaConstrucao
 	};
@@ -55089,6 +55228,7 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			else dispararToastDeCaptura();
 		}
 	}
+	if (enemy.isBoss) resolverBossDaSala(world, world.mapDef.id);
 	return {
 		gold: loot.gold + ouroDeAutoVenda,
 		ouroDeAutoVenda,
@@ -55129,7 +55269,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (!silent) updateAnimations(world, dt);
 		return [];
 	}
-	garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt, manualAdvance);
+	garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt, manualAdvance, () => garantirBossDaSala(world, world.mapDef, void 0, world.player, null));
 	if (world.salaCountdownRemaining != null) {
 		world.salaCountdownRemaining -= dt;
 		if (world.salaCountdownRemaining <= 0) {
