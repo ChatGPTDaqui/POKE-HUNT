@@ -1,5 +1,6 @@
-// PH-202/203: mini-boss (salas 1-9) e boss ultimate (sala 10) do bioma piloto
-// (`BIOMA_PILOTO_BOSS = 'igneo'`). Fecha a quota da sala normalmente, mas o
+// PH-202/203/225: mini-boss (salas 1-9) e boss ultimate (sala 10) — todo
+// bioma em ORDEM_DOS_BIOMAS tem boss (pivo 27/08, ver salaSystem.ts#bossDaSala
+// — nao e mais so o piloto igneo). Fecha a quota da sala normalmente, mas o
 // AVANCO fica bloqueado ate o boss ser resolvido (morto ou capturado) — sem
 // escape automatico, ver design em `_Architecture.md` (16/08).
 //
@@ -31,18 +32,61 @@ describe('bossDaSala (logica pura)', () => {
     expect(bossDaSala(null)).toBeNull()
   })
 
-  it('bioma fora do piloto nao pede boss, mesmo na ultima sala', () => {
-    expect(bossDaSala({ indice: SALAS_POR_HUNT - 1, chave: 'jungle', abates: 0, ciclos: 0 })).toBeNull()
+  it('sub-bioma desconhecido (fora dos 12 de ORDEM_DOS_BIOMAS) nao pede boss', () => {
+    expect(bossDaSala({ indice: SALAS_POR_HUNT - 1, chave: 'chave-que-nao-existe', abates: 0, ciclos: 0 })).toBeNull()
   })
 
-  it('salas 1-9 do bioma piloto pedem mini-boss', () => {
+  it('salas 1-9 de igneo pedem mini-boss', () => {
     for (let indice = 0; indice < SALAS_POR_HUNT - 1; indice++) {
       expect(bossDaSala({ indice, chave: 'volcano', abates: 0, ciclos: 0 })).toBe('mini')
     }
   })
 
-  it('a ultima sala do bioma piloto pede o boss ultimate', () => {
+  it('a ultima sala de igneo pede o boss ultimate', () => {
     expect(bossDaSala({ indice: SALAS_POR_HUNT - 1, chave: 'volcano', abates: 0, ciclos: 0 })).toBe('ultimate')
+  })
+
+  // PH-225: prova que nao esta hardcoded so pro piloto — 'jungle' e sub-bioma
+  // de 'mata' (data/biomas.ts), o SEGUNDO bioma de ORDEM_DOS_BIOMAS.
+  it('salas 1-9 de outro bioma (mata) TAMBEM pedem mini-boss', () => {
+    for (let indice = 0; indice < SALAS_POR_HUNT - 1; indice++) {
+      expect(bossDaSala({ indice, chave: 'jungle', abates: 0, ciclos: 0 })).toBe('mini')
+    }
+  })
+
+  it('a ultima sala de outro bioma (mata) TAMBEM pede o boss ultimate', () => {
+    expect(bossDaSala({ indice: SALAS_POR_HUNT - 1, chave: 'jungle', abates: 0, ciclos: 0 })).toBe('ultimate')
+  })
+})
+
+// PH-225: bug REAL relatado ao vivo pelo usuario — "boss aparece sozinho, tela
+// vazia, sem nenhum mob". Causa: `buildMapWorld` checava so bioma+indice da
+// sala (`bossDaSala`), nunca se a quota (30 abates) tinha de fato fechado.
+// Mascarado antes por so igneo ter boss habilitado; virou visivel pra
+// QUALQUER hunt de bioma assim que os 12 ganharam boss.
+describe('buildMapWorld respeita a quota antes de reconstruir o boss (PH-225)', () => {
+  it('sala boss-habilitada com quota ABERTA (abates < 30) spawna mob normal, nao boss', () => {
+    const poke = createPokeInstance(createRng(60), 'charmander', 20)
+    const world = buildMapWorld(
+      HUNT, poke,
+      { seed: 0, rng: createRng(60), counters: { entity: 1, effect: 1, pendingHit: 1 } },
+      { sala: { indice: 0, chave: 'volcano', abates: 0, ciclos: 0 } },
+    )
+    expect(world.bossPendente).toBeNull()
+    expect(world.enemies.length).toBeGreaterThan(0)
+    expect(world.enemies.every((e) => !e.isBoss)).toBe(true)
+  })
+
+  it('sala boss-habilitada com quota JA FECHADA (abates >= 30) reconstroi o boss, sem mob normal', () => {
+    const poke = createPokeInstance(createRng(61), 'charmander', 20)
+    const world = buildMapWorld(
+      HUNT, poke,
+      { seed: 0, rng: createRng(61), counters: { entity: 1, effect: 1, pendingHit: 1 } },
+      { sala: { indice: 0, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 } },
+    )
+    expect(world.bossPendente).not.toBeNull()
+    expect(world.enemies.length).toBe(1)
+    expect(world.enemies[0].isBoss).toBe(true)
   })
 })
 

@@ -34,6 +34,7 @@ import { rarityOf, realceDaRaridade } from '@/data/rarity'
 import { ESPERA_DE_TROCA_SEGUNDOS } from '@/data/huntTypes'
 import { formatStatGains } from '@/data/statLabels'
 import type { EspecialidadeNiveis } from '@/data/especialidades'
+import { ABATES_POR_SALA } from '@/data/biomas'
 
 import { createPlayerEntity, createEnemyEntity, isDead, takeDamage } from './entity'
 import { createWorldEffect } from './effect'
@@ -651,12 +652,21 @@ export function buildMapWorld(
   const enemies: EnemyEntity[] = []
   let bossPendente: BossPendente | null = null
   if (!countdownRemaining && !sequenceCleared) {
-    const tipoDeBoss = bossDaSala(sala)
+    // PH-225: achado corrigindo o proprio bug relatado ao vivo ("boss
+    // aparece sozinho, tela vazia, sem nenhum mob") — `bossDaSala` so olha
+    // bioma+indice da sala, NUNCA se a quota (30 abates) ja fechou. Sem o
+    // `sala.abates >= ABATES_POR_SALA` aqui, TODA reconstrucao de mundo
+    // numa sala boss-habilitada (inclusive a abertura da sessao, abates=0)
+    // pulava o spawn normal e ia direto pro boss — mascarado antes porque
+    // so igneo tinha boss (facil nao perceber numa unica hunt), virou
+    // impossivel de ignorar com os 12 biomas habilitados (PH-225): QUALQUER
+    // hunt de bioma, na abertura, tentava recriar um boss do nada.
+    const tipoDeBoss = sala && sala.abates >= ABATES_POR_SALA ? bossDaSala(sala) : null
     if (tipoDeBoss) {
-      // PH-202/203: sala em modo boss (quota ja fechou, spawn normal fica
-      // suspenso ate resolver). Recria FIEL quando `progresso.bossPendente`
-      // ja existe (zero RNG extra — outra janela ja tinha sorteado esse
-      // boss), sorteia na primeira vez que a sala pede boss senao.
+      // Sala em modo boss (quota ja fechou, spawn normal fica suspenso ate
+      // resolver). Recria FIEL quando `progresso.bossPendente` ja existe
+      // (zero RNG extra — outra janela ja tinha sorteado esse boss), sorteia
+      // na primeira vez que a sala pede boss senao.
       const { enemy, pendente } = criarEntidadeDoBoss(
         base, mapDef, { pool, janela }, tipoDeBoss, progresso?.bossPendente, player, entradaDoInimigo(mapDef, sala),
       )
