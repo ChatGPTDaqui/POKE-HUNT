@@ -55345,7 +55345,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		for (const grupo of grupos) gameState.unlockContinent(grupo);
 		if (!silent && algumEstavaTrancado) toastStore.getState().pushToast("Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.", "success", "world");
 	}
-	if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn) {
+	if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn && !world.bossPendente) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
 		if (world.respawnTimer <= 0) {
 			const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);

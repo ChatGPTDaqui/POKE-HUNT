@@ -72,6 +72,30 @@ describe('boss bloqueia o avanco de sala (PH-202)', () => {
     }
   })
 
+  it('boss vivo suspende o respawn de mob comum (nao enche a sala do lado dele)', () => {
+    // Achado revisando PH-217: `aliveCount` conta o boss (1) e fica abaixo de
+    // `maxEnemies`, entao sem o corte em `!world.bossPendente` o respawn
+    // normal enchia a sala de mob comum do lado do boss — o design fala em
+    // "spawn normal suspenso ate resolver". `respawnTimer = 0` de proposito
+    // (o contrario do resto do arquivo, que usa 999 pra NAO exercitar este
+    // caminho) — aqui e exatamente o que se quer testar.
+    const world = mundo(55)
+    world.sala = { indice: 0, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.enemies = []
+    world.respawnTimer = 0
+    const gameState = useGameStateStore.getState()
+
+    // So alguns ticks: o bastante pro boss nascer e o respawn (timer ja
+    // zerado) ter chance de disparar no MESMO tick — nao o bastante pro
+    // combate real decidir a luta (o alvo aqui e o respawn, nao o resultado
+    // do combate).
+    for (let i = 0; i < 3; i++) stepWorld(world, 0.1, gameState, { silent: true })
+
+    expect(world.bossPendente).not.toBeNull()
+    expect(world.enemies.length).toBe(1)
+    expect(world.enemies[0].isBoss).toBe(true)
+  })
+
   it('sala 10 do bioma piloto pede o boss ULTIMATE, no teto da faixa (nao so da janela)', () => {
     const world = mundo(51)
     world.sala = { indice: SALAS_POR_HUNT - 1, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 }

@@ -1114,7 +1114,13 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     }
   }
 
-  if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn) {
+  // PH-202/203: boss vivo suspende o respawn de mob comum — o design fala em
+  // "spawn normal suspenso ate resolver" e o spawn INICIAL do boss (via
+  // garantirBossDaSala/buildMapWorld) ja pula o loop normal, mas sem este
+  // corte aqui `aliveCount` (que so conta o boss, 1) ficava abaixo de
+  // `maxEnemies` e este respawn enchia a sala com mobs comuns do lado do
+  // boss — achado revisando PH-217 (ChatGPTDaqui, #182).
+  if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn && !world.bossPendente) {
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
       const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
