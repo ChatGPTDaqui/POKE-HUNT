@@ -13,7 +13,9 @@
 // mesma logica, forma diferente de apontar. Ability em pendingHit continua
 // referencia direta porque `AbilityDataEntry` e dado estatico (nunca muda
 // depois de carregado), sem risco de staleness.
-import type { PokeInstance } from '@/data/pokes'
+import type { PokeInstance, StatBlock } from '@/data/pokes'
+import type { RarityKey } from '@/data/rarity'
+import type { NatureKey } from '@/data/natures'
 import type { MapDef } from '@/data/maps'
 import type { ElementType } from '@/data/generated/types'
 import type { EspecialidadeNiveis } from '@/data/especialidades'
@@ -336,6 +338,38 @@ export interface EnemyEntity extends BaseEntity {
   // Setado por stepWorld apos handleEnemyDefeated — cadaver fica visivel ate
   // o timer zerar (ou pra sempre, se mapDef.keepCorpses).
   deathRemovalTimer: number | null
+  /**
+   * PH-202: mini-boss/boss ultimate do sistema de andares (bioma piloto).
+   * So marca a entidade — o estado que precisa SOBREVIVER entre janelas de
+   * flush (uid/especie/ivs/raridade/shiny/natureza/trait/hp) vive em
+   * `WorldState.bossPendente`, nao aqui.
+   */
+  isBoss?: boolean
+}
+
+/**
+ * PH-201/202/204: boss pendente da sala atual (mini ou ultimate), o
+ * suficiente pra RECRIAR a entidade fielmente numa reconstrucao de mundo
+ * sem consumir RNG de novo — `createPokeInstance` sorteia shiny e trait
+ * mesmo passando IV/raridade fixos, entao "recriar" com ele geraria um boss
+ * diferente a cada flush (~30s) se algum desses campos nao viesse pronto.
+ * Level entra aqui e nao e re-derivado da regra (teto da janela/faixa) pra
+ * nao mudar sozinho debaixo do jogador se a regra for rebalanceada depois
+ * com o boss ja em campo.
+ */
+export interface BossPendente {
+  uid: string
+  speciesId: string
+  /** Chave do encontro no catalogo de spawn — NAO e a especie. `awardKillLoot`
+   * usa isso pra decidir a tabela de loot daquela linha especifica. */
+  encounterId: string
+  level: number
+  ivs: StatBlock
+  rarity: RarityKey
+  isShiny: boolean
+  nature?: NatureKey
+  trait?: string
+  hpAtual: number
 }
 
 export type WorldEntity = PlayerEntity | EnemyEntity
@@ -574,6 +608,13 @@ export interface WorldState {
   countdownRemaining: number | null
   /** Nulo nas hunts sem salas: a inicial, as 11 BOSS e a do Campeao Lance. */
   sala: SalaAtiva | null
+  /**
+   * PH-202/203: boss (mini ou ultimate) da sala atual, ainda vivo. Nulo ==
+   * sala nao pede boss, ou o boss ja foi derrotado/capturado. Enquanto nao
+   * for nulo, `garantirTransicaoDeQuotaFechada` bloqueia o avanco de sala
+   * INCONDICIONAL — mesmo com o toggle de avanco manual desligado.
+   */
+  bossPendente: BossPendente | null
   /**
    * Contagem regressiva "Entrando em nova area" (ver
    * engine/systems/salaSystem.ts#registrarAbate/aplicarTransicaoDeSala).

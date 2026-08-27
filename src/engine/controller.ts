@@ -17,9 +17,28 @@ import { useWorldStore } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
 import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
 import { preloadEspecies, preloadHunt } from '@/data/preload'
+import { getMap } from '@/data/maps'
 import type { Point } from './types'
 import { pedirAcao, abrirSessaoDeHunt, fecharSessaoDeHunt } from '@/data/remote/autoridade'
 import { servidorAtivo } from '@/data/remote/servidor'
+
+/**
+ * Aviso de "seu POKE ja passou do teto desta hunt" (PH-208), ou `null` quando
+ * o nivel ainda cabe na faixa (ou a hunt nao tem faixa conhecida).
+ *
+ * Puro de proposito: o disparo mora em `enterMap`, que roda uma vez por sessao
+ * de hunt, mas o gatilho (`level > levelRange[1]`) e testavel sozinho, sem
+ * servidor. `levelRange[1]` e o teto nominal da hunt — a janela por sala
+ * (`salaSystem.janelaDaSala`) afunda a partir dele, entao passar do teto
+ * nominal ja significa que nenhuma sala rende XP cheio.
+ */
+export function avisoDeTetoDeHunt(pokeLevel: number, mapId: string): string | null {
+  const teto = getMap(mapId)?.levelRange[1]
+  if (teto == null || pokeLevel <= teto) return null
+  return `Seu POKE (Lv ${pokeLevel}) ja passou do teto desta hunt (Lv ${teto}). `
+    + 'O XP daqui pra frente rende pouco — troque de hunt ou leve um POKE mais fraco.'
+}
+
 export const controller = {
   returnToHospital(hospitalSpot: Point): void {
     const gameState = useGameStateStore.getState()
@@ -119,6 +138,14 @@ export const controller = {
     // `gameStateStore` — quando esta linha roda, o `mapDef` ja esta no lugar.
     gameState.setCurrentMapId(mapId)
     resetStats(gameState) // painel de taxa de farm reinicia do zero a cada hunt nova
+    // PH-208: o POKE ativo ja passou do teto de nivel desta hunt. Sem sinal, o
+    // jogador fica preso numa hunt facil demais — Zoka/Noctowl (Lv33) rodou 4
+    // hunts de Faixa 1 (teto Lv30) por 4h39min e o nivel nunca mudou. Uma vez
+    // so por entrada: este caminho roda uma vez por sessao de hunt, nunca por
+    // abate ou tick. Silenciado junto com os avisos de recusa na reentrada de
+    // boot (`silencioso`), onde o jogador nao pediu nada.
+    const avisoTeto = avisar ? avisoDeTetoDeHunt(activePoke.level, mapId) : null
+    if (avisoTeto) useToastStore.getState().pushToast(avisoTeto, 'info', 'world')
     return true
   },
 

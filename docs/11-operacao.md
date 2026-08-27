@@ -71,6 +71,33 @@ alcança o jogador sem antes conferir por onde produção é servida.
 pré-voo da promoção: abrir `https://dev.poke-hunt-euj.pages.dev`, confirmar que a tela sobe e que o
 console está limpo. Deploy verde não é evidência de app que inicia.
 
+### O lado servidor do smoke tem bancada (PH-220)
+
+```bash
+node scripts/harness/fumaca-credito.mjs                        # jogo-dev, ~2min
+node scripts/harness/fumaca-credito.mjs --espera=15            # mais rápido, janela menor
+node scripts/harness/fumaca-credito.mjs --funcao=jogo --confirmar-public
+```
+
+Responde **"o flush ainda credita?"** com a conta canônica de teste: abre sessão, espera, flusha, e
+confere que ouro/XP subiram. Depois dispara **dois flushes simultâneos** e confere que exatamente um
+credita — a serialização do CAS que impede POKE duplicado. Códigos de saída: `0` credita e
+serializa, `2` não, `1` inconclusivo (POKE desmaiou no meio, hunt inexistente — nada disso é
+evidência sobre o claim).
+
+Vale rodar depois de qualquer mexida em `aplicarFlush`/`gravarEstado` ou em `db.ts`, e depois de
+upgrade de PostgREST. O modo de falha que ela cobre é invisível de outra forma: `FLUSH_OCUPADO`
+responde **HTTP 200 com `segundosCreditados: 0`**, então um claim que pare de funcionar deixa o jogo
+sem creditar nada sem emitir erro, sem log vermelho e sem check reprovado. A PH-194 já foi um
+upgrade de PostgREST quebrando o projeto sem ninguém tocar em nada.
+
+**Ouro não serve para medir crédito duplicado** — a auto-venda de POKE capturado cai na mesma
+carteira e a variância chega a 2,5x por abate. A bancada mede `game_sessions.simulated_seconds` (o
+servidor soma a janela nele) e `rng_draws`. Esse detalhe custou um falso alarme na PH-219.
+
+Mirar `--funcao=jogo` é recusado sem `--confirmar-public`, pelo mesmo motivo de
+`scripts/lib/schema-alvo.cjs`: a bancada **escreve** (abre sessão e credita ouro de verdade).
+
 ### Dados
 
 | Comando | O que faz |

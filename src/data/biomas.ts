@@ -408,6 +408,15 @@ export const SALAS_POR_HUNT = 10
  */
 export const ABATES_POR_SALA = 30
 
+/**
+ * PH-202: sistema de andares (mini-boss salas 1-9, boss ultimate sala 10),
+ * design em `_Architecture.md` (brainstorm 16/08). Piloto: so este bioma
+ * ganha boss de verdade nesta rodada — os outros 11 continuam liberando
+ * automatico, sem exigir nada (evita travar o piloto atras de conteudo que
+ * ainda nao existe).
+ */
+export const BIOMA_PILOTO_BOSS = 'igneo'
+
 export const BIOMA_POR_CHAVE: Record<string, BiomaDef> = Object.fromEntries(
   BIOMAS.map((b) => [b.chave, b])
 )
