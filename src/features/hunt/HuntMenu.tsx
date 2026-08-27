@@ -10,7 +10,10 @@ import { pedirAcao } from '@/data/remote/autoridade'
 // multiplicado) — so o unlockMap do engine exige essa forma, por isso a chamada
 // de getMap() abaixo em vez de repassar o objeto cru.
 import { MAPS, getMap } from '@/data/maps'
-import { FAIXAS, SALAS_POR_HUNT, SUB_BIOMA_POR_CHAVE, type SubBiomaDef } from '@/data/biomas'
+import {
+  FAIXAS, SALAS_POR_HUNT, SUB_BIOMA_POR_CHAVE, indiceDoBiomaNoMapId, ORDEM_DOS_BIOMAS, BIOMA_POR_CHAVE,
+  type SubBiomaDef, type BiomaProgress,
+} from '@/data/biomas'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import type { HuntMapDef } from '@/data/huntTypes'
 import { getEncounter } from '@/data/enemies'
@@ -38,7 +41,24 @@ const CONTINENT_LABELS: Record<string, string> = {
 const TYPE_LIST = (Object.keys(TYPE_COLORS) as ElementType[]).sort()
 const fmt = new Intl.NumberFormat('pt-BR')
 
-async function acionarHunt(map: HuntMapDef, unlocked: boolean, continentGated: boolean) {
+// PH-229: mensagem de bloqueio do gate de bioma — espelha `bloqueioDeBiomaPendente`
+// (authority/src/appSessao.ts, PH-227), mas nao importa dela: aquele arquivo e
+// server-only (Deno, ErroHttp). O que os dois COMPARTILHAM de verdade e
+// `indiceDoBiomaNoMapId` (data/biomas.ts) — sem isso os dois lados podiam
+// discordar sobre "que indice este mapId espera".
+function bloqueioDeBiomaClient(mapId: string, faixa: string, biomaProgress: BiomaProgress): string | null {
+  const indiceEsperado = indiceDoBiomaNoMapId(mapId, faixa)
+  if (indiceEsperado <= 0) return null
+  const progresso = biomaProgress[faixa as keyof BiomaProgress] ?? 0
+  if (progresso >= indiceEsperado) return null
+  const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1]
+  const anteriorNome = BIOMA_POR_CHAVE[anteriorChave]?.nome ?? anteriorChave
+  return `Vença o boss de ${anteriorNome} para liberar esta área.`
+}
+
+async function acionarHunt(
+  map: HuntMapDef, unlocked: boolean, continentGated: boolean, bloqueioDeBioma: string | null,
+) {
   if (unlocked) {
     // A tela so fecha se o jogador REALMENTE entrou. Fechar antes
     // esconderia a recusa do servidor e deixaria o jogador olhando um
@@ -52,6 +72,15 @@ async function acionarHunt(map: HuntMapDef, unlocked: boolean, continentGated: b
       `Derrote o Campeao Lance antes de acessar ${CONTINENT_LABELS[mapContinent] || mapContinent}.`,
       'error', 'world',
     )
+    return
+  }
+  // PH-229: mesma ordem de prioridade do servidor (PH-227) — continente
+  // primeiro, bioma depois, custo em ouro por ultimo. Sem isto o clique
+  // tentava comprar o desbloqueio (unlockMap) num bioma so travado por
+  // progresso, gastando ouro numa acao que o servidor ia recusar de
+  // qualquer jeito.
+  if (bloqueioDeBioma) {
+    useToastStore.getState().pushToast(bloqueioDeBioma, 'error', 'world')
     return
   }
   const resolved = getMap(map.id)
@@ -260,6 +289,7 @@ export function HuntMenu() {
   const activeIndex = useGameStateStore((s) => s.activeIndex)
   const unlockedMaps = useGameStateStore((s) => s.unlockedMaps)
   const unlockedContinents = useGameStateStore((s) => s.unlockedContinents)
+  const biomaProgress = useGameStateStore((s) => s.biomaProgress)
 
   const continent = useUiStore((s) => s.huntContinent)
   const setContinent = useUiStore((s) => s.setHuntContinent)
@@ -285,14 +315,14 @@ export function HuntMenu() {
       .filter((m) => (m.continent ?? 'faixa1') === continent)
       .filter((m) => huntHasType(m, typeFilter))
       .filter((m) => huntMatches(m, term))
-      // Ordem por NIVEL (pedido explicito). A ordem anterior era a de insercao
-      // em `MAPS`, que sai do gerador agrupada por bioma — entao a lista pulava
-      // de Lv1-10 pra Lv71-80 e voltava, e escolher "a proxima hunt" virava
-      // leitura de cada card. Desempate pelo teto e depois pelo nome, pra duas
-      // hunts da mesma faixa nao trocarem de lugar entre renders.
+      // PH-229: ordem de PROGRESSAO do bioma (ORDEM_DOS_BIOMAS), nao mais por
+      // nivel — achado de pente fino: `levelRange` e IDENTICO pros 12 biomas
+      // da mesma faixa (todos cobrem a faixa inteira), entao o sort antigo
+      // degradava pra alfabetico, sem relacao nenhuma com o gate sequencial
+      // (PH-207/226/227) — o desbloqueio "pulava" pro meio do alfabeto sem
+      // logica visivel. Hunt sem bioma (indice -1: rota inicial) fica primeiro.
       .sort((a, b) =>
-        a.levelRange[0] - b.levelRange[0]
-        || a.levelRange[1] - b.levelRange[1]
+        indiceDoBiomaNoMapId(a.id, continent) - indiceDoBiomaNoMapId(b.id, continent)
         || a.name.localeCompare(b.name))
   }, [continent, typeFilter, search])
 
@@ -347,11 +377,16 @@ export function HuntMenu() {
         // gate de custo em ouro por mapa, e checado antes dele.
         const mapContinent = map.continent ?? 'faixa1'
         const continentGated = !unlockedContinents.includes(mapContinent)
+        // PH-229: gate de bioma (PH-207/226/227) — checado DEPOIS do
+        // continente e ANTES do custo em ouro, mesma prioridade do servidor.
+        const bloqueioDeBioma = continentGated ? null : bloqueioDeBiomaClient(map.id, mapContinent, biomaProgress)
+        const temBoss = indiceDoBiomaNoMapId(map.id, mapContinent) !== -1
         // Mesma regra do servidor (server/src/app.ts#abrirSessao): hunt sem
         // custo nasce liberada. Checar so a lista trancava visualmente as hunts
         // do Modo Pesadelo e as BOSS, que sao geradas em runtime e nunca entram
         // na coluna `unlocked_maps` do banco.
-        const unlocked = !continentGated && (map.unlockCost == null || unlockedMaps.includes(map.id))
+        const unlocked = !continentGated && !bloqueioDeBioma
+          && (map.unlockCost == null || unlockedMaps.includes(map.id))
         const odds = huntOdds(map)
         const expanded = expandedMapId === map.id
         const key = `map:${map.id}`
@@ -374,6 +409,14 @@ export function HuntMenu() {
                 <div className="truncate font-medium">
                   {map.name}{' '}
                   <span className="font-normal text-n400">(Lv {map.levelRange[0]}-{map.levelRange[1]})</span>
+                  {/* PH-229: selo de boss — motor exige mini-boss/boss ultimate
+                      em toda sala de todo bioma (PH-225), entao vale pra
+                      qualquer hunt que pertenca a ORDEM_DOS_BIOMAS. */}
+                  {temBoss && (
+                    <span className="ml-[.4em] rounded-[.3em] bg-[#ff4d4d33] px-[.35em] py-[.05em] align-middle text-[.65em] font-bold text-[#ff4d4d]">
+                      ★ BOSS
+                    </span>
+                  )}
                 </div>
                 {/* A linha de custo/gate so aparece quando ha bloqueio: com a
                     hunt liberada, "Desbloqueado" seria ruido — o proprio botao
@@ -382,7 +425,9 @@ export function HuntMenu() {
                   <div className="mt-[.15em] text-[.75em] text-warn">
                     {continentGated
                       ? 'Derrote o Campeao Lance para desbloquear'
-                      : `Custo: ${fmt.format(map.unlockCost ?? 0)} ouro`}
+                      : bloqueioDeBioma
+                        ? bloqueioDeBioma
+                        : `Custo: ${fmt.format(map.unlockCost ?? 0)} ouro`}
                   </div>
                 )}
               </div>
@@ -391,7 +436,7 @@ export function HuntMenu() {
                 disabled={pending || acao.pendingKey != null}
                 onClick={(e) => {
                   e.stopPropagation()
-                  void acao.run(key, () => acionarHunt(map, unlocked, continentGated))
+                  void acao.run(key, () => acionarHunt(map, unlocked, continentGated, bloqueioDeBioma))
                 }}
               >
                 {pending ? 'Entrando...' : unlocked ? 'Entrar' : continentGated ? 'Bloqueado' : 'Desbloquear'}

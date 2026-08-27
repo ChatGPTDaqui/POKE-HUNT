@@ -31554,6 +31554,27 @@ Object.fromEntries(FAIXAS$1.map((f) => [f.id, f]));
 function huntId(bioma, faixa) {
 	return `${bioma}_${faixa}`;
 }
+/**
+* Inverso de `huntId` — o bioma embutido no mapId de uma hunt de bioma, ou
+* `null` se o mapId nao segue esse padrao (BOSS/Nightmare/hunt inicial nao
+* tem bioma). PH-227/229: mesma logica usada pelo gate server-side
+* (abrirSessao) E pelo menu (HuntMenu) — nao duplicar, os dois precisam
+* concordar sobre "que bioma e esse mapId" sempre.
+*/
+function biomaDoMapId(mapId, faixa) {
+	return mapId.endsWith(`_${faixa}`) ? mapId.slice(0, -(faixa.length + 1)) : null;
+}
+/**
+* Indice do bioma embutido no mapId dentro de `ORDEM_DOS_BIOMAS`, ou `-1` se
+* o mapId nao tem bioma (hunt inicial/BOSS/Nightmare) ou o bioma nao esta na
+* ordem (nao deveria acontecer com os 12 habilitados, PH-225 — defesa em
+* profundidade). Usado pelo gate server-side (PH-227) E pelo sort/selo do
+* menu (PH-229).
+*/
+function indiceDoBiomaNoMapId(mapId, faixa) {
+	const bioma = biomaDoMapId(mapId, faixa);
+	return bioma ? ORDEM_DOS_BIOMAS.indexOf(bioma) : -1;
+}
 var SUB_BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.flatMap((bioma) => bioma.subBiomas.map((sub) => [sub.chave, {
 	sub,
 	bioma
@@ -56825,17 +56846,14 @@ async function sairDaHunt(cfg, userId, sessaoId) {
 /**
 * PH-227: mensagem de bloqueio (ou `null` se liberado) do gate sequencial de
 * bioma — vencer o boss ultimate do bioma N libera o N+1 (PH-207/226).
-* `mapId` e `huntId(bioma, faixa) = "${bioma}_${faixa}"` (biomas.ts) — a
-* faixa (`grupo`) ja veio de `MAPS[mapId].continent`, entao so sobra tirar o
-* sufixo pra achar o bioma, mesmo com bioma tendo underscore no proprio
-* nome (`aguas_interiores`, `campo_aberto`).
 *
 * Pura de proposito: testavel isolada, sem precisar mockar `db.js`/HTTP
-* inteiro so pra exercitar uma regra de negocio.
+* inteiro so pra exercitar uma regra de negocio. `biomaDoMapId` (PH-229)
+* e a MESMA funcao que HuntMenu usa pro selo/ordem/mensagem do menu — os
+* dois lados tem que concordar sobre "que bioma e esse mapId".
 */
 function bloqueioDeBiomaPendente(mapId, grupo, biomaProgress) {
-	const biomaChave = mapId.endsWith(`_${grupo}`) ? mapId.slice(0, -(grupo.length + 1)) : null;
-	const indiceEsperado = biomaChave ? ORDEM_DOS_BIOMAS.indexOf(biomaChave) : -1;
+	const indiceEsperado = indiceDoBiomaNoMapId(mapId, grupo);
 	if (indiceEsperado <= 0) return null;
 	if ((biomaProgress?.[grupo] ?? 0) >= indiceEsperado) return null;
 	const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1];
