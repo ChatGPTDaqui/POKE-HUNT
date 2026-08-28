@@ -12,9 +12,20 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
-  // PH-234. Entrada da promocao de 28/08, escrita ANTES de promover — o gate da
-  // regra e conferir o INTERVALO desde a nota anterior, e nao a issue que
-  // motivou a promocao.
+  // PH-234 + PH-235. Entrada da promocao de 28/08, escrita ANTES de promover — o
+  // gate da regra e conferir o INTERVALO desde a nota anterior, e nao a issue
+  // que motivou a promocao.
+  //
+  // REVARRIDA em 28/08 (PH-235): a PR de promocao (#201) tem `head: dev`, entao
+  // o diff dela CRESCE a cada merge na `dev` depois de aberta — de 28 pra 34
+  // commits neste caso. O lure entrou na `dev` DEPOIS de a #201 estar aberta e
+  // virou parte da promocao sem passar por nenhum gate novo. E o mesmo buraco
+  // que a 7.13 e a 7.14 existiram pra tapar, chegando por outra porta: nao e
+  // "esqueceram de escrever a nota", e "a nota foi escrita e o intervalo mudou
+  // embaixo dela".
+  //
+  // Licao pra proxima: conferir o intervalo `main..dev` DE NOVO na hora de
+  // aprovar a promocao, nao so na hora de abrir.
   //
   // Duas das tres coisas aqui foram EXCLUIDAS DE PROPOSITO da 7.14, e o
   // comentario dela diz por que:
@@ -34,19 +45,25 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   //    coberta abaixo), ordem canonica como constante (PH-223) e wiring de
   //    `bioma_progress` (PH-224). Encanamento: o que o jogador ve deles ja esta
   //    nas linhas do boss.
-  //  - Refactor, CI e a bancada de efeitos (`scripts/harness/`). Mesma regua da
-  //    7.11 a 7.14.
+  //  - Refactor, CI e as bancadas de `scripts/harness/` (efeitos do mapa e a de
+  //    custo do lure, PH-235). Mesma regua da 7.11 a 7.14.
+  //  - Do PH-235, tudo o que nao e a mecanica em si: a coluna
+  //    `auto_lure_config`, a RPC que a valida, o `db:types` e a bancada de
+  //    medicao. O que o jogador ve e a aba, o chip e o comportamento.
   {
     version: '7.15',
     date: '2026-08-28',
-    title: 'O boss saiu do vulcao e agora guarda os doze biomas — e o cenario parou de nevar polen',
+    title: 'Farm em area: junte ate quatro selvagens antes de bater — e o boss agora guarda os doze biomas',
     highlights: [
+      'AGORA VOCE PODE JUNTAR ATE QUATRO SELVAGENS ANTES DE BATER. Seu POKE sempre andava ate o mais proximo e lutava um por vez, entao golpe de area nunca acertava mais de um alvo — ele existia e nao servia pra nada. Com o Lure ligado (aba nova no painel de Automacoes) ele passa pelo raio de varios, puxa o grupo atras de si e so entao para pra lutar: um golpe de area acerta todos de uma vez. Voce escolhe juntar 1, 2, 3 ou 4, e um chip no topo mostra a reuniao acontecendo (2/4) pra nao parecer que o bot travou.',
+      'O PRECO DO LURE E LEVAR PANCADA DE TODOS AO MESMO TEMPO. Nao e farm de graca: juntar quatro multiplica o dano que entra no seu POKE, e o ganho depende de ter golpe de AREA na rotacao — sem um, o grupo so bate mais em voce. Shiny em campo cancela a reuniao na hora (ele continua tendo prioridade), e hunt de um inimigo so, como as de boss, ignora o Lure.',
       'O BOSS AGORA EXISTE NOS DOZE BIOMAS, NAO SO NO IGNEO. Ele tinha nascido em um bioma so, como piloto, e ficou la. Agora cada um dos doze tem o seu, na ordem canonica do mapa.',
       'E VENCER O BOSS E O QUE ABRE O PROXIMO BIOMA. O jogo passou a ter uma linha pra seguir: a area seguinte fica trancada ate voce derrubar o dono da atual. O menu de hunt diz quem esta trancado e o que falta — antes o botao simplesmente nao levava a lugar nenhum, sem explicar.',
       'O BOSS TAMBEM PASSOU A SE APRESENTAR. Ele entrava em cena como qualquer outro encontro, e o unico jeito de saber que aquilo era o boss era a barra de HP nao acabar nunca. Agora a entrada dele tem apresentacao propria, e no menu ele tem selo.',
       'OS EFEITOS DO CENARIO GANHARAM ESCALA. Folha, poeira, faisca, neve e areia estavam grandes demais pro tamanho de um POKE — a poeira de caverna chegava a um quarto da altura de um Pokemon — e quase todo bioma mostrava a mesma bolinha em outra cor. Agora cada um tem tamanho e formato proprios: a folha tomba, a faisca risca, a cinza urbana e uma fibra dobrada, o reflexo da agua e uma cruz de luz.',
       'E A CHUVA MOLHA O CHAO. As gotas caem, batem e respingam, com microgotas que quicam em volta. Selva e caverna ganharam gotejo proprio, pingando sempre do mesmo ponto, do jeito que agua parada na copa e em teto de gruta pinga.',
       'O NIVEL PAROU DE SUMIR NO F5. Subir de nivel e recarregar a pagina logo em seguida podia devolver o POKE no nivel anterior: a ultima gravacao nao chegava a sair. Agora ela sai.',
+      'UM SHINY NA TELA PODIA DESPENCAR O ATAQUE DO INIMIGO E ENCHER O CHAT. Com um shiny em campo e outro selvagem colado em voce, a habilidade de entrada em combate do seu POKE — Intimidate, por exemplo — disparava a cada quadro em vez de uma vez por luta: o Ataque do oponente caia ate o fundo em menos de um segundo e o chat levava uma linha por quadro. Agora ela dispara uma vez, como deveria.',
     ],
   },
   // PH-231. Varredura do INTERVALO desde a 7.13 (a licao que aquela entrada
