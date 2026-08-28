@@ -28,12 +28,13 @@ import { registrarCapturaPredita } from '@/data/remote/predicoesDeCaptura'
 import {
   MAX_TEAM_SIZE, defaultGameStateData, defaultUnlockedMaps,
   DEFAULT_AUTO_POT_RULES, DEFAULT_AUTO_CATCH_CONFIG, DEFAULT_AUTO_SELL_CONFIG,
+  DEFAULT_LURE_CONFIG, LURE_QUANTIDADE_MIN, LURE_QUANTIDADE_MAX,
   type AutoPotRule, type AutoCatchConfig, type AutoCatchRule, type AutoSellConfig,
-  type PerfStats, type TrainerInfo, type PokedexKillCount, type GameStateData,
+  type LureConfig, type PerfStats, type TrainerInfo, type PokedexKillCount, type GameStateData,
 } from '@/stores/gameStateDefaults'
 
 export { MAX_TEAM_SIZE, defaultGameStateData }
-export type { AutoPotRule, AutoCatchConfig, AutoCatchRule, AutoSellConfig, PerfStats, TrainerInfo, PokedexKillCount, GameStateData }
+export type { AutoPotRule, AutoCatchConfig, AutoCatchRule, AutoSellConfig, LureConfig, PerfStats, TrainerInfo, PokedexKillCount, GameStateData }
 
 export interface GameStateActions {
   setActiveIndex: (index: number) => void
@@ -112,6 +113,10 @@ export interface GameStateActions {
   removeAutoPotRule: (index: number) => void
   setAutoCatchConfig: (patch: Partial<AutoCatchConfig>) => void
   setAutoSellConfig: (patch: Partial<AutoSellConfig>) => void
+  // O clamp de `quantidade` mora AQUI, na action, e nao na tela: a mesma
+  // config e lida pelo motor todo tick, e um valor fora da faixa vindo de
+  // qualquer call site futuro sairia como fase de reuniao que nunca fecha.
+  setLureConfig: (patch: Partial<LureConfig>) => void
   addAutoCatchRule: (rule: AutoCatchRule) => void
   updateAutoCatchRule: (index: number, patch: Partial<AutoCatchRule>) => void
   removeAutoCatchRule: (index: number) => void
@@ -557,6 +562,17 @@ export const useGameStateStore = create<GameStateStore>()(
         set((state) => ({ autoCatchConfig: { ...state.autoCatchConfig, ...patch } }))
       },
 
+      setLureConfig: (patch) => {
+        set((state) => {
+          const bruta = patch.quantidade ?? state.lureConfig.quantidade
+          const quantidade = Math.max(
+            LURE_QUANTIDADE_MIN,
+            Math.min(LURE_QUANTIDADE_MAX, Math.round(bruta) || LURE_QUANTIDADE_MIN),
+          )
+          return { lureConfig: { ...state.lureConfig, ...patch, quantidade } }
+        })
+      },
+
       setAutoSellConfig: (patch) => {
         set((state) => ({ autoSellConfig: { ...state.autoSellConfig, ...patch } }))
       },
@@ -640,6 +656,10 @@ export const useGameStateStore = create<GameStateStore>()(
           // DESLIGADO. Uma automacao que apaga POKE nao pode nascer ligada num
           // save que ja existe.
           autoSellConfig: { ...DEFAULT_AUTO_SELL_CONFIG, ...(persisted.autoSellConfig || {}) },
+          // Mesmo motivo do `autoSellConfig` acima: save sem a chave cai no
+          // default DESLIGADO. Reunir selvagem multiplica o dano que entra no
+          // POKE — nao pode nascer ligado em quem nunca pediu.
+          lureConfig: { ...DEFAULT_LURE_CONFIG, ...(persisted.lureConfig || {}) },
           perfStats: { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now(), ...(persisted.perfStats || {}) },
           trainer: { name: 'Treinador', level: 1, exp: 0, ...(persisted.trainer || {}) },
           pokedexKills: persisted.pokedexKills || {},

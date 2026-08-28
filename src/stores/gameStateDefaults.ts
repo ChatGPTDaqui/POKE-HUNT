@@ -60,6 +60,21 @@ export interface AutoSellConfig {
   raridades: RarityKey[]
 }
 
+/**
+ * LURE: quantos selvagens o jogador quer REUNIR antes de o POKE dele parar pra
+ * lutar. Ver engine/systems/lureSystem.ts pra mecanica.
+ *
+ * `quantidade` e um inteiro de LURE_QUANTIDADE_MIN a LURE_QUANTIDADE_MAX. O
+ * teto nao e capricho de interface: `GEOMETRIA.maxEnemies` e 6, e pedir mais
+ * selvagens do que a hunt tem em campo faria a fase de reuniao viver de
+ * tempo-limite em tempo-limite. O limite e revalidado no servidor (`configurar_auto`)
+ * porque limite so de cliente neste projeto ja virou 502 (ver CLAUDE.md).
+ */
+export interface LureConfig {
+  ligado: boolean
+  quantidade: number
+}
+
 export interface PerfStats {
   gold: number
   xp: number
@@ -100,6 +115,17 @@ export const DEFAULT_AUTO_CATCH_CONFIG: AutoCatchConfig = { ballId: 'poke_ball',
 // no merge do `persist`.
 export const DEFAULT_AUTO_SELL_CONFIG: AutoSellConfig = { ligado: false, raridades: [] }
 
+// Piso e teto da quantidade de lure, num lugar so: a tela monta os botoes a
+// partir daqui, o clamp do motor le daqui, e o `check` da coluna na migration
+// repete os MESMOS numeros (nao ha como um SQL importar TS).
+export const LURE_QUANTIDADE_MIN = 1
+export const LURE_QUANTIDADE_MAX = 4
+// Nasce DESLIGADO: reunir 3 selvagens antes de bater triplica o dano que entra
+// no POKE, e uma automacao que muda o risco do combate nao pode aparecer ligada
+// num save que ja existe. `quantidade: 2` e so o valor que o seletor mostra
+// quando o jogador liga pela primeira vez.
+export const DEFAULT_LURE_CONFIG: LureConfig = { ligado: false, quantidade: 2 }
+
 // Toda hunt sem unlockCost comeca desbloqueada — hoje so a hunt lendaria
 // carrega um custo (ver CLAUDE.md).
 export function defaultUnlockedMaps(): string[] {
@@ -137,6 +163,12 @@ export interface GameStateData {
   // Item ausente = habilitado (mesmo padrao de "ausente = default" do resto
   // do projeto) — so guarda excecao explicita (`false`) por item.
   autoStatusConfig: Record<string, boolean>
+  /**
+   * LURE (ver `LureConfig`). Vive junto das automacoes porque e uma automacao:
+   * quem escolhe "reunir 3 antes de bater" esta configurando o bot, e a tela
+   * dela e uma aba do painel de Automacoes.
+   */
+  lureConfig: LureConfig
   perfStats: PerfStats
   trainer: TrainerInfo
   pokedexKills: Record<string, PokedexKillCount>
@@ -172,6 +204,7 @@ export function defaultGameStateData(): GameStateData {
     autoCatchRules: [],
     autoSellConfig: { ...DEFAULT_AUTO_SELL_CONFIG, raridades: [] },
     autoStatusConfig: {},
+    lureConfig: { ...DEFAULT_LURE_CONFIG },
     perfStats: { gold: 0, xp: 0, mobs: 0, shinys: 0, since: Date.now() },
     trainer: { name: 'Treinador', level: 1, exp: 0 },
     pokedexKills: {},
