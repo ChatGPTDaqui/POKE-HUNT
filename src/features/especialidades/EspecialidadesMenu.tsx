@@ -111,8 +111,14 @@ function DetalheEspecialidade({ tipo, semTitulo }: { tipo: ElementType | null; s
           <span className="text-[1.05em] font-medium">Maestria {tipo}</span>
         </div>
       )}
-      <Trilha tipo={tipo} trilha="dano" rotulo="DANO" descricao="+1% a +5% de dano por nivel" />
-      <Trilha tipo={tipo} trilha="defesa" rotulo="DEFESA" descricao="+1% a +5% de defesa por nivel" />
+      {/*
+        Os rotulos dizem o que a mecanica FAZ, nao o que o nome da trilha
+        sugere (PH-246). A trilha de defesa e `reducaoDeDefesa`: ela multiplica
+        o dano RECEBIDO daquele tipo por 1 - 0,01 x nivel. "+5% de defesa" e
+        outra coisa — o jogador estava pagando por uma leitura errada.
+      */}
+      <Trilha tipo={tipo} trilha="dano" rotulo="DANO" descricao={`+1% a +5% de dano causado com golpes ${tipo}`} />
+      <Trilha tipo={tipo} trilha="defesa" rotulo="DEFESA" descricao={`-1% a -5% de dano recebido de golpes ${tipo}`} />
     </div>
   )
 }
@@ -130,7 +136,7 @@ function Trilha({
   const stoneQtd = useGameStateStore((s) => s.items[stoneItemId(tipo)] ?? 0)
   const acao = useAcaoPendente()
 
-  const custo = custoDoProximoNivel(nivel)
+  const custo = custoDoProximoNivel(tipo, nivel)
   const noMax = custo == null
   const key = `${tipo}:${trilha}`
 

@@ -101,3 +101,4 @@ branches-apagadas-*.txt
 # distraido o commita — 200KB de cache de compilacao que nao serve pra ninguem
 # em outra maquina.
 authority/tsconfig.tsbuildinfo
+scripts/.gerado/

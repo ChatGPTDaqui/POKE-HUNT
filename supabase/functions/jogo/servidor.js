@@ -54115,7 +54115,7 @@ function awardKillLoot(rng, gameState, enemy, mapDef, drops = mapDef.itemDrops) 
 		droppedItems.push(drop.itemId);
 	}
 	if (rollChance(rng, STONE_DROP_CHANCE)) {
-		const stoneId = stoneItemId(species.type);
+		const stoneId = stoneItemId(species.type2 && rollChance(rng, .5) ? species.type2 : species.type);
 		gameState.addItem(stoneId, 1);
 		droppedItems.push(stoneId);
 	}

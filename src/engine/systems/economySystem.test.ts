@@ -85,3 +85,44 @@ describe('sellAllBagPokes — defesa em profundidade (PH-24)', () => {
     expect(useGameStateStore.getState().wallet.gold).toBeGreaterThan(ouroAntes)
   })
 })
+
+// PH-246: a Pedra FLYING nao caia de lugar nenhum. `awardKillLoot` dropava a
+// Stone do tipo PRIMARIO da vitima, e NENHUMA das 245 especies do catalogo tem
+// FLYING como primario — ele so existe como `type2`. A tela de Especialidades
+// anunciava os 10 niveis de FLYING com preco que nunca podia ser pago, e o
+// maximo de `progressoGlobal` era inatingivel junto.
+//
+// Estes casos exercitam a FUNCAO, e nao um modelo dela: `ofertaDeStone.ts`
+// espelha esta regra pra calcular o custo de cada tipo, e sem um teste que
+// chame `awardKillLoot` de verdade um revert no motor deixaria o espelho
+// mentindo em silencio.
+describe('Stone de abate cobre os dois tipos da vitima (PH-246)', () => {
+  function stonesDe(speciesId: string, tentativas: number): Set<string> {
+    const gameState = useGameStateStore.getState()
+    const mapDef = getMap('route_46')!
+    const saiu = new Set<string>()
+    for (let i = 0; i < tentativas; i++) {
+      const rng = createRng(1000 + i)
+      const poke = createPokeInstance(rng, speciesId, 5)
+      const { droppedItems } = awardKillLoot(rng, gameState, { poke } as EnemyEntity, mapDef)
+      for (const id of droppedItems) if (id.startsWith('stone_')) saiu.add(id)
+    }
+    return saiu
+  }
+
+  it('zubat (POISON/FLYING) solta Pedra FLYING, e nao so a do primario', () => {
+    const zubat = SPECIES.zubat
+    expect(zubat.type).toBe('POISON')
+    expect(zubat.type2).toBe('FLYING')
+
+    const saiu = stonesDe('zubat', 400)
+    expect(saiu, 'nenhuma Stone saiu em 400 abates — o teste nao mediu nada').not.toEqual(new Set())
+    expect([...saiu].sort()).toEqual(['stone_flying', 'stone_poison'])
+  })
+
+  it('especie de um tipo so continua soltando apenas a Stone dele', () => {
+    // O sorteio novo nao pode inventar um segundo tipo onde nao existe.
+    expect(SPECIES.rattata.type2).toBeFalsy()
+    expect([...stonesDe('rattata', 200)]).toEqual(['stone_normal'])
+  })
+})
