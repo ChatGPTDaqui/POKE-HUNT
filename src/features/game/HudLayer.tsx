@@ -38,6 +38,7 @@ import { ReservasRail } from '@/components/hud/ReservasRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
 import { SalaChip } from '@/components/hud/SalaChip'
 import { ClimaChip } from '@/components/hud/ClimaChip'
+import { LureChip } from '@/components/hud/LureChip'
 import { ChatLog } from '@/components/toasts/ChatLog'
 import { ChatMobile } from '@/components/toasts/ChatMobile'
 import { AutoWindow } from '@/components/auto/AutoFloatingPanel'
@@ -97,6 +98,12 @@ export function HudLayer() {
           <div className="flex w-full flex-wrap items-center gap-[.4em] [&:not(:empty)]:my-[.4em]">
             <SalaChip />
             <ClimaChip />
+            {/* Terceiro chip da MESMA linha: os tres respondem "onde estou e o
+                que o bot esta fazendo". O `flex-wrap` da linha ja cobre 390px —
+                em celular o lure desce pra linha de baixo em vez de espremer a
+                sala. Ele se esconde sozinho quando o lure esta inativo, entao
+                nao cobra largura de quem nao usa (ver LureChip). */}
+            <LureChip />
           </div>
           {/* Trilho de reservas: mesma coluna do trilho de status, e nao uma
               ancora propria na borda esquerda. A ancora foi tentada uma vez

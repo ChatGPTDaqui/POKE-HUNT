@@ -3364,12 +3364,26 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
   // automatico disparam de novo, como uma troca de POKE nos jogos reais. Roda
   // TODO frame, nao so no fim de luta: um unico inimigo pode desengajar
   // enquanto outros continuam engajados com o jogador.
-  if (player.state !== 'engaged' && player.entradaProcessada) player.entradaProcessada = false
   for (const enemy of enemies) {
     if (enemy.state !== 'engaged' && enemy.entradaProcessada) enemy.entradaProcessada = false
   }
 
   const engagedEnemies = enemies.filter((e) => !isDead(e) && e.state === 'engaged' && e.targetId === player.id)
+  // O reset DO JOGADOR olha se ainda ha alguem engajado nele, e nao o
+  // `player.state` — que foi como isto nasceu e era um bug de verdade.
+  //
+  // `player.state` e 'engaged' so quando o MOVIMENTO decidiu parar em cima do
+  // alvo mais proximo; um inimigo pode estar engajado no jogador enquanto o
+  // jogador ainda esta em 'chase' (correndo atras de um shiny do outro lado do
+  // mapa, ou — desde o lure — atravessando o mapa pra puxar o proximo
+  // selvagem). Nesses frames o par "reseta porque state != engaged" +
+  // "dispara porque entradaProcessada e false" se alternava a 60 Hz: Intimidate
+  // derrubava o Ataque do oponente ate -6 em ~6 frames, Drizzle reescrevia o
+  // clima todo frame, e o chat levava uma linha por frame.
+  //
+  // Sem nenhum inimigo engajado nao ha luta, e e ai — e so ai — que o hook do
+  // jogador rearma.
+  if (engagedEnemies.length === 0 && player.entradaProcessada) player.entradaProcessada = false
   // PH-132: quem o jogador esta enfrentando AGORA, publicado pra tela poder
   // mostrar os efeitos do alvo. O motor ja escolhia este inimigo todo tick
   // (`engagedEnemies[0]` e o `primaryTarget` de executePlayerAction) e jogava a

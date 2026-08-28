@@ -768,6 +768,32 @@ export function sincronizarAuto(): void {
 }
 
 /**
+ * A config de LURE, em CHAMADA PROPRIA — e nao mais uma chave no patch de
+ * `sincronizarAuto` acima.
+ *
+ * O motivo e a forma da RPC, nao organizacao: `configurar_auto` valida por
+ * chave conhecida e uma chave que ela nao reconhece derruba a TRANSACAO INTEIRA
+ * (ver o comentario da migration 20260826180000, que existe por causa disso).
+ * Enquanto a migration que ensina `lureConfig` a ela nao estiver aplicada num
+ * ambiente, mandar a chave junto do resto trocaria "a config de lure nao salva"
+ * por "NENHUMA automacao salva" — auto-catch, auto-pot, auto-venda e regras por
+ * especie caem com ela, todas em silencio, porque o `catch` aqui e um
+ * `reportarErro` e nao um bloqueio de tela.
+ *
+ * Isso valeria pra qualquer chave nova daqui pra frente, entao a separacao fica
+ * mesmo depois do deploy: dois grupos de config independentes nao tem motivo pra
+ * compartilhar uma transacao tudo-ou-nada.
+ */
+export function sincronizarLure(): void {
+  if (!servidorAtivo()) return
+  const s = useGameStateStore.getState()
+  void executarAcaoRpc({
+    tipo: 'configurarAuto',
+    patch: { lureConfig: s.lureConfig },
+  }).catch(reportarErro)
+}
+
+/**
  * Ultimo `configurar_auto` ao sair da pagina (PH-42).
  *
  * `sincronizarAuto()` acima e fire-and-forget via `supabase.rpc()` — se o
@@ -796,18 +822,28 @@ export function sincronizarAutoAoSair(): void {
   void supabase.auth.getSession().then(({ data }) => {
     const token = data.session?.access_token
     if (!token) return
-    void fetch(`${supabaseUrl}/rest/v1/rpc/configurar_auto`, {
-      method: 'POST',
-      keepalive: true,
-      headers: {
-        apikey: anonKey,
-        Authorization: `Bearer ${token}`,
-        'content-type': 'application/json',
-        'Accept-Profile': schema,
-        'Content-Profile': schema,
-      },
-      body: JSON.stringify({ p_patch: patch }),
-    })
+    // DUAS requests, pela mesma razao que `sincronizarLure` existe separada: se
+    // a chave `lureConfig` for recusada pelo ambiente, ela nao pode levar a
+    // config das outras automacoes junto no unload — que e exatamente o momento
+    // em que ninguem ve o erro.
+    postConfigurarAuto(token, patch)
+    postConfigurarAuto(token, { lureConfig: s.lureConfig })
+  })
+}
+
+/** POST cru em `configurar_auto` com `keepalive` — ver `sincronizarAutoAoSair`. */
+function postConfigurarAuto(token: string, patch: Record<string, unknown>): void {
+  void fetch(`${supabaseUrl}/rest/v1/rpc/configurar_auto`, {
+    method: 'POST',
+    keepalive: true,
+    headers: {
+      apikey: anonKey,
+      Authorization: `Bearer ${token}`,
+      'content-type': 'application/json',
+      'Accept-Profile': schema,
+      'Content-Profile': schema,
+    },
+    body: JSON.stringify({ p_patch: patch }),
   })
 }
 

@@ -12,6 +12,98 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-234 + PH-235. Entrada da promocao de 28/08, escrita ANTES de promover — o
+  // gate da regra e conferir o INTERVALO desde a nota anterior, e nao a issue
+  // que motivou a promocao.
+  //
+  // REVARRIDA em 28/08 (PH-235): a PR de promocao (#201) tem `head: dev`, entao
+  // o diff dela CRESCE a cada merge na `dev` depois de aberta — de 28 pra 34
+  // commits neste caso. O lure entrou na `dev` DEPOIS de a #201 estar aberta e
+  // virou parte da promocao sem passar por nenhum gate novo. E o mesmo buraco
+  // que a 7.13 e a 7.14 existiram pra tapar, chegando por outra porta: nao e
+  // "esqueceram de escrever a nota", e "a nota foi escrita e o intervalo mudou
+  // embaixo dela".
+  //
+  // Licao pra proxima: conferir o intervalo `main..dev` DE NOVO na hora de
+  // aprovar a promocao, nao so na hora de abrir.
+  //
+  // Duas das tres coisas aqui foram EXCLUIDAS DE PROPOSITO da 7.14, e o
+  // comentario dela diz por que:
+  //  - o sistema de boss estava meia-feature ("na `main` ele existe so no bioma
+  //    igneo, sem apresentacao visual e sem selo no menu"). A regra manda
+  //    esperar a versao completa e dar entrada propria. E esta.
+  //  - o PH-222 tinha mergeado na `dev` DEPOIS da promocao #186, entao ainda
+  //    nao estava em producao. Agora esta.
+  //
+  // O que fica de FORA, e por que:
+  //  - PH-233 (vento compartilhado da cena). Esta em PR ABERTA e nao entra
+  //    nesta promocao. E o caso mais facil de errar aqui: foi escrito no mesmo
+  //    dia que o PH-232 e parece parte dele — nao e. O PH-232 promoveu, o
+  //    PH-233 nao.
+  //  - Internals de flush e de boss (PH-217 a PH-220), enforcement do gate no
+  //    servidor (PH-227, que o jogador so percebe pela mensagem do menu, ja
+  //    coberta abaixo), ordem canonica como constante (PH-223) e wiring de
+  //    `bioma_progress` (PH-224). Encanamento: o que o jogador ve deles ja esta
+  //    nas linhas do boss.
+  //  - Refactor, CI e as bancadas de `scripts/harness/` (efeitos do mapa e a de
+  //    custo do lure, PH-235). Mesma regua da 7.11 a 7.14.
+  //  - Do PH-235, tudo o que nao e a mecanica em si: a coluna
+  //    `auto_lure_config`, a RPC que a valida, o `db:types` e a bancada de
+  //    medicao. O que o jogador ve e a aba, o chip e o comportamento.
+  {
+    version: '7.15',
+    date: '2026-08-28',
+    title: 'Farm em area: junte ate quatro selvagens antes de bater — e o boss agora guarda os doze biomas',
+    highlights: [
+      'AGORA VOCE PODE JUNTAR ATE QUATRO SELVAGENS ANTES DE BATER. Seu POKE sempre andava ate o mais proximo e lutava um por vez, entao golpe de area nunca acertava mais de um alvo — ele existia e nao servia pra nada. Com o Lure ligado (aba nova no painel de Automacoes) ele passa pelo raio de varios, puxa o grupo atras de si e so entao para pra lutar: um golpe de area acerta todos de uma vez. Voce escolhe juntar 1, 2, 3 ou 4, e um chip no topo mostra a reuniao acontecendo (2/4) pra nao parecer que o bot travou.',
+      'O PRECO DO LURE E LEVAR PANCADA DE TODOS AO MESMO TEMPO. Nao e farm de graca: juntar quatro multiplica o dano que entra no seu POKE, e o ganho depende de ter golpe de AREA na rotacao — sem um, o grupo so bate mais em voce. Shiny em campo cancela a reuniao na hora (ele continua tendo prioridade), e hunt de um inimigo so, como as de boss, ignora o Lure.',
+      'O BOSS AGORA EXISTE NOS DOZE BIOMAS, NAO SO NO IGNEO. Ele tinha nascido em um bioma so, como piloto, e ficou la. Agora cada um dos doze tem o seu, na ordem canonica do mapa.',
+      'E VENCER O BOSS E O QUE ABRE O PROXIMO BIOMA. O jogo passou a ter uma linha pra seguir: a area seguinte fica trancada ate voce derrubar o dono da atual. O menu de hunt diz quem esta trancado e o que falta — antes o botao simplesmente nao levava a lugar nenhum, sem explicar.',
+      'O BOSS TAMBEM PASSOU A SE APRESENTAR. Ele entrava em cena como qualquer outro encontro, e o unico jeito de saber que aquilo era o boss era a barra de HP nao acabar nunca. Agora a entrada dele tem apresentacao propria, e no menu ele tem selo.',
+      'OS EFEITOS DO CENARIO GANHARAM ESCALA. Folha, poeira, faisca, neve e areia estavam grandes demais pro tamanho de um POKE — a poeira de caverna chegava a um quarto da altura de um Pokemon — e quase todo bioma mostrava a mesma bolinha em outra cor. Agora cada um tem tamanho e formato proprios: a folha tomba, a faisca risca, a cinza urbana e uma fibra dobrada, o reflexo da agua e uma cruz de luz.',
+      'E A CHUVA MOLHA O CHAO. As gotas caem, batem e respingam, com microgotas que quicam em volta. Selva e caverna ganharam gotejo proprio, pingando sempre do mesmo ponto, do jeito que agua parada na copa e em teto de gruta pinga.',
+      'O NIVEL PAROU DE SUMIR NO F5. Subir de nivel e recarregar a pagina logo em seguida podia devolver o POKE no nivel anterior: a ultima gravacao nao chegava a sair. Agora ela sai.',
+      'UM SHINY NA TELA PODIA DESPENCAR O ATAQUE DO INIMIGO E ENCHER O CHAT. Com um shiny em campo e outro selvagem colado em voce, a habilidade de entrada em combate do seu POKE — Intimidate, por exemplo — disparava a cada quadro em vez de uma vez por luta: o Ataque do oponente caia ate o fundo em menos de um segundo e o chat levava uma linha por quadro. Agora ela dispara uma vez, como deveria.',
+    ],
+  },
+  // PH-231. Varredura do INTERVALO desde a 7.13 (a licao que aquela entrada
+  // deixou escrita): a 7.13 cobriu ate a promocao #149, e desde entao a `main`
+  // recebeu as promocoes #156, #159, #167 e #186 — a ultima (27/08 13:50) com
+  // `Supabase deploy` verde, migrations e Edge publicadas. Treze mudancas
+  // player-facing entraram sem nota.
+  //
+  // O que fica de FORA, e por que:
+  //  - SISTEMA DE BOSS/ANDARES (PH-200 a PH-229). Na `main` ele existe so no
+  //    bioma igneo, sem apresentacao visual (PH-228) e sem selo no menu
+  //    (PH-229) — o Otavio esta fechando o resto na `dev`. Meia-feature nao
+  //    entra em nota; ela ganha entrada propria quando a versao completa
+  //    promover.
+  //  - PH-222 (trailing edge do commitAgora) mergeou na `dev` DEPOIS da
+  //    promocao #186 — ainda nao esta em producao.
+  //  - Egress de PostgREST (PH-185/186), camada de VFX acima da HUD (PH-190, e
+  //    o encanamento do voo de ouro do PH-191), internals de flush e boss
+  //    (PH-217 a PH-220), fixes de CI. Nenhum muda o que o jogador ve. Mesma
+  //    regua da 7.11 a 7.13.
+  {
+    version: '7.14',
+    date: '2026-08-27',
+    title: 'Comemoracao nos tres marcos do jogo, o ouro voando ate a carteira, e dois menus novos',
+    highlights: [
+      'SUBIR DE NIVEL, EVOLUIR E ACHAR UM SHINY GANHARAM COMEMORACAO. Os tres marcos do jogo avisavam com a mesma linha de toast que rolava e sumia. Agora nivel comum mostra um chip rapido com os atributos ganhos; nivel com golpe novo, multiplo de 5 ou o 100 mostra um cartao central; evolucao e shiny mostram um cartao grande com antes -> depois. Abates seguidos que sobem varios niveis de uma vez juntam tudo num cartao so (Lv 33 -> 36) em vez de travar a tela repetindo, e a preferencia de menos movimento do sistema e respeitada.',
+      'O OURO E O XP DO ABATE VOAM ATE A CARTEIRA. Cada abate soltava dois textos, verde e dourado, sobre a grama — na mesma faixa estreita onde o numero de dano precisa aparecer. Agora as moedas nascem no POKE derrotado, sobem em leque e voam em arco ate a carteira do trilho, que pulsa na chegada com o valor exato logo abaixo. A informacao passou a chegar no numero que ela muda.',
+      'NOVO MENU: ESPECIALIDADES — MAESTRIA DE ELEMENTOS. Dezoito tipos elementais, cada um com dez niveis: cinco de bonus de dano (+1% por nivel, ate +5%) e cinco de bonus de defesa, trilhas independentes. Cada nivel custa um item do tipo mais ouro, com o preco subindo a cada degrau. O bonus vale no combate, e o progresso somado dos 180 niveis possiveis da um titulo global.',
+      'NOVO MENU: TASKS & MISSOES. Uma cadeia de missoes de abate por tipo elemental — derrotar a especie da posicao N libera a N+1. O progresso vem dos abates que voce ja fez (o mesmo contador do Bestiario, nao ha meta nova pra encher), cada missao reivindicada paga ouro, e fechar a cadeia inteira de um tipo da um bonus.',
+      'VOCE PODE SEGURAR A HUNT NUMA SALA SO. Fechar os 30 abates de uma sala sempre levou pra proxima sozinho. Agora ha um interruptor por hunt: com ele ligado a sala trava em 30/30 e um botao de proximo nivel faz o avanco quando voce quiser. Farm offline de horas de verdade continua avancando sozinho de qualquer jeito.',
+      'A HUD DE BATALHA FICOU LEGIVEL EM CINCO PONTOS. O nome do alvo saia quase apagado sobre a grama e ganhou fundo. As duas porcentagens do trilho agora dizem HP e XP em vez de dois numeros soltos. O nome do POKE parou de truncar quando ha espaco sobrando na linha. As reservas mostram a especie, nao so o nivel, e a reserva desmaiada tem selo KO em vez de depender so da foto acinzentada. Golpes do mesmo tipo elemental ganham uma sigla no canto pra voce distinguir sem abrir a ficha.',
+      'O CABECALHO E O TRILHO DE RESERVAS ENCOSTARAM NO CANTO. Ficavam meio dedo pra dentro da borda, e cada reserva era um card solto com borda propria — seis mini-janelas empilhadas. Agora a coluna cola na borda superior esquerda e as reservas leem como um bloco unico.',
+      'O JOGO AVISA QUANDO SEU POKE PASSOU DO TETO DA HUNT. Um Noctowl de Nivel 33 rodou 4h39min numa hunt de teto Nivel 30 sem mudar de nivel, e nada na tela dizia por que. Agora, ao entrar numa hunt facil demais pro nivel do POKE ativo, um aviso diz que o XP dali pra frente rende pouco.',
+      'O AVISO DE CAPTURA PAROU DE ENTREGAR O RESULTADO ANTES DA POKEBOLA. Capturado! e a captura falhou! apareciam no instante do arremesso, antes de a bola terminar de balancar na tela. Agora a narracao espera a animacao terminar.',
+      'A BARRA DE XP PAROU DE VOLTAR SOZINHA DURANTE A HUNT. O servidor reconfere cada janela de 30 segundos pelo relogio dele, e o corte as vezes fechava um pouco antes do ponto que voce ja tinha visto na tela — a barra parecia regredir sem voce ter perdido nada. Agora a queda so passa quando houve perda real por desmaio.',
+      'SUMIU AQUELE TOAST VERMELHO COM [diag-sala] E UM MONTE DE NUMERO. Era instrumentacao interna que vazou pra producao pela promocao de 26/08 — pro jogador, uma mensagem de erro incompreensivel no meio do jogo.',
+      'O VENTO PASSOU A APARECER NA VEGETACAO. A folha caia numa deriva constante; agora ha rajadas periodicas em que ela acelera e balanca de lado por alguns segundos, como vento passando pela copa.',
+      'O VULCAO GANHOU BRILHO DE LAVA RENTE AO CHAO. Antes so a brasa subia da fonte; agora uma faixa de luz pulsa perto da base da tela nas artes de vulcao e de caverna vulcanica.',
+    ],
+  },
   // PH-166. ENTRADA RETROATIVA — e a unica do arquivo que descreve codigo que JA
   // ESTAVA NO AR quando ela foi escrita. Os cinco itens abaixo subiram na
   // promocao #141 (25/08) e o jogador vinha usando todos sem aviso nenhum.
