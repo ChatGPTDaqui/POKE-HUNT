@@ -63,12 +63,7 @@ export function cadeiaDoTipo(tipo: ElementType): MissaoInfo[] {
   return POR_TIPO[tipo] ?? []
 }
 
-export function chaveDaMissao(tipo: ElementType, speciesId: string): string {
-  return `${tipo}:${speciesId}`
-}
-
-/** Inversa de `chaveDaMissao` — species id nunca tem ':' (e um slug snake_case). */
-export function missaoDaChave(chave: string): { tipo: ElementType; speciesId: string } {
-  const i = chave.indexOf(':')
-  return { tipo: chave.slice(0, i) as ElementType, speciesId: chave.slice(i + 1) }
-}
+// Re-export por compatibilidade: as duas moraram aqui e todo call site importa
+// daqui. Quem precisa SO da chave deve importar de `./missaoChave` direto —
+// ver a nota de la sobre os 38 kB que isto custava no bundle da Edge.
+export { chaveDaMissao, missaoDaChave } from './missaoChave'

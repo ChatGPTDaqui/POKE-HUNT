@@ -14,7 +14,11 @@ import type { RarityKey } from '@/data/rarity'
 import { NATURES_NEUTRAS, type NatureKey } from '@/data/natures'
 import { activeAbilitiesPadrao, golpesAprendidosAte, sanearEscolhaDeGolpes } from '@/data/activeAbilities'
 import type { StatusCondition } from '@/data/statusEffects'
-import { chaveDaMissao, missaoDaChave } from '@/data/missoes'
+// De `missaoChave`, e nao de `missoes`: este arquivo entra no bundle da Edge
+// Function, e importar daquele modulo arrastaria a cadeia inteira junto — 335
+// linhas de dado que o servidor nunca le, porque quem valida missao la e a RPC
+// `reivindicar_missao`, consultando a tabela `missao_cadeia` no Postgres.
+import { chaveDaMissao, missaoDaChave } from '@/data/missaoChave'
 
 type Json = Database['public']['Tables']['players']['Row']['auto_toggles']
 type Tables = Database['public']['Tables']
