@@ -44,6 +44,7 @@
 //   o jogador precisa ver a luta acontecendo.
 import { useUiStore } from '@/stores/uiStore'
 import { emPoke } from './escalaDoMundo'
+import { sincronizarVento, ventoAgora } from './vento'
 import {
   avancarGotas, criarEstadoDeGotas, desenharGotas, povoarGotas,
   type ConfigDeGota, type EstadoDeGotas,
@@ -93,8 +94,27 @@ export interface ReceitaDeClima {
   filtroClareia?: boolean
   /** Vinheta nas bordas, 0 = nenhuma. */
   vinheta: number
-  /** Rajadas: a velocidade oscila em ondas, em vez de ser constante. */
-  rajada?: boolean
+  /**
+   * Rajadas: a velocidade inteira da particula oscila, em vez de ser constante.
+   *
+   * Ate o PH-233 isto era uma senoide PROPRIA daqui (`1 + sin(fase * 0.5) *
+   * 0.45`), sem relacao nenhuma com a rajada que a folha do cenario usava desde
+   * o PH-188 — dois relogios de vento na mesma tela. Agora quem manda e
+   * `vento.ts`, o mesmo das duas camadas. O numero e quanto a velocidade sobe
+   * no pico: `0.9` = quase o dobro.
+   */
+  rajada?: number
+  /**
+   * Quantas unidades de mundo por segundo o vento empurra esta particula,
+   * horizontalmente, no PICO da rajada (PH-233). Ver `vento.ts`.
+   *
+   * Na chuva e no granizo isto e o que produz a INCLINACAO variavel: o risco e
+   * desenhado na direcao do deslocamento (ver `desenharParticula`), entao
+   * empurrar de lado inclina o traco sozinho, sem mexer em angulo de receita.
+   * Antes do PH-233 a chuva caia sempre no mesmo angulo, chovesse o que
+   * chovesse.
+   */
+  empuxoDoVento?: number
   /** Relampago raro: clarao branco seguido de escurecimento. */
   relampago?: boolean
   /** Feixes de luz descendo do topo. */
@@ -171,7 +191,7 @@ export const RECEITAS: Record<ClimaTipo, ReceitaDeClima> = {
     quantidade: 55, cor: '#cfe6f7', forma: 'risco',
     raio: [emPoke(0.18), emPoke(0.4)], velocidade: [480, 780], angulo: Math.PI / 2 + 0.26,
     espalhamento: 0.04, alpha: 0.6, bamboleio: 0,
-    filtro: '#12243a', filtroAlpha: 0.28, vinheta: 0.2, relampago: true,
+    filtro: '#12243a', filtroAlpha: 0.28, vinheta: 0.2, relampago: true, empuxoDoVento: 300,
     gotas: { quantidade: 58, config: GOTAS_DE_CHUVA },
   },
   // Sol nao tem precipitacao: o que da o clima sao os feixes descendo e a poeira
@@ -181,7 +201,7 @@ export const RECEITAS: Record<ClimaTipo, ReceitaDeClima> = {
     quantidade: 48, cor: '#ffe6a8', forma: 'mota',
     raio: [emPoke(0.018), emPoke(0.045)], velocidade: [6, 16], angulo: -Math.PI / 2 + 0.4,
     espalhamento: 1.1, alpha: 0.6, bamboleio: 12, aditivo: true,
-    filtro: '#ffb347', filtroAlpha: 0.17, vinheta: 0.1, raios: true,
+    filtro: '#ffb347', filtroAlpha: 0.17, vinheta: 0.1, raios: true, empuxoDoVento: 18,
   },
   // Pedra dura, quase vertical e RAPIDA. O contraste alto e proposital: granizo
   // e o clima que machuca, e ele tem que parecer agressivo ao lado da neve, que
@@ -190,7 +210,7 @@ export const RECEITAS: Record<ClimaTipo, ReceitaDeClima> = {
     quantidade: 110, cor: '#f2fdff', forma: 'pedra',
     raio: [emPoke(0.035), emPoke(0.09)], velocidade: [520, 820], angulo: Math.PI / 2 + 0.1,
     espalhamento: 0.05, alpha: 0.95, bamboleio: 2, rastro: 4.5, contorno: 'rgba(18,58,92,0.65)',
-    filtro: '#7fc6dd', filtroAlpha: 0.22, vinheta: 0.18,
+    filtro: '#7fc6dd', filtroAlpha: 0.22, vinheta: 0.18, empuxoDoVento: 90,
   },
   // Floco grande, lento, com deriva larga. O filtro CLAREIA: neve reflete luz
   // por todos os lados e apaga a sombra da cena. E o oposto do granizo de
@@ -200,7 +220,7 @@ export const RECEITAS: Record<ClimaTipo, ReceitaDeClima> = {
     quantidade: 92, cor: '#ffffff', forma: 'cristal',
     raio: [emPoke(0.032), emPoke(0.09)], velocidade: [30, 74], angulo: Math.PI / 2 + 0.16,
     espalhamento: 0.3, alpha: 0.95, bamboleio: 26, contorno: 'rgba(60,96,130,0.55)',
-    filtro: '#dbeeff', filtroAlpha: 0.2, filtroClareia: true, vinheta: 0.1,
+    filtro: '#dbeeff', filtroAlpha: 0.2, filtroClareia: true, vinheta: 0.1, empuxoDoVento: 110,
   },
   // Horizontal e em RAJADAS. A tempestade de areia e a unica que muda de
   // intensidade sozinha: sem a rajada ela vira um chuveiro lateral constante.
@@ -208,7 +228,7 @@ export const RECEITAS: Record<ClimaTipo, ReceitaDeClima> = {
     quantidade: 150, cor: '#f0dcac', forma: 'risco',
     raio: [emPoke(0.25), emPoke(0.65)], velocidade: [700, 1250], angulo: 0.1,
     espalhamento: 0.09, alpha: 0.62, bamboleio: 6,
-    filtro: '#a8763a', filtroAlpha: 0.24, vinheta: 0.16, rajada: true,
+    filtro: '#a8763a', filtroAlpha: 0.24, vinheta: 0.16, rajada: 0.9, empuxoDoVento: 420,
   },
   // Bancos enormes, lentissimos e quase transparentes, em varias camadas. A
   // nevoa nao tem particula visivel — ela e VOLUME. Alpha baixo com raio grande
@@ -217,7 +237,7 @@ export const RECEITAS: Record<ClimaTipo, ReceitaDeClima> = {
     quantidade: 26, cor: '#cfd6dc', forma: 'banco',
     raio: [emPoke(1.6), emPoke(4.2)], velocidade: [5, 16], angulo: 0.06,
     espalhamento: 0.5, alpha: 0.18, bamboleio: 10,
-    filtro: '#b9c2cb', filtroAlpha: 0.3, filtroClareia: true, vinheta: 0.08,
+    filtro: '#b9c2cb', filtroAlpha: 0.3, filtroClareia: true, vinheta: 0.08, empuxoDoVento: 34,
   },
 }
 
@@ -261,6 +281,18 @@ interface ParticulaDeClima {
   angulo: number
   /** Velocidade do giro, em radianos por segundo. Sinal = sentido. */
   giro: number
+  /**
+   * Velocidade DESTE quadro, ja com a rajada e o empuxo do vento (PH-233).
+   *
+   * Separada de `vx`/`vy` porque aquelas sao o estado permanente da particula,
+   * sorteado no nascimento: somar vento nelas acumularia vento sobre vento a
+   * cada quadro ate a chuva sair de lado e nunca mais voltar. Estas sao
+   * recalculadas do zero em `avancar`, e sao elas que `desenharParticula` le —
+   * o risco e o rastro sao tracados na direcao do deslocamento REAL, senao a
+   * chuva seria empurrada de lado e continuaria desenhada no angulo antigo.
+   */
+  vxEfetivo: number
+  vyEfetivo: number
 }
 
 let climaAtual: ClimaTipo | null = null
@@ -381,6 +413,12 @@ function semearParticula(
     // Sentido sorteado: nevasca em que todo floco gira pro mesmo lado lê como
     // animacao em loop, nao como neve.
     giro: (receita.forma === 'cristal' ? entre(r, NEVE_GIRO) : 0) * (r() < 0.5 ? -1 : 1),
+    // Nasce igual a velocidade sorteada: `avancar` recalcula no primeiro quadro,
+    // mas quem desenha antes disso (nao acontece hoje, e nao pode passar a
+    // acontecer em silencio) precisa de um vetor valido, e nao de zero — risco
+    // de comprimento zero nao aparece.
+    vxEfetivo: Math.cos(ang) * vel,
+    vyEfetivo: Math.sin(ang) * vel,
   }
 }
 
@@ -410,27 +448,57 @@ function reconstruir(clima: ClimaTipo, janela: JanelaDeClima, compacto: boolean)
   }
 }
 
-/** Recicla quem saiu da janela, mantendo a densidade constante. */
+/**
+ * Recicla quem saiu da janela, mantendo a densidade constante.
+ *
+ * Le a velocidade EFETIVA (com vento), e nao a sorteada: numa rajada forte a
+ * particula sai por uma borda que a velocidade propria dela nunca alcancaria, e
+ * decidir a borda de entrada pelo vetor antigo a faria reaparecer do lado
+ * errado — ou nao reaparecer, ficando parada fora da tela ate o vento virar.
+ */
 function reciclar(p: ParticulaDeClima, janela: JanelaDeClima, folga: number): void {
-  if (p.vy > 0 && p.y - folga > janela.y + janela.h) { p.y = janela.y - folga; p.x = janela.x + rand() * janela.w }
-  else if (p.vy < 0 && p.y + folga < janela.y) { p.y = janela.y + janela.h + folga; p.x = janela.x + rand() * janela.w }
-  if (p.vx > 0 && p.x - folga > janela.x + janela.w) { p.x = janela.x - folga; p.y = janela.y + rand() * janela.h }
-  else if (p.vx < 0 && p.x + folga < janela.x) { p.x = janela.x + janela.w + folga; p.y = janela.y + rand() * janela.h }
+  if (p.vyEfetivo > 0 && p.y - folga > janela.y + janela.h) { p.y = janela.y - folga; p.x = janela.x + rand() * janela.w }
+  else if (p.vyEfetivo < 0 && p.y + folga < janela.y) { p.y = janela.y + janela.h + folga; p.x = janela.x + rand() * janela.w }
+  if (p.vxEfetivo > 0 && p.x - folga > janela.x + janela.w) { p.x = janela.x - folga; p.y = janela.y + rand() * janela.h }
+  else if (p.vxEfetivo < 0 && p.x + folga < janela.x) { p.x = janela.x + janela.w + folga; p.y = janela.y + rand() * janela.h }
 }
 
+/**
+ * Avanca uma lista, ja com o vento da cena aplicado (PH-233).
+ *
+ * `escalaDoEmpuxo` existe pra a passagem rasante: aquelas particulas estao mais
+ * PERTO da camera (raio 2,6x, velocidade 1,5x), e coisa mais perto atravessa
+ * mais tela no mesmo vento. Sem isso a passagem da frente ficaria em pe
+ * enquanto o fundo inteiro deita na rajada.
+ */
 function avancar(
-  lista: ParticulaDeClima[], janela: JanelaDeClima, delta: number, multiplicadorDeVelocidade: number,
+  lista: ParticulaDeClima[], janela: JanelaDeClima, delta: number, receita: ReceitaDeClima,
+  escalaDoEmpuxo = 1,
 ): void {
+  const vento = ventoAgora()
+  // Rajada: a VELOCIDADE inteira sobe e desce. Antes do PH-233 saia de uma
+  // senoide propria deste arquivo; agora e o mesmo vento da folha do cenario.
+  const multiplicadorDeVelocidade = receita.rajada ? 1 + vento * receita.rajada : 1
+  // Empuxo: velocidade lateral EXTRA, em unidades por segundo. Nao entra em
+  // `p.vx` (que e o estado permanente da particula, sorteado no nascimento) —
+  // seria acumular vento sobre vento a cada quadro.
+  const empuxo = (receita.empuxoDoVento ?? 0) * vento * escalaDoEmpuxo
   for (const p of lista) {
-    p.x += p.vx * delta * multiplicadorDeVelocidade
-    p.y += p.vy * delta * multiplicadorDeVelocidade
+    // A velocidade EFETIVA do quadro vira estado por um motivo de desenho: o
+    // risco e o rastro sao tracados na direcao do deslocamento, entao e ela
+    // que precisa chegar em `desenharParticula`. Usar `p.vx` ali faria a chuva
+    // ser empurrada de lado e continuar desenhada no angulo antigo.
+    p.vxEfetivo = p.vx * multiplicadorDeVelocidade + empuxo
+    p.vyEfetivo = p.vy * multiplicadorDeVelocidade
+    p.x += p.vxEfetivo * delta
+    p.y += p.vyEfetivo * delta
     p.fase += delta * 1.4
     p.angulo += p.giro * delta
     // Desvio perpendicular ao deslocamento — o que impede a queda em linha reta.
     if (p.bamboleio > 0) {
       const desvio = Math.sin(p.fase) * p.bamboleio * delta
-      p.x += -p.vy * desvio * 0.012
-      p.y += p.vx * desvio * 0.012
+      p.x += -p.vyEfetivo * desvio * 0.012
+      p.y += p.vxEfetivo * desvio * 0.012
     }
     reciclar(p, janela, p.raio * 2 + 40)
   }
@@ -444,7 +512,7 @@ function desenharParticula(ctx: CanvasRenderingContext2D, p: ParticulaDeClima, r
       // Comprimento na DIRECAO do movimento: risco de chuva perpendicular a
       // queda e a falha mais obvia possivel, e acontece quando se desenha o
       // risco sempre na horizontal.
-      const n = Math.hypot(p.vx, p.vy) || 1
+      const n = Math.hypot(p.vxEfetivo, p.vyEfetivo) || 1
       // Espessura em fracao do COMPRIMENTO, com piso proprio.
       //
       // Antes do PH-232 o fator era 0,09 sobre um comprimento de ate 58 — 5,2
@@ -460,19 +528,19 @@ function desenharParticula(ctx: CanvasRenderingContext2D, p: ParticulaDeClima, r
       ctx.lineWidth = Math.max(0.9, p.raio * 0.09)
       ctx.beginPath()
       ctx.moveTo(p.x, p.y)
-      ctx.lineTo(p.x - (p.vx / n) * p.raio, p.y - (p.vy / n) * p.raio)
+      ctx.lineTo(p.x - (p.vxEfetivo / n) * p.raio, p.y - (p.vyEfetivo / n) * p.raio)
       ctx.stroke()
       break
     }
     case 'pedra': {
       // Rastro primeiro, pra a pedra ficar POR CIMA dele.
       if (receita.rastro) {
-        const n = Math.hypot(p.vx, p.vy) || 1
+        const n = Math.hypot(p.vxEfetivo, p.vyEfetivo) || 1
         ctx.globalAlpha = Math.max(0, alpha * 0.45)
         ctx.lineWidth = Math.max(1, p.raio * 0.5)
         ctx.beginPath()
         ctx.moveTo(p.x, p.y)
-        ctx.lineTo(p.x - (p.vx / n) * p.raio * receita.rastro, p.y - (p.vy / n) * p.raio * receita.rastro)
+        ctx.lineTo(p.x - (p.vxEfetivo / n) * p.raio * receita.rastro, p.y - (p.vyEfetivo / n) * p.raio * receita.rastro)
         ctx.stroke()
         ctx.globalAlpha = Math.max(0, alpha)
       }
@@ -619,10 +687,16 @@ export function desenharClimaFundo(
   const delta = ultimoInstante === 0 ? 0 : Math.min(DELTA_MAXIMO, (agora - ultimoInstante) / 1000)
   ultimoInstante = agora
   fase += delta
+  // O vento e da CENA (PH-233), nao desta camada: passa o instante que ja
+  // lemos e `vento.ts` ATRIBUI a fase, entao nao importa se `ambiente.ts`
+  // sincronizou antes ou depois no mesmo quadro. `fase` continua sendo daqui —
+  // ela move os feixes do sol e agenda o relampago, que sao deste arquivo.
+  sincronizarVento(agora)
 
-  // RAJADA: a areia acelera e desacelera em ondas longas. Sem isto ela vira um
-  // chuveiro lateral de intensidade constante, que nao le como tempestade.
-  const rajada = receita.rajada ? 1 + Math.sin(fase * 0.5) * 0.45 : 1
+  // A RAJADA saiu daqui. O que havia era `1 + Math.sin(fase * 0.5) * 0.45`, uma
+  // senoide propria sem relacao nenhuma com a rajada que a folha do cenario
+  // usa desde o PH-188 — dois ventos na mesma tela. Agora `avancar` le
+  // `ventoAgora()`, o mesmo das duas camadas.
 
   if (receita.relampago) {
     proximoRelampago -= delta
@@ -634,8 +708,11 @@ export function desenharClimaFundo(
     }
   }
 
-  avancar(particulas, janela, delta, rajada)
-  avancar(frente, janela, delta, rajada)
+  avancar(particulas, janela, delta, receita)
+  // 1,5x no empuxo da passagem rasante, o mesmo fator que a velocidade dela ja
+  // usa: aquelas particulas estao mais perto da camera, e coisa mais perto
+  // atravessa mais tela no mesmo vento.
+  avancar(frente, janela, delta, receita, 1.5)
 
   ctx.save()
   if (receita.raios) desenharRaios(ctx, janela)

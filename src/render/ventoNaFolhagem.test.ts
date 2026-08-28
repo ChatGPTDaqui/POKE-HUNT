@@ -8,7 +8,8 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest'
 
 import { useUiStore } from '@/stores/uiStore'
-import { desenharAmbiente, reiniciarAmbiente, intensidadeDoVento } from './ambiente'
+import { desenharAmbiente, reiniciarAmbiente } from './ambiente'
+import { intensidadeDoVento } from './vento'
 
 const FLORESTA = 'assets/hunt-backgrounds/forest.jpg' // folha — tem vento
 const CAVERNA = 'assets/hunt-backgrounds/ruins.jpg' // poeira — controle, sem vento
@@ -79,11 +80,12 @@ describe('a rajada acelera a queda da folha, e so da folha (PH-188)', () => {
    * crescente), os ultimos `JANELA_AMOSTRA` quadros ate aquele instante.
    *
    * Precisa ser uma sessao so, e nao uma chamada de `desenharAmbiente` por
-   * checkpoint: `faseGlobal` (o relogio que move a rajada) e estado de MODULO
-   * que `reiniciarAmbiente` nao zera — so os feixes de luz dependiam dele
-   * antes, e eles sao decorativos, sem motivo pra reiniciar ao trocar de
-   * mapa. Chamar duas vezes com reset no meio faz o segundo checkpoint
-   * herdar o relogio do primeiro e mirar no instante errado.
+   * checkpoint. Desde o PH-233 o relogio da rajada vive em `vento.ts` e e
+   * ABSOLUTO (fase = instante / 1000), entao ele acompanha o relogio falso
+   * deste teste — que o `vi.spyOn` abaixo reinicia em zero a cada chamada.
+   * Rodar tudo numa sessao continua e o que garante que os checkpoints caem
+   * nos instantes de rajada que `acharExtremos` escolheu, e que a folha e a
+   * poeira sao medidas exatamente nos MESMOS instantes de vento.
    */
   function coletarJanelas(imagem: string, checkpointsSegundos: number[]): Ponto[][][] {
     const ordem = [...checkpointsSegundos].sort((a, b) => a - b)
