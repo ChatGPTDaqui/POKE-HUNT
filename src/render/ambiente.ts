@@ -278,14 +278,18 @@ const GOTEJO_DE_CAVERNA: ConfigDeGota = {
 // incomodava era area coberta, nao contagem.
 export const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
   folha: {
-    quantidade: 30, cor: '#e8f0a8', raio: [emPoke(0.0225), emPoke(0.05)], velocidade: [16, 34],
+    // Ambar, e nao o amarelo-esverdeado de antes (`#e8f0a8`): folha que CAI e
+    // folha seca, e todo mapa deste preset e verde. Uma folha na mesma matiz do
+    // fundo desaparece por mais que se aumente o alpha — o que faltava era
+    // contraste de COR, nao de tamanho. Conferido no jogo, sala Relvado.
+    quantidade: 30, cor: '#d9a44e', raio: [emPoke(0.0225), emPoke(0.05)], velocidade: [16, 34],
     angulo: Math.PI / 2 + 0.35, espalhamento: 0.3, alpha: 0.75, bamboleio: 16, feixes: true,
     forma: 'folha', vento: true, faixaOrigemY: 0.4,
   },
   // Selva: folha um pouco maior e mais escura que a de floresta temperada, com
   // menos feixe (a copa e fechada) e o gotejo por baixo.
   selva: {
-    quantidade: 26, cor: '#cfe38f', raio: [emPoke(0.026), emPoke(0.0575)], velocidade: [13, 28],
+    quantidade: 26, cor: '#c9a84a', raio: [emPoke(0.026), emPoke(0.0575)], velocidade: [13, 28],
     angulo: Math.PI / 2 + 0.28, espalhamento: 0.34, alpha: 0.7, bamboleio: 14, feixes: true,
     forma: 'folha', vento: true, faixaOrigemY: 0.4,
     gotejo: { quantidade: 6, config: GOTEJO_DE_SELVA },
@@ -945,6 +949,16 @@ function desenharParticula(ctx: CanvasRenderingContext2D, p: Particula, r: Recei
     // que reflexo especular na agua faz — a onda so devolve o sol pro olho
     // quando a inclinacao dela passa pelo angulo certo.
     ctx.globalAlpha = p.alphaMax * Math.abs(Math.sin(p.fase * CINTILO_PISCA)) ** CINTILO_EXPOENTE
+  } else if (r.forma === 'folha') {
+    // Folha quase NAO pulsa de alpha, e essa e a diferenca entre corpo e luz.
+    //
+    // O pulso de alpha veio do PH-96, quando toda particula era o mesmo ponto e
+    // o pulso era a unica variacao que existia. Numa folha ele esta errado: uma
+    // folha e um objeto solido, nao um brilho — o que muda enquanto ela cai e a
+    // ORIENTACAO (o tombo), nao a opacidade. Com o pulso cheio a media de alpha
+    // caia pra ~0,31, e sobre grama clara isso e o mesmo que nao desenhar
+    // (conferido no jogo, sala Relvado de Campo Aberto I).
+    ctx.globalAlpha = p.alphaMax * (0.88 + 0.12 * Math.sin(p.fase * 0.8))
   } else {
     ctx.globalAlpha = p.alphaMax * (0.55 + 0.45 * Math.sin(p.fase * 0.8))
   }
