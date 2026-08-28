@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.17"
+    PostgrestVersion: "14.5"
   }
   dev: {
     Tables: {
@@ -904,6 +904,33 @@ export type Database = {
           species_id?: string | null
           taxa?: number
           unit_price?: number
+        }
+        Relationships: []
+      }
+      missao_cadeia: {
+        Row: {
+          alvo: number
+          eh_ultima: boolean
+          posicao: number
+          recompensa: number
+          species_id: string
+          tipo: Database["dev"]["Enums"]["element_type"]
+        }
+        Insert: {
+          alvo: number
+          eh_ultima: boolean
+          posicao: number
+          recompensa: number
+          species_id: string
+          tipo: Database["dev"]["Enums"]["element_type"]
+        }
+        Update: {
+          alvo?: number
+          eh_ultima?: boolean
+          posicao?: number
+          recompensa?: number
+          species_id?: string
+          tipo?: Database["dev"]["Enums"]["element_type"]
         }
         Relationships: []
       }
@@ -3035,6 +3062,33 @@ export type Database = {
           species_id?: string | null
           taxa?: number
           unit_price?: number
+        }
+        Relationships: []
+      }
+      missao_cadeia: {
+        Row: {
+          alvo: number
+          eh_ultima: boolean
+          posicao: number
+          recompensa: number
+          species_id: string
+          tipo: Database["public"]["Enums"]["element_type"]
+        }
+        Insert: {
+          alvo: number
+          eh_ultima: boolean
+          posicao: number
+          recompensa: number
+          species_id: string
+          tipo: Database["public"]["Enums"]["element_type"]
+        }
+        Update: {
+          alvo?: number
+          eh_ultima?: boolean
+          posicao?: number
+          recompensa?: number
+          species_id?: string
+          tipo?: Database["public"]["Enums"]["element_type"]
         }
         Relationships: []
       }
