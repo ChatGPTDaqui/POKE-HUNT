@@ -44,14 +44,35 @@ const RAIZ = dirname(dirname(fileURLToPath(import.meta.url)))
 const p = (...t) => join(RAIZ, ...t)
 
 const SO_RELATORIO = process.argv.includes('--relatorio')
+// O carimbo PEDIDO. Os arquivos nao usam ele cru — ver `nomeDaMigration`.
 const CARIMBO = (() => {
   if (SO_RELATORIO) return null
   const a = process.argv.find((x) => x.startsWith('--carimbo='))
   if (!a) throw new Error('passe --carimbo=YYYYMMDDHHMMSS (ou --relatorio)')
   const v = a.slice('--carimbo='.length)
   if (!/^\d{14}$/.test(v)) throw new Error(`carimbo invalido: ${v}`)
+  if (!v.endsWith('0')) throw new Error(`carimbo tem que terminar em 0 (o ultimo digito separa o par): ${v}`)
   return v
 })()
+
+/**
+ * `_public` fica com o carimbo terminando em 0 e `_dev` em 1 — o ULTIMO digito
+ * separa o par, mesma forma de `gerar-migration-evolucoes.mjs`.
+ *
+ * PH-249: a primeira versao deste gerador escrevia os dois arquivos com o
+ * MESMO carimbo. O CLI do Supabase usa o prefixo numerico como chave primaria
+ * de `supabase_migrations.schema_migrations`, entao o `db push` aplicou o SQL
+ * dos dois, registrou a versao uma vez e estourou `duplicate key value
+ * violates unique constraint "schema_migrations_pkey"` na segunda — travando
+ * TODO deploy seguinte, de dev e de main, incluindo a PR de promocao. O par ja
+ * emitido nao pode ser renomeado de volta (a versao 20260828140000 esta
+ * registrada com o nome do `_dev`), e por isso aquele par ficou com a ordem
+ * invertida; ver o cabecalho de `20260828140001_missao_cadeia_public.sql`.
+ */
+function nomeDaMigration(schema) {
+  const sufixo = schema === 'public' ? '0' : '1'
+  return `${CARIMBO.slice(0, 13)}${sufixo}_missao_cadeia_${schema}.sql`
+}
 
 // ---------------------------------------------------------------- numeros
 //
@@ -255,7 +276,7 @@ const valores = CADEIAS.flatMap(([, c]) => c)
 function corpo(schema) {
   const q = schema === 'dev' ? 'dev' : 'public'
   const cabecalho = schema === 'dev'
-    ? `-- PH-245 — espelho de ${CARIMBO}_missao_cadeia_public.sql no schema \`dev\`.\n`
+    ? `-- PH-245 — espelho de ${nomeDaMigration('public')} no schema \`dev\`.\n`
       + '-- O raciocinio completo esta na migration irma em `public`.\n'
     : `-- PH-245 — a cadeia de "Tasks & Missoes" vira TABELA, e a RPC passa a LER
 -- em vez de derivar de novo.
@@ -427,6 +448,9 @@ commit;
 `
 }
 
-writeFileSync(p('supabase', 'migrations', `${CARIMBO}_missao_cadeia_public.sql`), corpo('public'), 'utf8')
-writeFileSync(p('supabase', 'migrations', `${CARIMBO}_missao_cadeia_dev.sql`), corpo('dev'), 'utf8')
-console.log(`\nescrito: src/data/generated/missaoCadeia.generated.ts e o par ${CARIMBO}_missao_cadeia_{public,dev}.sql`)
+for (const schema of ['public', 'dev']) {
+  const nome = nomeDaMigration(schema)
+  writeFileSync(p('supabase', 'migrations', nome), corpo(schema), 'utf8')
+  console.log(`-> supabase/migrations/${nome}`)
+}
+console.log('\nescrito tambem: src/data/generated/missaoCadeia.generated.ts')

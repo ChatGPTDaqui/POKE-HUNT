@@ -1,6 +1,25 @@
 -- PH-245 — a cadeia de "Tasks & Missoes" vira TABELA, e a RPC passa a LER
 -- em vez de derivar de novo.
 --
+-- CARIMBO INVERTIDO DE PROPOSITO (PH-249). Em todo par deste repo o `_public`
+-- e N e o `_dev` e N+1; aqui e o contrario, e nao pode ser "arrumado".
+--
+-- O gerador emitiu os DOIS arquivos com o mesmo carimbo (20260828140000), e o
+-- CLI do Supabase usa o prefixo numerico como chave primaria de
+-- `supabase_migrations.schema_migrations`. O `db push` aplicou o SQL dos dois
+-- schemas com sucesso, registrou a versao uma vez (com o nome do `_dev`), e
+-- estourou `duplicate key value violates unique constraint
+-- "schema_migrations_pkey"` ao tentar registrar a segunda. A partir dai TODO
+-- `db push` reprovava — deploy de dev e de main, incluindo a PR de promocao.
+--
+-- Renomear ESTE arquivo pra N+1 e o unico conserto que nao mexe no registro na
+-- mao: o CLI o ve como versao nova e reaplica (o corpo e idempotente —
+-- `create table if not exists`, `delete` + `insert`, `create or replace
+-- function` —, e o `delete from player_missoes_reivindicadas` roda sobre uma
+-- tabela ja vazia). Renomear o `_dev` em vez deste deixaria a versao
+-- 20260828140000 registrada sem arquivo local, que e exatamente o que o gate
+-- `supabase-check` acusa como migration aplicada na mao.
+--
 -- O QUE ESTAVA QUEBRADO: `reivindicar_missao` montava a cadeia com
 -- `row_number() over (order by dex_number)` sobre `public.species`, enquanto o
 -- cliente montava a dele sobre o catalogo de `src/data`. As duas entradas nao
