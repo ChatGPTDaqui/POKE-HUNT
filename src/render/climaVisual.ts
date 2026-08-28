@@ -43,6 +43,11 @@
 // - NAO esconde o POKE. A passagem da frente e translucida e rala de proposito:
 //   o jogador precisa ver a luta acontecendo.
 import { useUiStore } from '@/stores/uiStore'
+import { emPoke } from './escalaDoMundo'
+import {
+  avancarGotas, criarEstadoDeGotas, desenharGotas, povoarGotas,
+  type ConfigDeGota, type EstadoDeGotas,
+} from './gotas'
 
 import type { ClimaTipo } from '@/engine/types'
 
@@ -57,9 +62,9 @@ export interface JanelaDeClima {
 // RECEITAS
 // ---------------------------------------------------------------------------
 
-type Forma = 'risco' | 'cristal' | 'pedra' | 'mota' | 'banco'
+export type Forma = 'risco' | 'cristal' | 'pedra' | 'mota' | 'banco'
 
-interface ReceitaDeClima {
+export interface ReceitaDeClima {
   /** Particulas em tela cheia no desktop. O compacto usa metade. */
   quantidade: number
   cor: string
@@ -111,25 +116,71 @@ interface ReceitaDeClima {
    * que tiram HP — tem que ser o mais evidente, nao o menos.
    */
   rastro?: number
+  /**
+   * Gotas que POUSAM e respingam no chao (PH-232). Ver `gotas.ts`.
+   *
+   * So a chuva pede, e o motivo esta la: sem contato com o solo a
+   * precipitacao flutua em espaco de tela, o olho nao tem contra o que aferir
+   * o tamanho dela, e depois de trinta segundos a tempestade vira papel de
+   * parede. Granizo tambem bateria no chao na vida real, mas ele ja tem
+   * rastro e quina pra se distinguir, e dois climas respingando ao mesmo
+   * tempo no bioma de gelo apagaria a diferenca entre "machuca" e "nao
+   * machuca" — que e a unica coisa que o jogador PRECISA ler ali.
+   */
+  gotas?: { quantidade: number; config: ConfigDeGota }
 }
 
-const RECEITAS: Record<ClimaTipo, ReceitaDeClima> = {
-  // Riscos longos e inclinados, escuros e dessaturados, com relampago raro. A
-  // chuva e o unico clima com evento pontual — e o que impede uma tempestade
-  // de virar papel de parede depois de trinta segundos olhando.
+/**
+ * A chuva que pousa. Convive com os riscos de fundo em vez de substitui-los:
+ * os riscos sao a chuva DISTANTE (que cai fora do que da pra ver) e as gotas
+ * sao a chuva PERTO, que termina no chao pintado. Duas distancias, nao dois
+ * desenhos da mesma coisa.
+ */
+const GOTAS_DE_CHUVA: ConfigDeGota = {
+  cor: '#cfe6f7', corDoRespingo: '#e8f5ff',
+  comprimento: [emPoke(0.2), emPoke(0.45)], espessura: [0.9, 1.8],
+  velocidade: [420, 700], inclinacao: 0.26, espalhamento: 0.05, alpha: 0.62,
+  raioDoRespingo: [2.6, 4.6], vidaDoRespingo: [0.3, 0.48], microgotas: 3, alphaDoRespingo: 0.95,
+  // Nem toda gota respinga: com 1.0 o chao inteiro pisca ao mesmo tempo e o
+  // efeito vira ruido. O resto atravessa a janela e le como "caiu fora do
+  // enquadramento", que e o que acontece de verdade.
+  fracaoQuePousa: 0.55,
+}
+
+// ---------------------------------------------------------------------------
+// A ESCALA DESTAS RECEITAS (PH-232)
+// ---------------------------------------------------------------------------
+// Os corpos sao declarados em `emPoke(fracao)` — fracao da altura de um POKE,
+// ver `escalaDoMundo.ts`. O que havia antes, medido contra a mesma regua:
+//
+//   risco de chuva    ate 58 de comprimento por 5,2 de espessura  = corda
+//   cristal de neve   ate 22 de diametro                          = 55% de um POKE
+//   pedra de granizo  ate 19,2 de diametro                        = 48%
+//   mota de sol       ate 10,4 de diametro                        = 26%
+//
+// O teto de clima e mais folgado que o de ambiente de proposito (18% contra
+// 12%): granizo e areia TIRAM HP, e um evento que mexe no combate tem que ser
+// mais evidente que a decoracao fixa do bioma. O banco de nevoa fica fora do
+// teto porque ele e volume, nao corpo.
+export const RECEITAS: Record<ClimaTipo, ReceitaDeClima> = {
+  // Riscos inclinados, escuros e dessaturados, com relampago raro, MAIS as
+  // gotas que pousam (PH-232). A chuva e o unico clima com evento pontual — e
+  // o que impede uma tempestade de virar papel de parede depois de trinta
+  // segundos olhando.
   chuva: {
-    quantidade: 120, cor: '#cfe6f7', forma: 'risco',
-    raio: [22, 58], velocidade: [520, 900], angulo: Math.PI / 2 + 0.26,
+    quantidade: 55, cor: '#cfe6f7', forma: 'risco',
+    raio: [emPoke(0.18), emPoke(0.4)], velocidade: [480, 780], angulo: Math.PI / 2 + 0.26,
     espalhamento: 0.04, alpha: 0.6, bamboleio: 0,
     filtro: '#12243a', filtroAlpha: 0.28, vinheta: 0.2, relampago: true,
+    gotas: { quantidade: 58, config: GOTAS_DE_CHUVA },
   },
   // Sol nao tem precipitacao: o que da o clima sao os feixes descendo e a poeira
   // suspensa que eles revelam. Por isso a contagem e baixa e o aditivo esta
   // ligado — a mota tem que BRILHAR, nao tapar.
   sol: {
-    quantidade: 26, cor: '#ffe6a8', forma: 'mota',
-    raio: [2.0, 5.2], velocidade: [6, 16], angulo: -Math.PI / 2 + 0.4,
-    espalhamento: 1.1, alpha: 0.55, bamboleio: 12, aditivo: true,
+    quantidade: 48, cor: '#ffe6a8', forma: 'mota',
+    raio: [emPoke(0.018), emPoke(0.045)], velocidade: [6, 16], angulo: -Math.PI / 2 + 0.4,
+    espalhamento: 1.1, alpha: 0.6, bamboleio: 12, aditivo: true,
     filtro: '#ffb347', filtroAlpha: 0.17, vinheta: 0.1, raios: true,
   },
   // Pedra dura, quase vertical e RAPIDA. O contraste alto e proposital: granizo
@@ -137,8 +188,8 @@ const RECEITAS: Record<ClimaTipo, ReceitaDeClima> = {
   // nao machuca e e macia.
   granizo: {
     quantidade: 110, cor: '#f2fdff', forma: 'pedra',
-    raio: [4.6, 9.6], velocidade: [520, 820], angulo: Math.PI / 2 + 0.1,
-    espalhamento: 0.05, alpha: 0.95, bamboleio: 2, rastro: 3.2,
+    raio: [emPoke(0.035), emPoke(0.09)], velocidade: [520, 820], angulo: Math.PI / 2 + 0.1,
+    espalhamento: 0.05, alpha: 0.95, bamboleio: 2, rastro: 4.5, contorno: 'rgba(18,58,92,0.65)',
     filtro: '#7fc6dd', filtroAlpha: 0.22, vinheta: 0.18,
   },
   // Floco grande, lento, com deriva larga. O filtro CLAREIA: neve reflete luz
@@ -146,8 +197,8 @@ const RECEITAS: Record<ClimaTipo, ReceitaDeClima> = {
   // proposito — os dois convivem no bioma de gelo e o jogador precisa
   // distinguir de relance qual dos dois esta tirando o HP dele.
   neve: {
-    quantidade: 80, cor: '#ffffff', forma: 'cristal',
-    raio: [3.4, 11.0], velocidade: [30, 74], angulo: Math.PI / 2 + 0.16,
+    quantidade: 92, cor: '#ffffff', forma: 'cristal',
+    raio: [emPoke(0.032), emPoke(0.09)], velocidade: [30, 74], angulo: Math.PI / 2 + 0.16,
     espalhamento: 0.3, alpha: 0.95, bamboleio: 26, contorno: 'rgba(60,96,130,0.55)',
     filtro: '#dbeeff', filtroAlpha: 0.2, filtroClareia: true, vinheta: 0.1,
   },
@@ -155,17 +206,17 @@ const RECEITAS: Record<ClimaTipo, ReceitaDeClima> = {
   // intensidade sozinha: sem a rajada ela vira um chuveiro lateral constante.
   areia: {
     quantidade: 150, cor: '#f0dcac', forma: 'risco',
-    raio: [40, 120], velocidade: [700, 1250], angulo: 0.1,
-    espalhamento: 0.09, alpha: 0.6, bamboleio: 6,
+    raio: [emPoke(0.25), emPoke(0.65)], velocidade: [700, 1250], angulo: 0.1,
+    espalhamento: 0.09, alpha: 0.62, bamboleio: 6,
     filtro: '#a8763a', filtroAlpha: 0.24, vinheta: 0.16, rajada: true,
   },
   // Bancos enormes, lentissimos e quase transparentes, em varias camadas. A
   // nevoa nao tem particula visivel — ela e VOLUME. Alpha baixo com raio grande
   // e o que produz volume; alpha alto com raio pequeno produz bolinha cinza.
   nevoa: {
-    quantidade: 22, cor: '#cfd6dc', forma: 'banco',
-    raio: [70, 190], velocidade: [5, 16], angulo: 0.06,
-    espalhamento: 0.5, alpha: 0.2, bamboleio: 10,
+    quantidade: 26, cor: '#cfd6dc', forma: 'banco',
+    raio: [emPoke(1.6), emPoke(4.2)], velocidade: [5, 16], angulo: 0.06,
+    espalhamento: 0.5, alpha: 0.18, bamboleio: 10,
     filtro: '#b9c2cb', filtroAlpha: 0.3, filtroClareia: true, vinheta: 0.08,
   },
 }
@@ -221,11 +272,34 @@ let fase = 0
 let proximoRelampago = 0
 /** Segundos restantes do clarao atual. 0 = sem relampago agora. */
 let relampagoAtivo = 0
+/** Gotas que pousam (PH-232). Null pra todo clima que nao seja chuva. */
+let gotas: EstadoDeGotas | null = null
+/**
+ * O gerador local desta camada, VIVO entre quadros.
+ *
+ * Antes do PH-232 a reciclagem (`reciclar`) usava `Math.random` direto,
+ * contrariando o proprio cabecalho do arquivo ("Sorteio local, igual
+ * `ambiente.ts`"). Nao dessincronizava o servidor — nao passa pelo `Rng` do
+ * mundo — mas fazia a camada ser diferente entre sessoes sem motivo, e
+ * `ambiente.test.ts` proibe exatamente isso no arquivo irmao. Guardar o
+ * gerador aqui fecha o furo sem mudar nada do que aparece na tela.
+ */
+let rand: () => number = () => 0.5
 
 /** Teto do passo. Aba em segundo plano devolve delta gigante ao voltar. */
 const DELTA_MAXIMO = 0.5
 /** Quantas particulas passam NA FRENTE das entidades. Poucas, e grandes. */
 const QUANTIDADE_NA_FRENTE = 7
+/**
+ * Teto de respingos vivos ao mesmo tempo.
+ *
+ * Regime medido no papel pra chuva no desktop: 58 gotas, 55% pousando, queda
+ * media de ~0,4s numa janela de ~470 unidades de altura, respingo vivendo
+ * ~0,39s — da algo entre 28 e 32 impactos vivos. 72 e mais que o dobro. O pool
+ * existe pra nao alocar um objeto por impacto a 60 quadros por segundo (ver
+ * `criarEstadoDeGotas`), nao pra racionar.
+ */
+const RESPINGOS_DA_CHUVA = 72
 /** Intervalo entre relampagos, em segundos, [min, max]. */
 const RELAMPAGO_INTERVALO: [number, number] = [7, 18]
 /** Duracao do clarao. Curtissimo — relampago longo lê como bug de render. */
@@ -248,6 +322,25 @@ const NEVE_FARPA_EM = 0.58
 const NEVE_FARPA_TAMANHO = 0.36
 /** Giro do floco, em radianos por segundo, [min, max]. */
 const NEVE_GIRO: [number, number] = [0.25, 0.95]
+
+/**
+ * Semente a partir do NOME do clima (FNV-1a), e nao do comprimento dele.
+ *
+ * A conta anterior era `clima.length * 7919 + 104729`, e ela COLIDE: `chuva`,
+ * `areia` e `nevoa` tem cinco letras, entao os tres partiam da mesma sequencia
+ * de sorteio. O efeito era invisivel (receitas diferentes consomem a sequencia
+ * de jeitos diferentes) e continua cosmetico, mas desde o PH-232 esse mesmo
+ * gerador tambem decide onde cada gota pousa — vale ter uma semente que de
+ * fato distinga os climas, em vez de uma que distinga o tamanho do nome.
+ */
+function semeteDoClima(clima: string): number {
+  let h = 2166136261
+  for (let i = 0; i < clima.length; i++) {
+    h ^= clima.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return h >>> 0
+}
 
 /** LCG local. NAO pode ser o `world.rng` — ver o cabecalho. */
 function sorteioLocal(semente: number): () => number {
@@ -293,7 +386,10 @@ function semearParticula(
 
 function reconstruir(clima: ClimaTipo, janela: JanelaDeClima, compacto: boolean): void {
   const receita = RECEITAS[clima]
-  const r = sorteioLocal(clima.length * 7919 + 104729)
+  // O gerador fica no estado do modulo, e nao local: `reciclar` roda a cada
+  // quadro e precisa dele. Ver `rand`.
+  rand = sorteioLocal(semeteDoClima(clima))
+  const r = rand
   const total = Math.max(1, Math.round(receita.quantidade * (compacto ? 0.5 : 1)))
   particulas = Array.from({ length: total }, () => semearParticula(r, receita, janela, false))
   frente = Array.from(
@@ -303,14 +399,23 @@ function reconstruir(clima: ClimaTipo, janela: JanelaDeClima, compacto: boolean)
   climaAtual = clima
   proximoRelampago = entre(r, RELAMPAGO_INTERVALO)
   relampagoAtivo = 0
+  if (receita.gotas) {
+    gotas = criarEstadoDeGotas(RESPINGOS_DA_CHUVA)
+    povoarGotas(
+      gotas, receita.gotas.config, janela, r,
+      Math.max(1, Math.round(receita.gotas.quantidade * (compacto ? 0.5 : 1))),
+    )
+  } else {
+    gotas = null
+  }
 }
 
 /** Recicla quem saiu da janela, mantendo a densidade constante. */
 function reciclar(p: ParticulaDeClima, janela: JanelaDeClima, folga: number): void {
-  if (p.vy > 0 && p.y - folga > janela.y + janela.h) { p.y = janela.y - folga; p.x = janela.x + Math.random() * janela.w }
-  else if (p.vy < 0 && p.y + folga < janela.y) { p.y = janela.y + janela.h + folga; p.x = janela.x + Math.random() * janela.w }
-  if (p.vx > 0 && p.x - folga > janela.x + janela.w) { p.x = janela.x - folga; p.y = janela.y + Math.random() * janela.h }
-  else if (p.vx < 0 && p.x + folga < janela.x) { p.x = janela.x + janela.w + folga; p.y = janela.y + Math.random() * janela.h }
+  if (p.vy > 0 && p.y - folga > janela.y + janela.h) { p.y = janela.y - folga; p.x = janela.x + rand() * janela.w }
+  else if (p.vy < 0 && p.y + folga < janela.y) { p.y = janela.y + janela.h + folga; p.x = janela.x + rand() * janela.w }
+  if (p.vx > 0 && p.x - folga > janela.x + janela.w) { p.x = janela.x - folga; p.y = janela.y + rand() * janela.h }
+  else if (p.vx < 0 && p.x + folga < janela.x) { p.x = janela.x + janela.w + folga; p.y = janela.y + rand() * janela.h }
 }
 
 function avancar(
@@ -340,7 +445,19 @@ function desenharParticula(ctx: CanvasRenderingContext2D, p: ParticulaDeClima, r
       // queda e a falha mais obvia possivel, e acontece quando se desenha o
       // risco sempre na horizontal.
       const n = Math.hypot(p.vx, p.vy) || 1
-      ctx.lineWidth = Math.max(1, p.raio * 0.09)
+      // Espessura em fracao do COMPRIMENTO, com piso proprio.
+      //
+      // Antes do PH-232 o fator era 0,09 sobre um comprimento de ate 58 — 5,2
+      // unidades de espessura, mais grosso que um grao de poeira e largo o
+      // bastante pra ler como corda. Com o comprimento agora em 7 a 16, o
+      // MESMO fator da 0,9 a 1,4: a conta nunca esteve errada, o comprimento
+      // e que estava.
+      //
+      // O piso de 0,9 nao e enfeite. Medido na bancada com 0,5: no zoom padrao
+      // isso da 0,75px, e a chuva SUMIU por completo sobre a floresta. Risco de
+      // chuva e borrao de luz, nao um objeto — abaixo de ~1,3px de tela ele nao
+      // sobrevive ao antialias.
+      ctx.lineWidth = Math.max(0.9, p.raio * 0.09)
       ctx.beginPath()
       ctx.moveTo(p.x, p.y)
       ctx.lineTo(p.x - (p.vx / n) * p.raio, p.y - (p.vy / n) * p.raio)
@@ -366,6 +483,17 @@ function desenharParticula(ctx: CanvasRenderingContext2D, p: ParticulaDeClima, r
       ctx.lineTo(p.x, p.y + p.raio)
       ctx.lineTo(p.x - p.raio * 0.55, p.y)
       ctx.closePath()
+      // Contorno escuro por baixo, pelo mesmo motivo do floco de neve: pedra
+      // quase branca sobre montanha de gelo (que e branca e azul-clara) some.
+      // Medido na bancada do PH-232: em `ice-mountain` o granizo era
+      // indistinguivel do fundo, e ele e um dos dois climas que TIRAM HP — o
+      // que menos pode ficar invisivel.
+      if (receita.contorno) {
+        ctx.strokeStyle = receita.contorno
+        ctx.lineWidth = Math.max(1, p.raio * 0.45)
+        ctx.stroke()
+        ctx.strokeStyle = receita.cor
+      }
       ctx.fill()
       break
     }
@@ -479,7 +607,7 @@ export function desenharClimaFundo(
   // mais cara das duas. A informacao nao se perde — o chip do HUD nao depende
   // deste ajuste (ver ClimaChip).
   if (!ui.vidaNoCenario || !clima) {
-    if (particulas.length) { particulas = []; frente = []; climaAtual = null }
+    if (particulas.length) { particulas = []; frente = []; climaAtual = null; gotas = null }
     return
   }
 
@@ -517,6 +645,16 @@ export function desenharClimaFundo(
   ctx.lineCap = 'round'
   for (const p of particulas) desenharParticula(ctx, p, receita)
   ctx.restore()
+
+  // Gotas que pousam (PH-232), DEPOIS dos riscos de fundo: elas sao a chuva
+  // perto da camera e o respingo delas mora no chao pintado, entao passam por
+  // cima da chuva distante. Continua tudo atras das entidades — quem desenha
+  // na frente e `desenharClimaFrente`, e respingo de chao ali daria a
+  // impressao de agua batendo no ar na altura do peito do POKE.
+  if (gotas && receita.gotas) {
+    avancarGotas(gotas, receita.gotas.config, janela, delta, rand)
+    desenharGotas(ctx, gotas, receita.gotas.config)
+  }
 }
 
 /**
@@ -589,6 +727,7 @@ export function reiniciarClimaVisual(): void {
   particulas = []
   frente = []
   climaAtual = null
+  gotas = null
   ultimoInstante = 0
   fase = 0
   proximoRelampago = 0
