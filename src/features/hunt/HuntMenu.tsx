@@ -26,10 +26,12 @@ import { unlockMap } from '@/engine/systems/economySystem'
 import { controller } from '@/engine/controller'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { useUiStore } from '@/stores/uiStore'
+import { useWorldStore } from '@/stores/worldStore'
 import { useToastStore } from '@/stores/toastStore'
 import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { TypeChip } from '@/components/shared/TypeChip'
 import { GameButton, GameCard, GameInput, GameSelect, SegmentedTabs, StickyHeader } from '@/components/game/controls'
+import { cn } from '@/lib/utils'
 
 // As abas do menu de hunts. `continent` deixou de ser regiao e virou o grupo
 // de gate (ver data/biomas.ts): as duas primeiras faixas nascem abertas, a
@@ -301,6 +303,16 @@ export function HuntMenu() {
   const [expandedMapId, setExpandedMapId] = useState<string | null>(null)
   const acao = useAcaoPendente()
 
+  // PH-244: qual hunt esta rodando AGORA.
+  //
+  // Vem do `worldStore` (efemero) e nao de `gameState.currentMapId`: aquele e
+  // estado persistido que o servidor zera no fim do flush quando a sessao para
+  // cedo (ver progresso.ts), entao ele pode dizer "nenhuma" com o jogador
+  // parado dentro da hunt. `mapDef` e o que o canvas esta desenhando — se ha
+  // mapa, o jogador esta la.
+  const mapaAtivoId = useWorldStore((s) => s.mapDef?.id ?? null)
+  const mapaAtivo = mapaAtivoId ? MAPS[mapaAtivoId] : null
+
   const continents = useMemo(
     () => [...new Set(Object.values(MAPS).map((m) => m.continent ?? 'faixa1'))],
     [],
@@ -366,6 +378,25 @@ export function HuntMenu() {
             ))}
           </GameSelect>
         </div>
+
+        {/* PH-244: a hunt em andamento, no cabecalho FIXO.
+            O selo no card sozinho nao resolve: o card so aparece se a aba de
+            faixa, a busca e o filtro de elemento deixarem — e o jogador chega
+            aqui justamente pra procurar OUTRA hunt, com os filtros mexidos. A
+            linha aqui responde "onde eu estou" sem depender de nada disso.
+            O botao leva ate o card (mesmo `focusHunt` que a Pokedex usa), senao
+            o aviso diz onde voce esta e nao ajuda a chegar la. */}
+        {mapaAtivo && (
+          <div className="flex flex-wrap items-center gap-[.4em] text-[.8em]">
+            <span className="rounded-[.3em] bg-ok/20 px-[.35em] py-[.05em] text-[.85em] font-bold text-ok">
+              EM CAÇADA
+            </span>
+            <span className="min-w-0 truncate text-n300">{mapaAtivo.name}</span>
+            <GameButton variant="ghost" onClick={() => focusHunt(mapaAtivo)}>
+              Ver na lista
+            </GameButton>
+          </div>
+        )}
       </StickyHeader>
 
       {visibleMaps.length === 0 && (
@@ -392,8 +423,20 @@ export function HuntMenu() {
         const key = `map:${map.id}`
         const pending = acao.isPending(key)
 
+        // PH-244: esta e a hunt em que o jogador esta agora.
+        const ehAtiva = map.id === mapaAtivoId
+
         return (
-          <div key={map.id} className="overflow-hidden rounded-[.7em] border border-n800 bg-n900">
+          <div
+            key={map.id}
+            className={cn(
+              'overflow-hidden rounded-[.7em] border bg-n900',
+              // Borda, e nao so o selo: a borda le de relance na lista rolando,
+              // e o selo responde "por que este esta diferente" quando o olho
+              // para nele. Um canal sozinho obriga a ler cada card.
+              ehAtiva ? 'border-ok' : 'border-n800',
+            )}
+          >
             <div
               onClick={() => setExpandedMapId(expanded ? null : map.id)}
               className="flex cursor-pointer items-center gap-[.5em] px-[.5em] py-[.4em] hover:bg-n800"
@@ -417,6 +460,14 @@ export function HuntMenu() {
                       ★ BOSS
                     </span>
                   )}
+                  {/* PH-244: o segundo canal da hunt ativa. Depois do selo de
+                      boss porque os dois podem coexistir, e "onde eu estou" e
+                      a informacao mais recente das duas. */}
+                  {ehAtiva && (
+                    <span className="ml-[.4em] rounded-[.3em] bg-ok/20 px-[.35em] py-[.05em] align-middle text-[.65em] font-bold text-ok">
+                      EM CAÇADA
+                    </span>
+                  )}
                 </div>
                 {/* A linha de custo/gate so aparece quando ha bloqueio: com a
                     hunt liberada, "Desbloqueado" seria ruido — o proprio botao
@@ -431,16 +482,32 @@ export function HuntMenu() {
                   </div>
                 )}
               </div>
-              <GameButton
-                variant={unlocked ? 'primary' : 'ghost'}
-                disabled={pending || acao.pendingKey != null}
-                onClick={(e) => {
+              {/* PH-244: na hunt ATIVA o botao volta pro campo em vez de
+                  "entrar" de novo.
+                  Nao e so o rotulo: `controller.enterMap` no MESMO mapa abre uma
+                  sessao nova no servidor, remonta o mundo e chama `resetStats`
+                  — ou seja, zera o painel de taxa de farm sem o jogador ter
+                  pedido nada. Um botao "Entrar" ao lado de um selo "EM CAÇADA"
+                  e uma contradicao que convida exatamente a esse clique. */}
+              {ehAtiva ? (
+                <GameButton variant="primary" onClick={(e) => {
                   e.stopPropagation()
-                  void acao.run(key, () => acionarHunt(map, unlocked, continentGated, bloqueioDeBioma))
-                }}
-              >
-                {pending ? 'Entrando...' : unlocked ? 'Entrar' : continentGated || bloqueioDeBioma ? 'Bloqueado' : 'Desbloquear'}
-              </GameButton>
+                  useUiStore.getState().closeScreen()
+                }}>
+                  Voltar ao campo
+                </GameButton>
+              ) : (
+                <GameButton
+                  variant={unlocked ? 'primary' : 'ghost'}
+                  disabled={pending || acao.pendingKey != null}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    void acao.run(key, () => acionarHunt(map, unlocked, continentGated, bloqueioDeBioma))
+                  }}
+                >
+                  {pending ? 'Entrando...' : unlocked ? 'Entrar' : continentGated || bloqueioDeBioma ? 'Bloqueado' : 'Desbloquear'}
+                </GameButton>
+              )}
             </div>
 
             {expanded && (
