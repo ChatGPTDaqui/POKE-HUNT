@@ -12,6 +12,44 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-231. Varredura do INTERVALO desde a 7.13 (a licao que aquela entrada
+  // deixou escrita): a 7.13 cobriu ate a promocao #149, e desde entao a `main`
+  // recebeu as promocoes #156, #159, #167 e #186 — a ultima (27/08 13:50) com
+  // `Supabase deploy` verde, migrations e Edge publicadas. Treze mudancas
+  // player-facing entraram sem nota.
+  //
+  // O que fica de FORA, e por que:
+  //  - SISTEMA DE BOSS/ANDARES (PH-200 a PH-229). Na `main` ele existe so no
+  //    bioma igneo, sem apresentacao visual (PH-228) e sem selo no menu
+  //    (PH-229) — o Otavio esta fechando o resto na `dev`. Meia-feature nao
+  //    entra em nota; ela ganha entrada propria quando a versao completa
+  //    promover.
+  //  - PH-222 (trailing edge do commitAgora) mergeou na `dev` DEPOIS da
+  //    promocao #186 — ainda nao esta em producao.
+  //  - Egress de PostgREST (PH-185/186), camada de VFX acima da HUD (PH-190, e
+  //    o encanamento do voo de ouro do PH-191), internals de flush e boss
+  //    (PH-217 a PH-220), fixes de CI. Nenhum muda o que o jogador ve. Mesma
+  //    regua da 7.11 a 7.13.
+  {
+    version: '7.14',
+    date: '2026-08-27',
+    title: 'Comemoracao nos tres marcos do jogo, o ouro voando ate a carteira, e dois menus novos',
+    highlights: [
+      'SUBIR DE NIVEL, EVOLUIR E ACHAR UM SHINY GANHARAM COMEMORACAO. Os tres marcos do jogo avisavam com a mesma linha de toast que rolava e sumia. Agora nivel comum mostra um chip rapido com os atributos ganhos; nivel com golpe novo, multiplo de 5 ou o 100 mostra um cartao central; evolucao e shiny mostram um cartao grande com antes -> depois. Abates seguidos que sobem varios niveis de uma vez juntam tudo num cartao so (Lv 33 -> 36) em vez de travar a tela repetindo, e a preferencia de menos movimento do sistema e respeitada.',
+      'O OURO E O XP DO ABATE VOAM ATE A CARTEIRA. Cada abate soltava dois textos, verde e dourado, sobre a grama — na mesma faixa estreita onde o numero de dano precisa aparecer. Agora as moedas nascem no POKE derrotado, sobem em leque e voam em arco ate a carteira do trilho, que pulsa na chegada com o valor exato logo abaixo. A informacao passou a chegar no numero que ela muda.',
+      'NOVO MENU: ESPECIALIDADES — MAESTRIA DE ELEMENTOS. Dezoito tipos elementais, cada um com dez niveis: cinco de bonus de dano (+1% por nivel, ate +5%) e cinco de bonus de defesa, trilhas independentes. Cada nivel custa um item do tipo mais ouro, com o preco subindo a cada degrau. O bonus vale no combate, e o progresso somado dos 180 niveis possiveis da um titulo global.',
+      'NOVO MENU: TASKS & MISSOES. Uma cadeia de missoes de abate por tipo elemental — derrotar a especie da posicao N libera a N+1. O progresso vem dos abates que voce ja fez (o mesmo contador do Bestiario, nao ha meta nova pra encher), cada missao reivindicada paga ouro, e fechar a cadeia inteira de um tipo da um bonus.',
+      'VOCE PODE SEGURAR A HUNT NUMA SALA SO. Fechar os 30 abates de uma sala sempre levou pra proxima sozinho. Agora ha um interruptor por hunt: com ele ligado a sala trava em 30/30 e um botao de proximo nivel faz o avanco quando voce quiser. Farm offline de horas de verdade continua avancando sozinho de qualquer jeito.',
+      'A HUD DE BATALHA FICOU LEGIVEL EM CINCO PONTOS. O nome do alvo saia quase apagado sobre a grama e ganhou fundo. As duas porcentagens do trilho agora dizem HP e XP em vez de dois numeros soltos. O nome do POKE parou de truncar quando ha espaco sobrando na linha. As reservas mostram a especie, nao so o nivel, e a reserva desmaiada tem selo KO em vez de depender so da foto acinzentada. Golpes do mesmo tipo elemental ganham uma sigla no canto pra voce distinguir sem abrir a ficha.',
+      'O CABECALHO E O TRILHO DE RESERVAS ENCOSTARAM NO CANTO. Ficavam meio dedo pra dentro da borda, e cada reserva era um card solto com borda propria — seis mini-janelas empilhadas. Agora a coluna cola na borda superior esquerda e as reservas leem como um bloco unico.',
+      'O JOGO AVISA QUANDO SEU POKE PASSOU DO TETO DA HUNT. Um Noctowl de Nivel 33 rodou 4h39min numa hunt de teto Nivel 30 sem mudar de nivel, e nada na tela dizia por que. Agora, ao entrar numa hunt facil demais pro nivel do POKE ativo, um aviso diz que o XP dali pra frente rende pouco.',
+      'O AVISO DE CAPTURA PAROU DE ENTREGAR O RESULTADO ANTES DA POKEBOLA. Capturado! e a captura falhou! apareciam no instante do arremesso, antes de a bola terminar de balancar na tela. Agora a narracao espera a animacao terminar.',
+      'A BARRA DE XP PAROU DE VOLTAR SOZINHA DURANTE A HUNT. O servidor reconfere cada janela de 30 segundos pelo relogio dele, e o corte as vezes fechava um pouco antes do ponto que voce ja tinha visto na tela — a barra parecia regredir sem voce ter perdido nada. Agora a queda so passa quando houve perda real por desmaio.',
+      'SUMIU AQUELE TOAST VERMELHO COM [diag-sala] E UM MONTE DE NUMERO. Era instrumentacao interna que vazou pra producao pela promocao de 26/08 — pro jogador, uma mensagem de erro incompreensivel no meio do jogo.',
+      'O VENTO PASSOU A APARECER NA VEGETACAO. A folha caia numa deriva constante; agora ha rajadas periodicas em que ela acelera e balanca de lado por alguns segundos, como vento passando pela copa.',
+      'O VULCAO GANHOU BRILHO DE LAVA RENTE AO CHAO. Antes so a brasa subia da fonte; agora uma faixa de luz pulsa perto da base da tela nas artes de vulcao e de caverna vulcanica.',
+    ],
+  },
   // PH-166. ENTRADA RETROATIVA — e a unica do arquivo que descreve codigo que JA
   // ESTAVA NO AR quando ela foi escrita. Os cinco itens abaixo subiram na
   // promocao #141 (25/08) e o jogador vinha usando todos sem aviso nenhum.
