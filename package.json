@@ -24,6 +24,7 @@
     "subbiomas:gerar": "node scripts/gerar-subbiomas.mjs",
     "tiers:gerar": "node scripts/gerar-spawn-tiers.mjs",
     "faces:emocao": "node scripts/importar-faces-emocao.mjs",
+    "sprites:topo": "node scripts/gerar-topo-dos-sprites.mjs",
     "especies:importar": "node scripts/importar-especies-novas.mjs",
     "gen3:catalogo": "node scripts/fetch-usum-catalog.js --dex-max=386 --saida=scripts/usum/catalog-gen3.json",
     "gen3:tiers": "node scripts/derive-spawn-tiers-gen3.mjs",

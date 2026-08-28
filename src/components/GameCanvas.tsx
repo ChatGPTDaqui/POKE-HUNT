@@ -15,6 +15,7 @@ import { useEffect, useRef } from 'react'
 import { Renderer } from '@/render/renderer'
 import { desenharVfx, registrarPintor } from '@/render/camadaVfx'
 import { converterRecompensasNovas, pintorDeRecompensa } from '@/render/vooDeRecompensa'
+import { converterDanoNovo, pintorDeDano } from '@/render/pulsoDeDanoRecebido'
 import { useGameLoop } from '@/engine/useGameLoop'
 import { useWorldStore } from '@/stores/worldStore'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -54,6 +55,11 @@ export function GameCanvas() {
     // Pintor do voo de recompensa (PH-191). Registrado uma vez, pro ciclo de
     // vida do canvas — ele mesmo nao desenha nada quando nao ha voo vivo.
     const soltarPintorDeRecompensa = registrarPintor(pintorDeRecompensa)
+    // Borda vermelha de dano recebido (PH-189). Mesmo contrato: registrado uma
+    // vez, no-op nos quadros sem clarao vivo. Registrado DEPOIS da recompensa
+    // pra pintar por cima dela — o alerta de "estou apanhando" nao pode ficar
+    // atras de uma chuva de moedas.
+    const soltarPintorDeDano = registrarPintor(pintorDeDano)
 
     // Bug real encontrado ao vivo (jogo abria o Hospital SEM o POKE em campo
     // sempre que a pagina era recarregada com um save existente): o
@@ -168,6 +174,10 @@ export function GameCanvas() {
       // `null` e nada e lancado.
       converterRecompensasNovas(world.effects, (p) =>
         renderer.mundoParaTela(world.mapDef, world.player, p))
+      // Dano recebido -> borda vermelha na moldura da tela (PH-189). Le os
+      // mesmos `damageNumber` que a placa do PH-131 le; sao canais separados
+      // pro mesmo fato, e por isso nunca discordam.
+      converterDanoNovo(world.effects, world.player?.id ?? null, world.player?.poke.stats.hp ?? 0)
       // DEPOIS do jogo, sempre: a camada de VFX fica acima da HUD e precisa ser
       // o ultimo desenho do quadro. Ela e no-op quando nao ha canvas registrado
       // (Hospital antes do mount, teste sem DOM), entao o call site nao precisa
@@ -188,6 +198,7 @@ export function GameCanvas() {
       canvas.removeEventListener('wheel', handleWheel)
       cancelAnimationFrame(rafId)
       soltarPintorDeRecompensa()
+      soltarPintorDeDano()
       clearInterval(syncInterval)
       useRendererStore.getState().setRenderer(null)
     }

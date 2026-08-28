@@ -13,7 +13,10 @@
 // resultado visual, sem mutar nada do store, e de brinde evita o hazard que
 // a nota original ja mencionava ("dois desenhos no mesmo tick, ex.
 // StrictMode double-invoke, podem corromper a posicao").
-import { drawEntity, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage } from './sprites'
+import {
+  drawEntity, drawHpBar, drawNameLevelTag, drawEffect, drawMapBackground, readyImage,
+  drawMarcaDoAlvo, drawMarcaDoJogador, planejarTextoDeCombate,
+} from './sprites'
 import { desenharAmbiente } from './ambiente'
 import { desenharClimaFundo, desenharClimaFrente, familiaDoClima } from './climaVisual'
 import { CENA_HOSPITAL, ZOOM_DA_CENA, escalaDoPoke } from '@/data/hospital'
@@ -304,22 +307,45 @@ export class Renderer {
     // ambiente porque a chuva passa por cima da folha que cai, nao por baixo.
     desenharClimaFundo(ctx, world.clima?.tipo ?? null, janela)
 
+    // Quem sou eu / em quem estou batendo (PH-189). O id do alvo ja existia no
+    // estado (`player.targetId`, publicado por `combatSystem#updateCombat`) e o
+    // canvas nao usava. So vale com o jogador em pe: sem POKE em campo nao ha
+    // "meu" nem alvo, e uma mira sobrando em cima de um mob leria como ordem.
+    const jogadorVivo = world.player && !world.player.fainted ? world.player : null
+    const idDoAlvo = jogadorVivo?.targetId ?? null
+    // Antes dos corpos: e marca de CHAO, e passar por cima de quem anda nela
+    // leria como efeito de golpe.
+    if (jogadorVivo) drawMarcaDoJogador(ctx, jogadorVivo)
+
     for (const enemy of world.enemies) {
       drawEntity(ctx, enemy)
       if (enemy.poke.hp > 0) {
-        drawHpBar(ctx, enemy)
+        drawHpBar(ctx, enemy, enemy.id === idDoAlvo)
         drawNameLevelTag(ctx, enemy)
       }
     }
 
-    if (world.player && !world.player.fainted) {
-      drawEntity(ctx, world.player)
-      drawHpBar(ctx, world.player)
-      drawNameLevelTag(ctx, world.player)
+    if (jogadorVivo) {
+      drawEntity(ctx, jogadorVivo)
+      drawHpBar(ctx, jogadorVivo, true)
+      drawNameLevelTag(ctx, jogadorVivo)
     }
 
+    // Depois dos corpos: o colchete e uma mira em volta do alvo, e o proprio
+    // POKE o cobriria se viesse antes.
+    if (idDoAlvo) {
+      const alvo = world.enemies.find((e) => e.id === idDoAlvo)
+      if (alvo && alvo.poke.hp > 0) drawMarcaDoAlvo(ctx, alvo)
+    }
+
+    // Segunda passada de layout do texto flutuante (PH-189): a raia que o motor
+    // reserva e por DONO e nao mede texto — ela nao sabe nada de dois POKE
+    // vizinhos escrevendo na mesma coluna de pixel. Aqui, com a largura de
+    // verdade em maos, as caixas que se atropelariam sobem. Ver
+    // `render/textoDeCombate.ts`.
+    const desviosDeTexto = planejarTextoDeCombate(ctx, world, { y: janela.y, h: janela.h })
     for (const effect of world.effects) {
-      drawEffect(ctx, effect, world)
+      drawEffect(ctx, effect, world, desviosDeTexto)
     }
 
     // Clima na FRENTE de tudo (PH-141): a passagem rasante, o filtro de cor, a
