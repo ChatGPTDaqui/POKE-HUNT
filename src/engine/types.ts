@@ -578,6 +578,53 @@ export interface EnemyHazards {
   stickyWeb: boolean
 }
 
+/**
+ * As duas fases do ciclo de LURE (ver engine/systems/lureSystem.ts).
+ *
+ *  - `reunindo`: o jogador esta PUXANDO selvagem — o alvo de movimento dele
+ *    deixa de ser "o inimigo vivo mais proximo" e passa a ser "o inimigo vivo
+ *    mais proximo que ainda NAO esta atras dele".
+ *  - `lutando`: comportamento de sempre (anda no mais proximo e bate).
+ */
+export type FaseDeLure = 'reunindo' | 'lutando'
+
+/**
+ * O estado do LURE neste tick. `world.lure === null` quer dizer "lure nao se
+ * aplica agora" (desligado na config, jogador desmaiado, hospital) — e nesse
+ * caso NADA no movimento muda em relacao ao que o jogo sempre fez.
+ *
+ * EFEMERO, mesma familia de `clima`/`salaCountdownRemaining`: nao atravessa a
+ * reconstrucao de mundo por janela de flush do servidor, e nao precisa — a
+ * reconstrucao devolve inimigos novos, em estado `idle`, entao o ciclo comeca do
+ * zero dos DOIS lados pelo mesmo motivo e nao ha o que sincronizar.
+ *
+ * `reunidos` e REDERIVADO das entidades vivas todo tick em vez de acumulado: um
+ * selvagem que morre ou solta o aggro no meio da reuniao precisa sair da conta,
+ * senao a fase fica esperando um numero que nunca mais fecha.
+ */
+export interface EstadoDeLure {
+  fase: FaseDeLure
+  /** Quantos o jogador pediu (1..4), ja clampeado. */
+  alvo: number
+  /** Quantos selvagens estao com aggro no jogador AGORA. */
+  reunidos: number
+  /**
+   * Segundos que faltam pro tempo-limite da fase `reunindo`. Ele existe pra a
+   * fase NUNCA travar: candidato atras de parede, retardatario que nao chega,
+   * selvagem que morre no meio da reuniao — todos terminam aqui, em vez de
+   * deixar o POKE andando sem bater pra sempre.
+   */
+  tempoRestante: number
+  /**
+   * Pra onde o movimento deve levar o jogador nesta fase. `null` em `lutando`
+   * (quem manda e o movimento normal) e tambem em `reunindo` quando o jogador
+   * esta SEGURANDO a posicao pra um retardatario alcancar.
+   */
+  destino: Point | null
+  /** Segurando a posicao porque um dos reunidos esta perto de soltar o aggro. */
+  esperandoRetardatario: boolean
+}
+
 export interface WorldState {
   mapDef: MapDef | null
   player: PlayerEntity | null
@@ -730,6 +777,11 @@ export interface WorldState {
    *  - com servidor: vem pronto no flush, junto da sala autoritativa.
    */
   climaAmbiente: Clima | null
+  /**
+   * Estado do LURE neste tick — ver `EstadoDeLure`. `null` = lure inativo, e ai
+   * o movimento e exatamente o de sempre.
+   */
+  lure: EstadoDeLure | null
   // Ver `EnemyHazards` acima. Ausente = nenhuma armadilha plantada ainda.
   // MESMO DESVIO que `clima`: nao atravessa reconstrucao de mundo (fora do
   // `ProgressoDaSessao` que `sala`/`sequenceIndex` usam pra sobreviver ao

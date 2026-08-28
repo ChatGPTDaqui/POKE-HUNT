@@ -44,6 +44,7 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     seed,
     counters: { entity: 1, effect: 1, pendingHit: 1 },
     pessimista: false,
+    lure: null,
     clima: null,
     climaAmbiente: null,
     especialidadeNiveis: null,

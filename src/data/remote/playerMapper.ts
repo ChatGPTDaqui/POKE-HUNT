@@ -6,7 +6,7 @@
 // aparecer), entao ficam separadas do I/O para poderem ser conferidas e
 // testadas sozinhas.
 import type { Database } from '@/lib/database.types'
-import type { GameStateData, AutoPotRule, AutoCatchConfig, AutoCatchRule, PerfStats, TrainerInfo, PokedexKillCount } from '@/stores/gameStateStore'
+import type { GameStateData, AutoPotRule, AutoCatchConfig, AutoCatchRule, LureConfig, PerfStats, TrainerInfo, PokedexKillCount } from '@/stores/gameStateStore'
 import type { ElementType } from '@/data/generated/types'
 import { especialidadeNiveisDefault, type EspecialidadeNiveis } from '@/data/especialidades'
 import { SPECIES, computeStatsAtLevel, type PokeInstance, type StatBlock } from '@/data/pokes'
@@ -245,6 +245,27 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     // do merge-com-default que `autoToggles` faz — ausencia ja E o estado
     // certo aqui.
     autoStatusConfig: fromJson<Record<string, boolean>>(p.auto_status_config, defaults.autoStatusConfig),
+    // LURE (PH-235). Duas coisas fora do padrao aqui, e as duas sao propositais:
+    //
+    // 1. MERGE com o default, pelo mesmo motivo do `autoToggles`/`autoSellConfig`
+    //    acima: linha gravada antes desta coluna existir volta sem as chaves, e
+    //    `quantidade: undefined` cairia dentro do clamp do motor como NaN.
+    //
+    // 2. Acesso por INDEXACAO (`p['auto_lure_config']`) e nao `p.auto_lure_config`.
+    //    `database.types.ts` e gerado do schema REMOTO, e a coluna desta leva so
+    //    chega la quando o CI aplicar a migration no merge em `dev` — antes disso
+    //    o tipo `Row` nao tem a chave e o acesso direto nao compila. O gate
+    //    `supabase-check.yml` compara o arquivo gerado com o commitado, entao
+    //    tambem nao da pra "adiantar" o campo nos tipos a mao. Depois do
+    //    `npm run db:types` que segue o deploy, esta linha continua valendo igual
+    //    — nao ha nada pra desfazer aqui, so o comentario pra apagar.
+    lureConfig: {
+      ...defaults.lureConfig,
+      ...fromJson<Partial<LureConfig>>(
+        (p as Record<string, Json>)['auto_lure_config'] ?? null,
+        {},
+      ),
+    },
     perfStats: fromJson<PerfStats>(p.perf_stats, defaults.perfStats),
     trainer: { name: p.trainer_name, level: p.trainer_level, exp: p.trainer_exp } satisfies TrainerInfo,
     pokedexKills,
@@ -277,6 +298,14 @@ export function gameStateToPlayerRow(userId: string, s: GameStateData): Tables['
     auto_catch_config: toJson(s.autoCatchConfig),
     auto_sell_config: toJson(s.autoSellConfig),
     auto_status_config: toJson(s.autoStatusConfig),
+    // `auto_lure_config` NAO entra aqui de proposito. Quem escreve a config de
+    // lure e a RPC `configurar_auto` (a tela), e a simulacao nunca a muda — ao
+    // contrario de `auto_toggles`/`auto_pot_rules`, que estao nesta lista desde
+    // antes por serem parte do snapshot que o flush reescreve. Incluir tambem
+    // significaria mandar a coluna em TODO flush, o que, enquanto a migration
+    // desta leva nao estiver aplicada no ambiente, faria o PostgREST recusar a
+    // gravacao inteira por coluna desconhecida — trocaria "config de lure nao
+    // salva" por "progresso nao salva".
     perf_stats: toJson(s.perfStats),
     bioma_progress: toJson(s.biomaProgress),
   }

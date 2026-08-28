@@ -310,6 +310,24 @@ export function updateMovement(world: WorldState, dt: number): void {
     // Meio da pose Shoot/Charge: segura a posicao — um POKE nunca pode
     // andar e usar um golpe no mesmo instante.
     player.state = 'engaged'
+  } else if (world.lure?.fase === 'reunindo') {
+    // LURE, fase de reuniao (engine/systems/lureSystem.ts). O jogador NAO para
+    // pra lutar: ele atravessa o raio de aggro do proximo selvagem pra puxa-lo.
+    //
+    // Este ramo so troca PRA ONDE o jogador anda — nao mexe em combate nenhum.
+    // `updateCombat` decide lutar pelo estado DOS INIMIGOS (`engagedEnemies`),
+    // entao o que alcancar o jogador durante a reuniao e enfrentado
+    // normalmente, e nenhum turno e desperdicado.
+    //
+    // `destino` nulo aqui significa "segura a posicao" (esperando retardatario,
+    // ver `esperandoRetardatario`) — e nao "sem alvo": cair no wander ali levaria
+    // o jogador pra longe justamente de quem esta tentando alcanca-lo.
+    const lure = world.lure
+    player.state = lure.destino ? 'chase' : 'idle'
+    player.wanderTarget = null
+    if (lure.destino && !imobilizadoPorStatus(player)) {
+      moveToward(player, lure.destino.x, lure.destino.y, player.moveSpeed, dt, mapDef)
+    }
   } else {
     // Um shiny em qualquer lugar da hunt sobrepoe tudo mais — o jogador
     // troca de foco pra ele imediatamente, mesmo no meio de outra luta.
