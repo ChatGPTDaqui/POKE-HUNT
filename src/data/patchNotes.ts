@@ -12,6 +12,43 @@ export interface PatchNoteEntry {
 }
 
 export const PATCH_NOTES: PatchNoteEntry[] = [
+  // PH-234. Entrada da promocao de 28/08, escrita ANTES de promover — o gate da
+  // regra e conferir o INTERVALO desde a nota anterior, e nao a issue que
+  // motivou a promocao.
+  //
+  // Duas das tres coisas aqui foram EXCLUIDAS DE PROPOSITO da 7.14, e o
+  // comentario dela diz por que:
+  //  - o sistema de boss estava meia-feature ("na `main` ele existe so no bioma
+  //    igneo, sem apresentacao visual e sem selo no menu"). A regra manda
+  //    esperar a versao completa e dar entrada propria. E esta.
+  //  - o PH-222 tinha mergeado na `dev` DEPOIS da promocao #186, entao ainda
+  //    nao estava em producao. Agora esta.
+  //
+  // O que fica de FORA, e por que:
+  //  - PH-233 (vento compartilhado da cena). Esta em PR ABERTA e nao entra
+  //    nesta promocao. E o caso mais facil de errar aqui: foi escrito no mesmo
+  //    dia que o PH-232 e parece parte dele — nao e. O PH-232 promoveu, o
+  //    PH-233 nao.
+  //  - Internals de flush e de boss (PH-217 a PH-220), enforcement do gate no
+  //    servidor (PH-227, que o jogador so percebe pela mensagem do menu, ja
+  //    coberta abaixo), ordem canonica como constante (PH-223) e wiring de
+  //    `bioma_progress` (PH-224). Encanamento: o que o jogador ve deles ja esta
+  //    nas linhas do boss.
+  //  - Refactor, CI e a bancada de efeitos (`scripts/harness/`). Mesma regua da
+  //    7.11 a 7.14.
+  {
+    version: '7.15',
+    date: '2026-08-28',
+    title: 'O boss saiu do vulcao e agora guarda os doze biomas — e o cenario parou de nevar polen',
+    highlights: [
+      'O BOSS AGORA EXISTE NOS DOZE BIOMAS, NAO SO NO IGNEO. Ele tinha nascido em um bioma so, como piloto, e ficou la. Agora cada um dos doze tem o seu, na ordem canonica do mapa.',
+      'E VENCER O BOSS E O QUE ABRE O PROXIMO BIOMA. O jogo passou a ter uma linha pra seguir: a area seguinte fica trancada ate voce derrubar o dono da atual. O menu de hunt diz quem esta trancado e o que falta — antes o botao simplesmente nao levava a lugar nenhum, sem explicar.',
+      'O BOSS TAMBEM PASSOU A SE APRESENTAR. Ele entrava em cena como qualquer outro encontro, e o unico jeito de saber que aquilo era o boss era a barra de HP nao acabar nunca. Agora a entrada dele tem apresentacao propria, e no menu ele tem selo.',
+      'OS EFEITOS DO CENARIO GANHARAM ESCALA. Folha, poeira, faisca, neve e areia estavam grandes demais pro tamanho de um POKE — a poeira de caverna chegava a um quarto da altura de um Pokemon — e quase todo bioma mostrava a mesma bolinha em outra cor. Agora cada um tem tamanho e formato proprios: a folha tomba, a faisca risca, a cinza urbana e uma fibra dobrada, o reflexo da agua e uma cruz de luz.',
+      'E A CHUVA MOLHA O CHAO. As gotas caem, batem e respingam, com microgotas que quicam em volta. Selva e caverna ganharam gotejo proprio, pingando sempre do mesmo ponto, do jeito que agua parada na copa e em teto de gruta pinga.',
+      'O NIVEL PAROU DE SUMIR NO F5. Subir de nivel e recarregar a pagina logo em seguida podia devolver o POKE no nivel anterior: a ultima gravacao nao chegava a sair. Agora ela sai.',
+    ],
+  },
   // PH-231. Varredura do INTERVALO desde a 7.13 (a licao que aquela entrada
   // deixou escrita): a 7.13 cobriu ate a promocao #149, e desde entao a `main`
   // recebeu as promocoes #156, #159, #167 e #186 — a ultima (27/08 13:50) com
