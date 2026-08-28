@@ -21,6 +21,8 @@ import { presetDaArte } from './ambiente'
 // de build, funciona igual no Vitest, e nao muda nada do que o app pode
 // importar.
 import fonteBruta from './ambiente.ts?raw'
+import fonteDoClima from './climaVisual.ts?raw'
+import fonteDasGotas from './gotas.ts?raw'
 
 describe('ambiente: toda arte de hunt tem vida (PH-96)', () => {
   // `COLISAO_POR_ARTE` e a lista canonica de artes jogaveis: e a chave por
@@ -83,5 +85,47 @@ describe('ambiente nao encosta na simulacao (PH-96)', () => {
     // manter fora do projeto. O gerador local resolve os dois.
     expect(fonte).not.toMatch(/Math\.random/)
     expect(fonte).toMatch(/function sorteioLocal/)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// A MESMA REGRA NAS CAMADAS IRMAS (PH-232)
+// ---------------------------------------------------------------------------
+// A regra de "sorteio local, nunca `Math.random`" estava escrita no cabecalho
+// de `climaVisual.ts` desde o PH-141 ("Sorteio local, igual `ambiente.ts`") e
+// nao era verdade: a reciclagem por borda chamava `Math.random` direto. Passou
+// despercebida por seis issues porque o guard so olhava um arquivo.
+//
+// Nao dessincronizava o servidor — nao passa pelo `Rng` do mundo — mas fazia a
+// camada ser diferente entre sessoes e entre jogadores sem motivo, que e
+// exatamente o que `determinismo.test.ts` existe pra manter fora do projeto.
+//
+// `gotas.ts` entra na mesma varredura por ser novo e por ser compartilhado
+// pelas duas camadas: um `Math.random` ali contaminaria as duas de uma vez.
+describe('as camadas irmas seguem a mesma regra (PH-232)', () => {
+  const semComentario = (bruto: string) =>
+    bruto.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1')
+
+  const arquivos: Array<[string, string]> = [
+    ['climaVisual.ts', semComentario(fonteDoClima)],
+    ['gotas.ts', semComentario(fonteDasGotas)],
+  ]
+
+  it.each(arquivos)('%s nao usa Math.random', (_nome, fonte) => {
+    expect(fonte).not.toMatch(/Math\.random/)
+  })
+
+  it.each(arquivos)('%s nao toca o rng do mundo', (_nome, fonte) => {
+    expect(fonte).not.toMatch(/world\.rng|useWorldStore|sortear\(/)
+  })
+
+  it('gotas.ts nao importa nada do motor', () => {
+    // `climaVisual.ts` fica de fora deste caso, e a excecao e legitima: ele
+    // importa o TIPO `ClimaTipo` de `@/engine/types`, que e a unica forma de
+    // ele saber qual clima desenhar. Tipo nao vira codigo e nao pode ler
+    // estado. `gotas.ts` nao tem nem essa necessidade — ele so recebe numeros.
+    const imports = [...arquivos[1][1].matchAll(/from\s+'([^']+)'/g)].map((m) => m[1])
+    const proibidos = imports.filter((i) => i.startsWith('@/') || i.includes('worldStore'))
+    expect(proibidos, `imports proibidos: ${proibidos.join(', ')}`).toEqual([])
   })
 })
