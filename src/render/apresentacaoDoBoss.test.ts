@@ -1,8 +1,9 @@
-// PH-228: boss (EnemyEntity.isBoss) tinha ZERO pista visual distinta de mob
-// comum — motor correto (spawn normal suspenso), so faltava a apresentacao.
-// `LEGENDARY_SPECIES_IDS` (Modo Pesadelo) ja tinha barra de HP grande; este
-// arquivo tranca que o boss por sala/andar (isBoss) ganha o MESMO tratamento
-// mais 3 sinais novos: sprite maior, tag "BOSS" no nome, aura pulsante.
+// PH-228/236: protetor (EnemyEntity.isProtetor) tinha ZERO pista visual
+// distinta de mob comum — motor correto (spawn normal suspenso), so faltava
+// a apresentacao. `LEGENDARY_SPECIES_IDS` (Modo Pesadelo) ja tinha barra de
+// HP grande; este arquivo tranca que o protetor por sala/andar (isProtetor)
+// ganha o MESMO tratamento mais 3 sinais novos: sprite maior, tag "GUARDIAN"/
+// "LORD" no nome (conforme o tipo, PH-236), aura pulsante.
 import { describe, expect, it } from 'vitest'
 
 import { drawEntity, drawHpBar, drawNameLevelTag } from './sprites'
@@ -35,42 +36,59 @@ function ctxEspiao() {
   return { ctx: alvo as unknown as CanvasRenderingContext2D, escritas, retangulos, auraDesenhada: () => auraDesenhada }
 }
 
-function entidade(isBoss: boolean): WorldEntity {
+function entidade(isProtetor: boolean): WorldEntity {
   return {
     id: 'e1', x: 100, y: 100, radius: 16, battleAnim: null, facing: 'down',
-    isBoss,
+    isProtetor,
     poke: { speciesId: 'charizard', level: 30, isShiny: false, hp: 50, stats: { hp: 100 }, ivs: {} },
   } as unknown as WorldEntity
 }
 
-describe('tag "BOSS" no nome (PH-228)', () => {
-  it('boss ganha a tag, mob comum nao', () => {
+describe('tag "GUARDIAN"/"LORD" no nome (PH-228/236)', () => {
+  it('protetor ganha a tag, mob comum nao', () => {
     const { ctx, escritas } = ctxEspiao()
-    drawNameLevelTag(ctx, entidade(true))
-    expect(escritas.some((t) => t.includes('BOSS'))).toBe(true)
+    drawNameLevelTag(ctx, entidade(true), 'guardian')
+    expect(escritas.some((t) => t.includes('GUARDIAN'))).toBe(true)
 
-    const semBoss = ctxEspiao()
-    drawNameLevelTag(semBoss.ctx, entidade(false))
-    expect(semBoss.escritas.some((t) => t.includes('BOSS'))).toBe(false)
+    const semProtetor = ctxEspiao()
+    drawNameLevelTag(semProtetor.ctx, entidade(false), 'guardian')
+    expect(semProtetor.escritas.some((t) => t.includes('GUARDIAN') || t.includes('LORD'))).toBe(false)
+  })
+
+  it('tipo lord mostra LORD, tipo guardian (ou tipo ausente) mostra GUARDIAN', () => {
+    const doLord = ctxEspiao()
+    drawNameLevelTag(doLord.ctx, entidade(true), 'lord')
+    expect(doLord.escritas.some((t) => t.includes('LORD'))).toBe(true)
+    expect(doLord.escritas.some((t) => t.includes('GUARDIAN'))).toBe(false)
+
+    const doGuardian = ctxEspiao()
+    drawNameLevelTag(doGuardian.ctx, entidade(true), 'guardian')
+    expect(doGuardian.escritas.some((t) => t.includes('GUARDIAN'))).toBe(true)
+
+    // Sem tipo (nao deveria acontecer em produção com isProtetor=true, mas
+    // e a rede de seguranca): cai no fallback GUARDIAN, nunca undefined na tela.
+    const semTipo = ctxEspiao()
+    drawNameLevelTag(semTipo.ctx, entidade(true))
+    expect(semTipo.escritas.some((t) => t.includes('GUARDIAN'))).toBe(true)
   })
 })
 
-describe('barra de HP maior pro boss (PH-228)', () => {
-  it('largura da barra do boss e maior que a do mob comum', () => {
-    const doBoss = ctxEspiao()
-    drawHpBar(doBoss.ctx, entidade(true))
+describe('barra de HP maior pro protetor (PH-228)', () => {
+  it('largura da barra do protetor e maior que a do mob comum', () => {
+    const doProtetor = ctxEspiao()
+    drawHpBar(doProtetor.ctx, entidade(true))
     const doMob = ctxEspiao()
     drawHpBar(doMob.ctx, entidade(false))
 
-    expect(doBoss.retangulos[0].w).toBeGreaterThan(doMob.retangulos[0].w)
+    expect(doProtetor.retangulos[0].w).toBeGreaterThan(doMob.retangulos[0].w)
   })
 })
 
-describe('aura pulsante de boss (PH-228)', () => {
-  it('boss desenha aura, mob comum nao', () => {
-    const doBoss = ctxEspiao()
-    drawEntity(doBoss.ctx, entidade(true))
-    expect(doBoss.auraDesenhada()).toBe(true)
+describe('aura pulsante de protetor (PH-228)', () => {
+  it('protetor desenha aura, mob comum nao', () => {
+    const doProtetor = ctxEspiao()
+    drawEntity(doProtetor.ctx, entidade(true))
+    expect(doProtetor.auraDesenhada()).toBe(true)
 
     const doMob = ctxEspiao()
     drawEntity(doMob.ctx, entidade(false))
