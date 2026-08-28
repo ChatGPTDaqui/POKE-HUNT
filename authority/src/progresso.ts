@@ -7,7 +7,7 @@ import {
   OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
   solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, ABATES_POR_SALA,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
-  type ClimaTipo, type BossPendente,
+  type ClimaTipo, type ProtetorPendente,
 } from '#engine'
 import {
   ErroHttp, selecionarTudo, selecionar, atualizar, atualizarRetornando, inserir, apagar, chamarRpc, type Config,
@@ -113,13 +113,17 @@ export interface LinhaSessao {
   sala_chave: string | null
   sala_abates: number | string
   ciclos: number | string
-  // Boss pendente da sala atual (PH-201/202/204). `boss_uid` nulo == sem boss
-  // ativo (sala nao pede, ou ja foi resolvido). Mesma familia do `sala_*`: o
-  // mundo e reconstruido a cada janela de flush, mas o boss NAO pode ser
-  // re-sorteado — `createPokeInstance` rola shiny/trait/nature mesmo com IV e
-  // raridade fixos, entao um boss recriado sem estes campos teria aparencia e
-  // stats diferentes a cada ~30s, e o RNG do servidor divergiria do cliente
-  // (que sorteou o boss uma vez so). Ver `bossDaLinha`/`colunasDoBoss`.
+  // Protetor pendente da sala atual (PH-201/202/204/236). Colunas `boss_*`
+  // mantidas com o nome antigo de proposito — sao as colunas REAIS de
+  // `game_sessions`; renomear so aqui quebraria toda leitura/escrita ate a
+  // migration do PH-241 (tabela `sala_protetor`) rodar. `boss_uid` nulo ==
+  // sem protetor ativo (sala nao pede, ou ja foi resolvido). Mesma familia
+  // do `sala_*`: o mundo e reconstruido a cada janela de flush, mas o
+  // protetor NAO pode ser re-sorteado — `createPokeInstance` rola
+  // shiny/trait/nature mesmo com IV e raridade fixos, entao um protetor
+  // recriado sem estes campos teria aparencia e stats diferentes a cada
+  // ~30s, e o RNG do servidor divergiria do cliente (que sorteou o protetor
+  // uma vez so). Ver `protetorDaLinha`/`colunasDoProtetor`.
   boss_uid: string | null
   boss_species_id: string | null
   boss_encounter_id: string | null
@@ -138,14 +142,15 @@ export interface LinhaSessao {
 }
 
 /**
- * PH-217: reconstroi o `BossPendente` da linha da sessao pra passar ao
- * `buildMapWorld`, ou `null` quando nao ha boss pendente (`boss_uid` nulo).
+ * PH-217/236: reconstroi o `ProtetorPendente` da linha da sessao pra passar
+ * ao `buildMapWorld`, ou `null` quando nao ha protetor pendente (`boss_uid`
+ * nulo — coluna mantida com o nome antigo, ver nota em `LinhaSessao`).
  *
- * Espelho exato de `colunasDoBoss` — o que uma grava a outra le. Os `Number()`
- * cobrem o PostgREST devolver `numeric`/`int8` como string, igual ao resto de
- * `LinhaSessao`.
+ * Espelho exato de `colunasDoProtetor` — o que uma grava a outra le. Os
+ * `Number()` cobrem o PostgREST devolver `numeric`/`int8` como string, igual
+ * ao resto de `LinhaSessao`.
  */
-export function bossDaLinha(s: LinhaSessao): BossPendente | null {
+export function protetorDaLinha(s: LinhaSessao): ProtetorPendente | null {
   if (s.boss_uid == null) return null
   return {
     uid: s.boss_uid,
@@ -160,20 +165,21 @@ export function bossDaLinha(s: LinhaSessao): BossPendente | null {
       defEsp: Number(s.boss_iv_def_esp ?? 0),
       speed: Number(s.boss_iv_speed ?? 0),
     },
-    rarity: (s.boss_rarity ?? 'comum') as BossPendente['rarity'],
+    rarity: (s.boss_rarity ?? 'comum') as ProtetorPendente['rarity'],
     isShiny: Boolean(s.boss_is_shiny),
-    nature: (s.boss_nature ?? undefined) as BossPendente['nature'],
+    nature: (s.boss_nature ?? undefined) as ProtetorPendente['nature'],
     trait: s.boss_trait ?? undefined,
     hpAtual: Number(s.boss_hp_atual ?? 0),
   }
 }
 
 /**
- * PH-217: as 15 colunas `boss_*` do `game_sessions` pra gravar no flush — todas
- * do `bossPendente` vivo, ou todas `null` quando o boss ja foi resolvido
- * (morto/capturado) e a sala liberou o avanco.
+ * PH-217/236: as 15 colunas `boss_*` do `game_sessions` pra gravar no flush
+ * (nome de coluna mantido, ver nota em `LinhaSessao`) — todas do
+ * `protetorPendente` vivo, ou todas `null` quando o protetor ja foi
+ * resolvido (morto/capturado) e a sala liberou o avanco.
  */
-export function colunasDoBoss(bp: BossPendente | null): Record<string, unknown> {
+export function colunasDoProtetor(bp: ProtetorPendente | null): Record<string, unknown> {
   return {
     boss_uid: bp?.uid ?? null,
     boss_species_id: bp?.speciesId ?? null,
@@ -1071,11 +1077,12 @@ async function simularSessao(
             ciclos: Number(sessao.ciclos ?? 0),
           }
         : null,
-      // PH-217: boss vivo da sala, recriado FIEL (zero RNG) em vez de sorteado
-      // de novo. Sem isto, `buildMapWorld` recebia `undefined` e `bossDaSala`
-      // ainda pedia boss -> sorteava um novo a cada janela, e o RNG do servidor
-      // saia de sincronia com o do cliente a partir da 2a janela.
-      bossPendente: bossDaLinha(sessao),
+      // PH-217/236: protetor vivo da sala, recriado FIEL (zero RNG) em vez
+      // de sorteado de novo. Sem isto, `buildMapWorld` recebia `undefined` e
+      // `protetorDaSala` ainda pedia protetor -> sorteava um novo a cada
+      // janela, e o RNG do servidor saia de sincronia com o do cliente a
+      // partir da 2a janela.
+      protetorPendente: protetorDaLinha(sessao),
     },
     estado.especialidades,
   )
@@ -1221,9 +1228,10 @@ async function simularSessao(
     sala_chave: world.sala?.chave ?? null,
     sala_abates: world.sala?.abates ?? 0,
     ciclos: world.sala?.ciclos ?? 0,
-    // PH-217: boss vivo persistido pra proxima janela recriar sem re-sortear;
-    // tudo `null` quando o boss foi resolvido nesta janela e a sala liberou.
-    ...colunasDoBoss(world.bossPendente),
+    // PH-217/236: protetor vivo persistido pra proxima janela recriar sem
+    // re-sortear; tudo `null` quando o protetor foi resolvido nesta janela
+    // e a sala liberou.
+    ...colunasDoProtetor(world.protetorPendente),
   })
 
   return {

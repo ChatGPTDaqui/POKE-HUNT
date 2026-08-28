@@ -19,7 +19,7 @@ import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
 import { buildMapWorld, stepWorld, handleEnemyDefeated } from '../simulation'
 import {
-  registrarAbate, garantirTransicaoDeQuotaFechada, solicitarAvancoDeSala, bossDaSala,
+  registrarAbate, garantirTransicaoDeQuotaFechada, solicitarAvancoDeSala, protetorDaSala,
 } from './salaSystem'
 import { ABATES_POR_SALA } from '@/data/biomas'
 import { useGameStateStore } from '@/stores/gameStateStore'
@@ -40,17 +40,18 @@ function fecharQuota(world: WorldState, opts?: { manualAdvance?: boolean }) {
 }
 
 /**
- * PH-225: sala boss-habilitada (todo bioma agora) nao arma a transicao no
- * proprio abate — `registrarAbate` se recusa de proposito ate o boss ser
- * resolvido. Mesmo padrao de `salas.test.ts#resolverBossSeHouver`.
+ * PH-225/236: sala com protetor habilitado (todo bioma agora) nao arma a
+ * transicao no proprio abate — `registrarAbate` se recusa de proposito ate
+ * o protetor ser resolvido. Mesmo padrao de
+ * `salas.test.ts#resolverProtetorSeHouver`.
  */
-function resolverBossSeHouver(world: WorldState) {
-  if (world.sala!.abates < ABATES_POR_SALA || !bossDaSala(world.sala)) return
+function resolverProtetorSeHouver(world: WorldState) {
+  if (world.sala!.abates < ABATES_POR_SALA || !protetorDaSala(world.sala)) return
   const gameState = useGameStateStore.getState()
-  if (!world.bossPendente) stepWorld(world, 0.1, gameState, { silent: true }) // nasce o boss
-  const boss = world.enemies.find((e) => e.isBoss)
-  if (boss) handleEnemyDefeated(world, boss, gameState, { silent: true })
-  world.enemies = world.enemies.filter((e) => !e.isBoss)
+  if (!world.protetorPendente) stepWorld(world, 0.1, gameState, { silent: true }) // nasce o protetor
+  const protetor = world.enemies.find((e) => e.isProtetor)
+  if (protetor) handleEnemyDefeated(world, protetor, gameState, { silent: true })
+  world.enemies = world.enemies.filter((e) => !e.isProtetor)
 }
 
 describe('avanco manual de sala (PH-177/181)', () => {
@@ -61,10 +62,11 @@ describe('avanco manual de sala (PH-177/181)', () => {
   it('registrarAbate: manualAdvance ausente/false avanca sozinho (comportamento atual preservado)', () => {
     const world = mundo(10)
     const evento = fecharQuota(world)
-    // PH-225: sala boss-habilitada nao arma no proprio abate — so depois de
-    // resolver o boss que ele faz nascer (ver salaSystem.ts#registrarAbate).
+    // PH-225: sala com protetor habilitado nao arma no proprio abate — so
+    // depois de resolver o protetor que ele faz nascer (ver
+    // salaSystem.ts#registrarAbate).
     expect(evento.avancou).toBe(false)
-    resolverBossSeHouver(world)
+    resolverProtetorSeHouver(world)
     expect(world.salaCountdownRemaining).not.toBeNull()
     expect(world.salaPendente).not.toBeNull()
   })
@@ -136,14 +138,15 @@ describe('avanco manual de sala (PH-177/181)', () => {
     fecharQuota(world, { manualAdvance: true })
     expect(world.salaCountdownRemaining).toBeNull()
 
-    // PH-225: sala boss-habilitada — o primeiro tick so faz o boss nascer
-    // (`offline` nao pula essa parte, so a espera de autoridade/manual
-    // advance mais abaixo em garantirTransicaoDeQuotaFechada). Resolve o
-    // boss antes de checar se a transicao arma.
+    // PH-225: sala com protetor habilitado — o primeiro tick so faz o
+    // protetor nascer (`offline` nao pula essa parte, so a espera de
+    // autoridade/manual advance mais abaixo em
+    // garantirTransicaoDeQuotaFechada). Resolve o protetor antes de checar
+    // se a transicao arma.
     stepWorld(world, 0.1, useGameStateStore.getState(), { silent: true, offline: true })
-    const boss = world.enemies.find((e) => e.isBoss)
-    if (boss) handleEnemyDefeated(world, boss, useGameStateStore.getState(), { silent: true })
-    world.enemies = world.enemies.filter((e) => !e.isBoss)
+    const protetor = world.enemies.find((e) => e.isProtetor)
+    if (protetor) handleEnemyDefeated(world, protetor, useGameStateStore.getState(), { silent: true })
+    world.enemies = world.enemies.filter((e) => !e.isProtetor)
 
     expect(world.salaCountdownRemaining).not.toBeNull()
     expect(world.salaPendente).not.toBeNull()

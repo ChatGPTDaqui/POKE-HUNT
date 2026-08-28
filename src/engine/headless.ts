@@ -44,7 +44,7 @@ export {
   MAX_ACTIVE_ABILITIES, activeAbilitiesPadrao, ehGolpeAoeDeNivel50, golpesUtilizaveis,
 } from '@/data/activeAbilities'
 
-export type { WorldState, WorldCounters, SalaAtiva, ClimaTipo, BossPendente } from './types'
+export type { WorldState, WorldCounters, SalaAtiva, ClimaTipo, ProtetorPendente } from './types'
 
 // Regras de economia e progressao usadas pelas ACOES do jogador (comprar,
 // vender, desbloquear, evoluir). O servidor chama exatamente estas — nao ha uma
