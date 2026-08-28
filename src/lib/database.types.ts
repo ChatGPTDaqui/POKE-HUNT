@@ -1189,6 +1189,7 @@ export type Database = {
         Row: {
           active_team_index: number
           auto_catch_config: Json
+          auto_lure_config: Json
           auto_pot_rules: Json
           auto_sell_config: Json
           auto_status_config: Json
@@ -1210,6 +1211,7 @@ export type Database = {
         Insert: {
           active_team_index?: number
           auto_catch_config?: Json
+          auto_lure_config?: Json
           auto_pot_rules?: Json
           auto_sell_config?: Json
           auto_status_config?: Json
@@ -1231,6 +1233,7 @@ export type Database = {
         Update: {
           active_team_index?: number
           auto_catch_config?: Json
+          auto_lure_config?: Json
           auto_pot_rules?: Json
           auto_sell_config?: Json
           auto_status_config?: Json
@@ -3317,6 +3320,7 @@ export type Database = {
         Row: {
           active_team_index: number
           auto_catch_config: Json
+          auto_lure_config: Json
           auto_pot_rules: Json
           auto_sell_config: Json
           auto_status_config: Json
@@ -3338,6 +3342,7 @@ export type Database = {
         Insert: {
           active_team_index?: number
           auto_catch_config?: Json
+          auto_lure_config?: Json
           auto_pot_rules?: Json
           auto_sell_config?: Json
           auto_status_config?: Json
@@ -3359,6 +3364,7 @@ export type Database = {
         Update: {
           active_team_index?: number
           auto_catch_config?: Json
+          auto_lure_config?: Json
           auto_pot_rules?: Json
           auto_sell_config?: Json
           auto_status_config?: Json
