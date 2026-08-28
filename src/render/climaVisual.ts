@@ -295,7 +295,7 @@ const QUANTIDADE_NA_FRENTE = 7
  *
  * Regime medido no papel pra chuva no desktop: 58 gotas, 55% pousando, queda
  * media de ~0,4s numa janela de ~470 unidades de altura, respingo vivendo
- * ~0,36s — da algo entre 25 e 30 impactos vivos. 72 e ~2,5x isso. O pool
+ * ~0,39s — da algo entre 28 e 32 impactos vivos. 72 e mais que o dobro. O pool
  * existe pra nao alocar um objeto por impacto a 60 quadros por segundo (ver
  * `criarEstadoDeGotas`), nao pra racionar.
  */

@@ -162,7 +162,7 @@ describe('a chuva pousa e respinga (PH-232)', () => {
         porRespingo.set(chave(a), lista)
       }
     }
-    // Vidas curtas (0,28 a 0,44s) contra quadros de 0,1s: um respingo aparece
+    // Vidas curtas (0,30 a 0,48s) contra quadros de 0,1s: um respingo aparece
     // em 3 ou 4 quadros. Quem aparece em um so nao tem o que comparar.
     const comHistoria = [...porRespingo.values()].filter((r) => r.length >= 3)
     expect(comHistoria.length, 'nenhum respingo durou o bastante pra medir').toBeGreaterThan(3)
@@ -172,7 +172,7 @@ describe('a chuva pousa e respinga (PH-232)', () => {
       expect(cresceu, `um respingo nao abriu: ${raios.map((r) => r.toFixed(1)).join(' -> ')}`).toBe(true)
     }
     // E some: o total de quadros em que um respingo aparece nao pode passar da
-    // vida maxima (0,44s = 5 quadros de 0,1s, com folga de arredondamento).
+    // vida maxima (0,48s = 5 quadros de 0,1s, com folga de arredondamento).
     const maisLongo = Math.max(...comHistoria.map((r) => r.length))
     expect(maisLongo, 'um respingo ficou plantado na tela').toBeLessThanOrEqual(6)
   })
