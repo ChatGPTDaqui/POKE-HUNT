@@ -31,6 +31,8 @@
     "gen3:arte": "node scripts/conferir-arte-gen3.mjs",
     "anims:conferir": "node scripts/conferir-animacoes-pmd.mjs",
     "evolucoes:migration": "node scripts/gerar-migration-evolucoes.mjs",
+    "missoes:gerar": "node scripts/gerar-cadeia-de-missoes.mjs",
+    "missoes:relatorio": "node scripts/gerar-cadeia-de-missoes.mjs --relatorio",
     "db:wipe": "node scripts/wipe-todos-os-saves.js",
     "conta:teste": "node scripts/conta-de-teste.js",
     "conta:criar": "node scripts/conta-de-teste.js --criar",
