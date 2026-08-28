@@ -86,8 +86,9 @@ function sessao(): LinhaSessao {
     sala_chave: null,
     sala_abates: 0,
     ciclos: 0,
-    // PH-217: LinhaSessao ganhou as 15 colunas boss_* depois deste arquivo
-    // existir — sem boss pendente em nenhum destes testes de claim.
+    // PH-217/236: LinhaSessao ganhou as 15 colunas boss_* (nome de coluna
+    // mantido, ver nota em progresso.ts) depois deste arquivo existir — sem
+    // protetor pendente em nenhum destes testes de claim.
     boss_uid: null,
     boss_species_id: null,
     boss_encounter_id: null,
