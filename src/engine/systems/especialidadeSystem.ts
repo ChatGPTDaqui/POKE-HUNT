@@ -16,7 +16,7 @@ export function subirNivelEspecialidade(
   trilha: EspecialidadeTrilha,
 ): EconomyResult {
   const nivelAtual = gameState.especialidades[tipo][trilha]
-  const custo = custoDoProximoNivel(nivelAtual)
+  const custo = custoDoProximoNivel(tipo, nivelAtual)
   if (!custo) return { success: false, reason: 'nivel_maximo' }
 
   const stoneId = stoneItemId(tipo)

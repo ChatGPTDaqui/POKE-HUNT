@@ -31,6 +31,7 @@
     "gen3:arte": "node scripts/conferir-arte-gen3.mjs",
     "anims:conferir": "node scripts/conferir-animacoes-pmd.mjs",
     "evolucoes:migration": "node scripts/gerar-migration-evolucoes.mjs",
+    "custo:especialidade": "vite build --config vite.custo-especialidade.config.ts && node scripts/.gerado/gerar-custo-de-especialidade.mjs",
     "db:wipe": "node scripts/wipe-todos-os-saves.js",
     "conta:teste": "node scripts/conta-de-teste.js",
     "conta:criar": "node scripts/conta-de-teste.js --criar",
