@@ -46,6 +46,12 @@
 -- `hall_da_fama` nao cobre — a linha da conquista ser apagada e recriada (fix de
 -- dado, reset parcial, rotina futura). Sem ele, isso reemitiria o presente.
 --
+-- O PRECO DO `AFTER INSERT`, dito aqui pra nao ser descoberto em producao: ele
+-- nao alcanca quem JA tinha a linha. Quem venceu o Lance antes desta feature
+-- existir nao recebe por este caminho — sao 3 jogadores em `public` (0 em `dev`)
+-- na data desta migration. Eles entram pela 20260828233000, que chama a MESMA
+-- funcao de concessao daqui e por isso herda o mesmo marcador.
+--
 -- =========================================================================
 -- O QUE NAO MUDA
 -- =========================================================================
@@ -125,29 +131,34 @@ grant select, insert on public.recompensa_concedida to service_role;
 --
 -- Se esse trio for reafinado, muda AQUI e em nenhum outro lugar: o cliente le a
 -- receita da mensagem, nao a repete.
-create or replace function public._recompensa_do_hall_da_fama()
-returns trigger
+--
+-- FUNCAO SEPARADA DO TRIGGER, e nao o corpo inline nele, porque ela tem DOIS
+-- chamadores: o trigger (vitoria nova) e a migration retroativa
+-- 20260828233000 (quem venceu antes desta feature existir). Escrever a carta
+-- duas vezes daria duas receitas pra manter em sincronia — exatamente a
+-- divergencia que a PH-245 pagou em producao.
+--
+-- Devolve `true` quando de fato concedeu. O chamador retroativo usa isso pra
+-- CONTAR; o trigger ignora, porque ele nao tem o que fazer com a resposta.
+create or replace function public._conceder_eevee_do_lance(p_user_id uuid)
+returns boolean
 language plpgsql
 security definer
 set search_path = public
 as $$
 begin
-  if new.conquista <> 'boss_lance' then
-    return new;
-  end if;
-
   insert into public.recompensa_concedida (user_id, chave)
-  values (new.user_id, 'eevee_do_lance')
+  values (p_user_id, 'eevee_do_lance')
   on conflict do nothing;
   -- `found` e falso quando o ON CONFLICT engoliu o insert: ja foi concedido
   -- antes, e sair aqui e o que impede a segunda carta.
   if not found then
-    return new;
+    return false;
   end if;
 
   insert into public.mail_messages (para_id, de_id, de_nome, tipo, assunto, corpo, anexo_poke)
   values (
-    new.user_id,
+    p_user_id,
     -- `de_id` NULO e o remetente do sistema: nao ha jogador por tras disso, e
     -- apontar pra um usuario real faria a carta parecer mandada por alguem.
     -- Mesma decisao de 20260809140000.
@@ -168,6 +179,28 @@ begin
     )
   );
 
+  return true;
+end;
+$$;
+
+-- Helper interno: nenhum papel do cliente executa isto. Um grant aqui seria uma
+-- rota direta pra se auto-conceder o presente, sem passar por conquista nenhuma.
+revoke all on function public._conceder_eevee_do_lance(uuid) from public;
+revoke execute on function public._conceder_eevee_do_lance(uuid) from anon;
+revoke execute on function public._conceder_eevee_do_lance(uuid) from authenticated;
+
+create or replace function public._recompensa_do_hall_da_fama()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.conquista <> 'boss_lance' then
+    return new;
+  end if;
+
+  perform public._conceder_eevee_do_lance(new.user_id);
   return new;
 end;
 $$;

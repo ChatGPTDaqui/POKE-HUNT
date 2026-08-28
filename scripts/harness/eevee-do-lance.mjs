@@ -27,6 +27,13 @@
 // — e o marcador e justamente a trava que a issue pediu. Apagar e recriar e o
 // unico jeito de fazer o trigger disparar de novo de verdade.
 //
+// Esse mesmo caso 3 e o que cobre a CONCESSAO RETROATIVA (20260828233000). A
+// migration dos veteranos e um `DO` de uma vez so, entao nao ha o que chamar
+// duas vezes aqui — mas ela chama exatamente a mesma
+// `_conceder_eevee_do_lance`, e a garantia de que ela nao concede em dobro e
+// justamente o marcador que o caso 3 exercita. Provado ali, vale pros dois
+// caminhos.
+//
 // SO A CONTA CANONICA DE TESTE. As credenciais saem de
 // `CONTA_TESTE_EMAIL`/`CONTA_TESTE_SENHA` do `.env` raiz (ver
 // scripts/conta-de-teste.js). A bancada MEXE no correio e na equipe da conta —

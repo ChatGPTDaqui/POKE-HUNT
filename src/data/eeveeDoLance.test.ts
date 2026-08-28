@@ -24,6 +24,8 @@ function migration(sufixo: string): string {
 
 const PUBLICO = migration('20260828230000_eevee_do_lance_public.sql')
 const DEV = migration('20260828230001_eevee_do_lance_dev.sql')
+const RETROATIVO_PUBLICO = migration('20260828233000_eevee_retroativo_public.sql')
+const RETROATIVO_DEV = migration('20260828233001_eevee_retroativo_dev.sql')
 
 /** Sem comentario e sem espaco duplicado — o que o Postgres de fato le. */
 function semComentario(sql: string): string {
@@ -35,6 +37,7 @@ function semComentario(sql: string): string {
 }
 
 const CORPO = { public: semComentario(PUBLICO), dev: semComentario(DEV) }
+const RETRO = { public: semComentario(RETROATIVO_PUBLICO), dev: semComentario(RETROATIVO_DEV) }
 
 describe('o glob enxergou o par de migrations (PH-164)', () => {
   it('os dois arquivos existem e nao estao vazios', () => {
@@ -69,7 +72,24 @@ describe.each(['public', 'dev'] as const)('invariantes da concessao em %s', (sch
     // segunda linha, o insert engolido seguiria direto pro `mail_messages`.
     expect(sql).toContain(`insert into ${s}.recompensa_concedida (user_id, chave)`)
     expect(sql).toContain('on conflict do nothing')
-    expect(sql).toMatch(/if not found then\s+return new;/)
+    expect(sql).toMatch(/if not found then return false;/)
+  })
+
+  it('a concessao mora numa funcao propria, com os dois chamadores em mente', () => {
+    // Trigger e migration retroativa chamam a MESMA funcao. Duas copias da
+    // receita divergiriam no dia em que so uma fosse reafinada, e o veterano
+    // receberia um Eevee diferente do de quem venceu depois.
+    expect(sql).toContain(`create or replace function ${s}._conceder_eevee_do_lance(p_user_id uuid)`)
+    expect(sql).toContain(`perform ${s}._conceder_eevee_do_lance(new.user_id)`)
+  })
+
+  it('a funcao de concessao nao e executavel por nenhum papel do cliente', () => {
+    // Um grant aqui seria rota direta pra se auto-conceder o presente, sem
+    // passar por conquista nenhuma. Ela e SECURITY DEFINER: o grant e a UNICA
+    // coisa que separa "helper interno" de "RPC publica".
+    expect(sql).toContain(`revoke execute on function ${s}._conceder_eevee_do_lance(uuid) from authenticated`)
+    expect(sql).toContain(`revoke execute on function ${s}._conceder_eevee_do_lance(uuid) from anon`)
+    expect(sql).not.toMatch(/grant execute on function \w+\._conceder_eevee_do_lance/)
   })
 
   it('o marcador tem chave primaria composta, e ninguem ganha insert nele', () => {
@@ -146,6 +166,44 @@ describe('a receita do presente (PH-164)', () => {
   })
 })
 
+describe.each(['public', 'dev'] as const)('concessao retroativa aos veteranos em %s', (schema) => {
+  const sql = RETRO[schema]
+  const s = schema === 'public' ? 'public' : 'dev'
+
+  it('varre quem ja tem a conquista — o trigger AFTER INSERT nunca alcanca esses', () => {
+    expect(sql).toContain(`from ${s}.hall_da_fama h`)
+    expect(sql).toContain("where h.conquista = 'boss_lance'")
+  })
+
+  it('chama a MESMA funcao de concessao, e nao uma segunda copia da carta', () => {
+    // A prova de que nao ha receita duplicada: a migration retroativa nao pode
+    // conter `insert into ... mail_messages` nenhum.
+    expect(sql).toContain(`${s}._conceder_eevee_do_lance(v_user_id)`)
+    expect(sql).not.toContain('mail_messages')
+    expect(sql).not.toContain('anexo_poke')
+  })
+
+  it('a idempotencia vem do marcador, nao de um `where not exists` escrito aqui', () => {
+    // Migration de dado que roda duas vezes e duplica linha e bug, nao
+    // migration. Aqui quem segura e o `on conflict do nothing` de dentro da
+    // funcao — por isso NAO ha uma segunda trava improvisada neste arquivo.
+    expect(sql).not.toContain('recompensa_concedida')
+    expect(sql).toContain('if ' + `${s}._conceder_eevee_do_lance(v_user_id) then`)
+  })
+
+  it('linha orfa no Hall nao aborta a migration inteira', () => {
+    // `recompensa_concedida.user_id` referencia `players`. Uma conquista de
+    // conta apagada estouraria a FK e travaria a fila de deploy de todo mundo
+    // por causa de um jogador que nem existe mais.
+    expect(sql).toContain(`exists (select 1 from ${s}.players p where p.user_id = h.user_id)`)
+  })
+
+  it('o RAISE usa % sozinho — `%s` deixaria o "s" literal na mensagem', () => {
+    expect(sql).toContain('raise notice')
+    expect(sql).not.toMatch(/raise notice[^;]*%s/)
+  })
+})
+
 describe('simetria do par public/dev (PH-164)', () => {
   it('o dev e o public com o schema trocado, e nada mais', () => {
     // Divergencia entre os dois e o modo de falha classico do repo: o bug
@@ -157,6 +215,18 @@ describe('simetria do par public/dev (PH-164)', () => {
       .split('set search_path = dev, public').join('SEARCH_PATH')
       .split('set search_path = public').join('SEARCH_PATH')
     expect(normalizar(DEV, 'dev')).toBe(normalizar(PUBLICO, 'public'))
+    expect(normalizar(RETROATIVO_DEV, 'dev')).toBe(normalizar(RETROATIVO_PUBLICO, 'public'))
+  })
+
+  it('os dois pares tem carimbo N / N+1, e nenhum deles colide', () => {
+    // `carimboDeMigration.test.ts` ja varre o diretorio inteiro; isto ancora o
+    // par DESTA feature, que e onde a ordem importa: a retroativa (233000)
+    // chama uma funcao que a 230000 cria, entao ela TEM que rodar depois.
+    // `migration()` ja localiza os quatro pelo nome do arquivo — o que falta
+    // travar e a DEPENDENCIA entre os pares, que so o carimbo garante.
+    expect(RETROATIVO_DEV).toContain('espelho de 20260828233000_eevee_retroativo_public.sql')
+    expect(PUBLICO).toContain('20260828233000')
+    expect(Number('20260828233000')).toBeGreaterThan(Number('20260828230001'))
   })
 
   it('as funcoes de dev enxergam public no search_path, como as que ja existem', () => {
