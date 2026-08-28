@@ -18,7 +18,7 @@
 // ultimo bit — posicao diverge, instante de engajamento diverge, kill diverge.
 // Um comparador acusaria jogador honesto. E re-simular pra conferir custa a
 // MESMA CPU que simular; se vai gastar, gaste sendo a autoridade.
-import { SPECIES, createPokeInstance, rollIvsDoBoss, type PokeInstance } from '@/data/pokes'
+import { SPECIES, createPokeInstance, rollIvsDoProtetor, type PokeInstance } from '@/data/pokes'
 import { mapDefParaSala, spawnPointParaSala, spawnInimigoParaSala, mapWalkRadius, isCellBlocked, nearestOpenPoint, type MapDef } from '@/data/maps'
 import { getEncounter } from '@/data/enemies'
 import { getItem } from '@/data/items'
@@ -313,7 +313,7 @@ function criarEntidadeDoProtetor(
   const encounter = getEncounter(encounterId)
   if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
   const level = tipo === 'lord' ? mapDef.levelRange[1] : (ctx.janela?.[1] ?? encounter.maxLevel)
-  const ivs = rollIvsDoBoss(rng)
+  const ivs = rollIvsDoProtetor(rng)
   const poke = createPokeInstance(rng, encounter.speciesId, level, { ivs })
   const enemy = createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId })
   enemy.isProtetor = true
