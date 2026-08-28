@@ -55775,14 +55775,7 @@ function simulateWorldSeconds({ world, gameState, seconds, stepSeconds, stepFn, 
 	return summary;
 }
 //#endregion
-//#region src/data/regions.ts
-var DEX_RE = /Nº\s*(\d+)/;
-Object.fromEntries(Object.entries(SPECIES_DATA).map(([id, species]) => {
-	const match = species.description.match(DEX_RE);
-	if (!match) throw new Error(`Especie "${id}" sem numero de Pokedex na descricao ("${species.description}") — sem ele nao da pra dizer se ela e de Kanto ou de Johto.`);
-	return [id, Number(match[1])];
-}));
-Object.keys(TYPE_COLORS);
+//#region src/data/missaoChave.ts
 function chaveDaMissao(tipo, speciesId) {
 	return `${tipo}:${speciesId}`;
 }
