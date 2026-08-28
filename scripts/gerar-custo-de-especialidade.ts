@@ -48,14 +48,32 @@ const RAIZ = dirname(dirname(dirname(fileURLToPath(import.meta.url))))
 const p = (...t: string[]) => join(RAIZ, ...t)
 
 const SO_RELATORIO = process.argv.includes('--relatorio')
+// O carimbo PEDIDO. Os arquivos nao usam ele cru — ver `nomeDaMigration`.
 const CARIMBO = (() => {
   if (SO_RELATORIO) return null
   const a = process.argv.find((x) => x.startsWith('--carimbo='))
   if (!a) throw new Error('passe --carimbo=YYYYMMDDHHMMSS (ou --relatorio)')
   const v = a.slice('--carimbo='.length)
   if (!/^\d{14}$/.test(v)) throw new Error(`carimbo invalido: ${v}`)
+  if (!v.endsWith('0')) throw new Error(`carimbo tem que terminar em 0 (o ultimo digito separa o par): ${v}`)
   return v
 })()
+
+/**
+ * `_public` fica com o carimbo terminando em 0 e `_dev` em 1 — o ULTIMO digito
+ * separa o par, mesma forma de `gerar-migration-evolucoes.mjs`.
+ *
+ * PH-249: escrever os dois arquivos com o MESMO carimbo trava a fila de deploy
+ * inteira. O CLI do Supabase usa o prefixo numerico como chave primaria de
+ * `supabase_migrations.schema_migrations`, entao o `db push` aplica o SQL dos
+ * dois, registra a versao uma vez e estoura `duplicate key value violates
+ * unique constraint "schema_migrations_pkey"` na segunda — e a partir dali
+ * TODO deploy reprova, de dev e de main. Aconteceu de verdade com o par de
+ * PH-245 em 28/08.
+ */
+function nomeDaMigration(schema: 'public' | 'dev') {
+  return `${CARIMBO!.slice(0, 13)}${schema === 'public' ? '0' : '1'}_custo_especialidade_${schema}.sql`
+}
 
 /**
  * Quantos abates devem bastar pra fechar as DUAS trilhas de um tipo, farmando
@@ -164,7 +182,7 @@ const casos = TIPOS.map((t) => `    when '${t}' then array[${CUSTOS[t].join(', '
 function corpo(schema: 'public' | 'dev') {
   const q = schema
   const cabecalho = schema === 'dev'
-    ? `-- PH-246 — espelho de ${CARIMBO}_custo_especialidade_public.sql no schema dev.\n`
+    ? `-- PH-246 — espelho de ${nomeDaMigration('public')} no schema dev.\n`
       + '-- O raciocinio completo esta na migration irma em public.\n'
     : `-- PH-246 — o custo em Stone da especialidade passa a escalar com a OFERTA
 -- de Stone de cada tipo.
@@ -278,6 +296,9 @@ commit;
 `
 }
 
-writeFileSync(p('supabase', 'migrations', `${CARIMBO}_custo_especialidade_public.sql`), corpo('public'), 'utf8')
-writeFileSync(p('supabase', 'migrations', `${CARIMBO}_custo_especialidade_dev.sql`), corpo('dev'), 'utf8')
-console.log(`\nescrito: src/data/generated/custoEspecialidade.generated.ts e o par ${CARIMBO}_custo_especialidade_{public,dev}.sql`)
+for (const schema of ['public', 'dev'] as const) {
+  const nome = nomeDaMigration(schema)
+  writeFileSync(p('supabase', 'migrations', nome), corpo(schema), 'utf8')
+  console.log(`-> supabase/migrations/${nome}`)
+}
+console.log('\nescrito tambem: src/data/generated/custoEspecialidade.generated.ts')
