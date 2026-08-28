@@ -60,6 +60,10 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     get autoCatchRules() { return s.autoCatchRules },
     get autoSellConfig() { return s.autoSellConfig },
     get autoStatusConfig() { return s.autoStatusConfig },
+    // Lido pela simulacao TODO tick (engine/systems/lureSystem.ts): e a config
+    // que decide pra onde o jogador anda. Sem este getter o resim do servidor
+    // mataria 1 a 1 enquanto o cliente mostra o grupo inteiro.
+    get lureConfig() { return s.lureConfig },
     get perfStats() { return s.perfStats },
     get trainer() { return s.trainer },
     get pokedexKills() { return s.pokedexKills },
@@ -203,6 +207,15 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     removeAutoPotRule: (index) => { s.autoPotRules.splice(index, 1) },
     setAutoCatchConfig: (patch) => { s.autoCatchConfig = { ...s.autoCatchConfig, ...patch } },
     setAutoSellConfig: (patch) => { s.autoSellConfig = { ...s.autoSellConfig, ...patch } },
+    // A simulacao nunca chama (quem configura lure e a tela, via `configurar_auto`),
+    // mas o tipo exige — e o clamp e repetido aqui de proposito: um stub que
+    // gravasse fora da faixa seria uma diferenca de comportamento entre client e
+    // servidor esperando pra ser descoberta.
+    setLureConfig: (patch) => {
+      const bruta = patch.quantidade ?? s.lureConfig.quantidade
+      const quantidade = Math.max(1, Math.min(4, Math.round(bruta) || 1))
+      s.lureConfig = { ...s.lureConfig, ...patch, quantidade }
+    },
     addAutoCatchRule: (rule: AutoCatchRule) => { s.autoCatchRules.push(rule) },
     updateAutoCatchRule: (index, patch) => {
       if (s.autoCatchRules[index]) s.autoCatchRules[index] = { ...s.autoCatchRules[index], ...patch }

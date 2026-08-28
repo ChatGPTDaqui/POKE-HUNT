@@ -53599,9 +53599,9 @@ function updateCombat(world, dt, opts = {}) {
 		defeatedEnemyIds,
 		playerJustFainted
 	};
-	if (player.state !== "engaged" && player.entradaProcessada) player.entradaProcessada = false;
 	for (const enemy of enemies) if (enemy.state !== "engaged" && enemy.entradaProcessada) enemy.entradaProcessada = false;
 	const engagedEnemies = enemies.filter((e) => !isDead(e) && e.state === "engaged" && e.targetId === player.id);
+	if (engagedEnemies.length === 0 && player.entradaProcessada) player.entradaProcessada = false;
 	player.targetId = engagedEnemies[0]?.id ?? null;
 	if (engagedEnemies.length > 0) {
 		const primaryTarget = engagedEnemies[0];
@@ -53829,7 +53829,12 @@ function updateMovement(world, dt) {
 	const mapRadius = mapWalkRadius(mapDef) - WANDER_MARGIN;
 	if (player.fainted) player.state = "dead";
 	else if (player.attackAnimTimer > 0) player.state = "engaged";
-	else {
+	else if (world.lure?.fase === "reunindo") {
+		const lure = world.lure;
+		player.state = lure.destino ? "chase" : "idle";
+		player.wanderTarget = null;
+		if (lure.destino && !imobilizadoPorStatus(player)) moveToward(player, lure.destino.x, lure.destino.y, player.moveSpeed, dt, mapDef);
+	} else {
 		const targetEnemy = findNearestAliveShiny(player, enemies) || findNearestAliveEnemy(player, enemies);
 		if (targetEnemy) {
 			const engageRange = engageRangeFor(player, targetEnemy);
@@ -53882,6 +53887,176 @@ function updateMovement(world, dt) {
 			} else wanderStep(world.rng, enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef);
 		}
 	}
+}
+//#endregion
+//#region src/stores/gameStateDefaults.ts
+var STARTING_ITEMS = {
+	poke_ball: 500,
+	potion: 500,
+	revive: 50
+};
+var DEFAULT_AUTO_POT_RULES = [{
+	hpPercent: 70,
+	itemId: "potion"
+}];
+var DEFAULT_AUTO_CATCH_CONFIG = {
+	ballId: "poke_ball",
+	catchShinyEnabled: true,
+	shinyBallId: "great_ball"
+};
+var DEFAULT_AUTO_SELL_CONFIG = {
+	ligado: false,
+	raridades: []
+};
+var DEFAULT_LURE_CONFIG = {
+	ligado: false,
+	quantidade: 2
+};
+function defaultUnlockedMaps() {
+	return Object.values(MAPS).filter((map) => !map.unlockCost).map((map) => map.id);
+}
+function defaultGameStateData() {
+	return {
+		team: [],
+		activeIndex: 0,
+		bagPokes: [],
+		items: { ...STARTING_ITEMS },
+		lockedItems: {},
+		wallet: {
+			gold: 1e3,
+			diamonds: 0
+		},
+		unlockedMaps: defaultUnlockedMaps(),
+		currentMapId: null,
+		autoToggles: {
+			autoPot: true,
+			autoCatch: false,
+			autoRevive: false,
+			autoStatus: true,
+			avancoManualDeSala: false
+		},
+		autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
+		autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
+		autoCatchRules: [],
+		autoSellConfig: {
+			...DEFAULT_AUTO_SELL_CONFIG,
+			raridades: []
+		},
+		autoStatusConfig: {},
+		lureConfig: { ...DEFAULT_LURE_CONFIG },
+		perfStats: {
+			gold: 0,
+			xp: 0,
+			mobs: 0,
+			shinys: 0,
+			since: Date.now()
+		},
+		trainer: {
+			name: "Treinador",
+			level: 1,
+			exp: 0
+		},
+		pokedexKills: {},
+		unlockedContinents: [...FAIXAS_INICIAIS],
+		missoesReivindicadas: {},
+		especialidades: especialidadeNiveisDefault(),
+		biomaProgress: biomaProgressDefault()
+	};
+}
+/**
+* Fracao da coleira (`enemy.leashRadius`) a partir da qual o jogador SEGURA a
+* posicao esperando o retardatario.
+*
+* Sem isso a reuniao se desfaz pela retaguarda exatamente quando esta quase
+* fechando: puxar o 3o/4o selvagem leva o jogador longe do 1o, e passar de
+* `leashRadius` (2,2x o aggro, ~385px) faz o bicho desistir e voltar pro spawn.
+* O jogador chegaria no ultimo candidato com a conta no mesmo lugar de antes.
+*
+* 0,8 e nao 1,0 porque a checagem roda uma vez por tick e o selvagem tambem se
+* move: no limite exato ele solta o aggro no mesmo frame em que a espera
+* comecaria.
+*/
+var LURE_FRACAO_DA_COLEIRA = .8;
+/** Este selvagem esta com aggro NO JOGADOR agora? */
+function estaReunido(enemy, playerId) {
+	if (isDead(enemy)) return false;
+	if (enemy.targetId !== playerId) return false;
+	return enemy.state === "chase" || enemy.state === "engaged";
+}
+/**
+* O selvagem vivo mais proximo que ainda NAO esta atras do jogador — o proximo
+* a ser puxado.
+*
+* Mais proximo, e nao "o que fecha o grupo mais rapido": o custo de puxar e a
+* distancia percorrida, e qualquer heuristica mais esperta que isso precisaria
+* prever pra onde o wander dos outros vai levar, o que este motor nao sabe.
+*/
+function proximoCandidato(player, enemies) {
+	let melhor = null;
+	let melhorDist = Infinity;
+	for (const enemy of enemies) {
+		if (isDead(enemy) || estaReunido(enemy, player.id)) continue;
+		const dist = distanceTo(player, enemy);
+		if (dist < melhorDist) {
+			melhorDist = dist;
+			melhor = enemy;
+		}
+	}
+	return melhor;
+}
+/** Ha shiny vivo em campo? */
+function temShinyVivo(enemies) {
+	return enemies.some((e) => !isDead(e) && e.poke.isShiny);
+}
+/**
+* Recalcula `world.lure` pro tick atual. Roda ANTES de `updateMovement`, que e
+* quem consome `destino`.
+*
+* Sai por `world.lure = null` (lure inativo, movimento e o de sempre) em todos
+* os casos em que reunir nao faz sentido:
+*  - config desligada;
+*  - sem jogador/mapa (Hospital);
+*  - jogador desmaiado — quem esta no chao nao puxa nada, e a troca de POKE
+*    seguinte precisa comecar o ciclo do zero;
+*  - `passiveEnemies` (boneco de treino): ele nunca revida, entao reunir seria
+*    so andar a mais pelo mesmo dano.
+*/
+function atualizarLure(world, gameState, dt) {
+	const { player, enemies, mapDef } = world;
+	const config = gameState.lureConfig;
+	if (!player || !mapDef || !config?.ligado || player.fainted || mapDef.passiveEnemies) {
+		world.lure = null;
+		return;
+	}
+	const alvo = Math.max(1, Math.min(4, Math.round(config.quantidade) || 1));
+	const reunidos = enemies.filter((e) => estaReunido(e, player.id));
+	const anterior = world.lure;
+	let fase = anterior?.fase ?? "reunindo";
+	let tempoRestante = anterior?.tempoRestante ?? 18;
+	if (fase === "lutando" && reunidos.length === 0) {
+		fase = "reunindo";
+		tempoRestante = 18;
+	}
+	let destino = null;
+	let esperandoRetardatario = false;
+	if (fase === "reunindo") {
+		tempoRestante -= dt;
+		const candidato = proximoCandidato(player, enemies);
+		if (reunidos.length >= alvo || candidato == null || temShinyVivo(enemies) || tempoRestante <= 0) fase = "lutando";
+		else if (reunidos.find((e) => distanceTo(player, e) > e.leashRadius * LURE_FRACAO_DA_COLEIRA)) esperandoRetardatario = true;
+		else destino = {
+			x: candidato.x,
+			y: candidato.y
+		};
+	}
+	world.lure = {
+		fase,
+		alvo,
+		reunidos: reunidos.length,
+		tempoRestante: Math.max(0, tempoRestante),
+		destino,
+		esperandoRetardatario
+	};
 }
 //#endregion
 //#region src/engine/systems/economySystem.ts
@@ -54643,6 +54818,7 @@ function emptyWorldState(seed = randomSeed()) {
 			pendingHit: 1
 		},
 		pessimista: false,
+		lure: null,
 		clima: null,
 		climaAmbiente: null,
 		especialidadeNiveis: null
@@ -55403,6 +55579,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (!silent) updateAnimations(world, dt);
 		return [];
 	}
+	atualizarLure(world, gameState, dt);
 	updateMovement(world, dt);
 	const { defeatedEnemyIds, playerJustFainted } = updateCombat(world, dt, { silent });
 	tickAttackAnimTimers(world, dt);
@@ -55598,76 +55775,6 @@ function simulateWorldSeconds({ world, gameState, seconds, stepSeconds, stepFn, 
 	return summary;
 }
 //#endregion
-//#region src/stores/gameStateDefaults.ts
-var STARTING_ITEMS = {
-	poke_ball: 500,
-	potion: 500,
-	revive: 50
-};
-var DEFAULT_AUTO_POT_RULES = [{
-	hpPercent: 70,
-	itemId: "potion"
-}];
-var DEFAULT_AUTO_CATCH_CONFIG = {
-	ballId: "poke_ball",
-	catchShinyEnabled: true,
-	shinyBallId: "great_ball"
-};
-var DEFAULT_AUTO_SELL_CONFIG = {
-	ligado: false,
-	raridades: []
-};
-function defaultUnlockedMaps() {
-	return Object.values(MAPS).filter((map) => !map.unlockCost).map((map) => map.id);
-}
-function defaultGameStateData() {
-	return {
-		team: [],
-		activeIndex: 0,
-		bagPokes: [],
-		items: { ...STARTING_ITEMS },
-		lockedItems: {},
-		wallet: {
-			gold: 1e3,
-			diamonds: 0
-		},
-		unlockedMaps: defaultUnlockedMaps(),
-		currentMapId: null,
-		autoToggles: {
-			autoPot: true,
-			autoCatch: false,
-			autoRevive: false,
-			autoStatus: true,
-			avancoManualDeSala: false
-		},
-		autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
-		autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
-		autoCatchRules: [],
-		autoSellConfig: {
-			...DEFAULT_AUTO_SELL_CONFIG,
-			raridades: []
-		},
-		autoStatusConfig: {},
-		perfStats: {
-			gold: 0,
-			xp: 0,
-			mobs: 0,
-			shinys: 0,
-			since: Date.now()
-		},
-		trainer: {
-			name: "Treinador",
-			level: 1,
-			exp: 0
-		},
-		pokedexKills: {},
-		unlockedContinents: [...FAIXAS_INICIAIS],
-		missoesReivindicadas: {},
-		especialidades: especialidadeNiveisDefault(),
-		biomaProgress: biomaProgressDefault()
-	};
-}
-//#endregion
 //#region src/data/regions.ts
 var DEX_RE = /Nº\s*(\d+)/;
 Object.fromEntries(Object.entries(SPECIES_DATA).map(([id, species]) => {
@@ -55783,6 +55890,10 @@ function snapshotToGameState(snap, defaults) {
 			...fromJson(p.auto_sell_config, defaults.autoSellConfig)
 		},
 		autoStatusConfig: fromJson(p.auto_status_config, defaults.autoStatusConfig),
+		lureConfig: {
+			...defaults.lureConfig,
+			...fromJson(p["auto_lure_config"] ?? null, {})
+		},
 		perfStats: fromJson(p.perf_stats, defaults.perfStats),
 		trainer: {
 			name: p.trainer_name,
@@ -55953,6 +56064,9 @@ function criarEstadoDoJogador(dados) {
 			},
 			get autoStatusConfig() {
 				return s.autoStatusConfig;
+			},
+			get lureConfig() {
+				return s.lureConfig;
 			},
 			get perfStats() {
 				return s.perfStats;
@@ -56136,6 +56250,15 @@ function criarEstadoDoJogador(dados) {
 				s.autoSellConfig = {
 					...s.autoSellConfig,
 					...patch
+				};
+			},
+			setLureConfig: (patch) => {
+				const bruta = patch.quantidade ?? s.lureConfig.quantidade;
+				const quantidade = Math.max(1, Math.min(4, Math.round(bruta) || 1));
+				s.lureConfig = {
+					...s.lureConfig,
+					...patch,
+					quantidade
 				};
 			},
 			addAutoCatchRule: (rule) => {

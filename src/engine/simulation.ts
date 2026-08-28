@@ -39,6 +39,7 @@ import { ABATES_POR_SALA, SALAS_POR_HUNT, ORDEM_DOS_BIOMAS, SUB_BIOMA_POR_CHAVE,
 import { createPlayerEntity, createEnemyEntity, isDead, takeDamage } from './entity'
 import { createWorldEffect } from './effect'
 import { updateMovement } from './systems/movementSystem'
+import { atualizarLure } from './systems/lureSystem'
 import { updateCombat } from './systems/combatSystem'
 import { aplicarStatus } from './systems/statusSystem'
 import { climaAmbienteDaSala, climaDeAmbiente } from './systems/climaAmbiente'
@@ -1048,6 +1049,12 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     return []
   }
 
+  // ANTES do movimento: quem decide se o jogador esta reunindo (e pra onde) e o
+  // lure, e `updateMovement` so executa o `destino` que sai daqui. Rodar depois
+  // deixaria o movimento um tick atrasado em relacao a fase — visivel no
+  // instante em que a conta fecha (o POKE daria um passo a mais pro candidato
+  // antes de virar pra lutar).
+  atualizarLure(world, gameState, dt)
   updateMovement(world, dt)
   const { defeatedEnemyIds, playerJustFainted } = updateCombat(world, dt, { silent })
   // attackAnimTimer precisa decrementar todo tick independente de `silent`
