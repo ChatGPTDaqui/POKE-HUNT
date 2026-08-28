@@ -446,28 +446,134 @@ silêncio.
 ## Camada ambiente: vida no cenário (`src/render/ambiente.ts`)
 
 Partículas decorativas desenhadas **entre o fundo e as entidades** — folha caindo, ondulação de
-água, brasa subindo, poeira, neve, areia soprando. Entrou no PH-96, ganhou máscara de água no
-PH-113 e forma por preset no PH-115.
+água, faísca subindo, poeira, neve, areia soprando, fiapo urbano e gotejo que respinga no chão.
+Entrou no PH-96, ganhou máscara de água no PH-113, forma por preset no PH-115, brilho de lava no
+PH-195 e a passada de escala/silhueta/gota no PH-232.
 
 ### O preset é por ARTE, não por bioma
 
-`PRESET_POR_ARTE` mapeia caminho de imagem → preset (`folha`, `agua`, `brasa`, `poeira`, `neve`,
-`areia`, `cidade`, `nenhum`). Mesma razão do wall-block ser propriedade do desenho: quem decide o
-que aparece na tela é a imagem. Sub-bioma sem arte própria mostra a do bioma e herda o ambiente
-dela; hunt sem sistema de salas (Pesadelo, BOSS, Lance, treino) também, sem cadastrar nada.
+`PRESET_POR_ARTE` mapeia caminho de imagem → preset (`folha`, `selva`, `agua`, `brasa`, `poeira`,
+`caverna`, `neve`, `areia`, `cidade`, `nenhum`). Mesma razão do wall-block ser propriedade do
+desenho: quem decide o que aparece na tela é a imagem. Sub-bioma sem arte própria mostra a do bioma
+e herda o ambiente dela; hunt sem sistema de salas (Pesadelo, BOSS, Lance, treino) também, sem
+cadastrar nada.
+
+`selva` e `caverna` (PH-232) são os dois presets **úmidos**: a mesma partícula do vizinho seco
+(`folha` e `poeira`) mais uma população de gotejo. A divisão é estreita de propósito — `jungle` é o
+único mapa de vegetação fechada do acervo, e `fairy-cave`/`abyss` são as únicas grutas fechadas.
+Ruína a céu aberto, templo, dojo e covil de dragão continuam secos: pingo ali seria goteira sem
+telhado.
 
 A tabela é **explícita** de propósito — um `includes('cave')` classificaria `cave-volcanic` como
 caverna e daria poeira a um mapa de lava. Arte que não esteja lá cai em `nenhum` e fica parada.
 `ambiente.test.ts` itera `COLISAO_POR_ARTE` (a lista canônica de artes jogáveis) e reprova arte
 nova sem preset: sem esse teste, a próxima arte a entrar ficaria parada em silêncio.
 
-### Cada preset tem forma própria, não só cor (PH-115)
+### A escala é medida contra o POKE, não contra a tela (PH-232)
 
-Até o PH-115 tudo era o mesmo círculo cheio, variando cor e tamanho — folha de floresta lia como
-ponto amarelo descendo. Hoje: folha é elipse achatada que **tomba** (velocidade e sentido
-sorteados); brasa **pisca** rápido com o raio pulsando; neve tem **profundidade** (um sorteio só
-controla tamanho, velocidade e alpha, então floco grande cai mais rápido e mais opaco); areia é
-risco na direção do vento. Poeira e cidade seguem círculo.
+`src/render/escalaDoMundo.ts` guarda a única régua que estas camadas têm: `ALTURA_DE_POKE = 40`
+unidades de mundo, o quadro de sprite mais comum do acervo (360 dos 1.266 registros de
+`battleSpriteAnims.ts`; `scaleForSpecies` devolve 1, então o quadro do arquivo **é** o tamanho na
+tela). Todo raio de receita é declarado em `emPoke(fração)`.
+
+Isso existe porque até o PH-232 os tamanhos eram números soltos, sem nada com que compará-los, e
+todos caíram na mesma faixa: poeira de caverna com 24% da altura de um Pokémon, floco de neve com
+30%, risco de chuva com 145% de comprimento por 5,2 unidades de espessura. O sintoma relatado foi
+"os efeitos parecem pólen" — o mesmo enxame de bolinhas em quase todo bioma.
+
+Os tetos, trancados por `proporcaoDasParticulas.test.ts`:
+
+- **Corpo de ambiente**: 12% da altura de um POKE (4,8 unidades de diâmetro).
+- **Corpo de clima**: 18%. Mais folgado de propósito — granizo e areia *tiram HP*, e um evento que
+  mexe no combate tem que ser mais evidente que a decoração fixa do bioma. O mesmo teste afirma
+  que o granizo é maior que a maior partícula decorativa.
+- **Rastro** (risco de areia, de chuva): fora do teto de corpo, porque borrão de movimento pode ser
+  mais comprido que o grão que o produziu. A trava dele é outra: comprimento ≥ 6 × espessura. O
+  risco de areia antigo tinha 4,4 de comprimento por até 5,0 de espessura — mais grosso que longo,
+  ou seja, uma bolha.
+- **Banco de névoa**: fora dos dois. Ele não é corpo, é volume; alpha baixo com raio grande é o
+  único jeito de produzir volume.
+
+O contrapeso de encolher é a **quantidade**: poeira foi de 26 para 62 partículas, cidade de 18 para
+40. Custa mais laço e menos pixel, e o que incomodava era área coberta, não contagem.
+
+Há também um piso, e ele foi medido na bancada: risco de chuva com 0,5 unidade de espessura
+(0,75px no zoom padrão) **sumiu por completo** sobre a floresta. Abaixo de ~1,3px de tela o traço
+não sobrevive ao antialias. Encolher demais é tão errado quanto o problema original.
+
+### Cada preset tem silhueta própria, não só cor (PH-115, refeito no PH-232)
+
+Até o PH-115 tudo era o mesmo círculo cheio, variando cor e tamanho. O PH-115 resolveu metade —
+folha virou elipse que tomba, neve ganhou profundidade, areia virou risco — e **quatro presets
+ficaram no default**: água sem máscara, poeira, cidade e brasa continuaram desenhando o mesmo
+`ctx.arc`, ou seja, quatro dos nove biomas com a mesma bolinha.
+
+Hoje a forma é um campo obrigatório (`Receita.forma`), sem default silencioso onde cair:
+
+| forma | quem usa | o que emite |
+|---|---|---|
+| `folha` | folha, selva | elipse achatada que **tomba** no próprio eixo |
+| `grao` | poeira, caverna, neve | ponto cheio — e só eles |
+| `fiapo` | cidade | fibra **dobrada** (dois segmentos) rolando devagar |
+| `risco` | areia | um segmento na direção do vento, comprimento ∝ velocidade |
+| `faisca` | brasa | rastro curto + núcleo que pulsa de tamanho |
+| `cintilo` | água | cruz de quatro pontas desiguais com núcleo quente |
+| `anel` | água **com máscara** | elipse vazada que abre e desmancha (PH-113) |
+
+`silhuetaPorPreset.test.ts` roda cada preset, agrupa as chamadas de canvas por caminho e reprova se
+dois dos quatro ex-círculos voltarem a emitir a mesma assinatura. `poeira` continua sendo um ponto
+puro **de propósito** (um grão de poeira *é* um ponto) e é o único com essa licença; o que o separa
+da neve é escala, e o teste de proporção exige pelo menos 1,5x de diferença.
+
+### Gota que cai e bate no chão (`src/render/gotas.ts`, PH-232)
+
+Até o PH-232 nenhuma partícula do jogo tinha fim: toda uma delas atravessava a janela e renascia na
+borda oposta. Sem contato com o solo, a partícula flutua em espaço de tela e o olho não tem contra
+o que aferir o tamanho dela — é por isso que "deixar tudo menor" sozinho não resolveria a queixa, e
+por que a chuva do PH-141 virava papel de parede depois de trinta segundos.
+
+`gotas.ts` é uma implementação só, usada por duas camadas com números diferentes: a chuva de
+`climaVisual.ts` e o gotejo de `selva`/`caverna` em `ambiente.ts`. Escrever duas vezes significaria
+corrigir duas vezes o mesmo bug de reciclagem.
+
+**Onde fica o "chão", já que não existe um.** A câmera é de cima com inclinação e o fundo é uma
+imagem sem metadado de profundidade. Mas nessa projeção *todo* pixel do fundo é chão: a cena
+inteira é o solo visto de cima. Então cada gota sorteia um `yChao` dentro da janela ao nascer e
+desaparece ali. Não é aproximação preguiçosa — numa vista de cima, chuva cai sobre a área inteira,
+não sobre uma reta na base da tela. `gotaBateNoChao.test.ts` reprova se os respingos se
+concentrarem em menos de 50% da altura da janela.
+
+Detalhes que não são cosméticos:
+
+- O ponto de impacto é o **máximo** entre "um trecho à frente da gota" e "dentro da janela". Só o
+  primeiro faria a gota reciclada (que nasce acima do topo) respingar fora da tela — falha
+  silenciosa, o efeito só pareceria mais fraco. Só o segundo faria metade das gotas nascer já
+  passada do próprio impacto e respingar todas juntas no primeiro quadro.
+- `fracaoQuePousa` < 1 na chuva (0,55). Com 1,0 o chão inteiro pisca ao mesmo tempo e vira ruído.
+- O respingo tem **alpha próprio** (`alphaDoRespingo`), maior que o da gota: ele apaga com o
+  quadrado do tempo restante, então o alpha médio ao longo da vida é um terço do de pico.
+- Pool de respingos de **tamanho fixo**, com rodízio ao encher. Em chuva forte nascem ~80 impactos
+  por segundo; alocar um objeto por impacto poria o coletor de lixo para trabalhar a 60 quadros por
+  segundo. Trancado por teste (200 gotas numa janela baixa, o pool não cresce).
+- `origemFixa` (só o gotejo): a gota volta sempre ao mesmo ponto do mundo, com espera entre uma e
+  outra. É o que separa "está chovendo" de "está pingando" — pingo de estalactite cai do mesmo
+  lugar dezenas de vezes.
+
+**Granizo ficou de fora**, e é escolha, não esquecimento: ele já tem rastro e quina para se
+distinguir, e dois climas respingando ao mesmo tempo no bioma de gelo apagaria a diferença entre o
+que machuca e o que não machuca.
+
+### A bancada visual (`scripts/harness/efeitos-do-mapa.html`)
+
+`npm run dev` e abrir `/scripts/harness/efeitos-do-mapa.html`: os nove presets e os seis climas
+lado a lado, sobre a arte real de cada bioma, na escala do jogo, com um POKE de tamanho real e uma
+barra de 40 unidades em cada painel. Nenhum teste de unidade responde "isso está bom" — ela
+responde.
+
+Cada painel importa `ambiente.ts?painel=N` / `climaVisual.ts?painel=N`. A query é necessária: as
+duas camadas guardam estado em variável de módulo (uma cena por vez, o que está certo no jogo), e
+com uma instância só cada painel veria "a arte mudou" e repovoaria a cada quadro — quinze telas de
+ruído parado. O Vite indexa módulo por URL completa, query inclusa.
 
 ### Água: ondulação recortada por máscara pintada (PH-113)
 
@@ -511,6 +617,13 @@ Então a camada tem gerador próprio (LCG local semeado pela URL da arte), vive 
 o único estado dela é um array de partículas que morre na troca de arte. `ambiente.test.ts` tranca
 isso estaticamente: nenhum import de `@/engine/*`, nenhuma menção a `world.rng`, nenhum
 `Math.random`.
+
+Desde o PH-232 a mesma varredura cobre `climaVisual.ts` e `gotas.ts`. O guard olhava um arquivo só,
+e por isso passou despercebido por seis issues que `climaVisual.ts` **chamava `Math.random` direto**
+na reciclagem por borda, apesar do cabeçalho dele dizer "sorteio local, igual `ambiente.ts`". Não
+dessincronizava o servidor (não passa pelo `Rng` do mundo), mas fazia a camada ser diferente entre
+sessões e entre jogadores sem motivo. `climaVisual.ts` continua com uma exceção legítima e nomeada:
+ele importa o *tipo* `ClimaTipo` de `@/engine/types`, que é como ele sabe qual clima desenhar.
 
 O ajuste "Vida no cenário" (`uiStore.vidaNoCenario`) desligado zera as partículas em vez de só
 parar de desenhá-las.
