@@ -334,7 +334,18 @@ export function avancarGotas(
     g.y += g.vy * delta
 
     if (g.pousa && g.y >= g.yChao) {
-      emitirRespingo(estado, cfg, g.x, g.yChao, Math.hypot(g.vx, g.vy), rand)
+      // A JANELA ANDA: a camera segue o jogador. O ponto de impacto foi
+      // sorteado dentro da janela de meio segundo atras, e nesse tempo ela se
+      // deslocou — a ~91 unidades/s do POKE, uns 35 numa queda tipica. Um
+      // `yChao` que ficou pra tras produziria respingo fora da tela: nao
+      // quebra nada, mas e desenho jogado fora, e nenhum teste de janela
+      // PARADA veria isso acontecer.
+      if (
+        g.x >= janela.x && g.x <= janela.x + janela.w
+        && g.yChao >= janela.y && g.yChao <= janela.y + janela.h
+      ) {
+        emitirRespingo(estado, cfg, g.x, g.yChao, Math.hypot(g.vx, g.vy), rand)
+      }
       nascerGota(g, cfg, janela, rand, false)
       continue
     }

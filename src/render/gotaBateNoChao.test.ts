@@ -117,6 +117,41 @@ describe('a chuva pousa e respinga (PH-232)', () => {
     expect(fora.length, `${fora.length} respingo(s) fora da janela`).toBe(0)
   })
 
+  it('nem quando a camera anda no meio da queda', () => {
+    // O caso anterior roda com a janela PARADA, e no jogo ela nunca esta: a
+    // camera segue o POKE a ~91 unidades/s. Um ponto de impacto sorteado ha
+    // meio segundo pode ter ficado pra tras da janela, e o respingo sairia
+    // fora da tela — desenho jogado fora que so aparece em movimento.
+    //
+    // A deriva aqui e maior que a do jogo de proposito: o que se quer e que a
+    // guarda exista, nao reproduzir a velocidade exata do jogador.
+    //
+    // O que se mede e o NASCIMENTO de cada respingo, nao todo quadro dele. Um
+    // respingo e uma marca no CHAO, em coordenada de mundo: e correto que ele
+    // saia de vista quando a camera se afasta, do mesmo jeito que uma pedra
+    // do cenario sai. O que seria errado e ele NASCER fora — ai ele nunca foi
+    // visto por ninguem.
+    const nascidosFora: Anel[] = []
+    const jaVistos = new Set<string>()
+    for (let i = 0; i < 80; i++) {
+      const janela = { x: JANELA.x + i * 6, y: JANELA.y + i * 4, w: JANELA.w, h: JANELA.h }
+      const { ctx, aneis } = ctxEspiao()
+      desenharClimaFundo(ctx, 'chuva', janela)
+      for (const a of aneis) {
+        if (jaVistos.has(chave(a))) continue
+        jaVistos.add(chave(a))
+        const dentro = a.x >= janela.x && a.x <= janela.x + janela.w
+          && a.y >= janela.y && a.y <= janela.y + janela.h
+        if (!dentro) nascidosFora.push(a)
+      }
+    }
+    expect(jaVistos.size, 'nenhum respingo nasceu — o caso nao mede nada').toBeGreaterThan(20)
+    expect(
+      nascidosFora.length,
+      `${nascidosFora.length} respingo(s) nasceram fora da janela em movimento`,
+    ).toBe(0)
+  })
+
   it('cada respingo ABRE e depois SOME', () => {
     const quadros = rodarClima('chuva', 60)
     const porRespingo = new Map<string, number[]>()

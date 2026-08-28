@@ -323,6 +323,25 @@ const NEVE_FARPA_TAMANHO = 0.36
 /** Giro do floco, em radianos por segundo, [min, max]. */
 const NEVE_GIRO: [number, number] = [0.25, 0.95]
 
+/**
+ * Semente a partir do NOME do clima (FNV-1a), e nao do comprimento dele.
+ *
+ * A conta anterior era `clima.length * 7919 + 104729`, e ela COLIDE: `chuva`,
+ * `areia` e `nevoa` tem cinco letras, entao os tres partiam da mesma sequencia
+ * de sorteio. O efeito era invisivel (receitas diferentes consomem a sequencia
+ * de jeitos diferentes) e continua cosmetico, mas desde o PH-232 esse mesmo
+ * gerador tambem decide onde cada gota pousa — vale ter uma semente que de
+ * fato distinga os climas, em vez de uma que distinga o tamanho do nome.
+ */
+function semeteDoClima(clima: string): number {
+  let h = 2166136261
+  for (let i = 0; i < clima.length; i++) {
+    h ^= clima.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return h >>> 0
+}
+
 /** LCG local. NAO pode ser o `world.rng` — ver o cabecalho. */
 function sorteioLocal(semente: number): () => number {
   let s = semente || 1
@@ -369,7 +388,7 @@ function reconstruir(clima: ClimaTipo, janela: JanelaDeClima, compacto: boolean)
   const receita = RECEITAS[clima]
   // O gerador fica no estado do modulo, e nao local: `reciclar` roda a cada
   // quadro e precisa dele. Ver `rand`.
-  rand = sorteioLocal(clima.length * 7919 + 104729)
+  rand = sorteioLocal(semeteDoClima(clima))
   const r = rand
   const total = Math.max(1, Math.round(receita.quantidade * (compacto ? 0.5 : 1)))
   particulas = Array.from({ length: total }, () => semearParticula(r, receita, janela, false))
