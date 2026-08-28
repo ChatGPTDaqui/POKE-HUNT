@@ -37,7 +37,26 @@ export async function loadPlayerState(userId: string, defaults: GameStateData): 
   // pequenas, disparadas juntas, uma unica vez no login.
   const [player, pokemon, items, pokedex, autoCatchRules, missoesReivindicadas, especialidades] = await Promise.all([
     supabase.from('players').select('*').eq('user_id', userId).maybeSingle(),
-    supabase.from('pokemon_instances').select('*').eq('user_id', userId),
+    // SO A EQUIPE (PH-182). O boot trazia `pokemon_instances` inteira: medido em
+    // producao no jogador mais pesado, 922 POKEs pra jogar com 2 — 76.855 B
+    // gzipados contra 477 B lendo so a equipe, 161x.
+    //
+    // E nao era so custo. A consulta NAO paginava, e o PostgREST corta em 1000
+    // linhas com 200 OK e sem erro nenhum (`Content-Range: 0-999/1054`, medido).
+    // Faltavam 78 POKEs pro boot desse jogador comecar a perder linha em
+    // silencio — o mesmo defeito que a PH-99 ja tinha corrigido na vitrine do
+    // Mercado.
+    //
+    // A reserva vem do caminho paginado que ja existe (`mochilaRemota.ts`,
+    // `.range()` em laco com conferencia do total declarado), quando a Mochila
+    // abre. `BagMenu` ja assumia isso no comentario dele; era o boot que ainda
+    // nao tinha acompanhado.
+    //
+    // `order('team_slot')` pelo mesmo motivo de `refetchEquipeInteira`: o resto
+    // do app assume `team[0]` = ativo, e sem ordem o Postgres devolve em ordem
+    // arbitraria.
+    supabase.from('pokemon_instances').select('*').eq('user_id', userId)
+      .eq('location', 'team').order('team_slot', { ascending: true }),
     supabase.from('player_items').select('*').eq('user_id', userId),
     supabase.from('player_pokedex').select('*').eq('user_id', userId),
     supabase.from('player_auto_catch_rules').select('*').eq('user_id', userId),
@@ -66,6 +85,8 @@ export async function loadPlayerState(userId: string, defaults: GameStateData): 
   }
 
   // Ancora o diff de exclusao do proximo save (ver `definirIdsConhecidos`).
+  // So EQUIPE, porque so equipe foi lida — e e essa correspondencia que o resto
+  // desta secao existe pra manter.
   definirIdsConhecidos(userId, snap.pokemon.map((r) => r.id))
   // Ancora o CAS otimista do proximo save (PH-18) — string bruta do Postgres,
   // nao `new Date(...).getTime()` reconstruido: `timestamptz` tem precisao de
@@ -90,11 +111,96 @@ export async function loadPlayerState(userId: string, defaults: GameStateData): 
 // pendente da conta anterior resolvendo DEPOIS do login da proxima, fazendo
 // o diff de exclusao comparar contra os ids errados e um POKE removido de
 // verdade "reaparecer" numa leitura futura (PH-19).
-const idsNoBancoPorUsuario = new Map<string, Set<string>>()
+//
+// DIVIDIDO EM EQUIPE E RESERVA DESDE A PH-182, e essa divisao e a coisa mais
+// importante deste arquivo.
+//
+// Ate a PH-182 o boot lia TUDO, entao "o que o banco tem" e "o que o estado
+// local tem" eram a mesma coisa por construcao, e o diff podia comparar contra
+// o estado inteiro sem pensar. Com o boot lendo so a equipe isso deixa de ser
+// verdade: `state.bagPokes` nasce VAZIO e so e preenchido quando a Mochila
+// abre.
+//
+// Diferenciar 922 ids conhecidos contra um estado que so tem 2 daria
+// `removidos = 920` e o save APAGARIA a colecao do jogador. Nao e hipotese: e o
+// risco que a propria issue nomeia, e o caminho que chega la ja existe —
+// `aplicarEstadoDoServidor` zera `bagPokes` num flush parcial quando a mochila
+// nao esta carregada (autoridade.ts).
+//
+// A regra, entao, e uma so e vale nos dois sentidos:
+//
+//   um id so pode entrar no diff de exclusao se o estado local for
+//   AUTORITATIVO sobre o conjunto onde ele vive.
+//
+// O cliente e sempre autoritativo sobre a EQUIPE (o boot a le inteira, sao no
+// maximo 6 linhas). Sobre a RESERVA ele so e autoritativo depois da leitura
+// paginada — e por isso `reserva` so e preenchida por `acrescentarIdsDaReserva`
+// e e esvaziada por `esquecerIdsDaReserva` no instante em que o estado perde a
+// mochila.
+interface IdsConhecidos {
+  equipe: Set<string>
+  /** `null` = a reserva NAO foi lida nesta sessao. Diferente de "lida e vazia". */
+  reserva: Set<string> | null
+}
+const idsNoBancoPorUsuario = new Map<string, IdsConhecidos>()
 
-/** Chamado pelo load e por quem importa um save, pra ancorar o diff. */
+/**
+ * Quantos POKEs um unico save pode apagar antes de a escrita ser recusada.
+ *
+ * 12 e generoso pro caso real (liberar/vender um de cada vez, e o time cabe em
+ * 6) e apertado o bastante pra pegar um descompasso de dominio, que apaga
+ * centenas. Nao e um limite de negocio — e um detector de bug.
+ */
+const TETO_DE_REMOCAO_POR_SAVE = 12
+
+function conhecidos(userId: string): IdsConhecidos {
+  let atual = idsNoBancoPorUsuario.get(userId)
+  if (!atual) {
+    atual = { equipe: new Set(), reserva: null }
+    idsNoBancoPorUsuario.set(userId, atual)
+  }
+  return atual
+}
+
+/**
+ * Registra os ids da RESERVA que a leitura paginada trouxe.
+ *
+ * Chamado por `carregarMochilaRemota` — e nao pela tela — porque e la que os
+ * dois fatos existem juntos: o `userId` da sessao e a lista exata que entrou no
+ * estado. Registrar na tela deixaria os dois podendo divergir.
+ */
+export function acrescentarIdsDaReserva(userId: string, ids: Iterable<string>): void {
+  conhecidos(userId).reserva = new Set(ids)
+}
+
+/**
+ * O estado local deixou de representar a reserva — esquece os ids dela.
+ *
+ * A partir daqui o diff de exclusao volta a olhar so a equipe, que e o unico
+ * conjunto sobre o qual o cliente continua autoritativo. Sem esta chamada, o
+ * proximo save veria 920 ids conhecidos contra um `bagPokes` vazio.
+ *
+ * Sem `userId` de proposito: quem esvazia a mochila (`mochilaStore.invalidar`,
+ * o ramo parcial de `aplicarEstadoDoServidor`) nao tem o id do usuario em maos,
+ * e pedir que tenha so pra esquecer algo seria plumbing que pode ser esquecido.
+ * Esquecer de MAIS e sempre seguro aqui: o custo e um POKE vendido offline
+ * demorar mais pra sumir do banco; o custo de esquecer de menos e apagar o
+ * acervo.
+ */
+export function esquecerIdsDaReserva(): void {
+  for (const entrada of idsNoBancoPorUsuario.values()) entrada.reserva = null
+}
+
+/**
+ * Chamado pelo load e por quem importa um save, pra ancorar o diff.
+ *
+ * Ancora a EQUIPE e ZERA o que se sabia da reserva: quem chama acabou de
+ * substituir o estado local, e o `bagPokes` desse estado novo nao veio de
+ * leitura paginada nenhuma. Manter a reserva antiga aqui seria justamente o
+ * descompasso que apaga acervo.
+ */
 export function definirIdsConhecidos(userId: string, ids: Iterable<string>): void {
-  idsNoBancoPorUsuario.set(userId, new Set(ids))
+  idsNoBancoPorUsuario.set(userId, { equipe: new Set(ids), reserva: null })
 }
 
 // `players.updated_at` que este cliente acredita ser o atual — CAS otimista
@@ -115,9 +221,17 @@ export async function savePlayerState(userId: string, state: GameStateData): Pro
   const missaoRows = gameStateToMissaoRows(userId, state)
   const especialidadeRows = gameStateToEspecialidadeRows(userId, state)
 
-  const idsNoBanco = idsNoBancoPorUsuario.get(userId) ?? new Set<string>()
+  const conhecido = idsNoBancoPorUsuario.get(userId)
   const vivos = new Set(pokemonRows.map((r) => r.id as string))
-  const removidos = [...idsNoBanco].filter((id) => !vivos.has(id))
+  // O DOMINIO DO DIFF (PH-182): equipe sempre, reserva so se ela foi lida.
+  // Ver a nota longa em `idsNoBancoPorUsuario` — com a reserva NAO lida,
+  // `state.bagPokes` e vazio por construcao e diferenciar contra ele apagaria a
+  // colecao inteira.
+  const dominio = [
+    ...(conhecido?.equipe ?? []),
+    ...(conhecido?.reserva ?? []),
+  ]
+  const removidos = dominio.filter((id) => !vivos.has(id))
 
   // CAS otimista: sem isso, duas abas do MESMO jogador cada uma com seu
   // proprio debounce de `setItem` fazem update/upsert sem checar conflito — a
@@ -149,6 +263,23 @@ export async function savePlayerState(userId: string, state: GameStateData): Pro
   // `one_pokemon_per_team_slot` reclamaria se a linha antiga ainda ocupasse o
   // slot no momento do upsert.
   if (removidos.length > 0) {
+    // REDE DE SEGURANCA (PH-182), e ela existe porque o custo de errar aqui e
+    // a colecao do jogador. O diff acima esta certo pelo raciocinio; esta
+    // guarda esta aqui pro dia em que alguem acrescentar um quarto caminho que
+    // esvazia `bagPokes` e esquecer de chamar `esquecerIdsDaReserva`.
+    //
+    // Remocao legitima por este caminho e miuda: um POKE liberado, um vendido.
+    // Venda em lote passa por RPC, que apaga no servidor — nao chega aqui. Uma
+    // remocao de dezenas de linhas num save de rotina nao e o jogador agindo, e
+    // um descompasso de dominio; abortar deixa o dado no lugar e o erro
+    // visivel, que e recuperavel, em vez de silenciosamente correto-e-vazio.
+    if (removidos.length > TETO_DE_REMOCAO_POR_SAVE) {
+      throw new Error(
+        `Save abortado: ${removidos.length} POKEs sumiriam de uma vez (teto ${TETO_DE_REMOCAO_POR_SAVE}). `
+        + 'Isso e descompasso entre o estado local e o que foi lido do banco, nao acao do jogador — '
+        + 'ver idsNoBancoPorUsuario em playerRepository.ts (PH-182).',
+      )
+    }
     const { error } = await supabase.from('pokemon_instances').delete().eq('user_id', userId).in('id', removidos)
     if (error) throw new Error(`Falha ao remover pokemon: ${error.message}`)
   }
@@ -189,7 +320,13 @@ export async function savePlayerState(userId: string, state: GameStateData): Pro
     if (error) throw new Error(`Falha ao salvar regras: ${error.message}`)
   }
 
-  idsNoBancoPorUsuario.set(userId, vivos)
+  // O que o banco tem agora e o que acabou de ser escrito — mas o DOMINIO nao
+  // muda aqui (PH-182). Um save nao LE nada, entao ele nao pode promover a
+  // reserva de "nao lida" pra "lida": se ela seguia desconhecida, segue.
+  idsNoBancoPorUsuario.set(userId, {
+    equipe: new Set(state.team.map((p) => p.uid)),
+    reserva: conhecido?.reserva ? new Set(state.bagPokes.map((p) => p.uid)) : null,
+  })
 }
 
 // Ultima tentativa de gravar quando a pagina esta fechando.
