@@ -55892,7 +55892,7 @@ function snapshotToGameState(snap, defaults) {
 		autoStatusConfig: fromJson(p.auto_status_config, defaults.autoStatusConfig),
 		lureConfig: {
 			...defaults.lureConfig,
-			...fromJson(p["auto_lure_config"] ?? null, {})
+			...fromJson(p.auto_lure_config, {})
 		},
 		perfStats: fromJson(p.perf_stats, defaults.perfStats),
 		trainer: {
