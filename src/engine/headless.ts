@@ -27,8 +27,8 @@ export { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 // authority/src/appSessao.ts#abrirSessao): se ela nascesse no primeiro flush, o
 // cliente entraria com uma sala sorteada por ele e trocaria de sub-bioma
 // (com aviso na tela) 30 segundos depois de entrar na hunt.
-export { novaSala, temSalas, solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN } from './systems/salaSystem'
-export type { AvancoDeSala } from './systems/salaSystem'
+export { novaSala, temSalas, solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, protetorDaSala } from './systems/salaSystem'
+export type { AvancoDeSala, TipoDeProtetor } from './systems/salaSystem'
 // PH-140: o servidor resolve o clima de ambiente e manda pro cliente, que nao
 // tem a semente da sessao pra derivar o dele.
 export { climaDaSala } from './systems/climaAmbiente'

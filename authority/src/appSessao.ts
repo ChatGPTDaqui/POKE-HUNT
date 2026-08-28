@@ -142,9 +142,12 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
  * pago pela outra.
  */
 async function sessaoAberta(cfg: Config, userId: string): Promise<LinhaSessao | null> {
+  // PH-241: `sala_protetor(*)` embutido via PostgREST — `session_id` e
+  // PRIMARY KEY da tabela filha, entao o embed vem como objeto UNICO (ou
+  // `null`), nao array. `protetorDaLinha` (progresso.ts) le daqui.
   const linhas = await selecionar<LinhaSessao>(
     cfg,
-    `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*&order=started_at.desc`,
+    `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*,sala_protetor(*)&order=started_at.desc`,
   )
   for (const orfa of linhas.slice(1)) await fecharLinhaDeSessao(cfg, orfa.id)
   return linhas[0] ?? null
