@@ -62,7 +62,12 @@ export const controller = {
   // a reentrada automatica na hunt no boot (PH-93, features/game/bootDaSessao).
   // Ali o jogador nao pediu nada, cair no Hospital ja e o estado seguro, e um
   // toast de erro sobre acao que ninguem disparou so ensina a ignorar toast.
-  async enterMap(mapId: string, opcoes?: { silencioso?: boolean }): Promise<boolean> {
+  //
+  // `retomando` (PH-266) e a outra metade da mesma condicao: esta entrada e a
+  // reentrada do boot, e nao um clique em "Entrar". Ela viaja ate o servidor,
+  // que a usa pra herdar a sala em que a hunt parou em vez de recomecar no
+  // ciclo 1, sala 1.
+  async enterMap(mapId: string, opcoes?: { silencioso?: boolean; retomando?: boolean }): Promise<boolean> {
     const avisar = !opcoes?.silencioso
     const gameState = useGameStateStore.getState()
     const activePoke = gameState.team[gameState.activeIndex]
@@ -93,7 +98,9 @@ export const controller = {
       }
       return false
     }
-    const sessao = await abrirSessaoDeHunt(mapId, activePoke.uid, { avisarErro: avisar })
+    const sessao = await abrirSessaoDeHunt(mapId, activePoke.uid, {
+      avisarErro: avisar, retomando: opcoes?.retomando ?? false,
+    })
     if (!sessao.ok) return false
     // Arte de TODA especie do pool na memoria antes de a cena aparecer — senao o
     // primeiro encontro com cada uma pisca sem sprite enquanto o PNG baixa (ver
