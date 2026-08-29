@@ -43,6 +43,7 @@ import { useUiStore } from '@/stores/uiStore'
 import { AGUA_POR_ARTE } from '@/data/generated/aguaMask.generated'
 import { LAVA_POR_ARTE } from '@/data/generated/lavaMask.generated'
 import { emPoke } from './escalaDoMundo'
+import { desenharPropsDeAmbiente, reiniciarPropsDeAmbiente } from './ambienteProps'
 import { empurraoDoVento, sincronizarVento, ventoAgora } from './vento'
 import {
   avancarGotas, criarEstadoDeGotas, desenharGotas, povoarGotas,
@@ -823,12 +824,33 @@ export function desenharAmbiente(
   familiaDeClima: 'neve' | 'areia' | null = null,
 ): void {
   const ui = useUiStore.getState()
+  const compacto = ui.viewportWidth > 0 && ui.viewportWidth < 760
   if (!ui.vidaNoCenario) {
     // Desligado no ajuste: solta o estado pra a camada nao voltar com
     // particulas velhas (e pra ela nao custar memoria enquanto esta off).
     if (particulas.length) { particulas = []; arteAtual = null; gotejo = null }
+    reiniciarPropsDeAmbiente()
     return
   }
+
+  // O relogio do quadro e lido UMA vez, aqui, e desce por parametro pra os
+  // props: duas leituras por quadro adiantariam o tempo em um passo sempre que
+  // `performance.now` for um contador (todo teste de camada mocka assim).
+  const agora = performance.now()
+  // O vento e da CENA (PH-233) e os props consultam ele pra inclinar fumaca e
+  // petala, entao ele precisa estar no instante certo ANTES do desenho deles.
+  // `sincronizarVento` ATRIBUI, nao acumula — chamar aqui e de novo abaixo com
+  // o mesmo `agora` da o mesmo resultado.
+  sincronizarVento(agora)
+
+  // PROPS (PH-254) ANTES de tudo, inclusive dos dois `return` abaixo.
+  //
+  // Os dois desligamentos que vem a seguir sao certos pra particula e errados
+  // pra prop: preset 'nenhum' significa "esta arte nao tem enxame proprio", e
+  // nao "esta arte nao tem chamine"; e clima calando o preset significa "ja
+  // esta nevando, nao neve de novo", e nao "a fogueira apagou porque nevou".
+  // Passar os props pra depois deles apagaria a fogueira no primeiro floco.
+  desenharPropsDeAmbiente(ctx, imagem, janela, compacto, agora)
 
   const preset = presetDaArte(imagem)
   if (preset === 'nenhum' || !imagem) {
@@ -852,20 +874,17 @@ export function desenharAmbiente(
 
   const mascara = mascaraDaArte(preset, imagem)
   const r = receitaDe(preset, mascara)
-  const compacto = ui.viewportWidth > 0 && ui.viewportWidth < 760
   if (arteAtual !== imagem || particulas.length === 0) reconstruir(imagem, preset, janela, compacto, mascara)
 
-  const agora = performance.now()
   // Primeiro quadro apos reconstruir: sem instante anterior, `delta` seria o
   // uptime inteiro da pagina.
   const delta = ultimoInstante === 0 ? 0 : Math.min(DELTA_MAXIMO, (agora - ultimoInstante) / 1000)
   ultimoInstante = agora
   faseGlobal += delta
-  // O vento e da CENA, nao desta camada (PH-233): passa o instante que ja
-  // lemos, e `vento.ts` atribui a fase em vez de acumular. `faseGlobal`
-  // continua sendo daqui — ela move o feixe de luz e o brilho de lava, que sao
-  // desta arte e nao do clima.
-  sincronizarVento(agora)
+  // O vento ja foi sincronizado la em cima, com o MESMO `agora` — ele precisa
+  // estar certo antes dos props, que desenham antes daqui. `faseGlobal`
+  // continua sendo desta camada: ela move o feixe de luz e o brilho de lava,
+  // que sao desta arte e nao do clima.
 
   ctx.save()
   if (r.aditivo) ctx.globalCompositeOperation = 'lighter'
@@ -1143,4 +1162,7 @@ export function reiniciarAmbiente(): void {
   ultimoInstante = 0
   focosDeBrilho = []
   gotejo = null
+  // Os props sao desenhados por esta funcao, entao soltar o ambiente sem soltar
+  // eles deixaria um caso de teste medindo a arte anterior.
+  reiniciarPropsDeAmbiente()
 }
