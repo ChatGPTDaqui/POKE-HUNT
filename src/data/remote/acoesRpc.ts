@@ -12,7 +12,7 @@ import { chaveDaMissao } from '@/data/missoes'
 import { stoneItemId } from '@/data/stones'
 import type { ElementType } from '@/data/generated/types'
 import { mochilaCarregada, useMochilaStore } from '@/stores/mochilaStore'
-import { rowToPoke } from './playerMapper'
+import { COLUNAS_DE_POKE, rowToPoke } from './playerMapper'
 import { useGameStateStore, type GameStateData } from '@/stores/gameStateStore'
 import { ErroServidor } from './servidor'
 // Estatico de proposito (PH-49): `gameStatePersistence.ts` ja importa
@@ -142,7 +142,7 @@ async function refetchTodosItens(): Promise<void> {
 }
 
 async function refetchPoke(pokeId: string): Promise<void> {
-  const { data, error } = await supabase.from('pokemon_instances').select('*').eq('id', pokeId).maybeSingle()
+  const { data, error } = await supabase.from('pokemon_instances').select(COLUNAS_DE_POKE).eq('id', pokeId).maybeSingle()
   if (error) {
     console.error(`refetchPoke(${pokeId}) falhou, mantendo estado local`, error)
     return
@@ -181,7 +181,7 @@ export async function refetchEquipeInteira(): Promise<void> {
   // depois de um F5 (que recarrega ordenado por outro caminho).
   const { data, error } = await supabase
     .from('pokemon_instances')
-    .select('*')
+    .select(COLUNAS_DE_POKE)
     .eq('user_id', uid)
     .eq('location', 'team')
     .order('team_slot', { ascending: true })

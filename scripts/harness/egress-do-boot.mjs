@@ -128,6 +128,17 @@ async function jogadorMaisPesado() {
 
 const kb = (b) => `${(b / 1024).toFixed(1)} KB`
 
+/**
+ * A lista de colunas da PH-184, COPIADA de `src/data/remote/playerMapper.ts`.
+ *
+ * Copia, e nao import, porque `scripts/` roda em Node puro e o modulo do
+ * cliente arrasta a cadeia inteira do jogo junto. A copia so serve pra MEDIR: se
+ * ela sair de sincronia com a de la, o numero abaixo fica levemente errado e
+ * nada do jogo muda. `src/data/remote/colunasDePoke.test.ts` e quem tranca a
+ * lista de verdade.
+ */
+const COLUNAS_DE_POKE = 'id,species_id,location,team_slot,level,exp,hp,is_shiny,rarity,locked,nature,trait,original_trainer,status,status_turns,created_at,iv_hp,iv_atk_fis,iv_atk_esp,iv_def,iv_def_esp,iv_speed,stat_hp,stat_atk_fis,stat_atk_esp,stat_def,stat_def_esp,stat_speed,active_abilities,disabled_abilities,unlocked_abilities'
+
 async function main() {
   console.log(`\nBancada de egress do boot — schema ${SCHEMA}\n`)
 
@@ -162,6 +173,20 @@ async function main() {
     // custou um falso 4x neste projeto.
     console.log(`  (cru, so pra referencia:         ${kb(antes.cru)} -> ${kb(depois.cru)})`)
   }
+  console.log('')
+
+  // A MOCHILA PAGINADA (PH-184). Ela continua lendo muitas linhas mesmo depois
+  // da PH-182 — e o unico lugar onde cortar COLUNA ainda vale alguma coisa. A
+  // propria PH-184 diz isso: com o boot em 0,9 KB, o ganho dela la some.
+  const mochilaTudo = await medir(`pokemon_instances?user_id=eq.${userId}&location=eq.bag&select=*`)
+  const mochilaColunas = await medir(
+    `pokemon_instances?user_id=eq.${userId}&location=eq.bag&select=${COLUNAS_DE_POKE}`,
+  )
+  const corte = 100 - (mochilaColunas.gzip / Math.max(1, mochilaTudo.gzip)) * 100
+  console.log('--- mochila paginada: o corte de COLUNAS (PH-184) ---')
+  console.log(`  select *:                        ${String(mochilaTudo.gzip).padStart(8)} B  ${kb(mochilaTudo.gzip)}`)
+  console.log(`  so as colunas usadas:            ${String(mochilaColunas.gzip).padStart(8)} B  ${kb(mochilaColunas.gzip)}`)
+  console.log(`  corte:                           ${corte.toFixed(1)}% do payload gzipado`)
   console.log('')
 
   // O defeito de correcao: a consulta ANTIGA truncava em silencio.
