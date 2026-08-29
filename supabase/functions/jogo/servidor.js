@@ -54740,6 +54740,8 @@ function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0, manualAdvance = f
 	const sala = world.sala;
 	if (!sala || sala.abates < 30) {
 		world.salaEsperaDaAutoridade = 0;
+		world.salaRespostasComQuotaCheia = 0;
+		world.salaRespostasDaAutoridade = 0;
 		return;
 	}
 	if (world.salaPendente || world.salaCountdownRemaining != null) return;
@@ -54748,6 +54750,9 @@ function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0, manualAdvance = f
 		if (world.salaPredita) return;
 		world.salaEsperaDaAutoridade += dt;
 		if (world.salaEsperaDaAutoridade < 120) return;
+		const mudo = world.salaRespostasDaAutoridade === 0;
+		const parado = world.salaRespostasComQuotaCheia >= 3;
+		if (!mudo && !parado) return;
 		world.salaEsperaDaAutoridade = 0;
 		if (armarTransicaoDeSala(world, mapId).avancou) world.salaPredita = true;
 		return;
@@ -54834,6 +54839,8 @@ function emptyWorldState(seed = randomSeed()) {
 		salaPendente: null,
 		salaSobAutoridade: false,
 		salaEsperaDaAutoridade: 0,
+		salaRespostasComQuotaCheia: 0,
+		salaRespostasDaAutoridade: 0,
 		salaPredita: false,
 		rng: createRng(seed),
 		seed,

@@ -76,13 +76,32 @@ export const SALA_TRANSITION_COUNTDOWN = 3
  * segundos. E o lado certo pra errar — um palpite errado troca a area debaixo
  * do jogador a cada sala, e a espera atrasa uma vez.
  *
- * MELHOR QUE UM NUMERO, quando isso voltar a importar: distinguir "servidor
- * atrasado" de "servidor que nunca avanca". O segundo responde flush com a
- * quota DELE cheia, repetidamente, sem trocar de sala — e isso e observavel na
- * resposta, sem relogio nenhum. Nao foi feito agora porque exige estado novo no
- * cliente, e o numero resolve o sintoma medido.
+ * E O NUMERO SOZINHO NAO BASTOU. Voltando ao jogo-dev depois de subir pra 120s,
+ * a troca fantasma apareceu de novo:
+ *
+ *   Sala 3/10 Planicie  ->  Sala 3/10 Vilarejo
+ *
+ * Relogio nao distingue "servidor atrasado" de "servidor que nunca avanca", e
+ * so o segundo justifica palpite. Por isso este tempo virou apenas a PRIMEIRA
+ * das duas condicoes: a segunda e `RESPOSTAS_ATE_DESISTIR_DA_AUTORIDADE`, logo
+ * abaixo, que olha o que a resposta do servidor diz em vez do relogio.
  */
 export const ESPERA_MAXIMA_PELA_AUTORIDADE = 120
+
+/**
+ * Quantas respostas seguidas da autoridade com a quota DELA cheia, na mesma
+ * sala, antes de o cliente desistir de esperar e palpitar (PH-271).
+ *
+ * O tempo (acima) e a primeira condicao; esta e a segunda, e as duas precisam
+ * valer. Sozinho, o relogio nao distingue servidor atrasado de servidor que
+ * nunca avanca — e so o segundo justifica palpite.
+ *
+ * 3 respostas, com o flush periodico de 30s, dao ~90s de servidor insistindo
+ * "minha quota esta cheia e eu continuo nesta sala". Menos que isso pegaria o
+ * servidor no meio de uma janela em que ele ja ia avancar; muito mais so
+ * atrasaria a rede de seguranca sem mudar a conclusao.
+ */
+export const RESPOSTAS_ATE_DESISTIR_DA_AUTORIDADE = 3
 
 /** A hunt e percorrida em salas? Hunt inicial, BOSS e Lance nao sao. */
 export function temSalas(mapId: string): boolean {
@@ -387,6 +406,10 @@ export function garantirTransicaoDeQuotaFechada(
   const sala = world.sala
   if (!sala || sala.abates < ABATES_POR_SALA) {
     world.salaEsperaDaAutoridade = 0
+    // PH-271: quota reaberta (sala nova) zera tambem a contagem de respostas com
+    // quota cheia — ela e sobre ESTA sala, nao sobre a sessao.
+    world.salaRespostasComQuotaCheia = 0
+    world.salaRespostasDaAutoridade = 0
     return
   }
   // PH-202/203: transicao ja armada (o proprio abate do protetor chamou
@@ -424,6 +447,34 @@ export function garantirTransicaoDeQuotaFechada(
     if (world.salaPredita) return
     world.salaEsperaDaAutoridade += dt
     if (world.salaEsperaDaAutoridade < ESPERA_MAXIMA_PELA_AUTORIDADE) return
+    // TEMPO NAO BASTA, E ISSO FOI MEDIDO DUAS VEZES (PH-271).
+    //
+    // O relogio sozinho nao distingue "o servidor esta atrasado" de "o servidor
+    // nunca vai avancar", e so o segundo justifica palpitar. A primeira
+    // tentativa foi subir a espera de 20s pra 120s, cobrindo o p90 de 107s da
+    // divergencia medida em scripts/harness/divergencia-de-quota.mjs — e ao
+    // vivo, no jogo-dev, a troca fantasma voltou mesmo assim:
+    //
+    //   Sala 3/10 Planicie  ->  Sala 3/10 Vilarejo
+    //
+    // Sub-bioma trocando com o numero da sala parado, que e o palpite local
+    // sendo corrigido pela autoridade na cara do jogador. Numero maior so adia.
+    //
+    // O sinal certo esta na RESPOSTA, nao no relogio. Sao TRES casos, e o
+    // relogio junta os tres num so:
+    //
+    //  1. servidor MUDO (rede caida, Edge fora do ar): nenhuma resposta chegou
+    //     nesta sala. Palpitar e a unica saida — sem isso a hunt trava com a
+    //     barra cheia toda vez que a rede cai, que e pior que o bug original.
+    //  2. servidor ATRASADO (o caso comum, e o que causava a troca fantasma):
+    //     ele responde com a quota DELE ainda subindo. Esperar e o certo.
+    //  3. servidor QUE NUNCA AVANCA (bundle anterior a 2026-08-19): ele responde
+    //     com a quota cheia, de novo e de novo, sem trocar de sala. Palpitar.
+    //
+    // Ver `salaRespostasDaAutoridade` e `salaRespostasComQuotaCheia` em types.ts.
+    const mudo = world.salaRespostasDaAutoridade === 0
+    const parado = world.salaRespostasComQuotaCheia >= RESPOSTAS_ATE_DESISTIR_DA_AUTORIDADE
+    if (!mudo && !parado) return
     world.salaEsperaDaAutoridade = 0
     const armada = armarTransicaoDeSala(world, mapId)
     if (armada.avancou) world.salaPredita = true
@@ -527,6 +578,15 @@ export function reconciliarSalaDaAutoridade(
     // Voltar faria a barra do HUD recuar sozinha.
     const alvo = world.salaPendente ?? world.sala
     if (alvo) alvo.abates = Math.max(alvo.abates, sala.abates)
+    // O SERVIDOR ESTA NESTA SALA COM A QUOTA DELE CHEIA? (PH-271)
+    //
+    // E a unica pergunta que separa "atrasado" de "nunca vai avancar", e a
+    // resposta e o que libera (ou nao) o palpite local em
+    // `garantirTransicaoDeQuotaFechada`. Quota incompleta zera: ele esta
+    // contando, e esperar e o certo.
+    world.salaRespostasDaAutoridade += 1
+    if (sala.abates >= ABATES_POR_SALA) world.salaRespostasComQuotaCheia += 1
+    else world.salaRespostasComQuotaCheia = 0
     // O servidor chegou na MESMA sala: o palpite virou verdade e o fallback
     // pode voltar a valer daqui pra frente.
     world.salaPredita = false
@@ -565,6 +625,10 @@ export function reconciliarSalaDaAutoridade(
   world.salaPendente = { ...sala }
   world.salaCountdownRemaining ??= SALA_TRANSITION_COUNTDOWN
   world.salaEsperaDaAutoridade = 0
+  // PH-271: o servidor trocou de sala, entao ele NAO e um servidor parado — a
+  // contagem recomeca do zero na sala nova.
+  world.salaRespostasComQuotaCheia = 0
+  world.salaRespostasDaAutoridade = 0
   world.salaPredita = false
 }
 
