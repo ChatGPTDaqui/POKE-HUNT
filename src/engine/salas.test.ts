@@ -665,3 +665,78 @@ describe('predicao local cede pra autoridade', () => {
     expect(world.salaPredita).toBe(true)
   })
 })
+
+// PH-258 — a sala nova que nasce MORTA, e o contador que mente na troca.
+//
+// Os dois casos abaixo vem do mesmo relato: "a hunt muda de bioma sem ter
+// completado as 30 kills, e em alguns casos ficando tambem sem novos oponentes;
+// ha casos em que nao se passa da sala 2".
+describe('transicao de sala nao deixa lixo pra tras (PH-258)', () => {
+  beforeEach(() => {
+    useGameStateStore.getState().resetToDefaults()
+  })
+
+  it('protetor da sala anterior nao segue pendurado — e o campo volta a nascer', () => {
+    // O CAMINHO REAL: a quota fecha, o protetor da sala nasce, o jogador NAO o
+    // mata, e o flush do servidor traz a sala seguinte. `aplicarTransicaoDeSala`
+    // zerava `world.enemies` mas deixava `protetorPendente` — e o respawn de mob
+    // comum tem `&& !world.protetorPendente` na condicao. Sala nova, campo
+    // vazio, respawn desligado por um protetor que nao existe mais: nada nasce,
+    // ninguem morre, a quota nunca fecha. F5 era a unica saida.
+    const world = mundo(77)
+    const gameState = useGameStateStore.getState()
+    world.salaSobAutoridade = true
+    world.sala!.abates = ABATES_POR_SALA
+
+    // Um tick pra o protetor da sala nascer (sem resolver — e esse o caso).
+    stepWorld(world, 0.1, gameState, { silent: true })
+    expect(world.protetorPendente, 'o cenario exige protetor pendente').not.toBeNull()
+
+    // O servidor manda a sala seguinte.
+    const proxima = { indice: 1, chave: world.sala!.chave, abates: 0, ciclos: 0 }
+    reconciliarSalaDaAutoridade(world, proxima)
+    for (let i = 0; i < Math.ceil(SALA_TRANSITION_COUNTDOWN / 0.1) + 2; i++) {
+      stepWorld(world, 0.1, gameState, { silent: true })
+    }
+
+    expect(world.sala!.indice, 'a sala trocou').toBe(1)
+    expect(world.protetorPendente, 'protetor fantasma da sala anterior').toBeNull()
+
+    // E o campo volta a ter inimigo: sem isto a sala e um mapa vazio pra sempre.
+    for (let i = 0; i < Math.ceil(world.mapDef!.respawnDelay / 0.1) + 20; i++) {
+      stepWorld(world, 0.1, gameState, { silent: true })
+    }
+    expect(world.enemies.filter((e) => e.poke.hp > 0).length).toBeGreaterThan(0)
+  })
+
+  it('a barra fecha antes do aviso quando o servidor troca a sala', () => {
+    // Cliente e servidor contam abates em sequencias de sorteio diferentes —
+    // medido em scripts/harness/divergencia-de-quota.mjs: mediana de 32,6s de
+    // diferenca pra fechar a quota, 112s no pior caso. Quem decide a troca e o
+    // servidor, entao quando ele manda sala nova a quota FECHOU; deixar a barra
+    // em 12/30 com "Entrando em nova area" na tela le como bug.
+    const world = mundo(78)
+    world.salaSobAutoridade = true
+    world.sala!.abates = 12
+
+    reconciliarSalaDaAutoridade(world, { indice: 1, chave: world.sala!.chave, abates: 0, ciclos: 0 })
+
+    expect(world.sala!.abates).toBe(ABATES_POR_SALA)
+    expect(world.salaPendente?.indice).toBe(1)
+    expect(world.salaCountdownRemaining).toBe(SALA_TRANSITION_COUNTDOWN)
+  })
+
+  it('sala IGUAL (so o contador andou) nao mexe na barra', () => {
+    // O contrato negativo: encher a barra so vale quando a sala TROCA. No caso
+    // comum — um flush a cada 30s, mesma sala — o contador do servidor manda,
+    // e forcar 30 aqui anunciaria quota fechada a hunt inteira.
+    const world = mundo(79)
+    world.salaSobAutoridade = true
+    world.sala!.abates = 12
+
+    reconciliarSalaDaAutoridade(world, { ...world.sala!, abates: 14 })
+
+    expect(world.sala!.abates).toBe(14)
+    expect(world.salaPendente).toBeNull()
+  })
+})
