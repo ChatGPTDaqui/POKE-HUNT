@@ -34,6 +34,7 @@ import { ComporMensagem } from './ComporMensagem'
 import { Conversa, type Contato } from './Conversa'
 import { LinhaDeMensagem } from './LinhaDeMensagem'
 import { PainelAmigos } from './PainelAmigos'
+import { RecebimentoDePoke } from './RecebimentoDePoke'
 
 const STALE_MS = 15000
 
@@ -67,6 +68,10 @@ export function CorreioMenu() {
   const [compondo, setCompondo] = useState<{ nickInicial?: string } | null>(null)
   const [contatoAberto, setContatoAberto] = useState<Contato | null>(null)
   const [meuId, setMeuId] = useState<string | null>(null)
+  // POKE que acabou de sair de um anexo (PH-164). Estado de COMPONENTE e nada
+  // mais: a tela de recebimento nao pode sobreviver a uma recarga de pagina —
+  // ver o cabecalho de `RecebimentoDePoke`.
+  const [pokeRecebido, setPokeRecebido] = useState<correioRpc.PokeRecebido | null>(null)
 
   // PH-119: quem abriu o Correio pedindo uma conversa específica (o botão
   // "Conversar" do perfil público). Consumido UMA vez e limpo — sem isso,
@@ -128,7 +133,13 @@ export function CorreioMenu() {
 
   const coletar = useMutation({
     mutationFn: (id: string) => correioRpc.coletarAnexo(id),
-    onSuccess: (r) => { toast(r.mensagem); recarregar() },
+    onSuccess: (r) => {
+      // Com POKE a tela de recebimento JA diz o que chegou; um toast por cima
+      // dela seria o mesmo aviso duas vezes, um deles atras de um overlay.
+      if (r.poke) setPokeRecebido(r.poke)
+      else toast(r.mensagem)
+      recarregar()
+    },
     onError: aoFalhar('Nao foi possivel coletar.'),
   })
 
@@ -387,6 +398,10 @@ export function CorreioMenu() {
           {painelDireito}
         </div>
       ) : painelDireito ?? painelEsquerdo}
+
+      {pokeRecebido && (
+        <RecebimentoDePoke poke={pokeRecebido} onFechar={() => setPokeRecebido(null)} />
+      )}
     </div>
   )
 }
