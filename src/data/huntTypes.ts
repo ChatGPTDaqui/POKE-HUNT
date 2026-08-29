@@ -42,6 +42,42 @@ export interface HuntMapDef extends MapDataEntry {
   // antes de `pickAbility`). IV de ataque no minimo sozinho nao bastava —
   // o gap de NIVEL na formula de dano ainda deixava passar dano real.
   passiveEnemies?: boolean
+  /**
+   * Distancia minima entre dois selvagens desta hunt no spawn, sobrepondo o
+   * `SPAWN_ENTRE_INIMIGOS` padrao (simulation.ts). Ausente = o padrao.
+   *
+   * Existe pra hunt inicial (PH-259): la a quantidade de inimigos em campo
+   * subiu, pra o POKE nao precisar atravessar o mapa entre um abate e o
+   * proximo, e o unico jeito de fazer isso sem devolver a morte de conta nova e
+   * garantir que eles nascam LONGE UNS DOS OUTROS. Com o padrao de 170 — menor
+   * que o raio de aggro de 175 (`WILD_AGGRO_RADIUS`) — dois vizinhos notam o
+   * jogador no mesmo instante, e um inicial Lv1 com 12 HP enfrenta os dois.
+   */
+  spawnEntreInimigos?: number
+  /**
+   * Faixa `[min, max]` de distancia do JOGADOR em que o selvagem desta hunt
+   * nasce, sobrepondo `SPAWN_CONE_MIN_DISTANCE`/`SPAWN_CONE_MAX_DISTANCE`
+   * (simulation.ts). Ausente = a padrao, 250-550.
+   *
+   * A padrao existe pra "criar a ideia de explorar o mapa" (pedido antigo). Na
+   * hunt inicial ela cobra caro demais: e uma hunt de UM inimigo em campo, e
+   * medindo com o motor headless o POKE passa metade do tempo so andando. Ver
+   * scripts/harness/spawn-da-hunt-inicial.mjs.
+   */
+  spawnDistancia?: [number, number]
+  /**
+   * Degraus de `maxEnemies` por NIVEL do POKE em campo, do menor pro maior
+   * nivel. Ausente = `maxEnemies` vale sempre.
+   *
+   * A hunt inicial e a unica que usa (PH-259). O que mata conta nova ali e uma
+   * janela estreita e conhecida — os primeiros 30-60 segundos, com o POKE Lv1 e
+   * 12 HP; passada ela, o POKE atravessa os 20 minutos inteiros. Um numero fixo
+   * tem que escolher entre proteger essa janela (1 inimigo, e o resto da hunt
+   * fica vazio) e dar ritmo (mais inimigos, e a conta morre no primeiro minuto,
+   * medido 4/10 com dois). Os degraus atendem os dois: a janela critica segue
+   * com um inimigo, e o campo enche quando o POKE ja aguenta.
+   */
+  maxEnemiesPorNivel?: { nivel: number; max: number }[]
 }
 
 export interface HuntEncounter extends EncounterDataEntry {
