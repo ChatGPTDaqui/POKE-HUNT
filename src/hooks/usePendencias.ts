@@ -94,7 +94,11 @@ export function usePendenciasDoCorreio(): number {
   // Aviso de sistema e pedido de amizade ficam fora das conversas, mas nao
   // fora do contador: pro sino do HUD e tudo "tem coisa esperando voce".
   const emAvisos = data.avisos.filter((m) => {
-    const temAnexoPendente = (m.anexo_itens?.length ?? 0) > 0 && !m.anexo_coletado_em
+    // PH-164: o anexo de POKE conta igual. Sem ele, a carta do Eevee marcada
+    // como lida sumia do sino com o presente ainda preso dentro — o mesmo
+    // buraco que o PH-22 fechou pro anexo de item.
+    const temAlgoAnexado = (m.anexo_itens?.length ?? 0) > 0 || Boolean(m.anexo_poke)
+    const temAnexoPendente = temAlgoAnexado && !m.anexo_coletado_em
     return temAnexoPendente || m.estado === 'pendente'
   }).length
   return naConversa + emAvisos

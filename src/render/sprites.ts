@@ -11,6 +11,10 @@
 // tambem `world` pra resolver o id numa entidade de verdade
 // (`resolveEffectOwner`), no lugar de `effect.owner` direto.
 import { directionRowFromFacing } from '@/engine/systems/animationSystem'
+// So `medirTextoDeCombate` usa — ver a nota em `seloDoProtetor` sobre por que a
+// medicao resolve o tipo do mundo que ja recebe, enquanto `drawNameLevelTag`
+// continua recebendo o tipo pronto de quem chama.
+import { protetorDaSala } from '@/engine/systems/salaSystem'
 import { hasBattleSprites } from '@/data/battleSprites'
 import { effectProgress } from '@/engine/effect'
 import { SPECIES } from '@/data/pokes'
@@ -49,21 +53,21 @@ function getSpecies(entity: WorldEntity): Species {
   return SPECIES[entity.poke.speciesId]
 }
 
-// PH-228: `isBoss` so existe em EnemyEntity (WorldEntity tambem cobre o
-// player) — `in` narrowing pra nao quebrar o union. Sistema separado do
-// LEGENDARY_SPECIES_IDS que drawHpBar ja usava (Modo Pesadelo, boss por
+// PH-228/236: `isProtetor` so existe em EnemyEntity (WorldEntity tambem
+// cobre o player) — `in` narrowing pra nao quebrar o union. Sistema separado
+// do LEGENDARY_SPECIES_IDS que drawHpBar ja usava (Modo Pesadelo, boss por
 // especie fixa) — os dois se somam, nao se substituem.
-function ehBoss(entity: WorldEntity): boolean {
-  return 'isBoss' in entity && entity.isBoss === true
+function ehProtetor(entity: WorldEntity): boolean {
+  return 'isProtetor' in entity && entity.isProtetor === true
 }
 
 // Mesmo fator nos 3 lugares que multiplicam scaleForSpecies (spriteBounds,
 // visualTopOffset, sombra) — sprite maior precisa da sombra/HP-bar/name-tag
-// acompanhando, senao a barra fica flutuando longe da cabeca do boss.
-const BOSS_SPRITE_SCALE = 1.4
+// acompanhando, senao a barra fica flutuando longe da cabeca do protetor.
+const PROTETOR_SPRITE_SCALE = 1.4
 
 function effectiveScale(entity: WorldEntity): number {
-  return scaleForSpecies(getSpecies(entity).id) * (ehBoss(entity) ? BOSS_SPRITE_SCALE : 1)
+  return scaleForSpecies(getSpecies(entity).id) * (ehProtetor(entity) ? PROTETOR_SPRITE_SCALE : 1)
 }
 
 function maxHp(entity: WorldEntity): number {
@@ -448,25 +452,25 @@ function drawShadow(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
   ctx.restore()
 }
 
-// PH-228: aura de "isso e boss", separada de `drawAura` (que sinaliza IV
-// maximizado — semantica diferente, um boss com IV normal nao devia ganhar
-// halo de raridade que ele nao tem). Pulso pelo relogio de parede, mesmo
-// padrao de CICLO_SIMBOLO_MS abaixo — enfeite que roda igual com o jogo
-// pausado atras de um menu.
-const AURA_DE_BOSS_CICLO_MS = 1600
-const AURA_DE_BOSS_RAIO_MIN = 0.85
-const AURA_DE_BOSS_RAIO_MAX = 1.05
+// PH-228/236: aura de "isso e protetor", separada de `drawAura` (que
+// sinaliza IV maximizado — semantica diferente, um protetor com IV normal
+// nao devia ganhar halo de raridade que ele nao tem). Pulso pelo relogio de
+// parede, mesmo padrao de CICLO_SIMBOLO_MS abaixo — enfeite que roda igual
+// com o jogo pausado atras de um menu.
+const AURA_DO_PROTETOR_CICLO_MS = 1600
+const AURA_DO_PROTETOR_RAIO_MIN = 0.85
+const AURA_DO_PROTETOR_RAIO_MAX = 1.05
 
-function drawBossAura(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
-  if (!ehBoss(entity)) return
+function drawAuraDoProtetor(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
+  if (!ehProtetor(entity)) return
   const cor = colorForType(getSpecies(entity).type)
   const bounds = spriteBounds(entity)
   const raioBase = bounds ? Math.max(bounds.w, bounds.h) * 0.55 : entity.radius * 1.8
-  const fase = (performance.now() % AURA_DE_BOSS_CICLO_MS) / AURA_DE_BOSS_CICLO_MS
+  const fase = (performance.now() % AURA_DO_PROTETOR_CICLO_MS) / AURA_DO_PROTETOR_CICLO_MS
   // Onda triangular (sobe e desce) em vez de senoidal — barato e a diferenca
   // nao e perceptivel num halo desse tamanho.
   const pulso = fase < 0.5 ? fase * 2 : 2 - fase * 2
-  const raio = raioBase * (AURA_DE_BOSS_RAIO_MIN + (AURA_DE_BOSS_RAIO_MAX - AURA_DE_BOSS_RAIO_MIN) * pulso)
+  const raio = raioBase * (AURA_DO_PROTETOR_RAIO_MIN + (AURA_DO_PROTETOR_RAIO_MAX - AURA_DO_PROTETOR_RAIO_MIN) * pulso)
   const centroY = entity.y - visualTopOffset(entity) * 0.5
 
   ctx.save()
@@ -483,7 +487,7 @@ function drawBossAura(ctx: CanvasRenderingContext2D, entity: WorldEntity): void 
 
 export function drawEntity(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
   drawShadow(ctx, entity)
-  drawBossAura(ctx, entity)
+  drawAuraDoProtetor(ctx, entity)
   drawAura(ctx, entity)
   const drewSprite = Boolean(entity.battleAnim) && drawBattleSprite(ctx, entity)
   // O placeholder geometrico (triangulo/circulo colorido) e pra especie que NAO
@@ -680,8 +684,8 @@ function roundedRectPath(ctx: CanvasRenderingContext2D, x: number, y: number, w:
   ctx.closePath()
 }
 
-const BOSS_HP_BAR_WIDTH_MULTIPLIER = 5
-const BOSS_HP_BAR_HEIGHT_MULTIPLIER = 2
+const PROTETOR_HP_BAR_WIDTH_MULTIPLIER = 5
+const PROTETOR_HP_BAR_HEIGHT_MULTIPLIER = 2
 
 /**
  * Cor do numero de porcentagem. Branco puro em cima do contorno preto — a COR
@@ -694,12 +698,14 @@ const COR_DA_PORCENTAGEM = '#ffffff'
 export function drawHpBar(
   ctx: CanvasRenderingContext2D, entity: WorldEntity, mostrarPorcentagem = false,
 ): void {
-  // PH-228: mesma barra grande que o Modo Pesadelo ja usa pros bosses por
-  // especie fixa (LEGENDARY_SPECIES_IDS) — o boss por sala/andar (isBoss)
-  // entra no mesmo tratamento visual, os dois sistemas nao se excluem.
-  const isBoss = ehBoss(entity) || LEGENDARY_SPECIES_IDS.includes(getSpecies(entity).id)
-  const width = HP_BAR_WIDTH * (isBoss ? BOSS_HP_BAR_WIDTH_MULTIPLIER : 1)
-  const height = HP_BAR_HEIGHT * (isBoss ? BOSS_HP_BAR_HEIGHT_MULTIPLIER : 1)
+  // PH-228/236: mesma barra grande que o Modo Pesadelo ja usa pros bosses
+  // por especie fixa (LEGENDARY_SPECIES_IDS) — o protetor por sala/andar
+  // (isProtetor) entra no mesmo tratamento visual, os dois sistemas nao se
+  // excluem. Nome neutro (`barraGrande`, nao `isProtetor`) de proposito: a
+  // condicao cobre os DOIS sistemas, e so um deles e de fato protetor.
+  const barraGrande = ehProtetor(entity) || LEGENDARY_SPECIES_IDS.includes(getSpecies(entity).id)
+  const width = HP_BAR_WIDTH * (barraGrande ? PROTETOR_HP_BAR_WIDTH_MULTIPLIER : 1)
+  const height = HP_BAR_HEIGHT * (barraGrande ? PROTETOR_HP_BAR_HEIGHT_MULTIPLIER : 1)
   const x = entity.x - width / 2
   const y = entity.y - visualTopOffset(entity) - 8 - height
   const pct = Math.max(0, entity.poke.hp / maxHp(entity))
@@ -748,20 +754,51 @@ export function drawHpBar(
 
 const SHINY_NAME_COLOR = '#b366ff'
 
-// PH-228: cor propria pra distinguir do amarelo de shiny e do branco normal —
-// vermelho/dourado le como "aviso/destaque", nao como raridade de captura.
-const BOSS_TAG_COLOR = '#ff4d4d'
+// PH-228/236: cor propria pra distinguir do amarelo de shiny e do branco
+// normal — vermelho/dourado le como "aviso/destaque", nao como raridade de
+// captura.
+const PROTETOR_TAG_COLOR = '#ff4d4d'
 
-/** O selo escrito acima do nome de um boss. Constante porque o planejador de
- * texto (PH-189) precisa medir a largura dele pra tratar o rotulo como
- * obstaculo — e uma string repetida em dois lugares vira caixa medida errada no
- * dia em que so um dos dois mudar. */
-const SELO_DE_BOSS = '★ BOSS ★'
+/**
+ * O selo escrito acima do nome de um protetor.
+ *
+ * PH-236: qual tag mostrar (Guardian, sala 1-9, ou Lord, sala 10) depende do
+ * TIPO do protetor — informacao que nao vive na entidade (`isProtetor` so marca
+ * QUE e protetor, nao QUAL). Quem chama passa o tipo resolvido pela sala
+ * (`protetorDaSala`, engine/systems/salaSystem.ts) — sprites.ts fica livre de
+ * reimportar a logica de sala, so decide o texto. `undefined`/`null` (player,
+ * cena do Hospital, chamador antigo) cai no fallback GUARDIAN, mas so aparece na
+ * tela quando `isProtetor` tambem for true.
+ *
+ * FUNCAO, e nao string literal no ponto de desenho (PH-189): o planejador de
+ * texto precisa medir a largura deste selo pra tratar o rotulo como obstaculo, e
+ * ele mede pelo mesmo caminho que a tela escreve. Com o texto repetido em dois
+ * lugares, o dia em que so um dos dois mudasse deixaria a caixa medida com a
+ * largura do OUTRO selo — e "★ GUARDIAN ★" e meia vez mais largo que "★ LORD ★",
+ * entao o erro nao seria de um pixel. Ver `medirTextoDeCombate` mais abaixo.
+ *
+ * E POR QUE `medirTextoDeCombate` PODE CHAMAR `protetorDaSala` E ESTA FUNCAO
+ * NAO: a regra de cima vale pro DESENHO. `drawNameLevelTag` recebe um `ctx` e
+ * uma entidade e nao tem mundo nenhum em maos — ali resolver a sala seria de
+ * fato reimportar logica que nao lhe pertence. `medirTextoDeCombate` ja recebe o
+ * `WorldState` inteiro e ja le `world.effects`/`enemies`/`player`; ler tambem
+ * `world.sala` nao acrescenta acoplamento novo. A alternativa — propagar o tipo
+ * por parametro ate la — passaria por sete chamadas de teste, e cada uma seria
+ * mais um lugar onde o teste pode medir um selo e a tela escrever outro, que e
+ * exatamente o que esta funcao existe pra impedir.
+ */
+function seloDoProtetor(tipoDeProtetor?: 'guardian' | 'lord' | null): string {
+  return tipoDeProtetor === 'lord' ? '★ LORD ★' : '★ GUARDIAN ★'
+}
 
-export function drawNameLevelTag(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
+export function drawNameLevelTag(
+  ctx: CanvasRenderingContext2D,
+  entity: WorldEntity,
+  tipoDeProtetor?: 'guardian' | 'lord' | null,
+): void {
   const halfHeight = visualTopOffset(entity)
   const isShiny = entity.poke.isShiny
-  const isBoss = ehBoss(entity)
+  const protetor = ehProtetor(entity)
   const name = isShiny ? `✨ ${getSpecies(entity).name}` : getSpecies(entity).name
   ctx.save()
   ctx.font = FONTE.nomeDaEspecie
@@ -776,11 +813,15 @@ export function drawNameLevelTag(ctx: CanvasRenderingContext2D, entity: WorldEnt
   ctx.strokeText(name, entity.x, entity.y - halfHeight - 26)
   ctx.fillStyle = isShiny ? SHINY_NAME_COLOR : '#f1f1f6'
   ctx.fillText(name, entity.x, entity.y - halfHeight - 26)
-  if (isBoss) {
+  if (protetor) {
+    // `FONTE.selo` e nao `'bold 9px monospace'` escrito aqui: e a MESMA fonte,
+    // e e a que o planejador usa pra medir a caixa deste selo. Duas grafias do
+    // mesmo valor sao duas coisas que podem divergir (PH-189).
+    const tagText = seloDoProtetor(tipoDeProtetor)
     ctx.font = FONTE.selo
-    ctx.strokeText(SELO_DE_BOSS, entity.x, entity.y - halfHeight - 37)
-    ctx.fillStyle = BOSS_TAG_COLOR
-    ctx.fillText(SELO_DE_BOSS, entity.x, entity.y - halfHeight - 37)
+    ctx.strokeText(tagText, entity.x, entity.y - halfHeight - 37)
+    ctx.fillStyle = PROTETOR_TAG_COLOR
+    ctx.fillText(tagText, entity.x, entity.y - halfHeight - 37)
   }
   ctx.restore()
 }
@@ -1374,7 +1415,11 @@ export function medirTextoDeCombate(
       m,
       entidade.poke.isShiny ? `✨ ${especie.name}` : especie.name,
       `Lv${entidade.poke.level}`,
-      ehBoss(entidade) ? SELO_DE_BOSS : null,
+      // Mesmo selo que a tela escreve, pelo mesmo caminho e com o tipo resolvido
+      // pela mesma sala — se aqui medisse "★ GUARDIAN ★" e o quadro escrevesse
+      // "★ LORD ★", a caixa reservada teria a largura errada e o texto vizinho
+      // subiria (ou nao subiria) pelo motivo errado (PH-189/236).
+      ehProtetor(entidade) ? seloDoProtetor(protetorDaSala(world.sala)) : null,
       entidade.x,
       entidade.y - visualTopOffset(entidade),
     ))

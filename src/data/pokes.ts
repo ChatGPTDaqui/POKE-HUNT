@@ -396,19 +396,19 @@ function rollIvs(rng: Rng, speciesId?: string): StatBlock {
   return ivs
 }
 
-// PH-202/204: IV do boss (mini/ultimate) e sorteado num piso mais alto que o
-// selvagem normal, nao 0-31 — design explicito, e ataca de quebra o problema
-// de IV nunca sair alto. Consome `world.rng` igual a qualquer sorteio de
-// combate, entao reconferivel pelo servidor do mesmo jeito.
-export const BOSS_IV_MIN = 20
-export function rollIvsDoBoss(rng: Rng): StatBlock {
+// PH-202/204/236: IV do protetor (Guardian/Lord) e sorteado num piso mais
+// alto que o selvagem normal, nao 0-31 — design explicito, e ataca de quebra
+// o problema de IV nunca sair alto. Consome `world.rng` igual a qualquer
+// sorteio de combate, entao reconferivel pelo servidor do mesmo jeito.
+export const PROTETOR_IV_MIN = 20
+export function rollIvsDoProtetor(rng: Rng): StatBlock {
   return {
-    hp: randInt(rng, BOSS_IV_MIN, IV_MAX),
-    atkFis: randInt(rng, BOSS_IV_MIN, IV_MAX),
-    atkEsp: randInt(rng, BOSS_IV_MIN, IV_MAX),
-    def: randInt(rng, BOSS_IV_MIN, IV_MAX),
-    defEsp: randInt(rng, BOSS_IV_MIN, IV_MAX),
-    speed: randInt(rng, BOSS_IV_MIN, IV_MAX),
+    hp: randInt(rng, PROTETOR_IV_MIN, IV_MAX),
+    atkFis: randInt(rng, PROTETOR_IV_MIN, IV_MAX),
+    atkEsp: randInt(rng, PROTETOR_IV_MIN, IV_MAX),
+    def: randInt(rng, PROTETOR_IV_MIN, IV_MAX),
+    defEsp: randInt(rng, PROTETOR_IV_MIN, IV_MAX),
+    speed: randInt(rng, PROTETOR_IV_MIN, IV_MAX),
   }
 }
 
@@ -437,9 +437,9 @@ export interface CreatePokeInstanceOptions {
   rarity?: RarityKey
   nature?: NatureKey
   /**
-   * PH-202/204: fixar tambem shiny/trait/uid, alem de ivs/rarity/nature
-   * acima — pra RECRIAR um boss persistido sem consumir `rng` de novo (os
-   * dois nao tinham parametro pra pular o sorteio antes desta leva).
+   * PH-202/204/236: fixar tambem shiny/trait/uid, alem de ivs/rarity/nature
+   * acima — pra RECRIAR um protetor persistido sem consumir `rng` de novo
+   * (os dois nao tinham parametro pra pular o sorteio antes desta leva).
    */
   isShiny?: boolean
   trait?: string

@@ -1,0 +1,425 @@
+-- PH-164 — vencer o Campeao Lance pela PRIMEIRA vez concede um Eevee, entregue
+-- pelo correio do sistema.
+--
+-- =========================================================================
+-- A DECISAO QUE A ISSUE PEDIA: o anexo do correio passa a carregar POKE
+-- =========================================================================
+--
+-- `anexo_itens` so sabia carregar item (`[{itemId, quantity}]`). As duas saidas
+-- eram conceder o POKE direto (e o correio virar so narrativa) ou ensinar o
+-- anexo a carregar POKE. A segunda foi a escolhida, e o motivo decisivo e o
+-- TIME CHEIO: com o POKE no anexo, a mensagem simplesmente fica la ate haver
+-- espaco — sem estado novo, sem fila, sem "o que fazer com o presente que nao
+-- coube". Conceder direto exigiria inventar esse tratamento agora e reinventa-lo
+-- em toda recompensa futura.
+--
+-- O anexo guarda uma RECEITA (especie, nivel, IVs, raridade), nao uma linha
+-- pronta de `pokemon_instances`: os stats sao derivados de `_calcular_stats`, e
+-- congelar numeros aqui os deixaria velhos no dia em que a formula ou a base da
+-- especie mudar — o POKE nasceria diferente de todo outro da mesma especie.
+--
+-- =========================================================================
+-- O SEGUNDO BURACO DA ISSUE JA ESTAVA FECHADO
+-- =========================================================================
+--
+-- A issue dizia que nao existia registro de "derrotou o Lance" e que ele
+-- precisaria ser autoridade do servidor. Ele passou a existir depois que ela foi
+-- escrita: `hall_da_fama` (20260808160000) e gravada pela AUTORIDADE dentro do
+-- flush (`authority/src/progresso.ts`, `ganhouGrupoDoLance`), tem chave primaria
+-- (user_id, conquista) e o INSERT so e concedido a `service_role` — o jogador
+-- tem SELECT e mais nada.
+--
+-- Por isso a concessao pendura num TRIGGER de INSERT dessa tabela em vez de
+-- codigo novo na Edge. Tres consequencias, e as tres sao o ponto:
+--
+--   1. E server-authoritative de graca. Um cliente que adultere o estado local
+--      pra "nunca venci" e revenca o Lance faz a autoridade tentar de novo o
+--      upsert em `hall_da_fama` — que cai no ON CONFLICT DO UPDATE e NAO dispara
+--      trigger de INSERT. Nao ha segunda concessao.
+--   2. Vale pra qualquer caminho que registre a conquista, hoje ou depois.
+--   3. Nao mexe no bundle da Edge, entao a mudanca de motor (e o risco dela)
+--      simplesmente nao existe nesta issue.
+--
+-- Mesmo assim a idempotencia NAO fica so nisso. `recompensa_concedida` e o
+-- marcador explicito que a issue pediu: um `insert ... on conflict do nothing`
+-- que so segue quando de fato inseriu. Ele cobre o caso que a PK de
+-- `hall_da_fama` nao cobre — a linha da conquista ser apagada e recriada (fix de
+-- dado, reset parcial, rotina futura). Sem ele, isso reemitiria o presente.
+--
+-- O PRECO DO `AFTER INSERT`, dito aqui pra nao ser descoberto em producao: ele
+-- nao alcanca quem JA tinha a linha. Quem venceu o Lance antes desta feature
+-- existir nao recebe por este caminho — sao 3 jogadores em `public` (0 em `dev`)
+-- na data desta migration. Eles entram pela 20260828233000, que chama a MESMA
+-- funcao de concessao daqui e por isso herda o mesmo marcador.
+--
+-- =========================================================================
+-- O QUE NAO MUDA
+-- =========================================================================
+--
+-- O claim continua sendo `update ... where anexo_coletado_em is null returning`,
+-- em transacao unica com a criacao do POKE. Duas abas coletando ao mesmo tempo:
+-- a segunda nao acha linha e recebe erro tratado. Time cheio: a excecao desfaz o
+-- claim junto, entao a mensagem volta a ficar pendente — o Eevee nao some.
+--
+-- `anexo_coletado_em` continua FORA do grant de update de `authenticated` (o
+-- `revoke update` de 20260812180000, linha 2018) — so esta RPC toca a coluna.
+
+begin;
+
+-- ---------------------------------------------------------------------------
+-- 1. O anexo aprende a carregar POKE
+-- ---------------------------------------------------------------------------
+alter table public.mail_messages
+  add column if not exists anexo_poke jsonb;
+
+comment on column public.mail_messages.anexo_poke is
+  'Receita do POKE anexado: {speciesId, level, ivs:{hp,atkFis,atkEsp,def,defEsp,speed}, rarity, isShiny}. '
+  'Nulo na esmagadora maioria das mensagens. Os stats NAO ficam aqui — sao derivados na coleta.';
+
+-- O indice de "tem coisa pra pegar" tinha o predicado amarrado so a
+-- `anexo_itens`, entao uma mensagem so-com-POKE ficava de fora dele. Predicado
+-- parcial nao se altera no lugar: cai e sobe de novo.
+drop index if exists public.mail_messages_anexo_pendente_idx;
+create index mail_messages_anexo_pendente_idx
+  on public.mail_messages (para_id)
+  where anexo_coletado_em is null
+    and (anexo_itens <> '[]'::jsonb or anexo_poke is not null);
+
+-- ---------------------------------------------------------------------------
+-- 2. Marcador de recompensa unica
+-- ---------------------------------------------------------------------------
+-- A chave primaria composta E o indice unico que a issue pediu; nao precisa ser
+-- parcial porque a tabela so guarda recompensa JA concedida — nao ha estado
+-- "pendente" pra excluir do indice.
+--
+-- Sem grant de INSERT pra ninguem: quem escreve e a funcao do trigger, que e
+-- SECURITY DEFINER e roda como dona da tabela. Um grant aqui abriria rota
+-- paralela pro cliente se declarar premiado.
+create table if not exists public.recompensa_concedida (
+  user_id uuid not null references public.players(user_id) on delete cascade,
+  chave text not null,
+  concedido_em timestamptz not null default now(),
+  primary key (user_id, chave)
+);
+
+alter table public.recompensa_concedida enable row level security;
+
+drop policy if exists "recompensa leitura propria" on public.recompensa_concedida;
+create policy "recompensa leitura propria" on public.recompensa_concedida
+  for select to authenticated using (user_id = auth.uid());
+
+grant select on public.recompensa_concedida to authenticated;
+grant select, insert on public.recompensa_concedida to service_role;
+
+-- ---------------------------------------------------------------------------
+-- 3. A concessao, no INSERT da conquista
+-- ---------------------------------------------------------------------------
+-- O NIVEL E OS IVs sao a unica coisa aqui que e escolha de balanceamento, e a
+-- issue nao os especifica. Escolhido: nivel 25 com IV 23 em tudo e raridade
+-- `comum`.
+--
+--   - IV 23 e o padrao declarado do proprio time do Lance
+--     (`data/nightmareMaps.ts#LANCE_IVS`) — o presente carrega a marca de quem
+--     deu, e o numero ja existia no jogo em vez de ser inventado aqui.
+--   - raridade `comum` (multiplicador 1,0) de proposito: `raro` ou acima
+--     multiplicaria os stats em 1,35x ou mais e o presente viraria pico de
+--     poder. O valor do Eevee e ele ser a porta das cinco evolucoes, nao ser
+--     forte de saida.
+--   - nivel 25 contra o nivel 80 que a evolucao exige (ver `pokes.generated.ts`):
+--     e um POKE de projeto, e o jogador cria ele. Comecar no nivel do time do
+--     Lance entregaria o fim junto com o comeco.
+--
+-- Se esse trio for reafinado, muda AQUI e em nenhum outro lugar: o cliente le a
+-- receita da mensagem, nao a repete.
+--
+-- FUNCAO SEPARADA DO TRIGGER, e nao o corpo inline nele, porque ela tem DOIS
+-- chamadores: o trigger (vitoria nova) e a migration retroativa
+-- 20260828233000 (quem venceu antes desta feature existir). Escrever a carta
+-- duas vezes daria duas receitas pra manter em sincronia — exatamente a
+-- divergencia que a PH-245 pagou em producao.
+--
+-- Devolve `true` quando de fato concedeu. O chamador retroativo usa isso pra
+-- CONTAR; o trigger ignora, porque ele nao tem o que fazer com a resposta.
+create or replace function public._conceder_eevee_do_lance(p_user_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.recompensa_concedida (user_id, chave)
+  values (p_user_id, 'eevee_do_lance')
+  on conflict do nothing;
+  -- `found` e falso quando o ON CONFLICT engoliu o insert: ja foi concedido
+  -- antes, e sair aqui e o que impede a segunda carta.
+  if not found then
+    return false;
+  end if;
+
+  insert into public.mail_messages (para_id, de_id, de_nome, tipo, assunto, corpo, anexo_poke)
+  values (
+    p_user_id,
+    -- `de_id` NULO e o remetente do sistema: nao ha jogador por tras disso, e
+    -- apontar pra um usuario real faria a carta parecer mandada por alguem.
+    -- Mesma decisao de 20260809140000.
+    null,
+    'Centro Pokemon',
+    'sistema',
+    'Um presente do Campeao Lance',
+    'Voce derrotou o Campeao Lance. Ele deixou um Eevee aos seus cuidados — '
+      || 'um POKE que pode seguir cinco caminhos diferentes. Colete abaixo.',
+    jsonb_build_object(
+      'speciesId', 'eevee',
+      'level', 25,
+      'ivs', jsonb_build_object(
+        'hp', 23, 'atkFis', 23, 'atkEsp', 23, 'def', 23, 'defEsp', 23, 'speed', 23
+      ),
+      'rarity', 'comum',
+      'isShiny', false
+    )
+  );
+
+  return true;
+end;
+$$;
+
+-- Helper interno: nenhum papel do cliente executa isto. Um grant aqui seria uma
+-- rota direta pra se auto-conceder o presente, sem passar por conquista nenhuma.
+revoke all on function public._conceder_eevee_do_lance(uuid) from public;
+revoke execute on function public._conceder_eevee_do_lance(uuid) from anon;
+revoke execute on function public._conceder_eevee_do_lance(uuid) from authenticated;
+
+create or replace function public._recompensa_do_hall_da_fama()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.conquista <> 'boss_lance' then
+    return new;
+  end if;
+
+  perform public._conceder_eevee_do_lance(new.user_id);
+  return new;
+end;
+$$;
+
+drop trigger if exists hall_da_fama_recompensa on public.hall_da_fama;
+create trigger hall_da_fama_recompensa
+  after insert on public.hall_da_fama
+  for each row execute function public._recompensa_do_hall_da_fama();
+
+-- ---------------------------------------------------------------------------
+-- 4. A coleta sabe entregar POKE
+-- ---------------------------------------------------------------------------
+-- Corpo inteiro reescrito (nao da pra `create or replace` so um pedaco). O que
+-- e NOVO em relacao a 20260823010000:
+--
+--   * o `where` do claim aceita mensagem so-com-POKE (antes exigia
+--     `anexo_itens != '[]'`, entao ela era invisivel pra RPC);
+--   * o bloco do POKE, com a checagem de espaco na equipe ANTES de criar;
+--   * o retorno leva `poke` e `mensagem`.
+--
+-- A CHECAGEM DE TIME CHEIO E DO SERVIDOR, e nao so da UI: limite de negocio que
+-- vive so no cliente vira 502 em vez de erro tratado — foi exatamente o que
+-- `MAX_TEAM_SIZE` fez ao bater na constraint do banco direto. O `6` aqui e o
+-- mesmo numero que `por_na_equipe` ja usa.
+create or replace function public.coletar_anexo_correio(p_mensagem_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_msg public.mail_messages;
+  v_item jsonb;
+  v_item_id text;
+  v_quantity int;
+  v_poke jsonb;
+  v_species public.species;
+  v_stats record;
+  v_level int;
+  v_rarity text;
+  v_shiny boolean;
+  v_ivs jsonb;
+  v_team_count int;
+  v_nome_treinador text;
+  v_poke_criado jsonb := null;
+  v_mensagem text;
+begin
+  if v_user_id is null then
+    raise exception 'nao autenticado' using errcode = '28000';
+  end if;
+
+  -- PH-67: serializa contra outras escritas concorrentes em players do MESMO
+  -- usuario (inclusive gravar_progresso/flush). Lock de transacao, libera
+  -- sozinho no commit/rollback, sem tabela nova.
+  perform pg_advisory_xact_lock(hashtext(v_user_id::text));
+
+  update public.mail_messages
+    set anexo_coletado_em = now(), estado = 'lido', read_at = now()
+    where id = p_mensagem_id and para_id = v_user_id
+      and anexo_coletado_em is null
+      and (anexo_itens != '[]'::jsonb or anexo_poke is not null)
+    returning * into v_msg;
+
+  if v_msg is null then
+    raise exception 'Nada para coletar nesta mensagem.' using errcode = 'P0001';
+  end if;
+
+  for v_item in select * from jsonb_array_elements(v_msg.anexo_itens) loop
+    v_item_id := v_item->>'itemId';
+    v_quantity := floor(coalesce((v_item->>'quantity')::numeric, 0));
+    if v_item_id is not null and v_quantity > 0 then
+      -- `gold` mora em `players.gold`, nao em `player_items` — mesma divisao
+      -- que `enviar_mensagem` usa para DEBITAR. Os dois lados precisam
+      -- concordar sobre onde o ouro vive; foi a discordancia que criou o
+      -- PH-87.
+      if v_item_id = 'gold' then
+        update public.players set gold = gold + v_quantity where user_id = v_user_id;
+        -- Sem linha em `players` o credito sumiria em silencio e a coleta
+        -- ainda responderia `ok`. Abortar devolve a mensagem ao estado
+        -- pendente, que e recuperavel; responder ok seria perder o ouro pela
+        -- segunda vez.
+        if not found then
+          raise exception 'jogador sem linha em players' using errcode = 'P0001';
+        end if;
+      else
+        insert into public.player_items (user_id, item_id, quantity)
+        values (v_user_id, v_item_id, v_quantity)
+        on conflict (user_id, item_id) do update
+          set quantity = public.player_items.quantity + excluded.quantity, updated_at = now();
+      end if;
+    end if;
+  end loop;
+
+  v_poke := v_msg.anexo_poke;
+  if v_poke is not null then
+    select * into v_species from public.species where id = v_poke->>'speciesId';
+    if v_species is null then
+      -- Receita apontando pra especie que nao existe mais (catalogo recortado
+      -- depois do envio). Abortar mantem a carta coletavel pra quando/se a
+      -- especie voltar; entregar "nada" e responder ok apagaria o presente.
+      raise exception 'A especie deste presente nao existe mais no catalogo.' using errcode = 'P0001';
+    end if;
+
+    select count(*) into v_team_count
+      from public.pokemon_instances
+      where user_id = v_user_id and location = 'team';
+    if v_team_count >= 6 then
+      -- A excecao desfaz o claim la de cima junto com tudo: a mensagem volta a
+      -- ficar pendente e o POKE continua no correio. E o comportamento que a
+      -- issue pede — erro legivel, nada perdido, coleta depois.
+      raise exception 'Sua equipe esta cheia. Libere um espaco e colete de novo — o presente continua aqui.'
+        using errcode = 'P0001';
+    end if;
+
+    v_level := greatest(1, coalesce((v_poke->>'level')::int, 1));
+    v_rarity := coalesce(v_poke->>'rarity', 'comum');
+    v_shiny := coalesce((v_poke->>'isShiny')::boolean, false);
+    v_ivs := coalesce(v_poke->'ivs', '{}'::jsonb);
+
+    select * into v_stats from public._calcular_stats(
+      v_species, v_level,
+      coalesce((v_ivs->>'hp')::int, 0),
+      coalesce((v_ivs->>'atkFis')::int, 0),
+      coalesce((v_ivs->>'atkEsp')::int, 0),
+      coalesce((v_ivs->>'def')::int, 0),
+      coalesce((v_ivs->>'defEsp')::int, 0),
+      coalesce((v_ivs->>'speed')::int, 0),
+      v_rarity, v_shiny
+    );
+
+    select trainer_name into v_nome_treinador from public.players where user_id = v_user_id;
+
+    insert into public.pokemon_instances (
+      user_id, species_id, location, team_slot, level, exp, hp, is_shiny, rarity, locked,
+      iv_hp, iv_atk_fis, iv_atk_esp, iv_def, iv_def_esp, iv_speed,
+      stat_hp, stat_atk_fis, stat_atk_esp, stat_def, stat_def_esp, stat_speed,
+      unlocked_abilities, original_trainer
+    ) values (
+      v_user_id, v_species.id, 'team', v_team_count, v_level, 0, v_stats.stat_hp, v_shiny, v_rarity::public.rarity_tier, false,
+      coalesce((v_ivs->>'hp')::int, 0),
+      coalesce((v_ivs->>'atkFis')::int, 0),
+      coalesce((v_ivs->>'atkEsp')::int, 0),
+      coalesce((v_ivs->>'def')::int, 0),
+      coalesce((v_ivs->>'defEsp')::int, 0),
+      coalesce((v_ivs->>'speed')::int, 0),
+      v_stats.stat_hp, v_stats.stat_atk_fis, v_stats.stat_atk_esp,
+      v_stats.stat_def, v_stats.stat_def_esp, v_stats.stat_speed,
+      (select coalesce(array_agg(move_id), '{}')
+         from public.species_moves
+         where species_id = v_species.id and level_req <= v_level),
+      v_nome_treinador
+    );
+
+    v_poke_criado := jsonb_build_object(
+      'speciesId', v_species.id,
+      'nome', v_species.name,
+      'level', v_level,
+      'isShiny', v_shiny
+    );
+    v_mensagem := format('%s entrou na sua equipe!', v_species.name);
+  end if;
+
+  return jsonb_build_object(
+    'ok', true,
+    'itens', v_msg.anexo_itens,
+    'poke', v_poke_criado,
+    -- O cliente ja fazia `toast(r.mensagem)` numa chave que a RPC nunca
+    -- devolvia — o aviso saia vazio. Agora sai preenchido nos dois casos.
+    'mensagem', coalesce(v_mensagem, 'Anexo coletado.')
+  );
+end;
+$$;
+
+revoke all on function public.coletar_anexo_correio(uuid) from public;
+revoke execute on function public.coletar_anexo_correio(uuid) from anon;
+grant execute on function public.coletar_anexo_correio(uuid) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- 5. "Marcar como lida" continua recusando mensagem com anexo pendente
+-- ---------------------------------------------------------------------------
+-- O filtro do PH-22 olhava so `anexo_itens`, entao uma carta so-com-POKE podia
+-- ser marcada lida com o presente ainda preso — e sumia da contagem de
+-- pendentes sem nunca ter sido entregue.
+create or replace function public.marcar_correio_lido(p_mensagem_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_user_id uuid := auth.uid();
+begin
+  if v_user_id is null then raise exception 'nao autenticado' using errcode = '28000'; end if;
+
+  -- PH-22: mesma exclusao ja aplicada a pedido_amizade (nao marca lido o que
+  -- ainda precisa de acao) -- estendida pra anexo de item ainda nao coletado,
+  -- senao a mensagem sai da contagem `naoLidas` mas o HUD (usePendenciasDoCorreio,
+  -- que soma temAnexoPendente OU pendente) continua contando, badges divergem.
+  --
+  -- PH-164: o `anexo_poke` entra na mesma exclusao. Sem ele uma carta
+  -- so-com-POKE podia ser marcada lida com o presente ainda preso.
+  update public.mail_messages
+    set estado = 'lido', read_at = now()
+    where id = p_mensagem_id
+      and para_id = v_user_id
+      and estado = 'pendente'
+      and tipo != 'pedido_amizade'
+      and not (
+        anexo_coletado_em is null
+        and (anexo_itens <> '[]'::jsonb or anexo_poke is not null)
+      );
+
+  return jsonb_build_object('ok', true);
+end;
+$$;
+
+revoke all on function public.marcar_correio_lido(uuid) from public;
+revoke execute on function public.marcar_correio_lido(uuid) from anon;
+grant execute on function public.marcar_correio_lido(uuid) to authenticated;
+
+commit;
