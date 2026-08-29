@@ -192,6 +192,34 @@ function mesclarPokedex(local: GameStateData, doServidor: GameStateData): GameSt
   return { ...local.pokedexKills, ...doFlush }
 }
 
+/**
+ * Missoes ja reivindicadas: UNIAO, nunca substituicao (PH-265).
+ *
+ * O BUG QUE ISTO CONSERTA. `carregarEstado` do servidor monta o snapshot com
+ * `missoesReivindicadas: []` de proposito — missao nao entra na resimulacao de
+ * combate, entao a rota nao le a tabela (ver authority/src/progresso.ts). Só que
+ * esse estado e aplicado no cliente por `setState`, e a lista vazia SOBRESCREVIA
+ * a local: bastava um flush (30 em 30 segundos) pra a tela de Tasks voltar a
+ * mostrar como disponivel uma missao ja reivindicada. O jogador clicava e a RPC
+ * respondia "Missao ja reivindicada" — o relato exato desta issue. O ouro da
+ * primeira reivindicacao tinha sido pago; o que se perdeu foi a marca na tela.
+ *
+ * Uniao e seguro porque a chave so ENTRA: `setMissaoReivindicada` nunca remove
+ * (o mesmo ja esta escrito em playerMapper.ts). Entao o pior caso de um servidor
+ * que um dia passe a mandar a lista cheia e ela somar com a local, e nao brigar
+ * com ela.
+ *
+ * O outro conserto possivel era a rota passar a LER a tabela em todo flush. Sai
+ * mais caro (uma consulta a cada 30s por jogador, no caminho que a PH-185/186
+ * existiu pra enxugar) e nao seria mais correto: o servidor de fato nao e dono
+ * deste campo durante a sessao — quem escreve nele e uma RPC de menu.
+ */
+function mesclarMissoes(local: GameStateData, doServidor: GameStateData): GameStateData['missoesReivindicadas'] {
+  const doFlush = doServidor.missoesReivindicadas
+  if (!doFlush || Object.keys(doFlush).length === 0) return local.missoesReivindicadas
+  return { ...local.missoesReivindicadas, ...doFlush }
+}
+
 export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo?: RespostaFlush['resumo']): void {
   if (!estado || typeof estado !== 'object') return
   const doServidor = estado as GameStateData
@@ -202,7 +230,12 @@ export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo
   reconciliarPokeAtivoNoWorld(doServidor)
   if (!parcial) {
     limparCapturasPreditas()
-    useGameStateStore.setState(doServidor)
+    // `setState` com FUNCAO, e nao com o objeto cru: `mesclarMissoes` precisa do
+    // estado local (ver o comentario dela). Este caminho tambem passava por
+    // cima da lista de missoes reivindicadas.
+    useGameStateStore.setState((local) => ({
+      ...doServidor, missoesReivindicadas: mesclarMissoes(local, doServidor),
+    }))
     return
   }
   const novos = Array.isArray(doServidor.bagPokes) ? doServidor.bagPokes : []
@@ -214,6 +247,7 @@ export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo
   if (!mochilaCarregada()) {
     useGameStateStore.setState((local) => ({
       ...doServidor, bagPokes: [], pokedexKills: mesclarPokedex(local, doServidor),
+      missoesReivindicadas: mesclarMissoes(local, doServidor),
     }))
     limparCapturasPreditas()
     return
@@ -222,6 +256,7 @@ export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo
   useGameStateStore.setState((local) => ({
     ...doServidor,
     pokedexKills: mesclarPokedex(local, doServidor),
+    missoesReivindicadas: mesclarMissoes(local, doServidor),
     bagPokes: [
       // Fora: o que era predicao (a linha real dela esta em `novos`) e qualquer
       // uid que o servidor esteja mandando agora — sem o segundo filtro, um
