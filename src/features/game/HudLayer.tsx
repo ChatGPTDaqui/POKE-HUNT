@@ -36,7 +36,7 @@ import { useRef } from 'react'
 import { StatusRail } from '@/components/hud/StatusRail'
 import { ReservasRail } from '@/components/hud/ReservasRail'
 import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
-import { SalaChip } from '@/components/hud/SalaChip'
+import { SalaChip, salaNoTrilho } from '@/components/hud/SalaChip'
 import { ClimaChip } from '@/components/hud/ClimaChip'
 import { LureChip } from '@/components/hud/LureChip'
 import { ColunaDeAtalhos } from '@/components/hud/ColunaDeAtalhos'
@@ -136,7 +136,13 @@ export function HudLayer() {
               longe do resto da HUD — exatamente o que o `max-w` e o
               `items-start` do container existem pra evitar (PH-83). */}
           <div className="flex w-full flex-wrap items-center justify-center gap-[.4em] [&:not(:empty)]:my-[.4em]">
-            <SalaChip />
+            {/* PH-272: em tela com largura o chip de sala subiu pro trilho, e
+                aqui ele nao pode aparecer de novo. Duas copias na tela nao dao
+                erro nenhum — so ficam erradas, e em silencio. Quem decide e
+                `salaNoTrilho`, a MESMA funcao que o `StatusRail` consulta.
+                No compacto ele continua aqui: o trilho de 390px nao tem largura
+                pra ele (ver a nota no topo de SalaChip.tsx). */}
+            {!salaNoTrilho(mode) && <SalaChip />}
             <ClimaChip />
             {/* Terceiro chip da MESMA linha: os tres respondem "onde estou e o
                 que o bot esta fazendo". O `flex-wrap` da linha ja cobre 390px —
