@@ -1,14 +1,17 @@
-// PH-184 — `unlocked_abilities` atravessava a rede em toda leitura de POKE pra
-// ser descartada na linha seguinte.
+// PH-184 — toda leitura de POKE fazia `select('*')`, trazendo colunas que o
+// cliente descarta.
 //
-// `rowToPoke` RECALCULA o moveset de (especie, nivel) — a coluna gravada e
-// ignorada de proposito, e isso ja era decisao antiga (a nota em `rowToPoke`
-// explica: sem o recalculo, todo POKE salvo teria ficado preso no learnset da
-// versao em que foi criado, e a migracao pro Ultra Sun renomeou 15 golpes).
+// A issue nasceu apontando `unlocked_abilities` como o alvo (17% do payload,
+// dizia): `rowToPoke` RECALCULA o moveset de (especie, nivel) e so cai na coluna
+// quando a especie e desconhecida.
 //
-// O que muda aqui e so parar de PEDIR a coluna.
+// MEDIDO, A CONTA VIROU OUTRA. No fio, gzipado, a coluna custa 0,7 ponto
+// percentual — o gzip come um array de ids de golpe repetido linha apos linha. E
+// ela e a UNICA fonte de golpes pra um POKE de especie fora do catalogo do
+// cliente. Entao ela FICA, e o ganho real (8,8%) vem de `user_id`/`updated_at`,
+// que a issue nem mencionava.
 //
-// Os dois riscos desta mudanca, e os dois tem caso abaixo:
+// Os riscos desta mudanca, e cada um tem caso abaixo:
 //
 //   1. tirar coluna DEMAIS. `location` e `team_slot` nao sao lidas por
 //      `rowToPoke`, mas quem chama decide equipe x mochila por elas. Sem elas o
@@ -16,6 +19,8 @@
 //   2. a lista repetida por call-site. Sao seis `.select()`; com seis copias,
 //      coluna nova entra no schema, um lugar e atualizado e os outros cinco
 //      passam a devolver POKE incompleto sem nada acusar.
+//   3. o fallback de especie desconhecida parar de resolver golpe. POKE sem
+//      golpe nao luta.
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { COLUNAS_DE_POKE, rowToPoke } from './playerMapper'
@@ -31,7 +36,7 @@ function linha(over: Record<string, unknown> = {}) {
     status: null, status_turns: null, created_at: '2026-01-01T00:00:00.000Z',
     iv_hp: 10, iv_atk_fis: 10, iv_atk_esp: 10, iv_def: 10, iv_def_esp: 10, iv_speed: 10,
     stat_hp: 20, stat_atk_fis: 10, stat_atk_esp: 10, stat_def: 10, stat_def_esp: 10, stat_speed: 10,
-    active_abilities: null, disabled_abilities: {},
+    active_abilities: null, disabled_abilities: {}, unlocked_abilities: [],
     ...over,
   } as unknown as Parameters<typeof rowToPoke>[0]
 }
@@ -39,8 +44,12 @@ function linha(over: Record<string, unknown> = {}) {
 afterEach(() => vi.restoreAllMocks())
 
 describe('a lista de colunas (PH-184)', () => {
-  it('nao pede `unlocked_abilities` — e o ponto da issue', () => {
-    expect(COLUNAS).not.toContain('unlocked_abilities')
+  it('PEDE `unlocked_abilities`, ao contrario do que a issue previa', () => {
+    // A issue queria corta-la (17% do payload, dizia). Medido no fio, gzipado,
+    // ela custa 0,7 ponto percentual — o gzip come um array de ids de golpe
+    // repetido linha apos linha. E ela e a UNICA fonte de golpes pra um POKE de
+    // especie fora do catalogo do cliente. Decisao registrada: fica.
+    expect(COLUNAS).toContain('unlocked_abilities')
   })
 
   it('nao pede o que ninguem le', () => {
@@ -88,30 +97,44 @@ describe('a lista de colunas (PH-184)', () => {
 })
 
 describe('especie fora do catalogo do cliente (PH-184, criterio 3)', () => {
-  it('nao quebra a carga, e o POKE continua utilizavel', () => {
-    // Antes o fallback era a coluna `unlocked_abilities`, que agora nao vem. O
-    // POKE tem que continuar CARREGANDO — o jogo inteiro nao pode deixar de
-    // abrir por causa de uma especie que o catalogo do cliente nao tem.
-    vi.spyOn(console, 'error').mockImplementation(() => {})
-    const poke = rowToPoke(linha({ species_id: 'especie-que-nao-existe' }))
+  it('AINDA RESOLVE OS GOLPES, pela coluna gravada', () => {
+    // Criterio 3 da issue, ao pe da letra. E a unica razao de
+    // `unlocked_abilities` seguir no `select`: sem ela o POKE chegaria sem golpe
+    // nenhum, e POKE sem golpe nao luta.
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const poke = rowToPoke(linha({
+      species_id: 'especie-que-nao-existe',
+      unlocked_abilities: ['tackle', 'growl'],
+    }))
     expect(poke.uid).toBe('p1')
     expect(poke.stats.hp).toBe(20) // cai nos `stat_*` gravados
-    expect(poke.unlockedAbilities).toEqual([])
+    expect(poke.unlockedAbilities).toEqual(['tackle', 'growl'])
   })
 
-  it('e GRITA, porque lista vazia em silencio ninguem descobre', () => {
-    // A divergencia catalogo-banco e real e tem issue propria (PH-247: o banco
-    // tem 6 especies que o cliente nao tem). Este console.error e o unico aviso
-    // que existe de que um POKE chegou sem golpes.
-    const erro = vi.spyOn(console, 'error').mockImplementation(() => {})
-    rowToPoke(linha({ species_id: 'especie-que-nao-existe' }))
-    expect(erro).toHaveBeenCalledTimes(1)
-    expect(String(erro.mock.calls[0][0])).toContain('especie-que-nao-existe')
+  it('avisa, porque especie fora do catalogo nao e situacao normal', () => {
+    // O POKE ainda aparece sem nome, sem sprite e com os stats gravados em vez
+    // dos recalculados. E sinal de divergencia catalogo-banco (PH-247), e sem
+    // log ninguem descobre.
+    const aviso = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    rowToPoke(linha({ species_id: 'outra-que-nao-existe', unlocked_abilities: ['tackle'] }))
+    expect(aviso).toHaveBeenCalledTimes(1)
+    expect(String(aviso.mock.calls[0][0])).toContain('outra-que-nao-existe')
   })
 
-  it('especie conhecida nao grita', () => {
-    const erro = vi.spyOn(console, 'error').mockImplementation(() => {})
+  it('avisa UMA vez por especie, e nao uma por POKE', () => {
+    // `rowToPoke` roda uma vez por linha e uma mochila real tem 4.082 delas —
+    // sem a deduplicacao o console vira 4.082 linhas identicas e afoga todo o
+    // resto.
+    const aviso = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    for (let i = 0; i < 50; i++) {
+      rowToPoke(linha({ id: `p${i}`, species_id: 'repetida-desconhecida', unlocked_abilities: [] }))
+    }
+    expect(aviso).toHaveBeenCalledTimes(1)
+  })
+
+  it('especie conhecida nao avisa', () => {
+    const aviso = vi.spyOn(console, 'warn').mockImplementation(() => {})
     rowToPoke(linha())
-    expect(erro).not.toHaveBeenCalled()
+    expect(aviso).not.toHaveBeenCalled()
   })
 })

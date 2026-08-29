@@ -67,13 +67,30 @@ export interface PlayerSnapshot {
  *
  * O QUE FICOU DE FORA, e por que:
  *
- * - `unlocked_abilities`: a razao desta issue. `rowToPoke` RECALCULA o moveset
- *   de (especie, nivel) e descarta a coluna na linha seguinte — ela atravessava
- *   a rede pra nada. A coluna continua sendo GRAVADA (`pokeToRow`), pros
- *   leitores de fora e pra nao virar campo morto no schema.
  * - `user_id`: toda consulta ja filtra por ele; devolve-lo e repetir o mesmo
  *   uuid em cada linha.
  * - `updated_at`: ninguem le no cliente.
+ *
+ * O QUE FICOU DENTRO CONTRA A EXPECTATIVA DA ISSUE: `unlocked_abilities`.
+ *
+ * Ela era a razao declarada desta issue — `rowToPoke` RECALCULA o moveset de
+ * (especie, nivel) e so cai na coluna quando a especie e desconhecida, entao a
+ * conta era "17% do payload atravessando a rede pra nada". Medido no fio,
+ * gzipado, na mochila do jogador mais pesado da base:
+ *
+ *   select *                    63.692 B
+ *   sem `unlocked_abilities`    57.661 B   -9,5%
+ *   COM `unlocked_abilities`    58.068 B   -8,8%
+ *
+ * A coluna custa 0,7 PONTO PERCENTUAL, nao 17. O gzip come quase tudo dela: sao
+ * os mesmos ids de golpe repetidos linha apos linha, que e o melhor caso
+ * possivel pro compressor. Praticamente todo o ganho de verdade vem de
+ * `user_id`/`updated_at`, que a issue nem mencionava.
+ *
+ * Entao ela FICA, e o motivo e o fallback: sem a coluna, um POKE de especie que
+ * o catalogo do CLIENTE nao tem chegaria sem golpe nenhum. Pagar 0,7% pra isso
+ * nao ter como acontecer e barato — e a divergencia catalogo-banco e real, tem
+ * issue propria (PH-247: o banco tem 6 especies que o cliente nao tem).
  *
  * `location` e `team_slot` ENTRAM mesmo sem `rowToPoke` toca-las: quem chama
  * decide equipe x mochila por elas (`snapshotToGameState`, `refetchPoke`,
@@ -84,32 +101,49 @@ export interface PlayerSnapshot {
 // compila. O cliente tipado do supabase-js infere o formato da linha a partir do
 // LITERAL passado pro `.select()`; qualquer coisa que chegue como `string`
 // generica vira `GenericStringError` e derruba todo `rowToPoke(data)` a jusante.
-export const COLUNAS_DE_POKE = 'id,species_id,location,team_slot,level,exp,hp,is_shiny,rarity,locked,nature,trait,original_trainer,status,status_turns,created_at,iv_hp,iv_atk_fis,iv_atk_esp,iv_def,iv_def_esp,iv_speed,stat_hp,stat_atk_fis,stat_atk_esp,stat_def,stat_def_esp,stat_speed,active_abilities,disabled_abilities'
+export const COLUNAS_DE_POKE = 'id,species_id,location,team_slot,level,exp,hp,is_shiny,rarity,locked,nature,trait,original_trainer,status,status_turns,created_at,iv_hp,iv_atk_fis,iv_atk_esp,iv_def,iv_def_esp,iv_speed,stat_hp,stat_atk_fis,stat_atk_esp,stat_def,stat_def_esp,stat_speed,active_abilities,disabled_abilities,unlocked_abilities'
 
 /**
  * A linha como ela CHEGA depois da PH-184 — sem as colunas que pararam de vir.
  *
- * `rowToPoke` passa a receber isto, e nao `PokemonRow`: com a linha completa na
- * assinatura, o TypeScript aceitaria de novo um `row.unlocked_abilities` e a
- * regressao voltaria sem ninguem notar. `pokeToRow` (escrita) continua montando
- * a linha inteira — o corte e so de LEITURA.
+ * `rowToPoke` recebe isto, e nao `PokemonRow`: a assinatura passa a DIZER quais
+ * colunas existem de verdade na leitura, entao usar uma que nao vem mais vira
+ * erro de compilacao em vez de `undefined` circulando pelo estado.
+ * `pokeToRow` (escrita) continua montando a linha inteira — o corte e so de
+ * LEITURA.
  */
-export type LinhaLidaDePoke = Omit<PokemonRow, 'unlocked_abilities' | 'user_id' | 'updated_at'>
+export type LinhaLidaDePoke = Omit<PokemonRow, 'user_id' | 'updated_at'>
 
 /**
- * Especie que o catalogo do cliente nao conhece.
+ * Especies desconhecidas ja avisadas — o aviso e por ESPECIE, nao por POKE.
  *
- * Devolve lista de golpes vazia e GRITA. Antes da PH-184 este caminho caia na
- * coluna `unlocked_abilities`, que agora nao vem mais pela rede. Silenciar seria
- * pior que a lista vazia: um POKE de especie desconhecida ja nao tem nome,
- * sprite nem base de stats, e ninguem ficaria sabendo por que.
+ * `rowToPoke` roda uma vez por linha, e uma mochila real tem 4.082 delas. Sem a
+ * deduplicacao, uma especie fora do catalogo enche o console com milhares de
+ * linhas identicas e afoga qualquer outra coisa que esteja la.
  */
-function semEspecie(speciesId: string): string[] {
-  console.error(
-    `rowToPoke: especie "${speciesId}" nao esta no catalogo do cliente — `
-    + 'o POKE fica sem golpes. Ver PH-247 (catalogo do banco x do cliente).',
-  )
-  return []
+const especiesJaAvisadas = new Set<string>()
+
+/**
+ * Especie que o catalogo do CLIENTE nao conhece: cai no learnset gravado.
+ *
+ * A coluna `unlocked_abilities` fica no `select` so por causa deste caminho (ver
+ * `COLUNAS_DE_POKE`) — sem ela o POKE chegaria sem golpe nenhum, e POKE sem
+ * golpe nao luta. Custa 0,7% do payload gzipado, medido; e barato pelo que
+ * evita.
+ *
+ * O aviso continua porque a situacao nao e normal: o POKE ainda vai aparecer sem
+ * nome, sem sprite e com os stats gravados em vez dos recalculados. E sinal de
+ * divergencia catalogo-banco (PH-247), e sem log ninguem descobre.
+ */
+function golpesGravados(speciesId: string, gravados: string[] | null): string[] {
+  if (!especiesJaAvisadas.has(speciesId)) {
+    especiesJaAvisadas.add(speciesId)
+    console.warn(
+      `rowToPoke: especie "${speciesId}" nao esta no catalogo do cliente — `
+      + 'usando o learnset gravado na linha. Ver PH-247 (catalogo do banco x do cliente).',
+    )
+  }
+  return gravados ?? []
 }
 
 export function rowToPoke(row: LinhaLidaDePoke): PokeInstance {
@@ -187,15 +221,18 @@ export function rowToPoke(row: LinhaLidaDePoke): PokeInstance {
     // simplesmente pula. A coluna continua sendo GRAVADA (pokeToRow) para
     // qualquer leitor externo e para nao virar um campo morto no schema.
     //
-    // PH-184: o fallback deixou de ser `row.unlocked_abilities`, porque a coluna
-    // nao vem mais pela rede (ver `COLUNAS_DE_POKE`). O caso e especie fora do
-    // catalogo do cliente, e ele nao acontece com o catalogo completo — mas
-    // TAMBEM nao pode virar silencio, porque a divergencia catalogo-banco e
-    // real e tem issue propria (PH-247: o banco tem 6 especies que o cliente nao
-    // tem). Entao: lista vazia e um erro no console, que e o unico jeito de
-    // alguem descobrir. O POKE ja esta quebrado nesse ponto de qualquer forma —
-    // sem especie nao ha nome, sprite nem base de stats.
-    unlockedAbilities: species ? golpesAprendidosAte(species, row.level) : semEspecie(row.species_id),
+    // PH-184: o fallback CONTINUA sendo a coluna gravada. Ele e a unica razao
+    // de `unlocked_abilities` seguir no `select` — e ela custa 0,7% do payload
+    // gzipado, medido, porque o gzip come um array de ids repetido linha apos
+    // linha. Tirar a coluna faria um POKE de especie fora do catalogo do cliente
+    // chegar sem golpe nenhum, e POKE sem golpe nao luta.
+    //
+    // O que mudou foi so o aviso: o caso passa a ser LOGADO (uma vez por
+    // especie, nao por POKE), porque divergencia catalogo-banco e real e tem
+    // issue propria — PH-247.
+    unlockedAbilities: species
+      ? golpesAprendidosAte(species, row.level)
+      : golpesGravados(row.species_id, row.unlocked_abilities),
     // Coluna adicionada depois (migration 20260809150000): linha antiga volta
     // com o default `{}` do banco, entao nao ha migracao de dado a fazer.
     disabledAbilities: (row.disabled_abilities ?? {}) as Record<string, boolean>,

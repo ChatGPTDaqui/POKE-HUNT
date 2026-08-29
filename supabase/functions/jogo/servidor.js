@@ -55789,16 +55789,31 @@ function toJson(value) {
 	return value;
 }
 /**
-* Especie que o catalogo do cliente nao conhece.
+* Especies desconhecidas ja avisadas — o aviso e por ESPECIE, nao por POKE.
 *
-* Devolve lista de golpes vazia e GRITA. Antes da PH-184 este caminho caia na
-* coluna `unlocked_abilities`, que agora nao vem mais pela rede. Silenciar seria
-* pior que a lista vazia: um POKE de especie desconhecida ja nao tem nome,
-* sprite nem base de stats, e ninguem ficaria sabendo por que.
+* `rowToPoke` roda uma vez por linha, e uma mochila real tem 4.082 delas. Sem a
+* deduplicacao, uma especie fora do catalogo enche o console com milhares de
+* linhas identicas e afoga qualquer outra coisa que esteja la.
 */
-function semEspecie(speciesId) {
-	console.error(`rowToPoke: especie "${speciesId}" nao esta no catalogo do cliente — o POKE fica sem golpes. Ver PH-247 (catalogo do banco x do cliente).`);
-	return [];
+var especiesJaAvisadas = /* @__PURE__ */ new Set();
+/**
+* Especie que o catalogo do CLIENTE nao conhece: cai no learnset gravado.
+*
+* A coluna `unlocked_abilities` fica no `select` so por causa deste caminho (ver
+* `COLUNAS_DE_POKE`) — sem ela o POKE chegaria sem golpe nenhum, e POKE sem
+* golpe nao luta. Custa 0,7% do payload gzipado, medido; e barato pelo que
+* evita.
+*
+* O aviso continua porque a situacao nao e normal: o POKE ainda vai aparecer sem
+* nome, sem sprite e com os stats gravados em vez dos recalculados. E sinal de
+* divergencia catalogo-banco (PH-247), e sem log ninguem descobre.
+*/
+function golpesGravados(speciesId, gravados) {
+	if (!especiesJaAvisadas.has(speciesId)) {
+		especiesJaAvisadas.add(speciesId);
+		console.warn(`rowToPoke: especie "${speciesId}" nao esta no catalogo do cliente — usando o learnset gravado na linha. Ver PH-247 (catalogo do banco x do cliente).`);
+	}
+	return gravados ?? [];
 }
 function rowToPoke(row) {
 	const ivs = {
@@ -55832,7 +55847,7 @@ function rowToPoke(row) {
 		nature,
 		trait: row.trait ?? void 0,
 		stats,
-		unlockedAbilities: species ? golpesAprendidosAte(species, row.level) : semEspecie(row.species_id),
+		unlockedAbilities: species ? golpesAprendidosAte(species, row.level) : golpesGravados(row.species_id, row.unlocked_abilities),
 		disabledAbilities: row.disabled_abilities ?? {},
 		activeAbilities: species ? sanearEscolhaDeGolpes(row.active_abilities ?? activeAbilitiesPadrao(species, row.level), golpesAprendidosAte(species, row.level), species, row.level) : row.active_abilities ?? void 0,
 		status: row.status ? {

@@ -137,7 +137,7 @@ const kb = (b) => `${(b / 1024).toFixed(1)} KB`
  * nada do jogo muda. `src/data/remote/colunasDePoke.test.ts` e quem tranca a
  * lista de verdade.
  */
-const COLUNAS_DE_POKE = 'id,species_id,location,team_slot,level,exp,hp,is_shiny,rarity,locked,nature,trait,original_trainer,status,status_turns,created_at,iv_hp,iv_atk_fis,iv_atk_esp,iv_def,iv_def_esp,iv_speed,stat_hp,stat_atk_fis,stat_atk_esp,stat_def,stat_def_esp,stat_speed,active_abilities,disabled_abilities'
+const COLUNAS_DE_POKE = 'id,species_id,location,team_slot,level,exp,hp,is_shiny,rarity,locked,nature,trait,original_trainer,status,status_turns,created_at,iv_hp,iv_atk_fis,iv_atk_esp,iv_def,iv_def_esp,iv_speed,stat_hp,stat_atk_fis,stat_atk_esp,stat_def,stat_def_esp,stat_speed,active_abilities,disabled_abilities,unlocked_abilities'
 
 async function main() {
   console.log(`\nBancada de egress do boot — schema ${SCHEMA}\n`)
