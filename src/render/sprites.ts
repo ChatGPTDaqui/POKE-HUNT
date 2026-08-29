@@ -1518,7 +1518,35 @@ function drawDamageNumber(
   ctx.restore()
 }
 
-const ABILITY_NAME_Y_OFFSET = 2
+/**
+ * Onde o nome do golpe fica: LOGO ABAIXO DA BARRA DE VIDA do POKE que atacou
+ * (PH-275), e nao no alto da coluna de texto junto com os numeros de dano.
+ *
+ * A geometria da placa, de cima pra baixo (`y` cresce pra baixo, e `topo` e
+ * `entity.y - visualTopOffset(entity)`, o alto do corpo):
+ *
+ *   topo - 26   nome da especie      (drawNameLevelTag)
+ *   topo - 15   Lv                   (drawNameLevelTag)
+ *   topo - 13   barra de vida, 5px de altura, terminando em `topo - 8`
+ *   topo +  3   NOME DO GOLPE        <- aqui
+ *   topo        cabeca do sprite
+ *
+ * O deslocamento parte de `EFFECT_BASE_GAP` porque a ancora da coluna de efeitos
+ * comeca justamente `EFFECT_BASE_GAP` ACIMA do topo do corpo: somar isso traz o
+ * texto de volta pro corpo. Os 3 pixels a mais poem a CAIXA inteira (contorno
+ * incluso) abaixo do fim da barra — com 1 so, medido no teste de geometria, o
+ * topo dela ainda ficava 1px por cima da barra.
+ *
+ * O `lane` continua embutido na ancora e continua subtraindo — entao um SEGUNDO
+ * golpe do mesmo POKE, ainda em cena, cai na raia de cima em vez de escrever por
+ * cima do primeiro. Era pedido explicito da issue: dois golpes seguidos nao
+ * podem deixar dois textos empilhados no mesmo lugar.
+ *
+ * Por que perto do corpo e nao no alto: o nome do golpe responde "o que ESTE
+ * POKE acabou de fazer", e no alto ele disputava leitura com os numeros de dano,
+ * que sao de quem RECEBEU. Duas perguntas diferentes no mesmo lugar.
+ */
+const ABILITY_NAME_Y_OFFSET = EFFECT_BASE_GAP + 3
 
 function drawAbilityName(
   ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState, desvio = 0,
