@@ -20,6 +20,8 @@ function builderGenerico() {
     insert: () => Promise.resolve({ error: null }),
     upsert: () => Promise.resolve({ error: null }),
     eq: () => builder,
+    // PH-182: o boot passou a ordenar a equipe por `team_slot`.
+    order: () => builder,
     in: () => Promise.resolve({ error: null }),
     maybeSingle: () => Promise.resolve({ data: null, error: null }),
     then: (resolve: (v: { data: unknown[]; error: null }) => void) => resolve({ data: [], error: null }),
