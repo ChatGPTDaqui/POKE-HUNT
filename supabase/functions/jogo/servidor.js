@@ -54689,6 +54689,7 @@ function armarTransicaoDeSala(world, mapId) {
 */
 function resolverBossDaSala(world, mapId) {
 	world.bossPendente = null;
+	world.bossResolvido = true;
 	if (world.salaSobAutoridade) return;
 	armarTransicaoDeSala(world, mapId);
 }
@@ -54745,6 +54746,7 @@ function aplicarTransicaoDeSala(world, mapId) {
 	if (!pendente) return;
 	world.sala = pendente;
 	world.salaPendente = null;
+	world.bossResolvido = false;
 	world.clima = null;
 	definirClimaDeAmbiente(world, world.salaSobAutoridade ? null : climaAmbienteDaSala(world.seed, world.sala));
 	world.salaEsperaDaAutoridade = 0;
@@ -54805,6 +54807,7 @@ function emptyWorldState(seed = randomSeed()) {
 		countdownRemaining: null,
 		sala: null,
 		bossPendente: null,
+		bossResolvido: false,
 		salaCountdownRemaining: null,
 		salaPendente: null,
 		salaSobAutoridade: false,
@@ -55173,6 +55176,7 @@ function garantirBossDaSala(world, mapDef, bossSalvo, player, entrada) {
 		world.bossPendente = null;
 		return false;
 	}
+	if (world.bossResolvido) return false;
 	if (world.bossPendente) return true;
 	const { enemy, pendente } = criarEntidadeDoBoss(world, mapDef, contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool), tipo, bossSalvo, player, entrada);
 	world.enemies.push(enemy);

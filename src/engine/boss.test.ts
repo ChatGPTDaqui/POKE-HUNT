@@ -14,7 +14,7 @@ import { describe, expect, it, beforeEach } from 'vitest'
 import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
 import { buildMapWorld, stepWorld, handleEnemyDefeated } from './simulation'
-import { bossDaSala } from './systems/salaSystem'
+import { bossDaSala, ESPERA_MAXIMA_PELA_AUTORIDADE, SALA_TRANSITION_COUNTDOWN } from './systems/salaSystem'
 import { ABATES_POR_SALA, SALAS_POR_HUNT } from '@/data/biomas'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import type { WorldState, BossPendente } from './types'
@@ -304,5 +304,93 @@ describe('avanco de biomaProgress ao vencer o boss ultimate (PH-226)', () => {
 
     expect(useGameStateStore.getState().biomaProgress.faixa1).toBe(INDICE_DE_MATA + 1)
     expect(useGameStateStore.getState().biomaProgress.faixa2).toBe(99)
+  })
+})
+
+// PH-230: o par `bossPendente`/`bossDaSala` nao distingue "boss ainda nao
+// nasceu" de "boss ja morreu" — os dois leem `bossPendente: null` numa sala
+// que `bossDaSala` continua marcando como boss-habilitada. Sem autoridade isso
+// nunca apareceu porque `resolverBossDaSala` arma a transicao no mesmo tick e a
+// sala troca. Sob `salaSobAutoridade` ela NAO troca (so o servidor decide), e o
+// tick seguinte relia "esta sala pede boss, nao ha boss" e sorteava outro.
+//
+// O estrago nao era so o gauntlet infinito na tela: o `garantirBossDaSala?.()`
+// de `garantirTransicaoDeQuotaFechada` retornava true pra sempre, e o
+// early-return dele acontecia ANTES do bloco de espera da autoridade — entao
+// `salaEsperaDaAutoridade` nunca acumulava e o fallback de predicao local
+// (a rede de seguranca contra servidor mudo/antigo) ficava morto.
+describe('boss resolvido sob autoridade nao respawna (PH-230)', () => {
+  beforeEach(() => {
+    useGameStateStore.getState().resetToDefaults()
+  })
+
+  /**
+   * Fecha a quota numa sala boss-habilitada sob autoridade, deixa o boss
+   * nascer e o mata. Devolve o mundo logo depois do abate do boss.
+   */
+  function bossCaidoSobAutoridade(semente: number): WorldState {
+    const world = mundo(semente)
+    world.salaSobAutoridade = true
+    world.sala = { indice: 0, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.enemies = []
+    world.respawnTimer = 999
+    const gameState = useGameStateStore.getState()
+
+    stepWorld(world, 0.1, gameState, { silent: true })
+    const boss = world.enemies.find((e) => e.isBoss)
+    expect(boss).toBeDefined()
+    handleEnemyDefeated(world, boss!, gameState, { silent: true })
+    world.enemies = world.enemies.filter((e) => e !== boss)
+    return world
+  }
+
+  it('sob autoridade, matar o boss NAO arma a transicao — mas tambem nao faz nascer outro', () => {
+    const world = bossCaidoSobAutoridade(60)
+    const gameState = useGameStateStore.getState()
+
+    // O contrato de `resolverBossDaSala` sob autoridade continua o de sempre:
+    // quem decide a proxima sala e o flush do servidor, nao o cliente.
+    expect(world.salaPendente).toBeNull()
+    expect(world.salaCountdownRemaining).toBeNull()
+    expect(world.bossResolvido).toBe(true)
+
+    // O bug: cada um destes ticks sorteava um boss novo.
+    for (let i = 0; i < 30; i++) {
+      stepWorld(world, 0.1, gameState, { silent: true })
+      expect(world.bossPendente).toBeNull()
+      expect(world.enemies.some((e) => e.isBoss)).toBe(false)
+    }
+  })
+
+  it('boss resolvido + servidor que nao responde: o fallback de predicao local ainda dispara', () => {
+    const world = bossCaidoSobAutoridade(61)
+    const gameState = useGameStateStore.getState()
+    const inicio = world.sala!.indice
+
+    // Nenhuma `reconciliarSalaDaAutoridade` aqui de proposito: e exatamente o
+    // servidor mudo (ou de versao antiga, sem `garantirTransicaoDeQuotaFechada`)
+    // que o fallback existe pra cobrir.
+    const ticks = Math.floor((ESPERA_MAXIMA_PELA_AUTORIDADE + SALA_TRANSITION_COUNTDOWN + 1) / 0.1)
+    for (let i = 0; i < ticks; i++) stepWorld(world, 0.1, gameState, { silent: true })
+
+    expect(world.sala!.indice).toBe(inicio + 1)
+    expect(world.salaPredita).toBe(true)
+    // Sala nova, marca zerada: o proximo boss desta hunt tem que poder nascer.
+    expect(world.bossResolvido).toBe(false)
+  })
+
+  it('sem autoridade, matar o boss segue armando a transicao no mesmo tick (nao regrediu)', () => {
+    const world = mundo(62)
+    world.sala = { indice: 0, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.enemies = []
+    world.respawnTimer = 999
+    const gameState = useGameStateStore.getState()
+
+    stepWorld(world, 0.1, gameState, { silent: true })
+    const boss = world.enemies.find((e) => e.isBoss)!
+    handleEnemyDefeated(world, boss, gameState, { silent: true })
+
+    expect(world.salaPendente).not.toBeNull()
+    expect(world.salaCountdownRemaining).not.toBeNull()
   })
 })

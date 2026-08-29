@@ -303,6 +303,11 @@ function armarTransicaoDeSala(world: WorldState, mapId: string): AvancoDeSala {
  */
 export function resolverBossDaSala(world: WorldState, mapId: string): void {
   world.bossPendente = null
+  // PH-230: marcar ANTES do corte de autoridade abaixo. Sem esta linha, sob
+  // `salaSobAutoridade` a sala nao avanca (por design) e nada registra que o
+  // boss ja caiu — `bossDaSala` continua dizendo "esta sala pede boss" e o
+  // proximo tick sorteia outro, pra sempre. Ver `WorldState.bossResolvido`.
+  world.bossResolvido = true
   if (world.salaSobAutoridade) return
   armarTransicaoDeSala(world, mapId)
 }
@@ -473,6 +478,8 @@ export function reconciliarSalaDaAutoridade(
   if (!atual) {
     world.sala = { ...sala }
     world.salaPredita = false
+    // PH-230: sala entrando direto (nao havia sala) nao herda marca de boss.
+    world.bossResolvido = false
     aplicarClima()
     return
   }
@@ -519,6 +526,8 @@ export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
   if (!pendente) return
   world.sala = pendente
   world.salaPendente = null
+  // PH-230: sala nova, boss novo — a marca vale por SALA, nao pela sessao.
+  world.bossResolvido = false
   // PH-140: o clima da sala anterior NAO acompanha o jogador — inclusive o de
   // golpe, que morre junto com a sala mesmo com turnos sobrando. Por isso o
   // `clima` e zerado ANTES de `definirClimaDeAmbiente`, que respeitaria um

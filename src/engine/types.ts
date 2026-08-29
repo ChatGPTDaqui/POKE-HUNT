@@ -663,6 +663,29 @@ export interface WorldState {
    */
   bossPendente: BossPendente | null
   /**
+   * PH-230: o boss desta sala JA foi derrotado/capturado nesta instancia de
+   * mundo. Existe porque `bossPendente: null` sozinho e ambiguo — le igual
+   * pra "ainda nao nasceu" e pra "ja morreu", e `bossDaSala` so olha
+   * bioma+indice, que nao mudam quando o boss cai.
+   *
+   * Sem isto, sob `salaSobAutoridade` o motor entrava em respawn infinito: o
+   * cliente nao arma a transicao (so o servidor decide a sala), a sala
+   * continua a mesma, e o tick seguinte lia "esta sala pede boss, nao ha boss"
+   * e sorteava OUTRO. Alem do gauntlet sem fim na tela, o
+   * `garantirBossDaSala?.()` de `garantirTransicaoDeQuotaFechada` retornava
+   * true pra sempre e o `salaEsperaDaAutoridade` logo abaixo nunca acumulava —
+   * o fallback de predicao local, que existe exatamente pro caso de servidor
+   * mudo, nunca disparava.
+   *
+   * Efemero como `salaPredita`/`salaCountdownRemaining`, e pelo mesmo motivo:
+   * quem reconstroi o mundo por janela e a autoridade, e la ela ja tera
+   * avancado a sala. Uma reconstrucao contra um servidor que NAO avancou
+   * (versao antiga, sem sistema de boss) volta a sortear um boss — mas ai o
+   * teto e um por janela, nao um por tick, e o fallback tem folga pra
+   * acumular e disparar.
+   */
+  bossResolvido: boolean
+  /**
    * Contagem regressiva "Entrando em nova area" (ver
    * engine/systems/salaSystem.ts#registrarAbate/aplicarTransicaoDeSala).
    * Nao nulo == quota de abates da sala atual ja fechou e o jogo esta

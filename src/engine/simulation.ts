@@ -348,6 +348,13 @@ function garantirBossDaSala(
     world.bossPendente = null
     return false
   }
+  // PH-230: o boss DESTA sala ja caiu e a sala ainda nao avancou — o caso
+  // normal sob `salaSobAutoridade`, onde quem avanca a sala e o flush do
+  // servidor e nao `resolverBossDaSala`. Sem este corte a sala pedia um boss
+  // novo a cada tick (respawn infinito) e o `true` daqui segurava pra sempre o
+  // early-return de `garantirTransicaoDeQuotaFechada`, matando o fallback de
+  // espera da autoridade. `false` = a sala nao bloqueia mais o avanco.
+  if (world.bossResolvido) return false
   // Ja resolvido nesta mesma instancia de mundo (chamada de novo no mesmo
   // tick, ou boss ja spawnado e ainda vivo) — idempotente, nao recria.
   if (world.bossPendente) return true
