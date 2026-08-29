@@ -33,10 +33,10 @@ describe('ORDEM_DOS_BIOMAS', () => {
     }
   })
 
-  it('igneo (piloto do boss) e o ULTIMO da ordem', () => {
+  it('igneo (piloto do protetor) e o ULTIMO da ordem', () => {
     // Nao e coincidencia: o gate sequencial so tem efeito de verdade porque
-    // igneo (o unico bioma com boss ate PH-225) e o ultimo — os 11 antes dele
-    // "destravam sozinhos" ate ganharem boss de verdade tambem.
+    // igneo (o unico bioma com protetor ate PH-225) e o ultimo — os 11 antes
+    // dele "destravam sozinhos" ate ganharem protetor de verdade tambem.
     expect(ORDEM_DOS_BIOMAS.at(-1)).toBe('igneo')
   })
 })

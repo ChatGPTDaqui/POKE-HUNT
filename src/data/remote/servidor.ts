@@ -409,6 +409,23 @@ export interface AnexoItemCorreio {
   quantity: number
 }
 
+/**
+ * POKE anexado a uma mensagem (PH-164).
+ *
+ * E uma RECEITA, nao um POKE pronto: quem monta a instancia — e calcula os
+ * stats a partir da base da especie — e `coletar_anexo_correio`, no banco. O
+ * cliente so precisa disto pra MOSTRAR o que esta esperando coleta: a arte da
+ * especie e o nivel. Congelar stats aqui os deixaria velhos entre o envio e a
+ * coleta, e o POKE nasceria diferente de todo outro da mesma especie.
+ */
+export interface AnexoPokeCorreio {
+  speciesId: string
+  level: number
+  isShiny?: boolean
+  rarity?: string
+  ivs?: Record<string, number>
+}
+
 export interface MensagemCorreio {
   id: string
   de_id: string | null
@@ -425,6 +442,8 @@ export interface MensagemCorreio {
   created_at: string
   /** Itens anexados. Vazio na maioria das mensagens. */
   anexo_itens?: AnexoItemCorreio[]
+  /** POKE anexado (PH-164). Nulo em tudo que nao e recompensa de POKE. */
+  anexo_poke?: AnexoPokeCorreio | null
   /** Carimbo de coleta — presente significa "ja recebido". */
   anexo_coletado_em?: string | null
   /**

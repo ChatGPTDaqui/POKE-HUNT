@@ -12,7 +12,8 @@
 import { Check, Gift, Trash, X } from '@phosphor-icons/react'
 import { GameButton, GameCard } from '@/components/game/controls'
 import { getItem } from '@/data/items'
-import { itemIconUrl } from '@/data/sprites'
+import { SPECIES } from '@/data/pokes'
+import { faceIconUrl, itemIconUrl } from '@/data/sprites'
 import type { MensagemCorreio } from '@/data/remote/servidor'
 import { cn } from '@/lib/utils'
 
@@ -40,11 +41,16 @@ export function LinhaDeMensagem({
   const pendente = m.estado === 'pendente'
   const ehPedido = m.tipo === 'pedido_amizade'
   const anexos = m.anexo_itens ?? []
-  const temAnexo = anexos.length > 0
+  // PH-164: o anexo pode ser um POKE em vez de (ou alem de) itens. Tudo que
+  // olhava so `anexo_itens` passava batido por uma carta so-com-POKE — o botao
+  // Coletar simplesmente nao aparecia, e o presente ficava invisivel.
+  const pokeAnexado = m.anexo_poke ?? null
+  const temAnexo = anexos.length > 0 || pokeAnexado !== null
   const coletado = Boolean(m.anexo_coletado_em)
   // O item ja saiu do inventario de quem mandou. Excluir com anexo pendente
   // destruiria o item sem ninguem ficar com ele — a RPC recusa, e o botao
-  // desabilitado explica antes do erro.
+  // desabilitado explica antes do erro. Vale igual pro POKE anexado (PH-164),
+  // e ali e pior: a concessao e UNICA, entao o presente apagado nao volta.
   const anexoPreso = temAnexo && !coletado
   const pedidoEmAberto = ehPedido && pendente
 
@@ -63,6 +69,20 @@ export function LinhaDeMensagem({
 
         {temAnexo && (
           <div className="mt-[.25em] flex flex-wrap items-center gap-[.3em]">
+            {pokeAnexado && (
+              <span className="flex items-center gap-[.25em] rounded-[.35em] border border-primary/50 bg-n800 px-[.35em] py-[.1em] text-[.78em] text-foreground">
+                <img
+                  src={faceIconUrl(pokeAnexado.speciesId, pokeAnexado.isShiny) ?? undefined}
+                  alt=""
+                  aria-hidden
+                  className="h-[1.2em] w-[1.2em] object-contain"
+                  style={{ imageRendering: 'pixelated' }}
+                />
+                {SPECIES[pokeAnexado.speciesId]?.name ?? pokeAnexado.speciesId}
+                {' '}
+                Lv{pokeAnexado.level}
+              </span>
+            )}
             {anexos.map((a) => (
               <span
                 key={a.itemId}

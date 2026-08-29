@@ -156,10 +156,19 @@ em `formulas.generated.ts`** — então o fallback é o valor efetivo.
 | **`MAGNITUDE_TABLE`** | `combatSystem.ts:86` | Golpe com potência sorteada |
 | **`COUNTER_MEMORY_WINDOW = 3`** | `combatSystem.ts:152` | Janela de memória do Counter |
 | **`DEATH_ANIM_GRACE_PERIOD = 4.0`** | `simulation.ts:57` | Inimigo derrotado fica visível tocando Faint |
+| **Guardian/Lord — protetor da sala** (`protetorDaSala`/`criarEntidadeDoProtetor`, antes `bossDaSala`/`criarEntidadeDoBoss`) | `src/engine/systems/salaSystem.ts`, `src/engine/simulation.ts` | Em produção desde 2026-08-25 (PH-225, 12 biomas), zero linha em `docs/` até 2026-08-28 |
 
 Os três do meio (`MIN_ACTION_GAP`, velocidade +30%, auto-destruição) são **regras de combate
 com efeito direto em balanceamento**. Estão documentados agora em
 [03](03-motor-de-simulacao.md) e [05](05-regras-de-negocio.md).
+
+**Atualizado em 2026-08-28**: a linha do Guardian/Lord acima — achada revisando se `docs/`
+precisava de entrada nova pro rename do PH-236 (elimina a palavra "boss" do sistema de sala,
+ver `CLAUDE.md`). O sistema inteiro (mini-boss por sala, boss ultimate no fim do andar, gate
+sequencial de bioma) rodava em produção desde 2026-08-25 sem nenhuma menção em `docs/` — mesma
+classe de lacuna já registrada nesta seção pra pathfinding e regras de combate. Documentado
+agora em [06](06-mundo-hunts-e-spawn.md#guardian-e-lord--protetor-da-sala), já com a
+nomenclatura Guardian/Lord (código ainda em rename via PH-237→243 no momento desta entrada).
 
 ---
 
