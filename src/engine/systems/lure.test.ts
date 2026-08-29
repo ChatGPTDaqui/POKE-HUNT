@@ -21,6 +21,7 @@ import { buildMapWorld } from '../simulation'
 import type { EnemyEntity, WorldState } from '../types'
 import { atualizarLure, LURE_TEMPO_MAXIMO_DE_REUNIAO } from './lureSystem'
 import { updateMovement } from './movementSystem'
+import { updateCombat } from './combatSystem'
 
 const PASSO = 1 / 60
 const HUNT = 'mata_faixa1' // hunt normal: `maxEnemies` 6, entao reunir 3 ou 4 cabe
@@ -285,5 +286,91 @@ describe('lure: efeito no movimento do jogador', () => {
     // o lure ignoraria.
     expect(distancia(player, jaAtras)).toBeLessThan(antesDoAtras)
     expect(distancia(player, alvoDoLure)).toBeGreaterThan(antesDoAlvo)
+  })
+})
+
+describe('lure: o jogador so bate depois de fechar a conta (PH-264)', () => {
+  // A/B do mesmo cenario. O que muda entre os dois casos e SO a fase do lure:
+  // um selvagem colado e engajado no jogador, e o golpe do jogador saindo ou
+  // nao. Sem o par, um teste que so olha "nao atacou" passaria tambem num motor
+  // que nunca ataca ninguem.
+  function cenarioDeCombate(reunidosEmCampo: number, quantidade: number) {
+    const c = cenario({ quantidade })
+    // O primeiro fica ENGAJADO e colado: e ele que poe o jogador em
+    // `engagedEnemies` e faz `executePlayerAction` ser alcancavel.
+    const colado = selvagem(c.world, { dx: 30, dy: 0, reunido: true })
+    colado.state = 'engaged'
+    for (let i = 1; i < reunidosEmCampo; i++) {
+      selvagem(c.world, { dx: 60 + i * 20, dy: 0, reunido: true })
+    }
+    // Candidato solto: sem ele a saida "sem candidato" fecharia a reuniao e o
+    // caso de reuniao nunca aconteceria.
+    selvagem(c.world, { dx: 0, dy: 320 })
+    return c
+  }
+
+  /** O golpe do jogador saiu neste tick? */
+  function jogadorGolpeou(world: WorldState): boolean {
+    const player = world.player!
+    return world.pendingHits.some((h) => h.attackerId === player.id) || player.attackAnimTimer > 0
+  }
+
+  it('reunindo: o POKE nao golpeia mesmo com inimigo engajado colado nele', () => {
+    // Pede 3, tem 1 atras: a reuniao continua, e ate PH-264 o POKE ja comecava
+    // a bater neste selvagem — que e exatamente o "esta batendo antes de lurar
+    // a quantidade solicitada" do relato.
+    const { world, gameState } = cenarioDeCombate(1, 3)
+
+    for (let i = 0; i < 60; i++) {
+      atualizarLure(world, gameState, PASSO)
+      updateCombat(world, PASSO, { silent: true })
+      expect(world.lure?.fase).toBe('reunindo')
+      expect(jogadorGolpeou(world)).toBe(false)
+    }
+  })
+
+  it('conta fechada: o POKE volta a golpear normalmente', () => {
+    const { world, gameState } = cenarioDeCombate(3, 3)
+
+    let golpeou = false
+    for (let i = 0; i < 60 && !golpeou; i++) {
+      atualizarLure(world, gameState, PASSO)
+      updateCombat(world, PASSO, { silent: true })
+      golpeou = jogadorGolpeou(world)
+    }
+
+    expect(world.lure?.fase).toBe('lutando')
+    expect(golpeou).toBe(true)
+  })
+
+  it('lure desligado: o POKE golpeia como sempre golpeou', () => {
+    // O contrato negativo. A supressao nao pode vazar pra quem nunca ligou o
+    // lure — a maioria das partidas.
+    const c = cenario({ ligado: false, quantidade: 3 })
+    const colado = selvagem(c.world, { dx: 30, dy: 0, reunido: true })
+    colado.state = 'engaged'
+
+    let golpeou = false
+    for (let i = 0; i < 60 && !golpeou; i++) {
+      atualizarLure(c.world, c.gameState, PASSO)
+      updateCombat(c.world, PASSO, { silent: true })
+      golpeou = jogadorGolpeou(c.world)
+    }
+
+    expect(c.world.lure).toBeNull()
+    expect(golpeou).toBe(true)
+  })
+
+  it('os selvagens continuam agindo durante a reuniao — nao e invulnerabilidade', () => {
+    const { world, gameState } = cenarioDeCombate(1, 3)
+    const player = world.player!
+    const hpInicial = player.poke.hp
+
+    for (let i = 0; i < 600; i++) {
+      atualizarLure(world, gameState, PASSO)
+      updateCombat(world, PASSO, { silent: true })
+    }
+
+    expect(player.poke.hp).toBeLessThan(hpInicial)
   })
 })
