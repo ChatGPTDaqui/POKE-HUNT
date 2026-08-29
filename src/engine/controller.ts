@@ -336,16 +336,18 @@ export const controller = {
     // reordenado ainda nao tinha chegado) e o colocava em campo — o HUD e o
     // sprite ficavam no POKE errado ate a proxima troca de cena. Mesmo padrao de
     // `chooseStarter`: reconstruir/atualizar so no `.then`.
-    void pedirAcao({ tipo: 'definirAtivo', indice: index }, () => gameState.moveTeamIndexToFront(index)).then(async () => {
+    void pedirAcao({ tipo: 'definirAtivo', indice: index }, () => gameState.moveTeamIndexToFront(index)).then(() => {
       const newActivePoke = useGameStateStore.getState().team[0]
-      // Arte da especie nova em cache ANTES de trocar o POKE em campo: sem isto
-      // o sprite trocaria pra "nada desenhado" por alguns frames enquanto o PNG
-      // da especie nova baixa.
-      if (newActivePoke) {
-        await preloadEspecies([{ speciesId: newActivePoke.speciesId, isShiny: newActivePoke.isShiny }])
-      }
+      if (!newActivePoke) return
+      // Preload solto, NAO `await`: numa aba em segundo plano o carregamento de
+      // imagem e o `setTimeout` do teto do preload ficam suspensos, e antes
+      // isto segurava a troca do POKE em campo — o HUD (que le
+      // `worldStore.player.poke`) ficava no POKE errado ate o F5 (PH-221, mesmo
+      // caso do `evolvePoke`). O sprite pode piscar alguns frames sem arte ate
+      // o PNG chegar; o guard de `drawEntity` cobre.
+      void preloadEspecies([{ speciesId: newActivePoke.speciesId, isShiny: newActivePoke.isShiny }])
       useWorldStore.getState().update((draft) => {
-        if (draft.player && newActivePoke) {
+        if (draft.player) {
           draft.player.poke = newActivePoke
           draft.player.cooldowns = {}
           draft.player.flashTimer = 0
@@ -498,19 +500,19 @@ export const controller = {
       gameState.updatePokeInstance(pokeUid, () => result.updatedPoke)
     })
     if (!ok) return
-    // Se a POKE evoluida esta em campo agora, o world tambem precisa
-    // refletir a nova especie/stats imediatamente. A arte da forma evoluida e
-    // carregada ANTES da troca; `updateAnimations` compara a URL do spritesheet
-    // (nao o nome da animacao), entao o proximo tick ja desenha a especie nova.
-    const world = useWorldStore.getState()
-    if (world.player && world.player.poke.uid === pokeUid) {
-      void preloadEspecies([{ speciesId: result.updatedPoke.speciesId, isShiny: result.updatedPoke.isShiny }])
-        .then(() => {
-          useWorldStore.getState().update((draft) => {
-            if (draft.player && draft.player.poke.uid === pokeUid) draft.player.poke = result.updatedPoke
-          })
-        })
-    }
+    // Se a POKE evoluida esta em campo agora, o world tambem precisa refletir a
+    // nova especie/stats IMEDIATAMENTE — o HUD le `worldStore.player.poke`
+    // durante a hunt (StatusRail#usePokeAtivo), e sob autoridade nada mais
+    // atualiza esse store depois de uma acao (a resposta so mexe no
+    // gameStateStore). Antes o update ficava DENTRO de `preloadEspecies().then`,
+    // e numa aba em segundo plano o carregamento de imagem e o `setTimeout` do
+    // teto ficam suspensos — a evolucao so aparecia no F5 (PH-221). Agora a
+    // troca de estado e sincrona e o preload roda solto por tras; o guard de
+    // `drawEntity` cobre os poucos frames ate a arte chegar.
+    void preloadEspecies([{ speciesId: result.updatedPoke.speciesId, isShiny: result.updatedPoke.isShiny }])
+    useWorldStore.getState().update((draft) => {
+      if (draft.player && draft.player.poke.uid === pokeUid) draft.player.poke = result.updatedPoke
+    })
     useToastStore.getState().pushToast(
       `${shinyPrefix(poke.isShiny)}${previousName} evoluiu para ${result.species.name}!`,
       'levelup', 'world',

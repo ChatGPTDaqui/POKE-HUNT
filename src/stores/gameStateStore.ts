@@ -96,8 +96,8 @@ export interface GameStateActions {
   setPokedexKillEntry: (speciesId: string, entry: PokedexKillCount) => void
   setMissaoReivindicada: (chave: string) => void
   setEspecialidadeNivel: (tipo: ElementType, trilha: EspecialidadeTrilha, nivel: number) => void
-  // PH-226: diferente de missao/especialidade (so menu), esta E chamada pela
-  // simulacao — vencer o boss ultimate avanca o indice dentro de
+  // PH-226/236: diferente de missao/especialidade (so menu), esta E chamada
+  // pela simulacao — vencer o Lord avanca o indice dentro de
   // handleEnemyDefeated (simulation.ts), nao so por acao de tela.
   setBiomaProgress: (faixa: string, indice: number) => void
 
