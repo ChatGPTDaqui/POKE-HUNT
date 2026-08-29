@@ -17,6 +17,7 @@ import type {
   AmigoDetalhado, AnexoItemCorreio, BloqueadoRemoto, ConversaResumo, MensagemCorreio,
 } from './servidor'
 import { useGameStateStore } from '@/stores/gameStateStore'
+import { refetchEquipeInteira } from './acoesRpc'
 
 
 // `treinadores_publico` e view exclusiva do schema `dev`, e as RPCs novas so
@@ -218,10 +219,32 @@ export async function marcarLida(mensagemId: string): Promise<{ ok: boolean }> {
   return { ok: true }
 }
 
-export async function coletarAnexo(mensagemId: string): Promise<{ ok: boolean; itens: AnexoItemCorreio[]; mensagem: string }> {
+/**
+ * POKE que a coleta acabou de criar (PH-164). Nulo quando o anexo era so item.
+ *
+ * Vem da RPC porque quem sabe o resultado e ela: a receita do anexo diz
+ * `speciesId`, e o NOME da especie e o que a tela de recebimento mostra — pedir
+ * de volta aqui seria uma leitura a mais pra um dado que a transacao ja tinha
+ * em maos.
+ */
+export interface PokeRecebido {
+  speciesId: string
+  nome: string
+  level: number
+  isShiny: boolean
+}
+
+export interface ResultadoDaColeta {
+  ok: boolean
+  itens: AnexoItemCorreio[]
+  poke: PokeRecebido | null
+  mensagem: string
+}
+
+export async function coletarAnexo(mensagemId: string): Promise<ResultadoDaColeta> {
   const { data, error } = await db.rpc('coletar_anexo_correio', { p_mensagem_id: mensagemId })
   if (error) throw new ErroServidor(409, error.message)
-  const resultado = data as { ok: boolean; itens: AnexoItemCorreio[]; mensagem: string }
+  const resultado = data as ResultadoDaColeta
 
   // A RPC ja creditou os itens na mesma transacao — so falta o client saber.
   // Refetch cirurgico so dos itemIds que vieram no retorno.
@@ -241,6 +264,19 @@ export async function coletarAnexo(mensagemId: string): Promise<{ ok: boolean; i
       }))
     }
   }
+
+  // O POKE nasceu no SERVIDOR, dentro da mesma transacao (PH-164), e o estado
+  // local nao sabe dele: sem isto a equipe so apareceria certa depois de um F5.
+  //
+  // O POKE novo nao corre risco de ser apagado nesse meio tempo — `savePlayerState`
+  // so deleta o que estava em `idsNoBancoPorUsuario` na ultima carga, e um id que
+  // nasceu depois nao esta la. O que se perde sem o refetch e a TELA, nao o POKE.
+  //
+  // Reusa o refetch das acoes de equipe em vez de refazer a leitura aqui: e ele
+  // que carrega a regra do `order('team_slot')`, e uma copia que se desatualize
+  // poe o POKE errado no campo.
+  if (resultado.poke) await refetchEquipeInteira()
+
   return resultado
 }
 

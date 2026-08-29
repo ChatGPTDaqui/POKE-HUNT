@@ -1,11 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  MISSAO_TYPES, MISSAO_BONUS_CADEIA_COMPLETA, alvoDaMissao, recompensaDaMissao,
-  cadeiaDoTipo, chaveDaMissao, missaoDaChave,
-} from './missoes'
+import { MISSAO_TYPES, cadeiaDoTipo, chaveDaMissao, missaoDaChave } from './missoes'
 import { SPECIES } from './pokes'
-import { pokedexNumber } from './regions'
 
 describe('MISSAO_TYPES', () => {
   it('cobre os 18 tipos', () => {
@@ -13,51 +9,63 @@ describe('MISSAO_TYPES', () => {
   })
 })
 
-describe('alvoDaMissao / recompensaDaMissao', () => {
-  it('crescem com a posicao', () => {
-    expect(alvoDaMissao(1)).toBeGreaterThan(alvoDaMissao(0))
-    expect(recompensaDaMissao(1, false)).toBeGreaterThan(recompensaDaMissao(0, false))
-  })
-
-  it('ultima da cadeia inclui o bonus fixo', () => {
-    const semBonus = recompensaDaMissao(3, false)
-    const comBonus = recompensaDaMissao(3, true)
-    expect(comBonus - semBonus).toBe(MISSAO_BONUS_CADEIA_COMPLETA)
-  })
-})
-
 describe('cadeiaDoTipo', () => {
   it('cobre os 18 tipos com pelo menos 1 especie', () => {
     for (const tipo of MISSAO_TYPES) {
-      expect(cadeiaDoTipo(tipo).length).toBeGreaterThan(0)
-    }
-  })
-
-  it('ordena por numero de pokedex crescente', () => {
-    const cadeia = cadeiaDoTipo('WATER')
-    for (let i = 1; i < cadeia.length; i++) {
-      expect(pokedexNumber(cadeia[i].speciesId)).toBeGreaterThan(pokedexNumber(cadeia[i - 1].speciesId))
+      expect(cadeiaDoTipo(tipo).length, `cadeia de ${tipo} vazia`).toBeGreaterThan(0)
     }
   })
 
   it('posicao e sequencial a partir de 0, e so a ultima tem ehUltima', () => {
-    const cadeia = cadeiaDoTipo('DRAGON')
-    cadeia.forEach((m, i) => expect(m.posicao).toBe(i))
-    expect(cadeia.filter((m) => m.ehUltima)).toHaveLength(1)
-    expect(cadeia[cadeia.length - 1].ehUltima).toBe(true)
+    for (const tipo of MISSAO_TYPES) {
+      const cadeia = cadeiaDoTipo(tipo)
+      cadeia.forEach((m, i) => expect(m.posicao, `${tipo}[${i}]`).toBe(i))
+      expect(cadeia.filter((m) => m.ehUltima), `${tipo} tem mais de uma ultima`).toHaveLength(1)
+      expect(cadeia[cadeia.length - 1].ehUltima).toBe(true)
+    }
   })
 
-  it('so especies do nosso catalogo entram (nenhuma fora de SPECIES)', () => {
-    for (const missao of cadeiaDoTipo('FAIRY')) {
-      expect(SPECIES[missao.speciesId]).toBeDefined()
+  it('alvo nunca decresce ao longo da cadeia', () => {
+    for (const tipo of MISSAO_TYPES) {
+      const cadeia = cadeiaDoTipo(tipo)
+      for (let i = 1; i < cadeia.length; i++) {
+        expect(cadeia[i].alvo, `${tipo} pos ${i}`).toBeGreaterThanOrEqual(cadeia[i - 1].alvo)
+      }
+    }
+  })
+
+  it('so especies do nosso catalogo entram, em TODOS os tipos', () => {
+    // Era `cadeiaDoTipo('FAIRY')` sozinho, e passava mesmo com a cadeia
+    // derivada errada. Agora varre os 18.
+    for (const tipo of MISSAO_TYPES) {
+      for (const missao of cadeiaDoTipo(tipo)) {
+        expect(SPECIES[missao.speciesId], `${tipo}: ${missao.speciesId} fora de SPECIES`).toBeDefined()
+      }
+    }
+  })
+
+  it('a especie de cada missao realmente tem o tipo da cadeia', () => {
+    for (const tipo of MISSAO_TYPES) {
+      for (const missao of cadeiaDoTipo(tipo)) {
+        const s = SPECIES[missao.speciesId]
+        expect(s.type === tipo || s.type2 === tipo, `${missao.speciesId} nao e ${tipo}`).toBe(true)
+      }
+    }
+  })
+
+  it('nenhuma especie aparece duas vezes na mesma cadeia', () => {
+    for (const tipo of MISSAO_TYPES) {
+      const ids = cadeiaDoTipo(tipo).map((m) => m.speciesId)
+      expect(new Set(ids).size, `${tipo} tem especie repetida`).toBe(ids.length)
     }
   })
 
   it('especie dual-type aparece nas duas cadeias', () => {
-    const bulbasaur = Object.values(SPECIES).find((s) => s.id === 'bulbasaur')
-    if (!bulbasaur?.type2) return // se o catalogo mudar o starter, o teste so pula
-    expect(cadeiaDoTipo(bulbasaur.type).some((m) => m.speciesId === 'bulbasaur')).toBe(true)
-    expect(cadeiaDoTipo(bulbasaur.type2).some((m) => m.speciesId === 'bulbasaur')).toBe(true)
+    const gastly = SPECIES['gastly']
+    expect(gastly.type).toBe('GHOST')
+    expect(gastly.type2).toBe('POISON')
+    expect(cadeiaDoTipo('GHOST').some((m) => m.speciesId === 'gastly')).toBe(true)
+    expect(cadeiaDoTipo('POISON').some((m) => m.speciesId === 'gastly')).toBe(true)
   })
 })
 
