@@ -50,10 +50,26 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   //  - Do PH-235, tudo o que nao e a mecanica em si: a coluna
   //    `auto_lure_config`, a RPC que a valida, o `db:types` e a bancada de
   //    medicao. O que o jogador ve e a aba, o chip e o comportamento.
+  //
+  // SEGUNDA REVARRIDA, tambem em 28/08 (PH-250) — e a licao acima acontecendo
+  // DE NOVO, no mesmo dia em que foi escrita. Depois da primeira revarrida,
+  // mais quatro PRs entraram na `dev` (#206 a #209) e o intervalo foi de 34 pra
+  // 49 commits. Duas delas sao player-facing e ganharam linha aqui: PH-245
+  // (missoes) e PH-246 (especialidades). Nao viraram 7.16 porque a 7.15 nao foi
+  // promovida — nenhum jogador leu — e a regra e uma entrada por PROMOCAO, nao
+  // por leva de trabalho.
+  //
+  // Delas fica de fora, pela mesma regua de sempre:
+  //  - PH-248 (`database.types.ts` regenerado depois da tabela nova) e PH-249
+  //    (par de migrations com carimbo duplicado travando o `db push`).
+  //    Encanamento puro: o jogador nao ve nem sente nenhum dos dois.
+  //  - De PH-245 e PH-246, o gerador, a tabela `missao_cadeia`, o custo em
+  //    tabela e os testes de contrato. O que o jogador ve e a cadeia que
+  //    funciona e o preco que ele consegue pagar.
   {
     version: '7.15',
     date: '2026-08-28',
-    title: 'Farm em area: junte ate quatro selvagens antes de bater — e o boss agora guarda os doze biomas',
+    title: 'Farm em area, o boss guardando os doze biomas — e as Missoes finalmente dando pra terminar',
     highlights: [
       'AGORA VOCE PODE JUNTAR ATE QUATRO SELVAGENS ANTES DE BATER. Seu POKE sempre andava ate o mais proximo e lutava um por vez, entao golpe de area nunca acertava mais de um alvo — ele existia e nao servia pra nada. Com o Lure ligado (aba nova no painel de Automacoes) ele passa pelo raio de varios, puxa o grupo atras de si e so entao para pra lutar: um golpe de area acerta todos de uma vez. Voce escolhe juntar 1, 2, 3 ou 4, e um chip no topo mostra a reuniao acontecendo (2/4) pra nao parecer que o bot travou.',
       'O PRECO DO LURE E LEVAR PANCADA DE TODOS AO MESMO TEMPO. Nao e farm de graca: juntar quatro multiplica o dano que entra no seu POKE, e o ganho depende de ter golpe de AREA na rotacao — sem um, o grupo so bate mais em voce. Shiny em campo cancela a reuniao na hora (ele continua tendo prioridade), e hunt de um inimigo so, como as de boss, ignora o Lure.',
@@ -64,6 +80,10 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'E A CHUVA MOLHA O CHAO. As gotas caem, batem e respingam, com microgotas que quicam em volta. Selva e caverna ganharam gotejo proprio, pingando sempre do mesmo ponto, do jeito que agua parada na copa e em teto de gruta pinga.',
       'O NIVEL PAROU DE SUMIR NO F5. Subir de nivel e recarregar a pagina logo em seguida podia devolver o POKE no nivel anterior: a ultima gravacao nao chegava a sair. Agora ela sai.',
       'UM SHINY NA TELA PODIA DESPENCAR O ATAQUE DO INIMIGO E ENCHER O CHAT. Com um shiny em campo e outro selvagem colado em voce, a habilidade de entrada em combate do seu POKE — Intimidate, por exemplo — disparava a cada quadro em vez de uma vez por luta: o Ataque do oponente caia ate o fundo em menos de um segundo e o chat levava uma linha por quadro. Agora ela dispara uma vez, como deveria.',
+      'AS MISSOES DE TIPO AGORA DAO PRA TERMINAR — QUATRO DELAS TRAVAVAM LOGO NA PRIMEIRA. Fogo, Agua, Planta e Veneno pediam, de cara, abates de Charmander, Squirtle e Bulbasaur — e nenhum dos tres aparece como selvagem em lugar nenhum do jogo. Como a cadeia so libera a seguinte quando voce fecha a anterior, essas quatro nunca saiam do lugar, e ao todo 148 das 359 missoes eram impossiveis. Agora nenhuma missao pede POKE que voce nao encontra.',
+      'E A ORDEM DAS MISSOES PASSOU A SEGUIR A DIFICULDADE, NAO O NUMERO DA POKEDEX. A primeira missao de Voador era Charizard; a de Gelo pedia 150 Articunos no quinto degrau. Cada cadeia agora comeca pelo POKE mais facil de achar daquele tipo e vai subindo, e lendario saiu de todas elas — ele aparece 20 vezes menos que um comum e travava tudo o que vinha depois. A recompensa acompanhou: antes o ouro por abate mudava ate 7,6 vezes so dependendo do tipo que voce escolhesse, e agora e praticamente o mesmo em todos os 18, com o bonus de conclusao crescendo junto com o tamanho da cadeia.',
+      'A ESPECIALIDADE DE VOADOR ERA IMPOSSIVEL DE COMPRAR, E A TELA COBRAVA POR ELA MESMO ASSIM. A Pedra VOADOR nao caia de lugar nenhum: o drop olhava so o tipo primario do POKE abatido, e nenhuma especie do jogo tem Voador como primario. Agora POKE de dois tipos solta a pedra de um dos dois, entao Voador tem fonte — e o progresso de 100% deixou de ser inalcancavel.',
+      'E O PRECO DAS ESPECIALIDADES PASSOU A LEVAR EM CONTA A RARIDADE DA PEDRA. Como cada pedra so cai do POKE do tipo dela, fechar as duas trilhas custava 18.800 abates em Fogo e 162.933 em Aco — nove vezes mais caro, sem nada que justificasse. Os tipos comuns seguem no mesmo preco de antes; os raros ficaram proporcionais ao que realmente aparece. A trilha de defesa tambem teve o texto corrigido: ela reduz o dano que voce RECEBE daquele tipo, e nao aumenta sua defesa.',
     ],
   },
   // PH-231. Varredura do INTERVALO desde a 7.13 (a licao que aquela entrada
