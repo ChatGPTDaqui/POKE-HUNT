@@ -24,7 +24,6 @@ import {
 } from './textoDeCombate'
 import { hpBarFillColor } from '@/data/hpBar'
 import { AURA_COLORS } from '@/data/auraColors'
-import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
 import { colorForType } from '@/data/typeColors'
 import { impactShapeForType, type ImpactShape } from '@/data/impactShapes'
 import {
@@ -51,9 +50,12 @@ function getSpecies(entity: WorldEntity): Species {
 }
 
 // PH-228/236: `isProtetor` so existe em EnemyEntity (WorldEntity tambem
-// cobre o player) — `in` narrowing pra nao quebrar o union. Sistema separado
-// do LEGENDARY_SPECIES_IDS que drawHpBar ja usava (Modo Pesadelo, boss por
-// especie fixa) — os dois se somam, nao se substituem.
+// cobre o player) — `in` narrowing pra nao quebrar o union.
+//
+// PH-256: desde entao ele e o UNICO dono da barra de HP grande. O
+// `LEGENDARY_SPECIES_IDS` tambem entrava nela (Modo Pesadelo, boss por especie
+// fixa) e saiu por pedido explicito do usuario — lendario volta a desenhar a
+// barra do tamanho comum. O protetor por sala/andar nao foi tocado.
 function ehProtetor(entity: WorldEntity): boolean {
   return 'isProtetor' in entity && entity.isProtetor === true
 }
@@ -695,12 +697,18 @@ const COR_DA_PORCENTAGEM = '#ffffff'
 export function drawHpBar(
   ctx: CanvasRenderingContext2D, entity: WorldEntity, mostrarPorcentagem = false,
 ): void {
-  // PH-228/236: mesma barra grande que o Modo Pesadelo ja usa pros bosses
-  // por especie fixa (LEGENDARY_SPECIES_IDS) — o protetor por sala/andar
-  // (isProtetor) entra no mesmo tratamento visual, os dois sistemas nao se
-  // excluem. Nome neutro (`barraGrande`, nao `isProtetor`) de proposito: a
-  // condicao cobre os DOIS sistemas, e so um deles e de fato protetor.
-  const barraGrande = ehProtetor(entity) || LEGENDARY_SPECIES_IDS.includes(getSpecies(entity).id)
+  // PH-228/236 criou a barra grande pro protetor por sala/andar; PH-256 tirou
+  // dela o segundo dono. Ate aqui a condicao era
+  // `ehProtetor(entity) || LEGENDARY_SPECIES_IDS.includes(...)`, e o lendario
+  // do Modo Pesadelo desenhava 160x10 onde um selvagem desenha 32x5. Por pedido
+  // explicito do usuario o lendario voltou ao tamanho comum: a escala visual
+  // 1.5x, a aura e o nome continuam distinguindo ele em campo, e a barra deixou
+  // de ser o quinto sinal da mesma coisa.
+  //
+  // O nome do multiplicador (`PROTETOR_*`) agora descreve o unico caso que
+  // sobrou, e a condicao ficou uma so — mantida em variavel propria porque
+  // largura e altura leem a mesma decisao.
+  const barraGrande = ehProtetor(entity)
   const width = HP_BAR_WIDTH * (barraGrande ? PROTETOR_HP_BAR_WIDTH_MULTIPLIER : 1)
   const height = HP_BAR_HEIGHT * (barraGrande ? PROTETOR_HP_BAR_HEIGHT_MULTIPLIER : 1)
   const x = entity.x - width / 2

@@ -29,7 +29,6 @@ import {
   FirstAid, Gear, GraduationCap, MagnifyingGlassMinus, MagnifyingGlassPlus, MapTrifold,
   Robot, Scales, Sparkle, Storefront, Trophy, UsersThree, Warning, BookBookmark, type Icon,
 } from '@phosphor-icons/react'
-import { controller } from '@/engine/controller'
 import { useWorldStore } from '@/stores/worldStore'
 import { useRendererStore } from '@/stores/rendererStore'
 import { useUiStore, useDeviceMode, type ScreenName } from '@/stores/uiStore'
@@ -40,6 +39,7 @@ import { AbilityHud } from '@/components/hud/AbilityHud'
 import { StatusEffectsBar } from '@/components/hud/StatusEffectsBar'
 import { Sheet } from '@/components/game/Sheet'
 import { useMedirAltura } from '@/hooks/useMedirAltura'
+import { TELAS_NA_COLUNA } from '@/components/hud/ColunaDeAtalhos'
 import { cn } from '@/lib/utils'
 
 export interface Destino {
@@ -90,8 +90,20 @@ export const TELAS_NA_BARRA: ReadonlySet<ScreenName> = new Set<ScreenName>(
   [...ESQUERDA, ...DIREITA].map((d) => d.screen),
 )
 
+/**
+ * A mesma regra vale pra COLUNA DE ATALHOS do canto superior direito (PH-257):
+ * Especialidades, Tasks e Bestiario tem lugar fixo na tela agora, e continuar
+ * listando os tres aqui somaria badge duas vezes.
+ *
+ * Eles ficam em `SECUNDARIOS` de proposito, filtrados no fim em vez de
+ * removidos: a lista continua sendo o inventario unico de "todo destino que nao
+ * e slot da barra", e mover um deles de volta pro "Mais" e uma linha na coluna,
+ * nao um destino que ninguem lembra que existia.
+ */
 export function destinosDaGrade(): DestinoDeTela[] {
-  return SECUNDARIOS.filter((d) => !TELAS_NA_BARRA.has(d.screen))
+  return SECUNDARIOS.filter(
+    (d) => !TELAS_NA_BARRA.has(d.screen) && !TELAS_NA_COLUNA.some((c) => c.screen === d.screen),
+  )
 }
 
 export function ActionDock() {
@@ -139,10 +151,23 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
   // toque so fecha o que estiver aberto por cima — nao ha viagem a fazer.
   const emHunt = useWorldStore((s) => s.mapDef != null)
   const closeScreen = useUiStore((s) => s.closeScreen)
+  // PH-263: dentro da hunt o toque MARCA a viagem em vez de fazer a viagem. A
+  // contagem de 3s e a troca de cena moram em `ViagemAoHospitalOverlay` — o
+  // cabecalho dela explica por que a saida deixou de ser instantanea.
+  //
+  // Segundo toque durante a contagem CANCELA. O mesmo botao serve de desfazer
+  // porque ele e o unico lugar em que o jogador ja esta olhando quando percebe
+  // que clicou sem querer; sem isso ele fica 3 segundos preso a uma saida que
+  // nao pediu.
+  const viagemMarcada = useUiStore((s) => s.viagemAoHospital != null)
+  const iniciarViagem = useUiStore((s) => s.iniciarViagemAoHospital)
+  const cancelarViagem = useUiStore((s) => s.cancelarViagemAoHospital)
   function irAoHospital() {
     closeScreen()
     setMoreOpen(false)
-    if (emHunt) void controller.returnToHospital({ x: 0, y: 0 })
+    if (!emHunt) return
+    if (viagemMarcada) cancelarViagem()
+    else iniciarViagem()
   }
 
   return (
@@ -180,9 +205,12 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
         onClick={() => toggleScreen(DIREITA[0].screen)}
       />
 
+      {/* `ativo` durante a contagem tambem: o slot fica marcado desde o toque,
+          e nao so quando a viagem termina — sem isso o unico sinal de que o
+          comando pegou seria o overlay no meio do campo. */}
       <SlotNav
         destino={{ label: 'Hospital', Icon: FirstAid }}
-        ativo={!emHunt}
+        ativo={!emHunt || viagemMarcada}
         rotulo={!deitado}
         onClick={irAoHospital}
       />

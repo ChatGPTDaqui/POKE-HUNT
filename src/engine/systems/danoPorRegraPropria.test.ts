@@ -24,6 +24,16 @@ import { createEnemyEntity } from '../entity'
 import { buildMapWorld } from '../simulation'
 import { updateCombat } from './combatSystem'
 
+/**
+ * Semente da sequencia de combate deste teste (PH-259).
+ *
+ * Escolhida por varredura pra que os nove golpes ACERTEM: varios tem precisao
+ * 90 no catalogo, e o que esta sob teste aqui e a REGRA DE DANO de cada um, nao
+ * a rolagem de acerto. Uma semente em que `sonic_boom` erra faz o caso medir 0
+ * de dano e acusar um golpe inerte que nao esta inerte.
+ */
+const SEMENTE_DO_COMBATE = 1
+
 const IMPLEMENTADOS = [
   'gyro_ball', 'electro_ball', 'wring_out', 'punishment', 'sonic_boom',
   'endeavor', 'final_gambit', 'low_kick', 'heavy_slam',
@@ -49,11 +59,28 @@ function cenario(golpeId: string, {
     [BASIC_ATTACK.id]: true,
   }
   const world = buildMapWorld('route_46', jogadorPoke, { seed: 0, rng, counters })
+  // SEQUENCIA DE COMBATE PROPRIA (PH-259).
+  //
+  // `buildMapWorld` consome sorteios por selvagem que poe em campo, e a hunt
+  // inicial passou a encher o campo conforme o nivel do POKE. Com o stream
+  // deslocado, a rolagem de acerto de `sonic_boom` (precisao 90) caiu do outro
+  // lado e o golpe ERROU — o teste passou a medir 0 de dano e acusar um golpe
+  // inerte que nao esta inerte, sem nada a ver com a regra dele.
+  //
+  // Reiniciar aqui desacopla a medicao de quantos sorteios a CONSTRUCAO do
+  // mundo gastou. Qualquer balanceamento de spawn pode mudar de novo; a regra
+  // de dano de um golpe nao muda por causa disso.
+  world.rng = createRng(SEMENTE_DO_COMBATE)
   const player = world.player!
   player.cooldowns = {}
   player.globalCooldown = 0
 
-  const enemyPoke = createPokeInstance(rng, especieInimigo, nivelInimigo)
+  // SEQUENCIA PROPRIA PRO ALVO (PH-259), pelo mesmo motivo da linha acima: o
+  // `rng` compartilhado dava ao Rattata natureza/IV/traco diferentes a cada
+  // mudanca de balanceamento da hunt, e varios casos daqui comparam DANO entre
+  // dois cenarios. Alvo estavel e o que faz a comparacao medir a regra do
+  // golpe em vez da diferenca entre dois bichos sorteados.
+  const enemyPoke = createPokeInstance(createRng(4321), especieInimigo, nivelInimigo)
   if (statsDoInimigo) {
     enemyPoke.stats = { ...enemyPoke.stats, hp: statsDoInimigo.hp, def: statsDoInimigo.def }
     enemyPoke.hp = statsDoInimigo.hp
