@@ -54747,7 +54747,7 @@ function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0, manualAdvance = f
 	if (world.salaSobAutoridade) {
 		if (world.salaPredita) return;
 		world.salaEsperaDaAutoridade += dt;
-		if (world.salaEsperaDaAutoridade < 20) return;
+		if (world.salaEsperaDaAutoridade < 120) return;
 		world.salaEsperaDaAutoridade = 0;
 		if (armarTransicaoDeSala(world, mapId).avancou) world.salaPredita = true;
 		return;

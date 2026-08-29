@@ -44,10 +44,45 @@ export const SALA_TRANSITION_COUNTDOWN = 3
 
 /**
  * Quanto o cliente espera a sala do servidor antes de voltar a sortear a
- * propria. Generoso de proposito: o flush periodico e de 30s e o pedido
- * disparado pela quota repete a cada 5s, entao 20s cobre varias tentativas.
+ * propria.
+ *
+ * 120s, e nao os 20s originais (PH-271). O valor antigo foi escolhido pela
+ * cadencia das REQUISICOES ("o flush periodico e de 30s e o pedido disparado
+ * pela quota repete a cada 5s, entao 20s cobre varias tentativas") — mas a
+ * pergunta certa nao e quantos pedidos cabem na janela, e sim quanto o servidor
+ * costuma demorar pra fechar a quota DELE.
+ *
+ * Medido em scripts/harness/divergencia-de-quota.mjs, 30 pares de sequencias:
+ * cliente e servidor levam tempos diferentes pra chegar aos 30 abates, com
+ * mediana de 32,6s de diferenca, p90 de 107,3s e pior caso de 112s. Ou seja,
+ * 20s era MENOR que a divergencia tipica — o fallback disparava no caso NORMAL,
+ * e nao no excepcional pra que ele foi escrito.
+ *
+ * O que isso causava, reproduzido ao vivo no jogo-dev em 29/08 lendo o chip de
+ * sala a cada 3 segundos:
+ *
+ *   63s  Sala 2/10 Relvado    0 p/ limpar
+ *   66s  Sala 2/10 Planicie   26 p/ limpar
+ *
+ * O numero da sala nao mudou e o sub-bioma trocou: o cliente tinha adiantado
+ * uma sala por palpite e a sala do servidor chegou depois, corrigindo. Pro
+ * jogador isso le como "a area mudou sozinha sem eu completar as 30 kills" —
+ * metade do relato da PH-258, que corrigiu a outra metade (a sala que nascia
+ * vazia).
+ *
+ * O CUSTO E REAL: contra um servidor que de fato nunca fecha a transicao
+ * (bundle publicado antes de 2026-08-19, o caso que este fallback existe pra
+ * cobrir), a sala fica parada em 30/30 por dois minutos em vez de vinte
+ * segundos. E o lado certo pra errar — um palpite errado troca a area debaixo
+ * do jogador a cada sala, e a espera atrasa uma vez.
+ *
+ * MELHOR QUE UM NUMERO, quando isso voltar a importar: distinguir "servidor
+ * atrasado" de "servidor que nunca avanca". O segundo responde flush com a
+ * quota DELE cheia, repetidamente, sem trocar de sala — e isso e observavel na
+ * resposta, sem relogio nenhum. Nao foi feito agora porque exige estado novo no
+ * cliente, e o numero resolve o sintoma medido.
  */
-export const ESPERA_MAXIMA_PELA_AUTORIDADE = 20
+export const ESPERA_MAXIMA_PELA_AUTORIDADE = 120
 
 /** A hunt e percorrida em salas? Hunt inicial, BOSS e Lance nao sao. */
 export function temSalas(mapId: string): boolean {
