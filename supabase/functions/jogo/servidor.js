@@ -57018,10 +57018,51 @@ function bloqueioDeBiomaPendente(mapId, grupo, biomaProgress) {
 	const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1];
 	return `Vença o Lord de ${BIOMA_POR_CHAVE[anteriorChave]?.nome ?? anteriorChave} para liberar esta área.`;
 }
+/**
+* Quanto tempo depois de fechada uma sessao ainda vale como "a hunt que o
+* jogador estava jogando" pra efeito de herdar a sala (PH-266).
+*
+* O caso que isto cobre e o F5: o boot ASSENTA a sessao (fecha) e reentra logo
+* em seguida, entao o `closed_at` da sessao anterior tem segundos de idade. Os
+* 5 minutos sao folga pra boot lento, aba que voltou do sono e o assentamento
+* de quem fechou a aba (que so fecha a sessao no carregamento seguinte).
+*
+* Nao e uma janela de imunidade: quem sai da hunt e volta DEPOIS disso recomeca
+* no ciclo 1, sala 1, como sempre foi.
+*/
+var JANELA_DE_HERANCA_DE_SALA_MS = 3e5;
+/**
+* A REGRA, separada do acesso ao banco — mesmo motivo de
+* `bloqueioDeBiomaPendente` ser pura: da pra exercitar "sessao velha demais",
+* "sem sala" e "protetor junto" sem mockar db.js/HTTP inteiro.
+*
+* `agoraMs` entra por parametro pra o teste nao depender do relogio real.
+*/
+function herancaDaLinha(ultima, agoraMs) {
+	if (!ultima?.sala_chave) return null;
+	if (ultima.closed_at) {
+		const fechadaEm = Date.parse(ultima.closed_at);
+		if (!Number.isFinite(fechadaEm)) return null;
+		if (agoraMs - fechadaEm > JANELA_DE_HERANCA_DE_SALA_MS) return null;
+	}
+	return {
+		sala: {
+			indice: Number(ultima.sala_indice ?? 0),
+			chave: ultima.sala_chave,
+			abates: Number(ultima.sala_abates ?? 0),
+			ciclos: Number(ultima.ciclos ?? 0)
+		},
+		protetor: ultima.sala_protetor ?? null
+	};
+}
+async function salaHerdada(cfg, userId, mapId) {
+	return herancaDaLinha((await selecionar(cfg, `game_sessions?user_id=eq.${userId}&map_id=eq.${encodeURIComponent(mapId)}&select=*,sala_protetor(*)&order=started_at.desc&limit=1`))[0], Date.now());
+}
 async function abrirSessao(cfg, userId, req) {
 	const corpo = await req.json().catch(() => null);
 	const mapId = corpo?.mapId;
 	const pokeUid = corpo?.pokeUid;
+	const retomando = corpo?.retomando === true;
 	if (!mapId || !pokeUid) throw new ErroHttp(400, "mapId e pokeUid sao obrigatorios");
 	if (!MAPS[mapId]) throw new ErroHttp(400, "hunt desconhecida");
 	const estado = await carregarEstado(cfg, userId, { comBag: false });
@@ -57040,7 +57081,8 @@ async function abrirSessao(cfg, userId, req) {
 	}
 	const semente = randomSeed();
 	const rng = createRng(semente);
-	const salaInicial = temSalas(mapId) ? novaSala(rng, mapId, 0, 0) : null;
+	const heranca = retomando && temSalas(mapId) ? await salaHerdada(cfg, userId, mapId) : null;
+	const salaInicial = heranca?.sala ?? (temSalas(mapId) ? novaSala(rng, mapId, 0, 0) : null);
 	let criada;
 	try {
 		[criada] = await inserir(cfg, "game_sessions", {
@@ -57052,8 +57094,8 @@ async function abrirSessao(cfg, userId, req) {
 			rng_draws: rng.draws,
 			sala_indice: salaInicial?.indice ?? 0,
 			sala_chave: salaInicial?.chave ?? null,
-			sala_abates: 0,
-			ciclos: 0
+			sala_abates: heranca?.sala.abates ?? 0,
+			ciclos: heranca?.sala.ciclos ?? 0
 		}, { retornar: true });
 	} catch {
 		const vencedora = await sessaoAberta(cfg, userId);
@@ -57069,6 +57111,13 @@ async function abrirSessao(cfg, userId, req) {
 				ciclos: Number(vencedora.ciclos ?? 0)
 			} : null
 		});
+	}
+	if (heranca?.protetor) {
+		const { session_id: _antiga, ...camposDoProtetor } = heranca.protetor;
+		await inserir(cfg, "sala_protetor", {
+			...camposDoProtetor,
+			session_id: criada.id
+		}).catch(() => {});
 	}
 	await atualizar(cfg, `players?user_id=eq.${userId}`, {
 		current_map_id: mapId,

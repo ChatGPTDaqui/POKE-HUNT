@@ -532,10 +532,15 @@ export const servidor = {
   // Sem ela o cliente construia o mundo com uma sala sorteada por ele, e o
   // sub-bioma trocava logo depois de entrar, quando a do servidor chegava.
   // `sala` ausente = servidor mais antigo, ou hunt sem sistema de salas.
-  abrirSessao: (mapId: string, pokeUid: string) =>
+  // `retomando` (PH-266): esta abertura e a REENTRADA do boot, e nao um clique
+  // em "Entrar". Com ela o servidor herda a sala em que a hunt parou, em vez de
+  // devolver o jogador pro ciclo 1, sala 1 — ver appSessao.ts#salaHerdada. A
+  // flag declara a INTENCAO; quem valida (mesmo mapa, sessao fechada ha pouco)
+  // e o servidor, e a sala herdada nunca vem do cliente.
+  abrirSessao: (mapId: string, pokeUid: string, retomando = false) =>
     pedir<{ sessaoId: string; mapId: string; sala?: SalaAtiva | null; clima?: ClimaTipo | null }>('/sessao/abrir', {
       method: 'POST',
-      body: JSON.stringify({ mapId, pokeUid }),
+      body: JSON.stringify({ mapId, pokeUid, retomando }),
     }),
 
   flush: () => pedir<RespostaFlush>('/sessao/flush', {
