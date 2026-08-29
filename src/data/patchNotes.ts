@@ -97,6 +97,24 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   // O que fica de fora delas: o `jogo-campo-sem-spinner` e o valor novo de
   // `ESPERA_MAXIMA_PELA_AUTORIDADE`. Encanamento — o jogador ve o numero
   // inteiro e a area parada, nao a constante.
+  //
+  // QUINTA REVARRIDA, ainda em 29/08 (PH-276). Mesma causa das quatro
+  // anteriores: a PR de promocao tem `head: dev`, entao o intervalo cresce
+  // embaixo da nota enquanto ela espera revisao. Entraram a terceira correcao
+  // de PH-271 e a PH-273 — as duas achadas TESTANDO no `jogo-dev` depois da
+  // leva pronta, nenhuma vinda de pedido ou de leitura de codigo.
+  //
+  //  - PH-271 nao ganha linha nova: "a area parou de trocar sem voce sair da
+  //    sala", que ja esta escrita aqui, e exatamente o que a correcao entrega.
+  //    Foram tres tentativas ate acertar, e o jogador ve uma coisa so.
+  //  - PH-273 ganha linha propria, logo depois daquela. As duas linhas de sala
+  //    que ja existiam falam de sala nascendo VAZIA e de troca com a barra pela
+  //    METADE; hunt parada com a barra CHEIA e um terceiro jeito de a hunt
+  //    morrer, e o jogador nao tem como saber que sao o mesmo assunto.
+  //
+  // Fica de fora: a bancada `scripts/harness/janela-do-protetor.mjs` (mesma
+  // regua das outras bancadas) e o valor novo de `REPETIR_PEDIDO_DE_SALA_MS`. O
+  // jogador ve a hunt andando, nao a constante.
   {
     version: '7.15',
     date: '2026-08-29',
@@ -119,6 +137,7 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'A SALA NOVA AS VEZES NASCIA VAZIA, E A HUNT MORRIA ALI. Depois de trocar de sala podia acontecer de nao nascer inimigo nenhum: campo limpo, nada pra matar, a contagem parada — e como a sala so avanca com 30 abates, a hunt ficava presa pra sempre naquele mapa. Recarregar a pagina era a unica saida. Corrigido: o guardiao da sala anterior ficava pendurado no lugar e desligava o nascimento dos selvagens.',
       'E A TROCA DE SALA PAROU DE ACONTECER COM A BARRA PELA METADE. Quem manda na contagem e o servidor, e o numero da sua tela e uma previsao — quando os dois discordavam, a area trocava mostrando 12/30 e parecia que o jogo tinha pulado a sala. Agora a barra fecha em 30/30 antes do aviso de area nova, que e o que de fato aconteceu.',
       'E A AREA PAROU DE TROCAR SEM VOCE SAIR DA SALA. Acontecia de o sub-bioma mudar sozinho — de Relvado pra Planicie, por exemplo — com o contador continuando em "Sala 2/10": quando o servidor demorava a responder, o jogo chutava a sala seguinte e depois se corrigia na sua frente. Ele agora espera de verdade antes de chutar qualquer coisa.',
+      'E A HUNT PAROU DE EMPACAR COM A BARRA CHEIA. Acontecia de a sala fechar os 30 abates e simplesmente nao passar: barra cheia, o guardiao em pe, e voce matando sem que nada andasse — em alguns casos por mais de dez minutos, ate voce desistir e sair. O jogo cobrava a area seguinte de tanto em tanto segundo, e essa pressa era justamente o que impedia o servidor de terminar a luta com o guardiao. Ele agora pergunta no ritmo certo, e a sala vira.',
       'O F5 PAROU DE TE MANDAR DE VOLTA PRA SALA 1. Recarregar a pagina no meio da hunt jogava voce na primeira sala do primeiro ciclo, perdendo o caminho inteiro. Agora voce volta na MESMA sala, com os mesmos abates e o mesmo ciclo — e se havia um guardiao em pe, ele continua la, com a vida que tinha.',
       'REIVINDICAR MISSAO RESPONDIA "MISSAO JA REIVINDICADA" E NAO PAGAVA. A tela voltava a oferecer, a cada 30 segundos, uma missao que voce ja tinha reivindicado; ao clicar de novo, o jogo recusava. O ouro da primeira vez sempre foi pago — o que sumia era a marca na tela.',
       'A HUNT INICIAL PAROU DE SER UMA CAMINHADA. So havia um selvagem no mapa inteiro, e o POKE passava metade do tempo atravessando o cenario ate o proximo. Agora eles nascem mais perto e o campo enche conforme seu inicial cresce: um ate o Nivel 2, dois a partir do 3, tres a partir do 5. Eles continuam nascendo longe uns dos outros, entao voce enfrenta um por vez — a primeira meia hora de conta nova era o unico lugar do jogo onde dava pra morrer sem entender por que.',
