@@ -3,44 +3,34 @@
 // (cadeia sequencial por tipo, bonus ao completar); numeros e fonte de dado
 // sao proprios deste jogo.
 //
-// A cadeia NAO e uma lista de especies hardcoded (nem aqui nem na RPC — ver
-// `reivindicar_missao` na migration): e derivada de `SPECIES` por tipo,
-// ordenada por numero de Pokedex, exatamente como a RPC deriva a mesma cadeia
-// de `species` no Postgres. Os dois lados so precisam concordar numa
-// FORMULA pequena (alvo/recompensa por posicao), nao numa lista de ~245
-// linhas — a mesma lista duplicada em dois lugares e o tipo de coisa que diverge
-// sem ninguem notar (ver CLAUDE.md sobre `COLUNAS_ITENS`/etc).
-import { SPECIES } from './pokes'
-import { pokedexNumber } from './regions'
+// A CADEIA NAO E MAIS DERIVADA AQUI (PH-245). Ela e lida de
+// `generated/missaoCadeia.generated.ts`, que sai de
+// `scripts/gerar-cadeia-de-missoes.mjs` — o MESMO gerador que emite o par de
+// migrations que popula a tabela `missao_cadeia` lida pela RPC.
+//
+// POR QUE MUDOU: a primeira versao derivava a cadeia dos dois lados — aqui a
+// partir de `SPECIES`, e dentro da propria `reivindicar_missao` a partir de
+// `public.species`. O comentario de la dizia que os dois lados "so precisam
+// concordar numa FORMULA pequena, nao numa lista de ~245 linhas". Concordar na
+// formula nao basta: eles tambem precisam concordar no CONJUNTO DE ENTRADA, e
+// nao concordavam. O banco tem 251 especies e o catalogo do cliente tem 245
+// (faltam vulpix, ninetales, chansey, blissey, mr__mime, shuckle), e 4
+// especies tem tipo diferente nos dois lados porque o retype de Fairy entrou
+// so no cliente. Medido em 28/08: as cadeias divergiam em 6 dos 18 tipos, e
+// FAIRY divergia ja na posicao 1 — a tela oferecia `clefairy` e a RPC
+// respondia "essa especie nao pertence a cadeia desse tipo", entao a cadeia
+// inteira era inalcancavel sob autoridade.
+//
+// A regra de elegibilidade e a ordem vivem no gerador, com o porque de cada
+// uma. Em resumo: entram so especies do elenco do cliente que aparecem em
+// algum sub-bioma e nao sao lendarias, ordenadas por dificuldade real de farm
+// (peso de spawn, depois estagio de evolucao, depois dex) — e nao por numero
+// de Pokedex, que era o que punha Charizard como missao 1 de FLYING.
+import { MISSAO_CADEIA } from './generated/missaoCadeia.generated'
 import { TYPE_COLORS } from './typeColors'
 import type { ElementType } from './generated/types'
 
 export const MISSAO_TYPES = Object.keys(TYPE_COLORS) as ElementType[]
-
-// alvo(posicao) = abates da especie pra reivindicar aquela posicao da cadeia.
-// recompensa(posicao) = gold pago ao reivindicar.
-// Primeira leva — sem playtest ainda, ajustavel aqui sem mexer em RPC nem UI
-// (so os 4 numeros abaixo, e o par tem que concordar com a copia na migration).
-const MISSAO_ALVO_BASE = 50
-const MISSAO_ALVO_INCREMENTO = 25
-const MISSAO_RECOMPENSA_BASE = 100
-const MISSAO_RECOMPENSA_INCREMENTO = 50
-// Bonus fixo (lump-sum) ao reivindicar a ULTIMA missao da cadeia de um tipo —
-// nao e multiplicador de XP como o "Bônus de Elementos Completos" do site de
-// referencia: bonus percentual exigiria um novo ponto de leitura no calculo de
-// XP (que hoje so sai de combate, resolvido pelo flush de sessao — ver
-// `authority/src/progresso.ts`). Lump-sum de gold reusa o mesmo caminho de
-// escrita que toda missao ja usa, sem inventar um segundo.
-export const MISSAO_BONUS_CADEIA_COMPLETA = 5000
-
-export function alvoDaMissao(posicao: number): number {
-  return MISSAO_ALVO_BASE + posicao * MISSAO_ALVO_INCREMENTO
-}
-
-export function recompensaDaMissao(posicao: number, ehUltima: boolean): number {
-  const base = MISSAO_RECOMPENSA_BASE + posicao * MISSAO_RECOMPENSA_INCREMENTO
-  return ehUltima ? base + MISSAO_BONUS_CADEIA_COMPLETA : base
-}
 
 export interface MissaoInfo {
   speciesId: string
@@ -50,33 +40,30 @@ export interface MissaoInfo {
   ehUltima: boolean
 }
 
-// So especies do NOSSO catalogo (dex <=251) entram — `SPECIES` ja e recortado
-// assim (ver recorteDaPokedex.test.ts), entao nao ha filtro extra a fazer:
-// uma especie do pokedream.com.br que nao exista aqui simplesmente nunca
-// aparece em `SPECIES.values()`.
+// Indexado uma vez no import: `MISSAO_CADEIA` e constante, e `cadeiaDoTipo` e
+// chamada por render de card na tela de Tasks.
+const POR_TIPO = ((): Record<string, MissaoInfo[]> => {
+  const mapa: Record<string, MissaoInfo[]> = {}
+  for (const linha of MISSAO_CADEIA) {
+    ;(mapa[linha.tipo] ??= []).push({
+      speciesId: linha.speciesId,
+      posicao: linha.posicao,
+      alvo: linha.alvo,
+      recompensa: linha.recompensa,
+      ehUltima: linha.ehUltima,
+    })
+  }
+  // O gerador ja emite em ordem de posicao; ordenar aqui de novo custa uma vez
+  // e tira a dependencia dessa premissa continuar valendo.
+  for (const lista of Object.values(mapa)) lista.sort((a, b) => a.posicao - b.posicao)
+  return mapa
+})()
+
 export function cadeiaDoTipo(tipo: ElementType): MissaoInfo[] {
-  const especies = Object.values(SPECIES)
-    .filter((s) => s.type === tipo || s.type2 === tipo)
-    .sort((a, b) => pokedexNumber(a.id) - pokedexNumber(b.id))
-
-  return especies.map((especie, posicao) => {
-    const ehUltima = posicao === especies.length - 1
-    return {
-      speciesId: especie.id,
-      posicao,
-      alvo: alvoDaMissao(posicao),
-      recompensa: recompensaDaMissao(posicao, ehUltima),
-      ehUltima,
-    }
-  })
+  return POR_TIPO[tipo] ?? []
 }
 
-export function chaveDaMissao(tipo: ElementType, speciesId: string): string {
-  return `${tipo}:${speciesId}`
-}
-
-/** Inversa de `chaveDaMissao` — species id nunca tem ':' (e um slug snake_case). */
-export function missaoDaChave(chave: string): { tipo: ElementType; speciesId: string } {
-  const i = chave.indexOf(':')
-  return { tipo: chave.slice(0, i) as ElementType, speciesId: chave.slice(i + 1) }
-}
+// Re-export por compatibilidade: as duas moraram aqui e todo call site importa
+// daqui. Quem precisa SO da chave deve importar de `./missaoChave` direto —
+// ver a nota de la sobre os 38 kB que isto custava no bundle da Edge.
+export { chaveDaMissao, missaoDaChave } from './missaoChave'

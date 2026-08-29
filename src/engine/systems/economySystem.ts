@@ -15,9 +15,16 @@ import type { EnemyEntity } from '../types'
 const formulaEngine = createFormulaEngine(FORMULAS)
 const POKEMON_SELL_DIVISOR = formulaEngine.eval('POKEMON_SELL_DIVISOR')
 const KILL_MONEY_DIVISOR = formulaEngine.eval('KILL_MONEY_DIVISOR')
-// 0.05 = pedido explicito do usuario (revertido de 0.2): todo kill tem 5%
-// de chance fixa de dropar uma Stone do tipo PRIMARIO da vitima,
-// independente da tabela itemDrops da propria hunt.
+// 0.05 = pedido explicito do usuario (revertido de 0.2): todo kill tem 5% de
+// chance fixa de dropar uma Stone de um dos tipos da vitima, independente da
+// tabela itemDrops da propria hunt.
+//
+// PH-246: o tipo da Stone era so o PRIMARIO. Como NENHUMA especie do catalogo
+// tem FLYING como primario (FLYING so existe como type2), a Pedra FLYING nao
+// caia de lugar nenhum — e a tela de Especialidades anunciava os 10 niveis de
+// FLYING com preco que nunca podia ser pago. Agora especie de dois tipos solta
+// a Stone de um dos dois, meio a meio. A chance TOTAL de sair alguma Stone nao
+// muda: continua sendo este mesmo 5%, so o sorteio de QUAL mudou.
 const STONE_DROP_CHANCE = formulaEngine.evalOrDefault('STONE_DROP_CHANCE', 0.05)
 const KILL_GOLD_MULTIPLIER = formulaEngine.evalOrDefault('KILL_GOLD_MULTIPLIER', 5)
 const GOLD_GLOBAL_MULTIPLIER = formulaEngine.evalOrDefault('GOLD_GLOBAL_MULTIPLIER', 1)
@@ -94,7 +101,13 @@ export function awardKillLoot(
   }
 
   if (rollChance(rng, STONE_DROP_CHANCE)) {
-    const stoneId = stoneItemId(species.type)
+    // O segundo sorteio so acontece quando a especie TEM segundo tipo. Sortear
+    // sempre e descartar em mono-tipo manteria a sequencia do RNG mais
+    // uniforme, mas gastaria um numero por abate no jogo inteiro pra nada —
+    // cliente e servidor rodam este mesmo bundle, entao os dois consomem a
+    // sequencia identica de qualquer jeito.
+    const tipoDaStone = species.type2 && rollChance(rng, 0.5) ? species.type2 : species.type
+    const stoneId = stoneItemId(tipoDaStone)
     gameState.addItem(stoneId, 1)
     droppedItems.push(stoneId)
   }
