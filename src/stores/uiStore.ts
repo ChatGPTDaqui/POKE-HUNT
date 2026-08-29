@@ -41,6 +41,8 @@ function pontoGrosso(): boolean {
 const HUD_SCALE_KEY = 'novo-poke-idle:hud-scale'
 const VIDRO_KEY = 'novo-poke-idle:vidro-fosco'
 const VIDA_CENARIO_KEY = 'novo-poke-idle:vida-no-cenario'
+const CHAT_ABA_KEY = 'novo-poke-idle:chat-aba'
+const CHAT_ABERTO_KEY = 'novo-poke-idle:chat-aberto'
 // 0.7 (era 0.8) porque a fonte base da HUD subiu 3px nesta leva: sem descer o
 // minimo, quem jogava confortavel no tamanho antigo perdeu a opcao de voltar.
 export const HUD_SCALE_MIN = 0.7
@@ -86,6 +88,51 @@ function lerVidroFosco(): boolean {
 function lerVidaNoCenario(): boolean {
   try {
     return localStorage.getItem(VIDA_CENARIO_KEY) !== '0'
+  } catch {
+    return true
+  }
+}
+
+// Aba do chat e chat recolhido (PH-212). Mesma familia das preferencias acima e
+// pelo mesmo motivo: e ajuste de EXIBICAO por aparelho, entao nao pode ir pro
+// `gameStateStore` (a autoridade sobrescreve aquele objeto inteiro no flush e
+// apagaria a escolha) nem viajar entre celular e desktop do mesmo jogador.
+//
+// O `winPos.chat` (posicao arrastada da janela) fica de FORA de proposito: ele
+// ja e zerado dentro da propria sessao quando a janela muda de tamanho
+// estrutural (ver `setViewport` mais abaixo), porque uma posicao guardada de um
+// viewport maior joga a janela pra fora da tela. Persistir isso entre sessoes
+// reintroduziria exatamente o caso que aquele reset existe pra evitar — o
+// jogador abriria o jogo no celular com o chat fora da area visivel, sem nada
+// na tela pra clicar e trazer de volta.
+//
+// O tamanho (o canto arrastavel do `resize` do CSS) tambem fica de fora, e por
+// um motivo diferente: ele nao e estado de aplicacao nenhum. E a classe
+// `resize` do Tailwind mexendo no elemento direto, e nada em `src/` le a altura
+// resultante. Persistir exigiria passar a MEDIR o elemento (ResizeObserver) e
+// criar estado que hoje nao existe — mudanca de desenho, nao de persistencia.
+const ABAS_DE_CHAT: readonly ChatTab[] = ['mundo', 'sistema', 'trade', 'log']
+
+function lerChatAba(): ChatTab {
+  try {
+    const bruto = localStorage.getItem(CHAT_ABA_KEY)
+    // Valida contra a uniao em vez de confiar na string: a chave e editavel
+    // pelo jogador no DevTools, e uma aba inexistente deixaria o painel
+    // renderizando vazio, sem nenhuma aba marcada como ativa.
+    return ABAS_DE_CHAT.includes(bruto as ChatTab) ? (bruto as ChatTab) : 'mundo'
+  } catch {
+    // Safari em navegacao privada lanca no acesso ao localStorage; preferencia
+    // perdida e aceitavel, crash nao.
+    return 'mundo'
+  }
+}
+
+// `!== '0'` e nao `=== '1'`, mesma razao de `lerVidaNoCenario`: o chat nasce
+// ABERTO, entao chave ausente (jogador novo, ou quem ja jogava antes disto)
+// tem que cair no aberto. So o '0' que o proprio toggle grava recolhe.
+function lerChatAberto(): boolean {
+  try {
+    return localStorage.getItem(CHAT_ABERTO_KEY) !== '0'
   } catch {
     return true
   }
@@ -285,10 +332,24 @@ export const useUiStore = create<UiState>((set, get) => ({
       winPos: analyzerOpen ? { ...s.winPos, analyzer: undefined } : s.winPos,
     })),
 
-  chatTab: 'mundo',
-  chatOpen: true,
-  setChatTab: (chatTab) => set({ chatTab }),
-  setChatOpen: (chatOpen) => set({ chatOpen }),
+  chatTab: lerChatAba(),
+  chatOpen: lerChatAberto(),
+  setChatTab: (chatTab) => {
+    try {
+      localStorage.setItem(CHAT_ABA_KEY, chatTab)
+    } catch {
+      // idem `readHudScale`: preferencia perdida e aceitavel, crash nao.
+    }
+    set({ chatTab })
+  },
+  setChatOpen: (chatOpen) => {
+    try {
+      localStorage.setItem(CHAT_ABERTO_KEY, chatOpen ? '1' : '0')
+    } catch {
+      // idem.
+    }
+    set({ chatOpen })
+  },
 
   footerHeight: 0,
   setFooterHeight: (height) => {
