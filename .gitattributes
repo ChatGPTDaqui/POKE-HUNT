@@ -1,0 +1,57 @@
+# PH-253 — line endings deterministicos.
+#
+# POR QUE ISTO EXISTE
+#
+# Sem este arquivo, `core.autocrlf=true` no Windows fazia o MESMO commit ser
+# materializado de formas diferentes dependendo de onde o checkout aconteceu.
+# Medido em 2026-08-28, dois worktrees do mesmo `.git` parados no mesmo commit:
+#
+#   POKE-HUNT-PH-164/supabase/migrations/20260828233000_...sql -> LF
+#   POKE-HUNT-PH-235/  (mesmo arquivo, mesmo commit)           -> CRLF
+#
+# O runner do CI e Linux e sempre materializa em LF. Isso nao e detalhe de
+# formatacao aqui: o repo tem uma familia de testes que le o PROPRIO FONTE
+# (`import.meta.glob('/supabase/migrations/*.sql', '?raw')` e assercoes sobre o
+# texto). Pra esses, line ending e entrada de dado.
+#
+# Foi assim que o PH-252 aconteceu: `eeveeDoLance.test.ts` usava `/--.*$/` pra
+# tirar comentario, e em JavaScript o `.` NAO casa line terminator — `\r` e um.
+# Em checkout CRLF o removedor nao removia nada e o teste passava a asserir
+# sobre a prosa da migration. Verde no CI, vermelho na maquina de quem escreveu,
+# e o tempo todo gasto em descobrir que os dois lugares nao liam o mesmo arquivo.
+#
+# `eol=lf` e nao so `text=auto`: `text=auto` sozinho normaliza no repositorio
+# mas deixa o checkout a cargo do `autocrlf`, o que manteria exatamente a
+# assimetria Windows-CRLF/CI-LF que motivou isto.
+* text=auto eol=lf
+
+# Binarios — nunca normalizar. `scripts/body-block-refs/` (211,9MB, 31 PNGs) e
+# `scripts/agua-refs/` (28,6MB) sao ENTRADA versionada de gerador (PH-163), e
+# uma normalizacao neles corromperia o arquivo, nao so o diff. O git ja
+# detectaria a maioria sozinho; explicito porque o custo de errar aqui e alto.
+*.png binary
+*.gif binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+# `.svg` fica de FORA desta lista de proposito: e XML, e texto. Marcado como
+# `binary` ele para de ser normalizado, e o `git add --renormalize` gravaria no
+# repositorio o CRLF do disco — `public/icons.svg` engordava 24 bytes,
+# exatamente uma linha a mais de `\r` por linha do arquivo. Ele cai na regra
+# `* text=auto eol=lf` la de cima, que e o certo.
+*.mp3 binary
+*.ogg binary
+*.wav binary
+*.dat binary
+*.xlsx binary
+
+# Scripts de shell do Windows: `cmd.exe` precisa de CRLF. Um `.bat` em LF pode
+# executar so a primeira linha, sem erro visivel.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Scripts POSIX: LF sempre, inclusive se alguem clonar com autocrlf ligado.
+# `#!/bin/sh\r` nao e um shebang valido — o kernel procura o interpretador
+# `/bin/sh\r`, que nao existe, e o erro sai como "arquivo nao encontrado".
+*.sh text eol=lf
