@@ -349,6 +349,14 @@ function garantirProtetorDaSala(
     world.protetorPendente = null
     return false
   }
+  // PH-230: o protetor DESTA sala ja caiu e a sala ainda nao avancou — o caso
+  // normal sob `salaSobAutoridade`, onde quem avanca a sala e o flush do
+  // servidor e nao `resolverProtetorDaSala`. Sem este corte a sala pedia um
+  // protetor novo a cada tick (respawn infinito) e o `true` daqui segurava pra
+  // sempre o early-return de `garantirTransicaoDeQuotaFechada`, matando o
+  // fallback de espera da autoridade. `false` = a sala nao bloqueia mais o
+  // avanco.
+  if (world.protetorResolvido) return false
   // Ja resolvido nesta mesma instancia de mundo (chamada de novo no mesmo
   // tick, ou protetor ja spawnado e ainda vivo) — idempotente, nao recria.
   if (world.protetorPendente) return true

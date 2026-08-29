@@ -54690,6 +54690,7 @@ function armarTransicaoDeSala(world, mapId) {
 */
 function resolverProtetorDaSala(world, mapId) {
 	world.protetorPendente = null;
+	world.protetorResolvido = true;
 	if (world.salaSobAutoridade) return;
 	armarTransicaoDeSala(world, mapId);
 }
@@ -54746,6 +54747,7 @@ function aplicarTransicaoDeSala(world, mapId) {
 	if (!pendente) return;
 	world.sala = pendente;
 	world.salaPendente = null;
+	world.protetorResolvido = false;
 	world.clima = null;
 	definirClimaDeAmbiente(world, world.salaSobAutoridade ? null : climaAmbienteDaSala(world.seed, world.sala));
 	world.salaEsperaDaAutoridade = 0;
@@ -54806,6 +54808,7 @@ function emptyWorldState(seed = randomSeed()) {
 		countdownRemaining: null,
 		sala: null,
 		protetorPendente: null,
+		protetorResolvido: false,
 		salaCountdownRemaining: null,
 		salaPendente: null,
 		salaSobAutoridade: false,
@@ -55175,6 +55178,7 @@ function garantirProtetorDaSala(world, mapDef, protetorSalvo, player, entrada) {
 		world.protetorPendente = null;
 		return false;
 	}
+	if (world.protetorResolvido) return false;
 	if (world.protetorPendente) return true;
 	const { enemy, pendente } = criarEntidadeDoProtetor(world, mapDef, contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool), tipo, protetorSalvo, player, entrada);
 	world.enemies.push(enemy);
