@@ -321,7 +321,18 @@ function AbaDeAutomacoes() {
               // Largura fixa e pequena: sem ela o input numerico cai no tamanho
               // default do navegador (~20 caracteres) e transborda a janela de
               // 19em na horizontal.
-              className="w-[3.4em] text-center"
+              //
+              // 4.6em, e nao 3.4em (PH-270). O valor antigo nao contava o SPINNER
+              // nativo do Chrome, que come largura util dentro do campo: medido no
+              // jogo com a regra padrao (70), `clientWidth` 35px contra
+              // `scrollWidth` 40px — o campo mostrava "7". A diferenca entre 7% e
+              // 70% de vida e a diferenca entre curar quase morto e curar cedo.
+              //
+              // `jogo-campo-sem-spinner` (index.css) esconde as setas: num campo
+              // de 1 a 99 que o jogador digita, elas so custam largura. Os dois
+              // juntos — largura maior e spinner fora — sao o que faz 99 caber
+              // sem transbordar a janela.
+              className="jogo-campo-sem-spinner w-[4.6em] text-center"
             />
             <span>% usar</span>
             <ItemPicker
