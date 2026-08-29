@@ -32,6 +32,7 @@ import { useAcaoPendente } from '@/hooks/useAcaoPendente'
 import { useFaceDoPoke } from '@/hooks/useFaceDoPoke'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { GameButton } from '@/components/game/controls'
+import { SalaChip } from '@/components/hud/SalaChip'
 import { useIntervalo } from '@/hooks/useIntervalo'
 import { useAncoraDeVfx, ANCORA } from '@/hooks/useAncoraDeVfx'
 import { cn } from '@/lib/utils'
@@ -65,6 +66,9 @@ export function StatusRail() {
   // do meio aumenta a altura do trilho.
   const mode = useDeviceMode().mode
   const estreito = mode === 'compacto'
+  // PH-272: com sala em cena, a faixa central do trilho esta ocupada — e e ela
+  // que paga a largura das taxas. Ver `TaxasInline`.
+  const temSala = useWorldStore((s) => s.sala != null)
   const [gavetaAberta, setGavetaAberta] = useState(false)
 
   return (
@@ -83,14 +87,26 @@ export function StatusRail() {
             `VitaisPoke`): sem este vao, com as barras tendo teto, o grupo da
             direita (carteira, detalhes, avatar) descolava da borda do trilho e
             ficava flutuando no meio dele — os vizinhos sao todos `shrink-0` e
-            nenhum cresce pra ocupar o resto. */}
-        <div className="min-w-0 flex-1" aria-hidden />
-        {!estreito && <ResumoLocal />}
+            nenhum cresce pra ocupar o resto.
+
+            PH-272: O VAO DEIXOU DE SER VAZIO. Ele e a faixa central do trilho, e
+            e nela que "Sala 3/10 Relvado" mora agora, a pedido do usuario.
+            `justify-center` dentro do proprio vao: o chip fica no meio do espaco
+            que sobra, sem nunca sobrepor os vizinhos. Posicao absoluta
+            centralizada na TELA foi descartada — em largura media ela passaria
+            por cima da carteira, e o trilho ja teve esse defeito uma vez (ver o
+            cabecalho deste arquivo).
+
+            A sobra continua virando espaco quando nao ha o que mostrar, entao a
+            razao original do vao segue de pe. */}
+        <div className="flex min-w-0 flex-1 items-center justify-center">
+          {!estreito && <FaixaCentral />}
+        </div>
         {/* Taxas so no amplo. Deitado a largura parece sobrar e nao sobra: com
             as taxas na faixa do meio, o nome do POKE truncava pra "Ent…" com a
             barra de HP em 180px enquanto o ouro exibia 13 digitos. O dado menos
             urgente e o que sai. */}
-        {mode === 'amplo' && <TaxasInline />}
+        {mode === 'amplo' && <TaxasInline sohOuro={temSala && !estreito} />}
         <Carteira abreviada={mode !== 'amplo'} />
         <BotaoDetalhes aberta={gavetaAberta} onToggle={() => setGavetaAberta((v) => !v)} />
         {/* No compacto o avatar era um botao mudo: sem largura pro nome e pro
@@ -390,17 +406,43 @@ function useTaxas() {
   return getPerfStats({ perfStats } as Parameters<typeof getPerfStats>[0])
 }
 
-// So o NOME do lugar. O contador da Pokedex saiu daqui: ele muda umas poucas
-// vezes por sessao, tem slot proprio na barra de navegacao e continua na
-// gaveta — permanente no trilho ele era uma linha de texto que ninguem le duas
-// vezes. O nome fica porque em hunt de BOSS nao ha chip de sala, e sem ele o
-// jogador nao tem em lugar nenhum da tela onde esta.
-function ResumoLocal() {
+/**
+ * A faixa central do trilho (PH-272): a sala, ou o nome do lugar quando nao ha
+ * sala.
+ *
+ * NUNCA OS DOIS, E NUNCA NENHUM — e o ponto deste componente.
+ *
+ *  - Os dois juntos seriam duas respostas pra mesma pergunta ("onde estou"), com
+ *    o nome da hunt repetindo o que o sub-bioma ja diz melhor.
+ *  - Nenhum deixaria um buraco no meio do trilho justamente no Hospital, que e
+ *    onde o jogador para pra ler a tela. O criterio de aceite da issue pede
+ *    exatamente isso.
+ *
+ * O nome do lugar era um bloco proprio encostado a direita, entre o vao e as
+ * taxas (`ResumoLocal`). Ele existia porque em hunt de BOSS nao ha chip de sala
+ * e o jogador ficaria sem saber onde esta — essa razao continua valendo, e por
+ * isso ele nao sumiu: virou o outro lado deste `if`.
+ */
+function FaixaCentral() {
+  const temSala = useWorldStore((s) => s.sala != null)
   const huntName = useWorldStore((s) => s.mapDef?.name ?? 'Hospital')
-  return <div className="max-w-[8em] shrink-0 truncate text-right text-[.72em] text-n300">{huntName}</div>
+  if (temSala) return <SalaChip embutido />
+  return <div className="max-w-[12em] truncate text-center text-[.72em] text-n300">{huntName}</div>
 }
 
-function TaxasInline() {
+/**
+ * `sohOuro` (PH-272): as tres taxas viram uma so.
+ *
+ * A faixa central passou a carregar a sala, e as tres taxas somavam ~230px que
+ * saiam justamente dali — medido na tela em 1280: com elas inteiras, o nome do
+ * sub-bioma era espremido a ZERO e o chip aparecia como "Sala 9/10" e uma barra
+ * solta, sem dizer onde o jogador estava.
+ *
+ * Fica o ouro por hora, que e o numero pelo qual um jogo idle e julgado. XP/h e
+ * Mobs/h continuam na gaveta logo abaixo (um toque) e no Hunt Analyzer — os
+ * dois ja estavam nos dois lugares, entao nada saiu do jogo.
+ */
+function TaxasInline({ sohOuro = false }: { sohOuro?: boolean }) {
   const stats = useTaxas()
   const abrirAnalyzer = useUiStore((s) => s.setAnalyzerOpen)
   return (
@@ -408,11 +450,14 @@ function TaxasInline() {
       type="button"
       data-keep-open
       onClick={() => abrirAnalyzer(true)}
+      title={sohOuro
+        ? `Gold/h ${fmtTaxa(stats.goldPerHour)} · XP/h ${fmtTaxa(stats.xpPerHour)} · Mobs/h ${stats.mobsPerHour}`
+        : undefined}
       className="flex shrink-0 cursor-pointer items-center gap-[.6em] rounded-[.5em] px-[.3em] py-[.2em] font-[inherit] text-[.72em] text-n400"
     >
       <span>Gold/h <b className="font-medium text-gold">{fmtTaxa(stats.goldPerHour)}</b></span>
-      <span>XP/h <b className="font-medium text-n200">{fmtTaxa(stats.xpPerHour)}</b></span>
-      <span>Mobs/h <b className="font-medium text-n200">{stats.mobsPerHour}</b></span>
+      {!sohOuro && <span>XP/h <b className="font-medium text-n200">{fmtTaxa(stats.xpPerHour)}</b></span>}
+      {!sohOuro && <span>Mobs/h <b className="font-medium text-n200">{stats.mobsPerHour}</b></span>}
     </button>
   )
 }
