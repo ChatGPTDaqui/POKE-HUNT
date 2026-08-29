@@ -89,13 +89,34 @@ export function HudLayer() {
             conteudo. */}
         <div className="flex w-full max-w-[64em] flex-col gap-0">
           <StatusRail />
+          {/* Trilho de reservas: mesma coluna do trilho de status, e nao uma
+              ancora propria na borda esquerda. A ancora foi tentada uma vez
+              (`ActivePokeCard`, ver o cabecalho deste arquivo) e cobria o HP em
+              390px. Aqui ele empurra em vez de sobrepor, e continua no canto
+              superior esquerdo porque o proprio componente se alinha a esquerda
+              dentro da linha.
+
+              ELE VEM LOGO DEPOIS DO CABECALHO DO POKE ATIVO (PH-261), e nao
+              depois dos chips. A fila de reservas E a continuacao do POKE em
+              campo — o slot 1 e o campo, e a numeracao dela comeca em 2 (ver
+              ReservasRail). A linha de sala/clima ficava no meio dos dois e
+              cortava essa leitura: no PC as reservas apareciam como um bloco
+              solto abaixo de um chip, sem relacao visivel com o POKE. */}
+          <ReservasRail />
           {/* Sala e clima na MESMA linha: os dois descrevem o lugar onde o
               jogador esta, e o clima e propriedade da sala (PH-140/PH-141).
               `flex-wrap` porque em 390px os dois nao cabem lado a lado — ali o
               clima desce pra linha de baixo em vez de espremer a sala.
               `:not(:empty)` (PH-197): a coluna nao espaca mais nada, entao o
-              respiro dos chips passa a ser deles — e so quando existem. */}
-          <div className="flex w-full flex-wrap items-center gap-[.4em] [&:not(:empty)]:my-[.4em]">
+              respiro dos chips passa a ser deles — e so quando existem.
+
+              `justify-center` (PH-261): a linha e CENTRALIZADA, a pedido. Ela
+              descreve o LUGAR, nao o POKE, e colada a esquerda competia com o
+              cabecalho. O centro e o da coluna (`max-w-[64em]`), e nao o da
+              tela: em monitor ultralargo centralizar na tela jogaria o chip pra
+              longe do resto da HUD — exatamente o que o `max-w` e o
+              `items-start` do container existem pra evitar (PH-83). */}
+          <div className="flex w-full flex-wrap items-center justify-center gap-[.4em] [&:not(:empty)]:my-[.4em]">
             <SalaChip />
             <ClimaChip />
             {/* Terceiro chip da MESMA linha: os tres respondem "onde estou e o
@@ -105,13 +126,6 @@ export function HudLayer() {
                 nao cobra largura de quem nao usa (ver LureChip). */}
             <LureChip />
           </div>
-          {/* Trilho de reservas: mesma coluna do trilho de status, e nao uma
-              ancora propria na borda esquerda. A ancora foi tentada uma vez
-              (`ActivePokeCard`, ver o cabecalho deste arquivo) e cobria o HP em
-              390px. Aqui ele empurra em vez de sobrepor, e continua no canto
-              superior esquerdo porque o proprio componente se alinha a esquerda
-              dentro da linha. */}
-          <ReservasRail />
         </div>
       </div>
 
