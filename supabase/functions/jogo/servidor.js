@@ -51764,6 +51764,187 @@ function definirClimaDeAmbiente(world, ambiente) {
 	world.clima = ambiente;
 }
 //#endregion
+//#region src/stores/gameStateDefaults.ts
+var STARTING_ITEMS = {
+	poke_ball: 500,
+	potion: 500,
+	revive: 50
+};
+var DEFAULT_AUTO_POT_RULES = [{
+	hpPercent: 70,
+	itemId: "potion"
+}];
+var DEFAULT_AUTO_CATCH_CONFIG = {
+	ballId: "poke_ball",
+	catchShinyEnabled: true,
+	shinyBallId: "great_ball"
+};
+var DEFAULT_AUTO_SELL_CONFIG = {
+	ligado: false,
+	raridades: []
+};
+var DEFAULT_LURE_CONFIG = {
+	ligado: false,
+	quantidade: 2
+};
+function defaultUnlockedMaps() {
+	return Object.values(MAPS).filter((map) => !map.unlockCost).map((map) => map.id);
+}
+function defaultGameStateData() {
+	return {
+		team: [],
+		activeIndex: 0,
+		bagPokes: [],
+		items: { ...STARTING_ITEMS },
+		lockedItems: {},
+		wallet: {
+			gold: 1e3,
+			diamonds: 0
+		},
+		unlockedMaps: defaultUnlockedMaps(),
+		currentMapId: null,
+		autoToggles: {
+			autoPot: true,
+			autoCatch: false,
+			autoRevive: false,
+			autoStatus: true,
+			avancoManualDeSala: false
+		},
+		autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
+		autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
+		autoCatchRules: [],
+		autoSellConfig: {
+			...DEFAULT_AUTO_SELL_CONFIG,
+			raridades: []
+		},
+		autoStatusConfig: {},
+		lureConfig: { ...DEFAULT_LURE_CONFIG },
+		perfStats: {
+			gold: 0,
+			xp: 0,
+			mobs: 0,
+			shinys: 0,
+			since: Date.now()
+		},
+		trainer: {
+			name: "Treinador",
+			level: 1,
+			exp: 0
+		},
+		pokedexKills: {},
+		unlockedContinents: [...FAIXAS_INICIAIS],
+		missoesReivindicadas: {},
+		especialidades: especialidadeNiveisDefault(),
+		biomaProgress: biomaProgressDefault()
+	};
+}
+/**
+* Fracao da coleira (`enemy.leashRadius`) a partir da qual o jogador SEGURA a
+* posicao esperando o retardatario.
+*
+* Sem isso a reuniao se desfaz pela retaguarda exatamente quando esta quase
+* fechando: puxar o 3o/4o selvagem leva o jogador longe do 1o, e passar de
+* `leashRadius` (2,2x o aggro, ~385px) faz o bicho desistir e voltar pro spawn.
+* O jogador chegaria no ultimo candidato com a conta no mesmo lugar de antes.
+*
+* 0,8 e nao 1,0 porque a checagem roda uma vez por tick e o selvagem tambem se
+* move: no limite exato ele solta o aggro no mesmo frame em que a espera
+* comecaria.
+*/
+var LURE_FRACAO_DA_COLEIRA = .8;
+/**
+* O jogador esta REUNINDO agora — ou seja, o golpe dele fica segurado (PH-264).
+*
+* Uma funcao, e nao `world.lure?.fase === 'reunindo'` escrito no combate: quem
+* responde "o jogador pode bater?" e o lure, e o `combatSystem` nao deve
+* conhecer as fases dele. Se amanha a supressao passar a valer so em parte da
+* reuniao (por HP baixo, por exemplo), muda aqui e o combate nao sabe de nada.
+*/
+function reunindoParaLure(world) {
+	return world.lure?.fase === "reunindo";
+}
+/** Este selvagem esta com aggro NO JOGADOR agora? */
+function estaReunido(enemy, playerId) {
+	if (isDead(enemy)) return false;
+	if (enemy.targetId !== playerId) return false;
+	return enemy.state === "chase" || enemy.state === "engaged";
+}
+/**
+* O selvagem vivo mais proximo que ainda NAO esta atras do jogador — o proximo
+* a ser puxado.
+*
+* Mais proximo, e nao "o que fecha o grupo mais rapido": o custo de puxar e a
+* distancia percorrida, e qualquer heuristica mais esperta que isso precisaria
+* prever pra onde o wander dos outros vai levar, o que este motor nao sabe.
+*/
+function proximoCandidato(player, enemies) {
+	let melhor = null;
+	let melhorDist = Infinity;
+	for (const enemy of enemies) {
+		if (isDead(enemy) || estaReunido(enemy, player.id)) continue;
+		const dist = distanceTo(player, enemy);
+		if (dist < melhorDist) {
+			melhorDist = dist;
+			melhor = enemy;
+		}
+	}
+	return melhor;
+}
+/** Ha shiny vivo em campo? */
+function temShinyVivo(enemies) {
+	return enemies.some((e) => !isDead(e) && e.poke.isShiny);
+}
+/**
+* Recalcula `world.lure` pro tick atual. Roda ANTES de `updateMovement`, que e
+* quem consome `destino`.
+*
+* Sai por `world.lure = null` (lure inativo, movimento e o de sempre) em todos
+* os casos em que reunir nao faz sentido:
+*  - config desligada;
+*  - sem jogador/mapa (Hospital);
+*  - jogador desmaiado — quem esta no chao nao puxa nada, e a troca de POKE
+*    seguinte precisa comecar o ciclo do zero;
+*  - `passiveEnemies` (boneco de treino): ele nunca revida, entao reunir seria
+*    so andar a mais pelo mesmo dano.
+*/
+function atualizarLure(world, gameState, dt) {
+	const { player, enemies, mapDef } = world;
+	const config = gameState.lureConfig;
+	if (!player || !mapDef || !config?.ligado || player.fainted || mapDef.passiveEnemies) {
+		world.lure = null;
+		return;
+	}
+	const alvo = Math.max(1, Math.min(4, Math.round(config.quantidade) || 1));
+	const reunidos = enemies.filter((e) => estaReunido(e, player.id));
+	const anterior = world.lure;
+	let fase = anterior?.fase ?? "reunindo";
+	let tempoRestante = anterior?.tempoRestante ?? 18;
+	if (fase === "lutando" && reunidos.length === 0) {
+		fase = "reunindo";
+		tempoRestante = 18;
+	}
+	let destino = null;
+	let esperandoRetardatario = false;
+	if (fase === "reunindo") {
+		tempoRestante -= dt;
+		const candidato = proximoCandidato(player, enemies);
+		if (reunidos.length >= alvo || candidato == null || temShinyVivo(enemies) || tempoRestante <= 0) fase = "lutando";
+		else if (reunidos.find((e) => distanceTo(player, e) > e.leashRadius * LURE_FRACAO_DA_COLEIRA)) esperandoRetardatario = true;
+		else destino = {
+			x: candidato.x,
+			y: candidato.y
+		};
+	}
+	world.lure = {
+		fase,
+		alvo,
+		reunidos: reunidos.length,
+		tempoRestante: Math.max(0, tempoRestante),
+		destino,
+		esperandoRetardatario
+	};
+}
+//#endregion
 //#region src/engine/systems/combatSystem.ts
 var HIT_LAND_DELAY = ATTACK_ANIM_DURATION;
 var IMPACT_EFFECT_DURATION = 1;
@@ -53613,7 +53794,7 @@ function updateCombat(world, dt, opts = {}) {
 			enemy.entradaProcessada = true;
 			resolveEntryHook(world, enemy, player, silent);
 		}
-		executePlayerAction(world, player, engagedEnemies, silent);
+		if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent);
 		for (const enemy of engagedEnemies) {
 			if (isDead(enemy) || player.fainted) continue;
 			executeEnemyAction(world, enemy, player, silent);
@@ -53887,176 +54068,6 @@ function updateMovement(world, dt) {
 			} else wanderStep(world.rng, enemy, dt, enemy.spawnPoint.x, enemy.spawnPoint.y, enemy.wanderRadius, mapCx, mapCy, mapRadius, mapDef);
 		}
 	}
-}
-//#endregion
-//#region src/stores/gameStateDefaults.ts
-var STARTING_ITEMS = {
-	poke_ball: 500,
-	potion: 500,
-	revive: 50
-};
-var DEFAULT_AUTO_POT_RULES = [{
-	hpPercent: 70,
-	itemId: "potion"
-}];
-var DEFAULT_AUTO_CATCH_CONFIG = {
-	ballId: "poke_ball",
-	catchShinyEnabled: true,
-	shinyBallId: "great_ball"
-};
-var DEFAULT_AUTO_SELL_CONFIG = {
-	ligado: false,
-	raridades: []
-};
-var DEFAULT_LURE_CONFIG = {
-	ligado: false,
-	quantidade: 2
-};
-function defaultUnlockedMaps() {
-	return Object.values(MAPS).filter((map) => !map.unlockCost).map((map) => map.id);
-}
-function defaultGameStateData() {
-	return {
-		team: [],
-		activeIndex: 0,
-		bagPokes: [],
-		items: { ...STARTING_ITEMS },
-		lockedItems: {},
-		wallet: {
-			gold: 1e3,
-			diamonds: 0
-		},
-		unlockedMaps: defaultUnlockedMaps(),
-		currentMapId: null,
-		autoToggles: {
-			autoPot: true,
-			autoCatch: false,
-			autoRevive: false,
-			autoStatus: true,
-			avancoManualDeSala: false
-		},
-		autoPotRules: DEFAULT_AUTO_POT_RULES.map((r) => ({ ...r })),
-		autoCatchConfig: { ...DEFAULT_AUTO_CATCH_CONFIG },
-		autoCatchRules: [],
-		autoSellConfig: {
-			...DEFAULT_AUTO_SELL_CONFIG,
-			raridades: []
-		},
-		autoStatusConfig: {},
-		lureConfig: { ...DEFAULT_LURE_CONFIG },
-		perfStats: {
-			gold: 0,
-			xp: 0,
-			mobs: 0,
-			shinys: 0,
-			since: Date.now()
-		},
-		trainer: {
-			name: "Treinador",
-			level: 1,
-			exp: 0
-		},
-		pokedexKills: {},
-		unlockedContinents: [...FAIXAS_INICIAIS],
-		missoesReivindicadas: {},
-		especialidades: especialidadeNiveisDefault(),
-		biomaProgress: biomaProgressDefault()
-	};
-}
-/**
-* Fracao da coleira (`enemy.leashRadius`) a partir da qual o jogador SEGURA a
-* posicao esperando o retardatario.
-*
-* Sem isso a reuniao se desfaz pela retaguarda exatamente quando esta quase
-* fechando: puxar o 3o/4o selvagem leva o jogador longe do 1o, e passar de
-* `leashRadius` (2,2x o aggro, ~385px) faz o bicho desistir e voltar pro spawn.
-* O jogador chegaria no ultimo candidato com a conta no mesmo lugar de antes.
-*
-* 0,8 e nao 1,0 porque a checagem roda uma vez por tick e o selvagem tambem se
-* move: no limite exato ele solta o aggro no mesmo frame em que a espera
-* comecaria.
-*/
-var LURE_FRACAO_DA_COLEIRA = .8;
-/** Este selvagem esta com aggro NO JOGADOR agora? */
-function estaReunido(enemy, playerId) {
-	if (isDead(enemy)) return false;
-	if (enemy.targetId !== playerId) return false;
-	return enemy.state === "chase" || enemy.state === "engaged";
-}
-/**
-* O selvagem vivo mais proximo que ainda NAO esta atras do jogador — o proximo
-* a ser puxado.
-*
-* Mais proximo, e nao "o que fecha o grupo mais rapido": o custo de puxar e a
-* distancia percorrida, e qualquer heuristica mais esperta que isso precisaria
-* prever pra onde o wander dos outros vai levar, o que este motor nao sabe.
-*/
-function proximoCandidato(player, enemies) {
-	let melhor = null;
-	let melhorDist = Infinity;
-	for (const enemy of enemies) {
-		if (isDead(enemy) || estaReunido(enemy, player.id)) continue;
-		const dist = distanceTo(player, enemy);
-		if (dist < melhorDist) {
-			melhorDist = dist;
-			melhor = enemy;
-		}
-	}
-	return melhor;
-}
-/** Ha shiny vivo em campo? */
-function temShinyVivo(enemies) {
-	return enemies.some((e) => !isDead(e) && e.poke.isShiny);
-}
-/**
-* Recalcula `world.lure` pro tick atual. Roda ANTES de `updateMovement`, que e
-* quem consome `destino`.
-*
-* Sai por `world.lure = null` (lure inativo, movimento e o de sempre) em todos
-* os casos em que reunir nao faz sentido:
-*  - config desligada;
-*  - sem jogador/mapa (Hospital);
-*  - jogador desmaiado — quem esta no chao nao puxa nada, e a troca de POKE
-*    seguinte precisa comecar o ciclo do zero;
-*  - `passiveEnemies` (boneco de treino): ele nunca revida, entao reunir seria
-*    so andar a mais pelo mesmo dano.
-*/
-function atualizarLure(world, gameState, dt) {
-	const { player, enemies, mapDef } = world;
-	const config = gameState.lureConfig;
-	if (!player || !mapDef || !config?.ligado || player.fainted || mapDef.passiveEnemies) {
-		world.lure = null;
-		return;
-	}
-	const alvo = Math.max(1, Math.min(4, Math.round(config.quantidade) || 1));
-	const reunidos = enemies.filter((e) => estaReunido(e, player.id));
-	const anterior = world.lure;
-	let fase = anterior?.fase ?? "reunindo";
-	let tempoRestante = anterior?.tempoRestante ?? 18;
-	if (fase === "lutando" && reunidos.length === 0) {
-		fase = "reunindo";
-		tempoRestante = 18;
-	}
-	let destino = null;
-	let esperandoRetardatario = false;
-	if (fase === "reunindo") {
-		tempoRestante -= dt;
-		const candidato = proximoCandidato(player, enemies);
-		if (reunidos.length >= alvo || candidato == null || temShinyVivo(enemies) || tempoRestante <= 0) fase = "lutando";
-		else if (reunidos.find((e) => distanceTo(player, e) > e.leashRadius * LURE_FRACAO_DA_COLEIRA)) esperandoRetardatario = true;
-		else destino = {
-			x: candidato.x,
-			y: candidato.y
-		};
-	}
-	world.lure = {
-		fase,
-		alvo,
-		reunidos: reunidos.length,
-		tempoRestante: Math.max(0, tempoRestante),
-		destino,
-		esperandoRetardatario
-	};
 }
 //#endregion
 //#region src/engine/systems/economySystem.ts
@@ -57018,10 +57029,51 @@ function bloqueioDeBiomaPendente(mapId, grupo, biomaProgress) {
 	const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1];
 	return `Vença o Lord de ${BIOMA_POR_CHAVE[anteriorChave]?.nome ?? anteriorChave} para liberar esta área.`;
 }
+/**
+* Quanto tempo depois de fechada uma sessao ainda vale como "a hunt que o
+* jogador estava jogando" pra efeito de herdar a sala (PH-266).
+*
+* O caso que isto cobre e o F5: o boot ASSENTA a sessao (fecha) e reentra logo
+* em seguida, entao o `closed_at` da sessao anterior tem segundos de idade. Os
+* 5 minutos sao folga pra boot lento, aba que voltou do sono e o assentamento
+* de quem fechou a aba (que so fecha a sessao no carregamento seguinte).
+*
+* Nao e uma janela de imunidade: quem sai da hunt e volta DEPOIS disso recomeca
+* no ciclo 1, sala 1, como sempre foi.
+*/
+var JANELA_DE_HERANCA_DE_SALA_MS = 3e5;
+/**
+* A REGRA, separada do acesso ao banco — mesmo motivo de
+* `bloqueioDeBiomaPendente` ser pura: da pra exercitar "sessao velha demais",
+* "sem sala" e "protetor junto" sem mockar db.js/HTTP inteiro.
+*
+* `agoraMs` entra por parametro pra o teste nao depender do relogio real.
+*/
+function herancaDaLinha(ultima, agoraMs) {
+	if (!ultima?.sala_chave) return null;
+	if (ultima.closed_at) {
+		const fechadaEm = Date.parse(ultima.closed_at);
+		if (!Number.isFinite(fechadaEm)) return null;
+		if (agoraMs - fechadaEm > JANELA_DE_HERANCA_DE_SALA_MS) return null;
+	}
+	return {
+		sala: {
+			indice: Number(ultima.sala_indice ?? 0),
+			chave: ultima.sala_chave,
+			abates: Number(ultima.sala_abates ?? 0),
+			ciclos: Number(ultima.ciclos ?? 0)
+		},
+		protetor: ultima.sala_protetor ?? null
+	};
+}
+async function salaHerdada(cfg, userId, mapId) {
+	return herancaDaLinha((await selecionar(cfg, `game_sessions?user_id=eq.${userId}&map_id=eq.${encodeURIComponent(mapId)}&select=*,sala_protetor(*)&order=started_at.desc&limit=1`))[0], Date.now());
+}
 async function abrirSessao(cfg, userId, req) {
 	const corpo = await req.json().catch(() => null);
 	const mapId = corpo?.mapId;
 	const pokeUid = corpo?.pokeUid;
+	const retomando = corpo?.retomando === true;
 	if (!mapId || !pokeUid) throw new ErroHttp(400, "mapId e pokeUid sao obrigatorios");
 	if (!MAPS[mapId]) throw new ErroHttp(400, "hunt desconhecida");
 	const estado = await carregarEstado(cfg, userId, { comBag: false });
@@ -57040,7 +57092,8 @@ async function abrirSessao(cfg, userId, req) {
 	}
 	const semente = randomSeed();
 	const rng = createRng(semente);
-	const salaInicial = temSalas(mapId) ? novaSala(rng, mapId, 0, 0) : null;
+	const heranca = retomando && temSalas(mapId) ? await salaHerdada(cfg, userId, mapId) : null;
+	const salaInicial = heranca?.sala ?? (temSalas(mapId) ? novaSala(rng, mapId, 0, 0) : null);
 	let criada;
 	try {
 		[criada] = await inserir(cfg, "game_sessions", {
@@ -57052,8 +57105,8 @@ async function abrirSessao(cfg, userId, req) {
 			rng_draws: rng.draws,
 			sala_indice: salaInicial?.indice ?? 0,
 			sala_chave: salaInicial?.chave ?? null,
-			sala_abates: 0,
-			ciclos: 0
+			sala_abates: heranca?.sala.abates ?? 0,
+			ciclos: heranca?.sala.ciclos ?? 0
 		}, { retornar: true });
 	} catch {
 		const vencedora = await sessaoAberta(cfg, userId);
@@ -57069,6 +57122,13 @@ async function abrirSessao(cfg, userId, req) {
 				ciclos: Number(vencedora.ciclos ?? 0)
 			} : null
 		});
+	}
+	if (heranca?.protetor) {
+		const { session_id: _antiga, ...camposDoProtetor } = heranca.protetor;
+		await inserir(cfg, "sala_protetor", {
+			...camposDoProtetor,
+			session_id: criada.id
+		}).catch(() => {});
 	}
 	await atualizar(cfg, `players?user_id=eq.${userId}`, {
 		current_map_id: mapId,

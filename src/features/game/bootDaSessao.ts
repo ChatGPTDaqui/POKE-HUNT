@@ -112,7 +112,12 @@ export async function retomarHuntSeHavia(): Promise<boolean> {
     return false
   }
 
-  const entrou = await controller.enterMap(estado.currentMapId!, { silencioso: true })
+  // `retomando: true` (PH-266): esta e a UNICA entrada em hunt que nao nasce de
+  // um clique, e e por isso que ela pode herdar a sala. O assentamento logo
+  // acima fechou a sessao que estava aberta; sem a flag, `/sessao/abrir` cria
+  // uma sessao nova em ciclo 1, sala 1 — um F5 no meio da sala 7 devolvia o
+  // jogador pra primeira.
+  const entrou = await controller.enterMap(estado.currentMapId!, { silencioso: true, retomando: true })
   if (!entrou) {
     // Recusa do servidor (hunt trancada desde a ultima sessao, POKE que nao e
     // mais da equipe). Cair no Hospital em silencio: o jogador nao pediu essa
