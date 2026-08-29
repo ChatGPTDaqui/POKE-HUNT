@@ -13,7 +13,8 @@
 // cliente — RLS de escrita nas tabelas de jogador segue revogada, aqui e so
 // `select` das linhas do proprio usuario.
 import { supabase } from '@/lib/supabase'
-import { rowToPoke } from './playerMapper'
+import { COLUNAS_DE_POKE, rowToPoke } from './playerMapper'
+import { acrescentarIdsDaReserva } from './playerRepository'
 import type { PokeInstance } from '@/data/pokes'
 
 // O PostgREST corta em 1000 linhas por request SEM ERRO NENHUM — 200 OK com a
@@ -33,7 +34,7 @@ export async function carregarMochilaRemota(): Promise<PokeInstance[]> {
   for (let inicio = 0; ; inicio += TAMANHO_DA_PAGINA) {
     const { data, error, count } = await supabase
       .from('pokemon_instances')
-      .select('*', { count: inicio === 0 ? 'exact' : undefined })
+      .select(COLUNAS_DE_POKE, { count: inicio === 0 ? 'exact' : undefined })
       .eq('user_id', userId)
       .eq('location', 'bag')
       // Ordem estavel entre paginas. Sem ela o Postgres nao garante posicao
@@ -61,6 +62,14 @@ export async function carregarMochilaRemota(): Promise<PokeInstance[]> {
       `Mochila incompleta: o banco declarou ${total} POKEs e chegaram ${acumulado.length}`,
     )
   }
+
+  // A partir daqui o estado local PASSA a representar a reserva, e o diff de
+  // exclusao do save pode voltar a olhar pra ela (PH-182). Registrado aqui, e
+  // nao na tela, porque e aqui que os dois fatos existem juntos: o `userId` da
+  // sessao e a lista exata que vai pro estado. DEPOIS da conferencia de total,
+  // de proposito — registrar uma leitura truncada como se fosse completa e
+  // exatamente o que faria o save seguinte apagar o que nao chegou.
+  acrescentarIdsDaReserva(userId, acumulado.map((p) => p.uid))
   return acumulado
 }
 
@@ -79,7 +88,7 @@ export async function carregarCapturasRecentes(limite: number): Promise<PokeInst
 
   const { data, error } = await supabase
     .from('pokemon_instances')
-    .select('*')
+    .select(COLUNAS_DE_POKE)
     .eq('user_id', userId)
     .in('location', ['team', 'bag'])
     .order('created_at', { ascending: false })
