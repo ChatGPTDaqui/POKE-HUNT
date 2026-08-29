@@ -471,10 +471,11 @@ describe('quota de sala fechada atravessa a janela', () => {
     // persistido, simulacao, progresso lido de volta. Com a transicao dependendo
     // de abate, o indice ficava em 0 pra sempre.
     //
-    // 5 segundos e o piso REAL da janela: o cliente nao pede flush de sala mais
-    // de uma vez a cada 5s (autoridade.ts#REPETIR_PEDIDO_DE_SALA_MS), e a
-    // contagem regressiva e de 3. Janela mais curta que a contagem nao completa a
-    // troca — ela apenas rearma na janela seguinte, sem travar.
+    // 5 segundos era o piso REAL da janela ate PH-273, quando o pedido de sala
+    // repetia a cada 5s (autoridade.ts#REPETIR_PEDIDO_DE_SALA_MS, hoje 30s
+    // porque janela curta travava a hunt). O piso baixo continua aqui de
+    // proposito: a contagem regressiva e de 3s, e uma janela mais curta que ela
+    // nao pode travar a troca — deve apenas rearmar na janela seguinte.
     let progresso = { indice: 0, chave: '', abates: ABATES_POR_SALA, ciclos: 0 }
     const primeiro = mundo(33)
     progresso = { ...progresso, chave: primeiro.sala!.chave }
@@ -764,7 +765,7 @@ describe('transicao de sala nao deixa lixo pra tras (PH-258)', () => {
 //     a troca fantasma apareceu igual — relogio maior so adia.
 //  2. exigir "3 respostas seguidas com a quota do servidor cheia", na teoria um
 //     servidor que nunca avanca. Ao vivo isso e a cara do servidor NORMAL: com
-//     a quota fechada o cliente pede flush a cada 5s, entao 3 respostas sao 15
+//     a quota fechada o cliente pedia flush a cada 5s, entao 3 respostas eram 15
 //     segundos, e o servidor legitimamente fica minutos na mesma sala matando
 //     o protetor dela (medido em 29/08: guardiao `lickitung` da sala 2, ~3
 //     minutos, com `kills: 0` em quase toda janela de 5s).
