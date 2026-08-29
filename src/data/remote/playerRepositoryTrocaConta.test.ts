@@ -33,6 +33,8 @@ function builderGenerico() {
     insert: () => Promise.resolve({ error: null }),
     upsert: () => Promise.resolve({ error: null }),
     eq: () => builder,
+    // PH-182: o boot passou a ordenar a equipe por `team_slot`.
+    order: () => builder,
     in: () => Promise.resolve({ error: null }),
     then: (resolve: (v: { data: unknown[]; error: null }) => void) => resolve({ data: [], error: null }),
   }
@@ -83,6 +85,8 @@ function builderPokemon() {
       if (campo === 'user_id') userId = valor
       return builder
     },
+    // PH-182: o boot passou a ordenar a equipe por `team_slot`.
+    order: () => builder,
     in: (_campo: string, ids: string[]) => {
       chamadasDelete.push({ userId, ids })
       return Promise.resolve({ error: null })
