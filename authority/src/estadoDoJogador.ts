@@ -70,8 +70,8 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     get unlockedContinents() { return s.unlockedContinents },
     get missoesReivindicadas() { return s.missoesReivindicadas },
     get especialidades() { return s.especialidades },
-    // PH-224: leitura pro gate de bioma (PH-227). A simulacao nunca chama
-    // isto — avancar o indice e side-effect de vencer o boss ultimate
+    // PH-224/236: leitura pro gate de bioma (PH-227). A simulacao nunca
+    // chama isto — avancar o indice e side-effect de vencer o Lord
     // (PH-226), nao de combate comum, entao nao ganha setter aqui.
     get biomaProgress() { return s.biomaProgress },
 
@@ -191,7 +191,7 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     // `reordenarReservas`: o tipo exige, e um stub que divergisse da regra do
     // navegador seria uma diferenca esperando pra ser descoberta.
     setEspecialidadeNivel: (tipo, trilha, nivel) => { s.especialidades[tipo][trilha] = nivel },
-    // PH-226: ESTA a simulacao chama de verdade — vencer o boss ultimate
+    // PH-226/236: ESTA a simulacao chama de verdade — vencer o Lord
     // avanca o indice dentro de handleEnemyDefeated (simulation.ts). Precisa
     // do mesmo comportamento nos dois lados (resim do servidor E predicao
     // do cliente rodam o mesmo handleEnemyDefeated).

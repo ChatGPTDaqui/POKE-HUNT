@@ -414,7 +414,7 @@ export const BIOMA_POR_CHAVE: Record<string, BiomaDef> = Object.fromEntries(
 
 /**
  * PH-223: ordem canonica dos 12 biomas pro gate sequencial (PH-226/227) —
- * vencer o boss ultimate do bioma N libera o bioma N+1. So existia como
+ * vencer o Lord do bioma N libera o bioma N+1. So existia como
  * tabela no vault (`_Architecture.md`, brainstorm 16/08, referencia: sequencia
  * de ginasios Kanto+Johto) — `BIOMAS` acima esta em ordem ARBITRARIA de
  * insercao (campo_aberto, mata, marinho, ...), que NAO bate com esta ordem.
