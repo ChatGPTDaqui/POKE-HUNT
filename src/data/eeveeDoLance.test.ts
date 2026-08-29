@@ -27,17 +27,85 @@ const DEV = migration('20260828230001_eevee_do_lance_dev.sql')
 const RETROATIVO_PUBLICO = migration('20260828233000_eevee_retroativo_public.sql')
 const RETROATIVO_DEV = migration('20260828233001_eevee_retroativo_dev.sql')
 
-/** Sem comentario e sem espaco duplicado — o que o Postgres de fato le. */
+/**
+ * Sem comentario e sem espaco duplicado — o que o Postgres de fato le.
+ *
+ * `[^\n]`, e nao `.`: em JavaScript o `.` de uma regex NAO casa line terminator,
+ * e `\r` e um deles. A versao anterior disto era
+ *
+ *     sql.split('\n').map((l) => l.replace(/--.*$/, '')).join('\n')
+ *
+ * e ela nao removia comentario nenhum quando o arquivo chegava em CRLF: depois
+ * do `split` cada linha ainda termina em `\r`, o `.*` parava antes dele, e o `$`
+ * (sem flag `m`) exigia fim de string — o casamento falhava inteiro e o
+ * `replace` devolvia a linha intacta. Os outros cinco testes de migration do
+ * repo ja usavam `[^\n]`, que casa `\r`; so este arquivo tinha a forma
+ * dependente de line ending (PH-252).
+ *
+ * E POR QUE ISSO NAO APARECEU NO CI: o repo nao tem `.gitattributes` e roda com
+ * `core.autocrlf=true` no Windows, entao o MESMO commit sai em LF no runner
+ * Linux e em CRLF no checkout local — dois worktrees desta maquina, no mesmo
+ * commit, tinham line endings diferentes. Verde no CI e vermelho na maquina de
+ * quem escreveu nao e flake: e o arquivo chegando diferente nos dois lugares.
+ *
+ * O estrago era silencioso nos DOIS sentidos, e o segundo e o pior: um
+ * `not.toContain` reprova quando a palavra aparece so na prosa — foi assim que
+ * isto veio a tona — mas um `toContain` passa VERDE casando o comentario que
+ * descreve a clausula, sem a clausula existir no SQL. Um arquivo que se propoe a
+ * travar invariante lida do fonte precisa ler o fonte, nao a explicacao dele.
+ */
 function semComentario(sql: string): string {
   return sql
-    .split('\n')
-    .map((l) => l.replace(/--.*$/, ''))
-    .join('\n')
+    .replace(/--[^\n]*/g, '')
     .replace(/\s+/g, ' ')
+    .trim()
 }
 
 const CORPO = { public: semComentario(PUBLICO), dev: semComentario(DEV) }
 const RETRO = { public: semComentario(RETROATIVO_PUBLICO), dev: semComentario(RETROATIVO_DEV) }
+
+describe('o removedor de comentario e quem sustenta todo o resto (PH-252)', () => {
+  // Cada caso deste arquivo assere sobre `CORPO`/`RETRO`. Se o removedor devolve
+  // o texto com a prosa dentro, o arquivo inteiro passa a medir a explicacao em
+  // vez do SQL — e a metade que falha alto (`not.toContain`) esconde a metade
+  // que passa calada (`toContain` casando comentario). Por isso ele e testado
+  // aqui, antes das invariantes que dependem dele.
+
+  it('remove comentario em arquivo CRLF — a regressao exata', () => {
+    // Com `/--.*$/` isto volta intacto: `.` nao casa `\r` em JavaScript, entao
+    // `.*` para antes dele e o `$` sem flag `m` nunca fecha o casamento.
+    expect(semComentario('select 1;\r\n-- some daqui\r\nselect 2;')).toBe('select 1; select 2;')
+  })
+
+  it('remove comentario em arquivo LF tambem', () => {
+    expect(semComentario('select 1;\n-- some daqui\nselect 2;')).toBe('select 1; select 2;')
+  })
+
+  it('remove comentario no fim de uma linha de codigo, sem levar o codigo junto', () => {
+    expect(semComentario('select 1; -- explicacao\r\nselect 2;')).toBe('select 1; select 2;')
+  })
+
+  it('nenhum dos quatro corpos processados guarda `--` sobrando', () => {
+    // Guarda contra os arquivos REAIS, e nao so contra entradas sinteticas:
+    // `--` nao e operador em SQL, entao um `--` que sobreviva ao removedor so
+    // pode ser comentario que ficou.
+    //
+    // Este caso sozinho NAO travaria a regressao, e por isso os tres acima
+    // existem: num checkout LF ele passa mesmo com o removedor quebrado, porque
+    // ali a forma antiga funcionava. Quem pega em qualquer checkout sao os casos
+    // com `\r\n` escrito na propria entrada, que nao dependem de como o git
+    // resolveu materializar o arquivo nesta maquina.
+    const corpos = {
+      'concessao public': CORPO.public,
+      'concessao dev': CORPO.dev,
+      'retroativo public': RETRO.public,
+      'retroativo dev': RETRO.dev,
+    }
+    for (const [nome, sql] of Object.entries(corpos)) {
+      expect(sql, `sobrou comentario em ${nome}`).not.toContain('--')
+    }
+  })
+})
 
 describe('o glob enxergou o par de migrations (PH-164)', () => {
   it('os dois arquivos existem e nao estao vazios', () => {
