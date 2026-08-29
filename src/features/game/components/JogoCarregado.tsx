@@ -8,6 +8,7 @@ import { DefeatModal } from '@/components/modals/DefeatModal'
 import { LanceCountdownModal, LanceVictoryReturn } from '@/components/modals/LanceModals'
 import { ReviveCountdownModal } from '@/components/modals/ReviveCountdownModal'
 import { SalaCountdownModal } from '@/components/modals/SalaCountdownModal'
+import { ViagemAoHospitalOverlay } from '@/components/modals/ViagemAoHospitalOverlay'
 import { OfflineFarmModal } from '@/components/modals/OfflineFarmModal'
 import { HudLayer } from '../HudLayer'
 import { ScreenOverlay } from '@/features/screens/ScreenOverlay'
@@ -99,6 +100,7 @@ export function JogoCarregado() {
             <LanceCountdownModal />
             <LanceVictoryReturn />
             <SalaCountdownModal />
+            <ViagemAoHospitalOverlay />
           </>
         )}
 
