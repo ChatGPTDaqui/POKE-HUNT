@@ -34,14 +34,27 @@
 // mesmo raciocinio de `trocaEmCampo` em types.ts: rederivar uma condicao
 // observavel e mais barato e mais seguro que carregar estado.
 //
-// O JOGADOR CONTINUA BATENDO DURANTE A REUNIAO
+// O JOGADOR NAO BATE DURANTE A REUNIAO (PH-264)
 // -----------------------------------------------------------------------------
-// Nada aqui suprime a acao do jogador. Suprimir teria dois custos e nenhum
-// ganho: o POKE apanharia de graca dos selvagens que alcancassem ele, e o DPS da
-// reuniao inteira iria pro lixo. E nao e necessario, porque o jogador anda a 91
-// px/s e o selvagem a 58,5 (ver engine/entity.ts) — quem puxa esta SEMPRE na
-// frente, entao engajar durante a reuniao e excecao (inimigo que veio de
-// frente), nao a regra.
+// REVERTIDO POR PEDIDO EXPLICITO DO USUARIO. Ate aqui nada suprimia a acao do
+// jogador, com o argumento de que suprimir custaria DPS e faria o POKE apanhar
+// de graca. Na tela isso lia como o lure nao funcionando: o jogador pede 4
+// selvagens, o POKE encosta no primeiro e comeca a bater — "ele esta batendo
+// antes de lurar a quantidade solicitada".
+//
+// Agora `reunindoParaLure` responde por essa decisao e `updateCombat` nao chama
+// `executePlayerAction` enquanto ela for verdadeira. A reuniao ficou com a
+// mecanica que o painel promete: reune primeiro, luta depois.
+//
+// O CUSTO E REAL E ESTA ACEITO: o selvagem que alcancar o jogador durante a
+// reuniao bate sem revide (os inimigos continuam agindo — suprimir os dois lados
+// seria invulnerabilidade, nao lure). O teto de `LURE_TEMPO_MAXIMO_DE_REUNIAO`
+// e o que limita esse tempo, e ele nao e mais so uma rede de seguranca contra
+// travamento: virou tambem o teto de quanto o POKE pode apanhar calado.
+//
+// Nao suprime NADA alem do golpe do jogador. Os hooks de entrada em combate
+// (Intimidate, Download, clima automatico) continuam disparando ao engajar, e
+// os inimigos continuam agindo normalmente.
 import { isDead, distanceTo } from '../entity'
 import { LURE_QUANTIDADE_MIN, LURE_QUANTIDADE_MAX } from '@/stores/gameStateDefaults'
 import type { GameStateStore } from '@/stores/gameStateStore'
@@ -78,6 +91,18 @@ export const LURE_TEMPO_MAXIMO_DE_REUNIAO = 18
  * comecaria.
  */
 const LURE_FRACAO_DA_COLEIRA = 0.8
+
+/**
+ * O jogador esta REUNINDO agora — ou seja, o golpe dele fica segurado (PH-264).
+ *
+ * Uma funcao, e nao `world.lure?.fase === 'reunindo'` escrito no combate: quem
+ * responde "o jogador pode bater?" e o lure, e o `combatSystem` nao deve
+ * conhecer as fases dele. Se amanha a supressao passar a valer so em parte da
+ * reuniao (por HP baixo, por exemplo), muda aqui e o combate nao sabe de nada.
+ */
+export function reunindoParaLure(world: WorldState): boolean {
+  return world.lure?.fase === 'reunindo'
+}
 
 /** Este selvagem esta com aggro NO JOGADOR agora? */
 function estaReunido(enemy: EnemyEntity, playerId: string): boolean {

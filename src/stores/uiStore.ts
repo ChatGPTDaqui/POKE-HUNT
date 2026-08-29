@@ -48,6 +48,17 @@ const CHAT_ABERTO_KEY = 'novo-poke-idle:chat-aberto'
 export const HUD_SCALE_MIN = 0.7
 export const HUD_SCALE_MAX = 1.4
 
+/**
+ * Quantos segundos o jogador espera entre pedir o Hospital e sair da hunt
+ * (PH-263, numero do usuario).
+ *
+ * O mesmo valor de `SALA_TRANSITION_COUNTDOWN` por coincidencia, e nao por
+ * derivacao — nao importar de la de proposito: aquele numero e do motor
+ * (congela a simulacao entre salas) e este e de interface. Amarrar os dois faz
+ * mexer num mudar o outro sem ninguem pedir.
+ */
+export const SEGUNDOS_ATE_O_HOSPITAL = 3
+
 // A escala da HUD NAO vive no gameStateStore de proposito. Aquele estado e
 // propriedade do servidor de autoridade (ele responde com o objeto inteiro e o
 // cliente sobrescreve o local com a resposta) — uma preferencia de video
@@ -149,6 +160,26 @@ interface UiState {
 
   autoOpen: boolean
   setAutoOpen: (open: boolean) => void
+
+  // VIAGEM AO HOSPITAL (PH-263): segundos que faltam pra sair da hunt, ou
+  // `null` quando nao ha viagem marcada.
+  //
+  // O botao Hospital tirava o jogador da hunt no MESMO frame do clique, e era
+  // isso que fazia dele um botao de fuga: qualquer situacao ruim em campo
+  // (POKE quase morto, bando em cima, protetor acordado) se resolvia saindo
+  // antes do proximo tick. Com a contagem, o jogo continua rodando durante os
+  // 3 segundos — a saida deixa de ser instantanea sem deixar de existir.
+  //
+  // Mora no uiStore, e nao no world: nao e estado de simulacao (o motor nao
+  // sabe da viagem, nem precisa saber), e o servidor nao tem o que fazer com
+  // ela. E o mesmo lugar de `autoOpen`/`moreOpen` — intencao de interface que
+  // vira uma acao.
+  viagemAoHospital: number | null
+  /** Marca a viagem. Idempotente: com uma contagem em andamento nao reinicia. */
+  iniciarViagemAoHospital: () => void
+  /** Escreve o restante (o relogio vive em `useViagemAoHospital`). */
+  definirViagemAoHospital: (segundos: number | null) => void
+  cancelarViagemAoHospital: () => void
 
   // Perfil do Treinador: modal proprio, aberto pela foto no card do topo. Nao
   // e uma `ScreenName` porque nao vive no menu — nao ha botao pra ele, e ele
@@ -296,6 +327,17 @@ export const useUiStore = create<UiState>((set, get) => ({
 
   autoOpen: false,
   setAutoOpen: (autoOpen) => set({ autoOpen }),
+
+  viagemAoHospital: null,
+  // O guard de "ja tem contagem" fica AQUI, e nao no botao: apertar duas vezes
+  // nao pode reiniciar a contagem nem abrir uma segunda viagem, e o botao nao e
+  // o unico lugar de onde isto pode ser chamado no futuro.
+  iniciarViagemAoHospital: () => {
+    if (get().viagemAoHospital != null) return
+    set({ viagemAoHospital: SEGUNDOS_ATE_O_HOSPITAL })
+  },
+  definirViagemAoHospital: (viagemAoHospital) => set({ viagemAoHospital }),
+  cancelarViagemAoHospital: () => set({ viagemAoHospital: null }),
 
   perfilOpen: false,
   // Abrir zera a posicao arrastada, mesma regra de `openScreen`.

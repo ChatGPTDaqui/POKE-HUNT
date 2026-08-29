@@ -328,9 +328,10 @@ function RaridadesTab() {
       <WikiCard title="Lendarios">
         Os 11 Pokemon lendarios do Dex nao aparecem em nenhuma hunt normal — eles sao exclusivos das 11{' '}
         <b>hunts BOSS</b> do Modo Pesadelo (um confronto único e fixo por lendario, nivel bem alto, sem
-        respawn). Em campo eles ganham uma escala visual 1.5x maior que o normal e uma barra de HP customizada
-        (5x mais larga, 2x mais alta) pra refletir o quao imponente e essa luta — isso e visual/de
-        apresentacao, a raridade sorteada neles continua seguindo a mesma tabela acima.
+        respawn). Em campo eles ganham uma escala visual 1.5x maior que o normal pra refletir o quao imponente
+        e essa luta — isso e visual/de apresentacao, a raridade sorteada neles continua seguindo a mesma
+        tabela acima. A barra de HP deles e a mesma de qualquer selvagem; a barra grande ficou sendo so do{' '}
+        <b>protetor</b> de sala/andar.
       </WikiCard>
     </div>
   )
