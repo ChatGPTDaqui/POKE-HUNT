@@ -38,6 +38,8 @@ export function emptyWorldState(seed: number = randomSeed()): WorldState {
     salaPendente: null,
     salaSobAutoridade: false,
     salaEsperaDaAutoridade: 0,
+    salaRespostasComQuotaCheia: 0,
+    salaRespostasDaAutoridade: 0,
     salaPredita: false,
     rng: createRng(seed),
     // Guardada alem do `rng` porque `rng.state` avanca a cada sorteio e deixa

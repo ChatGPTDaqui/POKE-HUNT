@@ -721,6 +721,36 @@ export interface WorldState {
    */
   salaEsperaDaAutoridade: number
   /**
+   * Quantas respostas SEGUIDAS da autoridade chegaram com a quota DELA cheia,
+   * na mesma sala em que o cliente ja esta (PH-271).
+   *
+   * E o sinal que separa os dois casos que a espera por TEMPO confunde:
+   *
+   *  - servidor ATRASADO (o caso normal): ele responde com `abates` ainda
+   *    subindo, e este contador zera. O cliente nao pode palpitar — palpitar
+   *    aqui e o que fazia o sub-bioma trocar sozinho dentro da mesma sala.
+   *  - servidor QUE NUNCA AVANCA (bundle anterior a 2026-08-19, o caso que o
+   *    fallback existe pra cobrir): ele responde com a quota cheia, de novo e de
+   *    novo, sem trocar de sala. O contador cresce, e ai o palpite e a unica
+   *    saida.
+   *
+   * Zera na troca de sala e sempre que a autoridade traz quota incompleta.
+   * Efemero como os vizinhos: no servidor `salaSobAutoridade` e false e nada
+   * aqui e escrito.
+   */
+  salaRespostasComQuotaCheia: number
+  /**
+   * Quantas respostas da autoridade chegaram na sala atual, de qualquer tipo
+   * (PH-271). Zero significa SERVIDOR MUDO — rede caida, Edge fora do ar, ou o
+   * cliente falando com um endereco que nao responde.
+   *
+   * E o terceiro caso, e ele nao aparece em `salaRespostasComQuotaCheia`: mudo e
+   * atrasado tem os dois zero la, e so o mudo justifica palpitar. Sem este
+   * contador a hunt travaria pra sempre com a barra cheia toda vez que a rede
+   * caisse — que e pior que o bug que a PH-271 veio consertar.
+   */
+  salaRespostasDaAutoridade: number
+  /**
    * A sala em vigor saiu do FALLBACK local (a espera acima estourou), e nao da
    * autoridade — ou seja, e palpite que o servidor ainda nao confirmou.
    *
