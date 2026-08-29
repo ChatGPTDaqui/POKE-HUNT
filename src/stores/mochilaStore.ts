@@ -13,6 +13,7 @@
 // cirurgicos das RPC) consultam esta chave.
 import { create } from 'zustand'
 import { carregarMochilaRemota } from '@/data/remote/mochilaRemota'
+import { esquecerIdsDaReserva } from '@/data/remote/playerRepository'
 import { useGameStateStore } from './gameStateStore'
 
 interface MochilaStore {
@@ -65,11 +66,18 @@ export const useMochilaStore = create<MochilaStore>((set, get) => ({
 
   invalidar: () => {
     emVoo = null
+    // PH-182: o estado local deixa de ser autoritativo sobre a reserva no mesmo
+    // instante em que ela e marcada como suja. Sem isto, o diff de exclusao do
+    // save continuaria conhecendo ids que o `bagPokes` pode perder logo em
+    // seguida — `aplicarEstadoDoServidor` zera a mochila num flush parcial
+    // justamente quando `carregada` e falso — e apagaria a colecao.
+    esquecerIdsDaReserva()
     set({ carregada: false })
   },
 
   reiniciar: () => {
     emVoo = null
+    esquecerIdsDaReserva()
     set({ carregada: false, carregando: false, erro: null })
   },
 }))

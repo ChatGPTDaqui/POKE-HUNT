@@ -14,6 +14,7 @@
 // `select` das linhas do proprio usuario.
 import { supabase } from '@/lib/supabase'
 import { rowToPoke } from './playerMapper'
+import { acrescentarIdsDaReserva } from './playerRepository'
 import type { PokeInstance } from '@/data/pokes'
 
 // O PostgREST corta em 1000 linhas por request SEM ERRO NENHUM — 200 OK com a
@@ -61,6 +62,14 @@ export async function carregarMochilaRemota(): Promise<PokeInstance[]> {
       `Mochila incompleta: o banco declarou ${total} POKEs e chegaram ${acumulado.length}`,
     )
   }
+
+  // A partir daqui o estado local PASSA a representar a reserva, e o diff de
+  // exclusao do save pode voltar a olhar pra ela (PH-182). Registrado aqui, e
+  // nao na tela, porque e aqui que os dois fatos existem juntos: o `userId` da
+  // sessao e a lista exata que vai pro estado. DEPOIS da conferencia de total,
+  // de proposito — registrar uma leitura truncada como se fosse completa e
+  // exatamente o que faria o save seguinte apagar o que nao chegou.
+  acrescentarIdsDaReserva(userId, acumulado.map((p) => p.uid))
   return acumulado
 }
 
