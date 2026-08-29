@@ -511,6 +511,22 @@ export function reconciliarSalaDaAutoridade(
   const posicao = (s: SalaAtiva) => s.ciclos * SALAS_POR_HUNT + s.indice
   if (!world.salaPredita && posicao(sala) < posicao(atual)) return
 
+  // A BARRA FECHA ANTES DO AVISO (PH-258).
+  //
+  // O contador da sala que esta saindo vai pra quota cheia. Ele e uma PREDICAO:
+  // cliente e servidor simulam com sequencias de sorteio diferentes (o cliente
+  // nao tem a semente da sessao) e matam quantidades diferentes no mesmo
+  // intervalo de relogio. Medido em scripts/harness/divergencia-de-quota.mjs,
+  // 30 pares: a diferenca de tempo pra fechar a quota tem mediana de 32,6s e
+  // chega a 112s no pior caso.
+  //
+  // Quem decide a troca e o servidor, entao quando ele manda sala nova a quota
+  // FECHOU — e deixar a barra do jogador em 12/30 enquanto a tela anuncia area
+  // nova le como bug ("mudou de bioma sem completar as 30 kills", o relato
+  // desta issue). Isto nao inventa progresso: escreve o que a autoridade acabou
+  // de dizer.
+  if (atual.abates < ABATES_POR_SALA) atual.abates = ABATES_POR_SALA
+
   world.salaPendente = { ...sala }
   world.salaCountdownRemaining ??= SALA_TRANSITION_COUNTDOWN
   world.salaEsperaDaAutoridade = 0
@@ -531,6 +547,23 @@ export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
   world.salaPendente = null
   // PH-230: sala nova, protetor novo — a marca vale por SALA, nao pela sessao.
   world.protetorResolvido = false
+  // O PROTETOR FICA NA SALA QUE PASSOU (PH-258), e esquecer esta linha matava a
+  // hunt inteira em silencio.
+  //
+  // `world.enemies` e zerado logo abaixo, mas `protetorPendente` sobrevivia — e
+  // o respawn de mob comum tem `&& !world.protetorPendente` na condicao
+  // (simulation.ts, "protetor vivo suspende o spawn normal"). Ou seja: sala
+  // nova, campo vazio, respawn desligado por um protetor que nao existe mais em
+  // lugar nenhum. Nada nasce, ninguem morre, a quota nunca fecha — os dois
+  // sintomas relatados juntos ("ficou sem novos oponentes" e "nao passa da sala
+  // 2"), e sem nenhum erro na tela.
+  //
+  // O caminho pra cair nisso e o normal sob autoridade: a quota fecha, o
+  // protetor da sala nasce, o jogador NAO o mata, e o flush do servidor traz a
+  // sala seguinte (la a quota tambem fechou, ou o protetor de la caiu). A
+  // transicao entao roda com um protetor pendurado. F5 era a unica saida,
+  // porque `buildMapWorld` reconstroi o mundo do zero.
+  world.protetorPendente = null
   // PH-140: o clima da sala anterior NAO acompanha o jogador — inclusive o de
   // golpe, que morre junto com a sala mesmo com turnos sobrando. Por isso o
   // `clima` e zerado ANTES de `definirClimaDeAmbiente`, que respeitaria um
