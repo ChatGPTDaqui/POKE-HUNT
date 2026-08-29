@@ -485,6 +485,7 @@ export type Database = {
         Row: {
           anexo_coletado_em: string | null
           anexo_itens: Json
+          anexo_poke: Json | null
           assunto: string | null
           corpo: string
           created_at: string
@@ -501,6 +502,7 @@ export type Database = {
         Insert: {
           anexo_coletado_em?: string | null
           anexo_itens?: Json
+          anexo_poke?: Json | null
           assunto?: string | null
           corpo?: string
           created_at?: string
@@ -517,6 +519,7 @@ export type Database = {
         Update: {
           anexo_coletado_em?: string | null
           anexo_itens?: Json
+          anexo_poke?: Json | null
           assunto?: string | null
           corpo?: string
           created_at?: string
@@ -1366,6 +1369,39 @@ export type Database = {
           },
         ]
       }
+      recompensa_concedida: {
+        Row: {
+          chave: string
+          concedido_em: string
+          user_id: string
+        }
+        Insert: {
+          chave: string
+          concedido_em?: string
+          user_id: string
+        }
+        Update: {
+          chave?: string
+          concedido_em?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recompensa_concedida_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "recompensa_concedida_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       sala_protetor: {
         Row: {
           encounter_id: string
@@ -1921,6 +1957,10 @@ export type Database = {
               stat_speed: number
             }[]
           }
+      _conceder_eevee_do_lance: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       _mult_natureza: {
         Args: { p_nature: string; p_stat: string }
         Returns: number
@@ -2683,6 +2723,7 @@ export type Database = {
         Row: {
           anexo_coletado_em: string | null
           anexo_itens: Json
+          anexo_poke: Json | null
           assunto: string | null
           corpo: string
           created_at: string
@@ -2699,6 +2740,7 @@ export type Database = {
         Insert: {
           anexo_coletado_em?: string | null
           anexo_itens?: Json
+          anexo_poke?: Json | null
           assunto?: string | null
           corpo?: string
           created_at?: string
@@ -2715,6 +2757,7 @@ export type Database = {
         Update: {
           anexo_coletado_em?: string | null
           anexo_itens?: Json
+          anexo_poke?: Json | null
           assunto?: string | null
           corpo?: string
           created_at?: string
@@ -3564,6 +3607,39 @@ export type Database = {
           },
         ]
       }
+      recompensa_concedida: {
+        Row: {
+          chave: string
+          concedido_em: string
+          user_id: string
+        }
+        Insert: {
+          chave: string
+          concedido_em?: string
+          user_id: string
+        }
+        Update: {
+          chave?: string
+          concedido_em?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recompensa_concedida_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "recompensa_concedida_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       sala_protetor: {
         Row: {
           encounter_id: string
@@ -4119,6 +4195,10 @@ export type Database = {
               stat_speed: number
             }[]
           }
+      _conceder_eevee_do_lance: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       _mult_natureza: {
         Args: { p_nature: string; p_stat: string }
         Returns: number
