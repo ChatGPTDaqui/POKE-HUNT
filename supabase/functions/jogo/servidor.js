@@ -55788,6 +55788,18 @@ function fromJson(value, fallback) {
 function toJson(value) {
 	return value;
 }
+/**
+* Especie que o catalogo do cliente nao conhece.
+*
+* Devolve lista de golpes vazia e GRITA. Antes da PH-184 este caminho caia na
+* coluna `unlocked_abilities`, que agora nao vem mais pela rede. Silenciar seria
+* pior que a lista vazia: um POKE de especie desconhecida ja nao tem nome,
+* sprite nem base de stats, e ninguem ficaria sabendo por que.
+*/
+function semEspecie(speciesId) {
+	console.error(`rowToPoke: especie "${speciesId}" nao esta no catalogo do cliente — o POKE fica sem golpes. Ver PH-247 (catalogo do banco x do cliente).`);
+	return [];
+}
 function rowToPoke(row) {
 	const ivs = {
 		hp: row.iv_hp,
@@ -55820,7 +55832,7 @@ function rowToPoke(row) {
 		nature,
 		trait: row.trait ?? void 0,
 		stats,
-		unlockedAbilities: species ? golpesAprendidosAte(species, row.level) : row.unlocked_abilities,
+		unlockedAbilities: species ? golpesAprendidosAte(species, row.level) : semEspecie(row.species_id),
 		disabledAbilities: row.disabled_abilities ?? {},
 		activeAbilities: species ? sanearEscolhaDeGolpes(row.active_abilities ?? activeAbilitiesPadrao(species, row.level), golpesAprendidosAte(species, row.level), species, row.level) : row.active_abilities ?? void 0,
 		status: row.status ? {

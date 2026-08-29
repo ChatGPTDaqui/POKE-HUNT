@@ -575,10 +575,16 @@ function linhaIgual(nova: Record<string, unknown>, atual: Record<string, unknown
  * false. Linha REMOVIDA nao aparece aqui — quem cuida disso e o diff de
  * remocao de cada bloco, que compara contra o que o banco tem agora.
  */
-function linhasQueMudaram<T extends Record<string, unknown>>(
+// DOIS parametros de tipo, e nao um (PH-184). `novas` sao linhas de ESCRITA
+// (`Insert`, com `user_id`); `atuais` sao as linhas LIDAS no load — e desde a
+// PH-184 a leitura de `pokemon_instances` traz MENOS colunas que a escrita.
+// Exigir o mesmo tipo dos dois lados amarrava um ao outro sem motivo: a
+// comparacao e estrutural e por chave, e nunca precisou que as duas formas
+// coincidissem.
+function linhasQueMudaram<T extends Record<string, unknown>, A extends Record<string, unknown>>(
   novas: T[],
-  atuais: T[] | undefined,
-  chaveDe: (linha: T) => string,
+  atuais: A[] | undefined,
+  chaveDe: (linha: T | A) => string,
 ): T[] {
   if (!atuais) return novas
   const porChave = new Map(atuais.map((l) => [chaveDe(l), l]))
@@ -586,10 +592,10 @@ function linhasQueMudaram<T extends Record<string, unknown>>(
 }
 
 /** Nada mudou nesta tabela: mesmas chaves, e nenhuma linha diferente. */
-function tabelaIntacta<T extends Record<string, unknown>>(
+function tabelaIntacta<T extends Record<string, unknown>, A extends Record<string, unknown>>(
   novas: T[],
-  atuais: T[] | undefined,
-  chaveDe: (linha: T) => string,
+  atuais: A[] | undefined,
+  chaveDe: (linha: T | A) => string,
 ): boolean {
   // `undefined` = nao ha baseline (chamador antigo, ou leitura que nao guardou
   // as linhas). Sem baseline nao ha como afirmar que nada mudou.
