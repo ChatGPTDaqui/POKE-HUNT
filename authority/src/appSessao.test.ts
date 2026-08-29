@@ -43,9 +43,9 @@ describe('bloqueioDeBiomaPendente (PH-227)', () => {
     expect(bloqueio).not.toBeNull()
   })
 
-  it('mapId de bioma sem boss habilitado (fora de ORDEM_DOS_BIOMAS) libera automatico', () => {
+  it('mapId de bioma sem protetor habilitado (fora de ORDEM_DOS_BIOMAS) libera automatico', () => {
     // Modo Pesadelo/BOSS nao seguem o padrao huntId(bioma, faixa) — indice
-    // -1, nunca bloqueia (defesa: sem boss, nao ha o que exigir).
+    // -1, nunca bloqueia (defesa: sem protetor, nao ha o que exigir).
     expect(bloqueioDeBiomaPendente('boss_lance', 'nightmare', biomaProgressDefault())).toBeNull()
   })
 })

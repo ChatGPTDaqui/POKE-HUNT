@@ -16,8 +16,9 @@
 //
 // PH-219 acrescentou `&select=id` a esse PATCH: a representacao continua sendo
 // o sinal de vitoria, mas a linha inteira (20+ colunas: `rng_state`, `sala_*`,
-// `sequence_*`, `boss_*`) nao atravessa mais a rede a cada 30s pra ser
-// descartada. 439 B -> 47 B no fio, medido gzipado em producao em 27/08.
+// `sequence_*`, e ate PH-241 tambem os 15 `boss_*`, ja migrados pra
+// `sala_protetor`) nao atravessa mais a rede a cada 30s pra ser descartada.
+// 439 B -> 47 B no fio, medido gzipado em producao em 27/08.
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import type { Config } from './db.js'
 import type { LinhaSessao } from './progresso.js'
@@ -86,23 +87,10 @@ function sessao(): LinhaSessao {
     sala_chave: null,
     sala_abates: 0,
     ciclos: 0,
-    // PH-217: LinhaSessao ganhou as 15 colunas boss_* depois deste arquivo
-    // existir — sem boss pendente em nenhum destes testes de claim.
-    boss_uid: null,
-    boss_species_id: null,
-    boss_encounter_id: null,
-    boss_level: null,
-    boss_iv_hp: null,
-    boss_iv_atk_fis: null,
-    boss_iv_atk_esp: null,
-    boss_iv_def: null,
-    boss_iv_def_esp: null,
-    boss_iv_speed: null,
-    boss_rarity: null,
-    boss_is_shiny: null,
-    boss_nature: null,
-    boss_trait: null,
-    boss_hp_atual: null,
+    // PH-241: `sala_protetor` e embutido via PostgREST (join), campo
+    // opcional — ausente/`null` aqui e o mesmo "sem protetor pendente" que
+    // estes testes de claim sempre quiseram.
+    sala_protetor: null,
   }
 }
 

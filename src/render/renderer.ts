@@ -21,6 +21,7 @@ import { desenharAmbiente } from './ambiente'
 import { desenharClimaFundo, desenharClimaFrente, familiaDoClima } from './climaVisual'
 import { CENA_HOSPITAL, ZOOM_DA_CENA, escalaDoPoke } from '@/data/hospital'
 import type { WorldEntity, WorldState } from '@/engine/types'
+import { protetorDaSala } from '@/engine/systems/salaSystem'
 import { arteParaSala, backgroundParaSala } from '@/data/maps'
 import type { MapDef } from '@/data/maps'
 
@@ -317,11 +318,16 @@ export class Renderer {
     // leria como efeito de golpe.
     if (jogadorVivo) drawMarcaDoJogador(ctx, jogadorVivo)
 
+    // PH-236: tipo do protetor (Guardian/Lord) vem da sala, nao da entidade
+    // — `entity.isProtetor` so marca QUE e protetor. Resolvido uma vez por
+    // frame (barato, `protetorDaSala` e pura) e repassado pra tag decidir o
+    // texto.
+    const tipoDeProtetorAtual = protetorDaSala(world.sala)
     for (const enemy of world.enemies) {
       drawEntity(ctx, enemy)
       if (enemy.poke.hp > 0) {
         drawHpBar(ctx, enemy, enemy.id === idDoAlvo)
-        drawNameLevelTag(ctx, enemy)
+        drawNameLevelTag(ctx, enemy, tipoDeProtetorAtual)
       }
     }
 
