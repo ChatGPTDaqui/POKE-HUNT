@@ -592,6 +592,52 @@ Detalhes que não são cosméticos:
 distinguir, e dois climas respingando ao mesmo tempo no bioma de gelo apagaria a diferença entre o
 que machuca e o que não machuca.
 
+### O vento é um só, para a cena inteira (`src/render/vento.ts`, PH-233)
+
+Antes do PH-233 havia **três osciladores de vento** rodando ao mesmo tempo:
+
+- `intensidadeDoVento` (PH-188), boa e calibrada, dirigindo **só** os presets `folha` e `selva`;
+- uma senoide própria da areia de clima, `1 + sin(fase * 0.5) * 0.45`, sem relação nenhuma com a
+  anterior;
+- inclinação **fixa** na receita de todo o resto — a chuva caía sempre no mesmo ângulo, chovesse o
+  que chovesse.
+
+Numa floresta com chuva, isso dava folha entrando em rajada enquanto a chuva continuava reta. Cada
+camada parecia um protetor de tela próprio rodando por cima do outro.
+
+**O relógio é absoluto, e é isso que faz a unificação existir de verdade.** As duas camadas têm,
+cada uma, o próprio acumulador de fase (`ambiente.faseGlobal`, `climaVisual.fase`) com o próprio
+`ultimoInstante`. Se as duas apenas passassem a chamar a mesma função, chamariam com fases
+diferentes — o mesmo bug com uma indireção a mais. Por isso `sincronizarVento(agora)` **atribui**
+`fase = agora / 1000` em vez de somar. Daí saem quatro propriedades, todas desejadas:
+
+- a ordem de chamada entre as camadas não importa;
+- chamar duas vezes no mesmo quadro não adianta o vento (idempotente);
+- camada que entra depois (o clima aparece no meio da luta) nasce na fase certa, não do zero;
+- aba em segundo plano que volta com minutos de atraso pega o vento na fase nova. Isso é seguro
+  aqui e **não** seria numa partícula: posição integrada com delta gigante teleporta, mas uma
+  oscilação limitada em [0,1] só continua de outro ponto do ciclo.
+
+Cada receita declara `empuxoDoVento` — quantas unidades de mundo por segundo o vento a empurra no
+pico da rajada. **Não há default**: quem não declara não é empurrado, e a ausência do campo é a
+declaração. Fora, por omissão deliberada: `caverna` e `poeira` (ruína, templo, dojo, covil) são
+lugar fechado, e sopro dentro de uma gruta selada é pior que a incoerência que a issue veio
+corrigir; a `agua` é reflexo de superfície, e reflexo não voa.
+
+A direção é a mesma para tudo e não há eixo Y: o acervo inteiro já sopra para a **direita** (folha
+em `PI/2+0.35`, areia em `0.1`, chuva em `+0.26`). Direção variável não acrescentaria nada que o
+olho leia e obrigaria a re-calibrar nove receitas.
+
+No clima, o empuxo entra numa velocidade **efetiva por quadro** (`vxEfetivo`/`vyEfetivo`), nunca em
+`vx`/`vy` — aquelas são o estado permanente sorteado no nascimento, e somar vento nelas acumularia
+vento sobre vento até a chuva sair de lado e nunca voltar. É a velocidade efetiva que
+`desenharParticula` lê, e é por isso que a chuva **inclina** na rajada: o risco é traçado na
+direção do deslocamento real.
+
+Medido na bancada, correlação entre a intensidade do vento e a deriva horizontal de cada camada ao
+longo de 60 instantes: **folha 0,999 · chuva 0,992 · areia de clima 0,999 · caverna 0** (amplitude
+zero). `ventoCompartilhado.test.ts` tranca os dois lados — quem sopra e quem não pode soprar.
+
 ### A bancada visual (`scripts/harness/efeitos-do-mapa.html`)
 
 `npm run dev` e abrir `/scripts/harness/efeitos-do-mapa.html`: os nove presets e os seis climas
@@ -599,10 +645,18 @@ lado a lado, sobre a arte real de cada bioma, na escala do jogo, com um POKE de 
 barra de 40 unidades em cada painel. Nenhum teste de unidade responde "isso está bom" — ela
 responde.
 
+A barra **"vento da cena"** no topo mostra a intensidade corrente (PH-233). Quando ela sobe, todos
+os painéis que têm vento inclinam juntos; os fechados não se mexem. Rajada é efeito de *tempo* —
+num quadro parado ela não aparece, então é preciso olhar a barra e a tela ao mesmo tempo.
+
 Cada painel importa `ambiente.ts?painel=N` / `climaVisual.ts?painel=N`. A query é necessária: as
 duas camadas guardam estado em variável de módulo (uma cena por vez, o que está certo no jogo), e
 com uma instância só cada painel veria "a arte mudou" e repovoaria a cada quadro — quinze telas de
 ruído parado. O Vite indexa módulo por URL completa, query inclusa.
+
+**O vento é a exceção, e errar nela é fácil:** ele tem que ser importado **sem** query. Com
+`?painel=N` a bancada leria um vento paralelo parado na fase 0, e o medidor mostraria uma linha reta
+enquanto a cena inteira sopra. Foi exatamente o que aconteceu na primeira medição de correlação.
 
 ### Água: ondulação recortada por máscara pintada (PH-113)
 

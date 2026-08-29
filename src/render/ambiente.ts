@@ -43,6 +43,7 @@ import { useUiStore } from '@/stores/uiStore'
 import { AGUA_POR_ARTE } from '@/data/generated/aguaMask.generated'
 import { LAVA_POR_ARTE } from '@/data/generated/lavaMask.generated'
 import { emPoke } from './escalaDoMundo'
+import { empurraoDoVento, sincronizarVento, ventoAgora } from './vento'
 import {
   avancarGotas, criarEstadoDeGotas, desenharGotas, povoarGotas,
   type ConfigDeGota, type EstadoDeGotas,
@@ -185,8 +186,23 @@ export interface Receita {
    * Folha: ganha rajada de vento periodica (PH-188) — bamboleio e velocidade
    * de queda sobem durante a rajada e voltam ao normal depois. So faz sentido
    * pra preset que representa vegetacao; agua/poeira/brasa/etc nao pedem vento.
+   *
+   * Isto e o TOMBO, e nao a deriva: quanto a folha reage ao vento por ser
+   * folha. Pra onde o vento LEVA a particula, ver `empuxoDoVento`.
    */
   vento?: boolean
+  /**
+   * Quantas unidades de mundo por segundo o vento empurra esta particula,
+   * horizontalmente, no PICO da rajada (PH-233). Ver `vento.ts`.
+   *
+   * Nao ha default, e isso e o desenho: preset que nao declara nao e empurrado.
+   * `poeira` (ruina, templo, dojo, covil), `caverna` e `agua` ficam de fora por
+   * OMISSAO DELIBERADA — os dois primeiros sao lugar fechado, e sopro dentro de
+   * uma gruta selada e pior que a incoerencia que o PH-233 veio corrigir; a
+   * agua e reflexo de superficie, e reflexo nao voa. `ventoCompartilhado.
+   * test.ts` tranca essa lista nos dois sentidos.
+   */
+  empuxoDoVento?: number
   /**
    * Fracao do ALTO da janela onde a particula pode NASCER (PH-188). `0.4` =
    * so no topo 40%. Undefined = janela inteira (todo preset sem isto).
@@ -284,14 +300,14 @@ export const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
     // contraste de COR, nao de tamanho. Conferido no jogo, sala Relvado.
     quantidade: 30, cor: '#d9a44e', raio: [emPoke(0.0225), emPoke(0.05)], velocidade: [16, 34],
     angulo: Math.PI / 2 + 0.35, espalhamento: 0.3, alpha: 0.75, bamboleio: 16, feixes: true,
-    forma: 'folha', vento: true, faixaOrigemY: 0.4,
+    forma: 'folha', vento: true, empuxoDoVento: 34, faixaOrigemY: 0.4,
   },
   // Selva: folha um pouco maior e mais escura que a de floresta temperada, com
   // menos feixe (a copa e fechada) e o gotejo por baixo.
   selva: {
     quantidade: 26, cor: '#c9a84a', raio: [emPoke(0.026), emPoke(0.0575)], velocidade: [13, 28],
     angulo: Math.PI / 2 + 0.28, espalhamento: 0.34, alpha: 0.7, bamboleio: 14, feixes: true,
-    forma: 'folha', vento: true, faixaOrigemY: 0.4,
+    forma: 'folha', vento: true, empuxoDoVento: 26, faixaOrigemY: 0.4,
     gotejo: { quantidade: 6, config: GOTEJO_DE_SELVA },
   },
   agua: {
@@ -302,7 +318,7 @@ export const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
   brasa: {
     quantidade: 40, cor: '#ffb057', raio: [emPoke(0.010), emPoke(0.0225)], velocidade: [18, 40],
     angulo: -Math.PI / 2, espalhamento: 0.4, alpha: 0.85, bamboleio: 11, aditivo: true,
-    forma: 'faisca', brilhoDoChao: true,
+    forma: 'faisca', brilhoDoChao: true, empuxoDoVento: 16,
   },
   poeira: {
     quantidade: 62, cor: '#e2dcc8', raio: [emPoke(0.0135), emPoke(0.034)], velocidade: [3, 9],
@@ -319,17 +335,23 @@ export const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
   neve: {
     quantidade: 60, cor: '#ffffff', raio: [emPoke(0.0225), emPoke(0.055)], velocidade: [22, 46],
     angulo: Math.PI / 2 + 0.22, espalhamento: 0.22, alpha: 0.9, bamboleio: 14,
-    forma: 'grao', profundidade: true,
+    forma: 'grao', profundidade: true, empuxoDoVento: 48,
   },
+  // Areia e o preset que mais responde: ela JA e vento, e o unico jeito de ela
+  // ler como rajada em vez de chuveiro lateral constante e o empuxo variar.
   areia: {
     quantidade: 54, cor: '#e8d2a4', raio: [emPoke(0.0125), emPoke(0.03)], velocidade: [70, 140],
     angulo: 0.12, espalhamento: 0.16, alpha: 0.6, bamboleio: 4,
-    forma: 'risco',
+    forma: 'risco', empuxoDoVento: 120,
   },
+  // Cidade tem vento, e ele e canalizado entre predios — mas fiapo em suspensao
+  // e leve e lento, entao o empuxo e pequeno em valor absoluto e grande em
+  // relacao a velocidade propria dela (3 a 8 u/s). E o que faz a cinza urbana
+  // "sair andando" quando a rajada passa.
   cidade: {
     quantidade: 40, cor: '#ded9d0', raio: [emPoke(0.014), emPoke(0.0325)], velocidade: [3, 8],
     angulo: 0.5, espalhamento: 1.6, alpha: 0.55, bamboleio: 6,
-    forma: 'fiapo',
+    forma: 'fiapo', empuxoDoVento: 22,
   },
 }
 
@@ -384,31 +406,15 @@ const CINTILO_EXPOENTE = 3
 const CINTILO_PISCA = 1.9
 
 // ---------------------------------------------------------------------------
-// RAJADA DE VENTO NA FOLHAGEM (PH-188)
+// RAJADA DE VENTO NA FOLHAGEM (PH-188, compartilhada no PH-233)
 // ---------------------------------------------------------------------------
-// Vento de verdade nao sopra constante: vem em rajada e some. Um multiplicador
-// senoidal simples (`sin(fase * f)`) leria como respiracao regular, nao vento —
-// metade do tempo em alta, metade em baixa. Somar tres senos de frequencia
-// incomensuravel e elevar o resultado ao cubo estreita os picos: a maior parte
-// do tempo o vento fica perto de zero, com rajadas esporadicas que sobem e
-// caem rapido — o padrao que le como natural, nao mecanico.
-const VENTO_FREQ: readonly [number, number, number] = [0.11, 0.23, 0.05]
-const VENTO_FASE: readonly [number, number, number] = [0, 2.1, 4.7]
-const VENTO_PESO: readonly [number, number, number] = [0.5, 0.3, 0.2]
-
-/**
- * Intensidade do vento em [0, 1], funcao pura de `faseGlobal` (segundos).
- *
- * Exportada pra ser testada direto, sem depender de mockar relogio e RNG do
- * sorteio local so pra reproduzir a fase de rajada.
- */
-export function intensidadeDoVento(fase: number): number {
-  const onda = VENTO_FREQ.reduce(
-    (soma, freq, i) => soma + Math.sin(fase * freq + VENTO_FASE[i]) * VENTO_PESO[i],
-    0,
-  )
-  return ((onda + 1) / 2) ** 3
-}
+// A funcao de rajada MUDOU DE CASA pra `vento.ts` e agora e a mesma que o clima
+// usa. Ate o PH-233 ela vivia aqui e dirigia so a folha, enquanto a areia do
+// clima tinha uma senoide propria e o resto tinha inclinacao fixa — tres ventos
+// diferentes na mesma tela. Ver o cabecalho de `vento.ts`.
+//
+// O que continua aqui e so o que e da FOLHA: quanto o tombo e a queda dela
+// reagem a rajada. Isso e caracteristica de folha, nao de vento.
 
 /** Quanto o bamboleio (deriva lateral) aumenta no pico da rajada. */
 const VENTO_BAMBOLEIO_PICO = 2.4
@@ -855,6 +861,11 @@ export function desenharAmbiente(
   const delta = ultimoInstante === 0 ? 0 : Math.min(DELTA_MAXIMO, (agora - ultimoInstante) / 1000)
   ultimoInstante = agora
   faseGlobal += delta
+  // O vento e da CENA, nao desta camada (PH-233): passa o instante que ja
+  // lemos, e `vento.ts` atribui a fase em vez de acumular. `faseGlobal`
+  // continua sendo daqui — ela move o feixe de luz e o brilho de lava, que sao
+  // desta arte e nao do clima.
+  sincronizarVento(agora)
 
   ctx.save()
   if (r.aditivo) ctx.globalCompositeOperation = 'lighter'
@@ -871,11 +882,15 @@ export function desenharAmbiente(
     : Number.POSITIVE_INFINITY
   // So folha pede `r.vento` — pra qualquer outro preset `rajada` fica 0 e os
   // multiplicadores abaixo caem em 1, sem mudar nada do comportamento antigo.
-  const rajada = r.vento ? intensidadeDoVento(faseGlobal) : 0
+  const rajada = r.vento ? ventoAgora() : 0
   const ventoQueda = 1 + rajada * VENTO_QUEDA_PICO
   const ventoBamboleio = 1 + rajada * VENTO_BAMBOLEIO_PICO
+  // Deriva horizontal da rajada (PH-233). Calculada UMA vez por quadro e nao
+  // por particula: o vento e o mesmo pra todas — e justamente essa a ideia.
+  // Preset sem `empuxoDoVento` recebe 0 e nao se mexe.
+  const empurrao = empurraoDoVento(r.empuxoDoVento, delta)
   for (const p of particulas) {
-    p.x += p.vx * ventoQueda * delta
+    p.x += p.vx * ventoQueda * delta + empurrao
     p.y += p.vy * ventoQueda * delta
     p.fase += delta * 1.7
     p.idade += delta
