@@ -86,6 +86,17 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
   //    `limiteDeInimigos` (PH-257/265/259). Encanamento das linhas que estao
   //    logo abaixo.
   //  - Testes e a resolucao do conflito de HudLayer entre PH-257 e PH-261.
+  //
+  // QUARTA REVARRIDA, no mesmo dia (PH-270 e PH-271). Estas duas nao vieram de
+  // pedido nem de leitura de codigo: sairam de TESTAR O JOGO no `jogo-dev`
+  // depois da leva pronta — o campo do Auto-pot cortando o segundo digito e o
+  // sub-bioma trocando dentro da mesma sala. As duas entraram em linhas que ja
+  // existiam (painel de automacoes e troca de sala), porque sao a mesma coisa
+  // que aquelas linhas contam.
+  //
+  // O que fica de fora delas: o `jogo-campo-sem-spinner` e o valor novo de
+  // `ESPERA_MAXIMA_PELA_AUTORIDADE`. Encanamento — o jogador ve o numero
+  // inteiro e a area parada, nao a constante.
   {
     version: '7.15',
     date: '2026-08-29',
@@ -107,6 +118,7 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'E O PRECO DAS ESPECIALIDADES PASSOU A LEVAR EM CONTA A RARIDADE DA PEDRA. Como cada pedra so cai do POKE do tipo dela, fechar as duas trilhas custava 18.800 abates em Fogo e 162.933 em Aco — nove vezes mais caro, sem nada que justificasse. Os tipos comuns seguem no mesmo preco de antes; os raros ficaram proporcionais ao que realmente aparece. A trilha de defesa tambem teve o texto corrigido: ela reduz o dano que voce RECEBE daquele tipo, e nao aumenta sua defesa.',
       'A SALA NOVA AS VEZES NASCIA VAZIA, E A HUNT MORRIA ALI. Depois de trocar de sala podia acontecer de nao nascer inimigo nenhum: campo limpo, nada pra matar, a contagem parada — e como a sala so avanca com 30 abates, a hunt ficava presa pra sempre naquele mapa. Recarregar a pagina era a unica saida. Corrigido: o guardiao da sala anterior ficava pendurado no lugar e desligava o nascimento dos selvagens.',
       'E A TROCA DE SALA PAROU DE ACONTECER COM A BARRA PELA METADE. Quem manda na contagem e o servidor, e o numero da sua tela e uma previsao — quando os dois discordavam, a area trocava mostrando 12/30 e parecia que o jogo tinha pulado a sala. Agora a barra fecha em 30/30 antes do aviso de area nova, que e o que de fato aconteceu.',
+      'E A AREA PAROU DE TROCAR SEM VOCE SAIR DA SALA. Acontecia de o sub-bioma mudar sozinho — de Relvado pra Planicie, por exemplo — com o contador continuando em "Sala 2/10": quando o servidor demorava a responder, o jogo chutava a sala seguinte e depois se corrigia na sua frente. Ele agora espera de verdade antes de chutar qualquer coisa.',
       'O F5 PAROU DE TE MANDAR DE VOLTA PRA SALA 1. Recarregar a pagina no meio da hunt jogava voce na primeira sala do primeiro ciclo, perdendo o caminho inteiro. Agora voce volta na MESMA sala, com os mesmos abates e o mesmo ciclo — e se havia um guardiao em pe, ele continua la, com a vida que tinha.',
       'REIVINDICAR MISSAO RESPONDIA "MISSAO JA REIVINDICADA" E NAO PAGAVA. A tela voltava a oferecer, a cada 30 segundos, uma missao que voce ja tinha reivindicado; ao clicar de novo, o jogo recusava. O ouro da primeira vez sempre foi pago — o que sumia era a marca na tela.',
       'A HUNT INICIAL PAROU DE SER UMA CAMINHADA. So havia um selvagem no mapa inteiro, e o POKE passava metade do tempo atravessando o cenario ate o proximo. Agora eles nascem mais perto e o campo enche conforme seu inicial cresce: um ate o Nivel 2, dois a partir do 3, tres a partir do 5. Eles continuam nascendo longe uns dos outros, entao voce enfrenta um por vez — a primeira meia hora de conta nova era o unico lugar do jogo onde dava pra morrer sem entender por que.',
@@ -114,7 +126,7 @@ export const PATCH_NOTES: PatchNoteEntry[] = [
       'O CLIMA EXPLICA O QUE ELE FAZ. Passe o ponteiro (ou toque) no chip de clima e ele lista os efeitos reais daquele tempo: quanto Agua ganha na chuva, quanto Fogo perde, quanto de vida o granizo e a areia tiram por turno, o que a neve muda pro tipo Gelo e quais golpes nunca erram. Antes so o nome aparecia, e o resto era adivinhacao.',
       'ESPECIALIDADES, TASKS E BESTIARIO SAIRAM DE DENTRO DO "MAIS". Os tres estavam a dois toques de distancia, no mesmo lugar que a Wiki e os Ajustes. Agora tem coluna fixa no canto superior direito, logo abaixo do seu card de treinador.',
       'A COLUNA DO TOPO FICOU MAIS FACIL DE LER. As reservas encostaram no POKE em campo (elas sao a fila dele, e havia um chip no meio separando os dois), e a sala/clima passou pro centro. A faixa preta do chat parou de atravessar a tela inteira pra escrever "Item encontrado: Potion" — ela agora tem o tamanho do texto.',
-      'E O PAINEL DE AUTOMACOES PAROU DE ESCONDER NUMERO. Numa janela estreita, o nome do item empurrava a contagem pra fora e o aviso de "suprimentos acabando" cortava justamente as horas restantes. As regras por especie tambem espremiam o nome do POKE em cinco letras.',
+      'E O PAINEL DE AUTOMACOES PAROU DE ESCONDER NUMERO. Numa janela estreita, o nome do item empurrava a contagem pra fora e o aviso de "suprimentos acabando" cortava justamente as horas restantes. As regras por especie tambem espremiam o nome do POKE em cinco letras. E o campo de "Vida ≤ __ %" do Auto-pot mostrava so o primeiro digito: a regra padrao de 70% aparecia como 7%, que e a diferenca entre curar cedo e curar quase morto.',
       'A BARRA DE VIDA DO LENDARIO VOLTOU AO TAMANHO NORMAL. Ela era cinco vezes mais larga e duas vezes mais alta que a de qualquer selvagem. A escala maior, a aura e o nome continuam distinguindo ele em campo; a barra gigante ficou so pro guardiao de sala.',
       'O CENARIO GANHOU FONTES DE VIDA ANCORADAS NO MAPA. Tocha com chama, chamine com fumaca, cristal brilhando, espuma quebrando na pedra, faisca de forja e enxame de vaga-lume: cada arte tem os seus, sempre no mesmo ponto, em vez de particula solta atravessando a tela.',
     ],
