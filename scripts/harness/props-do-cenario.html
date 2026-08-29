@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<!--
+  A camada pede a arte por caminho RELATIVO (`assets/ambiente-props/chama.png`),
+  igual todo o resto do desenho do jogo — no app isso resolve a partir da raiz
+  porque a pagina e `/`. Esta bancada mora em `/scripts/harness/`, entao sem a
+  base abaixo o mesmo caminho vira `/scripts/harness/assets/...` e da 404: os
+  props procedurais apareciam e os de ARTE nao, que e o sintoma mais confuso
+  possivel (parece bug de camada, e e bug de URL da pagina).
+-->
+<base href="/" />
+<title>Bancada dos props de cenário (PH-254)</title>
+<!--
+  BANCADA DOS PROPS DE CENARIO (PH-254)
+
+  POR QUE ELA EXISTE, E POR QUE ESTA NO GIT
+
+  A camada de props tem 90 testes e nenhum deles responde a pergunta que
+  importa: a fumaca sai DA chamine? a chama fica NO lampiao? a espuma bate NA
+  base da queda d'agua? Teste garante que a ancora existe, que a fracao esta em
+  [0,1] e que a conversao cai dentro do retangulo da arte — e nada disso
+  distingue "no lugar" de "vinte pixels ao lado".
+
+  `scripts/harness/mapa-de-ancoras.py` responde a metade da pergunta (a
+  posicao, com marcador estatico). Esta pagina responde a outra metade, que so
+  o tempo mostra: a fogueira PISCA? a pluma SOBE ou fica parada? o vaga-lume
+  some quando devia? a faisca aparece com que frequencia? Numero de quadro nao
+  responde isso — a tela responde.
+
+  Ela vai pro git por decisao registrada em CLAUDE.local.md ("Protótipo,
+  bancada de medição e harness de investigação VÃO pro git"). Nao entra no
+  bundle: e um HTML solto em scripts/, servido so pelo dev server.
+
+  COMO RODAR
+
+      npm run dev
+      abrir http://localhost:5173/scripts/harness/props-do-cenario.html
+
+  O QUE OLHAR
+
+  1. POSICAO. Cada painel esta centrado numa ancora de verdade daquela arte. A
+     coisa animada tem que estar em cima do que o desenho ja prometia — o
+     lampiao, a chamine, a fenda, a beira da agua.
+  2. TAMANHO CONTRA O POKE. O retangulo amarelo tem 40 unidades de altura, o
+     quadro de sprite mais comum do acervo (ver `escalaDoMundo.ts`). Prop maior
+     que o POKE compete com ele pela atencao; foi o erro que o PH-232 corrigiu
+     do outro lado (particula pequena demais lendo como polen).
+  3. RITMO. Espuma e faisca sao PULSO: ficam invisiveis a maior parte do tempo.
+     Se um painel parece parado, espere o ciclo antes de concluir que quebrou.
+  4. O CONJUNTO. Dois paineis vizinhos nao podem ler como a mesma coisa. Foi
+     assim que os quatro presets-circulo do PH-115 passaram batido.
+
+  A ESCALA E A DO JOGO: zoom 1.5 e escala de arte 0.8, os mesmos numeros do
+  renderer. Medir em escala qualquer daria impressao errada de tamanho.
+-->
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0; padding: 20px; background: #0d0f13; color: #e6e9ef;
+    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  h1 { font-size: 16px; margin: 0 0 4px; }
+  p.nota { margin: 0 0 16px; color: #96a0b5; max-width: 90ch; }
+  .grade { display: flex; flex-wrap: wrap; gap: 14px; }
+  .painel { background: #14171d; border: 1px solid #232833; border-radius: 6px; padding: 8px; }
+  .painel h2 { font-size: 12px; margin: 0 0 6px; color: #cfd6e4; font-weight: 600; }
+  .painel .tipos { color: #8b93a7; font-size: 11px; margin: 6px 0 0; }
+  canvas { display: block; background: #000; border-radius: 4px; }
+  .barra { height: 6px; background: #1d2130; border-radius: 3px; overflow: hidden; margin: 10px 0 16px; max-width: 420px; }
+  .barra > i { display: block; height: 100%; background: #6fa8ff; width: 0; }
+</style>
+</head>
+<body>
+<h1>Props de cenário — PH-254</h1>
+<p class="nota">
+  Cada painel é um recorte da arte real, no zoom do jogo, centrado numa âncora cadastrada.
+  O retângulo amarelo tem 40 unidades de mundo (a altura de um POKE).
+  Espuma, faísca e respingo são <b>pulso</b>: ficam invisíveis a maior parte do ciclo.
+</p>
+<div class="barra" title="vento da cena"><i id="vento"></i></div>
+<div class="grade" id="grade"></div>
+
+<script type="module">
+import { COLISAO_POR_ARTE } from '/src/data/generated/subBiomaCollision.generated.ts'
+import { ANCORAS_POR_ARTE } from '/src/data/ancorasDeAmbiente.ts'
+import { ALTURA_DE_POKE } from '/src/render/escalaDoMundo.ts'
+// SEM query: e esta a instancia que a camada consulta via './vento'. Com query
+// eu leria um vento paralelo parado na fase 0.
+import { sincronizarVento, ventoAgora } from '/src/render/vento.ts'
+
+const ZOOM = 1.5
+const LARGURA = 420
+const ALTURA = 280
+
+/**
+ * UMA INSTANCIA DE MODULO POR PAINEL.
+ *
+ * `ambienteProps.ts` guarda o estado em variavel de MODULO (arte atual, lista
+ * de props) — decisao certa dele: no jogo existe uma cena por vez. Aqui existem
+ * dezoito ao mesmo tempo, e uma instancia so faria cada painel ver "a arte
+ * mudou" e remontar tudo a cada quadro. Pra arte com mascara isso significa
+ * varrer milhares de celulas 60 vezes por segundo, dezoito vezes.
+ *
+ * O Vite indexa modulo por URL COMPLETA, query inclusa. Mesmo mecanismo que a
+ * bancada dos efeitos do mapa usa.
+ */
+function moduloDoPainel(i) {
+  return import(`/src/render/ambienteProps.ts?painel=${i}`)
+}
+
+const fundos = new Map()
+function fundo(url) {
+  if (!fundos.has(url)) {
+    const img = new Image()
+    img.src = url // resolvido pela <base> acima, igual o jogo faz
+    fundos.set(url, img)
+  }
+  return fundos.get(url)
+}
+
+// Ancora em que cada painel se centra. Sem escolha, o painel cairia sempre na
+// primeira da lista — que nem sempre e a mais interessante da arte.
+const FOCO = {
+  'assets/hunt-backgrounds/volcano.jpg': 3,
+  'assets/hunt-backgrounds/cave-volcanic.jpg': 8,
+  'assets/hunt-backgrounds/dragon.jpg': 5,
+  'assets/hunt-backgrounds/slum.jpg': 0,
+  'assets/hunt-backgrounds/town.jpg': 0,
+  'assets/hunt-backgrounds/town-night.jpg': 0,
+  'assets/hunt-backgrounds/metropolis.jpg': 0,
+  'assets/hunt-backgrounds/industrial.jpg': 3,
+  'assets/hunt-backgrounds/forest.jpg': 0,
+  'assets/hunt-backgrounds/jungle.jpg': 0,
+  'assets/hunt-backgrounds/temple.jpg': 1,
+  'assets/hunt-backgrounds/ruins.jpg': 0,
+  'assets/hunt-backgrounds/fairy-cave.jpg': 0,
+  'assets/hunt-backgrounds/ice-cave.jpg': 0,
+  'assets/hunt-backgrounds/abyss.jpg': 6,
+  'assets/hunt-backgrounds/dojo.jpg': 0,
+  'assets/hunt-backgrounds/beach.jpg': 4,
+  'assets/hunt-backgrounds/swamp.jpg': 0,
+}
+
+const grade = document.getElementById('grade')
+const paineis = []
+let i = 0
+for (const [arte, ancoras] of Object.entries(ANCORAS_POR_ARTE)) {
+  const col = COLISAO_POR_ARTE[arte]
+  if (!col?.arte) continue
+  const caixa = document.createElement('div')
+  caixa.className = 'painel'
+  const titulo = document.createElement('h2')
+  titulo.textContent = arte.split('/').pop()
+  const canvas = document.createElement('canvas')
+  canvas.width = LARGURA
+  canvas.height = ALTURA
+  const tipos = document.createElement('p')
+  tipos.className = 'tipos'
+  tipos.textContent = [...new Set(ancoras.map((a) => a.tipo))].join(' · ')
+  caixa.append(titulo, canvas, tipos)
+  grade.append(caixa)
+  paineis.push({ arte, col, ancoras, canvas, ctx: canvas.getContext('2d'), mod: await moduloDoPainel(i++) })
+}
+
+const pokeImg = new Image()
+pokeImg.src = 'assets/battle-sprites/pikachu/Idle-Anim.png'
+
+function desenhar(agora) {
+  sincronizarVento(agora)
+  document.getElementById('vento').style.width = `${(ventoAgora() * 100).toFixed(1)}%`
+
+  for (const p of paineis) {
+    const { ctx, col, arte } = p
+    const img = fundo(arte)
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.clearRect(0, 0, LARGURA, ALTURA)
+    if (!img.complete || !img.naturalWidth) continue
+
+    // Camera centrada na ancora escolhida, em unidade de mundo.
+    const foco = p.ancoras[FOCO[arte] ?? 0] ?? p.ancoras[0]
+    const alvoX = col.arte.x + foco.u * img.naturalWidth * col.arte.escala
+    const alvoY = col.arte.y + foco.v * img.naturalHeight * col.arte.escala
+    const janela = { x: alvoX - LARGURA / ZOOM / 2, y: alvoY - ALTURA / ZOOM / 2, w: LARGURA / ZOOM, h: ALTURA / ZOOM }
+
+    ctx.save()
+    ctx.scale(ZOOM, ZOOM)
+    ctx.translate(-janela.x, -janela.y)
+    ctx.imageSmoothingEnabled = false
+    ctx.drawImage(
+      img, col.arte.x, col.arte.y,
+      img.naturalWidth * col.arte.escala, img.naturalHeight * col.arte.escala,
+    )
+    p.mod.desenharPropsDeAmbiente(ctx, arte, janela, false, agora)
+
+    // Regua: 40 unidades de mundo no canto, com o Pikachu dentro quando ele
+    // carregar. O retangulo continua valendo como regua se ele nao carregar.
+    const rx = janela.x + 8
+    const ry = janela.y + janela.h - 8 - ALTURA_DE_POKE
+    if (pokeImg.complete && pokeImg.naturalWidth) {
+      ctx.drawImage(pokeImg, 0, 0, 40, 56, rx, ry - 16, 40, 56)
+    }
+    ctx.strokeStyle = '#ffd400'
+    ctx.lineWidth = 1
+    ctx.strokeRect(rx, ry, ALTURA_DE_POKE, ALTURA_DE_POKE)
+    ctx.restore()
+  }
+  requestAnimationFrame(desenhar)
+}
+requestAnimationFrame(desenhar)
+</script>
+</body>
+</html>
