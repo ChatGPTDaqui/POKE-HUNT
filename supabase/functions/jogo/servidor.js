@@ -28087,7 +28087,7 @@ function rollIvs(rng, speciesId) {
 	}
 	return ivs;
 }
-function rollIvsDoBoss(rng) {
+function rollIvsDoProtetor(rng) {
 	return {
 		hp: randInt(rng, 20, IV_MAX),
 		atkFis: randInt(rng, 20, IV_MAX),
@@ -31521,7 +31521,7 @@ var GEOMETRIA = {
 var BIOMA_POR_CHAVE = Object.fromEntries(BIOMAS.map((b) => [b.chave, b]));
 /**
 * PH-223: ordem canonica dos 12 biomas pro gate sequencial (PH-226/227) —
-* vencer o boss ultimate do bioma N libera o bioma N+1. So existia como
+* vencer o Lord do bioma N libera o bioma N+1. So existia como
 * tabela no vault (`_Architecture.md`, brainstorm 16/08, referencia: sequencia
 * de ginasios Kanto+Johto) — `BIOMAS` acima esta em ordem ARBITRARIA de
 * insercao (campo_aberto, mata, marinho, ...), que NAO bate com esta ordem.
@@ -54571,20 +54571,20 @@ function lootAtivo(sala, fallback) {
 	return perfil ? LOOT[perfil] : fallback;
 }
 /**
-* PH-202/225: todo bioma em ORDEM_DOS_BIOMAS tem boss (pivo 27/08 sobre o
+* PH-202/225: todo bioma em ORDEM_DOS_BIOMAS tem protetor (pivo 27/08 sobre o
 * "fora de escopo" original de 16/08, que limitava a so o bioma piloto —
 * o gate sequencial de PH-207/226 nao tinha efeito nenhum com so 1 bioma,
-* o ultimo da ordem, tendo boss). Salas 1-9 (indice 0-8) pedem mini-boss ao
-* fechar a quota; a ultima sala (indice SALAS_POR_HUNT-1) pede o ultimate da
-* faixa. Pura — nao sorteia nada, so decide QUAL boss a sala pede, se pedir
-* algum. A entidade em si (RNG, criacao) fica em simulation.ts, que ja
+* o ultimo da ordem, tendo protetor). Salas 1-9 (indice 0-8) pedem Guardian ao
+* fechar a quota; a ultima sala (indice SALAS_POR_HUNT-1) pede o Lord da
+* faixa. Pura — nao sorteia nada, so decide QUAL protetor a sala pede, se
+* pedir algum. A entidade em si (RNG, criacao) fica em simulation.ts, que ja
 * importa este modulo — colocar aqui criaria import circular.
 */
-function bossDaSala(sala) {
+function protetorDaSala(sala) {
 	if (!sala) return null;
 	const bioma = SUB_BIOMA_POR_CHAVE[sala.chave]?.bioma.chave;
 	if (!bioma || !ORDEM_DOS_BIOMAS.includes(bioma)) return null;
-	return sala.indice >= 9 ? "ultimate" : "mini";
+	return sala.indice >= 9 ? "lord" : "guardian";
 }
 function nomeDaSala(sala) {
 	if (!sala) return null;
@@ -54622,7 +54622,7 @@ function registrarAbate(world, mapId, opts = {}) {
 		};
 	}
 	sala.abates = 30;
-	if (bossDaSala(sala)) return {
+	if (protetorDaSala(sala)) return {
 		avancou: false,
 		fechouCiclo: false
 	};
@@ -54682,13 +54682,14 @@ function armarTransicaoDeSala(world, mapId) {
 }
 /**
 * PH-202/203: chamado por `handleEnemyDefeated` (simulation.ts) quando o
-* abate era o do boss da sala — o UNICO gatilho que pode armar a transicao
-* de uma sala do bioma piloto (`registrarAbate` se recusa, ver acima). Sob
-* autoridade remota o cliente nao arma nada, so limpa o boss local: quem
-* decide quando a sala avanca e o flush do servidor, igual toda outra sala.
+* abate era o do protetor da sala — o UNICO gatilho que pode armar a
+* transicao de uma sala do bioma piloto (`registrarAbate` se recusa, ver
+* acima). Sob autoridade remota o cliente nao arma nada, so limpa o protetor
+* local: quem decide quando a sala avanca e o flush do servidor, igual toda
+* outra sala.
 */
-function resolverBossDaSala(world, mapId) {
-	world.bossPendente = null;
+function resolverProtetorDaSala(world, mapId) {
+	world.protetorPendente = null;
 	if (world.salaSobAutoridade) return;
 	armarTransicaoDeSala(world, mapId);
 }
@@ -54714,14 +54715,14 @@ function resolverBossDaSala(world, mapId) {
 * cabe em qualquer duracao. Isso tambem fecha o caso que ja estava documentado
 * como "autocurativo no proximo abate" — ele nao era, quando nao havia proximo.
 */
-function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0, manualAdvance = false, garantirBossDaSala) {
+function garantirTransicaoDeQuotaFechada(world, mapId, dt = 0, manualAdvance = false, garantirProtetorDaSala) {
 	const sala = world.sala;
 	if (!sala || sala.abates < 30) {
 		world.salaEsperaDaAutoridade = 0;
 		return;
 	}
 	if (world.salaPendente || world.salaCountdownRemaining != null) return;
-	if (garantirBossDaSala?.()) return;
+	if (garantirProtetorDaSala?.()) return;
 	if (world.salaSobAutoridade) {
 		if (world.salaPredita) return;
 		world.salaEsperaDaAutoridade += dt;
@@ -54804,7 +54805,7 @@ function emptyWorldState(seed = randomSeed()) {
 		sequenceCleared: false,
 		countdownRemaining: null,
 		sala: null,
-		bossPendente: null,
+		protetorPendente: null,
 		salaCountdownRemaining: null,
 		salaPendente: null,
 		salaSobAutoridade: false,
@@ -55095,43 +55096,43 @@ function randomSpawnPoint(rng, mapDef, player, ocupados = []) {
 	return randomSpawnPointFullMap(rng, mapDef);
 }
 /**
-* PH-202/204/205: cria a entidade do boss da sala atual — nova (sorteando
-* especie/nivel/IV do pool da sala) ou RECRIADA fielmente a partir de um
-* `BossPendente` ja persistido. Recriar nunca sorteia de novo: `ivs`,
-* `rarity`, `nature`, `isShiny`, `trait` e `uid` chegam todos fixos em
-* `createPokeInstance`, entao a reconstrucao consome ZERO `rng` — sortear de
-* novo trocaria a aparencia/stats do boss a cada flush (~30s).
+* PH-202/204/205/236: cria a entidade do protetor da sala atual — nova
+* (sorteando especie/nivel/IV do pool da sala) ou RECRIADA fielmente a
+* partir de um `ProtetorPendente` ja persistido. Recriar nunca sorteia de
+* novo: `ivs`, `rarity`, `nature`, `isShiny`, `trait` e `uid` chegam todos
+* fixos em `createPokeInstance`, entao a reconstrucao consome ZERO `rng` —
+* sortear de novo trocaria a aparencia/stats do protetor a cada flush (~30s).
 */
-function criarEntidadeDoBoss(world, mapDef, ctx, tipo, bossSalvo, player, entrada) {
+function criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player, entrada) {
 	const { rng, counters } = world;
 	const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null, []);
-	if (bossSalvo) {
-		const poke = createPokeInstance(rng, bossSalvo.speciesId, bossSalvo.level, {
-			ivs: bossSalvo.ivs,
-			rarity: bossSalvo.rarity,
-			nature: bossSalvo.nature,
-			isShiny: bossSalvo.isShiny,
-			trait: bossSalvo.trait,
-			uid: bossSalvo.uid
+	if (protetorSalvo) {
+		const poke = createPokeInstance(rng, protetorSalvo.speciesId, protetorSalvo.level, {
+			ivs: protetorSalvo.ivs,
+			rarity: protetorSalvo.rarity,
+			nature: protetorSalvo.nature,
+			isShiny: protetorSalvo.isShiny,
+			trait: protetorSalvo.trait,
+			uid: protetorSalvo.uid
 		});
-		poke.hp = bossSalvo.hpAtual;
+		poke.hp = protetorSalvo.hpAtual;
 		const enemy = createEnemyEntity(counters, {
 			poke,
 			x: point.x,
 			y: point.y,
-			encounterId: bossSalvo.encounterId
+			encounterId: protetorSalvo.encounterId
 		});
-		enemy.isBoss = true;
+		enemy.isProtetor = true;
 		return {
 			enemy,
-			pendente: bossSalvo
+			pendente: protetorSalvo
 		};
 	}
 	const encounterId = weightedPick(rng, ctx.pool, (id) => getEncounter(id)?.weight ?? 45);
 	const encounter = getEncounter(encounterId);
 	if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
-	const level = tipo === "ultimate" ? mapDef.levelRange[1] : ctx.janela?.[1] ?? encounter.maxLevel;
-	const ivs = rollIvsDoBoss(rng);
+	const level = tipo === "lord" ? mapDef.levelRange[1] : ctx.janela?.[1] ?? encounter.maxLevel;
+	const ivs = rollIvsDoProtetor(rng);
 	const poke = createPokeInstance(rng, encounter.speciesId, level, { ivs });
 	const enemy = createEnemyEntity(counters, {
 		poke,
@@ -55139,7 +55140,7 @@ function criarEntidadeDoBoss(world, mapDef, ctx, tipo, bossSalvo, player, entrad
 		y: point.y,
 		encounterId
 	});
-	enemy.isBoss = true;
+	enemy.isProtetor = true;
 	return {
 		enemy,
 		pendente: {
@@ -55157,36 +55158,37 @@ function criarEntidadeDoBoss(world, mapDef, ctx, tipo, bossSalvo, player, entrad
 	};
 }
 /**
-* PH-202/203: garante o boss da sala atual quando ela pedir um — sorteia
-* (primeira vez) ou recria fiel (janela reconstruida com o boss ainda vivo),
-* e mantem `world.bossPendente`/`world.enemies` coerentes. Devolve true
-* quando a sala pede boss (bloqueia o avanco em
+* PH-202/203/236: garante o protetor da sala atual quando ela pedir um —
+* sorteia (primeira vez) ou recria fiel (janela reconstruida com o protetor
+* ainda vivo), e mantem `world.protetorPendente`/`world.enemies` coerentes.
+* Devolve true quando a sala pede protetor (bloqueia o avanco em
 * `garantirTransicaoDeQuotaFechada`, ver salaSystem.ts), false quando nao.
 *
 * Chamado tanto do `stepWorld` (quota acabou de fechar em tempo real) quanto
-* indiretamente de `buildMapWorld` (reconstrucao com boss ja persistido) —
-* os dois caminhos convergem aqui pra nao duplicar a logica de recriacao.
+* indiretamente de `buildMapWorld` (reconstrucao com protetor ja
+* persistido) — os dois caminhos convergem aqui pra nao duplicar a logica
+* de recriacao.
 */
-function garantirBossDaSala(world, mapDef, bossSalvo, player, entrada) {
-	const tipo = bossDaSala(world.sala);
+function garantirProtetorDaSala(world, mapDef, protetorSalvo, player, entrada) {
+	const tipo = protetorDaSala(world.sala);
 	if (!tipo) {
-		world.bossPendente = null;
+		world.protetorPendente = null;
 		return false;
 	}
-	if (world.bossPendente) return true;
-	const { enemy, pendente } = criarEntidadeDoBoss(world, mapDef, contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool), tipo, bossSalvo, player, entrada);
+	if (world.protetorPendente) return true;
+	const { enemy, pendente } = criarEntidadeDoProtetor(world, mapDef, contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool), tipo, protetorSalvo, player, entrada);
 	world.enemies.push(enemy);
-	world.bossPendente = pendente;
+	world.protetorPendente = pendente;
 	return true;
 }
 /**
-* PH-226: vencer (matar OU capturar) o boss ULTIMATE avanca o indice de
+* PH-226/236: vencer (matar OU capturar) o LORD avanca o indice de
 * `biomaProgress` da faixa atual — SO se o bioma resolvido for exatamente o
 * proximo esperado na ordem canonica (`ORDEM_DOS_BIOMAS`). Fora de ordem
 * (nao deveria acontecer com o enforcement de PH-227, mas e defesa em
 * profundidade — o motor nao confia cegamente no proprio estado do mundo)
 * nao mexe no indice: silencioso de proposito, mesma familia de decisao de
-* `resolverBossDaSala` nao logar/travar em cima de estado inconsistente.
+* `resolverProtetorDaSala` nao logar/travar em cima de estado inconsistente.
 *
 * Chamado de dentro de `handleEnemyDefeated`, entao roda IGUAL nos dois
 * lados que rodam esse motor — resim do servidor e predicao do cliente.
@@ -55340,17 +55342,17 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis)
 	const climaDaConstrucao = progresso && "clima" in progresso ? climaDeAmbiente(progresso.clima ?? null) : climaAmbienteDaSala(base.seed, sala);
 	const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool);
 	const enemies = [];
-	let bossPendente = null;
+	let protetorPendente = null;
 	if (!countdownRemaining && !sequenceCleared) {
-		const tipoDeBoss = sala && sala.abates >= 30 ? bossDaSala(sala) : null;
-		if (tipoDeBoss) {
-			const { enemy, pendente } = criarEntidadeDoBoss(base, mapDef, {
+		const tipoDeProtetor = sala && sala.abates >= 30 ? protetorDaSala(sala) : null;
+		if (tipoDeProtetor) {
+			const { enemy, pendente } = criarEntidadeDoProtetor(base, mapDef, {
 				pool,
 				janela
-			}, tipoDeBoss, progresso?.bossPendente, player, entradaDoInimigo(mapDef, sala));
+			}, tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala));
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
-			bossPendente = pendente;
+			protetorPendente = pendente;
 		} else if (mapDef.sequence) {
 			const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala));
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
@@ -55377,7 +55379,7 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis)
 		sequenceCleared,
 		countdownRemaining,
 		sala,
-		bossPendente,
+		protetorPendente,
 		clima: climaDaConstrucao,
 		climaAmbiente: climaDaConstrucao,
 		especialidadeNiveis: especialidadeNiveis ?? null
@@ -55511,9 +55513,9 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 			else dispararToastDeCaptura();
 		}
 	}
-	if (enemy.isBoss) {
+	if (enemy.isProtetor) {
 		if (world.sala?.indice === 9) avancarBiomaProgressSeForOProximo(world, gameState);
-		resolverBossDaSala(world, world.mapDef.id);
+		resolverProtetorDaSala(world, world.mapDef.id);
 	}
 	return {
 		gold: loot.gold + ouroDeAutoVenda,
@@ -55555,7 +55557,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		if (!silent) updateAnimations(world, dt);
 		return [];
 	}
-	garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt, manualAdvance, () => garantirBossDaSala(world, world.mapDef, void 0, world.player, null));
+	garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt, manualAdvance, () => garantirProtetorDaSala(world, world.mapDef, void 0, world.player, null));
 	if (world.salaCountdownRemaining != null) {
 		world.salaCountdownRemaining -= dt;
 		if (world.salaCountdownRemaining <= 0) {
@@ -55632,7 +55634,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		for (const grupo of grupos) gameState.unlockContinent(grupo);
 		if (!silent && algumEstavaTrancado) toastStore.getState().pushToast("Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.", "success", "world");
 	}
-	if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn && !world.bossPendente) {
+	if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn && !world.protetorPendente) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
 		if (world.respawnTimer <= 0) {
 			const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
@@ -55651,9 +55653,9 @@ function stepWorld(world, dt, gameState, opts = {}) {
 			world.respawnTimer = world.mapDef.respawnDelay;
 		}
 	}
-	if (world.bossPendente) {
-		const bossVivo = world.enemies.find((e) => e.isBoss && e.poke.uid === world.bossPendente.uid);
-		if (bossVivo) world.bossPendente.hpAtual = bossVivo.poke.hp;
+	if (world.protetorPendente) {
+		const protetorVivo = world.enemies.find((e) => e.isProtetor && e.poke.uid === world.protetorPendente.uid);
+		if (protetorVivo) world.protetorPendente.hpAtual = protetorVivo.poke.hp;
 	}
 	return kills;
 }
@@ -56395,57 +56397,63 @@ function porLotesDeId(ids) {
 var CONQUISTA_LANCE = "boss_lance";
 var MAX_SEGUNDOS_POR_FLUSH = 21600;
 /**
-* PH-217: reconstroi o `BossPendente` da linha da sessao pra passar ao
-* `buildMapWorld`, ou `null` quando nao ha boss pendente (`boss_uid` nulo).
+* PH-217/236/241: reconstroi o `ProtetorPendente` da linha da sessao (via
+* `sala_protetor` embutido) pra passar ao `buildMapWorld`, ou `null` quando
+* nao ha protetor pendente.
 *
-* Espelho exato de `colunasDoBoss` — o que uma grava a outra le. Os `Number()`
-* cobrem o PostgREST devolver `numeric`/`int8` como string, igual ao resto de
+* Le o que `payloadDoProtetor` (abaixo) monta e `gravar_flush_de_sessao`
+* grava — mas NAO e round-trip simetrico: a RPC recebe jsonb camelCase
+* (`payloadDoProtetor`) e devolve colunas relacionais snake_case
+* (`LinhaSalaProtetor`, via `sala_protetor` embutido), porque uma vira
+* INSERT/UPDATE e a outra e SELECT de volta. Os `Number()` cobrem o
+* PostgREST devolver `numeric`/`int8` como string, igual ao resto de
 * `LinhaSessao`.
 */
-function bossDaLinha(s) {
-	if (s.boss_uid == null) return null;
+function protetorDaLinha(s) {
+	const p = s.sala_protetor;
+	if (!p) return null;
 	return {
-		uid: s.boss_uid,
-		speciesId: s.boss_species_id ?? "",
-		encounterId: s.boss_encounter_id ?? "",
-		level: Number(s.boss_level ?? 0),
+		uid: p.uid,
+		speciesId: p.species_id,
+		encounterId: p.encounter_id,
+		level: Number(p.level),
 		ivs: {
-			hp: Number(s.boss_iv_hp ?? 0),
-			atkFis: Number(s.boss_iv_atk_fis ?? 0),
-			atkEsp: Number(s.boss_iv_atk_esp ?? 0),
-			def: Number(s.boss_iv_def ?? 0),
-			defEsp: Number(s.boss_iv_def_esp ?? 0),
-			speed: Number(s.boss_iv_speed ?? 0)
+			hp: Number(p.iv_hp),
+			atkFis: Number(p.iv_atk_fis),
+			atkEsp: Number(p.iv_atk_esp),
+			def: Number(p.iv_def),
+			defEsp: Number(p.iv_def_esp),
+			speed: Number(p.iv_speed)
 		},
-		rarity: s.boss_rarity ?? "comum",
-		isShiny: Boolean(s.boss_is_shiny),
-		nature: s.boss_nature ?? void 0,
-		trait: s.boss_trait ?? void 0,
-		hpAtual: Number(s.boss_hp_atual ?? 0)
+		rarity: p.rarity,
+		isShiny: p.is_shiny,
+		nature: p.nature ?? void 0,
+		trait: p.trait ?? void 0,
+		hpAtual: Number(p.hp_atual)
 	};
 }
 /**
-* PH-217: as 15 colunas `boss_*` do `game_sessions` pra gravar no flush — todas
-* do `bossPendente` vivo, ou todas `null` quando o boss ja foi resolvido
-* (morto/capturado) e a sala liberou o avanco.
+* PH-241: monta o payload jsonb de `p_protetor` pra `gravar_flush_de_sessao`
+* — `null` quando nao ha protetor (a funcao Postgres DELETA a linha de
+* `sala_protetor` nesse caso). `tipo` (Guardian/Lord) nao vem de
+* `ProtetorPendente` — precisa ser resolvido a parte por quem chama
+* (`protetorDaSala(world.sala)`, ver `simularSessao`), porque o motor nunca
+* guardou o proprio tipo no objeto persistido.
 */
-function colunasDoBoss(bp) {
+function payloadDoProtetor(bp, tipo) {
+	if (!bp) return null;
 	return {
-		boss_uid: bp?.uid ?? null,
-		boss_species_id: bp?.speciesId ?? null,
-		boss_encounter_id: bp?.encounterId ?? null,
-		boss_level: bp?.level ?? null,
-		boss_iv_hp: bp?.ivs.hp ?? null,
-		boss_iv_atk_fis: bp?.ivs.atkFis ?? null,
-		boss_iv_atk_esp: bp?.ivs.atkEsp ?? null,
-		boss_iv_def: bp?.ivs.def ?? null,
-		boss_iv_def_esp: bp?.ivs.defEsp ?? null,
-		boss_iv_speed: bp?.ivs.speed ?? null,
-		boss_rarity: bp?.rarity ?? null,
-		boss_is_shiny: bp?.isShiny ?? null,
-		boss_nature: bp?.nature ?? null,
-		boss_trait: bp?.trait ?? null,
-		boss_hp_atual: bp?.hpAtual ?? null
+		uid: bp.uid,
+		speciesId: bp.speciesId,
+		encounterId: bp.encounterId,
+		level: bp.level,
+		ivs: bp.ivs,
+		rarity: bp.rarity,
+		isShiny: bp.isShiny,
+		nature: bp.nature ?? null,
+		trait: bp.trait ?? null,
+		hpAtual: bp.hpAtual,
+		tipo
 	};
 }
 var MARCA_DE_FLUSH_EXPIRA_MS = 3e4;
@@ -56785,7 +56793,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 			abates: Number(sessao.sala_abates ?? 0),
 			ciclos: Number(sessao.ciclos ?? 0)
 		} : null,
-		bossPendente: bossDaLinha(sessao)
+		protetorPendente: protetorDaLinha(sessao)
 	}, estado.especialidades);
 	const offline = segundos > 120;
 	world.pessimista = offline;
@@ -56823,18 +56831,20 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		user_id: userId,
 		conquista: CONQUISTA_LANCE
 	}, { upsert: "user_id,conquista" });
-	await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, {
-		simulated_seconds: Number(sessao.simulated_seconds) + resumo.simulatedSeconds,
-		rng_state: world.rng.state,
-		rng_draws: world.rng.draws,
-		poke_uid: world.player.poke.uid,
-		sequence_index: world.sequenceIndex,
-		sequence_cleared: world.sequenceCleared,
-		sala_indice: world.sala?.indice ?? 0,
-		sala_chave: world.sala?.chave ?? null,
-		sala_abates: world.sala?.abates ?? 0,
-		ciclos: world.sala?.ciclos ?? 0,
-		...colunasDoBoss(world.bossPendente)
+	const tipoDeProtetor = world.protetorPendente ? protetorDaSala(world.sala) : null;
+	await chamarRpc(cfg, "gravar_flush_de_sessao", {
+		p_simulated_seconds: Number(sessao.simulated_seconds) + resumo.simulatedSeconds,
+		p_session_id: sessao.id,
+		p_rng_state: world.rng.state,
+		p_rng_draws: world.rng.draws,
+		p_poke_uid: world.player.poke.uid,
+		p_sequence_index: world.sequenceIndex,
+		p_sequence_cleared: world.sequenceCleared,
+		p_sala_indice: world.sala?.indice ?? 0,
+		p_sala_chave: world.sala?.chave ?? null,
+		p_sala_abates: world.sala?.abates ?? 0,
+		p_ciclos: world.sala?.ciclos ?? 0,
+		p_protetor: payloadDoProtetor(world.protetorPendente, tipoDeProtetor)
 	});
 	return {
 		segundosCreditados: segundos,
@@ -56941,7 +56951,7 @@ async function rotear(cfg, req, url) {
 * pago pela outra.
 */
 async function sessaoAberta(cfg, userId) {
-	const linhas = await selecionar(cfg, `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*&order=started_at.desc`);
+	const linhas = await selecionar(cfg, `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*,sala_protetor(*)&order=started_at.desc`);
 	for (const orfa of linhas.slice(1)) await fecharLinhaDeSessao(cfg, orfa.id);
 	return linhas[0] ?? null;
 }
@@ -56960,20 +56970,22 @@ async function sairDaHunt(cfg, userId, sessaoId) {
 	await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null });
 }
 /**
-* PH-227: mensagem de bloqueio (ou `null` se liberado) do gate sequencial de
-* bioma — vencer o boss ultimate do bioma N libera o N+1 (PH-207/226).
+* PH-227/236: mensagem de bloqueio (ou `null` se liberado) do gate
+* sequencial de bioma — vencer o Lord do bioma N libera o N+1 (PH-207/226).
 *
 * Pura de proposito: testavel isolada, sem precisar mockar `db.js`/HTTP
 * inteiro so pra exercitar uma regra de negocio. `biomaDoMapId` (PH-229)
 * e a MESMA funcao que HuntMenu usa pro selo/ordem/mensagem do menu — os
-* dois lados tem que concordar sobre "que bioma e esse mapId".
+* dois lados tem que concordar sobre "que bioma e esse mapId" E sobre o
+* texto exato da mensagem (`HuntMenu.tsx#bloqueioDeBiomaClient` espelha
+* esta string).
 */
 function bloqueioDeBiomaPendente(mapId, grupo, biomaProgress) {
 	const indiceEsperado = indiceDoBiomaNoMapId(mapId, grupo);
 	if (indiceEsperado <= 0) return null;
 	if ((biomaProgress?.[grupo] ?? 0) >= indiceEsperado) return null;
 	const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1];
-	return `Vença o boss de ${BIOMA_POR_CHAVE[anteriorChave]?.nome ?? anteriorChave} para liberar esta área.`;
+	return `Vença o Lord de ${BIOMA_POR_CHAVE[anteriorChave]?.nome ?? anteriorChave} para liberar esta área.`;
 }
 async function abrirSessao(cfg, userId, req) {
 	const corpo = await req.json().catch(() => null);

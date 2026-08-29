@@ -18,7 +18,7 @@
 // ultimo bit — posicao diverge, instante de engajamento diverge, kill diverge.
 // Um comparador acusaria jogador honesto. E re-simular pra conferir custa a
 // MESMA CPU que simular; se vai gastar, gaste sendo a autoridade.
-import { SPECIES, createPokeInstance, rollIvsDoBoss, type PokeInstance } from '@/data/pokes'
+import { SPECIES, createPokeInstance, rollIvsDoProtetor, type PokeInstance } from '@/data/pokes'
 import { mapDefParaSala, spawnPointParaSala, spawnInimigoParaSala, mapWalkRadius, isCellBlocked, nearestOpenPoint, type MapDef } from '@/data/maps'
 import { getEncounter } from '@/data/enemies'
 import { getItem } from '@/data/items'
@@ -50,7 +50,7 @@ import { awardKillLoot } from './systems/economySystem'
 import { recordKill } from './systems/farmRates'
 import {
   contextoDeSpawn, lootAtivo, novaSala, nomeDaSala, registrarAbate, temSalas,
-  aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, bossDaSala, resolverBossDaSala, type TipoDeBoss,
+  aplicarTransicaoDeSala, garantirTransicaoDeQuotaFechada, protetorDaSala, resolverProtetorDaSala, type TipoDeProtetor,
 } from './systems/salaSystem'
 import { recordPokedexKill } from './systems/pokedexSystem'
 import type { KillResult } from './systems/offlineSimSystem'
@@ -59,7 +59,7 @@ import type { GameStateStore } from '@/stores/gameStateStore'
 import { emptyWorldState } from './worldState'
 import { toastStore } from '@/stores/toastStoreVanilla'
 import { celebracaoStore } from '@/stores/celebracaoStoreVanilla'
-import type { ClimaTipo, EnemyEntity, EnemyHazards, Point, SalaAtiva, WorldState, BossPendente } from './types'
+import type { ClimaTipo, EnemyEntity, EnemyHazards, Point, SalaAtiva, WorldState, ProtetorPendente } from './types'
 
 export const STARTER_LEVEL = 1
 // Starters sempre saem previsiveis — raridade Comum, IV 75% (23/31) em toda
@@ -277,47 +277,47 @@ function randomSpawnPoint(
 }
 
 /**
- * PH-202/204/205: cria a entidade do boss da sala atual — nova (sorteando
- * especie/nivel/IV do pool da sala) ou RECRIADA fielmente a partir de um
- * `BossPendente` ja persistido. Recriar nunca sorteia de novo: `ivs`,
- * `rarity`, `nature`, `isShiny`, `trait` e `uid` chegam todos fixos em
- * `createPokeInstance`, entao a reconstrucao consome ZERO `rng` — sortear de
- * novo trocaria a aparencia/stats do boss a cada flush (~30s).
+ * PH-202/204/205/236: cria a entidade do protetor da sala atual — nova
+ * (sorteando especie/nivel/IV do pool da sala) ou RECRIADA fielmente a
+ * partir de um `ProtetorPendente` ja persistido. Recriar nunca sorteia de
+ * novo: `ivs`, `rarity`, `nature`, `isShiny`, `trait` e `uid` chegam todos
+ * fixos em `createPokeInstance`, entao a reconstrucao consome ZERO `rng` —
+ * sortear de novo trocaria a aparencia/stats do protetor a cada flush (~30s).
  */
-function criarEntidadeDoBoss(
+function criarEntidadeDoProtetor(
   world: SequenciaDeSorteio,
   mapDef: MapDef,
   ctx: { pool: string[]; janela?: [number, number] },
-  tipo: TipoDeBoss,
-  bossSalvo: BossPendente | null | undefined,
+  tipo: TipoDeProtetor,
+  protetorSalvo: ProtetorPendente | null | undefined,
   player: { x: number; y: number; facing: Point } | null,
   entrada: Point | null,
-): { enemy: EnemyEntity; pendente: BossPendente } {
+): { enemy: EnemyEntity; pendente: ProtetorPendente } {
   const { rng, counters } = world
   const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null, [])
 
-  if (bossSalvo) {
-    const poke = createPokeInstance(rng, bossSalvo.speciesId, bossSalvo.level, {
-      ivs: bossSalvo.ivs, rarity: bossSalvo.rarity, nature: bossSalvo.nature,
-      isShiny: bossSalvo.isShiny, trait: bossSalvo.trait, uid: bossSalvo.uid,
+  if (protetorSalvo) {
+    const poke = createPokeInstance(rng, protetorSalvo.speciesId, protetorSalvo.level, {
+      ivs: protetorSalvo.ivs, rarity: protetorSalvo.rarity, nature: protetorSalvo.nature,
+      isShiny: protetorSalvo.isShiny, trait: protetorSalvo.trait, uid: protetorSalvo.uid,
     })
-    poke.hp = bossSalvo.hpAtual
-    const enemy = createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId: bossSalvo.encounterId })
-    enemy.isBoss = true
-    return { enemy, pendente: bossSalvo }
+    poke.hp = protetorSalvo.hpAtual
+    const enemy = createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId: protetorSalvo.encounterId })
+    enemy.isProtetor = true
+    return { enemy, pendente: protetorSalvo }
   }
 
   // Novo: mesmo sorteio de espécie que o spawn comum usa (peso real do
-  // encontro), so o NIVEL e o IV seguem a regra propria do boss.
+  // encontro), so o NIVEL e o IV seguem a regra propria do protetor.
   const encounterId = weightedPick(rng, ctx.pool, (id) => getEncounter(id)?.weight ?? 45)
   const encounter = getEncounter(encounterId)
   if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`)
-  const level = tipo === 'ultimate' ? mapDef.levelRange[1] : (ctx.janela?.[1] ?? encounter.maxLevel)
-  const ivs = rollIvsDoBoss(rng)
+  const level = tipo === 'lord' ? mapDef.levelRange[1] : (ctx.janela?.[1] ?? encounter.maxLevel)
+  const ivs = rollIvsDoProtetor(rng)
   const poke = createPokeInstance(rng, encounter.speciesId, level, { ivs })
   const enemy = createEnemyEntity(counters, { poke, x: point.x, y: point.y, encounterId })
-  enemy.isBoss = true
-  const pendente: BossPendente = {
+  enemy.isProtetor = true
+  const pendente: ProtetorPendente = {
     uid: poke.uid, speciesId: poke.speciesId, encounterId, level, ivs,
     rarity: poke.rarity, isShiny: poke.isShiny, nature: poke.nature, trait: poke.trait,
     hpAtual: poke.hp,
@@ -326,47 +326,48 @@ function criarEntidadeDoBoss(
 }
 
 /**
- * PH-202/203: garante o boss da sala atual quando ela pedir um — sorteia
- * (primeira vez) ou recria fiel (janela reconstruida com o boss ainda vivo),
- * e mantem `world.bossPendente`/`world.enemies` coerentes. Devolve true
- * quando a sala pede boss (bloqueia o avanco em
+ * PH-202/203/236: garante o protetor da sala atual quando ela pedir um —
+ * sorteia (primeira vez) ou recria fiel (janela reconstruida com o protetor
+ * ainda vivo), e mantem `world.protetorPendente`/`world.enemies` coerentes.
+ * Devolve true quando a sala pede protetor (bloqueia o avanco em
  * `garantirTransicaoDeQuotaFechada`, ver salaSystem.ts), false quando nao.
  *
  * Chamado tanto do `stepWorld` (quota acabou de fechar em tempo real) quanto
- * indiretamente de `buildMapWorld` (reconstrucao com boss ja persistido) —
- * os dois caminhos convergem aqui pra nao duplicar a logica de recriacao.
+ * indiretamente de `buildMapWorld` (reconstrucao com protetor ja
+ * persistido) — os dois caminhos convergem aqui pra nao duplicar a logica
+ * de recriacao.
  */
-function garantirBossDaSala(
+function garantirProtetorDaSala(
   world: WorldState,
   mapDef: MapDef,
-  bossSalvo: BossPendente | null | undefined,
+  protetorSalvo: ProtetorPendente | null | undefined,
   player: { x: number; y: number; facing: Point } | null,
   entrada: Point | null,
 ): boolean {
-  const tipo = bossDaSala(world.sala)
+  const tipo = protetorDaSala(world.sala)
   if (!tipo) {
-    world.bossPendente = null
+    world.protetorPendente = null
     return false
   }
   // Ja resolvido nesta mesma instancia de mundo (chamada de novo no mesmo
-  // tick, ou boss ja spawnado e ainda vivo) — idempotente, nao recria.
-  if (world.bossPendente) return true
+  // tick, ou protetor ja spawnado e ainda vivo) — idempotente, nao recria.
+  if (world.protetorPendente) return true
 
   const ctx = contextoDeSpawn(mapDef.id, mapDef.levelRange, world.sala, mapDef.enemyPool)
-  const { enemy, pendente } = criarEntidadeDoBoss(world, mapDef, ctx, tipo, bossSalvo, player, entrada)
+  const { enemy, pendente } = criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player, entrada)
   world.enemies.push(enemy)
-  world.bossPendente = pendente
+  world.protetorPendente = pendente
   return true
 }
 
 /**
- * PH-226: vencer (matar OU capturar) o boss ULTIMATE avanca o indice de
+ * PH-226/236: vencer (matar OU capturar) o LORD avanca o indice de
  * `biomaProgress` da faixa atual — SO se o bioma resolvido for exatamente o
  * proximo esperado na ordem canonica (`ORDEM_DOS_BIOMAS`). Fora de ordem
  * (nao deveria acontecer com o enforcement de PH-227, mas e defesa em
  * profundidade — o motor nao confia cegamente no proprio estado do mundo)
  * nao mexe no indice: silencioso de proposito, mesma familia de decisao de
- * `resolverBossDaSala` nao logar/travar em cima de estado inconsistente.
+ * `resolverProtetorDaSala` nao logar/travar em cima de estado inconsistente.
  *
  * Chamado de dentro de `handleEnemyDefeated`, entao roda IGUAL nos dois
  * lados que rodam esse motor — resim do servidor e predicao do cliente.
@@ -612,13 +613,13 @@ export interface ProgressoDaSessao {
    */
   clima?: ClimaTipo | null
   /**
-   * PH-201/202: boss (mini ou ultimate) ainda vivo na sala em que a sessao
-   * parou. Presente == a sala esta em "modo boss": `buildMapWorld` recria a
-   * entidade FIELMENTE em vez do spawn normal — sortear de novo desalinharia
-   * o RNG e trocaria a aparencia do boss a cada flush. Ausente/null == sala
-   * sem boss pendente, spawn normal de sempre.
+   * PH-201/202/236: protetor (Guardian ou Lord) ainda vivo na sala em que a
+   * sessao parou. Presente == a sala esta em "modo protetor": `buildMapWorld`
+   * recria a entidade FIELMENTE em vez do spawn normal — sortear de novo
+   * desalinharia o RNG e trocaria a aparencia do protetor a cada flush.
+   * Ausente/null == sala sem protetor pendente, spawn normal de sempre.
    */
-  bossPendente?: BossPendente | null
+  protetorPendente?: ProtetorPendente | null
 }
 
 export function buildMapWorld(
@@ -674,29 +675,30 @@ export function buildMapWorld(
   const { pool, janela } = contextoDeSpawn(mapId, mapDef.levelRange, sala, mapDef.enemyPool)
 
   const enemies: EnemyEntity[] = []
-  let bossPendente: BossPendente | null = null
+  let protetorPendente: ProtetorPendente | null = null
   if (!countdownRemaining && !sequenceCleared) {
-    // PH-225: achado corrigindo o proprio bug relatado ao vivo ("boss
-    // aparece sozinho, tela vazia, sem nenhum mob") — `bossDaSala` so olha
-    // bioma+indice da sala, NUNCA se a quota (30 abates) ja fechou. Sem o
-    // `sala.abates >= ABATES_POR_SALA` aqui, TODA reconstrucao de mundo
-    // numa sala boss-habilitada (inclusive a abertura da sessao, abates=0)
-    // pulava o spawn normal e ia direto pro boss — mascarado antes porque
-    // so igneo tinha boss (facil nao perceber numa unica hunt), virou
-    // impossivel de ignorar com os 12 biomas habilitados (PH-225): QUALQUER
-    // hunt de bioma, na abertura, tentava recriar um boss do nada.
-    const tipoDeBoss = sala && sala.abates >= ABATES_POR_SALA ? bossDaSala(sala) : null
-    if (tipoDeBoss) {
-      // Sala em modo boss (quota ja fechou, spawn normal fica suspenso ate
-      // resolver). Recria FIEL quando `progresso.bossPendente` ja existe
-      // (zero RNG extra — outra janela ja tinha sorteado esse boss), sorteia
-      // na primeira vez que a sala pede boss senao.
-      const { enemy, pendente } = criarEntidadeDoBoss(
-        base, mapDef, { pool, janela }, tipoDeBoss, progresso?.bossPendente, player, entradaDoInimigo(mapDef, sala),
+    // PH-225: achado corrigindo o proprio bug relatado ao vivo ("protetor
+    // aparece sozinho, tela vazia, sem nenhum mob") — `protetorDaSala` so
+    // olha bioma+indice da sala, NUNCA se a quota (30 abates) ja fechou. Sem
+    // o `sala.abates >= ABATES_POR_SALA` aqui, TODA reconstrucao de mundo
+    // numa sala com protetor habilitado (inclusive a abertura da sessao,
+    // abates=0) pulava o spawn normal e ia direto pro protetor — mascarado
+    // antes porque so igneo tinha protetor (facil nao perceber numa unica
+    // hunt), virou impossivel de ignorar com os 12 biomas habilitados
+    // (PH-225): QUALQUER hunt de bioma, na abertura, tentava recriar um
+    // protetor do nada.
+    const tipoDeProtetor = sala && sala.abates >= ABATES_POR_SALA ? protetorDaSala(sala) : null
+    if (tipoDeProtetor) {
+      // Sala em modo protetor (quota ja fechou, spawn normal fica suspenso
+      // ate resolver). Recria FIEL quando `progresso.protetorPendente` ja
+      // existe (zero RNG extra — outra janela ja tinha sorteado esse
+      // protetor), sorteia na primeira vez que a sala pede protetor senao.
+      const { enemy, pendente } = criarEntidadeDoProtetor(
+        base, mapDef, { pool, janela }, tipoDeProtetor, progresso?.protetorPendente, player, entradaDoInimigo(mapDef, sala),
       )
       aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
       enemies.push(enemy)
-      bossPendente = pendente
+      protetorPendente = pendente
     } else if (mapDef.sequence) {
       const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala))
       aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
@@ -721,7 +723,7 @@ export function buildMapWorld(
     sequenceCleared,
     countdownRemaining,
     sala,
-    bossPendente,
+    protetorPendente,
     // PH-140: o clima de ambiente e reposto em TODA construcao de mundo, e nao
     // guardado. E o que faz ele sobreviver ao flush do servidor (que reconstroi
     // o mundo a cada 30-90s) sem coluna nova em `game_sessions`: mesma
@@ -940,11 +942,11 @@ export function handleEnemyDefeated(world: WorldState, enemy: EnemyEntity, gameS
   // PH-202/203: resolvido (morto OU capturado) arma a transicao NA HORA —
   // incondicional a `silent` porque o catch-up headless tambem precisa
   // desarmar o bloqueio. `registrarAbate` (chamado logo depois, mesmo tick,
-  // pro proprio abate deste boss) se recusa a arma-la de novo por conta
+  // pro proprio abate deste protetor) se recusa a arma-la de novo por conta
   // propria — ver salaSystem.ts#registrarAbate.
-  if (enemy.isBoss) {
+  if (enemy.isProtetor) {
     if (world.sala?.indice === SALAS_POR_HUNT - 1) avancarBiomaProgressSeForOProximo(world, gameState)
-    resolverBossDaSala(world, world.mapDef!.id)
+    resolverProtetorDaSala(world, world.mapDef!.id)
   }
 
   return {
@@ -1013,7 +1015,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // esperar um abate novo. Ver o livelock em
   // salaSystem.ts#garantirTransicaoDeQuotaFechada.
   garantirTransicaoDeQuotaFechada(world, world.mapDef.id, dt, manualAdvance, () =>
-    garantirBossDaSala(world, world.mapDef!, undefined, world.player, null))
+    garantirProtetorDaSala(world, world.mapDef!, undefined, world.player, null))
 
   // Contagem regressiva "Entrando em nova area" entre salas (ver
   // salaSystem.ts#registrarAbate/aplicarTransicaoDeSala): a quota de abates
@@ -1160,13 +1162,13 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     }
   }
 
-  // PH-202/203: boss vivo suspende o respawn de mob comum — o design fala em
-  // "spawn normal suspenso ate resolver" e o spawn INICIAL do boss (via
-  // garantirBossDaSala/buildMapWorld) ja pula o loop normal, mas sem este
-  // corte aqui `aliveCount` (que so conta o boss, 1) ficava abaixo de
-  // `maxEnemies` e este respawn enchia a sala com mobs comuns do lado do
-  // boss — achado revisando PH-217 (ChatGPTDaqui, #182).
-  if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn && !world.bossPendente) {
+  // PH-202/203: protetor vivo suspende o respawn de mob comum — o design fala
+  // em "spawn normal suspenso ate resolver" e o spawn INICIAL do protetor
+  // (via garantirProtetorDaSala/buildMapWorld) ja pula o loop normal, mas sem
+  // este corte aqui `aliveCount` (que so conta o protetor, 1) ficava abaixo
+  // de `maxEnemies` e este respawn enchia a sala com mobs comuns do lado do
+  // protetor — achado revisando PH-217 (ChatGPTDaqui, #182).
+  if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn && !world.protetorPendente) {
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
       const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
@@ -1186,14 +1188,15 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
     }
   }
 
-  // PH-217: `world.bossPendente.hpAtual` so nasce setado no spawn — o dano que
-  // o boss leva durante a janela vive na entidade. Espelha aqui, todo tick, pra
-  // o flush (authority/progresso.ts#aplicarFlush) persistir o HP real. Sem
-  // isto, a proxima reconstrucao de mundo (~30s) recria o boss com HP cheio, e
-  // uma luta longa nunca fecha. Sem RNG: so copia um numero.
-  if (world.bossPendente) {
-    const bossVivo = world.enemies.find((e) => e.isBoss && e.poke.uid === world.bossPendente!.uid)
-    if (bossVivo) world.bossPendente.hpAtual = bossVivo.poke.hp
+  // PH-217: `world.protetorPendente.hpAtual` so nasce setado no spawn — o
+  // dano que o protetor leva durante a janela vive na entidade. Espelha aqui,
+  // todo tick, pra o flush (authority/progresso.ts#aplicarFlush) persistir o
+  // HP real. Sem isto, a proxima reconstrucao de mundo (~30s) recria o
+  // protetor com HP cheio, e uma luta longa nunca fecha. Sem RNG: so copia
+  // um numero.
+  if (world.protetorPendente) {
+    const protetorVivo = world.enemies.find((e) => e.isProtetor && e.poke.uid === world.protetorPendente!.uid)
+    if (protetorVivo) world.protetorPendente.hpAtual = protetorVivo.poke.hp
   }
 
   return kills
