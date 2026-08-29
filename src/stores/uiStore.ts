@@ -207,6 +207,15 @@ interface UiState {
   navHeight: number
   setNavHeight: (height: number) => void
 
+  // Altura do TRILHO DE STATUS (PH-257), medida pelo mesmo mecanismo e pelo
+  // mesmo motivo dos dois acima: a coluna de atalhos do canto superior direito
+  // comeca logo abaixo do card do treinador, e a altura do trilho muda com o
+  // regime, com o nome da especie em campo e com o `hudScale`. Uma constante em
+  // `em` erraria em algum desses eixos — e errar aqui significa a coluna
+  // cobrindo a carteira ou flutuando no meio da tela.
+  trilhoHeight: number
+  setTrilhoHeight: (height: number) => void
+
   // Largura E ALTURA do viewport em px. Vivem na store (e nao num `useState`
   // por componente) porque varias superficies decidem posicao a partir delas:
   // um listener de resize compartilhado em vez de um por superficie.
@@ -361,6 +370,12 @@ export const useUiStore = create<UiState>((set, get) => ({
   setNavHeight: (height) => {
     const r = Math.round(height)
     if (get().navHeight !== r) set({ navHeight: r })
+  },
+
+  trilhoHeight: 0,
+  setTrilhoHeight: (height) => {
+    const r = Math.round(height)
+    if (get().trilhoHeight !== r) set({ trilhoHeight: r })
   },
 
   viewportWidth: typeof window === 'undefined' ? 1280 : window.innerWidth,
