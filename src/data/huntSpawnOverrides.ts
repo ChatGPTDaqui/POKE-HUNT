@@ -296,6 +296,28 @@ function montarHunt(bioma: BiomaDef, faixa: FaixaDef): void {
     // 12 HP e nao sobrevive a varios de uma vez. Ver o porque medido em
     // data/biomas.ts#MAX_INIMIGOS_HUNT_INICIAL.
     maxEnemies: MAX_INIMIGOS_HUNT_INICIAL,
+    // PH-259, e os tres campos abaixo respondem juntos ao mesmo relato ("tem
+    // pouco pokemon e o POKE anda muito ate o proximo"). Os numeros saem de
+    // scripts/harness/spawn-da-hunt-inicial.mjs, 20 sementes por configuracao:
+    //
+    //   1 inimigo, spawn 250-550 (era) ... 0/20 mortes, 19,9 abates/5min, 51% andando
+    //   4 inimigos, spawn 250-550 ....... 4/20 mortes, 21,9 abates/5min, 38% andando
+    //   1 inimigo, spawn 150-350 ........ 0/20 mortes, 25,1 abates/5min, 41% andando
+    //
+    // O ganho vem da DISTANCIA, e nao da quantidade: sozinho, aproximar o
+    // spawn rendeu +26% de abates sem nenhuma morte, enquanto quadruplicar os
+    // inimigos rendeu +10% e trouxe morte de conta nova de volta.
+    //
+    // O campo mais cheio (o pedido literal) entra pelos DEGRAUS, e nao no
+    // numero fixo: a janela em que conta nova morre sao os primeiros 30-60
+    // segundos com o POKE Lv1, e ela fica com um inimigo so. Do Lv3 em diante o
+    // POKE ja aguenta e o campo enche.
+    spawnDistancia: [150, 350],
+    maxEnemiesPorNivel: [{ nivel: 3, max: 2 }, { nivel: 5, max: 3 }],
+    // Folga entre selvagens maior que a padrao (170): com dois ou tres em campo
+    // numa faixa de spawn mais curta, o padrao — que e MENOR que o raio de
+    // aggro de 175 — poria os dois em cima do jogador ao mesmo tempo.
+    spawnEntreInimigos: 400,
     respawnDelay: GEOMETRIA.respawnDelay,
     spawnPoints: GEOMETRIA.spawnPoints.map((p) => ({ ...p })),
     enemyPool: pool.map((speciesId) =>
