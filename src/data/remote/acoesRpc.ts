@@ -165,7 +165,14 @@ async function refetchPoke(pokeId: string): Promise<void> {
   })
 }
 
-async function refetchEquipeInteira(): Promise<void> {
+/**
+ * Exportada desde a PH-164: coletar um anexo de POKE (`correioRealtime.ts`) cria
+ * o POKE no SERVIDOR, e o cliente precisa do mesmo refetch que as acoes de
+ * equipe ja usam. Reescrever a leitura la duplicaria a regra do
+ * `order('team_slot')` abaixo, e uma copia que se desatualize poe o POKE errado
+ * no campo.
+ */
+export async function refetchEquipeInteira(): Promise<void> {
   const uid = await userIdAtual()
   // `order('team_slot')` e obrigatorio: `definirAtivo` reordena os slots pra
   // trazer o POKE escolhido pro topo (slot 0), e o resto do app assume
