@@ -304,6 +304,12 @@ function armarTransicaoDeSala(world: WorldState, mapId: string): AvancoDeSala {
  */
 export function resolverProtetorDaSala(world: WorldState, mapId: string): void {
   world.protetorPendente = null
+  // PH-230: marcar ANTES do corte de autoridade abaixo. Sem esta linha, sob
+  // `salaSobAutoridade` a sala nao avanca (por design) e nada registra que o
+  // protetor ja caiu — `protetorDaSala` continua dizendo "esta sala pede
+  // protetor" e o proximo tick sorteia outro, pra sempre. Ver
+  // `WorldState.protetorResolvido`.
+  world.protetorResolvido = true
   if (world.salaSobAutoridade) return
   armarTransicaoDeSala(world, mapId)
 }
@@ -475,6 +481,8 @@ export function reconciliarSalaDaAutoridade(
   if (!atual) {
     world.sala = { ...sala }
     world.salaPredita = false
+    // PH-230: sala entrando direto (nao havia sala) nao herda marca de protetor.
+    world.protetorResolvido = false
     aplicarClima()
     return
   }
@@ -521,6 +529,8 @@ export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
   if (!pendente) return
   world.sala = pendente
   world.salaPendente = null
+  // PH-230: sala nova, protetor novo — a marca vale por SALA, nao pela sessao.
+  world.protetorResolvido = false
   // PH-140: o clima da sala anterior NAO acompanha o jogador — inclusive o de
   // golpe, que morre junto com a sala mesmo com turnos sobrando. Por isso o
   // `clima` e zerado ANTES de `definirClimaDeAmbiente`, que respeitaria um

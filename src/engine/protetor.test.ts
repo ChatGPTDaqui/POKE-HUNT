@@ -14,7 +14,9 @@ import { describe, expect, it, beforeEach } from 'vitest'
 import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
 import { buildMapWorld, stepWorld, handleEnemyDefeated } from './simulation'
-import { protetorDaSala } from './systems/salaSystem'
+import {
+  protetorDaSala, ESPERA_MAXIMA_PELA_AUTORIDADE, SALA_TRANSITION_COUNTDOWN,
+} from './systems/salaSystem'
 import { ABATES_POR_SALA, SALAS_POR_HUNT } from '@/data/biomas'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import type { WorldState, ProtetorPendente } from './types'
@@ -306,5 +308,94 @@ describe('avanco de biomaProgress ao vencer o Lord (PH-226)', () => {
 
     expect(useGameStateStore.getState().biomaProgress.faixa1).toBe(INDICE_DE_MATA + 1)
     expect(useGameStateStore.getState().biomaProgress.faixa2).toBe(99)
+  })
+})
+
+// PH-230: o par `protetorPendente`/`protetorDaSala` nao distingue "protetor
+// ainda nao nasceu" de "protetor ja morreu" — os dois leem `protetorPendente:
+// null` numa sala que `protetorDaSala` continua marcando como
+// protetor-habilitada. Sem autoridade isso nunca apareceu porque
+// `resolverProtetorDaSala` arma a transicao no mesmo tick e a sala troca. Sob
+// `salaSobAutoridade` ela NAO troca (so o servidor decide), e o tick seguinte
+// relia "esta sala pede protetor, nao ha protetor" e sorteava outro.
+//
+// O estrago nao era so o gauntlet infinito na tela: o `garantirProtetorDaSala?.()`
+// de `garantirTransicaoDeQuotaFechada` retornava true pra sempre, e o
+// early-return dele acontecia ANTES do bloco de espera da autoridade — entao
+// `salaEsperaDaAutoridade` nunca acumulava e o fallback de predicao local
+// (a rede de seguranca contra servidor mudo/antigo) ficava morto.
+describe('protetor resolvido sob autoridade nao respawna (PH-230)', () => {
+  beforeEach(() => {
+    useGameStateStore.getState().resetToDefaults()
+  })
+
+  /**
+   * Fecha a quota numa sala protetor-habilitada sob autoridade, deixa o
+   * protetor nascer e o mata. Devolve o mundo logo depois do abate.
+   */
+  function protetorCaidoSobAutoridade(semente: number): WorldState {
+    const world = mundo(semente)
+    world.salaSobAutoridade = true
+    world.sala = { indice: 0, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.enemies = []
+    world.respawnTimer = 999
+    const gameState = useGameStateStore.getState()
+
+    stepWorld(world, 0.1, gameState, { silent: true })
+    const protetor = world.enemies.find((e) => e.isProtetor)
+    expect(protetor).toBeDefined()
+    handleEnemyDefeated(world, protetor!, gameState, { silent: true })
+    world.enemies = world.enemies.filter((e) => e !== protetor)
+    return world
+  }
+
+  it('sob autoridade, matar o protetor NAO arma a transicao — mas tambem nao faz nascer outro', () => {
+    const world = protetorCaidoSobAutoridade(60)
+    const gameState = useGameStateStore.getState()
+
+    // O contrato de `resolverProtetorDaSala` sob autoridade continua o de
+    // sempre: quem decide a proxima sala e o flush do servidor, nao o cliente.
+    expect(world.salaPendente).toBeNull()
+    expect(world.salaCountdownRemaining).toBeNull()
+    expect(world.protetorResolvido).toBe(true)
+
+    // O bug: cada um destes ticks sorteava um protetor novo.
+    for (let i = 0; i < 30; i++) {
+      stepWorld(world, 0.1, gameState, { silent: true })
+      expect(world.protetorPendente).toBeNull()
+      expect(world.enemies.some((e) => e.isProtetor)).toBe(false)
+    }
+  })
+
+  it('protetor resolvido + servidor que nao responde: o fallback de predicao local ainda dispara', () => {
+    const world = protetorCaidoSobAutoridade(61)
+    const gameState = useGameStateStore.getState()
+    const inicio = world.sala!.indice
+
+    // Nenhuma `reconciliarSalaDaAutoridade` aqui de proposito: e exatamente o
+    // servidor mudo (ou de versao antiga, sem `garantirTransicaoDeQuotaFechada`)
+    // que o fallback existe pra cobrir.
+    const ticks = Math.floor((ESPERA_MAXIMA_PELA_AUTORIDADE + SALA_TRANSITION_COUNTDOWN + 1) / 0.1)
+    for (let i = 0; i < ticks; i++) stepWorld(world, 0.1, gameState, { silent: true })
+
+    expect(world.sala!.indice).toBe(inicio + 1)
+    expect(world.salaPredita).toBe(true)
+    // Sala nova, marca zerada: o proximo protetor desta hunt tem que poder nascer.
+    expect(world.protetorResolvido).toBe(false)
+  })
+
+  it('sem autoridade, matar o protetor segue armando a transicao no mesmo tick (nao regrediu)', () => {
+    const world = mundo(62)
+    world.sala = { indice: 0, chave: 'volcano', abates: ABATES_POR_SALA, ciclos: 0 }
+    world.enemies = []
+    world.respawnTimer = 999
+    const gameState = useGameStateStore.getState()
+
+    stepWorld(world, 0.1, gameState, { silent: true })
+    const protetor = world.enemies.find((e) => e.isProtetor)!
+    handleEnemyDefeated(world, protetor, gameState, { silent: true })
+
+    expect(world.salaPendente).not.toBeNull()
+    expect(world.salaCountdownRemaining).not.toBeNull()
   })
 })
