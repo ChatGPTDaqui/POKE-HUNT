@@ -27,23 +27,24 @@ export { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 // authority/src/appSessao.ts#abrirSessao): se ela nascesse no primeiro flush, o
 // cliente entraria com uma sala sorteada por ele e trocaria de sub-bioma
 // (com aviso na tela) 30 segundos depois de entrar na hunt.
-export { novaSala, temSalas, solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN } from './systems/salaSystem'
-export type { AvancoDeSala } from './systems/salaSystem'
+export { novaSala, temSalas, solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, protetorDaSala } from './systems/salaSystem'
+export type { AvancoDeSala, TipoDeProtetor } from './systems/salaSystem'
 // PH-140: o servidor resolve o clima de ambiente e manda pro cliente, que nao
 // tem a semente da sessao pra derivar o dele.
 export { climaDaSala } from './systems/climaAmbiente'
 export {
   BIOMAS, FAIXAS, FAIXAS_INICIAIS, GRUPOS_DO_LANCE, SALAS_POR_HUNT, ABATES_POR_SALA,
-  BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, huntId,
+  BIOMA_POR_CHAVE, SUB_BIOMA_POR_CHAVE, huntId, biomaDoMapId, indiceDoBiomaNoMapId,
+  ORDEM_DOS_BIOMAS, biomaProgressDefault,
 } from '@/data/biomas'
-export type { BiomaDef, SubBiomaDef, FaixaDef, FaixaId } from '@/data/biomas'
+export type { BiomaDef, SubBiomaDef, FaixaDef, FaixaId, BiomaProgress } from '@/data/biomas'
 export { getEncounter } from '@/data/enemies'
 export { ITEMS, getItem } from '@/data/items'
 export {
   MAX_ACTIVE_ABILITIES, activeAbilitiesPadrao, ehGolpeAoeDeNivel50, golpesUtilizaveis,
 } from '@/data/activeAbilities'
 
-export type { WorldState, WorldCounters, SalaAtiva, ClimaTipo, BossPendente } from './types'
+export type { WorldState, WorldCounters, SalaAtiva, ClimaTipo, ProtetorPendente } from './types'
 
 // Regras de economia e progressao usadas pelas ACOES do jogador (comprar,
 // vender, desbloquear, evoluir). O servidor chama exatamente estas — nao ha uma

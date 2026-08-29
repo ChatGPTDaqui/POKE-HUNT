@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.17"
+    PostgrestVersion: "14.5"
   }
   dev: {
     Tables: {
@@ -255,21 +255,6 @@ export type Database = {
       }
       game_sessions: {
         Row: {
-          boss_encounter_id: string | null
-          boss_hp_atual: number | null
-          boss_is_shiny: boolean | null
-          boss_iv_atk_esp: number | null
-          boss_iv_atk_fis: number | null
-          boss_iv_def: number | null
-          boss_iv_def_esp: number | null
-          boss_iv_hp: number | null
-          boss_iv_speed: number | null
-          boss_level: number | null
-          boss_nature: string | null
-          boss_rarity: string | null
-          boss_species_id: string | null
-          boss_trait: string | null
-          boss_uid: string | null
           ciclos: number
           closed_at: string | null
           flushing_since: string | null
@@ -290,21 +275,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          boss_encounter_id?: string | null
-          boss_hp_atual?: number | null
-          boss_is_shiny?: boolean | null
-          boss_iv_atk_esp?: number | null
-          boss_iv_atk_fis?: number | null
-          boss_iv_def?: number | null
-          boss_iv_def_esp?: number | null
-          boss_iv_hp?: number | null
-          boss_iv_speed?: number | null
-          boss_level?: number | null
-          boss_nature?: string | null
-          boss_rarity?: string | null
-          boss_species_id?: string | null
-          boss_trait?: string | null
-          boss_uid?: string | null
           ciclos?: number
           closed_at?: string | null
           flushing_since?: string | null
@@ -325,21 +295,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          boss_encounter_id?: string | null
-          boss_hp_atual?: number | null
-          boss_is_shiny?: boolean | null
-          boss_iv_atk_esp?: number | null
-          boss_iv_atk_fis?: number | null
-          boss_iv_def?: number | null
-          boss_iv_def_esp?: number | null
-          boss_iv_hp?: number | null
-          boss_iv_speed?: number | null
-          boss_level?: number | null
-          boss_nature?: string | null
-          boss_rarity?: string | null
-          boss_species_id?: string | null
-          boss_trait?: string | null
-          boss_uid?: string | null
           ciclos?: number
           closed_at?: string | null
           flushing_since?: string | null
@@ -530,6 +485,7 @@ export type Database = {
         Row: {
           anexo_coletado_em: string | null
           anexo_itens: Json
+          anexo_poke: Json | null
           assunto: string | null
           corpo: string
           created_at: string
@@ -546,6 +502,7 @@ export type Database = {
         Insert: {
           anexo_coletado_em?: string | null
           anexo_itens?: Json
+          anexo_poke?: Json | null
           assunto?: string | null
           corpo?: string
           created_at?: string
@@ -562,6 +519,7 @@ export type Database = {
         Update: {
           anexo_coletado_em?: string | null
           anexo_itens?: Json
+          anexo_poke?: Json | null
           assunto?: string | null
           corpo?: string
           created_at?: string
@@ -907,6 +865,33 @@ export type Database = {
         }
         Relationships: []
       }
+      missao_cadeia: {
+        Row: {
+          alvo: number
+          eh_ultima: boolean
+          posicao: number
+          recompensa: number
+          species_id: string
+          tipo: Database["dev"]["Enums"]["element_type"]
+        }
+        Insert: {
+          alvo: number
+          eh_ultima: boolean
+          posicao: number
+          recompensa: number
+          species_id: string
+          tipo: Database["dev"]["Enums"]["element_type"]
+        }
+        Update: {
+          alvo?: number
+          eh_ultima?: boolean
+          posicao?: number
+          recompensa?: number
+          species_id?: string
+          tipo?: Database["dev"]["Enums"]["element_type"]
+        }
+        Relationships: []
+      }
       moves: {
         Row: {
           accuracy: number
@@ -1189,6 +1174,7 @@ export type Database = {
         Row: {
           active_team_index: number
           auto_catch_config: Json
+          auto_lure_config: Json
           auto_pot_rules: Json
           auto_sell_config: Json
           auto_status_config: Json
@@ -1210,6 +1196,7 @@ export type Database = {
         Insert: {
           active_team_index?: number
           auto_catch_config?: Json
+          auto_lure_config?: Json
           auto_pot_rules?: Json
           auto_sell_config?: Json
           auto_status_config?: Json
@@ -1231,6 +1218,7 @@ export type Database = {
         Update: {
           active_team_index?: number
           auto_catch_config?: Json
+          auto_lure_config?: Json
           auto_pot_rules?: Json
           auto_sell_config?: Json
           auto_status_config?: Json
@@ -1378,6 +1366,107 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "treinadores_publico"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      recompensa_concedida: {
+        Row: {
+          chave: string
+          concedido_em: string
+          user_id: string
+        }
+        Insert: {
+          chave: string
+          concedido_em?: string
+          user_id: string
+        }
+        Update: {
+          chave?: string
+          concedido_em?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recompensa_concedida_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "recompensa_concedida_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      sala_protetor: {
+        Row: {
+          encounter_id: string
+          hp_atual: number
+          is_shiny: boolean
+          iv_atk_esp: number
+          iv_atk_fis: number
+          iv_def: number
+          iv_def_esp: number
+          iv_hp: number
+          iv_speed: number
+          level: number
+          nature: string | null
+          rarity: string
+          session_id: string
+          species_id: string
+          tipo: string
+          trait: string | null
+          uid: string
+        }
+        Insert: {
+          encounter_id: string
+          hp_atual: number
+          is_shiny: boolean
+          iv_atk_esp: number
+          iv_atk_fis: number
+          iv_def: number
+          iv_def_esp: number
+          iv_hp: number
+          iv_speed: number
+          level: number
+          nature?: string | null
+          rarity: string
+          session_id: string
+          species_id: string
+          tipo: string
+          trait?: string | null
+          uid: string
+        }
+        Update: {
+          encounter_id?: string
+          hp_atual?: number
+          is_shiny?: boolean
+          iv_atk_esp?: number
+          iv_atk_fis?: number
+          iv_def?: number
+          iv_def_esp?: number
+          iv_hp?: number
+          iv_speed?: number
+          level?: number
+          nature?: string | null
+          rarity?: string
+          session_id?: string
+          species_id?: string
+          tipo?: string
+          trait?: string | null
+          uid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sala_protetor_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "game_sessions"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1868,6 +1957,10 @@ export type Database = {
               stat_speed: number
             }[]
           }
+      _conceder_eevee_do_lance: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       _mult_natureza: {
         Args: { p_nature: string; p_stat: string }
         Returns: number
@@ -1961,6 +2054,23 @@ export type Database = {
         | { Args: { p_alvo?: string; p_poke_id: string }; Returns: Json }
       excluir_conversa: { Args: { p_contato_id: string }; Returns: Json }
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
+      gravar_flush_de_sessao: {
+        Args: {
+          p_ciclos: number
+          p_poke_uid: string
+          p_protetor: Json
+          p_rng_draws: number
+          p_rng_state: number
+          p_sala_abates: number
+          p_sala_chave: string
+          p_sala_indice: number
+          p_sequence_cleared: boolean
+          p_sequence_index: number
+          p_session_id: string
+          p_simulated_seconds: number
+        }
+        Returns: undefined
+      }
       gravar_progresso: {
         Args: {
           p_patch: Json
@@ -2383,21 +2493,6 @@ export type Database = {
       }
       game_sessions: {
         Row: {
-          boss_encounter_id: string | null
-          boss_hp_atual: number | null
-          boss_is_shiny: boolean | null
-          boss_iv_atk_esp: number | null
-          boss_iv_atk_fis: number | null
-          boss_iv_def: number | null
-          boss_iv_def_esp: number | null
-          boss_iv_hp: number | null
-          boss_iv_speed: number | null
-          boss_level: number | null
-          boss_nature: string | null
-          boss_rarity: string | null
-          boss_species_id: string | null
-          boss_trait: string | null
-          boss_uid: string | null
           ciclos: number
           closed_at: string | null
           flushing_since: string | null
@@ -2418,21 +2513,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          boss_encounter_id?: string | null
-          boss_hp_atual?: number | null
-          boss_is_shiny?: boolean | null
-          boss_iv_atk_esp?: number | null
-          boss_iv_atk_fis?: number | null
-          boss_iv_def?: number | null
-          boss_iv_def_esp?: number | null
-          boss_iv_hp?: number | null
-          boss_iv_speed?: number | null
-          boss_level?: number | null
-          boss_nature?: string | null
-          boss_rarity?: string | null
-          boss_species_id?: string | null
-          boss_trait?: string | null
-          boss_uid?: string | null
           ciclos?: number
           closed_at?: string | null
           flushing_since?: string | null
@@ -2453,21 +2533,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          boss_encounter_id?: string | null
-          boss_hp_atual?: number | null
-          boss_is_shiny?: boolean | null
-          boss_iv_atk_esp?: number | null
-          boss_iv_atk_fis?: number | null
-          boss_iv_def?: number | null
-          boss_iv_def_esp?: number | null
-          boss_iv_hp?: number | null
-          boss_iv_speed?: number | null
-          boss_level?: number | null
-          boss_nature?: string | null
-          boss_rarity?: string | null
-          boss_species_id?: string | null
-          boss_trait?: string | null
-          boss_uid?: string | null
           ciclos?: number
           closed_at?: string | null
           flushing_since?: string | null
@@ -2658,6 +2723,7 @@ export type Database = {
         Row: {
           anexo_coletado_em: string | null
           anexo_itens: Json
+          anexo_poke: Json | null
           assunto: string | null
           corpo: string
           created_at: string
@@ -2674,6 +2740,7 @@ export type Database = {
         Insert: {
           anexo_coletado_em?: string | null
           anexo_itens?: Json
+          anexo_poke?: Json | null
           assunto?: string | null
           corpo?: string
           created_at?: string
@@ -2690,6 +2757,7 @@ export type Database = {
         Update: {
           anexo_coletado_em?: string | null
           anexo_itens?: Json
+          anexo_poke?: Json | null
           assunto?: string | null
           corpo?: string
           created_at?: string
@@ -3035,6 +3103,33 @@ export type Database = {
         }
         Relationships: []
       }
+      missao_cadeia: {
+        Row: {
+          alvo: number
+          eh_ultima: boolean
+          posicao: number
+          recompensa: number
+          species_id: string
+          tipo: Database["public"]["Enums"]["element_type"]
+        }
+        Insert: {
+          alvo: number
+          eh_ultima: boolean
+          posicao: number
+          recompensa: number
+          species_id: string
+          tipo: Database["public"]["Enums"]["element_type"]
+        }
+        Update: {
+          alvo?: number
+          eh_ultima?: boolean
+          posicao?: number
+          recompensa?: number
+          species_id?: string
+          tipo?: Database["public"]["Enums"]["element_type"]
+        }
+        Relationships: []
+      }
       moves: {
         Row: {
           accuracy: number
@@ -3317,6 +3412,7 @@ export type Database = {
         Row: {
           active_team_index: number
           auto_catch_config: Json
+          auto_lure_config: Json
           auto_pot_rules: Json
           auto_sell_config: Json
           auto_status_config: Json
@@ -3338,6 +3434,7 @@ export type Database = {
         Insert: {
           active_team_index?: number
           auto_catch_config?: Json
+          auto_lure_config?: Json
           auto_pot_rules?: Json
           auto_sell_config?: Json
           auto_status_config?: Json
@@ -3359,6 +3456,7 @@ export type Database = {
         Update: {
           active_team_index?: number
           auto_catch_config?: Json
+          auto_lure_config?: Json
           auto_pot_rules?: Json
           auto_sell_config?: Json
           auto_status_config?: Json
@@ -3506,6 +3604,107 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "treinadores_publico"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      recompensa_concedida: {
+        Row: {
+          chave: string
+          concedido_em: string
+          user_id: string
+        }
+        Insert: {
+          chave: string
+          concedido_em?: string
+          user_id: string
+        }
+        Update: {
+          chave?: string
+          concedido_em?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recompensa_concedida_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "recompensa_concedida_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "treinadores_publico"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      sala_protetor: {
+        Row: {
+          encounter_id: string
+          hp_atual: number
+          is_shiny: boolean
+          iv_atk_esp: number
+          iv_atk_fis: number
+          iv_def: number
+          iv_def_esp: number
+          iv_hp: number
+          iv_speed: number
+          level: number
+          nature: string | null
+          rarity: string
+          session_id: string
+          species_id: string
+          tipo: string
+          trait: string | null
+          uid: string
+        }
+        Insert: {
+          encounter_id: string
+          hp_atual: number
+          is_shiny: boolean
+          iv_atk_esp: number
+          iv_atk_fis: number
+          iv_def: number
+          iv_def_esp: number
+          iv_hp: number
+          iv_speed: number
+          level: number
+          nature?: string | null
+          rarity: string
+          session_id: string
+          species_id: string
+          tipo: string
+          trait?: string | null
+          uid: string
+        }
+        Update: {
+          encounter_id?: string
+          hp_atual?: number
+          is_shiny?: boolean
+          iv_atk_esp?: number
+          iv_atk_fis?: number
+          iv_def?: number
+          iv_def_esp?: number
+          iv_hp?: number
+          iv_speed?: number
+          level?: number
+          nature?: string | null
+          rarity?: string
+          session_id?: string
+          species_id?: string
+          tipo?: string
+          trait?: string | null
+          uid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sala_protetor_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "game_sessions"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3996,6 +4195,10 @@ export type Database = {
               stat_speed: number
             }[]
           }
+      _conceder_eevee_do_lance: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       _mult_natureza: {
         Args: { p_nature: string; p_stat: string }
         Returns: number
@@ -4089,6 +4292,23 @@ export type Database = {
         | { Args: { p_alvo?: string; p_poke_id: string }; Returns: Json }
       excluir_conversa: { Args: { p_contato_id: string }; Returns: Json }
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
+      gravar_flush_de_sessao: {
+        Args: {
+          p_ciclos: number
+          p_poke_uid: string
+          p_protetor: Json
+          p_rng_draws: number
+          p_rng_state: number
+          p_sala_abates: number
+          p_sala_chave: string
+          p_sala_indice: number
+          p_sequence_cleared: boolean
+          p_sequence_index: number
+          p_session_id: string
+          p_simulated_seconds: number
+        }
+        Returns: undefined
+      }
       gravar_progresso: {
         Args: {
           p_patch: Json

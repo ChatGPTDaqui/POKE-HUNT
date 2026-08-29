@@ -1,5 +1,10 @@
-// Vida ambiente do cenario (PH-96): folha caindo, brilho de agua, brasa,
-// poeira, neve, areia soprando.
+// Vida ambiente do cenario (PH-96): folha caindo, cintilancia de agua, faisca,
+// poeira, neve, areia soprando, fiapo urbano e gotejo que respinga no chao.
+//
+// A ESCALA de tudo isto vem de `escalaDoMundo.ts` (PH-232) e a SILHUETA de
+// cada preset esta no bloco "AS SILHUETAS", mais abaixo. Os dois existem pelo
+// mesmo motivo: antes deles a camada desenhava a mesma bolinha grande demais
+// em quase todo bioma.
 //
 // ---------------------------------------------------------------------------
 // POR QUE E UMA CAMADA, E NAO ANIMACAO DA ARTE
@@ -37,16 +42,29 @@
 import { useUiStore } from '@/stores/uiStore'
 import { AGUA_POR_ARTE } from '@/data/generated/aguaMask.generated'
 import { LAVA_POR_ARTE } from '@/data/generated/lavaMask.generated'
+import { emPoke } from './escalaDoMundo'
+import { empurraoDoVento, sincronizarVento, ventoAgora } from './vento'
+import {
+  avancarGotas, criarEstadoDeGotas, desenharGotas, povoarGotas,
+  type ConfigDeGota, type EstadoDeGotas,
+} from './gotas'
 
 export type PresetAmbiente =
-  | 'folha' // floresta, selva, mato alto — folha caindo em deriva + feixe de luz
+  | 'folha' // floresta, campo, mato alto — folha caindo em deriva + feixe de luz
+  | 'selva' // selva — folha da copa + gotejo que respinga no chao
   | 'agua' // mar, lago, praia, ilha, pantano — cintilancia de superficie
-  | 'brasa' // vulcao, caverna vulcanica — brasa subindo
-  | 'poeira' // caverna, ruinas, templo, gruta — poeira em suspensao
+  | 'brasa' // vulcao, caverna vulcanica — faisca subindo
+  | 'poeira' // ruinas, templo, dojo, covil — poeira SECA em suspensao
+  | 'caverna' // gruta e abismo — poeira fina + pingo de teto que respinga
   | 'neve' // montanha e caverna de gelo — neve caindo com deriva
   | 'areia' // deserto, ermos, terra devastada — areia soprando rasteira
-  | 'cidade' // urbano — poeira fina, mais rala que a de caverna
+  | 'cidade' // urbano — fiapo/cinza em suspensao, mais ralo que a poeira
   | 'nenhum'
+
+// A regua de escala vem de `escalaDoMundo.ts` (PH-232): todo raio daqui e
+// declarado em FRACAO da altura de um POKE, e a fracao fica visivel na propria
+// linha da receita. Ver aquele arquivo pra os numeros que motivaram a mudanca
+// e pra por que a referencia e 40 unidades.
 
 /**
  * Preset por ARTE, e nao por chave de bioma.
@@ -64,7 +82,11 @@ export type PresetAmbiente =
  */
 const PRESET_POR_ARTE: Record<string, PresetAmbiente> = {
   'assets/hunt-backgrounds/forest.jpg': 'folha',
-  'assets/hunt-backgrounds/jungle.jpg': 'folha',
+  // Selva e o unico mapa de vegetacao FECHADA do acervo: agua fica parada na
+  // copa e pinga depois. Floresta temperada e campo aberto nao pingam — dar
+  // gotejo aos cinco de uma vez seria "chove em todo mapa verde", que e o
+  // oposto do que separar os biomas quer dizer.
+  'assets/hunt-backgrounds/jungle.jpg': 'selva',
   'assets/hunt-backgrounds/tall-grass.jpg': 'folha',
   'assets/hunt-backgrounds/meadow.jpg': 'folha',
   'assets/hunt-backgrounds/plains.jpg': 'folha',
@@ -79,12 +101,15 @@ const PRESET_POR_ARTE: Record<string, PresetAmbiente> = {
   'assets/hunt-backgrounds/volcano.jpg': 'brasa',
   'assets/hunt-backgrounds/cave-volcanic.jpg': 'brasa',
 
+  // SECO fica em `poeira`; gruta fechada, onde a agua escorre pela rocha,
+  // ganha o gotejo. Ruina a ceu aberto, templo, dojo e covil de dragao sao
+  // secos — pingo ali seria goteira sem telhado.
   'assets/hunt-backgrounds/ruins.jpg': 'poeira',
   'assets/hunt-backgrounds/temple.jpg': 'poeira',
-  'assets/hunt-backgrounds/fairy-cave.jpg': 'poeira',
-  'assets/hunt-backgrounds/abyss.jpg': 'poeira',
   'assets/hunt-backgrounds/dragon.jpg': 'poeira',
   'assets/hunt-backgrounds/dojo.jpg': 'poeira',
+  'assets/hunt-backgrounds/fairy-cave.jpg': 'caverna',
+  'assets/hunt-backgrounds/abyss.jpg': 'caverna',
 
   'assets/hunt-backgrounds/ice-cave.jpg': 'neve',
   'assets/hunt-backgrounds/ice-mountain.jpg': 'neve',
@@ -102,7 +127,7 @@ const PRESET_POR_ARTE: Record<string, PresetAmbiente> = {
   'assets/hunt-backgrounds/construction-site.jpg': 'cidade',
 }
 
-interface Receita {
+export interface Receita {
   /** Quantas particulas em tela cheia no desktop. O compacto usa metade. */
   quantidade: number
   cor: string
@@ -120,8 +145,20 @@ interface Receita {
   bamboleio: number
   /** `lighter` faz brasa e cintilancia somarem luz em vez de tapar o cenario. */
   aditivo?: boolean
-  /** Desenha como risco horizontal (areia soprando) em vez de ponto. */
-  risco?: boolean
+  /**
+   * A SILHUETA da particula (PH-232).
+   *
+   * Antes disto a forma saia de tres booleanos soltos (`risco`, `girar`,
+   * `faisca`) e o default — nenhum deles ligado — era o circulo cheio. Quatro
+   * dos sete presets caiam nesse default: agua sem mascara, poeira, cidade e
+   * brasa desenhavam exatamente o mesmo `arc`, variando so cor e raio. Um
+   * campo obrigatorio resolve pela estrutura: nao ha mais "default silencioso"
+   * onde cair, e adicionar preset novo obriga a escolher a silhueta.
+   *
+   * Ver `desenharParticula` pra o que cada uma emite; `silhuetaPorPreset.
+   * test.ts` reprova se dois presets voltarem a emitir a mesma coisa.
+   */
+  forma: FormaDeParticula
   /** Feixe de luz difuso atravessando a cena, para as artes de floresta. */
   feixes?: boolean
   /**
@@ -130,22 +167,6 @@ interface Receita {
    * anel em cima de terra seria o pior dos dois mundos.
    */
   ondular?: boolean
-  /**
-   * Folha: elipse que GIRA enquanto cai, em vez de circulo.
-   *
-   * Todo preset desenhava o mesmo circulo cheio, variando so cor e tamanho —
-   * folha de floresta lia como ponto amarelo descendo de lado. Uma folha de
-   * verdade e achatada e tomba no ar, e e o tombo (nao a cor) que faz o cerebro
-   * ler "folha".
-   */
-  girar?: boolean
-  /**
-   * Brasa: pisca rapido e o raio pulsa, em vez de alpha suave e raio fixo.
-   *
-   * Faisca de fogo nao tem brilho constante: ela apaga e reacende. O pulso de
-   * raio junto com o de alpha e o que separa "faisca" de "ponto laranja".
-   */
-  faisca?: boolean
   /**
    * Neve: UM sorteio controla tamanho, velocidade e alpha de cada floco.
    *
@@ -165,8 +186,23 @@ interface Receita {
    * Folha: ganha rajada de vento periodica (PH-188) — bamboleio e velocidade
    * de queda sobem durante a rajada e voltam ao normal depois. So faz sentido
    * pra preset que representa vegetacao; agua/poeira/brasa/etc nao pedem vento.
+   *
+   * Isto e o TOMBO, e nao a deriva: quanto a folha reage ao vento por ser
+   * folha. Pra onde o vento LEVA a particula, ver `empuxoDoVento`.
    */
   vento?: boolean
+  /**
+   * Quantas unidades de mundo por segundo o vento empurra esta particula,
+   * horizontalmente, no PICO da rajada (PH-233). Ver `vento.ts`.
+   *
+   * Nao ha default, e isso e o desenho: preset que nao declara nao e empurrado.
+   * `poeira` (ruina, templo, dojo, covil), `caverna` e `agua` ficam de fora por
+   * OMISSAO DELIBERADA — os dois primeiros sao lugar fechado, e sopro dentro de
+   * uma gruta selada e pior que a incoerencia que o PH-233 veio corrigir; a
+   * agua e reflexo de superficie, e reflexo nao voa. `ventoCompartilhado.
+   * test.ts` tranca essa lista nos dois sentidos.
+   */
+  empuxoDoVento?: number
   /**
    * Fracao do ALTO da janela onde a particula pode NASCER (PH-188). `0.4` =
    * so no topo 40%. Undefined = janela inteira (todo preset sem isto).
@@ -181,48 +217,157 @@ interface Receita {
    * dessa faixa, so a primeira populacao precisa.
    */
   faixaOrigemY?: number
+  /**
+   * Gotejo (PH-232): populacao SEPARADA de gotas que caem de um ponto fixo do
+   * mundo e RESPINGAM no chao. Ver `gotas.ts`.
+   *
+   * Nao e uma forma de particula, e uma segunda camada: as gotas tem ciclo de
+   * vida proprio (esperam no teto, caem, morrem no impacto) que nao cabe no
+   * laco de reciclagem por borda que as outras usam.
+   */
+  gotejo?: { quantidade: number; config: ConfigDeGota }
 }
 
-const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
+/**
+ * As silhuetas. Cada uma emite uma sequencia PROPRIA de primitivas de canvas —
+ * e essa sequencia que `silhuetaPorPreset.test.ts` compara entre presets.
+ *
+ *   folha    elipse achatada que TOMBA no eixo enquanto cai (PH-115)
+ *   grao     ponto cheio, sem pulso — poeira e neve
+ *   fiapo    fibra DOBRADA (dois segmentos) que rola devagar — cinza urbana
+ *   risco    um segmento reto na direcao do vento — areia soprando
+ *   faisca   rastro curto na direcao do movimento + nucleo que pulsa — brasa
+ *   cintilo  cruz de quatro pontas com nucleo quente — reflexo em agua
+ *   anel     elipse VAZADA que abre e desmancha — ondulacao de agua (PH-113)
+ *
+ * `anel` nao aparece em receita nenhuma: ele e sorteado dentro do preset
+ * `agua` quando ha mascara (ver `receitaDe`), e convive com `cintilo` no
+ * mesmo laco.
+ */
+export type FormaDeParticula = 'folha' | 'grao' | 'fiapo' | 'risco' | 'faisca' | 'cintilo'
+
+/**
+ * Gotejo de vegetacao fechada: agua que ficou parada na copa e cai depois.
+ *
+ * Verde-claro e nao azul: o que pinga da mata leva a cor da folha que a
+ * segurou. Azul de agua limpa ali leria como chuva, e chuva e clima — quem
+ * decide isso e o servidor, nao a arte do mapa.
+ */
+const GOTEJO_DE_SELVA: ConfigDeGota = {
+  cor: '#bfe6d8', corDoRespingo: '#eafff8',
+  comprimento: [3.0, 6.0], espessura: [0.5, 0.9],
+  velocidade: [150, 240], inclinacao: 0.05, espalhamento: 0.06, alpha: 0.55,
+  raioDoRespingo: [2.4, 4.2], vidaDoRespingo: [0.34, 0.52], microgotas: 3, alphaDoRespingo: 0.9,
+  fracaoQuePousa: 1, origemFixa: true, espera: [0.8, 3.4],
+}
+
+/**
+ * Gotejo de gruta: pingo de teto, mais lento, mais raro e ADITIVO.
+ *
+ * Aditivo porque caverna e o cenario mais escuro do acervo — agua desenhada
+ * por cima some, agua que SOMA luz aparece. E o mesmo motivo pelo qual a brasa
+ * e aditiva desde o PH-96.
+ */
+const GOTEJO_DE_CAVERNA: ConfigDeGota = {
+  cor: '#a8d8e8', corDoRespingo: '#dff4ff',
+  comprimento: [2.6, 5.2], espessura: [0.45, 0.85],
+  velocidade: [130, 210], inclinacao: 0, espalhamento: 0.04, alpha: 0.6,
+  raioDoRespingo: [2.0, 3.6], vidaDoRespingo: [0.38, 0.58], microgotas: 3, alphaDoRespingo: 0.9,
+  fracaoQuePousa: 1, origemFixa: true, espera: [1.0, 4.0], aditivo: true,
+}
+
+// ---------------------------------------------------------------------------
+// AS RECEITAS
+// ---------------------------------------------------------------------------
+// Os raios sao declarados em `emPoke(fracao)` de proposito: e a fracao, e nao
+// o numero de unidades, que diz se a particula tem o tamanho da coisa que ela
+// representa. Comparativo com o que havia antes do PH-232, em DIAMETRO sobre a
+// altura de um POKE:
+//
+//   poeira  24% -> 6%      cidade  19% -> 5,5%
+//   neve    30% -> 11%     brasa   27% -> 4,5% (nucleo; o rastro e movimento)
+//   agua    22% -> 8,5%    folha   17% -> 10%
+//
+// A CONTRAPARTIDA e a quantidade: particula menor precisa aparecer em maior
+// numero pra a camada continuar sendo notada. Poeira foi de 26 pra 62, cidade
+// de 18 pra 40. Custa mais laco e menos pixel — e a troca certa, porque o que
+// incomodava era area coberta, nao contagem.
+export const RECEITAS: Record<Exclude<PresetAmbiente, 'nenhum'>, Receita> = {
   folha: {
-    quantidade: 34, cor: '#e8f0a8', raio: [1.7, 3.4], velocidade: [16, 34],
-    angulo: Math.PI / 2 + 0.35, espalhamento: 0.3, alpha: 0.72, bamboleio: 16, feixes: true,
-    girar: true, vento: true, faixaOrigemY: 0.4,
+    // Ambar, e nao o amarelo-esverdeado de antes (`#e8f0a8`): folha que CAI e
+    // folha seca, e todo mapa deste preset e verde. Uma folha na mesma matiz do
+    // fundo desaparece por mais que se aumente o alpha — o que faltava era
+    // contraste de COR, nao de tamanho. Conferido no jogo, sala Relvado.
+    quantidade: 30, cor: '#d9a44e', raio: [emPoke(0.0225), emPoke(0.05)], velocidade: [16, 34],
+    angulo: Math.PI / 2 + 0.35, espalhamento: 0.3, alpha: 0.75, bamboleio: 16, feixes: true,
+    forma: 'folha', vento: true, empuxoDoVento: 34, faixaOrigemY: 0.4,
+  },
+  // Selva: folha um pouco maior e mais escura que a de floresta temperada, com
+  // menos feixe (a copa e fechada) e o gotejo por baixo.
+  selva: {
+    quantidade: 26, cor: '#c9a84a', raio: [emPoke(0.026), emPoke(0.0575)], velocidade: [13, 28],
+    angulo: Math.PI / 2 + 0.28, espalhamento: 0.34, alpha: 0.7, bamboleio: 14, feixes: true,
+    forma: 'folha', vento: true, empuxoDoVento: 26, faixaOrigemY: 0.4,
+    gotejo: { quantidade: 6, config: GOTEJO_DE_SELVA },
   },
   agua: {
-    quantidade: 30, cor: '#eaf8ff', raio: [2.2, 4.4], velocidade: [4, 11],
-    angulo: -Math.PI / 2, espalhamento: 1.2, alpha: 0.5, bamboleio: 5, aditivo: true,
+    quantidade: 44, cor: '#eaf8ff', raio: [emPoke(0.018), emPoke(0.0425)], velocidade: [4, 11],
+    angulo: -Math.PI / 2, espalhamento: 1.2, alpha: 0.55, bamboleio: 5, aditivo: true,
+    forma: 'cintilo',
   },
   brasa: {
-    quantidade: 30, cor: '#ffb057', raio: [2.6, 5.4], velocidade: [18, 40],
-    angulo: -Math.PI / 2, espalhamento: 0.4, alpha: 0.8, bamboleio: 11, aditivo: true,
-    faisca: true, brilhoDoChao: true,
+    quantidade: 40, cor: '#ffb057', raio: [emPoke(0.010), emPoke(0.0225)], velocidade: [18, 40],
+    angulo: -Math.PI / 2, espalhamento: 0.4, alpha: 0.85, bamboleio: 11, aditivo: true,
+    forma: 'faisca', brilhoDoChao: true, empuxoDoVento: 16,
   },
   poeira: {
-    quantidade: 26, cor: '#e2dcc8', raio: [2.2, 4.8], velocidade: [3, 9],
-    angulo: Math.PI / 2, espalhamento: 1.5, alpha: 0.44, bamboleio: 8,
+    quantidade: 62, cor: '#e2dcc8', raio: [emPoke(0.0135), emPoke(0.034)], velocidade: [3, 9],
+    angulo: Math.PI / 2, espalhamento: 1.5, alpha: 0.6, bamboleio: 8,
+    forma: 'grao',
+  },
+  // Caverna: mesma poeira, ainda mais fina, com o pingo de teto por cima.
+  caverna: {
+    quantidade: 52, cor: '#cfd8dc', raio: [emPoke(0.0125), emPoke(0.03)], velocidade: [2, 7],
+    angulo: Math.PI / 2, espalhamento: 1.6, alpha: 0.55, bamboleio: 9,
+    forma: 'grao',
+    gotejo: { quantidade: 5, config: GOTEJO_DE_CAVERNA },
   },
   neve: {
-    quantidade: 46, cor: '#ffffff', raio: [2.8, 6.0], velocidade: [22, 46],
+    quantidade: 60, cor: '#ffffff', raio: [emPoke(0.0225), emPoke(0.055)], velocidade: [22, 46],
     angulo: Math.PI / 2 + 0.22, espalhamento: 0.22, alpha: 0.9, bamboleio: 14,
-    profundidade: true,
+    forma: 'grao', profundidade: true, empuxoDoVento: 48,
   },
+  // Areia e o preset que mais responde: ela JA e vento, e o unico jeito de ela
+  // ler como rajada em vez de chuveiro lateral constante e o empuxo variar.
   areia: {
-    quantidade: 32, cor: '#e8d2a4', raio: [2.4, 5.0], velocidade: [46, 88],
-    angulo: 0.12, espalhamento: 0.16, alpha: 0.46, bamboleio: 4, risco: true,
+    quantidade: 54, cor: '#e8d2a4', raio: [emPoke(0.0125), emPoke(0.03)], velocidade: [70, 140],
+    angulo: 0.12, espalhamento: 0.16, alpha: 0.6, bamboleio: 4,
+    forma: 'risco', empuxoDoVento: 120,
   },
+  // Cidade tem vento, e ele e canalizado entre predios — mas fiapo em suspensao
+  // e leve e lento, entao o empuxo e pequeno em valor absoluto e grande em
+  // relacao a velocidade propria dela (3 a 8 u/s). E o que faz a cinza urbana
+  // "sair andando" quando a rajada passa.
   cidade: {
-    quantidade: 18, cor: '#ded9d0', raio: [1.8, 3.8], velocidade: [3, 8],
-    angulo: 0.5, espalhamento: 1.6, alpha: 0.34, bamboleio: 6,
+    quantidade: 40, cor: '#ded9d0', raio: [emPoke(0.014), emPoke(0.0325)], velocidade: [3, 8],
+    angulo: 0.5, espalhamento: 1.6, alpha: 0.55, bamboleio: 6,
+    forma: 'fiapo', empuxoDoVento: 22,
   },
 }
 
 // ---------------------------------------------------------------------------
-// AS TRES FORMAS QUE NAO SAO O CIRCULO (PH-115)
+// AS SILHUETAS (PH-115, refeitas no PH-232)
 // ---------------------------------------------------------------------------
 // O PH-96 desenhou tudo como circulo cheio, com `risco` (areia) como unica
-// excecao. Cor e tamanho separavam os presets no codigo, mas nao na tela: folha,
-// brasa, neve, poeira e poeira de cidade eram o mesmo ponto em cores diferentes.
+// excecao. O PH-115 tirou folha, neve e areia desse molde, mas quatro presets
+// ficaram: agua sem mascara, poeira, cidade e brasa continuaram sendo o mesmo
+// `arc` em cores diferentes — e sao justamente quatro dos nove biomas.
+//
+// Agora cada silhueta emite uma sequencia PROPRIA de primitivas, e a diferenca
+// nao e cosmetica: e o formato que diz ao olho o que a coisa e. Fiapo de cinza
+// urbana e uma fibra DOBRADA porque fibra nao e reta; faisca e um rastro
+// porque brasa viaja; cintilancia e uma cruz porque reflexo especular tem
+// pontas. Nenhuma delas e um circulo.
 
 /** Razao vertical da folha. Achatada, senao ela gira e ninguem percebe. */
 const FOLHA_ACHATAMENTO = 0.45
@@ -232,33 +377,44 @@ const FOLHA_GIRO = [0.8, 2.4] as const
 const FAISCA_PISCA = 2.6
 /** Quanto do raio a faisca perde no fundo do pulso. */
 const FAISCA_PULSO = 0.4
-
-// ---------------------------------------------------------------------------
-// RAJADA DE VENTO NA FOLHAGEM (PH-188)
-// ---------------------------------------------------------------------------
-// Vento de verdade nao sopra constante: vem em rajada e some. Um multiplicador
-// senoidal simples (`sin(fase * f)`) leria como respiracao regular, nao vento —
-// metade do tempo em alta, metade em baixa. Somar tres senos de frequencia
-// incomensuravel e elevar o resultado ao cubo estreita os picos: a maior parte
-// do tempo o vento fica perto de zero, com rajadas esporadicas que sobem e
-// caem rapido — o padrao que le como natural, nao mecanico.
-const VENTO_FREQ: readonly [number, number, number] = [0.11, 0.23, 0.05]
-const VENTO_FASE: readonly [number, number, number] = [0, 2.1, 4.7]
-const VENTO_PESO: readonly [number, number, number] = [0.5, 0.3, 0.2]
-
+/** Comprimento do rastro da faisca, em multiplos do raio do nucleo. */
+const FAISCA_RASTRO = 6
+/** Espessura do rastro da faisca, em fracao do raio do nucleo. */
+const FAISCA_TRACO = 0.8
 /**
- * Intensidade do vento em [0, 1], funcao pura de `faseGlobal` (segundos).
+ * Comprimento do risco de areia, em segundos de deslocamento.
  *
- * Exportada pra ser testada direto, sem depender de mockar relogio e RNG do
- * sorteio local so pra reproduzir a fase de rajada.
+ * A conta e proporcional a VELOCIDADE, e nao um numero fixo: risco de vento e
+ * borrao de movimento, entao grao rapido tem que deixar rastro mais longo que
+ * grao lento. Antes do PH-232 o comprimento era `velocidade * 0,05` com
+ * espessura ate 5 unidades — 4,4 de comprimento por 5 de espessura, ou seja,
+ * mais grosso que longo. Isso nao e um risco, e uma bolha, e era exatamente
+ * assim que aparecia na tela.
  */
-export function intensidadeDoVento(fase: number): number {
-  const onda = VENTO_FREQ.reduce(
-    (soma, freq, i) => soma + Math.sin(fase * freq + VENTO_FASE[i]) * VENTO_PESO[i],
-    0,
-  )
-  return ((onda + 1) / 2) ** 3
-}
+export const RISCO_SEGUNDOS = 0.11
+/** Angulo da dobra do fiapo, em radianos. Fibra reta leria como risco de areia. */
+const FIAPO_DOBRA = 1.15
+/** Velocidade do rolamento do fiapo, em radianos por unidade de fase. */
+const FIAPO_ROLAGEM = 0.45
+/** Meio-comprimento da ponta longa da cruz de cintilancia, em multiplos do raio. */
+const CINTILO_PONTA = 2.2
+/** Razao da ponta CURTA da cruz. Cruz de pontas iguais le como simbolo, nao como brilho. */
+const CINTILO_RAZAO_CURTA = 0.45
+/** Expoente do pisca da cintilancia. Alto = a maior parte do tempo apagada, com estalos. */
+const CINTILO_EXPOENTE = 3
+/** Frequencia do pisca da cintilancia, em radianos por unidade de fase. */
+const CINTILO_PISCA = 1.9
+
+// ---------------------------------------------------------------------------
+// RAJADA DE VENTO NA FOLHAGEM (PH-188, compartilhada no PH-233)
+// ---------------------------------------------------------------------------
+// A funcao de rajada MUDOU DE CASA pra `vento.ts` e agora e a mesma que o clima
+// usa. Ate o PH-233 ela vivia aqui e dirigia so a folha, enquanto a areia do
+// clima tinha uma senoide propria e o resto tinha inclinacao fixa — tres ventos
+// diferentes na mesma tela. Ver o cabecalho de `vento.ts`.
+//
+// O que continua aqui e so o que e da FOLHA: quanto o tombo e a queda dela
+// reagem a rajada. Isso e caracteristica de folha, nao de vento.
 
 /** Quanto o bamboleio (deriva lateral) aumenta no pico da rajada. */
 const VENTO_BAMBOLEIO_PICO = 2.4
@@ -428,6 +584,25 @@ interface FocoDeBrilho {
 }
 let focosDeBrilho: FocoDeBrilho[] = []
 
+/**
+ * Estado do gotejo (PH-232). Null quando o preset da vez nao pinga — que e a
+ * maioria: so `selva` e `caverna` pedem.
+ *
+ * Vive fora de `particulas` porque a gota nao recicla por borda: ela morre no
+ * impacto, espera no teto e recomeca. Enfiar esse ciclo no laco geral obrigaria
+ * todo preset a carregar campos que so dois usam.
+ */
+let gotejo: EstadoDeGotas | null = null
+
+/**
+ * Teto de respingos vivos ao mesmo tempo no gotejo de ambiente.
+ *
+ * Com 6 gotas e espera de ate 3,4s entre elas, o regime real fica em torno de
+ * 2 impactos vivos. 12 e folga de 6x — o pool existe pra nao alocar por
+ * impacto (ver `criarEstadoDeGotas`), nao pra racionar.
+ */
+const RESPINGOS_DO_GOTEJO = 12
+
 // Teto de tempo por quadro. Aba em segundo plano volta com um `delta` de
 // minutos, e integrar isso de uma vez teleportaria toda particula pra fora da
 // janela — a camada sumiria por alguns segundos ate reciclar. Meio segundo e
@@ -509,10 +684,14 @@ function nascer(
   p.idade = 0
   p.anel = !!r.ondular && rand() < ANEL_FRACAO
   p.vida = p.anel ? ANEL_VIDA[0] + rand() * (ANEL_VIDA[1] - ANEL_VIDA[0]) : 0
-  // Sentido sorteado: folha caindo toda pro mesmo lado le como engrenagem.
-  p.giro = r.girar
-    ? (rand() < 0.5 ? -1 : 1) * (FOLHA_GIRO[0] + rand() * (FOLHA_GIRO[1] - FOLHA_GIRO[0]))
-    : 0
+  // Sentido sorteado: folha caindo toda pro mesmo lado le como engrenagem. O
+  // fiapo de cidade tambem rola, mas MUITO mais devagar — cinza em suspensao
+  // nao tomba, ela roda em torno do proprio eixo enquanto boia.
+  const rolagem = r.forma === 'folha' ? 1 : r.forma === 'fiapo' ? FIAPO_ROLAGEM : 0
+  p.giro = rolagem === 0
+    ? 0
+    : (rand() < 0.5 ? -1 : 1) * rolagem
+      * (FOLHA_GIRO[0] + rand() * (FOLHA_GIRO[1] - FOLHA_GIRO[0]))
 
   // Com mascara, a particula nasce DENTRO da regiao e nao na borda da janela
   // — o ponto inteiro do PH-113 (agua) e do PH-195 (lava). Vale tambem na
@@ -611,6 +790,19 @@ function reconstruir(
       })
     }
   }
+  // Gotejo (PH-232): populacao propria, mesmo gerador local seedado pela arte.
+  // Sem `r.gotejo` o estado e SOLTO em vez de ficar parado — a maioria dos
+  // presets nao pinga, e um pool alocado que nunca recebe impacto e memoria
+  // presa por nada.
+  if (r.gotejo) {
+    gotejo = criarEstadoDeGotas(RESPINGOS_DO_GOTEJO)
+    povoarGotas(
+      gotejo, r.gotejo.config, janela, rand,
+      Math.max(1, Math.round(r.gotejo.quantidade * (compacto ? 0.5 : 1))),
+    )
+  } else {
+    gotejo = null
+  }
 }
 
 /**
@@ -634,13 +826,13 @@ export function desenharAmbiente(
   if (!ui.vidaNoCenario) {
     // Desligado no ajuste: solta o estado pra a camada nao voltar com
     // particulas velhas (e pra ela nao custar memoria enquanto esta off).
-    if (particulas.length) { particulas = []; arteAtual = null }
+    if (particulas.length) { particulas = []; arteAtual = null; gotejo = null }
     return
   }
 
   const preset = presetDaArte(imagem)
   if (preset === 'nenhum' || !imagem) {
-    if (particulas.length) { particulas = []; arteAtual = null }
+    if (particulas.length) { particulas = []; arteAtual = null; gotejo = null }
     return
   }
 
@@ -654,7 +846,7 @@ export function desenharAmbiente(
   // Cala so a familia COINCIDENTE. Chuva numa floresta continua com folha
   // caindo: sao duas coisas diferentes acontecendo, e as duas sao verdade.
   if (familiaDeClima === preset) {
-    if (particulas.length) { particulas = []; arteAtual = null }
+    if (particulas.length) { particulas = []; arteAtual = null; gotejo = null }
     return
   }
 
@@ -669,6 +861,11 @@ export function desenharAmbiente(
   const delta = ultimoInstante === 0 ? 0 : Math.min(DELTA_MAXIMO, (agora - ultimoInstante) / 1000)
   ultimoInstante = agora
   faseGlobal += delta
+  // O vento e da CENA, nao desta camada (PH-233): passa o instante que ja
+  // lemos, e `vento.ts` atribui a fase em vez de acumular. `faseGlobal`
+  // continua sendo daqui — ela move o feixe de luz e o brilho de lava, que sao
+  // desta arte e nao do clima.
+  sincronizarVento(agora)
 
   ctx.save()
   if (r.aditivo) ctx.globalCompositeOperation = 'lighter'
@@ -685,11 +882,15 @@ export function desenharAmbiente(
     : Number.POSITIVE_INFINITY
   // So folha pede `r.vento` — pra qualquer outro preset `rajada` fica 0 e os
   // multiplicadores abaixo caem em 1, sem mudar nada do comportamento antigo.
-  const rajada = r.vento ? intensidadeDoVento(faseGlobal) : 0
+  const rajada = r.vento ? ventoAgora() : 0
   const ventoQueda = 1 + rajada * VENTO_QUEDA_PICO
   const ventoBamboleio = 1 + rajada * VENTO_BAMBOLEIO_PICO
+  // Deriva horizontal da rajada (PH-233). Calculada UMA vez por quadro e nao
+  // por particula: o vento e o mesmo pra todas — e justamente essa a ideia.
+  // Preset sem `empuxoDoVento` recebe 0 e nao se mexe.
+  const empurrao = empurraoDoVento(r.empuxoDoVento, delta)
   for (const p of particulas) {
-    p.x += p.vx * ventoQueda * delta
+    p.x += p.vx * ventoQueda * delta + empurrao
     p.y += p.vy * ventoQueda * delta
     p.fase += delta * 1.7
     p.idade += delta
@@ -733,34 +934,123 @@ export function desenharAmbiente(
       ctx.stroke()
       continue
     }
-    // Pisca rapido E o raio pulsa junto (faisca). `Math.abs` do seno em vez do
-    // seno cru: com o seno, metade do ciclo fica no alpha minimo e a brasa passa
-    // mais tempo apagada que acesa.
-    const pulso = r.faisca ? Math.abs(Math.sin(p.fase * FAISCA_PISCA)) : 0
-    ctx.globalAlpha = r.faisca
-      ? p.alphaMax * (0.3 + 0.7 * pulso)
-      : p.alphaMax * (0.55 + 0.45 * Math.sin(p.fase * 0.8))
-    if (r.risco) {
-      // Areia soprando le melhor como risco na direcao do vento que como ponto.
+    desenharParticula(ctx, p, r)
+  }
+
+  // Gotejo por ultimo dentro da camada: a gota vem da COPA/TETO, entao ela
+  // passa na frente da folha e da poeira que ja estao no ar. (Continua atras
+  // das entidades — a camada inteira e desenhada antes delas.)
+  if (gotejo && r.gotejo) {
+    avancarGotas(gotejo, r.gotejo.config, janela, delta, rand)
+    desenharGotas(ctx, gotejo, r.gotejo.config)
+  }
+  ctx.restore()
+}
+
+/**
+ * A silhueta de UMA particula. Ver o bloco "AS SILHUETAS" pra por que cada
+ * preset tem a sua, e `silhuetaPorPreset.test.ts` pra o que trava isso.
+ */
+function desenharParticula(ctx: CanvasRenderingContext2D, p: Particula, r: Receita): void {
+  // Pisca rapido E o raio pulsa junto (faisca). `Math.abs` do seno em vez do
+  // seno cru: com o seno, metade do ciclo fica no alpha minimo e a brasa passa
+  // mais tempo apagada que acesa.
+  const pulso = r.forma === 'faisca' ? Math.abs(Math.sin(p.fase * FAISCA_PISCA)) : 0
+  if (r.forma === 'faisca') {
+    ctx.globalAlpha = p.alphaMax * (0.3 + 0.7 * pulso)
+  } else if (r.forma === 'cintilo') {
+    // Estalo, e nao respiracao: elevar |sen| a uma potencia alta deixa a
+    // cintilancia apagada quase o tempo todo, com faiscas curtas de luz. E o
+    // que reflexo especular na agua faz — a onda so devolve o sol pro olho
+    // quando a inclinacao dela passa pelo angulo certo.
+    ctx.globalAlpha = p.alphaMax * Math.abs(Math.sin(p.fase * CINTILO_PISCA)) ** CINTILO_EXPOENTE
+  } else if (r.forma === 'folha') {
+    // Folha quase NAO pulsa de alpha, e essa e a diferenca entre corpo e luz.
+    //
+    // O pulso de alpha veio do PH-96, quando toda particula era o mesmo ponto e
+    // o pulso era a unica variacao que existia. Numa folha ele esta errado: uma
+    // folha e um objeto solido, nao um brilho — o que muda enquanto ela cai e a
+    // ORIENTACAO (o tombo), nao a opacidade. Com o pulso cheio a media de alpha
+    // caia pra ~0,31, e sobre grama clara isso e o mesmo que nao desenhar
+    // (conferido no jogo, sala Relvado de Campo Aberto I).
+    ctx.globalAlpha = p.alphaMax * (0.88 + 0.12 * Math.sin(p.fase * 0.8))
+  } else {
+    ctx.globalAlpha = p.alphaMax * (0.55 + 0.45 * Math.sin(p.fase * 0.8))
+  }
+
+  switch (r.forma) {
+    case 'risco': {
+      // Areia soprando: borrao de movimento na direcao do vento. O comprimento
+      // sai da VELOCIDADE (ver RISCO_SEGUNDOS) — grao rapido risca mais longe.
       ctx.lineWidth = p.raio
       ctx.beginPath()
       ctx.moveTo(p.x, p.y)
-      ctx.lineTo(p.x - p.vx * 0.05, p.y - p.vy * 0.05)
+      ctx.lineTo(p.x - p.vx * RISCO_SEGUNDOS, p.y - p.vy * RISCO_SEGUNDOS)
       ctx.stroke()
-    } else if (p.giro !== 0) {
-      // Folha: elipse achatada girando no proprio eixo. A rotacao sai da fase
-      // (que ja avanca com o tempo), entao nao ha estado novo por particula alem
-      // da velocidade do tombo.
+      return
+    }
+    case 'folha': {
+      // Elipse achatada girando no proprio eixo. A rotacao sai da fase (que ja
+      // avanca com o tempo), entao nao ha estado novo por particula alem da
+      // velocidade do tombo.
       ctx.beginPath()
       ctx.ellipse(p.x, p.y, p.raio, p.raio * FOLHA_ACHATAMENTO, p.fase * p.giro, 0, Math.PI * 2)
       ctx.fill()
-    } else {
+      return
+    }
+    case 'fiapo': {
+      // Fibra DOBRADA: dois segmentos num V aberto, rolando devagar. A dobra e
+      // o que separa cinza urbana do risco de areia — os dois seriam uma linha
+      // reta, e uma linha reta parada no ar nao le como nada.
+      const a = p.fase * p.giro
+      const b = a + FIAPO_DOBRA
+      ctx.lineWidth = Math.max(0.5, p.raio * 0.55)
       ctx.beginPath()
-      ctx.arc(p.x, p.y, p.raio * (r.faisca ? 1 - FAISCA_PULSO * (1 - pulso) : 1), 0, Math.PI * 2)
+      ctx.moveTo(p.x + Math.cos(a) * p.raio, p.y + Math.sin(a) * p.raio)
+      ctx.lineTo(p.x, p.y)
+      ctx.lineTo(p.x + Math.cos(b) * p.raio, p.y + Math.sin(b) * p.raio)
+      ctx.stroke()
+      return
+    }
+    case 'faisca': {
+      // Rastro na direcao do movimento + nucleo que pulsa de tamanho.
+      const n = Math.hypot(p.vx, p.vy) || 1
+      const comprimento = p.raio * FAISCA_RASTRO
+      ctx.lineWidth = Math.max(0.3, p.raio * FAISCA_TRACO)
+      ctx.beginPath()
+      ctx.moveTo(p.x, p.y)
+      ctx.lineTo(p.x - (p.vx / n) * comprimento, p.y - (p.vy / n) * comprimento)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.arc(p.x, p.y, p.raio * (1 - FAISCA_PULSO * (1 - pulso)), 0, Math.PI * 2)
+      ctx.fill()
+      return
+    }
+    case 'cintilo': {
+      // Cruz de quatro pontas com nucleo quente. As pontas sao desiguais (uma
+      // longa, uma curta) porque cruz simetrica le como simbolo desenhado;
+      // brilho real tem uma direcao dominante.
+      const longa = p.raio * CINTILO_PONTA
+      const curta = longa * CINTILO_RAZAO_CURTA
+      ctx.lineWidth = Math.max(0.3, p.raio * 0.4)
+      ctx.beginPath()
+      ctx.moveTo(p.x - longa, p.y)
+      ctx.lineTo(p.x + longa, p.y)
+      ctx.moveTo(p.x, p.y - curta)
+      ctx.lineTo(p.x, p.y + curta)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.arc(p.x, p.y, p.raio * 0.45, 0, Math.PI * 2)
+      ctx.fill()
+      return
+    }
+    case 'grao':
+    default: {
+      ctx.beginPath()
+      ctx.arc(p.x, p.y, p.raio, 0, Math.PI * 2)
       ctx.fill()
     }
   }
-  ctx.restore()
 }
 
 // Feixe de luz difuso das artes de floresta: tres faixas diagonais bem
@@ -852,4 +1142,5 @@ export function reiniciarAmbiente(): void {
   arteAtual = null
   ultimoInstante = 0
   focosDeBrilho = []
+  gotejo = null
 }

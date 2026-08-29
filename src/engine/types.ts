@@ -339,25 +339,25 @@ export interface EnemyEntity extends BaseEntity {
   // o timer zerar (ou pra sempre, se mapDef.keepCorpses).
   deathRemovalTimer: number | null
   /**
-   * PH-202: mini-boss/boss ultimate do sistema de andares (bioma piloto).
+   * PH-202/236: Guardian/Lord do sistema de andares (bioma piloto).
    * So marca a entidade — o estado que precisa SOBREVIVER entre janelas de
    * flush (uid/especie/ivs/raridade/shiny/natureza/trait/hp) vive em
-   * `WorldState.bossPendente`, nao aqui.
+   * `WorldState.protetorPendente`, nao aqui.
    */
-  isBoss?: boolean
+  isProtetor?: boolean
 }
 
 /**
- * PH-201/202/204: boss pendente da sala atual (mini ou ultimate), o
+ * PH-201/202/204/236: protetor pendente da sala atual (Guardian ou Lord), o
  * suficiente pra RECRIAR a entidade fielmente numa reconstrucao de mundo
  * sem consumir RNG de novo — `createPokeInstance` sorteia shiny e trait
- * mesmo passando IV/raridade fixos, entao "recriar" com ele geraria um boss
- * diferente a cada flush (~30s) se algum desses campos nao viesse pronto.
- * Level entra aqui e nao e re-derivado da regra (teto da janela/faixa) pra
- * nao mudar sozinho debaixo do jogador se a regra for rebalanceada depois
- * com o boss ja em campo.
+ * mesmo passando IV/raridade fixos, entao "recriar" com ele geraria um
+ * protetor diferente a cada flush (~30s) se algum desses campos nao viesse
+ * pronto. Level entra aqui e nao e re-derivado da regra (teto da
+ * janela/faixa) pra nao mudar sozinho debaixo do jogador se a regra for
+ * rebalanceada depois com o protetor ja em campo.
  */
-export interface BossPendente {
+export interface ProtetorPendente {
   uid: string
   speciesId: string
   /** Chave do encontro no catalogo de spawn — NAO e a especie. `awardKillLoot`
@@ -578,6 +578,53 @@ export interface EnemyHazards {
   stickyWeb: boolean
 }
 
+/**
+ * As duas fases do ciclo de LURE (ver engine/systems/lureSystem.ts).
+ *
+ *  - `reunindo`: o jogador esta PUXANDO selvagem — o alvo de movimento dele
+ *    deixa de ser "o inimigo vivo mais proximo" e passa a ser "o inimigo vivo
+ *    mais proximo que ainda NAO esta atras dele".
+ *  - `lutando`: comportamento de sempre (anda no mais proximo e bate).
+ */
+export type FaseDeLure = 'reunindo' | 'lutando'
+
+/**
+ * O estado do LURE neste tick. `world.lure === null` quer dizer "lure nao se
+ * aplica agora" (desligado na config, jogador desmaiado, hospital) — e nesse
+ * caso NADA no movimento muda em relacao ao que o jogo sempre fez.
+ *
+ * EFEMERO, mesma familia de `clima`/`salaCountdownRemaining`: nao atravessa a
+ * reconstrucao de mundo por janela de flush do servidor, e nao precisa — a
+ * reconstrucao devolve inimigos novos, em estado `idle`, entao o ciclo comeca do
+ * zero dos DOIS lados pelo mesmo motivo e nao ha o que sincronizar.
+ *
+ * `reunidos` e REDERIVADO das entidades vivas todo tick em vez de acumulado: um
+ * selvagem que morre ou solta o aggro no meio da reuniao precisa sair da conta,
+ * senao a fase fica esperando um numero que nunca mais fecha.
+ */
+export interface EstadoDeLure {
+  fase: FaseDeLure
+  /** Quantos o jogador pediu (1..4), ja clampeado. */
+  alvo: number
+  /** Quantos selvagens estao com aggro no jogador AGORA. */
+  reunidos: number
+  /**
+   * Segundos que faltam pro tempo-limite da fase `reunindo`. Ele existe pra a
+   * fase NUNCA travar: candidato atras de parede, retardatario que nao chega,
+   * selvagem que morre no meio da reuniao — todos terminam aqui, em vez de
+   * deixar o POKE andando sem bater pra sempre.
+   */
+  tempoRestante: number
+  /**
+   * Pra onde o movimento deve levar o jogador nesta fase. `null` em `lutando`
+   * (quem manda e o movimento normal) e tambem em `reunindo` quando o jogador
+   * esta SEGURANDO a posicao pra um retardatario alcancar.
+   */
+  destino: Point | null
+  /** Segurando a posicao porque um dos reunidos esta perto de soltar o aggro. */
+  esperandoRetardatario: boolean
+}
+
 export interface WorldState {
   mapDef: MapDef | null
   player: PlayerEntity | null
@@ -609,12 +656,36 @@ export interface WorldState {
   /** Nulo nas hunts sem salas: a inicial, as 11 BOSS e a do Campeao Lance. */
   sala: SalaAtiva | null
   /**
-   * PH-202/203: boss (mini ou ultimate) da sala atual, ainda vivo. Nulo ==
-   * sala nao pede boss, ou o boss ja foi derrotado/capturado. Enquanto nao
-   * for nulo, `garantirTransicaoDeQuotaFechada` bloqueia o avanco de sala
+   * PH-202/203/236: protetor (Guardian ou Lord) da sala atual, ainda vivo.
+   * Nulo == sala nao pede protetor, ou o protetor ja foi
+   * derrotado/capturado. Enquanto nao for nulo,
+   * `garantirTransicaoDeQuotaFechada` bloqueia o avanco de sala
    * INCONDICIONAL — mesmo com o toggle de avanco manual desligado.
    */
-  bossPendente: BossPendente | null
+  protetorPendente: ProtetorPendente | null
+  /**
+   * PH-230: o protetor desta sala JA foi derrotado/capturado nesta instancia de
+   * mundo. Existe porque `protetorPendente: null` sozinho e ambiguo — le igual
+   * pra "ainda nao nasceu" e pra "ja morreu", e `protetorDaSala` so olha
+   * bioma+indice, que nao mudam quando o protetor cai.
+   *
+   * Sem isto, sob `salaSobAutoridade` o motor entrava em respawn infinito: o
+   * cliente nao arma a transicao (so o servidor decide a sala), a sala
+   * continua a mesma, e o tick seguinte lia "esta sala pede protetor, nao ha
+   * protetor" e sorteava OUTRO. Alem do gauntlet sem fim na tela, o
+   * `garantirProtetorDaSala?.()` de `garantirTransicaoDeQuotaFechada`
+   * retornava true pra sempre e o `salaEsperaDaAutoridade` logo abaixo nunca
+   * acumulava — o fallback de predicao local, que existe exatamente pro caso
+   * de servidor mudo, nunca disparava.
+   *
+   * Efemero como `salaPredita`/`salaCountdownRemaining`, e pelo mesmo motivo:
+   * quem reconstroi o mundo por janela e a autoridade, e la ela ja tera
+   * avancado a sala. Uma reconstrucao contra um servidor que NAO avancou
+   * (versao antiga, sem sistema de protetor) volta a sortear um protetor — mas
+   * ai o teto e um por janela, nao um por tick, e o fallback tem folga pra
+   * acumular e disparar.
+   */
+  protetorResolvido: boolean
   /**
    * Contagem regressiva "Entrando em nova area" (ver
    * engine/systems/salaSystem.ts#registrarAbate/aplicarTransicaoDeSala).
@@ -730,6 +801,11 @@ export interface WorldState {
    *  - com servidor: vem pronto no flush, junto da sala autoritativa.
    */
   climaAmbiente: Clima | null
+  /**
+   * Estado do LURE neste tick — ver `EstadoDeLure`. `null` = lure inativo, e ai
+   * o movimento e exatamente o de sempre.
+   */
+  lure: EstadoDeLure | null
   // Ver `EnemyHazards` acima. Ausente = nenhuma armadilha plantada ainda.
   // MESMO DESVIO que `clima`: nao atravessa reconstrucao de mundo (fora do
   // `ProgressoDaSessao` que `sala`/`sequenceIndex` usam pra sobreviver ao

@@ -25,7 +25,7 @@
 // recomeca no ciclo 1, sala 1.
 import { weightedPick } from '@/core/random'
 import type { Rng } from '@/core/rng'
-import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, BIOMA_PILOTO_BOSS, LOOT, type SubBiomaDef } from '@/data/biomas'
+import { SALAS_POR_HUNT, ABATES_POR_SALA, SUB_BIOMA_POR_CHAVE, ORDEM_DOS_BIOMAS, LOOT, type SubBiomaDef } from '@/data/biomas'
 import { climaAmbienteDaSala, climaDeAmbiente, definirClimaDeAmbiente } from './climaAmbiente'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { getEncounter } from '@/data/enemies'
@@ -156,21 +156,23 @@ export function lootAtivo(sala: SalaAtiva | null, fallback: MapItemDrop[]): MapI
   return perfil ? LOOT[perfil] : fallback
 }
 
-export type TipoDeBoss = 'mini' | 'ultimate'
+export type TipoDeProtetor = 'guardian' | 'lord'
 
 /**
- * PH-202: so o bioma piloto (BIOMA_PILOTO_BOSS) tem boss por enquanto. Salas
- * 1-9 (indice 0-8) pedem mini-boss ao fechar a quota; a ultima sala (indice
- * SALAS_POR_HUNT-1) pede o ultimate da faixa. Pura — nao sorteia nada, so
- * decide QUAL boss a sala pede, se pedir algum. A entidade em si (RNG,
- * criacao) fica em simulation.ts, que ja importa este modulo — colocar aqui
- * criaria import circular.
+ * PH-202/225: todo bioma em ORDEM_DOS_BIOMAS tem protetor (pivo 27/08 sobre o
+ * "fora de escopo" original de 16/08, que limitava a so o bioma piloto —
+ * o gate sequencial de PH-207/226 nao tinha efeito nenhum com so 1 bioma,
+ * o ultimo da ordem, tendo protetor). Salas 1-9 (indice 0-8) pedem Guardian ao
+ * fechar a quota; a ultima sala (indice SALAS_POR_HUNT-1) pede o Lord da
+ * faixa. Pura — nao sorteia nada, so decide QUAL protetor a sala pede, se
+ * pedir algum. A entidade em si (RNG, criacao) fica em simulation.ts, que ja
+ * importa este modulo — colocar aqui criaria import circular.
  */
-export function bossDaSala(sala: SalaAtiva | null): TipoDeBoss | null {
+export function protetorDaSala(sala: SalaAtiva | null): TipoDeProtetor | null {
   if (!sala) return null
   const bioma = SUB_BIOMA_POR_CHAVE[sala.chave]?.bioma.chave
-  if (bioma !== BIOMA_PILOTO_BOSS) return null
-  return sala.indice >= SALAS_POR_HUNT - 1 ? 'ultimate' : 'mini'
+  if (!bioma || !ORDEM_DOS_BIOMAS.includes(bioma)) return null
+  return sala.indice >= SALAS_POR_HUNT - 1 ? 'lord' : 'guardian'
 }
 
 export function nomeDaSala(sala: SalaAtiva | null): string | null {
@@ -236,14 +238,14 @@ export function registrarAbate(world: WorldState, mapId: string, opts: { manualA
   // quota real.
   sala.abates = ABATES_POR_SALA
   // PH-202/203: sala do bioma piloto nunca arma transicao por conta propria
-  // (nem no 30o abate normal, nem no proprio abate do boss) — quem arma e
-  // `resolverBossDaSala`, e so depois que o boss cair. Sem este corte, o 30o
-  // abate (quase sempre um inimigo comum, o boss ainda nem nasceu) armava a
-  // contagem regressiva NA HORA e `aplicarTransicaoDeSala` 3s depois zerava
-  // `world.enemies` — apagando o boss que `garantirTransicaoDeQuotaFechada`
-  // ainda ia criar no tick seguinte — e a sala avancava sem o jogador nunca
-  // ter visto o boss resolver nada.
-  if (bossDaSala(sala)) return { avancou: false, fechouCiclo: false }
+  // (nem no 30o abate normal, nem no proprio abate do protetor) — quem arma e
+  // `resolverProtetorDaSala`, e so depois que o protetor cair. Sem este corte,
+  // o 30o abate (quase sempre um inimigo comum, o protetor ainda nem nasceu)
+  // armava a contagem regressiva NA HORA e `aplicarTransicaoDeSala` 3s depois
+  // zerava `world.enemies` — apagando o protetor que
+  // `garantirTransicaoDeQuotaFechada` ainda ia criar no tick seguinte — e a
+  // sala avancava sem o jogador nunca ter visto o protetor resolver nada.
+  if (protetorDaSala(sala)) return { avancou: false, fechouCiclo: false }
   // Toggle ligado + janela curta (jogador ativo): fecha a quota mas nao
   // sorteia nem arma a transicao — fica em 30/30 ate o avanco manual
   // (`avancarSalaManualmente`, endpoint PH-178). Cap acima ja preservado:
@@ -294,13 +296,20 @@ function armarTransicaoDeSala(world: WorldState, mapId: string): AvancoDeSala {
 
 /**
  * PH-202/203: chamado por `handleEnemyDefeated` (simulation.ts) quando o
- * abate era o do boss da sala — o UNICO gatilho que pode armar a transicao
- * de uma sala do bioma piloto (`registrarAbate` se recusa, ver acima). Sob
- * autoridade remota o cliente nao arma nada, so limpa o boss local: quem
- * decide quando a sala avanca e o flush do servidor, igual toda outra sala.
+ * abate era o do protetor da sala — o UNICO gatilho que pode armar a
+ * transicao de uma sala do bioma piloto (`registrarAbate` se recusa, ver
+ * acima). Sob autoridade remota o cliente nao arma nada, so limpa o protetor
+ * local: quem decide quando a sala avanca e o flush do servidor, igual toda
+ * outra sala.
  */
-export function resolverBossDaSala(world: WorldState, mapId: string): void {
-  world.bossPendente = null
+export function resolverProtetorDaSala(world: WorldState, mapId: string): void {
+  world.protetorPendente = null
+  // PH-230: marcar ANTES do corte de autoridade abaixo. Sem esta linha, sob
+  // `salaSobAutoridade` a sala nao avanca (por design) e nada registra que o
+  // protetor ja caiu — `protetorDaSala` continua dizendo "esta sala pede
+  // protetor" e o proximo tick sorteia outro, pra sempre. Ver
+  // `WorldState.protetorResolvido`.
+  world.protetorResolvido = true
   if (world.salaSobAutoridade) return
   armarTransicaoDeSala(world, mapId)
 }
@@ -333,25 +342,26 @@ export function garantirTransicaoDeQuotaFechada(
   dt = 0,
   manualAdvance = false,
   // PH-202/203: injetado de fora (simulation.ts) pra evitar import circular
-  // — a criacao do boss usa `world.rng`/createPokeInstance/createEnemyEntity,
-  // que ja importam este arquivo. Devolve true quando a sala pede boss
+  // — a criacao do protetor usa `world.rng`/createPokeInstance/createEnemyEntity,
+  // que ja importam este arquivo. Devolve true quando a sala pede protetor
   // (acabou de spawnar um novo, ou ja tinha um vivo) — nesse caso o avanco
   // fica bloqueado INCONDICIONAL, antes de qualquer outra logica desta
   // funcao, inclusive o toggle de avanco manual e a espera de autoridade.
-  garantirBossDaSala?: () => boolean,
+  garantirProtetorDaSala?: () => boolean,
 ): void {
   const sala = world.sala
   if (!sala || sala.abates < ABATES_POR_SALA) {
     world.salaEsperaDaAutoridade = 0
     return
   }
-  // PH-202/203: transicao ja armada (o proprio abate do boss chamou
-  // `resolverBossDaSala` neste MESMO tick, antes deste gate rodar de novo no
-  // proximo) — nao reavaliar o boss. Sem este corte, `bossPendente` ja limpo
-  // + sala ainda sem avancar fazia o gate ler "precisa de boss" de novo e
-  // sortear um SEGUNDO boss por cima da transicao que ja estava a caminho.
+  // PH-202/203: transicao ja armada (o proprio abate do protetor chamou
+  // `resolverProtetorDaSala` neste MESMO tick, antes deste gate rodar de novo
+  // no proximo) — nao reavaliar o protetor. Sem este corte, `protetorPendente`
+  // ja limpo + sala ainda sem avancar fazia o gate ler "precisa de protetor"
+  // de novo e sortear um SEGUNDO protetor por cima da transicao que ja estava
+  // a caminho.
   if (world.salaPendente || world.salaCountdownRemaining != null) return
-  if (garantirBossDaSala?.()) return
+  if (garantirProtetorDaSala?.()) return
   if (world.salaSobAutoridade) {
     // Sob autoridade remota quem sorteia e o servidor, e o cliente espera o
     // flush. Mas nao pra sempre: se a resposta nao trouxer sala nova nesta
@@ -471,6 +481,8 @@ export function reconciliarSalaDaAutoridade(
   if (!atual) {
     world.sala = { ...sala }
     world.salaPredita = false
+    // PH-230: sala entrando direto (nao havia sala) nao herda marca de protetor.
+    world.protetorResolvido = false
     aplicarClima()
     return
   }
@@ -517,6 +529,8 @@ export function aplicarTransicaoDeSala(world: WorldState, mapId: string): void {
   if (!pendente) return
   world.sala = pendente
   world.salaPendente = null
+  // PH-230: sala nova, protetor novo — a marca vale por SALA, nao pela sessao.
+  world.protetorResolvido = false
   // PH-140: o clima da sala anterior NAO acompanha o jogador — inclusive o de
   // golpe, que morre junto com a sala mesmo com turnos sobrando. Por isso o
   // `clima` e zerado ANTES de `definirClimaDeAmbiente`, que respeitaria um

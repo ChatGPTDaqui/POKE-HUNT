@@ -10,10 +10,10 @@ import { describe, expect, it, beforeEach } from 'vitest'
 
 import { createRng } from '@/core/rng'
 import { createPokeInstance } from '@/data/pokes'
-import { buildMapWorld, stepWorld } from './simulation'
+import { buildMapWorld, stepWorld, handleEnemyDefeated } from './simulation'
 import {
   janelaDaSala, poolAtivo, registrarAbate, temSalas, aplicarTransicaoDeSala, SALA_TRANSITION_COUNTDOWN,
-  reconciliarSalaDaAutoridade, ESPERA_MAXIMA_PELA_AUTORIDADE,
+  reconciliarSalaDaAutoridade, ESPERA_MAXIMA_PELA_AUTORIDADE, protetorDaSala,
 } from './systems/salaSystem'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { ABATES_POR_SALA, SALAS_POR_HUNT } from '@/data/biomas'
@@ -33,6 +33,53 @@ function mundo(semente: number, mapa = HUNT): WorldState {
 }
 
 /**
+ * PH-225/236: todo bioma agora pede protetor em TODA sala (nao so a
+ * ultima) — `registrarAbate` se recusa a armar a transicao enquanto
+ * `protetorDaSala(sala)` for verdade (ver salaSystem.ts), e o motor so cria
+ * o protetor de verdade via `stepWorld`/`buildMapWorld`, nunca via
+ * `registrarAbate` sozinho. Ao fechar a quota aqui (helper de baixo nivel,
+ * sem stepWorld), o teste precisa simular o resto do fluxo real: um tick pra
+ * nascer o protetor, resolve-lo (mata direto, silent) e SO ENTAO a quota
+ * realmente libera a transicao. Sem isto, o helper ficaria testando um
+ * caminho que nao existe mais em bioma nenhum do jogo.
+ */
+/**
+ * Devolve `avancou`/`fechouCiclo` igual `registrarAbate` devolveria — o
+ * sinal se perde de verdade quando a transicao arma via
+ * `resolverProtetorDaSala` (o `armarTransicaoDeSala` interno descarta o
+ * retorno), entao quem chama `abater()` esperando ler `fechouCiclo` no
+ * evento do abate 30 precisa deste substituto.
+ */
+function resolverProtetorSeHouver(world: WorldState): { avancou: boolean; fechouCiclo: boolean } {
+  if (world.sala!.abates < ABATES_POR_SALA || !protetorDaSala(world.sala)) {
+    return { avancou: false, fechouCiclo: false }
+  }
+  const gameState = useGameStateStore.getState()
+  if (!world.protetorPendente) tick(world, 0.1, gameState) // nasce o protetor
+  const protetor = world.enemies.find((e) => e.isProtetor)
+  if (protetor) handleEnemyDefeated(world, protetor, gameState, { silent: true })
+  world.enemies = world.enemies.filter((e) => !e.isProtetor)
+  const fechouCiclo = world.salaPendente?.indice === 0
+  return { avancou: world.salaCountdownRemaining != null, fechouCiclo }
+}
+
+/**
+ * Mesma logica de `resolverProtetorSeHouver`, mas envolvendo `stepWorld` —
+ * pros testes que avancam o mundo em loop direto (nao passam pelo helper
+ * `abater()`). Resolve o protetor NA HORA que ele aparece, no mesmo tick,
+ * pra nao alterar o numero de ticks que cada teste ja calculava com cuidado
+ * (ESPERA_MAXIMA_PELA_AUTORIDADE, SALA_TRANSITION_COUNTDOWN etc).
+ */
+function tick(world: WorldState, dt: number, gameState: ReturnType<typeof useGameStateStore.getState>) {
+  stepWorld(world, dt, gameState, { silent: true })
+  if (world.protetorPendente) {
+    const protetor = world.enemies.find((e) => e.isProtetor)
+    if (protetor) handleEnemyDefeated(world, protetor, gameState, { silent: true })
+    world.enemies = world.enemies.filter((e) => !e.isProtetor)
+  }
+}
+
+/**
  * Conta abates direto, sem esperar o combate — o alvo aqui e a maquina de
  * salas. Ao fechar a quota, `registrarAbate` so ARMA a transicao (ver
  * salaSystem.ts); resolve na hora (equivalente a um tick de `stepWorld` com
@@ -42,7 +89,9 @@ function mundo(semente: number, mapa = HUNT): WorldState {
 function abater(world: WorldState, quantos: number) {
   const eventos = []
   for (let i = 0; i < quantos; i++) {
-    eventos.push(registrarAbate(world, world.mapDef!.id))
+    const evento = registrarAbate(world, world.mapDef!.id)
+    const doProtetor = resolverProtetorSeHouver(world)
+    eventos.push(doProtetor.avancou ? doProtetor : evento)
     if (world.salaCountdownRemaining != null) {
       aplicarTransicaoDeSala(world, world.mapDef!.id)
       world.salaCountdownRemaining = null
@@ -83,10 +132,14 @@ describe('salas', () => {
     expect(world.salaCountdownRemaining).toBeNull()
 
     // O abate que fecha a quota so ARMA a transicao — a sala AINDA e a
-    // antiga ate a contagem regressiva zerar (ver salaSystem.ts).
+    // antiga ate a contagem regressiva zerar (ver salaSystem.ts). PH-225:
+    // sala com protetor habilitado NAO arma no proprio abate — so depois de
+    // resolver o protetor que nasce por causa dele (registrarAbate se
+    // recusa de proposito, ver salaSystem.ts#registrarAbate).
     const ultimo = registrarAbate(world, world.mapDef!.id)
-    expect(ultimo.avancou).toBe(true)
-    expect(ultimo.fechouCiclo).toBe(false)
+    expect(ultimo.avancou).toBe(false)
+    expect(world.sala!.abates).toBe(ABATES_POR_SALA)
+    resolverProtetorSeHouver(world)
     expect(world.sala!.indice).toBe(0)
     expect(world.salaCountdownRemaining).toBe(SALA_TRANSITION_COUNTDOWN)
     expect(world.salaPendente).not.toBeNull()
@@ -107,12 +160,13 @@ describe('salas', () => {
     const gameState = useGameStateStore.getState()
 
     for (let i = 0; i < ABATES_POR_SALA; i++) registrarAbate(world, world.mapDef!.id)
+    resolverProtetorSeHouver(world) // PH-225: sala com protetor habilitado, so arma depois de resolver
     expect(world.salaCountdownRemaining).toBe(SALA_TRANSITION_COUNTDOWN)
     expect(world.sala!.indice).toBe(0)
 
     // Congelado: um tick pequeno so desconta a contagem, nada mais muda.
     const enemiesAntes = world.enemies.length
-    stepWorld(world, 0.1, gameState, { silent: true })
+    tick(world, 0.1, gameState)
     expect(world.sala!.indice).toBe(0)
     expect(world.enemies.length).toBe(enemiesAntes)
 
@@ -155,7 +209,7 @@ describe('salas', () => {
 
     // E o respawn, que roda por outro caminho no stepWorld, tambem.
     const gameState = useGameStateStore.getState()
-    for (let i = 0; i < 3000; i++) stepWorld(world, 0.1, gameState, { silent: true })
+    for (let i = 0; i < 3000; i++) tick(world, 0.1, gameState)
     const salaAgora = world.sala!.chave
     const permitidas = new Set(POOL_POR_SALA[HUNT][salaAgora].map((id) => ENCOUNTERS[id].speciesId))
     for (const inimigo of world.enemies) {
@@ -259,6 +313,7 @@ describe('sala sob autoridade do servidor', () => {
     const world = mundo(7)
     expect(world.salaSobAutoridade).toBe(false)
     for (let i = 0; i < ABATES_POR_SALA; i++) registrarAbate(world, world.mapDef!.id)
+    resolverProtetorSeHouver(world) // PH-225: sala com protetor habilitado, so arma depois de resolver
     expect(world.salaPendente).not.toBeNull()
     expect(world.salaCountdownRemaining).toBe(SALA_TRANSITION_COUNTDOWN)
   })
@@ -401,7 +456,7 @@ describe('quota de sala fechada atravessa a janela', () => {
     world.respawnTimer = 999
 
     const gameState = useGameStateStore.getState()
-    for (let i = 0; i < 60; i++) stepWorld(world, 0.1, gameState, { silent: true })
+    for (let i = 0; i < 60; i++) tick(world, 0.1, gameState)
 
     expect(world.sala!.indice).toBe(1)
     expect(world.salaPendente).toBeNull()
@@ -430,9 +485,16 @@ describe('quota de sala fechada atravessa a janela', () => {
       rng: createRng(33),
       counters: { entity: 1, effect: 1, pendingHit: 1 },
     }, { sala: { ...progresso } })
+    // PH-225: quota ja fechada na propria reconstrucao (`progresso.sala.abates`)
+    // faz `buildMapWorld` reconstruir o protetor pendente na hora — a linha
+    // antiga `world.enemies = []` (pre-protetor) apagava a entidade sem
+    // apagar `world.protetorPendente`, travando a sala pra sempre
+    // (protetorPendente "fantasma", sem entidade correspondente pra
+    // resolver). Resolve o protetor ANTES de zerar o campo, entao.
+    resolverProtetorSeHouver(world)
     world.enemies = []
     world.respawnTimer = 999
-    for (let i = 0; i < 50; i++) stepWorld(world, 0.1, gameState, { silent: true })
+    for (let i = 0; i < 50; i++) tick(world, 0.1, gameState)
 
     expect(world.sala!.indice, 'a sala nao avancou numa janela de 5s sem abate').toBe(1)
     expect(world.sala!.abates).toBe(0)
@@ -447,7 +509,7 @@ describe('quota de sala fechada atravessa a janela', () => {
     world.respawnTimer = 999
 
     const gameState = useGameStateStore.getState()
-    for (let i = 0; i < 60; i++) stepWorld(world, 0.1, gameState, { silent: true })
+    for (let i = 0; i < 60; i++) tick(world, 0.1, gameState)
 
     expect(world.sala!.indice).toBe(0)
     expect(world.sala!.chave).toBe(daPrimeira)
@@ -468,20 +530,27 @@ describe('espera pela autoridade tem teto', () => {
     const world = mundo(45)
     world.salaSobAutoridade = true
     world.sala!.abates = ABATES_POR_SALA
+    // PH-225: chave sem bioma mapeado de proposito — este teste e sobre o
+    // MECANISMO de espera/fallback de autoridade, nao sobre protetor. Sob
+    // salaSobAutoridade, resolver o protetor nao arma nada localmente (so o
+    // servidor decide a proxima sala), entao a mesma sala re-pediria
+    // protetor pra sempre e nunca deixaria o timer de espera abaixo
+    // acumular.
+    world.sala!.chave = 'sala-de-teste-sem-protetor'
     world.enemies = []
     world.respawnTimer = 999
     const gameState = useGameStateStore.getState()
 
     // Antes do teto: nada acontece, o cliente espera.
     for (let i = 0; i < Math.floor((ESPERA_MAXIMA_PELA_AUTORIDADE - 2) / 0.1); i++) {
-      stepWorld(world, 0.1, gameState, { silent: true })
+      tick(world, 0.1, gameState)
     }
     expect(world.sala!.indice).toBe(0)
     expect(world.salaPendente).toBeNull()
 
     // Passado o teto (mais a contagem regressiva), a sala anda.
     for (let i = 0; i < Math.floor((2 + SALA_TRANSITION_COUNTDOWN + 1) / 0.1); i++) {
-      stepWorld(world, 0.1, gameState, { silent: true })
+      tick(world, 0.1, gameState)
     }
     expect(world.sala!.indice).toBe(1)
   })
@@ -490,10 +559,11 @@ describe('espera pela autoridade tem teto', () => {
     const world = mundo(45)
     world.salaSobAutoridade = true
     world.sala!.abates = ABATES_POR_SALA
+    world.sala!.chave = 'sala-de-teste-sem-protetor' // ver nota do teste acima
     world.enemies = []
     world.respawnTimer = 999
     const gameState = useGameStateStore.getState()
-    for (let i = 0; i < 100; i++) stepWorld(world, 0.1, gameState, { silent: true })
+    for (let i = 0; i < 100; i++) tick(world, 0.1, gameState)
     expect(world.salaEsperaDaAutoridade).toBeGreaterThan(0)
 
     const outra = Object.keys(POOL_POR_SALA[HUNT]).find((c) => c !== world.sala!.chave)!
@@ -517,10 +587,11 @@ describe('predicao local cede pra autoridade', () => {
     const gameState = useGameStateStore.getState()
     world.salaSobAutoridade = true
     world.sala!.abates = ABATES_POR_SALA
+    world.sala!.chave = 'sala-de-teste-sem-protetor' // ver nota em "espera pela autoridade tem teto"
     world.enemies = []
     world.respawnTimer = 999
     const ticks = Math.floor((ESPERA_MAXIMA_PELA_AUTORIDADE + SALA_TRANSITION_COUNTDOWN + 1) / 0.1)
-    for (let i = 0; i < ticks; i++) stepWorld(world, 0.1, gameState, { silent: true })
+    for (let i = 0; i < ticks; i++) tick(world, 0.1, gameState)
     return world.sala!
   }
 
@@ -568,8 +639,11 @@ describe('predicao local cede pra autoridade', () => {
     // Quota da sala predita fecha e a espera estoura de novo — e nada acontece,
     // porque a predicao anterior segue sem confirmacao do servidor.
     world.sala!.abates = ABATES_POR_SALA
+    // A sala predita e sorteada de verdade (novaSala) — real, com protetor
+    // habilitado de novo. Mesma nota das outras: fora do escopo deste teste.
+    world.sala!.chave = 'sala-de-teste-sem-protetor'
     const ticks = Math.floor((ESPERA_MAXIMA_PELA_AUTORIDADE * 2 + SALA_TRANSITION_COUNTDOWN + 1) / 0.1)
-    for (let i = 0; i < ticks; i++) stepWorld(world, 0.1, gameState, { silent: true })
+    for (let i = 0; i < ticks; i++) tick(world, 0.1, gameState)
     expect(world.sala!.indice).toBe(1)
     expect(world.salaPendente).toBeNull()
   })
@@ -578,12 +652,15 @@ describe('predicao local cede pra autoridade', () => {
     const world = mundo(45)
     const gameState = useGameStateStore.getState()
     const predita = predizerLocalmente(world)
+    // Mesma nota das outras: a sala predita e sorteada de verdade (com
+    // protetor habilitado), fora do escopo deste teste (mecanismo de fallback).
+    world.sala!.chave = 'sala-de-teste-sem-protetor'
 
-    reconciliarSalaDaAutoridade(world, { ...predita, abates: ABATES_POR_SALA })
+    reconciliarSalaDaAutoridade(world, { ...predita, chave: 'sala-de-teste-sem-protetor', abates: ABATES_POR_SALA })
     expect(world.salaPredita).toBe(false)
 
     const ticks = Math.floor((ESPERA_MAXIMA_PELA_AUTORIDADE + SALA_TRANSITION_COUNTDOWN + 1) / 0.1)
-    for (let i = 0; i < ticks; i++) stepWorld(world, 0.1, gameState, { silent: true })
+    for (let i = 0; i < ticks; i++) tick(world, 0.1, gameState)
     expect(world.sala!.indice).toBe(2)
     expect(world.salaPredita).toBe(true)
   })

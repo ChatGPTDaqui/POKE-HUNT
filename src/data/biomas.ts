@@ -408,18 +408,49 @@ export const SALAS_POR_HUNT = 10
  */
 export const ABATES_POR_SALA = 30
 
-/**
- * PH-202: sistema de andares (mini-boss salas 1-9, boss ultimate sala 10),
- * design em `_Architecture.md` (brainstorm 16/08). Piloto: so este bioma
- * ganha boss de verdade nesta rodada — os outros 11 continuam liberando
- * automatico, sem exigir nada (evita travar o piloto atras de conteudo que
- * ainda nao existe).
- */
-export const BIOMA_PILOTO_BOSS = 'igneo'
-
 export const BIOMA_POR_CHAVE: Record<string, BiomaDef> = Object.fromEntries(
   BIOMAS.map((b) => [b.chave, b])
 )
+
+/**
+ * PH-223: ordem canonica dos 12 biomas pro gate sequencial (PH-226/227) —
+ * vencer o Lord do bioma N libera o bioma N+1. So existia como
+ * tabela no vault (`_Architecture.md`, brainstorm 16/08, referencia: sequencia
+ * de ginasios Kanto+Johto) — `BIOMAS` acima esta em ordem ARBITRARIA de
+ * insercao (campo_aberto, mata, marinho, ...), que NAO bate com esta ordem.
+ * Nao usar `BIOMAS.map(b => b.chave)` no lugar disto — e exatamente o furo que
+ * esta constante fecha.
+ */
+export const ORDEM_DOS_BIOMAS: readonly string[] = [
+  'campo_aberto',
+  'subterraneo',
+  'marinho',
+  'industrial',
+  'mata',
+  'aguas_interiores',
+  'urbano',
+  'gelido',
+  'aridos',
+  'sagrado',
+  'sombrio',
+  'igneo',
+]
+
+/**
+ * PH-224: `players.bioma_progress` (migration PH-200) — indice de quantos
+ * biomas da FAIXA o jogador ja venceu (posicao em `ORDEM_DOS_BIOMAS`), nao
+ * lista de biomas liberados. Uma faixa por chave porque o gate e independente
+ * entre as 3 (a Faixa II reinicia do zero, mesma decisao do brainstorm 16/08).
+ */
+export interface BiomaProgress {
+  faixa1: number
+  faixa2: number
+  faixa3: number
+}
+
+export function biomaProgressDefault(): BiomaProgress {
+  return { faixa1: 0, faixa2: 0, faixa3: 0 }
+}
 
 export const FAIXA_POR_ID: Record<string, FaixaDef> = Object.fromEntries(
   FAIXAS.map((f) => [f.id, f])
@@ -428,6 +459,29 @@ export const FAIXA_POR_ID: Record<string, FaixaDef> = Object.fromEntries(
 /** Id da hunt de um bioma numa faixa. Estavel: e o que vai pro banco. */
 export function huntId(bioma: string, faixa: FaixaId): string {
   return `${bioma}_${faixa}`
+}
+
+/**
+ * Inverso de `huntId` — o bioma embutido no mapId de uma hunt de bioma, ou
+ * `null` se o mapId nao segue esse padrao (BOSS/Nightmare/hunt inicial nao
+ * tem bioma). PH-227/229: mesma logica usada pelo gate server-side
+ * (abrirSessao) E pelo menu (HuntMenu) — nao duplicar, os dois precisam
+ * concordar sobre "que bioma e esse mapId" sempre.
+ */
+export function biomaDoMapId(mapId: string, faixa: string): string | null {
+  return mapId.endsWith(`_${faixa}`) ? mapId.slice(0, -(faixa.length + 1)) : null
+}
+
+/**
+ * Indice do bioma embutido no mapId dentro de `ORDEM_DOS_BIOMAS`, ou `-1` se
+ * o mapId nao tem bioma (hunt inicial/BOSS/Nightmare) ou o bioma nao esta na
+ * ordem (nao deveria acontecer com os 12 habilitados, PH-225 — defesa em
+ * profundidade). Usado pelo gate server-side (PH-227) E pelo sort/selo do
+ * menu (PH-229).
+ */
+export function indiceDoBiomaNoMapId(mapId: string, faixa: string): number {
+  const bioma = biomaDoMapId(mapId, faixa)
+  return bioma ? ORDEM_DOS_BIOMAS.indexOf(bioma) : -1
 }
 
 export const SUB_BIOMA_POR_CHAVE: Record<string, { sub: SubBiomaDef; bioma: BiomaDef }> =

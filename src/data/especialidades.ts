@@ -11,6 +11,22 @@
 // tipo agora serve DOIS propositos (evolucao de Nivel 80 e Especialidades),
 // concorrendo pelo mesmo drop. Se isso se provar apertado demais em
 // playtest, a saida e uma fonte de drop dedicada, nao mudar o material.
+//
+// O CUSTO E POR TIPO, e nao um array unico (PH-246). A Stone so cai de POKE
+// daquele tipo, e os tipos nao aparecem na mesma frequencia — com custo unico,
+// fechar as duas trilhas ia de 18.800 abates (FIRE/WATER/ELECTRIC/PSYCHIC) a
+// 162.933 (STEEL), nove vezes de diferenca, e FLYING era impossivel porque
+// nenhuma especie tem FLYING como tipo primario e o drop so olhava o primario.
+// Agora `awardKillLoot` sorteia entre os dois tipos da vitima, e o custo de
+// cada tipo sai de um alvo unico de abates dividido pela oferta MEDIDA daquele
+// tipo — ver `scripts/gerar-custo-de-especialidade.mjs`, que emite tanto
+// `generated/custoEspecialidade.generated.ts` quanto o par de migrations com o
+// custo que a RPC cobra. Esforco medido depois: 1,11x entre o tipo mais caro e
+// o mais barato.
+import {
+  ESPECIALIDADE_GOLD_POR_NIVEL,
+  ESPECIALIDADE_STONE_POR_NIVEL,
+} from './generated/custoEspecialidade.generated'
 import { TYPE_COLORS } from './typeColors'
 import type { ElementType } from './generated/types'
 
@@ -31,9 +47,8 @@ export function especialidadeNiveisDefault(): EspecialidadeNiveis {
   ) as EspecialidadeNiveis
 }
 
-// 5 niveis por trilha, dano e defesa nasceram com a mesma escala (primeira
-// leva — ver nota do modulo). `ESPECIALIDADE_CUSTOS[i]` e o custo pra SUBIR
-// do nivel `i` pro nivel `i + 1` (indice 0 = alcancar nivel 1).
+// 5 niveis por trilha, dano e defesa com a mesma escala. O indice `i` e o
+// custo pra SUBIR do nivel `i` pro nivel `i + 1` (indice 0 = alcancar nivel 1).
 export const ESPECIALIDADE_NIVEL_MAX = 5
 
 export interface EspecialidadeCusto {
@@ -41,21 +56,21 @@ export interface EspecialidadeCusto {
   gold: number
 }
 
-export const ESPECIALIDADE_CUSTOS: EspecialidadeCusto[] = [
-  { stoneQtd: 15, gold: 500 },
-  { stoneQtd: 35, gold: 1500 },
-  { stoneQtd: 70, gold: 4000 },
-  { stoneQtd: 130, gold: 10000 },
-  { stoneQtd: 220, gold: 25000 },
-]
+export function custosDoTipo(tipo: ElementType): EspecialidadeCusto[] {
+  const stones = ESPECIALIDADE_STONE_POR_NIVEL[tipo]
+  return ESPECIALIDADE_GOLD_POR_NIVEL.map((gold, i) => ({ stoneQtd: stones[i], gold }))
+}
 
 // +1% por nivel, ate +5% no nivel 5 — mesmo teto do pokedream.com.br (a forma
 // e referencia; o numero em si e simples e facil de rebalancear).
 export const ESPECIALIDADE_BONUS_POR_NIVEL = 0.01
 
-export function custoDoProximoNivel(nivelAtual: number): EspecialidadeCusto | null {
+export function custoDoProximoNivel(tipo: ElementType, nivelAtual: number): EspecialidadeCusto | null {
   if (nivelAtual < 0 || nivelAtual >= ESPECIALIDADE_NIVEL_MAX) return null
-  return ESPECIALIDADE_CUSTOS[nivelAtual]
+  return {
+    stoneQtd: ESPECIALIDADE_STONE_POR_NIVEL[tipo][nivelAtual],
+    gold: ESPECIALIDADE_GOLD_POR_NIVEL[nivelAtual],
+  }
 }
 
 function nivelDe(niveis: EspecialidadeNiveis | null | undefined, tipo: ElementType, trilha: EspecialidadeTrilha): number {

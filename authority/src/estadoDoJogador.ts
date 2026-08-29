@@ -60,12 +60,20 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     get autoCatchRules() { return s.autoCatchRules },
     get autoSellConfig() { return s.autoSellConfig },
     get autoStatusConfig() { return s.autoStatusConfig },
+    // Lido pela simulacao TODO tick (engine/systems/lureSystem.ts): e a config
+    // que decide pra onde o jogador anda. Sem este getter o resim do servidor
+    // mataria 1 a 1 enquanto o cliente mostra o grupo inteiro.
+    get lureConfig() { return s.lureConfig },
     get perfStats() { return s.perfStats },
     get trainer() { return s.trainer },
     get pokedexKills() { return s.pokedexKills },
     get unlockedContinents() { return s.unlockedContinents },
     get missoesReivindicadas() { return s.missoesReivindicadas },
     get especialidades() { return s.especialidades },
+    // PH-224/236: leitura pro gate de bioma (PH-227). A simulacao nunca
+    // chama isto — avancar o indice e side-effect de vencer o Lord
+    // (PH-226), nao de combate comum, entao nao ganha setter aqui.
+    get biomaProgress() { return s.biomaProgress },
 
     // ----- acoes que a simulacao realmente usa -----
     setActiveIndex: (index) => { s.activeIndex = index },
@@ -183,6 +191,11 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     // `reordenarReservas`: o tipo exige, e um stub que divergisse da regra do
     // navegador seria uma diferenca esperando pra ser descoberta.
     setEspecialidadeNivel: (tipo, trilha, nivel) => { s.especialidades[tipo][trilha] = nivel },
+    // PH-226/236: ESTA a simulacao chama de verdade — vencer o Lord
+    // avanca o indice dentro de handleEnemyDefeated (simulation.ts). Precisa
+    // do mesmo comportamento nos dois lados (resim do servidor E predicao
+    // do cliente rodam o mesmo handleEnemyDefeated).
+    setBiomaProgress: (faixa, indice) => { s.biomaProgress[faixa as keyof typeof s.biomaProgress] = indice },
 
     // ----- acoes de UI: existem pro tipo fechar, nao sao usadas na simulacao -----
     setAutoToggle: (key, value) => { s.autoToggles[key] = value },
@@ -194,6 +207,15 @@ export function criarEstadoDoJogador(dados: GameStateData): EstadoDoJogador {
     removeAutoPotRule: (index) => { s.autoPotRules.splice(index, 1) },
     setAutoCatchConfig: (patch) => { s.autoCatchConfig = { ...s.autoCatchConfig, ...patch } },
     setAutoSellConfig: (patch) => { s.autoSellConfig = { ...s.autoSellConfig, ...patch } },
+    // A simulacao nunca chama (quem configura lure e a tela, via `configurar_auto`),
+    // mas o tipo exige — e o clamp e repetido aqui de proposito: um stub que
+    // gravasse fora da faixa seria uma diferenca de comportamento entre client e
+    // servidor esperando pra ser descoberta.
+    setLureConfig: (patch) => {
+      const bruta = patch.quantidade ?? s.lureConfig.quantidade
+      const quantidade = Math.max(1, Math.min(4, Math.round(bruta) || 1))
+      s.lureConfig = { ...s.lureConfig, ...patch, quantidade }
+    },
     addAutoCatchRule: (rule: AutoCatchRule) => { s.autoCatchRules.push(rule) },
     updateAutoCatchRule: (index, patch) => {
       if (s.autoCatchRules[index]) s.autoCatchRules[index] = { ...s.autoCatchRules[index], ...patch }

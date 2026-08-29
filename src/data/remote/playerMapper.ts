@@ -6,7 +6,7 @@
 // aparecer), entao ficam separadas do I/O para poderem ser conferidas e
 // testadas sozinhas.
 import type { Database } from '@/lib/database.types'
-import type { GameStateData, AutoPotRule, AutoCatchConfig, AutoCatchRule, PerfStats, TrainerInfo, PokedexKillCount } from '@/stores/gameStateStore'
+import type { GameStateData, AutoPotRule, AutoCatchConfig, AutoCatchRule, LureConfig, PerfStats, TrainerInfo, PokedexKillCount } from '@/stores/gameStateStore'
 import type { ElementType } from '@/data/generated/types'
 import { especialidadeNiveisDefault, type EspecialidadeNiveis } from '@/data/especialidades'
 import { SPECIES, computeStatsAtLevel, type PokeInstance, type StatBlock } from '@/data/pokes'
@@ -14,7 +14,11 @@ import type { RarityKey } from '@/data/rarity'
 import { NATURES_NEUTRAS, type NatureKey } from '@/data/natures'
 import { activeAbilitiesPadrao, golpesAprendidosAte, sanearEscolhaDeGolpes } from '@/data/activeAbilities'
 import type { StatusCondition } from '@/data/statusEffects'
-import { chaveDaMissao, missaoDaChave } from '@/data/missoes'
+// De `missaoChave`, e nao de `missoes`: este arquivo entra no bundle da Edge
+// Function, e importar daquele modulo arrastaria a cadeia inteira junto — 335
+// linhas de dado que o servidor nunca le, porque quem valida missao la e a RPC
+// `reivindicar_missao`, consultando a tabela `missao_cadeia` no Postgres.
+import { chaveDaMissao, missaoDaChave } from '@/data/missaoChave'
 
 type Json = Database['public']['Tables']['players']['Row']['auto_toggles']
 type Tables = Database['public']['Tables']
@@ -41,7 +45,8 @@ export type EspecialidadeRow = Tables['player_especialidades']['Row']
 
 export interface PlayerSnapshot {
   player: PlayerRow
-  pokemon: PokemonRow[]
+  // PH-184: a linha lida, sem as colunas que pararam de vir pela rede.
+  pokemon: LinhaLidaDePoke[]
   items: ItemRow[]
   pokedex: PokedexRow[]
   autoCatchRules: AutoCatchRuleRow[]
@@ -51,7 +56,97 @@ export interface PlayerSnapshot {
 
 // --- DB -> jogo -------------------------------------------------------------
 
-export function rowToPoke(row: PokemonRow): PokeInstance {
+/**
+ * As colunas de `pokemon_instances` que o cliente de fato usa (PH-184).
+ *
+ * MORA AQUI, ao lado de `rowToPoke`, e nao copiada em cada `.select()`. A issue
+ * e explicita sobre isso, e o motivo e concreto: com a lista repetida por
+ * call-site, uma coluna nova entra no schema, um dos seis lugares e atualizado e
+ * os outros cinco passam a devolver um POKE sem ela — em silencio, porque
+ * `rowToPoke` le `undefined` e segue.
+ *
+ * O QUE FICOU DE FORA, e por que:
+ *
+ * - `user_id`: toda consulta ja filtra por ele; devolve-lo e repetir o mesmo
+ *   uuid em cada linha.
+ * - `updated_at`: ninguem le no cliente.
+ *
+ * O QUE FICOU DENTRO CONTRA A EXPECTATIVA DA ISSUE: `unlocked_abilities`.
+ *
+ * Ela era a razao declarada desta issue — `rowToPoke` RECALCULA o moveset de
+ * (especie, nivel) e so cai na coluna quando a especie e desconhecida, entao a
+ * conta era "17% do payload atravessando a rede pra nada". Medido no fio,
+ * gzipado, na mochila do jogador mais pesado da base:
+ *
+ *   select *                    63.692 B
+ *   sem `unlocked_abilities`    57.661 B   -9,5%
+ *   COM `unlocked_abilities`    58.068 B   -8,8%
+ *
+ * A coluna custa 0,7 PONTO PERCENTUAL, nao 17. O gzip come quase tudo dela: sao
+ * os mesmos ids de golpe repetidos linha apos linha, que e o melhor caso
+ * possivel pro compressor. Praticamente todo o ganho de verdade vem de
+ * `user_id`/`updated_at`, que a issue nem mencionava.
+ *
+ * Entao ela FICA, e o motivo e o fallback: sem a coluna, um POKE de especie que
+ * o catalogo do CLIENTE nao tem chegaria sem golpe nenhum. Pagar 0,7% pra isso
+ * nao ter como acontecer e barato — e a divergencia catalogo-banco e real, tem
+ * issue propria (PH-247: o banco tem 6 especies que o cliente nao tem).
+ *
+ * `location` e `team_slot` ENTRAM mesmo sem `rowToPoke` toca-las: quem chama
+ * decide equipe x mochila por elas (`snapshotToGameState`, `refetchPoke`,
+ * `mercadoRpc`). Tira-las e exatamente o modo de falha que este comentario
+ * existe pra evitar.
+ */
+// UMA LINHA SO, e nao um array com `.join(',')` — que era a forma legivel e nao
+// compila. O cliente tipado do supabase-js infere o formato da linha a partir do
+// LITERAL passado pro `.select()`; qualquer coisa que chegue como `string`
+// generica vira `GenericStringError` e derruba todo `rowToPoke(data)` a jusante.
+export const COLUNAS_DE_POKE = 'id,species_id,location,team_slot,level,exp,hp,is_shiny,rarity,locked,nature,trait,original_trainer,status,status_turns,created_at,iv_hp,iv_atk_fis,iv_atk_esp,iv_def,iv_def_esp,iv_speed,stat_hp,stat_atk_fis,stat_atk_esp,stat_def,stat_def_esp,stat_speed,active_abilities,disabled_abilities,unlocked_abilities'
+
+/**
+ * A linha como ela CHEGA depois da PH-184 — sem as colunas que pararam de vir.
+ *
+ * `rowToPoke` recebe isto, e nao `PokemonRow`: a assinatura passa a DIZER quais
+ * colunas existem de verdade na leitura, entao usar uma que nao vem mais vira
+ * erro de compilacao em vez de `undefined` circulando pelo estado.
+ * `pokeToRow` (escrita) continua montando a linha inteira — o corte e so de
+ * LEITURA.
+ */
+export type LinhaLidaDePoke = Omit<PokemonRow, 'user_id' | 'updated_at'>
+
+/**
+ * Especies desconhecidas ja avisadas — o aviso e por ESPECIE, nao por POKE.
+ *
+ * `rowToPoke` roda uma vez por linha, e uma mochila real tem 4.082 delas. Sem a
+ * deduplicacao, uma especie fora do catalogo enche o console com milhares de
+ * linhas identicas e afoga qualquer outra coisa que esteja la.
+ */
+const especiesJaAvisadas = new Set<string>()
+
+/**
+ * Especie que o catalogo do CLIENTE nao conhece: cai no learnset gravado.
+ *
+ * A coluna `unlocked_abilities` fica no `select` so por causa deste caminho (ver
+ * `COLUNAS_DE_POKE`) — sem ela o POKE chegaria sem golpe nenhum, e POKE sem
+ * golpe nao luta. Custa 0,7% do payload gzipado, medido; e barato pelo que
+ * evita.
+ *
+ * O aviso continua porque a situacao nao e normal: o POKE ainda vai aparecer sem
+ * nome, sem sprite e com os stats gravados em vez dos recalculados. E sinal de
+ * divergencia catalogo-banco (PH-247), e sem log ninguem descobre.
+ */
+function golpesGravados(speciesId: string, gravados: string[] | null): string[] {
+  if (!especiesJaAvisadas.has(speciesId)) {
+    especiesJaAvisadas.add(speciesId)
+    console.warn(
+      `rowToPoke: especie "${speciesId}" nao esta no catalogo do cliente — `
+      + 'usando o learnset gravado na linha. Ver PH-247 (catalogo do banco x do cliente).',
+    )
+  }
+  return gravados ?? []
+}
+
+export function rowToPoke(row: LinhaLidaDePoke): PokeInstance {
   const ivs: StatBlock = {
     hp: row.iv_hp, atkFis: row.iv_atk_fis, atkEsp: row.iv_atk_esp,
     def: row.iv_def, defEsp: row.iv_def_esp, speed: row.iv_speed,
@@ -125,7 +220,19 @@ export function rowToPoke(row: PokemonRow): PokeInstance {
     // silencio os golpes renomeados — `getAbility` devolve null e o combate
     // simplesmente pula. A coluna continua sendo GRAVADA (pokeToRow) para
     // qualquer leitor externo e para nao virar um campo morto no schema.
-    unlockedAbilities: species ? golpesAprendidosAte(species, row.level) : row.unlocked_abilities,
+    //
+    // PH-184: o fallback CONTINUA sendo a coluna gravada. Ele e a unica razao
+    // de `unlocked_abilities` seguir no `select` — e ela custa 0,7% do payload
+    // gzipado, medido, porque o gzip come um array de ids repetido linha apos
+    // linha. Tirar a coluna faria um POKE de especie fora do catalogo do cliente
+    // chegar sem golpe nenhum, e POKE sem golpe nao luta.
+    //
+    // O que mudou foi so o aviso: o caso passa a ser LOGADO (uma vez por
+    // especie, nao por POKE), porque divergencia catalogo-banco e real e tem
+    // issue propria — PH-247.
+    unlockedAbilities: species
+      ? golpesAprendidosAte(species, row.level)
+      : golpesGravados(row.species_id, row.unlocked_abilities),
     // Coluna adicionada depois (migration 20260809150000): linha antiga volta
     // com o default `{}` do banco, entao nao ha migracao de dado a fazer.
     disabledAbilities: (row.disabled_abilities ?? {}) as Record<string, boolean>,
@@ -245,11 +352,24 @@ export function snapshotToGameState(snap: PlayerSnapshot, defaults: GameStateDat
     // do merge-com-default que `autoToggles` faz — ausencia ja E o estado
     // certo aqui.
     autoStatusConfig: fromJson<Record<string, boolean>>(p.auto_status_config, defaults.autoStatusConfig),
+    // LURE (PH-235). MERGE com o default pelo mesmo motivo do
+    // `autoToggles`/`autoSellConfig` acima: linha gravada antes desta coluna
+    // existir volta sem as chaves, e `quantidade: undefined` cairia dentro do
+    // clamp do motor como NaN.
+    lureConfig: {
+      ...defaults.lureConfig,
+      ...fromJson<Partial<LureConfig>>(p.auto_lure_config, {}),
+    },
     perfStats: fromJson<PerfStats>(p.perf_stats, defaults.perfStats),
     trainer: { name: p.trainer_name, level: p.trainer_level, exp: p.trainer_exp } satisfies TrainerInfo,
     pokedexKills,
     missoesReivindicadas,
     especialidades,
+    // PH-224: MERGE com o default pelo mesmo motivo de autoToggles/autoSellConfig
+    // — linha gravada antes desta coluna existir (todo jogador ate 27/08) volta
+    // sem a chave, e faixa ausente tem que virar 0, nao undefined (quebraria a
+    // comparacao de indice do gate, PH-227).
+    biomaProgress: { ...defaults.biomaProgress, ...fromJson(p.bioma_progress, defaults.biomaProgress) },
   }
 }
 
@@ -272,7 +392,15 @@ export function gameStateToPlayerRow(userId: string, s: GameStateData): Tables['
     auto_catch_config: toJson(s.autoCatchConfig),
     auto_sell_config: toJson(s.autoSellConfig),
     auto_status_config: toJson(s.autoStatusConfig),
+    // `auto_lure_config` NAO entra aqui de proposito (PH-235). Quem escreve a
+    // config de lure e a RPC `configurar_auto`, chamada pela tela, e a simulacao
+    // nunca a muda — ao contrario de `auto_toggles`/`auto_pot_rules`, que estao
+    // nesta lista por serem parte do snapshot que o flush reescreve. Mandar a
+    // coluna em TODO flush so criaria uma segunda escritora pra um valor que ja
+    // tem dona, e com ela a corrida "o flush grava a config velha por cima da que
+    // o jogador acabou de escolher".
     perf_stats: toJson(s.perfStats),
+    bioma_progress: toJson(s.biomaProgress),
   }
 }
 

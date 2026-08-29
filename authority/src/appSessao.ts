@@ -9,7 +9,10 @@ import {
   aplicarFlush, carregarEstado, comEstadoParaEscrita, gravarEstado,
   FLUSH_OCUPADO, type LinhaSessao,
 } from './progresso.js'
-import { MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas, climaDaSala } from '#engine'
+import {
+  MAPS, randomSeed, createEmptySummary, createRng, novaSala, temSalas, climaDaSala,
+  ORDEM_DOS_BIOMAS, BIOMA_POR_CHAVE, indiceDoBiomaNoMapId, type BiomaProgress,
+} from '#engine'
 
 function json(dado: unknown, status = 200): Response {
   return new Response(JSON.stringify(dado), {
@@ -139,9 +142,12 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
  * pago pela outra.
  */
 async function sessaoAberta(cfg: Config, userId: string): Promise<LinhaSessao | null> {
+  // PH-241: `sala_protetor(*)` embutido via PostgREST — `session_id` e
+  // PRIMARY KEY da tabela filha, entao o embed vem como objeto UNICO (ou
+  // `null`), nao array. `protetorDaLinha` (progresso.ts) le daqui.
   const linhas = await selecionar<LinhaSessao>(
     cfg,
-    `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*&order=started_at.desc`,
+    `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*,sala_protetor(*)&order=started_at.desc`,
   )
   for (const orfa of linhas.slice(1)) await fecharLinhaDeSessao(cfg, orfa.id)
   return linhas[0] ?? null
@@ -161,6 +167,32 @@ async function fecharLinhaDeSessao(cfg: Config, sessaoId: string): Promise<void>
 async function sairDaHunt(cfg: Config, userId: string, sessaoId: string): Promise<void> {
   await fecharLinhaDeSessao(cfg, sessaoId)
   await atualizar(cfg, `players?user_id=eq.${userId}`, { current_map_id: null })
+}
+
+/**
+ * PH-227/236: mensagem de bloqueio (ou `null` se liberado) do gate
+ * sequencial de bioma — vencer o Lord do bioma N libera o N+1 (PH-207/226).
+ *
+ * Pura de proposito: testavel isolada, sem precisar mockar `db.js`/HTTP
+ * inteiro so pra exercitar uma regra de negocio. `biomaDoMapId` (PH-229)
+ * e a MESMA funcao que HuntMenu usa pro selo/ordem/mensagem do menu — os
+ * dois lados tem que concordar sobre "que bioma e esse mapId" E sobre o
+ * texto exato da mensagem (`HuntMenu.tsx#bloqueioDeBiomaClient` espelha
+ * esta string).
+ */
+export function bloqueioDeBiomaPendente(
+  mapId: string, grupo: string, biomaProgress: BiomaProgress,
+): string | null {
+  const indiceEsperado = indiceDoBiomaNoMapId(mapId, grupo)
+  // Bioma sem protetor habilitado (indice -1, nao acontece hoje com os 12
+  // todos habilitados — PH-225) ou o PRIMEIRO da ordem (indice 0) libera
+  // automatico, sem checar nada — nao ha "Lord anterior" pra vencer.
+  if (indiceEsperado <= 0) return null
+  const progresso = (biomaProgress?.[grupo as keyof BiomaProgress] ?? 0) as number
+  if (progresso >= indiceEsperado) return null
+  const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1]
+  const anteriorNome = BIOMA_POR_CHAVE[anteriorChave]?.nome ?? anteriorChave
+  return `Vença o Lord de ${anteriorNome} para liberar esta área.`
 }
 
 async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<Response> {
@@ -192,6 +224,12 @@ async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<R
   if (!estado.unlockedContinents.includes(grupo)) {
     throw new ErroHttp(403, 'Derrote o Campeao Lance para acessar esta area.')
   }
+  // PH-227: gate sequencial de bioma (PH-207/226) — sem isto, qualquer
+  // jogador chama esta rota direto (curl/devtools) com o mapId de um bioma
+  // ainda bloqueado e entra mesmo assim. Regra do projeto: limite de
+  // negocio so no cliente vira bypass.
+  const bloqueio = bloqueioDeBiomaPendente(mapId, grupo, estado.biomaProgress)
+  if (bloqueio) throw new ErroHttp(403, bloqueio)
 
   const anterior = await sessaoAberta(cfg, userId)
   if (anterior) {

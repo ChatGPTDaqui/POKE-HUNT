@@ -13,8 +13,8 @@
 //    era workaround pra nao reconstruir DOM interativo debaixo do ponteiro.
 //    Aqui as contagens saem de selectors do Zustand.
 //  - `controller.save()` apos cada mutacao: o `persist` grava sozinho.
-import { useEffect, useMemo, useRef } from 'react'
-import { Question, Warning } from '@phosphor-icons/react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Warning } from '@phosphor-icons/react'
 import { ITEMS } from '@/data/items'
 import { SPECIES } from '@/data/pokes'
 import { getEncounter } from '@/data/enemies'
@@ -22,36 +22,18 @@ import { BEST_POTION_OPTION } from '@/engine/systems/autoSystem'
 import { useGameStateStore } from '@/stores/gameStateStore'
 import { sincronizarAuto } from '@/data/remote/autoridade'
 import { useWorldStore } from '@/stores/worldStore'
-import { GameButton, GameCheck, GameInput, GameSelect, GameSwitch } from '@/components/game/controls'
-import { Explicacao } from '@/components/shared/Explicacao'
+import { GameButton, GameCheck, GameInput, GameSelect, GameSwitch, SegmentedTabs } from '@/components/game/controls'
 import { estoqueDoItemDeRegra, itensEmUso, LIMIAR_ESTOQUE_BAIXO, FAMILIA_REVIVE } from './estoqueBaixo'
 import { usePrevisaoDeConsumo, formatarTempoRestante, rotuloDoRecurso } from './consumo'
 import { ItemPicker, type OpcaoDeItem } from './ItemPicker'
+import { BlocoAuto, InfoIcon } from './BlocoAuto'
+import { LurePanel } from './LurePanel'
 import { cn } from '@/lib/utils'
 
 const MAX_AUTO_POT_RULES = 3
 
 const POTION_OPTIONS = Object.values(ITEMS).filter((i) => i.kind === 'potion')
 const BALL_OPTIONS = Object.values(ITEMS).filter((i) => i.kind === 'ball')
-
-// A explicacao de cada automacao vivia so no hover do `?` — e e justamente aqui
-// que o jogador decide se liga o auto-catch e com qual bola. Este arquivo tinha
-// um ramo proprio por `coarse` abrindo um Sheet; virou `Explicacao`, o mecanismo
-// unico que abre nos dois ponteiros (ver components/shared/Explicacao.tsx).
-function InfoIcon({ text }: { text: string }) {
-  return (
-    <Explicacao
-      conteudo={text}
-      classeDoConteudo="max-w-[18em]"
-      className="cursor-help"
-      rotulo="O que isso faz"
-    >
-      <span className="inline-flex h-[1.15em] w-[1.15em] items-center justify-center rounded-full border border-n600 text-n500">
-        <Question className="text-[.7em]" />
-      </span>
-    </Explicacao>
-  )
-}
 
 /**
  * Monta as opcoes do ItemPicker com estoque e alerta ja resolvidos.
@@ -91,40 +73,6 @@ function useOpcoes(
     }
   })
   return extra ? [extra, ...lista] : lista
-}
-
-/** Bloco de uma automacao: cabecalho com toggle + corpo com as regras dela. */
-function BlocoAuto({
-  titulo, dica, ligado, aoLigar, extraCabecalho, children,
-}: {
-  titulo: string
-  dica: string
-  ligado: boolean
-  aoLigar: (v: boolean) => void
-  extraCabecalho?: React.ReactNode
-  children?: React.ReactNode
-}) {
-  return (
-    <section
-      className={cn(
-        'flex flex-col gap-[.5em] rounded-[.7em] border p-[.6em] transition-colors',
-        ligado ? 'border-n700 bg-n900/60' : 'border-n800',
-      )}
-    >
-      <header className="flex items-center gap-[.5em]">
-        <span className="flex flex-1 items-center gap-[.4em] font-medium">
-          {titulo}
-          <InfoIcon text={dica} />
-        </span>
-        {extraCabecalho}
-        <GameSwitch checked={ligado} onChange={aoLigar} label={titulo} />
-      </header>
-      {/* O corpo continua visivel com a automacao desligada, so esmaecido: a
-          configuracao e o motivo de o jogador abrir este painel, e escondê-la
-          faria "ligar" virar um salto no escuro. */}
-      {children && <div className={cn('flex flex-col gap-[.5em]', !ligado && 'opacity-55')}>{children}</div>}
-    </section>
-  )
 }
 
 /** Aviso minimalista de "os suprimentos estao acabando". */
@@ -180,7 +128,13 @@ function useCurrentHuntSpecies() {
   return [...seen.values()]
 }
 
-export function AutoPanel() {
+/**
+ * As automacoes de sempre — auto-catch, auto-pot, auto-status, auto-revive e o
+ * avanco manual de sala. Virou uma ABA quando o Lure entrou (ver `AutoPanel`
+ * no fim do arquivo): sao duas familias de configuracao diferentes, e empilhar
+ * as duas numa coluna de 19em faria a de baixo nunca ser encontrada.
+ */
+function AbaDeAutomacoes() {
   const autoToggles = useGameStateStore((s) => s.autoToggles)
   const autoPotRules = useGameStateStore((s) => s.autoPotRules)
   const autoCatchConfig = useGameStateStore((s) => s.autoCatchConfig)
@@ -230,7 +184,7 @@ export function AutoPanel() {
   )
 
   return (
-    <div className="flex flex-col gap-[.45em] text-[.8em]">
+    <div className="flex flex-col gap-[.45em]">
       <PrevisaoDeRecursos />
 
       <BlocoAuto
@@ -421,6 +375,34 @@ export function AutoPanel() {
         ligado={autoToggles.avancoManualDeSala}
         aoLigar={(v) => setAutoToggle('avancoManualDeSala', v)}
       />
+    </div>
+  )
+}
+
+type AbaDoBot = 'automacoes' | 'lure'
+
+const ABAS: { value: AbaDoBot; label: string }[] = [
+  { value: 'automacoes', label: 'Automações' },
+  { value: 'lure', label: 'Lure' },
+]
+
+/**
+ * O painel inteiro: a fileira de abas + a aba escolhida.
+ *
+ * Cada aba mantem o PROPRIO `useEffect` de sincronizacao com o servidor (o
+ * `sincronizarAuto` manda o batch completo dos dois jeitos), entao trocar de
+ * aba nao perde config nem dispara sync a toa — o primeiro disparo de cada uma
+ * e ignorado de proposito. Ver a nota longa em `AbaDeAutomacoes`.
+ *
+ * `text-[.8em]` fica AQUI, uma vez: as abas e as duas telas escalam juntas, e
+ * era daqui que o tamanho de fonte do painel sempre saiu.
+ */
+export function AutoPanel() {
+  const [aba, setAba] = useState<AbaDoBot>('automacoes')
+  return (
+    <div className="flex flex-col gap-[.5em] text-[.8em]">
+      <SegmentedTabs value={aba} onChange={setAba} options={ABAS} />
+      {aba === 'automacoes' ? <AbaDeAutomacoes /> : <LurePanel />}
     </div>
   )
 }

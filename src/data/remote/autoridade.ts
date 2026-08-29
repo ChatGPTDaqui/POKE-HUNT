@@ -71,7 +71,11 @@ function reconciliarExpAntesDeAplicar(doServidor: GameStateData, resumo: Respost
   const queda = pokeLocal.exp - pokeServidor.exp
   if (queda <= 0) return // subiu ou empatou, servidor passa como veio
 
-  const orcamento = resumo.expPerdidaPorMorte
+  // `?? 0`: Edge mais antiga (ou `/estado` sem resim) pode mandar `resumo` sem
+  // `expPerdidaPorMorte`. Sem o coalesce, `pokeLocal.exp - undefined` grava
+  // `NaN` na exp do POKE ativo e a barra/nivel quebram ate o proximo flush
+  // limpo (PH-221). Ausente = sem orcamento de morte = toda queda e espuria.
+  const orcamento = resumo.expPerdidaPorMorte ?? 0
   if (queda <= orcamento) return // legitima (penalidade de morte real), mostra normal
 
   // Excedente e espurio — trava no que a penalidade de verdade justifica,
@@ -83,6 +87,67 @@ function reconciliarExpAntesDeAplicar(doServidor: GameStateData, resumo: Respost
     exp: pokeLocal.exp - orcamento,
     level: Math.max(pokeLocal.level, pokeServidor.level),
   }
+}
+
+/**
+ * PH-221: reflete no `worldStore.player.poke` — o que o HUD (`StatusRail`) le
+ * durante a hunt — a mudanca de PROGRESSAO que o servidor acabou de aplicar no
+ * `gameStateStore`.
+ *
+ * Sob autoridade, `aplicarEstadoDoServidor` so mexe no `gameStateStore`, e o
+ * unico sync (`syncActivePokeToGameState`, GameCanvas, 5s) so vai
+ * `world -> gameState` — nada volta. Efeito: evolucao, golpe novo, recalculo
+ * de stat e correcao de nivel do POKE ativo so apareciam no HUD depois do F5
+ * (que reconstroi o world a partir do `gameStateStore`) ou ao sair da hunt.
+ *
+ * Regras, na mesma filosofia de `reconciliarExpAntesDeAplicar`:
+ *  - especie / stats / minLevel / traco / `unlockedAbilities`: SEGUEM o
+ *    servidor sempre (evolucao e golpe novo tem que aparecer). `hp` continua
+ *    sendo a vida ao vivo do combate — so e reclampado pro novo teto.
+ *  - nivel / exp: NUNCA regridem abaixo do que o jogador ja viu no world. Sobe
+ *    quando o servidor traz mais; segura o local quando viria menos
+ *    (descompasso de janela, pessimista de aba oculta). Valor nao-finito do
+ *    servidor e ignorado.
+ *
+ * `activeAbilities` / `disabledAbilities` NAO entram aqui de proposito: sao
+ * escolha do jogador e ja tem caminho proprio de patch no world
+ * (`controller.ts#definirGolpesAtivos` / `#alternarHabilidade`).
+ */
+function reconciliarPokeAtivoNoWorld(doServidor: GameStateData): void {
+  if (!Array.isArray(doServidor.team)) return
+  const noWorld = useWorldStore.getState().player?.poke
+  if (!noWorld) return
+  const doServ = doServidor.team.find((p) => p.uid === noWorld.uid)
+  if (!doServ) return
+
+  const level = Math.max(noWorld.level, Number.isFinite(doServ.level) ? doServ.level : noWorld.level)
+  const exp = Math.max(noWorld.exp, Number.isFinite(doServ.exp) ? doServ.exp : noWorld.exp)
+
+  const jaAtual =
+    doServ.speciesId === noWorld.speciesId
+    && level === noWorld.level
+    && exp === noWorld.exp
+    && (doServ.unlockedAbilities?.length ?? 0) === (noWorld.unlockedAbilities?.length ?? 0)
+    && (doServ.minLevel ?? null) === (noWorld.minLevel ?? null)
+  if (jaAtual) return
+
+  const stats = doServ.stats ?? noWorld.stats
+  useWorldStore.getState().update((draft) => {
+    if (!draft.player || draft.player.poke.uid !== noWorld.uid) return
+    draft.player.poke = {
+      ...draft.player.poke,
+      speciesId: doServ.speciesId,
+      level,
+      exp,
+      stats,
+      hp: Math.min(draft.player.poke.hp, stats.hp),
+      minLevel: doServ.minLevel ?? draft.player.poke.minLevel,
+      isShiny: doServ.isShiny,
+      nature: doServ.nature ?? draft.player.poke.nature,
+      trait: doServ.trait ?? draft.player.poke.trait,
+      unlockedAbilities: doServ.unlockedAbilities ?? draft.player.poke.unlockedAbilities,
+    }
+  })
 }
 
 /**
@@ -131,6 +196,10 @@ export function aplicarEstadoDoServidor(estado: unknown, parcial = false, resumo
   if (!estado || typeof estado !== 'object') return
   const doServidor = estado as GameStateData
   reconciliarExpAntesDeAplicar(doServidor, resumo)
+  // Roda ANTES do setState de proposito: so le `doServidor.team` + worldStore e
+  // escreve no worldStore — nao depende do gameStateStore ja ter sido gravado,
+  // e ver os valores ja travados por `reconciliarExpAntesDeAplicar` acima.
+  reconciliarPokeAtivoNoWorld(doServidor)
   if (!parcial) {
     limparCapturasPreditas()
     useGameStateStore.setState(doServidor)
@@ -604,6 +673,19 @@ export async function avancarSalaManualmente(): Promise<void> {
 // dispararia uma chamada de rede por segundo.
 const INTERVALO_MINIMO_COMMIT_MS = 5000
 let ultimoCommit = 0
+// Trailing edge do debounce acima — achado revisando o proprio bug que este
+// arquivo documenta ("dou F5 e perco niveis"): o guard so tinha leading edge
+// (`return` puro dentro da janela), sem agendar nada pro fim dela. Um SEGUNDO
+// level-up a menos de 5s do primeiro (comum: POKE de nivel baixo, ou um abate
+// que cruza varios niveis de uma vez via `grantExp`) era descartado em
+// silencio — nada ficava agendado pra cobrir aquele ganho, e o jogador so
+// reconciliava no proximo gatilho normal (timer de 30s, /acao, mercado,
+// visibilitychange). Um F5 antes disso lia o ultimo estado persistido, sem
+// aquele nivel — exatamente o bug relatado, so que na FRESTA que o fix
+// original nao fechava. Sem parametro de proposito: o commit agendado le o
+// estado NA HORA que dispara, entao ja cobre qualquer level-up que tenha
+// acontecido no meio da espera, nao so o que a disparou.
+let commitAgendado: ReturnType<typeof setTimeout> | null = null
 
 /**
  * Grava o progresso AGORA, sem esperar o ciclo normal.
@@ -625,7 +707,19 @@ let ultimoCommit = 0
  */
 export async function commitAgora(): Promise<void> {
   const agora = Date.now()
-  if (agora - ultimoCommit < INTERVALO_MINIMO_COMMIT_MS) return
+  const restante = INTERVALO_MINIMO_COMMIT_MS - (agora - ultimoCommit)
+  if (restante > 0) {
+    // Ja tem um commit agendado pro fim desta janela — nao duplica o timer,
+    // ele ja vai cobrir este level-up (e qualquer outro que aconteca antes
+    // de disparar) igual.
+    if (commitAgendado == null) {
+      commitAgendado = setTimeout(() => {
+        commitAgendado = null
+        void commitAgora()
+      }, restante)
+    }
+    return
+  }
   ultimoCommit = agora
   if (servidorAtivo()) {
     // So faz sentido com uma sessao de hunt aberta; fora dela o `liquidar`
@@ -674,6 +768,32 @@ export function sincronizarAuto(): void {
 }
 
 /**
+ * A config de LURE, em CHAMADA PROPRIA — e nao mais uma chave no patch de
+ * `sincronizarAuto` acima.
+ *
+ * O motivo e a forma da RPC, nao organizacao: `configurar_auto` valida por
+ * chave conhecida e uma chave que ela nao reconhece derruba a TRANSACAO INTEIRA
+ * (ver o comentario da migration 20260826180000, que existe por causa disso).
+ * Enquanto a migration que ensina `lureConfig` a ela nao estiver aplicada num
+ * ambiente, mandar a chave junto do resto trocaria "a config de lure nao salva"
+ * por "NENHUMA automacao salva" — auto-catch, auto-pot, auto-venda e regras por
+ * especie caem com ela, todas em silencio, porque o `catch` aqui e um
+ * `reportarErro` e nao um bloqueio de tela.
+ *
+ * Isso valeria pra qualquer chave nova daqui pra frente, entao a separacao fica
+ * mesmo depois do deploy: dois grupos de config independentes nao tem motivo pra
+ * compartilhar uma transacao tudo-ou-nada.
+ */
+export function sincronizarLure(): void {
+  if (!servidorAtivo()) return
+  const s = useGameStateStore.getState()
+  void executarAcaoRpc({
+    tipo: 'configurarAuto',
+    patch: { lureConfig: s.lureConfig },
+  }).catch(reportarErro)
+}
+
+/**
  * Ultimo `configurar_auto` ao sair da pagina (PH-42).
  *
  * `sincronizarAuto()` acima e fire-and-forget via `supabase.rpc()` — se o
@@ -702,18 +822,28 @@ export function sincronizarAutoAoSair(): void {
   void supabase.auth.getSession().then(({ data }) => {
     const token = data.session?.access_token
     if (!token) return
-    void fetch(`${supabaseUrl}/rest/v1/rpc/configurar_auto`, {
-      method: 'POST',
-      keepalive: true,
-      headers: {
-        apikey: anonKey,
-        Authorization: `Bearer ${token}`,
-        'content-type': 'application/json',
-        'Accept-Profile': schema,
-        'Content-Profile': schema,
-      },
-      body: JSON.stringify({ p_patch: patch }),
-    })
+    // DUAS requests, pela mesma razao que `sincronizarLure` existe separada: se
+    // a chave `lureConfig` for recusada pelo ambiente, ela nao pode levar a
+    // config das outras automacoes junto no unload — que e exatamente o momento
+    // em que ninguem ve o erro.
+    postConfigurarAuto(token, patch)
+    postConfigurarAuto(token, { lureConfig: s.lureConfig })
+  })
+}
+
+/** POST cru em `configurar_auto` com `keepalive` — ver `sincronizarAutoAoSair`. */
+function postConfigurarAuto(token: string, patch: Record<string, unknown>): void {
+  void fetch(`${supabaseUrl}/rest/v1/rpc/configurar_auto`, {
+    method: 'POST',
+    keepalive: true,
+    headers: {
+      apikey: anonKey,
+      Authorization: `Bearer ${token}`,
+      'content-type': 'application/json',
+      'Accept-Profile': schema,
+      'Content-Profile': schema,
+    },
+    body: JSON.stringify({ p_patch: patch }),
   })
 }
 

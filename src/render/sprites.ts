@@ -11,14 +11,21 @@
 // tambem `world` pra resolver o id numa entidade de verdade
 // (`resolveEffectOwner`), no lugar de `effect.owner` direto.
 import { directionRowFromFacing } from '@/engine/systems/animationSystem'
+import { protetorDaSala } from '@/engine/systems/salaSystem'
 import { hasBattleSprites } from '@/data/battleSprites'
 import { effectProgress } from '@/engine/effect'
 import { SPECIES } from '@/data/pokes'
 import { scaleForSpecies } from '@/data/pokeHeights'
 import { footOffsetFraction } from '@/data/spriteFootOffsets'
+import { topoOpacoFraction } from '@/data/spriteTopOffsets'
+import {
+  alturaDaFonte, caixaDoNomeDeGolpe, caixaDoNumeroDeDano, caixaDoRotuloFixo, FONTE, medidorDoCanvas,
+  resolverColunasDeTexto, type Caixa, type CaixaDeEfeito, type Janela, type Medidor,
+} from './textoDeCombate'
 import { hpBarFillColor } from '@/data/hpBar'
 import { AURA_COLORS } from '@/data/auraColors'
 import { LEGENDARY_SPECIES_IDS } from '@/data/legendaries'
+import { colorForType } from '@/data/typeColors'
 import { impactShapeForType, type ImpactShape } from '@/data/impactShapes'
 import {
   captureAnimFrameDuration,
@@ -41,6 +48,23 @@ const IV_MAX = 31
 
 function getSpecies(entity: WorldEntity): Species {
   return SPECIES[entity.poke.speciesId]
+}
+
+// PH-228/236: `isProtetor` so existe em EnemyEntity (WorldEntity tambem
+// cobre o player) — `in` narrowing pra nao quebrar o union. Sistema separado
+// do LEGENDARY_SPECIES_IDS que drawHpBar ja usava (Modo Pesadelo, boss por
+// especie fixa) — os dois se somam, nao se substituem.
+function ehProtetor(entity: WorldEntity): boolean {
+  return 'isProtetor' in entity && entity.isProtetor === true
+}
+
+// Mesmo fator nos 3 lugares que multiplicam scaleForSpecies (spriteBounds,
+// visualTopOffset, sombra) — sprite maior precisa da sombra/HP-bar/name-tag
+// acompanhando, senao a barra fica flutuando longe da cabeca do protetor.
+const PROTETOR_SPRITE_SCALE = 1.4
+
+function effectiveScale(entity: WorldEntity): number {
+  return scaleForSpecies(getSpecies(entity).id) * (ehProtetor(entity) ? PROTETOR_SPRITE_SCALE : 1)
 }
 
 function maxHp(entity: WorldEntity): number {
@@ -238,7 +262,7 @@ interface SpriteBounds {
 function spriteBounds(entity: WorldEntity): SpriteBounds | null {
   if (!entity.battleAnim) return null
   const anim = entity.battleAnim
-  const scale = scaleForSpecies(getSpecies(entity).id)
+  const scale = effectiveScale(entity)
   const footFraction = footOffsetFraction(getSpecies(entity).id)
   const destW = anim.frameWidth * scale
   const destH = anim.frameHeight * scale
@@ -383,17 +407,38 @@ function drawAura(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
   ctx.restore()
 }
 
+/**
+ * Distancia de `entity.y` ate o topo VISIVEL do POKE — o primeiro pixel opaco
+ * do quadro, e nao a borda da moldura (PH-189).
+ *
+ * Ancora de tudo que fica acima do corpo: nome, nivel, barra de HP, aura de
+ * boss, simbolo de status e a coluna de texto de combate. Ate a PH-189 ela
+ * devolvia o topo da MOLDURA, e como o padding vazio do PMD varia por especie o
+ * vao entre a cabeca e o rotulo ia de 0 a 11px — medido em
+ * `scripts/harness/vao-do-rotulo.mjs`. Esse vao vazio e justamente a faixa que o
+ * texto do POKE vizinho invade.
+ *
+ * A fracao e lida POR FILEIRA DE DIRECAO, com a mesma fileira que
+ * `currentFrameSource` desenha: a silhueta de um POKE de perfil e mais alta que
+ * a dele de frente, e acompanhar isso e o que deixa o rotulo colado na cabeca em
+ * vez de flutuando acima dela em metade das direcoes.
+ */
 function visualTopOffset(entity: WorldEntity): number {
   if (!entity.battleAnim) return entity.radius
-  const scale = scaleForSpecies(getSpecies(entity).id)
+  const scale = effectiveScale(entity)
   const footFraction = footOffsetFraction(getSpecies(entity).id)
-  return entity.battleAnim.frameHeight * (scale * (0.5 + footFraction) - footFraction)
+  const topoVazio = topoOpacoFraction(
+    getSpecies(entity).id,
+    entity.battleAnim.name,
+    directionRowFromFacing(entity.facing),
+  )
+  return entity.battleAnim.frameHeight * (scale * (0.5 + footFraction - topoVazio) - footFraction)
 }
 
 function drawShadow(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
   const groundY = entity.y + groundOffset(entity)
   const baseWidth = entity.battleAnim
-    ? entity.battleAnim.frameWidth * scaleForSpecies(getSpecies(entity).id)
+    ? entity.battleAnim.frameWidth * effectiveScale(entity)
     : entity.radius * 2
   const rx = baseWidth * 0.32
   ctx.save()
@@ -404,8 +449,42 @@ function drawShadow(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
   ctx.restore()
 }
 
+// PH-228/236: aura de "isso e protetor", separada de `drawAura` (que
+// sinaliza IV maximizado — semantica diferente, um protetor com IV normal
+// nao devia ganhar halo de raridade que ele nao tem). Pulso pelo relogio de
+// parede, mesmo padrao de CICLO_SIMBOLO_MS abaixo — enfeite que roda igual
+// com o jogo pausado atras de um menu.
+const AURA_DO_PROTETOR_CICLO_MS = 1600
+const AURA_DO_PROTETOR_RAIO_MIN = 0.85
+const AURA_DO_PROTETOR_RAIO_MAX = 1.05
+
+function drawAuraDoProtetor(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
+  if (!ehProtetor(entity)) return
+  const cor = colorForType(getSpecies(entity).type)
+  const bounds = spriteBounds(entity)
+  const raioBase = bounds ? Math.max(bounds.w, bounds.h) * 0.55 : entity.radius * 1.8
+  const fase = (performance.now() % AURA_DO_PROTETOR_CICLO_MS) / AURA_DO_PROTETOR_CICLO_MS
+  // Onda triangular (sobe e desce) em vez de senoidal — barato e a diferenca
+  // nao e perceptivel num halo desse tamanho.
+  const pulso = fase < 0.5 ? fase * 2 : 2 - fase * 2
+  const raio = raioBase * (AURA_DO_PROTETOR_RAIO_MIN + (AURA_DO_PROTETOR_RAIO_MAX - AURA_DO_PROTETOR_RAIO_MIN) * pulso)
+  const centroY = entity.y - visualTopOffset(entity) * 0.5
+
+  ctx.save()
+  const grad = ctx.createRadialGradient(entity.x, centroY, 0, entity.x, centroY, raio)
+  grad.addColorStop(0, `${cor}66`)
+  grad.addColorStop(0.7, `${cor}33`)
+  grad.addColorStop(1, `${cor}00`)
+  ctx.fillStyle = grad
+  ctx.beginPath()
+  ctx.arc(entity.x, centroY, raio, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.restore()
+}
+
 export function drawEntity(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
   drawShadow(ctx, entity)
+  drawAuraDoProtetor(ctx, entity)
   drawAura(ctx, entity)
   const drewSprite = Boolean(entity.battleAnim) && drawBattleSprite(ctx, entity)
   // O placeholder geometrico (triangulo/circulo colorido) e pra especie que NAO
@@ -425,6 +504,108 @@ export function drawEntity(ctx: CanvasRenderingContext2D, entity: WorldEntity): 
   // colorida mesmo com a arte ja em cache.
   if (!drewSprite && !hasBattleSprites(getSpecies(entity).id)) drawPlaceholderShape(ctx, entity)
   drawVfxSobreCorpo(ctx, entity)
+}
+
+// --- quem sou eu, e em quem estou batendo (PH-189) ---------------------------
+//
+// Com 4 corpos em cena, achar "qual e o meu" exigia LER o nome da especie —
+// texto, no meio de outros seis textos, pra responder a pergunta mais basica da
+// tela. `player.targetId` ja existia e ja era publicado por
+// `combatSystem#updateCombat`; o canvas simplesmente nao desenhava nada com ele.
+//
+// Sao duas marcas de FORMA e POSICAO diferentes, nao duas cores da mesma marca:
+// um anel no CHAO embaixo do meu POKE, e um colchete em volta do CORPO do alvo.
+// Distinguir por cor sozinha falharia pra quem nao separa vermelho de azul, e
+// os dois marcadores podem estar na tela ao mesmo tempo.
+const COR_DA_MARCA_DO_JOGADOR = '#5eead4'
+const COR_DA_MARCA_DO_ALVO = '#fb7185'
+const CICLO_DA_MARCA_MS = 1800
+
+/** Onda triangular 0..1 pelo relogio de parede. Mesma escolha de `drawBossAura`. */
+function pulsoDaMarca(): number {
+  const fase = (performance.now() % CICLO_DA_MARCA_MS) / CICLO_DA_MARCA_MS
+  return fase < 0.5 ? fase * 2 : 2 - fase * 2
+}
+
+/**
+ * Anel no chao embaixo do POKE do jogador.
+ *
+ * No CHAO e nao em volta do corpo porque o chao esta sempre livre: em volta do
+ * corpo ele disputaria com a aura de IV maximo, com a aura de boss e com a
+ * tinta de status, e um marcador que some quando o POKE fica envenenado nao
+ * serve pra "qual e o meu".
+ *
+ * Desenhado ANTES dos corpos (ver `Renderer#renderMap`) pra ficar por baixo de
+ * todo mundo — e uma marca de chao, e um anel passando por cima de um POKE que
+ * anda em cima dele leria como efeito de golpe.
+ */
+export function drawMarcaDoJogador(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
+  const groundY = entity.y + groundOffset(entity)
+  const baseWidth = entity.battleAnim
+    ? entity.battleAnim.frameWidth * effectiveScale(entity)
+    : entity.radius * 2
+  const rx = baseWidth * 0.42 * (0.94 + pulsoDaMarca() * 0.12)
+
+  ctx.save()
+  ctx.strokeStyle = COR_DA_MARCA_DO_JOGADOR
+  ctx.lineWidth = 2
+  ctx.globalAlpha = 0.55 + pulsoDaMarca() * 0.35
+  ctx.beginPath()
+  ctx.ellipse(entity.x, groundY - 1, rx, rx * 0.35, 0, 0, Math.PI * 2)
+  ctx.stroke()
+  // Anel interno mais fraco: um traco so, sobre grama de alta frequencia, some.
+  // Dois circulos concentricos leem como marcador mesmo com o fundo poluido.
+  ctx.globalAlpha *= 0.6
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.ellipse(entity.x, groundY - 1, rx * 0.66, rx * 0.66 * 0.35, 0, 0, Math.PI * 2)
+  ctx.stroke()
+  ctx.restore()
+}
+
+/** Comprimento do braco de cada colchete, como fracao do lado da caixa. */
+const BRACO_DO_COLCHETE = 0.3
+
+/**
+ * Colchetes nos quatro cantos do corpo do alvo atual.
+ *
+ * Em volta do CORPO (e nao no chao) porque a pergunta e outra: "em quem estou
+ * batendo" e sobre o alvo, e o retangulo de mira e a convencao que responde isso
+ * sem texto. Desenhado DEPOIS dos corpos, senao o proprio POKE o cobriria.
+ *
+ * Cantos e nao retangulo fechado: fechado vira uma moldura que compete com a
+ * silhueta do POKE — quatro cantos leem como mira e deixam o corpo inteiro
+ * visivel.
+ */
+export function drawMarcaDoAlvo(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
+  const bounds = spriteBounds(entity)
+  const meio = entity.radius * 1.2
+  const caixa = bounds ?? { x: entity.x - meio, y: entity.y - meio, w: meio * 2, h: meio * 2 }
+  // Afasta com o pulso: a mira "respira" em volta do alvo, o que a separa de
+  // qualquer coisa estatica desenhada no cenario.
+  const folga = 2 + pulsoDaMarca() * 2
+  const x0 = caixa.x - folga
+  const y0 = caixa.y - folga
+  const x1 = caixa.x + caixa.w + folga
+  const y1 = caixa.y + caixa.h + folga
+  const bx = Math.max(4, caixa.w * BRACO_DO_COLCHETE)
+  const by = Math.max(4, caixa.h * BRACO_DO_COLCHETE)
+
+  ctx.save()
+  ctx.strokeStyle = COR_DA_MARCA_DO_ALVO
+  ctx.lineWidth = 2
+  ctx.lineCap = 'round'
+  ctx.globalAlpha = 0.95
+  for (const [cx, cy, sx, sy] of [
+    [x0, y0, 1, 1], [x1, y0, -1, 1], [x0, y1, 1, -1], [x1, y1, -1, -1],
+  ] as const) {
+    ctx.beginPath()
+    ctx.moveTo(cx, cy + sy * by)
+    ctx.lineTo(cx, cy)
+    ctx.lineTo(cx + sx * bx, cy)
+    ctx.stroke()
+  }
+  ctx.restore()
 }
 
 // Altura do simbolo constante de sono/confusao, em pixel de mundo. Fixa e nao
@@ -500,13 +681,28 @@ function roundedRectPath(ctx: CanvasRenderingContext2D, x: number, y: number, w:
   ctx.closePath()
 }
 
-const BOSS_HP_BAR_WIDTH_MULTIPLIER = 5
-const BOSS_HP_BAR_HEIGHT_MULTIPLIER = 2
+const PROTETOR_HP_BAR_WIDTH_MULTIPLIER = 5
+const PROTETOR_HP_BAR_HEIGHT_MULTIPLIER = 2
 
-export function drawHpBar(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
-  const isBoss = LEGENDARY_SPECIES_IDS.includes(getSpecies(entity).id)
-  const width = HP_BAR_WIDTH * (isBoss ? BOSS_HP_BAR_WIDTH_MULTIPLIER : 1)
-  const height = HP_BAR_HEIGHT * (isBoss ? BOSS_HP_BAR_HEIGHT_MULTIPLIER : 1)
+/**
+ * Cor do numero de porcentagem. Branco puro em cima do contorno preto — a COR
+ * ja e canal da barra atras (`hpBarFillColor` vai de verde a vermelho), e
+ * repetir o mesmo canal no numero nao acrescenta leitura nenhuma; o numero esta
+ * ali pra dar a quantidade EXATA que o comprimento de um traco de 32px nao da.
+ */
+const COR_DA_PORCENTAGEM = '#ffffff'
+
+export function drawHpBar(
+  ctx: CanvasRenderingContext2D, entity: WorldEntity, mostrarPorcentagem = false,
+): void {
+  // PH-228/236: mesma barra grande que o Modo Pesadelo ja usa pros bosses
+  // por especie fixa (LEGENDARY_SPECIES_IDS) — o protetor por sala/andar
+  // (isProtetor) entra no mesmo tratamento visual, os dois sistemas nao se
+  // excluem. Nome neutro (`barraGrande`, nao `isProtetor`) de proposito: a
+  // condicao cobre os DOIS sistemas, e so um deles e de fato protetor.
+  const barraGrande = ehProtetor(entity) || LEGENDARY_SPECIES_IDS.includes(getSpecies(entity).id)
+  const width = HP_BAR_WIDTH * (barraGrande ? PROTETOR_HP_BAR_WIDTH_MULTIPLIER : 1)
+  const height = HP_BAR_HEIGHT * (barraGrande ? PROTETOR_HP_BAR_HEIGHT_MULTIPLIER : 1)
   const x = entity.x - width / 2
   const y = entity.y - visualTopOffset(entity) - 8 - height
   const pct = Math.max(0, entity.poke.hp / maxHp(entity))
@@ -524,17 +720,70 @@ export function drawHpBar(ctx: CanvasRenderingContext2D, entity: WorldEntity): v
     ctx.fillStyle = hpBarFillColor(pct)
     ctx.fill()
   }
+
+  // A porcentagem (PH-189). So no POKE do jogador e no alvo dele — quem decide
+  // e o `Renderer`, que e quem conhece `player.targetId`. Escrever em todo mundo
+  // devolveria ao campo exatamente o excesso de texto que a issue esta tirando
+  // dele, e num mob de passagem o numero nao responde pergunta nenhuma: o
+  // comprimento da barra ja diz "quase morto".
+  //
+  // A DIREITA da barra, e nao em cima: acima ficam o nivel (-15) e o nome (-26),
+  // e embaixo esta a cabeca do POKE. A lateral e o unico lugar livre que nao
+  // empurra nada.
+  if (mostrarPorcentagem) {
+    // Arredonda pra cima acima de zero: com 1 de HP de 300, `Math.round` daria
+    // "0%" num POKE que ainda esta vivo — e "0%" le como morto.
+    const inteiro = pct > 0 ? Math.max(1, Math.round(pct * 100)) : 0
+    ctx.font = FONTE.porcentagemDeHp
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'alphabetic'
+    ctx.lineWidth = 3
+    ctx.lineJoin = 'round'
+    ctx.strokeStyle = '#000000'
+    const texto = `${inteiro}%`
+    const py = y + height
+    ctx.strokeText(texto, x + width + 3, py)
+    ctx.fillStyle = COR_DA_PORCENTAGEM
+    ctx.fillText(texto, x + width + 3, py)
+  }
   ctx.restore()
 }
 
 const SHINY_NAME_COLOR = '#b366ff'
 
-export function drawNameLevelTag(ctx: CanvasRenderingContext2D, entity: WorldEntity): void {
+// PH-228/236: cor propria pra distinguir do amarelo de shiny e do branco
+// normal — vermelho/dourado le como "aviso/destaque", nao como raridade de
+// captura.
+const PROTETOR_TAG_COLOR = '#ff4d4d'
+
+// PH-236: qual tag mostrar (Guardian, sala 1-9, ou Lord, sala 10) depende do
+// TIPO do protetor — informacao que nao vive na entidade (`isProtetor` so
+// marca QUE e protetor, nao QUAL). Quem chama passa o tipo resolvido pela
+// sala (`protetorDaSala`, engine/systems/salaSystem.ts) — sprites.ts fica
+// livre de reimportar a logica de sala, so decide o texto. `undefined`/
+// `null` (player, cena do Hospital, chamador antigo) cai no fallback
+// GUARDIAN, mas so aparece na tela quando `isProtetor` tambem for true.
+//
+// `rotuloDeProtetor` (abaixo) e a UNICA fonte do texto do selo — o
+// planejador de texto (PH-189, `medirTextoDeCombate`) precisa medir a mesma
+// string que vai pro canvas pra tratar o rotulo como obstaculo; duplicar a
+// string ali e aqui vira caixa medida errada no dia em que so um dos dois
+// mudar.
+export function rotuloDeProtetor(tipoDeProtetor?: 'guardian' | 'lord' | null): string {
+  return tipoDeProtetor === 'lord' ? '★ LORD ★' : '★ GUARDIAN ★'
+}
+
+export function drawNameLevelTag(
+  ctx: CanvasRenderingContext2D,
+  entity: WorldEntity,
+  tipoDeProtetor?: 'guardian' | 'lord' | null,
+): void {
   const halfHeight = visualTopOffset(entity)
   const isShiny = entity.poke.isShiny
+  const protetor = ehProtetor(entity)
   const name = isShiny ? `✨ ${getSpecies(entity).name}` : getSpecies(entity).name
   ctx.save()
-  ctx.font = '9px monospace'
+  ctx.font = FONTE.nomeDaEspecie
   ctx.textAlign = 'center'
   ctx.lineWidth = 3
   ctx.lineJoin = 'round'
@@ -546,6 +795,13 @@ export function drawNameLevelTag(ctx: CanvasRenderingContext2D, entity: WorldEnt
   ctx.strokeText(name, entity.x, entity.y - halfHeight - 26)
   ctx.fillStyle = isShiny ? SHINY_NAME_COLOR : '#f1f1f6'
   ctx.fillText(name, entity.x, entity.y - halfHeight - 26)
+  if (protetor) {
+    const tagText = rotuloDeProtetor(tipoDeProtetor)
+    ctx.font = FONTE.selo
+    ctx.strokeText(tagText, entity.x, entity.y - halfHeight - 37)
+    ctx.fillStyle = PROTETOR_TAG_COLOR
+    ctx.fillText(tagText, entity.x, entity.y - halfHeight - 37)
+  }
   ctx.restore()
 }
 
@@ -1056,6 +1312,9 @@ const EFFECT_LANE_HEIGHT = 16
 const EFFECT_BASE_GAP = 44
 const EFFECT_COLUMN_X_OFFSET = -18
 
+// Quanto o numero de dano sobe ao longo da vida dele.
+const SUBIDA_DO_NUMERO = 30
+
 function effectAnchor(effect: WorldEffect, world: WorldState): { x: number; y: number } {
   const owner = resolveEffectOwner(effect, world)
   if (!owner) return { x: effect.targetX!, y: effect.targetY! }
@@ -1063,6 +1322,89 @@ function effectAnchor(effect: WorldEffect, world: WorldState): { x: number; y: n
     x: owner.x + EFFECT_COLUMN_X_OFFSET,
     y: owner.y - visualTopOffset(owner) - EFFECT_BASE_GAP - effect.lane * EFFECT_LANE_HEIGHT,
   }
+}
+
+/**
+ * Onde o texto de um efeito e escrito de fato — a ancora do dono ja com o
+ * deslocamento proprio do tipo (o float do numero, o offset do nome do golpe).
+ *
+ * Existe pra o planejador e o desenho lerem o MESMO ponto. Enquanto a conta do
+ * float vivia dentro de `drawDamageNumber`, medir a caixa fora dele exigiria
+ * repetir a formula, e uma copia que se desatualize mede uma caixa que nao esta
+ * onde o texto esta.
+ */
+function ancoraDoTexto(effect: WorldEffect, world: WorldState): { x: number; y: number } {
+  const ancora = effectAnchor(effect, world)
+  if (effect.type === 'damageNumber') {
+    return { x: ancora.x, y: ancora.y - SUBIDA_DO_NUMERO * effectProgress(effect) }
+  }
+  return { x: ancora.x, y: ancora.y + ABILITY_NAME_Y_OFFSET }
+}
+
+/**
+ * Segunda passada de layout do texto de combate, do lado do CLIENTE (PH-189).
+ *
+ * Devolve quanto cada caixa precisa subir pra ninguem se atropelar. Ver o
+ * cabecalho de `render/textoDeCombate.ts` pro porque isto nao pode morar no
+ * motor: a raia de la e por dono e nao mede texto, porque vai pro bundle da Edge
+ * e precisa ser deterministica sem canvas.
+ *
+ * Chamado uma vez por quadro pelo `Renderer`, antes do laco que desenha os
+ * efeitos. O resultado e passado pra `drawEffect`; sem ele o desenho cai no
+ * comportamento antigo (deslocamento zero), que e o que os testes de canal do
+ * PH-131 exercitam.
+ */
+export function planejarTextoDeCombate(
+  ctx: CanvasRenderingContext2D, world: WorldState, janela: Janela,
+): Map<string, number> {
+  const { moveis, fixas } = medirTextoDeCombate(medidorDoCanvas(ctx), world)
+  if (moveis.length === 0) return new Map()
+  return resolverColunasDeTexto(moveis, fixas, janela)
+}
+
+/**
+ * As caixas do quadro, medidas e ainda NAO resolvidas.
+ *
+ * Separada de `planejarTextoDeCombate` pra o teste poder medir a mesma coisa que
+ * o jogo mede e conferir sobreposicao com regua — o criterio de aceite da PH-189
+ * e explicito em pedir medicao das caixas, e nao inspecao visual.
+ */
+export function medirTextoDeCombate(
+  m: Medidor, world: WorldState,
+): { moveis: CaixaDeEfeito[]; fixas: Caixa[] } {
+  const moveis: CaixaDeEfeito[] = []
+  for (const effect of world.effects) {
+    if (effect.type !== 'damageNumber' && effect.type !== 'abilityName') continue
+    const owner = resolveEffectOwner(effect, world)
+    // Efeito sem dono nao entra: ele nasce colado no ponto do impacto
+    // (`targetX/targetY`) e mover isso trocaria o significado do texto.
+    if (!owner) continue
+    const { x, y } = ancoraDoTexto(effect, world)
+    const caixa = effect.type === 'damageNumber'
+      ? caixaDoNumeroDeDano(m, effect, x, y)
+      : caixaDoNomeDeGolpe(m, effect, x, y)
+    moveis.push({ ...caixa, id: effect.id, ownerId: effect.ownerId, lane: effect.lane })
+  }
+
+  // PH-236: mesma fonte de verdade do texto (`rotuloDeProtetor`) que
+  // `drawNameLevelTag` usa pra desenhar — resolvido uma vez por chamada,
+  // igual ao Renderer faz antes do loop de desenho.
+  const tipoDeProtetorAtual = protetorDaSala(world.sala)
+  const fixas: Caixa[] = []
+  for (const entidade of [world.player, ...world.enemies]) {
+    if (!entidade || entidade.poke.hp <= 0) continue
+    const especie = getSpecies(entidade)
+    fixas.push(caixaDoRotuloFixo(
+      m,
+      entidade.poke.isShiny ? `✨ ${especie.name}` : especie.name,
+      `Lv${entidade.poke.level}`,
+      ehProtetor(entidade) ? rotuloDeProtetor(tipoDeProtetorAtual) : null,
+      entidade.x,
+      entidade.y - visualTopOffset(entidade),
+    ))
+  }
+
+  return { moveis, fixas }
 }
 
 /** Marca escrita do critico. Curta pra caber ao lado do numero em 390px. */
@@ -1098,13 +1440,14 @@ const BORDA_DA_PLACA = 'rgba(248, 113, 113, 0.9)'
  * critico, super efetivo e recebido ao mesmo tempo. Empilhar duas delas na cor
  * faria uma esconder a outra.
  */
-function drawDamageNumber(ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState): void {
+function drawDamageNumber(
+  ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState, desvio = 0,
+): void {
   const progress = effectProgress(effect)
-  const floatOffset = 30 * progress
   const alpha = progress < 0.7 ? 1 : 1 - (progress - 0.7) / 0.3
-  const anchor = effectAnchor(effect, world)
+  const anchor = ancoraDoTexto(effect, world)
   const x = anchor.x
-  const y = anchor.y - floatOffset
+  const y = anchor.y - desvio
   const color = effect.color || '#ffffff'
   // Dono do efeito de dano E o alvo que levou o hit (ver spawnDamageNumber).
   const recebidoPeloJogador = Boolean(
@@ -1123,11 +1466,11 @@ function drawDamageNumber(ctx: CanvasRenderingContext2D, effect: WorldEffect, wo
   ctx.lineJoin = 'round'
   // Tamanho e canal pre-atentivo: o numero maior e lido como "esse foi
   // diferente" antes de qualquer texto.
-  ctx.font = crit ? 'bold 17px monospace' : 'bold 12px monospace'
+  ctx.font = crit ? FONTE.danoCritico : FONTE.dano
 
   if (recebidoPeloJogador) {
     const m = ctx.measureText(numero)
-    const alturaTexto = crit ? 17 : 12
+    const alturaTexto = alturaDaFonte(crit ? FONTE.danoCritico : FONTE.dano)
     const pad = 3
     ctx.fillStyle = PLACA_DE_DANO_RECEBIDO
     roundedRectPath(ctx, x - pad, y - alturaTexto, m.width + pad * 2, alturaTexto + pad, 3)
@@ -1148,7 +1491,7 @@ function drawDamageNumber(ctx: CanvasRenderingContext2D, effect: WorldEffect, wo
   // nao gastar raia (ver spawnDamageNumber).
   if (crit) {
     const largura = ctx.measureText(numero).width
-    ctx.font = 'bold 9px monospace'
+    ctx.font = FONTE.marcaDeCritico
     ctx.fillStyle = COR_DE_CRITICO
     ctx.strokeText(ROTULO_DE_CRITICO, x + largura + 3, y)
     ctx.fillText(ROTULO_DE_CRITICO, x + largura + 3, y)
@@ -1156,7 +1499,7 @@ function drawDamageNumber(ctx: CanvasRenderingContext2D, effect: WorldEffect, wo
 
   if (effect.effectiveness) {
     const isSuper = effect.effectiveness === 'super'
-    ctx.font = isSuper ? 'bold 13px monospace' : '9px monospace'
+    ctx.font = isSuper ? FONTE.efetividadeSuper : FONTE.efetividade
     ctx.fillStyle = color
     // O rotulo sobe junto quando o numero cresceu, senao o critico encosta nele.
     const labelY = y - (isSuper ? 14 : 12) - (crit ? 5 : 0)
@@ -1169,12 +1512,14 @@ function drawDamageNumber(ctx: CanvasRenderingContext2D, effect: WorldEffect, wo
 
 const ABILITY_NAME_Y_OFFSET = 2
 
-function drawAbilityName(ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState): void {
+function drawAbilityName(
+  ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState, desvio = 0,
+): void {
   const progress = effectProgress(effect)
   const alpha = progress < 0.7 ? 1 : 1 - (progress - 0.7) / 0.3
-  const anchor = effectAnchor(effect, world)
+  const anchor = ancoraDoTexto(effect, world)
   const x = anchor.x
-  const y = anchor.y + ABILITY_NAME_Y_OFFSET
+  const y = anchor.y - desvio
 
   ctx.save()
   ctx.globalAlpha = Math.max(0, alpha)
@@ -1182,7 +1527,7 @@ function drawAbilityName(ctx: CanvasRenderingContext2D, effect: WorldEffect, wor
   ctx.lineWidth = 3
   ctx.lineJoin = 'round'
   ctx.strokeStyle = '#000000'
-  ctx.font = 'bold 8px monospace'
+  ctx.font = FONTE.nomeDeGolpe
   ctx.fillStyle = effect.color || '#cdd6ff'
   ctx.strokeText(effect.text!, x, y)
   ctx.fillText(effect.text!, x, y)
@@ -1203,9 +1548,13 @@ function drawAbilityName(ctx: CanvasRenderingContext2D, effect: WorldEffect, wor
 // O efeito `rewardText` CONTINUA existindo no `WorldState`: o motor nao foi
 // alterado. Quem o consome agora e a camada de VFX, no cliente.
 
-export function drawEffect(ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState): void {
-  if (effect.type === 'damageNumber') return drawDamageNumber(ctx, effect, world)
-  if (effect.type === 'abilityName') return drawAbilityName(ctx, effect, world)
+export function drawEffect(
+  ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState,
+  desvios?: ReadonlyMap<string, number>,
+): void {
+  const desvio = desvios?.get(effect.id) ?? 0
+  if (effect.type === 'damageNumber') return drawDamageNumber(ctx, effect, world, desvio)
+  if (effect.type === 'abilityName') return drawAbilityName(ctx, effect, world, desvio)
   if (effect.type === 'abilityEffect') return drawAbilityEffect(ctx, effect)
   if (effect.type === 'captureAnim') return drawCaptureAnim(ctx, effect)
 }
