@@ -2,9 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8" />
-<title>Bancada dos efeitos do mapa (PH-232)</title>
+<title>Bancada dos efeitos do mapa (PH-232, PH-233)</title>
 <!--
-  BANCADA DE MEDICAO DOS EFEITOS DO MAPA (PH-232)
+  BANCADA DE MEDICAO DOS EFEITOS DO MAPA (PH-232, vento no PH-233)
 
   POR QUE ELA EXISTE, E POR QUE ESTA NO GIT
 
@@ -38,6 +38,16 @@
   3. O respingo de gota: ele tem que nascer, abrir e sumir, e cair pela area
      inteira — nao numa faixa so.
 
+  4. O VENTO (PH-233). Ele e UM so pra cena inteira, e a barra "vento da cena"
+     no topo mostra a intensidade corrente. Quando ela sobe, TODOS os paineis
+     que tem vento tem que inclinar juntos — folha, selva, faisca, neve, areia,
+     fiapo urbano, chuva, granizo, nevoa. Os que NAO podem se mexer, e sao os
+     lugares fechados: caverna, poeira (ruina/templo/dojo) e a cintilancia da
+     agua. Se algum deles balancar, alguem ligou vento em lugar selado.
+
+     Rajada e efeito de TEMPO: em quadro parado ela nao aparece. Pra ver, olhe
+     a barra e a tela ao mesmo tempo, ou pause no pico.
+
   A ESCALA E A DO JOGO, e isso importa: a camera desenha com zoom 1.5 por
   padrao, entao a janela de mundo tem `largura_do_canvas / 1.5` unidades. Medir
   numa escala qualquer daria a impressao errada de tamanho, que e exatamente o
@@ -58,10 +68,13 @@
   canvas { display: block; border: 1px solid #2a3040; background: #000; }
   .barra { margin-bottom: 14px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
   label { color: #98a2b3; }
+  #medidor { width: 260px; height: 10px; background: #1b2130; border: 1px solid #2a3040; position: relative; }
+  #agulha { position: absolute; inset: 0 auto 0 0; width: 0; background: linear-gradient(90deg,#3d6ea8,#7fc6dd); }
+  #ventoNum { color: #c3cad6; min-width: 4ch; }
 </style>
 </head>
 <body>
-<h1>Bancada dos efeitos do mapa — PH-232</h1>
+<h1>Bancada dos efeitos do mapa — PH-232 / PH-233</h1>
 <p class="nota">
   Cada painel roda a camada de verdade (<code>src/render/ambiente.ts</code> e
   <code>src/render/climaVisual.ts</code>) sobre a arte real do bioma, na mesma
@@ -74,10 +87,19 @@
   <label><input type="checkbox" id="semFundo" /> sem arte de fundo (so as particulas)</label>
   <label>zoom <input type="range" id="zoom" min="0.5" max="2.5" step="0.1" value="1.5" /> <span id="zoomVal">1.5</span></label>
 </div>
+<div class="barra">
+  <span>vento da cena</span>
+  <div id="medidor" title="intensidadeDoVento no instante atual — o MESMO valor que as duas camadas leem"><i id="agulha"></i></div>
+  <span id="ventoNum">0.00</span>
+</div>
 <div class="grade" id="grade"></div>
 
 <script type="module">
 import { ALTURA_DE_POKE } from '/src/render/escalaDoMundo.ts'
+// SEM query, de proposito: e esta a instancia que as camadas importam via
+// './vento'. Com `?painel=N` eu leria um vento paralelo parado na fase 0, e o
+// medidor mostraria uma linha reta enquanto a cena inteira sopra.
+import { ventoAgora } from '/src/render/vento.ts'
 import { useUiStore } from '/src/stores/uiStore.ts'
 
 // A camada le o ajuste do jogador antes de desenhar qualquer coisa; sem isto
@@ -227,8 +249,13 @@ zoomEl.addEventListener('input', () => { zoomVal.textContent = zoomEl.value })
 // sai de cima dela.
 let t = 0
 
+const agulha = document.getElementById('agulha')
+const ventoNum = document.getElementById('ventoNum')
+
 function quadro() {
   if (!pausar.checked) t += 1 / 60
+  // O vento e desenhado DEPOIS dos paineis, la embaixo: quem sincroniza a fase
+  // e a propria camada, entao ler antes mostraria o valor do quadro anterior.
   const zoom = Number(zoomEl.value)
   const janela = {
     x: 400 + Math.sin(t * 0.25) * 240,
@@ -258,6 +285,10 @@ function quadro() {
     p.desenhar(ctx, janela, `assets/hunt-backgrounds/${p.arte}`)
     ctx.restore()
   }
+
+  const v = ventoAgora()
+  agulha.style.width = (v * 100).toFixed(1) + '%'
+  ventoNum.textContent = v.toFixed(2)
   requestAnimationFrame(quadro)
 }
 
