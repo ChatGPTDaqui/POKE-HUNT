@@ -21,7 +21,7 @@ import { ErroServidor } from './servidor'
 // principal de qualquer jeito. O `await import()` que existia aqui era
 // INEFFECTIVE_DYNAMIC_IMPORT (aviso do build): nao criava split nenhum, so
 // sugeria no codigo-fonte um limite de carregamento que nao existe de verdade.
-import { loadPlayerState } from './playerRepository'
+import { loadPlayerState, descartarIdsConhecidos } from './playerRepository'
 
 type Acao = { tipo: string } & Record<string, unknown>
 type RespostaRpc = { data: unknown; error: { message: string; code?: string } | null }
@@ -191,6 +191,11 @@ function removerPokes(pokeIds: string[]): void {
     team: s.team.filter((p) => !idsFora.has(p.uid)),
     bagPokes: s.bagPokes.filter((p) => !idsFora.has(p.uid)),
   }))
+  // Quem apagou as linhas foi a RPC, no servidor. Sem avisar o repositorio, o
+  // diff de exclusao do proximo save leria estes ids como "sumiram do estado" e
+  // mandaria um DELETE inutil — e uma venda em lote acima de
+  // TETO_DE_REMOCAO_POR_SAVE abortaria a escrita inteira (PH-182).
+  descartarIdsConhecidos(pokeIds)
 }
 
 /** So pra escolherStarter/reiniciarJogo: os 2 casos em que TUDO muda de fato. */
@@ -198,11 +203,12 @@ async function refetchTudo(): Promise<void> {
   const uid = await userIdAtual()
   const resultado = await loadPlayerState(uid, useGameStateStore.getState() as GameStateData)
   if (resultado) useGameStateStore.setState(resultado.data)
-  // `loadPlayerState` le `pokemon_instances` sem paginar, entao a mochila que
-  // ele traz nao serve como verdade (o PostgREST corta em 1000 linhas sem
-  // erro). Invalidar forca a leitura paginada de verdade na proxima abertura da
-  // tela. Nos dois casos que usam isto — inicial e reset — a mochila esta
-  // vazia, mas o desenho nao pode depender disso.
+  // `loadPlayerState` le SO a equipe desde a PH-182, entao ele nao traz mochila
+  // nenhuma — `bagPokes` sai daqui vazio por construcao. Invalidar e o que
+  // marca esse vazio como "nao lido" em vez de "nao tem", e o que forca a
+  // leitura paginada de verdade na proxima abertura da tela. Nos dois casos que
+  // usam isto — inicial e reset — a mochila esta vazia de fato, mas o desenho
+  // nao pode depender disso.
   useMochilaStore.getState().invalidar()
 }
 

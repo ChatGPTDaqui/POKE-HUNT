@@ -30,6 +30,8 @@ let linhasDoBanco: Record<string, unknown>[]
 let deletados: string[][]
 /** Filtros que a consulta de boot mandou — e como o teste vê o `location=team`. */
 let filtrosDaLeitura: [string, unknown][]
+/** Se o UPDATE em `players` chegou a ser disparado neste save. */
+let playersEscrito: boolean
 
 function builderGenerico() {
   const builder = {
@@ -53,7 +55,7 @@ function builderGenerico() {
 function builderPlayers() {
   const builder = {
     select: () => builder,
-    update: () => builder,
+    update: () => { playersEscrito = true; return builder },
     eq: () => builder,
     order: () => builder,
     maybeSingle: () => Promise.resolve({
@@ -117,6 +119,7 @@ beforeEach(() => {
   linhasDoBanco = EQUIPE.map((p, i) => linhaDe(p, 'team', i))
   deletados = []
   filtrosDaLeitura = []
+  playersEscrito = false
   vi.resetModules()
 })
 
@@ -198,5 +201,55 @@ describe('a exclusao legitima continua funcionando (PH-182)', () => {
     deletados = []
     await repo.savePlayerState('u1', estado({ bagPokes: [] }))
     expect(deletados).toEqual([])
+  })
+})
+
+// Achado auditando a PR #214 antes do merge. Os dois casos abaixo sao sobre a
+// REDE DE SEGURANCA (`TETO_DE_REMOCAO_POR_SAVE`), nao sobre o dominio: o dominio
+// esta certo, a rede e que estava disparando em cima de acao legitima do
+// jogador e deixando a escrita pela metade quando disparava.
+describe('a rede de seguranca nao pode punir acao legitima (PH-182, auditoria)', () => {
+  it('venda em lote por RPC nao deixa ids fantasmas no dominio', async () => {
+    // O caminho real: `vender_pokes` apaga no SERVIDOR e `removerPokes`
+    // (acoesRpc.ts) so tira do estado local. Sem avisar o repositorio, os 20 ids
+    // vendidos continuavam no dominio conhecido, o save seguinte os via como
+    // "sumiram do estado" e o teto de 12 abortava a escrita — em cima do botao
+    // "Vender Tudo", que a propria UI oferece sobre a mochila inteira.
+    const repo = await import('./playerRepository')
+    await repo.loadPlayerState('u1', defaultGameStateData())
+    repo.acrescentarIdsDaReserva('u1', RESERVA.map((p) => p.uid))
+
+    const vendidos = RESERVA.slice(0, 20).map((p) => p.uid)
+    repo.descartarIdsConhecidos(vendidos)
+
+    await repo.savePlayerState('u1', estado({ bagPokes: RESERVA.slice(20) }))
+    // Nada a apagar: quem apagou foi a RPC, no servidor.
+    expect(deletados).toEqual([])
+  })
+
+  it('quando a rede dispara, ela nao deixa o save pela metade nem repete pra sempre', async () => {
+    // Duas coisas de uma vez, e as duas doiam:
+    //
+    //  1. O teto era conferido DEPOIS do UPDATE em `players`, entao o save
+    //     abortado ja tinha gravado ouro/nivel e avancado o `updated_at` do CAS
+    //     — e nada de POKE/item/pokedex/missao era escrito.
+    //  2. O dominio nao mudava no caminho de erro, entao TODO save seguinte da
+    //     sessao reincidia no mesmo teto: o jogo parava de persistir POKE em
+    //     silencio (o erro so vira toast) ate um F5.
+    const repo = await import('./playerRepository')
+    await repo.loadPlayerState('u1', defaultGameStateData())
+    repo.acrescentarIdsDaReserva('u1', RESERVA.map((p) => p.uid))
+
+    await expect(repo.savePlayerState('u1', estado({ bagPokes: [] })))
+      .rejects.toThrow(/Save abortado/)
+    expect(deletados).toEqual([])
+    expect(playersEscrito).toBe(false)
+
+    // O save seguinte tem que voltar a funcionar: a reserva foi esquecida ao
+    // disparar, e o dominio caiu pra equipe, sobre a qual o cliente E
+    // autoritativo.
+    await repo.savePlayerState('u1', estado({ bagPokes: [] }))
+    expect(deletados).toEqual([])
+    expect(playersEscrito).toBe(true)
   })
 })
