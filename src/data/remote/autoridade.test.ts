@@ -23,6 +23,9 @@ import {
 } from './autoridade'
 import { LIMIAR_OFFLINE_SEGUNDOS } from '@/engine/simulation'
 import { useToastStore } from '@/stores/toastStore'
+import { useWorldStore } from '@/stores/worldStore'
+import { useGameStateStore } from '@/stores/gameStateStore'
+import { ABATES_POR_SALA } from '@/data/biomas'
 
 const mock = servidor as unknown as {
   abrirSessao: ReturnType<typeof vi.fn>
@@ -270,5 +273,104 @@ describe('commitAgora — trailing edge do debounce (bug "F5 perde nivel")', () 
 
     await vi.advanceTimersByTimeAsync(5000)
     expect(mock.flush).toHaveBeenCalledTimes(1) // nada extra
+  })
+})
+
+// PH-273 — INSISTIR ENCOLHE A JANELA DO SERVIDOR, E JANELA CURTA TRAVA A HUNT.
+//
+// Com a quota da sala fechada, o cliente pede o flush na hora em vez de esperar
+// o periodico (`observarQuotaDeSala`) — a sala nao avanca sem o servidor, e
+// deixar a barra cheia parada por 30s le como jogo travado. O pedido tem uma
+// repeticao propria, e ela era de 5 segundos.
+//
+// So que cada pedido FECHA a janela de simulacao do servidor: ele credita o
+// intervalo desde o ultimo flush, reconstroi o mundo do zero (POKE de volta no
+// ponto de entrada) e simula so aquilo. Pedir de 5 em 5 segundos nao apressa
+// ninguem — poe o servidor pra viver de janelas de 5s, que nao pagam nem a
+// caminhada ate o alvo.
+//
+// Medido na conta de teste no jogo-dev em 2026-08-29, mesma sessao:
+//
+//   janela de   5s  ->  0 abates (dezenas seguidas; o protetor da sala ficou com
+//                                 o mesmo `hp_atual` por mais de 10 minutos)
+//   janela de  35s  -> 10 abates, e a sala avancou
+//   janela de 111s  -> 24 abates e o protetor morto
+//
+// Como a sala so avanca quando o protetor dela morre e quem tem que mata-lo e o
+// servidor, o resultado era a hunt parada em 30/30 pra sempre.
+describe('pedido de sala com a quota fechada (PH-273)', () => {
+  const janela = { estado: {}, resumo: { kills: 0, gold: 0, xp: 0 }, sala: null }
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.clearAllMocks()
+    pararFlushPeriodico()
+    useWorldStore.setState({ sala: null, salaSobAutoridade: false })
+    useGameStateStore.getState().resetToDefaults()
+  })
+
+  afterEach(() => {
+    pararFlushPeriodico()
+    useWorldStore.setState({ sala: null, salaSobAutoridade: false })
+    vi.useRealTimers()
+  })
+
+  /** Fecha a quota no world, que e o que dispara o observador. */
+  function fecharQuota(indice = 0) {
+    useWorldStore.setState({
+      salaSobAutoridade: true,
+      salaPendente: null,
+      salaCountdownRemaining: null,
+      sala: { indice, chave: 'grass', abates: ABATES_POR_SALA, ciclos: 0 },
+    })
+  }
+
+  it('a quota fechada nao pode ser repedida antes do intervalo de flush inteiro', async () => {
+    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'mata_faixa1' })
+    mock.flush.mockResolvedValue(janela)
+    await abrirSessaoDeHunt('mata_faixa1', 'poke-1')
+    mock.flush.mockClear()
+
+    fecharQuota()
+    await vi.advanceTimersByTimeAsync(0)
+    expect(mock.flush, 'o primeiro pedido continua saindo na hora').toHaveBeenCalledTimes(1)
+
+    // A JANELA QUE O SERVIDOR VAI RECEBER. Cada tick abaixo repete o estado de
+    // quota fechada, que e exatamente o que acontece no jogo: o mundo continua
+    // andando com a barra cheia. Com a repeticao de 5s, isto virava seis pedidos
+    // — cinco janelas de 5s, zero abate em cada uma. Cinco e nao seis pra
+    // parar em 25s: aos 30s o flush PERIODICO entra, e ele e legitimo.
+    for (let i = 0; i < 5; i++) {
+      await vi.advanceTimersByTimeAsync(5000)
+      useWorldStore.setState({ sala: { indice: 0, chave: 'grass', abates: ABATES_POR_SALA, ciclos: 0 } })
+    }
+    expect(
+      mock.flush.mock.calls.length,
+      'o cliente repediu antes do intervalo e encolheu a janela do servidor',
+    ).toBe(1)
+
+    // Passado o intervalo inteiro, repedir e legitimo: a janela ja tem tamanho.
+    await vi.advanceTimersByTimeAsync(INTERVALO_FLUSH_MS)
+    useWorldStore.setState({ sala: { indice: 0, chave: 'grass', abates: ABATES_POR_SALA, ciclos: 0 } })
+    await vi.advanceTimersByTimeAsync(0)
+    expect(mock.flush.mock.calls.length).toBeGreaterThan(1)
+  })
+
+  it('sala NOVA com a quota fechada pede na hora, sem esperar o intervalo', async () => {
+    mock.abrirSessao.mockResolvedValue({ sessaoId: 's1', mapId: 'mata_faixa1' })
+    mock.flush.mockResolvedValue(janela)
+    await abrirSessaoDeHunt('mata_faixa1', 'poke-1')
+    mock.flush.mockClear()
+
+    fecharQuota(0)
+    await vi.advanceTimersByTimeAsync(0)
+    expect(mock.flush).toHaveBeenCalledTimes(1)
+
+    // Outra sala e outro pedido: a chave do pedido e (ciclo, sala), e o teto de
+    // repeticao nao pode segurar a sala seguinte — senao o jogador que limpa
+    // duas salas rapido espera o intervalo inteiro na segunda.
+    fecharQuota(1)
+    await vi.advanceTimersByTimeAsync(0)
+    expect(mock.flush).toHaveBeenCalledTimes(2)
   })
 })

@@ -48,7 +48,7 @@ export const SALA_TRANSITION_COUNTDOWN = 3
  *
  * 120s, e nao os 20s originais (PH-271). O valor antigo foi escolhido pela
  * cadencia das REQUISICOES ("o flush periodico e de 30s e o pedido disparado
- * pela quota repete a cada 5s, entao 20s cobre varias tentativas") — mas a
+ * pela quota repetia a cada 5s, entao 20s cobre varias tentativas") — mas a
  * pergunta certa nao e quantos pedidos cabem na janela, e sim quanto o servidor
  * costuma demorar pra fechar a quota DELE.
  *
@@ -370,7 +370,10 @@ export function resolverProtetorDaSala(world: WorldState, mapId: string): void {
  * A sala travava em `abates: 30` pra sempre — e o cliente, que agora espera a
  * sala do servidor em vez de sortear a propria, travava com ela. Nao aparecia
  * antes porque a janela normal e de 30s e sempre cabia; apareceu quando o cliente
- * passou a pedir flush a cada 5s ao fechar a quota.
+ * passou a pedir flush a cada 5s ao fechar a quota. (Esse pedido de 5s voltou a
+ * ser de 30s em PH-273 — janela curta travava a hunt por outro motivo, o
+ * servidor sem tempo de matar o protetor. A defesa aqui continua valendo: ela
+ * nao pode depender do tamanho da janela.)
  *
  * Com a quota fechada valendo por si, a transicao acontece no comeco da janela e
  * cabe em qualquer duracao. Isso tambem fecha o caso que ja estava documentado
@@ -444,9 +447,10 @@ export function garantirTransicaoDeQuotaFechada(
     // quota do servidor cheia" — na teoria, um servidor que nunca avanca. Ao
     // vivo, mediu-se que essa e a cara do servidor NORMAL:
     //
-    //   - com a quota fechada o cliente pede flush de 5 em 5 segundos
-    //     (REPETIR_PEDIDO_DE_SALA_MS em data/remote/autoridade.ts), entao "3
-    //     respostas" sao QUINZE SEGUNDOS, nao os 90 que a constante supunha;
+    //   - com a quota fechada o cliente pedia flush de 5 em 5 segundos
+    //     (REPETIR_PEDIDO_DE_SALA_MS em data/remote/autoridade.ts, hoje 30s por
+    //     causa de PH-273), entao "3 respostas" eram QUINZE SEGUNDOS, e nao os
+    //     90 que a constante supunha;
     //   - e o servidor legitimamente responde "mesma sala, 30/30" por MINUTOS,
     //     porque a sala so avanca quando o PROTETOR dela morre (PH-202/203) e
     //     ele mata o protetor bem mais devagar que o cliente: o mundo do

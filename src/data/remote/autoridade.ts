@@ -636,7 +636,32 @@ export function pararFlushPeriodico(): void {
 // ainda NAO ter fechado a quota dele: as duas simulacoes contam abates
 // separadamente e a dele pode estar dois abates atras. Nesse caso a resposta traz
 // a mesma sala, e o proximo tick pede de novo depois do intervalo.
-const REPETIR_PEDIDO_DE_SALA_MS = 5000
+//
+// 30s, E NAO OS 5s ORIGINAIS — INSISTIR TRAVAVA A HUNT (PH-273).
+//
+// Cada pedido FECHA a janela de simulacao do servidor: ele credita o intervalo
+// desde o ultimo flush, reconstroi o mundo com `buildMapWorld` (POKE de volta no
+// ponto de entrada, inimigos recriados) e simula so aquele intervalo. Pedir de
+// 5 em 5 segundos nao acelera o servidor — ele passa a viver de janelas de 5s,
+// e janela de 5s nao paga nem a caminhada ate o alvo.
+//
+// Medido na conta de teste no jogo-dev em 2026-08-29, mesma sessao, lendo o
+// resumo de cada resposta:
+//
+//   janela de   5s  ->  0 abates   (dezenas seguidas, `hp_atual` do protetor
+//                                   parado em 72 por mais de 10 minutos)
+//   janela de  35s  -> 10 abates, 415 de ouro, sala avancou
+//   janela de  82s  -> 25 abates, 950 de ouro
+//   janela de 111s  -> 24 abates, 6.880 de ouro, protetor morto
+//
+// Como a sala so avanca quando o protetor dela morre (PH-202/203) e quem tem que
+// mata-lo e o servidor, o resultado era uma hunt parada em 30/30 pra sempre — o
+// "nao passa da sala 2" do relato. Um livelock em que a pressa e a causa: quanto
+// mais o cliente pedia, menor a janela e menos o servidor avancava.
+//
+// O custo de esperar o intervalo cheio e o que este pedido existia pra evitar
+// (ate 30s com a barra cheia). Esse custo e real, e e MUITO menor que travar.
+const REPETIR_PEDIDO_DE_SALA_MS = INTERVALO_FLUSH_MS
 let pararObservadorDeSala: (() => void) | null = null
 let salaJaPedida: string | null = null
 let ultimoPedidoDeSala = 0

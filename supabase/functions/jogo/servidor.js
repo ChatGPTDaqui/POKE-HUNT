@@ -54730,7 +54730,10 @@ function resolverProtetorDaSala(world, mapId) {
 * A sala travava em `abates: 30` pra sempre — e o cliente, que agora espera a
 * sala do servidor em vez de sortear a propria, travava com ela. Nao aparecia
 * antes porque a janela normal e de 30s e sempre cabia; apareceu quando o cliente
-* passou a pedir flush a cada 5s ao fechar a quota.
+* passou a pedir flush a cada 5s ao fechar a quota. (Esse pedido de 5s voltou a
+* ser de 30s em PH-273 — janela curta travava a hunt por outro motivo, o
+* servidor sem tempo de matar o protetor. A defesa aqui continua valendo: ela
+* nao pode depender do tamanho da janela.)
 *
 * Com a quota fechada valendo por si, a transicao acontece no comeco da janela e
 * cabe em qualquer duracao. Isso tambem fecha o caso que ja estava documentado
