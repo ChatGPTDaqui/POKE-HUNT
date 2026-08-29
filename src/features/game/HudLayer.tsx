@@ -39,6 +39,7 @@ import { ActionDock, SheetMais } from '@/components/hud/ActionDock'
 import { SalaChip } from '@/components/hud/SalaChip'
 import { ClimaChip } from '@/components/hud/ClimaChip'
 import { LureChip } from '@/components/hud/LureChip'
+import { ColunaDeAtalhos } from '@/components/hud/ColunaDeAtalhos'
 import { ChatLog } from '@/components/toasts/ChatLog'
 import { ChatMobile } from '@/components/toasts/ChatMobile'
 import { AutoWindow } from '@/components/auto/AutoFloatingPanel'
@@ -62,6 +63,12 @@ export function HudLayer() {
   // com o numero de golpes do POKE e com o `hudScale`.
   const footerRef = useRef<HTMLDivElement>(null)
   useMedirAltura(footerRef, setFooterHeight)
+
+  // Mesma medida, mesmo motivo, pro TOPO (PH-257): a coluna de atalhos do canto
+  // direito comeca onde o trilho acaba, e a altura dele muda com o regime, com
+  // o nome da especie em campo e com a escala da HUD.
+  const trilhoRef = useRef<HTMLDivElement>(null)
+  useMedirAltura(trilhoRef, useUiStore((s) => s.setTrilhoHeight))
 
   return (
     <>
@@ -88,7 +95,19 @@ export function HudLayer() {
             verdade, e a margem propria dela (abaixo) so vale quando ela tem
             conteudo. */}
         <div className="flex w-full max-w-[64em] flex-col gap-0">
-          <StatusRail />
+          {/* Medido pra `ColunaDeAtalhos` (PH-257) saber onde o trilho acaba —
+              ela comeca logo abaixo do card do treinador. Um `div` so pra
+              medida, sem estilo nenhum: `StatusRail` ja e uma coluna com
+              largura propria, e envolver com classe mudaria o layout dele.
+
+              A MEDIDA E SO DO TRILHO, e nao do bloco todo (foi o conflito com a
+              PH-261, resolvido aqui): as reservas ficam FORA deste `div`. Medir
+              os dois juntos empurraria a coluna de atalhos pra baixo da fila de
+              reservas, que cresce com o tamanho da equipe — e o pedido era
+              "logo abaixo do lvl do treinador", que mora no trilho. */}
+          <div ref={trilhoRef}>
+            <StatusRail />
+          </div>
           {/* Trilho de reservas: mesma coluna do trilho de status, e nao uma
               ancora propria na borda esquerda. A ancora foi tentada uma vez
               (`ActivePokeCard`, ver o cabecalho deste arquivo) e cobria o HP em
@@ -128,6 +147,12 @@ export function HudLayer() {
           </div>
         </div>
       </div>
+
+      {/* Coluna de atalhos (PH-257): Especialidades, Tasks e Bestiario no canto
+          superior direito, logo abaixo do card do treinador. Irma do bloco do
+          topo, e nao filha: ela ancora na DIREITA e aquele container e uma
+          coluna alinhada a esquerda. */}
+      <ColunaDeAtalhos />
 
       {/* Rodape: ticker do chat (quando nao ha janela flutuante) + doca. Os dois
           no MESMO container medido — o botao Auto e o chat costumavam se

@@ -39,6 +39,7 @@ import { AbilityHud } from '@/components/hud/AbilityHud'
 import { StatusEffectsBar } from '@/components/hud/StatusEffectsBar'
 import { Sheet } from '@/components/game/Sheet'
 import { useMedirAltura } from '@/hooks/useMedirAltura'
+import { TELAS_NA_COLUNA } from '@/components/hud/ColunaDeAtalhos'
 import { cn } from '@/lib/utils'
 
 export interface Destino {
@@ -89,8 +90,20 @@ export const TELAS_NA_BARRA: ReadonlySet<ScreenName> = new Set<ScreenName>(
   [...ESQUERDA, ...DIREITA].map((d) => d.screen),
 )
 
+/**
+ * A mesma regra vale pra COLUNA DE ATALHOS do canto superior direito (PH-257):
+ * Especialidades, Tasks e Bestiario tem lugar fixo na tela agora, e continuar
+ * listando os tres aqui somaria badge duas vezes.
+ *
+ * Eles ficam em `SECUNDARIOS` de proposito, filtrados no fim em vez de
+ * removidos: a lista continua sendo o inventario unico de "todo destino que nao
+ * e slot da barra", e mover um deles de volta pro "Mais" e uma linha na coluna,
+ * nao um destino que ninguem lembra que existia.
+ */
 export function destinosDaGrade(): DestinoDeTela[] {
-  return SECUNDARIOS.filter((d) => !TELAS_NA_BARRA.has(d.screen))
+  return SECUNDARIOS.filter(
+    (d) => !TELAS_NA_BARRA.has(d.screen) && !TELAS_NA_COLUNA.some((c) => c.screen === d.screen),
+  )
 }
 
 export function ActionDock() {
