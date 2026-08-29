@@ -54768,6 +54768,7 @@ function aplicarTransicaoDeSala(world, mapId) {
 	world.sala = pendente;
 	world.salaPendente = null;
 	world.protetorResolvido = false;
+	world.protetorPendente = null;
 	world.clima = null;
 	definirClimaDeAmbiente(world, world.salaSobAutoridade ? null : climaAmbienteDaSala(world.seed, world.sala));
 	world.salaEsperaDaAutoridade = 0;
