@@ -81,27 +81,13 @@ export const SALA_TRANSITION_COUNTDOWN = 3
  *
  *   Sala 3/10 Planicie  ->  Sala 3/10 Vilarejo
  *
- * Relogio nao distingue "servidor atrasado" de "servidor que nunca avanca", e
- * so o segundo justifica palpite. Por isso este tempo virou apenas a PRIMEIRA
- * das duas condicoes: a segunda e `RESPOSTAS_ATE_DESISTIR_DA_AUTORIDADE`, logo
- * abaixo, que olha o que a resposta do servidor diz em vez do relogio.
+ * Por isso estes 120 segundos deixaram de contar tempo de ESPERA e passaram a
+ * contar tempo de SILENCIO: qualquer resposta da autoridade zera o relogio (ver
+ * `reconciliarSalaDaAutoridade`), entao ele so estoura quando o servidor parou
+ * de responder de vez. Servidor vivo — mesmo repetindo a mesma sala por
+ * minutos — e o dono da sala, e o cliente espera.
  */
 export const ESPERA_MAXIMA_PELA_AUTORIDADE = 120
-
-/**
- * Quantas respostas seguidas da autoridade com a quota DELA cheia, na mesma
- * sala, antes de o cliente desistir de esperar e palpitar (PH-271).
- *
- * O tempo (acima) e a primeira condicao; esta e a segunda, e as duas precisam
- * valer. Sozinho, o relogio nao distingue servidor atrasado de servidor que
- * nunca avanca — e so o segundo justifica palpite.
- *
- * 3 respostas, com o flush periodico de 30s, dao ~90s de servidor insistindo
- * "minha quota esta cheia e eu continuo nesta sala". Menos que isso pegaria o
- * servidor no meio de uma janela em que ele ja ia avancar; muito mais so
- * atrasaria a rede de seguranca sem mudar a conclusao.
- */
-export const RESPOSTAS_ATE_DESISTIR_DA_AUTORIDADE = 3
 
 /** A hunt e percorrida em salas? Hunt inicial, BOSS e Lance nao sao. */
 export function temSalas(mapId: string): boolean {
@@ -406,10 +392,6 @@ export function garantirTransicaoDeQuotaFechada(
   const sala = world.sala
   if (!sala || sala.abates < ABATES_POR_SALA) {
     world.salaEsperaDaAutoridade = 0
-    // PH-271: quota reaberta (sala nova) zera tambem a contagem de respostas com
-    // quota cheia — ela e sobre ESTA sala, nao sobre a sessao.
-    world.salaRespostasComQuotaCheia = 0
-    world.salaRespostasDaAutoridade = 0
     return
   }
   // PH-202/203: transicao ja armada (o proprio abate do protetor chamou
@@ -445,36 +427,49 @@ export function garantirTransicaoDeQuotaFechada(
     // sempre a autoridade, e o HUD volta pro sub-bioma que de fato pagou o
     // loot em vez de fugir dele pra sempre.
     if (world.salaPredita) return
-    world.salaEsperaDaAutoridade += dt
-    if (world.salaEsperaDaAutoridade < ESPERA_MAXIMA_PELA_AUTORIDADE) return
-    // TEMPO NAO BASTA, E ISSO FOI MEDIDO DUAS VEZES (PH-271).
+    // O RELOGIO MEDE SILENCIO, NAO ESPERA (PH-271). Ele so anda aqui, e
+    // `reconciliarSalaDaAutoridade` o zera a cada resposta que chega — de
+    // modo que ele so estoura quando o servidor parou de responder.
     //
-    // O relogio sozinho nao distingue "o servidor esta atrasado" de "o servidor
-    // nunca vai avancar", e so o segundo justifica palpitar. A primeira
-    // tentativa foi subir a espera de 20s pra 120s, cobrindo o p90 de 107s da
-    // divergencia medida em scripts/harness/divergencia-de-quota.mjs — e ao
-    // vivo, no jogo-dev, a troca fantasma voltou mesmo assim:
+    // O relogio sozinho nao distingue "servidor que ainda nao chegou nesta
+    // sala" de "servidor que nunca vai chegar", e so o segundo justificaria
+    // palpite. A primeira tentativa foi subir a espera de 20s pra 120s,
+    // cobrindo o p90 de 107s da divergencia medida em
+    // scripts/harness/divergencia-de-quota.mjs — e ao vivo, no jogo-dev, a
+    // troca fantasma voltou mesmo assim:
     //
     //   Sala 3/10 Planicie  ->  Sala 3/10 Vilarejo
     //
-    // Sub-bioma trocando com o numero da sala parado, que e o palpite local
-    // sendo corrigido pela autoridade na cara do jogador. Numero maior so adia.
+    // A segunda tentativa trocou o relogio por "3 respostas seguidas com a
+    // quota do servidor cheia" — na teoria, um servidor que nunca avanca. Ao
+    // vivo, mediu-se que essa e a cara do servidor NORMAL:
     //
-    // O sinal certo esta na RESPOSTA, nao no relogio. Sao TRES casos, e o
-    // relogio junta os tres num so:
+    //   - com a quota fechada o cliente pede flush de 5 em 5 segundos
+    //     (REPETIR_PEDIDO_DE_SALA_MS em data/remote/autoridade.ts), entao "3
+    //     respostas" sao QUINZE SEGUNDOS, nao os 90 que a constante supunha;
+    //   - e o servidor legitimamente responde "mesma sala, 30/30" por MINUTOS,
+    //     porque a sala so avanca quando o PROTETOR dela morre (PH-202/203) e
+    //     ele mata o protetor bem mais devagar que o cliente: o mundo do
+    //     servidor e reconstruido a cada janela, com o POKE de volta no ponto
+    //     de entrada. Medido em 29/08, sessao real no jogo-dev: guardiao
+    //     `lickitung` da sala 2, `hp_atual` caindo ao longo de dezenas de
+    //     janelas de ~5s, ~3 minutos ate cair — com `kills: 0` em quase toda
+    //     janela.
     //
-    //  1. servidor MUDO (rede caida, Edge fora do ar): nenhuma resposta chegou
-    //     nesta sala. Palpitar e a unica saida — sem isso a hunt trava com a
-    //     barra cheia toda vez que a rede cai, que e pior que o bug original.
-    //  2. servidor ATRASADO (o caso comum, e o que causava a troca fantasma):
-    //     ele responde com a quota DELE ainda subindo. Esperar e o certo.
-    //  3. servidor QUE NUNCA AVANCA (bundle anterior a 2026-08-19): ele responde
-    //     com a quota cheia, de novo e de novo, sem trocar de sala. Palpitar.
+    // Ou seja: quota cheia repetida NAO e sinal de servidor parado. Sobra UM
+    // caso em que palpitar se justifica, e ele nao tem nada a ver com o que a
+    // resposta diz — e nao ter resposta nenhuma:
     //
-    // Ver `salaRespostasDaAutoridade` e `salaRespostasComQuotaCheia` em types.ts.
-    const mudo = world.salaRespostasDaAutoridade === 0
-    const parado = world.salaRespostasComQuotaCheia >= RESPOSTAS_ATE_DESISTIR_DA_AUTORIDADE
-    if (!mudo && !parado) return
+    //  - servidor MUDO (rede caida, Edge fora do ar): sem palpite a hunt trava
+    //    com a barra cheia ate a rede voltar, que e pior que o bug original.
+    //  - servidor QUE RESPONDE, qualquer que seja a resposta: ele esta vivo, e
+    //    servidor vivo e o dono da sala. O cliente espera. Se ele demora
+    //    minutos matando o protetor, o certo na tela e 30/30 parado — nao uma
+    //    area nova que o servidor vai desmentir no flush seguinte.
+    //
+    // Ver `salaEsperaDaAutoridade` em types.ts.
+    world.salaEsperaDaAutoridade += dt
+    if (world.salaEsperaDaAutoridade < ESPERA_MAXIMA_PELA_AUTORIDADE) return
     world.salaEsperaDaAutoridade = 0
     const armada = armarTransicaoDeSala(world, mapId)
     if (armada.avancou) world.salaPredita = true
@@ -535,6 +530,16 @@ export function reconciliarSalaDaAutoridade(
   // Fora de hunt nao ha sala: escrever uma aqui deixaria o Hospital com um
   // sub-bioma pendurado no HUD.
   if (!world.mapDef) return
+  // PH-271: A RESPOSTA ZERA A ESPERA, O CONTEUDO DELA NAO IMPORTA.
+  //
+  // O relogio de `salaEsperaDaAutoridade` mede SILENCIO, e esta linha e o que
+  // faz dele silencio em vez de "tempo desde que a quota fechou". Uma resposta
+  // so precisa responder uma pergunta — "o servidor esta vivo?" — e a resposta
+  // e sim mesmo quando ela traz a mesma sala pela centesima vez, ou uma sala
+  // que vai ser descartada logo abaixo por ser anterior a atual.
+  //
+  // Fica ANTES do `if (!sala)`: sala nula tambem e resposta.
+  world.salaEsperaDaAutoridade = 0
   if (!sala) {
     // `null` DO SERVIDOR TEM DOIS SIGNIFICADOS, e tratar os dois igual apagava
     // a sala em jogo.
@@ -578,15 +583,6 @@ export function reconciliarSalaDaAutoridade(
     // Voltar faria a barra do HUD recuar sozinha.
     const alvo = world.salaPendente ?? world.sala
     if (alvo) alvo.abates = Math.max(alvo.abates, sala.abates)
-    // O SERVIDOR ESTA NESTA SALA COM A QUOTA DELE CHEIA? (PH-271)
-    //
-    // E a unica pergunta que separa "atrasado" de "nunca vai avancar", e a
-    // resposta e o que libera (ou nao) o palpite local em
-    // `garantirTransicaoDeQuotaFechada`. Quota incompleta zera: ele esta
-    // contando, e esperar e o certo.
-    world.salaRespostasDaAutoridade += 1
-    if (sala.abates >= ABATES_POR_SALA) world.salaRespostasComQuotaCheia += 1
-    else world.salaRespostasComQuotaCheia = 0
     // O servidor chegou na MESMA sala: o palpite virou verdade e o fallback
     // pode voltar a valer daqui pra frente.
     world.salaPredita = false
@@ -625,10 +621,6 @@ export function reconciliarSalaDaAutoridade(
   world.salaPendente = { ...sala }
   world.salaCountdownRemaining ??= SALA_TRANSITION_COUNTDOWN
   world.salaEsperaDaAutoridade = 0
-  // PH-271: o servidor trocou de sala, entao ele NAO e um servidor parado — a
-  // contagem recomeca do zero na sala nova.
-  world.salaRespostasComQuotaCheia = 0
-  world.salaRespostasDaAutoridade = 0
   world.salaPredita = false
 }
 

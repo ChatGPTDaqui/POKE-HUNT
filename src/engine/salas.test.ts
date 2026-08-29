@@ -14,13 +14,12 @@ import { buildMapWorld, stepWorld, handleEnemyDefeated } from './simulation'
 import {
   janelaDaSala, poolAtivo, registrarAbate, temSalas, aplicarTransicaoDeSala, SALA_TRANSITION_COUNTDOWN,
   reconciliarSalaDaAutoridade, ESPERA_MAXIMA_PELA_AUTORIDADE, protetorDaSala,
-  RESPOSTAS_ATE_DESISTIR_DA_AUTORIDADE,
 } from './systems/salaSystem'
 import { POOL_POR_SALA } from '@/data/huntSpawnOverrides'
 import { ABATES_POR_SALA, SALAS_POR_HUNT } from '@/data/biomas'
 import { ENCOUNTERS } from '@/data/huntSpawnOverrides'
 import { useGameStateStore } from '@/stores/gameStateStore'
-import type { WorldState } from './types'
+import type { SalaAtiva, WorldState } from './types'
 
 const HUNT = 'mata_faixa1'
 
@@ -541,13 +540,9 @@ describe('espera pela autoridade tem teto', () => {
     world.enemies = []
     world.respawnTimer = 999
     const gameState = useGameStateStore.getState()
-    // PH-271: o servidor deste cenario e o de VERSAO ANTIGA — ele responde, e a
-    // resposta diz "minha quota esta cheia e eu continuo nesta sala". Sem estas
-    // respostas o cliente espera pra sempre, que passou a ser o comportamento
-    // certo contra servidor apenas atrasado.
-    for (let i = 0; i < RESPOSTAS_ATE_DESISTIR_DA_AUTORIDADE; i++) {
-      reconciliarSalaDaAutoridade(world, { ...world.sala!, abates: ABATES_POR_SALA })
-    }
+    // PH-271: o servidor deste cenario esta MUDO — nenhuma resposta chega, e e
+    // so isso que libera o palpite local hoje. Servidor que responde, mesmo
+    // repetindo a mesma sala, faz o cliente esperar.
 
     // Antes do teto: nada acontece, o cliente espera.
     for (let i = 0; i < Math.floor((ESPERA_MAXIMA_PELA_AUTORIDADE - 2) / 0.1); i++) {
@@ -598,14 +593,8 @@ describe('predicao local cede pra autoridade', () => {
     world.sala!.chave = 'sala-de-teste-sem-protetor' // ver nota em "espera pela autoridade tem teto"
     world.enemies = []
     world.respawnTimer = 999
-    // PH-271: tempo sozinho nao libera mais o palpite. Ele agora exige as duas
-    // condicoes — a espera vencida E o servidor insistindo que a quota DELE esta
-    // cheia sem trocar de sala. Estas respostas sao o segundo requisito, e sao o
-    // que caracteriza "servidor de versao antiga" (o unico caso em que palpitar
-    // e o certo).
-    for (let i = 0; i < RESPOSTAS_ATE_DESISTIR_DA_AUTORIDADE; i++) {
-      reconciliarSalaDaAutoridade(world, { ...world.sala!, abates: ABATES_POR_SALA })
-    }
+    // PH-271: o relogio de espera conta SILENCIO. Nenhuma resposta da
+    // autoridade neste cenario, entao ele estoura e o palpite local vale.
     const ticks = Math.floor((ESPERA_MAXIMA_PELA_AUTORIDADE + SALA_TRANSITION_COUNTDOWN + 1) / 0.1)
     for (let i = 0; i < ticks; i++) tick(world, 0.1, gameState)
     return world.sala!
@@ -675,12 +664,9 @@ describe('predicao local cede pra autoridade', () => {
     reconciliarSalaDaAutoridade(world, { ...predita, chave: 'sala-de-teste-sem-protetor', abates: ABATES_POR_SALA })
     expect(world.salaPredita).toBe(false)
 
-    // PH-271: destravar o fallback DE NOVO exige o mesmo sinal de sempre — o
-    // servidor insistindo com a quota dele cheia na mesma sala. A primeira
-    // confirmacao acima ja conta como uma; faltam as outras.
-    for (let i = 1; i < RESPOSTAS_ATE_DESISTIR_DA_AUTORIDADE; i++) {
-      reconciliarSalaDaAutoridade(world, { ...world.sala!, abates: ABATES_POR_SALA })
-    }
+    // PH-271: a confirmacao acima zerou o relogio de silencio. Daqui pra frente
+    // o servidor nao responde mais, e sao os ticks abaixo que o fazem estourar
+    // de novo — uma sala de adiantamento, como antes.
 
     const ticks = Math.floor((ESPERA_MAXIMA_PELA_AUTORIDADE + SALA_TRANSITION_COUNTDOWN + 1) / 0.1)
     for (let i = 0; i < ticks; i++) tick(world, 0.1, gameState)
@@ -764,18 +750,28 @@ describe('transicao de sala nao deixa lixo pra tras (PH-258)', () => {
   })
 })
 
-// PH-271 — o palpite local so vale contra servidor que NUNCA avanca.
+// PH-271 — o palpite local so vale contra servidor MUDO.
 //
 // O sintoma no jogo era o sub-bioma trocando sozinho com o numero da sala
 // parado ("Sala 3/10 Planicie" -> "Sala 3/10 Vilarejo"): o cliente chutava a
 // sala seguinte e a autoridade corrigia depois, na frente do jogador.
 //
-// A primeira tentativa foi so aumentar a espera (20s -> 120s), cobrindo o p90
-// de 107s da divergencia medida em scripts/harness/divergencia-de-quota.mjs. NAO
-// RESOLVEU — voltando ao jogo-dev, a troca fantasma apareceu igual. Relogio nao
-// distingue "servidor atrasado" de "servidor que nunca avanca", e e por isso que
-// estes casos olham a RESPOSTA e nao o tempo.
-describe('palpite de sala so contra servidor parado (PH-271)', () => {
+// Duas tentativas falharam antes destes casos, e as duas por confiar em algo
+// que nao prova nada sobre o servidor:
+//
+//  1. aumentar a espera (20s -> 120s), cobrindo o p90 de 107s da divergencia
+//     medida em scripts/harness/divergencia-de-quota.mjs. Voltando ao jogo-dev,
+//     a troca fantasma apareceu igual — relogio maior so adia.
+//  2. exigir "3 respostas seguidas com a quota do servidor cheia", na teoria um
+//     servidor que nunca avanca. Ao vivo isso e a cara do servidor NORMAL: com
+//     a quota fechada o cliente pede flush a cada 5s, entao 3 respostas sao 15
+//     segundos, e o servidor legitimamente fica minutos na mesma sala matando
+//     o protetor dela (medido em 29/08: guardiao `lickitung` da sala 2, ~3
+//     minutos, com `kills: 0` em quase toda janela de 5s).
+//
+// O que sobrou e o unico sinal que nao depende do conteudo da resposta: nao ter
+// resposta nenhuma. Servidor que responde e o dono da sala, e o cliente espera.
+describe('palpite de sala so contra servidor mudo (PH-271)', () => {
   beforeEach(() => {
     useGameStateStore.getState().resetToDefaults()
   })
@@ -809,10 +805,14 @@ describe('palpite de sala so contra servidor parado (PH-271)', () => {
     gameState: ReturnType<typeof useGameStateStore.getState>,
     segundos: number,
     abatesDoServidor: (passo: number) => number,
+    // Sala fixa a mandar em vez da atual — pros casos em que a resposta vai ser
+    // descartada por `reconciliarSalaDaAutoridade` e ainda assim precisa contar
+    // como "o servidor esta vivo".
+    salaFixa?: SalaAtiva,
   ) {
     for (let s = 0; s < segundos; s++) {
       if (s % 30 === 0) {
-        reconciliarSalaDaAutoridade(world, { ...world.sala!, abates: abatesDoServidor(s / 30) })
+        reconciliarSalaDaAutoridade(world, salaFixa ?? { ...world.sala!, abates: abatesDoServidor(s / 30) })
       }
       for (let t = 0; t < 10; t++) tick(world, 0.1, gameState)
     }
@@ -830,38 +830,29 @@ describe('palpite de sala so contra servidor parado (PH-271)', () => {
     expect(world.sala!.indice).toBe(0)
   })
 
-  it('servidor QUE NUNCA AVANCA (quota dele cheia, sala parada): o cliente chuta', () => {
+  it('servidor PARADO NA MESMA SALA com a quota cheia (matando o protetor): o cliente espera', () => {
     const { world, gameState } = comQuotaFechada(62)
-    // Mesma duracao, mesma cadencia — muda so o que a resposta diz: a quota do
-    // servidor esta cheia e ele continua na mesma sala. E o servidor de versao
-    // antiga, o unico caso em que palpitar e o certo.
+    // O caso medido ao vivo em 29/08, e o que a segunda tentativa de correcao
+    // confundia com "servidor de versao antiga": a quota do servidor esta cheia
+    // e ele continua na mesma sala, flush apos flush, porque o protetor da sala
+    // dele ainda nao morreu. Isso durou ~3 minutos numa sessao real — o dobro
+    // da espera de tempo aqui e conservador perto disso.
     rodarComServidorRespondendo(world, gameState, ESPERA_MAXIMA_PELA_AUTORIDADE * 2, () => ABATES_POR_SALA)
 
-    // Aqui o palpite E o certo: sem ele a hunt fica parada pra sempre contra um
-    // servidor de versao antiga, que e o caso pro qual o fallback existe.
-    //
-    // A asserção olha a SALA, e nao `salaPredita` nem `salaCountdownRemaining`.
-    // Os dois sao instantaneos e ja mudaram quando o teste mede: o countdown de
-    // 3s se esgota, e o `salaPredita` volta a false assim que a autoridade
-    // confirma a sala nova no flush seguinte. O que fica e o avanco — e e ele
-    // que o jogador ve.
-    expect(world.sala!.indice, 'o cliente nao chutou contra um servidor parado').toBe(1)
-  })
-
-  it('uma resposta com quota cheia nao basta — o servidor pode avancar no proximo flush', () => {
-    const { world, gameState } = comQuotaFechada(63)
-    rodarComServidorRespondendo(world, gameState, ESPERA_MAXIMA_PELA_AUTORIDADE + 40, (i) => (i === 0 ? ABATES_POR_SALA : 12 + i))
-
-    expect(world.salaPredita).toBe(false)
+    expect(world.salaPredita, 'o cliente chutou por cima de um servidor vivo').toBe(false)
     expect(world.salaPendente).toBeNull()
+    expect(world.sala!.indice).toBe(0)
   })
 
   it('servidor MUDO (nenhuma resposta): o cliente chuta — senao a hunt trava na queda de rede', () => {
     const { world, gameState } = comQuotaFechada(65)
-    // Nenhuma resposta da autoridade aqui, de proposito: e o TERCEIRO caso, e
-    // ele nao aparece no contador de quota cheia — mudo e atrasado tem os dois
-    // zero la. Sem o `salaRespostasDaAutoridade`, a hunt travaria com a barra
-    // cheia toda vez que a rede caisse.
+    // Nenhuma resposta da autoridade aqui, de proposito. E o unico caso que
+    // ainda libera o palpite, e sem ele a hunt travaria com a barra cheia toda
+    // vez que a rede caisse — pior que o bug que a PH-271 veio consertar.
+    //
+    // A asserção olha a SALA, e nao `salaPredita` nem `salaCountdownRemaining`:
+    // os dois sao instantaneos e ja mudaram quando o teste mede. O que fica e o
+    // avanco, e e ele que o jogador ve.
     for (let i = 0; i < Math.ceil((ESPERA_MAXIMA_PELA_AUTORIDADE + SALA_TRANSITION_COUNTDOWN + 1) / 0.1); i++) {
       tick(world, 0.1, gameState)
     }
@@ -869,12 +860,29 @@ describe('palpite de sala so contra servidor parado (PH-271)', () => {
     expect(world.sala!.indice, 'a hunt travaria pra sempre numa queda de rede').toBe(1)
   })
 
-  it('quota incompleta ZERA a contagem: duas cheias e uma incompleta nao chutam', () => {
+  it('resposta ANTIGA (sala anterior, que sera descartada) tambem conta como servidor vivo', () => {
     const { world, gameState } = comQuotaFechada(64)
-    // Cheia, cheia, e ai o servidor volta a contar — o terceiro flush prova que
-    // ele esta vivo, e a contagem recomeca do zero.
-    rodarComServidorRespondendo(world, gameState, ESPERA_MAXIMA_PELA_AUTORIDADE + 40, (i) => (i < 2 ? ABATES_POR_SALA : 5))
+    // Resposta que `reconciliarSalaDaAutoridade` descarta logo em seguida por
+    // ser de posicao anterior. Ela nao muda nada no estado da sala — mas prova
+    // que o servidor esta vivo, e e so isso que o relogio de silencio pergunta.
+    // Contar so as respostas "uteis" deixava um cliente ja divergente com cara
+    // de servidor mudo, e ai ele chutava de novo em cima da propria divergencia.
+    world.sala!.ciclos = 2
+    rodarComServidorRespondendo(
+      world, gameState, ESPERA_MAXIMA_PELA_AUTORIDADE * 2,
+      () => ABATES_POR_SALA, { ...world.sala!, ciclos: 1, abates: ABATES_POR_SALA },
+    )
 
+    // A asserção e no RELOGIO, e nao no palpite: neste cenario o palpite nao
+    // chega a disparar nem com a correcao desligada (a resposta descartada
+    // deixa o mundo em estados que nao alimentam o relogio a cada tick), entao
+    // olhar `salaPredita` seria um teste que passa sem provar nada. O que a
+    // correcao muda de verdade e o relogio nunca passar de uma janela de flush.
+    expect(
+      world.salaEsperaDaAutoridade,
+      'resposta descartada nao zerou o silencio — o cliente acha que o servidor sumiu',
+    ).toBeLessThan(45) // menos de uma janela e meia de flush; sem a correcao passa de 120
     expect(world.salaPredita).toBe(false)
+    expect(world.sala!.indice).toBe(0)
   })
 })
