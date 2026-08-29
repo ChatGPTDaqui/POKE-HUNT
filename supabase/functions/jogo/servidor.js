@@ -33028,6 +33028,15 @@ function montarHunt(bioma, faixa) {
 			image: "assets/hunt-backgrounds/forest.jpg"
 		},
 		maxEnemies: 1,
+		spawnDistancia: [150, 350],
+		maxEnemiesPorNivel: [{
+			nivel: 3,
+			max: 2
+		}, {
+			nivel: 5,
+			max: 3
+		}],
+		spawnEntreInimigos: 400,
 		respawnDelay: GEOMETRIA.respawnDelay,
 		spawnPoints: GEOMETRIA.spawnPoints.map((p) => ({ ...p })),
 		enemyPool: pool.map((speciesId) => addEncounter(STARTER_HUNT_ID, {
@@ -55055,6 +55064,23 @@ function randomSpawnPointFullMap(rng, mapDef) {
 		y
 	};
 }
+/**
+* Quantos inimigos podem estar em campo AGORA (PH-259).
+*
+* `mapDef.maxEnemies` continua sendo a resposta pra 100% das hunts; o unico
+* caso com degraus e a inicial, onde o limite sobe com o nivel do POKE em campo
+* (ver huntTypes#maxEnemiesPorNivel). Uma funcao, e nao o campo lido direto nos
+* quatro pontos de spawn, porque os quatro precisam concordar: se o respawn
+* usasse o teto alto e a construcao do mundo o baixo, o campo encheria por
+* respawn e nunca esvaziaria.
+*/
+function limiteDeInimigos(mapDef, poke) {
+	const degraus = mapDef.maxEnemiesPorNivel;
+	if (!degraus?.length || !poke) return mapDef.maxEnemies;
+	let limite = mapDef.maxEnemies;
+	for (const degrau of degraus) if (poke.level >= degrau.nivel) limite = degrau.max;
+	return limite;
+}
 /** Distancia do ponto ao inimigo ja posicionado mais proximo. */
 function folgaAte(x, y, ocupados) {
 	let menor = Number.POSITIVE_INFINITY;
@@ -55072,6 +55098,9 @@ function folgaAte(x, y, ocupados) {
 */
 function randomSpawnPoint(rng, mapDef, player, ocupados = []) {
 	if (!player) return randomSpawnPointFullMap(rng, mapDef);
+	const folgaPedida = mapDef.spawnEntreInimigos ?? SPAWN_ENTRE_INIMIGOS;
+	const distMin = mapDef.spawnDistancia?.[0] ?? SPAWN_CONE_MIN_DISTANCE;
+	const distMax = mapDef.spawnDistancia?.[1] ?? SPAWN_CONE_MAX_DISTANCE;
 	const cx = mapDef.bounds.width / 2;
 	const cy = mapDef.bounds.height / 2;
 	const radius = mapWalkRadius(mapDef);
@@ -55080,7 +55109,7 @@ function randomSpawnPoint(rng, mapDef, player, ocupados = []) {
 	const orcamento = ocupados.length > 0 ? SPAWN_ESPACADO_MAX_ATTEMPTS : SPAWN_POINT_MAX_ATTEMPTS;
 	for (let attempts = 0; attempts < orcamento; attempts++) {
 		const angle = facingAngle + randRange(rng, -SPAWN_CONE_HALF_ANGLE, SPAWN_CONE_HALF_ANGLE);
-		const dist = randRange(rng, SPAWN_CONE_MIN_DISTANCE, SPAWN_CONE_MAX_DISTANCE);
+		const dist = randRange(rng, distMin, distMax);
 		const x = player.x + Math.cos(angle) * dist;
 		const y = player.y + Math.sin(angle) * dist;
 		if (Math.hypot(x - cx, y - cy) > radius) continue;
@@ -55093,7 +55122,7 @@ function randomSpawnPoint(rng, mapDef, player, ocupados = []) {
 			},
 			folga
 		};
-		if (melhor.folga >= SPAWN_ENTRE_INIMIGOS * 1.5) break;
+		if (melhor.folga >= folgaPedida * 1.5) break;
 	}
 	if (melhor) return melhor.ponto;
 	return randomSpawnPointFullMap(rng, mapDef);
@@ -55361,7 +55390,7 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis)
 			const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala));
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
-		} else for (let i = 0; i < mapDef.maxEnemies; i++) {
+		} else for (let i = 0; i < limiteDeInimigos(mapDef, player?.poke); i++) {
 			const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala), enemies);
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
 			enemies.push(enemy);
@@ -55551,7 +55580,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 				world.enemies.push(enemy);
 			} else {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
-				for (let i = 0; i < world.mapDef.maxEnemies; i++) {
+				for (let i = 0; i < limiteDeInimigos(world.mapDef, world.player?.poke); i++) {
 					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
 					aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 					world.enemies.push(enemy);
@@ -55570,7 +55599,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 			aplicarTransicaoDeSala(world, world.mapDef.id);
 			if (world.mapDef) {
 				const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);
-				for (let i = 0; i < world.mapDef.maxEnemies; i++) {
+				for (let i = 0; i < limiteDeInimigos(world.mapDef, world.player?.poke); i++) {
 					const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies);
 					aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy);
 					world.enemies.push(enemy);
@@ -55638,7 +55667,7 @@ function stepWorld(world, dt, gameState, opts = {}) {
 		for (const grupo of grupos) gameState.unlockContinent(grupo);
 		if (!silent && algumEstavaTrancado) toastStore.getState().pushToast("Voce derrotou o Campeao Lance! A Faixa III e o Modo Pesadelo foram liberados.", "success", "world");
 	}
-	if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn && !world.protetorPendente) {
+	if (aliveCount < limiteDeInimigos(world.mapDef, world.player?.poke) && !world.mapDef.noRespawn && !world.protetorPendente) {
 		world.respawnTimer = (world.respawnTimer ?? 0) - dt;
 		if (world.respawnTimer <= 0) {
 			const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool);

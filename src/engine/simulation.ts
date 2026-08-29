@@ -225,6 +225,28 @@ function randomSpawnPointFullMap(rng: Rng, mapDef: MapDef): Point {
   return { x, y }
 }
 
+/**
+ * Quantos inimigos podem estar em campo AGORA (PH-259).
+ *
+ * `mapDef.maxEnemies` continua sendo a resposta pra 100% das hunts; o unico
+ * caso com degraus e a inicial, onde o limite sobe com o nivel do POKE em campo
+ * (ver huntTypes#maxEnemiesPorNivel). Uma funcao, e nao o campo lido direto nos
+ * quatro pontos de spawn, porque os quatro precisam concordar: se o respawn
+ * usasse o teto alto e a construcao do mundo o baixo, o campo encheria por
+ * respawn e nunca esvaziaria.
+ */
+export function limiteDeInimigos(mapDef: MapDef, poke?: { level: number } | null): number {
+  const degraus = mapDef.maxEnemiesPorNivel
+  if (!degraus?.length || !poke) return mapDef.maxEnemies
+  let limite = mapDef.maxEnemies
+  // Percorre todos em vez de parar no primeiro que casa: a lista e do menor pro
+  // maior nivel, e o ULTIMO degrau alcancado e o que vale.
+  for (const degrau of degraus) {
+    if (poke.level >= degrau.nivel) limite = degrau.max
+  }
+  return limite
+}
+
 /** Distancia do ponto ao inimigo ja posicionado mais proximo. */
 function folgaAte(x: number, y: number, ocupados: Point[]): number {
   let menor = Number.POSITIVE_INFINITY
@@ -249,6 +271,16 @@ function randomSpawnPoint(
 ): Point {
   if (!player) return randomSpawnPointFullMap(rng, mapDef)
 
+  // PH-259: a hunt inicial pede folga MAIOR que a padrao — la o numero de
+  // inimigos em campo subiu, e o que impede isso de virar dois bichos em cima
+  // de um POKE Lv1 e eles nascerem a mais de um raio de aggro um do outro. Ver
+  // huntTypes#spawnEntreInimigos. Ausente = o valor de sempre.
+  const folgaPedida = mapDef.spawnEntreInimigos ?? SPAWN_ENTRE_INIMIGOS
+  // PH-259: e a faixa de distancia em que o selvagem nasce. A hunt inicial usa
+  // uma mais curta que a padrao — ver huntTypes#spawnDistancia.
+  const distMin = mapDef.spawnDistancia?.[0] ?? SPAWN_CONE_MIN_DISTANCE
+  const distMax = mapDef.spawnDistancia?.[1] ?? SPAWN_CONE_MAX_DISTANCE
+
   const cx = mapDef.bounds.width / 2
   const cy = mapDef.bounds.height / 2
   const radius = mapWalkRadius(mapDef)
@@ -258,7 +290,7 @@ function randomSpawnPoint(
   const orcamento = ocupados.length > 0 ? SPAWN_ESPACADO_MAX_ATTEMPTS : SPAWN_POINT_MAX_ATTEMPTS
   for (let attempts = 0; attempts < orcamento; attempts++) {
     const angle = facingAngle + randRange(rng, -SPAWN_CONE_HALF_ANGLE, SPAWN_CONE_HALF_ANGLE)
-    const dist = randRange(rng, SPAWN_CONE_MIN_DISTANCE, SPAWN_CONE_MAX_DISTANCE)
+    const dist = randRange(rng, distMin, distMax)
     const x = player.x + Math.cos(angle) * dist
     const y = player.y + Math.sin(angle) * dist
     if (Math.hypot(x - cx, y - cy) > radius) continue
@@ -268,7 +300,7 @@ function randomSpawnPoint(
     // Sai cedo SO quando ja esta bem servido. Aceitar o primeiro que passa
     // raspando espalha pior: o ponto "ok por pouco" rouba o espaco de quem vem
     // depois, e a leva inteira termina mais apertada do que precisava.
-    if (melhor.folga >= SPAWN_ENTRE_INIMIGOS * 1.5) break
+    if (melhor.folga >= folgaPedida * 1.5) break
   }
   // Melhor esforco: o candidato valido mais afastado dos outros. Perder o
   // espacamento e melhor que perder o cone de visao, que e pedido explicito.
@@ -712,7 +744,7 @@ export function buildMapWorld(
       aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
       enemies.push(enemy)
     } else {
-      for (let i = 0; i < mapDef.maxEnemies; i++) {
+      for (let i = 0; i < limiteDeInimigos(mapDef, player?.poke); i++) {
         const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala), enemies)
         aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy)
         enemies.push(enemy)
@@ -1007,7 +1039,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
         world.enemies.push(enemy)
       } else {
         const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
-        for (let i = 0; i < world.mapDef.maxEnemies; i++) {
+        for (let i = 0; i < limiteDeInimigos(world.mapDef, world.player?.poke); i++) {
           const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies)
           aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
           world.enemies.push(enemy)
@@ -1038,7 +1070,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
       aplicarTransicaoDeSala(world, world.mapDef.id)
       if (world.mapDef) {
         const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
-        for (let i = 0; i < world.mapDef.maxEnemies; i++) {
+        for (let i = 0; i < limiteDeInimigos(world.mapDef, world.player?.poke); i++) {
           const enemy = spawnEnemyAt(world, world.mapDef, ctx.pool, ctx.janela, world.player, entradaDoInimigo(world.mapDef, world.sala), world.enemies)
           aplicarHazardsAoInimigo(world.rng, world.enemyHazards, enemy)
           world.enemies.push(enemy)
@@ -1176,7 +1208,7 @@ export function stepWorld(world: WorldState, dt: number, gameState: GameStateSto
   // este corte aqui `aliveCount` (que so conta o protetor, 1) ficava abaixo
   // de `maxEnemies` e este respawn enchia a sala com mobs comuns do lado do
   // protetor — achado revisando PH-217 (ChatGPTDaqui, #182).
-  if (aliveCount < world.mapDef.maxEnemies && !world.mapDef.noRespawn && !world.protetorPendente) {
+  if (aliveCount < limiteDeInimigos(world.mapDef, world.player?.poke) && !world.mapDef.noRespawn && !world.protetorPendente) {
     world.respawnTimer = (world.respawnTimer ?? 0) - dt
     if (world.respawnTimer <= 0) {
       const ctx = contextoDeSpawn(world.mapDef.id, world.mapDef.levelRange, world.sala, world.mapDef.enemyPool)
