@@ -422,13 +422,16 @@ function agendarProximoFlush(): void {
  * manda o campo.
  */
 export async function abrirSessaoDeHunt(
-  mapId: string, pokeUid: string, opcoes?: { avisarErro?: boolean },
+  mapId: string, pokeUid: string, opcoes?: { avisarErro?: boolean; retomando?: boolean },
 ): Promise<{ ok: boolean; sala: SalaAtiva | null; clima?: ClimaTipo | null }> {
   // Sem servidor nao ha autoridade: `clima` sai AUSENTE (e nao `null`) pra o
   // motor derivar o dele — ver ProgressoDaSessao.clima (PH-140).
   if (!servidorAtivo()) return { ok: true, sala: null }
   try {
-    const resposta = await servidor.abrirSessao(mapId, pokeUid)
+    // `retomando` (PH-266) so vem do boot, junto com `avisarErro: false` — sao
+    // as duas metades da mesma condicao ("o jogador nao pediu isto"). Ver
+    // features/game/bootDaSessao.ts.
+    const resposta = await servidor.abrirSessao(mapId, pokeUid, opcoes?.retomando ?? false)
     pararFlushPeriodico()
     // Hunt nova comeca no piso: a primeira janela e quase sempre produtiva, e
     // herdar o intervalo esticado da hunt anterior faria o jogador entrar e
