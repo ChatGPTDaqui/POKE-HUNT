@@ -253,6 +253,35 @@ lendário único ou fixture de teste, sala não faz sentido para nenhuma.
 As outras 72 (36 hunts de bioma × faixa + os 36 espelhos do Modo Pesadelo) passam pelas 10
 salas. **O Modo Pesadelo entrou nessa conta em 2026-08-19** — ver a seção dele abaixo.
 
+## Guardian e Lord — protetor da sala
+
+Adicionado 2026-08-27 (PH-223→230), em rename de nomenclatura no PH-236 (28/08). **Não
+confundir com "hunts BOSS" da seção seguinte** — são sistemas diferentes que só coincidem no
+nome em português ("boss"); ver `CLAUDE.md` para a lista dos três sistemas de boss do projeto.
+
+Toda sala 1-9 pede um **Guardian** ao fechar a quota de 30 abates; a sala 10 (última do
+ciclo) pede um **Lord**. `protetorDaSala(sala)` (`src/engine/systems/salaSystem.ts`, antes
+`bossDaSala`) decide qual, olhando só bioma + índice — pura, não sorteia nada. A entidade em si
+(espécie do pool da própria sala, IV 20-31 por stat em vez do 0-31 padrão, raridade normal —
+pode rolar legendary/mythic) é criada por `criarEntidadeDoProtetor` (`simulation.ts`, antes
+`criarEntidadeDoBoss`). Avançar de sala fica bloqueado até derrotar OU capturar o protetor —
+captura sempre possível, com multiplicador de chance reduzido.
+
+Vencer o Lord (não o Guardian) avança `bioma_progress` da faixa — só se o bioma resolvido for
+exatamente o próximo esperado em `ORDEM_DOS_BIOMAS` (`data/biomas.ts`). `abrirSessao`
+(`authority/src/appSessao.ts`) valida esse progresso no servidor antes de liberar a hunt —
+gate não é só cosmético no menu.
+
+Ativo nos 12 biomas desde PH-225 (antes, só o piloto ígneo). Persistência entre janelas de
+flush: `authority/src/progresso.ts` (tabela `sala_protetor` a partir do PH-241 — antes,
+colunas `boss_*` em `game_sessions`) guarda o protetor vivo pra não resortear a cada
+reconstrução de mundo.
+
+**Bug conhecido, aberto** (PH-230): sob autoridade remota (`world.salaSobAutoridade`, ver
+seção anterior), resolver o protetor não arma a transição de sala localmente — o servidor é
+quem decide. Existe um caminho de loop onde a mesma sala volta a pedir protetor no tick
+seguinte antes do flush confirmar a sala nova. Detalhe em `docs/13-divergencias-conhecidas.md`.
+
 ## Wall-block pela ARTE de fundo (colisão pintada à mão)
 
 `src/data/maps.ts#mapDefParaSala` escolhe a grade de colisão pela **imagem que está na tela**,
