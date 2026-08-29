@@ -59,11 +59,27 @@ function Ticker({ onOpen }: { onOpen: () => void }) {
       aria-label="Abrir chat"
       // Faixa fina de proposito (cada pixel dela e jogo escondido), com a area
       // de toque crescida por baixo — ver `.alvo-estendido` no index.css.
+      //
+      // LARGURA DE CONTEUDO (PH-262), e nao `w-full`. A faixa escura ia de ponta
+      // a ponta do rodape em toda mensagem: "Item encontrado: Potion" ocupa um
+      // terco dela, e os outros dois tercos eram vidro fosco cobrindo o campo de
+      // batalha sem dizer nada. O pedido foi literal — "deixe apenas o suficiente
+      // para a escrita".
+      //
+      // `max-w-full` mantem o teto: mensagem longa continua truncando na largura
+      // da tela em vez de estourar pra fora dela. `self-center` e obrigatorio
+      // porque o pai e `items-stretch` (HudLayer) — sem ele o `w-fit` nao teria
+      // efeito nenhum.
       className={cn(
-        'vidro alvo-estendido pointer-events-auto relative flex w-full cursor-pointer items-center gap-[.45em]',
+        'vidro alvo-estendido pointer-events-auto relative flex w-fit max-w-full cursor-pointer',
+        'self-center items-center gap-[.45em]',
         'rounded-full px-[.7em] py-[.3em] text-left font-[inherit]',
       )}
-      style={{ '--alvo-folga': '-9px', '--alvo-folga-x': '0px' } as CSSProperties}
+      // A AREA DE TOQUE NAO ENCOLHE JUNTO. `--alvo-folga` ja crescia o alvo por
+      // cima/por baixo; com a faixa curta, `--alvo-folga-x` (era 0) passa a
+      // crescer tambem pros lados, senao o alvo do chat encolheria junto com a
+      // mensagem — e uma linha de duas palavras viraria um botao de 80px.
+      style={{ '--alvo-folga': '-9px', '--alvo-folga-x': '-16px' } as CSSProperties}
     >
       <ChatCircleDots className="shrink-0 text-[.95em] text-n400" />
       <span
