@@ -439,6 +439,14 @@ export async function lerSnapshot(
   // gold via `reivindicar_missao` (RPC de menu, fora da resimulacao) — a
   // resimulacao de sessao nunca le nem escreve este campo, so precisa dele
   // presente pro tipo `GameStateData` fechar.
+  //
+  // CUIDADO (PH-265): esta lista vazia VIAJA pro cliente dentro de `estado`, e
+  // por um tempo ela APAGAVA a lista de la. Um flush a cada 30s fazia a tela de
+  // Tasks voltar a mostrar como disponivel uma missao ja reivindicada, e o
+  // clique seguinte batia na RPC com "Missao ja reivindicada". Quem defende
+  // disso e `mesclarMissoes` (src/data/remote/autoridade.ts): no cliente a
+  // lista de missoes e UNIAO, nunca substituicao. Se um dia esta rota passar a
+  // ler a tabela, aquela uniao continua correta — a chave so entra.
   const linhasNoLoad: PlayerSnapshot = {
     player: player[0], pokemon, items, pokedex, autoCatchRules, especialidades, missoesReivindicadas: [],
   }

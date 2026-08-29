@@ -29,7 +29,6 @@ import {
   FirstAid, Gear, GraduationCap, MagnifyingGlassMinus, MagnifyingGlassPlus, MapTrifold,
   Robot, Scales, Sparkle, Storefront, Trophy, UsersThree, Warning, BookBookmark, type Icon,
 } from '@phosphor-icons/react'
-import { controller } from '@/engine/controller'
 import { useWorldStore } from '@/stores/worldStore'
 import { useRendererStore } from '@/stores/rendererStore'
 import { useUiStore, useDeviceMode, type ScreenName } from '@/stores/uiStore'
@@ -152,10 +151,23 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
   // toque so fecha o que estiver aberto por cima — nao ha viagem a fazer.
   const emHunt = useWorldStore((s) => s.mapDef != null)
   const closeScreen = useUiStore((s) => s.closeScreen)
+  // PH-263: dentro da hunt o toque MARCA a viagem em vez de fazer a viagem. A
+  // contagem de 3s e a troca de cena moram em `ViagemAoHospitalOverlay` — o
+  // cabecalho dela explica por que a saida deixou de ser instantanea.
+  //
+  // Segundo toque durante a contagem CANCELA. O mesmo botao serve de desfazer
+  // porque ele e o unico lugar em que o jogador ja esta olhando quando percebe
+  // que clicou sem querer; sem isso ele fica 3 segundos preso a uma saida que
+  // nao pediu.
+  const viagemMarcada = useUiStore((s) => s.viagemAoHospital != null)
+  const iniciarViagem = useUiStore((s) => s.iniciarViagemAoHospital)
+  const cancelarViagem = useUiStore((s) => s.cancelarViagemAoHospital)
   function irAoHospital() {
     closeScreen()
     setMoreOpen(false)
-    if (emHunt) void controller.returnToHospital({ x: 0, y: 0 })
+    if (!emHunt) return
+    if (viagemMarcada) cancelarViagem()
+    else iniciarViagem()
   }
 
   return (
@@ -193,9 +205,12 @@ function BarraNavegacao({ deitado }: { deitado: boolean }) {
         onClick={() => toggleScreen(DIREITA[0].screen)}
       />
 
+      {/* `ativo` durante a contagem tambem: o slot fica marcado desde o toque,
+          e nao so quando a viagem termina — sem isso o unico sinal de que o
+          comando pegou seria o overlay no meio do campo. */}
       <SlotNav
         destino={{ label: 'Hospital', Icon: FirstAid }}
-        ativo={!emHunt}
+        ativo={!emHunt || viagemMarcada}
         rotulo={!deitado}
         onClick={irAoHospital}
       />

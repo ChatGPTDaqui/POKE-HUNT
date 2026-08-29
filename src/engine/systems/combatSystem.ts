@@ -52,6 +52,7 @@ import { getEffectiveness } from '@/data/generated/typeChart.generated'
 import { rollChance, randRange } from '@/core/random'
 import { ATTACK_ANIM_DURATION, triggerAttackAnim } from './animationSystem'
 import { reporClimaDeAmbiente } from './climaAmbiente'
+import { reunindoParaLure } from './lureSystem'
 import { createWorldEffect, effectDone, reapontarParaAtacante, seguirDono, tickEffect } from '../effect'
 import {
   isDead, getGroundOffset, tickCooldowns, isAbilityReady,
@@ -3410,7 +3411,16 @@ export function updateCombat(world: WorldState, dt: number, opts: { silent?: boo
       }
     }
 
-    executePlayerAction(world, player, engagedEnemies, silent)
+    // PH-264: reunindo, o jogador NAO golpeia — a mecanica que o painel de Lure
+    // promete e "junta a quantidade pedida, depois luta", e ate aqui o POKE
+    // comecava a bater no primeiro selvagem que encostasse. So o golpe DELE fica
+    // segurado: os hooks de entrada acima ja rodaram e os inimigos agem
+    // normalmente logo abaixo (segurar os dois lados seria invulnerabilidade).
+    //
+    // Quem termina a reuniao e o proprio lure, e ele tem quatro saidas — conta
+    // fechada, sem candidato pra puxar, shiny em campo e o teto de tempo —,
+    // entao isto nao pode virar um POKE que nunca ataca.
+    if (!reunindoParaLure(world)) executePlayerAction(world, player, engagedEnemies, silent)
 
     for (const enemy of engagedEnemies) {
       if (isDead(enemy) || player.fainted) continue
