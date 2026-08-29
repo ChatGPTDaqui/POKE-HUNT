@@ -38,6 +38,10 @@ vi.mock('@/lib/supabase', () => {
 
 vi.mock('./playerMapper', () => ({
   rowToPoke: (row: { id: string }) => ({ uid: row.id }),
+  // PH-184: a leitura passou a pedir colunas nomeadas em vez de `select('*')`.
+  // O valor nao importa pro que este arquivo julga (paginacao e conferencia do
+  // total declarado); a ausencia dele, sim — o mock estoura na primeira request.
+  COLUNAS_DE_POKE: 'id',
 }))
 
 const { carregarMochilaRemota } = await import('./mochilaRemota')

@@ -13,7 +13,7 @@
 // cliente — RLS de escrita nas tabelas de jogador segue revogada, aqui e so
 // `select` das linhas do proprio usuario.
 import { supabase } from '@/lib/supabase'
-import { rowToPoke } from './playerMapper'
+import { COLUNAS_DE_POKE, rowToPoke } from './playerMapper'
 import { acrescentarIdsDaReserva } from './playerRepository'
 import type { PokeInstance } from '@/data/pokes'
 
@@ -34,7 +34,7 @@ export async function carregarMochilaRemota(): Promise<PokeInstance[]> {
   for (let inicio = 0; ; inicio += TAMANHO_DA_PAGINA) {
     const { data, error, count } = await supabase
       .from('pokemon_instances')
-      .select('*', { count: inicio === 0 ? 'exact' : undefined })
+      .select(COLUNAS_DE_POKE, { count: inicio === 0 ? 'exact' : undefined })
       .eq('user_id', userId)
       .eq('location', 'bag')
       // Ordem estavel entre paginas. Sem ela o Postgres nao garante posicao
@@ -88,7 +88,7 @@ export async function carregarCapturasRecentes(limite: number): Promise<PokeInst
 
   const { data, error } = await supabase
     .from('pokemon_instances')
-    .select('*')
+    .select(COLUNAS_DE_POKE)
     .eq('user_id', userId)
     .in('location', ['team', 'bag'])
     .order('created_at', { ascending: false })

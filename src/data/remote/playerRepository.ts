@@ -13,6 +13,7 @@ import {
   gameStateToAutoCatchRuleRows,
   gameStateToMissaoRows,
   gameStateToEspecialidadeRows,
+  COLUNAS_DE_POKE,
   type PlayerSnapshot,
 } from './playerMapper'
 
@@ -55,7 +56,7 @@ export async function loadPlayerState(userId: string, defaults: GameStateData): 
     // `order('team_slot')` pelo mesmo motivo de `refetchEquipeInteira`: o resto
     // do app assume `team[0]` = ativo, e sem ordem o Postgres devolve em ordem
     // arbitraria.
-    supabase.from('pokemon_instances').select('*').eq('user_id', userId)
+    supabase.from('pokemon_instances').select(COLUNAS_DE_POKE).eq('user_id', userId)
       .eq('location', 'team').order('team_slot', { ascending: true }),
     supabase.from('player_items').select('*').eq('user_id', userId),
     supabase.from('player_pokedex').select('*').eq('user_id', userId),
