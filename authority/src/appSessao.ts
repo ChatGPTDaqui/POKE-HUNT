@@ -142,9 +142,12 @@ async function rotear(cfg: OpcoesApp, req: Request, url: URL): Promise<Response>
  * pago pela outra.
  */
 async function sessaoAberta(cfg: Config, userId: string): Promise<LinhaSessao | null> {
+  // PH-241: `sala_protetor(*)` embutido via PostgREST — `session_id` e
+  // PRIMARY KEY da tabela filha, entao o embed vem como objeto UNICO (ou
+  // `null`), nao array. `protetorDaLinha` (progresso.ts) le daqui.
   const linhas = await selecionar<LinhaSessao>(
     cfg,
-    `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*&order=started_at.desc`,
+    `game_sessions?user_id=eq.${userId}&closed_at=is.null&select=*,sala_protetor(*)&order=started_at.desc`,
   )
   for (const orfa of linhas.slice(1)) await fecharLinhaDeSessao(cfg, orfa.id)
   return linhas[0] ?? null
@@ -167,27 +170,29 @@ async function sairDaHunt(cfg: Config, userId: string, sessaoId: string): Promis
 }
 
 /**
- * PH-227: mensagem de bloqueio (ou `null` se liberado) do gate sequencial de
- * bioma — vencer o boss ultimate do bioma N libera o N+1 (PH-207/226).
+ * PH-227/236: mensagem de bloqueio (ou `null` se liberado) do gate
+ * sequencial de bioma — vencer o Lord do bioma N libera o N+1 (PH-207/226).
  *
  * Pura de proposito: testavel isolada, sem precisar mockar `db.js`/HTTP
  * inteiro so pra exercitar uma regra de negocio. `biomaDoMapId` (PH-229)
  * e a MESMA funcao que HuntMenu usa pro selo/ordem/mensagem do menu — os
- * dois lados tem que concordar sobre "que bioma e esse mapId".
+ * dois lados tem que concordar sobre "que bioma e esse mapId" E sobre o
+ * texto exato da mensagem (`HuntMenu.tsx#bloqueioDeBiomaClient` espelha
+ * esta string).
  */
 export function bloqueioDeBiomaPendente(
   mapId: string, grupo: string, biomaProgress: BiomaProgress,
 ): string | null {
   const indiceEsperado = indiceDoBiomaNoMapId(mapId, grupo)
-  // Bioma sem boss habilitado (indice -1, nao acontece hoje com os 12 todos
-  // habilitados — PH-225) ou o PRIMEIRO da ordem (indice 0) libera
-  // automatico, sem checar nada — nao ha "boss anterior" pra vencer.
+  // Bioma sem protetor habilitado (indice -1, nao acontece hoje com os 12
+  // todos habilitados — PH-225) ou o PRIMEIRO da ordem (indice 0) libera
+  // automatico, sem checar nada — nao ha "Lord anterior" pra vencer.
   if (indiceEsperado <= 0) return null
   const progresso = (biomaProgress?.[grupo as keyof BiomaProgress] ?? 0) as number
   if (progresso >= indiceEsperado) return null
   const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1]
   const anteriorNome = BIOMA_POR_CHAVE[anteriorChave]?.nome ?? anteriorChave
-  return `Vença o boss de ${anteriorNome} para liberar esta área.`
+  return `Vença o Lord de ${anteriorNome} para liberar esta área.`
 }
 
 async function abrirSessao(cfg: Config, userId: string, req: Request): Promise<Response> {

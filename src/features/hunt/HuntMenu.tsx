@@ -55,7 +55,7 @@ function bloqueioDeBiomaClient(mapId: string, faixa: string, biomaProgress: Biom
   if (progresso >= indiceEsperado) return null
   const anteriorChave = ORDEM_DOS_BIOMAS[indiceEsperado - 1]
   const anteriorNome = BIOMA_POR_CHAVE[anteriorChave]?.nome ?? anteriorChave
-  return `Vença o boss de ${anteriorNome} para liberar esta área.`
+  return `Vença o Lord de ${anteriorNome} para liberar esta área.`
 }
 
 async function acionarHunt(
@@ -411,7 +411,7 @@ export function HuntMenu() {
         // PH-229: gate de bioma (PH-207/226/227) — checado DEPOIS do
         // continente e ANTES do custo em ouro, mesma prioridade do servidor.
         const bloqueioDeBioma = continentGated ? null : bloqueioDeBiomaClient(map.id, mapContinent, biomaProgress)
-        const temBoss = indiceDoBiomaNoMapId(map.id, mapContinent) !== -1
+        const temProtetor = indiceDoBiomaNoMapId(map.id, mapContinent) !== -1
         // Mesma regra do servidor (server/src/app.ts#abrirSessao): hunt sem
         // custo nasce liberada. Checar so a lista trancava visualmente as hunts
         // do Modo Pesadelo e as BOSS, que sao geradas em runtime e nunca entram
@@ -452,12 +452,18 @@ export function HuntMenu() {
                 <div className="truncate font-medium">
                   {map.name}{' '}
                   <span className="font-normal text-n400">(Lv {map.levelRange[0]}-{map.levelRange[1]})</span>
-                  {/* PH-229: selo de boss — motor exige mini-boss/boss ultimate
+                  {/* PH-229/236: selo de protetor — motor exige Guardian/Lord
                       em toda sala de todo bioma (PH-225), entao vale pra
-                      qualquer hunt que pertenca a ORDEM_DOS_BIOMAS. */}
-                  {temBoss && (
+                      qualquer hunt que pertenca a ORDEM_DOS_BIOMAS. Selo
+                      generico ("PROTETOR", nao "GUARDIAN"/"LORD"): este card
+                      e da tela de SELEÇÃO de hunt, uma hunt inteira tem os
+                      DOIS tipos (Guardian nas salas 1-9, Lord na 10) — nao
+                      ha um "tipo" unico pra condicionar aqui, so a tag
+                      dentro da hunt ativa (drawNameLevelTag, sprites.ts)
+                      sabe qual protetor esta na tela agora. */}
+                  {temProtetor && (
                     <span className="ml-[.4em] rounded-[.3em] bg-[#ff4d4d33] px-[.35em] py-[.05em] align-middle text-[.65em] font-bold text-[#ff4d4d]">
-                      ★ BOSS
+                      ★ PROTETOR
                     </span>
                   )}
                   {/* PH-244: o segundo canal da hunt ativa. Depois do selo de

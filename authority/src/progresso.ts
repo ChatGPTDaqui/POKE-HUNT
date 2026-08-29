@@ -5,9 +5,9 @@ import {
   gameStateToItemRows, gameStateToPokedexRows, gameStateToAutoCatchRuleRows,
   defaultGameStateData, MAPS, GRUPOS_DO_LANCE,
   OFFLINE_SIM_STEP_SECONDS, LIVE_SIM_STEP_SECONDS, recordBatch, LIMIAR_OFFLINE_SEGUNDOS, createEmptySummary,
-  solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, ABATES_POR_SALA,
+  solicitarAvancoDeSala, SALA_TRANSITION_COUNTDOWN, ABATES_POR_SALA, protetorDaSala,
   type GameStateData, type PlayerSnapshot, type OfflineSimSummary, type SalaAtiva,
-  type ClimaTipo, type BossPendente,
+  type ClimaTipo, type ProtetorPendente,
 } from '#engine'
 import {
   ErroHttp, selecionarTudo, selecionar, atualizar, atualizarRetornando, inserir, apagar, chamarRpc, type Config,
@@ -113,83 +113,100 @@ export interface LinhaSessao {
   sala_chave: string | null
   sala_abates: number | string
   ciclos: number | string
-  // Boss pendente da sala atual (PH-201/202/204). `boss_uid` nulo == sem boss
-  // ativo (sala nao pede, ou ja foi resolvido). Mesma familia do `sala_*`: o
-  // mundo e reconstruido a cada janela de flush, mas o boss NAO pode ser
-  // re-sorteado — `createPokeInstance` rola shiny/trait/nature mesmo com IV e
-  // raridade fixos, entao um boss recriado sem estes campos teria aparencia e
-  // stats diferentes a cada ~30s, e o RNG do servidor divergiria do cliente
-  // (que sorteou o boss uma vez so). Ver `bossDaLinha`/`colunasDoBoss`.
-  boss_uid: string | null
-  boss_species_id: string | null
-  boss_encounter_id: string | null
-  boss_level: number | string | null
-  boss_iv_hp: number | string | null
-  boss_iv_atk_fis: number | string | null
-  boss_iv_atk_esp: number | string | null
-  boss_iv_def: number | string | null
-  boss_iv_def_esp: number | string | null
-  boss_iv_speed: number | string | null
-  boss_rarity: string | null
-  boss_is_shiny: boolean | null
-  boss_nature: string | null
-  boss_trait: string | null
-  boss_hp_atual: number | string | null
+  // PH-241/236: protetor pendente da sala atual — tabela dedicada
+  // `sala_protetor`, nao mais colunas `boss_*` aqui (as 15 colunas antigas
+  // saíram de `game_sessions` na migration do PH-241). Embutido via
+  // PostgREST (`select=*,sala_protetor(*)`, ver appSessao.ts#sessaoAberta) —
+  // objeto UNICO (nao array) porque `session_id` e PRIMARY KEY da tabela
+  // filha. Ausente/`undefined` (INSERT sem embed, ex.: abertura de sessao
+  // nova) tratado igual a `null` — sessao recem-criada nunca tem protetor.
+  // Linha ausente == sem protetor ativo, mesma semantica do antigo
+  // `boss_uid` nulo.
+  sala_protetor?: LinhaSalaProtetor | null
+}
+
+/** PH-241: espelha as colunas de `sala_protetor` (uma linha por sessao, no maximo). */
+export interface LinhaSalaProtetor {
+  session_id: string
+  uid: string
+  species_id: string
+  encounter_id: string
+  level: number | string
+  iv_hp: number | string
+  iv_atk_fis: number | string
+  iv_atk_esp: number | string
+  iv_def: number | string
+  iv_def_esp: number | string
+  iv_speed: number | string
+  rarity: string
+  is_shiny: boolean
+  nature: string | null
+  trait: string | null
+  hp_atual: number | string
+  tipo: string
 }
 
 /**
- * PH-217: reconstroi o `BossPendente` da linha da sessao pra passar ao
- * `buildMapWorld`, ou `null` quando nao ha boss pendente (`boss_uid` nulo).
+ * PH-217/236/241: reconstroi o `ProtetorPendente` da linha da sessao (via
+ * `sala_protetor` embutido) pra passar ao `buildMapWorld`, ou `null` quando
+ * nao ha protetor pendente.
  *
- * Espelho exato de `colunasDoBoss` — o que uma grava a outra le. Os `Number()`
- * cobrem o PostgREST devolver `numeric`/`int8` como string, igual ao resto de
+ * Le o que `payloadDoProtetor` (abaixo) monta e `gravar_flush_de_sessao`
+ * grava — mas NAO e round-trip simetrico: a RPC recebe jsonb camelCase
+ * (`payloadDoProtetor`) e devolve colunas relacionais snake_case
+ * (`LinhaSalaProtetor`, via `sala_protetor` embutido), porque uma vira
+ * INSERT/UPDATE e a outra e SELECT de volta. Os `Number()` cobrem o
+ * PostgREST devolver `numeric`/`int8` como string, igual ao resto de
  * `LinhaSessao`.
  */
-export function bossDaLinha(s: LinhaSessao): BossPendente | null {
-  if (s.boss_uid == null) return null
+export function protetorDaLinha(s: LinhaSessao): ProtetorPendente | null {
+  const p = s.sala_protetor
+  if (!p) return null
   return {
-    uid: s.boss_uid,
-    speciesId: s.boss_species_id ?? '',
-    encounterId: s.boss_encounter_id ?? '',
-    level: Number(s.boss_level ?? 0),
+    uid: p.uid,
+    speciesId: p.species_id,
+    encounterId: p.encounter_id,
+    level: Number(p.level),
     ivs: {
-      hp: Number(s.boss_iv_hp ?? 0),
-      atkFis: Number(s.boss_iv_atk_fis ?? 0),
-      atkEsp: Number(s.boss_iv_atk_esp ?? 0),
-      def: Number(s.boss_iv_def ?? 0),
-      defEsp: Number(s.boss_iv_def_esp ?? 0),
-      speed: Number(s.boss_iv_speed ?? 0),
+      hp: Number(p.iv_hp),
+      atkFis: Number(p.iv_atk_fis),
+      atkEsp: Number(p.iv_atk_esp),
+      def: Number(p.iv_def),
+      defEsp: Number(p.iv_def_esp),
+      speed: Number(p.iv_speed),
     },
-    rarity: (s.boss_rarity ?? 'comum') as BossPendente['rarity'],
-    isShiny: Boolean(s.boss_is_shiny),
-    nature: (s.boss_nature ?? undefined) as BossPendente['nature'],
-    trait: s.boss_trait ?? undefined,
-    hpAtual: Number(s.boss_hp_atual ?? 0),
+    rarity: p.rarity as ProtetorPendente['rarity'],
+    isShiny: p.is_shiny,
+    nature: (p.nature ?? undefined) as ProtetorPendente['nature'],
+    trait: p.trait ?? undefined,
+    hpAtual: Number(p.hp_atual),
   }
 }
 
 /**
- * PH-217: as 15 colunas `boss_*` do `game_sessions` pra gravar no flush — todas
- * do `bossPendente` vivo, ou todas `null` quando o boss ja foi resolvido
- * (morto/capturado) e a sala liberou o avanco.
+ * PH-241: monta o payload jsonb de `p_protetor` pra `gravar_flush_de_sessao`
+ * — `null` quando nao ha protetor (a funcao Postgres DELETA a linha de
+ * `sala_protetor` nesse caso). `tipo` (Guardian/Lord) nao vem de
+ * `ProtetorPendente` — precisa ser resolvido a parte por quem chama
+ * (`protetorDaSala(world.sala)`, ver `simularSessao`), porque o motor nunca
+ * guardou o proprio tipo no objeto persistido.
  */
-export function colunasDoBoss(bp: BossPendente | null): Record<string, unknown> {
+export function payloadDoProtetor(
+  bp: ProtetorPendente | null, tipo: string | null,
+): Record<string, unknown> | null {
+  if (!bp) return null
   return {
-    boss_uid: bp?.uid ?? null,
-    boss_species_id: bp?.speciesId ?? null,
-    boss_encounter_id: bp?.encounterId ?? null,
-    boss_level: bp?.level ?? null,
-    boss_iv_hp: bp?.ivs.hp ?? null,
-    boss_iv_atk_fis: bp?.ivs.atkFis ?? null,
-    boss_iv_atk_esp: bp?.ivs.atkEsp ?? null,
-    boss_iv_def: bp?.ivs.def ?? null,
-    boss_iv_def_esp: bp?.ivs.defEsp ?? null,
-    boss_iv_speed: bp?.ivs.speed ?? null,
-    boss_rarity: bp?.rarity ?? null,
-    boss_is_shiny: bp?.isShiny ?? null,
-    boss_nature: bp?.nature ?? null,
-    boss_trait: bp?.trait ?? null,
-    boss_hp_atual: bp?.hpAtual ?? null,
+    uid: bp.uid,
+    speciesId: bp.speciesId,
+    encounterId: bp.encounterId,
+    level: bp.level,
+    ivs: bp.ivs,
+    rarity: bp.rarity,
+    isShiny: bp.isShiny,
+    nature: bp.nature ?? null,
+    trait: bp.trait ?? null,
+    hpAtual: bp.hpAtual,
+    tipo,
   }
 }
 
@@ -941,8 +958,9 @@ export async function aplicarFlush(
   // perdida, e com `return=minimal` isso seria indistinguivel de sucesso. Mas a
   // linha em si nunca e lida: o unico uso de `reivindicada` e o teste de
   // verdade logo abaixo. Sem `select`, o PostgREST devolvia as 20+ colunas da
-  // sessao (`rng_state`, `sala_*`, `sequence_*`, `boss_*`) a cada flush — 439 B
-  // no fio contra 47 B, medido gzipado em producao em 27/08, ~11% do egress do
+  // sessao (`rng_state`, `sala_*`, `sequence_*`, e ate PH-241 tambem os 15
+  // `boss_*`, ja migrados pra `sala_protetor`) a cada flush — 439 B no fio
+  // contra 47 B, medido gzipado em producao em 27/08, ~11% do egress do
   // caminho de flush inteiro. Se um dia algum campo da linha reivindicada for
   // preciso, o que cresce e o `select`, junto do tipo.
   const [reivindicada] = await atualizarRetornando<Pick<LinhaSessao, 'id'>>(
@@ -1071,11 +1089,12 @@ async function simularSessao(
             ciclos: Number(sessao.ciclos ?? 0),
           }
         : null,
-      // PH-217: boss vivo da sala, recriado FIEL (zero RNG) em vez de sorteado
-      // de novo. Sem isto, `buildMapWorld` recebia `undefined` e `bossDaSala`
-      // ainda pedia boss -> sorteava um novo a cada janela, e o RNG do servidor
-      // saia de sincronia com o do cliente a partir da 2a janela.
-      bossPendente: bossDaLinha(sessao),
+      // PH-217/236: protetor vivo da sala, recriado FIEL (zero RNG) em vez
+      // de sorteado de novo. Sem isto, `buildMapWorld` recebia `undefined` e
+      // `protetorDaSala` ainda pedia protetor -> sorteava um novo a cada
+      // janela, e o RNG do servidor saia de sincronia com o do cliente a
+      // partir da 2a janela.
+      protetorPendente: protetorDaLinha(sessao),
     },
     estado.especialidades,
   )
@@ -1186,18 +1205,32 @@ async function simularSessao(
   // `desde + segundos`: o tempo descartado pelo teto foi tempo real que passou,
   // e credita-lo depois daria ao jogador o direito de acumular semanas paradas e
   // sacar tudo de uma vez.
-  await atualizar(cfg, `game_sessions?id=eq.${sessao.id}`, {
+  //
+  // PH-241: RPC `gravar_flush_de_sessao` no lugar do PATCH cru em
+  // `game_sessions` — o protetor agora vive em `sala_protetor` (tabela
+  // separada), e update+upsert-ou-delete nas duas tabelas so ficam atomicos
+  // dentro de uma funcao Postgres (um PATCH via PostgREST so cobre UMA
+  // tabela). Sem lock novo aqui: o claim atomico do intervalo (topo de
+  // `aplicarFlush`) ja serializou qualquer flush concorrente do mesmo
+  // jogador antes desta chamada.
+  //
+  // `protetorDaSala(world.sala)` re-derivado (nao lido de `world.protetorPendente`,
+  // que nao carrega o proprio tipo) — pura, sem RNG, e a sala fica travada
+  // enquanto o protetor existe, entao reavaliar aqui e seguro.
+  const tipoDeProtetor = world.protetorPendente ? protetorDaSala(world.sala) : null
+  await chamarRpc(cfg, 'gravar_flush_de_sessao', {
     // `resumo.simulatedSeconds` e nao `segundos`: os dois so divergem quando a
     // simulacao PAROU antes do fim do intervalo (POKE caido), e ai creditar o
     // intervalo cheio mentiria no "tempo de jogo" do Perfil — na medicao que
     // originou este fix, tres flushes de 6h somaram 30 horas de tempo jogado
     // pra 6 horas de simulacao real.
-    simulated_seconds: Number(sessao.simulated_seconds) + resumo.simulatedSeconds,
+    p_simulated_seconds: Number(sessao.simulated_seconds) + resumo.simulatedSeconds,
+    p_session_id: sessao.id,
     // Grava onde a sequencia parou. `world.rng` e o MESMO objeto passado pro
     // `buildMapWorld` — `nextFloat` muta em lugar de proposito (ver core/rng.ts),
     // entao ler daqui pega o estado ja avancado pela simulacao inteira.
-    rng_state: world.rng.state,
-    rng_draws: world.rng.draws,
+    p_rng_state: world.rng.state,
+    p_rng_draws: world.rng.draws,
     // BUG REAL (achado com o Campeao Lance): `poke_uid` so era gravado na
     // ABERTURA da sessao (`/sessao/abrir`) e nunca mais mudava.
     // `autoSwitchTeamOnFaint` troca `world.player.poke` dentro da simulacao
@@ -1214,16 +1247,17 @@ async function simularSessao(
     // como se o Lance fosse inganhavel a partir da primeira troca de POKE.
     // Gravar aqui o UID de quem estava de fato em campo no fim desta janela
     // fecha o ciclo: a proxima reconstroi exatamente de onde a luta parou.
-    poke_uid: world.player!.poke.uid,
-    sequence_index: world.sequenceIndex,
-    sequence_cleared: world.sequenceCleared,
-    sala_indice: world.sala?.indice ?? 0,
-    sala_chave: world.sala?.chave ?? null,
-    sala_abates: world.sala?.abates ?? 0,
-    ciclos: world.sala?.ciclos ?? 0,
-    // PH-217: boss vivo persistido pra proxima janela recriar sem re-sortear;
-    // tudo `null` quando o boss foi resolvido nesta janela e a sala liberou.
-    ...colunasDoBoss(world.bossPendente),
+    p_poke_uid: world.player!.poke.uid,
+    p_sequence_index: world.sequenceIndex,
+    p_sequence_cleared: world.sequenceCleared,
+    p_sala_indice: world.sala?.indice ?? 0,
+    p_sala_chave: world.sala?.chave ?? null,
+    p_sala_abates: world.sala?.abates ?? 0,
+    p_ciclos: world.sala?.ciclos ?? 0,
+    // PH-241/236: protetor vivo persistido pra proxima janela recriar sem
+    // re-sortear; `null` quando o protetor foi resolvido nesta janela e a
+    // sala liberou (a funcao DELETA a linha de sala_protetor nesse caso).
+    p_protetor: payloadDoProtetor(world.protetorPendente, tipoDeProtetor),
   })
 
   return {
