@@ -11,9 +11,6 @@
 // tambem `world` pra resolver o id numa entidade de verdade
 // (`resolveEffectOwner`), no lugar de `effect.owner` direto.
 import { directionRowFromFacing } from '@/engine/systems/animationSystem'
-// So `medirTextoDeCombate` usa — ver a nota em `seloDoProtetor` sobre por que a
-// medicao resolve o tipo do mundo que ja recebe, enquanto `drawNameLevelTag`
-// continua recebendo o tipo pronto de quem chama.
 import { protetorDaSala } from '@/engine/systems/salaSystem'
 import { hasBattleSprites } from '@/data/battleSprites'
 import { effectProgress } from '@/engine/effect'
@@ -759,35 +756,20 @@ const SHINY_NAME_COLOR = '#b366ff'
 // captura.
 const PROTETOR_TAG_COLOR = '#ff4d4d'
 
-/**
- * O selo escrito acima do nome de um protetor.
- *
- * PH-236: qual tag mostrar (Guardian, sala 1-9, ou Lord, sala 10) depende do
- * TIPO do protetor — informacao que nao vive na entidade (`isProtetor` so marca
- * QUE e protetor, nao QUAL). Quem chama passa o tipo resolvido pela sala
- * (`protetorDaSala`, engine/systems/salaSystem.ts) — sprites.ts fica livre de
- * reimportar a logica de sala, so decide o texto. `undefined`/`null` (player,
- * cena do Hospital, chamador antigo) cai no fallback GUARDIAN, mas so aparece na
- * tela quando `isProtetor` tambem for true.
- *
- * FUNCAO, e nao string literal no ponto de desenho (PH-189): o planejador de
- * texto precisa medir a largura deste selo pra tratar o rotulo como obstaculo, e
- * ele mede pelo mesmo caminho que a tela escreve. Com o texto repetido em dois
- * lugares, o dia em que so um dos dois mudasse deixaria a caixa medida com a
- * largura do OUTRO selo — e "★ GUARDIAN ★" e meia vez mais largo que "★ LORD ★",
- * entao o erro nao seria de um pixel. Ver `medirTextoDeCombate` mais abaixo.
- *
- * E POR QUE `medirTextoDeCombate` PODE CHAMAR `protetorDaSala` E ESTA FUNCAO
- * NAO: a regra de cima vale pro DESENHO. `drawNameLevelTag` recebe um `ctx` e
- * uma entidade e nao tem mundo nenhum em maos — ali resolver a sala seria de
- * fato reimportar logica que nao lhe pertence. `medirTextoDeCombate` ja recebe o
- * `WorldState` inteiro e ja le `world.effects`/`enemies`/`player`; ler tambem
- * `world.sala` nao acrescenta acoplamento novo. A alternativa — propagar o tipo
- * por parametro ate la — passaria por sete chamadas de teste, e cada uma seria
- * mais um lugar onde o teste pode medir um selo e a tela escrever outro, que e
- * exatamente o que esta funcao existe pra impedir.
- */
-function seloDoProtetor(tipoDeProtetor?: 'guardian' | 'lord' | null): string {
+// PH-236: qual tag mostrar (Guardian, sala 1-9, ou Lord, sala 10) depende do
+// TIPO do protetor — informacao que nao vive na entidade (`isProtetor` so
+// marca QUE e protetor, nao QUAL). Quem chama passa o tipo resolvido pela
+// sala (`protetorDaSala`, engine/systems/salaSystem.ts) — sprites.ts fica
+// livre de reimportar a logica de sala, so decide o texto. `undefined`/
+// `null` (player, cena do Hospital, chamador antigo) cai no fallback
+// GUARDIAN, mas so aparece na tela quando `isProtetor` tambem for true.
+//
+// `rotuloDeProtetor` (abaixo) e a UNICA fonte do texto do selo — o
+// planejador de texto (PH-189, `medirTextoDeCombate`) precisa medir a mesma
+// string que vai pro canvas pra tratar o rotulo como obstaculo; duplicar a
+// string ali e aqui vira caixa medida errada no dia em que so um dos dois
+// mudar.
+export function rotuloDeProtetor(tipoDeProtetor?: 'guardian' | 'lord' | null): string {
   return tipoDeProtetor === 'lord' ? '★ LORD ★' : '★ GUARDIAN ★'
 }
 
@@ -814,10 +796,7 @@ export function drawNameLevelTag(
   ctx.fillStyle = isShiny ? SHINY_NAME_COLOR : '#f1f1f6'
   ctx.fillText(name, entity.x, entity.y - halfHeight - 26)
   if (protetor) {
-    // `FONTE.selo` e nao `'bold 9px monospace'` escrito aqui: e a MESMA fonte,
-    // e e a que o planejador usa pra medir a caixa deste selo. Duas grafias do
-    // mesmo valor sao duas coisas que podem divergir (PH-189).
-    const tagText = seloDoProtetor(tipoDeProtetor)
+    const tagText = rotuloDeProtetor(tipoDeProtetor)
     ctx.font = FONTE.selo
     ctx.strokeText(tagText, entity.x, entity.y - halfHeight - 37)
     ctx.fillStyle = PROTETOR_TAG_COLOR
@@ -1407,6 +1386,10 @@ export function medirTextoDeCombate(
     moveis.push({ ...caixa, id: effect.id, ownerId: effect.ownerId, lane: effect.lane })
   }
 
+  // PH-236: mesma fonte de verdade do texto (`rotuloDeProtetor`) que
+  // `drawNameLevelTag` usa pra desenhar — resolvido uma vez por chamada,
+  // igual ao Renderer faz antes do loop de desenho.
+  const tipoDeProtetorAtual = protetorDaSala(world.sala)
   const fixas: Caixa[] = []
   for (const entidade of [world.player, ...world.enemies]) {
     if (!entidade || entidade.poke.hp <= 0) continue
@@ -1415,11 +1398,7 @@ export function medirTextoDeCombate(
       m,
       entidade.poke.isShiny ? `✨ ${especie.name}` : especie.name,
       `Lv${entidade.poke.level}`,
-      // Mesmo selo que a tela escreve, pelo mesmo caminho e com o tipo resolvido
-      // pela mesma sala — se aqui medisse "★ GUARDIAN ★" e o quadro escrevesse
-      // "★ LORD ★", a caixa reservada teria a largura errada e o texto vizinho
-      // subiria (ou nao subiria) pelo motivo errado (PH-189/236).
-      ehProtetor(entidade) ? seloDoProtetor(protetorDaSala(world.sala)) : null,
+      ehProtetor(entidade) ? rotuloDeProtetor(tipoDeProtetorAtual) : null,
       entidade.x,
       entidade.y - visualTopOffset(entidade),
     ))
