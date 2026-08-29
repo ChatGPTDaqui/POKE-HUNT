@@ -100,15 +100,24 @@ function PrevisaoDeRecursos() {
       <span className="flex items-center gap-[.35em] font-medium text-bad">
         <Warning weight="fill" /> Suprimentos acabando
       </span>
-      {previsoes.map((p) => (
-        <span key={p.itemId} className="flex justify-between gap-[.45em] text-n300">
-          <span className="truncate">{rotuloDoRecurso(p.itemId, (id) => ITEMS[id]?.name ?? id)}</span>
-          <span className="shrink-0 tabular-nums">
-            {formatarTempoRestante(p.horasRestantes)}
-            <span className="text-n500"> · {Math.round(p.porHora)}/h</span>
+      {previsoes.map((p) => {
+        const rotulo = rotuloDoRecurso(p.itemId, (id) => ITEMS[id]?.name ?? id)
+        return (
+          <span key={p.itemId} className="flex justify-between gap-[.45em] text-n300">
+            {/* `min-w-0` junto do `truncate` (PH-260): sem ele o `truncate` nao
+                tem efeito nenhum dentro de um flex — a base do item e `auto`, o
+                texto empurra a caixa e quem cede e a COLUNA DA DIREITA, que
+                perdia o "12h · 40/h". Ou seja, o aviso de suprimento acabando
+                cortava justamente o numero que ele existe pra dar.
+                O `title` cobre o nome longo que agora trunca de verdade. */}
+            <span className="min-w-0 truncate" title={rotulo}>{rotulo}</span>
+            <span className="shrink-0 tabular-nums">
+              {formatarTempoRestante(p.horasRestantes)}
+              <span className="text-n500"> · {Math.round(p.porHora)}/h</span>
+            </span>
           </span>
-        </span>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -241,24 +250,38 @@ function AbaDeAutomacoes() {
             options.set(rule.speciesId, stale ? `${stale.name} (fora da hunt atual)` : rule.speciesId)
           }
           return (
-            <div key={index} className="flex flex-wrap items-center gap-[.4em] rounded-[.5em] border border-n800 p-[.4em]">
+            // DUAS LINHAS, e nao uma (PH-260). Os tres controles disputavam
+            // ~17em uteis (a janela tem 19em, ver AutoFloatingPanel): sobravam
+            // ~5em pro nome da especie, e "Butterfree (fora da hunt atual)"
+            // aparecia como "Butt…". O `flex-wrap` ate quebrava a linha, mas so
+            // depois de espremer os tres — a quebra e por falta de espaco, e o
+            // espaco ja tinha acabado.
+            //
+            // Agora a especie ocupa a largura inteira em cima, e a bola + o
+            // remover dividem a linha de baixo. Mesma altura de antes na
+            // pratica (a linha ja quebrava), e o nome cabe.
+            <div key={index} className="flex flex-col gap-[.35em] rounded-[.5em] border border-n800 p-[.4em]">
               <GameSelect
                 value={rule.speciesId}
                 onChange={(e) => updateAutoCatchRule(index, { speciesId: e.target.value })}
-                className="flex-1"
+                className="w-full"
               >
                 {[...options.entries()].map(([id, name]) => (
                   <option key={id} value={id}>{name}</option>
                 ))}
               </GameSelect>
-              <ItemPicker
-                label="Bola da regra"
-                className="w-[8.5em]"
-                value={rule.ballItemId}
-                opcoes={opcoesBola}
-                onChange={(ballItemId) => updateAutoCatchRule(index, { ballItemId })}
-              />
-              <GameButton variant="ghost" onClick={() => removeAutoCatchRule(index)}>Remover</GameButton>
+              <div className="flex items-center gap-[.4em]">
+                <ItemPicker
+                  label="Bola da regra"
+                  className="min-w-0 flex-1"
+                  value={rule.ballItemId}
+                  opcoes={opcoesBola}
+                  onChange={(ballItemId) => updateAutoCatchRule(index, { ballItemId })}
+                />
+                <GameButton variant="ghost" className="shrink-0" onClick={() => removeAutoCatchRule(index)}>
+                  Remover
+                </GameButton>
+              </div>
             </div>
           )
         })}
@@ -338,13 +361,22 @@ function AbaDeAutomacoes() {
         <div className="flex flex-col gap-[.25em]">
           {opcoesCuraDeStatus.map((o) => (
             <div key={o.id} className="flex items-center justify-between gap-[.5em] text-n400">
+              {/* `min-w-0` no rotulo (PH-260): o `GameCheck` e um flex inline, e
+                  sem isto o nome do item empurrava a linha e a contagem saia da
+                  janela de 19em. Com ele o nome trunca (com `title`) e o numero
+                  fica. */}
               <GameCheck
+                className="min-w-0"
                 checked={autoStatusConfig[o.id] !== false}
                 onChange={(v) => setAutoStatusItem(o.id, v)}
               >
-                {o.nome}
+                <span className="truncate" title={o.nome}>{o.nome}</span>
               </GameCheck>
-              <span className={cn('tabular-nums', o.alerta && 'font-semibold text-bad')}>x{o.quantidade}</span>
+              {/* `shrink-0` (PH-260): a contagem e o dado que decide se a
+                  automacao vai parar, e sem ele ela cedia largura pro nome do
+                  item — numa janela de 19em, com nome longo, o numero era o que
+                  sumia. */}
+              <span className={cn('shrink-0 tabular-nums', o.alerta && 'font-semibold text-bad')}>x{o.quantidade}</span>
             </div>
           ))}
         </div>
@@ -362,8 +394,12 @@ function AbaDeAutomacoes() {
         <div className="flex flex-col gap-[.25em]">
           {opcoesRevive.map((o) => (
             <div key={o.id} className="flex items-center justify-between gap-[.5em] text-n400">
-              <span>{o.nome}</span>
-              <span className={cn('tabular-nums', o.alerta && 'font-semibold text-bad')}>x{o.quantidade}</span>
+              <span className="min-w-0 truncate" title={o.nome}>{o.nome}</span>
+              {/* `shrink-0` (PH-260): a contagem e o dado que decide se a
+                  automacao vai parar, e sem ele ela cedia largura pro nome do
+                  item — numa janela de 19em, com nome longo, o numero era o que
+                  sumia. */}
+              <span className={cn('shrink-0 tabular-nums', o.alerta && 'font-semibold text-bad')}>x{o.quantidade}</span>
             </div>
           ))}
         </div>

@@ -39,9 +39,20 @@ function Linha({ opcao }: { opcao: OpcaoDeItem }) {
       ) : (
         <span className="h-[1.5em] w-[1.5em] shrink-0 rounded-[.25em] border border-n700" />
       )}
-      <span className="min-w-0 flex-1 truncate text-left">{opcao.nome}</span>
+      {/* `title` (PH-260): a linha trunca — a janela tem 19em, e nome de item
+          longo nao cabe ao lado do icone e do estoque. Truncar sem saida nenhuma
+          deixava o jogador escolhendo item pela primeira silaba. Com o `title` o
+          nome inteiro fica a um hover, e a lista aberta continua mostrando todas
+          as opcoes por extenso. */}
+      <span className="min-w-0 flex-1 truncate text-left" title={opcao.nome}>{opcao.nome}</span>
       {opcao.quantidade != null && (
-        <span className={cn('shrink-0 tabular-nums', opcao.alerta ? 'font-semibold text-bad' : 'text-n400')}>
+        // `shrink-0` + `tabular-nums` ja estavam aqui; o `title` (PH-260) e pra
+        // contagem grande: a conta de teste passa de 1.000 de um item so, e o
+        // numero e o dado que decide se a automacao vai parar.
+        <span
+          className={cn('shrink-0 tabular-nums', opcao.alerta ? 'font-semibold text-bad' : 'text-n400')}
+          title={`${opcao.quantidade} em estoque`}
+        >
           x{opcao.quantidade}
         </span>
       )}
