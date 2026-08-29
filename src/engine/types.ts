@@ -664,6 +664,29 @@ export interface WorldState {
    */
   protetorPendente: ProtetorPendente | null
   /**
+   * PH-230: o protetor desta sala JA foi derrotado/capturado nesta instancia de
+   * mundo. Existe porque `protetorPendente: null` sozinho e ambiguo — le igual
+   * pra "ainda nao nasceu" e pra "ja morreu", e `protetorDaSala` so olha
+   * bioma+indice, que nao mudam quando o protetor cai.
+   *
+   * Sem isto, sob `salaSobAutoridade` o motor entrava em respawn infinito: o
+   * cliente nao arma a transicao (so o servidor decide a sala), a sala
+   * continua a mesma, e o tick seguinte lia "esta sala pede protetor, nao ha
+   * protetor" e sorteava OUTRO. Alem do gauntlet sem fim na tela, o
+   * `garantirProtetorDaSala?.()` de `garantirTransicaoDeQuotaFechada`
+   * retornava true pra sempre e o `salaEsperaDaAutoridade` logo abaixo nunca
+   * acumulava — o fallback de predicao local, que existe exatamente pro caso
+   * de servidor mudo, nunca disparava.
+   *
+   * Efemero como `salaPredita`/`salaCountdownRemaining`, e pelo mesmo motivo:
+   * quem reconstroi o mundo por janela e a autoridade, e la ela ja tera
+   * avancado a sala. Uma reconstrucao contra um servidor que NAO avancou
+   * (versao antiga, sem sistema de protetor) volta a sortear um protetor — mas
+   * ai o teto e um por janela, nao um por tick, e o fallback tem folga pra
+   * acumular e disparar.
+   */
+  protetorResolvido: boolean
+  /**
    * Contagem regressiva "Entrando em nova area" (ver
    * engine/systems/salaSystem.ts#registrarAbate/aplicarTransicaoDeSala).
    * Nao nulo == quota de abates da sala atual ja fechou e o jogo esta
