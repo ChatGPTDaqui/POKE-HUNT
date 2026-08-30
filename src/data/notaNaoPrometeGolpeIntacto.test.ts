@@ -72,6 +72,16 @@ describe('nota nao promete golpe intacto em POKE salvo (PH-158)', () => {
     expect(i712, 'a entrada 7.12 sumiu do arquivo').toBeGreaterThanOrEqual(0)
     expect(i711, 'a entrada 7.11 sumiu do arquivo').toBeGreaterThanOrEqual(0)
     expect(i712, 'a 7.12 corrige a 7.11 e tem que aparecer ACIMA dela').toBeLessThan(i711)
-    expect(sortedPatchNotes()[0]!.highlights.length).toBeGreaterThan(4)
+    // PH-306: aqui havia um `expect(sortedPatchNotes()[0].highlights.length)
+    // .toBeGreaterThan(4)`. Nao tinha relacao com o par 7.11/7.12 — media a
+    // nota MAIS RECENTE, qualquer que fosse — e impunha um piso arbitrario de
+    // 5 itens a toda promocao futura. Reprovou a 7.16, que nasceu com 4 itens
+    // legitimos, e a mensagem de falha vinha deste teste, sugerindo que a
+    // ordem das notas tinha quebrado.
+    //
+    // Pior que o falso alarme: a regua de patch notes manda NAO INFLAR
+    // ("meia-feature nao entra", "encanamento fica de fora"), e um teste que
+    // exige 5 itens empurra na direcao oposta — o jeito mais facil de passar
+    // por ele e escrever linha que nao deveria existir.
   })
 })
