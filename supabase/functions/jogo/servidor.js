@@ -54814,10 +54814,11 @@ function armarTransicaoDeSala(world, mapId) {
 * local: quem decide quando a sala avanca e o flush do servidor, igual toda
 * outra sala.
 */
-function resolverProtetorDaSala(world, mapId) {
+function resolverProtetorDaSala(world, mapId, opts = {}) {
 	world.protetorPendente = null;
 	world.protetorResolvido = true;
 	if (world.salaSobAutoridade) return;
+	if (opts.manualAdvance) return;
 	armarTransicaoDeSala(world, mapId);
 }
 /**
@@ -55669,7 +55670,7 @@ function handleEnemyDefeated(world, enemy, gameState, opts = {}) {
 	}
 	if (enemy.isProtetor) {
 		if (world.sala?.indice === 9) avancarBiomaProgressSeForOProximo(world, gameState);
-		resolverProtetorDaSala(world, world.mapDef.id);
+		resolverProtetorDaSala(world, world.mapDef.id, { manualAdvance: opts.manualAdvance ?? false });
 	}
 	return {
 		gold: loot.gold + ouroDeAutoVenda,
@@ -55744,7 +55745,10 @@ function stepWorld(world, dt, gameState, opts = {}) {
 	if (defeatedEnemyIds.length > 0) for (const enemyId of defeatedEnemyIds) {
 		const enemy = world.enemies.find((e) => e.id === enemyId);
 		if (!enemy) continue;
-		kills.push(handleEnemyDefeated(world, enemy, gameState, { silent }));
+		kills.push(handleEnemyDefeated(world, enemy, gameState, {
+			silent,
+			manualAdvance
+		}));
 		enemy.deathRemovalTimer = silent ? 0 : 4;
 		registrarAbate(world, world.mapDef.id, { manualAdvance });
 	}

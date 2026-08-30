@@ -73,8 +73,71 @@ function useCorreioAoVivo(): void {
   }, [qc])
 }
 
+/**
+ * O que esta esperando o jogador no Correio, SEPARADO POR NATUREZA (PH-287).
+ *
+ * Era um numero so, e o numero sozinho mentia por omissao. Carta com item
+ * anexado conta DUAS vezes — uma como mensagem por ler, outra como anexo por
+ * coletar (PH-22/PH-164, comportamento deliberado pra o presente nao sumir do
+ * sino antes de ser recolhido). O jogador lia a mensagem, via o contador cair de
+ * 2 pra 1, e o sino continuava aceso sem NADA na tela dizendo que ainda faltava
+ * pegar o item. Foi provavelmente o que originou o relato da PH-213, fechada
+ * como nao reproduzida: o estado sempre esteve certo, a comunicacao e que nao
+ * existia.
+ */
+export interface PendenciasDoCorreio {
+  /** O que o sino mostra. Continua sendo a soma — no badge nao cabe mais que um numero. */
+  total: number
+  /** Mensagens e pedidos que o jogador ainda nao abriu. */
+  porLer: number
+  /** Itens e POKEs presos em carta, esperando serem recolhidos. */
+  anexos: number
+}
+
+/**
+ * A conta, separada da consulta pra poder ser testada sem React e sem rede.
+ *
+ * `data` e o retorno de `correio()`; o parametro estrutural evita arrastar o
+ * tipo inteiro da RPC pra ca so pra somar tres campos.
+ */
+export function resumoDoCorreio(data: {
+  conversas: { naoLidas: number; anexosPendentes: number }[]
+  avisos: {
+    estado?: string | null
+    anexo_itens?: unknown[] | null
+    anexo_poke?: unknown
+    anexo_coletado_em?: string | null
+  }[]
+} | undefined): PendenciasDoCorreio {
+  if (!data) return { total: 0, porLer: 0, anexos: 0 }
+
+  // As conversas (PH-81) trazem `naoLidas` e `anexosPendentes` ja contados pela
+  // RPC, por contato — a separacao que esta issue precisa ja existia na origem,
+  // e era jogada fora aqui.
+  let porLer = data.conversas.reduce((t, c) => t + c.naoLidas, 0)
+  let anexos = data.conversas.reduce((t, c) => t + c.anexosPendentes, 0)
+
+  // Aviso de sistema e pedido de amizade ficam fora das conversas, mas nao fora
+  // do contador: pro sino do HUD e tudo "tem coisa esperando voce".
+  for (const m of data.avisos) {
+    // PH-164: o anexo de POKE conta igual. Sem ele, a carta do Eevee marcada
+    // como lida sumia do sino com o presente ainda preso dentro — o mesmo
+    // buraco que a PH-22 fechou pro anexo de item.
+    const temAlgoAnexado = (m.anexo_itens?.length ?? 0) > 0 || Boolean(m.anexo_poke)
+    // `else if`, e nao dois `if`: aqui o aviso e UMA carta, e ela conta uma vez
+    // — era assim que o `filter(...).length` de antes contava, e mudar isso
+    // inflaria o sino sem que nada tivesse chegado. Na CONVERSA o caso e outro:
+    // `naoLidas` e `anexosPendentes` sao contagens de mensagens diferentes, e
+    // por isso somam mesmo.
+    if (temAlgoAnexado && !m.anexo_coletado_em) anexos += 1
+    else if (m.estado === 'pendente') porLer += 1
+  }
+
+  return { total: porLer + anexos, porLer, anexos }
+}
+
 /** Mensagem de conversa nao lida + aviso pendente + anexo ainda nao coletado. */
-export function usePendenciasDoCorreio(): number {
+export function usePendenciasDoCorreio(): PendenciasDoCorreio {
   useCorreioAoVivo()
   const { data } = useQuery({
     queryKey: ['correio'],
@@ -85,23 +148,27 @@ export function usePendenciasDoCorreio(): number {
     // ninguem ver, e um jogo idle passa horas em segundo plano.
     refetchIntervalInBackground: false,
   })
-  if (!data) return 0
-  // As conversas (PH-81) trazem `naoLidas` e `anexosPendentes` ja contados pela
-  // RPC, por contato. Somar os dois aqui e o que faz o sino avisar tambem
-  // quando o que chegou foi um ITEM, e nao um texto novo — sem isso, mensagem
-  // ja lida com anexo por coletar sumiria do contador com o item preso dentro.
-  const naConversa = data.conversas.reduce((t, c) => t + c.naoLidas + c.anexosPendentes, 0)
-  // Aviso de sistema e pedido de amizade ficam fora das conversas, mas nao
-  // fora do contador: pro sino do HUD e tudo "tem coisa esperando voce".
-  const emAvisos = data.avisos.filter((m) => {
-    // PH-164: o anexo de POKE conta igual. Sem ele, a carta do Eevee marcada
-    // como lida sumia do sino com o presente ainda preso dentro — o mesmo
-    // buraco que o PH-22 fechou pro anexo de item.
-    const temAlgoAnexado = (m.anexo_itens?.length ?? 0) > 0 || Boolean(m.anexo_poke)
-    const temAnexoPendente = temAlgoAnexado && !m.anexo_coletado_em
-    return temAnexoPendente || m.estado === 'pendente'
-  }).length
-  return naConversa + emAvisos
+  return resumoDoCorreio(data)
+}
+
+/**
+ * O que o sino do Correio esta dizendo, em uma frase (PH-287).
+ *
+ * `null` quando nao ha nada — quem chama trata como "sem bolha", e a tela sem
+ * pendencia continua exatamente como era.
+ */
+export function fraseDasPendencias(p: PendenciasDoCorreio): string | null {
+  if (p.total === 0) return null
+  const partes: string[] = []
+  if (p.porLer > 0) {
+    partes.push(`${p.porLer} ${p.porLer === 1 ? 'mensagem por ler' : 'mensagens por ler'}`)
+  }
+  // "por coletar", e nao "anexo pendente": o jogador precisa saber que a acao e
+  // PEGAR, e "anexo" e palavra de e-mail, nao de jogo.
+  if (p.anexos > 0) {
+    partes.push(`${p.anexos} ${p.anexos === 1 ? 'item por coletar' : 'itens por coletar'}`)
+  }
+  return partes.join(' e ')
 }
 
 /** Lances recebidos que ainda esperam aceitar/recusar. */

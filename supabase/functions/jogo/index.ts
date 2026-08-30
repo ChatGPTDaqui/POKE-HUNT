@@ -29,11 +29,39 @@ const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const schema = Deno.env.get('JOGO_SCHEMA') ?? 'dev'
 
 // Origens do jogo. `*` junto de `Authorization` deixaria qualquer site chamar
-// isto com o token do jogador, entao a lista e explicita — configure com
-// `supabase secrets set ORIGENS_PERMITIDAS=https://seu-dominio`.
-const origensPermitidas = (Deno.env.get('ORIGENS_PERMITIDAS') ?? 'http://localhost:5173')
-  .split(',')
-  .map((o) => o.trim())
+// isto com o token do jogador, entao a lista e explicita.
+//
+// PH-293: AS ORIGENS DO PROPRIO JOGO SAO A BASE, e o secret so ACRESCENTA.
+//
+// Antes a lista vinha inteira do secret `ORIGENS_PERMITIDAS`, com fallback pra
+// `localhost:5173`. Secret nao aparece em code review, nao entra em teste e nao
+// tem historico: quando o cliente de staging subiu, ninguem lembrou de
+// acrescenta-lo, e o ambiente inteiro passou a carregar a tela sem nunca
+// carregar o jogo — com a mensagem de erro culpando o bloqueador de anuncios do
+// jogador. Foi a segunda vez que esse cliente quebrou em silencio (a primeira
+// foi a PH-134, por variavel de ambiente ausente).
+//
+// A lista continua explicita e continua sem curinga. O que mudou e que o que e
+// NOSSO esta versionado, e o secret passa a servir pro que nao da pra prever
+// daqui: dominio proprio, preview especifico, um cliente novo.
+//
+// ESTA LISTA E COPIA de `src/data/origensDoJogo.ts` — este arquivo roda no Deno
+// e nao importa de `src/`. `origensDoJogo.test.ts` compara as duas lendo o fonte
+// daqui, e reprova se divergirem.
+const ORIGENS_DO_JOGO = [
+  'http://localhost:5173',
+  'http://localhost:4173',
+  'https://poke-hunt-euj.pages.dev',
+  'https://dev.poke-hunt-euj.pages.dev',
+]
+
+const origensPermitidas = [...new Set([
+  ...ORIGENS_DO_JOGO,
+  ...(Deno.env.get('ORIGENS_PERMITIDAS') ?? '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean),
+])]
 
 // Chave PUBLICA do projeto (JWKS), usada por auth.ts pra conferir a assinatura
 // do token sem ida de rede. Nao e segredo — e o mesmo JSON servido em
