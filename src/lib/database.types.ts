@@ -2054,6 +2054,7 @@ export type Database = {
         | { Args: { p_alvo?: string; p_poke_id: string }; Returns: Json }
       excluir_conversa: { Args: { p_contato_id: string }; Returns: Json }
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
+      fechar_sessoes_inativas: { Args: { p_limite?: string }; Returns: number }
       gravar_flush_de_sessao: {
         Args: {
           p_ciclos: number
@@ -4292,6 +4293,7 @@ export type Database = {
         | { Args: { p_alvo?: string; p_poke_id: string }; Returns: Json }
       excluir_conversa: { Args: { p_contato_id: string }; Returns: Json }
       excluir_correio: { Args: { p_mensagem_id: string }; Returns: Json }
+      fechar_sessoes_inativas: { Args: { p_limite?: string }; Returns: number }
       gravar_flush_de_sessao: {
         Args: {
           p_ciclos: number

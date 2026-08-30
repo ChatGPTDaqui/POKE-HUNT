@@ -56,6 +56,42 @@ describe('ambiente: toda arte de hunt tem vida (PH-96)', () => {
   })
 })
 
+// PH-255 — as cinco artes cujo NOME contradiz o DESENHO.
+//
+// O bloco acima prova que toda arte tem ALGUM preset, e ele nunca teria pego
+// este bug: `cidade` e um preset perfeitamente valido, e `town-night.jpg` e um
+// nome perfeitamente convincente. O que estas linhas travam e a classificacao
+// por nome de arquivo voltar numa arrumacao futura — sao exatamente as cinco em
+// que a intuicao pelo nome leva pro lado errado.
+describe('preset sai do DESENHO, nao do nome do arquivo (PH-255)', () => {
+  const RECLASSIFICADAS: [string, string, string, string][] = [
+    ['town-night.jpg', 'folha', 'cidade', 'mata de noite com rio, lagoa e vaga-lume — zero construcoes'],
+    ['town.jpg', 'folha', 'cidade', 'duas construcoes numa mesa; o resto e floresta, lago e duas quedas'],
+    ['dojo.jpg', 'folha', 'poeira', 'jardim japones com cerejeira, rio de carpas e piso molhado'],
+    ['dragon.jpg', 'brasa', 'poeira', 'rio de lava atravessando a arte, geiser e tocha acesa'],
+    ['mountain.jpg', 'folha', 'neve', 'vale verde com rio de degelo; neve so nos picos do fundo'],
+  ]
+
+  it.each(RECLASSIFICADAS)('%s e "%s" (era "%s"): %s', (arquivo, esperado, antigo) => {
+    expect(
+      presetDaArte(`assets/hunt-backgrounds/${arquivo}`),
+      `${arquivo} voltou pro preset que o NOME sugere ("${antigo}"). Abra a arte antes de mudar `
+      + 'esta linha — o motivo de cada uma esta em comentario na propria entrada de PRESET_POR_ARTE.',
+    ).toBe(esperado)
+  })
+
+  it('nenhuma delas virou "agua" sem referencia de mascara pintada', () => {
+    // `lerArtesDeAgua()` (scripts/build-agua-mask.js) monta a fila de mascara
+    // lendo `'agua'` desta tabela, e cada arte da fila EXIGE um arquivo pintado
+    // a mao em `scripts/agua-refs/`. Marcar `agua` sem pintar a referencia
+    // quebra o build da mascara pedindo arquivo que nao existe — e as quatro
+    // primeiras tem agua bem visivel, entao a tentacao e real.
+    for (const [arquivo] of RECLASSIFICADAS) {
+      expect(presetDaArte(`assets/hunt-backgrounds/${arquivo}`)).not.toBe('agua')
+    }
+  })
+})
+
 describe('ambiente nao encosta na simulacao (PH-96)', () => {
   const bruto = fonteBruta
   // Comentario fora antes de procurar: o arquivo FALA de `world.rng` sem

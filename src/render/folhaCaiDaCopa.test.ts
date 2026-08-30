@@ -10,7 +10,8 @@ import { useUiStore } from '@/stores/uiStore'
 import { desenharAmbiente, reiniciarAmbiente } from './ambiente'
 
 const FLORESTA = 'assets/hunt-backgrounds/forest.jpg' // folha — faixaOrigemY
-const MONTANHA = 'assets/hunt-backgrounds/mountain.jpg' // neve — controle, sem faixa
+// PH-255: era `mountain.jpg`, que saiu de `neve` (a arte e um vale verde).
+const MONTANHA = 'assets/hunt-backgrounds/ice-mountain.jpg' // neve — controle, sem faixa
 
 const JANELA = { x: 0, y: 0, w: 900, h: 600 }
 
