@@ -97,6 +97,48 @@ function supabase(args, opcoes = {}) {
 }
 
 /**
+ * A lista de projetos que o CLI devolveu, seja qual for o embrulho (PH-299).
+ *
+ * `null` quando nao da pra reconhecer nada — e quem chama trata isso como
+ * "segue sem a conferencia", nunca como erro.
+ *
+ * POR QUE ISTO E UMA FUNCAO SEPARADA, e testada
+ * ---------------------------------------------------------------------------
+ * A versao anterior fazia `JSON.parse(saida).some(...)` com um `try/catch` em
+ * volta so do parse. Isso cobre "nao e JSON" e NAO cobre "e JSON valido, de
+ * outro formato" — que foi o que aconteceu: o CLI 2.116.0 responde
+ *
+ *     {"projects":[{"id":"…","ref":"…","name":"…"}],"message":""}
+ *
+ * e nao um array. O `.some` estourou DEPOIS do guard, com
+ * `projetos.some is not a function`, e derrubou o deploy de PRODUCAO deixando o
+ * banco novo com a Edge antiga.
+ *
+ * E o mesmo modo de falha da PH-290, corrigido no gate do `jq` na mesma manha:
+ * guarda que so cobre o caso vazio e deixa passar o caso "formato mudou". Aqui
+ * ele fica isolado numa funcao pura, pra poder ter teste — o script inteiro nao
+ * roda em teste (ele publica de verdade).
+ */
+export function listaDeProjetos(saida) {
+  let dado
+  try {
+    dado = JSON.parse(saida)
+  } catch {
+    return null
+  }
+  if (Array.isArray(dado)) return dado
+  // Formatos de embrulho conhecidos e plausiveis. Nao e adivinhacao solta: a
+  // pergunta e "existe um array de projetos aqui dentro?", e o custo de errar e
+  // baixo — cai no `null`, que so desliga a conferencia previa.
+  if (dado && typeof dado === 'object') {
+    for (const chave of ['projects', 'projetos', 'data', 'result']) {
+      if (Array.isArray(dado[chave])) return dado[chave]
+    }
+  }
+  return null
+}
+
+/**
  * A conta logada enxerga este projeto? Falha CEDO e com instrucao, em vez de
  * deixar o 403 generico aparecer no meio do upload.
  */
@@ -111,13 +153,12 @@ function conferirAcesso(ref) {
     throw e
   }
 
-  let projetos
-  try {
-    projetos = JSON.parse(saida)
-  } catch {
+  const projetos = listaDeProjetos(saida)
+  if (!projetos) {
     // Formato de saida do CLI mudou. Melhor seguir e deixar o deploy falhar com
-    // o erro dele do que abortar uma publicacao valida por causa do parser.
-    console.warn('  Aviso: nao consegui interpretar `projects list --output-format json`. Seguindo sem a conferencia previa.')
+    // o erro dele do que abortar uma publicacao valida por causa do parser — ou,
+    // pior, estourar aqui e derrubar o deploy inteiro (PH-299).
+    console.warn('  Aviso: nao reconheci a saida de `projects list --output-format json`. Seguindo sem a conferencia previa.')
     return
   }
 

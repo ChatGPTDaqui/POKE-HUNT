@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { refDaUrl, resolverProjeto, resolverFuncao } from './publicar-edge.mjs'
+import { refDaUrl, resolverProjeto, resolverFuncao, listaDeProjetos } from './publicar-edge.mjs'
 
 const RAIZ = join(import.meta.dirname, '..')
 const PKG = JSON.parse(readFileSync(join(RAIZ, 'package.json'), 'utf8'))
@@ -74,5 +74,64 @@ describe('o alvo do deploy da Edge (PH-187)', () => {
     // e o 403 generico do meio do upload foi o que atrasou o diagnostico em
     // 26/08.
     expect(FONTE.indexOf('conferirAcesso(ref)')).toBeLessThan(FONTE.indexOf("'functions', 'deploy'"))
+  })
+})
+
+// PH-299 — DERRUBOU O DEPLOY DE PRODUCAO, e o guard que existia nao pegou.
+//
+// `conferirAcesso` fazia `JSON.parse(saida).some(...)`, com `try/catch` so em
+// volta do parse. Isso cobre "nao e JSON" e NAO cobre "e JSON valido, de outro
+// formato" — que foi o caso: o CLI 2.116.0 responde
+//
+//     {"projects":[{"id":"…","ref":"…"}],"message":""}
+//
+// O `.some` estourou depois do guard (`projetos.some is not a function`) e o
+// passo de publicar a Edge morreu. As migrations JA tinham sido aplicadas no
+// mesmo run, entao producao ficou com banco novo e servidor antigo.
+//
+// E o mesmo modo de falha da PH-290, corrigido no gate do `jq` na mesma manha.
+// Por isso a normalizacao virou funcao pura e exportada: o script inteiro nao
+// tem teste (ele publica de verdade), mas ISTO tem.
+describe('a saida do `projects list` e normalizada (PH-299)', () => {
+  const projeto = { id: 'uogmhqbyjgafjujbqdty', ref: 'uogmhqbyjgafjujbqdty', name: 'PokeInspiration' }
+
+  it('o formato REAL do CLI hoje: objeto com `projects` dentro', () => {
+    const saida = JSON.stringify({ projects: [projeto], message: '' })
+    expect(listaDeProjetos(saida)).toEqual([projeto])
+  })
+
+  it('array direto continua valendo — era o formato antigo', () => {
+    expect(listaDeProjetos(JSON.stringify([projeto]))).toEqual([projeto])
+  })
+
+  it('lista vazia e uma LISTA, nao um formato desconhecido', () => {
+    // A diferenca importa: `[]` significa "a conta nao enxerga projeto nenhum",
+    // e isso tem de RECUSAR a publicacao. `null` significa "nao sei ler", e
+    // segue sem conferir. Confundir os dois publicaria as cegas.
+    expect(listaDeProjetos('[]')).toEqual([])
+    expect(listaDeProjetos(JSON.stringify({ projects: [] }))).toEqual([])
+  })
+
+  it('formato desconhecido devolve null em vez de estourar', () => {
+    // O caso que derrubou o deploy. Nenhuma destas linhas pode lancar.
+    expect(listaDeProjetos('{"message":"algo novo"}')).toBeNull()
+    expect(listaDeProjetos('{"projects":"nao e array"}')).toBeNull()
+    expect(listaDeProjetos('"uma string"')).toBeNull()
+    expect(listaDeProjetos('42')).toBeNull()
+    expect(listaDeProjetos('null')).toBeNull()
+  })
+
+  it('saida que nem e JSON devolve null, sem lancar', () => {
+    expect(listaDeProjetos('Connecting to Supabase...')).toBeNull()
+    expect(listaDeProjetos('')).toBeNull()
+  })
+
+  it('o chamador trata `null` como "segue" e lista vazia como "recusa"', () => {
+    // Lido do fonte porque `conferirAcesso` chama `process.exit` e o CLI de
+    // verdade — o que da pra travar aqui e a FORMA da decisao.
+    expect(FONTE).toContain('const projetos = listaDeProjetos(saida)')
+    expect(FONTE).toMatch(/if \(!projetos\) \{[\s\S]*?console\.warn[\s\S]*?return/)
+    // E a recusa continua existindo pra lista que nao contem o ref.
+    expect(FONTE).toContain('RECUSADO: a conta logada no CLI do Supabase nao enxerga o projeto')
   })
 })
