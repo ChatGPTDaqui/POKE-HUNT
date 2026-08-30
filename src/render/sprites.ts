@@ -1528,14 +1528,18 @@ function drawDamageNumber(
  *   topo - 26   nome da especie      (drawNameLevelTag)
  *   topo - 15   Lv                   (drawNameLevelTag)
  *   topo - 13   barra de vida, 5px de altura, terminando em `topo - 8`
- *   topo +  3   NOME DO GOLPE        <- aqui
+ *   topo +  2   NOME DO GOLPE        <- aqui, encostado na barra
  *   topo        cabeca do sprite
  *
  * O deslocamento parte de `EFFECT_BASE_GAP` porque a ancora da coluna de efeitos
  * comeca justamente `EFFECT_BASE_GAP` ACIMA do topo do corpo: somar isso traz o
- * texto de volta pro corpo. Os 3 pixels a mais poem a CAIXA inteira (contorno
- * incluso) abaixo do fim da barra — com 1 so, medido no teste de geometria, o
- * topo dela ainda ficava 1px por cima da barra.
+ * texto de volta pro corpo.
+ *
+ * COLADO NA BARRA, e nao 3px abaixo dela (PH-283, a pedido do usuario, depois de
+ * ver na tela). Com a folga, o nome flutuava entre a barra e o POKE e nao lia
+ * como parte da placa. A placa de fundo (`PLACA_DO_GOLPE`) da a folga visual que
+ * o vao dava, sem o texto se soltar da barra: o topo dela encosta em `topo - 8`,
+ * que e exatamente onde a barra termina.
  *
  * O `lane` continua embutido na ancora e continua subtraindo — entao um SEGUNDO
  * golpe do mesmo POKE, ainda em cena, cai na raia de cima em vez de escrever por
@@ -1546,7 +1550,21 @@ function drawDamageNumber(
  * POKE acabou de fazer", e no alto ele disputava leitura com os numeros de dano,
  * que sao de quem RECEBEU. Duas perguntas diferentes no mesmo lugar.
  */
-const ABILITY_NAME_Y_OFFSET = EFFECT_BASE_GAP + 3
+const ABILITY_NAME_Y_OFFSET = EFFECT_BASE_GAP + 2
+
+/**
+ * Fundo da placa do nome do golpe (PH-283).
+ *
+ * Escuro e translucido: ela existe pra o texto ler sobre QUALQUER coisa — grama
+ * clara, o proprio sprite, e principalmente a animacao do golpe, que nos
+ * grandes (Lava Plume, Eruption) cobre a area inteira por alguns quadros e
+ * engolia o nome. Mesma familia do fundo que o numero de dano recebido ja usa
+ * (`PLACA_DE_DANO_RECEBIDO`): area le de relance e nao disputa a COR do texto,
+ * que continua sendo o tipo do golpe.
+ */
+const PLACA_DO_GOLPE = 'rgba(10, 12, 20, 0.72)'
+const PLACA_DO_GOLPE_FOLGA_X = 3
+const PLACA_DO_GOLPE_FOLGA_Y = 2
 
 function drawAbilityName(
   ctx: CanvasRenderingContext2D, effect: WorldEffect, world: WorldState, desvio = 0,
@@ -1560,10 +1578,26 @@ function drawAbilityName(
   ctx.save()
   ctx.globalAlpha = Math.max(0, alpha)
   ctx.textAlign = 'left'
+  ctx.font = FONTE.nomeDeGolpe
+
+  const largura = ctx.measureText(effect.text ?? '').width
+  const altura = alturaDaFonte(FONTE.nomeDeGolpe)
+  roundedRectPath(
+    ctx,
+    x - PLACA_DO_GOLPE_FOLGA_X,
+    y - altura - PLACA_DO_GOLPE_FOLGA_Y,
+    largura + PLACA_DO_GOLPE_FOLGA_X * 2,
+    altura + PLACA_DO_GOLPE_FOLGA_Y * 2,
+    2,
+  )
+  ctx.fillStyle = PLACA_DO_GOLPE
+  ctx.fill()
+
+  // O contorno CONTINUA, e nao virou redundante: a placa e translucida, entao
+  // sobre um fundo claro que atravesse ela o texto ainda precisa da borda.
   ctx.lineWidth = 3
   ctx.lineJoin = 'round'
   ctx.strokeStyle = '#000000'
-  ctx.font = FONTE.nomeDeGolpe
   ctx.fillStyle = effect.color || '#cdd6ff'
   ctx.strokeText(effect.text!, x, y)
   ctx.fillText(effect.text!, x, y)
