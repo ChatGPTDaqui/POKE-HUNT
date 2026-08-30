@@ -160,6 +160,16 @@ export interface LinhaSessao {
   // de metade do conteudo.
   sequence_index: number | string
   sequence_cleared: boolean
+  /**
+   * PH-307: HP do membro da sequencia em campo no fim da janela anterior.
+   * Ausente (servidor antigo, coluna recem-criada) e `null` valem igual: sem
+   * informacao, o membro nasce com HP cheio. `0` quer dizer "ja caiu, o indice
+   * ainda nao avancou" — ver `ProgressoDaSessao.sequenceHp` no motor.
+   *
+   * Sem ele o dano sumia na borda de cada janela e o Lance era inganhavel pra
+   * quem nao derrubasse um membro inteiro dentro de ~30 segundos.
+   */
+  sequence_hp?: number | string | null
   // Sala atual da hunt. `sala_chave` nula = a sessao ainda nao entrou em
   // nenhuma sala (hunt sem salas, ou primeira janela).
   sala_indice: number | string
@@ -261,6 +271,24 @@ export function payloadDoProtetor(
     hpAtual: bp.hpAtual,
     tipo,
   }
+}
+
+/**
+ * PH-307: o que gravar em `game_sessions.sequence_hp` no fim desta janela.
+ *
+ *   `null` — o mapa nao tem sequencia (nao ha o que guardar).
+ *   `> 0`  — o membro em campo, com o HP em que a luta parou.
+ *   `0`    — o membro deste indice CAIU e o indice ainda nao avancou (o avanco
+ *            espera `respawnDelay`). E o valor que impede a proxima janela de
+ *            ressuscita-lo inteiro e cobrar a mesma luta duas vezes.
+ *
+ * Mapa de sequencia tem `maxEnemies: 1` e `keepCorpses`, entao "o inimigo em
+ * campo" e o unico vivo — o cadaver que fica na tela nao conta.
+ */
+export function hpDaSequencia(world: { mapDef?: { sequence?: string[] } | null; enemies: Array<{ poke: { hp: number } }> }): number | null {
+  if (!world.mapDef?.sequence) return null
+  const vivo = world.enemies.find((e) => e.poke.hp > 0)
+  return vivo ? vivo.poke.hp : 0
 }
 
 // Marca de flush mais velha que isto e tratada como lixo: a invocacao morreu no
@@ -1169,6 +1197,10 @@ async function simularSessao(
     {
       sequenceIndex: Number(sessao.sequence_index ?? 0),
       sequenceCleared: Boolean(sessao.sequence_cleared),
+      // PH-307. `?? null` e nao `?? undefined`: os dois significam a mesma
+      // coisa pro motor (sem informacao = HP cheio), e o `null` explicito deixa
+      // claro que a ausencia foi LIDA, nao esquecida.
+      sequenceHp: sessao.sequence_hp == null ? null : Number(sessao.sequence_hp),
       sala: sessao.sala_chave
         ? {
             indice: Number(sessao.sala_indice ?? 0),
@@ -1338,6 +1370,11 @@ async function simularSessao(
     p_poke_uid: world.player!.poke.uid,
     p_sequence_index: world.sequenceIndex,
     p_sequence_cleared: world.sequenceCleared,
+    // PH-307: o HP do membro da sequencia em campo AGORA. `null` fora de mapa
+    // de sequencia (nao ha o que guardar); `0` quando ele ja caiu e o indice
+    // ainda nao avancou, que e o que impede a proxima janela de ressuscita-lo
+    // inteiro. Ver `ProgressoDaSessao.sequenceHp`.
+    p_sequence_hp: hpDaSequencia(world),
     p_sala_indice: world.sala?.indice ?? 0,
     p_sala_chave: world.sala?.chave ?? null,
     p_sala_abates: world.sala?.abates ?? 0,

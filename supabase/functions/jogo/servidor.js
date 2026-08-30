@@ -55573,9 +55573,13 @@ function buildMapWorld(mapId, activePoke, carry, progresso, especialidadeNiveis)
 			enemies.push(enemy);
 			protetorPendente = pendente;
 		} else if (mapDef.sequence) {
-			const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala));
-			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
-			enemies.push(enemy);
+			if (progresso?.sequenceHp !== 0) {
+				const enemy = spawnSequenceEnemy(base, mapDef, sequenceIndex, entradaDoInimigo(mapDef, sala));
+				const hpSalvo = progresso?.sequenceHp;
+				if (hpSalvo != null && hpSalvo > 0) enemy.poke.hp = Math.min(hpSalvo, enemy.poke.stats.hp);
+				aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
+				enemies.push(enemy);
+			}
 		} else for (let i = 0; i < limiteDeInimigos(mapDef, player?.poke); i++) {
 			const enemy = spawnEnemyAt(base, mapDef, pool, janela, player, entradaDoInimigo(mapDef, sala), enemies);
 			aplicarHazardsAoInimigo(base.rng, base.enemyHazards, enemy);
@@ -56716,6 +56720,23 @@ function payloadDoProtetor(bp, tipo) {
 		tipo
 	};
 }
+/**
+* PH-307: o que gravar em `game_sessions.sequence_hp` no fim desta janela.
+*
+*   `null` — o mapa nao tem sequencia (nao ha o que guardar).
+*   `> 0`  — o membro em campo, com o HP em que a luta parou.
+*   `0`    — o membro deste indice CAIU e o indice ainda nao avancou (o avanco
+*            espera `respawnDelay`). E o valor que impede a proxima janela de
+*            ressuscita-lo inteiro e cobrar a mesma luta duas vezes.
+*
+* Mapa de sequencia tem `maxEnemies: 1` e `keepCorpses`, entao "o inimigo em
+* campo" e o unico vivo — o cadaver que fica na tela nao conta.
+*/
+function hpDaSequencia(world) {
+	if (!world.mapDef?.sequence) return null;
+	const vivo = world.enemies.find((e) => e.poke.hp > 0);
+	return vivo ? vivo.poke.hp : 0;
+}
 var MARCA_DE_FLUSH_EXPIRA_MS = 3e4;
 var ESPERA_MAXIMA_POR_FLUSH_MS = 2500;
 var INTERVALO_DE_SONDAGEM_MS = 120;
@@ -57048,6 +57069,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 	}, {
 		sequenceIndex: Number(sessao.sequence_index ?? 0),
 		sequenceCleared: Boolean(sessao.sequence_cleared),
+		sequenceHp: sessao.sequence_hp == null ? null : Number(sessao.sequence_hp),
 		sala: sessao.sala_chave ? {
 			indice: Number(sessao.sala_indice ?? 0),
 			chave: sessao.sala_chave,
@@ -57101,6 +57123,7 @@ async function simularSessao(cfg, userId, sessao, dados, pokeIdsNoLoad, playerUp
 		p_poke_uid: world.player.poke.uid,
 		p_sequence_index: world.sequenceIndex,
 		p_sequence_cleared: world.sequenceCleared,
+		p_sequence_hp: hpDaSequencia(world),
 		p_sala_indice: world.sala?.indice ?? 0,
 		p_sala_chave: world.sala?.chave ?? null,
 		p_sala_abates: world.sala?.abates ?? 0,
