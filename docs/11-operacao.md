@@ -68,8 +68,22 @@ alcança o jogador sem antes conferir por onde produção é servida.
 
 **Enquanto não houver check automático** (item pendente da PH-134, bloqueado porque mexe em
 `.github/workflows/` e o token de push não tem escopo `workflow`), o passo é manual e entra no
-pré-voo da promoção: abrir `https://dev.poke-hunt-euj.pages.dev`, confirmar que a tela sobe e que o
-console está limpo. Deploy verde não é evidência de app que inicia.
+pré-voo da promoção. Deploy verde não é evidência de app que inicia.
+
+**E "a tela sobe" também não é** — foi assim que o staging passou duas levas quebrado (PH-134 e
+PH-293, esta última com a tela de login funcionando e o jogo nunca carregando). Desde a PH-300 a
+verificação é o harness, não o olho:
+
+```bash
+node scripts/harness/fumaca-de-producao.mjs             # produção + staging
+node scripts/harness/fumaca-de-producao.mjs --producao  # só um deles
+```
+
+Ele faz o caminho que o cliente faz por baixo — autentica e pede `/estado` com o `Origin` daquele
+cliente — e cobra **as três coisas juntas**: status 200, header de CORS para aquela origem, e o
+`estado` do jogador no corpo. Qualquer uma faltando reprova com a causa nomeada, e o processo sai
+com código 1. Abrir a página no navegador continua valendo como olhada extra, nunca como a
+verificação.
 
 ### O lado servidor do smoke tem bancada (PH-220)
 
