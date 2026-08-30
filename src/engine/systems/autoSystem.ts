@@ -194,18 +194,27 @@ export function updateAutoHeal(world: WorldState, gameState: GameStateStore, dt:
 // esta ligado. Precedencia: uma regra por-especie (gameState.autoCatchRules)
 // ganha da config de bola shiny, que ganha da bola padrao. Uma regra
 // combinada NAO tem fallback pra outra bola quando a sua propria acaba.
-export function maybeAutoCatch(rng: Rng, gameState: GameStateStore, defeatedPoke: PokeInstance): CaptureResult | null {
+export function maybeAutoCatch(
+  rng: Rng,
+  gameState: GameStateStore,
+  defeatedPoke: PokeInstance,
+  // PH-205: repassado a `attemptCapture`, que corta a chance pela metade. So
+  // ATRAVESSA esta funcao — nenhuma regra do bot muda por ser protetor: a
+  // precedencia por especie, a bola de shiny e a bola padrao continuam iguais.
+  // O protetor e mais dificil de pegar, nao um caso especial do bot.
+  ehProtetor = false,
+): CaptureResult | null {
   if (!gameState.autoToggles.autoCatch) return null
 
   const rule = gameState.autoCatchRules.find((r) => r.speciesId === defeatedPoke.speciesId)
   if (rule) {
     if (!rule.ballItemId || !gameState.hasItem(rule.ballItemId, 1)) return null
-    return attemptCapture(rng, gameState, defeatedPoke, rule.ballItemId)
+    return attemptCapture(rng, gameState, defeatedPoke, rule.ballItemId, ehProtetor)
   }
 
   const config = gameState.autoCatchConfig
   const isShiny = Boolean(defeatedPoke.isShiny)
   const ballId = isShiny && config.catchShinyEnabled ? config.shinyBallId : config.ballId
   if (!ballId || !gameState.hasItem(ballId, 1)) return null
-  return attemptCapture(rng, gameState, defeatedPoke, ballId)
+  return attemptCapture(rng, gameState, defeatedPoke, ballId, ehProtetor)
 }
