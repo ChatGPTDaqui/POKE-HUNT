@@ -687,6 +687,21 @@ export interface WorldState {
    */
   protetorResolvido: boolean
   /**
+   * PH-301: ha quantos segundos o protetor esta ENGAJADO sem perder um ponto
+   * de HP. Zera a cada ponto de dano e a cada troca de protetor; ao passar de
+   * `PROTETOR_SEM_DANO_LIMITE` (simulation.ts) o protetor e trocado por outro.
+   *
+   * Existe porque "a sala nao avanca" nao tem sintoma nenhum: o POKE fica
+   * batendo, o HP nao cai, e nada no jogo denuncia. Medido em bancada — um
+   * Charmander monotipo de FOGO contra um Ponyta com Flash Fire deixou o
+   * `hp_atual` do protetor parado em 46 por janela apos janela, sem fim.
+   *
+   * Efemero como `protetorResolvido` e pelo mesmo motivo (a autoridade
+   * reconstroi o mundo por janela), e por isso o limite e MENOR que a janela de
+   * flush: ele precisa caber inteiro dentro de uma.
+   */
+  protetorSemDanoSegundos: number
+  /**
    * Contagem regressiva "Entrando em nova area" (ver
    * engine/systems/salaSystem.ts#registrarAbate/aplicarTransicaoDeSala).
    * Nao nulo == quota de abates da sala atual ja fechou e o jogo esta

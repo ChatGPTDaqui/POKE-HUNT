@@ -52474,6 +52474,48 @@ function specialDamageFor(rng, ability, attackerEntity, defenderEntity) {
 	}
 	return null;
 }
+/**
+* PH-301: este golpe causa dano ZERO neste alvo por IMUNIDADE — nao "pouco
+* dano", nao "resistido": zero, sempre, enquanto o par golpe/alvo for este.
+*
+* As duas fontes sao as MESMAS que `estimateDamage` consulta nas primeiras
+* linhas dela (tabela de tipos e `resolverImunidadeDeTipo`), e a resposta e
+* separada em funcao propria porque quem pergunta nao quer um numero: quer
+* saber se vale gastar o turno. Usar `estimateDamage(...) === 0` no lugar
+* disto pegaria junto casos que NAO sao imunidade (poder condicional zerado,
+* golpe de status), e pular esses seria mudar estrategia, nao evitar
+* desperdicio.
+*
+* Nao muta nada: `aplicarEfeitos=false` e rng derivado, mesmo contrato de
+* leitura de `estimateDamage`.
+*
+* O TRAVAMENTO QUE ISTO EXISTE PRA FECHAR: o POKE do jogador escolhe golpe por
+* `pickAbilityDaFila`, que roda a fila na ordem e nunca perguntou se o golpe
+* pode causar dano. Um POKE monotipo contra um alvo imune aquele tipo (um
+* Charmander de 4 golpes de FOGO contra um Ponyta com Flash Fire, medido)
+* lanca golpe de 0 pra sempre. Com mob comum isso so ocupa um slot de spawn;
+* com o PROTETOR da sala, que e o unico inimigo em campo, a sala nunca avanca.
+*/
+function golpeAnuladoPorImunidade(rng, attackerEntity, defenderEntity, ability) {
+	if (!isDamagingAbility(ability)) return false;
+	const defenderSpecies = SPECIES[defenderEntity.poke.speciesId];
+	const [defType1, defType2] = tiposEfetivosParaEfetividade(defenderEntity, defenderSpecies);
+	if (efetividadeConsiderandoRevelado(getEffectiveness(ability.type, defType1, defType2), ability, defenderEntity, defenderSpecies) === 0) return true;
+	return resolverImunidadeDeTipo(deriveRng(rng.state, "anulado-por-imunidade"), ability.type, defenderEntity, false, traitsDoConfronto(attackerEntity, defenderEntity).defensor).imune;
+}
+/**
+* PH-301: existe ALGUM golpe no arsenal deste atacante que causa dano neste
+* alvo? Usado em dois lugares que nao se enxergam: a escolha de golpe (pra so
+* pular golpe anulado quando ha alternativa) e o sorteio do protetor da sala
+* (pra nao entregar a sala um protetor que o POKE ativo nao consegue arranhar).
+*/
+function podeDanificar(rng, attackerEntity, defenderEntity) {
+	const especie = SPECIES[attackerEntity.poke.speciesId];
+	if (!especie) return true;
+	const comDano = golpesUtilizaveis(attackerEntity.poke, especie, attackerEntity.kind === "enemy").map((id) => getAbility(id)).filter((a) => a != null).map((a) => a.id === BASIC_ATTACK.id ? basicAttackFor(especie) : a).filter((a) => isDamagingAbility(a));
+	if (comDano.length === 0) return true;
+	return comDano.some((a) => !golpeAnuladoPorImunidade(rng, attackerEntity, defenderEntity, a));
+}
 function estimateDamage(rng, attackerEntity, defenderEntity, ability) {
 	const attackerPoke = attackerEntity.poke;
 	const defenderPoke = defenderEntity.poke;
@@ -52805,6 +52847,7 @@ function pickAbilityDaFila(world, entity, defenderEntity, candidatos, estaSilenc
 	if (n === 0) return null;
 	const inicio = ((entity.filaGolpeIndex ?? 0) % n + n) % n;
 	const prontosDeDano = candidatos.filter((a) => a.id !== BASIC_ATTACK.id && isDamagingAbility(a) && isAbilityReady(entity, a.id));
+	const temGolpeQueFunciona = candidatos.some((a) => isDamagingAbility(a) && !golpeAnuladoPorImunidade(rng, entity, defenderEntity, a));
 	let maiorDanoCache = null;
 	const maiorDanoSePronto = () => {
 		if (maiorDanoCache == null) maiorDanoCache = prontosDeDano.reduce((max, a) => Math.max(max, estimateDamage(rng, entity, defenderEntity, a)), 0);
@@ -52814,6 +52857,7 @@ function pickAbilityDaFila(world, entity, defenderEntity, candidatos, estaSilenc
 		const idx = (inicio + passo) % n;
 		const ability = candidatos[idx];
 		if (!isAbilityReady(entity, ability.id)) continue;
+		if (temGolpeQueFunciona && golpeAnuladoPorImunidade(rng, entity, defenderEntity, ability)) continue;
 		if (!isDamagingAbility(ability)) {
 			if (estaSilenciado) continue;
 			if (!(ability.status != null && statusVaiPegar(defenderEntity, ability.status, ability.id) || golpeDeApoioUtil(world, entity, defenderEntity, ability, prontosDeDano, clima))) continue;
@@ -54940,6 +54984,7 @@ function emptyWorldState(seed = randomSeed()) {
 		sala: null,
 		protetorPendente: null,
 		protetorResolvido: false,
+		protetorSemDanoSegundos: 0,
 		salaCountdownRemaining: null,
 		salaPendente: null,
 		salaSobAutoridade: false,
@@ -54960,7 +55005,7 @@ function emptyWorldState(seed = randomSeed()) {
 	};
 }
 //#endregion
-//#region node_modules/zustand/esm/vanilla.mjs
+//#region ../NOVO POKE IDLE/node_modules/zustand/esm/vanilla.mjs
 var createStoreImpl = (createState) => {
 	let state;
 	const listeners = /* @__PURE__ */ new Set();
@@ -55258,6 +55303,7 @@ function randomSpawnPoint(rng, mapDef, player, ocupados = []) {
 * sortear de novo trocaria a aparencia/stats do protetor a cada flush (~30s).
 */
 function criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player, entrada) {
+	const atacante = player;
 	const { rng, counters } = world;
 	const point = entrada ?? randomSpawnPoint(rng, mapDef, player ?? null, []);
 	if (protetorSalvo) {
@@ -55282,12 +55328,30 @@ function criarEntidadeDoProtetor(world, mapDef, ctx, tipo, protetorSalvo, player
 			pendente: protetorSalvo
 		};
 	}
-	const encounterId = weightedPick(rng, ctx.pool, (id) => getEncounter(id)?.weight ?? 45);
-	const encounter = getEncounter(encounterId);
-	if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
-	const level = tipo === "lord" ? mapDef.levelRange[1] : ctx.janela?.[1] ?? encounter.maxLevel;
-	const ivs = rollIvsDoProtetor(rng);
-	const poke = createPokeInstance(rng, encounter.speciesId, level, { ivs });
+	let escolhido = null;
+	for (let tentativa = 0; tentativa < 6; tentativa++) {
+		const encounterId = weightedPick(rng, ctx.pool, (id) => getEncounter(id)?.weight ?? 45);
+		const encounter = getEncounter(encounterId);
+		if (!encounter) throw new Error(`Encontro desconhecido: ${encounterId}`);
+		const level = tipo === "lord" ? mapDef.levelRange[1] : ctx.janela?.[1] ?? encounter.maxLevel;
+		const ivs = rollIvsDoProtetor(rng);
+		const poke = createPokeInstance(rng, encounter.speciesId, level, { ivs });
+		escolhido = {
+			encounterId,
+			level,
+			ivs,
+			poke
+		};
+		if (!atacante) break;
+		if (podeDanificar(rng, atacante, createEnemyEntity({ ...counters }, {
+			poke,
+			x: point.x,
+			y: point.y,
+			encounterId
+		}))) break;
+	}
+	if (!escolhido) throw new Error("Sorteio de protetor nao produziu candidato");
+	const { encounterId, level, ivs, poke } = escolhido;
 	const enemy = createEnemyEntity(counters, {
 		poke,
 		x: point.x,
@@ -55813,8 +55877,19 @@ function stepWorld(world, dt, gameState, opts = {}) {
 	}
 	if (world.protetorPendente) {
 		const protetorVivo = world.enemies.find((e) => e.isProtetor && e.poke.uid === world.protetorPendente.uid);
-		if (protetorVivo) world.protetorPendente.hpAtual = protetorVivo.poke.hp;
-	}
+		if (protetorVivo) {
+			const engajado = protetorVivo.state === "engaged" && world.player?.state === "engaged";
+			if (protetorVivo.poke.hp < world.protetorPendente.hpAtual) world.protetorSemDanoSegundos = 0;
+			else if (engajado) world.protetorSemDanoSegundos += dt;
+			world.protetorPendente.hpAtual = protetorVivo.poke.hp;
+			if (world.protetorSemDanoSegundos >= 12) {
+				world.enemies = world.enemies.filter((e) => e.id !== protetorVivo.id);
+				world.protetorPendente = null;
+				world.protetorSemDanoSegundos = 0;
+				if (!silent) toastStore.getState().pushToast("O protetor da sala fugiu do combate. Outro tomou o lugar dele.", "info", "world");
+			}
+		}
+	} else world.protetorSemDanoSegundos = 0;
 	return kills;
 }
 //#endregion

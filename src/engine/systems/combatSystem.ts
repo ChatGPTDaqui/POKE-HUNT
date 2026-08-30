@@ -916,6 +916,68 @@ function specialDamageFor(rng: Rng, ability: Ability, attackerEntity: WorldEntit
 // numero de candidatos varia por nivel/cooldown — se a estimativa gastasse
 // sorteios, a sequencia que o servidor verifica dependeria de detalhes que nao
 // sao eventos de jogo.  le o estado sem avanca-lo.
+/**
+ * PH-301: este golpe causa dano ZERO neste alvo por IMUNIDADE — nao "pouco
+ * dano", nao "resistido": zero, sempre, enquanto o par golpe/alvo for este.
+ *
+ * As duas fontes sao as MESMAS que `estimateDamage` consulta nas primeiras
+ * linhas dela (tabela de tipos e `resolverImunidadeDeTipo`), e a resposta e
+ * separada em funcao propria porque quem pergunta nao quer um numero: quer
+ * saber se vale gastar o turno. Usar `estimateDamage(...) === 0` no lugar
+ * disto pegaria junto casos que NAO sao imunidade (poder condicional zerado,
+ * golpe de status), e pular esses seria mudar estrategia, nao evitar
+ * desperdicio.
+ *
+ * Nao muta nada: `aplicarEfeitos=false` e rng derivado, mesmo contrato de
+ * leitura de `estimateDamage`.
+ *
+ * O TRAVAMENTO QUE ISTO EXISTE PRA FECHAR: o POKE do jogador escolhe golpe por
+ * `pickAbilityDaFila`, que roda a fila na ordem e nunca perguntou se o golpe
+ * pode causar dano. Um POKE monotipo contra um alvo imune aquele tipo (um
+ * Charmander de 4 golpes de FOGO contra um Ponyta com Flash Fire, medido)
+ * lanca golpe de 0 pra sempre. Com mob comum isso so ocupa um slot de spawn;
+ * com o PROTETOR da sala, que e o unico inimigo em campo, a sala nunca avanca.
+ */
+export function golpeAnuladoPorImunidade(
+  rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity, ability: Ability,
+): boolean {
+  if (!isDamagingAbility(ability)) return false
+  const defenderSpecies = SPECIES[defenderEntity.poke.speciesId]
+  const [defType1, defType2] = tiposEfetivosParaEfetividade(defenderEntity, defenderSpecies)
+  const efetividade = efetividadeConsiderandoRevelado(
+    getEffectiveness(ability.type, defType1, defType2), ability, defenderEntity, defenderSpecies,
+  )
+  if (efetividade === 0) return true
+  return resolverImunidadeDeTipo(
+    deriveRng(rng.state, 'anulado-por-imunidade'), ability.type, defenderEntity, false,
+    traitsDoConfronto(attackerEntity, defenderEntity).defensor,
+  ).imune
+}
+
+/**
+ * PH-301: existe ALGUM golpe no arsenal deste atacante que causa dano neste
+ * alvo? Usado em dois lugares que nao se enxergam: a escolha de golpe (pra so
+ * pular golpe anulado quando ha alternativa) e o sorteio do protetor da sala
+ * (pra nao entregar a sala um protetor que o POKE ativo nao consegue arranhar).
+ */
+export function podeDanificar(rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity): boolean {
+  const especie = SPECIES[attackerEntity.poke.speciesId]
+  if (!especie) return true
+  const golpes = golpesUtilizaveis(attackerEntity.poke, especie, attackerEntity.kind === 'enemy')
+    .map((id) => getAbility(id))
+    .filter((a): a is Ability => a != null)
+    // O Ataque Basico assume o tipo primario do atacante (`basicAttackFor`),
+    // entao ele NAO e escape de imunidade: a versao NORMAL do catalogo mentiria
+    // aqui. Avaliado com o tipo que ele de fato teria.
+    .map((a) => (a.id === BASIC_ATTACK.id ? basicAttackFor(especie) : a))
+  const comDano = golpes.filter((a) => isDamagingAbility(a))
+  // Arsenal sem nenhum golpe de dano nao e caso de imunidade — nao ha o que
+  // filtrar, e responder `false` aqui faria o sorteio do protetor girar em
+  // falso ate o teto de tentativas.
+  if (comDano.length === 0) return true
+  return comDano.some((a) => !golpeAnuladoPorImunidade(rng, attackerEntity, defenderEntity, a))
+}
+
 function estimateDamage(rng: Rng, attackerEntity: WorldEntity, defenderEntity: WorldEntity, ability: Ability): number {
   const attackerPoke = attackerEntity.poke
   const defenderPoke = defenderEntity.poke
@@ -1696,6 +1758,16 @@ function pickAbilityDaFila(
     a.id !== BASIC_ATTACK.id && isDamagingAbility(a) && isAbilityReady(entity, a.id)
   ))
 
+  // PH-301: ha ALTERNATIVA a um golpe anulado por imunidade? A pergunta olha a
+  // fila INTEIRA, nao so os golpes prontos: se o unico que funciona esta em
+  // cooldown, esperar por ele e melhor que gastar o turno num golpe que causa
+  // zero por definicao. Sem esta condicao, um POKE cujos golpes sao TODOS
+  // anulados nao escolheria nada e ficaria parado sem nem tentar — trocar
+  // "bate de graca" por "nao bate" nao e correcao.
+  const temGolpeQueFunciona = candidatos.some(
+    (a) => isDamagingAbility(a) && !golpeAnuladoPorImunidade(rng, entity, defenderEntity, a),
+  )
+
   // So calcula (e so uma vez) se algum golpe de status da fila realmente
   // pedir a checagem de overkill abaixo.
   let maiorDanoCache: number | null = null
@@ -1712,6 +1784,11 @@ function pickAbilityDaFila(
     const idx = (inicio + passo) % n
     const ability = candidatos[idx]
     if (!isAbilityReady(entity, ability.id)) continue
+    // PH-301: golpe anulado por imunidade nao gasta turno enquanto houver outro
+    // que funcione. A fila do jogador e uma ORDEM, nao um ranking — pular aqui
+    // preserva a ordem escolhida e so tira da rotacao o que nao pode dar
+    // resultado nenhum contra ESTE alvo. Ver `golpeAnuladoPorImunidade`.
+    if (temGolpeQueFunciona && golpeAnuladoPorImunidade(rng, entity, defenderEntity, ability)) continue
     // NAO e `ability.power === 0`. Os 12 golpes de DANO SEM PODER BASE
     // (data/abilities.ts#DANO_SEM_PODER_BASE: Flail, Reversal, Seismic Toss,
     // Night Shade, Dragon Rage, Super Fang, Psywave, Magnitude, Present,
