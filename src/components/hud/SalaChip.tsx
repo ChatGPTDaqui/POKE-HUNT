@@ -21,6 +21,8 @@ import { SALAS_POR_HUNT, ABATES_POR_SALA } from '@/data/biomas'
 import { janelaDaSala, nomeDaSala, protetorDaSala } from '@/engine/systems/salaSystem'
 import { avancarSalaManualmente } from '@/data/remote/autoridade'
 import { GameButton } from '@/components/game/controls'
+import { Explicacao, BolhaDoVerbete } from '@/components/shared/Explicacao'
+import { verbete } from '@/data/glossario'
 import type { DeviceMode } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
 
@@ -70,22 +72,47 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
   // fazer enquanto o overlay de "Entrando em nova area" ja esta na tela).
   const podeAvancarManual = avancoManualLigado && quotaFechada && countdown == null && !travadaPeloProtetor
 
-  // O TITULO CARREGA O QUE NAO CABE (PH-272). No trilho, `Lv X-Y` e o numero do
-  // ciclo saem de cena pra o NOME do sub-bioma caber inteiro — o nome e a
-  // resposta pra "onde estou", e um chip que mostra a faixa de nivel e corta
-  // "Vilarej…" respondeu a pergunta errada. Os dois continuam a um passar de
-  // mouse, e na versao de baixo (compacto) continuam escritos.
-  const titulo = [
-    `Sala ${sala.indice + 1}/${SALAS_POR_HUNT}`,
+  // O QUE NAO CABE NO CHIP (PH-272). No trilho, `Lv X-Y` e o numero do ciclo
+  // saem de cena pra o NOME do sub-bioma caber inteiro — o nome e a resposta pra
+  // "onde estou", e um chip que mostra a faixa de nivel e corta "Vilarej…"
+  // respondeu a pergunta errada. Os dois continuam a um passar de mouse OU a um
+  // toque, na bolha; e na versao de baixo (compacto) continuam escritos.
+  const detalhes = [
+    `Sala ${sala.indice + 1} de ${SALAS_POR_HUNT}`,
     nome,
-    janela ? `Lv ${janela[0]}-${janela[1]}` : null,
-    `${restantes} de ${ABATES_POR_SALA} para limpar`,
+    janela ? `selvagens de Lv ${janela[0]} a ${janela[1]}` : null,
+    `faltam ${restantes} de ${ABATES_POR_SALA} abates`,
     sala.ciclos > 0 ? `ciclo ${sala.ciclos + 1}` : null,
   ].filter(Boolean).join(' · ')
 
   return (
+    // PH-165: ESTE CHIP NAO TINHA EXPLICACAO NENHUMA — era o exemplo do terceiro
+    // padrao que o inventario (docs/19) descreve, "nada", e o `title=` do
+    // embutido era o segundo, que nao existe no dedo. Agora ele usa a bolha do
+    // projeto, como o clima ao lado (PH-267).
+    //
+    // A bolha tem DUAS partes, e a ordem importa: primeiro o que o chip nao
+    // coube dizer (faixa de nivel, abates que faltam, ciclo), depois o CONCEITO
+    // de sala — que e o que um jogador novo nao tem de onde deduzir.
+    //
+    // O VERBETE DO PROTETOR SO ENTRA COM A QUOTA FECHADA — o MESMO predicado do
+    // aviso "Derrote o Guardiao" logo abaixo, e nao por acaso: os dois respondem
+    // a mesma pergunta ("por que 30/30 nao avanca").
+    //
+    // A regra apertou DUAS vezes, e as duas foram medindo em 390px:
+    //
+    //   1. Com o verbete sempre presente, a bolha passava de 12 linhas e cobria
+    //      o campo de jogo inteiro — o risco que a issue nomeia, "a bolha
+    //      aparecer onde atrapalha cresce com o volume". Cada verbete respeita o
+    //      limite de 1 a 3 frases; o que estoura e a SOMA, e nenhuma regra do
+    //      glossario cobre isso.
+    //   2. `travadaPeloProtetor` sozinho NAO cortava nada: ele e "protetor
+    //      vivo", verdadeiro desde o primeiro segundo da sala. Visto na tela —
+    //      sala 9 recem-entrada, 0 de 30 abates, ja ensinando a regra do Lorde.
+    //
+    // Com a quota fechada a informacao vira acionavel: a barra encheu, a sala
+    // parou, e a bolha responde exatamente isso.
     <div
-      title={embutido ? titulo : undefined}
       className={cn(
         'flex items-center gap-[.6em] overflow-hidden',
         // `min-w-0` no embutido: ele vive dentro de um `flex-1` do trilho, e sem
@@ -95,6 +122,23 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
         embutido ? 'min-w-0' : 'vidro rounded-full px-[.9em] py-[.35em]',
       )}
     >
+    <Explicacao
+      envolve="bloco"
+      side="bottom"
+      rotulo={`Sala ${sala.indice + 1} de ${SALAS_POR_HUNT}`}
+      conteudo={
+        <div className="flex flex-col gap-[.4em] text-left">
+          <span className="font-medium text-n100">{detalhes}</span>
+          <BolhaDoVerbete v={verbete('sala')} />
+          {quotaFechada && travadaPeloProtetor && <BolhaDoVerbete v={verbete('protetorDaSala')} />}
+        </div>
+      }
+    >
+    {/* O GATILHO PARA ANTES DO BOTAO, de proposito: `Explicacao` abre no click, e
+        com o botao "Proximo Nivel" dentro dela o toque que avanca a sala abriria
+        a bolha por cima do proprio avanco. O aviso "Derrote o Lorde" fica dentro
+        — ele e leitura, nao acao. */}
+    <div className="flex min-w-0 items-center gap-[.6em]">
       <span className="shrink-0 text-[.72em] tabular-nums text-n400">
         Sala <b className="font-medium text-n100">{sala.indice + 1}</b>/{SALAS_POR_HUNT}
       </span>
@@ -128,6 +172,8 @@ export function SalaChip({ embutido = false }: { embutido?: boolean } = {}) {
           Derrote o {tipoDeProtetor === 'lord' ? 'Lorde' : 'Guardião'}
         </span>
       )}
+    </div>
+    </Explicacao>
       {podeAvancarManual && (
         <GameButton
           variant="ghost"

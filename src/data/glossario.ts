@@ -21,6 +21,10 @@ import { descricaoDaTrait, motivoSemEfeito } from './traitInfo'
 import { RARITIES, type RarityKey } from './rarity'
 import { STAT_LABEL } from './statLabels'
 import { TURNO_SEGUNDOS } from './abilities'
+// Os dois numeros do verbete de sala saem daqui, e nao escritos a mao: sao a
+// MESMA fonte que o motor usa pra decidir quando a sala vira. Ajustar o ritmo da
+// hunt sem tocar no texto e o modo de falha que a regra 3 do cabecalho descreve.
+import { SALAS_POR_HUNT, ABATES_POR_SALA } from './biomas'
 import {
   SEGUNDOS_DE_IMUNIDADE_APOS_CURA,
   ehVolatil,
@@ -173,6 +177,39 @@ export const GLOSSARIO = {
       'Zera ao sair da hunt ou ao trocar de POKE — diferente de status, que fica.',
     ],
     wiki: 'Status',
+  },
+
+  // --- Mundo e economia (PH-165) --------------------------------------------
+  // O glossario nasceu junto da ficha do POKE, entao ele era quase todo
+  // vocabulario de COMBATE — e o inventario da PH-165 contou 11 das 19 areas do
+  // jogo em ZERO verbete. Estes tres sao os que a HUD permanente pede: o que o
+  // jogador ve na tela o tempo todo sem ter pedido.
+  sala: {
+    titulo: 'Sala',
+    corpo: [
+      `Cada hunt tem ${SALAS_POR_HUNT} salas, e cada uma pede ${ABATES_POR_SALA} abates pra limpar.`,
+      'A cada sala o cenário muda e os selvagens sobem de nível — a hunt afunda conforme você limpa.',
+      `Limpar a última fecha um ciclo: a hunt volta pra sala 1 e o contador de ciclos sobe.`,
+    ],
+    wiki: 'Hunts',
+  },
+
+  protetorDaSala: {
+    titulo: 'Guardião e Lorde',
+    corpo: [
+      'Sala com Guardião ou Lorde não avança só com os abates: enquanto ele estiver vivo, ela fica parada mesmo com a barra cheia.',
+      'O Lorde é o último, e derrotar ele é o que libera o próximo bioma no menu de hunts.',
+    ],
+    wiki: 'Hunts',
+  },
+
+  carteira: {
+    titulo: 'Ouro e diamante',
+    corpo: [
+      'Ouro sai de abate, de item vendido e do Mercado. É com ele que se compra na Loja e se paga o Hospital.',
+      'Diamante é a moeda rara: ele não cai de abate.',
+    ],
+    wiki: 'Economia',
   },
 } satisfies Record<string, Verbete>
 
